@@ -301,18 +301,20 @@ Performance
 
 Elapsed time in seconds, smaller is better. Indicative only...
 
+	------------|---------|-----------|-----------|---------|----------
 	            |   tpl   |   swipl   |  gprolog  |   yap   |  scryer
+	            |         |   8.2.1   |    1.45   |   6.5   |  0.8.127
 	------------|---------|-----------|-----------|---------|----------
-	sieve(5)    |   0.36  |   0.35    |   0.58    |   0.31  |   7.78
-	fib(30)     |   0.51  |   0.33    |   0.56    |   0.81  |   6.74
-	hanoi(22)   |   1.16  |   0.48    |   1.18    |   0.88  |  10.7
-	queens11    |   1.26  |   0.97    |   1.42    |   1.46  |  10.7
-	puzzle      |   0.56  |   0.17    |   0.28    |   0.21  |
-	chess       |  11.8   |   4.95    |   4.95    |   4.88  |
+	sieve(5)    |   0.38  |   0.27    |   0.52    |   0.31  |   7.63
+	fib(30)     |   0.57  |   0.30    |   0.56    |   0.79  |   6.74
+	hanoiq(22)  |   1.19  |   0.39    |   1.18    |   0.85  |   9.9
+	queens11    |   1.33  |   0.88    |   1.40    |   1.46  |  10.9
+	puzzle      |   0.57  |   0.17    |   0.28    |   0.22  |
+	chess       |  11.7   |   4.95    |   4.95    |   4.88  |
 	------------|---------|-----------|-----------|---------|----------
-	testindex1a |   1.30  |   1.09    |   0.70    |   4.94  |
-	testindex1b |   1.43  |   1.09    |   >300    |   5.11  |
-	testindex5  |  10.6   |   9.1     |   4.6     |  49.7   |
+	testindex1a |   1.36  |   1.01    |   0.70    |   4.94  |
+	testindex1b |   1.56  |   1.03    |   >300    |   5.10  |
+	testindex5  |  10.6   |   7.7     |   4.23    |  49.7   |
 	------------|---------|-----------|-----------|---------|----------
 
 Note: only the relative times per test above are relevant. Actual tests
@@ -322,8 +324,8 @@ may have been done on varying machines.
 	tpl -l samples/fib.pro -g "time(test),halt"
 	tpl -l samples/hanoi.pro -g "time(hanoiq(22)),halt"
 	tpl -l samples/queens11.pro -g "time(testq),halt"
-	tpl -l samples/chess.pro -g "time(main),halt"
 	tpl -l samples/puzzle.pro -g "time(main),halt"
+	tpl -l samples/chess.pro -g "time(main),halt"
 	tpl -l samples/testindex.pro -g "time(test1a),halt"
 	tpl -l samples/testindex.pro -g "time(test1b),halt"
 	tpl -l samples/testindex.pro -g "time(test5),halt"
@@ -331,7 +333,7 @@ may have been done on varying machines.
 	swipl -l samples/sieve.pro -g "time(test5),halt"
 	etc
 
-	yap -l samples/sieve.pro -g "time(test5),halt" -s64000
+	yap -l samples/sieve.pro -g "time(test5),halt" -s128000
 	etc
 
 	export setenv LOCALSZ=256000
