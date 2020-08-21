@@ -317,9 +317,6 @@ Elapsed time in seconds, smaller is better. Indicative only...
 	testindex5  |  10.6   |   7.7     |   4.23    |  49.7   |
 	------------|---------|-----------|-----------|---------|----------
 
-Note: only the relative times per test above are relevant. Actual tests
-may have been done on varying machines.
-
 	tpl -l samples/sieve.pro -g "time(test5),halt"
 	tpl -l samples/fib.pro -g "time(test),halt"
 	tpl -l samples/hanoi.pro -g "time(hanoiq(22)),halt"
