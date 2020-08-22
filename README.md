@@ -36,7 +36,7 @@ to do the tests under valgrind.
 
 A 'make debug' build compiles in 0.17s with TCC, 1.8s with CLANG & 2.1s
 with GCC. Should build on any Unix-like system with a C99 compiler.
-Tested on Manjaro, Ubuntu 20.04 & FreeBSD 12.1 systems.
+Tested on Manjaro, Ubuntu 20.04, Raspbian & FreeBSD 12.1 systems.
 
 
 Usage
@@ -289,11 +289,11 @@ the *rdiv/2* operator or by *1r3* style notation:
 	X = 0.1428571428571428
 	Y = 1r7
 	yes
-	?- X is 1 rdiv 7.
-	X = 1r7
 	yes
 	?- X = 1 rdiv 7.
 	X = 1 rdiv 7.
+	?- X is 1 rdiv 7.
+	X = 1r7
 	?- X is 1 rdiv 1.
 	X = 1
 	?-
