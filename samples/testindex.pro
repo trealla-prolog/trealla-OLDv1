@@ -1,13 +1,10 @@
-:- dynamic(f/1).
-:- dynamic(g/2).
-
 test1a :-
 	write('Load...'), nl,
 	between(1,1000000,I),
 		assertz(g(I,I)),
 		fail.
 test1a :-
-	write('Search using 1st-arg...'), nl,
+	write('Match using 1st-arg...'), nl,
 	between(1,1000000,I),
 		g(I,_),
 		fail.
@@ -20,7 +17,7 @@ test1b :-
 		assertz(g(I,I)),
 		fail.
 test1b :-
-	write('Search using 2nd-arg...'), nl,
+	write('Match using 2nd-arg...'), nl,
 	between(1,1000000,I),
 		g(_,I),
 		fail.
@@ -83,7 +80,7 @@ test5 :-
 			assertz(f(J)),
 			fail.
 test5 :-
-	write('Search using once 1st-arg...'), nl,
+	write('Match using once 1st-arg...'), nl,
 	between(1,1000000,I),
 		once(f(I)),
 		%write(I), nl,
