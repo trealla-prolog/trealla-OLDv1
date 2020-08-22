@@ -282,21 +282,22 @@ Rationals are a native type, with integers just a special case where
 the denominator happens to be 1. Rationals can be specified using
 the *rdiv/2* operator or by *1r3* style notation:
 
-	?- X is 1 / 7.
-	X = 0.1428571428571428
-	yes
 	?- X is 1 / 7, Y is rationalize(X).
 	X = 0.1428571428571428
 	Y = 1r7
 	yes
-	yes
 	?- X = 1 rdiv 7.
 	X = 1 rdiv 7.
+	yes
 	?- X is 1 rdiv 7.
-	X = 1r7
+	X = 1r7.
+	yes
+	?- X is 1r7.
+	X = 1r7.
+	yes
 	?- X is 1 rdiv 1.
 	X = 1
-	?-
+	yes
 
 
 Performance
