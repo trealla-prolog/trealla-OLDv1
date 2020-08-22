@@ -213,11 +213,11 @@ bytes, = 0 meaning return what is there (if non-blocking) or a var meaning
 return all bytes until end end of file,
 
 
-Persistence			##TO-DO##
+Persistence			##EXPERIMENTAL##
 ===========
 
 Declaring something dynamic with the *persist* directive causes that
-clause to be saved to a per-module database.
+clause to be saved to a per-module database on update (assert/retract).
 
 
 Coroutines
