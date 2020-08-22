@@ -194,7 +194,7 @@ Others
 	dict:get/4              # defget(+dict,+name,-value,+default)
 
 
-Networking
+Networking          ##EXPERIMENTAL##
 ==========
 
 	server/3                # server(+host,-stream)
@@ -220,7 +220,7 @@ Declaring something dynamic with the *persist* directive causes that
 clause to be saved to a per-module database on update (assert/retract).
 
 
-Coroutines
+Coroutines          ##EXPERIMENTAL##
 ==========
 
 Trealla is single-threaded but cooperative multitasking is available
@@ -286,6 +286,7 @@ the *rdiv/2* operator or by *1r3* style notation:
 	X = 0.1428571428571428
 	yes
 	?- X is 1 / 7, Y is rationalize(X).
+	X = 0.1428571428571428
 	Y = 1r7
 	yes
 	?- X is 1 rdiv 7.
@@ -293,6 +294,8 @@ the *rdiv/2* operator or by *1r3* style notation:
 	yes
 	?- X = 1 rdiv 7.
 	X = 1 rdiv 7.
+	?- X is 1 rdiv 1.
+	X = 1
 	?-
 
 
