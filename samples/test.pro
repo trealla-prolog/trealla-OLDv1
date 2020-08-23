@@ -210,4 +210,7 @@ test56 :-
 test61(0).
 test61(N) :- N > 0, M is N - 1, test61(M).
 
-test62(N) :- ((N > 0 -> M is N - 1, test62(M)) ; true ).
+test62(N) :- N > 0, !, M is N - 1, test62(M).
+test62(0).
+
+test63(N) :- ((N > 0 -> M is N - 1, test63(M)) ; true ).

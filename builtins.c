@@ -5242,6 +5242,30 @@ static int fn_time_1(query *q)
 	return 1;
 }
 
+static int fn_statistics_2(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,var);
+
+	if (!strcmp(GET_STR(p1), "cputime")) {
+		int64_t now = gettimeofday_usec() / 1000;
+		double elapsed = now - q->time_started;
+		cell tmp;
+		make_float(&tmp, elapsed/1000);
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		return 1;
+	}
+
+	if (!strcmp(GET_STR(p1), "gctime")) {
+		cell tmp;
+		make_float(&tmp, 0);
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		return 1;
+	}
+
+	return 0;
+}
+
 static int fn_sleep_1(query *q)
 {
 	if (q->retry)
@@ -8116,6 +8140,7 @@ static const struct builtins g_iso_funcs[] =
 	{"listing", 0, fn_listing_0, NULL},
 	{"listing", 1, fn_listing_1, NULL},
 	{"time", 1, fn_time_1, NULL},
+	{"statistics", 2, fn_statistics_2, NULL},
 
 	{0}
 };

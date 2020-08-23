@@ -873,6 +873,7 @@ void query_execute(query *q, term *t)
 	q->st.sp = t->nbr_vars;
 	q->st.curr_frame = 0;
 	q->st.fp = 1;
+	q->time_started = gettimeofday_usec() / 1000;
 
 	frame *g = q->frames + q->st.curr_frame;
 	g->nbr_vars = t->nbr_vars;
