@@ -5246,9 +5246,9 @@ static int fn_time_1(query *q)
 static int fn_statistics_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,list_or_var);
 
-	if (!strcmp(GET_STR(p1), "cputime")) {
+	if (!strcmp(GET_STR(p1), "cputime") && is_var(p2)) {
 		int64_t now = gettimeofday_usec() / 1000;
 		double elapsed = now - q->time_started;
 		cell tmp;
@@ -5257,7 +5257,7 @@ static int fn_statistics_2(query *q)
 		return 1;
 	}
 
-	if (!strcmp(GET_STR(p1), "gctime")) {
+	if (!strcmp(GET_STR(p1), "gctime") && is_var(p2)) {
 		cell tmp;
 		make_float(&tmp, 0);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -5300,6 +5300,28 @@ static int fn_delay_1(query *q)
 	}
 
 	msleep((unsigned)p1->val_int);
+	return 1;
+}
+
+static int fn_busy_1(query *q)
+{
+	GET_FIRST_ARG(p1,integer);
+	int_t elapse = p1->val_int;
+
+	if (elapse < 0)
+		return 1;
+
+	// Limit to 60 seconds...
+
+	if (elapse > (60 * 1000))
+		return 1;
+
+	int_t started = gettimeofday_usec() / 1000;
+	int_t end = started + elapse;
+
+	while ((gettimeofday_usec() / 1000) < end)
+		;
+
 	return 1;
 }
 
@@ -8226,6 +8248,7 @@ static const struct builtins g_other_funcs[] =
 	{"writeln", 1, fn_writeln_1, "+term"},
 	{"sleep", 1, fn_sleep_1, "+integer"},
 	{"delay", 1, fn_delay_1, "+integer"},
+	{"busy", 1, fn_busy_1, "+integer"},
 	{"now", 0, fn_now_0, NULL},
 	{"now", 1, fn_now_1, "now(-integer)"},
 	{"get_time", 1, fn_get_time_1, "-var"},
