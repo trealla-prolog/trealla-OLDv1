@@ -296,8 +296,9 @@ static void make_frame(query *q, unsigned nbr_vars, int last_match)
 	g->nbr_slots = nbr_vars;
 	g->nbr_vars = nbr_vars;
 	g->any_choices = 0;
-	q->st.sp += nbr_vars;
+	g->did_cut = 0;
 
+	q->st.sp += nbr_vars;
 	q->st.curr_frame = new_frame;
 }
 
@@ -349,7 +350,7 @@ static void commit_me(query *q, term *t)
 	g->m = q->m;
 	q->m = q->st.curr_clause->m;
 	int last_match = (!q->st.curr_clause->next && !q->st.iter) || t->first_cut;
-	int recursive = last_match && (q->st.curr_cell->flags&FLAG_TAILREC);
+	int recursive = (last_match || g->did_cut) && (q->st.curr_cell->flags&FLAG_TAILREC);
 	int tco = recursive && !g->any_choices && check_slots(q, g, t);
 
 	if (!last_match) {
@@ -376,6 +377,7 @@ void cut_me(query *q, int inner_cut)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g->any_choices = 0;
+	g->did_cut = 1;
 
 	if (!q->cp) {
 		q->st.tp = 0;
