@@ -1012,9 +1012,7 @@ static void directives(parser *p, term *t)
 			else if (!strcmp(GET_STR(p2), "compatibility"))
 				p->m->flag.rational_syntax_natural = 0;
 		} else {
-			fprintf(stderr, "Error: unknown flag\n");
-			p->error = 1;
-			return;
+			fprintf(stderr, "Warning: unknown flag: %s\n", GET_STR(p1));
 		}
 
 		return;
