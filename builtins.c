@@ -6432,14 +6432,43 @@ static int fn_msort_2(query *q)
 	return unify(q, l, p1_ctx, p2, p2_ctx);
 }
 
-static int fn_consult_1(query *q)
+static int do_consult(query *q, cell *p1)
 {
-	GET_FIRST_ARG(p1,atom);
 	const char *src = GET_STR(p1);
 
 	if (!module_load_file(q->m, src)) {
 		throw_error(q, p1, "existence_error", "cannot_open_file");
 		return 0;
+	}
+
+	return 1;
+}
+
+static int fn_consult_1(query *q)
+{
+	GET_FIRST_ARG(p1,atom_or_list);
+
+	if (is_atom(p1)) {
+		if (!do_consult(q, p1)) {
+			throw_error(q, p1, "existence_error", "cannot_open_file");
+			return 0;
+		}
+
+		return 1;
+	}
+
+	while (is_list(p1)) {
+		cell *head = p1 + 1;
+		cell *c = GET_VALUE(q, head, p1_ctx);
+
+		if (!do_consult(q, c)) {
+			throw_error(q, p1, "existence_error", "cannot_open_file");
+			return 0;
+		}
+
+		p1 = head + head->nbr_cells;
+		p1 = GET_VALUE(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
 	}
 
 	return 1;
@@ -6451,9 +6480,7 @@ static int fn_load_files_2(query *q)
 	GET_NEXT_ARG(p2,list_or_nil);
 
 	if (is_atom(p1)) {
-		const char *src = GET_STR(p1);
-
-		if (!module_load_file(q->m, src)) {
+		if (!do_consult(q, p1)) {
 			throw_error(q, p1, "existence_error", "cannot_open_file");
 			return 0;
 		}
@@ -6464,9 +6491,8 @@ static int fn_load_files_2(query *q)
 	while (is_list(p1)) {
 		cell *head = p1 + 1;
 		cell *c = GET_VALUE(q, head, p1_ctx);
-		const char *src = GET_STR(c);
 
-		if (!module_load_file(q->m, src)) {
+		if (!do_consult(q, c)) {
 			throw_error(q, p1, "existence_error", "cannot_open_file");
 			return 0;
 		}
