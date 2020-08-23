@@ -458,6 +458,9 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 		if (!consulting) {
 			h->flags |= FLAG_RULE_DYNAMIC;
 			h->index = sl_create(compkey);
+
+			if (m->make_public)
+				h->flags |= FLAG_RULE_PUBLIC;
 		}
 	}
 
@@ -516,6 +519,9 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 			h->flags |= FLAG_RULE_DYNAMIC;
 			h->index = sl_create(compkey);
 		}
+
+		if (consulting && m->make_public)
+			h->flags |= FLAG_RULE_PUBLIC;
 	}
 
 	if (m->prebuilt)

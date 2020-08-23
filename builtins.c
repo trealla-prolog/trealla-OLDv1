@@ -6459,8 +6459,8 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 	}
 
 	module *tmp_m = create_module(GET_STR(mod));
-	tmp_m->make_public = 1;
 	const char *src = GET_STR(file);
+	tmp_m->make_public = 1;
 
 	if (!module_load_file(tmp_m, src)) {
 		throw_error(q, p1, "existence_error", "cannot_open_file");
@@ -6474,33 +6474,6 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 static int fn_consult_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
-
-	if (!is_list(p1)) {
-		if (!do_consult(q, p1, p1_ctx))
-			return 0;
-
-		return 1;
-	}
-
-	while (is_list(p1)) {
-		cell *head = p1 + 1;
-		cell *c = GET_VALUE(q, head, p1_ctx);
-
-		if (!do_consult(q, c, q->latest_ctx))
-			return 0;
-
-		p1 = head + head->nbr_cells;
-		p1 = GET_VALUE(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-	}
-
-	return 1;
-}
-
-static int fn_load_files_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_structure);
-	GET_NEXT_ARG(p2,list_or_nil);
 
 	if (!is_list(p1)) {
 		if (!do_consult(q, p1, p1_ctx))
@@ -8323,7 +8296,7 @@ static const struct builtins g_other_funcs[] =
 	{"getenv", 2, fn_getenv_2},
 	{"setenv", 2, fn_setenv_2},
 	{"unsetenv", 1, fn_unsetenv_1},
-	{"load_files", 2, fn_load_files_2, NULL},
+	{"load_files", 2, fn_consult_1, NULL},
 
 #if USE_SSL
 	{"sha1", 2, fn_sha1_2, "+atom,?atom"},
