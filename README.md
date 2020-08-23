@@ -155,6 +155,9 @@ SWI-Prolog
 	http_delete/3
 	http_open/3
 
+Note: consult/1 and load_files/2 support lists of files as args. Also
+support loading into modules eg. *consult(MOD:FILE-SPEC)*.
+
 
 Others
 ======
