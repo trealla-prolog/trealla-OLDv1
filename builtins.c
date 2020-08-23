@@ -6459,6 +6459,7 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 	}
 
 	module *tmp_m = create_module(GET_STR(mod));
+	tmp_m->make_public = 1;
 	const char *src = GET_STR(file);
 
 	if (!module_load_file(tmp_m, src)) {
