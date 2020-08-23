@@ -6458,13 +6458,12 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 		return 0;
 	}
 
-	module *save_m = q->m;
-	q->m = create_module(GET_STR(mod));
+	module *tmp_m = create_module(GET_STR(mod));
 	const char *src = GET_STR(file);
 
-	if (!module_load_file(q->m, src)) {
+	if (!module_load_file(tmp_m, src)) {
 		throw_error(q, p1, "existence_error", "cannot_open_file");
-		q->m = save_m;
+		destroy_module(tmp_m);
 		return 0;
 	}
 
