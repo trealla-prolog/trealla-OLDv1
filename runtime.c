@@ -163,6 +163,23 @@ static void unwind_trail(query *q, const choice *ch)
 	}
 }
 
+static void trim_trail(query *q)
+{
+	idx_t curr_choice = q->cp - 1;
+	const choice *ch = q->choices + curr_choice;
+
+	while (q->st.tp > ch->st.tp) {
+		trail *tr = q->trails + q->st.tp - 1;
+
+		if (tr->ctx == q->st.curr_frame) {
+			q->st.tp--;
+			continue;
+		}
+
+		break;
+	}
+}
+
 void undo_me(query *q)
 {
 	idx_t curr_choice = q->cp - 1;
@@ -302,6 +319,11 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 		g->env = q->st.sp;
 		q->st.sp += nbr_vars;
 	}
+
+	if (q->cp)
+		trim_trail(q);
+	else
+		q->st.tp = 0;
 
 	q->tot_tcos++;
 }
