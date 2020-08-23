@@ -5511,7 +5511,7 @@ static int fn_loadfile_2(query *q)
 	FILE *fp = fopen(filename, "rb");
 
 	if (!fp) {
-		throw_error(q, p1, "existence_error", "cannot open file");
+		throw_error(q, p1, "existence_error", "cannot_open_file");
 		return 0;
 	}
 
@@ -5542,7 +5542,7 @@ static int fn_getfile_2(query *q)
 	FILE *fp = fopen(filename, "r");
 
 	if (!fp) {
-		throw_error(q, p1, "existence_error", "cannot open file");
+		throw_error(q, p1, "existence_error", "cannot_open_file");
 		return 0;
 	}
 
@@ -6438,7 +6438,7 @@ static int fn_consult_1(query *q)
 	const char *src = GET_STR(p1);
 
 	if (!module_load_file(q->m, src)) {
-		throw_error(q, p1, "existence_error", "cannot open file");
+		throw_error(q, p1, "existence_error", "cannot_open_file");
 		return 0;
 	}
 
@@ -6454,7 +6454,7 @@ static int fn_load_files_2(query *q)
 		const char *src = GET_STR(p1);
 
 		if (!module_load_file(q->m, src)) {
-			throw_error(q, p1, "existence_error", "cannot open file");
+			throw_error(q, p1, "existence_error", "cannot_open_file");
 			return 0;
 		}
 
@@ -6467,7 +6467,7 @@ static int fn_load_files_2(query *q)
 		const char *src = GET_STR(c);
 
 		if (!module_load_file(q->m, src)) {
-			throw_error(q, p1, "existence_error", "cannot open file");
+			throw_error(q, p1, "existence_error", "cannot_open_file");
 			return 0;
 		}
 
