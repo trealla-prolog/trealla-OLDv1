@@ -4453,10 +4453,9 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		l = end_list(q, l);
 		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
 		return 1;
-	} else {
-		throw_error(q, p1, "domain_error", "flag");
-		return 0;
 	}
+
+	return 0;
 }
 
 static int fn_iso_set_prolog_flag_2(query *q)
