@@ -8239,6 +8239,7 @@ static const struct builtins g_other_funcs[] =
 	{"getenv", 2, fn_getenv_2},
 	{"setenv", 2, fn_setenv_2},
 	{"unsetenv", 1, fn_unsetenv_1},
+	{"load_files", 2, fn_consult_1, NULL},
 
 #if USE_SSL
 	{"sha1", 2, fn_sha1_2, "+atom,?atom"},
