@@ -830,8 +830,15 @@ static void directives(parser *p, term *t)
 
 	const char *dirname = GET_STR(c);
 
-	if (!strcmp(dirname, "initialization"))
+	if (!strcmp(dirname, "initialization") && (c->arity == 1)) {
+		p->run_init = 1;
 		return;
+	}
+
+	if (!strcmp(dirname, "initialization") && (c->arity == 2) && !p->m->iso_only) {
+		p->run_init = 2;
+		return;
+	}
 
 	if (!strcmp(dirname, "include") && (c->arity == 1)) {
 		cell *p1 = c + 1;
@@ -944,7 +951,7 @@ static void directives(parser *p, term *t)
 		return;
 	}
 
-	if (!strcmp(dirname, "persist") && (c->arity >= 1)) {
+	if (!strcmp(dirname, "persist") && (c->arity >= 1) && !p->m->iso_only) {
 		cell *p1 = c + 1;
 
 		while (!is_end(p1)) {
@@ -963,7 +970,7 @@ static void directives(parser *p, term *t)
 		return;
 	}
 
-	if (!strcmp(dirname, "volatile") && (c->arity >= 1)) {
+	if (!strcmp(dirname, "volatile") && (c->arity >= 1) && !p->m->iso_only) {
 		cell *p1 = c + 1;
 
 		while (!is_end(p1)) {
@@ -2408,12 +2415,16 @@ static module *module_load_text(module *m, const char *src)
 		parser_xref_db(p);
 		int save = p->m->quiet;
 		p->m->quiet = 1;
+		p->m->halt = 0;
 		p->directive = 1;
 
-		if (parser_run(p, "initialization(G), call(G)", 0))
-			p->m->halt = 1;
-		else
-			p->m->halt = 0;
+		if (p->run_init == 1) {
+			if (parser_run(p, "initialization(G), call(G)", 0))
+				p->m->halt = 1;
+		} else if (p->run_init == 2) {
+			if (parser_run(p, "initialization(G,_), call(G)", 0))
+				p->m->halt = 1;
+		}
 
 		p->directive = 0;
 		p->m->quiet = save;

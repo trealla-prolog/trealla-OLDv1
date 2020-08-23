@@ -275,7 +275,7 @@ struct parser_ {
 	char *token, *save_line, *srcptr;
 	size_t token_size, n_line;
 	int start_term, end_of_term, line_nbr, comment, error;
-	int directive, consulting, one_shot, dq_consing, depth;
+	int directive, consulting, one_shot, dq_consing, depth, run_init;
 	int quoted, is_var, is_op, skip, command, in_dcg, dcg_passthru;
 	unsigned val_type;
 };

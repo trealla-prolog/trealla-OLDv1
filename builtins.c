@@ -8213,7 +8213,6 @@ static const struct builtins g_iso_funcs[] =
 	{"listing", 0, fn_listing_0, NULL},
 	{"listing", 1, fn_listing_1, NULL},
 	{"time", 1, fn_time_1, NULL},
-	{"statistics", 2, fn_statistics_2, NULL},
 
 	{0}
 };
@@ -8312,7 +8311,8 @@ static const struct builtins g_other_funcs[] =
 	{"getenv", 2, fn_getenv_2},
 	{"setenv", 2, fn_setenv_2},
 	{"unsetenv", 1, fn_unsetenv_1},
-	{"load_files", 2, fn_consult_1, NULL},
+	{"load_files", 2, fn_consult_1, "+files"},
+	{"statistics", 2, fn_statistics_2, "+atom,-var"},
 
 #if USE_SSL
 	{"sha1", 2, fn_sha1_2, "+atom,?atom"},
@@ -8330,7 +8330,7 @@ static const struct builtins g_other_funcs[] =
 	{"send", 1, fn_send_1, "+term"},
 	{"recv", 1, fn_recv_1, "?term"},
 
-	// To be used for database log
+	// Used for database log
 
 	{"a_", 2, fn_sys_asserta_2, "+term,+ref"},
 	{"z_", 2, fn_sys_assertz_2, "+term,+ref"},
