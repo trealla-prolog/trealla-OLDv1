@@ -6446,7 +6446,7 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 	}
 
 	if (strcmp(GET_STR(p1), ":")) {
-		throw_error(q, p1, "type_error", "not_a_file");
+		throw_error(q, p1, "type_error", "not_a_file_spec");
 		return 0;
 	}
 
@@ -6454,15 +6454,17 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 	cell *file = GET_VALUE(q, p1+2, p1_ctx);
 
 	if (!is_atom(mod) || !is_atom(file)) {
-		throw_error(q, p1, "type_error", "not_an_atom");
+		throw_error(q, p1, "type_error", "not_a_file_spec");
 		return 0;
 	}
 
+	module *save_m = q->m;
 	q->m = create_module(GET_STR(mod));
 	const char *src = GET_STR(file);
 
 	if (!module_load_file(q->m, src)) {
 		throw_error(q, p1, "existence_error", "cannot_open_file");
+		q->m = save_m;
 		return 0;
 	}
 
