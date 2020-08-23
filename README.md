@@ -128,6 +128,7 @@ SWI-Prolog
 	setenv/2
 	unsetenv/1
 	uuid/1                       # generates non-standard UUID string
+	load_files/2
 
 	delete_file/1
 	exists_file/1

@@ -6436,8 +6436,47 @@ static int fn_consult_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	const char *src = GET_STR(p1);
-	int ok = module_load_file(q->m, src);
-	return ok;
+
+	if (!module_load_file(q->m, src)) {
+		throw_error(q, p1, "existence_error", "cannot open file");
+		return 0;
+	}
+
+	return 1;
+}
+
+static int fn_load_files_2(query *q)
+{
+	GET_FIRST_ARG(p1,atom_or_list);
+	GET_NEXT_ARG(p2,list_or_nil);
+
+	if (is_atom(p1)) {
+		const char *src = GET_STR(p1);
+
+		if (!module_load_file(q->m, src)) {
+			throw_error(q, p1, "existence_error", "cannot open file");
+			return 0;
+		}
+
+		return 1;
+	}
+
+	while (is_list(p1)) {
+		cell *head = p1 + 1;
+		cell *c = GET_VALUE(q, head, p1_ctx);
+		const char *src = GET_STR(c);
+
+		if (!module_load_file(q->m, src)) {
+			throw_error(q, p1, "existence_error", "cannot open file");
+			return 0;
+		}
+
+		p1 = head + head->nbr_cells;
+		p1 = GET_VALUE(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+	}
+
+	return 1;
 }
 
 static int fn_deconsult_1(query *q)
@@ -8239,7 +8278,7 @@ static const struct builtins g_other_funcs[] =
 	{"getenv", 2, fn_getenv_2},
 	{"setenv", 2, fn_setenv_2},
 	{"unsetenv", 1, fn_unsetenv_1},
-	{"load_files", 2, fn_consult_1, NULL},
+	{"load_files", 2, fn_load_files_2, NULL},
 
 #if USE_SSL
 	{"sha1", 2, fn_sha1_2, "+atom,?atom"},
