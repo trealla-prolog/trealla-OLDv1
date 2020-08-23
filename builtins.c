@@ -6436,6 +6436,7 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 {
 	if (is_atom(p1)) {
 		const char *src = GET_STR(p1);
+		deconsult(src);
 
 		if (!module_load_file(q->m, src)) {
 			throw_error(q, p1, "existence_error", "cannot_open_file");
@@ -6460,6 +6461,7 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 
 	module *tmp_m = create_module(GET_STR(mod));
 	const char *src = GET_STR(file);
+	deconsult(src);
 	tmp_m->make_public = 1;
 
 	if (!module_load_file(tmp_m, src)) {
@@ -6495,14 +6497,6 @@ static int fn_consult_1(query *q)
 	}
 
 	return 1;
-}
-
-static int fn_deconsult_1(query *q)
-{
-	GET_FIRST_ARG(p1,atom);
-	const char *src = GET_STR(p1);
-	int ok = deconsult(src);
-	return ok;
 }
 
 static int format_integer(char *dst, int_t v, int grouping, int sep, int decimals)
@@ -8194,7 +8188,6 @@ static const struct builtins g_iso_funcs[] =
 
 	{"module", 1, fn_module_1, NULL},
 	{"consult", 1, fn_consult_1, NULL},
-	{"deconsult", 1, fn_deconsult_1, NULL},
 	{"listing", 0, fn_listing_0, NULL},
 	{"listing", 1, fn_listing_1, NULL},
 	{"time", 1, fn_time_1, NULL},
