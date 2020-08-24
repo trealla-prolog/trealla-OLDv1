@@ -61,6 +61,9 @@ skiplist *sl_create(int (*compkey)(const void*, const void*))
 
 void sl_destroy(skiplist *l)
 {
+	if (!l)
+		return;
+
 	slnode_t *p, *q;
 	p = l->header;
 	q = p->forward[0];

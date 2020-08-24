@@ -4012,7 +4012,9 @@ static int do_abolish(query *q, cell *c)
 				db_log(q, r, LOG_ERASE);
 		}
 
-		h->flags = 0;
+		h->flags = FLAG_RULE_ABOLISHED;
+		sl_destroy(h->index);
+		h->index = NULL;
 	}
 
 	return 1;

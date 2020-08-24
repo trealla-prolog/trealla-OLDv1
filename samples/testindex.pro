@@ -9,6 +9,7 @@ test1a :-
 		g(I,_),
 		fail.
 test1a :-
+	abolish(g,2),
 	write('Done... '), write(1000000), write(' items'), nl, true.
 
 test1b :-
@@ -22,6 +23,7 @@ test1b :-
 		g(_,I),
 		fail.
 test1b :-
+	abolish(g,2),
 	write('Done... '), write(1000000), write(' items'), nl, true.
 
 test2a :-
@@ -34,6 +36,7 @@ test2a :-
 	f(_),
 		fail.
 test2a :-
+	abolish(f,1),
 	write('Done... '), write(1000000), write(' items'), nl, true.
 
 test2b :-
@@ -58,6 +61,7 @@ test3 :-
 	g(_,_),
 		fail.
 test3 :-
+	abolish(f,1),
 	write('Done... '), write(1000000), write(' items'), nl,
 	true.
 
@@ -71,6 +75,7 @@ test4 :-
 	retract(f(_)),
 		fail.
 test4 :-
+	abolish(f,1),
 	write('Done... '), write(1000000), write(' items'), nl, true.
 
 test5 :-
@@ -86,6 +91,7 @@ test5 :-
 		%write(I), nl,
 		fail.
 test5 :-
+	abolish(f,1),
 	write('Done... '), write(1000000), write(' items'), nl, true.
 
 test6 :-
@@ -95,4 +101,7 @@ test6 :-
 	ff(X),
 	write(X), nl,
 	fail.
-test6.
+test6 :-
+	abolish(ff,1),
+	true.
+

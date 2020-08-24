@@ -252,6 +252,9 @@ cell *get_body(cell *c)
 rule *find_match(module *m, cell *c)
 {
 	for (rule *h = m->head; h; h = h->next) {
+		if (h->flags&FLAG_RULE_ABOLISHED)
+			continue;
+
 		if ((h->val_offset == c->val_offset) && (h->arity == c->arity))
 			return h;
 	}
@@ -348,17 +351,31 @@ int uuid_from_string(const char *s, uuid *u)
 	return 1;
 }
 
+static rule *get_rule(module *m)
+{
+	for (rule *h = m->head; h; h = h->next) {
+		if (h->flags&FLAG_RULE_ABOLISHED)
+			return h;
+	}
+
+	return NULL;
+}
+
 static rule *create_rule(module *m, cell *c)
 {
-	rule *h = calloc(1, sizeof(rule));
+	rule *h = get_rule(m);
 
-	if (m->tail)
-		m->tail->next = h;
+	if (!h) {
+		h = calloc(1, sizeof(rule));
 
-	m->tail = h;
+		if (m->tail)
+			m->tail->next = h;
 
-	if (!m->head)
-		m->head = h;
+		m->tail = h;
+
+		if (!m->head)
+			m->head = h;
+	}
 
 	h->val_offset = c->val_offset;
 	h->arity = c->arity;
@@ -2644,9 +2661,7 @@ void destroy_module(module *m)
 			r = save;
 		}
 
-		if (h->index)
-			sl_destroy(h->index);
-
+		sl_destroy(h->index);
 		free(h);
 		h = save;
 	}
