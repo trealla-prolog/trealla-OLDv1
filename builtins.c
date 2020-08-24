@@ -4051,8 +4051,7 @@ static int fn_iso_abolish_1(query *q)
 	cell tmp = {{0}};
 	tmp.val_str = p1_name->val_str;
 	tmp.arity = p1_arity->val_int;
-	int ok = abolish_from_db(q, &tmp);
-	return ok;
+	return abolish_from_db(q, &tmp);
 }
 
 static int fn_iso_asserta_1(query *q)
@@ -8048,6 +8047,15 @@ static int fn_db_save_0(query *q)
 	return 1;
 }
 
+static int fn_abolish_2(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,integer);
+	cell tmp = *p1;
+	tmp.arity = p2->val_int;
+	return abolish_from_db(q, &tmp);
+}
+
 static int fn_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -8269,6 +8277,8 @@ static const struct builtins g_other_funcs[] =
 	{"rdiv", 2, fn_rdiv_2, "+integer,+integer"},
 	{"rational", 1, fn_rational_1, "+number"},
 	{"rationalize", 1, fn_rational_1, "+number"},
+	{"abolish", 2, fn_abolish_2, NULL},
+	{"assert", 1, fn_iso_assertz_1, NULL},
 
 	{"string", 1, fn_iso_atom_1, "+term"},
 	{"atomic_concat", 3, fn_atomic_concat_3, NULL},
