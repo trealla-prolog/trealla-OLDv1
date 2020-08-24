@@ -4048,8 +4048,8 @@ static int fn_iso_abolish_1(query *q)
 		return 0;
 	}
 
-	cell tmp = {{0}};
-	tmp.val_str = p1_name->val_str;
+	cell tmp;
+	tmp = *p1_name;
 	tmp.arity = p1_arity->val_int;
 	return do_abolish(q, &tmp);
 }
