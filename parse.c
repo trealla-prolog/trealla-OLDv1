@@ -104,8 +104,6 @@ static struct op_table g_ops[] =
 	{"rem", OP_YFX, 400},
 	{"mod", OP_YFX, 400},
 	{"xor", OP_YFX, 400},
-	{"and", OP_YFX, 400},
-	{"or", OP_YFX, 400},
 	{"<<", OP_YFX, 400},
 	{">>", OP_YFX, 400},
 	{"**", OP_XFX, 200},
