@@ -6679,7 +6679,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 		} else if ((ch == 'e') || (ch == 'E')) {
 			if (!is_real(c)) {
 				free(tmpbuf);
-			throw_error(q, c, "type_error", "float");
+				throw_error(q, c, "type_error", "float");
 				return 0;
 			}
 
@@ -6813,6 +6813,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 
 			if (feof(str->fp)) {
 				free(tmpbuf);
+				fprintf(stderr, "Error: end of file on write\n");
 				return 0;
 			}
 
