@@ -4441,13 +4441,13 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		return 1;
 	} else if (!strcmp(GET_STR(p1), "version_data")) {
-		unsigned v1 = 0, v2 = 0;
-		sscanf(VERSION, "v%u.%u", &v1, &v2);
+		unsigned v1 = 0, v2 = 0, v3 = 0;
+		sscanf(VERSION, "v%u.%u.%u", &v1, &v2, &v3);
 		cell *tmp = alloc_heap(q, 5);
 		make_literal(&tmp[0], find_in_pool("trealla"));
 		make_int(&tmp[1], v1);
 		make_int(&tmp[2], v2);
-		make_int(&tmp[3], 0);
+		make_int(&tmp[3], v3);
 		make_literal(&tmp[4], g_nil_s);
 		tmp[0].arity = 4;
 		tmp[0].nbr_cells = 5;
