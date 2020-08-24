@@ -3995,7 +3995,7 @@ static int fn_iso_retractall_1(query *q)
 	return 1;
 }
 
-static int abolish_from_db(query *q, cell *c)
+static int do_abolish(query *q, cell *c)
 {
 	rule *h = find_match(q->m, c);
 
@@ -4051,7 +4051,7 @@ static int fn_iso_abolish_1(query *q)
 	cell tmp = {{0}};
 	tmp.val_str = p1_name->val_str;
 	tmp.arity = p1_arity->val_int;
-	return abolish_from_db(q, &tmp);
+	return do_abolish(q, &tmp);
 }
 
 static int fn_iso_asserta_1(query *q)
@@ -8053,7 +8053,7 @@ static int fn_abolish_2(query *q)
 	GET_NEXT_ARG(p2,integer);
 	cell tmp = *p1;
 	tmp.arity = p2->val_int;
-	return abolish_from_db(q, &tmp);
+	return do_abolish(q, &tmp);
 }
 
 static int fn_module_1(query *q)
