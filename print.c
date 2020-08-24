@@ -304,9 +304,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		(c->flags & OP_YFX) | (c->flags & OP_XFY);
 
 	if (q->ignore_ops || !optype || !c->arity) {
-		int quote = (running <= 0) && !is_var(c) && !is_structure(c);
-		quote += q->quoted && needs_quote(q->m, src);
-		if (is_var(c)) quote = 0;
+		int quote = ((running <= 0) || q->quoted) && !is_var(c) && needs_quote(q->m, src);
 		dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 		int braces = 0;
 
