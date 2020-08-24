@@ -4444,7 +4444,7 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		unsigned v1 = 0, v2 = 0;
 		sscanf(VERSION, "v%u.%u", &v1, &v2);
 		cell *tmp = alloc_heap(q, 5);
-		make_literal(&tmp[0], find_in_pool("tpl"));
+		make_literal(&tmp[0], find_in_pool("trealla"));
 		make_int(&tmp[1], v1);
 		make_int(&tmp[2], v2);
 		make_int(&tmp[3], 0);
