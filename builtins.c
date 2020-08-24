@@ -5155,7 +5155,7 @@ static int fn_sys_assertz_2(query *q)
 	return do_assertz_2(q);
 }
 
-static void save_db(FILE *fp, query *q, int dq)
+static void save_db(FILE *fp, query *q, int dq, int logging)
 {
 	int save = q->quoted;
 	q->quoted = 1;
@@ -5164,14 +5164,24 @@ static void save_db(FILE *fp, query *q, int dq)
 		if (h->flags&FLAG_RULE_PREBUILT)
 			continue;
 
-		if (!(h->flags&FLAG_RULE_PERSIST))
+		if (logging && !(h->flags&FLAG_RULE_PERSIST))
 			continue;
 
 		for (clause *r = h->head; r; r = r->next) {
 			if (r->t.deleted)
 				continue;
 
+			if (logging)
+				fprintf(fp, "z_(");
+
 			write_term(q, fp, r->t.cells, 0, dq, 0, 0, 0);
+
+			if (logging) {
+				char tmpbuf[256];
+				uuid_to_string(&r->u, tmpbuf, sizeof(tmpbuf));
+				fprintf(fp, ",'%s')", tmpbuf);
+			}
+
 			fprintf(fp, ".\n");
 		}
 	}
@@ -5181,7 +5191,7 @@ static void save_db(FILE *fp, query *q, int dq)
 
 static int fn_listing_0(query *q)
 {
-	save_db(stdout, q, q->m->dq);
+	save_db(stdout, q, q->m->dq, 0);
 	return 1;
 }
 
@@ -8010,7 +8020,7 @@ static int fn_db_save_0(query *q)
 	char filename2[1024];
 	snprintf(filename2, sizeof(filename2), "%s.TMP", q->m->name);
 	FILE *fp = fopen(filename2, "wb");
-	save_db(q->m->fp, q, q->m->dq);
+	save_db(q->m->fp, q, q->m->dq, 1);
 	fclose(fp);
 	remove(filename);
 	rename(filename2, filename);
