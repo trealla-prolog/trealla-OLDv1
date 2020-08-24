@@ -835,11 +835,6 @@ static void directives(parser *p, term *t)
 		return;
 	}
 
-	if (!strcmp(dirname, "initialization") && (c->arity == 2) && !p->m->iso_only) {
-		p->run_init = 2;
-		return;
-	}
-
 	if (!strcmp(dirname, "include") && (c->arity == 1)) {
 		cell *p1 = c + 1;
 		if (!is_literal(p1)) return;
@@ -2420,9 +2415,6 @@ static module *module_load_text(module *m, const char *src)
 
 		if (p->run_init == 1) {
 			if (parser_run(p, "initialization(G), call(G)", 0))
-				p->m->halt = 1;
-		} else if (p->run_init == 2) {
-			if (parser_run(p, "initialization(G,_), call(G)", 0))
 				p->m->halt = 1;
 		}
 
