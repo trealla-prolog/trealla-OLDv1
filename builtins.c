@@ -4931,12 +4931,11 @@ static int fn_iso_bagof_3(query *q)
 		return 0;
 	}
 
-	do_sys_listn(q, p3, p3_ctx);
-
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 	ch->qnbr = q->qnbr;
 
+	do_sys_listn(q, p3, p3_ctx);
 	return 1;
 }
 
@@ -4948,7 +4947,7 @@ static int fn_iso_setof_3(query *q)
 	idx_t xs_vars = 0;
 	p2 = get_existentials(q, p2, &xs_vars);
 
-	// First time thru: generate all solutions
+	// First time thru generate all solutions
 
 	if (!q->retry) {
 		cell *tmp = clone_term(q, 1, p2, p2_ctx, 3+p2->nbr_cells);
@@ -4959,6 +4958,7 @@ static int fn_iso_setof_3(query *q)
 		copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 		nbr_cells += p2->nbr_cells;
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
+		free(q->tmpq[q->qnbr]);
 		q->tmpq[q->qnbr] = NULL;
 		init_queuen(q);
 		make_choice(q);
@@ -4994,7 +4994,7 @@ static int fn_iso_setof_3(query *q)
 
 		if (unify(q, p2, p2_ctx, c, q->st.curr_frame)) {
 			c->flags |= FLAG_DELETED;
-			cell *c1 = deep_clone_term_on_tmp(q, p1, p1_ctx);
+			cell *c1 = deep_clone_term_on_tmp(q, p1, q->st.curr_frame);
 			alloc_queuen(q, q->qnbr, c1);
 		}
 
@@ -5011,6 +5011,10 @@ static int fn_iso_setof_3(query *q)
 		q->qnbr--;
 		return 0;
 	}
+
+	idx_t curr_choice = q->cp - 1;
+	choice *ch = q->choices + curr_choice;
+	ch->qnbr = q->qnbr;
 
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	l = nodesort(q, l, q->st.curr_frame, 1, 0);
