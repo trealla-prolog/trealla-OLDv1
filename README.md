@@ -14,6 +14,9 @@ Written in plain-old C.
 	REPL with history
 	MIT licensed
 
+Trealla is not WAM-based. It uses tree-walking, structure-sharing and
+deep-binding.
+
 
 Building
 ========
