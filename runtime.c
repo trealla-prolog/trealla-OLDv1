@@ -101,11 +101,19 @@ unsigned create_vars(query *q, unsigned nbr)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 
+	//printf("*** create_vars=%u, nbr_vars=%u, nbr_slots=%u\n", nbr, g->nbr_vars, g->nbr_slots);
+
 	if ((g->env + g->nbr_slots) == q->st.sp) {
 		unsigned slot_nbr = g->nbr_vars;
 		g->nbr_slots += nbr;
 		g->nbr_vars += nbr;
 		q->st.sp += nbr;
+		return slot_nbr;
+	}
+
+	if ((g->nbr_vars + nbr) < g->nbr_slots) {
+		unsigned slot_nbr = g->nbr_vars;
+		g->nbr_vars += nbr;
 		return slot_nbr;
 	}
 
@@ -216,6 +224,7 @@ void make_choice(query *q)
 
 	frame *g = GET_FRAME(q->st.curr_frame);
 	ch->nbr_vars = g->nbr_vars;
+	ch->nbr_slots = g->nbr_slots;
 	ch->any_choices = g->any_choices;
 }
 
@@ -271,6 +280,7 @@ int retry_choice(query *q)
 
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g->nbr_vars = ch->nbr_vars;
+	g->nbr_slots = ch->nbr_slots;
 	g->any_choices = ch->any_choices;
 	g->overflow = 0;
 	return 1;
