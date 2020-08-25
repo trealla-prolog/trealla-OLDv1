@@ -86,7 +86,7 @@ static void unpin_vars(query *q)
 	frame *g = GET_FRAME(q->st.curr_frame);
 	uint32_t mask = 1;
 
-	for (unsigned i = 0; i < (sizeof(idx_t)*8); i++, mask <<= 1) {
+	for (unsigned i = 0; i < g->nbr_vars; i++, mask <<= 1) {
 		if (!(ch->pins & mask))
 			continue;
 
@@ -4829,15 +4829,10 @@ static int do_collect_vars2(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 static uint32_t get_vars(query *q, cell *p, idx_t p_ctx)
 {
 	cell *slots[MAX_ARITY] = {0};
+	int cnt = do_collect_vars2(q, p, p->nbr_cells, slots);
 	uint32_t mask = 0;
-	int cnt = 0;
 
-	if (is_structure(p))
-		cnt = do_collect_vars2(q, p+1, p->nbr_cells-1, slots);
-	else
-		cnt = do_collect_vars2(q, p, p->nbr_cells, slots);
-
-	for (unsigned i = 0; (i < cnt) && (i < (sizeof(idx_t)*8)); i++)
+	for (unsigned i = 0; i < cnt; i++)
 		mask |= 1 << slots[i]->slot_nbr;
 
 	return mask;
@@ -4849,7 +4844,7 @@ static cell *get_existentials(const query *q, cell *p2, uint32_t *xs)
 		cell *c = p2 + 1;
 
 		if (is_var(c))
-			*xs |= (uint32_t)1 << c->slot_nbr;
+			*xs |= 1 << c->slot_nbr;
 
 		p2 += 1 + c->nbr_cells;
 		return get_existentials(q, p2, xs);
@@ -4905,7 +4900,7 @@ static int fn_iso_bagof_3(query *q)
 	uint32_t p2_vars = get_vars(q, p2, p2_ctx);
 	uint32_t mask = (p1_vars^p2_vars) & ~xs_vars;
 	pin_vars(q, mask);
-	cell *c_end = q->tmpq[q->qnbr]+q->tmpq_size[q->qnbr];
+	cell *c_end = q->tmpq[q->qnbr] + q->tmpq_size[q->qnbr];
 
 	for (cell *c = q->tmpq[q->qnbr]; c < c_end; c += c->nbr_cells) {
 		if (c->flags & FLAG_DELETED)
@@ -4986,7 +4981,7 @@ static int fn_iso_setof_3(query *q)
 	uint32_t p2_vars = get_vars(q, p2, p2_ctx);
 	uint32_t mask = (p1_vars^p2_vars) & ~xs_vars;
 	pin_vars(q, mask);
-	cell *c_end = q->tmpq[q->qnbr]+q->tmpq_size[q->qnbr];
+	cell *c_end = q->tmpq[q->qnbr] + q->tmpq_size[q->qnbr];
 
 	for (cell *c = q->tmpq[q->qnbr]; c < c_end; c += c->nbr_cells) {
 		if (c->flags & FLAG_DELETED)
