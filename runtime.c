@@ -62,6 +62,7 @@ static void check_frame(query *q)
 		q->max_frames = q->st.fp;
 
 		if (q->st.fp >= q->nbr_frames) {
+			idx_t save_frame = q->nbr_frames;
 			q->nbr_frames += q->nbr_frames / 2;
 
 			if ((sizeof(frame)*q->nbr_frames) > (1024LL*1024*1024)) {
@@ -72,6 +73,7 @@ static void check_frame(query *q)
 			assert(q->nbr_frames);
 			q->frames = realloc(q->frames, sizeof(frame)*q->nbr_frames);
 			assert(q->frames);
+			memset(q->frames+save_frame, 0, sizeof(frame)*(q->nbr_frames-save_frame));
 		}
 	}
 }
