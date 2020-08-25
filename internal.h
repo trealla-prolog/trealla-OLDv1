@@ -222,8 +222,8 @@ typedef struct {
 
 typedef struct {
 	qstate st;
-	uint32_t pins;
 	idx_t v1, v2;
+	uint32_t pins;
 	uint8_t nbr_vars, inner_cut, any_choices, catchme, qnbr;
 } choice;
 

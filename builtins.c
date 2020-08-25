@@ -4843,13 +4843,13 @@ static uint32_t get_vars(query *q, cell *p, idx_t p_ctx)
 	return mask;
 }
 
-static cell *get_existentials(const query *q, cell *p2, idx_t *xs)
+static cell *get_existentials(const query *q, cell *p2, uint32_t *xs)
 {
 	while (is_structure(p2) && !strcmp(GET_STR(p2), "^")) {
 		cell *c = p2 + 1;
 
 		if (is_var(c))
-			*xs |= (idx_t)1 << c->slot_nbr;
+			*xs |= (uint32_t)1 << c->slot_nbr;
 
 		p2 += 1 + c->nbr_cells;
 		return get_existentials(q, p2, xs);
@@ -4863,7 +4863,7 @@ static int fn_iso_bagof_3(query *q)
 	GET_FIRST_ARG(p1,structure_or_var);
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
-	idx_t xs_vars = 0;
+	uint32_t xs_vars = 0;
 	p2 = get_existentials(q, p2, &xs_vars);
 
 	// First time thru generate all solutions
@@ -4944,7 +4944,7 @@ static int fn_iso_setof_3(query *q)
 	GET_FIRST_ARG(p1,structure_or_var);
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
-	idx_t xs_vars = 0;
+	uint32_t xs_vars = 0;
 	p2 = get_existentials(q, p2, &xs_vars);
 
 	// First time thru generate all solutions
