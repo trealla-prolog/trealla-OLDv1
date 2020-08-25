@@ -218,7 +218,7 @@ test63(N) :- ((N > 0 -> M is N - 1, test63(M)) ; true ).
 task64(G) :- G.
 
 test64 :-
-	task64(findall(X, pr(X, Y), S)),
+	task64(findall(X, pr(X, _), S)),
 	writeln(S).
 
 pr(99, 1).
