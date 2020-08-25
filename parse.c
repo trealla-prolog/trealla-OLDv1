@@ -1566,7 +1566,7 @@ static cell *make_literal(parser *p, idx_t offset)
 	return c;
 }
 
-static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *val_den)
+static int parse_number(module *m, const char **srcptr, int_t *val_num, int_t *val_den)
 {
 	*val_den = 1;
 	const char *s = *srcptr;
@@ -1652,9 +1652,9 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 		if (neg) *val_num = -*val_num;
 		int try_rational = 0;
 
-		if (!p->m->iso_only && ((tmpptr[0] == 'r') || (tmpptr[0] == 'R')))
+		if (!m->iso_only && ((tmpptr[0] == 'r') || (tmpptr[0] == 'R')))
 			try_rational = 1;
-		else if (!p->m->iso_only && (tmpptr[0] == '/') && p->m->flag.rational_syntax_natural)
+		else if (!m->iso_only && (tmpptr[0] == '/') && m->flag.rational_syntax_natural)
 			try_rational = 1;
 
 		if (try_rational && isdigit(tmpptr[1]) ) {
@@ -1914,7 +1914,7 @@ static int get_token(parser *p, int last_op)
 	const char *tmpptr = src;
 	int_t v = 0, d = 1;
 
-	if ((*src != '-') && (*src != '+') && parse_number(p, &src, &v, &d)) {
+	if ((*src != '-') && (*src != '+') && parse_number(p->m, &src, &v, &d)) {
 		if (neg)
 			*dst++ = '-';
 
@@ -2292,7 +2292,7 @@ int parser_tokenize(parser *p, int args, int consing)
 
 		if (p->val_type == TYPE_INT) {
 			const char *src = p->token;
-			parse_number(p, &src, &c->val_num, &c->val_den);
+			parse_number(p->m, &src, &c->val_num, &c->val_den);
 
 			if (strstr(p->token, "0o"))
 				c->flags |= FLAG_OCTAL;
