@@ -1647,6 +1647,7 @@ static int parse_number(module *m, const char **srcptr, int_t *val_num, int_t *v
 	}
 
 	int_t v = 0;
+	char *tmpptr = (char*)s;
 
 	while ((*s >= '0') && (*s <= '9')) {
 		v *= 10;
@@ -1664,7 +1665,9 @@ static int parse_number(module *m, const char **srcptr, int_t *val_num, int_t *v
 		try_rational = 1;
 
 	if (!try_rational) {
-		*srcptr = s;
+		strtod(tmpptr, &tmpptr);
+		if (tmpptr[-1] == '.') tmpptr--;
+		*srcptr = tmpptr;
 		return 1;
 	}
 
