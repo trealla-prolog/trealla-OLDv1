@@ -4330,7 +4330,12 @@ static int fn_iso_functor_3(query *q)
 			return 0;
 		}
 
-		int arity = p3->val_int;
+		if ((p3->val_int <= 0) || (p3->val_int > MAX_ARITY/2)){
+			throw_error(q, p3, "domain_error", "integer");
+			return 0;
+		}
+
+		unsigned arity = p3->val_int;
 		unsigned slot_nbr;
 
 		if (!(slot_nbr = create_vars(q, arity))) {
