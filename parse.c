@@ -1575,9 +1575,11 @@ static int parse_number(module *m, const char **srcptr, int_t *val_num, int_t *v
 	if (*s == '-') {
 		neg = 1;
 		s++;
-	} else if (*s == '+') {
+	} else if (*s == '+')
 		s++;
-	}
+
+	if (!isdigit(*s))
+		return 0;
 
 	if ((*s == '0') && (s[1] == '\'')) {
 		s += 2;
@@ -1644,38 +1646,47 @@ static int parse_number(module *m, const char **srcptr, int_t *val_num, int_t *v
 		return 1;
 	}
 
-	if (isdigit(*s)) {
-		char *tmpptr;
-		strtod(s, &tmpptr);
-		if (tmpptr[-1] == '.') tmpptr--;
-		*val_num = atoll(s);
-		if (neg) *val_num = -*val_num;
-		int try_rational = 0;
+	int_t v = 0;
 
-		if (!m->iso_only && ((tmpptr[0] == 'r') || (tmpptr[0] == 'R')))
-			try_rational = 1;
-		else if (!m->iso_only && (tmpptr[0] == '/') && m->flag.rational_syntax_natural)
-			try_rational = 1;
+	while ((*s >= '0') && (*s <= '9')) {
+		v *= 10;
+		v += *s - '0';
+		s++;
+	}
 
-		if (try_rational && isdigit(tmpptr[1]) ) {
-			s = tmpptr + 1;
-			strtod(s, &tmpptr);
-			if (tmpptr[-1] == '.') tmpptr--;
-			*val_den = atoll(s);
+	*((uint_t*)val_num) = v;
+	if (neg) *val_num = -*val_num;
+	int try_rational = 0;
 
-			cell tmp;
-			tmp.val_num = *val_num;
-			tmp.val_den = *val_den;
-			do_reduce(&tmp);
-			*val_num = tmp.val_num;
-			*val_den = tmp.val_den;
-		}
+	if (!m->iso_only && ((*s == 'r') || (*s == 'R')))
+		try_rational = 1;
+	else if (!m->iso_only && (*s == '/') && m->flag.rational_syntax_natural)
+		try_rational = 1;
 
-		*srcptr = tmpptr;
+	if (!try_rational) {
+		*srcptr = s;
 		return 1;
 	}
 
-	return 0;
+	s++;
+	v = 0;
+
+	while ((*s >= '0') && (*s <= '9')) {
+		v *= 10;
+		v += *s - '0';
+		s++;
+	}
+
+	*((uint_t*)val_den) = v;
+
+	cell tmp;
+	tmp.val_num = *val_num;
+	tmp.val_den = *val_den;
+	do_reduce(&tmp);
+	*val_num = tmp.val_num;
+	*val_den = tmp.val_den;
+	*srcptr = s;
+	return 1;
 }
 
 static int get_octal(const char **srcptr)
