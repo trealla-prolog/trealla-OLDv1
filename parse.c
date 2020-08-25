@@ -721,7 +721,7 @@ query *create_subquery(query *q, cell *curr_cell)
 	subq->current_input = q->current_input;
 	subq->current_output = q->current_output;
 
-	cell *tmp = clone_term(subq, 0, curr_cell, 0, 1);
+	cell *tmp = clone_term(subq, 0, curr_cell, 1);
 	idx_t nbr_cells = tmp->nbr_cells;
 	make_end(tmp+nbr_cells);
 	subq->st.curr_cell = tmp;

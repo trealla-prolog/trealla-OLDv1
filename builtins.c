@@ -542,7 +542,7 @@ cell *deep_clone_term_on_heap(query *q, cell *p1, idx_t p1_ctx)
 	return get_heap(q, save_idx);
 }
 
-cell *clone_term(query *q, int prefix, cell *p1, idx_t p1_ctx, idx_t suffix)
+cell *clone_term(query *q, int prefix, cell *p1, idx_t suffix)
 {
 	cell *tmp = alloc_heap(q, (prefix?1:0)+p1->nbr_cells+suffix);
 
@@ -4117,7 +4117,7 @@ int call_me(query *q, cell *p1, idx_t p1_ctx)
 		tmp = copy_term(q, 1, p1, p1_ctx, 1);
 		unify(q, p1, p1_ctx, tmp+1, q->st.curr_frame);
 	} else
-		tmp = clone_term(q, 1, p1, p1_ctx, 1);
+		tmp = clone_term(q, 1, p1, 1);
 
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
@@ -4129,14 +4129,14 @@ static int fn_iso_call_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	idx_t save_pos = heap_used(q);
-	clone_term(q, 1, p1, p1_ctx, 0);
+	clone_term(q, 1, p1, 0);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	unsigned arity = p1->arity;
 	int args = 2;
 
 	while (args++ <= q->st.curr_cell->arity) {
 		cell *p2 = get_next_raw_arg(q);
-		clone_term(q, 0, p2, p1_ctx, 0);
+		clone_term(q, 0, p2, 0);
 		nbr_cells += p2->nbr_cells;
 		arity++;
 	}
@@ -4164,14 +4164,14 @@ static int fn_iso_disjunction_2(query *q)
 	GET_NEXT_ARG(p2,callable);
 
 	if (q->retry) {
-		cell *tmp = clone_term(q, 1, p2, p2_ctx, 1);
+		cell *tmp = clone_term(q, 1, p2, 1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
 		q->st.curr_cell = tmp;
 		return 1;
 	}
 
-	cell *tmp = clone_term(q, 1, p1, p1_ctx, 1);
+	cell *tmp = clone_term(q, 1, p1, 1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
 	make_choice(q);
@@ -4185,7 +4185,7 @@ static int fn_iso_negation_1(query *q)
 		return 1;
 
 	GET_FIRST_ARG(p1,callable);
-	cell *tmp = clone_term(q, 1, p1, p1_ctx, 2);
+	cell *tmp = clone_term(q, 1, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_inner_cut_0, 0, 0);
 	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
@@ -4203,7 +4203,7 @@ static int fn_iso_once_1(query *q)
 		return 0;
 
 	GET_FIRST_ARG(p1,callable);
-	cell *tmp = clone_term(q, 1, p1, p1_ctx, 2);
+	cell *tmp = clone_term(q, 1, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_inner_cut_0, 0, 0);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
@@ -4221,10 +4221,10 @@ static int fn_iso_ifthen_2(query *q)
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
 	idx_t save_pos = heap_used(q);
-	cell *tmp = clone_term(q, 1, p1, p1_ctx, 1);
+	cell *tmp = clone_term(q, 1, p1, 1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_inner_cut_0, 0, 0);
-	clone_term(q, 0, p2, p2_ctx, 1);
+	clone_term(q, 0, p2, 1);
 	nbr_cells += p2->nbr_cells;
 	tmp = get_heap(q, save_pos);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
@@ -4244,7 +4244,7 @@ static int fn_iso_catch_3(query *q)
 
 	if (q->retry == 2) {
 		q->retry = 0;
-		cell *tmp = clone_term(q, 1, p3, p3_ctx, 1);
+		cell *tmp = clone_term(q, 1, p3, 1);
 		idx_t nbr_cells = 1 + p3->nbr_cells;
 		make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
 		make_choice(q);
@@ -4258,7 +4258,7 @@ static int fn_iso_catch_3(query *q)
 	if (q->retry)
 		return 0;
 
-	cell *tmp = clone_term(q, 1, p1, p1_ctx, 1);
+	cell *tmp = clone_term(q, 1, p1, 1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
 	make_choice(q);
@@ -4795,7 +4795,7 @@ static int fn_iso_findall_3(query *q)
 		return 1;
 	}
 
-	cell *tmp = clone_term(q, 1, p2, p2_ctx, 3+p1->nbr_cells);
+	cell *tmp = clone_term(q, 1, p2, 3+p1->nbr_cells);
 	q->qnbr++;
 	idx_t nbr_cells = 1 + p2->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queue_2, 2, 1+p1->nbr_cells);
@@ -4864,7 +4864,7 @@ static int fn_iso_bagof_3(query *q)
 	// First time thru generate all solutions
 
 	if (!q->retry) {
-		cell *tmp = clone_term(q, 1, p2, p2_ctx, 3+p2->nbr_cells);
+		cell *tmp = clone_term(q, 1, p2, 3+p2->nbr_cells);
 		q->qnbr++;
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queue_2, 2, 1+p2->nbr_cells);
@@ -4945,7 +4945,7 @@ static int fn_iso_setof_3(query *q)
 	// First time thru generate all solutions
 
 	if (!q->retry) {
-		cell *tmp = clone_term(q, 1, p2, p2_ctx, 3+p2->nbr_cells);
+		cell *tmp = clone_term(q, 1, p2, 3+p2->nbr_cells);
 		q->qnbr++;
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queue_2, 2, 1+p2->nbr_cells);
@@ -5265,7 +5265,7 @@ static int fn_time_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	fn_sys_timer_0(q);
-	cell *tmp = clone_term(q, 1, p1, p1_ctx, 2);
+	cell *tmp = clone_term(q, 1, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_elapsed_s, fn_sys_elapsed_0, 0, 0);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
@@ -5449,8 +5449,8 @@ static int fn_forall_2(query *q)
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
 
-	cell *tmp = clone_term(q, 1, p1, p1_ctx, 0);
-	clone_term(q, 0, p2, p2_ctx, 1);
+	cell *tmp = clone_term(q, 1, p1, 0);
+	clone_term(q, 0, p2, 1);
 	idx_t nbr_cells = 1 + p1->nbr_cells + p2->nbr_cells;
 	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 	make_choice(q);
@@ -7541,7 +7541,7 @@ static int fn_ignore_1(query *q)
 		return 1;
 
 	GET_FIRST_ARG(p1,callable);
-	cell *tmp = clone_term(q, 1, p1, p1_ctx, 2);
+	cell *tmp = clone_term(q, 1, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_inner_cut_0, 0, 0);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
@@ -7961,7 +7961,7 @@ static int fn_findall_4(query *q)
 		return 1;
 	}
 
-	cell *tmp = clone_term(q, 1, p2, p2_ctx, 3+p1->nbr_cells);
+	cell *tmp = clone_term(q, 1, p2, 3+p1->nbr_cells);
 	q->qnbr++;
 	idx_t nbr_cells = 1 + p2->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queue_2, 2, 1+p1->nbr_cells);

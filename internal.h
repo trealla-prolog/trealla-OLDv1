@@ -357,7 +357,7 @@ query *create_subquery(query *q, cell *curr_cell);
 void destroy_query(query *q);
 void run_query(query *q);
 cell *deep_clone_term_on_heap(query *q, cell *p1, idx_t p1_ctx);
-cell *clone_term(query *q, int prefix, cell *p1, idx_t p1_ctx, idx_t suffix);
+cell *clone_term(query *q, int prefix, cell *p1, idx_t suffix);
 void make_end(cell *tmp);
 int do_match(query *q, cell *curr_cell);
 idx_t find_in_pool(const char *name);
