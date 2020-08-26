@@ -368,7 +368,7 @@ needs name/2 (at least). Also *testindex* needs between/3 so won't
 load, is it in a module?
 
 
-Peirera benchmark3 (see *samples/broken/peirera.pl*), time in uSecs
+Peirera benchmarks (see *samples/broken/peirera.pl*), time in uSecs
 per iteration and smaller is better.
 
 	----------------------|---------|-----------|--------------
