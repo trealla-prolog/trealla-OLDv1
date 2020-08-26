@@ -1336,8 +1336,6 @@ bench_mark(deep_unify, 100, equal(Term1, Term2), dummy(Term1, Term2)) :- term409
 
 equal(X, X).
 
-duplicate_term(_,_).
-
 term64(X1) :-
    X1 = f(X2, X2a),
    X2 = f(X4, X4a),
