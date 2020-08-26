@@ -12,7 +12,7 @@ struct keyval_ {
 	void *key, *val;
 };
 
-#define BUCKET_SIZE 16
+#define BUCKET_SIZE 32
 #define MAX_ITERS 16
 
 struct slnode_ {
