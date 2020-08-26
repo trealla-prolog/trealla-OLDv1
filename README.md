@@ -371,9 +371,9 @@ load, is it in a module?
 Peirera benchmark3 (see *samples/broken/peirera.pl*), time in uSecs
 per iteration and smaller is better.
 
-	----------------------|---------|-----------|
-	                      |   tpl   |   swipl   |    tpl
-	                      |         |   8.2.1   |  (latest)
+	----------------------|---------|-----------|--------------
+	                      |   tpl   |   swipl   |
+	                      |         |   8.2.1   |
 	----------------------|---------|-----------|--------------
 	tail_call_atom        |    3.6  |    2.4    |
 	binary_call_atom_atom |    4.9  |    4.3    |
@@ -391,14 +391,14 @@ per iteration and smaller is better.
 	deep_unify            |    2.2  |    2.5    |
 	integer_add           |   12.1  |   12.8    |
 	floating_add          |   11.9  |   13.5    |
-	index                 |   26.7  |    4.6    |    25.0
-	assert_unit           | 2483.9  |  451.8    |   917.9
+	index                 |   25.0  |    4.6    |
+	assert_unit           |  917.9  |  451.8    |
 	setof                 |   26.5  |   22.9    |
 	pair_setof            |   35.4  |   32.8    |
 	double_setof          |  254.7  |  169.8    |
 	bagof                 |   19.5  |   15.5    |
 	----------------------|---------|-----------|--------------
-	 Total time           |   21.8s |    8.3s   |    19.5
+	 Total time           |   19.5s |    8.3s   |
 	----------------------|---------|-----------|--------------
 
 	tpl -l samples/broken/peirera.pl -g "bench_peirera,halt"
