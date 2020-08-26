@@ -323,10 +323,10 @@ pr(1, 99).
 pr(0, 100).
 
 test65 :-
-	abolish(ua, 3),
-	create_units(1, 100, L),
 	between(1,1000,_),
+		create_units(1, 1000, L),
 		assert_clauses(L),
+		abolish(ua, 3),
 		fail.
 test65.
 
