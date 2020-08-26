@@ -322,3 +322,22 @@ pr(2, 98).
 pr(1, 99).
 pr(0, 100).
 
+test65 :-
+	between(1,1000,_),
+		abolish(ua, 3),
+		create_units(1, 1000, L),
+		assert_clauses(L),
+		fail.
+test65 :-
+	abolish(ua, 3).
+
+create_units(I, N, []) :- I > N, !.
+create_units(I, N, [ua(K, X, f(K, X))|Rest]) :-
+	K is I * (1 + I//100),
+	J is I + 1,
+	create_units(J, N, Rest).
+
+assert_clauses([]).
+assert_clauses([Clause|Rest]) :-
+	assert(Clause),
+	assert_clauses(Rest).

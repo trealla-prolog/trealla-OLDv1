@@ -379,6 +379,7 @@ static rule *create_rule(module *m, cell *c)
 
 	h->val_offset = c->val_offset;
 	h->arity = c->arity;
+	h->flags = 0;
 	return h;
 }
 

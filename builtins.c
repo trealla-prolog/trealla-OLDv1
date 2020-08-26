@@ -3998,25 +3998,29 @@ static int fn_iso_retractall_1(query *q)
 static int do_abolish(query *q, cell *c)
 {
 	rule *h = find_match(q->m, c);
+	if (!h) return 1;
 
-	if (h) {
-		if (!(h->flags&FLAG_RULE_DYNAMIC)) {
-			fprintf(stderr, "Error: not dynamic '%s/%u'\n", GET_STR(c), c->arity);
-			return 0;
-		}
-
-		for (clause *r = h->head ; r; r = r->next) {
-			retract_from_db(q->m, r);
-
-			if (!q->m->loading && r->t.persist)
-				db_log(q, r, LOG_ERASE);
-		}
-
-		h->flags = FLAG_RULE_ABOLISHED;
-		sl_destroy(h->index);
-		h->index = NULL;
+	if (!(h->flags&FLAG_RULE_DYNAMIC)) {
+		fprintf(stderr, "Error: not dynamic '%s/%u'\n", GET_STR(c), c->arity);
+		return 0;
 	}
 
+	for (clause *r = h->head ; r; r = r->next) {
+		if (!q->m->loading && r->t.persist)
+			db_log(q, r, LOG_ERASE);
+	}
+
+	for (clause *r = h->head; r != NULL;) {
+		clause *save = r->next;
+		clear_term(&r->t);
+		free(r);
+		r = save;
+	}
+
+	h->flags = FLAG_RULE_ABOLISHED;
+	sl_destroy(h->index);
+	h->index = NULL;
+	h->head = h->tail = NULL;
 	return 1;
 }
 
