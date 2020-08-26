@@ -366,3 +366,39 @@ Scryer came from *cargo install scryer-prolog* (it takes a long time)
 and needs *m4* installed. It seems puzzle won't compile, and chess
 needs name/2 (at least). Also *testindex* needs between/3 so won't
 load, is it in a module?
+
+
+Peirera benchmark3 (see *samples/broken/peirera.pl*), time in uSecs
+per iteration and smaller is better.
+
+	----------------------|---------|-----------|
+	                      |   tpl   |   swipl   |
+	                      |         |   8.2.1   |
+	----------------------|---------|-----------|
+	tail_call_atom        |    3.5  |    2.4    |
+	binary_call_atom_atom |    5.2  |    4.3    |
+	cons_list             |    4.6  |    3.2    |
+	walk_list             |    6.8  |    3.0    |
+	walk_list_rec         |    9.9  |    2.7    |
+	cons_term             |    4.6  |    3.6    |
+	walk_term             |    6.8  |    3.0    |
+	walk_term_rec         |   10.0  |    3.5    |
+	shallow_backtracking  |    3.4  |    0.0    |
+	deep_backtracking     |    8.2  |    3.7    |
+	choice_point          |    3.9  |    6.3    |
+	trail_variables       |    4.7  |    5.4    |
+	medium_unify          |    0.6  |    0.5    |
+	deep_unify            |    2.3  |    2.5    |
+	integer_add           |   12.1  |   12.8    |
+	floating_add          |   12.1  |   13.5    |
+	index                 |   27.9  |    4.6    |
+	assert_unit           | 2836.7  |  451.8    |
+	setof                 |   26.7  |   22.9    |
+	pair_setof            |   36.1  |   32.8    |
+	double_setof          |  256.4  |  169.8    |
+	bagof                 |   19.5  |   15.5    |
+	----------------------|---------|-----------|
+	 Total time           |   21.8s |    8.3s   |
+	----------------------|---------|-----------|
+
+	tpl -l samples/broken/peirera.pl -g "bench_peirera,halt"
