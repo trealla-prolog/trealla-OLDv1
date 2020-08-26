@@ -367,14 +367,8 @@ static rule *create_rule(module *m, cell *c)
 
 	if (!h) {
 		h = calloc(1, sizeof(rule));
-
-		if (m->tail)
-			m->tail->next = h;
-
-		m->tail = h;
-
-		if (!m->head)
-			m->head = h;
+		h->next = m->head;
+		m->head = h;
 	}
 
 	h->val_offset = c->val_offset;
@@ -1254,7 +1248,9 @@ void parser_assign_vars(parser *p)
 	c->nbr_cells = 1;
 
 	check_first_cut(p);
-	directives(p, t);
+
+	if (p->consulting)
+		directives(p, t);
 }
 
 static int attach_ops(parser *p, idx_t start_idx)

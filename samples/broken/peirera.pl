@@ -1717,9 +1717,9 @@ arg100(N, T, R) :- arg(N, T, R).
 % 18. 100 indexed calls; some systems may require extra declarations to
 % put an index on the first argument.
 
-bench_mark(index, 2000, ix(1), dummy(1)).
+:- dynamic ix/1.
 
-% :- public ix/1.
+bench_mark(index, 2000, ix(1), dummy(1)).
 
 ix(1) :- ix(10000).
 ix(4).
@@ -1823,6 +1823,7 @@ ix(9801) :- ix(9604).
 ix(10000) :- ix(9801).
 
 % 19. Make 1000 asserts of unit clauses
+
 bench_mark(assert_unit, 100, assert_clauses(L), dummy(L)) :-
    abolish(ua, 3),
    create_units(1, 1000, L).
