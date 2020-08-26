@@ -409,12 +409,10 @@ void cut_me(query *q, int inner_cut)
 		if (ch->inner_cut && !inner_cut)
 			break;
 
-		if (ch->inner_cut && inner_cut)
-			cut = 1;
-
-		if (ch->st.iter) {
+		if (ch->inner_cut && inner_cut) {
 			sl_done(ch->st.iter);
 			ch->st.iter = NULL;
+			cut = 1;
 		}
 
 		q->cp--;
@@ -771,10 +769,12 @@ static int match(query *q)
 				next_key(q);
 			} else {
 				q->st.curr_clause = h->head;
+				sl_done(q->st.iter);
 				q->st.iter = NULL;
 			}
 		} else {
 			q->st.curr_clause = h->head;
+			sl_done(q->st.iter);
 			q->st.iter = NULL;
 		}
 	} else
@@ -891,5 +891,6 @@ void query_execute(query *q, term *t)
 	g->nbr_vars = t->nbr_vars;
 	g->nbr_slots = t->nbr_vars;
 	run_query(q);
+	sl_done(q->st.iter);
 }
 

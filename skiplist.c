@@ -9,11 +9,11 @@ typedef struct keyval_ keyval_t;
 typedef struct slnode_ slnode_t;
 
 struct keyval_ {
-	void *key;
-	void *val;
+	void *key, *val;
 };
 
 #define BUCKET_SIZE 16
+#define MAX_ITERS 16
 
 struct slnode_ {
 	keyval_t bkt[BUCKET_SIZE];
@@ -25,36 +25,35 @@ struct sliter_ {
 	skiplist *l;
 	slnode_t *p;
 	const void *key;
-	int idx, dynamic;
+	int idx, dynamic, busy;
 };
 
 struct skiplist_ {
 	slnode_t *header;
 	int (*compkey)(const void*, const void*);
-	sliter iter;
+	sliter iter[MAX_ITERS];
 	size_t count;
-	int level, iter_cnt;
+	int level;
 	unsigned seed;
 };
 
-#define max_levels 32
-#define max_level (max_levels - 1)
+#define MAX_LEVELS 32
+#define MAX_LEVEL (MAX_LEVELS - 1)
 #define new_node_of_level(x) (slnode_t*)malloc(sizeof(slnode_t) + ((x) * sizeof(slnode_t*)))
 
 skiplist *sl_create(int (*compkey)(const void*, const void*))
 {
-	skiplist *l = (skiplist*)malloc(sizeof(struct skiplist_));
-	l->header = new_node_of_level(max_levels);
+	skiplist *l = (skiplist*)calloc(1, sizeof(struct skiplist_));
+	l->header = new_node_of_level(MAX_LEVELS);
 	l->seed = (unsigned)(size_t)(l + clock());
 	l->level = 1;
 
-	for (int i = 0; i < max_levels; i++)
+	for (int i = 0; i < MAX_LEVELS; i++)
 		l->header->forward[i] = NULL;
 
 	l->header->nbr = 1;
 	l->header->bkt[0].key = NULL;
 	l->compkey = compkey;
-	l->iter_cnt = 0;
 	l->count = 0;
 	return l;
 }
@@ -145,12 +144,12 @@ static int random_level(unsigned *seedp)
 {
 	const double P = 0.5;
 	int lvl = (int)(log(frand(seedp)) / log(1. - P));
-	return lvl < max_level ? lvl : max_level;
+	return lvl < MAX_LEVEL ? lvl : MAX_LEVEL;
 }
 
 int sl_set(skiplist *l, const void *key, const void *val)
 {
-	slnode_t *update[max_levels];
+	slnode_t *update[MAX_LEVELS];
 	slnode_t *p, *q;
 	slnode_t stash;
 	stash.nbr = 0;
@@ -223,7 +222,7 @@ int sl_set(skiplist *l, const void *key, const void *val)
 
 int sl_app(skiplist *l, const void *key, const void *val)
 {
-	slnode_t *update[max_levels];
+	slnode_t *update[MAX_LEVELS];
 	slnode_t *p, *q;
 	slnode_t stash;
 	stash.nbr = 0;
@@ -320,7 +319,7 @@ int sl_get(const skiplist *l, const void *key, const void **val)
 int sl_del(skiplist *l, const void *key)
 {
 	int k, m;
-	slnode_t *update[max_levels];
+	slnode_t *update[MAX_LEVELS];
 	slnode_t *p, *q;
 	p = l->header;
 
@@ -448,14 +447,23 @@ sliter *sl_findkey(skiplist *l, const void *key)
 		return NULL;
 
 	sliter *iter;
+	int i = 0;
 
-	if (l->iter_cnt++) {
+	while (i < MAX_ITERS) {
+		if (!l->iter[i].busy)
+			break;
+
+		i++;
+	}
+
+	if (i >= MAX_ITERS) {
 		iter = malloc(sizeof(sliter));
 		iter->dynamic = 1;
 	}
 	else {
-		iter = &l->iter;
+		iter = &l->iter[i];
 		iter->dynamic = 0;
+		iter->busy = 1;
 	}
 
 	iter->key = key;
@@ -494,10 +502,13 @@ int sl_nextkey(sliter *iter, void **val)
 
 void sl_done(sliter *iter)
 {
-	iter->l->iter_cnt--;
+	if (!iter)
+		return;
 
 	if (iter->dynamic)
 		free(iter);
+	else
+		iter->busy = 0;
 }
 
 void sl_dump(const skiplist *l, const char *(*f)(void*, const void*), void *p1)
