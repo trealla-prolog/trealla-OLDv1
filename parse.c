@@ -249,7 +249,7 @@ cell *get_body(cell *c)
 	return c;
 }
 
-rule *find_match(module *m, cell *c)
+rule *find_rule(module *m, cell *c)
 {
 	for (rule *h = m->head; h; h = h->next) {
 		if (h->flags&FLAG_RULE_ABOLISHED)
@@ -265,6 +265,9 @@ rule *find_match(module *m, cell *c)
 rule *find_functor(module *m, const char *name, unsigned arity)
 {
 	for (rule *h = m->head; h; h = h->next) {
+		if (h->flags&FLAG_RULE_ABOLISHED)
+			continue;
+
 		if (!strcmp(g_pool+h->val_offset, name) && (h->arity == arity))
 			return h;
 	}
@@ -453,7 +456,7 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 		return NULL;
 	}
 
-	rule *h = find_match(m, c);
+	rule *h = find_rule(m, c);
 
 	if (h && !consulting) {
 		if (!(h->flags&FLAG_RULE_DYNAMIC)) {
@@ -513,7 +516,7 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 		return NULL;
 	}
 
-	rule *h = find_match(m, c);
+	rule *h = find_rule(m, c);
 
 	if (h && !consulting) {
 		if (!(h->flags&FLAG_RULE_DYNAMIC)) {
@@ -602,7 +605,7 @@ static void set_dynamic_in_db(module *m, const char *name, idx_t arity)
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_offset = find_in_pool(name);
 	tmp.arity = arity;
-	rule *h = find_match(m, &tmp);
+	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
 	h->flags |= FLAG_RULE_DYNAMIC;
 	h->index = sl_create(compkey);
@@ -614,7 +617,7 @@ static void set_persist_in_db(module *m, const char *name, idx_t arity)
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_offset = find_in_pool(name);
 	tmp.arity = arity;
-	rule *h = find_match(m, &tmp);
+	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
 	h->flags |= FLAG_RULE_DYNAMIC | FLAG_RULE_PERSIST;
 	h->index = sl_create(compkey);
@@ -627,7 +630,7 @@ static void set_volatile_in_db(module *m, const char *name, unsigned arity)
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_offset = find_in_pool(name);
 	tmp.arity = arity;
-	rule *h = find_match(m, &tmp);
+	rule *h = find_rule(m, &tmp);
 	if (!h) return;
 	h->flags |= FLAG_RULE_VOLATILE;
 }
@@ -1111,7 +1114,7 @@ int parser_xref(parser *p, term *t, rule *parent)
 		module *tmp_m = NULL;
 
 		while (m) {
-			rule *h = find_match(m, c);
+			rule *h = find_rule(m, c);
 
 			if ((c+c->nbr_cells) >= (t->cells+t->cidx-1)) {
 				if (parent && (h == parent))
@@ -2694,8 +2697,8 @@ void destroy_module(module *m)
 	if (m->fp)
 		fclose(m->fp);
 
-	free(m->filename);
 	destroy_parser(m->p);
+	free(m->filename);
 	free(m->name);
 	free(m);
 }

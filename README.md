@@ -403,5 +403,3 @@ per iteration and smaller is better.
 
 	tpl -l samples/broken/peirera.pl -g "bench_peirera,halt"
 
-Currently Trealla only indexes clause args, not clauses themselves.
-Obviously a linear search is not going to cut it long-term.
