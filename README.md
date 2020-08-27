@@ -311,7 +311,8 @@ the *rdiv/2* operator or by *1r3* style notation:
 Performance
 ===========
 
-Elapsed time in seconds, smaller is better. Indicative only...
+Elapsed time in seconds, smaller is better. Times are indicative only.
+Compile with GCC 10.1.0 on Linux.
 
 	------------|---------|-----------|-----------|---------|----------
 	            |   tpl   |   swipl   |  gprolog  |   yap   |  scryer
