@@ -35,11 +35,12 @@ Run...
 	make debug
 	make valgrind
 
-to do the tests under valgrind.
+to do the tests under valgrind memory checking.
 
 A 'make debug' build compiles in 0.17s with TCC, 1.8s with CLANG & 2.1s
 with GCC. Should build on any Unix-like system with a C99 compiler.
-Tested on Manjaro, Ubuntu 20.04, Raspbian & FreeBSD 12.1 systems.
+Has been tested on Manjaro, Ubuntu 20.04, FreeBSD 12.1 and Raspbian
+(32 & 64-bit) systems.
 
 
 Usage
