@@ -8043,6 +8043,7 @@ static int fn_db_load_0(query *q)
 
 static int fn_db_save_0(query *q)
 {
+	fflush(q->m->fp);
 	fsync(fileno(q->m->fp));
 	fclose(q->m->fp);
 	char filename[1024];
