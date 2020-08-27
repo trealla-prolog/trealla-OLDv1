@@ -1591,7 +1591,6 @@ static int fn_iso_nl_0(query *q)
 	int n = get_named_stream(q, "user_output");
 	stream *str = &g_streams[n];
 	fputc('\n', str->fp);
-	fflush(str->fp);
 	return !ferror(str->fp);
 }
 
@@ -1601,7 +1600,6 @@ static int fn_iso_nl_1(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	fputc('\n', str->fp);
-	fflush(str->fp);
 	return !ferror(str->fp);
 }
 
@@ -8043,8 +8041,6 @@ static int fn_db_load_0(query *q)
 
 static int fn_db_save_0(query *q)
 {
-	fflush(q->m->fp);
-	fsync(fileno(q->m->fp));
 	fclose(q->m->fp);
 	char filename[1024];
 	snprintf(filename, sizeof(filename), "%s.db", q->m->name);
