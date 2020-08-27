@@ -275,8 +275,8 @@ rule *find_functor(module *m, const char *name, unsigned arity)
 	return NULL;
 }
 
-uint64_t gettimeofday_usec(void)
 #ifdef _WIN32
+uint64_t get_time_in_usec(void)
 {
     static const uint64_t epoch = 116444736000000000ULL;
     FILETIME file_time;
@@ -289,10 +289,11 @@ uint64_t gettimeofday_usec(void)
     return (u.QuadPart - epoch) / 10 + (1000ULL * system_time.wMilliseconds);
 }
 #else
+uint64_t get_time_in_usec(void)
 {
-    struct timeval tp;
-    gettimeofday(&tp, NULL);
-    return ((uint64_t)tp.tv_sec * 1000 * 1000) + tp.tv_usec;
+	struct timespec now;
+	clock_gettime(CLOCK_REALTIME, &now);
+    return (uint64_t)(now.tv_sec * 1000 * 1000) + (now.tv_nsec / 1000);
 }
 #endif
 
@@ -314,7 +315,7 @@ void uuid_gen(uuid *u)
 	if (!g_seed)
 		g_seed = (uint64_t)time(0) & MASK_FINAL;
 
-	uint64_t now = gettimeofday_usec();
+	uint64_t now = get_time_in_usec();
 	compare_and_zero(now, &s_last, &s_cnt);
 	u->u1 = now;
 	u->u2 = s_cnt++;

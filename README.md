@@ -375,31 +375,33 @@ per iteration and smaller is better.
 	                      |   tpl   |   swipl   |
 	                      |         |   8.2.1   |
 	----------------------|---------|-----------|--------------
-	tail_call_atom        |    3.6  |    2.4    |
-	binary_call_atom_atom |    4.9  |    4.3    |
-	cons_list             |    4.6  |    3.2    |
-	walk_list             |    6.7  |    3.0    |
-	walk_list_rec         |    9.9  |    2.7    |
-	cons_term             |    4.6  |    3.6    |
-	walk_term             |    6.8  |    3.0    |
-	walk_term_rec         |   10.0  |    3.5    |
-	shallow_backtracking  |    3.1  |    0.0    |
-	deep_backtracking     |    8.3  |    3.7    |
-	choice_point          |    3.7  |    6.3    |
-	trail_variables       |    4.7  |    5.4    |
+	tail_call_atom        |    3.4  |    2.4    |
+	binary_call_atom_atom |    4.8  |    4.3    |
+	cons_list             |    4.4  |    3.2    |
+	walk_list             |    6.5  |    3.0    |
+	walk_list_rec         |    9.3  |    2.7    |
+	cons_term             |    4.7  |    3.6    |
+	walk_term             |    6.9  |    3.0    |
+	walk_term_rec         |   10.2  |    3.5    |
+	shallow_backtracking  |    3.4  |    0.0    |
+	deep_backtracking     |    8.1  |    3.7    |
+	choice_point          |    3.8  |    6.3    |
+	trail_variables       |    4.5  |    5.4    |
 	medium_unify          |    0.6  |    0.5    |
 	deep_unify            |    2.2  |    2.5    |
 	integer_add           |   12.1  |   12.8    |
-	floating_add          |   11.9  |   13.5    |
-	index                 |   25.0  |    4.6    |
-	assert_unit           |  917.9  |  451.8    |
-	setof                 |   26.5  |   22.9    |
-	pair_setof            |   35.4  |   32.8    |
-	double_setof          |  254.7  |  169.8    |
-	bagof                 |   19.5  |   15.5    |
+	floating_add          |   12.6  |   13.5    |
+	index                 |   27.0  |    4.6    |
+	assert_unit           |  940.5  |  451.8    |
+	setof                 |   27.4  |   22.9    |
+	pair_setof            |   37.1  |   32.8    |
+	double_setof          |  280.8  |  169.8    |
+	bagof                 |   19.7  |   15.5    |
 	----------------------|---------|-----------|--------------
-	 Total time           |   19.5s |    8.3s   |
+	 Total time           |   19.9s |    8.3s   |
 	----------------------|---------|-----------|--------------
+
+Times above vary about 5% run to run.
 
 	tpl -l samples/broken/peirera.pl -g "bench_peirera,halt"
 

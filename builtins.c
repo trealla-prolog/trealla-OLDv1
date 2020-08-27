@@ -5287,12 +5287,12 @@ static int fn_listing_1(query *q)
 
 static int fn_sys_timer_0(query *q)
 {
-	q->time_started = gettimeofday_usec() / 1000;
+	q->time_started = get_time_in_usec() / 1000;
 	return 1;
 }
 static int fn_sys_elapsed_0(query *q)
 {
-	int_t elapsed = gettimeofday_usec() / 1000;
+	int_t elapsed = get_time_in_usec() / 1000;
 	elapsed -= q->time_started;
 	fprintf(stderr, "Time elapsed %.03g secs\n", (double)elapsed/1000);
 	return 1;
@@ -5316,7 +5316,7 @@ static int fn_statistics_2(query *q)
 	GET_NEXT_ARG(p2,list_or_var);
 
 	if (!strcmp(GET_STR(p1), "cputime") && is_var(p2)) {
-		int64_t now = gettimeofday_usec() / 1000;
+		int64_t now = get_time_in_usec() / 1000;
 		double elapsed = now - q->time_started;
 		cell tmp;
 		make_float(&tmp, elapsed/1000);
@@ -5342,7 +5342,7 @@ static int fn_sleep_1(query *q)
 	GET_FIRST_ARG(p1,integer);
 
 	if (q->is_subquery) {
-		q->tmo = gettimeofday_usec() / 1000;
+		q->tmo = get_time_in_usec() / 1000;
 		q->tmo += p1->val_int * 1000;
 		do_yield_0(q);
 		return 0;
@@ -5360,7 +5360,7 @@ static int fn_delay_1(query *q)
 	GET_FIRST_ARG(p1,integer);
 
 	if (q->is_subquery) {
-		q->tmo = gettimeofday_usec() / 1000;
+		q->tmo = get_time_in_usec() / 1000;
 		q->tmo += p1->val_int;
 		do_yield_0(q);
 		return 0;
@@ -5383,10 +5383,10 @@ static int fn_busy_1(query *q)
 	if (elapse > (60 * 1000))
 		return 1;
 
-	int_t started = gettimeofday_usec() / 1000;
+	int_t started = get_time_in_usec() / 1000;
 	int_t end = started + elapse;
 
-	while ((gettimeofday_usec() / 1000) < end)
+	while ((get_time_in_usec() / 1000) < end)
 		;
 
 	return 1;
@@ -5394,7 +5394,7 @@ static int fn_busy_1(query *q)
 
 static int fn_now_0(query *q)
 {
-	int_t secs = gettimeofday_usec() / 1000 / 1000;
+	int_t secs = get_time_in_usec() / 1000 / 1000;
 	q->accum.val_type = TYPE_INT;
 	q->accum.val_int = secs;
 	return 1;
@@ -5403,7 +5403,7 @@ static int fn_now_0(query *q)
 static int fn_now_1(query *q)
 {
 	GET_FIRST_ARG(p1,var);
-	int_t secs = gettimeofday_usec() / 1000 / 1000;
+	int_t secs = get_time_in_usec() / 1000 / 1000;
 	cell tmp;
 	make_int(&tmp, secs);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -5413,7 +5413,7 @@ static int fn_now_1(query *q)
 static int fn_get_time_1(query *q)
 {
 	GET_FIRST_ARG(p1,var);
-	double v = ((double)gettimeofday_usec()) / 1000 / 1000;
+	double v = ((double)get_time_in_usec()) / 1000 / 1000;
 	cell tmp;
 	make_float(&tmp, (double)v);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -5794,7 +5794,7 @@ static int fn_accept_2(query *q)
 
 	if (fd == -1) {
 		if (q->is_subquery) {
-			q->tmo = gettimeofday_usec() / 1000;
+			q->tmo = get_time_in_usec() / 1000;
 			q->tmo += 1;
 			do_yield_0(q);
 			return 0;
@@ -6014,7 +6014,7 @@ static int fn_getline_2(query *q)
 
 		if (q->is_subquery && !feof(str->fp)) {
 			clearerr(str->fp);
-			q->tmo =gettimeofday_usec() / 1000;
+			q->tmo =get_time_in_usec() / 1000;
 			q->tmo += 1;
 			do_yield_0(q);
 			return 0;
@@ -6066,7 +6066,7 @@ static int fn_bread_3(query *q)
 
 			if (q->is_subquery) {
 				clearerr(str->fp);
-				q->tmo = gettimeofday_usec() / 1000;
+				q->tmo = get_time_in_usec() / 1000;
 				q->tmo += 1;
 				do_yield_0(q);
 				return 0;
@@ -6231,7 +6231,7 @@ static int fn_is_list_1(query *q)
 static int fn_wait_0(query *q)
 {
 	while (!g_tpl_abort && q->m->tasks) {
-		int_t now = gettimeofday_usec() / 1000;
+		int_t now = get_time_in_usec() / 1000;
 		query *task = q->m->tasks;
 		int did_something = 0;
 
@@ -6277,7 +6277,7 @@ static int fn_wait_0(query *q)
 static int fn_await_0(query *q)
 {
 	while (!g_tpl_abort && q->m->tasks) {
-		int_t now = gettimeofday_usec() / 1000;
+		int_t now = get_time_in_usec() / 1000;
 		query *task = q->m->tasks;
 		int did_something = 0;
 

@@ -370,6 +370,6 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected);
 char *uuid_to_string(const uuid *u, char *buf, size_t buflen);
 int uuid_from_string(const char *s, uuid *u);
 void uuid_gen(uuid *u);
-uint64_t gettimeofday_usec(void);
+uint64_t get_time_in_usec(void);
 void clear_term(term *t);
 void do_db_load(module *m);
