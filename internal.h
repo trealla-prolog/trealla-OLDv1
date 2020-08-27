@@ -24,9 +24,10 @@ typedef __uint64_t uint_t;
 
 typedef uint32_t idx_t;
 
+#define max(a,b) (a)<(b)?(a):(b)
+#define MAX_SMALL_STRING (max(sizeof(int_t),sizeof(void*))*2)
 #define MAX_VAR_POOL_SIZE 1000
 #define MAX_ARITY UCHAR_MAX
-#define MAX_SMALL_STRING (sizeof(int_t)*2)
 #define MAX_USER_OPS 100
 #define MAX_QUEUES 16
 #define MAX_STREAMS 64
