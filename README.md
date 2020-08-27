@@ -312,7 +312,7 @@ Performance
 ===========
 
 Elapsed time in seconds, smaller is better. Times are indicative only.
-Compile with GCC 10.1.0 on Linux.
+Compiled with GCC 10.1.0 on Linux.
 
 	------------|---------|-----------|-----------|---------|----------
 	            |   tpl   |   swipl   |  gprolog  |   yap   |  scryer
