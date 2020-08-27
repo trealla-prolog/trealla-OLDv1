@@ -297,64 +297,6 @@ uint64_t get_time_in_usec(void)
 }
 #endif
 
-static void compare_and_zero(uint64_t v1, uint64_t *v2, uint64_t *v)
-{
-	if (v1 != *v2) {
-		*v2 = v1;
-		*v = 0;
-	}
-}
-
-#define MASK_FINAL 0x0000FFFFFFFFFFFF // Final 48 bits
-
-void uuid_gen(uuid *u)
-{
-	static uint64_t s_last = 0, s_cnt = 0;
-	static uint64_t g_seed = 0;
-
-	if (!g_seed)
-		g_seed = (uint64_t)time(0) & MASK_FINAL;
-
-	uint64_t now = get_time_in_usec();
-	compare_and_zero(now, &s_last, &s_cnt);
-	u->u1 = now;
-	u->u2 = s_cnt++;
-	u->u2 <<= 48;
-	u->u2 |= g_seed;
-}
-
-char *uuid_to_string(const uuid *u, char *buf, size_t buflen)
-{
-	snprintf(buf, buflen, "%016llX-%04llX-%012llX",
-		(unsigned long long)u->u1,
-		(unsigned long long)(u->u2 >> 48),
-		(unsigned long long)(u->u2 & MASK_FINAL));
-
-	return buf;
-}
-
-int uuid_from_string(const char *s, uuid *u)
-{
-	if (!s) {
-		uuid tmp = {0};
-		*u = tmp;
-		return 0;
-	}
-
-	unsigned long long p1 = 0, p2 = 0, p3 = 0;
-
-	if (sscanf(s, "%llX%*c%llX%*c%llX", &p1, &p2, &p3) != 3) {
-		uuid tmp = {0};
-		*u = tmp;
-		return 0;
-	}
-
-	u->u1 = p1;
-	u->u2 = p2 << 48;
-	u->u2 |= p3 & MASK_FINAL;
-	return 1;
-}
-
 static rule *get_rule(module *m)
 {
 	for (rule *h = m->head; h; h = h->next) {
@@ -500,7 +442,6 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 	}
 
 	t->cidx = 0;
-	uuid_gen(&r->u);
 
 	if (h->flags&FLAG_RULE_PERSIST)
 		r->t.persist = 1;
@@ -562,7 +503,6 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 	}
 
 	t->cidx = 0;
-	uuid_gen(&r->u);
 
 	if (h->flags&FLAG_RULE_PERSIST)
 		r->t.persist = 1;
