@@ -141,7 +141,7 @@ static void make_float(cell *tmp, double v)
 	tmp->val_type = TYPE_FLOAT;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
-	tmp->val_real = v;
+	tmp->val_flt = v;
 }
 
 static void make_structure(cell *tmp, idx_t offset, void *fn, unsigned arity, idx_t extra_cells)
@@ -152,7 +152,7 @@ static void make_structure(cell *tmp, idx_t offset, void *fn, unsigned arity, id
 	tmp->flags = FLAG_BUILTIN;
 	tmp->arity = arity;
 	tmp->fn = fn;
-	tmp->val_offset = offset;
+	tmp->val_off = offset;
 }
 
 void make_end(cell *tmp)
@@ -161,14 +161,14 @@ void make_end(cell *tmp)
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
 	tmp->match = NULL;
-	tmp->val_cell = NULL;
+	tmp->val_ptr = NULL;
 }
 
 static void make_end_return(cell *tmp, cell *c)
 {
 	make_end(tmp);
 	tmp->flags = FLAG_RETURN;
-	tmp->val_cell = c;
+	tmp->val_ptr = c;
 }
 
 static void make_literal(cell *tmp, idx_t offset)
@@ -176,7 +176,7 @@ static void make_literal(cell *tmp, idx_t offset)
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
-	tmp->val_offset = offset;
+	tmp->val_off = offset;
 }
 
 static void make_small(cell *tmp, const char *s)
@@ -339,7 +339,7 @@ static cell *alloc_list(query *q, const cell *c)
 	cell *tmp = alloc_heap(q, 1+c->nbr_cells);
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1 + c->nbr_cells;
-	tmp->val_offset = g_dot_s;
+	tmp->val_off = g_dot_s;
 	tmp->arity = 2;
 	copy_cells(tmp+1, c, c->nbr_cells);
 	return tmp;
@@ -351,7 +351,7 @@ static cell *append_list(query *q, cell *l, const cell *c)
 	cell *tmp = alloc_heap(q, 1+c->nbr_cells);
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1 + c->nbr_cells;
-	tmp->val_offset = g_dot_s;
+	tmp->val_off = g_dot_s;
 	tmp->arity = 2;
 	copy_cells(tmp+1, c, c->nbr_cells);
 	l = q->arenas->heap + save;
@@ -365,7 +365,7 @@ static cell *end_list(query *q, cell *l)
 	cell *tmp = alloc_heap(q, 1);
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1;
-	tmp->val_offset = g_nil_s;
+	tmp->val_off = g_nil_s;
 	l = q->arenas->heap + save;
 	l->nbr_cells += tmp->nbr_cells;
 	return l;
@@ -800,7 +800,7 @@ static int fn_iso_atom_chars_2(query *q)
 			*dst = '\0';
 
 			if (is_literal(tail)) {
-				if (tail->val_offset == g_nil_s)
+				if (tail->val_off == g_nil_s)
 					break;
 			}
 
@@ -890,7 +890,7 @@ static int fn_iso_atom_codes_2(query *q)
 			dst += strlen(ch);
 
 			if (is_literal(tail)) {
-				if (tail->val_offset == g_nil_s)
+				if (tail->val_off == g_nil_s)
 					break;
 			}
 
@@ -960,7 +960,7 @@ static int fn_iso_number_chars_2(query *q)
 			val += ch - '0';
 
 			if (is_literal(tail)) {
-				if (tail->val_offset == g_nil_s)
+				if (tail->val_off == g_nil_s)
 					break;
 			}
 
@@ -1040,7 +1040,7 @@ static int fn_iso_number_codes_2(query *q)
 			val += ch - '0';
 
 			if (is_literal(tail)) {
-				if (tail->val_offset == g_nil_s)
+				if (tail->val_off == g_nil_s)
 					break;
 			}
 
@@ -2287,14 +2287,14 @@ static int fn_iso_is_2(query *q)
 		return (p1->val_num == p2.val_num) && (p1->val_den == p2.val_den);
 	}
 
-	if (is_real(p1) && is_real(&p2))
-		return p1->val_real == p2.val_real;
+	if (is_float(p1) && is_float(&p2))
+		return p1->val_flt == p2.val_flt;
 
 	if (is_atom(p1) && is_number(&p2) && !strcmp(GET_STR(p1), "nan"))
-		return is_real(&p2)? isnan(p2.val_real) : 0;
+		return is_float(&p2)? isnan(p2.val_flt) : 0;
 
 	if (is_atom(p1) && is_number(&p2) && !strcmp(GET_STR(p1), "inf"))
-		return is_real(&p2) ? isinf(p2.val_real) : 0;
+		return is_float(&p2) ? isinf(p2.val_flt) : 0;
 
 	throw_error(q, p1, "type_error", "number");
 	return 0;
@@ -2307,14 +2307,14 @@ static int fn_iso_float_1(query *q)
 	if (q->calc) {
 		cell p1 = calc(q, p1_tmp);
 
-		if is_real(&p1) {
-			q->accum.val_real = p1.val_real;
+		if is_float(&p1) {
+			q->accum.val_flt = p1.val_flt;
 			q->accum.val_type = TYPE_FLOAT;
 			return 1;
 		}
 
 		if (is_integer(&p1)) {
-			q->accum.val_real = (double)p1.val_int;
+			q->accum.val_flt = (double)p1.val_int;
 			q->accum.val_type = TYPE_FLOAT;
 			return 1;
 		}
@@ -2323,7 +2323,7 @@ static int fn_iso_float_1(query *q)
 		return 0;
 	}
 
-	return is_real(p1_tmp);
+	return is_float(p1_tmp);
 }
 
 static int fn_iso_integer_1(query *q)
@@ -2333,8 +2333,8 @@ static int fn_iso_integer_1(query *q)
 	if (q->calc) {
 		cell p1 = calc(q, p1_tmp);
 
-		if is_real(&p1) {
-			q->accum.val_int = (int_t)p1.val_real;
+		if is_float(&p1) {
+			q->accum.val_int = (int_t)p1.val_flt;
 			q->accum.val_den = 1;
 			q->accum.val_type = TYPE_INT;
 			return 1;
@@ -2362,8 +2362,8 @@ static int fn_iso_abs_1(query *q)
 
 	if (is_integer(&p1))
 		q->accum.val_int = llabs(p1.val_int);
-	else if is_real(&p1)
-		q->accum.val_real = fabs(p1.val_real);
+	else if is_float(&p1)
+		q->accum.val_flt = fabs(p1.val_flt);
 	else {
 		throw_error(q, &p1, "type_error", "number");
 		return 0;
@@ -2380,8 +2380,8 @@ static int fn_iso_sign_1(query *q)
 
 	if (is_integer(&p1))
 		q->accum.val_int = p1.val_int < 0 ? -1 : p1.val_int > 0  ? 1 : 0;
-	else if is_real(&p1)
-		q->accum.val_real = p1.val_real < 0 ? -1 : p1.val_real > 0  ? 1 : 0;
+	else if is_float(&p1)
+		q->accum.val_flt = p1.val_flt < 0 ? -1 : p1.val_flt > 0  ? 1 : 0;
 	else {
 		throw_error(q, &p1, "type_error", "number");
 		return 0;
@@ -2406,8 +2406,8 @@ static int fn_iso_negative_1(query *q)
 
 	if (is_rational(&p1))
 		q->accum.val_num = -p1.val_num;
-	else if (is_real(&p1))
-		q->accum.val_real = -p1.val_real;
+	else if (is_float(&p1))
+		q->accum.val_flt = -p1.val_flt;
 	else {
 		throw_error(q, &p1, "type_error", "number");
 		return 0;
@@ -2418,14 +2418,14 @@ static int fn_iso_negative_1(query *q)
 
 static int fn_iso_pi_0(query *q)
 {
-	q->accum.val_real = M_PI;
+	q->accum.val_flt = M_PI;
 	q->accum.val_type = TYPE_FLOAT;
 	return 1;
 }
 
 static int fn_iso_e_0(query *q)
 {
-	q->accum.val_real = M_E;
+	q->accum.val_flt = M_E;
 	q->accum.val_type = TYPE_FLOAT;
 	return 1;
 }
@@ -2456,14 +2456,14 @@ static int fn_iso_add_2(query *q)
 		q->accum.val_num += p2.val_num * p1.val_den;
 		q->accum.val_den = p1.val_den * p2.val_den;
 		q->accum.val_type = TYPE_INT;
-	} else if (is_integer(&p1) && is_real(&p2)) {
-		q->accum.val_real = (double)p1.val_int + p2.val_real;
+	} else if (is_integer(&p1) && is_float(&p2)) {
+		q->accum.val_flt = (double)p1.val_int + p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1) && is_real(&p2)) {
-		q->accum.val_real = p1.val_real + p2.val_real;
+	} else if (is_float(&p1) && is_float(&p2)) {
+		q->accum.val_flt = p1.val_flt + p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1) && is_integer(&p2)) {
-		q->accum.val_real = p1.val_real + p2.val_int;
+	} else if (is_float(&p1) && is_integer(&p2)) {
+		q->accum.val_flt = p1.val_flt + p2.val_int;
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2499,14 +2499,14 @@ static int fn_iso_sub_2(query *q)
 		q->accum.val_num -= p2.val_num * p1.val_den;
 		q->accum.val_den = p1.val_den * p2.val_den;
 		q->accum.val_type = TYPE_INT;
-	} else if (is_integer(&p1) && is_real(&p2)) {
-		q->accum.val_real = (double)p1.val_int - p2.val_real;
+	} else if (is_integer(&p1) && is_float(&p2)) {
+		q->accum.val_flt = (double)p1.val_int - p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1) && is_real(&p2)) {
-		q->accum.val_real = p1.val_real - p2.val_real;
+	} else if (is_float(&p1) && is_float(&p2)) {
+		q->accum.val_flt = p1.val_flt - p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1) && is_integer(&p2)) {
-		q->accum.val_real = p1.val_real - p2.val_int;
+	} else if (is_float(&p1) && is_integer(&p2)) {
+		q->accum.val_flt = p1.val_flt - p2.val_int;
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2543,14 +2543,14 @@ static int fn_iso_mul_2(query *q)
 		q->accum.val_den = p1.val_den * p2.val_den;
 		q->accum.val_den *= p1.val_den * p2.val_den;
 		q->accum.val_type = TYPE_INT;
-	} else if (is_integer(&p1) && is_real(&p2)) {
-		q->accum.val_real = (double)p1.val_int * p2.val_real;
+	} else if (is_integer(&p1) && is_float(&p2)) {
+		q->accum.val_flt = (double)p1.val_int * p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1) && is_real(&p2)) {
-		q->accum.val_real = p1.val_real * p2.val_real;
+	} else if (is_float(&p1) && is_float(&p2)) {
+		q->accum.val_flt = p1.val_flt * p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1) && is_integer(&p2)) {
-		q->accum.val_real = p1.val_real * p2.val_int;
+	} else if (is_float(&p1) && is_integer(&p2)) {
+		q->accum.val_flt = p1.val_flt * p2.val_int;
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2566,10 +2566,10 @@ static int fn_iso_exp_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		q->accum.val_real = exp((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = exp((double)p1.val_num/p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1)) {
-		q->accum.val_real = exp(p1.val_real);
+	} else if (is_float(&p1)) {
+		q->accum.val_flt = exp(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2585,10 +2585,10 @@ static int fn_iso_sqrt_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		q->accum.val_real = sqrt((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = sqrt((double)p1.val_num/p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1)) {
-		q->accum.val_real = sqrt(p1.val_real);
+	} else if (is_float(&p1)) {
+		q->accum.val_flt = sqrt(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2604,10 +2604,10 @@ static int fn_iso_log_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		q->accum.val_real = log((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = log((double)p1.val_num/p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1)) {
-		q->accum.val_real = log(p1.val_real);
+	} else if (is_float(&p1)) {
+		q->accum.val_flt = log(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2622,16 +2622,16 @@ static int fn_iso_truncate_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (is_real(&p1)) {
+	if (is_float(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = p1.val_real;
+		__int128_t tmp = p1.val_flt;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
 			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
 			return 0;
 		} else {
 #endif
-			q->accum.val_int = (int_t)p1.val_real;
+			q->accum.val_int = (int_t)p1.val_flt;
 			q->accum.val_type = TYPE_INT;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
@@ -2649,16 +2649,16 @@ static int fn_iso_round_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (is_real(&p1)) {
+	if (is_float(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = round(p1.val_real);
+		__int128_t tmp = round(p1.val_flt);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
 			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
 			return 0;
 		} else {
 #endif
-			q->accum.val_int = (int_t)round(p1.val_real);
+			q->accum.val_int = (int_t)round(p1.val_flt);
 			q->accum.val_type = TYPE_INT;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
@@ -2676,16 +2676,16 @@ static int fn_iso_ceiling_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (is_real(&p1)) {
+	if (is_float(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = ceil(p1.val_real);
+		__int128_t tmp = ceil(p1.val_flt);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
 			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
 			return 0;
 		} else {
 #endif
-			q->accum.val_int = (int_t)ceil(p1.val_real);
+			q->accum.val_int = (int_t)ceil(p1.val_flt);
 			q->accum.val_type = TYPE_INT;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
@@ -2703,16 +2703,16 @@ static int fn_iso_float_integer_part_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (is_real(&p1)) {
+	if (is_float(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = p1.val_real;
+		__int128_t tmp = p1.val_flt;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
 			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
 			return 0;
 		} else {
 #endif
-			q->accum.val_real = (int_t)p1.val_real;
+			q->accum.val_flt = (int_t)p1.val_flt;
 			q->accum.val_type = TYPE_FLOAT;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
@@ -2730,16 +2730,16 @@ static int fn_iso_float_fractional_part_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (is_real(&p1)) {
+	if (is_float(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = p1.val_real - (__int64_t)p1.val_real;
+		__int128_t tmp = p1.val_flt - (__int64_t)p1.val_flt;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
 			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
 			return 0;
 		} else {
 #endif
-			q->accum.val_real = p1.val_real - (int_t)p1.val_real;
+			q->accum.val_flt = p1.val_flt - (int_t)p1.val_flt;
 			q->accum.val_type = TYPE_FLOAT;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
@@ -2757,16 +2757,16 @@ static int fn_iso_floor_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (is_real(&p1)) {
+	if (is_float(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = floor(p1.val_real);
+		__int128_t tmp = floor(p1.val_flt);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
 			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
 			return 0;
 		} else {
 #endif
-			q->accum.val_int = (int_t)floor(p1.val_real);
+			q->accum.val_int = (int_t)floor(p1.val_flt);
 			q->accum.val_type = TYPE_INT;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
@@ -2785,10 +2785,10 @@ static int fn_iso_sin_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		q->accum.val_real = sin((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = sin((double)p1.val_num/p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1)) {
-		q->accum.val_real = sin(p1.val_real);
+	} else if (is_float(&p1)) {
+		q->accum.val_flt = sin(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2804,10 +2804,10 @@ static int fn_iso_cos_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		q->accum.val_real = cos((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = cos((double)p1.val_num/p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1)) {
-		q->accum.val_real = cos(p1.val_real);
+	} else if (is_float(&p1)) {
+		q->accum.val_flt = cos(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2823,10 +2823,10 @@ static int fn_iso_tan_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		q->accum.val_real = tan((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = tan((double)p1.val_num/p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1)) {
-		q->accum.val_real = tan(p1.val_real);
+	} else if (is_float(&p1)) {
+		q->accum.val_flt = tan(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2842,10 +2842,10 @@ static int fn_iso_asin_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		q->accum.val_real = asin((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = asin((double)p1.val_num/p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1)) {
-		q->accum.val_real = asin(p1.val_real);
+	} else if (is_float(&p1)) {
+		q->accum.val_flt = asin(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2861,10 +2861,10 @@ static int fn_iso_acos_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		q->accum.val_real = acos((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = acos((double)p1.val_num/p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1)) {
-		q->accum.val_real = acos(p1.val_real);
+	} else if (is_float(&p1)) {
+		q->accum.val_flt = acos(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2880,10 +2880,10 @@ static int fn_iso_atan_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		q->accum.val_real = atan((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = atan((double)p1.val_num/p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1)) {
-		q->accum.val_real = atan(p1.val_real);
+	} else if (is_float(&p1)) {
+		q->accum.val_flt = atan(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2901,16 +2901,16 @@ static int fn_iso_atan_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_rational(&p1) && is_rational(&p2)) {
-		q->accum.val_real = atan2((double)p1.val_num/p1.val_den, (double)p2.val_num/p2.val_den);
+		q->accum.val_flt = atan2((double)p1.val_num/p1.val_den, (double)p2.val_num/p2.val_den);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_rational(&p1) && is_real(&p2)) {
-		q->accum.val_real = atan2((double)p1.val_num/p1.val_den, p2.val_real);
+	} else if (is_rational(&p1) && is_float(&p2)) {
+		q->accum.val_flt = atan2((double)p1.val_num/p1.val_den, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1) && is_real(&p2)) {
-		q->accum.val_real = atan2(p1.val_real, p2.val_real);
+	} else if (is_float(&p1) && is_float(&p2)) {
+		q->accum.val_flt = atan2(p1.val_flt, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1) && is_integer(&p2)) {
-		q->accum.val_real = atan2(p1.val_real, p2.val_int);
+	} else if (is_float(&p1) && is_integer(&p2)) {
+		q->accum.val_flt = atan2(p1.val_flt, p2.val_int);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2934,18 +2934,18 @@ static int fn_iso_copysign_2(query *q)
 			q->accum.val_num = -llabs(p1.val_num);
 
 		q->accum.val_type = TYPE_INT;
-	} else if (is_rational(&p1) && is_real(&p2)) {
+	} else if (is_rational(&p1) && is_float(&p2)) {
 		q->accum = p1;
 
-		if (p2.val_real < 0.0)
+		if (p2.val_flt < 0.0)
 			q->accum.val_num = -llabs(p1.val_num);
 
 		q->accum.val_type = TYPE_INT;
-	} else if (is_real(&p1) && is_real(&p2)) {
-		q->accum.val_real = copysign(p1.val_real, p2.val_real);
+	} else if (is_float(&p1) && is_float(&p2)) {
+		q->accum.val_flt = copysign(p1.val_flt, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1) && is_rational(&p2)) {
-		q->accum.val_real = copysign(p1.val_real, p2.val_int);
+	} else if (is_float(&p1) && is_rational(&p2)) {
+		q->accum.val_flt = copysign(p1.val_flt, p2.val_int);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2963,16 +2963,16 @@ static int fn_iso_pow_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_rational(&p1) && is_rational(&p2)) {
-		q->accum.val_real = pow((double)p1.val_num/p1.val_den, (double)p2.val_num/p2.val_den);
+		q->accum.val_flt = pow((double)p1.val_num/p1.val_den, (double)p2.val_num/p2.val_den);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_rational(&p1) && is_real(&p2)) {
-		q->accum.val_real = pow((double)p1.val_num/p1.val_den, p2.val_real);
+	} else if (is_rational(&p1) && is_float(&p2)) {
+		q->accum.val_flt = pow((double)p1.val_num/p1.val_den, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1) && is_real(&p2)) {
-		q->accum.val_real = pow(p1.val_real, p2.val_real);
+	} else if (is_float(&p1) && is_float(&p2)) {
+		q->accum.val_flt = pow(p1.val_flt, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1) && is_integer(&p2)) {
-		q->accum.val_real = pow(p1.val_real, p2.val_int);
+	} else if (is_float(&p1) && is_integer(&p2)) {
+		q->accum.val_flt = pow(p1.val_flt, p2.val_int);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -3004,16 +3004,16 @@ static int fn_iso_powi_2(query *q)
 		}
 #endif
 	} else if (is_rational(&p1) && is_rational(&p2)) {
-		q->accum.val_real = pow((double)p1.val_num/p1.val_den, (double)p2.val_num/p2.val_den);
+		q->accum.val_flt = pow((double)p1.val_num/p1.val_den, (double)p2.val_num/p2.val_den);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_rational(&p1) && is_real(&p2)) {
-		q->accum.val_real = pow((double)p1.val_num/p1.val_den, p2.val_real);
+	} else if (is_rational(&p1) && is_float(&p2)) {
+		q->accum.val_flt = pow((double)p1.val_num/p1.val_den, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1) && is_real(&p2)) {
-		q->accum.val_real = pow(p1.val_real, p2.val_real);
+	} else if (is_float(&p1) && is_float(&p2)) {
+		q->accum.val_flt = pow(p1.val_flt, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1) && is_integer(&p2)) {
-		q->accum.val_real = pow(p1.val_real, p2.val_int);
+	} else if (is_float(&p1) && is_integer(&p2)) {
+		q->accum.val_flt = pow(p1.val_flt, p2.val_int);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -3031,7 +3031,7 @@ static int fn_iso_divide_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_real = (double)p1.val_int / p2.val_int;
+		q->accum.val_flt = (double)p1.val_int / p2.val_int;
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_rational(&p1) && is_rational(&p2)) {
 		p1.val_num *= p2.val_den;
@@ -3039,14 +3039,14 @@ static int fn_iso_divide_2(query *q)
 		q->accum.val_num = p1.val_num;
 		q->accum.val_den = p2.val_num;
 		q->accum.val_type = TYPE_INT;
-	} else if (is_integer(&p1) && is_real(&p2)) {
-		q->accum.val_real = (double)p1.val_int / p2.val_real;
+	} else if (is_integer(&p1) && is_float(&p2)) {
+		q->accum.val_flt = (double)p1.val_int / p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1) && is_real(&p2)) {
-		q->accum.val_real = p1.val_real / p2.val_real;
+	} else if (is_float(&p1) && is_float(&p2)) {
+		q->accum.val_flt = p1.val_flt / p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1) && is_integer(&p2)) {
-		q->accum.val_real = p1.val_real / p2.val_int;
+	} else if (is_float(&p1) && is_integer(&p2)) {
+		q->accum.val_flt = p1.val_flt / p2.val_int;
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -3268,13 +3268,13 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 			return tmp1.val_num < tmp2.val_num ? -1 : tmp1.val_num > tmp2.val_num ? 1 : 0;
 		}
 
-		if (is_real(p1) && is_real(p2))
-			return p1->val_real < p2->val_real ? -1 : p1->val_real > p2->val_real ? 1 : 0;
+		if (is_float(p1) && is_float(p2))
+			return p1->val_flt < p2->val_flt ? -1 : p1->val_flt > p2->val_flt ? 1 : 0;
 
-		if (is_integer(p1) && is_real(p2))
+		if (is_integer(p1) && is_float(p2))
 			return 1;
 
-		if (is_real(p1) && is_integer(p2))
+		if (is_float(p1) && is_integer(p2))
 			return -1;
 	}
 
@@ -3354,12 +3354,12 @@ static int fn_iso_neq_2(query *q)
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num == p2.val_num;
-	} else if (is_integer(&p1) && is_real(&p2))
-		return p1.val_int == p2.val_real;
-	else if (is_real(&p1) && is_real(&p2))
-		return p1.val_real == p2.val_real;
-	else if (is_real(&p1) && is_integer(&p2))
-		return p1.val_real == p2.val_int;
+	} else if (is_integer(&p1) && is_float(&p2))
+		return p1.val_int == p2.val_flt;
+	else if (is_float(&p1) && is_float(&p2))
+		return p1.val_flt == p2.val_flt;
+	else if (is_float(&p1) && is_integer(&p2))
+		return p1.val_flt == p2.val_int;
 
 	throw_error(q, &p1, "type_error", "number");
 	return 0;
@@ -3378,12 +3378,12 @@ static int fn_iso_nne_2(query *q)
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num != p2.val_num;
-	} else if (is_integer(&p1) && is_real(&p2))
-		return p1.val_int != p2.val_real;
-	else if (is_real(&p1) && is_real(&p2))
-		return p1.val_real != p2.val_real;
-	else if (is_real(&p1) && is_integer(&p2))
-		return p1.val_real != p2.val_int;
+	} else if (is_integer(&p1) && is_float(&p2))
+		return p1.val_int != p2.val_flt;
+	else if (is_float(&p1) && is_float(&p2))
+		return p1.val_flt != p2.val_flt;
+	else if (is_float(&p1) && is_integer(&p2))
+		return p1.val_flt != p2.val_int;
 
 	throw_error(q, &p1, "type_error", "number");
 	return 0;
@@ -3402,12 +3402,12 @@ static int fn_iso_nge_2(query *q)
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num >= p2.val_num;
-	} else if (is_integer(&p1) && is_real(&p2))
-		return p1.val_int >= p2.val_real;
-	else if (is_real(&p1) && is_real(&p2))
-		return p1.val_real >= p2.val_real;
-	else if (is_real(&p1) && is_integer(&p2))
-		return p1.val_real >= p2.val_int;
+	} else if (is_integer(&p1) && is_float(&p2))
+		return p1.val_int >= p2.val_flt;
+	else if (is_float(&p1) && is_float(&p2))
+		return p1.val_flt >= p2.val_flt;
+	else if (is_float(&p1) && is_integer(&p2))
+		return p1.val_flt >= p2.val_int;
 
 	throw_error(q, &p1, "type_error", "number");
 	return 0;
@@ -3426,12 +3426,12 @@ static int fn_iso_ngt_2(query *q)
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num > p2.val_num;
-	} else if (is_integer(&p1) && is_real(&p2))
-		return p1.val_int > p2.val_real;
-	else if (is_real(&p1) && is_real(&p2))
-		return p1.val_real > p2.val_real;
-	else if (is_real(&p1) && is_integer(&p2))
-		return p1.val_real > p2.val_int;
+	} else if (is_integer(&p1) && is_float(&p2))
+		return p1.val_int > p2.val_flt;
+	else if (is_float(&p1) && is_float(&p2))
+		return p1.val_flt > p2.val_flt;
+	else if (is_float(&p1) && is_integer(&p2))
+		return p1.val_flt > p2.val_int;
 
 	throw_error(q, &p1, "type_error", "number");
 	return 0;
@@ -3450,12 +3450,12 @@ static int fn_iso_nle_2(query *q)
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num <= p2.val_num;
-	} else if (is_integer(&p1) && is_real(&p2))
-		return p1.val_int <= p2.val_real;
-	else if (is_real(&p1) && is_real(&p2))
-		return p1.val_real <= p2.val_real;
-	else if (is_real(&p1) && is_integer(&p2))
-		return p1.val_real <= p2.val_int;
+	} else if (is_integer(&p1) && is_float(&p2))
+		return p1.val_int <= p2.val_flt;
+	else if (is_float(&p1) && is_float(&p2))
+		return p1.val_flt <= p2.val_flt;
+	else if (is_float(&p1) && is_integer(&p2))
+		return p1.val_flt <= p2.val_int;
 
 	throw_error(q, &p1, "type_error", "number");
 	return 0;
@@ -3474,12 +3474,12 @@ static int fn_iso_nlt_2(query *q)
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num < p2.val_num;
-	} else if (is_integer(&p1) && is_real(&p2))
-		return p1.val_int < p2.val_real;
-	else if (is_real(&p1) && is_real(&p2))
-		return p1.val_real < p2.val_real;
-	else if (is_real(&p1) && is_integer(&p2))
-		return p1.val_real < p2.val_int;
+	} else if (is_integer(&p1) && is_float(&p2))
+		return p1.val_int < p2.val_flt;
+	else if (is_float(&p1) && is_float(&p2))
+		return p1.val_flt < p2.val_flt;
+	else if (is_float(&p1) && is_integer(&p2))
+		return p1.val_flt < p2.val_int;
 
 	throw_error(q, &p1, "type_error", "number");
 	return 0;
@@ -3561,14 +3561,14 @@ static int fn_iso_univ_2(query *q)
 		size_t nbr_cells = p2->nbr_cells;
 		cell *tmp = malloc(sizeof(cell)*nbr_cells);
 		size_t idx = 0;
-		make_literal(tmp+idx++, head->val_offset);
+		make_literal(tmp+idx++, head->val_off);
 
 		while (tail) {
 			tail = GET_VALUE(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
 
 			if (is_literal(tail)) {
-				if (tail->val_offset == g_nil_s)
+				if (tail->val_off == g_nil_s)
 					break;
 			}
 
@@ -3786,7 +3786,7 @@ static int do_length(query *q)
 	tmp.val_type = TYPE_VAR;
 	tmp.nbr_cells = 1;
 	tmp.flags = 0;
-	tmp.val_offset = g_anon_s;
+	tmp.val_off = g_anon_s;
 	tmp.slot_nbr = slot_nbr++;
 	cell *l = alloc_list(q, &tmp);
 
@@ -3885,7 +3885,7 @@ static int fn_iso_length_2(query *q)
 		tmp.val_type = TYPE_VAR;
 		tmp.nbr_cells = 1;
 		tmp.flags = 0;
-		tmp.val_offset = g_anon_s;
+		tmp.val_off = g_anon_s;
 		tmp.slot_nbr = slot_nbr++;
 		cell *l = alloc_list(q, &tmp);
 
@@ -4351,13 +4351,13 @@ static int fn_iso_functor_3(query *q)
 		tmp[0].val_type = TYPE_LITERAL;
 		tmp[0].arity = arity;
 		tmp[0].nbr_cells = 1 + arity;
-		tmp[0].val_offset = p2->val_offset;
+		tmp[0].val_off = p2->val_off;
 
 		for (unsigned i = 1; i <= arity; i++) {
 			tmp[i].val_type = TYPE_VAR;
 			tmp[i].nbr_cells = 1;
 			tmp[i].slot_nbr = slot_nbr++;
-			tmp[i].val_offset = g_anon_s;
+			tmp[i].val_off = g_anon_s;
 		}
 
 		set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
@@ -4562,10 +4562,10 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 				return 1;
 			else
 				return 0;
-		} else if (is_real(p2)) {
-			if (((double)p1->val_num/p1->val_den) < p2->val_real)
+		} else if (is_float(p2)) {
+			if (((double)p1->val_num/p1->val_den) < p2->val_flt)
 				return -1;
-			else if (((double)p1->val_num/p1->val_den) > p2->val_real)
+			else if (((double)p1->val_num/p1->val_den) > p2->val_flt)
 				return 1;
 			else
 				return 0;
@@ -4574,18 +4574,18 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 		else if (is_var(p2))
 			return 1;
 	}
-	else if (is_real(p1)) {
+	else if (is_float(p1)) {
 		if (is_rational(p2)) {
-			if (p1->val_real < ((double)p2->val_num/p2->val_den))
+			if (p1->val_flt < ((double)p2->val_num/p2->val_den))
 				return -1;
-			else if (p1->val_real > ((double)p2->val_num/p2->val_den))
+			else if (p1->val_flt > ((double)p2->val_num/p2->val_den))
 				return 1;
 			else
 				return 0;
-		} else if (is_real(p2)) {
-			if (p1->val_real < p2->val_real)
+		} else if (is_float(p2)) {
+			if (p1->val_flt < p2->val_flt)
 				return -1;
-			else if (p1->val_real > p2->val_real)
+			else if (p1->val_flt > p2->val_flt)
 				return 1;
 			else
 				return 0;
@@ -5260,7 +5260,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 		if (h->flags&FLAG_RULE_PREBUILT)
 			continue;
 
-		if (name != h->val_offset)
+		if (name != h->val_off)
 			continue;
 
 		if ((arity != h->arity) && (arity != -1))
@@ -5279,7 +5279,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 static int fn_listing_1(query *q)
 {
 	GET_FIRST_ARG(p1,literal);
-	idx_t name = p1->val_offset;
+	idx_t name = p1->val_off;
 	unsigned arity = -1;
 	save_name(stdout, q, name, arity);
 	return 1;
@@ -6456,10 +6456,10 @@ static int fn_log10_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_integer(&p1)) {
-		q->accum.val_real = log10(p1.val_int);
+		q->accum.val_flt = log10(p1.val_int);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_real(&p1)) {
-		q->accum.val_real = log10(p1.val_real);
+	} else if (is_float(&p1)) {
+		q->accum.val_flt = log10(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -6713,7 +6713,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 
 			len = put_char_utf8(dst, (int)c->val_int);
 		} else if ((ch == 'e') || (ch == 'E')) {
-			if (!is_real(c)) {
+			if (!is_float(c)) {
 				free(tmpbuf);
 				throw_error(q, c, "type_error", "float");
 				return 0;
@@ -6729,11 +6729,11 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 			}
 
 			if (ch == 'e')
-				len = sprintf(dst, "%e", c->val_real);
+				len = sprintf(dst, "%e", c->val_flt);
 			else
-				len = sprintf(dst, "%E", c->val_real);
+				len = sprintf(dst, "%E", c->val_flt);
 		} else if (ch == 'f') {
-			if (!is_real(c)) {
+			if (!is_float(c)) {
 				free(tmpbuf);
 				throw_error(q, c, "type_error", "float");
 				return 0;
@@ -6748,7 +6748,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 				nbytes = bufsiz - save;
 			}
 
-			len = sprintf(dst, "%f", c->val_real);
+			len = sprintf(dst, "%f", c->val_flt);
 		} else if (ch == 'I') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
@@ -7559,8 +7559,8 @@ static int fn_rational_1(query *q)
 			return 1;
 		}
 
-		if (is_real(&p1)) {
-			do_real_to_fraction(p1.val_real, 0.00001, &q->accum.val_num, &q->accum.val_den);
+		if (is_float(&p1)) {
+			do_real_to_fraction(p1.val_flt, 0.00001, &q->accum.val_num, &q->accum.val_den);
 			q->accum.val_type = TYPE_INT;
 			return 1;
 		}
@@ -7677,7 +7677,7 @@ static int fn_atomic_concat_3(query *q)
 			len1 = strlen(tmpbuf1);
 			src1 = tmpbuf1;
 		} else {
-			sprintf(tmpbuf1, "%.17g", p1->val_real);
+			sprintf(tmpbuf1, "%.17g", p1->val_flt);
 			len1 = strlen(tmpbuf1);
 			src1 = tmpbuf1;
 		}
@@ -7694,7 +7694,7 @@ static int fn_atomic_concat_3(query *q)
 			len2 = strlen(tmpbuf2);
 			src2 = tmpbuf2;
 		} else {
-			sprintf(tmpbuf2, "%.17g", p2->val_real);
+			sprintf(tmpbuf2, "%.17g", p2->val_flt);
 			len2 = strlen(tmpbuf2);
 			src2 = tmpbuf2;
 		}

@@ -432,7 +432,7 @@ static void follow_me(query *q)
 	q->st.curr_cell += q->st.curr_cell->nbr_cells;
 
 	while (q->st.curr_cell && is_end(q->st.curr_cell))
-		q->st.curr_cell = q->st.curr_cell->val_cell;
+		q->st.curr_cell = q->st.curr_cell->val_ptr;
 }
 
 static int resume_frame(query *q)
@@ -475,7 +475,7 @@ cell *deref_var(query *q, cell *c, idx_t c_ctx)
 
 	if (is_indirect(&e->c)) {
 		q->latest_ctx = e->ctx;
-		return e->c.val_cell;
+		return e->c.val_ptr;
 	}
 
 	q->latest_ctx = q->st.curr_frame;
@@ -487,7 +487,7 @@ static void make_indirect(cell *tmp, cell *c)
 	tmp->val_type = TYPE_INDIRECT;
 	tmp->nbr_cells = 1;
 	tmp->arity = 0;
-	tmp->val_cell = c;
+	tmp->val_ptr = c;
 }
 
 void set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
@@ -535,7 +535,7 @@ static int unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_
 	if (p1->arity != p2->arity)
 		return 0;
 
-	if (p1->val_offset != p2->val_offset)
+	if (p1->val_off != p2->val_off)
 		return 0;
 
 	unsigned arity = p1->arity;
@@ -567,8 +567,8 @@ static int unify_int(cell *p1, cell *p2)
 
 static int unify_float(cell *p1, cell *p2)
 {
-	if (is_real(p2))
-		return p1->val_real == p2->val_real;
+	if (is_float(p2))
+		return p1->val_flt == p2->val_flt;
 
 	return 0;
 }
@@ -578,10 +578,10 @@ static int unify_float(cell *p1, cell *p2)
 static int unify_literal(cell *p1, cell *p2)
 {
 	if (is_literal(p2))
-		return p1->val_offset == p2->val_offset;
+		return p1->val_off == p2->val_off;
 
 	if (is_string(p2))
-		return !strcmp(g_pool+p1->val_offset, GET_STR2(p2));
+		return !strcmp(g_pool+p1->val_off, GET_STR2(p2));
 
 	return 0;
 }
@@ -589,7 +589,7 @@ static int unify_literal(cell *p1, cell *p2)
 static int unify_string(cell *p1, cell *p2)
 {
 	if (is_literal(p2))
-		return !strcmp(GET_STR2(p1), g_pool+p2->val_offset);
+		return !strcmp(GET_STR2(p1), g_pool+p2->val_off);
 
 	if (is_string(p2))
 		return !strcmp(GET_STR2(p1), GET_STR2(p2));

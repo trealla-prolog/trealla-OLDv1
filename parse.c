@@ -226,7 +226,7 @@ cell *get_head(cell *c)
 	if (!is_literal(c))
 		return NULL;
 
-	if (c->val_offset != g_clause_s)
+	if (c->val_off != g_clause_s)
 		return c;
 
 	return c + 1;
@@ -237,7 +237,7 @@ cell *get_body(cell *c)
 	if (!is_literal(c))
 		return NULL;
 
-	if (c->val_offset != g_clause_s)
+	if (c->val_off != g_clause_s)
 		return NULL;
 
 	c = c + 1;
@@ -255,7 +255,7 @@ rule *find_rule(module *m, cell *c)
 		if (h->flags&FLAG_RULE_ABOLISHED)
 			continue;
 
-		if ((h->val_offset == c->val_offset) && (h->arity == c->arity))
+		if ((h->val_off == c->val_off) && (h->arity == c->arity))
 			return h;
 	}
 
@@ -268,7 +268,7 @@ rule *find_functor(module *m, const char *name, unsigned arity)
 		if (h->flags&FLAG_RULE_ABOLISHED)
 			continue;
 
-		if (!strcmp(g_pool+h->val_offset, name) && (h->arity == arity))
+		if (!strcmp(g_pool+h->val_off, name) && (h->arity == arity))
 			return h;
 	}
 
@@ -375,7 +375,7 @@ static rule *create_rule(module *m, cell *c)
 		m->head = h;
 	}
 
-	h->val_offset = c->val_offset;
+	h->val_off = c->val_off;
 	h->arity = c->arity;
 	h->flags = 0;
 	return h;
@@ -396,11 +396,11 @@ static int compkey(const void *ptr1, const void *ptr2)
 				return 0;
 		} else if (is_var(p2))
 			return 0;
-	} else if (is_real(p1)) {
-		if (is_real(p2)) {
-			if (p1->val_real < p2->val_real)
+	} else if (is_float(p1)) {
+		if (is_float(p2)) {
+			if (p1->val_flt < p2->val_flt)
 				return -1;
-			else if (p1->val_real > p2->val_real)
+			else if (p1->val_flt > p2->val_flt)
 				return 1;
 			else
 				return 0;
@@ -604,7 +604,7 @@ static void set_dynamic_in_db(module *m, const char *name, idx_t arity)
 {
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_offset = find_in_pool(name);
+	tmp.val_off = find_in_pool(name);
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
@@ -616,7 +616,7 @@ static void set_persist_in_db(module *m, const char *name, idx_t arity)
 {
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_offset = find_in_pool(name);
+	tmp.val_off = find_in_pool(name);
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
@@ -629,7 +629,7 @@ static void set_volatile_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_offset = find_in_pool(name);
+	tmp.val_off = find_in_pool(name);
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) return;
@@ -794,7 +794,7 @@ static void dump_vars(query *q, parser *p)
 			continue;
 
 		if (is_indirect(&e->c))
-			c = e->c.val_cell;
+			c = e->c.val_ptr;
 		else
 			c = GET_VALUE(q, &e->c, 0);
 
@@ -881,7 +881,7 @@ static void directives(parser *p, term *t)
 				if (!is_integer(a)) return;
 				cell tmp;
 				tmp.val_type = TYPE_LITERAL;
-				tmp.val_offset = find_in_pool(GET_STR(f));
+				tmp.val_off = find_in_pool(GET_STR(f));
 				tmp.arity = a->val_int;
 				rule *h = create_rule(p->m, &tmp);
 				h->flags |= FLAG_RULE_PUBLIC;
@@ -1107,7 +1107,7 @@ int parser_xref(parser *p, term *t, rule *parent)
 			m = find_module(tmpbuf1);
 
 			if (m)
-				c->val_offset = find_in_pool(tmpbuf2);
+				c->val_off = find_in_pool(tmpbuf2);
 			else
 				m = p->m;
 		}
@@ -1395,7 +1395,7 @@ static void parser_dcg_rewrite(parser *p)
 	cell *phrase = t->cells + 1;
 	cell *tmp = calloc(1+(t->cidx*4), sizeof(cell));
 	*tmp = t->cells[0];
-	tmp->val_offset = find_in_pool(":-");
+	tmp->val_off = find_in_pool(":-");
 	idx_t nbr_cells = 1;
 	int cnt = 0, head = 1, insert = 0;
 
@@ -1420,7 +1420,7 @@ static void parser_dcg_rewrite(parser *p)
 
 			if (last && ((phrase2 - t->cells) >= t->cidx)) {
 				tmp[nbr_cells].val_type = TYPE_LITERAL;
-				tmp[nbr_cells].val_offset = find_in_pool(",");
+				tmp[nbr_cells].val_off = find_in_pool(",");
 				tmp[nbr_cells].nbr_cells = 2 + len;
 				tmp[nbr_cells].arity = 2;
 				tmp[nbr_cells].flags = FLAG_BUILTIN | OP_XFY;
@@ -1433,7 +1433,7 @@ static void parser_dcg_rewrite(parser *p)
 
 			if (last && ((phrase - t->cells) >= t->cidx)) {
 				tmp[nbr_cells+0].val_type = TYPE_LITERAL;
-				tmp[nbr_cells+0].val_offset = find_in_pool("=");
+				tmp[nbr_cells+0].val_off = find_in_pool("=");
 				tmp[nbr_cells+0].nbr_cells = 3;
 				tmp[nbr_cells+0].arity = 2;
 				tmp[nbr_cells+0].flags = FLAG_BUILTIN | OP_XFX;
@@ -1441,12 +1441,12 @@ static void parser_dcg_rewrite(parser *p)
 				tmp[nbr_cells+1].val_type = TYPE_VAR;
 				tmp[nbr_cells+1].nbr_cells = 1;
 				char v[20]; sprintf(v, "S_");
-				tmp[nbr_cells+1].val_offset = find_in_pool(v);
+				tmp[nbr_cells+1].val_off = find_in_pool(v);
 
 				tmp[nbr_cells+2].val_type = TYPE_VAR;
 				tmp[nbr_cells+2].nbr_cells = 1;
 				sprintf(v, "S%d_", cnt++);
-				tmp[nbr_cells+2].val_offset = find_in_pool(v);
+				tmp[nbr_cells+2].val_off = find_in_pool(v);
 
 				nbr_cells += 3;
 			}
@@ -1456,7 +1456,7 @@ static void parser_dcg_rewrite(parser *p)
 
 		if (is_list(phrase) && insert) {
 			tmp[nbr_cells+0].val_type = TYPE_LITERAL;
-			tmp[nbr_cells+0].val_offset = find_in_pool("=");
+			tmp[nbr_cells+0].val_off = find_in_pool("=");
 			tmp[nbr_cells+0].nbr_cells = 5;
 			tmp[nbr_cells+0].arity = 2;
 			tmp[nbr_cells+0].flags = FLAG_BUILTIN | OP_XFX;
@@ -1464,7 +1464,7 @@ static void parser_dcg_rewrite(parser *p)
 			tmp[nbr_cells+1].val_type = TYPE_VAR;
 			tmp[nbr_cells+1].nbr_cells = 1;
 			char v[20]; sprintf(v, "S_");
-			tmp[nbr_cells+1].val_offset = find_in_pool(v);
+			tmp[nbr_cells+1].val_off = find_in_pool(v);
 
 			tmp[nbr_cells+2] = phrase[0];
 			tmp[nbr_cells+2].nbr_cells = 3;
@@ -1476,14 +1476,14 @@ static void parser_dcg_rewrite(parser *p)
 			tmp[nbr_cells+4].nbr_cells = 1;
 			if (last) { sprintf(v, "S_"); last = 0; }
 			else sprintf(v, "S%d_", cnt++);
-			tmp[nbr_cells+4].val_offset = find_in_pool(v);
+			tmp[nbr_cells+4].val_off = find_in_pool(v);
 
 			nbr_cells += 5;
 			phrase += phrase->nbr_cells;
 		} else if (is_list(phrase)) {
 			int len = phrase[0].nbr_cells;
 			tmp[nbr_cells+0].val_type = TYPE_LITERAL;
-			tmp[nbr_cells+0].val_offset = find_in_pool("=");
+			tmp[nbr_cells+0].val_off = find_in_pool("=");
 			tmp[nbr_cells+0].nbr_cells = 2 + len;
 			tmp[nbr_cells+0].arity = 2;
 			tmp[nbr_cells+0].flags = FLAG_BUILTIN | OP_XFX;
@@ -1491,7 +1491,7 @@ static void parser_dcg_rewrite(parser *p)
 			tmp[nbr_cells+1].val_type = TYPE_VAR;
 			tmp[nbr_cells+1].nbr_cells = 1;
 			char v[20]; sprintf(v, "S%d_", cnt);
-			tmp[nbr_cells+1].val_offset = find_in_pool(v);
+			tmp[nbr_cells+1].val_off = find_in_pool(v);
 
 			copy_cells(tmp+nbr_cells+2, phrase, len);
 
@@ -1499,14 +1499,14 @@ static void parser_dcg_rewrite(parser *p)
 			tmp[nbr_cells+2+len-1].nbr_cells = 1;
 			if (last) { sprintf(v, "S_"); last = 0; }
 			else sprintf(v, "S%d_", ++cnt);
-			tmp[nbr_cells+2+len-1].val_offset = find_in_pool(v);
+			tmp[nbr_cells+2+len-1].val_off = find_in_pool(v);
 			tmp[nbr_cells+2+len-1].flags = 0;
 
 			nbr_cells += 2+len;
 			phrase += phrase->nbr_cells;
 		} else if (is_nil(phrase)) {
 			tmp[nbr_cells+0].val_type = TYPE_LITERAL;
-			tmp[nbr_cells+0].val_offset = find_in_pool("=");
+			tmp[nbr_cells+0].val_off = find_in_pool("=");
 			tmp[nbr_cells+0].nbr_cells = 3;
 			tmp[nbr_cells+0].arity = 2;
 			tmp[nbr_cells+0].flags = FLAG_BUILTIN | OP_XFX;
@@ -1514,12 +1514,12 @@ static void parser_dcg_rewrite(parser *p)
 			tmp[nbr_cells+1].val_type = TYPE_VAR;
 			tmp[nbr_cells+1].nbr_cells = 1;
 			char v[20]; sprintf(v, "S%d_", cnt);
-			tmp[nbr_cells+1].val_offset = find_in_pool(v);
+			tmp[nbr_cells+1].val_off = find_in_pool(v);
 
 			tmp[nbr_cells+2].val_type = TYPE_VAR;
 			tmp[nbr_cells+2].nbr_cells = 1;
 			sprintf(v, "S_");
-			tmp[nbr_cells+2].val_offset = find_in_pool(v);
+			tmp[nbr_cells+2].val_off = find_in_pool(v);
 
 			nbr_cells += 3;
 			phrase += phrase->nbr_cells;
@@ -1529,13 +1529,13 @@ static void parser_dcg_rewrite(parser *p)
 			tmp[nbr_cells+phrase->nbr_cells+0].val_type = TYPE_VAR;
 			tmp[nbr_cells+phrase->nbr_cells+0].nbr_cells = 1;
 			char v[20]; sprintf(v, "S%d_", cnt);
-			tmp[nbr_cells+phrase->nbr_cells+0].val_offset = find_in_pool(v);
+			tmp[nbr_cells+phrase->nbr_cells+0].val_off = find_in_pool(v);
 
 			tmp[nbr_cells+phrase->nbr_cells+1].val_type = TYPE_VAR;
 			tmp[nbr_cells+phrase->nbr_cells+1].nbr_cells = 1;
 			if (head || last) { sprintf(v, "S_"); last = 0; }
 			else sprintf(v, "S%d_", ++cnt);
-			tmp[nbr_cells+phrase->nbr_cells+1].val_offset = find_in_pool(v);
+			tmp[nbr_cells+phrase->nbr_cells+1].val_off = find_in_pool(v);
 
 			tmp[nbr_cells].nbr_cells += 2;
 			tmp[nbr_cells].arity += 2;
@@ -1563,7 +1563,7 @@ static cell *make_literal(parser *p, idx_t offset)
 	memset(c, 0, sizeof(cell));
 	c->val_type = TYPE_LITERAL;
 	c->nbr_cells = 1;
-	c->val_offset = offset;
+	c->val_off = offset;
 	return c;
 }
 
@@ -2317,7 +2317,7 @@ int parser_tokenize(parser *p, int args, int consing)
 				c->flags |= FLAG_BINARY;
 		}
 		else if (p->val_type == TYPE_FLOAT)
-			c->val_real = atof(p->token);
+			c->val_flt = atof(p->token);
 		else if (!p->quoted || func || p->is_op || p->is_var || check_builtin(p->m, p->token, 0)) {
 			if (func && !strcmp(p->token, "."))
 				c->precedence = 0;
@@ -2325,7 +2325,7 @@ int parser_tokenize(parser *p, int args, int consing)
 			if (p->is_var)
 				c->val_type = TYPE_VAR;
 
-			c->val_offset = find_in_pool(p->token);
+			c->val_off = find_in_pool(p->token);
 		} else {
 			c->val_type = TYPE_STRING;
 

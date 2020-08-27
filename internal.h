@@ -32,7 +32,7 @@ typedef uint32_t idx_t;
 #define MAX_STREAMS 64
 #define STREAM_BUFLEN 1024
 
-#define GET_STR(c) ((c)->val_type != TYPE_STRING ? g_pool+((c)->val_offset) : (c)->flags&FLAG_SMALL_STRING ? (c)->val_chars : (c)->val_str)
+#define GET_STR(c) ((c)->val_type != TYPE_STRING ? g_pool+((c)->val_off) : (c)->flags&FLAG_SMALL_STRING ? (c)->val_chars : (c)->val_str)
 #define LEN_STR(c) ((c->flags&FLAG_BINARY) ? c->nbytes : strlen(GET_STR(c)))
 
 #define GET_FRAME(i) q->frames+(i)
@@ -46,15 +46,15 @@ typedef uint32_t idx_t;
 #define is_indirect(c) ((c)->val_type == TYPE_INDIRECT)
 #define is_integer(c) (((c)->val_type == TYPE_INT) && ((c)->val_den == 1))
 #define is_rational(c) ((c)->val_type == TYPE_INT)
-#define is_real(c) ((c)->val_type == TYPE_FLOAT)
+#define is_float(c) ((c)->val_type == TYPE_FLOAT)
 #define is_empty(c) ((c)->val_type == TYPE_EMPTY)
 #define is_end(c) ((c)->val_type == TYPE_END)
 
-#define is_number(c) (is_rational(c) || is_real(c))
+#define is_number(c) (is_rational(c) || is_float(c))
 #define is_atom(c) ((is_literal(c) || is_string(c)) && !(c)->arity)
 #define is_structure(c) (is_literal(c) && (c)->arity)
-#define is_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_offset == g_dot_s))
-#define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_offset == g_nil_s))
+#define is_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
+#define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
 #define is_smallstring(c) ((c)->flags&FLAG_SMALL_STRING)
 #define is_bigstring(c) (is_string(c) && !is_smallstring(c))
 #define is_const(c) (is_string(c) && ((c)->flags&FLAG_CONST))
@@ -127,10 +127,10 @@ struct cell_ {
 			union {
 				int_t val_int;				// integer
 				int_t val_num;				// rational numerator
-				double val_real;			// float
-				unsigned val_offset;		// offset to string in pool
+				double val_flt;				// float
+				unsigned val_off;			// offset to string in pool
 				char *val_str;				// C-string
-				cell *val_cell;				// indirect
+				cell *val_ptr;				// indirect
 			};
 		};
 
@@ -168,7 +168,7 @@ struct rule_ {
 	rule *next;
 	clause *head, *tail;
 	skiplist *index;
-	idx_t val_offset;
+	idx_t val_off;
 	uint8_t arity, flags;
 };
 
