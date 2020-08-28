@@ -197,14 +197,19 @@ test55 :-
 	maplist(spawn(geturl),L),
 	wait, writeln('Finished').
 
-task56(Url) :-
+test56 :-
+	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
+	spawnlist(geturl,L),
+	writeln('Finished').
+
+task57(Url) :-
 	http_open([host(Url),path('/'),method('head')],S,[status_code(Code)]),
 	close(S),
 	writeln(Code).
 
-test56 :-
+test57 :-
 	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
-	maplist(task56,L),
+	maplist(task57,L),
 	writeln('Finished').
 
 test61(0).

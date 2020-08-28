@@ -228,26 +228,24 @@ Declaring something dynamic with the *persist* directive causes that
 clause to be saved to a per-module database on update (assert/retract).
 
 
-Coroutines          ##EXPERIMENTAL##
-==========
+Concurrency          ##EXPERIMENTAL##
+===========
 
 Trealla is single-threaded but cooperative multitasking is available
-in the form of coroutines that run until they yield control, either
-explicitly or implicitly when waiting on input or a timer...
+in the form of light-weith coroutines that run until they yield control,
+either explicitly or implicitly (when waiting on input or a timer)...
 
 	fork/0                  # parent fails, child continues
-	spawn/1                 # spawn(+callable)
-	spawn/2-3               # spawn(+callable,+term,...)
+	spawn/1-n               # concurrent form of call/1-n
 	yield/0                 # voluntarily yield control
 	wait/0                  # parent should wait for children to finish
 	await/0                 # parent should wait for a message
-	send/1                  # send(+term) send term to parent queue
-	recv/1                  # recv(-term) pop term from queue
+	send/1                  # apend term to parent queue
+	recv/1                  # pop term from queue
+	spawnlist/1-n           # concurrent form of maplist/1-n
 
 Note: *send/1*, *sleep/1* and *delay/1* do implied yields. As does *getline/2*,
 *bread/3*, *bwrite/2* and *accept/2*.
-
-Note: *spawn/1-2* are the concurrent forms of *call/1-2*.
 
 An example:
 
@@ -262,25 +260,41 @@ An example:
 		maplist(geturl,L),
 		writeln('Finished').
 
-	% Fetch each URL in list concurrently...
+	% Fetch each URL in list concurrently (method 1)...
 
 	test55 :-
 		L = ['www.google.com','www.bing.com','duckduckgo.com'],
 		maplist(spawn(geturl),L),
-		wait, writeln('Finished').
+		wait,
+		writeln('Finished').
+
+	% Fetch each URL in list concurrently (method 2)...
+
+	test56 :-
+		L = ['www.google.com','www.bing.com','duckduckgo.com'],
+		spawnlist(geturl,L),
+		writeln('Finished').
 
 	$ ./tpl -l samples/test -g "time(test54),halt"
 	Job [www.google.com] 200 ==> www.google.com done
 	Job [www.bing.com] 200 ==> www.bing.com done
 	Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
 	Finished
-	Time elapsed 0.702 secs
+	Time elapsed 0.663 secs
+
 	$ ./tpl -l samples/test -g "time(test55),halt"
 	Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
 	Job [www.bing.com] 200 ==> www.bing.com done
 	Job [www.google.com] 200 ==> www.google.com done
 	Finished
-	Time elapsed 0.229 secs
+	Time elapsed 0.331 secs
+
+	$ ./tpl -l samples/test -g "time(test56),halt"
+	Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
+	Job [www.bing.com] 200 ==> www.bing.com done
+	Job [www.google.com] 200 ==> www.google.com done
+	Finished
+	Time elapsed 0.33 secs
 
 
 Rationals
