@@ -76,8 +76,8 @@ enum {
 	FLAG_HEX=1<<1,						// only used with TYPE_INT
 	FLAG_OCTAL=1<<2,					// only used with TYPE_INT
 	FLAG_BINARY=1<<3,					// only used with TYPE_INT
-	FLAG_TAILREC=1<<4,
-	FLAG_SMALLSTRING=1<<5,
+	FLAG_SMALLSTRING=1<<4,				// only used with TYPE_STRING
+	FLAG_TAILREC=1<<5,
 	FLAG_PASSTHRU=1<<6,
 
 	//FLAG_SPARE1=1<<7,
