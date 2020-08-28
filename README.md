@@ -263,7 +263,7 @@ An example:
 	% Fetch each URL in list concurrently (method 1)...
 
 	test55 :-
-		L = ['www.google.com','www.bing.com','duckduckgo.com'],
+		L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
 		maplist(spawn(geturl),L),
 		wait,
 		writeln('Finished').
@@ -271,7 +271,7 @@ An example:
 	% Fetch each URL in list concurrently (method 2)...
 
 	test56 :-
-		L = ['www.google.com','www.bing.com','duckduckgo.com'],
+		L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
 		spawnlist(geturl,L),
 		writeln('Finished').
 
