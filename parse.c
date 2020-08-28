@@ -631,19 +631,26 @@ query *create_query(module *m, int small)
 	q->qid = g_subq_id++;
 	q->m = m;
 	q->trace = m->trace;
+	q->current_input = 0;
+	q->current_output = 1;
+	q->accum.val_den = 1;
+
+	// Allocate these now...
+
 	q->nbr_frames = small ? INITIAL_NBR_GOALS/10 : INITIAL_NBR_GOALS;
 	q->nbr_slots = small ? INITIAL_NBR_SLOTS/10 : INITIAL_NBR_SLOTS;
 	q->nbr_choices = small ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
 	q->nbr_trails = small ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
+
 	q->frames = calloc(q->nbr_frames, sizeof(frame));
 	q->slots = calloc(q->nbr_slots, sizeof(slot));
 	q->choices = calloc(q->nbr_choices, sizeof(choice));
 	q->trails = calloc(q->nbr_trails, sizeof(trail));
+
+	// Allocate these later as needed...
+
 	q->h_size = small ? INITIAL_NBR_HEAP/10 : INITIAL_NBR_HEAP;
 	q->tmph_size = small ? INITIAL_NBR_CELLS/10 : INITIAL_NBR_CELLS;
-	q->current_input = 0;
-	q->current_output = 1;
-	q->accum.val_den = 1;
 
 	for (int i = 0; i < MAX_QUEUES; i++)
 		q->q_size[i] = small ? INITIAL_NBR_QUEUE/10 : INITIAL_NBR_QUEUE;
