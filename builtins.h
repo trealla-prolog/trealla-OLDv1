@@ -46,6 +46,12 @@ inline static cell *get_first_arg(query *q)
 	return GET_VALUE(q, q->last_arg, q->st.curr_frame);
 }
 
+inline static cell *get_first_arg_raw(query *q)
+{
+	q->last_arg = q->st.curr_cell + 1;
+	return q->last_arg;
+}
+
 inline static cell *get_next_arg(query *q)
 {
 	q->last_arg += q->last_arg->nbr_cells;

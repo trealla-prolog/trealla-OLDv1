@@ -819,9 +819,7 @@ void run_query(query *q)
 		}
 
 		if (is_var(q->st.curr_cell)) {
-			cell *c = GET_VALUE(q, q->st.curr_cell, q->st.curr_frame);
-
-			if (!call_me(q, c, q->latest_ctx))
+			if (!call_me(q, q->st.curr_cell, q->st.curr_frame))
 				continue;
 		}
 

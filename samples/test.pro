@@ -1,6 +1,6 @@
 test1 :-
 	\+ \+ true,
-	writeln(ok).
+	writeln(ok1).
 test1 :-
 	writeln(failed).
 

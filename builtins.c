@@ -4168,6 +4168,9 @@ static int fn_iso_assertz_1(query *q)
 
 int call_me(query *q, cell *p1, idx_t p1_ctx)
 {
+	p1 = GET_VALUE(q, p1, p1_ctx);
+	p1_ctx = q->latest_ctx;
+
 	if (!is_callable(p1)) {
 		throw_error(q, p1, "type_error", "callable");
 		return 0;
