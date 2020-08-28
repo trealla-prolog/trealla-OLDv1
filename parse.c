@@ -1060,8 +1060,6 @@ int parser_xref(parser *p, term *t, rule *parent)
 			if ((c+c->nbr_cells) >= (t->cells+t->cidx-1)) {
 				if (parent && (h == parent))
 					c->flags |= FLAG_TAILREC;
-
-				c->flags |= FLAG_TAIL;
 			}
 
 			if (h && (m != p->m) && !(h->flags&FLAG_RULE_PUBLIC) && strcmp(GET_STR(c), "dynamic")) {

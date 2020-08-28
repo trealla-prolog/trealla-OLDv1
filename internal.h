@@ -76,12 +76,12 @@ enum {
 	FLAG_HEX=1<<1,						// only used with TYPE_INT
 	FLAG_OCTAL=1<<2,					// only used with TYPE_INT
 	FLAG_BINARY=1<<3,					// only used with TYPE_INT
-	FLAG_TAIL=1<<4,
-	FLAG_TAILREC=1<<5,
-	FLAG_SMALL_STRING=1<<6,
-	FLAG_PASSTHRU=1<<7,
+	FLAG_TAILREC=1<<4,
+	FLAG_SMALL_STRING=1<<5,
+	FLAG_PASSTHRU=1<<6,
 
-	//FLAG_SPARE1=1<<8,
+	//FLAG_SPARE1=1<<7,
+	//FLAG_SPARE2=1<<8,
 
 	FLAG_RETURN=FLAG_HEX,				// only used with TYPE_END
 	FLAG_FIRST_USE=FLAG_HEX,			// only used with TYPE_VAR
