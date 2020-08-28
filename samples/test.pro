@@ -232,6 +232,7 @@ pr(3,c).
 task64(G) :- G.
 
 test64 :-
+	Dummy=1,
 	task64(findall(X, pr(X,_), S)),
 	writeln(S).
 

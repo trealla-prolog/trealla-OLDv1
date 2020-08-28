@@ -1884,6 +1884,11 @@ access_back(Start, End) :-
 
 % 22. Setof and bagof
 
+%bench_mark(setof, 1000, setof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
+%bench_mark(pair_setof, 1000, setof((X,Y), pr(X, Y), S), dummy((X,Y), pr(X, Y), S)).
+%bench_mark(double_setof, 100, setof((X,S), setof(Y, pr(X, Y), S), T), dummy((X,S), setof(Y, pr(X, Y), S), T)).
+%bench_mark(bagof, 1000, bagof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
+
 bench_mark(setof, 1000, do_setof, dummy(X, Y^pr(X, Y), _S)).
 bench_mark(pair_setof, 1000, do_pair_setof, dummy((X,Y), pr(X, Y), _S)).
 bench_mark(double_setof, 100, do_double_setof, dummy(_, setof(Y, pr(_X, Y), _S), _T)).
