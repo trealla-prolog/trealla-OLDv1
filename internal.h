@@ -84,7 +84,7 @@ enum {
 	//FLAG_SPARE2=1<<8,
 
 	FLAG_RETURN=FLAG_HEX,				// only used with TYPE_END
-	FLAG_FIRSTUSE=FLAG_HEX,			// only used with TYPE_VAR
+	FLAG_FIRSTUSE=FLAG_HEX,				// only used with TYPE_VAR
 	FLAG_SLICE=FLAG_HEX,			    // only used with TYPE_STRING
 	FLAG_CONST=FLAG_OCTAL,			    // only used with TYPE_STRING
 	FLAG_STREAM=FLAG_SMALLSTRING,		// only used with TYPE_INT
