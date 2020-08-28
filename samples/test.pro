@@ -225,10 +225,14 @@ test62(0).
 
 test63(N) :- ((N > 0 -> M is N - 1, test63(M)) ; true ).
 
+pr(1,a).
+pr(2,b).
+pr(3,c).
+
 task64(G) :- G.
 
 test64 :-
-	task64(findall(X, pr(X, _), S)),
+	task64(findall(X, pr(X,_), S)),
 	writeln(S).
 
 task70(X,Y) :- write('Got '), writeln(X), Y=456.
