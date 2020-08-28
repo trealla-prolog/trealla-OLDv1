@@ -33,7 +33,7 @@ typedef uint32_t idx_t;
 #define MAX_STREAMS 64
 #define STREAM_BUFLEN 1024
 
-#define GET_STR(c) ((c)->val_type != TYPE_STRING ? g_pool+((c)->val_off) : (c)->flags&FLAG_SMALL_STRING ? (c)->val_chars : (c)->val_str)
+#define GET_STR(c) ((c)->val_type != TYPE_STRING ? g_pool+((c)->val_off) : (c)->flags&FLAG_SMALLSTRING ? (c)->val_chars : (c)->val_str)
 #define LEN_STR(c) ((c->flags&FLAG_BINARY) ? c->nbytes : strlen(GET_STR(c)))
 
 #define GET_FRAME(i) q->frames+(i)
@@ -56,7 +56,7 @@ typedef uint32_t idx_t;
 #define is_structure(c) (is_literal(c) && (c)->arity)
 #define is_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
-#define is_smallstring(c) ((c)->flags&FLAG_SMALL_STRING)
+#define is_smallstring(c) ((c)->flags&FLAG_SMALLSTRING)
 #define is_bigstring(c) (is_string(c) && !is_smallstring(c))
 #define is_const(c) (is_string(c) && ((c)->flags&FLAG_CONST))
 
@@ -77,7 +77,7 @@ enum {
 	FLAG_OCTAL=1<<2,					// only used with TYPE_INT
 	FLAG_BINARY=1<<3,					// only used with TYPE_INT
 	FLAG_TAILREC=1<<4,
-	FLAG_SMALL_STRING=1<<5,
+	FLAG_SMALLSTRING=1<<5,
 	FLAG_PASSTHRU=1<<6,
 
 	//FLAG_SPARE1=1<<7,
@@ -87,7 +87,7 @@ enum {
 	FLAG_FIRST_USE=FLAG_HEX,			// only used with TYPE_VAR
 	FLAG_SLICE=FLAG_HEX,			    // only used with TYPE_STRING
 	FLAG_CONST=FLAG_OCTAL,			    // only used with TYPE_STRING
-	FLAG_STREAM=FLAG_SMALL_STRING,		// only used with TYPE_INT
+	FLAG_STREAM=FLAG_SMALLSTRING,		// only used with TYPE_INT
 	FLAG_DELETED=FLAG_HEX,				// only used by bagof
 
 	OP_FX=1<<9,

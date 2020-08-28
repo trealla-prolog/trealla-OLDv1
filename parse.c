@@ -2268,7 +2268,7 @@ int parser_tokenize(parser *p, int args, int consing)
 			c->val_type = TYPE_STRING;
 
 			if (strlen(p->token) < MAX_SMALL_STRING) {
-				c->flags |= FLAG_SMALL_STRING;
+				c->flags |= FLAG_SMALLSTRING;
 				strcpy(c->val_chars, p->token);
 			} else
 				c->val_str = strdup(p->token);
