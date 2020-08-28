@@ -113,12 +113,6 @@ unsigned create_vars(query *q, unsigned nbr)
 		return slot_nbr;
 	}
 
-	if ((g->nbr_vars + nbr) < g->nbr_slots) {
-		unsigned slot_nbr = g->nbr_vars;
-		g->nbr_vars += nbr;
-		return slot_nbr;
-	}
-
 	assert(!g->overflow);
 	g->overflow = q->st.sp;
 	q->st.sp += nbr;
