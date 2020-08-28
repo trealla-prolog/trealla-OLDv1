@@ -1172,7 +1172,7 @@ void parser_assign_vars(parser *p)
 		p->vartab.var_name[c->slot_nbr] = GET_STR(c);
 
 		if (p->vartab.var_used[c->slot_nbr]++ == 0) {
-			c->flags |= FLAG_FIRST_USE;
+			c->flags |= FLAG_FIRSTUSE;
 			t->nbr_vars++;
 		}
 	}
