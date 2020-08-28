@@ -45,8 +45,8 @@ typedef uint32_t idx_t;
 #define is_literal(c) ((c)->val_type == TYPE_LITERAL)
 #define is_string(c) ((c)->val_type == TYPE_STRING)
 #define is_indirect(c) ((c)->val_type == TYPE_INDIRECT)
-#define is_integer(c) (((c)->val_type == TYPE_INT) && ((c)->val_den == 1))
-#define is_rational(c) ((c)->val_type == TYPE_INT)
+#define is_integer(c) (((c)->val_type == TYPE_INTEGER) && ((c)->val_den == 1))
+#define is_rational(c) ((c)->val_type == TYPE_INTEGER)
 #define is_float(c) ((c)->val_type == TYPE_FLOAT)
 #define is_empty(c) ((c)->val_type == TYPE_EMPTY)
 #define is_end(c) ((c)->val_type == TYPE_END)
@@ -65,7 +65,7 @@ enum {
 	TYPE_VAR,
 	TYPE_LITERAL,
 	TYPE_STRING,
-	TYPE_INT,
+	TYPE_INTEGER,
 	TYPE_FLOAT,
 	TYPE_INDIRECT,
 	TYPE_END
@@ -73,9 +73,9 @@ enum {
 
 enum {
 	FLAG_BUILTIN=1<<0,
-	FLAG_HEX=1<<1,						// only used with TYPE_INT
-	FLAG_OCTAL=1<<2,					// only used with TYPE_INT
-	FLAG_BINARY=1<<3,					// only used with TYPE_INT
+	FLAG_HEX=1<<1,						// only used with TYPE_INTEGER
+	FLAG_OCTAL=1<<2,					// only used with TYPE_INTEGER
+	FLAG_BINARY=1<<3,					// only used with TYPE_INTEGER
 	FLAG_SMALLSTRING=1<<4,				// only used with TYPE_STRING
 	FLAG_TAILREC=1<<5,
 	FLAG_PASSTHRU=1<<6,
@@ -87,7 +87,7 @@ enum {
 	FLAG_FIRSTUSE=FLAG_HEX,				// only used with TYPE_VAR
 	FLAG_SLICE=FLAG_HEX,			    // only used with TYPE_STRING
 	FLAG_CONST=FLAG_OCTAL,			    // only used with TYPE_STRING
-	FLAG_STREAM=FLAG_SMALLSTRING,		// only used with TYPE_INT
+	FLAG_STREAM=FLAG_SMALLSTRING,		// only used with TYPE_INTEGER
 	FLAG_DELETED=FLAG_HEX,				// only used by bagof
 
 	OP_FX=1<<9,

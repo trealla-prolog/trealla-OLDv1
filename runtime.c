@@ -608,7 +608,7 @@ static const struct dispatch g_disp[] =
 	{TYPE_VAR, NULL},
 	{TYPE_LITERAL, unify_literal},
 	{TYPE_STRING, unify_string},
-	{TYPE_INT, unify_int},
+	{TYPE_INTEGER, unify_int},
 	{TYPE_FLOAT, unify_float},
 	{0}
 };

@@ -1756,7 +1756,7 @@ static int get_token(parser *p, int last_op)
 		dst += sprintf(dst, "%u", ch);
 		*dst = '\0';
 		p->srcptr = (char*)src;
-		p->val_type = TYPE_INT;
+		p->val_type = TYPE_INTEGER;
 		p->dq_consing = -1;
 		return 1;
 	}
@@ -1886,7 +1886,7 @@ static int get_token(parser *p, int last_op)
 		if (strchr(dst, '.') || strchr(dst, 'e') || strchr(dst, 'E'))
 			p->val_type = TYPE_FLOAT;
 		else
-			p->val_type = TYPE_INT;
+			p->val_type = TYPE_INTEGER;
 
 		p->srcptr = (char*)src;
 		return 1;
@@ -2243,7 +2243,7 @@ int parser_tokenize(parser *p, int args, int consing)
 		if (p->dcg_passthru)
 			c->flags |= FLAG_PASSTHRU;
 
-		if (p->val_type == TYPE_INT) {
+		if (p->val_type == TYPE_INTEGER) {
 			const char *src = p->token;
 			parse_number(p->m, &src, &c->val_num, &c->val_den);
 

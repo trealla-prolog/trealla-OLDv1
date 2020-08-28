@@ -129,7 +129,7 @@ static void get_params(query *q, idx_t *p1, idx_t *p2)
 
 static void make_int(cell *tmp, int_t v)
 {
-	tmp->val_type = TYPE_INT;
+	tmp->val_type = TYPE_INTEGER;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
 	tmp->val_int = v;
@@ -2334,14 +2334,14 @@ static int fn_iso_integer_1(query *q)
 		if is_float(&p1) {
 			q->accum.val_int = (int_t)p1.val_flt;
 			q->accum.val_den = 1;
-			q->accum.val_type = TYPE_INT;
+			q->accum.val_type = TYPE_INTEGER;
 			return 1;
 		}
 
 		if (is_rational(&p1)) {
 			q->accum.val_num = p1.val_num;
 			q->accum.val_den = p1.val_den;
-			q->accum.val_type = TYPE_INT;
+			q->accum.val_type = TYPE_INTEGER;
 			return 1;
 		}
 
@@ -2445,7 +2445,7 @@ static int fn_iso_add_2(query *q)
 		} else {
 #endif
 			q->accum.val_int = p1.val_int + p2.val_int;
-			q->accum.val_type = TYPE_INT;
+			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
 #endif
@@ -2453,7 +2453,7 @@ static int fn_iso_add_2(query *q)
 		q->accum.val_num = p1.val_num * p2.val_den;
 		q->accum.val_num += p2.val_num * p1.val_den;
 		q->accum.val_den = p1.val_den * p2.val_den;
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_integer(&p1) && is_float(&p2)) {
 		q->accum.val_flt = (double)p1.val_int + p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
@@ -2488,7 +2488,7 @@ static int fn_iso_sub_2(query *q)
 		} else {
 #endif
 			q->accum.val_int = p1.val_int - p2.val_int;
-			q->accum.val_type = TYPE_INT;
+			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
 #endif
@@ -2496,7 +2496,7 @@ static int fn_iso_sub_2(query *q)
 		q->accum.val_num = p1.val_num * p2.val_den;
 		q->accum.val_num -= p2.val_num * p1.val_den;
 		q->accum.val_den = p1.val_den * p2.val_den;
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_integer(&p1) && is_float(&p2)) {
 		q->accum.val_flt = (double)p1.val_int - p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
@@ -2531,7 +2531,7 @@ static int fn_iso_mul_2(query *q)
 		} else {
 #endif
 			q->accum.val_int = p1.val_int * p2.val_int;
-			q->accum.val_type = TYPE_INT;
+			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
 #endif
@@ -2540,7 +2540,7 @@ static int fn_iso_mul_2(query *q)
 		q->accum.val_num *= p2.val_num * p1.val_den;
 		q->accum.val_den = p1.val_den * p2.val_den;
 		q->accum.val_den *= p1.val_den * p2.val_den;
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_integer(&p1) && is_float(&p2)) {
 		q->accum.val_flt = (double)p1.val_int * p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
@@ -2630,7 +2630,7 @@ static int fn_iso_truncate_1(query *q)
 		} else {
 #endif
 			q->accum.val_int = (int_t)p1.val_flt;
-			q->accum.val_type = TYPE_INT;
+			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
 #endif
@@ -2657,7 +2657,7 @@ static int fn_iso_round_1(query *q)
 		} else {
 #endif
 			q->accum.val_int = (int_t)round(p1.val_flt);
-			q->accum.val_type = TYPE_INT;
+			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
 #endif
@@ -2684,7 +2684,7 @@ static int fn_iso_ceiling_1(query *q)
 		} else {
 #endif
 			q->accum.val_int = (int_t)ceil(p1.val_flt);
-			q->accum.val_type = TYPE_INT;
+			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
 #endif
@@ -2765,7 +2765,7 @@ static int fn_iso_floor_1(query *q)
 		} else {
 #endif
 			q->accum.val_int = (int_t)floor(p1.val_flt);
-			q->accum.val_type = TYPE_INT;
+			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
 #endif
@@ -2931,14 +2931,14 @@ static int fn_iso_copysign_2(query *q)
 		if (p2.val_num < 0)
 			q->accum.val_num = -llabs(p1.val_num);
 
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_rational(&p1) && is_float(&p2)) {
 		q->accum = p1;
 
 		if (p2.val_flt < 0.0)
 			q->accum.val_num = -llabs(p1.val_num);
 
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_float(&p1) && is_float(&p2)) {
 		q->accum.val_flt = copysign(p1.val_flt, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
@@ -2997,7 +2997,7 @@ static int fn_iso_powi_2(query *q)
 		} else {
 #endif
 			q->accum.val_int = (int_t)pow(p1.val_int,p2.val_int);
-			q->accum.val_type = TYPE_INT;
+			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
 #endif
@@ -3036,7 +3036,7 @@ static int fn_iso_divide_2(query *q)
 		p2.val_num *= p1.val_den;
 		q->accum.val_num = p1.val_num;
 		q->accum.val_den = p2.val_num;
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_integer(&p1) && is_float(&p2)) {
 		q->accum.val_flt = (double)p1.val_int / p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
@@ -3063,7 +3063,7 @@ static int fn_iso_divint_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = p1.val_int / p2.val_int;
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
 		return 0;
@@ -3081,7 +3081,7 @@ static int fn_iso_div_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_int = (p1.val_int - llabs(p1.val_int % p2.val_int)) / p2.val_int;
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
 		return 0;
@@ -3099,7 +3099,7 @@ static int fn_iso_mod_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_int = llabs(p1.val_int % p2.val_int);
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
 		return 0;
@@ -3117,7 +3117,7 @@ static int fn_iso_max_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_int = p1.val_int >= p2.val_int ? p1.val_int : p2.val_int;
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
 		return 0;
@@ -3135,7 +3135,7 @@ static int fn_iso_min_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_int = p1.val_int <= p2.val_int ? p1.val_int : p2.val_int;
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
 		return 0;
@@ -3153,7 +3153,7 @@ static int fn_iso_xor_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_int = p1.val_int ^ p2.val_int;
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
 		return 0;
@@ -3171,7 +3171,7 @@ static int fn_iso_and_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_int = p1.val_int & p2.val_int;
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
 		return 0;
@@ -3189,7 +3189,7 @@ static int fn_iso_or_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_int = p1.val_int | p2.val_int;
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
 		return 0;
@@ -3207,7 +3207,7 @@ static int fn_iso_shl_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_int = p1.val_int << p2.val_int;
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
 		return 0;
@@ -3225,7 +3225,7 @@ static int fn_iso_shr_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_int = p1.val_int >> p2.val_int;
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
 		return 0;
@@ -3241,7 +3241,7 @@ static int fn_iso_neg_1(query *q)
 
 	if (is_integer(&p1)) {
 		q->accum.val_int = ~p1.val_int;
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
 		return 0;
@@ -5453,7 +5453,7 @@ static int fn_busy_1(query *q)
 static int fn_now_0(query *q)
 {
 	int_t secs = get_time_in_usec() / 1000 / 1000;
-	q->accum.val_type = TYPE_INT;
+	q->accum.val_type = TYPE_INTEGER;
 	q->accum.val_int = secs;
 	return 1;
 }
@@ -6550,14 +6550,14 @@ static int fn_random_1(query *q)
 		return 0;
 	}
 
-	q->accum.val_type = TYPE_INT;
+	q->accum.val_type = TYPE_INTEGER;
 	q->accum.val_int = llabs(random()%p1->val_int);
 	return 1;
 }
 
 static int fn_rand_0(query *q)
 {
-	q->accum.val_type = TYPE_INT;
+	q->accum.val_type = TYPE_INTEGER;
 	q->accum.val_int = random()%RAND_MAX;
 	return 1;
 }
@@ -7546,7 +7546,7 @@ static int fn_rdiv_2(query *q)
 		p2.val_num *= p1.val_den;
 		q->accum.val_num = p1.val_num;
 		q->accum.val_den = p2.val_num;
-		q->accum.val_type = TYPE_INT;
+		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
 		return 0;
@@ -7613,13 +7613,13 @@ static int fn_rational_1(query *q)
 			reduce(&p1);
 			q->accum.val_num = p1.val_num;
 			q->accum.val_den = p1.val_den;
-			q->accum.val_type = TYPE_INT;
+			q->accum.val_type = TYPE_INTEGER;
 			return 1;
 		}
 
 		if (is_float(&p1)) {
 			do_real_to_fraction(p1.val_flt, 0.00001, &q->accum.val_num, &q->accum.val_den);
-			q->accum.val_type = TYPE_INT;
+			q->accum.val_type = TYPE_INTEGER;
 			return 1;
 		}
 
