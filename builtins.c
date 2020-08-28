@@ -3718,13 +3718,13 @@ static int fn_iso_term_variables_2(query *q)
 	return ok;
 }
 
-static cell *copy_term(query *q, cell *p1, idx_t p1_ctx, idx_t suffix)
+static cell *copy_term(query *q, cell *p1, idx_t suffix)
 {
 	cell *tmp = alloc_heap(q, p1->nbr_cells+suffix);
 	cell *src = p1, *dst = tmp;
-	unsigned slots[MAX_ARITY] = {0};
 	frame *g = GET_FRAME(q->st.curr_frame);
 	unsigned new_varno = g->nbr_vars;
+	unsigned slots[MAX_ARITY] = {0};
 
 	for (idx_t i = 0; i < p1->nbr_cells; i++, dst++, src++) {
 		*dst = *src;
@@ -3753,7 +3753,7 @@ static int fn_iso_copy_term_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	cell *tmp1 = deep_clone_term_on_tmp(q, p1, p1_ctx);
-	cell *tmp = copy_term(q, tmp1, p1_ctx, 0);
+	cell *tmp = copy_term(q, tmp1, 0);
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
@@ -4172,7 +4172,7 @@ int call_me(query *q, cell *p1, idx_t p1_ctx)
 	cell *tmp;
 
 	if (p1_ctx != q->st.curr_frame) {
-		tmp = copy_term(q, p1, p1_ctx, 1);
+		tmp = copy_term(q, p1, 1);
 		unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	} else
 		tmp = clone_term(q, 0, p1, 1);
@@ -4858,8 +4858,8 @@ static int fn_iso_findall_3(query *q)
 		return 1;
 	}
 
-	cell *tmp = clone_term(q, 1, p2, 3+p1->nbr_cells);
 	q->qnbr++;
+	cell *tmp = clone_term(q, 1, p2, 3+p1->nbr_cells);
 	idx_t nbr_cells = 1 + p2->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
 	make_int(tmp+nbr_cells++, q->qnbr);
@@ -4886,8 +4886,8 @@ static int fn_findall_4(query *q)
 		return 1;
 	}
 
-	cell *tmp = clone_term(q, 1, p2, 3+p1->nbr_cells);
 	q->qnbr++;
+	cell *tmp = clone_term(q, 1, p2, 3+p1->nbr_cells);
 	idx_t nbr_cells = 1 + p2->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
 	make_int(tmp+nbr_cells++, q->qnbr);
@@ -4955,8 +4955,8 @@ static int fn_iso_bagof_3(query *q)
 	// First time thru generate all solutions
 
 	if (!q->retry) {
-		cell *tmp = clone_term(q, 1, p2, 3+p2->nbr_cells);
 		q->qnbr++;
+		cell *tmp = clone_term(q, 1, p2, 3+p2->nbr_cells);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
 		make_int(tmp+nbr_cells++, q->qnbr);
@@ -5036,8 +5036,8 @@ static int fn_iso_setof_3(query *q)
 	// First time thru generate all solutions
 
 	if (!q->retry) {
-		cell *tmp = clone_term(q, 1, p2, 3+p2->nbr_cells);
 		q->qnbr++;
+		cell *tmp = clone_term(q, 1, p2, 3+p2->nbr_cells);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
 		make_int(tmp+nbr_cells++, q->qnbr);
