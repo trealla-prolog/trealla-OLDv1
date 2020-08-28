@@ -203,12 +203,17 @@ test56 :-
 	writeln('Finished').
 
 task57(Url) :-
-	http_open([host(Url),path('/'),method('head')],S,[status_code(Code)]),
+	http_open([host(Url),path('/'),method('head')],S,[status_code(Code),final_url(Url2)]),
 	close(S),
-	writeln(Code).
+	format('Got ~w (~w) ==> ~w\n', [Url,Code,Url2]).
 
 test57 :-
 	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
+	maplist(task57,L),
+	writeln('Finished').
+
+test58 :-
+	L = ['google.com','bing.com','duckduckgo.com'],
 	maplist(task57,L),
 	writeln('Finished').
 
