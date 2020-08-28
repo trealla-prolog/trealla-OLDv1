@@ -3718,17 +3718,10 @@ static int fn_iso_term_variables_2(query *q)
 	return ok;
 }
 
-static cell *copy_term(query *q, int prefix, cell *p1, idx_t p1_ctx, idx_t suffix)
+static cell *copy_term(query *q, cell *p1, idx_t p1_ctx, idx_t suffix)
 {
-	cell *tmp = alloc_heap(q, (prefix?1:0)+p1->nbr_cells+suffix);
-
-	if (prefix) {
-		tmp->val_type = TYPE_EMPTY;
-		tmp->nbr_cells = 1;
-		tmp->flags = FLAG_BUILTIN;
-	}
-
-	cell *src = p1, *dst = tmp + (prefix?1:0);
+	cell *tmp = alloc_heap(q, p1->nbr_cells+suffix);
+	cell *src = p1, *dst = tmp;
 	unsigned slots[MAX_ARITY] = {0};
 	frame *g = GET_FRAME(q->st.curr_frame);
 	unsigned new_varno = g->nbr_vars;
@@ -3760,7 +3753,7 @@ static int fn_iso_copy_term_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	cell *tmp1 = deep_clone_term_on_tmp(q, p1, p1_ctx);
-	cell *tmp = copy_term(q, 0, tmp1, p1_ctx, 0);
+	cell *tmp = copy_term(q, tmp1, p1_ctx, 0);
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
@@ -4179,12 +4172,12 @@ int call_me(query *q, cell *p1, idx_t p1_ctx)
 	cell *tmp;
 
 	if (p1_ctx != q->st.curr_frame) {
-		tmp = copy_term(q, 1, p1, p1_ctx, 1);
-		unify(q, p1, p1_ctx, tmp+1, q->st.curr_frame);
+		tmp = copy_term(q, p1, p1_ctx, 1);
+		unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	} else
-		tmp = clone_term(q, 1, p1, 1);
+		tmp = clone_term(q, 0, p1, 1);
 
-	idx_t nbr_cells = 1 + p1->nbr_cells;
+	idx_t nbr_cells = p1->nbr_cells;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
 	q->st.curr_cell = tmp;
 	return 1;
