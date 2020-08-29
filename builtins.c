@@ -6855,6 +6855,11 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 
 			len = format_integer(dst, c->val_int, 3, ',', noargval?2:argval);
 		} else {
+			int saveq = q->quoted;
+
+			if (ch == 'q')
+				q->quoted = 1;
+
 			if (canonical)
 				len = write_canonical_to_buf(q, NULL, 0, c, 1, q->m->dq, 0);
 			else
@@ -6871,6 +6876,8 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 				len = write_canonical_to_buf(q, dst, nbytes, c, 1, q->m->dq, 0);
 			else
 				len = write_term_to_buf(q, dst, nbytes, c, 1, q->m->dq, 0, 999, 0);
+
+			q->quoted = saveq;
 		}
 
 		dst += len;
