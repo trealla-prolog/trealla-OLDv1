@@ -5541,6 +5541,61 @@ static int fn_forall_2(query *q)
 	return 1;
 }
 
+static int fn_split_string_4(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,atom);
+	GET_NEXT_ARG(p3,atom);
+	GET_NEXT_ARG(p4,any);
+
+	if (is_nil(p1)) {
+		throw_error(q, p1, "type_error", "atom");
+		return 0;
+	}
+
+	int ch = peek_char_utf8(GET_STR(p2));
+	int pad = peek_char_utf8(GET_STR(p3));
+	const char *start = GET_STR(p1), *ptr;
+	cell *l = NULL;
+	int nbr = 1;
+
+	if (!*start) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
+	}
+
+	while ((ptr = strchr_utf8(start, ch)) != NULL) {
+		while ((peek_char_utf8(start) == pad) && (pad != ch))
+			get_char_utf8(&start);
+
+		cell tmp = make_stringn(q, start, ptr-start);
+
+		if (nbr++ == 1)
+			l = alloc_list(q, &tmp);
+		else
+			l = append_list(q, l, &tmp);
+
+		start = ptr + 1;
+	}
+
+	if (*start) {
+		while (peek_char_utf8(start) == pad)
+			get_char_utf8(&start);
+
+		if (!l) {
+			cell tmp = make_string(q, start);
+			l = alloc_list(q, &tmp);
+		} else {
+			cell tmp = make_string(q, start);
+			l = append_list(q, l, &tmp);
+		}
+	}
+
+	l = end_list(q, l);
+	return unify(q, p4, p4_ctx, l, q->st.curr_frame);
+}
+
 static int fn_split_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -8368,6 +8423,7 @@ static const struct builtins g_other_funcs[] =
 	{"getfile", 2, fn_getfile_2, "+atom,-list"},
 	{"loadfile", 2, fn_loadfile_2, "+atom,-string"},
 	{"savefile", 2, fn_savefile_2, "+atom,+string"},
+	{"split_string", 4, fn_split_string_4, "+atom,+sep,+pad,-list"},
 	{"split", 3, fn_split_3, "+atom,+atom,?list"},
 	{"split", 4, fn_split_4, "+atom,+atom,?left,?right"},
 	{"msort", 2, fn_msort_2, "+list,-list"},
