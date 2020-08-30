@@ -5377,6 +5377,18 @@ static int fn_statistics_2(query *q)
 		return 1;
 	}
 
+	if (!strcmp(GET_STR(p1), "runtime")) {
+		int64_t now = get_time_in_usec();
+		double elapsed = now - q->time_started;
+		cell tmp;
+		make_int(&tmp, elapsed/1000);
+		cell *l = alloc_list(q, &tmp);
+		l = append_list(q, l, &tmp);
+		make_literal(&tmp, g_nil_s);
+		l = end_list(q, l);
+		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
+	}
+
 	return 0;
 }
 

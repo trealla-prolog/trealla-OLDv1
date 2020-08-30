@@ -153,8 +153,7 @@ from(L, U, I) :- M is (L+U) >> 1 + 1,   from(M, U, I).
 %   tests will call statistics/2 and reset it.)
 
 get_cpu_time(T) :-
-    statistics(cputime, T1),
-    T is round(T1*1000).
+        statistics(runtime, [T|_]).
 
 %%	bench_time(-Time)
 %
