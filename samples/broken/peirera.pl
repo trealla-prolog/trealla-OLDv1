@@ -186,7 +186,7 @@ bench_mark(Name, NetTime, Speedup) :-
 	NetTime is TestTime-OverHead,
         Average  is 1000000*NetTime/Iterations,
 
-	format('~w\t took ~2f-~2f=~2f/~d = ~1f\t usec/iter.~n',
+	format('~w~t~22t took ~2f-~2f=~2f/~d = ~t~1f~60t usec/iter.~n',
 	       [Name, TestTime, OverHead, NetTime, Iterations, Average]).
 
 
