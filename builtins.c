@@ -6823,7 +6823,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 				nbytes = bufsiz - save;
 			}
 
-			len = sprintf(dst, "%f", c->val_flt);
+			len = sprintf(dst, "%.*f", argval, c->val_flt);
 		} else if (ch == 'I') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
