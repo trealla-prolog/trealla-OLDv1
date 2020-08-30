@@ -5006,8 +5006,6 @@ static int fn_iso_bagof_3(query *q)
 		undo_me(q);
 	}
 
-	unpin_vars(q);
-
 	if (!queuen_used(q)) {
 		drop_choice(q);
 		init_queuen(q);
@@ -5017,10 +5015,10 @@ static int fn_iso_bagof_3(query *q)
 		return 0;
 	}
 
+	unpin_vars(q);
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 	ch->qnbr = q->qnbr;
-
 	do_sys_listn(q, p3, p3_ctx);
 	return 1;
 }
@@ -5087,8 +5085,6 @@ static int fn_iso_setof_3(query *q)
 		undo_me(q);
 	}
 
-	unpin_vars(q);
-
 	if (!queuen_used(q)) {
 		drop_choice(q);
 		init_queuen(q);
@@ -5098,10 +5094,10 @@ static int fn_iso_setof_3(query *q)
 		return 0;
 	}
 
+	unpin_vars(q);
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 	ch->qnbr = q->qnbr;
-
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	l = nodesort(q, l, q->st.curr_frame, 1, 0);
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
