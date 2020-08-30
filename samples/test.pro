@@ -232,7 +232,7 @@ pr(3,c).
 task64(G) :- G.
 
 test64 :-
-	task64(findall(f(X), pr(X,_), S)),
+	task64(findall(X, pr(X,_), S)),
 	writeln(S).
 
 task70(X,Y) :- write('Got '), writeln(X), Y=456.

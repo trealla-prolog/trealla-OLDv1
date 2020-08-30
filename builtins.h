@@ -35,9 +35,19 @@ extern int do_yield_0(query *q);
 	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx; \
 	if (!is_##val_type(p)) { throw_error(q, p, "type_error", #val_type); return 0; }
 
+#define GET_FIRST_RAW_ARG(p,val_type) \
+	__attribute__((unused)) cell *p = get_first_raw_arg(q); \
+	__attribute__((unused)) idx_t p##_ctx = q->st.curr_frame; \
+	if (!is_##val_type(p)) { throw_error(q, p, "type_error", #val_type); return 0; }
+
 #define GET_NEXT_ARG(p,val_type) \
 	__attribute__((unused)) cell *p = get_next_arg(q); \
 	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx; \
+	if (!is_##val_type(p)) { throw_error(q, p, "type_error", #val_type); return 0; }
+
+#define GET_NEXT_RAW_ARG(p,val_type) \
+	__attribute__((unused)) cell *p = get_next_raw_arg(q); \
+	__attribute__((unused)) idx_t p##_ctx = q->st.curr_frame; \
 	if (!is_##val_type(p)) { throw_error(q, p, "type_error", #val_type); return 0; }
 
 inline static cell *get_first_arg(query *q)
@@ -46,7 +56,7 @@ inline static cell *get_first_arg(query *q)
 	return GET_VALUE(q, q->last_arg, q->st.curr_frame);
 }
 
-inline static cell *get_first_arg_raw(query *q)
+inline static cell *get_first_raw_arg(query *q)
 {
 	q->last_arg = q->st.curr_cell + 1;
 	return q->last_arg;

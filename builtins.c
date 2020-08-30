@@ -4848,7 +4848,7 @@ static int fn_sys_queuen_2(query *q)
 
 static int fn_iso_findall_3(query *q)
 {
-	GET_FIRST_ARG(p1,any);
+	GET_FIRST_RAW_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
 
@@ -4875,7 +4875,7 @@ static int fn_iso_findall_3(query *q)
 
 static int fn_findall_4(query *q)
 {
-	GET_FIRST_ARG(p1,any);
+	GET_FIRST_RAW_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
 	GET_NEXT_ARG(p4,var);
@@ -4929,7 +4929,7 @@ static uint32_t get_vars(query *q, cell *p, idx_t p_ctx)
 	return mask;
 }
 
-static cell *get_existentials(const query *q, cell *p2, uint32_t *xs)
+static cell *skip_existentials(const query *q, cell *p2, uint32_t *xs)
 {
 	while (is_structure(p2) && !strcmp(GET_STR(p2), "^")) {
 		cell *c = p2 + 1;
@@ -4938,7 +4938,7 @@ static cell *get_existentials(const query *q, cell *p2, uint32_t *xs)
 			*xs |= 1 << c->slot_nbr;
 
 		p2 += 1 + c->nbr_cells;
-		return get_existentials(q, p2, xs);
+		return skip_existentials(q, p2, xs);
 	}
 
 	return p2;
@@ -4946,11 +4946,11 @@ static cell *get_existentials(const query *q, cell *p2, uint32_t *xs)
 
 static int fn_iso_bagof_3(query *q)
 {
-	GET_FIRST_ARG(p1,structure_or_var);
+	GET_FIRST_RAW_ARG(p1,structure_or_var);
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
 	uint32_t xs_vars = 0;
-	p2 = get_existentials(q, p2, &xs_vars);
+	p2 = skip_existentials(q, p2, &xs_vars);
 
 	// First time thru generate all solutions
 
@@ -5027,11 +5027,11 @@ static int fn_iso_bagof_3(query *q)
 
 static int fn_iso_setof_3(query *q)
 {
-	GET_FIRST_ARG(p1,structure_or_var);
+	GET_FIRST_RAW_ARG(p1,structure_or_var);
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
 	uint32_t xs_vars = 0;
-	p2 = get_existentials(q, p2, &xs_vars);
+	p2 = skip_existentials(q, p2, &xs_vars);
 
 	// First time thru generate all solutions
 
