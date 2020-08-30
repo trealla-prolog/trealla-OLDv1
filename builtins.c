@@ -5596,54 +5596,6 @@ static int fn_split_string_4(query *q)
 	return unify(q, p4, p4_ctx, l, q->st.curr_frame);
 }
 
-static int fn_split_3(query *q)
-{
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,atom);
-	GET_NEXT_ARG(p3,any);
-
-	if (is_nil(p1)) {
-		throw_error(q, p1, "type_error", "atom");
-		return 0;
-	}
-
-	const char *start = GET_STR(p1), *ptr;
-	int ch = peek_char_utf8(GET_STR(p2));
-	cell *l = NULL;
-	int nbr = 1;
-
-	if (!*start) {
-		cell tmp;
-		make_literal(&tmp, g_nil_s);
-		return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
-	}
-
-	while ((ptr = strchr_utf8(start, ch)) != NULL) {
-		cell tmp = make_stringn(q, start, ptr-start);
-
-		if (nbr++ == 1)
-			l = alloc_list(q, &tmp);
-		else
-			l = append_list(q, l, &tmp);
-
-		start = ptr + 1;
-		while (isspace(*start)) start++;
-	}
-
-	if (*start) {
-		if (!l) {
-			cell tmp = make_string(q, start);
-			l = alloc_list(q, &tmp);
-		} else {
-			cell tmp = make_string(q, start);
-			l = append_list(q, l, &tmp);
-		}
-	}
-
-	l = end_list(q, l);
-	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
-}
-
 static int fn_split_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -8424,7 +8376,6 @@ static const struct builtins g_other_funcs[] =
 	{"loadfile", 2, fn_loadfile_2, "+atom,-string"},
 	{"savefile", 2, fn_savefile_2, "+atom,+string"},
 	{"split_string", 4, fn_split_string_4, "+atom,+sep,+pad,-list"},
-	{"split", 3, fn_split_3, "+atom,+atom,?list"},
 	{"split", 4, fn_split_4, "+atom,+atom,?left,?right"},
 	{"msort", 2, fn_msort_2, "+list,-list"},
 	{"is_list", 1, fn_is_list_1, "+term"},
