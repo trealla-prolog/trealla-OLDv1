@@ -343,7 +343,7 @@ cell *get_head(cell *c);
 cell *get_body(cell *c);
 rule *find_rule(module *m, cell *c);
 rule *find_functor(module *m, const char *name, unsigned arity);
-int call_me(query *q, cell *p1, idx_t p1_ctx);
+int call_me(query *q, cell *p1);
 void undo_me(query *q);
 parser *create_parser(module *m);
 void destroy_parser(parser *p);

@@ -813,7 +813,7 @@ void run_query(query *q)
 		}
 
 		if (is_var(q->st.curr_cell)) {
-			if (!call_me(q, q->st.curr_cell, q->st.curr_frame))
+			if (!call_me(q, q->st.curr_cell))
 				continue;
 		}
 

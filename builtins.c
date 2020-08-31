@@ -168,7 +168,7 @@ static void make_end_return(cell *tmp, cell *c)
 {
 	make_end(tmp);
 	tmp->flags = FLAG_RETURN;
-	tmp->val_ptr = c;
+	tmp->val_ptr = c + c->nbr_cells;
 }
 
 static void make_literal(cell *tmp, idx_t offset)
@@ -4159,10 +4159,10 @@ static int fn_iso_assertz_1(query *q)
 	return 1;
 }
 
-int call_me(query *q, cell *p1, idx_t p1_ctx)
+int call_me(query *q, cell *p1)
 {
-	p1 = GET_VALUE(q, p1, p1_ctx);
-	p1_ctx = q->latest_ctx;
+	p1 = GET_VALUE(q, p1, q->st.curr_frame);
+	idx_t p1_ctx = q->latest_ctx;
 
 	if (!is_callable(p1)) {
 		throw_error(q, p1, "type_error", "callable");
@@ -4178,7 +4178,7 @@ int call_me(query *q, cell *p1, idx_t p1_ctx)
 		tmp = clone_term(q, 0, p1, 1);
 
 	idx_t nbr_cells = p1->nbr_cells;
-	make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return 1;
 }
@@ -4211,7 +4211,7 @@ static int fn_iso_call_n(query *q)
 		tmp[1].flags &= ~FLAG_BUILTIN;
 	}
 
-	make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return 1;
 }
@@ -4224,14 +4224,14 @@ static int fn_iso_disjunction_2(query *q)
 	if (q->retry) {
 		cell *tmp = clone_term(q, 1, p2, 1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
-		make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
+		make_end_return(tmp+nbr_cells, q->st.curr_cell);
 		q->st.curr_cell = tmp;
 		return 1;
 	}
 
 	cell *tmp = clone_term(q, 1, p1, 1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	make_choice(q);
 	q->st.curr_cell = tmp;
 	return 1;
@@ -4264,7 +4264,7 @@ static int fn_iso_once_1(query *q)
 	cell *tmp = clone_term(q, 1, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_inner_cut_0, 0, 0);
-	make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	make_choice(q);
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
@@ -4285,7 +4285,7 @@ static int fn_iso_ifthen_2(query *q)
 	clone_term(q, 0, p2, 1);
 	nbr_cells += p2->nbr_cells;
 	tmp = get_heap(q, save_pos);
-	make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return 1;
 }
@@ -4304,7 +4304,7 @@ static int fn_iso_catch_3(query *q)
 		q->retry = 0;
 		cell *tmp = clone_term(q, 1, p3, 1);
 		idx_t nbr_cells = 1 + p3->nbr_cells;
-		make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
+		make_end_return(tmp+nbr_cells, q->st.curr_cell);
 		make_choice(q);
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
@@ -4318,7 +4318,7 @@ static int fn_iso_catch_3(query *q)
 
 	cell *tmp = clone_term(q, 1, p1, 1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	make_choice(q);
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
@@ -4948,7 +4948,7 @@ static int fn_iso_bagof_3(query *q)
 {
 	GET_FIRST_RAW_ARG(p1,structure_or_var);
 	GET_NEXT_RAW_ARG(p2,callable);
-	GET_NEXT_RAW_ARG(p3,any);
+	GET_NEXT_ARG(p3,any);
 	uint32_t xs_vars = 0;
 	p2 = skip_existentials(q, p2, &xs_vars);
 
@@ -5025,7 +5025,7 @@ static int fn_iso_setof_3(query *q)
 {
 	GET_FIRST_RAW_ARG(p1,structure_or_var);
 	GET_NEXT_RAW_ARG(p2,callable);
-	GET_NEXT_RAW_ARG(p3,any);
+	GET_NEXT_ARG(p3,any);
 	uint32_t xs_vars = 0;
 	p2 = skip_existentials(q, p2, &xs_vars);
 
@@ -5351,7 +5351,7 @@ static int fn_time_1(query *q)
 	cell *tmp = clone_term(q, 1, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_elapsed_s, fn_sys_elapsed_0, 0, 0);
-	make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return 1;
 }
@@ -7663,7 +7663,7 @@ static int fn_ignore_1(query *q)
 	cell *tmp = clone_term(q, 1, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_inner_cut_0, 0, 0);
-	make_end_return(tmp+nbr_cells, q->st.curr_cell+q->st.curr_cell->nbr_cells);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	make_choice(q);
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;

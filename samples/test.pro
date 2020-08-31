@@ -235,6 +235,10 @@ test64 :-
 	task64(findall(X, pr(X,_), S)),
 	writeln(S).
 
+test65 :-
+	task64(bagof(X, pr(X,_), S)),
+	writeln(S).
+
 task70(X,Y) :- write('Got '), writeln(X), Y=456.
 
 test70 :- freeze(X, task70(X,Y)), X=123, writeln(Y), writeln('OK done').
