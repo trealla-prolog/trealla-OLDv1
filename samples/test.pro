@@ -245,6 +245,10 @@ test66 :-
 test67 :-
 	call_nth(between(1,inf,I),_), writeln(I), sleep(1), fail.
 
+test68 :-
+	between(1,3,I), test66, writeln(I), fail.
+test68.
+
 task70(X,Y) :- write('Got '), writeln(X), Y=456.
 
 test70 :- freeze(X, task70(X,Y)), X=123, writeln(Y), writeln('OK done').

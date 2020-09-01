@@ -8152,7 +8152,12 @@ static int fn_abolish_2(query *q)
 static int fn_sys_fail_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	return p1->val_int == q->retries;
+
+	if (p1->val_int != q->retries)
+		return 0;
+
+	drop_choice(q);
+	return 1;
 }
 
 static int fn_call_nth_2(query *q)
