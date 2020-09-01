@@ -239,6 +239,12 @@ test65 :-
 	task64(bagof(X, pr(X,_), S)),
 	writeln(S).
 
+test66 :-
+	call_nth(between(1,inf,I),12345678), write(I), nl.
+
+test67 :-
+	between(1,inf,I), I is 12345678, write(I),nl.
+
 task70(X,Y) :- write('Got '), writeln(X), Y=456.
 
 test70 :- freeze(X, task70(X,Y)), X=123, writeln(Y), writeln('OK done').

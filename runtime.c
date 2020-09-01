@@ -103,7 +103,7 @@ unsigned create_vars(query *q, unsigned nbr)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 
-	//printf("*** create_vars=%u, nbr_vars=%u, nbr_slots=%u\n", nbr, g->nbr_vars, g->nbr_slots);
+	//printf("*** create_vars=%u, nbr_vars=%u, nbr_slots=%u, st.sp=%u\n", nbr, g->nbr_vars, g->nbr_slots, q->st.sp);
 
 	if ((g->env + g->nbr_slots) == q->st.sp) {
 		unsigned slot_nbr = g->nbr_vars;
@@ -141,7 +141,7 @@ static void trace_call(query *q, cell *c, int box)
 
 #if DEBUG
 	frame *g = GET_FRAME(q->st.curr_frame);
-	fprintf(stderr, "{f(%u:%u):ch%u:tp%u:cp%u:fp%u:sp%u} ", q->st.curr_frame, g->nbr_vars, g->any_choices, q->st.tp, q->cp, q->st.fp, q->st.sp);
+	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u:tp%u:cp%u:fp%u:sp%u} ", q->st.curr_frame, g->nbr_vars, g->nbr_slots, g->any_choices, q->st.tp, q->cp, q->st.fp, q->st.sp);
 #endif
 
 	idx_t save_ctx = q->latest_ctx;
@@ -228,6 +228,7 @@ int retry_choice(query *q)
 	if (!q->cp)
 		return 0;
 
+	q->retries++;
 	idx_t curr_choice = drop_choice(q);
 	const choice *ch = q->choices + curr_choice;
 	unwind_trail(q, ch);
@@ -293,6 +294,7 @@ static void make_frame(query *q, unsigned nbr_vars, int last_match)
 	if (!last_match)
 		g->any_choices = 1;
 
+	q->retries = 1;
 	idx_t new_frame = q->st.fp++;
 	g = GET_FRAME(new_frame);
 	g->prev_frame = q->st.curr_frame;

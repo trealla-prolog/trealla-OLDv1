@@ -147,8 +147,7 @@ static void make_float(cell *tmp, double v)
 static void make_structure(cell *tmp, idx_t offset, void *fn, unsigned arity, idx_t extra_cells)
 {
 	tmp->val_type = TYPE_LITERAL;
-	tmp->nbr_cells = 1;
-	tmp->nbr_cells += extra_cells;
+	tmp->nbr_cells = 1 + extra_cells;
 	tmp->flags = FLAG_BUILTIN;
 	tmp->arity = arity;
 	tmp->fn = fn;
@@ -5520,8 +5519,10 @@ static int fn_between_3(query *q)
 
 	int_t val = p3->val_int;
 
-	if (val == p2->val_int)
-		return 0;
+	if (is_integer(p2)) {
+		if (val == p2->val_int)
+			return 0;
+	}
 
 	val++;
 	GET_RAW_ARG(3,p3_raw);
@@ -5529,7 +5530,7 @@ static int fn_between_3(query *q)
 	make_int(&tmp, val);
 	reset_value(q, p3_raw, p3_raw_ctx, &tmp, q->st.curr_frame);
 
-	if (val != p2->val_int)
+	if (!is_integer(p2) || (val != p2->val_int))
 		make_choice(q);
 
 	return 1;
@@ -8148,6 +8149,25 @@ static int fn_abolish_2(query *q)
 	return do_abolish(q, &tmp);
 }
 
+static int fn_sys_fail_1(query *q)
+{
+	GET_FIRST_ARG(p1,integer);
+	return p1->val_int == q->retries;
+}
+
+static int fn_call_nth_2(query *q)
+{
+	GET_FIRST_RAW_ARG(p1,callable);
+	GET_NEXT_RAW_ARG(p2,integer);
+	cell *tmp = clone_term(q, 1, p1, 2+1);
+	idx_t nbr_cells = 1 + p1->nbr_cells;
+	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_fail_1, 1, 1);
+	make_int(tmp+nbr_cells++, p2->val_int);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	q->st.curr_cell = tmp;
+	return 1;
+}
+
 static int fn_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -8446,6 +8466,8 @@ static const struct builtins g_other_funcs[] =
 	{"load_files", 2, fn_consult_1, "+files"},
 	{"statistics", 2, fn_statistics_2, "+atom,-var"},
 	{"duplicate_term", 2, fn_iso_copy_term_2, "+atom,-var"},
+	{"call_nth", 2, fn_call_nth_2, "+callable,+integer"},
+	{"sys_fail", 1, fn_sys_fail_1, "+integer"},
 
 #if USE_SSL
 	{"sha1", 2, fn_sha1_2, "+atom,?atom"},
