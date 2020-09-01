@@ -128,12 +128,14 @@ SWI-Prolog
 	code_type/2
 	string_upper/2
 	string_lower/2
-	getenv/2
-	setenv/2
-	unsetenv/1
 	uuid/1                       # generates non-standard UUID string
 	load_files/2
 	split_string/4
+
+	getenv/2
+	setenv/2
+	unsetenv/1
+
 	call_nth/2
 	offset/2
 	limit/2
