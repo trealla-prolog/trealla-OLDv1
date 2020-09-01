@@ -8157,8 +8157,8 @@ static int fn_sys_fail_1(query *q)
 
 static int fn_call_nth_2(query *q)
 {
-	GET_FIRST_RAW_ARG(p1,callable);
-	GET_NEXT_RAW_ARG(p2,integer_or_var);
+	GET_FIRST_ARG(p1,callable);
+	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_var(p2)) {
 		cell *tmp = clone_term(q, 1, p1, 1);
