@@ -228,7 +228,6 @@ int retry_choice(query *q)
 	if (!q->cp)
 		return 0;
 
-	q->retries++;
 	idx_t curr_choice = drop_choice(q);
 	const choice *ch = q->choices + curr_choice;
 	unwind_trail(q, ch);

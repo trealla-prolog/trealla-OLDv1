@@ -8153,7 +8153,7 @@ static int fn_sys_fail_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 
-	if (p1->val_int != q->retries)
+	if (++q->call_nth_retries != p1->val_int)
 		return 0;
 
 	drop_choice(q);
@@ -8173,7 +8173,7 @@ static int fn_call_nth_2(query *q)
 		return 1;
 	}
 
-	q->retries = 1;
+	q->call_nth_retries = 1;
 	cell *tmp = clone_term(q, 1, p1, 2+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_fail_1, 1, 1);
@@ -8482,7 +8482,6 @@ static const struct builtins g_other_funcs[] =
 	{"statistics", 2, fn_statistics_2, "+atom,-var"},
 	{"duplicate_term", 2, fn_iso_copy_term_2, "+atom,-var"},
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer"},
-	{"sys_fail", 1, fn_sys_fail_1, "+integer"},
 
 #if USE_SSL
 	{"sha1", 2, fn_sha1_2, "+atom,?atom"},
