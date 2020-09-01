@@ -240,10 +240,10 @@ test65 :-
 	writeln(S).
 
 test66 :-
-	call_nth(between(1,inf,I),12345678), write(I), nl.
+	call_nth(between(1,inf,I),12345678), writeln(I).
 
 test67 :-
-	between(1,inf,I), I is 12345678, write(I),nl.
+	between(1,inf,I), I is 12345678, writeln(I).
 
 task70(X,Y) :- write('Got '), writeln(X), Y=456.
 

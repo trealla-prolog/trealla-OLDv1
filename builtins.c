@@ -5493,7 +5493,7 @@ static int fn_between_3(query *q)
 	GET_NEXT_ARG(p2,integer_or_atom);
 	GET_NEXT_ARG(p3,integer_or_var);
 
-	if (is_atom(p2) && strcmp(GET_STR(p2), "inf") && strcmp(GET_STR(p2), "infinite")) {
+	if (!q->retry && is_atom(p2) && strcmp(GET_STR(p2), "inf") && strcmp(GET_STR(p2), "infinite")) {
 		throw_error(q, p2, "type_error", "integer");
 		return 0;
 	}
@@ -5511,7 +5511,7 @@ static int fn_between_3(query *q)
 	if (!q->retry) {
 		set_var(q, p3, p3_ctx, p1, q->st.curr_frame);
 
-		if (p1->val_int != p2->val_int)
+		if (!is_integer(p2) || (p1->val_int != p2->val_int))
 			make_choice(q);
 
 		return 1;
