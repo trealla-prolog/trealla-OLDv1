@@ -8158,7 +8158,16 @@ static int fn_sys_fail_1(query *q)
 static int fn_call_nth_2(query *q)
 {
 	GET_FIRST_RAW_ARG(p1,callable);
-	GET_NEXT_RAW_ARG(p2,integer);
+	GET_NEXT_RAW_ARG(p2,integer_or_var);
+
+	if (is_var(p2)) {
+		cell *tmp = clone_term(q, 1, p1, 1);
+		idx_t nbr_cells = 1 + p1->nbr_cells;
+		make_end_return(tmp+nbr_cells, q->st.curr_cell);
+		q->st.curr_cell = tmp;
+		return 1;
+	}
+
 	q->retries = 1;
 	cell *tmp = clone_term(q, 1, p1, 2+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
