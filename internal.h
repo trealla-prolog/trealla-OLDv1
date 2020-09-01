@@ -251,7 +251,7 @@ struct query_ {
 	qstate st;
 	int64_t time_started, tmo;
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos, step, qid;
-	uint64_t nv_mask, limit_retries, offset_retries;
+	uint64_t nv_mask;
 	int halt, halt_code, status, error, trace, calc, qnbr, yielded;
 	int retry, resume, no_tco, current_input, current_output;
 	int max_depth, quoted, nl, fullstop, ignore_ops, character_escapes;

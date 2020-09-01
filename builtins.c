@@ -8149,11 +8149,12 @@ static int fn_abolish_2(query *q)
 	return do_abolish(q, &tmp);
 }
 
-static int fn_sys_lt_1(query *q)
+static int fn_sys_lt_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
+	GET_NEXT_ARG(p2,integer);
 
-	if (q->limit_retries++ < p1->val_int)
+	if (p1->val_int++ < p2->val_int)
 		return 1;
 
 	drop_choice(q);
@@ -8164,21 +8165,22 @@ static int fn_limit_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,callable);
-	q->limit_retries = 1;
-	cell *tmp = clone_term(q, 1, p2, 2+1);
+	cell *tmp = clone_term(q, 1, p2, 3+1);
 	idx_t nbr_cells = 1 + p2->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_lt_1, 1, 1);
+	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_lt_2, 2, 2);
+	make_int(tmp+nbr_cells++, 1);
 	make_int(tmp+nbr_cells++, p1->val_int);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return 1;
 }
 
-static int fn_sys_gt_1(query *q)
+static int fn_sys_gt_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
+	GET_NEXT_ARG(p2,integer);
 
-	if (q->offset_retries++ <= p1->val_int)
+	if (p1->val_int++ <= p2->val_int)
 		return 0;
 
 	return 1;
@@ -8188,21 +8190,22 @@ static int fn_offset_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,callable);
-	q->offset_retries = 1;
-	cell *tmp = clone_term(q, 1, p2, 2+1);
+	cell *tmp = clone_term(q, 1, p2, 3+1);
 	idx_t nbr_cells = 1 + p2->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_gt_1, 1, 1);
+	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_gt_2, 2, 2);
+	make_int(tmp+nbr_cells++, 1);
 	make_int(tmp+nbr_cells++, p1->val_int);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return 1;
 }
 
-static int fn_sys_ne_1(query *q)
+static int fn_sys_ne_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
+	GET_NEXT_ARG(p2,integer);
 
-	if (q->limit_retries++ != p1->val_int)
+	if (p1->val_int++ != p2->val_int)
 		return 0;
 
 	drop_choice(q);
@@ -8222,10 +8225,10 @@ static int fn_call_nth_2(query *q)
 		return 1;
 	}
 
-	q->limit_retries = 1;
-	cell *tmp = clone_term(q, 1, p1, 2+1);
+	cell *tmp = clone_term(q, 1, p1, 3+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_ne_1, 1, 1);
+	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_ne_2, 2, 2);
+	make_int(tmp+nbr_cells++, 1);
 	make_int(tmp+nbr_cells++, p2->val_int);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
