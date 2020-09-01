@@ -8149,7 +8149,7 @@ static int fn_abolish_2(query *q)
 	return do_abolish(q, &tmp);
 }
 
-static int fn_sys_fail_1(query *q)
+static int fn_sys_ne_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 
@@ -8176,7 +8176,7 @@ static int fn_call_nth_2(query *q)
 	q->call_nth_retries = 1;
 	cell *tmp = clone_term(q, 1, p1, 2+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_fail_1, 1, 1);
+	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_ne_1, 1, 1);
 	make_int(tmp+nbr_cells++, p2->val_int);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
