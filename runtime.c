@@ -294,7 +294,6 @@ static void make_frame(query *q, unsigned nbr_vars, int last_match)
 	if (!last_match)
 		g->any_choices = 1;
 
-	q->retries = 1;
 	idx_t new_frame = q->st.fp++;
 	g = GET_FRAME(new_frame);
 	g->prev_frame = q->st.curr_frame;

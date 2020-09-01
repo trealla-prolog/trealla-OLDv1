@@ -8159,6 +8159,7 @@ static int fn_call_nth_2(query *q)
 {
 	GET_FIRST_RAW_ARG(p1,callable);
 	GET_NEXT_RAW_ARG(p2,integer);
+	q->retries = 1;
 	cell *tmp = clone_term(q, 1, p1, 2+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_fail_1, 1, 1);
