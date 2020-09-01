@@ -252,6 +252,7 @@ test68.
 
 test69 :-
 	limit(5, offset(5, between(1,20,I))), writeln(I), fail.
+test69.
 
 task70(X,Y) :- write('Got '), writeln(X), Y=456.
 

@@ -8149,11 +8149,60 @@ static int fn_abolish_2(query *q)
 	return do_abolish(q, &tmp);
 }
 
+static int fn_sys_lt_1(query *q)
+{
+	GET_FIRST_ARG(p1,integer);
+
+	if (q->limit_retries++ < p1->val_int)
+		return 1;
+
+	drop_choice(q);
+	return 1;
+}
+
+static int fn_limit_2(query *q)
+{
+	GET_FIRST_ARG(p1,integer);
+	GET_NEXT_ARG(p2,callable);
+	q->limit_retries = 1;
+	cell *tmp = clone_term(q, 1, p2, 2+1);
+	idx_t nbr_cells = 1 + p2->nbr_cells;
+	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_lt_1, 1, 1);
+	make_int(tmp+nbr_cells++, p1->val_int);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	q->st.curr_cell = tmp;
+	return 1;
+}
+
+static int fn_sys_gt_1(query *q)
+{
+	GET_FIRST_ARG(p1,integer);
+
+	if (q->offset_retries++ <= p1->val_int)
+		return 0;
+
+	return 1;
+}
+
+static int fn_offset_2(query *q)
+{
+	GET_FIRST_ARG(p1,integer);
+	GET_NEXT_ARG(p2,callable);
+	q->offset_retries = 1;
+	cell *tmp = clone_term(q, 1, p2, 2+1);
+	idx_t nbr_cells = 1 + p2->nbr_cells;
+	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_gt_1, 1, 1);
+	make_int(tmp+nbr_cells++, p1->val_int);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	q->st.curr_cell = tmp;
+	return 1;
+}
+
 static int fn_sys_ne_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 
-	if (++q->call_nth_retries != p1->val_int)
+	if (q->limit_retries++ != p1->val_int)
 		return 0;
 
 	drop_choice(q);
@@ -8173,7 +8222,7 @@ static int fn_call_nth_2(query *q)
 		return 1;
 	}
 
-	q->call_nth_retries = 1;
+	q->limit_retries = 1;
 	cell *tmp = clone_term(q, 1, p1, 2+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_ne_1, 1, 1);
@@ -8482,6 +8531,8 @@ static const struct builtins g_other_funcs[] =
 	{"statistics", 2, fn_statistics_2, "+atom,-var"},
 	{"duplicate_term", 2, fn_iso_copy_term_2, "+atom,-var"},
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer"},
+	{"limit", 2, fn_limit_2, "+integer,+callable"},
+	{"offset", 2, fn_offset_2, "+integer,+callable"},
 
 #if USE_SSL
 	{"sha1", 2, fn_sha1_2, "+atom,?atom"},

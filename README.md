@@ -135,6 +135,8 @@ SWI-Prolog
 	load_files/2
 	split_string/4
 	call_nth/2
+	offset/2
+	limit/2
 
 	delete_file/1
 	exists_file/1
