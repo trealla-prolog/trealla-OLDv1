@@ -11,6 +11,7 @@
 #endif
 
 #include "internal.h"
+#include "builtins.h"
 
 #define trace if (q->trace /*&& !consulting*/) trace_call
 
@@ -448,37 +449,6 @@ static int resume_frame(query *q)
 	q->st.curr_cell = curr_cell;
 	q->m = g->m;
 	return 1;
-}
-
-cell *deref_var(query *q, cell *c, idx_t c_ctx)
-{
-	if (!is_var(c)) {
-		q->latest_ctx = c_ctx;
-		return c;
-	}
-
-	frame *g = GET_FRAME(c_ctx);
-	slot *e = GET_SLOT(g, c->slot_nbr);
-
-	while (is_var(&e->c)) {
-		c = &e->c;
-		c_ctx = e->ctx;
-		frame *g = GET_FRAME(c_ctx);
-		e = GET_SLOT(g, c->slot_nbr);
-	}
-
-	if (is_empty(&e->c)) {
-		q->latest_ctx = c_ctx;
-		return c;
-	}
-
-	if (is_indirect(&e->c)) {
-		q->latest_ctx = e->ctx;
-		return e->c.val_ptr;
-	}
-
-	q->latest_ctx = q->st.curr_frame;
-	return &e->c;
 }
 
 static void make_indirect(cell *tmp, cell *c)

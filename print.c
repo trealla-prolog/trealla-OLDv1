@@ -11,6 +11,7 @@
 #endif
 
 #include "internal.h"
+#include "builtins.h"
 #include "utf8.h"
 
 static int needs_quote(module *m, const char *src)

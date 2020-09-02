@@ -30,6 +30,37 @@ extern int do_yield_0(query *q);
 #define is_stream_or_structure(c) (is_structure(c) || is_stream(c))
 #define is_any(c) 1
 
+inline static cell *deref_var(query *q, cell *c, idx_t c_ctx)
+{
+	if (!is_var(c)) {
+		q->latest_ctx = c_ctx;
+		return c;
+	}
+
+	frame *g = GET_FRAME(c_ctx);
+	slot *e = GET_SLOT(g, c->slot_nbr);
+
+	while (is_var(&e->c)) {
+		c = &e->c;
+		c_ctx = e->ctx;
+		frame *g = GET_FRAME(c_ctx);
+		e = GET_SLOT(g, c->slot_nbr);
+	}
+
+	if (is_empty(&e->c)) {
+		q->latest_ctx = c_ctx;
+		return c;
+	}
+
+	if (is_indirect(&e->c)) {
+		q->latest_ctx = e->ctx;
+		return e->c.val_ptr;
+	}
+
+	q->latest_ctx = q->st.curr_frame;
+	return &e->c;
+}
+
 #define GET_FIRST_ARG(p,val_type) \
 	__attribute__((unused)) cell *p = get_first_arg(q); \
 	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx; \
@@ -83,3 +114,4 @@ inline static cell *get_raw_arg(query *q, int n)
 
 	return c;
 }
+

@@ -18,6 +18,7 @@
 #include "history.h"
 #include "library.h"
 #include "trealla.h"
+#include "builtins.h"
 #include "utf8.h"
 
 static const unsigned INITIAL_TOKEN_SIZE = 100;

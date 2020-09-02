@@ -396,30 +396,30 @@ per iteration and smaller is better.
 	                      |   tpl   |   swipl   |
 	                      |         |   8.2.1   |
 	----------------------|---------|-----------|--------------
-	tail_call_atom        |    3.4  |    2.4    |
-	binary_call_atom_atom |    4.8  |    4.3    |
+	tail_call_atom        |    3.5  |    2.4    |
+	binary_call_atom_atom |    5.4  |    4.3    |
 	cons_list             |    4.4  |    3.2    |
-	walk_list             |    6.5  |    3.0    |
-	walk_list_rec         |    9.3  |    2.7    |
-	cons_term             |    4.7  |    3.6    |
-	walk_term             |    6.9  |    3.0    |
-	walk_term_rec         |   10.2  |    3.5    |
-	shallow_backtracking  |    3.4  |    0.0    |
-	deep_backtracking     |    8.1  |    3.7    |
-	choice_point          |    3.8  |    6.3    |
-	trail_variables       |    4.5  |    5.4    |
-	medium_unify          |    0.6  |    0.5    |
-	deep_unify            |    2.2  |    2.5    |
-	integer_add           |   12.1  |   12.8    |
-	floating_add          |   12.6  |   13.5    |
+	walk_list             |    6.0  |    3.0    |
+	walk_list_rec         |    8.7  |    2.7    |
+	cons_term             |    4.3  |    3.6    |
+	walk_term             |    6.0  |    3.0    |
+	walk_term_rec         |    8.8  |    3.5    |
+	shallow_backtracking  |    3.1  |    0.0    |
+	deep_backtracking     |    7.3  |    3.7    |
+	choice_point          |    3.6  |    6.3    |
+	trail_variables       |    4.4  |    5.4    |
+	medium_unify          |    0.5  |    0.5    |
+	deep_unify            |    1.9  |    2.5    |
+	integer_add           |   11.9  |   12.8    |
+	floating_add          |   11.7  |   13.5    |
 	index                 |   27.0  |    4.6    |
-	assert_unit           |  940.5  |  451.8    |
-	setof                 |   27.4  |   22.9    |
-	pair_setof            |   37.1  |   32.8    |
-	double_setof          |  280.8  |  169.8    |
+	assert_unit           |  930.5  |  451.8    |
+	setof                 |   26.4  |   22.9    |
+	pair_setof            |   35.7  |   32.8    |
+	double_setof          |  248.8  |  169.8    |
 	bagof                 |   19.7  |   15.5    |
 	----------------------|---------|-----------|--------------
-	 Total time           |   19.9s |    8.3s   |
+	 Total time           |   16.9s |    8.3s   |
 	----------------------|---------|-----------|--------------
 
 Times above vary about 5% run to run.

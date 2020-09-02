@@ -311,7 +311,6 @@ extern char *g_pool;
 #define copy_cells(dst,src,nbr_cells) memcpy(dst, src, sizeof(cell)*(nbr_cells))
 
 int is_in_pool(const char *name, idx_t *offset);
-cell *deref_var(query *q, cell *c, idx_t ctx);
 void set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
 int unify(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx);
