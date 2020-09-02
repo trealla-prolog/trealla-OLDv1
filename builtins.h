@@ -47,13 +47,11 @@ inline static cell *deref(query *q, cell *c, idx_t c_ctx)
 		return c;
 	}
 
-	if (is_indirect(&e->c)) {
-		q->latest_ctx = e->ctx;
-		return e->c.val_ptr;
-	}
+	if (!is_indirect(&e->c))
+		return &e->c;
 
-	q->latest_ctx = q->st.curr_frame;
-	return &e->c;
+	q->latest_ctx = e->ctx;
+	return e->c.val_ptr;
 }
 
 #define deref_var(q,c,c_ctx) !is_var(c) ? (q->latest_ctx = c_ctx, c) : deref(q,c,c_ctx)
