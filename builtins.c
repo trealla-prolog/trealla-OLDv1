@@ -5543,8 +5543,6 @@ static int fn_forall_2(query *q)
 
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
-	GET_NEXT_ARG(p3,any);
-
 	cell *tmp = clone_term(q, 1, p1, 0);
 	clone_term(q, 0, p2, 1);
 	idx_t nbr_cells = 1 + p1->nbr_cells + p2->nbr_cells;
