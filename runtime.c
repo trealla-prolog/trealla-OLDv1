@@ -596,9 +596,6 @@ int unify(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 	}
 
 	if (is_var(p1)) {
-		if (is_empty(p2))
-			return 1;
-
 		if (is_structure(p2) && (p2_ctx >= q->st.curr_frame))
 			q->no_tco = 1;
 
@@ -607,9 +604,6 @@ int unify(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 	}
 
 	if (is_var(p2)) {
-		if (is_empty(p1))
-			return 1;
-
 		if (is_structure(p1) && (p1_ctx >= q->st.curr_frame))
 			q->no_tco = 1;
 
