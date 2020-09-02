@@ -3970,44 +3970,30 @@ enum log_type { LOG_ASSERTA=1, LOG_ASSERTZ=2, LOG_ERASE=3 };
 
 static void db_log(query *q, clause *r, enum log_type l)
 {
-	static int s_quiet = 5;
 	int save = q->quoted;
+	char tmpbuf[256];
 	q->quoted = 2;
 
 	switch(l) {
-		case LOG_ASSERTA:
-		{
+		case LOG_ASSERTA: {
 			size_t len = write_term_to_buf(q, NULL, 0, r->t.cells, 1, 0, 0, 0, 0);
 			char *dst = malloc(len+1);
 			write_term_to_buf(q, dst, len+1, r->t.cells, 1, 0, 0, 0, 0);
-			char tmpbuf2[80];
-			uuid_to_string(&r->u, tmpbuf2, sizeof(tmpbuf2));
-			fprintf(q->m->fp, "a_(%s,'%s').\n", dst, tmpbuf2);
+			uuid_to_string(&r->u, tmpbuf, sizeof(tmpbuf));
+			fprintf(q->m->fp, "a_(%s,'%s').\n", dst, tmpbuf);
 			free(dst);
 			break;
-		}
-		case LOG_ASSERTZ:
-		{
+		} case LOG_ASSERTZ: {
 			size_t len = write_term_to_buf(q, NULL, 0, r->t.cells, 1, 0, 0, 0, 0);
 			char *dst = malloc(len+1);
 			write_term_to_buf(q, dst, len+1, r->t.cells, 1, 0, 0, 0, 0);
-			char tmpbuf2[80];
-			uuid_to_string(&r->u, tmpbuf2, sizeof(tmpbuf2));
-			fprintf(q->m->fp, "z_(%s,'%s').\n", dst, tmpbuf2);
+			uuid_to_string(&r->u, tmpbuf, sizeof(tmpbuf));
+			fprintf(q->m->fp, "z_(%s,'%s').\n", dst, tmpbuf);
 			free(dst);
 			break;
-		}
-		case LOG_ERASE:
-		{
-			char tmpbuf[256], tmpbuf2[80];
-			uuid_to_string(&r->u, tmpbuf2, sizeof(tmpbuf2));
-			int len = snprintf(tmpbuf, sizeof(tmpbuf), "e_('%s').\n", tmpbuf2);
-
-			if (fwrite(tmpbuf, len, 1, q->m->fp) <= 0) {
-				if (s_quiet-- > 0)
-					fprintf(stderr, "Error: db_log write error '%s'\n", strerror(errno));
-			}
-
+		} case LOG_ERASE: {
+			uuid_to_string(&r->u, tmpbuf, sizeof(tmpbuf));
+			fprintf(q->m->fp, "e_('%s').\n", tmpbuf);
 			break;
 		}
 	}
