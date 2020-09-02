@@ -30,7 +30,7 @@ extern int do_yield_0(query *q);
 #define is_stream_or_structure(c) (is_structure(c) || is_stream(c))
 #define is_any(c) 1
 
-inline static cell *deref_var(query *q, cell *c, idx_t c_ctx)
+inline static cell *deref(query *q, cell *c, idx_t c_ctx)
 {
 	if (!is_var(c)) {
 		q->latest_ctx = c_ctx;
@@ -59,6 +59,16 @@ inline static cell *deref_var(query *q, cell *c, idx_t c_ctx)
 
 	q->latest_ctx = q->st.curr_frame;
 	return &e->c;
+}
+
+inline static cell *deref_var(query *q, cell *c, idx_t c_ctx)
+{
+	if (!is_var(c)) {
+		q->latest_ctx = c_ctx;
+		return c;
+	}
+
+	return deref(q, c, c_ctx);
 }
 
 #define GET_FIRST_ARG(p,val_type) \

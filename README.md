@@ -419,7 +419,7 @@ per iteration and smaller is better.
 	double_setof          |  248.8  |  169.8    |
 	bagof                 |   19.7  |   15.5    |
 	----------------------|---------|-----------|--------------
-	 Total time           |   16.9s |    8.3s   |
+	 Total time           |   17.1s |    8.3s   |
 	----------------------|---------|-----------|--------------
 
 Times above vary about 5% run to run.
