@@ -36,22 +36,17 @@ inline static cell *deref(query *q, cell *c, idx_t c_ctx)
 	slot *e = GET_SLOT(g, c->slot_nbr);
 
 	while (is_var(&e->c)) {
-		c = &e->c;
-		c_ctx = e->ctx;
-		g = GET_FRAME(c_ctx);
-		e = GET_SLOT(g, c->slot_nbr);
+		g = GET_FRAME(c_ctx=e->ctx);
+		e = GET_SLOT(g, (c=&e->c)->slot_nbr);
 	}
 
-	if (is_empty(&e->c)) {
-		q->latest_ctx = c_ctx;
-		return c;
-	}
+	if (is_empty(&e->c))
+		return (q->latest_ctx=c_ctx, c);
 
 	if (!is_indirect(&e->c))
 		return &e->c;
 
-	q->latest_ctx = e->ctx;
-	return e->c.val_ptr;
+	return (q->latest_ctx=e->ctx, e->c.val_ptr);
 }
 
 #define deref_var(q,c,c_ctx) !is_var(c) ? (q->latest_ctx = c_ctx, c) : deref(q,c,c_ctx)
