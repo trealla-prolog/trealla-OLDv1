@@ -39,8 +39,6 @@ typedef uint32_t idx_t;
 #define GET_FRAME(i) q->frames+(i)
 #define GET_SLOT(g,i) (i) < g->nbr_slots ? q->slots+g->env+(i) : q->slots+g->overflow+((i)-g->nbr_slots)
 
-#define GET_VALUE(q,c,c_ctx) !is_var(c) ? (q->latest_ctx = c_ctx, c) : deref_var(q, c, c_ctx)
-
 #define is_var(c) ((c)->val_type == TYPE_VAR)
 #define is_literal(c) ((c)->val_type == TYPE_LITERAL)
 #define is_string(c) ((c)->val_type == TYPE_STRING)

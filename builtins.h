@@ -53,7 +53,7 @@ extern int do_yield_0(query *q);
 inline static cell *get_first_arg(query *q)
 {
 	q->last_arg = q->st.curr_cell + 1;
-	return GET_VALUE(q, q->last_arg, q->st.curr_frame);
+	return deref_var(q, q->last_arg, q->st.curr_frame);
 }
 
 inline static cell *get_first_raw_arg(query *q)
@@ -65,7 +65,7 @@ inline static cell *get_first_raw_arg(query *q)
 inline static cell *get_next_arg(query *q)
 {
 	q->last_arg += q->last_arg->nbr_cells;
-	return GET_VALUE(q, q->last_arg, q->st.curr_frame);
+	return deref_var(q, q->last_arg, q->st.curr_frame);
 }
 
 inline static cell *get_next_raw_arg(query *q)

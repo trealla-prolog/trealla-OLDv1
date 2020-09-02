@@ -677,7 +677,7 @@ query *create_subquery(query *q, cell *curr_cell)
 	slot *e = GET_SLOT(gsrc, 0);
 
 	for (unsigned i = 0; i < gsrc->nbr_vars; i++, e++) {
-		cell *c = GET_VALUE(q, &e->c, e->ctx);
+		cell *c = deref_var(q, &e->c, e->ctx);
 		cell tmp;
 		tmp.val_type = TYPE_VAR;
 		tmp.slot_nbr = i;
@@ -742,7 +742,7 @@ static void dump_vars(query *q, parser *p)
 		if (is_indirect(&e->c))
 			c = e->c.val_ptr;
 		else
-			c = GET_VALUE(q, &e->c, 0);
+			c = deref_var(q, &e->c, 0);
 
 		fprintf(stdout, "\n%s = ", p->vartab.var_name[i]);
 		int save = q->quoted;

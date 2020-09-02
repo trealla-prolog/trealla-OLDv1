@@ -452,6 +452,11 @@ static int resume_frame(query *q)
 
 cell *deref_var(query *q, cell *c, idx_t c_ctx)
 {
+	if (!is_var(c)) {
+		q->latest_ctx = c_ctx;
+		return c;
+	}
+
 	frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->slot_nbr);
 
@@ -536,9 +541,9 @@ static int unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_
 	p1++; p2++;
 
 	while (arity--) {
-		cell *c1 = GET_VALUE(q, p1, p1_ctx);
+		cell *c1 = deref_var(q, p1, p1_ctx);
 		idx_t c1_ctx = q->latest_ctx;
-		cell *c2 = GET_VALUE(q, p2, p2_ctx);
+		cell *c2 = deref_var(q, p2, p2_ctx);
 		idx_t c2_ctx = q->latest_ctx;
 
 		if (!unify(q, c1, c1_ctx, c2, c2_ctx))
