@@ -595,8 +595,6 @@ static int fn_iso_fail_0(query *q)
 static int fn_iso_halt_0(query *q)
 {
 	q->halt_code = q->halt = q->error = 1;
-	fflush(stderr);
-	fflush(stdout);
 	return 0;
 }
 
@@ -605,8 +603,6 @@ static int fn_iso_halt_1(query *q)
 	GET_FIRST_ARG(p1,integer);
 	q->halt_code = p1->val_int;
 	q->halt = q->error = 1;
-	fflush(stderr);
-	fflush(stdout);
 	return 0;
 }
 
@@ -6911,7 +6907,6 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 		int n = get_named_stream(q, "user_output");
 		stream *str = &g_streams[n];
 		stream_write(tmpbuf, len, str);
-		fflush(str->fp);
 	} else if (is_structure(str) && ((strcmp(GET_STR(str),"atom") && strcmp(GET_STR(str),"string")) || (str->arity > 1) || !is_var(str+1))) {
 		free(tmpbuf);
 		throw_error(q, c, "type_error", "structure");
@@ -6938,8 +6933,6 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 			len -= nbytes;
 			src += nbytes;
 		}
-
-		fflush(str->fp);
 	} else {
 		free(tmpbuf);
 		throw_error(q, p1, "type_error", "stream");
@@ -7360,7 +7353,6 @@ static int fn_edin_tab_1(query *q)
 	for (int i = 0; i < p1.val_int; i++)
 		fputc(' ', str->fp);
 
-	fflush(str->fp);
 	return !ferror(str->fp);
 }
 
@@ -7381,7 +7373,6 @@ static int fn_edin_tab_2(query *q)
 	for (int i = 0; i < p1.val_int; i++)
 		fputc(' ', str->fp);
 
-	fflush(str->fp);
 	return !ferror(str->fp);
 }
 
