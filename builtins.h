@@ -38,7 +38,7 @@ inline static cell *deref(query *q, cell *c, idx_t c_ctx)
 	while (is_var(&e->c)) {
 		c = &e->c;
 		c_ctx = e->ctx;
-		frame *g = GET_FRAME(c_ctx);
+		g = GET_FRAME(c_ctx);
 		e = GET_SLOT(g, c->slot_nbr);
 	}
 
@@ -56,15 +56,7 @@ inline static cell *deref(query *q, cell *c, idx_t c_ctx)
 	return &e->c;
 }
 
-inline static cell *deref_var(query *q, cell *c, idx_t c_ctx)
-{
-	if (!is_var(c)) {
-		q->latest_ctx = c_ctx;
-		return c;
-	}
-
-	return deref(q, c, c_ctx);
-}
+#define deref_var(q,c,c_ctx) !is_var(c) ? (q->latest_ctx = c_ctx, c) : deref(q,c,c_ctx)
 
 #define GET_FIRST_ARG(p,val_type) \
 	__attribute__((unused)) cell *p = get_first_arg(q); \

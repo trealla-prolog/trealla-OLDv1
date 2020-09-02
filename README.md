@@ -422,7 +422,7 @@ per iteration and smaller is better.
 	 Total time           |   17.1s |    8.3s   |
 	----------------------|---------|-----------|--------------
 
-Times above vary about 5% run to run.
+Times above vary about 5-10% run to run.
 
 	tpl -l samples/broken/peirera.pl -g "bench_peirera,halt"
 
