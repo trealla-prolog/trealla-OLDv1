@@ -32,11 +32,6 @@ extern int do_yield_0(query *q);
 
 inline static cell *deref(query *q, cell *c, idx_t c_ctx)
 {
-	if (!is_var(c)) {
-		q->latest_ctx = c_ctx;
-		return c;
-	}
-
 	frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->slot_nbr);
 
