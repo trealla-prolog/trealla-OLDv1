@@ -777,7 +777,7 @@ void run_query(query *q)
 
 	while (!q->error) {
 		if (g_tpl_interrupt) {
-			printf("\n(a)abort, (c)ontinue, (e)xit: ");
+			printf("\nAction (a)abort, (c)ontinue, (e)xit: ");
 			fflush(stdout);
 			int ch = getchar();
 			getchar();
