@@ -237,7 +237,7 @@ Concurrency          ##EXPERIMENTAL##
 ===========
 
 Trealla is single-threaded but cooperative multitasking is available
-in the form of light-weith coroutines that run until they yield control,
+in the form of light-weight coroutines that run until they yield control,
 either explicitly or implicitly (when waiting on input or a timer)...
 
 	fork/0                  # parent fails, child continues
