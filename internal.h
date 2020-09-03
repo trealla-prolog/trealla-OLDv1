@@ -143,9 +143,9 @@ typedef struct {
 
 typedef struct {
 	idx_t nbr_cells, cidx;
+	uint8_t nbr_vars;
 
 	struct {
-		unsigned nbr_vars:8;
 		unsigned first_cut:1;
 		unsigned cut_only:1;
 		unsigned is_deleted:1;
@@ -167,9 +167,9 @@ struct rule_ {
 	clause *head, *tail;
 	skiplist *index;
 	idx_t val_off;
+	uint8_t arity;
 
 	struct {
-		unsigned arity:8;
 		unsigned is_prebuilt:1;
 		unsigned is_public:1;
 		unsigned is_dynamic:1;
