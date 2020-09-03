@@ -144,14 +144,10 @@ typedef struct {
 typedef struct {
 	idx_t nbr_cells, cidx;
 	uint8_t nbr_vars;
-
-	struct {
-		unsigned first_cut:1;
-		unsigned cut_only:1;
-		unsigned is_deleted:1;
-		unsigned is_persist:1;
-	};
-
+	unsigned first_cut:1;
+	unsigned cut_only:1;
+	unsigned is_deleted:1;
+	unsigned is_persist:1;
 	cell cells[];
 } term;
 
@@ -168,14 +164,11 @@ struct rule_ {
 	skiplist *index;
 	idx_t val_off;
 	uint8_t arity;
-
-	struct {
-		unsigned is_prebuilt:1;
-		unsigned is_public:1;
-		unsigned is_dynamic:1;
-		unsigned is_persist:1;
-		unsigned is_abolished:1;
-	};
+	unsigned is_prebuilt:1;
+	unsigned is_public:1;
+	unsigned is_dynamic:1;
+	unsigned is_persist:1;
+	unsigned is_abolished:1;
 };
 
 struct builtins {
@@ -205,7 +198,9 @@ typedef struct {
 	cell *curr_cell;
 	module *m;
 	idx_t prev_frame, env, overflow;
-	uint8_t any_choices, nbr_vars, nbr_slots, did_cut;
+	uint8_t nbr_vars, nbr_slots;
+	unsigned any_choices:1;
+	unsigned did_cut:1;
 } frame;
 
 typedef struct {
@@ -230,7 +225,9 @@ typedef struct {
 	qstate st;
 	idx_t v1, v2;
 	uint32_t pins;
-	uint8_t nbr_vars, inner_cut, any_choices, catchme, qnbr;
+	uint8_t nbr_vars, catchme, qnbr;
+	unsigned inner_cut:1;
+	unsigned any_choices:1;
 } choice;
 
 typedef struct arena_ arena;
