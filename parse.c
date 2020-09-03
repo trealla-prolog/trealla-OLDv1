@@ -32,7 +32,7 @@ static const unsigned INITIAL_NBR_SLOTS = 1000;
 static const unsigned INITIAL_NBR_CHOICES = 1000;
 static const unsigned INITIAL_NBR_TRAILS = 1000;
 
-static const int SPAWN_LIMIT = 8;
+static const int SPAWN_LIMIT = 4;
 
 struct prolog_ {
 	module *m;

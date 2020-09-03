@@ -260,7 +260,7 @@ Note: *spawn/n* acts as if defined as:
 	...
 
 In practice *spawn* calls a special version of *fork* that limits
-the number of such concurrent tasks (currently set at 8). Excess tasks
+the number of such concurrent tasks (currently set at 4). Excess tasks
 will pipeline, as one task finishes another will be started. The normal
 *fork* is not limited.
 
