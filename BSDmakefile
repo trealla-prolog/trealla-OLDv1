@@ -61,7 +61,7 @@ library.o: library.c library.h
 network.o: network.c internal.h skiplist.h network.h
 parse.o: parse.c builtins.h internal.h skiplist.h library.h trealla.h utf8.h
 print.o: print.c builtins.h internal.h skiplist.h utf8.h
-runtime.o: runtime.c builtins.h internal.h skiplist.h
+runtime.o: runtime.c builtins.h history.h internal.h skiplist.h
 skiplist.o: skiplist.c skiplist.h
 tpl.o: tpl.c history.h trealla.h
 utf8.o: utf8.c utf8.h

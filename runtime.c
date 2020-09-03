@@ -11,6 +11,7 @@
 #endif
 
 #include "internal.h"
+#include "history.h"
 #include "builtins.h"
 
 #define trace if (q->trace /*&& !consulting*/) trace_call
@@ -779,8 +780,8 @@ void run_query(query *q)
 		if (g_tpl_interrupt) {
 			printf("\nAction (a)abort, (c)ontinue, (e)xit: ");
 			fflush(stdout);
-			int ch = getchar();
-			getchar();
+			int ch = history_getch();
+			printf("%c\n", ch);
 
 			if (ch == 'c') {
 				g_tpl_interrupt = 0;
