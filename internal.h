@@ -248,18 +248,19 @@ struct query_ {
 	cell accum;
 	qstate st;
 	int64_t time_started, tmo;
-	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos, step, qid;
-	uint64_t nv_mask;
-	int halt, halt_code, status, error, trace, calc, qnbr, yielded;
-	int retry, resume, no_tco, current_input, current_output;
-	int max_depth, quoted, nl, fullstop, ignore_ops, character_escapes;
-	int is_subquery;
+	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
+	uint64_t nv_mask, step, qid;
+	int max_depth;
 	idx_t cp, tmphp, nv_start;
 	idx_t latest_ctx, popp, qp[MAX_QUEUES];
 	idx_t nbr_frames, nbr_slots, nbr_trails, nbr_choices;
 	idx_t max_choices, max_frames, max_slots, max_trails, max_heaps;
 	idx_t tot_heaps, tot_heapsize, tmpq_size[MAX_QUEUES];
 	idx_t h_size, tmph_size, q_size[MAX_QUEUES];
+	uint8_t halt, halt_code, status, error, trace, calc, qnbr, yielded;
+	uint8_t retry, resume, no_tco, current_input, current_output;
+	uint8_t quoted, nl, fullstop, ignore_ops;
+	uint8_t character_escapes, is_subquery;
 };
 
 struct parser_ {
@@ -274,10 +275,12 @@ struct parser_ {
 	term *t;
 	char *token, *save_line, *srcptr;
 	size_t token_size, n_line;
-	int start_term, end_of_term, line_nbr, comment, error;
-	int directive, consulting, one_shot, dq_consing, depth, run_init;
-	int quoted, is_var, is_op, skip, command, in_dcg, dcg_passthru;
+	int line_nbr, error, depth, quoted;
 	unsigned val_type;
+	int8_t dq_consing;
+	uint8_t run_init, directive, consulting, one_shot;
+	uint8_t start_term, end_of_term, comment;
+	uint8_t is_var, is_op, skip, command, in_dcg, dcg_passthru;
 };
 
 struct module_ {
