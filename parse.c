@@ -617,7 +617,7 @@ void destroy_parser(parser *p)
 	free(p);
 }
 
-query *create_query(module *m, int is_subquery)
+query *create_query(module *m, int is_task)
 {
 	static uint64_t g_query_id = 0;
 
@@ -630,10 +630,10 @@ query *create_query(module *m, int is_subquery)
 
 	// Allocate these now...
 
-	q->nbr_frames = is_subquery ? INITIAL_NBR_GOALS/10 : INITIAL_NBR_GOALS;
-	q->nbr_slots = is_subquery ? INITIAL_NBR_SLOTS/10 : INITIAL_NBR_SLOTS;
-	q->nbr_choices = is_subquery ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
-	q->nbr_trails = is_subquery ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
+	q->nbr_frames = is_task ? INITIAL_NBR_GOALS/10 : INITIAL_NBR_GOALS;
+	q->nbr_slots = is_task ? INITIAL_NBR_SLOTS/10 : INITIAL_NBR_SLOTS;
+	q->nbr_choices = is_task ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
+	q->nbr_trails = is_task ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
 
 	q->frames = calloc(q->nbr_frames, sizeof(frame));
 	q->slots = calloc(q->nbr_slots, sizeof(slot));
@@ -642,21 +642,21 @@ query *create_query(module *m, int is_subquery)
 
 	// Allocate these later as needed...
 
-	q->h_size = is_subquery ? INITIAL_NBR_HEAP/10 : INITIAL_NBR_HEAP;
-	q->tmph_size = is_subquery ? INITIAL_NBR_CELLS/10 : INITIAL_NBR_CELLS;
+	q->h_size = is_task ? INITIAL_NBR_HEAP/10 : INITIAL_NBR_HEAP;
+	q->tmph_size = is_task ? INITIAL_NBR_CELLS/10 : INITIAL_NBR_CELLS;
 
 	for (int i = 0; i < MAX_QUEUES; i++)
-		q->q_size[i] = is_subquery ? INITIAL_NBR_QUEUE/10 : INITIAL_NBR_QUEUE;
+		q->q_size[i] = is_task ? INITIAL_NBR_QUEUE/10 : INITIAL_NBR_QUEUE;
 
 	return q;
 }
 
-query *create_subquery(query *q, cell *curr_cell)
+query *create_task(query *q, cell *curr_cell)
 {
 	query *subq = create_query(q->m, 1);
 	subq->parent = q;
 	subq->st.fp = 1;
-	subq->is_subquery = 1;
+	subq->is_task = 1;
 	subq->current_input = q->current_input;
 	subq->current_output = q->current_output;
 

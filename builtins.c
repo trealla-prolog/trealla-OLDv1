@@ -5376,7 +5376,7 @@ static int fn_sleep_1(query *q)
 
 	GET_FIRST_ARG(p1,integer);
 
-	if (q->is_subquery) {
+	if (q->is_task) {
 		q->tmo = get_time_in_usec() / 1000;
 		q->tmo += p1->val_int * 1000;
 		do_yield_0(q);
@@ -5394,7 +5394,7 @@ static int fn_delay_1(query *q)
 
 	GET_FIRST_ARG(p1,integer);
 
-	if (q->is_subquery) {
+	if (q->is_task) {
 		q->tmo = get_time_in_usec() / 1000;
 		q->tmo += p1->val_int;
 		do_yield_0(q);
@@ -5786,7 +5786,7 @@ static int fn_server_3(query *q)
 	}
 
 	parse_host(GET_STR(p1), hostname, path, &port, &ssl);
-	nonblock = q->is_subquery;
+	nonblock = q->is_task;
 
 	int fd = net_server(hostname, port, udp, nonblock);
 
@@ -5835,7 +5835,7 @@ static int fn_accept_2(query *q)
 	int fd = net_accept(str);
 
 	if (fd == -1) {
-		if (q->is_subquery) {
+		if (q->is_task) {
 			q->tmo = get_time_in_usec() / 1000;
 			q->tmo += 1;
 			do_yield_0(q);
@@ -5937,7 +5937,7 @@ static int fn_client_5(query *q)
 	}
 
 	parse_host(GET_STR(p1), hostname, path, &port, &ssl);
-	nonblock = q->is_subquery;
+	nonblock = q->is_task;
 
 	while (is_list(p5)) {
 		cell *head = p5 + 1;
@@ -6054,7 +6054,7 @@ static int fn_getline_2(query *q)
 	if (stream_getline(&line, &len, str) == -1) {
 		free(line);
 
-		if (q->is_subquery && !feof(str->fp)) {
+		if (q->is_task && !feof(str->fp)) {
 			clearerr(str->fp);
 			q->tmo =get_time_in_usec() / 1000;
 			q->tmo += 1;
@@ -6106,7 +6106,7 @@ static int fn_bread_3(query *q)
 				return 0;
 			}
 
-			if (q->is_subquery) {
+			if (q->is_task) {
 				clearerr(str->fp);
 				q->tmo = get_time_in_usec() / 1000;
 				q->tmo += 1;
@@ -6390,7 +6390,7 @@ static int fn_spawn_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = deep_clone_term_on_tmp(q, p1, p1_ctx);
-	query *task = create_subquery(q, tmp);
+	query *task = create_task(q, tmp);
 	task->next = q->m->tasks;
 	task->yielded = 1;
 
@@ -6435,7 +6435,7 @@ static int fn_spawn_n(query *q)
 		tmp->flags &= ~FLAG_BUILTIN;
 	}
 
-	query *task = create_subquery(q, tmp);
+	query *task = create_task(q, tmp);
 	task->next = q->m->tasks;
 	task->yielded = 1;
 
@@ -6449,7 +6449,7 @@ static int fn_spawn_n(query *q)
 static int fn_fork_0(query *q)
 {
 	cell *curr_cell = q->st.curr_cell + q->st.curr_cell->nbr_cells;
-	query *task = create_subquery(q, curr_cell);
+	query *task = create_task(q, curr_cell);
 	task->next = q->m->tasks;
 	task->yielded = 1;
 

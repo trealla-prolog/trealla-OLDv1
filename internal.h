@@ -261,10 +261,20 @@ struct query_ {
 	idx_t max_choices, max_frames, max_slots, max_trails, max_heaps;
 	idx_t tot_heaps, tot_heapsize, tmpq_size[MAX_QUEUES];
 	idx_t h_size, tmph_size, q_size[MAX_QUEUES];
-	uint8_t halt, halt_code, status, error, trace, calc, qnbr, yielded;
-	uint8_t retry, resume, no_tco, current_input, current_output;
-	uint8_t quoted, nl, fullstop, ignore_ops;
-	uint8_t character_escapes, is_subquery;
+	uint8_t retry, halt_code, status, qnbr, quoted;
+	uint8_t current_input, current_output;
+	unsigned resume:1;
+	unsigned no_tco:1;
+	unsigned error:1;
+	unsigned trace:1;
+	unsigned calc:1;
+	unsigned yielded:1;
+	unsigned is_task:1;
+	unsigned nl:1;
+	unsigned fullstop:1;
+	unsigned ignore_ops:1;
+	unsigned character_escapes:1;
+	unsigned halt:1;
 };
 
 struct parser_ {
@@ -358,7 +368,7 @@ idx_t drop_choice(query *q);
 int retry_choice(query *q);
 void parser_assign_vars(parser *p);
 query *create_query(module *m, int sub_query);
-query *create_subquery(query *q, cell *curr_cell);
+query *create_task(query *q, cell *curr_cell);
 void destroy_query(query *q);
 void run_query(query *q);
 cell *deep_clone_term_on_heap(query *q, cell *p1, idx_t p1_ctx);
