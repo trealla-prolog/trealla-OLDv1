@@ -252,7 +252,7 @@ cell *get_body(cell *c)
 rule *find_rule(module *m, cell *c)
 {
 	for (rule *h = m->head; h; h = h->next) {
-		if (h->flags&FLAG_RULE_ABOLISHED)
+		if (h->is_abolished)
 			continue;
 
 		if ((h->val_off == c->val_off) && (h->arity == c->arity))
@@ -265,7 +265,7 @@ rule *find_rule(module *m, cell *c)
 rule *find_functor(module *m, const char *name, unsigned arity)
 {
 	for (rule *h = m->head; h; h = h->next) {
-		if (h->flags&FLAG_RULE_ABOLISHED)
+		if (h->is_abolished)
 			continue;
 
 		if (!strcmp(g_pool+h->val_off, name) && (h->arity == arity))
@@ -300,7 +300,7 @@ uint64_t get_time_in_usec(void)
 static rule *get_rule(module *m)
 {
 	for (rule *h = m->head; h; h = h->next) {
-		if (h->flags&FLAG_RULE_ABOLISHED)
+		if (h->is_abolished)
 			return h;
 	}
 
@@ -319,7 +319,11 @@ static rule *create_rule(module *m, cell *c)
 
 	h->val_off = c->val_off;
 	h->arity = c->arity;
-	h->flags = 0;
+	h->is_prebuilt = 0;
+	h->is_public = 0;
+	h->is_dynamic = 0;
+	h->is_persist = 0;
+	h->is_abolished = 0;
 	return h;
 }
 
@@ -402,7 +406,7 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 	rule *h = find_rule(m, c);
 
 	if (h && !consulting) {
-		if (!(h->flags&FLAG_RULE_DYNAMIC)) {
+		if (!h->is_dynamic) {
 			fprintf(stderr, "Error: not a fact or clause\n");
 			return NULL;
 		}
@@ -412,17 +416,17 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 		h = create_rule(m, c);
 
 		if (!consulting) {
-			h->flags |= FLAG_RULE_DYNAMIC;
+			h->is_dynamic = 1;
 			h->index = sl_create(compkey);
 
 			if (m->make_public)
-				h->flags |= FLAG_RULE_PUBLIC;
+				h->is_public = 1;
 		}
 	}
 
 
 	if (m->prebuilt)
-		h->flags |= FLAG_RULE_PREBUILT;
+		h->is_prebuilt = 1;
 
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
@@ -436,15 +440,15 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 	if (!h->tail)
 		h->tail = r;
 
-	if ((h->flags&FLAG_RULE_DYNAMIC) && (c->arity > 0)) {
+	if (h->is_dynamic && (c->arity > 0)) {
 		cell *c = get_head(r->t.cells);
 		sl_set(h->index, c, r);
 	}
 
 	t->cidx = 0;
 
-	if (h->flags&FLAG_RULE_PERSIST)
-		r->t.persist = 1;
+	if (h->is_persist)
+		r->t.is_persist = 1;
 
 	return r;
 }
@@ -461,7 +465,7 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 	rule *h = find_rule(m, c);
 
 	if (h && !consulting) {
-		if (!(h->flags&FLAG_RULE_DYNAMIC)) {
+		if (!h->is_dynamic) {
 			fprintf(stderr, "Error: not a fact or clause\n");
 			return NULL;
 		}
@@ -471,16 +475,16 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 		h = create_rule(m, c);
 
 		if (!consulting) {
-			h->flags |= FLAG_RULE_DYNAMIC;
+			h->is_dynamic = 1;
 			h->index = sl_create(compkey);
 		}
 
 		if (consulting && m->make_public)
-			h->flags |= FLAG_RULE_PUBLIC;
+			h->is_public = 1;
 	}
 
 	if (m->prebuilt)
-		h->flags |= FLAG_RULE_PREBUILT;
+		h->is_prebuilt = 1;
 
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
@@ -497,22 +501,22 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 	if (!h->head)
 		h->head = r;
 
-	if ((h->flags&FLAG_RULE_DYNAMIC) && (c->arity > 0)) {
+	if (h->is_dynamic && (c->arity > 0)) {
 		cell *c = get_head(r->t.cells);
 		sl_app(h->index, c, r);
 	}
 
 	t->cidx = 0;
 
-	if (h->flags&FLAG_RULE_PERSIST)
-		r->t.persist = 1;
+	if (h->is_persist)
+		r->t.is_persist = 1;
 
 	return r;
 }
 
 clause *retract_from_db(module *m, clause *r)
 {
-	r->t.deleted = 1;
+	r->t.is_deleted = 1;
 	m->dirty = 1;
 	return r;
 }
@@ -521,7 +525,7 @@ clause *find_in_db(module *m, uuid *ref)
 {
 	for (rule *h = m->head; h; h = h->next) {
 		for (clause *r = h->head ; r; r = r->next) {
-			if (r->t.deleted)
+			if (r->t.is_deleted)
 				continue;
 
 			if (!memcmp(&r->u, ref, sizeof(uuid)))
@@ -536,7 +540,7 @@ clause *erase_from_db(module *m, uuid *ref)
 {
 	clause *r = find_in_db(m, ref);
 	if (!r) return 0;
-	r->t.deleted = 1;
+	r->t.is_deleted = 1;
 	return r;
 }
 
@@ -548,7 +552,7 @@ static void set_dynamic_in_db(module *m, const char *name, idx_t arity)
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
-	h->flags |= FLAG_RULE_DYNAMIC;
+	h->is_dynamic = 1;
 	h->index = sl_create(compkey);
 }
 
@@ -560,7 +564,8 @@ static void set_persist_in_db(module *m, const char *name, idx_t arity)
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
-	h->flags |= FLAG_RULE_DYNAMIC | FLAG_RULE_PERSIST;
+	h->is_dynamic = 1;
+	h->is_persist = 1;
 	h->index = sl_create(compkey);
 	m->use_persist = 1;
 }
@@ -819,7 +824,7 @@ static void directives(parser *p, term *t)
 				tmp.val_off = find_in_pool(GET_STR(f));
 				tmp.arity = a->val_int;
 				rule *h = create_rule(p->m, &tmp);
-				h->flags |= FLAG_RULE_PUBLIC;
+				h->is_public = 1;
 			}
 
 			cell *tail = head + head->nbr_cells;
@@ -1038,7 +1043,7 @@ int parser_xref(parser *p, term *t, rule *parent)
 					c->flags |= FLAG_TAILREC;
 			}
 
-			if (h && (m != p->m) && !(h->flags&FLAG_RULE_PUBLIC) && strcmp(GET_STR(c), "dynamic")) {
+			if (h && (m != p->m) && !h->is_public && strcmp(GET_STR(c), "dynamic")) {
 				fprintf(stderr, "Error: not a public method %s/%u\n", GET_STR(c), c->arity);
 				//p->error = 1;
 				break;
@@ -2264,7 +2269,7 @@ static void module_purge(module *m)
 		clause *last = NULL;
 
 		for (clause *r = h->head; r != NULL;) {
-			if (!r->t.deleted) {
+			if (!r->t.is_deleted) {
 				last = r;
 				r = r->next;
 				continue;
@@ -2466,11 +2471,11 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 	q.m = m;
 
 	for (rule *h = m->head; h; h = h->next) {
-		if (h->flags&FLAG_RULE_PREBUILT)
+		if (h->is_prebuilt)
 			continue;
 
 		for (clause *r = h->head; r; r = r->next) {
-			if (r->t.deleted)
+			if (r->t.is_deleted)
 				continue;
 
 			if (canonical)

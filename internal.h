@@ -148,8 +148,8 @@ typedef struct {
 		unsigned nbr_vars:8;
 		unsigned first_cut:1;
 		unsigned cut_only:1;
-		unsigned deleted:1;
-		unsigned persist:1;
+		unsigned is_deleted:1;
+		unsigned is_persist:1;
 	};
 
 	cell cells[];
@@ -162,20 +162,20 @@ struct clause_ {
 	term t;
 };
 
-enum {
-	FLAG_RULE_PREBUILT=1<<0,
-	FLAG_RULE_PUBLIC=1<<1,
-	FLAG_RULE_DYNAMIC=1<<2,
-	FLAG_RULE_PERSIST=1<<3,
-	FLAG_RULE_ABOLISHED=1<<4
-};
-
 struct rule_ {
 	rule *next;
 	clause *head, *tail;
 	skiplist *index;
 	idx_t val_off;
-	uint8_t arity, flags;
+
+	struct {
+		unsigned arity:8;
+		unsigned is_prebuilt:1;
+		unsigned is_public:1;
+		unsigned is_dynamic:1;
+		unsigned is_persist:1;
+		unsigned is_abolished:1;
+	};
 };
 
 struct builtins {

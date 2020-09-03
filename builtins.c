@@ -4011,7 +4011,7 @@ static int fn_iso_retract_1(query *q)
 	clause *r = retract_from_db(q->m, q->st.curr_clause);
 	if (!r) return 0;
 
-	if (!q->m->loading && r->t.persist)
+	if (!q->m->loading && r->t.is_persist)
 		db_log(q, r, LOG_ERASE);
 
 	return 1;
@@ -4030,20 +4030,20 @@ static int do_abolish(query *q, cell *c)
 	rule *h = find_rule(q->m, c);
 	if (!h) return 1;
 
-	if (!(h->flags&FLAG_RULE_DYNAMIC)) {
+	if (!h->is_dynamic) {
 		fprintf(stderr, "Error: not dynamic '%s/%u'\n", GET_STR(c), c->arity);
 		return 0;
 	}
 
 	for (clause *r = h->head ; r; r = r->next) {
-		if (!q->m->loading && r->t.persist)
+		if (!q->m->loading && r->t.is_persist)
 			db_log(q, r, LOG_ERASE);
 	}
 
 	for (clause *r = h->head; r != NULL; r = r->next)
-		r->t.deleted = 1;
+		r->t.is_deleted = 1;
 
-	h->flags = FLAG_RULE_ABOLISHED;
+	h->is_abolished = 1;
 	sl_destroy(h->index);
 	h->index = NULL;
 	h->head = h->tail = NULL;
@@ -4105,7 +4105,7 @@ static int fn_iso_asserta_1(query *q)
 	if (!r) return 0;
 	uuid_gen(&r->u);
 
-	if (!q->m->loading && r->t.persist)
+	if (!q->m->loading && r->t.is_persist)
 		db_log(q, r, LOG_ASSERTA);
 
 	return 1;
@@ -4130,7 +4130,7 @@ static int fn_iso_assertz_1(query *q)
 	if (!r) return 0;
 	uuid_gen(&r->u);
 
-	if (!q->m->loading && r->t.persist)
+	if (!q->m->loading && r->t.is_persist)
 		db_log(q, r, LOG_ASSERTZ);
 
 	return 1;
@@ -5084,7 +5084,7 @@ static int fn_erase_1(query *q)
 	clause *r = erase_from_db(q->m, &u);
 	if (!r) return 0;
 
-	if (!q->m->loading && r->t.persist)
+	if (!q->m->loading && r->t.is_persist)
 		db_log(q, r, LOG_ERASE);
 
 	return 1;
@@ -5165,7 +5165,7 @@ static int do_asserta_2(query *q)
 		set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	}
 
-	if (!q->m->loading && r->t.persist)
+	if (!q->m->loading && r->t.is_persist)
 		db_log(q, r, LOG_ASSERTA);
 
 	return 1;
@@ -5215,7 +5215,7 @@ static int do_assertz_2(query *q)
 		set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	}
 
-	if (!q->m->loading && r->t.persist)
+	if (!q->m->loading && r->t.is_persist)
 		db_log(q, r, LOG_ASSERTZ);
 
 	return 1;
@@ -5241,14 +5241,14 @@ static void save_db(FILE *fp, query *q, int dq, int logging)
 	q->quoted = 1;
 
 	for (rule *h = q->m->head; h; h = h->next) {
-		if (h->flags&FLAG_RULE_PREBUILT)
+		if (h->is_prebuilt)
 			continue;
 
-		if (logging && !(h->flags&FLAG_RULE_PERSIST))
+		if (logging && !h->is_persist)
 			continue;
 
 		for (clause *r = h->head; r; r = r->next) {
-			if (r->t.deleted)
+			if (r->t.is_deleted)
 				continue;
 
 			if (logging)
@@ -5280,7 +5280,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 	module *m = q->st.curr_clause->m;
 
 	for (rule *h = m->head; h; h = h->next) {
-		if (h->flags&FLAG_RULE_PREBUILT)
+		if (h->is_prebuilt)
 			continue;
 
 		if (name != h->val_off)
@@ -5290,7 +5290,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 			continue;
 
 		for (clause *r = h->head; r; r = r->next) {
-			if (r->t.deleted)
+			if (r->t.is_deleted)
 				continue;
 
 			write_term(q, fp, r->t.cells, 0, m->dq, 0, 0, 0);
@@ -7858,31 +7858,31 @@ static int fn_predicate_property_2(query *q)
 			return 1;
 	}
 
-	if (h && !(h->flags&FLAG_RULE_DYNAMIC)) {
+	if (h && !h->is_dynamic) {
 		make_literal(&tmp, find_in_pool("built_in"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return 1;
 	}
 
-	if (h && (h->flags&FLAG_RULE_DYNAMIC)) {
+	if (h && h->is_dynamic) {
 		make_literal(&tmp, find_in_pool("dynamic"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return 1;
 	}
 
-	if (h && (h->flags&FLAG_RULE_PERSIST)) {
+	if (h && h->is_persist) {
 		make_literal(&tmp, find_in_pool("persist"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return 1;
 	}
 
-	if (h && (h->flags&FLAG_RULE_PUBLIC)) {
+	if (h && h->is_public) {
 		make_literal(&tmp, find_in_pool("public"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return 1;
 	}
 
-	if (h && (h->flags&FLAG_RULE_PUBLIC)) {
+	if (h && h->is_public) {
 		make_literal(&tmp, find_in_pool("exported"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return 1;

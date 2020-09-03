@@ -642,7 +642,7 @@ static int do_match2(query *q, cell *curr_cell)
 	make_choice(q);
 
 	for (; q->st.curr_clause; q->st.curr_clause = q->st.curr_clause->next) {
-		if (q->st.curr_clause->t.deleted)
+		if (q->st.curr_clause->t.is_deleted)
 			continue;
 
 		term *t = &q->st.curr_clause->t;
@@ -679,7 +679,7 @@ int do_match(query *q, cell *curr_cell)
 	make_choice(q);
 
 	for (; q->st.curr_clause; q->st.curr_clause = q->st.curr_clause->next) {
-		if (q->st.curr_clause->t.deleted)
+		if (q->st.curr_clause->t.is_deleted)
 			continue;
 
 		term *t = &q->st.curr_clause->t;
@@ -750,7 +750,7 @@ static int match(query *q)
 	make_choice(q);
 
 	for (; q->st.curr_clause; next_key(q)) {
-		if (q->st.curr_clause->t.deleted)
+		if (q->st.curr_clause->t.is_deleted)
 			continue;
 
 		term *t = &q->st.curr_clause->t;
