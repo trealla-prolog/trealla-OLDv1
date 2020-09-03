@@ -148,8 +148,11 @@ idx_t find_in_pool(const char *name)
 	size_t len = strlen(name);
 
 	if ((offset+len+1) >= g_pool_size) {
-		g_pool = realloc(g_pool, g_pool_size*=2);
+		size_t nbytes = g_pool_size * 2;
+		g_pool = realloc(g_pool, nbytes);
+		memset(g_pool+g_pool_size, 0, nbytes-g_pool_size);
 		if (!g_pool) abort();
+		g_pool_size = nbytes;
 	}
 
 	strcpy(g_pool+offset, name);
