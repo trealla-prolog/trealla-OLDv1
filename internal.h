@@ -290,11 +290,21 @@ struct parser_ {
 	char *token, *save_line, *srcptr;
 	size_t token_size, n_line;
 	int line_nbr, error, depth, quoted;
-	unsigned val_type;
+	uint8_t val_type;
 	int8_t dq_consing;
-	uint8_t run_init, directive, consulting, one_shot;
-	uint8_t start_term, end_of_term, comment;
-	uint8_t is_var, is_op, skip, command, in_dcg, dcg_passthru;
+	unsigned run_init:1;
+	unsigned directive:1;
+	unsigned consulting:1;
+	unsigned one_shot:1;
+	unsigned start_term:1;
+	unsigned end_of_term:1;
+	unsigned comment:1;
+	unsigned is_var:1;
+	unsigned is_op;
+	unsigned skip:1;
+	unsigned command:1;
+	unsigned in_dcg:1;
+	unsigned dcg_passthru:1;
 };
 
 struct module_ {
