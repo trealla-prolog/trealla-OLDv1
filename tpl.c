@@ -34,8 +34,8 @@
 
 static void sigfn(int s)
 {
-	signal(SIGINT, 0);
-	g_tpl_abort = 1;
+	signal(SIGINT, &sigfn);
+	g_tpl_interrupt = 1;
 }
 
 static int daemonize(int argc, char *argv[])

@@ -6276,12 +6276,12 @@ static int fn_is_list_1(query *q)
 
 static int fn_wait_0(query *q)
 {
-	while (!g_tpl_abort && q->m->tasks) {
+	while (!g_tpl_interrupt && q->m->tasks) {
 		int_t now = get_time_in_usec() / 1000;
 		query *task = q->m->tasks;
 		int did_something = 0;
 
-		while (!g_tpl_abort && task) {
+		while (!g_tpl_interrupt && task) {
 			if (task->tmo) {
 				if (now <= task->tmo) {
 					task = task->next;
@@ -6322,12 +6322,12 @@ static int fn_wait_0(query *q)
 
 static int fn_await_0(query *q)
 {
-	while (!g_tpl_abort && q->m->tasks) {
+	while (!g_tpl_interrupt && q->m->tasks) {
 		int_t now = get_time_in_usec() / 1000;
 		query *task = q->m->tasks;
 		int did_something = 0;
 
-		while (!g_tpl_abort && task) {
+		while (!g_tpl_interrupt && task) {
 			if (task->tmo) {
 				if (now <= task->tmo) {
 					task = task->next;

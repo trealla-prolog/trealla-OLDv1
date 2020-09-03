@@ -15,7 +15,7 @@
 
 #define trace if (q->trace /*&& !consulting*/) trace_call
 
-int g_tpl_abort = 0;
+int g_tpl_interrupt = 0;
 
 enum { CALL, EXIT, REDO, NEXT, FAIL };
 
@@ -775,7 +775,30 @@ void run_query(query *q)
 {
 	q->yielded = 0;
 
-	while (!g_tpl_abort && !q->error) {
+	while (!q->error) {
+		if (g_tpl_interrupt) {
+			printf("\n(a)abort, (c)ontinue, (e)xit: ");
+			fflush(stdout);
+			int ch = getchar();
+			getchar();
+
+			if (ch == 'c') {
+				g_tpl_interrupt = 0;
+				continue;
+			}
+
+			if (ch == 'a') {
+				g_tpl_interrupt = 0;
+				break;
+			}
+
+			if (ch == 'e') {
+				signal(SIGINT, NULL);
+				q->halt = 1;
+				break;
+			}
+		}
+
 		if (q->retry) {
 			if (!retry_choice(q))
 				break;
