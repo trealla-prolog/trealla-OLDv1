@@ -252,6 +252,18 @@ either explicitly or implicitly (when waiting on input or a timer)...
 Note: *send/1*, *sleep/1* and *delay/1* do implied yields. As does *getline/2*,
 *bread/3*, *bwrite/2* and *accept/2*.
 
+Note: *spawn/n* acts as if defined as:
+
+	spawn(G) :- fork, call(G).
+	spawn(G,P1) :- fork, call(G,P1).
+	spawn(G,P1,P2) :- fork, call(G,P1,P2).
+	...
+
+In practice *spawn* calls a special version of *fork* that limits
+the number of such concurrent tasks (currently set at 8). Excess tasks
+will pipeline, as one task finishes another will be started. The normal
+*fork* is not limited.
+
 An example:
 
 	geturl(Url) :-

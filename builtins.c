@@ -6275,9 +6275,16 @@ static int fn_wait_0(query *q)
 	while (!g_tpl_interrupt && q->m->tasks) {
 		int_t now = get_time_in_usec() / 1000;
 		query *task = q->m->tasks;
-		int did_something = 0;
+		int did_something = 0, spawn_cnt = 0;
 
 		while (!g_tpl_interrupt && task) {
+			if (task->spawned) {
+				spawn_cnt++;
+
+				if (spawn_cnt >= q->m->spawn_limit)
+					break;
+			}
+
 			if (task->tmo) {
 				if (now <= task->tmo) {
 					task = task->next;
@@ -6321,9 +6328,16 @@ static int fn_await_0(query *q)
 	while (!g_tpl_interrupt && q->m->tasks) {
 		int_t now = get_time_in_usec() / 1000;
 		query *task = q->m->tasks;
-		int did_something = 0;
+		int did_something = 0, spawn_cnt = 0;
 
 		while (!g_tpl_interrupt && task) {
+			if (task->spawned) {
+				spawn_cnt++;
+
+				if (spawn_cnt >= q->m->spawn_limit)
+					break;
+			}
+
 			if (task->tmo) {
 				if (now <= task->tmo) {
 					task = task->next;
@@ -6391,6 +6405,7 @@ static int fn_spawn_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = deep_clone_term_on_tmp(q, p1, p1_ctx);
 	query *task = create_task(q, tmp);
+	task->spawned = 1;
 	task->next = q->m->tasks;
 	task->yielded = 1;
 

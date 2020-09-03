@@ -275,6 +275,7 @@ struct query_ {
 	unsigned ignore_ops:1;
 	unsigned character_escapes:1;
 	unsigned halt:1;
+	unsigned spawned:1;
 };
 
 struct parser_ {
@@ -325,7 +326,7 @@ struct module_ {
 
 	int prebuilt, dq, halt, halt_code, status, trace, quiet, dirty;
 	int user_ops, opt, stats, iso_only, use_persist, loading;
-	int make_public;
+	int make_public, spawn_limit;
 };
 
 extern idx_t g_empty_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
