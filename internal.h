@@ -143,7 +143,15 @@ typedef struct {
 
 typedef struct {
 	idx_t nbr_cells, cidx;
-	uint8_t nbr_vars, first_cut, cut_only, deleted, persist;
+
+	struct {
+		unsigned nbr_vars:8;
+		unsigned first_cut:1;
+		unsigned cut_only:1;
+		unsigned deleted:1;
+		unsigned persist:1;
+	};
+
 	cell cells[];
 } term;
 
@@ -159,8 +167,7 @@ enum {
 	FLAG_RULE_PUBLIC=1<<1,
 	FLAG_RULE_DYNAMIC=1<<2,
 	FLAG_RULE_PERSIST=1<<3,
-	FLAG_RULE_ABOLISHED=1<<4,
-	FLAG_RULE_VOLATILE=1<<5
+	FLAG_RULE_ABOLISHED=1<<4
 };
 
 struct rule_ {

@@ -4040,12 +4040,8 @@ static int do_abolish(query *q, cell *c)
 			db_log(q, r, LOG_ERASE);
 	}
 
-	for (clause *r = h->head; r != NULL;) {
-		clause *save = r->next;
-		clear_term(&r->t);
-		free(r);
-		r = save;
-	}
+	for (clause *r = h->head; r != NULL; r = r->next)
+		r->t.deleted = 1;
 
 	h->flags = FLAG_RULE_ABOLISHED;
 	sl_destroy(h->index);
@@ -7876,12 +7872,6 @@ static int fn_predicate_property_2(query *q)
 
 	if (h && (h->flags&FLAG_RULE_PERSIST)) {
 		make_literal(&tmp, find_in_pool("persist"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
-			return 1;
-	}
-
-	if (h && (h->flags&FLAG_RULE_VOLATILE)) {
-		make_literal(&tmp, find_in_pool("volatile"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return 1;
 	}

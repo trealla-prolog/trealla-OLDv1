@@ -61,10 +61,9 @@ static struct op_table g_ops[] =
 	{",", OP_XFY, 1000},
 
 	{"op", OP_FX, 1150},
-	{"public", OP_FX, 1150},
+	{"public", OP_FX, 1150},			// NOT USED
 	{"dynamic", OP_FX, 1150},
 	{"persist", OP_FX, 1150},
-	{"volatile", OP_FX, 1150},
 	{"initialization", OP_FX, 1150},
 	{"set_prolog_flag", OP_FX, 1150},
 	{"module", OP_FX, 1150},
@@ -566,17 +565,6 @@ static void set_persist_in_db(module *m, const char *name, idx_t arity)
 	m->use_persist = 1;
 }
 
-static void set_volatile_in_db(module *m, const char *name, unsigned arity)
-{
-	cell tmp;
-	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = find_in_pool(name);
-	tmp.arity = arity;
-	rule *h = find_rule(m, &tmp);
-	if (!h) return;
-	h->flags |= FLAG_RULE_VOLATILE;
-}
-
 void clear_term(term *t)
 {
 	for (idx_t i = 0; i < t->cidx; i++) {
@@ -918,25 +906,6 @@ static void directives(parser *p, term *t)
 				cell *c_arity = p1 + 2;
 				if (!is_integer(c_arity)) return;
 				set_persist_in_db(p->m, GET_STR(c_name), c_arity->val_int);
-				p1 += p1->nbr_cells;
-			} else
-				p1 += 1;
-		}
-
-		return;
-	}
-
-	if (!strcmp(dirname, "volatile") && (c->arity >= 1) && !p->m->iso_only) {
-		cell *p1 = c + 1;
-
-		while (!is_end(p1)) {
-			if (!is_literal(p1)) return;
-			if (is_literal(p1) && !strcmp(GET_STR(p1), "/") && (p1->arity == 2)) {
-				cell *c_name = p1 + 1;
-				if (!is_literal(c_name)) return;
-				cell *c_arity = p1 + 2;
-				if (!is_integer(c_arity)) return;
-				set_volatile_in_db(p->m, GET_STR(c_name), c_arity->val_int);
 				p1 += p1->nbr_cells;
 			} else
 				p1 += 1;
@@ -2497,7 +2466,7 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 	q.m = m;
 
 	for (rule *h = m->head; h; h = h->next) {
-		if (h->flags&(FLAG_RULE_PREBUILT|FLAG_RULE_VOLATILE))
+		if (h->flags&FLAG_RULE_PREBUILT)
 			continue;
 
 		for (clause *r = h->head; r; r = r->next) {
