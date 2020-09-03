@@ -138,14 +138,14 @@ struct cell_ {
 };
 
 typedef struct {
+	uint64_t u1, u2;
+} uuid;
+
+typedef struct {
 	idx_t nbr_cells, cidx;
 	uint8_t nbr_vars, first_cut, cut_only, deleted, persist;
 	cell cells[];
 } term;
-
-typedef struct {
-	uint64_t u1, u2;
-} uuid;
 
 struct clause_ {
 	clause *next;
