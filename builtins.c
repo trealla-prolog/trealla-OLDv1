@@ -6405,9 +6405,9 @@ static int fn_spawn_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = deep_clone_term_on_tmp(q, p1, p1_ctx);
 	query *task = create_task(q, tmp);
-	task->spawned = 1;
 	task->next = q->m->tasks;
 	task->yielded = 1;
+	task->spawned = 1;
 
 	if (q->m->tasks)
 		q->m->tasks->prev = task;
@@ -6453,6 +6453,7 @@ static int fn_spawn_n(query *q)
 	query *task = create_task(q, tmp);
 	task->next = q->m->tasks;
 	task->yielded = 1;
+	task->spawned = 1;
 
 	if (q->m->tasks)
 		q->m->tasks->prev = task;
