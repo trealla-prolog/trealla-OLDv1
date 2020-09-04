@@ -4023,7 +4023,7 @@ static int fn_iso_retractall_1(query *q)
 	rule *h = find_rule(q->m, p1);
 
 	if (!h) {
-		set_dynamic_in_db(q->m, GET_STR(p1), p1->arity);
+		//set_dynamic_in_db(q->m, GET_STR(p1), p1->arity);
 		return 1;
 	}
 
