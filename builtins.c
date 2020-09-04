@@ -4035,13 +4035,15 @@ static int do_abolish(query *q, cell *c)
 		return 0;
 	}
 
-	for (clause *r = h->head ; r; r = r->next) {
-		if (!q->m->loading && r->t.is_persist)
+	for (clause *r = h->head; r; r = r->next) {
+		if (!q->m->loading && r->t.is_persist && !r->t.is_deleted)
 			db_log(q, r, LOG_ERASE);
-	}
 
-	for (clause *r = h->head; r != NULL; r = r->next)
-		r->t.is_deleted = 1;
+		clause *save = r->next;
+		clear_term(&r->t);
+		free(r);
+		r = save;
+	}
 
 	h->is_abolished = 1;
 	sl_destroy(h->index);
@@ -4076,7 +4078,7 @@ static int fn_iso_abolish_1(query *q)
 	cell *p1_arity = p1 + 2;
 
 	if (!is_integer(p1_arity)) {
-			throw_error(q, p1_arity, "type_error", "integer");
+		throw_error(q, p1_arity, "type_error", "integer");
 		return 0;
 	}
 

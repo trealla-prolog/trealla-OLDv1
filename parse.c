@@ -2591,10 +2591,10 @@ void destroy_module(module *m)
 		m->tasks = task;
 	}
 
-	for (rule *h = m->head; h != NULL;) {
+	for (rule *h = m->head; h;) {
 		rule *save = h->next;
 
-		for (clause *r = h->head; r != NULL;) {
+		for (clause *r = h->head; r;) {
 			clause *save = r->next;
 			clear_term(&r->t);
 			free(r);
