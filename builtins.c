@@ -5096,6 +5096,52 @@ static int fn_iso_setof_3(query *q)
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
+static int fn_iso_op_3(query *q)
+{
+	GET_FIRST_ARG(p1,integer);
+	GET_NEXT_ARG(p2,atom);
+	GET_NEXT_ARG(p3,atom);
+
+	unsigned optype;
+	const char *spec = GET_STR(p2);
+
+	if (!strcmp(spec, "fx"))
+		optype = OP_FX;
+	else if (!strcmp(spec, "fy"))
+		optype = OP_FY;
+	else if (!strcmp(spec, "xf"))
+		optype = OP_XF;
+	else if (!strcmp(spec, "xfx"))
+		optype = OP_XFX;
+	else if (!strcmp(spec, "xfy"))
+		optype = OP_XFY;
+	else if (!strcmp(spec, "yf"))
+		optype = OP_YF;
+	else if (!strcmp(spec, "yfx"))
+		optype = OP_YFX;
+	else {
+		throw_error(q, p2, "type_error", "operator_type");
+		return 0;
+	}
+
+	int tmp_userop = 0;
+	unsigned tmp_optype = 0;
+
+	int ok = get_op(q->m, GET_STR(p3), &tmp_optype, &tmp_userop, 0);
+
+	if (ok && !tmp_userop) {
+		throw_error(q, p3, "permission_error", "op");
+		return 0;
+	}
+
+	if (!set_op(q->m, GET_STR(p3), optype, p1->val_int)) {
+		throw_error(q, p3, "domain_error", "op");
+		return 0;
+	}
+
+	return 1;
+}
+
 static int fn_erase_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -8423,6 +8469,7 @@ static const struct builtins g_iso_funcs[] =
 	{"findall", 3, fn_iso_findall_3, NULL},
 	{"bagof", 3, fn_iso_bagof_3, NULL},
 	{"setof", 3, fn_iso_setof_3, NULL},
+	{"op", 3, fn_iso_op_3, NULL},
 
 	//
 

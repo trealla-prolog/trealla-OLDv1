@@ -397,3 +397,4 @@ uint64_t get_time_in_usec(void);
 void clear_term(term *t);
 void do_db_load(module *m);
 void set_dynamic_in_db(module *m, const char *name, idx_t arity);
+int set_op(module *m, const char *name, unsigned val_type, unsigned precedence);

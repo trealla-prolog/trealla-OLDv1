@@ -190,7 +190,7 @@ int get_op(module *m, const char *name, unsigned *val_type, int *userop, int hin
 	return 0;
 }
 
-static int set_op(module *m, const char *name, unsigned val_type, unsigned precedence)
+int set_op(module *m, const char *name, unsigned val_type, unsigned precedence)
 {
 	struct op_table *ptr = m->ops;
 	name = g_pool + find_in_pool(name);
