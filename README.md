@@ -261,7 +261,7 @@ Note: *spawn/n* acts as if defined as:
 
 In practice *spawn* calls a special version of *fork/0* that limits
 the number of such concurrent tasks (see the *cpu_count* flag, initially
-set at 4). Excess tasks will be scheduled as tasks finish.
+and artificially set at 4). Excess tasks will be scheduled as tasks finish.
 
 An example:
 
