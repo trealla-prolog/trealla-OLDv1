@@ -4019,6 +4019,14 @@ static int fn_iso_retract_1(query *q)
 
 static int fn_iso_retractall_1(query *q)
 {
+	GET_FIRST_ARG(p1,atom);
+	rule *h = find_rule(q->m, p1);
+
+	if (!h) {
+		set_dynamic_in_db(q->m, GET_STR(p1), p1->arity);
+		return 1;
+	}
+
 	while (fn_iso_retract_1(q))
 		retry_choice(q);
 

@@ -546,7 +546,7 @@ clause *erase_from_db(module *m, uuid *ref)
 	return r;
 }
 
-static void set_dynamic_in_db(module *m, const char *name, idx_t arity)
+void set_dynamic_in_db(module *m, const char *name, idx_t arity)
 {
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
@@ -555,7 +555,9 @@ static void set_dynamic_in_db(module *m, const char *name, idx_t arity)
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
 	h->is_dynamic = 1;
-	h->index = sl_create(compkey);
+
+	if (!h->index)
+		h->index = sl_create(compkey);
 }
 
 static void set_persist_in_db(module *m, const char *name, idx_t arity)
@@ -568,7 +570,10 @@ static void set_persist_in_db(module *m, const char *name, idx_t arity)
 	if (!h) h = create_rule(m, &tmp);
 	h->is_dynamic = 1;
 	h->is_persist = 1;
-	h->index = sl_create(compkey);
+
+	if (!h->index)
+		h->index = sl_create(compkey);
+
 	m->use_persist = 1;
 }
 

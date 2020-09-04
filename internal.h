@@ -396,3 +396,4 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected);
 uint64_t get_time_in_usec(void);
 void clear_term(term *t);
 void do_db_load(module *m);
+void set_dynamic_in_db(module *m, const char *name, idx_t arity);
