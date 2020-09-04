@@ -4263,16 +4263,21 @@ static int fn_iso_once_1(query *q)
 #if 0
 static int fn_iso_ifthen_2(query *q)
 {
+	if (q->retry)
+		return 0;
+
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
-	idx_t save_pos = heap_used(q);
-	cell *tmp = clone_term(q, 1, p1, 1);
+	cell *tmp = clone_term(q, 1, p1, 1+p2->nbr_cells+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_inner_cut_0, 0, 0);
-	clone_term(q, 0, p2, 1);
+	copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	nbr_cells += p2->nbr_cells;
-	tmp = get_heap(q, save_pos);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	make_choice(q);
+	idx_t curr_choice = q->cp - 1;
+	choice *ch = q->choices + curr_choice;
+	ch->inner_cut = 1;
 	q->st.curr_cell = tmp;
 	return 1;
 }
