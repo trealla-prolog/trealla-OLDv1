@@ -1842,7 +1842,7 @@ assert_clauses([Clause|Rest]) :-
 
 % 20. Access 100 dynamically-created clauses with 1st arg. instantiated
 
-bench_mark(access_unit, 1000, access_dix(1, 1), dummy(1, 1)) :-
+xbench_mark(access_unit, 1000, access_dix(1, 1), dummy(1, 1)) :-
    abolish(dix, 2),
    dix_clauses(1, 100, L),
    assert_clauses(L).
@@ -1863,7 +1863,7 @@ access_dix(Start, End) :-
    (   Where = End
    ->  true
    ;   access_dix(Where, End)
-   ), !.
+   ).
 
 % 21. Access 100 dynamic unit clauses (2nd argument instantiated)
 
