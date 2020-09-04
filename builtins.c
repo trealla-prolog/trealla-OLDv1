@@ -4003,7 +4003,7 @@ static void db_log(query *q, clause *r, enum log_type l)
 
 static int fn_iso_retract_1(query *q)
 {
-	GET_FIRST_ARG(p1,nonvar);
+	GET_FIRST_ARG(p1,callable);
 
 	if (!do_match(q, p1))
 		return 0;
@@ -4019,7 +4019,7 @@ static int fn_iso_retract_1(query *q)
 
 static int fn_iso_retractall_1(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_structure);
+	GET_FIRST_ARG(p1,callable);
 	rule *h = find_rule(q->m, p1);
 
 	if (!h) {
@@ -4062,7 +4062,7 @@ static int do_abolish(query *q, cell *c)
 
 static int fn_iso_abolish_1(query *q)
 {
-	GET_FIRST_ARG(p1,structure);
+	GET_FIRST_ARG(p1,callable);
 
 	if (p1->arity != 2) {
 		throw_error(q, p1, "type_error", "indicator");
@@ -4098,7 +4098,7 @@ static int fn_iso_abolish_1(query *q)
 
 static int fn_iso_asserta_1(query *q)
 {
-	GET_FIRST_ARG(p1,nonvar);
+	GET_FIRST_ARG(p1,callable);
 	cell *tmp = deep_clone_term_on_tmp(q, p1, p1_ctx);
 	idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->m->p;
@@ -4123,7 +4123,7 @@ static int fn_iso_asserta_1(query *q)
 
 static int fn_iso_assertz_1(query *q)
 {
-	GET_FIRST_ARG(p1,nonvar);
+	GET_FIRST_ARG(p1,callable);
 	cell *tmp = deep_clone_term_on_tmp(q, p1, p1_ctx);
 	idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->m->p;
