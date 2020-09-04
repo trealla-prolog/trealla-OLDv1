@@ -259,10 +259,9 @@ Note: *spawn/n* acts as if defined as:
 	spawn(G,P1,P2) :- fork, call(G,P1,P2).
 	...
 
-In practice *spawn* calls a special version of *fork* that limits
-the number of such concurrent tasks (currently set at 4). Excess tasks
-will pipeline, as one task finishes another will be started. The normal
-*fork* is not limited.
+In practice *spawn* calls a special version of *fork/0* that limits
+the number of such concurrent tasks (see the *cpu_count* flag, initially
+set at 4). Excess tasks will be scheduled as tasks finish.
 
 An example:
 
