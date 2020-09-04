@@ -2273,10 +2273,10 @@ static void module_purge(module *m)
 	if (!m->dirty)
 		return;
 
-	for (rule *h = m->head; h != NULL; h = h->next) {
+	for (rule *h = m->head; h; h = h->next) {
 		clause *last = NULL;
 
-		for (clause *r = h->head; r != NULL;) {
+		for (clause *r = h->head; r;) {
 			if (!r->t.is_deleted) {
 				last = r;
 				r = r->next;
