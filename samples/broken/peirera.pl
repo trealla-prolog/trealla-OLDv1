@@ -1823,7 +1823,7 @@ ix(10000) :- ix(9801).
 
 % 19. Make 1000 asserts of unit clauses
 
-xbench_mark(assert_unit, 100, assert_clauses(L), dummy(L)) :-
+bench_mark(assert_unit, 100, assert_clauses(L), dummy(L)) :-
    abolish(ua, 3),
    create_units(1, 1000, L).
 
