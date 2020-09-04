@@ -1823,7 +1823,7 @@ ix(10000) :- ix(9801).
 
 % 19. Make 1000 asserts of unit clauses
 
-bench_mark(assert_unit, 100, assert_clauses(L), dummy(L)) :-
+xbench_mark(assert_unit, 100, assert_clauses(L), dummy(L)) :-
    abolish(ua, 3),
    create_units(1, 1000, L).
 
@@ -1869,7 +1869,7 @@ access_dix(Start, End) :-
 
 % :- public access_back/2.
 
-bench_mark(slow_access_unit, 100, access_back(1, 1), dummy(1, 1)) :-
+xbench_mark(slow_access_unit, 100, access_back(1, 1), dummy(1, 1)) :-
    abolish(dix, 2),
    dix_clauses(1, 100, L),
    assert_clauses(L).

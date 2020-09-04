@@ -305,8 +305,10 @@ uint64_t get_time_in_usec(void)
 static rule *get_rule(module *m)
 {
 	for (rule *h = m->head; h; h = h->next) {
-		if (h->is_abolished)
+		if (h->is_abolished) {
+			h->is_abolished = 0;
 			return h;
+		}
 	}
 
 	return NULL;
@@ -328,7 +330,6 @@ static rule *create_rule(module *m, cell *c)
 	h->is_public = 0;
 	h->is_dynamic = 0;
 	h->is_persist = 0;
-	h->is_abolished = 0;
 	return h;
 }
 
