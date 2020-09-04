@@ -543,6 +543,7 @@ clause *erase_from_db(module *m, uuid *ref)
 	clause *r = find_in_db(m, ref);
 	if (!r) return 0;
 	r->t.is_deleted = 1;
+	m->dirty = 1;
 	return r;
 }
 
