@@ -4019,7 +4019,7 @@ static int fn_iso_retract_1(query *q)
 
 static int fn_iso_retractall_1(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_structure);
 	rule *h = find_rule(q->m, p1);
 
 	if (!h) {
