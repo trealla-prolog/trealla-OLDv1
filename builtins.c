@@ -5120,7 +5120,7 @@ static int fn_iso_op_3(query *q)
 	else if (!strcmp(spec, "yfx"))
 		optype = OP_YFX;
 	else {
-		throw_error(q, p2, "type_error", "operator_type");
+		throw_error(q, p2, "type_error", "create");
 		return 0;
 	}
 
@@ -5130,12 +5130,12 @@ static int fn_iso_op_3(query *q)
 	int ok = get_op(q->m, GET_STR(p3), &tmp_optype, &tmp_userop, 0);
 
 	if (ok && !tmp_userop) {
-		throw_error(q, p3, "permission_error", "op");
+		throw_error(q, p3, "permission_error", "create");
 		return 0;
 	}
 
 	if (!set_op(q->m, GET_STR(p3), optype, p1->val_int)) {
-		throw_error(q, p3, "domain_error", "op");
+		throw_error(q, p3, "domain_error", "create");
 		return 0;
 	}
 
