@@ -311,19 +311,15 @@ static rule *get_rule(module *m)
 		}
 	}
 
-	return NULL;
+	rule *h = calloc(1, sizeof(rule));
+	h->next = m->head;
+	m->head = h;
+	return h;
 }
 
 static rule *create_rule(module *m, cell *c)
 {
 	rule *h = get_rule(m);
-
-	if (!h) {
-		h = calloc(1, sizeof(rule));
-		h->next = m->head;
-		m->head = h;
-	}
-
 	h->val_off = c->val_off;
 	h->arity = c->arity;
 	h->is_prebuilt = 0;
