@@ -4035,7 +4035,7 @@ static int do_abolish(query *q, cell *c)
 		return 0;
 	}
 
-	for (clause *r = h->head; r; r = r->next) {
+	for (clause *r = h->head; r;) {
 		if (!q->m->loading && r->t.is_persist && !r->t.is_deleted)
 			db_log(q, r, LOG_ERASE);
 
