@@ -225,6 +225,14 @@ void make_choice(query *q)
 	ch->any_choices = g->any_choices;
 }
 
+void make_inner_choice(query *q)
+{
+	make_choice(q);
+	idx_t curr_choice = q->cp - 1;
+	choice *ch = q->choices + curr_choice;
+	ch->inner_cut = 1;
+}
+
 int retry_choice(query *q)
 {
 	if (!q->cp)
