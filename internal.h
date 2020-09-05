@@ -225,9 +225,11 @@ typedef struct {
 	qstate st;
 	idx_t v1, v2;
 	uint32_t pins;
-	uint8_t nbr_vars, catchme, qnbr;
+	uint8_t nbr_vars, qnbr;
 	unsigned inner_cut:1;
 	unsigned any_choices:1;
+	unsigned catchme1:1;
+	unsigned catchme2:1;
 } choice;
 
 typedef struct arena_ arena;

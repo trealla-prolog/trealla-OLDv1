@@ -4291,7 +4291,7 @@ static int fn_iso_catch_3(query *q)
 		make_choice(q);
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
-		ch->catchme = 2;
+		ch->catchme2 = 1;
 		q->st.curr_cell = tmp;
 		return 1;
 	}
@@ -4305,7 +4305,7 @@ static int fn_iso_catch_3(query *q)
 	make_choice(q);
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
-	ch->catchme = 1;
+	ch->catchme1 = 1;
 	q->st.curr_cell = tmp;
 	return 1;
 }
@@ -4317,7 +4317,7 @@ static int do_throw_term(query *q, cell *c)
 	while (retry_choice(q)) {
 		choice *ch = q->choices + q->cp;
 
-		if (ch->catchme != 1)
+		if (!ch->catchme1)
 			continue;
 
 		q->retry = 2;

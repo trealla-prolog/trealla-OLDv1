@@ -215,7 +215,8 @@ void make_choice(query *q)
 	ch->st = q->st;
 	ch->qnbr = 0;
 	ch->inner_cut = 0;
-	ch->catchme = 0;
+	ch->catchme1 = 0;
+	ch->catchme2 = 0;
 	ch->pins = 0;
 
 	q->st.iter = NULL;
@@ -242,7 +243,7 @@ int retry_choice(query *q)
 	const choice *ch = q->choices + curr_choice;
 	unwind_trail(q, ch);
 
-	if (ch->catchme == 2)
+	if (ch->catchme2)
 		return retry_choice(q);
 
 	for (idx_t i = ch->st.hp; i < q->st.hp; i++) {
