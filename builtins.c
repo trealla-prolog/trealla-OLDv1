@@ -4288,7 +4288,7 @@ static int fn_iso_catch_3(query *q)
 		cell *tmp = clone_term(q, 1, p3, 1);
 		idx_t nbr_cells = 1 + p3->nbr_cells;
 		make_end_return(tmp+nbr_cells, q->st.curr_cell);
-		make_catch(q, 2);
+		make_catcher(q, 2);
 		q->st.curr_cell = tmp;
 		return 1;
 	}
@@ -4299,7 +4299,7 @@ static int fn_iso_catch_3(query *q)
 	cell *tmp = clone_term(q, 1, p1, 1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
-	make_catch(q, 1);
+	make_catcher(q, 1);
 	q->st.curr_cell = tmp;
 	return 1;
 }

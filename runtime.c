@@ -234,7 +234,7 @@ void make_inner_choice(query *q)
 	ch->inner_cut = 1;
 }
 
-void make_catch(query *q, int retry)
+void make_catcher(query *q, int retry)
 {
 	make_choice(q);
 	idx_t curr_choice = q->cp - 1;
