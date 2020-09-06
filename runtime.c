@@ -214,7 +214,7 @@ void make_choice(query *q)
 	choice *ch = q->choices + curr_choice;
 	ch->st = q->st;
 	ch->qnbr = 0;
-	ch->inner_cut = 0;
+	ch->local_cut = 0;
 	ch->catchme1 = 0;
 	ch->catchme2 = 0;
 	ch->pins = 0;
@@ -226,12 +226,12 @@ void make_choice(query *q)
 	ch->any_choices = g->any_choices;
 }
 
-void make_inner_choice(query *q)
+void make_local_cut(query *q)
 {
 	make_choice(q);
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
-	ch->inner_cut = 1;
+	ch->local_cut = 1;
 }
 
 void make_catcher(query *q, int retry)
@@ -400,7 +400,7 @@ static void commit_me(query *q, term *t)
 	q->nv_mask = 0;
 }
 
-void cut_me(query *q, int inner_cut)
+void cut_me(query *q, int local_cut)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g->any_choices = 0;
@@ -423,10 +423,10 @@ void cut_me(query *q, int inner_cut)
 			q->qnbr--;
 		}
 
-		if (ch->inner_cut && !inner_cut)
+		if (ch->local_cut && !local_cut)
 			break;
 
-		if (ch->inner_cut && inner_cut) {
+		if (ch->local_cut && local_cut) {
 			sl_done(ch->st.iter);
 			ch->st.iter = NULL;
 			cut = 1;
