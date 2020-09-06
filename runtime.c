@@ -739,7 +739,7 @@ static int match(query *q)
 		}
 
 		if (h->index) {
-			cell *key = deep_clone_term_on_heap(q, q->st.curr_cell, q->st.curr_frame);
+			cell *key = deep_clone_on_heap(q, q->st.curr_cell, q->st.curr_frame);
 			int all_vars = 1, arity = key->arity;
 
 			for (cell *c = key + 1; arity--; c += c->nbr_cells) {
