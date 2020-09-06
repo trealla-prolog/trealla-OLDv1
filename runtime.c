@@ -404,7 +404,7 @@ void cut_me(query *q, int local_cut)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g->any_choices = 0;
-	g->did_cut = 1;
+	g->did_cut = !local_cut;
 
 	if (!q->cp) {
 		q->st.tp = 0;
