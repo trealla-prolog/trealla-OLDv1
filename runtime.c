@@ -138,7 +138,7 @@ static void trace_call(query *q, cell *c, int box)
 	if (is_empty(c))
 		return;
 
-	fprintf(stderr, " [%lld] ", (long long)q->step);
+	fprintf(stderr, " [%llu] ", (unsigned long long)q->step);
 	fprintf(stderr, "%s ", box==CALL?"CALL":box==EXIT?"EXIT":box==REDO?"REDO":box==NEXT?isatty(2)?"\e[32mNEXT\e[0m":"NEXT":isatty(2)?"\e[31mFAIL\e[0m":"FAIL");
 
 #if DEBUG
