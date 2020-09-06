@@ -403,19 +403,17 @@ static void commit_me(query *q, term *t)
 void cut_me(query *q, int local_cut)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
-	g->any_choices = 0;
 	g->did_cut = !local_cut;
-
-	if (!q->cp) {
-		q->st.tp = 0;
-		return;
-	}
-
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
+	g->any_choices = !local_cut;
 	int cut = 0;
 
-	while ((ch->st.fp >= q->st.curr_frame) && !cut) {
+	while (!cut && q->cp) {
+		idx_t curr_choice = q->cp - 1;
+		choice *ch = q->choices + curr_choice;
+
+		if (ch->st.fp < q->st.curr_frame)
+			break;
+
 		if (ch->qnbr) {
 			q->qnbr = ch->qnbr;
 			free(q->tmpq[q->qnbr]);
@@ -433,10 +431,6 @@ void cut_me(query *q, int local_cut)
 		}
 
 		q->cp--;
-		ch--;
-
-		if (!q->cp)
-			break;
 	}
 
 	if (!q->cp) {

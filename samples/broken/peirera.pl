@@ -1869,7 +1869,7 @@ access_dix(Start, End) :-
 
 % :- public access_back/2.
 
-bench_mark(slow_access_unit, 100, access_back(1, 1), dummy(1, 1)) :-
+xbench_mark(slow_access_unit, 100, access_back(1, 1), dummy(1, 1)) :-
    abolish(dix, 2),
    dix_clauses(1, 100, L),
    assert_clauses(L).
