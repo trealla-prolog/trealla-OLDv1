@@ -32,7 +32,7 @@ static const unsigned INITIAL_NBR_SLOTS = 1000;
 static const unsigned INITIAL_NBR_CHOICES = 1000;
 static const unsigned INITIAL_NBR_TRAILS = 1000;
 
-static const int SPAWN_LIMIT = 4;
+static const int CPU_COUNT = 4;
 
 struct prolog_ {
 	module *m;
@@ -2534,7 +2534,7 @@ module *create_module(const char *name)
 	m->flag.rational_syntax_natural = 0;
 	m->flag.prefer_rationals = 0;
 	m->user_ops = MAX_USER_OPS;
-	m->cpu_count = SPAWN_LIMIT;
+	m->cpu_count = CPU_COUNT;
 	m->iso_only = 0;
 
 	make_rule(m, "A -> B :- A, !, B.");
