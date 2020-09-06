@@ -975,7 +975,7 @@ static int fn_iso_number_chars_2(query *q)
 	}
 
 	char tmpbuf[256];
-	sprintf(tmpbuf, "%lld", (long long)p1->val_int);
+	sprint_int(tmpbuf, sizeof(tmpbuf), p1->val_int, 10);
 	const char *src = tmpbuf;
 
 	cell tmp;
@@ -1055,7 +1055,7 @@ static int fn_iso_number_codes_2(query *q)
 	}
 
 	char tmpbuf[256];
-	sprintf(tmpbuf, "%lld", (long long)p1->val_int);
+	sprint_int(tmpbuf, sizeof(tmpbuf), p1->val_int, 10);
 	const char *src = tmpbuf;
 	cell tmp;
 	make_int(&tmp, *src);
@@ -6705,7 +6705,7 @@ static int fn_consult_1(query *q)
 static int format_integer(char *dst, int_t v, int grouping, int sep, int decimals)
 {
 	char tmpbuf1[256], tmpbuf2[256];
-	sprintf(tmpbuf1, "%lld", (long long)v);
+	sprint_int(tmpbuf1, sizeof(tmpbuf1), v, 10);
 	const char *src = tmpbuf1 + (strlen(tmpbuf1) - 1);
 	char *dst2 = tmpbuf2;
 	int i = 1, j = 1;
@@ -7524,7 +7524,7 @@ static int fn_atom_number_2(query *q)
 
 	if (is_var(p1)) {
 		char tmpbuf[256];
-		sprintf(tmpbuf, "%lld", (long long)p2->val_int);
+		sprint_int(tmpbuf, sizeof(tmpbuf), p2->val_int, 10);
 		cell tmp = make_string(q, tmpbuf);
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return 1;
@@ -7735,7 +7735,7 @@ static int fn_setenv_2(query *q)
 		setenv(GET_STR(p1), GET_STR(p2), 1);
 	} else {
 		char tmpbuf[256];
-		sprintf(tmpbuf, "%lld", (long long)p2->val_int);
+		sprint_int(tmpbuf, sizeof(tmpbuf), p2->val_int, 10);
 		setenv(GET_STR(p1), tmpbuf, 1);
 	}
 
@@ -7792,16 +7792,14 @@ static int fn_atomic_concat_3(query *q)
 			len1 = LEN_STR(p1);
 			src1 = GET_STR(p1);
 		} else if (is_integer(p1)) {
-			sprintf(tmpbuf1, "%lld", (long long)p1->val_int);
-			len1 = strlen(tmpbuf1);
+			len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), p1->val_int, 10);
 			src1 = tmpbuf1;
 		} else if (is_rational(p1)) {
-			sprintf(tmpbuf1, "%lldr%lld", (long long)p1->val_num, (long long)p1->val_den);
-			len1 = strlen(tmpbuf1);
+			len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), p1->val_num, 10);
+			len1 += sprint_int(tmpbuf1+len1, sizeof(tmpbuf1)-len1, p1->val_den, 10);
 			src1 = tmpbuf1;
 		} else {
-			sprintf(tmpbuf1, "%.17g", p1->val_flt);
-			len1 = strlen(tmpbuf1);
+			len1 = sprintf(tmpbuf1, "%.17g", p1->val_flt);
 			src1 = tmpbuf1;
 		}
 
@@ -7809,16 +7807,14 @@ static int fn_atomic_concat_3(query *q)
 			len2 = LEN_STR(p2);
 			src2 = GET_STR(p2);
 		} else if (is_integer(p2)) {
-			sprintf(tmpbuf2, "%lld", (long long)p2->val_int);
-			len2 = strlen(tmpbuf2);
+			len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), p2->val_int, 10);
 			src2 = tmpbuf2;
 		} else if (is_rational(p2)) {
-			sprintf(tmpbuf2, "%lldr%lld", (long long)p2->val_num, (long long)p2->val_den);
-			len2 = strlen(tmpbuf2);
+			len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), p2->val_num, 10);
+			len2 += sprint_int(tmpbuf2+len2, sizeof(tmpbuf2)-len2, p2->val_den, 10);
 			src2 = tmpbuf2;
 		} else {
-			sprintf(tmpbuf2, "%.17g", p2->val_flt);
-			len2 = strlen(tmpbuf2);
+			len2 = sprintf(tmpbuf2, "%.17g", p2->val_flt);
 			src2 = tmpbuf2;
 		}
 
