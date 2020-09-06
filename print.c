@@ -57,7 +57,7 @@ static size_t _sprint_int(char *dst, size_t size, int_t n, int base)
 	return dst - save_dst;
 }
 
-static size_t sprint_int(char *dst, size_t size, int_t n, int base)
+size_t sprint_int(char *dst, size_t size, int_t n, int base)
 {
 	const char *save_dst = dst;
 
