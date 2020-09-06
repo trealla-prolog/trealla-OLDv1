@@ -2534,7 +2534,7 @@ module *create_module(const char *name)
 	m->flag.rational_syntax_natural = 0;
 	m->flag.prefer_rationals = 0;
 	m->user_ops = MAX_USER_OPS;
-	m->spawn_limit = SPAWN_LIMIT;
+	m->cpu_count = SPAWN_LIMIT;
 	m->iso_only = 0;
 
 	make_rule(m, "A -> B :- A, !, B.");

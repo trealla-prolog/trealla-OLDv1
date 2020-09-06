@@ -4476,7 +4476,7 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		return 1;
 	} else if (!strcmp(GET_STR(p1), "cpu_count")) {
 		cell tmp;
-		make_int(&tmp, q->m->spawn_limit);
+		make_int(&tmp, q->m->cpu_count);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		return 1;
 	} else if (!strcmp(GET_STR(p1), "version")) {
@@ -4536,7 +4536,7 @@ static int fn_iso_set_prolog_flag_2(query *q)
 	}
 
 	if (!strcmp(GET_STR(p1), "cpu_count") && is_integer(p2)) {
-		q->m->spawn_limit = p2->val_int;
+		q->m->cpu_count = p2->val_int;
 		return 1;
 	}
 
@@ -6337,7 +6337,7 @@ static int fn_wait_0(query *q)
 			if (task->spawned) {
 				spawn_cnt++;
 
-				if (spawn_cnt >= q->m->spawn_limit)
+				if (spawn_cnt >= q->m->cpu_count)
 					break;
 			}
 
@@ -6390,7 +6390,7 @@ static int fn_await_0(query *q)
 			if (task->spawned) {
 				spawn_cnt++;
 
-				if (spawn_cnt >= q->m->spawn_limit)
+				if (spawn_cnt >= q->m->cpu_count)
 					break;
 			}
 
