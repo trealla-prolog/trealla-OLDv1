@@ -415,6 +415,11 @@ per iteration and smaller is better.
 	cons_list             |    4.4  |    3.2    |
 	walk_list             |    6.0  |    3.0    |
 	walk_list_rec         |    8.7  |    2.7    |
+	args(1)               |    9.5  |    2.7    |
+	args(2)               |   13.5  |    4.2    |
+	args(4)               |   21.8  |   11.1    |
+	args(8)               |   37.2  |   17.0    |
+	args(16)              |   67.8  |   30.0    |
 	cons_term             |    4.3  |    3.6    |
 	walk_term             |    6.0  |    3.0    |
 	walk_term_rec         |    8.8  |    3.5    |
@@ -426,6 +431,11 @@ per iteration and smaller is better.
 	deep_unify            |    1.9  |    2.5    |
 	integer_add           |   11.9  |   12.8    |
 	floating_add          |   11.7  |   13.5    |
+	arg(1)                |   11.9  |    7.5    |
+	arg(2)                |   11.9  |    7.4    |
+	arg(4)                |   12.2  |    7.6    |
+	arg(8)                |   12.7  |    7.7    |
+	arg(16)               |   13.9  |    7.5    |
 	index                 |   27.0  |    4.6    |
 	assert_unit           |  930.5  |  451.8    |
 	access_unit           |   83.9  |   10.1    |
@@ -435,7 +445,7 @@ per iteration and smaller is better.
 	double_setof          |   35.4  |  175.6    |
 	bagof                 |   20.5  |   15.5    |
 	----------------------|---------|-----------|--------------
-	 Total time           |   21.5s |    8.7s   |
+	 Total time           |   31.3s |   12.5s   |
 	----------------------|---------|-----------|--------------
 
 Times above vary about 10% run to run.

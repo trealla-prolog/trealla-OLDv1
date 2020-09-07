@@ -6796,9 +6796,8 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 			break;
 
 		cell *head = p2 + 1;
-		c = deref_var(q, head, q->latest_ctx);
+		c = deref_var(q, head, p2_ctx);
 		p2 = head + head->nbr_cells;
-		p2_ctx = q->latest_ctx;
 
 		if (ch == 'i')
 			continue;

@@ -530,7 +530,7 @@ bench_mark(walk_list_rec, 2000, wlr(L), dummy(L)) :- r1(L).
 
 % 6. Walk down N 100 copies of the same 100 element list, recursively.
 
-xbench_mark(args(N), 2000, args(N, L), dummy(N, L)) :- args(N), r1(L).
+bench_mark(args(N), 2000, args(N, L), dummy(N, L)) :- args(N), r1(L).
 
 % :- public args/2.
 
@@ -1592,7 +1592,7 @@ fa100(M, K, P) :- P is M + K.
 
 % 17. 100 calls to arg at position N
 
-xbench_mark(arg(N), 2000, arg1(N, Term, R), dummy(N, Term, R)) :- args(N), complex_nary_term(100, N, Term).
+bench_mark(arg(N), 2000, arg1(N, Term, R), dummy(N, Term, R)) :- args(N), complex_nary_term(100, N, Term).
 
 % :- public arg1/3.
 
