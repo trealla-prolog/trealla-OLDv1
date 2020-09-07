@@ -2537,14 +2537,22 @@ module *create_module(const char *name)
 	m->cpu_count = CPU_COUNT;
 	m->iso_only = 0;
 
+	// Meta-rules...
+
+	make_rule(m, "A -> B ; _C :- A, !, B.");
+	make_rule(m, "_A -> _B ; C :- !, C.");
 	make_rule(m, "A -> B :- A, !, B.");
+	make_rule(m, "A ; _B :- A.");
+	make_rule(m, "_A ; B :- B.");
+
 	make_rule(m, "phrase(P,L) :- phrase(P,L,[]).");
 	make_rule(m, "phrase(P,L,Rest) :- call(P,L,Rest).");
 
 	// This is an approximation...
+
 	make_rule(m, "setup_call_cleanup(A,G,B) :- once(A), (G -> true ; (B, !, fail)).");
 
-	// Edinburgh
+	// Edinburgh...
 
 	make_rule(m, "tab(0) :- !.");
 	make_rule(m, "tab(N) :- put_code(32), M is N-1, tab(M).");
@@ -2560,7 +2568,7 @@ module *create_module(const char *name)
 	make_rule(m, "tell(F) :- open(F,write,S), set_output(S).");
 	make_rule(m, "append(F) :- open(F,append,S), set_output(S).");
 
-	// SWI
+	// SWI...
 
 	make_rule(m, "current_key(K) :- var(K), clause('$record_key'(K,_),_).");
 	make_rule(m, "recorda(K,V) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V)).");
@@ -2574,7 +2582,7 @@ module *create_module(const char *name)
 	make_rule(m, "succ(X,Y) :- integer(X), Y is X + 1, X >= 0, !.");
 	make_rule(m, "succ(X,Y) :- integer(Y), X is Y - 1, X >= 0.");
 
-	// Other
+	// Other...
 
 	make_rule(m, "client(U,H,P,S) :- client(U,H,P,S,[]).");
 	make_rule(m, "server(H,S) :- server(H,S,[]).");

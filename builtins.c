@@ -4223,6 +4223,7 @@ static int fn_iso_ifthen_2(query *q)
 }
 #endif
 
+#if 0
 static int fn_iso_disjunction_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
@@ -4243,6 +4244,7 @@ static int fn_iso_disjunction_2(query *q)
 	q->st.curr_cell = tmp;
 	return 1;
 }
+#endif
 
 static int fn_iso_negation_1(query *q)
 {
@@ -8287,7 +8289,7 @@ static const struct builtins g_iso_funcs[] =
 	{"call", 1, NULL, NULL},
 
 	//{"->", 2, fn_iso_ifthen_2, NULL},
-	{";", 2, fn_iso_disjunction_2, NULL},
+	//{";", 2, fn_iso_disjunction_2, NULL},
 	{"\\+", 1, fn_iso_negation_1, NULL},
 	{"catch", 3, fn_iso_catch_3, NULL},
 	{"throw", 1, fn_iso_throw_1, NULL},

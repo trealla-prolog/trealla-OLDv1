@@ -351,7 +351,7 @@ Compiled with GCC 10.1.0 on Linux.
 	sieve(5)    |   0.36  |   0.27    |   0.52    |   0.31  |   7.63
 	fib(30)     |   0.59  |   0.30    |   0.56    |   0.79  |   6.74
 	hanoiq(22)  |   1.15  |   0.39    |   1.18    |   0.85  |   9.9
-	queens11    |   1.27  |   0.88    |   1.40    |   1.46  |  10.9
+	queens11    |   1.27* |   0.88    |   1.40    |   1.46  |  10.9
 	puzzle      |   0.54  |   0.17    |   0.28    |   0.22  |
 	chess       |  10.5   |   4.9     |   4.9     |   4.9   |
 	------------|---------|-----------|-----------|---------|----------
@@ -384,6 +384,9 @@ Compiled with GCC 10.1.0 on Linux.
 	time scryer-prolog samples/sieve.pro -g "test5,halt"
 	etc
 
+Note: queens11 is now running at 2s due to emulated negation while
+issues with if-then-else is sorted out.
+
 Times for gprolog & scryer were done using the unix *time* command and
 thus include setup time, whereas the others were done with the predicate
 *time(+Goal)*.
@@ -415,7 +418,7 @@ per iteration and smaller is better.
 	cons_term             |    4.3  |    3.6    |
 	walk_term             |    6.0  |    3.0    |
 	walk_term_rec         |    8.8  |    3.5    |
-	shallow_backtracking  |    3.1  |    0.0    |
+	shallow_backtracking  |    3.1  |    0.0?   |
 	deep_backtracking     |    7.3  |    3.7    |
 	choice_point          |    3.6  |    6.3    |
 	trail_variables       |    4.4  |    5.4    |
@@ -425,12 +428,14 @@ per iteration and smaller is better.
 	floating_add          |   11.7  |   13.5    |
 	index                 |   27.0  |    4.6    |
 	assert_unit           |  930.5  |  451.8    |
-	setof                 |   26.4  |   22.9    |
-	pair_setof            |   35.7  |   32.8    |
-	double_setof          |  248.8  |  169.8    |
-	bagof                 |   19.7  |   15.5    |
+	access_unit           |   83.9  |   10.1    |
+	slow_access_unit      |   -0.6? |   10.6    |
+	setof                 |   27.7  |   22.9    |
+	pair_setof            |   37.3  |   32.8    |
+	double_setof          |   35.4  |  175.6    |
+	bagof                 |   20.5  |   15.5    |
 	----------------------|---------|-----------|--------------
-	 Total time           |   17.5s |    8.3s   |
+	 Total time           |   21.5s |    8.7s   |
 	----------------------|---------|-----------|--------------
 
 Times above vary about 10% run to run.

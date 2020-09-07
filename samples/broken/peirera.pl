@@ -1842,7 +1842,7 @@ assert_clauses([Clause|Rest]) :-
 
 % 20. Access 100 dynamically-created clauses with 1st arg. instantiated
 
-xbench_mark(access_unit, 1000, access_dix(1, 1), dummy(1, 1)) :-
+bench_mark(access_unit, 1000, access_dix(1, 1), dummy(1, 1)) :-
    abolish(dix, 2),
    dix_clauses(1, 100, L),
    assert_clauses(L).
@@ -1869,7 +1869,7 @@ access_dix(Start, End) :-
 
 % :- public access_back/2.
 
-xbench_mark(slow_access_unit, 100, access_back(1, 1), dummy(1, 1)) :-
+bench_mark(slow_access_unit, 100, access_back(1, 1), dummy(1, 1)) :-
    abolish(dix, 2),
    dix_clauses(1, 100, L),
    assert_clauses(L).
@@ -1883,20 +1883,10 @@ access_back(Start, End) :-
 
 % 22. Setof and bagof
 
-%bench_mark(setof, 1000, setof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
-%bench_mark(pair_setof, 1000, setof((X,Y), pr(X, Y), S), dummy((X,Y), pr(X, Y), S)).
-%bench_mark(double_setof, 100, setof((X,S), setof(Y, pr(X, Y), S), T), dummy((X,S), setof(Y, pr(X, Y), S), T)).
-%bench_mark(bagof, 1000, bagof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
-
-bench_mark(setof, 1000, do_setof, dummy(X, Y^pr(X, Y), _S)).
-bench_mark(pair_setof, 1000, do_pair_setof, dummy((X,Y), pr(X, Y), _S)).
-bench_mark(double_setof, 100, do_double_setof, dummy(_, setof(Y, pr(_X, Y), _S), _T)).
-bench_mark(bagof, 1000, do_bagof, dummy(X, Y^pr(X, Y), _S)).
-
-do_setof :- setof(X, Y^pr(X, Y), _S).
-do_pair_setof :- setof((X,Y), pr(X, Y), _S).
-do_double_setof :- setof((X,S), setof(Y, pr(X, Y), S), _T).
-do_bagof :- bagof(X, Y^pr(X, Y), _S).
+bench_mark(setof, 1000, setof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
+bench_mark(pair_setof, 1000, setof((X,Y), pr(X, Y), S), dummy((X,Y), pr(X, Y), S)).
+bench_mark(double_setof, 100, setof((X,S), setof(Y, pr(X, Y), S), T), dummy((X,S), setof(Y, pr(X, Y), S), T)).
+bench_mark(bagof, 1000, bagof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
 
 pr(99, 1).
 pr(98, 2).
