@@ -226,7 +226,7 @@ void make_choice(query *q)
 	ch->any_choices = g->any_choices;
 }
 
-void make_local_cut(query *q)
+void make_local_choice(query *q)
 {
 	make_choice(q);
 	idx_t curr_choice = q->cp - 1;

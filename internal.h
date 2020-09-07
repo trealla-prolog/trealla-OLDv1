@@ -362,7 +362,7 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 void write_term(query *q, FILE *fp, cell *c, int running, int dq, int cons, int max_depth, int depth);
 size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int dq, int cons, int max_depth, int depth);
 void make_choice(query *q);
-void make_local_cut(query *q);
+void make_local_choice(query *q);
 void make_catcher(query *q, int type);
 void cut_me(query *q, int local_cut);
 int check_builtin(module *m, const char *name, unsigned arity);
