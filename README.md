@@ -384,7 +384,7 @@ Compiled with GCC 10.1.0 on Linux.
 	time scryer-prolog samples/sieve.pro -g "test5,halt"
 	etc
 
-Note: queens11 is now running at 2s due to emulated negation while
+Note: queens11 is now running at 2s due to emulated disjunction while
 issues with if-then-else is sorted out.
 
 Times for gprolog & scryer were done using the unix *time* command and

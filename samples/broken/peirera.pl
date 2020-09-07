@@ -911,7 +911,7 @@ bench_mark(choice_point, 2000, choice, dummy(a)).
 
 % :- public choice/0.
 
-%choice :- c1(a), !.		FIXME
+%choice :- c1(a), !.
 choice :- once(c1(a)).
 
 c1(a) :- c2(a).
