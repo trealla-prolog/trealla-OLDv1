@@ -6335,6 +6335,12 @@ static int fn_is_list_1(query *q)
 	return is_list(p1) || is_nil(p1);
 }
 
+static int fn_is_stream_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	return is_stream(p1);
+}
+
 static int fn_wait_0(query *q)
 {
 	while (!g_tpl_interrupt && q->m->tasks) {
@@ -8527,6 +8533,7 @@ static const struct builtins g_other_funcs[] =
 	{"split", 4, fn_split_4, "+atom,+atom,?left,?right"},
 	{"msort", 2, fn_msort_2, "+list,-list"},
 	{"is_list", 1, fn_is_list_1, "+term"},
+	{"is_stream", 1, fn_is_stream_1, "+term"},
 	{"list", 1, fn_is_list_1, "+term"},
 	{"forall", 2, fn_forall_2, "+term,+term"},
 	{"term_hash", 2, fn_term_hash_2, "+term,?integer"},
