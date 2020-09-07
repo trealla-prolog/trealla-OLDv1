@@ -1471,11 +1471,10 @@ static int fn_iso_open_3(query *q)
 
 static int fn_iso_open_4(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_stream);
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,var);
 	GET_NEXT_ARG(p4,list_or_nil);
-	const char *filename = GET_STR(p1);
 	const char *mode = GET_STR(p2);
 	int n = find_stream(q);
 
@@ -1483,6 +1482,20 @@ static int fn_iso_open_4(query *q)
 		throw_error(q, p1, "resource_error", "too many open streams");
 		return 0;
 	}
+
+	const char *filename;
+	stream *oldstr = NULL;
+
+	if (is_stream(p1)) {
+		int oldn = get_stream(q, p1);
+
+		if (oldn < 0)
+			return 0;
+
+		stream *oldstr = &g_streams[oldn];
+		filename = oldstr->filename;
+	} else
+		filename = GET_STR(p1);
 
 	stream *str = &g_streams[n];
 	str->filename = strdup(filename);
@@ -1506,6 +1519,8 @@ static int fn_iso_open_4(query *q)
 
 				if (is_atom(name) && !strcmp(GET_STR(name), "binary"))
 					binary = 1;
+				else if (is_atom(name) && !strcmp(GET_STR(name), "text"))
+					binary = 0;
 			}
 		}
 
@@ -1514,14 +1529,27 @@ static int fn_iso_open_4(query *q)
 		p4_ctx = q->latest_ctx;
 	}
 
-	if (!strcmp(mode, "read"))
-		str->fp = fopen(filename, binary?"rb":"r");
-	else if (!strcmp(mode, "write"))
-		str->fp = fopen(filename, binary?"wb":"w");
-	else if (!strcmp(mode, "append"))
-		str->fp = fopen(filename, binary?"ab":"a");
-	else if (!strcmp(mode, "update"))
-		str->fp = fopen(filename, binary?"rb+":"r+");
+	if (oldstr) {
+		int fd = fileno(oldstr->fp);
+
+		if (!strcmp(mode, "read"))
+			str->fp = fdopen(fd, binary?"rb":"r");
+		else if (!strcmp(mode, "write"))
+			str->fp = fdopen(fd, binary?"wb":"w");
+		else if (!strcmp(mode, "append"))
+			str->fp = fdopen(fd, binary?"ab":"a");
+		else if (!strcmp(mode, "update"))
+			str->fp = fdopen(fd, binary?"rb+":"r+");
+	} else {
+		if (!strcmp(mode, "read"))
+			str->fp = fopen(filename, binary?"rb":"r");
+		else if (!strcmp(mode, "write"))
+			str->fp = fopen(filename, binary?"wb":"w");
+		else if (!strcmp(mode, "append"))
+			str->fp = fopen(filename, binary?"ab":"a");
+		else if (!strcmp(mode, "update"))
+			str->fp = fopen(filename, binary?"rb+":"r+");
+	}
 
 	cell *tmp = alloc_heap(q, 1);
 	make_int(tmp, n);
