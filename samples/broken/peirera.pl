@@ -117,7 +117,6 @@ performance of SIM-I vs.  Prolog-20.
 %mode(_).
 
 :- discontiguous(bench_mark/4).
-:- discontiguous(xbench_mark/4).
 
 % File #1, driver.pl:
 
