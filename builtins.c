@@ -1488,6 +1488,7 @@ static int fn_iso_open_4(query *q)
 	str->filename = strdup(filename);
 	str->name = strdup(filename);
 	str->mode = strdup(mode);
+	int binary = 0;
 
 	while (is_list(p4)) {
 		cell *head = p4 + 1;
@@ -1499,6 +1500,12 @@ static int fn_iso_open_4(query *q)
 				name = deref_var(q, name, q->latest_ctx);
 				free(str->name);
 				str->name = strdup(GET_STR(name));
+			} else if (!strcmp(GET_STR(c), "type")) {
+				cell *name = c + 1;
+				name = deref_var(q, name, q->latest_ctx);
+
+				if (is_atom(name) && !strcmp(GET_STR(name), "binary"))
+					binary = 1;
 			}
 		}
 
@@ -1508,13 +1515,13 @@ static int fn_iso_open_4(query *q)
 	}
 
 	if (!strcmp(mode, "read"))
-		str->fp = fopen(filename, "r");
+		str->fp = fopen(filename, binary?"rb":"r");
 	else if (!strcmp(mode, "write"))
-		str->fp = fopen(filename, "w");
+		str->fp = fopen(filename, binary?"wb":"w");
 	else if (!strcmp(mode, "append"))
-		str->fp = fopen(filename, "a");
+		str->fp = fopen(filename, binary?"ab":"a");
 	else if (!strcmp(mode, "update"))
-		str->fp = fopen(filename, "r+");
+		str->fp = fopen(filename, binary?"rb+":"r+");
 
 	cell *tmp = alloc_heap(q, 1);
 	make_int(tmp, n);
