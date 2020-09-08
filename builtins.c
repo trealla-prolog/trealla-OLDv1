@@ -8581,6 +8581,7 @@ static const struct builtins g_other_funcs[] =
 	{"urlenc", 2, fn_urlenc_2, "?atom,?atom"},
 	{"string_lower", 2, fn_string_lower_2, "?atom,?atom"},
 	{"string_upper", 2, fn_string_upper_2, "?atom,?atom"},
+	{"read_string", 3, fn_bread_3, "+stream,+integer,-atom"},
 	{"bread", 3, fn_bread_3, "+stream,+integer,-atom"},
 	{"bwrite", 2, fn_bwrite_2, "+stream,-atom"},
 	{"atom_number", 2, fn_atom_number_2, "?atom,?integer"},

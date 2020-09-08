@@ -132,6 +132,7 @@ SWI-Prolog
 	uuid/1                       # generates non-standard UUID string
 	load_files/2
 	split_string/4
+	read_string/3                # same as bread/3
 
 	getenv/2
 	setenv/2
