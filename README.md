@@ -7,7 +7,7 @@ Written in plain-old C.
 	Integers are 64-bit (optionally 128-bit)
 	Reals are double
 	Rationals are a native type
-	Atoms are UTF-8 of unlimited length
+	Atoms (synonymous with strings) are UTF-8 of unlimited length
 	Arity limit 255
 	Full-term indexing
 	Peristence to per-module database
