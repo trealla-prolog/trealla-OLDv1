@@ -2751,7 +2751,6 @@ void pl_destroy(prolog *pl)
 
 				free(g_streams[i].filename);
 				free(g_streams[i].mode);
-
 				free(g_streams[i].name);
 				g_streams[i].name = NULL;
 			}
