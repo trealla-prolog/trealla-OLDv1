@@ -19,7 +19,7 @@ extern int do_yield_0(query *q);
 #define is_list_or_nil_or_var(c) (is_list_or_nil(c) || is_var(c))
 #define is_list_or_var(c) (is_list(c) || is_var(c))
 #define is_structure_or_var(c) (is_structure(c) || is_var(c))
-#define is_atom_or_stream(c) (is_atom(c) || is_stream(c))
+#define is_structure_or_stream(c) (is_structure(c) || is_stream(c))
 #define is_atom_or_var(c) (is_atom(c) || is_var(c))
 #define is_atom_or_int(c) (is_atom(c) || is_integer(c))
 #define is_atom_or_list(c) (is_atom(c) || is_list(c))

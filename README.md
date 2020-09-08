@@ -200,7 +200,7 @@ Others
 	sha1/2                  # sha1(?atom,?hash)        NEEDS OPENSSL
 	sha256/2                # sha256(?atom,?hash)      NEEDS OPENSSL
 	sha512/2                # sha512(?atom,?hash)      NEEDS OPENSSL
-	open(+stream, )         # reopen a stream
+	open(stream(str), )     # with open/4 reopen a stream
 
 	persist/1               # directive 'persist funct/arity'
 

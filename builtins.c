@@ -1471,7 +1471,7 @@ static int fn_iso_open_3(query *q)
 
 static int fn_iso_open_4(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_stream);
+	GET_FIRST_ARG(p1,structure_or_stream);
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,var);
 	GET_NEXT_ARG(p4,list_or_nil);
@@ -1486,8 +1486,8 @@ static int fn_iso_open_4(query *q)
 	const char *filename;
 	stream *oldstr = NULL;
 
-	if (is_stream(p1)) {
-		int oldn = get_stream(q, p1);
+	if (is_structure(p1) && (p1->arity == 1) && !strcmp(GET_STR(p1), "stream")) {
+		int oldn = get_stream(q, p1+1);
 
 		if (oldn < 0)
 			return 0;
