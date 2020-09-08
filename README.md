@@ -381,10 +381,10 @@ Compiled with GCC 10.1.0 on Linux.
 
 	export setenv LOCALSZ=256000
 	export setenv GLOBALSZ=128000
-	time gprolog --consult-file samples/sieve.pro --query-goal "test5,halt"
+	time gprolog --consult-file samples/sieve.pro --query-goal test5,halt
 	etc
 
-	time scryer-prolog samples/sieve.pro -g "test5,halt"
+	time scryer-prolog samples/sieve.pro -g test5,halt
 	etc
 
 Note: queens11 is now running at 2s due to emulated disjunction while
@@ -392,7 +392,7 @@ issues with if-then-else is sorted out.
 
 Times for gprolog & scryer were done using the unix *time* command and
 thus include setup time, whereas the others were done with the predicate
-*time(+Goal)*.
+*time(Goal)*.
 
 Also, gprolog only seems to implement 1st argument indexing (hence very
 slow *testindex1b* result) Also 2 internal stacks needed to be boosted.
@@ -453,5 +453,5 @@ per iteration and smaller is better.
 
 Times above vary about 10% run to run.
 
-	tpl -l samples/broken/peirera.pl -g "bench_peirera,halt"
+	tpl -l samples/broken/peirera.pl -g bench_peirera,halt
 
