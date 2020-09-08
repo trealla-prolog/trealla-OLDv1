@@ -1489,8 +1489,10 @@ static int fn_iso_open_4(query *q)
 	if (is_structure(p1) && (p1->arity == 1) && !strcmp(GET_STR(p1), "stream")) {
 		int oldn = get_stream(q, p1+1);
 
-		if (oldn < 0)
+		if (oldn < 0) {
+			throw_error(q, p1, "type_error", "not a stream");
 			return 0;
+		}
 
 		stream *oldstr = &g_streams[oldn];
 		filename = oldstr->filename;
