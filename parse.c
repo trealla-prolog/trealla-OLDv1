@@ -2545,12 +2545,6 @@ module *create_module(const char *name)
 	make_rule(m, "A ; _B :- A.");
 	make_rule(m, "_A ; B :- B.");
 
-	//make_rule(m, "\\+ G :- G, !, fail.");
-	//make_rule(m, "\\+ _G.");
-	//make_rule(m, "once(G) :- G, !.");
-	//make_rule(m, "ignore(G) :- G, !.");
-	//make_rule(m, "ignore(_G).");
-
 	make_rule(m, "phrase(P,L) :- phrase(P,L,[]).");
 	make_rule(m, "phrase(P,L,Rest) :- call(P,L,Rest).");
 

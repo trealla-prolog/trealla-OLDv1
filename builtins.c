@@ -4283,7 +4283,6 @@ static int fn_iso_disjunction_2(query *q)
 }
 #endif
 
-#if 1
 static int fn_iso_negation_1(query *q)
 {
 	if (q->retry)
@@ -4298,9 +4297,7 @@ static int fn_iso_negation_1(query *q)
 	q->st.curr_cell = tmp;
 	return 1;
 }
-#endif
 
-#if 1
 static int fn_iso_once_1(query *q)
 {
 	if (q->retry)
@@ -4315,9 +4312,7 @@ static int fn_iso_once_1(query *q)
 	q->st.curr_cell = tmp;
 	return 1;
 }
-#endif
 
-#if 1
 static int fn_ignore_1(query *q)
 {
 	if (q->retry)
@@ -4332,7 +4327,6 @@ static int fn_ignore_1(query *q)
 	q->st.curr_cell = tmp;
 	return 1;
 }
-#endif
 
 static int fn_iso_catch_3(query *q)
 {
