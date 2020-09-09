@@ -4899,24 +4899,24 @@ static int fn_iso_findall_3(query *q)
 	GET_NEXT_RAW_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
 
-	if (q->retry) {
-		do_sys_listn(q, p3, p3_ctx);
-		q->qnbr--;
+	if (!q->retry) {
+		q->qnbr++;
+		cell *tmp = clone_to_heap(q, 1, p2, 3+p1->nbr_cells);
+		idx_t nbr_cells = 1 + p2->nbr_cells;
+		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
+		make_int(tmp+nbr_cells++, q->qnbr);
+		copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
+		nbr_cells += p1->nbr_cells;
+		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
+		q->tmpq[q->qnbr] = NULL;
+		init_queuen(q);
+		make_choice(q);
+		q->st.curr_cell = tmp;
 		return 1;
 	}
 
-	q->qnbr++;
-	cell *tmp = clone_to_heap(q, 1, p2, 3+p1->nbr_cells);
-	idx_t nbr_cells = 1 + p2->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
-	make_int(tmp+nbr_cells++, q->qnbr);
-	copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
-	nbr_cells += p1->nbr_cells;
-	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
-	q->tmpq[q->qnbr] = NULL;
-	init_queuen(q);
-	make_choice(q);
-	q->st.curr_cell = tmp;
+	do_sys_listn(q, p3, p3_ctx);
+	q->qnbr--;
 	return 1;
 }
 
@@ -4927,24 +4927,24 @@ static int fn_findall_4(query *q)
 	GET_NEXT_ARG(p3,any);
 	GET_NEXT_ARG(p4,var);
 
-	if (q->retry) {
-		do_sys_listn2(q, p3, p3_ctx, p4);
-		q->qnbr--;
+	if (!q->retry) {
+		q->qnbr++;
+		cell *tmp = clone_to_heap(q, 1, p2, 3+p1->nbr_cells);
+		idx_t nbr_cells = 1 + p2->nbr_cells;
+		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
+		make_int(tmp+nbr_cells++, q->qnbr);
+		copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
+		nbr_cells += p1->nbr_cells;
+		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
+		q->tmpq[q->qnbr] = NULL;
+		init_queuen(q);
+		make_choice(q);
+		q->st.curr_cell = tmp;
 		return 1;
 	}
 
-	q->qnbr++;
-	cell *tmp = clone_to_heap(q, 1, p2, 3+p1->nbr_cells);
-	idx_t nbr_cells = 1 + p2->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
-	make_int(tmp+nbr_cells++, q->qnbr);
-	copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
-	nbr_cells += p1->nbr_cells;
-	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
-	q->tmpq[q->qnbr] = NULL;
-	init_queuen(q);
-	make_choice(q);
-	q->st.curr_cell = tmp;
+	do_sys_listn2(q, p3, p3_ctx, p4);
+	q->qnbr--;
 	return 1;
 }
 
