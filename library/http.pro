@@ -83,7 +83,7 @@ http_get(Url,Data,Opts) :-
 	dict:get(Hdrs2,'transfer-encoding',V,''),
 	(V == chunked -> http_chunked(S,'',Data2) ; http_read(S,Hdrs2,Data2)),
 	close(S),
-	((Code2 >= 301, Code2 =< 302) ->
+	(memberchk(Code2,[301,302]) ->
 		(dict:get(Hdrs2,'location',Url2,''),
 		ignore(memberchk(final_url(Url2),Opts)),
 		http_get(Url2,Data,Opts))
