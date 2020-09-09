@@ -8338,8 +8338,8 @@ static const struct builtins g_iso_funcs[] =
 
 	//{"->", 2, fn_iso_ifthen_2, NULL},
 	//{";", 2, fn_iso_disjunction_2, NULL},
-
 	{"\\+", 1, fn_iso_negation_1, NULL},
+
 	{"once", 1, fn_iso_once_1, NULL},
 	{"ignore", 1, fn_ignore_1, "+callable"},
 
