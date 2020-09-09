@@ -217,6 +217,12 @@ test58 :-
 	maplist(task57,L),
 	writeln('Finished').
 
+test59 :-
+	L = ['www.duckduckgo.com'],
+	maplist(geturl,L),
+	writeln('Finished').
+
+
 test61(0).
 test61(N) :- N > 0, M is N - 1, test61(M).
 

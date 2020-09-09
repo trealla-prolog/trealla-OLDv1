@@ -1471,7 +1471,7 @@ static int fn_iso_open_3(query *q)
 
 static int fn_iso_open_4(query *q)
 {
-	GET_FIRST_ARG(p1,structure_or_stream);
+	GET_FIRST_ARG(p1,atom_or_structure);
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,var);
 	GET_NEXT_ARG(p4,list_or_nil);
