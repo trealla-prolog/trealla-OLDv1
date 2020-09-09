@@ -43,22 +43,25 @@ test6 :- Orig='Aa...Bb...Cc...Dd',sys_queue(Orig),string_lower(Orig,S),sys_queue
 test6 :- sys_list(L),writeln(L).
 
 test7 :-
-	http_get('www.duckduckgo.com',Data,[status_code(Code),headers(Hdrs)]),
+	http_get('www.duckduckgo.com',_Data,[status_code(Code),headers(Hdrs)]),
 	write('Response='), writeln(Code),
 	writeln(Hdrs),
-	write(Data), nl.
+	%write(_Data), nl,
+	true.
 
 test8 :-
-	http_get('http://www.bing.com',Data,[status_code(Code),headers(Hdrs)]),
+	http_get('http://www.bing.com',_Data,[status_code(Code),headers(Hdrs)]),
 	write('Response='), writeln(Code),
 	writeln(Hdrs),
-	write(Data), nl.
+	%write(_Data), nl,
+	true.
 
 test9 :-
-	http_get('https://www.google.com',Data,[status_code(Code),headers(Hdrs)]),
+	http_get('https://www.google.com',_Data,[status_code(Code),headers(Hdrs)]),
 	write('Response='), writeln(Code),
 	writeln(Hdrs),
-	write(Data), nl.
+	%write(_Data), nl,
+	true.
 
 task10(C) :-
 	repeat,
@@ -201,27 +204,6 @@ test56 :-
 	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
 	spawnlist(geturl,L),
 	writeln('Finished').
-
-task57(Url) :-
-	http_open([host(Url),path('/'),method('head')],S,[status_code(Code),final_url(Url2)]),
-	close(S),
-	format('Got ~w (~w) ==> ~w\n', [Url,Code,Url2]).
-
-test57 :-
-	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
-	maplist(task57,L),
-	writeln('Finished').
-
-test58 :-
-	L = ['google.com','bing.com','duckduckgo.com'],
-	maplist(task57,L),
-	writeln('Finished').
-
-test59 :-
-	L = ['www.duckduckgo.com'],
-	maplist(geturl,L),
-	writeln('Finished').
-
 
 test61(0).
 test61(N) :- N > 0, M is N - 1, test61(M).

@@ -673,7 +673,7 @@ static int fn_iso_cut_0(query *q)
 	return 1;
 }
 
-static int fn_local_cut_0(query *q)
+/* static*/ int fn_local_cut_0(query *q)
 {
 	cut_me(q, 1);
 	return 1;
@@ -4283,6 +4283,7 @@ static int fn_iso_disjunction_2(query *q)
 }
 #endif
 
+#if 1
 static int fn_iso_negation_1(query *q)
 {
 	if (q->retry)
@@ -4297,7 +4298,9 @@ static int fn_iso_negation_1(query *q)
 	q->st.curr_cell = tmp;
 	return 1;
 }
+#endif
 
+#if 1
 static int fn_iso_once_1(query *q)
 {
 	if (q->retry)
@@ -4312,6 +4315,24 @@ static int fn_iso_once_1(query *q)
 	q->st.curr_cell = tmp;
 	return 1;
 }
+#endif
+
+#if 1
+static int fn_ignore_1(query *q)
+{
+	if (q->retry)
+		return 1;
+
+	GET_FIRST_ARG(p1,callable);
+	cell *tmp = clone_to_heap(q, 1, p1, 2);
+	idx_t nbr_cells = 1 + p1->nbr_cells;
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	make_local_choice(q);
+	q->st.curr_cell = tmp;
+	return 1;
+}
+#endif
 
 static int fn_iso_catch_3(query *q)
 {
@@ -7742,21 +7763,6 @@ static int fn_rational_1(query *q)
 	return is_rational(p1_tmp);
 }
 
-static int fn_ignore_1(query *q)
-{
-	if (q->retry)
-		return 1;
-
-	GET_FIRST_ARG(p1,callable);
-	cell *tmp = clone_to_heap(q, 1, p1, 2);
-	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
-	make_end_return(tmp+nbr_cells, q->st.curr_cell);
-	make_local_choice(q);
-	q->st.curr_cell = tmp;
-	return 1;
-}
-
 static int fn_getenv_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -8332,7 +8338,11 @@ static const struct builtins g_iso_funcs[] =
 
 	//{"->", 2, fn_iso_ifthen_2, NULL},
 	//{";", 2, fn_iso_disjunction_2, NULL},
+
 	{"\\+", 1, fn_iso_negation_1, NULL},
+	{"once", 1, fn_iso_once_1, NULL},
+	{"ignore", 1, fn_ignore_1, "+callable"},
+
 	{"catch", 3, fn_iso_catch_3, NULL},
 	{"throw", 1, fn_iso_throw_1, NULL},
 
@@ -8344,7 +8354,6 @@ static const struct builtins g_iso_funcs[] =
 	{"call", 7, fn_iso_call_n, NULL},
 	{"call", 8, fn_iso_call_n, NULL},
 
-	{"once", 1, fn_iso_once_1, NULL},
 	{"repeat", 0, fn_iso_repeat_0, NULL},
 	{"true", 0, fn_iso_true_0, NULL},
 	{"fail", 0, fn_iso_fail_0, NULL},
@@ -8537,7 +8546,6 @@ static const struct builtins g_other_funcs[] =
 	{"string", 1, fn_iso_atom_1, "+term"},
 	{"atomic_concat", 3, fn_atomic_concat_3, NULL},
 	{"replace", 4, fn_replace_4, "+orig,+from,+to,-new"},
-	{"ignore", 1, fn_ignore_1, "+callable"},
 	{"writeln", 1, fn_writeln_1, "+term"},
 	{"sleep", 1, fn_sleep_1, "+integer"},
 	{"delay", 1, fn_delay_1, "+integer"},

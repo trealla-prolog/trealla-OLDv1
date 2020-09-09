@@ -421,12 +421,15 @@ void cut_me(query *q, int local_cut)
 			q->qnbr--;
 		}
 
+		if (ch->st.iter) {
+			sl_done(ch->st.iter);
+			ch->st.iter = NULL;
+		}
+
 		if (ch->local_cut && !local_cut)
 			break;
 
 		if (ch->local_cut && local_cut) {
-			sl_done(ch->st.iter);
-			ch->st.iter = NULL;
 			cut = 1;
 		}
 

@@ -10,8 +10,7 @@ http_response(S,Code) :-
 
 http_headers(S,Pair) :-
 	repeat,
-		(at_end_of_stream(S) -> (!, fail) ; true),
-		getline(S,Line),
+		(getline(S,Line) -> true ; (!, fail)),
 		split(Line,':',K,V),
 		(K == '' -> (!, fail) ; true),
 		string_lower(K,K2),
