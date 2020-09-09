@@ -246,23 +246,16 @@ task70(X,Y) :- write('Got '), writeln(X), Y=456.
 
 test70 :- freeze(X, task70(X,Y)), X=123, writeln(Y), writeln('OK done').
 
-test16a  :-
-    write('Test16a:\t'),
-    once(X is 1+2), X =:= 3,
-    write('PASSED!'), nl, !.
+test80 :-
+	between(1,10,I),
+		write(I), nl,
+		(I is 5 -> !; true),
+		fail.
+test80 :- write(oops), nl.
 
-test16b  :-
-    write('Test16b:\t'),
-    once((X is 1+2, true)), X =:= 3,
-    write('PASSED!'), nl, !.
+task81(G) :- G.
+test81 :- X=1,Y=2, task81(Z is X+Y), write(Z), nl.
 
-age11(peter,7).
-age11(anne,5).
-age11(pat,8).
-age11(tom,5).
-
-test16c  :-
-    write('Test16c:\t'),
-    findall(X,once(age11(X,_)),L),
-    ground(L), L=[peter],
-    write('PASSED!'), nl, !.
+task82(G) :- write(doit), nl, G.
+test82 :- task82(!), fail.
+test82 :- write(here), nl.

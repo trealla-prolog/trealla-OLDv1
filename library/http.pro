@@ -8,14 +8,19 @@ http_response(S, Code) :-
 	split(Rest, ' ', Code2, _Rest2),
 	atom_number(Code2, Code).
 
+get_header(S, Line) :-
+	getline(S, Line).
+get_header(S, Line) :-
+	\+ at_end_of_stream(S),
+	get_header(S,Line).
+
 http_headers(S, Pair) :-
-	repeat,
-		(getline(S, Line) -> true ; (!, fail)),
-		split(Line,':', K, V),
-		(K == '' -> (!, fail) ; true),
-		string_lower(K, K2),
-		string_lower(V, V2),
-		Pair=K2:V2.
+	get_header(S, Line),
+	split(Line,':', K, V),
+	(K == '' -> (!, fail) ; true),
+	string_lower(K, K2),
+	string_lower(V, V2),
+	Pair=K2:V2.
 
 http_chunked(S, Tmp, Data) :-
 	getline(S, Line),
