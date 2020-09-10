@@ -4193,7 +4193,7 @@ int call_me(query *q, cell *p1)
 	} else
 		tmp = clone_to_heap(q, 0, p1, 1);
 
-	idx_t nbr_cells = p1->nbr_cells;
+	idx_t nbr_cells = tmp->nbr_cells;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return 1;
