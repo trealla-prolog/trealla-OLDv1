@@ -104,28 +104,25 @@ static void check_slot(query *q)
 unsigned create_vars(query *q, unsigned nbr)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
+	unsigned slot_nbr = g->nbr_vars;
 
 	//printf("*** create_vars=%u, nbr_vars=%u, nbr_slots=%u, st.sp=%u\n", nbr, g->nbr_vars, g->nbr_slots, q->st.sp);
 
 	if ((g->env + g->nbr_slots) == q->st.sp) {
-		unsigned slot_nbr = g->nbr_vars;
 		g->nbr_slots += nbr;
-		g->nbr_vars += nbr;
 		q->st.sp += nbr;
-		return slot_nbr;
+	} else {
+		assert(!g->overflow);
+		g->overflow = q->st.sp;
+		q->st.sp += nbr;
+		check_slot(q);
 	}
-
-	assert(!g->overflow);
-	g->overflow = q->st.sp;
-	q->st.sp += nbr;
-	check_slot(q);
 
 	for (int i = 0; i < nbr; i++) {
 		slot *e = GET_SLOT(g, g->nbr_vars+i);
 		e->c.val_type = TYPE_EMPTY;
 	}
 
-	unsigned slot_nbr = g->nbr_vars;
 	g->nbr_vars += nbr;
 	return slot_nbr;
 }

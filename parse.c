@@ -2534,12 +2534,14 @@ module *create_module(const char *name)
 	m->cpu_count = CPU_COUNT;
 	m->iso_only = 0;
 
+	make_rule(m, "call_var(G) :- copy_term(G,G2), call(G2), G2=G.");
+
 	make_rule(m, "phrase(P,L) :- phrase(P,L,[]).");
 	make_rule(m, "phrase(P,L,Rest) :- call(P,L,Rest).");
 
 	// This is an approximation...
 
-	make_rule(m, "setup_call_cleanup(A,G,B) :- once(A), (G -> true ; (B, !, fail)).");
+	make_rule(m, "setup_call_cleanup(A,G,B) :- once(A), (call(G) -> true ; (call(B), !, fail)).");
 
 	// Edinburgh...
 

@@ -211,7 +211,7 @@ iterations(I0, _Name, Action, Control, I) :-
 do_n(N, Goal, Time) :-
 	get_cpu_time(T0),
 	(   between(1,N,_),
-	    Goal,
+	    call_var(Goal),
 	    fail
 	;   get_cpu_time(T1),
 	    Time is (T1 - T0)/1000
@@ -911,8 +911,7 @@ bench_mark(choice_point, 2000, choice, dummy(a)).
 
 % :- public choice/0.
 
-%choice :- c1(a), !.
-choice :- once(c1(a)).
+choice :- c1(a), !.
 
 c1(a) :- c2(a).
 c1(a).
@@ -1591,7 +1590,7 @@ fa100(M, K, P) :- P is M + K.
 
 % 17. 100 calls to arg at position N
 
-bench_mark(arg(N), 2000, arg1(N, Term, R), dummy(N, Term, R)) :- args(N), complex_nary_term(100, N, Term).
+xbench_mark(arg(N), 2000, arg1(N, Term, R), dummy(N, Term, R)) :- args(N), complex_nary_term(100, N, Term).
 
 % :- public arg1/3.
 
