@@ -227,6 +227,7 @@ typedef struct {
 	uint32_t pins;
 	uint8_t nbr_vars, qnbr;
 	unsigned local_cut:1;
+	unsigned barrier:1;
 	unsigned any_choices:1;
 	unsigned catchme1:1;
 	unsigned catchme2:1;
@@ -338,7 +339,11 @@ extern stream g_streams[MAX_STREAMS];
 extern module *g_modules;
 extern char *g_pool;
 
-#define copy_cells(dst,src,nbr_cells) memcpy(dst, src, sizeof(cell)*(nbr_cells))
+static inline idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
+{
+	memcpy(dst, src, sizeof(cell)*(nbr_cells));
+	return nbr_cells;
+}
 
 int is_in_pool(const char *name, idx_t *offset);
 void set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
@@ -362,6 +367,7 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 void write_term(query *q, FILE *fp, cell *c, int running, int dq, int cons, int max_depth, int depth);
 size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int dq, int cons, int max_depth, int depth);
 void make_choice(query *q);
+void make_barrier(query *q);
 void make_local_choice(query *q);
 void make_catcher(query *q, int type);
 void cut_me(query *q, int local_cut);

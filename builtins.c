@@ -302,8 +302,7 @@ static cell *alloc_queue(query *q, const cell *c)
 	}
 
 	cell *dst = q->queue[0] + q->qp[0];
-	copy_cells(dst, c, c->nbr_cells);
-	q->qp[0] += c->nbr_cells;
+	q->qp[0] += copy_cells(dst, c, c->nbr_cells);
 	return dst;
 }
 
@@ -328,8 +327,7 @@ static cell *alloc_queuen(query *q, int qnbr, const cell *c)
 	}
 
 	cell *dst = q->queue[qnbr] + q->qp[qnbr];
-	copy_cells(dst, c, c->nbr_cells);
-	q->qp[qnbr] += c->nbr_cells;
+	q->qp[qnbr] += copy_cells(dst, c, c->nbr_cells);
 	return dst;
 }
 
@@ -552,9 +550,8 @@ cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix)
 		tmp->flags = FLAG_BUILTIN;
 	}
 
-	copy_cells(tmp+(prefix?1:0), p1, p1->nbr_cells);
+	idx_t nbr_cells = copy_cells(tmp+(prefix?1:0), p1, p1->nbr_cells);
 	cell *c = tmp + (prefix?1:0);
-	idx_t nbr_cells = p1->nbr_cells;
 
 	for (idx_t i = 0; i < nbr_cells; i++, c++) {
 		if (is_bigstring(c))
@@ -3615,9 +3612,7 @@ static int fn_iso_univ_2(query *q)
 				tmp = realloc(tmp, sizeof(cell)*(nbr_cells*=2));
 			}
 
-			copy_cells(tmp+idx, head, head->nbr_cells);
-			idx += head->nbr_cells;
-
+			idx += copy_cells(tmp+idx, head, head->nbr_cells);
 			tmp[0].nbr_cells += head->nbr_cells;
 			tmp[0].arity++;
 		}
@@ -3662,8 +3657,7 @@ static int fn_iso_univ_2(query *q)
 			make_literal(tmp+idx++, g_dot_s);
 			tmp[idx-1].arity = 2;
 			tmp[idx-1].nbr_cells = 1+(p1->nbr_cells-idx);
-			copy_cells(tmp+idx, c, c->nbr_cells);
-			idx += c->nbr_cells;
+			idx += copy_cells(tmp+idx, c, c->nbr_cells);
 			c += c->nbr_cells;
 			i += c->nbr_cells;
 		}
@@ -4145,8 +4139,7 @@ static int fn_iso_asserta_1(query *q)
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	copy_cells(p->t->cells, tmp, nbr_cells);
-	p->t->cidx = nbr_cells;
+	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
 	parser_assign_vars(p);
 	clause *r = asserta_to_db(q->m, p->t, 0);
 	if (!r) return 0;
@@ -4170,8 +4163,7 @@ static int fn_iso_assertz_1(query *q)
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	copy_cells(p->t->cells, tmp, nbr_cells);
-	p->t->cidx = nbr_cells;
+	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
 	parser_assign_vars(p);
 	clause *r = assertz_to_db(q->m, p->t, 0);
 	if (!r) return 0;
@@ -4240,7 +4232,6 @@ static int fn_iso_call_n(query *q)
 	return 1;
 }
 
-#if 0
 static int fn_iso_ifthen_2(query *q)
 {
 	if (q->retry)
@@ -4251,18 +4242,42 @@ static int fn_iso_ifthen_2(query *q)
 	cell *tmp = clone_to_heap(q, 1, p1, 1+p2->nbr_cells+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
-	copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
-	nbr_cells += p2->nbr_cells;
+	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	make_local_choice(q);
 	q->st.curr_cell = tmp;
 	return 1;
 }
-#endif
 
-#if 0
+static int do_ifthenelse(query *q, cell *p1, cell *p2, cell *p3)
+{
+	if (q->retry) {
+		cell *tmp = clone_to_heap(q, 1, p3, 1);
+		idx_t nbr_cells = 1 + p3->nbr_cells;
+		make_end_return(tmp+nbr_cells, q->st.curr_cell);
+		q->st.curr_cell = tmp;
+		return 1;
+	}
+
+	cell *tmp = clone_to_heap(q, 1, p1, 1+p2->nbr_cells+1);
+	idx_t nbr_cells = 1 + p1->nbr_cells;
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
+	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	make_local_choice(q);
+	q->st.curr_cell = tmp;
+	return 1;
+}
+
 static int fn_iso_disjunction_2(query *q)
 {
+	if ((q->st.curr_cell+1)->fn == fn_iso_ifthen_2) {
+		cell *p1 = q->st.curr_cell + 2;
+		cell *p2 = p1 + p1->nbr_cells;
+		cell *p3 = p2 + p2->nbr_cells;
+		return do_ifthenelse(q, p1, p2, p3);
+	}
+
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
 
@@ -4281,7 +4296,6 @@ static int fn_iso_disjunction_2(query *q)
 	q->st.curr_cell = tmp;
 	return 1;
 }
-#endif
 
 static int fn_iso_negation_1(query *q)
 {
@@ -4810,9 +4824,7 @@ static int fn_iso_keysort_2(query *q)
 static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 {
 	if (!nbr_cells || !c->nbr_cells) {
-		cell tmp;
-		make_literal(&tmp, g_nil_s);
-		cell *c = alloc_heap(q, 1);
+		cell *c = alloc_tmp_heap(q, 1);
 		make_literal(c, g_nil_s);
 		return c;
 	}
@@ -4899,12 +4911,11 @@ static int fn_iso_findall_3(query *q)
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
 		make_int(tmp+nbr_cells++, q->qnbr);
-		copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
-		nbr_cells += p1->nbr_cells;
+		nbr_cells += copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		q->tmpq[q->qnbr] = NULL;
 		init_queuen(q);
-		make_choice(q);
+		make_barrier(q);
 		q->st.curr_cell = tmp;
 		return 1;
 	}
@@ -4927,8 +4938,7 @@ static int fn_findall_4(query *q)
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
 		make_int(tmp+nbr_cells++, q->qnbr);
-		copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
-		nbr_cells += p1->nbr_cells;
+		nbr_cells += copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		q->tmpq[q->qnbr] = NULL;
 		init_queuen(q);
@@ -5001,11 +5011,10 @@ static int fn_iso_bagof_3(query *q)
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
 		make_int(tmp+nbr_cells++, q->qnbr);
-		copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
-		nbr_cells += p2->nbr_cells;
+		nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		init_queuen(q);
-		make_choice(q);
+		make_barrier(q);
 		q->st.curr_cell = tmp;
 		return 1;
 	}
@@ -5020,8 +5029,7 @@ static int fn_iso_bagof_3(query *q)
 	if (!q->tmpq[q->qnbr]) {
 		idx_t nbr_cells = queuen_used(q);
 		q->tmpq[q->qnbr] = malloc(sizeof(cell)*nbr_cells);
-		copy_cells(q->tmpq[q->qnbr], get_queuen(q), nbr_cells);
-		q->tmpq_size[q->qnbr] = nbr_cells;
+		q->tmpq_size[q->qnbr] = copy_cells(q->tmpq[q->qnbr], get_queuen(q), nbr_cells);
 	}
 
 	init_queuen(q);
@@ -5078,11 +5086,10 @@ static int fn_iso_setof_3(query *q)
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
 		make_int(tmp+nbr_cells++, q->qnbr);
-		copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
-		nbr_cells += p2->nbr_cells;
+		nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		init_queuen(q);
-		make_choice(q);
+		make_barrier(q);
 		q->st.curr_cell = tmp;
 		return 1;
 	}
@@ -5097,8 +5104,7 @@ static int fn_iso_setof_3(query *q)
 	if (!q->tmpq[q->qnbr]) {
 		idx_t nbr_cells = queuen_used(q);
 		q->tmpq[q->qnbr] = malloc(sizeof(cell)*nbr_cells);
-		copy_cells(q->tmpq[q->qnbr], get_queuen(q), nbr_cells);
-		q->tmpq_size[q->qnbr] = nbr_cells;
+		q->tmpq_size[q->qnbr] = copy_cells(q->tmpq[q->qnbr], get_queuen(q), nbr_cells);
 	}
 
 	init_queuen(q);
@@ -5258,8 +5264,7 @@ static int do_asserta_2(query *q)
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	copy_cells(p->t->cells, tmp, nbr_cells);
-	p->t->cidx = nbr_cells;
+	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
 	parser_assign_vars(p);
 	clause *r = asserta_to_db(q->m, p->t, 0);
 	if (!r) return 0;
@@ -5308,8 +5313,7 @@ static int do_assertz_2(query *q)
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	copy_cells(p->t->cells, tmp, nbr_cells);
-	p->t->cidx = nbr_cells;
+	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
 	parser_assign_vars(p);
 	clause *r = assertz_to_db(q->m, p->t, 0);
 	if (!r) return 0;
@@ -6536,15 +6540,14 @@ static int fn_spawn_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = alloc_heap(q, p1->nbr_cells);
-	copy_cells(tmp, p1, p1->nbr_cells);
-	idx_t n = p1->nbr_cells;
+	idx_t n = copy_cells(tmp, p1, p1->nbr_cells);
 	unsigned arity = p1->arity;
 	int args = 2;
 
 	while (args++ <= q->st.curr_cell->arity) {
 		GET_NEXT_ARG(p2,any);
 		cell *tmp2 = alloc_heap(q, p2->nbr_cells);
-		copy_cells(tmp2, p2, p2->nbr_cells);
+		n += copy_cells(tmp2, p2, p2->nbr_cells);
 		cell *c = tmp2;
 
 		for (idx_t i = 0; i < p2->nbr_cells; i++, c++) {
@@ -6552,7 +6555,6 @@ static int fn_spawn_n(query *q)
 				c->val_str = strdup(c->val_str);
 		}
 
-		n += p2->nbr_cells;
 		arity++;
 	}
 
@@ -8330,8 +8332,8 @@ static const struct builtins g_iso_funcs[] =
 	{",", 2, NULL, NULL},
 	{"call", 1, NULL, NULL},
 
-	//{"->", 2, fn_iso_ifthen_2, NULL},
-	//{";", 2, fn_iso_disjunction_2, NULL},
+	{"->", 2, fn_iso_ifthen_2, NULL},
+	{";", 2, fn_iso_disjunction_2, NULL},
 	{"\\+", 1, fn_iso_negation_1, NULL},
 
 	{"once", 1, fn_iso_once_1, NULL},

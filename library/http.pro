@@ -19,8 +19,7 @@ http_headers(S, Pair) :-
 	split(Line,':', K, V),
 	(K == '' -> (!, fail) ; true),
 	string_lower(K, K2),
-	string_lower(V, V2),
-	Pair=K2:V2.
+	Pair=K2:V.
 
 http_chunked(S, Tmp, Data) :-
 	getline(S, Line),

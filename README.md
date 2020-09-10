@@ -354,9 +354,9 @@ Compiled with GCC 10.1.0 on Linux.
 	sieve(5)    |   0.36  |   0.27    |   0.52    |   0.31  |   7.63
 	fib(30)     |   0.59  |   0.30    |   0.56    |   0.79  |   6.74
 	hanoiq(22)  |   1.15  |   0.39    |   1.18    |   0.85  |   9.9
-	queens11    |   1.27* |   0.88    |   1.40    |   1.46  |  10.9
-	puzzle      |   0.54  |   0.17    |   0.28    |   0.22  |
-	chess       |  10.5   |   4.9     |   4.9     |   4.9   |
+	queens11    |   1.27  |   0.88    |   1.40    |   1.46  |  10.9
+	puzzle      |   0.37  |   0.17    |   0.28    |   0.22  |
+	chess       |  10.7   |   4.9     |   4.9     |   4.9   |
 	------------|---------|-----------|-----------|---------|----------
 	testindex1a |   1.35  |   1.31    |   0.70    |   4.94  |
 	testindex1b |   1.47  |   1.38    |   >300    |   5.10  |
@@ -386,9 +386,6 @@ Compiled with GCC 10.1.0 on Linux.
 
 	time scryer-prolog samples/sieve.pro -g test5,halt
 	etc
-
-Note: queens11 is now running at 2s due to emulated disjunction while
-issues with if-then-else is sorted out.
 
 Times for gprolog & scryer were done using the unix *time* command and
 thus include setup time, whereas the others were done with the predicate

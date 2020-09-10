@@ -225,7 +225,9 @@ test64 :-
 
 test65 :-
 	task64(bagof(X, pr(X,_), S)),
-	writeln(S).
+	writeln(S),
+	fail.
+test65.
 
 test66 :-
 	call_nth(between(1,inf,I),12345678), writeln(I), fail.
@@ -258,4 +260,4 @@ test81 :- X=1,Y=2, task81(Z is X+Y), write(Z), nl.
 
 task82(G) :- write(doit), nl, G.
 test82 :- task82(!), fail.
-test82 :- write(here), nl.
+test82 :- write(ok), nl.

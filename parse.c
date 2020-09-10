@@ -433,8 +433,7 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
 	memcpy(&r->t, t, sizeof(term));
-	copy_cells(r->t.cells, t->cells, nbr_cells);
-	r->t.nbr_cells = nbr_cells;
+	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
 	r->m = m;
 	r->next = h->head;
 	h->head = r;
@@ -491,8 +490,7 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
 	memcpy(&r->t, t, sizeof(term));
-	copy_cells(r->t.cells, t->cells, nbr_cells);
-	r->t.nbr_cells = nbr_cells;
+	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
 	r->m = m;
 
 	if (h->tail)
@@ -1354,8 +1352,7 @@ static void parser_dcg_rewrite(parser *p)
 				nbr_cells++;
 			}
 
-			copy_cells(tmp+nbr_cells, phrase+1, len);
-			nbr_cells += len;
+			nbr_cells += copy_cells(tmp+nbr_cells, phrase+1, len);
 			phrase += phrase->nbr_cells;
 
 			if (last && ((phrase - t->cells) >= t->cidx)) {
@@ -2536,14 +2533,6 @@ module *create_module(const char *name)
 	m->user_ops = MAX_USER_OPS;
 	m->cpu_count = CPU_COUNT;
 	m->iso_only = 0;
-
-	// Meta-rules...
-
-	make_rule(m, "A -> B ; _C :- A, !, B.");
-	make_rule(m, "_A -> _B ; C :- !, C.");
-	make_rule(m, "A -> B :- A, !, B.");
-	make_rule(m, "A ; _B :- A.");
-	make_rule(m, "_A ; B :- B.");
 
 	make_rule(m, "phrase(P,L) :- phrase(P,L,[]).");
 	make_rule(m, "phrase(P,L,Rest) :- call(P,L,Rest).");
