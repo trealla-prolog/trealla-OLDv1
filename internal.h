@@ -258,12 +258,11 @@ struct query_ {
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
 	uint64_t nv_mask, step, qid;
 	int max_depth;
-	idx_t cp, tmphp, nv_start;
-	idx_t latest_ctx, popp, qp[MAX_QUEUES];
+	idx_t cp, tmphp, nv_start, latest_ctx, popp;
 	idx_t frames_size, slots_size, trails_size, choices_size;
 	idx_t max_choices, max_frames, max_slots, max_trails, max_heaps;
-	idx_t tot_heaps, tot_heapsize, tmpq_size[MAX_QUEUES];
-	idx_t h_size, tmph_size, q_size[MAX_QUEUES];
+	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;
+	idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
 	uint8_t retry, halt_code, status, qnbr, quoted;
 	uint8_t current_input, current_output;
 	unsigned resume:1;
