@@ -552,10 +552,8 @@ cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix)
 	copy_cells(tmp+(prefix?1:0), p1, p1->nbr_cells);
 	cell *c = tmp + (prefix?1:0);
 
-	for (idx_t i = 0; i < p1->nbr_cells; i++, c++) {
-		if (is_bigstring(c))
-			c->flags |= FLAG_CONST;
-	}
+	for (idx_t i = 0; i < p1->nbr_cells; i++, c++)
+		ref_string(c);
 
 	return tmp;
 }
@@ -5785,7 +5783,8 @@ static int fn_loadfile_2(query *q)
 
 	s[st.st_size] = '\0';
 	fclose(fp);
-	cell tmp = make_stringn(q, s, st.st_size);
+	cell tmp;
+	new_stringn(&tmp, s, st.st_size);
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	free(s);
 	return 1;
@@ -5815,7 +5814,8 @@ static int fn_getfile_2(query *q)
 		if (line[strlen(line)-1] == '\r')
 			line[strlen(line)-1] = '\0';
 
-		cell tmp = tmp_string(q, line);
+		cell tmp;
+		new_string(&tmp, line);
 
 		if (nbr++ == 1)
 			l = alloc_list(q, &tmp);

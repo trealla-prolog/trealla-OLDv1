@@ -55,9 +55,7 @@ typedef uint32_t idx_t;
 #define is_structure(c) (is_literal(c) && (c)->arity)
 #define is_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
-#define is_smallstring(c) ((c)->flags&FLAG_SMALLSTRING)
-#define is_bigstring(c) (is_string(c) && !is_smallstring(c))
-#define is_const(c) (is_string(c) && ((c)->flags&FLAG_CONST))
+#define is_bigstring(c) (is_string(c) && !((c)->flags&FLAG_SMALLSTRING))
 
 enum {
 	TYPE_EMPTY=0,
@@ -75,18 +73,17 @@ enum {
 	FLAG_HEX=1<<1,						// only used with TYPE_INTEGER
 	FLAG_OCTAL=1<<2,					// only used with TYPE_INTEGER
 	FLAG_BINARY=1<<3,					// only used with TYPE_INTEGER
-	FLAG_SMALLSTRING=1<<4,				// only used with TYPE_STRING
-	FLAG_TAILREC=1<<5,
-	FLAG_PASSTHRU=1<<6,
+	FLAG_TAILREC=1<<4,
+	FLAG_PASSTHRU=1<<5,
+	FLAG_STREAM=1<<6,
 
-	//FLAG_SPARE1=1<<7,
-	//FLAG_SPARE2=1<<8,
+	//FLAG_SPARE2=1<<7,
+	//FLAG_SPARE3=1<<8,
 
 	FLAG_RETURN=FLAG_HEX,				// only used with TYPE_END
 	FLAG_FIRSTUSE=FLAG_HEX,				// only used with TYPE_VAR
 	FLAG_BLOB=FLAG_HEX,				    // only used with TYPE_STRING
-	FLAG_CONST=FLAG_OCTAL,			    // only used with TYPE_STRING
-	FLAG_STREAM=FLAG_SMALLSTRING,		// only used with TYPE_INTEGER
+	FLAG_SMALLSTRING=FLAG_OCTAL,	    // only used with TYPE_STRING
 	FLAG_DELETED=FLAG_HEX,				// only used by bagof
 
 	OP_FX=1<<9,
