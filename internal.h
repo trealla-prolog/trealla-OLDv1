@@ -32,6 +32,7 @@ typedef uint32_t idx_t;
 #define MAX_QUEUES 16
 #define MAX_STREAMS 64
 #define STREAM_BUFLEN 1024
+#define USE_BUILTINS 0
 
 #define GET_STR(c) ((c)->val_type != TYPE_STRING ? g_pool+((c)->val_off) : (c)->flags&FLAG_SMALLSTRING ? (c)->val_chars : (c)->val_str)
 #define LEN_STR(c) ((c->flags&FLAG_BINARY) ? c->nbytes : strlen(GET_STR(c)))

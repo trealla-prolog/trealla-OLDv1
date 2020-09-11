@@ -2538,11 +2538,13 @@ module *create_module(const char *name)
 
 	make_rule(m, "call_goal(G) :- copy_term(G,G2), G2, G2=G.");
 
+#if !USE_BUILTINS
 	make_rule(m, "A -> B ; _C :- A, !, B.");
 	make_rule(m, "_A -> _B ; C :- !, C.");
 	make_rule(m, "A -> B :- A, !, B.");
 	make_rule(m, "A ; _B :- A.");
 	make_rule(m, "_A ; B :- B.");
+#endif
 
 	make_rule(m, "phrase(P,L) :- phrase(P,L,[]).");
 	make_rule(m, "phrase(P,L,Rest) :- call(P,L,Rest).");

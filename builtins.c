@@ -4266,6 +4266,7 @@ static int fn_iso_call_n(query *q)
 	return 1;
 }
 
+#if USE_BUILTINS
 static int fn_iso_ifthen_2(query *q)
 {
 	if (q->retry)
@@ -4330,6 +4331,7 @@ static int fn_iso_disjunction_2(query *q)
 	q->st.curr_cell = tmp;
 	return 1;
 }
+#endif
 
 static int fn_iso_negation_1(query *q)
 {
@@ -8371,16 +8373,15 @@ static const struct builtins g_iso_funcs[] =
 	{",", 2, NULL, NULL},
 	{"call", 1, NULL, NULL},
 
+#if USE_BUILTINS
 	{"->", 2, fn_iso_ifthen_2, NULL},
 	{";", 2, fn_iso_disjunction_2, NULL},
+#endif
+
 	{"\\+", 1, fn_iso_negation_1, NULL},
-
 	{"once", 1, fn_iso_once_1, NULL},
-	{"ignore", 1, fn_ignore_1, "+callable"},
-
 	{"catch", 3, fn_iso_catch_3, NULL},
 	{"throw", 1, fn_iso_throw_1, NULL},
-
 	{"call", 2, fn_iso_call_n, NULL},
 	{"call", 3, fn_iso_call_n, NULL},
 	{"call", 4, fn_iso_call_n, NULL},
@@ -8388,7 +8389,6 @@ static const struct builtins g_iso_funcs[] =
 	{"call", 6, fn_iso_call_n, NULL},
 	{"call", 7, fn_iso_call_n, NULL},
 	{"call", 8, fn_iso_call_n, NULL},
-
 	{"repeat", 0, fn_iso_repeat_0, NULL},
 	{"true", 0, fn_iso_true_0, NULL},
 	{"fail", 0, fn_iso_fail_0, NULL},
@@ -8568,6 +8568,7 @@ static const struct builtins g_other_funcs[] =
 
 	// Miscellaneous...
 
+	{"ignore", 1, fn_ignore_1, "+callable"},
 	{"format", 1, fn_format_1, "+atom"},
 	{"format", 2, fn_format_2, "+atom,+list"},
 	{"format", 3, fn_format_3, "+stream,+atom,+list"},
