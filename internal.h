@@ -35,7 +35,7 @@ typedef uint32_t idx_t;
 #define USE_BUILTINS 1
 
 #define GET_STR(c) ((c)->val_type != TYPE_STRING ? g_pool+((c)->val_off) : (c)->flags&FLAG_SMALLSTRING ? (c)->val_chars : (c)->val_sbuf->val_str)
-#define LEN_STR(c) ((c->flags&FLAG_BINARY) ? c->val_sbuf->nbytes : strlen(GET_STR(c)))
+#define LEN_STR(c) ((c->flags&FLAG_BLOB) ? c->val_sbuf->nbytes : strlen(GET_STR(c)))
 
 #define GET_FRAME(i) q->frames+(i)
 #define GET_SLOT(g,i) (i) < g->nbr_slots ? q->slots+g->env+(i) : q->slots+g->overflow+((i)-g->nbr_slots)
