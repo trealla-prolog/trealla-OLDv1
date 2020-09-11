@@ -34,8 +34,8 @@ typedef uint32_t idx_t;
 #define STREAM_BUFLEN 1024
 #define USE_BUILTINS 0
 
-#define GET_STR(c) ((c)->val_type != TYPE_STRING ? g_pool+((c)->val_off) : (c)->flags&FLAG_SMALLSTRING ? (c)->val_chars : (c)->val_str)
-#define LEN_STR(c) ((c->flags&FLAG_BINARY) ? c->nbytes : strlen(GET_STR(c)))
+#define GET_STR(c) ((c)->val_type != TYPE_STRING ? g_pool+((c)->val_off) : (c)->flags&FLAG_SMALLSTRING ? (c)->val_chars : (c)->val_sbuf->val_str)
+#define LEN_STR(c) ((c->flags&FLAG_BINARY) ? c->val_sbuf->nbytes : strlen(GET_STR(c)))
 
 #define GET_FRAME(i) q->frames+(i)
 #define GET_SLOT(g,i) (i) < g->nbr_slots ? q->slots+g->env+(i) : q->slots+g->overflow+((i)-g->nbr_slots)
@@ -105,6 +105,12 @@ typedef struct clause_ clause;
 typedef struct cell_ cell;
 typedef struct parser_ parser;
 
+typedef struct sbuf_ {
+	uint32_t refcnt;			// reference count
+	uint32_t nbytes;        	// size for BLOBs
+	char val_str[];				// C-string
+} sbuf;
+
 struct cell_ {
 	struct {
 		uint8_t val_type;
@@ -118,12 +124,6 @@ struct cell_ {
 			union {
 				rule *match;				// rules
 				int (*fn)(query*);			// builtins
-
-				struct {
-					uint32_t nbytes;        // slice size for BLOBs
-					uint32_t refcnt;		// use for strings
-				};
-
 				uint16_t precedence;		// ops parsing
 				uint8_t slot_nbr;			// vars
 				int_t val_den;				// rational denominator
@@ -133,8 +133,8 @@ struct cell_ {
 				int_t val_num;				// rational numerator
 				double val_flt;				// float
 				unsigned val_off;			// offset to string in pool
-				char *val_str;				// C-string
 				cell *val_ptr;				// indirect
+				sbuf *val_sbuf;				// buf string
 			};
 		};
 
@@ -342,6 +342,37 @@ extern idx_t g_gt_s, g_eq_s, g_sys_elapsed_s, g_sys_queue_s;
 extern stream g_streams[MAX_STREAMS];
 extern module *g_modules;
 extern char *g_pool;
+
+#define ref_string(c) if (is_bigstring(c)) (c)->val_sbuf->refcnt++
+#define deref_string(c) if (is_bigstring(c) && !--(c)->val_sbuf->refcnt) free((c)->val_sbuf)
+
+inline static void new_string(cell *c, const char *s)
+{
+	c->val_type = TYPE_STRING;
+	c->nbr_cells = 1;
+	c->flags = 0;
+	c->arity = 0;
+	size_t len = strlen(s);
+	c->val_sbuf = malloc(sizeof(sbuf)+len+1);
+	c->val_sbuf->refcnt = 1;
+	c->val_sbuf->nbytes = len;
+	memcpy(c->val_sbuf->val_str, s, len);
+	c->val_sbuf->val_str[len] = '\0';
+}
+
+inline static void new_stringn(cell *c, const char *s, uint32_t n)
+{
+	c->val_type = TYPE_STRING;
+	c->flags = FLAG_BLOB;
+	c->nbr_cells = 1;
+	c->arity = 0;
+	size_t len = n;
+	c->val_sbuf = malloc(sizeof(sbuf)+len+1);
+	c->val_sbuf->refcnt = 1;
+	c->val_sbuf->nbytes = len;
+	memcpy(c->val_sbuf->val_str, s, len);
+	c->val_sbuf->val_str[len] = '\0';
+}
 
 static inline idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 {

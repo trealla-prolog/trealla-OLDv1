@@ -258,12 +258,19 @@ static cell *alloc_heap(query *q, idx_t nbr_cells)
 static idx_t heap_used(const query *q) { return q->st.hp; }
 static cell *get_heap(const query *q, idx_t i) { return q->arenas->heap + i; }
 
-static cell *alloc_string(query *q, char *s, int take)
+static cell *alloc_string(query *q, const char *s)
 {
 	cell *tmp = alloc_heap(q, 1);
 	tmp->val_type = TYPE_STRING;
-	tmp->nbr_cells = 1;
-	tmp->val_str = take ? s : strdup(s);
+	new_string(tmp, s);
+	return tmp;
+}
+
+static cell *alloc_stringn(query *q, const char *s, uint32_t n)
+{
+	cell *tmp = alloc_heap(q, 1);
+	tmp->val_type = TYPE_STRING;
+	new_stringn(tmp, s, n);
 	return tmp;
 }
 
@@ -374,13 +381,8 @@ static cell tmp_string(query *q, const char *s)
 
 	if (strlen(s) < MAX_SMALL_STRING) {
 		make_small(&tmp, s);
-	} else {
-		tmp.val_type = TYPE_STRING;
-		tmp.val_str = strdup(s);
-		tmp.nbr_cells = 1;
-		tmp.flags = 0;
-		tmp.arity = 0;
-	}
+	} else
+		new_string(&tmp, s);
 
 	return tmp;
 }
@@ -391,13 +393,8 @@ static cell tmp_stringn(query *q, const char *s, size_t n)
 
 	if (strlen(s) < MAX_SMALL_STRING) {
 		make_smalln(&tmp, s, n);
-	} else {
-		tmp.val_type = TYPE_STRING;
-		tmp.val_str = strndup(s, n);
-		tmp.nbr_cells = 1;
-		tmp.flags = 0;
-		tmp.arity = 0;
-	}
+	} else
+		new_stringn(&tmp, s, n);
 
 	return tmp;
 }
@@ -406,10 +403,10 @@ static cell make_string(query *q, const char *s)
 {
 	cell tmp;
 
-	if (strlen(s) < MAX_SMALL_STRING) {
+	if (strlen(s) < MAX_SMALL_STRING)
 		make_small(&tmp, s);
-	} else
-		tmp = *alloc_string(q, (char*)s, 0);
+	else
+		tmp = *alloc_string(q, s);
 
 	return tmp;
 }
@@ -421,36 +418,8 @@ static cell make_stringn(query *q, const char *s, size_t n)
 	if (n < MAX_SMALL_STRING) {
 		make_smalln(&tmp, s, n);
 	} else
-		tmp = *alloc_string(q, strndup(s, n), 1);
+		alloc_stringn(q, s, n);
 
-	return tmp;
-}
-
-static cell take_string(query *q, char *s)
-{
-	cell tmp;
-
-	if (strlen(s) < MAX_SMALL_STRING) {
-		make_small(&tmp, s);
-		free(s);
-	} else
-		tmp = *alloc_string(q, s, 1);
-
-	return tmp;
-}
-
-static cell take_blob(query *q, const char *s, size_t n)
-{
-	cell tmp;
-
-	if (n < MAX_SMALL_STRING) {
-		make_smalln(&tmp, s, n);
-		return tmp;
-	}
-
-	tmp = *alloc_string(q, strndup(s, n), 1);
-	tmp.flags |= FLAG_BLOB;
-	tmp.nbytes = n;
 	return tmp;
 }
 
@@ -491,9 +460,7 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	copy_cells(tmp, p1, 1);
 
 	if (!is_structure(p1)) {
-		if (is_bigstring(p1))
-			tmp->val_str = strdup(p1->val_str);
-
+		ref_string(p1);
 		return;
 	}
 
@@ -536,9 +503,7 @@ static void deep_clone2_to_heap(query *q, cell *p1, idx_t p1_ctx)
 	copy_cells(tmp, p1, 1);
 
 	if (!is_structure(p1)) {
-		if (is_bigstring(p1) && !is_const(p1))
-			tmp->val_str = strdup(p1->val_str);
-
+		ref_string(p1);
 		return;
 	}
 
@@ -860,7 +825,7 @@ static int fn_iso_atom_chars_2(query *q)
 		tmp.flags |= FLAG_SMALLSTRING;
 		strcpy(tmp.val_chars, tmpbuf);
 	} else
-		tmp.val_str = strdup(tmpbuf);
+		new_string(&tmp, tmpbuf);
 
 	src += nbytes;
 	cell *l = alloc_list(q, &tmp);
@@ -1019,7 +984,7 @@ static int fn_iso_number_chars_2(query *q)
 		tmp.flags |= FLAG_SMALLSTRING;
 		strcpy(tmp.val_chars, src);
 	} else
-		tmp.val_str = strdup(src);
+		new_string(&tmp, src);
 
 	cell *l = alloc_list(q, &tmp);
 
@@ -1225,10 +1190,12 @@ static int do_atom_concat_3(query *q)
 
 	GET_RAW_ARG(1,p1_raw);
 	GET_RAW_ARG(2,p2_raw);
-	cell tmp = take_string(q, dst1);
+	cell tmp = make_string(q, dst1);
 	reset_value(q, p1_raw, p1_raw_ctx, &tmp, q->st.curr_frame);
-	tmp = take_string(q, dst2);
+	tmp = make_string(q, dst2);
 	reset_value(q, p2_raw, p2_raw_ctx, &tmp, q->st.curr_frame);
+	free(dst2);
+	free(dst1);
 
 	if (!done)
 		make_choice(q);
@@ -1286,7 +1253,8 @@ static int fn_iso_atom_concat_3(query *q)
 		memcpy(dst, src1, len1);
 		memcpy(dst+len1, src2, len2);
 		dst[nbytes] = '\0';
-		cell tmp = take_blob(q, dst, nbytes);
+		cell tmp = make_stringn(q, dst, nbytes);
+		free(dst);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		return 1;
 	}
@@ -1296,8 +1264,9 @@ static int fn_iso_atom_concat_3(query *q)
 			return 0;
 
 		char *dst = strndup(GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
-		cell tmp = take_string(q, dst);
+		cell tmp = make_string(q, dst);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+		free(dst);
 		return 1;
 	}
 
@@ -1306,8 +1275,9 @@ static int fn_iso_atom_concat_3(query *q)
 			return 0;
 
 		char *dst = strdup(GET_STR(p3)+LEN_STR(p1));
-		cell tmp = take_string(q, dst);
+		cell tmp = make_string(q, dst);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		free(dst);
 		return 1;
 	}
 
@@ -4503,7 +4473,7 @@ static int fn_iso_functor_3(query *q)
 	tmp.val_type = TYPE_LITERAL;
 	tmp.nbr_cells = 1;
 	tmp.match = p1->match;
-	tmp.val_str = p1->val_str;
+	tmp.val_off = p1->val_off;
 
 	if (!unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 		return 0;
@@ -5815,8 +5785,9 @@ static int fn_loadfile_2(query *q)
 
 	s[st.st_size] = '\0';
 	fclose(fp);
-	cell tmp = take_blob(q, s, st.st_size);
+	cell tmp = make_stringn(q, s, st.st_size);
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	free(s);
 	return 1;
 }
 
@@ -6270,8 +6241,9 @@ static int fn_bread_3(query *q)
 			}
 		}
 
-		cell tmp = take_blob(q, str->data, str->data_len);
+		cell tmp = make_stringn(q, str->data, str->data_len);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		free(str->data);
 		str->data = NULL;
 		return 1;
 	}
@@ -6285,8 +6257,9 @@ static int fn_bread_3(query *q)
 		size_t nbytes = stream_read(str->data, str->alloc_nbytes, str);
 		str->data[nbytes] = '\0';
 		str->data = realloc(str->data, nbytes+1);
-		cell tmp = take_blob(q, str->data, nbytes);
+		cell tmp = make_stringn(q, str->data, nbytes);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		free(str->data);
 		str->data = NULL;
 		return 1;
 	}
@@ -6312,8 +6285,9 @@ static int fn_bread_3(query *q)
 	cell tmp1;
 	make_int(&tmp1, str->data_len);
 	set_var(q, p1, p1_ctx, &tmp1, q->st.curr_frame);
-	cell tmp2 = take_blob(q, str->data, str->data_len);
+	cell tmp2 = make_stringn(q, str->data, str->data_len);
 	set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
+	free(str->data);
 	str->data = NULL;
 	return 1;
 }
@@ -6385,7 +6359,8 @@ static int fn_term_to_atom_2(query *q)
 		free(dst);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else {
-		cell tmp = take_string(q, dst);
+		cell tmp = make_string(q, dst);
+		free(dst);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 }
@@ -6414,7 +6389,8 @@ static int fn_write_term_to_atom_3(query *q)
 		free(dst);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else {
-		cell tmp = take_string(q, dst);
+		cell tmp = make_string(q, dst);
+		free(dst);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 }
@@ -6591,10 +6567,8 @@ static int fn_spawn_n(query *q)
 		n += copy_cells(tmp2, p2, p2->nbr_cells);
 		cell *c = tmp2;
 
-		for (idx_t i = 0; i < p2->nbr_cells; i++, c++) {
-			if (is_bigstring(c))
-				c->val_str = strdup(c->val_str);
-		}
+		for (idx_t i = 0; i < p2->nbr_cells; i++, c++)
+			ref_string(c);
 
 		arity++;
 	}
@@ -6643,16 +6617,7 @@ static int fn_send_1(query *q)
 
 	for (idx_t i = 0; i < c->nbr_cells; i++) {
 		cell *c2 = c + i;
-
-		if (is_string(c2) && !(c2->flags&FLAG_SMALLSTRING)) {
-			if ((c2->flags&FLAG_BLOB)) {
-				size_t nbytes = c2->nbytes;
-				char *tmp = malloc(nbytes + 1);
-				memcpy(tmp, c2->val_str, nbytes+1);
-				c2->val_str = tmp;
-			} else
-				c2->val_str = strdup(c2->val_str);
-		}
+		ref_string(c2);
 	}
 
 	alloc_queue(dstq, c);
@@ -7313,7 +7278,8 @@ static int fn_string_lower_2(query *q)
 		s++;
 	}
 
-	cell tmp = take_string(q, tmps);
+	cell tmp = make_string(q, tmps);
+	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7329,7 +7295,8 @@ static int fn_string_upper_2(query *q)
 		s++;
 	}
 
-	cell tmp = take_string(q, tmps);
+	cell tmp = make_string(q, tmps);
+	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7843,7 +7810,7 @@ static int fn_uuid_1(query *q)
     uuid_gen(&u);
     char tmpbuf[128];
     uuid_to_string(&u, tmpbuf, sizeof(tmpbuf));
-	cell *tmp = alloc_string(q, tmpbuf, 0);
+	cell *tmp = alloc_string(q, tmpbuf);
 	set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	return 1;
 }
@@ -7910,8 +7877,9 @@ static int fn_atomic_concat_3(query *q)
 		memcpy(dst, src1, len1);
 		memcpy(dst+len1, src2, len2);
 		dst[nbytes] = '\0';
-		cell tmp = take_blob(q, dst, nbytes);
+		cell tmp = make_stringn(q, dst, nbytes);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+		free(dst);
 		return 1;
 	}
 
@@ -7920,8 +7888,9 @@ static int fn_atomic_concat_3(query *q)
 			return 0;
 
 		char *dst = strndup(GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
-		cell tmp = take_string(q, dst);
+		cell tmp = make_string(q, dst);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+		free(dst);
 		return 1;
 	}
 
@@ -7930,8 +7899,9 @@ static int fn_atomic_concat_3(query *q)
 			return 0;
 
 		char *dst = strdup(GET_STR(p3)+LEN_STR(p1));
-		cell tmp = take_string(q, dst);
+		cell tmp = make_string(q, dst);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		free(dst);
 		return 1;
 	}
 

@@ -267,9 +267,7 @@ int retry_choice(query *q)
 	for (idx_t i = ch->st.hp; i < q->st.hp; i++) {
 		cell *c = &q->arenas->heap[i];
 
-		if (is_bigstring(c) && !is_const(c)) {
-			free(c->val_str);
-		} else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
+		if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 			stream *str = &g_streams[c->val_num];
 
 			if (str->fp) {
@@ -280,7 +278,8 @@ int retry_choice(query *q)
 				free(str->name);
 				memset(str, 0, sizeof(stream));
 			}
-		}
+		} else
+			deref_string(c);
 
 		c->val_type = TYPE_EMPTY;
 	}
@@ -571,7 +570,7 @@ static int unify_float(cell *p1, cell *p2)
 	return 0;
 }
 
-#define GET_STR2(c) ((c)->flags&FLAG_SMALLSTRING ? (c)->val_chars : (c)->val_str)
+#define GET_STR2(c) ((c)->flags&FLAG_SMALLSTRING ? (c)->val_chars : (c)->val_sbuf->val_str)
 
 static int unify_literal(cell *p1, cell *p2)
 {

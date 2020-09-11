@@ -580,10 +580,7 @@ void clear_term(term *t)
 {
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
-
-		if (is_bigstring(c) && !is_const(c))
-			free(c->val_str);
-
+		deref_string(c);
 		c->val_type = TYPE_EMPTY;
 	}
 
@@ -696,9 +693,7 @@ void destroy_query(query *q)
 		for (idx_t i = 0; (i < a->hp) && (a == q->arenas); i++) {
 			cell *c = &a->heap[i];
 
-			if (is_bigstring(c) && !is_const(c))
-				free(c->val_str);
-			else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
+			if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 				stream *str = &g_streams[c->val_num];
 
 				if (str->fp) {
@@ -709,7 +704,8 @@ void destroy_query(query *q)
 					free(str->name);
 					memset(str, 0, sizeof(stream));
 				}
-			}
+			} else
+				deref_string(c);
 		}
 
 		arena *save = a;
@@ -2257,7 +2253,7 @@ int parser_tokenize(parser *p, int args, int consing)
 				c->flags |= FLAG_SMALLSTRING;
 				strcpy(c->val_chars, p->token);
 			} else
-				c->val_str = strdup(p->token);
+				new_string(c, p->token);
 		}
 	}
 
