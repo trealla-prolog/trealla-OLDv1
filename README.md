@@ -30,16 +30,10 @@ There are no dependencies except OpenSSL, which can removed by:
 
 	make nossl
 
-Run...
+A 'make debug' compiles in <1s with TCC & ~2s with GCC & CLANG.
 
-	make debug
-	make valgrind
-
-to do the tests under valgrind memory checking.
-
-A 'make debug' build compiles in 0.17s with TCC, 1.8s with CLANG & 2.1s
-with GCC. Should build on any Unix-like system with a C99 compiler.
-Has been tested on Manjaro, Ubuntu 20.04, FreeBSD 12.1 and Raspbian
+Should build on any Unix-like system with a C99 compiler. Has been
+tested on Manjaro, Ubuntu 20.04, FreeBSD 12.1 and Raspbian
 (32 & 64-bit) systems.
 
 
