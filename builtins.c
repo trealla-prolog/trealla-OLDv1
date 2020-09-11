@@ -4185,11 +4185,9 @@ int call_me(query *q, cell *p1)
 		return 0;
 	}
 
-	int local_ctx = p1_ctx == q->st.curr_frame;
 	cell *tmp;
 
-	if ((p1_ctx != q->st.curr_frame) && !local_ctx) {
-		printf("*** here\n");
+	if (p1_ctx != q->st.curr_frame) {
 		tmp = copy_to_heap(q, p1, 1);
 		unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	} else

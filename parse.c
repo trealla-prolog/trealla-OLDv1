@@ -2534,7 +2534,15 @@ module *create_module(const char *name)
 	m->cpu_count = CPU_COUNT;
 	m->iso_only = 0;
 
+	// Meta-rules...
+
 	make_rule(m, "call_goal(G) :- copy_term(G,G2), G2, G2=G.");
+
+	make_rule(m, "A -> B ; _C :- A, !, B.");
+	make_rule(m, "_A -> _B ; C :- !, C.");
+	make_rule(m, "A -> B :- A, !, B.");
+	make_rule(m, "A ; _B :- A.");
+	make_rule(m, "_A ; B :- B.");
 
 	make_rule(m, "phrase(P,L) :- phrase(P,L,[]).");
 	make_rule(m, "phrase(P,L,Rest) :- call(P,L,Rest).");
