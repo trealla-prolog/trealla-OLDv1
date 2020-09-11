@@ -25,7 +25,7 @@ typedef __uint64_t uint_t;
 
 typedef uint32_t idx_t;
 
-#define MAX_SMALL_STRING (MAX(sizeof(int_t),sizeof(void*))*2)
+#define MAX_SMALL_STRING (MAX(sizeof(int_t),sizeof(void*))*4)
 #define MAX_VAR_POOL_SIZE 1000
 #define MAX_ARITY UCHAR_MAX
 #define MAX_USER_OPS 100

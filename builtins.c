@@ -376,9 +376,10 @@ static cell tmp_string(query *q, const char *s)
 		make_small(&tmp, s);
 	} else {
 		tmp.val_type = TYPE_STRING;
+		tmp.val_str = strdup(s);
 		tmp.nbr_cells = 1;
 		tmp.flags = 0;
-		tmp.val_str = strdup(s);
+		tmp.arity = 0;
 	}
 
 	return tmp;
@@ -392,9 +393,10 @@ static cell tmp_stringn(query *q, const char *s, size_t n)
 		make_smalln(&tmp, s, n);
 	} else {
 		tmp.val_type = TYPE_STRING;
+		tmp.val_str = strndup(s, n);
 		tmp.nbr_cells = 1;
 		tmp.flags = 0;
-		tmp.val_str = strndup(s, n);
+		tmp.arity = 0;
 	}
 
 	return tmp;
