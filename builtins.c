@@ -502,7 +502,7 @@ static void deep_clone2_to_heap(query *q, cell *p1, idx_t p1_ctx)
 	copy_cells(tmp, p1, 1);
 
 	if (!is_structure(p1)) {
-		if (is_bigstring(p1))
+		if (is_bigstring(p1) && !is_const(p1))
 			tmp->val_str = strdup(p1->val_str);
 
 		return;
@@ -550,10 +550,10 @@ cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix)
 		tmp->flags = FLAG_BUILTIN;
 	}
 
-	idx_t nbr_cells = copy_cells(tmp+(prefix?1:0), p1, p1->nbr_cells);
+	copy_cells(tmp+(prefix?1:0), p1, p1->nbr_cells);
 	cell *c = tmp + (prefix?1:0);
 
-	for (idx_t i = 0; i < nbr_cells; i++, c++) {
+	for (idx_t i = 0; i < p1->nbr_cells; i++, c++) {
 		if (is_bigstring(c))
 			c->flags |= FLAG_CONST;
 	}
