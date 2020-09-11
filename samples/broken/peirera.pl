@@ -212,7 +212,7 @@ iterations(I0, _Name, Action, Control, I) :-
 do_n(N, Goal, Time) :-
 	get_cpu_time(T0),
 	(   between(1,N,_),
-	    call(Goal),
+	    call_goal(Goal),
 	    fail
 	;   get_cpu_time(T1),
 	    Time is (T1 - T0)/1000

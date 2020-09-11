@@ -260,7 +260,7 @@ struct query_ {
 	int max_depth;
 	idx_t cp, tmphp, nv_start;
 	idx_t latest_ctx, popp, qp[MAX_QUEUES];
-	idx_t nbr_frames, nbr_slots, nbr_trails, nbr_choices;
+	idx_t frames_size, slots_size, trails_size, choices_size;
 	idx_t max_choices, max_frames, max_slots, max_trails, max_heaps;
 	idx_t tot_heaps, tot_heapsize, tmpq_size[MAX_QUEUES];
 	idx_t h_size, tmph_size, q_size[MAX_QUEUES];

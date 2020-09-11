@@ -636,15 +636,15 @@ query *create_query(module *m, int is_task)
 
 	// Allocate these now...
 
-	q->nbr_frames = is_task ? INITIAL_NBR_GOALS/10 : INITIAL_NBR_GOALS;
-	q->nbr_slots = is_task ? INITIAL_NBR_SLOTS/10 : INITIAL_NBR_SLOTS;
-	q->nbr_choices = is_task ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
-	q->nbr_trails = is_task ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
+	q->frames_size = is_task ? INITIAL_NBR_GOALS/10 : INITIAL_NBR_GOALS;
+	q->slots_size = is_task ? INITIAL_NBR_SLOTS/10 : INITIAL_NBR_SLOTS;
+	q->choices_size = is_task ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
+	q->trails_size = is_task ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
 
-	q->frames = calloc(q->nbr_frames, sizeof(frame));
-	q->slots = calloc(q->nbr_slots, sizeof(slot));
-	q->choices = calloc(q->nbr_choices, sizeof(choice));
-	q->trails = calloc(q->nbr_trails, sizeof(trail));
+	q->frames = calloc(q->frames_size, sizeof(frame));
+	q->slots = calloc(q->slots_size, sizeof(slot));
+	q->choices = calloc(q->choices_size, sizeof(choice));
+	q->trails = calloc(q->trails_size, sizeof(trail));
 
 	// Allocate these later as needed...
 
@@ -2534,7 +2534,7 @@ module *create_module(const char *name)
 	m->cpu_count = CPU_COUNT;
 	m->iso_only = 0;
 
-	make_rule(m, "call(G) :- copy_term(G,G2), G2, G2=G.");
+	make_rule(m, "call_goal(G) :- copy_term(G,G2), G2, G2=G.");
 
 	make_rule(m, "phrase(P,L) :- phrase(P,L,[]).");
 	make_rule(m, "phrase(P,L,Rest) :- call(P,L,Rest).");

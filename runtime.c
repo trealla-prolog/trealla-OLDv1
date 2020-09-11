@@ -25,15 +25,15 @@ static void check_trail(query *q)
 	if (q->st.tp > q->max_trails) {
 		q->max_trails = q->st.tp;
 
-		if (q->st.tp >= q->nbr_trails) {
-			q->nbr_trails += q->nbr_trails / 2;
+		if (q->st.tp >= q->trails_size) {
+			q->trails_size += q->trails_size / 2;
 
-			if ((sizeof(trail)*q->nbr_trails) > (1024LL*1024*1024)) {
+			if ((sizeof(trail)*q->trails_size) > (1024LL*1024*1024)) {
 				fprintf(stderr, "Out of trail\n");
 				abort();
 			}
 
-			q->trails = realloc(q->trails, sizeof(trail)*q->nbr_trails);
+			q->trails = realloc(q->trails, sizeof(trail)*q->trails_size);
 			assert(q->trails);
 		}
 	}
@@ -44,15 +44,15 @@ static void check_choice(query *q)
 	if (q->cp > q->max_choices) {
 		q->max_choices = q->cp;
 
-		if (q->cp >= q->nbr_choices) {
-			q->nbr_choices += q->nbr_choices / 2;
+		if (q->cp >= q->choices_size) {
+			q->choices_size += q->choices_size / 2;
 
-			if ((sizeof(choice)*q->nbr_choices) > (1024LL*1024*1024)) {
+			if ((sizeof(choice)*q->choices_size) > (1024LL*1024*1024)) {
 				fprintf(stderr, "Out of choices\n");
 				abort();
 			}
 
-			q->choices = realloc(q->choices, sizeof(choice)*q->nbr_choices);
+			q->choices = realloc(q->choices, sizeof(choice)*q->choices_size);
 			assert(q->choices);
 		}
 	}
@@ -63,19 +63,19 @@ static void check_frame(query *q)
 	if (q->st.fp > q->max_frames) {
 		q->max_frames = q->st.fp;
 
-		if (q->st.fp >= q->nbr_frames) {
-			idx_t save_frame = q->nbr_frames;
-			q->nbr_frames += q->nbr_frames / 2;
+		if (q->st.fp >= q->frames_size) {
+			idx_t save_frame = q->frames_size;
+			q->frames_size += q->frames_size / 2;
 
-			if ((sizeof(frame)*q->nbr_frames) > (1024LL*1024*1024)) {
+			if ((sizeof(frame)*q->frames_size) > (1024LL*1024*1024)) {
 				fprintf(stderr, "Out of frames\n");
 				abort();
 			}
 
-			assert(q->nbr_frames);
-			q->frames = realloc(q->frames, sizeof(frame)*q->nbr_frames);
+			assert(q->frames_size);
+			q->frames = realloc(q->frames, sizeof(frame)*q->frames_size);
 			assert(q->frames);
-			memset(q->frames+save_frame, 0, sizeof(frame)*(q->nbr_frames-save_frame));
+			memset(q->frames+save_frame, 0, sizeof(frame)*(q->frames_size-save_frame));
 		}
 	}
 }
@@ -85,18 +85,18 @@ static void check_slot(query *q)
 	if (q->st.sp > q->max_slots) {
 		q->max_slots = q->st.sp;
 
-		if ((q->st.sp+MAX_ARITY) >= q->nbr_slots) {
-			idx_t save_slots = q->nbr_slots;
-			q->nbr_slots += q->nbr_slots / 2;
+		if ((q->st.sp+MAX_ARITY) >= q->slots_size) {
+			idx_t save_slots = q->slots_size;
+			q->slots_size += q->slots_size / 2;
 
-			if ((sizeof(slot)*q->nbr_slots) > (1024LL*1024*1024)) {
+			if ((sizeof(slot)*q->slots_size) > (1024LL*1024*1024)) {
 				fprintf(stderr, "Out of environment\n");
 				abort();
 			}
 
-			q->slots = realloc(q->slots, sizeof(slot)*q->nbr_slots);
+			q->slots = realloc(q->slots, sizeof(slot)*q->slots_size);
 			assert(q->slots);
-			memset(q->slots+save_slots, 0, sizeof(slot)*(q->nbr_slots-save_slots));
+			memset(q->slots+save_slots, 0, sizeof(slot)*(q->slots_size-save_slots));
 		}
 	}
 }
