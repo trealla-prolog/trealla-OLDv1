@@ -258,22 +258,6 @@ static cell *alloc_heap(query *q, idx_t nbr_cells)
 static idx_t heap_used(const query *q) { return q->st.hp; }
 static cell *get_heap(const query *q, idx_t i) { return q->arenas->heap + i; }
 
-static cell *alloc_string(query *q, const char *s)
-{
-	cell *tmp = alloc_heap(q, 1);
-	tmp->val_type = TYPE_STRING;
-	new_string(tmp, s);
-	return tmp;
-}
-
-static cell *alloc_stringn(query *q, const char *s, uint32_t n)
-{
-	cell *tmp = alloc_heap(q, 1);
-	tmp->val_type = TYPE_STRING;
-	new_stringn(tmp, s, n);
-	return tmp;
-}
-
 static void init_queue(query* q)
 {
 	free(q->queue[0]);
@@ -375,7 +359,7 @@ static cell *end_list(query *q, const cell *l)
 	return l2;
 }
 
-static cell tmp_string(query *q, const char *s)
+static cell make_string(query *q, const char *s)
 {
 	cell tmp;
 
@@ -387,7 +371,7 @@ static cell tmp_string(query *q, const char *s)
 	return tmp;
 }
 
-static cell tmp_stringn(query *q, const char *s, size_t n)
+static cell make_stringn(query *q, const char *s, size_t n)
 {
 	cell tmp;
 
@@ -395,30 +379,6 @@ static cell tmp_stringn(query *q, const char *s, size_t n)
 		make_smalln(&tmp, s, n);
 	} else
 		new_stringn(&tmp, s, n);
-
-	return tmp;
-}
-
-static cell make_string(query *q, const char *s)
-{
-	cell tmp;
-
-	if (strlen(s) < MAX_SMALL_STRING)
-		make_small(&tmp, s);
-	else
-		tmp = *alloc_string(q, s);
-
-	return tmp;
-}
-
-static cell make_stringn(query *q, const char *s, size_t n)
-{
-	cell tmp;
-
-	if (n < MAX_SMALL_STRING) {
-		make_smalln(&tmp, s, n);
-	} else
-		alloc_stringn(q, s, n);
 
 	return tmp;
 }
@@ -830,7 +790,7 @@ static int fn_iso_atom_chars_2(query *q)
 
 	while (*src) {
 		nbytes = len_char_utf8(src);
-		cell tmp = tmp_stringn(q, src, nbytes);
+		cell tmp = make_stringn(q, src, nbytes);
 		src += nbytes;
 		l = append_list(q, l, &tmp);
 	}
@@ -987,7 +947,7 @@ static int fn_iso_number_chars_2(query *q)
 	cell *l = alloc_list(q, &tmp);
 
 	while (*++src) {
-		cell tmp = tmp_stringn(q, src, 1);
+		cell tmp = make_stringn(q, src, 1);
 		l = append_list(q, l, &tmp);
 	}
 
@@ -4580,11 +4540,11 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		}
 
 		int i = g_avc;
-		cell tmp = tmp_string(q, g_av[i++]);
+		cell tmp = make_string(q, g_av[i++]);
 		cell *l = alloc_list(q, &tmp);
 
 		while (i < g_ac) {
-			tmp = tmp_string(q, g_av[i++]);
+			tmp = make_string(q, g_av[i++]);
 			l = append_list(q, l, &tmp);
 		}
 
@@ -5682,7 +5642,7 @@ static int fn_split_string_4(query *q)
 		while ((peek_char_utf8(start) == pad) && (pad != ch))
 			get_char_utf8(&start);
 
-		cell tmp = tmp_stringn(q, start, ptr-start);
+		cell tmp = make_stringn(q, start, ptr-start);
 
 		if (nbr++ == 1)
 			l = alloc_list(q, &tmp);
@@ -5696,7 +5656,7 @@ static int fn_split_string_4(query *q)
 		while (peek_char_utf8(start) == pad)
 			get_char_utf8(&start);
 
-		cell tmp = tmp_string(q, start);
+		cell tmp = make_string(q, start);
 
 		if (!l)
 			l = alloc_list(q, &tmp);
@@ -7810,8 +7770,8 @@ static int fn_uuid_1(query *q)
     uuid_gen(&u);
     char tmpbuf[128];
     uuid_to_string(&u, tmpbuf, sizeof(tmpbuf));
-	cell *tmp = alloc_string(q, tmpbuf);
-	set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
+	cell tmp = make_string(q, tmpbuf);
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return 1;
 }
 
