@@ -181,18 +181,18 @@ static void make_literal(cell *tmp, idx_t offset)
 static void make_small(cell *tmp, const char *s)
 {
 	tmp->val_type = TYPE_STRING;
+	tmp->flags = FLAG_SMALLSTRING;
 	tmp->nbr_cells = 1;
 	tmp->arity = 0;
-	tmp->flags = FLAG_SMALLSTRING;
 	strcpy(tmp->val_chars, s);
 }
 
 static void make_smalln(cell *tmp, const char *s, size_t n)
 {
 	tmp->val_type = TYPE_STRING;
+	tmp->flags = FLAG_SMALLSTRING;
 	tmp->nbr_cells = 1;
 	tmp->arity = 0;
-	tmp->flags = FLAG_SMALLSTRING;
 	memcpy(tmp->val_chars, s, n);
 	tmp->val_chars[n] = '\0';
 }
@@ -363,9 +363,9 @@ static cell make_string(query *q, const char *s)
 {
 	cell tmp;
 
-	if (strlen(s) < MAX_SMALL_STRING) {
+	if (strlen(s) < MAX_SMALL_STRING)
 		make_small(&tmp, s);
-	} else
+	else
 		new_string(&tmp, s);
 
 	return tmp;
@@ -375,9 +375,9 @@ static cell make_stringn(query *q, const char *s, size_t n)
 {
 	cell tmp;
 
-	if (strlen(s) < MAX_SMALL_STRING) {
+	if (strlen(s) < MAX_SMALL_STRING)
 		make_smalln(&tmp, s, n);
-	} else
+	 else
 		new_stringn(&tmp, s, n);
 
 	return tmp;
