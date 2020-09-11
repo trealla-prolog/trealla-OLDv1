@@ -368,6 +368,38 @@ static cell *end_list(query *q, const cell *l)
 	return l2;
 }
 
+static cell tmp_string(query *q, const char *s)
+{
+	cell tmp;
+
+	if (strlen(s) < MAX_SMALL_STRING) {
+		make_small(&tmp, s);
+	} else {
+		tmp.val_type = TYPE_STRING;
+		tmp.nbr_cells = 1;
+		tmp.flags = 0;
+		tmp.val_str = strdup(s);
+	}
+
+	return tmp;
+}
+
+static cell tmp_stringn(query *q, const char *s, size_t n)
+{
+	cell tmp;
+
+	if (strlen(s) < MAX_SMALL_STRING) {
+		make_smalln(&tmp, s, n);
+	} else {
+		tmp.val_type = TYPE_STRING;
+		tmp.nbr_cells = 1;
+		tmp.flags = 0;
+		tmp.val_str = strndup(s, n);
+	}
+
+	return tmp;
+}
+
 static cell make_string(query *q, const char *s)
 {
 	cell tmp;
@@ -833,7 +865,7 @@ static int fn_iso_atom_chars_2(query *q)
 
 	while (*src) {
 		nbytes = len_char_utf8(src);
-		cell tmp = make_stringn(q, src, nbytes);
+		cell tmp = tmp_stringn(q, src, nbytes);
 		src += nbytes;
 		l = append_list(q, l, &tmp);
 	}
@@ -990,7 +1022,7 @@ static int fn_iso_number_chars_2(query *q)
 	cell *l = alloc_list(q, &tmp);
 
 	while (*++src) {
-		cell tmp = make_stringn(q, src, 1);
+		cell tmp = tmp_stringn(q, src, 1);
 		l = append_list(q, l, &tmp);
 	}
 
@@ -4580,7 +4612,7 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		cell *l = alloc_list(q, &tmp);
 
 		while (i < g_ac) {
-			tmp = make_string(q, g_av[i++]);
+			tmp = tmp_string(q, g_av[i++]);
 			l = append_list(q, l, &tmp);
 		}
 
@@ -5678,7 +5710,7 @@ static int fn_split_string_4(query *q)
 		while ((peek_char_utf8(start) == pad) && (pad != ch))
 			get_char_utf8(&start);
 
-		cell tmp = make_stringn(q, start, ptr-start);
+		cell tmp = tmp_stringn(q, start, ptr-start);
 
 		if (nbr++ == 1)
 			l = alloc_list(q, &tmp);
@@ -5692,13 +5724,12 @@ static int fn_split_string_4(query *q)
 		while (peek_char_utf8(start) == pad)
 			get_char_utf8(&start);
 
-		if (!l) {
-			cell tmp = make_string(q, start);
+		cell tmp = tmp_string(q, start);
+
+		if (!l)
 			l = alloc_list(q, &tmp);
-		} else {
-			cell tmp = make_string(q, start);
+		else
 			l = append_list(q, l, &tmp);
-		}
 	}
 
 	l = end_list(q, l);
@@ -5809,7 +5840,7 @@ static int fn_getfile_2(query *q)
 		if (line[strlen(line)-1] == '\r')
 			line[strlen(line)-1] = '\0';
 
-		cell tmp = make_string(q, line);
+		cell tmp = tmp_string(q, line);
 
 		if (nbr++ == 1)
 			l = alloc_list(q, &tmp);
