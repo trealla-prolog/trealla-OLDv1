@@ -449,7 +449,7 @@ static cell take_blob(query *q, const char *s, size_t n)
 	}
 
 	tmp = *alloc_string(q, strndup(s, n), 1);
-	tmp.flags |= FLAG_SLICE;
+	tmp.flags |= FLAG_BLOB;
 	tmp.nbytes = n;
 	return tmp;
 }
@@ -6643,7 +6643,7 @@ static int fn_send_1(query *q)
 		cell *c2 = c + i;
 
 		if (is_string(c2) && !(c2->flags&FLAG_SMALLSTRING)) {
-			if ((c2->flags&FLAG_SLICE)) {
+			if ((c2->flags&FLAG_BLOB)) {
 				size_t nbytes = c2->nbytes;
 				char *tmp = malloc(nbytes + 1);
 				memcpy(tmp, c2->val_str, nbytes+1);

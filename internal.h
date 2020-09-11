@@ -25,7 +25,7 @@ typedef __uint64_t uint_t;
 
 typedef uint32_t idx_t;
 
-#define MAX_SMALL_STRING (MAX(sizeof(int_t),sizeof(void*))*4)
+#define MAX_SMALL_STRING (MAX(sizeof(int_t),sizeof(void*))*2)
 #define MAX_VAR_POOL_SIZE 1000
 #define MAX_ARITY UCHAR_MAX
 #define MAX_USER_OPS 100
@@ -83,7 +83,7 @@ enum {
 
 	FLAG_RETURN=FLAG_HEX,				// only used with TYPE_END
 	FLAG_FIRSTUSE=FLAG_HEX,				// only used with TYPE_VAR
-	FLAG_SLICE=FLAG_HEX,			    // only used with TYPE_STRING
+	FLAG_BLOB=FLAG_HEX,				    // only used with TYPE_STRING
 	FLAG_CONST=FLAG_OCTAL,			    // only used with TYPE_STRING
 	FLAG_STREAM=FLAG_SMALLSTRING,		// only used with TYPE_INTEGER
 	FLAG_DELETED=FLAG_HEX,				// only used by bagof
