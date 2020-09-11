@@ -4608,7 +4608,7 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		}
 
 		int i = g_avc;
-		cell tmp = make_string(q, g_av[i++]);
+		cell tmp = tmp_string(q, g_av[i++]);
 		cell *l = alloc_list(q, &tmp);
 
 		while (i < g_ac) {
