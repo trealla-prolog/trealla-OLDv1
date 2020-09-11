@@ -5418,6 +5418,12 @@ static int fn_listing_1(query *q)
 	GET_FIRST_ARG(p1,literal);
 	idx_t name = p1->val_off;
 	unsigned arity = -1;
+
+	if (p1->arity) {
+		name = (p1+1)->val_off;
+		arity = (p1+2)->val_int;
+	}
+
 	save_name(stdout, q, name, arity);
 	return 1;
 }
