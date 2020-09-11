@@ -336,9 +336,9 @@ static int compkey(const void *ptr1, const void *ptr2)
 
 	if (is_integer(p1)) {
 		if (is_integer(p2)) {
-			if (p1->val_int < p2->val_int)
+			if (p1->val_num < p2->val_num)
 				return -1;
-			else if (p1->val_int > p2->val_int)
+			else if (p1->val_num > p2->val_num)
 				return 1;
 			else
 				return 0;
@@ -699,7 +699,7 @@ void destroy_query(query *q)
 			if (is_bigstring(c) && !is_const(c))
 				free(c->val_str);
 			else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
-				stream *str = &g_streams[c->val_int];
+				stream *str = &g_streams[c->val_num];
 
 				if (str->fp) {
 					fclose(str->fp);
@@ -828,7 +828,7 @@ static void directives(parser *p, term *t)
 				cell tmp;
 				tmp.val_type = TYPE_LITERAL;
 				tmp.val_off = find_in_pool(GET_STR(f));
-				tmp.arity = a->val_int;
+				tmp.arity = a->val_num;
 				rule *h = create_rule(p->m, &tmp);
 				h->is_public = 1;
 			}
@@ -897,7 +897,7 @@ static void directives(parser *p, term *t)
 				if (!is_literal(c_name)) return;
 				cell *c_arity = p1 + 2;
 				if (!is_integer(c_arity)) return;
-				set_dynamic_in_db(p->m, GET_STR(c_name), c_arity->val_int);
+				set_dynamic_in_db(p->m, GET_STR(c_name), c_arity->val_num);
 				p1 += p1->nbr_cells;
 			} else
 				p1 += 1;
@@ -916,7 +916,7 @@ static void directives(parser *p, term *t)
 				if (!is_literal(c_name)) return;
 				cell *c_arity = p1 + 2;
 				if (!is_integer(c_arity)) return;
-				set_persist_in_db(p->m, GET_STR(c_name), c_arity->val_int);
+				set_persist_in_db(p->m, GET_STR(c_name), c_arity->val_num);
 				p1 += p1->nbr_cells;
 			} else
 				p1 += 1;
@@ -998,7 +998,7 @@ static void directives(parser *p, term *t)
 			return;
 		}
 
-		if (!set_op(p->m, GET_STR(p3), optype, p1->val_int)) {
+		if (!set_op(p->m, GET_STR(p3), optype, p1->val_num)) {
 			fprintf(stderr, "Error: could not set op\n");
 			return;
 		}

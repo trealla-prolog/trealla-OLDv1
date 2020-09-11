@@ -270,7 +270,7 @@ int retry_choice(query *q)
 		if (is_bigstring(c) && !is_const(c)) {
 			free(c->val_str);
 		} else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
-			stream *str = &g_streams[c->val_int];
+			stream *str = &g_streams[c->val_num];
 
 			if (str->fp) {
 				fclose(str->fp);

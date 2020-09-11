@@ -117,11 +117,11 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 
 	if (is_rational(c)) {
 		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY))) {
-			dst += snprintf(dst, dstlen, "%s0x", c->val_int<0?"-":"");
-			dst += sprint_int(dst, dstlen, c->val_int, 16);
+			dst += snprintf(dst, dstlen, "%s0x", c->val_num<0?"-":"");
+			dst += sprint_int(dst, dstlen, c->val_num, 16);
 		} else if ((c->flags & FLAG_OCTAL) && !running) {
-			dst += snprintf(dst, dstlen, "%s0o", c->val_int<0?"-":"");
-			dst += sprint_int(dst, dstlen, c->val_int, 8);
+			dst += snprintf(dst, dstlen, "%s0o", c->val_num<0?"-":"");
+			dst += sprint_int(dst, dstlen, c->val_num, 8);
 		} else if (c->val_den != 1) {
 			if (q->m->flag.rational_syntax_natural) {
 				dst += sprint_int(dst, dstlen, c->val_num, 10);
@@ -133,7 +133,7 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 				dst += sprint_int(dst, dstlen, c->val_den, 10);
 			}
 		} else
-			dst += sprint_int(dst, dstlen, c->val_int, 10);
+			dst += sprint_int(dst, dstlen, c->val_num, 10);
 
 		return dst - save_dst;
 	}
@@ -209,11 +209,11 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 	if (is_rational(c)) {
 		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY)) && !running) {
-			dst += snprintf(dst, dstlen, "%s0x", c->val_int<0?"-":"");
-			dst += sprint_int(dst, dstlen, c->val_int, 16);
+			dst += snprintf(dst, dstlen, "%s0x", c->val_num<0?"-":"");
+			dst += sprint_int(dst, dstlen, c->val_num, 16);
 		} else if ((c->flags & FLAG_OCTAL) && !running) {
-			dst += snprintf(dst, dstlen, "%s0o", c->val_int<0?"-":"");
-			dst += sprint_int(dst, dstlen, c->val_int, 8);
+			dst += snprintf(dst, dstlen, "%s0o", c->val_num<0?"-":"");
+			dst += sprint_int(dst, dstlen, c->val_num, 8);
 		} else if (c->val_den != 1) {
 			if (q->m->flag.rational_syntax_natural) {
 				dst += sprint_int(dst, dstlen, c->val_num, 10);
@@ -225,7 +225,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 				dst += sprint_int(dst, dstlen, c->val_den, 10);
 			}
 		} else
-			dst += sprint_int(dst, dstlen, c->val_int, 10);
+			dst += sprint_int(dst, dstlen, c->val_num, 10);
 
 		return dst - save_dst;
 	}

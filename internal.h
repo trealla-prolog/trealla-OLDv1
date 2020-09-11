@@ -118,14 +118,18 @@ struct cell_ {
 			union {
 				rule *match;				// rules
 				int (*fn)(query*);			// builtins
-				size_t nbytes;              // slice size
+
+				struct {
+					uint32_t nbytes;        // slice size for BLOBs
+					uint32_t refcnt;		// use for strings
+				};
+
 				uint16_t precedence;		// ops parsing
 				uint8_t slot_nbr;			// vars
 				int_t val_den;				// rational denominator
 			};
 
 			union {
-				int_t val_int;				// integer
 				int_t val_num;				// rational numerator
 				double val_flt;				// float
 				unsigned val_off;			// offset to string in pool

@@ -132,7 +132,7 @@ static void make_int(cell *tmp, int_t v)
 	tmp->val_type = TYPE_INTEGER;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
-	tmp->val_int = v;
+	tmp->val_num = v;
 	tmp->val_den = 1;
 }
 
@@ -632,7 +632,7 @@ static int fn_iso_halt_0(query *q)
 static int fn_iso_halt_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	q->halt_code = p1->val_int;
+	q->halt_code = p1->val_num;
 	q->halt = q->error = 1;
 	return 0;
 }
@@ -743,7 +743,7 @@ static int fn_iso_current_rule_1(query *q)
 	}
 
 	const char *functor = GET_STR(pf);
-	unsigned arity = pa->val_int;
+	unsigned arity = pa->val_num;
 	module *m = q->m;
 
 	if (strchr(functor, ':')) {
@@ -903,7 +903,7 @@ static int fn_iso_atom_codes_2(query *q)
 				return 0;
 			}
 
-			int_t val = head->val_int;
+			int_t val = head->val_num;
 			char ch[10];
 			put_char_utf8(ch, val);
 			size_t nlen = dst - tmpbuf;
@@ -1006,7 +1006,7 @@ static int fn_iso_number_chars_2(query *q)
 	}
 
 	char tmpbuf[256];
-	sprint_int(tmpbuf, sizeof(tmpbuf), p1->val_int, 10);
+	sprint_int(tmpbuf, sizeof(tmpbuf), p1->val_num, 10);
 	const char *src = tmpbuf;
 
 	cell tmp;
@@ -1055,7 +1055,7 @@ static int fn_iso_number_codes_2(query *q)
 				return 0;
 			}
 
-			int ch = head->val_int;
+			int ch = head->val_num;
 
 			if ((ch < '0') || (ch > '9')) {
 				throw_error(q, head, "domain_error", "digit");
@@ -1086,7 +1086,7 @@ static int fn_iso_number_codes_2(query *q)
 	}
 
 	char tmpbuf[256];
-	sprint_int(tmpbuf, sizeof(tmpbuf), p1->val_int, 10);
+	sprint_int(tmpbuf, sizeof(tmpbuf), p1->val_num, 10);
 	const char *src = tmpbuf;
 	cell tmp;
 	make_int(&tmp, *src);
@@ -1115,10 +1115,10 @@ static int fn_iso_sub_atom_5(query *q)
 		make_choice(q);
 
 		if (!is_var(p2))
-			before = p2->val_int;
+			before = p2->val_num;
 
 		if (!is_var(p3)) {
-			len = p3->val_int;
+			len = p3->val_num;
 			set_pinned(q, 3);
 		}
 	} else {
@@ -1128,7 +1128,7 @@ static int fn_iso_sub_atom_5(query *q)
 		len = v2;
 
 		if (is_pinned(q, 3)) {
-			len = p3->val_int;
+			len = p3->val_num;
 			before++;
 
 			if ((before+len) > LEN_STR(p1)) {
@@ -1372,17 +1372,17 @@ static int get_stream(query *q, cell *p1)
 		return -1;
 	}
 
-	if ((p1->val_int < 0) || (p1->val_int >= MAX_STREAMS)) {
+	if ((p1->val_num < 0) || (p1->val_num >= MAX_STREAMS)) {
 		throw_error(q, p1, "type_error", "stream");
 		return -1;
 	}
 
-	if (!g_streams[p1->val_int].fp) {
+	if (!g_streams[p1->val_num].fp) {
 		throw_error(q, p1, "type_error", "stream");
 		return -1;
 	}
 
-	return p1->val_int;
+	return p1->val_num;
 }
 
 static int fn_iso_current_input_1(query *q)
@@ -1462,7 +1462,7 @@ static int fn_iso_set_stream_position_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,integer);
-	return !fseeko(str->fp, p1->val_int, SEEK_SET);
+	return !fseeko(str->fp, p1->val_num, SEEK_SET);
 }
 
 static int fn_iso_open_3(query *q)
@@ -1866,7 +1866,7 @@ static void parse_write_params(query *q, cell *p)
 
 	if (!strcmp(GET_STR(p), "max_depth")) {
 		if (is_integer(p+1))
-			q->max_depth = p[1].val_int;
+			q->max_depth = p[1].val_num;
 	} else if (!strcmp(GET_STR(p), "fullstop")) {
 		if (is_literal(p+1))
 			q->fullstop = !strcmp(GET_STR(p+1), "true");
@@ -1975,7 +1975,7 @@ static int fn_iso_put_code_1(query *q)
 	GET_FIRST_ARG(p1,integer);
 	int n = get_named_stream(q, "user_output");
 	stream *str = &g_streams[n];
-	int ch = (int)p1->val_int;
+	int ch = (int)p1->val_num;
 	char tmpbuf[20];
 	put_char_utf8(tmpbuf, ch);
 	stream_write(tmpbuf, strlen(tmpbuf), str);
@@ -1988,7 +1988,7 @@ static int fn_iso_put_code_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,integer);
-	int ch = (int)p1->val_int;
+	int ch = (int)p1->val_num;
 	char tmpbuf[20];
 	put_char_utf8(tmpbuf, ch);
 	stream_write(tmpbuf, strlen(tmpbuf), str);
@@ -2341,7 +2341,7 @@ static int fn_iso_is_2(query *q)
 	}
 
 	if (is_integer(p1) && is_integer(&p2))
-		return (p1->val_int == p2.val_int);
+		return (p1->val_num == p2.val_num);
 
 	if (is_rational(p1) && is_rational(&p2)) {
 		reduce(p1); reduce(&p2);
@@ -2375,7 +2375,7 @@ static int fn_iso_float_1(query *q)
 		}
 
 		if (is_integer(&p1)) {
-			q->accum.val_flt = (double)p1.val_int;
+			q->accum.val_flt = (double)p1.val_num;
 			q->accum.val_type = TYPE_FLOAT;
 			return 1;
 		}
@@ -2395,7 +2395,7 @@ static int fn_iso_integer_1(query *q)
 		cell p1 = calc(q, p1_tmp);
 
 		if is_float(&p1) {
-			q->accum.val_int = (int_t)p1.val_flt;
+			q->accum.val_num = (int_t)p1.val_flt;
 			q->accum.val_den = 1;
 			q->accum.val_type = TYPE_INTEGER;
 			return 1;
@@ -2422,7 +2422,7 @@ static int fn_iso_abs_1(query *q)
 	q->accum.val_type = p1.val_type;
 
 	if (is_integer(&p1))
-		q->accum.val_int = llabs(p1.val_int);
+		q->accum.val_num = llabs(p1.val_num);
 	else if is_float(&p1)
 		q->accum.val_flt = fabs(p1.val_flt);
 	else {
@@ -2440,7 +2440,7 @@ static int fn_iso_sign_1(query *q)
 	q->accum.val_type = p1.val_type;
 
 	if (is_integer(&p1))
-		q->accum.val_int = p1.val_int < 0 ? -1 : p1.val_int > 0  ? 1 : 0;
+		q->accum.val_num = p1.val_num < 0 ? -1 : p1.val_num > 0  ? 1 : 0;
 	else if is_float(&p1)
 		q->accum.val_flt = p1.val_flt < 0 ? -1 : p1.val_flt > 0  ? 1 : 0;
 	else {
@@ -2500,14 +2500,14 @@ static int fn_iso_add_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = (__int128_t)p1.val_int + p2.val_int;
+		__int128_t tmp = (__int128_t)p1.val_num + p2.val_num;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
 			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
 			return 0;
 		} else {
 #endif
-			q->accum.val_int = p1.val_int + p2.val_int;
+			q->accum.val_num = p1.val_num + p2.val_num;
 			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
@@ -2518,13 +2518,13 @@ static int fn_iso_add_2(query *q)
 		q->accum.val_den = p1.val_den * p2.val_den;
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_integer(&p1) && is_float(&p2)) {
-		q->accum.val_flt = (double)p1.val_int + p2.val_flt;
+		q->accum.val_flt = (double)p1.val_num + p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_float(&p2)) {
 		q->accum.val_flt = p1.val_flt + p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_integer(&p2)) {
-		q->accum.val_flt = p1.val_flt + p2.val_int;
+		q->accum.val_flt = p1.val_flt + p2.val_num;
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2543,14 +2543,14 @@ static int fn_iso_sub_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = (__int128_t)p1.val_int - p2.val_int;
+		__int128_t tmp = (__int128_t)p1.val_num - p2.val_num;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
 			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
 			return 0;
 		} else {
 #endif
-			q->accum.val_int = p1.val_int - p2.val_int;
+			q->accum.val_num = p1.val_num - p2.val_num;
 			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
@@ -2561,13 +2561,13 @@ static int fn_iso_sub_2(query *q)
 		q->accum.val_den = p1.val_den * p2.val_den;
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_integer(&p1) && is_float(&p2)) {
-		q->accum.val_flt = (double)p1.val_int - p2.val_flt;
+		q->accum.val_flt = (double)p1.val_num - p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_float(&p2)) {
 		q->accum.val_flt = p1.val_flt - p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_integer(&p2)) {
-		q->accum.val_flt = p1.val_flt - p2.val_int;
+		q->accum.val_flt = p1.val_flt - p2.val_num;
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2586,14 +2586,14 @@ static int fn_iso_mul_2(query *q)
 
 	if ((is_integer(&p1)) && is_integer(&p2)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = (__int128_t)p1.val_int * p2.val_int;
+		__int128_t tmp = (__int128_t)p1.val_num * p2.val_num;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
 			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
 			return 0;
 		} else {
 #endif
-			q->accum.val_int = p1.val_int * p2.val_int;
+			q->accum.val_num = p1.val_num * p2.val_num;
 			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
@@ -2605,13 +2605,13 @@ static int fn_iso_mul_2(query *q)
 		q->accum.val_den *= p1.val_den * p2.val_den;
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_integer(&p1) && is_float(&p2)) {
-		q->accum.val_flt = (double)p1.val_int * p2.val_flt;
+		q->accum.val_flt = (double)p1.val_num * p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_float(&p2)) {
 		q->accum.val_flt = p1.val_flt * p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_integer(&p2)) {
-		q->accum.val_flt = p1.val_flt * p2.val_int;
+		q->accum.val_flt = p1.val_flt * p2.val_num;
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -2692,7 +2692,7 @@ static int fn_iso_truncate_1(query *q)
 			return 0;
 		} else {
 #endif
-			q->accum.val_int = (int_t)p1.val_flt;
+			q->accum.val_num = (int_t)p1.val_flt;
 			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
@@ -2719,7 +2719,7 @@ static int fn_iso_round_1(query *q)
 			return 0;
 		} else {
 #endif
-			q->accum.val_int = (int_t)round(p1.val_flt);
+			q->accum.val_num = (int_t)round(p1.val_flt);
 			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
@@ -2746,7 +2746,7 @@ static int fn_iso_ceiling_1(query *q)
 			return 0;
 		} else {
 #endif
-			q->accum.val_int = (int_t)ceil(p1.val_flt);
+			q->accum.val_num = (int_t)ceil(p1.val_flt);
 			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
@@ -2827,7 +2827,7 @@ static int fn_iso_floor_1(query *q)
 			return 0;
 		} else {
 #endif
-			q->accum.val_int = (int_t)floor(p1.val_flt);
+			q->accum.val_num = (int_t)floor(p1.val_flt);
 			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
@@ -2971,7 +2971,7 @@ static int fn_iso_atan_2(query *q)
 		q->accum.val_flt = atan2(p1.val_flt, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_integer(&p2)) {
-		q->accum.val_flt = atan2(p1.val_flt, p2.val_int);
+		q->accum.val_flt = atan2(p1.val_flt, p2.val_num);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -3006,7 +3006,7 @@ static int fn_iso_copysign_2(query *q)
 		q->accum.val_flt = copysign(p1.val_flt, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_rational(&p2)) {
-		q->accum.val_flt = copysign(p1.val_flt, p2.val_int);
+		q->accum.val_flt = copysign(p1.val_flt, p2.val_num);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -3033,7 +3033,7 @@ static int fn_iso_pow_2(query *q)
 		q->accum.val_flt = pow(p1.val_flt, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_integer(&p2)) {
-		q->accum.val_flt = pow(p1.val_flt, p2.val_int);
+		q->accum.val_flt = pow(p1.val_flt, p2.val_num);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -3052,14 +3052,14 @@ static int fn_iso_powi_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = pow(p1.val_int,p2.val_int);
+		__int128_t tmp = pow(p1.val_num,p2.val_num);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
 			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
 			return 0;
 		} else {
 #endif
-			q->accum.val_int = (int_t)pow(p1.val_int,p2.val_int);
+			q->accum.val_num = (int_t)pow(p1.val_num,p2.val_num);
 			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		}
@@ -3074,7 +3074,7 @@ static int fn_iso_powi_2(query *q)
 		q->accum.val_flt = pow(p1.val_flt, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_integer(&p2)) {
-		q->accum.val_flt = pow(p1.val_flt, p2.val_int);
+		q->accum.val_flt = pow(p1.val_flt, p2.val_num);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -3092,7 +3092,7 @@ static int fn_iso_divide_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_flt = (double)p1.val_int / p2.val_int;
+		q->accum.val_flt = (double)p1.val_num / p2.val_num;
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_rational(&p1) && is_rational(&p2)) {
 		p1.val_num *= p2.val_den;
@@ -3101,13 +3101,13 @@ static int fn_iso_divide_2(query *q)
 		q->accum.val_den = p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_integer(&p1) && is_float(&p2)) {
-		q->accum.val_flt = (double)p1.val_int / p2.val_flt;
+		q->accum.val_flt = (double)p1.val_num / p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_float(&p2)) {
 		q->accum.val_flt = p1.val_flt / p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_integer(&p2)) {
-		q->accum.val_flt = p1.val_flt / p2.val_int;
+		q->accum.val_flt = p1.val_flt / p2.val_num;
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
 		throw_error(q, &p1, "type_error", "number");
@@ -3125,7 +3125,7 @@ static int fn_iso_divint_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_num = p1.val_int / p2.val_int;
+		q->accum.val_num = p1.val_num / p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
@@ -3143,7 +3143,7 @@ static int fn_iso_div_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_int = (p1.val_int - llabs(p1.val_int % p2.val_int)) / p2.val_int;
+		q->accum.val_num = (p1.val_num - llabs(p1.val_num % p2.val_num)) / p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
@@ -3161,7 +3161,7 @@ static int fn_iso_mod_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_int = llabs(p1.val_int % p2.val_int);
+		q->accum.val_num = llabs(p1.val_num % p2.val_num);
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
@@ -3179,7 +3179,7 @@ static int fn_iso_max_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_int = p1.val_int >= p2.val_int ? p1.val_int : p2.val_int;
+		q->accum.val_num = p1.val_num >= p2.val_num ? p1.val_num : p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
@@ -3197,7 +3197,7 @@ static int fn_iso_min_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_int = p1.val_int <= p2.val_int ? p1.val_int : p2.val_int;
+		q->accum.val_num = p1.val_num <= p2.val_num ? p1.val_num : p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
@@ -3215,7 +3215,7 @@ static int fn_iso_xor_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_int = p1.val_int ^ p2.val_int;
+		q->accum.val_num = p1.val_num ^ p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
@@ -3233,7 +3233,7 @@ static int fn_iso_and_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_int = p1.val_int & p2.val_int;
+		q->accum.val_num = p1.val_num & p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
@@ -3251,7 +3251,7 @@ static int fn_iso_or_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_int = p1.val_int | p2.val_int;
+		q->accum.val_num = p1.val_num | p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
@@ -3269,7 +3269,7 @@ static int fn_iso_shl_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_int = p1.val_int << p2.val_int;
+		q->accum.val_num = p1.val_num << p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
@@ -3287,7 +3287,7 @@ static int fn_iso_shr_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_int = p1.val_int >> p2.val_int;
+		q->accum.val_num = p1.val_num >> p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
@@ -3303,7 +3303,7 @@ static int fn_iso_neg_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_integer(&p1)) {
-		q->accum.val_int = ~p1.val_int;
+		q->accum.val_num = ~p1.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
@@ -3410,17 +3410,17 @@ static int fn_iso_neq_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2))
-		return p1.val_int == p2.val_int;
+		return p1.val_num == p2.val_num;
 	else if (is_rational(&p1) && is_rational(&p2)) {
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num == p2.val_num;
 	} else if (is_integer(&p1) && is_float(&p2))
-		return p1.val_int == p2.val_flt;
+		return p1.val_num == p2.val_flt;
 	else if (is_float(&p1) && is_float(&p2))
 		return p1.val_flt == p2.val_flt;
 	else if (is_float(&p1) && is_integer(&p2))
-		return p1.val_flt == p2.val_int;
+		return p1.val_flt == p2.val_num;
 
 	throw_error(q, &p1, "type_error", "number");
 	return 0;
@@ -3434,17 +3434,17 @@ static int fn_iso_nne_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2))
-		return p1.val_int != p2.val_int;
+		return p1.val_num != p2.val_num;
 	else if (is_rational(&p1) && is_rational(&p2)) {
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num != p2.val_num;
 	} else if (is_integer(&p1) && is_float(&p2))
-		return p1.val_int != p2.val_flt;
+		return p1.val_num != p2.val_flt;
 	else if (is_float(&p1) && is_float(&p2))
 		return p1.val_flt != p2.val_flt;
 	else if (is_float(&p1) && is_integer(&p2))
-		return p1.val_flt != p2.val_int;
+		return p1.val_flt != p2.val_num;
 
 	throw_error(q, &p1, "type_error", "number");
 	return 0;
@@ -3458,17 +3458,17 @@ static int fn_iso_nge_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2))
-		return p1.val_int >= p2.val_int;
+		return p1.val_num >= p2.val_num;
 	else if (is_rational(&p1) && is_rational(&p2)) {
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num >= p2.val_num;
 	} else if (is_integer(&p1) && is_float(&p2))
-		return p1.val_int >= p2.val_flt;
+		return p1.val_num >= p2.val_flt;
 	else if (is_float(&p1) && is_float(&p2))
 		return p1.val_flt >= p2.val_flt;
 	else if (is_float(&p1) && is_integer(&p2))
-		return p1.val_flt >= p2.val_int;
+		return p1.val_flt >= p2.val_num;
 
 	throw_error(q, &p1, "type_error", "number");
 	return 0;
@@ -3482,17 +3482,17 @@ static int fn_iso_ngt_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2))
-		return p1.val_int > p2.val_int;
+		return p1.val_num > p2.val_num;
 	else if (is_rational(&p1) && is_rational(&p2)) {
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num > p2.val_num;
 	} else if (is_integer(&p1) && is_float(&p2))
-		return p1.val_int > p2.val_flt;
+		return p1.val_num > p2.val_flt;
 	else if (is_float(&p1) && is_float(&p2))
 		return p1.val_flt > p2.val_flt;
 	else if (is_float(&p1) && is_integer(&p2))
-		return p1.val_flt > p2.val_int;
+		return p1.val_flt > p2.val_num;
 
 	throw_error(q, &p1, "type_error", "number");
 	return 0;
@@ -3506,17 +3506,17 @@ static int fn_iso_nle_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2))
-		return p1.val_int <= p2.val_int;
+		return p1.val_num <= p2.val_num;
 	else if (is_rational(&p1) && is_rational(&p2)) {
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num <= p2.val_num;
 	} else if (is_integer(&p1) && is_float(&p2))
-		return p1.val_int <= p2.val_flt;
+		return p1.val_num <= p2.val_flt;
 	else if (is_float(&p1) && is_float(&p2))
 		return p1.val_flt <= p2.val_flt;
 	else if (is_float(&p1) && is_integer(&p2))
-		return p1.val_flt <= p2.val_int;
+		return p1.val_flt <= p2.val_num;
 
 	throw_error(q, &p1, "type_error", "number");
 	return 0;
@@ -3530,17 +3530,17 @@ static int fn_iso_nlt_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2))
-		return p1.val_int < p2.val_int;
+		return p1.val_num < p2.val_num;
 	else if (is_rational(&p1) && is_rational(&p2)) {
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num < p2.val_num;
 	} else if (is_integer(&p1) && is_float(&p2))
-		return p1.val_int < p2.val_flt;
+		return p1.val_num < p2.val_flt;
 	else if (is_float(&p1) && is_float(&p2))
 		return p1.val_flt < p2.val_flt;
 	else if (is_float(&p1) && is_integer(&p2))
-		return p1.val_flt < p2.val_int;
+		return p1.val_flt < p2.val_num;
 
 	throw_error(q, &p1, "type_error", "number");
 	return 0;
@@ -3553,7 +3553,7 @@ static int fn_iso_arg_3(query *q)
 	GET_NEXT_ARG(p3,any);
 
 	if (is_integer(p1)) {
-		int arg = p1->val_int;
+		int arg = p1->val_num;
 
 		if (q->retry) {
 			if (++arg > p2->arity)
@@ -3821,7 +3821,7 @@ static int do_length(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer);
-	int cnt = p2->val_int;
+	int cnt = p2->val_num;
 	GET_RAW_ARG(2, p2_orig);
 	cell tmp;
 	make_int(&tmp, ++cnt);
@@ -3891,7 +3891,7 @@ static int fn_iso_length_2(query *q)
 	}
 
 	if (is_integer(p2) && !is_var(p1)) {
-		if (p2->val_int == 0) {
+		if (p2->val_num == 0) {
 			cell tmp;
 			make_literal(&tmp, g_nil_s);
 			return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -3908,17 +3908,17 @@ static int fn_iso_length_2(query *q)
 			cnt++;
 		}
 
-		return p2->val_int == cnt;
+		return p2->val_num == cnt;
 	}
 
 
 	if (is_var(p1) && is_integer(p2)) {
-		if ((p2->val_int < 0) || (p2->val_int > MAX_ARITY)) {
+		if ((p2->val_num < 0) || (p2->val_num > MAX_ARITY)) {
 			throw_error(q, p2, "resource_error", "too many vars");
 			return 0;
 		}
 
-		if (p2->val_int == 0) {
+		if (p2->val_num == 0) {
 			cell tmp;
 			make_literal(&tmp, g_nil_s);
 			set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -3927,7 +3927,7 @@ static int fn_iso_length_2(query *q)
 
 		unsigned slot_nbr;
 
-		if (!(slot_nbr = create_vars(q, p2->val_int))) {
+		if (!(slot_nbr = create_vars(q, p2->val_num))) {
 		throw_error(q, p2, "resource_error", "too many vars");
 			return 0;
 		}
@@ -3940,7 +3940,7 @@ static int fn_iso_length_2(query *q)
 		tmp.slot_nbr = slot_nbr++;
 		cell *l = alloc_list(q, &tmp);
 
-		for (int i = 1; i < p2->val_int; i++) {
+		for (int i = 1; i < p2->val_num; i++) {
 			tmp.slot_nbr = slot_nbr++;
 			l = append_list(q, l, &tmp);
 		}
@@ -4157,7 +4157,7 @@ static int fn_iso_abolish_1(query *q)
 
 	cell tmp;
 	tmp = *p1_name;
-	tmp.arity = p1_arity->val_int;
+	tmp.arity = p1_arity->val_num;
 	return do_abolish(q, &tmp);
 }
 
@@ -4469,12 +4469,12 @@ static int fn_iso_functor_3(query *q)
 			return 0;
 		}
 
-		if ((p3->val_int <= 0) || (p3->val_int > MAX_ARITY/2)){
+		if ((p3->val_num <= 0) || (p3->val_num > MAX_ARITY/2)){
 			throw_error(q, p3, "domain_error", "integer");
 			return 0;
 		}
 
-		unsigned arity = p3->val_int;
+		unsigned arity = p3->val_num;
 		unsigned slot_nbr;
 
 		if (!(slot_nbr = create_vars(q, arity))) {
@@ -4640,7 +4640,7 @@ static int fn_iso_set_prolog_flag_2(query *q)
 	}
 
 	if (!strcmp(GET_STR(p1), "cpu_count") && is_integer(p2)) {
-		q->m->cpu_count = p2->val_int;
+		q->m->cpu_count = p2->val_num;
 		return 1;
 	}
 
@@ -4701,9 +4701,9 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 			cell tmp1 = *p1, tmp2 = *p2;
 			tmp1.val_num *= tmp2.val_den;
 			tmp2.val_num *= tmp1.val_den;
-			if (tmp1.val_int < tmp2.val_int)
+			if (tmp1.val_num < tmp2.val_num)
 				return -1;
-			else if (tmp1.val_int > tmp2.val_int)
+			else if (tmp1.val_num > tmp2.val_num)
 				return 1;
 			else
 				return 0;
@@ -4931,7 +4931,7 @@ static int fn_sys_queuen_2(query *q)
 			c->val_type = TYPE_EMPTY;
 	}
 
-	alloc_queuen(q, p1->val_int, tmp);
+	alloc_queuen(q, p1->val_num, tmp);
 	return 1;
 }
 
@@ -5220,7 +5220,7 @@ static int fn_iso_op_3(query *q)
 		return 0;
 	}
 
-	if (!set_op(q->m, GET_STR(p3), optype, p1->val_int)) {
+	if (!set_op(q->m, GET_STR(p3), optype, p1->val_num)) {
 		throw_error(q, p3, "domain_error", "create");
 		return 0;
 	}
@@ -5457,7 +5457,7 @@ static int fn_listing_1(query *q)
 
 	if (p1->arity) {
 		name = (p1+1)->val_off;
-		arity = (p1+2)->val_int;
+		arity = (p1+2)->val_num;
 	}
 
 	save_name(stdout, q, name, arity);
@@ -5534,12 +5534,12 @@ static int fn_sleep_1(query *q)
 
 	if (q->is_task) {
 		q->tmo = get_time_in_usec() / 1000;
-		q->tmo += p1->val_int * 1000;
+		q->tmo += p1->val_num * 1000;
 		do_yield_0(q);
 		return 0;
 	}
 
-	sleep((unsigned)p1->val_int);
+	sleep((unsigned)p1->val_num);
 	return 1;
 }
 
@@ -5552,19 +5552,19 @@ static int fn_delay_1(query *q)
 
 	if (q->is_task) {
 		q->tmo = get_time_in_usec() / 1000;
-		q->tmo += p1->val_int;
+		q->tmo += p1->val_num;
 		do_yield_0(q);
 		return 0;
 	}
 
-	msleep((unsigned)p1->val_int);
+	msleep((unsigned)p1->val_num);
 	return 1;
 }
 
 static int fn_busy_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	int_t elapse = p1->val_int;
+	int_t elapse = p1->val_num;
 
 	if (elapse < 0)
 		return 1;
@@ -5587,7 +5587,7 @@ static int fn_now_0(query *q)
 {
 	int_t secs = get_time_in_usec() / 1000 / 1000;
 	q->accum.val_type = TYPE_INTEGER;
-	q->accum.val_int = secs;
+	q->accum.val_num = secs;
 	return 1;
 }
 
@@ -5638,23 +5638,23 @@ static int fn_between_3(query *q)
 	}
 
 	if (is_integer(p2)) {
-		if (p1->val_int > p2->val_int)
+		if (p1->val_num > p2->val_num)
 			return 0;
 	}
 
 	if (!q->retry) {
 		set_var(q, p3, p3_ctx, p1, q->st.curr_frame);
 
-		if (!is_integer(p2) || (p1->val_int != p2->val_int))
+		if (!is_integer(p2) || (p1->val_num != p2->val_num))
 			make_choice(q);
 
 		return 1;
 	}
 
-	int_t val = p3->val_int;
+	int_t val = p3->val_num;
 
 	if (is_integer(p2)) {
-		if (val == p2->val_int)
+		if (val == p2->val_num)
 			return 0;
 	}
 
@@ -5664,7 +5664,7 @@ static int fn_between_3(query *q)
 	make_int(&tmp, val);
 	reset_value(q, p3_raw, p3_raw_ctx, &tmp, q->st.curr_frame);
 
-	if (!is_integer(p2) || (val != p2->val_int))
+	if (!is_integer(p2) || (val != p2->val_num))
 		make_choice(q);
 
 	return 1;
@@ -5931,7 +5931,7 @@ static int fn_server_3(query *q)
 				c = c + 1;
 
 				if (is_integer(c))
-					port = c->val_int;
+					port = c->val_num;
 			}
 		}
 
@@ -6082,7 +6082,7 @@ static int fn_client_5(query *q)
 				c = c + 1;
 
 				if (is_integer(c))
-					port = (int)c->val_int;
+					port = (int)c->val_num;
 			}
 		}
 
@@ -6240,14 +6240,14 @@ static int fn_bread_3(query *q)
 	stream *str = &g_streams[n];
 	size_t len;
 
-	if (is_integer(p1) && (p1->val_int > 0)) {
+	if (is_integer(p1) && (p1->val_num > 0)) {
 		if (!str->data) {
-			str->data = malloc(p1->val_int+1);
+			str->data = malloc(p1->val_num+1);
 			str->data_len = 0;
 		}
 
 		for (;;) {
-			len = p1->val_int - str->data_len;
+			len = p1->val_num - str->data_len;
 			size_t nbytes = stream_read(str->data+str->data_len, len, str);
 			str->data_len += nbytes;
 			str->data[str->data_len] = '\0';
@@ -6673,7 +6673,7 @@ static int fn_log10_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_integer(&p1)) {
-		q->accum.val_flt = log10(p1.val_int);
+		q->accum.val_flt = log10(p1.val_num);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = log10(p1.val_flt);
@@ -6689,7 +6689,7 @@ static int fn_log10_1(query *q)
 static int fn_srandom_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	srandom(p1->val_int);
+	srandom(p1->val_num);
 	return 1;
 }
 
@@ -6704,20 +6704,20 @@ static int fn_random_1(query *q)
 		return 1;
 	}
 
-	if (p1->val_int < 1) {
+	if (p1->val_num < 1) {
 		throw_error(q, p1, "domain_error", "positive_integer");
 		return 0;
 	}
 
 	q->accum.val_type = TYPE_INTEGER;
-	q->accum.val_int = llabs(random()%p1->val_int);
+	q->accum.val_num = llabs(random()%p1->val_num);
 	return 1;
 }
 
 static int fn_rand_0(query *q)
 {
 	q->accum.val_type = TYPE_INTEGER;
-	q->accum.val_int = random()%RAND_MAX;
+	q->accum.val_num = random()%RAND_MAX;
 	return 1;
 }
 
@@ -6937,7 +6937,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 				nbytes = bufsiz - save;
 			}
 
-			len = put_char_utf8(dst, (int)c->val_int);
+			len = put_char_utf8(dst, (int)c->val_num);
 		} else if ((ch == 'e') || (ch == 'E')) {
 			if (!is_float(c)) {
 				free(tmpbuf);
@@ -6991,7 +6991,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 				nbytes = bufsiz - save;
 			}
 
-			len = format_integer(dst, c->val_int, noargval?3:argval, '_', 0);
+			len = format_integer(dst, c->val_num, noargval?3:argval, '_', 0);
 		} else if (ch == 'd') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
@@ -7008,7 +7008,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 				nbytes = bufsiz - save;
 			}
 
-			len = format_integer(dst, c->val_int, 0, ',', noargval?2:argval);
+			len = format_integer(dst, c->val_num, 0, ',', noargval?2:argval);
 		} else if (ch == 'D') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
@@ -7025,7 +7025,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 				nbytes = bufsiz - save;
 			}
 
-			len = format_integer(dst, c->val_int, 3, ',', noargval?2:argval);
+			len = format_integer(dst, c->val_num, 3, ',', noargval?2:argval);
 		} else {
 			int saveq = q->quoted;
 
@@ -7456,7 +7456,7 @@ static int fn_edin_skip_1(query *q)
 		} else if (ch == '\n')
 			str->did_getc = 0;
 
-		if (ch == p1->val_int)
+		if (ch == p1->val_num)
 			break;
 	}
 
@@ -7486,7 +7486,7 @@ static int fn_edin_skip_2(query *q)
 		} else if (ch == '\n')
 			str->did_getc = 0;
 
-		if (ch == p1->val_int)
+		if (ch == p1->val_num)
 			break;
 	}
 
@@ -7506,7 +7506,7 @@ static int fn_edin_tab_1(query *q)
 	int n = get_named_stream(q, "user_output");
 	stream *str = &g_streams[n];
 
-	for (int i = 0; i < p1.val_int; i++)
+	for (int i = 0; i < p1.val_num; i++)
 		fputc(' ', str->fp);
 
 	return !ferror(str->fp);
@@ -7526,7 +7526,7 @@ static int fn_edin_tab_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 
-	for (int i = 0; i < p1.val_int; i++)
+	for (int i = 0; i < p1.val_num; i++)
 		fputc(' ', str->fp);
 
 	return !ferror(str->fp);
@@ -7626,7 +7626,7 @@ static int fn_atom_number_2(query *q)
 
 	if (is_var(p1)) {
 		char tmpbuf[256];
-		sprint_int(tmpbuf, sizeof(tmpbuf), p2->val_int, 10);
+		sprint_int(tmpbuf, sizeof(tmpbuf), p2->val_num, 10);
 		cell tmp = make_string(q, tmpbuf);
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return 1;
@@ -7641,7 +7641,7 @@ static int fn_atom_number_2(query *q)
 		return 1;
 	}
 
-	return p1_val == p2->val_int;
+	return p1_val == p2->val_num;
 }
 
 static int fn_atom_hex_2(query *q)
@@ -7656,7 +7656,7 @@ static int fn_atom_hex_2(query *q)
 
 	if (is_var(p1)) {
 		char tmpbuf[256];
-		sprintf(tmpbuf, "%llx", (long long)p2->val_int);
+		sprintf(tmpbuf, "%llx", (long long)p2->val_num);
 		cell tmp = make_string(q, tmpbuf);
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return 1;
@@ -7671,7 +7671,7 @@ static int fn_atom_hex_2(query *q)
 		return 1;
 	}
 
-	return p1_val == p2->val_int;
+	return p1_val == p2->val_num;
 }
 
 static int fn_atom_octal_2(query *q)
@@ -7686,7 +7686,7 @@ static int fn_atom_octal_2(query *q)
 
 	if (is_var(p1)) {
 		char tmpbuf[256];
-		sprintf(tmpbuf, "%llo", (long long)p2->val_int);
+		sprintf(tmpbuf, "%llo", (long long)p2->val_num);
 		cell tmp = make_string(q, tmpbuf);
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return 1;
@@ -7701,7 +7701,7 @@ static int fn_atom_octal_2(query *q)
 		return 1;
 	}
 
-	return p1_val == p2->val_int;
+	return p1_val == p2->val_num;
 }
 
 static int fn_rdiv_2(query *q)
@@ -7822,7 +7822,7 @@ static int fn_setenv_2(query *q)
 		setenv(GET_STR(p1), GET_STR(p2), 1);
 	} else {
 		char tmpbuf[256];
-		sprint_int(tmpbuf, sizeof(tmpbuf), p2->val_int, 10);
+		sprint_int(tmpbuf, sizeof(tmpbuf), p2->val_num, 10);
 		setenv(GET_STR(p1), tmpbuf, 1);
 	}
 
@@ -7879,7 +7879,7 @@ static int fn_atomic_concat_3(query *q)
 			len1 = LEN_STR(p1);
 			src1 = GET_STR(p1);
 		} else if (is_integer(p1)) {
-			len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), p1->val_int, 10);
+			len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), p1->val_num, 10);
 			src1 = tmpbuf1;
 		} else if (is_rational(p1)) {
 			len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), p1->val_num, 10);
@@ -7894,7 +7894,7 @@ static int fn_atomic_concat_3(query *q)
 			len2 = LEN_STR(p2);
 			src2 = GET_STR(p2);
 		} else if (is_integer(p2)) {
-			len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), p2->val_int, 10);
+			len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), p2->val_num, 10);
 			src2 = tmpbuf2;
 		} else if (is_rational(p2)) {
 			len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), p2->val_num, 10);
@@ -8096,7 +8096,7 @@ static int fn_numbervars_3(query *q)
 		do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots, &cnt);
 
 	q->nv_mask = 0;
-	unsigned end = q->nv_start = p2->val_int;
+	unsigned end = q->nv_start = p2->val_num;
 
 	for (unsigned i = 0; i < cnt; i++) {
 		if (!slots[i])
@@ -8145,7 +8145,7 @@ static int fn_char_type_2(query *q)
 
 		ch = peek_char_utf8(GET_STR(p1));
 	} else
-		ch = p1->val_int;
+		ch = p1->val_num;
 
 	if (!strcmp(GET_STR(p2), "alpha"))
 		return isalpha(ch);
@@ -8262,7 +8262,7 @@ static int fn_abolish_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,integer);
 	cell tmp = *p1;
-	tmp.arity = p2->val_int;
+	tmp.arity = p2->val_num;
 	return do_abolish(q, &tmp);
 }
 
@@ -8271,7 +8271,7 @@ static int fn_sys_lt_2(query *q)
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
 
-	if (p1->val_int++ < p2->val_int)
+	if (p1->val_num++ < p2->val_num)
 		return 1;
 
 	drop_choice(q);
@@ -8286,7 +8286,7 @@ static int fn_limit_2(query *q)
 	idx_t nbr_cells = 1 + p2->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_lt_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
-	make_int(tmp+nbr_cells++, p1->val_int);
+	make_int(tmp+nbr_cells++, p1->val_num);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return 1;
@@ -8297,7 +8297,7 @@ static int fn_sys_gt_2(query *q)
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
 
-	if (p1->val_int++ <= p2->val_int)
+	if (p1->val_num++ <= p2->val_num)
 		return 0;
 
 	return 1;
@@ -8311,7 +8311,7 @@ static int fn_offset_2(query *q)
 	idx_t nbr_cells = 1 + p2->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_gt_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
-	make_int(tmp+nbr_cells++, p1->val_int);
+	make_int(tmp+nbr_cells++, p1->val_num);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return 1;
@@ -8322,7 +8322,7 @@ static int fn_sys_ne_2(query *q)
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
 
-	if (p1->val_int++ != p2->val_int)
+	if (p1->val_num++ != p2->val_num)
 		return 0;
 
 	drop_choice(q);
@@ -8346,7 +8346,7 @@ static int fn_call_nth_2(query *q)
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_ne_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
-	make_int(tmp+nbr_cells++, p2->val_int);
+	make_int(tmp+nbr_cells++, p2->val_num);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return 1;
