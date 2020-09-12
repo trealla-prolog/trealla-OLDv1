@@ -226,6 +226,15 @@ module *find_module(const char *name)
 	return NULL;
 }
 
+static void make_string(cell *c, const char *s)
+{
+	if (strlen(s) < MAX_SMALL_STRING) {
+		c->val_type = TYPE_STRING;
+		strcpy(c->val_chars, s);
+	} else
+		new_string(c, s, 1);
+}
+
 cell *get_head(cell *c)
 {
 	if (!is_literal(c))
@@ -2251,14 +2260,8 @@ int parser_tokenize(parser *p, int args, int consing)
 				c->val_type = TYPE_VAR;
 
 			c->val_off = find_in_pool(p->token);
-		} else {
-			c->val_type = TYPE_STRING;
-
-			if (strlen(p->token) < MAX_SMALL_STRING)
-				strcpy(c->val_chars, p->token);
-			else
-				new_string(c, p->token, 1);
-		}
+		} else
+			make_string(c, p->token);
 	}
 
 	p->depth--;

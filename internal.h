@@ -35,7 +35,7 @@ typedef uint32_t idx_t;
 #define USE_BUILTINS 1
 
 #define GET_STR(c) ((c)->val_type != TYPE_STRING ? g_pool+((c)->val_off) : (c)->flags&FLAG_BIGSTRING ? (c)->val_sbuf->val_str : (c)->val_chars)
-#define LEN_STR(c) ((c->flags&FLAG_BLOB) ? c->val_sbuf->nbytes : strlen(GET_STR(c)))
+#define LEN_STR(c) ((c->flags&FLAG_BIGSTRING) ? c->val_sbuf->nbytes : strlen(GET_STR(c)))
 
 #define GET_FRAME(i) q->frames+(i)
 #define GET_SLOT(g,i) (i) < g->nbr_slots ? q->slots+g->env+(i) : q->slots+g->overflow+((i)-g->nbr_slots)
@@ -82,7 +82,6 @@ enum {
 
 	FLAG_RETURN=FLAG_HEX,				// only used with TYPE_END
 	FLAG_FIRSTUSE=FLAG_HEX,				// only used with TYPE_VAR
-	FLAG_BLOB=FLAG_HEX,				    // only used with TYPE_STRING
 	FLAG_BIGSTRING=FLAG_OCTAL	,	    // only used with TYPE_STRING
 	FLAG_DELETED=FLAG_HEX,				// only used by bagof
 
@@ -371,7 +370,6 @@ inline static void new_stringn(cell *c, const char *s, uint32_t n, int refs)
 {
 	c->val_type = TYPE_STRING;
 	c->flags = FLAG_BIGSTRING;
-	c->flags |= FLAG_BLOB;
 	c->nbr_cells = 1;
 	c->arity = 0;
 	size_t len = n;
