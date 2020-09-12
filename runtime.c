@@ -495,8 +495,10 @@ void set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 
 	if (v->arity)
 		make_indirect(&e->c, v);
-	else
+	else {
+		ref_string(v);
 		e->c = *v;
+	}
 
 	if (!q->cp)
 		return;

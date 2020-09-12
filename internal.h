@@ -340,8 +340,18 @@ extern stream g_streams[MAX_STREAMS];
 extern module *g_modules;
 extern char *g_pool;
 
-#define ref_string(c) if (is_bigstring(c)) (c)->val_sbuf->refcnt++
-#define deref_string(c) if (is_bigstring(c) && !--(c)->val_sbuf->refcnt) free((c)->val_sbuf)
+inline static void ref_string(cell *c)
+{
+	if (is_bigstring(c))
+		c->val_sbuf->refcnt++;
+}
+
+inline static void deref_string(cell *c)
+{
+	if (is_bigstring(c))
+		if (!--c->val_sbuf->refcnt)
+			free(c->val_sbuf);
+}
 
 inline static void new_string(cell *c, const char *s)
 {
