@@ -365,7 +365,7 @@ static void make_string(cell *tmp, const char *s)
 	if (strlen(s) < MAX_SMALL_STRING)
 		make_small(tmp, s);
 	else
-		new_string(tmp, s, 0);
+		new_string(tmp, s);
 }
 
 static void make_stringn(cell *tmp, const char *s, size_t n)
@@ -373,7 +373,7 @@ static void make_stringn(cell *tmp, const char *s, size_t n)
 	if (strlen(s) < MAX_SMALL_STRING)
 		make_smalln(tmp, s, n);
 	 else
-		new_stringn(tmp, s, n, 0);
+		new_stringn(tmp, s, n);
 }
 
 static size_t stream_write(const void *ptr, size_t nbytes, stream *str)
@@ -760,7 +760,9 @@ static int fn_iso_atom_chars_2(query *q)
 		cell tmp;
 		make_string(&tmp, tmpbuf);
 		free(tmpbuf);
-		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		int ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		deref_string(&tmp);
+		return ok;
 	}
 
 	const char *src = GET_STR(p1);
@@ -842,7 +844,9 @@ static int fn_iso_atom_codes_2(query *q)
 		cell tmp;
 		make_string(&tmp, tmpbuf);
 		free(tmpbuf);
-		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		int ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		deref_string(&tmp);
+		return ok;
 	}
 
 	const char *tmpbuf = GET_STR(p1);
@@ -4023,7 +4027,7 @@ static int do_abolish(query *q, cell *c)
 			db_log(q, r, LOG_ERASE);
 
 		clause *save = r->next;
-		clear_term(&r->t);
+		clear_term(&r->t, 1);
 		free(r);
 		r = save;
 	}
@@ -8158,7 +8162,7 @@ static void restore_db(module *m, FILE *fp)
 		parser_tokenize(p, 0, 0);
 		parser_xref(p, p->t, NULL);
 		query_execute(q, p->t);
-		clear_term(p->t);
+		clear_term(p->t, 1);
 	}
 
 	m->loading = 0;

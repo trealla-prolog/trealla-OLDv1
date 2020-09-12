@@ -76,13 +76,12 @@ enum {
 	FLAG_TAILREC=1<<4,
 	FLAG_PASSTHRU=1<<5,
 	FLAG_STREAM=1<<6,
+	FLAG_BIGSTRING=1<<7,
 
-	//FLAG_SPARE2=1<<7,
 	//FLAG_SPARE3=1<<8,
 
 	FLAG_RETURN=FLAG_HEX,				// only used with TYPE_END
 	FLAG_FIRSTUSE=FLAG_HEX,				// only used with TYPE_VAR
-	FLAG_BIGSTRING=FLAG_OCTAL	,	    // only used with TYPE_STRING
 	FLAG_DELETED=FLAG_HEX,				// only used by bagof
 
 	OP_FX=1<<9,
@@ -352,7 +351,7 @@ inline static void deref_string(const cell *c)
 			free(c->val_sbuf);
 }
 
-inline static void new_string(cell *c, const char *s, int refs)
+inline static void new_string(cell *c, const char *s)
 {
 	c->val_type = TYPE_STRING;
 	c->flags = FLAG_BIGSTRING;
@@ -360,13 +359,13 @@ inline static void new_string(cell *c, const char *s, int refs)
 	c->arity = 0;
 	size_t len = strlen(s);
 	c->val_sbuf = malloc(sizeof(sbuf)+len+1);
-	c->val_sbuf->refcnt = refs ? 1 : 0;
+	c->val_sbuf->refcnt = 1;
 	c->val_sbuf->nbytes = len;
 	memcpy(c->val_sbuf->val_str, s, len);
 	c->val_sbuf->val_str[len] = '\0';
 }
 
-inline static void new_stringn(cell *c, const char *s, uint32_t n, int refs)
+inline static void new_stringn(cell *c, const char *s, uint32_t n)
 {
 	c->val_type = TYPE_STRING;
 	c->flags = FLAG_BIGSTRING;
@@ -374,7 +373,7 @@ inline static void new_stringn(cell *c, const char *s, uint32_t n, int refs)
 	c->arity = 0;
 	size_t len = n;
 	c->val_sbuf = malloc(sizeof(sbuf)+len+1);
-	c->val_sbuf->refcnt = refs ? 1 : 0;
+	c->val_sbuf->refcnt = 1;
 	c->val_sbuf->nbytes = len;
 	memcpy(c->val_sbuf->val_str, s, len);
 	c->val_sbuf->val_str[len] = '\0';
@@ -382,7 +381,7 @@ inline static void new_stringn(cell *c, const char *s, uint32_t n, int refs)
 
 static inline idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 {
-	memcpy(dst, src, sizeof(cell)*(nbr_cells));
+	memcpy(dst, src, sizeof(cell)*nbr_cells);
 	return nbr_cells;
 }
 
@@ -445,7 +444,7 @@ void try_me(const query *q, unsigned vars);
 void load_keywords(module *m);
 void throw_error(query *q, cell *c, const char *err_type, const char *expected);
 uint64_t get_time_in_usec(void);
-void clear_term(term *t);
+void clear_term(term *t, int deref);
 void do_db_load(module *m);
 void set_dynamic_in_db(module *m, const char *name, idx_t arity);
 int set_op(module *m, const char *name, unsigned val_type, unsigned precedence);

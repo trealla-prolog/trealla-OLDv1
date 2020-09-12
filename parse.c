@@ -232,7 +232,7 @@ static void make_string(cell *c, const char *s)
 		c->val_type = TYPE_STRING;
 		strcpy(c->val_chars, s);
 	} else
-		new_string(c, s, 1);
+		new_string(c, s);
 }
 
 cell *get_head(cell *c)
@@ -585,11 +585,11 @@ static void set_persist_in_db(module *m, const char *name, idx_t arity)
 	m->use_persist = 1;
 }
 
-void clear_term(term *t)
+void clear_term(term *t, int deref)
 {
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
-		deref_string(c);
+		if (deref) deref_string(c);
 		c->val_type = TYPE_EMPTY;
 	}
 
@@ -623,7 +623,7 @@ parser *create_parser(module *m)
 
 void destroy_parser(parser *p)
 {
-	clear_term(p->t);
+	clear_term(p->t, 0);
 	free(p->token);
 	free(p->t);
 	free(p);
@@ -2293,7 +2293,7 @@ static void module_purge(module *m)
 				last->next = r->next;
 
 			clause *next = r->next;
-			clear_term(&r->t);
+			clear_term(&r->t, 1);
 			free(r);
 			r = next;
 		}
@@ -2611,7 +2611,7 @@ void destroy_module(module *m)
 
 		for (clause *r = h->head; r;) {
 			clause *save = r->next;
-			clear_term(&r->t);
+			clear_term(&r->t, 1);
 			free(r);
 			r = save;
 		}
