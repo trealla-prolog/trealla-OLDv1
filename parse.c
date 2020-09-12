@@ -2747,15 +2747,22 @@ void pl_destroy(prolog *pl)
 
 	if (!--g_tpl_count) {
 		for (int i = 0; i < MAX_STREAMS; i++) {
-			if (g_streams[i].fp) {
-				if (i > 2)
-					fclose(g_streams[i].fp);
+			stream *str = &g_streams[i];
 
-				free(g_streams[i].filename);
-				free(g_streams[i].mode);
-				free(g_streams[i].name);
-				g_streams[i].name = NULL;
+			if (str->fp) {
+				if (i > 2)
+					fclose(str->fp);
+
+				free(str->filename);
+				free(str->mode);
+				free(str->name);
+				str->name = NULL;
 			}
+
+			if (str->p)
+				destroy_parser(str->p);
+
+			str->p = NULL;
 		}
 
 		memset(g_streams, 0, sizeof(g_streams));
