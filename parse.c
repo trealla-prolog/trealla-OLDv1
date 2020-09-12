@@ -2249,10 +2249,9 @@ int parser_tokenize(parser *p, int args, int consing)
 		} else {
 			c->val_type = TYPE_STRING;
 
-			if (strlen(p->token) < MAX_SMALL_STRING) {
-				c->flags |= FLAG_SMALLSTRING;
+			if (strlen(p->token) < MAX_SMALL_STRING)
 				strcpy(c->val_chars, p->token);
-			} else
+			else
 				new_string(c, p->token);
 		}
 	}

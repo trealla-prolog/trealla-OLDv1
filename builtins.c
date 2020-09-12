@@ -181,8 +181,8 @@ static void make_literal(cell *tmp, idx_t offset)
 static void make_small(cell *tmp, const char *s)
 {
 	tmp->val_type = TYPE_STRING;
-	tmp->flags = FLAG_SMALLSTRING;
 	tmp->nbr_cells = 1;
+	tmp->flags = 0;
 	tmp->arity = 0;
 	strcpy(tmp->val_chars, s);
 }
@@ -190,8 +190,8 @@ static void make_small(cell *tmp, const char *s)
 static void make_smalln(cell *tmp, const char *s, size_t n)
 {
 	tmp->val_type = TYPE_STRING;
-	tmp->flags = FLAG_SMALLSTRING;
 	tmp->nbr_cells = 1;
+	tmp->flags = 0;
 	tmp->arity = 0;
 	memcpy(tmp->val_chars, s, n);
 	tmp->val_chars[n] = '\0';
@@ -779,10 +779,9 @@ static int fn_iso_atom_chars_2(query *q)
 	memcpy(tmpbuf, src, nbytes);
 	tmpbuf[nbytes] = '\0';
 
-	if (nbytes < MAX_SMALL_STRING) {
-		tmp.flags |= FLAG_SMALLSTRING;
+	if (nbytes < MAX_SMALL_STRING)
 		strcpy(tmp.val_chars, tmpbuf);
-	} else
+	else
 		new_string(&tmp, tmpbuf);
 
 	src += nbytes;
@@ -938,10 +937,9 @@ static int fn_iso_number_chars_2(query *q)
 	tmp.flags = 0;
 	int nbytes = strlen(src);
 
-	if (nbytes < MAX_SMALL_STRING) {
-		tmp.flags |= FLAG_SMALLSTRING;
+	if (nbytes < MAX_SMALL_STRING)
 		strcpy(tmp.val_chars, src);
-	} else
+	else
 		new_string(&tmp, src);
 
 	cell *l = alloc_list(q, &tmp);

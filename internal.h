@@ -34,7 +34,7 @@ typedef uint32_t idx_t;
 #define STREAM_BUFLEN 1024
 #define USE_BUILTINS 1
 
-#define GET_STR(c) ((c)->val_type != TYPE_STRING ? g_pool+((c)->val_off) : (c)->flags&FLAG_SMALLSTRING ? (c)->val_chars : (c)->val_sbuf->val_str)
+#define GET_STR(c) ((c)->val_type != TYPE_STRING ? g_pool+((c)->val_off) : (c)->flags&FLAG_BIGSTRING ? (c)->val_sbuf->val_str : (c)->val_chars)
 #define LEN_STR(c) ((c->flags&FLAG_BLOB) ? c->val_sbuf->nbytes : strlen(GET_STR(c)))
 
 #define GET_FRAME(i) q->frames+(i)
@@ -55,7 +55,7 @@ typedef uint32_t idx_t;
 #define is_structure(c) (is_literal(c) && (c)->arity)
 #define is_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
-#define is_bigstring(c) (is_string(c) && !((c)->flags&FLAG_SMALLSTRING))
+#define is_bigstring(c) ((c)->flags&FLAG_BIGSTRING)
 
 enum {
 	TYPE_EMPTY=0,
@@ -83,7 +83,7 @@ enum {
 	FLAG_RETURN=FLAG_HEX,				// only used with TYPE_END
 	FLAG_FIRSTUSE=FLAG_HEX,				// only used with TYPE_VAR
 	FLAG_BLOB=FLAG_HEX,				    // only used with TYPE_STRING
-	FLAG_SMALLSTRING=FLAG_OCTAL,	    // only used with TYPE_STRING
+	FLAG_BIGSTRING=FLAG_OCTAL	,	    // only used with TYPE_STRING
 	FLAG_DELETED=FLAG_HEX,				// only used by bagof
 
 	OP_FX=1<<9,
@@ -356,8 +356,8 @@ inline static void deref_string(cell *c)
 inline static void new_string(cell *c, const char *s)
 {
 	c->val_type = TYPE_STRING;
+	c->flags = FLAG_BIGSTRING;
 	c->nbr_cells = 1;
-	c->flags = 0;
 	c->arity = 0;
 	size_t len = strlen(s);
 	c->val_sbuf = malloc(sizeof(sbuf)+len+1);
@@ -370,7 +370,8 @@ inline static void new_string(cell *c, const char *s)
 inline static void new_stringn(cell *c, const char *s, uint32_t n)
 {
 	c->val_type = TYPE_STRING;
-	c->flags = FLAG_BLOB;
+	c->flags = FLAG_BIGSTRING;
+	c->flags |= FLAG_BLOB;
 	c->nbr_cells = 1;
 	c->arity = 0;
 	size_t len = n;

@@ -572,7 +572,7 @@ static int unify_float(cell *p1, cell *p2)
 	return 0;
 }
 
-#define GET_STR2(c) ((c)->flags&FLAG_SMALLSTRING ? (c)->val_chars : (c)->val_sbuf->val_str)
+#define GET_STR2(c) ((c)->flags&FLAG_BIGSTRING ? (c)->val_sbuf->val_str : (c)->val_chars)
 
 static int unify_literal(cell *p1, cell *p2)
 {
