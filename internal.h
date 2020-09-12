@@ -340,7 +340,7 @@ extern stream g_streams[MAX_STREAMS];
 extern module *g_modules;
 extern char *g_pool;
 
-inline static void ref_string(cell *c)
+inline static void ref_string(const cell *c)
 {
 	if (is_bigstring(c))
 		c->val_sbuf->refcnt++;
