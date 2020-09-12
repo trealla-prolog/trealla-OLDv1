@@ -377,9 +377,9 @@ static cell tmp_string(query *q, const char *s)
 		make_small(&tmp, s);
 	} else {
 		tmp.val_type = TYPE_STRING;
+		tmp.flags = FLAG_BIGSTRING;
 		tmp.val_str = strdup(s);
 		tmp.nbr_cells = 1;
-		tmp.flags = 0;
 		tmp.arity = 0;
 	}
 
@@ -394,9 +394,9 @@ static cell tmp_stringn(query *q, const char *s, size_t n)
 		make_smalln(&tmp, s, n);
 	} else {
 		tmp.val_type = TYPE_STRING;
+		tmp.flags = FLAG_BIGSTRING;
 		tmp.val_str = strndup(s, n);
 		tmp.nbr_cells = 1;
-		tmp.flags = 0;
 		tmp.arity = 0;
 	}
 
@@ -849,21 +849,10 @@ static int fn_iso_atom_chars_2(query *q)
 
 	const char *src = GET_STR(p1);
 	int nbytes = len_char_utf8(src);
-	cell tmp;
-	tmp.val_type = TYPE_STRING;
-	tmp.nbr_cells = 1;
-	tmp.flags = 0;
 	char tmpbuf[80];
 	memcpy(tmpbuf, src, nbytes);
 	tmpbuf[nbytes] = '\0';
-
-	if (nbytes < MAX_SMALL_STRING)
-		strcpy(tmp.val_chars, tmpbuf);
-	else {
-		tmp.flags |= FLAG_BIGSTRING;
-		tmp.val_str = strdup(tmpbuf);
-	}
-
+	cell tmp = tmp_string(q, tmpbuf);
 	src += nbytes;
 	cell *l = alloc_list(q, &tmp);
 
@@ -1010,20 +999,7 @@ static int fn_iso_number_chars_2(query *q)
 	char tmpbuf[256];
 	sprint_int(tmpbuf, sizeof(tmpbuf), p1->val_num, 10);
 	const char *src = tmpbuf;
-
-	cell tmp;
-	tmp.val_type = TYPE_STRING;
-	tmp.nbr_cells = 1;
-	tmp.flags = 0;
-	int nbytes = strlen(src);
-
-	if (nbytes < MAX_SMALL_STRING)
-		strcpy(tmp.val_chars, src);
-	else {
-		tmp.flags |= FLAG_BIGSTRING;
-		tmp.val_str = strdup(src);
-	}
-
+	cell tmp = tmp_stringn(q, src, 1);
 	cell *l = alloc_list(q, &tmp);
 
 	while (*++src) {
@@ -6647,7 +6623,7 @@ static int fn_send_1(query *q)
 	for (idx_t i = 0; i < c->nbr_cells; i++) {
 		cell *c2 = c + i;
 
-		if (c2->flags&FLAG_BIGSTRING) {
+		if (is_bigstring(c2)) {
 			if ((c2->flags&FLAG_BLOB)) {
 				size_t nbytes = c2->nbytes;
 				char *tmp = malloc(nbytes + 1);
