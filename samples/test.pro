@@ -43,7 +43,7 @@ test6a :- S='Aa...Bb...Cc...Dd', writeln(S).
 
 test6b :- Orig='Aa...Bb...Cc...Dd', string_lower(Orig,S), writeln(S).
 
-test6c :- Orig='Aa...Bb...Cc...Dd', fail.
+test6c :- Orig='Aa...Bb...Cc...Dd', writeln(Orig), fail.
 test6c :- writeln(ok).
 
 test6d :- Orig='Aa...Bb...Cc...Dd', sys_queue(Orig), string_lower(Orig,S), sys_queue(S), fail.
