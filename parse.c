@@ -714,6 +714,11 @@ void destroy_query(query *q)
 		free(save);
 	}
 
+	for (idx_t i = 0; i < q->slots_size; i++) {
+		slot *e = q->slots + i;
+		deref_string(&e->c);
+	}
+
 	for (int i = 0; i < MAX_QUEUES; i++)
 		free(q->queue[i]);
 
@@ -2252,7 +2257,7 @@ int parser_tokenize(parser *p, int args, int consing)
 			if (strlen(p->token) < MAX_SMALL_STRING)
 				strcpy(c->val_chars, p->token);
 			else
-				new_string(c, p->token);
+				new_string(c, p->token, 1);
 		}
 	}
 

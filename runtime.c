@@ -120,6 +120,7 @@ unsigned create_vars(query *q, unsigned nbr)
 
 	for (int i = 0; i < nbr; i++) {
 		slot *e = GET_SLOT(g, g->nbr_vars+i);
+		deref_string(&e->c);
 		e->c.val_type = TYPE_EMPTY;
 	}
 
@@ -162,6 +163,7 @@ static void unwind_trail(query *q, const choice *ch)
 
 		frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->slot_nbr);
+		deref_string(&e->c);
 		e->c.val_type = TYPE_EMPTY;
 	}
 }
@@ -197,8 +199,10 @@ void try_me(const query *q, unsigned vars)
 	g->env = q->st.sp;
 	slot *e = GET_SLOT(g, 0);
 
-	for (unsigned i = 0; i < vars; i++, e++)
+	for (unsigned i = 0; i < vars; i++, e++) {
+		deref_string(&e->c);
 		e->c.val_type = TYPE_EMPTY;
+	}
 }
 
 void make_choice(query *q)

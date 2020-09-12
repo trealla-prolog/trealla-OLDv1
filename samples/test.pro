@@ -39,8 +39,12 @@ test4c :-
 test5a :- throw(error(p1,p2)).
 test5b :- _ is abs(abc).
 
-test6 :- Orig='Aa...Bb...Cc...Dd',sys_queue(Orig),string_lower(Orig,S),sys_queue(S),fail.
-test6 :- sys_list(L),writeln(L).
+test6a :- S='Aa...Bb...Cc...Dd', writeln(S).
+
+test6b :- Orig='Aa...Bb...Cc...Dd', string_lower(Orig,S), writeln(S).
+
+test6c :- Orig='Aa...Bb...Cc...Dd', sys_queue(Orig), string_lower(Orig,S), sys_queue(S), fail.
+test6c :- sys_list(L),writeln(L).
 
 test7 :-
 	http_get('www.duckduckgo.com',_Data,[status_code(Code),headers(Hdrs)]),

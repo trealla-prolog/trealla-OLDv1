@@ -346,14 +346,14 @@ inline static void ref_string(const cell *c)
 		c->val_sbuf->refcnt++;
 }
 
-inline static void deref_string(cell *c)
+inline static void deref_string(const cell *c)
 {
 	if (is_bigstring(c))
 		if (!--c->val_sbuf->refcnt)
 			free(c->val_sbuf);
 }
 
-inline static void new_string(cell *c, const char *s)
+inline static void new_string(cell *c, const char *s, int refs)
 {
 	c->val_type = TYPE_STRING;
 	c->flags = FLAG_BIGSTRING;
@@ -361,13 +361,13 @@ inline static void new_string(cell *c, const char *s)
 	c->arity = 0;
 	size_t len = strlen(s);
 	c->val_sbuf = malloc(sizeof(sbuf)+len+1);
-	c->val_sbuf->refcnt = 1;
+	c->val_sbuf->refcnt = refs ? 1 : 0;
 	c->val_sbuf->nbytes = len;
 	memcpy(c->val_sbuf->val_str, s, len);
 	c->val_sbuf->val_str[len] = '\0';
 }
 
-inline static void new_stringn(cell *c, const char *s, uint32_t n)
+inline static void new_stringn(cell *c, const char *s, uint32_t n, int refs)
 {
 	c->val_type = TYPE_STRING;
 	c->flags = FLAG_BIGSTRING;
@@ -376,7 +376,7 @@ inline static void new_stringn(cell *c, const char *s, uint32_t n)
 	c->arity = 0;
 	size_t len = n;
 	c->val_sbuf = malloc(sizeof(sbuf)+len+1);
-	c->val_sbuf->refcnt = 1;
+	c->val_sbuf->refcnt = refs ? 1 : 0;
 	c->val_sbuf->nbytes = len;
 	memcpy(c->val_sbuf->val_str, s, len);
 	c->val_sbuf->val_str[len] = '\0';
