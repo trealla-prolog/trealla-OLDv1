@@ -4892,8 +4892,6 @@ static int fn_sys_queue_1(query *q)
 	for (idx_t i = 0; i < tmp->nbr_cells; i++, c++) {
 		if (is_var(c))
 			c->val_type = TYPE_EMPTY;
-		else if (is_bigstring(c))
-			c->val_str = strdup(c->val_str);
 	}
 
 	alloc_queue(q, tmp);
@@ -4910,8 +4908,6 @@ static int fn_sys_queuen_2(query *q)
 	for (idx_t i = 0; i < tmp->nbr_cells; i++, c++) {
 		if (is_var(c))
 			c->val_type = TYPE_EMPTY;
-		else if (is_bigstring(c))
-			c->val_str = strdup(c->val_str);
 	}
 
 	alloc_queuen(q, p1->val_num, tmp);
