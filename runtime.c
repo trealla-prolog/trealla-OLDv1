@@ -120,7 +120,6 @@ unsigned create_vars(query *q, unsigned nbr)
 
 	for (int i = 0; i < nbr; i++) {
 		slot *e = GET_SLOT(g, g->nbr_vars+i);
-		deref_string(&e->c);
 		e->c.val_type = TYPE_EMPTY;
 	}
 
@@ -163,7 +162,6 @@ static void unwind_trail(query *q, const choice *ch)
 
 		frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->slot_nbr);
-		deref_string(&e->c);
 		e->c.val_type = TYPE_EMPTY;
 	}
 }
@@ -199,10 +197,8 @@ void try_me(const query *q, unsigned vars)
 	g->env = q->st.sp;
 	slot *e = GET_SLOT(g, 0);
 
-	for (unsigned i = 0; i < vars; i++, e++) {
-		deref_string(&e->c);
+	for (unsigned i = 0; i < vars; i++, e++)
 		e->c.val_type = TYPE_EMPTY;
-	}
 }
 
 void make_choice(query *q)
@@ -271,7 +267,9 @@ int retry_choice(query *q)
 	for (idx_t i = ch->st.hp; i < q->st.hp; i++) {
 		cell *c = &q->arenas->heap[i];
 
-		if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
+		if (is_bigstring(c) && !is_const(c)) {
+			free(c->val_str);
+		} else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 			stream *str = &g_streams[c->val_num];
 
 			if (str->fp) {
@@ -282,8 +280,7 @@ int retry_choice(query *q)
 				free(str->name);
 				memset(str, 0, sizeof(stream));
 			}
-		} else
-			deref_string(c);
+		}
 
 		c->val_type = TYPE_EMPTY;
 	}
@@ -499,10 +496,8 @@ void set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 
 	if (v->arity)
 		make_indirect(&e->c, v);
-	else {
-		ref_string(v);
+	else
 		e->c = *v;
-	}
 
 	if (!q->cp)
 		return;
@@ -576,7 +571,7 @@ static int unify_float(cell *p1, cell *p2)
 	return 0;
 }
 
-#define GET_STR2(c) ((c)->flags&FLAG_BIGSTRING ? (c)->val_sbuf->val_str : (c)->val_chars)
+#define GET_STR2(c) ((c)->flags&FLAG_SMALLSTRING ? (c)->val_chars : (c)->val_str)
 
 static int unify_literal(cell *p1, cell *p2)
 {

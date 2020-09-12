@@ -226,15 +226,6 @@ module *find_module(const char *name)
 	return NULL;
 }
 
-static void make_string(cell *c, const char *s)
-{
-	if (strlen(s) < MAX_SMALL_STRING) {
-		c->val_type = TYPE_STRING;
-		strcpy(c->val_chars, s);
-	} else
-		new_string(c, s);
-}
-
 cell *get_head(cell *c)
 {
 	if (!is_literal(c))
@@ -585,11 +576,14 @@ static void set_persist_in_db(module *m, const char *name, idx_t arity)
 	m->use_persist = 1;
 }
 
-void clear_term(term *t, int deref)
+void clear_term(term *t)
 {
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
-		if (deref) deref_string(c);
+
+		if (is_bigstring(c) && !is_const(c))
+			free(c->val_str);
+
 		c->val_type = TYPE_EMPTY;
 	}
 
@@ -623,7 +617,7 @@ parser *create_parser(module *m)
 
 void destroy_parser(parser *p)
 {
-	clear_term(p->t, 0);
+	clear_term(p->t);
 	free(p->token);
 	free(p->t);
 	free(p);
@@ -702,7 +696,9 @@ void destroy_query(query *q)
 		for (idx_t i = 0; (i < a->hp) && (a == q->arenas); i++) {
 			cell *c = &a->heap[i];
 
-			if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
+			if (is_bigstring(c) && !is_const(c))
+				free(c->val_str);
+			else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 				stream *str = &g_streams[c->val_num];
 
 				if (str->fp) {
@@ -713,19 +709,13 @@ void destroy_query(query *q)
 					free(str->name);
 					memset(str, 0, sizeof(stream));
 				}
-			} else
-				deref_string(c);
+			}
 		}
 
 		arena *save = a;
 		a = a->next;
 		free(save->heap);
 		free(save);
-	}
-
-	for (idx_t i = 0; i < q->slots_size; i++) {
-		slot *e = q->slots + i;
-		deref_string(&e->c);
 	}
 
 	for (int i = 0; i < MAX_QUEUES; i++)
@@ -2260,8 +2250,15 @@ int parser_tokenize(parser *p, int args, int consing)
 				c->val_type = TYPE_VAR;
 
 			c->val_off = find_in_pool(p->token);
-		} else
-			make_string(c, p->token);
+		} else {
+			c->val_type = TYPE_STRING;
+
+			if (strlen(p->token) < MAX_SMALL_STRING) {
+				c->flags |= FLAG_SMALLSTRING;
+				strcpy(c->val_chars, p->token);
+			} else
+				c->val_str = strdup(p->token);
+		}
 	}
 
 	p->depth--;
@@ -2293,7 +2290,7 @@ static void module_purge(module *m)
 				last->next = r->next;
 
 			clause *next = r->next;
-			clear_term(&r->t, 1);
+			clear_term(&r->t);
 			free(r);
 			r = next;
 		}
@@ -2611,7 +2608,7 @@ void destroy_module(module *m)
 
 		for (clause *r = h->head; r;) {
 			clause *save = r->next;
-			clear_term(&r->t, 1);
+			clear_term(&r->t);
 			free(r);
 			r = save;
 		}
