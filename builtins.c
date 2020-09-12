@@ -183,7 +183,7 @@ static void make_small(cell *tmp, const char *s)
 	tmp->val_type = TYPE_STRING;
 	tmp->nbr_cells = 1;
 	tmp->arity = 0;
-	tmp->flags = FLAG_SMALLSTRING;
+	tmp->flags = 0;
 	strcpy(tmp->val_chars, s);
 }
 
@@ -192,7 +192,7 @@ static void make_smalln(cell *tmp, const char *s, size_t n)
 	tmp->val_type = TYPE_STRING;
 	tmp->nbr_cells = 1;
 	tmp->arity = 0;
-	tmp->flags = FLAG_SMALLSTRING;
+	tmp->flags = 0;
 	memcpy(tmp->val_chars, s, n);
 	tmp->val_chars[n] = '\0';
 }
@@ -262,6 +262,7 @@ static cell *alloc_string(query *q, char *s, int take)
 {
 	cell *tmp = alloc_heap(q, 1);
 	tmp->val_type = TYPE_STRING;
+	tmp->flags = FLAG_BIGSTRING;
 	tmp->nbr_cells = 1;
 	tmp->val_str = take ? s : strdup(s);
 	return tmp;
@@ -856,11 +857,12 @@ static int fn_iso_atom_chars_2(query *q)
 	memcpy(tmpbuf, src, nbytes);
 	tmpbuf[nbytes] = '\0';
 
-	if (nbytes < MAX_SMALL_STRING) {
-		tmp.flags |= FLAG_SMALLSTRING;
+	if (nbytes < MAX_SMALL_STRING)
 		strcpy(tmp.val_chars, tmpbuf);
-	} else
+	else {
+		tmp.flags |= FLAG_BIGSTRING;
 		tmp.val_str = strdup(tmpbuf);
+	}
 
 	src += nbytes;
 	cell *l = alloc_list(q, &tmp);
@@ -1015,11 +1017,12 @@ static int fn_iso_number_chars_2(query *q)
 	tmp.flags = 0;
 	int nbytes = strlen(src);
 
-	if (nbytes < MAX_SMALL_STRING) {
-		tmp.flags |= FLAG_SMALLSTRING;
+	if (nbytes < MAX_SMALL_STRING)
 		strcpy(tmp.val_chars, src);
-	} else
+	else {
+		tmp.flags |= FLAG_BIGSTRING;
 		tmp.val_str = strdup(src);
+	}
 
 	cell *l = alloc_list(q, &tmp);
 
@@ -6644,7 +6647,7 @@ static int fn_send_1(query *q)
 	for (idx_t i = 0; i < c->nbr_cells; i++) {
 		cell *c2 = c + i;
 
-		if (is_string(c2) && !(c2->flags&FLAG_SMALLSTRING)) {
+		if (c2->flags&FLAG_BIGSTRING) {
 			if ((c2->flags&FLAG_BLOB)) {
 				size_t nbytes = c2->nbytes;
 				char *tmp = malloc(nbytes + 1);

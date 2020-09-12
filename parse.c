@@ -2253,11 +2253,12 @@ int parser_tokenize(parser *p, int args, int consing)
 		} else {
 			c->val_type = TYPE_STRING;
 
-			if (strlen(p->token) < MAX_SMALL_STRING) {
-				c->flags |= FLAG_SMALLSTRING;
+			if (strlen(p->token) < MAX_SMALL_STRING)
 				strcpy(c->val_chars, p->token);
-			} else
+			else {
+				c->flags |= FLAG_BIGSTRING;
 				c->val_str = strdup(p->token);
+			}
 		}
 	}
 
