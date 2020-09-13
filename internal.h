@@ -77,9 +77,10 @@ enum {
 	FLAG_OCTAL=1<<2,					// only used with TYPE_INTEGER
 	FLAG_BINARY=1<<3,					// only used with TYPE_INTEGER
 	FLAG_STREAM=1<<4,					// only used with TYPE_INTEGER
-	FLAG_TAIL_REC=1<<6,
-	FLAG_PASS_THRU=1<<7,
+	FLAG_TAIL_REC=1<<5,
+	FLAG_PASS_THRU=1<<6,
 
+	//FLAG_SPARE1=1<<7,
 	//FLAG_SPARE2=1<<8,
 
 	FLAG2_RETURN=FLAG_STREAM,			// only used with TYPE_END
