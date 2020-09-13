@@ -166,7 +166,6 @@ void make_end(cell *tmp)
 static void make_end_return(cell *tmp, cell *c)
 {
 	make_end(tmp);
-	tmp->flags = FLAG2_RETURN;
 	tmp->val_ptr = c + c->nbr_cells;
 }
 
