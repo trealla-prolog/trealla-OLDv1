@@ -306,7 +306,7 @@ static rule *get_rule(module *m)
 {
 	for (rule *h = m->head; h; h = h->next) {
 		if (h->is_abolished) {
-			h->is_abolished = 0;
+			memset(h, 0, sizeof(rule));
 			return h;
 		}
 	}
@@ -322,11 +322,15 @@ static rule *create_rule(module *m, cell *c)
 	rule *h = get_rule(m);
 	h->val_off = c->val_off;
 	h->arity = c->arity;
-	h->is_prebuilt = 0;
-	h->is_public = 0;
-	h->is_dynamic = 0;
-	h->is_persist = 0;
 	return h;
+}
+
+static void reindex_rule(module *m, rule *h)
+{
+	for (clause *r = h->head; r; r = r->next) {
+		cell *c = get_head(r->t.cells);
+		sl_set(h->index, c, r);
+	}
 }
 
 static int compkey(const void *ptr1, const void *ptr2)
@@ -432,16 +436,18 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
+	r->parent = h;
 	memcpy(&r->t, t, sizeof(term));
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
 	r->m = m;
 	r->next = h->head;
 	h->head = r;
+	h->cnt++;
 
 	if (!h->tail)
 		h->tail = r;
 
-	if (h->is_dynamic && (c->arity > 0)) {
+	if (h->index && (c->arity > 0)) {
 		cell *c = get_head(r->t.cells);
 		sl_set(h->index, c, r);
 	}
@@ -450,6 +456,11 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 
 	if (h->is_persist)
 		r->t.is_persist = 1;
+
+	if (!h->index && (h->cnt > 10) && h->arity && !is_structure(c+1)) {
+		h->index = sl_create(compkey);
+		reindex_rule(m, h);
+	}
 
 	return r;
 }
@@ -489,6 +500,7 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
+	r->parent = h;
 	memcpy(&r->t, t, sizeof(term));
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
 	r->m = m;
@@ -497,11 +509,12 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 		h->tail->next = r;
 
 	h->tail = r;
+	h->cnt++;
 
 	if (!h->head)
 		h->head = r;
 
-	if (h->is_dynamic && (c->arity > 0)) {
+	if (h->index && (c->arity > 0)) {
 		cell *c = get_head(r->t.cells);
 		sl_app(h->index, c, r);
 	}
@@ -511,11 +524,17 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 	if (h->is_persist)
 		r->t.is_persist = 1;
 
+	if (!h->index && (h->cnt > 10) && h->arity && !is_structure(c+1)) {
+		h->index = sl_create(compkey);
+		reindex_rule(m, h);
+	}
+
 	return r;
 }
 
 clause *retract_from_db(module *m, clause *r)
 {
+	r->parent->cnt--;
 	r->t.is_deleted = 1;
 	m->dirty = 1;
 	return r;

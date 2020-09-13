@@ -4073,6 +4073,7 @@ static int do_abolish(query *q, cell *c)
 	sl_destroy(h->index);
 	h->index = NULL;
 	h->head = h->tail = NULL;
+	h->cnt = 0;
 	return 1;
 }
 

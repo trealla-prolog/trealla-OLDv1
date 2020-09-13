@@ -530,7 +530,7 @@ bench_mark(walk_list_rec, 2000, wlr(L), dummy(L)) :- r1(L).
 
 % 6. Walk down N 100 copies of the same 100 element list, recursively.
 
-bench_mark(args(N), 2000, args(N, L), dummy(N, L)) :- args(N), r1(L).
+xbench_mark(args(N), 2000, args(N, L), dummy(N, L)) :- args(N), r1(L).
 
 % :- public args/2.
 
@@ -802,8 +802,6 @@ bench_mark(deep_backtracking, 2000, deep, dummy(a)).
 % :- public deep/0.
 
 deep :- b(_, Y), Y = 100.
-
-:- dynamic b/2.
 
 b(_X, 1).
 b(_X, 2).
@@ -1718,8 +1716,6 @@ arg100(N, T, R) :- arg(N, T, R).
 % 18. 100 indexed calls; some systems may require extra declarations to
 % put an index on the first argument.
 
-:- dynamic ix/1.
-
 bench_mark(index, 2000, ix(1), dummy(1)).
 
 ix(1) :- ix(10000).
@@ -1844,7 +1840,7 @@ assert_clauses([Clause|Rest]) :-
 
 % 20. Access 100 dynamically-created clauses with 1st arg. instantiated
 
-bench_mark(access_unit, 1000, access_dix(1, 1), dummy(1, 1)) :-
+xbench_mark(access_unit, 1000, access_dix(1, 1), dummy(1, 1)) :-
    abolish(dix, 2),
    dix_clauses(1, 100, L),
    assert_clauses(L).
@@ -1871,7 +1867,7 @@ access_dix(Start, End) :-
 
 % :- public access_back/2.
 
-bench_mark(slow_access_unit, 100, access_back(1, 1), dummy(1, 1)) :-
+xbench_mark(slow_access_unit, 100, access_back(1, 1), dummy(1, 1)) :-
    abolish(dix, 2),
    dix_clauses(1, 100, L),
    assert_clauses(L).

@@ -151,6 +151,7 @@ typedef struct {
 } term;
 
 struct clause_ {
+	rule *parent;
 	clause *next;
 	module *m;
 	uuid u;
@@ -161,6 +162,7 @@ struct rule_ {
 	rule *next;
 	clause *head, *tail;
 	skiplist *index;
+	uint32_t cnt;
 	idx_t val_off;
 	uint8_t arity;
 	unsigned is_prebuilt:1;

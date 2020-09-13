@@ -279,8 +279,6 @@ task82(G) :- write(doit), nl, G.
 test82 :- task82(!), fail.
 test82 :- write(ok), nl.
 
-:- dynamic b/2.
-
 test83 :- between(1,1000000,_), shallow, fail.
 test83.
 
