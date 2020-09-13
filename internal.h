@@ -83,11 +83,11 @@ enum {
 	//FLAG_SPARE1=1<<7,
 	//FLAG_SPARE2=1<<8,
 
-	FLAG2_RETURN=FLAG_STREAM,			// only used with TYPE_END
+	FLAG2_RETURN=FLAG_HEX,				// only used with TYPE_END
 	FLAG2_DELETED=FLAG_HEX,				// only used by bagof
 	FLAG2_FIRST_USE=FLAG_HEX,			// only used with TYPE_VAR
-	FLAG2_BIG_STRING=FLAG_OCTAL,		// only used with TYPE_STRING
 	FLAG2_CONST_STRING=FLAG_HEX,		// only used with TYPE_STRING
+	FLAG2_BIG_STRING=FLAG_OCTAL,		// only used with TYPE_STRING
 
 	OP_FX=1<<9,
 	OP_FY=1<<10,
