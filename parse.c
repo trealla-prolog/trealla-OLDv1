@@ -692,6 +692,12 @@ void destroy_query(query *q)
 	free(q->trails);
 	free(q->choices);
 
+	while (q->qnbr > 0) {
+		free(q->tmpq[q->qnbr]);
+		q->tmpq[q->qnbr] = NULL;
+		q->qnbr--;
+	}
+
 	for (arena *a = q->arenas; a;) {
 		for (idx_t i = 0; (i < a->hp) && (a == q->arenas); i++) {
 			cell *c = &a->heap[i];
