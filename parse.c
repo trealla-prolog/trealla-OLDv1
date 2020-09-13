@@ -581,7 +581,7 @@ void clear_term(term *t)
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
 
-		if (is_bigstring(c) && !is_const(c))
+		if (is_big_string(c) && !is_const_string(c))
 			free(c->val_str);
 
 		c->val_type = TYPE_EMPTY;
@@ -696,7 +696,7 @@ void destroy_query(query *q)
 		for (idx_t i = 0; (i < a->hp) && (a == q->arenas); i++) {
 			cell *c = &a->heap[i];
 
-			if (is_bigstring(c) && !is_const(c))
+			if (is_big_string(c) && !is_const_string(c))
 				free(c->val_str);
 			else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 				stream *str = &g_streams[c->val_num];
@@ -1046,7 +1046,7 @@ int parser_xref(parser *p, term *t, rule *parent)
 
 			if ((c+c->nbr_cells) >= (t->cells+t->cidx-1)) {
 				if (parent && (h == parent))
-					c->flags |= FLAG_TAILREC;
+					c->flags |= FLAG_TAIL_REC;
 			}
 
 			if (h && (m != p->m) && !h->is_public && strcmp(GET_STR(c), "dynamic")) {
@@ -1159,7 +1159,7 @@ void parser_assign_vars(parser *p)
 		p->vartab.var_name[c->slot_nbr] = GET_STR(c);
 
 		if (p->vartab.var_used[c->slot_nbr]++ == 0) {
-			c->flags |= FLAG_FIRSTUSE;
+			c->flags |= FLAG2_FIRST_USE;
 			t->nbr_vars++;
 		}
 	}
@@ -2227,7 +2227,7 @@ int parser_tokenize(parser *p, int args, int consing)
 		c->precedence = precedence;
 
 		if (p->dcg_passthru)
-			c->flags |= FLAG_PASSTHRU;
+			c->flags |= FLAG_PASS_THRU;
 
 		if (p->val_type == TYPE_INTEGER) {
 			const char *src = p->token;
@@ -2256,7 +2256,7 @@ int parser_tokenize(parser *p, int args, int consing)
 			if (strlen(p->token) < MAX_SMALL_STRING)
 				strcpy(c->val_chars, p->token);
 			else {
-				c->flags |= FLAG_BIGSTRING;
+				c->flags |= FLAG2_BIG_STRING;
 				c->val_str = strdup(p->token);
 			}
 		}

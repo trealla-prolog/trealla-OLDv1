@@ -166,7 +166,7 @@ void make_end(cell *tmp)
 static void make_end_return(cell *tmp, cell *c)
 {
 	make_end(tmp);
-	tmp->flags = FLAG_RETURN;
+	tmp->flags = FLAG2_RETURN;
 	tmp->val_ptr = c + c->nbr_cells;
 }
 
@@ -262,7 +262,7 @@ static cell *alloc_string(query *q, char *s, int take)
 {
 	cell *tmp = alloc_heap(q, 1);
 	tmp->val_type = TYPE_STRING;
-	tmp->flags = FLAG_BIGSTRING;
+	tmp->flags = FLAG2_BIG_STRING;
 	tmp->nbr_cells = 1;
 	tmp->val_str = take ? s : strdup(s);
 	return tmp;
@@ -377,7 +377,7 @@ static cell tmp_string(query *q, const char *s)
 		make_small(&tmp, s);
 	} else {
 		tmp.val_type = TYPE_STRING;
-		tmp.flags = FLAG_BIGSTRING;
+		tmp.flags = FLAG2_BIG_STRING;
 		tmp.val_str = strdup(s);
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;
@@ -394,7 +394,7 @@ static cell tmp_stringn(query *q, const char *s, size_t n)
 		make_smalln(&tmp, s, n);
 	} else {
 		tmp.val_type = TYPE_STRING;
-		tmp.flags = FLAG_BIGSTRING;
+		tmp.flags = FLAG2_BIG_STRING;
 		tmp.val_str = strndup(s, n);
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;
@@ -450,7 +450,7 @@ static cell take_blob(query *q, const char *s, size_t n)
 	}
 
 	tmp = *alloc_string(q, strndup(s, n), 1);
-	tmp.flags |= FLAG_BLOB;
+	tmp.flags |= FLAG2_BLOB_STRING;
 	tmp.nbytes = n;
 	return tmp;
 }
@@ -492,7 +492,7 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	copy_cells(tmp, p1, 1);
 
 	if (!is_structure(p1)) {
-		if (is_bigstring(p1) && !is_const(p1))
+		if (is_big_string(p1) && !is_const_string(p1))
 			tmp->val_str = strdup(p1->val_str);
 
 		return;
@@ -537,7 +537,7 @@ static void deep_clone2_to_heap(query *q, cell *p1, idx_t p1_ctx)
 	copy_cells(tmp, p1, 1);
 
 	if (!is_structure(p1)) {
-		if (is_bigstring(p1) && !is_const(p1))
+		if (is_big_string(p1) && !is_const_string(p1))
 			tmp->val_str = strdup(p1->val_str);
 
 		return;
@@ -3750,8 +3750,8 @@ cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix)
 	cell *c = tmp + (prefix?1:0);
 
 	for (idx_t i = 0; i < p1->nbr_cells; i++, c++) {
-		if (is_bigstring(c))
-			c->flags |= FLAG_CONST;
+		if (is_big_string(c))
+			c->flags |= FLAG2_CONST_STRING;
 	}
 
 	return tmp;
@@ -3768,8 +3768,8 @@ static cell *copy_to_heap(query *q, cell *p1, idx_t suffix)
 	for (idx_t i = 0; i < p1->nbr_cells; i++, dst++, src++) {
 		*dst = *src;
 
-		if (is_bigstring(src))
-			dst->flags |= FLAG_CONST;
+		if (is_big_string(src))
+			dst->flags |= FLAG2_CONST_STRING;
 
 		if (!is_var(src))
 			continue;
@@ -5059,11 +5059,11 @@ static int fn_iso_bagof_3(query *q)
 	cell *c_end = q->tmpq[q->qnbr] + q->tmpq_size[q->qnbr];
 
 	for (cell *c = q->tmpq[q->qnbr]; c < c_end; c += c->nbr_cells) {
-		if (c->flags & FLAG_DELETED)
+		if (c->flags & FLAG2_DELETED)
 			continue;
 
 		if (unify(q, p2, p2_ctx, c, q->st.curr_frame)) {
-			c->flags |= FLAG_DELETED;
+			c->flags |= FLAG2_DELETED;
 			cell *c1 = deep_clone_to_tmp(q, p1, q->st.curr_frame);
 			alloc_queuen(q, q->qnbr, c1);
 		}
@@ -5134,11 +5134,11 @@ static int fn_iso_setof_3(query *q)
 	cell *c_end = q->tmpq[q->qnbr] + q->tmpq_size[q->qnbr];
 
 	for (cell *c = q->tmpq[q->qnbr]; c < c_end; c += c->nbr_cells) {
-		if (c->flags & FLAG_DELETED)
+		if (c->flags & FLAG2_DELETED)
 			continue;
 
 		if (unify(q, p2, p2_ctx, c, q->st.curr_frame)) {
-			c->flags |= FLAG_DELETED;
+			c->flags |= FLAG2_DELETED;
 			cell *c1 = deep_clone_to_tmp(q, p1, q->st.curr_frame);
 			alloc_queuen(q, q->qnbr, c1);
 		}
@@ -6574,7 +6574,7 @@ static int fn_spawn_n(query *q)
 		cell *c = tmp2;
 
 		for (idx_t i = 0; i < p2->nbr_cells; i++, c++) {
-			if (is_bigstring(c))
+			if (is_big_string(c))
 				c->val_str = strdup(c->val_str);
 		}
 
@@ -6626,8 +6626,8 @@ static int fn_send_1(query *q)
 	for (idx_t i = 0; i < c->nbr_cells; i++) {
 		cell *c2 = c + i;
 
-		if (is_bigstring(c2)) {
-			if ((c2->flags&FLAG_BLOB)) {
+		if (is_big_string(c2)) {
+			if ((c2->flags&FLAG2_BLOB_STRING)) {
 				size_t nbytes = c2->nbytes;
 				char *tmp = malloc(nbytes + 1);
 				memcpy(tmp, c2->val_str, nbytes+1);

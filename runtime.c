@@ -267,7 +267,7 @@ int retry_choice(query *q)
 	for (idx_t i = ch->st.hp; i < q->st.hp; i++) {
 		cell *c = &q->arenas->heap[i];
 
-		if (is_bigstring(c) && !is_const(c)) {
+		if (is_big_string(c) && !is_const_string(c)) {
 			free(c->val_str);
 		} else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 			stream *str = &g_streams[c->val_num];
@@ -383,7 +383,7 @@ static void commit_me(query *q, term *t)
 	g->m = q->m;
 	q->m = q->st.curr_clause->m;
 	int last_match = (!q->st.curr_clause->next && !q->st.iter) || t->first_cut;
-	int recursive = (last_match || g->did_cut) && (q->st.curr_cell->flags&FLAG_TAILREC);
+	int recursive = (last_match || g->did_cut) && (q->st.curr_cell->flags&FLAG_TAIL_REC);
 	int tco = recursive && !g->any_choices && check_slots(q, g, t);
 
 	if (!last_match) {
@@ -571,7 +571,7 @@ static int unify_float(cell *p1, cell *p2)
 	return 0;
 }
 
-#define GET_STR2(c) ((c)->flags&FLAG_BIGSTRING ? (c)->val_str : (c)->val_chars)
+#define GET_STR2(c) ((c)->flags&FLAG2_BIG_STRING ? (c)->val_str : (c)->val_chars)
 
 static int unify_literal(cell *p1, cell *p2)
 {
