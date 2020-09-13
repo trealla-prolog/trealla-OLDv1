@@ -803,6 +803,8 @@ bench_mark(deep_backtracking, 2000, deep, dummy(a)).
 
 deep :- b(_, Y), Y = 100.
 
+:- dynamic b/2.
+
 b(_X, 1).
 b(_X, 2).
 b(_X, 3).
