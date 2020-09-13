@@ -440,18 +440,20 @@ static cell take_string(query *q, char *s)
 	return tmp;
 }
 
-static cell take_blob(query *q, const char *s, size_t n)
+static cell take_blob(query *q, char *s, size_t n)
 {
 	cell tmp;
 
 	if (n < MAX_SMALL_STRING) {
 		make_smalln(&tmp, s, n);
+		free(s);
 		return tmp;
 	}
 
 	tmp = *alloc_string(q, strndup(s, n), 1);
 	tmp.flags |= FLAG2_BLOB_STRING;
 	tmp.nbytes = n;
+	free(s);
 	return tmp;
 }
 

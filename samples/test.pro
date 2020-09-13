@@ -49,6 +49,8 @@ test6c :- writeln(ok).
 test6d :- Orig='Aa...Bb...Cc...Dd', sys_queue(Orig), string_lower(Orig,S), sys_queue(S), fail.
 test6d :- sys_list(L),writeln(L).
 
+test6e :- Orig='Aa...Bb...Cc...Dd', atom_concat(Orig,Orig,S2), writeln(S2).
+
 test7 :-
 	http_get('www.duckduckgo.com',_Data,[status_code(Code),headers(Hdrs)]),
 	write('Response='), writeln(Code),
