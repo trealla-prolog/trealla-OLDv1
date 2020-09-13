@@ -4481,11 +4481,10 @@ static int fn_iso_functor_3(query *q)
 		return 1;
 	}
 
-	cell tmp = {{0}};
+	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
-	tmp.nbr_cells = 1;
-	tmp.match = p1->match;
-	tmp.val_str = p1->val_str;
+	tmp.val_off = p1->val_off;
+	tmp.arity = 0;
 
 	if (!unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 		return 0;
@@ -6570,7 +6569,7 @@ static int fn_spawn_n(query *q)
 		cell *c = tmp2;
 
 		for (idx_t i = 0; i < p2->nbr_cells; i++, c++) {
-			if (is_big_string(c))
+			if (is_big_string(c) && !is_const_string(c))
 				c->val_str = strdup(c->val_str);
 		}
 
@@ -6622,7 +6621,7 @@ static int fn_send_1(query *q)
 	for (idx_t i = 0; i < c->nbr_cells; i++) {
 		cell *c2 = c + i;
 
-		if (is_big_string(c2)) {
+		if (is_big_string(c2) && !is_const_string(c2)) {
 			if ((c2->flags&FLAG2_BLOB_STRING)) {
 				size_t nbytes = c2->nbytes;
 				char *tmp = malloc(nbytes + 1);
