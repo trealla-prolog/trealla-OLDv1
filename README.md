@@ -9,7 +9,7 @@ Written in plain-old C.
 	Rationals are a native type
 	Atoms (synonymous with strings) are UTF-8 of unlimited length
 	Arity limit 255
-	Full-term indexing
+	Full-term just-in-time indexing
 	Peristence to per-module database
 	REPL with history
 	MIT licensed
