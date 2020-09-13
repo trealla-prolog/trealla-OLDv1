@@ -34,9 +34,6 @@ typedef uint32_t idx_t;
 #define STREAM_BUFLEN 1024
 #define USE_BUILTINS 1
 
-#define GET_STR(c) ((c)->val_type != TYPE_STRING ? g_pool+((c)->val_off) : (c)->flags&FLAG2_BIG_STRING ? (c)->val_str : (c)->val_chars)
-#define LEN_STR(c) ((c->flags&FLAG2_BLOB_STRING) ? c->nbytes : strlen(GET_STR(c)))
-
 #define GET_FRAME(i) q->frames+(i)
 #define GET_SLOT(g,i) (i) < g->nbr_slots ? q->slots+g->env+(i) : q->slots+g->overflow+((i)-g->nbr_slots)
 
@@ -57,6 +54,11 @@ typedef uint32_t idx_t;
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
 #define is_big_string(c) (is_string(c) && ((c)->flags&FLAG2_BIG_STRING))
 #define is_const_string(c) (is_string(c) && ((c)->flags&FLAG2_CONST_STRING))
+
+// These 2 assume literal or string types...
+
+#define GET_STR(c) ((c)->val_type != TYPE_STRING ? g_pool+((c)->val_off) : (c)->flags&FLAG2_BIG_STRING ? (c)->val_str : (c)->val_chars)
+#define LEN_STR(c) ((c->flags&FLAG2_BLOB_STRING) ? c->nbytes : strlen(GET_STR(c)))
 
 enum {
 	TYPE_EMPTY=0,
@@ -80,10 +82,9 @@ enum {
 
 	//FLAG_SPARE2=1<<8,
 
+	FLAG2_RETURN=FLAG_STREAM,			// only used with TYPE_END
 	FLAG2_DELETED=FLAG_HEX,				// only used by bagof
-	FLAG2_RETURN=FLAG_HEX,				// only used with TYPE_END
 	FLAG2_FIRST_USE=FLAG_HEX,			// only used with TYPE_VAR
-
 	FLAG2_BIG_STRING=FLAG_OCTAL,		// only used with TYPE_STRING
 	FLAG2_BLOB_STRING=FLAG_BINARY,		// only used with TYPE_STRING
 	FLAG2_CONST_STRING=FLAG_HEX,		// only used with TYPE_STRING
