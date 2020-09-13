@@ -117,7 +117,7 @@ struct cell_ {
 			union {
 				rule *match;				// rules
 				int (*fn)(query*);			// builtins
-				uint32_t nbytes; 	       // slice size for strings
+				uint32_t nbytes;			// slice size for strings
 				uint16_t precedence;		// ops parsing
 				uint8_t slot_nbr;			// vars
 				int_t val_den;				// rational denominator
@@ -126,7 +126,7 @@ struct cell_ {
 			union {
 				int_t val_num;				// rational numerator
 				double val_flt;				// float
-				unsigned val_off;			// offset to string in pool
+				idx_t val_off;				// offset to string in pool
 				char *val_str;				// C-string
 				cell *val_ptr;				// indirect
 			};
