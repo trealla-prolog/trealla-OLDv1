@@ -407,6 +407,12 @@ static cell make_stringn(query *q, const char *s, size_t n)
 	return tmp;
 }
 
+static cell make_blob(query *q, const char *s, size_t n)
+{
+	cell tmp = *alloc_stringn(q, s, n);
+	return tmp;
+}
+
 static cell make_string(query *q, const char *s)
 {
 	size_t n = strlen(s);
@@ -5755,7 +5761,7 @@ static int fn_loadfile_2(query *q)
 
 	s[st.st_size] = '\0';
 	fclose(fp);
-	cell tmp = make_stringn(q, s, st.st_size);
+	cell tmp = make_blob(q, s, st.st_size);
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	free(s);
 	return 1;
@@ -6211,7 +6217,7 @@ static int fn_bread_3(query *q)
 			}
 		}
 
-		cell tmp = make_stringn(q, str->data, str->data_len);
+		cell tmp = make_blob(q, str->data, str->data_len);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(str->data);
 		str->data = NULL;
@@ -6227,7 +6233,7 @@ static int fn_bread_3(query *q)
 		size_t nbytes = stream_read(str->data, str->alloc_nbytes, str);
 		str->data[nbytes] = '\0';
 		str->data = realloc(str->data, nbytes+1);
-		cell tmp = make_stringn(q, str->data, nbytes);
+		cell tmp = make_blob(q, str->data, nbytes);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(str->data);
 		str->data = NULL;
@@ -6255,7 +6261,7 @@ static int fn_bread_3(query *q)
 	cell tmp1;
 	make_int(&tmp1, str->data_len);
 	set_var(q, p1, p1_ctx, &tmp1, q->st.curr_frame);
-	cell tmp2 = make_stringn(q, str->data, str->data_len);
+	cell tmp2 = make_blob(q, str->data, str->data_len);
 	set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	free(str->data);
 	str->data = NULL;
