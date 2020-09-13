@@ -5047,7 +5047,8 @@ static int fn_iso_bagof_3(query *q)
 	if (!q->tmpq[q->qnbr]) {
 		idx_t nbr_cells = queuen_used(q);
 		q->tmpq[q->qnbr] = malloc(sizeof(cell)*nbr_cells);
-		q->tmpq_size[q->qnbr] = copy_cells(q->tmpq[q->qnbr], get_queuen(q), nbr_cells);
+		copy_cells(q->tmpq[q->qnbr], get_queuen(q), nbr_cells);
+		q->tmpq_size[q->qnbr] = nbr_cells;
 	}
 
 	init_queuen(q);
@@ -5122,7 +5123,8 @@ static int fn_iso_setof_3(query *q)
 	if (!q->tmpq[q->qnbr]) {
 		idx_t nbr_cells = queuen_used(q);
 		q->tmpq[q->qnbr] = malloc(sizeof(cell)*nbr_cells);
-		q->tmpq_size[q->qnbr] = copy_cells(q->tmpq[q->qnbr], get_queuen(q), nbr_cells);
+		copy_cells(q->tmpq[q->qnbr], get_queuen(q), nbr_cells);
+		q->tmpq_size[q->qnbr] = nbr_cells;
 	}
 
 	init_queuen(q);

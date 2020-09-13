@@ -115,11 +115,19 @@ test11b :-
 		delay(100),
 		fail.
 
-test12 :-
+test12a :-
 	JsonData = '[{"foo":1,"bar":2}, {"bar":3,"foo":4}]',
 	read_term_from_atom(JsonData, Data, [double_quotes(atom)]),
 	findall(X, (member({F1:A,F2:B},Data), (F1=foo -> X = A ; (F2=foo -> X = B))), L),
 	writeln(L).
+
+test12b :-
+	JsonData = '[{"foo":1,"bar":2}, {"bar":3,"foo":4}]',
+	read_term_from_atom(JsonData, Data, [double_quotes(atom)]),
+	bagof(X, (member({F1:A,F2:B},Data), (F1=foo -> X = A ; (F2=foo -> X = B))), L),
+	writeln(L),
+	fail.
+test12b.
 
 test13.
 test13 :- test13.
