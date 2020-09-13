@@ -692,10 +692,10 @@ void destroy_query(query *q)
 	free(q->trails);
 	free(q->choices);
 
-	while (q->qnbr > 0) {
-		free(q->tmpq[q->qnbr]);
-		q->tmpq[q->qnbr] = NULL;
-		q->qnbr--;
+	while (q->st.qnbr > 0) {
+		free(q->tmpq[q->st.qnbr]);
+		q->tmpq[q->st.qnbr] = NULL;
+		q->st.qnbr--;
 	}
 
 	for (arena *a = q->arenas; a;) {

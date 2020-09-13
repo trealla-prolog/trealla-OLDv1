@@ -222,14 +222,15 @@ typedef struct {
 	cell *curr_cell;
 	clause *curr_clause;
 	sliter *iter;
-	idx_t curr_frame, fp, hp, tp, sp, anbr;
+	idx_t curr_frame, fp, hp, tp, sp;
+	uint8_t anbr, qnbr;
 } qstate;
 
 typedef struct {
 	qstate st;
 	idx_t v1, v2;
 	uint32_t pins;
-	uint8_t nbr_vars, qnbr;
+	uint8_t nbr_vars;
 	unsigned local_cut:1;
 	unsigned barrier:1;
 	unsigned any_choices:1;
@@ -267,7 +268,7 @@ struct query_ {
 	idx_t max_choices, max_frames, max_slots, max_trails, max_heaps;
 	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;
 	idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
-	uint8_t retry, halt_code, status, qnbr, quoted;
+	uint8_t retry, halt_code, status, quoted;
 	uint8_t current_input, current_output;
 	unsigned resume:1;
 	unsigned no_tco:1;

@@ -210,7 +210,6 @@ void make_choice(query *q)
 	idx_t curr_choice = q->cp++;
 	choice *ch = q->choices + curr_choice;
 	ch->st = q->st;
-	ch->qnbr = 0;
 	ch->local_cut = 0;
 	ch->barrier = 0;
 	ch->catchme1 = 0;
@@ -423,11 +422,11 @@ void cut_me(query *q, int local_cut)
 		if (ch->barrier)
 			break;
 
-		if (ch->qnbr) {
-			q->qnbr = ch->qnbr;
-			free(q->tmpq[q->qnbr]);
-			q->tmpq[q->qnbr] = NULL;
-			q->qnbr--;
+		if (ch->st.qnbr) {
+			q->st.qnbr = ch->st.qnbr;
+			free(q->tmpq[q->st.qnbr]);
+			q->tmpq[q->st.qnbr] = NULL;
+			q->st.qnbr--;
 		}
 
 		if (ch->st.iter) {

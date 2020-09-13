@@ -309,13 +309,13 @@ static cell *alloc_queue(query *q, const cell *c)
 
 static void init_queuen(query* q)
 {
-	free(q->queue[q->qnbr]);
-	q->queue[q->qnbr] = NULL;
-	q->qp[q->qnbr] = 0;
+	free(q->queue[q->st.qnbr]);
+	q->queue[q->st.qnbr] = NULL;
+	q->qp[q->st.qnbr] = 0;
 }
 
-static idx_t queuen_used(const query *q) { return q->qp[q->qnbr]; }
-static cell *get_queuen(query *q) { return q->queue[q->qnbr]; }
+static idx_t queuen_used(const query *q) { return q->qp[q->st.qnbr]; }
+static cell *get_queuen(query *q) { return q->queue[q->st.qnbr]; }
 
 static cell *alloc_queuen(query *q, int qnbr, const cell *c)
 {
@@ -4924,14 +4924,14 @@ static int fn_iso_findall_3(query *q)
 	GET_NEXT_ARG(p3,any);
 
 	if (!q->retry) {
-		q->qnbr++;
+		q->st.qnbr++;
 		cell *tmp = clone_to_heap(q, 1, p2, 3+p1->nbr_cells);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
-		make_int(tmp+nbr_cells++, q->qnbr);
+		make_int(tmp+nbr_cells++, q->st.qnbr);
 		nbr_cells += copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
-		q->tmpq[q->qnbr] = NULL;
+		q->tmpq[q->st.qnbr] = NULL;
 		init_queuen(q);
 		make_barrier(q);
 		q->st.curr_cell = tmp;
@@ -4939,7 +4939,7 @@ static int fn_iso_findall_3(query *q)
 	}
 
 	do_sys_listn(q, p3, p3_ctx);
-	q->qnbr--;
+	q->st.qnbr--;
 	return 1;
 }
 
@@ -4951,14 +4951,14 @@ static int fn_findall_4(query *q)
 	GET_NEXT_ARG(p4,var);
 
 	if (!q->retry) {
-		q->qnbr++;
+		q->st.qnbr++;
 		cell *tmp = clone_to_heap(q, 1, p2, 3+p1->nbr_cells);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
-		make_int(tmp+nbr_cells++, q->qnbr);
+		make_int(tmp+nbr_cells++, q->st.qnbr);
 		nbr_cells += copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
-		q->tmpq[q->qnbr] = NULL;
+		q->tmpq[q->st.qnbr] = NULL;
 		init_queuen(q);
 		make_choice(q);
 		q->st.curr_cell = tmp;
@@ -4966,7 +4966,7 @@ static int fn_findall_4(query *q)
 	}
 
 	do_sys_listn2(q, p3, p3_ctx, p4);
-	q->qnbr--;
+	q->st.qnbr--;
 	return 1;
 }
 
@@ -5024,11 +5024,11 @@ static int fn_iso_bagof_3(query *q)
 	// First time thru generate all solutions
 
 	if (!q->retry) {
-		q->qnbr++;
+		q->st.qnbr++;
 		cell *tmp = clone_to_heap(q, 1, p2, 3+p2->nbr_cells);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
-		make_int(tmp+nbr_cells++, q->qnbr);
+		make_int(tmp+nbr_cells++, q->st.qnbr);
 		nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		init_queuen(q);
@@ -5037,18 +5037,18 @@ static int fn_iso_bagof_3(query *q)
 		return 1;
 	}
 
-	if (!queuen_used(q) && !q->tmpq[q->qnbr]) {
-		q->qnbr--;
+	if (!queuen_used(q) && !q->tmpq[q->st.qnbr]) {
+		q->st.qnbr--;
 		return 0;
 	}
 
 	// Take a copy
 
-	if (!q->tmpq[q->qnbr]) {
+	if (!q->tmpq[q->st.qnbr]) {
 		idx_t nbr_cells = queuen_used(q);
-		q->tmpq[q->qnbr] = malloc(sizeof(cell)*nbr_cells);
-		copy_cells(q->tmpq[q->qnbr], get_queuen(q), nbr_cells);
-		q->tmpq_size[q->qnbr] = nbr_cells;
+		q->tmpq[q->st.qnbr] = malloc(sizeof(cell)*nbr_cells);
+		copy_cells(q->tmpq[q->st.qnbr], get_queuen(q), nbr_cells);
+		q->tmpq_size[q->st.qnbr] = nbr_cells;
 	}
 
 	init_queuen(q);
@@ -5057,16 +5057,16 @@ static int fn_iso_bagof_3(query *q)
 	uint32_t p2_vars = get_vars(q, p2, p2_ctx);
 	uint32_t mask = (p1_vars^p2_vars) & ~xs_vars;
 	pin_vars(q, mask);
-	cell *c_end = q->tmpq[q->qnbr] + q->tmpq_size[q->qnbr];
+	cell *c_end = q->tmpq[q->st.qnbr] + q->tmpq_size[q->st.qnbr];
 
-	for (cell *c = q->tmpq[q->qnbr]; c < c_end; c += c->nbr_cells) {
+	for (cell *c = q->tmpq[q->st.qnbr]; c < c_end; c += c->nbr_cells) {
 		if (c->flags & FLAG2_DELETED)
 			continue;
 
 		if (unify(q, p2, p2_ctx, c, q->st.curr_frame)) {
 			c->flags |= FLAG2_DELETED;
 			cell *c1 = deep_clone_to_tmp(q, p1, q->st.curr_frame);
-			alloc_queuen(q, q->qnbr, c1);
+			alloc_queuen(q, q->st.qnbr, c1);
 		}
 
 		undo_me(q);
@@ -5075,16 +5075,13 @@ static int fn_iso_bagof_3(query *q)
 	if (!queuen_used(q)) {
 		drop_choice(q);
 		init_queuen(q);
-		free(q->tmpq[q->qnbr]);
-		q->tmpq[q->qnbr] = NULL;
-		q->qnbr--;
+		free(q->tmpq[q->st.qnbr]);
+		q->tmpq[q->st.qnbr] = NULL;
+		q->st.qnbr--;
 		return 0;
 	}
 
 	unpin_vars(q);
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
-	ch->qnbr = q->qnbr;
 	do_sys_listn(q, p3, p3_ctx);
 	return 1;
 }
@@ -5100,11 +5097,11 @@ static int fn_iso_setof_3(query *q)
 	// First time thru generate all solutions
 
 	if (!q->retry) {
-		q->qnbr++;
+		q->st.qnbr++;
 		cell *tmp = clone_to_heap(q, 1, p2, 3+p2->nbr_cells);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
-		make_int(tmp+nbr_cells++, q->qnbr);
+		make_int(tmp+nbr_cells++, q->st.qnbr);
 		nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		init_queuen(q);
@@ -5113,18 +5110,18 @@ static int fn_iso_setof_3(query *q)
 		return 1;
 	}
 
-	if (!queuen_used(q) && !q->tmpq[q->qnbr]) {
-		q->qnbr--;
+	if (!queuen_used(q) && !q->tmpq[q->st.qnbr]) {
+		q->st.qnbr--;
 		return 0;
 	}
 
 	// Take a copy
 
-	if (!q->tmpq[q->qnbr]) {
+	if (!q->tmpq[q->st.qnbr]) {
 		idx_t nbr_cells = queuen_used(q);
-		q->tmpq[q->qnbr] = malloc(sizeof(cell)*nbr_cells);
-		copy_cells(q->tmpq[q->qnbr], get_queuen(q), nbr_cells);
-		q->tmpq_size[q->qnbr] = nbr_cells;
+		q->tmpq[q->st.qnbr] = malloc(sizeof(cell)*nbr_cells);
+		copy_cells(q->tmpq[q->st.qnbr], get_queuen(q), nbr_cells);
+		q->tmpq_size[q->st.qnbr] = nbr_cells;
 	}
 
 	init_queuen(q);
@@ -5133,16 +5130,16 @@ static int fn_iso_setof_3(query *q)
 	uint32_t p2_vars = get_vars(q, p2, p2_ctx);
 	uint32_t mask = (p1_vars^p2_vars) & ~xs_vars;
 	pin_vars(q, mask);
-	cell *c_end = q->tmpq[q->qnbr] + q->tmpq_size[q->qnbr];
+	cell *c_end = q->tmpq[q->st.qnbr] + q->tmpq_size[q->st.qnbr];
 
-	for (cell *c = q->tmpq[q->qnbr]; c < c_end; c += c->nbr_cells) {
+	for (cell *c = q->tmpq[q->st.qnbr]; c < c_end; c += c->nbr_cells) {
 		if (c->flags & FLAG2_DELETED)
 			continue;
 
 		if (unify(q, p2, p2_ctx, c, q->st.curr_frame)) {
 			c->flags |= FLAG2_DELETED;
 			cell *c1 = deep_clone_to_tmp(q, p1, q->st.curr_frame);
-			alloc_queuen(q, q->qnbr, c1);
+			alloc_queuen(q, q->st.qnbr, c1);
 		}
 
 		undo_me(q);
@@ -5151,16 +5148,13 @@ static int fn_iso_setof_3(query *q)
 	if (!queuen_used(q)) {
 		drop_choice(q);
 		init_queuen(q);
-		free(q->tmpq[q->qnbr]);
-		q->tmpq[q->qnbr] = NULL;
-		q->qnbr--;
+		free(q->tmpq[q->st.qnbr]);
+		q->tmpq[q->st.qnbr] = NULL;
+		q->st.qnbr--;
 		return 0;
 	}
 
 	unpin_vars(q);
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
-	ch->qnbr = q->qnbr;
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	l = nodesort(q, l, q->st.curr_frame, 1, 0);
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
