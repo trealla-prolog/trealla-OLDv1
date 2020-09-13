@@ -2267,6 +2267,7 @@ int parser_tokenize(parser *p, int args, int consing)
 
 				c->flags |= FLAG2_BIG_STRING;
 				c->val_str = strdup(p->token);
+				c->nbytes = strlen(p->token);
 			}
 		}
 	}

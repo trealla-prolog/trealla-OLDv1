@@ -57,8 +57,8 @@ typedef uint32_t idx_t;
 
 // These 2 assume literal or string types...
 
-#define GET_STR(c) ((c)->val_type != TYPE_STRING ? g_pool+((c)->val_off) : (c)->flags&FLAG2_BIG_STRING ? (c)->val_str : (c)->val_chars)
-#define LEN_STR(c) ((c->flags&FLAG2_BLOB_STRING) ? c->nbytes : strlen(GET_STR(c)))
+#define GET_STR(c) ((c)->val_type != TYPE_STRING ? (g_pool+(c)->val_off) : (c)->flags&FLAG2_BIG_STRING ? (c)->val_str : (c)->val_chars)
+#define LEN_STR(c) ((c)->flags&FLAG2_BIG_STRING ? (c)->nbytes : strlen(GET_STR(c)))
 
 enum {
 	TYPE_EMPTY=0,
@@ -86,7 +86,6 @@ enum {
 	FLAG2_DELETED=FLAG_HEX,				// only used by bagof
 	FLAG2_FIRST_USE=FLAG_HEX,			// only used with TYPE_VAR
 	FLAG2_BIG_STRING=FLAG_OCTAL,		// only used with TYPE_STRING
-	FLAG2_BLOB_STRING=FLAG_BINARY,		// only used with TYPE_STRING
 	FLAG2_CONST_STRING=FLAG_HEX,		// only used with TYPE_STRING
 
 	OP_FX=1<<9,
@@ -118,12 +117,7 @@ struct cell_ {
 			union {
 				rule *match;				// rules
 				int (*fn)(query*);			// builtins
-
-				struct {
-					uint32_t nbytes;        // slice size for BLOBs
-					uint32_t refcnt;		// use for strings
-				};
-
+				uint32_t nbytes; 	       // slice size for strings
 				uint16_t precedence;		// ops parsing
 				uint8_t slot_nbr;			// vars
 				int_t val_den;				// rational denominator
