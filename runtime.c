@@ -437,11 +437,9 @@ void cut_me(query *q, int local_cut)
 		if (ch->local_cut && !local_cut)
 			break;
 
-		if (ch->local_cut && local_cut) {
+		if (ch->local_cut && local_cut)
 			done = 1;
-		}
 
-		//fprintf(stderr, "*** cut\n");
 		q->cp--;
 	}
 
