@@ -158,7 +158,8 @@ void make_end(cell *tmp)
 {
 	tmp->val_type = TYPE_END;
 	tmp->nbr_cells = 1;
-	tmp->arity = tmp->flags = 0;
+	tmp->flags = 0;
+	tmp->arity = 0;
 	tmp->match = NULL;
 	tmp->val_ptr = NULL;
 }
