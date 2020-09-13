@@ -492,7 +492,7 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	copy_cells(tmp, p1, 1);
 
 	if (!is_structure(p1)) {
-		if (is_bigstring(p1))
+		if (is_bigstring(p1) && !is_const(p1))
 			tmp->val_str = strdup(p1->val_str);
 
 		return;
@@ -572,28 +572,6 @@ cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 
 	deep_clone2_to_heap(q, p1, p1_ctx);
 	return get_heap(q, save_idx);
-}
-
-cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix)
-{
-	cell *tmp = alloc_heap(q, (prefix?1:0)+p1->nbr_cells+suffix);
-
-	if (prefix) {
-		// Needed for follow() to work
-		tmp->val_type = TYPE_EMPTY;
-		tmp->nbr_cells = 1;
-		tmp->flags = FLAG_BUILTIN;
-	}
-
-	copy_cells(tmp+(prefix?1:0), p1, p1->nbr_cells);
-	cell *c = tmp + (prefix?1:0);
-
-	for (idx_t i = 0; i < p1->nbr_cells; i++, c++) {
-		if (is_bigstring(c))
-			c->flags |= FLAG_CONST;
-	}
-
-	return tmp;
 }
 
 static int fn_iso_unify_2(query *q)
@@ -3757,6 +3735,28 @@ static int fn_iso_term_variables_2(query *q)
 	return ok;
 }
 
+cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix)
+{
+	cell *tmp = alloc_heap(q, (prefix?1:0)+p1->nbr_cells+suffix);
+
+	if (prefix) {
+		// Needed for follow() to work
+		tmp->val_type = TYPE_EMPTY;
+		tmp->nbr_cells = 1;
+		tmp->flags = FLAG_BUILTIN;
+	}
+
+	copy_cells(tmp+(prefix?1:0), p1, p1->nbr_cells);
+	cell *c = tmp + (prefix?1:0);
+
+	for (idx_t i = 0; i < p1->nbr_cells; i++, c++) {
+		if (is_bigstring(c))
+			c->flags |= FLAG_CONST;
+	}
+
+	return tmp;
+}
+
 static cell *copy_to_heap(query *q, cell *p1, idx_t suffix)
 {
 	cell *tmp = alloc_heap(q, p1->nbr_cells+suffix);
@@ -3768,7 +3768,10 @@ static cell *copy_to_heap(query *q, cell *p1, idx_t suffix)
 	for (idx_t i = 0; i < p1->nbr_cells; i++, dst++, src++) {
 		*dst = *src;
 
-		if (!is_var(dst))
+		if (is_bigstring(src))
+			dst->flags |= FLAG_CONST;
+
+		if (!is_var(src))
 			continue;
 
 		if (slots[dst->slot_nbr] == 0)
