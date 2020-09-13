@@ -581,7 +581,7 @@ void clear_term(term *t)
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
 
-		if (is_big_string(c) && !is_const_string(c))
+		if (is_big_string(c))
 			free(c->val_str);
 
 		c->val_type = TYPE_EMPTY;
@@ -2262,6 +2262,9 @@ int parser_tokenize(parser *p, int args, int consing)
 			if (strlen(p->token) < MAX_SMALL_STRING)
 				strcpy(c->val_chars, p->token);
 			else {
+				if (p->consulting)
+					c->flags |= FLAG2_CONST_STRING;
+
 				c->flags |= FLAG2_BIG_STRING;
 				c->val_str = strdup(p->token);
 			}
