@@ -212,7 +212,7 @@ iterations(I0, _Name, Action, Control, I) :-
 do_n(N, Goal, Time) :-
 	get_cpu_time(T0),
 	(   between(1,N,_),
-	    call(Goal),
+	    Goal,
 	    fail
 	;   get_cpu_time(T1),
 	    Time is (T1 - T0)/1000
@@ -1882,10 +1882,20 @@ access_back(Start, End) :-
 
 % 22. Setof and bagof
 
-xbench_mark(setof, 1000, setof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
-xbench_mark(pair_setof, 1000, setof((X,Y), pr(X, Y), S), dummy((X,Y), pr(X, Y), S)).
-xbench_mark(double_setof, 100, setof((X,S), setof(Y, pr(X, Y), S), T), dummy((X,S), setof(Y, pr(X, Y), S), T)).
-xbench_mark(bagof, 1000, bagof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
+%bench_mark(setof, 1000, setof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
+%bench_mark(pair_setof, 1000, setof((X,Y), pr(X, Y), S), dummy((X,Y), pr(X, Y), S)).
+%bench_mark(double_setof, 100, setof((X,S), setof(Y, pr(X, Y), S), T), dummy((X,S), setof(Y, pr(X, Y), S), T)).
+%bench_mark(bagof, 1000, bagof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
+
+bench_mark(setof, 1000, do_setof, dummy(X, Y^pr(X, Y), _S)).
+bench_mark(pair_setof, 1000, do_pair_setof, dummy((X,Y), pr(X, Y), _S)).
+bench_mark(double_setof, 100, do_double_setof, dummy((X,S), setof(Y, pr(X, Y), S), _T)).
+bench_mark(bagof, 1000, do_bagof, dummy(X, Y^pr(X, Y), _S)).
+
+do_setof :- setof(X, Y^pr(X, Y), _S).
+do_pair_setof :- setof((X,Y), pr(X, Y), _S).
+do_double_setof :- setof((X,S), setof(Y, pr(X, Y), S), _T).
+do_bagof :- bagof(X, Y^pr(X, Y), _S).
 
 pr(99, 1).
 pr(98, 2).
