@@ -2579,6 +2579,7 @@ module *create_module(const char *name)
 	// This is an approximation...
 
 	make_rule(m, "setup_call_cleanup(A,G,B) :- once(A), (G -> true ; (B, !, fail)).");
+	make_rule(m, "call_cleanup(G,B) :- G -> true ; (B, !, fail).");
 
 	// Edinburgh...
 
