@@ -2395,7 +2395,7 @@ static module *module_load_text(module *m, const char *src)
 		p->directive = 1;
 
 		if (p->run_init == 1) {
-			if (parser_run(p, "initialization(G), call(G)", 0))
+			if (parser_run(p, "initialization(G), call_goal(G)", 0))
 				p->m->halt = 1;
 		}
 
@@ -2437,7 +2437,7 @@ int module_load_fp(module *m, FILE *fp)
 		p->m->quiet = 1;
 		p->directive = 1;
 
-		if (parser_run(p, "initialization(G), call(G)", 0))
+		if (parser_run(p, "initialization(G), call_goal(G)", 0))
 			p->m->halt = 1;
 		else
 			p->m->halt = 0;
@@ -2563,7 +2563,7 @@ module *create_module(const char *name)
 
 	// Meta-rules...
 
-	make_rule(m, "call_goal(G) :- copy_term(G,G2), call(G2), G2=G.");
+	make_rule(m, "call(G) :- G.");
 
 #if !USE_BUILTINS
 	make_rule(m, "A -> B ; _C :- A, !, B.");

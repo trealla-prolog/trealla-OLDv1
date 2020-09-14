@@ -117,7 +117,7 @@ performance of SIM-I vs.  Prolog-20.
 %mode(_).
 
 :- discontiguous(bench_mark/4).
-:- discontiguous(bench_mark/4).
+:- discontiguous(xbench_mark/4).
 
 % File #1, driver.pl:
 
@@ -212,7 +212,7 @@ iterations(I0, _Name, Action, Control, I) :-
 do_n(N, Goal, Time) :-
 	get_cpu_time(T0),
 	(   between(1,N,_),
-	    Goal,
+	    call(Goal),
 	    fail
 	;   get_cpu_time(T1),
 	    Time is (T1 - T0)/1000
@@ -531,7 +531,7 @@ bench_mark(walk_list_rec, 2000, wlr(L), dummy(L)) :- r1(L).
 
 % 6. Walk down N 100 copies of the same 100 element list, recursively.
 
-xbench_mark(args(N), 2000, args(N, L), dummy(N, L)) :- args(N), r1(L).
+bench_mark(args(N), 2000, args(N, L), dummy(N, L)) :- args(N), r1(L).
 
 % :- public args/2.
 
@@ -1882,20 +1882,10 @@ access_back(Start, End) :-
 
 % 22. Setof and bagof
 
-%bench_mark(setof, 1000, setof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
-%bench_mark(pair_setof, 1000, setof((X,Y), pr(X, Y), S), dummy((X,Y), pr(X, Y), S)).
-%bench_mark(double_setof, 100, setof((X,S), setof(Y, pr(X, Y), S), T), dummy((X,S), setof(Y, pr(X, Y), S), T)).
-%bench_mark(bagof, 1000, bagof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
-
-bench_mark(setof, 1000, do_setof, dummy(X, Y^pr(X, Y), _S)).
-bench_mark(pair_setof, 1000, do_pair_setof, dummy((X,Y), pr(X, Y), _S)).
-bench_mark(double_setof, 100, do_double_setof, dummy((X,S), setof(Y, pr(X, Y), S), _T)).
-bench_mark(bagof, 1000, do_bagof, dummy(X, Y^pr(X, Y), _S)).
-
-do_setof :- setof(X, Y^pr(X, Y), _S).
-do_pair_setof :- setof((X,Y), pr(X, Y), _S).
-do_double_setof :- setof((X,S), setof(Y, pr(X, Y), S), _T).
-do_bagof :- bagof(X, Y^pr(X, Y), _S).
+bench_mark(setof, 1000, setof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
+bench_mark(pair_setof, 1000, setof((X,Y), pr(X, Y), S), dummy((X,Y), pr(X, Y), S)).
+bench_mark(double_setof, 100, setof((X,S), setof(Y, pr(X, Y), S), T), dummy((X,S), setof(Y, pr(X, Y), S), T)).
+bench_mark(bagof, 1000, bagof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
 
 pr(99, 1).
 pr(98, 2).
