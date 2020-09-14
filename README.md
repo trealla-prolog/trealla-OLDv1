@@ -424,7 +424,7 @@ per iteration and smaller is better.
 	walk_term             |    6.0  |    3.0    |
 	walk_term_rec         |    8.8  |    3.5    |
 	shallow_backtracking  |    0.3  |    0.1    |
-	deep_backtracking     |    8.0  |    3.7    |
+	deep_backtracking     |    8.0  |    2.9    |
 	choice_point          |    3.6  |    6.3    |
 	trail_variables       |    4.4  |    5.4    |
 	medium_unify          |    0.5  |    0.5    |

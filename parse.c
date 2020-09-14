@@ -2568,7 +2568,7 @@ module *create_module(const char *name)
 
 	// Meta-rules...
 
-	make_rule(m, "call_goal(G) :- copy_term(G,G2), G2, G2=G.");
+	make_rule(m, "call_goal(G) :- copy_term(G,G2), call(G2), G2=G.");
 
 #if !USE_BUILTINS
 	make_rule(m, "A -> B ; _C :- A, !, B.");

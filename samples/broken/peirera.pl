@@ -117,7 +117,7 @@ performance of SIM-I vs.  Prolog-20.
 %mode(_).
 
 :- discontiguous(bench_mark/4).
-:- discontiguous(xbench_mark/4).
+:- discontiguous(bench_mark/4).
 
 % File #1, driver.pl:
 
@@ -212,11 +212,12 @@ iterations(I0, _Name, Action, Control, I) :-
 do_n(N, Goal, Time) :-
 	get_cpu_time(T0),
 	(   between(1,N,_),
-	    Goal,
+	    call(Goal),
 	    fail
 	;   get_cpu_time(T1),
 	    Time is (T1 - T0)/1000
-	).
+	),
+	!.
 
 % File #2, benches.pl
 
@@ -273,7 +274,7 @@ dummy(_, _, _).
 
 % 1. 100 determinate tail calls
 
-xbench_mark(tail_call_atom_atom, 2000, p1(a), dummy(a)).
+bench_mark(tail_call_atom_atom, 2000, p1(a), dummy(a)).
 
 % :- public p1/1.
 
@@ -380,7 +381,7 @@ p100(a).
 
 % 2. 63 determinate nontail calls, 64 determinate tail calls.
 
-xbench_mark(binary_call_atom_atom, 2000, q1(a), dummy(a)).
+bench_mark(binary_call_atom_atom, 2000, q1(a), dummy(a)).
 
 % :- public q1/1.
 
@@ -514,17 +515,17 @@ q127(a).
 
 % 3. Construct one 100 element list, nonrecursively.
 
-xbench_mark(cons_list, 2000, r1(L), dummy(L)).
+bench_mark(cons_list, 2000, r1(L), dummy(L)).
 
 % :- public r1/1.
 
 % 4. Walk down a 100 element list, nonrecursively
 
-xbench_mark(walk_list, 2000, r1(L), dummy(L)) :- r1(L).
+bench_mark(walk_list, 2000, r1(L), dummy(L)) :- r1(L).
 
 % 5. Walk down a 100 element list, recursively
 
-xbench_mark(walk_list_rec, 2000, wlr(L), dummy(L)) :- r1(L).
+bench_mark(walk_list_rec, 2000, wlr(L), dummy(L)) :- r1(L).
 
 % :- public wlr/1.
 
@@ -666,17 +667,17 @@ r101([]).
 
 % 7. Construct a term with 100 nodes, nonrecursively
 
-xbench_mark(cons_term, 2000, s1(T), dummy(T)).
+bench_mark(cons_term, 2000, s1(T), dummy(T)).
 
 % :- public s1/1.
 
 % 8. Walk down a term with 100 nodes, nonrecursively.
 
-xbench_mark(walk_term, 2000, s1(T), dummy(T)) :- s1(T).
+bench_mark(walk_term, 2000, s1(T), dummy(T)) :- s1(T).
 
 % 9. Walk down a term with 100 nodes, recursively.
 
-xbench_mark(walk_term_rec, 2000, wtr(T), dummy(T)) :- s1(T).
+bench_mark(walk_term_rec, 2000, wtr(T), dummy(T)) :- s1(T).
 
 % :- public wtr/1.
 
@@ -789,7 +790,7 @@ s101(nil).
 
 % 10. 99 shallow failures; assumes no indexing on 2nd argument
 
-xbench_mark(shallow_backtracking, 2000, shallow, dummy(a)).
+bench_mark(shallow_backtracking, 2000, shallow, dummy).
 
 % :- public shallow/0.
 
@@ -797,7 +798,7 @@ shallow :- b(_, 100).
 
 % 11. 99 deep failures; assumes no indexing on 2nd argument
 
-xbench_mark(deep_backtracking, 2000, deep, dummy(a)).
+bench_mark(deep_backtracking, 2000, deep, dummy).
 
 % :- public deep/0.
 
@@ -908,7 +909,7 @@ b(_X, 100).
 % 12. Push 100 choice points
 % Assumes no super-clever (multipredicate) optimizer
 
-xbench_mark(choice_point, 2000, choice, dummy(a)).
+bench_mark(choice_point, 2000, choice, dummy(a)).
 
 % :- public choice/0.
 
@@ -1118,7 +1119,7 @@ c100(a).
 
 % 13. Create 100 choice points and trail 100 variables
 
-xbench_mark(trail_variables, 2000, trail, dummy).
+bench_mark(trail_variables, 2000, trail, dummy).
 
 % :- public trail/0.
 
@@ -1328,8 +1329,8 @@ t100(b).
 
 % 14. Unify terms that are small in space but textually large.
 
-xbench_mark(medium_unify, 2000, equal(Term1, Term2), dummy(Term1, Term2)) :- term64(Term1), term64(Term2).
-xbench_mark(deep_unify, 100, equal(Term1, Term2), dummy(Term1, Term2)) :- term4096(Term1), term4096(Term2).
+bench_mark(medium_unify, 2000, equal(Term1, Term2), dummy(Term1, Term2)) :- term64(Term1), term64(Term2).
+bench_mark(deep_unify, 100, equal(Term1, Term2), dummy(Term1, Term2)) :- term4096(Term1), term4096(Term2).
 
 % :- public equal/2.
 
@@ -1378,7 +1379,7 @@ term4096(X1) :-
 % 15. Do 100 integer additions nonrecursively,
 % avoiding obvious compiler optimizations.
 
-xbench_mark(integer_add, 1000, a1(0, 1, R), dummy(0, 1, R)).
+bench_mark(integer_add, 1000, a1(0, 1, R), dummy(0, 1, R)).
 
 % :- public a1/3.
 
@@ -1485,7 +1486,7 @@ a100(M, K, P) :- P is M + K.
 
 % 16. 100 floating additions
 
-xbench_mark(floating_add, 1000, fa1(0.1, 1.1, R), dummy(0.1, 1.1, R)).
+bench_mark(floating_add, 1000, fa1(0.1, 1.1, R), dummy(0.1, 1.1, R)).
 
 % :- public fa1/3.
 
@@ -1592,7 +1593,7 @@ fa100(M, K, P) :- P is M + K.
 
 % 17. 100 calls to arg at position N
 
-xbench_mark(arg(N), 2000, arg1(N, Term, R), dummy(N, Term, R)) :- args(N), complex_nary_term(100, N, Term).
+bench_mark(arg(N), 2000, arg1(N, Term, R), dummy(N, Term, R)) :- args(N), complex_nary_term(100, N, Term).
 
 % :- public arg1/3.
 
@@ -1716,7 +1717,7 @@ arg100(N, T, R) :- arg(N, T, R).
 % 18. 100 indexed calls; some systems may require extra declarations to
 % put an index on the first argument.
 
-xbench_mark(index, 2000, ix(1), dummy(1)).
+bench_mark(index, 2000, ix(1), dummy(1)).
 
 ix(1) :- ix(10000).
 ix(4).
@@ -1821,7 +1822,7 @@ ix(10000) :- ix(9801).
 
 % 19. Make 1000 asserts of unit clauses
 
-xbench_mark(assert_unit, 100, assert_clauses(L), dummy(L)) :-
+bench_mark(assert_unit, 100, assert_clauses(L), dummy(L)) :-
    abolish(ua, 3),
    create_units(1, 1000, L).
 
@@ -1881,10 +1882,10 @@ access_back(Start, End) :-
 
 % 22. Setof and bagof
 
-bench_mark(setof, 1000, setof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
-bench_mark(pair_setof, 1000, setof((X,Y), pr(X, Y), S), dummy((X,Y), pr(X, Y), S)).
-bench_mark(double_setof, 100, setof((X,S), setof(Y, pr(X, Y), S), T), dummy((X,S), setof(Y, pr(X, Y), S), T)).
-bench_mark(bagof, 1000, bagof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
+xbench_mark(setof, 1000, setof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
+xbench_mark(pair_setof, 1000, setof((X,Y), pr(X, Y), S), dummy((X,Y), pr(X, Y), S)).
+xbench_mark(double_setof, 100, setof((X,S), setof(Y, pr(X, Y), S), T), dummy((X,S), setof(Y, pr(X, Y), S), T)).
+xbench_mark(bagof, 1000, bagof(X, Y^pr(X, Y), S), dummy(X, Y^pr(X, Y), S)).
 
 pr(99, 1).
 pr(98, 2).
