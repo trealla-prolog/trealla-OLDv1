@@ -5021,7 +5021,7 @@ static int fn_iso_bagof_3(query *q)
 	}
 
 	init_queuen(q);
-	make_choice(q);
+	make_barrier(q);
 	uint32_t p1_vars = get_vars(q, p1, p1_ctx);
 	uint32_t p2_vars = get_vars(q, p2, p2_ctx);
 	uint32_t mask = (p1_vars^p2_vars) & ~xs_vars;
@@ -5094,7 +5094,7 @@ static int fn_iso_setof_3(query *q)
 	}
 
 	init_queuen(q);
-	make_choice(q);
+	make_barrier(q);
 	uint32_t p1_vars = get_vars(q, p1, p1_ctx);
 	uint32_t p2_vars = get_vars(q, p2, p2_ctx);
 	uint32_t mask = (p1_vars^p2_vars) & ~xs_vars;
