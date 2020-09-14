@@ -34,7 +34,7 @@ static const unsigned INITIAL_NBR_TRAILS = 1000;
 
 static const int CPU_COUNT = 4;
 
-#define JUST_IN_TIME_COUNT 40
+#define JUST_IN_TIME_COUNT 50
 
 struct prolog_ {
 	module *m;
