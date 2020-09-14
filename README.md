@@ -146,6 +146,7 @@ SWI-Prolog
 	exists_file/1
 	rename_file/2
 	time_file/2
+	size_file/2
 	exists_directory/1
 	make_directory/1
 	working_directory/2

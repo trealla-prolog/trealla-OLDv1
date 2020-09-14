@@ -7332,6 +7332,21 @@ static int fn_time_file_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
+static int fn_size_file_2(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,var);
+	const char *filename = GET_STR(p1);
+	struct stat st = {0};
+
+	if (stat(filename, &st) != 0)
+		return 0;
+
+	cell tmp;
+	make_int(&tmp, st.st_size);
+	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+}
+
 static int fn_exists_directory_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -8570,6 +8585,7 @@ static const struct builtins g_other_funcs[] =
 	{"delete_file", 1, fn_delete_file_1, "+atom"},
 	{"exists_file", 1, fn_exists_file_1, "+atom"},
 	{"time_file", 2, fn_time_file_2, "+atom,-real"},
+	{"size_file", 2, fn_size_file_2, "+atom,-integer"},
 	{"exists_directory", 1, fn_exists_directory_1, "+atom"},
 	{"make_directory", 1, fn_make_directory_1, "+atom"},
 	{"working_directory", 2, fn_working_directory_2, "-atom,+atom"},
