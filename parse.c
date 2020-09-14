@@ -327,14 +327,6 @@ static rule *create_rule(module *m, cell *c)
 	return h;
 }
 
-static void reindex_rule(module *m, rule *h)
-{
-	for (clause *r = h->head; r; r = r->next) {
-		cell *c = get_head(r->t.cells);
-		sl_set(h->index, c, r);
-	}
-}
-
 static int compkey(const void *ptr1, const void *ptr2)
 {
 	const cell *p1 = (const cell*)ptr1;
@@ -402,6 +394,16 @@ static int compkey(const void *ptr1, const void *ptr2)
 	return 0;
 }
 
+static void reindex_rule(module *m, rule *h)
+{
+	h->index = sl_create(compkey);
+
+	for (clause *r = h->head; r; r = r->next) {
+		cell *c = get_head(r->t.cells);
+		sl_set(h->index, c, r);
+	}
+}
+
 clause *asserta_to_db(module *m, term *t, int consulting)
 {
 	cell *c = get_head(t->cells);
@@ -425,7 +427,6 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 
 		if (!consulting) {
 			h->is_dynamic = 1;
-			h->index = sl_create(compkey);
 
 			if (m->make_public)
 				h->is_public = 1;
@@ -459,10 +460,8 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 	if (h->is_persist)
 		r->t.is_persist = 1;
 
-	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1)) {
-		h->index = sl_create(compkey);
+	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1))
 		reindex_rule(m, h);
-	}
 
 	return r;
 }
@@ -488,10 +487,8 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 	if (!h) {
 		h = create_rule(m, c);
 
-		if (!consulting) {
+		if (!consulting)
 			h->is_dynamic = 1;
-			h->index = sl_create(compkey);
-		}
 
 		if (consulting && m->make_public)
 			h->is_public = 1;
@@ -526,10 +523,8 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 	if (h->is_persist)
 		r->t.is_persist = 1;
 
-	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1)) {
-		h->index = sl_create(compkey);
+	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1))
 		reindex_rule(m, h);
-	}
 
 	return r;
 }
