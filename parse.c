@@ -34,6 +34,8 @@ static const unsigned INITIAL_NBR_TRAILS = 1000;
 
 static const int CPU_COUNT = 4;
 
+#define JUST_IN_TIME_COUNT 40
+
 struct prolog_ {
 	module *m;
 };
@@ -457,7 +459,7 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 	if (h->is_persist)
 		r->t.is_persist = 1;
 
-	if (!h->index && (h->cnt > 10) && h->arity && !is_structure(c+1)) {
+	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1)) {
 		h->index = sl_create(compkey);
 		reindex_rule(m, h);
 	}
@@ -524,7 +526,7 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 	if (h->is_persist)
 		r->t.is_persist = 1;
 
-	if (!h->index && (h->cnt > 10) && h->arity && !is_structure(c+1)) {
+	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1)) {
 		h->index = sl_create(compkey);
 		reindex_rule(m, h);
 	}
