@@ -8253,7 +8253,7 @@ static int fn_limit_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,callable);
-	cell *tmp = clone_to_heap(q, 1, p2, 3+1);
+	cell *tmp = clone_to_heap(q, 1, p2, 4);
 	idx_t nbr_cells = 1 + p2->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_lt_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
@@ -8278,7 +8278,7 @@ static int fn_offset_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,callable);
-	cell *tmp = clone_to_heap(q, 1, p2, 3+1);
+	cell *tmp = clone_to_heap(q, 1, p2, 4);
 	idx_t nbr_cells = 1 + p2->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_gt_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
@@ -8313,7 +8313,7 @@ static int fn_call_nth_2(query *q)
 		return 1;
 	}
 
-	cell *tmp = clone_to_heap(q, 1, p1, 3+1);
+	cell *tmp = clone_to_heap(q, 1, p1, 4);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_ne_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
