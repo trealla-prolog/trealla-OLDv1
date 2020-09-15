@@ -8219,6 +8219,7 @@ static int fn_db_save_0(query *q)
 	char filename2[1024];
 	snprintf(filename2, sizeof(filename2), "%s.TMP", q->m->name);
 	FILE *fp = fopen(filename2, "wb");
+	if (!fp) return 0;
 	save_db(q->m->fp, q, q->m->dq, 1);
 	fclose(fp);
 	remove(filename);
