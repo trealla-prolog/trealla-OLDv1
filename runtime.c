@@ -399,8 +399,10 @@ static void commit_me(query *q, term *t)
 void cut_me(query *q, int local_cut)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
-	g->did_cut = !local_cut;
-	g->any_choices = !local_cut;
+	g->any_choices = !local_cut;	// ???
+
+	if (!local_cut)
+		g->did_cut = 1;
 
 	while (q->cp) {
 		idx_t curr_choice = q->cp - 1;

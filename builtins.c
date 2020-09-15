@@ -5750,7 +5750,7 @@ static int fn_loadfile_2(query *q)
 
 	struct stat st = {0};
 
-	if (stat(filename, &st) != 0)
+	if (stat(filename, &st))
 		return 0;
 
 	char *s = malloc(st.st_size+1);
@@ -7291,7 +7291,7 @@ static int fn_exists_file_1(query *q)
 	const char *filename = GET_STR(p1);
 	struct stat st = {0};
 
-	if (stat(filename, &st) != 0)
+	if (stat(filename, &st))
 		return 0;
 
 	if ((st.st_mode & S_IFMT) != S_IFREG)
@@ -7324,7 +7324,7 @@ static int fn_time_file_2(query *q)
 	const char *filename = GET_STR(p1);
 	struct stat st = {0};
 
-	if (stat(filename, &st) != 0)
+	if (stat(filename, &st))
 		return 0;
 
 	cell tmp;
@@ -7339,7 +7339,7 @@ static int fn_size_file_2(query *q)
 	const char *filename = GET_STR(p1);
 	struct stat st = {0};
 
-	if (stat(filename, &st) != 0)
+	if (stat(filename, &st))
 		return 0;
 
 	cell tmp;
@@ -7353,7 +7353,7 @@ static int fn_exists_directory_1(query *q)
 	const char *filename = GET_STR(p1);
 	struct stat st = {0};
 
-	if (stat(filename, &st) != 0)
+	if (stat(filename, &st))
 		return 0;
 
 	if ((st.st_mode & S_IFMT) != S_IFDIR)
@@ -7368,7 +7368,7 @@ static int fn_make_directory_1(query *q)
 	const char *pathname = GET_STR(p1);
 	struct stat st = {0};
 
-	if (stat(pathname, &st) == 0)
+	if (!stat(pathname, &st))
 		return 0;
 
 	return !mkdir(pathname, 0777);
