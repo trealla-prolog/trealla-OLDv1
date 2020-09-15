@@ -229,7 +229,6 @@ typedef struct {
 	uint32_t pins;
 	uint8_t nbr_vars;
 	unsigned local_cut:1;
-	unsigned barrier:1;
 	unsigned any_choices:1;
 	unsigned catchme1:1;
 	unsigned catchme2:1;
@@ -368,7 +367,6 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 void write_term(query *q, FILE *fp, cell *c, int running, int dq, int cons, int max_depth, int depth);
 size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int dq, int cons, int max_depth, int depth);
 void make_choice(query *q);
-void make_barrier(query *q);
 void make_local_choice(query *q);
 void make_catcher(query *q, int type);
 void cut_me(query *q, int local_cut);

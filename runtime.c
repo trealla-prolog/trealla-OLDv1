@@ -211,7 +211,6 @@ void make_choice(query *q)
 	choice *ch = q->choices + curr_choice;
 	ch->st = q->st;
 	ch->local_cut = 0;
-	ch->barrier = 0;
 	ch->catchme1 = 0;
 	ch->catchme2 = 0;
 	ch->pins = 0;
@@ -221,14 +220,6 @@ void make_choice(query *q)
 	frame *g = GET_FRAME(q->st.curr_frame);
 	ch->nbr_vars = g->nbr_vars;
 	ch->any_choices = g->any_choices;
-}
-
-void make_barrier(query *q)
-{
-	make_choice(q);
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
-	ch->barrier = 1;
 }
 
 void make_local_choice(query *q)
@@ -417,9 +408,6 @@ void cut_me(query *q, int local_cut)
 		choice *ch = q->choices + curr_choice;
 
 		if (ch->st.fp < q->st.curr_frame)
-			break;
-
-		if (ch->barrier)
 			break;
 
 		if (ch->st.qnbr) {
