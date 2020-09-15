@@ -4185,7 +4185,7 @@ int call_me(query *q, cell *p1)
 	idx_t nbr_cells = tmp->nbr_cells;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
-	make_local_choice(q);
+	make_barrier(q);
 	return 1;
 }
 
@@ -4235,7 +4235,7 @@ static int fn_iso_ifthen_2(query *q)
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
-	make_local_choice(q);
+	make_barrier(q);
 	q->st.curr_cell = tmp;
 	return 1;
 }
@@ -4255,7 +4255,7 @@ static int do_ifthenelse(query *q, cell *p1, cell *p2, cell *p3)
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
-	make_local_choice(q);
+	make_barrier(q);
 	q->st.curr_cell = tmp;
 	return 1;
 }
@@ -4299,7 +4299,7 @@ static int fn_iso_negation_1(query *q)
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
-	make_local_choice(q);
+	make_barrier(q);
 	q->st.curr_cell = tmp;
 	return 1;
 }
@@ -4314,7 +4314,7 @@ static int fn_iso_once_1(query *q)
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
-	make_local_choice(q);
+	make_barrier(q);
 	q->st.curr_cell = tmp;
 	return 1;
 }
@@ -4329,7 +4329,7 @@ static int fn_ignore_1(query *q)
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
-	make_local_choice(q);
+	make_barrier(q);
 	q->st.curr_cell = tmp;
 	return 1;
 }
@@ -4906,7 +4906,7 @@ static int fn_iso_findall_3(query *q)
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		q->tmpq[q->st.qnbr] = NULL;
 		init_queuen(q);
-		make_local_choice(q);
+		make_barrier(q);
 		q->st.curr_cell = tmp;
 		return 1;
 	}
@@ -4933,7 +4933,7 @@ static int fn_findall_4(query *q)
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		q->tmpq[q->st.qnbr] = NULL;
 		init_queuen(q);
-		make_local_choice(q);
+		make_barrier(q);
 		q->st.curr_cell = tmp;
 		return 1;
 	}
@@ -5005,7 +5005,7 @@ static int fn_iso_bagof_3(query *q)
 		nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		init_queuen(q);
-		make_local_choice(q);
+		make_barrier(q);
 		q->st.curr_cell = tmp;
 		return 1;
 	}
@@ -5078,7 +5078,7 @@ static int fn_iso_setof_3(query *q)
 		nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		init_queuen(q);
-		make_local_choice(q);
+		make_barrier(q);
 		q->st.curr_cell = tmp;
 		return 1;
 	}
