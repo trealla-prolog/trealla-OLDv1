@@ -277,3 +277,7 @@ test81 :- writeln(ok).
 
 test82 :- \+ \+ true, writeln(ok).
 test82 :- writeln(nok).
+
+test83 :- \+ \+ (!, true), writeln(ok).
+test83 :- writeln(nok).
+
