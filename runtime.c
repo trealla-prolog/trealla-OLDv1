@@ -401,9 +401,8 @@ void cut_me(query *q, int local_cut)
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g->did_cut = !local_cut;
 	g->any_choices = !local_cut;
-	int done = 0;
 
-	while (!done && q->cp) {
+	while (q->cp) {
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
 
@@ -425,15 +424,14 @@ void cut_me(query *q, int local_cut)
 		if (ch->local_cut && !local_cut)
 			break;
 
-		if (ch->local_cut && local_cut)
-			done = 1;
-
 		q->cp--;
+
+		if (ch->local_cut && local_cut)
+			break;
 	}
 
-	if (!q->cp) {
+	if (!q->cp)
 		q->st.tp = 0;
-	}
 }
 
 static void follow_me(query *q)
