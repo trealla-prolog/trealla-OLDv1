@@ -216,8 +216,7 @@ do_n(N, Goal, Time) :-
 	    fail
 	;   get_cpu_time(T1),
 	    Time is (T1 - T0)/1000
-	),
-	!.
+	).
 
 % File #2, benches.pl
 
