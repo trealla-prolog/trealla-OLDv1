@@ -4163,6 +4163,9 @@ static int fn_iso_assertz_1(query *q)
 
 int call_me(query *q, cell *p1)
 {
+	if (q->retry)
+		return 0;
+
 	p1 = deref_var(q, p1, q->st.curr_frame);
 	idx_t p1_ctx = q->latest_ctx;
 
@@ -4182,6 +4185,7 @@ int call_me(query *q, cell *p1)
 	idx_t nbr_cells = tmp->nbr_cells;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
+	make_local_choice(q);
 	return 1;
 }
 

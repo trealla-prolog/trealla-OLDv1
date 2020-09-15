@@ -912,8 +912,7 @@ bench_mark(choice_point, 2000, choice, dummy(a)).
 
 % :- public choice/0.
 
-%choice :- c1(a), !.
-choice :- once(c1(a)).
+choice :- c1(a), !.
 
 c1(a) :- c2(a).
 c1(a).
@@ -1122,8 +1121,7 @@ bench_mark(trail_variables, 2000, trail, dummy).
 
 % :- public trail/0.
 
-%trail :- t1(_X), !.
-trail :- once(t1(_X)).
+trail :- t1(_X), !.
 
 t1(a) :- t2(_X).
 t1(b).
