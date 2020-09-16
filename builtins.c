@@ -5484,8 +5484,8 @@ static int fn_sleep_1(query *q)
 	GET_FIRST_ARG(p1,integer);
 
 	if (q->is_task) {
-		q->tmo = get_time_in_usec() / 1000;
-		q->tmo += p1->val_num * 1000;
+		q->tmo_msecs = get_time_in_usec() / 1000;
+		q->tmo_msecs += p1->val_num * 1000;
 		do_yield_0(q);
 		return 0;
 	}
@@ -5502,8 +5502,8 @@ static int fn_delay_1(query *q)
 	GET_FIRST_ARG(p1,integer);
 
 	if (q->is_task) {
-		q->tmo = get_time_in_usec() / 1000;
-		q->tmo += p1->val_num;
+		q->tmo_msecs = get_time_in_usec() / 1000;
+		q->tmo_msecs += p1->val_num;
 		do_yield_0(q);
 		return 0;
 	}
@@ -5943,8 +5943,8 @@ static int fn_accept_2(query *q)
 
 	if (fd == -1) {
 		if (q->is_task) {
-			q->tmo = get_time_in_usec() / 1000;
-			q->tmo += 1;
+			q->tmo_msecs = get_time_in_usec() / 1000;
+			q->tmo_msecs += 1;
 			do_yield_0(q);
 			return 0;
 		}
@@ -6163,8 +6163,8 @@ static int fn_getline_2(query *q)
 
 		if (q->is_task && !feof(str->fp)) {
 			clearerr(str->fp);
-			q->tmo =get_time_in_usec() / 1000;
-			q->tmo += 1;
+			q->tmo_msecs =get_time_in_usec() / 1000;
+			q->tmo_msecs += 1;
 			do_yield_0(q);
 			return 0;
 		}
@@ -6215,8 +6215,8 @@ static int fn_bread_3(query *q)
 
 			if (q->is_task) {
 				clearerr(str->fp);
-				q->tmo = get_time_in_usec() / 1000;
-				q->tmo += 1;
+				q->tmo_msecs = get_time_in_usec() / 1000;
+				q->tmo_msecs += 1;
 				do_yield_0(q);
 				return 0;
 			}
@@ -6403,13 +6403,13 @@ static int fn_wait_0(query *q)
 					break;
 			}
 
-			if (task->tmo) {
-				if (now <= task->tmo) {
+			if (task->tmo_msecs) {
+				if (now <= task->tmo_msecs) {
 					task = task->next;
 					continue;
 				}
 
-				task->tmo = 0;
+				task->tmo_msecs = 0;
 			}
 
 			if (!task->yielded || !task->st.curr_cell) {
@@ -6456,13 +6456,13 @@ static int fn_await_0(query *q)
 					break;
 			}
 
-			if (task->tmo) {
-				if (now <= task->tmo) {
+			if (task->tmo_msecs) {
+				if (now <= task->tmo_msecs) {
 					task = task->next;
 					continue;
 				}
 
-				task->tmo = 0;
+				task->tmo_msecs = 0;
 			}
 
 			if (!task->yielded || !q->st.curr_cell) {
@@ -6484,7 +6484,7 @@ static int fn_await_0(query *q)
 
 			run_query(task);
 
-			if (!task->tmo && task->yielded) {
+			if (!task->tmo_msecs && task->yielded) {
 				did_something++;
 				break;
 			}

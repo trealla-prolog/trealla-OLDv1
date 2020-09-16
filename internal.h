@@ -255,7 +255,7 @@ struct query_ {
 	arena *arenas;
 	cell accum;
 	qstate st;
-	int64_t time_started, tmo;
+	int64_t time_started, tmo_msecs;
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
 	uint64_t nv_mask, step, qid;
 	int max_depth;
