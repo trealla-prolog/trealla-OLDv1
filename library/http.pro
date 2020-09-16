@@ -33,8 +33,9 @@ read_body(S, Hdrs, Data) :-
 	(atom(V) -> atom_number(V, Len) ; Len=V),
 	bread(S, Len, Data).
 
-http_open([], _, _) :- !, fail.
+% Open with options...
 
+http_open([], _, _) :- !, fail.
 http_open(UrlList, S, Opts) :-
 	is_list(UrlList),
 	is_list(Opts),
@@ -58,6 +59,8 @@ http_open(UrlList, S, Opts) :-
 	ignore(memberchk(headers(Hdrs), OptList)),
 	ignore(memberchk(final_url(Location), OptList)),
 	true.
+
+% Client request processing...
 
 process(Url, S, Opts) :-
 	atom(Url),
@@ -87,6 +90,8 @@ process(Url, S, Opts) :-
 	ignore(memberchk(status_code2(Code), OptList)),
 	ignore(memberchk(headers2(Hdrs), OptList)),
 	true.
+
+% Client requests...
 
 http_get(Url, Data, Opts) :-
 	Opts2=[headers2(Hdrs)|Opts],
@@ -118,7 +123,7 @@ http_put(Url, Data, Reply, Opts) :-
 http_delete(Url, Data, Opts) :-
 	http_get(Url, Data, [method(delete)|Opts]).
 
-% Handle a server request
+% Handle a server request...
 
 http_request(S, Method, Path, Hdrs) :-
 	getline(S, Line),
