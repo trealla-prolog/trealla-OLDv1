@@ -10,12 +10,13 @@ read_response(S, Code) :-
 	atom_number(Code2, Code).
 
 read_header(S, Pair) :-
-	(getline(S, Line) -> true ; (!, fail)),
+	getline(S, Line),
 	split(Line,':', K, V),
 	(K \= '' -> true ; (!, fail)),
 	string_lower(K, K2),
 	Pair=K2:V.
 read_header(S, Pair) :-
+	\+ at_end_of_stream(S),
 	read_header(S, Pair).
 
 read_chunks(S, Tmp, Data) :-
