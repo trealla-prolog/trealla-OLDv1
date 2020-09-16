@@ -92,8 +92,8 @@ http_get(Url, Data, Opts) :-
 	Opts2=[headers2(Hdrs)|Opts],
 	Opts3=[status_code2(Code)|Opts2],
 	process(Url, S, Opts3),
-	dict:get(Hdrs, 'transfer-encoding', V, ''),
-	( V == chunked ->
+	dict:get(Hdrs, 'transfer-encoding', TE, ''),
+	( TE == chunked ->
 		read_chunks(S, '', Data2) ;
 		read_body(S, Hdrs, Data2)
 	),
