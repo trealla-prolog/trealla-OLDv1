@@ -99,15 +99,15 @@ http_get(Url, Data, Opts) :-
 	process(Url, S, Opts3),
 	dict:get(Hdrs, 'transfer-encoding', TE, ''),
 	( TE == chunked ->
-		read_chunks(S, '', Data2) ;
-		read_body(S, Hdrs, Data2)
+		read_chunks(S, '', Body) ;
+		read_body(S, Hdrs, Body)
 	),
 	close(S),
 	(memberchk(Code, [301,302]) ->
 		(dict:get(Hdrs, 'location', Loc, ''),
 		http_get(Loc, Data, Opts))
 	;
-		(Data=Data2,
+		(Data=Body,
 		ignore(memberchk(final_url(Url), Opts)),
 		ignore(memberchk(status_code(Code), Opts)),
 		ignore(memberchk(headers(Hdrs), Opts)))
