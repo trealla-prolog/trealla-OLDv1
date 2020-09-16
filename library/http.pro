@@ -99,16 +99,13 @@ http_get(Url, Data, Opts) :-
 	),
 	close(S),
 	(memberchk(Code, [301,302]) ->
-		(dict:get(Hdrs, 'location', Url2, ''),
-		ignore(memberchk(final_url(Url2), Opts)),
-		http_get(Url2, Data, Opts))
+		(dict:get(Hdrs, 'location', Loc, ''),
+		http_get(Loc, Data, Opts))
 	;
 		(Data=Data2,
 		ignore(memberchk(final_url(Url), Opts)),
-		ignore(memberchk(status_code2(V1), Opts3)),
-		ignore(memberchk(status_code(V1), Opts)),
-		ignore(memberchk(headers2(V2), Opts3)),
-		ignore(memberchk(headers(V2), Opts)))
+		ignore(memberchk(status_code(Code), Opts)),
+		ignore(memberchk(headers(Hdrs), Opts)))
 	),
 	true.
 
