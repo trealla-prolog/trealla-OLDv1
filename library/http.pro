@@ -80,7 +80,10 @@ http_get(Url, Data, Opts) :-
 	Opts3=[status_code2(Code2)|Opts2],
 	http_process(Url, S, Opts3),
 	dict:get(Hdrs2, 'transfer-encoding', V, ''),
-	(V == chunked -> http_chunked(S, '', Data2) ; http_read(S, Hdrs2, Data2)),
+	( V == chunked ->
+		http_chunked(S, '', Data2) ;
+		http_read(S, Hdrs2, Data2)
+	),
 	close(S),
 	(memberchk(Code2, [301,302]) ->
 		(dict:get(Hdrs2, 'location', Url2, ''),
