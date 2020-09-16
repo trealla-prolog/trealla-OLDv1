@@ -44,7 +44,7 @@ stream g_streams[MAX_STREAMS] = {{0}};
 char *g_pool = NULL;
 idx_t g_empty_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s;
-idx_t g_sys_elapsed_s, g_sys_queue_s;
+idx_t g_sys_elapsed_s, g_sys_queue_s, g_false_s;
 
 static idx_t g_pool_offset = 0, g_pool_size = 0;
 static int g_tpl_count = 0;
@@ -2717,12 +2717,13 @@ prolog *pl_create()
 		g_pool_offset = 0;
 	}
 
+	g_true_s = find_in_pool("true");
+	g_false_s = find_in_pool("false");
 	g_empty_s = find_in_pool("");
 	g_anon_s = find_in_pool("_");
 	g_dot_s = find_in_pool(".");
 	g_cut_s = find_in_pool("!");
 	g_nil_s = find_in_pool("[]");
-	g_true_s = find_in_pool("true");
 	g_fail_s = find_in_pool("fail");
 	g_clause_s = find_in_pool(":-");
 	g_sys_elapsed_s = find_in_pool("sys_elapsed");
