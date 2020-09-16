@@ -4492,9 +4492,9 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		cell tmp;
 
 		if (q->m->flag.character_escapes)
-			make_literal(&tmp, find_in_pool("true"));
+			make_literal(&tmp, g_true_s);
 		else
-			make_literal(&tmp, find_in_pool("false"));
+			make_literal(&tmp, g_false_s);
 
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		return 1;
@@ -4502,9 +4502,9 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		cell tmp;
 
 		if (q->m->flag.prefer_rationals)
-			make_literal(&tmp, find_in_pool("true"));
+			make_literal(&tmp, g_true_s);
 		else
-			make_literal(&tmp, find_in_pool("false"));
+			make_literal(&tmp, g_false_s);
 
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		return 1;
@@ -4530,7 +4530,7 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		return 1;
 	} else if (!strcmp(GET_STR(p1), "bounded")) {
 		cell tmp;
-		make_literal(&tmp, find_in_pool("false"));
+		make_literal(&tmp, g_false_s);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		return 1;
 	} else if (!strcmp(GET_STR(p1), "cpu_count")) {
