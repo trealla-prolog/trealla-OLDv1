@@ -208,7 +208,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 	}
 
 	if (is_rational(c)) {
-		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY)) && !running) {
+		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY)) && (running <= 0)) {
 			dst += snprintf(dst, dstlen, "%s0x", c->val_num<0?"-":"");
 			dst += sprint_int(dst, dstlen, c->val_num, 16);
 		} else if ((c->flags & FLAG_OCTAL) && !running) {

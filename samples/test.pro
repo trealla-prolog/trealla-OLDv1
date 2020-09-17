@@ -78,7 +78,7 @@ task10(C) :-
 	task10(C).
 
 test10a :-
-	%fork,
+	fork,
 	server(':8080',S,[]),
 	accept(S,C),
 		writeln([here,' ',S,' ',C]),
