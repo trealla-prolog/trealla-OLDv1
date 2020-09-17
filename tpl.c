@@ -185,6 +185,8 @@ int main(int ac, char *av[])
 	} else
 		signal(SIGINT, &sigfn);
 
+	signal(SIGPIPE, SIG_IGN);
+
 	for (i = 1; i < ac; i++) {
 		if (!strcmp(av[i], "--"))
 			break;

@@ -7033,13 +7033,12 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 		while (len) {
 			size_t nbytes = stream_write(src, len, str);
 
-			if (feof(str->fp)) {
+			if (feof(str->fp) || ferror(str->fp)) {
 				free(tmpbuf);
 				fprintf(stderr, "Error: end of file on write\n");
 				return 0;
 			}
 
-			clearerr(str->fp);
 			len -= nbytes;
 			src += nbytes;
 		}
