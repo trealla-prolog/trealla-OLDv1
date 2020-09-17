@@ -1255,7 +1255,7 @@ static int fn_iso_atom_length_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static int find_stream(query *q)
+static int new_stream(query *q)
 {
 	for (int i = 0; i < MAX_STREAMS; i++) {
 		if (!g_streams[i].fp)
@@ -1398,7 +1398,7 @@ static int fn_iso_open_3(query *q)
 	GET_NEXT_ARG(p3,var);
 	const char *filename = GET_STR(p1);
 	const char *mode = GET_STR(p2);
-	int n = find_stream(q);
+	int n = new_stream(q);
 
 	if (n < 0) {
 		throw_error(q, p1, "resource_error", "too many open streams");
@@ -1433,7 +1433,7 @@ static int fn_iso_open_4(query *q)
 	GET_NEXT_ARG(p3,var);
 	GET_NEXT_ARG(p4,list_or_nil);
 	const char *mode = GET_STR(p2);
-	int n = find_stream(q);
+	int n = new_stream(q);
 
 	if (n < 0) {
 		throw_error(q, p1, "resource_error", "too many open streams");
@@ -5902,7 +5902,7 @@ static int fn_server_3(query *q)
 		return 0;
 	}
 
-	int n = find_stream(q);
+	int n = new_stream(q);
 
 	if (n < 0) {
 		throw_error(q, p1, "resource_error", "too many open streams");
@@ -5960,7 +5960,7 @@ static int fn_accept_2(query *q)
 		sslptr = net_enable_ssl(fd, str->name);
 #endif
 
-	n = find_stream(q);
+	n = new_stream(q);
 
 	if (n < 0) {
 		throw_error(q, p1, "resource_error", "too many open streams");
@@ -6080,7 +6080,7 @@ static int fn_client_5(query *q)
 			return 0;
 	}
 
-	int n = find_stream(q);
+	int n = new_stream(q);
 
 	if (n < 0) {
 		throw_error(q, p1, "resource_error", "too many open streams");
