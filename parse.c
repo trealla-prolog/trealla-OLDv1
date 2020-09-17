@@ -700,6 +700,7 @@ query *create_task(query *q, cell *curr_cell)
 		set_var(subq, &tmp, 0, c, q->latest_ctx);
 	}
 
+	subq->st.sp = gsrc->nbr_vars;
 	return subq;
 }
 

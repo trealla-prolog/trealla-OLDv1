@@ -5925,10 +5925,10 @@ static int fn_server_3(query *q)
 		close(fd);
 	}
 
-	cell tmp;
-	make_int(&tmp, n);
-	tmp.flags |= FLAG_STREAM | FLAG_HEX;
-	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	cell *tmp = alloc_heap(q, 1);
+	make_int(tmp, n);
+	tmp->flags |= FLAG_STREAM | FLAG_HEX;
+	set_var(q, p2, p2_ctx, tmp, q->st.curr_frame);
 	return 1;
 }
 
@@ -5984,7 +5984,6 @@ static int fn_accept_2(query *q)
 		close(fd);
 	}
 
-	make_choice(q);
 	cell tmp;
 	make_int(&tmp, n);
 	tmp.flags |= FLAG_STREAM | FLAG_HEX;
@@ -6108,9 +6107,10 @@ static int fn_client_5(query *q)
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	tmp = make_string(q, path);
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
-	make_int(&tmp, n);
-	tmp.flags |= FLAG_STREAM | FLAG_HEX;
-	set_var(q, p4, p4_ctx, &tmp, q->st.curr_frame);
+	cell *tmp2 = alloc_heap(q, 1);
+	make_int(tmp2, n);
+	tmp2->flags |= FLAG_STREAM | FLAG_HEX;
+	set_var(q, p4, p4_ctx, tmp2, q->st.curr_frame);
 	return 1;
 }
 

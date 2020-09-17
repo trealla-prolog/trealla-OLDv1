@@ -82,7 +82,7 @@ test10a :-
 	server(':8080',S,[]),
 	accept(S,C),
 		writeln([here,' ',S,' ',C]),
-		task10(X).
+		task10(C).
 test10a :-
 	wait.
 
