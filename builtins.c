@@ -184,8 +184,8 @@ static void make_smalln(cell *tmp, const char *s, size_t n)
 	tmp->nbr_cells = 1;
 	tmp->arity = 0;
 	tmp->flags = 0;
-	memcpy(tmp->val_chars, s, n);
-	tmp->val_chars[n] = '\0';
+	memcpy(tmp->val_chr, s, n);
+	tmp->val_chr[n] = '\0';
 }
 
 static void make_small(cell *tmp, const char *s)

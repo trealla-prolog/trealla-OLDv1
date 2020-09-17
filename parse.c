@@ -2277,7 +2277,7 @@ int parser_tokenize(parser *p, int args, int consing)
 			c->val_type = TYPE_STRING;
 
 			if (strlen(p->token) < MAX_SMALL_STRING)
-				strcpy(c->val_chars, p->token);
+				strcpy(c->val_chr, p->token);
 			else {
 				if (p->consulting)
 					c->flags |= FLAG2_CONST_STRING;

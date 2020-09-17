@@ -57,7 +57,7 @@ typedef uint32_t idx_t;
 
 // These 2 assume literal or string types...
 
-#define GET_STR(c) ((c)->val_type != TYPE_STRING ? (g_pool+(c)->val_off) : (c)->flags&FLAG2_BIG_STRING ? (c)->val_str : (c)->val_chars)
+#define GET_STR(c) ((c)->val_type != TYPE_STRING ? (g_pool+(c)->val_off) : (c)->flags&FLAG2_BIG_STRING ? (c)->val_str : (c)->val_chr)
 #define LEN_STR(c) ((c)->flags&FLAG2_BIG_STRING ? (c)->nbytes : strlen(GET_STR(c)))
 
 enum {
@@ -105,34 +105,44 @@ typedef struct cell_ cell;
 typedef struct parser_ parser;
 
 struct cell_ {
-	struct {
-		uint8_t val_type;
-		uint8_t arity;
-		uint16_t flags;
-		idx_t nbr_cells;
-	};
+	uint8_t val_type;
+	uint8_t arity;
+	uint16_t flags;
+	idx_t nbr_cells;
 
 	union {
 		struct {
-			union {
-				rule *match;				// rules
-				int (*fn)(query*);			// builtins
-				uint32_t nbytes;			// slice size for strings
-				uint16_t precedence;		// ops parsing
-				uint8_t slot_nbr;			// vars
-				int_t val_den;				// rational denominator
-			};
-
-			union {
-				int_t val_num;				// rational numerator
-				double val_flt;				// float
-				idx_t val_off;				// offset to string in pool
-				char *val_str;				// C-string
-				cell *val_ptr;				// indirect
-			};
+			int_t val_num;
+			int_t val_den;
 		};
 
-		char val_chars[MAX_SMALL_STRING];	// small string copy
+		struct {
+			double val_flt;
+		};
+
+		struct {
+			char val_chr[MAX_SMALL_STRING];
+		};
+
+		struct {
+			char *val_str;
+			uint32_t nbytes;
+		};
+
+		struct {
+			union {
+				int (*fn)(query*);
+				rule *match;
+				uint16_t precedence;
+				uint8_t slot_nbr;
+			};
+
+			idx_t val_off;
+		};
+
+		struct {
+			cell *val_ptr;
+		};
 	};
 };
 
