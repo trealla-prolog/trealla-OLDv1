@@ -424,9 +424,11 @@ static size_t stream_write(const void *ptr, size_t nbytes, stream *str)
 #if USE_SSL
 	if (str->ssl)
 		return ssl_write(ptr, nbytes, str);
-	else
 #endif
-		return fwrite(ptr, 1, nbytes, str->fp);
+
+	size_t len = fwrite(ptr, 1, nbytes, str->fp);
+	fflush(str->fp);
+	return len;
 }
 
 static size_t stream_read(void *ptr, size_t nbytes, stream *str)
