@@ -110,6 +110,8 @@ struct cell_ {
 	uint16_t flags;
 	idx_t nbr_cells;
 
+	// The following unions are based off 'val_type' ...
+
 	union {
 		struct {
 			int_t val_num;
