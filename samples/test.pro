@@ -73,18 +73,15 @@ test9 :-
 	true.
 
 task10(C) :-
-	repeat,
-		(at_end_of_stream(C) -> (!, fail) ; true),
-		getline(C,L),
-		write('GOT: '), writeln(L),
-		fail.
-task10(_).
+	getline(C,L),
+	write('GOT: '), writeln(L),
+	task10(C).
 
 test10a :-
 	fork,
 	server(':8080',S,[]),
 	accept(S,C),
-		fork,
+		writeln([here,' ',S,' ',C]),
 		task10(C).
 test10a :-
 	wait.
