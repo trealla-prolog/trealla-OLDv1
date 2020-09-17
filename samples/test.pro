@@ -277,12 +277,3 @@ test82 :- writeln(nok).
 
 test83 :- \+ \+ (!, true), writeln(ok).
 test83 :- writeln(nok).
-
-test84 :-
-	between(1,inf,I),
-		writeln(I),
-		I >= 10,
-		!,
-		fail.
-test84 :-
-	writeln(done).

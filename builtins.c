@@ -6293,7 +6293,7 @@ static int fn_bwrite_2(query *q)
 				return 0;
 		}
 
-		// TODO make this yieldable
+		// TODO: make this yieldable
 
 		clearerr(str->fp);
 		len -= nbytes;
