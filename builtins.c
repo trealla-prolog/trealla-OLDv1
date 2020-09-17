@@ -7039,6 +7039,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 				return 0;
 			}
 
+			clearerr(str->fp);
 			len -= nbytes;
 			src += nbytes;
 		}
