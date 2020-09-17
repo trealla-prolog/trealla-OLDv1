@@ -81,7 +81,7 @@ test10a :-
 	fork,
 	server(':8080',S,[]),
 	accept(S,C),
-		writeln([here,' ',S,' ',C]),
+		fork,
 		task10(C).
 test10a :-
 	wait.

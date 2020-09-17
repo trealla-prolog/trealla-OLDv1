@@ -5984,6 +5984,7 @@ static int fn_accept_2(query *q)
 		close(fd);
 	}
 
+	make_choice(q);
 	cell tmp;
 	make_int(&tmp, n);
 	tmp.flags |= FLAG_STREAM | FLAG_HEX;
