@@ -88,10 +88,11 @@ test10a :-
 
 test10b :-
 	client('localhost:8080',_,_,S,[]),
-	between(1,inf,I),
-		(format(S,'[~d] Hello, world~n',[I]) ->
-			delay(10) ; (writeln(oops), !)),
+	repeat,
+		format(S,'[~d] Hello, world~n',[I]),
+		delay(10),
 		fail.
+test10b.
 
 task11(C) :-
 	repeat,
