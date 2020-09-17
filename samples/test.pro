@@ -93,6 +93,17 @@ test10b :-
 			delay(1) ; (writeln(disconnected), !)),
 		fail.
 
+test10c :-
+	fork,
+	server(':8080',S,[]),
+	accept(S,C),
+		fork,
+		http_request(C,Method,Path,Ver,Hdrs),
+		writeln([Method,Path,Ver,Hdrs]),
+		close(C).
+test10c :-
+	wait.
+
 task11(C) :-
 	repeat,
 		getline(C,L),
