@@ -1369,7 +1369,7 @@ static int fn_iso_stream_property_2(query *q)
 		return 1;
 	}
 
-	if (!strcmp(GET_STR(p1), "line_count")) {
+	if (!strcmp(GET_STR(p1), "line_count") && str->p) {
 		cell *c = p1 + 1;
 		c = deref_var(q, c, q->latest_ctx);
 		cell tmp;
