@@ -74,7 +74,7 @@ test9 :-
 
 task10(C) :-
 	getline(C,L),
-	write('GOT: '), writeln(L),
+	format('GOT: ~w\n', [L]),
 	task10(C).
 
 test10a :-
