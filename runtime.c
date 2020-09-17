@@ -89,7 +89,7 @@ static void check_slot(query *q)
 			idx_t save_slots = q->slots_size;
 			q->slots_size += q->slots_size / 2;
 
-			if ((sizeof(slot)*q->slots_size) > (1024LL*1024*1024)) {
+			if ((sizeof(slot)*q->slots_size) > (1024LL*1024*1024*2)) {
 				fprintf(stderr, "Out of environment\n");
 				abort();
 			}
