@@ -78,7 +78,7 @@ task10(C) :-
 	task10(C).
 
 test10a :-
-	fork,
+	%fork,
 	server(':8080',S,[]),
 	accept(S,C),
 		writeln([here,' ',S,' ',C]),
@@ -89,7 +89,7 @@ test10a :-
 test10b :-
 	client('localhost:8080',_,_,S,[]),
 	between(1,inf,I),
-		(format(S,'[~d] Hello, world~n',[I]) ->
+		(format(S,'[~w] Hello, world~n',[I]) ->
 			delay(1) ; (writeln(disconnected), !)),
 		fail.
 
@@ -110,7 +110,7 @@ test11a :-
 test11b :-
 	client('localhost:8080',_,_,S,[udp(true)]),
 	between(1,1000000,I),
-		format(S,'[~d] Hello, world~n',[I]),
+		format(S,'[~w] Hello, world~n',[I]),
 		delay(100),
 		fail.
 
@@ -175,7 +175,7 @@ test18b :- assertz(f18(123),_), clause(f18(_),_,_).
 
 task50(T) :-
 	between(1,inf,_),
-		format('Task ... ~d',[T]), nl,
+		format('Task ... ~w',[T]), nl,
 		sleep(T),
 		fail.
 
@@ -193,7 +193,7 @@ test52 :- sys_list(L), sort(L,L2),
 	read_term_from_atom(S,S2,[]), write_term(S2,[]), nl.
 
 task53(T) :- between(1,10,_), R is random(1000), delay(R), send({T,R}), fail.
-task53(T) :- format('Task ~d done~n',[T]).
+task53(T) :- format('Task ~w done~n',[T]).
 
 test53 :- between(1,4,I), fork, task53(I).
 test53 :-
