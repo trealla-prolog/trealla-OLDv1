@@ -126,10 +126,11 @@ http_delete(Url, Data, Opts) :-
 
 % Handle a server request...
 
-http_request(S, Method, Path, Hdrs) :-
+http_request(S, Method, Path, Ver, Hdrs) :-
 	getline(S, Line),
 	split(Line, ' ' ,Method2, Rest),
-	split(Rest, ' ', Path, _),
+	split(Rest, ' ', Path, Rest2),
+	split(Rest2, '/', _, Ver),
 	string_upper(Method2, Method),
 	findall(Hdr, read_header(S, Hdr), Hdrs),
 	true.
