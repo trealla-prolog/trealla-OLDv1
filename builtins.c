@@ -1547,7 +1547,7 @@ static int fn_iso_at_end_of_stream_0(query *q)
 {
 	int n = get_named_stream(q, "user_input");
 	stream *str = &g_streams[n];
-	return feof(str->fp);
+	return ferror(str->fp);
 }
 
 static int fn_iso_at_end_of_stream_1(query *q)
@@ -1555,7 +1555,7 @@ static int fn_iso_at_end_of_stream_1(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
-	return feof(str->fp);
+	return ferror(str->fp);
 }
 
 static int fn_iso_flush_output_0(query *q)
@@ -1963,7 +1963,7 @@ static int fn_iso_get_char_1(query *q)
 	int ch = str->ungetch ? str->ungetch : getc_utf8(str->fp);
 	str->ungetch = 0;
 
-	if (feof(str->fp)) {
+	if (ferror(str->fp)) {
 		str->did_getc = 0;
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
@@ -1996,7 +1996,7 @@ static int fn_iso_get_char_2(query *q)
 	int ch = str->ungetch ? str->ungetch : getc_utf8(str->fp);
 	str->ungetch = 0;
 
-	if (feof(str->fp)) {
+	if (ferror(str->fp)) {
 		str->did_getc = 0;
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
@@ -2114,7 +2114,7 @@ static int fn_iso_peek_char_1(query *q)
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : getc_utf8(str->fp);
 
-	if (feof(str->fp)) {
+	if (ferror(str->fp)) {
 		clearerr(str->fp);
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
@@ -2138,7 +2138,7 @@ static int fn_iso_peek_char_2(query *q)
 
 	int ch = str->ungetch ? str->ungetch : getc_utf8(str->fp);
 
-	if (feof(str->fp)) {
+	if (ferror(str->fp)) {
 		clearerr(str->fp);
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
@@ -6161,7 +6161,7 @@ static int fn_getline_2(query *q)
 	if (stream_getline(&line, &len, str) == -1) {
 		free(line);
 
-		if (q->is_task && !feof(str->fp)) {
+		if (q->is_task && !ferror(str->fp)) {
 			clearerr(str->fp);
 			q->tmo_msecs =get_time_in_usec() / 1000;
 			q->tmo_msecs += 1;
@@ -6207,7 +6207,7 @@ static int fn_bread_3(query *q)
 			if (nbytes == len)
 				break;
 
-			if (feof(str->fp)) {
+			if (ferror(str->fp)) {
 				free(str->data);
 				str->data = NULL;
 				return 0;
@@ -6256,7 +6256,7 @@ static int fn_bread_3(query *q)
 		str->data_len += nbytes;
 		str->data[str->data_len] = '\0';
 
-		if (!nbytes || feof(str->fp))
+		if (!nbytes || ferror(str->fp))
 			break;
 
 		if (str->alloc_nbytes == str->data_len)
@@ -6285,7 +6285,7 @@ static int fn_bwrite_2(query *q)
 	while (len) {
 		size_t nbytes = stream_write(src, len, str);
 
-		if (feof(str->fp))
+		if (ferror(str->fp))
 			return 0;
 
 		// TODO make this yieldable
@@ -7033,9 +7033,8 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 		while (len) {
 			size_t nbytes = stream_write(src, len, str);
 
-			if (feof(str->fp) || ferror(str->fp)) {
+			if (ferror(str->fp)) {
 				free(tmpbuf);
-				fprintf(stderr, "Error: end of file on write\n");
 				return 0;
 			}
 
@@ -7421,7 +7420,7 @@ static int fn_edin_skip_1(query *q)
 		int ch = str->ungetch ? str->ungetch : getc_utf8(str->fp);
 		str->ungetch = 0;
 
-		if (feof(str->fp)) {
+		if (ferror(str->fp)) {
 			str->did_getc = 0;
 			break;
 		} else if (ch == '\n')
@@ -7451,7 +7450,7 @@ static int fn_edin_skip_2(query *q)
 		int ch = str->ungetch ? str->ungetch : getc_utf8(str->fp);
 		str->ungetch = 0;
 
-		if (feof(str->fp)) {
+		if (ferror(str->fp)) {
 			str->did_getc = 0;
 			break;
 		} else if (ch == '\n')

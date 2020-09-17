@@ -90,7 +90,7 @@ test10b :-
 	client('localhost:8080',_,_,S,[]),
 	between(1,inf,I),
 		(format(S,'[~d] Hello, world~n',[I]) ->
-			delay(1) ; !),
+			delay(1) ; (writeln(disconnected), !)),
 		fail.
 
 task11(C) :-
