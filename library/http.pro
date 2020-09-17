@@ -1,6 +1,6 @@
 :- module(http, [
 	http_open/3, http_get/3, http_post/4, http_put/4, http_delete/3,
-	http_request/4
+	http_request/5
 	]).
 
 read_response(S, Code) :-
