@@ -76,6 +76,11 @@ int net_connect(const char *hostname, unsigned port, int udp, int nodelay, int n
 		if (fd == -1)
 		   continue;
 
+        int flag = 1;
+        setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *)&flag, sizeof(flag));
+        int flag2 = 1;
+        setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, (char *)&flag2, sizeof(flag2));
+
 		if (connect(fd, rp->ai_addr, rp->ai_addrlen) != -1)
 			break;
 
