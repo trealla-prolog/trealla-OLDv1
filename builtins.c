@@ -255,6 +255,19 @@ static cell *alloc_heap(query *q, idx_t nbr_cells)
 static idx_t heap_used(const query *q) { return q->st.hp; }
 static cell *get_heap(const query *q, idx_t i) { return q->arenas->heap + i; }
 
+static cell *alloc_stringn(query *q, const char *s, size_t n)
+{
+	cell *tmp = alloc_heap(q, 1);
+	tmp->val_type = TYPE_STRING;
+	tmp->flags = FLAG2_BIG_STRING;
+	tmp->nbr_cells = 1;
+	tmp->val_str = malloc(n+1);
+	memcpy(tmp->val_str, s, n);
+	tmp->val_str[n] = '\0';
+	tmp->nbytes = n;
+	return tmp;
+}
+
 static void init_queue(query* q)
 {
 	free(q->queue[0]);
@@ -356,37 +369,54 @@ static cell *end_list(query *q, const cell *l)
 	return l2;
 }
 
+static cell tmp_stringn(query *q, const char *s, size_t n)
+{
+	cell tmp;
+
+	if (strlen(s) < MAX_SMALL_STRING)
+		make_smalln(&tmp, s, n);
+	 else {
+		tmp.val_type = TYPE_STRING;
+		tmp.flags = FLAG2_BIG_STRING;
+		tmp.val_str = malloc(n+1);
+		memcpy(tmp.val_str, s, n);
+		tmp.val_str[n] = '\0';
+		tmp.nbytes = n;
+		tmp.nbr_cells = 1;
+		tmp.arity = 0;
+	}
+
+	return tmp;
+}
+
+static cell tmp_string(query *q, const char *s)
+{
+	size_t n = strlen(s);
+	return tmp_stringn(q, s, n);
+}
+
 static cell make_stringn(query *q, const char *s, size_t n)
 {
 	cell tmp;
 
 	if (n < MAX_SMALL_STRING)
 		make_smalln(&tmp, s, n);
-	else {
-		tmp.arity = 0;
-		tmp.nbr_cells = 1;
-		tmp.val_type = TYPE_STRING;
-		tmp.flags = FLAG2_BIG_STRING;
-		tmp.val_sbuf = new_string(s, tmp.nbytes=n);
-	}
+	else
+		tmp = *alloc_stringn(q, s, n);
 
 	return tmp;
 }
 
 static cell make_blob(query *q, const char *s, size_t n)
 {
-	cell tmp;
-	tmp.arity = 0;
-	tmp.nbr_cells = 1;
-	tmp.val_type = TYPE_STRING;
-	tmp.flags = FLAG2_BIG_STRING;
-	tmp.val_sbuf = new_string(s, tmp.nbytes=n);
+	cell tmp = *alloc_stringn(q, s, n);
 	return tmp;
 }
 
 static cell make_string(query *q, const char *s)
 {
-	return make_stringn(q, s, strlen(s));
+	size_t n = strlen(s);
+	return make_stringn(q, s, n);
 }
 
 static size_t stream_write(const void *ptr, size_t nbytes, stream *str)
@@ -429,7 +459,7 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 
 	if (!is_structure(p1)) {
 		if (is_big_string(p1) && !is_const_string(p1))
-			ref_string(p1->val_sbuf);
+			tmp->val_str = strdup(p1->val_str);
 
 		return;
 	}
@@ -474,7 +504,7 @@ static void deep_clone2_to_heap(query *q, cell *p1, idx_t p1_ctx)
 
 	if (!is_structure(p1)) {
 		if (is_big_string(p1) && !is_const_string(p1))
-			ref_string(p1->val_sbuf);
+			tmp->val_str = strdup(p1->val_str);
 
 		return;
 	}
@@ -766,13 +796,13 @@ static int fn_iso_atom_chars_2(query *q)
 	char tmpbuf[80];
 	memcpy(tmpbuf, src, nbytes);
 	tmpbuf[nbytes] = '\0';
-	cell tmp = make_string(q, tmpbuf);
+	cell tmp = tmp_string(q, tmpbuf);
 	src += nbytes;
 	cell *l = alloc_list(q, &tmp);
 
 	while (*src) {
 		nbytes = len_char_utf8(src);
-		cell tmp = make_stringn(q, src, nbytes);
+		cell tmp = tmp_stringn(q, src, nbytes);
 		src += nbytes;
 		l = append_list(q, l, &tmp);
 	}
@@ -913,11 +943,11 @@ static int fn_iso_number_chars_2(query *q)
 	char tmpbuf[256];
 	sprint_int(tmpbuf, sizeof(tmpbuf), p1->val_num, 10);
 	const char *src = tmpbuf;
-	cell tmp = make_stringn(q, src, 1);
+	cell tmp = tmp_stringn(q, src, 1);
 	cell *l = alloc_list(q, &tmp);
 
 	while (*++src) {
-		cell tmp = make_stringn(q, src, 1);
+		cell tmp = tmp_stringn(q, src, 1);
 		l = append_list(q, l, &tmp);
 	}
 
@@ -4539,11 +4569,11 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		}
 
 		int i = g_avc;
-		cell tmp = make_string(q, g_av[i++]);
+		cell tmp = tmp_string(q, g_av[i++]);
 		cell *l = alloc_list(q, &tmp);
 
 		while (i < g_ac) {
-			tmp = make_string(q, g_av[i++]);
+			tmp = tmp_string(q, g_av[i++]);
 			l = append_list(q, l, &tmp);
 		}
 
@@ -5637,7 +5667,7 @@ static int fn_split_string_4(query *q)
 		while ((peek_char_utf8(start) == pad) && (pad != ch))
 			get_char_utf8(&start);
 
-		cell tmp = make_stringn(q, start, ptr-start);
+		cell tmp = tmp_stringn(q, start, ptr-start);
 
 		if (nbr++ == 1)
 			l = alloc_list(q, &tmp);
@@ -5651,7 +5681,7 @@ static int fn_split_string_4(query *q)
 		while (peek_char_utf8(start) == pad)
 			get_char_utf8(&start);
 
-		cell tmp = make_string(q, start);
+		cell tmp = tmp_string(q, start);
 
 		if (!l)
 			l = alloc_list(q, &tmp);
@@ -5768,7 +5798,7 @@ static int fn_getfile_2(query *q)
 		if (line[strlen(line)-1] == '\r')
 			line[strlen(line)-1] = '\0';
 
-		cell tmp = make_string(q, line);
+		cell tmp = tmp_string(q, line);
 
 		if (nbr++ == 1)
 			l = alloc_list(q, &tmp);
@@ -6525,7 +6555,7 @@ static int fn_spawn_n(query *q)
 
 		for (idx_t i = 0; i < p2->nbr_cells; i++, c++) {
 			if (is_big_string(c) && !is_const_string(c))
-				ref_string(c->val_sbuf);
+				c->val_str = strdup(c->val_str);
 		}
 
 		arity++;
@@ -6576,8 +6606,12 @@ static int fn_send_1(query *q)
 	for (idx_t i = 0; i < c->nbr_cells; i++) {
 		cell *c2 = c + i;
 
-		if (is_big_string(c2))
-			ref_string(c2->val_sbuf);
+		if (is_big_string(c2)) {
+			size_t nbytes = c2->nbytes;
+			char *tmp = malloc(nbytes + 1);
+			memcpy(tmp, c2->val_str, nbytes+1);
+			c2->val_str = tmp;
+		}
 	}
 
 	alloc_queue(dstq, c);

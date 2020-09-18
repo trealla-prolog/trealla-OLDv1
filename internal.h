@@ -57,7 +57,7 @@ typedef uint32_t idx_t;
 
 // These 2 assume literal or string types...
 
-#define GET_STR(c) ((c)->val_type != TYPE_STRING ? (g_pool+(c)->val_off) : (c)->flags&FLAG2_BIG_STRING ? (c)->val_sbuf->str : (c)->val_chr)
+#define GET_STR(c) ((c)->val_type != TYPE_STRING ? (g_pool+(c)->val_off) : (c)->flags&FLAG2_BIG_STRING ? (c)->val_str : (c)->val_chr)
 #define LEN_STR(c) ((c)->flags&FLAG2_BIG_STRING ? (c)->nbytes : strlen(GET_STR(c)))
 
 enum {
@@ -104,11 +104,6 @@ typedef struct clause_ clause;
 typedef struct cell_ cell;
 typedef struct parser_ parser;
 
-typedef struct sbuf_ {
-	uint32_t refcnt;
-	char str[];
-} sbuf;
-
 struct cell_ {
 	uint8_t val_type;
 	uint8_t arity;
@@ -132,7 +127,7 @@ struct cell_ {
 		};
 
 		struct {
-			sbuf *val_sbuf;
+			char *val_str;
 			uint32_t nbytes;
 		};
 
@@ -356,27 +351,7 @@ extern stream g_streams[MAX_STREAMS];
 extern module *g_modules;
 extern char *g_pool;
 
-inline static sbuf *new_string(const char *s, uint32_t len)
-{
-	sbuf *ptr = malloc(sizeof(sbuf)+len+1);
-	memcpy(ptr->str, s, len);
-	ptr->str[len] = '\0';
-	ptr->refcnt = 1;
-	return ptr;
-}
-
-inline static void ref_string(sbuf *ptr)
-{
-	ptr->refcnt++;
-}
-
-inline static void deref_string(sbuf *ptr)
-{
-	if (!--ptr->refcnt)
-		free(ptr);
-}
-
-inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
+static inline idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 {
 	memcpy(dst, src, sizeof(cell)*(nbr_cells));
 	return nbr_cells;
