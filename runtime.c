@@ -258,7 +258,7 @@ int retry_choice(query *q)
 		cell *c = &q->arenas->heap[i];
 
 		if (is_big_string(c) && !is_const_string(c)) {
-			free(c->val_str);
+			deref_string(c->val_sbuf);
 		} else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 			stream *str = &g_streams[c->val_num];
 
@@ -556,7 +556,7 @@ static int unify_float(cell *p1, cell *p2)
 	return 0;
 }
 
-#define GET_STR2(c) ((c)->flags&FLAG2_BIG_STRING ? (c)->val_str : (c)->val_chr)
+#define GET_STR2(c) ((c)->flags&FLAG2_BIG_STRING ? (c)->val_sbuf->str : (c)->val_chr)
 
 static int unify_literal(cell *p1, cell *p2)
 {

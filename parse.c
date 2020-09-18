@@ -598,7 +598,7 @@ void clear_term(term *t)
 		cell *c = t->cells + i;
 
 		if (is_big_string(c))
-			free(c->val_str);
+			deref_string(c->val_sbuf);
 
 		c->val_type = TYPE_EMPTY;
 	}
@@ -720,7 +720,7 @@ void destroy_query(query *q)
 			cell *c = &a->heap[i];
 
 			if (is_big_string(c) && !is_const_string(c))
-				free(c->val_str);
+				deref_string(c->val_sbuf);
 			else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 				stream *str = &g_streams[c->val_num];
 
@@ -2283,8 +2283,7 @@ int parser_tokenize(parser *p, int args, int consing)
 					c->flags |= FLAG2_CONST_STRING;
 
 				c->flags |= FLAG2_BIG_STRING;
-				c->val_str = strdup(p->token);
-				c->nbytes = strlen(p->token);
+				c->val_sbuf = new_string(p->token, c->nbytes=strlen(p->token));
 			}
 		}
 	}
