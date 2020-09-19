@@ -233,10 +233,10 @@ typedef struct {
 	sliter *iter;
 	idx_t curr_frame, fp, hp, tp, sp;
 	uint8_t anbr, qnbr;
-} qstate;
+} state;
 
 typedef struct {
-	qstate st;
+	state st;
 	idx_t v1, v2;
 	uint32_t pins;
 	uint8_t nbr_vars;
@@ -266,7 +266,7 @@ struct query_ {
 	cell *tmp_heap, *queue[MAX_QUEUES];
 	arena *arenas;
 	cell accum;
-	qstate st;
+	state st;
 	int64_t time_started, tmo_msecs;
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
 	uint64_t nv_mask, step, qid;
