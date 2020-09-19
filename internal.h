@@ -58,7 +58,7 @@ typedef uint32_t idx_t;
 // These 2 assume literal or string types...
 
 #define GET_STR(c) ((c)->val_type != TYPE_STRING ? (g_pool+(c)->val_off) : (c)->flags&FLAG2_BIG_STRING ? (c)->val_str : (c)->val_chr)
-#define LEN_STR(c) ((c)->flags&FLAG2_BIG_STRING ? (c)->nbytes : strlen(GET_STR(c)))
+#define LEN_STR(c) ((c)->flags&FLAG2_BIG_STRING ? (c)->len_str : strlen(GET_STR(c)))
 
 enum {
 	TYPE_EMPTY=0,
@@ -128,7 +128,7 @@ struct cell_ {
 
 		struct {
 			char *val_str;
-			uint32_t nbytes;
+			uint32_t len_str;
 		};
 
 		struct {

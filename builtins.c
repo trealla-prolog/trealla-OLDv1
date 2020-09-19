@@ -264,7 +264,7 @@ static cell *alloc_stringn(query *q, const char *s, size_t n)
 	tmp->val_str = malloc(n+1);
 	memcpy(tmp->val_str, s, n);
 	tmp->val_str[n] = '\0';
-	tmp->nbytes = n;
+	tmp->len_str = n;
 	return tmp;
 }
 
@@ -381,7 +381,7 @@ static cell tmp_stringn(query *q, const char *s, size_t n)
 		tmp.val_str = malloc(n+1);
 		memcpy(tmp.val_str, s, n);
 		tmp.val_str[n] = '\0';
-		tmp.nbytes = n;
+		tmp.len_str = n;
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;
 	}
@@ -6607,7 +6607,7 @@ static int fn_send_1(query *q)
 		cell *c2 = c + i;
 
 		if (is_big_string(c2)) {
-			size_t nbytes = c2->nbytes;
+			size_t nbytes = c2->len_str;
 			char *tmp = malloc(nbytes + 1);
 			memcpy(tmp, c2->val_str, nbytes+1);
 			c2->val_str = tmp;
