@@ -242,20 +242,41 @@ void make_catcher(query *q, int retry)
 		ch->catchme2 = 1;
 }
 
-int retry_choice(query *q)
+static void trim_heap(query *q, const choice *ch)
 {
-	if (!q->cp)
-		return 0;
+	for (arena *a = q->arenas; a;) {
+		if (a->nbr <= ch->st.anbr)
+			break;
 
-	idx_t curr_choice = drop_choice(q);
-	const choice *ch = q->choices + curr_choice;
-	unwind_trail(q, ch);
+		for (idx_t i = 0; i < a->hp; i++) {
+			cell *c = a->heap + i;
 
-	if (ch->catchme2)
-		return retry_choice(q);
+			if (is_big_string(c) && !is_const_string(c)) {
+				free(c->val_str);
+			} else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
+				stream *str = &g_streams[c->val_num];
+
+				if (str->fp) {
+					fclose(str->fp);
+					free(str->filename);
+					free(str->mode);
+					free(str->data);
+					free(str->name);
+					memset(str, 0, sizeof(stream));
+				}
+			}
+
+			c->val_type = TYPE_EMPTY;
+		}
+
+		arena *save = a;
+		q->arenas = a = a->next;
+		free(save->heap);
+		free(save);
+	}
 
 	for (idx_t i = ch->st.hp; i < q->st.hp; i++) {
-		cell *c = &q->arenas->heap[i];
+		cell *c = q->arenas->heap + i;
 
 		if (is_big_string(c) && !is_const_string(c)) {
 			free(c->val_str);
@@ -275,21 +296,21 @@ int retry_choice(query *q)
 		c->val_type = TYPE_EMPTY;
 	}
 
-	for (arena *a = q->arenas; a;) {
-		if (a->nbr > ch->st.anbr) {
-			arena *save = a;
-			q->arenas = a = a->next;
-			free(save->heap);
-			free(save);
-			continue;
-		}
+}
 
-		if (a->nbr == ch->st.anbr)
-			break;
+int retry_choice(query *q)
+{
+	if (!q->cp)
+		return 0;
 
-		a = a->next;
-	}
+	idx_t curr_choice = drop_choice(q);
+	const choice *ch = q->choices + curr_choice;
+	unwind_trail(q, ch);
 
+	if (ch->catchme2)
+		return retry_choice(q);
+
+	trim_heap(q, ch);
 	q->st = ch->st;
 
 	frame *g = GET_FRAME(q->st.curr_frame);

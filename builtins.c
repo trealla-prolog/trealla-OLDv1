@@ -223,26 +223,27 @@ static cell *get_tmp_heap(const query *q, idx_t i) { return q->tmp_heap + i; }
 
 static cell *alloc_heap(query *q, idx_t nbr_cells)
 {
-	if (q->st.hp > q->max_heaps)
-		q->max_heaps = q->st.hp;
-
 	if (!q->arenas) {
-		q->arenas = calloc(1, sizeof(arena));
-		q->arenas->heap = calloc(q->h_size, sizeof(cell));
-		q->arenas->h_size = q->h_size;
-		q->arenas->nbr = q->st.anbr++;
+		arena *a = calloc(1, sizeof(arena));
+		a->heap = calloc(q->h_size, sizeof(cell));
+		a->h_size = q->h_size;
+		a->nbr = q->st.anbr++;
+		q->arenas = a;
 	}
 
 	if ((q->st.hp + nbr_cells) >= q->h_size) {
 		arena *a = calloc(1, sizeof(arena));
 		a->next = q->arenas;
-		idx_t save_size = q->h_size;
 		q->h_size *= 2;
+
+		if (q->h_size < nbr_cells)
+			q->h_size += nbr_cells;
+
 		a->heap = calloc(q->h_size, sizeof(cell));
-		copy_cells(a->heap, q->arenas->heap, save_size);
 		a->h_size = q->h_size;
 		a->nbr = q->st.anbr++;
 		q->arenas = a;
+		q->st.hp = 0;
 	}
 
 	cell *c = q->arenas->heap + q->st.hp;
@@ -332,41 +333,38 @@ static cell *alloc_queuen(query *q, int qnbr, const cell *c)
 	return dst;
 }
 
-static cell *alloc_list(query *q, const cell *c)
+static void alloc_list(query *q, const cell *c)
 {
-	cell *tmp = alloc_heap(q, 1+c->nbr_cells);
+	init_tmp_heap(q);
+	cell *tmp = alloc_tmp_heap(q, 1+c->nbr_cells);
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1 + c->nbr_cells;
 	tmp->val_off = g_dot_s;
 	tmp->arity = 2;
 	copy_cells(tmp+1, c, c->nbr_cells);
-	return tmp;
 }
 
-static cell *append_list(query *q, const cell *l, const cell *c)
+static void append_list(query *q, const cell *c)
 {
-	idx_t save = l - q->arenas->heap;
-	cell *tmp = alloc_heap(q, 1+c->nbr_cells);
+	cell *tmp = alloc_tmp_heap(q, 1+c->nbr_cells);
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1 + c->nbr_cells;
 	tmp->val_off = g_dot_s;
 	tmp->arity = 2;
 	copy_cells(tmp+1, c, c->nbr_cells);
-	cell *l2 = q->arenas->heap + save;
-	l2->nbr_cells += tmp->nbr_cells;
-	return l2;
 }
 
-static cell *end_list(query *q, const cell *l)
+static cell *end_list(query *q)
 {
-	idx_t save = l - q->arenas->heap;
-	cell *tmp = alloc_heap(q, 1);
+	cell *tmp = alloc_tmp_heap(q, 1);
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1;
 	tmp->val_off = g_nil_s;
-	cell *l2 = q->arenas->heap + save;
-	l2->nbr_cells += tmp->nbr_cells;
-	return l2;
+	idx_t nbr_cells = tmp_heap_used(q);
+	tmp = alloc_heap(q, nbr_cells);
+	copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
+	tmp->nbr_cells = nbr_cells;
+	return tmp;
 }
 
 static cell tmp_stringn(query *q, const char *s, size_t n)
@@ -496,48 +494,18 @@ static cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	return get_tmp_heap(q, save_idx);
 }
 
-static void deep_clone2_to_heap(query *q, cell *p1, idx_t p1_ctx)
-{
-	idx_t save_idx = heap_used(q);
-	cell *tmp = alloc_heap(q, 1);
-	copy_cells(tmp, p1, 1);
-
-	if (!is_structure(p1)) {
-		if (is_big_string(p1) && !is_const_string(p1))
-			tmp->val_str = strdup(p1->val_str);
-
-		return;
-	}
-
-	idx_t nbr_cells = p1->nbr_cells;
-	p1++;
-
-	for (idx_t i = 1; i < nbr_cells;) {
-		if (is_var(p1)) {
-			cell *c = deref_var(q, p1, p1_ctx);
-			deep_clone2_to_heap(q, c, q->latest_ctx);
-		} else
-			deep_clone2_to_heap(q, p1, p1_ctx);
-
-		i += p1->nbr_cells;
-		p1 += p1->nbr_cells;
-	}
-
-	tmp = get_heap(q, save_idx);
-	tmp->nbr_cells = heap_used(q) - save_idx;
-}
-
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 {
-	idx_t save_idx = heap_used(q);
-
 	if (is_var(p1)) {
 		p1 = deref_var(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
 
-	deep_clone2_to_heap(q, p1, p1_ctx);
-	return get_heap(q, save_idx);
+	deep_clone_to_tmp(q, p1, p1_ctx);
+	idx_t nbr_cells = tmp_heap_used(q);
+	cell *tmp = alloc_heap(q, nbr_cells);
+	copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
+	return tmp;
 }
 
 static int fn_iso_unify_2(query *q)
@@ -798,16 +766,16 @@ static int fn_iso_atom_chars_2(query *q)
 	tmpbuf[nbytes] = '\0';
 	cell tmp = tmp_string(q, tmpbuf);
 	src += nbytes;
-	cell *l = alloc_list(q, &tmp);
+	alloc_list(q, &tmp);
 
 	while (*src) {
 		nbytes = len_char_utf8(src);
 		cell tmp = tmp_stringn(q, src, nbytes);
 		src += nbytes;
-		l = append_list(q, l, &tmp);
+		append_list(q, &tmp);
 	}
 
-	l = end_list(q, l);
+	cell *l = end_list(q);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -874,15 +842,15 @@ static int fn_iso_atom_codes_2(query *q)
 	const char *src = tmpbuf;
 	cell tmp;
 	make_int(&tmp, get_char_utf8(&src));
-	cell *l = alloc_list(q, &tmp);
+	alloc_list(q, &tmp);
 
 	while (*src) {
 		cell tmp;
 		make_int(&tmp, get_char_utf8(&src));
-		l = append_list(q, l, &tmp);
+		append_list(q, &tmp);
 	}
 
-	l = end_list(q, l);
+	cell *l = end_list(q);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -944,14 +912,14 @@ static int fn_iso_number_chars_2(query *q)
 	sprint_int(tmpbuf, sizeof(tmpbuf), p1->val_num, 10);
 	const char *src = tmpbuf;
 	cell tmp = tmp_stringn(q, src, 1);
-	cell *l = alloc_list(q, &tmp);
+	alloc_list(q, &tmp);
 
 	while (*++src) {
 		cell tmp = tmp_stringn(q, src, 1);
-		l = append_list(q, l, &tmp);
+		append_list(q, &tmp);
 	}
 
-	l = end_list(q, l);
+	cell *l = end_list(q);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -1013,15 +981,15 @@ static int fn_iso_number_codes_2(query *q)
 	const char *src = tmpbuf;
 	cell tmp;
 	make_int(&tmp, *src);
-	cell *l = alloc_list(q, &tmp);
+	alloc_list(q, &tmp);
 
 	while (*++src) {
 		cell tmp;
 		make_int(&tmp, *src);
-		l = append_list(q, l, &tmp);
+		append_list(q, &tmp);
 	}
 
-	l = end_list(q, l);
+	cell *l = end_list(q);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -3792,14 +3760,14 @@ static int do_length(query *q)
 	tmp.flags = 0;
 	tmp.val_off = g_anon_s;
 	tmp.slot_nbr = slot_nbr++;
-	cell *l = alloc_list(q, &tmp);
+	alloc_list(q, &tmp);
 
 	for (int i = 1; i < cnt; i++) {
 		tmp.slot_nbr = slot_nbr++;
-		l = append_list(q, l, &tmp);
+		append_list(q, &tmp);
 	}
 
-	l = end_list(q, l);
+	cell *l = end_list(q);
 	set_var(q, p1, p1_ctx, l, q->st.curr_frame);
 	return 1;
 }
@@ -3891,14 +3859,14 @@ static int fn_iso_length_2(query *q)
 		tmp.flags = 0;
 		tmp.val_off = g_anon_s;
 		tmp.slot_nbr = slot_nbr++;
-		cell *l = alloc_list(q, &tmp);
+		alloc_list(q, &tmp);
 
 		for (int i = 1; i < p2->val_num; i++) {
 			tmp.slot_nbr = slot_nbr++;
-			l = append_list(q, l, &tmp);
+			append_list(q, &tmp);
 		}
 
-		l = end_list(q, l);
+		cell *l = end_list(q);
 		set_var(q, p1, p1_ctx, l, q->st.curr_frame);
 		return 1;
 	}
@@ -4570,14 +4538,14 @@ static int fn_iso_current_prolog_flag_2(query *q)
 
 		int i = g_avc;
 		cell tmp = tmp_string(q, g_av[i++]);
-		cell *l = alloc_list(q, &tmp);
+		alloc_list(q, &tmp);
 
 		while (i < g_ac) {
 			tmp = tmp_string(q, g_av[i++]);
-			l = append_list(q, l, &tmp);
+			append_list(q, &tmp);
 		}
 
-		l = end_list(q, l);
+		cell *l = end_list(q);
 		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
 		return 1;
 	}
@@ -4749,6 +4717,7 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 {
 	cell *p = deep_clone_to_tmp(q, p1, p1_ctx);
+	idx_t save_size = q->tmph_size;
 	size_t cnt = 0;
 	cell *l = p;
 
@@ -4775,7 +4744,8 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 #else
 	qsort_r(base, cnt, sizeof(cell*), nodecmp, (void*)(long)keysort);
 #endif
-	l = NULL;
+
+	q->tmp_heap = NULL;
 
 	for (size_t i = 0; i < cnt; i++) {
 		if (i > 0) {
@@ -4788,13 +4758,16 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 		}
 
 		if (i == 0)
-			l = alloc_list(q, base[i]);
+			alloc_list(q, base[i]);
 		else
-			l = append_list(q, l, base[i]);
+			append_list(q, base[i]);
 	}
 
-	l = end_list(q, l);
+	l = end_list(q);
 	free(base);
+	free(q->tmp_heap);
+	q->tmp_heap = p;
+	q->tmph_size = save_size;
 	return l;
 }
 
@@ -4822,18 +4795,17 @@ static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 		return c;
 	}
 
-	cell *l = alloc_list(q, c);
+	alloc_list(q, c);
 	nbr_cells -= c->nbr_cells;
 	c += c->nbr_cells;
 
 	while (nbr_cells > 0) {
-		l = append_list(q, l, c);
+		append_list(q, c);
 		nbr_cells -= c->nbr_cells;
 		c += c->nbr_cells;
 	}
 
-	l = end_list(q, l);
-	return l;
+	return end_list(q);
 }
 
 static void do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
@@ -5468,10 +5440,10 @@ static int fn_statistics_2(query *q)
 		double elapsed = now - q->time_started;
 		cell tmp;
 		make_int(&tmp, elapsed/1000);
-		cell *l = alloc_list(q, &tmp);
-		l = append_list(q, l, &tmp);
+		alloc_list(q, &tmp);
+		append_list(q, &tmp);
 		make_literal(&tmp, g_nil_s);
-		l = end_list(q, l);
+		cell *l = end_list(q);
 		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
@@ -5655,7 +5627,7 @@ static int fn_split_string_4(query *q)
 	int pad = peek_char_utf8(GET_STR(p3));
 	const char *start = GET_STR(p1), *ptr;
 	cell *l = NULL;
-	int nbr = 1;
+	int nbr = 1, in_list = 0;
 
 	if (!*start) {
 		cell tmp;
@@ -5670,11 +5642,12 @@ static int fn_split_string_4(query *q)
 		cell tmp = tmp_stringn(q, start, ptr-start);
 
 		if (nbr++ == 1)
-			l = alloc_list(q, &tmp);
+			alloc_list(q, &tmp);
 		else
-			l = append_list(q, l, &tmp);
+			append_list(q, &tmp);
 
 		start = ptr + 1;
+		in_list = 1;
 	}
 
 	if (*start) {
@@ -5683,13 +5656,13 @@ static int fn_split_string_4(query *q)
 
 		cell tmp = tmp_string(q, start);
 
-		if (!l)
-			l = alloc_list(q, &tmp);
+		if (!in_list)
+			alloc_list(q, &tmp);
 		else
-			l = append_list(q, l, &tmp);
+			append_list(q, &tmp);
 	}
 
-	l = end_list(q, l);
+	l = end_list(q);
 	return unify(q, p4, p4_ctx, l, q->st.curr_frame);
 }
 
@@ -5786,10 +5759,9 @@ static int fn_getfile_2(query *q)
 		return 0;
 	}
 
-	cell *l = NULL;
 	char *line = NULL;
 	size_t len = 0;
-	int nbr = 1;
+	int nbr = 1, in_list = 0;
 
 	while (getline(&line, &len, fp) != -1) {
 		if (line[strlen(line)-1] == '\n')
@@ -5801,20 +5773,22 @@ static int fn_getfile_2(query *q)
 		cell tmp = tmp_string(q, line);
 
 		if (nbr++ == 1)
-			l = alloc_list(q, &tmp);
+			alloc_list(q, &tmp);
 		else
-			l = append_list(q, l, &tmp);
+			append_list(q, &tmp);
+
+		in_list = 1;
 	}
 
 	free(line);
 	fclose(fp);
 
-	if (!l) {
+	if (!in_list) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else {
-		l = end_list(q, l);
+		cell *l = end_list(q);
 		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
@@ -8092,7 +8066,7 @@ static int fn_numbervars_3(query *q)
 	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 }
 
-unsigned count_bits(uint64_t mask, unsigned bit)
+unsigned count_bits(unsigned long long mask, unsigned bit)
 {
 	unsigned bits = 0;
 

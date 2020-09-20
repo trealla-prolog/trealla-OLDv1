@@ -2,7 +2,6 @@ Trealla ProLog
 ==============
 
 A compact, efficient Prolog interpreter with ISO compliant aspirations.
-Written in plain-old C.
 
 	Integers are 64-bit (optionally 128-bit)
 	Reals are double
@@ -21,6 +20,8 @@ deep-binding.
 Building
 ========
 
+Written in plain-old C.
+
 	git clone https://github.com/trealla-prolog/trealla.git
 	cd trealla
 	make
@@ -32,15 +33,15 @@ There are no dependencies except OpenSSL, which can removed by:
 
 Run...
 
-	make debug
+	make clean && make debug
 	make valgrind
 
 to do the tests under valgrind memory checking.
 
-A 'make debug' build compiles in 0.17s with TCC, 1.8s with CLANG & 2.1s
-with GCC. Should build on any Unix-like system with a C99 compiler.
-Has been tested on Manjaro, Ubuntu 20.04, FreeBSD 12.1 and Raspbian
-(32 & 64-bit) systems.
+A 'make debug' build compiles in 0.2s with TCC and 2s with CLANG and
+GCC. Should build on any Unix-like system with a C99 compiler (could do
+C89 with a few cosmetic tweaks). Has been tested on Manjaro, Ubuntu,
+FreeBSD and Raspbian (both 32 & 64-bit) systems.
 
 
 Usage
@@ -356,7 +357,7 @@ Compiled with GCC 10.1.0 on Linux.
 	fib(30)     |   0.59  |   0.30    |   0.56    |   0.79  |   6.74
 	hanoiq(22)  |   1.15  |   0.39    |   1.18    |   0.85  |   9.9
 	queens11    |   1.27  |   0.88    |   1.40    |   1.46  |  10.9
-	puzzle      |   0.37  |   0.17    |   0.28    |   0.22  |
+	puzzle      |   0.35  |   0.17    |   0.28    |   0.22  |
 	chess       |  10.7   |   4.9     |   4.9     |   4.9   |
 	------------|---------|-----------|-----------|---------|----------
 	testindex1a |   1.35  |   1.31    |   0.70    |   4.94  |

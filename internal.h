@@ -15,9 +15,16 @@
 #define USE_INT128 0
 #endif
 
+#ifndef USE_INT32
+#define USE_INT32 0
+#endif
+
 #if USE_INT128
 typedef __int128_t int_t;
 typedef __uint128_t uint_t;
+#elif USE_INT32
+typedef __int32_t int_t;
+typedef __uint32_t uint_t;
 #else
 typedef __int64_t int_t;
 typedef __uint64_t uint_t;
@@ -267,13 +274,13 @@ struct query_ {
 	arena *arenas;
 	cell accum;
 	state st;
-	int64_t time_started, tmo_msecs;
-	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
-	uint64_t nv_mask, step, qid;
+	unsigned long long tot_goals, tot_retries, tot_matches, tot_tcos;
+	unsigned long long nv_mask, step, qid;
+	unsigned long long time_started, tmo_msecs;
 	int max_depth;
 	idx_t cp, tmphp, nv_start, latest_ctx, popp;
 	idx_t frames_size, slots_size, trails_size, choices_size;
-	idx_t max_choices, max_frames, max_slots, max_trails, max_heaps;
+	idx_t max_choices, max_frames, max_slots, max_trails;
 	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;
 	idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
 	uint8_t retry, halt_code, status, quoted;
@@ -410,11 +417,11 @@ int do_match(query *q, cell *curr_cell);
 idx_t find_in_pool(const char *name);
 void do_reduce(cell *n);
 unsigned create_vars(query *q, unsigned nbr);
-unsigned count_bits(uint64_t mask, unsigned bit);
+unsigned count_bits(unsigned long long mask, unsigned bit);
 void try_me(const query *q, unsigned vars);
 void load_keywords(module *m);
 void throw_error(query *q, cell *c, const char *err_type, const char *expected);
-uint64_t get_time_in_usec(void);
+unsigned long long get_time_in_usec(void);
 void clear_term(term *t);
 void do_db_load(module *m);
 void set_dynamic_in_db(module *m, const char *name, idx_t arity);

@@ -283,9 +283,9 @@ rule *find_functor(module *m, const char *name, unsigned arity)
 }
 
 #ifdef _WIN32
-uint64_t get_time_in_usec(void)
+unsigned long long get_time_in_usec(void)
 {
-    static const uint64_t epoch = 116444736000000000ULL;
+    static const unsigned long long epoch = 116444736000000000ULL;
     FILETIME file_time;
     SYSTEMTIME system_time;
     ULARGE_INTEGER u;
@@ -296,11 +296,11 @@ uint64_t get_time_in_usec(void)
     return (u.QuadPart - epoch) / 10 + (1000ULL * system_time.wMilliseconds);
 }
 #else
-uint64_t get_time_in_usec(void)
+unsigned long long get_time_in_usec(void)
 {
 	struct timespec now;
 	clock_gettime(CLOCK_REALTIME, &now);
-    return (uint64_t)(now.tv_sec * 1000 * 1000) + (now.tv_nsec / 1000);
+    return (unsigned long long)(now.tv_sec * 1000 * 1000) + (now.tv_nsec / 1000);
 }
 #endif
 
@@ -641,7 +641,7 @@ void destroy_parser(parser *p)
 
 query *create_query(module *m, int is_task)
 {
-	static uint64_t g_query_id = 0;
+	static unsigned long long g_query_id = 0;
 
 	query *q = calloc(1, sizeof(query));
 	q->qid = g_query_id++;
@@ -716,8 +716,8 @@ void destroy_query(query *q)
 	}
 
 	for (arena *a = q->arenas; a;) {
-		for (idx_t i = 0; (i < a->hp) && (a == q->arenas); i++) {
-			cell *c = &a->heap[i];
+		for (idx_t i = 0; i < a->hp; i++) {
+			cell *c = a->heap + i;
 
 			if (is_big_string(c) && !is_const_string(c))
 				free(c->val_str);
@@ -2364,9 +2364,9 @@ static int parser_run(parser *p, const char *src, int dump)
 
 	if (!p->m->quiet && !p->directive && dump && q->m->stats) {
 		fprintf(stderr,
-			"Goals %llu, Matches %llu, Max frames %u, Max choices %u, Max trails: %u, Heap: %u, Backtracks %llu, TCOs:%llu\n",
+			"Goals %llu, Matches %llu, Max frames %u, Max choices %u, Max trails: %u, Backtracks %llu, TCOs:%llu\n",
 			(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
-			q->max_frames, q->max_choices, q->max_trails, q->max_heaps,
+			q->max_frames, q->max_choices, q->max_trails,
 			(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
 	}
 

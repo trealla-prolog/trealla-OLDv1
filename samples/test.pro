@@ -249,7 +249,7 @@ pr(1,a).
 pr(2,b).
 pr(3,c).
 
-task64(G) :- call_goal(G).
+task64(G) :- G.
 
 test64 :-
 	task64(findall(X, pr(X,_), S)),
