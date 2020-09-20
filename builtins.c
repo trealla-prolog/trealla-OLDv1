@@ -237,7 +237,7 @@ static cell *alloc_heap(query *q, idx_t nbr_cells)
 		arena *a = calloc(1, sizeof(arena));
 		a->next = q->arenas;
 		idx_t save_size = q->h_size;
-		q->h_size += q->h_size / 2;
+		q->h_size *= 2;
 		a->heap = calloc(q->h_size, sizeof(cell));
 		copy_cells(a->heap, q->arenas->heap, save_size);
 		a->h_size = q->h_size;
