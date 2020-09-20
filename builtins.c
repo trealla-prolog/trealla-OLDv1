@@ -3894,7 +3894,9 @@ static int fn_iso_clause_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static void compare_and_zero(uint64_t v1, uint64_t *v2, uint64_t *v)
+typedef unsigned long long ullong;
+
+static void compare_and_zero(ullong v1, ullong *v2, ullong *v)
 {
 	if (v1 != *v2) {
 		*v2 = v1;
@@ -3906,13 +3908,13 @@ static void compare_and_zero(uint64_t v1, uint64_t *v2, uint64_t *v)
 
 static void uuid_gen(uuid *u)
 {
-	static uint64_t s_last = 0, s_cnt = 0;
-	static uint64_t g_seed = 0;
+	static ullong s_last = 0, s_cnt = 0;
+	static ullong g_seed = 0;
 
 	if (!g_seed)
-		g_seed = (uint64_t)time(0) & MASK_FINAL;
+		g_seed = (ullong)time(0) & MASK_FINAL;
 
-	uint64_t now = get_time_in_usec();
+	ullong now = get_time_in_usec();
 	compare_and_zero(now, &s_last, &s_cnt);
 	u->u1 = now;
 	u->u2 = s_cnt++;
@@ -3923,9 +3925,9 @@ static void uuid_gen(uuid *u)
 static char *uuid_to_string(const uuid *u, char *buf, size_t buflen)
 {
 	snprintf(buf, buflen, "%016llX-%04llX-%012llX",
-		(unsigned long long)u->u1,
-		(unsigned long long)(u->u2 >> 48),
-		(unsigned long long)(u->u2 & MASK_FINAL));
+		(ullong)u->u1,
+		(ullong)(u->u2 >> 48),
+		(ullong)(u->u2 & MASK_FINAL));
 
 	return buf;
 }
@@ -5396,7 +5398,7 @@ static int fn_sys_timer_0(query *q)
 }
 static int fn_sys_elapsed_0(query *q)
 {
-	int64_t elapsed = get_time_in_usec();
+	unsigned long long elapsed = get_time_in_usec();
 	elapsed -= q->time_started;
 	fprintf(stderr, "Time elapsed %.03g secs\n", (double)elapsed/1000/1000);
 	return 1;
@@ -5420,7 +5422,7 @@ static int fn_statistics_2(query *q)
 	GET_NEXT_ARG(p2,list_or_var);
 
 	if (!strcmp(GET_STR(p1), "cputime") && is_var(p2)) {
-		int64_t now = get_time_in_usec();
+		unsigned long long now = get_time_in_usec();
 		double elapsed = now - q->time_started;
 		cell tmp;
 		make_float(&tmp, elapsed/1000/1000);
@@ -5436,7 +5438,7 @@ static int fn_statistics_2(query *q)
 	}
 
 	if (!strcmp(GET_STR(p1), "runtime")) {
-		int64_t now = get_time_in_usec();
+		unsigned long long now = get_time_in_usec();
 		double elapsed = now - q->time_started;
 		cell tmp;
 		make_int(&tmp, elapsed/1000);
