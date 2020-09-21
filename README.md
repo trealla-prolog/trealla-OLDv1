@@ -234,8 +234,13 @@ return all bytes until end end of file,
 Persistence			##EXPERIMENTAL##
 ===========
 
-Declaring something dynamic with the *persist* directive causes that
-clause to be saved to a per-module database on update (assert/retract).
+Declaring something dynamic with the *persist* directive:
+
+	:- persist :predindicator
+
+causes that clause to be saved to a per-module database on update
+(asserta/assertz/retract). Maybe this should be an option to
+*dynamic/2*?
 
 
 Concurrency          ##EXPERIMENTAL##
