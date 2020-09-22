@@ -225,7 +225,8 @@ The options list can include *udp(bool)* (default is false),
 *nodelay(bool)* (default is true) and *ssl(bool)* (default is false).
 
 The additional server options can include *keyfile(filespec)* and
-*certfile(filespec)*.
+*certfile(filespec)*. If just one concatenated file is supplied, use
+*keyfile(filespec)* only.
 
 The optional schemes 'http://' (the default) and 'https://' can be
 provided in the client URL.

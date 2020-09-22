@@ -157,7 +157,7 @@ int net_server(const char *hostname, unsigned port, int udp, int nonblock, const
 		return fd;
 
 #if USE_SSL
-	if (keyfile && certfile) {
+	if (keyfile) {
 		if (!g_ctx_use_cnt++) {
 			g_ctx = SSL_CTX_new(TLS_server_method());
 			//SSL_CTX_set_options(g_ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
@@ -168,10 +168,10 @@ int net_server(const char *hostname, unsigned port, int udp, int nonblock, const
 			printf("SSL load private key failed: %s\n", keyfile);
 
 		if (!SSL_CTX_use_certificate_file(g_ctx, certfile, SSL_FILETYPE_PEM))
-			printf("SSL load certificate failed: %s\n", certfile);
+			printf("SSL load certificate failed: %s\n", !certfile?keyfile:certfile);
 
 		if (!SSL_CTX_load_verify_locations(g_ctx, certfile, NULL)) {
-			printf("SSL set_load_verify_locations failed: %s\n", certfile);
+			printf("SSL set_load_verify_locations failed: %s\n", !certfile?keyfile:certfile);
 
 			if (!SSL_CTX_set_default_verify_paths(g_ctx))
 				printf("SSL set_default_verify_paths faile\n");
