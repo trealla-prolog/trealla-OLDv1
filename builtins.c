@@ -5986,6 +5986,7 @@ static int fn_accept_2(query *q)
 	}
 #endif
 
+	net_set_nonblocking(str);
 	make_choice(q);
 	cell tmp;
 	make_int(&tmp, n);

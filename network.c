@@ -200,13 +200,13 @@ int net_accept(stream *str)
 	setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (char*)&flag, sizeof(flag));
 	flag = str->nodelay;
 	setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, sizeof(flag));
-
-	if (str->nonblock) {
-		unsigned long flag = 1;
-		ioctl(fd, FIONBIO, &flag);
-	}
-
 	return fd;
+}
+
+void net_set_nonblocking(stream *str)
+{
+	unsigned long flag = 1;
+	ioctl(fileno(str->fp), FIONBIO, &flag);
 }
 
 #if USE_SSL
