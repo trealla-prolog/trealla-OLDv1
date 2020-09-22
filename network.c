@@ -27,20 +27,6 @@
 #endif
 
 #if USE_SSL
-#ifdef _WIN32
-#define msleep Sleep
-#else
-static void msleep(int ms)
-{
-	struct timespec tv;
-	tv.tv_sec = (ms) / 1000;
-	tv.tv_nsec = ((ms) % 1000) * 1000 * 1000;
-	nanosleep(&tv, &tv);
-}
-#endif
-#endif
-
-#if USE_SSL
 #include "openssl/err.h"
 #include "openssl/ssl.h"
 #endif
@@ -237,7 +223,6 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 	}
 
 	SSL_set_fd(ssl, fd);
-	int status = 0, cnt = 0;
 
 	if (is_server) {
 		if (SSL_accept(ssl) == -1) {
@@ -249,14 +234,7 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 	} else {
         SSL_set_tlsext_host_name(ssl, hostname);
 
-		while ((status = SSL_connect(ssl)) == -1) {
-			if ((cnt++) > (5*1000))
-				break;
-
-			msleep(1);
-		}
-
-		if (status <= 0) {
+		if (SSL_connect(ssl) <= 0) {
 			fprintf(stderr, "SSL_connect failed\n");
 			ERR_print_errors_fp(stderr);
 			SSL_free(ssl);
