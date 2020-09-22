@@ -690,7 +690,7 @@ static int fn_iso_atom_chars_2(query *q)
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 
 	if (is_var(p1) && is_var(p2)) {
-		throw_error(q, p1, "instantiation_error", "not sufficiently instantiated");
+		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 		return 0;
 	}
 
@@ -781,7 +781,7 @@ static int fn_iso_atom_codes_2(query *q)
 	GET_NEXT_ARG(p2,list_or_var);
 
 	if (is_var(p1) && is_var(p2)) {
-		throw_error(q, p1, "instantiation_error", "not sufficiently instantiated");
+		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 		return 0;
 	}
 
@@ -856,7 +856,7 @@ static int fn_iso_number_chars_2(query *q)
 	GET_NEXT_ARG(p2,list_or_var);
 
 	if (is_var(p1) && is_var(p2)) {
-		throw_error(q, p1, "instantiation_error", "not sufficiently instantiated");
+		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 		return 0;
 	}
 
@@ -925,7 +925,7 @@ static int fn_iso_number_codes_2(query *q)
 	GET_NEXT_ARG(p2,list_or_var);
 
 	if (is_var(p1) && is_var(p2)) {
-		throw_error(q, p1, "instantiation_error", "not sufficiently instantiated");
+		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 		return 0;
 	}
 
@@ -1367,7 +1367,7 @@ static int fn_iso_open_3(query *q)
 	int n = new_stream(q);
 
 	if (n < 0) {
-		throw_error(q, p1, "resource_error", "too many open streams");
+		throw_error(q, p1, "resource_error", "too_many_open_streams");
 		return 0;
 	}
 
@@ -1402,7 +1402,7 @@ static int fn_iso_open_4(query *q)
 	int n = new_stream(q);
 
 	if (n < 0) {
-		throw_error(q, p1, "resource_error", "too many open streams");
+		throw_error(q, p1, "resource_error", "too_many_open_streams");
 		return 0;
 	}
 
@@ -1413,7 +1413,7 @@ static int fn_iso_open_4(query *q)
 		int oldn = get_stream(q, p1+1);
 
 		if (oldn < 0) {
-			throw_error(q, p1, "type_error", "not a stream");
+			throw_error(q, p1, "type_error", "not_a_stream");
 			return 0;
 		}
 
@@ -2395,7 +2395,7 @@ static int fn_iso_add_2(query *q)
 		__int128_t tmp = (__int128_t)p1.val_num + p2.val_num;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
+			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
 #endif
@@ -2438,7 +2438,7 @@ static int fn_iso_sub_2(query *q)
 		__int128_t tmp = (__int128_t)p1.val_num - p2.val_num;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
+			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
 #endif
@@ -2481,7 +2481,7 @@ static int fn_iso_mul_2(query *q)
 		__int128_t tmp = (__int128_t)p1.val_num * p2.val_num;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
+			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
 #endif
@@ -2580,7 +2580,7 @@ static int fn_iso_truncate_1(query *q)
 		__int128_t tmp = p1.val_flt;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
+			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
 #endif
@@ -2607,7 +2607,7 @@ static int fn_iso_round_1(query *q)
 		__int128_t tmp = round(p1.val_flt);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
+			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
 #endif
@@ -2634,7 +2634,7 @@ static int fn_iso_ceiling_1(query *q)
 		__int128_t tmp = ceil(p1.val_flt);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
+			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
 #endif
@@ -2661,7 +2661,7 @@ static int fn_iso_float_integer_part_1(query *q)
 		__int128_t tmp = p1.val_flt;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
+			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
 #endif
@@ -2688,7 +2688,7 @@ static int fn_iso_float_fractional_part_1(query *q)
 		__int128_t tmp = p1.val_flt - (__int64_t)p1.val_flt;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
+			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
 #endif
@@ -2715,7 +2715,7 @@ static int fn_iso_floor_1(query *q)
 		__int128_t tmp = floor(p1.val_flt);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
+			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
 #endif
@@ -2947,7 +2947,7 @@ static int fn_iso_powi_2(query *q)
 		__int128_t tmp = pow(p1.val_num,p2.val_num);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer overflow or underflow");
+			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
 #endif
@@ -3464,7 +3464,7 @@ static int fn_iso_arg_3(query *q)
 		}
 
 		if ((arg < 1) || (arg > p2->arity)) {
-			throw_error(q, p1, "type_error", "out of range");
+			throw_error(q, p1, "type_error", "out_of_range");
 			return 0;
 		}
 
@@ -3717,7 +3717,7 @@ static cell *copy_to_heap(query *q, cell *p1, idx_t suffix)
 
 	if (new_varno != g->nbr_vars) {
 		if (!create_vars(q, new_varno-g->nbr_vars)) {
-			throw_error(q, p1, "resource_error", "too many vars");
+			throw_error(q, p1, "resource_error", "too_many_vars");
 			return NULL;
 		}
 	}
@@ -3747,7 +3747,7 @@ static int do_length(query *q)
 	unsigned slot_nbr;
 
 	if (!(slot_nbr = create_vars(q, cnt))) {
-		throw_error(q, p1, "resource_error", "too many vars");
+		throw_error(q, p1, "resource_error", "too_many_vars");
 		return 0;
 	}
 
@@ -3831,7 +3831,7 @@ static int fn_iso_length_2(query *q)
 
 	if (is_var(p1) && is_integer(p2)) {
 		if ((p2->val_num < 0) || (p2->val_num > MAX_ARITY)) {
-			throw_error(q, p2, "resource_error", "too many vars");
+			throw_error(q, p2, "resource_error", "too_many_vars");
 			return 0;
 		}
 
@@ -3845,7 +3845,7 @@ static int fn_iso_length_2(query *q)
 		unsigned slot_nbr;
 
 		if (!(slot_nbr = create_vars(q, p2->val_num))) {
-		throw_error(q, p2, "resource_error", "too many vars");
+		throw_error(q, p2, "resource_error", "too_many_vars");
 			return 0;
 		}
 
@@ -4402,7 +4402,7 @@ static int fn_iso_functor_3(query *q)
 		unsigned slot_nbr;
 
 		if (!(slot_nbr = create_vars(q, arity))) {
-			throw_error(q, p3, "resource_error", "too many vars");
+			throw_error(q, p3, "resource_error", "too_many_vars");
 			return 0;
 		}
 
@@ -5733,7 +5733,7 @@ static int fn_loadfile_2(query *q)
 	char *s = malloc(st.st_size+1);
 
 	if (fread(s, 1, st.st_size, fp) != st.st_size) {
-		throw_error(q, p1, "domain_error", "cannot read");
+		throw_error(q, p1, "domain_error", "cannot_read");
 		return 0;
 	}
 
@@ -5894,14 +5894,14 @@ static int fn_server_3(query *q)
 	int fd = net_server(hostname, port, udp, nonblock, ssl?keyfile:NULL, ssl?certfile:NULL);
 
 	if (fd == -1) {
-		throw_error(q, p1, "existence_error", "server failed");
+		throw_error(q, p1, "existence_error", "server_failed");
 		return 0;
 	}
 
 	int n = new_stream(q);
 
 	if (n < 0) {
-		throw_error(q, p1, "resource_error", "too many open streams");
+		throw_error(q, p1, "resource_error", "too_many_open_streams");
 		close(fd);
 		return 0;
 	}
@@ -5954,7 +5954,7 @@ static int fn_accept_2(query *q)
 	n = new_stream(q);
 
 	if (n < 0) {
-		throw_error(q, p1, "resource_error", "too many open streams");
+		throw_error(q, p1, "resource_error", "too_many_open_streams");
 		close(fd);
 		return 0;
 	}
@@ -5968,7 +5968,6 @@ static int fn_accept_2(query *q)
 	str2->udp = str->udp;
 	str2->ssl = str->ssl;
 	str2->fp = fdopen(fd, "r+");
-	str->sslptr = NULL;
 
 	if (str2->fp == NULL) {
 		throw_error(q, p1, "existence_error", "cannot_open_stream");
@@ -5980,7 +5979,7 @@ static int fn_accept_2(query *q)
 	if (str->ssl) {
 		str2->sslptr = net_enable_ssl(fd, str->name, 1, str->level, NULL);
 
-		if (!str->sslptr) {
+		if (!str2->sslptr) {
 			close(fd);
 			return 0;
 		}
@@ -6086,7 +6085,7 @@ static int fn_client_5(query *q)
 	int n = new_stream(q);
 
 	if (n < 0) {
-		throw_error(q, p1, "resource_error", "too many open streams");
+		throw_error(q, p1, "resource_error", "too_many_open_streams");
 		close(fd);
 		return 0;
 	}
@@ -6101,7 +6100,6 @@ static int fn_client_5(query *q)
 	str->ssl = ssl;
 	str->level = level;
 	str->fp = fdopen(fd, "r+");
-	str->sslptr = NULL;
 
 	if (str->fp == NULL) {
 		throw_error(q, p1, "existence_error", "cannot_open_stream");
@@ -7611,7 +7609,7 @@ static int fn_atom_number_2(query *q)
 	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_var(p1) && is_var(p2)) {
-		throw_error(q, p1, "instantiation_error", "not sufficiently instantiated");
+		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 		return 0;
 	}
 
@@ -7671,7 +7669,7 @@ static int fn_atom_octal_2(query *q)
 	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_var(p1) && is_var(p2)) {
-		throw_error(q, p1, "instantiation_error", "not sufficiently instantiated");
+		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 		return 0;
 	}
 
