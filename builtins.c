@@ -234,11 +234,7 @@ static cell *alloc_heap(query *q, idx_t nbr_cells)
 	if ((q->st.hp + nbr_cells) >= q->h_size) {
 		arena *a = calloc(1, sizeof(arena));
 		a->next = q->arenas;
-		q->h_size += q->h_size / 2;
-
-		if (q->h_size < nbr_cells)
-			q->h_size += nbr_cells;
-
+		q->h_size *= 2;
 		a->heap = calloc(q->h_size, sizeof(cell));
 		a->h_size = q->h_size;
 		a->nbr = q->st.anbr++;
@@ -8200,6 +8196,9 @@ static int fn_db_load_0(query *q)
 
 static int fn_db_save_0(query *q)
 {
+	if (!q->m->fp)
+		return 0;
+
 	fclose(q->m->fp);
 	char filename[1024];
 	snprintf(filename, sizeof(filename), "%s.db", q->m->name);
