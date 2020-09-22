@@ -6092,6 +6092,7 @@ static int fn_client_5(query *q)
 	str->nonblock = nonblock;
 	str->udp = udp;
 	str->ssl = ssl;
+	str->level = level;
 
 	if (str->fp == NULL) {
 		throw_error(q, p1, "existence_error", "cannot open stream");
@@ -6100,7 +6101,7 @@ static int fn_client_5(query *q)
 
 #if USE_SSL
 	if (ssl) {
-		str->sslptr = net_enable_ssl(fd, hostname, 0, level, certfile);
+		str->sslptr = net_enable_ssl(fd, hostname, 0, str->level, certfile);
 
 		if (!str->sslptr) {
 			close(fd);
