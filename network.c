@@ -146,8 +146,8 @@ int net_server(const char *hostname, unsigned port, int udp, int nonblock, const
 	if (keyfile) {
 		if (!g_ctx_use_cnt++) {
 			g_ctx = SSL_CTX_new(TLS_server_method());
-			SSL_CTX_set_options(g_ctx, SSL_OP_NO_SSLv3|SSL_OP_NO_SSLv2|SSL_OP_CIPHER_SERVER_PREFERENCE);
-			SSL_CTX_set_cipher_list(g_ctx, DEFAULT_CIPHERS);
+			//SSL_CTX_set_options(g_ctx, SSL_OP_NO_SSLv3|SSL_OP_NO_SSLv2|SSL_OP_CIPHER_SERVER_PREFERENCE);
+			//SSL_CTX_set_cipher_list(g_ctx, DEFAULT_CIPHERS);
 		}
 
 		if (!SSL_CTX_use_PrivateKey_file(g_ctx, keyfile, SSL_FILETYPE_PEM))
@@ -200,14 +200,14 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 {
 	if (!g_ctx_use_cnt++) {
 		g_ctx = SSL_CTX_new(is_server?TLS_server_method():TLS_client_method());
-		SSL_CTX_set_options(g_ctx, SSL_OP_NO_SSLv3|SSL_OP_NO_SSLv2);
-		SSL_CTX_set_cipher_list(g_ctx, DEFAULT_CIPHERS);
+		//SSL_CTX_set_options(g_ctx, SSL_OP_NO_SSLv3|SSL_OP_NO_SSLv2);
+		//SSL_CTX_set_cipher_list(g_ctx, DEFAULT_CIPHERS);
 	}
 
 	SSL *ssl = SSL_new(g_ctx);
 	SSL_set_ssl_method(ssl, is_server?TLS_server_method():TLS_client_method());
-	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
-	SSL_set_verify(ssl, SSL_VERIFY_NONE, 0);
+	//SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
+	//SSL_set_verify(ssl, SSL_VERIFY_NONE, 0);
 
 	if (!is_server && certfile) {
 		if (!SSL_CTX_use_certificate_file(g_ctx, certfile, SSL_FILETYPE_PEM))
