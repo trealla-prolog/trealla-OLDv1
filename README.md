@@ -221,14 +221,18 @@ Networking          ##EXPERIMENTAL##
 	client/4                # client(+url,-host,-path,-stream)
 	client/5                # client(+url,-host,-path,-stream,+list)
 
-The options list can include *udp(bool)* (default is false), *nodelay(bool)* (default
-is true) and *ssl(bool)* (default is false).
+The options list can include *udp(bool)* (default is false),
+*nodelay(bool)* (default is true) and *ssl(bool)* (default is false).
 
-The optional schemes 'http://' (the default) and 'https://' can be provided in the client URL.
+The additional server options can include *keyfile(filespec)* and
+*certfile(filespec)*.
 
-With *bread/3* the 'len' arg can be an integer > 0 meaning return that many
-bytes, = 0 meaning return what is there (if non-blocking) or a var meaning
-return all bytes until end end of file,
+The optional schemes 'http://' (the default) and 'https://' can be
+provided in the client URL.
+
+With *bread/3* the 'len' arg can be an integer > 0 meaning return that
+many bytes, = 0 meaning return what is there (if non-blocking) or a var
+meaning return all bytes until end end of file,
 
 
 Persistence			##EXPERIMENTAL##

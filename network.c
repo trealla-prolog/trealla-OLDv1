@@ -109,7 +109,7 @@ int net_connect(const char *hostname, unsigned port, int udp, int nodelay, int n
 	return fd;
 }
 
-int net_server(const char *hostname, unsigned port, int udp, int nonblock)
+int net_server(const char *hostname, unsigned port, int udp, int nonblock, const char *keyfile, const char *certfile)
 {
 	struct addrinfo hints, *result, *rp;
 	int fd, status;
@@ -156,6 +156,29 @@ int net_server(const char *hostname, unsigned port, int udp, int nonblock)
 	if (udp)
 		return fd;
 
+#if USE_SSL
+	if (keyfile && certfile) {
+		if (!g_ctx_use_cnt++) {
+			g_ctx = SSL_CTX_new(TLS_server_method());
+			//SSL_CTX_set_options(g_ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
+			//SSL_CTX_set_cipher_list(g_ctx, DEFAULT_CIPHERS);
+		}
+
+		if (!SSL_CTX_use_PrivateKey_file(g_ctx, (char*)keyfile, SSL_FILETYPE_PEM))
+			printf("SSL load private key failed\n");
+
+		if (!SSL_CTX_use_certificate_file(g_ctx, (char*)certfile, SSL_FILETYPE_PEM))
+			printf("SSL load certificate failed\n");
+
+		if (!SSL_CTX_load_verify_locations(g_ctx, (char*)certfile, (char*)NULL)) {
+			printf("SSL set_load_verify_locations failed\n");
+
+			if (!SSL_CTX_set_default_verify_paths(g_ctx))
+				printf("SSL set_default_verify_paths faile\n");
+		}
+	}
+#endif
+
 	listen(fd, 4096);
 	return fd;
 }
@@ -187,10 +210,10 @@ int net_accept(stream *str)
 }
 
 #if USE_SSL
-void *net_enable_ssl(int fd, const char *hostname)
+void *net_enable_ssl(int fd, const char *hostname, int server)
 {
 	if (!g_ctx_use_cnt++) {
-		g_ctx = SSL_CTX_new(TLS_client_method());
+		g_ctx = SSL_CTX_new(server?TLS_server_method():TLS_client_method());
 		//SSL_CTX_set_options(g_ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
 		//SSL_CTX_set_cipher_list(g_ctx, DEFAULT_CIPHERS);
 	}

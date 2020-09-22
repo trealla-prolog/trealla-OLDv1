@@ -5823,6 +5823,7 @@ static int fn_server_3(query *q)
 	GET_NEXT_ARG(p2,var);
 	GET_NEXT_ARG(p3,list_or_nil);
 	char hostname[1024], path[4096];
+	char *keyfile = NULL, *certfile = NULL;
 	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0;
 	unsigned port = 80;
 
@@ -5846,6 +5847,16 @@ static int fn_server_3(query *q)
 
 				if (is_atom(c))
 					ssl = !strcmp(GET_STR(c), "true") ? 1 : 0;
+			} else if (!strcmp(GET_STR(c), "keyfile")) {
+				c = c + 1;
+
+				if (is_atom(c))
+					keyfile = GET_STR(c);
+			} else if (!strcmp(GET_STR(c), "certfile")) {
+				c = c + 1;
+
+				if (is_atom(c))
+					certfile = GET_STR(c);
 			} else if (!strcmp(GET_STR(c), "scheme")) {
 				c = c + 1;
 
@@ -5869,7 +5880,7 @@ static int fn_server_3(query *q)
 	parse_host(GET_STR(p1), hostname, path, &port, &ssl);
 	nonblock = q->is_task;
 
-	int fd = net_server(hostname, port, udp, nonblock);
+	int fd = net_server(hostname, port, udp, nonblock, keyfile, certfile);
 
 	if (fd == -1) {
 		throw_error(q, p1, "existence_error", "server failed");
@@ -5931,7 +5942,7 @@ static int fn_accept_2(query *q)
 
 #if USE_SSL
 	if (str->ssl)
-		sslptr = net_enable_ssl(fd, str->name);
+		sslptr = net_enable_ssl(fd, str->name, 1);
 #endif
 
 	n = new_stream(q);
@@ -6047,7 +6058,7 @@ static int fn_client_5(query *q)
 
 	if (ssl) {
 #if USE_SSL
-		sslptr = net_enable_ssl(fd, hostname);
+		sslptr = net_enable_ssl(fd, hostname, 0);
 #endif
 
 		if (!sslptr)
