@@ -291,7 +291,8 @@ int ssl_getline(char **lineptr, size_t *n, stream *str)
 
 			if (dstlen-- <= 1) {
 				size_t savelen = dst - *lineptr;
-				*lineptr = realloc(*lineptr, *n *= 2);
+				*n *= 2;
+				*lineptr = realloc(*lineptr, *n);
 				dst = *lineptr + savelen;
 				dstlen = *n - savelen;
 			}
