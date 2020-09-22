@@ -5912,7 +5912,7 @@ static int fn_server_3(query *q)
 	str->level = level;
 
 	if (str->fp == NULL) {
-		throw_error(q, p1, "existence_error", "cannot open stream");
+		throw_error(q, p1, "existence_error", "cannot_open_stream");
 		close(fd);
 	}
 
@@ -5960,9 +5960,10 @@ static int fn_accept_2(query *q)
 	str2->nonblock = str->nonblock;
 	str2->udp = str->udp;
 	str2->ssl = str->ssl;
+	str2->fp = fdopen(fd, "r+");
 
 	if (str2->fp == NULL) {
-		throw_error(q, p1, "existence_error", "cannot open stream");
+		throw_error(q, p1, "existence_error", "cannot_open_stream");
 		close(fd);
 	}
 
@@ -5976,9 +5977,6 @@ static int fn_accept_2(query *q)
 		}
 	}
 #endif
-
-	if (!str->ssl)
-		str2->fp = fdopen(fd, "r+");
 
 	make_choice(q);
 	cell tmp;
@@ -6093,9 +6091,10 @@ static int fn_client_5(query *q)
 	str->udp = udp;
 	str->ssl = ssl;
 	str->level = level;
+	str->fp = fdopen(fd, "r+");
 
 	if (str->fp == NULL) {
-		throw_error(q, p1, "existence_error", "cannot open stream");
+		throw_error(q, p1, "existence_error", "cannot_open_stream");
 		close(fd);
 	}
 
@@ -6109,9 +6108,6 @@ static int fn_client_5(query *q)
 		}
 	}
 #endif
-
-	if (!ssl)
-		str->fp = fdopen(fd, "r+");
 
 	cell tmp = make_string(q, hostname);
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
