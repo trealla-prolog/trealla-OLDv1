@@ -5938,13 +5938,6 @@ static int fn_accept_2(query *q)
 		return 0;
 	}
 
-	void *sslptr = NULL;
-
-#if USE_SSL
-	if (str->ssl)
-		sslptr = net_enable_ssl(fd, str->name, 1);
-#endif
-
 	n = new_stream(q);
 
 	if (n < 0) {
@@ -5960,14 +5953,26 @@ static int fn_accept_2(query *q)
 	str2->nodelay = str->nodelay;
 	str2->nonblock = str->nonblock;
 	str2->udp = str->udp;
-	str2->fp = fdopen(fd, "r+");
 	str2->ssl = str->ssl;
-	str2->sslptr = sslptr;
 
 	if (str2->fp == NULL) {
 		throw_error(q, p1, "existence_error", "cannot open stream");
 		close(fd);
 	}
+
+#if USE_SSL
+	if (str->ssl) {
+		str2->sslptr = net_enable_ssl(fd, str->name, 1);
+
+		if (!str->sslptr) {
+			close(fd);
+			return 0;
+		}
+	}
+#endif
+
+	if (!str->ssl)
+		str2->fp = fdopen(fd, "r+");
 
 	make_choice(q);
 	cell tmp;
@@ -6054,17 +6059,6 @@ static int fn_client_5(query *q)
 	if (fd == -1)
 		return 0;
 
-	void *sslptr = NULL;
-
-	if (ssl) {
-#if USE_SSL
-		sslptr = net_enable_ssl(fd, hostname, 0);
-#endif
-
-		if (!sslptr)
-			return 0;
-	}
-
 	int n = new_stream(q);
 
 	if (n < 0) {
@@ -6080,14 +6074,26 @@ static int fn_client_5(query *q)
 	str->nodelay = nodelay;
 	str->nonblock = nonblock;
 	str->udp = udp;
-	str->fp = fdopen(fd, "r+");
 	str->ssl = ssl;
-	str->sslptr = sslptr;
 
 	if (str->fp == NULL) {
 		throw_error(q, p1, "existence_error", "cannot open stream");
 		close(fd);
 	}
+
+#if USE_SSL
+	if (ssl) {
+		str->sslptr = net_enable_ssl(fd, hostname, 0);
+
+		if (!str->sslptr) {
+			close(fd);
+			return 0;
+		}
+	}
+#endif
+
+	if (!ssl)
+		str->fp = fdopen(fd, "r+");
 
 	cell tmp = make_string(q, hostname);
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
