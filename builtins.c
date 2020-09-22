@@ -6004,6 +6004,7 @@ static int fn_client_5(query *q)
 	char hostname[1024], path[4096];
 	char *certfile = NULL;
 	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, level = 0;
+	hostname[0] = path[0] = '\0';
 	unsigned port = 80;
 
 	while (is_list(p5)) {
