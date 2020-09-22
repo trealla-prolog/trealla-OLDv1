@@ -210,7 +210,7 @@ int net_accept(stream *str)
 }
 
 #if USE_SSL
-void *net_enable_ssl(int fd, const char *hostname, int server)
+void *net_enable_ssl(int fd, const char *hostname, int server, int level, const char *certfile)
 {
 	if (!g_ctx_use_cnt++) {
 		g_ctx = SSL_CTX_new(server?TLS_server_method():TLS_client_method());
@@ -219,9 +219,25 @@ void *net_enable_ssl(int fd, const char *hostname, int server)
 	}
 
 	SSL *ssl = SSL_new(g_ctx);
-	//SSL_set_ssl_method(ssl, TLS_client_method());
+	//SSL_set_ssl_method(ssl, server?TLS_server_method():TLS_client_method());
 	//SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
-	//SSL_set_verify(ssl, SSL_VERIFY_NONE, 0);
+
+	if (certfile) {
+		if (!SSL_CTX_use_certificate_file(g_ctx, certfile, SSL_FILETYPE_PEM))
+			printf("SSL load certificate failed\n");
+
+		// if (!SSL_CTX_set_default_verify_paths(g_ctx))
+		//  printf("SSL set_default_verify_paths
+		// failed\n");
+
+		int level = 0;
+
+		if ((level > 0) && certfile)
+			SSL_set_verify(ssl, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, 0);
+		else
+			SSL_set_verify(ssl, SSL_VERIFY_NONE, 0);
+	}
+
 	SSL_set_tlsext_host_name(ssl, hostname);
 	SSL_set_fd(ssl, fd);
 	int status = 0, cnt = 0;

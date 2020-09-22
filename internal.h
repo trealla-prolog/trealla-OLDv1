@@ -231,7 +231,7 @@ typedef struct {
 	char srcbuf[STREAM_BUFLEN];
 	size_t data_len, alloc_nbytes;
 	int ungetch, srclen;
-	uint8_t did_getc, nodelay, nonblock, udp, ssl;
+	uint8_t did_getc, nodelay, nonblock, udp, ssl, level;
 } stream;
 
 typedef struct {

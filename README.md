@@ -222,7 +222,8 @@ Networking          ##EXPERIMENTAL##
 	client/5                # client(+url,-host,-path,-stream,+list)
 
 The options list can include *udp(bool)* (default is false),
-*nodelay(bool)* (default is true) and *ssl(bool)* (default is false).
+*nodelay(bool)* (default is true), *ssl(bool)* (default is false)
+and *certfile(filespec)*.
 
 The additional server options can include *keyfile(filespec)* and
 *certfile(filespec)*. If just one concatenated file is supplied, use

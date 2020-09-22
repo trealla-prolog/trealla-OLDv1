@@ -5824,7 +5824,7 @@ static int fn_server_3(query *q)
 	GET_NEXT_ARG(p3,list_or_nil);
 	char hostname[1024], path[4096];
 	char *keyfile = NULL, *certfile = NULL;
-	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0;
+	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, level = 0;
 	unsigned port = 80;
 
 	while (is_list(p3)) {
@@ -5869,6 +5869,11 @@ static int fn_server_3(query *q)
 
 				if (is_integer(c))
 					port = c->val_num;
+			} else if (!strcmp(GET_STR(c), "level")) {
+				c = c + 1;
+
+				if (is_integer(c))
+					level = (int)c->val_num;
 			}
 		}
 
@@ -5904,6 +5909,7 @@ static int fn_server_3(query *q)
 	str->udp = udp;
 	str->fp = fdopen(fd, "r+");
 	str->ssl = ssl;
+	str->level = level;
 
 	if (str->fp == NULL) {
 		throw_error(q, p1, "existence_error", "cannot open stream");
@@ -5962,7 +5968,7 @@ static int fn_accept_2(query *q)
 
 #if USE_SSL
 	if (str->ssl) {
-		str2->sslptr = net_enable_ssl(fd, str->name, 1);
+		str2->sslptr = net_enable_ssl(fd, str->name, 1, str->level, NULL);
 
 		if (!str->sslptr) {
 			close(fd);
@@ -5990,7 +5996,8 @@ static int fn_client_5(query *q)
 	GET_NEXT_ARG(p4,var);
 	GET_NEXT_ARG(p5,list_or_nil);
 	char hostname[1024], path[4096];
-	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0;
+	char *certfile = NULL;
+	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, level = 0;
 	unsigned port = 80;
 
 	while (is_list(p5)) {
@@ -6013,6 +6020,11 @@ static int fn_client_5(query *q)
 
 				if (is_atom(c))
 					ssl = !strcmp(GET_STR(c), "true") ? 1 : 0;
+			} else if (!strcmp(GET_STR(c), "certfile")) {
+				c = c + 1;
+
+				if (is_atom(c))
+					certfile = GET_STR(c);
 			} else if (!strcmp(GET_STR(c), "scheme")) {
 				c = c + 1;
 
@@ -6025,6 +6037,11 @@ static int fn_client_5(query *q)
 
 				if (is_integer(c))
 					port = (int)c->val_num;
+			} else if (!strcmp(GET_STR(c), "level")) {
+				c = c + 1;
+
+				if (is_integer(c))
+					level = (int)c->val_num;
 			}
 		}
 
@@ -6083,7 +6100,7 @@ static int fn_client_5(query *q)
 
 #if USE_SSL
 	if (ssl) {
-		str->sslptr = net_enable_ssl(fd, hostname, 0);
+		str->sslptr = net_enable_ssl(fd, hostname, 0, level, certfile);
 
 		if (!str->sslptr) {
 			close(fd);
