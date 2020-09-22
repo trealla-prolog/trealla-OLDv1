@@ -215,7 +215,7 @@ Others
 Networking          ##EXPERIMENTAL##
 ==========
 
-	server/3                # server(+host,-stream)
+	server/2                # server(+host,-stream)
 	server/3                # server(+host,-stream,+list)
 	accept/2                # accept(+stream,-stream)
 	client/4                # client(+url,-host,-path,-stream)
