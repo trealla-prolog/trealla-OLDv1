@@ -269,7 +269,7 @@ int ssl_getline(char **lineptr, size_t *n, stream *str)
 	if (!*lineptr)
 		*lineptr = malloc(*n=1024);
 
-	char *dstptr = *lineptr;
+	char *dst = *lineptr;
 	size_t dstlen = *n;
 	int done = 0;
 
@@ -287,24 +287,24 @@ int ssl_getline(char **lineptr, size_t *n, stream *str)
 
 		while (str->srclen-- > 0) {
 			int ch = *str->src++;
-			*dstptr++ = ch;
+			*dst++ = ch;
 
 			if (dstlen-- <= 1) {
-				size_t savelen = dstptr - *lineptr;
+				size_t savelen = dst - *lineptr;
 				*lineptr = realloc(*lineptr, *n *= 2);
-				dstptr = *lineptr + savelen;
+				dst = *lineptr + savelen;
 				dstlen = *n - savelen;
 			}
 
 			if (ch == '\n') {
-				*dstptr = '\0';
+				*dst = '\0';
 				done = 1;
 				break;
 			}
 		}
 	}
 
-	return dstptr - *lineptr;
+	return dst - *lineptr;
 }
 
 void ssl_close(stream *str)
