@@ -210,19 +210,19 @@ int net_accept(stream *str)
 }
 
 #if USE_SSL
-void *net_enable_ssl(int fd, const char *hostname, int server, int level, const char *certfile)
+void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, const char *certfile)
 {
 	if (!g_ctx_use_cnt++) {
-		g_ctx = SSL_CTX_new(server?TLS_server_method():TLS_client_method());
+		g_ctx = SSL_CTX_new(is_server?TLS_server_method():TLS_client_method());
 		SSL_CTX_set_options(g_ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
 		SSL_CTX_set_cipher_list(g_ctx, DEFAULT_CIPHERS);
 	}
 
 	SSL *ssl = SSL_new(g_ctx);
-	SSL_set_ssl_method(ssl, server?TLS_server_method():TLS_client_method());
+	SSL_set_ssl_method(ssl, is_server?TLS_server_method():TLS_client_method());
 	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
 
-	if (certfile) {
+	if (!is_server && certfile) {
 		if (!SSL_CTX_use_certificate_file(g_ctx, certfile, SSL_FILETYPE_PEM))
 			printf("SSL load certificate failed\n");
 
@@ -237,22 +237,31 @@ void *net_enable_ssl(int fd, const char *hostname, int server, int level, const 
 			SSL_set_verify(ssl, SSL_VERIFY_NONE, 0);
 	}
 
-	SSL_set_tlsext_host_name(ssl, hostname);
 	SSL_set_fd(ssl, fd);
 	int status = 0, cnt = 0;
 
-	while ((status = SSL_connect(ssl)) == -1) {
-		if ((cnt++) > (5*1000))
-			break;
+	if (is_server) {
+		if (SSL_accept(ssl) == -1) {
+			fprintf(stderr, "SSL_accept failed\n");
+			ERR_print_errors_fp(stderr);
+			return NULL;
+		}
+	} else {
+        SSL_set_tlsext_host_name(ssl, hostname);
 
-		msleep(1);
-	}
+		while ((status = SSL_connect(ssl)) == -1) {
+			if ((cnt++) > (5*1000))
+				break;
 
-	if (status <= 0) {
-		fprintf(stderr, "SSL_connect failed\n");
-		ERR_print_errors_fp(stderr);
-		SSL_free(ssl);
-		return NULL;
+			msleep(1);
+		}
+
+		if (status <= 0) {
+			fprintf(stderr, "SSL_connect failed\n");
+			ERR_print_errors_fp(stderr);
+			SSL_free(ssl);
+			return NULL;
+		}
 	}
 
 	return ssl;
