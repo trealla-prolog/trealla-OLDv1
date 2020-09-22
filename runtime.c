@@ -277,7 +277,7 @@ static void trim_heap(query *q, const choice *ch)
 
 	const arena *a = q->arenas;
 
-	for (idx_t i = ch->st.hp; i < a->hp; i++) {
+	for (idx_t i = ch->st.hp; a && (i < a->hp); i++) {
 		cell *c = a->heap + i;
 
 		if (is_big_string(c) && !is_const_string(c)) {

@@ -5795,9 +5795,6 @@ static int fn_getfile_2(query *q)
 
 static void parse_host(const char *src, char *hostname, char *path, unsigned *port, int *ssl)
 {
-	*hostname = '\0';
-	*path = '\0';
-
 	if (!strncmp(src, "https://", 8)) {
 		src += 8;
 		*ssl = 1;
@@ -5823,9 +5820,11 @@ static int fn_server_3(query *q)
 	GET_NEXT_ARG(p2,var);
 	GET_NEXT_ARG(p3,list_or_nil);
 	char hostname[1024], path[4096];
-	char *keyfile = NULL, *certfile = NULL;
+	char *keyfile = "privkey.pem", *certfile = "fullchain.pem";
 	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, level = 0;
 	unsigned port = 80;
+	strcpy(hostname, "localhost");
+	path[0] = '\0';
 
 	while (is_list(p3)) {
 		cell *head = p3 + 1;
@@ -5857,6 +5856,13 @@ static int fn_server_3(query *q)
 
 				if (is_atom(c))
 					certfile = GET_STR(c);
+			} else if (!strcmp(GET_STR(c), "hostname")) {
+				c = c + 1;
+
+				if (is_atom(c)) {
+					strncpy(hostname, GET_STR(c), sizeof(hostname));
+					hostname[sizeof(hostname)-1] = '\0';
+				}
 			} else if (!strcmp(GET_STR(c), "scheme")) {
 				c = c + 1;
 
@@ -5877,7 +5883,7 @@ static int fn_server_3(query *q)
 			}
 		}
 
-		c = head + 1;
+		c = head + 2;
 		p3 = deref_var(q, c, p3_ctx);
 		p3_ctx = q->latest_ctx;
 	}
@@ -5885,7 +5891,7 @@ static int fn_server_3(query *q)
 	parse_host(GET_STR(p1), hostname, path, &port, &ssl);
 	nonblock = q->is_task;
 
-	int fd = net_server(hostname, port, udp, nonblock, keyfile, certfile);
+	int fd = net_server(hostname, port, udp, nonblock, ssl?keyfile:NULL, ssl?certfile:NULL);
 
 	if (fd == -1) {
 		throw_error(q, p1, "existence_error", "server failed");
@@ -5910,6 +5916,7 @@ static int fn_server_3(query *q)
 	str->fp = fdopen(fd, "r+");
 	str->ssl = ssl;
 	str->level = level;
+	str->sslptr = NULL;
 
 	if (str->fp == NULL) {
 		throw_error(q, p1, "existence_error", "cannot_open_stream");
@@ -5961,10 +5968,12 @@ static int fn_accept_2(query *q)
 	str2->udp = str->udp;
 	str2->ssl = str->ssl;
 	str2->fp = fdopen(fd, "r+");
+	str->sslptr = NULL;
 
 	if (str2->fp == NULL) {
 		throw_error(q, p1, "existence_error", "cannot_open_stream");
 		close(fd);
+		return 0;
 	}
 
 #if USE_SSL
@@ -6043,7 +6052,7 @@ static int fn_client_5(query *q)
 			}
 		}
 
-		c = head + 1;
+		c = head + 2;
 		p5 = deref_var(q, c, p5_ctx);
 		p5_ctx = q->latest_ctx;
 	}
@@ -6092,10 +6101,12 @@ static int fn_client_5(query *q)
 	str->ssl = ssl;
 	str->level = level;
 	str->fp = fdopen(fd, "r+");
+	str->sslptr = NULL;
 
 	if (str->fp == NULL) {
 		throw_error(q, p1, "existence_error", "cannot_open_stream");
 		close(fd);
+		return 0;
 	}
 
 #if USE_SSL

@@ -185,8 +185,8 @@ int net_server(const char *hostname, unsigned port, int udp, int nonblock, const
 
 int net_accept(stream *str)
 {
-	struct sockaddr_in addr;
-	socklen_t len;
+	struct sockaddr_in addr = {0};
+	socklen_t len = 0;
 	int fd = accept(fileno(str->fp), (struct sockaddr*)&addr, &len);
 
 	if ((fd == -1) && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
@@ -214,21 +214,20 @@ void *net_enable_ssl(int fd, const char *hostname, int server, int level, const 
 {
 	if (!g_ctx_use_cnt++) {
 		g_ctx = SSL_CTX_new(server?TLS_server_method():TLS_client_method());
-		//SSL_CTX_set_options(g_ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
-		//SSL_CTX_set_cipher_list(g_ctx, DEFAULT_CIPHERS);
+		SSL_CTX_set_options(g_ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
+		SSL_CTX_set_cipher_list(g_ctx, DEFAULT_CIPHERS);
 	}
 
 	SSL *ssl = SSL_new(g_ctx);
-	//SSL_set_ssl_method(ssl, server?TLS_server_method():TLS_client_method());
-	//SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
+	SSL_set_ssl_method(ssl, server?TLS_server_method():TLS_client_method());
+	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
 
 	if (certfile) {
 		if (!SSL_CTX_use_certificate_file(g_ctx, certfile, SSL_FILETYPE_PEM))
 			printf("SSL load certificate failed\n");
 
-		// if (!SSL_CTX_set_default_verify_paths(g_ctx))
-		//  printf("SSL set_default_verify_paths
-		// failed\n");
+		if (!SSL_CTX_set_default_verify_paths(g_ctx))
+			printf("SSL set_default_verify_paths failed\n");
 
 		int level = 0;
 
@@ -252,7 +251,8 @@ void *net_enable_ssl(int fd, const char *hostname, int server, int level, const 
 	if (status <= 0) {
 		fprintf(stderr, "SSL_connect failed\n");
 		ERR_print_errors_fp(stderr);
-		return 0;
+		SSL_free(ssl);
+		return NULL;
 	}
 
 	return ssl;

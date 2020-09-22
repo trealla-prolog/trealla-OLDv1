@@ -79,7 +79,8 @@ task10(C) :-
 
 test10a :-
 	fork,
-	server(':8080',S,[]),
+	%server(':8080',S,[ssl(false),hostname('localhost')]),
+	server(':8081',S,[ssl(true),hostname('localhost')]),
 	accept(S,C),
 		fork,
 		task10(C).
