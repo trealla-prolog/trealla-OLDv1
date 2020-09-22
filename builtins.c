@@ -7559,9 +7559,8 @@ static int fn_term_hash_2(query *q)
 	write_term_to_buf(q, dst, len+1, p1, 1, q->m->dq, 0, 999, 0);
 	cell tmp;
 	make_int(&tmp, do_jenkins_one_at_a_time_hash(dst));
-	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	free(dst);
-	return ok;
+	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
 static int fn_atom_number_2(query *q)
