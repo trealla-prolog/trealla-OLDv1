@@ -160,17 +160,17 @@ int net_server(const char *hostname, unsigned port, int udp, int nonblock, const
 	if (keyfile) {
 		if (!g_ctx_use_cnt++) {
 			g_ctx = SSL_CTX_new(TLS_server_method());
-			//SSL_CTX_set_options(g_ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
-			//SSL_CTX_set_cipher_list(g_ctx, DEFAULT_CIPHERS);
+			SSL_CTX_set_options(g_ctx, SSL_OP_NO_SSLv3|SSL_OP_NO_SSLv2|SSL_OP_CIPHER_SERVER_PREFERENCE);
+			SSL_CTX_set_cipher_list(g_ctx, DEFAULT_CIPHERS);
 		}
 
 		if (!SSL_CTX_use_PrivateKey_file(g_ctx, keyfile, SSL_FILETYPE_PEM))
 			printf("SSL load private key failed: %s\n", keyfile);
 
-		if (!SSL_CTX_use_certificate_file(g_ctx, certfile, SSL_FILETYPE_PEM))
+		if (!SSL_CTX_use_certificate_file(g_ctx, !certfile?keyfile:certfile, SSL_FILETYPE_PEM))
 			printf("SSL load certificate failed: %s\n", !certfile?keyfile:certfile);
 
-		if (!SSL_CTX_load_verify_locations(g_ctx, certfile, NULL)) {
+		if (!SSL_CTX_load_verify_locations(g_ctx, !certfile?keyfile:certfile, NULL)) {
 			printf("SSL set_load_verify_locations failed: %s\n", !certfile?keyfile:certfile);
 
 			if (!SSL_CTX_set_default_verify_paths(g_ctx))
@@ -214,13 +214,14 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 {
 	if (!g_ctx_use_cnt++) {
 		g_ctx = SSL_CTX_new(is_server?TLS_server_method():TLS_client_method());
-		SSL_CTX_set_options(g_ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
+		SSL_CTX_set_options(g_ctx, SSL_OP_NO_SSLv3|SSL_OP_NO_SSLv2);
 		SSL_CTX_set_cipher_list(g_ctx, DEFAULT_CIPHERS);
 	}
 
 	SSL *ssl = SSL_new(g_ctx);
 	SSL_set_ssl_method(ssl, is_server?TLS_server_method():TLS_client_method());
 	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
+	SSL_set_verify(ssl, SSL_VERIFY_NONE, 0);
 
 	if (!is_server && certfile) {
 		if (!SSL_CTX_use_certificate_file(g_ctx, certfile, SSL_FILETYPE_PEM))
@@ -231,10 +232,8 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 
 		int level = 0;
 
-		if ((level > 0) && certfile)
-			SSL_set_verify(ssl, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, 0);
-		else
-			SSL_set_verify(ssl, SSL_VERIFY_NONE, 0);
+		if (level > 0)
+			SSL_set_verify(ssl, SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT, 0);
 	}
 
 	SSL_set_fd(ssl, fd);
@@ -244,6 +243,7 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 		if (SSL_accept(ssl) == -1) {
 			fprintf(stderr, "SSL_accept failed\n");
 			ERR_print_errors_fp(stderr);
+			SSL_free(ssl);
 			return NULL;
 		}
 	} else {
