@@ -19,16 +19,16 @@
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #else
 #include <netdb.h>
-#include <netinet/in.h>
+//#include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <sys/ioctl.h>
-#include <sys/socket.h>
+//#include <sys/socket.h>
 #include <unistd.h>
 #endif
 
 #if USE_OPENSSL
-#include "openssl/err.h"
-#include "openssl/ssl.h"
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 #endif
 
 #include "internal.h"
