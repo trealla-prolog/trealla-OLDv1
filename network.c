@@ -26,7 +26,7 @@
 #include <unistd.h>
 #endif
 
-#if USE_SSL
+#if USE_OPENSSL
 #include "openssl/err.h"
 #include "openssl/ssl.h"
 #endif
@@ -36,7 +36,7 @@
 #include "internal.h"
 #include "network.h"
 
-#if USE_SSL
+#if USE_OPENSSL
 static int g_ctx_use_cnt = 0;
 static SSL_CTX *g_ctx = NULL;
 #endif
@@ -142,7 +142,7 @@ int net_server(const char *hostname, unsigned port, int udp, int nonblock, const
 	if (udp)
 		return fd;
 
-#if USE_SSL
+#if USE_OPENSSL
 	if (keyfile) {
 		if (!g_ctx_use_cnt++) {
 			g_ctx = SSL_CTX_new(TLS_server_method());
@@ -197,7 +197,7 @@ void net_set_nonblocking(stream *str)
 	ioctl(fileno(str->fp), FIONBIO, &flag);
 }
 
-#if USE_SSL
+#if USE_OPENSSL
 void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, const char *certfile)
 {
 	if (!g_ctx_use_cnt++) {

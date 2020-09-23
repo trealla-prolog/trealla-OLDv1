@@ -27,7 +27,7 @@
 #include "utf8.h"
 #include "builtins.h"
 
-#if USE_SSL
+#if USE_OPENSSL
 #include "openssl/sha.h"
 #endif
 
@@ -415,7 +415,7 @@ static cell make_string(query *q, const char *s)
 
 static size_t stream_write(const void *ptr, size_t nbytes, stream *str)
 {
-#if USE_SSL
+#if USE_OPENSSL
 	if (str->ssl)
 		return ssl_write(ptr, nbytes, str);
 #endif
@@ -427,7 +427,7 @@ static size_t stream_write(const void *ptr, size_t nbytes, stream *str)
 
 static size_t stream_read(void *ptr, size_t nbytes, stream *str)
 {
-#if USE_SSL
+#if USE_OPENSSL
 	if (str->ssl)
 		return ssl_read(ptr, nbytes, str);
 	else
@@ -437,7 +437,7 @@ static size_t stream_read(void *ptr, size_t nbytes, stream *str)
 
 ssize_t stream_getline(char **lineptr, size_t *len, stream *str)
 {
-#if USE_SSL
+#if USE_OPENSSL
 	if (str->ssl)
 		return ssl_getline(lineptr, len, str);
 	else
@@ -1495,7 +1495,7 @@ static int fn_iso_close_1(query *q)
 	if (n <= 2)
 		return 0;
 
-#if USE_SSL
+#if USE_OPENSSL
 	if (str->ssl)
 		ssl_close(str);
 #endif
@@ -5975,7 +5975,7 @@ static int fn_accept_2(query *q)
 		return 0;
 	}
 
-#if USE_SSL
+#if USE_OPENSSL
 	if (str->ssl) {
 		str2->sslptr = net_enable_ssl(fd, str->name, 1, str->level, NULL);
 
@@ -6109,7 +6109,7 @@ static int fn_client_5(query *q)
 		return 0;
 	}
 
-#if USE_SSL
+#if USE_OPENSSL
 	if (ssl) {
 		str->sslptr = net_enable_ssl(fd, hostname, 0, str->level, certfile);
 
@@ -7095,7 +7095,7 @@ static int fn_format_3(query *q)
 	return do_format(q, pstr, pstr_ctx, p1, !is_nil(p2)?p2:NULL, p2_ctx);
 }
 
-#if USE_SSL
+#if USE_OPENSSL
 static int fn_sha1_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -8657,7 +8657,7 @@ static const struct builtins g_other_funcs[] =
 	{"limit", 2, fn_limit_2, "+integer,+callable"},
 	{"offset", 2, fn_offset_2, "+integer,+callable"},
 
-#if USE_SSL
+#if USE_OPENSSL
 	{"sha1", 2, fn_sha1_2, "+atom,?atom"},
 	{"sha256", 2, fn_sha256_2, "+atom,?atom"},
 	{"sha512", 2, fn_sha512_2, "+atom,?atom"},

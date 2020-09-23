@@ -7,8 +7,8 @@
 
 #include "skiplist.h"
 
-#ifndef USE_SSL
-#define USE_SSL 0
+#ifndef USE_OPENSSL
+#define USE_OPENSSL 0
 #endif
 
 #ifndef USE_INT128
