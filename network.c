@@ -31,8 +31,6 @@
 #include "openssl/ssl.h"
 #endif
 
-#define DEFAULT_CIPHERS "HIGH:!aNULL" /* EECDH+AESGCM:EDH+AESGCM:EECDH+AES256:EDH+AES256 */
-
 #include "internal.h"
 #include "network.h"
 
@@ -147,7 +145,6 @@ int net_server(const char *hostname, unsigned port, int udp, int nonblock, const
 		if (!g_ctx_use_cnt++) {
 			g_ctx = SSL_CTX_new(TLS_server_method());
 			SSL_CTX_set_options(g_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
-			//SSL_CTX_set_cipher_list(g_ctx, DEFAULT_CIPHERS);
 		}
 
 		if (!SSL_CTX_use_PrivateKey_file(g_ctx, keyfile, SSL_FILETYPE_PEM)) {
@@ -197,9 +194,9 @@ void net_set_nonblocking(stream *str)
 	ioctl(fileno(str->fp), FIONBIO, &flag);
 }
 
-#if USE_OPENSSL
 void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, const char *certfile)
 {
+#if USE_OPENSSL
 	if (!g_ctx_use_cnt++) {
 		g_ctx = SSL_CTX_new(is_server?TLS_server_method():TLS_client_method());
 		//SSL_CTX_set_cipher_list(g_ctx, DEFAULT_CIPHERS);
@@ -243,17 +240,24 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 			return NULL;
 		}
 	}
-
 	return ssl;
+#else
+	return NULL;
+#endif
 }
 
 size_t ssl_write(const void *ptr, size_t nbytes, stream *str)
 {
+#if USE_OPENSSL
 	return SSL_write((SSL*)str->sslptr, ptr, nbytes);
+#else
+	return 0;
+#endif
 }
 
 size_t ssl_read(void *ptr, size_t len, stream *str)
 {
+#if USE_OPENSSL
 	char *dst = ptr;
 
 	while (len && str->srclen) {
@@ -267,10 +271,14 @@ size_t ssl_read(void *ptr, size_t len, stream *str)
 	}
 
 	return SSL_read((SSL*)str->sslptr, ptr, len);
+#else
+	return 0;
+#endif
 }
 
 int ssl_getline(char **lineptr, size_t *n, stream *str)
 {
+#if USE_OPENSSL
 	if (!*lineptr)
 		*lineptr = malloc(*n=1024);
 
@@ -311,14 +319,18 @@ int ssl_getline(char **lineptr, size_t *n, stream *str)
 	}
 
 	return dst - *lineptr;
+#else
+	return 0;
+#endif
 }
 
 void ssl_close(stream *str)
 {
+#if USE_OPENSSL
 	SSL_shutdown((SSL*)str->sslptr);
 	SSL_free((SSL*)str->sslptr);
 
 	if (!--g_ctx_use_cnt)
 		SSL_CTX_free(g_ctx);
-}
 #endif
+}

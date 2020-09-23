@@ -415,10 +415,8 @@ static cell make_string(query *q, const char *s)
 
 static size_t stream_write(const void *ptr, size_t nbytes, stream *str)
 {
-#if USE_OPENSSL
 	if (str->ssl)
 		return ssl_write(ptr, nbytes, str);
-#endif
 
 	size_t len = fwrite(ptr, 1, nbytes, str->fp);
 	fflush(str->fp);
@@ -427,21 +425,17 @@ static size_t stream_write(const void *ptr, size_t nbytes, stream *str)
 
 static size_t stream_read(void *ptr, size_t nbytes, stream *str)
 {
-#if USE_OPENSSL
 	if (str->ssl)
 		return ssl_read(ptr, nbytes, str);
 	else
-#endif
 		return fread(ptr, 1, nbytes, str->fp);
 }
 
 ssize_t stream_getline(char **lineptr, size_t *len, stream *str)
 {
-#if USE_OPENSSL
 	if (str->ssl)
 		return ssl_getline(lineptr, len, str);
 	else
-#endif
 		return getline(lineptr, len, str->fp);
 }
 
@@ -1495,10 +1489,8 @@ static int fn_iso_close_1(query *q)
 	if (n <= 2)
 		return 0;
 
-#if USE_OPENSSL
 	if (str->ssl)
 		ssl_close(str);
-#endif
 
 	fclose(str->fp);
 	free(str->filename);
@@ -5975,7 +5967,6 @@ static int fn_accept_2(query *q)
 		return 0;
 	}
 
-#if USE_OPENSSL
 	if (str->ssl) {
 		str2->sslptr = net_enable_ssl(fd, str->name, 1, str->level, NULL);
 
@@ -5984,7 +5975,6 @@ static int fn_accept_2(query *q)
 			return 0;
 		}
 	}
-#endif
 
 	net_set_nonblocking(str);
 	make_choice(q);
@@ -6109,7 +6099,6 @@ static int fn_client_5(query *q)
 		return 0;
 	}
 
-#if USE_OPENSSL
 	if (ssl) {
 		str->sslptr = net_enable_ssl(fd, hostname, 0, str->level, certfile);
 
@@ -6118,7 +6107,6 @@ static int fn_client_5(query *q)
 			return 0;
 		}
 	}
-#endif
 
 	cell tmp = make_string(q, hostname);
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
