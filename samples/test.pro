@@ -66,8 +66,8 @@ test8 :-
 	true.
 
 test9 :-
-	http_get('https://www.google.com',_Data,[status_code(Code),headers(Hdrs)]),
-	write('Response='), writeln(Code),
+	http_get('https://www.google.com',_Data,[status_code(Code),headers(Hdrs),final_url(Location)]),
+	write('Response='), write(Code), write(' location='), writeln(Location),
 	writeln(Hdrs),
 	%write(_Data), nl,
 	true.

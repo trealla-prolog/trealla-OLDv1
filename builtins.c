@@ -5883,7 +5883,7 @@ static int fn_server_3(query *q)
 	parse_host(GET_STR(p1), hostname, path, &port, &ssl);
 	nonblock = q->is_task;
 
-	int fd = net_server(hostname, port, udp, nonblock, ssl?keyfile:NULL, ssl?certfile:NULL);
+	int fd = net_server(hostname, port, udp, ssl?keyfile:NULL, ssl?certfile:NULL);
 
 	if (fd == -1) {
 		throw_error(q, p1, "existence_error", "server_failed");
@@ -5915,6 +5915,7 @@ static int fn_server_3(query *q)
 		close(fd);
 	}
 
+	net_set_nonblocking(str);
 	cell *tmp = alloc_heap(q, 1);
 	make_int(tmp, n);
 	tmp->flags |= FLAG_STREAM | FLAG_HEX;
@@ -5976,7 +5977,7 @@ static int fn_accept_2(query *q)
 		}
 	}
 
-	net_set_nonblocking(str);
+	net_set_nonblocking(str2);
 	make_choice(q);
 	cell tmp;
 	make_int(&tmp, n);
@@ -6069,7 +6070,7 @@ static int fn_client_5(query *q)
 		p5_ctx = q->latest_ctx;
 	}
 
-	int fd = net_connect(hostname, port, udp, nodelay, nonblock);
+	int fd = net_connect(hostname, port, udp, nodelay);
 
 	if (fd == -1)
 		return 0;
@@ -6107,6 +6108,9 @@ static int fn_client_5(query *q)
 			return 0;
 		}
 	}
+
+	if (nonblock)
+		net_set_nonblocking(str);
 
 	cell tmp = make_string(q, hostname);
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);

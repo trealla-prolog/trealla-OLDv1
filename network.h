@@ -1,8 +1,8 @@
 #pragma once
 
-int net_server(const char *hostname, unsigned port, int udp, int nonblock, const char *keyfile, const char *certfile);
+int net_server(const char *hostname, unsigned port, int udp, const char *keyfile, const char *certfile);
 int net_accept(stream *str);
-int net_connect(const char *hostname, unsigned port, int udp, int nodelay, int nonblock);
+int net_connect(const char *hostname, unsigned port, int udp, int nodelay);
 void net_set_nonblocking(stream *str);
 
 void *net_enable_ssl(int fd, const char *hostname, int server, int level, const char *certfile);

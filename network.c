@@ -39,7 +39,7 @@ static int g_ctx_use_cnt = 0;
 static SSL_CTX *g_ctx = NULL;
 #endif
 
-int net_connect(const char *hostname, unsigned port, int udp, int nodelay, int nonblock)
+int net_connect(const char *hostname, unsigned port, int udp, int nodelay)
 {
 	struct addrinfo hints, *result, *rp;
 	int fd, status;
@@ -84,16 +84,10 @@ int net_connect(const char *hostname, unsigned port, int udp, int nodelay, int n
 	setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (char*)&flag, sizeof(flag));
 	flag = nodelay;
 	setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, sizeof(flag));
-
-	if (nonblock) {
-		unsigned long flag = 1;
-		ioctl(fd, FIONBIO, &flag);
-	}
-
 	return fd;
 }
 
-int net_server(const char *hostname, unsigned port, int udp, int nonblock, const char *keyfile, const char *certfile)
+int net_server(const char *hostname, unsigned port, int udp, const char *keyfile, const char *certfile)
 {
 	struct addrinfo hints, *result, *rp;
 	int fd, status;
@@ -131,11 +125,6 @@ int net_server(const char *hostname, unsigned port, int udp, int nonblock, const
 
 	if (rp == NULL)
 		return -1;
-
-	if (nonblock) {
-		unsigned long flag = 1;
-		ioctl(fd, FIONBIO, &flag);
-	}
 
 	if (udp)
 		return fd;
