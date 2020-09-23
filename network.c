@@ -146,7 +146,7 @@ int net_server(const char *hostname, unsigned port, int udp, int nonblock, const
 	if (keyfile) {
 		if (!g_ctx_use_cnt++) {
 			g_ctx = SSL_CTX_new(TLS_server_method());
-			//SSL_CTX_set_options(g_ctx, SSL_OP_NO_SSLv3|SSL_OP_NO_SSLv2|SSL_OP_CIPHER_SERVER_PREFERENCE);
+			SSL_CTX_set_options(g_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
 			//SSL_CTX_set_cipher_list(g_ctx, DEFAULT_CIPHERS);
 		}
 
@@ -202,7 +202,6 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 {
 	if (!g_ctx_use_cnt++) {
 		g_ctx = SSL_CTX_new(is_server?TLS_server_method():TLS_client_method());
-		//SSL_CTX_set_options(g_ctx, SSL_OP_NO_SSLv3|SSL_OP_NO_SSLv2);
 		//SSL_CTX_set_cipher_list(g_ctx, DEFAULT_CIPHERS);
 	}
 
