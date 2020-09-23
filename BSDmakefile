@@ -14,8 +14,6 @@ OBJECTS = tpl.o history.o builtins.o library.o \
 	skiplist.o base64.o network.o utf8.o\
 	lists.o dict.o apply.o http.o auth.o
 
-PL = ./tpl
-
 all: tpl
 
 tpl: $(OBJECTS)
