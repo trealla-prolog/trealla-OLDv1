@@ -34,12 +34,12 @@ There are no dependencies except OpenSSL, which can removed by:
 Run...
 
 	make clean && make debug
-	make valgrind
+	make test_valgrind
 
-to do the tests under valgrind memory checking.
+to do the tests under *valgrind* memory checking.
 
-A 'make debug' build compiles in 0.2s with TCC and 2s with CLANG and
-GCC. Should build on any Unix-like system with a C99 compiler (could do
+A 'make debug' build compiles in 0.2s with *tcc* and 2s with *clang* and
+*gcc*. Should build on any Unix-like system with a C99 compiler (could do
 C89 with a few cosmetic tweaks). Has been tested on Manjaro, Ubuntu,
 FreeBSD and Raspbian (both 32 & 64-bit) systems.
 

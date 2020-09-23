@@ -21,32 +21,29 @@ all: tpl
 tpl: $(OBJECTS)
 	$(CC) -o tpl $(OBJECTS) $(OPT) $(LDFLAGS)
 
-nossl:
-	$(MAKE) 'OPT=$(OPT) -DUSE_OPENSSL=0' NOSSL=0
-
 profile:
 	$(MAKE) 'OPT=$(OPT) -O0 -pg -DDEBUG'
 
 debug:
 	$(MAKE) 'OPT=$(OPT) -O0 -g -DDEBUG'
 
-debug128:
-	$(MAKE) 'OPT=$(OPT) -O0 -g -DDEBUG -DUSE_INT128=1'
+nossl:
+	$(MAKE) 'OPT=$(OPT) -DUSE_OPENSSL=0' NOSSL=1
 
-int128:
-	$(MAKE) 'OPT=$(OPT) -DUSE_INT128=1'
+profile_nossl:
+	$(MAKE) 'OPT=$(OPT) -O0 -pg -DDEBUG' NOSSL=1
 
-nossl128:
-	$(MAKE) 'OPT=$(OPT) -DUSE_OPENSSL=0 -DUSE_INT128=1' NOSSL=0
+debug_nossl:
+	$(MAKE) 'OPT=$(OPT) -O0 -g -DDEBUG' NOSSL=1
 
 test:
 	./tests/run.sh
 
-valgrind:
+test_valgrind:
 	./tests/run_valgrind.sh
 
-testswi:
-	./tests/runswi.sh
+test_swi:
+	./tests/run_swi.sh
 
 clean:
 	rm -f tpl *.o *.out gmon.* *.core
