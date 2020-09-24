@@ -51,7 +51,7 @@ http_open(UrlList, S, Opts) :-
 		(Maj = 1, Min = 1)),
 	client(Host, _Host, _Path, S, OptList),
 	string_upper(Method, UMethod),
-	format(S,'~a /~a HTTP/~d.~d\r~nHost: ~a\r~nConnection: keep-alive\r~n\r~n', [UMethod, Path, Maj, Min, Host]),
+	format(S,'~a /~a HTTP/~d.~d\r\nHost: ~a\r\nConnection: keep-alive\r\n\r\n', [UMethod, Path, Maj, Min, Host]),
 	read_response(S, Code),
 	findall(Hdr, read_header(S, Hdr), Hdrs),
 	atom_concat(Host, Path, Url),
@@ -79,12 +79,12 @@ process(Url, S, Opts) :-
 	client(Url, Host, Path, S, OptList),
 	string_upper(Method, UMethod),
 	(memberchk(header('content_type', Ct), OptList) ->
-		format(atom(Ctype), 'Content-Type: ~w\r~n',[Ct]) ;
+		format(atom(Ctype), 'Content-Type: ~w\r\n',[Ct]) ;
 		Ctype = '' ),
 	(nonvar(PostData) ->
-		(atom_length(PostData, DataLen), format(atom(Clen), 'Content-Length: ~d\r~n', [DataLen])) ;
+		(atom_length(PostData, DataLen), format(atom(Clen), 'Content-Length: ~d\r\n', [DataLen])) ;
 		Clen = '' ),
-	format(S,'~a /~a HTTP/~d.~d\r~nHost: ~a\r~nConnection: close\r~n~w~w\r~n', [UMethod, Path, Maj, Min, Host, Ctype, Clen]),
+	format(S,'~a /~a HTTP/~d.~d\r\nHost: ~a\r\nConnection: close\r\n~w~w\r\n', [UMethod, Path, Maj, Min, Host, Ctype, Clen]),
 	(nonvar(DataLen) -> bwrite(S, PostData) ; true),
 	read_response(S, Code),
 	findall(Hdr, read_header(S, Hdr), Hdrs),
