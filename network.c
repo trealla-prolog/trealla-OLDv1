@@ -250,6 +250,32 @@ size_t net_write(const void *ptr, size_t nbytes, stream *str)
 	return fwrite(ptr, 1, nbytes, str->fp);
 }
 
+int net_getc(stream *str)
+{
+#if USE_OPENSSL
+	size_t len = 1;
+	char ptr[2];
+
+	if (str->ssl) {
+		char *dst = ptr;
+
+		while (len && str->srclen) {
+			*dst++ = *str->src++;
+			str->srclen--;
+			len--;
+		}
+
+		if (dst != ptr) {
+			return ptr[0];
+		}
+
+		return SSL_read((SSL*)str->sslptr, ptr, len);
+	}
+#endif
+
+	return getc(str->fp);
+}
+
 size_t net_read(void *ptr, size_t len, stream *str)
 {
 #if USE_OPENSSL

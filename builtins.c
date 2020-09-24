@@ -1656,7 +1656,7 @@ static int fn_iso_write_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream(q, "user_output");
 	stream *str = &g_streams[n];
-	write_term(q, str->fp, p1, 1, q->m->dq, 0, 200, 0);
+	write_term_to_stream(q, str, p1, 1, q->m->dq, 0, 200, 0);
 	return !ferror(str->fp);
 }
 
@@ -1666,7 +1666,7 @@ static int fn_iso_write_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
-	write_term(q, str->fp, p1, 1, q->m->dq, 0, 200, 0);
+	write_term_to_stream(q, str, p1, 1, q->m->dq, 0, 200, 0);
 	return !ferror(str->fp);
 }
 
@@ -1677,7 +1677,7 @@ static int fn_iso_writeq_1(query *q)
 	stream *str = &g_streams[n];
 	int save = q->quoted;
 	q->quoted = 1;
-	write_term(q, str->fp, p1, 1, q->m->dq, 0, 200, 1);
+	write_term_to_stream(q, str, p1, 1, q->m->dq, 0, 200, 1);
 	q->quoted = save;
 	return !ferror(str->fp);
 }
@@ -1690,7 +1690,7 @@ static int fn_iso_writeq_2(query *q)
 	GET_NEXT_ARG(p1,any);
 	int save = q->quoted;
 	q->quoted = 1;
-	write_term(q, str->fp, p1, 1, q->m->dq, 0, 200, 1);
+	write_term_to_stream(q, str, p1, 1, q->m->dq, 0, 200, 1);
 	q->quoted = save;
 	return !ferror(str->fp);
 }
@@ -1756,13 +1756,13 @@ static int fn_iso_write_term_2(query *q)
 	}
 
 	q->latest_ctx = p1_ctx;
-	write_term(q, str->fp, p1, 1, q->m->dq, 0, q->max_depth, q->quoted?1:0);
+	write_term_to_stream(q, str, p1, 1, q->m->dq, 0, q->max_depth, q->quoted?1:0);
 
 	if (q->fullstop)
-		fputc('.', str->fp);
+		net_write(".", 1, str);
 
 	if (q->nl)
-		fputc('\n', str->fp);
+		net_write("\n", 1, str);
 
 	q->max_depth = q->quoted = q->nl = q->fullstop = 0;
 	q->ignore_ops = 0;
@@ -1787,13 +1787,13 @@ static int fn_iso_write_term_3(query *q)
 	}
 
 	q->latest_ctx = p1_ctx;
-	write_term(q, str->fp, p1, 1, q->m->dq, 0, q->max_depth, q->quoted?1:0);
+	write_term_to_stream(q, str, p1, 1, q->m->dq, 0, q->max_depth, q->quoted?1:0);
 
 	if (q->fullstop)
-		fputc('.', str->fp);
+		net_write(".", 1, str);
 
 	if (q->nl)
-		fputc('\n', str->fp);
+		net_write("\n", 1, str);
 
 	q->max_depth = q->quoted = q->nl = q->fullstop = 0;
 	q->ignore_ops = 0;
@@ -2003,7 +2003,7 @@ static int fn_iso_get_byte_1(query *q)
 	}
 
 	str->did_getc = 1;
-	int ch = str->ungetch ? str->ungetch : getc(str->fp);
+	int ch = str->ungetch ? str->ungetch : net_getc(str);
 	str->ungetch = 0;
 
 	if ((ch == '\n') || (ch == EOF))
@@ -2027,7 +2027,7 @@ static int fn_iso_get_byte_2(query *q)
 	}
 
 	str->did_getc = 1;
-	int ch = str->ungetch ? str->ungetch : getc(str->fp);
+	int ch = str->ungetch ? str->ungetch : net_getc(str);
 	str->ungetch = 0;
 
 	if ((ch == '\n') || (ch == EOF))
@@ -2114,7 +2114,7 @@ static int fn_iso_peek_byte_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream(q, "user_input");
 	stream *str = &g_streams[n];
-	int ch = str->ungetch ? str->ungetch : getc(str->fp);
+	int ch = str->ungetch ? str->ungetch : net_getc(str);
 	str->ungetch = ch;
 	cell tmp;
 	make_int(&tmp, ch);
@@ -2127,7 +2127,7 @@ static int fn_iso_peek_byte_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
-	int ch = str->ungetch ? str->ungetch : getc(str->fp);
+	int ch = str->ungetch ? str->ungetch : net_getc(str);
 	str->ungetch = ch;
 	cell tmp;
 	make_int(&tmp, ch);
@@ -5504,7 +5504,7 @@ static int fn_writeln_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream(q, "user_output");
 	stream *str = &g_streams[n];
-	write_term(q, str->fp, p1, 1, q->m->dq, 0, 200, 0);
+	write_term_to_stream(q, str, p1, 1, q->m->dq, 0, 200, 0);
 	fputc('\n', str->fp);
 	return !ferror(str->fp);
 }
