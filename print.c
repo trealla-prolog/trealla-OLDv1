@@ -12,6 +12,7 @@
 
 #include "internal.h"
 #include "builtins.h"
+#include "network.h"
 #include "utf8.h"
 
 static int needs_quote(module *m, const char *src)
@@ -392,6 +393,30 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 	return dst - save_dst;
 }
 
+void write_canonical_to_stream(query *q, stream *str, cell *c, int running, int dq, int depth)
+{
+	idx_t save_ctx = q->latest_ctx;
+	size_t len = write_canonical_to_buf(q, NULL, 0, c, running, dq, depth);
+	char *dst = malloc(len+1);
+	write_canonical_to_buf(q, dst, len+1, c, running, dq, depth);
+	const char *src = dst;
+
+	while (len) {
+		size_t nbytes = net_write(src, len, str);
+
+		if (feof(str->fp)) {
+			q->error = 1;
+			return;
+		}
+
+		len -= nbytes;
+		src += nbytes;
+	}
+
+	free(dst);
+	q->latest_ctx = save_ctx;
+}
+
 void write_canonical(query *q, FILE *fp, cell *c, int running, int dq, int depth)
 {
 	idx_t save_ctx = q->latest_ctx;
@@ -404,6 +429,30 @@ void write_canonical(query *q, FILE *fp, cell *c, int running, int dq, int depth
 		size_t nbytes = fwrite(src, 1, len, fp);
 
 		if (feof(fp)) {
+			q->error = 1;
+			return;
+		}
+
+		len -= nbytes;
+		src += nbytes;
+	}
+
+	free(dst);
+	q->latest_ctx = save_ctx;
+}
+
+void write_term_to_stream(query *q, stream *str, cell *c, int running, int dq, int cons, int max_depth, int depth)
+{
+	idx_t save_ctx = q->latest_ctx;
+	size_t len = write_term_to_buf(q, NULL, 0, c, running, dq, cons, max_depth, depth);
+	char *dst = malloc(len+1);
+	write_term_to_buf(q, dst, len+1, c, running, dq, cons, max_depth, depth);
+	const char *src = dst;
+
+	while (len) {
+		size_t nbytes = net_write(src, len, str);
+
+		if (feof(str->fp)) {
 			q->error = 1;
 			return;
 		}
