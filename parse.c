@@ -826,9 +826,7 @@ static void directives(parser *p, term *t)
 				cell *f = head+1, *a = f+1;
 				if (!is_literal(f)) return;
 				if (!is_integer(a)) return;
-				cell tmp;
-				tmp.val_type = TYPE_LITERAL;
-				tmp.val_off = find_in_pool(GET_STR(f));
+				cell tmp = *f;
 				tmp.arity = a->val_num;
 				rule *h = create_rule(p->m, &tmp);
 				h->is_public = 1;
