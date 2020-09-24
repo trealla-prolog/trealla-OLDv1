@@ -269,7 +269,10 @@ int net_getc(stream *str)
 			return ptr[0];
 		}
 
-		return SSL_read((SSL*)str->sslptr, ptr, len);
+		if (SSL_read((SSL*)str->sslptr, ptr, len) == 0)
+			return EOF;
+
+		return ptr[0];
 	}
 #endif
 
