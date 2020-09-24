@@ -2043,7 +2043,7 @@ static int fn_iso_peek_char_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream(q, "user_input");
 	stream *str = &g_streams[n];
-	int ch = str->ungetch ? str->ungetch : fgetc_utf8(str->fp);
+	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 
 	if (feof(str->fp)) {
 		clearerr(str->fp);
@@ -2067,7 +2067,7 @@ static int fn_iso_peek_char_2(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
 
-	int ch = str->ungetch ? str->ungetch : fgetc_utf8(str->fp);
+	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 
 	if (feof(str->fp)) {
 		clearerr(str->fp);
@@ -2089,7 +2089,7 @@ static int fn_iso_peek_code_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream(q, "user_input");
 	stream *str = &g_streams[n];
-	int ch = str->ungetch ? str->ungetch : fgetc_utf8(str->fp);
+	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 	str->ungetch = ch;
 	cell tmp;
 	make_int(&tmp, ch);
@@ -2102,7 +2102,7 @@ static int fn_iso_peek_code_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
-	int ch = str->ungetch ? str->ungetch : fgetc_utf8(str->fp);
+	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 	str->ungetch = ch;
 	cell tmp;
 	make_int(&tmp, ch);
@@ -7402,7 +7402,7 @@ static int fn_edin_skip_1(query *q)
 
 	for (;;) {
 		str->did_getc = 1;
-		int ch = str->ungetch ? str->ungetch : fgetc_utf8(str->fp);
+		int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 		str->ungetch = 0;
 
 		if (feof(str->fp)) {
@@ -7432,7 +7432,7 @@ static int fn_edin_skip_2(query *q)
 
 	for (;;) {
 		str->did_getc = 1;
-		int ch = str->ungetch ? str->ungetch : fgetc_utf8(str->fp);
+		int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 		str->ungetch = 0;
 
 		if (feof(str->fp)) {
