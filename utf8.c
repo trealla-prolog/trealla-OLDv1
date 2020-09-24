@@ -234,8 +234,7 @@ int readc_utf8(int fd, int *res)
 		} else if ((ch & 0b10000000) == 0b10000000) {
 			n <<= 6;
 			n |= ch & 0b00111111;
-		}
-		else {
+		} else {
 			n = ch;
 		}
 	}
