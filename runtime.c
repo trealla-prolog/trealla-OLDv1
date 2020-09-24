@@ -20,6 +20,28 @@ int g_tpl_interrupt = 0;
 
 enum { CALL, EXIT, REDO, NEXT, FAIL };
 
+#ifdef _WIN32
+unsigned long long get_time_in_usec(void)
+{
+    static const unsigned long long epoch = 116444736000000000ULL;
+    FILETIME file_time;
+    SYSTEMTIME system_time;
+    ULARGE_INTEGER u;
+    GetSystemTime(&system_time);
+    SystemTimeToFileTime(&system_time, &file_time);
+    u.LowPart = file_time.dwLowDateTime;
+    u.HighPart = file_time.dwHighDateTime;
+    return (u.QuadPart - epoch) / 10 + (1000ULL * system_time.wMilliseconds);
+}
+#else
+unsigned long long get_time_in_usec(void)
+{
+	struct timespec now;
+	clock_gettime(CLOCK_REALTIME, &now);
+    return (unsigned long long)(now.tv_sec * 1000 * 1000) + (now.tv_nsec / 1000);
+}
+#endif
+
 static void check_trail(query *q)
 {
 	if (q->st.tp > q->max_trails) {

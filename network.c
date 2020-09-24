@@ -241,93 +241,101 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 #endif
 }
 
-size_t ssl_write(const void *ptr, size_t nbytes, stream *str)
+size_t net_write(const void *ptr, size_t nbytes, stream *str)
 {
 #if USE_OPENSSL
-	return SSL_write((SSL*)str->sslptr, ptr, nbytes);
-#else
-	return 0;
+	if (str->ssl)
+		return SSL_write((SSL*)str->sslptr, ptr, nbytes);
 #endif
+	return fwrite(ptr, 1, nbytes, str->fp);
 }
 
-size_t ssl_read(void *ptr, size_t len, stream *str)
+size_t net_read(void *ptr, size_t len, stream *str)
 {
 #if USE_OPENSSL
-	char *dst = ptr;
+	if (str->ssl) {
+		char *dst = ptr;
 
-	while (len && str->srclen) {
-		*dst++ = *str->src++;
-		str->srclen--;
-		len--;
-	}
-
-	if (dst != ptr) {
-		return dst - (char*)ptr;
-	}
-
-	return SSL_read((SSL*)str->sslptr, ptr, len);
-#else
-	return 0;
-#endif
-}
-
-int ssl_getline(char **lineptr, size_t *n, stream *str)
-{
-#if USE_OPENSSL
-	if (!*lineptr)
-		*lineptr = malloc(*n=1024);
-
-	char *dst = *lineptr;
-	size_t dstlen = *n;
-	int done = 0;
-
-	while (!done) {
-		if (str->srclen <= 0) {
-			int rlen = SSL_read((SSL*)str->sslptr, str->srcbuf, STREAM_BUFLEN);
-
-			if (rlen <= 0)
-				return -1;
-
-			str->srcbuf[rlen] = '\0';
-			str->src = str->srcbuf;
-			str->srclen = rlen;
+		while (len && str->srclen) {
+			*dst++ = *str->src++;
+			str->srclen--;
+			len--;
 		}
 
-		while (str->srclen-- > 0) {
-			int ch = *str->src++;
-			*dst++ = ch;
-
-			if (dstlen-- <= 1) {
-				size_t savelen = dst - *lineptr;
-				*n *= 2;
-				*lineptr = realloc(*lineptr, *n);
-				dst = *lineptr + savelen;
-				dstlen = *n - savelen;
-			}
-
-			if (ch == '\n') {
-				*dst = '\0';
-				done = 1;
-				break;
-			}
+		if (dst != ptr) {
+			return dst - (char*)ptr;
 		}
-	}
 
-	return dst - *lineptr;
-#else
-	return 0;
+		return SSL_read((SSL*)str->sslptr, ptr, len);
+	}
 #endif
+
+	return fread(ptr, 1, len, str->fp);
 }
 
-void ssl_close(stream *str)
+int net_getline(char **lineptr, size_t *n, stream *str)
 {
 #if USE_OPENSSL
-	SSL_shutdown((SSL*)str->sslptr);
-	SSL_free((SSL*)str->sslptr);
+	if (str->ssl) {
+		if (!*lineptr)
+			*lineptr = malloc(*n=1024);
 
-	if (!--g_ctx_use_cnt) {
-		SSL_CTX_free(g_ctx);
-		g_ctx = NULL;
+		char *dst = *lineptr;
+		size_t dstlen = *n;
+		int done = 0;
+
+		while (!done) {
+			if (str->srclen <= 0) {
+				int rlen = SSL_read((SSL*)str->sslptr, str->srcbuf, STREAM_BUFLEN);
+
+				if (rlen <= 0)
+					return -1;
+
+				str->srcbuf[rlen] = '\0';
+				str->src = str->srcbuf;
+				str->srclen = rlen;
+			}
+
+			while (str->srclen-- > 0) {
+				int ch = *str->src++;
+				*dst++ = ch;
+
+				if (dstlen-- <= 1) {
+					size_t savelen = dst - *lineptr;
+					*n *= 2;
+					*lineptr = realloc(*lineptr, *n);
+					dst = *lineptr + savelen;
+					dstlen = *n - savelen;
+				}
+
+				if (ch == '\n') {
+					*dst = '\0';
+					done = 1;
+					break;
+				}
+			}
+		}
+
+		return dst - *lineptr;
 	}
 #endif
+
+	return getline(lineptr, n, str->fp);
+}
+
+void net_close(stream *str)
+{
+#if USE_OPENSSL
+	if (str->ssl) {
+		SSL_shutdown((SSL*)str->sslptr);
+		SSL_free((SSL*)str->sslptr);
+
+		if (!--g_ctx_use_cnt) {
+			SSL_CTX_free(g_ctx);
+			g_ctx = NULL;
+		}
+	}
+#endif
+
+	fclose(str->fp);
 }

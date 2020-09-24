@@ -415,32 +415,6 @@ static cell make_string(query *q, const char *s)
 	return make_stringn(q, s, n);
 }
 
-static size_t stream_write(const void *ptr, size_t nbytes, stream *str)
-{
-	if (str->ssl)
-		return ssl_write(ptr, nbytes, str);
-
-	size_t len = fwrite(ptr, 1, nbytes, str->fp);
-	fflush(str->fp);
-	return len;
-}
-
-static size_t stream_read(void *ptr, size_t nbytes, stream *str)
-{
-	if (str->ssl)
-		return ssl_read(ptr, nbytes, str);
-	else
-		return fread(ptr, 1, nbytes, str->fp);
-}
-
-ssize_t stream_getline(char **lineptr, size_t *len, stream *str)
-{
-	if (str->ssl)
-		return ssl_getline(lineptr, len, str);
-	else
-		return getline(lineptr, len, str->fp);
-}
-
 static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
 	idx_t save_idx = tmp_heap_used(q);
@@ -1491,10 +1465,7 @@ static int fn_iso_close_1(query *q)
 	if (n <= 2)
 		return 0;
 
-	if (str->ssl)
-		ssl_close(str);
-
-	fclose(str->fp);
+	net_close(str);
 	free(str->filename);
 	free(str->mode);
 	free(str->data);
@@ -1604,7 +1575,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	}
 
 	if (!src) {
-		if (stream_getline(&p->save_line, &p->n_line, str) == -1) {
+		if (net_getline(&p->save_line, &p->n_line, str) == -1) {
 			destroy_parser(p);
 			cell tmp;
 			make_literal(&tmp, g_eof_s);
@@ -1838,7 +1809,7 @@ static int fn_iso_put_char_1(query *q)
 	int ch = get_char_utf8(&src);
 	char tmpbuf[20];
 	put_char_utf8(tmpbuf, ch);
-	stream_write(tmpbuf, strlen(tmpbuf), str);
+	net_write(tmpbuf, strlen(tmpbuf), str);
 	return !ferror(str->fp);
 }
 
@@ -1852,7 +1823,7 @@ static int fn_iso_put_char_2(query *q)
 	int ch = get_char_utf8(&src);
 	char tmpbuf[20];
 	put_char_utf8(tmpbuf, ch);
-	stream_write(tmpbuf, strlen(tmpbuf), str);
+	net_write(tmpbuf, strlen(tmpbuf), str);
 	return !ferror(str->fp);
 }
 
@@ -1864,7 +1835,7 @@ static int fn_iso_put_code_1(query *q)
 	int ch = (int)p1->val_num;
 	char tmpbuf[20];
 	put_char_utf8(tmpbuf, ch);
-	stream_write(tmpbuf, strlen(tmpbuf), str);
+	net_write(tmpbuf, strlen(tmpbuf), str);
 	return !ferror(str->fp);
 }
 
@@ -1877,7 +1848,7 @@ static int fn_iso_put_code_2(query *q)
 	int ch = (int)p1->val_num;
 	char tmpbuf[20];
 	put_char_utf8(tmpbuf, ch);
-	stream_write(tmpbuf, strlen(tmpbuf), str);
+	net_write(tmpbuf, strlen(tmpbuf), str);
 	return !ferror(str->fp);
 }
 
@@ -1890,7 +1861,7 @@ static int fn_iso_put_byte_1(query *q)
 	int ch = *src;
 	char tmpbuf[20];
 	put_char_utf8(tmpbuf, ch);
-	stream_write(tmpbuf, strlen(tmpbuf), str);
+	net_write(tmpbuf, strlen(tmpbuf), str);
 	return !ferror(str->fp);
 }
 
@@ -1904,7 +1875,7 @@ static int fn_iso_put_byte_2(query *q)
 	int ch = *src;
 	char tmpbuf[20];
 	put_char_utf8(tmpbuf, ch);
-	stream_write(tmpbuf, strlen(tmpbuf), str);
+	net_write(tmpbuf, strlen(tmpbuf), str);
 	return !ferror(str->fp);
 }
 
@@ -6138,7 +6109,7 @@ static int fn_getline_1(query *q)
 		fflush(str->fp);
 	}
 
-	if (stream_getline(&line, &len, str) == -1) {
+	if (net_getline(&line, &len, str) == -1) {
 		perror("getline");
 		free(line);
 		return 0;
@@ -6169,7 +6140,7 @@ static int fn_getline_2(query *q)
 		fflush(str->fp);
 	}
 
-	if (stream_getline(&line, &len, str) == -1) {
+	if (net_getline(&line, &len, str) == -1) {
 		free(line);
 
 		if (q->is_task && !feof(str->fp)) {
@@ -6211,7 +6182,7 @@ static int fn_bread_3(query *q)
 
 		for (;;) {
 			len = p1->val_num - str->data_len;
-			size_t nbytes = stream_read(str->data+str->data_len, len, str);
+			size_t nbytes = net_read(str->data+str->data_len, len, str);
 			str->data_len += nbytes;
 			str->data[str->data_len] = '\0';
 
@@ -6246,7 +6217,7 @@ static int fn_bread_3(query *q)
 			str->data_len = 0;
 		}
 
-		size_t nbytes = stream_read(str->data, str->alloc_nbytes, str);
+		size_t nbytes = net_read(str->data, str->alloc_nbytes, str);
 		str->data[nbytes] = '\0';
 		str->data = realloc(str->data, nbytes+1);
 		cell tmp = make_blob(q, str->data, nbytes);
@@ -6263,7 +6234,7 @@ static int fn_bread_3(query *q)
 
 	for (;;) {
 		size_t len = str->alloc_nbytes - str->data_len;
-		size_t nbytes = stream_read(str->data+str->data_len, len, str);
+		size_t nbytes = net_read(str->data+str->data_len, len, str);
 		str->data_len += nbytes;
 		str->data[str->data_len] = '\0';
 
@@ -6294,7 +6265,7 @@ static int fn_bwrite_2(query *q)
 	size_t len = LEN_STR(p1);
 
 	while (len) {
-		size_t nbytes = stream_write(src, len, str);
+		size_t nbytes = net_write(src, len, str);
 
 		if (!nbytes) {
 			if (feof(str->fp) || ferror(str->fp))
@@ -7029,7 +7000,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 	if (str == NULL) {
 		int n = get_named_stream(q, "user_output");
 		stream *str = &g_streams[n];
-		stream_write(tmpbuf, len, str);
+		net_write(tmpbuf, len, str);
 	} else if (is_structure(str) && ((strcmp(GET_STR(str),"atom") && strcmp(GET_STR(str),"string")) || (str->arity > 1) || !is_var(str+1))) {
 		free(tmpbuf);
 		throw_error(q, c, "type_error", "structure");
@@ -7044,7 +7015,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 		const char *src = tmpbuf;
 
 		while (len) {
-			size_t nbytes = stream_write(src, len, str);
+			size_t nbytes = net_write(src, len, str);
 
 			if (!nbytes) {
 				if (feof(str->fp) || ferror(str->fp)) {
