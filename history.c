@@ -53,7 +53,7 @@ int history_getch(void)
 	newattr = oldattr;
 	newattr.c_lflag &= ~(ICANON | ECHO);
 	tcsetattr(STDIN_FILENO, TCSANOW, &newattr);
-	int ch = getc_utf8(stdin);
+	int ch = fgetc_utf8(stdin);
 	tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);
 	return ch;
 }

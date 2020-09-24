@@ -7,7 +7,7 @@
  */
 
 extern int readc_utf8(int fd, int *ch);
-extern int getc_utf8(FILE *fp);
+extern int fgetc_utf8(FILE *fp);
 extern size_t strlen_utf8(const char *s);
 extern int isalpha_utf8(int ch);
 extern int isalnum_utf8(int ch);
@@ -27,3 +27,9 @@ extern int put_char_bare_utf8(char *dst, int ch);
 extern int put_len_utf8(int ch);
 extern int is_char_utf8(const char *src);
 extern int len_char_utf8(const char *src);
+
+/*
+ * This allows supplying a getter function...
+ */
+
+extern int xgetc_utf8(int(*fn)(), void*);

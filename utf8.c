@@ -260,13 +260,13 @@ int readc_utf8(int fd, int *res)
 	return 1;
 }
 
-int getc_utf8(FILE *fp)
+int xgetc_utf8(int(*fn)(), void *p1)
 {
 	unsigned int n = 0;
 	int expect = 1;
 
 	while (expect--) {
-		int _ch = fgetc(fp);
+		int _ch = fn(p1);
 
 		if (_ch == EOF)
 			return EOF;
@@ -303,4 +303,9 @@ int getc_utf8(FILE *fp)
 	}
 
 	return (int)n;
+}
+
+int fgetc_utf8(FILE *fp)
+{
+	return xgetc_utf8(fgetc, fp);
 }
