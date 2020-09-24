@@ -280,8 +280,8 @@ struct query_ {
 	state st;
 	unsigned long long tot_goals, tot_retries, tot_matches, tot_tcos;
 	unsigned long long nv_mask, step, qid;
-	unsigned long long time_started, tmo_msecs;
-	int max_depth;
+	unsigned long long time_started;
+	int max_depth, tmo_msecs;
 	idx_t cp, tmphp, nv_start, latest_ctx, popp;
 	idx_t frames_size, slots_size, trails_size, choices_size;
 	idx_t max_choices, max_frames, max_slots, max_trails;
