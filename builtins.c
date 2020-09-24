@@ -4686,8 +4686,7 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 
 	while (is_list(l)) {
 		cell *head = l + 1;
-		cell *tail = head + head->nbr_cells;
-		l = tail;
+		l = head + head->nbr_cells;
 		cnt++;
 	}
 
@@ -4697,9 +4696,8 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 
 	while (is_list(l)) {
 		cell *head = l + 1;
-		cell *tail = head + head->nbr_cells;
 		base[idx++] = head;
-		l = tail;
+		l = head + head->nbr_cells;
 	}
 
 #ifdef __FreeBSD__
@@ -5848,7 +5846,7 @@ static int fn_server_3(query *q)
 			}
 		}
 
-		c = head + 2;
+		c = head + head->nbr_cells;
 		p3 = deref_var(q, c, p3_ctx);
 		p3_ctx = q->latest_ctx;
 	}
