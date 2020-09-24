@@ -236,6 +236,9 @@ With *bread/3* the 'len' arg can be an integer > 0 meaning return that
 many bytes, = 0 meaning return what is there (if non-blocking) or a var
 meaning return all bytes until end end of file,
 
+Currently, network I/O should limit itself to bread/bwrite/format and
+getline for reading and writing.
+
 
 Persistence			##EXPERIMENTAL##
 ===========
