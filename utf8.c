@@ -40,9 +40,8 @@ const char *strchr_utf8(const char *s, int ch)
 {
 	const char *src = s;
 
-	while (*src && (peek_char_utf8(src) != ch)) {
+	while (*src && (peek_char_utf8(src) != ch))
 		get_char_utf8(&src);
-	}
 
 	if (!*src || (peek_char_utf8(src) != ch))
 		return NULL;
@@ -55,9 +54,8 @@ const char *strrchr_utf8(const char *s, int ch)
 	const char *src = s, *save_src = NULL;
 
 	while (*src) {
-		while (*src && peek_char_utf8(src) != ch) {
+		while (*src && peek_char_utf8(src) != ch)
 			get_char_utf8(&src);
-		}
 
 		if (!*src || (peek_char_utf8(src) != ch))
 			return save_src;
@@ -116,15 +114,13 @@ int put_char_bare_utf8(char *_dst, int _ch)
 	if (ch <= 0x7F) {
 		*dst++ = ch;
 		len = 1;
-	}
-	else if (ch <= 0x07FF) {
+	} else if (ch <= 0x07FF) {
 		*dst = 0b11000000;
 		*dst++ |= (ch >> 6) & 0b00011111;
 		*dst = 0b10000000;
 		*dst++ |= (ch & 0b00111111);
 		len = 2;
-	}
-	else if (ch <= 0xFFFF) {
+	} else if (ch <= 0xFFFF) {
 		*dst = 0b11100000;
 		*dst++ |= (ch >> 12) & 0b00001111;
 		*dst = 0b10000000;
@@ -132,8 +128,7 @@ int put_char_bare_utf8(char *_dst, int _ch)
 		*dst = 0b10000000;
 		*dst++ |= ch & 0b00111111;
 		len = 3;
-	}
-	else if (ch <= 0x01FFFFF) {
+	} else if (ch <= 0x01FFFFF) {
 		*dst = 0b11100000;
 		*dst++ |= (ch >> 18) & 0b00000111;
 		*dst = 0b10000000;
@@ -180,28 +175,22 @@ int get_char_utf8(const char **_src)
 		if ((ch & 0b11111100) == 0b11111100) {
 			n = ch & 0b00000001;
 			expect = 5;
-		}
-		else if ((ch & 0b11111000) == 0b11111000) {
+		} else if ((ch & 0b11111000) == 0b11111000) {
 			n = ch & 0b00000011;
 			expect = 4;
-		}
-		else if ((ch & 0b11110000) == 0b11110000) {
+		} else if ((ch & 0b11110000) == 0b11110000) {
 			n = ch & 0b00000111;
 			expect = 3;
-		}
-		else if ((ch & 0b11100000) == 0b11100000) {
+		} else if ((ch & 0b11100000) == 0b11100000) {
 			n = ch & 0b00001111;
 			expect = 2;
-		}
-		else if ((ch & 0b11000000) == 0b11000000) {
+		} else if ((ch & 0b11000000) == 0b11000000) {
 			n = ch & 0b00011111;
 			expect = 1;
-		}
-		else if ((ch & 0b10000000) == 0b10000000) {
+		} else if ((ch & 0b10000000) == 0b10000000) {
 			n <<= 6;
 			n |= ch & 0b00111111;
-		}
-		else {
+		} else {
 			n = ch;
 		}
 	}
@@ -230,24 +219,19 @@ int readc_utf8(int fd, int *res)
 		if ((ch & 0b11111100) == 0b11111100) {
 			n = ch & 0b00000001;
 			expect = 5;
-		}
-		else if ((ch & 0b11111000) == 0b11111000) {
+		} else if ((ch & 0b11111000) == 0b11111000) {
 			n = ch & 0b00000011;
 			expect = 4;
-		}
-		else if ((ch & 0b11110000) == 0b11110000) {
+		} else if ((ch & 0b11110000) == 0b11110000) {
 			n = ch & 0b00000111;
 			expect = 3;
-		}
-		else if ((ch & 0b11100000) == 0b11100000) {
+		} else if ((ch & 0b11100000) == 0b11100000) {
 			n = ch & 0b00001111;
 			expect = 2;
-		}
-		else if ((ch & 0b11000000) == 0b11000000) {
+		} else if ((ch & 0b11000000) == 0b11000000) {
 			n = ch & 0b00011111;
 			expect = 1;
-		}
-		else if ((ch & 0b10000000) == 0b10000000) {
+		} else if ((ch & 0b10000000) == 0b10000000) {
 			n <<= 6;
 			n |= ch & 0b00111111;
 		}
@@ -276,28 +260,22 @@ int xgetc_utf8(int(*fn)(), void *p1)
 		if ((ch & 0b11111100) == 0b11111100) {
 			n = ch & 0b00000001;
 			expect = 5;
-		}
-		else if ((ch & 0b11111000) == 0b11111000) {
+		} else if ((ch & 0b11111000) == 0b11111000) {
 			n = ch & 0b00000011;
 			expect = 4;
-		}
-		else if ((ch & 0b11110000) == 0b11110000) {
+		} else if ((ch & 0b11110000) == 0b11110000) {
 			n = ch & 0b00000111;
 			expect = 3;
-		}
-		else if ((ch & 0b11100000) == 0b11100000) {
+		} else if ((ch & 0b11100000) == 0b11100000) {
 			n = ch & 0b00001111;
 			expect = 2;
-		}
-		else if ((ch & 0b11000000) == 0b11000000) {
+		} else if ((ch & 0b11000000) == 0b11000000) {
 			n = ch & 0b00011111;
 			expect = 1;
-		}
-		else if ((ch & 0b10000000) == 0b10000000) {
+		} else if ((ch & 0b10000000) == 0b10000000) {
 			n <<= 6;
 			n |= ch & 0b00111111;
-		}
-		else {
+		} else {
 			n = ch;
 		}
 	}
