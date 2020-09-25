@@ -6577,7 +6577,7 @@ static int fn_wait_0(query *q)
 	while (!g_tpl_interrupt && q->m->tasks) {
 		int_t now = get_time_in_usec() / 1000;
 		query *task = q->m->tasks;
-		int did_something = 0, spawn_cnt = 0;
+		unsigned did_something = 0, spawn_cnt = 0;
 
 		while (!g_tpl_interrupt && task) {
 			if (task->spawned) {
@@ -6597,15 +6597,15 @@ static int fn_wait_0(query *q)
 			}
 
 			if (!task->yielded || !task->st.curr_cell) {
-				query *next = pop_task(q->m, task);
-				destroy_query(task);
-				task = next;
+				query *save = task;
+				task = pop_task(q->m, task);
+				destroy_query(save);
 				continue;
 			}
 
 			run_query(task);
 			task = task->next;
-			did_something++;
+			did_something = 1;
 		}
 
 		if (!did_something)
@@ -6620,7 +6620,7 @@ static int fn_await_0(query *q)
 	while (!g_tpl_interrupt && q->m->tasks) {
 		int_t now = get_time_in_usec() / 1000;
 		query *task = q->m->tasks;
-		int did_something = 0, spawn_cnt = 0;
+		unsigned did_something = 0, spawn_cnt = 0;
 
 		while (!g_tpl_interrupt && task) {
 			if (task->spawned) {
@@ -6640,16 +6640,16 @@ static int fn_await_0(query *q)
 			}
 
 			if (!task->yielded || !q->st.curr_cell) {
-				query *next = pop_task(q->m, task);
-				destroy_query(task);
-				task = next;
+				query *save = task;
+				task = pop_task(q->m, task);
+				destroy_query(save);
 				continue;
 			}
 
 			run_query(task);
 
 			if (!task->tmo_msecs && task->yielded) {
-				did_something++;
+				did_something = 1;
 				break;
 			}
 		}
