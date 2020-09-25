@@ -74,6 +74,15 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 	free(dst);
 }
 
+static int do_yield_0(query *q, int msecs)
+{
+	q->yielded = 1;
+	q->tmo_msecs = get_time_in_usec() / 1000;
+	q->tmo_msecs += msecs;
+	make_choice(q);
+	return 0;
+}
+
 static void pin_vars(query *q, uint32_t mask)
 {
 	idx_t curr_choice = q->cp - 1;
@@ -1576,6 +1585,13 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 
 	if (!src) {
 		if (net_getline(&p->save_line, &p->n_line, str) == -1) {
+
+			if (q->is_task && !feof(str->fp)) {
+				clearerr(str->fp);
+				do_yield_0(q, 1);
+				return 0;
+			}
+
 			destroy_parser(p);
 			cell tmp;
 			make_literal(&tmp, g_eof_s);
@@ -1890,8 +1906,15 @@ static int fn_iso_get_char_1(query *q)
 		fflush(str->fp);
 	}
 
-	str->did_getc = 1;
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
+
+	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+		clearerr(str->fp);
+		do_yield_0(q, 1);
+		return 0;
+	}
+
+	str->did_getc = 1;
 	str->ungetch = 0;
 
 	if (feof(str->fp)) {
@@ -1923,8 +1946,15 @@ static int fn_iso_get_char_2(query *q)
 		fflush(str->fp);
 	}
 
-	str->did_getc = 1;
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
+
+	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+		clearerr(str->fp);
+		do_yield_0(q, 1);
+		return 0;
+	}
+
+	str->did_getc = 1;
 	str->ungetch = 0;
 
 	if (feof(str->fp)) {
@@ -1955,8 +1985,15 @@ static int fn_iso_get_code_1(query *q)
 		fflush(str->fp);
 	}
 
-	str->did_getc = 1;
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
+
+	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+		clearerr(str->fp);
+		do_yield_0(q, 1);
+		return 0;
+	}
+
+	str->did_getc = 1;
 	str->ungetch = 0;
 
 	if ((ch == '\n') || (ch == EOF))
@@ -1979,8 +2016,15 @@ static int fn_iso_get_code_2(query *q)
 		fflush(str->fp);
 	}
 
-	str->did_getc = 1;
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
+
+	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+		clearerr(str->fp);
+		do_yield_0(q, 1);
+		return 0;
+	}
+
+	str->did_getc = 1;
 	str->ungetch = 0;
 
 	if ((ch == '\n') || (ch == EOF))
@@ -2002,8 +2046,15 @@ static int fn_iso_get_byte_1(query *q)
 		fflush(str->fp);
 	}
 
-	str->did_getc = 1;
 	int ch = str->ungetch ? str->ungetch : net_getc(str);
+
+	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+		clearerr(str->fp);
+		do_yield_0(q, 1);
+		return 0;
+	}
+
+	str->did_getc = 1;
 	str->ungetch = 0;
 
 	if ((ch == '\n') || (ch == EOF))
@@ -2026,8 +2077,15 @@ static int fn_iso_get_byte_2(query *q)
 		fflush(str->fp);
 	}
 
-	str->did_getc = 1;
 	int ch = str->ungetch ? str->ungetch : net_getc(str);
+
+	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+		clearerr(str->fp);
+		do_yield_0(q, 1);
+		return 0;
+	}
+
+	str->did_getc = 1;
 	str->ungetch = 0;
 
 	if ((ch == '\n') || (ch == EOF))
@@ -2044,6 +2102,12 @@ static int fn_iso_peek_char_1(query *q)
 	int n = get_named_stream(q, "user_input");
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
+
+	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+		clearerr(str->fp);
+		do_yield_0(q, 1);
+		return 0;
+	}
 
 	if (feof(str->fp)) {
 		clearerr(str->fp);
@@ -2069,6 +2133,12 @@ static int fn_iso_peek_char_2(query *q)
 
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 
+	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+		clearerr(str->fp);
+		do_yield_0(q, 1);
+		return 0;
+	}
+
 	if (feof(str->fp)) {
 		clearerr(str->fp);
 		cell tmp;
@@ -2090,6 +2160,13 @@ static int fn_iso_peek_code_1(query *q)
 	int n = get_named_stream(q, "user_input");
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
+
+	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+		clearerr(str->fp);
+		do_yield_0(q, 1);
+		return 0;
+	}
+
 	str->ungetch = ch;
 	cell tmp;
 	make_int(&tmp, ch);
@@ -2103,6 +2180,13 @@ static int fn_iso_peek_code_2(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
+
+	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+		clearerr(str->fp);
+		do_yield_0(q, 1);
+		return 0;
+	}
+
 	str->ungetch = ch;
 	cell tmp;
 	make_int(&tmp, ch);
@@ -2115,6 +2199,13 @@ static int fn_iso_peek_byte_1(query *q)
 	int n = get_named_stream(q, "user_input");
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : net_getc(str);
+
+	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+		clearerr(str->fp);
+		do_yield_0(q, 1);
+		return 0;
+	}
+
 	str->ungetch = ch;
 	cell tmp;
 	make_int(&tmp, ch);
@@ -2128,6 +2219,13 @@ static int fn_iso_peek_byte_2(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
 	int ch = str->ungetch ? str->ungetch : net_getc(str);
+
+	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+		clearerr(str->fp);
+		do_yield_0(q, 1);
+		return 0;
+	}
+
 	str->ungetch = ch;
 	cell tmp;
 	make_int(&tmp, ch);
@@ -5411,15 +5509,6 @@ static int fn_statistics_2(query *q)
 	return 0;
 }
 
-static int do_yield_0(query *q, int msecs)
-{
-	q->yielded = 1;
-	q->tmo_msecs = get_time_in_usec() / 1000;
-	q->tmo_msecs += msecs;
-	make_choice(q);
-	return 0;
-}
-
 static int fn_sleep_1(query *q)
 {
 	if (q->retry)
@@ -5910,7 +5999,7 @@ static int fn_accept_2(query *q)
 
 	if (fd == -1) {
 		if (q->is_task) {
-			do_yield_0(q, 1);
+			do_yield_0(q, 10);
 			return 0;
 		}
 
