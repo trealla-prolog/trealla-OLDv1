@@ -3,9 +3,10 @@ Trealla ProLog
 
 A compact, efficient Prolog interpreter with ISO compliant aspirations.
 
-	Integers are 64-bit (optionally 128-bit)
-	Reals are double
+	Integers are 64-bit (optionally 32 or 128-bit)
+	Integer overflow detection
 	Rationals are a native type
+	Reals are double
 	Atoms (synonymous with strings) are UTF-8 of unlimited length
 	Arity limit 255
 	Full-term just-in-time indexing

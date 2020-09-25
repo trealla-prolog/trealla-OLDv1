@@ -2461,10 +2461,19 @@ static int fn_iso_add_2(query *q)
 			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
+		int64_t tmp = (int64_t)p1.val_num + p2.val_num;
+
+		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			throw_error(q, &p1, "domain_error", "integer_overflow");
+			return 0;
+		} else {
 #endif
 			q->accum.val_num = p1.val_num + p2.val_num;
 			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
+		}
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
 	} else if (is_rational(&p1) && is_rational(&p2)) {
@@ -2504,10 +2513,19 @@ static int fn_iso_sub_2(query *q)
 			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
+		int64_t tmp = (int64_t)p1.val_num - p2.val_num;
+
+		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			throw_error(q, &p1, "domain_error", "integer_overflow");
+			return 0;
+		} else {
 #endif
 			q->accum.val_num = p1.val_num - p2.val_num;
 			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
+		}
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
 	} else if (is_rational(&p1) && is_rational(&p2)) {
@@ -2547,10 +2565,19 @@ static int fn_iso_mul_2(query *q)
 			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
+		int64_t tmp = (int64_t)p1.val_num * p2.val_num;
+
+		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			throw_error(q, &p1, "domain_error", "integer_overflow");
+			return 0;
+		} else {
 #endif
 			q->accum.val_num = p1.val_num * p2.val_num;
 			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
+		}
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
 	} else if (is_rational(&p1) && is_rational(&p2)) {
@@ -2646,10 +2673,19 @@ static int fn_iso_truncate_1(query *q)
 			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
+		int64_t tmp = p1.val_flt;
+
+		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			throw_error(q, &p1, "domain_error", "integer_overflow");
+			return 0;
+		} else {
 #endif
 			q->accum.val_num = (int_t)p1.val_flt;
 			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
+		}
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
 	} else {
@@ -2673,10 +2709,19 @@ static int fn_iso_round_1(query *q)
 			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
+		int64_t tmp = round(p1.val_flt);
+
+		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			throw_error(q, &p1, "domain_error", "integer_overflow");
+			return 0;
+		} else {
 #endif
 			q->accum.val_num = (int_t)round(p1.val_flt);
 			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
+		}
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
 	} else {
@@ -2700,10 +2745,19 @@ static int fn_iso_ceiling_1(query *q)
 			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
+		int64_t tmp = ceil(p1.val_flt);
+
+		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			throw_error(q, &p1, "domain_error", "integer_overflow");
+			return 0;
+		} else {
 #endif
 			q->accum.val_num = (int_t)ceil(p1.val_flt);
 			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
+		}
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
 	} else {
@@ -2727,10 +2781,19 @@ static int fn_iso_float_integer_part_1(query *q)
 			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
+		int64_t tmp = p1.val_flt;
+
+		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			throw_error(q, &p1, "domain_error", "integer_overflow");
+			return 0;
+		} else {
 #endif
 			q->accum.val_flt = (int_t)p1.val_flt;
 			q->accum.val_type = TYPE_FLOAT;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
+		}
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
 	} else {
@@ -2754,10 +2817,19 @@ static int fn_iso_float_fractional_part_1(query *q)
 			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
+		int64_t tmp = p1.val_flt - (int64_t)p1.val_flt;
+
+		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			throw_error(q, &p1, "domain_error", "integer_overflow");
+			return 0;
+		} else {
 #endif
 			q->accum.val_flt = p1.val_flt - (int_t)p1.val_flt;
 			q->accum.val_type = TYPE_FLOAT;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
+		}
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
 	} else {
@@ -2781,10 +2853,19 @@ static int fn_iso_floor_1(query *q)
 			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
+		int64_t tmp = floor(p1.val_flt);
+
+		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			throw_error(q, &p1, "domain_error", "integer_overflow");
+			return 0;
+		} else {
 #endif
 			q->accum.val_num = (int_t)floor(p1.val_flt);
 			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
+		}
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
 	} else {
@@ -3013,10 +3094,19 @@ static int fn_iso_powi_2(query *q)
 			throw_error(q, &p1, "domain_error", "integer_overflow");
 			return 0;
 		} else {
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
+		int64_t tmp = pow(p1.val_num,p2.val_num);
+
+		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			throw_error(q, &p1, "domain_error", "integer_overflow");
+			return 0;
+		} else {
 #endif
 			q->accum.val_num = (int_t)pow(p1.val_num,p2.val_num);
 			q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
+		}
+#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
 	} else if (is_rational(&p1) && is_rational(&p2)) {
