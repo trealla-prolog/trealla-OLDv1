@@ -38,10 +38,11 @@ Run...
 
 to do the tests under *valgrind* memory checking.
 
-A 'make debug' build compiles in 0.2s with *tcc* and 2s with *clang* and
-*gcc*. Should build on any Unix-like system with a C99 compiler (could do
-C89 with a few cosmetic tweaks). Has been tested on Manjaro, Ubuntu,
-FreeBSD and Raspbian (both 32 & 64-bit) systems.
+A 'make debug' build compiles in 0.2s with *tcc* and about 2s with
+*clang* and *gcc*. Should build on any Unix-like system with a C99
+compiler (could do C89 with a few cosmetic tweaks). Has been tested on
+Manjaro, Ubuntu, FreeBSD and Raspbian (32 & 64-bit) systems. There
+are no plans for a Windows port.
 
 
 Usage
