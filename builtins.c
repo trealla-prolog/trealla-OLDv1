@@ -8438,6 +8438,37 @@ static int fn_offset_2(query *q)
 	return 1;
 }
 
+static int fn_freeze_2(query *q)
+{
+	GET_FIRST_ARG(p1,var);
+	GET_NEXT_ARG(p2,callable);
+	return 0;
+}
+
+static int fn_put_atts_2(query *q)
+{
+	GET_FIRST_ARG(p1,var);
+	GET_NEXT_ARG(p2,callable);
+	return 0;
+}
+
+static int fn_get_atts_2(query *q)
+{
+	GET_FIRST_ARG(p1,attrvar);
+
+	if (!p1->attrs)
+		return 0;
+
+	GET_NEXT_ARG(p2,callable);
+	return 0;
+}
+
+static int fn_attributed_1(query *q)
+{
+	GET_FIRST_ARG(p1,var);
+	return is_attrvar(p1);
+}
+
 static int fn_sys_ne_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
@@ -8779,6 +8810,11 @@ static const struct builtins g_other_funcs[] =
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer"},
 	{"limit", 2, fn_limit_2, "+integer,+callable"},
 	{"offset", 2, fn_offset_2, "+integer,+callable"},
+
+	{"freeze", 2, fn_freeze_2, "-var,+callable"},
+	{"put_atts", 2, fn_put_atts_2, "-var,+callable"},
+	{"get_atts", 2, fn_get_atts_2, "-var,+callable"},
+	{"attributed", 1, fn_attributed_1, "-var"},
 
 #if USE_OPENSSL
 	{"sha1", 2, fn_sha1_2, "+atom,?atom"},

@@ -147,6 +147,7 @@ struct cell_ {
 			union {
 				int (*fn)(query*);
 				rule *match;
+				cell *attrs;
 				uint16_t precedence;
 			};
 
