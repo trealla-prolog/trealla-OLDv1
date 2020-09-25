@@ -87,17 +87,18 @@ enum {
 	FLAG_HEX=1<<1,						// only used with TYPE_INTEGER
 	FLAG_OCTAL=1<<2,					// only used with TYPE_INTEGER
 	FLAG_BINARY=1<<3,					// only used with TYPE_INTEGER
-	FLAG_STREAM=1<<4,					// only used with TYPE_INTEGER
-	FLAG_TAIL_REC=1<<5,
-	FLAG_PASS_THRU=1<<6,
+	FLAG_TAIL_REC=1<<4,
+	FLAG_PASS_THRU=1<<5,
 
-	//FLAG_SPARE1=1<<7,
-	//FLAG_SPARE2=1<<8,
+	//FLAG_SPARE3=1<<6,
+	//FLAG_SPARE2=1<<7,
+	//FLAG_SPARE1=1<<8,
 
 	FLAG2_DELETED=FLAG_HEX,				// only used by bagof
 	FLAG2_FIRST_USE=FLAG_HEX,			// only used with TYPE_VAR
 	FLAG2_CONST_STRING=FLAG_HEX,		// only used with TYPE_STRING
 	FLAG2_BIG_STRING=FLAG_OCTAL,		// only used with TYPE_STRING
+	FLAG2_STREAM=FLAG_TAIL_REC,			// only used with TYPE_INTEGER
 
 	OP_FX=1<<9,
 	OP_FY=1<<10,
@@ -147,7 +148,7 @@ struct cell_ {
 				int (*fn)(query*);
 				rule *match;
 				uint16_t precedence;
-				uint8_t slot_nbr;
+				uint16_t slot_nbr;
 			};
 
 			idx_t val_off;
@@ -165,7 +166,7 @@ typedef struct {
 
 typedef struct {
 	idx_t nbr_cells, cidx;
-	uint8_t nbr_vars;
+	uint16_t nbr_vars;
 	unsigned first_cut:1;
 	unsigned cut_only:1;
 	unsigned is_deleted:1;
@@ -187,7 +188,7 @@ struct rule_ {
 	skiplist *index;
 	uint32_t cnt;
 	idx_t val_off;
-	uint8_t arity;
+	uint16_t arity;
 	unsigned is_prebuilt:1;
 	unsigned is_public:1;
 	unsigned is_dynamic:1;
@@ -210,7 +211,7 @@ struct op_table {
 
 typedef struct {
 	idx_t ctx;
-	uint8_t slot_nbr;
+	uint16_t slot_nbr;
 } trail;
 
 typedef struct {
@@ -222,7 +223,7 @@ typedef struct {
 	cell *curr_cell;
 	module *m;
 	idx_t prev_frame, env, overflow;
-	uint8_t nbr_vars, nbr_slots;
+	uint16_t nbr_vars, nbr_slots;
 	unsigned any_choices:1;
 	unsigned did_cut:1;
 } frame;
@@ -235,7 +236,12 @@ typedef struct {
 	char srcbuf[STREAM_BUFLEN];
 	size_t data_len, alloc_nbytes;
 	int ungetch, srclen;
-	uint8_t did_getc, nodelay, nonblock, udp, ssl, level;
+	uint8_t level;
+	unsigned did_getc:1;
+	unsigned nodelay:1;
+	unsigned nonblock:1;
+	unsigned udp:1;
+	unsigned ssl:1;
 } stream;
 
 typedef struct {

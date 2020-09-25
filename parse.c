@@ -699,7 +699,7 @@ void destroy_query(query *q)
 
 			if (is_big_string(c) && !is_const_string(c))
 				free(c->val_str);
-			else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
+			else if (is_integer(c) && ((c)->flags&FLAG2_STREAM)) {
 				stream *str = &g_streams[c->val_num];
 
 				if (str->fp) {
