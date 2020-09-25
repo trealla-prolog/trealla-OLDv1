@@ -6370,6 +6370,30 @@ static int fn_is_stream_1(query *q)
 	return is_stream(p1);
 }
 
+static void push_task(module *m, query *task)
+{
+	task->next = m->tasks;
+
+	if (m->tasks)
+		m->tasks->prev = task;
+
+	m->tasks = task;
+}
+
+static query *pop_task(module *m, query *task)
+{
+	if (task->prev)
+		task->prev->next = task->next;
+
+	if (task->next)
+		task->next->prev = task->prev;
+
+	if (task == m->tasks)
+		m->tasks = task->next;
+
+	return task->next;
+}
+
 static int fn_wait_0(query *q)
 {
 	while (!g_tpl_interrupt && q->m->tasks) {
@@ -6395,19 +6419,9 @@ static int fn_wait_0(query *q)
 			}
 
 			if (!task->yielded || !task->st.curr_cell) {
-				query *save = task;
-
-				if (task->prev)
-					task->prev->next = task->next;
-
-				if (task->next)
-					task->next->prev = task->prev;
-
-				if (task == q->m->tasks)
-					q->m->tasks = task->next;
-
-				task = task->next;
-				destroy_query(save);
+				query *next = pop_task(q->m, task);
+				destroy_query(task);
+				task = next;
 				continue;
 			}
 
@@ -6448,19 +6462,9 @@ static int fn_await_0(query *q)
 			}
 
 			if (!task->yielded || !q->st.curr_cell) {
-				query *save = task;
-
-				if (task->prev)
-					task->prev->next = task->next;
-
-				if (task->next)
-					task->next->prev = task->prev;
-
-				if (task == q->m->tasks)
-					q->m->tasks = task->next;
-
-				task = task->next;
-				destroy_query(save);
+				query *next = pop_task(q->m, task);
+				destroy_query(task);
+				task = next;
 				continue;
 			}
 
@@ -6505,14 +6509,9 @@ static int fn_spawn_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
 	query *task = create_task(q, tmp);
-	task->next = q->m->tasks;
 	task->yielded = 1;
 	task->spawned = 1;
-
-	if (q->m->tasks)
-		q->m->tasks->prev = task;
-
-	q->m->tasks = task;
+	push_task(q->m, task);
 	return 1;
 }
 
@@ -6549,14 +6548,9 @@ static int fn_spawn_n(query *q)
 	}
 
 	query *task = create_task(q, tmp);
-	task->next = q->m->tasks;
 	task->yielded = 1;
 	task->spawned = 1;
-
-	if (q->m->tasks)
-		q->m->tasks->prev = task;
-
-	q->m->tasks = task;
+	push_task(q->m, task);
 	return 1;
 }
 
@@ -6564,13 +6558,8 @@ static int fn_fork_0(query *q)
 {
 	cell *curr_cell = q->st.curr_cell + q->st.curr_cell->nbr_cells;
 	query *task = create_task(q, curr_cell);
-	task->next = q->m->tasks;
 	task->yielded = 1;
-
-	if (q->m->tasks)
-		q->m->tasks->prev = task;
-
-	q->m->tasks = task;
+	push_task(q->m, task);
 	return 0;
 }
 
