@@ -5411,6 +5411,15 @@ static int fn_statistics_2(query *q)
 	return 0;
 }
 
+static int do_yield_0(query *q, int msecs)
+{
+	q->yielded = 1;
+	q->tmo_msecs = get_time_in_usec() / 1000;
+	q->tmo_msecs += msecs;
+	make_choice(q);
+	return 0;
+}
+
 static int fn_sleep_1(query *q)
 {
 	if (q->retry)
@@ -5419,9 +5428,7 @@ static int fn_sleep_1(query *q)
 	GET_FIRST_ARG(p1,integer);
 
 	if (q->is_task) {
-		q->tmo_msecs = get_time_in_usec() / 1000;
-		q->tmo_msecs += p1->val_num * 1000;
-		do_yield_0(q);
+		do_yield_0(q, p1->val_num*1000);
 		return 0;
 	}
 
@@ -5437,9 +5444,7 @@ static int fn_delay_1(query *q)
 	GET_FIRST_ARG(p1,integer);
 
 	if (q->is_task) {
-		q->tmo_msecs = get_time_in_usec() / 1000;
-		q->tmo_msecs += p1->val_num;
-		do_yield_0(q);
+		do_yield_0(q, p1->val_num);
 		return 0;
 	}
 
@@ -5905,9 +5910,7 @@ static int fn_accept_2(query *q)
 
 	if (fd == -1) {
 		if (q->is_task) {
-			q->tmo_msecs = get_time_in_usec() / 1000;
-			q->tmo_msecs += 1;
-			do_yield_0(q);
+			do_yield_0(q, 1);
 			return 0;
 		}
 
@@ -6143,9 +6146,7 @@ static int fn_getline_2(query *q)
 
 		if (q->is_task && !feof(str->fp)) {
 			clearerr(str->fp);
-			q->tmo_msecs =get_time_in_usec() / 1000;
-			q->tmo_msecs += 1;
-			do_yield_0(q);
+			do_yield_0(q, 1);
 			return 0;
 		}
 
@@ -6195,9 +6196,7 @@ static int fn_bread_3(query *q)
 
 			if (q->is_task) {
 				clearerr(str->fp);
-				q->tmo_msecs = get_time_in_usec() / 1000;
-				q->tmo_msecs += 1;
-				do_yield_0(q);
+				do_yield_0(q, 1);
 				return 0;
 			}
 		}
@@ -6489,19 +6488,12 @@ static int fn_await_0(query *q)
 	return 1;
 }
 
-int do_yield_0(query *q)
-{
-	make_choice(q);
-	q->yielded = 1;
-	return 0;
-}
-
 static int fn_yield_0(query *q)
 {
 	if (q->retry)
 		return 1;
 
-	return do_yield_0(q);
+	return do_yield_0(q, 0);
 }
 
 static int fn_spawn_1(query *q)

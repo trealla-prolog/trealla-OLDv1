@@ -11,8 +11,6 @@
 	__attribute__((unused)) cell *p = get_raw_arg(q,n); \
 	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx
 
-extern int do_yield_0(query *q);
-
 #define is_atomic(c) (is_atom(c) || is_number(c))
 #define is_callable(c) (is_literal(c) || is_string(c))
 #define is_list_or_nil(c) (is_list(c) || is_nil(c))
