@@ -6404,7 +6404,7 @@ static int fn_wait_0(query *q)
 					task->next->prev = task->prev;
 
 				if (task == q->m->tasks)
-					q->m->tasks = q->m->tasks->next;
+					q->m->tasks = task->next;
 
 				task = task->next;
 				destroy_query(save);
@@ -6457,7 +6457,7 @@ static int fn_await_0(query *q)
 					task->next->prev = task->prev;
 
 				if (task == q->m->tasks)
-					q->m->tasks = q->m->tasks->next;
+					q->m->tasks = task->next;
 
 				task = task->next;
 				destroy_query(save);
