@@ -148,10 +148,10 @@ struct cell_ {
 				int (*fn)(query*);
 				rule *match;
 				uint16_t precedence;
-				uint16_t slot_nbr;
 			};
 
 			idx_t val_off;
+			uint16_t slot_nbr;
 		};
 
 		struct {
