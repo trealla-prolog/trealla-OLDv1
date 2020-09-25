@@ -889,8 +889,7 @@ static void directives(parser *p, term *t)
 	if (!strcmp(dirname, "dynamic") && (c->arity >= 1)) {
 		cell *p1 = c + 1;
 
-		while (!is_end(p1)) {
-			if (!is_literal(p1)) return;
+		while (is_literal(p1)) {
 			if (is_literal(p1) && !strcmp(GET_STR(p1), "/") && (p1->arity == 2)) {
 				cell *c_name = p1 + 1;
 				if (!is_literal(c_name)) return;
@@ -898,7 +897,7 @@ static void directives(parser *p, term *t)
 				if (!is_integer(c_arity)) return;
 				set_dynamic_in_db(p->m, GET_STR(c_name), c_arity->val_num);
 				p1 += p1->nbr_cells;
-			} else
+			} else if (!strcmp(GET_STR(p1), ","))
 				p1 += 1;
 		}
 
@@ -908,8 +907,7 @@ static void directives(parser *p, term *t)
 	if (!strcmp(dirname, "persist") && (c->arity >= 1) && !p->m->iso_only) {
 		cell *p1 = c + 1;
 
-		while (!is_end(p1)) {
-			if (!is_literal(p1)) return;
+		while (is_literal(p1)) {
 			if (is_literal(p1) && !strcmp(GET_STR(p1), "/") && (p1->arity == 2)) {
 				cell *c_name = p1 + 1;
 				if (!is_literal(c_name)) return;
@@ -917,7 +915,7 @@ static void directives(parser *p, term *t)
 				if (!is_integer(c_arity)) return;
 				set_persist_in_db(p->m, GET_STR(c_name), c_arity->val_num);
 				p1 += p1->nbr_cells;
-			} else
+			} else if (!strcmp(GET_STR(p1), ","))
 				p1 += 1;
 		}
 
