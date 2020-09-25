@@ -84,9 +84,9 @@ enum {
 
 enum {
 	FLAG_BUILTIN=1<<0,
-	FLAG_HEX=1<<1,						// only used with TYPE_INTEGER
-	FLAG_OCTAL=1<<2,					// only used with TYPE_INTEGER
-	FLAG_BINARY=1<<3,					// only used with TYPE_INTEGER
+	FLAG_HEX=1<<1,						// used with TYPE_INTEGER
+	FLAG_OCTAL=1<<2,					// used with TYPE_INTEGER
+	FLAG_BINARY=1<<3,					// used with TYPE_INTEGER
 	FLAG_TAIL_REC=1<<4,
 	FLAG_PASS_THRU=1<<5,
 
@@ -94,11 +94,11 @@ enum {
 	//FLAG_SPARE2=1<<7,
 	//FLAG_SPARE1=1<<8,
 
-	FLAG2_DELETED=FLAG_HEX,				// only used by bagof
-	FLAG2_FIRST_USE=FLAG_HEX,			// only used with TYPE_VAR
-	FLAG2_CONST_STRING=FLAG_HEX,		// only used with TYPE_STRING
-	FLAG2_BIG_STRING=FLAG_OCTAL,		// only used with TYPE_STRING
-	FLAG2_STREAM=FLAG_TAIL_REC,			// only used with TYPE_INTEGER
+	FLAG2_DELETED=FLAG_HEX,				// used by bagof
+	FLAG2_FIRST_USE=FLAG_HEX,			// used with TYPE_VAR
+	FLAG2_CONST_STRING=FLAG_HEX,		// used with TYPE_STRING
+	FLAG2_BIG_STRING=FLAG_OCTAL,		// used with TYPE_STRING
+	FLAG2_STREAM=FLAG_TAIL_REC,			// used with TYPE_INTEGER
 
 	OP_FX=1<<9,
 	OP_FY=1<<10,
