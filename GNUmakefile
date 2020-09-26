@@ -12,7 +12,7 @@ endif
 OBJECTS = tpl.o history.o builtins.o library.o \
 	parse.o print.o runtime.o \
 	skiplist.o base64.o network.o utf8.o\
-	lists.o dict.o apply.o http.o auth.o
+	lists.o dict.o apply.o http.o auth.o atts.o
 
 all: tpl
 
@@ -77,3 +77,6 @@ http.o: library/http.pro
 
 auth.o: library/auth.pro
 	$(LD) -r -b binary -o auth.o library/auth.pro
+
+atts.o: library/atts.pro
+	$(LD) -r -b binary -o atts.o library/atts.pro

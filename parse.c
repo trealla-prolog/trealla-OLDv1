@@ -2728,7 +2728,8 @@ prolog *pl_create()
 
 	for (library *lib = g_libs; lib->name; lib++) {
 		if (!strcmp(lib->name, "apply") || !strcmp(lib->name, "dict") ||
-			!strcmp(lib->name, "http") || !strcmp(lib->name, "lists")) {
+			!strcmp(lib->name, "http") || !strcmp(lib->name, "lists") ||
+			!strcmp(lib->name, "atts")) {
 			char *src = strndup((const char*)lib->start, (lib->end-lib->start));
 			module_load_text(pl->m, src);
 			free(src);
