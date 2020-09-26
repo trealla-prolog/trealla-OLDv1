@@ -315,8 +315,11 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			return dst - save_dst;
 		}
 
-		if (running && is_var(c)) {
-			dst += snprintf(dst, dstlen, "%s_%u_%u", src, q->latest_ctx, c->slot_nbr);
+		if (running && is_var(c) && (q->latest_ctx != q->st.curr_frame)) {
+			frame *g = GET_FRAME(q->latest_ctx);
+			slot *e = GET_SLOT(g, c->slot_nbr);
+			idx_t slot_nbr = e - q->slots;
+			dst += snprintf(dst, dstlen, "_%u", (unsigned)slot_nbr);
 			return dst - save_dst;
 		}
 

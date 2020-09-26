@@ -748,7 +748,7 @@ static void dump_vars(query *q, parser *p)
 		fprintf(stdout, "\n%s = ", p->vartab.var_name[i]);
 		int save = q->quoted;
 		q->quoted = 1;
-		write_term(q, stdout, c, 1, q->m->dq, 0, 999, 0);
+		write_term(q, stdout, c, 0, q->m->dq, 0, 999, 0);
 		q->quoted = save;
 		any++;
 	}
