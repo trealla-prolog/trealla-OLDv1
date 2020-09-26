@@ -7,6 +7,7 @@ put_atts(V, A) :- !,
 	functor(A, F, _),
 	dict:set(D, F, A, D2),
 	sys_put_atts(V, D2),
+
 	writeln(D2),
 	copy_term(D2, D3),
 	writeln(D3).
