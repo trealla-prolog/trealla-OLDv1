@@ -8467,6 +8467,22 @@ static int fn_freeze_2(query *q)
 	return 1;
 }
 
+static int fn_frozen_2(query *q)
+{
+	GET_FIRST_ARG(p1,var);
+	GET_NEXT_ARG(p2,any);
+	frame *g = GET_FRAME(p1_ctx);
+	slot *e = GET_SLOT(g, p1->slot_nbr);
+
+	if (!e->c.attrs) {
+		cell tmp;
+		make_literal(&tmp, g_true_s);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
+
+	return unify(q, p2, p2_ctx, e->c.attrs, q->st.curr_frame);
+}
+
 #if 0
 static int fn_put_atts_2(query *q)
 {
@@ -8839,11 +8855,12 @@ static const struct builtins g_other_funcs[] =
 	{"limit", 2, fn_limit_2, "+integer,+callable"},
 	{"offset", 2, fn_offset_2, "+integer,+callable"},
 
-	{"freeze", 2, fn_freeze_2, "-var,+callable"},
+	{"freeze", 2, fn_freeze_2, "+var,+callable"},
+	{"frozen", 2, fn_frozen_2, "+var,+callable"},
 
 #if 0
-	{"put_atts", 2, fn_put_atts_2, "-var,+callable"},
-	{"get_atts", 2, fn_get_atts_2, "-var,+callable"},
+	{"put_atts", 2, fn_put_atts_2, "+var,+callable"},
+	{"get_atts", 2, fn_get_atts_2, "+var,+callable"},
 	{"attributed", 1, fn_attributed_1, "-var"},
 #endif
 
