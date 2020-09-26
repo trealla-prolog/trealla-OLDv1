@@ -7,6 +7,10 @@ task71(X) :- write('Frozen X='), writeln(X), fail.
 test71 :- freeze(X, task71(X)), X=123, writeln('Ooops').
 test71 :- writeln('OK done').
 
-main :- test70, test71, halt.
+task72(X) :- write('Frozen X='), writeln(X).
+
+test72 :- X=123, freeze(X, task72(X)), writeln('OK done').
+
+main :- test70, test71, test72, halt.
 
 :- initialization(main).

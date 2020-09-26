@@ -285,6 +285,10 @@ task71(X) :- write('Frozen X='), writeln(X), fail.
 test71 :- freeze(X, task71(X)), X=123, writeln('Ooops').
 test71 :- writeln('OK done').
 
+task72(X) :- write('Frozen X='), writeln(X).
+
+test72 :- X=123, freeze(X, task72(X)), writeln('OK done').
+
 test80 :-
 	between(1,10,I),
 		write(I), nl,
