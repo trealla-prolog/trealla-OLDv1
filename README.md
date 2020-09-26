@@ -342,25 +342,19 @@ An example:
 	Time elapsed 0.33 secs
 
 
-Rationals
+Rationals          ##EXPERIMENTAL##
 =========
 
 Rationals are a native type, with integers just a special case where
 the denominator happens to be 1. Rationals can be specified using
-the *rdiv/2* operator or by *1r3* style notation:
+the *rdiv/2* operator:
 
 	?- X is 1 / 7, Y is rationalize(X).
 	X = 0.1428571428571428
-	Y = 1r7
-	yes
-	?- X = 1 rdiv 7.
-	X = 1 rdiv 7.
+	Y = 1 rdiv 7
 	yes
 	?- X is 1 rdiv 7.
-	X = 1r7.
-	yes
-	?- X is 1r7.
-	X = 1r7.
+	X = 1 rdiv 7.
 	yes
 	?- X is 1 rdiv 1.
 	X = 1
@@ -381,7 +375,7 @@ Compiled with GCC 10.1.0 on Linux.
 	fib(30)     |   0.59  |   0.30    |   0.56    |   0.79  |   6.74
 	hanoiq(22)  |   1.15  |   0.39    |   1.18    |   0.85  |   9.9
 	queens11    |   1.27  |   0.88    |   1.40    |   1.46  |  10.9
-	puzzle      |   0.35  |   0.17    |   0.28    |   0.22  |
+	puzzle      |   0.35  |   0.17    |   0.28    |   0.22  |   3.08
 	chess       |  10.7   |   4.9     |   4.9     |   4.9   |
 	------------|---------|-----------|-----------|---------|----------
 	testindex1a |   1.35  |   1.31    |   0.70    |   4.94  |

@@ -130,7 +130,7 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 				dst += sprint_int(dst, dstlen, c->val_den, 10);
 			} else {
 				dst += sprint_int(dst, dstlen, c->val_num, 10);
-				dst += snprintf(dst, dstlen, "r");
+				dst += snprintf(dst, dstlen, " rdiv ");
 				dst += sprint_int(dst, dstlen, c->val_den, 10);
 			}
 		} else
@@ -222,7 +222,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 				dst += sprint_int(dst, dstlen, c->val_den, 10);
 			} else {
 				dst += sprint_int(dst, dstlen, c->val_num, 10);
-				dst += snprintf(dst, dstlen, "r");
+				dst += snprintf(dst, dstlen, " rdiv ");
 				dst += sprint_int(dst, dstlen, c->val_den, 10);
 			}
 		} else

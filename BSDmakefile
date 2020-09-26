@@ -79,4 +79,4 @@ auth.o: library/auth.pro
 	$(LD) -m elf_x86_64 -r -b binary -o auth.o library/auth.pro
 
 atts.o: library/atts.pro
-	$(LD) -r -b binary -o atts.o library/atts.pro
+	$(LD) -m elf_x86_64 -r -b binary -o atts.o library/atts.pro

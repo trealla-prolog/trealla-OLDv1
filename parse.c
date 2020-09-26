@@ -1581,7 +1581,7 @@ static int parse_number(module *m, const char **srcptr, int_t *val_num, int_t *v
 	if (neg) *val_num = -*val_num;
 	int try_rational = 0;
 
-	if (!m->iso_only && ((*s == 'r') || (*s == 'R')))
+	if (!m->iso_only && ((*s == 'r') || (*s == 'R')) && 0)
 		try_rational = 1;
 	else if (!m->iso_only && (*s == '/') && m->flag.rational_syntax_natural)
 		try_rational = 1;
