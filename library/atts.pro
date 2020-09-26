@@ -1,8 +1,7 @@
 :- module(atts, [put_atts/2, get_atts/2, attributed/1]).
 :- use_module(library(dict)).
 
-% Attributed variables, or a stealth key-value store?
-% This is a start.
+% This is a start, and currently non-functional!
 
 put_atts(V, +A) :- !,
 	sys_get_atts(V, D),
