@@ -8487,7 +8487,7 @@ static int fn_sys_put_atts_2(query *q)
 {
 	GET_FIRST_ARG(p1,var);
 	GET_NEXT_ARG(p2,callable);
-	cell *tmp = clone_to_heap(q, 0, p2, 0);
+	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->slot_nbr);
 	e->c.attrs = tmp;
@@ -8501,21 +8501,28 @@ static int fn_sys_get_atts_2(query *q)
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->slot_nbr);
 
-	if (!e->c.attrs) {
+	if (!e->c.attrs || is_nil(&e->c)) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	return unify(q, p2, p2_ctx, e->c.attrs, q->st.curr_frame);
-}
+	cell *c = e->c.attrs + 1;
+	cell *tmp = c + 1;
+	tmp += tmp->nbr_cells;
+	alloc_list(q, tmp);
+	c += c->nbr_cells;
 
-static int fn_attributed_1(query *q)
-{
-	GET_FIRST_ARG(p1,var);
-	frame *g = GET_FRAME(p1_ctx);
-	slot *e = GET_SLOT(g, p1->slot_nbr);
-	return e->c.attrs ? 1 : 0;
+	while (is_list(c)) {
+		c = c + 1;
+		cell *tmp = c + 1;
+		tmp += tmp->nbr_cells;
+		append_list(q, tmp);
+		c += c->nbr_cells;
+	}
+
+	cell *l = end_list(q);
+	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
 static int fn_sys_ne_2(query *q)
@@ -8864,7 +8871,6 @@ static const struct builtins g_other_funcs[] =
 	{"frozen", 2, fn_frozen_2, "+var,+callable"},
 	{"sys_put_atts", 2, fn_sys_put_atts_2, "+var,+callable"},
 	{"sys_get_atts", 2, fn_sys_get_atts_2, "+var,+callable"},
-	{"attributed", 1, fn_attributed_1, "-var"},
 
 #if USE_OPENSSL
 	{"sha1", 2, fn_sha1_2, "+atom,?atom"},
