@@ -88,7 +88,7 @@ test10a :-
 
 test10b :-
 	client('localhost:8080',_,_,S,[]),
-	between(1,inf,I),
+	between(1,1000000,I),
 		(format(S,'[~w] Hello, world~n',[I]) ->
 			delay(1) ; (writeln(disconnected), !)),
 		fail.
@@ -192,7 +192,7 @@ test18a :- assertz(f18(123),R), assertz(f18(456)), erase(R), listing(f18).
 test18b :- assertz(f18(123),_), clause(f18(_),_,_).
 
 task50(T) :-
-	between(1,inf,_),
+	between(1,1000000,_),
 		format('Task ... ~w',[T]), nl,
 		sleep(T),
 		fail.
@@ -262,11 +262,11 @@ test65 :-
 test65.
 
 test66 :-
-	call_nth(between(1,inf,I),12345678), writeln(I), fail.
+	call_nth(between(1,1000000000,I),12345678), writeln(I), fail.
 test66.
 
 test67 :-
-	call_nth(between(1,inf,I),_), writeln(I), sleep(1), fail.
+	call_nth(between(1,1000000000,I),_), writeln(I), sleep(1), fail.
 
 test68 :-
 	between(1,3,I), test66, writeln(I), fail.
