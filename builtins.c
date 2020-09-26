@@ -5699,6 +5699,14 @@ static int fn_between_3(query *q)
 	GET_NEXT_ARG(p3,integer_or_var);
 
 	if (!q->retry && !is_var(p3)) {
+		if (p3->val_num > p2->val_num)
+			return 0;
+
+		if (p3->val_num < p1->val_num)
+			return 0;
+
+		return 1;
+	} else if (!q->retry && !is_var(p3)) {
 		throw_error(q, p3, "type_error", "var");
 		return 0;
 	}
