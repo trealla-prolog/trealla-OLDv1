@@ -95,11 +95,16 @@ GNU-Prolog & SWI-Prolog
 	name/2
 	maplist/1-4
 	tab/1-2
+
 	random/1                # random(-float) float [0.0,<1.0]
 	random/1                # random(+integer) function returning integer [0,<integer]
 
 	freeze/2
 	frozen/2
+
+	get_atts/2
+	put_atts/2
+	attributed/1
 
 
 GNU-Prolog
