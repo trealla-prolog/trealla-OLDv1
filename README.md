@@ -99,12 +99,8 @@ GNU-Prolog & SWI-Prolog
 	random/1                # random(-float) float [0.0,<1.0]
 	random/1                # random(+integer) function returning integer [0,<integer]
 
-	freeze/2
-	frozen/2
-
-	get_atts/2
-	put_atts/2
-	attributed/1
+	freeze/2          ##EXPERIMENTAL##
+	frozen/2          ##EXPERIMENTAL##
 
 
 GNU-Prolog
@@ -418,6 +414,4 @@ Yap came from *git clone https://github.com/vscosta/yap-6.3* and needs
 *cmake* installed.
 
 Scryer came from *cargo install scryer-prolog* (it takes a long time)
-and needs *m4* installed. It seems puzzle won't compile, and chess
-needs name/2 (at least). Also *testindex* needs between/3 so won't
-load, is it in a module?
+and needs *m4* installed. Chess needs name/2 (at least).

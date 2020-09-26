@@ -1,16 +1,13 @@
 :- module(atts, [put_atts/2, get_atts/2, attributed/1]).
-
 :- use_module(library(dict)).
+
+% ##EXPERIMENTAL##
 
 put_atts(V, A) :- !,
 	sys_get_atts(V, D),
 	functor(A, F, _),
 	dict:set(D, F, A, D2),
-	sys_put_atts(V, D2),
-
-	writeln(D2),
-	copy_term(D2, D3),
-	writeln(D3).
+	sys_put_atts(V, D2).
 
 put_atts(V, +A) :- !,
 	sys_get_atts(V, D),
