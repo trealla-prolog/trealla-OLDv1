@@ -7,7 +7,7 @@ A compact, efficient Prolog interpreter with ISO compliant aspirations.
 	Integer overflow detection
 	Rationals are a native type
 	Reals are double
-	Atoms (synonymous with strings) are UTF-8 of unlimited length
+	Atoms are UTF-8 of unlimited length
 	Arity limit 255
 	Full-term just-in-time indexing
 	Peristence to per-module database
@@ -135,12 +135,12 @@ SWI-Prolog
 	rdiv/2
 	char_type/2
 	code_type/2
-	string_upper/2
-	string_lower/2
-	uuid/1                       # generates non-standard UUID string
+	string_upper/2			# convert atom to upper-case
+	string_lower/2			# convert atom to lower-case
+	uuid/1					# generates non-standard UUID
 	load_files/2
-	split_string/4
-	read_string/3                # same as bread/3
+	split_string/4          # split apart atoms
+	read_string/3			# read atom (as per bread/3)
 
 	getenv/2
 	setenv/2
