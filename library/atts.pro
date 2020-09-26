@@ -30,8 +30,7 @@ get_atts(V, L) :- var(L), !,
 get_atts(V, +A) :- !,
 	sys_get_atts(V, D),
 	functor(A, F, _),
-	dict:get(D, F, X),
-	X = A.
+	dict:get(D, F, A).
 
 get_atts(V, -A) :- !,
 	sys_get_atts(V, D),
