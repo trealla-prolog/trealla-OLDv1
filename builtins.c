@@ -103,6 +103,7 @@ static void unpin_vars(query *q)
 
 		slot *e = GET_SLOT(g, i);
 		e->c.val_type = TYPE_EMPTY;
+		e->c.attrs = NULL;
 	}
 
 	ch->pins = 0;
