@@ -8450,16 +8450,15 @@ static int fn_freeze_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
+	cell *tmp = clone_to_heap(q, 0, p2, 0);
 
 	if (is_var(p1)) {
-		cell *tmp = clone_to_heap(q, 0, p2, 0);
 		frame *g = GET_FRAME(p1_ctx);
 		slot *e = GET_SLOT(g, p1->slot_nbr);
 		e->c.attrs = tmp;
 		return 1;
 	}
 
-	cell *tmp = clone_to_heap(q, 1, p2, 1);
 	idx_t nbr_cells = 1 + p2->nbr_cells;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;

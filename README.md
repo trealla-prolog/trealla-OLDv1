@@ -78,7 +78,7 @@ What's missing?
 	database is immediate update view, fix
 	modules need more work
 	missing directives?
-	aiming to run clp(z) down the track
+	aiming to run clpz.pl down the track
 
 
 GNU-Prolog & SWI-Prolog
