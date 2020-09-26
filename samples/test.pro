@@ -295,3 +295,5 @@ test82 :- writeln(nok).
 
 test83 :- \+ \+ (!, true), writeln(ok).
 test83 :- writeln(nok).
+
+test90 :- D=[a:1,b:2,c:3], dict:lst(D,L), writeln(L).

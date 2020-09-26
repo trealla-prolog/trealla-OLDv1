@@ -8501,28 +8501,13 @@ static int fn_sys_get_atts_2(query *q)
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->slot_nbr);
 
-	if (!e->c.attrs || is_nil(&e->c)) {
+	if (!e->c.attrs) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	cell *c = e->c.attrs + 1;
-	cell *tmp = c + 1;
-	tmp += tmp->nbr_cells;
-	alloc_list(q, tmp);
-	c += c->nbr_cells;
-
-	while (is_list(c)) {
-		c = c + 1;
-		cell *tmp = c + 1;
-		tmp += tmp->nbr_cells;
-		append_list(q, tmp);
-		c += c->nbr_cells;
-	}
-
-	cell *l = end_list(q);
-	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
+	return unify(q, p2, p2_ctx, e->c.attrs, q->st.curr_frame);
 }
 
 static int fn_sys_ne_2(query *q)

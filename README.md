@@ -214,7 +214,8 @@ Others
 	dict:set/4              # set(+dict,+name,+value,-dict)
 	dict:del/3              # del(+dict,+name,-dict)
 	dict:get/3              # get(+dict,+name,-value)
-	dict:get/4              # defget(+dict,+name,-value,+default)
+	dict:get/4              # get(+dict,+name,-value,+default)
+	dict:lst/2              # lst(+dict,-list)
 
 
 Networking          ##EXPERIMENTAL##

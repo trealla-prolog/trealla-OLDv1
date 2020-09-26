@@ -1,4 +1,4 @@
-:- module(dict, [get/4, get/3, set/4, del/3]).
+:- module(dict, [get/4, get/3, set/4, del/3, lst/2]).
 
 get([], _, D, D) :- !.
 get([N:V|_], N, V, _) :- !.
@@ -13,3 +13,8 @@ set(L, N, V, [N:V|L2]) :- del(L, N, L2).
 del([], _, []) :- !.
 del([N:_|T], N, T) :- !.
 del([H|T], N, [H|L]) :- del(T, N, L).
+
+lst0([], L, L).
+lst0([_:V|T], L1, L) :- lst0(T, [V|L1], L).
+
+lst(D, L) :- lst0(D, [], L).

@@ -23,10 +23,9 @@ put_atts(V, -A) :- !,
 	dict:del(D, F, D2),
 	sys_put_atts(V, D2).
 
-get_atts(V, L) :-
-	var(L), !,
+get_atts(V, L) :- var(L), !,
 	sys_get_atts(V, D),
-	L = D.
+	dict:lst(D, L).
 
 get_atts(V, +A) :- !,
 	sys_get_atts(V, D),
@@ -37,7 +36,7 @@ get_atts(V, +A) :- !,
 get_atts(V, -A) :- !,
 	sys_get_atts(V, D),
 	functor(A, F, _),
-	\+ dict:get(D, F, X).
+	\+ dict:get(D, F, _).
 
 attributed(V) :-
 	sys_get_atts(V, D),
