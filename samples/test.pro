@@ -276,9 +276,9 @@ test69 :-
 	limit(5, offset(5, between(1,20,I))), writeln(I), fail.
 test69.
 
-task70(X,Y) :- write('Got '), writeln(X), Y=456.
+task70(X,Y) :- write('Frozen X='),write(X),Y=456,write(', set Y='),writeln(Y).
 
-test70 :- freeze(X, task70(X,Y)), X=123, writeln(Y), writeln('OK done').
+test70 :- freeze(X, task70(X,Y)), X=123, write('Y='), writeln(Y), writeln('OK done').
 
 test80 :-
 	between(1,10,I),

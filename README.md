@@ -97,6 +97,7 @@ GNU-Prolog & SWI-Prolog
 	tab/1-2
 	random/1                # random(-float) float [0.0,<1.0]
 	random/1                # random(+integer) function returning integer [0,<integer]
+	freeze/2
 
 
 GNU-Prolog

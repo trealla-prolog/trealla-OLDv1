@@ -185,6 +185,7 @@ static void unwind_trail(query *q, const choice *ch)
 		frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->slot_nbr);
 		e->c.val_type = TYPE_EMPTY;
+		e->c.attrs = NULL;
 	}
 }
 
@@ -219,8 +220,10 @@ void try_me(const query *q, unsigned vars)
 	g->env = q->st.sp;
 	slot *e = GET_SLOT(g, 0);
 
-	for (unsigned i = 0; i < vars; i++, e++)
+	for (unsigned i = 0; i < vars; i++, e++) {
 		e->c.val_type = TYPE_EMPTY;
+		e->c.attrs = NULL;
+	}
 }
 
 void make_choice(query *q)
@@ -522,12 +525,20 @@ void set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 {
 	frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->slot_nbr);
+	cell *frozen = NULL;
+
+	if (is_empty(&e->c) && e->c.attrs)
+		frozen = e->c.attrs;
+
 	e->ctx = v_ctx;
 
 	if (v->arity)
 		make_indirect(&e->c, v);
 	else
 		e->c = *v;
+
+	if (frozen)
+		call_attrs(q, frozen);
 
 	if (!q->cp)
 		return;

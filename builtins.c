@@ -8438,11 +8438,23 @@ static int fn_offset_2(query *q)
 	return 1;
 }
 
+void call_attrs(query *q, cell *attrs)
+{
+	cell *tmp = clone_to_heap(q, 1, attrs, 1);
+	idx_t nbr_cells = 1 + attrs->nbr_cells;
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	q->st.curr_cell = tmp;
+}
+
 static int fn_freeze_2(query *q)
 {
 	GET_FIRST_ARG(p1,var);
 	GET_NEXT_ARG(p2,callable);
-	return 0;
+	cell *tmp = clone_to_heap(q, 0, p2, 0);
+	frame *g = GET_FRAME(p1_ctx);
+	slot *e = GET_SLOT(g, p1->slot_nbr);
+	e->c.attrs = tmp;
+	return 1;
 }
 
 #if 0

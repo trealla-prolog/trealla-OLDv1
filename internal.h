@@ -440,3 +440,4 @@ void do_db_load(module *m);
 void set_dynamic_in_db(module *m, const char *name, idx_t arity);
 int set_op(module *m, const char *name, unsigned val_type, unsigned precedence);
 size_t sprint_int(char *dst, size_t size, int_t n, int base);
+void call_attrs(query *q, cell *attrs);
