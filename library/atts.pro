@@ -6,7 +6,10 @@ put_atts(V, A) :- !,
 	sys_get_atts(V, D),
 	functor(A, F, _),
 	dict:set(D, F, A, D2),
-	sys_put_atts(V, D2).
+	sys_put_atts(V, D2),
+	writeln(D2),
+	copy_term(D2, D3),
+	writeln(D3).
 
 put_atts(V, +A) :- !,
 	sys_get_atts(V, D),
@@ -20,8 +23,8 @@ put_atts(V, -A) :- !,
 	dict:del(D, F, D2),
 	sys_put_atts(V, D2).
 
-get_atts(V, L) :- !,
-	var(L),
+get_atts(V, L) :-
+	var(L), !,
 	sys_get_atts(V, D),
 	L = D.
 
