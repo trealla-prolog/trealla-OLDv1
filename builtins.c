@@ -8483,25 +8483,31 @@ static int fn_frozen_2(query *q)
 	return unify(q, p2, p2_ctx, e->c.attrs, q->st.curr_frame);
 }
 
-#if 0
 static int fn_put_atts_2(query *q)
 {
 	GET_FIRST_ARG(p1,var);
 	GET_NEXT_ARG(p2,callable);
-	return 0;
+	cell *tmp = clone_to_heap(q, 0, p2, 0);
+	frame *g = GET_FRAME(p1_ctx);
+	slot *e = GET_SLOT(g, p1->slot_nbr);
+	e->c.attrs = tmp;
+	return 1;
 }
 
 static int fn_get_atts_2(query *q)
 {
-	GET_FIRST_ARG(p1,attrvar);
+	GET_FIRST_ARG(p1,var);
+	GET_NEXT_ARG(p2,any);
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->slot_nbr);
 
-	if (!e->c.attrs)
-		return 0;
+	if (!e->c.attrs) {
+		cell tmp;
+		make_literal(&tmp, g_true_s);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
 
-	GET_NEXT_ARG(p2,callable);
-	return 0;
+	return unify(q, p2, p2_ctx, e->c.attrs, q->st.curr_frame);
 }
 
 static int fn_attributed_1(query *q)
@@ -8509,9 +8515,8 @@ static int fn_attributed_1(query *q)
 	GET_FIRST_ARG(p1,var);
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->slot_nbr);
-	return is_attrvar(&e->c);
+	return e->c.attrs ? 1 : 0;
 }
-#endif
 
 static int fn_sys_ne_2(query *q)
 {
@@ -8857,12 +8862,9 @@ static const struct builtins g_other_funcs[] =
 
 	{"freeze", 2, fn_freeze_2, "+var,+callable"},
 	{"frozen", 2, fn_frozen_2, "+var,+callable"},
-
-#if 0
 	{"put_atts", 2, fn_put_atts_2, "+var,+callable"},
 	{"get_atts", 2, fn_get_atts_2, "+var,+callable"},
 	{"attributed", 1, fn_attributed_1, "-var"},
-#endif
 
 #if USE_OPENSSL
 	{"sha1", 2, fn_sha1_2, "+atom,?atom"},

@@ -26,7 +26,6 @@
 #define is_nonvar(c) (!is_var(c))
 #define is_stream(c) (get_stream(q,c) >= 0)
 #define is_stream_or_structure(c) (is_structure(c) || is_stream(c))
-#define is_attrvar(c) (is_var(c) && (c)->attrs)
 #define is_any(c) 1
 
 inline static cell *deref(query *q, cell *c, idx_t c_ctx)
