@@ -1746,6 +1746,17 @@ static int get_token(parser *p, int last_op)
 
 	if (p->dq_consing && p->m->flag.double_quote_chars) {
 		int ch = get_char_utf8(&src);
+
+		if ((ch == '\\') && p->m->flag.character_escapes) {
+			ch = get_escape(&src, &p->error);
+
+			if (p->error) {
+				fprintf(stderr, "Error: illegal character escape, line %d\n", p->line_nbr);
+				p->error = 1;
+				return 0;
+			}
+		}
+
 		dst += put_char_utf8(dst, ch);
 		*dst = '\0';
 		p->srcptr = (char*)src;
