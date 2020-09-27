@@ -1871,11 +1871,16 @@ static int fn_iso_put_code_2(query *q)
 
 static int fn_iso_put_byte_1(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,integer);
 	int n = get_named_stream(q, "user_output");
 	stream *str = &g_streams[n];
-	const char *src = GET_STR(p1);
-	int ch = *src;
+	int ch = (int)p1->val_num;
+
+	if ((ch > 255) || (ch < 0)) {
+		throw_error(q, p1, "type_error", "byte");
+		return 0;
+	}
+
 	char tmpbuf[20];
 	put_char_utf8(tmpbuf, ch);
 	net_write(tmpbuf, strlen(tmpbuf), str);
@@ -1887,9 +1892,14 @@ static int fn_iso_put_byte_2(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
-	GET_NEXT_ARG(p1,atom);
-	const char *src = GET_STR(p1);
-	int ch = *src;
+	GET_NEXT_ARG(p1,integer);
+	int ch = (int)p1->val_num;
+
+	if ((ch > 255) || (ch < 0)) {
+		throw_error(q, p1, "type_error", "byte");
+		return 0;
+	}
+
 	char tmpbuf[20];
 	put_char_utf8(tmpbuf, ch);
 	net_write(tmpbuf, strlen(tmpbuf), str);
