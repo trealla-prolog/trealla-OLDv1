@@ -64,19 +64,19 @@ utf8.o: utf8.c utf8.h
 # Library modules
 
 dict.o: library/dict.pro
-	$(LD) -r -o dict.o library/dict.pro
+	$(LD) -m elf_x86_64 -r -b binary -o dict.o library/dict.pro
 
 lists.o: library/lists.pro
-	$(LD) -r -o lists.o library/lists.pro
+	$(LD) -m elf_x86_64 -r -b binary -o lists.o library/lists.pro
 
 apply.o: library/apply.pro
-	$(LD) -r -o apply.o library/apply.pro
+	$(LD) -m elf_x86_64 -r -b binary -o apply.o library/apply.pro
 
 http.o: library/http.pro
-	$(LD) -r -o http.o library/http.pro
+	$(LD) -m elf_x86_64 -r -b binary -o http.o library/http.pro
 
 auth.o: library/auth.pro
-	$(LD) -r -o auth.o library/auth.pro
+	$(LD) -m elf_x86_64 -r -b binary -o auth.o library/auth.pro
 
 atts.o: library/atts.pro
-	$(LD) -r -o atts.o library/atts.pro
+	$(LD) -m elf_x86_64 -r -b binary -o atts.o library/atts.pro
