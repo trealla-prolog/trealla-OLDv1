@@ -221,6 +221,7 @@ Attributed variables		##UNDER DEVELOPMENT##
 	freeze/2
 	frozen/2
 
+	attribute/1
 	put_atts/2
 	get_atts/2
 	attributed/1
