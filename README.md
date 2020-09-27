@@ -202,8 +202,6 @@ Others
 	bwrite/2                # bwrite(+stream,+blob)
 	replace/4               # replace(+atom,+old,+new,-atom)
 	split/4                 # split(+atom,+sep,?left,?right)
-	sys_queue/1             # push (append) term to queue
-	sys_list/1              # pop list of all queued items
 	base64/2                # base64(?decoded,?encoded)
 	urlenc/2                # urlenc(?decoded,?encoded)
 	sha1/2                  # sha1(?atom,?hash)        NEEDS OPENSSL

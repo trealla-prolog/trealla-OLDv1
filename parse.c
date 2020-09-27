@@ -2701,8 +2701,8 @@ prolog *pl_create()
 	g_nil_s = find_in_pool("[]");
 	g_fail_s = find_in_pool("fail");
 	g_clause_s = find_in_pool(":-");
-	g_sys_elapsed_s = find_in_pool("sys_elapsed");
-	g_sys_queue_s = find_in_pool("sys_queue");
+	g_sys_elapsed_s = find_in_pool("$elapsed");
+	g_sys_queue_s = find_in_pool("$queue");
 	g_eof_s = find_in_pool("end_of_file");
 	g_lt_s = find_in_pool("<");
 	g_gt_s = find_in_pool(">");

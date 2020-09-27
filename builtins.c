@@ -8849,8 +8849,8 @@ static const struct builtins g_other_funcs[] =
 	{"instance", 2, fn_instance_2, "+ref,?term"},
 	{"erase", 1, fn_erase_1, "+ref"},
 	{"clause", 3, fn_clause_3, "?head,?body,-ref"},
-	{"sys_queue", 1, fn_sys_queue_1, "+term"},
-	{"sys_list", 1, fn_sys_list_1, "-list"},
+	{"$queue", 1, fn_sys_queue_1, "+term"},
+	{"$list", 1, fn_sys_list_1, "-list"},
 	{"getenv", 2, fn_getenv_2},
 	{"setenv", 2, fn_setenv_2},
 	{"unsetenv", 1, fn_unsetenv_1},
@@ -8863,8 +8863,8 @@ static const struct builtins g_other_funcs[] =
 
 	{"freeze", 2, fn_freeze_2, "+var,+callable"},
 	{"frozen", 2, fn_frozen_2, "+var,+callable"},
-	{"sys_put_atts", 2, fn_sys_put_atts_2, "+var,+callable"},
-	{"sys_get_atts", 2, fn_sys_get_atts_2, "+var,+callable"},
+	{"$put_atts", 2, fn_sys_put_atts_2, "+var,+callable"},
+	{"$get_atts", 2, fn_sys_get_atts_2, "+var,+callable"},
 
 #if USE_OPENSSL
 	{"sha1", 2, fn_sha1_2, "+atom,?atom"},
