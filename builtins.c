@@ -8506,17 +8506,19 @@ static int fn_sys_put_atts_2(query *q)
 static int fn_sys_get_atts_2(query *q)
 {
 	GET_FIRST_ARG(p1,var);
-	GET_NEXT_ARG(p2,any);
+	GET_NEXT_ARG(p2,var);
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->slot_nbr);
 
 	if (!e->c.attrs) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		return 1;
 	}
 
-	return unify(q, p2, p2_ctx, e->c.attrs, q->st.curr_frame);
+	set_var(q, p2, p2_ctx, e->c.attrs, q->st.curr_frame);
+	return 1;
 }
 
 static int fn_sys_ne_2(query *q)
