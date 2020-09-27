@@ -2528,7 +2528,7 @@ module *create_module(const char *name)
 	g_modules = m;
 
 	m->p = create_parser(m);
-	m->flag.double_quote_codes = 1;
+	m->flag.double_quote_chars = 1;
 	m->flag.character_escapes = 1;
 	m->flag.rational_syntax_natural = 0;
 	m->flag.prefer_rationals = 0;
