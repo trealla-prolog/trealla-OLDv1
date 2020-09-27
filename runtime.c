@@ -530,7 +530,7 @@ void set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 	slot *e = GET_SLOT(g, c->slot_nbr);
 	cell *frozen = NULL;
 
-	if (is_empty(&e->c) && e->c.attrs && !is_empty(e->c.attrs))
+	if (is_empty(&e->c) && e->c.attrs && !is_list_or_nil(e->c.attrs))
 		frozen = e->c.attrs;
 
 	e->ctx = v_ctx;
