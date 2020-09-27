@@ -163,7 +163,7 @@ static void trace_call(query *q, cell *c, int box)
 
 #if DEBUG
 	frame *g = GET_FRAME(q->st.curr_frame);
-	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u:tp%u:cp%u:fp%u:sp%u} ", q->st.curr_frame, g->nbr_vars, g->nbr_slots, g->any_choices, q->st.tp, q->cp, q->st.fp, q->st.sp);
+	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u:tp%u:cp%u:fp%u:sp%u:hp%u} ", q->st.curr_frame, g->nbr_vars, g->nbr_slots, g->any_choices, q->st.tp, q->cp, q->st.fp, q->st.sp, q->st.hp);
 #endif
 
 	idx_t save_ctx = q->latest_ctx;

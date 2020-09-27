@@ -15,10 +15,21 @@ put_atts(V, -(A)) :-
 	dict:del(D, F, D2),
 	'$put_atts'(V, D2).
 
+put_atts(V, A) :- !,
+	'$get_atts'(V, D),
+	functor(A, F, _),
+	dict:set(D, F, A, D2),
+	'$put_atts'(V, D2).
+
 get_atts(V, L) :-
 	var(L), !,
 	'$get_atts'(V, D),
 	dict:lst(D, L).
+
+get_atts(V, +A) :- !,
+	'$get_atts'(V, D),
+	functor(A, F, _),
+	dict:get(D, F, A).
 
 get_atts(V, +(A)) :- !,
 	'$get_atts'(V, D),
