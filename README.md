@@ -100,9 +100,6 @@ GNU-Prolog & SWI-Prolog
 	random/1                # random(-float) float [0.0,<1.0]
 	random/1                # random(+integer) function returning integer [0,<integer]
 
-	freeze/2          ##EXPERIMENTAL##
-	frozen/2          ##EXPERIMENTAL##
-
 
 GNU-Prolog
 ==========
@@ -215,10 +212,21 @@ Others
 	dict:del/3              # del(+dict,+name,-dict)
 	dict:get/3              # get(+dict,+name,-value)
 	dict:get/4              # get(+dict,+name,-value,+default)
-	dict:lst/2              # lst(+dict,-list)
+	dict:lst/2              # lst(+dict,-values)
 
 
-Networking          ##EXPERIMENTAL##
+Attributed variables		##UNDER DEVELOPMENT##
+====================
+
+	freeze/2
+	frozen/2
+
+	put_atts/2
+	get_atts/2
+	attributed/1
+
+
+Networking					##EXPERIMENTAL##
 ==========
 
 	server/2                # server(+host,-stream)
@@ -245,7 +253,7 @@ meaning return all bytes until end end of file,
 Network SSL reading does not support get_code/get_char/peek_code/peek_char.
 
 
-Persistence			##EXPERIMENTAL##
+Persistence					##EXPERIMENTAL##
 ===========
 
 Declaring something dynamic with the *persist* directive:
@@ -257,7 +265,7 @@ causes that clause to be saved to a per-module database on update
 *dynamic/2*?
 
 
-Concurrency          ##EXPERIMENTAL##
+Concurrency					##EXPERIMENTAL##
 ===========
 
 Trealla is single-threaded but cooperative multitasking is available
@@ -337,7 +345,7 @@ An example:
 	Time elapsed 0.33 secs
 
 
-Rationals          ##EXPERIMENTAL##
+Rationals						##EXPERIMENTAL##
 =========
 
 Rationals are a native type, with integers just a special case where
