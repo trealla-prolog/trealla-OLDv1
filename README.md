@@ -201,9 +201,9 @@ Others
 	split/4                 # split(+atom,+sep,?left,?right)
 	base64/2                # base64(?decoded,?encoded)
 	urlenc/2                # urlenc(?decoded,?encoded)
-	sha1/2                  # sha1(?atom,?hash)        NEEDS OPENSSL
-	sha256/2                # sha256(?atom,?hash)      NEEDS OPENSSL
-	sha512/2                # sha512(?atom,?hash)      NEEDS OPENSSL
+	sha1/2                  # sha1(+plaintext,?hash)        NEEDS OPENSSL
+	sha256/2                # sha256(+plaintext,?hash)      NEEDS OPENSSL
+	sha512/2                # sha512(+plaintext,?hash)      NEEDS OPENSSL
 	open(stream(str), )     # with open/4 reopen a stream
 
 	persist/1               # directive 'persist funct/arity'

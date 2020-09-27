@@ -7338,10 +7338,17 @@ static int fn_format_3(query *q)
 #if USE_OPENSSL
 static int fn_sha1_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom_or_var);
+	const char *str;
+
+	if (is_list(p1))
+		str = convert_list_to_string(q, p1, p1_ctx);
+	 else
+		str = GET_STR(p1);
+
 	unsigned char digest[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*)GET_STR(p1), LEN_STR(p1), digest);
+	SHA1((unsigned char*)str, LEN_STR(p1), digest);
 	char tmpbuf[512];
 	char *dst = tmpbuf;
 	size_t buflen = sizeof(tmpbuf);
@@ -7358,10 +7365,17 @@ static int fn_sha1_2(query *q)
 
 static int fn_sha256_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom_or_var);
+	const char *str;
+
+	if (is_list(p1))
+		str = convert_list_to_string(q, p1, p1_ctx);
+	 else
+		str = GET_STR(p1);
+
 	unsigned char digest[SHA256_DIGEST_LENGTH];
-	SHA256((unsigned char*)GET_STR(p1), LEN_STR(p1), digest);
+	SHA256((unsigned char*)str, LEN_STR(p1), digest);
 	char tmpbuf[512];
 	char *dst = tmpbuf;
 	size_t buflen = sizeof(tmpbuf);
@@ -7378,10 +7392,17 @@ static int fn_sha256_2(query *q)
 
 static int fn_sha512_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom_or_var);
+	const char *str;
+
+	if (is_list(p1))
+		str = convert_list_to_string(q, p1, p1_ctx);
+	 else
+		str = GET_STR(p1);
+
 	unsigned char digest[SHA512_DIGEST_LENGTH];
-	SHA512((unsigned char*)GET_STR(p1), LEN_STR(p1), digest);
+	SHA512((unsigned char*)str, LEN_STR(p1), digest);
 	char tmpbuf[512];
 	char *dst = tmpbuf;
 	size_t buflen = sizeof(tmpbuf);
