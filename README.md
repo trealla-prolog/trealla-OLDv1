@@ -368,10 +368,10 @@ Compiled with GCC 10.1.0 on Linux.
 	            |   tpl   |   swipl   |  gprolog  |   yap   |  scryer
 	            |  1.1.7  |   8.2.1   |    1.45   |   6.5   |  0.8.127
 	------------|---------|-----------|-----------|---------|----------
-	sieve(5)    |   0.36  |   0.27    |   0.52    |   0.31  |   7.63
-	fib(30)     |   0.59  |   0.30    |   0.56    |   0.79  |   6.74
-	hanoiq(22)  |   1.15  |   0.39    |   1.18    |   0.85  |   9.9
-	queens11    |   1.27  |   0.88    |   1.40    |   1.46  |  10.9
+	sieve       |   0.36  |   0.27    |   0.52    |   0.31  |   7.63
+	fibonacci   |   0.59  |   0.30    |   0.56    |   0.79  |   6.74
+	hanoi       |   1.15  |   0.39    |   1.18    |   0.85  |   9.9
+	queens      |   1.27  |   0.88    |   1.40    |   1.46  |  10.9
 	puzzle      |   0.35  |   0.17    |   0.28    |   0.22  |   3.08
 	chess       |  10.7   |   4.9     |   4.9     |   4.9   |
 	------------|---------|-----------|-----------|---------|----------
@@ -416,3 +416,8 @@ Yap came from *git clone https://github.com/vscosta/yap-6.3* and needs
 
 Scryer came from *cargo install scryer-prolog* (it takes a long time)
 and needs *m4* installed. Chess needs name/2 (at least).
+
+The Peirera (sic) benchmarks can be run:
+
+	tpl -l samples/broken/peirera.pl -g bench_peirera,halt
+	swipl -l samples/broken/peirera.pl -g bench_peirera,halt
