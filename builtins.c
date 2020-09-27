@@ -6941,9 +6941,69 @@ static int format_integer(char *dst, int_t v, int grouping, int sep, int decimal
 	return dst2 - dst;
 }
 
-static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx_t p2_ctx)
+static char *convert_list_to_string(query *q, cell *p1, idx_t p1_ctx)
 {
-	const char *src = GET_STR(p1);
+	cell *l = p1;
+	idx_t l_ctx = p1_ctx;
+	unsigned cnt = 0;
+
+	while (is_list(l)) {
+		cell *head = l + 1;
+		cell *c = deref_var(q, head, l_ctx);
+
+		if (is_integer(c))
+			cnt++;
+		else if (is_atom(c))
+			cnt++;
+		else
+			return 0;
+
+		l = head + head->nbr_cells;
+		l = deref_var(q, l, l_ctx);
+		l_ctx = q->latest_ctx;
+	}
+
+	// Allow for max UTF8 bytes per char
+
+	char *tmpbuf = malloc((cnt*6)+1);
+	char *dst = tmpbuf;
+	l = p1;
+
+	while (is_list(l)) {
+		cell *head = l + 1;
+		cell *c = deref_var(q, head, l_ctx);
+		int ch;
+
+		if (is_integer(c))
+			ch = (int)c->val_num;
+		else if (is_atom(c)) {
+			const char *ptr = GET_STR(c);
+			ch = get_char_utf8(&ptr);
+		}
+
+		dst += put_char_utf8(dst, ch);
+		l = head + head->nbr_cells;
+		l = deref_var(q, l, l_ctx);
+		l_ctx = q->latest_ctx;
+	}
+
+	*dst = '\0';
+	return tmpbuf;
+}
+
+static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx, cell* p2, idx_t p2_ctx)
+{
+	char *srcbuf;
+
+	if (is_list(p1))
+		srcbuf = convert_list_to_string(q, p1, p1_ctx);
+	 else
+		srcbuf = GET_STR(p1);
+
+	if (!srcbuf)
+		return 0;
+
+	const char *src = srcbuf;
 	size_t bufsiz;
 	char *tmpbuf = malloc(bufsiz=strlen(src)+100);
 	char *dst = tmpbuf;
@@ -7201,29 +7261,32 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 		return 0;
 	}
 
+	if (is_list(p1))
+		free(srcbuf);
+
 	free(tmpbuf);
 	return 1;
 }
 
 static int fn_format_1(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
-	return do_format(q, NULL, 0, p1, NULL, 0);
+	GET_FIRST_ARG(p1,atom_or_list);
+	return do_format(q, NULL, 0, p1, p1_ctx, NULL, 0);
 }
 
 static int fn_format_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,list_or_nil);
-	return do_format(q, NULL, 0, p1, !is_nil(p2)?p2:NULL, p2_ctx);
+	return do_format(q, NULL, 0, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
 }
 
 static int fn_format_3(query *q)
 {
 	GET_FIRST_ARG(pstr,stream_or_structure);
-	GET_NEXT_ARG(p1,atom);
+	GET_NEXT_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,list_or_nil);
-	return do_format(q, pstr, pstr_ctx, p1, !is_nil(p2)?p2:NULL, p2_ctx);
+	return do_format(q, pstr, pstr_ctx, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
 }
 
 #if USE_OPENSSL

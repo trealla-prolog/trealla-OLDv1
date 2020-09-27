@@ -218,13 +218,15 @@ Others
 Attributed variables		##UNDER DEVELOPMENT##
 ====================
 
+	atts:put_atts/2
+	atts:get_atts/2
+	atts:attributed/1
+
+Not built on attributed variables per se, but using the same mechanism
+under the hood...
+
 	freeze/2
 	frozen/2
-
-	attribute/1
-	put_atts/2
-	get_atts/2
-	attributed/1
 
 
 Networking					##EXPERIMENTAL##
