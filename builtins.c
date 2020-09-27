@@ -459,7 +459,6 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 static cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
 	init_tmp_heap(q);
-	idx_t save_idx = tmp_heap_used(q);
 
 	if (is_var(p1)) {
 		p1 = deref_var(q, p1, p1_ctx);
@@ -467,7 +466,7 @@ static cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	}
 
 	deep_clone2_to_tmp(q, p1, p1_ctx);
-	return get_tmp_heap(q, save_idx);
+	return q->tmp_heap;
 }
 
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
@@ -477,10 +476,9 @@ cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 		p1_ctx = q->latest_ctx;
 	}
 
-	deep_clone_to_tmp(q, p1, p1_ctx);
-	idx_t nbr_cells = tmp_heap_used(q);
-	cell *tmp = alloc_heap(q, nbr_cells);
-	copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
+	p1 = deep_clone_to_tmp(q, p1, p1_ctx);
+	cell *tmp = alloc_heap(q, p1->nbr_cells);
+	copy_cells(tmp, p1, p1->nbr_cells);
 	return tmp;
 }
 
@@ -8495,7 +8493,7 @@ static int fn_frozen_2(query *q)
 static int fn_sys_put_atts_2(query *q)
 {
 	GET_FIRST_ARG(p1,var);
-	GET_NEXT_ARG(p2,callable);
+	GET_NEXT_ARG(p2,list_or_nil);
 	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->slot_nbr);
