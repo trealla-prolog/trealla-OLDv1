@@ -113,7 +113,7 @@ SWI-Prolog
 	setup_call_cleanup/3
 	findall/4
 	term_to_atom/2
-	atom_number/2
+	atom_number/2			# synonymous with string_number/2
 	atomic_concat/3
 	format(atom(A),...)
 	var_number/2
@@ -182,6 +182,7 @@ codes-list (aka *strings*).
 Others
 ======
 
+	string_number/2         # unify (in decimal) with number
 	string_hex/2            # unify (in hex) with number
 	string_octal/2          # unify (in octal) with number
 	log10/1                 # function returning log10 of arg

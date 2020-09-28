@@ -8015,9 +8015,9 @@ static int fn_term_hash_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_atom_number_2(query *q)
+static int fn_string_number_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_var);
+	GET_FIRST_ARG(p1,atom_or_list_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_var(p1) && is_var(p2)) {
@@ -8033,7 +8033,14 @@ static int fn_atom_number_2(query *q)
 		return 1;
 	}
 
-	int_t p1_val = strtoll(GET_STR(p1), NULL, 10);
+	const char *src;
+
+	if (is_list(p1))
+		src = convert_list_to_string(q, p1, p1_ctx);
+	 else
+		src = GET_STR(p1);
+
+	int_t p1_val = strtoll(src, NULL, 10);
 
 	if (is_var(p2)) {
 		cell tmp;
@@ -9132,7 +9139,8 @@ static const struct builtins g_other_funcs[] =
 	{"read_string", 3, fn_bread_3, "+stream,+integer,-atom"},
 	{"bread", 3, fn_bread_3, "+stream,+integer,-atom"},
 	{"bwrite", 2, fn_bwrite_2, "+stream,-atom"},
-	{"atom_number", 2, fn_atom_number_2, "?string,?integer"},
+	{"atom_number", 2, fn_string_number_2, "?string,?integer"},
+	{"string_number", 2, fn_string_number_2, "?string,?integer"},
 	{"string_hex", 2, fn_string_hex_2, "?string,?integer"},
 	{"string_octal", 2, fn_string_octal_2, "?atom,?integer"},
 	{"predicate_property", 2, fn_predicate_property_2, "+callable,?atom"},
