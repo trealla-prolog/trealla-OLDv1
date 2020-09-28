@@ -5843,19 +5843,25 @@ static int fn_forall_2(query *q)
 
 static int fn_split_string_4(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,atom);
 	GET_NEXT_ARG(p4,any);
+	const char *src;
 
-	if (is_nil(p1)) {
+	if (is_list(p1))
+		src = convert_list_to_string(q, p1, p1_ctx);
+	 else
+		src = GET_STR(p1);
+
+	if (!src || !*src) {
 		throw_error(q, p1, "type_error", "atom");
 		return 0;
 	}
 
 	int ch = peek_char_utf8(GET_STR(p2));
 	int pad = peek_char_utf8(GET_STR(p3));
-	const char *start = GET_STR(p1), *ptr;
+	const char *start = src, *ptr;
 	cell *l = NULL;
 	int nbr = 1, in_list = 0;
 
@@ -7581,9 +7587,19 @@ static int fn_urlenc_2(query *q)
 
 static int fn_string_lower_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom_or_var);
-	char *tmps = strdup(GET_STR(p1));
+	const char *src;
+
+	if (is_list(p1))
+		src = convert_list_to_string(q, p1, p1_ctx);
+	 else
+		src = GET_STR(p1);
+
+	if (!src)
+		return 0;
+
+	char *tmps = strdup(src);
 	char *s = tmps;
 
 	while (*s) {
@@ -7598,9 +7614,19 @@ static int fn_string_lower_2(query *q)
 
 static int fn_string_upper_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom_or_var);
-	char *tmps = strdup(GET_STR(p1));
+	const char *src;
+
+	if (is_list(p1))
+		src = convert_list_to_string(q, p1, p1_ctx);
+	 else
+		src = GET_STR(p1);
+
+	if (!src)
+		return 0;
+
+	char *tmps = strdup(src);
 	char *s = tmps;
 
 	while (*s) {
