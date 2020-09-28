@@ -59,7 +59,7 @@ typedef uint32_t idx_t;
 #define is_end(c) ((c)->val_type == TYPE_END)
 
 #define is_number(c) (is_rational(c) || is_float(c))
-#define is_atom(c) ((is_literal(c) || is_string(c)) && !(c)->arity)
+#define is_atom(c) ((is_literal(c) && !(c)->arity) || is_string(c))
 #define is_structure(c) (is_literal(c) && (c)->arity)
 #define is_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
