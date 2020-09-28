@@ -132,12 +132,12 @@ SWI-Prolog
 	rdiv/2
 	char_type/2
 	code_type/2
-	string_upper/2			# convert atom to upper-case
-	string_lower/2			# convert atom to lower-case
+	string_upper/2
+	string_lower/2
 	uuid/1					# generates non-standard UUID
 	load_files/2
-	split_string/4          # split apart atoms
-	read_string/3			# read atom (as per bread/3)
+	split_string/4
+	read_string/3			# synonoymous with bread/3
 
 	getenv/2
 	setenv/2
