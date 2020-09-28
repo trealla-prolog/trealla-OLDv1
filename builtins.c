@@ -1249,13 +1249,15 @@ static int fn_iso_atom_length_2(query *q)
 	GET_NEXT_ARG(p2,integer_or_var);
 	const char *src;
 
-	if (is_list(p1))
+	if (is_list(p1)) {
 		src = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		src = GET_STR(p1);
 
-	if (!src)
-		return 0;
+		if (!src) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		src = GET_STR(p1);
 
 	cell tmp;
 	make_int(&tmp, strlen_utf8(src));
@@ -1403,16 +1405,19 @@ static int fn_iso_open_3(query *q)
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,var);
-	const char *filename;
+	const char *src;
 
-	if (is_list(p1))
-		filename = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		filename = GET_STR(p1);
+	if (is_list(p1)) {
+		src = convert_list_to_string(q, p1, p1_ctx);
 
-	if (!filename)
-		return 0;
+		if (!src) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		src = GET_STR(p1);
 
+	const char *filename = src;
 	const char *mode = GET_STR(p2);
 	int n = new_stream(q);
 
@@ -1469,13 +1474,16 @@ static int fn_iso_open_4(query *q)
 
 		stream *oldstr = &g_streams[oldn];
 		filename = oldstr->filename;
-	} else if (is_list(p1))
+	} else if (is_list(p1)) {
 		filename = convert_list_to_string(q, p1, p1_ctx);
+
+		if (!filename) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	}
 	else
 		filename = GET_STR(p1);
-
-	if (!filename)
-		return 0;
 
 	stream *str = &g_streams[n];
 	str->filename = strdup(filename);
@@ -5849,12 +5857,18 @@ static int fn_split_string_4(query *q)
 	GET_NEXT_ARG(p4,any);
 	const char *src;
 
-	if (is_list(p1))
+	if (is_list(p1)) {
 		src = convert_list_to_string(q, p1, p1_ctx);
-	 else
+
+		if (!src) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
 		src = GET_STR(p1);
 
-	if (!src || !*src) {
+
+	if (!src) {
 		throw_error(q, p1, "type_error", "atom");
 		return 0;
 	}
@@ -5944,16 +5958,19 @@ static int fn_savefile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,string);
-	const char *filename;
+	const char *src;
 
-	if (is_list(p1))
-		filename = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		filename = GET_STR(p1);
+	if (is_list(p1)) {
+		src = convert_list_to_string(q, p1, p1_ctx);
 
-	if (!filename)
-		return 0;
+		if (!src) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		src = GET_STR(p1);
 
+	const char *filename = src;
 	FILE *fp = fopen(filename, "wb");
 	fwrite(GET_STR(p2), 1, LEN_STR(p2), fp);
 	fclose(fp);
@@ -5964,16 +5981,19 @@ static int fn_loadfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,var);
-	const char *filename;
+	const char *src;
 
-	if (is_list(p1))
-		filename = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		filename = GET_STR(p1);
+	if (is_list(p1)) {
+		src = convert_list_to_string(q, p1, p1_ctx);
 
-	if (!filename)
-		return 0;
+		if (!src) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		src = GET_STR(p1);
 
+	const char *filename = src;
 	FILE *fp = fopen(filename, "rb");
 
 	if (!fp) {
@@ -6005,16 +6025,19 @@ static int fn_getfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,var);
-	const char *filename;
+	const char *src;
 
-	if (is_list(p1))
-		filename = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		filename = GET_STR(p1);
+	if (is_list(p1)) {
+		src = convert_list_to_string(q, p1, p1_ctx);
 
-	if (!filename)
-		return 0;
+		if (!src) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		src = GET_STR(p1);
 
+	const char *filename = src;
 	FILE *fp = fopen(filename, "r");
 
 	if (!fp) {
@@ -6155,13 +6178,15 @@ static int fn_server_3(query *q)
 
 	const char *url;
 
-	if (is_list(p1))
+	if (is_list(p1)) {
 		url = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		url = GET_STR(p1);
 
-	if (!url)
-		return 0;
+		if (!url) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		url = GET_STR(p1);
 
 	parse_host(url, hostname, path, &port, &ssl);
 	nonblock = q->is_task;
@@ -6332,13 +6357,15 @@ static int fn_client_5(query *q)
 
 	const char *url;
 
-	if (is_list(p1))
+	if (is_list(p1)) {
 		url = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		url = GET_STR(p1);
 
-	if (!url)
-		return 0;
+		if (!url) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		url = GET_STR(p1);
 
 	parse_host(url, hostname, path, &port, &ssl);
 	nonblock = q->is_task;
@@ -6605,13 +6632,15 @@ static int fn_read_term_from_atom_3(query *q)
 	stream *str = &g_streams[n];
 	const char *p;
 
-	if (is_list(p1))
+	if (is_list(p1)) {
 		p = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		p = GET_STR(p1);
 
-	if (!p)
-		return 0;
+		if (!p) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		p = GET_STR(p1);
 
 	char *src = malloc(strlen(p)+10);
 	sprintf(src, "%s", p);
@@ -7084,13 +7113,15 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx,
 {
 	char *srcbuf;
 
-	if (is_list(p1))
+	if (is_list(p1)) {
 		srcbuf = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		srcbuf = GET_STR(p1);
 
-	if (!srcbuf)
-		return 0;
+		if (!srcbuf) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		srcbuf = GET_STR(p1);
 
 	const char *src = srcbuf;
 	size_t bufsiz;
@@ -7382,13 +7413,15 @@ static int fn_sha1_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *str;
 
-	if (is_list(p1))
+	if (is_list(p1)) {
 		str = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		str = GET_STR(p1);
 
-	if (!str)
-		return 0;
+		if (!str) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p1);
 
 	unsigned char digest[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*)str, strlen(str), digest);
@@ -7428,13 +7461,15 @@ static int fn_sha256_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *str;
 
-	if (is_list(p1))
+	if (is_list(p1)) {
 		str = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		str = GET_STR(p1);
 
-	if (!str)
-		return 0;
+		if (!str) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p1);
 
 	unsigned char digest[SHA256_DIGEST_LENGTH];
 	SHA256((unsigned char*)str, strlen(str), digest);
@@ -7474,13 +7509,15 @@ static int fn_sha512_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *str;
 
-	if (is_list(p1))
+	if (is_list(p1)) {
 		str = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		str = GET_STR(p1);
 
-	if (!str)
-		return 0;
+		if (!str) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p1);
 
 	unsigned char digest[SHA512_DIGEST_LENGTH];
 	SHA512((unsigned char*)str, strlen(str), digest);
@@ -7521,13 +7558,15 @@ static int do_b64encode_2(query *q)
 	GET_NEXT_ARG(p2,var);
 	const char *str;
 
-	if (is_list(p1))
+	if (is_list(p1)) {
 		str = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		str = GET_STR(p1);
 
-	if (!str)
-		return 0;
+		if (!str) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p1);
 
 	size_t len = strlen(str);
 	char *dstbuf = malloc((len*3)+1);
@@ -7562,13 +7601,15 @@ static int do_b64decode_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_list);
 	const char *str;
 
-	if (is_list(p2))
+	if (is_list(p2)) {
 		str = convert_list_to_string(q, p2, p2_ctx);
-	 else
-		str = GET_STR(p2);
 
-	if (!str)
-		return 0;
+		if (!str) {
+			throw_error(q, p2, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p2);
 
 	size_t len = strlen(str);
 	char *dstbuf = malloc(len+1);
@@ -7656,13 +7697,15 @@ static int do_urlencode_2(query *q)
 	GET_NEXT_ARG(p2,var);
 	const char *str;
 
-	if (is_list(p1))
+	if (is_list(p1)) {
 		str = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		str = GET_STR(p1);
 
-	if (!str)
-		return 0;
+		if (!str) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p1);
 
 	size_t len = strlen(str);
 	char *dstbuf = malloc((len*3)+1);
@@ -7697,13 +7740,15 @@ static int do_urldecode_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_list);
 	const char *str;
 
-	if (is_list(p2))
+	if (is_list(p2)) {
 		str = convert_list_to_string(q, p2, p2_ctx);
-	 else
-		str = GET_STR(p2);
 
-	if (!str)
-		return 0;
+		if (!str) {
+			throw_error(q, p2, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p2);
 
 	size_t len = strlen(str);
 	char *dstbuf = malloc(len+1);
@@ -7750,17 +7795,19 @@ static int fn_string_lower_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom_or_var);
-	const char *src;
+	const char *str;
 
-	if (is_list(p1))
-		src = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		src = GET_STR(p1);
+	if (is_list(p1)) {
+		str = convert_list_to_string(q, p1, p1_ctx);
 
-	if (!src)
-		return 0;
+		if (!str) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p1);
 
-	char *tmps = strdup(src);
+	char *tmps = strdup(str);
 	char *s = tmps;
 
 	while (*s) {
@@ -7777,17 +7824,19 @@ static int fn_string_upper_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom_or_var);
-	const char *src;
+	const char *str;
 
-	if (is_list(p1))
-		src = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		src = GET_STR(p1);
+	if (is_list(p1)) {
+		str = convert_list_to_string(q, p1, p1_ctx);
 
-	if (!src)
-		return 0;
+		if (!str) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p1);
 
-	char *tmps = strdup(src);
+	char *tmps = strdup(str);
 	char *s = tmps;
 
 	while (*s) {
@@ -7803,16 +7852,19 @@ static int fn_string_upper_2(query *q)
 static int fn_exists_file_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
-	const char *filename;
+	const char *str;
 
-	if (is_list(p1))
-		filename = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		filename = GET_STR(p1);
+	if (is_list(p1)) {
+		str = convert_list_to_string(q, p1, p1_ctx);
 
-	if (!filename)
-		return 0;
+		if (!str) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p1);
 
+	const char *filename = str;
 	struct stat st = {0};
 
 	if (stat(filename, &st))
@@ -7827,16 +7879,19 @@ static int fn_exists_file_1(query *q)
 static int fn_delete_file_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
-	const char *filename;
+	const char *str;
 
-	if (is_list(p1))
-		filename = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		filename = GET_STR(p1);
+	if (is_list(p1)) {
+		str = convert_list_to_string(q, p1, p1_ctx);
 
-	if (!filename)
-		return 0;
+		if (!str) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p1);
 
+	const char *filename = str;
 	remove(filename);
 	return 1;
 }
@@ -7845,26 +7900,31 @@ static int fn_rename_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom_or_list);
-	const char *filename1;
+	const char *str;
 
-	if (is_list(p1))
-		filename1 = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		filename1 = GET_STR(p1);
+	if (is_list(p1)) {
+		str = convert_list_to_string(q, p1, p1_ctx);
 
-	if (!filename1)
-		return 0;
+		if (!str) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p1);
 
-	const char *filename2;
+	const char *filename1 = str;
 
-	if (is_list(p1))
-		filename2 = convert_list_to_string(q, p2, p2_ctx);
-	 else
-		filename2 = GET_STR(p2);
+	if (is_list(p2)) {
+		str = convert_list_to_string(q, p2, p2_ctx);
 
-	if (!filename2)
-		return 0;
+		if (!str) {
+			throw_error(q, p2, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p2);
 
+	const char *filename2 = str;
 	return !rename(filename1, filename2);
 }
 
@@ -7872,16 +7932,19 @@ static int fn_time_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,var);
-	const char *filename;
+	const char *str;
 
-	if (is_list(p1))
-		filename = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		filename = GET_STR(p1);
+	if (is_list(p1)) {
+		str = convert_list_to_string(q, p1, p1_ctx);
 
-	if (!filename)
-		return 0;
+		if (!str) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p1);
 
+	const char *filename = str;
 	struct stat st = {0};
 
 	if (stat(filename, &st))
@@ -7896,16 +7959,19 @@ static int fn_size_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,var);
-	const char *filename;
+	const char *str;
 
-	if (is_list(p1))
-		filename = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		filename = GET_STR(p1);
+	if (is_list(p1)) {
+		str = convert_list_to_string(q, p1, p1_ctx);
 
-	if (!filename)
-		return 0;
+		if (!str) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p1);
 
+	const char *filename = str;
 	struct stat st = {0};
 
 	if (stat(filename, &st))
@@ -7919,16 +7985,19 @@ static int fn_size_file_2(query *q)
 static int fn_exists_directory_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
-	const char *filename;
+	const char *str;
 
-	if (is_list(p1))
-		filename = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		filename = GET_STR(p1);
+	if (is_list(p1)) {
+		str = convert_list_to_string(q, p1, p1_ctx);
 
-	if (!filename)
-		return 0;
+		if (!str) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p1);
 
+	const char *filename = str;
 	struct stat st = {0};
 
 	if (stat(filename, &st))
@@ -7943,16 +8012,19 @@ static int fn_exists_directory_1(query *q)
 static int fn_make_directory_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
-	const char *filename;
+	const char *str;
 
-	if (is_list(p1))
-		filename = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		filename = GET_STR(p1);
+	if (is_list(p1)) {
+		str = convert_list_to_string(q, p1, p1_ctx);
 
-	if (!filename)
-		return 0;
+		if (!str) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p1);
 
+	const char *filename = str;
 	struct stat st = {0};
 
 	if (!stat(filename, &st))
@@ -7984,16 +8056,19 @@ static int fn_working_directory_2(query *q)
 static int fn_chdir_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
-	const char *filename;
+	const char *str;
 
-	if (is_list(p1))
-		filename = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		filename = GET_STR(p1);
+	if (is_list(p1)) {
+		str = convert_list_to_string(q, p1, p1_ctx);
 
-	if (!filename)
-		return 0;
+		if (!str) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		str = GET_STR(p1);
 
+	const char *filename = str;
 	return !chdir(filename);
 }
 
@@ -8196,9 +8271,14 @@ static int fn_string_number_2(query *q)
 
 	const char *src;
 
-	if (is_list(p1))
+	if (is_list(p1)) {
 		src = convert_list_to_string(q, p1, p1_ctx);
-	 else
+
+		if (!src) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
 		src = GET_STR(p1);
 
 	int_t p1_val = strtoll(src, NULL, 10);
@@ -8233,13 +8313,15 @@ static int fn_string_hex_2(query *q)
 
 	const char *src;
 
-	if (is_list(p1))
+	if (is_list(p1)) {
 		src = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		src = GET_STR(p1);
 
-	if (!src)
-		return 0;
+		if (!src) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		src = GET_STR(p1);
 
 	uint_t p1_val = strtoull(src, NULL, 16);
 
@@ -8273,13 +8355,15 @@ static int fn_string_octal_2(query *q)
 
 	const char *src;
 
-	if (is_list(p1))
+	if (is_list(p1)) {
 		src = convert_list_to_string(q, p1, p1_ctx);
-	 else
-		src = GET_STR(p1);
 
-	if (!src)
-		return 0;
+		if (!src) {
+			throw_error(q, p1, "type_error", "string");
+			return 0;
+		}
+	} else
+		src = GET_STR(p1);
 
 	uint_t p1_val = strtoull(src, NULL, 8);
 
