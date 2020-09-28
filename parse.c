@@ -1704,8 +1704,11 @@ static int get_token(parser *p, int last_op)
 	char *dst = p->token;
 	int neg = 0;
 	p->val_type = TYPE_LITERAL;
-	p->quoted = p->is_var = p->is_op = 0;
+	p->dq_consing = p->quoted = p->is_var = p->is_op = 0;
 	*dst = '\0';
+
+	if ((*src == '"') && !p->m->flag.double_quote_atom)
+		p->dq_consing = 1;
 
 	while (isspace(*src)) {
 		if (*src == '\n')
@@ -2183,7 +2186,8 @@ int parser_tokenize(parser *p, int args, int consing)
 		}
 		else if (p->val_type == TYPE_FLOAT)
 			c->val_flt = atof(p->token);
-		else if (!p->quoted || func || p->is_op || p->is_var || check_builtin(p->m, p->token, 0)) {
+		else if ((!p->quoted || func || p->is_op || p->is_var ||
+				check_builtin(p->m, p->token, 0)) && !p->dq_consing) {
 			if (func && !strcmp(p->token, "."))
 				c->precedence = 0;
 

@@ -99,7 +99,7 @@ enum {
 	FLAG2_CONST_STRING=FLAG_HEX,		// used with TYPE_STRING
 	FLAG2_BIG_STRING=FLAG_OCTAL,		// used with TYPE_STRING
 	FLAG2_STREAM=FLAG_TAIL_REC,			// used with TYPE_INTEGER
-	FLAG2_PRETTY=FLAG_BINARY,			// use with lists
+	FLAG2_DQ_CONSING=FLAG_BINARY,		// used with TYPE_STRING
 
 	OP_FX=1<<9,
 	OP_FY=1<<10,
@@ -328,6 +328,7 @@ struct parser_ {
 	size_t token_size, n_line;
 	int line_nbr, error, depth, quoted;
 	uint8_t val_type;
+	int8_t dq_consing;
 	unsigned run_init:1;
 	unsigned directive:1;
 	unsigned consulting:1;

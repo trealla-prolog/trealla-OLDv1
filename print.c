@@ -257,8 +257,6 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 	// FIXME make non-recursive
 
-	int pretty = c->flags&FLAG2_PRETTY;
-
 	while (is_list(c)) {
 		if (max_depth && (depth >= max_depth)) {
 			dst += snprintf(dst, dstlen, " |...");
@@ -268,22 +266,11 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		cell *h = LIST_HEAD(c);
 		cell *tail = LIST_TAIL(h);
 
-		if (!cons) {
-			if (pretty)
-				dst += snprintf(dst, dstlen, "%s", "\"");
-			else
-				dst += snprintf(dst, dstlen, "%s", "[");
-		}
+		if (!cons)
+			dst += snprintf(dst, dstlen, "%s", "[");
 
 		h = running ? deref_var(q, h, save_ctx) : h;
-
-		if (pretty) {
-			if (is_integer(h))
-				dst += snprintf(dst, dstlen, "%d", (int)h->val_num);
-			else
-				dst += snprintf(dst, dstlen, "%s", GET_STR(h));
-		} else
-			dst += write_term_to_buf(q, dst, dstlen, h, running, dq, 0, max_depth, depth+1);
+		dst += write_term_to_buf(q, dst, dstlen, h, running, dq, 0, max_depth, depth+1);
 
 		tail = running ? deref_var(q, tail, save_ctx) : tail;
 
@@ -296,9 +283,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			}
 		}
 		else if (is_list(tail)) {
-			if (!pretty)
-				dst += snprintf(dst, dstlen, "%s", ",");
-
+			dst += snprintf(dst, dstlen, "%s", ",");
 			c = tail;
 			save_ctx = q->latest_ctx;
 			print_list++;
@@ -310,12 +295,8 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			dst += write_term_to_buf(q, dst, dstlen, tail, running, dq, 1, max_depth, depth+1);
 		}
 
-		if (!cons || print_list) {
-			if (pretty)
-				dst += snprintf(dst, dstlen, "%s", "\"");
-			else
-				dst += snprintf(dst, dstlen, "%s", "]");
-		}
+		if (!cons || print_list)
+			dst += snprintf(dst, dstlen, "%s", "]");
 
 		q->latest_ctx = save2_ctx;
 		return dst - save_dst;
