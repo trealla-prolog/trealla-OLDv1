@@ -370,6 +370,23 @@ the *rdiv/2* operator:
 	yes
 
 
+List views						##PROPOSED##
+==========
+
+	view_bytes(+in,-list)
+	view_codes(+in,-list)
+	view_chars(+in,-list)
+
+Creates a mapped view onto an atom, string, stream, file or memory
+region that appears as a list, but without the overhead of creating an
+actual list...
+
+	?- view_codes('123', L).
+	L = [49,50,51].
+
+	?- view_chars(file('db.dat'), L).
+
+
 Performance
 ===========
 
