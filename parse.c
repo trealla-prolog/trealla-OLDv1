@@ -760,9 +760,9 @@ static void dump_vars(query *q, parser *p)
 static void consultall(parser *p, cell *l)
 {
 	while (is_list(l)) {
-		cell *c = l + 1;
-		module_load_file(p->m, GET_STR(c));
-		l = c + c->nbr_cells;
+		cell *h = LIST_HEAD(l);
+		module_load_file(p->m, GET_STR(h));
+		l = LIST_TAIL(h);;
 	}
 }
 
@@ -820,7 +820,7 @@ static void directives(parser *p, term *t)
 		p->m = create_module(name);
 
 		while (is_list(p2)) {
-			cell *head = p2 + 1;
+			cell *head = LIST_HEAD(p2);
 
 			if (is_structure(head)) {
 				cell *f = head+1, *a = f+1;
@@ -832,8 +832,7 @@ static void directives(parser *p, term *t)
 				h->is_public = 1;
 			}
 
-			cell *tail = head + head->nbr_cells;
-			p2 = tail;
+			p2 = LIST_TAIL(head);
 		}
 
 		return;

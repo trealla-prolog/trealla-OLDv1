@@ -377,6 +377,9 @@ static inline idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 	return nbr_cells;
 }
 
+#define LIST_HEAD(l) ((l) + 1)
+#define LIST_TAIL(h) ((h) + (h)->nbr_cells)
+
 int is_in_pool(const char *name, idx_t *offset);
 void set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);

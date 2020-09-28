@@ -263,14 +263,14 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			return dst - save_dst;
 		}
 
-		cell *head = c + 1;
-		cell *tail = head + head->nbr_cells;
+		cell *h = LIST_HEAD(c);
+		cell *tail = LIST_TAIL(h);
 
 		if (!cons)
 			dst += snprintf(dst, dstlen, "%s", "[");
 
-		head = running ? deref_var(q, head, save_ctx) : head;
-		dst += write_term_to_buf(q, dst, dstlen, head, running, dq, 0, max_depth, depth+1);
+		h = running ? deref_var(q, h, save_ctx) : h;
+		dst += write_term_to_buf(q, dst, dstlen, h, running, dq, 0, max_depth, depth+1);
 		tail = running ? deref_var(q, tail, save_ctx) : tail;
 
 		if (is_literal(tail) && !is_structure(tail)) {

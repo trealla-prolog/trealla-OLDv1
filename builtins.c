@@ -489,8 +489,8 @@ static char *convert_list_to_string(query *q, cell *p1, idx_t p1_ctx)
 	unsigned cnt = 0;
 
 	while (is_list(l)) {
-		cell *head = l + 1;
-		cell *c = deref_var(q, head, l_ctx);
+		cell *h = LIST_HEAD(l);
+		cell *c = deref_var(q, h, l_ctx);
 
 		if (is_integer(c))
 			cnt++;
@@ -499,7 +499,7 @@ static char *convert_list_to_string(query *q, cell *p1, idx_t p1_ctx)
 		else
 			return 0;
 
-		l = head + head->nbr_cells;
+		l = LIST_TAIL(h);
 		l = deref_var(q, l, l_ctx);
 		l_ctx = q->latest_ctx;
 	}
@@ -511,8 +511,8 @@ static char *convert_list_to_string(query *q, cell *p1, idx_t p1_ctx)
 	l = p1;
 
 	while (is_list(l)) {
-		cell *head = l + 1;
-		cell *c = deref_var(q, head, l_ctx);
+		cell *h = LIST_HEAD(l);
+		cell *c = deref_var(q, h, l_ctx);
 		int ch;
 
 		if (is_integer(c))
@@ -523,7 +523,7 @@ static char *convert_list_to_string(query *q, cell *p1, idx_t p1_ctx)
 		}
 
 		dst += put_char_utf8(dst, ch);
-		l = head + head->nbr_cells;
+		l = LIST_TAIL(h);
 		l = deref_var(q, l, l_ctx);
 		l_ctx = q->latest_ctx;
 	}
@@ -1484,8 +1484,8 @@ static int fn_iso_open_4(query *q)
 	int binary = 0;
 
 	while (is_list(p4)) {
-		cell *head = p4 + 1;
-		cell *c = deref_var(q, head, p4_ctx);
+		cell *h = LIST_HEAD(p4);
+		cell *c = deref_var(q, h, p4_ctx);
 
 		if (is_structure(c) && (c->arity == 1)) {
 			if (!strcmp(GET_STR(c), "alias")) {
@@ -1504,7 +1504,7 @@ static int fn_iso_open_4(query *q)
 			}
 		}
 
-		p4 = head + head->nbr_cells;
+		p4 = LIST_TAIL(h);
 		p4 = deref_var(q, p4, p4_ctx);
 		p4_ctx = q->latest_ctx;
 	}
@@ -1646,10 +1646,10 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	int flag_atom = q->m->flag.double_quote_atom;
 
 	while (is_list(p2)) {
-		cell *head = p2 + 1;
-		cell *c = deref_var(q, head, p2_ctx);
+		cell *h = LIST_HEAD(p2);
+		cell *c = deref_var(q, h, p2_ctx);
 		parse_read_params(q, c, str);
-		p2 = head + head->nbr_cells;
+		p2 = LIST_TAIL(h);
 		p2 = deref_var(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
@@ -1839,10 +1839,10 @@ static int fn_iso_write_term_2(query *q)
 	stream *str = &g_streams[n];
 
 	while (is_list(p2)) {
-		cell *head = p2 + 1;
-		cell *c = deref_var(q, head, p2_ctx);
+		cell *h = LIST_HEAD(p2);
+		cell *c = deref_var(q, h, p2_ctx);
 		parse_write_params(q, c);
-		p2 = head + head->nbr_cells;
+		p2 = LIST_TAIL(h);
 		p2 = deref_var(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
@@ -1870,10 +1870,10 @@ static int fn_iso_write_term_3(query *q)
 	GET_NEXT_ARG(p2,any);
 
 	while (is_list(p2)) {
-		cell *head = p2 + 1;
-		cell *c = deref_var(q, head, p2_ctx);
+		cell *h = LIST_HEAD(p2);
+		cell *c = deref_var(q, h, p2_ctx);
 		parse_write_params(q, c);
-		p2 = head + head->nbr_cells;
+		p2 = LIST_TAIL(h);
 		p2 = deref_var(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
@@ -4033,9 +4033,9 @@ static int fn_iso_length_2(query *q)
 		cell *l = p1;
 
 		while (is_list(l)) {
-			cell *head = l + 1;
-			cell *tail = head + head->nbr_cells;
-			l = deref_var(q, tail, p1_ctx);
+			cell *h = LIST_HEAD(l);
+			l = LIST_TAIL(h);
+			l = deref_var(q, l, p1_ctx);
 			p1_ctx = q->latest_ctx;
 			cnt++;
 		}
@@ -4057,9 +4057,9 @@ static int fn_iso_length_2(query *q)
 		cell *l = p1;
 
 		while (is_list(l)) {
-			cell *head = l + 1;
-			cell *tail = head + head->nbr_cells;
-			l = deref_var(q, tail, p1_ctx);
+			cell *h = LIST_HEAD(l);
+			l = LIST_TAIL(h);
+			l = deref_var(q, l, p1_ctx);
 			p1_ctx = q->latest_ctx;
 			cnt++;
 		}
@@ -4959,8 +4959,8 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 	cell *l = p;
 
 	while (is_list(l)) {
-		cell *head = l + 1;
-		l = head + head->nbr_cells;
+		cell *h = LIST_HEAD(l);
+		l = LIST_TAIL(h);
 		cnt++;
 	}
 
@@ -4969,9 +4969,9 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 	l = p;
 
 	while (is_list(l)) {
-		cell *head = l + 1;
-		base[idx++] = head;
-		l = head + head->nbr_cells;
+		cell *h = LIST_HEAD(l);
+		base[idx++] = h;
+		l = LIST_TAIL(h);
 	}
 
 #ifdef __FreeBSD__
@@ -6092,8 +6092,8 @@ static int fn_server_3(query *q)
 	path[0] = '\0';
 
 	while (is_list(p3)) {
-		cell *head = p3 + 1;
-		cell *c = deref_var(q, head, p3_ctx);
+		cell *h = LIST_HEAD(p3);
+		cell *c = deref_var(q, h, p3_ctx);
 
 		if (is_structure(c) && (c->arity == 1)) {
 			if (!strcmp(GET_STR(c), "udp")) {
@@ -6148,8 +6148,8 @@ static int fn_server_3(query *q)
 			}
 		}
 
-		c = head + head->nbr_cells;
-		p3 = deref_var(q, c, p3_ctx);
+		p3 = LIST_TAIL(h);
+		p3 = deref_var(q, p3, p3_ctx);
 		p3_ctx = q->latest_ctx;
 	}
 
@@ -6281,8 +6281,8 @@ static int fn_client_5(query *q)
 	unsigned port = 80;
 
 	while (is_list(p5)) {
-		cell *head = p5 + 1;
-		cell *c = deref_var(q, head, p5_ctx);
+		cell *h = LIST_HEAD(p5);
+		cell *c = deref_var(q, h, p5_ctx);
 
 		if (is_structure(c) && (c->arity == 1)) {
 			if (!strcmp(GET_STR(c), "udp")) {
@@ -6325,8 +6325,8 @@ static int fn_client_5(query *q)
 			}
 		}
 
-		c = head + 2;
-		p5 = deref_var(q, c, p5_ctx);
+		p5 = LIST_TAIL(h);
+		p5 = deref_var(q, p5, p5_ctx);
 		p5_ctx = q->latest_ctx;
 	}
 
@@ -6344,8 +6344,8 @@ static int fn_client_5(query *q)
 	nonblock = q->is_task;
 
 	while (is_list(p5)) {
-		cell *head = p5 + 1;
-		cell *c = deref_var(q, head, p5_ctx);
+		cell *h = LIST_HEAD(p5);
+		cell *c = deref_var(q, h, p5_ctx);
 
 		if (is_structure(c) && (c->arity == 1)) {
 			if (!strcmp(GET_STR(c), "host")) {
@@ -6356,8 +6356,8 @@ static int fn_client_5(query *q)
 			}
 		}
 
-		c = head + 1;
-		p5 = deref_var(q, c, p5_ctx);
+		p5 = LIST_TAIL(h);
+		p5 = deref_var(q, p5, p5_ctx);
 		p5_ctx = q->latest_ctx;
 	}
 
@@ -7034,13 +7034,13 @@ static int fn_consult_1(query *q)
 	}
 
 	while (is_list(p1)) {
-		cell *head = p1 + 1;
-		cell *c = deref_var(q, head, p1_ctx);
+		cell *h = LIST_HEAD(p1);
+		cell *c = deref_var(q, h, p1_ctx);
 
 		if (!do_consult(q, c, q->latest_ctx))
 			return 0;
 
-		p1 = head + head->nbr_cells;
+		p1 = LIST_TAIL(h);
 		p1 = deref_var(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
