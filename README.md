@@ -176,6 +176,8 @@ SWI-Prolog
 Note: consult/1 and load_files/2 support lists of files as args. Also
 support loading into modules eg. *consult(MOD:FILE-SPEC)*.
 
+As generally, atoms can be used interchangeably with chars-lists and
+codes-list (aka *strings*).
 
 Others
 ======

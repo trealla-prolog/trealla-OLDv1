@@ -8047,7 +8047,7 @@ static int fn_atom_number_2(query *q)
 
 static int fn_atom_hex_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_var);
+	GET_FIRST_ARG(p1,atom_or_list_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_var(p1) && is_var(p2)) {
@@ -8063,7 +8063,17 @@ static int fn_atom_hex_2(query *q)
 		return 1;
 	}
 
-	uint_t p1_val = strtoull(GET_STR(p1), NULL, 16);
+	const char *src;
+
+	if (is_list(p1))
+		src = convert_list_to_string(q, p1, p1_ctx);
+	 else
+		src = GET_STR(p1);
+
+	if (!src)
+		return 0;
+
+	uint_t p1_val = strtoull(src, NULL, 16);
 
 	if (is_var(p2)) {
 		cell tmp;
@@ -8077,7 +8087,7 @@ static int fn_atom_hex_2(query *q)
 
 static int fn_atom_octal_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_var);
+	GET_FIRST_ARG(p1,atom_or_list_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_var(p1) && is_var(p2)) {
@@ -8093,7 +8103,17 @@ static int fn_atom_octal_2(query *q)
 		return 1;
 	}
 
-	uint_t p1_val = strtoull(GET_STR(p1), NULL, 8);
+	const char *src;
+
+	if (is_list(p1))
+		src = convert_list_to_string(q, p1, p1_ctx);
+	 else
+		src = GET_STR(p1);
+
+	if (!src)
+		return 0;
+
+	uint_t p1_val = strtoull(src, NULL, 8);
 
 	if (is_var(p2)) {
 		cell tmp;
