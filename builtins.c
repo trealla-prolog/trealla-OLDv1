@@ -8045,7 +8045,7 @@ static int fn_atom_number_2(query *q)
 	return p1_val == p2->val_num;
 }
 
-static int fn_atom_hex_2(query *q)
+static int fn_string_hex_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
@@ -8085,7 +8085,7 @@ static int fn_atom_hex_2(query *q)
 	return p1_val == p2->val_num;
 }
 
-static int fn_atom_octal_2(query *q)
+static int fn_string_octal_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
@@ -9132,9 +9132,9 @@ static const struct builtins g_other_funcs[] =
 	{"read_string", 3, fn_bread_3, "+stream,+integer,-atom"},
 	{"bread", 3, fn_bread_3, "+stream,+integer,-atom"},
 	{"bwrite", 2, fn_bwrite_2, "+stream,-atom"},
-	{"atom_number", 2, fn_atom_number_2, "?atom,?integer"},
-	{"atom_hex", 2, fn_atom_hex_2, "?atom,?integer"},
-	{"atom_octal", 2, fn_atom_octal_2, "?atom,?integer"},
+	{"atom_number", 2, fn_atom_number_2, "?string,?integer"},
+	{"string_hex", 2, fn_string_hex_2, "?string,?integer"},
+	{"string_octal", 2, fn_string_octal_2, "?atom,?integer"},
 	{"predicate_property", 2, fn_predicate_property_2, "+callable,?atom"},
 	{"numbervars", 1, fn_numbervars_1, "+term"},
 	{"numbervars", 3, fn_numbervars_3, "+term,+start,?end"},

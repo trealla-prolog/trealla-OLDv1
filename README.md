@@ -182,8 +182,8 @@ codes-list (aka *strings*).
 Others
 ======
 
-	atom_hex/2              # unify atom (in hex) with number
-	atom_octal/2            # unify atom (in octal) with number
+	atom_hex/2              # unify (in hex) with number
+	atom_octal/2            # unify (in octal) with number
 	log10/1                 # function returning log10 of arg
 	now/0                   # function returning C-time in secs as integer
 	now/1                   # now (-integer) C-time in secs as integer
