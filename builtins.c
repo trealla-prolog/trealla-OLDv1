@@ -7458,7 +7458,7 @@ static int fn_sha256_2(query *q)
 	make_smalln(&tmp, src++, 1);
 	alloc_list(q, &tmp);
 
-	for (int i = 1; i < (SHA_DIGEST_LENGTH*2); i++) {
+	for (int i = 1; i < (SHA256_DIGEST_LENGTH*2); i++) {
 		make_smalln(&tmp, src++, 1);
 		append_list(q, &tmp);
 	}
@@ -7504,7 +7504,7 @@ static int fn_sha512_2(query *q)
 	make_smalln(&tmp, src++, 1);
 	alloc_list(q, &tmp);
 
-	for (int i = 1; i < (SHA_DIGEST_LENGTH*2); i++) {
+	for (int i = 1; i < (SHA512_DIGEST_LENGTH*2); i++) {
 		make_smalln(&tmp, src++, 1);
 		append_list(q, &tmp);
 	}
@@ -7519,7 +7519,6 @@ static int do_b64encode_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,var);
-
 	const char *str;
 
 	if (is_list(p1))
@@ -7540,6 +7539,7 @@ static int do_b64encode_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
+	len = strlen(dstbuf);
 	const char *src = dstbuf;
 	cell tmp;
 	make_smalln(&tmp, src++, 1);
@@ -7560,7 +7560,6 @@ static int do_b64decode_2(query *q)
 {
 	GET_FIRST_ARG(p1,var);
 	GET_NEXT_ARG(p2,atom_or_list);
-
 	const char *str;
 
 	if (is_list(p2))
@@ -7581,6 +7580,7 @@ static int do_b64decode_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
+	len = strlen(dstbuf);
 	const char *src = dstbuf;
 	cell tmp;
 	make_smalln(&tmp, src++, 1);
@@ -7652,38 +7652,94 @@ char *url_decode(const char *src, char *dstbuf)
 
 static int do_urlencode_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,var);
-	size_t len = LEN_STR(p1);
+	const char *str;
+
+	if (is_list(p1))
+		str = convert_list_to_string(q, p1, p1_ctx);
+	 else
+		str = GET_STR(p1);
+
+	if (!str)
+		return 0;
+
+	size_t len = strlen(str);
 	char *dstbuf = malloc((len*3)+1);
-	url_encode(GET_STR(p1), len, dstbuf);
+	url_encode(str, len, dstbuf);
 	cell tmp = make_cstring(q, dstbuf);
+
+	if (!is_list(p1)) {
+		tmp = make_cstring(q, dstbuf);
+		free(dstbuf);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
+
+	len = strlen(dstbuf);
+	const char *src = dstbuf;
+	make_smalln(&tmp, src++, 1);
+	alloc_list(q, &tmp);
+
+	for (int i = 1; i < len; i++) {
+		make_smalln(&tmp, src++, 1);
+		append_list(q, &tmp);
+	}
+
+	cell *l = end_list(q);
+	l->flags |= FLAG2_PRETTY;
 	free(dstbuf);
-	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	return 1;
+	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
 static int do_urldecode_2(query *q)
 {
 	GET_FIRST_ARG(p1,var);
-	GET_NEXT_ARG(p2,atom);
-	size_t len = LEN_STR(p2);
+	GET_NEXT_ARG(p2,atom_or_list);
+	const char *str;
+
+	if (is_list(p2))
+		str = convert_list_to_string(q, p2, p2_ctx);
+	 else
+		str = GET_STR(p2);
+
+	if (!str)
+		return 0;
+
+	size_t len = strlen(str);
 	char *dstbuf = malloc(len+1);
-	url_decode(GET_STR(p2), dstbuf);
+	url_decode(str, dstbuf);
 	cell tmp = make_cstring(q, dstbuf);
+
+	if (!is_list(p2)) {
+		tmp = make_cstring(q, dstbuf);
+		free(dstbuf);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	len = strlen(dstbuf);
+	const char *src = dstbuf;
+	make_smalln(&tmp, src++, 1);
+	alloc_list(q, &tmp);
+
+	for (int i = 1; i < len; i++) {
+		make_smalln(&tmp, src++, 1);
+		append_list(q, &tmp);
+	}
+
+	cell *l = end_list(q);
+	l->flags |= FLAG2_PRETTY;
 	free(dstbuf);
-	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return 1;
+	return unify(q, p1, p1_ctx, l, q->st.curr_frame);
 }
 
 static int fn_urlenc_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_var);
-	GET_NEXT_ARG(p2,atom_or_var);
+	GET_FIRST_ARG(p1,atom_or_list_or_var);
+	GET_NEXT_ARG(p2,atom_or_list_or_var);
 
-	if (is_atom(p1) && is_var(p2))
+	if (is_atom_or_list_or_var(p1) && is_var(p2))
 		return do_urlencode_2(q);
-	else if (is_var(p1) && is_atom(p2))
+	else if (is_var(p1) && is_atom_or_list_or_var(p2))
 		return do_urldecode_2(q);
 
 	throw_error(q, p1, "instantiation_error", "atom");
