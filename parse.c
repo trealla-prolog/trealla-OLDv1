@@ -1707,63 +1707,6 @@ static int get_token(parser *p, int last_op)
 	p->quoted = p->is_var = p->is_op = 0;
 	*dst = '\0';
 
-	if (p->dq_consing && (*src == '"') && !p->m->flag.double_quote_atom) {
-		*dst++ = ']';
-		*dst = '\0';
-		p->srcptr = (char*)++src;
-		p->dq_consing = 0;
-		return 1;
-	}
-
-	if (p->dq_consing < 0) {
-		*dst++ = ',';
-		*dst = '\0';
-		p->dq_consing = 1;
-		return 1;
-	}
-
-	if (p->dq_consing && p->m->flag.double_quote_codes) {
-		int ch = get_char_utf8(&src);
-
-		if ((ch == '\\') && p->m->flag.character_escapes) {
-			ch = get_escape(&src, &p->error);
-
-			if (p->error) {
-				fprintf(stderr, "Error: illegal character escape, line %d\n", p->line_nbr);
-				p->error = 1;
-				return 0;
-			}
-		}
-
-		dst += sprintf(dst, "%u", ch);
-		*dst = '\0';
-		p->srcptr = (char*)src;
-		p->val_type = TYPE_INTEGER;
-		p->dq_consing = -1;
-		return 1;
-	}
-
-	if (p->dq_consing && p->m->flag.double_quote_chars) {
-		int ch = get_char_utf8(&src);
-
-		if ((ch == '\\') && p->m->flag.character_escapes) {
-			ch = get_escape(&src, &p->error);
-
-			if (p->error) {
-				fprintf(stderr, "Error: illegal character escape, line %d\n", p->line_nbr);
-				p->error = 1;
-				return 0;
-			}
-		}
-
-		dst += put_char_utf8(dst, ch);
-		*dst = '\0';
-		p->srcptr = (char*)src;
-		p->quoted = 1;
-		p->dq_consing = -1;
-		return 1;
-	}
-
 	while (isspace(*src)) {
 		if (*src == '\n')
 			p->line_nbr++;
@@ -1889,15 +1832,6 @@ static int get_token(parser *p, int last_op)
 
 	if ((*src == '"') || (*src == '`') || (*src == '\'')) {
 		p->quoted = *src++;
-
-		if ((p->quoted == '"') && !p->m->flag.double_quote_atom) {
-			*dst++ = '[';
-			*dst = '\0';
-			p->srcptr = (char*)src;
-			p->dq_consing = 1;
-			p->quoted = 0;
-			return 1;
-		}
 
 		for (;;) {
 			while (*src) {

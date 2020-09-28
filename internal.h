@@ -328,7 +328,6 @@ struct parser_ {
 	size_t token_size, n_line;
 	int line_nbr, error, depth, quoted;
 	uint8_t val_type;
-	int8_t dq_consing;
 	unsigned run_init:1;
 	unsigned directive:1;
 	unsigned consulting:1;
