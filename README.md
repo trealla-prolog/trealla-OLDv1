@@ -23,7 +23,7 @@ Building
 
 Written in plain-old C.
 
-	git clone https://github.com/trealla-prolog/trealla.git
+	git clone https://github.com/infradig/trealla.git
 	cd trealla
 	make
 	make test
