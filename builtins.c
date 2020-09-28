@@ -1245,10 +1245,20 @@ static int fn_iso_atom_concat_3(query *q)
 
 static int fn_iso_atom_length_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,integer_or_var);
+	const char *src;
+
+	if (is_list(p1))
+		src = convert_list_to_string(q, p1, p1_ctx);
+	 else
+		src = GET_STR(p1);
+
+	if (!src)
+		return 0;
+
 	cell tmp;
-	make_int(&tmp, strlen_utf8(GET_STR(p1)));
+	make_int(&tmp, strlen_utf8(src));
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -1400,6 +1410,9 @@ static int fn_iso_open_3(query *q)
 	 else
 		filename = GET_STR(p1);
 
+	if (!filename)
+		return 0;
+
 	const char *mode = GET_STR(p2);
 	int n = new_stream(q);
 
@@ -1460,6 +1473,9 @@ static int fn_iso_open_4(query *q)
 		filename = convert_list_to_string(q, p1, p1_ctx);
 	else
 		filename = GET_STR(p1);
+
+	if (!filename)
+		return 0;
 
 	stream *str = &g_streams[n];
 	str->filename = strdup(filename);
@@ -5929,6 +5945,9 @@ static int fn_savefile_2(query *q)
 	 else
 		filename = GET_STR(p1);
 
+	if (!filename)
+		return 0;
+
 	FILE *fp = fopen(filename, "wb");
 	fwrite(GET_STR(p2), 1, LEN_STR(p2), fp);
 	fclose(fp);
@@ -5945,6 +5964,9 @@ static int fn_loadfile_2(query *q)
 		filename = convert_list_to_string(q, p1, p1_ctx);
 	 else
 		filename = GET_STR(p1);
+
+	if (!filename)
+		return 0;
 
 	FILE *fp = fopen(filename, "rb");
 
@@ -5983,6 +6005,9 @@ static int fn_getfile_2(query *q)
 		filename = convert_list_to_string(q, p1, p1_ctx);
 	 else
 		filename = GET_STR(p1);
+
+	if (!filename)
+		return 0;
 
 	FILE *fp = fopen(filename, "r");
 
@@ -6128,6 +6153,9 @@ static int fn_server_3(query *q)
 		url = convert_list_to_string(q, p1, p1_ctx);
 	 else
 		url = GET_STR(p1);
+
+	if (!url)
+		return 0;
 
 	parse_host(url, hostname, path, &port, &ssl);
 	nonblock = q->is_task;
@@ -6302,6 +6330,9 @@ static int fn_client_5(query *q)
 		url = convert_list_to_string(q, p1, p1_ctx);
 	 else
 		url = GET_STR(p1);
+
+	if (!url)
+		return 0;
 
 	parse_host(url, hostname, path, &port, &ssl);
 	nonblock = q->is_task;
@@ -6572,6 +6603,9 @@ static int fn_read_term_from_atom_3(query *q)
 		p = convert_list_to_string(q, p1, p1_ctx);
 	 else
 		p = GET_STR(p1);
+
+	if (!p)
+		return 0;
 
 	char *src = malloc(strlen(p)+10);
 	sprintf(src, "%s", p);
@@ -7347,6 +7381,9 @@ static int fn_sha1_2(query *q)
 	 else
 		str = GET_STR(p1);
 
+	if (!str)
+		return 0;
+
 	unsigned char digest[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*)str, LEN_STR(p1), digest);
 	char tmpbuf[512];
@@ -7373,6 +7410,9 @@ static int fn_sha256_2(query *q)
 		str = convert_list_to_string(q, p1, p1_ctx);
 	 else
 		str = GET_STR(p1);
+
+	if (!str)
+		return 0;
 
 	unsigned char digest[SHA256_DIGEST_LENGTH];
 	SHA256((unsigned char*)str, LEN_STR(p1), digest);
@@ -7401,6 +7441,8 @@ static int fn_sha512_2(query *q)
 	 else
 		str = GET_STR(p1);
 
+	if (!str)
+		return 0;
 	unsigned char digest[SHA512_DIGEST_LENGTH];
 	SHA512((unsigned char*)str, LEN_STR(p1), digest);
 	char tmpbuf[512];
@@ -7581,6 +7623,9 @@ static int fn_exists_file_1(query *q)
 	 else
 		filename = GET_STR(p1);
 
+	if (!filename)
+		return 0;
+
 	struct stat st = {0};
 
 	if (stat(filename, &st))
@@ -7602,6 +7647,9 @@ static int fn_delete_file_1(query *q)
 	 else
 		filename = GET_STR(p1);
 
+	if (!filename)
+		return 0;
+
 	remove(filename);
 	return 1;
 }
@@ -7617,12 +7665,18 @@ static int fn_rename_file_2(query *q)
 	 else
 		filename1 = GET_STR(p1);
 
+	if (!filename1)
+		return 0;
+
 	const char *filename2;
 
 	if (is_list(p1))
 		filename2 = convert_list_to_string(q, p2, p2_ctx);
 	 else
 		filename2 = GET_STR(p2);
+
+	if (!filename2)
+		return 0;
 
 	return !rename(filename1, filename2);
 }
@@ -7637,6 +7691,9 @@ static int fn_time_file_2(query *q)
 		filename = convert_list_to_string(q, p1, p1_ctx);
 	 else
 		filename = GET_STR(p1);
+
+	if (!filename)
+		return 0;
 
 	struct stat st = {0};
 
@@ -7659,6 +7716,9 @@ static int fn_size_file_2(query *q)
 	 else
 		filename = GET_STR(p1);
 
+	if (!filename)
+		return 0;
+
 	struct stat st = {0};
 
 	if (stat(filename, &st))
@@ -7678,6 +7738,9 @@ static int fn_exists_directory_1(query *q)
 		filename = convert_list_to_string(q, p1, p1_ctx);
 	 else
 		filename = GET_STR(p1);
+
+	if (!filename)
+		return 0;
 
 	struct stat st = {0};
 
@@ -7699,6 +7762,9 @@ static int fn_make_directory_1(query *q)
 		filename = convert_list_to_string(q, p1, p1_ctx);
 	 else
 		filename = GET_STR(p1);
+
+	if (!filename)
+		return 0;
 
 	struct stat st = {0};
 
@@ -7737,6 +7803,9 @@ static int fn_chdir_1(query *q)
 		filename = convert_list_to_string(q, p1, p1_ctx);
 	 else
 		filename = GET_STR(p1);
+
+	if (!filename)
+		return 0;
 
 	return !chdir(filename);
 }

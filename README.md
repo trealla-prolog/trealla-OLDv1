@@ -87,7 +87,7 @@ GNU-Prolog & SWI-Prolog
 	between/3
 	forall/2
 	msort/2
-	read_term_from_atom/3
+	read_term_from_atom/3	# input term can be atom or string-list
 	format/1-3
 	predicate_property/2
 	numbervars/1,3-4
@@ -190,11 +190,11 @@ Others
 	rand/0                  # function returning integer [0,RAND_MAX]
 	rand/1                  # integer(-integer) integer [0,RAND_MAX]
 	delay/1                 # delay(+integer) sleep for ms
-	loadfile/2              # loadfile(+filename,-atom)
-	savefile/2              # savefile(+filename,+atom)
+	loadfile/2              # loadfile(+filename,-blob)
+	savefile/2              # savefile(+filename,+blob)
 	getfile/2               # getfile(+filename,-list)
-	getline/1               # getline(-atom)
-	getline/2               # getline(+stream,-atom)
+	getline/1               # getline(-blob)
+	getline/2               # getline(+stream,-blob)
 	bread/3                 # bread(+stream,?len,-blob)
 	bwrite/2                # bwrite(+stream,+blob)
 	replace/4               # replace(+atom,+old,+new,-atom)
