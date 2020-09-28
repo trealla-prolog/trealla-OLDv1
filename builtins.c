@@ -7815,9 +7815,26 @@ static int fn_string_lower_2(query *q)
 		s++;
 	}
 
-	cell tmp = make_cstring(q, tmps);
+	if (!is_list(p1)) {
+		cell tmp = make_cstring(q, tmps);
+		free(tmps);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
+
+	const char *src = tmps;
+	cell tmp;
+	make_smalln(&tmp, src++, 1);
+	alloc_list(q, &tmp);
+
+	for (int i = 1; i < (SHA_DIGEST_LENGTH*2); i++) {
+		make_smalln(&tmp, src++, 1);
+		append_list(q, &tmp);
+	}
+
+	cell *l = end_list(q);
+	l->flags |= FLAG2_PRETTY;
 	free(tmps);
-	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
 static int fn_string_upper_2(query *q)
@@ -7844,9 +7861,26 @@ static int fn_string_upper_2(query *q)
 		s++;
 	}
 
-	cell tmp = make_cstring(q, tmps);
+	if (!is_list(p1)) {
+		cell tmp = make_cstring(q, tmps);
+		free(tmps);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
+
+	const char *src = tmps;
+	cell tmp;
+	make_smalln(&tmp, src++, 1);
+	alloc_list(q, &tmp);
+
+	for (int i = 1; i < (SHA_DIGEST_LENGTH*2); i++) {
+		make_smalln(&tmp, src++, 1);
+		append_list(q, &tmp);
+	}
+
+	cell *l = end_list(q);
+	l->flags |= FLAG2_PRETTY;
 	free(tmps);
-	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
 static int fn_exists_file_1(query *q)
