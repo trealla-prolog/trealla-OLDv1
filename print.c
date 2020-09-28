@@ -78,13 +78,13 @@ size_t sprint_int(char *dst, size_t size, int_t n, int base)
 	return dst - save_dst;
 }
 
-static size_t formatted(char *dst, size_t dstlen, const char *src)
+static size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen)
 {
 	extern const char *g_escapes;
 	extern const char *g_anti_escapes;
 	size_t len = 0;
 
-	while (*src) {
+	while (*src && srclen--) {
 		int ch = *src++;
 		const char *ptr = strchr(g_escapes, ch);
 
@@ -101,6 +101,22 @@ static size_t formatted(char *dst, size_t dstlen, const char *src)
 
 			len++;
 		}
+	}
+
+	return len;
+}
+
+static size_t plain(char *dst, size_t dstlen, const char *src, size_t srclen)
+{
+	size_t len = 0;
+
+	while (*src && srclen--) {
+		int ch = *src++;
+
+		if (dstlen)
+			*dst++ = ch;
+
+		len++;
 	}
 
 	return len;
@@ -165,8 +181,9 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 
 	const char *src = GET_STR(c);
 	int quote = !is_var(c) && needs_quote(q->m, src);
+	if (is_dq_consing(c)) dq = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
-	dst += formatted(dst, dstlen, src);
+	dst += formatted(dst, dstlen, src, is_big_string(c) ? c->len_str : INT_MAX);
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 
 	if (!is_structure(c))
@@ -308,6 +325,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 	if (q->ignore_ops || !optype || !c->arity) {
 		int quote = ((running <= 0) || q->quoted) && !is_var(c) && needs_quote(q->m, src);
+		if (is_dq_consing(c)) dq = 1;
 		dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 		int braces = 0;
 
@@ -324,12 +342,12 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			return dst - save_dst;
 		}
 
-		if (!strcmp(src, "{}") && c->arity)
+		if (c->arity && !strcmp(src, "{}"))
 			braces = 1;
 		else if (quote)
-			dst += formatted(dst, dstlen, src);
+			dst += formatted(dst, dstlen, src, is_big_string(c) ? c->len_str : INT_MAX);
 		else
-			dst += snprintf(dst, dstlen, "%s", src);
+			dst += plain(dst, dstlen, src, is_big_string(c) ? c->len_str : INT_MAX);
 
 		dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 

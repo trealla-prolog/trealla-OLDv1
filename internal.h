@@ -6,6 +6,7 @@
 #include <sys/param.h>
 
 #include "skiplist.h"
+#include "utf8.h"
 
 #ifndef USE_OPENSSL
 #define USE_OPENSSL 0
@@ -61,10 +62,14 @@ typedef uint32_t idx_t;
 #define is_number(c) (is_rational(c) || is_float(c))
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_string(c))
 #define is_structure(c) (is_literal(c) && (c)->arity)
-#define is_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
+#define is_real_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
+#define is_fake_list(c) (is_string(c) && is_dq_consing(c))
+#define is_list(c) (is_fake_list(c) || is_real_list(c))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
 #define is_big_string(c) (is_string(c) && ((c)->flags&FLAG2_BIG_STRING))
 #define is_const_string(c) (is_string(c) && ((c)->flags&FLAG2_CONST_STRING))
+#define is_dq_consing(c) ((c)->flags&FLAG2_DQ_CONSING)
+#define is_dq_consing2(c) ((c)->flags&FLAG2_DQ_CONSING2)
 
 // These 2 assume literal or string types...
 
@@ -100,6 +105,7 @@ enum {
 	FLAG2_BIG_STRING=FLAG_OCTAL,		// used with TYPE_STRING
 	FLAG2_STREAM=FLAG_TAIL_REC,			// used with TYPE_INTEGER
 	FLAG2_DQ_CONSING=FLAG_BINARY,		// used with TYPE_STRING
+	FLAG2_DQ_CONSING2=FLAG_OCTAL,			// used with TYPE_STRING
 
 	OP_FX=1<<9,
 	OP_FY=1<<10,
@@ -144,6 +150,7 @@ struct cell_ {
 		struct {
 			char *val_str;
 			uint32_t len_str;
+			uint32_t rem_str;
 		};
 
 		struct {
@@ -372,14 +379,14 @@ extern stream g_streams[MAX_STREAMS];
 extern module *g_modules;
 extern char *g_pool;
 
-static inline idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
+inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 {
 	memcpy(dst, src, sizeof(cell)*(nbr_cells));
 	return nbr_cells;
 }
 
-#define LIST_HEAD(l) ((l) + 1)
-#define LIST_TAIL(h) ((h) + (h)->nbr_cells)
+cell *LIST_HEAD(cell *l);
+cell *LIST_TAIL(cell *h);
 
 int is_in_pool(const char *name, idx_t *offset);
 void set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);

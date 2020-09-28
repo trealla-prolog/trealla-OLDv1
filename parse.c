@@ -218,6 +218,57 @@ int set_op(module *m, const char *name, unsigned val_type, unsigned precedence)
 
 module *g_modules = NULL;
 
+cell *LIST_HEAD(cell *l)
+{
+	static cell tmp2;
+
+	if (is_dq_consing(l)) {
+		cell tmp;
+		tmp.val_type = TYPE_STRING;
+		tmp.flags = FLAG2_BIG_STRING|FLAG2_CONST_STRING|FLAG2_DQ_CONSING2;
+		tmp.nbr_cells = 1;
+		tmp.arity = 0;
+		tmp.val_str = l->val_str;
+		int n = len_char_utf8(l->val_str);
+		tmp.len_str = n;
+		tmp.rem_str = l->rem_str - n;
+		tmp2 = tmp;
+		return &tmp2;
+	}
+
+	return l + 1;
+}
+
+cell *LIST_TAIL(cell *h)
+{
+	static cell tmp2;
+
+	if (is_dq_consing2(h) && h->rem_str) {
+		cell tmp;
+		tmp.val_type = TYPE_STRING;
+		tmp.flags = FLAG2_BIG_STRING|FLAG2_CONST_STRING|FLAG2_DQ_CONSING;
+		tmp.nbr_cells = 1;
+		tmp.arity = 0;
+		tmp.val_str = h->val_str + h->len_str;
+		int n = len_char_utf8(tmp.val_str);
+		tmp.len_str = n;
+		tmp.rem_str = h->rem_str;
+		tmp2 = tmp;
+		return &tmp2;
+	} else if (is_dq_consing2(h)) {
+		cell tmp;
+		tmp.val_type = TYPE_LITERAL;
+		tmp.nbr_cells = 1;
+		tmp.flags = 0;
+		tmp.arity = 0;
+		tmp.val_off = g_nil_s;
+		tmp2 = tmp;
+		return &tmp2;
+	}
+
+	return h + h->nbr_cells;
+}
+
 module *find_module(const char *name)
 {
 	for (module *m = g_modules; m; m = m->next) {
@@ -2198,7 +2249,10 @@ int parser_tokenize(parser *p, int args, int consing)
 		} else {
 			c->val_type = TYPE_STRING;
 
-			if (strlen(p->token) < MAX_SMALL_STRING)
+			if (p->dq_consing)
+				c->flags |= FLAG2_DQ_CONSING;
+
+			if ((strlen(p->token) < MAX_SMALL_STRING) && !p->dq_consing)
 				strcpy(c->val_chr, p->token);
 			else {
 				if (p->consulting)
@@ -2207,6 +2261,7 @@ int parser_tokenize(parser *p, int args, int consing)
 				c->flags |= FLAG2_BIG_STRING;
 				c->val_str = strdup(p->token);
 				c->len_str = strlen(p->token);
+				c->rem_str = c->len_str;
 			}
 		}
 	}

@@ -599,6 +599,31 @@ static int unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_
 	return 1;
 }
 
+static int unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
+{
+	while (is_list(p1) && is_list(p2)) {
+		cell *h1 = LIST_HEAD(p1);
+		cell *h2 = LIST_HEAD(p2);
+
+		cell *c1 = deref_var(q, h1, p1_ctx);
+		idx_t c1_ctx = q->latest_ctx;
+		cell *c2 = deref_var(q, h2, p2_ctx);
+		idx_t c2_ctx = q->latest_ctx;
+
+		if (!unify(q, c1, c1_ctx, c2, c2_ctx))
+			return 0;
+
+		p1 = LIST_TAIL(h1);
+		p1 = deref_var(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+		p2 = LIST_TAIL(h2);
+		p2 = deref_var(q, p2, p2_ctx);
+		p2_ctx = q->latest_ctx;
+	}
+
+	return is_nil(p1) && is_nil(p2);
+}
+
 static int unify_int(cell *p1, cell *p2)
 {
 	if (is_rational(p2))
@@ -623,18 +648,18 @@ static int unify_literal(cell *p1, cell *p2)
 		return p1->val_off == p2->val_off;
 
 	if (is_string(p2))
-		return !strcmp(g_pool+p1->val_off, GET_STR2(p2));
+		return !strncmp(g_pool+p1->val_off, GET_STR2(p2), LEN_STR(p2));
 
 	return 0;
 }
 
 static int unify_string(cell *p1, cell *p2)
 {
-	if (is_literal(p2))
-		return !strcmp(GET_STR2(p1), g_pool+p2->val_off);
+	if (is_literal(p2) && (LEN_STR(p2) == strlen(g_pool+p2->val_off)))
+		return !memcmp(GET_STR2(p1), g_pool+p2->val_off, LEN_STR(p1));
 
-	if (is_string(p2))
-		return !strcmp(GET_STR2(p1), GET_STR2(p2));
+	if (is_string(p2) && (LEN_STR(p1) == LEN_STR(p2)))
+		return !memcmp(GET_STR2(p1), GET_STR2(p2), LEN_STR(p1));
 
 	return 0;
 }
@@ -683,6 +708,9 @@ int unify(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		set_var(q, p2, p2_ctx, p1, p1_ctx);
 		return 1;
 	}
+
+	if (is_list(p1) && is_list(p2))
+		return unify_list(q, p1, p1_ctx, p2, p2_ctx);
 
 	if (p1->arity)
 		return unify_structure(q, p1, p1_ctx, p2, p2_ctx);
