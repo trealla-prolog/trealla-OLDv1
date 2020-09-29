@@ -8,7 +8,7 @@ A compact, efficient Prolog interpreter with ISO compliant aspirations.
 	Rationals are a native type
 	Reals are double
 	Atoms are UTF-8 of unlimited length
-	The default string is *chars*, using a compact UTF8 representation
+	The default string is *chars*, using a compact UTF-8 representation
 	Arity limit 255
 	Full-term just-in-time indexing
 	Peristence to per-module database
