@@ -1755,7 +1755,7 @@ static int get_token(parser *p, int last_op)
 	char *dst = p->token;
 	int neg = 0;
 	p->val_type = TYPE_LITERAL;
-	p->dq_fake = p->dq_consing = p->quoted = p->is_var = p->is_op = 0;
+	p->dq_fake = p->quoted = p->is_var = p->is_op = 0;
 	*dst = '\0';
 
 	if (p->dq_consing && (*src == '"')) {
