@@ -63,13 +63,13 @@ typedef uint32_t idx_t;
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_string(c))
 #define is_structure(c) (is_literal(c) && (c)->arity)
 #define is_real_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
-#define is_fake_list(c) (is_string(c) && is_dq_fake(c))
+#define is_fake_list(c) (is_string(c) && is_dq_string(c))
 #define is_list(c) (is_fake_list(c) || is_real_list(c))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
 #define is_big_string(c) (is_string(c) && ((c)->flags&FLAG2_BIG_STRING))
 #define is_const_string(c) (is_string(c) && ((c)->flags&FLAG2_CONST_STRING))
-#define is_dq_fake(c) ((c)->flags&FLAG2_DQ_FAKE)
-#define is_dq_fake2(c) ((c)->flags&FLAG2_DQ_FAKE2)
+#define is_dq_string(c) ((c)->flags&FLAG2_DQ_STRING)
+#define is_dq_string2(c) ((c)->flags&FLAG2_DQ_STRING2)
 
 // These 2 assume literal or string types...
 
@@ -104,9 +104,9 @@ enum {
 	FLAG2_CONST_STRING=FLAG_HEX,		// used with TYPE_STRING
 	FLAG2_BIG_STRING=FLAG_OCTAL,		// used with TYPE_STRING
 	FLAG2_STREAM=FLAG_TAIL_REC,			// used with TYPE_INTEGER
-	FLAG2_DQ_FAKE=FLAG_BINARY,			// used with TYPE_STRING
-	FLAG2_DQ_FAKE2=FLAG_OCTAL,			// used with TYPE_STRING
-	FLAG2_PRETTY=FLAG_TAIL_REC,			// used with TYPE_STRING
+	FLAG2_DQ_STRING=FLAG_BINARY,		// used with TYPE_STRING
+	FLAG2_DQ_STRING2=FLAG_OCTAL,		// used with TYPE_STRING
+	FLAG2_PRETTY_PRINT=FLAG_TAIL_REC,	// used with TYPE_STRING
 
 	OP_FX=1<<9,
 	OP_FY=1<<10,

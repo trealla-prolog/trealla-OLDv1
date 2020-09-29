@@ -17,6 +17,7 @@
 #define PATH_SEP "\\"
 #else
 #include <unistd.h>
+#include <sys/mman.h>
 #define PATH_SEP "/"
 #endif
 
@@ -1461,6 +1462,8 @@ static int fn_iso_open_4(query *q)
 	str->filename = strdup(filename);
 	str->name = strdup(filename);
 	str->mode = strdup(mode);
+	cell *mmap_var = NULL;
+	idx_t mmap_ctx = 0;
 	int binary = 0;
 
 	while (is_list(p4)) {
@@ -1468,7 +1471,11 @@ static int fn_iso_open_4(query *q)
 		cell *c = deref_var(q, h, p4_ctx);
 
 		if (is_structure(c) && (c->arity == 1)) {
-			if (!strcmp(GET_STR(c), "alias")) {
+			if (!strcmp(GET_STR(c), "mmap")) {
+				mmap_var = c + 1;
+				mmap_var = deref_var(q, mmap_var, q->latest_ctx);
+				mmap_ctx = q->latest_ctx;
+			} else if (!strcmp(GET_STR(c), "alias")) {
 				cell *name = c + 1;
 				name = deref_var(q, name, q->latest_ctx);
 				free(str->name);
@@ -1510,6 +1517,35 @@ static int fn_iso_open_4(query *q)
 		else if (!strcmp(mode, "update"))
 			str->fp = fopen(filename, binary?"rb+":"r+");
 	}
+
+	if (!str->fp) {
+		return 0;
+	}
+
+#ifndef _WIN32
+	int prot = 0;
+
+	if (!strcmp(mode, "read"))
+		prot = PROT_READ;
+	else
+		prot = PROT_WRITE;
+
+	if (is_var(mmap_var)) {
+		struct stat st = {0};
+		stat(filename, &st);
+		size_t len = st.st_size;
+		int fd = fileno(str->fp);
+		void *addr = mmap(0, len, prot, MAP_PRIVATE, fd, 0);
+		cell tmp = {0};
+		tmp.val_type = TYPE_STRING;
+		tmp.flags = FLAG2_BIG_STRING|FLAG2_DQ_STRING;
+		tmp.nbr_cells = 1;
+		tmp.val_str = addr;
+		tmp.len_str = len;
+		tmp.rem_str = len;
+		unify(q, mmap_var, mmap_ctx, &tmp, q->st.curr_frame);
+	}
+#endif
 
 	cell *tmp = alloc_heap(q, 1);
 	make_int(tmp, n);
@@ -5901,7 +5937,7 @@ static int fn_split_4(query *q)
 			ptr++;
 
 		tmp = make_cstring(q, ptr);
-		tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+		tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 		return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -5956,7 +5992,7 @@ static int fn_loadfile_2(query *q)
 	s[st.st_size] = '\0';
 	fclose(fp);
 	cell tmp = make_blob(q, s, st.st_size);
-	tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+	tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	free(s);
 	free(filename);
@@ -5988,7 +6024,7 @@ static int fn_getfile_2(query *q)
 			line[strlen(line)-1] = '\0';
 
 		cell tmp = tmp_cstring(q, line);
-		tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+		tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 
 		if (nbr++ == 1)
 			alloc_list(q, &tmp);
@@ -6378,7 +6414,7 @@ static int fn_getline_1(query *q)
 		line[strlen(line)-1] = '\0';
 
 	cell tmp = make_cstring(q, line);
-	tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+	tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 	free(line);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
@@ -6416,7 +6452,7 @@ static int fn_getline_2(query *q)
 		line[strlen(line)-1] = '\0';
 
 	cell tmp = make_cstring(q, line);
-	tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+	tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 	free(line);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
@@ -6459,7 +6495,7 @@ static int fn_bread_3(query *q)
 		}
 
 		cell tmp = make_blob(q, str->data, str->data_len);
-		tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+		tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(str->data);
 		str->data = NULL;
@@ -6476,7 +6512,7 @@ static int fn_bread_3(query *q)
 		str->data[nbytes] = '\0';
 		str->data = realloc(str->data, nbytes+1);
 		cell tmp = make_blob(q, str->data, nbytes);
-		tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+		tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(str->data);
 		str->data = NULL;
@@ -6505,7 +6541,7 @@ static int fn_bread_3(query *q)
 	make_int(&tmp1, str->data_len);
 	set_var(q, p1, p1_ctx, &tmp1, q->st.curr_frame);
 	cell tmp2 = make_blob(q, str->data, str->data_len);
-	tmp2.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+	tmp2.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 	set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	free(str->data);
 	str->data = NULL;
@@ -7319,7 +7355,7 @@ static int fn_sha1_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmpbuf);
-	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7341,7 +7377,7 @@ static int fn_sha256_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmpbuf);
-	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7363,7 +7399,7 @@ static int fn_sha512_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmpbuf);
-	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 #endif
@@ -7377,7 +7413,7 @@ static int do_b64encode_2(query *q)
 	char *dstbuf = malloc((len*3)+1);
 	b64_encode(str, len, &dstbuf, 0, 0);
 	cell tmp = make_cstring(q, dstbuf);
-	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7391,7 +7427,7 @@ static int do_b64decode_2(query *q)
 	char *dstbuf = malloc(len+1);
 	b64_decode(str, len, &dstbuf);
 	cell tmp = make_cstring(q, dstbuf);
-	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7459,7 +7495,7 @@ static int do_urlencode_2(query *q)
 	url_encode(str, len, dstbuf);
 	cell tmp = make_cstring(q, dstbuf);
 	tmp = make_cstring(q, dstbuf);
-	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7474,7 +7510,7 @@ static int do_urldecode_2(query *q)
 	url_decode(str, dstbuf);
 	cell tmp = make_cstring(q, dstbuf);
 	tmp = make_cstring(q, dstbuf);
-	if (is_fake_list(p2)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+	if (is_fake_list(p2)) tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 	free(dstbuf);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
@@ -7507,7 +7543,7 @@ static int fn_string_lower_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmps);
-	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7526,7 +7562,7 @@ static int fn_string_upper_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmps);
-	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -8209,7 +8245,7 @@ static int fn_replace_4(query *q)
 
 	*dst = '\0';
 	cell tmp = make_cstring(q, dstbuf);
-	tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
+	tmp.flags |= FLAG2_DQ_STRING|FLAG2_PRETTY_PRINT;
 	free(dstbuf);
 	set_var(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	return 1;

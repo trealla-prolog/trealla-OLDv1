@@ -1,8 +1,4 @@
-% A grammar in DCG
-
 :-initialization(main).
-
-%%%%%%%%%%%%%%%%% Grammar %%%%%%%%%%%%%%%%%%%
 
 sentence --> np, vp.
 np --> det, noun.
@@ -19,5 +15,5 @@ det --> [a].
     Generate all possible sentences...
 */
 
-main :- phrase(sentence,X), write(X), nl, fail.
+main :- phrase(sentence, X), write(X), nl, fail.
 main :- halt.

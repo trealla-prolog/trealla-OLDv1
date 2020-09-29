@@ -222,10 +222,10 @@ cell *LIST_HEAD(cell *l)
 {
 	static cell tmp2;
 
-	if (is_dq_fake(l)) {
+	if (is_dq_string(l)) {
 		cell tmp;
 		tmp.val_type = TYPE_STRING;
-		tmp.flags = FLAG2_BIG_STRING|FLAG2_CONST_STRING|FLAG2_DQ_FAKE2;
+		tmp.flags = FLAG2_BIG_STRING|FLAG2_CONST_STRING|FLAG2_DQ_STRING2;
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;
 		tmp.val_str = l->val_str;
@@ -243,10 +243,10 @@ cell *LIST_TAIL(cell *h)
 {
 	static cell tmp2;
 
-	if (is_dq_fake2(h) && h->rem_str) {
+	if (is_dq_string2(h) && h->rem_str) {
 		cell tmp;
 		tmp.val_type = TYPE_STRING;
-		tmp.flags = FLAG2_BIG_STRING|FLAG2_CONST_STRING|FLAG2_DQ_FAKE;
+		tmp.flags = FLAG2_BIG_STRING|FLAG2_CONST_STRING|FLAG2_DQ_STRING;
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;
 		tmp.val_str = h->val_str + h->len_str;
@@ -255,7 +255,7 @@ cell *LIST_TAIL(cell *h)
 		tmp.rem_str = h->rem_str;
 		tmp2 = tmp;
 		return &tmp2;
-	} else if (is_dq_fake2(h)) {
+	} else if (is_dq_string2(h)) {
 		cell tmp;
 		tmp.val_type = TYPE_LITERAL;
 		tmp.nbr_cells = 1;
@@ -2293,7 +2293,7 @@ int parser_tokenize(parser *p, int args, int consing)
 			c->val_type = TYPE_STRING;
 
 			if (p->dq_fake)
-				c->flags |= FLAG2_DQ_FAKE;
+				c->flags |= FLAG2_DQ_STRING;
 
 			if ((strlen(p->token) < MAX_SMALL_STRING) && !p->dq_fake)
 				strcpy(c->val_chr, p->token);
@@ -2594,13 +2594,6 @@ module *create_module(const char *name)
 	make_rule(m, "_A ; B :- B.");
 #endif
 
-	// For now...
-
-	make_rule(m, "phrase(P,L) :- phrase(P,L,[]).");
-	make_rule(m, "phrase(P,L,Rest) :- call(P,L,Rest).");
-	make_rule(m, "phrase_from_file(P,F) :- phrase_from_file(P,F,[]).");
-	make_rule(m, "phrase_from_file(P,F,_) :- load_file(F,L), phrase(P,L).");
-
 	// This is an approximation...
 
 	make_rule(m, "setup_call_cleanup(A,G,B) :- once(A), (G -> true ; (B, !, fail)).");
@@ -2779,7 +2772,7 @@ prolog *pl_create()
 	for (library *lib = g_libs; lib->name; lib++) {
 		if (!strcmp(lib->name, "apply") || !strcmp(lib->name, "dict") ||
 			!strcmp(lib->name, "http") || !strcmp(lib->name, "lists") ||
-			!strcmp(lib->name, "atts")) {
+			!strcmp(lib->name, "atts") || !strcmp(lib->name, "phrase")) {
 			char *src = strndup((const char*)lib->start, (lib->end-lib->start));
 			module_load_text(pl->m, src);
 			free(src);

@@ -158,8 +158,8 @@ SWI-Prolog
 	working_directory/2
 	chdir/1
 
-	phrase/2-3
-	phrase_from-file/2-3
+	phrase/2-3				# autoloaded from library(phrase)
+	phrase_from_file/2-3	# autoloaded from library(phrase)
 
 	current_key/1
 	recorda/2-3
@@ -171,11 +171,11 @@ SWI-Prolog
 	clause/3
 	erase/1
 
-	http_get/3
-	http_post/4
-	http_put/4
-	http_delete/3
-	http_open/3
+	http_get/3				# autoloaded from library(http)
+	http_post/4				# autoloaded from library(http)
+	http_put/4				# autoloaded from library(http)
+	http_delete/3			# autoloaded from library(http)
+	http_open/3				# autoloaded from library(http)
 
 Note: consult/1 and load_files/2 support lists of files as args. Also
 support loading into modules eg. *consult(MOD:FILE-SPEC)*.
@@ -211,7 +211,9 @@ Others
 	sha1/2                  # sha1(+plaintext,?hash)        NEEDS OPENSSL
 	sha256/2                # sha256(+plaintext,?hash)      NEEDS OPENSSL
 	sha512/2                # sha512(+plaintext,?hash)      NEEDS OPENSSL
-	open(stream(str), )     # with open/4 reopen a stream
+
+	open(stream(str),... )  # with open/4 reopen a stream
+	open(F,M,S,[mmap(Ls)])  # with open/4 mmap() the file to Ls
 
 	persist/1               # directive 'persist funct/arity'
 
@@ -225,9 +227,9 @@ Others
 Attributed variables		##UNDER DEVELOPMENT##
 ====================
 
-	atts:put_atts/2
-	atts:get_atts/2
-	atts:attributed/1
+	atts:put_atts/2			# autoloaded from library(atts)
+	atts:get_atts/2			# autoloaded from library(atts)
+	atts:attributed/1		# autoloaded from library(atts)
 
 Not built on attributed variables per se, but using the same mechanism
 under the hood...
