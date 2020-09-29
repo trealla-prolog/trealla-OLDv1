@@ -734,8 +734,8 @@ static int fn_iso_atom_chars_2(query *q)
 	}
 
 	if (!is_var(p2)) {
-		cell *head = p2 + 1;
-		cell *tail = head + head->nbr_cells;
+		cell *head = LIST_HEAD(p2);
+		cell *tail = LIST_TAIL(head);
 		head = deref_var(q, head, p2_ctx);
 		q->latest_ctx = p2_ctx;
 
@@ -778,8 +778,8 @@ static int fn_iso_atom_chars_2(query *q)
 				return 0;
 			}
 
-			head = tail+1;
-			tail = head+head->nbr_cells;
+			head = LIST_HEAD(tail);
+			tail = LIST_TAIL(head);
 			head = deref_var(q, head, q->latest_ctx);
 		}
 
@@ -819,8 +819,8 @@ static int fn_iso_atom_codes_2(query *q)
 	}
 
 	if (!is_var(p2) && is_var(p1)) {
-		cell *head = p2 + 1;
-		cell *tail = head + head->nbr_cells;
+		cell *head = LIST_HEAD(p2);
+		cell *tail = LIST_TAIL(head);
 		head = deref_var(q, head, p2_ctx);
 
 		size_t nbytes;
@@ -857,8 +857,8 @@ static int fn_iso_atom_codes_2(query *q)
 				return 0;
 			}
 
-			head = tail+1;
-			tail = head+head->nbr_cells;
+			head = LIST_HEAD(tail);
+			tail = LIST_TAIL(head);
 			head = deref_var(q, head, q->latest_ctx);
 		}
 
@@ -894,8 +894,8 @@ static int fn_iso_number_chars_2(query *q)
 	}
 
 	if (!is_var(p2)) {
-		cell *head = p2 + 1;
-		cell *tail = head + head->nbr_cells;
+		cell *head = LIST_HEAD(p2);
+		cell *tail = LIST_TAIL(head);
 		head = deref_var(q, head, p2_ctx);
 
 		int_t val = 0;
@@ -927,8 +927,8 @@ static int fn_iso_number_chars_2(query *q)
 				return 0;
 			}
 
-			head = tail+1;
-			tail = head+head->nbr_cells;
+			head = LIST_HEAD(tail);
+			tail = LIST_TAIL(head);
 			head = deref_var(q, head, q->latest_ctx);
 		}
 
@@ -963,8 +963,8 @@ static int fn_iso_number_codes_2(query *q)
 	}
 
 	if (!is_var(p2)) {
-		cell *head = p2 + 1;
-		cell *tail = head + head->nbr_cells;
+		cell *head = LIST_HEAD(p2);
+		cell *tail = LIST_TAIL(head);
 		head = deref_var(q, head, p2_ctx);
 
 		int_t val = 0;
@@ -995,8 +995,8 @@ static int fn_iso_number_codes_2(query *q)
 				return 0;
 			}
 
-			head = tail+1;
-			tail = head+head->nbr_cells;
+			head = LIST_HEAD(tail);
+			tail = LIST_TAIL(head);
 			head = deref_var(q, head, q->latest_ctx);
 		}
 
@@ -1406,9 +1406,9 @@ static int fn_iso_open_3(query *q)
 	}
 
 	stream *str = &g_streams[n];
-	str->filename = strdup(filename);
-	str->name = strdup(filename);
-	str->mode = strdup(mode);
+	str->filename = strndup(filename, LEN_STR(p1));
+	str->name = strndup(filename, LEN_STR(p1));
+	str->mode = strndup(mode, LEN_STR(p2));
 
 	if (!strcmp(mode, "read"))
 		str->fp = fopen(filename, "r");
@@ -1457,9 +1457,9 @@ static int fn_iso_open_4(query *q)
 		filename = GET_STR(p1);
 
 	stream *str = &g_streams[n];
-	str->filename = strdup(filename);
-	str->name = strdup(filename);
-	str->mode = strdup(mode);
+	str->filename = strndup(filename, strlen(filename)	);
+	str->name = strndup(filename, strlen(filename));
+	str->mode = strndup(mode, strlen(mode));
 	int binary = 0;
 
 	while (is_list(p4)) {
@@ -3720,8 +3720,8 @@ static int fn_iso_univ_2(query *q)
 			return 0;
 		}
 
-		cell *head = p2 + 1;
-		cell *tail = head + head->nbr_cells;
+		cell *head = LIST_HEAD(p2);
+		cell *tail = LIST_TAIL(head);
 		head = deref_var(q, head, p2_ctx);
 
 		if (!is_atom(head)) {
@@ -3748,8 +3748,8 @@ static int fn_iso_univ_2(query *q)
 				return 0;
 			}
 
-			head = tail+1;
-			tail = head+head->nbr_cells;
+			head = LIST_HEAD(tail);
+			tail = LIST_TAIL(head);
 
 			if ((idx + head->nbr_cells) >= nbr_cells) {
 				nbr_cells += head->nbr_cells;
@@ -5912,10 +5912,11 @@ static int fn_savefile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,string);
-	const char *filename = GET_STR(p1);
+	char *filename = strndup(GET_STR(p1), LEN_STR(p1));
 	FILE *fp = fopen(filename, "wb");
 	fwrite(GET_STR(p2), 1, LEN_STR(p2), fp);
 	fclose(fp);
+	free(filename);
 	return 1;
 }
 
@@ -5923,23 +5924,27 @@ static int fn_loadfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,var);
-	const char *filename = GET_STR(p1);
+	char *filename = strndup(GET_STR(p1), LEN_STR(p1));
 	FILE *fp = fopen(filename, "rb");
 
 	if (!fp) {
 		throw_error(q, p1, "existence_error", "cannot_open_file");
+		free(filename);
 		return 0;
 	}
 
 	struct stat st = {0};
 
-	if (stat(filename, &st))
+	if (stat(filename, &st)) {
+		free(filename);
 		return 0;
+	}
 
 	char *s = malloc(st.st_size+1);
 
 	if (fread(s, 1, st.st_size, fp) != st.st_size) {
 		throw_error(q, p1, "domain_error", "cannot_read");
+		free(filename);
 		return 0;
 	}
 
@@ -5948,6 +5953,7 @@ static int fn_loadfile_2(query *q)
 	cell tmp = make_blob(q, s, st.st_size);
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	free(s);
+	free(filename);
 	return 1;
 }
 
@@ -5955,11 +5961,12 @@ static int fn_getfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,var);
-	const char *filename = GET_STR(p1);
+	char *filename = strndup(GET_STR(p1), LEN_STR(p1));
 	FILE *fp = fopen(filename, "r");
 
 	if (!fp) {
 		throw_error(q, p1, "existence_error", "cannot_open_file");
+		free(filename);
 		return 0;
 	}
 
@@ -5986,6 +5993,7 @@ static int fn_getfile_2(query *q)
 
 	free(line);
 	fclose(fp);
+	free(filename);
 
 	if (!in_list) {
 		cell tmp;

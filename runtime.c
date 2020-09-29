@@ -621,7 +621,7 @@ static int unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		p2_ctx = q->latest_ctx;
 	}
 
-	return is_nil(p1) && is_nil(p2);
+	return unify(q, p1, p1_ctx, p2, p2_ctx);
 }
 
 static int unify_int(cell *p1, cell *p2)
