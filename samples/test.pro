@@ -220,7 +220,7 @@ test53 :-
 
 geturl(Url) :-
 	http_get(Url,_Data,[status_code(Code),final_url(Location)]), !,
-	format('Job [~w] ~w ==> ~w done~n',[Url,Code,Location]).
+	format("Job [~w] ~w ==> ~w done~n",[Url,Code,Location]).
 
 test54 :-
 	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],

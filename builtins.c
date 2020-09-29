@@ -5901,6 +5901,7 @@ static int fn_split_4(query *q)
 			ptr++;
 
 		tmp = make_cstring(q, ptr);
+		tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 		return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -5955,6 +5956,7 @@ static int fn_loadfile_2(query *q)
 	s[st.st_size] = '\0';
 	fclose(fp);
 	cell tmp = make_blob(q, s, st.st_size);
+	tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	free(s);
 	free(filename);
@@ -5986,6 +5988,7 @@ static int fn_getfile_2(query *q)
 			line[strlen(line)-1] = '\0';
 
 		cell tmp = tmp_cstring(q, line);
+		tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 
 		if (nbr++ == 1)
 			alloc_list(q, &tmp);
@@ -6375,6 +6378,7 @@ static int fn_getline_1(query *q)
 		line[strlen(line)-1] = '\0';
 
 	cell tmp = make_cstring(q, line);
+	tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 	free(line);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
@@ -6412,6 +6416,7 @@ static int fn_getline_2(query *q)
 		line[strlen(line)-1] = '\0';
 
 	cell tmp = make_cstring(q, line);
+	tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 	free(line);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
@@ -6454,6 +6459,7 @@ static int fn_bread_3(query *q)
 		}
 
 		cell tmp = make_blob(q, str->data, str->data_len);
+		tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(str->data);
 		str->data = NULL;
@@ -6470,6 +6476,7 @@ static int fn_bread_3(query *q)
 		str->data[nbytes] = '\0';
 		str->data = realloc(str->data, nbytes+1);
 		cell tmp = make_blob(q, str->data, nbytes);
+		tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(str->data);
 		str->data = NULL;
@@ -6498,6 +6505,7 @@ static int fn_bread_3(query *q)
 	make_int(&tmp1, str->data_len);
 	set_var(q, p1, p1_ctx, &tmp1, q->st.curr_frame);
 	cell tmp2 = make_blob(q, str->data, str->data_len);
+	tmp2.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 	set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	free(str->data);
 	str->data = NULL;
@@ -8201,6 +8209,7 @@ static int fn_replace_4(query *q)
 
 	*dst = '\0';
 	cell tmp = make_cstring(q, dstbuf);
+	tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 	free(dstbuf);
 	set_var(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	return 1;

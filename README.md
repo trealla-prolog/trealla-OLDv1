@@ -194,14 +194,14 @@ Others
 	rand/0                  # function returning integer [0,RAND_MAX]
 	rand/1                  # integer(-integer) integer [0,RAND_MAX]
 	delay/1                 # delay(+integer) sleep for ms
-	loadfile/2              # loadfile(+filename,-blob)
-	savefile/2              # savefile(+filename,+blob)
-	getfile/2               # getfile(+filename,-list)
-	getline/1               # getline(-blob)
-	getline/2               # getline(+stream,-blob)
-	bread/3                 # bread(+stream,?len,-blob)
-	bwrite/2                # bwrite(+stream,+blob)
-	replace/4               # replace(+atom,+old,+new,-atom)
+	loadfile/2              # loadfile(+filename,-string)
+	savefile/2              # savefile(+filename,+string)
+	getfile/2               # getfile(+filename,-strings)
+	getline/1               # getline(-string)
+	getline/2               # getline(+stream,-string)
+	bread/3                 # bread(+stream,?len,-string)
+	bwrite/2                # bwrite(+stream,+string)
+	replace/4               # replace(+string,+old,+new,-string)
 	split/4                 # split(+atom,+sep,?left,?right)
 	base64/2                # base64(?decoded,?encoded)
 	urlenc/2                # urlenc(?decoded,?encoded)
@@ -306,7 +306,7 @@ An example:
 
 	geturl(Url) :-
 		http_get(Url,_Data,[status_code(Code),final_url(Location)]),
-		format('Job [~w] ~w ==> ~w done~n',[Url,Code,Location]).
+		format("Job [~w] ~w ==> ~w done~n",[Url,Code,Location]).
 
 	% Fetch each URL in list sequentially...
 
