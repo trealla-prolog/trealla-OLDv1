@@ -1406,9 +1406,9 @@ static int fn_iso_open_3(query *q)
 	}
 
 	stream *str = &g_streams[n];
-	str->filename = strndup(filename, LEN_STR(p1));
-	str->name = strndup(filename, LEN_STR(p1));
-	str->mode = strndup(mode, LEN_STR(p2));
+	str->filename = strdup(filename);
+	str->name = strdup(filename);
+	str->mode = strdup(mode);
 
 	if (!strcmp(mode, "read"))
 		str->fp = fopen(filename, "r");
@@ -1457,9 +1457,9 @@ static int fn_iso_open_4(query *q)
 		filename = GET_STR(p1);
 
 	stream *str = &g_streams[n];
-	str->filename = strndup(filename, strlen(filename)	);
-	str->name = strndup(filename, strlen(filename));
-	str->mode = strndup(mode, strlen(mode));
+	str->filename = strdup(filename);
+	str->name = strdup(filename);
+	str->mode = strdup(mode);
 	int binary = 0;
 
 	while (is_list(p4)) {
@@ -5912,7 +5912,7 @@ static int fn_savefile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,string);
-	char *filename = strndup(GET_STR(p1), LEN_STR(p1));
+	char *filename = strdup(GET_STR(p1));
 	FILE *fp = fopen(filename, "wb");
 	fwrite(GET_STR(p2), 1, LEN_STR(p2), fp);
 	fclose(fp);
@@ -5924,7 +5924,7 @@ static int fn_loadfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,var);
-	char *filename = strndup(GET_STR(p1), LEN_STR(p1));
+	char *filename = strdup(GET_STR(p1));
 	FILE *fp = fopen(filename, "rb");
 
 	if (!fp) {
@@ -5961,7 +5961,7 @@ static int fn_getfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,var);
-	char *filename = strndup(GET_STR(p1), LEN_STR(p1));
+	char *filename = strdup(GET_STR(p1));
 	FILE *fp = fopen(filename, "r");
 
 	if (!fp) {
