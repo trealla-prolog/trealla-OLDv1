@@ -1758,9 +1758,6 @@ static int get_token(parser *p, int last_op)
 	p->dq_consing = p->quoted = p->is_var = p->is_op = 0;
 	*dst = '\0';
 
-	if ((*src == '"') && !p->m->flag.double_quote_atom)
-		p->dq_consing = 1;
-
 	while (isspace(*src)) {
 		if (*src == '\n')
 			p->line_nbr++;
@@ -1885,6 +1882,9 @@ static int get_token(parser *p, int last_op)
 	// Quoted strings...
 
 	if ((*src == '"') || (*src == '`') || (*src == '\'')) {
+		if (p->m->flag.double_quote_chars)
+			p->dq_consing = 1;
+
 		p->quoted = *src++;
 
 		for (;;) {
