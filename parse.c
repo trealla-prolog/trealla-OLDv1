@@ -2596,6 +2596,8 @@ module *create_module(const char *name)
 
 	make_rule(m, "phrase(P,L) :- phrase(P,L,[]).");
 	make_rule(m, "phrase(P,L,Rest) :- call(P,L,Rest).");
+	make_rule(m, "phrase_from_file(P,F) :- phrase_from_file(P,F,[]).");
+	make_rule(m, "phrase_from_file(P,F,Opt) :- load_file(F,L), phrase(P,L).");
 
 	// This is an approximation...
 
