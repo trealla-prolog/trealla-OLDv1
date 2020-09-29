@@ -158,6 +158,9 @@ SWI-Prolog
 	working_directory/2
 	chdir/1
 
+	phrase/2-3
+	phrase_from-file/2-3
+
 	current_key/1
 	recorda/2-3
 	recordz/2-3
