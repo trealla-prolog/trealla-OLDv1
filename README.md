@@ -212,7 +212,7 @@ Others
 	sha256/2                # sha256(+plaintext,?hash)      NEEDS OPENSSL
 	sha512/2                # sha512(+plaintext,?hash)      NEEDS OPENSSL
 
-	open(stream(str),...)   # with open/4 reopen a stream
+	open(stream(Str),...)   # with open/4 reopen a stream
 	open(F,M,S,[mmap(Ls)])  # with open/4 mmap() the file to Ls
 
 	persist/1               # directive 'persist funct/arity'
