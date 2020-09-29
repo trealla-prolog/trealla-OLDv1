@@ -799,7 +799,7 @@ static void dump_vars(query *q, parser *p)
 		fprintf(stdout, "\n%s = ", p->vartab.var_name[i]);
 		int save = q->quoted;
 		q->quoted = 1;
-		write_term(q, stdout, c, 0, q->m->dq, 0, 999, 0);
+		write_term(q, stdout, c, 0, 0, 999, 0);
 		q->quoted = save;
 		any++;
 	}
@@ -2532,9 +2532,9 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 				continue;
 
 			if (canonical)
-				write_canonical(&q, fp, r->t.cells, 0, dq, 0);
+				write_canonical(&q, fp, r->t.cells, 0, 0);
 			else
-				write_term(&q, fp, r->t.cells, 0, dq, 0, 0, 0);
+				write_term(&q, fp, r->t.cells, 0, 0, 0, 0);
 
 			fprintf(fp, "\n");
 		}
@@ -2596,7 +2596,7 @@ module *create_module(const char *name)
 
 	// This is an approximation...
 
-	make_rule(m, "setup_call_cleanup(A,G,B) :- once(A), (G -> true ; (B, !, fail)).");
+	make_rule(m, "setup_call_cleanup(A,G,B) :- (A, !), (G -> true ; (B, !, fail)).");
 	make_rule(m, "call_cleanup(G,B) :- G -> true ; (B, !, fail).");
 
 	// Edinburgh...

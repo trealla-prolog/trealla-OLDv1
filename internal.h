@@ -369,7 +369,7 @@ struct module_ {
 		int rational_syntax_natural, prefer_rationals;
 	} flag;
 
-	int prebuilt, dq, halt, halt_code, status, trace, quiet, dirty;
+	int prebuilt, halt, halt_code, status, trace, quiet, dirty;
 	int user_ops, opt, stats, iso_only, use_persist, loading;
 	int make_public, cpu_count;
 };
@@ -407,12 +407,12 @@ clause *retract_from_db(module *m, clause *r);
 clause *erase_from_db(module *m, uuid *ref);
 clause *find_in_db(module *m, uuid *ref);
 int get_op(module *m, const char *name, unsigned *val_type, int *userop, int hint_prefix);
-void write_canonical(query *q, FILE *fp, cell *c, int running, int dq, int depth);
-void write_canonical_to_stream(query *q, stream *str, cell *c, int running, int dq, int depth);
-size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int dq, int depth);
-void write_term(query *q, FILE *fp, cell *c, int running, int dq, int cons, int max_depth, int depth);
-void write_term_to_stream(query *q, stream *str, cell *c, int running, int dq, int cons, int max_depth, int depth);
-size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int dq, int cons, int max_depth, int depth);
+void write_canonical(query *q, FILE *fp, cell *c, int running, int depth);
+void write_canonical_to_stream(query *q, stream *str, cell *c, int running, int depth);
+size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int depth);
+void write_term(query *q, FILE *fp, cell *c, int running, int cons, int max_depth, int depth);
+void write_term_to_stream(query *q, stream *str, cell *c, int running, int cons, int max_depth, int depth);
+size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int cons, int max_depth, int depth);
 void make_choice(query *q);
 void make_barrier(query *q);
 void make_catcher(query *q, int type);

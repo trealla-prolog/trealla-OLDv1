@@ -52,22 +52,22 @@ test6d :- sys_list(L),writeln(L).
 test6e :- Orig='Aa...Bb...Cc...Dd', atom_concat(Orig,Orig,S2), writeln(S2).
 
 test7 :-
-	http_get('www.duckduckgo.com',_Data,[status_code(Code),headers(Hdrs)]),
-	write('Response='), writeln(Code),
+	http_get("www.duckduckgo.com",_Data,[status_code(Code),headers(Hdrs)]),
+	format("Response=~w~n", [Code]),
 	writeln(Hdrs),
 	%write(_Data), nl,
 	true.
 
 test8 :-
-	http_get('http://www.bing.com',_Data,[status_code(Code),headers(Hdrs)]),
-	write('Response='), writeln(Code),
+	http_get("http://www.bing.com",_Data,[status_code(Code),headers(Hdrs)]),
+	format("Response=~w~n", [Code]),
 	writeln(Hdrs),
 	%write(_Data), nl,
 	true.
 
 test9 :-
-	http_get('https://www.google.com',_Data,[status_code(Code),headers(Hdrs),final_url(Location)]),
-	write('Response='), write(Code), write(' location='), writeln(Location),
+	http_get("https://www.google.com",_Data,[status_code(Code),headers(Hdrs),final_url(Location)]),
+	format("Response=~w, location=~s~n", [Code,Location]),
 	writeln(Hdrs),
 	%write(_Data), nl,
 	true.
@@ -297,3 +297,10 @@ test83 :- \+ \+ (!, true), writeln(ok).
 test83 :- writeln(nok).
 
 test90 :- D=[a:1,b:2,c:3], dict:lst(D,L), writeln(L).
+
+test91 :-
+	setup_call_cleanup(
+		open("README.md", read, Str, [mmap(Ls)]),
+		writeln(Ls),
+		close(Str)
+	).

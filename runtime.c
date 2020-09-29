@@ -168,7 +168,7 @@ static void trace_call(query *q, cell *c, int box)
 
 	idx_t save_ctx = q->latest_ctx;
 	q->latest_ctx = q->st.curr_frame;
-	write_term(q, stderr, c, -1, 0, 0, 100, 0);
+	write_term(q, stderr, c, -1, 0, 100, 0);
 	q->latest_ctx = save_ctx;
 	fprintf(stderr, "\n");
 }

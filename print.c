@@ -122,7 +122,7 @@ static size_t plain(char *dst, size_t dstlen, const char *src, size_t srclen)
 	return len;
 }
 
-size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int dq, int depth)
+size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int depth)
 {
 	char *save_dst = dst;
 
@@ -180,7 +180,7 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 	}
 
 	const char *src = GET_STR(c);
-	int quote = !is_var(c) && needs_quote(q->m, src);
+	int dq, quote = !is_var(c) && needs_quote(q->m, src);
 	if (is_dq_string(c)) dq = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 	dst += formatted(dst, dstlen, src, is_big_string(c) ? c->len_str : INT_MAX);
@@ -195,7 +195,7 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 
 	for (c++; arity--; c += c->nbr_cells) {
 		cell *p = running ? deref_var(q, c, save_ctx) : c;
-		dst += write_canonical_to_buf(q, dst, dstlen, p, running, dq, depth+1);
+		dst += write_canonical_to_buf(q, dst, dstlen, p, running, depth+1);
 
 		if (arity)
 			dst += snprintf(dst, dstlen, ",");
@@ -215,7 +215,7 @@ static char *varformat(unsigned nbr)
 	return tmpbuf;
 }
 
-size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int dq, int cons, int max_depth, int depth)
+size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int cons, int max_depth, int depth)
 {
 	char *save_dst = dst;
 
@@ -287,7 +287,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			dst += snprintf(dst, dstlen, "%s", "[");
 
 		h = running ? deref_var(q, h, save_ctx) : h;
-		dst += write_term_to_buf(q, dst, dstlen, h, running, dq, 0, max_depth, depth+1);
+		dst += write_term_to_buf(q, dst, dstlen, h, running, 0, max_depth, depth+1);
 
 		tail = running ? deref_var(q, tail, save_ctx) : tail;
 
@@ -296,7 +296,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 			if (strcmp(src, "[]")) {
 				dst += snprintf(dst, dstlen, "%s", "|");
-				dst += write_term_to_buf(q, dst, dstlen, tail, running, dq, 1, max_depth, depth+1);
+				dst += write_term_to_buf(q, dst, dstlen, tail, running, 1, max_depth, depth+1);
 			}
 		}
 		else if (is_list(tail)) {
@@ -309,7 +309,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		}
 		else {
 			dst += snprintf(dst, dstlen, "%s", "|");
-			dst += write_term_to_buf(q, dst, dstlen, tail, running, dq, 1, max_depth, depth+1);
+			dst += write_term_to_buf(q, dst, dstlen, tail, running, 1, max_depth, depth+1);
 		}
 
 		if (!cons || print_list)
@@ -325,8 +325,8 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 	if (q->ignore_ops || !optype || !c->arity) {
 		int quote = ((running <= 0) || q->quoted) && !is_var(c) && needs_quote(q->m, src);
-		if (is_dq_string(c)) dq = quote = 1;
-		int braces = 0;
+		//if (is_dq_string(c)) dq = quote = 1;
+		int dq = 0, braces = 0;
 		if (c->arity && !strcmp(src, "{}")) braces = 1;
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
@@ -343,12 +343,14 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			return dst - save_dst;
 		}
 
+		int len_str = is_dq_string(c) ? strlen(src) : c->len_str;
+
 		if (braces)
 			;
 		else if (quote)
-			dst += formatted(dst, dstlen, src, is_big_string(c) ? c->len_str : INT_MAX);
+			dst += formatted(dst, dstlen, src, is_big_string(c) ? len_str : INT_MAX);
 		else
-			dst += plain(dst, dstlen, src, is_big_string(c) ? c->len_str : INT_MAX);
+			dst += plain(dst, dstlen, src, is_big_string(c) ? len_str : INT_MAX);
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
@@ -358,7 +360,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 			for (c++; arity--; c += c->nbr_cells) {
 				cell *tmp = running ? deref_var(q, c, save_ctx) : c;
-				dst += write_term_to_buf(q, dst, dstlen, tmp, running, dq, 0, max_depth, depth+1);
+				dst += write_term_to_buf(q, dst, dstlen, tmp, running, 0, max_depth, depth+1);
 
 				if (arity)
 					dst += snprintf(dst, dstlen, ",");
@@ -370,7 +372,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 	else if ((c->flags & OP_XF) || (c->flags & OP_YF)) {
 		cell *lhs = c + 1;
 		lhs = running ? deref_var(q, lhs, save_ctx) : lhs;
-		dst += write_term_to_buf(q, dst, dstlen, lhs, running, dq, 0, max_depth, depth+1);
+		dst += write_term_to_buf(q, dst, dstlen, lhs, running, 0, max_depth, depth+1);
 		dst += snprintf(dst, dstlen, "%s", src);
 	}
 	else if ((c->flags & OP_FX) || (c->flags & OP_FY)) {
@@ -381,7 +383,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		dst += snprintf(dst, dstlen, "%s", src);
 		if (space && !parens) dst += snprintf(dst, dstlen, " ");
 		if (parens) dst += snprintf(dst, dstlen, "(");
-		dst += write_term_to_buf(q, dst, dstlen, rhs, running, dq, 0, max_depth, depth+1);
+		dst += write_term_to_buf(q, dst, dstlen, rhs, running, 0, max_depth, depth+1);
 		if (parens) dst += snprintf(dst, dstlen, ")");
 	}
 	else {
@@ -397,7 +399,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		int lhs_parens = lhs_prec1 > my_prec;
 		lhs_parens |= lhs_prec2;
 		if (parens || lhs_parens) dst += snprintf(dst, dstlen, "(");
-		dst += write_term_to_buf(q, dst, dstlen, lhs, running, dq, 0, max_depth, depth+1);
+		dst += write_term_to_buf(q, dst, dstlen, lhs, running, 0, max_depth, depth+1);
 		if (lhs_parens) dst += snprintf(dst, dstlen, ")");
 		rhs = running ? deref_var(q, rhs, save_ctx) : rhs;
 		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "-->") || !*src;
@@ -408,7 +410,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		int rhs_parens = rhs_prec1 > my_prec;
 		rhs_parens |= rhs_prec2;
 		if (rhs_parens) dst += snprintf(dst, dstlen, "(");
-		dst += write_term_to_buf(q, dst, dstlen, rhs, running, dq, 0, max_depth, depth+1);
+		dst += write_term_to_buf(q, dst, dstlen, rhs, running, 0, max_depth, depth+1);
 		if (parens || rhs_parens) dst += snprintf(dst, dstlen, ")");
 	}
 
@@ -416,12 +418,12 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 	return dst - save_dst;
 }
 
-void write_canonical_to_stream(query *q, stream *str, cell *c, int running, int dq, int depth)
+void write_canonical_to_stream(query *q, stream *str, cell *c, int running, int depth)
 {
 	idx_t save_ctx = q->latest_ctx;
-	size_t len = write_canonical_to_buf(q, NULL, 0, c, running, dq, depth);
+	size_t len = write_canonical_to_buf(q, NULL, 0, c, running, depth);
 	char *dst = malloc(len+1);
-	write_canonical_to_buf(q, dst, len+1, c, running, dq, depth);
+	write_canonical_to_buf(q, dst, len+1, c, running, depth);
 	const char *src = dst;
 
 	while (len) {
@@ -440,12 +442,12 @@ void write_canonical_to_stream(query *q, stream *str, cell *c, int running, int 
 	q->latest_ctx = save_ctx;
 }
 
-void write_canonical(query *q, FILE *fp, cell *c, int running, int dq, int depth)
+void write_canonical(query *q, FILE *fp, cell *c, int running, int depth)
 {
 	idx_t save_ctx = q->latest_ctx;
-	size_t len = write_canonical_to_buf(q, NULL, 0, c, running, dq, depth);
+	size_t len = write_canonical_to_buf(q, NULL, 0, c, running, depth);
 	char *dst = malloc(len+1);
-	write_canonical_to_buf(q, dst, len+1, c, running, dq, depth);
+	write_canonical_to_buf(q, dst, len+1, c, running, depth);
 	const char *src = dst;
 
 	while (len) {
@@ -464,12 +466,12 @@ void write_canonical(query *q, FILE *fp, cell *c, int running, int dq, int depth
 	q->latest_ctx = save_ctx;
 }
 
-void write_term_to_stream(query *q, stream *str, cell *c, int running, int dq, int cons, int max_depth, int depth)
+void write_term_to_stream(query *q, stream *str, cell *c, int running, int cons, int max_depth, int depth)
 {
 	idx_t save_ctx = q->latest_ctx;
-	size_t len = write_term_to_buf(q, NULL, 0, c, running, dq, cons, max_depth, depth);
+	size_t len = write_term_to_buf(q, NULL, 0, c, running, cons, max_depth, depth);
 	char *dst = malloc(len+1);
-	write_term_to_buf(q, dst, len+1, c, running, dq, cons, max_depth, depth);
+	write_term_to_buf(q, dst, len+1, c, running, cons, max_depth, depth);
 	const char *src = dst;
 
 	while (len) {
@@ -488,12 +490,12 @@ void write_term_to_stream(query *q, stream *str, cell *c, int running, int dq, i
 	q->latest_ctx = save_ctx;
 }
 
-void write_term(query *q, FILE *fp, cell *c, int running, int dq, int cons, int max_depth, int depth)
+void write_term(query *q, FILE *fp, cell *c, int running, int cons, int max_depth, int depth)
 {
 	idx_t save_ctx = q->latest_ctx;
-	size_t len = write_term_to_buf(q, NULL, 0, c, running, dq, cons, max_depth, depth);
+	size_t len = write_term_to_buf(q, NULL, 0, c, running, cons, max_depth, depth);
 	char *dst = malloc(len+1);
-	write_term_to_buf(q, dst, len+1, c, running, dq, cons, max_depth, depth);
+	write_term_to_buf(q, dst, len+1, c, running, cons, max_depth, depth);
 	const char *src = dst;
 
 	while (len) {
