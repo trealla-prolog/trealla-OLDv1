@@ -2594,7 +2594,7 @@ module *create_module(const char *name)
 	make_rule(m, "_A ; B :- B.");
 #endif
 
-	// This is an approximation...
+	// This is an approximation... it needs a catcher
 
 	make_rule(m, "setup_call_cleanup(A,G,B) :- (A, !), (G -> true ; (B, !, fail)).");
 	make_rule(m, "call_cleanup(G,B) :- G -> true ; (B, !, fail).");
