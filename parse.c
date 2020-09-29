@@ -222,10 +222,10 @@ cell *LIST_HEAD(cell *l)
 {
 	static cell tmp2;
 
-	if (is_dq_consing(l)) {
+	if (is_dq_fake(l)) {
 		cell tmp;
 		tmp.val_type = TYPE_STRING;
-		tmp.flags = FLAG2_BIG_STRING|FLAG2_CONST_STRING|FLAG2_DQ_CONSING2;
+		tmp.flags = FLAG2_BIG_STRING|FLAG2_CONST_STRING|FLAG2_DQ_FAKE2;
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;
 		tmp.val_str = l->val_str;
@@ -243,10 +243,10 @@ cell *LIST_TAIL(cell *h)
 {
 	static cell tmp2;
 
-	if (is_dq_consing2(h) && h->rem_str) {
+	if (is_dq_fake2(h) && h->rem_str) {
 		cell tmp;
 		tmp.val_type = TYPE_STRING;
-		tmp.flags = FLAG2_BIG_STRING|FLAG2_CONST_STRING|FLAG2_DQ_CONSING;
+		tmp.flags = FLAG2_BIG_STRING|FLAG2_CONST_STRING|FLAG2_DQ_FAKE;
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;
 		tmp.val_str = h->val_str + h->len_str;
@@ -255,7 +255,7 @@ cell *LIST_TAIL(cell *h)
 		tmp.rem_str = h->rem_str;
 		tmp2 = tmp;
 		return &tmp2;
-	} else if (is_dq_consing2(h)) {
+	} else if (is_dq_fake2(h)) {
 		cell tmp;
 		tmp.val_type = TYPE_LITERAL;
 		tmp.nbr_cells = 1;
@@ -1755,8 +1755,44 @@ static int get_token(parser *p, int last_op)
 	char *dst = p->token;
 	int neg = 0;
 	p->val_type = TYPE_LITERAL;
-	p->dq_consing = p->quoted = p->is_var = p->is_op = 0;
+	p->dq_fake = p->dq_consing = p->quoted = p->is_var = p->is_op = 0;
 	*dst = '\0';
+
+	if (p->dq_consing && (*src == '"')) {
+		*dst++ = ']';
+		*dst = '\0';
+		p->srcptr = (char*)++src;
+		p->dq_consing = 0;
+		return 1;
+	}
+
+	if (p->dq_consing < 0) {
+		*dst++ = ',';
+		*dst = '\0';
+		p->dq_consing = 1;
+		return 1;
+	}
+
+	if (p->dq_consing) {
+		int ch = get_char_utf8(&src);
+
+		if ((ch == '\\') && p->m->flag.character_escapes) {
+			ch = get_escape(&src, &p->error);
+
+			if (p->error) {
+				fprintf(stderr, "Error: illegal character escape, line %d\n", p->line_nbr);
+				p->error = 1;
+				return 0;
+			}
+		}
+
+		dst += sprintf(dst, "%u", ch);
+		*dst = '\0';
+		p->srcptr = (char*)src;
+		p->val_type = TYPE_INTEGER;
+		p->dq_consing = -1;
+		return 1;
+	}
 
 	while (isspace(*src)) {
 		if (*src == '\n')
@@ -1882,10 +1918,17 @@ static int get_token(parser *p, int last_op)
 	// Quoted strings...
 
 	if ((*src == '"') || (*src == '`') || (*src == '\'')) {
-		if (p->m->flag.double_quote_chars)
-			p->dq_consing = 1;
-
 		p->quoted = *src++;
+
+		if ((p->quoted == '"') && p->m->flag.double_quote_codes) {
+			*dst++ = '[';
+			*dst = '\0';
+			p->srcptr = (char*)src;
+			p->dq_consing = 1;
+			p->quoted = 0;
+			return 1;
+		} else if ((p->quoted == '"') && p->m->flag.double_quote_chars)
+			p->dq_fake = 1;
 
 		for (;;) {
 			while (*src) {
@@ -2238,7 +2281,7 @@ int parser_tokenize(parser *p, int args, int consing)
 		else if (p->val_type == TYPE_FLOAT)
 			c->val_flt = atof(p->token);
 		else if ((!p->quoted || func || p->is_op || p->is_var ||
-				check_builtin(p->m, p->token, 0)) && !p->dq_consing) {
+				check_builtin(p->m, p->token, 0)) && !p->dq_fake) {
 			if (func && !strcmp(p->token, "."))
 				c->precedence = 0;
 
@@ -2249,10 +2292,10 @@ int parser_tokenize(parser *p, int args, int consing)
 		} else {
 			c->val_type = TYPE_STRING;
 
-			if (p->dq_consing)
-				c->flags |= FLAG2_DQ_CONSING;
+			if (p->dq_fake)
+				c->flags |= FLAG2_DQ_FAKE;
 
-			if ((strlen(p->token) < MAX_SMALL_STRING) && !p->dq_consing)
+			if ((strlen(p->token) < MAX_SMALL_STRING) && !p->dq_fake)
 				strcpy(c->val_chr, p->token);
 			else {
 				if (p->consulting)

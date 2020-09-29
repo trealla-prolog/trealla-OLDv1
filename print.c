@@ -181,7 +181,7 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 
 	const char *src = GET_STR(c);
 	int quote = !is_var(c) && needs_quote(q->m, src);
-	if (is_dq_consing(c)) dq = 1;
+	if (is_dq_fake(c)) dq = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 	dst += formatted(dst, dstlen, src, is_big_string(c) ? c->len_str : INT_MAX);
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
@@ -325,7 +325,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 	if (q->ignore_ops || !optype || !c->arity) {
 		int quote = ((running <= 0) || q->quoted) && !is_var(c) && needs_quote(q->m, src);
-		if (is_dq_consing(c)) dq = 1;
+		if (is_dq_fake(c)) dq = 1;
 		dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 		int braces = 0;
 
