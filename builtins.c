@@ -4641,10 +4641,13 @@ static int fn_iso_functor_3(query *q)
 		return 1;
 	}
 
-	cell tmp;
+	cell tmp = {0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = p1->val_off;
-	tmp.arity = 0;
+	tmp.nbr_cells = 1;
+
+	if (is_fake_list(p2))
+		tmp.val_off = g_dot_s;
 
 	if (!unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 		return 0;
