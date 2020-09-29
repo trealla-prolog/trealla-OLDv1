@@ -2,11 +2,11 @@
 	phrase/2, phrase/3,
 	phrase_from_file/2, phrase_from_file/3 ].
 
-phrase(P, L) :-
-	phrase(P, L, []).
+phrase(P, Ls) :-
+	phrase(P, Ls, []).
 
-phrase(P, L, Rest) :-
-	call(P, L, Rest).
+phrase(P, Ls, Rest) :-
+	call(P, Ls, Rest).
 
 phrase_from_file(P, Filename) :-
 	phrase_from_file(P, Filename, []).

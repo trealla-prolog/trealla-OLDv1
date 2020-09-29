@@ -158,9 +158,6 @@ SWI-Prolog
 	working_directory/2
 	chdir/1
 
-	phrase/2-3				# autoloaded from library(phrase)
-	phrase_from_file/2-3	# autoloaded from library(phrase)
-
 	current_key/1
 	recorda/2-3
 	recordz/2-3
@@ -217,6 +214,22 @@ Others
 
 	persist/1               # directive 'persist funct/arity'
 
+Phrase						##EXPERIMENTAL##
+======
+
+Autoloaded from library(phrase)...
+
+	phrase/2-3
+	phrase_from_file/2-3
+
+Note: *phrase_from_file* mmap's the file to a string (chars-list).
+
+
+A simple dictionary
+===================
+
+Autoloaded from library(dict)...
+
 	dict:set/4              # set(+dict,+name,+value,-dict)
 	dict:del/3              # del(+dict,+name,-dict)
 	dict:get/3              # get(+dict,+name,-value)
@@ -224,12 +237,12 @@ Others
 	dict:lst/2              # lst(+dict,-values)
 
 
-Attributed variables		##UNDER DEVELOPMENT##
+Attributed variables		##NOT WORKING YET##
 ====================
 
-	atts:put_atts/2			# autoloaded from library(atts)
-	atts:get_atts/2			# autoloaded from library(atts)
-	atts:attributed/1		# autoloaded from library(atts)
+	put_atts/2				# autoloaded from library(atts)
+	get_atts/2				# autoloaded from library(atts)
+	attributed/1			# autoloaded from library(atts)
 
 Not built on attributed variables per se, but using the same mechanism
 under the hood...
