@@ -274,7 +274,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 	// FIXME make non-recursive
 
-	while (is_real_list(c)) {
+	while (is_list(c)) {
 		if (max_depth && (depth >= max_depth)) {
 			dst += snprintf(dst, dstlen, " |...");
 			return dst - save_dst;
@@ -326,8 +326,9 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 	if (q->ignore_ops || !optype || !c->arity) {
 		int quote = ((running <= 0) || q->quoted) && !is_var(c) && needs_quote(q->m, src);
 		if (is_dq_fake(c)) dq = quote = 1;
-		dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 		int braces = 0;
+		if (c->arity && !strcmp(src, "{}")) braces = 1;
+		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
 		if (running && is_var(c) && ((1ULL << c->slot_nbr) & q->nv_mask)) {
 			dst += snprintf(dst, dstlen, "%s", varformat(q->nv_start + count_bits(q->nv_mask, c->slot_nbr)));
@@ -342,14 +343,14 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			return dst - save_dst;
 		}
 
-		if (c->arity && !strcmp(src, "{}"))
-			braces = 1;
+		if (braces)
+			;
 		else if (quote)
 			dst += formatted(dst, dstlen, src, is_big_string(c) ? c->len_str : INT_MAX);
 		else
 			dst += plain(dst, dstlen, src, is_big_string(c) ? c->len_str : INT_MAX);
 
-		dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
+		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
 		if (is_structure(c)) {
 			idx_t arity = c->arity;
