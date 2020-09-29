@@ -274,6 +274,7 @@ static cell *alloc_stringn(query *q, const char *s, size_t n)
 	memcpy(tmp->val_str, s, n);
 	tmp->val_str[n] = '\0';
 	tmp->len_str = n;
+	tmp->rem_str = n;
 	return tmp;
 }
 
@@ -7310,6 +7311,7 @@ static int fn_sha1_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmpbuf);
+	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7331,6 +7333,7 @@ static int fn_sha256_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmpbuf);
+	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7352,6 +7355,7 @@ static int fn_sha512_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmpbuf);
+	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 #endif
@@ -7365,6 +7369,7 @@ static int do_b64encode_2(query *q)
 	char *dstbuf = malloc((len*3)+1);
 	b64_encode(str, len, &dstbuf, 0, 0);
 	cell tmp = make_cstring(q, dstbuf);
+	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7378,6 +7383,7 @@ static int do_b64decode_2(query *q)
 	char *dstbuf = malloc(len+1);
 	b64_decode(str, len, &dstbuf);
 	cell tmp = make_cstring(q, dstbuf);
+	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7445,6 +7451,7 @@ static int do_urlencode_2(query *q)
 	url_encode(str, len, dstbuf);
 	cell tmp = make_cstring(q, dstbuf);
 	tmp = make_cstring(q, dstbuf);
+	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7459,6 +7466,7 @@ static int do_urldecode_2(query *q)
 	url_decode(str, dstbuf);
 	cell tmp = make_cstring(q, dstbuf);
 	tmp = make_cstring(q, dstbuf);
+	if (is_fake_list(p2)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 	free(dstbuf);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
@@ -7491,6 +7499,7 @@ static int fn_string_lower_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmps);
+	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7509,6 +7518,7 @@ static int fn_string_upper_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmps);
+	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_FAKE|FLAG2_PRETTY;
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }

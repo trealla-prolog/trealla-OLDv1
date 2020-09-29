@@ -270,11 +270,11 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 	idx_t save_ctx = q->latest_ctx;
 	idx_t save2_ctx = q->latest_ctx;
 	const char *src = GET_STR(c);
-	int print_list = 0;
+	int print_list = 0, pretty = c->flags&FLAG2_PRETTY;
 
 	// FIXME make non-recursive
 
-	while (is_list(c)) {
+	while (is_list(c) && !pretty) {
 		if (max_depth && (depth >= max_depth)) {
 			dst += snprintf(dst, dstlen, " |...");
 			return dst - save_dst;
