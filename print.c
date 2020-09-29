@@ -274,7 +274,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 	// FIXME make non-recursive
 
-	while (is_list(c)) {
+	while (is_real_list(c)) {
 		if (max_depth && (depth >= max_depth)) {
 			dst += snprintf(dst, dstlen, " |...");
 			return dst - save_dst;
@@ -325,7 +325,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 	if (q->ignore_ops || !optype || !c->arity) {
 		int quote = ((running <= 0) || q->quoted) && !is_var(c) && needs_quote(q->m, src);
-		if (is_dq_fake(c)) dq = 1;
+		if (is_dq_fake(c)) dq = quote = 1;
 		dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 		int braces = 0;
 
