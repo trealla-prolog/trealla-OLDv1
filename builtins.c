@@ -1421,6 +1421,11 @@ static int fn_iso_open_3(query *q)
 	else if (!strcmp(mode, "update"))
 		str->fp = fopen(filename, "r+");
 
+	if (!str->fp) {
+		throw_error(q, p1, "existence_error", "cannot_open_file");
+		return 0;
+	}
+
 	cell *tmp = alloc_heap(q, 1);
 	make_int(tmp, n);
 	tmp->flags |= FLAG2_STREAM | FLAG_HEX;
@@ -1519,6 +1524,7 @@ static int fn_iso_open_4(query *q)
 	}
 
 	if (!str->fp) {
+		throw_error(q, p1, "existence_error", "cannot_open_file");
 		return 0;
 	}
 
@@ -7606,8 +7612,10 @@ static int fn_time_file_2(query *q)
 	const char *filename = GET_STR(p1);
 	struct stat st = {0};
 
-	if (stat(filename, &st))
+	if (stat(filename, &st)) {
+		throw_error(q, p1, "existence_error", "cannot_open_file");
 		return 0;
+	}
 
 	cell tmp;
 	make_float(&tmp, st.st_mtime);
@@ -7621,8 +7629,10 @@ static int fn_size_file_2(query *q)
 	const char *filename = GET_STR(p1);
 	struct stat st = {0};
 
-	if (stat(filename, &st))
+	if (stat(filename, &st)) {
+		throw_error(q, p1, "existence_error", "cannot_open_file");
 		return 0;
+	}
 
 	cell tmp;
 	make_int(&tmp, st.st_size);
