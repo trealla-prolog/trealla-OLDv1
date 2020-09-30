@@ -8720,6 +8720,22 @@ static int fn_phrase_3(query *q)
 	return fn_call_dcg_3(q);
 }
 
+static int fn_phrase_2(query *q)
+{
+	GET_FIRST_ARG(p1,callable);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
+	cell *this = q->st.curr_cell;
+	cell *tmp = clone_to_heap(q, 1, this, this->nbr_cells+2);
+	idx_t nbr_cells = 1 + this->nbr_cells;
+	make_literal(tmp+nbr_cells++, g_nil_s);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	tmp[1].arity = 3;
+	tmp[1].fn = fn_phrase_3;
+	tmp[1].nbr_cells += 1;
+	q->st.curr_cell = tmp;
+	return 1;
+}
+
 static int fn_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -8918,6 +8934,7 @@ static const struct builtins g_iso_funcs[] =
 	{"listing", 1, fn_listing_1, NULL},
 	{"time", 1, fn_time_1, NULL},
 
+	{"phrase", 2, fn_phrase_2, NULL},
 	{"phrase", 3, fn_phrase_3, NULL},
 	{"call_dcg", 3, fn_call_dcg_3, NULL},
 
