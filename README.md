@@ -10,6 +10,7 @@ A compact, efficient Prolog interpreter with ISO compliant aspirations.
 	Atoms are UTF-8 of unlimited length
 	The default string is *chars*, using a compact UTF-8 representation
 	Arity limit 255
+	Limited DCG capability
 	Full-term just-in-time indexing
 	Peristence to per-module database
 	REPL with history
@@ -63,7 +64,6 @@ where options can be:
 	-w, --watchdog     - create watchdog
 	--stats            - print stats
 	--iso-only         - ISO-only mode
-	--traditional      - don't pretty-print string
 	--consult          - consult from STDIN
 
 For example:

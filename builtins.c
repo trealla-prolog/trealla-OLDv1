@@ -9002,6 +9002,7 @@ static const struct builtins g_other_funcs[] =
 	{"split", 4, fn_split_4, "+atom,+atom,?left,?right"},
 	{"msort", 2, fn_msort_2, "+list,-list"},
 	{"is_list", 1, fn_is_list_1, "+term"},
+	{"list", 1, fn_is_list_1, "+term"},
 	{"is_stream", 1, fn_is_stream_1, "+term"},
 	{"forall", 2, fn_forall_2, "+term,+term"},
 	{"term_hash", 2, fn_term_hash_2, "+term,?integer"},

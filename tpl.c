@@ -164,8 +164,6 @@ int main(int ac, char *av[])
 		} else if (!strcmp(av[i], "-q") || !strcmp(av[i], "--quiet")) {
 			set_quiet(pl);
 			quiet = 1;
-		} else if (!strcmp(av[i], "--traditional")) {
-			set_notpretty(pl);
 		} else if (!strcmp(av[i], "-O0") || !strcmp(av[i], "--noopt"))
 			set_opt(pl, 0);
 		else if (!strcmp(av[i], "-t") || !strcmp(av[i], "--trace"))
@@ -242,7 +240,6 @@ int main(int ac, char *av[])
 		fprintf(stderr, "  --consult\t- consult from STDIN\n");
 		fprintf(stderr, "  --stats\t\t- print stats\n");
 		fprintf(stderr, "  --iso-only\t\t- ISO-only mode\n");
-		fprintf(stderr, "  --traditional\t\t- Don't pretty-print strings\n");
 	}
 
 	if (version && !quiet)

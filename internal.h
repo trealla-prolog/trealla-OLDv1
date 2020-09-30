@@ -94,15 +94,14 @@ enum {
 	FLAG_BINARY=1<<3,					// used with TYPE_INTEGER
 	FLAG_TAIL_REC=1<<4,
 	FLAG_PASS_THRU=1<<5,
+	FLAG2_BIG_STRING=1<<6,
 
-	//FLAG_SPARE3=1<<6,
 	//FLAG_SPARE2=1<<7,
 	//FLAG_SPARE1=1<<8,
 
 	FLAG2_DELETED=FLAG_HEX,				// used by bagof
 	FLAG2_FIRST_USE=FLAG_HEX,			// used with TYPE_VAR
 	FLAG2_CONST_STRING=FLAG_HEX,		// used with TYPE_STRING
-	FLAG2_BIG_STRING=FLAG_OCTAL,		// used with TYPE_STRING
 	FLAG2_STREAM=FLAG_TAIL_REC,			// used with TYPE_INTEGER
 	FLAG2_DQ_STRING=FLAG_BINARY,		// used with TYPE_STRING
 	FLAG2_DQ_STRING2=FLAG_OCTAL,		// used with TYPE_STRING
@@ -368,7 +367,7 @@ struct module_ {
 		int rational_syntax_natural, prefer_rationals;
 	} flag;
 
-	int prebuilt, halt, halt_code, status, trace, quiet, notpretty, dirty;
+	int prebuilt, halt, halt_code, status, trace, quiet, dirty;
 	int user_ops, opt, stats, iso_only, use_persist, loading;
 	int make_public, cpu_count;
 };

@@ -14,7 +14,6 @@ int get_halt(prolog*);
 int get_status(prolog*);
 void set_trace(prolog*);
 void set_quiet(prolog*);
-void set_notpretty(prolog*);
 void set_stats(prolog*);
 void set_iso_only(prolog*);
 void set_opt(prolog*, int onoff);

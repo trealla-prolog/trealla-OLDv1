@@ -311,3 +311,7 @@ test91 :-
 test92 :-
 	phrase_from_file(list(Ls), "README.md"),
 	writeln(Ls).
+
+test93 :-
+	L = ['a','cccccccccccccccc'],
+	writeln(L).
