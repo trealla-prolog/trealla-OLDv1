@@ -1562,6 +1562,9 @@ static int fn_iso_open_4(query *q)
 
 static int fn_iso_close_1(query *q)
 {
+	if (q->retry)
+		return 0;
+
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
@@ -4689,7 +4692,7 @@ static int fn_iso_functor_3(query *q)
 	tmp.val_off = p1->val_off;
 	tmp.nbr_cells = 1;
 
-	if (is_fake_list(p2))
+	if (is_dq_list(p2))
 		tmp.val_off = g_dot_s;
 
 	if (!unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
@@ -7361,7 +7364,7 @@ static int fn_sha1_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmpbuf);
-	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_STRING;
+	if (is_dq_list(p1)) tmp.flags |= FLAG2_DQ_STRING;
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7383,7 +7386,7 @@ static int fn_sha256_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmpbuf);
-	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_STRING;
+	if (is_dq_list(p1)) tmp.flags |= FLAG2_DQ_STRING;
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7405,7 +7408,7 @@ static int fn_sha512_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmpbuf);
-	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_STRING;
+	if (is_dq_list(p1)) tmp.flags |= FLAG2_DQ_STRING;
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 #endif
@@ -7419,7 +7422,7 @@ static int do_b64encode_2(query *q)
 	char *dstbuf = malloc((len*3)+1);
 	b64_encode(str, len, &dstbuf, 0, 0);
 	cell tmp = make_cstring(q, dstbuf);
-	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_STRING;
+	if (is_dq_list(p1)) tmp.flags |= FLAG2_DQ_STRING;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7433,7 +7436,7 @@ static int do_b64decode_2(query *q)
 	char *dstbuf = malloc(len+1);
 	b64_decode(str, len, &dstbuf);
 	cell tmp = make_cstring(q, dstbuf);
-	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_STRING;
+	if (is_dq_list(p1)) tmp.flags |= FLAG2_DQ_STRING;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7501,7 +7504,7 @@ static int do_urlencode_2(query *q)
 	url_encode(str, len, dstbuf);
 	cell tmp = make_cstring(q, dstbuf);
 	tmp = make_cstring(q, dstbuf);
-	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_STRING;
+	if (is_dq_list(p1)) tmp.flags |= FLAG2_DQ_STRING;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7516,7 +7519,7 @@ static int do_urldecode_2(query *q)
 	url_decode(str, dstbuf);
 	cell tmp = make_cstring(q, dstbuf);
 	tmp = make_cstring(q, dstbuf);
-	if (is_fake_list(p2)) tmp.flags |= FLAG2_DQ_STRING;
+	if (is_dq_list(p2)) tmp.flags |= FLAG2_DQ_STRING;
 	free(dstbuf);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
@@ -7549,7 +7552,7 @@ static int fn_string_lower_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmps);
-	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_STRING;
+	if (is_dq_list(p1)) tmp.flags |= FLAG2_DQ_STRING;
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7568,7 +7571,7 @@ static int fn_string_upper_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmps);
-	if (is_fake_list(p1)) tmp.flags |= FLAG2_DQ_STRING;
+	if (is_dq_list(p1)) tmp.flags |= FLAG2_DQ_STRING;
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -8950,7 +8953,6 @@ static const struct builtins g_other_funcs[] =
 	{"msort", 2, fn_msort_2, "+list,-list"},
 	{"is_list", 1, fn_is_list_1, "+term"},
 	{"is_stream", 1, fn_is_stream_1, "+term"},
-	{"list", 1, fn_is_list_1, "+term"},
 	{"forall", 2, fn_forall_2, "+term,+term"},
 	{"term_hash", 2, fn_term_hash_2, "+term,?integer"},
 	{"rename_file", 2, fn_rename_file_2, "+atom,+atom"},

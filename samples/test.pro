@@ -304,3 +304,9 @@ test91 :-
 		writeln(Ls),
 		close(Str)
 	).
+
+list([]) --> [].
+list([L|Ls]) --> [L], list(Ls).
+
+test92 :- phrase_from_file(list(Ls), "README.md"), writeln(Ls).
+test92 :- writeln(error).

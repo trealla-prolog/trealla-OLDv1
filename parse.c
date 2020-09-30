@@ -1755,7 +1755,7 @@ static int get_token(parser *p, int last_op)
 	char *dst = p->token;
 	int neg = 0;
 	p->val_type = TYPE_LITERAL;
-	p->dq_fake = p->quoted = p->is_var = p->is_op = 0;
+	p->string = p->quoted = p->is_var = p->is_op = 0;
 	*dst = '\0';
 
 	if (p->dq_consing && (*src == '"')) {
@@ -1928,7 +1928,7 @@ static int get_token(parser *p, int last_op)
 			p->quoted = 0;
 			return 1;
 		} else if ((p->quoted == '"') && p->m->flag.double_quote_chars)
-			p->dq_fake = 1;
+			p->string = 1;
 
 		for (;;) {
 			while (*src) {
@@ -2281,7 +2281,7 @@ int parser_tokenize(parser *p, int args, int consing)
 		else if (p->val_type == TYPE_FLOAT)
 			c->val_flt = atof(p->token);
 		else if ((!p->quoted || func || p->is_op || p->is_var ||
-				check_builtin(p->m, p->token, 0)) && !p->dq_fake) {
+				check_builtin(p->m, p->token, 0)) && !p->string) {
 			if (func && !strcmp(p->token, "."))
 				c->precedence = 0;
 
@@ -2292,10 +2292,10 @@ int parser_tokenize(parser *p, int args, int consing)
 		} else {
 			c->val_type = TYPE_STRING;
 
-			if (p->dq_fake)
+			if (p->string)
 				c->flags |= FLAG2_DQ_STRING;
 
-			if ((strlen(p->token) < MAX_SMALL_STRING) && !p->dq_fake)
+			if ((strlen(p->token) < MAX_SMALL_STRING) && !p->string)
 				strcpy(c->val_chr, p->token);
 			else {
 				if (p->consulting)

@@ -63,8 +63,8 @@ typedef uint32_t idx_t;
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_string(c))
 #define is_structure(c) (is_literal(c) && (c)->arity)
 #define is_real_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
-#define is_fake_list(c) (is_string(c) && is_dq_string(c))
-#define is_list(c) (is_fake_list(c) || is_real_list(c))
+#define is_dq_list(c) (is_string(c) && is_dq_string(c))
+#define is_list(c) (is_dq_list(c) || is_real_list(c))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
 #define is_big_string(c) (is_string(c) && ((c)->flags&FLAG2_BIG_STRING))
 #define is_const_string(c) (is_string(c) && ((c)->flags&FLAG2_CONST_STRING))
@@ -336,7 +336,7 @@ struct parser_ {
 	int line_nbr, error, depth, quoted;
 	uint8_t val_type;
 	int8_t dq_consing;
-	unsigned dq_fake:1;
+	unsigned string:1;
 	unsigned run_init:1;
 	unsigned directive:1;
 	unsigned consulting:1;
