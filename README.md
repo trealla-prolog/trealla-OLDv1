@@ -102,6 +102,9 @@ GNU-Prolog & SWI-Prolog
 	random/1                # random(-float) float [0.0,<1.0]
 	random/1                # random(+integer) function returning integer [0,<integer]
 
+	phrase/2-3
+	phrase_from_file/2-3	# NOT YET WORKING
+
 
 GNU-Prolog
 ==========
@@ -214,16 +217,6 @@ Others
 	open(F,M,S,[mmap(Ls)])  # with open/4 mmap() the file to Ls
 
 	persist/1               # directive 'persist funct/arity'
-
-Phrase						##EXPERIMENTAL##
-======
-
-Autoloaded from library(phrase)...
-
-	phrase/2-3
-	phrase_from_file/2-3
-
-Note: *phrase_from_file* mmap's the file to a string (chars-list).
 
 
 A simple dictionary

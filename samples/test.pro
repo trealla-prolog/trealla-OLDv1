@@ -298,14 +298,19 @@ test83 :- writeln(nok).
 
 test90 :- D=[a:1,b:2,c:3], dict:lst(D,L), writeln(L).
 
-test91 :-
-	setup_call_cleanup(
-		open("README.md", read, Str, [mmap(Ls)]),
-		writeln(Ls),
-		close(Str)
-	).
-
 list([]) --> [].
 list([L|Ls]) --> [L], list(Ls).
 
-test92 :- phrase_from_file(list(Ls), "README.md"), writeln(Ls).
+test91 :-
+	open("README.md", read, Str, [mmap(Ms)]),
+	atom_length(Ms,N1),
+	format("Ms atom_length=~w~n", [N1]),
+	phrase(list(Ls), Ms, []),
+	is_list(Ls),
+	length(Ls,N2),
+	format("Ls list_length=~w~n", [N2]),
+	close(Str).
+
+test92 :-
+	phrase_from_file(list(Ls), "README.md"),
+	writeln(Ls).
