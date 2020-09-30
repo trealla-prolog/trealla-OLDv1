@@ -4,10 +4,3 @@ phrase_from_file(P, Filename) :-
 		phrase(P, Ls, []),
 		close(Str)
 	).
-
-phrase_from_file(P, Filename, Opts) :-
-	setup_call_cleanup(
-		open(Filename, read, Str, [mmap(Ls)|Opts]),
-		phrase(P, Ls, []),
-		close(Str)
-	).
