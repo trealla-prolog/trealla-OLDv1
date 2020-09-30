@@ -1251,9 +1251,8 @@ static int fn_iso_atom_length_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,integer_or_var);
-	const char *src = GET_STR(p1);
 	cell tmp;
-	make_int(&tmp, strlen_utf8(src));
+	make_int(&tmp, LEN_STR(p1));
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 

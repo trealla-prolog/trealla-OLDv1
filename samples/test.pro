@@ -303,12 +303,9 @@ list([L|Ls]) --> [L], list(Ls).
 
 test91 :-
 	open("README.md", read, Str, [mmap(Ms)]),
-	atom_length(Ms,N1),
-	format("Ms atom_length=~w~n", [N1]),
+	atom_length(Ms,N1), format("Ms atom_length=~w~n", [N1]),
 	phrase(list(Ls), Ms, []),
-	is_list(Ls),
-	length(Ls,N2),
-	format("Ls list_length=~w~n", [N2]),
+	length(Ls,N2), format("Ls list_length=~w~n", [N2]),
 	close(Str).
 
 test92 :-
