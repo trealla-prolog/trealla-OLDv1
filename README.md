@@ -103,7 +103,6 @@ GNU-Prolog & SWI-Prolog
 	random/1                # random(+integer) function returning integer [0,<integer]
 
 	phrase/2-3
-	phrase_from_file/2		# NOT YET WORKING
 
 
 GNU-Prolog
