@@ -262,8 +262,8 @@ static cell *alloc_heap(query *q, idx_t nbr_cells)
 	return c;
 }
 
-static idx_t heap_used(const query *q) { return q->st.hp; }
-static cell *get_heap(const query *q, idx_t i) { return q->arenas->heap + i; }
+//static idx_t heap_used(const query *q) { return q->st.hp; }
+//static cell *get_heap(const query *q, idx_t i) { return q->arenas->heap + i; }
 
 static cell *alloc_stringn(query *q, const char *s, size_t n)
 {
@@ -3934,9 +3934,9 @@ static int fn_iso_term_variables_2(query *q)
 	return ok;
 }
 
-cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix)
+static cell *clone_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
 {
-	cell *tmp = alloc_heap(q, (prefix?1:0)+p1->nbr_cells+suffix);
+	cell *tmp = alloc_heap(q, (prefix?1:0)+nbr_cells+suffix);
 
 	if (prefix) {
 		// Needed for follow() to work
@@ -3945,15 +3945,20 @@ cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix)
 		tmp->flags = FLAG_BUILTIN;
 	}
 
-	copy_cells(tmp+(prefix?1:0), p1, p1->nbr_cells);
+	copy_cells(tmp+(prefix?1:0), p1, nbr_cells);
 	cell *c = tmp + (prefix?1:0);
 
-	for (idx_t i = 0; i < p1->nbr_cells; i++, c++) {
+	for (idx_t i = 0; i < nbr_cells; i++, c++) {
 		if (is_big_string(c))
 			c->flags |= FLAG2_CONST_STRING;
 	}
 
 	return tmp;
+}
+
+cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix)
+{
+	return clone_to_heap2(q, prefix, p1, p1->nbr_cells, suffix);
 }
 
 static cell *copy_to_heap(query *q, cell *p1, idx_t suffix)
@@ -4424,22 +4429,24 @@ int call_me(query *q, cell *p1)
 static int fn_iso_call_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	idx_t save_pos = heap_used(q);
-	clone_to_heap(q, 1, p1, 0);
-	idx_t nbr_cells = 1 + p1->nbr_cells;
+	init_tmp_heap(q);
+	cell *tmp2 = alloc_tmp_heap(q, p1->nbr_cells);
+	copy_cells(tmp2, p1, p1->nbr_cells);
+	idx_t nbr_cells = p1->nbr_cells;
 	unsigned arity = p1->arity;
 	int args = 2;
 
 	while (args++ <= q->st.curr_cell->arity) {
 		cell *p2 = get_next_raw_arg(q);
-		clone_to_heap(q, 0, p2, 0);
+		cell *tmp2 = alloc_tmp_heap(q, p2->nbr_cells);
+		copy_cells(tmp2, p2, p2->nbr_cells);
 		nbr_cells += p2->nbr_cells;
 		arity++;
 	}
 
-	alloc_heap(q, 1);
-	cell *tmp = get_heap(q, save_pos);
-	tmp[1].nbr_cells = nbr_cells - 1;
+	tmp2 = get_tmp_heap(q, 0);
+	cell *tmp = clone_to_heap2(q, 1, tmp2, nbr_cells, 1);
+	tmp[1].nbr_cells = nbr_cells;
 	tmp[1].arity = arity;
 
 	if ((tmp[1].fn = get_builtin(q->m, GET_STR(tmp+1), arity)) != NULL)
@@ -4449,7 +4456,7 @@ static int fn_iso_call_n(query *q)
 		tmp[1].flags &= ~FLAG_BUILTIN;
 	}
 
-	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	make_end_return(tmp+1+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return 1;
 }
