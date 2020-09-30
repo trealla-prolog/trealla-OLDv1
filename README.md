@@ -241,10 +241,6 @@ Autoloaded from library(dict)...
 Attributed variables		##NOT WORKING YET##
 ====================
 
-	put_atts/2				# autoloaded from library(atts)
-	get_atts/2				# autoloaded from library(atts)
-	attributed/1			# autoloaded from library(atts)
-
 Not built on attributed variables per se, but using the same mechanism
 under the hood...
 

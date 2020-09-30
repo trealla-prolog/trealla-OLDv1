@@ -8704,6 +8704,22 @@ static int fn_call_nth_2(query *q)
 	return 1;
 }
 
+static int fn_call_dcg_3(query *q)
+{
+	GET_FIRST_ARG(p1,callable);
+	GET_NEXT_ARG(p2,any);
+	GET_NEXT_ARG(p3,any);
+	return fn_iso_call_n(q);
+}
+
+static int fn_phrase_3(query *q)
+{
+	GET_FIRST_ARG(p1,callable);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
+	GET_NEXT_ARG(p3,list_or_nil_or_var);
+	return fn_call_dcg_3(q);
+}
+
 static int fn_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -8901,7 +8917,9 @@ static const struct builtins g_iso_funcs[] =
 	{"listing", 0, fn_listing_0, NULL},
 	{"listing", 1, fn_listing_1, NULL},
 	{"time", 1, fn_time_1, NULL},
-	{"phrase", 3, fn_iso_call_n, NULL},
+
+	{"phrase", 3, fn_phrase_3, NULL},
+	{"call_dcg", 3, fn_call_dcg_3, NULL},
 
 	{0}
 };

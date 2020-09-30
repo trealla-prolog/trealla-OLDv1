@@ -1,4 +1,3 @@
-:- module(atts, [put_atts/2, get_atts/2, attributed/1]).
 :- use_module(library(dict)).
 
 % This is a start...
