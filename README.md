@@ -63,7 +63,7 @@ where options can be:
 	-w, --watchdog     - create watchdog
 	--stats            - print stats
 	--iso-only         - ISO-only mode
-	--not-pretty       - don't pretty-print string
+	--traditional      - don't pretty-print string
 	--consult          - consult from STDIN
 
 For example:
