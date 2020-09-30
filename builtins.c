@@ -8901,6 +8901,7 @@ static const struct builtins g_iso_funcs[] =
 	{"listing", 0, fn_listing_0, NULL},
 	{"listing", 1, fn_listing_1, NULL},
 	{"time", 1, fn_time_1, NULL},
+	{"phrase", 3, fn_iso_call_n, NULL},
 
 	{0}
 };
