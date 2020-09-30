@@ -159,15 +159,14 @@ int main(int ac, char *av[])
 
 		if (!strcmp(av[i], "-h") || !strcmp(av[i], "--help")) {
 			version = 2;
-		}
-		else if (!strcmp(av[i], "-v") || !strcmp(av[i], "--version")) {
+		} else if (!strcmp(av[i], "-v") || !strcmp(av[i], "--version")) {
 			version = 1;
-		}
-		else if (!strcmp(av[i], "-q") || !strcmp(av[i], "--quiet")) {
+		} else if (!strcmp(av[i], "-q") || !strcmp(av[i], "--quiet")) {
 			set_quiet(pl);
 			quiet = 1;
-		}
-		else if (!strcmp(av[i], "-O0") || !strcmp(av[i], "--noopt"))
+		} else if (!strcmp(av[i], "--not-pretty")) {
+			set_notpretty(pl);
+		} else if (!strcmp(av[i], "-O0") || !strcmp(av[i], "--noopt"))
 			set_opt(pl, 0);
 		else if (!strcmp(av[i], "-t") || !strcmp(av[i], "--trace"))
 			set_trace(pl);
@@ -243,6 +242,7 @@ int main(int ac, char *av[])
 		fprintf(stderr, "  --consult\t- consult from STDIN\n");
 		fprintf(stderr, "  --stats\t\t- print stats\n");
 		fprintf(stderr, "  --iso-only\t\t- ISO-only mode\n");
+		fprintf(stderr, "  --not-pretty\t\t- Don't pretty-print strings\n");
 	}
 
 	if (version && !quiet)

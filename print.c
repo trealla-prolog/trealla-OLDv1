@@ -270,11 +270,11 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 	idx_t save_ctx = q->latest_ctx;
 	idx_t save2_ctx = q->latest_ctx;
 	const char *src = GET_STR(c);
-	int print_list = 0, pretty = c->flags&FLAG2_PRETTY_PRINT;
+	int print_list = 0;
 
 	// FIXME make non-recursive
 
-	while (is_list(c) && !pretty) {
+	while (is_real_list(c) || (is_fake_list(c) && q->m->notpretty)) {
 		if (max_depth && (depth >= max_depth)) {
 			dst += snprintf(dst, dstlen, " |...");
 			return dst - save_dst;
@@ -325,8 +325,8 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 	if (q->ignore_ops || !optype || !c->arity) {
 		int quote = ((running <= 0) || q->quoted) && !is_var(c) && needs_quote(q->m, src);
-		//if (is_dq_string(c)) dq = quote = 1;
 		int dq = 0, braces = 0;
+		if (is_dq_string(c)) dq = quote = 1;
 		if (c->arity && !strcmp(src, "{}")) braces = 1;
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 

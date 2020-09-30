@@ -15,7 +15,7 @@ for source in tests/tests/*
 do
 	case "$source" in
 		*.pro)
-			cmd="$TPL -q -l "
+			cmd="$TPL -q --not-pretty -l "
 			;;
 		*.sh)
 			cmd="env TPL=$TPL sh"

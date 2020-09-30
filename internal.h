@@ -106,7 +106,6 @@ enum {
 	FLAG2_STREAM=FLAG_TAIL_REC,			// used with TYPE_INTEGER
 	FLAG2_DQ_STRING=FLAG_BINARY,		// used with TYPE_STRING
 	FLAG2_DQ_STRING2=FLAG_OCTAL,		// used with TYPE_STRING
-	FLAG2_PRETTY_PRINT=FLAG_TAIL_REC,	// used with TYPE_STRING
 
 	OP_FX=1<<9,
 	OP_FY=1<<10,
@@ -369,7 +368,7 @@ struct module_ {
 		int rational_syntax_natural, prefer_rationals;
 	} flag;
 
-	int prebuilt, halt, halt_code, status, trace, quiet, dirty;
+	int prebuilt, halt, halt_code, status, trace, quiet, notpretty, dirty;
 	int user_ops, opt, stats, iso_only, use_persist, loading;
 	int make_public, cpu_count;
 };
