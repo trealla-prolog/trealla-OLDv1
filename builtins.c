@@ -8730,7 +8730,7 @@ static int fn_phrase_2(query *q)
 	make_literal(tmp+nbr_cells++, g_nil_s);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	tmp[1].arity = 3;
-	tmp[1].fn = fn_phrase_3;
+	tmp[1].fn = fn_call_dcg_3;
 	tmp[1].nbr_cells += 1;
 	q->st.curr_cell = tmp;
 	return 1;
