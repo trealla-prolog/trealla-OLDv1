@@ -709,6 +709,9 @@ int unify(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		return 1;
 	}
 
+	if (is_string(p1) && is_string(p2))
+		return unify_catom(p1, p2);
+
 	if (is_list(p1) && is_list(p2))
 		return unify_list(q, p1, p1_ctx, p2, p2_ctx);
 
