@@ -590,7 +590,7 @@ static int fn_iso_number_1(query *q)
 static int fn_iso_atom_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return is_atom(p1) && !is_string(p1);
+	return is_iso_atom(p1);
 }
 
 static int fn_iso_compound_1(query *q)
@@ -602,7 +602,7 @@ static int fn_iso_compound_1(query *q)
 static int fn_iso_atomic_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return is_atomic(p1) && !is_string(p1);
+	return is_iso_atomic(p1);
 }
 
 static int fn_iso_var_1(query *q)
@@ -721,7 +721,7 @@ static int fn_iso_current_rule_1(query *q)
 
 static int fn_iso_atom_chars_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_var);
+	GET_FIRST_ARG(p1,iso_atom_or_var);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 
 	if (is_var(p1) && is_var(p2)) {
@@ -812,7 +812,7 @@ static int fn_iso_atom_chars_2(query *q)
 
 static int fn_iso_atom_codes_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_var);
+	GET_FIRST_ARG(p1,iso_atom_or_var);
 	GET_NEXT_ARG(p2,list_or_var);
 
 	if (is_var(p1) && is_var(p2)) {
@@ -1173,7 +1173,7 @@ static int fn_iso_atom_concat_3(query *q)
 		return do_atom_concat_3(q);
 
 	if (is_var(p3)) {
-		if (!is_atom(p1)) {
+		if (!is_iso_atom(p1)) {
 			throw_error(q, p1, "type_error", "atom");
 			return 0;
 		}
@@ -1249,7 +1249,7 @@ static int fn_iso_atom_concat_3(query *q)
 
 static int fn_iso_atom_length_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,iso_atom);
 	GET_NEXT_ARG(p2,integer_or_var);
 	size_t len;
 
@@ -1447,7 +1447,7 @@ static int fn_iso_open_3(query *q)
 
 static int fn_iso_open_4(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_structure);
+	GET_FIRST_ARG(p1,atom_or_string_or_structure);
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,var);
 	GET_NEXT_ARG(p4,list_or_nil);
@@ -5896,11 +5896,11 @@ static int fn_forall_2(query *q)
 	return 1;
 }
 
-static int fn_split_catom_4(query *q)
+static int fn_split_atom_4(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,atom);
-	GET_NEXT_ARG(p3,atom);
+	GET_FIRST_ARG(p1,atom_or_string);
+	GET_NEXT_ARG(p2,atom_or_string);
+	GET_NEXT_ARG(p3,atom_or_string);
 	GET_NEXT_ARG(p4,any);
 	const char *src = GET_STR(p1);
 	int ch = peek_char_utf8(GET_STR(p2));
@@ -5948,8 +5948,8 @@ static int fn_split_catom_4(query *q)
 
 static int fn_split_4(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,atom);
+	GET_FIRST_ARG(p1,atom_or_string);
+	GET_NEXT_ARG(p2,atom_or_string);
 	GET_NEXT_ARG(p3,any);
 	GET_NEXT_ARG(p4,any);
 
@@ -5988,8 +5988,8 @@ static int fn_split_4(query *q)
 
 static int fn_savefile_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,cstring);
+	GET_FIRST_ARG(p1,atom_or_string);
+	GET_NEXT_ARG(p2,atom);
 	char *filename = strdup(GET_STR(p1));
 	FILE *fp = fopen(filename, "wb");
 	fwrite(GET_STR(p2), 1, LEN_STR(p2), fp);
@@ -6000,7 +6000,7 @@ static int fn_savefile_2(query *q)
 
 static int fn_loadfile_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_string);
 	GET_NEXT_ARG(p2,var);
 	char *filename = strdup(GET_STR(p1));
 	FILE *fp = fopen(filename, "rb");
@@ -6038,7 +6038,7 @@ static int fn_loadfile_2(query *q)
 
 static int fn_getfile_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_string);
 	GET_NEXT_ARG(p2,var);
 	char *filename = strdup(GET_STR(p1));
 	FILE *fp = fopen(filename, "r");
@@ -6110,7 +6110,7 @@ static void parse_host(const char *src, char *hostname, char *path, unsigned *po
 
 static int fn_server_3(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_string);
 	GET_NEXT_ARG(p2,var);
 	GET_NEXT_ARG(p3,list_or_nil);
 	char hostname[1024], path[4096];
@@ -6289,7 +6289,7 @@ static int fn_accept_2(query *q)
 
 static int fn_client_5(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_string);
 	GET_NEXT_ARG(p2,var);
 	GET_NEXT_ARG(p3,var);
 	GET_NEXT_ARG(p4,var);
@@ -6614,7 +6614,7 @@ static int fn_bwrite_2(query *q)
 
 static int fn_read_term_from_atom_3(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_string);
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,any);
 	int n = get_named_stream(q, "user_input");
@@ -7160,7 +7160,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx,
 		if (ch == 'k')
 			canonical = 1;
 
-		if ((ch == 'a') && !is_atom(c)) {
+		if ((ch == 'a') && !is_atom(c) && !is_list(c)) {
 			free(tmpbuf);
 			throw_error(q, c, "type_error", "atom");
 			return 0;
@@ -7376,8 +7376,8 @@ static int fn_format_3(query *q)
 #if USE_OPENSSL
 static int fn_sha1_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,atom_or_var);
+	GET_FIRST_ARG(p1,atom_or_string);
+	GET_NEXT_ARG(p2,atom_or_string_or_var);
 	const char *str = GET_STR(p1);
 	unsigned char digest[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*)str, strlen(str), digest);
@@ -7398,8 +7398,8 @@ static int fn_sha1_2(query *q)
 
 static int fn_sha256_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,atom_or_var);
+	GET_FIRST_ARG(p1,atom_or_string);
+	GET_NEXT_ARG(p2,atom_or_string_or_var);
 	const char *str = GET_STR(p1);
 	unsigned char digest[SHA256_DIGEST_LENGTH];
 	SHA256((unsigned char*)str, strlen(str), digest);
@@ -7420,8 +7420,8 @@ static int fn_sha256_2(query *q)
 
 static int fn_sha512_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,atom_or_var);
+	GET_FIRST_ARG(p1,atom_or_string);
+	GET_NEXT_ARG(p2,atom_or_string_or_var);
 	const char *str = GET_STR(p1);
 	unsigned char digest[SHA512_DIGEST_LENGTH];
 	SHA512((unsigned char*)str, strlen(str), digest);
@@ -7458,7 +7458,7 @@ static int do_b64encode_2(query *q)
 static int do_b64decode_2(query *q)
 {
 	GET_FIRST_ARG(p1,var);
-	GET_NEXT_ARG(p2,atom);
+	GET_NEXT_ARG(p2,atom_or_string);
 	const char *str = GET_STR(p2);
 	size_t len = strlen(str);
 	char *dstbuf = malloc(len+1);
@@ -7471,12 +7471,12 @@ static int do_b64decode_2(query *q)
 
 static int fn_base64_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_var);
-	GET_NEXT_ARG(p2,atom_or_var);
+	GET_FIRST_ARG(p1,atom_or_string_or_var);
+	GET_NEXT_ARG(p2,atom_or_string_or_var);
 
-	if (is_atom(p1) && is_var(p2))
+	if ((is_atom(p1) || is_list(p1)) && is_var(p2))
 		return do_b64encode_2(q);
-	else if (is_var(p1) && is_atom(p2))
+	else if (is_var(p1) && (is_atom(p2) || is_string(p2)))
 		return do_b64decode_2(q);
 
 	throw_error(q, p1, "instantiation_error", "atom");
@@ -7524,7 +7524,7 @@ char *url_decode(const char *src, char *dstbuf)
 
 static int do_urlencode_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_string);
 	GET_NEXT_ARG(p2,var);
 	const char *str = GET_STR(p1);
 	size_t len = strlen(str);
@@ -7540,7 +7540,7 @@ static int do_urlencode_2(query *q)
 static int do_urldecode_2(query *q)
 {
 	GET_FIRST_ARG(p1,var);
-	GET_NEXT_ARG(p2,atom);
+	GET_NEXT_ARG(p2,atom_or_string);
 	const char *str = GET_STR(p1);
 	size_t len = strlen(str);
 	char *dstbuf = malloc(len+1);
@@ -7554,21 +7554,21 @@ static int do_urldecode_2(query *q)
 
 static int fn_urlenc_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_var);
-	GET_NEXT_ARG(p2,atom_or_var);
+	GET_FIRST_ARG(p1,atom_or_string_or_var);
+	GET_NEXT_ARG(p2,atom_or_string_or_var);
 
-	if (is_atom_or_var(p1) && is_var(p2))
+	if ((is_atom(p1) || is_string(p1)) && is_var(p2))
 		return do_urlencode_2(q);
-	else if (is_var(p1) && is_atom_or_var(p2))
+	else if (is_var(p1) && (is_atom(p2) || is_string(p2)))
 		return do_urldecode_2(q);
 
 	throw_error(q, p1, "instantiation_error", "atom");
 	return 0;
 }
 
-static int fn_catom_lower_2(query *q)
+static int fn_atom_lower_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_string);
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *str = GET_STR(p1);
 	char *tmps = strdup(str);
@@ -7585,9 +7585,9 @@ static int fn_catom_lower_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_catom_upper_2(query *q)
+static int fn_atom_upper_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_string);
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *str = GET_STR(p1);
 	char *tmps = strdup(str);
@@ -7903,7 +7903,7 @@ static int fn_term_hash_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_catom_number_2(query *q)
+static int fn_atom_number_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
@@ -7934,7 +7934,38 @@ static int fn_catom_number_2(query *q)
 	return p1_val == p2->val_num;
 }
 
-static int fn_catom_hex_2(query *q)
+static int fn_string_number_2(query *q)
+{
+	GET_FIRST_ARG(p1,atom_or_string_or_var);
+	GET_NEXT_ARG(p2,integer_or_var);
+
+	if (is_var(p1) && is_var(p2)) {
+		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
+		return 0;
+	}
+
+	if (is_var(p1)) {
+		char tmpbuf[256];
+		sprint_int(tmpbuf, sizeof(tmpbuf), p2->val_num, 10);
+		cell tmp = make_cstring(q, tmpbuf);
+		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		return 1;
+	}
+
+	const char *src = GET_STR(p1);
+	int_t p1_val = strtoll(src, NULL, 10);
+
+	if (is_var(p2)) {
+		cell tmp;
+		make_int(&tmp, p1_val);
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		return 1;
+	}
+
+	return p1_val == p2->val_num;
+}
+
+static int fn_atom_hex_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
@@ -7965,7 +7996,7 @@ static int fn_catom_hex_2(query *q)
 	return p1_val == p2->val_num;
 }
 
-static int fn_catom_octal_2(query *q)
+static int fn_atom_octal_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
@@ -8064,7 +8095,7 @@ static void do_real_to_fraction(double v, double accuracy, int_t *num, int_t *de
 	return;
 }
 
-static int fn_catom_1(query *q)
+static int fn_atom_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return is_string(p1);
@@ -8767,6 +8798,93 @@ static int fn_phrase_2(query *q)
 	return 1;
 }
 
+static int fn_string_concat_3(query *q)
+{
+	if (q->retry)
+		return do_atom_concat_3(q);
+
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,any);
+	GET_NEXT_ARG(p3,any);
+
+	if (is_var(p1) && is_var(p2))
+		return do_atom_concat_3(q);
+
+	if (is_var(p3)) {
+		if (!is_atom(p1) && !is_string(p1)) {
+			throw_error(q, p1, "type_error", "atom");
+			return 0;
+		}
+
+		if (!is_atom(p2) && !is_string(p2)) {
+			throw_error(q, p1, "type_error", "atom");
+			return 0;
+		}
+
+		const char *src1, *src2;
+		size_t len1, len2;
+		char tmpbuf1[256], tmpbuf2[256];
+
+		if (is_atom(p1)) {
+			src1 = GET_STR(p1);
+			len1 = LEN_STR(p1);
+		} else {
+			write_term_to_buf(q, tmpbuf1, sizeof(tmpbuf1), p1, 1, 0, 0, 0);
+			len1 = strlen(tmpbuf1);
+			src1 = tmpbuf1;
+		}
+
+		if (is_atom(p2)) {
+			src2 = GET_STR(p2);
+			len2 = LEN_STR(p2);
+		} else {
+			write_term_to_buf(q, tmpbuf2, sizeof(tmpbuf2), p2, 1, 0, 0, 0);
+			len2 = strlen(tmpbuf2);
+			src2 = tmpbuf2;
+		}
+
+		size_t nbytes = len1 + len2;
+		char *dst = malloc(nbytes + 1);
+		memcpy(dst, src1, len1);
+		memcpy(dst+len1, src2, len2);
+		dst[nbytes] = '\0';
+		cell tmp = make_cstringn(q, dst, nbytes);
+		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+		free(dst);
+		return 1;
+	}
+
+	if (is_var(p1)) {
+		if (strcmp(GET_STR(p3)+(LEN_STR(p3)-LEN_STR(p2)), GET_STR(p2)))
+			return 0;
+
+		char *dst = strndup(GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
+		cell tmp = make_cstring(q, dst);
+		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+		free(dst);
+		return 1;
+	}
+
+	if (is_var(p2)) {
+		if (strncmp(GET_STR(p3), GET_STR(p1), LEN_STR(p1)))
+			return 0;
+
+		char *dst = strdup(GET_STR(p3)+LEN_STR(p1));
+		cell tmp = make_cstring(q, dst);
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		free(dst);
+		return 1;
+	}
+
+	if (strncmp(GET_STR(p3), GET_STR(p1), LEN_STR(p1)))
+		return 0;
+
+	if (strcmp(GET_STR(p3)+LEN_STR(p1), GET_STR(p2)))
+		return 0;
+
+	return 1;
+}
+
 static int fn_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -8984,6 +9102,7 @@ static const struct builtins g_other_funcs[] =
 
 	// Miscellaneous...
 
+	{"string_concat", 3, fn_string_concat_3, NULL},
 	{"ignore", 1, fn_ignore_1, "+callable"},
 	{"format", 1, fn_format_1, "+string"},
 	{"format", 2, fn_format_2, "+string,+list"},
@@ -8995,7 +9114,7 @@ static const struct builtins g_other_funcs[] =
 	{"abolish", 2, fn_abolish_2, NULL},
 	{"assert", 1, fn_iso_assertz_1, NULL},
 
-	{"string", 1, fn_catom_1, "+term"},
+	{"string", 1, fn_atom_1, "+term"},
 	{"atomic_concat", 3, fn_atomic_concat_3, NULL},
 	{"replace", 4, fn_replace_4, "+orig,+from,+to,-new"},
 	{"writeln", 1, fn_writeln_1, "+term"},
@@ -9019,7 +9138,7 @@ static const struct builtins g_other_funcs[] =
 	{"getfile", 2, fn_getfile_2, "+string,-list"},
 	{"loadfile", 2, fn_loadfile_2, "+string,-string"},
 	{"savefile", 2, fn_savefile_2, "+string,+string"},
-	{"split_catom", 4, fn_split_catom_4, "+string,+sep,+pad,-list"},
+	{"split_catom", 4, fn_split_atom_4, "+string,+sep,+pad,-list"},
 	{"split", 4, fn_split_4, "+string,+string,?left,?right"},
 	{"msort", 2, fn_msort_2, "+list,-list"},
 	{"is_list", 1, fn_is_list_1, "+term"},
@@ -9042,15 +9161,15 @@ static const struct builtins g_other_funcs[] =
 	{"term_to_atom", 2, fn_term_to_atom_2, "+term,-string"},
 	{"base64", 2, fn_base64_2, "?string,?string"},
 	{"urlenc", 2, fn_urlenc_2, "?string,?string"},
-	{"string_lower", 2, fn_catom_lower_2, "?string,?string"},
-	{"string_upper", 2, fn_catom_upper_2, "?string,?string"},
+	{"string_lower", 2, fn_atom_lower_2, "?string,?string"},
+	{"string_upper", 2, fn_atom_upper_2, "?string,?string"},
 	{"read_catom", 3, fn_bread_3, "+stream,+integer,-string"},
 	{"bread", 3, fn_bread_3, "+stream,+integer,-string"},
 	{"bwrite", 2, fn_bwrite_2, "+stream,-string"},
-	{"atom_number", 2, fn_catom_number_2, "?string,?integer"},
-	{"string_number", 2, fn_catom_number_2, "?string,?integer"},
-	{"string_hex", 2, fn_catom_hex_2, "?string,?integer"},
-	{"string_octal", 2, fn_catom_octal_2, "?string,?integer"},
+	{"atom_number", 2, fn_atom_number_2, "?string,?integer"},
+	{"string_number", 2, fn_string_number_2, "?string,?integer"},
+	{"string_hex", 2, fn_atom_hex_2, "?string,?integer"},
+	{"string_octal", 2, fn_atom_octal_2, "?string,?integer"},
 	{"predicate_property", 2, fn_predicate_property_2, "+callable,?string"},
 	{"numbervars", 1, fn_numbervars_1, "+term"},
 	{"numbervars", 3, fn_numbervars_3, "+term,+start,?end"},

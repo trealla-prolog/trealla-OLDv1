@@ -7,7 +7,7 @@ read_response(S, Code) :-
 	getline(S, Line),
 	split(Line, ' ' ,_Ver, Rest),
 	split(Rest, ' ', Code2, _Rest2),
-	atom_number(Code2, Code).
+	string_number(Code2, Code).
 
 read_header(S, Pair) :-
 	getline(S, Line),
@@ -25,13 +25,13 @@ read_chunks(S, Tmp, Data) :-
 	Len > 0,
 	bread(S, Len, Tmp2),
 	getline(S, _),
-	atom_concat(Tmp, Tmp2, Tmp3),
+	string_concat(Tmp, Tmp2, Tmp3),
 	read_chunks(S, Tmp3, Data).
 read_chunks(_, Data, Data).
 
 read_body(S, Hdrs, Data) :-
 	dict:get(Hdrs, 'content-length', V, _),
-	atom_number(V, Len),
+	string_number(V, Len),
 	bread(S, Len, Data).
 
 % Open with options...
@@ -54,7 +54,7 @@ http_open(UrlList, S, Opts) :-
 	format(S,"~a /~a HTTP/~d.~d\r\nHost: ~a\r\nConnection: keep-alive\r\n\r\n", [UMethod, Path, Maj, Min, Host]),
 	read_response(S, Code),
 	findall(Hdr, read_header(S, Hdr), Hdrs),
-	atom_concat(Host, Path, Url),
+	string_concat(Host, Path, Url),
 	dict:get(Hdrs, 'location', Location, Url),
 	ignore(memberchk(status_code(Code), OptList)),
 	ignore(memberchk(headers(Hdrs), OptList)),
@@ -81,7 +81,7 @@ process(Url, S, Opts) :-
 		format(atom(Ctype), "Content-Type: ~w\r\n",[Ct]) ;
 		Ctype = '' ),
 	(nonvar(PostData) ->
-		(atom_length(PostData, DataLen), format(atom(Clen), "Content-Length: ~d\r\n", [DataLen])) ;
+		(length(PostData, DataLen), format(atom(Clen), "Content-Length: ~d\r\n", [DataLen])) ;
 		Clen = '' ),
 	format(S,"~a /~a HTTP/~d.~d\r\nHost: ~a\r\nConnection: close\r\n~w~w\r\n", [UMethod, Path, Maj, Min, Host, Ctype, Clen]),
 	(nonvar(DataLen) -> bwrite(S, PostData) ; true),
