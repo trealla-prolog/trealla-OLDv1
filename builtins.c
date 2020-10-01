@@ -4067,14 +4067,19 @@ static int fn_iso_length_2(query *q)
 			return 0;
 
 		int cnt = 0;
-		cell *l = p1;
 
-		while (is_list(l)) {
-			LIST_HEAD(l);
-			l = LIST_TAIL(l);
-			l = deref_var(q, l, p1_ctx);
-			p1_ctx = q->latest_ctx;
-			cnt++;
+		if (is_string(p1)) {
+			cnt = p1->len_str;
+		} else {
+			cell *l = p1;
+
+			while (is_list(l)) {
+				LIST_HEAD(l);
+				l = LIST_TAIL(l);
+				l = deref_var(q, l, p1_ctx);
+				p1_ctx = q->latest_ctx;
+				cnt++;
+			}
 		}
 
 		cell tmp;
