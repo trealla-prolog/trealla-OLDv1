@@ -232,7 +232,7 @@ under the hood...
 DCG							##UNDER DEVELOPMENT##
 ===
 
-	call_dcg/2
+	call_dcg/3
 	phrase/2-3
 	phrase_from_file/2-3
 
