@@ -12,7 +12,7 @@ USE_OPENSSL = 0
 OBJECTS = tpl.o history.o builtins.o library.o \
 	parse.o print.o runtime.o \
 	skiplist.o base64.o network.o utf8.o \
-	lists.o dict.o apply.o http.o auth.o atts.o phrase.o
+	lists.o dict.o apply.o http.o auth.o atts.o
 
 all: tpl
 
@@ -81,6 +81,3 @@ auth.o: library/auth.pro
 
 atts.o: library/atts.pro
 	$(LD) -m elf_x86_64 -r -b binary -o atts.o library/atts.pro
-
-phrase.o: library/phrase.pro
-	$(LD) -m elf_x86_64 -r -b binary -o phrase.o library/phrase.pro
