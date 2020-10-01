@@ -313,12 +313,7 @@ test91 :-
 	length(Ls,N2), format("Ls length=~w~n", [N2]),
 	close(Str).
 
-phrase_from_file(P, Filename) :-
-	open(Filename, read, Str, [mmap(Ms)]),
-	phrase(P, Ms, []),
-	close(Str).
-
 test92 :-
 	phrase_from_file(list(Ls), "README.md"),
-	length(Ls,N), format("Ls list_length=~w~n", [N]).
+	length(Ls,N), format("Ls length=~w~n", [N]).
 

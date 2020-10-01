@@ -102,8 +102,6 @@ GNU-Prolog & SWI-Prolog
 	random/1                # random(-float) float [0.0,<1.0]
 	random/1                # random(+integer) function returning integer [0,<integer]
 
-	phrase/2-3
-
 
 GNU-Prolog
 ==========
@@ -238,6 +236,13 @@ under the hood...
 
 	freeze/2
 	frozen/2
+
+DCG							##UNDER DEVELOPMENT##
+===
+
+	call_dcg/2
+	phrase/2-3
+	phrase_from_file/3
 
 
 Networking					##EXPERIMENTAL##
