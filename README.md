@@ -103,15 +103,10 @@ GNU-Prolog & SWI-Prolog
 	random/1                # random(+integer) function returning integer [0,<integer]
 
 
-GNU-Prolog
-==========
+Others
+======
 
 	write_term_to_atom/3
-
-
-SWI-Prolog
-==========
-
 	setup_call_cleanup/3
 	findall/4
 	term_to_atom/2
@@ -134,12 +129,10 @@ SWI-Prolog
 	rdiv/2
 	char_type/2
 	code_type/2
-	string_upper/2
-	string_lower/2
 	uuid/1					# generates non-standard UUID
 	load_files/2
-	split_catom/4
-	read_catom/3			# synonoymous with bread/3
+	split_atom/4
+	read_atom/3				# synonoymous with bread/3
 
 	getenv/2
 	setenv/2
@@ -175,18 +168,13 @@ SWI-Prolog
 	http_delete/3			# autoloaded from library(http)
 	http_open/3				# autoloaded from library(http)
 
-Note: consult/1 and load_files/2 support lists of files as args. Also
-support loading into modules eg. *consult(MOD:FILE-SPEC)*.
-
-As generally, atoms can be used interchangeably with chars-lists and
-codes-list (aka *strings*).
-
-Others
-======
-
+	string_upper/2
+	string_lower/2
+	string_concat/2         # as atom-concat/3 but with strings
 	string_number/2         # unify (in decimal) with number
 	string_hex/2            # unify (in hex) with number
 	string_octal/2          # unify (in octal) with number
+
 	log10/1                 # function returning log10 of arg
 	now/0                   # function returning C-time in secs as integer
 	now/1                   # now (-integer) C-time in secs as integer
@@ -214,6 +202,9 @@ Others
 	open(F,M,S,[mmap(Ls)])  # with open/4 mmap() the file to Ls
 
 	persist/1               # directive 'persist funct/arity'
+
+Note: consult/1 and load_files/2 support lists of files as args. Also
+support loading into modules eg. *consult(MOD:FILE-SPEC)*.
 
 
 A simple dictionary
