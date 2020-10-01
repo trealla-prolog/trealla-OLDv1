@@ -5950,6 +5950,7 @@ static int fn_split_4(query *q)
 
 	if ((ptr = strchr_utf8(start, ch)) != NULL) {
 		cell tmp = make_cstringn(q, start, ptr-start);
+		tmp.flags |= FLAG2_DQ_STRING;
 
 		if (!unify(q, p3, p3_ctx, &tmp, q->st.curr_frame))
 			return 0;
@@ -8128,6 +8129,7 @@ static int fn_uuid_1(query *q)
     char tmpbuf[128];
     uuid_to_string(&u, tmpbuf, sizeof(tmpbuf));
 	cell tmp = make_cstring(q, tmpbuf);
+	tmp.flags |= FLAG2_DQ_STRING;
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return 1;
 }
@@ -8195,6 +8197,7 @@ static int fn_atomic_concat_3(query *q)
 		memcpy(dst+len1, src2, len2);
 		dst[nbytes] = '\0';
 		cell tmp = make_cstringn(q, dst, nbytes);
+		tmp.flags |= FLAG2_DQ_STRING;
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		free(dst);
 		return 1;
@@ -8206,6 +8209,7 @@ static int fn_atomic_concat_3(query *q)
 
 		char *dst = strndup(GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
 		cell tmp = make_cstring(q, dst);
+		tmp.flags |= FLAG2_DQ_STRING;
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		free(dst);
 		return 1;
@@ -8217,6 +8221,7 @@ static int fn_atomic_concat_3(query *q)
 
 		char *dst = strdup(GET_STR(p3)+LEN_STR(p1));
 		cell tmp = make_cstring(q, dst);
+		tmp.flags |= FLAG2_DQ_STRING;
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(dst);
 		return 1;
@@ -8970,9 +8975,9 @@ static const struct builtins g_other_funcs[] =
 	// Miscellaneous...
 
 	{"ignore", 1, fn_ignore_1, "+callable"},
-	{"format", 1, fn_format_1, "+atom"},
-	{"format", 2, fn_format_2, "+atom,+list"},
-	{"format", 3, fn_format_3, "+stream,+atom,+list"},
+	{"format", 1, fn_format_1, "+string"},
+	{"format", 2, fn_format_2, "+string,+list"},
+	{"format", 3, fn_format_3, "+stream,+string,+list"},
 	{"findall", 4, fn_findall_4, NULL},
 	{"rdiv", 2, fn_rdiv_2, "+integer,+integer"},
 	{"rational", 1, fn_rational_1, "+number"},
@@ -8996,54 +9001,54 @@ static const struct builtins g_other_funcs[] =
 	{"srandom", 1, fn_srandom_1, "+integer"},
 	{"between", 3, fn_between_3, "+integer,+integer,-integer"},
 	{"log10", 1, fn_log10_1, "+integer"},
-	{"client", 5, fn_client_5, "+atom,-atom,-atom,-stream,+list"},
-	{"server", 3, fn_server_3, "+atom,-stream,+list"},
+	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list"},
+	{"server", 3, fn_server_3, "+string,-stream,+list"},
 	{"accept", 2, fn_accept_2, "+stream,-stream"},
-	{"getline", 1, fn_getline_1, "-atom"},
-	{"getline", 2, fn_getline_2, "+stream,-atom"},
-	{"getfile", 2, fn_getfile_2, "+atom,-list"},
-	{"loadfile", 2, fn_loadfile_2, "+atom,-string"},
-	{"savefile", 2, fn_savefile_2, "+atom,+string"},
-	{"split_string", 4, fn_split_string_4, "+atom,+sep,+pad,-list"},
-	{"split", 4, fn_split_4, "+atom,+atom,?left,?right"},
+	{"getline", 1, fn_getline_1, "-string"},
+	{"getline", 2, fn_getline_2, "+stream,-string"},
+	{"getfile", 2, fn_getfile_2, "+string,-list"},
+	{"loadfile", 2, fn_loadfile_2, "+string,-string"},
+	{"savefile", 2, fn_savefile_2, "+string,+string"},
+	{"split_string", 4, fn_split_string_4, "+string,+sep,+pad,-list"},
+	{"split", 4, fn_split_4, "+string,+string,?left,?right"},
 	{"msort", 2, fn_msort_2, "+list,-list"},
 	{"is_list", 1, fn_is_list_1, "+term"},
 	{"list", 1, fn_is_list_1, "+term"},
 	{"is_stream", 1, fn_is_stream_1, "+term"},
 	{"forall", 2, fn_forall_2, "+term,+term"},
 	{"term_hash", 2, fn_term_hash_2, "+term,?integer"},
-	{"rename_file", 2, fn_rename_file_2, "+atom,+atom"},
-	{"delete_file", 1, fn_delete_file_1, "+atom"},
-	{"exists_file", 1, fn_exists_file_1, "+atom"},
-	{"time_file", 2, fn_time_file_2, "+atom,-real"},
-	{"size_file", 2, fn_size_file_2, "+atom,-integer"},
-	{"exists_directory", 1, fn_exists_directory_1, "+atom"},
-	{"make_directory", 1, fn_make_directory_1, "+atom"},
-	{"working_directory", 2, fn_working_directory_2, "-atom,+atom"},
-	{"chdir", 1, fn_chdir_1, "+atom"},
-	{"name", 2, fn_iso_atom_codes_2, "?atom,?list"},
-	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+atom,-term,+list"},
-	{"write_term_to_atom", 3, fn_write_term_to_atom_3, "-atom,+term,+list"},
-	{"term_to_atom", 2, fn_term_to_atom_2, "+term,-atom"},
-	{"base64", 2, fn_base64_2, "?atom,?atom"},
-	{"urlenc", 2, fn_urlenc_2, "?atom,?atom"},
-	{"string_lower", 2, fn_string_lower_2, "?atom,?atom"},
-	{"string_upper", 2, fn_string_upper_2, "?atom,?atom"},
-	{"read_string", 3, fn_bread_3, "+stream,+integer,-atom"},
-	{"bread", 3, fn_bread_3, "+stream,+integer,-atom"},
-	{"bwrite", 2, fn_bwrite_2, "+stream,-atom"},
+	{"rename_file", 2, fn_rename_file_2, "+string,+string"},
+	{"delete_file", 1, fn_delete_file_1, "+string"},
+	{"exists_file", 1, fn_exists_file_1, "+string"},
+	{"time_file", 2, fn_time_file_2, "+string,-real"},
+	{"size_file", 2, fn_size_file_2, "+string,-integer"},
+	{"exists_directory", 1, fn_exists_directory_1, "+string"},
+	{"make_directory", 1, fn_make_directory_1, "+string"},
+	{"working_directory", 2, fn_working_directory_2, "-string,+string"},
+	{"chdir", 1, fn_chdir_1, "+string"},
+	{"name", 2, fn_iso_atom_codes_2, "?string,?list"},
+	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+string,-term,+list"},
+	{"write_term_to_atom", 3, fn_write_term_to_atom_3, "-string,+term,+list"},
+	{"term_to_atom", 2, fn_term_to_atom_2, "+term,-string"},
+	{"base64", 2, fn_base64_2, "?string,?string"},
+	{"urlenc", 2, fn_urlenc_2, "?string,?string"},
+	{"string_lower", 2, fn_string_lower_2, "?string,?string"},
+	{"string_upper", 2, fn_string_upper_2, "?string,?string"},
+	{"read_string", 3, fn_bread_3, "+stream,+integer,-string"},
+	{"bread", 3, fn_bread_3, "+stream,+integer,-string"},
+	{"bwrite", 2, fn_bwrite_2, "+stream,-string"},
 	{"atom_number", 2, fn_string_number_2, "?string,?integer"},
 	{"string_number", 2, fn_string_number_2, "?string,?integer"},
 	{"string_hex", 2, fn_string_hex_2, "?string,?integer"},
-	{"string_octal", 2, fn_string_octal_2, "?atom,?integer"},
-	{"predicate_property", 2, fn_predicate_property_2, "+callable,?atom"},
+	{"string_octal", 2, fn_string_octal_2, "?string,?integer"},
+	{"predicate_property", 2, fn_predicate_property_2, "+callable,?string"},
 	{"numbervars", 1, fn_numbervars_1, "+term"},
 	{"numbervars", 3, fn_numbervars_3, "+term,+start,?end"},
 	{"numbervars", 4, fn_numbervars_3, "+term,+start,?end,+list"},
 	{"var_number", 2, fn_var_number_2, "+term,?integer"},
 	{"char_type", 2, fn_char_type_2, "+char,+term"},
 	{"code_type", 2, fn_char_type_2, "+code,+term"},
-	{"uuid", 1, fn_uuid_1, "-atom"},
+	{"uuid", 1, fn_uuid_1, "-string"},
 	{"asserta", 2, fn_asserta_2, "+term,-ref"},
 	{"assertz", 2, fn_assertz_2, "+term,-ref"},
 	{"instance", 2, fn_instance_2, "+ref,?term"},
@@ -9055,8 +9060,8 @@ static const struct builtins g_other_funcs[] =
 	{"setenv", 2, fn_setenv_2},
 	{"unsetenv", 1, fn_unsetenv_1},
 	{"load_files", 2, fn_consult_1, "+files"},
-	{"statistics", 2, fn_statistics_2, "+atom,-var"},
-	{"duplicate_term", 2, fn_iso_copy_term_2, "+atom,-var"},
+	{"statistics", 2, fn_statistics_2, "+string,-var"},
+	{"duplicate_term", 2, fn_iso_copy_term_2, "+string,-var"},
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer"},
 	{"limit", 2, fn_limit_2, "+integer,+callable"},
 	{"offset", 2, fn_offset_2, "+integer,+callable"},
@@ -9067,9 +9072,9 @@ static const struct builtins g_other_funcs[] =
 	{"$get_atts", 2, fn_sys_get_atts_2, "+var,+callable"},
 
 #if USE_OPENSSL
-	{"sha1", 2, fn_sha1_2, "+atom,?atom"},
-	{"sha256", 2, fn_sha256_2, "+atom,?atom"},
-	{"sha512", 2, fn_sha512_2, "+atom,?atom"},
+	{"sha1", 2, fn_sha1_2, "+string,?string"},
+	{"sha256", 2, fn_sha256_2, "+string,?string"},
+	{"sha512", 2, fn_sha512_2, "+string,?string"},
 #endif
 
 	{"fork", 0, fn_fork_0, NULL},
