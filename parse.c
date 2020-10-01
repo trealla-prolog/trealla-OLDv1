@@ -248,7 +248,7 @@ cell *LIST_TAIL(cell *h)
 		tmp.val_type = TYPE_STRING;
 		tmp.flags = FLAG2_BIG_STRING|FLAG2_CONST_STRING|FLAG2_DQ_STRING;
 		tmp.nbr_cells = 1;
-		tmp.arity = 0;
+		tmp.arity = 2;
 		tmp.val_str = h->val_str + h->len_str;
 		int n = len_char_utf8(tmp.val_str);
 		tmp.len_str = n;
@@ -626,7 +626,7 @@ void clear_term(term *t)
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
 
-		if (is_big_string(c))
+		if (is_stringn(c))
 			free(c->val_str);
 
 		c->val_type = TYPE_EMPTY;
@@ -748,7 +748,7 @@ void destroy_query(query *q)
 		for (idx_t i = 0; i < a->hp; i++) {
 			cell *c = a->heap + i;
 
-			if (is_big_string(c) && !is_const_string(c))
+			if (is_stringn(c) && !is_const_string(c))
 				free(c->val_str);
 			else if (is_integer(c) && ((c)->flags&FLAG2_STREAM)) {
 				stream *str = &g_streams[c->val_num];
@@ -1935,6 +1935,11 @@ static int get_token(parser *p, int last_op)
 				int ch = get_char_utf8(&src);
 
 				if (ch == p->quoted) {
+					if ((ch == '"') && !*p->token && p->string) {
+						strcpy(p->token, "[]");
+						p->string = 0;
+					}
+
 					p->quoted = 0;
 					break;
 				}
@@ -2292,8 +2297,10 @@ int parser_tokenize(parser *p, int args, int consing)
 		} else {
 			c->val_type = TYPE_STRING;
 
-			if (p->string)
+			if (p->string) {
 				c->flags |= FLAG2_DQ_STRING;
+				c->arity = 2;
+			}
 
 			if ((strlen(p->token) < MAX_SMALL_STRING) && !p->string)
 				strcpy(c->val_chr, p->token);

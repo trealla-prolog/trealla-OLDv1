@@ -66,7 +66,7 @@ typedef uint32_t idx_t;
 #define is_dq_list(c) (is_string(c) && is_dq_string(c))
 #define is_list(c) (is_dq_list(c) || is_real_list(c))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
-#define is_big_string(c) (is_string(c) && ((c)->flags&FLAG2_BIG_STRING))
+#define is_stringn(c) (is_string(c) && ((c)->flags&FLAG2_BIG_STRING))
 #define is_const_string(c) (is_string(c) && ((c)->flags&FLAG2_CONST_STRING))
 #define is_dq_string(c) ((c)->flags&FLAG2_DQ_STRING)
 #define is_dq_string2(c) ((c)->flags&FLAG2_DQ_STRING2)

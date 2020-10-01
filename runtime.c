@@ -277,7 +277,7 @@ static void trim_heap(query *q, const choice *ch)
 		for (idx_t i = 0; i < a->hp; i++) {
 			cell *c = a->heap + i;
 
-			if (is_big_string(c) && !is_const_string(c)) {
+			if (is_stringn(c) && !is_const_string(c)) {
 				free(c->val_str);
 			} else if (is_integer(c) && ((c)->flags&FLAG2_STREAM)) {
 				stream *str = &g_streams[c->val_num];
@@ -307,7 +307,7 @@ static void trim_heap(query *q, const choice *ch)
 	for (idx_t i = ch->st.hp; a && (i < a->hp); i++) {
 		cell *c = a->heap + i;
 
-		if (is_big_string(c) && !is_const_string(c)) {
+		if (is_stringn(c) && !is_const_string(c)) {
 			free(c->val_str);
 		} else if (is_integer(c) && ((c)->flags&FLAG2_STREAM)) {
 			stream *str = &g_streams[c->val_num];

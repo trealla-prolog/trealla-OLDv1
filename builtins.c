@@ -434,7 +434,7 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	copy_cells(tmp, p1, 1);
 
 	if (!is_structure(p1)) {
-		if (is_big_string(p1) && !is_const_string(p1))
+		if (is_stringn(p1) && !is_const_string(p1))
 			tmp->val_str = strdup(p1->val_str);
 
 		return;
@@ -590,19 +590,19 @@ static int fn_iso_number_1(query *q)
 static int fn_iso_atom_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return is_atom(p1);
+	return is_atom(p1) && !is_dq_string(p1);
 }
 
 static int fn_iso_compound_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return is_structure(p1) ? 1 : 0;
+	return is_structure(p1) || is_dq_string(p1) ? 1 : 0;
 }
 
 static int fn_iso_atomic_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return is_atomic(p1);
+	return is_atomic(p1) && !is_dq_string(p1);
 }
 
 static int fn_iso_var_1(query *q)
@@ -1249,11 +1249,11 @@ static int fn_iso_atom_concat_3(query *q)
 
 static int fn_iso_atom_length_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_string);
 	GET_NEXT_ARG(p2,integer_or_var);
 	size_t len;
 
-	if (is_big_string(p1)) {
+	if (is_stringn(p1)) {
 		const char *p = GET_STR(p1);
 		len = substrlen_utf8(p, p+p1->len_str);
 	} else
@@ -3956,7 +3956,7 @@ static cell *clone_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx
 	cell *c = tmp + (prefix?1:0);
 
 	for (idx_t i = 0; i < nbr_cells; i++, c++) {
-		if (is_big_string(c))
+		if (is_stringn(c))
 			c->flags |= FLAG2_CONST_STRING;
 	}
 
@@ -3979,7 +3979,7 @@ static cell *copy_to_heap(query *q, cell *p1, idx_t suffix)
 	for (idx_t i = 0; i < p1->nbr_cells; i++, dst++, src++) {
 		*dst = *src;
 
-		if (is_big_string(src))
+		if (is_stringn(src))
 			dst->flags |= FLAG2_CONST_STRING;
 
 		if (!is_var(src))
@@ -6841,7 +6841,7 @@ static int fn_spawn_n(query *q)
 		cell *c = tmp2;
 
 		for (idx_t i = 0; i < p2->nbr_cells; i++, c++) {
-			if (is_big_string(c) && !is_const_string(c))
+			if (is_stringn(c) && !is_const_string(c))
 				c->val_str = strdup(c->val_str);
 		}
 
@@ -6883,7 +6883,7 @@ static int fn_send_1(query *q)
 	for (idx_t i = 0; i < c->nbr_cells; i++) {
 		cell *c2 = c + i;
 
-		if (is_big_string(c2)) {
+		if (is_stringn(c2)) {
 			size_t nbytes = c2->len_str;
 			char *tmp = malloc(nbytes + 1);
 			memcpy(tmp, c2->val_str, nbytes+1);
