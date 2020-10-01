@@ -223,18 +223,23 @@ geturl(Url) :-
 	format("Job [~w] ~w ==> ~w done~n",[Url,Code,Location]).
 
 test54 :-
-	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
+	L = ["www.google.com","www.bing.com","www.duckduckgo.com"],
 	maplist(geturl,L),
 	writeln('Finished').
 
 test55 :-
-	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
+	L = ["www.google.com","www.bing.com","www.duckduckgo.com"],
 	maplist(spawn(geturl),L),
 	wait, writeln('Finished').
 
 test56 :-
-	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
+	L = ["www.google.com","www.bing.com","www.duckduckgo.com"],
 	spawnlist(geturl,L),
+	writeln('Finished').
+
+test57 :-
+	L = ["www.google.com","www.bing.com","www.duckduckgo.com"],
+	maplist(writeln,L),
 	writeln('Finished').
 
 test61(0).

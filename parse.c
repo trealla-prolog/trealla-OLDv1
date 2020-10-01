@@ -218,9 +218,10 @@ int set_op(module *m, const char *name, unsigned val_type, unsigned precedence)
 
 module *g_modules = NULL;
 
-cell *LIST_HEAD(cell *l)
+cell *list_head(cell **lptr)
 {
 	static cell tmp2;
+	cell *l = *lptr;
 
 	if (is_string(l)) {
 		cell tmp;
@@ -233,15 +234,23 @@ cell *LIST_HEAD(cell *l)
 		tmp.len_str = n;
 		tmp.rem_str = l->rem_str - n;
 		tmp2 = tmp;
+		*lptr = &tmp2;
 		return &tmp2;
 	}
 
 	return l + 1;
 }
 
-cell *LIST_TAIL(cell *h)
+cell *list_tail(cell *l)
 {
 	static cell tmp2;
+
+	if (!is_string(l)) {
+		cell *h = l + 1;
+		return h + h->nbr_cells;
+	}
+
+	cell *h = l;
 
 	if (is_string(h) && h->rem_str) {
 		cell tmp;
@@ -813,7 +822,7 @@ static void consultall(parser *p, cell *l)
 	while (is_list(l)) {
 		cell *h = LIST_HEAD(l);
 		module_load_file(p->m, GET_STR(h));
-		l = LIST_TAIL(h);;
+		l = LIST_TAIL(l);
 	}
 }
 
@@ -883,7 +892,7 @@ static void directives(parser *p, term *t)
 				h->is_public = 1;
 			}
 
-			p2 = LIST_TAIL(head);
+			p2 = LIST_TAIL(p2);
 		}
 
 		return;

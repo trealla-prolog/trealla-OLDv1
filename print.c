@@ -281,7 +281,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		}
 
 		cell *h = LIST_HEAD(c);
-		cell *tail = LIST_TAIL(h);
+		cell *tail = LIST_TAIL(c);
 
 		if (!cons)
 			dst += snprintf(dst, dstlen, "%s", "[");

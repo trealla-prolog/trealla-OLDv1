@@ -502,7 +502,7 @@ static char *convert_list_to_catom(query *q, cell *p1, idx_t p1_ctx)
 		else
 			return 0;
 
-		l = LIST_TAIL(h);
+		l = LIST_TAIL(l);
 		l = deref_var(q, l, l_ctx);
 		l_ctx = q->latest_ctx;
 	}
@@ -526,7 +526,7 @@ static char *convert_list_to_catom(query *q, cell *p1, idx_t p1_ctx)
 		}
 
 		dst += put_char_utf8(dst, ch);
-		l = LIST_TAIL(h);
+		l = LIST_TAIL(l);
 		l = deref_var(q, l, l_ctx);
 		l_ctx = q->latest_ctx;
 	}
@@ -737,7 +737,7 @@ static int fn_iso_atom_chars_2(query *q)
 
 	if (!is_var(p2)) {
 		cell *head = LIST_HEAD(p2);
-		cell *tail = LIST_TAIL(head);
+		cell *tail = LIST_TAIL(p2);
 		head = deref_var(q, head, p2_ctx);
 		q->latest_ctx = p2_ctx;
 
@@ -781,7 +781,7 @@ static int fn_iso_atom_chars_2(query *q)
 			}
 
 			head = LIST_HEAD(tail);
-			tail = LIST_TAIL(head);
+			tail = LIST_TAIL(tail);
 			head = deref_var(q, head, q->latest_ctx);
 		}
 
@@ -822,7 +822,7 @@ static int fn_iso_atom_codes_2(query *q)
 
 	if (!is_var(p2) && is_var(p1)) {
 		cell *head = LIST_HEAD(p2);
-		cell *tail = LIST_TAIL(head);
+		cell *tail = LIST_TAIL(p2);
 		head = deref_var(q, head, p2_ctx);
 
 		size_t nbytes;
@@ -860,7 +860,7 @@ static int fn_iso_atom_codes_2(query *q)
 			}
 
 			head = LIST_HEAD(tail);
-			tail = LIST_TAIL(head);
+			tail = LIST_TAIL(tail);
 			head = deref_var(q, head, q->latest_ctx);
 		}
 
@@ -897,7 +897,7 @@ static int fn_iso_number_chars_2(query *q)
 
 	if (!is_var(p2)) {
 		cell *head = LIST_HEAD(p2);
-		cell *tail = LIST_TAIL(head);
+		cell *tail = LIST_TAIL(p2);
 		head = deref_var(q, head, p2_ctx);
 
 		int_t val = 0;
@@ -930,7 +930,7 @@ static int fn_iso_number_chars_2(query *q)
 			}
 
 			head = LIST_HEAD(tail);
-			tail = LIST_TAIL(head);
+			tail = LIST_TAIL(tail);
 			head = deref_var(q, head, q->latest_ctx);
 		}
 
@@ -966,7 +966,7 @@ static int fn_iso_number_codes_2(query *q)
 
 	if (!is_var(p2)) {
 		cell *head = LIST_HEAD(p2);
-		cell *tail = LIST_TAIL(head);
+		cell *tail = LIST_TAIL(p2);
 		head = deref_var(q, head, p2_ctx);
 
 		int_t val = 0;
@@ -998,7 +998,7 @@ static int fn_iso_number_codes_2(query *q)
 			}
 
 			head = LIST_HEAD(tail);
-			tail = LIST_TAIL(head);
+			tail = LIST_TAIL(tail);
 			head = deref_var(q, head, q->latest_ctx);
 		}
 
@@ -1503,7 +1503,7 @@ static int fn_iso_open_4(query *q)
 			}
 		}
 
-		p4 = LIST_TAIL(h);
+		p4 = LIST_TAIL(p4);
 		p4 = deref_var(q, p4, p4_ctx);
 		p4_ctx = q->latest_ctx;
 	}
@@ -1681,7 +1681,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 		cell *h = LIST_HEAD(p2);
 		cell *c = deref_var(q, h, p2_ctx);
 		parse_read_params(q, c, str);
-		p2 = LIST_TAIL(h);
+		p2 = LIST_TAIL(p2);
 		p2 = deref_var(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
@@ -1874,7 +1874,7 @@ static int fn_iso_write_term_2(query *q)
 		cell *h = LIST_HEAD(p2);
 		cell *c = deref_var(q, h, p2_ctx);
 		parse_write_params(q, c);
-		p2 = LIST_TAIL(h);
+		p2 = LIST_TAIL(p2);
 		p2 = deref_var(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
@@ -1905,7 +1905,7 @@ static int fn_iso_write_term_3(query *q)
 		cell *h = LIST_HEAD(p2);
 		cell *c = deref_var(q, h, p2_ctx);
 		parse_write_params(q, c);
-		p2 = LIST_TAIL(h);
+		p2 = LIST_TAIL(p2);
 		p2 = deref_var(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
@@ -3774,7 +3774,7 @@ static int fn_iso_univ_2(query *q)
 		}
 
 		cell *head = LIST_HEAD(p2);
-		cell *tail = LIST_TAIL(head);
+		cell *tail = LIST_TAIL(p2);
 		head = deref_var(q, head, p2_ctx);
 
 		if (!is_atom(head)) {
@@ -3802,7 +3802,7 @@ static int fn_iso_univ_2(query *q)
 			}
 
 			head = LIST_HEAD(tail);
-			tail = LIST_TAIL(head);
+			tail = LIST_TAIL(tail);
 
 			if ((idx + head->nbr_cells) >= nbr_cells) {
 				nbr_cells += head->nbr_cells;
@@ -4070,8 +4070,8 @@ static int fn_iso_length_2(query *q)
 		cell *l = p1;
 
 		while (is_list(l)) {
-			cell *h = LIST_HEAD(l);
-			l = LIST_TAIL(h);
+			LIST_HEAD(l);
+			l = LIST_TAIL(l);
 			l = deref_var(q, l, p1_ctx);
 			p1_ctx = q->latest_ctx;
 			cnt++;
@@ -4094,8 +4094,8 @@ static int fn_iso_length_2(query *q)
 		cell *l = p1;
 
 		while (is_list(l)) {
-			cell *h = LIST_HEAD(l);
-			l = LIST_TAIL(h);
+			LIST_HEAD(l);
+			l = LIST_TAIL(l);
 			l = deref_var(q, l, p1_ctx);
 			p1_ctx = q->latest_ctx;
 			cnt++;
@@ -5001,8 +5001,8 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 	cell *l = p;
 
 	while (is_list(l)) {
-		cell *h = LIST_HEAD(l);
-		l = LIST_TAIL(h);
+		LIST_HEAD(l);
+		l = LIST_TAIL(l);
 		cnt++;
 	}
 
@@ -5013,7 +5013,7 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 	while (is_list(l)) {
 		cell *h = LIST_HEAD(l);
 		base[idx++] = h;
-		l = LIST_TAIL(h);
+		l = LIST_TAIL(l);
 	}
 
 #ifdef __FreeBSD__
@@ -6164,7 +6164,7 @@ static int fn_server_3(query *q)
 			}
 		}
 
-		p3 = LIST_TAIL(h);
+		p3 = LIST_TAIL(p3);
 		p3 = deref_var(q, p3, p3_ctx);
 		p3_ctx = q->latest_ctx;
 	}
@@ -6332,7 +6332,7 @@ static int fn_client_5(query *q)
 			}
 		}
 
-		p5 = LIST_TAIL(h);
+		p5 = LIST_TAIL(p5);
 		p5 = deref_var(q, p5, p5_ctx);
 		p5_ctx = q->latest_ctx;
 	}
@@ -6354,7 +6354,7 @@ static int fn_client_5(query *q)
 			}
 		}
 
-		p5 = LIST_TAIL(h);
+		p5 = LIST_TAIL(p5);
 		p5 = deref_var(q, p5, p5_ctx);
 		p5_ctx = q->latest_ctx;
 	}
@@ -7034,7 +7034,7 @@ static int fn_consult_1(query *q)
 		if (!do_consult(q, c, q->latest_ctx))
 			return 0;
 
-		p1 = LIST_TAIL(h);
+		p1 = LIST_TAIL(p1);
 		p1 = deref_var(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}

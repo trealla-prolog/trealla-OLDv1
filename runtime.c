@@ -613,10 +613,10 @@ static int unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		if (!unify(q, c1, c1_ctx, c2, c2_ctx))
 			return 0;
 
-		p1 = LIST_TAIL(h1);
+		p1 = LIST_TAIL(p1);
 		p1 = deref_var(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
-		p2 = LIST_TAIL(h2);
+		p2 = LIST_TAIL(p2);
 		p2 = deref_var(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}

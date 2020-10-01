@@ -383,8 +383,11 @@ inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 	return nbr_cells;
 }
 
-cell *LIST_HEAD(cell *l);
-cell *LIST_TAIL(cell *h);
+#define LIST_HEAD(l) list_head(&l)
+#define LIST_TAIL(l) list_tail(l)
+
+cell *list_head(cell **l);
+cell *list_tail(cell *h);
 
 int is_in_pool(const char *name, idx_t *offset);
 void set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
