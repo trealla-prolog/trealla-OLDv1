@@ -384,10 +384,10 @@ inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 }
 
 #define LIST_HEAD(l) list_head(&l)
-#define LIST_TAIL(l) list_tail(l)
+#define LIST_TAIL(l) list_tail(&l)
 
 cell *list_head(cell **l);
-cell *list_tail(cell *h);
+cell *list_tail(cell **l);
 
 int is_in_pool(const char *name, idx_t *offset);
 void set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);

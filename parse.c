@@ -220,62 +220,55 @@ module *g_modules = NULL;
 
 cell *list_head(cell **lptr)
 {
-	static cell tmp2;
 	cell *l = *lptr;
 
-	if (is_string(l)) {
-		cell tmp;
-		tmp.val_type = TYPE_CSTRING;
-		tmp.flags = FLAG_BLOB|FLAG_CONST_CSTRING|FLAG_STRING;
-		tmp.nbr_cells = 1;
-		tmp.arity = 0;
-		tmp.val_str = l->val_str;
-		int n = len_char_utf8(l->val_str);
-		tmp.len_str = n;
-		tmp.rem_str = l->rem_str - n;
-		tmp2 = tmp;
-		*lptr = &tmp2;
-		return &tmp2;
-	}
+	if (!is_string(l))
+		return l + 1;
 
-	return l + 1;
+	static cell tmp;
+	tmp.val_type = TYPE_CSTRING;
+	tmp.flags = FLAG_BLOB|FLAG_CONST_CSTRING|FLAG_STRING;
+	tmp.nbr_cells = 1;
+	tmp.arity = 0;
+	tmp.val_str = l->val_str;
+	int n = len_char_utf8(l->val_str);
+	tmp.len_str = n;
+	tmp.rem_str = l->rem_str - n;
+	*lptr = &tmp;
+	return &tmp;
 }
 
-cell *list_tail(cell *l)
+cell *list_tail(cell **lptr)
 {
-	static cell tmp2;
+	cell *l = *lptr;
 
 	if (!is_string(l)) {
 		cell *h = l + 1;
 		return h + h->nbr_cells;
 	}
 
-	cell *h = l;
-
-	if (is_string(h) && h->rem_str) {
-		cell tmp;
+	if (is_string(l) && l->rem_str) {
+		static cell tmp;
 		tmp.val_type = TYPE_CSTRING;
 		tmp.flags = FLAG_BLOB|FLAG_CONST_CSTRING|FLAG_STRING;
 		tmp.nbr_cells = 1;
 		tmp.arity = 2;
-		tmp.val_str = h->val_str + h->len_str;
+		tmp.val_str = l->val_str + l->len_str;
 		int n = len_char_utf8(tmp.val_str);
 		tmp.len_str = n;
-		tmp.rem_str = h->rem_str;
-		tmp2 = tmp;
-		return &tmp2;
-	} else if (is_string(h)) {
-		cell tmp;
-		tmp.val_type = TYPE_LITERAL;
-		tmp.nbr_cells = 1;
-		tmp.flags = 0;
-		tmp.arity = 0;
-		tmp.val_off = g_nil_s;
-		tmp2 = tmp;
-		return &tmp2;
+		tmp.rem_str = l->rem_str;
+		*lptr = &tmp;
+		return &tmp;
 	}
 
-	return h + h->nbr_cells;
+	static cell tmp;
+	tmp.val_type = TYPE_LITERAL;
+	tmp.nbr_cells = 1;
+	tmp.flags = 0;
+	tmp.arity = 0;
+	tmp.val_off = g_nil_s;
+	*lptr = &tmp;
+	return &tmp;
 }
 
 module *find_module(const char *name)
