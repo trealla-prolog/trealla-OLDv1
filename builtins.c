@@ -1249,7 +1249,7 @@ static int fn_iso_atom_concat_3(query *q)
 
 static int fn_iso_atom_length_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_string);
+	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,integer_or_var);
 	size_t len;
 
