@@ -227,7 +227,7 @@ cell *list_head(cell **lptr)
 
 	static cell tmp;
 	tmp.val_type = TYPE_CSTRING;
-	tmp.flags = FLAG_BLOB|FLAG_CONST_CSTRING|FLAG_STRING;
+	tmp.flags = FLAG_BLOB|FLAG_CONST_CSTRING|FLAG_STRING|FLAG_HEAD;
 	tmp.nbr_cells = 1;
 	tmp.arity = 0;
 	tmp.val_str = l->val_str;
@@ -254,8 +254,7 @@ cell *list_tail(cell **lptr)
 		tmp.nbr_cells = 1;
 		tmp.arity = 2;
 		tmp.val_str = l->val_str + l->len_str;
-		int n = len_char_utf8(tmp.val_str);
-		tmp.len_str = n;
+		tmp.len_str = l->rem_str;
 		tmp.rem_str = l->rem_str;
 		*lptr = &tmp;
 		return &tmp;
@@ -801,7 +800,7 @@ static void dump_vars(query *q, parser *p)
 		fprintf(stdout, "\n%s = ", p->vartab.var_name[i]);
 		int save = q->quoted;
 		q->quoted = 1;
-		write_term(q, stdout, c, 0, 0, 999, 0);
+		write_term(q, stdout, c, 1, 0, 999, 0);
 		q->quoted = save;
 		any++;
 	}
