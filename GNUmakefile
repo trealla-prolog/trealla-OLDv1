@@ -64,20 +64,24 @@ utf8.o: utf8.c utf8.h
 
 # Library modules
 
+ifeq ($(OS),Darwin)
+	OSFLAG = -m elf_x86_64
+endif
+
 dict.o: library/dict.pro
-	$(LD) -r -b binary -o dict.o library/dict.pro
+	$(LD) $(OSFLAG) -r -b binary -o dict.o library/dict.pro
 
 lists.o: library/lists.pro
-	$(LD) -r -b binary -o lists.o library/lists.pro
+	$(LD) $(OSFLAG) -r -b binary -o lists.o library/lists.pro
 
 apply.o: library/apply.pro
-	$(LD) -r -b binary -o apply.o library/apply.pro
+	$(LD) $(OSFLAG) -r -b binary -o apply.o library/apply.pro
 
 http.o: library/http.pro
-	$(LD) -r -b binary -o http.o library/http.pro
+	$(LD) $(OSFLAG) -r -b binary -o http.o library/http.pro
 
 auth.o: library/auth.pro
-	$(LD) -r -b binary -o auth.o library/auth.pro
+	$(LD) $(OSFLAG) -r -b binary -o auth.o library/auth.pro
 
 atts.o: library/atts.pro
-	$(LD) -r -b binary -o atts.o library/atts.pro
+	$(LD) $(OSFLAG) -r -b binary -o atts.o library/atts.pro
