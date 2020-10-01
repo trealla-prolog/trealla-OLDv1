@@ -2594,8 +2594,16 @@ module *create_module(const char *name)
 
 	make_rule(m, "call(G) :- G.");
 
-	make_rule(m, "phrase_from_file(P, Filename) :- "			\
+	make_rule(m, "phrase_from_file(P, Filename) :- "		\
 		"open(Filename, read, Str, [mmap(Ms)]),"			\
+		"length(Ms,N1), format(\"Ms length=~w~n\", [N1]),"	\
+		"copy_term(P, P2),"									\
+		"P2=P,"												\
+		"phrase(P2, Ms, []),"								\
+		"close(Str).");
+
+	make_rule(m, "phrase_from_file(P, Filename, Opts) :- "	\
+		"open(Filename, read, Str, [mmap(Ms)|Opts]),"		\
 		"length(Ms,N1), format(\"Ms length=~w~n\", [N1]),"	\
 		"copy_term(P, P2),"									\
 		"P2=P,"												\

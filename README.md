@@ -233,7 +233,7 @@ DCG							##UNDER DEVELOPMENT##
 
 	call_dcg/2
 	phrase/2-3
-	phrase_from_file/2
+	phrase_from_file/2-3
 
 
 Networking					##EXPERIMENTAL##
