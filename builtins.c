@@ -1253,6 +1253,11 @@ static int fn_iso_atom_length_2(query *q)
 	GET_NEXT_ARG(p2,integer_or_var);
 	size_t len;
 
+	if (is_string(p1)) {
+		throw_error(q, p1, "type_error", "atom");
+		return -1;
+	}
+
 	if (is_blob(p1)) {
 		const char *p = GET_STR(p1);
 		len = substrlen_utf8(p, p+p1->len_str);
@@ -4069,7 +4074,7 @@ static int fn_iso_length_2(query *q)
 		int cnt = 0;
 
 		if (is_string(p1)) {
-			cnt = p1->len_str;
+			cnt = strlen_utf8(p1->val_str);
 		} else {
 			cell *l = p1;
 
@@ -4098,7 +4103,7 @@ static int fn_iso_length_2(query *q)
 		int cnt = 0;
 
 		if (is_string(p1)) {
-			cnt = p1->len_str;
+			cnt = strlen_utf8(p1->val_str);
 		} else {
 			cell *l = p1;
 
