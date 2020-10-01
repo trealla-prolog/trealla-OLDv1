@@ -4478,7 +4478,6 @@ static int fn_iso_call_n(query *q)
 	return 1;
 }
 
-#if USE_BUILTINS
 static int fn_iso_ifthen_2(query *q)
 {
 	if (q->retry)
@@ -4543,7 +4542,6 @@ static int fn_iso_disjunction_2(query *q)
 	q->st.curr_cell = tmp;
 	return 1;
 }
-#endif
 
 static int fn_iso_negation_1(query *q)
 {
@@ -8785,11 +8783,8 @@ static const struct builtins g_iso_funcs[] =
 	{",", 2, NULL, NULL},
 	//{"call", 1, NULL, NULL},
 
-#if USE_BUILTINS
 	{"->", 2, fn_iso_ifthen_2, NULL},
 	{";", 2, fn_iso_disjunction_2, NULL},
-#endif
-
 	{"\\+", 1, fn_iso_negation_1, NULL},
 	{"once", 1, fn_iso_once_1, NULL},
 	{"catch", 3, fn_iso_catch_3, NULL},

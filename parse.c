@@ -2594,14 +2594,6 @@ module *create_module(const char *name)
 
 	make_rule(m, "call(G) :- G.");
 
-#if !USE_BUILTINS
-	make_rule(m, "A -> B ; _C :- A, !, B.");
-	make_rule(m, "_A -> _B ; C :- !, C.");
-	make_rule(m, "A -> B :- A, !, B.");
-	make_rule(m, "A ; _B :- A.");
-	make_rule(m, "_A ; B :- B.");
-#endif
-
 	// This is an approximation... it needs a catcher
 
 	make_rule(m, "setup_call_cleanup(A,G,B) :- A, !, (G -> true ; (B, !, fail)).");

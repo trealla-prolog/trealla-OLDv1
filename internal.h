@@ -44,7 +44,6 @@ typedef uint32_t idx_t;
 #define MAX_QUEUES 16
 #define MAX_STREAMS 64
 #define STREAM_BUFLEN 1024
-#define USE_BUILTINS 1
 
 #define GET_FRAME(i) q->frames+(i)
 #define GET_SLOT(g,i) (i) < g->nbr_slots ? q->slots+g->env+(i) : q->slots+g->overflow+((i)-g->nbr_slots)
