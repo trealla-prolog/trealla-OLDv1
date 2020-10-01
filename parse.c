@@ -225,7 +225,7 @@ cell *LIST_HEAD(cell *l)
 	if (is_string(l)) {
 		cell tmp;
 		tmp.val_type = TYPE_CSTRING;
-		tmp.flags = FLAG_BLOB|FLAG_CONST_STRING|FLAG_STRING;
+		tmp.flags = FLAG_BLOB|FLAG_CONST_CSTRING|FLAG_STRING;
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;
 		tmp.val_str = l->val_str;
@@ -246,7 +246,7 @@ cell *LIST_TAIL(cell *h)
 	if (is_string(h) && h->rem_str) {
 		cell tmp;
 		tmp.val_type = TYPE_CSTRING;
-		tmp.flags = FLAG_BLOB|FLAG_CONST_STRING|FLAG_STRING;
+		tmp.flags = FLAG_BLOB|FLAG_CONST_CSTRING|FLAG_STRING;
 		tmp.nbr_cells = 1;
 		tmp.arity = 2;
 		tmp.val_str = h->val_str + h->len_str;
@@ -2306,7 +2306,7 @@ int parser_tokenize(parser *p, int args, int consing)
 				strcpy(c->val_chr, p->token);
 			else {
 				if (p->consulting)
-					c->flags |= FLAG_CONST_STRING;
+					c->flags |= FLAG_CONST_CSTRING;
 
 				c->flags |= FLAG_BLOB;
 				c->val_str = strdup(p->token);

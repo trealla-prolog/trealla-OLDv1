@@ -180,8 +180,8 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 	}
 
 	const char *src = GET_STR(c);
-	int dq, quote = !is_var(c) && needs_quote(q->m, src);
-	if (is_string(c)) dq = 1;
+	int dq = 0, quote = !is_var(c) && needs_quote(q->m, src);
+	if (is_string(c)) dq = quote = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 	dst += formatted(dst, dstlen, src, is_blob(c) ? c->len_str : INT_MAX);
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");

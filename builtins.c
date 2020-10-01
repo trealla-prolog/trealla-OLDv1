@@ -1551,7 +1551,7 @@ static int fn_iso_open_4(query *q)
 		void *addr = mmap(0, len, prot, MAP_PRIVATE, fd, 0);
 		cell tmp = {0};
 		tmp.val_type = TYPE_CSTRING;
-		tmp.flags = FLAG_BLOB|FLAG_STRING|FLAG_CONST_STRING;
+		tmp.flags = FLAG_BLOB|FLAG_STRING|FLAG_CONST_CSTRING;
 		tmp.nbr_cells = 1;
 		tmp.val_str = addr;
 		tmp.len_str = len;
@@ -3957,7 +3957,7 @@ static cell *clone_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx
 
 	for (idx_t i = 0; i < nbr_cells; i++, c++) {
 		if (is_blob(c))
-			c->flags |= FLAG_CONST_STRING;
+			c->flags |= FLAG_CONST_CSTRING;
 	}
 
 	return tmp;
@@ -3980,7 +3980,7 @@ static cell *copy_to_heap(query *q, cell *p1, idx_t suffix)
 		*dst = *src;
 
 		if (is_blob(src))
-			dst->flags |= FLAG_CONST_STRING;
+			dst->flags |= FLAG_CONST_CSTRING;
 
 		if (!is_var(src))
 			continue;
