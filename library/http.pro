@@ -31,7 +31,7 @@ read_chunks(_, Data, Data).
 
 read_body(S, Hdrs, Data) :-
 	dict:get(Hdrs, 'content-length', V, _),
-	(atom(V) -> atom_number(V, Len) ; Len=V),
+	atom_number(V, Len),
 	bread(S, Len, Data).
 
 % Open with options...
@@ -64,7 +64,6 @@ http_open(UrlList, S, Opts) :-
 % Client request processing...
 
 process(Url, S, Opts) :-
-	atom(Url),
 	is_list(Opts),
 	OptList=Opts,
 	(memberchk(post(PostData), OptList) ->
