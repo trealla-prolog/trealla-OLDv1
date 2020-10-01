@@ -222,10 +222,10 @@ cell *LIST_HEAD(cell *l)
 {
 	static cell tmp2;
 
-	if (is_dq_string(l)) {
+	if (is_string(l)) {
 		cell tmp;
-		tmp.val_type = TYPE_STRING;
-		tmp.flags = FLAG2_BIG_STRING|FLAG2_CONST_STRING|FLAG2_DQ_STRING2;
+		tmp.val_type = TYPE_CSTRING;
+		tmp.flags = FLAG_BLOB|FLAG2_CONST_STRING|FLAG2_STRING;
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;
 		tmp.val_str = l->val_str;
@@ -243,10 +243,10 @@ cell *LIST_TAIL(cell *h)
 {
 	static cell tmp2;
 
-	if (is_dq_string2(h) && h->rem_str) {
+	if (is_string(h) && h->rem_str) {
 		cell tmp;
-		tmp.val_type = TYPE_STRING;
-		tmp.flags = FLAG2_BIG_STRING|FLAG2_CONST_STRING|FLAG2_DQ_STRING;
+		tmp.val_type = TYPE_CSTRING;
+		tmp.flags = FLAG_BLOB|FLAG2_CONST_STRING|FLAG2_STRING;
 		tmp.nbr_cells = 1;
 		tmp.arity = 2;
 		tmp.val_str = h->val_str + h->len_str;
@@ -255,7 +255,7 @@ cell *LIST_TAIL(cell *h)
 		tmp.rem_str = h->rem_str;
 		tmp2 = tmp;
 		return &tmp2;
-	} else if (is_dq_string2(h)) {
+	} else if (is_string(h)) {
 		cell tmp;
 		tmp.val_type = TYPE_LITERAL;
 		tmp.nbr_cells = 1;
@@ -626,7 +626,7 @@ void clear_term(term *t)
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
 
-		if (is_stringn(c))
+		if (is_blob(c))
 			free(c->val_str);
 
 		c->val_type = TYPE_EMPTY;
@@ -748,7 +748,7 @@ void destroy_query(query *q)
 		for (idx_t i = 0; i < a->hp; i++) {
 			cell *c = a->heap + i;
 
-			if (is_stringn(c) && !is_const_string(c))
+			if (is_blob(c) && !is_const_cstring(c))
 				free(c->val_str);
 			else if (is_integer(c) && ((c)->flags&FLAG2_STREAM)) {
 				stream *str = &g_streams[c->val_num];
@@ -2295,10 +2295,10 @@ int parser_tokenize(parser *p, int args, int consing)
 
 			c->val_off = find_in_pool(p->token);
 		} else {
-			c->val_type = TYPE_STRING;
+			c->val_type = TYPE_CSTRING;
 
 			if (p->string) {
-				c->flags |= FLAG2_DQ_STRING;
+				c->flags |= FLAG2_STRING;
 				c->arity = 2;
 			}
 
@@ -2308,7 +2308,7 @@ int parser_tokenize(parser *p, int args, int consing)
 				if (p->consulting)
 					c->flags |= FLAG2_CONST_STRING;
 
-				c->flags |= FLAG2_BIG_STRING;
+				c->flags |= FLAG_BLOB;
 				c->val_str = strdup(p->token);
 				c->len_str = strlen(p->token);
 				c->rem_str = c->len_str;

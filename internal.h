@@ -49,38 +49,34 @@ typedef uint32_t idx_t;
 #define GET_FRAME(i) q->frames+(i)
 #define GET_SLOT(g,i) (i) < g->nbr_slots ? q->slots+g->env+(i) : q->slots+g->overflow+((i)-g->nbr_slots)
 
-#define is_var(c) ((c)->val_type == TYPE_VAR)
+// Primary type...
+
 #define is_literal(c) ((c)->val_type == TYPE_LITERAL)
-#define is_string(c) ((c)->val_type == TYPE_STRING)
-#define is_indirect(c) ((c)->val_type == TYPE_INDIRECT)
-#define is_integer(c) (((c)->val_type == TYPE_INTEGER) && ((c)->val_den == 1))
-#define is_rational(c) ((c)->val_type == TYPE_INTEGER)
-#define is_float(c) ((c)->val_type == TYPE_FLOAT)
+#define is_cstring(c) ((c)->val_type == TYPE_CSTRING)
+#define is_var(c) ((c)->val_type == TYPE_VAR)
 #define is_empty(c) ((c)->val_type == TYPE_EMPTY)
 #define is_end(c) ((c)->val_type == TYPE_END)
+#define is_indirect(c) ((c)->val_type == TYPE_INDIRECT)
+#define is_float(c) ((c)->val_type == TYPE_FLOAT)
+#define is_rational(c) ((c)->val_type == TYPE_INTEGER)
 
-#define is_number(c) (is_rational(c) || is_float(c))
-#define is_atom(c) ((is_literal(c) && !(c)->arity) || is_string(c))
-#define is_structure(c) (is_literal(c) && (c)->arity)
+// Secondary type...
+
 #define is_real_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
-#define is_dq_list(c) (is_string(c) && is_dq_string(c))
-#define is_list(c) (is_dq_list(c) || is_real_list(c))
-#define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
-#define is_stringn(c) (is_string(c) && ((c)->flags&FLAG2_BIG_STRING))
-#define is_const_string(c) (is_string(c) && ((c)->flags&FLAG2_CONST_STRING))
-#define is_dq_string(c) ((c)->flags&FLAG2_DQ_STRING)
-#define is_dq_string2(c) ((c)->flags&FLAG2_DQ_STRING2)
+#define is_string(c) (is_cstring(c) && (c)->flags&FLAG2_STRING)
+#define is_const_cstring(c) (is_cstring(c) && ((c)->flags&FLAG2_CONST_STRING))
+#define is_blob(c) (is_cstring(c) && ((c)->flags&FLAG_BLOB))
 
-// These 2 assume literal or string types...
+// These 2 assume literal or cstring types...
 
-#define GET_STR(c) ((c)->val_type != TYPE_STRING ? (g_pool+(c)->val_off) : (c)->flags&FLAG2_BIG_STRING ? (c)->val_str : (c)->val_chr)
-#define LEN_STR(c) ((c)->flags&FLAG2_BIG_STRING ? (c)->len_str : strlen(GET_STR(c)))
+#define GET_STR(c) ((c)->val_type != TYPE_CSTRING ? (g_pool+(c)->val_off) : (c)->flags&FLAG_BLOB ? (c)->val_str : (c)->val_chr)
+#define LEN_STR(c) ((c)->flags&FLAG_BLOB ? (c)->len_str : strlen(GET_STR(c)))
 
 enum {
 	TYPE_EMPTY=0,
 	TYPE_VAR,
 	TYPE_LITERAL,
-	TYPE_STRING,
+	TYPE_CSTRING,
 	TYPE_INTEGER,
 	TYPE_FLOAT,
 	TYPE_INDIRECT,
@@ -94,17 +90,16 @@ enum {
 	FLAG_BINARY=1<<3,					// used with TYPE_INTEGER
 	FLAG_TAIL_REC=1<<4,
 	FLAG_PASS_THRU=1<<5,
-	FLAG2_BIG_STRING=1<<6,
+	FLAG_BLOB=1<<6,
 
 	//FLAG_SPARE2=1<<7,
 	//FLAG_SPARE1=1<<8,
 
 	FLAG2_DELETED=FLAG_HEX,				// used by bagof
 	FLAG2_FIRST_USE=FLAG_HEX,			// used with TYPE_VAR
-	FLAG2_CONST_STRING=FLAG_HEX,		// used with TYPE_STRING
+	FLAG2_CONST_STRING=FLAG_HEX,		// used with TYPE_CSTRING
 	FLAG2_STREAM=FLAG_TAIL_REC,			// used with TYPE_INTEGER
-	FLAG2_DQ_STRING=FLAG_BINARY,		// used with TYPE_STRING
-	FLAG2_DQ_STRING2=FLAG_OCTAL,		// used with TYPE_STRING
+	FLAG2_STRING=FLAG_BINARY,		// used with TYPE_CSTRING
 
 	OP_FX=1<<9,
 	OP_FY=1<<10,

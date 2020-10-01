@@ -140,8 +140,8 @@ SWI-Prolog
 	string_lower/2
 	uuid/1					# generates non-standard UUID
 	load_files/2
-	split_string/4
-	read_string/3			# synonoymous with bread/3
+	split_catom/4
+	read_catom/3			# synonoymous with bread/3
 
 	getenv/2
 	setenv/2

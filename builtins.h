@@ -11,8 +11,14 @@
 	__attribute__((unused)) cell *p = get_raw_arg(q,n); \
 	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx
 
+#define is_integer(c) (((c)->val_type == TYPE_INTEGER) && ((c)->val_den == 1))
+#define is_list(c) (is_string(c) || is_real_list(c))
+#define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
+#define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
+#define is_structure(c) (is_literal(c) && (c)->arity)
+#define is_number(c) (is_rational(c) || is_float(c))
 #define is_atomic(c) (is_atom(c) || is_number(c))
-#define is_callable(c) (is_literal(c) || is_string(c))
+#define is_callable(c) (is_literal(c) || is_cstring(c))
 #define is_list_or_nil(c) (is_list(c) || is_nil(c))
 #define is_list_or_nil_or_var(c) (is_list_or_nil(c) || is_var(c))
 #define is_list_or_var(c) (is_list(c) || is_var(c))
@@ -20,9 +26,9 @@
 #define is_atom_or_var(c) (is_atom(c) || is_var(c))
 #define is_atom_or_int(c) (is_atom(c) || is_integer(c))
 #define is_atom_or_list(c) (is_atom(c) || is_list(c))
-#define is_atom_or_string(c) (is_atom(c) || is_string(c))
+#define is_atom_or_catom(c) (is_atom(c) || is_cstring(c))
 #define is_atom_or_structure(c) (is_atom(c) || is_structure(c))
-#define is_atom_or_string_or_structure(c) (is_atom(c) || is_string(c) || is_structure(c))
+#define is_atom_or_catom_or_structure(c) (is_atom(c) || is_cstring(c) || is_structure(c))
 #define is_integer_or_var(c) (is_integer(c) || is_var(c))
 #define is_integer_or_atom(c) (is_integer(c) || is_atom(c))
 #define is_nonvar(c) (!is_var(c))

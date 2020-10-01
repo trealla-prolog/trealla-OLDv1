@@ -181,9 +181,9 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 
 	const char *src = GET_STR(c);
 	int dq, quote = !is_var(c) && needs_quote(q->m, src);
-	if (is_dq_string(c)) dq = 1;
+	if (is_string(c)) dq = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
-	dst += formatted(dst, dstlen, src, is_stringn(c) ? c->len_str : INT_MAX);
+	dst += formatted(dst, dstlen, src, is_blob(c) ? c->len_str : INT_MAX);
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 
 	if (!is_structure(c))
@@ -326,7 +326,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 	if (q->ignore_ops || !optype || !c->arity) {
 		int quote = ((running <= 0) || q->quoted) && !is_var(c) && needs_quote(q->m, src);
 		int dq = 0, braces = 0;
-		if (is_dq_string(c)) dq = quote = 1;
+		if (is_string(c)) dq = quote = 1;
 		if (c->arity && !strcmp(src, "{}")) braces = 1;
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
@@ -343,24 +343,24 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			return dst - save_dst;
 		}
 
-		int len_str = is_dq_string(c) ? strlen(src) : c->len_str;
+		int len_str = is_string(c) ? strlen(src) : c->len_str;
 
 		if (braces)
 			;
 		else if (quote) {
-			if ((running < 0) && is_stringn(c) && (len_str > 128))
+			if ((running < 0) && is_blob(c) && (len_str > 128))
 				len_str = 128;
 
-			dst += formatted(dst, dstlen, src, is_stringn(c) ? len_str : INT_MAX);
+			dst += formatted(dst, dstlen, src, is_blob(c) ? len_str : INT_MAX);
 
-			if ((running < 0) && is_stringn(c) && (len_str == 128))
+			if ((running < 0) && is_blob(c) && (len_str == 128))
 				dst += snprintf(dst, dstlen, "%s", "...");
 		} else
-			dst += plain(dst, dstlen, src, is_stringn(c) ? len_str : INT_MAX);
+			dst += plain(dst, dstlen, src, is_blob(c) ? len_str : INT_MAX);
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
-		if (is_structure(c) && !is_dq_list(c)) {
+		if (is_structure(c) && !is_string(c)) {
 			idx_t arity = c->arity;
 			dst += snprintf(dst, dstlen, braces?"{":"(");
 
