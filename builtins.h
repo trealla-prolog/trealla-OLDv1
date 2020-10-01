@@ -11,14 +11,11 @@
 	__attribute__((unused)) cell *p = get_raw_arg(q,n); \
 	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx
 
-#define is_integer(c) (((c)->val_type == TYPE_INTEGER) && ((c)->val_den == 1))
-#define is_list(c) (is_string(c) || is_real_list(c))
+#define is_callable(c) (is_literal(c) || is_cstring(c))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
-#define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
 #define is_structure(c) (is_literal(c) && (c)->arity)
 #define is_number(c) (is_rational(c) || is_float(c))
 #define is_atomic(c) (is_atom(c) || is_number(c))
-#define is_callable(c) (is_literal(c) || is_cstring(c))
 #define is_list_or_nil(c) (is_list(c) || is_nil(c))
 #define is_list_or_nil_or_var(c) (is_list_or_nil(c) || is_var(c))
 #define is_list_or_var(c) (is_list(c) || is_var(c))

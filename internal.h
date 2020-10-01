@@ -60,12 +60,15 @@ typedef uint32_t idx_t;
 #define is_float(c) ((c)->val_type == TYPE_FLOAT)
 #define is_rational(c) ((c)->val_type == TYPE_INTEGER)
 
-// Secondary type...
+// Derived type...
 
-#define is_real_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
-#define is_string(c) (is_cstring(c) && (c)->flags&FLAG2_STRING)
-#define is_const_cstring(c) (is_cstring(c) && ((c)->flags&FLAG2_CONST_STRING))
+#define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
+#define is_string(c) (is_cstring(c) && (c)->flags&FLAG_STRING)
 #define is_blob(c) (is_cstring(c) && ((c)->flags&FLAG_BLOB))
+#define is_real_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
+#define is_list(c) (is_real_list(c) || is_string(c))
+#define is_integer(c) (((c)->val_type == TYPE_INTEGER) && ((c)->val_den == 1))
+#define is_const_cstring(c) (is_cstring(c) && ((c)->flags&FLAG_CONST_STRING))
 
 // These 2 assume literal or cstring types...
 
@@ -95,11 +98,11 @@ enum {
 	//FLAG_SPARE2=1<<7,
 	//FLAG_SPARE1=1<<8,
 
-	FLAG2_DELETED=FLAG_HEX,				// used by bagof
-	FLAG2_FIRST_USE=FLAG_HEX,			// used with TYPE_VAR
-	FLAG2_CONST_STRING=FLAG_HEX,		// used with TYPE_CSTRING
-	FLAG2_STREAM=FLAG_TAIL_REC,			// used with TYPE_INTEGER
-	FLAG2_STRING=FLAG_BINARY,		// used with TYPE_CSTRING
+	FLAG_DELETED=FLAG_HEX,				// used by bagof
+	FLAG_FIRST_USE=FLAG_HEX,			// used with TYPE_VAR
+	FLAG_CONST_STRING=FLAG_HEX,			// used with TYPE_CSTRING
+	FLAG_STREAM=FLAG_TAIL_REC,			// used with TYPE_INTEGER
+	FLAG_STRING=FLAG_BINARY,			// used with TYPE_CSTRING
 
 	OP_FX=1<<9,
 	OP_FY=1<<10,

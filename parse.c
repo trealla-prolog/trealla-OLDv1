@@ -225,7 +225,7 @@ cell *LIST_HEAD(cell *l)
 	if (is_string(l)) {
 		cell tmp;
 		tmp.val_type = TYPE_CSTRING;
-		tmp.flags = FLAG_BLOB|FLAG2_CONST_STRING|FLAG2_STRING;
+		tmp.flags = FLAG_BLOB|FLAG_CONST_STRING|FLAG_STRING;
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;
 		tmp.val_str = l->val_str;
@@ -246,7 +246,7 @@ cell *LIST_TAIL(cell *h)
 	if (is_string(h) && h->rem_str) {
 		cell tmp;
 		tmp.val_type = TYPE_CSTRING;
-		tmp.flags = FLAG_BLOB|FLAG2_CONST_STRING|FLAG2_STRING;
+		tmp.flags = FLAG_BLOB|FLAG_CONST_STRING|FLAG_STRING;
 		tmp.nbr_cells = 1;
 		tmp.arity = 2;
 		tmp.val_str = h->val_str + h->len_str;
@@ -750,7 +750,7 @@ void destroy_query(query *q)
 
 			if (is_blob(c) && !is_const_cstring(c))
 				free(c->val_str);
-			else if (is_integer(c) && ((c)->flags&FLAG2_STREAM)) {
+			else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 				stream *str = &g_streams[c->val_num];
 
 				if (str->fp) {
@@ -1206,7 +1206,7 @@ void parser_assign_vars(parser *p)
 		p->vartab.var_name[c->slot_nbr] = GET_STR(c);
 
 		if (p->vartab.var_used[c->slot_nbr]++ == 0) {
-			c->flags |= FLAG2_FIRST_USE;
+			c->flags |= FLAG_FIRST_USE;
 			t->nbr_vars++;
 		}
 	}
@@ -2298,7 +2298,7 @@ int parser_tokenize(parser *p, int args, int consing)
 			c->val_type = TYPE_CSTRING;
 
 			if (p->string) {
-				c->flags |= FLAG2_STRING;
+				c->flags |= FLAG_STRING;
 				c->arity = 2;
 			}
 
@@ -2306,7 +2306,7 @@ int parser_tokenize(parser *p, int args, int consing)
 				strcpy(c->val_chr, p->token);
 			else {
 				if (p->consulting)
-					c->flags |= FLAG2_CONST_STRING;
+					c->flags |= FLAG_CONST_STRING;
 
 				c->flags |= FLAG_BLOB;
 				c->val_str = strdup(p->token);

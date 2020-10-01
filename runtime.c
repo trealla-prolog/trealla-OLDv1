@@ -279,7 +279,7 @@ static void trim_heap(query *q, const choice *ch)
 
 			if (is_blob(c) && !is_const_cstring(c)) {
 				free(c->val_str);
-			} else if (is_integer(c) && ((c)->flags&FLAG2_STREAM)) {
+			} else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 				stream *str = &g_streams[c->val_num];
 
 				if (str->fp) {
@@ -309,7 +309,7 @@ static void trim_heap(query *q, const choice *ch)
 
 		if (is_blob(c) && !is_const_cstring(c)) {
 			free(c->val_str);
-		} else if (is_integer(c) && ((c)->flags&FLAG2_STREAM)) {
+		} else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 			stream *str = &g_streams[c->val_num];
 
 			if (str->fp) {

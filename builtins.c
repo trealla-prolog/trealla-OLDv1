@@ -1302,7 +1302,7 @@ static int get_stream(query *q, cell *p1)
 		return n;
 	}
 
-	if (!is_integer(p1) || !(p1->flags&FLAG2_STREAM)) {
+	if (!is_integer(p1) || !(p1->flags&FLAG_STREAM)) {
 		throw_error(q, p1, "type_error", "stream");
 		return -1;
 	}
@@ -1435,7 +1435,7 @@ static int fn_iso_open_3(query *q)
 
 	cell *tmp = alloc_heap(q, 1);
 	make_int(tmp, n);
-	tmp->flags |= FLAG2_STREAM | FLAG_HEX;
+	tmp->flags |= FLAG_STREAM | FLAG_HEX;
 	set_var(q, p3, p3_ctx, tmp, q->st.curr_frame);
 	return 1;
 }
@@ -1551,7 +1551,7 @@ static int fn_iso_open_4(query *q)
 		void *addr = mmap(0, len, prot, MAP_PRIVATE, fd, 0);
 		cell tmp = {0};
 		tmp.val_type = TYPE_CSTRING;
-		tmp.flags = FLAG_BLOB|FLAG2_STRING|FLAG2_CONST_STRING;
+		tmp.flags = FLAG_BLOB|FLAG_STRING|FLAG_CONST_STRING;
 		tmp.nbr_cells = 1;
 		tmp.val_str = addr;
 		tmp.len_str = len;
@@ -1562,7 +1562,7 @@ static int fn_iso_open_4(query *q)
 
 	cell *tmp = alloc_heap(q, 1);
 	make_int(tmp, n);
-	tmp->flags |= FLAG2_STREAM | FLAG_HEX;
+	tmp->flags |= FLAG_STREAM | FLAG_HEX;
 	set_var(q, p3, p3_ctx, tmp, q->st.curr_frame);
 	return 1;
 }
@@ -3957,7 +3957,7 @@ static cell *clone_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx
 
 	for (idx_t i = 0; i < nbr_cells; i++, c++) {
 		if (is_blob(c))
-			c->flags |= FLAG2_CONST_STRING;
+			c->flags |= FLAG_CONST_STRING;
 	}
 
 	return tmp;
@@ -3980,7 +3980,7 @@ static cell *copy_to_heap(query *q, cell *p1, idx_t suffix)
 		*dst = *src;
 
 		if (is_blob(src))
-			dst->flags |= FLAG2_CONST_STRING;
+			dst->flags |= FLAG_CONST_STRING;
 
 		if (!is_var(src))
 			continue;
@@ -5284,11 +5284,11 @@ static int fn_iso_bagof_3(query *q)
 	cell *c_end = q->tmpq[q->st.qnbr] + q->tmpq_size[q->st.qnbr];
 
 	for (cell *c = q->tmpq[q->st.qnbr]; c < c_end; c += c->nbr_cells) {
-		if (c->flags & FLAG2_DELETED)
+		if (c->flags & FLAG_DELETED)
 			continue;
 
 		if (unify(q, p2, p2_ctx, c, q->st.curr_frame)) {
-			c->flags |= FLAG2_DELETED;
+			c->flags |= FLAG_DELETED;
 			cell *c1 = deep_clone_to_tmp(q, p1, q->st.curr_frame);
 			alloc_queuen(q, q->st.qnbr, c1);
 		}
@@ -5357,11 +5357,11 @@ static int fn_iso_setof_3(query *q)
 	cell *c_end = q->tmpq[q->st.qnbr] + q->tmpq_size[q->st.qnbr];
 
 	for (cell *c = q->tmpq[q->st.qnbr]; c < c_end; c += c->nbr_cells) {
-		if (c->flags & FLAG2_DELETED)
+		if (c->flags & FLAG_DELETED)
 			continue;
 
 		if (unify(q, p2, p2_ctx, c, q->st.curr_frame)) {
-			c->flags |= FLAG2_DELETED;
+			c->flags |= FLAG_DELETED;
 			cell *c1 = deep_clone_to_tmp(q, p1, q->st.curr_frame);
 			alloc_queuen(q, q->st.qnbr, c1);
 		}
@@ -5950,7 +5950,7 @@ static int fn_split_4(query *q)
 
 	if ((ptr = strchr_utf8(start, ch)) != NULL) {
 		cell tmp = make_cstringn(q, start, ptr-start);
-		tmp.flags |= FLAG2_STRING;
+		tmp.flags |= FLAG_STRING;
 
 		if (!unify(q, p3, p3_ctx, &tmp, q->st.curr_frame))
 			return 0;
@@ -5961,7 +5961,7 @@ static int fn_split_4(query *q)
 			ptr++;
 
 		tmp = make_cstring(q, ptr);
-		tmp.flags |= FLAG2_STRING;
+		tmp.flags |= FLAG_STRING;
 		return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -6016,7 +6016,7 @@ static int fn_loadfile_2(query *q)
 	s[st.st_size] = '\0';
 	fclose(fp);
 	cell tmp = make_blob(q, s, st.st_size);
-	tmp.flags |= FLAG2_STRING;
+	tmp.flags |= FLAG_STRING;
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	free(s);
 	free(filename);
@@ -6048,7 +6048,7 @@ static int fn_getfile_2(query *q)
 			line[strlen(line)-1] = '\0';
 
 		cell tmp = tmp_cstring(q, line);
-		tmp.flags |= FLAG2_STRING;
+		tmp.flags |= FLAG_STRING;
 
 		if (nbr++ == 1)
 			alloc_list(q, &tmp);
@@ -6208,7 +6208,7 @@ static int fn_server_3(query *q)
 	net_set_nonblocking(str);
 	cell *tmp = alloc_heap(q, 1);
 	make_int(tmp, n);
-	tmp->flags |= FLAG2_STREAM | FLAG_HEX;
+	tmp->flags |= FLAG_STREAM | FLAG_HEX;
 	set_var(q, p2, p2_ctx, tmp, q->st.curr_frame);
 	return 1;
 }
@@ -6269,7 +6269,7 @@ static int fn_accept_2(query *q)
 	make_choice(q);
 	cell tmp;
 	make_int(&tmp, n);
-	tmp.flags |= FLAG2_STREAM | FLAG_HEX;
+	tmp.flags |= FLAG_STREAM | FLAG_HEX;
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return 1;
 }
@@ -6407,7 +6407,7 @@ static int fn_client_5(query *q)
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	cell *tmp2 = alloc_heap(q, 1);
 	make_int(tmp2, n);
-	tmp2->flags |= FLAG2_STREAM | FLAG_HEX;
+	tmp2->flags |= FLAG_STREAM | FLAG_HEX;
 	set_var(q, p4, p4_ctx, tmp2, q->st.curr_frame);
 	return 1;
 }
@@ -6438,7 +6438,7 @@ static int fn_getline_1(query *q)
 		line[strlen(line)-1] = '\0';
 
 	cell tmp = make_cstring(q, line);
-	tmp.flags |= FLAG2_STRING;
+	tmp.flags |= FLAG_STRING;
 	free(line);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
@@ -6476,7 +6476,7 @@ static int fn_getline_2(query *q)
 		line[strlen(line)-1] = '\0';
 
 	cell tmp = make_cstring(q, line);
-	tmp.flags |= FLAG2_STRING;
+	tmp.flags |= FLAG_STRING;
 	free(line);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
@@ -6519,7 +6519,7 @@ static int fn_bread_3(query *q)
 		}
 
 		cell tmp = make_blob(q, str->data, str->data_len);
-		tmp.flags |= FLAG2_STRING;
+		tmp.flags |= FLAG_STRING;
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(str->data);
 		str->data = NULL;
@@ -6536,7 +6536,7 @@ static int fn_bread_3(query *q)
 		str->data[nbytes] = '\0';
 		str->data = realloc(str->data, nbytes+1);
 		cell tmp = make_blob(q, str->data, nbytes);
-		tmp.flags |= FLAG2_STRING;
+		tmp.flags |= FLAG_STRING;
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(str->data);
 		str->data = NULL;
@@ -6565,7 +6565,7 @@ static int fn_bread_3(query *q)
 	make_int(&tmp1, str->data_len);
 	set_var(q, p1, p1_ctx, &tmp1, q->st.curr_frame);
 	cell tmp2 = make_blob(q, str->data, str->data_len);
-	tmp2.flags |= FLAG2_STRING;
+	tmp2.flags |= FLAG_STRING;
 	set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	free(str->data);
 	str->data = NULL;
@@ -7379,7 +7379,7 @@ static int fn_sha1_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmpbuf);
-	if (is_string(p1)) tmp.flags |= FLAG2_STRING;
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7401,7 +7401,7 @@ static int fn_sha256_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmpbuf);
-	if (is_string(p1)) tmp.flags |= FLAG2_STRING;
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7423,7 +7423,7 @@ static int fn_sha512_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmpbuf);
-	if (is_string(p1)) tmp.flags |= FLAG2_STRING;
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 #endif
@@ -7437,7 +7437,7 @@ static int do_b64encode_2(query *q)
 	char *dstbuf = malloc((len*3)+1);
 	b64_encode(str, len, &dstbuf, 0, 0);
 	cell tmp = make_cstring(q, dstbuf);
-	if (is_string(p1)) tmp.flags |= FLAG2_STRING;
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7451,7 +7451,7 @@ static int do_b64decode_2(query *q)
 	char *dstbuf = malloc(len+1);
 	b64_decode(str, len, &dstbuf);
 	cell tmp = make_cstring(q, dstbuf);
-	if (is_string(p1)) tmp.flags |= FLAG2_STRING;
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7519,7 +7519,7 @@ static int do_urlencode_2(query *q)
 	url_encode(str, len, dstbuf);
 	cell tmp = make_cstring(q, dstbuf);
 	tmp = make_cstring(q, dstbuf);
-	if (is_string(p1)) tmp.flags |= FLAG2_STRING;
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7534,7 +7534,7 @@ static int do_urldecode_2(query *q)
 	url_decode(str, dstbuf);
 	cell tmp = make_cstring(q, dstbuf);
 	tmp = make_cstring(q, dstbuf);
-	if (is_string(p2)) tmp.flags |= FLAG2_STRING;
+	if (is_string(p2)) tmp.flags |= FLAG_STRING;
 	free(dstbuf);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
@@ -7567,7 +7567,7 @@ static int fn_catom_lower_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmps);
-	if (is_string(p1)) tmp.flags |= FLAG2_STRING;
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7586,7 +7586,7 @@ static int fn_catom_upper_2(query *q)
 	}
 
 	cell tmp = make_cstring(q, tmps);
-	if (is_string(p1)) tmp.flags |= FLAG2_STRING;
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -8129,7 +8129,7 @@ static int fn_uuid_1(query *q)
     char tmpbuf[128];
     uuid_to_catom(&u, tmpbuf, sizeof(tmpbuf));
 	cell tmp = make_cstring(q, tmpbuf);
-	tmp.flags |= FLAG2_STRING;
+	tmp.flags |= FLAG_STRING;
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return 1;
 }
@@ -8197,7 +8197,7 @@ static int fn_atomic_concat_3(query *q)
 		memcpy(dst+len1, src2, len2);
 		dst[nbytes] = '\0';
 		cell tmp = make_cstringn(q, dst, nbytes);
-		tmp.flags |= FLAG2_STRING;
+		tmp.flags |= FLAG_STRING;
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		free(dst);
 		return 1;
@@ -8209,7 +8209,7 @@ static int fn_atomic_concat_3(query *q)
 
 		char *dst = strndup(GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
 		cell tmp = make_cstring(q, dst);
-		tmp.flags |= FLAG2_STRING;
+		tmp.flags |= FLAG_STRING;
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		free(dst);
 		return 1;
@@ -8221,7 +8221,7 @@ static int fn_atomic_concat_3(query *q)
 
 		char *dst = strdup(GET_STR(p3)+LEN_STR(p1));
 		cell tmp = make_cstring(q, dst);
-		tmp.flags |= FLAG2_STRING;
+		tmp.flags |= FLAG_STRING;
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(dst);
 		return 1;
@@ -8283,7 +8283,7 @@ static int fn_replace_4(query *q)
 
 	*dst = '\0';
 	cell tmp = make_cstring(q, dstbuf);
-	tmp.flags |= FLAG2_STRING;
+	tmp.flags |= FLAG_STRING;
 	free(dstbuf);
 	set_var(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	return 1;
