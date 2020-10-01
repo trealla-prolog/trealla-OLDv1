@@ -648,7 +648,7 @@ static int fn_iso_cut_0(query *q)
 	return 1;
 }
 
-/* static*/ int fn_local_cut_0(query *q)
+static int fn_local_cut_0(query *q)
 {
 	cut_me(q, 1);
 	return 1;
@@ -8050,6 +8050,12 @@ static void do_real_to_fraction(double v, double accuracy, int_t *num, int_t *de
 	return;
 }
 
+static int fn_string_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	return is_dq_string(p1);
+}
+
 static int fn_rational_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
@@ -8974,7 +8980,7 @@ static const struct builtins g_other_funcs[] =
 	{"abolish", 2, fn_abolish_2, NULL},
 	{"assert", 1, fn_iso_assertz_1, NULL},
 
-	{"string", 1, fn_iso_atom_1, "+term"},
+	{"string", 1, fn_string_1, "+term"},
 	{"atomic_concat", 3, fn_atomic_concat_3, NULL},
 	{"replace", 4, fn_replace_4, "+orig,+from,+to,-new"},
 	{"writeln", 1, fn_writeln_1, "+term"},
