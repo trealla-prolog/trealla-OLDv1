@@ -674,7 +674,7 @@ static int fn_iso_current_rule_1(query *q)
 static int fn_iso_atom_chars_2(query *q)
 {
 	GET_FIRST_ARG(p1,iso_atom_or_var);
-	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
 		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
@@ -858,7 +858,7 @@ static int fn_iso_atom_codes_2(query *q)
 static int fn_iso_number_chars_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
-	GET_NEXT_ARG(p2,iso_list_or_var);
+	GET_NEXT_ARG(p2,list_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
 		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
@@ -1420,7 +1420,7 @@ static int fn_iso_open_4(query *q)
 	GET_FIRST_ARG(p1,atom_or_structure);
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,variable);
-	GET_NEXT_ARG(p4,iso_list_or_nil);
+	GET_NEXT_ARG(p4,list_or_nil);
 	const char *mode = GET_STR(p2);
 	int n = new_stream(q);
 
@@ -1732,7 +1732,7 @@ static int fn_iso_read_2(query *q)
 static int fn_iso_read_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,iso_list_or_nil);
+	GET_NEXT_ARG(p2,list_or_nil);
 	int n = get_named_stream(q, "user_input");
 	stream *str = &g_streams[n];
 	return do_read_term(q, str, p1, p1_ctx, p2, p2_ctx, NULL);
@@ -1744,7 +1744,7 @@ static int fn_iso_read_term_3(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
-	GET_NEXT_ARG(p2,iso_list_or_nil);
+	GET_NEXT_ARG(p2,list_or_nil);
 	return do_read_term(q, str, p1, p1_ctx, p2, p2_ctx, NULL);
 }
 
@@ -4884,16 +4884,16 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 
 static int fn_iso_sort_2(query *q)
 {
-	GET_FIRST_ARG(p1,iso_list_or_nil);
-	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
+	GET_FIRST_ARG(p1,list_or_nil);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	cell *l = nodesort(q, p1, p1_ctx, 1, 0);
 	return unify(q, l, p1_ctx, p2, p2_ctx);
 }
 
 static int fn_iso_keysort_2(query *q)
 {
-	GET_FIRST_ARG(p1,iso_list_or_nil);
-	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
+	GET_FIRST_ARG(p1,list_or_nil);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	cell *l = nodesort(q, p1, p1_ctx, 0, 1);
 	return unify(q, l, p1_ctx, p2, p2_ctx);
 }
@@ -5528,7 +5528,7 @@ static int fn_time_1(query *q)
 static int fn_statistics_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,iso_list_or_var);
+	GET_NEXT_ARG(p2,list_or_var);
 
 	if (!strcmp(GET_STR(p1), "cputime") && is_variable(p2)) {
 		unsigned long long now = get_time_in_usec();
@@ -5933,7 +5933,7 @@ static int fn_server_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,variable);
-	GET_NEXT_ARG(p3,iso_list_or_nil);
+	GET_NEXT_ARG(p3,list_or_nil);
 	char hostname[1024], path[4096];
 	char *keyfile = "privkey.pem", *certfile = "fullchain.pem";
 	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, level = 0;
@@ -6114,7 +6114,7 @@ static int fn_client_5(query *q)
 	GET_NEXT_ARG(p2,variable);
 	GET_NEXT_ARG(p3,variable);
 	GET_NEXT_ARG(p4,variable);
-	GET_NEXT_ARG(p5,iso_list_or_nil);
+	GET_NEXT_ARG(p5,list_or_nil);
 	char hostname[1024], path[4096];
 	char *certfile = NULL;
 	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, level = 0;
@@ -6803,8 +6803,8 @@ static int fn_rand_1(query *q)
 
 static int fn_msort_2(query *q)
 {
-	GET_FIRST_ARG(p1,iso_list_or_nil);
-	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
+	GET_FIRST_ARG(p1,list_or_nil);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	cell *l = nodesort(q, p1, p1_ctx, 0, 0);
 	return unify(q, l, p1_ctx, p2, p2_ctx);
 }
@@ -7182,7 +7182,7 @@ static int fn_format_1(query *q)
 static int fn_format_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,iso_list_or_nil);
+	GET_NEXT_ARG(p2,list_or_nil);
 	return do_format(q, NULL, 0, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
 }
 
@@ -7190,7 +7190,7 @@ static int fn_format_3(query *q)
 {
 	GET_FIRST_ARG(pstr,stream_or_structure);
 	GET_NEXT_ARG(p1,atom);
-	GET_NEXT_ARG(p2,iso_list_or_nil);
+	GET_NEXT_ARG(p2,list_or_nil);
 	return do_format(q, pstr, pstr_ctx, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
 }
 
@@ -8526,7 +8526,7 @@ static int fn_frozen_2(query *q)
 static int fn_sys_put_atts_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	GET_NEXT_ARG(p2,iso_list_or_nil);
+	GET_NEXT_ARG(p2,list_or_nil);
 	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->slot_nbr);
