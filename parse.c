@@ -1158,7 +1158,7 @@ static void directives(parser *p, term *t)
 	}
 }
 
-int parser_xref(parser *p, term *t, rule *parent)
+void parser_xref(parser *p, term *t, rule *parent)
 {
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
@@ -1219,8 +1219,6 @@ int parser_xref(parser *p, term *t, rule *parent)
 				m = m->next;
 		}
 	}
-
-	return 1;
 }
 
 static void parser_xref_db(parser *p)
@@ -2480,9 +2478,7 @@ static int parser_run(parser *p, const char *src, int dump)
 		parser_assign_vars(p);
 	}
 
-	if (!parser_xref(p, p->t, NULL))
-		return 0;
-
+	parser_xref(p, p->t, NULL);
 	query *q = create_query(p->m, 0);
 	query_execute(q, p->t);
 

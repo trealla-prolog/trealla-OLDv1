@@ -430,7 +430,7 @@ parser *create_parser(module *m);
 void destroy_parser(parser *p);
 int parser_tokenize(parser *p, int args, int consing);
 int parser_attach(parser *p, int start_idx);
-int parser_xref(parser *p, term *t, rule *parent);
+void parser_xref(parser *p, term *t, rule *parent);
 idx_t drop_choice(query *q);
 int retry_choice(query *q);
 void parser_assign_vars(parser *p);

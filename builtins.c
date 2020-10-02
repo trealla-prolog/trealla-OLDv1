@@ -1684,9 +1684,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	if (!parser_attach(p, 0))
 		return 0;
 
-	if (!parser_xref(p, p->t, NULL))
-		return 0;
-
+	parser_xref(p, p->t, NULL);
 	q->m->flag.double_quote_chars = flag_chars;
 	q->m->flag.double_quote_codes = flag_codes;
 	q->m->flag.double_quote_atom = flag_atom;
