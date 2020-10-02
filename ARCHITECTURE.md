@@ -1,15 +1,15 @@
 Introduction
 ============
 
-For convenience a fixed size cell is used. The following diagrams
-illustrate how the cell layout on 64-bit systems.
+For convenience a fixed size cell has been implemented. The following
+diagrams illustrate the cell layout on 64-bit systems.
 
 
 Atom
 ====
 
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |
+    0	| val_type |  arity  |       flags        |    CELL 1
 		+----------+---------+----------+---------+
     4	|                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -32,7 +32,7 @@ Var
 ===
 
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |
+    0	| val_type |  arity  |       flags        |    CELL 1
 		+----------+---------+----------+---------+
     4	|                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -55,7 +55,7 @@ Integer
 =======
 
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |
+    0	| val_type |  arity  |       flags        |    CELL 1
 		+----------+---------+----------+---------+
     4	|                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -78,7 +78,7 @@ Rational
 ========
 
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |
+    0	| val_type |  arity  |       flags        |    CELL 1
 		+----------+---------+----------+---------+
     4	|                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -100,7 +100,7 @@ Float
 =====
 
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |
+    0	| val_type |  arity  |       flags        |    CELL 1
 		+----------+---------+----------+---------+
     4	|                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -122,7 +122,7 @@ Cstring
 =======
 
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |
+    0	| val_type |  arity  |       flags        |    CELL 1
 		+----------+---------+----------+---------+
     4	|                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -145,7 +145,7 @@ BLOB
 ====
 
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |
+    0	| val_type |  arity  |       flags        |    CELL 1
 		+----------+---------+----------+---------+
     4	|                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -170,7 +170,7 @@ String
 ======
 
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |
+    0	| val_type |  arity  |       flags        |    CELL 1
 		+----------+---------+----------+---------+
     4	|                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -195,7 +195,7 @@ String head
 ===========
 
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |
+    0	| val_type |  arity  |       flags        |    CELL 1
 		+----------+---------+----------+---------+
     4	|                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -220,7 +220,7 @@ Compound
 ========
 
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |
+    0	| val_type |  arity  |       flags        |    CELL 1
 		+----------+---------+----------+---------+
     4	|                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -232,6 +232,7 @@ Compound
         +----------+---------+----------+---------+
    24	|               - UNUSED -                |
         +----------+---------+----------+---------+
+    0	| val_type |  arity  |       flags        |    CELL 2
 
 Where *val_type* is TYPE_ATOM.
 Where *arity* is always > 0.
@@ -244,7 +245,7 @@ List
 ====
 
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |
+    0	| val_type |  arity  |       flags        |    CELL 1
 		+----------+---------+----------+---------+
     4	|                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -256,6 +257,7 @@ List
         +----------+---------+----------+---------+
    24	|               - UNUSED -                |
         +----------+---------+----------+---------+
+    0	| val_type |  arity  |       flags        |    CELL 2
 
 Where *val_type* is TYPE_ATOM.
 Where *arity* is always 2.
