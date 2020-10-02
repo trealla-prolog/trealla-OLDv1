@@ -552,7 +552,7 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 
 	if (strchr(GET_STR(c), ':')) {
 		const char *src = GET_STR(c);
-		//printf("*** assertz %s/%u\n", src, (unsigned)c->arity);
+		printf("*** assertz %s/%u\n", src, (unsigned)c->arity);
 		char mod[256], name[256];
 		mod[0] = name[0] = '\0';
 		sscanf(src, "%[^:]:%s", mod, name);
@@ -569,6 +569,8 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 			set_multifile_in_db(m, name, c->arity);
 			//return NULL;
 		}
+
+		c->val_off
 	}
 
 	rule *h = find_rule(m, c);

@@ -17,7 +17,7 @@ Literal
         |               - UNUSED -                |
    12	|                                         |
         +----------+---------+----------+---------+
-   16	|                 val_offset              |
+   16	|                 val_off                 |
         +----------+---------+----------+---------+
    20	|               - UNUSED -                |
         +----------+---------+----------+---------+
@@ -25,9 +25,9 @@ Literal
 Where *val_type* is TYPE_LITERAL.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
-Where *val_offset* is into the symbol table.
+Where *val_off* is into the symbol table.
 
-Two atoms will unify if their *val_offset* is the same.
+Two atoms will unify if their *val_off* is the same.
 An Atom is always used for functor names.
 
 
@@ -43,7 +43,7 @@ Var
         |               - UNUSED -                |
    12	|                                         |
         +----------+---------+----------+---------+
-   16	|                 val_offset              |
+   16	|                 val_off                 |
         +----------+---------+----------+---------+
    20	|       slot_nbr     |      - UNUSED -    |
         +----------+---------+----------+---------+
@@ -51,7 +51,7 @@ Var
 Where *val_type* is TYPE_VAR.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
-Where *val_offset* is into the symbol table.
+Where *val_off* is into the symbol table.
 
 
 Integer
@@ -240,7 +240,7 @@ Compound
         +               - UNUSED -                +
    12	|                                         |
         +----------+---------+----------+---------+
-   16	|                 val_offset              |
+   16	|                 val_off                 |
         +----------+---------+----------+---------+
    20	|               - UNUSED -                |
         +----------+---------+----------+---------+
@@ -249,7 +249,7 @@ Compound
 Where *val_type* is TYPE_LITERAL.
 Where *arity* is > 0.
 Where *nbr_cells* is > 1 and includes the args.
-Where *val_offset* is into the symbol table.
+Where *val_off* is into the symbol table.
 Where args are the following cells (see *nbr_cells*).
 
 
@@ -265,7 +265,7 @@ List
         +               - UNUSED -                +
    12	|                                         |
         +----------+---------+----------+---------+
-   16	|                 val_offset              |
+   16	|                 val_off                 |
         +----------+---------+----------+---------+
    20	|               - UNUSED -                |
         +----------+---------+----------+---------+
@@ -274,7 +274,7 @@ List
 Where *val_type* is TYPE_LITERAL.
 Where *arity* is always 2.
 Where *nbr_cells* is > 1 and includes head & tail args.
-Where *val_offset* is into the symbol table to '.'.
+Where *val_off* is into the symbol table to '.'.
 Where args are the following cells (see *nbr_cells*).
 Where the tail arg is usually a list.
 Where the final tail arg is usually the atom '[]'.
