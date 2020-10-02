@@ -52,7 +52,7 @@ typedef uint32_t idx_t;
 
 #define is_literal(c) ((c)->val_type == TYPE_LITERAL)
 #define is_cstring(c) ((c)->val_type == TYPE_CSTRING)
-#define is_variable(c) ((c)->val_type == TYPE_VAR)
+#define is_variable(c) ((c)->val_type == TYPE_VARIABLE)
 #define is_empty(c) ((c)->val_type == TYPE_EMPTY)
 #define is_end(c) ((c)->val_type == TYPE_END)
 #define is_indirect(c) ((c)->val_type == TYPE_INDIRECT)
@@ -78,7 +78,7 @@ typedef uint32_t idx_t;
 
 enum {
 	TYPE_EMPTY=0,
-	TYPE_VAR,
+	TYPE_VARIABLE,
 	TYPE_LITERAL,
 	TYPE_CSTRING,
 	TYPE_INTEGER,
@@ -100,7 +100,7 @@ enum {
 	//FLAG_SPARE1=1<<8,
 
 	FLAG_DELETED=FLAG_HEX,				// used by bagof
-	FLAG_FIRST_USE=FLAG_HEX,			// used with TYPE_VAR
+	FLAG_FIRST_USE=FLAG_HEX,			// used with TYPE_VARIABLE
 	FLAG_STREAM=FLAG_TAIL_REC,			// used with TYPE_INTEGER
 	FLAG_CONST_CSTRING=FLAG_HEX,		// used with TYPE_CSTRING
 	FLAG_STRING=FLAG_OCTAL,				// used with TYPE_CSTRING

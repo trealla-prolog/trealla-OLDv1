@@ -3984,7 +3984,7 @@ static int do_length(query *q)
 		return 0;
 	}
 
-	tmp.val_type = TYPE_VAR;
+	tmp.val_type = TYPE_VARIABLE;
 	tmp.nbr_cells = 1;
 	tmp.flags = 0;
 	tmp.val_off = g_anon_s;
@@ -4093,7 +4093,7 @@ static int fn_iso_length_2(query *q)
 		}
 
 		cell tmp;
-		tmp.val_type = TYPE_VAR;
+		tmp.val_type = TYPE_VARIABLE;
 		tmp.nbr_cells = 1;
 		tmp.flags = 0;
 		tmp.val_off = g_anon_s;
@@ -4656,7 +4656,7 @@ static int fn_iso_functor_3(query *q)
 		tmp[0].val_off = p2->val_off;
 
 		for (unsigned i = 1; i <= arity; i++) {
-			tmp[i].val_type = TYPE_VAR;
+			tmp[i].val_type = TYPE_VARIABLE;
 			tmp[i].nbr_cells = 1;
 			tmp[i].slot_nbr = slot_nbr++;
 			tmp[i].val_off = g_anon_s;

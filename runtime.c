@@ -599,31 +599,6 @@ static int unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_
 	return 1;
 }
 
-static int unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
-{
-	while (is_list(p1) && is_list(p2)) {
-		cell *h1 = LIST_HEAD(p1);
-		cell *h2 = LIST_HEAD(p2);
-
-		cell *c1 = deref_var(q, h1, p1_ctx);
-		idx_t c1_ctx = q->latest_ctx;
-		cell *c2 = deref_var(q, h2, p2_ctx);
-		idx_t c2_ctx = q->latest_ctx;
-
-		if (!unify(q, c1, c1_ctx, c2, c2_ctx))
-			return 0;
-
-		p1 = LIST_TAIL(p1);
-		p1 = deref_var(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-		p2 = LIST_TAIL(p2);
-		p2 = deref_var(q, p2, p2_ctx);
-		p2_ctx = q->latest_ctx;
-	}
-
-	return unify(q, p1, p1_ctx, p2, p2_ctx);
-}
-
 static int unify_int(cell *p1, cell *p2)
 {
 	if (is_rational(p2))
@@ -664,6 +639,34 @@ static int unify_catom(cell *p1, cell *p2)
 	return 0;
 }
 
+static int unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
+{
+	if (is_string(p1) && is_string(p2))
+		return unify_catom(p1, p2);
+
+	while (is_list(p1) && is_list(p2)) {
+		cell *h1 = LIST_HEAD(p1);
+		cell *h2 = LIST_HEAD(p2);
+
+		cell *c1 = deref_var(q, h1, p1_ctx);
+		idx_t c1_ctx = q->latest_ctx;
+		cell *c2 = deref_var(q, h2, p2_ctx);
+		idx_t c2_ctx = q->latest_ctx;
+
+		if (!unify(q, c1, c1_ctx, c2, c2_ctx))
+			return 0;
+
+		p1 = LIST_TAIL(p1);
+		p1 = deref_var(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+		p2 = LIST_TAIL(p2);
+		p2 = deref_var(q, p2, p2_ctx);
+		p2_ctx = q->latest_ctx;
+	}
+
+	return unify(q, p1, p1_ctx, p2, p2_ctx);
+}
+
 struct dispatch {
 	uint8_t val_type;
 	int (*fn)(cell*, cell*);
@@ -672,7 +675,7 @@ struct dispatch {
 static const struct dispatch g_disp[] =
 {
 	{TYPE_EMPTY, NULL},
-	{TYPE_VAR, NULL},
+	{TYPE_VARIABLE, NULL},
 	{TYPE_LITERAL, unify_literal},
 	{TYPE_CSTRING, unify_catom},
 	{TYPE_INTEGER, unify_int},
@@ -708,9 +711,6 @@ int unify(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		set_var(q, p2, p2_ctx, p1, p1_ctx);
 		return 1;
 	}
-
-	if (is_string(p1) && is_string(p2))
-		return unify_catom(p1, p2);
 
 	if (is_list(p1) && is_list(p2))
 		return unify_list(q, p1, p1_ctx, p2, p2_ctx);

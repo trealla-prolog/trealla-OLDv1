@@ -791,7 +791,7 @@ query *create_task(query *q, cell *curr_cell)
 	for (unsigned i = 0; i < gsrc->nbr_vars; i++, e++) {
 		cell *c = deref_var(q, &e->c, e->ctx);
 		cell tmp;
-		tmp.val_type = TYPE_VAR;
+		tmp.val_type = TYPE_VARIABLE;
 		tmp.slot_nbr = i;
 		set_var(subq, &tmp, 0, c, q->latest_ctx);
 	}
@@ -1515,12 +1515,12 @@ static void parser_dcg_rewrite(parser *p)
 				tmp[nbr_cells+0].arity = 2;
 				tmp[nbr_cells+0].flags = FLAG_BUILTIN | OP_XFX;
 
-				tmp[nbr_cells+1].val_type = TYPE_VAR;
+				tmp[nbr_cells+1].val_type = TYPE_VARIABLE;
 				tmp[nbr_cells+1].nbr_cells = 1;
 				char v[20]; sprintf(v, "S_");
 				tmp[nbr_cells+1].val_off = find_in_pool(v);
 
-				tmp[nbr_cells+2].val_type = TYPE_VAR;
+				tmp[nbr_cells+2].val_type = TYPE_VARIABLE;
 				tmp[nbr_cells+2].nbr_cells = 1;
 				sprintf(v, "S%d_", cnt++);
 				tmp[nbr_cells+2].val_off = find_in_pool(v);
@@ -1538,7 +1538,7 @@ static void parser_dcg_rewrite(parser *p)
 			tmp[nbr_cells+0].arity = 2;
 			tmp[nbr_cells+0].flags = FLAG_BUILTIN | OP_XFX;
 
-			tmp[nbr_cells+1].val_type = TYPE_VAR;
+			tmp[nbr_cells+1].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+1].nbr_cells = 1;
 			char v[20]; sprintf(v, "S_");
 			tmp[nbr_cells+1].val_off = find_in_pool(v);
@@ -1549,7 +1549,7 @@ static void parser_dcg_rewrite(parser *p)
 
 			tmp[nbr_cells+3] = phrase[1];
 
-			tmp[nbr_cells+4].val_type = TYPE_VAR;
+			tmp[nbr_cells+4].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+4].nbr_cells = 1;
 			if (last) { sprintf(v, "S_"); last = 0; }
 			else sprintf(v, "S%d_", cnt++);
@@ -1565,14 +1565,14 @@ static void parser_dcg_rewrite(parser *p)
 			tmp[nbr_cells+0].arity = 2;
 			tmp[nbr_cells+0].flags = FLAG_BUILTIN | OP_XFX;
 
-			tmp[nbr_cells+1].val_type = TYPE_VAR;
+			tmp[nbr_cells+1].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+1].nbr_cells = 1;
 			char v[20]; sprintf(v, "S%d_", cnt);
 			tmp[nbr_cells+1].val_off = find_in_pool(v);
 
 			copy_cells(tmp+nbr_cells+2, phrase, len);
 
-			tmp[nbr_cells+2+len-1].val_type = TYPE_VAR;
+			tmp[nbr_cells+2+len-1].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+2+len-1].nbr_cells = 1;
 			if (last) { sprintf(v, "S_"); last = 0; }
 			else sprintf(v, "S%d_", ++cnt);
@@ -1588,12 +1588,12 @@ static void parser_dcg_rewrite(parser *p)
 			tmp[nbr_cells+0].arity = 2;
 			tmp[nbr_cells+0].flags = FLAG_BUILTIN | OP_XFX;
 
-			tmp[nbr_cells+1].val_type = TYPE_VAR;
+			tmp[nbr_cells+1].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+1].nbr_cells = 1;
 			char v[20]; sprintf(v, "S%d_", cnt);
 			tmp[nbr_cells+1].val_off = find_in_pool(v);
 
-			tmp[nbr_cells+2].val_type = TYPE_VAR;
+			tmp[nbr_cells+2].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+2].nbr_cells = 1;
 			sprintf(v, "S_");
 			tmp[nbr_cells+2].val_off = find_in_pool(v);
@@ -1603,12 +1603,12 @@ static void parser_dcg_rewrite(parser *p)
 		} else {
 			copy_cells(tmp+nbr_cells, phrase, phrase->nbr_cells);
 
-			tmp[nbr_cells+phrase->nbr_cells+0].val_type = TYPE_VAR;
+			tmp[nbr_cells+phrase->nbr_cells+0].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+phrase->nbr_cells+0].nbr_cells = 1;
 			char v[20]; sprintf(v, "S%d_", cnt);
 			tmp[nbr_cells+phrase->nbr_cells+0].val_off = find_in_pool(v);
 
-			tmp[nbr_cells+phrase->nbr_cells+1].val_type = TYPE_VAR;
+			tmp[nbr_cells+phrase->nbr_cells+1].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+phrase->nbr_cells+1].nbr_cells = 1;
 			if (head || last) { sprintf(v, "S_"); last = 0; }
 			else sprintf(v, "S%d_", ++cnt);
@@ -2397,7 +2397,7 @@ int parser_tokenize(parser *p, int args, int consing)
 				c->precedence = 0;
 
 			if (p->is_variable)
-				c->val_type = TYPE_VAR;
+				c->val_type = TYPE_VARIABLE;
 
 			c->val_off = find_in_pool(p->token);
 		} else {
