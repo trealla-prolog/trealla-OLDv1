@@ -198,6 +198,7 @@ Where *arity* is always 2.
 Where *flags* is FLAG_BLOB|FLAG_STRING.
 Where *nbr_cells* is always 1.
 Where *val_str* is a pointer to UTF-8 chars.
+Where *len_str* is the number of remaining bytes in the string.
 Where *rem_str* is the number of remaining bytes in the string.
 
 
