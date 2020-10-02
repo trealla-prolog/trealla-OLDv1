@@ -5,8 +5,8 @@ For convenience a fixed size cell has been implemented. The following
 diagrams illustrate the cell layout on 64-bit systems.
 
 
-Atom
-====
+Literal
+=======
 
         +----------+---------+----------+---------+
     0	| val_type |  arity  |       flags        |    CELL 1
@@ -22,7 +22,7 @@ Atom
    20	|               - UNUSED -                |
         +----------+---------+----------+---------+
 
-Where *val_type* is TYPE_ATOM.
+Where *val_type* is TYPE_LITERAL.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
 Where *val_offset* is into the symbol table.
@@ -246,7 +246,7 @@ Compound
         +----------+---------+----------+---------+
     0	| val_type |  arity  |       flags        |    CELL 2
 
-Where *val_type* is TYPE_ATOM.
+Where *val_type* is TYPE_LITERAL.
 Where *arity* is always > 0.
 Where *nbr_cells* is always > 1 and includes the args.
 Where *val_offset* is into the symbol table.
@@ -271,7 +271,7 @@ List
         +----------+---------+----------+---------+
     0	| val_type |  arity  |       flags        |    CELL 2
 
-Where *val_type* is TYPE_ATOM.
+Where *val_type* is TYPE_LITERAL.
 Where *arity* is always 2.
 Where *nbr_cells* is always > 1 and includes head & tail args.
 Where *val_offset* is into the symbol table to '.'.
