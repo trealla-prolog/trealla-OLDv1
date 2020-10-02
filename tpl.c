@@ -230,8 +230,10 @@ int main(int ac, char *av[])
 
 	if ((version == 2) && !quiet) {
 		fprintf(stderr, "Usage:\n");
-		fprintf(stderr, "  tpl [options] [[-l] file] [-g goal]\n");
+		fprintf(stderr, "  tpl [options] [files]\n");
 		fprintf(stderr, "Options:\n");
+		fprintf(stderr, "  -f file\t\t- consult file\n");
+		fprintf(stderr, "  -g goal\t\t- query goal\n");
 		fprintf(stderr, "  -v, --version\t\t- print version info and exit\n");
 		fprintf(stderr, "  -h, --help\t\t- print help info and exit\n");
 		fprintf(stderr, "  -O0, --noopt\t\t- turn off optimization\n");

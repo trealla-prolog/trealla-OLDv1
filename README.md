@@ -51,11 +51,13 @@ are no plans for a Windows port.
 Usage
 =====
 
-	tpl [options] [[-l] file] [-g goal]
+	tpl [options] [files]
 
 where options can be:
 
 	-O0, --noopt       - no optimization
+	-l file            - consult file
+	-g goal            - query goal
 	-t, --trace        - trace
 	-q, --quiet        - quiet mode (no banner)
 	-v, --version      - version
