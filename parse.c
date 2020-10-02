@@ -1008,7 +1008,7 @@ static void directives(parser *p, term *t)
 			} else if (!strcmp(GET_STR(p1), ","))
 				p1 += 1;
 			else {
-				fprintf(stderr, "Error: unknown\n");
+				fprintf(stderr, "Error: unknown module\n");
 				p->error = 1;
 				return;
 			}
