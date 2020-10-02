@@ -216,8 +216,8 @@ Where *val_str* is a pointer to one UTF-8 char.
 Where *len_str* is the number of relevant bytes.
 
 
-Functor
-=======
+Compound
+========
 
         +----------+---------+----------+---------+
     0	| val_type |  arity  |       flags        |
@@ -259,9 +259,9 @@ List
 
 Where *val_type* is TYPE_ATOM.
 Where *arity* is always 2.
-Where *nbr_cells* is always > 1 and includes *head* & *tail* args.
+Where *nbr_cells* is always > 1 and includes head & tail args.
 Where *val_offset* is into the symbol table to '.'.
 Where args are the following cells (see *nbr_cells*).
-Where the *tail* arg is usually a list.
-Where the final *tail* arg is usually the atom '[]'.
+Where the tail arg is usually a list.
+Where the final tail arg is usually the atom '[]'.
 
