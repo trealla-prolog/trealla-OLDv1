@@ -633,6 +633,18 @@ void set_multifile_in_db(module *m, const char *name, idx_t arity)
 	h->is_multifile = 1;
 }
 
+static int is_multifile_in_db(const char *mod, const char *name, idx_t arity)
+{
+	module *m = find_module(mod);
+	if (!m) return 0;
+	cell tmp;
+	tmp.val_type = TYPE_LITERAL;
+	tmp.val_off = find_in_pool(name);
+	tmp.arity = arity;
+	rule *h = find_rule(m, &tmp);
+	return h ? 1 : 0;
+}
+
 void clear_term(term *t)
 {
 	for (idx_t i = 0; i < t->cidx; i++) {
@@ -975,10 +987,31 @@ static void directives(parser *p, term *t)
 				if (!is_literal(c_name)) return;
 				cell *c_arity = p1 + 2;
 				if (!is_integer(c_arity)) return;
-				set_multifile_in_db(p->m, GET_STR(c_name), c_arity->val_num);
+				const char *src = GET_STR(c_name);
+
+				if (!strchr(src, ':')) {
+					set_multifile_in_db(p->m, src, c_arity->val_num);
+				} else {
+					char mod[256], name[256];
+					mod[0] = name[0] = '\0';
+					sscanf(src, "%[^:]:%s", mod, name);
+					mod[sizeof(mod)-1] = name[sizeof(name)-1] = '\0';
+
+					if (!is_multifile_in_db(mod, name, c_arity->val_num)) {
+						fprintf(stderr, "Error: not multile %s:%s/%u\n", mod, name, (unsigned)c_arity->val_num);
+						p->error = 1;
+						return;
+					}
+				}
+
 				p1 += p1->nbr_cells;
 			} else if (!strcmp(GET_STR(p1), ","))
 				p1 += 1;
+			else {
+				fprintf(stderr, "Error: unknown\n");
+				p->error = 1;
+				return;
+			}
 		}
 
 		return;
