@@ -64,6 +64,8 @@ utf8.o: utf8.c utf8.h
 
 # Library modules
 
+UNAME_S := $(shell uname -s)
+
 ifeq ($(UNAME_S),Darwin)
 	OSFLAG = -m elf_x86_64
 endif
