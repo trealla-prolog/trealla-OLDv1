@@ -771,11 +771,17 @@ static int fn_iso_atom_chars_2(query *q)
 static int fn_iso_atom_codes_2(query *q)
 {
 	GET_FIRST_ARG(p1,iso_atom_or_var);
-	GET_NEXT_ARG(p2,list_or_var);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
 		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 		return 0;
+	}
+
+	if (!is_variable(p2) && is_nil(p2)) {
+		cell tmp;
+		make_literal(&tmp, g_empty_s);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (is_variable(p2) && !strcmp(GET_STR(p1), "")) {
