@@ -481,9 +481,8 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 		}
 
 		if (!is_multifile_in_db(mod, name, c->arity)) {
-			fprintf(stderr, "Warning: not mulitile %s:%s/%u\n", mod, name, (unsigned)c->arity);
+			fprintf(stderr, "Warning: not declared mulitile %s:%s/%u\n", mod, name, (unsigned)c->arity);
 			set_multifile_in_db(m, name, c->arity);
-			//return NULL;
 		}
 
 		c->val_off = find_in_pool(name);
@@ -565,9 +564,8 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 		}
 
 		if (!is_multifile_in_db(mod, name, c->arity)) {
-			fprintf(stderr, "Warning: not mulitile %s:%s/%u\n", mod, name, (unsigned)c->arity);
+			fprintf(stderr, "Warning: not declared mulitile %s:%s/%u\n", mod, name, (unsigned)c->arity);
 			set_multifile_in_db(m, name, c->arity);
-			//return NULL;
 		}
 
 		c->val_off = find_in_pool(name);
