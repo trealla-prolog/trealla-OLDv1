@@ -484,61 +484,6 @@ cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 	return tmp;
 }
 
-#if 0
-static char *convert_list_to_catom(query *q, cell *p1, idx_t p1_ctx)
-{
-	cell *l = p1;
-	idx_t l_ctx = p1_ctx;
-	unsigned cnt = 0;
-
-	while (is_list(l)) {
-		cell *h = LIST_HEAD(l);
-		cell *c = deref_var(q, h, l_ctx);
-
-		if (is_integer(c))
-			cnt++;
-		else if (is_atom(c))
-			cnt++;
-		else
-			return 0;
-
-		l = LIST_TAIL(l);
-		l = deref_var(q, l, l_ctx);
-		l_ctx = q->latest_ctx;
-	}
-
-	// Allow for max UTF8 bytes per char
-
-	char *tmpbuf = malloc((cnt*6)+1);
-	char *dst = tmpbuf;
-	l = p1;
-
-	while (is_list(l)) {
-		cell *h = LIST_HEAD(l);
-		cell *c = deref_var(q, h, l_ctx);
-		int ch;
-
-		if (is_integer(c))
-			ch = (int)c->val_num;
-		else if (is_atom(c)) {
-			const char *ptr = GET_STR(c);
-			ch = get_char_utf8(&ptr);
-		}
-
-		dst += put_char_utf8(dst, ch);
-		l = LIST_TAIL(l);
-		l = deref_var(q, l, l_ctx);
-		l_ctx = q->latest_ctx;
-	}
-
-	*dst = '\0';
-
-	cell *tmp = alloc_catomn(q, tmpbuf, dst-tmpbuf);
-	free(tmpbuf);
-	return tmp->val_str;
-}
-#endif
-
 static int fn_iso_unify_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
