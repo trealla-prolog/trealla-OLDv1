@@ -122,8 +122,6 @@ typedef struct clause_ clause;
 typedef struct cell_ cell;
 typedef struct parser_ parser;
 
-// For convenience using a fixed size cell...
-
 struct cell_ {
 	uint8_t val_type;
 	uint8_t arity;
