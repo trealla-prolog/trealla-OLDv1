@@ -43,8 +43,13 @@ static const char **key_words = NULL;
 #define italic "\e[3m"
 #define red "\e[31m"
 
+#if 0
 #define SAVE "\e[s"
 #define UNSAVE "\e[u"
+#else
+#define SAVE "\e7"
+#define UNSAVE "\e8"
+#endif
 
 int history_getch(void)
 {
