@@ -60,10 +60,11 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 	if (is_var(c)) {
 		err_type = "instantiation_error";
 		snprintf(dst2, len2, "error(%s,%s/%u)", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
-	} else if (!strcmp(err_type, "type_error"))
-		snprintf(dst2, len2, "error(%s(%s,%s))", err_type, expected, dst);
-	else
+	} else if (!strcmp(err_type, "type_error")) {
+		snprintf(dst2, len2, "error(%s(%s,%s))", err_type, strcmp(expected,"iso_atom")?expected:"atom", dst);
+	} else {
 		snprintf(dst2, len2, "error(%s(%s,%s/%u),%s/%u)", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+	}
 
 	parser *p = q->m->p;
 	p->srcptr = dst2;
