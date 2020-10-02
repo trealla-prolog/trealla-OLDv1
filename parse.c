@@ -471,7 +471,7 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 		const char *src = GET_STR(c);
 		char mod[256], name[256];
 		mod[0] = name[0] = '\0';
-		sscanf(src, "%[^:]:%s", mod, name);
+		sscanf(src, "%255[^:]:%255s", mod, name);
 		mod[sizeof(mod)-1] = name[sizeof(name)-1] = '\0';
 		m = find_module(mod);
 
@@ -554,7 +554,7 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 		const char *src = GET_STR(c);
 		char mod[256], name[256];
 		mod[0] = name[0] = '\0';
-		sscanf(src, "%[^:]:%s", mod, name);
+		sscanf(src, "%255[^:]:%255s", mod, name);
 		mod[sizeof(mod)-1] = name[sizeof(name)-1] = '\0';
 		m = find_module(mod);
 
@@ -1037,7 +1037,7 @@ static void directives(parser *p, term *t)
 				} else {
 					char mod[256], name[256];
 					mod[0] = name[0] = '\0';
-					sscanf(src, "%[^:]:%s", mod, name);
+					sscanf(src, "%255[^:]:%255s", mod, name);
 					mod[sizeof(mod)-1] = name[sizeof(name)-1] = '\0';
 
 					if (!is_multifile_in_db(mod, name, c_arity->val_num)) {
