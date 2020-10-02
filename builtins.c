@@ -61,7 +61,13 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 		err_type = "instantiation_error";
 		snprintf(dst2, len2, "error(%s,%s/%u)", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (!strcmp(err_type, "type_error")) {
-		snprintf(dst2, len2, "error(%s(%s,%s))", err_type, strncmp(expected,"iso_",4)?expected:expected+4, dst);
+		const char *t = expected;
+		if (!strncmp(t,"iso_",4)) t = t+4;
+		char tmpbuf[256];
+		strcpy(tmpbuf, t);
+		char *ptr = strchr(tmpbuf, '_');
+		if (ptr) *ptr = '\0';
+		snprintf(dst2, len2, "error(%s(%s,%s))", err_type, tmpbuf, dst);
 	} else {
 		snprintf(dst2, len2, "error(%s(%s,%s/%u),%s/%u)", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	}
