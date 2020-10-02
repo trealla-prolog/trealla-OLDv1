@@ -19,13 +19,16 @@ Atom
         +----------+---------+----------+---------+
    16	|                 val_offset              |
         +----------+---------+----------+---------+
-   24	|               - UNUSED -                |
+   20	|               - UNUSED -                |
         +----------+---------+----------+---------+
 
 Where *val_type* is TYPE_ATOM.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
 Where *val_offset* is into the symbol table.
+
+Two atoms will unify if their *val_offset* is the same.
+An Atom is always used for functor names.
 
 
 Var
@@ -42,7 +45,7 @@ Var
         +----------+---------+----------+---------+
    16	|                 val_offset              |
         +----------+---------+----------+---------+
-   24	|       slot_nbr     |      - UNUSED -    |
+   20	|       slot_nbr     |      - UNUSED -    |
         +----------+---------+----------+---------+
 
 Where *val_type* is TYPE_VAR.
@@ -65,7 +68,7 @@ Integer
         +----------+---------+----------+---------+
    16	|                                         |
         +                 val_den                 +
-   24	|                                         |
+   20	|                                         |
         +----------+---------+----------+---------+
 
 Where *val_type* is TYPE_RATIONAL.
@@ -88,12 +91,14 @@ Rational
         +----------+---------+----------+---------+
    16	|                                         |
         +                 val_den                 +
-   24	|                                         |
+   20	|                                         |
         +----------+---------+----------+---------+
 
 Where *val_type* is TYPE_RATIONAL.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
+
+A rational with *val_den* of 1 thus becomes an integer.
 
 
 Float
@@ -110,7 +115,7 @@ Float
         +----------+---------+----------+---------+
    16	|                                         |
         +               - UNUSED -                +
-   24	|                                         |
+   20	|                                         |
         +----------+---------+----------+---------+
 
 Where *val_type* is TYPE_FLOAT.
@@ -129,16 +134,18 @@ Cstring
     8	|                                         |
         +                                         +
    12	|                                         |
-        +                 val_chr                 +
+        +                 val_chr[16]             +
    16	|                                         |
         +                                         +
-   24	|                                         |
+   20	|                                         |
         +----------+---------+----------+---------+
 
 Where *val_type* is TYPE_CSTRING.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
 Where *val_chr* is up to 15 bytes of UTF-8 chars, NULL-terminated.
+
+A Cstring may be used for atoms that are not functors and need quoting.
 
 
 BLOB
@@ -153,17 +160,20 @@ BLOB
         +                 val_str                 +
    12	|                                         |
         +----------+---------+----------+---------+
-   16	|                                         |
-        +        len_str     |    - UNUSED -      +
-   24	|                                         |
+   16	|                 len_str                 |
+        +----------+---------+----------+---------+
+   20	|               - UNUSED -                |
         +----------+---------+----------+---------+
 
 Where *val_type* is TYPE_CSTRING.
 Where *arity* is always 0.
 Where *flags* is FLAG_BLOB.
 Where *nbr_cells* is always 1.
-Where *val_str* is a pointer to UTF-8 chars.
+Where *val_str* is a char pointer to UTF-8 chars.
 Where *len_str* is the number of allocated bytes.
+
+A BLOB is length delimited, not NULL-terminated (though it may be).
+A BLOB may be used for atoms that are not functors and > 15 bytes long.
 
 
 String
@@ -178,9 +188,9 @@ String
         +                 val_str                 +
    12	|                                         |
         +----------+---------+----------+---------+
-   16	|                                         |
-        +     - UNUSED -     |      rem_str       +
-   24	|                                         |
+   16	|                 len_str                 |
+        +----------+---------+----------+---------+
+   20	|                 rem_str                 |
         +----------+---------+----------+---------+
 
 Where *val_type* is TYPE_CSTRING.
@@ -203,9 +213,9 @@ String head
         +                 val_str                 +
    12	|                                         |
         +----------+---------+----------+---------+
-   16	|                                         |
-        +        len_str     |    - UNUSED -      +
-   24	|                                         |
+   16	|                 len_str                 |
+        +----------+---------+----------+---------+
+   20	|                 rem_str                 |
         +----------+---------+----------+---------+
 
 Where *val_type* is TYPE_CSTRING.
@@ -213,7 +223,7 @@ Where *arity* is always 2.
 Where *flags* is FLAG_BLOB|FLAG_STRING|FLAG_HEAD.
 Where *nbr_cells* is always 1.
 Where *val_str* is a pointer to one UTF-8 char.
-Where *len_str* is the number of relevant bytes.
+Where *len_str* is the number of bytes pointed to.
 
 
 Compound
@@ -230,7 +240,7 @@ Compound
         +----------+---------+----------+---------+
    16	|                 val_offset              |
         +----------+---------+----------+---------+
-   24	|               - UNUSED -                |
+   20	|               - UNUSED -                |
         +----------+---------+----------+---------+
     0	| val_type |  arity  |       flags        |    CELL 2
 
@@ -255,7 +265,7 @@ List
         +----------+---------+----------+---------+
    16	|                 val_offset              |
         +----------+---------+----------+---------+
-   24	|               - UNUSED -                |
+   20	|               - UNUSED -                |
         +----------+---------+----------+---------+
     0	| val_type |  arity  |       flags        |    CELL 2
 
