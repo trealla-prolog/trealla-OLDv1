@@ -247,8 +247,8 @@ Compound
     0	| val_type |  arity  |       flags        |    CELL 2
 
 Where *val_type* is TYPE_LITERAL.
-Where *arity* is always > 0.
-Where *nbr_cells* is always > 1 and includes the args.
+Where *arity* is > 0.
+Where *nbr_cells* is > 1 and includes the args.
 Where *val_offset* is into the symbol table.
 Where args are the following cells (see *nbr_cells*).
 
@@ -273,7 +273,7 @@ List
 
 Where *val_type* is TYPE_LITERAL.
 Where *arity* is always 2.
-Where *nbr_cells* is always > 1 and includes head & tail args.
+Where *nbr_cells* is > 1 and includes head & tail args.
 Where *val_offset* is into the symbol table to '.'.
 Where args are the following cells (see *nbr_cells*).
 Where the tail arg is usually a list.
