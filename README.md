@@ -51,7 +51,7 @@ are no plans for a Windows port.
 Usage
 =====
 
-	tpl [options] files [-g goal]
+	tpl [options] [[-l] file] [-g goal]
 
 where options can be:
 
