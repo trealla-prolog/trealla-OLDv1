@@ -170,8 +170,6 @@ int main(int ac, char *av[])
 			set_trace(pl);
 		else if (!strcmp(av[i], "--stats"))
 			set_stats(pl);
-		else if (!strcmp(av[i], "--iso-only"))
-			set_iso_only(pl);
 		else if (!strcmp(av[i], "-d") || !strcmp(av[i], "--daemon"))
 			daemon = 1;
 	}
@@ -243,7 +241,6 @@ int main(int ac, char *av[])
 		fprintf(stderr, "  -w, --watchdog\t\t- create watchdog\n");
 		fprintf(stderr, "  --consult\t- consult from STDIN\n");
 		fprintf(stderr, "  --stats\t\t- print stats\n");
-		fprintf(stderr, "  --iso-only\t\t- ISO-only mode\n");
 	}
 
 	if (version && !quiet)

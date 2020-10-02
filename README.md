@@ -65,7 +65,6 @@ where options can be:
 	-d, --daemonize    - daemonize
 	-w, --watchdog     - create watchdog
 	--stats            - print stats
-	--iso-only         - ISO-only mode
 	--consult          - consult from STDIN
 
 For example:

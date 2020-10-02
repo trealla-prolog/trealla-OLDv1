@@ -622,6 +622,17 @@ static void set_persist_in_db(module *m, const char *name, idx_t arity)
 	m->use_persist = 1;
 }
 
+void set_multifile_in_db(module *m, const char *name, idx_t arity)
+{
+	cell tmp;
+	tmp.val_type = TYPE_LITERAL;
+	tmp.val_off = find_in_pool(name);
+	tmp.arity = arity;
+	rule *h = find_rule(m, &tmp);
+	if (!h) h = create_rule(m, &tmp);
+	h->is_multifile = 1;
+}
+
 void clear_term(term *t)
 {
 	for (idx_t i = 0; i < t->cidx; i++) {
@@ -955,7 +966,25 @@ static void directives(parser *p, term *t)
 		return;
 	}
 
-	if (!strcmp(dirname, "persist") && (c->arity >= 1) && !p->m->iso_only) {
+	if (!strcmp(dirname, "multifile") && (c->arity >= 1)) {
+		cell *p1 = c + 1;
+
+		while (is_literal(p1)) {
+			if (is_literal(p1) && !strcmp(GET_STR(p1), "/") && (p1->arity == 2)) {
+				cell *c_name = p1 + 1;
+				if (!is_literal(c_name)) return;
+				cell *c_arity = p1 + 2;
+				if (!is_integer(c_arity)) return;
+				set_multifile_in_db(p->m, GET_STR(c_name), c_arity->val_num);
+				p1 += p1->nbr_cells;
+			} else if (!strcmp(GET_STR(p1), ","))
+				p1 += 1;
+		}
+
+		return;
+	}
+
+	if (!strcmp(dirname, "persist") && (c->arity >= 1)) {
 		cell *p1 = c + 1;
 
 		while (is_literal(p1)) {
@@ -998,12 +1027,12 @@ static void directives(parser *p, term *t)
 				p->m->flag.character_escapes = 1;
 			else if (!strcmp(GET_STR(p2), "false"))
 				p->m->flag.character_escapes = 0;
-		} else if (!p->m->iso_only && !strcmp(GET_STR(p1), "prefer_rationals")) {
+		} else if (!strcmp(GET_STR(p1), "prefer_rationals")) {
 			if (!strcmp(GET_STR(p2), "true"))
 				p->m->flag.prefer_rationals = 1;
 			else if (!strcmp(GET_STR(p2), "false"))
 				p->m->flag.prefer_rationals = 0;
-		} else if (!p->m->iso_only && !strcmp(GET_STR(p1), "rational_syntax")) {
+		} else if (!strcmp(GET_STR(p1), "rational_syntax")) {
 			if (!strcmp(GET_STR(p2), "natural"))
 				p->m->flag.rational_syntax_natural = 1;
 			else if (!strcmp(GET_STR(p2), "compatibility"))
@@ -1632,9 +1661,9 @@ static int parse_number(module *m, const char **srcptr, int_t *val_num, int_t *v
 	if (neg) *val_num = -*val_num;
 	int try_rational = 0;
 
-	if (!m->iso_only && ((*s == 'r') || (*s == 'R')) && 0)
+	if (((*s == 'r') || (*s == 'R')) && 0)
 		try_rational = 1;
-	else if (!m->iso_only && (*s == '/') && m->flag.rational_syntax_natural)
+	else if ((*s == '/') && m->flag.rational_syntax_natural)
 		try_rational = 1;
 
 	if (!try_rational) {
@@ -2588,7 +2617,6 @@ module *create_module(const char *name)
 	m->flag.prefer_rationals = 0;
 	m->user_ops = MAX_USER_OPS;
 	m->cpu_count = CPU_COUNT;
-	m->iso_only = 0;
 
 	// Meta-rules...
 
@@ -2715,7 +2743,6 @@ int get_status(prolog *pl) { return pl->m->status; }
 void set_trace(prolog *pl) { pl->m->trace = 1; }
 void set_quiet(prolog *pl) { pl->m->quiet = 1; }
 void set_stats(prolog *pl) { pl->m->stats = 1; }
-void set_iso_only(prolog *pl) { pl->m->iso_only = 1; }
 void set_opt(prolog *pl, int level) { pl->m->opt = level; }
 
 int pl_eval(prolog *pl, const char *src)

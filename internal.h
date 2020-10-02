@@ -203,6 +203,7 @@ struct rule_ {
 	unsigned is_public:1;
 	unsigned is_dynamic:1;
 	unsigned is_persist:1;
+	unsigned is_multifile:1;
 	unsigned is_abolished:1;
 };
 

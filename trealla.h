@@ -15,7 +15,6 @@ int get_status(prolog*);
 void set_trace(prolog*);
 void set_quiet(prolog*);
 void set_stats(prolog*);
-void set_iso_only(prolog*);
 void set_opt(prolog*, int onoff);
 
 extern int g_tpl_interrupt, g_ac, g_avc;
