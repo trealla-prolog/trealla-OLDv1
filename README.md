@@ -51,7 +51,7 @@ are no plans for a Windows port.
 Usage
 =====
 
-	tpl [options] [-l file] [-g goal]
+	tpl [options] [[-l] file] [-g goal]
 
 where options can be:
 
@@ -69,6 +69,7 @@ where options can be:
 For example:
 
 	./tpl -l samples/sieve -g test2,halt
+	./tpl samples/sieve -g test2,halt
 
 Invocation without any goal presents the REPL.
 

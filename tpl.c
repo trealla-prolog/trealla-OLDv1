@@ -145,7 +145,7 @@ int main(int ac, char *av[])
 	char histfile[1024];
 	snprintf(histfile, sizeof(histfile), "%s/%s", homedir, ".tpl_history");
 
-	int i, do_load = 0, do_goal = 0, version = 0, quiet = 0, daemon = 0;
+	int i, do_load = 1, do_goal = 0, version = 0, quiet = 0, daemon = 0;
 	void *pl = pl_create();
 	set_opt(pl, 1);
 
@@ -195,9 +195,11 @@ int main(int ac, char *av[])
 			}
 		}
 		else if (!strcmp(av[i], "-l") || !strcmp(av[i], "--consult-file"))
-			do_load = 1;
-		else if (!strcmp(av[i], "-g") || !strcmp(av[i], "--query-goal"))
+			;
+		else if (!strcmp(av[i], "-g") || !strcmp(av[i], "--query-goal")) {
 			do_goal = 1;
+			do_load = 0;
+		}
 		else if (av[i][0] == '-')
 			continue;
 		else if (do_load) {
@@ -228,7 +230,7 @@ int main(int ac, char *av[])
 
 	if ((version == 2) && !quiet) {
 		fprintf(stderr, "Usage:\n");
-		fprintf(stderr, "  tpl [options] [-l file] [-g goal]\n");
+		fprintf(stderr, "  tpl [options] [[-l] file] [-g goal]\n");
 		fprintf(stderr, "Options:\n");
 		fprintf(stderr, "  -v, --version\t\t- print version info and exit\n");
 		fprintf(stderr, "  -h, --help\t\t- print help info and exit\n");
