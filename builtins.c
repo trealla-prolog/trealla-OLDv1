@@ -3965,153 +3965,6 @@ static int fn_iso_copy_term_2(query *q)
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
-static int do_length(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,integer);
-	int cnt = p2->val_num;
-	GET_RAW_ARG(2, p2_orig);
-	cell tmp;
-	make_int(&tmp, ++cnt);
-	set_var(q, p2_orig, p2_orig_ctx, &tmp, q->st.curr_frame);
-	make_choice(q);
-	unsigned slot_nbr;
-
-	if (!(slot_nbr = create_vars(q, cnt))) {
-		throw_error(q, p1, "resource_error", "too_many_vars");
-		return 0;
-	}
-
-	tmp.val_type = TYPE_VARIABLE;
-	tmp.nbr_cells = 1;
-	tmp.flags = 0;
-	tmp.val_off = g_anon_s;
-	tmp.slot_nbr = slot_nbr++;
-	alloc_list(q, &tmp);
-
-	for (int i = 1; i < cnt; i++) {
-		tmp.slot_nbr = slot_nbr++;
-		append_list(q, &tmp);
-	}
-
-	cell *l = end_list(q);
-	set_var(q, p1, p1_ctx, l, q->st.curr_frame);
-	return 1;
-}
-
-static int fn_iso_length_2(query *q)
-{
-	if (q->retry)
-		return do_length(q);
-
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
-
-	if (is_variable(p1) && is_variable(p2)) {
-		cell tmp;
-		make_int(&tmp, 0);
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		make_choice(q);
-		make_literal(&tmp, g_nil_s);
-		set_var(q, p1,p1_ctx, &tmp, q->st.curr_frame);
-		return 1;
-	}
-
-	if (!is_variable(p1) && is_variable(p2)) {
-		if (!is_list(p1) && !is_nil(p1))
-			return 0;
-
-		int cnt = 0;
-
-		if (is_string(p1)) {
-			cnt = strlen_utf8(p1->val_str);
-		} else {
-			cell *l = p1;
-
-			while (is_list(l)) {
-				LIST_HEAD(l);
-				l = LIST_TAIL(l);
-				l = deref_var(q, l, p1_ctx);
-				p1_ctx = q->latest_ctx;
-				cnt++;
-			}
-		}
-
-		cell tmp;
-		make_int(&tmp, cnt);
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		return 1;
-	}
-
-	if (is_integer(p2) && !is_variable(p1)) {
-		if (p2->val_num == 0) {
-			cell tmp;
-			make_literal(&tmp, g_nil_s);
-			return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-		}
-
-		int cnt = 0;
-
-		if (is_string(p1)) {
-			cnt = strlen_utf8(p1->val_str);
-		} else {
-			cell *l = p1;
-
-			while (is_list(l)) {
-				LIST_HEAD(l);
-				l = LIST_TAIL(l);
-				l = deref_var(q, l, p1_ctx);
-				p1_ctx = q->latest_ctx;
-				cnt++;
-			}
-		}
-
-		return p2->val_num == cnt;
-	}
-
-
-	if (is_variable(p1) && is_integer(p2)) {
-		if ((p2->val_num < 0) || (p2->val_num > MAX_ARITY)) {
-			throw_error(q, p2, "resource_error", "too_many_vars");
-			return 0;
-		}
-
-		if (p2->val_num == 0) {
-			cell tmp;
-			make_literal(&tmp, g_nil_s);
-			set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-			return 1;
-		}
-
-		unsigned slot_nbr;
-
-		if (!(slot_nbr = create_vars(q, p2->val_num))) {
-		throw_error(q, p2, "resource_error", "too_many_vars");
-			return 0;
-		}
-
-		cell tmp;
-		tmp.val_type = TYPE_VARIABLE;
-		tmp.nbr_cells = 1;
-		tmp.flags = 0;
-		tmp.val_off = g_anon_s;
-		tmp.slot_nbr = slot_nbr++;
-		alloc_list(q, &tmp);
-
-		for (int i = 1; i < p2->val_num; i++) {
-			tmp.slot_nbr = slot_nbr++;
-			append_list(q, &tmp);
-		}
-
-		cell *l = end_list(q);
-		set_var(q, p1, p1_ctx, l, q->st.curr_frame);
-		return 1;
-	}
-
-	throw_error(q, p1, "type_error", "arg invalid");
-	return 0;
-}
-
 static int fn_iso_clause_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
@@ -8748,6 +8601,153 @@ static int fn_phrase_2(query *q)
 	return 1;
 }
 
+static int do_length(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,integer);
+	int cnt = p2->val_num;
+	GET_RAW_ARG(2, p2_orig);
+	cell tmp;
+	make_int(&tmp, ++cnt);
+	set_var(q, p2_orig, p2_orig_ctx, &tmp, q->st.curr_frame);
+	make_choice(q);
+	unsigned slot_nbr;
+
+	if (!(slot_nbr = create_vars(q, cnt))) {
+		throw_error(q, p1, "resource_error", "too_many_vars");
+		return 0;
+	}
+
+	tmp.val_type = TYPE_VARIABLE;
+	tmp.nbr_cells = 1;
+	tmp.flags = 0;
+	tmp.val_off = g_anon_s;
+	tmp.slot_nbr = slot_nbr++;
+	alloc_list(q, &tmp);
+
+	for (int i = 1; i < cnt; i++) {
+		tmp.slot_nbr = slot_nbr++;
+		append_list(q, &tmp);
+	}
+
+	cell *l = end_list(q);
+	set_var(q, p1, p1_ctx, l, q->st.curr_frame);
+	return 1;
+}
+
+static int fn_length_2(query *q)
+{
+	if (q->retry)
+		return do_length(q);
+
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,any);
+
+	if (is_variable(p1) && is_variable(p2)) {
+		cell tmp;
+		make_int(&tmp, 0);
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		make_choice(q);
+		make_literal(&tmp, g_nil_s);
+		set_var(q, p1,p1_ctx, &tmp, q->st.curr_frame);
+		return 1;
+	}
+
+	if (!is_variable(p1) && is_variable(p2)) {
+		if (!is_list(p1) && !is_nil(p1))
+			return 0;
+
+		int cnt = 0;
+
+		if (is_string(p1)) {
+			cnt = strlen_utf8(p1->val_str);
+		} else {
+			cell *l = p1;
+
+			while (is_list(l)) {
+				LIST_HEAD(l);
+				l = LIST_TAIL(l);
+				l = deref_var(q, l, p1_ctx);
+				p1_ctx = q->latest_ctx;
+				cnt++;
+			}
+		}
+
+		cell tmp;
+		make_int(&tmp, cnt);
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		return 1;
+	}
+
+	if (is_integer(p2) && !is_variable(p1)) {
+		if (p2->val_num == 0) {
+			cell tmp;
+			make_literal(&tmp, g_nil_s);
+			return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		}
+
+		int cnt = 0;
+
+		if (is_string(p1)) {
+			cnt = strlen_utf8(p1->val_str);
+		} else {
+			cell *l = p1;
+
+			while (is_list(l)) {
+				LIST_HEAD(l);
+				l = LIST_TAIL(l);
+				l = deref_var(q, l, p1_ctx);
+				p1_ctx = q->latest_ctx;
+				cnt++;
+			}
+		}
+
+		return p2->val_num == cnt;
+	}
+
+
+	if (is_variable(p1) && is_integer(p2)) {
+		if ((p2->val_num < 0) || (p2->val_num > MAX_ARITY)) {
+			throw_error(q, p2, "resource_error", "too_many_vars");
+			return 0;
+		}
+
+		if (p2->val_num == 0) {
+			cell tmp;
+			make_literal(&tmp, g_nil_s);
+			set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+			return 1;
+		}
+
+		unsigned slot_nbr;
+
+		if (!(slot_nbr = create_vars(q, p2->val_num))) {
+		throw_error(q, p2, "resource_error", "too_many_vars");
+			return 0;
+		}
+
+		cell tmp;
+		tmp.val_type = TYPE_VARIABLE;
+		tmp.nbr_cells = 1;
+		tmp.flags = 0;
+		tmp.val_off = g_anon_s;
+		tmp.slot_nbr = slot_nbr++;
+		alloc_list(q, &tmp);
+
+		for (int i = 1; i < p2->val_num; i++) {
+			tmp.slot_nbr = slot_nbr++;
+			append_list(q, &tmp);
+		}
+
+		cell *l = end_list(q);
+		set_var(q, p1, p1_ctx, l, q->st.curr_frame);
+		return 1;
+	}
+
+	throw_error(q, p1, "type_error", "arg invalid");
+	return 0;
+}
+
 static int fn_string_concat_3(query *q)
 {
 	if (q->retry)
@@ -8891,7 +8891,6 @@ static const struct builtins g_iso_funcs[] =
 	{"number_codes", 2, fn_iso_number_codes_2, NULL},
 	{"!", 0, fn_iso_cut_0, NULL},
 	{"is", 2, fn_iso_is_2, NULL},
-	{"length", 2, fn_iso_length_2, NULL},
 	{"clause", 2, fn_iso_clause_2, NULL},
 	{"arg", 3, fn_iso_arg_3, NULL},
 	{"functor", 3, fn_iso_functor_3, NULL},
@@ -9052,6 +9051,7 @@ static const struct builtins g_other_funcs[] =
 
 	// Miscellaneous...
 
+	{"length", 2, fn_length_2, NULL},
 	{"string_concat", 3, fn_string_concat_3, NULL},
 	{"ignore", 1, fn_ignore_1, "+callable"},
 	{"format", 1, fn_format_1, "+string"},
