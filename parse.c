@@ -357,6 +357,30 @@ static rule *create_rule(module *m, cell *c)
 	return h;
 }
 
+void set_multifile_in_db(module *m, const char *name, idx_t arity)
+{
+	cell tmp;
+	tmp.val_type = TYPE_LITERAL;
+	tmp.val_off = find_in_pool(name);
+	tmp.arity = arity;
+	rule *h = find_rule(m, &tmp);
+	if (!h) h = create_rule(m, &tmp);
+	h->is_multifile = 1;
+}
+
+static int is_multifile_in_db(const char *mod, const char *name, idx_t arity)
+{
+	module *m = find_module(mod);
+	if (!m) return 0;
+	cell tmp;
+	tmp.val_type = TYPE_LITERAL;
+	tmp.val_off = find_in_pool(name);
+	tmp.arity = arity;
+	rule *h = find_rule(m, &tmp);
+	if (!h) return 0;
+	return h->is_multifile ? 1 : 0;
+}
+
 static int compkey(const void *ptr1, const void *ptr2)
 {
 	const cell *p1 = (const cell*)ptr1;
@@ -443,6 +467,27 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 		return NULL;
 	}
 
+	if (strchr(GET_STR(c), ':')) {
+		const char *src = GET_STR(c);
+		//printf("*** asserta %s/%u\n", src, (unsigned)c->arity);
+		char mod[256], name[256];
+		mod[0] = name[0] = '\0';
+		sscanf(src, "%[^:]:%s", mod, name);
+		mod[sizeof(mod)-1] = name[sizeof(name)-1] = '\0';
+		m = find_module(mod);
+
+		if (!m) {
+			fprintf(stderr, "Error: unknown module: %s\n", mod);
+			return NULL;
+		}
+
+		if (!is_multifile_in_db(mod, name, c->arity)) {
+			fprintf(stderr, "Warning: not mulitile %s:%s/%u\n", mod, name, (unsigned)c->arity);
+			set_multifile_in_db(m, name, c->arity);
+			//return NULL;
+		}
+	}
+
 	rule *h = find_rule(m, c);
 
 	if (h && !consulting) {
@@ -503,6 +548,27 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 	if (!c) {
 		fprintf(stderr, "Error: no fact or clause head\n");
 		return NULL;
+	}
+
+	if (strchr(GET_STR(c), ':')) {
+		const char *src = GET_STR(c);
+		//printf("*** assertz %s/%u\n", src, (unsigned)c->arity);
+		char mod[256], name[256];
+		mod[0] = name[0] = '\0';
+		sscanf(src, "%[^:]:%s", mod, name);
+		mod[sizeof(mod)-1] = name[sizeof(name)-1] = '\0';
+		m = find_module(mod);
+
+		if (!m) {
+			fprintf(stderr, "Error: unknown module: %s\n", mod);
+			return NULL;
+		}
+
+		if (!is_multifile_in_db(mod, name, c->arity)) {
+			fprintf(stderr, "Warning: not mulitile %s:%s/%u\n", mod, name, (unsigned)c->arity);
+			set_multifile_in_db(m, name, c->arity);
+			//return NULL;
+		}
 	}
 
 	rule *h = find_rule(m, c);
@@ -620,29 +686,6 @@ static void set_persist_in_db(module *m, const char *name, idx_t arity)
 		h->index = sl_create(compkey);
 
 	m->use_persist = 1;
-}
-
-void set_multifile_in_db(module *m, const char *name, idx_t arity)
-{
-	cell tmp;
-	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = find_in_pool(name);
-	tmp.arity = arity;
-	rule *h = find_rule(m, &tmp);
-	if (!h) h = create_rule(m, &tmp);
-	h->is_multifile = 1;
-}
-
-static int is_multifile_in_db(const char *mod, const char *name, idx_t arity)
-{
-	module *m = find_module(mod);
-	if (!m) return 0;
-	cell tmp;
-	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = find_in_pool(name);
-	tmp.arity = arity;
-	rule *h = find_rule(m, &tmp);
-	return h ? 1 : 0;
 }
 
 void clear_term(term *t)
