@@ -80,7 +80,7 @@ What's missing?
 
 	there may be missing or incomplete ISO predicates
 	database is immediate update view, fix
-	modules need more work
+	modules need more work (multifile for one)
 	missing directives?
 	aiming to run clpz.pl down the track
 
@@ -125,7 +125,6 @@ Others
 	inf/0
 	nan/0
 	\uXXXX and \UXXXXXXXX quoted character escapes
-	volatile/1
 	rational/1
 	rationalize/1
 	rdiv/2
