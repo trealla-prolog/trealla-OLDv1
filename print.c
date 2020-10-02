@@ -274,7 +274,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 	// FIXME make non-recursive
 
-	while (is_real_list(c)) {
+	while (is_iso_list(c)) {
 		if (max_depth && (depth >= max_depth)) {
 			dst += snprintf(dst, dstlen, " |...");
 			return dst - save_dst;
