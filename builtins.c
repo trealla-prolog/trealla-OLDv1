@@ -8640,8 +8640,8 @@ static int fn_length_2(query *q)
 	if (q->retry)
 		return do_length(q);
 
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
+	GET_FIRST_ARG(p1,list_or_nil_or_var);
+	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
 		cell tmp;
