@@ -61,7 +61,7 @@ typedef uint32_t idx_t;
 
 // Derived type...
 
-#define is_iso_atom(c) ((is_literal(c) && !(c)->arity) || (is_cstring(c) && !is_string(c)))
+#define is_iso_atom(c) ((is_literal(c) || is_cstring(c)) && !(c)->arity)
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || (is_cstring(c)))
 #define is_string(c) (is_cstring(c) && (c)->flags&FLAG_STRING)
 #define is_blob(c) (is_cstring(c) && ((c)->flags&FLAG_BLOB))
