@@ -18,12 +18,12 @@
 #define is_iso_atomic(c) (is_iso_atom(c) || is_number(c))
 #define is_atomic(c) (is_atom(c) || is_number(c))
 #define is_list_or_nil(c) (is_list(c) || is_nil(c))
-#define is_list_or_nil_or_var(c) (is_list_or_nil(c) || is_var(c))
-#define is_list_or_var(c) (is_list(c) || is_var(c))
-#define is_structure_or_var(c) (is_structure(c) || is_var(c))
-#define is_iso_atom_or_var(c) (is_atom(c) || is_var(c))
-#define is_atom_or_var(c) (is_atom(c) || is_var(c))
-#define is_atom_or_string_or_var(c) (is_atom(c) || is_string(c) || is_var(c))
+#define is_list_or_nil_or_var(c) (is_list_or_nil(c) || is_variable(c))
+#define is_list_or_var(c) (is_list(c) || is_variable(c))
+#define is_structure_or_var(c) (is_structure(c) || is_variable(c))
+#define is_iso_atom_or_var(c) (is_atom(c) || is_variable(c))
+#define is_atom_or_var(c) (is_atom(c) || is_variable(c))
+#define is_atom_or_string_or_var(c) (is_atom(c) || is_string(c) || is_variable(c))
 #define is_atom_or_int(c) (is_atom(c) || is_integer(c))
 #define is_atom_or_list(c) (is_atom(c) || is_list(c))
 #define is_atom_or_catom(c) (is_atom(c) || is_cstring(c))
@@ -31,9 +31,9 @@
 #define is_atom_or_string(c) (is_atom(c) || is_string(c))
 #define is_atom_or_string_or_structure(c) (is_atom(c) || is_string(c) || is_structure(c))
 #define is_atom_or_catom_or_structure(c) (is_atom(c) || is_cstring(c) || is_structure(c))
-#define is_integer_or_var(c) (is_integer(c) || is_var(c))
+#define is_integer_or_var(c) (is_integer(c) || is_variable(c))
 #define is_integer_or_atom(c) (is_integer(c) || is_atom(c))
-#define is_nonvar(c) (!is_var(c))
+#define is_nonvar(c) (!is_variable(c))
 #define is_stream(c) (get_stream(q,c) >= 0)
 #define is_stream_or_structure(c) (is_structure(c) || is_stream(c))
 #define is_any(c) 1
@@ -43,7 +43,7 @@ inline static cell *deref(query *q, cell *c, idx_t c_ctx)
 	frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->slot_nbr);
 
-	while (is_var(&e->c)) {
+	while (is_variable(&e->c)) {
 		g = GET_FRAME(c_ctx=e->ctx);
 		e = GET_SLOT(g, (c=&e->c)->slot_nbr);
 	}
@@ -57,7 +57,7 @@ inline static cell *deref(query *q, cell *c, idx_t c_ctx)
 	return (q->latest_ctx=e->ctx, e->c.val_ptr);
 }
 
-#define deref_var(q,c,c_ctx) !is_var(c) ? (q->latest_ctx = c_ctx, c) : deref(q,c,c_ctx)
+#define deref_var(q,c,c_ctx) !is_variable(c) ? (q->latest_ctx = c_ctx, c) : deref(q,c,c_ctx)
 
 #define GET_FIRST_ARG(p,val_type) \
 	__attribute__((unused)) cell *p = get_first_arg(q); \

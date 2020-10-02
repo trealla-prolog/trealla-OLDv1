@@ -557,7 +557,7 @@ void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 	frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->slot_nbr);
 
-	while (is_var(&e->c)) {
+	while (is_variable(&e->c)) {
 		c = &e->c;
 		c_ctx = e->ctx;
 		g = GET_FRAME(c_ctx);
@@ -682,7 +682,7 @@ static const struct dispatch g_disp[] =
 
 int unify(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
-	if (is_var(p1) && is_var(p2)) {
+	if (is_variable(p1) && is_variable(p2)) {
 		if (p2_ctx > p1_ctx)
 			set_var(q, p2, p2_ctx, p1, p1_ctx);
 		else if (p2_ctx < p1_ctx)
@@ -693,7 +693,7 @@ int unify(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		return 1;
 	}
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		if (is_structure(p2) && (p2_ctx >= q->st.curr_frame))
 			q->no_tco = 1;
 
@@ -701,7 +701,7 @@ int unify(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		return 1;
 	}
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		if (is_structure(p1) && (p1_ctx >= q->st.curr_frame))
 			q->no_tco = 1;
 
@@ -825,7 +825,7 @@ static int match(query *q)
 			int all_vars = 1, arity = key->arity;
 
 			for (cell *c = key + 1; arity--; c += c->nbr_cells) {
-				if (!is_var(c)) {
+				if (!is_variable(c)) {
 					all_vars = 0;
 					break;
 				}
@@ -908,7 +908,7 @@ void run_query(query *q)
 				break;
 		}
 
-		if (is_var(q->st.curr_cell)) {
+		if (is_variable(q->st.curr_cell)) {
 			if (!call_me(q, q->st.curr_cell))
 				continue;
 		}

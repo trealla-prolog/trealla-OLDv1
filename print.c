@@ -174,13 +174,13 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 		return dst - save_dst;
 	}
 
-	if (is_var(c) && ((1ULL << c->slot_nbr) & q->nv_mask)) {
+	if (is_variable(c) && ((1ULL << c->slot_nbr) & q->nv_mask)) {
 		dst += snprintf(dst, dstlen, "'$VAR'(%u)", q->nv_start + count_bits(q->nv_mask, c->slot_nbr));
 		return dst - save_dst;
 	}
 
 	const char *src = GET_STR(c);
-	int dq = 0, quote = !is_var(c) && needs_quote(q->m, src);
+	int dq = 0, quote = !is_variable(c) && needs_quote(q->m, src);
 	if (is_string(c)) dq = quote = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 	dst += formatted(dst, dstlen, src, is_blob(c) ? c->len_str : INT_MAX);
@@ -324,18 +324,18 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		(c->flags & OP_YFX) | (c->flags & OP_XFY);
 
 	if (q->ignore_ops || !optype || !c->arity) {
-		int quote = ((running <= 0) || q->quoted) && !is_var(c) && needs_quote(q->m, src);
+		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quote(q->m, src);
 		int dq = 0, braces = 0;
 		if (is_string(c) && !is_head(c)) dq = quote = 1;
 		if (c->arity && !strcmp(src, "{}")) braces = 1;
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
-		if (running && is_var(c) && ((1ULL << c->slot_nbr) & q->nv_mask)) {
+		if (running && is_variable(c) && ((1ULL << c->slot_nbr) & q->nv_mask)) {
 			dst += snprintf(dst, dstlen, "%s", varformat(q->nv_start + count_bits(q->nv_mask, c->slot_nbr)));
 			return dst - save_dst;
 		}
 
-		if (running && is_var(c) && (q->latest_ctx != q->st.curr_frame)) {
+		if (running && is_variable(c) && (q->latest_ctx != q->st.curr_frame)) {
 			frame *g = GET_FRAME(q->latest_ctx);
 			slot *e = GET_SLOT(g, c->slot_nbr);
 			idx_t slot_nbr = e - q->slots;

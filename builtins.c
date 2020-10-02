@@ -57,7 +57,7 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q->st.curr_cell) + 20;
 	char *dst2 = malloc(len2+1);
 
-	if (is_var(c)) {
+	if (is_variable(c)) {
 		err_type = "instantiation_error";
 		snprintf(dst2, len2, "error(%s,%s/%u)", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (!strcmp(err_type, "type_error")) {
@@ -445,7 +445,7 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	p1++;
 
 	for (idx_t i = 1; i < nbr_cells;) {
-		if (is_var(p1)) {
+		if (is_variable(p1)) {
 			cell *c = deref_var(q, p1, p1_ctx);
 			deep_clone2_to_tmp(q, c, q->latest_ctx);
 		} else
@@ -463,7 +463,7 @@ static cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
 	init_tmp_heap(q);
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		p1 = deref_var(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
@@ -474,7 +474,7 @@ static cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 {
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		p1 = deref_var(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
@@ -554,18 +554,18 @@ static int fn_iso_atomic_1(query *q)
 static int fn_iso_var_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return is_var(p1);
+	return is_variable(p1);
 }
 
 static int fn_iso_nonvar_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return !is_var(p1);
+	return !is_variable(p1);
 }
 
 static int check_has_vars(query *q, cell *c)
 {
-	if (is_var(c))
+	if (is_variable(c))
 		return 1;
 
 	idx_t save_ctx = q->latest_ctx;
@@ -670,18 +670,18 @@ static int fn_iso_atom_chars_2(query *q)
 	GET_FIRST_ARG(p1,iso_atom_or_var);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 
-	if (is_var(p1) && is_var(p2)) {
+	if (is_variable(p1) && is_variable(p2)) {
 		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 		return 0;
 	}
 
-	if (!is_var(p2) && is_nil(p2)) {
+	if (!is_variable(p2) && is_nil(p2)) {
 		cell tmp;
 		make_literal(&tmp, g_empty_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (!is_var(p2)) {
+	if (!is_variable(p2)) {
 		cell *head = LIST_HEAD(p2);
 		cell *tail = LIST_TAIL(p2);
 		head = deref_var(q, head, p2_ctx);
@@ -761,12 +761,12 @@ static int fn_iso_atom_codes_2(query *q)
 	GET_FIRST_ARG(p1,iso_atom_or_var);
 	GET_NEXT_ARG(p2,list_or_var);
 
-	if (is_var(p1) && is_var(p2)) {
+	if (is_variable(p1) && is_variable(p2)) {
 		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 		return 0;
 	}
 
-	if (!is_var(p2) && is_var(p1)) {
+	if (!is_variable(p2) && is_variable(p1)) {
 		cell *head = LIST_HEAD(p2);
 		cell *tail = LIST_TAIL(p2);
 		head = deref_var(q, head, p2_ctx);
@@ -836,12 +836,12 @@ static int fn_iso_number_chars_2(query *q)
 	GET_FIRST_ARG(p1,integer_or_var);
 	GET_NEXT_ARG(p2,list_or_var);
 
-	if (is_var(p1) && is_var(p2)) {
+	if (is_variable(p1) && is_variable(p2)) {
 		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 		return 0;
 	}
 
-	if (!is_var(p2)) {
+	if (!is_variable(p2)) {
 		cell *head = LIST_HEAD(p2);
 		cell *tail = LIST_TAIL(p2);
 		head = deref_var(q, head, p2_ctx);
@@ -905,12 +905,12 @@ static int fn_iso_number_codes_2(query *q)
 	GET_FIRST_ARG(p1,integer_or_var);
 	GET_NEXT_ARG(p2,list_or_var);
 
-	if (is_var(p1) && is_var(p2)) {
+	if (is_variable(p1) && is_variable(p2)) {
 		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 		return 0;
 	}
 
-	if (!is_var(p2)) {
+	if (!is_variable(p2)) {
 		cell *head = LIST_HEAD(p2);
 		cell *tail = LIST_TAIL(p2);
 		head = deref_var(q, head, p2_ctx);
@@ -982,10 +982,10 @@ static int fn_iso_sub_atom_5(query *q)
 	if (!q->retry) {
 		make_choice(q);
 
-		if (!is_var(p2))
+		if (!is_variable(p2))
 			before = p2->val_num;
 
-		if (!is_var(p3)) {
+		if (!is_variable(p3)) {
 			len = p3->val_num;
 			set_pinned(q, 3);
 		}
@@ -1068,8 +1068,8 @@ static int fn_iso_sub_atom_5(query *q)
 static int do_atom_concat_3(query *q)
 {
 	if (!q->retry) {
-		GET_FIRST_ARG(p1,var);
-		GET_NEXT_ARG(p2,var);
+		GET_FIRST_ARG(p1,variable);
+		GET_NEXT_ARG(p2,variable);
 		GET_NEXT_ARG(p3,atom);
 		cell tmp;
 		make_literal(&tmp, g_empty_s);
@@ -1115,10 +1115,10 @@ static int fn_iso_atom_concat_3(query *q)
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,any);
 
-	if (is_var(p1) && is_var(p2))
+	if (is_variable(p1) && is_variable(p2))
 		return do_atom_concat_3(q);
 
-	if (is_var(p3)) {
+	if (is_variable(p3)) {
 		if (!is_iso_atom(p1)) {
 			throw_error(q, p1, "type_error", "atom");
 			return 0;
@@ -1162,7 +1162,7 @@ static int fn_iso_atom_concat_3(query *q)
 		return 1;
 	}
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		if (strcmp(GET_STR(p3)+(LEN_STR(p3)-LEN_STR(p2)), GET_STR(p2)))
 			return 0;
 
@@ -1173,7 +1173,7 @@ static int fn_iso_atom_concat_3(query *q)
 		return 1;
 	}
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		if (strncmp(GET_STR(p3), GET_STR(p1), LEN_STR(p1)))
 			return 0;
 
@@ -1273,7 +1273,7 @@ static int get_stream(query *q, cell *p1)
 
 static int fn_iso_current_input_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_int(&tmp, q->current_input);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -1282,7 +1282,7 @@ static int fn_iso_current_input_1(query *q)
 
 static int fn_iso_current_output_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_int(&tmp, q->current_output);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -1355,7 +1355,7 @@ static int fn_iso_open_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom);
-	GET_NEXT_ARG(p3,var);
+	GET_NEXT_ARG(p3,variable);
 	const char *filename = GET_STR(p1);
 	const char *mode = GET_STR(p2);
 	int n = new_stream(q);
@@ -1395,7 +1395,7 @@ static int fn_iso_open_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_string_or_structure);
 	GET_NEXT_ARG(p2,atom);
-	GET_NEXT_ARG(p3,var);
+	GET_NEXT_ARG(p3,variable);
 	GET_NEXT_ARG(p4,list_or_nil);
 	const char *mode = GET_STR(p2);
 	int n = new_stream(q);
@@ -1494,7 +1494,7 @@ static int fn_iso_open_4(query *q)
 	else
 		prot = PROT_WRITE;
 
-	if (is_var(mmap_var)) {
+	if (is_variable(mmap_var)) {
 		struct stat st = {0};
 		stat(filename, &st);
 		size_t len = st.st_size;
@@ -2353,13 +2353,13 @@ static int fn_iso_is_2(query *q)
 	if (q->error)
 		return 0;
 
-	if (is_var(p1) && is_rational(&p2)) {
+	if (is_variable(p1) && is_rational(&p2)) {
 		reduce(&p2);
 		set_var(q, p1, p1_ctx, &p2, q->st.curr_frame);
 		return 1;
 	}
 
-	if (is_var(p1) && is_number(&p2)) {
+	if (is_variable(p1) && is_number(&p2)) {
 		set_var(q, p1, p1_ctx, &p2, q->st.curr_frame);
 		return 1;
 	}
@@ -3505,7 +3505,7 @@ static int fn_iso_compare_3(query *q)
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,any);
 
-	if (is_var(p2) || is_var(p3)) {
+	if (is_variable(p2) || is_variable(p3)) {
 		throw_error(q, p1, "type_error", "term");
 		return 0;
 	}
@@ -3700,7 +3700,7 @@ static int fn_iso_arg_3(query *q)
 		}
 	}
 
-	if (is_var(p1) && is_var(p3)) {
+	if (is_variable(p1) && is_variable(p3)) {
 		cell tmp;
 		make_int(&tmp, 1);
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -3718,7 +3718,7 @@ static int fn_iso_univ_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
-	if ((is_var(p1) || is_structure(p1)) && !is_var(p2)) {
+	if ((is_variable(p1) || is_structure(p1)) && !is_variable(p2)) {
 		if (!is_list(p2)) {
 			throw_error(q, p1, "type_error", "list");
 			return 0;
@@ -3765,7 +3765,7 @@ static int fn_iso_univ_2(query *q)
 			tmp[0].arity++;
 		}
 
-		if (is_var(p1)) {
+		if (is_variable(p1)) {
 			cell *save = tmp;
 			cell *tmp = alloc_heap(q, idx);
 			copy_cells(tmp, save, idx);
@@ -3784,7 +3784,7 @@ static int fn_iso_univ_2(query *q)
 		int ok = unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 		free(tmp);
 		return ok;
-	} else if (is_var(p2)) {
+	} else if (is_variable(p2)) {
 		if (!is_structure(p1)) {
 			throw_error(q, p1, "type_error", "compound");
 			return 0;
@@ -3832,7 +3832,7 @@ static void do_collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, c
 
 		if (is_structure(c)) {
 			do_collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1, slots, cnt);
-		} else if (is_var(c)) {
+		} else if (is_variable(c)) {
 			if (!slots[*cnt]) {
 				slots[*cnt] = c;
 				(*cnt)++;
@@ -3878,7 +3878,7 @@ static int fn_iso_term_variables_2(query *q)
 		make_literal(tmp+idx++, g_nil_s);
 	}
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		cell *save = tmp;
 		tmp = alloc_heap(q, idx);
 		copy_cells(tmp, save, idx);
@@ -3933,7 +3933,7 @@ static cell *copy_to_heap(query *q, cell *p1, idx_t suffix)
 		if (is_blob(src))
 			dst->flags |= FLAG_CONST_CSTRING;
 
-		if (!is_var(src))
+		if (!is_variable(src))
 			continue;
 
 		if (slots[dst->slot_nbr] == 0)
@@ -4003,7 +4003,7 @@ static int fn_iso_length_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
-	if (is_var(p1) && is_var(p2)) {
+	if (is_variable(p1) && is_variable(p2)) {
 		cell tmp;
 		make_int(&tmp, 0);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -4013,7 +4013,7 @@ static int fn_iso_length_2(query *q)
 		return 1;
 	}
 
-	if (!is_var(p1) && is_var(p2)) {
+	if (!is_variable(p1) && is_variable(p2)) {
 		if (!is_list(p1) && !is_nil(p1))
 			return 0;
 
@@ -4039,7 +4039,7 @@ static int fn_iso_length_2(query *q)
 		return 1;
 	}
 
-	if (is_integer(p2) && !is_var(p1)) {
+	if (is_integer(p2) && !is_variable(p1)) {
 		if (p2->val_num == 0) {
 			cell tmp;
 			make_literal(&tmp, g_nil_s);
@@ -4066,7 +4066,7 @@ static int fn_iso_length_2(query *q)
 	}
 
 
-	if (is_var(p1) && is_integer(p2)) {
+	if (is_variable(p1) && is_integer(p2)) {
 		if ((p2->val_num < 0) || (p2->val_num > MAX_ARITY)) {
 			throw_error(q, p2, "resource_error", "too_many_vars");
 			return 0;
@@ -4619,7 +4619,7 @@ static int fn_iso_functor_3(query *q)
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,any);
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		if (!is_atom(p2)){
 			throw_error(q, p2, "type_error", "atom");
 			return 0;
@@ -4682,7 +4682,7 @@ static int fn_iso_functor_3(query *q)
 static int fn_iso_current_prolog_flag_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,variable);
 
 	if (!strcmp(GET_STR(p1), "double_quotes")) {
 		cell tmp;
@@ -4879,7 +4879,7 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 				return 0;
 		} else if (is_atom(p2))
 			return -1;
-		else if (is_var(p2))
+		else if (is_variable(p2))
 			return 1;
 	}
 	else if (is_float(p1)) {
@@ -4899,7 +4899,7 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 				return 0;
 		} else if (is_atom(p2))
 			return -1;
-		else if (is_var(p2))
+		else if (is_variable(p2))
 			return 1;
 	} else if (is_atom(p1)) {
 		if (is_atom(p2))
@@ -4908,8 +4908,8 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 			return -1;
 		else
 			return 1;
-	} else if (is_var(p1)) {
-		if (is_var(p2))
+	} else if (is_variable(p1)) {
+		if (is_variable(p2))
 			return p1->slot_nbr < p2->slot_nbr ? -1 : p1->slot_nbr > p2->slot_nbr ? 1 : 0;
 		else
 			return -1;
@@ -5062,7 +5062,7 @@ static void do_sys_listn2(query *q, cell *p1, idx_t p1_ctx, cell *tail)
 
 static int fn_sys_list_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	cell *l = convert_to_list(q, get_queue(q), queue_used(q));
 	unify(q, p1, p1_ctx, l, q->st.curr_frame);
 	init_queue(q);
@@ -5076,7 +5076,7 @@ static int fn_sys_queue_1(query *q)
 	cell *c = tmp;
 
 	for (idx_t i = 0; i < tmp->nbr_cells; i++, c++) {
-		if (is_var(c))
+		if (is_variable(c))
 			c->val_type = TYPE_EMPTY;
 	}
 
@@ -5092,7 +5092,7 @@ static int fn_sys_queuen_2(query *q)
 	cell *c = tmp;
 
 	for (idx_t i = 0; i < tmp->nbr_cells; i++, c++) {
-		if (is_var(c))
+		if (is_variable(c))
 			c->val_type = TYPE_EMPTY;
 	}
 
@@ -5131,7 +5131,7 @@ static int fn_findall_4(query *q)
 	GET_FIRST_RAW_ARG(p1,any);
 	GET_NEXT_RAW_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
-	GET_NEXT_ARG(p4,var);
+	GET_NEXT_ARG(p4,variable);
 
 	if (!q->retry) {
 		q->st.qnbr++;
@@ -5158,7 +5158,7 @@ static int do_collect_vars2(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 	int cnt = 0;
 
 	for (idx_t i = 0; i < nbr_cells; i++, p1++) {
-		if (is_var(p1)) {
+		if (is_variable(p1)) {
 			if (!slots[cnt]) {
 				slots[cnt] = p1;
 				cnt++;
@@ -5186,7 +5186,7 @@ static cell *skip_existentials(const query *q, cell *p2, uint32_t *xs)
 	while (is_structure(p2) && !strcmp(GET_STR(p2), "^")) {
 		cell *c = p2 + 1;
 
-		if (is_var(c))
+		if (is_variable(c))
 			*xs |= 1 << c->slot_nbr;
 
 		p2 += 1 + c->nbr_cells;
@@ -5421,7 +5421,7 @@ static int fn_clause_3(query *q)
 	GET_NEXT_ARG(p3,atom_or_var);
 	term *t;
 
-	if (!is_var(p3)) {
+	if (!is_variable(p3)) {
 		uuid u;
 		uuid_from_catom(GET_STR(p3), &u);
 		clause *r = find_in_db(q->m, &u);
@@ -5466,7 +5466,7 @@ static int do_asserta_2(query *q)
 	clause *r = asserta_to_db(q->m, p->t, 0);
 	if (!r) return 0;
 
-	if (!is_var(p2)) {
+	if (!is_variable(p2)) {
 		uuid u;
 		uuid_from_catom(GET_STR(p2), &u);
 		r->u = u;
@@ -5486,7 +5486,7 @@ static int do_asserta_2(query *q)
 static int fn_asserta_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,variable);
 	return do_asserta_2(q);
 }
 
@@ -5515,7 +5515,7 @@ static int do_assertz_2(query *q)
 	clause *r = assertz_to_db(q->m, p->t, 0);
 	if (!r) return 0;
 
-	if (!is_var(p2)) {
+	if (!is_variable(p2)) {
 		uuid u;
 		uuid_from_catom(GET_STR(p2), &u);
 		r->u = u;
@@ -5535,7 +5535,7 @@ static int do_assertz_2(query *q)
 static int fn_assertz_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,variable);
 	return do_assertz_2(q);
 }
 
@@ -5655,7 +5655,7 @@ static int fn_statistics_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,list_or_var);
 
-	if (!strcmp(GET_STR(p1), "cputime") && is_var(p2)) {
+	if (!strcmp(GET_STR(p1), "cputime") && is_variable(p2)) {
 		unsigned long long now = get_time_in_usec();
 		double elapsed = now - q->time_started;
 		cell tmp;
@@ -5664,7 +5664,7 @@ static int fn_statistics_2(query *q)
 		return 1;
 	}
 
-	if (!strcmp(GET_STR(p1), "gctime") && is_var(p2)) {
+	if (!strcmp(GET_STR(p1), "gctime") && is_variable(p2)) {
 		cell tmp;
 		make_float(&tmp, 0);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -5750,7 +5750,7 @@ static int fn_now_0(query *q)
 
 static int fn_now_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	int_t secs = get_time_in_usec() / 1000 / 1000;
 	cell tmp;
 	make_int(&tmp, secs);
@@ -5760,7 +5760,7 @@ static int fn_now_1(query *q)
 
 static int fn_get_time_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	double v = ((double)get_time_in_usec()) / 1000 / 1000;
 	cell tmp;
 	make_float(&tmp, (double)v);
@@ -5784,7 +5784,7 @@ static int fn_between_3(query *q)
 	GET_NEXT_ARG(p2,integer);
 	GET_NEXT_ARG(p3,integer_or_var);
 
-	if (!q->retry && !is_var(p3)) {
+	if (!q->retry && !is_variable(p3)) {
 		if (p3->val_num > p2->val_num)
 			return 0;
 
@@ -5792,8 +5792,8 @@ static int fn_between_3(query *q)
 			return 0;
 
 		return 1;
-	} else if (!q->retry && !is_var(p3)) {
-		throw_error(q, p3, "type_error", "var");
+	} else if (!q->retry && !is_variable(p3)) {
+		throw_error(q, p3, "type_error", "variable");
 		return 0;
 	}
 
@@ -5947,7 +5947,7 @@ static int fn_savefile_2(query *q)
 static int fn_loadfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_string);
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,variable);
 	char *filename = strdup(GET_STR(p1));
 	FILE *fp = fopen(filename, "rb");
 
@@ -5985,7 +5985,7 @@ static int fn_loadfile_2(query *q)
 static int fn_getfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_string);
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,variable);
 	char *filename = strdup(GET_STR(p1));
 	FILE *fp = fopen(filename, "r");
 
@@ -6057,7 +6057,7 @@ static void parse_host(const char *src, char *hostname, char *path, unsigned *po
 static int fn_server_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_string);
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,variable);
 	GET_NEXT_ARG(p3,list_or_nil);
 	char hostname[1024], path[4096];
 	char *keyfile = "privkey.pem", *certfile = "fullchain.pem";
@@ -6175,7 +6175,7 @@ static int fn_server_3(query *q)
 static int fn_accept_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
-	GET_NEXT_ARG(p1,var);
+	GET_NEXT_ARG(p1,variable);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 
@@ -6236,9 +6236,9 @@ static int fn_accept_2(query *q)
 static int fn_client_5(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_string);
-	GET_NEXT_ARG(p2,var);
-	GET_NEXT_ARG(p3,var);
-	GET_NEXT_ARG(p4,var);
+	GET_NEXT_ARG(p2,variable);
+	GET_NEXT_ARG(p3,variable);
+	GET_NEXT_ARG(p4,variable);
 	GET_NEXT_ARG(p5,list_or_nil);
 	char hostname[1024], path[4096];
 	char *certfile = NULL;
@@ -6444,7 +6444,7 @@ static int fn_bread_3(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,integer_or_var);
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,variable);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	size_t len;
@@ -6858,7 +6858,7 @@ static int fn_send_1(query *q)
 
 static int fn_recv_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	cell *c = pop_queue(q);
 	return unify(q, p1, p1_ctx, c, q->st.curr_frame);
 }
@@ -6893,7 +6893,7 @@ static int fn_random_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		cell tmp;
 		make_float(&tmp, ((double)random())/UINT32_MAX);
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -6919,7 +6919,7 @@ static int fn_rand_0(query *q)
 
 static int fn_rand_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_int(&tmp, random()%RAND_MAX);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -7260,7 +7260,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx,
 		int n = get_named_stream(q, "user_output");
 		stream *str = &g_streams[n];
 		net_write(tmpbuf, len, str);
-	} else if (is_structure(str) && ((strcmp(GET_STR(str),"atom") && strcmp(GET_STR(str),"string")) || (str->arity > 1) || !is_var(str+1))) {
+	} else if (is_structure(str) && ((strcmp(GET_STR(str),"atom") && strcmp(GET_STR(str),"string")) || (str->arity > 1) || !is_variable(str+1))) {
 		free(tmpbuf);
 		throw_error(q, c, "type_error", "structure");
 		return 0;
@@ -7390,7 +7390,7 @@ static int fn_sha512_2(query *q)
 static int do_b64encode_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,variable);
 	const char *str = GET_STR(p1);
 	size_t len = strlen(str);
 	char *dstbuf = malloc((len*3)+1);
@@ -7403,7 +7403,7 @@ static int do_b64encode_2(query *q)
 
 static int do_b64decode_2(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,atom_or_string);
 	const char *str = GET_STR(p2);
 	size_t len = strlen(str);
@@ -7420,9 +7420,9 @@ static int fn_base64_2(query *q)
 	GET_FIRST_ARG(p1,atom_or_string_or_var);
 	GET_NEXT_ARG(p2,atom_or_string_or_var);
 
-	if ((is_atom(p1) || is_list(p1)) && is_var(p2))
+	if ((is_atom(p1) || is_list(p1)) && is_variable(p2))
 		return do_b64encode_2(q);
-	else if (is_var(p1) && (is_atom(p2) || is_string(p2)))
+	else if (is_variable(p1) && (is_atom(p2) || is_string(p2)))
 		return do_b64decode_2(q);
 
 	throw_error(q, p1, "instantiation_error", "atom");
@@ -7471,7 +7471,7 @@ char *url_decode(const char *src, char *dstbuf)
 static int do_urlencode_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_string);
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,variable);
 	const char *str = GET_STR(p1);
 	size_t len = strlen(str);
 	char *dstbuf = malloc((len*3)+1);
@@ -7485,7 +7485,7 @@ static int do_urlencode_2(query *q)
 
 static int do_urldecode_2(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,atom_or_string);
 	const char *str = GET_STR(p1);
 	size_t len = strlen(str);
@@ -7503,9 +7503,9 @@ static int fn_urlenc_2(query *q)
 	GET_FIRST_ARG(p1,atom_or_string_or_var);
 	GET_NEXT_ARG(p2,atom_or_string_or_var);
 
-	if ((is_atom(p1) || is_string(p1)) && is_var(p2))
+	if ((is_atom(p1) || is_string(p1)) && is_variable(p2))
 		return do_urlencode_2(q);
-	else if (is_var(p1) && (is_atom(p2) || is_string(p2)))
+	else if (is_variable(p1) && (is_atom(p2) || is_string(p2)))
 		return do_urldecode_2(q);
 
 	throw_error(q, p1, "instantiation_error", "atom");
@@ -7585,7 +7585,7 @@ static int fn_rename_file_2(query *q)
 static int fn_time_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,variable);
 	const char *filename = GET_STR(p1);
 	struct stat st = {0};
 
@@ -7602,7 +7602,7 @@ static int fn_time_file_2(query *q)
 static int fn_size_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,variable);
 	const char *filename = GET_STR(p1);
 	struct stat st = {0};
 
@@ -7645,7 +7645,7 @@ static int fn_make_directory_1(query *q)
 
 static int fn_working_directory_2(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,atom_or_var);
 	char tmpbuf[PATH_MAX], tmpbuf2[PATH_MAX];
 	char *oldpath = getcwd(tmpbuf, sizeof(tmpbuf));
@@ -7804,7 +7804,7 @@ static int fn_edin_told_0(query *q)
 
 static int fn_edin_seeing_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	char *name = q->current_input==0?"user":g_streams[q->current_input].name;
 	cell tmp = make_cstring(q, name);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -7813,7 +7813,7 @@ static int fn_edin_seeing_1(query *q)
 
 static int fn_edin_telling_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	char *name =q->current_output==1?"user":g_streams[q->current_output].name;
 	cell tmp = make_cstring(q, name);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -7854,12 +7854,12 @@ static int fn_atom_number_2(query *q)
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
 
-	if (is_var(p1) && is_var(p2)) {
+	if (is_variable(p1) && is_variable(p2)) {
 		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 		return 0;
 	}
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		char tmpbuf[256];
 		sprint_int(tmpbuf, sizeof(tmpbuf), p2->val_num, 10);
 		cell tmp = make_cstring(q, tmpbuf);
@@ -7870,7 +7870,7 @@ static int fn_atom_number_2(query *q)
 	const char *src = GET_STR(p1);
 	int_t p1_val = strtoll(src, NULL, 10);
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		cell tmp;
 		make_int(&tmp, p1_val);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -7885,12 +7885,12 @@ static int fn_string_number_2(query *q)
 	GET_FIRST_ARG(p1,atom_or_string_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
 
-	if (is_var(p1) && is_var(p2)) {
+	if (is_variable(p1) && is_variable(p2)) {
 		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 		return 0;
 	}
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		char tmpbuf[256];
 		sprint_int(tmpbuf, sizeof(tmpbuf), p2->val_num, 10);
 		cell tmp = make_cstring(q, tmpbuf);
@@ -7901,7 +7901,7 @@ static int fn_string_number_2(query *q)
 	const char *src = GET_STR(p1);
 	int_t p1_val = strtoll(src, NULL, 10);
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		cell tmp;
 		make_int(&tmp, p1_val);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -7916,12 +7916,12 @@ static int fn_atom_hex_2(query *q)
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
 
-	if (is_var(p1) && is_var(p2)) {
+	if (is_variable(p1) && is_variable(p2)) {
 		throw_error(q, p1, "instantiation_error", "atom");
 		return 0;
 	}
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		char tmpbuf[256];
 		sprintf(tmpbuf, "%llx", (long long)p2->val_num);
 		cell tmp = make_cstring(q, tmpbuf);
@@ -7932,7 +7932,7 @@ static int fn_atom_hex_2(query *q)
 	const char *src = GET_STR(p1);
 	uint_t p1_val = strtoull(src, NULL, 16);
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		cell tmp;
 		make_int(&tmp, p1_val);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -7947,12 +7947,12 @@ static int fn_atom_octal_2(query *q)
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
 
-	if (is_var(p1) && is_var(p2)) {
+	if (is_variable(p1) && is_variable(p2)) {
 		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 		return 0;
 	}
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		char tmpbuf[256];
 		sprintf(tmpbuf, "%llo", (long long)p2->val_num);
 		cell tmp = make_cstring(q, tmpbuf);
@@ -7963,7 +7963,7 @@ static int fn_atom_octal_2(query *q)
 	const char *src = GET_STR(p1);
 	uint_t p1_val = strtoull(src, NULL, 8);
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		cell tmp;
 		make_int(&tmp, p1_val);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -8113,7 +8113,7 @@ static int fn_unsetenv_1(query *q)
 
 static int fn_uuid_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
     uuid u;
     uuid_gen(&u);
     char tmpbuf[128];
@@ -8133,10 +8133,10 @@ static int fn_atomic_concat_3(query *q)
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,any);
 
-	if (is_var(p1) && is_var(p2))
+	if (is_variable(p1) && is_variable(p2))
 		return do_atom_concat_3(q);
 
-	if (is_var(p3)) {
+	if (is_variable(p3)) {
 		if (!is_atomic(p1)) {
 			throw_error(q, p1, "type_error", "atomic");
 			return 0;
@@ -8193,7 +8193,7 @@ static int fn_atomic_concat_3(query *q)
 		return 1;
 	}
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		if (strcmp(GET_STR(p3)+(LEN_STR(p3)-LEN_STR(p2)), GET_STR(p2)))
 			return 0;
 
@@ -8205,7 +8205,7 @@ static int fn_atomic_concat_3(query *q)
 		return 1;
 	}
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		if (strncmp(GET_STR(p3), GET_STR(p1), LEN_STR(p1)))
 			return 0;
 
@@ -8231,7 +8231,7 @@ static int fn_replace_4(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,atom);
-	GET_NEXT_ARG(p4,var);
+	GET_NEXT_ARG(p4,variable);
 
 	int srclen = LEN_STR(p1);
 	int dstlen = srclen * 2;
@@ -8408,7 +8408,7 @@ unsigned count_bits(unsigned long long mask, unsigned bit)
 
 static int fn_var_number_2(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,integer_or_var)
 	unsigned pos = count_bits(q->nv_mask, p1->slot_nbr);
 	cell tmp;
@@ -8617,7 +8617,7 @@ static int fn_freeze_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		cell *tmp = clone_to_heap(q, 0, p2, 0);
 		frame *g = GET_FRAME(p1_ctx);
 		slot *e = GET_SLOT(g, p1->slot_nbr);
@@ -8634,7 +8634,7 @@ static int fn_freeze_2(query *q)
 
 static int fn_frozen_2(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,any);
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->slot_nbr);
@@ -8650,7 +8650,7 @@ static int fn_frozen_2(query *q)
 
 static int fn_sys_put_atts_2(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
 	frame *g = GET_FRAME(p1_ctx);
@@ -8661,8 +8661,8 @@ static int fn_sys_put_atts_2(query *q)
 
 static int fn_sys_get_atts_2(query *q)
 {
-	GET_FIRST_ARG(p1,var);
-	GET_NEXT_ARG(p2,var);
+	GET_FIRST_ARG(p1,variable);
+	GET_NEXT_ARG(p2,variable);
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->slot_nbr);
 
@@ -8694,7 +8694,7 @@ static int fn_call_nth_2(query *q)
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,integer_or_var);
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		cell *tmp = clone_to_heap(q, 1, p1, 1);
 		idx_t nbr_cells = 1 + p1->nbr_cells;
 		make_end_return(tmp+nbr_cells, q->st.curr_cell);
@@ -8753,10 +8753,10 @@ static int fn_string_concat_3(query *q)
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,any);
 
-	if (is_var(p1) && is_var(p2))
+	if (is_variable(p1) && is_variable(p2))
 		return do_atom_concat_3(q);
 
-	if (is_var(p3)) {
+	if (is_variable(p3)) {
 		if (!is_atom(p1) && !is_string(p1)) {
 			throw_error(q, p1, "type_error", "atom");
 			return 0;
@@ -8800,7 +8800,7 @@ static int fn_string_concat_3(query *q)
 		return 1;
 	}
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		if (strcmp(GET_STR(p3)+(LEN_STR(p3)-LEN_STR(p2)), GET_STR(p2)))
 			return 0;
 
@@ -8811,7 +8811,7 @@ static int fn_string_concat_3(query *q)
 		return 1;
 	}
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		if (strncmp(GET_STR(p3), GET_STR(p1), LEN_STR(p1)))
 			return 0;
 
@@ -9069,7 +9069,7 @@ static const struct builtins g_other_funcs[] =
 	{"busy", 1, fn_busy_1, "+integer"},
 	{"now", 0, fn_now_0, NULL},
 	{"now", 1, fn_now_1, "now(-integer)"},
-	{"get_time", 1, fn_get_time_1, "-var"},
+	{"get_time", 1, fn_get_time_1, "-variable"},
 	{"random", 1, fn_random_1, "?integer"},
 	{"rand", 1, fn_rand_1, "?integer"},
 	{"rand", 0, fn_rand_0, NULL},
@@ -9135,16 +9135,16 @@ static const struct builtins g_other_funcs[] =
 	{"setenv", 2, fn_setenv_2},
 	{"unsetenv", 1, fn_unsetenv_1},
 	{"load_files", 2, fn_consult_1, "+files"},
-	{"statistics", 2, fn_statistics_2, "+string,-var"},
-	{"duplicate_term", 2, fn_iso_copy_term_2, "+string,-var"},
+	{"statistics", 2, fn_statistics_2, "+string,-variable"},
+	{"duplicate_term", 2, fn_iso_copy_term_2, "+string,-variable"},
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer"},
 	{"limit", 2, fn_limit_2, "+integer,+callable"},
 	{"offset", 2, fn_offset_2, "+integer,+callable"},
 
-	{"freeze", 2, fn_freeze_2, "+var,+callable"},
-	{"frozen", 2, fn_frozen_2, "+var,+callable"},
-	{"$put_atts", 2, fn_sys_put_atts_2, "+var,+callable"},
-	{"$get_atts", 2, fn_sys_get_atts_2, "+var,+callable"},
+	{"freeze", 2, fn_freeze_2, "+variable,+callable"},
+	{"frozen", 2, fn_frozen_2, "+variable,+callable"},
+	{"$put_atts", 2, fn_sys_put_atts_2, "+variable,+callable"},
+	{"$get_atts", 2, fn_sys_get_atts_2, "+variable,+callable"},
 
 #if USE_OPENSSL
 	{"sha1", 2, fn_sha1_2, "+string,?string"},

@@ -394,7 +394,7 @@ static int compkey(const void *ptr1, const void *ptr2)
 				return 1;
 			else
 				return 0;
-		} else if (is_var(p2))
+		} else if (is_variable(p2))
 			return 0;
 	} else if (is_float(p1)) {
 		if (is_float(p2)) {
@@ -404,12 +404,12 @@ static int compkey(const void *ptr1, const void *ptr2)
 				return 1;
 			else
 				return 0;
-		} else if (is_var(p2))
+		} else if (is_variable(p2))
 			return 0;
 	} else if (is_atom(p1)) {
 		if (is_atom(p2))
 			return strcmp(GET_STR(p1), GET_STR(p2));
-		else if (is_var(p2))
+		else if (is_variable(p2))
 			return 0;
 	} else if (is_structure(p1)) {
 		if (is_structure(p2)) {
@@ -438,9 +438,9 @@ static int compkey(const void *ptr1, const void *ptr2)
 			}
 
 			return 0;
-		} else if (is_var(p2))
+		} else if (is_variable(p2))
 			return 0;
-	} else if (is_var(p1))
+	} else if (is_variable(p1))
 		return 0;
 	else
 		return 0;
@@ -1277,7 +1277,7 @@ static idx_t get_varno(parser *p, const char *src)
 	size_t len = strlen(src);
 
 	if ((offset+len+1) >= MAX_VAR_POOL_SIZE) {
-		fprintf(stderr, "Error: var pool exhausted\n");
+		fprintf(stderr, "Error: variable pool exhausted\n");
 		p->error = 1;
 		return 0;
 	}
@@ -1298,7 +1298,7 @@ void parser_assign_vars(parser *p)
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
 
-		if (!is_var(c))
+		if (!is_variable(c))
 			continue;
 
 		c->slot_nbr = get_varno(p, GET_STR(c));
@@ -1861,7 +1861,7 @@ static int get_token(parser *p, int last_op)
 	char *dst = p->token;
 	int neg = 0;
 	p->val_type = TYPE_LITERAL;
-	p->string = p->quoted = p->is_var = p->is_op = 0;
+	p->string = p->quoted = p->is_variable = p->is_op = 0;
 	*dst = '\0';
 
 	if (p->dq_consing && (*src == '"')) {
@@ -2129,7 +2129,7 @@ static int get_token(parser *p, int last_op)
 		}
 
 		if (isupper(*p->token) || (*p->token == '_'))
-			p->is_var = 1;
+			p->is_variable = 1;
 		else if (get_op(p->m, p->token, NULL, NULL, 0))
 			p->is_op = 1;
 
@@ -2321,7 +2321,7 @@ int parser_tokenize(parser *p, int args, int consing)
 			return arity;
 		}
 
-		if (p->is_var && (*p->srcptr == '(')) {
+		if (p->is_variable && (*p->srcptr == '(')) {
 			fprintf(stderr, "Error: syntax error, line %d: %s\n", p->line_nbr, p->srcptr);
 			p->error = 1;
 			break;
@@ -2391,12 +2391,12 @@ int parser_tokenize(parser *p, int args, int consing)
 		}
 		else if (p->val_type == TYPE_FLOAT)
 			c->val_flt = atof(p->token);
-		else if ((!p->quoted || func || p->is_op || p->is_var ||
+		else if ((!p->quoted || func || p->is_op || p->is_variable ||
 				check_builtin(p->m, p->token, 0)) && !p->string) {
 			if (func && !strcmp(p->token, "."))
 				c->precedence = 0;
 
-			if (p->is_var)
+			if (p->is_variable)
 				c->val_type = TYPE_VAR;
 
 			c->val_off = find_in_pool(p->token);
@@ -2734,7 +2734,7 @@ module *create_module(const char *name)
 
 	// SWI...
 
-	make_rule(m, "current_key(K) :- var(K), clause('$record_key'(K,_),_).");
+	make_rule(m, "current_key(K) :- variable(K), clause('$record_key'(K,_),_).");
 	make_rule(m, "recorda(K,V) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V)).");
 	make_rule(m, "recordz(K,V) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V)).");
 	make_rule(m, "recorded(K,V) :- nonvar(K), clause('$record_key'(K,V),_).");

@@ -179,7 +179,7 @@ Others
 	log10/1                 # function returning log10 of arg
 	now/0                   # function returning C-time in secs as integer
 	now/1                   # now (-integer) C-time in secs as integer
-	get_time/1              # get_time(-var) C-time in secs as float
+	get_time/1              # get_time(-variable) C-time in secs as float
 	srandom/1               # seed(+integer) seed random number generator
 	rand/0                  # function returning integer [0,RAND_MAX]
 	rand/1                  # integer(-integer) integer [0,RAND_MAX]
@@ -259,7 +259,7 @@ The optional schemes 'http://' (the default) and 'https://' can be
 provided in the client URL.
 
 With *bread/3* the 'len' arg can be an integer > 0 meaning return that
-many bytes, = 0 meaning return what is there (if non-blocking) or a var
+many bytes, = 0 meaning return what is there (if non-blocking) or a variable
 meaning return all bytes until end end of file,
 
 Network SSL reading does not support get_code/get_char/peek_code/peek_char.

@@ -52,7 +52,7 @@ typedef uint32_t idx_t;
 
 #define is_literal(c) ((c)->val_type == TYPE_LITERAL)
 #define is_cstring(c) ((c)->val_type == TYPE_CSTRING)
-#define is_var(c) ((c)->val_type == TYPE_VAR)
+#define is_variable(c) ((c)->val_type == TYPE_VAR)
 #define is_empty(c) ((c)->val_type == TYPE_EMPTY)
 #define is_end(c) ((c)->val_type == TYPE_END)
 #define is_indirect(c) ((c)->val_type == TYPE_INDIRECT)
@@ -342,7 +342,7 @@ struct parser_ {
 	unsigned start_term:1;
 	unsigned end_of_term:1;
 	unsigned comment:1;
-	unsigned is_var:1;
+	unsigned is_variable:1;
 	unsigned is_op;
 	unsigned skip:1;
 	unsigned command:1;
