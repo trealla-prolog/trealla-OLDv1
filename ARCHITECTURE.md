@@ -198,7 +198,7 @@ Where *arity* is always 2.
 Where *flags* is FLAG_BLOB|FLAG_STRING.
 Where *nbr_cells* is always 1.
 Where *val_str* is a pointer to UTF-8 chars.
-Where *rem_str* is the number of remaining bytes.
+Where *rem_str* is the number of remaining bytes in the string.
 
 
 String head
@@ -224,6 +224,7 @@ Where *flags* is FLAG_BLOB|FLAG_STRING|FLAG_HEAD.
 Where *nbr_cells* is always 1.
 Where *val_str* is a pointer to one UTF-8 char.
 Where *len_str* is the number of bytes pointed to.
+Where *rem_str* is the number of remaining bytes in the string.
 
 
 Compound
