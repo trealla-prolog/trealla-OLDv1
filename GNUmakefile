@@ -67,6 +67,9 @@ utf8.o: utf8.c utf8.h
 ifeq ($(OS),Darwin)
 	OSFLAG = -m elf_x86_64
 endif
+ifeq ($(OS),FreeBSD)
+	OSFLAG = -m elf_x86_64
+endif
 
 dict.o: library/dict.pro
 	$(LD) $(OSFLAG) -r -b binary -o dict.o library/dict.pro
