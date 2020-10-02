@@ -309,52 +309,56 @@ and artificially set at 4). Excess tasks will be scheduled as tasks finish.
 
 An example:
 
-	geturl(Url) :-
-		http_get(Url,_Data,[status_code(Code),final_url(Location)]),
-		format("Job [~w] ~w ==> ~w done~n",[Url,Code,Location]).
+```prolog
+geturl(Url) :-
+	http_get(Url,_Data,[status_code(Code),final_url(Location)]),
+	format("Job [~w] ~w ==> ~w done~n",[Url,Code,Location]).
 
-	% Fetch each URL in list sequentially...
+% Fetch each URL in list sequentially...
 
-	test54 :-
-		L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
-		maplist(geturl,L),
-		writeln('Finished').
+test54 :-
+	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
+	maplist(geturl,L),
+	writeln('Finished').
 
-	% Fetch each URL in list concurrently (method 1)...
+% Fetch each URL in list concurrently (method 1)...
 
-	test55 :-
-		L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
-		maplist(spawn(geturl),L),
-		wait,
-		writeln('Finished').
+test55 :-
+	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
+	maplist(spawn(geturl),L),
+	wait,
+	writeln('Finished').
 
-	% Fetch each URL in list concurrently (method 2)...
+% Fetch each URL in list concurrently (method 2)...
 
-	test56 :-
-		L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
-		spawnlist(geturl,L),
-		writeln('Finished').
+test56 :-
+	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
+	spawnlist(geturl,L),
+	writeln('Finished').
+```
 
-	$ ./tpl samples/test -g "time(test54),halt"
-	Job [www.google.com] 200 ==> www.google.com done
-	Job [www.bing.com] 200 ==> www.bing.com done
-	Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
-	Finished
-	Time elapsed 0.663 secs
+```console
+$ ./tpl samples/test -g "time(test54),halt"
+Job [www.google.com] 200 ==> www.google.com done
+Job [www.bing.com] 200 ==> www.bing.com done
+Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
+Finished
+Time elapsed 0.663 secs
 
-	$ ./tpl samples/test -g "time(test55),halt"
-	Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
-	Job [www.bing.com] 200 ==> www.bing.com done
-	Job [www.google.com] 200 ==> www.google.com done
-	Finished
-	Time elapsed 0.331 secs
+$ ./tpl samples/test -g "time(test55),halt"
+Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
+Job [www.bing.com] 200 ==> www.bing.com done
+Job [www.google.com] 200 ==> www.google.com done
+Finished
+Time elapsed 0.331 secs
 
-	$ ./tpl samples/test -g "time(test56),halt"
-	Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
-	Job [www.bing.com] 200 ==> www.bing.com done
-	Job [www.google.com] 200 ==> www.google.com done
-	Finished
-	Time elapsed 0.33 secs
+$ ./tpl samples/test -g "time(test56),halt"
+Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
+Job [www.bing.com] 200 ==> www.bing.com done
+Job [www.google.com] 200 ==> www.google.com done
+Finished
+Time elapsed 0.33 secs
+```
 
 
 Rationals						##EXPERIMENTAL##
