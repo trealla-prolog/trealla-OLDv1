@@ -51,7 +51,7 @@ are no plans for a Windows port.
 Usage
 =====
 
-	tpl [options] [[-l] file] [-g goal]
+	tpl [options] files [-g goal]
 
 where options can be:
 
@@ -68,7 +68,7 @@ where options can be:
 
 For example:
 
-	./tpl -l samples/sieve -g test2,halt
+	./tpl samples/sieve -g test2,halt
 	./tpl samples/sieve -g test2,halt
 
 Invocation without any goal presents the REPL.
@@ -335,21 +335,21 @@ An example:
 		spawnlist(geturl,L),
 		writeln('Finished').
 
-	$ ./tpl -l samples/test -g "time(test54),halt"
+	$ ./tpl samples/test -g "time(test54),halt"
 	Job [www.google.com] 200 ==> www.google.com done
 	Job [www.bing.com] 200 ==> www.bing.com done
 	Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
 	Finished
 	Time elapsed 0.663 secs
 
-	$ ./tpl -l samples/test -g "time(test55),halt"
+	$ ./tpl samples/test -g "time(test55),halt"
 	Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
 	Job [www.bing.com] 200 ==> www.bing.com done
 	Job [www.google.com] 200 ==> www.google.com done
 	Finished
 	Time elapsed 0.331 secs
 
-	$ ./tpl -l samples/test -g "time(test56),halt"
+	$ ./tpl samples/test -g "time(test56),halt"
 	Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
 	Job [www.bing.com] 200 ==> www.bing.com done
 	Job [www.google.com] 200 ==> www.google.com done
@@ -398,20 +398,20 @@ Compiled with GCC 10.1.0 on Linux.
 	testindex5  |   9.3   |  11.8     |   4.2     |  49.7   |
 	------------|---------|-----------|-----------|---------|----------
 
-	tpl -l samples/sieve.pro -g "time(test5),halt"
-	tpl -l samples/fib.pro -g "time(test),halt"
-	tpl -l samples/hanoi.pro -g "time(hanoiq(22)),halt"
-	tpl -l samples/queens11.pro -g "time(testq),halt"
-	tpl -l samples/puzzle.pro -g "time(main),halt"
-	tpl -l samples/chess.pro -g "time(main),halt"
-	tpl -l samples/testindex.pro -g "time(test1a),halt"
-	tpl -l samples/testindex.pro -g "time(test1b),halt"
-	tpl -l samples/testindex.pro -g "time(test5),halt"
+	tpl samples/sieve.pro -g "time(test5),halt"
+	tpl samples/fib.pro -g "time(test),halt"
+	tpl samples/hanoi.pro -g "time(hanoiq(22)),halt"
+	tpl samples/queens11.pro -g "time(testq),halt"
+	tpl samples/puzzle.pro -g "time(main),halt"
+	tpl samples/chess.pro -g "time(main),halt"
+	tpl samples/testindex.pro -g "time(test1a),halt"
+	tpl samples/testindex.pro -g "time(test1b),halt"
+	tpl samples/testindex.pro -g "time(test5),halt"
 
-	swipl -l samples/sieve.pro -g "time(test5),halt"
+	swipl samples/sieve.pro -g "time(test5),halt"
 	etc
 
-	yap -l samples/sieve.pro -g "time(test5),halt" -s128000
+	yap samples/sieve.pro -g "time(test5),halt" -s128000
 	etc
 
 	export setenv LOCALSZ=256000
@@ -437,5 +437,5 @@ and needs *m4* installed. Chess needs name/2 (at least).
 
 The Peirera (sic) benchmarks can be run:
 
-	tpl -l samples/broken/peirera.pl -g bench_peirera,halt
-	swipl -l samples/broken/peirera.pl -g bench_peirera,halt
+	tpl samples/broken/peirera.pl -g bench_peirera,halt
+	swipl samples/broken/peirera.pl -g bench_peirera,halt
