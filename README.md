@@ -408,7 +408,7 @@ Compiled with GCC 10.1.0 on Linux.
 	tpl samples/testindex.pro -g "time(test1b),halt"
 	tpl samples/testindex.pro -g "time(test5),halt"
 
-	swipl samples/sieve.pro -g "time(test5),halt"
+	swipl -l samples/sieve.pro -g "time(test5),halt"
 	etc
 
 	yap samples/sieve.pro -g "time(test5),halt" -s128000
@@ -438,4 +438,4 @@ and needs *m4* installed. Chess needs name/2 (at least).
 The Peirera (sic) benchmarks can be run:
 
 	tpl samples/broken/peirera.pl -g bench_peirera,halt
-	swipl samples/broken/peirera.pl -g bench_peirera,halt
+	swipl -l samples/broken/peirera.pl -g bench_peirera,halt
