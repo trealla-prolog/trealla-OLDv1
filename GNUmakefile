@@ -64,6 +64,8 @@ utf8.o: utf8.c utf8.h
 
 # Library modules
 
+# Needed for using gmake with non-GNU linkers...
+
 UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Darwin)
