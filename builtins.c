@@ -687,6 +687,12 @@ static int fn_iso_atom_chars_2(query *q)
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
+	if (is_variable(p2) && !strcmp(GET_STR(p1), "")) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
+
 	if (!is_variable(p2)) {
 		cell *head = LIST_HEAD(p2);
 		cell *tail = LIST_TAIL(p2);
