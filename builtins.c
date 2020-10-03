@@ -8592,6 +8592,7 @@ static int fn_call_dcg_3(query *q)
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,any);
+	// TODO : call DCG to process term
 	return fn_iso_call_n(q);
 }
 
