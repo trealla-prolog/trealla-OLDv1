@@ -2690,7 +2690,7 @@ module *create_module(const char *name)
 	m->user_ops = MAX_USER_OPS;
 	m->cpu_count = CPU_COUNT;
 
-	// Meta-rules...
+	make_rule(m, "call(G) :- G.");
 
 	make_rule(m, "phrase_from_file(P, Filename) :- "		\
 		"open(Filename, read, Str, [mmap(Ms)]),"			\
