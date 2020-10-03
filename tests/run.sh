@@ -11,11 +11,12 @@ trap "rm -f $TMP" EXIT
 failed_count=0
 succeeded_count=0
 
-for source in tests/tests/*
+for source in tests/tests/* tests/issues/*
+
 do
 	case "$source" in
 		*.pro)
-			cmd="$TPL -q --traditional "
+			cmd="$TPL -q --ns "
 			;;
 		*.sh)
 			cmd="env TPL=$TPL sh"

@@ -146,6 +146,7 @@ int main(int ac, char *av[])
 	snprintf(histfile, sizeof(histfile), "%s/%s", homedir, ".tpl_history");
 
 	int i, do_load = 1, do_goal = 0, version = 0, quiet = 0, daemon = 0;
+	int ns = 0;
 	void *pl = pl_create();
 	set_opt(pl, 1);
 
@@ -170,6 +171,8 @@ int main(int ac, char *av[])
 			set_trace(pl);
 		else if (!strcmp(av[i], "--stats"))
 			set_stats(pl);
+		else if (!strcmp(av[i], "--ns"))
+			ns = 1;
 		else if (!strcmp(av[i], "-d") || !strcmp(av[i], "--daemon"))
 			daemon = 1;
 	}
@@ -203,7 +206,7 @@ int main(int ac, char *av[])
 		else if (do_load) {
 			do_load = 0;
 
-			if (!pl_consult(pl, av[i])) {
+			if (!pl_consult(pl, av[i]) || ns) {
 				pl_destroy(pl);
 				return 1;
 			}
@@ -216,7 +219,7 @@ int main(int ac, char *av[])
 				return 1;
 			}
 
-			if (get_halt(pl)) {
+			if (get_halt(pl) || ns) {
 				pl_destroy(pl);
 				return 1;
 			}
@@ -241,6 +244,7 @@ int main(int ac, char *av[])
 		fprintf(stderr, "  -w, --watchdog\t\t- create watchdog\n");
 		fprintf(stderr, "  --consult\t- consult from STDIN\n");
 		fprintf(stderr, "  --stats\t\t- print stats\n");
+		fprintf(stderr, "  --ns\t\t- non-stop (to top-level)\n");
 	}
 
 	if (version && !quiet)
