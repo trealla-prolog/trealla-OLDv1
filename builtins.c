@@ -3456,9 +3456,6 @@ static double rat_to_float(cell *n)
 
 static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
-	if (p1->arity != p2->arity)
-		return p1->arity < p2->arity ? -1 : p1->arity > p2->arity ? 1 : 0;
-
 	if (p1->arity == 0) {
 		if (is_atom(p1) && is_atom(p2))
 			return strcmp(GET_STR(p1), GET_STR(p2));
