@@ -32,7 +32,7 @@ Written in plain-old C.
 
 There are no dependencies except OpenSSL, which can removed by:
 
-	make nossl
+	make NOSSL=1
 
 Run...
 

@@ -25,15 +25,6 @@ profile:
 debug:
 	$(MAKE) 'OPT=$(OPT) -O0 -g -DDEBUG'
 
-nossl:
-	$(MAKE) 'OPT=$(OPT) -DUSE_OPENSSL=0' NOSSL=1
-
-profile_nossl:
-	$(MAKE) 'OPT=$(OPT) -O0 -pg -DDEBUG' NOSSL=1
-
-debug_nossl:
-	$(MAKE) 'OPT=$(OPT) -O0 -g -DDEBUG' NOSSL=1
-
 test:
 	./tests/run.sh
 
