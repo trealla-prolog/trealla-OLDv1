@@ -2692,19 +2692,15 @@ module *create_module(const char *name)
 
 	// Meta-rules...
 
-	make_rule(m, "call(G) :- G.");
-
 	make_rule(m, "phrase_from_file(P, Filename) :- "		\
 		"open(Filename, read, Str, [mmap(Ms)]),"			\
-		"copy_term(P, P2),"									\
-		"P2=P,"												\
+		"copy_term(P, P2), P2=P,"							\
 		"phrase(P2, Ms, []),"								\
 		"close(Str).");
 
 	make_rule(m, "phrase_from_file(P, Filename, Opts) :- "	\
 		"open(Filename, read, Str, [mmap(Ms)|Opts]),"		\
-		"copy_term(P, P2),"									\
-		"P2=P,"												\
+		"copy_term(P, P2), P2=P,"							\
 		"phrase(P2, Ms, []),"								\
 		"close(Str).");
 

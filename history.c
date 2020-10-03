@@ -106,6 +106,10 @@ void history_output(const char *prompt, const char *line) { output("%s%s\n", pro
 
 static int flash_check(int ch, char *line, char *dst, int quoted, int depth, int rhs, int lhs)
 {
+#if 1
+	return 1;
+#endif
+
 	const char *src = NULL;
 	int i;
 
