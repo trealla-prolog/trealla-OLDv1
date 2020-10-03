@@ -8596,6 +8596,16 @@ static int fn_call_dcg_3(query *q)
 	if (is_list_or_nil(p1))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
+	if (is_structure(p1) && !strcmp(GET_STR(p1), "{}")) {
+		unify(q, p2, p2_ctx, p3, p3_ctx);
+		p1 = p1 + 1;
+		cell *tmp = clone_to_heap(q, 1, p1, 1);
+		idx_t nbr_cells = 1 + p1->nbr_cells;
+		make_end_return(tmp+nbr_cells, q->st.curr_cell);
+		q->st.curr_cell = tmp;
+		return 1;
+	}
+
 	return fn_iso_call_n(q);
 }
 
