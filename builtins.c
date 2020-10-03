@@ -44,6 +44,11 @@ static void msleep(int ms)
 }
 #endif
 
+static double rat_to_float(cell *n)
+{
+	return (double)n->val_num / n->val_den;
+}
+
 static int do_throw_term(query *q, cell *c);
 
 void throw_error(query *q, cell *c, const char *err_type, const char *expected)
@@ -3447,11 +3452,6 @@ static int fn_iso_neg_1(query *q)
 	}
 
 	return 1;
-}
-
-static double rat_to_float(cell *n)
-{
-	return (double)n->val_num / n->val_den;
 }
 
 static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
