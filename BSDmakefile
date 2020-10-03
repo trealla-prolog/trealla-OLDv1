@@ -64,20 +64,24 @@ utf8.o: utf8.c utf8.h
 
 # Library modules
 
+UNAME_M := $(shell uname -m)
+
+OSFLAG = -m elf_$(UNAME_M)
+
 dict.o: library/dict.pro
-	$(LD) -m elf_x86_64 -r -b binary -o dict.o library/dict.pro
+	$(LD) $(OSFLAG) -r -b binary -o dict.o library/dict.pro
 
 lists.o: library/lists.pro
-	$(LD) -m elf_x86_64 -r -b binary -o lists.o library/lists.pro
+	$(LD) $(OSFLAG) -r -b binary -o lists.o library/lists.pro
 
 apply.o: library/apply.pro
-	$(LD) -m elf_x86_64 -r -b binary -o apply.o library/apply.pro
+	$(LD) $(OSFLAG) -r -b binary -o apply.o library/apply.pro
 
 http.o: library/http.pro
-	$(LD) -m elf_x86_64 -r -b binary -o http.o library/http.pro
+	$(LD) $(OSFLAG) -r -b binary -o http.o library/http.pro
 
 auth.o: library/auth.pro
-	$(LD) -m elf_x86_64 -r -b binary -o auth.o library/auth.pro
+	$(LD) $(OSFLAG) -r -b binary -o auth.o library/auth.pro
 
 atts.o: library/atts.pro
-	$(LD) -m elf_x86_64 -r -b binary -o atts.o library/atts.pro
+	$(LD) $(OSFLAG) -r -b binary -o atts.o library/atts.pro

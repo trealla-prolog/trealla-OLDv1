@@ -64,16 +64,9 @@ utf8.o: utf8.c utf8.h
 
 # Library modules
 
-# Needed for using gmake with non-GNU linkers...
+UNAME_M := $(shell uname -m)
 
-UNAME_S := $(shell uname -s)
-
-ifeq ($(UNAME_S),Darwin)
-	OSFLAG = -m elf_x86_64
-endif
-ifeq ($(UNAME_S),FreeBSD)
-	OSFLAG = -m elf_x86_64
-endif
+OSFLAG = -m elf_$(UNAME_M)
 
 dict.o: library/dict.pro
 	$(LD) $(OSFLAG) -r -b binary -o dict.o library/dict.pro
