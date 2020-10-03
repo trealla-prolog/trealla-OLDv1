@@ -43,6 +43,7 @@ LOOP:
 		;
 
 	const char *s = line;
+
 	if (cmd) {
 		size_t n = strlen(cmd) + strlen(line);
 		cmd = realloc(cmd, n+1);
