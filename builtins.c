@@ -3480,8 +3480,13 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		if (!is_variable(p1) && is_variable(p2))
 			return 1;
 
-		if (is_variable(p1) && is_variable(p2))
-			return p1->slot_nbr < p2->slot_nbr ? -1 : p1->slot_nbr > p2->slot_nbr ? 1 : 0;
+		if (is_variable(p1) && is_variable(p2)) {
+			frame *g1 = GET_FRAME(p1_ctx);
+			frame *g2 = GET_FRAME(p2_ctx);
+			idx_t p1_slot = GET_SLOT(g1,p1->slot_nbr) - q->slots;
+			idx_t p2_slot = GET_SLOT(g2,p2->slot_nbr) - q->slots;
+			return p1_slot < p2_slot ? -1 : p1_slot > p2_slot ? 1 : 0;
+		}
 	}
 
 	// TO-DO...
