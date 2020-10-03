@@ -3473,6 +3473,15 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 
 		if (is_float(p1) && is_integer(p2))
 			return -1;
+
+		if (is_variable(p1) && !is_variable(p2))
+			return -1;
+
+		if (!is_variable(p1) && is_variable(p2))
+			return 1;
+
+		if (is_variable(p1) && is_variable(p2))
+			return p1->slot_nbr < p2->slot_nbr ? -1 : p1->slot_nbr > p2->slot_nbr ? 1 : 0;
 	}
 
 	// TO-DO...
