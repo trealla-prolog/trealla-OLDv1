@@ -2887,11 +2887,6 @@ prolog *pl_create()
 		}
 	}
 
-	if (isatty(0)) {
-		load_keywords(pl->m);
-		history_keywords((const char **)pl->m->keywords);
-	}
-
 	return pl;
 }
 
