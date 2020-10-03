@@ -3495,7 +3495,6 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 
 	// TO-DO...
 
-	throw_error(q, p1, "type_error", "atom_or_number");
 	return 0;
 }
 
