@@ -373,7 +373,7 @@ struct module_ {
 
 extern idx_t g_empty_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 extern idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_false_s;
-extern idx_t g_gt_s, g_eq_s, g_sys_elapsed_s, g_sys_queue_s;
+extern idx_t g_gt_s, g_eq_s, g_sys_elapsed_s, g_sys_queue_s, g_braces_s;
 extern stream g_streams[MAX_STREAMS];
 extern module *g_modules;
 extern char *g_pool;
