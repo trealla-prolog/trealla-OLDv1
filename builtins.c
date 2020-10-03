@@ -8589,16 +8589,19 @@ static int fn_call_nth_2(query *q)
 
 static int fn_call_dcg_3(query *q)
 {
-	GET_FIRST_ARG(p1,callable);
+	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,any);
-	// TODO : call DCG to process term
+
+	if (is_list_or_nil(p1))
+		return unify(q, p1, p1_ctx, p2, p2_ctx);
+
 	return fn_iso_call_n(q);
 }
 
 static int fn_phrase_3(query *q)
 {
-	GET_FIRST_ARG(p1,callable);
+	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	GET_NEXT_ARG(p3,list_or_nil_or_var);
 	return fn_call_dcg_3(q);
@@ -8606,7 +8609,7 @@ static int fn_phrase_3(query *q)
 
 static int fn_phrase_2(query *q)
 {
-	GET_FIRST_ARG(p1,callable);
+	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	cell *this = q->st.curr_cell;
 	cell *tmp = clone_to_heap(q, 1, this, this->nbr_cells+2);
