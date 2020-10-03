@@ -63,8 +63,6 @@ int history_getch(void)
 	return ch;
 }
 
-char *history_readline(const char *prompt) { return history_readline_eol(prompt, '\0'); }
-
 static void output(const char *fmt, const char *prompt, const char *line)
 {
 	size_t len = (strlen(line) * 10) + 1024;
