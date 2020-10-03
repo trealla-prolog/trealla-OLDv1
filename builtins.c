@@ -3449,6 +3449,11 @@ static int fn_iso_neg_1(query *q)
 	return 1;
 }
 
+static double rat_to_float(cell *n)
+{
+	return (double)n->val_num / n->val_den;
+}
+
 static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
 	if (p1->arity != p2->arity)
@@ -3468,11 +3473,11 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		if (is_float(p1) && is_float(p2))
 			return p1->val_flt < p2->val_flt ? -1 : p1->val_flt > p2->val_flt ? 1 : 0;
 
-		if (is_integer(p1) && is_float(p2))
-			return 1;
+		if (is_rational(p1) && is_float(p2))
+			return rat_to_float(p1) < p2->val_flt ? -1 : rat_to_float(p1) > p2->val_flt ? 1 : 0;
 
-		if (is_float(p1) && is_integer(p2))
-			return -1;
+		if (is_float(p1) && is_rational(p2))
+			return rat_to_float(p2) < p1->val_flt ? -1 : rat_to_float(p2) > p1->val_flt ? 1 : 0;
 
 		if (is_variable(p1) && !is_variable(p2))
 			return -1;
