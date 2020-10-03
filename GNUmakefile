@@ -64,8 +64,7 @@ utf8.o: utf8.c utf8.h
 
 # Library modules
 
-UNAME_M := $(shell uname -m)
-
+UNAME_M = $(shell uname -m)
 OSFLAG = -m elf_$(UNAME_M)
 
 dict.o: library/dict.pro
