@@ -3492,6 +3492,9 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 			idx_t p2_slot = GET_SLOT(g2,p2->slot_nbr) - q->slots;
 			return p1_slot < p2_slot ? -1 : p1_slot > p2_slot ? 1 : 0;
 		}
+
+		throw_error(q, p1, "type_error", "atom_or_number");
+		return 0;
 	}
 
 	// TO-DO...
