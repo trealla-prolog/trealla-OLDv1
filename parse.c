@@ -1751,7 +1751,7 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 			(*s == '(') ||
 			(isalpha(*s))  ||
 			0) {
-			fprintf(stdout, "Error: syntax error, parsin, line %d\n", p->line_nbr);
+			fprintf(stdout, "Error: syntax error, parsing number, line %d\n", p->line_nbr);
 			p->error = 1;
 		}
 
