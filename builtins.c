@@ -8780,7 +8780,7 @@ static int fn_length_2(query *q)
 		unsigned slot_nbr;
 
 		if (!(slot_nbr = create_vars(q, p2->val_num))) {
-		throw_error(q, p2, "resource_error", "too_many_vars");
+			throw_error(q, p2, "resource_error", "too_many_vars");
 			return 0;
 		}
 

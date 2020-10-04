@@ -5,5 +5,5 @@ main :-
 		(E is 16 -> (write(ok), nl, halt) ; true),
 		X is 2^E,
 		write(X), nl,
-		length(_Ls, X),
+		length(Ls, X),
 		fail.
