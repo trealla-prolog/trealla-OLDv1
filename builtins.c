@@ -9188,7 +9188,7 @@ static const struct builtins g_other_funcs[] =
 	{"bwrite", 2, fn_bwrite_2, "+stream,-string"},
 	{"atom_number", 2, fn_atom_number_2, "?string,?integer"},
 	{"hex_chars", 2, fn_hex_chars_2, "?integer,?string"},
-	{"octal_chars", 2, fn_octal_chars_2, "?integer"?string},
+	{"octal_chars", 2, fn_octal_chars_2, "?integer,?string"},
 	{"predicate_property", 2, fn_predicate_property_2, "+callable,?string"},
 	{"numbervars", 1, fn_numbervars_1, "+term"},
 	{"numbervars", 3, fn_numbervars_3, "+term,+start,?end"},
