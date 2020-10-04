@@ -5845,7 +5845,7 @@ static int fn_split_4(query *q)
 	int ch = peek_char_utf8(GET_STR(p2));
 
 	if ((ptr = strchr_utf8(start, ch)) != NULL) {
-		cell tmp = make_cstringn(q, start, ptr-start);
+		cell tmp = make_blob(q, start, ptr-start);
 		tmp.flags |= FLAG_STRING;
 
 		if (!unify(q, p3, p3_ctx, &tmp, q->st.curr_frame))
@@ -5856,7 +5856,7 @@ static int fn_split_4(query *q)
 		while (isspace(*ptr))
 			ptr++;
 
-		tmp = make_cstring(q, ptr);
+		tmp = make_blob(q, ptr, LEN_STR(p1)-(ptr-start));
 		tmp.flags |= FLAG_STRING;
 		return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	}
@@ -7817,37 +7817,6 @@ static int fn_atom_number_2(query *q)
 	return p1_val == p2->val_num;
 }
 
-static int fn_string_number_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_var);
-	GET_NEXT_ARG(p2,integer_or_var);
-
-	if (is_variable(p1) && is_variable(p2)) {
-		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
-		return 0;
-	}
-
-	if (is_variable(p1)) {
-		char tmpbuf[256];
-		sprint_int(tmpbuf, sizeof(tmpbuf), p2->val_num, 10);
-		cell tmp = make_cstring(q, tmpbuf);
-		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-		return 1;
-	}
-
-	const char *src = GET_STR(p1);
-	int_t p1_val = strtoll(src, NULL, 10);
-
-	if (is_variable(p2)) {
-		cell tmp;
-		make_int(&tmp, p1_val);
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		return 1;
-	}
-
-	return p1_val == p2->val_num;
-}
-
 static int fn_atom_hex_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
@@ -9218,7 +9187,6 @@ static const struct builtins g_other_funcs[] =
 	{"bread", 3, fn_bread_3, "+stream,+integer,-string"},
 	{"bwrite", 2, fn_bwrite_2, "+stream,-string"},
 	{"atom_number", 2, fn_atom_number_2, "?string,?integer"},
-	{"string_number", 2, fn_string_number_2, "?string,?integer"},
 	{"string_hex", 2, fn_atom_hex_2, "?string,?integer"},
 	{"string_octal", 2, fn_atom_octal_2, "?string,?integer"},
 	{"predicate_property", 2, fn_predicate_property_2, "+callable,?string"},

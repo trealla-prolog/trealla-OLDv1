@@ -7,7 +7,7 @@ read_response(S, Code) :-
 	getline(S, Line),
 	split(Line, ' ' ,_Ver, Rest),
 	split(Rest, ' ', Code2, _Rest2),
-	string_number(Code2, Code).
+	number_chars(Code, Code2).
 
 read_header(S, Pair) :-
 	getline(S, Line),
@@ -31,7 +31,7 @@ read_chunks(_, Data, Data).
 
 read_body(S, Hdrs, Data) :-
 	dict:get(Hdrs, 'content-length', V, _),
-	string_number(V, Len),
+	number_chars(Len, V),
 	bread(S, Len, Data).
 
 % Open with options...

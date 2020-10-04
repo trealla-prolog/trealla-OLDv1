@@ -112,7 +112,7 @@ Others
 	setup_call_cleanup/3
 	findall/4
 	term_to_atom/2
-	atom_number/2			# synonymous with string_number/2
+	atom_number/2
 	atomic_concat/3
 	format(atom(A),...)
 	var_number/2
@@ -171,10 +171,9 @@ Others
 
 	string_upper/2
 	string_lower/2
+	string_hex/2            # unify (in hex) with integer
+	string_octal/2          # unify (in octal) with integer
 	string_concat/2         # as atom-concat/3 but with strings
-	string_number/2         # unify (in decimal) with number
-	string_hex/2            # unify (in hex) with number
-	string_octal/2          # unify (in octal) with number
 
 	log10/1                 # function returning log10 of arg
 	now/0                   # function returning C-time in secs as integer
