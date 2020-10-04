@@ -309,7 +309,7 @@ list([L|Ls]) --> [L], list(Ls).
 test91 :-
 	open("README.md", read, Str, [mmap(Ms)]),
 	length(Ms,N1), format("Ms length=~w~n", [N1]),
-	phrase(list(Ls), Ms),
+	phrase(list(Ls), Ms, []),
 	length(Ls,N2), format("Ls length=~w~n", [N2]),
 	close(Str).
 
