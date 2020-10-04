@@ -69,6 +69,7 @@ typedef uint32_t idx_t;
 #define is_list(c) (is_iso_list(c) || is_string(c))
 #define is_integer(c) (((c)->val_type == TYPE_INTEGER) && ((c)->val_den == 1))
 #define is_const_cstring(c) (is_cstring(c) && ((c)->flags&FLAG_CONST_CSTRING))
+#define is_anon(c) ((c)->flags&FLAG_ANON)
 #define is_head(c) ((c)->flags&FLAG_HEAD)
 
 // These 2 assume literal or cstring types...
@@ -101,6 +102,7 @@ enum {
 
 	FLAG_DELETED=FLAG_HEX,				// used by bagof
 	FLAG_FIRST_USE=FLAG_HEX,			// used with TYPE_VARIABLE
+	FLAG_ANON=FLAG_OCTAL,				// used with TYPE_VARIABLE
 	FLAG_STREAM=FLAG_TAIL_REC,			// used with TYPE_INTEGER
 	FLAG_CONST_CSTRING=FLAG_HEX,		// used with TYPE_CSTRING
 	FLAG_STRING=FLAG_OCTAL,				// used with TYPE_CSTRING

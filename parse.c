@@ -1329,6 +1329,17 @@ void parser_assign_vars(parser *p)
 		}
 	}
 
+	for (idx_t i = 0; i < t->cidx; i++) {
+		cell *c = t->cells + i;
+
+		if (!is_variable(c))
+			continue;
+
+		if (p->vartab.var_used[c->slot_nbr] == 1)
+			c->flags |= FLAG_ANON;
+	}
+
+
 	cell *c = make_cell(p);
 	memset(c, 0, sizeof(cell));
 	c->val_type = TYPE_END;

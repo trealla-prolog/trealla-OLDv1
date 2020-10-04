@@ -8699,8 +8699,12 @@ static int fn_length_2(query *q)
 		make_int(&tmp, 0);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		make_choice(q);
-		make_literal(&tmp, g_nil_s);
-		set_var(q, p1,p1_ctx, &tmp, q->st.curr_frame);
+
+		if (!is_anon(p1)) {
+			make_literal(&tmp, g_nil_s);
+			set_var(q, p1,p1_ctx, &tmp, q->st.curr_frame);
+		}
+
 		return 1;
 	}
 
@@ -8758,10 +8762,13 @@ static int fn_length_2(query *q)
 
 
 	if (is_variable(p1) && is_integer(p2)) {
-		if ((p2->val_num < 0) || (p2->val_num > MAX_ARITY)) {
+		if ((p2->val_num < 0) || (p2->val_num > 32768)) {
 			throw_error(q, p2, "resource_error", "too_many_vars");
 			return 0;
 		}
+
+		if (is_anon(p1))
+			return 1;
 
 		if (p2->val_num == 0) {
 			cell tmp;
