@@ -52,7 +52,7 @@ static void check_trail(query *q)
 			q->trails_size += q->trails_size / 2;
 
 			if ((sizeof(trail)*q->trails_size) > (1024LL*1024*1024)) {
-				fprintf(stderr, "Out of trail\n");
+				fprintf(stderr, "Error: out of trail\n");
 				abort();
 			}
 
@@ -71,7 +71,7 @@ static void check_choice(query *q)
 			q->choices_size += q->choices_size / 2;
 
 			if ((sizeof(choice)*q->choices_size) > (1024LL*1024*1024)) {
-				fprintf(stderr, "Out of choices\n");
+				fprintf(stderr, "Error: out of choices\n");
 				abort();
 			}
 
@@ -91,7 +91,7 @@ static void check_frame(query *q)
 			q->frames_size += q->frames_size / 2;
 
 			if ((sizeof(frame)*q->frames_size) > (1024LL*1024*1024)) {
-				fprintf(stderr, "Out of frames\n");
+				fprintf(stderr, "Error: out of frames\n");
 				abort();
 			}
 
@@ -113,7 +113,7 @@ static void check_slot(query *q)
 			q->slots_size += q->slots_size / 2;
 
 			if ((sizeof(slot)*q->slots_size) > (1024LL*1024*1024*2)) {
-				fprintf(stderr, "Out of environment\n");
+				fprintf(stderr, "Error: out of environment\n");
 				abort();
 			}
 
