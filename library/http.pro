@@ -21,7 +21,7 @@ read_header(S, Pair) :-
 
 read_chunks(S, Tmp, Data) :-
 	getline(S, Line),
-	string_hex(Line, Len),
+	hex_chars(Len, Line),
 	Len > 0,
 	bread(S, Len, Tmp2),
 	getline(S, _),

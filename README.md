@@ -171,9 +171,10 @@ Others
 
 	string_upper/2
 	string_lower/2
-	string_hex/2            # unify (in hex) with integer
-	string_octal/2          # unify (in octal) with integer
 	string_concat/2         # as atom-concat/3 but with strings
+
+	hex_chars/2             # as number_chars, but in hex
+	octal_chars/2           # as number_chars, but in octal
 
 	log10/1                 # function returning log10 of arg
 	now/0                   # function returning C-time in secs as integer

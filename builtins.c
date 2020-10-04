@@ -7817,10 +7817,10 @@ static int fn_atom_number_2(query *q)
 	return p1_val == p2->val_num;
 }
 
-static int fn_atom_hex_2(query *q)
+static int fn_hex_chars_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_var);
-	GET_NEXT_ARG(p2,integer_or_var);
+	GET_FIRST_ARG(p2,integer_or_var);
+	GET_NEXT_ARG(p1,atom_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
 		throw_error(q, p1, "instantiation_error", "atom");
@@ -7848,10 +7848,10 @@ static int fn_atom_hex_2(query *q)
 	return p1_val == p2->val_num;
 }
 
-static int fn_atom_octal_2(query *q)
+static int fn_octal_chars_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_var);
-	GET_NEXT_ARG(p2,integer_or_var);
+	GET_FIRST_ARG(p2,integer_or_var);
+	GET_NEXT_ARG(p1,atom_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
 		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
@@ -9187,8 +9187,8 @@ static const struct builtins g_other_funcs[] =
 	{"bread", 3, fn_bread_3, "+stream,+integer,-string"},
 	{"bwrite", 2, fn_bwrite_2, "+stream,-string"},
 	{"atom_number", 2, fn_atom_number_2, "?string,?integer"},
-	{"string_hex", 2, fn_atom_hex_2, "?string,?integer"},
-	{"string_octal", 2, fn_atom_octal_2, "?string,?integer"},
+	{"hex_chars", 2, fn_hex_chars_2, "?integer,?string"},
+	{"octal_chars", 2, fn_octal_chars_2, "?integer"?string},
 	{"predicate_property", 2, fn_predicate_property_2, "+callable,?string"},
 	{"numbervars", 1, fn_numbervars_1, "+term"},
 	{"numbervars", 3, fn_numbervars_3, "+term,+start,?end"},
