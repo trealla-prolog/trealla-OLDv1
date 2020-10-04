@@ -1,7 +1,7 @@
 :-initialization(main).
 
 main :-
-	_X \== a,
+	[a,b] \== [a,c],
 	write(ok), nl,
 	halt.
 main :-

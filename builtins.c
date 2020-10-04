@@ -3493,7 +3493,24 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		return 0;
 	}
 
-	// TO-DO...
+	while (is_list(p1) && is_list(p2)) {
+		cell *h1 = LIST_HEAD(p1);
+		h1 = deref_var(q, h1, p1_ctx);
+		idx_t tmp1_ctx = q->latest_ctx;
+		cell *h2 = LIST_HEAD(p2);
+		h2 = deref_var(q, h2, p2_ctx);
+		idx_t tmp2_ctx = q->latest_ctx;
+
+		int val = compare(q, h1, tmp1_ctx, h2, tmp2_ctx);
+		if (val) return val;
+
+		p1 = LIST_TAIL(p1);
+		p1 = deref_var(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+		p2 = LIST_TAIL(p2);
+		p2 = deref_var(q, p2, p2_ctx);
+		p2_ctx = q->latest_ctx;
+	}
 
 	return 0;
 }
