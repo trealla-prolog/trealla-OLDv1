@@ -3512,6 +3512,32 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		p2_ctx = q->latest_ctx;
 	}
 
+	if (p1->arity < p2->arity)
+		return -1;
+
+	if (p1->arity > p2->arity)
+		return 1;
+
+	int val = strcmp(GET_STR(p1), GET_STR(p2));
+	if (val) return val;
+
+	int arity = p1->arity;
+	p1 = p1 + 1;
+	p2 = p2 + 1;
+
+	while (arity--) {
+		cell *h1 = deref_var(q, p1, p1_ctx);
+		idx_t tmp1_ctx = q->latest_ctx;
+		cell *h2 = deref_var(q, p2, p2_ctx);
+		idx_t tmp2_ctx = q->latest_ctx;
+
+		int val = compare(q, h1, tmp1_ctx, h2, tmp2_ctx);
+		if (val) return val;
+
+		p1 += p1->nbr_cells;
+		p2 += p2->nbr_cells;
+	}
+
 	return 0;
 }
 
