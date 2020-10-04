@@ -58,6 +58,7 @@ where options can be:
 	-O0, --noopt       - no optimization
 	-l file            - consult file
 	-g goal            - query goal
+	--library path     - alt to TPL_LIBRARY_PATH env variable
 	-t, --trace        - trace
 	-q, --quiet        - quiet mode (no banner)
 	-v, --version      - version

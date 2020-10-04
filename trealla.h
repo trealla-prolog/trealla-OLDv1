@@ -19,3 +19,4 @@ void set_opt(prolog*, int onoff);
 
 extern int g_tpl_interrupt, g_ac, g_avc;
 extern char **g_av;
+extern const char *g_tpl_lib;

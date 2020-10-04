@@ -48,6 +48,7 @@ idx_t g_sys_elapsed_s, g_sys_queue_s, g_false_s, g_braces_s;
 
 static idx_t g_pool_offset = 0, g_pool_size = 0;
 static int g_tpl_count = 0;
+const char *g_tpl_lib = NULL;
 
 int g_ac = 0, g_avc = 1;
 char **g_av = NULL;
@@ -960,6 +961,7 @@ static void directives(parser *p, term *t)
 		cell *p1 = c + 1;
 		if (!is_literal(p1)) return;
 		const char *name = GET_STR(p1);
+		char dstbuf[1024*2];
 
 		if (!strcmp(name, "library")) {
 			p1 = p1 + 1;
@@ -988,7 +990,12 @@ static void directives(parser *p, term *t)
 				return;
 			}
 
-			return;
+			query q = {0};
+			q.m = p->m;
+			snprintf(dstbuf, sizeof(dstbuf), "%s/", g_tpl_lib);
+			char *dst = dstbuf + strlen(dstbuf);
+			write_term_to_buf(&q, dst, sizeof(dstbuf)-strlen(g_tpl_lib), p1, 1, 0, 0, 0);
+			name = dstbuf;
 		}
 
 		module_load_file(p->m, name);
@@ -2851,6 +2858,12 @@ int pl_consult(prolog *pl, const char *filename)
 
 prolog *pl_create()
 {
+	if (!g_tpl_lib)
+		g_tpl_lib = getenv("TPL_LIBRARY_PATH");
+
+	if (!g_tpl_lib)
+		g_tpl_lib = "library";
+
 	g_tpl_count++;
 	srandom(time(0)+clock()+getpid());
 	prolog *pl = calloc(1, sizeof(prolog));

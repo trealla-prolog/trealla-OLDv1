@@ -145,7 +145,8 @@ int main(int ac, char *av[])
 	char histfile[1024];
 	snprintf(histfile, sizeof(histfile), "%s/%s", homedir, ".tpl_history");
 
-	int i, do_load = 1, do_goal = 0, version = 0, quiet = 0, daemon = 0;
+	int i, do_load = 1, do_goal = 0, do_lib = 0;
+	int version = 0, quiet = 0, daemon = 0;
 	int ns = 0;
 	void *pl = pl_create();
 	set_opt(pl, 1);
@@ -195,6 +196,8 @@ int main(int ac, char *av[])
 				return 1;
 			}
 		}
+		else if (!strcmp(av[i], "--library"))
+			do_lib = 1;
 		else if (!strcmp(av[i], "-l") || !strcmp(av[i], "--consult-file"))
 			;
 		else if (!strcmp(av[i], "-g") || !strcmp(av[i], "--query-goal")) {
@@ -203,7 +206,10 @@ int main(int ac, char *av[])
 		}
 		else if (av[i][0] == '-')
 			continue;
-		else if (do_load) {
+		else if (do_lib) {
+			g_tpl_lib = av[i];
+			do_lib = 0;
+		} else if (do_load) {
 			do_load = 0;
 
 			if (!pl_consult(pl, av[i]) || ns) {
@@ -235,6 +241,7 @@ int main(int ac, char *av[])
 		fprintf(stderr, "Options:\n");
 		fprintf(stderr, "  -f file\t\t- consult file\n");
 		fprintf(stderr, "  -g goal\t\t- query goal\n");
+		fprintf(stderr, "  --library path\t\t- library path\n");
 		fprintf(stderr, "  -v, --version\t\t- print version info and exit\n");
 		fprintf(stderr, "  -h, --help\t\t- print help info and exit\n");
 		fprintf(stderr, "  -O0, --noopt\t\t- turn off optimization\n");
