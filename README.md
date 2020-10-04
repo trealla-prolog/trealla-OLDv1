@@ -75,6 +75,9 @@ For example:
 
 Invocation without any goal presents the REPL.
 
+Note: a '--library path' option must precede any file loads
+that make use of it. Only one path can be specified.
+
 
 What's missing?
 ===============
