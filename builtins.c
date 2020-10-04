@@ -7786,37 +7786,6 @@ static int fn_term_hash_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_atom_number_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_var);
-	GET_NEXT_ARG(p2,integer_or_var);
-
-	if (is_variable(p1) && is_variable(p2)) {
-		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
-		return 0;
-	}
-
-	if (is_variable(p1)) {
-		char tmpbuf[256];
-		sprint_int(tmpbuf, sizeof(tmpbuf), p2->val_num, 10);
-		cell tmp = make_cstring(q, tmpbuf);
-		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-		return 1;
-	}
-
-	const char *src = GET_STR(p1);
-	int_t p1_val = strtoll(src, NULL, 10);
-
-	if (is_variable(p2)) {
-		cell tmp;
-		make_int(&tmp, p1_val);
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		return 1;
-	}
-
-	return p1_val == p2->val_num;
-}
-
 static int fn_hex_chars_2(query *q)
 {
 	GET_FIRST_ARG(p2,integer_or_var);
@@ -9186,7 +9155,6 @@ static const struct builtins g_other_funcs[] =
 	{"read_catom", 3, fn_bread_3, "+stream,+integer,-string"},
 	{"bread", 3, fn_bread_3, "+stream,+integer,-string"},
 	{"bwrite", 2, fn_bwrite_2, "+stream,-string"},
-	{"atom_number", 2, fn_atom_number_2, "?string,?integer"},
 	{"hex_chars", 2, fn_hex_chars_2, "?integer,?string"},
 	{"octal_chars", 2, fn_octal_chars_2, "?integer,?string"},
 	{"predicate_property", 2, fn_predicate_property_2, "+callable,?string"},

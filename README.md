@@ -112,7 +112,6 @@ Others
 	setup_call_cleanup/3
 	findall/4
 	term_to_atom/2
-	atom_number/2
 	atomic_concat/3
 	format(atom(A),...)
 	var_number/2
