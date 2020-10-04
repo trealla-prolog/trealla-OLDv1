@@ -57,7 +57,7 @@ where options can be:
 
 	-O0, --noopt       - no optimization
 	-l file            - consult file
-	-g goal            - query goal
+	-g goal            - query goal (only used once)
 	--library path     - alt to TPL_LIBRARY_PATH env variable
 	-t, --trace        - trace
 	-q, --quiet        - quiet mode (no banner)
@@ -70,13 +70,9 @@ where options can be:
 
 For example:
 
-	./tpl samples/sieve -g test2,halt
-	./tpl samples/sieve -g test2,halt
+	./tpl -g test2,halt samples/sieve
 
 Invocation without any goal presents the REPL.
-
-Note: a '--library path' option must precede any file loads
-that make use of it. Only one path can be specified.
 
 
 What's missing?
@@ -406,28 +402,28 @@ Compiled with GCC 10.1.0 on Linux.
 	testindex5  |   9.3   |  11.8     |   4.2     |  49.7   |
 	------------|---------|-----------|-----------|---------|----------
 
-	tpl samples/sieve.pro -g "time(test5),halt"
-	tpl samples/fib.pro -g "time(test),halt"
-	tpl samples/hanoi.pro -g "time(hanoiq(22)),halt"
-	tpl samples/queens11.pro -g "time(testq),halt"
-	tpl samples/puzzle.pro -g "time(main),halt"
-	tpl samples/chess.pro -g "time(main),halt"
-	tpl samples/testindex.pro -g "time(test1a),halt"
-	tpl samples/testindex.pro -g "time(test1b),halt"
-	tpl samples/testindex.pro -g "time(test5),halt"
+	tpl -g "time(test5),halt" samples/sieve.pro -g
+	tpl -g "time(test),halt" samples/fib.pro
+	tpl -g "time(hanoiq(22)),halt" samples/hanoi.pro
+	tpl -g "time(testq),halt" samples/queens11.pro
+	tpl -g "time(main),halt" samples/puzzle.pro
+	tpl -g "time(main),halt" samples/chess.pro
+	tpl -g "time(test1a),halt" samples/testindex.pro
+	tpl -g "time(test1b),halt" samples/testindex.pro
+	tpl -g "time(test5),halt" samples/testindex.pro
 
-	swipl -l samples/sieve.pro -g "time(test5),halt"
+	swipl -g "time(test5),halt" samples/sieve.pro
 	etc
 
-	yap samples/sieve.pro -g "time(test5),halt" -s128000
+	yap -g "time(test5),halt" -s128000 samples/sieve.pro
 	etc
 
 	export setenv LOCALSZ=256000
 	export setenv GLOBALSZ=128000
-	time gprolog --consult-file samples/sieve.pro --query-goal test5,halt
+	time gprolog --query-goal test5,halt --consult-file samples/sieve.pro
 	etc
 
-	time scryer-prolog samples/sieve.pro -g test5,halt
+	time scryer-prolog -g test5,halt samples/sieve.pro
 	etc
 
 Times for gprolog & scryer were done using the unix *time* command and
@@ -445,5 +441,5 @@ and needs *m4* installed. Chess needs name/2 (at least).
 
 The Peirera (sic) benchmarks can be run:
 
-	tpl samples/broken/peirera.pl -g bench_peirera,halt
-	swipl -l samples/broken/peirera.pl -g bench_peirera,halt
+	tpl -g bench_peirera,halt samples/broken/peirera.pl
+	swipl -g bench_peirera,halt samples/broken/peirera.pl
