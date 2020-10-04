@@ -249,17 +249,17 @@ int main(int ac, char *av[])
 		fprintf(stderr, "Options:\n");
 		fprintf(stderr, "  -f file\t\t- consult file\n");
 		fprintf(stderr, "  -g goal\t\t- query goal (only used once)\n");
-		fprintf(stderr, "  --library path\t\t- alt to TPL_LIBRARY_PATH env variable\n");
+		fprintf(stderr, "  --library path\t- alt to TPL_LIBRARY_PATH env variable\n");
 		fprintf(stderr, "  -v, --version\t\t- print version info and exit\n");
 		fprintf(stderr, "  -h, --help\t\t- print help info and exit\n");
 		fprintf(stderr, "  -O0, --noopt\t\t- turn off optimization\n");
 		fprintf(stderr, "  -q, --quiet\t\t- quiet mode\n");
 		fprintf(stderr, "  -t, --trace\t\t- trace mode\n");
 		fprintf(stderr, "  -d, --daemon\t\t- daemonize\n");
-		fprintf(stderr, "  -w, --watchdog\t\t- create watchdog\n");
-		fprintf(stderr, "  --consult\t- consult from STDIN\n");
+		fprintf(stderr, "  -w, --watchdog\t- create watchdog\n");
+		fprintf(stderr, "  --consult\t\t- consult from STDIN\n");
 		fprintf(stderr, "  --stats\t\t- print stats\n");
-		fprintf(stderr, "  --ns\t\t- non-stop (to top-level)\n");
+		fprintf(stderr, "  --ns\t\t\t- non-stop (to top-level)\n");
 	}
 
 	if (version && !quiet)
