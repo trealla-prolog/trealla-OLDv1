@@ -179,6 +179,24 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 		return dst - save_dst;
 	}
 
+	if (is_string(c)) {
+		int cnt = 0;
+		cell *l = c;
+
+		while (is_list(l)) {
+			cell *h = LIST_HEAD(l);
+			l = LIST_TAIL(l);
+			h->flags &= ~FLAG_STRING;
+
+			if (!cnt++)
+				alloc_list(q, h);
+			else
+				append_list(q, h);
+		}
+
+		c = end_list(q);
+	}
+
 	const char *src = GET_STR(c);
 	int dq = 0, quote = !is_variable(c) && needs_quote(q->m, src);
 	if (is_string(c)) dq = quote = 1;
