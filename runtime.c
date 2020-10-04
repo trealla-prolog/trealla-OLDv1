@@ -892,6 +892,7 @@ void run_query(query *q)
 			}
 
 			if (ch == 'a') {
+				signal(SIGINT, NULL);
 				g_tpl_interrupt = 0;
 				break;
 			}
