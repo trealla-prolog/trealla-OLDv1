@@ -892,8 +892,8 @@ void run_query(query *q)
 			}
 
 			if (ch == 'a') {
-				signal(SIGINT, NULL);
 				g_tpl_interrupt = 0;
+				q->abort = 1;
 				break;
 			}
 
@@ -975,6 +975,7 @@ void query_execute(query *q, term *t)
 	q->st.curr_frame = 0;
 	q->st.fp = 1;
 	q->time_started = get_time_in_usec();
+	q->abort = 0;
 
 	frame *g = q->frames + q->st.curr_frame;
 	g->nbr_vars = t->nbr_vars;

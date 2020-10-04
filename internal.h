@@ -318,6 +318,7 @@ struct query_ {
 	unsigned ignore_ops:1;
 	unsigned character_escapes:1;
 	unsigned halt:1;
+	unsigned abort:1;
 	unsigned spawned:1;
 };
 
