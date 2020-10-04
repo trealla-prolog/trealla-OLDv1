@@ -241,7 +241,7 @@ int main(int ac, char *av[])
 		fprintf(stderr, "Options:\n");
 		fprintf(stderr, "  -f file\t\t- consult file\n");
 		fprintf(stderr, "  -g goal\t\t- query goal\n");
-		fprintf(stderr, "  --library path\t\t- library path\n");
+		fprintf(stderr, "  --library path\t\t- alt to TPL_LIBRARY_PATH env variable\n");
 		fprintf(stderr, "  -v, --version\t\t- print version info and exit\n");
 		fprintf(stderr, "  -h, --help\t\t- print help info and exit\n");
 		fprintf(stderr, "  -O0, --noopt\t\t- turn off optimization\n");
