@@ -521,6 +521,7 @@ static void make_indirect(cell *tmp, cell *c)
 	tmp->val_type = TYPE_INDIRECT;
 	tmp->nbr_cells = 1;
 	tmp->arity = 0;
+	tmp->flags = 0;
 	tmp->val_ptr = c;
 }
 
@@ -566,7 +567,7 @@ void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 
 	e->ctx = v_ctx;
 
-	if (v->arity)
+	if (v->arity && !is_string(v))
 		make_indirect(&e->c, v);
 	else
 		e->c = *v;
