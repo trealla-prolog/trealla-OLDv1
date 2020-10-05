@@ -303,8 +303,9 @@ struct query_ {
 	idx_t max_choices, max_frames, max_slots, max_trails;
 	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;
 	idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
-	uint8_t retry, halt_code, status, quoted;
+	uint8_t retry, halt_code, status;
 	uint8_t current_input, current_output;
+	int8_t quoted;
 	unsigned resume:1;
 	unsigned no_tco:1;
 	unsigned error:1;

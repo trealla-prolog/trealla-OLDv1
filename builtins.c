@@ -433,12 +433,6 @@ static cell make_cstring(query *q, const char *s)
 	return make_cstringn(q, s, n);
 }
 
-static cell make_blob(query *q, const char *s, size_t n)
-{
-	cell tmp = *alloc_catomn(q, s, n);
-	return tmp;
-}
-
 static cell make_string(query *q, const char *s, size_t n)
 {
 	cell tmp = *alloc_catomn(q, s, n);
@@ -7172,6 +7166,9 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx,
 			if (ch == 'q')
 				q->quoted = 1;
 
+			if (is_string(c) && !q->quoted)
+				q->quoted = -1;
+
 			if (canonical)
 				len = write_canonical_to_buf(q, NULL, 0, c, 1, 0);
 			else
@@ -7460,8 +7457,7 @@ static int fn_string_lower_2(query *q)
 		s++;
 	}
 
-	cell tmp = make_blob(q, tmps, LEN_STR(p1));
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, tmps, LEN_STR(p1));
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7479,8 +7475,7 @@ static int fn_string_upper_2(query *q)
 		s++;
 	}
 
-	cell tmp = make_blob(q, tmps, LEN_STR(p1));
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, tmps, LEN_STR(p1));
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
