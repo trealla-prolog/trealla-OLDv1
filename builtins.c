@@ -6578,6 +6578,12 @@ static int fn_is_list_1(query *q)
 	return is_list(p1) || is_nil(p1);
 }
 
+static int fn_is_string_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	return is_string(p1);
+}
+
 static int fn_is_stream_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -9125,6 +9131,7 @@ static const struct builtins g_other_funcs[] =
 	{"split", 4, fn_split_4, "+string,+string,?left,?right"},
 	{"msort", 2, fn_msort_2, "+list,-list"},
 	{"is_list", 1, fn_is_list_1, "+term"},
+	{"is_string", 1, fn_is_string_1, "+term"},
 	{"list", 1, fn_is_list_1, "+term"},
 	{"is_stream", 1, fn_is_stream_1, "+term"},
 	{"forall", 2, fn_forall_2, "+term,+term"},
