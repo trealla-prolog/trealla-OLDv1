@@ -5852,8 +5852,7 @@ static int fn_split_4(query *q)
 	int ch = peek_char_utf8(GET_STR(p2));
 
 	if ((ptr = strchr_utf8(start, ch)) != NULL) {
-		cell tmp = make_blob(q, start, ptr-start);
-		tmp.flags |= FLAG_STRING;
+		cell tmp = make_string(q, start, ptr-start);
 
 		if (!unify(q, p3, p3_ctx, &tmp, q->st.curr_frame))
 			return 0;
@@ -5863,7 +5862,7 @@ static int fn_split_4(query *q)
 		while (isspace(*ptr))
 			ptr++;
 
-		tmp = make_blob(q, ptr, LEN_STR(p1)-(ptr-start));
+		tmp = make_string(q, ptr, LEN_STR(p1)-(ptr-start));
 		tmp.flags |= FLAG_STRING;
 		return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	}
