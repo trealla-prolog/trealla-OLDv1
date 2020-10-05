@@ -427,16 +427,16 @@ static cell make_cstringn(query *q, const char *s, size_t n)
 	return tmp;
 }
 
-static cell make_blob(query *q, const char *s, size_t n)
-{
-	cell tmp = *alloc_catomn(q, s, n);
-	return tmp;
-}
-
 static cell make_cstring(query *q, const char *s)
 {
 	size_t n = strlen(s);
 	return make_cstringn(q, s, n);
+}
+
+static cell make_blob(query *q, const char *s, size_t n)
+{
+	cell tmp = *alloc_catomn(q, s, n);
+	return tmp;
 }
 
 static cell make_string(query *q, const char *s, size_t n)
@@ -5852,8 +5852,7 @@ static int fn_split_4(query *q)
 	int ch = peek_char_utf8(GET_STR(p2));
 
 	if ((ptr = strchr_utf8(start, ch)) != NULL) {
-		cell tmp = make_blob(q, start, ptr-start);
-		tmp.flags |= FLAG_STRING;
+		cell tmp = make_string(q, start, ptr-start);
 
 		if (!unify(q, p3, p3_ctx, &tmp, q->st.curr_frame))
 			return 0;
@@ -5863,8 +5862,7 @@ static int fn_split_4(query *q)
 		while (isspace(*ptr))
 			ptr++;
 
-		tmp = make_blob(q, ptr, LEN_STR(p1)-(ptr-start));
-		tmp.flags |= FLAG_STRING;
+		tmp = make_string(q, ptr, LEN_STR(p1)-(ptr-start));
 		return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -5918,8 +5916,7 @@ static int fn_loadfile_2(query *q)
 
 	s[st.st_size] = '\0';
 	fclose(fp);
-	cell tmp = make_blob(q, s, st.st_size);
-	tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, s, st.st_size);
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	free(s);
 	free(filename);
@@ -5944,13 +5941,18 @@ static int fn_getfile_2(query *q)
 	int nbr = 1, in_list = 0;
 
 	while (getline(&line, &len, fp) != -1) {
-		if (line[strlen(line)-1] == '\n')
-			line[strlen(line)-1] = '\0';
+		size_t len = strlen(line);
+		if (line[len-1] == '\n') {
+			line[len-1] = '\0';
+			len--;
+		}
 
-		if (line[strlen(line)-1] == '\r')
-			line[strlen(line)-1] = '\0';
+		if (line[len-1] == '\r') {
+			line[len-1] = '\0';
+			len--;
+		}
 
-		cell tmp = tmp_cstring(q, line);
+		cell tmp = tmp_cstringn(q, line, len);
 		tmp.flags |= FLAG_STRING;
 
 		if (nbr++ == 1)
@@ -6421,8 +6423,7 @@ static int fn_bread_3(query *q)
 			}
 		}
 
-		cell tmp = make_blob(q, str->data, str->data_len);
-		tmp.flags |= FLAG_STRING;
+		cell tmp = make_string(q, str->data, str->data_len);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(str->data);
 		str->data = NULL;
@@ -6438,8 +6439,7 @@ static int fn_bread_3(query *q)
 		size_t nbytes = net_read(str->data, str->alloc_nbytes, str);
 		str->data[nbytes] = '\0';
 		str->data = realloc(str->data, nbytes+1);
-		cell tmp = make_blob(q, str->data, nbytes);
-		tmp.flags |= FLAG_STRING;
+		cell tmp = make_string(q, str->data, nbytes);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(str->data);
 		str->data = NULL;
@@ -6467,8 +6467,7 @@ static int fn_bread_3(query *q)
 	cell tmp1;
 	make_int(&tmp1, str->data_len);
 	set_var(q, p1, p1_ctx, &tmp1, q->st.curr_frame);
-	cell tmp2 = make_blob(q, str->data, str->data_len);
-	tmp2.flags |= FLAG_STRING;
+	cell tmp2 = make_string(q, str->data, str->data_len);
 	set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	free(str->data);
 	str->data = NULL;
@@ -7456,12 +7455,12 @@ static int fn_urlenc_2(query *q)
 	return 0;
 }
 
-static int fn_atom_lower_2(query *q)
+static int fn_string_lower_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *str = GET_STR(p1);
-	char *tmps = strdup(str);
+	char *tmps = strndup(str, LEN_STR(p1));
 	char *s = tmps;
 
 	while (*s) {
@@ -7469,18 +7468,18 @@ static int fn_atom_lower_2(query *q)
 		s++;
 	}
 
-	cell tmp = make_cstring(q, tmps);
+	cell tmp = make_blob(q, tmps, LEN_STR(p1));
 	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_atom_upper_2(query *q)
+static int fn_string_upper_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *str = GET_STR(p1);
-	char *tmps = strdup(str);
+	char *tmps = strndup(str, LEN_STR(p1));
 	char *s = tmps;
 
 	while (*s) {
@@ -7488,7 +7487,7 @@ static int fn_atom_upper_2(query *q)
 		s++;
 	}
 
-	cell tmp = make_cstring(q, tmps);
+	cell tmp = make_blob(q, tmps, LEN_STR(p1));
 	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -9159,8 +9158,8 @@ static const struct builtins g_other_funcs[] =
 	{"term_to_atom", 2, fn_term_to_atom_2, "+term,-string"},
 	{"base64", 2, fn_base64_2, "?string,?string"},
 	{"urlenc", 2, fn_urlenc_2, "?string,?string"},
-	{"string_lower", 2, fn_atom_lower_2, "?string,?string"},
-	{"string_upper", 2, fn_atom_upper_2, "?string,?string"},
+	{"string_lower", 2, fn_string_lower_2, "?string,?string"},
+	{"string_upper", 2, fn_string_upper_2, "?string,?string"},
 	{"read_catom", 3, fn_bread_3, "+stream,+integer,-string"},
 	{"bread", 3, fn_bread_3, "+stream,+integer,-string"},
 	{"bwrite", 2, fn_bwrite_2, "+stream,-string"},
