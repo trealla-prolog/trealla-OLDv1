@@ -117,7 +117,6 @@ Others
 	var_number/2
 	ignore/1
 	is_list/1
-	is_string/1
 	is_stream/1
 	term_hash/2
 	writeln/1
