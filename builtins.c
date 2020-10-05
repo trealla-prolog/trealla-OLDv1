@@ -7281,8 +7281,7 @@ static int fn_sha1_2(query *q)
 		buflen -= len;
 	}
 
-	cell tmp = make_cstring(q, tmpbuf);
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7303,8 +7302,7 @@ static int fn_sha256_2(query *q)
 		buflen -= len;
 	}
 
-	cell tmp = make_cstring(q, tmpbuf);
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7325,8 +7323,7 @@ static int fn_sha512_2(query *q)
 		buflen -= len;
 	}
 
-	cell tmp = make_cstring(q, tmpbuf);
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 #endif
@@ -7339,8 +7336,7 @@ static int do_b64encode_2(query *q)
 	size_t len = strlen(str);
 	char *dstbuf = malloc((len*3)+1);
 	b64_encode(str, len, &dstbuf, 0, 0);
-	cell tmp = make_cstring(q, dstbuf);
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, dstbuf, strlen(dstbuf));
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7353,8 +7349,7 @@ static int do_b64decode_2(query *q)
 	size_t len = strlen(str);
 	char *dstbuf = malloc(len+1);
 	b64_decode(str, len, &dstbuf);
-	cell tmp = make_cstring(q, dstbuf);
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, dstbuf, strlen(dstbuf));
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7420,9 +7415,7 @@ static int do_urlencode_2(query *q)
 	size_t len = strlen(str);
 	char *dstbuf = malloc((len*3)+1);
 	url_encode(str, len, dstbuf);
-	cell tmp = make_cstring(q, dstbuf);
-	tmp = make_cstring(q, dstbuf);
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, dstbuf, strlen(dstbuf));
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7435,9 +7428,7 @@ static int do_urldecode_2(query *q)
 	size_t len = strlen(str);
 	char *dstbuf = malloc(len+1);
 	url_decode(str, dstbuf);
-	cell tmp = make_cstring(q, dstbuf);
-	tmp = make_cstring(q, dstbuf);
-	if (is_string(p2)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, dstbuf, strlen(dstbuf));
 	free(dstbuf);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
