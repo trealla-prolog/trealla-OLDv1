@@ -324,7 +324,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 				dst += write_term_to_buf(q, dst, dstlen, tail, running, 1, max_depth, depth+1);
 			}
 		}
-		else if (is_list(tail)) {
+		else if (is_iso_list(tail)) {
 			dst += snprintf(dst, dstlen, "%s", ",");
 			c = tail;
 			save_ctx = q->latest_ctx;
