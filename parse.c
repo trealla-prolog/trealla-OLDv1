@@ -2506,7 +2506,7 @@ static int parser_run(parser *p, const char *src, int dump)
 
 	if (q->halt)
 		q->error = 0;
-	else if (dump && !q->abort)
+	else if (dump && !q->abort && q->status)
 		dump_vars(q, p);
 
 	p->m->halt = q->halt;
