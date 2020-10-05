@@ -5852,7 +5852,8 @@ static int fn_split_4(query *q)
 	int ch = peek_char_utf8(GET_STR(p2));
 
 	if ((ptr = strchr_utf8(start, ch)) != NULL) {
-		cell tmp = make_string(q, start, ptr-start);
+		cell tmp = make_blob(q, start, ptr-start);
+		tmp.flags |= FLAG_STRING;
 
 		if (!unify(q, p3, p3_ctx, &tmp, q->st.curr_frame))
 			return 0;
@@ -5862,7 +5863,7 @@ static int fn_split_4(query *q)
 		while (isspace(*ptr))
 			ptr++;
 
-		tmp = make_string(q, ptr, LEN_STR(p1)-(ptr-start));
+		tmp = make_blob(q, ptr, LEN_STR(p1)-(ptr-start));
 		tmp.flags |= FLAG_STRING;
 		return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	}
@@ -5917,7 +5918,7 @@ static int fn_loadfile_2(query *q)
 
 	s[st.st_size] = '\0';
 	fclose(fp);
-	cell tmp = make_string(q, s, st.st_size);
+	cell tmp = make_blob(q, s, st.st_size);
 	tmp.flags |= FLAG_STRING;
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	free(s);
@@ -5943,18 +5944,14 @@ static int fn_getfile_2(query *q)
 	int nbr = 1, in_list = 0;
 
 	while (getline(&line, &len, fp) != -1) {
-		size_t nlen = strlen(line);
-		if (line[nlen-1] == '\n') {
-			line[nlen-1] = '\0';
-			nlen--;
-		}
+		if (line[strlen(line)-1] == '\n')
+			line[strlen(line)-1] = '\0';
 
-		if (line[nlen-1] == '\r') {
-			line[nlen-1] = '\0';
-			nlen--;
-		}
+		if (line[strlen(line)-1] == '\r')
+			line[strlen(line)-1] = '\0';
 
-		cell tmp = make_string(q, line, nlen);
+		cell tmp = tmp_cstring(q, line);
+		tmp.flags |= FLAG_STRING;
 
 		if (nbr++ == 1)
 			alloc_list(q, &tmp);
@@ -7284,7 +7281,8 @@ static int fn_sha1_2(query *q)
 		buflen -= len;
 	}
 
-	cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
+	cell tmp = make_cstring(q, tmpbuf);
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7305,7 +7303,8 @@ static int fn_sha256_2(query *q)
 		buflen -= len;
 	}
 
-	cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
+	cell tmp = make_cstring(q, tmpbuf);
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7326,7 +7325,8 @@ static int fn_sha512_2(query *q)
 		buflen -= len;
 	}
 
-	cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
+	cell tmp = make_cstring(q, tmpbuf);
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 #endif
@@ -7339,7 +7339,8 @@ static int do_b64encode_2(query *q)
 	size_t len = strlen(str);
 	char *dstbuf = malloc((len*3)+1);
 	b64_encode(str, len, &dstbuf, 0, 0);
-	cell tmp = make_string(q, dstbuf, strlen(dstbuf));
+	cell tmp = make_cstring(q, dstbuf);
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7352,7 +7353,8 @@ static int do_b64decode_2(query *q)
 	size_t len = strlen(str);
 	char *dstbuf = malloc(len+1);
 	b64_decode(str, len, &dstbuf);
-	cell tmp = make_string(q, dstbuf, strlen(dstbuf));
+	cell tmp = make_cstring(q, dstbuf);
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7418,7 +7420,9 @@ static int do_urlencode_2(query *q)
 	size_t len = strlen(str);
 	char *dstbuf = malloc((len*3)+1);
 	url_encode(str, len, dstbuf);
-	cell tmp = make_string(q, dstbuf, strlen(dstbuf));
+	cell tmp = make_cstring(q, dstbuf);
+	tmp = make_cstring(q, dstbuf);
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7431,7 +7435,9 @@ static int do_urldecode_2(query *q)
 	size_t len = strlen(str);
 	char *dstbuf = malloc(len+1);
 	url_decode(str, dstbuf);
-	cell tmp = make_string(q, dstbuf, strlen(dstbuf));
+	cell tmp = make_cstring(q, dstbuf);
+	tmp = make_cstring(q, dstbuf);
+	if (is_string(p2)) tmp.flags |= FLAG_STRING;
 	free(dstbuf);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
@@ -7450,12 +7456,12 @@ static int fn_urlenc_2(query *q)
 	return 0;
 }
 
-static int fn_string_lower_2(query *q)
+static int fn_atom_lower_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *str = GET_STR(p1);
-	char *tmps = strndup(str, LEN_STR(p1));
+	char *tmps = strdup(str);
 	char *s = tmps;
 
 	while (*s) {
@@ -7463,17 +7469,18 @@ static int fn_string_lower_2(query *q)
 		s++;
 	}
 
-	cell tmp = make_string(q, tmps, LEN_STR(p1));
+	cell tmp = make_cstring(q, tmps);
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_string_upper_2(query *q)
+static int fn_atom_upper_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *str = GET_STR(p1);
-	char *tmps = strndup(str, LEN_STR(p1));
+	char *tmps = strdup(str);
 	char *s = tmps;
 
 	while (*s) {
@@ -7481,7 +7488,8 @@ static int fn_string_upper_2(query *q)
 		s++;
 	}
 
-	cell tmp = make_string(q, tmps, LEN_STR(p1));
+	cell tmp = make_cstring(q, tmps);
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -9151,8 +9159,8 @@ static const struct builtins g_other_funcs[] =
 	{"term_to_atom", 2, fn_term_to_atom_2, "+term,-string"},
 	{"base64", 2, fn_base64_2, "?string,?string"},
 	{"urlenc", 2, fn_urlenc_2, "?string,?string"},
-	{"string_lower", 2, fn_string_lower_2, "?string,?string"},
-	{"string_upper", 2, fn_string_upper_2, "?string,?string"},
+	{"string_lower", 2, fn_atom_lower_2, "?string,?string"},
+	{"string_upper", 2, fn_atom_upper_2, "?string,?string"},
 	{"read_catom", 3, fn_bread_3, "+stream,+integer,-string"},
 	{"bread", 3, fn_bread_3, "+stream,+integer,-string"},
 	{"bwrite", 2, fn_bwrite_2, "+stream,-string"},
