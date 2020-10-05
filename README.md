@@ -170,7 +170,6 @@ Others
 
 	string_upper/2
 	string_lower/2
-	string_concat/3         # as atom_concat/3 but with strings
 
 	hex_chars/2             # as number_chars, but in hex
 	octal_chars/2           # as number_chars, but in octal
