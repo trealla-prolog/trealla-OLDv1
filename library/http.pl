@@ -25,7 +25,7 @@ read_chunks(S, Tmp, Data) :-
 	Len > 0,
 	bread(S, Len, Tmp2),
 	getline(S, _),
-	string_concat(Tmp, Tmp2, Tmp3),
+	append(Tmp, Tmp2, Tmp3),
 	read_chunks(S, Tmp3, Data).
 read_chunks(_, Data, Data).
 
@@ -54,7 +54,7 @@ http_open(UrlList, S, Opts) :-
 	format(S,"~a /~a HTTP/~d.~d\r\nHost: ~a\r\nConnection: keep-alive\r\n\r\n", [UMethod, Path, Maj, Min, Host]),
 	read_response(S, Code),
 	findall(Hdr, read_header(S, Hdr), Hdrs),
-	string_concat(Host, Path, Url),
+	append(Host, Path, Url),
 	dict:get(Hdrs, 'location', Location, Url),
 	ignore(memberchk(status_code(Code), OptList)),
 	ignore(memberchk(headers(Hdrs), OptList)),

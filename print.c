@@ -241,38 +241,6 @@ static char *varformat(unsigned nbr)
 	return tmpbuf;
 }
 
-int scan_list(query *q, cell *l, idx_t l_ctx)
-{
-	idx_t save_ctx = l_ctx;
-	int is_chars_list = 0;
-
-	while (is_iso_list(l)) {
-		cell *h = list_head(l);
-		cell *c = deref_var(q, h, save_ctx);
-
-		if (is_atom(c)) {
-			const char *src = GET_STR(c);
-
-			if (len_char_utf8(src) != LEN_STR(c)) {
-				is_chars_list = 0;
-				break;
-			}
-
-			is_chars_list = 1;
-		} else {
-			is_chars_list = 0;
-			break;
-		}
-
-		l = list_tail(l);
-		l = deref_var(q, l, save_ctx);
-		save_ctx = q->latest_ctx;
-	}
-
-	q->latest_ctx = save_ctx;
-	return is_chars_list;
-}
-
 size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int cons, int max_depth, int depth)
 {
 	char *save_dst = dst;

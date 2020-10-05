@@ -2205,6 +2205,38 @@ static int get_token(parser *p, int last_op)
 	return 1;
 }
 
+int scan_list(query *q, cell *l, idx_t l_ctx)
+{
+	idx_t save_ctx = l_ctx;
+	int is_chars_list = 0;
+
+	while (is_iso_list(l)) {
+		cell *h = list_head(l);
+		cell *c = q ? deref_var(q, h, save_ctx) : h;
+
+		if (is_atom(c)) {
+			const char *src = GET_STR(c);
+
+			if (len_char_utf8(src) != LEN_STR(c)) {
+				is_chars_list = 0;
+				break;
+			}
+
+			is_chars_list = 1;
+		} else {
+			is_chars_list = 0;
+			break;
+		}
+
+		l = list_tail(l);
+		l = q ? deref_var(q, l, save_ctx) : l;
+		if (q) save_ctx = q->latest_ctx;
+	}
+
+	q->latest_ctx = save_ctx;
+	return is_chars_list;
+}
+
 int parser_tokenize(parser *p, int args, int consing)
 {
 	int begin_idx = p->t->cidx;
@@ -2261,8 +2293,13 @@ int parser_tokenize(parser *p, int args, int consing)
 				break;
 
 			c = make_literal(p, g_nil_s);
+
 			c = p->t->cells+save_idx;
 			c->nbr_cells = p->t->cidx - save_idx;
+
+			if (0) {
+			}
+
 			p->start_term = 0;
 			last_op = 0;
 			continue;
