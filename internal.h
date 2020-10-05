@@ -145,7 +145,7 @@ struct cell_ {
 
 		struct {
 			char *val_str;
-			uint32_t len_str;
+			size_t len_str;
 		};
 
 		struct {
