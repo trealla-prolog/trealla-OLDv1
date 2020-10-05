@@ -228,7 +228,7 @@ cell *list_head(cell *l)
 
 	static cell tmp;
 	tmp.val_type = TYPE_CSTRING;
-	tmp.flags = FLAG_HEAD;
+	tmp.flags = 0;
 	tmp.nbr_cells = 1;
 	tmp.arity = 0;
 	memcpy(tmp.val_chr, l->val_str, n);
