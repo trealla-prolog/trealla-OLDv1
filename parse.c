@@ -228,9 +228,9 @@ cell *list_head(cell *l)
 
 	static cell tmp;
 	tmp.val_type = TYPE_CSTRING;
-	tmp.flags = 0;
 	tmp.nbr_cells = 1;
 	tmp.arity = 0;
+	tmp.flags = 0;
 	memcpy(tmp.val_chr, l->val_str, n);
 	tmp.val_chr[n] = '\0';
 	return &tmp;
@@ -259,8 +259,8 @@ cell *list_tail(cell *l)
 	static cell tmp;
 	tmp.val_type = TYPE_LITERAL;
 	tmp.nbr_cells = 1;
-	tmp.flags = 0;
 	tmp.arity = 0;
+	tmp.flags = 0;
 	tmp.val_off = g_nil_s;
 	return &tmp;
 }

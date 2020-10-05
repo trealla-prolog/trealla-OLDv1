@@ -199,7 +199,8 @@ static void make_literal(cell *tmp, idx_t offset)
 {
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1;
-	tmp->arity = tmp->flags = 0;
+	tmp->arity = 0;
+	tmp->flags = 0;
 	tmp->val_off = offset;
 }
 
