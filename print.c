@@ -332,6 +332,18 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			cons = 1;
 			continue;
 		}
+		else if (is_string(tail)) {
+			cell *l = tail;
+
+			while (is_list(l)) {
+				dst += snprintf(dst, dstlen, "%s", ",");
+				cell *h = LIST_HEAD(l);
+				dst += snprintf(dst, dstlen, "%s", GET_STR(h));
+				l = LIST_TAIL(l);
+			}
+
+			print_list++;
+		}
 		else {
 			dst += snprintf(dst, dstlen, "%s", "|");
 			dst += write_term_to_buf(q, dst, dstlen, tail, running, 1, max_depth, depth+1);
