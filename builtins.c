@@ -553,13 +553,13 @@ static int fn_iso_atom_1(query *q)
 static int fn_iso_compound_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return is_structure(p1) || is_string(p1) ? 1 : 0;
+	return is_structure(p1) || is_list(p1) ? 1 : 0;
 }
 
 static int fn_iso_atomic_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return is_iso_atomic(p1);
+	return is_atomic(p1);
 }
 
 static int fn_iso_var_1(query *q)

@@ -16,7 +16,6 @@
 #define is_structure(c) (is_literal(c) && (c)->arity)
 #define is_number(c) (is_rational(c) || is_float(c))
 #define is_atomic(c) (is_atom(c) || is_number(c))
-#define is_iso_atomic(c) (is_iso_atom(c) || is_number(c))
 #define is_list_or_nil(c) (is_list(c) || is_nil(c))
 #define is_iso_list_or_nil(c) (is_iso_list(c) || is_nil(c))
 #define is_list_or_nil_or_var(c) (is_list_or_nil(c) || is_variable(c))
