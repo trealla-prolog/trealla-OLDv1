@@ -439,6 +439,13 @@ static cell make_cstring(query *q, const char *s)
 	return make_cstringn(q, s, n);
 }
 
+static cell make_string(query *q, const char *s, size_t n)
+{
+	cell tmp = *alloc_catomn(q, s, n);
+	tmp.flags |= FLAG_STRING;
+	return tmp;
+}
+
 static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
 	idx_t save_idx = tmp_heap_used(q);
@@ -8847,8 +8854,9 @@ static int fn_string_concat_3(query *q)
 		if (strcmp(GET_STR(p3)+(LEN_STR(p3)-LEN_STR(p2)), GET_STR(p2)))
 			return 0;
 
-		char *dst = strndup(GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
-		cell tmp = make_cstring(q, dst);
+		size_t len = LEN_STR(p3)-LEN_STR(p2);
+		char *dst = strndup(GET_STR(p3), len);
+		cell tmp = make_string(q, dst, len);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		free(dst);
 		return 1;
@@ -8859,7 +8867,8 @@ static int fn_string_concat_3(query *q)
 			return 0;
 
 		char *dst = strdup(GET_STR(p3)+LEN_STR(p1));
-		cell tmp = make_cstring(q, dst);
+		size_t len = strlen(dst);
+		cell tmp = make_string(q, dst, len);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(dst);
 		return 1;
