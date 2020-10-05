@@ -62,10 +62,11 @@ typedef uint32_t idx_t;
 // Derived type...
 
 #define is_iso_atom(c) ((is_literal(c) || is_cstring(c)) && !(c)->arity)
+#define is_iso_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
+
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || (is_cstring(c)))
 #define is_string(c) (is_cstring(c) && (c)->flags&FLAG_STRING)
 #define is_blob(c) (is_cstring(c) && ((c)->flags&FLAG_BLOB))
-#define is_iso_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
 #define is_list(c) (is_iso_list(c) || is_string(c))
 #define is_integer(c) (((c)->val_type == TYPE_INTEGER) && ((c)->val_den == 1))
 #define is_const_cstring(c) (is_cstring(c) && ((c)->flags&FLAG_CONST_CSTRING))
@@ -452,7 +453,7 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected);
 unsigned long long get_time_in_usec(void);
 void clear_term(term *t);
 void do_db_load(module *m);
-void set_dynamic_in_db(module *m, const char *name, idx_t arity);
+void set_dynamic_in_db(module *m, const char *name, unsigned arity);
 int set_op(module *m, const char *name, unsigned val_type, unsigned precedence);
 size_t sprint_int(char *dst, size_t size, int_t n, int base);
 void call_attrs(query *q, cell *attrs);

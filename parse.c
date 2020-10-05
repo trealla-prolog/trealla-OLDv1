@@ -652,7 +652,7 @@ clause *erase_from_db(module *m, uuid *ref)
 	return r;
 }
 
-void set_dynamic_in_db(module *m, const char *name, idx_t arity)
+void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
@@ -666,7 +666,7 @@ void set_dynamic_in_db(module *m, const char *name, idx_t arity)
 		h->index = sl_create(compkey);
 }
 
-static void set_persist_in_db(module *m, const char *name, idx_t arity)
+static void set_persist_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
