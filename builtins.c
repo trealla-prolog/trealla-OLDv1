@@ -5917,7 +5917,7 @@ static int fn_loadfile_2(query *q)
 
 	s[st.st_size] = '\0';
 	fclose(fp);
-	cell tmp = make_blob(q, s, st.st_size);
+	cell tmp = make_string(q, s, st.st_size);
 	tmp.flags |= FLAG_STRING;
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	free(s);
@@ -5943,14 +5943,18 @@ static int fn_getfile_2(query *q)
 	int nbr = 1, in_list = 0;
 
 	while (getline(&line, &len, fp) != -1) {
-		if (line[strlen(line)-1] == '\n')
-			line[strlen(line)-1] = '\0';
+		size_t nlen = strlen(line);
+		if (line[nlen-1] == '\n') {
+			line[nlen-1] = '\0';
+			nlen--;
+		}
 
-		if (line[strlen(line)-1] == '\r')
-			line[strlen(line)-1] = '\0';
+		if (line[nlen-1] == '\r') {
+			line[nlen-1] = '\0';
+			nlen--;
+		}
 
-		cell tmp = tmp_cstring(q, line);
-		tmp.flags |= FLAG_STRING;
+		cell tmp = make_string(q, line, nlen);
 
 		if (nbr++ == 1)
 			alloc_list(q, &tmp);
