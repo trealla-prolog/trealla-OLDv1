@@ -219,45 +219,40 @@ int set_op(module *m, const char *name, unsigned val_type, unsigned precedence)
 
 module *g_modules = NULL;
 
-cell *list_head(cell **lptr)
+cell *list_head(cell *l)
 {
-	cell *l = *lptr;
-
 	if (!is_string(l))
 		return l + 1;
 
+	size_t n = len_char_utf8(l->val_str);
+
 	static cell tmp;
 	tmp.val_type = TYPE_CSTRING;
-	tmp.flags = FLAG_BLOB|FLAG_CONST_CSTRING|FLAG_STRING|FLAG_HEAD;
+	tmp.flags = FLAG_HEAD;
 	tmp.nbr_cells = 1;
 	tmp.arity = 0;
-	tmp.val_str = l->val_str;
-	int n = len_char_utf8(l->val_str);
-	tmp.len_str = n;
-	tmp.rem_str = l->rem_str - n;
-	*lptr = &tmp;
+	memcpy(tmp.val_chr, l->val_str, n);
+	tmp.val_chr[n] = '\0';
 	return &tmp;
 }
 
-cell *list_tail(cell **lptr)
+cell *list_tail(cell *l)
 {
-	cell *l = *lptr;
-
 	if (!is_string(l)) {
 		cell *h = l + 1;
 		return h + h->nbr_cells;
 	}
 
-	if (is_string(l) && l->rem_str) {
+	size_t n = len_char_utf8(l->val_str);
+
+	if (is_string(l) && (l->len_str-n)) {
 		static cell tmp;
 		tmp.val_type = TYPE_CSTRING;
 		tmp.flags = FLAG_BLOB|FLAG_CONST_CSTRING|FLAG_STRING;
 		tmp.nbr_cells = 1;
 		tmp.arity = 2;
-		tmp.val_str = l->val_str + l->len_str;
-		tmp.len_str = l->rem_str;
-		tmp.rem_str = l->rem_str;
-		*lptr = &tmp;
+		tmp.val_str = l->val_str + n;
+		tmp.len_str = l->len_str - n;
 		return &tmp;
 	}
 
@@ -267,7 +262,6 @@ cell *list_tail(cell **lptr)
 	tmp.flags = 0;
 	tmp.arity = 0;
 	tmp.val_off = g_nil_s;
-	*lptr = &tmp;
 	return &tmp;
 }
 
@@ -2444,7 +2438,6 @@ int parser_tokenize(parser *p, int args, int consing)
 				c->flags |= FLAG_BLOB;
 				c->val_str = strdup(p->token);
 				c->len_str = strlen(p->token);
-				c->rem_str = c->len_str;
 			}
 		}
 	}

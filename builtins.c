@@ -287,7 +287,6 @@ static cell *alloc_catomn(query *q, const char *s, size_t n)
 	memcpy(tmp->val_str, s, n);
 	tmp->val_str[n] = '\0';
 	tmp->len_str = n;
-	tmp->rem_str = n;
 	return tmp;
 }
 
@@ -1536,7 +1535,6 @@ static int fn_iso_open_4(query *q)
 		tmp.nbr_cells = 1;
 		tmp.val_str = addr;
 		tmp.len_str = len;
-		tmp.rem_str = len;
 		unify(q, mmap_var, mmap_ctx, &tmp, q->st.curr_frame);
 	}
 #endif
