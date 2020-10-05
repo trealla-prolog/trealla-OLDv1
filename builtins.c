@@ -7036,9 +7036,9 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx,
 		if (!p2 || !is_list(p2))
 			break;
 
-		cell *head = p2 + 1;
+		cell *head = LIST_HEAD(p2);
 		c = deref_var(q, head, p2_ctx);
-		p2 = head + head->nbr_cells;
+		p2 = LIST_TAIL(p2);
 
 		if (ch == 'i')
 			continue;
@@ -7049,7 +7049,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx,
 		if (ch == 'k')
 			canonical = 1;
 
-		if ((ch == 'a') && !is_atom(c) && !is_list(c)) {
+		if ((ch == 'a') && !is_atom(c)) {
 			free(tmpbuf);
 			throw_error(q, c, "type_error", "atom");
 			return 0;
@@ -7269,7 +7269,7 @@ static int fn_sha1_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *str = GET_STR(p1);
 	unsigned char digest[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*)str, strlen(str), digest);
+	SHA1((unsigned char*)str, LEN_STR(p1), digest);
 	char tmpbuf[512];
 	char *dst = tmpbuf;
 	size_t buflen = sizeof(tmpbuf);
@@ -7280,8 +7280,7 @@ static int fn_sha1_2(query *q)
 		buflen -= len;
 	}
 
-	cell tmp = make_cstring(q, tmpbuf);
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7291,7 +7290,7 @@ static int fn_sha256_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *str = GET_STR(p1);
 	unsigned char digest[SHA256_DIGEST_LENGTH];
-	SHA256((unsigned char*)str, strlen(str), digest);
+	SHA256((unsigned char*)str, LEN_STR(p1), digest);
 	char tmpbuf[512];
 	char *dst = tmpbuf;
 	size_t buflen = sizeof(tmpbuf);
@@ -7302,8 +7301,7 @@ static int fn_sha256_2(query *q)
 		buflen -= len;
 	}
 
-	cell tmp = make_cstring(q, tmpbuf);
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7313,7 +7311,7 @@ static int fn_sha512_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *str = GET_STR(p1);
 	unsigned char digest[SHA512_DIGEST_LENGTH];
-	SHA512((unsigned char*)str, strlen(str), digest);
+	SHA512((unsigned char*)str, LEN_STR(p1), digest);
 	char tmpbuf[512];
 	char *dst = tmpbuf;
 	size_t buflen = sizeof(tmpbuf);
@@ -7324,8 +7322,7 @@ static int fn_sha512_2(query *q)
 		buflen -= len;
 	}
 
-	cell tmp = make_cstring(q, tmpbuf);
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 #endif
@@ -7335,11 +7332,10 @@ static int do_b64encode_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,variable);
 	const char *str = GET_STR(p1);
-	size_t len = strlen(str);
+	size_t len = LEN_STR(p1);
 	char *dstbuf = malloc((len*3)+1);
 	b64_encode(str, len, &dstbuf, 0, 0);
-	cell tmp = make_cstring(q, dstbuf);
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, dstbuf, strlen(dstbuf));
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7349,10 +7345,10 @@ static int do_b64decode_2(query *q)
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,atom);
 	const char *str = GET_STR(p2);
-	size_t len = strlen(str);
+	size_t len = LEN_STR(p1);
 	char *dstbuf = malloc(len+1);
 	b64_decode(str, len, &dstbuf);
-	cell tmp = make_cstring(q, dstbuf);
+	cell tmp = make_string(q, dstbuf, strlen(dstbuf));
 	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -7416,12 +7412,10 @@ static int do_urlencode_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,variable);
 	const char *str = GET_STR(p1);
-	size_t len = strlen(str);
+	size_t len = LEN_STR(p1);
 	char *dstbuf = malloc((len*3)+1);
 	url_encode(str, len, dstbuf);
-	cell tmp = make_cstring(q, dstbuf);
-	tmp = make_cstring(q, dstbuf);
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, dstbuf, strlen(dstbuf));
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7431,12 +7425,10 @@ static int do_urldecode_2(query *q)
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,atom);
 	const char *str = GET_STR(p1);
-	size_t len = strlen(str);
+	size_t len = LEN_STR(p1);
 	char *dstbuf = malloc(len+1);
 	url_decode(str, dstbuf);
-	cell tmp = make_cstring(q, dstbuf);
-	tmp = make_cstring(q, dstbuf);
-	if (is_string(p2)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, dstbuf, strlen(dstbuf));
 	free(dstbuf);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
