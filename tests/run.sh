@@ -15,7 +15,7 @@ for source in tests/tests/* tests/issues/*
 
 do
 	case "$source" in
-		*.pro)
+		*.pl)
 			cmd="$TPL -q --ns "
 			;;
 		*.sh)

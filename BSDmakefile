@@ -55,20 +55,20 @@ utf8.o: utf8.c utf8.h
 
 # Library modules
 
-dict.o: library/dict.pro
-	$(LD) -m elf_x86_64 -r -b binary -o dict.o library/dict.pro
+dict.o: library/dict.pl
+	$(LD) -m elf_x86_64 -r -b binary -o dict.o library/dict.pl
 
-lists.o: library/lists.pro
-	$(LD) -m elf_x86_64 -r -b binary -o lists.o library/lists.pro
+lists.o: library/lists.pl
+	$(LD) -m elf_x86_64 -r -b binary -o lists.o library/lists.pl
 
-apply.o: library/apply.pro
-	$(LD) -m elf_x86_64 -r -b binary -o apply.o library/apply.pro
+apply.o: library/apply.pl
+	$(LD) -m elf_x86_64 -r -b binary -o apply.o library/apply.pl
 
-http.o: library/http.pro
-	$(LD) -m elf_x86_64 -r -b binary -o http.o library/http.pro
+http.o: library/http.pl
+	$(LD) -m elf_x86_64 -r -b binary -o http.o library/http.pl
 
-auth.o: library/auth.pro
-	$(LD) -m elf_x86_64 -r -b binary -o auth.o library/auth.pro
+auth.o: library/auth.pl
+	$(LD) -m elf_x86_64 -r -b binary -o auth.o library/auth.pl
 
-atts.o: library/atts.pro
-	$(LD) -m elf_x86_64 -r -b binary -o atts.o library/atts.pro
+atts.o: library/atts.pl
+	$(LD) -m elf_x86_64 -r -b binary -o atts.o library/atts.pl

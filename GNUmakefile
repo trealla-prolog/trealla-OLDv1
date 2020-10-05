@@ -66,20 +66,20 @@ ifeq ($(UNAME_S),FreeBSD)
 	OSFLAG = -m elf_x86_64
 endif
 
-dict.o: library/dict.pro
-	$(LD) $(OSFLAG) -r -b binary -o dict.o library/dict.pro
+dict.o: library/dict.pl
+	$(LD) $(OSFLAG) -r -b binary -o dict.o library/dict.pl
 
-lists.o: library/lists.pro
-	$(LD) $(OSFLAG) -r -b binary -o lists.o library/lists.pro
+lists.o: library/lists.pl
+	$(LD) $(OSFLAG) -r -b binary -o lists.o library/lists.pl
 
-apply.o: library/apply.pro
-	$(LD) $(OSFLAG) -r -b binary -o apply.o library/apply.pro
+apply.o: library/apply.pl
+	$(LD) $(OSFLAG) -r -b binary -o apply.o library/apply.pl
 
-http.o: library/http.pro
-	$(LD) $(OSFLAG) -r -b binary -o http.o library/http.pro
+http.o: library/http.pl
+	$(LD) $(OSFLAG) -r -b binary -o http.o library/http.pl
 
-auth.o: library/auth.pro
-	$(LD) $(OSFLAG) -r -b binary -o auth.o library/auth.pro
+auth.o: library/auth.pl
+	$(LD) $(OSFLAG) -r -b binary -o auth.o library/auth.pl
 
-atts.o: library/atts.pro
-	$(LD) $(OSFLAG) -r -b binary -o atts.o library/atts.pro
+atts.o: library/atts.pl
+	$(LD) $(OSFLAG) -r -b binary -o atts.o library/atts.pl

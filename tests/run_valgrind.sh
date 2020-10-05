@@ -15,7 +15,7 @@ succeeded_count=0
 for source in tests/tests/*
 do
 	case "$source" in
-		*.pro)
+		*.pl)
 			cmd="$TPL -q --traditional "
 			;;
 		*.sh)
