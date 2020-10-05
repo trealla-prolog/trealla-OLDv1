@@ -2233,7 +2233,7 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 		if (q) save_ctx = q->latest_ctx;
 	}
 
-	q->latest_ctx = save_ctx;
+	if (q) q->latest_ctx = save_ctx;
 	return is_chars_list;
 }
 
@@ -2297,7 +2297,8 @@ int parser_tokenize(parser *p, int args, int consing)
 			c = p->t->cells+save_idx;
 			c->nbr_cells = p->t->cidx - save_idx;
 
-			if (0) {
+			if (scan_list(NULL, c, 0)) {
+				// convert to string
 			}
 
 			p->start_term = 0;
