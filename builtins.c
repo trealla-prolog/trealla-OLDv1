@@ -7456,12 +7456,12 @@ static int fn_urlenc_2(query *q)
 	return 0;
 }
 
-static int fn_atom_lower_2(query *q)
+static int fn_string_lower_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *str = GET_STR(p1);
-	char *tmps = strdup(str);
+	char *tmps = strndup(str, LEN_STR(p1));
 	char *s = tmps;
 
 	while (*s) {
@@ -7469,18 +7469,17 @@ static int fn_atom_lower_2(query *q)
 		s++;
 	}
 
-	cell tmp = make_cstring(q, tmps);
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, tmps, LEN_STR(p1));
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_atom_upper_2(query *q)
+static int fn_string_upper_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *str = GET_STR(p1);
-	char *tmps = strdup(str);
+	char *tmps = strndup(str, LEN_STR(p1));
 	char *s = tmps;
 
 	while (*s) {
@@ -7488,8 +7487,7 @@ static int fn_atom_upper_2(query *q)
 		s++;
 	}
 
-	cell tmp = make_cstring(q, tmps);
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(q, tmps, LEN_STR(p1));
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -9159,8 +9157,8 @@ static const struct builtins g_other_funcs[] =
 	{"term_to_atom", 2, fn_term_to_atom_2, "+term,-string"},
 	{"base64", 2, fn_base64_2, "?string,?string"},
 	{"urlenc", 2, fn_urlenc_2, "?string,?string"},
-	{"string_lower", 2, fn_atom_lower_2, "?string,?string"},
-	{"string_upper", 2, fn_atom_upper_2, "?string,?string"},
+	{"string_lower", 2, fn_string_lower_2, "?string,?string"},
+	{"string_upper", 2, fn_string_upper_2, "?string,?string"},
 	{"read_catom", 3, fn_bread_3, "+stream,+integer,-string"},
 	{"bread", 3, fn_bread_3, "+stream,+integer,-string"},
 	{"bwrite", 2, fn_bwrite_2, "+stream,-string"},
