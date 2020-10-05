@@ -8785,17 +8785,59 @@ static int fn_length_2(query *q)
 	return 0;
 }
 
+// NOTE: this just handles the mode(-,-,+) case...
+
+static int do_string_concat_3(query *q)
+{
+	if (!q->retry) {
+		GET_FIRST_ARG(p1,variable);
+		GET_NEXT_ARG(p2,variable);
+		GET_NEXT_ARG(p3,atom);
+		cell tmp = make_string(q, "", 0);
+		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		set_var(q, p2, p2_ctx, p3, q->st.curr_frame);
+		make_choice(q);
+		return 1;
+	}
+
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,any);
+	GET_NEXT_ARG(p3,atom);
+	const char *src = GET_STR(p3);
+	size_t len = LEN_STR(p1) + len_char_utf8(src);
+	char *dst1 = strndup(src, len);
+	char *dst2 = strdup(src+len);
+	int done = 0;
+
+	if (!*dst2)
+		done = 1;
+
+	GET_RAW_ARG(1,p1_raw);
+	GET_RAW_ARG(2,p2_raw);
+	cell tmp = make_string(q, dst1, strlen(dst1));
+	free(dst1);
+	reset_value(q, p1_raw, p1_raw_ctx, &tmp, q->st.curr_frame);
+	tmp = make_string(q, dst2, strlen(dst2));
+	reset_value(q, p2_raw, p2_raw_ctx, &tmp, q->st.curr_frame);
+	free(dst2);
+
+	if (!done)
+		make_choice(q);
+
+	return 1;
+}
+
 static int fn_string_concat_3(query *q)
 {
 	if (q->retry)
-		return do_atom_concat_3(q);
+		return do_string_concat_3(q);
 
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,any);
 
 	if (is_variable(p1) && is_variable(p2))
-		return do_atom_concat_3(q);
+		return do_string_concat_3(q);
 
 	if (is_variable(p3)) {
 		if (!is_atom(p1) && !is_string(p1)) {
