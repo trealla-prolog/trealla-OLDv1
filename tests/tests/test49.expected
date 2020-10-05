@@ -1,9 +1,9 @@
-[c,d,a,a,f,e,g]
-[c,d,a,a]
-[f,e]
-[g]
-[c,d,a,a,f,e,g]
-[a,c,d,e,f,g]
+"cdaafeg"
+"cdaa"
+"fe"
+"g"
+"cdaafeg"
+"acdefg"
 [bar(c),bar(d),bar(a),bar(a),bar(f),bar(e),bar(g)]
 [bar(c),bar(d),bar(a),bar(a)]
 [bar(f),bar(e)]

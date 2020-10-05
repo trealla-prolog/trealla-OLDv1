@@ -241,6 +241,38 @@ static char *varformat(unsigned nbr)
 	return tmpbuf;
 }
 
+int scan_list(query *q, cell *l, idx_t l_ctx)
+{
+	idx_t save_ctx = l_ctx;
+	int is_chars_list = 0;
+
+	while (is_iso_list(l)) {
+		cell *h = list_head(l);
+		cell *c = deref_var(q, h, save_ctx);
+
+		if (is_atom(c)) {
+			const char *src = GET_STR(c);
+
+			if (len_char_utf8(src) != LEN_STR(c)) {
+				is_chars_list = 0;
+				break;
+			}
+
+			is_chars_list = 1;
+		} else {
+			is_chars_list = 0;
+			break;
+		}
+
+		l = list_tail(l);
+		l = deref_var(q, l, save_ctx);
+		save_ctx = q->latest_ctx;
+	}
+
+	q->latest_ctx = save_ctx;
+	return is_chars_list;
+}
+
 size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int cons, int max_depth, int depth)
 {
 	char *save_dst = dst;
@@ -299,6 +331,26 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 	int print_list = 0;
 
 	// FIXME make non-recursive
+
+	int is_chars_list = scan_list(q, c, q->latest_ctx);
+
+	if (is_chars_list) {
+		cell *l = c;
+		dst += snprintf(dst, dstlen, "%s", "\"");
+
+		while (is_list(l)) {
+			cell *h = LIST_HEAD(l);
+			cell *c = deref_var(q, h, save_ctx);
+			dst += snprintf(dst, dstlen, "%s", GET_STR(c));
+			l = LIST_TAIL(l);
+			l = deref_var(q, l, save_ctx);
+			save_ctx = q->latest_ctx;
+		}
+
+		dst += snprintf(dst, dstlen, "%s", "\"");
+		q->latest_ctx = save2_ctx;
+		return dst - save_dst;
+	}
 
 	while (is_iso_list(c)) {
 		if (max_depth && (depth >= max_depth)) {

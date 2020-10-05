@@ -460,3 +460,4 @@ void call_attrs(query *q, cell *attrs);
 void alloc_list(query *q, const cell *c);
 void append_list(query *q, const cell *c);
 cell *end_list(query *q);
+int scan_list(query *q, cell *l, idx_t l_ctx);
