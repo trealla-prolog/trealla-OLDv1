@@ -401,28 +401,28 @@ Compiled with GCC 10.1.0 on Linux.
 	testindex5  |   9.3   |  11.8     |   4.2     |  49.7   |
 	------------|---------|-----------|-----------|---------|----------
 
-	tpl -g "time(test5),halt" samples/sieve.pro -g
-	tpl -g "time(test),halt" samples/fib.pro
-	tpl -g "time(hanoiq(22)),halt" samples/hanoi.pro
-	tpl -g "time(testq),halt" samples/queens11.pro
-	tpl -g "time(main),halt" samples/puzzle.pro
-	tpl -g "time(main),halt" samples/chess.pro
-	tpl -g "time(test1a),halt" samples/testindex.pro
-	tpl -g "time(test1b),halt" samples/testindex.pro
-	tpl -g "time(test5),halt" samples/testindex.pro
+	tpl -g "time(test5),halt" samples/sieve.pl -g
+	tpl -g "time(test),halt" samples/fib.pl
+	tpl -g "time(hanoiq(22)),halt" samples/hanoi.pl
+	tpl -g "time(testq),halt" samples/queens11.pl
+	tpl -g "time(main),halt" samples/puzzle.pl
+	tpl -g "time(main),halt" samples/chess.pl
+	tpl -g "time(test1a),halt" samples/testindex.pl
+	tpl -g "time(test1b),halt" samples/testindex.pl
+	tpl -g "time(test5),halt" samples/testindex.pl
 
-	swipl -g "time(test5),halt" samples/sieve.pro
+	swipl -g "time(test5),halt" samples/sieve.pl
 	etc
 
-	yap -g "time(test5),halt" -s128000 samples/sieve.pro
+	yap -g "time(test5),halt" -s128000 samples/sieve.pl
 	etc
 
 	export setenv LOCALSZ=256000
 	export setenv GLOBALSZ=128000
-	time gprolog --query-goal test5,halt --consult-file samples/sieve.pro
+	time gprolog --query-goal test5,halt --consult-file samples/sieve.pl
 	etc
 
-	time scryer-prolog -g test5,halt samples/sieve.pro
+	time scryer-prolog -g test5,halt samples/sieve.pl
 	etc
 
 Times for gprolog & scryer were done using the unix *time* command and
