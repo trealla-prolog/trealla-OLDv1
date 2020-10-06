@@ -99,14 +99,12 @@ Acknowledgements
 ================
 
 Special thanks to [Xin Wang](https://github.com/dram) for providing the
-testing framework and for driving development of a prior but ultimately
-abandoned version of Trealla Prolog, hopefully i've paid you back with
-this complete rewrite.
+testing framework.
 
 Special thanks to [Markus Triska](https://github.com/triska) for
 driving the use of packed UTF-8 strings for character-lists. For the
 idea of mmap()-ing files as strings. For his rigorous approach to types
-and for relentless bug-checking.
+and for bug-checking.
 
 
 GNU-Prolog & SWI-Prolog
