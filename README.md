@@ -95,7 +95,7 @@ you back with this complete rewrite.
 
 Special thanks to [Markus Triska](https://github.com/triska) for
 driving the use of packed UTF-8 strings for character-lists. For the
-of  mmap()-ing files as such. For his rigorous approach to types and
+idea of mmap()-ing files as such. For his rigorous approach to types and
 relentless bug-checking.
 
 
