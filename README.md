@@ -458,7 +458,7 @@ Yap came from *git clone https://github.com/vscosta/yap-6.3* and needs
 *cmake* installed.
 
 Scryer came from *cargo install scryer-prolog* (it takes a long time)
-and needs *m4* installed. Chess needs name/2 (at least).
+and needs *m4* installed.
 
 The Peirera (sic) benchmarks can be run:
 
