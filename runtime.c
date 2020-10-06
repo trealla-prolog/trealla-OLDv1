@@ -613,26 +613,24 @@ static int unify_float(cell *p1, cell *p2)
 	return 0;
 }
 
-#define GET_STR2(c) ((c)->flags&FLAG_BLOB ? (c)->val_str : (c)->val_chr)
-
 static int unify_literal(cell *p1, cell *p2)
 {
 	if (is_literal(p2))
 		return p1->val_off == p2->val_off;
 
-	if (is_cstring(p2))
-		return !strncmp(g_pool+p1->val_off, GET_STR2(p2), LEN_STR(p2));
+	if (is_cstring(p2) && (LEN_STR(p2) == LEN_STR(p1)))
+		return !memcmp(GET_STR(p2), g_pool+p1->val_off, LEN_STR(p1));
 
 	return 0;
 }
 
-static int unify_catom(cell *p1, cell *p2)
+static int unify_cstring(cell *p1, cell *p2)
 {
-	if (is_literal(p2) && (LEN_STR(p1) == strlen(g_pool+p2->val_off)))
-		return !memcmp(GET_STR2(p1), g_pool+p2->val_off, LEN_STR(p1));
-
 	if (is_cstring(p2) && (LEN_STR(p1) == LEN_STR(p2)))
-		return !memcmp(GET_STR2(p1), GET_STR2(p2), LEN_STR(p1));
+		return !memcmp(GET_STR(p1), GET_STR(p2), LEN_STR(p1));
+
+	if (is_literal(p2) && (LEN_STR(p1) == LEN_STR(p2)))
+		return !memcmp(GET_STR(p1), g_pool+p2->val_off, LEN_STR(p1));
 
 	return 0;
 }
@@ -672,7 +670,7 @@ static const struct dispatch g_disp[] =
 	{TYPE_EMPTY, NULL},
 	{TYPE_VARIABLE, NULL},
 	{TYPE_LITERAL, unify_literal},
-	{TYPE_CSTRING, unify_catom},
+	{TYPE_CSTRING, unify_cstring},
 	{TYPE_INTEGER, unify_int},
 	{TYPE_FLOAT, unify_float},
 	{0}
@@ -708,7 +706,7 @@ int unify(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 	}
 
 	if (is_string(p1) && is_string(p2))
-		return unify_catom(p1, p2);
+		return unify_cstring(p1, p2);
 
 	if (is_list(p1) && is_list(p2))
 		return unify_list(q, p1, p1_ctx, p2, p2_ctx);
