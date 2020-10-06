@@ -85,6 +85,20 @@ What's missing?
 	aiming to run clpz.pl down the track
 
 
+Acknowledgements
+================
+
+Special thanks to [Xin Wang](https://github.com/dram) for providing the
+unit testing framework and for driving development of a prior but
+ultimately  abandoned version of Trealla Prolog, hopefully i've paid
+you back with this complete rewrite.
+
+Special thanks to [Markus Triska](https://github.com/triska) for
+driving the use of packed UTF-8 strings for character-lists. For the
+of  mmap()-ing files as such. For his rigorous approach to types and
+relentless bug-checking.
+
+
 GNU-Prolog & SWI-Prolog
 =======================
 
