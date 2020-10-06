@@ -2213,7 +2213,6 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 	int is_chars_list = 0;
 
 	while (is_iso_list(l)) {
-		cell *save_l = l;
 		cell *h = list_head(l);
 		cell *c = q ? deref_var(q, h, save_ctx) : h;
 
@@ -2234,14 +2233,6 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 		l = list_tail(l);
 		l = q ? deref_var(q, l, save_ctx) : l;
 		if (q) save_ctx = q->latest_ctx;
-
-		if ((l == save_l) && 0) {
-			fprintf(stderr, "Error: loop in scan_list\n");
-			if (q) q->latest_ctx = save_ctx;
-			q->halt = 1;
-			q->error = 1;
-			return 0;
-		}
 	}
 
 	if (q) q->latest_ctx = save_ctx;
