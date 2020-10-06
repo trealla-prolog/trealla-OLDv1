@@ -639,9 +639,6 @@ static int unify_catom(cell *p1, cell *p2)
 
 static int unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
-	if (is_string(p1) && is_string(p2))
-		return unify_catom(p1, p2);
-
 	while (is_list(p1) && is_list(p2)) {
 		cell *h1 = LIST_HEAD(p1);
 		cell *h2 = LIST_HEAD(p2);
@@ -709,6 +706,9 @@ int unify(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		set_var(q, p2, p2_ctx, p1, p1_ctx);
 		return 1;
 	}
+
+	if (is_string(p1) && is_string(p2))
+		return unify_catom(p1, p2);
 
 	if (is_list(p1) && is_list(p2))
 		return unify_list(q, p1, p1_ctx, p2, p2_ctx);
