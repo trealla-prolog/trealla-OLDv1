@@ -2237,6 +2237,7 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 
 		if ((l == save_l) && 0) {
 			fprintf(stderr, "Error: loop in scan_list\n");
+			if (q) q->latest_ctx = save_ctx;
 			q->halt = 1;
 			q->error = 1;
 			return 0;
