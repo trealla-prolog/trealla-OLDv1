@@ -27,12 +27,17 @@ Written in plain-old C.
 
 	git clone https://github.com/infradig/trealla.git
 	cd trealla
+
+On Debian systems you may need to install GNU readline:
+
+	sudo apt install libreadline-dev
+
+Other systems may vary. There are no other dependencies except OpenSSL.
+
+Then...
+
 	make
 	make test
-
-There are no dependencies except OpenSSL, which can removed by:
-
-	make NOSSL=1
 
 Run...
 
@@ -41,7 +46,11 @@ Run...
 
 to do the tests under *valgrind* memory checking.
 
-A 'make debug' build compiles in 0.2s with *tcc* and about 2s with
+To build without OpenSSL:
+
+	make NOSSL=1
+
+A 'make debug' build compiles in 0.2s with *tcc* and about 3s with
 *clang* and *gcc*. Should build on any Unix-like system with a C99
 compiler (could do C89 with a few cosmetic tweaks). Has been tested on
 Manjaro, Ubuntu, FreeBSD and Raspbian (32 & 64-bit) systems. There
