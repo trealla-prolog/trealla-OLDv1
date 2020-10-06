@@ -166,10 +166,7 @@ static void trace_call(query *q, cell *c, int box)
 	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u:tp%u:cp%u:fp%u:sp%u:hp%u} ", q->st.curr_frame, g->nbr_vars, g->nbr_slots, g->any_choices, q->st.tp, q->cp, q->st.fp, q->st.sp, q->st.hp);
 #endif
 
-	idx_t save_ctx = q->latest_ctx;
-	q->latest_ctx = q->st.curr_frame;
 	write_term(q, stderr, c, -1, 0, 100, 0);
-	q->latest_ctx = save_ctx;
 	fprintf(stderr, "\n");
 }
 

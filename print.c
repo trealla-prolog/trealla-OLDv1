@@ -295,11 +295,6 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 	idx_t save_ctx = q->latest_ctx;
 	idx_t save2_ctx = q->latest_ctx;
-	const char *src = GET_STR(c);
-	int print_list = 0;
-
-	// FIXME make non-recursive
-
 	int is_chars_list = scan_list(q, c, q->latest_ctx);
 
 	if (is_chars_list) {
@@ -320,6 +315,11 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		return dst - save_dst;
 	}
 
+	// FIXME make non-recursive
+
+	const char *src = GET_STR(c);
+	int print_list = 0;
+
 	while (is_iso_list(c)) {
 		if (max_depth && (depth >= max_depth)) {
 			dst += snprintf(dst, dstlen, " |...");
@@ -327,14 +327,16 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		}
 
 		cell *h = LIST_HEAD(c);
-		cell *tail = LIST_TAIL(c);
 
 		if (!cons)
 			dst += snprintf(dst, dstlen, "%s", "[");
 
 		h = running ? deref_var(q, h, save_ctx) : h;
 		dst += write_term_to_buf(q, dst, dstlen, h, running, 0, max_depth, depth+1);
+
+		cell *tail = LIST_TAIL(c);
 		tail = running ? deref_var(q, tail, save_ctx) : tail;
+		save_ctx = q->latest_ctx;
 
 		if (is_literal(tail) && !is_structure(tail)) {
 			src = GET_STR(tail);
@@ -347,7 +349,6 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		else if (is_iso_list(tail)) {
 			dst += snprintf(dst, dstlen, "%s", ",");
 			c = tail;
-			save_ctx = q->latest_ctx;
 			print_list++;
 			cons = 1;
 			continue;
@@ -390,6 +391,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 		if (running && is_variable(c) && ((1ULL << c->slot_nbr) & q->nv_mask)) {
 			dst += snprintf(dst, dstlen, "%s", varformat(q->nv_start + count_bits(q->nv_mask, c->slot_nbr)));
+			q->latest_ctx = save2_ctx;
 			return dst - save_dst;
 		}
 
@@ -398,6 +400,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			slot *e = GET_SLOT(g, c->slot_nbr);
 			idx_t slot_nbr = e - q->slots;
 			dst += snprintf(dst, dstlen, "_%u", (unsigned)slot_nbr);
+			q->latest_ctx = save2_ctx;
 			return dst - save_dst;
 		}
 
@@ -478,13 +481,12 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		if (parens || rhs_parens) dst += snprintf(dst, dstlen, ")");
 	}
 
-	q->latest_ctx = save_ctx;
+	q->latest_ctx = save2_ctx;
 	return dst - save_dst;
 }
 
 void write_canonical_to_stream(query *q, stream *str, cell *c, int running, int depth)
 {
-	idx_t save_ctx = q->latest_ctx;
 	size_t len = write_canonical_to_buf(q, NULL, 0, c, running, depth);
 	char *dst = malloc(len+1);
 	write_canonical_to_buf(q, dst, len+1, c, running, depth);
@@ -503,12 +505,10 @@ void write_canonical_to_stream(query *q, stream *str, cell *c, int running, int 
 	}
 
 	free(dst);
-	q->latest_ctx = save_ctx;
 }
 
 void write_canonical(query *q, FILE *fp, cell *c, int running, int depth)
 {
-	idx_t save_ctx = q->latest_ctx;
 	size_t len = write_canonical_to_buf(q, NULL, 0, c, running, depth);
 	char *dst = malloc(len+1);
 	write_canonical_to_buf(q, dst, len+1, c, running, depth);
@@ -527,12 +527,10 @@ void write_canonical(query *q, FILE *fp, cell *c, int running, int depth)
 	}
 
 	free(dst);
-	q->latest_ctx = save_ctx;
 }
 
 void write_term_to_stream(query *q, stream *str, cell *c, int running, int cons, int max_depth, int depth)
 {
-	idx_t save_ctx = q->latest_ctx;
 	size_t len = write_term_to_buf(q, NULL, 0, c, running, cons, max_depth, depth);
 	char *dst = malloc(len+1);
 	write_term_to_buf(q, dst, len+1, c, running, cons, max_depth, depth);
@@ -551,12 +549,10 @@ void write_term_to_stream(query *q, stream *str, cell *c, int running, int cons,
 	}
 
 	free(dst);
-	q->latest_ctx = save_ctx;
 }
 
 void write_term(query *q, FILE *fp, cell *c, int running, int cons, int max_depth, int depth)
 {
-	idx_t save_ctx = q->latest_ctx;
 	size_t len = write_term_to_buf(q, NULL, 0, c, running, cons, max_depth, depth);
 	char *dst = malloc(len+1);
 	write_term_to_buf(q, dst, len+1, c, running, cons, max_depth, depth);
@@ -575,5 +571,4 @@ void write_term(query *q, FILE *fp, cell *c, int running, int cons, int max_dept
 	}
 
 	free(dst);
-	q->latest_ctx = save_ctx;
 }
