@@ -8589,7 +8589,9 @@ static int fn_call_dcg_3(query *q)
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
 	if (is_structure(p1) && (p1->val_off == g_braces_s)) {
-		unify(q, p2, p2_ctx, p3, p3_ctx);
+		if (!unify(q, p2, p2_ctx, p3, p3_ctx))
+			return 0;
+
 		p1 = p1 + 1;
 		cell *tmp = clone_to_heap(q, 1, p1, 1);
 		idx_t nbr_cells = 1 + p1->nbr_cells;

@@ -1483,7 +1483,7 @@ static void parser_dcg_rewrite(parser *p)
 		return;
 
 	cell *phrase = t->cells + 1;
-	cell *tmp = calloc(1+(t->cidx*4), sizeof(cell));
+	cell *tmp = calloc(1+(t->cidx*10), sizeof(cell));
 	*tmp = t->cells[0];
 	tmp->val_off = find_in_pool(":-");
 	idx_t nbr_cells = 1;
@@ -1556,8 +1556,8 @@ static void parser_dcg_rewrite(parser *p)
 			tmp[nbr_cells+1].val_off = find_in_pool(v);
 
 			tmp[nbr_cells+2] = phrase[0];
-			tmp[nbr_cells+2].nbr_cells = 3;
-			tmp[nbr_cells+2].arity = 2;
+			//tmp[nbr_cells+2].nbr_cells = 3;
+			//tmp[nbr_cells+2].arity = 2;
 
 			tmp[nbr_cells+3] = phrase[1];
 
@@ -2294,12 +2294,12 @@ int parser_tokenize(parser *p, int args, int consing)
 			if (p->error)
 				break;
 
-			c = make_literal(p, g_nil_s);
+			make_literal(p, g_nil_s);
 
-			c = p->t->cells+save_idx;
+			c = p->t->cells + save_idx;
 			c->nbr_cells = p->t->cidx - save_idx;
 
-			if (scan_list(NULL, c, 0)) {
+			if (scan_list(NULL, c, 0) && 0) {
 				char *dst = 0;
 				size_t dstlen = 0;
 				cell *l = c;
