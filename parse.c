@@ -848,10 +848,12 @@ static void dump_vars(query *q, parser *p)
 	int any = 0;
 
 	for (unsigned i = 0; i < g->nbr_vars; i++, e++) {
-		cell *c;
 
 		if (is_empty(&e->c))
 			continue;
+
+		q->latest_ctx = e->ctx;
+		cell *c;
 
 		if (is_indirect(&e->c))
 			c = e->c.val_ptr;
