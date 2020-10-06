@@ -2216,7 +2216,7 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 		cell *h = list_head(l);
 		cell *c = q ? deref_var(q, h, save_ctx) : h;
 
-		if (is_atom(c)) {
+		if (is_atom(c) && !is_blob(c)) {
 			const char *src = GET_STR(c);
 
 			if (len_char_utf8(src) != LEN_STR(c)) {
