@@ -397,7 +397,6 @@ cell *list_tail(cell *l);
 int is_in_pool(const char *name, idx_t *offset);
 void set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
-int unify(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx);
 int module_load_fp(module *m, FILE *fp);
 int module_load_file(module *m, const char *filename);
 int module_save_file(module *m, const char *filename);

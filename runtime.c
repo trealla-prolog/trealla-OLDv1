@@ -573,7 +573,9 @@ void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		e->c = *v;
 }
 
-static int unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
+int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth);
+
+static int unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
 {
 	if (p1->arity != p2->arity)
 		return 0;
@@ -590,7 +592,7 @@ static int unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_
 		cell *c2 = deref_var(q, p2, p2_ctx);
 		idx_t c2_ctx = q->latest_ctx;
 
-		if (!unify(q, c1, c1_ctx, c2, c2_ctx))
+		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
 			return 0;
 
 		p1 += p1->nbr_cells;
@@ -638,7 +640,7 @@ static int unify_cstring(cell *p1, cell *p2)
 	return 0;
 }
 
-static int unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
+static int unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
 {
 	while (is_list(p1) && is_list(p2)) {
 		cell *h1 = LIST_HEAD(p1);
@@ -649,7 +651,7 @@ static int unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		cell *c2 = deref_var(q, h2, p2_ctx);
 		idx_t c2_ctx = q->latest_ctx;
 
-		if (!unify(q, c1, c1_ctx, c2, c2_ctx))
+		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
 			return 0;
 
 		p1 = LIST_TAIL(p1);
@@ -660,7 +662,7 @@ static int unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		p2_ctx = q->latest_ctx;
 	}
 
-	return unify(q, p1, p1_ctx, p2, p2_ctx);
+	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 }
 
 struct dispatch {
@@ -679,8 +681,13 @@ static const struct dispatch g_disp[] =
 	{0}
 };
 
-int unify(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
+int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
 {
+	if (depth == 1000) {
+		q->cycle_error = 1;
+		return 1;
+	}
+
 	if (is_variable(p1) && is_variable(p2)) {
 		if (p2_ctx > p1_ctx)
 			set_var(q, p2, p2_ctx, p1, p1_ctx);
@@ -712,10 +719,10 @@ int unify(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		return unify_cstring(p1, p2);
 
 	if (is_list(p1) && is_list(p2))
-		return unify_list(q, p1, p1_ctx, p2, p2_ctx);
+		return unify_list(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 
 	if (p1->arity)
-		return unify_structure(q, p1, p1_ctx, p2, p2_ctx);
+		return unify_structure(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 
 	return g_disp[p1->val_type].fn(p1, p2);
 }
@@ -752,7 +759,7 @@ static int do_match2(query *q, cell *curr_cell)
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
 
-		if (unify_structure(q, curr_cell, q->st.curr_frame, c, q->st.fp))
+		if (unify_structure(q, curr_cell, q->st.curr_frame, c, q->st.fp, 0))
 			return 1;
 
 		undo_me(q);
@@ -789,7 +796,7 @@ int do_match(query *q, cell *curr_cell)
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
 
-		if (unify_structure(q, curr_cell, q->st.curr_frame, head, q->st.fp))
+		if (unify_structure(q, curr_cell, q->st.curr_frame, head, q->st.fp, 0))
 			return 1;
 
 		undo_me(q);
@@ -861,7 +868,7 @@ static int match(query *q)
 		q->tot_matches++;
 		q->no_tco = 0;
 
-		if (unify_structure(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp)) {
+		if (unify_structure(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp, 0)) {
 			trace(q, q->st.curr_cell, EXIT);
 			commit_me(q, t);
 			return 1;

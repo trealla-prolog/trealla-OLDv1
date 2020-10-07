@@ -3455,8 +3455,13 @@ static int fn_iso_neg_1(query *q)
 	return 1;
 }
 
-static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
+static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
 {
+	if (depth == 1000) {
+		q->cycle_error = 1;
+		return 0;
+	}
+
 	if (p1->arity == 0) {
 		if (is_atom(p1) && is_atom(p2))
 			return strcmp(GET_STR(p1), GET_STR(p2));
@@ -3502,7 +3507,7 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		h2 = deref_var(q, h2, p2_ctx);
 		idx_t tmp2_ctx = q->latest_ctx;
 
-		int val = compare(q, h1, tmp1_ctx, h2, tmp2_ctx);
+		int val = compare(q, h1, tmp1_ctx, h2, tmp2_ctx, depth+1);
 		if (val) return val;
 
 		p1 = LIST_TAIL(p1);
@@ -3532,7 +3537,7 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 		cell *h2 = deref_var(q, p2, p2_ctx);
 		idx_t tmp2_ctx = q->latest_ctx;
 
-		int val = compare(q, h1, tmp1_ctx, h2, tmp2_ctx);
+		int val = compare(q, h1, tmp1_ctx, h2, tmp2_ctx, depth+1);
 		if (val) return val;
 
 		p1 += p1->nbr_cells;
@@ -3546,42 +3551,42 @@ static int fn_iso_seq_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	return compare(q, p1, p1_ctx, p2, p2_ctx) == 0;
+	return compare(q, p1, p1_ctx, p2, p2_ctx, 0) == 0;
 }
 
 static int fn_iso_sne_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	return compare(q, p1, p1_ctx, p2, p2_ctx) != 0;
+	return compare(q, p1, p1_ctx, p2, p2_ctx, 0) != 0;
 }
 
 static int fn_iso_slt_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	return compare(q, p1, p1_ctx, p2, p2_ctx) < 0;
+	return compare(q, p1, p1_ctx, p2, p2_ctx, 0) < 0;
 }
 
 static int fn_iso_sle_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	return compare(q, p1, p1_ctx, p2, p2_ctx) <= 0;
+	return compare(q, p1, p1_ctx, p2, p2_ctx, 0) <= 0;
 }
 
 static int fn_iso_sgt_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	return compare(q, p1, p1_ctx, p2, p2_ctx) > 0;
+	return compare(q, p1, p1_ctx, p2, p2_ctx, 0) > 0;
 }
 
 static int fn_iso_sge_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	return compare(q, p1, p1_ctx, p2, p2_ctx) >= 0;
+	return compare(q, p1, p1_ctx, p2, p2_ctx, 0) >= 0;
 }
 
 static int fn_iso_compare_3(query *q)
@@ -3595,7 +3600,7 @@ static int fn_iso_compare_3(query *q)
 		return 0;
 	}
 
-	int status = compare(q, p2, p2_ctx, p3, p3_ctx);
+	int status = compare(q, p2, p2_ctx, p3, p3_ctx, 0);
 	cell tmp;
 	make_literal(&tmp, status<0?g_lt_s:status>0?g_gt_s:g_eq_s);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
