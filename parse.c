@@ -1556,8 +1556,8 @@ static void parser_dcg_rewrite(parser *p)
 			tmp[nbr_cells+1].val_off = find_in_pool(v);
 
 			tmp[nbr_cells+2] = phrase[0];
-			//tmp[nbr_cells+2].nbr_cells = 3;
-			//tmp[nbr_cells+2].arity = 2;
+			tmp[nbr_cells+2].nbr_cells = 3;
+			tmp[nbr_cells+2].arity = 2;
 
 			tmp[nbr_cells+3] = phrase[1];
 
@@ -1579,19 +1579,19 @@ static void parser_dcg_rewrite(parser *p)
 
 			tmp[nbr_cells+1].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+1].nbr_cells = 1;
-			char v[20]; sprintf(v, "S%d_", cnt);
+			char v[20]; sprintf(v, "S%d_", cnt++);
 			tmp[nbr_cells+1].val_off = find_in_pool(v);
 
 			copy_cells(tmp+nbr_cells+2, phrase, len);
 
-			tmp[nbr_cells+2+len-1].val_type = TYPE_VARIABLE;
-			tmp[nbr_cells+2+len-1].nbr_cells = 1;
+			tmp[nbr_cells+1+len].val_type = TYPE_VARIABLE;
+			tmp[nbr_cells+1+len].nbr_cells = 1;
 			if (last) { sprintf(v, "S_"); last = 0; }
-			else sprintf(v, "S%d_", ++cnt);
-			tmp[nbr_cells+2+len-1].val_off = find_in_pool(v);
-			tmp[nbr_cells+2+len-1].flags = 0;
+			else sprintf(v, "S%d_", cnt);
+			tmp[nbr_cells+1+len].val_off = find_in_pool(v);
+			tmp[nbr_cells+1+len].flags = 0;
 
-			nbr_cells += 2+len;
+			nbr_cells += 2 + len;
 			phrase += phrase->nbr_cells;
 		} else if (is_nil(phrase)) {
 			tmp[nbr_cells+0].val_type = TYPE_LITERAL;
@@ -2233,6 +2233,11 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 		l = list_tail(l);
 		l = q ? deref_var(q, l, save_ctx) : l;
 		if (q) save_ctx = q->latest_ctx;
+
+		if (is_variable(l)) {
+			is_chars_list = 0;
+			break;
+		}
 	}
 
 	if (q) q->latest_ctx = save_ctx;
@@ -2298,6 +2303,8 @@ int parser_tokenize(parser *p, int args, int consing)
 
 			c = p->t->cells + save_idx;
 			c->nbr_cells = p->t->cidx - save_idx;
+
+			// Before we can do this, DCG must recognize strings
 
 			if (scan_list(NULL, c, 0) && 0) {
 				char *dst = 0;
@@ -2972,6 +2979,7 @@ prolog *pl_create()
 
 	pl->m = create_module("user");
 	pl->m->filename = strdup("~/.tpl_user");
+	pl->m->prebuilt = 1;
 
 	for (library *lib = g_libs; lib->name; lib++) {
 		if (!strcmp(lib->name, "apply") || !strcmp(lib->name, "dict") ||
@@ -2983,6 +2991,7 @@ prolog *pl_create()
 		}
 	}
 
+	pl->m->prebuilt = 0;
 	return pl;
 }
 
