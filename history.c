@@ -40,7 +40,7 @@ char *history_readline_eol(const char *prompt, char eol)
 LOOP:
 
 	if ((line = readline(prompt)) == NULL)
-		return (char*)EOF;
+		return NULL;
 
 	const char *s = line;
 

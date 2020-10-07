@@ -272,9 +272,6 @@ int main(int ac, char *av[])
 	char *line;
 
 	while ((line = history_readline_eol("?- ", '.')) != NULL) {
-		if (line == (char*)EOF)
-			break;
-
 		if (!strcmp(line, "halt.")) {
 			free(line);
 			break;
