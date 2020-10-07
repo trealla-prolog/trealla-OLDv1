@@ -70,6 +70,7 @@ typedef uint32_t idx_t;
 #define is_list(c) (is_iso_list(c) || is_string(c))
 #define is_integer(c) (((c)->val_type == TYPE_INTEGER) && ((c)->val_den == 1))
 #define is_const_cstring(c) (is_cstring(c) && ((c)->flags&FLAG_CONST_CSTRING))
+#define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
 #define is_anon(c) ((c)->flags&FLAG_ANON)
 
 // These 2 assume literal or cstring types...
@@ -335,6 +336,7 @@ struct parser_ {
 	int line_nbr, error, depth, quoted;
 	uint8_t val_type;
 	int8_t dq_consing;
+	unsigned was_quoted:1;
 	unsigned string:1;
 	unsigned run_init:1;
 	unsigned directive:1;

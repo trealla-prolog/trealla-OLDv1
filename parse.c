@@ -1884,7 +1884,7 @@ static int get_token(parser *p, int last_op)
 	char *dst = p->token;
 	int neg = 0;
 	p->val_type = TYPE_LITERAL;
-	p->string = p->quoted = p->is_variable = p->is_op = 0;
+	p->string = p->was_quoted = p->quoted = p->is_variable = p->is_op = 0;
 	*dst = '\0';
 
 	if (p->dq_consing && (*src == '"')) {
@@ -2048,6 +2048,7 @@ static int get_token(parser *p, int last_op)
 
 	if ((*src == '"') || (*src == '`') || (*src == '\'')) {
 		p->quoted = *src++;
+		p->was_quoted = 1;
 
 		if ((p->quoted == '"') && p->m->flag.double_quote_codes) {
 			*dst++ = '[';
@@ -2065,8 +2066,10 @@ static int get_token(parser *p, int last_op)
 
 				if (ch == p->quoted) {
 					if ((ch == '"') && !*p->token && p->string) {
-						strcpy(p->token, "[]");
-						p->string = 0;
+						dst += put_char_utf8(dst, ch='[');
+						dst += put_char_utf8(dst, ch=']');
+						*dst = '\0';
+						p->was_quoted = p->string = 0;
 					}
 
 					p->quoted = 0;
@@ -2480,7 +2483,7 @@ int parser_tokenize(parser *p, int args, int consing)
 		}
 		else if (p->val_type == TYPE_FLOAT)
 			c->val_flt = atof(p->token);
-		else if ((!p->quoted || func || p->is_op || p->is_variable ||
+		else if ((!p->was_quoted || func || p->is_op || p->is_variable ||
 				check_builtin(p->m, p->token, 0)) && !p->string) {
 			if (func && !strcmp(p->token, "."))
 				c->precedence = 0;

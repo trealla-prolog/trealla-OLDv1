@@ -687,7 +687,7 @@ static int fn_iso_atom_chars_2(query *q)
 		return 0;
 	}
 
-	if (!is_variable(p2) && is_nil(p2)) {
+	if (is_variable(p1) && is_nil(p2)) {
 		cell tmp;
 		make_literal(&tmp, g_empty_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
