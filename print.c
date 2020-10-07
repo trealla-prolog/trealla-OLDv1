@@ -531,6 +531,12 @@ void write_canonical(query *q, FILE *fp, cell *c, int running, int depth)
 void write_term_to_stream(query *q, stream *str, cell *c, int running, int cons, int depth)
 {
 	size_t len = write_term_to_buf(q, NULL, 0, c, running, cons, depth);
+
+	if (q->cycle_error) {
+		running = 0;
+		len = write_term_to_buf(q, NULL, 0, c, running, cons, depth);
+	}
+
 	char *dst = malloc(len+1);
 	write_term_to_buf(q, dst, len+1, c, running, cons, depth);
 	const char *src = dst;
@@ -553,6 +559,12 @@ void write_term_to_stream(query *q, stream *str, cell *c, int running, int cons,
 void write_term(query *q, FILE *fp, cell *c, int running, int cons, int depth)
 {
 	size_t len = write_term_to_buf(q, NULL, 0, c, running, cons, depth);
+
+	if (q->cycle_error) {
+		running = 0;
+		len = write_term_to_buf(q, NULL, 0, c, running, cons, depth);
+	}
+
 	char *dst = malloc(len+1);
 	write_term_to_buf(q, dst, len+1, c, running, cons, depth);
 	const char *src = dst;
