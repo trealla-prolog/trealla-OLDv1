@@ -68,7 +68,7 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 	} else if (!strcmp(err_type, "type_error")) {
 		const char *t = expected;
 		if (!strncmp(t,"iso_",4)) t = t+4;
-		char tmpbuf[256];
+		char tmpbuf[1024];
 		strcpy(tmpbuf, t);
 		char *ptr = strchr(tmpbuf, '_');
 		if (ptr) *ptr = '\0';
@@ -83,6 +83,7 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 	parser_attach(p, 0);
 	//parser_xref(p, p->t, NULL);
 	do_throw_term(q, p->t->cells);
+	clear_term(p->t);
 	free(dst2);
 	free(dst);
 }
