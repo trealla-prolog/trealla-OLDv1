@@ -39,7 +39,7 @@ char *history_readline_eol(const char *prompt, char eol)
 
 LOOP:
 
-	while ((line = readline(prompt)) == NULL)
+	if ((line = readline(prompt)) == NULL)
 		return (char*)EOF;
 
 	const char *s = line;
