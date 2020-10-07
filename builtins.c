@@ -279,7 +279,7 @@ static cell *alloc_heap(query *q, idx_t nbr_cells)
 //static idx_t heap_used(const query *q) { return q->st.hp; }
 //static cell *get_heap(const query *q, idx_t i) { return q->arenas->heap + i; }
 
-static cell *alloc_catomn(query *q, const char *s, size_t n)
+static cell *alloc_cstringn(query *q, const char *s, size_t n)
 {
 	cell *tmp = alloc_heap(q, 1);
 	tmp->val_type = TYPE_CSTRING;
@@ -423,7 +423,7 @@ static cell make_cstringn(query *q, const char *s, size_t n)
 	if (n < MAX_SMALL_STRING)
 		make_smalln(&tmp, s, n);
 	else
-		tmp = *alloc_catomn(q, s, n);
+		tmp = *alloc_cstringn(q, s, n);
 
 	return tmp;
 }
@@ -436,7 +436,7 @@ static cell make_cstring(query *q, const char *s)
 
 static cell make_string(query *q, const char *s, size_t n)
 {
-	cell tmp = *alloc_catomn(q, s, n);
+	cell tmp = *alloc_cstringn(q, s, n);
 	tmp.flags |= FLAG_STRING;
 	return tmp;
 }
@@ -4098,7 +4098,7 @@ static void uuid_gen(uuid *u)
 	u->u2 |= g_seed;
 }
 
-static char *uuid_to_catom(const uuid *u, char *buf, size_t buflen)
+static char *uuid_to_buf(const uuid *u, char *buf, size_t buflen)
 {
 	snprintf(buf, buflen, "%016llX-%04llX-%012llX",
 		(ullong)u->u1,
@@ -4108,7 +4108,7 @@ static char *uuid_to_catom(const uuid *u, char *buf, size_t buflen)
 	return buf;
 }
 
-static int uuid_from_catom(const char *s, uuid *u)
+static int uuid_from_buf(const char *s, uuid *u)
 {
 	if (!s) {
 		uuid tmp = {0};
@@ -4143,7 +4143,7 @@ static void db_log(query *q, clause *r, enum log_type l)
 			size_t len = write_term_to_buf(q, NULL, 0, r->t.cells, 1, 0, 0);
 			char *dst = malloc(len+1);
 			write_term_to_buf(q, dst, len+1, r->t.cells, 1, 0, 0);
-			uuid_to_catom(&r->u, tmpbuf, sizeof(tmpbuf));
+			uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
 			fprintf(q->m->fp, "a_(%s,'%s').\n", dst, tmpbuf);
 			free(dst);
 			break;
@@ -4151,12 +4151,12 @@ static void db_log(query *q, clause *r, enum log_type l)
 			size_t len = write_term_to_buf(q, NULL, 0, r->t.cells, 1, 0, 0);
 			char *dst = malloc(len+1);
 			write_term_to_buf(q, dst, len+1, r->t.cells, 1, 0, 0);
-			uuid_to_catom(&r->u, tmpbuf, sizeof(tmpbuf));
+			uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
 			fprintf(q->m->fp, "z_(%s,'%s').\n", dst, tmpbuf);
 			free(dst);
 			break;
 		} case LOG_ERASE: {
-			uuid_to_catom(&r->u, tmpbuf, sizeof(tmpbuf));
+			uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
 			fprintf(q->m->fp, "e_('%s').\n", tmpbuf);
 			break;
 		}
@@ -5336,7 +5336,7 @@ static int fn_erase_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	uuid u;
-	uuid_from_catom(GET_STR(p1), &u);
+	uuid_from_buf(GET_STR(p1), &u);
 	clause *r = erase_from_db(q->m, &u);
 	if (!r) return 0;
 
@@ -5351,7 +5351,7 @@ static int fn_instance_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,any);
 	uuid u;
-	uuid_from_catom(GET_STR(p1), &u);
+	uuid_from_buf(GET_STR(p1), &u);
 	clause *r = find_in_db(q->m, &u);
 	if (!r) return 0;
 	return unify(q, p2, p2_ctx, r->t.cells, q->st.curr_frame);
@@ -5366,7 +5366,7 @@ static int fn_clause_3(query *q)
 
 	if (!is_variable(p3)) {
 		uuid u;
-		uuid_from_catom(GET_STR(p3), &u);
+		uuid_from_buf(GET_STR(p3), &u);
 		clause *r = find_in_db(q->m, &u);
 		if (!r) return 0;
 		t = &r->t;
@@ -5375,7 +5375,7 @@ static int fn_clause_3(query *q)
 			return 0;
 
 		char tmpbuf[128];
-		uuid_to_catom(&q->st.curr_clause->u, tmpbuf, sizeof(tmpbuf));
+		uuid_to_buf(&q->st.curr_clause->u, tmpbuf, sizeof(tmpbuf));
 		cell tmp = make_cstring(q, tmpbuf);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		t = &q->st.curr_clause->t;
@@ -5411,11 +5411,11 @@ static int do_asserta_2(query *q)
 
 	if (!is_variable(p2)) {
 		uuid u;
-		uuid_from_catom(GET_STR(p2), &u);
+		uuid_from_buf(GET_STR(p2), &u);
 		r->u = u;
 	} else {
 		char tmpbuf[128];
-		uuid_to_catom(&r->u, tmpbuf, sizeof(tmpbuf));
+		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
 		cell tmp2 = make_cstring(q, tmpbuf);
 		set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	}
@@ -5460,11 +5460,11 @@ static int do_assertz_2(query *q)
 
 	if (!is_variable(p2)) {
 		uuid u;
-		uuid_from_catom(GET_STR(p2), &u);
+		uuid_from_buf(GET_STR(p2), &u);
 		r->u = u;
 	} else {
 		char tmpbuf[128];
-		uuid_to_catom(&r->u, tmpbuf, sizeof(tmpbuf));
+		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
 		cell tmp2 = make_cstring(q, tmpbuf);
 		set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	}
@@ -5512,7 +5512,7 @@ static void save_db(FILE *fp, query *q, int logging)
 
 			if (logging) {
 				char tmpbuf[256];
-				uuid_to_catom(&r->u, tmpbuf, sizeof(tmpbuf));
+				uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
 				fprintf(fp, ",'%s')", tmpbuf);
 			}
 
@@ -7990,7 +7990,7 @@ static int fn_uuid_1(query *q)
     uuid u;
     uuid_gen(&u);
     char tmpbuf[128];
-    uuid_to_catom(&u, tmpbuf, sizeof(tmpbuf));
+    uuid_to_buf(&u, tmpbuf, sizeof(tmpbuf));
 	cell tmp = make_cstring(q, tmpbuf);
 	tmp.flags |= FLAG_STRING;
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -9039,7 +9039,7 @@ static const struct builtins g_other_funcs[] =
 	{"getfile", 2, fn_getfile_2, "+string,-list"},
 	{"loadfile", 2, fn_loadfile_2, "+string,-string"},
 	{"savefile", 2, fn_savefile_2, "+string,+string"},
-	{"split_catom", 4, fn_split_atom_4, "+string,+sep,+pad,-list"},
+	{"split_atom", 4, fn_split_atom_4, "+string,+sep,+pad,-list"},
 	{"split", 4, fn_split_4, "+string,+string,?left,?right"},
 	{"msort", 2, fn_msort_2, "+list,-list"},
 	{"is_list", 1, fn_is_list_1, "+term"},
@@ -9064,7 +9064,6 @@ static const struct builtins g_other_funcs[] =
 	{"urlenc", 2, fn_urlenc_2, "?string,?string"},
 	{"string_lower", 2, fn_string_lower_2, "?string,?string"},
 	{"string_upper", 2, fn_string_upper_2, "?string,?string"},
-	{"read_catom", 3, fn_bread_3, "+stream,+integer,-string"},
 	{"bread", 3, fn_bread_3, "+stream,+integer,-string"},
 	{"bwrite", 2, fn_bwrite_2, "+stream,-string"},
 	{"hex_chars", 2, fn_hex_chars_2, "?integer,?string"},

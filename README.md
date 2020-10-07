@@ -154,7 +154,6 @@ Others
 	uuid/1					# generates non-standard UUID
 	load_files/2
 	split_atom/4
-	read_atom/3				# synonoymous with bread/3
 
 	getenv/2
 	setenv/2
@@ -212,7 +211,7 @@ Others
 	bread/3                 # bread(+stream,?len,-string)
 	bwrite/2                # bwrite(+stream,+string)
 	replace/4               # replace(+string,+old,+new,-string)
-	split/4                 # split(+atom,+sep,?left,?right)
+	split/4                 # split(+string,+sep,?left,?right)
 	base64/2                # base64(?decoded,?encoded)
 	urlenc/2                # urlenc(?decoded,?encoded)
 	sha1/2                  # sha1(+plaintext,?hash)        NEEDS OPENSSL
