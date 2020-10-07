@@ -2307,11 +2307,12 @@ int parser_tokenize(parser *p, int args, int consing)
 			c = p->t->cells + save_idx;
 			c->nbr_cells = p->t->cidx - save_idx;
 
+#if 0
 			// Before we can do this, DCG must recognize strings
 
-			if (scan_list(NULL, c, 0) && 0) {
-				char *dst = 0;
+			if (scan_list(NULL, c, 0)) {
 				size_t dstlen = 0;
+				char *dst = 0;
 				cell *l = c;
 
 				while (is_list(l)) {
@@ -2320,9 +2321,9 @@ int parser_tokenize(parser *p, int args, int consing)
 					l = LIST_TAIL(l);
 				}
 
+				dstlen = dst - (char*)NULL;
 				char *tmpbuf = malloc(dstlen+1);
 				dst = tmpbuf;
-				dstlen = dst - (char*)NULL;
 				l = c;
 
 				while (is_list(l)) {
@@ -2333,6 +2334,7 @@ int parser_tokenize(parser *p, int args, int consing)
 
 				free(tmpbuf);
 			}
+#endif
 
 			p->start_term = 0;
 			last_op = 0;
