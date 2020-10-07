@@ -60,7 +60,7 @@ There are no plans for a Windows port.
 Usage
 =====
 
-	tpl [options] [files]
+	tpl [options] [files] [-- args]
 
 where options can be:
 

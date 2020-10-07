@@ -24,12 +24,12 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #define msleep(ms)                                                                                                             \
-	{                                                                                                                          \
-		struct timespec tv;                                                                                                    \
-		tv.tv_sec = (ms) / 1000;                                                                                               \
-		tv.tv_nsec = ((ms) % 1000) * 1000 * 1000;                                                                              \
-		nanosleep(&tv, &tv);                                                                                                   \
-	}
+{                                                                                                                          \
+	struct timespec tv;                                                                                                    \
+	tv.tv_sec = (ms) / 1000;                                                                                               \
+	tv.tv_nsec = ((ms) % 1000) * 1000 * 1000;                                                                              \
+	nanosleep(&tv, &tv);                                                                                                   \
+}
 #endif
 
 static void sigfn(int s)
@@ -76,16 +76,17 @@ static int daemonize(int argc, char *argv[])
 	startInfo.dwFlags = STARTF_USESHOWWINDOW;
 	startInfo.wShowWindow = SW_HIDE;
 
-	if (!CreateProcessA((LPSTR)cmd,              // application name
-						(LPSTR)args,             // command line arguments
-						NULL,                    // process attributes
-						NULL,                    // thread attributes
-						FALSE,                   // inherit (file) handles
-						DETACHED_PROCESS,        // Detach
-						NULL,                    // environment
-						(path[0] ? path : NULL), // current directory
-						&startInfo,              // startup info
-						&process)                // process information
+	if (!CreateProcessA(
+		(LPSTR)cmd,              // application name
+		(LPSTR)args,             // command line arguments
+		NULL,                    // process attributes
+		NULL,                    // thread attributes
+		FALSE,                   // inherit (file) handles
+		DETACHED_PROCESS,        // Detach
+		NULL,                    // environment
+		(path[0] ? path : NULL), // current directory
+		&startInfo,              // startup info
+		&process)                // process information
 		) {
 		fprintf(stdedrr, "Error: creation of the process failed\n");
 		return 1;
@@ -245,7 +246,7 @@ int main(int ac, char *av[])
 
 	if ((version == 2) && !quiet) {
 		fprintf(stderr, "Usage:\n");
-		fprintf(stderr, "  tpl [options] [files]\n");
+		fprintf(stderr, "  tpl [options] [files] [-- args]\n");
 		fprintf(stderr, "Options:\n");
 		fprintf(stderr, "  -f file\t\t- consult file\n");
 		fprintf(stderr, "  -g goal\t\t- query goal (only used once)\n");
