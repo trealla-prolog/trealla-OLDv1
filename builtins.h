@@ -111,7 +111,5 @@ inline static cell *get_raw_arg(query *q, int n)
 
 int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth);
 
-inline static int unify(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
-{
-	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
-}
+#define unify(q,p1,p1_ctx,p2,p2_ctx) \
+	unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0)
