@@ -15,7 +15,7 @@
 #include "network.h"
 #include "utf8.h"
 
-#define MAX_DEPTH 10000
+#define MAX_DEPTH 1000
 
 static int needs_quote(module *m, const char *src)
 {
@@ -129,8 +129,8 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 	char *save_dst = dst;
 
 	if (depth > MAX_DEPTH) {
-		fprintf(stderr, "Error: max depth exceeded\n");
-		q->error = 1;
+		dst += snprintf(dst, dstlen, "...");
+		q->cycle_error = 1;
 		return dst - save_dst;
 	}
 
@@ -187,8 +187,7 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 
 		while (is_list(l)) {
 			if (cnt == MAX_DEPTH) {
-				fprintf(stderr, "Error: max depth exceeded\n");
-				q->error = 1;
+				dst += snprintf(dst, dstlen, "...");
 				return dst - save_dst;
 			}
 
@@ -241,13 +240,13 @@ static char *varformat(unsigned nbr)
 	return tmpbuf;
 }
 
-size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int cons, int max_depth, int depth)
+size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int cons, int depth)
 {
 	char *save_dst = dst;
 
 	if (depth > MAX_DEPTH) {
-		fprintf(stderr, "Error: max depth exceeded\n");
-		q->error = 1;
+		dst += snprintf(dst, dstlen, "...");
+		q->cycle_error = 1;
 		return dst - save_dst;
 	}
 
@@ -321,8 +320,8 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 	int print_list = 0;
 
 	while (is_iso_list(c)) {
-		if (max_depth && (depth >= max_depth)) {
-			dst += snprintf(dst, dstlen, " |...");
+		if (q->max_depth && (depth >= q->max_depth)) {
+			dst += snprintf(dst, dstlen, "...");
 			return dst - save_dst;
 		}
 
@@ -332,7 +331,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			dst += snprintf(dst, dstlen, "%s", "[");
 
 		h = running ? deref_var(q, h, save_ctx) : h;
-		dst += write_term_to_buf(q, dst, dstlen, h, running, 0, max_depth, depth+1);
+		dst += write_term_to_buf(q, dst, dstlen, h, running, 0, depth+1);
 
 		cell *tail = LIST_TAIL(c);
 		tail = running ? deref_var(q, tail, save_ctx) : tail;
@@ -343,7 +342,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 			if (strcmp(src, "[]")) {
 				dst += snprintf(dst, dstlen, "%s", "|");
-				dst += write_term_to_buf(q, dst, dstlen, tail, running, 1, max_depth, depth+1);
+				dst += write_term_to_buf(q, dst, dstlen, tail, running, 1, depth+1);
 			}
 		}
 		else if (is_iso_list(tail)) {
@@ -367,7 +366,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		}
 		else {
 			dst += snprintf(dst, dstlen, "%s", "|");
-			dst += write_term_to_buf(q, dst, dstlen, tail, running, 1, max_depth, depth+1);
+			dst += write_term_to_buf(q, dst, dstlen, tail, running, 1, depth+1);
 		}
 
 		if (!cons || print_list)
@@ -427,7 +426,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 			for (c++; arity--; c += c->nbr_cells) {
 				cell *tmp = running ? deref_var(q, c, save_ctx) : c;
-				dst += write_term_to_buf(q, dst, dstlen, tmp, running, 0, max_depth, depth+1);
+				dst += write_term_to_buf(q, dst, dstlen, tmp, running, 0, depth+1);
 
 				if (arity)
 					dst += snprintf(dst, dstlen, ",");
@@ -439,7 +438,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 	else if ((c->flags & OP_XF) || (c->flags & OP_YF)) {
 		cell *lhs = c + 1;
 		lhs = running ? deref_var(q, lhs, save_ctx) : lhs;
-		dst += write_term_to_buf(q, dst, dstlen, lhs, running, 0, max_depth, depth+1);
+		dst += write_term_to_buf(q, dst, dstlen, lhs, running, 0, depth+1);
 		dst += snprintf(dst, dstlen, "%s", src);
 	}
 	else if ((c->flags & OP_FX) || (c->flags & OP_FY)) {
@@ -450,7 +449,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		dst += snprintf(dst, dstlen, "%s", src);
 		if (space && !parens) dst += snprintf(dst, dstlen, " ");
 		if (parens) dst += snprintf(dst, dstlen, "(");
-		dst += write_term_to_buf(q, dst, dstlen, rhs, running, 0, max_depth, depth+1);
+		dst += write_term_to_buf(q, dst, dstlen, rhs, running, 0, depth+1);
 		if (parens) dst += snprintf(dst, dstlen, ")");
 	}
 	else {
@@ -466,7 +465,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		int lhs_parens = lhs_prec1 > my_prec;
 		lhs_parens |= lhs_prec2;
 		if (parens || lhs_parens) dst += snprintf(dst, dstlen, "(");
-		dst += write_term_to_buf(q, dst, dstlen, lhs, running, 0, max_depth, depth+1);
+		dst += write_term_to_buf(q, dst, dstlen, lhs, running, 0, depth+1);
 		if (lhs_parens) dst += snprintf(dst, dstlen, ")");
 		rhs = running ? deref_var(q, rhs, save_ctx) : rhs;
 		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "-->") || !*src;
@@ -477,7 +476,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		int rhs_parens = rhs_prec1 > my_prec;
 		rhs_parens |= rhs_prec2;
 		if (rhs_parens) dst += snprintf(dst, dstlen, "(");
-		dst += write_term_to_buf(q, dst, dstlen, rhs, running, 0, max_depth, depth+1);
+		dst += write_term_to_buf(q, dst, dstlen, rhs, running, 0, depth+1);
 		if (parens || rhs_parens) dst += snprintf(dst, dstlen, ")");
 	}
 
@@ -529,11 +528,11 @@ void write_canonical(query *q, FILE *fp, cell *c, int running, int depth)
 	free(dst);
 }
 
-void write_term_to_stream(query *q, stream *str, cell *c, int running, int cons, int max_depth, int depth)
+void write_term_to_stream(query *q, stream *str, cell *c, int running, int cons, int depth)
 {
-	size_t len = write_term_to_buf(q, NULL, 0, c, running, cons, max_depth, depth);
+	size_t len = write_term_to_buf(q, NULL, 0, c, running, cons, depth);
 	char *dst = malloc(len+1);
-	write_term_to_buf(q, dst, len+1, c, running, cons, max_depth, depth);
+	write_term_to_buf(q, dst, len+1, c, running, cons, depth);
 	const char *src = dst;
 
 	while (len) {
@@ -551,11 +550,11 @@ void write_term_to_stream(query *q, stream *str, cell *c, int running, int cons,
 	free(dst);
 }
 
-void write_term(query *q, FILE *fp, cell *c, int running, int cons, int max_depth, int depth)
+void write_term(query *q, FILE *fp, cell *c, int running, int cons, int depth)
 {
-	size_t len = write_term_to_buf(q, NULL, 0, c, running, cons, max_depth, depth);
+	size_t len = write_term_to_buf(q, NULL, 0, c, running, cons, depth);
 	char *dst = malloc(len+1);
-	write_term_to_buf(q, dst, len+1, c, running, cons, max_depth, depth);
+	write_term_to_buf(q, dst, len+1, c, running, cons, depth);
 	const char *src = dst;
 
 	while (len) {

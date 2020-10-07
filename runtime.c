@@ -166,8 +166,11 @@ static void trace_call(query *q, cell *c, int box)
 	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u:tp%u:cp%u:fp%u:sp%u:hp%u} ", q->st.curr_frame, g->nbr_vars, g->nbr_slots, g->any_choices, q->st.tp, q->cp, q->st.fp, q->st.sp, q->st.hp);
 #endif
 
-	write_term(q, stderr, c, -1, 0, 100, 0);
+	int save_depth = q->max_depth;
+	q->max_depth = 100;
+	write_term(q, stderr, c, -1, 0, 0);
 	fprintf(stderr, "\n");
+	q->max_depth = save_depth;
 }
 
 static void unwind_trail(query *q, const choice *ch)
@@ -972,6 +975,7 @@ void query_execute(query *q, term *t)
 	q->st.fp = 1;
 	q->time_started = get_time_in_usec();
 	q->abort = 0;
+	q->cycle_error = 0;
 
 	frame *g = q->frames + q->st.curr_frame;
 	g->nbr_vars = t->nbr_vars;

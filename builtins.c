@@ -56,9 +56,9 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 	cell tmp = *c;
 	tmp.nbr_cells = 1;
 	tmp.arity = 0;
-	size_t len = write_term_to_buf(q, NULL, 0, &tmp, 1, 0, 0, 0);
+	size_t len = write_term_to_buf(q, NULL, 0, &tmp, 1, 0, 0);
 	char *dst = malloc(len+1);
-	write_term_to_buf(q, dst, len+1, &tmp, 1, 0, 0, 0);
+	write_term_to_buf(q, dst, len+1, &tmp, 1, 0, 0);
 	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q->st.curr_cell) + 20;
 	char *dst2 = malloc(len2+1);
 
@@ -1168,7 +1168,7 @@ static int fn_iso_atom_concat_3(query *q)
 			src1 = GET_STR(p1);
 			len1 = LEN_STR(p1);
 		} else {
-			write_term_to_buf(q, tmpbuf1, sizeof(tmpbuf1), p1, 1, 0, 0, 0);
+			write_term_to_buf(q, tmpbuf1, sizeof(tmpbuf1), p1, 1, 0, 0);
 			len1 = strlen(tmpbuf1);
 			src1 = tmpbuf1;
 		}
@@ -1177,7 +1177,7 @@ static int fn_iso_atom_concat_3(query *q)
 			src2 = GET_STR(p2);
 			len2 = LEN_STR(p2);
 		} else {
-			write_term_to_buf(q, tmpbuf2, sizeof(tmpbuf2), p2, 1, 0, 0, 0);
+			write_term_to_buf(q, tmpbuf2, sizeof(tmpbuf2), p2, 1, 0, 0);
 			len2 = strlen(tmpbuf2);
 			src2 = tmpbuf2;
 		}
@@ -1759,7 +1759,7 @@ static int fn_iso_write_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream(q, "user_output");
 	stream *str = &g_streams[n];
-	write_term_to_stream(q, str, p1, 1, 0, 200, 0);
+	write_term_to_stream(q, str, p1, 1, 0, 0);
 	return !ferror(str->fp);
 }
 
@@ -1769,7 +1769,7 @@ static int fn_iso_write_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
-	write_term_to_stream(q, str, p1, 1, 0, 200, 0);
+	write_term_to_stream(q, str, p1, 1, 0, 0);
 	return !ferror(str->fp);
 }
 
@@ -1780,7 +1780,7 @@ static int fn_iso_writeq_1(query *q)
 	stream *str = &g_streams[n];
 	int save = q->quoted;
 	q->quoted = 1;
-	write_term_to_stream(q, str, p1, 1, 0, 200, 1);
+	write_term_to_stream(q, str, p1, 1, 0, 1);
 	q->quoted = save;
 	return !ferror(str->fp);
 }
@@ -1793,7 +1793,7 @@ static int fn_iso_writeq_2(query *q)
 	GET_NEXT_ARG(p1,any);
 	int save = q->quoted;
 	q->quoted = 1;
-	write_term_to_stream(q, str, p1, 1, 0, 200, 1);
+	write_term_to_stream(q, str, p1, 1, 0, 1);
 	q->quoted = save;
 	return !ferror(str->fp);
 }
@@ -1859,7 +1859,7 @@ static int fn_iso_write_term_2(query *q)
 	}
 
 	q->latest_ctx = p1_ctx;
-	write_term_to_stream(q, str, p1, 1, 0, q->max_depth, q->quoted?1:0);
+	write_term_to_stream(q, str, p1, 1, 0, q->quoted?1:0);
 
 	if (q->fullstop)
 		net_write(".", 1, str);
@@ -1890,7 +1890,7 @@ static int fn_iso_write_term_3(query *q)
 	}
 
 	q->latest_ctx = p1_ctx;
-	write_term_to_stream(q, str, p1, 1, 0, q->max_depth, q->quoted?1:0);
+	write_term_to_stream(q, str, p1, 1, 0, q->quoted?1:0);
 
 	if (q->fullstop)
 		net_write(".", 1, str);
@@ -4135,17 +4135,17 @@ static void db_log(query *q, clause *r, enum log_type l)
 
 	switch(l) {
 		case LOG_ASSERTA: {
-			size_t len = write_term_to_buf(q, NULL, 0, r->t.cells, 1, 0, 0, 0);
+			size_t len = write_term_to_buf(q, NULL, 0, r->t.cells, 1, 0, 0);
 			char *dst = malloc(len+1);
-			write_term_to_buf(q, dst, len+1, r->t.cells, 1, 0, 0, 0);
+			write_term_to_buf(q, dst, len+1, r->t.cells, 1, 0, 0);
 			uuid_to_catom(&r->u, tmpbuf, sizeof(tmpbuf));
 			fprintf(q->m->fp, "a_(%s,'%s').\n", dst, tmpbuf);
 			free(dst);
 			break;
 		} case LOG_ASSERTZ: {
-			size_t len = write_term_to_buf(q, NULL, 0, r->t.cells, 1, 0, 0, 0);
+			size_t len = write_term_to_buf(q, NULL, 0, r->t.cells, 1, 0, 0);
 			char *dst = malloc(len+1);
-			write_term_to_buf(q, dst, len+1, r->t.cells, 1, 0, 0, 0);
+			write_term_to_buf(q, dst, len+1, r->t.cells, 1, 0, 0);
 			uuid_to_catom(&r->u, tmpbuf, sizeof(tmpbuf));
 			fprintf(q->m->fp, "z_(%s,'%s').\n", dst, tmpbuf);
 			free(dst);
@@ -4527,7 +4527,7 @@ static int do_throw_term(query *q, cell *c)
 	}
 
 	fprintf(stderr, "Error: uncaught exception... ");
-	write_term(q, stderr, c, 1, 0, 999, 0);
+	write_term(q, stderr, c, 1, 0, 0);
 	fprintf(stderr, "\n");
 	q->exception = NULL;
 	q->error = 1;
@@ -5503,7 +5503,7 @@ static void save_db(FILE *fp, query *q, int logging)
 			if (logging)
 				fprintf(fp, "z_(");
 
-			write_term(q, fp, r->t.cells, 0, 0, 0, 0);
+			write_term(q, fp, r->t.cells, 0, 0, 0);
 
 			if (logging) {
 				char tmpbuf[256];
@@ -5542,7 +5542,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 			if (r->t.is_deleted)
 				continue;
 
-			write_term(q, fp, r->t.cells, 0, 0, 0, 0);
+			write_term(q, fp, r->t.cells, 0, 0, 0);
 			fprintf(fp, ".\n");
 		}
 	}
@@ -5711,7 +5711,7 @@ static int fn_writeln_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream(q, "user_output");
 	stream *str = &g_streams[n];
-	write_term_to_stream(q, str, p1, 1, 0, 200, 0);
+	write_term_to_stream(q, str, p1, 1, 0, 0);
 	fputc('\n', str->fp);
 	return !ferror(str->fp);
 }
@@ -6521,14 +6521,14 @@ static int fn_term_to_atom_2(query *q)
 
 	if (is_number(p1)) {
 		char tmpbuf[256], *dst = tmpbuf;
-		write_term_to_buf(q, dst, sizeof(tmpbuf), p1, 1, 0, 999, 0);
+		write_term_to_buf(q, dst, sizeof(tmpbuf), p1, 1, 0, 0);
 		cell tmp = make_cstring(q, dst);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	size_t len = write_term_to_buf(q, NULL, 0, p1, 1, 0, 999, 0);
+	size_t len = write_term_to_buf(q, NULL, 0, p1, 1, 0, 0);
 	char *dst = malloc(len+1);
-	write_term_to_buf(q, dst, len+1, p1, 1, 0, 999, 0);
+	write_term_to_buf(q, dst, len+1, p1, 1, 0, 0);
 	idx_t offset;
 
 	if (is_in_pool(dst, &offset)) {
@@ -6551,14 +6551,14 @@ static int fn_write_term_to_atom_3(query *q)
 
 	if (is_number(p1)) {
 		char tmpbuf[256], *dst = tmpbuf;
-		write_term_to_buf(q, dst, sizeof(tmpbuf), p1, 1, 0, 999, 0);
+		write_term_to_buf(q, dst, sizeof(tmpbuf), p1, 1, 0, 0);
 		cell tmp = make_cstring(q, dst);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	size_t len = write_term_to_buf(q, NULL, 0, p1, 1, 0, 999, 0);
+	size_t len = write_term_to_buf(q, NULL, 0, p1, 1, 0, 0);
 	char *dst = malloc(len+1);
-	write_term_to_buf(q, dst, len+1, p1, 1, 0, 999, 0);
+	write_term_to_buf(q, dst, len+1, p1, 1, 0, 0);
 	idx_t offset;
 
 	if (is_in_pool(dst, &offset)) {
@@ -7172,7 +7172,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx,
 			if (canonical)
 				len = write_canonical_to_buf(q, NULL, 0, c, 1, 0);
 			else
-				len = write_term_to_buf(q, NULL, 0, c, 1, 0, 999, 0);
+				len = write_term_to_buf(q, NULL, 0, c, 1, 0, 0);
 
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
@@ -7184,7 +7184,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx,
 			if (canonical)
 				len = write_canonical_to_buf(q, dst, nbytes, c, 1, 0);
 			else
-				len = write_term_to_buf(q, dst, nbytes, c, 1, 0, 999, 0);
+				len = write_term_to_buf(q, dst, nbytes, c, 1, 0, 0);
 
 			q->quoted = saveq;
 		}
@@ -7770,9 +7770,9 @@ static int fn_term_hash_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 	GET_NEXT_ARG(p2,integer_or_var);
-	size_t len = write_term_to_buf(q, NULL, 0, p1, 1, 0, 999, 0);
+	size_t len = write_term_to_buf(q, NULL, 0, p1, 1, 0, 0);
 	char *dst = malloc(len+1);
-	write_term_to_buf(q, dst, len+1, p1, 1, 0, 999, 0);
+	write_term_to_buf(q, dst, len+1, p1, 1, 0, 0);
 	cell tmp;
 	make_int(&tmp, do_jenkins_one_at_a_time_hash(dst));
 	free(dst);

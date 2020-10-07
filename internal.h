@@ -318,6 +318,7 @@ struct query_ {
 	unsigned character_escapes:1;
 	unsigned halt:1;
 	unsigned abort:1;
+	unsigned cycle_error:1;
 	unsigned spawned:1;
 };
 
@@ -413,9 +414,9 @@ int get_op(module *m, const char *name, unsigned *val_type, int *userop, int hin
 void write_canonical(query *q, FILE *fp, cell *c, int running, int depth);
 void write_canonical_to_stream(query *q, stream *str, cell *c, int running, int depth);
 size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int depth);
-void write_term(query *q, FILE *fp, cell *c, int running, int cons, int max_depth, int depth);
-void write_term_to_stream(query *q, stream *str, cell *c, int running, int cons, int max_depth, int depth);
-size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int cons, int max_depth, int depth);
+void write_term(query *q, FILE *fp, cell *c, int running, int cons, int depth);
+void write_term_to_stream(query *q, stream *str, cell *c, int running, int cons, int depth);
+size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int running, int cons, int depth);
 void make_choice(query *q);
 void make_barrier(query *q);
 void make_catcher(query *q, int type);
