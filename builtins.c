@@ -5531,7 +5531,7 @@ static int fn_listing_0(query *q)
 
 static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 {
-	module *m = q->st.curr_clause->m;
+	module *m = q->st.curr_clause ? q->st.curr_clause->m : q->m;
 
 	for (rule *h = m->head; h; h = h->next) {
 		if (h->is_prebuilt)
@@ -5560,8 +5560,24 @@ static int fn_listing_1(query *q)
 	unsigned arity = -1;
 
 	if (p1->arity) {
-		name = (p1+1)->val_off;
-		arity = (p1+2)->val_num;
+		cell *p2 = p1 + 1;
+
+		if (!is_literal(p2)) {
+			throw_error(q, p2, "type_error", "atom");
+			q->error = 1;
+			return 0;
+		}
+
+		cell *p3 = p2 + p2->nbr_cells;
+
+		if (!is_integer(p3)) {
+			throw_error(q, p3, "type_error", "integer");
+			q->error = 1;
+			return 0;
+		}
+
+		name = p2->val_off;
+		arity = p3->val_num;
 	}
 
 	save_name(stdout, q, name, arity);
