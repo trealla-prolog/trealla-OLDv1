@@ -860,6 +860,9 @@ static void dump_vars(query *q, parser *p)
 		else
 			c = deref_var(q, &e->c, 0);
 
+		if (!strcmp(p->vartab.var_name[i], "_"))
+			continue;
+
 		fprintf(stdout, "\n%s = ", p->vartab.var_name[i]);
 		int save = q->quoted;
 		q->quoted = 1;
