@@ -1637,10 +1637,19 @@ static void parser_dcg_rewrite(parser *p)
 		head = 0;
 	}
 
+#if 1
+	// This is a magic fix...
+	tmp[nbr_cells].val_type = TYPE_LITERAL;
+	tmp[nbr_cells].val_off = find_in_pool("true");
+	tmp[nbr_cells].nbr_cells = 1;
+	tmp[nbr_cells].arity = 0;
+	tmp[nbr_cells].flags = FLAG_BUILTIN;
+	nbr_cells++;
+#endif
+
 	tmp->nbr_cells = nbr_cells;
-	nbr_cells++;	// spare
-	p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*nbr_cells));
-	copy_cells(p->t->cells, tmp, nbr_cells-1);
+	p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
+	copy_cells(p->t->cells, tmp, nbr_cells);
 	p->t->nbr_cells = nbr_cells;
 	p->t->cidx = tmp->nbr_cells;
 	free(tmp);
