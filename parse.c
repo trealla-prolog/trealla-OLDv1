@@ -1752,11 +1752,17 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 	int_t v = 0;
 	char *tmpptr = (char*)s;
 
-	while ((*s >= '0') && (*s <= '9')) {
-		v *= 10;
-		v += *s - '0';
+	while (((*s >= '0') && (*s <= '9')) || isspace(*s)) {
+		if (!isspace(*s)) {
+			v *= 10;
+			v += *s - '0';
+		}
+
 		s++;
 	}
+
+	if (isspace(s[-1]))
+		s--;
 
 	*((uint_t*)val_num) = v;
 	if (neg) *val_num = -*val_num;
@@ -1768,15 +1774,15 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 		try_rational = 1;
 
 	if (!try_rational) {
+		*srcptr = s;
 		strtod(tmpptr, &tmpptr);
-		if (tmpptr[-1] == '.') tmpptr--;
-		*srcptr = tmpptr;
+
+		if (tmpptr[-1] == '.')
+			*srcptr = --tmpptr;
+
 		s = *srcptr;
 
-		if (
-			(*s == '(') ||
-			(isalpha(*s))  ||
-			0) {
+		if ((*s == '(') || (isalpha(*s)) || 0) {
 			fprintf(stdout, "Error: syntax error, parsing number, line %d\n", p->line_nbr);
 			p->error = 1;
 		}
@@ -1787,9 +1793,12 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 	s++;
 	v = 0;
 
-	while ((*s >= '0') && (*s <= '9')) {
-		v *= 10;
-		v += *s - '0';
+	while (((*s >= '0') && (*s <= '9')) || isspace(*s)) {
+		if (!isspace(*s)) {
+			v *= 10;
+			v += *s - '0';
+		}
+
 		s++;
 	}
 
