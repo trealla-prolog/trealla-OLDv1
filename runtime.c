@@ -644,10 +644,10 @@ static int unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, 
 {
 	while (is_list(p1) && is_list(p2)) {
 		cell *h1 = LIST_HEAD(p1);
-		cell *h2 = LIST_HEAD(p2);
-
 		cell *c1 = deref_var(q, h1, p1_ctx);
 		idx_t c1_ctx = q->latest_ctx;
+
+		cell *h2 = LIST_HEAD(p2);
 		cell *c2 = deref_var(q, h2, p2_ctx);
 		idx_t c2_ctx = q->latest_ctx;
 
@@ -657,6 +657,7 @@ static int unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, 
 		p1 = LIST_TAIL(p1);
 		p1 = deref_var(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
+
 		p2 = LIST_TAIL(p2);
 		p2 = deref_var(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
