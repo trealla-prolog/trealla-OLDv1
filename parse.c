@@ -863,6 +863,9 @@ static void dump_vars(query *q, parser *p)
 		if (!strcmp(p->vartab.var_name[i], "_"))
 			continue;
 
+		if (any)
+			fprintf(stdout, ",");
+
 		fprintf(stdout, "\n%s = ", p->vartab.var_name[i]);
 		int save = q->quoted;
 		q->quoted = 1;
@@ -872,7 +875,7 @@ static void dump_vars(query *q, parser *p)
 	}
 
 	if (any)
-		fprintf(stdout, "\n\n");
+		fprintf(stdout, ".\n\n");
 }
 
 static void consultall(parser *p, cell *l)
