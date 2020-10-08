@@ -8601,6 +8601,13 @@ static int fn_call_nth_2(query *q)
 	return 1;
 }
 
+static int fn_dcg_translate_rule_2(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,any);
+	return 0;
+}
+
 static int fn_call_dcg_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -9000,6 +9007,7 @@ static const struct builtins g_iso_funcs[] =
 	{"phrase", 2, fn_phrase_2, NULL},
 	{"phrase", 3, fn_phrase_3, NULL},
 	{"call_dcg", 3, fn_call_dcg_3, NULL},
+	{"dcg_translate_rule", 3, fn_dcg_translate_rule_2, NULL},
 
 	{0}
 };
