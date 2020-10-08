@@ -3875,8 +3875,8 @@ static int fn_iso_univ_2(query *q)
 		free(tmp);
 		return ok;
 	} else if (is_variable(p2)) {
-		if (!is_structure(p1)) {
-			throw_error(q, p1, "type_error", "compound");
+		if (!is_callable(p1)) {
+			throw_error(q, p1, "type_error", "callable");
 			return 0;
 		}
 

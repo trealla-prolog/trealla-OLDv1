@@ -468,7 +468,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		dst += write_term_to_buf(q, dst, dstlen, lhs, running, 0, depth+1);
 		if (lhs_parens) dst += snprintf(dst, dstlen, ")");
 		rhs = running ? deref_var(q, rhs, save_ctx) : rhs;
-		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "-->") || !*src;
+		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "-->") || !strcmp(src, "=..") || !*src;
 		if (space && !parens) dst += snprintf(dst, dstlen, " ");
 		dst += snprintf(dst, dstlen, "%s", src);
 		if (!*src) space = 0;
