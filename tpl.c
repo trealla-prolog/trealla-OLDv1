@@ -283,10 +283,7 @@ int main(int ac, char *av[])
 		if (get_halt(pl))
 			break;
 
-		if (isatty(0))
-			history_output("", get_status(pl) ? "true." : "false.");
-		else
-			printf("%s\n", get_status(pl) ? "true" : "false");
+		printf("%s\n", get_status(pl) ? "true" : "false");
 	}
 
 	if (isatty(0))

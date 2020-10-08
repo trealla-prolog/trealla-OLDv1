@@ -58,8 +58,7 @@ http_open(UrlList, S, Opts) :-
 	dict:get(Hdrs, 'location', Location, Url),
 	ignore(memberchk(status_code(Code), OptList)),
 	ignore(memberchk(headers(Hdrs), OptList)),
-	ignore(memberchk(final_url(Location), OptList)),
-	true.
+	ignore(memberchk(final_url(Location), OptList)).
 
 % Client request processing...
 
@@ -88,8 +87,7 @@ process(Url, S, Opts) :-
 	read_response(S, Code),
 	findall(Hdr, read_header(S, Hdr), Hdrs),
 	ignore(memberchk(status_code2(Code), OptList)),
-	ignore(memberchk(headers2(Hdrs), OptList)),
-	true.
+	ignore(memberchk(headers2(Hdrs), OptList)).
 
 % Client requests...
 
@@ -111,8 +109,7 @@ http_get(Url, Data, Opts) :-
 		ignore(memberchk(final_url(Url), Opts)),
 		ignore(memberchk(status_code(Code), Opts)),
 		ignore(memberchk(headers(Hdrs), Opts)))
-	),
-	true.
+	).
 
 http_post(Url, Data, Reply, Opts) :-
 	http_get(Url, Reply,[post(Data)|Opts]).
@@ -131,5 +128,4 @@ http_request(S, Method, Path, Ver, Hdrs) :-
 	split(Rest, ' ', Path, Rest2),
 	split(Rest2, '/', _, Ver),
 	string_upper(Method2, Method),
-	findall(Hdr, read_header(S, Hdr), Hdrs),
-	true.
+	findall(Hdr, read_header(S, Hdr), Hdrs).

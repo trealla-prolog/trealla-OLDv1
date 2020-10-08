@@ -25,13 +25,6 @@ int history_getch(void)
 	return ch;
 }
 
-static void output(const char *fmt, const char *prompt, const char *line)
-{
-	printf(fmt, prompt, line);
-}
-
-void history_output(const char *prompt, const char *line) { output("%s%s\n", prompt, line); }
-
 char *history_readline_eol(const char *prompt, char eol)
 {
 	char *cmd = NULL;
