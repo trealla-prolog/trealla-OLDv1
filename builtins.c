@@ -8661,15 +8661,20 @@ static int do_length(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer);
-	idx_t cnt = p2->val_num;
+	idx_t nbr = p2->val_num;
 	GET_RAW_ARG(2, p2_orig);
 	cell tmp;
-	make_int(&tmp, ++cnt);
+	make_int(&tmp, ++nbr);
 	set_var(q, p2_orig, p2_orig_ctx, &tmp, q->st.curr_frame);
 	make_choice(q);
 	unsigned slot_nbr;
 
-	if (!(slot_nbr = create_vars(q, cnt))) {
+	if ((nbr < 0) || (nbr >= 32768)) {
+		throw_error(q, p2, "resource_error", "too_many_vars");
+		return 0;
+	}
+
+	if (!(slot_nbr = create_vars(q, nbr))) {
 		throw_error(q, p1, "resource_error", "too_many_vars");
 		return 0;
 	}
@@ -8681,7 +8686,7 @@ static int do_length(query *q)
 	tmp.slot_nbr = slot_nbr++;
 	alloc_list(q, &tmp);
 
-	for (int i = 1; i < cnt; i++) {
+	for (int i = 1; i < nbr; i++) {
 		tmp.slot_nbr = slot_nbr++;
 		append_list(q, &tmp);
 	}
@@ -8769,7 +8774,7 @@ static int fn_length_2(query *q)
 	if (is_variable(p1) && is_integer(p2)) {
 		idx_t nbr = p2->val_num;
 
-		if ((nbr < 0) || (nbr > 32768)) {
+		if ((nbr < 0) || (nbr >= 32768)) {
 			throw_error(q, p2, "resource_error", "too_many_vars");
 			return 0;
 		}
