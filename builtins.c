@@ -4338,7 +4338,7 @@ static int fn_iso_call_n(query *q)
 	copy_cells(tmp2, p1, p1->nbr_cells);
 	idx_t nbr_cells = p1->nbr_cells;
 	unsigned arity = p1->arity;
-	int args = 2;
+	unsigned args = 2;
 
 	while (args++ <= q->st.curr_cell->arity) {
 		cell *p2 = get_next_raw_arg(q);
