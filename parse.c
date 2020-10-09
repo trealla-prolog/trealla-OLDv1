@@ -898,7 +898,7 @@ static void directives(parser *p, term *t)
 	if (!is_literal(t->cells))
 		return;
 
-	if (is_list(t->cells) && p->command) {
+	if (is_iso_list(t->cells) && p->command) {
 		consultall(p, t->cells);
 		p->skip = 1;
 		return;
@@ -942,7 +942,7 @@ static void directives(parser *p, term *t)
 
 		p->m = create_module(name);
 
-		while (is_list(p2)) {
+		while (is_iso_list(p2)) {
 			cell *head = LIST_HEAD(p2);
 
 			if (is_structure(head)) {
