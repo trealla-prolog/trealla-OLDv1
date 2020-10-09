@@ -3806,27 +3806,22 @@ static int fn_iso_arg_3(query *q)
 static int fn_iso_univ_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
+	GET_NEXT_ARG(p2,list_or_var);
 
-	if ((is_variable(p1) || is_structure(p1)) && !is_variable(p2)) {
-		if (!is_list(p2)) {
-			throw_error(q, p1, "type_error", "list");
-			return 0;
-		}
-
+	if (!is_variable(p2)) {
 		cell *head = LIST_HEAD(p2);
 		cell *tail = LIST_TAIL(p2);
 		head = deref_var(q, head, p2_ctx);
 
-		if (!is_atom(head)) {
-			throw_error(q, head, "type_error", "term");
+		if (!is_atomic(head)) {
+			throw_error(q, head, "type_error", "atomic");
 			return 0;
 		}
 
 		size_t nbr_cells = p2->nbr_cells;
 		cell *tmp = malloc(sizeof(cell)*nbr_cells);
 		size_t idx = 0;
-		make_literal(tmp+idx++, head->val_off);
+		tmp[idx++] = *head;
 
 		while (tail) {
 			tail = deref_var(q, tail, p2_ctx);
@@ -3860,12 +3855,15 @@ static int fn_iso_univ_2(query *q)
 			cell *tmp = alloc_heap(q, idx);
 			copy_cells(tmp, save, idx);
 			free(save);
-			tmp->fn = get_builtin(q->m, GET_STR(tmp), tmp->arity);
 
-			if (tmp->fn)
-				tmp->flags |= FLAG_BUILTIN;
-			else
-				tmp->match = find_rule(q->m, tmp);
+			if (is_literal(tmp)) {
+				tmp->fn = get_builtin(q->m, GET_STR(tmp), tmp->arity);
+
+				if (tmp->fn)
+					tmp->flags |= FLAG_BUILTIN;
+				else
+					tmp->match = find_rule(q->m, tmp);
+			}
 
 			set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
 			return 1;
@@ -3874,41 +3872,32 @@ static int fn_iso_univ_2(query *q)
 		int ok = unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 		free(tmp);
 		return ok;
+	} else if (is_variable(p2) && is_list(p1) && 0) {
+		cell tmp;
+		make_literal(&tmp, g_dot_s);
+		alloc_list(q, &tmp);
+		append_list(q, LIST_HEAD(p1));
+		append_list(q, LIST_TAIL(p1));
+		cell *l = end_list(q);
+		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
+		return 1;
 	} else if (is_variable(p2)) {
-		if (!is_callable(p1)) {
-			throw_error(q, p1, "type_error", "callable");
-			return 0;
-		}
-
+		idx_t nbr_cells = p1->nbr_cells;
 		cell *c = p1;
-		size_t nbr_cells = 100;
-		cell *tmp = malloc(sizeof(cell)*nbr_cells);
-		size_t idx = 0;
+		cell tmp = *c++;
+		tmp.nbr_cells = 1;
+		tmp.arity = 0;
+		alloc_list(q, &tmp);
+		nbr_cells -= tmp.nbr_cells;
+		unsigned arity = p1->arity;
 
-		make_literal(tmp+idx++, g_dot_s);
-		tmp[idx] = *c++;
-		tmp[idx].nbr_cells = 1;
-		tmp[idx].arity = 0;
-		idx++;
-
-		for (idx_t i = 1; i < p1->nbr_cells;) {
-			make_literal(tmp+idx++, g_dot_s);
-			tmp[idx-1].arity = 2;
-			tmp[idx-1].nbr_cells = 1+(p1->nbr_cells-idx);
-			idx += copy_cells(tmp+idx, c, c->nbr_cells);
+		while (arity--) {
+			append_list(q, c);
 			c += c->nbr_cells;
-			i += c->nbr_cells;
 		}
 
-		make_literal(tmp+idx++, g_nil_s);
-		tmp[0].arity = 2;
-		tmp[0].nbr_cells = idx;
-
-		cell *save = tmp;
-		tmp = alloc_heap(q, idx);
-		copy_cells(tmp, save, idx);
-		free(save);
-		set_var(q, p2, p2_ctx, tmp, q->st.curr_frame);
+		cell *l = end_list(q);
+		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
 		return 1;
 	}
 
