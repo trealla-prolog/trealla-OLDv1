@@ -334,7 +334,7 @@ struct parser_ {
 	term *t;
 	char *token, *save_line, *srcptr;
 	size_t token_size, n_line;
-	int line_nbr, error, depth, quoted;
+	int line_nbr, error, depth, quoted, nbr_vars;
 	uint8_t val_type;
 	int8_t dq_consing;
 	unsigned was_quoted:1;

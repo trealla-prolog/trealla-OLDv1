@@ -847,7 +847,7 @@ static void dump_vars(query *q, parser *p)
 	slot *e = GET_SLOT(g, 0);
 	int any = 0;
 
-	for (unsigned i = 0; i < g->nbr_vars; i++, e++) {
+	for (unsigned i = 0; i < p->nbr_vars; i++, e++) {
 
 		if (is_empty(&e->c))
 			continue;
@@ -1298,6 +1298,7 @@ static idx_t get_varno(parser *p, const char *src)
 void parser_assign_vars(parser *p)
 {
 	p->start_term = 1;
+	p->nbr_vars = 0;
 	memset(&p->vartab, 0, sizeof(p->vartab));
 	term *t = p->t;
 	t->nbr_vars = 0;
@@ -1323,6 +1324,7 @@ void parser_assign_vars(parser *p)
 		if (p->vartab.var_used[c->slot_nbr]++ == 0) {
 			c->flags |= FLAG_FIRST_USE;
 			t->nbr_vars++;
+			p->nbr_vars++;
 		}
 	}
 
