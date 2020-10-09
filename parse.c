@@ -1648,7 +1648,7 @@ static void parser_dcg_rewrite(parser *p)
 #if 1
 	// This is a magic fix...
 	tmp[nbr_cells].val_type = TYPE_LITERAL;
-	tmp[nbr_cells].val_off = find_in_pool("true");
+	tmp[nbr_cells].val_off = g_true_s;
 	tmp[nbr_cells].nbr_cells = 1;
 	tmp[nbr_cells].arity = 0;
 	tmp[nbr_cells].flags = FLAG_BUILTIN;
