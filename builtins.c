@@ -3872,12 +3872,16 @@ static int fn_iso_univ_2(query *q)
 		int ok = unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 		free(tmp);
 		return ok;
-	} else if (is_variable(p2) && is_list(p1) && 0) {
+	} else if (is_variable(p2) && is_list(p1)) {
+		idx_t nbr_cells = p1->nbr_cells;
+		cell *h = LIST_HEAD(p1);
+		cell *t = LIST_TAIL(p1);
+		t->nbr_cells = nbr_cells - h->nbr_cells - 1;	// TODO: fix list parsing
 		cell tmp;
 		make_literal(&tmp, g_dot_s);
 		alloc_list(q, &tmp);
-		append_list(q, LIST_HEAD(p1));
-		append_list(q, LIST_TAIL(p1));
+		append_list(q, h);
+		append_list(q, t);
 		cell *l = end_list(q);
 		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
 		return 1;
