@@ -14,5 +14,4 @@
 13
 14
 15
-16
-Error: uncaught exception... error(resource_error(too_many_vars,65536/0),length/2)
+Error: uncaught exception... error(resource_error(too_many_vars,32768/0),length/2)

@@ -108,7 +108,7 @@ static void check_slot(query *q)
 	if (q->st.sp > q->max_slots) {
 		q->max_slots = q->st.sp;
 
-		if ((q->st.sp+MAX_ARITY) >= q->slots_size) {
+		while ((q->st.sp+MAX_ARITY) >= q->slots_size) {
 			idx_t save_slots = q->slots_size;
 			q->slots_size += q->slots_size / 2;
 
@@ -128,8 +128,6 @@ unsigned create_vars(query *q, unsigned nbr)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 	unsigned slot_nbr = g->nbr_vars;
-
-	//printf("*** create_vars=%u, nbr_vars=%u, nbr_slots=%u, st.sp=%u\n", nbr, g->nbr_vars, g->nbr_slots, q->st.sp);
 
 	if ((g->env + g->nbr_slots) >= q->st.sp) {
 		g->nbr_slots += nbr;

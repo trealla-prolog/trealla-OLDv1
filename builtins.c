@@ -231,8 +231,12 @@ static void init_tmp_heap(query* q)
 
 static cell *alloc_tmp_heap(query *q, idx_t nbr_cells)
 {
-	if (!q->tmp_heap)
+	if (!q->tmp_heap) {
+		if (q->tmph_size < nbr_cells)
+			q->tmph_size = nbr_cells;
+
 		q->tmp_heap = calloc(q->tmph_size, sizeof(cell));
+	}
 
 	while ((q->tmphp + nbr_cells) >= q->tmph_size) {
 		q->tmph_size += q->tmph_size / 2;
@@ -251,6 +255,9 @@ static cell *get_tmp_heap(const query *q, idx_t i) { return q->tmp_heap + i; }
 static cell *alloc_heap(query *q, idx_t nbr_cells)
 {
 	if (!q->arenas) {
+		if (q->h_size < nbr_cells)
+			q->h_size = nbr_cells;
+
 		arena *a = calloc(1, sizeof(arena));
 		a->heap = calloc(q->h_size, sizeof(cell));
 		a->h_size = q->h_size;
@@ -8654,7 +8661,7 @@ static int do_length(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer);
-	int cnt = p2->val_num;
+	idx_t cnt = p2->val_num;
 	GET_RAW_ARG(2, p2_orig);
 	cell tmp;
 	make_int(&tmp, ++cnt);
@@ -8760,15 +8767,17 @@ static int fn_length_2(query *q)
 
 
 	if (is_variable(p1) && is_integer(p2)) {
-		if ((p2->val_num < 0) || (p2->val_num > 32768)) {
+		idx_t nbr = p2->val_num;
+
+		if ((nbr < 0) || (nbr > 32768)) {
 			throw_error(q, p2, "resource_error", "too_many_vars");
 			return 0;
 		}
 
-		if (is_anon(p1))
-			return 1;
+		//if (is_anon(p1))
+		//	return 1;
 
-		if (p2->val_num == 0) {
+		if (nbr == 0) {
 			cell tmp;
 			make_literal(&tmp, g_nil_s);
 			set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -8777,7 +8786,7 @@ static int fn_length_2(query *q)
 
 		unsigned slot_nbr;
 
-		if (!(slot_nbr = create_vars(q, p2->val_num))) {
+		if (!(slot_nbr = create_vars(q, nbr))) {
 			throw_error(q, p2, "resource_error", "too_many_vars");
 			return 0;
 		}
@@ -8785,12 +8794,12 @@ static int fn_length_2(query *q)
 		cell tmp;
 		tmp.val_type = TYPE_VARIABLE;
 		tmp.nbr_cells = 1;
-		tmp.flags = 0;
+		tmp.flags = FLAG_ANON;
 		tmp.val_off = g_anon_s;
 		tmp.slot_nbr = slot_nbr++;
 		alloc_list(q, &tmp);
 
-		for (int i = 1; i < p2->val_num; i++) {
+		for (int i = 1; i < nbr; i++) {
 			tmp.slot_nbr = slot_nbr++;
 			append_list(q, &tmp);
 		}

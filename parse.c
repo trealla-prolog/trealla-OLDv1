@@ -1339,7 +1339,7 @@ void parser_assign_vars(parser *p)
 		if (!is_variable(c))
 			continue;
 
-		if (p->vartab.var_used[c->slot_nbr] == 1)
+		if (c->val_off == g_anon_s)
 			c->flags |= FLAG_ANON;
 	}
 
