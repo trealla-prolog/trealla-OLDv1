@@ -133,7 +133,7 @@ unsigned create_vars(query *q, unsigned nbr)
 
 	if ((g->env + g->nbr_slots) >= q->st.sp) {
 		g->nbr_slots += nbr;
-		q->st.sp += nbr;
+		q->st.sp = g->env + g->nbr_slots;
 	} else {
 		assert(!g->overflow);
 		g->overflow = q->st.sp;
