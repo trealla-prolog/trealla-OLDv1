@@ -131,7 +131,7 @@ unsigned create_vars(query *q, unsigned nbr)
 
 	//printf("*** create_vars=%u, nbr_vars=%u, nbr_slots=%u, st.sp=%u\n", nbr, g->nbr_vars, g->nbr_slots, q->st.sp);
 
-	if ((g->env + g->nbr_slots) == q->st.sp) {
+	if ((g->env + g->nbr_slots) >= q->st.sp) {
 		g->nbr_slots += nbr;
 		q->st.sp += nbr;
 	} else {
