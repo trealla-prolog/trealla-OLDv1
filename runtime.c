@@ -988,6 +988,7 @@ void query_execute(query *q, term *t)
 	q->time_started = get_time_in_usec();
 	q->abort = 0;
 	q->cycle_error = 0;
+	q->m->dump_vars = 0;
 
 	frame *g = q->frames + q->st.curr_frame;
 	g->nbr_vars = t->nbr_vars;

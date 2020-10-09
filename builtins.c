@@ -4527,6 +4527,7 @@ static int do_throw_term(query *q, cell *c)
 	fprintf(stderr, "Error: uncaught exception... ");
 	write_term(q, stderr, c, 1, 0, 0);
 	fprintf(stderr, "\n");
+	q->m->dump_vars = 1;
 	q->exception = NULL;
 	q->error = 1;
 	return 0;
