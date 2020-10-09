@@ -12,6 +12,8 @@ int pl_consult_fp(prolog*, FILE *fp);
 int get_halt_code(prolog*);
 int get_halt(prolog*);
 int get_status(prolog*);
+int get_dump_vars(prolog*);
+
 void set_trace(prolog*);
 void set_quiet(prolog*);
 void set_stats(prolog*);

@@ -283,7 +283,8 @@ int main(int ac, char *av[])
 		if (get_halt(pl))
 			break;
 
-		printf("%s\n", get_status(pl) ? "true" : "false");
+		if (!get_dump_vars(pl))
+			printf("%s\n", get_status(pl) ? "true." : "false.");
 	}
 
 	if (isatty(0))

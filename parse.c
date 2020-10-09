@@ -876,6 +876,8 @@ static void dump_vars(query *q, parser *p)
 
 	if (any)
 		fprintf(stdout, ".\n\n");
+
+	q->m->dump_vars = any;
 }
 
 static void consultall(parser *p, cell *l)
@@ -2923,6 +2925,7 @@ int deconsult(const char *filename)
 int get_halt(prolog *pl) { return pl->m->halt; }
 int get_halt_code(prolog *pl) { return pl->m->halt_code; }
 int get_status(prolog *pl) { return pl->m->status; }
+int get_dump_vars(prolog *pl) { return pl->m->dump_vars; }
 
 void set_trace(prolog *pl) { pl->m->trace = 1; }
 void set_quiet(prolog *pl) { pl->m->quiet = 1; }
