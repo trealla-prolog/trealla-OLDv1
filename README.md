@@ -107,7 +107,7 @@ Strings
 Double-quoted strings, when *set_prolog_flag(double_quotes,chars)* is set
 (which is the default) are stored as packed UTF-8 byte arrays. This is
 compact and efficient. Such strings emulate a list representation and
-from the programmer point of view are very much indistinguihable from
+from the programmer point of view are very much indistinguishable from
 lists.
 
 A good use of such strings is *open(Filename,read,Str,[mmap(Ls))*
