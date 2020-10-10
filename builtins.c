@@ -8779,8 +8779,8 @@ static int fn_length_2(query *q)
 			return 0;
 		}
 
-		//if (is_anon(p1))
-		//	return 1;
+		if (is_anon(p1))
+			return 1;
 
 		if (nbr == 0) {
 			cell tmp;

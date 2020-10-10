@@ -8,9 +8,9 @@ A compact, efficient Prolog interpreter with ISO compliant aspirations.
 	Rationals are a native type
 	Reals are double
 	Atoms are UTF-8 of unlimited length
-	The default string is *chars*, using a compact UTF-8 representation
-	Arity limit 255
-	Limited DCG capability
+	The default double-quoted representation is *chars* list
+	Double-quoted strings are packed UTF-8 bytes arrays
+	DCG capability
 	Full-term just-in-time indexing
 	Peristence to per-module database
 	REPL with history
@@ -79,13 +79,15 @@ For example:
 Invocation without any goal presents the REPL.
 
 
-What's missing?
-===============
+What's missing, problems?
+=========================
 
 	there may be missing or incomplete ISO predicates
 	database is immediate update view, fix
 	modules need more work (multifile for one)
 	missing directives?
+	arity limit is 255
+	environment limit is 32K vars per frame
 	aiming to run clpz.pl down the track
 
 
