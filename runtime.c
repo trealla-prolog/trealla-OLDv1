@@ -138,6 +138,8 @@ unsigned create_vars(query *q, unsigned nbr)
 		q->st.sp += nbr;
 	}
 
+	check_slot(q);
+
 	for (int i = 0; i < nbr; i++) {
 		slot *e = GET_SLOT(g, g->nbr_vars+i);
 		e->c.val_type = TYPE_EMPTY;
@@ -242,6 +244,7 @@ void make_choice(query *q)
 
 	frame *g = GET_FRAME(q->st.curr_frame);
 	ch->nbr_vars = g->nbr_vars;
+	ch->nbr_slots = g->nbr_slots;
 	ch->any_choices = g->any_choices;
 }
 
@@ -342,6 +345,7 @@ int retry_choice(query *q)
 
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g->nbr_vars = ch->nbr_vars;
+	g->nbr_slots = ch->nbr_slots;
 	g->any_choices = ch->any_choices;
 	g->overflow = 0;
 	return 1;

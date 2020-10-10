@@ -265,7 +265,7 @@ typedef struct {
 	state st;
 	idx_t v1, v2;
 	uint32_t pins;
-	uint8_t nbr_vars;
+	uint8_t nbr_vars, nbr_slots;
 	unsigned local_cut:1;
 	unsigned any_choices:1;
 	unsigned catchme1:1;

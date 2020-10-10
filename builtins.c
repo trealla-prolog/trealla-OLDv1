@@ -54,12 +54,9 @@ static int do_throw_term(query *q, cell *c);
 
 void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 {
-	cell tmp = *c;
-	tmp.nbr_cells = 1;
-	tmp.arity = 0;
-	size_t len = write_term_to_buf(q, NULL, 0, &tmp, 1, 0, 0);
+	size_t len = write_term_to_buf(q, NULL, 0, c, 1, 0, 0);
 	char *dst = malloc(len+1);
-	write_term_to_buf(q, dst, len+1, &tmp, 1, 0, 0);
+	write_term_to_buf(q, dst, len+1, c, 1, 0, 0);
 	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q->st.curr_cell) + 20;
 	char *dst2 = malloc(len2+1);
 
@@ -8669,14 +8666,19 @@ static int do_length(query *q)
 	set_var(q, p2_orig, p2_orig_ctx, &tmp, q->st.curr_frame);
 	make_choice(q);
 
-	unsigned slot_nbr;
+	if (is_anon(p1))
+		return 1;
 
 	if ((nbr < 0) || (nbr >= MAX_VARS)) {
+		drop_choice(q);
 		throw_error(q, p2, "resource_error", "too_many_vars");
 		return 0;
 	}
 
+	unsigned slot_nbr;
+
 	if (!(slot_nbr = create_vars(q, nbr))) {
+		drop_choice(q);
 		throw_error(q, p1, "resource_error", "too_many_vars");
 		return 0;
 	}
@@ -8801,7 +8803,7 @@ static int fn_length_2(query *q)
 		cell tmp;
 		tmp.val_type = TYPE_VARIABLE;
 		tmp.nbr_cells = 1;
-		tmp.flags = FLAG_ANON;
+		tmp.flags = 0;
 		tmp.val_off = g_anon_s;
 		tmp.slot_nbr = slot_nbr++;
 		alloc_list(q, &tmp);
