@@ -3837,12 +3837,14 @@ static int fn_iso_univ_2(query *q)
 		head = deref_var(q, head, p2_ctx);
 
 		if (!is_atomic(head)) {
-			throw_error(q, head, "type_error", "atomic");
+			if (is_variable(p1))
+				throw_error(q, head, "type_error", "atomic");
+
 			return 0;
 		}
 
 		size_t nbr_cells = p2->nbr_cells;
-		cell *tmp = malloc(sizeof(cell)*nbr_cells);
+		cell *tmp = malloc(sizeof(cell)*nbr_cells* 2);
 		size_t idx = 0;
 		tmp[idx++] = *head;
 
@@ -3856,7 +3858,9 @@ static int fn_iso_univ_2(query *q)
 			}
 
 			if (!is_list(tail)) {
-				throw_error(q, tail, "type_error", "list");
+				if (is_variable(p1))
+					throw_error(q, tail, "type_error", "list");
+
 				return 0;
 			}
 
