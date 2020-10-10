@@ -28,12 +28,6 @@ debug:
 test:
 	./tests/run.sh
 
-test_valgrind:
-	./tests/run_valgrind.sh
-
-test_swi:
-	./tests/run_swi.sh
-
 clean:
 	rm -f tpl *.o *.out gmon.* *.core
 
