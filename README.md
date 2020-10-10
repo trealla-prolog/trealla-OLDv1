@@ -9,10 +9,9 @@ A compact, efficient Prolog interpreter with ISO compliant aspirations.
 	Reals are double
 	Atoms are UTF-8 of unlimited length
 	The default double-quoted representation is *chars* list
-	Double-quoted strings are packed UTF-8 bytes arrays
-	DCG capability
+	Double-quoted strings are packed UTF-8 byte arrays
 	Full-term just-in-time indexing
-	Peristence to per-module database
+	DCG capability
 	REPL with history
 	MIT licensed
 
