@@ -5158,7 +5158,7 @@ static cell *skip_existentials(const query *q, cell *p2, uint32_t *xs)
 
 static int fn_iso_bagof_3(query *q)
 {
-	GET_FIRST_RAW_ARG(p1,structure_or_var);
+	GET_FIRST_RAW_ARG(p1,any);
 	GET_NEXT_RAW_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
 	uint32_t xs_vars = 0;
@@ -5231,7 +5231,7 @@ static int fn_iso_bagof_3(query *q)
 
 static int fn_iso_setof_3(query *q)
 {
-	GET_FIRST_RAW_ARG(p1,structure_or_var);
+	GET_FIRST_RAW_ARG(p1,any);
 	GET_NEXT_RAW_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
 	uint32_t xs_vars = 0;
