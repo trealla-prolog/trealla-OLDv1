@@ -3836,7 +3836,7 @@ static int fn_iso_univ_2(query *q)
 		cell *tail = LIST_TAIL(p2);
 		head = deref_var(q, head, p2_ctx);
 
-		if (!is_atomic(head)) {
+		if (!is_atom(head) && !is_number(head) && !is_variable(head)) {
 			if (is_variable(p1))
 				throw_error(q, head, "type_error", "atomic");
 
@@ -3896,8 +3896,21 @@ static int fn_iso_univ_2(query *q)
 			return 1;
 		}
 
-		int ok = unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 		free(tmp);
+		cell tmp2 = *p1;
+		tmp2.nbr_cells = 1;
+		tmp2.arity = 0;
+		alloc_list(q, &tmp2);
+		cell *c = p1 + 1;
+		unsigned arity = p1->arity;
+
+		while (arity--) {
+			append_list(q, c);
+			c += c->nbr_cells;
+		}
+
+		cell *l = end_list(q);
+		int ok = unify(q, l, p1_ctx, p2, p2_ctx);
 		return ok;
 	} else if (is_variable(p2) && is_list(p1)) {
 		idx_t nbr_cells = p1->nbr_cells;
