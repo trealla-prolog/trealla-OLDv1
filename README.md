@@ -9,7 +9,6 @@ A compact, efficient Prolog interpreter with ISO compliant aspirations.
 	Reals are double
 	Atoms are UTF-8 of unlimited length
 	The default double-quoted representation is *chars* list
-	Double-quoted strings are packed UTF-8 byte arrays
 	Full-term just-in-time indexing
 	DCG capability
 	REPL with history
@@ -100,6 +99,21 @@ Special thanks to [Markus Triska](https://github.com/triska) for
 driving the use of packed UTF-8 strings for character-lists. For the
 idea of mmap()-ing files as strings. For his rigorous approach to types
 and for bug-checking.
+
+
+Strings
+=======
+
+Double-quoted strings, when *set_prolog_flag(double_quotes,chars)* is set
+(which is the default) are stored as packed UTF-8 byte arrays. This is
+compact and efficient. Such strings emulate a list representation and
+from the programmer point of view are very much indistinguihable from
+lists.
+
+A good use of such strings is *open(Filename,read,Str,[mmap(Ls))*
+which gives a memory-mapped view of a file as a string *Ls*. List
+operations on files are now essentially zero-overhead. DCG applications
+will gain greatly.
 
 
 GNU-Prolog & SWI-Prolog
