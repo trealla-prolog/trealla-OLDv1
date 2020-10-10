@@ -462,7 +462,7 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 		return NULL;
 	}
 
-	if (strchr(GET_STR(c), ':')) {
+	if (!is_quoted(c) && strchr(GET_STR(c), ':')) {
 		const char *src = GET_STR(c);
 		char mod[256], name[256];
 		mod[0] = name[0] = '\0';
@@ -545,7 +545,7 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 		return NULL;
 	}
 
-	if (strchr(GET_STR(c), ':')) {
+	if (!is_quoted(c) && strchr(GET_STR(c), ':')) {
 		const char *src = GET_STR(c);
 		char mod[256], name[256];
 		mod[0] = name[0] = '\0';
@@ -688,7 +688,7 @@ void clear_term(term *t)
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
 
-		if (is_blob(c))
+		if (is_blob(c) && !is_const_cstring(c))
 			free(c->val_str);
 
 		c->val_type = TYPE_EMPTY;
@@ -2511,6 +2511,9 @@ int parser_tokenize(parser *p, int args, int consing)
 
 			if (p->is_variable)
 				c->val_type = TYPE_VARIABLE;
+
+			if (p->was_quoted)
+				c->flags |= FLAG_QUOTED;
 
 			c->val_off = find_in_pool(p->token);
 		} else {

@@ -73,6 +73,7 @@ typedef uint32_t idx_t;
 #define is_integer(c) (((c)->val_type == TYPE_INTEGER) && ((c)->val_den == 1))
 #define is_const_cstring(c) (is_cstring(c) && ((c)->flags&FLAG_CONST_CSTRING))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
+#define is_quoted(c) ((c)->flags&FLAG_QUOTED)
 #define is_anon(c) ((c)->flags&FLAG_ANON)
 
 // These 2 assume literal or cstring types...
@@ -108,6 +109,7 @@ enum {
 	FLAG_ANON=FLAG_OCTAL,				// used with TYPE_VARIABLE
 	FLAG_STREAM=FLAG_TAIL_REC,			// used with TYPE_INTEGER
 	FLAG_CONST_CSTRING=FLAG_HEX,		// used with TYPE_CSTRING
+	FLAG_QUOTED=FLAG_OCTAL,				// used with TYPE_CSTRING
 
 	OP_FX=1<<9,
 	OP_FY=1<<10,
