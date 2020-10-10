@@ -880,7 +880,7 @@ static void dump_vars(query *q, parser *p)
 	q->m->dump_vars = any;
 }
 
-static void consultall(parser *p, cell *l)
+void consultall(parser *p, cell *l)
 {
 	while (is_list(l)) {
 		cell *h = LIST_HEAD(l);
@@ -898,7 +898,7 @@ static void directives(parser *p, term *t)
 	if (!is_literal(t->cells))
 		return;
 
-	if (is_iso_list(t->cells) && p->command) {
+	if (is_list(t->cells) && p->command) {
 		consultall(p, t->cells);
 		p->skip = 1;
 		return;

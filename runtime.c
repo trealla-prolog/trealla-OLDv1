@@ -936,7 +936,10 @@ void run_query(query *q)
 				break;
 			}
 
-			if (!match(q)) {
+			if (is_list(q->st.curr_cell)) {
+				consultall(q->m->p, q->st.curr_cell);
+				follow_me(q);
+			} else if (!match(q)) {
 				q->retry = 1;
 				q->tot_retries++;
 				trace(q, q->st.curr_cell, FAIL);
