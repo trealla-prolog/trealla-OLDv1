@@ -112,7 +112,7 @@ lists.
 
 A good use of such strings is *open(Filename,read,Str,[mmap(Ls))*
 which gives a memory-mapped view of a file as a string *Ls*. List
-operations on files are now essentially zero-overhead. DCG applications
+operations on files are now essentially zero-overhead! DCG applications
 will gain greatly.
 
 
