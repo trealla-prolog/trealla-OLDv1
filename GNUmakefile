@@ -9,6 +9,12 @@ else
 USE_OPENSSL = 0
 endif
 
+ifdef INT128
+CFLAGS += -DUSE_INT128=1
+else ifdef INT32
+CFLAGS += -DUSE_INT32=1
+endif
+
 OBJECTS = tpl.o history.o builtins.o library.o \
 	parse.o print.o runtime.o \
 	skiplist.o base64.o network.o utf8.o \
