@@ -136,10 +136,7 @@ unsigned create_vars(query *q, unsigned nbr)
 		assert(!g->overflow);
 		g->overflow = q->st.sp;
 		q->st.sp += nbr;
-		check_slot(q);
 	}
-
-	//check_slot(q);
 
 	for (int i = 0; i < nbr; i++) {
 		slot *e = GET_SLOT(g, g->nbr_vars+i);
