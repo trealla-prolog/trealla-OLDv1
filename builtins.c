@@ -52,40 +52,6 @@ static double rat_to_float(cell *n)
 
 static int do_throw_term(query *q, cell *c);
 
-void throw_error(query *q, cell *c, const char *err_type, const char *expected)
-{
-	size_t len = write_term_to_buf(q, NULL, 0, c, 1, 0, 0);
-	char *dst = malloc(len+1);
-	write_term_to_buf(q, dst, len+1, c, 1, 0, 0);
-	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q->st.curr_cell) + 20;
-	char *dst2 = malloc(len2+1);
-
-	if (is_variable(c)) {
-		err_type = "instantiation_error";
-		snprintf(dst2, len2, "error(%s,%s/%u)", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
-	} else if (!strcmp(err_type, "type_error")) {
-		const char *t = expected;
-		if (!strncmp(t,"iso_",4)) t = t+4;
-		char tmpbuf[1024];
-		strcpy(tmpbuf, t);
-		char *ptr = strchr(tmpbuf, '_');
-		if (ptr) *ptr = '\0';
-		snprintf(dst2, len2, "error(%s(%s,%s))", err_type, tmpbuf, dst);
-	} else {
-		snprintf(dst2, len2, "error(%s(%s,%s/%u),%s/%u)", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
-	}
-
-	parser *p = q->m->p;
-	p->srcptr = dst2;
-	parser_tokenize(p, 0, 0);
-	parser_attach(p, 0);
-	//parser_xref(p, p->t, NULL);
-	do_throw_term(q, p->t->cells);
-	clear_term(p->t);
-	free(dst2);
-	free(dst);
-}
-
 static int do_yield_0(query *q, int msecs)
 {
 	q->yielded = 1;
@@ -501,6 +467,47 @@ cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 	cell *tmp = alloc_heap(q, p1->nbr_cells);
 	copy_cells(tmp, p1, p1->nbr_cells);
 	return tmp;
+}
+
+void throw_error(query *q, cell *c, const char *err_type, const char *expected)
+{
+	cell tmp;
+
+	if (is_literal(c))
+		tmp = make_cstring(q, GET_STR(c));
+	else
+		tmp = *c;
+
+	size_t len = write_term_to_buf(q, NULL, 0, &tmp, 1, 0, 0);
+	char *dst = malloc(len+1);
+	write_term_to_buf(q, dst, len+1, &tmp, 1, 0, 0);
+	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q->st.curr_cell) + 20;
+	char *dst2 = malloc(len2+1);
+
+	if (is_variable(c)) {
+		err_type = "instantiation_error";
+		snprintf(dst2, len2, "error(%s,%s/%u)", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+	} else if (!strcmp(err_type, "type_error")) {
+		const char *t = expected;
+		if (!strncmp(t,"iso_",4)) t = t+4;
+		char tmpbuf[1024];
+		strcpy(tmpbuf, t);
+		char *ptr = strchr(tmpbuf, '_');
+		if (ptr) *ptr = '\0';
+		snprintf(dst2, len2, "error(%s(%s,%s))", err_type, tmpbuf, dst);
+	} else {
+		snprintf(dst2, len2, "error(%s(%s,(%s)/%u),%s/%u)", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+	}
+
+	parser *p = q->m->p;
+	p->srcptr = dst2;
+	parser_tokenize(p, 0, 0);
+	parser_attach(p, 0);
+	//parser_xref(p, p->t, NULL);
+	do_throw_term(q, p->t->cells);
+	clear_term(p->t);
+	free(dst2);
+	free(dst);
 }
 
 static int fn_iso_unify_2(query *q)
