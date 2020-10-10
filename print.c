@@ -15,8 +15,6 @@
 #include "network.h"
 #include "utf8.h"
 
-#define MAX_DEPTH 1000
-
 static int needs_quote(module *m, const char *src)
 {
 	if (!strcmp(src, ",") || !strcmp(src, ".") || !strcmp(src, "|"))
@@ -129,7 +127,9 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 	char *save_dst = dst;
 
 	if (depth > MAX_DEPTH) {
-		dst += snprintf(dst, dstlen, "...");
+		if (depth > 64)
+			dst += snprintf(dst, dstlen, "...");
+
 		q->cycle_error = 1;
 		return dst - save_dst;
 	}
@@ -186,7 +186,7 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 		cell *l = c;
 
 		while (is_list(l)) {
-			if (cnt == MAX_DEPTH) {
+			if (cnt > 64) {
 				dst += snprintf(dst, dstlen, "...");
 				return dst - save_dst;
 			}
@@ -245,7 +245,9 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 	char *save_dst = dst;
 
 	if (depth > MAX_DEPTH) {
-		dst += snprintf(dst, dstlen, "...");
+		if (depth > 64)
+			dst += snprintf(dst, dstlen, "...");
+
 		q->cycle_error = 1;
 		return dst - save_dst;
 	}

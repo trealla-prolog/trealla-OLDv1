@@ -43,6 +43,8 @@ typedef uint32_t idx_t;
 #define MAX_USER_OPS 100
 #define MAX_QUEUES 16
 #define MAX_STREAMS 64
+#define MAX_DEPTH 1000
+
 #define STREAM_BUFLEN 1024
 
 #define GET_FRAME(i) (q->frames+(i))

@@ -15,9 +15,15 @@
 #define snprintf _snprintf
 #define msleep Sleep
 #define PATH_SEP "\\"
+#define USE_MMAP 0
 #else
+#ifndef USE_MMAP
+#define USE_MMAP 1
+#endif
 #include <unistd.h>
+#if USE_MMAP
 #include <sys/mman.h>
+#endif
 #define PATH_SEP "/"
 #endif
 
@@ -1468,9 +1474,12 @@ static int fn_iso_open_4(query *q)
 	str->filename = strdup(filename);
 	str->name = strdup(filename);
 	str->mode = strdup(mode);
+	int binary = 0;
+
+#if USE_MMAP
 	cell *mmap_var = NULL;
 	idx_t mmap_ctx = 0;
-	int binary = 0;
+#endif
 
 	while (is_list(p4)) {
 		cell *h = LIST_HEAD(p4);
@@ -1478,9 +1487,11 @@ static int fn_iso_open_4(query *q)
 
 		if (is_structure(c) && (c->arity == 1)) {
 			if (!strcmp(GET_STR(c), "mmap")) {
+#if USE_MMAP
 				mmap_var = c + 1;
 				mmap_var = deref_var(q, mmap_var, q->latest_ctx);
 				mmap_ctx = q->latest_ctx;
+#endif
 			} else if (!strcmp(GET_STR(c), "alias")) {
 				cell *name = c + 1;
 				name = deref_var(q, name, q->latest_ctx);
@@ -1529,7 +1540,7 @@ static int fn_iso_open_4(query *q)
 		return 0;
 	}
 
-#ifndef _WIN32
+#if USE_MMAP
 	int prot = 0;
 
 	if (!strcmp(mode, "read"))
@@ -3469,7 +3480,7 @@ static int fn_iso_neg_1(query *q)
 
 static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
 {
-	if (depth == 1000) {
+	if (depth == MAX_DEPTH) {
 		q->cycle_error = 1;
 		return 0;
 	}

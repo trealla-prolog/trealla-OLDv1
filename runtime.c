@@ -695,7 +695,7 @@ inline static void bind_vars(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p
 
 int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
 {
-	if (depth == 1000) {
+	if (depth == MAX_DEPTH) {
 		q->cycle_error = 1;
 		return 1;
 	}
