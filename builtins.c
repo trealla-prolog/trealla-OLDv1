@@ -2486,7 +2486,7 @@ static int fn_iso_abs_1(query *q)
 	q->accum.val_type = p1.val_type;
 
 	if (is_integer(&p1))
-		q->accum.val_num = llabs(p1.val_num);
+		q->accum.val_num = llabs((long long)p1.val_num);
 	else if is_float(&p1)
 		q->accum.val_flt = fabs(p1.val_flt);
 	else {
@@ -3137,14 +3137,14 @@ static int fn_iso_copysign_2(query *q)
 		q->accum = p1;
 
 		if (p2.val_num < 0)
-			q->accum.val_num = -llabs(p1.val_num);
+			q->accum.val_num = -llabs((long long)p1.val_num);
 
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_rational(&p1) && is_float(&p2)) {
 		q->accum = p1;
 
 		if (p2.val_flt < 0.0)
-			q->accum.val_num = -llabs(p1.val_num);
+			q->accum.val_num = -llabs((long long)p1.val_num);
 
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_float(&p1) && is_float(&p2)) {
@@ -3297,7 +3297,7 @@ static int fn_iso_div_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_num = (p1.val_num - llabs(p1.val_num % p2.val_num)) / p2.val_num;
+		q->accum.val_num = (p1.val_num - llabs((long long)(p1.val_num % p2.val_num))) / p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
@@ -3315,7 +3315,7 @@ static int fn_iso_mod_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_num = llabs(p1.val_num % p2.val_num);
+			q->accum.val_num = llabs((long long)(p1.val_num % p2.val_num));
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
@@ -6870,7 +6870,7 @@ static int fn_random_1(query *q)
 	}
 
 	q->accum.val_type = TYPE_INTEGER;
-	q->accum.val_num = llabs(random()%p1->val_num);
+	q->accum.val_num = llabs((long long)(random()%p1->val_num));
 	return 1;
 }
 

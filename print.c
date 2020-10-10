@@ -66,7 +66,7 @@ size_t sprint_int(char *dst, size_t size, int_t n, int base)
 
 	if ((n < 0) && (base == 10)) {
 		if (size) *dst++ = '-'; else dst++;
-		n = llabs(n);
+		n = llabs((long long)n);
 	}
 
 	if (n == 0) {
