@@ -3900,6 +3900,7 @@ static int fn_iso_univ_2(query *q)
 		cell tmp2 = *p1;
 		tmp2.nbr_cells = 1;
 		tmp2.arity = 0;
+		tmp2.flags = 0;
 		alloc_list(q, &tmp2);
 		cell *c = p1 + 1;
 		unsigned arity = p1->arity;
