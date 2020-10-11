@@ -15,6 +15,10 @@
 #include "network.h"
 #include "utf8.h"
 
+#ifndef DBL_DECIMAL_DIG
+#define DBL_DECIMAL_DIG DBL_DIG
+#endif
+
 static int needs_quote(module *m, const char *src)
 {
 	if (!strcmp(src, ",") || !strcmp(src, ".") || !strcmp(src, "|"))
@@ -167,7 +171,11 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 	}
 	else if (is_float(c)) {
 		char tmpbuf[256];
-		sprintf(tmpbuf, "%.*g", 16, c->val_flt);
+		sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, c->val_flt);
+		const char *ptr = strchr(tmpbuf, '.');
+
+		if (ptr && (strlen(ptr+1) > 1))
+			sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, c->val_flt);
 
 		if (!strchr(tmpbuf, '.'))
 			strcat(tmpbuf, ".0");
