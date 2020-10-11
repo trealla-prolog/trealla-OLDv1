@@ -8707,7 +8707,7 @@ static int do_length(query *q)
 	if (is_anon(p1))
 		return 1;
 
-	if ((nbr < 0) || (nbr >= MAX_VARS)) {
+	if (nbr >= MAX_VARS) {
 		drop_choice(q);
 		throw_error(q, p2, "resource_error", "too_many_vars");
 		return 0;
@@ -8819,7 +8819,7 @@ static int fn_length_2(query *q)
 
 		idx_t nbr = p2->val_num;
 
-		if ((nbr < 0) || (nbr >= MAX_VARS)) {
+		if (nbr >= MAX_VARS) {
 			throw_error(q, p2, "resource_error", "too_many_vars");
 			return 0;
 		}
