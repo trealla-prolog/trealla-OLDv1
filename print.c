@@ -384,11 +384,17 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 
 	if (q->ignore_ops || !optype) {
 		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quote(q->m, src);
-		int dq = 0, braces = 0;
+		int dq = 0, braces = 0, parens = 0;
 		if (is_string(c)) dq = quote = 1;
 		if (q->quoted < 0) quote = 0;
 		if (c->arity && !strcmp(src, "{}")) braces = 1;
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
+
+		if (q->quoted && get_op(q->m, GET_STR(c), NULL, NULL, 0))
+			parens = 1;
+
+		if (parens)
+			dst += snprintf(dst, dstlen, "%s", "(");
 
 		if (running && is_variable(c) && ((1ULL << c->slot_nbr) & q->nv_mask)) {
 			dst += snprintf(dst, dstlen, "%s", varformat(q->nv_start + count_bits(q->nv_mask, c->slot_nbr)));
@@ -421,6 +427,9 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			dst += plain(dst, dstlen, src, is_blob(c) ? len_str : INT_MAX);
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
+
+		if (parens)
+			dst += snprintf(dst, dstlen, "%s", ")");
 
 		if (is_structure(c) && !is_string(c)) {
 			idx_t arity = c->arity;
