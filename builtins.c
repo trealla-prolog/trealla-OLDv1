@@ -8725,7 +8725,7 @@ static int do_length(query *q)
 	GET_RAW_ARG(2, p2_orig);
 	cell tmp;
 	make_int(&tmp, ++nbr);
-	set_var(q, p2_orig, p2_orig_ctx, &tmp, q->st.curr_frame);
+	reset_value(q, p2_orig, p2_orig_ctx, &tmp, q->st.curr_frame);
 	make_choice(q);
 
 	if (is_anon(p1))
