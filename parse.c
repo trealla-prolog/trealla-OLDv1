@@ -2288,16 +2288,11 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 
 static void fix_list(cell *c, idx_t cnt)
 {
-	c->nbr_cells = cnt;
-	cell *h = c + 1;
-	cell *l = h + h->nbr_cells;
-	cnt -= 1 + h->nbr_cells;
-
-	while (is_list(l)) {
-		l->nbr_cells = cnt;
-		h = l + 1;
-		l = h + h->nbr_cells;
-		cnt -= 1 + h->nbr_cells;
+	while (is_list(c)) {
+		c->nbr_cells = cnt;
+		c = c + 1;
+		c = c + c->nbr_cells;
+		cnt -= 1 + c->nbr_cells;
 	}
 }
 
