@@ -2165,6 +2165,7 @@ static int get_token(parser *p, int last_op)
 			} else
 				p->quoted = 1;
 
+			p->len_str = dst - p->token;
 			p->srcptr = (char*)src;
 			return 1;
 		}
@@ -2560,8 +2561,16 @@ int parser_tokenize(parser *p, int args, int consing)
 					c->flags |= FLAG_CONST_CSTRING;
 
 				c->flags |= FLAG_BLOB;
-				c->val_str = strdup(p->token);
-				c->len_str = strlen(p->token);
+
+				if (p->string) {
+					c->len_str = p->len_str;
+					c->val_str = malloc(p->len_str+1);
+					memcpy(c->val_str, p->token, p->len_str);
+					c->val_str[p->len_str] = '\0';
+				} else {
+					c->val_str = strdup(p->token);
+					c->len_str = strlen(p->token);
+				}
 			}
 		}
 	}
