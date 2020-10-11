@@ -368,19 +368,19 @@ static cell tmp_cstringn(query *q, const char *s, size_t n)
 {
 	cell tmp;
 
-	if (strlen(s) < MAX_SMALL_STRING)
+	if (strlen(s) < MAX_SMALL_STRING) {
 		make_smalln(&tmp, s, n);
-	 else {
-		tmp.val_type = TYPE_CSTRING;
-		tmp.flags = FLAG_BLOB;
-		tmp.val_str = malloc(n+1);
-		memcpy(tmp.val_str, s, n);
-		tmp.val_str[n] = '\0';
-		tmp.len_str = n;
-		tmp.nbr_cells = 1;
-		tmp.arity = 0;
+		return tmp;
 	}
 
+	tmp.val_type = TYPE_CSTRING;
+	tmp.flags = FLAG_BLOB;
+	tmp.val_str = malloc(n+1);
+	memcpy(tmp.val_str, s, n);
+	tmp.val_str[n] = '\0';
+	tmp.len_str = n;
+	tmp.nbr_cells = 1;
+	tmp.arity = 0;
 	return tmp;
 }
 
