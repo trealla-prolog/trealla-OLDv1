@@ -52,8 +52,9 @@ static void check_trail(query *q)
 			q->trails_size += q->trails_size / 2;
 
 			if ((sizeof(trail)*q->trails_size) > (1024LL*1024*1024)) {
-				fprintf(stderr, "Error: out of trail\n");
-				abort();
+				throw_error(q, q->st.curr_cell, "resource_error", "Out_of_trail_space");
+				q->error = 1;
+				return;
 			}
 
 			q->trails = realloc(q->trails, sizeof(trail)*q->trails_size);
@@ -71,8 +72,9 @@ static void check_choice(query *q)
 			q->choices_size += q->choices_size / 2;
 
 			if ((sizeof(choice)*q->choices_size) > (1024LL*1024*1024)) {
-				fprintf(stderr, "Error: out of choices\n");
-				abort();
+				throw_error(q, q->st.curr_cell, "resource_error", "Out_of_choice_space");
+				q->error = 1;
+				return;
 			}
 
 			q->choices = realloc(q->choices, sizeof(choice)*q->choices_size);
@@ -91,8 +93,9 @@ static void check_frame(query *q)
 			q->frames_size += q->frames_size / 2;
 
 			if ((sizeof(frame)*q->frames_size) > (1024LL*1024*1024)) {
-				fprintf(stderr, "Error: out of frames\n");
-				abort();
+				throw_error(q, q->st.curr_cell, "resource_error", "Out_of_frame_space");
+				q->error = 1;
+				return;
 			}
 
 			assert(q->frames_size);
@@ -115,8 +118,9 @@ static void check_slot(query *q, unsigned cnt)
 			q->slots_size += q->slots_size / 2;
 
 			if ((sizeof(slot)*q->slots_size) > (1024LL*1024*1024*2)) {
-				fprintf(stderr, "Error: out of environment\n");
-				abort();
+				throw_error(q, q->st.curr_cell, "resource_error", "Out_of_env_space");
+				q->error = 1;
+				return;
 			}
 
 			q->slots = realloc(q->slots, sizeof(slot)*q->slots_size);
