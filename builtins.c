@@ -238,7 +238,12 @@ static cell *alloc_heap(query *q, idx_t nbr_cells)
 	if ((q->st.hp + nbr_cells) >= q->h_size) {
 		arena *a = calloc(1, sizeof(arena));
 		a->next = q->arenas;
-		q->h_size *= 2;
+
+		if (q->h_size < nbr_cells) {
+			q->h_size = nbr_cells;
+			q->h_size += nbr_cells / 2;
+		}
+
 		a->heap = calloc(q->h_size, sizeof(cell));
 		a->h_size = q->h_size;
 		a->nbr = q->st.anbr++;
