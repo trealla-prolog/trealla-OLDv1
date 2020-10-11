@@ -3883,8 +3883,19 @@ static int fn_iso_univ_2(query *q)
 			tmp[0].arity++;
 		}
 
+		cell *save = tmp;
+
 		if (is_variable(p1)) {
-			cell *save = tmp;
+			cell *h = LIST_HEAD(p2);
+			cell *t = LIST_TAIL(p2);
+			h = deref_var(q, h, p2_ctx);
+
+			if (!is_iso_atom(h) && is_iso_list(t)) {
+				throw_error(q, h, "type_error", "atom");
+				return 0;
+			}
+
+			h = save;
 			cell *tmp = alloc_heap(q, idx);
 			copy_cells(tmp, save, idx);
 			free(save);
