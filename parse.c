@@ -593,7 +593,17 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 	r->parent = h;
 	memcpy(&r->t, t, sizeof(term));
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
+	r->t.cidx = nbr_cells;
 	r->m = m;
+
+	if (!consulting) {
+		for (idx_t i = 0; i < r->t.cidx; i++) {
+			cell *c = r->t.cells + i;
+
+			if (is_blob(c) && is_const_cstring(c))
+				c->flags |= FLAG_DUP_CSTRING;
+		}
+	}
 
 	if (h->tail)
 		h->tail->next = r;
@@ -688,7 +698,7 @@ void clear_term(term *t)
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
 
-		if (is_blob(c) && !is_const_cstring(c))
+		if (is_blob(c) && !is_dup_cstring(c))
 			free(c->val_str);
 
 		c->val_type = TYPE_EMPTY;
