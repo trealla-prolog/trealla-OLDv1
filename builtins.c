@@ -792,6 +792,7 @@ static int fn_iso_atom_chars_2(query *q)
 	}
 
 	cell *l = end_list(q);
+	fix_list(l, l->nbr_cells);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -879,6 +880,7 @@ static int fn_iso_atom_codes_2(query *q)
 	}
 
 	cell *l = end_list(q);
+	fix_list(l, l->nbr_cells);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -948,6 +950,7 @@ static int fn_iso_number_chars_2(query *q)
 	}
 
 	cell *l = end_list(q);
+	fix_list(l, l->nbr_cells);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -1018,6 +1021,7 @@ static int fn_iso_number_codes_2(query *q)
 	}
 
 	cell *l = end_list(q);
+	fix_list(l, l->nbr_cells);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -3913,6 +3917,7 @@ static int fn_iso_univ_2(query *q)
 		}
 
 		cell *l = end_list(q);
+		fix_list(l, l->nbr_cells);
 		int ok = unify(q, l, p1_ctx, p2, p2_ctx);
 		return ok;
 	} else if (is_variable(p2) && is_list(p1)) {
@@ -3926,6 +3931,7 @@ static int fn_iso_univ_2(query *q)
 		append_list(q, h);
 		append_list(q, t);
 		cell *l = end_list(q);
+		fix_list(l, l->nbr_cells);
 		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
 		return 1;
 	} else if (is_variable(p2)) {
@@ -3944,6 +3950,7 @@ static int fn_iso_univ_2(query *q)
 		}
 
 		cell *l = end_list(q);
+		fix_list(l, l->nbr_cells);
 		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
 		return 1;
 	}
@@ -4764,6 +4771,7 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		}
 
 		cell *l = end_list(q);
+		fix_list(l, l->nbr_cells);
 		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
 		return 1;
 	}
@@ -5027,6 +5035,7 @@ static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 static void do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 {
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
+	fix_list(l, l->nbr_cells);
 	unify(q, p1, p1_ctx, l, q->st.curr_frame);
 	init_queuen(q);
 }
@@ -5036,6 +5045,7 @@ static void do_sys_listn2(query *q, cell *p1, idx_t p1_ctx, cell *tail)
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	l->nbr_cells--;	// drop []
 	l[l->nbr_cells++] = *tail;
+	fix_list(l, l->nbr_cells);
 	unify(q, p1, p1_ctx, l, q->st.curr_frame);
 	init_queuen(q);
 }
@@ -5044,6 +5054,7 @@ static int fn_sys_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell *l = convert_to_list(q, get_queue(q), queue_used(q));
+	fix_list(l, l->nbr_cells);
 	unify(q, p1, p1_ctx, l, q->st.curr_frame);
 	init_queue(q);
 	return 1;
@@ -5885,6 +5896,7 @@ static int fn_split_atom_4(query *q)
 	}
 
 	l = end_list(q);
+	fix_list(l, l->nbr_cells);
 	return unify(q, p4, p4_ctx, l, q->st.curr_frame);
 }
 
@@ -6025,6 +6037,7 @@ static int fn_getfile_2(query *q)
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else {
 		cell *l = end_list(q);
+		fix_list(l, l->nbr_cells);
 		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
@@ -8734,6 +8747,7 @@ static int do_length(query *q)
 	}
 
 	cell *l = end_list(q);
+	fix_list(l, l->nbr_cells);
 	set_var(q, p1, p1_ctx, l, q->st.curr_frame);
 	return 1;
 }
@@ -8852,6 +8866,7 @@ static int fn_length_2(query *q)
 		}
 
 		cell *l = end_list(q);
+		fix_list(l, l->nbr_cells);
 		set_var(q, p1, p1_ctx, l, q->st.curr_frame);
 		return 1;
 	}
