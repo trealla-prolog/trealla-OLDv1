@@ -103,12 +103,14 @@ static void check_frame(query *q)
 	}
 }
 
-static void check_slot(query *q)
+static void check_slot(query *q, unsigned cnt)
 {
-	if (q->st.sp > q->max_slots) {
+	idx_t nbr = q->st.sp + cnt + MAX_ARITY;
+
+	if (nbr > q->max_slots) {
 		q->max_slots = q->st.sp;
 
-		while ((q->st.sp+MAX_ARITY) >= q->slots_size) {
+		while (nbr >= q->slots_size) {
 			idx_t save_slots = q->slots_size;
 			q->slots_size += q->slots_size / 2;
 
@@ -124,28 +126,28 @@ static void check_slot(query *q)
 	}
 }
 
-unsigned create_vars(query *q, unsigned nbr)
+unsigned create_vars(query *q, unsigned cnt)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 	unsigned slot_nbr = g->nbr_vars;
 
 	if ((g->env + g->nbr_slots) >= q->st.sp) {
-		g->nbr_slots += nbr;
+		g->nbr_slots += cnt;
 		q->st.sp = g->env + g->nbr_slots;
 	} else {
 		assert(!g->overflow);
 		g->overflow = q->st.sp;
-		q->st.sp += nbr;
+		q->st.sp += cnt;
 	}
 
-	check_slot(q);
+	check_slot(q, cnt);
 
 	for (int i = 0; i < nbr; i++) {
 		slot *e = GET_SLOT(g, g->nbr_vars+i);
 		e->c.val_type = TYPE_EMPTY;
 	}
 
-	g->nbr_vars += nbr;
+	g->nbr_vars += cnt;
 	return slot_nbr;
 }
 
@@ -229,7 +231,6 @@ void try_me(const query *q, unsigned vars)
 void make_choice(query *q)
 {
 	check_frame(q);
-	check_slot(q);
 	check_choice(q);
 
 	idx_t curr_choice = q->cp++;
@@ -246,6 +247,7 @@ void make_choice(query *q)
 	ch->nbr_vars = g->nbr_vars;
 	ch->nbr_slots = g->nbr_slots;
 	ch->any_choices = g->any_choices;
+	check_slot(q, g->nbr_vars);
 }
 
 void make_barrier(query *q)
