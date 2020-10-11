@@ -513,6 +513,16 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 	memcpy(&r->t, t, sizeof(term));
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
 	r->m = m;
+
+	if (!consulting) {
+		for (idx_t i = 0; i < r->t.cidx; i++) {
+			cell *c = r->t.cells + i;
+
+			if (is_blob(c) && is_const_cstring(c))
+				c->flags |= FLAG_DUP_CSTRING;
+		}
+	}
+
 	r->next = h->head;
 	h->head = r;
 	h->cnt++;

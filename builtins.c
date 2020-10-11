@@ -336,12 +336,7 @@ static cell *alloc_queuen(query *q, int qnbr, const cell *c)
 void alloc_list(query *q, const cell *c)
 {
 	init_tmp_heap(q);
-	cell *tmp = alloc_tmp_heap(q, 1+c->nbr_cells);
-	tmp->val_type = TYPE_LITERAL;
-	tmp->nbr_cells = 1 + c->nbr_cells;
-	tmp->val_off = g_dot_s;
-	tmp->arity = 2;
-	copy_cells(tmp+1, c, c->nbr_cells);
+	append_list(q, c);
 }
 
 void append_list(query *q, const cell *c)
@@ -351,7 +346,8 @@ void append_list(query *q, const cell *c)
 	tmp->nbr_cells = 1 + c->nbr_cells;
 	tmp->val_off = g_dot_s;
 	tmp->arity = 2;
-	copy_cells(tmp+1, c, c->nbr_cells);
+	tmp++;
+	copy_cells(tmp, c, c->nbr_cells);
 }
 
 cell *end_list(query *q)
@@ -364,6 +360,7 @@ cell *end_list(query *q)
 	tmp = alloc_heap(q, nbr_cells);
 	copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
 	tmp->nbr_cells = nbr_cells;
+	init_tmp_heap(q);
 	return tmp;
 }
 
