@@ -2286,7 +2286,7 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 	return is_chars_list;
 }
 
-static void fix_list(cell *c, idx_t cnt)
+void fix_list(cell *c, idx_t cnt)
 {
 	while (is_list(c)) {
 		c->nbr_cells = cnt;
