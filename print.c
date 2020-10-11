@@ -88,17 +88,31 @@ static size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen
 	extern const char *g_anti_escapes;
 	size_t len = 0;
 
-	while (*src && srclen--) {
+	while (srclen--) {
 		int ch = *src++;
 		const char *ptr = strchr(g_escapes, ch);
 
-		if (ptr) {
+		if (ch && ptr) {
 			if (dstlen) {
 				*dst++ = '\\';
 				*dst++ = g_anti_escapes[ptr-g_escapes];
 			}
 
-			len += 2;;
+			len += 2;
+		} else if (ch < ' ') {
+			if (dstlen) {
+				*dst++ = '\\';
+				*dst++ = 'x';
+			}
+
+			size_t n = snprintf(dst, dstlen, "%d", ch);
+			len += n;
+			if (dstlen) dst += n;
+
+			if (dstlen)
+				*dst++ = '\\';
+
+			len += 3;
 		} else {
 			if (dstlen)
 				*dst++ = ch;
@@ -107,6 +121,9 @@ static size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen
 		}
 	}
 
+	if (dstlen)
+		*dst = '\0';
+
 	return len;
 }
 
@@ -114,7 +131,7 @@ static size_t plain(char *dst, size_t dstlen, const char *src, size_t srclen)
 {
 	size_t len = 0;
 
-	while (*src && srclen--) {
+	while (srclen--) {
 		int ch = *src++;
 
 		if (dstlen)
@@ -122,6 +139,9 @@ static size_t plain(char *dst, size_t dstlen, const char *src, size_t srclen)
 
 		len++;
 	}
+
+	if (dstlen)
+		*dst = '\0';
 
 	return len;
 }
@@ -216,7 +236,7 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 	int dq = 0, quote = !is_variable(c) && needs_quote(q->m, src);
 	if (is_string(c)) dq = quote = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
-	dst += formatted(dst, dstlen, src, is_blob(c) ? c->len_str : INT_MAX);
+	dst += formatted(dst, dstlen, src, is_blob(c) ? c->len_str : strlen(src));
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 
 	if (!is_structure(c))
@@ -431,12 +451,12 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			if ((running < 0) && is_blob(c) && (len_str > 128))
 				len_str = 128;
 
-			dst += formatted(dst, dstlen, src, is_blob(c) ? len_str : INT_MAX);
+			dst += formatted(dst, dstlen, src, is_blob(c) ? len_str : strlen(src));
 
 			if ((running < 0) && is_blob(c) && (len_str == 128))
 				dst += snprintf(dst, dstlen, "%s", "...");
 		} else
-			dst += plain(dst, dstlen, src, is_blob(c) ? len_str : INT_MAX);
+			dst += plain(dst, dstlen, src, is_blob(c) ? len_str : strlen(src));
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
