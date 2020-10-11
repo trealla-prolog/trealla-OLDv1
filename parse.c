@@ -2342,7 +2342,6 @@ int parser_tokenize(parser *p, int args, int consing)
 				break;
 
 			make_literal(p, g_nil_s);
-
 			c = p->t->cells + save_idx;
 			c->nbr_cells = p->t->cidx - save_idx;
 
