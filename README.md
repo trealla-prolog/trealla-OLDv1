@@ -81,12 +81,11 @@ What's missing, problems?
 =========================
 
 	there may be missing or incomplete ISO predicates
-	database is immediate update view, fix
-	modules need more work (multifile for one)
 	missing directives?
-	arity limit is 255
+	database is immediate update view, fix
+	modules may need more work
 	environment limit is 32K vars per frame
-	aiming to run clpz.pl down the track
+	implement attributed variables
 
 
 Acknowledgements
@@ -110,7 +109,7 @@ compact and efficient. Such strings emulate a list representation and
 from the programmer point of view are very much indistinguishable from
 lists.
 
-A good use of such strings is *open(Filename,read,Str,[mmap(Ls))*
+A good use of such strings is *open(filename,read,Str,[mmap(Ls))*
 which gives a memory-mapped view of a file as a string *Ls*. List
 operations on files are now essentially zero-overhead! DCG applications
 will gain greatly (*phrase_from_file/[2-3]* uses this).
