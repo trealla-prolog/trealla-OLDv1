@@ -1006,6 +1006,9 @@ static void directives(parser *p, term *t)
 				return;
 			}
 
+			if (!strcmp(name, "between"))
+				return;
+
 			for (library *lib = g_libs; lib->name; lib++) {
 				if (strcmp(lib->name, name))
 					continue;
