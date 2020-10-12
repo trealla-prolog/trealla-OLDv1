@@ -121,6 +121,7 @@ GNU-Prolog & SWI-Prolog
 	between/3
 	forall/2
 	msort/2
+	merge/3
 	read_term_from_atom/3	# input term can be atom or string-list
 	format/1-3
 	predicate_property/2

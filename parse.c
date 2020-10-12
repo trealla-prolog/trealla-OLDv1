@@ -1006,7 +1006,10 @@ static void directives(parser *p, term *t)
 				return;
 			}
 
-			if (!strcmp(name, "between"))
+			if (!strcmp(name, "between") ||
+				!strcmp(name, "terms") ||
+				!strcmp(name, "files") ||
+				!strcmp(name, "dcgs"))
 				return;
 
 			for (library *lib = g_libs; lib->name; lib++) {
@@ -3055,6 +3058,8 @@ prolog *pl_create()
 	pl->m = create_module("user");
 	pl->m->filename = strdup("~/.tpl_user");
 	pl->m->prebuilt = 1;
+
+	set_multifile_in_db(pl->m, "term_expansion", 6);
 
 	for (library *lib = g_libs; lib->name; lib++) {
 		if (!strcmp(lib->name, "apply") || !strcmp(lib->name, "dict") ||

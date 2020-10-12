@@ -1,7 +1,5 @@
 :- use_module(library(dict)).
 
-% This is a start...
-
 put_atts(V, +(A)) :- !,
 	'$get_atts'(V, D),
 	functor(A, F, _),
