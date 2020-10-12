@@ -7849,7 +7849,7 @@ static int fn_hex_chars_2(query *q)
 	if (is_variable(p1)) {
 		char tmpbuf[256];
 		sprintf(tmpbuf, "%llx", (long long)p2->val_num);
-		cell tmp = make_cstring(q, tmpbuf);
+		cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return 1;
 	}
@@ -7880,7 +7880,7 @@ static int fn_octal_chars_2(query *q)
 	if (is_variable(p1)) {
 		char tmpbuf[256];
 		sprintf(tmpbuf, "%llo", (long long)p2->val_num);
-		cell tmp = make_cstring(q, tmpbuf);
+		cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return 1;
 	}
