@@ -5797,7 +5797,7 @@ static int fn_between_3(query *q)
 		set_var(q, p3, p3_ctx, p1, q->st.curr_frame);
 
 		if (p1->val_num != p2->val_num)
-			make_choice(q);
+			make_barrier(q);
 
 		return 1;
 	}
@@ -5814,7 +5814,7 @@ static int fn_between_3(query *q)
 	reset_value(q, p3_raw, p3_raw_ctx, &tmp, q->st.curr_frame);
 
 	if (val != p2->val_num)
-		make_choice(q);
+		make_barrier(q);
 
 	return 1;
 }
