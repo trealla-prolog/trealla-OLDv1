@@ -245,7 +245,10 @@ cell *list_tail(cell *l)
 
 	size_t n = len_char_utf8(l->val_str);
 
-	if (is_string(l) && (l->len_str-n)) {
+	if (!n)
+		n = 1;
+
+	if (is_string(l) && ((l->len_str-n) > 0)) {
 		static cell tmp;
 		tmp.val_type = TYPE_CSTRING;
 		tmp.flags = FLAG_BLOB|FLAG_CONST_CSTRING|FLAG_STRING;

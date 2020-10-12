@@ -337,7 +337,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		while (is_list(l)) {
 			cell *h = LIST_HEAD(l);
 			cell *c = deref_var(q, h, save_ctx);
-			dst += snprintf(dst, dstlen, "%s", GET_STR(c));
+			dst += formatted(dst, dstlen, GET_STR(c), LEN_STR(c));
 			l = LIST_TAIL(l);
 			l = deref_var(q, l, save_ctx);
 			save_ctx = q->latest_ctx;
