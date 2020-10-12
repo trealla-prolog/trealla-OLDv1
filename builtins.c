@@ -776,24 +776,9 @@ static int fn_iso_atom_chars_2(query *q)
 	}
 
 	const char *src = GET_STR(p1);
-	int nbytes = len_char_utf8(src);
-	char tmpbuf[80];
-	memcpy(tmpbuf, src, nbytes);
-	tmpbuf[nbytes] = '\0';
-	cell tmp = tmp_cstring(q, tmpbuf);
-	src += nbytes;
-	alloc_list(q, &tmp);
-
-	while (*src) {
-		nbytes = len_char_utf8(src);
-		cell tmp = tmp_cstringn(q, src, nbytes);
-		src += nbytes;
-		append_list(q, &tmp);
-	}
-
-	cell *l = end_list(q);
-	fix_list(l, l->nbr_cells);
-	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
+	int nbytes = LEN_STR(p1);
+	cell tmp = make_string(q, src, nbytes);
+	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
 static int fn_iso_atom_codes_2(query *q)
@@ -940,18 +925,8 @@ static int fn_iso_number_chars_2(query *q)
 
 	char tmpbuf[256];
 	sprint_int(tmpbuf, sizeof(tmpbuf), p1->val_num, 10);
-	const char *src = tmpbuf;
-	cell tmp = tmp_cstringn(q, src, 1);
-	alloc_list(q, &tmp);
-
-	while (*++src) {
-		cell tmp = tmp_cstringn(q, src, 1);
-		append_list(q, &tmp);
-	}
-
-	cell *l = end_list(q);
-	fix_list(l, l->nbr_cells);
-	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
+	cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
+	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
 static int fn_iso_number_codes_2(query *q)
