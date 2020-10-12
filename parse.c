@@ -226,13 +226,16 @@ cell *list_head(cell *l)
 
 	size_t n = len_char_utf8(l->val_str);
 
+	if (!n)
+		n = 1;
+
 	static cell tmp;
 	tmp.val_type = TYPE_CSTRING;
+	tmp.flags = FLAG_BLOB|FLAG_CONST_CSTRING;
 	tmp.nbr_cells = 1;
 	tmp.arity = 0;
-	tmp.flags = 0;
-	memcpy(tmp.val_chr, l->val_str, n);
-	tmp.val_chr[n] = '\0';
+	tmp.val_str = l->val_str;
+	tmp.len_str = n;
 	return &tmp;
 }
 
@@ -2262,7 +2265,7 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 		cell *h = list_head(l);
 		cell *c = q ? deref_var(q, h, save_ctx) : h;
 
-		if (is_atom(c) && !is_blob(c)) {
+		if (is_atom(c)) {
 			const char *src = GET_STR(c);
 
 			if (len_char_utf8(src) != LEN_STR(c)) {

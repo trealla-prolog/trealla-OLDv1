@@ -392,7 +392,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			while (is_list(l)) {
 				dst += snprintf(dst, dstlen, "%s", ",");
 				cell *h = LIST_HEAD(l);
-				dst += snprintf(dst, dstlen, "%s", GET_STR(h));
+				dst += formatted(dst, dstlen, GET_STR(h), LEN_STR(h));
 				l = LIST_TAIL(l);
 			}
 
