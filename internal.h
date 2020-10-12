@@ -237,7 +237,7 @@ typedef struct {
 typedef struct {
 	cell *curr_cell;
 	module *m;
-	idx_t prev_frame, env, overflow;
+	idx_t prev_frame, env, overflow, cgen;
 	uint16_t nbr_vars, nbr_slots;
 	unsigned any_choices:1;
 	unsigned did_cut:1;
@@ -269,7 +269,7 @@ typedef struct {
 
 typedef struct {
 	state st;
-	idx_t v1, v2;
+	idx_t v1, v2, cgen;
 	uint32_t pins;
 	uint8_t nbr_vars, nbr_slots;
 	unsigned local_cut:1;
@@ -303,7 +303,7 @@ struct query_ {
 	unsigned long long nv_mask, step, qid;
 	unsigned long long time_started;
 	int max_depth, tmo_msecs;
-	idx_t cp, tmphp, nv_start, latest_ctx, popp;
+	idx_t cp, tmphp, nv_start, latest_ctx, popp, cgen;
 	idx_t frames_size, slots_size, trails_size, choices_size;
 	idx_t max_choices, max_frames, max_slots, max_trails;
 	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;

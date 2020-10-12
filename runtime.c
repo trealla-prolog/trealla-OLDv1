@@ -240,6 +240,7 @@ void make_choice(query *q)
 	idx_t curr_choice = q->cp++;
 	choice *ch = q->choices + curr_choice;
 	ch->st = q->st;
+	ch->cgen = ++q->cgen;
 	ch->local_cut = 0;
 	ch->catchme1 = 0;
 	ch->catchme2 = 0;
@@ -374,6 +375,7 @@ static void make_frame(query *q, unsigned nbr_vars, int last_match)
 	g = GET_FRAME(new_frame);
 	g->prev_frame = q->st.curr_frame;
 	g->curr_cell = q->st.curr_cell;
+	g->cgen = q->cgen;
 	g->nbr_slots = nbr_vars;
 	g->nbr_vars = nbr_vars;
 	g->any_choices = 0;
@@ -467,7 +469,7 @@ void cut_me(query *q, int local_cut)
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
 
-		if (ch->st.fp < q->st.curr_frame)
+		if (ch->cgen < g->cgen)
 			break;
 
 		if (ch->st.qnbr) {
