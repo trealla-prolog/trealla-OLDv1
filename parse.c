@@ -3059,7 +3059,8 @@ prolog *pl_create()
 	pl->m->filename = strdup("~/.tpl_user");
 	pl->m->prebuilt = 1;
 
-	set_multifile_in_db(pl->m, "term_expansion", 6);
+	set_multifile_in_db(pl->m, "term_expansion", 2);
+	set_dynamic_in_db(pl->m, "term_expansion", 2);
 
 	for (library *lib = g_libs; lib->name; lib++) {
 		if (!strcmp(lib->name, "apply") || !strcmp(lib->name, "dict") ||
