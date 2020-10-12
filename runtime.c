@@ -15,7 +15,7 @@
 #include "history.h"
 #include "builtins.h"
 
-#define trace if (q->trace /*&& !consulting*/) trace_call
+#define Trace if (q->trace /*&& !consulting*/) trace_call
 
 int g_tpl_interrupt = 0;
 
@@ -117,7 +117,7 @@ static void check_slot(query *q, unsigned cnt)
 			idx_t save_slots = q->slots_size;
 			q->slots_size += q->slots_size / 2;
 
-			if ((sizeof(slot)*q->slots_size) > (1024LL*1024*1024*2)) {
+			if ((sizeof(slot)*q->slots_size) > (1024LL*1024*1024)) {
 				throw_error(q, q->st.curr_cell, "resource_error", "Out_of_env_space");
 				q->error = 1;
 				return;
@@ -258,6 +258,7 @@ void make_choice(query *q)
 void make_barrier(query *q)
 {
 	make_choice(q);
+	if (q->error) return;
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 	ch->local_cut = 1;
@@ -266,6 +267,7 @@ void make_barrier(query *q)
 void make_catcher(query *q, int retry)
 {
 	make_choice(q);
+	if (q->error) return;
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 
@@ -884,7 +886,11 @@ static int match(query *q)
 		q->no_tco = 0;
 
 		if (unify_structure(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp, 0)) {
-			trace(q, q->st.curr_cell, EXIT);
+			Trace(q, q->st.curr_cell, EXIT);
+
+			if (q->error)
+				return 0;
+
 			commit_me(q, t);
 			return 1;
 		}
@@ -937,7 +943,7 @@ void run_query(query *q)
 
 		q->tot_goals++;
 		q->step++;
-		trace(q, q->st.curr_cell, q->retry?REDO:q->resume?NEXT:CALL);
+		Trace(q, q->st.curr_cell, q->retry?REDO:q->resume?NEXT:CALL);
 
 		if (!(q->st.curr_cell->flags&FLAG_BUILTIN)) {
 			if (!is_literal(q->st.curr_cell)) {
@@ -951,7 +957,7 @@ void run_query(query *q)
 			} else if (!match(q)) {
 				q->retry = 1;
 				q->tot_retries++;
-				trace(q, q->st.curr_cell, FAIL);
+				Trace(q, q->st.curr_cell, FAIL);
 				continue;
 			}
 		} else {
@@ -969,11 +975,15 @@ void run_query(query *q)
 					break;
 
 				q->tot_retries++;
-				trace(q, q->st.curr_cell, FAIL);
+				Trace(q, q->st.curr_cell, FAIL);
 				continue;
 			}
 
-			trace(q, q->st.curr_cell, EXIT);
+			Trace(q, q->st.curr_cell, EXIT);
+
+			if (q->error)
+				break;
+
 			follow_me(q);
 		}
 
