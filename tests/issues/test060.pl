@@ -3,6 +3,7 @@
 fill(0, []).
 fill(Len, [L|T]) :-
     succ(L, Len),
+    !,
     fill(L, T).
 
 main :-

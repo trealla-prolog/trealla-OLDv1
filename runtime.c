@@ -434,12 +434,13 @@ static void commit_me(query *q, term *t)
 	int recursive = (last_match || g->did_cut) && (q->st.curr_cell->flags&FLAG_TAIL_REC);
 	int tco = recursive && !g->any_choices && check_slots(q, g, t);
 
-	if (!last_match) {
+	if (last_match)
+		drop_choice(q);
+	else {
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
 		ch->st.curr_clause = q->st.curr_clause;
-	} else
-		drop_choice(q);
+	}
 
 	if (tco)
 		reuse_frame(q, t->nbr_vars);
