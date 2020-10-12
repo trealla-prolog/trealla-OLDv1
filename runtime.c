@@ -397,6 +397,15 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 
 	if (!q->no_tco && q->m->opt) {
 		frame *new_g = GET_FRAME(q->st.fp);
+
+		for (unsigned i = 0; i < nbr_vars; i++) {
+			slot *e = GET_SLOT(g, i);
+			cell *c = &e->c;
+
+			if (is_string(c) && !is_const_cstring(c))
+				free(c->val_str);
+		}
+
 		slot *from = GET_SLOT(new_g, 0);
 		slot *to = GET_SLOT(g, 0);
 		memcpy(to, from, sizeof(slot)*nbr_vars);
