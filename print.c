@@ -19,7 +19,7 @@
 #define DBL_DECIMAL_DIG DBL_DIG
 #endif
 
-static int needs_quote(module *m, const char *src)
+static int needs_quote(module *m, const char *src, size_t srclen)
 {
 	if (!strcmp(src, ",") || !strcmp(src, ".") || !strcmp(src, "|"))
 		return 1;
@@ -33,7 +33,7 @@ static int needs_quote(module *m, const char *src)
 	if (get_op(m, src, NULL, NULL, 0))
 		return 0;
 
-	while (*src) {
+	while (srclen--) {
 		int ch = get_char_utf8(&src);
 
 		if ((iscntrl(ch) || isspace(ch) || ispunct(ch)) && (ch != '_'))
@@ -233,10 +233,10 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, int r
 	}
 
 	const char *src = GET_STR(c);
-	int dq = 0, quote = !is_variable(c) && needs_quote(q->m, src);
+	int dq = 0, quote = !is_variable(c) && needs_quote(q->m, src, LEN_STR(c));
 	if (is_string(c)) dq = quote = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
-	dst += formatted(dst, dstlen, src, is_blob(c) ? c->len_str : strlen(src));
+	dst += formatted(dst, dstlen, src, LEN_STR(c));
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 
 	if (!is_structure(c))
@@ -415,7 +415,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 		(c->flags & OP_YFX) | (c->flags & OP_XFY);
 
 	if (q->ignore_ops || !optype) {
-		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quote(q->m, src);
+		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quote(q->m, src, LEN_STR(c));
 		int dq = 0, braces = 0, parens = 0;
 		if (is_string(c)) dq = quote = 1;
 		if (q->quoted < 0) quote = 0;
@@ -451,12 +451,12 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			if ((running < 0) && is_blob(c) && (len_str > 128))
 				len_str = 128;
 
-			dst += formatted(dst, dstlen, src, is_blob(c) ? len_str : strlen(src));
+			dst += formatted(dst, dstlen, src, LEN_STR(c));
 
 			if ((running < 0) && is_blob(c) && (len_str == 128))
 				dst += snprintf(dst, dstlen, "%s", "...");
 		} else
-			dst += plain(dst, dstlen, src, is_blob(c) ? len_str : strlen(src));
+			dst += plain(dst, dstlen, src, LEN_STR(c));
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
