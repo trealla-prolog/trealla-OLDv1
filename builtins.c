@@ -2368,6 +2368,8 @@ static void do_calc(query *q, cell *c)
 	q->st.curr_cell = save;
 }
 
+#define calc(q,c) !(c->flags&FLAG_BUILTIN) ? *c : (do_calc(q, c), q->accum)
+
 static int_t gcd(int_t num, int_t remainder)
 {
 	if (remainder == 0)
@@ -2397,13 +2399,11 @@ void do_reduce(cell *n)
 }
 
 #define reduce(c) if ((c)->val_den != 1) do_reduce(c)
-#define calc(q,c) !(c->flags&FLAG_BUILTIN) ? *c : (do_calc(q, c), q->accum)
 
 static int fn_iso_is_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	q->accum.val_den = 1;
 	cell p2 = calc(q, p2_tmp);
 	p2.nbr_cells = 1;
 
