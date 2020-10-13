@@ -5031,9 +5031,9 @@ static void do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	fix_list(l);
 
-	cell *c = l;
 	frame *g = GET_FRAME(q->st.curr_frame);
 	unsigned new_varno = g->nbr_vars;
+	cell *c = l;
 
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
 		if (is_variable(c))
@@ -5054,9 +5054,9 @@ static void do_sys_listn2(query *q, cell *p1, idx_t p1_ctx, cell *tail)
 	l[l->nbr_cells++] = *tail;
 	fix_list(l);
 
-	cell *c = l;
 	frame *g = GET_FRAME(q->st.curr_frame);
 	unsigned new_varno = g->nbr_vars;
+	cell *c = l;
 
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
 		if (is_variable(c))
@@ -5076,9 +5076,9 @@ static int fn_sys_list_1(query *q)
 	cell *l = convert_to_list(q, get_queue(q), queue_used(q));
 	fix_list(l);
 
-	cell *c = l;
 	frame *g = GET_FRAME(q->st.curr_frame);
 	unsigned new_varno = g->nbr_vars;
+	cell *c = l;
 
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
 		if (is_variable(c))
