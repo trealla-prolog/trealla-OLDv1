@@ -171,10 +171,9 @@ static void trace_call(query *q, cell *c, int box)
 	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u:tp%u:cp%u:fp%u:sp%u:hp%u} ", q->st.curr_frame, g->nbr_vars, g->nbr_slots, g->any_choices, q->st.tp, q->cp, q->st.fp, q->st.sp, q->st.hp);
 #endif
 
-	q->latest_ctx = q->st.curr_frame;
 	int save_depth = q->max_depth;
 	q->max_depth = 100;
-	write_term(q, stderr, c, -1, 0, 0);
+	write_term(q, stderr, c, q->st.curr_frame, -1, 0, 0);
 	fprintf(stderr, "\n");
 	q->max_depth = save_depth;
 }

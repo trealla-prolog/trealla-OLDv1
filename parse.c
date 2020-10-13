@@ -905,9 +905,10 @@ static void dump_vars(query *q, parser *p)
 		q->latest_ctx = e->ctx;
 		cell *c;
 
-		if (is_indirect(&e->c))
+		if (is_indirect(&e->c)) {
 			c = e->c.val_ptr;
-		else
+			q->latest_ctx = e->ctx;
+		} else
 			c = deref_var(q, &e->c, 0);
 
 		if (!strcmp(p->vartab.var_name[i], "_"))
@@ -919,7 +920,7 @@ static void dump_vars(query *q, parser *p)
 		fprintf(stdout, "\n%s = ", p->vartab.var_name[i]);
 		int save = q->quoted;
 		q->quoted = 1;
-		write_term(q, stdout, c, 1, 0, 0);
+		write_term(q, stdout, c, q->latest_ctx, 1, 0, 0);
 		q->quoted = save;
 		any++;
 	}
@@ -1054,7 +1055,8 @@ static void directives(parser *p, term *t)
 			q.m = p->m;
 			snprintf(dstbuf, sizeof(dstbuf), "%s/", g_tpl_lib);
 			char *dst = dstbuf + strlen(dstbuf);
-			write_term_to_buf(&q, dst, sizeof(dstbuf)-strlen(g_tpl_lib), p1, 1, 0, 0);
+			idx_t ctx = 0;
+			write_term_to_buf(&q, dst, sizeof(dstbuf)-strlen(g_tpl_lib), p1, ctx, 1, 0, 0);
 			name = dstbuf;
 		}
 
@@ -2833,6 +2835,7 @@ int module_load_file(module *m, const char *filename)
 
 static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 {
+	idx_t ctx = 0;
 	query q = {0};
 	q.m = m;
 
@@ -2845,9 +2848,9 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 				continue;
 
 			if (canonical)
-				write_canonical(&q, fp, r->t.cells, 0, 0);
+				write_canonical(&q, fp, r->t.cells, ctx, 0, 0);
 			else
-				write_term(&q, fp, r->t.cells, 0, 0, 0);
+				write_term(&q, fp, r->t.cells, ctx, 0, 0, 0);
 
 			fprintf(fp, "\n");
 		}
