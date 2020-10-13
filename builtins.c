@@ -5030,6 +5030,19 @@ static void do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 {
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	fix_list(l, l->nbr_cells);
+
+	cell *c = l;
+	frame *g = GET_FRAME(q->st.curr_frame);
+	unsigned new_varno = g->nbr_vars;
+
+	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
+		if (is_variable(c))
+			c->slot_nbr = new_varno++;
+	}
+
+	if (new_varno != g->nbr_vars)
+		create_vars(q, new_varno-g->nbr_vars);
+
 	unify(q, p1, p1_ctx, l, q->st.curr_frame);
 	init_queuen(q);
 }
@@ -5040,6 +5053,19 @@ static void do_sys_listn2(query *q, cell *p1, idx_t p1_ctx, cell *tail)
 	l->nbr_cells--;	// drop []
 	l[l->nbr_cells++] = *tail;
 	fix_list(l, l->nbr_cells);
+
+	cell *c = l;
+	frame *g = GET_FRAME(q->st.curr_frame);
+	unsigned new_varno = g->nbr_vars;
+
+	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
+		if (is_variable(c))
+			c->slot_nbr = new_varno++;
+	}
+
+	if (new_varno != g->nbr_vars)
+		create_vars(q, new_varno-g->nbr_vars);
+
 	unify(q, p1, p1_ctx, l, q->st.curr_frame);
 	init_queuen(q);
 }
@@ -5049,6 +5075,19 @@ static int fn_sys_list_1(query *q)
 	GET_FIRST_ARG(p1,variable);
 	cell *l = convert_to_list(q, get_queue(q), queue_used(q));
 	fix_list(l, l->nbr_cells);
+
+	cell *c = l;
+	frame *g = GET_FRAME(q->st.curr_frame);
+	unsigned new_varno = g->nbr_vars;
+
+	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
+		if (is_variable(c))
+			c->slot_nbr = new_varno++;
+	}
+
+	if (new_varno != g->nbr_vars)
+		create_vars(q, new_varno-g->nbr_vars);
+
 	unify(q, p1, p1_ctx, l, q->st.curr_frame);
 	init_queue(q);
 	return 1;
@@ -5058,13 +5097,6 @@ static int fn_sys_queue_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
-	cell *c = tmp;
-
-	for (idx_t i = 0; i < tmp->nbr_cells; i++, c++) {
-		if (is_variable(c))
-			c->val_type = TYPE_EMPTY;
-	}
-
 	alloc_queue(q, tmp);
 	return 1;
 }
@@ -5074,13 +5106,6 @@ static int fn_sys_queuen_2(query *q)
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,any);
 	cell *tmp = deep_clone_to_tmp(q, p2, p2_ctx);
-	cell *c = tmp;
-
-	for (idx_t i = 0; i < tmp->nbr_cells; i++, c++) {
-		if (is_variable(c))
-			c->val_type = TYPE_EMPTY;
-	}
-
 	alloc_queuen(q, p1->val_num, tmp);
 	return 1;
 }
