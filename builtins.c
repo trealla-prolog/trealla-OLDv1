@@ -4381,10 +4381,10 @@ static int fn_iso_call_n(query *q)
 	copy_cells(tmp2, p1, p1->nbr_cells);
 	idx_t nbr_cells = p1->nbr_cells;
 	unsigned arity = p1->arity;
-	unsigned args = 2;
+	unsigned args = 1;
 
-	while (args++ <= q->st.curr_cell->arity) {
-		cell *p2 = get_next_raw_arg(q);
+	while (args++ < q->st.curr_cell->arity) {
+		cell *p2 = get_next_arg(q);
 		cell *tmp2 = alloc_tmp_heap(q, p2->nbr_cells);
 		copy_cells(tmp2, p2, p2->nbr_cells);
 		nbr_cells += p2->nbr_cells;
@@ -6830,9 +6830,9 @@ static int fn_spawn_n(query *q)
 	cell *tmp = alloc_heap(q, p1->nbr_cells);
 	idx_t n = copy_cells(tmp, p1, p1->nbr_cells);
 	unsigned arity = p1->arity;
-	int args = 2;
+	int args = 1;
 
-	while (args++ <= q->st.curr_cell->arity) {
+	while (args++ < q->st.curr_cell->arity) {
 		GET_NEXT_ARG(p2,any);
 		cell *tmp2 = alloc_heap(q, p2->nbr_cells);
 		n += copy_cells(tmp2, p2, p2->nbr_cells);
