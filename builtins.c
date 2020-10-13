@@ -4045,7 +4045,7 @@ cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix)
 	return clone_to_heap2(q, prefix, p1, p1->nbr_cells, suffix);
 }
 
-static cell *copy_to_heap(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
+static cell *copy_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
 {
 	cell *tmp = alloc_heap(q, (prefix?1:0)+nbr_cells+suffix);
 
@@ -4086,12 +4086,17 @@ static cell *copy_to_heap(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_t
 	return tmp;
 }
 
+cell *copy_to_heap(query *q, cell *p1, idx_t suffix)
+{
+	return copy_to_heap2(q, 0, p1, p1->nbr_cells, suffix);
+}
+
 static int fn_iso_copy_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	cell *tmp1 = deep_clone_to_tmp(q, p1, p1_ctx);
-	cell *tmp = copy_to_heap(q, 0, tmp1, tmp1->nbr_cells, 0);
+	cell *tmp = copy_to_heap(q, tmp1, 0);
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
@@ -4369,7 +4374,7 @@ int call_me(query *q, cell *p1)
 	cell *tmp;
 
 	if (p1_ctx != q->st.curr_frame) {
-		tmp = copy_to_heap(q, 0, p1, p1->nbr_cells, 1);
+		tmp = copy_to_heap(q, p1, 1);
 		unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	} else
 		tmp = clone_to_heap(q, 0, p1, 1);
