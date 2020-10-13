@@ -8705,7 +8705,7 @@ static int fn_frozen_2(query *q)
 	return unify(q, p2, p2_ctx, e->c.attrs, q->st.curr_frame);
 }
 
-static int fn_sys_put_atts_2(query *q)
+static int fn_put_attrs_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,list_or_nil);
@@ -8716,7 +8716,7 @@ static int fn_sys_put_atts_2(query *q)
 	return 1;
 }
 
-static int fn_sys_get_atts_2(query *q)
+static int fn_get_attrs_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,variable);
@@ -9302,8 +9302,8 @@ static const struct builtins g_other_funcs[] =
 
 	{"freeze", 2, fn_freeze_2, "+variable,+callable"},
 	{"frozen", 2, fn_frozen_2, "+variable,+callable"},
-	{"$put_atts", 2, fn_sys_put_atts_2, "+variable,+callable"},
-	{"$get_atts", 2, fn_sys_get_atts_2, "+variable,+callable"},
+	{"put_attrs", 2, fn_put_attrs_2, "+variable,+callable"},
+	{"get_attrs", 2, fn_get_attrs_2, "+variable,+callable"},
 
 #if USE_OPENSSL
 	{"sha1", 2, fn_sha1_2, "+string,?string"},
