@@ -322,7 +322,7 @@ rule *find_rule(module *m, cell *c)
 	return NULL;
 }
 
-rule *find_meta_rule(module *m, cell *c)
+rule *match_rule(module *m, cell *c)
 {
 	module *save_m = m;
 	module *tmp_m = NULL;
