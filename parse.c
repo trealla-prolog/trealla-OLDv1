@@ -2299,8 +2299,10 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 	return is_chars_list;
 }
 
-void fix_list(cell *c, idx_t cnt)
+void fix_list(cell *c)
 {
+	idx_t cnt = c->nbr_cells;
+
 	while (is_list(c)) {
 		c->nbr_cells = cnt;
 		c = c + 1;
@@ -2366,7 +2368,8 @@ int parser_tokenize(parser *p, int args, int consing)
 
 			make_literal(p, g_nil_s);
 			c = p->t->cells + save_idx;
-			fix_list(c, p->t->cidx - save_idx);
+			c->nbr_cells = p->t->cidx - save_idx;
+			fix_list(c);
 
 #if 0
 			// Before we can do this, DCG must recognize strings
