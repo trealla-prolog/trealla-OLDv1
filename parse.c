@@ -309,7 +309,7 @@ cell *get_body(cell *c)
 	return c;
 }
 
-rule *find_rule(module *m, cell *c)
+static rule *find_rule(module *m, cell *c)
 {
 	for (rule *h = m->head; h; h = h->next) {
 		if (h->is_abolished)
@@ -322,7 +322,7 @@ rule *find_rule(module *m, cell *c)
 	return NULL;
 }
 
-rule *match_rule(module *m, cell *c)
+rule *find_matching_rule(module *m, cell *c)
 {
 	module *save_m = m;
 	module *tmp_m = NULL;

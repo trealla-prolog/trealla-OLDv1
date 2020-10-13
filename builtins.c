@@ -3888,7 +3888,7 @@ static int fn_iso_univ_2(query *q)
 				if (tmp->fn)
 					tmp->flags |= FLAG_BUILTIN;
 				else
-					tmp->match = match_rule(q->m, tmp);
+					tmp->match = find_matching_rule(q->m, tmp);
 			}
 
 			set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
@@ -4238,7 +4238,7 @@ static int fn_iso_retract_1(query *q)
 static int fn_iso_retractall_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	rule *h = find_rule(q->m, p1);
+	rule *h = find_matching_rule(q->m, p1);
 
 	if (!h) {
 		//set_dynamic_in_db(q->m, GET_STR(p1), p1->arity);
@@ -4253,7 +4253,7 @@ static int fn_iso_retractall_1(query *q)
 
 static int do_abolish(query *q, cell *c)
 {
-	rule *h = find_rule(q->m, c);
+	rule *h = find_matching_rule(q->m, c);
 	if (!h) return 1;
 
 	if (!h->is_dynamic) {
@@ -4418,7 +4418,7 @@ static int fn_iso_call_n(query *q)
 	if ((tmp[1].fn = get_builtin(q->m, GET_STR(tmp+1), arity)) != NULL)
 		tmp[1].flags |= FLAG_BUILTIN;
 	else {
-		tmp[1].match = match_rule(q->m, tmp+1);
+		tmp[1].match = find_matching_rule(q->m, tmp+1);
 		tmp[1].flags &= ~FLAG_BUILTIN;
 	}
 
@@ -4448,7 +4448,7 @@ static int fn_iso_call_n(query *q)
 	if ((tmp2->fn = get_builtin(q->m, GET_STR(tmp2), arity)) != NULL)
 		tmp2->flags |= FLAG_BUILTIN;
 	else {
-		tmp2->match = match_rule(q->m, tmp2);
+		tmp2->match = find_matching_rule(q->m, tmp2);
 		tmp2->flags &= ~FLAG_BUILTIN;
 	}
 
@@ -6904,7 +6904,7 @@ static int fn_spawn_n(query *q)
 	if ((tmp->fn = get_builtin(q->m, GET_STR(p1), arity)) != NULL)
 		tmp->flags |= FLAG_BUILTIN;
 	else {
-		tmp->match = match_rule(q->m, tmp);
+		tmp->match = find_matching_rule(q->m, tmp);
 		tmp->flags &= ~FLAG_BUILTIN;
 	}
 
@@ -6936,7 +6936,7 @@ static int fn_spawn_n(query *q)
 	if ((tmp2->fn = get_builtin(q->m, GET_STR(tmp2), arity)) != NULL)
 		tmp2->flags |= FLAG_BUILTIN;
 	else {
-		tmp2->match = match_rule(q->m, tmp2);
+		tmp2->match = find_matching_rule(q->m, tmp2);
 		tmp2->flags &= ~FLAG_BUILTIN;
 	}
 
