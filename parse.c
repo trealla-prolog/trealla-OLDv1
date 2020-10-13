@@ -2726,8 +2726,7 @@ static module *module_load_text(module *m, const char *src)
 				p->m->halt = 1;
 		}
 
-		p->command = 0;
-		p->directive = 0;
+		p->command = p->directive = 0;
 		p->m->quiet = save;
 	}
 
@@ -2772,8 +2771,7 @@ int module_load_fp(module *m, FILE *fp)
 				p->m->halt = 1;
 		}
 
-		p->command = 0;
-		p->directive = 0;
+		p->command = p->directive = 0;
 		p->m->quiet = save;
 	}
 
