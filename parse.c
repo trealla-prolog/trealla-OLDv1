@@ -2764,12 +2764,13 @@ int module_load_fp(module *m, FILE *fp)
 		int save = p->m->quiet;
 		p->m->quiet = 1;
 		p->directive = 1;
-		p->command = 1;
 
-		if (parser_run(p, "initialization(G), G", 0))
-			p->m->halt = 1;
-		else
-			p->m->halt = 0;
+		if (p->run_init == 1) {
+			p->command = 1;
+
+			if (parser_run(p, "initialization(G), G", 0))
+				p->m->halt = 1;
+		}
 
 		p->command = 0;
 		p->directive = 0;
