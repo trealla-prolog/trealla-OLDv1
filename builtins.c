@@ -4391,6 +4391,7 @@ int call_me(query *q, cell *p1)
 	return 1;
 }
 
+#if 1
 static int fn_iso_call_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
@@ -4425,6 +4426,39 @@ static int fn_iso_call_n(query *q)
 	q->st.curr_cell = tmp;
 	return 1;
 }
+#else
+static int fn_iso_call_n(query *q)
+{
+	GET_FIRST_ARG(p1,callable);
+	init_tmp_heap(q);
+	deep_clone2_to_tmp(q, p1, p1_ctx);
+	unsigned arity = p1->arity;
+	unsigned args = 1;
+
+	while (args++ < q->st.curr_cell->arity) {
+		cell *p2 = get_next_arg(q);
+		deep_clone2_to_tmp(q, p2, q->latest_ctx);
+		arity++;
+	}
+
+	cell *tmp2 = get_tmp_heap(q, 0);
+	idx_t nbr_cells = tmp_heap_used(q);
+	cell *tmp = clone_to_heap2(q, 1, tmp2, nbr_cells, 1);
+	tmp[1].nbr_cells = nbr_cells;
+	tmp[1].arity = arity;
+
+	if ((tmp[1].fn = get_builtin(q->m, GET_STR(tmp+1), arity)) != NULL)
+		tmp[1].flags |= FLAG_BUILTIN;
+	else {
+		tmp[1].match = match_rule(q->m, tmp+1);
+		tmp[1].flags &= ~FLAG_BUILTIN;
+	}
+
+	make_end_return(tmp+1+nbr_cells, q->st.curr_cell);
+	q->st.curr_cell = tmp;
+	return 1;
+}
+#endif
 
 static int fn_iso_ifthen_2(query *q)
 {
@@ -6842,6 +6876,7 @@ static int fn_spawn_1(query *q)
 	return 1;
 }
 
+#if 1
 static int fn_spawn_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
@@ -6880,6 +6915,41 @@ static int fn_spawn_n(query *q)
 	push_task(q->m, task);
 	return 1;
 }
+#else
+static int fn_spawn_n(query *q)
+{
+	GET_FIRST_ARG(p1,callable);
+	init_tmp_heap(q);
+	deep_clone2_to_tmp(q, p1, p1_ctx);
+	unsigned arity = p1->arity;
+	unsigned args = 1;
+
+	while (args++ < q->st.curr_cell->arity) {
+		cell *p2 = get_next_arg(q);
+		deep_clone2_to_tmp(q, p2, q->latest_ctx);
+		arity++;
+	}
+
+	cell *tmp2 = get_tmp_heap(q, 0);
+	idx_t nbr_cells = tmp_heap_used(q);
+	cell *tmp = clone_to_heap2(q, 0, tmp2, nbr_cells, 0);
+	tmp->nbr_cells = nbr_cells;
+	tmp->arity = arity;
+
+	if ((tmp->fn = get_builtin(q->m, GET_STR(tmp), arity)) != NULL)
+		tmp->flags |= FLAG_BUILTIN;
+	else {
+		tmp->match = match_rule(q->m, tmp);
+		tmp->flags &= ~FLAG_BUILTIN;
+	}
+
+	query *task = create_task(q, tmp);
+	task->yielded = 1;
+	task->spawned = 1;
+	push_task(q->m, task);
+	return 1;
+}
+#endif
 
 static int fn_fork_0(query *q)
 {
