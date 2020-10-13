@@ -432,6 +432,7 @@ void query_execute(query *q, term *t);
 cell *get_head(cell *c);
 cell *get_body(cell *c);
 rule *find_rule(module *m, cell *c);
+rule *find_meta_rule(module *m, cell *c);
 rule *find_functor(module *m, const char *name, unsigned arity);
 int call_me(query *q, cell *p1);
 void undo_me(query *q);

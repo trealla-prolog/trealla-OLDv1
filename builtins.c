@@ -3888,7 +3888,7 @@ static int fn_iso_univ_2(query *q)
 				if (tmp->fn)
 					tmp->flags |= FLAG_BUILTIN;
 				else
-					tmp->match = find_rule(q->m, tmp);
+					tmp->match = find_meta_rule(q->m, tmp);
 			}
 
 			set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
@@ -4399,7 +4399,7 @@ static int fn_iso_call_n(query *q)
 	if ((tmp[1].fn = get_builtin(q->m, GET_STR(tmp+1), arity)) != NULL)
 		tmp[1].flags |= FLAG_BUILTIN;
 	else {
-		tmp[1].match = find_rule(q->m, tmp+1);
+		tmp[1].match = find_meta_rule(q->m, tmp+1);
 		tmp[1].flags &= ~FLAG_BUILTIN;
 	}
 
@@ -6852,7 +6852,7 @@ static int fn_spawn_n(query *q)
 	if ((tmp->fn = get_builtin(q->m, GET_STR(p1), arity)) != NULL)
 		tmp->flags |= FLAG_BUILTIN;
 	else {
-		tmp->match = find_rule(q->m, tmp);
+		tmp->match = find_meta_rule(q->m, tmp);
 		tmp->flags &= ~FLAG_BUILTIN;
 	}
 

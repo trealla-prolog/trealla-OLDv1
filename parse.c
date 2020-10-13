@@ -322,6 +322,31 @@ rule *find_rule(module *m, cell *c)
 	return NULL;
 }
 
+rule *find_meta_rule(module *m, cell *c)
+{
+	module *save_m = m;
+	module *tmp_m = NULL;
+
+	while (m) {
+		rule *h = find_rule(m, c);
+
+		if (h && (m != save_m) && !h->is_public && strcmp(GET_STR(c), "dynamic")) {
+			fprintf(stdout, "Error: not a public method %s/%u\n", GET_STR(c), c->arity);
+			break;
+		}
+
+		if (h)
+			return h;
+
+		if (!tmp_m)
+			m = tmp_m = g_modules;
+		else
+			m = m->next;
+	}
+
+	return NULL;
+}
+
 rule *find_functor(module *m, const char *name, unsigned arity)
 {
 	for (rule *h = m->head; h; h = h->next) {
