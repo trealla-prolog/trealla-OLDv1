@@ -4391,7 +4391,7 @@ int call_me(query *q, cell *p1)
 	return 1;
 }
 
-#if 1
+#if 0
 static int fn_iso_call_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
@@ -4436,8 +4436,8 @@ static int fn_iso_call_n(query *q)
 	unsigned args = 1;
 
 	while (args++ < q->st.curr_cell->arity) {
-		cell *p2 = get_next_arg(q);
-		deep_clone2_to_tmp(q, p2, q->latest_ctx);
+		cell *p2 = get_next_raw_arg(q);
+		deep_clone2_to_tmp(q, p2, q->st.curr_frame);
 		arity++;
 	}
 
@@ -6876,7 +6876,7 @@ static int fn_spawn_1(query *q)
 	return 1;
 }
 
-#if 1
+#if 0
 static int fn_spawn_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
