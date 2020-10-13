@@ -899,7 +899,6 @@ static void dump_vars(query *q, parser *p)
 	int any = 0;
 
 	for (unsigned i = 0; i < p->nbr_vars; i++, e++) {
-
 		if (is_empty(&e->c))
 			continue;
 

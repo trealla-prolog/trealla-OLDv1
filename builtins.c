@@ -4074,6 +4074,7 @@ static cell *copy_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_
 			slots[dst->slot_nbr] = new_varno++;
 
 		dst->slot_nbr = slots[dst->slot_nbr];
+		dst->val_off = g_anon_s;
 	}
 
 	if (new_varno != g->nbr_vars) {
@@ -4095,6 +4096,10 @@ static int fn_iso_copy_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
+
+	if (is_variable(p1) && is_variable(p2))
+		return 1;
+
 	cell *tmp1 = deep_clone_to_tmp(q, p1, p1_ctx);
 	cell *tmp = copy_to_heap(q, tmp1, 0);
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
