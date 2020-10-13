@@ -4442,19 +4442,18 @@ static int fn_iso_call_n(query *q)
 	}
 
 	cell *tmp2 = get_tmp_heap(q, 0);
-	idx_t nbr_cells = tmp_heap_used(q);
-	cell *tmp = clone_to_heap2(q, 1, tmp2, nbr_cells, 1);
-	tmp[1].nbr_cells = nbr_cells;
-	tmp[1].arity = arity;
+	tmp2->nbr_cells = tmp_heap_used(q);
+	tmp2->arity = arity;
 
-	if ((tmp[1].fn = get_builtin(q->m, GET_STR(tmp+1), arity)) != NULL)
-		tmp[1].flags |= FLAG_BUILTIN;
+	if ((tmp2->fn = get_builtin(q->m, GET_STR(tmp2), arity)) != NULL)
+		tmp2->flags |= FLAG_BUILTIN;
 	else {
-		tmp[1].match = match_rule(q->m, tmp+1);
-		tmp[1].flags &= ~FLAG_BUILTIN;
+		tmp2->match = match_rule(q->m, tmp2);
+		tmp2->flags &= ~FLAG_BUILTIN;
 	}
 
-	make_end_return(tmp+1+nbr_cells, q->st.curr_cell);
+	cell *tmp = clone_to_heap(q, 1, tmp2, 1);
+	make_end_return(tmp+1+tmp2->nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return 1;
 }
