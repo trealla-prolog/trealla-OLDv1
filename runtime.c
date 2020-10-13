@@ -767,7 +767,7 @@ static void next_key(query *q)
 static int do_match2(query *q, cell *curr_cell)
 {
 	cell *head = get_head(curr_cell);
-	rule *h = find_rule(q->m, head);
+	rule *h = find_meta_rule(q->m, head);
 
 	if (!h)
 		q->st.curr_clause = NULL;
@@ -803,7 +803,7 @@ int do_match(query *q, cell *curr_cell)
 		if (!strcmp(GET_STR(curr_cell), ":-"))
 			return do_match2(q, curr_cell);
 
-		rule *h = find_rule(q->m, curr_cell);
+		rule *h = find_meta_rule(q->m, curr_cell);
 
 		if (!h)
 			q->st.curr_clause = NULL;
@@ -838,7 +838,7 @@ static int match(query *q)
 		rule *h = q->st.curr_cell->match;
 
 		if (!h) {
-			q->st.curr_cell->match = find_rule(q->m, q->st.curr_cell);
+			q->st.curr_cell->match = find_meta_rule(q->m, q->st.curr_cell);
 			h = q->st.curr_cell->match;
 
 			if (!h) {
