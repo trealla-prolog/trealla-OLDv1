@@ -769,7 +769,6 @@ static int fn_iso_atom_chars_2(query *q)
 
 			if (!is_list(tail)) {
 				throw_error(q, tail, "type_error", "list");
-				q->error = 1;
 				return 0;
 			}
 
@@ -5040,8 +5039,12 @@ static void do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 			c->slot_nbr = new_varno++;
 	}
 
-	if (new_varno != g->nbr_vars)
-		create_vars(q, new_varno-g->nbr_vars);
+	if (new_varno != g->nbr_vars) {
+		if (!create_vars(q, new_varno-g->nbr_vars)) {
+			throw_error(q, p1, "resource_error", "too_many_vars");
+			return;
+		}
+	}
 
 	unify(q, p1, p1_ctx, l, q->st.curr_frame);
 	init_queuen(q);
@@ -5063,8 +5066,12 @@ static void do_sys_listn2(query *q, cell *p1, idx_t p1_ctx, cell *tail)
 			c->slot_nbr = new_varno++;
 	}
 
-	if (new_varno != g->nbr_vars)
-		create_vars(q, new_varno-g->nbr_vars);
+	if (new_varno != g->nbr_vars) {
+		if (!create_vars(q, new_varno-g->nbr_vars)) {
+			throw_error(q, p1, "resource_error", "too_many_vars");
+			return;
+		}
+	}
 
 	unify(q, p1, p1_ctx, l, q->st.curr_frame);
 	init_queuen(q);
@@ -5085,8 +5092,12 @@ static int fn_sys_list_1(query *q)
 			c->slot_nbr = new_varno++;
 	}
 
-	if (new_varno != g->nbr_vars)
-		create_vars(q, new_varno-g->nbr_vars);
+	if (new_varno != g->nbr_vars) {
+		if (!create_vars(q, new_varno-g->nbr_vars)) {
+			throw_error(q, p1, "resource_error", "too_many_vars");
+			return 0;
+		}
+	}
 
 	unify(q, p1, p1_ctx, l, q->st.curr_frame);
 	init_queue(q);
