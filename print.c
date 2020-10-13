@@ -443,7 +443,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, int runnin
 			return dst - save_dst;
 		}
 
-		int len_str = !is_blob(c) ? strlen(src) : c->len_str;
+		int len_str = LEN_STR(c);
 
 		if (braces)
 			;
