@@ -6930,21 +6930,19 @@ static int fn_spawn_n(query *q)
 	}
 
 	cell *tmp2 = get_tmp_heap(q, 0);
-	idx_t nbr_cells = tmp_heap_used(q);
-	cell *tmp = clone_to_heap2(q, 0, tmp2, nbr_cells, 0);
-	tmp->nbr_cells = nbr_cells;
-	tmp->arity = arity;
+	tmp2->nbr_cells = tmp_heap_used(q);
+	tmp2->arity = arity;
 
-	if ((tmp->fn = get_builtin(q->m, GET_STR(tmp), arity)) != NULL)
-		tmp->flags |= FLAG_BUILTIN;
+	if ((tmp2->fn = get_builtin(q->m, GET_STR(tmp2), arity)) != NULL)
+		tmp2->flags |= FLAG_BUILTIN;
 	else {
-		tmp->match = match_rule(q->m, tmp);
-		tmp->flags &= ~FLAG_BUILTIN;
+		tmp2->match = match_rule(q->m, tmp2);
+		tmp2->flags &= ~FLAG_BUILTIN;
 	}
 
+	cell *tmp = clone_to_heap(q, 0, tmp2, 0);
 	query *task = create_task(q, tmp);
-	task->yielded = 1;
-	task->spawned = 1;
+	task->yielded = task->spawned = 1;
 	push_task(q->m, task);
 	return 1;
 }
