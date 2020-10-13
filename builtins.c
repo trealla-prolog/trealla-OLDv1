@@ -4045,15 +4045,23 @@ cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix)
 	return clone_to_heap2(q, prefix, p1, p1->nbr_cells, suffix);
 }
 
-static cell *copy_to_heap(query *q, cell *p1, idx_t suffix)
+static cell *copy_to_heap(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
 {
-	cell *tmp = alloc_heap(q, p1->nbr_cells+suffix);
-	cell *src = p1, *dst = tmp;
+	cell *tmp = alloc_heap(q, (prefix?1:0)+nbr_cells+suffix);
+
+	if (prefix) {
+		// Needed for follow() to work
+		tmp->val_type = TYPE_EMPTY;
+		tmp->nbr_cells = 1;
+		tmp->flags = FLAG_BUILTIN;
+	}
+
+	cell *src = p1, *dst = tmp+(prefix?1:0);
 	frame *g = GET_FRAME(q->st.curr_frame);
 	unsigned new_varno = g->nbr_vars;
 	unsigned slots[MAX_ARITY] = {0};
 
-	for (idx_t i = 0; i < p1->nbr_cells; i++, dst++, src++) {
+	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
 		*dst = *src;
 
 		if (is_blob(src))
@@ -4083,7 +4091,7 @@ static int fn_iso_copy_term_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	cell *tmp1 = deep_clone_to_tmp(q, p1, p1_ctx);
-	cell *tmp = copy_to_heap(q, tmp1, 0);
+	cell *tmp = copy_to_heap(q, 0, tmp1, tmp1->nbr_cells, 0);
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
@@ -4361,7 +4369,7 @@ int call_me(query *q, cell *p1)
 	cell *tmp;
 
 	if (p1_ctx != q->st.curr_frame) {
-		tmp = copy_to_heap(q, p1, 1);
+		tmp = copy_to_heap(q, 0, p1, p1->nbr_cells, 1);
 		unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	} else
 		tmp = clone_to_heap(q, 0, p1, 1);
