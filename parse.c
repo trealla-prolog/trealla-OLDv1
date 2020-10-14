@@ -2329,7 +2329,7 @@ void fix_list(cell *c)
 {
 	idx_t cnt = c->nbr_cells;
 
-	while (is_list(c)) {
+	while (is_iso_list(c)) {
 		c->nbr_cells = cnt;
 		c = c + 1;
 		c = c + c->nbr_cells;
