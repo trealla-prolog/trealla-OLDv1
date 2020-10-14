@@ -426,7 +426,8 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 			return dst - save_dst;
 		}
 
-		if (running && is_variable(c) && (c_ctx != q->st.curr_frame)) {
+		if (running && is_variable(c) &&
+			((c_ctx != q->st.curr_frame) || is_fresh(c))) {
 			frame *g = GET_FRAME(c_ctx);
 			slot *e = GET_SLOT(g, c->slot_nbr);
 			idx_t slot_nbr = e - q->slots;

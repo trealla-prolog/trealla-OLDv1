@@ -4088,7 +4088,7 @@ static cell *copy_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_
 			slots[dst->slot_nbr] = new_varno++;
 
 		dst->slot_nbr = slots[dst->slot_nbr];
-		dst->val_off = g_anon_s;
+		dst->flags |= FLAG_FRESH;
 	}
 
 	if (new_varno != g->nbr_vars) {
