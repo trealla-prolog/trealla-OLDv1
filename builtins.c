@@ -431,6 +431,8 @@ static cell make_string(query *q, const char *s, size_t n)
 static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
 	idx_t save_idx = tmp_heap_used(q);
+	p1 = deref_var(q, p1, p1_ctx);
+	p1_ctx = q->latest_ctx;
 	cell *tmp = alloc_tmp_heap(q, 1);
 	copy_cells(tmp, p1, 1);
 
@@ -4390,8 +4392,7 @@ int call_me(query *q, cell *p1)
 static int fn_iso_call_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	init_tmp_heap(q);
-	deep_clone2_to_tmp(q, p1, p1_ctx);
+	deep_clone_to_tmp(q, p1, p1_ctx);
 	unsigned arity = p1->arity;
 	unsigned args = 1;
 
@@ -6838,8 +6839,7 @@ static int fn_spawn_1(query *q)
 static int fn_spawn_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	init_tmp_heap(q);
-	deep_clone2_to_tmp(q, p1, p1_ctx);
+	deep_clone_to_tmp(q, p1, p1_ctx);
 	unsigned arity = p1->arity;
 	unsigned args = 1;
 
