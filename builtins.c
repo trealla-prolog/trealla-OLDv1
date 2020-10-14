@@ -6851,13 +6851,13 @@ static int fn_spawn_1(query *q)
 static int fn_spawn_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	deep_clone_to_tmp(q, p1, p1_ctx);
+	clone_to_tmp(q, p1);
 	unsigned arity = p1->arity;
 	unsigned args = 1;
 
 	while (args++ < q->st.curr_cell->arity) {
-		cell *p2 = get_next_arg(q);
-		deep_clone2_to_tmp(q, p2, q->latest_ctx);
+		cell *p2 = get_next_raw_arg(q);
+		clone2_to_tmp(q, p2);
 		arity++;
 	}
 
