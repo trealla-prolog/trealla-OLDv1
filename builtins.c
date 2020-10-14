@@ -4029,6 +4029,7 @@ static cell *clone_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx
 
 	copy_cells(tmp+(prefix?1:0), p1, nbr_cells);
 	cell *c = tmp + (prefix?1:0);
+	c->nbr_cells = nbr_cells;
 
 	for (idx_t i = 0; i < nbr_cells; i++, c++) {
 		if (is_blob(c))
