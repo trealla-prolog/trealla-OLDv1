@@ -4011,7 +4011,25 @@ static int fn_iso_term_variables_2(query *q)
 	return ok;
 }
 
-static cell *clone_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
+static void clone2_to_tmp(query *q, cell *p1)
+{
+	cell *tmp = alloc_tmp_heap(q, p1->nbr_cells);
+	copy_cells(tmp, p1, p1->nbr_cells);
+	cell *c = tmp;
+
+	for (idx_t i = 0; i < p1->nbr_cells; i++, c++) {
+		if (is_blob(c))
+			c->flags |= FLAG_CONST_CSTRING;
+	}
+}
+
+static void clone_to_tmp(query *q, cell *p1)
+{
+	init_tmp_heap(q);
+	clone2_to_tmp(q, p1);
+}
+
+static cell *clone2_to_heap(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
 {
 	cell *tmp = alloc_heap(q, (prefix?1:0)+nbr_cells+suffix);
 
@@ -4036,7 +4054,7 @@ static cell *clone_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx
 
 cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix)
 {
-	return clone_to_heap2(q, prefix, p1, p1->nbr_cells, suffix);
+	return clone2_to_heap(q, prefix, p1, p1->nbr_cells, suffix);
 }
 
 static cell *copy_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
@@ -4386,13 +4404,13 @@ int call_me(query *q, cell *p1)
 static int fn_iso_call_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	deep_clone_to_tmp(q, p1, p1_ctx);
+	clone_to_tmp(q, p1);
 	unsigned arity = p1->arity;
 	unsigned args = 1;
 
 	while (args++ < q->st.curr_cell->arity) {
-		cell *p2 = get_next_arg(q);
-		deep_clone2_to_tmp(q, p2, q->latest_ctx);
+		cell *p2 = get_next_raw_arg(q);
+		clone2_to_tmp(q, p2);
 		arity++;
 	}
 
