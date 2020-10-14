@@ -18,11 +18,9 @@ maplist(P, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s]) :-
 	call(P, X1, X2, X3, X4),
 	maplist(P, X1s, X2s, X3s, X4s).
 
-% TO-DO...
-
 spawnlist(_, []) :- wait.
 spawnlist(P, [X1|X1s]) :-
-z	spawn(P, X1),
+	spawn(P, X1),
 	spawnlist(P, X1s).
 
 spawnlist(_, [], []) :- wait.
