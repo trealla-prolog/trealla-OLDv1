@@ -1,5 +1,8 @@
 :- initialization(main).
 
+:- use_module(library(apply)).
+:- use_module(library(lists)).
+
 main :-
     maplist(col([[1,2],[3,4]]), [1,2], X1),
     writeln(X1),
