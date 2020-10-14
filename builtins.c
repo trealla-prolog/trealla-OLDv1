@@ -4123,9 +4123,7 @@ static int fn_iso_clause_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-typedef unsigned long long ullong;
-
-static void compare_and_zero(ullong v1, ullong *v2, ullong *v)
+static void compare_and_zero(uint64_t v1, uint64_t *v2, uint64_t *v)
 {
 	if (v1 != *v2) {
 		*v2 = v1;
@@ -4137,13 +4135,13 @@ static void compare_and_zero(ullong v1, ullong *v2, ullong *v)
 
 static void uuid_gen(uuid *u)
 {
-	static ullong s_last = 0, s_cnt = 0;
-	static ullong g_seed = 0;
+	static uint64_t s_last = 0, s_cnt = 0;
+	static uint64_t g_seed = 0;
 
 	if (!g_seed)
-		g_seed = (ullong)time(0) & MASK_FINAL;
+		g_seed = (uint64_t)time(0) & MASK_FINAL;
 
-	ullong now = get_time_in_usec();
+	uint64_t now = get_time_in_usec();
 	compare_and_zero(now, &s_last, &s_cnt);
 	u->u1 = now;
 	u->u2 = s_cnt++;
@@ -4154,9 +4152,9 @@ static void uuid_gen(uuid *u)
 static char *uuid_to_buf(const uuid *u, char *buf, size_t buflen)
 {
 	snprintf(buf, buflen, "%016llX-%04llX-%012llX",
-		(ullong)u->u1,
-		(ullong)(u->u2 >> 48),
-		(ullong)(u->u2 & MASK_FINAL));
+		(unsigned long long)u->u1,
+		(unsigned long long)(u->u2 >> 48),
+		(unsigned long long)(u->u2 & MASK_FINAL));
 
 	return buf;
 }
