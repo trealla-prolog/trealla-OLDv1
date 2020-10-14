@@ -909,7 +909,7 @@ static void dump_vars(query *q, parser *p)
 			c = e->c.val_ptr;
 			q->latest_ctx = e->ctx;
 		} else
-			c = deref_var(q, &e->c, 0);
+			c = deref_var(q, &e->c, e->ctx);
 
 		if (!strcmp(p->vartab.var_name[i], "_"))
 			continue;
