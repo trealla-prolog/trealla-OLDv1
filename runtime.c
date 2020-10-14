@@ -52,7 +52,7 @@ static void check_trail(query *q)
 			q->trails_size += q->trails_size / 2;
 
 			if ((sizeof(trail)*q->trails_size) > (1024LL*1024*1024)) {
-				throw_error(q, q->st.curr_cell, "resource_error", "Out_of_trail_space");
+				throw_error(q, q->st.curr_cell, "resource_error", "out_of_trail_space");
 				q->error = 1;
 				return;
 			}
@@ -72,7 +72,7 @@ static void check_choice(query *q)
 			q->choices_size += q->choices_size / 2;
 
 			if ((sizeof(choice)*q->choices_size) > (1024LL*1024*1024)) {
-				throw_error(q, q->st.curr_cell, "resource_error", "Out_of_choice_space");
+				throw_error(q, q->st.curr_cell, "resource_error", "out_of_choice_space");
 				q->error = 1;
 				return;
 			}
@@ -93,7 +93,7 @@ static void check_frame(query *q)
 			q->frames_size += q->frames_size / 2;
 
 			if ((sizeof(frame)*q->frames_size) > (1024LL*1024*1024)) {
-				throw_error(q, q->st.curr_cell, "resource_error", "Out_of_frame_space");
+				throw_error(q, q->st.curr_cell, "resource_error", "out_of_frame_space");
 				q->error = 1;
 				return;
 			}
@@ -118,7 +118,7 @@ static void check_slot(query *q, unsigned cnt)
 			q->slots_size += q->slots_size / 2;
 
 			if ((sizeof(slot)*q->slots_size) > (1024LL*1024*1024)) {
-				throw_error(q, q->st.curr_cell, "resource_error", "Out_of_env_space");
+				throw_error(q, q->st.curr_cell, "resource_error", "out_of_slot_space");
 				q->error = 1;
 				return;
 			}
@@ -394,6 +394,10 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	g->overflow = 0;
 	g->nbr_slots = nbr_vars;
 	g->nbr_vars = nbr_vars;
+
+	idx_t curr_choice = q->cp - 1;
+	choice *ch = q->choices + curr_choice;
+	q->st.sp = ch->st.sp;
 
 	if (!q->no_tco && q->m->opt) {
 		frame *new_g = GET_FRAME(q->st.fp);
