@@ -432,6 +432,7 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
 	idx_t save_idx = tmp_heap_used(q);
 	cell *tmp = alloc_tmp_heap(q, 1);
+	unsigned arity = p1->arity;
 	copy_cells(tmp, p1, 1);
 
 	if (!is_structure(p1)) {
@@ -441,17 +442,28 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 		return;
 	}
 
-	idx_t nbr_cells = p1->nbr_cells;
 	p1++;
 
-	for (idx_t i = 1; i < nbr_cells;) {
-		if (is_variable(p1)) {
-			cell *c = deref_var(q, p1, p1_ctx);
+#if 0
+	if (is_iso_list(p1)) {
+		while (is_list(p1)) {
+			cell *h = LIST_HEAD(p1);
+			cell *c = deref_var(q, h, p1_ctx);
 			deep_clone2_to_tmp(q, c, q->latest_ctx);
-		} else
-			deep_clone2_to_tmp(q, p1, p1_ctx);
+			cell *t = LIST_HEAD(p1);
+			p1 = deref_var(q, t, p1_ctx);
+			p1_ctx = q->latest_ctx;
+		}
 
-		i += p1->nbr_cells;
+		p1 = deref_var(q, p1, p1_ctx);
+		deep_clone2_to_tmp(q, p1, q->latest_ctx);
+		return;
+	}
+#endif
+
+	while (arity--) {
+		cell *c = deref_var(q, p1, p1_ctx);
+		deep_clone2_to_tmp(q, c, q->latest_ctx);
 		p1 += p1->nbr_cells;
 	}
 
