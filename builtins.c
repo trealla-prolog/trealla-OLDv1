@@ -4397,8 +4397,8 @@ static int fn_iso_call_n(query *q)
 	unsigned args = 1;
 
 	while (args++ < q->st.curr_cell->arity) {
-		cell *p2 = get_next_raw_arg(q);
-		deep_clone2_to_tmp(q, p2, q->st.curr_frame);
+		cell *p2 = get_next_arg(q);
+		deep_clone2_to_tmp(q, p2, q->latest_ctx);
 		arity++;
 	}
 
