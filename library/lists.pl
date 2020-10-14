@@ -46,7 +46,7 @@ merge([],[],[]).
 merge([X],[],[X]).
 merge([],[Y],[Y]).
 merge([X|List1],[Y|List2],[X|List]) :-
-	X =< Y,!,
+	X =< Y, !,
 	merge(List1,[Y|List2],List).
 merge([X|List1],[Y|List2],[Y|List]) :-
 	merge([X|List1],List2,List).
