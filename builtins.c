@@ -460,7 +460,7 @@ static cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
 	init_tmp_heap(q);
 
-	if (is_variable(p1)) {
+	if (is_variable(p1) && 0) {
 		p1 = deref_var(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
@@ -471,11 +471,6 @@ static cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 {
-	if (is_variable(p1)) {
-		p1 = deref_var(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-	}
-
 	p1 = deep_clone_to_tmp(q, p1, p1_ctx);
 	cell *tmp = alloc_heap(q, p1->nbr_cells);
 	copy_cells(tmp, p1, p1->nbr_cells);
