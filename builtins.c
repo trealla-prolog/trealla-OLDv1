@@ -3875,136 +3875,72 @@ static int fn_iso_univ_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_var);
 
-	if (!is_variable(p2)) {
-		cell *head = LIST_HEAD(p2);
-		cell *tail = LIST_TAIL(p2);
-		head = deref_var(q, head, p2_ctx);
+	if (is_variable(p1) && is_variable(p2)) {
+		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
+		return 0;
+	}
 
-		if (!is_atom(head) && !is_number(head) && !is_variable(head)) {
-			if (is_variable(p1))
-				throw_error(q, head, "type_error", "atomic");
-
-			return 0;
-		}
-
-		size_t nbr_cells = p2->nbr_cells;
-		cell *tmp = malloc(sizeof(cell)*nbr_cells* 2);
-		size_t idx = 0;
-		tmp[idx++] = *head;
-
-		while (tail) {
-			tail = deref_var(q, tail, p2_ctx);
-			p2_ctx = q->latest_ctx;
-
-			if (is_literal(tail)) {
-				if (tail->val_off == g_nil_s)
-					break;
-			}
-
-			if (!is_list(tail)) {
-				if (is_variable(p1))
-					throw_error(q, tail, "type_error", "list");
-
-				return 0;
-			}
-
-			head = LIST_HEAD(tail);
-			tail = LIST_TAIL(tail);
-
-			if ((idx + head->nbr_cells) >= nbr_cells) {
-				nbr_cells += head->nbr_cells;
-				tmp = realloc(tmp, sizeof(cell)*(nbr_cells*=2));
-			}
-
-			idx += copy_cells(tmp+idx, head, head->nbr_cells);
-			tmp[0].nbr_cells += head->nbr_cells;
-			tmp[0].arity++;
-		}
-
-		cell *save = tmp;
-
-		if (is_variable(p1)) {
-			cell *h = LIST_HEAD(p2);
-			cell *t = LIST_TAIL(p2);
-			h = deref_var(q, h, p2_ctx);
-
-			if (!is_iso_atom(h) && is_iso_list(t)) {
-				throw_error(q, h, "type_error", "atom");
-				return 0;
-			}
-
-			h = save;
-			cell *tmp = alloc_heap(q, idx);
-			copy_cells(tmp, save, idx);
-			free(save);
-
-			if (is_literal(tmp)) {
-				tmp->fn = get_builtin(q->m, GET_STR(tmp), tmp->arity);
-
-				if (tmp->fn)
-					tmp->flags |= FLAG_BUILTIN;
-				else
-					tmp->match = find_matching_rule(q->m, tmp);
-			}
-
-			set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
-			return 1;
-		}
-
-		free(tmp);
-		cell tmp2 = *p1;
-		tmp2.nbr_cells = 1;
-		tmp2.arity = 0;
-		tmp2.flags = 0;
-		alloc_list(q, &tmp2);
-		cell *c = p1 + 1;
-		unsigned arity = p1->arity;
-
-		while (arity--) {
-			append_list(q, c);
-			c += c->nbr_cells;
-		}
-
-		cell *l = end_list(q);
-		fix_list(l);
-		int ok = unify(q, l, p1_ctx, p2, p2_ctx);
-		return ok;
-	} else if (is_variable(p2) && is_list(p1)) {
-		idx_t nbr_cells = p1->nbr_cells;
-		cell *h = LIST_HEAD(p1);
-		cell *t = LIST_TAIL(p1);
-		t->nbr_cells = nbr_cells - h->nbr_cells - 1;	// TODO: fix list parsing
-		cell tmp;
-		make_literal(&tmp, g_dot_s);
-		alloc_list(q, &tmp);
-		append_list(q, h);
-		append_list(q, t);
-		cell *l = end_list(q);
-		fix_list(l);
-		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
-		return 1;
-	} else if (is_variable(p2)) {
-		idx_t nbr_cells = p1->nbr_cells;
-		cell *c = p1;
-		cell tmp = *c++;
+	if (is_variable(p2)) {
+		cell tmp = *p1;
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;
 		alloc_list(q, &tmp);
-		nbr_cells -= tmp.nbr_cells;
 		unsigned arity = p1->arity;
+		p1++;
 
 		while (arity--) {
-			append_list(q, c);
-			c += c->nbr_cells;
+			append_list(q, p1);
+			p1 += p1->nbr_cells;
 		}
 
 		cell *l = end_list(q);
 		fix_list(l);
-		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
-		return 1;
+		return unify(q, p2, p2_ctx, l, p1_ctx);
 	}
 
-	return 0;
+	if (is_variable(p1)) {
+		cell *l = p2;
+		unsigned arity = 0;
+
+		while (is_list(l)) {
+			cell *h = l + 1;
+			cell *tmp = alloc_tmp_heap(q, h->nbr_cells);
+			copy_cells(tmp, h, h->nbr_cells);
+			l = h + h->nbr_cells;
+			arity++;
+		}
+
+		arity--;
+
+		if (!is_literal(p2+1) && arity) {
+			throw_error(q, p2+1, "type_error", "atom");
+			return 0;
+		}
+
+		idx_t nbr_cells = tmp_heap_used(q);
+		cell *tmp = get_tmp_heap(q, 0);
+		tmp->nbr_cells = nbr_cells;
+		tmp->arity = arity;
+		cell *tmp2 = alloc_heap(q, nbr_cells);
+		copy_cells(tmp2, tmp, nbr_cells);
+		return unify(q, p1, p1_ctx, tmp2, p1_ctx);
+	}
+
+	cell tmp = *p1;
+	tmp.nbr_cells = 1;
+	tmp.arity = 0;
+	alloc_list(q, &tmp);
+	unsigned arity = p1->arity;
+	p1++;
+
+	while (arity--) {
+		append_list(q, p1);
+		p1 += p1->nbr_cells;
+	}
+
+	cell *l = end_list(q);
+	fix_list(l);
+	return unify(q, p2, p2_ctx, l, p1_ctx);
 }
 
 static void do_collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, cell **slots, int *cnt)
