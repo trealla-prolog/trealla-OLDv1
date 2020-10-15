@@ -1,15 +1,15 @@
 :- use_module(library(dict)).
 
 get_attr(V, Name, Value) :-
-	Access =.. [Name, Value],
+	Access =.. [Name,Value],
 	get_atts(V, [+Access]).
 
 put_attr(V, Name, Value) :-
-	Access =.. [Name, Value],
+	Access =.. [Name,Value],
 	put_atts(V, [+Access]).
 
 del_attr(V, Name) :-
-	Access =.. [Name, _],
+	Access =.. [Name,_],
 	put_atts(V, [-Access]).
 
 put_atts(V, +(A)) :- !,
