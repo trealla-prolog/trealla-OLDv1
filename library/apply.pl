@@ -25,7 +25,8 @@ spawnlist(P, [X1|X1s]) :-
 
 spawnlist(_, [], []) :- wait.
 spawnlist(P, [X1|X1s], [X2|X2s]) :-
-	spawn(P, X1, X2), spawnlist(P, X1s, X2s).
+	spawn(P, X1, X2),
+	spawnlist(P, X1s, X2s).
 
 spawnlist(_, [], [], []) :- wait.
 spawnlist(P, [X1|X1s], [X2|X2s], [X3|X3s]) :-
