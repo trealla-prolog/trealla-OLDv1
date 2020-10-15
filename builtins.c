@@ -429,6 +429,69 @@ static cell make_string(query *q, const char *s, size_t n)
 	return tmp;
 }
 
+static idx_t g_tab1[4000], g_tab2[4000], g_varno;
+static size_t g_tab_idx = 0;
+
+static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
+{
+	idx_t save_idx = tmp_heap_used(q);
+	p1 = deref_var(q, p1, p1_ctx);
+	p1_ctx = q->latest_ctx;
+	cell *tmp = alloc_tmp_heap(q, 1);
+	copy_cells(tmp, p1, 1);
+
+	if (!is_structure(p1)) {
+		if (is_blob(p1) && !is_const_cstring(p1))
+			tmp->val_str = strdup(p1->val_str);
+		else if (is_variable(p1)) {
+			frame *g = GET_FRAME(p1_ctx);
+			slot *e = GET_SLOT(g, p1->slot_nbr);
+			idx_t slot_nbr = e - q->slots;
+
+			for (size_t i = 0; i < g_tab_idx; i++) {
+				if (g_tab1[i] == slot_nbr) {
+					tmp->slot_nbr = g_tab2[i];
+					tmp->flags = FLAG_FRESH;
+					break;
+				}
+			}
+
+			tmp->slot_nbr = g_varno;
+			tmp->flags = FLAG_FRESH;
+			g_tab1[g_tab_idx] = slot_nbr;
+			g_tab2[g_tab_idx] = g_varno++;
+			g_tab_idx++;
+		}
+
+		return;
+	}
+
+	unsigned arity = p1->arity;
+	p1++;
+
+	while (arity--) {
+		cell *c = deref_var(q, p1, p1_ctx);
+		deep_copy2_to_tmp(q, c, q->latest_ctx);
+		p1 += p1->nbr_cells;
+	}
+
+	tmp = get_tmp_heap(q, save_idx);
+	tmp->nbr_cells = tmp_heap_used(q) - save_idx;
+}
+
+static cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx)
+{
+	init_tmp_heap(q);
+
+	if (is_variable(p1) && 0) {
+		p1 = deref_var(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+	}
+
+	deep_copy2_to_tmp(q, p1, p1_ctx);
+	return q->tmp_heap;
+}
+
 static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
 	idx_t save_idx = tmp_heap_used(q);
@@ -4120,8 +4183,20 @@ static int fn_iso_copy_term_2(query *q)
 	if (!has_vars(q, p1, p1_ctx) && !is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
-	cell *tmp1 = deep_clone_to_tmp(q, p1, p1_ctx);
-	cell *tmp = copy_to_heap(q, 0, tmp1, 0);
+	frame *g = GET_FRAME(q->st.curr_frame);
+	g_varno = g->nbr_vars;
+	g_tab_idx = 0;
+
+	cell *tmp1 = deep_copy_to_tmp(q, p1, p1_ctx);
+
+	if (g_varno != g->nbr_vars) {
+		if (!create_vars(q, g_varno-g->nbr_vars)) {
+			throw_error(q, p1, "resource_error", "too_many_vars");
+			return 0;
+		}
+	}
+
+	cell *tmp = clone_to_heap(q, 0, tmp1, 0);
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
