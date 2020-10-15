@@ -8640,9 +8640,11 @@ static int fn_frozen_2(query *q)
 static int fn_del_attrs_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
+	GET_NEXT_ARG(p2,list_or_nil);
+	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->slot_nbr);
-	e->c.attrs = NULL;
+	e->c.attrs = tmp;
 	return 1;
 }
 
