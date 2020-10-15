@@ -598,19 +598,18 @@ static int fn_iso_nonvar_1(query *q)
 	return !is_variable(p1);
 }
 
-static int check_has_vars(query *q, cell *c)
+static int has_vars(query *q, cell *c, idx_t c_ctx)
 {
 	if (is_variable(c))
 		return 1;
 
-	idx_t save_ctx = q->latest_ctx;
 	idx_t nbr = c->nbr_cells;
 	c++;
 
 	for (idx_t i = 1; i < nbr; i++, c++) {
-		cell *c2 = deref_var(q, c, save_ctx);
+		cell *c2 = deref_var(q, c, c_ctx);
 
-		if (check_has_vars(q, c2))
+		if (has_vars(q, c2, q->latest_ctx))
 			return 1;
 	}
 
@@ -620,7 +619,7 @@ static int check_has_vars(query *q, cell *c)
 static int fn_iso_ground_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return !check_has_vars(q, p1);
+	return !has_vars(q, p1, p1_ctx);
 }
 
 static int fn_iso_cut_0(query *q)
@@ -4115,6 +4114,9 @@ static int fn_iso_copy_term_2(query *q)
 	if (is_variable(p1) && is_variable(p2))
 		return 1;
 
+	if (!has_vars(q, p1, p1_ctx))
+		return unify(q, p1, p1_ctx, p2, p2_ctx);
+
 	cell *tmp1 = deep_clone_to_tmp(q, p1, p1_ctx);
 	cell *tmp = copy_to_heap(q, 0, tmp1, 0);
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
@@ -4609,7 +4611,7 @@ static int fn_iso_throw_1(query *q)
 	cell *c = deep_clone_to_tmp(q, p1, p1_ctx);
 	q->latest_ctx = q->st.curr_frame;
 
-	if (check_has_vars(q, c)) {
+	if (has_vars(q, c, p1_ctx)) {
 		throw_error(q, c, "instantiation_error", "instantiated");
 		return 0;
 	}
