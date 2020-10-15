@@ -8,6 +8,10 @@ main :-
     writeln(X1),
     maplist(col([[A,2],[3,A]]), [1,2], X2),
     writeln(X2),
+    maplist(length, M, [2,2]),
+    writeln(M),
+    maplist(col(M), [1,2], X),
+    writeln(X),
     halt.
 
 col(Matrix, N, Column) :-
