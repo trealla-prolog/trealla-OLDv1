@@ -2821,7 +2821,7 @@ int module_load_file(module *m, const char *filename)
 
 	if (!fp) {
 		strncpy(tmpbuf, filename, sizeof(tmpbuf)); tmpbuf[sizeof(tmpbuf)-1] = '\0';
-		fprintf(stdout, "Error: file '%s[.pro|.pl|.P]' does not exist\n", filename);
+		fprintf(stdout, "Error: file '%s.pl' does not exist\n", filename);
 		return 0;
 	}
 
