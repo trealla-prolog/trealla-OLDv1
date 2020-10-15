@@ -8637,6 +8637,15 @@ static int fn_frozen_2(query *q)
 	return unify(q, p2, p2_ctx, e->c.attrs, q->st.curr_frame);
 }
 
+static int fn_del_attrs_1(query *q)
+{
+	GET_FIRST_ARG(p1,variable);
+	frame *g = GET_FRAME(p1_ctx);
+	slot *e = GET_SLOT(g, p1->slot_nbr);
+	e->c.attrs = NULL;
+	return 1;
+}
+
 static int fn_put_attrs_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
@@ -8947,6 +8956,7 @@ static int fn_use_module_1(query *q)
 
 		if (!strcmp(name, "between") ||
 			!strcmp(name, "terms") ||
+			!strcmp(name, "types") ||
 			!strcmp(name, "files") ||
 			!strcmp(name, "dcgs"))
 			return 1;
@@ -9286,6 +9296,7 @@ static const struct builtins g_other_funcs[] =
 
 	{"freeze", 2, fn_freeze_2, "+variable,+callable"},
 	{"frozen", 2, fn_frozen_2, "+variable,+callable"},
+	{"del_attrs", 1, fn_del_attrs_1, "+variable"},
 	{"put_attrs", 2, fn_put_attrs_2, "+variable,+callable"},
 	{"get_attrs", 2, fn_get_attrs_2, "+variable,+callable"},
 
