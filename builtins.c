@@ -31,6 +31,7 @@
 #include "internal.h"
 #include "network.h"
 #include "base64.h"
+#include "library.h"
 #include "utf8.h"
 #include "builtins.h"
 
@@ -8924,6 +8925,57 @@ static int fn_length_2(query *q)
 	return 0;
 }
 
+static int fn_use_module_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	if (!is_literal(p1)) return 0;
+	const char *name = GET_STR(p1);
+	char dstbuf[1024*2];
+
+	if (!strcmp(name, "library")) {
+		p1 = p1 + 1;
+		if (!is_literal(p1)) return 0;
+		name = GET_STR(p1);
+		module *m;
+
+		if ((m = find_module(name)) != NULL) {
+			if (!m->fp)
+				do_db_load(m);
+
+			return 1;
+		}
+
+		if (!strcmp(name, "between") ||
+			!strcmp(name, "terms") ||
+			!strcmp(name, "files") ||
+			!strcmp(name, "dcgs"))
+			return 1;
+
+		for (library *lib = g_libs; lib->name; lib++) {
+			if (strcmp(lib->name, name))
+				continue;
+
+			char *src = strndup((const char*)lib->start, (lib->end-lib->start));
+			m = module_load_text(q->m, src);
+			free(src);
+
+			if (m != q->m)
+				do_db_load(m);
+
+			return 1;
+		}
+
+		snprintf(dstbuf, sizeof(dstbuf), "%s/", g_tpl_lib);
+		char *dst = dstbuf + strlen(dstbuf);
+		idx_t ctx = 0;
+		write_term_to_buf(q, dst, sizeof(dstbuf)-strlen(g_tpl_lib), p1, ctx, 1, 0, 0);
+		name = dstbuf;
+	}
+
+	module_load_file(q->m, name);
+	return 1;
+}
+
 static int fn_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -9112,6 +9164,7 @@ static const struct builtins g_iso_funcs[] =
 
 	//
 
+	{"use_module", 1, fn_use_module_1, NULL},
 	{"module", 1, fn_module_1, NULL},
 	{"consult", 1, fn_consult_1, NULL},
 	{"listing", 0, fn_listing_0, NULL},

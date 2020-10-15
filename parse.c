@@ -940,8 +940,6 @@ void consultall(parser *p, cell *l)
 	}
 }
 
-static module *module_load_text(module *m, const char *src);
-
 static void directives(parser *p, term *t)
 {
 	p->skip = 0;
@@ -2701,7 +2699,7 @@ static int parser_run(parser *p, const char *src, int dump)
 	return ok;
 }
 
-static module *module_load_text(module *m, const char *src)
+module *module_load_text(module *m, const char *src)
 {
 	parser *p = create_parser(m);
 	p->consulting = 1;
