@@ -7569,8 +7569,10 @@ static int fn_string_lower_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
-	const char *str = GET_STR(p1);
-	char *tmps = strndup(str, LEN_STR(p1));
+	size_t len = LEN_STR(p1);
+	char *tmps = malloc(len+1);
+	memcpy(tmps, GET_STR(p1), len);
+	tmps[len] = '\0';
 	char *s = tmps;
 
 	while (*s) {
@@ -7578,7 +7580,7 @@ static int fn_string_lower_2(query *q)
 		s++;
 	}
 
-	cell tmp = make_string(q, tmps, LEN_STR(p1));
+	cell tmp = make_string(q, tmps, len);
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7587,8 +7589,10 @@ static int fn_string_upper_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
-	const char *str = GET_STR(p1);
-	char *tmps = strndup(str, LEN_STR(p1));
+	size_t len = LEN_STR(p1);
+	char *tmps = malloc(len+1);
+	memcpy(tmps, GET_STR(p1), len);
+	tmps[len] = '\0';
 	char *s = tmps;
 
 	while (*s) {
@@ -7596,7 +7600,7 @@ static int fn_string_upper_2(query *q)
 		s++;
 	}
 
-	cell tmp = make_string(q, tmps, LEN_STR(p1));
+	cell tmp = make_string(q, tmps, len);
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
