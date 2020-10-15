@@ -4666,6 +4666,7 @@ static int fn_iso_functor_3(query *q)
 			tmp[i].nbr_cells = 1;
 			tmp[i].slot_nbr = slot_nbr++;
 			tmp[i].val_off = g_anon_s;
+			tmp[i].flags = FLAG_FRESH;
 		}
 
 		set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
@@ -5067,8 +5068,10 @@ static void do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 	cell *c = l;
 
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
-		if (is_variable(c))
+		if (is_variable(c)) {
 			c->slot_nbr = new_varno++;
+			c->flags = FLAG_FRESH;
+		}
 	}
 
 	if (new_varno != g->nbr_vars) {
@@ -5094,8 +5097,10 @@ static void do_sys_listn2(query *q, cell *p1, idx_t p1_ctx, cell *tail)
 	cell *c = l;
 
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
-		if (is_variable(c))
+		if (is_variable(c)) {
 			c->slot_nbr = new_varno++;
+			c->flags = FLAG_FRESH;
+		}
 	}
 
 	if (new_varno != g->nbr_vars) {
@@ -5120,8 +5125,10 @@ static int fn_sys_list_1(query *q)
 	cell *c = l;
 
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
-		if (is_variable(c))
+		if (is_variable(c)) {
 			c->slot_nbr = new_varno++;
+			c->flags = FLAG_FRESH;
+		}
 	}
 
 	if (new_varno != g->nbr_vars) {
@@ -8806,7 +8813,7 @@ static int do_length(query *q)
 
 	tmp.val_type = TYPE_VARIABLE;
 	tmp.nbr_cells = 1;
-	tmp.flags = 0;
+	tmp.flags = FLAG_FRESH;
 	tmp.val_off = g_anon_s;
 	tmp.slot_nbr = slot_nbr++;
 	alloc_list(q, &tmp);
@@ -8925,7 +8932,7 @@ static int fn_length_2(query *q)
 		cell tmp;
 		tmp.val_type = TYPE_VARIABLE;
 		tmp.nbr_cells = 1;
-		tmp.flags = 0;
+		tmp.flags = FLAG_FRESH;
 		tmp.val_off = g_anon_s;
 		tmp.slot_nbr = slot_nbr++;
 		alloc_list(q, &tmp);
