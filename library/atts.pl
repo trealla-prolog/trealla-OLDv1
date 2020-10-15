@@ -1,5 +1,7 @@
 :- use_module(library(dict)).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 get_attr(V, Name, Value) :-
 	var(V),
 	Access =.. [Name,Value],
