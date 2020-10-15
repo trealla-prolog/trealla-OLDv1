@@ -4114,7 +4114,7 @@ static int fn_iso_copy_term_2(query *q)
 	if (is_variable(p1) && is_variable(p2))
 		return 1;
 
-	if (!has_vars(q, p1, p1_ctx))
+	if (!has_vars(q, p1, p1_ctx) && !is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
 	cell *tmp1 = deep_clone_to_tmp(q, p1, p1_ctx);
