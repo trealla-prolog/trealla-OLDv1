@@ -18,7 +18,7 @@ CFLAGS += -DUSE_INT32=1
 OBJECTS = tpl.o history.o builtins.o library.o \
 	parse.o print.o runtime.o \
 	skiplist.o base64.o network.o utf8.o \
-	lists.o dict.o apply.o http.o auth.o atts.o
+	lists.o dict.o apply.o http.o atts.o
 
 all: tpl
 
@@ -66,9 +66,6 @@ apply.o: library/apply.pl
 
 http.o: library/http.pl
 	$(LD) -m elf_x86_64 -r -b binary -o http.o library/http.pl
-
-auth.o: library/auth.pl
-	$(LD) -m elf_x86_64 -r -b binary -o auth.o library/auth.pl
 
 atts.o: library/atts.pl
 	$(LD) -m elf_x86_64 -r -b binary -o atts.o library/atts.pl
