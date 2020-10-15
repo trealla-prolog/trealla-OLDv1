@@ -66,7 +66,7 @@ typedef uint32_t idx_t;
 #define is_iso_atom(c) ((is_literal(c) || is_cstring(c)) && !(c)->arity)
 #define is_iso_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
 
-#define is_atom(c) ((is_literal(c) && !(c)->arity) || (is_cstring(c)))
+#define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
 #define is_string(c) (is_cstring(c) && (c)->flags&FLAG_STRING)
 #define is_blob(c) (is_cstring(c) && ((c)->flags&FLAG_BLOB))
 #define is_list(c) (is_iso_list(c) || is_string(c))
