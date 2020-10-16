@@ -37,11 +37,11 @@
 inline static cell *deref(query *q, cell *c, idx_t c_ctx)
 {
 	frame *g = GET_FRAME(c_ctx);
-	slot *e = GET_SLOT(g, c->slot_nbr);
+	slot *e = GET_SLOT(g, c->var_nbr);
 
 	while (is_variable(&e->c)) {
 		g = GET_FRAME(c_ctx=e->ctx);
-		e = GET_SLOT(g, (c=&e->c)->slot_nbr);
+		e = GET_SLOT(g, (c=&e->c)->var_nbr);
 	}
 
 	if (is_empty(&e->c))

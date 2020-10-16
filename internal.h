@@ -167,7 +167,7 @@ struct cell_ {
 			};
 
 			idx_t val_off;
-			idx_t slot_nbr;
+			idx_t var_nbr;
 		};
 
 		struct {
@@ -227,8 +227,8 @@ struct op_table {
 };
 
 typedef struct {
-	idx_t ctx;
-	idx_t slot_nbr;
+	idx_t ctx;			// TO-DO: just one
+	idx_t var_nbr;		// would do here
 } trail;
 
 typedef struct {

@@ -184,12 +184,12 @@ static void unwind_trail(query *q, const choice *ch)
 		trail *tr = q->trails + --q->st.tp;
 
 		if (ch->pins) {
-			if (ch->pins & (1 << tr->slot_nbr))
+			if (ch->pins & (1 << tr->var_nbr))
 				continue;
 		}
 
 		frame *g = GET_FRAME(tr->ctx);
-		slot *e = GET_SLOT(g, tr->slot_nbr);
+		slot *e = GET_SLOT(g, tr->var_nbr);
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = NULL;
 	}
@@ -553,7 +553,7 @@ static void make_indirect(cell *tmp, cell *c)
 void set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 {
 	frame *g = GET_FRAME(c_ctx);
-	slot *e = GET_SLOT(g, c->slot_nbr);
+	slot *e = GET_SLOT(g, c->var_nbr);
 	cell *frozen = NULL;
 
 	if (is_empty(&e->c) && e->c.attrs && !is_list_or_nil(e->c.attrs))
@@ -574,20 +574,20 @@ void set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 
 	check_trail(q);
 	trail *tr = q->trails + q->st.tp++;
-	tr->slot_nbr = c->slot_nbr;
+	tr->var_nbr = c->var_nbr;
 	tr->ctx = c_ctx;
 }
 
 void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 {
 	frame *g = GET_FRAME(c_ctx);
-	slot *e = GET_SLOT(g, c->slot_nbr);
+	slot *e = GET_SLOT(g, c->var_nbr);
 
 	while (is_variable(&e->c)) {
 		c = &e->c;
 		c_ctx = e->ctx;
 		g = GET_FRAME(c_ctx);
-		e = GET_SLOT(g, c->slot_nbr);
+		e = GET_SLOT(g, c->var_nbr);
 	}
 
 	e->ctx = v_ctx;
@@ -713,7 +713,7 @@ inline static void bind_vars(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p
 		set_var(q, p2, p2_ctx, p1, p1_ctx);
 	else if (p2_ctx < p1_ctx)
 		set_var(q, p1, p1_ctx, p2, p2_ctx);
-	else if (p2->slot_nbr != p1->slot_nbr)
+	else if (p2->var_nbr != p1->var_nbr)
 		set_var(q, p2, p2_ctx, p1, p1_ctx);
 }
 

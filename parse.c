@@ -838,7 +838,7 @@ query *create_task(query *q, cell *curr_cell)
 		cell *c = deref_var(q, &e->c, e->ctx);
 		cell tmp;
 		tmp.val_type = TYPE_VARIABLE;
-		tmp.slot_nbr = i;
+		tmp.var_nbr = i;
 		set_var(subq, &tmp, 0, c, q->latest_ctx);
 	}
 
@@ -1368,17 +1368,17 @@ void parser_assign_vars(parser *p)
 		if (!is_variable(c))
 			continue;
 
-		c->slot_nbr = get_varno(p, GET_STR(c));
+		c->var_nbr = get_varno(p, GET_STR(c));
 
-		if (c->slot_nbr == MAX_ARITY) {
+		if (c->var_nbr == MAX_ARITY) {
 			fprintf(stdout, "Error: max vars per term reached\n");
 			p->error = 1;
 			return;
 		}
 
-		p->vartab.var_name[c->slot_nbr] = GET_STR(c);
+		p->vartab.var_name[c->var_nbr] = GET_STR(c);
 
-		if (p->vartab.var_used[c->slot_nbr]++ == 0) {
+		if (p->vartab.var_used[c->var_nbr]++ == 0) {
 			c->flags |= FLAG_FIRST_USE;
 			t->nbr_vars++;
 			p->nbr_vars++;

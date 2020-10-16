@@ -445,18 +445,18 @@ static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 			tmp->val_str = strdup(p1->val_str);
 		else if (is_variable(p1)) {
 			frame *g = GET_FRAME(p1_ctx);
-			slot *e = GET_SLOT(g, p1->slot_nbr);
+			slot *e = GET_SLOT(g, p1->var_nbr);
 			idx_t slot_nbr = e - q->slots;
 
 			for (size_t i = 0; i < g_tab_idx; i++) {
 				if (g_tab1[i] == slot_nbr) {
-					tmp->slot_nbr = g_tab2[i];
+					tmp->var_nbr = g_tab2[i];
 					tmp->flags = FLAG_FRESH;
 					break;
 				}
 			}
 
-			tmp->slot_nbr = g_varno;
+			tmp->var_nbr = g_varno;
 			tmp->flags = FLAG_FRESH;
 			g_tab1[g_tab_idx] = slot_nbr;
 			g_tab2[g_tab_idx] = g_varno++;
@@ -3567,8 +3567,8 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 		if (is_variable(p1) && is_variable(p2)) {
 			frame *g1 = GET_FRAME(p1_ctx);
 			frame *g2 = GET_FRAME(p2_ctx);
-			idx_t p1_slot = GET_SLOT(g1,p1->slot_nbr) - q->slots;
-			idx_t p2_slot = GET_SLOT(g2,p2->slot_nbr) - q->slots;
+			idx_t p1_slot = GET_SLOT(g1,p1->var_nbr) - q->slots;
+			idx_t p2_slot = GET_SLOT(g2,p2->var_nbr) - q->slots;
 			return p1_slot < p2_slot ? -1 : p1_slot > p2_slot ? 1 : 0;
 		}
 
@@ -4092,10 +4092,10 @@ static cell *copy_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_
 		if (!is_variable(src))
 			continue;
 
-		if (slots[dst->slot_nbr] == 0)
-			slots[dst->slot_nbr] = new_varno++;
+		if (slots[dst->var_nbr] == 0)
+			slots[dst->var_nbr] = new_varno++;
 
-		dst->slot_nbr = slots[dst->slot_nbr];
+		dst->var_nbr = slots[dst->var_nbr];
 		dst->flags |= FLAG_FRESH;
 	}
 
@@ -4678,7 +4678,7 @@ static int fn_iso_functor_3(query *q)
 		for (unsigned i = 1; i <= arity; i++) {
 			tmp[i].val_type = TYPE_VARIABLE;
 			tmp[i].nbr_cells = 1;
-			tmp[i].slot_nbr = slot_nbr++;
+			tmp[i].var_nbr = slot_nbr++;
 			tmp[i].val_off = g_anon_s;
 			tmp[i].flags = FLAG_FRESH;
 		}
@@ -4938,7 +4938,7 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 			return 1;
 	} else if (is_variable(p1)) {
 		if (is_variable(p2))
-			return p1->slot_nbr < p2->slot_nbr ? -1 : p1->slot_nbr > p2->slot_nbr ? 1 : 0;
+			return p1->var_nbr < p2->var_nbr ? -1 : p1->var_nbr > p2->var_nbr ? 1 : 0;
 		else
 			return -1;
 	} else if (is_structure(p1)) {
@@ -5083,7 +5083,7 @@ static void do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
 		if (is_variable(c)) {
-			c->slot_nbr = new_varno++;
+			c->var_nbr = new_varno++;
 			c->flags = FLAG_FRESH;
 		}
 	}
@@ -5112,7 +5112,7 @@ static void do_sys_listn2(query *q, cell *p1, idx_t p1_ctx, cell *tail)
 
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
 		if (is_variable(c)) {
-			c->slot_nbr = new_varno++;
+			c->var_nbr = new_varno++;
 			c->flags = FLAG_FRESH;
 		}
 	}
@@ -5140,7 +5140,7 @@ static int fn_sys_list_1(query *q)
 
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
 		if (is_variable(c) && 0) {
-			c->slot_nbr = new_varno++;
+			c->var_nbr = new_varno++;
 			c->flags = FLAG_FRESH;
 		}
 	}
@@ -5250,7 +5250,7 @@ static uint32_t get_vars(query *q, cell *p, idx_t p_ctx)
 	uint32_t mask = 0;
 
 	for (unsigned i = 0; i < cnt; i++)
-		mask |= 1 << slots[i]->slot_nbr;
+		mask |= 1 << slots[i]->var_nbr;
 
 	return mask;
 }
@@ -5261,7 +5261,7 @@ static cell *skip_existentials(const query *q, cell *p2, uint32_t *xs)
 		cell *c = p2 + 1;
 
 		if (is_variable(c))
-			*xs |= 1 << c->slot_nbr;
+			*xs |= 1 << c->var_nbr;
 
 		p2 += 1 + c->nbr_cells;
 		return skip_existentials(q, p2, xs);
@@ -5281,8 +5281,12 @@ static int fn_iso_bagof_3(query *q)
 	// First time thru generate all solutions
 
 	if (!q->retry) {
+		cell *tmp = deep_copy_to_tmp(q, p2, p2_ctx);
+		p2 = alloc_heap(q, tmp->nbr_cells);
+		copy_cells(p2, tmp, tmp->nbr_cells);
+
 		q->st.qnbr++;
-		cell *tmp = clone_to_heap(q, 1, p2, 2+p2->nbr_cells+1);
+		tmp = clone_to_heap(q, 1, p2, 2+p2->nbr_cells+1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
@@ -5357,8 +5361,12 @@ static int fn_iso_setof_3(query *q)
 	// First time thru generate all solutions
 
 	if (!q->retry) {
+		cell *tmp = deep_copy_to_tmp(q, p2, p2_ctx);
+		p2 = alloc_heap(q, tmp->nbr_cells);
+		copy_cells(p2, tmp, tmp->nbr_cells);
+
 		q->st.qnbr++;
-		cell *tmp = clone_to_heap(q, 1, p2, 2+p2->nbr_cells+1);
+		tmp = clone_to_heap(q, 1, p2, 2+p2->nbr_cells+1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
@@ -8382,7 +8390,7 @@ static int fn_numbervars_1(query *q)
 		if (!slots[i])
 			continue;
 
-		q->nv_mask |= 1ULL << slots[i]->slot_nbr;
+		q->nv_mask |= 1ULL << slots[i]->var_nbr;
 		end++;
 	}
 
@@ -8410,7 +8418,7 @@ static int fn_numbervars_3(query *q)
 		if (!slots[i])
 			continue;
 
-		q->nv_mask |= 1ULL << slots[i]->slot_nbr;
+		q->nv_mask |= 1ULL << slots[i]->var_nbr;
 		end++;
 	}
 
@@ -8435,7 +8443,7 @@ static int fn_var_number_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,integer_or_var)
-	unsigned pos = count_bits(q->nv_mask, p1->slot_nbr);
+	unsigned pos = count_bits(q->nv_mask, p1->var_nbr);
 	cell tmp;
 	make_int(&tmp, q->nv_start+pos);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -8645,7 +8653,7 @@ static int fn_freeze_2(query *q)
 	if (is_variable(p1)) {
 		cell *tmp = clone_to_heap(q, 0, p2, 0);
 		frame *g = GET_FRAME(p1_ctx);
-		slot *e = GET_SLOT(g, p1->slot_nbr);
+		slot *e = GET_SLOT(g, p1->var_nbr);
 		e->c.attrs = tmp;
 		return 1;
 	}
@@ -8662,7 +8670,7 @@ static int fn_frozen_2(query *q)
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,any);
 	frame *g = GET_FRAME(p1_ctx);
-	slot *e = GET_SLOT(g, p1->slot_nbr);
+	slot *e = GET_SLOT(g, p1->var_nbr);
 
 	if (!e->c.attrs) {
 		cell tmp;
@@ -8679,7 +8687,7 @@ static int fn_del_attrs_1(query *q)
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
 	frame *g = GET_FRAME(p1_ctx);
-	slot *e = GET_SLOT(g, p1->slot_nbr);
+	slot *e = GET_SLOT(g, p1->var_nbr);
 	e->c.attrs = tmp;
 	return 1;
 }
@@ -8690,7 +8698,7 @@ static int fn_put_attrs_2(query *q)
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
 	frame *g = GET_FRAME(p1_ctx);
-	slot *e = GET_SLOT(g, p1->slot_nbr);
+	slot *e = GET_SLOT(g, p1->var_nbr);
 	e->c.attrs = tmp;
 	return 1;
 }
@@ -8700,7 +8708,7 @@ static int fn_get_attrs_2(query *q)
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,variable);
 	frame *g = GET_FRAME(p1_ctx);
-	slot *e = GET_SLOT(g, p1->slot_nbr);
+	slot *e = GET_SLOT(g, p1->var_nbr);
 
 	if (!e->c.attrs) {
 		cell tmp;
@@ -8835,11 +8843,11 @@ static int do_length(query *q)
 	tmp.nbr_cells = 1;
 	tmp.flags = FLAG_FRESH;
 	tmp.val_off = g_anon_s;
-	tmp.slot_nbr = slot_nbr++;
+	tmp.var_nbr = slot_nbr++;
 	alloc_list(q, &tmp);
 
 	for (int i = 1; i < nbr; i++) {
-		tmp.slot_nbr = slot_nbr++;
+		tmp.var_nbr = slot_nbr++;
 		append_list(q, &tmp);
 	}
 
@@ -8954,11 +8962,11 @@ static int fn_length_2(query *q)
 		tmp.nbr_cells = 1;
 		tmp.flags = FLAG_FRESH;
 		tmp.val_off = g_anon_s;
-		tmp.slot_nbr = slot_nbr++;
+		tmp.var_nbr = slot_nbr++;
 		alloc_list(q, &tmp);
 
 		for (int i = 1; i < nbr; i++) {
-			tmp.slot_nbr = slot_nbr++;
+			tmp.var_nbr = slot_nbr++;
 			append_list(q, &tmp);
 		}
 

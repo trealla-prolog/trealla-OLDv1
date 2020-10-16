@@ -204,8 +204,8 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 		return dst - save_dst;
 	}
 
-	if (is_variable(c) && ((1ULL << c->slot_nbr) & q->nv_mask)) {
-		dst += snprintf(dst, dstlen, "'$VAR'(%u)", q->nv_start + count_bits(q->nv_mask, c->slot_nbr));
+	if (is_variable(c) && ((1ULL << c->var_nbr) & q->nv_mask)) {
+		dst += snprintf(dst, dstlen, "'$VAR'(%u)", q->nv_start + count_bits(q->nv_mask, c->var_nbr));
 		return dst - save_dst;
 	}
 
@@ -421,15 +421,15 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		if (parens)
 			dst += snprintf(dst, dstlen, "%s", "(");
 
-		if (running && is_variable(c) && ((1ULL << c->slot_nbr) & q->nv_mask)) {
-			dst += snprintf(dst, dstlen, "%s", varformat(q->nv_start + count_bits(q->nv_mask, c->slot_nbr)));
+		if (running && is_variable(c) && ((1ULL << c->var_nbr) & q->nv_mask)) {
+			dst += snprintf(dst, dstlen, "%s", varformat(q->nv_start + count_bits(q->nv_mask, c->var_nbr)));
 			return dst - save_dst;
 		}
 
 		if (running && is_variable(c) &&
 			((c_ctx != q->st.curr_frame) || is_fresh(c) || (running > 0))) {
 			frame *g = GET_FRAME(c_ctx);
-			slot *e = GET_SLOT(g, c->slot_nbr);
+			slot *e = GET_SLOT(g, c->var_nbr);
 			idx_t slot_nbr = e - q->slots;
 			dst += snprintf(dst, dstlen, "_%u", (unsigned)slot_nbr);
 			return dst - save_dst;
