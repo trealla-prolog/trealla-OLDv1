@@ -442,28 +442,31 @@ static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	copy_cells(tmp, p1, 1);
 
 	if (!is_structure(p1)) {
-		if (is_blob(p1) && !is_const_cstring(p1))
+		if (is_blob(p1) && !is_const_cstring(p1)) {
 			tmp->val_str = strdup(p1->val_str);
-		else if (is_variable(p1)) {
-			frame *g = GET_FRAME(p1_ctx);
-			slot *e = GET_SLOT(g, p1->var_nbr);
-			idx_t slot_nbr = e - q->slots;
-
-			for (size_t i = 0; i < g_tab_idx; i++) {
-				if (g_tab1[i] == slot_nbr) {
-					tmp->var_nbr = g_tab2[i];
-					tmp->flags = FLAG_FRESH;
-					break;
-				}
-			}
-
-			tmp->var_nbr = g_varno;
-			tmp->flags = FLAG_FRESH;
-			g_tab1[g_tab_idx] = slot_nbr;
-			g_tab2[g_tab_idx] = g_varno++;
-			g_tab_idx++;
+			return;
 		}
 
+		if (!is_variable(p1))
+			return;
+
+		frame *g = GET_FRAME(p1_ctx);
+		slot *e = GET_SLOT(g, p1->var_nbr);
+		idx_t slot_nbr = e - q->slots;
+
+		for (size_t i = 0; i < g_tab_idx; i++) {
+			if (g_tab1[i] == slot_nbr) {
+				tmp->var_nbr = g_tab2[i];
+				tmp->flags = FLAG_FRESH;
+				return;
+			}
+		}
+
+		tmp->var_nbr = g_varno;
+		tmp->flags = FLAG_FRESH;
+		g_tab1[g_tab_idx] = slot_nbr;
+		g_tab2[g_tab_idx] = g_varno++;
+		g_tab_idx++;
 		return;
 	}
 
@@ -5362,12 +5365,8 @@ static int fn_iso_setof_3(query *q)
 	// First time thru generate all solutions
 
 	if (!q->retry) {
-		cell *tmp = deep_copy_to_tmp(q, p2, p2_ctx);
-		p2 = alloc_heap(q, tmp->nbr_cells);
-		copy_cells(p2, tmp, tmp->nbr_cells);
-
 		q->st.qnbr++;
-		tmp = clone_to_heap(q, 1, p2, 2+p2->nbr_cells+1);
+		cell *tmp = clone_to_heap(q, 1, p2, 2+p2->nbr_cells+1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
@@ -9214,10 +9213,11 @@ static const struct builtins g_iso_funcs[] =
 	{"set_prolog_flag", 2, fn_iso_set_prolog_flag_2, NULL},
 	{"sort", 2, fn_iso_sort_2, NULL},
 	{"keysort", 2, fn_iso_keysort_2, NULL},
-	{"findall", 3, fn_iso_findall_3, NULL},
-	{"bagof", 3, fn_iso_bagof_3, NULL},
-	{"setof", 3, fn_iso_setof_3, NULL},
 	{"op", 3, fn_iso_op_3, NULL},
+	{"findall", 3, fn_iso_findall_3, NULL},
+
+	{"$bagof", 3, fn_iso_bagof_3, NULL},
+	{"$setof", 3, fn_iso_setof_3, NULL},
 
 	//
 

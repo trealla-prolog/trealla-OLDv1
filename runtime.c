@@ -541,7 +541,7 @@ static int resume_frame(query *q)
 	return 1;
 }
 
-static void make_indirect(cell *tmp, cell *c)
+void make_indirect(cell *tmp, cell *c)
 {
 	tmp->val_type = TYPE_INDIRECT;
 	tmp->nbr_cells = 1;

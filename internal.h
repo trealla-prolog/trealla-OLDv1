@@ -474,3 +474,4 @@ int scan_list(query *q, cell *l, idx_t l_ctx);
 void consultall(parser *p, cell *l);
 void fix_list(cell *c);
 module *module_load_text(module *m, const char *src);
+void make_indirect(cell *tmp, cell *c);

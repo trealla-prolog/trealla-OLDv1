@@ -2898,6 +2898,16 @@ module *create_module(const char *name)
 
 	make_rule(m, "call(G) :- G.");
 
+	make_rule(m, "bagof(T,G,B) :- "							\
+		"copy_term('$bagof'(T,G,B),TMP_G),"					\
+		"TMP_G,"											\
+		"'$bagof'(T,G,B)=TMP_G.");
+
+	make_rule(m, "setof(T,G,B) :- "							\
+		"copy_term('$setof'(T,G,B),TMP_G),"					\
+		"TMP_G,"											\
+		"'$setof'(T,G,B)=TMP_G.");
+
 	// This is until calln is fixed...
 
 	make_rule(m, "call(G,P1) :- "							\
