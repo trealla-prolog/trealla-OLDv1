@@ -5312,13 +5312,13 @@ static int fn_iso_bagof_3(query *q)
 	uint32_t mask = (p1_vars^p2_vars) & ~xs_vars;
 	pin_vars(q, mask);
 	cell *c_end = q->tmpq[q->st.qnbr] + q->tmpq_size[q->st.qnbr];
+	frame *g = GET_FRAME(q->st.curr_frame);
 
 	for (cell *c = q->tmpq[q->st.qnbr]; c < c_end; c += c->nbr_cells) {
 		if (c->flags & FLAG_DELETED)
 			continue;
 
-		try_me(q, 16);
-		//write_term(q, stdout, c, p2_ctx, 1, 0, 0); printf("\n");
+		try_me(q, g->nbr_vars);
 
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			c->flags |= FLAG_DELETED;
@@ -5388,12 +5388,13 @@ static int fn_iso_setof_3(query *q)
 	uint32_t mask = (p1_vars^p2_vars) & ~xs_vars;
 	pin_vars(q, mask);
 	cell *c_end = q->tmpq[q->st.qnbr] + q->tmpq_size[q->st.qnbr];
+	frame *g = GET_FRAME(q->st.curr_frame);
 
 	for (cell *c = q->tmpq[q->st.qnbr]; c < c_end; c += c->nbr_cells) {
 		if (c->flags & FLAG_DELETED)
 			continue;
 
-		try_me(q, 16);
+		try_me(q, g->nbr_vars);
 
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			c->flags |= FLAG_DELETED;
