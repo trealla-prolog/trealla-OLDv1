@@ -2898,6 +2898,8 @@ module *create_module(const char *name)
 
 	make_rule(m, "call(G) :- G.");
 
+	// This is until calln is fixed...
+
 	make_rule(m, "call(G,P1) :- "							\
 		"copy_term(G,TMP_G), G=TMP_G,"						\
 		"copy_term(P1,TMP_P1), P1=TMP_P1,"					\

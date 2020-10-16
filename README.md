@@ -135,6 +135,9 @@ GNU-Prolog & SWI-Prolog
 	random/1                # random(-float) float [0.0,<1.0]
 	random/1                # random(+integer) function returning integer [0,<integer]
 
+	freeze/2
+	frozen/2
+
 
 Others
 ======
@@ -251,11 +254,23 @@ Autoloaded from library(dict)...
 Attributed variables		##NOT WORKING YET##
 ====================
 
-Not built on attributed variables per se, but using the same mechanism
-under the hood...
+	:- use_module(library(atts)).
 
-	freeze/2
-	frozen/2
+Exporting...
+
+	get_attr(V, Module, Value)
+	put_attr(V, Module, Value)
+	del_attr(V, Module)
+
+	put_atts(V, +(A))
+	put_atts(V, -(A))
+	put_atts(V, A)
+	get_atts(V, L)
+	get_atts(V, +(A))
+	get_atts(V, -(A))
+	get_atts(V, A)
+
+	attributed(V)
 
 
 DCG							##UNDER DEVELOPMENT##

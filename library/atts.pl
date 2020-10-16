@@ -2,19 +2,19 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-get_attr(V, Name, Value) :-
+get_attr(V, Module, Value) :-
 	var(V),
-	Access =.. [Name,Value],
+	Access =.. [Module,Value],
 	get_atts(V, [+Access]).
 
-put_attr(V, Name, Value) :-
+put_attr(V, Module, Value) :-
 	var(V),
-	Access =.. [Name,Value],
+	Access =.. [Module,Value],
 	put_atts(V, [+Access]).
 
-del_attr(V, Name) :-
+del_attr(V, Module) :-
 	var(V),
-	Access =.. [Name,_],
+	Access =.. [Module,_],
 	put_atts(V, [-Access]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
