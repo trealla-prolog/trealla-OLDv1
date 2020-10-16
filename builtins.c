@@ -429,7 +429,8 @@ static cell make_string(query *q, const char *s, size_t n)
 	return tmp;
 }
 
-static idx_t g_tab1[4000], g_tab2[4000], g_varno;
+static idx_t g_tab1[4000];
+unsigned g_tab2[4000], g_varno;
 static size_t g_tab_idx = 0;
 
 static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
