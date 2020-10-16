@@ -5179,7 +5179,7 @@ static int fn_iso_findall_3(query *q)
 
 	if (!q->retry) {
 		q->st.qnbr++;
-		cell *tmp = clone_to_heap(q, 1, p2, 3+p1->nbr_cells);
+		cell *tmp = clone_to_heap(q, 1, p2, 2+p1->nbr_cells+1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
@@ -5206,7 +5206,7 @@ static int fn_findall_4(query *q)
 
 	if (!q->retry) {
 		q->st.qnbr++;
-		cell *tmp = clone_to_heap(q, 1, p2, 3+p1->nbr_cells);
+		cell *tmp = clone_to_heap(q, 1, p2, 2+p1->nbr_cells+1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
@@ -5279,7 +5279,7 @@ static int fn_iso_bagof_3(query *q)
 
 	if (!q->retry) {
 		q->st.qnbr++;
-		cell *tmp = clone_to_heap(q, 1, p2, 3+p2->nbr_cells);
+		cell *tmp = clone_to_heap(q, 1, p2, 2+p2->nbr_cells+1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
@@ -5352,7 +5352,7 @@ static int fn_iso_setof_3(query *q)
 
 	if (!q->retry) {
 		q->st.qnbr++;
-		cell *tmp = clone_to_heap(q, 1, p2, 3+p2->nbr_cells);
+		cell *tmp = clone_to_heap(q, 1, p2, 2+p2->nbr_cells+1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
