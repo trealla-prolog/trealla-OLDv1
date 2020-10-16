@@ -917,7 +917,7 @@ static void dump_vars(query *q, parser *p)
 		if (any)
 			fprintf(stdout, ",");
 
-		fprintf(stdout, "\n%s = ", p->vartab.var_name[i]);
+		fprintf(stdout, " %s = ", p->vartab.var_name[i]);
 		int save = q->quoted;
 		q->quoted = 1;
 		write_term(q, stdout, c, q->latest_ctx, -1, 0, 0);
@@ -926,7 +926,7 @@ static void dump_vars(query *q, parser *p)
 	}
 
 	if (any)
-		fprintf(stdout, ".\n\n");
+		fprintf(stdout, ".\n");
 
 	q->m->dump_vars = any;
 }
