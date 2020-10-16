@@ -5136,7 +5136,7 @@ static int fn_sys_list_1(query *q)
 	cell *c = l;
 
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
-		if (is_variable(c)) {
+		if (is_variable(c) && 0) {
 			c->slot_nbr = new_varno++;
 			c->flags = FLAG_FRESH;
 		}
@@ -5317,7 +5317,10 @@ static int fn_iso_bagof_3(query *q)
 		if (c->flags & FLAG_DELETED)
 			continue;
 
-		if (unify(q, p2, p2_ctx, c, q->st.curr_frame)) {
+		try_me(q, 16);
+		//write_term(q, stdout, c, p2_ctx, 1, 0, 0); printf("\n");
+
+		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			c->flags |= FLAG_DELETED;
 			cell *c1 = deep_clone_to_tmp(q, p1, q->st.curr_frame);
 			alloc_queuen(q, q->st.qnbr, c1);
@@ -5336,8 +5339,8 @@ static int fn_iso_bagof_3(query *q)
 	}
 
 	unpin_vars(q);
-	do_sys_listn(q, p3, p3_ctx);
-	return 1;
+	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
+	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
 static int fn_iso_setof_3(query *q)
@@ -5390,7 +5393,9 @@ static int fn_iso_setof_3(query *q)
 		if (c->flags & FLAG_DELETED)
 			continue;
 
-		if (unify(q, p2, p2_ctx, c, q->st.curr_frame)) {
+		try_me(q, 16);
+
+		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			c->flags |= FLAG_DELETED;
 			cell *c1 = deep_clone_to_tmp(q, p1, q->st.curr_frame);
 			alloc_queuen(q, q->st.qnbr, c1);
