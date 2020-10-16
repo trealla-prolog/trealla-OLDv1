@@ -494,10 +494,8 @@ static cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	deep_copy2_to_tmp(q, p1, p1_ctx);
 
 	if (g_varno != g->nbr_vars) {
-		if (!create_vars(q, g_varno-g->nbr_vars)) {
-			throw_error(q, p1, "resource_error", "too_many_vars");
+		if (!create_vars(q, g_varno-g->nbr_vars))
 			return NULL;
-		}
 	}
 
 	return q->tmp_heap;
@@ -4132,8 +4130,10 @@ static int fn_iso_copy_term_2(query *q)
 
 	cell *tmp1 = deep_copy_to_tmp(q, p1, p1_ctx);
 
-	if (!tmp1)
+	if (!tmp1) {
+		throw_error(q, p1, "resource_error", "too_many_vars");
 		return 0;
+	}
 
 	cell *tmp = clone_to_heap(q, 0, tmp1, 0);
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
