@@ -713,10 +713,8 @@ inline static void bind_vars(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p
 		set_var(q, p2, p2_ctx, p1, p1_ctx);
 	else if (p2_ctx < p1_ctx)
 		set_var(q, p1, p1_ctx, p2, p2_ctx);
-	else if (p2->slot_nbr > p1->slot_nbr)
+	else if (p2->slot_nbr != p1->slot_nbr)
 		set_var(q, p2, p2_ctx, p1, p1_ctx);
-	else if (p1->slot_nbr < p2->slot_nbr)
-		set_var(q, p1, p1_ctx, p2, p2_ctx);
 }
 
 int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
