@@ -429,12 +429,13 @@ static cell make_string(query *q, const char *s, size_t n)
 	return tmp;
 }
 
-static idx_t g_tab1[4000];
-unsigned g_tab2[4000], g_varno;
-static size_t g_tab_idx = 0;
+static unsigned g_varno;
+static size_t g_tab_idx;
 
 static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
+	static idx_t g_tab1[64000];
+	static unsigned g_tab2[64000];
 	idx_t save_idx = tmp_heap_used(q);
 	p1 = deref_var(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
