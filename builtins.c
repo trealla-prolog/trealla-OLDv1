@@ -506,6 +506,14 @@ static cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	return q->tmp_heap;
 }
 
+static cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx)
+{
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx);
+	cell *tmp2 = alloc_heap(q, tmp->nbr_cells);
+	copy_cells(tmp2, tmp, tmp->nbr_cells);
+	return tmp2;
+}
+
 static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
 	idx_t save_idx = tmp_heap_used(q);
@@ -4138,14 +4146,13 @@ static int fn_iso_copy_term_2(query *q)
 	if (!has_vars(q, p1, p1_ctx) && !is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
-	cell *tmp1 = deep_copy_to_tmp(q, p1, p1_ctx);
+	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx);
 
-	if (!tmp1) {
+	if (!tmp) {
 		throw_error(q, p1, "resource_error", "too_many_vars");
 		return 0;
 	}
 
-	cell *tmp = clone_to_heap(q, 0, tmp1, 0);
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
@@ -4992,7 +4999,7 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 
 static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 {
-	cell *p = deep_clone_to_tmp(q, p1, p1_ctx);
+	cell *p = p1;
 	size_t cnt = 0;
 	cell *l = p;
 
@@ -5045,11 +5052,9 @@ static int fn_iso_sort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx);
-	cell *tmp2 = alloc_heap(q, tmp->nbr_cells);
-	copy_cells(tmp2, tmp, tmp->nbr_cells);
-	cell *l = nodesort(q, tmp2, q->st.curr_frame, 1, 0);
-	unify(q, tmp2, q->st.curr_frame, p1, p1_ctx);
+	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx);
+	unify(q, tmp, q->st.curr_frame, p1, p1_ctx);
+	cell *l = nodesort(q, tmp, q->st.curr_frame, 1, 0);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -5057,7 +5062,9 @@ static int fn_iso_keysort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
-	cell *l = nodesort(q, p1, p1_ctx, 0, 1);
+	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx);
+	unify(q, tmp, q->st.curr_frame, p1, p1_ctx);
+	cell *l = nodesort(q, tmp, q->st.curr_frame, 0, 1);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -5291,12 +5298,8 @@ static int fn_iso_bagof_3(query *q)
 	// First time thru generate all solutions
 
 	if (!q->retry) {
-		cell *tmp = deep_copy_to_tmp(q, p2, p2_ctx);
-		p2 = alloc_heap(q, tmp->nbr_cells);
-		copy_cells(p2, tmp, tmp->nbr_cells);
-
 		q->st.qnbr++;
-		tmp = clone_to_heap(q, 1, p2, 2+p2->nbr_cells+1);
+		cell *tmp = clone_to_heap(q, 1, p2, 2+p2->nbr_cells+1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
@@ -7033,7 +7036,9 @@ static int fn_msort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
-	cell *l = nodesort(q, p1, p1_ctx, 0, 0);
+	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx);
+	unify(q, tmp, q->st.curr_frame, p1, p1_ctx);
+	cell *l = nodesort(q, tmp, q->st.curr_frame, 0, 0);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
