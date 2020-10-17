@@ -5025,8 +5025,6 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 	qsort_r(base, cnt, sizeof(cell*), nodecmp, (void*)(long)keysort);
 #endif
 
-	q->tmp_heap = NULL;
-
 	for (size_t i = 0; i < cnt; i++) {
 		if ((i > 0) && dedup) {
 #ifdef __FreeBSD__
