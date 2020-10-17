@@ -5015,11 +5015,11 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 	q->tmp_heap = NULL;
 
 	for (size_t i = 0; i < cnt; i++) {
-		if (i > 0) {
+		if ((i > 0) && dedup) {
 #ifdef __FreeBSD__
-			if (dedup && !nodecmp((void*)(long)keysort, &base[i], &base[i-1]))
+			if (!nodecmp((void*)(long)keysort, &base[i], &base[i-1]))
 #else
-			if (dedup && !nodecmp(&base[i], &base[i-1], (void*)(long)keysort))
+			if (!nodecmp(&base[i], &base[i-1], (void*)(long)keysort))
 #endif
 				continue;
 		}
