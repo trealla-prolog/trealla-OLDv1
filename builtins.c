@@ -5045,7 +5045,11 @@ static int fn_iso_sort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
-	cell *l = nodesort(q, p1, p1_ctx, 1, 0);
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx);
+	cell *tmp2 = alloc_heap(q, tmp->nbr_cells);
+	copy_cells(tmp2, tmp, tmp->nbr_cells);
+	cell *l = nodesort(q, tmp2, q->st.curr_frame, 1, 0);
+	unify(q, tmp2, q->st.curr_frame, p1, p1_ctx);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
