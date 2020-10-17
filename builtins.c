@@ -3915,29 +3915,34 @@ static int fn_iso_univ_2(query *q)
 	if (is_variable(p1)) {
 		cell *l = p2;
 		unsigned arity = 0;
+		idx_t save_p2_ctx = p2_ctx;
+		init_tmp_heap(q);
 
 		while (is_list(l)) {
-			cell *h = l + 1;
+			cell *h = LIST_HEAD(l);
+			h = deref_var(q, h, save_p2_ctx);
 			cell *tmp = alloc_tmp_heap(q, h->nbr_cells);
 			copy_cells(tmp, h, h->nbr_cells);
-			l = h + h->nbr_cells;
+			l = LIST_TAIL(l);
+			l = deref_var(q, l, save_p2_ctx);
+			save_p2_ctx = q->latest_ctx;
 			arity++;
 		}
 
 		arity--;
+		idx_t nbr_cells = tmp_heap_used(q);
+		cell *tmp = get_tmp_heap(q, 0);
 
-		if (!is_literal(p2+1) && arity) {
-			throw_error(q, p2+1, "type_error", "atom");
+		if (!is_literal(tmp) && arity) {
+			throw_error(q, tmp, "type_error", "atom");
 			return 0;
 		}
 
-		idx_t nbr_cells = tmp_heap_used(q);
-		cell *tmp = get_tmp_heap(q, 0);
 		tmp->nbr_cells = nbr_cells;
 		tmp->arity = arity;
 		cell *tmp2 = alloc_heap(q, nbr_cells);
 		copy_cells(tmp2, tmp, nbr_cells);
-		return unify(q, p1, p1_ctx, tmp2, p1_ctx);
+		return unify(q, p1, p1_ctx, tmp2, p2_ctx);
 	}
 
 	cell tmp = *p1;
@@ -5041,7 +5046,7 @@ static int fn_iso_sort_2(query *q)
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	cell *l = nodesort(q, p1, p1_ctx, 1, 0);
-	return unify(q, l, q->st.curr_frame, p2, p2_ctx);
+	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
 static int fn_iso_keysort_2(query *q)
@@ -5049,7 +5054,7 @@ static int fn_iso_keysort_2(query *q)
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	cell *l = nodesort(q, p1, p1_ctx, 0, 1);
-	return unify(q, l, q->st.curr_frame, p2, p2_ctx);
+	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
 static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
@@ -7025,7 +7030,7 @@ static int fn_msort_2(query *q)
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	cell *l = nodesort(q, p1, p1_ctx, 0, 0);
-	return unify(q, l, q->st.curr_frame, p2, p2_ctx);
+	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
 static int do_consult(query *q, cell *p1, idx_t p1_ctx)
