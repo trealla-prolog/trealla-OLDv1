@@ -513,7 +513,7 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	cell *tmp = alloc_tmp_heap(q, 1);
 	copy_cells(tmp, p1, 1);
 
-	if (!is_structure(p1)) {
+	if (!is_structure(p1) || is_string(p1)) {
 		if (is_blob(p1) && !is_const_cstring(p1))
 			tmp->val_str = strdup(p1->val_str);
 
@@ -4423,7 +4423,7 @@ int call_me(query *q, cell *p1)
 	idx_t nbr_cells = tmp->nbr_cells;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
-	make_barrier(q);
+	make_choice(q);
 	return 1;
 }
 
@@ -5341,8 +5341,8 @@ static int fn_iso_bagof_3(query *q)
 	}
 
 	if (!queuen_used(q)) {
-		drop_choice(q);
 		init_queuen(q);
+		cut_me(q, 1);
 		free(q->tmpq[q->st.qnbr]);
 		q->tmpq[q->st.qnbr] = NULL;
 		q->st.qnbr--;
@@ -5417,8 +5417,8 @@ static int fn_iso_setof_3(query *q)
 	}
 
 	if (!queuen_used(q)) {
-		drop_choice(q);
 		init_queuen(q);
+		cut_me(q, 1);
 		free(q->tmpq[q->st.qnbr]);
 		q->tmpq[q->st.qnbr] = NULL;
 		q->st.qnbr--;
@@ -9215,7 +9215,6 @@ static const struct builtins g_iso_funcs[] =
 	{"keysort", 2, fn_iso_keysort_2, NULL},
 	{"op", 3, fn_iso_op_3, NULL},
 	{"findall", 3, fn_iso_findall_3, NULL},
-
 	{"$bagof", 3, fn_iso_bagof_3, NULL},
 	{"$setof", 3, fn_iso_setof_3, NULL},
 

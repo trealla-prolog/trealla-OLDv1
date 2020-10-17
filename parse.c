@@ -2908,8 +2908,6 @@ module *create_module(const char *name)
 		"TMP_G,"											\
 		"'$setof'(T,G,B)=TMP_G.");
 
-	// This is until calln is fixed...
-
 	make_rule(m, "call(G,P1) :- "							\
 		"copy_term(G,TMP_G), G=TMP_G,"						\
 		"copy_term(P1,TMP_P1), P1=TMP_P1,"					\
