@@ -227,8 +227,8 @@ struct op_table {
 };
 
 typedef struct {
-	idx_t ctx;			// TO-DO: just one
-	idx_t var_nbr;		// would do here
+	idx_t ctx;			// TO-DO: just combine
+	idx_t var_nbr;		// both into a slot idx
 } trail;
 
 typedef struct {
