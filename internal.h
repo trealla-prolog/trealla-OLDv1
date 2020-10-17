@@ -48,7 +48,7 @@ typedef uint32_t idx_t;
 #define STREAM_BUFLEN 1024
 
 #define GET_FRAME(i) (q->frames+(i))
-#define GET_SLOT(g,i) ((i) < g->nbr_slots ? q->slots+g->env+(i) : q->slots+g->overflow+((i)-g->nbr_slots))
+#define GET_SLOT(g,i) ((i) < g->nbr_slots ? q->slots+g->ctx+(i) : q->slots+g->overflow+((i)-g->nbr_slots))
 
 // Primary type...
 
@@ -239,7 +239,7 @@ typedef struct {
 typedef struct {
 	cell *curr_cell;
 	module *m;
-	idx_t prev_frame, env, overflow, cgen;
+	idx_t prev_frame, ctx, overflow, cgen;
 	uint16_t nbr_vars, nbr_slots;
 	unsigned any_choices:1;
 	unsigned did_cut:1;

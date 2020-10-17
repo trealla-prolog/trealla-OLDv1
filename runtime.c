@@ -135,9 +135,9 @@ unsigned create_vars(query *q, unsigned cnt)
 	frame *g = GET_FRAME(q->st.curr_frame);
 	unsigned slot_nbr = g->nbr_vars;
 
-	if ((g->env + g->nbr_slots) >= q->st.sp) {
+	if ((g->ctx + g->nbr_slots) >= q->st.sp) {
 		g->nbr_slots += cnt;
-		q->st.sp = g->env + g->nbr_slots;
+		q->st.sp = g->ctx + g->nbr_slots;
 	} else {
 		assert(!g->overflow);
 		g->overflow = q->st.sp;
@@ -223,7 +223,7 @@ void try_me(const query *q, unsigned vars)
 {
 	frame *g = GET_FRAME(q->st.fp);
 	g->nbr_slots = vars;
-	g->env = q->st.sp;
+	g->ctx = q->st.sp;
 	slot *e = GET_SLOT(g, 0);
 
 	for (unsigned i = 0; i < vars; i++, e++) {
@@ -413,9 +413,9 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 		slot *from = GET_SLOT(new_g, 0);
 		slot *to = GET_SLOT(g, 0);
 		memcpy(to, from, sizeof(slot)*nbr_vars);
-		q->st.sp = g->env + nbr_vars;
+		q->st.sp = g->ctx + nbr_vars;
 	} else {
-		g->env = q->st.sp;
+		g->ctx = q->st.sp;
 		q->st.sp += nbr_vars;
 	}
 
