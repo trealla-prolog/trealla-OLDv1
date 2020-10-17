@@ -4987,7 +4987,6 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 {
 	cell *p = deep_clone_to_tmp(q, p1, p1_ctx);
-	idx_t save_size = q->tmph_size;
 	size_t cnt = 0;
 	cell *l = p;
 
@@ -5033,9 +5032,6 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 
 	l = end_list(q);
 	free(base);
-	free(q->tmp_heap);
-	q->tmp_heap = p;
-	q->tmph_size = save_size;
 	return l;
 }
 
