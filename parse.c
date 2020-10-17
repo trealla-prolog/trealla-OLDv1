@@ -507,7 +507,7 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 		}
 
 		if (!is_multifile_in_db(mod, name, c->arity)) {
-			fprintf(stdout, "Warning: not declared mulitile %s:%s/%u\n", mod, name, (unsigned)c->arity);
+			fprintf(stdout, "Warning: not declared multifile %s:%s/%u\n", mod, name, (unsigned)c->arity);
 			set_multifile_in_db(m, name, c->arity);
 		}
 
@@ -600,7 +600,7 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 		}
 
 		if (!is_multifile_in_db(mod, name, c->arity)) {
-			fprintf(stdout, "Warning: not declared mulitile %s:%s/%u\n", mod, name, (unsigned)c->arity);
+			fprintf(stdout, "Warning: not declared multifile %s:%s/%u\n", mod, name, (unsigned)c->arity);
 			set_multifile_in_db(m, name, c->arity);
 		}
 
