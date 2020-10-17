@@ -5048,7 +5048,7 @@ static int fn_iso_keysort_2(query *q)
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	cell *l = nodesort(q, p1, p1_ctx, 0, 1);
-	return unify(q, l, p1_ctx, p2, p2_ctx);
+	return unify(q, l, q->st.curr_frame, p2, p2_ctx);
 }
 
 static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
