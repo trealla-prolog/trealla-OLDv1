@@ -22,9 +22,9 @@ int g_tpl_interrupt = 0;
 enum { CALL, EXIT, REDO, NEXT, FAIL };
 
 #ifdef _WIN32
-unsigned long long get_time_in_usec(void)
+uint64_t get_time_in_usec(void)
 {
-    static const unsigned long long epoch = 116444736000000000ULL;
+    static const uint64_t epoch = 116444736000000000ULL;
     FILETIME file_time;
     SYSTEMTIME system_time;
     ULARGE_INTEGER u;
@@ -35,11 +35,11 @@ unsigned long long get_time_in_usec(void)
     return (u.QuadPart - epoch) / 10 + (1000ULL * system_time.wMilliseconds);
 }
 #else
-unsigned long long get_time_in_usec(void)
+uint64_t get_time_in_usec(void)
 {
 	struct timespec now;
 	clock_gettime(CLOCK_REALTIME, &now);
-    return (unsigned long long)(now.tv_sec * 1000 * 1000) + (now.tv_nsec / 1000);
+    return (uint64_t)(now.tv_sec * 1000 * 1000) + (now.tv_nsec / 1000);
 }
 #endif
 

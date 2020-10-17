@@ -783,7 +783,7 @@ void destroy_parser(parser *p)
 
 query *create_query(module *m, int is_task)
 {
-	static unsigned long long g_query_id = 0;
+	static uint64_t g_query_id = 0;
 
 	query *q = calloc(1, sizeof(query));
 	q->qid = g_query_id++;

@@ -5733,7 +5733,7 @@ static int fn_sys_timer_0(query *q)
 }
 static int fn_sys_elapsed_0(query *q)
 {
-	unsigned long long elapsed = get_time_in_usec();
+	uint64_t elapsed = get_time_in_usec();
 	elapsed -= q->time_started;
 	fprintf(stderr, "Time elapsed %.03g secs\n", (double)elapsed/1000/1000);
 	return 1;
@@ -5757,7 +5757,7 @@ static int fn_statistics_2(query *q)
 	GET_NEXT_ARG(p2,list_or_var);
 
 	if (!strcmp(GET_STR(p1), "cputime") && is_variable(p2)) {
-		unsigned long long now = get_time_in_usec();
+		uint64_t now = get_time_in_usec();
 		double elapsed = now - q->time_started;
 		cell tmp;
 		make_float(&tmp, elapsed/1000/1000);
@@ -5773,7 +5773,7 @@ static int fn_statistics_2(query *q)
 	}
 
 	if (!strcmp(GET_STR(p1), "runtime")) {
-		unsigned long long now = get_time_in_usec();
+		uint64_t now = get_time_in_usec();
 		double elapsed = now - q->time_started;
 		cell tmp;
 		make_int(&tmp, elapsed/1000);
@@ -8424,7 +8424,7 @@ static int fn_numbervars_3(query *q)
 	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 }
 
-unsigned count_bits(unsigned long long mask, unsigned bit)
+unsigned count_bits(uint64_t mask, unsigned bit)
 {
 	unsigned bits = 0;
 
