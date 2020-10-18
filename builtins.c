@@ -4999,7 +4999,7 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 
 static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 {
-	cell *p = p1;
+	cell *p = deep_clone_to_heap(q, p1, p1_ctx);
 	size_t cnt = 0;
 	cell *l = p;
 
@@ -5050,9 +5050,7 @@ static int fn_iso_sort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
-	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx);
-	unify(q, tmp, q->st.curr_frame, p1, p1_ctx);
-	cell *l = nodesort(q, tmp, q->st.curr_frame, 1, 0);
+	cell *l = nodesort(q, p1, p1_ctx, 1, 0);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -5060,9 +5058,7 @@ static int fn_iso_keysort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
-	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx);
-	unify(q, tmp, q->st.curr_frame, p1, p1_ctx);
-	cell *l = nodesort(q, tmp, q->st.curr_frame, 0, 1);
+	cell *l = nodesort(q, p1, p1_ctx, 0, 1);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -7034,9 +7030,7 @@ static int fn_msort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
-	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx);
-	unify(q, tmp, q->st.curr_frame, p1, p1_ctx);
-	cell *l = nodesort(q, tmp, q->st.curr_frame, 0, 0);
+	cell *l = nodesort(q, p1, p1_ctx, 0, 0);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
