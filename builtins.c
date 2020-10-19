@@ -6,6 +6,7 @@
 #include <math.h>
 #include <float.h>
 #include <errno.h>
+#include <assert.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 
@@ -52,10 +53,12 @@ static void msleep(int ms)
 }
 #endif
 
+#if 0
 static double rat_to_float(cell *n)
 {
 	return (double)n->val_num / n->val_den;
 }
+#endif
 
 static int do_throw_term(query *q, cell *c);
 
@@ -3546,6 +3549,20 @@ static int fn_iso_neg_1(query *q)
 	return 1;
 }
 
+static int ctsring_cmp(const char *s1, size_t len1, const char *s2, size_t len2)
+{
+	size_t len = len1 < len2 ? len1 : len2;
+	int val = memcmp(s1, s2, len);
+	if (val) return val;
+
+	if (len1 < len2)
+		return -1;
+	else if (len1 > len2)
+		return 1;
+
+	return 0;
+}
+
 static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
 {
 	if (depth == MAX_DEPTH) {
@@ -3553,8 +3570,8 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 		return 0;
 	}
 
-	if (p1->arity == 0) {
-		if (is_variable(p1) && is_variable(p2)) {
+	if (is_variable(p1)) {
+		if (is_variable(p2)) {
 			frame *g1 = GET_FRAME(p1_ctx);
 			frame *g2 = GET_FRAME(p2_ctx);
 			idx_t p1_slot = GET_SLOT(g1,p1->var_nbr) - q->slots;
@@ -3562,43 +3579,48 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 			return p1_slot < p2_slot ? -1 : p1_slot > p2_slot ? 1 : 0;
 		}
 
-		if (is_rational(p1) && is_rational(p2)) {
+		return -1;
+	}
+
+	if (is_rational(p1)) {
+		if (is_rational(p2)) {
 			cell tmp1 = *p1, tmp2 = *p2;
 			tmp1.val_num *= tmp2.val_den;
 			tmp2.val_num *= tmp1.val_den;
 			return tmp1.val_num < tmp2.val_num ? -1 : tmp1.val_num > tmp2.val_num ? 1 : 0;
 		}
 
-		if (is_rational(p1) && is_float(p2))
-			return rat_to_float(p1) < p2->val_flt ? -1 : rat_to_float(p1) > p2->val_flt ? 1 : 0;
-
-		if (is_float(p1) && is_float(p2))
-			return p1->val_flt < p2->val_flt ? -1 : p1->val_flt > p2->val_flt ? 1 : 0;
-
-		if (is_float(p1) && is_rational(p2))
-			return rat_to_float(p2) < p1->val_flt ? -1 : rat_to_float(p2) > p1->val_flt ? 1 : 0;
-
-		if (is_atom(p1) && is_atom(p2))
-			return strcmp(GET_STR(p1), GET_STR(p2));
-
-		if (is_variable(p1))
-			return -1;
-
-		if (is_atom(p1))
+		if (is_float(p2))
 			return 1;
 
-		if (is_rational(p1))
+		if (is_variable(p2))
 			return 1;
 
-		if (is_float(p1))
-			return 1;
-
-		throw_error(q, p1, "type_error", "unknown_type");
 		return -1;
 	}
 
-	if (is_string(p1) && is_string(p2))
-		return strcmp(GET_STR(p1), GET_STR(p2));
+	if (is_float(p1)) {
+		if (is_float(p2))
+			return p1->val_flt < p2->val_flt ? -1 : p1->val_flt > p2->val_flt ? 1 : 0;
+
+		if (is_variable(p2))
+			return 1;
+
+		return -1;
+	}
+
+	if (is_iso_atom(p1)) {
+		if (is_iso_atom(p2))
+			return ctsring_cmp(GET_STR(p1), LEN_STR(p1), GET_STR(p2), LEN_STR(p2));
+
+		if (is_variable(p2) || is_number(p2))
+			return 1;
+
+		return -1;
+	}
+
+	assert(p1->val_type && p2->val_type);
+	assert((p1->val_type != TYPE_END) && (p2->val_type != TYPE_END));
 
 	if (p1->arity < p2->arity)
 		return -1;
@@ -3606,8 +3628,7 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 	if (p1->arity > p2->arity)
 		return 1;
 
-#if 0
-	if (is_iso_list(p1) && is_iso_list(p2)) {
+	if (is_list(p1) && is_list(p2)) {
 		while (is_list(p1) && is_list(p2)) {
 			cell *h1 = LIST_HEAD(p1);
 			h1 = deref_var(q, h1, p1_ctx);
@@ -3627,9 +3648,17 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 			p2_ctx = q->latest_ctx;
 		}
 
+		if (is_list(p1))
+			return 1;
+
+		if (is_list(p2))
+			return -1;
+
+		int val = compare(q, p1, p1_ctx, p2, p2_ctx, depth+1);
+		if (val) return val;
+
 		return 0;
 	}
-#endif
 
 	int val = strcmp(GET_STR(p1), GET_STR(p2));
 	if (val) return val;
