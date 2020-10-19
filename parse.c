@@ -836,9 +836,10 @@ query *create_task(query *q, cell *curr_cell)
 
 	for (unsigned i = 0; i < gsrc->nbr_vars; i++, e++) {
 		cell *c = deref_var(q, &e->c, e->ctx);
-		cell tmp;
+		cell tmp = {0};
 		tmp.val_type = TYPE_VARIABLE;
 		tmp.var_nbr = i;
+		tmp.val_off = g_anon_s;
 		set_var(subq, &tmp, 0, c, q->latest_ctx);
 	}
 
@@ -1596,11 +1597,13 @@ static void parser_dcg_rewrite(parser *p)
 
 				tmp[nbr_cells+1].val_type = TYPE_VARIABLE;
 				tmp[nbr_cells+1].nbr_cells = 1;
+				tmp[nbr_cells+1].arity = 0;
 				char v[20]; sprintf(v, "S_");
 				tmp[nbr_cells+1].val_off = find_in_pool(v);
 
 				tmp[nbr_cells+2].val_type = TYPE_VARIABLE;
 				tmp[nbr_cells+2].nbr_cells = 1;
+				tmp[nbr_cells+2].arity = 0;
 				sprintf(v, "S%d_", cnt++);
 				tmp[nbr_cells+2].val_off = find_in_pool(v);
 
@@ -1619,6 +1622,7 @@ static void parser_dcg_rewrite(parser *p)
 
 			tmp[nbr_cells+1].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+1].nbr_cells = 1;
+			tmp[nbr_cells+1].arity = 0;
 			char v[20]; sprintf(v, "S_");
 			tmp[nbr_cells+1].val_off = find_in_pool(v);
 
@@ -1630,6 +1634,7 @@ static void parser_dcg_rewrite(parser *p)
 
 			tmp[nbr_cells+4].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+4].nbr_cells = 1;
+			tmp[nbr_cells+4].arity = 0;
 			if (last) { sprintf(v, "S_"); last = 0; }
 			else sprintf(v, "S%d_", cnt++);
 			tmp[nbr_cells+4].val_off = find_in_pool(v);
@@ -1646,6 +1651,7 @@ static void parser_dcg_rewrite(parser *p)
 
 			tmp[nbr_cells+1].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+1].nbr_cells = 1;
+			tmp[nbr_cells+1].arity = 0;
 			char v[20]; sprintf(v, "S%d_", cnt++);
 			tmp[nbr_cells+1].val_off = find_in_pool(v);
 
@@ -1653,6 +1659,7 @@ static void parser_dcg_rewrite(parser *p)
 
 			tmp[nbr_cells+2+len-1].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+2+len-1].nbr_cells = 1;
+			tmp[nbr_cells+2+len-1].arity = 0;
 			if (last) { sprintf(v, "S_"); last = 0; }
 			else sprintf(v, "S%d_", cnt);
 			tmp[nbr_cells+2+len-1].val_off = find_in_pool(v);
@@ -1669,11 +1676,13 @@ static void parser_dcg_rewrite(parser *p)
 
 			tmp[nbr_cells+1].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+1].nbr_cells = 1;
+			tmp[nbr_cells+1].arity = 0;
 			char v[20]; sprintf(v, "S%d_", cnt);
 			tmp[nbr_cells+1].val_off = find_in_pool(v);
 
 			tmp[nbr_cells+2].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+2].nbr_cells = 1;
+			tmp[nbr_cells+2].arity = 0;
 			sprintf(v, "S_");
 			tmp[nbr_cells+2].val_off = find_in_pool(v);
 
@@ -1684,11 +1693,13 @@ static void parser_dcg_rewrite(parser *p)
 
 			tmp[nbr_cells+phrase->nbr_cells+0].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+phrase->nbr_cells+0].nbr_cells = 1;
+			tmp[nbr_cells+phrase->nbr_cells+0].arity = 0;
 			char v[20]; sprintf(v, "S%d_", cnt);
 			tmp[nbr_cells+phrase->nbr_cells+0].val_off = find_in_pool(v);
 
 			tmp[nbr_cells+phrase->nbr_cells+1].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+phrase->nbr_cells+1].nbr_cells = 1;
+			tmp[nbr_cells+phrase->nbr_cells+1].arity = 0;
 			if (head || last) { sprintf(v, "S_"); last = 0; }
 			else sprintf(v, "S%d_", ++cnt);
 			tmp[nbr_cells+phrase->nbr_cells+1].val_off = find_in_pool(v);

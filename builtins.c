@@ -4148,8 +4148,8 @@ static cell *copy_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_
 
 	cell *src = p1, *dst = tmp+(prefix?1:0);
 	frame *g = GET_FRAME(q->st.curr_frame);
-	unsigned new_varno = g->nbr_vars;
-	unsigned slots[MAX_ARITY] = {0};
+	g_varno = g->nbr_vars;
+	g_tab_idx = 0;
 
 	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
 		*dst = *src;
@@ -4160,15 +4160,29 @@ static cell *copy_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_
 		if (!is_variable(src))
 			continue;
 
-		if (slots[dst->var_nbr] == 0)
-			slots[dst->var_nbr] = new_varno++;
+		slot *e = GET_SLOT(g, src->var_nbr);
+		idx_t slot_nbr = e - q->slots;
+		int found = 0;
 
-		dst->var_nbr = slots[dst->var_nbr];
-		dst->flags |= FLAG_FRESH;
+		for (size_t i = 0; i < g_tab_idx; i++) {
+			if (g_tab1[i] == slot_nbr) {
+				dst->var_nbr = g_tab2[i];
+				break;
+			}
+		}
+
+		if (!found) {
+			dst->var_nbr = g_varno;
+			g_tab1[g_tab_idx] = slot_nbr;
+			g_tab2[g_tab_idx] = g_varno++;
+			g_tab_idx++;
+		}
+
+		dst->flags = FLAG_FRESH;
 	}
 
-	if (new_varno != g->nbr_vars) {
-		if (!create_vars(q, new_varno-g->nbr_vars)) {
+	if (g_varno != g->nbr_vars) {
+		if (!create_vars(q, g_varno-g->nbr_vars)) {
 			throw_error(q, p1, "resource_error", "too_many_vars");
 			return NULL;
 		}
@@ -4729,9 +4743,9 @@ static int fn_iso_functor_3(query *q)
 		}
 
 		unsigned arity = p3->val_num;
-		unsigned slot_nbr;
+		unsigned var_nbr;
 
-		if (!(slot_nbr = create_vars(q, arity))) {
+		if (!(var_nbr = create_vars(q, arity))) {
 			throw_error(q, p3, "resource_error", "too_many_vars");
 			return 0;
 		}
@@ -4745,7 +4759,7 @@ static int fn_iso_functor_3(query *q)
 		for (unsigned i = 1; i <= arity; i++) {
 			tmp[i].val_type = TYPE_VARIABLE;
 			tmp[i].nbr_cells = 1;
-			tmp[i].var_nbr = slot_nbr++;
+			tmp[i].var_nbr = var_nbr++;
 			tmp[i].val_off = g_anon_s;
 			tmp[i].flags = FLAG_FRESH;
 		}
@@ -5154,12 +5168,17 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 		}
 
 		sslot *s = &base[i];
-		cell tmp;
+		cell tmp ;
 		cell *c;
+
+		//printf("*** type=%u/%u\n", (unsigned)s->c->val_type, s->c->arity);
 
 		if (is_variable(s->c) || has_vars(q, s->c, s->ctx)) {
 			tmp = *s->orig_c;
+			tmp.val_off = g_anon_s;
 			tmp.flags = FLAG_FRESH;
+			tmp.nbr_cells = 1;
+			tmp.arity = 0;
 			frame *orig_g = GET_FRAME(s->orig_ctx);
 			slot *e = GET_SLOT(orig_g, s->orig_c->var_nbr);
 			idx_t slot_nbr = e - q->slots;
@@ -8990,9 +9009,9 @@ static int do_length(query *q)
 		return 0;
 	}
 
-	unsigned slot_nbr;
+	unsigned var_nbr;
 
-	if (!(slot_nbr = create_vars(q, nbr))) {
+	if (!(var_nbr = create_vars(q, nbr))) {
 		drop_choice(q);
 		throw_error(q, p1, "resource_error", "too_many_vars");
 		return 0;
@@ -9002,11 +9021,12 @@ static int do_length(query *q)
 	tmp.nbr_cells = 1;
 	tmp.flags = FLAG_FRESH;
 	tmp.val_off = g_anon_s;
-	tmp.var_nbr = slot_nbr++;
+	tmp.var_nbr = var_nbr++;
+	tmp.arity = 0;
 	alloc_list(q, &tmp);
 
 	for (int i = 1; i < nbr; i++) {
-		tmp.var_nbr = slot_nbr++;
+		tmp.var_nbr = var_nbr++;
 		append_list(q, &tmp);
 	}
 
@@ -9109,9 +9129,9 @@ static int fn_length_2(query *q)
 			return 1;
 		}
 
-		unsigned slot_nbr;
+		unsigned var_nbr;
 
-		if (!(slot_nbr = create_vars(q, nbr))) {
+		if (!(var_nbr = create_vars(q, nbr))) {
 			throw_error(q, p2, "resource_error", "too_many_vars");
 			return 0;
 		}
@@ -9119,13 +9139,14 @@ static int fn_length_2(query *q)
 		cell tmp;
 		tmp.val_type = TYPE_VARIABLE;
 		tmp.nbr_cells = 1;
+		tmp.arity = 0;
 		tmp.flags = FLAG_FRESH;
 		tmp.val_off = g_anon_s;
-		tmp.var_nbr = slot_nbr++;
+		tmp.var_nbr = var_nbr++;
 		alloc_list(q, &tmp);
 
 		for (int i = 1; i < nbr; i++) {
-			tmp.var_nbr = slot_nbr++;
+			tmp.var_nbr = var_nbr++;
 			append_list(q, &tmp);
 		}
 

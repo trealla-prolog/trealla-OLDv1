@@ -528,7 +528,7 @@ void make_indirect(cell *tmp, cell *c)
 unsigned create_vars(query *q, unsigned cnt)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
-	unsigned slot_nbr = g->nbr_vars;
+	unsigned var_nbr = g->nbr_vars;
 
 	if ((g->ctx + g->nbr_slots) >= q->st.sp) {
 		g->nbr_slots += cnt;
@@ -549,7 +549,7 @@ unsigned create_vars(query *q, unsigned cnt)
 	}
 
 	g->nbr_vars += cnt;
-	return slot_nbr;
+	return var_nbr;
 }
 
 void set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
