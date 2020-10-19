@@ -3196,4 +3196,3 @@ void pl_destroy(prolog *pl)
 		g_pool = NULL;
 	}
 }
-
