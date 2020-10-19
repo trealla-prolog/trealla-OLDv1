@@ -2307,29 +2307,26 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 		cell *h = list_head(l);
 		cell *c = q ? deref_var(q, h, save_ctx) : h;
 
-		if (is_atom(c)) {
-			const char *src = GET_STR(c);
-
-			if (len_char_utf8(src) != LEN_STR(c)) {
-				is_chars_list = 0;
-				break;
-			}
-
-			is_chars_list = 1;
-		} else {
+		if (!is_atom(c)) {
 			is_chars_list = 0;
 			break;
 		}
 
+		const char *src = GET_STR(c);
+
+		if (len_char_utf8(src) != LEN_STR(c)) {
+			is_chars_list = 0;
+			break;
+		}
+
+		is_chars_list = 1;
 		l = list_tail(l);
 		l = q ? deref_var(q, l, save_ctx) : l;
 		if (q) save_ctx = q->latest_ctx;
-
-		if (is_variable(l)) {
-			is_chars_list = 0;
-			break;
-		}
 	}
+
+	if (is_variable(l))
+		is_chars_list = 0;
 
 	if (q) q->latest_ctx = save_ctx;
 	return is_chars_list;
