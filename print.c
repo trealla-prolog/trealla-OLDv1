@@ -360,7 +360,10 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 			dst += snprintf(dst, dstlen, "%s", "[");
 
 		head = running ? deref_var(q, head, c_ctx) : head;
+		int parens = is_structure(head) && !strcmp(GET_STR(head), ",");
+		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
 		dst += write_term_to_buf(q, dst, dstlen, head, q->latest_ctx, running, 0, depth+1);
+		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
 		cell *tail = LIST_TAIL(c);
 		tail = running ? deref_var(q, tail, c_ctx) : tail;
 		c_ctx = q->latest_ctx;
