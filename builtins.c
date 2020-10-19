@@ -5099,7 +5099,7 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *arg)
 	return 0;
 }
 
-static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort, int bare_sort)
+static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g_varno = g->nbr_vars;
@@ -5157,7 +5157,7 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort, 
 		cell tmp;
 		cell *c;
 
-		if (bare_sort && (is_variable(s->c) || has_vars(q, s->c, s->ctx))) {
+		if (is_variable(s->c) || has_vars(q, s->c, s->ctx)) {
 			tmp = *s->orig_c;
 			tmp.flags = FLAG_FRESH;
 			frame *orig_g = GET_FRAME(s->orig_ctx);
@@ -5206,7 +5206,7 @@ static int fn_iso_sort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
-	cell *l = nodesort(q, p1, p1_ctx, 1, 0, 1);
+	cell *l = nodesort(q, p1, p1_ctx, 1, 0);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -5214,7 +5214,7 @@ static int fn_iso_keysort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
-	cell *l = nodesort(q, p1, p1_ctx, 0, 1, 1);
+	cell *l = nodesort(q, p1, p1_ctx, 0, 1);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -5586,7 +5586,7 @@ static int fn_iso_setof_3(query *q)
 
 	unpin_vars(q);
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
-	l = nodesort(q, l, q->st.curr_frame, 1, 0, 0);
+	l = nodesort(q, l, q->st.curr_frame, 1, 0);
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
@@ -7186,7 +7186,7 @@ static int fn_msort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
-	cell *l = nodesort(q, p1, p1_ctx, 0, 0, 1);
+	cell *l = nodesort(q, p1, p1_ctx, 0, 0);
 	return unify(q, p2, p2_ctx, l, p1_ctx);
 }
 
