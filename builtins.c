@@ -3549,7 +3549,7 @@ static int fn_iso_neg_1(query *q)
 	return 1;
 }
 
-static int ctsring_cmp(const char *s1, size_t len1, const char *s2, size_t len2)
+static int cstring_cmp(const char *s1, size_t len1, const char *s2, size_t len2)
 {
 	size_t len = len1 < len2 ? len1 : len2;
 	int val = memcmp(s1, s2, len);
@@ -3611,7 +3611,7 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 
 	if (is_iso_atom(p1)) {
 		if (is_iso_atom(p2))
-			return ctsring_cmp(GET_STR(p1), LEN_STR(p1), GET_STR(p2), LEN_STR(p2));
+			return cstring_cmp(GET_STR(p1), LEN_STR(p1), GET_STR(p2), LEN_STR(p2));
 
 		if (is_variable(p2) || is_number(p2))
 			return 1;
@@ -5009,7 +5009,7 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *arg)
 			return 1;
 	} else if (is_atom(p1)) {
 		if (is_atom(p2))
-			return strcmp(GET_STR(p1), GET_STR(p2));
+			return cstring_cmp(GET_STR(p1), LEN_STR(p1), GET_STR(p2), LEN_STR(p2));
 		else if (is_structure(p2))
 			return -1;
 		else
