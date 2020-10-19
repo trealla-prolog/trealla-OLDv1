@@ -5116,7 +5116,7 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 		cnt++;
 	}
 
-	sslot *base = malloc(sizeof(slot)*cnt);
+	sslot *base = malloc(sizeof(sslot)*cnt);
 	size_t idx = 0;
 	save_p1_ctx = p1_ctx;
 	l = p1;
