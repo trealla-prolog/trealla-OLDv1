@@ -4490,6 +4490,24 @@ int call_me(query *q, cell *p1)
 		return 0;
 	}
 
+	static const char *fudge = ",;->";
+
+	if (is_structure(p1) && is_op(p1) && strstr(fudge,GET_STR(p1))) {
+		unsigned arity = p1->arity;
+		cell *p = p1 + 1;
+
+		while (arity--) {
+			cell *arg = deref_var(q, p, p1_ctx);
+
+			if (!is_callable(arg)) {
+				throw_error(q, arg, "type_error", "callable");
+				return 0;
+			}
+
+			p += p->nbr_cells;
+		}
+	}
+
 	cell *tmp;
 
 	if (p1_ctx != q->st.curr_frame) {
@@ -5174,7 +5192,9 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 
 		//printf("*** type=%u/%u\n", (unsigned)s->c->val_type, s->c->arity);
 
-		if (is_variable(s->c) || has_vars(q, s->c, s->ctx)) {
+		int rebase = is_variable(s->c) || has_vars(q, s->c, s->ctx);
+
+		if (rebase && (s->ctx != q->st.curr_frame)) {
 			tmp = *s->orig_c;
 			tmp.val_off = g_anon_s;
 			tmp.flags = FLAG_FRESH;
