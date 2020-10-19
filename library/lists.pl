@@ -1,7 +1,7 @@
 :- module(lists, [
 	member/2, memberchk/2, select/3, selectchk/3, subtract/3, union/3,
 	intersection/3, reverse/2, append/3, nth/3, nth1/3, nth0/3,
-	merge/3
+	merge/3, last/2, flatten/2
 	]).
 
 member(X, [X|_]).
@@ -41,6 +41,28 @@ nth1(N, [_|T], H) :- nth1(M, T, H), N is M + 1.
 
 nth0(0, [H|_], H).
 nth0(N, [_|T], H) :- nth0(M, T, H), N is M + 1.
+
+last([X|Xs], Last) :-
+    last(Xs, X, Last).
+
+last([], Last, Last).
+last([X|Xs], _, Last) :-
+    last(Xs, X, Last).
+
+flatten(List, FlatList) :-
+    flatten(List, [], FlatList0),
+    !,
+    FlatList = FlatList0.
+
+flatten(Var, Tl, [Var|Tl]) :-
+    var(Var),
+    !.
+flatten([], Tl, Tl) :- !.
+flatten([Hd|Tl], Tail, List) :-
+    !,
+    flatten(Hd, FlatHeadTail, List),
+    flatten(Tl, Tail, FlatHeadTail).
+flatten(NonList, Tl, [NonList|Tl]).
 
 merge([],[],[]).
 merge([X],[],[X]).

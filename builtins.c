@@ -431,11 +431,11 @@ static cell make_string(query *q, const char *s, size_t n)
 
 static unsigned g_varno;
 static size_t g_tab_idx;
+static idx_t g_tab1[64000];
+static unsigned g_tab2[64000];
 
 static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
-	static idx_t g_tab1[64000];
-	static unsigned g_tab2[64000];
 	idx_t save_idx = tmp_heap_used(q);
 	p1 = deref_var(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
@@ -688,14 +688,16 @@ static int has_vars(query *q, cell *c, idx_t c_ctx)
 	if (is_variable(c))
 		return 1;
 
-	idx_t nbr = c->nbr_cells;
+	unsigned arity = c->arity;
 	c++;
 
-	for (idx_t i = 1; i < nbr; i++, c++) {
+	while (arity--) {
 		cell *c2 = deref_var(q, c, c_ctx);
 
 		if (has_vars(q, c2, q->latest_ctx))
 			return 1;
+
+		c += c->nbr_cells;
 	}
 
 	return 0;
@@ -3585,33 +3587,43 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 			return p1_slot < p2_slot ? -1 : p1_slot > p2_slot ? 1 : 0;
 		}
 
-		return 0;
+		throw_error(q, p1, "type_error", "any");
+		return -1;
 	}
 
-	while (is_list(p1) && is_list(p2)) {
-		cell *h1 = LIST_HEAD(p1);
-		h1 = deref_var(q, h1, p1_ctx);
-		idx_t tmp1_ctx = q->latest_ctx;
-		cell *h2 = LIST_HEAD(p2);
-		h2 = deref_var(q, h2, p2_ctx);
-		idx_t tmp2_ctx = q->latest_ctx;
-
-		int val = compare(q, h1, tmp1_ctx, h2, tmp2_ctx, depth+1);
-		if (val) return val;
-
-		p1 = LIST_TAIL(p1);
-		p1 = deref_var(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-		p2 = LIST_TAIL(p2);
-		p2 = deref_var(q, p2, p2_ctx);
-		p2_ctx = q->latest_ctx;
-	}
+	if (is_string(p1) && is_string(p2))
+		return strcmp(GET_STR(p1), GET_STR(p2));
 
 	if (p1->arity < p2->arity)
 		return -1;
 
 	if (p1->arity > p2->arity)
 		return 1;
+
+#if 0
+	if (is_iso_list(p1) && is_iso_list(p2)) {
+		while (is_list(p1) && is_list(p2)) {
+			cell *h1 = LIST_HEAD(p1);
+			h1 = deref_var(q, h1, p1_ctx);
+			idx_t tmp1_ctx = q->latest_ctx;
+			cell *h2 = LIST_HEAD(p2);
+			h2 = deref_var(q, h2, p2_ctx);
+			idx_t tmp2_ctx = q->latest_ctx;
+
+			int val = compare(q, h1, tmp1_ctx, h2, tmp2_ctx, depth+1);
+			if (val) return val;
+
+			p1 = LIST_TAIL(p1);
+			p1 = deref_var(q, p1, p1_ctx);
+			p1_ctx = q->latest_ctx;
+			p2 = LIST_TAIL(p2);
+			p2 = deref_var(q, p2, p2_ctx);
+			p2_ctx = q->latest_ctx;
+		}
+
+		return 0;
+	}
+#endif
 
 	int val = strcmp(GET_STR(p1), GET_STR(p2));
 	if (val) return val;
@@ -4894,15 +4906,29 @@ static int fn_iso_set_prolog_flag_2(query *q)
 	return 1;
 }
 
+typedef struct {
+	cell *c, *orig_c;
+	idx_t ctx, orig_ctx;
+}
+ sslot;
+
 #ifdef __FreeBSD__
-static int nodecmp(void *thunk, const void *ptr1, const void *ptr2)
+static int nodecmp(void *arg, const void *ptr1, const void *ptr2)
 #else
-static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
+static int nodecmp(const void *ptr1, const void *ptr2, void *arg)
 #endif
 {
-	const cell *p1 = *(const cell**)ptr1;
-	const cell *p2 = *(const cell**)ptr2;
-	int keysort = (int)(long)thunk;
+	const sslot *s1 = (const sslot*)ptr1;
+	const sslot *s2 = (const sslot*)ptr2;
+	cell *p1 = s1->c; idx_t p1_ctx = s1->ctx;
+	cell *p2 = s2->c; idx_t p2_ctx = s2->ctx;
+	query *q = (query*)arg;
+	int keysort = q->keysort;
+
+	p1 = deref_var(q, p1, p1_ctx);
+	p1_ctx = q->latest_ctx;
+	p2 = deref_var(q, p2, p2_ctx);
+	p2_ctx = q->latest_ctx;
 
 	if (is_rational(p1)) {
 		if (is_rational(p2)) {
@@ -4954,9 +4980,11 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 		else
 			return 1;
 	} else if (is_variable(p1)) {
-		if (is_variable(p2))
-			return p1->var_nbr < p2->var_nbr ? -1 : p1->var_nbr > p2->var_nbr ? 1 : 0;
-		else
+		if (is_variable(p2)) {
+			idx_t slot1 = p1_ctx + p1->var_nbr;
+			idx_t slot2 = p2_ctx + p2->var_nbr;
+			return slot1 < slot2 ? -1 : slot1 > slot2 ? 1 : 0;
+		} else
 			return -1;
 	} else if (is_structure(p1)) {
 		if (is_structure(p2)) {
@@ -4975,11 +5003,21 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 			p1++; p2++;
 
 			while (arity--) {
+				sslot s1, s2;
+				s1.ctx = p1_ctx;
+				s1.c = p1;
+				s2.ctx = p2_ctx;
+				s2.c = p2;
+
+				unsigned save_keysort = q->keysort;
+				q->keysort = 0;
+
 #ifdef __FreeBSD__
-				int i = nodecmp(NULL, &p1, &p2);
+				int i = nodecmp(q, &s1, &s2);
 #else
-				int i = nodecmp(&p1, &p2, NULL);
+				int i = nodecmp(&s1, &s2, q);
 #endif
+				q->keysort = save_keysort ? 1 : 0;
 
 				if (i != 0)
 					return i;
@@ -4999,49 +5037,103 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 
 static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 {
-	cell *p = deep_clone_to_heap(q, p1, p1_ctx);
+	frame *g = GET_FRAME(q->st.curr_frame);
+	g_varno = g->nbr_vars;
+	g_tab_idx = 0;
+	cell *l = p1;
+	idx_t save_p1_ctx = p1_ctx;
 	size_t cnt = 0;
-	cell *l = p;
 
 	while (is_list(l)) {
 		LIST_HEAD(l);
 		l = LIST_TAIL(l);
+		l = deref_var(q, l, save_p1_ctx);
+		save_p1_ctx = q->latest_ctx;
 		cnt++;
 	}
 
-	cell **base = malloc(sizeof(cell*)*cnt);
+	sslot *base = malloc(sizeof(slot)*cnt);
 	size_t idx = 0;
-	l = p;
+	save_p1_ctx = p1_ctx;
+	l = p1;
 
 	while (is_list(l)) {
 		cell *h = LIST_HEAD(l);
-		base[idx++] = h;
+		sslot s;
+		s.orig_c = h;
+		s.orig_ctx = save_p1_ctx;
+		h = deref_var(q, h, save_p1_ctx);
+		s.c = h;
+		s.ctx = q->latest_ctx;
+		base[idx++] = s;
 		l = LIST_TAIL(l);
+		l = deref_var(q, l, save_p1_ctx);
+		save_p1_ctx = q->latest_ctx;
 	}
 
+	q->keysort = keysort ? 1 : 0;
+
 #ifdef __FreeBSD__
-	qsort_r(base, cnt, sizeof(cell*), (void*)(long)keysort, nodecmp);
+	qsort_r(base, cnt, sizeof(sslot), q, nodecmp);
 #else
-	qsort_r(base, cnt, sizeof(cell*), nodecmp, (void*)(long)keysort);
+	qsort_r(base, cnt, sizeof(sslot), nodecmp, q);
 #endif
 
 	for (size_t i = 0; i < cnt; i++) {
 		if ((i > 0) && dedup) {
 #ifdef __FreeBSD__
-			if (!nodecmp((void*)(long)keysort, &base[i], &base[i-1]))
+			if (!nodecmp(q, &base[i], &base[i-1]))
 #else
-			if (!nodecmp(&base[i], &base[i-1], (void*)(long)keysort))
+			if (!nodecmp(&base[i], &base[i-1], q))
 #endif
 				continue;
 		}
 
+		sslot *s = &base[i];
+		cell tmp;
+		cell *c;
+
+		if (is_variable(s->c) || has_vars(q, s->c, s->ctx)) {
+			tmp = *s->orig_c;
+			tmp.flags = FLAG_FRESH;
+			frame *orig_g = GET_FRAME(s->orig_ctx);
+			slot *e = GET_SLOT(orig_g, s->orig_c->var_nbr);
+			idx_t slot_nbr = e - q->slots;
+			int found = 0;
+
+			for (size_t i = 0; i < g_tab_idx; i++) {
+				if (g_tab1[i] == slot_nbr) {
+					tmp.var_nbr = g_tab2[i];
+					found = 1;
+					break;
+				}
+			}
+
+			if (!found) {
+				tmp.var_nbr = g_varno;
+				g_tab1[g_tab_idx] = slot_nbr;
+				g_tab2[g_tab_idx] = g_varno++;
+				g_tab_idx++;
+
+				create_vars(q, 1);
+				slot *e = GET_SLOT(g, tmp.var_nbr);
+				e->ctx = s->orig_ctx;
+				e->c = *s->orig_c;
+			}
+
+			c = &tmp;
+		} else {
+			c = s->c;
+		}
+
 		if (i == 0)
-			alloc_list(q, base[i]);
+			alloc_list(q, c);
 		else
-			append_list(q, base[i]);
+			append_list(q, c);
 	}
 
 	l = end_list(q);
+	fix_list(l);
 	free(base);
 	return l;
 }
@@ -7031,7 +7123,7 @@ static int fn_msort_2(query *q)
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	cell *l = nodesort(q, p1, p1_ctx, 0, 0);
-	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
+	return unify(q, p2, p2_ctx, l, p1_ctx);
 }
 
 static int do_consult(query *q, cell *p1, idx_t p1_ctx)

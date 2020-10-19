@@ -313,6 +313,7 @@ struct query_ {
 	uint8_t retry, halt_code, status;
 	uint8_t current_input, current_output;
 	int8_t quoted;
+	unsigned keysort:1;
 	unsigned resume:1;
 	unsigned no_tco:1;
 	unsigned error:1;

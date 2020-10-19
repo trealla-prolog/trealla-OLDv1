@@ -7,6 +7,6 @@ main :-
     writeln(ListSorted),
     halt.
 
-prepare([A,B]) :-
+prepare([B,A]) :-
     A =.. [pair,2,X],
     B =.. [trio,3,Y,Z].

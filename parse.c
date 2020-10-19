@@ -2909,56 +2909,44 @@ module *create_module(const char *name)
 		"'$setof'(T,G,B)=TMP_G.");
 
 	make_rule(m, "call(G,P1) :- "							\
-		"copy_term(G,TMP_G), G=TMP_G,"						\
-		"copy_term(P1,TMP_P1), P1=TMP_P1,"					\
-		"'$calln'(TMP_G,TMP_P1).");
+		"copy_term('$calln'(G,P1),TMP_G),"					\
+		"'$calln'(G,P1)=TMP_G,"								\
+		"TMP_G.");
 
 	make_rule(m, "call(G,P1,P2) :- "						\
-		"copy_term(G,TMP_G), G=TMP_G,"						\
-		"copy_term(P1,TMP_P1), P1=TMP_P1,"					\
-		"copy_term(P2,TMP_P2), P2=TMP_P2,"					\
-		"'$calln'(TMP_G,TMP_P1,TMP_P2).");
+		"copy_term('$calln'(G,P1,P2),TMP_G),"				\
+		"'$calln'(G,P1,P2)=TMP_G,"							\
+		"TMP_G.");
 
 	make_rule(m, "call(G,P1,P2,P3) :- "						\
-		"copy_term(G,TMP_G), G=TMP_G,"						\
-		"copy_term(P1,TMP_P1), P1=TMP_P1,"					\
-		"copy_term(P2,TMP_P2), P2=TMP_P2,"					\
-		"copy_term(P3,TMP_P3), P3=TMP_P3,"					\
-		"'$calln'(TMP_G,TMP_P1,TMP_P2,TMP_P3).");
+		"copy_term('$calln'(G,P1,P2,P3),TMP_G),"			\
+		"'$calln'(G,P1,P2,P3)=TMP_G,"						\
+		"TMP_G.");
 
 	make_rule(m, "call(G,P1,P2,P3,P4) :- "					\
-		"copy_term(G,TMP_G), G=TMP_G,"						\
-		"copy_term(P1,TMP_P1), P1=TMP_P1,"					\
-		"copy_term(P2,TMP_P2), P2=TMP_P2,"					\
-		"copy_term(P3,TMP_P3), P3=TMP_P3,"					\
-		"copy_term(P4,TMP_P4), P4=TMP_P4,"					\
-		"'$calln'(TMP_G,TMP_P1,TMP_P2,TMP_P3,TMP_P4).");
+		"copy_term('$calln'(G,P1,P2,P3,P4),TMP_G),"			\
+		"'$calln'(G,P1,P2,P3,P4)=TMP_G,"					\
+		"TMP_G.");
 
 	make_rule(m, "spawn(G,P1) :- "							\
-		"copy_term(G,TMP_G), G=TMP_G,"						\
-		"copy_term(P1,TMP_P1), P1=TMP_P1,"					\
-		"'$spawnn'(TMP_G,TMP_P1).");
+		"copy_term('$spawnn'(G,P1),TMP_G),"					\
+		"'$spawnn'(G,P1)=TMP_G,"							\
+		"TMP_G.");
 
 	make_rule(m, "spawn(G,P1,P2) :- "						\
-		"copy_term(G,TMP_G), G=TMP_G,"						\
-		"copy_term(P1,TMP_P1), P1=TMP_P1,"					\
-		"copy_term(P2,TMP_P2), P2=TMP_P2,"					\
-		"'$spawnn'(TMP_G,TMP_P1,TMP_P2).");
+		"copy_term('$spawnn'(G,P1,P2),TMP_G),"				\
+		"'$spawnn'(G,P1,P2)=TMP_G,"							\
+		"TMP_G.");
 
-	make_rule(m, "spawn(G,P1,P2,P3) :- "						\
-		"copy_term(G,TMP_G), G=TMP_G,"						\
-		"copy_term(P1,TMP_P1), P1=TMP_P1,"					\
-		"copy_term(P2,TMP_P2), P2=TMP_P2,"					\
-		"copy_term(P3,TMP_P3), P3=TMP_P3,"					\
-		"'$spawnn'(TMP_G,TMP_P1,TMP_P2,TMP_P3).");
+	make_rule(m, "spawn(G,P1,P2,P3) :- "					\
+		"copy_term('$spawnn'(G,P1,P2,P3),TMP_G),"			\
+		"'$spawnn'(G,P1,P2,P3)=TMP_G,"						\
+		"TMP_G.");
 
 	make_rule(m, "spawn(G,P1,P2,P3,P4) :- "					\
-		"copy_term(G,TMP_G), G=TMP_G,"						\
-		"copy_term(P1,TMP_P1), P1=TMP_P1,"					\
-		"copy_term(P2,TMP_P2), P2=TMP_P2,"					\
-		"copy_term(P3,TMP_P3), P3=TMP_P3,"					\
-		"copy_term(P4,TMP_P4), P4=TMP_P4,"					\
-		"'$spawnn'(TMP_G,TMP_P1,TMP_P2,TMP_P3,TMP_P4).");
+		"copy_term('$spawnn'(G,P1,P2,P3,P4),TMP_G),"		\
+		"'$spawnn'(G,P1,P2,P3,P4)=TMP_G,"					\
+		"TMP_G.");
 
 	make_rule(m, "phrase_from_file(P, Filename) :- "		\
 		"open(Filename, read, Str, [mmap(Ms)]),"			\

@@ -130,31 +130,6 @@ static void check_slot(query *q, unsigned cnt)
 	}
 }
 
-unsigned create_vars(query *q, unsigned cnt)
-{
-	frame *g = GET_FRAME(q->st.curr_frame);
-	unsigned slot_nbr = g->nbr_vars;
-
-	if ((g->ctx + g->nbr_slots) >= q->st.sp) {
-		g->nbr_slots += cnt;
-		q->st.sp = g->ctx + g->nbr_slots;
-	} else {
-		assert(!g->overflow);
-		g->overflow = q->st.sp;
-		q->st.sp += cnt;
-	}
-
-	check_slot(q, cnt);
-
-	for (int i = 0; i < cnt; i++) {
-		slot *e = GET_SLOT(g, g->nbr_vars+i);
-		e->c.val_type = TYPE_EMPTY;
-	}
-
-	g->nbr_vars += cnt;
-	return slot_nbr;
-}
-
 static void trace_call(query *q, cell *c, int box)
 {
 	if (!c->fn)
@@ -548,6 +523,33 @@ void make_indirect(cell *tmp, cell *c)
 	tmp->arity = 0;
 	tmp->flags = 0;
 	tmp->val_ptr = c;
+}
+
+unsigned create_vars(query *q, unsigned cnt)
+{
+	frame *g = GET_FRAME(q->st.curr_frame);
+	unsigned slot_nbr = g->nbr_vars;
+
+	if ((g->ctx + g->nbr_slots) >= q->st.sp) {
+		g->nbr_slots += cnt;
+		q->st.sp = g->ctx + g->nbr_slots;
+	} else if (!g->overflow) {
+		g->overflow = q->st.sp;
+		q->st.sp += cnt;
+	} else {
+		assert((g->overflow + (g->nbr_vars-g->nbr_slots)) == q->st.sp);
+		q->st.sp += cnt;
+	}
+
+	check_slot(q, cnt);
+
+	for (int i = 0; i < cnt; i++) {
+		slot *e = GET_SLOT(g, g->nbr_vars+i);
+		e->c.val_type = TYPE_EMPTY;
+	}
+
+	g->nbr_vars += cnt;
+	return slot_nbr;
 }
 
 void set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
