@@ -4958,114 +4958,140 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *arg)
 	cell *p1 = s1->c; idx_t p1_ctx = s1->ctx;
 	cell *p2 = s2->c; idx_t p2_ctx = s2->ctx;
 	query *q = (query*)arg;
-	int keysort = q->keysort;
 
 	p1 = deref_var(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
 	p2 = deref_var(q, p2, p2_ctx);
 	p2_ctx = q->latest_ctx;
 
+	if (is_variable(p1)) {
+		if (is_variable(p2)) {
+			frame *g1 = GET_FRAME(p1_ctx);
+			frame *g2 = GET_FRAME(p2_ctx);
+			idx_t p1_slot = GET_SLOT(g1,p1->var_nbr) - q->slots;
+			idx_t p2_slot = GET_SLOT(g2,p2->var_nbr) - q->slots;
+			return p1_slot < p2_slot ? -1 : p1_slot > p2_slot ? 1 : 0;
+		}
+
+		return -1;
+	}
+
 	if (is_rational(p1)) {
 		if (is_rational(p2)) {
 			cell tmp1 = *p1, tmp2 = *p2;
 			tmp1.val_num *= tmp2.val_den;
 			tmp2.val_num *= tmp1.val_den;
-			if (tmp1.val_num < tmp2.val_num)
-				return -1;
-			else if (tmp1.val_num > tmp2.val_num)
-				return 1;
-			else
-				return 0;
-		} else if (is_float(p2)) {
-			if (((double)p1->val_num/p1->val_den) < p2->val_flt)
-				return -1;
-			else if (((double)p1->val_num/p1->val_den) > p2->val_flt)
-				return 1;
-			else
-				return 0;
-		} else if (is_atom(p2))
-			return -1;
-		else if (is_variable(p2))
+			return tmp1.val_num < tmp2.val_num ? -1 : tmp1.val_num > tmp2.val_num ? 1 : 0;
+		}
+
+		if (is_float(p2))
 			return 1;
+
+		if (is_variable(p2))
+			return 1;
+
+		return -1;
 	}
-	else if (is_float(p1)) {
-		if (is_rational(p2)) {
-			if (p1->val_flt < ((double)p2->val_num/p2->val_den))
-				return -1;
-			else if (p1->val_flt > ((double)p2->val_num/p2->val_den))
-				return 1;
-			else
-				return 0;
-		} else if (is_float(p2)) {
-			if (p1->val_flt < p2->val_flt)
-				return -1;
-			else if (p1->val_flt > p2->val_flt)
-				return 1;
-			else
-				return 0;
-		} else if (is_atom(p2))
-			return -1;
-		else if (is_variable(p2))
+
+	if (is_float(p1)) {
+		if (is_float(p2))
+			return p1->val_flt < p2->val_flt ? -1 : p1->val_flt > p2->val_flt ? 1 : 0;
+
+		if (is_variable(p2))
 			return 1;
-	} else if (is_atom(p1)) {
-		if (is_atom(p2))
+
+		return -1;
+	}
+
+	if (is_iso_atom(p1)) {
+		if (is_iso_atom(p2))
 			return cstring_cmp(GET_STR(p1), LEN_STR(p1), GET_STR(p2), LEN_STR(p2));
-		else if (is_structure(p2))
-			return -1;
-		else
+
+		if (is_variable(p2) || is_number(p2))
 			return 1;
-	} else if (is_variable(p1)) {
-		if (is_variable(p2)) {
-			idx_t slot1 = p1_ctx + p1->var_nbr;
-			idx_t slot2 = p2_ctx + p2->var_nbr;
-			return slot1 < slot2 ? -1 : slot1 > slot2 ? 1 : 0;
-		} else
-			return -1;
-	} else if (is_structure(p1)) {
-		if (is_structure(p2)) {
-			if (p1->arity < p2->arity)
-				return -1;
 
-			if (p1->arity > p2->arity)
-				return 1;
+		return -1;
+	}
 
-			int i = strcmp(GET_STR(p1), GET_STR(p2));
+	assert(p1->val_type && p2->val_type);
+	assert((p1->val_type != TYPE_END) && (p2->val_type != TYPE_END));
 
-			if (i != 0)
-				return i;
+	if (p1->arity < p2->arity)
+		return -1;
 
-			int arity = !keysort ? p1->arity : 1;
-			p1++; p2++;
+	if (p1->arity > p2->arity)
+		return 1;
 
-			while (arity--) {
-				sslot s1, s2;
-				s1.ctx = p1_ctx;
-				s1.c = p1;
-				s2.ctx = p2_ctx;
-				s2.c = p2;
+	if (is_list(p1) && is_list(p2)) {
+		while (is_list(p1) && is_list(p2)) {
+			cell *h1 = LIST_HEAD(p1);
+			h1 = deref_var(q, h1, p1_ctx);
+			idx_t h1_ctx = q->latest_ctx;
+			cell *h2 = LIST_HEAD(p2);
+			h2 = deref_var(q, h2, p2_ctx);
+			idx_t h2_ctx = q->latest_ctx;
 
-				unsigned save_keysort = q->keysort;
-				q->keysort = 0;
+			sslot s1, s2;
+			s1.ctx = h1_ctx;
+			s1.c = h1;
+			s2.ctx = h2_ctx;
+			s2.c = h2;
 
 #ifdef __FreeBSD__
-				int i = nodecmp(q, &s1, &s2);
+			int val = nodecmp(q, &s1, &s2);
 #else
-				int i = nodecmp(&s1, &s2, q);
+			int val = nodecmp(&s1, &s2, q);
 #endif
-				q->keysort = save_keysort ? 1 : 0;
 
-				if (i != 0)
-					return i;
+			if (val) return val;
 
-				p1 += p1->nbr_cells;
-				p2 += p2->nbr_cells;
-			}
+			p1 = LIST_TAIL(p1);
+			p1 = deref_var(q, p1, p1_ctx);
+			p1_ctx = q->latest_ctx;
+			p2 = LIST_TAIL(p2);
+			p2 = deref_var(q, p2, p2_ctx);
+			p2_ctx = q->latest_ctx;
+		}
 
-			return 0;
-		} else
+		if (is_list(p1))
 			return 1;
-	} else
+
+		if (is_list(p2))
+			return -1;
+
 		return 0;
+	}
+
+	int val = strcmp(GET_STR(p1), GET_STR(p2));
+	if (val) return val;
+
+	int arity = p1->arity;
+	p1 = p1 + 1;
+	p2 = p2 + 1;
+
+	while (arity--) {
+		cell *h1 = deref_var(q, p1, p1_ctx);
+		idx_t h1_ctx = q->latest_ctx;
+		cell *h2 = deref_var(q, p2, p2_ctx);
+		idx_t h2_ctx = q->latest_ctx;
+
+		sslot s1, s2;
+		s1.ctx = h1_ctx;
+		s1.c = h1;
+		s2.ctx = h2_ctx;
+		s2.c = h2;
+
+#ifdef __FreeBSD__
+		int val = nodecmp(q, &s1, &s2);
+#else
+		int val = nodecmp(&s1, &s2, q);
+#endif
+
+		if (val) return val;
+
+		p1 += p1->nbr_cells;
+		p2 += p2->nbr_cells;
+	}
 
 	return 0;
 }
