@@ -691,6 +691,9 @@ static int has_vars(query *q, cell *c, idx_t c_ctx)
 	if (is_variable(c))
 		return 1;
 
+	if (!is_structure(c))
+		return 0;
+
 	unsigned arity = c->arity;
 	c++;
 
