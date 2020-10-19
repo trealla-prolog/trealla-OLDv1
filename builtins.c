@@ -3554,31 +3554,6 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 	}
 
 	if (p1->arity == 0) {
-		if (is_atom(p1) && is_atom(p2))
-			return strcmp(GET_STR(p1), GET_STR(p2));
-
-		if (is_rational(p1) && is_rational(p2)) {
-			cell tmp1 = *p1, tmp2 = *p2;
-			tmp1.val_num *= tmp2.val_den;
-			tmp2.val_num *= tmp1.val_den;
-			return tmp1.val_num < tmp2.val_num ? -1 : tmp1.val_num > tmp2.val_num ? 1 : 0;
-		}
-
-		if (is_float(p1) && is_float(p2))
-			return p1->val_flt < p2->val_flt ? -1 : p1->val_flt > p2->val_flt ? 1 : 0;
-
-		if (is_rational(p1) && is_float(p2))
-			return rat_to_float(p1) < p2->val_flt ? -1 : rat_to_float(p1) > p2->val_flt ? 1 : 0;
-
-		if (is_float(p1) && is_rational(p2))
-			return rat_to_float(p2) < p1->val_flt ? -1 : rat_to_float(p2) > p1->val_flt ? 1 : 0;
-
-		if (is_variable(p1) && !is_variable(p2))
-			return -1;
-
-		if (!is_variable(p1) && is_variable(p2))
-			return 1;
-
 		if (is_variable(p1) && is_variable(p2)) {
 			frame *g1 = GET_FRAME(p1_ctx);
 			frame *g2 = GET_FRAME(p2_ctx);
@@ -3587,7 +3562,38 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 			return p1_slot < p2_slot ? -1 : p1_slot > p2_slot ? 1 : 0;
 		}
 
-		throw_error(q, p1, "type_error", "any");
+		if (is_rational(p1) && is_rational(p2)) {
+			cell tmp1 = *p1, tmp2 = *p2;
+			tmp1.val_num *= tmp2.val_den;
+			tmp2.val_num *= tmp1.val_den;
+			return tmp1.val_num < tmp2.val_num ? -1 : tmp1.val_num > tmp2.val_num ? 1 : 0;
+		}
+
+		if (is_rational(p1) && is_float(p2))
+			return rat_to_float(p1) < p2->val_flt ? -1 : rat_to_float(p1) > p2->val_flt ? 1 : 0;
+
+		if (is_float(p1) && is_float(p2))
+			return p1->val_flt < p2->val_flt ? -1 : p1->val_flt > p2->val_flt ? 1 : 0;
+
+		if (is_float(p1) && is_rational(p2))
+			return rat_to_float(p2) < p1->val_flt ? -1 : rat_to_float(p2) > p1->val_flt ? 1 : 0;
+
+		if (is_atom(p1) && is_atom(p2))
+			return strcmp(GET_STR(p1), GET_STR(p2));
+
+		if (is_variable(p1))
+			return -1;
+
+		if (is_atom(p1))
+			return 1;
+
+		if (is_rational(p1))
+			return 1;
+
+		if (is_float(p1))
+			return 1;
+
+		throw_error(q, p1, "type_error", "unknown_type");
 		return -1;
 	}
 

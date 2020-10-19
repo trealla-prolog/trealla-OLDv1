@@ -3106,8 +3106,8 @@ prolog *pl_create()
 		g_pool_offset = 0;
 	}
 
-	g_true_s = find_in_pool("true");
 	g_false_s = find_in_pool("false");
+	g_true_s = find_in_pool("true");
 	g_empty_s = find_in_pool("");
 	g_anon_s = find_in_pool("_");
 	g_dot_s = find_in_pool(".");
