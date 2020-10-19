@@ -432,6 +432,7 @@ static cell make_string(query *q, const char *s, size_t n)
 	return tmp;
 }
 
+// TO-DO: clean this up...
 static unsigned g_varno;
 static size_t g_tab_idx;
 static idx_t g_tab1[64000];
