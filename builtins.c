@@ -5240,6 +5240,7 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 	return l;
 }
 
+#if 0
 static int fn_iso_sort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
@@ -5247,6 +5248,7 @@ static int fn_iso_sort_2(query *q)
 	cell *l = nodesort(q, p1, p1_ctx, 1, 0);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
+#endif
 
 static int fn_iso_keysort_2(query *q)
 {
@@ -7220,6 +7222,7 @@ static int fn_rand_1(query *q)
 	return 1;
 }
 
+#if 0
 static int fn_msort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
@@ -7227,6 +7230,7 @@ static int fn_msort_2(query *q)
 	cell *l = nodesort(q, p1, p1_ctx, 0, 0);
 	return unify(q, p2, p2_ctx, l, p1_ctx);
 }
+#endif
 
 static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 {
@@ -9476,10 +9480,10 @@ static const struct builtins g_iso_funcs[] =
 	{"$bagof", 3, fn_iso_bagof_3, NULL},
 	{"$setof", 3, fn_iso_setof_3, NULL},
 
-	{"$old_msort", 2, fn_msort_2, NULL},
-	{"$old_sort", 2, fn_iso_sort_2, NULL},
-
-	//
+#if 0
+	{"sort", 2, fn_iso_sort_2, NULL},
+	{"msort", 2, fn_msort_2, NULL},
+#endif
 
 	{"use_module", 1, fn_use_module_1, NULL},
 	{"module", 1, fn_module_1, NULL},
