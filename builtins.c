@@ -5187,6 +5187,8 @@ static cell *skip_existentials(const query *q, cell *p2, uint32_t *xs)
 	while (is_structure(p2) && !strcmp(GET_STR(p2), "^")) {
 		cell *c = p2 + 1;
 
+		assert(c->var_nbr < 32);
+
 		if (is_variable(c))
 			*xs |= 1 << c->var_nbr;
 
