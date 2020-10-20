@@ -2945,11 +2945,11 @@ module *create_module(const char *name)
 		"compare(Delta, H1, H2), !, "						\
 		"mmerge(Delta, H1, H2, T1, T2, Result).");
 
-	make_rule(m, "mmerge(>, H1, H2, T1, T2, [H2|R]) :- "		\
+	make_rule(m, "mmerge(>, H1, H2, T1, T2, [H2|R]) :- "	\
 		"mmerge([H1|T1], T2, R).");
-	make_rule(m, "mmerge(=, H1, H2, T1, T2, [H1|R]) :- "		\
+	make_rule(m, "mmerge(=, H1, H2, T1, T2, [H1|R]) :- "	\
 		"mmerge(T1, [H2|T2], R).");
-	make_rule(m, "mmerge(<, H1, H2, T1, T2, [H1|R]) :- "		\
+	make_rule(m, "mmerge(<, H1, H2, T1, T2, [H1|R]) :- "	\
 		"mmerge(T1, [H2|T2], R).");
 
 	make_rule(m, "msort(L, R) :- "							\
@@ -2966,6 +2966,27 @@ module *create_module(const char *name)
 		"plus(N1, N2, N), "									\
 		"msort(N1, L1, L2, R1), "							\
 		"msort(N2, L2, L3, R2), "							\
+		"mmerge(R1, R2, R).");
+
+	make_rule(m, "keycompare(Delta, (K1-_), (K2-_)) :- "	\
+		"(K1 @< K2 -> Delta = '<' ; "						\
+		"(K1 @> K2 -> Delta = '>' ; "						\
+		"Delta = '=').");
+
+	make_rule(m, "keysort(L, R) :- "						\
+		"length(L,N), "										\
+		"keysort(N, L, _, R).");
+
+	make_rule(m, "keysort(2, [X1, X2|L], L, R) :- !, "		\
+		"keycompare(Delta, X1, X2), "						\
+		"'$sort2'(Delta, X1, X2, R).");
+	make_rule(m, "keysort(1, [X|L], L, [X]) :- !.");
+	make_rule(m, "keysort(0, L, L, []) :- !.");
+	make_rule(m, "keysort(N, L1, L3, R) :- "				\
+		"N1 is N // 2, "									\
+		"plus(N1, N2, N), "									\
+		"keysort(N1, L1, L2, R1), "							\
+		"keysort(N2, L2, L3, R2), "							\
 		"mmerge(R1, R2, R).");
 
 	make_rule(m, "bagof(T,G,B) :- "							\
