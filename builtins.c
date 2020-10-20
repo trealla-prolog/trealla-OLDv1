@@ -9382,11 +9382,6 @@ static const struct builtins g_iso_funcs[] =
 	{"findall", 3, fn_iso_findall_3, NULL},
 	{"$bagof", 3, fn_iso_bagof_3, NULL},
 
-#if 0
-	{"sort", 2, fn_iso_sort_2, NULL},
-	{"msort", 2, fn_msort_2, NULL},
-#endif
-
 	{"use_module", 1, fn_use_module_1, NULL},
 	{"module", 1, fn_module_1, NULL},
 	{"consult", 1, fn_consult_1, NULL},

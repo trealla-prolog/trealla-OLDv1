@@ -2939,13 +2939,26 @@ module *create_module(const char *name)
 	make_rule(m, "'$sort2'(=, X1, _,  [X1]).");
 	make_rule(m, "'$sort2'(>, X1, X2, [X2, X1]).");
 
+	make_rule(m, "mmerge([], R, R) :- !.");
+	make_rule(m, "mmerge(R, [], R) :- !.");
+	make_rule(m, "mmerge([H1|T1], [H2|T2], Result) :- "		\
+		"compare(Delta, H1, H2), !, "						\
+		"mmerge(Delta, H1, H2, T1, T2, Result).");
+
+	make_rule(m, "mmerge(>, H1, H2, T1, T2, [H2|R]) :- "		\
+		"mmerge([H1|T1], T2, R).");
+	make_rule(m, "mmerge(=, H1, H2, T1, T2, [H1|R]) :- "		\
+		"mmerge(T1, [H2|T2], R).");
+	make_rule(m, "mmerge(<, H1, H2, T1, T2, [H1|R]) :- "		\
+		"mmerge(T1, [H2|T2], R).");
+
 	make_rule(m, "msort(L, R) :- "							\
 		"length(L,N), "										\
 		"msort(N, L, _, R).");
 
 	make_rule(m, "msort(2, [X1, X2|L], L, R) :- !, "		\
 		"compare(Delta, X1, X2), "							\
-		"'$msort2'(Delta, X1, X2, R).");
+		"'$sort2'(Delta, X1, X2, R).");
 	make_rule(m, "msort(1, [X|L], L, [X]) :- !.");
 	make_rule(m, "msort(0, L, L, []) :- !.");
 	make_rule(m, "msort(N, L1, L3, R) :- "					\
@@ -2953,11 +2966,7 @@ module *create_module(const char *name)
 		"plus(N1, N2, N), "									\
 		"msort(N1, L1, L2, R1), "							\
 		"msort(N2, L2, L3, R2), "							\
-		"merge(R1, R2, R).");
-
-	make_rule(m, "'$msort2'(<, X1, X2, [X1, X2]).");
-	make_rule(m, "'$msort2'(=, X1, X2, [X2, X1]).");
-	make_rule(m, "'$msort2'(>, X1, X2, [X2, X1]).");
+		"mmerge(R1, R2, R).");
 
 	make_rule(m, "bagof(T,G,B) :- "							\
 		"copy_term('$bagof'(T,G,B),TMP_G),"					\
