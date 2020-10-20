@@ -5196,6 +5196,7 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 
 		if (rebase && (s->ctx != q->st.curr_frame)) {
 			tmp = *s->orig_c;
+			tmp.val_type = TYPE_VARIABLE;
 			tmp.val_off = g_anon_s;
 			tmp.flags = FLAG_FRESH;
 			tmp.nbr_cells = 1;
@@ -5218,11 +5219,14 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 				g_tab1[g_tab_idx] = slot_nbr;
 				g_tab2[g_tab_idx] = g_varno++;
 				g_tab_idx++;
-
 				create_vars(q, 1);
 				slot *e = GET_SLOT(g, tmp.var_nbr);
-				e->ctx = s->orig_ctx;
-				e->c = *s->orig_c;
+				e->ctx = s->ctx;
+
+				if (is_variable(s->c))
+					e->c = *s->c;
+				else
+					make_indirect(&e->c, s->c);
 			}
 
 			c = &tmp;
