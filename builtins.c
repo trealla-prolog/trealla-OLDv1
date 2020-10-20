@@ -5240,24 +5240,6 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 	return l;
 }
 
-#if 0
-static int fn_iso_sort_2(query *q)
-{
-	GET_FIRST_ARG(p1,list_or_nil);
-	GET_NEXT_ARG(p2,list_or_nil_or_var);
-	cell *l = nodesort(q, p1, p1_ctx, 1, 0);
-	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
-}
-
-static int fn_msort_2(query *q)
-{
-	GET_FIRST_ARG(p1,list_or_nil);
-	GET_NEXT_ARG(p2,list_or_nil_or_var);
-	cell *l = nodesort(q, p1, p1_ctx, 0, 0);
-	return unify(q, p2, p2_ctx, l, p1_ctx);
-}
-#endif
-
 static int fn_iso_keysort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
@@ -5558,85 +5540,6 @@ static int fn_iso_bagof_3(query *q)
 
 	unpin_vars(q);
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
-	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
-}
-
-static int fn_iso_setof_3(query *q)
-{
-	GET_FIRST_RAW_ARG(p1,any);
-	GET_NEXT_RAW_ARG(p2,callable);
-	GET_NEXT_ARG(p3,any);
-	uint32_t xs_vars = 0;
-	p2 = skip_existentials(q, p2, &xs_vars);
-
-	// First time thru generate all solutions
-
-	if (!q->retry) {
-		q->st.qnbr++;
-		cell *tmp = clone_to_heap(q, 1, p2, 2+p2->nbr_cells+1);
-		idx_t nbr_cells = 1 + p2->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
-		make_int(tmp+nbr_cells++, q->st.qnbr);
-		nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
-		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
-		init_queuen(q);
-		make_barrier(q);
-		q->st.curr_cell = tmp;
-		return 1;
-	}
-
-	if (!queuen_used(q) && !q->tmpq[q->st.qnbr]) {
-		q->st.qnbr--;
-		return 0;
-	}
-
-	// Take a copy
-
-	if (!q->tmpq[q->st.qnbr]) {
-		idx_t nbr_cells = queuen_used(q);
-		q->tmpq[q->st.qnbr] = malloc(sizeof(cell)*nbr_cells);
-		copy_cells(q->tmpq[q->st.qnbr], get_queuen(q), nbr_cells);
-		q->tmpq_size[q->st.qnbr] = nbr_cells;
-	}
-
-	init_queuen(q);
-	make_choice(q);
-	uint32_t p1_vars = get_vars(q, p1, p1_ctx);
-	uint32_t p2_vars = get_vars(q, p2, p2_ctx);
-	uint32_t mask = (p1_vars^p2_vars) & ~xs_vars;
-	pin_vars(q, mask);
-	cell *c_end = q->tmpq[q->st.qnbr] + q->tmpq_size[q->st.qnbr];
-	frame *g = GET_FRAME(q->st.curr_frame);
-
-	for (cell *c = q->tmpq[q->st.qnbr]; c < c_end; c += c->nbr_cells) {
-		if (c->flags & FLAG_DELETED)
-			continue;
-
-		try_me(q, g->nbr_vars);
-
-		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
-			c->flags |= FLAG_DELETED;
-			cell *c1 = deep_clone_to_tmp(q, p1, q->st.curr_frame);
-			alloc_queuen(q, q->st.qnbr, c1);
-		}
-
-		undo_me(q);
-	}
-
-	if (!queuen_used(q)) {
-		init_queuen(q);
-		cut_me(q, 1);
-		free(q->tmpq[q->st.qnbr]);
-		q->tmpq[q->st.qnbr] = NULL;
-		q->st.qnbr--;
-		return 0;
-	}
-
-	unpin_vars(q);
-	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
-#if 0
-	l = nodesort(q, l, q->st.curr_frame, 1, 0);
-#endif
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
@@ -9478,7 +9381,6 @@ static const struct builtins g_iso_funcs[] =
 	{"op", 3, fn_iso_op_3, NULL},
 	{"findall", 3, fn_iso_findall_3, NULL},
 	{"$bagof", 3, fn_iso_bagof_3, NULL},
-	{"$setof", 3, fn_iso_setof_3, NULL},
 
 #if 0
 	{"sort", 2, fn_iso_sort_2, NULL},

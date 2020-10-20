@@ -2904,6 +2904,8 @@ module *create_module(const char *name)
 	m->user_ops = MAX_USER_OPS;
 	m->cpu_count = CPU_COUNT;
 
+	make_rule(m, "call(G) :- G.");
+
 	parser *p = create_parser(m);
 	p->consulting = 1;
 	parser_xref_db(p);
@@ -2913,7 +2915,20 @@ module *create_module(const char *name)
 
 static void setup_module(module *m)
 {
-	make_rule(m, "call(G) :- G.");
+	m->prebuilt = 1;
+
+	set_multifile_in_db(m, "term_expansion", 2);
+	set_dynamic_in_db(m, "term_expansion", 2);
+
+	for (library *lib = g_libs; lib->name; lib++) {
+		if (!strcmp(lib->name, "apply") || !strcmp(lib->name, "dict") ||
+			!strcmp(lib->name, "http") || !strcmp(lib->name, "lists") ||
+			!strcmp(lib->name, "atts") || !strcmp(lib->name, "phrase")) {
+			char *src = strndup((const char*)lib->start, (lib->end-lib->start));
+			module_load_text(m, src);
+			free(src);
+		}
+	}
 
 	make_rule(m, "bagof(T,G,B) :- "							\
 		"copy_term('$bagof'(T,G,B),TMP_G),"					\
@@ -2921,9 +2936,9 @@ static void setup_module(module *m)
 		"'$bagof'(T,G,B)=TMP_G.");
 
 	make_rule(m, "setof(T,G,B) :- "							\
-		"copy_term('$setof'(T,G,B),TMP_G),"					\
+		"copy_term('$bagof'(T,G,B),TMP_G),"					\
 		"TMP_G,"											\
-		"'$setof'(T,G,TMP_B)=TMP_G,"						\
+		"'$bagof'(T,G,TMP_B)=TMP_G,"						\
 		"sort(TMP_B,B).");
 
 	make_rule(m, "call(G,P1) :- "							\
@@ -3016,6 +3031,8 @@ static void setup_module(module *m)
 
 	make_rule(m, "client(U,H,P,S) :- client(U,H,P,S,[]).");
 	make_rule(m, "server(H,S) :- server(H,S,[]).");
+
+	m->prebuilt = 0;
 }
 
 void destroy_module(module *m)
@@ -3152,23 +3169,7 @@ prolog *pl_create()
 
 	pl->m = create_module("user");
 	pl->m->filename = strdup("~/.tpl_user");
-	pl->m->prebuilt = 1;
-
-	set_multifile_in_db(pl->m, "term_expansion", 2);
-	set_dynamic_in_db(pl->m, "term_expansion", 2);
-
-	for (library *lib = g_libs; lib->name; lib++) {
-		if (!strcmp(lib->name, "apply") || !strcmp(lib->name, "dict") ||
-			!strcmp(lib->name, "http") || !strcmp(lib->name, "lists") ||
-			!strcmp(lib->name, "atts") || !strcmp(lib->name, "phrase")) {
-			char *src = strndup((const char*)lib->start, (lib->end-lib->start));
-			module_load_text(pl->m, src);
-			free(src);
-		}
-	}
-
 	setup_module(pl->m);
-	pl->m->prebuilt = 0;
 	return pl;
 }
 
