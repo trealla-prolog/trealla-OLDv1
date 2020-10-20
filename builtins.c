@@ -5194,7 +5194,7 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 
 		int rebase = is_variable(s->c) || has_vars(q, s->c, s->ctx);
 
-		if (rebase /* && (s->ctx != q->st.curr_frame) */) {
+		if (rebase && (s->ctx != q->st.curr_frame) ) {
 			tmp.val_type = TYPE_VARIABLE;
 			tmp.val_off = g_anon_s;
 			tmp.flags = FLAG_FRESH;
@@ -8800,6 +8800,66 @@ static int fn_sys_lt_2(query *q)
 	return 1;
 }
 
+static int fn_plus_3(query *q)
+{
+	GET_FIRST_ARG(p1,integer_or_var);
+	GET_NEXT_ARG(p2,integer_or_var);
+	GET_NEXT_ARG(p3,integer_or_var);
+
+	if (is_variable(p1)) {
+		if (!is_integer(p2)) {
+			throw_error(q, p2, "type_error", "integer");
+			return 0;
+		}
+
+		if (!is_integer(p3)) {
+			throw_error(q, p3, "type_error", "integer");
+			return 0;
+		}
+
+		cell tmp;
+		make_int(&tmp, p3->val_num - p2->val_num);
+		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		return 1;
+	}
+
+	if (is_variable(p2)) {
+		if (!is_integer(p1)) {
+			throw_error(q, p1, "type_error", "integer");
+			return 0;
+		}
+
+		if (!is_integer(p3)) {
+			throw_error(q, p3, "type_error", "integer");
+			return 0;
+		}
+
+		cell tmp;
+		make_int(&tmp, p3->val_num - p1->val_num);
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		return 1;
+	}
+
+	if (is_variable(p3)) {
+		if (!is_integer(p2)) {
+			throw_error(q, p2, "type_error", "integer");
+			return 0;
+		}
+
+		if (!is_integer(p1)) {
+			throw_error(q, p1, "type_error", "integer");
+			return 0;
+		}
+
+		cell tmp;
+		make_int(&tmp, p1->val_num + p2->val_num);
+		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+		return 1;
+	}
+
+	return p3->val_num == p1->val_num + p2->val_num;
+}
+
 static int fn_limit_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
@@ -9543,6 +9603,7 @@ static const struct builtins g_other_funcs[] =
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer"},
 	{"limit", 2, fn_limit_2, "+integer,+callable"},
 	{"offset", 2, fn_offset_2, "+integer,+callable"},
+	{"plus", 3, fn_plus_3, "?integer,?integer,?integer"},
 
 	{"freeze", 2, fn_freeze_2, "+variable,+callable"},
 	{"frozen", 2, fn_frozen_2, "+variable,+callable"},

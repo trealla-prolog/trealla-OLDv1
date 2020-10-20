@@ -166,14 +166,15 @@ Others
 	uuid/1					# generates non-standard UUID
 	load_files/2
 	split_atom/4
-
-	getenv/2
-	setenv/2
-	unsetenv/1
+	plus/3
 
 	call_nth/2
 	offset/2
 	limit/2
+
+	getenv/2
+	setenv/2
+	unsetenv/1
 
 	delete_file/1
 	exists_file/1
