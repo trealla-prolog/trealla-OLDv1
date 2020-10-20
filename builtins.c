@@ -3735,11 +3735,6 @@ static int fn_iso_compare_3(query *q)
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,any);
 
-	if (is_variable(p2) || is_variable(p3)) {
-		throw_error(q, p1, "type_error", "term");
-		return 0;
-	}
-
 	int status = compare(q, p2, p2_ctx, p3, p3_ctx, 0);
 	cell tmp;
 	make_literal(&tmp, status<0?g_lt_s:status>0?g_gt_s:g_eq_s);
