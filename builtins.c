@@ -5584,6 +5584,12 @@ static int fn_sys_elapsed_0(query *q)
 	return 1;
 }
 
+static int fn_trace_0(query *q)
+{
+	q->trace = 1;
+	return 1;
+}
+
 static int fn_time_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
@@ -9117,6 +9123,7 @@ static const struct builtins g_iso_funcs[] =
 	{"listing", 0, fn_listing_0, NULL},
 	{"listing", 1, fn_listing_1, NULL},
 	{"time", 1, fn_time_1, NULL},
+	{"trace", 0, fn_trace_0, NULL},
 
 	{"phrase", 2, fn_phrase_2, NULL},
 	{"phrase", 3, fn_phrase_3, NULL},
