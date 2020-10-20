@@ -5194,8 +5194,7 @@ static cell *nodesort(query *q, cell *p1, idx_t p1_ctx, int dedup, int keysort)
 
 		int rebase = is_variable(s->c) || has_vars(q, s->c, s->ctx);
 
-		if (rebase && (s->ctx != q->st.curr_frame)) {
-			tmp = *s->orig_c;
+		if (rebase /* && (s->ctx != q->st.curr_frame) */) {
 			tmp.val_type = TYPE_VARIABLE;
 			tmp.val_off = g_anon_s;
 			tmp.flags = FLAG_FRESH;
