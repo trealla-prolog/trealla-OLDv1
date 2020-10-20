@@ -5248,6 +5248,14 @@ static int fn_iso_sort_2(query *q)
 	cell *l = nodesort(q, p1, p1_ctx, 1, 0);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
+
+static int fn_msort_2(query *q)
+{
+	GET_FIRST_ARG(p1,list_or_nil);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
+	cell *l = nodesort(q, p1, p1_ctx, 0, 0);
+	return unify(q, p2, p2_ctx, l, p1_ctx);
+}
 #endif
 
 static int fn_iso_keysort_2(query *q)
@@ -7221,16 +7229,6 @@ static int fn_rand_1(query *q)
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return 1;
 }
-
-#if 0
-static int fn_msort_2(query *q)
-{
-	GET_FIRST_ARG(p1,list_or_nil);
-	GET_NEXT_ARG(p2,list_or_nil_or_var);
-	cell *l = nodesort(q, p1, p1_ctx, 0, 0);
-	return unify(q, p2, p2_ctx, l, p1_ctx);
-}
-#endif
 
 static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 {
