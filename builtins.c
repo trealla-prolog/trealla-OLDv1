@@ -5634,7 +5634,9 @@ static int fn_iso_setof_3(query *q)
 
 	unpin_vars(q);
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
+#if 0
 	l = nodesort(q, l, q->st.curr_frame, 1, 0);
+#endif
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 

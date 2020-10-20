@@ -2904,6 +2904,15 @@ module *create_module(const char *name)
 	m->user_ops = MAX_USER_OPS;
 	m->cpu_count = CPU_COUNT;
 
+	parser *p = create_parser(m);
+	p->consulting = 1;
+	parser_xref_db(p);
+	destroy_parser(p);
+	return m;
+}
+
+static void setup_module(module *m)
+{
 	make_rule(m, "call(G) :- G.");
 
 	make_rule(m, "bagof(T,G,B) :- "							\
@@ -2914,7 +2923,8 @@ module *create_module(const char *name)
 	make_rule(m, "setof(T,G,B) :- "							\
 		"copy_term('$setof'(T,G,B),TMP_G),"					\
 		"TMP_G,"											\
-		"'$setof'(T,G,B)=TMP_G.");
+		"'$setof'(T,G,TMP_B)=TMP_G,"						\
+		"sort(TMP_B,B).");
 
 	make_rule(m, "call(G,P1) :- "							\
 		"copy_term('$calln'(G,P1),TMP_G),"					\
@@ -3006,12 +3016,6 @@ module *create_module(const char *name)
 
 	make_rule(m, "client(U,H,P,S) :- client(U,H,P,S,[]).");
 	make_rule(m, "server(H,S) :- server(H,S,[]).");
-
-	parser *p = create_parser(m);
-	p->consulting = 1;
-	parser_xref_db(p);
-	destroy_parser(p);
-	return m;
 }
 
 void destroy_module(module *m)
@@ -3163,6 +3167,7 @@ prolog *pl_create()
 		}
 	}
 
+	setup_module(pl->m);
 	pl->m->prebuilt = 0;
 	return pl;
 }
