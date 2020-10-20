@@ -2965,7 +2965,7 @@ module *create_module(const char *name)
 		"'$bagof'(T,G,B)=TMP_G.");
 
 	make_rule(m, "setof(T,G,B) :- "							\
-		"copy_term('$bagof'(T,G,B),TMP_G),"					\
+		"copy_term('$bagof'(T,G,TMP_B),TMP_G),"					\
 		"TMP_G,"											\
 		"'$bagof'(T,G,TMP_B)=TMP_G,"						\
 		"sort(TMP_B,B).");
