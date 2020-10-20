@@ -9470,12 +9470,14 @@ static const struct builtins g_iso_funcs[] =
 	{"float_fractional_part", 1, fn_iso_float_fractional_part_1, NULL},
 	{"current_prolog_flag", 2, fn_iso_current_prolog_flag_2, NULL},
 	{"set_prolog_flag", 2, fn_iso_set_prolog_flag_2, NULL},
-	{"sort", 2, fn_iso_sort_2, NULL},
 	{"keysort", 2, fn_iso_keysort_2, NULL},
 	{"op", 3, fn_iso_op_3, NULL},
 	{"findall", 3, fn_iso_findall_3, NULL},
 	{"$bagof", 3, fn_iso_bagof_3, NULL},
 	{"$setof", 3, fn_iso_setof_3, NULL},
+
+	{"$old_msort", 2, fn_msort_2, NULL},
+	{"$old_sort", 2, fn_iso_sort_2, NULL},
 
 	//
 
@@ -9547,7 +9549,6 @@ static const struct builtins g_other_funcs[] =
 	{"savefile", 2, fn_savefile_2, "+string,+string"},
 	{"split_atom", 4, fn_split_atom_4, "+string,+sep,+pad,-list"},
 	{"split", 4, fn_split_4, "+string,+string,?left,?right"},
-	{"msort", 2, fn_msort_2, "+list,-list"},
 	{"is_list", 1, fn_is_list_1, "+term"},
 	{"list", 1, fn_is_list_1, "+term"},
 	{"is_stream", 1, fn_is_stream_1, "+term"},
