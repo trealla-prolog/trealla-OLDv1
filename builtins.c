@@ -5271,10 +5271,7 @@ static int fn_iso_bagof_3(query *q)
 	if (!queuen_used(q)) {
 		//printf("*** [%u] nothing\n", q->st.qnbr);
 		init_queuen(q);
-		cut_me(q, 1);
-		free(q->tmpq[q->st.qnbr]);
-		q->tmpq[q->st.qnbr] = NULL;
-		q->st.qnbr--;
+		cut_me(q, 0);
 		return 0;
 	}
 
