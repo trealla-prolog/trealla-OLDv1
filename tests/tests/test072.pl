@@ -1,7 +1,6 @@
 :- initialization(main(10)).
 
 main(Size) :-
-	halt,
     setof(Total, M^Freq^Perm^square(Size, M, Total, Freq, Perm), Totals),
     last(Totals, Max),
     square(Size, Board, Max, _, Permutation),
