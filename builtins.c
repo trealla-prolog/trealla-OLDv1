@@ -5170,14 +5170,16 @@ static int do_collect_vars2(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 	return cnt;
 }
 
-static uint32_t get_vars(query *q, cell *p, idx_t p_ctx)
+static uint16_t get_vars(query *q, cell *p, idx_t p_ctx)
 {
 	cell *slots[MAX_ARITY] = {0};
 	int cnt = do_collect_vars2(q, p, p->nbr_cells, slots);
-	uint32_t mask = 0;
+	uint16_t mask = 0;
 
-	for (unsigned i = 0; i < cnt; i++)
+	for (unsigned i = 0; i < cnt; i++) {
+		assert(slots[i]->var_nbr < 16);
 		mask |= 1 << slots[i]->var_nbr;
+	}
 
 	return mask;
 }
