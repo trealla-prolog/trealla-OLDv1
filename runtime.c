@@ -474,9 +474,6 @@ void cut_me(query *q, int local_cut)
 			ch->st.iter = NULL;
 		}
 
-		if (ch->local_cut && !local_cut)
-			break;
-
 		q->cp--;
 
 		if (ch->local_cut && local_cut)
