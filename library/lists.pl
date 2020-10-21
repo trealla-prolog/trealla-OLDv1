@@ -26,9 +26,10 @@ intersection([], _, []).
 intersection([H|T], Y, [H|Z]) :- member(H, Y), !, intersection(T, Y, Z).
 intersection([_|T], Y, Z) :- intersection(T, Y, Z).
 
-revzap([], L, L) :- !.
-revzap([H|L], L2, L3) :- revzap(L, [H|L2], L3).
-reverse(L1, L2) :- revzap(L1, [], L2).
+reverse(L1, L2) :- revzap_(L1, [], L2).
+
+revzap_([], L, L) :- !.
+revzap_([H|L], L2, L3) :- revzap_(L, [H|L2], L3).
 
 append([], L, L).
 append([H|T], L, [H|R]) :- append(T, L, R).
@@ -42,24 +43,24 @@ nth1(N, [_|T], H) :- nth1(M, T, H), N is M + 1.
 nth0(0, [H|_], H).
 nth0(N, [_|T], H) :- nth0(M, T, H), N is M + 1.
 
-last([X|Xs], Last) :-
-    last(Xs, X, Last).
+last_([], Last, Last).
+last_([X|Xs], _, Last) :-
+    last_(Xs, X, Last).
 
-last([], Last, Last).
-last([X|Xs], _, Last) :-
-    last(Xs, X, Last).
+last([X|Xs], Last) :-
+    last_(Xs, X, Last).
 
 flatten(List, FlatList) :-
-    flatten(List, [], FlatList0),
+    flatten_(List, [], FlatList0),
     !,
     FlatList = FlatList0.
 
-flatten(Var, Tl, [Var|Tl]) :-
+flatten_(Var, Tl, [Var|Tl]) :-
     var(Var),
     !.
-flatten([], Tl, Tl) :- !.
-flatten([Hd|Tl], Tail, List) :-
+flatten_([], Tl, Tl) :- !.
+flatten_([Hd|Tl], Tail, List) :-
     !,
-    flatten(Hd, FlatHeadTail, List),
-    flatten(Tl, Tail, FlatHeadTail).
-flatten(NonList, Tl, [NonList|Tl]).
+    flatten_(Hd, FlatHeadTail, List),
+    flatten_(Tl, Tail, FlatHeadTail).
+flatten_(NonList, Tl, [NonList|Tl]).
