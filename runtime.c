@@ -539,11 +539,11 @@ unsigned create_vars(query *q, unsigned cnt)
 	} else if ((g->overflow + (g->nbr_vars-g->nbr_slots)) == q->st.sp) {
 		q->st.sp += cnt;
 	} else {
-		//assert((g->overflow + (g->nbr_vars-g->nbr_slots)) == q->st.sp);
+		assert(0);
 		idx_t save_overflow = g->overflow;
 		g->overflow = q->st.sp;
 		idx_t cnt2 = g->nbr_vars-g->nbr_slots;
-		memcpy(q->slots+g->overflow, q->slots+save_overflow, cnt2);
+		memcpy(q->slots+g->overflow, q->slots+save_overflow, sizeof(slot)*cnt2);
 		q->st.sp += cnt2;
 		q->st.sp += cnt;
 	}
