@@ -7205,7 +7205,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx,
 		int n = get_named_stream(q, "user_output");
 		stream *str = &g_streams[n];
 		net_write(tmpbuf, len, str);
-	} else if (is_structure(str) && ((strcmp(GET_STR(str),"atom") && strcmp(GET_STR(str),"string")) || (str->arity > 1) || !is_variable(str+1))) {
+	} else if (is_structure(str) && ((strcmp(GET_STR(str),"atom") && strcmp(GET_STR(str),"chars") && strcmp(GET_STR(str),"string")) || (str->arity > 1) || !is_variable(str+1))) {
 		free(tmpbuf);
 		throw_error(q, c, "type_error", "structure");
 		return 0;

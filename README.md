@@ -132,6 +132,9 @@ GNU-Prolog & SWI-Prolog
 	maplist/1-4
 	tab/1-2
 
+	write_term_to_atom/3	# GNU-Prolog
+	term_to_atom/2			# SWI-Prolog
+
 	random/1                # random(-float) float [0.0,<1.0]
 	random/1                # random(+integer) function returning integer [0,<integer]
 
@@ -142,10 +145,8 @@ GNU-Prolog & SWI-Prolog
 Others
 ======
 
-	write_term_to_atom/3
 	setup_call_cleanup/3
 	findall/4
-	term_to_atom/2
 	atomic_concat/3
 	format(atom(A),...)
 	var_number/2
