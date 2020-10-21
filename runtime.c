@@ -462,7 +462,7 @@ void cut_me(query *q, int local_cut)
 		if (ch->cgen < g->cgen)
 			break;
 
-		if (ch->st.qnbr && 0) {
+		if (ch->st.qnbr) {
 			q->st.qnbr = ch->st.qnbr;
 			free(q->tmpq[q->st.qnbr]);
 			q->tmpq[q->st.qnbr] = NULL;
