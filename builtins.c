@@ -71,7 +71,7 @@ static int do_yield_0(query *q, int msecs)
 	return 0;
 }
 
-static void pin_vars(query *q, uint16_t mask)
+static void pin_vars(query *q, uint64_t mask)
 {
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
@@ -83,7 +83,7 @@ static void unpin_vars(query *q)
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 	frame *g = GET_FRAME(q->st.curr_frame);
-	uint16_t mask = 1;
+	uint64_t mask = 1;
 
 	for (unsigned i = 0; i < g->nbr_vars; i++, mask <<= 1) {
 		if (!(ch->pins & mask))
@@ -101,14 +101,14 @@ static void set_pinned(query *q, int i)
 {
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
-	ch->pins |= 1 << i;
+	ch->pins |= 1ULL << i;
 }
 
 static int is_pinned(query *q, int i)
 {
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
-	return ch->pins & (1 << i) ? 1 : 0;
+	return ch->pins & (1ULL << i) ? 1 : 0;
 }
 
 static void set_params(query *q, idx_t p1, idx_t p2)
@@ -5161,6 +5161,7 @@ static int do_collect_vars2(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 	for (idx_t i = 0; i < nbr_cells; i++, p1++) {
 		if (is_variable(p1)) {
 			if (!slots[cnt]) {
+				assert(cnt < MAX_ARITY);
 				slots[cnt] = p1;
 				cnt++;
 			}
@@ -5170,26 +5171,26 @@ static int do_collect_vars2(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 	return cnt;
 }
 
-static uint16_t get_vars(query *q, cell *p, idx_t p_ctx)
+static uint64_t get_vars(query *q, cell *p, idx_t p_ctx)
 {
 	cell *slots[MAX_ARITY] = {0};
 	int cnt = do_collect_vars2(q, p, p->nbr_cells, slots);
-	uint16_t mask = 0;
+	uint64_t mask = 0;
 
 	for (unsigned i = 0; i < cnt; i++) {
-		assert(slots[i]->var_nbr < 16);
-		mask |= 1 << slots[i]->var_nbr;
+		assert(slots[i]->var_nbr < 64);
+		mask |= 1ULL << slots[i]->var_nbr;
 	}
 
 	return mask;
 }
 
-static cell *skip_existentials(const query *q, cell *p2, uint16_t *xs)
+static cell *skip_existentials(const query *q, cell *p2, uint64_t *xs)
 {
 	while (is_structure(p2) && !strcmp(GET_STR(p2), "^")) {
 		cell *c = p2 + 1;
 
-		assert(c->var_nbr < 16);
+		assert(c->var_nbr < 64);
 
 		if (is_variable(c))
 			*xs |= 1 << c->var_nbr;
@@ -5206,7 +5207,7 @@ static int fn_iso_bagof_3(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
-	uint16_t xs_vars = 0;
+	uint64_t xs_vars = 0;
 	p2 = skip_existentials(q, p2, &xs_vars);
 
 	// First time thru generate all solutions
@@ -5226,8 +5227,6 @@ static int fn_iso_bagof_3(query *q)
 		return 1;
 	}
 
-	//printf("*** [%u] work\n", q->st.qnbr);
-
 	if (!queuen_used(q) && !q->tmpq[q->st.qnbr]) {
 		//printf("*** [%u] no work\n", q->st.qnbr);
 		q->st.qnbr--;
@@ -5244,11 +5243,13 @@ static int fn_iso_bagof_3(query *q)
 		q->tmpq_size[q->st.qnbr] = nbr_cells;
 	}
 
+	//printf("*** [%u] working\n", q->st.qnbr);
+
 	init_queuen(q);
 	make_choice(q);
-	uint16_t p1_vars = get_vars(q, p1, p1_ctx);
-	uint16_t p2_vars = get_vars(q, p2, p2_ctx);
-	uint16_t mask = (p1_vars^p2_vars) & ~xs_vars;
+	uint64_t p1_vars = get_vars(q, p1, p1_ctx);
+	uint64_t p2_vars = get_vars(q, p2, p2_ctx);
+	uint64_t mask = (p1_vars^p2_vars) & ~xs_vars;
 	pin_vars(q, mask);
 	cell *c_end = q->tmpq[q->st.qnbr] + q->tmpq_size[q->st.qnbr];
 	frame *g = GET_FRAME(q->st.curr_frame);

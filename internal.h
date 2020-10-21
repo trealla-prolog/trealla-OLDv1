@@ -273,8 +273,8 @@ typedef struct {
 typedef struct {
 	state st;
 	idx_t v1, v2, cgen;
+	uint64_t pins;
 	uint16_t nbr_vars, nbr_slots;
-	uint16_t pins;
 	unsigned local_cut:1;
 	unsigned any_choices:1;
 	unsigned catchme1:1;
