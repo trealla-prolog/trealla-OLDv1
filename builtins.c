@@ -4037,7 +4037,7 @@ static void do_collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, c
 static int fn_iso_term_variables_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
 
 	cell *slots[MAX_ARITY] = {0};
 	int cnt = 0;
