@@ -1965,6 +1965,29 @@ static int get_escape(const char **_src, int *error)
 	return ch;
 }
 
+static int is_matching_pair(char **dst, char **src, int lh, int rh)
+{
+	char *s = *src, *d = *dst;
+
+	if (*s != lh)
+		return 0;
+
+	while (s++, isspace(*s))
+		;
+
+	if (*s != rh)
+		return 0;
+
+	s++;
+	*d++ = lh;
+	*d++ = rh;
+	*d = '\0';
+	*dst = d;
+	*src = s;
+	return 1;
+}
+
+
 static int get_token(parser *p, int last_op)
 {
 	const char *src = p->srcptr;
@@ -2251,12 +2274,8 @@ static int get_token(parser *p, int last_op)
 		return 1;
 	}
 
-	if (((src[0] == '[') && (src[1] == ']')) ||
-		//((src[0] == '(') && (src[1] == ')')) ||		// Non-ISO
-		((src[0] == '{') && (src[1] == '}'))) {
-		*dst++ = *src++;
-		*dst++ = *src++;
-		*dst = '\0';
+	if (is_matching_pair(&dst, (char**)&src, '[',']') ||
+		is_matching_pair(&dst, (char**)&src, '{','}')) {
 		p->srcptr = (char*)src;
 		return (dst-p->token) > 0;
 	}
