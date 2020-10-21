@@ -4519,13 +4519,16 @@ int call_me(query *q, cell *p1)
 
 	idx_t nbr_cells = tmp->nbr_cells;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	make_barrier(q);
 	q->st.curr_cell = tmp;
-	make_choice(q);
 	return 1;
 }
 
 static int fn_iso_call_n(query *q)
 {
+	if (q->retry)
+		return 0;
+
 	GET_FIRST_ARG(p1,callable);
 	clone_to_tmp(q, p1);
 	unsigned arity = p1->arity;
@@ -4550,6 +4553,7 @@ static int fn_iso_call_n(query *q)
 
 	cell *tmp = clone_to_heap(q, 1, tmp2, 1);
 	make_end_return(tmp+1+tmp2->nbr_cells, q->st.curr_cell);
+	make_barrier(q);
 	q->st.curr_cell = tmp;
 	return 1;
 }
@@ -5807,7 +5811,7 @@ static int fn_forall_2(query *q)
 	clone_to_heap(q, 0, p2, 1);
 	idx_t nbr_cells = 1 + p1->nbr_cells + p2->nbr_cells;
 	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
-	make_choice(q);
+	make_barrier(q);
 	q->st.curr_cell = tmp;
 	return 1;
 }
