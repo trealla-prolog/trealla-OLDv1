@@ -251,7 +251,7 @@ cell *list_tail(cell *l)
 	if (!n)
 		n = 1;
 
-	if (is_string(l) && ((l->len_str-n) > 0)) {
+	if (is_string(l) && ((l->len_str - n) > 0)) {
 		static cell tmp;
 		tmp.val_type = TYPE_CSTRING;
 		tmp.flags = FLAG_BLOB|FLAG_CONST_CSTRING|FLAG_STRING;
@@ -1903,7 +1903,7 @@ static int get_hex(const char **srcptr, int n)
 	const char *src = *srcptr;
 	int v = 0;
 
-	while ((n > 0) && *src == '0') {
+	while ((n > 0) && (*src == '0')) {
 		src++; n--;
 	}
 
@@ -2277,14 +2277,14 @@ static int get_token(parser *p, int last_op)
 	if (is_matching_pair(&dst, (char**)&src, '[',']') ||
 		is_matching_pair(&dst, (char**)&src, '{','}')) {
 		p->srcptr = (char*)src;
-		return (dst-p->token) > 0;
+		return (dst - p->token) != 0;
 	}
 
 	if (src[0] == '!') {
 		*dst++ = *src++;
 		*dst = '\0';
 		p->srcptr = (char*)src;
-		return (dst-p->token) > 0;
+		return (dst - p->token) != 0;
 	}
 
 	static const char *s_delims = "(){}[]_, `'\"\t\r\n";
