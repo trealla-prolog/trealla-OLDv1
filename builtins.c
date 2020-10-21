@@ -4016,22 +4016,26 @@ static int fn_iso_univ_2(query *q)
 	return unify(q, p2, p2_ctx, l, p1_ctx);
 }
 
-static void do_collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, cell **slots, int *cnt)
+static int do_collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, cell **slots)
 {
+	int cnt = 0;
+
 	for (int i = 0; i < nbr_cells; i++, p1++) {
 		cell *c = deref_var(q, p1, p1_ctx);
 
 		if (is_structure(c)) {
-			do_collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1, slots, cnt);
+			cnt += do_collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1, slots);
 		} else if (is_variable(c)) {
 			assert(c->var_nbr < MAX_ARITY);
 
 			if (!slots[c->var_nbr]) {
 				slots[c->var_nbr] = c;
-				(*cnt)++;
+				cnt++;
 			}
 		}
 	}
+
+	return cnt;
 }
 
 static int fn_iso_term_variables_2(query *q)
@@ -4043,9 +4047,9 @@ static int fn_iso_term_variables_2(query *q)
 	int cnt = 0;
 
 	if (is_structure(p1))
-		do_collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1, slots, &cnt);
+		cnt = do_collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
 	else
-		do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots, &cnt);
+		cnt = do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
 
 	cell *tmp = calloc((cnt*2)+1, sizeof(cell));
 	int idx = 0;
@@ -5156,27 +5160,35 @@ static int fn_findall_4(query *q)
 	return 1;
 }
 
-static void do_collect_vars2(query *q, cell *p1, idx_t nbr_cells, cell **slots)
+static int do_collect_vars2(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 {
+	int cnt = 0;
+
 	for (idx_t i = 0; i < nbr_cells; i++, p1++) {
 		if (is_variable(p1)) {
 			assert(p1->var_nbr < MAX_ARITY);
 
-			if (!slots[p1->var_nbr])
+			if (!slots[p1->var_nbr]) {
 				slots[p1->var_nbr] = p1;
+				cnt++;
+			}
 		}
 	}
+
+	return cnt;
 }
 
 static uint64_t get_vars(query *q, cell *p, idx_t p_ctx)
 {
 	cell *slots[MAX_ARITY] = {0};
-	do_collect_vars2(q, p, p->nbr_cells, slots);
+	int cnt = do_collect_vars2(q, p, p->nbr_cells, slots);
 	uint64_t mask = 0;
 
-	for (unsigned i = 0; i < MAX_ARITY; i++) {
-		if (slots[i])
-			mask |= 1ULL << i;
+	if (cnt) {
+		for (unsigned i = 0; i < MAX_ARITY; i++) {
+			if (slots[i])
+				mask |= 1ULL << i;
+		}
 	}
 
 	return mask;
@@ -8222,17 +8234,16 @@ static int fn_numbervars_1(query *q)
 	GET_FIRST_ARG(p1,any);
 
 	cell *slots[MAX_ARITY] = {0};
-	int cnt = 0;
 
 	if (is_structure(p1))
-		do_collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1, slots, &cnt);
+		do_collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
 	else
-		do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots, &cnt);
+		do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
 
 	q->nv_mask = 0;
 	unsigned end = q->nv_start = 0;
 
-	for (unsigned i = 0; i < cnt; i++) {
+	for (unsigned i = 0; i < MAX_ARITY; i++) {
 		if (!slots[i])
 			continue;
 
@@ -8250,17 +8261,16 @@ static int fn_numbervars_3(query *q)
 	GET_NEXT_ARG(p3,integer_or_var)
 
 	cell *slots[MAX_ARITY] = {0};
-	int cnt = 0;
 
 	if (is_structure(p1))
-		do_collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1, slots, &cnt);
+		do_collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
 	else
-		do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots, &cnt);
+		do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
 
 	q->nv_mask = 0;
 	unsigned end = q->nv_start = p2->val_num;
 
-	for (unsigned i = 0; i < cnt; i++) {
+	for (unsigned i = 0; i < MAX_ARITY; i++) {
 		if (!slots[i])
 			continue;
 
