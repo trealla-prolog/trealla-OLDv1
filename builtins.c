@@ -3932,7 +3932,7 @@ static int fn_iso_arg_3(query *q)
 	GET_NEXT_ARG(p3,any);
 
 	if (is_integer(p1)) {
-		int arg_nbr = p1->val_num;
+		unsigned arg_nbr = p1->val_num;
 
 		if (q->retry) {
 			if (++arg_nbr > p2->arity)
@@ -3957,9 +3957,11 @@ static int fn_iso_arg_3(query *q)
 
 		cell *c = p2 + 1;
 
-		for (int i = 1; i <= arg_nbr; i++) {
-			if (i == arg_nbr)
-				return unify(q, p3, p3_ctx, c, p2_ctx);
+		for (unsigned i = 1; i <= arg_nbr; i++) {
+			if (i == arg_nbr) {
+				c = deref_var(q, c, p2_ctx);
+				return unify(q, p3, p3_ctx, c, q->latest_ctx);
+			}
 
 			c += c->nbr_cells;
 		}
@@ -8745,7 +8747,7 @@ static int do_length(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer);
-	idx_t nbr = p2->val_num;
+	unsigned nbr = p2->val_num;
 	GET_RAW_ARG(2, p2_orig);
 	cell tmp;
 	make_int(&tmp, ++nbr);
@@ -8814,7 +8816,7 @@ static int fn_length_2(query *q)
 		if (!is_list(p1) && !is_nil(p1))
 			return 0;
 
-		int cnt = 0;
+		unsigned cnt = 0;
 
 		if (is_string(p1)) {
 			cnt = strlen_utf8(p1->val_str);
@@ -8837,6 +8839,11 @@ static int fn_length_2(query *q)
 	}
 
 	if (is_integer(p2) && !is_variable(p1)) {
+		if (p2->val_num < 0) {
+			throw_error(q, p2, "domain_error", "out_of_range");
+			return 0;
+		}
+
 		if (p2->val_num == 0) {
 			cell tmp;
 			make_literal(&tmp, g_nil_s);
@@ -8867,12 +8874,17 @@ static int fn_length_2(query *q)
 		if (is_anon(p1))
 			return 1;
 
-		idx_t nbr = p2->val_num;
+		if (p2->val_num < 0) {
+			throw_error(q, p2, "domain_error", "positive_integers");
+			return 0;
+		}
 
-		if (nbr >= MAX_VARS) {
+		if (p2->val_num >= MAX_VARS) {
 			throw_error(q, p2, "resource_error", "too_many_vars");
 			return 0;
 		}
+
+		idx_t nbr = p2->val_num;
 
 		if (nbr == 0) {
 			cell tmp;
