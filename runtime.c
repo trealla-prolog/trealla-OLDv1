@@ -434,7 +434,7 @@ static void commit_me(query *q, term *t)
 		ch->st.curr_clause = q->st.curr_clause;
 	}
 
-	if (tco)
+	if (tco && q->cp)
 		reuse_frame(q, t->nbr_vars);
 	else
 		make_frame(q, t->nbr_vars, last_match);
