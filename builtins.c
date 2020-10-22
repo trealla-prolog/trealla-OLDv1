@@ -6616,7 +6616,17 @@ static int fn_write_term_to_chars_3(query *q)
 static int fn_is_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return is_list(p1) || is_nil(p1);
+
+	if (!is_list(p1) && !is_nil(p1))
+		return 0;
+
+	while (is_list(p1)) {
+		p1 = LIST_TAIL(p1);
+		p1 = deref_var(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+	}
+
+	return is_nil(p1);
 }
 
 static int fn_is_stream_1(query *q)
