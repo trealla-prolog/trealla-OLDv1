@@ -149,11 +149,13 @@ Others
 	write_term_to_chars/3
 	chars_base64/3			# currently options are ignored
 	chars_urlenc/3			# currently options are ignored
+	hex_chars/2             # as number_chars, but in hex
+	octal_chars/2           # as number_chars, but in octal
 
+	format(atom(A),...)
 	setup_call_cleanup/3
 	findall/4
 	atomic_concat/3
-	format(atom(A),...)
 	var_number/2
 	ignore/1
 	is_list/1
@@ -210,9 +212,6 @@ Others
 
 	string_upper/2
 	string_lower/2
-
-	hex_chars/2             # as number_chars, but in hex
-	octal_chars/2           # as number_chars, but in octal
 
 	log10/1                 # function returning log10 of arg
 	now/0                   # function returning C-time in secs as integer
