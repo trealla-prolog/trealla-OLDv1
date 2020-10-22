@@ -793,6 +793,37 @@ static int fn_iso_current_rule_1(query *q)
 	return 0;
 }
 
+static int fn_iso_char_code_2(query *q)
+{
+	GET_FIRST_ARG(p1,atom_or_var);
+	GET_NEXT_ARG(p2,integer_or_var);
+
+	if (is_variable(p1) && is_variable(p2)) {
+		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
+		return 0;
+	}
+
+	if (is_variable(p2)) {
+		const char *src = GET_STR(p1);
+		int ch = peek_char_utf8(src);
+		cell tmp;
+		make_int(&tmp, ch);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (is_variable(p1)) {
+		char tmpbuf[256];
+		put_char_utf8(tmpbuf, p2->val_num);
+		cell tmp;
+		make_small(&tmp, tmpbuf);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	const char *src = GET_STR(p1);
+	int ch = peek_char_utf8(src);
+	return ch == p2->val_num;
+}
+
 static int fn_iso_atom_chars_2(query *q)
 {
 	GET_FIRST_ARG(p1,iso_atom_or_var);
@@ -8969,6 +9000,7 @@ static const struct builtins g_iso_funcs[] =
 	{"nonvar", 1, fn_iso_nonvar_1, NULL},
 	{"ground", 1, fn_iso_ground_1, NULL},
 	{"callable", 1, fn_iso_callable_1, NULL},
+	{"char_code", 2, fn_iso_char_code_2, NULL},
 	{"atom_chars", 2, fn_iso_atom_chars_2, NULL},
 	{"atom_codes", 2, fn_iso_atom_codes_2, NULL},
 	{"number_chars", 2, fn_iso_number_chars_2, NULL},
