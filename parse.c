@@ -251,7 +251,7 @@ cell *list_tail(cell *l)
 	if (!n)
 		n = 1;
 
-	if (is_string(l) && ((l->len_str - n) > 0)) {
+	if (is_string(l) && ((l->len_str - n) != 0)) {
 		static cell tmp;
 		tmp.val_type = TYPE_CSTRING;
 		tmp.flags = FLAG_BLOB|FLAG_CONST_CSTRING|FLAG_STRING;
