@@ -19,7 +19,7 @@ board([_|Queens], [Col-Vars|Board], Col0, N, [_|VR], VC) :-
     constraints(N, Vars, VR, VC),
     board(Queens, Board, Col, N, VR, [_|VC]).
 
-constraints(0, _, _, _) :- !.
+constraints(0, _, _, _).
 constraints(N, Row, [R|Rs], [C|Cs]) :-
     arg(N, Row, R-C),
     M is N-1,

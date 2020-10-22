@@ -3930,10 +3930,10 @@ static int fn_iso_arg_3(query *q)
 	GET_NEXT_ARG(p3,any);
 
 	if (is_integer(p1)) {
-		int arg = p1->val_num;
+		int arg_nbr = p1->val_num;
 
 		if (q->retry) {
-			if (++arg > p2->arity)
+			if (++arg_nbr > p2->arity)
 				return 0;
 
 			GET_RAW_ARG(1, p1_raw);
@@ -3943,20 +3943,20 @@ static int fn_iso_arg_3(query *q)
 			p3 = p3_raw; p3_ctx = p3_raw_ctx;
 
 			cell tmp;
-			make_int(&tmp, arg);
+			make_int(&tmp, arg_nbr);
 			reset_value(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 			make_choice(q);
 		}
 
-		if ((arg < 1) || (arg > p2->arity)) {
-			throw_error(q, p1, "type_error", "out_of_range");
+		if ((arg_nbr < 1) || (arg_nbr > p2->arity)) {
+			throw_error(q, p1, "domain_error", "out_of_range");
 			return 0;
 		}
 
 		cell *c = p2 + 1;
 
-		for (int i = 1; i <= arg; i++) {
-			if (i == arg)
+		for (int i = 1; i <= arg_nbr; i++) {
+			if (i == arg_nbr)
 				return unify(q, p3, p3_ctx, c, p2_ctx);
 
 			c += c->nbr_cells;
