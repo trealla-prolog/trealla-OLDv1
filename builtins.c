@@ -8906,7 +8906,7 @@ static int fn_length_2(query *q)
 		return 1;
 	}
 
-	throw_error(q, p1, "type_error", "arg invalid");
+	throw_error(q, p1, "type_error", "arg_invalid");
 	return 0;
 }
 
