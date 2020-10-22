@@ -2925,6 +2925,9 @@ module *create_module(const char *name)
 
 	make_rule(m, "call(G) :- G.");
 
+	make_rule(m, "format(F) :- format(F,[]).");
+	make_rule(m, "term_to_atom(T,S) :- write_term_to_chars(S,T,[]).");
+
 	make_rule(m, "merge([], R, R) :- !.");
 	make_rule(m, "merge(R, [], R) :- !.");
 	make_rule(m, "merge([H1|T1], [H2|T2], Result) :- "		\

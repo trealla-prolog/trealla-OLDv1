@@ -122,7 +122,6 @@ GNU-Prolog & SWI-Prolog
 	forall/2
 	msort/2
 	merge/3
-	read_term_from_atom/3	# input term can be atom or string-list
 	format/1-3
 	predicate_property/2
 	numbervars/1,3-4
@@ -132,8 +131,9 @@ GNU-Prolog & SWI-Prolog
 	maplist/1-4
 	tab/1-2
 
-	write_term_to_atom/3	# GNU-Prolog
-	term_to_atom/2			# SWI-Prolog
+	read_term_from_atom/3	# use read_term_from_chars/3
+	write_term_to_atom/3	# use write_term_to_chars/3
+	term_to_atom/2			# use write_term_to_chars/3
 
 	random/1                # random(-float) float [0.0,<1.0]
 	random/1                # random(+integer) function returning integer [0,<integer]
@@ -144,6 +144,9 @@ GNU-Prolog & SWI-Prolog
 
 Others
 ======
+
+	read_term_from_chars/3
+	write_term_to_chars/3
 
 	setup_call_cleanup/3
 	findall/4

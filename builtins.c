@@ -6581,7 +6581,7 @@ static int fn_term_to_atom_2(query *q)
 	}
 }
 
-static int fn_write_term_to_atom_3(query *q)
+static int fn_write_term_to_chars_3(query *q)
 {
 	GET_FIRST_ARG(p2,any);
 	GET_NEXT_ARG(p1,any);
@@ -7259,12 +7259,6 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx,
 
 	free(tmpbuf);
 	return 1;
-}
-
-static int fn_format_1(query *q)
-{
-	GET_FIRST_ARG(p1,atom);
-	return do_format(q, NULL, 0, p1, p1_ctx, NULL, 0);
 }
 
 static int fn_format_2(query *q)
@@ -9170,7 +9164,6 @@ static const struct builtins g_other_funcs[] =
 
 	{"length", 2, fn_length_2, NULL},
 	{"ignore", 1, fn_ignore_1, "+callable"},
-	{"format", 1, fn_format_1, "+string"},
 	{"format", 2, fn_format_2, "+string,+list"},
 	{"format", 3, fn_format_3, "+stream,+string,+list"},
 	{"findall", 4, fn_findall_4, NULL},
@@ -9222,7 +9215,8 @@ static const struct builtins g_other_funcs[] =
 	{"chdir", 1, fn_chdir_1, "+string"},
 	{"name", 2, fn_iso_atom_codes_2, "?string,?list"},
 	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+string,-term,+list"},
-	{"write_term_to_atom", 3, fn_write_term_to_atom_3, "-string,+term,+list"},
+	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "-string,+term,+list"},
+	{"write_term_to_atom", 3, fn_write_term_to_chars_3, "-string,+term,+list"},
 	{"term_to_atom", 2, fn_term_to_atom_2, "+term,-string"},
 	{"base64", 2, fn_base64_2, "?string,?string"},
 	{"urlenc", 2, fn_urlenc_2, "?string,?string"},
