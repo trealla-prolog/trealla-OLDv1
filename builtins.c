@@ -448,7 +448,10 @@ static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 
 	if (!is_structure(p1)) {
 		if (is_blob(p1) && !is_const_cstring(p1)) {
-			tmp->val_str = strdup(p1->val_str);
+			size_t len = LEN_STR(p1);
+			tmp->val_str = malloc(len+1);
+			memcpy(tmp->val_str, p1->val_str, len);
+			tmp->val_str[len] = '\0';
 			return;
 		}
 
@@ -526,9 +529,13 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	cell *tmp = alloc_tmp_heap(q, 1);
 	copy_cells(tmp, p1, 1);
 
-	if (!is_structure(p1) || is_string(p1)) {
-		if (is_blob(p1) && !is_const_cstring(p1))
-			tmp->val_str = strdup(p1->val_str);
+	if (!is_structure(p1)) {
+		if (is_blob(p1) && !is_const_cstring(p1)) {
+			size_t len = LEN_STR(p1);
+			tmp->val_str = malloc(len+1);
+			memcpy(tmp->val_str, p1->val_str, len);
+			tmp->val_str[len] = '\0';
+		}
 
 		return;
 	}
