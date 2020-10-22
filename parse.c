@@ -1031,6 +1031,7 @@ static void directives(parser *p, term *t)
 			}
 
 			if (!strcmp(name, "between") ||
+				!strcmp(name, "charsio") ||
 				!strcmp(name, "terms") ||
 				!strcmp(name, "types") ||
 				!strcmp(name, "files") ||

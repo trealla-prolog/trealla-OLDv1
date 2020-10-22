@@ -5,14 +5,6 @@ partition([X|L], Y, L1, [X|L2]) :-
 	partition(L, Y, L1, L2).
 partition([], _, [], []).
 
-/*
-qsort([X|L], R, R0) :-
-	partition(L, X, L1, L2),
-	qsort(L2, R1, R0),
-	qsort(L1, R, [X|R1]).
-qsort([], R, R).
-*/
-
 maplist(_, []).
 maplist(P, [X1|X1s]) :-
 	call(P, X1),
@@ -52,4 +44,3 @@ spawnlist(_, [], [], [], []), wait.
 spawnlist(P, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s]) :-
 	spawn(P, X1, X2, X3, X4),
 	spawnlist(P, X1s, X2s, X3s, X4s).
-
