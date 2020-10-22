@@ -5265,7 +5265,6 @@ static int fn_iso_bagof_3(query *q)
 
 	if (!q->retry) {
 		q->st.qnbr++;
-		//printf("*** [%u] start bagof\n", q->st.qnbr);
 		cell *tmp = clone_to_heap(q, 1, p2, 2+p2->nbr_cells+1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
@@ -5279,7 +5278,6 @@ static int fn_iso_bagof_3(query *q)
 	}
 
 	if (!queuen_used(q) && !q->tmpq[q->st.qnbr]) {
-		//printf("*** [%u] no work\n", q->st.qnbr);
 		q->st.qnbr--;
 		return 0;
 	}
@@ -5287,14 +5285,11 @@ static int fn_iso_bagof_3(query *q)
 	// Take a copy
 
 	if (!q->tmpq[q->st.qnbr]) {
-		//printf("*** [%u] take copy\n", q->st.qnbr);
 		idx_t nbr_cells = queuen_used(q);
 		q->tmpq[q->st.qnbr] = malloc(sizeof(cell)*nbr_cells);
 		copy_cells(q->tmpq[q->st.qnbr], get_queuen(q), nbr_cells);
 		q->tmpq_size[q->st.qnbr] = nbr_cells;
 	}
-
-	//printf("*** [%u] working\n", q->st.qnbr);
 
 	init_queuen(q);
 	make_choice(q);
@@ -5321,13 +5316,11 @@ static int fn_iso_bagof_3(query *q)
 	}
 
 	if (!queuen_used(q)) {
-		//printf("*** [%u] nothing\n", q->st.qnbr);
 		init_queuen(q);
 		cut_me(q, 0);
 		return 0;
 	}
 
-	//printf("*** [%u] here's a bag\n", q->st.qnbr);
 	unpin_vars(q);
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
@@ -5816,7 +5809,7 @@ static int fn_between_3(query *q)
 		set_var(q, p3, p3_ctx, p1, q->st.curr_frame);
 
 		if (p1->val_num != p2->val_num)
-			make_barrier(q);
+			make_choice(q);
 
 		return 1;
 	}
@@ -5833,7 +5826,7 @@ static int fn_between_3(query *q)
 	reset_value(q, p3_raw, p3_raw_ctx, &tmp, q->st.curr_frame);
 
 	if (val != p2->val_num)
-		make_barrier(q);
+		make_choice(q);
 
 	return 1;
 }
