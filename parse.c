@@ -2927,6 +2927,7 @@ module *create_module(const char *name)
 	m->cpu_count = CPU_COUNT;
 
 	make_rule(m, "call(G) :- G.");
+	make_rule(m, "format(F) :- format(F, []).");
 
 	make_rule(m, "chars_base64(Plain,Base64,_) :- base64(Plain,Base64).");
 	make_rule(m, "chars_urlenc(Plain,Url,_) :- urlenc(Plain,Url).");
