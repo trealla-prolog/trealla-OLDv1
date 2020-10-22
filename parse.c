@@ -2925,8 +2925,7 @@ module *create_module(const char *name)
 
 	make_rule(m, "call(G) :- G.");
 
-	make_rule(m, "format(F) :- format(F,[]).");
-	make_rule(m, "term_to_atom(T,S) :- write_term_to_chars(S,T,[]).");
+	make_rule(m, "chars_bas64(Plain,Base64,_) :- base64(Plain,Base64).");
 
 	make_rule(m, "merge([], R, R) :- !.");
 	make_rule(m, "merge(R, [], R) :- !.");
@@ -3094,19 +3093,22 @@ module *create_module(const char *name)
 	make_rule(m, "tell(F) :- open(F,write,S), set_output(S).");
 	make_rule(m, "append(F) :- open(F,append,S), set_output(S).");
 
-	// SWI...
+	// SWI or GNU
 
 	make_rule(m, "current_key(K) :- variable(K), clause('$record_key'(K,_),_).");
 	make_rule(m, "recorda(K,V) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V)).");
 	make_rule(m, "recordz(K,V) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V)).");
 	make_rule(m, "recorded(K,V) :- nonvar(K), clause('$record_key'(K,V),_).");
-
 	make_rule(m, "recorda(K,V,R) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V),R).");
 	make_rule(m, "recordz(K,V,R) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V),R).");
 	make_rule(m, "recorded(K,V,R) :- nonvar(K), clause('$record_key'(K,V),_,R).");
 
 	make_rule(m, "succ(X,Y) :- integer(X), Y is X + 1, X >= 0, !.");
 	make_rule(m, "succ(X,Y) :- integer(Y), X is Y - 1, X >= 0.");
+
+	make_rule(m, "term_to_atom(T,S) :- write_term_to_chars(S,T,[]).");
+	make_rule(m, "write_term_to_atom(S,T,Opts) :- write_term_to_chars(S,T,Opts).");
+	make_rule(m, "read_term_from_atom(S,T,Opts) :- read_term_from_chars(S,T,Opts).");
 
 	// Other...
 

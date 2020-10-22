@@ -147,6 +147,7 @@ Others
 
 	read_term_from_chars/3
 	write_term_to_chars/3
+	chars_base64/3			# currently options are ignored
 
 	setup_call_cleanup/3
 	findall/4

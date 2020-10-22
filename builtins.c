@@ -6533,7 +6533,7 @@ static int fn_bwrite_2(query *q)
 	return 1;
 }
 
-static int fn_read_term_from_atom_3(query *q)
+static int fn_read_term_from_chars_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,any);
@@ -6550,35 +6550,6 @@ static int fn_read_term_from_atom_3(query *q)
 	int ok = do_read_term(q, str, p2, p2_ctx, p3, p3_ctx, src);
 	free(src);
 	return ok;
-}
-
-static int fn_term_to_atom_2(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
-
-	if (is_number(p1)) {
-		char tmpbuf[256], *dst = tmpbuf;
-		write_term_to_buf(q, dst, sizeof(tmpbuf), p1, p1_ctx, 1, 0, 0);
-		cell tmp = make_cstring(q, dst);
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	}
-
-	size_t len = write_term_to_buf(q, NULL, 0, p1, p1_ctx, 1, 0, 0);
-	char *dst = malloc(len+1);
-	write_term_to_buf(q, dst, len+1, p1, p1_ctx, 1, 0, 0);
-	idx_t offset;
-
-	if (is_in_pool(dst, &offset)) {
-		cell tmp;
-		make_literal(&tmp, offset);
-		free(dst);
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else {
-		cell tmp = make_cstring(q, dst);
-		free(dst);
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	}
 }
 
 static int fn_write_term_to_chars_3(query *q)
@@ -9214,10 +9185,8 @@ static const struct builtins g_other_funcs[] =
 	{"working_directory", 2, fn_working_directory_2, "-string,+string"},
 	{"chdir", 1, fn_chdir_1, "+string"},
 	{"name", 2, fn_iso_atom_codes_2, "?string,?list"},
-	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+string,-term,+list"},
+	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+string,-term,+list"},
 	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "-string,+term,+list"},
-	{"write_term_to_atom", 3, fn_write_term_to_chars_3, "-string,+term,+list"},
-	{"term_to_atom", 2, fn_term_to_atom_2, "+term,-string"},
 	{"base64", 2, fn_base64_2, "?string,?string"},
 	{"urlenc", 2, fn_urlenc_2, "?string,?string"},
 	{"string_lower", 2, fn_string_lower_2, "?string,?string"},
