@@ -1388,7 +1388,9 @@ void parser_assign_vars(parser *p)
 	}
 
 	for (idx_t i = 0; i < t->nbr_vars; i++) {
-		if (p->consulting && (p->vartab.var_used[i] == 1) && (*p->vartab.var_name[i] != '_')) {
+		if (p->consulting && (p->vartab.var_used[i] == 1) &&
+			(p->vartab.var_name[i][strlen(p->vartab.var_name[i])-1] != '_') &&
+			(*p->vartab.var_name[i] != '_')) {
 			if (!p->m->quiet)
 				fprintf(stdout, "Warning: singleton: %s, line %d\n", p->vartab.var_name[i], (int)p->line_nbr);
 		}
@@ -2926,7 +2928,8 @@ module *create_module(const char *name)
 
 	make_rule(m, "call(G) :- G.");
 
-	make_rule(m, "chars_bas64(Plain,Base64,_) :- base64(Plain,Base64).");
+	make_rule(m, "chars_base64(Plain,Base64,_) :- base64(Plain,Base64).");
+	make_rule(m, "chars_urlenc(Plain,Url,_) :- urlenc(Plain,Url).");
 
 	make_rule(m, "merge([], R, R) :- !.");
 	make_rule(m, "merge(R, [], R) :- !.");

@@ -148,6 +148,7 @@ Others
 	read_term_from_chars/3
 	write_term_to_chars/3
 	chars_base64/3			# currently options are ignored
+	chars_urlenc/3			# currently options are ignored
 
 	setup_call_cleanup/3
 	findall/4
@@ -230,8 +231,6 @@ Others
 	bwrite/2                # bwrite(+stream,+string)
 	replace/4               # replace(+string,+old,+new,-string)
 	split/4                 # split(+string,+sep,?left,?right)
-	base64/2                # base64(?decoded,?encoded)
-	urlenc/2                # urlenc(?decoded,?encoded)
 	sha1/2                  # sha1(+plaintext,?hash)        NEEDS OPENSSL
 	sha256/2                # sha256(+plaintext,?hash)      NEEDS OPENSSL
 	sha512/2                # sha512(+plaintext,?hash)      NEEDS OPENSSL
