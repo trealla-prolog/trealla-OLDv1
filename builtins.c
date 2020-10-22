@@ -5325,6 +5325,7 @@ static int fn_iso_bagof_3(query *q)
 
 	unpin_vars(q);
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
+	fix_list(l);
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
@@ -5352,7 +5353,7 @@ static int fn_iso_op_3(query *q)
 	else if (!strcmp(spec, "yfx"))
 		optype = OP_YFX;
 	else {
-		throw_error(q, p2, "type_error", "create");
+		throw_error(q, p2, "domain_error", "op_spec");
 		return 0;
 	}
 
@@ -5362,12 +5363,12 @@ static int fn_iso_op_3(query *q)
 	int ok = get_op(q->m, GET_STR(p3), &tmp_optype, &tmp_userop, 0);
 
 	if (ok && !tmp_userop) {
-		throw_error(q, p3, "permission_error", "create");
+		throw_error(q, p3, "permission_error", "can't_create_op");
 		return 0;
 	}
 
 	if (!set_op(q->m, GET_STR(p3), optype, p1->val_num)) {
-		throw_error(q, p3, "domain_error", "create");
+		throw_error(q, p3, "domain_error", "too_many_ops");
 		return 0;
 	}
 
@@ -5687,6 +5688,7 @@ static int fn_statistics_2(query *q)
 		append_list(q, &tmp);
 		make_literal(&tmp, g_nil_s);
 		cell *l = end_list(q);
+		fix_list(l);
 		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
