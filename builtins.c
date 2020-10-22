@@ -601,8 +601,10 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 		char *ptr = strchr(tmpbuf, '_');
 		if (ptr) *ptr = '\0';
 		snprintf(dst2, len2, "error(%s(%s,%s))", err_type, tmpbuf, dst);
-	} else {
+	} else if (c->arity) {
 		snprintf(dst2, len2, "error(%s(%s,(%s)/%u),%s/%u)", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+	} else {
+		snprintf(dst2, len2, "error(%s(%s,%s),%s/%u)", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	}
 
 	parser *p = q->m->p;
