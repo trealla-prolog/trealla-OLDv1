@@ -5627,6 +5627,9 @@ static int fn_listing_1(query *q)
 
 		name = p2->val_off;
 		arity = p3->val_num;
+
+		if (!strcmp(GET_STR(p1), "//"))
+			arity += 2;
 	}
 
 	save_name(stdout, q, name, arity);
@@ -8795,7 +8798,7 @@ static int do_length(query *q)
 	return 1;
 }
 
-static int fn_length_2(query *q)
+static int fn_iso_length_2(query *q)
 {
 	if (q->retry)
 		return do_length(q);
@@ -9039,6 +9042,7 @@ static const struct builtins g_iso_funcs[] =
 	{"!", 0, fn_iso_cut_0, NULL},
 	{"is", 2, fn_iso_is_2, NULL},
 	{"clause", 2, fn_iso_clause_2, NULL},
+	{"length", 2, fn_iso_length_2, NULL},
 	{"arg", 3, fn_iso_arg_3, NULL},
 	{"functor", 3, fn_iso_functor_3, NULL},
 	{"=..", 2, fn_iso_univ_2, NULL},
@@ -9196,7 +9200,6 @@ static const struct builtins g_other_funcs[] =
 
 	// Miscellaneous...
 
-	{"length", 2, fn_length_2, NULL},
 	{"ignore", 1, fn_ignore_1, "+callable"},
 	{"format", 2, fn_format_2, "+string,+list"},
 	{"format", 3, fn_format_3, "+stream,+string,+list"},
