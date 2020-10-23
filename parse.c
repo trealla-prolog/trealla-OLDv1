@@ -1001,7 +1001,7 @@ static void directives(parser *p, term *t)
 				tmp.arity = a->val_num;
 
 				if (!strcmp(GET_STR(head), "//"))
-					tmp.arity *= 2;
+					tmp.arity += 2;
 
 				rule *h = create_rule(p->m, &tmp);
 				h->is_public = 1;
