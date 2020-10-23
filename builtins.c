@@ -6631,6 +6631,7 @@ static int fn_is_list_1(query *q)
 		return 0;
 
 	while (is_list(p1)) {
+		LIST_HEAD(p1);
 		p1 = LIST_TAIL(p1);
 		p1 = deref_var(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;

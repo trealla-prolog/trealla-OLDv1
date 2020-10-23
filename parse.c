@@ -239,7 +239,7 @@ cell *list_head(cell *l)
 	return &tmp;
 }
 
-cell *list_tail(cell *l)
+cell *list_tail(cell *l, cell *tmp)
 {
 	if (!is_string(l)) {
 		cell *h = l + 1;
@@ -252,23 +252,21 @@ cell *list_tail(cell *l)
 		n = 1;
 
 	if (is_string(l) && ((l->len_str - n) != 0)) {
-		static cell tmp;
-		tmp.val_type = TYPE_CSTRING;
-		tmp.flags = FLAG_BLOB|FLAG_CONST_CSTRING|FLAG_STRING;
-		tmp.nbr_cells = 1;
-		tmp.arity = 2;
-		tmp.val_str = l->val_str + n;
-		tmp.len_str = l->len_str - n;
-		return &tmp;
+		tmp->val_type = TYPE_CSTRING;
+		tmp->flags = FLAG_BLOB|FLAG_CONST_CSTRING|FLAG_STRING;
+		tmp->nbr_cells = 1;
+		tmp->arity = 2;
+		tmp->val_str = l->val_str + n;
+		tmp->len_str = l->len_str - n;
+		return tmp;
 	}
 
-	static cell tmp;
-	tmp.val_type = TYPE_LITERAL;
-	tmp.nbr_cells = 1;
-	tmp.arity = 0;
-	tmp.flags = 0;
-	tmp.val_off = g_nil_s;
-	return &tmp;
+	tmp->val_type = TYPE_LITERAL;
+	tmp->nbr_cells = 1;
+	tmp->arity = 0;
+	tmp->flags = 0;
+	tmp->val_off = g_nil_s;
+	return tmp;
 }
 
 module *find_module(const char *name)
