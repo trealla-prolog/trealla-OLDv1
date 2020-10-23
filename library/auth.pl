@@ -8,6 +8,8 @@
 	listusers/1, save/0
 	]).
 
+:- use_module(library(dict)).
+
 % These are our database records:
 
 :- dynamic auth_session/2.

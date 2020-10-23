@@ -141,6 +141,9 @@ GNU-Prolog & SWI-Prolog
 	freeze/2
 	frozen/2
 
+	put_attrs/2
+	get_attrs/2
+
 
 Others
 ======
@@ -246,7 +249,7 @@ support loading into modules eg. *consult(MOD:FILE-SPEC)*.
 A simple dictionary
 ===================
 
-Autoloaded from library(dict)...
+	:- use_module(library(dict)).
 
 	dict:set/4              # set(+dict,+name,+value,-dict)
 	dict:del/3              # del(+dict,+name,-dict)
@@ -258,7 +261,7 @@ Autoloaded from library(dict)...
 Attributed variables		##NOT WORKING YET##
 ====================
 
-	:- use_module(library(atts)).
+	:- use_module(library(atts)).	AUTOLOADED
 
 Exporting...
 

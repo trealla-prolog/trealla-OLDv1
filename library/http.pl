@@ -3,6 +3,8 @@
 	http_request/5
 	]).
 
+:- use_module(library(dict)).
+
 read_response(S, Code) :-
 	getline(S, Line),
 	split(Line, ' ' ,_Ver, Rest),
