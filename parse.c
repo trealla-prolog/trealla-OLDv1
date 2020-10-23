@@ -231,11 +231,11 @@ cell *list_head(cell *l)
 
 	static cell tmp;
 	tmp.val_type = TYPE_CSTRING;
-	tmp.flags = FLAG_BLOB|FLAG_CONST_CSTRING;
 	tmp.nbr_cells = 1;
+	tmp.flags = 0;
 	tmp.arity = 0;
-	tmp.val_str = l->val_str;
-	tmp.len_str = n;
+	memcpy(tmp.val_chr, l->val_str, n);
+	tmp.val_chr[n] = '\0';
 	return &tmp;
 }
 
@@ -2326,7 +2326,7 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 	int is_chars_list = 0;
 
 	while (is_iso_list(l)) {
-		cell *h = list_head(l);
+		cell *h = LIST_HEAD(l);
 		cell *c = q ? deref_var(q, h, save_ctx) : h;
 
 		if (!is_atom(c)) {
@@ -2342,7 +2342,7 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 		}
 
 		is_chars_list = 1;
-		l = list_tail(l);
+		l = LIST_TAIL(l);
 		l = q ? deref_var(q, l, save_ctx) : l;
 		if (q) save_ctx = q->latest_ctx;
 	}
