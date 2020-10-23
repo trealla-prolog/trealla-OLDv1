@@ -239,7 +239,7 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 	dst += formatted(dst, dstlen, src, LEN_STR(c));
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 
-	if (!is_structure(c))
+	if (!is_compound(c))
 		return dst - save_dst;
 
 	idx_t arity = c->arity;
@@ -360,7 +360,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 			dst += snprintf(dst, dstlen, "%s", "[");
 
 		head = running ? deref_var(q, head, c_ctx) : head;
-		int parens = is_structure(head) && !strcmp(GET_STR(head), ",");
+		int parens = is_compound(head) && !strcmp(GET_STR(head), ",");
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
 		dst += write_term_to_buf(q, dst, dstlen, head, q->latest_ctx, running, 0, depth+1);
 		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
@@ -368,7 +368,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		tail = running ? deref_var(q, tail, c_ctx) : tail;
 		c_ctx = q->latest_ctx;
 
-		if (is_literal(tail) && !is_structure(tail)) {
+		if (is_literal(tail) && !is_compound(tail)) {
 			src = GET_STR(tail);
 
 			if (strcmp(src, "[]")) {
@@ -458,7 +458,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		if (parens)
 			dst += snprintf(dst, dstlen, "%s", ")");
 
-		if (is_structure(c) && !is_string(c)) {
+		if (is_compound(c) && !is_string(c)) {
 			idx_t arity = c->arity;
 			dst += snprintf(dst, dstlen, braces?"{":"(");
 
@@ -483,7 +483,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		cell *rhs = c + 1;
 		rhs = running ? deref_var(q, rhs, c_ctx) : rhs;
 		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "\\+");
-		int parens = is_structure(rhs) && !strcmp(GET_STR(rhs), ",");
+		int parens = is_compound(rhs) && !strcmp(GET_STR(rhs), ",");
 		dst += snprintf(dst, dstlen, "%s", src);
 		if (space && !parens) dst += snprintf(dst, dstlen, " ");
 		if (parens) dst += snprintf(dst, dstlen, "(");

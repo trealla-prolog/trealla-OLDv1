@@ -446,7 +446,7 @@ static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	cell *tmp = alloc_tmp_heap(q, 1);
 	copy_cells(tmp, p1, 1);
 
-	if (!is_structure(p1)) {
+	if (!is_compound(p1)) {
 		if (is_blob(p1) && !is_const_cstring(p1)) {
 			size_t len = LEN_STR(p1);
 			tmp->val_str = malloc(len+1);
@@ -529,7 +529,7 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	cell *tmp = alloc_tmp_heap(q, 1);
 	copy_cells(tmp, p1, 1);
 
-	if (!is_structure(p1)) {
+	if (!is_compound(p1)) {
 		if (is_blob(p1) && !is_const_cstring(p1)) {
 			size_t len = LEN_STR(p1);
 			tmp->val_str = malloc(len+1);
@@ -675,7 +675,7 @@ static int fn_iso_atom_1(query *q)
 static int fn_iso_compound_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return is_structure(p1) ? 1 : 0;
+	return is_compound(p1) ? 1 : 0;
 }
 
 static int fn_iso_atomic_1(query *q)
@@ -701,7 +701,7 @@ static int has_vars(query *q, cell *c, idx_t c_ctx)
 	if (is_variable(c))
 		return 1;
 
-	if (!is_structure(c))
+	if (!is_compound(c))
 		return 0;
 
 	unsigned arity = c->arity;
@@ -749,7 +749,7 @@ static int fn_iso_callable_1(query *q)
 
 static int fn_iso_current_rule_1(query *q)
 {
-	GET_FIRST_ARG(p1,structure);
+	GET_FIRST_ARG(p1,compound);
 
 	if (strcmp(GET_STR(p1), "/")) {
 		throw_error(q, p1, "type_error", "predicate_indicator");
@@ -1470,7 +1470,7 @@ static int fn_iso_set_output_1(query *q)
 static int fn_iso_stream_property_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
-	GET_NEXT_ARG(p1,structure);
+	GET_NEXT_ARG(p1,compound);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 
@@ -1557,7 +1557,7 @@ static int fn_iso_open_3(query *q)
 
 static int fn_iso_open_4(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_structure);
+	GET_FIRST_ARG(p1,atom_or_compound);
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,variable);
 	GET_NEXT_ARG(p4,list_or_nil);
@@ -1572,7 +1572,7 @@ static int fn_iso_open_4(query *q)
 	const char *filename;
 	stream *oldstr = NULL;
 
-	if (is_structure(p1) && (p1->arity == 1) && !strcmp(GET_STR(p1), "stream")) {
+	if (is_compound(p1) && (p1->arity == 1) && !strcmp(GET_STR(p1), "stream")) {
 		int oldn = get_stream(q, p1+1);
 
 		if (oldn < 0) {
@@ -1600,7 +1600,7 @@ static int fn_iso_open_4(query *q)
 		cell *h = LIST_HEAD(p4);
 		cell *c = deref_var(q, h, p4_ctx);
 
-		if (is_structure(c) && (c->arity == 1)) {
+		if (is_compound(c) && (c->arity == 1)) {
 			if (!strcmp(GET_STR(c), "mmap")) {
 #if USE_MMAP
 				mmap_var = c + 1;
@@ -1761,7 +1761,7 @@ static int fn_iso_nl_1(query *q)
 
 static void parse_read_params(query *q, cell *p, stream *str)
 {
-	if (!is_structure(p))
+	if (!is_compound(p))
 		return;
 
 	if (!strcmp(GET_STR(p), "character_escapes")) {
@@ -1959,7 +1959,7 @@ static void parse_write_params(query *q, cell *p)
 {	if (!is_literal(p))
 		return;
 
-	if (!is_structure(p))
+	if (!is_compound(p))
 		return;
 
 	if (!strcmp(GET_STR(p), "max_depth")) {
@@ -3928,7 +3928,7 @@ static int fn_iso_nlt_2(query *q)
 static int fn_iso_arg_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,structure);
+	GET_NEXT_ARG(p2,compound);
 	GET_NEXT_ARG(p3,any);
 
 	if (is_integer(p1)) {
@@ -4069,7 +4069,7 @@ static int do_collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, ce
 	for (int i = 0; i < nbr_cells; i++, p1++) {
 		cell *c = deref_var(q, p1, p1_ctx);
 
-		if (is_structure(c)) {
+		if (is_compound(c)) {
 			cnt += do_collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1, slots);
 		} else if (is_variable(c)) {
 			assert(c->var_nbr < MAX_ARITY);
@@ -4092,7 +4092,7 @@ static int fn_iso_term_variables_2(query *q)
 	cell *slots[MAX_ARITY] = {0};
 	int cnt = 0;
 
-	if (is_structure(p1))
+	if (is_compound(p1))
 		cnt = do_collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
 	else
 		cnt = do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
@@ -4539,7 +4539,7 @@ int call_me(query *q, cell *p1)
 
 	static const char *fudge = ",;->";
 
-	if (is_structure(p1) && is_op(p1) && strstr(fudge,GET_STR(p1))) {
+	if (is_compound(p1) && is_op(p1) && strstr(fudge,GET_STR(p1))) {
 		unsigned arity = p1->arity;
 		cell *p = p1 + 1;
 
@@ -5246,7 +5246,7 @@ static uint64_t get_vars(query *q, cell *p, idx_t p_ctx)
 
 static cell *skip_existentials(const query *q, cell *p2, uint64_t *xs)
 {
-	while (is_structure(p2) && !strcmp(GET_STR(p2), "^")) {
+	while (is_compound(p2) && !strcmp(GET_STR(p2), "^")) {
 		cell *c = p2 + 1;
 
 		assert(c->var_nbr < 64);
@@ -6089,7 +6089,7 @@ static int fn_server_3(query *q)
 		cell *h = LIST_HEAD(p3);
 		cell *c = deref_var(q, h, p3_ctx);
 
-		if (is_structure(c) && (c->arity == 1)) {
+		if (is_compound(c) && (c->arity == 1)) {
 			if (!strcmp(GET_STR(c), "udp")) {
 				c = c + 1;
 
@@ -6269,7 +6269,7 @@ static int fn_client_5(query *q)
 		cell *h = LIST_HEAD(p5);
 		cell *c = deref_var(q, h, p5_ctx);
 
-		if (is_structure(c) && (c->arity == 1)) {
+		if (is_compound(c) && (c->arity == 1)) {
 			if (!strcmp(GET_STR(c), "udp")) {
 				c = c + 1;
 
@@ -6323,7 +6323,7 @@ static int fn_client_5(query *q)
 		cell *h = LIST_HEAD(p5);
 		cell *c = deref_var(q, h, p5_ctx);
 
-		if (is_structure(c) && (c->arity == 1)) {
+		if (is_compound(c) && (c->arity == 1)) {
 			if (!strcmp(GET_STR(c), "host")) {
 				c = c + 1;
 
@@ -6959,7 +6959,7 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 
 static int fn_consult_1(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_structure);
+	GET_FIRST_ARG(p1,atom_or_compound);
 
 	if (!is_list(p1)) {
 		if (!do_consult(q, p1, p1_ctx))
@@ -7246,11 +7246,11 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx,
 		int n = get_named_stream(q, "user_output");
 		stream *str = &g_streams[n];
 		net_write(tmpbuf, len, str);
-	} else if (is_structure(str) && ((strcmp(GET_STR(str),"atom") && strcmp(GET_STR(str),"chars") && strcmp(GET_STR(str),"string")) || (str->arity > 1) || !is_variable(str+1))) {
+	} else if (is_compound(str) && ((strcmp(GET_STR(str),"atom") && strcmp(GET_STR(str),"chars") && strcmp(GET_STR(str),"string")) || (str->arity > 1) || !is_variable(str+1))) {
 		free(tmpbuf);
 		throw_error(q, c, "type_error", "structure");
 		return 0;
-	} else if (is_structure(str)) {
+	} else if (is_compound(str)) {
 		cell *c = deref_var(q, str+1, str_ctx);
 		cell tmp = make_cstring(q, tmpbuf);
 		set_var(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
@@ -7293,7 +7293,7 @@ static int fn_format_2(query *q)
 
 static int fn_format_3(query *q)
 {
-	GET_FIRST_ARG(pstr,stream_or_structure);
+	GET_FIRST_ARG(pstr,stream_or_compound);
 	GET_NEXT_ARG(p1,atom);
 	GET_NEXT_ARG(p2,list_or_nil);
 	return do_format(q, pstr, pstr_ctx, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
@@ -8256,7 +8256,7 @@ static int fn_numbervars_1(query *q)
 
 	cell *slots[MAX_ARITY] = {0};
 
-	if (is_structure(p1))
+	if (is_compound(p1))
 		do_collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
 	else
 		do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
@@ -8283,7 +8283,7 @@ static int fn_numbervars_3(query *q)
 
 	cell *slots[MAX_ARITY] = {0};
 
-	if (is_structure(p1))
+	if (is_compound(p1))
 		do_collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
 	else
 		do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
@@ -8709,7 +8709,7 @@ static int fn_call_dcg_3(query *q)
 	if (is_list_or_nil(p1))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
-	if (is_structure(p1) && (p1->val_off == g_braces_s)) {
+	if (is_compound(p1) && (p1->val_off == g_braces_s)) {
 		if (!unify(q, p2, p2_ctx, p3, p3_ctx))
 			return 0;
 
