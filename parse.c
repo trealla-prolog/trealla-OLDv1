@@ -1576,6 +1576,12 @@ static void parser_dcg_rewrite(parser *p)
 			continue;
 		}
 
+		if (!strcmp(GET_STR(phrase), "!")) {
+			tmp[nbr_cells++] = *phrase;
+			phrase++;
+			continue;
+		}
+
 		int last = ((phrase+phrase->nbr_cells) - t->cells) >= t->cidx;
 
 		if (!strcmp(GET_STR(phrase), "{}") && phrase->arity) {
