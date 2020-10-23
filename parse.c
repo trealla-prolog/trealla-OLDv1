@@ -999,6 +999,10 @@ static void directives(parser *p, term *t)
 				if (!is_integer(a)) return;
 				cell tmp = *f;
 				tmp.arity = a->val_num;
+
+				if (!strcmp(GET_STR(head), "//"))
+					tmp.arity *= 2;
+
 				rule *h = create_rule(p->m, &tmp);
 				h->is_public = 1;
 			}
