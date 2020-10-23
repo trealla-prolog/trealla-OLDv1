@@ -435,8 +435,8 @@ static int compkey(const void *ptr1, const void *ptr2)
 			return strcmp(GET_STR(p1), GET_STR(p2));
 		else if (is_variable(p2))
 			return 0;
-	} else if (is_compound(p1)) {
-		if (is_compound(p2)) {
+	} else if (is_structure(p1)) {
+		if (is_structure(p2)) {
 			if (p1->arity < p2->arity)
 				return -1;
 
@@ -569,7 +569,7 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 	if (h->is_persist)
 		r->t.is_persist = 1;
 
-	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_compound(c+1))
+	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1))
 		reindex_rule(m, h);
 
 	return r;
@@ -663,7 +663,7 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 	if (h->is_persist)
 		r->t.is_persist = 1;
 
-	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_compound(c+1))
+	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1))
 		reindex_rule(m, h);
 
 	return r;
@@ -993,7 +993,7 @@ static void directives(parser *p, term *t)
 		while (is_iso_list(p2)) {
 			cell *head = LIST_HEAD(p2);
 
-			if (is_compound(head)) {
+			if (is_structure(head)) {
 				cell *f = head+1, *a = f+1;
 				if (!is_literal(f)) return;
 				if (!is_integer(a)) return;

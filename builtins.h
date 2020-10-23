@@ -12,19 +12,21 @@
 	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx
 
 #define is_callable(c) (is_literal(c) || is_cstring(c))
-#define is_compound(c) ((c)->arity)
+#define is_structure(c) (is_literal(c) && (c)->arity)
 #define is_number(c) (is_rational(c) || is_float(c))
 #define is_atomic(c) (is_atom(c) || is_number(c))
 #define is_list_or_nil(c) (is_list(c) || is_nil(c))
 #define is_list_or_nil_or_var(c) (is_list_or_nil(c) || is_variable(c))
 #define is_list_or_var(c) (is_list(c) || is_variable(c))
+#define is_structure_or_var(c) (is_structure(c) || is_variable(c))
 #define is_atom_or_var(c) (is_atom(c) || is_variable(c))
 #define is_atom_or_int(c) (is_atom(c) || is_integer(c))
-#define is_atom_or_compound(c) (is_atom(c) || is_compound(c))
+#define is_atom_or_structure(c) (is_atom(c) || is_structure(c))
 #define is_integer_or_var(c) (is_integer(c) || is_variable(c))
+#define is_integer_or_atom(c) (is_integer(c) || is_atom(c))
 #define is_nonvar(c) (!is_variable(c))
 #define is_stream(c) (get_stream(q,c) >= 0)
-#define is_stream_or_compound(c) (is_compound(c) || is_stream(c))
+#define is_stream_or_structure(c) (is_structure(c) || is_stream(c))
 #define is_any(c) 1
 
 #define is_iso_list_or_nil(c) (is_iso_list(c) || is_nil(c))

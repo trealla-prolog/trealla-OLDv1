@@ -735,7 +735,7 @@ int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 	}
 
 	if (is_variable(p1)) {
-		if (is_compound(p2) && (p2_ctx >= q->st.curr_frame))
+		if (is_structure(p2) && (p2_ctx >= q->st.curr_frame))
 			q->no_tco = 1;
 
 		set_var(q, p1, p1_ctx, p2, p2_ctx);
@@ -743,7 +743,7 @@ int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 	}
 
 	if (is_variable(p2)) {
-		if (is_compound(p1) && (p1_ctx >= q->st.curr_frame))
+		if (is_structure(p1) && (p1_ctx >= q->st.curr_frame))
 			q->no_tco = 1;
 
 		set_var(q, p2, p2_ctx, p1, p1_ctx);
