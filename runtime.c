@@ -566,7 +566,7 @@ void set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 
 	e->ctx = v_ctx;
 
-	if (v->arity && !is_string(v))
+	if (is_structure(v))
 		make_indirect(&e->c, v);
 	else
 		e->c = *v;
