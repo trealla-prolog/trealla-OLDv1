@@ -13,6 +13,7 @@
 
 #define is_callable(c) (is_literal(c) || is_cstring(c))
 #define is_structure(c) (is_literal(c) && (c)->arity)
+#define is_compound(c) (is_structure(c) || is_string(c))
 #define is_number(c) (is_rational(c) || is_float(c))
 #define is_atomic(c) (is_atom(c) || is_number(c))
 #define is_list_or_nil(c) (is_list(c) || is_nil(c))

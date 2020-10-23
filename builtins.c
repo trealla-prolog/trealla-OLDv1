@@ -675,7 +675,7 @@ static int fn_iso_atom_1(query *q)
 static int fn_iso_compound_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return is_structure(p1) || is_string(p1) ? 1 : 0;
+	return is_compound(p1) ? 1 : 0;
 }
 
 static int fn_iso_atomic_1(query *q)
