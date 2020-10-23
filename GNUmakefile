@@ -18,7 +18,7 @@ endif
 OBJECTS = tpl.o history.o builtins.o library.o \
 	parse.o print.o runtime.o \
 	skiplist.o base64.o network.o utf8.o \
-	lists.o dict.o apply.o http.o atts.o
+	lists.o dict.o apply.o http.o atts.o error.o
 
 all: tpl
 
@@ -80,3 +80,6 @@ http.o: library/http.pl
 
 atts.o: library/atts.pl
 	$(LD) $(OSFLAG) -r -b binary -o atts.o library/atts.pl
+
+error.o: library/error.pl
+	$(LD) -m elf_x86_64 -r -b binary -o error.o library/error.pl

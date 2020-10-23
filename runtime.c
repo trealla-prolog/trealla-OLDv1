@@ -410,7 +410,7 @@ static int check_slots(const query *q, frame *g, term *t)
 	for (unsigned i = 0; i < g->nbr_vars; i++) {
 		slot *e = GET_SLOT(g, i);
 
-		if (is_indirect(&e->c))
+		if (is_indirect(&e->c) || is_string(&e->c))
 			return 0;
 	}
 
