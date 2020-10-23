@@ -97,7 +97,7 @@ static struct op_table g_ops[] =
 	{"-", OP_YFX, 500},
 	{"?", OP_FX, 500},
 
-    {"rdiv", OP_YFX, 400},
+	{"rdiv", OP_YFX, 400},
 
 	{"*", OP_YFX, 400},
 	{"/", OP_YFX, 400},
@@ -2410,9 +2410,9 @@ int parser_tokenize(parser *p, int args, int consing)
 			continue;
 		}
 
-        if (p->in_dcg && !p->quoted && !strcmp(p->token, "|") && !p->dcg_passthru) {
+		if (p->in_dcg && !p->quoted && !strcmp(p->token, "|") && !p->dcg_passthru)
 			strcpy(p->token, ";");
-        } else if (p->in_dcg && !p->quoted && !strcmp(p->token, "{") && !p->dcg_passthru++)
+		else if (p->in_dcg && !p->quoted && !strcmp(p->token, "{") && !p->dcg_passthru++)
 			;
 		else if (p->in_dcg && !p->quoted && !strcmp(p->token, "}") && !--p->dcg_passthru)
 			;
