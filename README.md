@@ -129,6 +129,7 @@ GNU-Prolog & SWI-Prolog
 	sleep/1
 	name/2
 	maplist/1-4
+	foldl/4-7
 	tab/1-2
 
 	read_term_from_atom/3	# use read_term_from_chars/3 instead
