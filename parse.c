@@ -748,8 +748,8 @@ void clear_term(term *t)
 
 static cell *make_cell(parser *p)
 {
-	while (p->t->cidx >= p->t->nbr_cells) {
-		int nbr_cells = p->t->nbr_cells * 2;
+	if (p->t->cidx == p->t->nbr_cells) {
+		idx_t nbr_cells = p->t->nbr_cells * 2;
 		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*nbr_cells));
 		if (!p->t) abort();
 		p->t->nbr_cells = nbr_cells;
@@ -1413,7 +1413,7 @@ void parser_assign_vars(parser *p)
 	check_first_cut(p);
 
 	if (p->consulting)
-		directives(p, t);
+		directives(p, p->t);
 }
 
 static int attach_ops(parser *p, idx_t start_idx)
@@ -1552,7 +1552,8 @@ static void parser_dcg_rewrite(parser *p)
 		return;
 
 	cell *phrase = t->cells + 1;
-	cell *tmp = calloc(1+(t->cidx*10), sizeof(cell));
+	idx_t save_nbr_cells = 1 + (t->nbr_cells * 10);
+	cell *tmp = calloc(save_nbr_cells, sizeof(cell));
 	*tmp = t->cells[0];
 	tmp->val_off = find_in_pool(":-");
 	idx_t nbr_cells = 1;
