@@ -653,7 +653,7 @@ static int unify_literal(cell *p1, cell *p2)
 	if (is_literal(p2))
 		return p1->val_off == p2->val_off;
 
-	if (is_cstring(p2) && (LEN_STR(p2) == LEN_STR(p1)))
+	if (is_cstring(p2) && (LEN_STR(p1) == LEN_STR(p2)))
 		return !memcmp(GET_STR(p2), g_pool+p1->val_off, LEN_STR(p1));
 
 	return 0;
