@@ -1730,7 +1730,7 @@ static void parser_dcg_rewrite(parser *p)
 	p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
 	copy_cells(p->t->cells, tmp, nbr_cells);
 	p->t->nbr_cells = nbr_cells;
-	p->t->cidx = tmp->nbr_cells;
+	p->t->cidx = nbr_cells;
 	free(tmp);
 }
 
