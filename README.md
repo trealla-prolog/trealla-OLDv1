@@ -128,9 +128,10 @@ GNU-Prolog & SWI-Prolog
 	e/0
 	sleep/1
 	name/2
-	maplist/1-4
-	foldl/4-7
 	tab/1-2
+
+	maplist/1-4				# autoloaded from library(apply)
+	foldl/4-7				# autoloaded from library(apply)
 
 	read_term_from_atom/3	# use read_term_from_chars/3 instead
 	write_term_to_atom/3	# use write_term_to_chars/3 instead
