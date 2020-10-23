@@ -3950,10 +3950,13 @@ static int fn_iso_arg_3(query *q)
 			make_choice(q);
 		}
 
-		if ((arg_nbr < 1) || (arg_nbr > p2->arity)) {
+		if (arg_nbr < 0) {
 			throw_error(q, p1, "domain_error", "out_of_range");
 			return 0;
 		}
+
+		if ((arg_nbr == 0) || (arg_nbr > p2->arity))
+			return 0;
 
 		cell *c = p2 + 1;
 
@@ -3972,7 +3975,8 @@ static int fn_iso_arg_3(query *q)
 		make_int(&tmp, 1);
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		cell *c = p2 + 1;
-		set_var(q, p3, p3_ctx, c, p2_ctx);
+		c = deref_var(q, c, p2_ctx);
+		set_var(q, p3, p3_ctx, c, q->latest_ctx);
 		make_choice(q);
 		return 1;
 	}
