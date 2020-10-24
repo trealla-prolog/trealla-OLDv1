@@ -66,8 +66,8 @@ foldl(Goal, List1, List2, List3, V0, V) :-
 
 foldl_([], [], [], _, V, V).
 foldl_([H1|T1], [H2|T2], [H3|T3], Goal, V0, V) :-
-	  call(Goal, H1, H2, H3, V0, V1),
-	  foldl_(T1, T2, T3, Goal, V1, V).
+	call(Goal, H1, H2, H3, V0, V1),
+	foldl_(T1, T2, T3, Goal, V1, V).
 
 foldl(Goal, List1, List2, List3, List4, V0, V) :-
 	foldl_(List1, List2, List3, List4, Goal, V0, V).
