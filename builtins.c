@@ -4297,7 +4297,6 @@ static int fn_iso_clause_2(query *q)
 		frame *g = GET_FRAME(q->st.curr_frame);
 		try_me(q, g->nbr_vars);
 		int ok = unify(q, p2, p2_ctx, body, q->st.fp);
-		if (!ok) undo_me(q);
 		return ok;
 	}
 
