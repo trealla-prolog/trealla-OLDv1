@@ -4293,8 +4293,13 @@ static int fn_iso_clause_2(query *q)
 	term *t = &q->st.curr_clause->t;
 	cell *body = get_body(t->cells);
 
-	if (body)
-		return unify(q, p2, p2_ctx, body, q->st.fp);
+	if (body) {
+		frame *g = GET_FRAME(q->st.curr_frame);
+		try_me(q, g->nbr_vars);
+		int ok = unify(q, p2, p2_ctx, body, q->st.fp);
+		if (!ok) undo_me(q);
+		return ok;
+	}
 
 	cell tmp;
 	make_literal(&tmp, g_true_s);
