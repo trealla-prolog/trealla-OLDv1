@@ -4615,6 +4615,7 @@ static int fn_iso_ifthen_2(query *q)
 	cell *tmp = clone_to_heap(q, 1, p1, 1+p2->nbr_cells+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
+	tmp[nbr_cells-1].cgen = q->cgen + 1;
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	make_barrier(q);
@@ -4635,6 +4636,7 @@ static int do_ifthenelse(query *q, cell *p1, cell *p2, cell *p3)
 	cell *tmp = clone_to_heap(q, 1, p1, 1+p2->nbr_cells+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
+	tmp[nbr_cells-1].cgen = q->cgen + 1;
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	make_barrier(q);
@@ -4679,6 +4681,7 @@ static int fn_iso_negation_1(query *q)
 	cell *tmp = clone_to_heap(q, 1, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
+	tmp[nbr_cells-1].cgen = q->cgen + 1;
 	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 	make_barrier(q);
 	q->st.curr_cell = tmp;
@@ -4694,6 +4697,7 @@ static int fn_iso_once_1(query *q)
 	cell *tmp = clone_to_heap(q, 1, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
+	tmp[nbr_cells-1].cgen = q->cgen + 1;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	make_barrier(q);
 	q->st.curr_cell = tmp;
@@ -4709,6 +4713,7 @@ static int fn_ignore_1(query *q)
 	cell *tmp = clone_to_heap(q, 1, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
+	tmp[nbr_cells-1].cgen = q->cgen + 1;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	make_barrier(q);
 	q->st.curr_cell = tmp;

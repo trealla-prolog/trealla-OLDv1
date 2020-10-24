@@ -168,7 +168,11 @@ struct cell_ {
 			};
 
 			idx_t val_off;
-			idx_t var_nbr;
+
+			union {
+				idx_t var_nbr;			// used with TYPE_VAR
+				idx_t cgen;				// used with cuts
+			};
 		};
 
 		struct {

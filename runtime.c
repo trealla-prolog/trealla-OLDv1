@@ -475,7 +475,8 @@ void cut_me(query *q, int local_cut)
 
 		q->cp--;
 
-		if (ch->local_cut && local_cut)
+		if ((ch->local_cut && local_cut) &&
+			(ch->cgen == q->st.curr_cell->cgen))
 			break;
 	}
 
