@@ -64,7 +64,7 @@ play(Board) :-
 
 get_command(Command) :-
     nl, write('-> '),
-    read(Command), !.
+    read(Command), writeln(Command), !.
 get_command(Command) :-
     get_command(Command).
 

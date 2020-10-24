@@ -1789,6 +1789,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 		str->p = create_parser(q->m);
 
 	parser *p = str->p;
+	p->t->cidx = 0;
 	p->start_term = 1;
 	p->one_shot = 1;
 	p->error = 0;
