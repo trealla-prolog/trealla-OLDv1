@@ -1861,7 +1861,9 @@ static int fn_iso_read_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream(q, "user_input");
 	stream *str = &g_streams[n];
-	return do_read_term(q, str, p1, p1_ctx, NULL, 0, NULL);
+	cell tmp;
+	make_literal(&tmp, g_nil_s);
+	return do_read_term(q, str, p1, p1_ctx, &tmp, q->st.curr_frame, NULL);
 }
 
 static int fn_iso_read_2(query *q)
@@ -1870,7 +1872,9 @@ static int fn_iso_read_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
-	return do_read_term(q, str, p1, p1_ctx, NULL, 0, NULL);
+	cell tmp;
+	make_literal(&tmp, g_nil_s);
+	return do_read_term(q, str, p1, p1_ctx, &tmp, q->st.curr_frame, NULL);
 }
 
 static int fn_iso_read_term_2(query *q)
