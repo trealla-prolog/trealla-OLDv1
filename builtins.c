@@ -1789,6 +1789,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 		str->p = create_parser(q->m);
 
 	parser *p = str->p;
+	p->fp = str->fp;
 	p->t->cidx = 0;
 	p->start_term = 1;
 	p->one_shot = 1;
@@ -1806,35 +1807,43 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 		p2_ctx = q->latest_ctx;
 	}
 
-	if (isatty(fileno(str->fp)) && !src) {
-		printf("| ");
-		fflush(str->fp);
-	}
+	for (;;) {
+#if 0
+		if (isatty(fileno(str->fp)) && !src) {
+			printf("| ");
+			fflush(str->fp);
+		}
+#endif
 
-	if (!src) {
-		if (net_getline(&p->save_line, &p->n_line, str) == -1) {
+		if (!src) {
+			if (net_getline(&p->save_line, &p->n_line, str) == -1) {
+				if (q->is_task && !feof(str->fp)) {
+					clearerr(str->fp);
+					do_yield_0(q, 1);
+					return 0;
+				}
 
-			if (q->is_task && !feof(str->fp)) {
-				clearerr(str->fp);
-				do_yield_0(q, 1);
-				return 0;
+				destroy_parser(p);
+				cell tmp;
+				make_literal(&tmp, g_eof_s);
+				return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 			}
 
-			destroy_parser(p);
-			cell tmp;
-			make_literal(&tmp, g_eof_s);
-			return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-		}
+			if (p->save_line[strlen(p->save_line)-1] == '\n')
+				p->save_line[strlen(p->save_line)-1] = '\0';
 
-		if (p->save_line[strlen(p->save_line)-1] == '\n')
-			p->save_line[strlen(p->save_line)-1] = '\0';
+			if (p->save_line[strlen(p->save_line)-1] == '\r')
+				p->save_line[strlen(p->save_line)-1] = '\0';
 
-		if (p->save_line[strlen(p->save_line)-1] == '\r')
-			p->save_line[strlen(p->save_line)-1] = '\0';
+			if (!strlen(p->save_line))
+				continue;
 
-		p->srcptr = p->save_line;
-	} else
-		p->srcptr = src;
+			p->srcptr = p->save_line;
+		} else
+			p->srcptr = src;
+
+		break;
+	}
 
 	int save = q->m->flag.character_escapes;
 	q->m->flag.character_escapes = q->character_escapes;
