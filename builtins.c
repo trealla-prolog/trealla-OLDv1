@@ -4577,9 +4577,6 @@ int call_me(query *q, cell *p1)
 
 static int fn_iso_call_n(query *q)
 {
-	if (q->retry)
-		return 0;
-
 	GET_FIRST_ARG(p1,callable);
 	clone_to_tmp(q, p1);
 	unsigned arity = p1->arity;
@@ -4604,7 +4601,6 @@ static int fn_iso_call_n(query *q)
 
 	cell *tmp = clone_to_heap(q, 1, tmp2, 1);
 	make_end_return(tmp+1+tmp2->nbr_cells, q->st.curr_cell);
-	make_barrier(q);
 	q->st.curr_cell = tmp;
 	return 1;
 }
