@@ -4287,14 +4287,14 @@ static int fn_iso_clause_2(query *q)
 	GET_FIRST_ARG(p1,nonvar);
 	GET_NEXT_ARG(p2,any);
 
-	if (!do_match(q, p1))
+	if (!do_match(q, p1, p1_ctx))
 		return 0;
 
 	term *t = &q->st.curr_clause->t;
 	cell *body = get_body(t->cells);
 
 	if (body)
-		return unify(q, p2, p2_ctx, body, q->st.curr_frame);
+		return unify(q, p2, p2_ctx, body, q->st.fp);
 
 	cell tmp;
 	make_literal(&tmp, g_true_s);
@@ -4398,7 +4398,7 @@ static int fn_iso_retract_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
-	if (!do_match(q, p1))
+	if (!do_match(q, p1, p1_ctx))
 		return 0;
 
 	clause *r = retract_from_db(q->m, q->st.curr_clause);
@@ -5435,7 +5435,7 @@ static int fn_clause_3(query *q)
 		if (!r) return 0;
 		t = &r->t;
 	} else {
-		if (!do_match(q, p1))
+		if (!do_match(q, p1, p1_ctx))
 			return 0;
 
 		char tmpbuf[128];
