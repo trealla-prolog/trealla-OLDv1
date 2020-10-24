@@ -4294,7 +4294,7 @@ static int fn_iso_clause_2(query *q)
 	cell *body = get_body(t->cells);
 
 	if (body) {
-		frame *g = GET_FRAME(q->st.curr_frame);
+		frame *g = GET_FRAME(q->st.fp);
 		try_me(q, g->nbr_vars);
 		int ok = unify(q, p2, p2_ctx, body, q->st.fp);
 		return ok;
