@@ -464,7 +464,23 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 
 			for (c++; arity--; c += c->nbr_cells) {
 				cell *tmp = running ? deref_var(q, c, c_ctx) : c;
+				int parens = 0;
+
+				if (!braces && is_literal(tmp)) {
+					const char *s = GET_STR(tmp);
+
+					if (!strcmp(s, ",") || !strcmp(s, ";") ||
+						!strcmp(s, "->") || !strcmp(s, ":-"))
+						parens = 1;
+				}
+
+				if (parens)
+					dst += snprintf(dst, dstlen, "(");
+
 				dst += write_term_to_buf(q, dst, dstlen, tmp, q->latest_ctx, running, 0, depth+1);
+
+				if (parens)
+					dst += snprintf(dst, dstlen, ")");
 
 				if (arity)
 					dst += snprintf(dst, dstlen, ",");
