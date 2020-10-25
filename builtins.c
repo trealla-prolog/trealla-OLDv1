@@ -4292,17 +4292,22 @@ static int fn_iso_clause_2(query *q)
 
 	term *t = &q->st.curr_clause->t;
 	cell *body = get_body(t->cells);
+	int ok;
 
-	if (body) {
-		frame *g = GET_FRAME(q->st.fp);
-		try_me(q, g->nbr_vars);
-		int ok = unify(q, p2, p2_ctx, body, q->st.fp);
-		return ok;
+	if (body)
+		ok = unify(q, p2, p2_ctx, body, q->st.fp);
+	else {
+		cell tmp;
+		make_literal(&tmp, g_true_s);
+		ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	cell tmp;
-	make_literal(&tmp, g_true_s);
-	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	if (!ok) {
+		undo_me(q);
+		drop_choice(q);
+	}
+
+	return ok;
 }
 
 static void compare_and_zero(uint64_t v1, uint64_t *v2, uint64_t *v)
