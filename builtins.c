@@ -4284,7 +4284,7 @@ static int fn_iso_copy_term_2(query *q)
 
 static void stash_me(query *q, term *t)
 {
-	int last_match = (!q->st.curr_clause->next && !q->st.iter);
+	int last_match = !q->st.curr_clause->next /*&& !q->st.iter*/;
 
 	if (last_match)
 		drop_choice(q);
@@ -4294,8 +4294,18 @@ static void stash_me(query *q, term *t)
 		ch->st.curr_clause = q->st.curr_clause;
 	}
 
-	q->st.fp += 1;
-	q->st.sp += t->nbr_vars;
+	unsigned nbr_vars = t->nbr_vars;
+	idx_t new_frame = q->st.fp++;
+	frame *g = GET_FRAME(new_frame);
+	g->prev_frame = q->st.curr_frame;
+	g->curr_cell = NULL;
+	g->cgen = q->cgen;
+	g->nbr_slots = nbr_vars;
+	g->nbr_vars = nbr_vars;
+	g->any_choices = 0;
+	g->did_cut = 0;
+
+	q->st.sp += nbr_vars;
 }
 
 static int fn_iso_clause_2(query *q)
