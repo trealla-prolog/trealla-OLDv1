@@ -4310,28 +4310,34 @@ static void stash_me(query *q, term *t)
 
 static int fn_iso_clause_2(query *q)
 {
-	GET_FIRST_ARG(p1,nonvar);
+	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,any);
 
-	if (!do_match(q, p1, p1_ctx))
-		return 0;
+	for (;;) {
+		if (!do_match(q, p1, p1_ctx))
+			return 0;
 
-	term *t = &q->st.curr_clause->t;
-	cell *body = get_body(t->cells);
-	int ok;
+		term *t = &q->st.curr_clause->t;
+		cell *body = get_body(t->cells);
+		int ok;
 
-	if (body)
-		ok = unify(q, p2, p2_ctx, body, q->st.fp);
-	else {
-		cell tmp;
-		make_literal(&tmp, g_true_s);
-		ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		if (body)
+			ok = unify(q, p2, p2_ctx, body, q->st.fp);
+		else {
+			cell tmp;
+			make_literal(&tmp, g_true_s);
+			ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		}
+
+		if (ok) {
+			stash_me(q, t);
+			break;
+		}
+
+		q->retry = 1;
 	}
 
-	if (ok)
-		stash_me(q, t);
-
-	return ok;
+	return 1;
 }
 
 static void compare_and_zero(uint64_t v1, uint64_t *v2, uint64_t *v)
@@ -5459,40 +5465,47 @@ static int fn_clause_3(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,atom_or_var);
-	term *t;
 
-	if (!is_variable(p3)) {
-		uuid u;
-		uuid_from_buf(GET_STR(p3), &u);
-		clause *r = find_in_db(q->m, &u);
-		if (!r) return 0;
-		t = &r->t;
-	} else {
-		if (!do_match(q, p1, p1_ctx))
-			return 0;
+	for (;;) {
+		term *t;
 
-		char tmpbuf[128];
-		uuid_to_buf(&q->st.curr_clause->u, tmpbuf, sizeof(tmpbuf));
-		cell tmp = make_cstring(q, tmpbuf);
-		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
-		t = &q->st.curr_clause->t;
+		if (!is_variable(p3)) {
+			uuid u;
+			uuid_from_buf(GET_STR(p3), &u);
+			clause *r = find_in_db(q->m, &u);
+			if (!r) return 0;
+			t = &r->t;
+		} else {
+			if (!do_match(q, p1, p1_ctx))
+				return 0;
+
+			char tmpbuf[128];
+			uuid_to_buf(&q->st.curr_clause->u, tmpbuf, sizeof(tmpbuf));
+			cell tmp = make_cstring(q, tmpbuf);
+			set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+			t = &q->st.curr_clause->t;
+		}
+
+		cell *body = get_body(t->cells);
+		int ok;
+
+		if (body)
+			ok = unify(q, p2, p2_ctx, body, q->st.fp);
+		else {
+			cell tmp;
+			make_literal(&tmp, g_true_s);
+			ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		}
+
+		if (ok) {
+			stash_me(q, t);
+			break;
+		}
+
+		q->retry = 1;
 	}
 
-	cell *body = get_body(t->cells);
-	int ok;
-
-	if (body)
-		ok = unify(q, p2, p2_ctx, body, q->st.fp);
-	else {
-		cell tmp;
-		make_literal(&tmp, g_true_s);
-		ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (ok)
-		stash_me(q, t);
-
-	return ok;
+	return 1;
 }
 
 static int do_asserta_2(query *q)
