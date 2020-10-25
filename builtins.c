@@ -5469,13 +5469,20 @@ static int fn_clause_3(query *q)
 	}
 
 	cell *body = get_body(t->cells);
+	int ok;
 
 	if (body)
-		return unify(q, p2, p2_ctx, body, q->st.curr_frame);
+		ok = unify(q, p2, p2_ctx, body, q->st.fp);
+	else {
+		cell tmp;
+		make_literal(&tmp, g_true_s);
+		ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
 
-	cell tmp;
-	make_literal(&tmp, g_true_s);
-	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	if (ok)
+		stash_me(q, t);
+
+	return ok;
 }
 
 static int do_asserta_2(query *q)
