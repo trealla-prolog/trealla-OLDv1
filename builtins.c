@@ -4284,7 +4284,7 @@ static int fn_iso_copy_term_2(query *q)
 
 static void stash_me(query *q, term *t)
 {
-	int last_match = !q->st.curr_clause->next /*&& !q->st.iter*/;
+	int last_match = !q->st.curr_clause->next && !q->st.iter;
 
 	if (last_match)
 		drop_choice(q);
