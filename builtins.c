@@ -4318,9 +4318,8 @@ static int fn_iso_clause_2(query *q)
 		ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (ok) {
+	if (ok)
 		stash_me(q, t);
-	}
 
 	return ok;
 }
