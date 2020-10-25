@@ -4282,6 +4282,22 @@ static int fn_iso_copy_term_2(query *q)
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
+static void stash_me(query *q, term *t)
+{
+	int last_match = (!q->st.curr_clause->next && !q->st.iter);
+
+	if (last_match)
+		drop_choice(q);
+	else {
+		idx_t curr_choice = q->cp - 1;
+		choice *ch = q->choices + curr_choice;
+		ch->st.curr_clause = q->st.curr_clause;
+	}
+
+	q->st.fp += 1;
+	q->st.sp += t->nbr_vars;
+}
+
 static int fn_iso_clause_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
@@ -4303,8 +4319,7 @@ static int fn_iso_clause_2(query *q)
 	}
 
 	if (ok) {
-		q->st.fp += 1;
-		q->st.sp += t->nbr_vars;
+		stash_me(q, t);
 	}
 
 	return ok;
