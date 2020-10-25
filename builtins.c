@@ -4302,6 +4302,11 @@ static int fn_iso_clause_2(query *q)
 		ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
+	if (ok) {
+		q->st.fp += 1;
+		q->st.sp += t->nbr_vars;
+	}
+
 	return ok;
 }
 

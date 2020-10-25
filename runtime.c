@@ -341,7 +341,7 @@ idx_t drop_choice(query *q)
 	return curr_choice;
 }
 
-static void make_frame(query *q, unsigned nbr_vars, int last_match)
+void make_frame(query *q, unsigned nbr_vars, int last_match)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 
