@@ -168,11 +168,11 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 		} else if (c->val_den != 1) {
 			if (q->m->flag.rational_syntax_natural) {
 				dst += sprint_int(dst, dstlen, c->val_num, 10);
-				dst += snprintf(dst, dstlen, "/");
+				dst += snprintf(dst, dstlen, "%s", "/");
 				dst += sprint_int(dst, dstlen, c->val_den, 10);
 			} else {
 				dst += sprint_int(dst, dstlen, c->val_num, 10);
-				dst += snprintf(dst, dstlen, " rdiv ");
+				dst += snprintf(dst, dstlen, "%s", " rdiv ");
 				dst += sprint_int(dst, dstlen, c->val_den, 10);
 			}
 		} else
@@ -350,7 +350,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 
 	while (is_iso_list(c)) {
 		if (q->max_depth && (depth >= q->max_depth)) {
-			dst += snprintf(dst, dstlen, "...");
+			dst += snprintf(dst, dstlen, "%s", "...");
 			return dst - save_dst;
 		}
 
@@ -460,7 +460,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 
 		if (is_structure(c) && !is_string(c)) {
 			idx_t arity = c->arity;
-			dst += snprintf(dst, dstlen, braces?"{":"(");
+			dst += snprintf(dst, dstlen, "%s", braces?"{":"(");
 
 			for (c++; arity--; c += c->nbr_cells) {
 				cell *tmp = running ? deref_var(q, c, c_ctx) : c;
@@ -475,18 +475,18 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 				}
 
 				if (parens)
-					dst += snprintf(dst, dstlen, "(");
+					dst += snprintf(dst, dstlen, "%s", "(");
 
 				dst += write_term_to_buf(q, dst, dstlen, tmp, q->latest_ctx, running, 0, depth+1);
 
 				if (parens)
-					dst += snprintf(dst, dstlen, ")");
+					dst += snprintf(dst, dstlen, "%s", ")");
 
 				if (arity)
-					dst += snprintf(dst, dstlen, ",");
+					dst += snprintf(dst, dstlen, "%s", ",");
 			}
 
-			dst += snprintf(dst, dstlen, braces?"}":")");
+			dst += snprintf(dst, dstlen, "%s", braces?"}":")");
 		}
 	}
 	else if ((c->flags & OP_XF) || (c->flags & OP_YF)) {
@@ -501,10 +501,10 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "\\+");
 		int parens = is_structure(rhs) && !strcmp(GET_STR(rhs), ",");
 		dst += snprintf(dst, dstlen, "%s", src);
-		if (space && !parens) dst += snprintf(dst, dstlen, " ");
-		if (parens) dst += snprintf(dst, dstlen, "(");
+		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
+		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
 		dst += write_term_to_buf(q, dst, dstlen, rhs, q->latest_ctx, running, 0, depth+1);
-		if (parens) dst += snprintf(dst, dstlen, ")");
+		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
 	}
 	else {
 		cell *lhs = c + 1;
@@ -521,19 +521,19 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		int parens = 0;//depth && strcmp(src, ",") && strcmp(src, "is") && strcmp(src, "->");
 		int lhs_parens = lhs_prec1 > my_prec;
 		lhs_parens |= lhs_prec2;
-		if (parens || lhs_parens) dst += snprintf(dst, dstlen, "(");
+		if (parens || lhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
 		dst += write_term_to_buf(q, dst, dstlen, lhs, lhs_ctx, running, 0, depth+1);
-		if (lhs_parens) dst += snprintf(dst, dstlen, ")");
+		if (lhs_parens) dst += snprintf(dst, dstlen, "%s", ")");
 		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "-->") || !strcmp(src, "=..") || !*src;
-		if (space && !parens) dst += snprintf(dst, dstlen, " ");
+		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
 		dst += snprintf(dst, dstlen, "%s", src);
 		if (!*src) space = 0;
-		if (space && !parens) dst += snprintf(dst, dstlen, " ");
+		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
 		int rhs_parens = rhs_prec1 > my_prec;
 		rhs_parens |= rhs_prec2;
-		if (rhs_parens) dst += snprintf(dst, dstlen, "(");
+		if (rhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
 		dst += write_term_to_buf(q, dst, dstlen, rhs, rhs_ctx, running, 0, depth+1);
-		if (parens || rhs_parens) dst += snprintf(dst, dstlen, ")");
+		if (parens || rhs_parens) dst += snprintf(dst, dstlen, "%s", ")");
 	}
 
 	return dst - save_dst;
