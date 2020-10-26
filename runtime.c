@@ -618,9 +618,9 @@ static int unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_
 	p1++; p2++;
 
 	while (arity--) {
-		cell *c1 = deref_var(q, p1, p1_ctx);
+		cell *c1 = deref(q, p1, p1_ctx);
 		idx_t c1_ctx = q->latest_ctx;
-		cell *c2 = deref_var(q, p2, p2_ctx);
+		cell *c2 = deref(q, p2, p2_ctx);
 		idx_t c2_ctx = q->latest_ctx;
 
 		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
@@ -675,22 +675,22 @@ static int unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, 
 {
 	while (is_list(p1) && is_list(p2)) {
 		cell *h1 = LIST_HEAD(p1);
-		cell *c1 = deref_var(q, h1, p1_ctx);
+		cell *c1 = deref(q, h1, p1_ctx);
 		idx_t c1_ctx = q->latest_ctx;
 
 		cell *h2 = LIST_HEAD(p2);
-		cell *c2 = deref_var(q, h2, p2_ctx);
+		cell *c2 = deref(q, h2, p2_ctx);
 		idx_t c2_ctx = q->latest_ctx;
 
 		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
 			return 0;
 
 		p1 = LIST_TAIL(p1);
-		p1 = deref_var(q, p1, p1_ctx);
+		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 
 		p2 = LIST_TAIL(p2);
-		p2 = deref_var(q, p2, p2_ctx);
+		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
 

@@ -441,7 +441,7 @@ static unsigned g_tab2[64000];
 static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
 	idx_t save_idx = tmp_heap_used(q);
-	p1 = deref_var(q, p1, p1_ctx);
+	p1 = deref(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
 	cell *tmp = alloc_tmp_heap(q, 1);
 	copy_cells(tmp, p1, 1);
@@ -482,7 +482,7 @@ static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	p1++;
 
 	while (arity--) {
-		cell *c = deref_var(q, p1, p1_ctx);
+		cell *c = deref(q, p1, p1_ctx);
 		deep_copy2_to_tmp(q, c, q->latest_ctx);
 		p1 += p1->nbr_cells;
 	}
@@ -499,7 +499,7 @@ static cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	g_tab_idx = 0;
 
 	if (is_variable(p1) && 0) {
-		p1 = deref_var(q, p1, p1_ctx);
+		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
 
@@ -524,7 +524,7 @@ static cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx)
 static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
 	idx_t save_idx = tmp_heap_used(q);
-	p1 = deref_var(q, p1, p1_ctx);
+	p1 = deref(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
 	cell *tmp = alloc_tmp_heap(q, 1);
 	copy_cells(tmp, p1, 1);
@@ -544,7 +544,7 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	p1++;
 
 	while (arity--) {
-		cell *c = deref_var(q, p1, p1_ctx);
+		cell *c = deref(q, p1, p1_ctx);
 		deep_clone2_to_tmp(q, c, q->latest_ctx);
 		p1 += p1->nbr_cells;
 	}
@@ -558,7 +558,7 @@ static cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	init_tmp_heap(q);
 
 	if (is_variable(p1) && 0) {
-		p1 = deref_var(q, p1, p1_ctx);
+		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
 
@@ -708,7 +708,7 @@ static int has_vars(query *q, cell *c, idx_t c_ctx)
 	c++;
 
 	while (arity--) {
-		cell *c2 = deref_var(q, c, c_ctx);
+		cell *c2 = deref(q, c, c_ctx);
 
 		if (has_vars(q, c2, q->latest_ctx))
 			return 1;
@@ -756,8 +756,8 @@ static int fn_iso_current_rule_1(query *q)
 		return 0;
 	}
 
-	cell *pf = deref_var(q, p1+1,p1_ctx);
-	cell *pa = deref_var(q, p1+2, p1_ctx);
+	cell *pf = deref(q, p1+1,p1_ctx);
+	cell *pa = deref(q, p1+2, p1_ctx);
 
 	if (!is_atom(pf)) {
 		throw_error(q, p1, "type_error", "atom");
@@ -858,7 +858,7 @@ static int fn_iso_atom_chars_2(query *q)
 	if (!is_variable(p2)) {
 		cell *head = LIST_HEAD(p2);
 		cell *tail = LIST_TAIL(p2);
-		head = deref_var(q, head, p2_ctx);
+		head = deref(q, head, p2_ctx);
 		q->latest_ctx = p2_ctx;
 
 		size_t bufsiz;
@@ -866,7 +866,7 @@ static int fn_iso_atom_chars_2(query *q)
 		*tmpbuf = '\0';
 
 		while (tail) {
-			tail = deref_var(q, tail, p2_ctx);
+			tail = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
 
 			if (!is_atom(head)) {
@@ -901,7 +901,7 @@ static int fn_iso_atom_chars_2(query *q)
 
 			head = LIST_HEAD(tail);
 			tail = LIST_TAIL(tail);
-			head = deref_var(q, head, q->latest_ctx);
+			head = deref(q, head, q->latest_ctx);
 		}
 
 		cell tmp = make_cstring(q, tmpbuf);
@@ -940,13 +940,13 @@ static int fn_iso_atom_codes_2(query *q)
 	if (!is_variable(p2) && is_variable(p1)) {
 		cell *head = LIST_HEAD(p2);
 		cell *tail = LIST_TAIL(p2);
-		head = deref_var(q, head, p2_ctx);
+		head = deref(q, head, p2_ctx);
 
 		size_t nbytes;
 		char *tmpbuf = malloc(nbytes=256), *dst = tmpbuf;
 
 		while (tail) {
-			tail = deref_var(q, tail, p2_ctx);
+			tail = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
 
 			if (!is_integer(head)) {
@@ -978,7 +978,7 @@ static int fn_iso_atom_codes_2(query *q)
 
 			head = LIST_HEAD(tail);
 			tail = LIST_TAIL(tail);
-			head = deref_var(q, head, q->latest_ctx);
+			head = deref(q, head, q->latest_ctx);
 		}
 
 		cell tmp = make_cstring(q, tmpbuf);
@@ -1016,7 +1016,7 @@ static int fn_iso_number_chars_2(query *q)
 	if (!is_variable(p2)) {
 		cell *head = LIST_HEAD(p2);
 		cell *tail = LIST_TAIL(p2);
-		head = deref_var(q, head, p2_ctx);
+		head = deref(q, head, p2_ctx);
 
 		int_t val = 0;
 
@@ -1049,7 +1049,7 @@ static int fn_iso_number_chars_2(query *q)
 
 			head = LIST_HEAD(tail);
 			tail = LIST_TAIL(tail);
-			head = deref_var(q, head, q->latest_ctx);
+			head = deref(q, head, q->latest_ctx);
 		}
 
 		cell tmp;
@@ -1076,7 +1076,7 @@ static int fn_iso_number_codes_2(query *q)
 	if (!is_variable(p2)) {
 		cell *head = LIST_HEAD(p2);
 		cell *tail = LIST_TAIL(p2);
-		head = deref_var(q, head, p2_ctx);
+		head = deref(q, head, p2_ctx);
 
 		int_t val = 0;
 
@@ -1108,7 +1108,7 @@ static int fn_iso_number_codes_2(query *q)
 
 			head = LIST_HEAD(tail);
 			tail = LIST_TAIL(tail);
-			head = deref_var(q, head, q->latest_ctx);
+			head = deref(q, head, q->latest_ctx);
 		}
 
 		cell tmp;
@@ -1481,7 +1481,7 @@ static int fn_iso_stream_property_2(query *q)
 
 	if (!strcmp(GET_STR(p1), "position")) {
 		cell *c = p1 + 1;
-		c = deref_var(q, c, q->latest_ctx);
+		c = deref(q, c, q->latest_ctx);
 		cell tmp;
 		make_int(&tmp, ftello(str->fp));
 
@@ -1493,7 +1493,7 @@ static int fn_iso_stream_property_2(query *q)
 
 	if (!strcmp(GET_STR(p1), "line_count") && str->p) {
 		cell *c = p1 + 1;
-		c = deref_var(q, c, q->latest_ctx);
+		c = deref(q, c, q->latest_ctx);
 		cell tmp;
 		make_int(&tmp, str->p->line_nbr);
 
@@ -1598,23 +1598,23 @@ static int fn_iso_open_4(query *q)
 
 	while (is_list(p4)) {
 		cell *h = LIST_HEAD(p4);
-		cell *c = deref_var(q, h, p4_ctx);
+		cell *c = deref(q, h, p4_ctx);
 
 		if (is_structure(c) && (c->arity == 1)) {
 			if (!strcmp(GET_STR(c), "mmap")) {
 #if USE_MMAP
 				mmap_var = c + 1;
-				mmap_var = deref_var(q, mmap_var, q->latest_ctx);
+				mmap_var = deref(q, mmap_var, q->latest_ctx);
 				mmap_ctx = q->latest_ctx;
 #endif
 			} else if (!strcmp(GET_STR(c), "alias")) {
 				cell *name = c + 1;
-				name = deref_var(q, name, q->latest_ctx);
+				name = deref(q, name, q->latest_ctx);
 				free(str->name);
 				str->name = strdup(GET_STR(name));
 			} else if (!strcmp(GET_STR(c), "type")) {
 				cell *name = c + 1;
-				name = deref_var(q, name, q->latest_ctx);
+				name = deref(q, name, q->latest_ctx);
 
 				if (is_atom(name) && !strcmp(GET_STR(name), "binary"))
 					binary = 1;
@@ -1624,7 +1624,7 @@ static int fn_iso_open_4(query *q)
 		}
 
 		p4 = LIST_TAIL(p4);
-		p4 = deref_var(q, p4, p4_ctx);
+		p4 = deref(q, p4, p4_ctx);
 		p4_ctx = q->latest_ctx;
 	}
 
@@ -1800,10 +1800,10 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
-		cell *c = deref_var(q, h, p2_ctx);
+		cell *c = deref(q, h, p2_ctx);
 		parse_read_params(q, c, str);
 		p2 = LIST_TAIL(p2);
-		p2 = deref_var(q, p2, p2_ctx);
+		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
 
@@ -2003,10 +2003,10 @@ static int fn_iso_write_term_2(query *q)
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
-		cell *c = deref_var(q, h, p2_ctx);
+		cell *c = deref(q, h, p2_ctx);
 		parse_write_params(q, c);
 		p2 = LIST_TAIL(p2);
-		p2 = deref_var(q, p2, p2_ctx);
+		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
 
@@ -2034,10 +2034,10 @@ static int fn_iso_write_term_3(query *q)
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
-		cell *c = deref_var(q, h, p2_ctx);
+		cell *c = deref(q, h, p2_ctx);
 		parse_write_params(q, c);
 		p2 = LIST_TAIL(p2);
-		p2 = deref_var(q, p2, p2_ctx);
+		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
 
@@ -3689,20 +3689,20 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 	if (is_list(p1) && is_list(p2)) {
 		while (is_list(p1) && is_list(p2)) {
 			cell *h1 = LIST_HEAD(p1);
-			h1 = deref_var(q, h1, p1_ctx);
+			h1 = deref(q, h1, p1_ctx);
 			idx_t tmp1_ctx = q->latest_ctx;
 			cell *h2 = LIST_HEAD(p2);
-			h2 = deref_var(q, h2, p2_ctx);
+			h2 = deref(q, h2, p2_ctx);
 			idx_t tmp2_ctx = q->latest_ctx;
 
 			int val = compare(q, h1, tmp1_ctx, h2, tmp2_ctx, depth+1);
 			if (val) return val;
 
 			p1 = LIST_TAIL(p1);
-			p1 = deref_var(q, p1, p1_ctx);
+			p1 = deref(q, p1, p1_ctx);
 			p1_ctx = q->latest_ctx;
 			p2 = LIST_TAIL(p2);
-			p2 = deref_var(q, p2, p2_ctx);
+			p2 = deref(q, p2, p2_ctx);
 			p2_ctx = q->latest_ctx;
 		}
 
@@ -3726,9 +3726,9 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 	p2 = p2 + 1;
 
 	while (arity--) {
-		cell *h1 = deref_var(q, p1, p1_ctx);
+		cell *h1 = deref(q, p1, p1_ctx);
 		idx_t tmp1_ctx = q->latest_ctx;
-		cell *h2 = deref_var(q, p2, p2_ctx);
+		cell *h2 = deref(q, p2, p2_ctx);
 		idx_t tmp2_ctx = q->latest_ctx;
 
 		int val = compare(q, h1, tmp1_ctx, h2, tmp2_ctx, depth+1);
@@ -3976,7 +3976,7 @@ static int fn_iso_arg_3(query *q)
 
 		for (unsigned i = 1; i <= arg_nbr; i++) {
 			if (i == arg_nbr) {
-				c = deref_var(q, c, p2_ctx);
+				c = deref(q, c, p2_ctx);
 				return unify(q, p3, p3_ctx, c, q->latest_ctx);
 			}
 
@@ -3989,7 +3989,7 @@ static int fn_iso_arg_3(query *q)
 		make_int(&tmp, 1);
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		cell *c = p2 + 1;
-		c = deref_var(q, c, p2_ctx);
+		c = deref(q, c, p2_ctx);
 		set_var(q, p3, p3_ctx, c, q->latest_ctx);
 		make_choice(q);
 		return 1;
@@ -4034,11 +4034,11 @@ static int fn_iso_univ_2(query *q)
 
 		while (is_list(l)) {
 			cell *h = LIST_HEAD(l);
-			h = deref_var(q, h, save_p2_ctx);
+			h = deref(q, h, save_p2_ctx);
 			cell *tmp = alloc_tmp_heap(q, h->nbr_cells);
 			copy_cells(tmp, h, h->nbr_cells);
 			l = LIST_TAIL(l);
-			l = deref_var(q, l, save_p2_ctx);
+			l = deref(q, l, save_p2_ctx);
 			save_p2_ctx = q->latest_ctx;
 			arity++;
 		}
@@ -4081,7 +4081,7 @@ static int do_collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, ce
 	int cnt = 0;
 
 	for (int i = 0; i < nbr_cells; i++, p1++) {
-		cell *c = deref_var(q, p1, p1_ctx);
+		cell *c = deref(q, p1, p1_ctx);
 
 		if (is_structure(c)) {
 			cnt += do_collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1, slots);
@@ -4583,7 +4583,7 @@ int call_me(query *q, cell *p1)
 	if (q->retry)
 		return 0;
 
-	p1 = deref_var(q, p1, q->st.curr_frame);
+	p1 = deref(q, p1, q->st.curr_frame);
 	idx_t p1_ctx = q->latest_ctx;
 
 	if (!is_callable(p1)) {
@@ -4598,7 +4598,7 @@ int call_me(query *q, cell *p1)
 		cell *p = p1 + 1;
 
 		while (arity--) {
-			cell *arg = deref_var(q, p, p1_ctx);
+			cell *arg = deref(q, p, p1_ctx);
 
 			if (!is_callable(arg)) {
 				throw_error(q, arg, "type_error", "callable");
@@ -6159,7 +6159,7 @@ static int fn_server_3(query *q)
 
 	while (is_list(p3)) {
 		cell *h = LIST_HEAD(p3);
-		cell *c = deref_var(q, h, p3_ctx);
+		cell *c = deref(q, h, p3_ctx);
 
 		if (is_structure(c) && (c->arity == 1)) {
 			if (!strcmp(GET_STR(c), "udp")) {
@@ -6215,7 +6215,7 @@ static int fn_server_3(query *q)
 		}
 
 		p3 = LIST_TAIL(p3);
-		p3 = deref_var(q, p3, p3_ctx);
+		p3 = deref(q, p3, p3_ctx);
 		p3_ctx = q->latest_ctx;
 	}
 
@@ -6339,7 +6339,7 @@ static int fn_client_5(query *q)
 
 	while (is_list(p5)) {
 		cell *h = LIST_HEAD(p5);
-		cell *c = deref_var(q, h, p5_ctx);
+		cell *c = deref(q, h, p5_ctx);
 
 		if (is_structure(c) && (c->arity == 1)) {
 			if (!strcmp(GET_STR(c), "udp")) {
@@ -6383,7 +6383,7 @@ static int fn_client_5(query *q)
 		}
 
 		p5 = LIST_TAIL(p5);
-		p5 = deref_var(q, p5, p5_ctx);
+		p5 = deref(q, p5, p5_ctx);
 		p5_ctx = q->latest_ctx;
 	}
 
@@ -6393,7 +6393,7 @@ static int fn_client_5(query *q)
 
 	while (is_list(p5)) {
 		cell *h = LIST_HEAD(p5);
-		cell *c = deref_var(q, h, p5_ctx);
+		cell *c = deref(q, h, p5_ctx);
 
 		if (is_structure(c) && (c->arity == 1)) {
 			if (!strcmp(GET_STR(c), "host")) {
@@ -6405,7 +6405,7 @@ static int fn_client_5(query *q)
 		}
 
 		p5 = LIST_TAIL(p5);
-		p5 = deref_var(q, p5, p5_ctx);
+		p5 = deref(q, p5, p5_ctx);
 		p5_ctx = q->latest_ctx;
 	}
 
@@ -6705,7 +6705,7 @@ static int fn_is_list_1(query *q)
 	while (is_list(p1)) {
 		LIST_HEAD(p1);
 		p1 = LIST_TAIL(p1);
-		p1 = deref_var(q, p1, p1_ctx);
+		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
 
@@ -7007,8 +7007,8 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 		return 0;
 	}
 
-	cell *mod = deref_var(q, p1+1, p1_ctx);
-	cell *file = deref_var(q, p1+2, p1_ctx);
+	cell *mod = deref(q, p1+1, p1_ctx);
+	cell *file = deref(q, p1+2, p1_ctx);
 
 	if (!is_atom(mod) || !is_atom(file)) {
 		throw_error(q, p1, "type_error", "not_a_file_spec");
@@ -7042,13 +7042,13 @@ static int fn_consult_1(query *q)
 
 	while (is_list(p1)) {
 		cell *h = LIST_HEAD(p1);
-		cell *c = deref_var(q, h, p1_ctx);
+		cell *c = deref(q, h, p1_ctx);
 
 		if (!do_consult(q, c, q->latest_ctx))
 			return 0;
 
 		p1 = LIST_TAIL(p1);
-		p1 = deref_var(q, p1, p1_ctx);
+		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
 
@@ -7148,7 +7148,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx,
 			break;
 
 		cell *head = LIST_HEAD(p2);
-		c = deref_var(q, head, p2_ctx);
+		c = deref(q, head, p2_ctx);
 		idx_t c_ctx = q->latest_ctx;
 		p2 = LIST_TAIL(p2);
 
@@ -7323,7 +7323,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx,
 		throw_error(q, c, "type_error", "structure");
 		return 0;
 	} else if (is_structure(str)) {
-		cell *c = deref_var(q, str+1, str_ctx);
+		cell *c = deref(q, str+1, str_ctx);
 		cell tmp = make_cstring(q, tmpbuf);
 		set_var(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	} else if (is_stream(str)) {
@@ -8903,7 +8903,7 @@ static int fn_iso_length_2(query *q)
 			while (is_list(l)) {
 				LIST_HEAD(l);
 				l = LIST_TAIL(l);
-				l = deref_var(q, l, p1_ctx);
+				l = deref(q, l, p1_ctx);
 				p1_ctx = q->latest_ctx;
 				cnt++;
 			}
@@ -8937,7 +8937,7 @@ static int fn_iso_length_2(query *q)
 			while (is_list(l)) {
 				LIST_HEAD(l);
 				l = LIST_TAIL(l);
-				l = deref_var(q, l, p1_ctx);
+				l = deref(q, l, p1_ctx);
 				p1_ctx = q->latest_ctx;
 				cnt++;
 			}

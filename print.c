@@ -246,7 +246,7 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 	dst += snprintf(dst, dstlen, "(");
 
 	for (c++; arity--; c += c->nbr_cells) {
-		cell *tmp = running ? deref_var(q, c, c_ctx) : c;
+		cell *tmp = running ? deref(q, c, c_ctx) : c;
 		dst += write_canonical_to_buf(q, dst, dstlen, tmp, q->latest_ctx, running, depth+1);
 
 		if (arity)
@@ -332,10 +332,10 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 
 		while (is_list(l)) {
 			cell *h = LIST_HEAD(l);
-			cell *c = deref_var(q, h, c_ctx);
+			cell *c = deref(q, h, c_ctx);
 			dst += formatted(dst, dstlen, GET_STR(c), LEN_STR(c));
 			l = LIST_TAIL(l);
-			l = deref_var(q, l, c_ctx);
+			l = deref(q, l, c_ctx);
 			c_ctx = q->latest_ctx;
 		}
 
@@ -359,13 +359,13 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		if (!cons)
 			dst += snprintf(dst, dstlen, "%s", "[");
 
-		head = running ? deref_var(q, head, c_ctx) : head;
+		head = running ? deref(q, head, c_ctx) : head;
 		int parens = is_structure(head) && !strcmp(GET_STR(head), ",");
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
 		dst += write_term_to_buf(q, dst, dstlen, head, q->latest_ctx, running, 0, depth+1);
 		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
 		cell *tail = LIST_TAIL(c);
-		tail = running ? deref_var(q, tail, c_ctx) : tail;
+		tail = running ? deref(q, tail, c_ctx) : tail;
 		c_ctx = q->latest_ctx;
 
 		if (is_literal(tail) && !is_structure(tail)) {
@@ -463,7 +463,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 			dst += snprintf(dst, dstlen, "%s", braces?"{":"(");
 
 			for (c++; arity--; c += c->nbr_cells) {
-				cell *tmp = running ? deref_var(q, c, c_ctx) : c;
+				cell *tmp = running ? deref(q, c, c_ctx) : c;
 				int parens = 0;
 
 				if (!braces && is_literal(tmp)) {
@@ -491,13 +491,13 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 	}
 	else if ((c->flags & OP_XF) || (c->flags & OP_YF)) {
 		cell *lhs = c + 1;
-		lhs = running ? deref_var(q, lhs, c_ctx) : lhs;
+		lhs = running ? deref(q, lhs, c_ctx) : lhs;
 		dst += write_term_to_buf(q, dst, dstlen, lhs, q->latest_ctx, running, 0, depth+1);
 		dst += snprintf(dst, dstlen, "%s", src);
 	}
 	else if ((c->flags & OP_FX) || (c->flags & OP_FY)) {
 		cell *rhs = c + 1;
-		rhs = running ? deref_var(q, rhs, c_ctx) : rhs;
+		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "\\+");
 		int parens = is_structure(rhs) && !strcmp(GET_STR(rhs), ",");
 		dst += snprintf(dst, dstlen, "%s", src);
@@ -509,9 +509,9 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 	else {
 		cell *lhs = c + 1;
 		cell *rhs = lhs + lhs->nbr_cells;
-		lhs = running ? deref_var(q, lhs, c_ctx) : lhs;
+		lhs = running ? deref(q, lhs, c_ctx) : lhs;
 		idx_t lhs_ctx = q->latest_ctx;
-		rhs = running ? deref_var(q, rhs, c_ctx) : rhs;
+		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		idx_t rhs_ctx = q->latest_ctx;
 		int my_prec = get_op(q->m, GET_STR(c), NULL, NULL, 0);
 		int lhs_prec1 = is_literal(lhs) ? get_op(q->m, GET_STR(lhs), NULL, NULL, 0) : 0;

@@ -36,7 +36,7 @@
 #define is_iso_list_or_var(c) (is_iso_list(c) || is_variable(c))
 #define is_iso_atom_or_var(c) (is_iso_atom(c) || is_variable(c))
 
-inline static cell *deref(query *q, cell *c, idx_t c_ctx)
+inline static cell *deref_var(query *q, cell *c, idx_t c_ctx)
 {
 	frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
@@ -55,7 +55,7 @@ inline static cell *deref(query *q, cell *c, idx_t c_ctx)
 	return (q->latest_ctx=e->ctx, e->c.val_ptr);
 }
 
-#define deref_var(q,c,c_ctx) !is_variable(c) ? (q->latest_ctx = c_ctx, c) : deref(q,c,c_ctx)
+#define deref(q,c,c_ctx) !is_variable(c) ? (q->latest_ctx = c_ctx, c) : deref_var(q,c,c_ctx)
 
 #define GET_FIRST_ARG(p,val_type) \
 	__attribute__((unused)) cell *p = get_first_arg(q); \
@@ -81,7 +81,7 @@ inline static cell *deref(query *q, cell *c, idx_t c_ctx)
 inline static cell *get_first_arg(query *q)
 {
 	q->last_arg = q->st.curr_cell + 1;
-	return deref_var(q, q->last_arg, q->st.curr_frame);
+	return deref(q, q->last_arg, q->st.curr_frame);
 }
 
 inline static cell *get_first_raw_arg(query *q)
@@ -93,7 +93,7 @@ inline static cell *get_first_raw_arg(query *q)
 inline static cell *get_next_arg(query *q)
 {
 	q->last_arg += q->last_arg->nbr_cells;
-	return deref_var(q, q->last_arg, q->st.curr_frame);
+	return deref(q, q->last_arg, q->st.curr_frame);
 }
 
 inline static cell *get_next_raw_arg(query *q)

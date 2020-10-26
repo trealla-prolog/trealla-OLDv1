@@ -833,7 +833,7 @@ query *create_task(query *q, cell *curr_cell)
 	slot *e = GET_SLOT(gsrc, 0);
 
 	for (unsigned i = 0; i < gsrc->nbr_vars; i++, e++) {
-		cell *c = deref_var(q, &e->c, e->ctx);
+		cell *c = deref(q, &e->c, e->ctx);
 		cell tmp = {0};
 		tmp.val_type = TYPE_VARIABLE;
 		tmp.var_nbr = i;
@@ -908,7 +908,7 @@ static void dump_vars(query *q, parser *p)
 			c = e->c.val_ptr;
 			q->latest_ctx = e->ctx;
 		} else
-			c = deref_var(q, &e->c, e->ctx);
+			c = deref(q, &e->c, e->ctx);
 
 		if (!strcmp(p->vartab.var_name[i], "_"))
 			continue;
@@ -2335,7 +2335,7 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 
 	while (is_iso_list(l)) {
 		cell *h = LIST_HEAD(l);
-		cell *c = q ? deref_var(q, h, save_ctx) : h;
+		cell *c = q ? deref(q, h, save_ctx) : h;
 
 		if (!is_atom(c)) {
 			is_chars_list = 0;
@@ -2351,7 +2351,7 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 
 		is_chars_list = 1;
 		l = LIST_TAIL(l);
-		l = q ? deref_var(q, l, save_ctx) : l;
+		l = q ? deref(q, l, save_ctx) : l;
 		if (q) save_ctx = q->latest_ctx;
 	}
 
