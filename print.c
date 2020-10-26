@@ -509,19 +509,21 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 	else {
 		cell *lhs = c + 1;
 		cell *rhs = lhs + lhs->nbr_cells;
+		lhs = running ? deref_var(q, lhs, c_ctx) : lhs;
+		idx_t lhs_ctx = q->latest_ctx;
+		rhs = running ? deref_var(q, rhs, c_ctx) : rhs;
+		idx_t rhs_ctx = q->latest_ctx;
 		int my_prec = get_op(q->m, GET_STR(c), NULL, NULL, 0);
 		int lhs_prec1 = is_literal(lhs) ? get_op(q->m, GET_STR(lhs), NULL, NULL, 0) : 0;
 		int lhs_prec2 = is_literal(lhs) && !lhs->arity ? get_op(q->m, GET_STR(lhs), NULL, NULL, 0) : 0;
 		int rhs_prec1 = is_literal(rhs) ? get_op(q->m, GET_STR(rhs), NULL, NULL, 0) : 0;
 		int rhs_prec2 = is_literal(rhs) && !rhs->arity ? get_op(q->m, GET_STR(rhs), NULL, NULL, 0) : 0;
-		lhs = running ? deref_var(q, lhs, c_ctx) : lhs;
 		int parens = 0;//depth && strcmp(src, ",") && strcmp(src, "is") && strcmp(src, "->");
 		int lhs_parens = lhs_prec1 > my_prec;
 		lhs_parens |= lhs_prec2;
 		if (parens || lhs_parens) dst += snprintf(dst, dstlen, "(");
-		dst += write_term_to_buf(q, dst, dstlen, lhs, q->latest_ctx, running, 0, depth+1);
+		dst += write_term_to_buf(q, dst, dstlen, lhs, lhs_ctx, running, 0, depth+1);
 		if (lhs_parens) dst += snprintf(dst, dstlen, ")");
-		rhs = running ? deref_var(q, rhs, c_ctx) : rhs;
 		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "-->") || !strcmp(src, "=..") || !*src;
 		if (space && !parens) dst += snprintf(dst, dstlen, " ");
 		dst += snprintf(dst, dstlen, "%s", src);
@@ -530,7 +532,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		int rhs_parens = rhs_prec1 > my_prec;
 		rhs_parens |= rhs_prec2;
 		if (rhs_parens) dst += snprintf(dst, dstlen, "(");
-		dst += write_term_to_buf(q, dst, dstlen, rhs, q->latest_ctx, running, 0, depth+1);
+		dst += write_term_to_buf(q, dst, dstlen, rhs, rhs_ctx, running, 0, depth+1);
 		if (parens || rhs_parens) dst += snprintf(dst, dstlen, ")");
 	}
 

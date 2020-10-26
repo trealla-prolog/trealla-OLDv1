@@ -713,16 +713,6 @@ static const struct dispatch g_disp[] =
 	{0}
 };
 
-inline static void bind_vars(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
-{
-	if (p2_ctx > p1_ctx)
-		set_var(q, p2, p2_ctx, p1, p1_ctx);
-	else if (p2_ctx < p1_ctx)
-		set_var(q, p1, p1_ctx, p2, p2_ctx);
-	else if (p2->var_nbr != p1->var_nbr)
-		set_var(q, p2, p2_ctx, p1, p1_ctx);
-}
-
 int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
 {
 	if (depth == MAX_DEPTH) {
@@ -731,7 +721,12 @@ int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 	}
 
 	if (is_variable(p1) && is_variable(p2)) {
-		bind_vars(q, p1, p1_ctx, p2, p2_ctx);
+		if (p2_ctx > p1_ctx)
+			set_var(q, p2, p2_ctx, p1, p1_ctx);
+		else if (p2_ctx < p1_ctx)
+			set_var(q, p1, p1_ctx, p2, p2_ctx);
+		else if (p2->var_nbr != p1->var_nbr)
+			set_var(q, p2, p2_ctx, p1, p1_ctx);
 		return 1;
 	}
 
