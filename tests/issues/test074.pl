@@ -6,10 +6,12 @@
 % experience, and organizes training data into a coherent structure.
 
 :- initialization(main).
+:- discontiguous(cup/1).
+:- dynamic(cup/1).
 
 main :-
 	ebl(cup(obj1), cup(_), Rule),
-	writeln(Rule),
+	write(Rule), nl,
 	halt.
 
 % domain theory
@@ -69,7 +71,7 @@ ebl((A, B), (GenA, GenB), (AProof, BProof), (GenAProof, GenBProof)) :-
 	ebl(B, GenB, BProof, GenBProof).
 ebl(A, GenA, (A :- Proof), (GenA :- GenProof)) :-
 	clause(GenA, GenB),
-	writeln(clause(GenA, GenB)),
+	write(clause(GenA, GenB)), nl,
 	copy_term(GenA-GenB, A-B),
 	B \= true,
 	ebl(B, GenB, Proof, GenProof).
