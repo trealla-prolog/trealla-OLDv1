@@ -12,6 +12,7 @@
 	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx
 
 #define is_callable(c) (is_literal(c) || is_cstring(c))
+#define is_callable_or_var(c) (is_literal(c) || is_cstring(c) || is_variable(c))
 #define is_structure(c) (is_literal(c) && (c)->arity)
 #define is_compound(c) (is_structure(c) || is_string(c))
 #define is_number(c) (is_rational(c) || is_float(c))

@@ -4311,7 +4311,7 @@ static void stash_me(query *q, term *t)
 static int fn_iso_clause_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	GET_NEXT_ARG(p2,any);
+	GET_NEXT_ARG(p2,callable_or_var);
 
 	for (;;) {
 		if (!do_match(q, p1, p1_ctx))
@@ -5462,8 +5462,8 @@ static int fn_instance_2(query *q)
 
 static int fn_clause_3(query *q)
 {
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
+	GET_FIRST_ARG(p1,callable);
+	GET_NEXT_ARG(p2,callable_or_var);
 	GET_NEXT_ARG(p3,atom_or_var);
 
 	for (;;) {
