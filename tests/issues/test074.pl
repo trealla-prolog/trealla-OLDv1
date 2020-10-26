@@ -7,7 +7,6 @@
 
 :- initialization(main).
 :- discontiguous(cup/1).
-:- dynamic(cup/1).
 
 main :-
 	ebl(cup(obj1), cup(_), Rule),
