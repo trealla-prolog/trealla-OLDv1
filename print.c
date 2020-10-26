@@ -184,12 +184,10 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 	if (is_float(c) && (c->val_flt == M_PI)) {
 		dst += snprintf(dst, dstlen, "%s", "3.141592653589793");
 		return dst - save_dst;
-	}
-	else if (is_float(c) && (c->val_flt == M_E)) {
+	} else if (is_float(c) && (c->val_flt == M_E)) {
 		dst += snprintf(dst, dstlen, "%s", "2.718281828459045");
 		return dst - save_dst;
-	}
-	else if (is_float(c)) {
+	} else if (is_float(c)) {
 		char tmpbuf[256];
 		sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, c->val_flt);
 		const char *ptr = strchr(tmpbuf, '.');
@@ -304,12 +302,10 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 	if (is_float(c) && (c->val_flt == M_PI)) {
 		dst += snprintf(dst, dstlen, "%s", "3.141592653589793");
 		return dst - save_dst;
-	}
-	else if (is_float(c) && (c->val_flt == M_E)) {
+	} else if (is_float(c) && (c->val_flt == M_E)) {
 		dst += snprintf(dst, dstlen, "%s", "2.718281828459045");
 		return dst - save_dst;
-	}
-	else if (is_float(c)) {
+	} else if (is_float(c)) {
 		char tmpbuf[256];
 		sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG-1, c->val_flt);
 		const char *ptr = strchr(tmpbuf, '.');
@@ -360,9 +356,10 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 			dst += snprintf(dst, dstlen, "%s", "[");
 
 		head = running ? deref(q, head, c_ctx) : head;
+		idx_t head_ctx = q->latest_ctx;
 		int parens = is_structure(head) && !strcmp(GET_STR(head), ",");
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
-		dst += write_term_to_buf(q, dst, dstlen, head, q->latest_ctx, running, 0, depth+1);
+		dst += write_term_to_buf(q, dst, dstlen, head, head_ctx, running, 0, depth+1);
 		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
 		cell *tail = LIST_TAIL(c);
 		tail = running ? deref(q, tail, c_ctx) : tail;
@@ -375,15 +372,13 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 				dst += snprintf(dst, dstlen, "%s", "|");
 				dst += write_term_to_buf(q, dst, dstlen, tail, c_ctx, running, 1, depth+1);
 			}
-		}
-		else if (is_iso_list(tail)) {
+		} else if (is_iso_list(tail)) {
 			dst += snprintf(dst, dstlen, "%s", ",");
 			c = tail;
 			print_list++;
 			cons = 1;
 			continue;
-		}
-		else if (is_string(tail)) {
+		} else if (is_string(tail)) {
 			cell *l = tail;
 
 			while (is_list(l)) {
@@ -394,8 +389,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 			}
 
 			print_list++;
-		}
-		else {
+		} else {
 			dst += snprintf(dst, dstlen, "%s", "|");
 			dst += write_term_to_buf(q, dst, dstlen, tail, c_ctx, running, 1, depth+1);
 		}
@@ -464,6 +458,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 
 			for (c++; arity--; c += c->nbr_cells) {
 				cell *tmp = running ? deref(q, c, c_ctx) : c;
+				idx_t tmp_ctx = q->latest_ctx;
 				int parens = 0;
 
 				if (!braces && is_literal(tmp)) {
@@ -477,7 +472,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 				if (parens)
 					dst += snprintf(dst, dstlen, "%s", "(");
 
-				dst += write_term_to_buf(q, dst, dstlen, tmp, q->latest_ctx, running, 0, depth+1);
+				dst += write_term_to_buf(q, dst, dstlen, tmp, tmp_ctx, running, 0, depth+1);
 
 				if (parens)
 					dst += snprintf(dst, dstlen, "%s", ")");
@@ -488,25 +483,24 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 
 			dst += snprintf(dst, dstlen, "%s", braces?"}":")");
 		}
-	}
-	else if ((c->flags & OP_XF) || (c->flags & OP_YF)) {
+	} else if ((c->flags & OP_XF) || (c->flags & OP_YF)) {
 		cell *lhs = c + 1;
 		lhs = running ? deref(q, lhs, c_ctx) : lhs;
-		dst += write_term_to_buf(q, dst, dstlen, lhs, q->latest_ctx, running, 0, depth+1);
+		idx_t lhs_ctx = q->latest_ctx;
+		dst += write_term_to_buf(q, dst, dstlen, lhs, lhs_ctx, running, 0, depth+1);
 		dst += snprintf(dst, dstlen, "%s", src);
-	}
-	else if ((c->flags & OP_FX) || (c->flags & OP_FY)) {
+	} else if ((c->flags & OP_FX) || (c->flags & OP_FY)) {
 		cell *rhs = c + 1;
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
+		idx_t rhs_ctx = q->latest_ctx;
 		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "\\+");
 		int parens = is_structure(rhs) && !strcmp(GET_STR(rhs), ",");
 		dst += snprintf(dst, dstlen, "%s", src);
 		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
-		dst += write_term_to_buf(q, dst, dstlen, rhs, q->latest_ctx, running, 0, depth+1);
+		dst += write_term_to_buf(q, dst, dstlen, rhs, rhs_ctx, running, 0, depth+1);
 		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
-	}
-	else {
+	} else {
 		cell *lhs = c + 1;
 		cell *rhs = lhs + lhs->nbr_cells;
 		lhs = running ? deref(q, lhs, c_ctx) : lhs;
