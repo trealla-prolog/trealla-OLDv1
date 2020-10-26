@@ -774,9 +774,9 @@ static void next_key(query *q)
 		q->st.curr_clause = q->st.curr_clause->next;
 }
 
-static int do_match2(query *q, cell *curr_cell)
+static int do_match2(query *q, cell *p1, idx_t p1_ctx)
 {
-	cell *head = get_head(curr_cell);
+	cell *head = get_head(p1);
 	rule *h = find_matching_rule(q->m, head);
 
 	if (!h)
@@ -795,7 +795,7 @@ static int do_match2(query *q, cell *curr_cell)
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
 
-		if (unify_structure(q, curr_cell, q->st.curr_frame, c, q->st.fp, 0))
+		if (unify_structure(q, p1, p1_ctx, c, q->st.fp, 0))
 			return 1;
 
 		undo_me(q);
@@ -811,7 +811,7 @@ int do_match(query *q, cell *p1, idx_t p1_ctx)
 		q->st.curr_clause = q->st.curr_clause->next;
 	else {
 		if (!strcmp(GET_STR(p1), ":-"))
-			return do_match2(q, p1);
+			return do_match2(q, p1, p1_ctx);
 
 		rule *h = find_matching_rule(q->m, p1);
 
