@@ -4334,6 +4334,7 @@ static int fn_iso_clause_2(query *q)
 			break;
 		}
 
+		drop_choice(q);
 		q->retry = 1;
 	}
 
