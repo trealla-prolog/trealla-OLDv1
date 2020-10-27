@@ -52,7 +52,7 @@ size_t b64_encode(const char *s, size_t nbytes, char **pdst, int breaks, int cr)
 	int inbuf_size = 0, line_len = 0;
 	uint8_t inbuf[4];
 
-	for (int i = 0; i < nbytes; i++) {
+	for (size_t i = 0; i < nbytes; i++) {
 		inbuf[inbuf_size++] = s[i];
 
 		if (inbuf_size == 3) {
@@ -143,7 +143,7 @@ size_t b64_decode(const char *s, size_t nbytes, char **pdst)
 	uint8_t inbuf[4];
 	int inbuf_size = 0;
 
-	for (int i = 0; i < nbytes; i++) {
+	for (size_t i = 0; i < nbytes; i++) {
 		int n = conv_to_number(*s++);
 
 		if (n >= 0)
