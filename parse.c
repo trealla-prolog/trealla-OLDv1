@@ -1691,7 +1691,7 @@ static void parser_dcg_rewrite(parser *p)
 			tmp[nbr_cells+4].nbr_cells = 1;
 			tmp[nbr_cells+4].arity = 0;
 			if (last) { sprintf(v, "S_"); last = 0; }
-			else sprintf(v, "S%d_", cnt);
+			else sprintf(v, "S%d_", cnt+1);
 			tmp[nbr_cells+4].val_off = find_in_pool(v);
 
 			nbr_cells += 5;
@@ -1757,7 +1757,7 @@ static void parser_dcg_rewrite(parser *p)
 			tmp[nbr_cells+phrase->nbr_cells+1].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+phrase->nbr_cells+1].nbr_cells = 1;
 			tmp[nbr_cells+phrase->nbr_cells+1].arity = 0;
-			if (head || (last && !did_insert)) { sprintf(v, "S_"); last = 0; }
+			if (head || last) { sprintf(v, "S_"); last = 0; }
 			else sprintf(v, "S%d_", ++cnt);
 			tmp[nbr_cells+phrase->nbr_cells+1].val_off = find_in_pool(v);
 
