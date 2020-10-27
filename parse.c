@@ -1563,19 +1563,19 @@ static void parser_dcg_rewrite(parser *p)
 	int cnt = 0, head = 1, insert = 0;
 
 	while ((phrase - t->cells) < t->cidx) {
-		if (!strcmp(GET_STR(phrase), ",") && phrase->arity && head) {
+		if (phrase->arity && head && !strcmp(GET_STR(phrase), ",")) {
 			phrase++;
 			insert++;
 			continue;
 		}
 
-		if (!strcmp(GET_STR(phrase), ",") && phrase->arity) {
+		if (phrase->arity && !strcmp(GET_STR(phrase), ",")) {
 			tmp[nbr_cells++] = *phrase;
 			phrase++;
 			continue;
 		}
 
-		if (!strcmp(GET_STR(phrase), "!")) {
+		if (is_literal(phrase) && !strcmp(GET_STR(phrase), "!")) {
 			tmp[nbr_cells++] = *phrase;
 			phrase++;
 			continue;
@@ -1583,14 +1583,14 @@ static void parser_dcg_rewrite(parser *p)
 
 		int last = ((phrase+phrase->nbr_cells) - t->cells) >= t->cidx;
 
-		if (!strcmp(GET_STR(phrase), "{}") && phrase->arity) {
+		if (phrase->arity && !strcmp(GET_STR(phrase), "{}")) {
 			idx_t len = phrase->nbr_cells - 1;
 			cell *phrase2 = phrase + phrase->nbr_cells;
 
 			if (last && ((phrase2 - t->cells) >= t->cidx)) {
 				tmp[nbr_cells].val_type = TYPE_LITERAL;
 				tmp[nbr_cells].val_off = find_in_pool(",");
-				tmp[nbr_cells].nbr_cells = 2 + len;
+				tmp[nbr_cells].nbr_cells = 1 + (len+1) + 3;
 				tmp[nbr_cells].arity = 2;
 				tmp[nbr_cells].flags = FLAG_BUILTIN | OP_XFY;
 				nbr_cells++;
