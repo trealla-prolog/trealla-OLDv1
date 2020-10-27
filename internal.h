@@ -348,7 +348,8 @@ struct parser_ {
 	term *t;
 	char *token, *save_line, *srcptr;
 	size_t token_size, n_line, len_str;
-	int line_nbr, error, depth, quoted, nbr_vars;
+	int line_nbr, error, depth, quoted; //FIXME: cehteh: cant these be all unsigned?
+	unsigned nbr_vars;
 	uint8_t val_type;
 	int8_t dq_consing;
 	unsigned was_quoted:1;
@@ -376,7 +377,7 @@ struct module_ {
 	parser *p;
 	FILE *fp;
 	struct op_table ops[MAX_USER_OPS+1];
-    const char *keywords[1000];
+        const char *keywords[1000];
 
 	struct {
 		int double_quote_codes, double_quote_chars, double_quote_atom;
@@ -386,7 +387,8 @@ struct module_ {
 
 	int prebuilt, halt, halt_code, status, trace, quiet, dirty;
 	int user_ops, opt, stats, iso_only, use_persist, loading;
-	int make_public, cpu_count, dump_vars;
+	int make_public, dump_vars;  //note by cehteh: investigate: can these be unsigned (or bool)
+	unsigned cpu_count;
 };
 
 extern idx_t g_empty_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;

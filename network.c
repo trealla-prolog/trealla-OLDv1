@@ -89,15 +89,16 @@ int net_connect(const char *hostname, unsigned port, int udp, int nodelay)
 
 int net_server(const char *hostname, unsigned port, int udp, const char *keyfile, const char *certfile)
 {
+        (void) hostname;
 	struct addrinfo hints, *result, *rp;
 	int fd, status;
 
 	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = udp ? SOCK_DGRAM : SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-    char svc[20];
-    sprintf(svc, "%u", port);
+        hints.ai_flags = AI_PASSIVE;
+        char svc[20];
+        sprintf(svc, "%u", port);
 
 	if ((status = getaddrinfo(NULL, svc, &hints, &result)) != 0) {
 		perror("getaddrinfo");
@@ -154,6 +155,9 @@ int net_server(const char *hostname, unsigned port, int udp, const char *keyfile
 		SSL_CTX_load_verify_locations(g_ctx, !certfile?keyfile:certfile, NULL);
 		SSL_CTX_set_default_verify_paths(g_ctx);
 	}
+#else
+        (void) keyfile;
+        (void) certfile;
 #endif
 
 	listen(fd, -1);
@@ -210,7 +214,7 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 		}
 
 		SSL_CTX_set_default_verify_paths(g_ctx);
-		int level = 0;
+		int level = 0; //FIXME: cehteh: level parameter unused, is this a bug or intended?
 
 		if (level > 0)
 			SSL_set_verify(ssl, SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT, 0);
@@ -237,6 +241,11 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 	}
 	return ssl;
 #else
+        (void) fd;
+        (void) hostname;
+        (void) is_server;
+        (void) level;
+        (void) certfile;
 	return NULL;
 #endif
 }

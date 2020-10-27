@@ -26,7 +26,7 @@ extern int put_char_utf8(char *dst, int ch);
 extern int put_char_bare_utf8(char *dst, int ch);
 extern int put_len_utf8(int ch);
 extern int is_char_utf8(const char *src);
-extern int len_char_utf8(const char *src);
+extern size_t len_char_utf8(const char *src);
 
 /*
  * This allows supplying a getter function...
