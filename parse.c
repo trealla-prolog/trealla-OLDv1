@@ -1544,6 +1544,9 @@ int parser_attach(parser *p, int start_idx)
 	return !p->error;
 }
 
+// Don't mess with this, it is currently subject to great change and
+// maybe even a complete rewrite is on the cards...
+
 static void parser_dcg_rewrite(parser *p)
 {
 	p->in_dcg = 0;
