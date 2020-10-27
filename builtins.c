@@ -3971,7 +3971,7 @@ static int fn_iso_arg_3(query *q)
 			make_choice(q);
 		}
 
-		if (arg_nbr < 0) { //FIXME: cehteh: can never happen
+		if (arg_nbr < 0) {
 			throw_error(q, p1, "domain_error", "out_of_range");
 			return 0;
 		}
