@@ -96,9 +96,9 @@ int net_server(const char *hostname, unsigned port, int udp, const char *keyfile
 	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = udp ? SOCK_DGRAM : SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-    char svc[20];
-    sprintf(svc, "%u", port);
+        hints.ai_flags = AI_PASSIVE;
+        char svc[20];
+        sprintf(svc, "%u", port);
 
 	if ((status = getaddrinfo(NULL, svc, &hints, &result)) != 0) {
 		perror("getaddrinfo");
