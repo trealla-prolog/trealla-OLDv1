@@ -15,7 +15,7 @@ size_t strlen_utf8(const char *s)
 	while (*s) {
 		unsigned char ch = *(unsigned char *)s++;
 
-        if ((ch < 0x80) || (ch > 0xBF))
+		if ((ch < 0x80) || (ch > 0xBF))
 			cnt++;
 	}
 
@@ -29,7 +29,7 @@ size_t substrlen_utf8(const char *s, const char *end)
 	while (*s && (s <= end)) {
 		unsigned char ch = *(unsigned char *)s++;
 
-        if ((ch < 0x80) || (ch > 0xBF))
+		if ((ch < 0x80) || (ch > 0xBF))
 			cnt++;
 	}
 
@@ -156,7 +156,7 @@ int peek_char_utf8(const char *_src)
 	return get_char_utf8(&src);
 }
 
-int len_char_utf8(const char *_src)
+size_t len_char_utf8(const char *_src)
 {
 	const char *src = _src;
 	get_char_utf8(&src);
