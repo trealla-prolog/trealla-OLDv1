@@ -2120,22 +2120,23 @@ static int get_token(parser *p, int last_op)
 		src++;
 	}
 
-	if ((!*src || (*src == '%')) && p->fp) {
+	while ((!*src || (*src == '%')) && p->fp) {
 		if (*src == '%')
 			p->line_nbr++;
 
-		if (getline(&p->save_line, &p->n_line, p->fp) == -1)
+		if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
 			return 0;
+		}
 
 		p->srcptr = p->save_line;
 		src = p->srcptr;
-	}
 
-	while (isspace(*src)) {
-		if (*src == '\n')
-			p->line_nbr++;
+		while (isspace(*src)) {
+			if (*src == '\n')
+				p->line_nbr++;
 
-		src++;
+			src++;
+		}
 	}
 
 	if (!*src) {
