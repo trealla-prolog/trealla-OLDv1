@@ -3953,7 +3953,7 @@ static int fn_iso_arg_3(query *q)
 	GET_NEXT_ARG(p3,any);
 
 	if (is_integer(p1)) {
-		unsigned arg_nbr = p1->val_num;
+		int arg_nbr = p1->val_num;
 
 		if (q->retry) {
 			if (++arg_nbr > p2->arity)
@@ -3981,7 +3981,7 @@ static int fn_iso_arg_3(query *q)
 
 		cell *c = p2 + 1;
 
-		for (unsigned i = 1; i <= arg_nbr; i++) {
+		for (int i = 1; i <= arg_nbr; i++) {
 			if (i == arg_nbr) {
 				c = deref(q, c, p2_ctx);
 				return unify(q, p3, p3_ctx, c, q->latest_ctx);
