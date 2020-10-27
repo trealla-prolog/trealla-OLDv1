@@ -1577,13 +1577,48 @@ static void parser_dcg_rewrite(parser *p)
 			continue;
 		}
 
+		int last = ((phrase+phrase->nbr_cells) - t->cells) >= t->cidx;
+
 		if (is_literal(phrase) && !strcmp(GET_STR(phrase), "!")) {
-			tmp[nbr_cells++] = *phrase;
-			phrase++;
+			idx_t len = phrase->nbr_cells;
+			cell *phrase2 = phrase + phrase->nbr_cells;
+
+			if (last && ((phrase2 - t->cells) >= t->cidx)) {
+				tmp[nbr_cells].val_type = TYPE_LITERAL;
+				tmp[nbr_cells].val_off = find_in_pool(",");
+				tmp[nbr_cells].nbr_cells = 1 + (len+1) + 3;
+				tmp[nbr_cells].arity = 2;
+				tmp[nbr_cells].flags = FLAG_BUILTIN | OP_XFY;
+				nbr_cells++;
+			}
+
+			nbr_cells += copy_cells(tmp+nbr_cells, phrase, len);
+			phrase += phrase->nbr_cells;
+
+			if (last && ((phrase - t->cells) >= t->cidx)) {
+				tmp[nbr_cells+0].val_type = TYPE_LITERAL;
+				tmp[nbr_cells+0].val_off = find_in_pool("=");
+				tmp[nbr_cells+0].nbr_cells = 3;
+				tmp[nbr_cells+0].arity = 2;
+				tmp[nbr_cells+0].flags = FLAG_BUILTIN | OP_XFX;
+
+				tmp[nbr_cells+1].val_type = TYPE_VARIABLE;
+				tmp[nbr_cells+1].nbr_cells = 1;
+				tmp[nbr_cells+1].arity = 0;
+				sprintf(v, "S_");
+				tmp[nbr_cells+1].val_off = find_in_pool(v);
+
+				tmp[nbr_cells+2].val_type = TYPE_VARIABLE;
+				tmp[nbr_cells+2].nbr_cells = 1;
+				tmp[nbr_cells+2].arity = 0;
+				sprintf(v, "S%d_", cnt++);
+				tmp[nbr_cells+2].val_off = find_in_pool(v);
+
+				nbr_cells += 3;
+			}
+
 			continue;
 		}
-
-		int last = ((phrase+phrase->nbr_cells) - t->cells) >= t->cidx;
 
 		if (phrase->arity && !strcmp(GET_STR(phrase), "{}")) {
 			idx_t len = phrase->nbr_cells - 1;
