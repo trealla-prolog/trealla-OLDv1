@@ -1652,6 +1652,7 @@ static void parser_dcg_rewrite(parser *p)
 
 			nbr_cells += 5;
 			phrase += phrase->nbr_cells;
+			insert = 0;
 		} else if (is_iso_list(phrase)) {
 			int len = phrase[0].nbr_cells - 1;
 			tmp[nbr_cells+0].val_type = TYPE_LITERAL;
