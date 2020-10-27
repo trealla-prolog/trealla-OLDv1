@@ -15,6 +15,11 @@ else ifdef INT32
 CFLAGS += -DUSE_INT32=1
 endif
 
+ifdef LTO
+CFLAGS += -flto=$(LTO)
+LDFLAGS += -flto=$(LTO)
+endif
+
 OBJECTS = tpl.o history.o builtins.o library.o \
 	parse.o print.o runtime.o \
 	skiplist.o base64.o network.o utf8.o \
