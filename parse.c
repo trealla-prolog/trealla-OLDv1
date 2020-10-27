@@ -2193,7 +2193,7 @@ static int get_token(parser *p, int last_op)
 
 		// There is room for a number...
 
-		if ((src-tmpptr) >= p->token_size) {
+		if ((size_t)(src-tmpptr) >= p->token_size) {
 			size_t len = dst - p->token;
 			p->token = realloc(p->token, p->token_size*=2);
 			if (!p->token) abort();
@@ -2260,7 +2260,7 @@ static int get_token(parser *p, int last_op)
 					}
 				}
 
-				int len = (dst-p->token) + put_len_utf8(ch) + 1;
+				size_t len = (dst-p->token) + put_len_utf8(ch) + 1;
 
 				if (len >= p->token_size) {
 					size_t len = dst - p->token;
@@ -2309,7 +2309,7 @@ static int get_token(parser *p, int last_op)
 			((ch == ':') && find_module(p->token))) {
 			ch = get_char_utf8(&src);
 
-			int len = (dst-p->token) + put_len_utf8(ch) + 1;
+			size_t len = (dst-p->token) + put_len_utf8(ch) + 1;
 
 			if (len >= p->token_size) {
 				size_t len = dst - p->token;
@@ -2350,7 +2350,7 @@ static int get_token(parser *p, int last_op)
 
 	while (*src) {
 		ch = get_char_utf8(&src);
-		int len = (dst-p->token) + put_len_utf8(ch) + 1;
+		size_t len = (dst-p->token) + put_len_utf8(ch) + 1;
 
 		if (len >= p->token_size) {
 			size_t len = dst - p->token;
@@ -2461,7 +2461,7 @@ int parser_tokenize(parser *p, int args, int consing)
 		else if (p->in_dcg && !p->quoted && !strcmp(p->token, "{") && !p->dcg_passthru++)
 			;
 		else if (p->in_dcg && !p->quoted && !strcmp(p->token, "}") && !--p->dcg_passthru)
-			;
+			{}
 
 		if (!p->depth && !p->in_dcg && !p->quoted && !strcmp(p->token, "-->"))
 			p->in_dcg = 1;

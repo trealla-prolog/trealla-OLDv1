@@ -1145,7 +1145,7 @@ static int fn_iso_sub_atom_5(query *q)
 	GET_NEXT_ARG(p3,integer_or_var);
 	GET_NEXT_ARG(p4,integer_or_var);
 	GET_NEXT_ARG(p5,atom_or_var);
-	int before = 0, len = 0;
+	size_t before = 0, len = 0;
 
 	if (!q->retry) {
 		make_choice(q);
@@ -1186,8 +1186,8 @@ static int fn_iso_sub_atom_5(query *q)
 
 	int any = 0;
 
-	for (int i = before; i <= LEN_STR(p1); i++) {
-		for (int j = len; j <= LEN_STR(p1); j++) {
+	for (size_t i = before; i <= LEN_STR(p1); i++) {
+		for (size_t j = len; j <= LEN_STR(p1); j++) {
 			cell tmp;
 			any = 1;
 
@@ -4087,7 +4087,7 @@ static int do_collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, ce
 {
 	int cnt = 0;
 
-	for (int i = 0; i < nbr_cells; i++, p1++) {
+	for (idx_t i = 0; i < nbr_cells; i++, p1++) {
 		cell *c = deref(q, p1, p1_ctx);
 
 		if (is_structure(c)) {
@@ -5667,7 +5667,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 		if (name != h->val_off)
 			continue;
 
-		if ((arity != h->arity) && (arity != -1))
+		if ((arity != h->arity) && (arity != -1U))
 			continue;
 
 		for (clause *r = h->head; r; r = r->next) {
@@ -5827,8 +5827,8 @@ static int fn_busy_1(query *q)
 	if (elapse > (60 * 1000))
 		return 1;
 
-	int_t started = get_time_in_usec() / 1000;
-	int_t end = started + elapse;
+	uint_t started = get_time_in_usec() / 1000;
+	uint_t end = started + elapse;
 
 	while ((get_time_in_usec() / 1000) < end)
 		;
@@ -6061,7 +6061,7 @@ static int fn_loadfile_2(query *q)
 
 	char *s = malloc(st.st_size+1);
 
-	if (fread(s, 1, st.st_size, fp) != st.st_size) {
+	if (fread(s, 1, st.st_size, fp) != (size_t)st.st_size) {
 		throw_error(q, p1, "domain_error", "cannot_read");
 		free(filename);
 		return 0;
@@ -8866,7 +8866,7 @@ static int do_length(query *q)
 	tmp.arity = 0;
 	alloc_list(q, &tmp);
 
-	for (int i = 1; i < nbr; i++) {
+	for (unsigned i = 1; i < nbr; i++) {
 		tmp.var_nbr = var_nbr++;
 		append_list(q, &tmp);
 	}
@@ -8996,7 +8996,7 @@ static int fn_iso_length_2(query *q)
 		tmp.var_nbr = var_nbr++;
 		alloc_list(q, &tmp);
 
-		for (int i = 1; i < nbr; i++) {
+		for (idx_t i = 1; i < nbr; i++) {
 			tmp.var_nbr = var_nbr++;
 			append_list(q, &tmp);
 		}
@@ -9355,9 +9355,9 @@ static const struct builtins g_other_funcs[] =
 	{"clause", 3, fn_clause_3, "?head,?body,-ref"},
 	{"$queue", 1, fn_sys_queue_1, "+term"},
 	{"$list", 1, fn_sys_list_1, "-list"},
-	{"getenv", 2, fn_getenv_2},
-	{"setenv", 2, fn_setenv_2},
-	{"unsetenv", 1, fn_unsetenv_1},
+	{"getenv", 2, fn_getenv_2, NULL},
+	{"setenv", 2, fn_setenv_2, NULL},
+	{"unsetenv", 1, fn_unsetenv_1, NULL},
 	{"load_files", 2, fn_consult_1, "+files"},
 	{"statistics", 2, fn_statistics_2, "+string,-variable"},
 	{"duplicate_term", 2, fn_iso_copy_term_2, "+string,-variable"},
