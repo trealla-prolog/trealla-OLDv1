@@ -375,6 +375,7 @@ cell *end_list(query *q)
 
 static cell tmp_cstringn(query *q, const char *s, size_t n)
 {
+        (void) q;
 	cell tmp;
 
 	if (strlen(s) < MAX_SMALL_STRING) {
@@ -419,6 +420,7 @@ static cell make_cstring(query *q, const char *s)
 
 static cell make_string(query *q, const char *s, size_t n)
 {
+        (void) q;
 	cell tmp;
 	tmp.val_type = TYPE_CSTRING;
 	tmp.flags = FLAG_BLOB;
@@ -638,11 +640,13 @@ static int fn_iso_repeat_0(query *q)
 
 static int fn_iso_true_0(query *q)
 {
+        (void) q;
 	return 1;
 }
 
 static int fn_iso_fail_0(query *q)
 {
+        (void) q;
 	return 0;
 }
 
@@ -1381,6 +1385,7 @@ static int fn_iso_atom_length_2(query *q)
 
 static int new_stream(query *q)
 {
+        (void) q;
 	for (int i = 0; i < MAX_STREAMS; i++) {
 		if (!g_streams[i].fp)
 			return i;
@@ -1391,6 +1396,7 @@ static int new_stream(query *q)
 
 static int get_named_stream(query *q, const char *name)
 {
+        (void) q;
 	for (int i = 0; i < MAX_STREAMS; i++) {
 		stream *str = &g_streams[i];
 
@@ -1761,6 +1767,7 @@ static int fn_iso_nl_1(query *q)
 
 static void parse_read_params(query *q, cell *p, stream *str)
 {
+        (void) str;
 	if (!is_structure(p))
 		return;
 
@@ -5267,6 +5274,7 @@ static int fn_findall_4(query *q)
 
 static int do_collect_vars2(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 {
+        (void) q;
 	int cnt = 0;
 
 	for (idx_t i = 0; i < nbr_cells; i++, p1++) {
@@ -5285,6 +5293,7 @@ static int do_collect_vars2(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 
 static uint64_t get_vars(query *q, cell *p, idx_t p_ctx)
 {
+        (void) p_ctx;
 	cell *slots[MAX_ARITY] = {0};
 	int cnt = do_collect_vars2(q, p, p->nbr_cells, slots);
 	uint64_t mask = 0;
@@ -7089,6 +7098,7 @@ static int format_integer(char *dst, int_t v, int grouping, int sep, int decimal
 
 static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx, cell* p2, idx_t p2_ctx)
 {
+        (void) p1_ctx;
 	char *srcbuf = GET_STR(p1);
 	const char *src = srcbuf;
 	size_t bufsiz;

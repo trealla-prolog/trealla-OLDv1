@@ -89,6 +89,7 @@ int net_connect(const char *hostname, unsigned port, int udp, int nodelay)
 
 int net_server(const char *hostname, unsigned port, int udp, const char *keyfile, const char *certfile)
 {
+        (void) hostname;
 	struct addrinfo hints, *result, *rp;
 	int fd, status;
 
@@ -154,6 +155,9 @@ int net_server(const char *hostname, unsigned port, int udp, const char *keyfile
 		SSL_CTX_load_verify_locations(g_ctx, !certfile?keyfile:certfile, NULL);
 		SSL_CTX_set_default_verify_paths(g_ctx);
 	}
+#else
+        (void) keyfile;
+        (void) certfile;
 #endif
 
 	listen(fd, -1);
@@ -237,6 +241,11 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 	}
 	return ssl;
 #else
+        (void) fd;
+        (void) hostname;
+        (void) is_server;
+        (void) level;
+        (void) certfile;
 	return NULL;
 #endif
 }

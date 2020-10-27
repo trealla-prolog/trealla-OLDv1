@@ -34,6 +34,7 @@
 
 static void sigfn(int s)
 {
+        (void) s;
 	signal(SIGINT, &sigfn);
 	g_tpl_interrupt = 1;
 }

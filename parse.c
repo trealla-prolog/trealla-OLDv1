@@ -474,6 +474,7 @@ static int compkey(const void *ptr1, const void *ptr2)
 
 static void reindex_rule(module *m, rule *h)
 {
+        (void) m;
 	h->index = sl_create(compkey);
 
 	for (clause *r = h->head; r; r = r->next) {
@@ -2918,6 +2919,7 @@ int module_load_file(module *m, const char *filename)
 
 static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 {
+        (void) dq;
 	idx_t ctx = 0;
 	query q = {0};
 	q.m = m;
