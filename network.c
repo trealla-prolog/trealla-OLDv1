@@ -214,7 +214,7 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 		}
 
 		SSL_CTX_set_default_verify_paths(g_ctx);
-		int level = 0;
+		int level = 0; //FIXME: cehteh: level parameter unused, is this a bug or intended?
 
 		if (level > 0)
 			SSL_set_verify(ssl, SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT, 0);

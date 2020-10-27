@@ -3971,7 +3971,7 @@ static int fn_iso_arg_3(query *q)
 			make_choice(q);
 		}
 
-		if (arg_nbr < 0) {
+		if (arg_nbr < 0) { //FIXME: cehteh: can never happen
 			throw_error(q, p1, "domain_error", "out_of_range");
 			return 0;
 		}
@@ -6408,8 +6408,8 @@ static int fn_client_5(query *q)
 			if (!strcmp(GET_STR(c), "host")) {
 				c = c + 1;
 
-				if (is_atom(c))
-					;//udp = !strcmp(GET_STR(c), "true") ? 1 : 0;
+				//if (is_atom(c))
+				//	;//udp = !strcmp(GET_STR(c), "true") ? 1 : 0;
 			}
 		}
 
@@ -7933,7 +7933,7 @@ static int fn_hex_chars_2(query *q)
 		return 1;
 	}
 
-	return p1_val == p2->val_num;
+	return p1_val == (uint_t)p2->val_num;  //FIXME: cehteh: is this cast correct?
 }
 
 static int fn_octal_chars_2(query *q)
@@ -7964,7 +7964,7 @@ static int fn_octal_chars_2(query *q)
 		return 1;
 	}
 
-	return p1_val == p2->val_num;
+	return p1_val == (uint_t)p2->val_num;  //FIXME: cehteh: is this cast correct?
 }
 
 static int fn_rdiv_2(query *q)
