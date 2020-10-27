@@ -93,4 +93,4 @@ atts.o: library/atts.pl
 	$(LD) $(OSFLAG) -r -b binary -o atts.o library/atts.pl
 
 error.o: library/error.pl
-	$(LD) -m elf_x86_64 -r -b binary -o error.o library/error.pl
+	$(LD) $(OSFLAG) -r -b binary -o error.o library/error.pl
