@@ -1653,10 +1653,10 @@ static void parser_dcg_rewrite(parser *p)
 			nbr_cells += 5;
 			phrase += phrase->nbr_cells;
 		} else if (is_iso_list(phrase)) {
-			int len = phrase[0].nbr_cells;
+			int len = phrase[0].nbr_cells - 1;
 			tmp[nbr_cells+0].val_type = TYPE_LITERAL;
 			tmp[nbr_cells+0].val_off = find_in_pool("=");
-			tmp[nbr_cells+0].nbr_cells = 2 + len;
+			tmp[nbr_cells+0].nbr_cells = 2 + len + 1;
 			tmp[nbr_cells+0].arity = 2;
 			tmp[nbr_cells+0].flags = FLAG_BUILTIN | OP_XFX;
 
@@ -1668,15 +1668,15 @@ static void parser_dcg_rewrite(parser *p)
 
 			copy_cells(tmp+nbr_cells+2, phrase, len);
 
-			tmp[nbr_cells+2+len-1].val_type = TYPE_VARIABLE;
-			tmp[nbr_cells+2+len-1].nbr_cells = 1;
-			tmp[nbr_cells+2+len-1].arity = 0;
+			tmp[nbr_cells+2+len].val_type = TYPE_VARIABLE;
+			tmp[nbr_cells+2+len].nbr_cells = 1;
+			tmp[nbr_cells+2+len].arity = 0;
 			if (last) { sprintf(v, "S_"); last = 0; }
 			else sprintf(v, "S%d_", cnt);
-			tmp[nbr_cells+2+len-1].val_off = find_in_pool(v);
-			tmp[nbr_cells+2+len-1].flags = 0;
+			tmp[nbr_cells+2+len].val_off = find_in_pool(v);
+			tmp[nbr_cells+2+len].flags = 0;
 
-			nbr_cells += 2 + len;
+			nbr_cells += 2 + len + 1;
 			phrase += phrase->nbr_cells;
 		} else if (is_nil(phrase)) {
 			tmp[nbr_cells+0].val_type = TYPE_LITERAL;
