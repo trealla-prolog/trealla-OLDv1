@@ -402,7 +402,7 @@ inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 	return nbr_cells;
 }
 
-#define LIST_HEAD(l) list_head(l); cell l##_tmp
+#define LIST_HEAD(l) list_head(l); __attribute__((unused)) cell l##_tmp
 #define LIST_TAIL(l) list_tail(l, &l##_tmp)
 
 cell *list_head(cell *l);
