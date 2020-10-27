@@ -377,7 +377,7 @@ struct module_ {
 	parser *p;
 	FILE *fp;
 	struct op_table ops[MAX_USER_OPS+1];
-    const char *keywords[1000];
+        const char *keywords[1000];
 
 	struct {
 		int double_quote_codes, double_quote_chars, double_quote_atom;
