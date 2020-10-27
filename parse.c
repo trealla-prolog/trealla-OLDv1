@@ -1577,7 +1577,20 @@ static void parser_dcg_rewrite(parser *p)
 			continue;
 		}
 
+		if (phrase->arity && !strcmp(GET_STR(phrase), ";")) {
+			tmp[nbr_cells++] = *phrase;
+			phrase++;
+			continue;
+		}
+
+		if (phrase->arity && !strcmp(GET_STR(phrase), "->")) {
+			tmp[nbr_cells++] = *phrase;
+			phrase++;
+			continue;
+		}
+
 		int last = ((phrase+phrase->nbr_cells) - t->cells) >= t->cidx;
+		if (did_insert) last = 0;
 
 		if (is_literal(phrase) && !strcmp(GET_STR(phrase), "!")) {
 			idx_t len = phrase->nbr_cells;
@@ -1690,8 +1703,7 @@ static void parser_dcg_rewrite(parser *p)
 			tmp[nbr_cells+4].val_type = TYPE_VARIABLE;
 			tmp[nbr_cells+4].nbr_cells = 1;
 			tmp[nbr_cells+4].arity = 0;
-			if (last) { sprintf(v, "S_"); last = 0; }
-			else sprintf(v, "S%d_", cnt+1);
+			sprintf(v, "S%d_", cnt+1);
 			tmp[nbr_cells+4].val_off = find_in_pool(v);
 
 			nbr_cells += 5;
