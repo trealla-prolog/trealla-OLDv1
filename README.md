@@ -43,6 +43,13 @@ Then...
 
 	make test
 
+You can build without compile-time in-built library modules:
+
+	make NOLDLIBS=1
+
+and this is currently necessary with OSX. The only effect is to make
+startup a little slower as they are pre-loaded from disk.
+
 A 'make debug' build compiles in 0.2s with *tcc* and about 3s with
 *clang* and *gcc*. Should build on any Unix-like system with a C99
 compiler (could do C89 with a few cosmetic tweaks). Has been tested on

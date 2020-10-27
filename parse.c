@@ -3335,15 +3335,21 @@ prolog *pl_create()
 	set_multifile_in_db(pl->m, "term_expansion", 2);
 	set_dynamic_in_db(pl->m, "term_expansion", 2);
 
+#if !NOLDLIBS
 	for (library *lib = g_libs; lib->name; lib++) {
 		if (!strcmp(lib->name, "apply") || !strcmp(lib->name, "lists") ||
-			!strcmp(lib->name, "http") ||
-			!strcmp(lib->name, "atts") || !strcmp(lib->name, "phrase")) {
+			!strcmp(lib->name, "http") || !strcmp(lib->name, "atts")) {
 			char *src = strndup((const char*)lib->start, (lib->end-lib->start));
 			module_load_text(pl->m, src);
 			free(src);
 		}
 	}
+#else
+	module_load_file(pl->m, "library/apply.pl");
+	module_load_file(pl->m, "library/lists.pl");
+	module_load_file(pl->m, "library/http.pl");
+	module_load_file(pl->m, "library/atts.pl");
+#endif
 
 	pl->m->prebuilt = 0;
 	return pl;
