@@ -375,6 +375,7 @@ cell *end_list(query *q)
 
 static cell tmp_cstringn(query *q, const char *s, size_t n)
 {
+        (void) q;
 	cell tmp;
 
 	if (strlen(s) < MAX_SMALL_STRING) {
@@ -419,6 +420,7 @@ static cell make_cstring(query *q, const char *s)
 
 static cell make_string(query *q, const char *s, size_t n)
 {
+        (void) q;
 	cell tmp;
 	tmp.val_type = TYPE_CSTRING;
 	tmp.flags = FLAG_BLOB;
@@ -638,11 +640,13 @@ static int fn_iso_repeat_0(query *q)
 
 static int fn_iso_true_0(query *q)
 {
+        (void) q;
 	return 1;
 }
 
 static int fn_iso_fail_0(query *q)
 {
+        (void) q;
 	return 0;
 }
 
@@ -1141,7 +1145,7 @@ static int fn_iso_sub_atom_5(query *q)
 	GET_NEXT_ARG(p3,integer_or_var);
 	GET_NEXT_ARG(p4,integer_or_var);
 	GET_NEXT_ARG(p5,atom_or_var);
-	int before = 0, len = 0;
+	size_t before = 0, len = 0;
 
 	if (!q->retry) {
 		make_choice(q);
@@ -1182,8 +1186,8 @@ static int fn_iso_sub_atom_5(query *q)
 
 	int any = 0;
 
-	for (int i = before; i <= LEN_STR(p1); i++) {
-		for (int j = len; j <= LEN_STR(p1); j++) {
+	for (size_t i = before; i <= LEN_STR(p1); i++) {
+		for (size_t j = len; j <= LEN_STR(p1); j++) {
 			cell tmp;
 			any = 1;
 
@@ -1381,6 +1385,7 @@ static int fn_iso_atom_length_2(query *q)
 
 static int new_stream(query *q)
 {
+        (void) q;
 	for (int i = 0; i < MAX_STREAMS; i++) {
 		if (!g_streams[i].fp)
 			return i;
@@ -1391,6 +1396,7 @@ static int new_stream(query *q)
 
 static int get_named_stream(query *q, const char *name)
 {
+        (void) q;
 	for (int i = 0; i < MAX_STREAMS; i++) {
 		stream *str = &g_streams[i];
 
@@ -1761,6 +1767,7 @@ static int fn_iso_nl_1(query *q)
 
 static void parse_read_params(query *q, cell *p, stream *str)
 {
+        (void) str;
 	if (!is_structure(p))
 		return;
 
@@ -3964,7 +3971,7 @@ static int fn_iso_arg_3(query *q)
 			make_choice(q);
 		}
 
-		if (arg_nbr < 0) {
+		if (arg_nbr < 0) { //FIXME: cehteh: can never happen
 			throw_error(q, p1, "domain_error", "out_of_range");
 			return 0;
 		}
@@ -4080,7 +4087,7 @@ static int do_collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, ce
 {
 	int cnt = 0;
 
-	for (int i = 0; i < nbr_cells; i++, p1++) {
+	for (idx_t i = 0; i < nbr_cells; i++, p1++) {
 		cell *c = deref(q, p1, p1_ctx);
 
 		if (is_structure(c)) {
@@ -5267,6 +5274,7 @@ static int fn_findall_4(query *q)
 
 static int do_collect_vars2(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 {
+        (void) q;
 	int cnt = 0;
 
 	for (idx_t i = 0; i < nbr_cells; i++, p1++) {
@@ -5285,6 +5293,7 @@ static int do_collect_vars2(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 
 static uint64_t get_vars(query *q, cell *p, idx_t p_ctx)
 {
+        (void) p_ctx;
 	cell *slots[MAX_ARITY] = {0};
 	int cnt = do_collect_vars2(q, p, p->nbr_cells, slots);
 	uint64_t mask = 0;
@@ -5658,7 +5667,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 		if (name != h->val_off)
 			continue;
 
-		if ((arity != h->arity) && (arity != -1))
+		if ((arity != h->arity) && (arity != -1U))
 			continue;
 
 		for (clause *r = h->head; r; r = r->next) {
@@ -5818,8 +5827,8 @@ static int fn_busy_1(query *q)
 	if (elapse > (60 * 1000))
 		return 1;
 
-	int_t started = get_time_in_usec() / 1000;
-	int_t end = started + elapse;
+	uint_t started = get_time_in_usec() / 1000;
+	uint_t end = started + elapse;
 
 	while ((get_time_in_usec() / 1000) < end)
 		;
@@ -6052,7 +6061,7 @@ static int fn_loadfile_2(query *q)
 
 	char *s = malloc(st.st_size+1);
 
-	if (fread(s, 1, st.st_size, fp) != st.st_size) {
+	if (fread(s, 1, st.st_size, fp) != (size_t)st.st_size) {
 		throw_error(q, p1, "domain_error", "cannot_read");
 		free(filename);
 		return 0;
@@ -6399,8 +6408,8 @@ static int fn_client_5(query *q)
 			if (!strcmp(GET_STR(c), "host")) {
 				c = c + 1;
 
-				if (is_atom(c))
-					;//udp = !strcmp(GET_STR(c), "true") ? 1 : 0;
+				//if (is_atom(c))
+				//	;//udp = !strcmp(GET_STR(c), "true") ? 1 : 0;
 			}
 		}
 
@@ -7089,6 +7098,7 @@ static int format_integer(char *dst, int_t v, int grouping, int sep, int decimal
 
 static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx, cell* p2, idx_t p2_ctx)
 {
+        (void) p1_ctx;
 	char *srcbuf = GET_STR(p1);
 	const char *src = srcbuf;
 	size_t bufsiz;
@@ -7923,7 +7933,7 @@ static int fn_hex_chars_2(query *q)
 		return 1;
 	}
 
-	return p1_val == p2->val_num;
+	return p1_val == (uint_t)p2->val_num;  //FIXME: cehteh: is this cast correct?
 }
 
 static int fn_octal_chars_2(query *q)
@@ -7954,7 +7964,7 @@ static int fn_octal_chars_2(query *q)
 		return 1;
 	}
 
-	return p1_val == p2->val_num;
+	return p1_val == (uint_t)p2->val_num;  //FIXME: cehteh: is this cast correct?
 }
 
 static int fn_rdiv_2(query *q)
@@ -8856,7 +8866,7 @@ static int do_length(query *q)
 	tmp.arity = 0;
 	alloc_list(q, &tmp);
 
-	for (int i = 1; i < nbr; i++) {
+	for (unsigned i = 1; i < nbr; i++) {
 		tmp.var_nbr = var_nbr++;
 		append_list(q, &tmp);
 	}
@@ -8986,7 +8996,7 @@ static int fn_iso_length_2(query *q)
 		tmp.var_nbr = var_nbr++;
 		alloc_list(q, &tmp);
 
-		for (int i = 1; i < nbr; i++) {
+		for (idx_t i = 1; i < nbr; i++) {
 			tmp.var_nbr = var_nbr++;
 			append_list(q, &tmp);
 		}
@@ -9345,9 +9355,9 @@ static const struct builtins g_other_funcs[] =
 	{"clause", 3, fn_clause_3, "?head,?body,-ref"},
 	{"$queue", 1, fn_sys_queue_1, "+term"},
 	{"$list", 1, fn_sys_list_1, "-list"},
-	{"getenv", 2, fn_getenv_2},
-	{"setenv", 2, fn_setenv_2},
-	{"unsetenv", 1, fn_unsetenv_1},
+	{"getenv", 2, fn_getenv_2, NULL},
+	{"setenv", 2, fn_setenv_2, NULL},
+	{"unsetenv", 1, fn_unsetenv_1, NULL},
 	{"load_files", 2, fn_consult_1, "+files"},
 	{"statistics", 2, fn_statistics_2, "+string,-variable"},
 	{"duplicate_term", 2, fn_iso_copy_term_2, "+string,-variable"},
