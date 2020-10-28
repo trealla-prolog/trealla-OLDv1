@@ -2371,7 +2371,7 @@ static int get_token(parser *p, int last_op)
 		return (dst - p->token) != 0;
 	}
 
-	static const char *s_delims = "(){}[]_, `'\"\t\r\n";
+	static const char *s_delims = "(){}[]|_, `'\"\t\r\n";
 	p->is_op = 1;
 
 	while (*src) {
