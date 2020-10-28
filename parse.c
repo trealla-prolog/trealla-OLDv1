@@ -2145,6 +2145,13 @@ static int get_token(parser *p, int last_op)
 		}
 	}
 
+	while (isspace(*src)) {
+		if (*src == '\n')
+			p->line_nbr++;
+
+		src++;
+	}
+
 	if (!*src) {
 		p->srcptr = (char*)src;
 		return 0;
