@@ -38,7 +38,9 @@ read_body(S, Hdrs, Data) :-
 
 % Open with options...
 
-http_open([], _, _) :- !, fail.
+http_open([], _, _) :- !,
+	fail.
+
 http_open(UrlList, S, Opts) :-
 	is_list(UrlList),
 	is_list(Opts),
@@ -114,7 +116,7 @@ http_get(Url, Data, Opts) :-
 	).
 
 http_post(Url, Data, Reply, Opts) :-
-	http_get(Url, Reply,[post(Data)|Opts]).
+	http_get(Url, Reply, [post(Data)|Opts]).
 
 http_put(Url, Data, Reply, Opts) :-
 	http_post(Url, Data, Reply, [method(put)|Opts]).
