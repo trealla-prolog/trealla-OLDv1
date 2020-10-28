@@ -995,6 +995,9 @@ static void directives(parser *p, term *t)
 			cell *head = LIST_HEAD(p2);
 
 			if (is_structure(head)) {
+				if (strcmp(GET_STR(head), "/") && strcmp(GET_STR(head), "//"))
+					return;
+
 				cell *f = head+1, *a = f+1;
 				if (!is_literal(f)) return;
 				if (!is_integer(a)) return;
