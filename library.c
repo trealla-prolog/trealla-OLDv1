@@ -1,6 +1,6 @@
 #include "library.h"
 
-#if !NOLDLIBS
+#if USE_LDLIBS
 extern uint8_t _binary_library_lists_pl_start[];
 extern uint8_t _binary_library_lists_pl_end[];
 extern uint8_t _binary_library_dict_pl_start[];
@@ -16,7 +16,7 @@ extern uint8_t _binary_library_error_pl_end[];
 #endif
 
 library g_libs[] = {
-#if !NOLDLIBS
+#if USE_LDLIBS
      {"lists", _binary_library_lists_pl_start, _binary_library_lists_pl_end},
      {"dict", _binary_library_dict_pl_start, _binary_library_dict_pl_end},
      {"apply", _binary_library_apply_pl_start, _binary_library_apply_pl_end},

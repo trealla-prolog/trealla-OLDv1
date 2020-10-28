@@ -21,8 +21,9 @@ OBJECTS = tpl.o history.o builtins.o library.o \
 
 .ifndef NOLDLIBS
 OBJECTS += lists.o dict.o apply.o http.o atts.o error.o
+CFLAGS += -DUSE_LDLIBS=1
 .else
-CFLAGS += -DNOLDLIBS=1
+CFLAGS += -DUSE_LDLIBS=0
 .endif
 
 all: tpl
