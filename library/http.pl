@@ -100,7 +100,7 @@ http_get(Url, Data, Opts) :-
 	Opts3=[status_code2(Code)|Opts2],
 	process(Url, S, Opts3),
 	dict:get(Hdrs, 'transfer-encoding', TE, ''),
-	( TE == chunked ->
+	( TE == "chunked" ->
 		read_chunks(S, '', Body) ;
 		read_body(S, Hdrs, Body)
 	),
