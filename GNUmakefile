@@ -73,7 +73,8 @@ UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Darwin)
 	OSFLAG = -m elf_x86_64
-elifeq ($(UNAME_S),FreeBSD)
+endif
+ifeq ($(UNAME_S),FreeBSD)
 	OSFLAG = -m elf_x86_64
 endif
 
