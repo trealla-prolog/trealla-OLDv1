@@ -373,9 +373,8 @@ cell *end_list(query *q)
 	return tmp;
 }
 
-static cell tmp_cstringn(query *q, const char *s, size_t n)
+static cell tmp_cstringn(const char *s, size_t n)
 {
-        (void) q;
 	cell tmp;
 
 	if (strlen(s) < MAX_SMALL_STRING) {
@@ -394,10 +393,10 @@ static cell tmp_cstringn(query *q, const char *s, size_t n)
 	return tmp;
 }
 
-static cell tmp_cstring(query *q, const char *s)
+static cell tmp_cstring(const char *s)
 {
 	size_t n = strlen(s);
-	return tmp_cstringn(q, s, n);
+	return tmp_cstringn(s, n);
 }
 
 static cell make_cstringn(query *q, const char *s, size_t n)
@@ -418,9 +417,8 @@ static cell make_cstring(query *q, const char *s)
 	return make_cstringn(q, s, n);
 }
 
-static cell make_string(query *q, const char *s, size_t n)
+static cell make_string(const char *s, size_t n)
 {
-        (void) q;
 	cell tmp;
 	tmp.val_type = TYPE_CSTRING;
 	tmp.flags = FLAG_BLOB;
@@ -429,7 +427,7 @@ static cell make_string(query *q, const char *s, size_t n)
 	tmp.val_str[n] = '\0';
 	tmp.len_str = n;
 	tmp.nbr_cells = 1;
-	tmp.arity = 0;
+	tmp.arity = 2;
 	tmp.flags |= FLAG_STRING;
 	return tmp;
 }
@@ -638,15 +636,13 @@ static int fn_iso_repeat_0(query *q)
 	return 1;
 }
 
-static int fn_iso_true_0(query *q)
+static int fn_iso_true_0(__attribute__((unused)) query *q)
 {
-        (void) q;
 	return 1;
 }
 
-static int fn_iso_fail_0(query *q)
+static int fn_iso_fail_0(__attribute__((unused)) query *q)
 {
-        (void) q;
 	return 0;
 }
 
@@ -915,7 +911,7 @@ static int fn_iso_atom_chars_2(query *q)
 
 	const char *src = GET_STR(p1);
 	int nbytes = LEN_STR(p1);
-	cell tmp = make_string(q, src, nbytes);
+	cell tmp = make_string(src, nbytes);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -1063,7 +1059,7 @@ static int fn_iso_number_chars_2(query *q)
 
 	char tmpbuf[256];
 	sprint_int(tmpbuf, sizeof(tmpbuf), p1->val_num, 10);
-	cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
+	cell tmp = make_string(tmpbuf, strlen(tmpbuf));
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -1383,9 +1379,8 @@ static int fn_iso_atom_length_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static int new_stream(query *q)
+static int new_stream()
 {
-        (void) q;
 	for (int i = 0; i < MAX_STREAMS; i++) {
 		if (!g_streams[i].fp)
 			return i;
@@ -1394,9 +1389,8 @@ static int new_stream(query *q)
 	return -1;
 }
 
-static int get_named_stream(query *q, const char *name)
+static int get_named_stream(const char *name)
 {
-        (void) q;
 	for (int i = 0; i < MAX_STREAMS; i++) {
 		stream *str = &g_streams[i];
 
@@ -1413,7 +1407,7 @@ static int get_named_stream(query *q, const char *name)
 static int get_stream(query *q, cell *p1)
 {
 	if (is_atom(p1)) {
-		int n = get_named_stream(q, GET_STR(p1));
+		int n = get_named_stream(GET_STR(p1));
 
 		if (n < 0) {
 			throw_error(q, p1, "type_error", "stream");
@@ -1528,7 +1522,7 @@ static int fn_iso_open_3(query *q)
 	GET_NEXT_ARG(p3,variable);
 	const char *filename = GET_STR(p1);
 	const char *mode = GET_STR(p2);
-	int n = new_stream(q);
+	int n = new_stream();
 
 	if (n < 0) {
 		throw_error(q, p1, "resource_error", "too_many_open_streams");
@@ -1568,7 +1562,7 @@ static int fn_iso_open_4(query *q)
 	GET_NEXT_ARG(p3,variable);
 	GET_NEXT_ARG(p4,list_or_nil);
 	const char *mode = GET_STR(p2);
-	int n = new_stream(q);
+	int n = new_stream();
 
 	if (n < 0) {
 		throw_error(q, p1, "resource_error", "too_many_open_streams");
@@ -1716,9 +1710,9 @@ static int fn_iso_close_1(query *q)
 	return 1;
 }
 
-static int fn_iso_at_end_of_stream_0(query *q)
+static int fn_iso_at_end_of_stream_0(__attribute__((unused)) query *q)
 {
-	int n = get_named_stream(q, "user_input");
+	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
 	return feof(str->fp) || ferror(str->fp);
 }
@@ -1731,9 +1725,9 @@ static int fn_iso_at_end_of_stream_1(query *q)
 	return feof(str->fp) || ferror(str->fp);
 }
 
-static int fn_iso_flush_output_0(query *q)
+static int fn_iso_flush_output_0(__attribute__((unused)) query *q)
 {
-	int n = get_named_stream(q, "user_output");
+	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
 	fflush(str->fp);
 	return !ferror(str->fp);
@@ -1748,9 +1742,9 @@ static int fn_iso_flush_output_1(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_nl_0(query *q)
+static int fn_iso_nl_0(__attribute__((unused)) query *q)
 {
-	int n = get_named_stream(q, "user_output");
+	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
 	fputc('\n', str->fp);
 	return !ferror(str->fp);
@@ -1765,9 +1759,8 @@ static int fn_iso_nl_1(query *q)
 	return !ferror(str->fp);
 }
 
-static void parse_read_params(query *q, cell *p, stream *str)
+static void parse_read_params(query *q, cell *p)
 {
-        (void) str;
 	if (!is_structure(p))
 		return;
 
@@ -1808,7 +1801,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
 		cell *c = deref(q, h, p2_ctx);
-		parse_read_params(q, c, str);
+		parse_read_params(q, c);
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
@@ -1876,7 +1869,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 static int fn_iso_read_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream(q, "user_input");
+	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
 	cell tmp;
 	make_literal(&tmp, g_nil_s);
@@ -1898,7 +1891,7 @@ static int fn_iso_read_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
-	int n = get_named_stream(q, "user_input");
+	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
 	return do_read_term(q, str, p1, p1_ctx, p2, p2_ctx, NULL);
 }
@@ -1916,7 +1909,7 @@ static int fn_iso_read_term_3(query *q)
 static int fn_iso_write_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream(q, "user_output");
+	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
 	write_term_to_stream(q, str, p1, p1_ctx, 1, 0, 0);
 	return !ferror(str->fp);
@@ -1935,7 +1928,7 @@ static int fn_iso_write_2(query *q)
 static int fn_iso_writeq_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream(q, "user_output");
+	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
 	int save = q->quoted;
 	q->quoted = 1;
@@ -1960,7 +1953,7 @@ static int fn_iso_writeq_2(query *q)
 static int fn_iso_write_canonical_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream(q, "user_output");
+	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
 	write_canonical(q, str->fp, p1, p1_ctx, 1, 0);
 	return !ferror(str->fp);
@@ -2005,7 +1998,7 @@ static int fn_iso_write_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	int n = get_named_stream(q, "user_output");
+	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
 
 	while (is_list(p2)) {
@@ -2065,7 +2058,7 @@ static int fn_iso_write_term_3(query *q)
 static int fn_iso_put_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	int n = get_named_stream(q, "user_output");
+	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
 	const char *src = GET_STR(p1);
 	int ch = get_char_utf8(&src);
@@ -2092,7 +2085,7 @@ static int fn_iso_put_char_2(query *q)
 static int fn_iso_put_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	int n = get_named_stream(q, "user_output");
+	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
 	int ch = (int)p1->val_num;
 	char tmpbuf[20];
@@ -2117,7 +2110,7 @@ static int fn_iso_put_code_2(query *q)
 static int fn_iso_put_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	int n = get_named_stream(q, "user_output");
+	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
 	int ch = (int)p1->val_num;
 
@@ -2154,7 +2147,7 @@ static int fn_iso_put_byte_2(query *q)
 static int fn_iso_get_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
-	int n = get_named_stream(q, "user_input");
+	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
@@ -2233,7 +2226,7 @@ static int fn_iso_get_char_2(query *q)
 static int fn_iso_get_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
-	int n = get_named_stream(q, "user_input");
+	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
@@ -2294,7 +2287,7 @@ static int fn_iso_get_code_2(query *q)
 static int fn_iso_get_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
-	int n = get_named_stream(q, "user_input");
+	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
@@ -2355,7 +2348,7 @@ static int fn_iso_get_byte_2(query *q)
 static int fn_iso_peek_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream(q, "user_input");
+	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 
@@ -2413,7 +2406,7 @@ static int fn_iso_peek_char_2(query *q)
 static int fn_iso_peek_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream(q, "user_input");
+	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 
@@ -2452,7 +2445,7 @@ static int fn_iso_peek_code_2(query *q)
 static int fn_iso_peek_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream(q, "user_input");
+	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : net_getc(str);
 
@@ -5015,11 +5008,11 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		}
 
 		int i = g_avc;
-		cell tmp = tmp_cstring(q, g_av[i++]);
+		cell tmp = tmp_cstring(g_av[i++]);
 		alloc_list(q, &tmp);
 
 		while (i < g_ac) {
-			tmp = tmp_cstring(q, g_av[i++]);
+			tmp = tmp_cstring(g_av[i++]);
 			append_list(q, &tmp);
 		}
 
@@ -5272,9 +5265,8 @@ static int fn_findall_4(query *q)
 	return 1;
 }
 
-static int do_collect_vars2(query *q, cell *p1, idx_t nbr_cells, cell **slots)
+static int do_collect_vars2(cell *p1, idx_t nbr_cells, cell **slots)
 {
-        (void) q;
 	int cnt = 0;
 
 	for (idx_t i = 0; i < nbr_cells; i++, p1++) {
@@ -5291,11 +5283,10 @@ static int do_collect_vars2(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 	return cnt;
 }
 
-static uint64_t get_vars(query *q, cell *p, idx_t p_ctx)
+static uint64_t get_vars(cell *p, __attribute__((unused)) idx_t p_ctx)
 {
-        (void) p_ctx;
 	cell *slots[MAX_ARITY] = {0};
-	int cnt = do_collect_vars2(q, p, p->nbr_cells, slots);
+	int cnt = do_collect_vars2(p, p->nbr_cells, slots);
 	uint64_t mask = 0;
 
 	if (cnt) {
@@ -5365,8 +5356,8 @@ static int fn_iso_bagof_3(query *q)
 
 	init_queuen(q);
 	make_choice(q);
-	uint64_t p1_vars = get_vars(q, p1, p1_ctx);
-	uint64_t p2_vars = get_vars(q, p2, p2_ctx);
+	uint64_t p1_vars = get_vars(p1, p1_ctx);
+	uint64_t p2_vars = get_vars(p2, p2_ctx);
 	uint64_t mask = (p1_vars^p2_vars) & ~xs_vars;
 	pin_vars(q, mask);
 	cell *c_end = q->tmpq[q->st.qnbr] + q->tmpq_size[q->st.qnbr];
@@ -5867,7 +5858,7 @@ static int fn_get_time_1(query *q)
 static int fn_writeln_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream(q, "user_output");
+	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
 	write_term_to_stream(q, str, p1, p1_ctx, 1, 0, 0);
 	fputc('\n', str->fp);
@@ -5961,7 +5952,7 @@ static int fn_split_atom_4(query *q)
 		while ((peek_char_utf8(start) == pad) && (pad != ch))
 			get_char_utf8(&start);
 
-		cell tmp = tmp_cstringn(q, start, ptr-start);
+		cell tmp = tmp_cstringn(start, ptr-start);
 
 		if (nbr++ == 1)
 			alloc_list(q, &tmp);
@@ -5976,7 +5967,7 @@ static int fn_split_atom_4(query *q)
 		while (peek_char_utf8(start) == pad)
 			get_char_utf8(&start);
 
-		cell tmp = tmp_cstring(q, start);
+		cell tmp = tmp_cstring(start);
 
 		if (!in_list)
 			alloc_list(q, &tmp);
@@ -6005,7 +5996,7 @@ static int fn_split_4(query *q)
 	int ch = peek_char_utf8(GET_STR(p2));
 
 	if ((ptr = strchr_utf8(start, ch)) != NULL) {
-		cell tmp = make_string(q, start, ptr-start);
+		cell tmp = make_string(start, ptr-start);
 
 		if (!unify(q, p3, p3_ctx, &tmp, q->st.curr_frame))
 			return 0;
@@ -6015,7 +6006,7 @@ static int fn_split_4(query *q)
 		while (isspace(*ptr))
 			ptr++;
 
-		tmp = make_string(q, ptr, LEN_STR(p1)-(ptr-start));
+		tmp = make_string(ptr, LEN_STR(p1)-(ptr-start));
 		return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -6069,7 +6060,7 @@ static int fn_loadfile_2(query *q)
 
 	s[st.st_size] = '\0';
 	fclose(fp);
-	cell tmp = make_string(q, s, st.st_size);
+	cell tmp = make_string(s, st.st_size);
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	free(s);
 	free(filename);
@@ -6105,7 +6096,7 @@ static int fn_getfile_2(query *q)
 			len--;
 		}
 
-		cell tmp = tmp_cstringn(q, line, len);
+		cell tmp = tmp_cstringn(line, len);
 		tmp.flags |= FLAG_STRING;
 
 		if (nbr++ == 1)
@@ -6239,7 +6230,7 @@ static int fn_server_3(query *q)
 		return 0;
 	}
 
-	int n = new_stream(q);
+	int n = new_stream();
 
 	if (n < 0) {
 		throw_error(q, p1, "resource_error", "too_many_open_streams");
@@ -6291,7 +6282,7 @@ static int fn_accept_2(query *q)
 		return 0;
 	}
 
-	n = new_stream(q);
+	n = new_stream();
 
 	if (n < 0) {
 		throw_error(q, p1, "resource_error", "too_many_open_streams");
@@ -6423,7 +6414,7 @@ static int fn_client_5(query *q)
 	if (fd == -1)
 		return 0;
 
-	int n = new_stream(q);
+	int n = new_stream();
 
 	if (n < 0) {
 		throw_error(q, p1, "resource_error", "too_many_open_streams");
@@ -6474,7 +6465,7 @@ static int fn_client_5(query *q)
 static int fn_getline_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream(q, "user_input");
+	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
 	char *line = NULL;
 	size_t len = 0;
@@ -6577,7 +6568,7 @@ static int fn_bread_3(query *q)
 			}
 		}
 
-		cell tmp = make_string(q, str->data, str->data_len);
+		cell tmp = make_string(str->data, str->data_len);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(str->data);
 		str->data = NULL;
@@ -6593,7 +6584,7 @@ static int fn_bread_3(query *q)
 		size_t nbytes = net_read(str->data, str->alloc_nbytes, str);
 		str->data[nbytes] = '\0';
 		str->data = realloc(str->data, nbytes+1);
-		cell tmp = make_string(q, str->data, nbytes);
+		cell tmp = make_string(str->data, nbytes);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(str->data);
 		str->data = NULL;
@@ -6621,7 +6612,7 @@ static int fn_bread_3(query *q)
 	cell tmp1;
 	make_int(&tmp1, str->data_len);
 	set_var(q, p1, p1_ctx, &tmp1, q->st.curr_frame);
-	cell tmp2 = make_string(q, str->data, str->data_len);
+	cell tmp2 = make_string(str->data, str->data_len);
 	set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	free(str->data);
 	str->data = NULL;
@@ -6660,7 +6651,7 @@ static int fn_read_term_from_chars_3(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,any);
-	int n = get_named_stream(q, "user_input");
+	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
 	const char *p = GET_STR(p1);
 	char *src = malloc(strlen(p)+10);
@@ -7096,9 +7087,8 @@ static int format_integer(char *dst, int_t v, int grouping, int sep, int decimal
 	return dst2 - dst;
 }
 
-static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx, cell* p2, idx_t p2_ctx)
+static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx_t p2_ctx)
 {
-        (void) p1_ctx;
 	char *srcbuf = GET_STR(p1);
 	const char *src = srcbuf;
 	size_t bufsiz;
@@ -7325,7 +7315,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, idx_t p1_ctx,
 	size_t len = dst - tmpbuf;
 
 	if (str == NULL) {
-		int n = get_named_stream(q, "user_output");
+		int n = get_named_stream("user_output");
 		stream *str = &g_streams[n];
 		net_write(tmpbuf, len, str);
 	} else if (is_structure(str) && ((strcmp(GET_STR(str),"atom") && strcmp(GET_STR(str),"chars") && strcmp(GET_STR(str),"string")) || (str->arity > 1) || !is_variable(str+1))) {
@@ -7370,7 +7360,7 @@ static int fn_format_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,list_or_nil);
-	return do_format(q, NULL, 0, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
+	return do_format(q, NULL, 0, p1, !is_nil(p2)?p2:NULL, p2_ctx);
 }
 
 static int fn_format_3(query *q)
@@ -7378,7 +7368,7 @@ static int fn_format_3(query *q)
 	GET_FIRST_ARG(pstr,stream_or_structure);
 	GET_NEXT_ARG(p1,atom);
 	GET_NEXT_ARG(p2,list_or_nil);
-	return do_format(q, pstr, pstr_ctx, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
+	return do_format(q, pstr, pstr_ctx, p1, !is_nil(p2)?p2:NULL, p2_ctx);
 }
 
 #if USE_OPENSSL
@@ -7399,7 +7389,7 @@ static int fn_sha1_2(query *q)
 		buflen -= len;
 	}
 
-	cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
+	cell tmp = make_string(tmpbuf, strlen(tmpbuf));
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7420,7 +7410,7 @@ static int fn_sha256_2(query *q)
 		buflen -= len;
 	}
 
-	cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
+	cell tmp = make_string(tmpbuf, strlen(tmpbuf));
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -7441,7 +7431,7 @@ static int fn_sha512_2(query *q)
 		buflen -= len;
 	}
 
-	cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
+	cell tmp = make_string(tmpbuf, strlen(tmpbuf));
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 #endif
@@ -7454,7 +7444,7 @@ static int do_b64encode_2(query *q)
 	size_t len = LEN_STR(p1);
 	char *dstbuf = malloc((len*3)+1);
 	b64_encode(str, len, &dstbuf, 0, 0);
-	cell tmp = make_string(q, dstbuf, strlen(dstbuf));
+	cell tmp = make_string(dstbuf, strlen(dstbuf));
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7467,7 +7457,7 @@ static int do_b64decode_2(query *q)
 	size_t len = LEN_STR(p1);
 	char *dstbuf = malloc(len+1);
 	b64_decode(str, len, &dstbuf);
-	cell tmp = make_string(q, dstbuf, strlen(dstbuf));
+	cell tmp = make_string(dstbuf, strlen(dstbuf));
 	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -7534,7 +7524,7 @@ static int do_urlencode_2(query *q)
 	size_t len = LEN_STR(p1);
 	char *dstbuf = malloc((len*3)+1);
 	url_encode(str, len, dstbuf);
-	cell tmp = make_string(q, dstbuf, strlen(dstbuf));
+	cell tmp = make_string(dstbuf, strlen(dstbuf));
 	free(dstbuf);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7547,7 +7537,7 @@ static int do_urldecode_2(query *q)
 	size_t len = LEN_STR(p1);
 	char *dstbuf = malloc(len+1);
 	url_decode(str, dstbuf);
-	cell tmp = make_string(q, dstbuf, strlen(dstbuf));
+	cell tmp = make_string(dstbuf, strlen(dstbuf));
 	free(dstbuf);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
@@ -7581,7 +7571,7 @@ static int fn_string_lower_2(query *q)
 		s++;
 	}
 
-	cell tmp = make_string(q, tmps, len);
+	cell tmp = make_string(tmps, len);
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7601,7 +7591,7 @@ static int fn_string_upper_2(query *q)
 		s++;
 	}
 
-	cell tmp = make_string(q, tmps, len);
+	cell tmp = make_string(tmps, len);
 	free(tmps);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
@@ -7729,7 +7719,7 @@ static int fn_chdir_1(query *q)
 static int fn_edin_skip_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	int n = get_named_stream(q, "user_input");
+	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
@@ -7795,7 +7785,7 @@ static int fn_edin_tab_1(query *q)
 		return 0;
 	}
 
-	int n = get_named_stream(q, "user_output");
+	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
 
 	for (int i = 0; i < p1.val_num; i++)
@@ -7826,7 +7816,7 @@ static int fn_edin_tab_2(query *q)
 
 static int fn_edin_seen_0(query *q)
 {
-	int n = get_named_stream(q, "user_input");
+	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
 
 	if (n <= 2)
@@ -7843,7 +7833,7 @@ static int fn_edin_seen_0(query *q)
 
 static int fn_edin_told_0(query *q)
 {
-	int n = get_named_stream(q, "user_output");
+	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
 
 	if (n <= 2)
@@ -7918,7 +7908,7 @@ static int fn_hex_chars_2(query *q)
 	if (is_variable(p1)) {
 		char tmpbuf[256];
 		sprintf(tmpbuf, "%llx", (long long)p2->val_num);
-		cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
+		cell tmp = make_string(tmpbuf, strlen(tmpbuf));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return 1;
 	}
@@ -7949,7 +7939,7 @@ static int fn_octal_chars_2(query *q)
 	if (is_variable(p1)) {
 		char tmpbuf[256];
 		sprintf(tmpbuf, "%llo", (long long)p2->val_num);
-		cell tmp = make_string(q, tmpbuf, strlen(tmpbuf));
+		cell tmp = make_string(tmpbuf, strlen(tmpbuf));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return 1;
 	}
