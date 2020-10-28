@@ -3345,7 +3345,10 @@ prolog *pl_create()
 	for (library *lib = g_libs; lib->name; lib++) {
 		if (!strcmp(lib->name, "apply") || !strcmp(lib->name, "lists") ||
 			!strcmp(lib->name, "http") || !strcmp(lib->name, "atts")) {
-			char *src = strndup((const char*)lib->start, (lib->end-lib->start));
+			size_t len = lib->end-lib->start;
+			char *src = malloc(len+1);
+			memcpy(src, lib->start, len);
+			src[len] = '\0';
 			module_load_text(pl->m, src);
 			free(src);
 		}
