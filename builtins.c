@@ -7914,7 +7914,7 @@ static int fn_hex_chars_2(query *q)
 	}
 
 	const char *src = GET_STR(p1);
-	uint_t p1_val = strtoull(src, NULL, 16);
+	int_t p1_val = strtoull(src, NULL, 16);
 
 	if (is_variable(p2)) {
 		cell tmp;
@@ -7923,7 +7923,7 @@ static int fn_hex_chars_2(query *q)
 		return 1;
 	}
 
-	return p1_val == (uint_t)p2->val_num;  //FIXME: cehteh: is this cast correct?
+	return p1_val == p2->val_num;
 }
 
 static int fn_octal_chars_2(query *q)
@@ -7945,7 +7945,7 @@ static int fn_octal_chars_2(query *q)
 	}
 
 	const char *src = GET_STR(p1);
-	uint_t p1_val = strtoull(src, NULL, 8);
+	int_t p1_val = strtoull(src, NULL, 8);
 
 	if (is_variable(p2)) {
 		cell tmp;
@@ -7954,7 +7954,7 @@ static int fn_octal_chars_2(query *q)
 		return 1;
 	}
 
-	return p1_val == (uint_t)p2->val_num;  //FIXME: cehteh: is this cast correct?
+	return p1_val == p2->val_num;
 }
 
 static int fn_rdiv_2(query *q)

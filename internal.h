@@ -348,7 +348,8 @@ struct parser_ {
 	term *t;
 	char *token, *save_line, *srcptr;
 	size_t token_size, n_line, len_str;
-	int line_nbr, error, depth, quoted; //FIXME: cehteh: cant these be all unsigned?
+	int line_nbr, error, depth; //FIXME: cehteh: cant these be all unsigned?
+	int quoted;
 	unsigned nbr_vars;
 	uint8_t val_type;
 	int8_t dq_consing;
