@@ -1,5 +1,5 @@
 GIT_VERSION := "$(shell git describe --abbrev=4 --dirty --always --tags)"
-CFLAGS = -Isrc -I/usr/local/include -DUSE_OPENSSL=$(USE_OPENSSL) -DVERSION='$(GIT_VERSION)' -O3 $(OPT) -Wall -D_GNU_SOURCE
+CFLAGS = -Isrc -I/usr/local/include -DUSE_OPENSSL=$(USE_OPENSSL) -DVERSION='$(GIT_VERSION)' -O3 $(OPT) -Wall -Wextra -D_GNU_SOURCE
 LDFLAGS = -lreadline -L/usr/local/lib -lm
 
 .ifndef NOSSL
