@@ -194,14 +194,15 @@ void undo_me(query *q)
 	unwind_trail(q, ch);
 }
 
-void try_me(const query *q, unsigned vars)
+void try_me(const query *q, unsigned nbr_vars)
 {
 	frame *g = GET_FRAME(q->st.fp);
-	g->nbr_slots = vars;
+	g->nbr_slots = nbr_vars;
+	g->nbr_vars = nbr_vars;
 	g->ctx = q->st.sp;
 	slot *e = GET_SLOT(g, 0);
 
-	for (unsigned i = 0; i < vars; i++, e++) {
+	for (unsigned i = 0; i < nbr_vars; i++, e++) {
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = NULL;
 	}
@@ -353,8 +354,7 @@ void make_frame(query *q, unsigned nbr_vars, int last_match)
 	g->prev_frame = q->st.curr_frame;
 	g->curr_cell = q->st.curr_cell;
 	g->cgen = q->cgen;
-	g->nbr_slots = nbr_vars;
-	g->nbr_vars = nbr_vars;
+	g->overflow = 0;
 	g->any_choices = 0;
 	g->did_cut = 0;
 
@@ -365,10 +365,11 @@ void make_frame(query *q, unsigned nbr_vars, int last_match)
 static void reuse_frame(query *q, unsigned nbr_vars)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
-	g->any_choices = 0;
-	g->overflow = 0;
 	g->nbr_slots = nbr_vars;
 	g->nbr_vars = nbr_vars;
+	g->overflow = 0;
+	g->any_choices = 0;
+	g->did_cut = 0;
 
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;

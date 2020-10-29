@@ -4289,6 +4289,8 @@ static void stash_me(query *q, term *t)
 	if (last_match)
 		drop_choice(q);
 	else {
+		frame *g = GET_FRAME(q->st.curr_frame);
+		g->any_choices = 1;
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
 		ch->st.curr_clause = q->st.curr_clause;
@@ -4302,6 +4304,7 @@ static void stash_me(query *q, term *t)
 	g->cgen = q->cgen;
 	g->nbr_slots = nbr_vars;
 	g->nbr_vars = nbr_vars;
+	g->overflow = 0;
 	g->any_choices = 0;
 	g->did_cut = 0;
 
