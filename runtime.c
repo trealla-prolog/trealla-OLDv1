@@ -815,12 +815,33 @@ int do_match(query *q, cell *p1, idx_t p1_ctx)
 		if (!strcmp(GET_STR(p1), ":-"))
 			return do_match2(q, p1, p1_ctx);
 
-		rule *h = find_matching_rule(q->m, p1);
+		rule *h = p1->match;
 
-		if (!h)
+		if (!h) {
+			p1->match = find_matching_rule(q->m, p1);
+			h = p1->match;
+		}
+
+		if (!h) {
+			const char *name = GET_STR(p1);
+			int tmp_userop = 0;
+			unsigned tmp_optype = 0;
+
+			if (get_op(q->m, name, &tmp_optype, &tmp_userop, 0)) {
+				throw_error(q, p1, "permission_error", "access_control_structure");
+				return 0;
+			} else
+				set_dynamic_in_db(q->m, name, p1->arity);
+
 			q->st.curr_clause = NULL;
-		else
+		}
+		else {
+			if (!h->is_dynamic) {
+				throw_error(q, p1, "permission_error", "access_private_procedure");
+			}
+
 			q->st.curr_clause = h->head;
+		}
 	}
 
 	if (!q->st.curr_clause)

@@ -584,11 +584,14 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 		tmp = *c;
 
 	idx_t c_ctx = q->latest_ctx;
+	int save_quoted = q->quoted;
+	q->quoted = 1;
 	size_t len = write_term_to_buf(q, NULL, 0, &tmp, c_ctx, 1, 0, 0);
 	char *dst = malloc(len+1);
 	write_term_to_buf(q, dst, len+1, &tmp, c_ctx, 1, 0, 0);
 	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q->st.curr_cell) + 20;
 	char *dst2 = malloc(len2+1);
+	q->quoted = save_quoted;
 
 	if (is_variable(c)) {
 		err_type = "instantiation_error";
