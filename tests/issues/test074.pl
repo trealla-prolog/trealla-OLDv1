@@ -75,6 +75,7 @@ ebl(Goal, Gen_goal, (Gen_goal :- Premise)) :-
 	extract_support(Gen_proof, Premise).
 
 ebl(A, GenA, A, GenA) :-
+    \+functor(A, ',', _),
 	clause(A, true).
 ebl((A, B), (GenA, GenB), (AProof, BProof), (GenAProof, GenBProof)) :-
 	!,
