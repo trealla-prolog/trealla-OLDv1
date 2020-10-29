@@ -5479,7 +5479,7 @@ static int fn_clause_3(query *q)
 			t = &r->t;
 		} else {
 			if (!do_match(q, p1, p1_ctx))
-				return 0;
+				break;
 
 			char tmpbuf[128];
 			uuid_to_buf(&q->st.curr_clause->u, tmpbuf, sizeof(tmpbuf));
@@ -5501,7 +5501,7 @@ static int fn_clause_3(query *q)
 
 		if (ok) {
 			stash_me(q, t);
-			break;
+			return 1;
 		}
 
 		undo_me(q);
@@ -5509,7 +5509,7 @@ static int fn_clause_3(query *q)
 		q->retry = 1;
 	}
 
-	return 1;
+	return 0;
 }
 
 static int do_asserta_2(query *q)
