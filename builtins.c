@@ -4316,10 +4316,7 @@ static int fn_iso_clause_2(query *q)
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable_or_var);
 
-	for (;;) {
-		if (!do_match(q, p1, p1_ctx))
-			return 0;
-
+	while (do_match(q, p1, p1_ctx)) {
 		term *t = &q->st.curr_clause->t;
 		cell *body = get_body(t->cells);
 		int ok;
@@ -4334,7 +4331,7 @@ static int fn_iso_clause_2(query *q)
 
 		if (ok) {
 			stash_me(q, t);
-			break;
+			return 1;
 		}
 
 		undo_me(q);
@@ -4342,7 +4339,7 @@ static int fn_iso_clause_2(query *q)
 		q->retry = 1;
 	}
 
-	return 1;
+	return 0;
 }
 
 static void compare_and_zero(uint64_t v1, uint64_t *v2, uint64_t *v)
