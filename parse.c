@@ -2430,6 +2430,10 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 
 	if (is_variable(l))
 		is_chars_list = 0;
+	else if (is_string(l))
+		;
+	else if (!is_literal(l) || (l->val_off != g_nil_s))
+		is_chars_list = 0;
 
 	if (q) q->latest_ctx = save_ctx;
 	return is_chars_list;
