@@ -5504,6 +5504,8 @@ static int fn_clause_3(query *q)
 			break;
 		}
 
+		undo_me(q);
+		drop_choice(q);
 		q->retry = 1;
 	}
 
