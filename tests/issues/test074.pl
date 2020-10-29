@@ -8,6 +8,18 @@
 :- initialization(main).
 :- discontiguous(cup/1).
 
+:- dynamic(cup/1).
+:- dynamic(holds_liquid/1).
+:- dynamic(liftable/1).
+:- dynamic(light/1).
+:- dynamic(small/1).
+:- dynamic(part/2).
+:- dynamic(owns/2).
+:- dynamic(points_up/1).
+:- dynamic(concave/1).
+:- dynamic(color/2).
+:- dynamic(made_of/2).
+
 main :-
 	ebl(cup(obj1), cup(_), Rule),
 	write(Rule), nl,
