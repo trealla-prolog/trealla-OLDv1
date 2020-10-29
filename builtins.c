@@ -4302,8 +4302,6 @@ static void stash_me(query *q, term *t)
 	g->prev_frame = q->st.curr_frame;
 	g->curr_cell = NULL;
 	g->cgen = q->cgen;
-	g->nbr_slots = nbr_vars;
-	g->nbr_vars = nbr_vars;
 	g->overflow = 0;
 	g->any_choices = 0;
 	g->did_cut = 0;

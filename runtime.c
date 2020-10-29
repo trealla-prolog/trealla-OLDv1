@@ -781,6 +781,9 @@ static int do_match2(query *q, cell *p1, idx_t p1_ctx)
 	else
 		q->st.curr_clause = h->head;
 
+	if (!q->st.curr_clause)
+		return 0;
+
 	make_choice(q);
 
 	for (; q->st.curr_clause; q->st.curr_clause = q->st.curr_clause->next) {
@@ -791,6 +794,7 @@ static int do_match2(query *q, cell *p1, idx_t p1_ctx)
 		cell *c = t->cells;
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
+		q->no_tco = 0;
 
 		if (unify_structure(q, p1, p1_ctx, c, q->st.fp, 0))
 			return 1;
@@ -818,6 +822,9 @@ int do_match(query *q, cell *p1, idx_t p1_ctx)
 			q->st.curr_clause = h->head;
 	}
 
+	if (!q->st.curr_clause)
+		return 0;
+
 	make_choice(q);
 
 	for (; q->st.curr_clause; q->st.curr_clause = q->st.curr_clause->next) {
@@ -828,6 +835,7 @@ int do_match(query *q, cell *p1, idx_t p1_ctx)
 		cell *head = get_head(t->cells);
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
+		q->no_tco = 0;
 
 		if (unify_structure(q, p1, p1_ctx, head, q->st.fp, 0))
 			return 1;
