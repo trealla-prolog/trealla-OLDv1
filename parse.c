@@ -2465,7 +2465,9 @@ int parser_tokenize(parser *p, int args, int consing)
 
 		//fprintf(stdout, "Debug: token '%s' quoted=%d, val_type=%u, op=%d, lastop=%d\n", p->token, p->quoted, p->val_type, p->is_op, last_op);
 
-		if (!p->quoted && !strcmp(p->token, ".") && (*p->srcptr != '(') && (*p->srcptr != ',') && (*p->srcptr != ')')) {
+		if (!p->quoted && !strcmp(p->token, ".") && (*p->srcptr != '(') &&
+			(*p->srcptr != ',') && (*p->srcptr != ')') && (*p->srcptr != ']') &&
+				(*p->srcptr != '|')) {
 			if (parser_attach(p, 0)) {
 				parser_dcg_rewrite(p);
 				parser_assign_vars(p);
