@@ -4,4 +4,3 @@ clause(light(_1),small(_1))
 clause(holds_liquid(_1),(part(_1,_59),concave(_59),points_up(_59)))
 clause(concave(bowl),true)
 cup(_1) :- small(_1),part(_1,handle),part(_1,_59),concave(_59),points_up(_59)
-

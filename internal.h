@@ -276,7 +276,7 @@ typedef struct {
 
 typedef struct {
 	state st;
-	idx_t v1, v2, cgen;
+	idx_t v1, v2, cgen, overflow;
 	uint64_t pins;
 	uint16_t nbr_vars, nbr_slots;
 	unsigned local_cut:1;

@@ -228,6 +228,7 @@ void make_choice(query *q)
 	ch->nbr_vars = g->nbr_vars;
 	ch->nbr_slots = g->nbr_slots;
 	ch->any_choices = g->any_choices;
+	ch->overflow = g->overflow;
 	check_slot(q, g->nbr_vars);
 }
 
@@ -332,7 +333,7 @@ int retry_choice(query *q)
 	g->nbr_vars = ch->nbr_vars;
 	g->nbr_slots = ch->nbr_slots;
 	g->any_choices = ch->any_choices;
-	g->overflow = 0;
+	g->overflow = ch->overflow;
 	return 1;
 }
 
