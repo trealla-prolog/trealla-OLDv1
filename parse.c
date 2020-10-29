@@ -2636,8 +2636,8 @@ int parser_tokenize(parser *p, int args, int consing)
 
 		if (precedence && (
 			(*p->srcptr == ',') || (*p->srcptr == ')') ||
-			(*p->srcptr == '|') || (*p->srcptr == ']') || (*p->srcptr == '}')
-			)) {
+			(*p->srcptr == '|') || (*p->srcptr == ']') ||
+			(*p->srcptr == '}') )) {
 			optype = 0;
 			precedence = 0;
 		}
