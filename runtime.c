@@ -550,6 +550,7 @@ unsigned create_vars(query *q, unsigned cnt)
 	for (unsigned i = 0; i < cnt; i++) {
 		slot *e = GET_SLOT(g, g->nbr_vars+i);
 		e->c.val_type = TYPE_EMPTY;
+		e->c.attrs = NULL;
 	}
 
 	g->nbr_vars += cnt;
