@@ -81,5 +81,5 @@ subsumes_term(G,S) :-
 	\+ \+ (
 		term_variables(S, V1),
 		G = S,
-		term_variables(S, V2),
+		term_variables(V1, V2),
 		V2 == V1).

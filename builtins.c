@@ -5283,7 +5283,7 @@ static int fn_findall_4(query *q)
 	return 1;
 }
 
-static int do_collect_vars2(cell *p1, idx_t nbr_cells, cell **slots)
+static int collect_local_vars(cell *p1, idx_t nbr_cells, cell **slots)
 {
 	int cnt = 0;
 
@@ -5304,7 +5304,7 @@ static int do_collect_vars2(cell *p1, idx_t nbr_cells, cell **slots)
 static uint64_t get_vars(cell *p, __attribute__((unused)) idx_t p_ctx)
 {
 	cell *slots[MAX_ARITY] = {0};
-	int cnt = do_collect_vars2(p, p->nbr_cells, slots);
+	int cnt = collect_local_vars(p, p->nbr_cells, slots);
 	uint64_t mask = 0;
 
 	if (cnt) {
@@ -8342,7 +8342,7 @@ static int fn_predicate_property_2(query *q)
 	return 0;
 }
 
-static int do_collect_vars3(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, cell **slots)
+static int do_collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, cell **slots)
 {
 	int cnt = 0;
 
@@ -8350,7 +8350,7 @@ static int do_collect_vars3(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, c
 		cell *c = deref(q, p1, p1_ctx);
 
 		if (is_structure(c)) {
-			cnt += do_collect_vars3(q, c+1, q->latest_ctx, c->nbr_cells-1, slots);
+			cnt += do_collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1, slots);
 		} else if (is_variable(c)) {
 			assert(c->var_nbr < MAX_ARITY);
 
@@ -8367,13 +8367,12 @@ static int do_collect_vars3(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, c
 static int fn_numbervars_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-
 	cell *slots[MAX_ARITY] = {0};
 
 	if (is_structure(p1))
-		do_collect_vars3(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
+		do_collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
 	else
-		do_collect_vars3(q, p1, p1_ctx, p1->nbr_cells, slots);
+		do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
 
 	q->nv_mask = 0;
 	unsigned end = q->nv_start = 0;
@@ -8394,13 +8393,12 @@ static int fn_numbervars_3(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer)
 	GET_NEXT_ARG(p3,integer_or_var)
-
 	cell *slots[MAX_ARITY] = {0};
 
 	if (is_structure(p1))
-		do_collect_vars3(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
+		do_collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
 	else
-		do_collect_vars3(q, p1, p1_ctx, p1->nbr_cells, slots);
+		do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
 
 	q->nv_mask = 0;
 	unsigned end = q->nv_start = p2->val_num;
