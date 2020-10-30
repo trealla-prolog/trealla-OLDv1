@@ -4045,7 +4045,7 @@ static int fn_iso_univ_2(query *q)
 			h = deref(q, h, save_p2_ctx);
 			cell *tmp = alloc_tmp_heap(q, h->nbr_cells);
 
-			if (is_variable(h)) {
+			if (is_variable(h) && (q->latest_ctx != q->st.curr_frame)) {
 				frame *g = GET_FRAME(q->latest_ctx);
 				slot *e = GET_SLOT(g, h->var_nbr);
 				idx_t slot_nbr = e - q->slots;
