@@ -772,15 +772,26 @@ static void next_key(query *q)
 		q->st.curr_clause = q->st.curr_clause->next;
 }
 
-static int do_match2(query *q, cell *p1, idx_t p1_ctx)
+static int match_full(query *q, cell *p1, idx_t p1_ctx)
 {
 	cell *head = get_head(p1);
 	rule *h = find_matching_rule(q->m, head);
 
+	if (!h) {
+		head->match = find_matching_rule(q->m, head);
+		h = head->match;
+	}
+
 	if (!h)
 		q->st.curr_clause = NULL;
-	else
+	else {
+		if (!h->is_dynamic) {
+			throw_error(q, p1, "permission_error", "access_private_procedure");
+			return 0;
+		}
+
 		q->st.curr_clause = h->head;
+	}
 
 	if (!q->st.curr_clause)
 		return 0;
@@ -807,13 +818,13 @@ static int do_match2(query *q, cell *p1, idx_t p1_ctx)
 	return 0;
 }
 
-int do_match(query *q, cell *p1, idx_t p1_ctx)
+int match_clause(query *q, cell *p1, idx_t p1_ctx)
 {
 	if (q->retry)
 		q->st.curr_clause = q->st.curr_clause->next;
 	else {
 		if (!strcmp(GET_STR(p1), ":-"))
-			return do_match2(q, p1, p1_ctx);
+			return match_full(q, p1, p1_ctx);
 
 		rule *h = p1->match;
 
@@ -838,6 +849,7 @@ int do_match(query *q, cell *p1, idx_t p1_ctx)
 		else {
 			if (!h->is_dynamic) {
 				throw_error(q, p1, "permission_error", "access_private_procedure");
+				return 0;
 			}
 
 			q->st.curr_clause = h->head;
@@ -869,7 +881,7 @@ int do_match(query *q, cell *p1, idx_t p1_ctx)
 	return 0;
 }
 
-static int match(query *q)
+static int match_rule(query *q)
 {
 	if (!q->retry) {
 		rule *h = q->st.curr_cell->match;
@@ -1000,7 +1012,7 @@ void run_query(query *q)
 			if (is_list(q->st.curr_cell)) {
 				consultall(q->m->p, q->st.curr_cell);
 				follow_me(q);
-			} else if (!match(q)) {
+			} else if (!match_rule(q)) {
 				q->retry = 1;
 				q->tot_retries++;
 				Trace(q, q->st.curr_cell, FAIL);

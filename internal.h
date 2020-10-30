@@ -461,7 +461,7 @@ void run_query(query *q);
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx);
 cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix);
 void make_end(cell *tmp);
-int do_match(query *q, cell *p1, idx_t p1_ctx);
+int match_clause(query *q, cell *p1, idx_t p1_ctx);
 idx_t find_in_pool(const char *name);
 void do_reduce(cell *n);
 unsigned create_vars(query *q, unsigned nbr);

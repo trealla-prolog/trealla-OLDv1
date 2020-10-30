@@ -4317,7 +4317,7 @@ static int fn_iso_clause_2(query *q)
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable_or_var);
 
-	while (do_match(q, p1, p1_ctx)) {
+	while (match_clause(q, p1, p1_ctx)) {
 		term *t = &q->st.curr_clause->t;
 		cell *body = get_body(t->cells);
 		int ok;
@@ -4440,7 +4440,7 @@ static int fn_iso_retract_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
-	if (!do_match(q, p1, p1_ctx))
+	if (!match_clause(q, p1, p1_ctx))
 		return 0;
 
 	clause *r = retract_from_db(q->m, q->st.curr_clause);
@@ -5467,7 +5467,7 @@ static int fn_clause_3(query *q)
 			if (!r) return 0;
 			t = &r->t;
 		} else {
-			if (!do_match(q, p1, p1_ctx))
+			if (!match_clause(q, p1, p1_ctx))
 				break;
 
 			char tmpbuf[128];
