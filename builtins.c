@@ -4917,7 +4917,7 @@ static int fn_iso_functor_3(query *q)
 static int fn_iso_current_prolog_flag_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,variable);
+	GET_NEXT_ARG(p2,any);
 
 	if (!strcmp(GET_STR(p1), "double_quotes")) {
 		cell tmp;
@@ -4929,8 +4929,7 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		else if (q->m->flag.double_quote_chars)
 			make_literal(&tmp, find_in_pool("chars"));
 
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		return 1;
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "character_escapes")) {
 		cell tmp;
 
@@ -4939,8 +4938,7 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		else
 			make_literal(&tmp, g_false_s);
 
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		return 1;
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "prefer_rationals")) {
 		cell tmp;
 
@@ -4949,8 +4947,7 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		else
 			make_literal(&tmp, g_false_s);
 
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		return 1;
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "rational_syntax")) {
 		cell tmp;
 
@@ -4959,35 +4956,25 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		else
 			make_literal(&tmp, find_in_pool("compatibility"));
 
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		return 1;
-	} else if (!strcmp(GET_STR(p1), "version_git")) {
-		cell tmp;
-		make_literal(&tmp, find_in_pool(VERSION));
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		return 1;
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "dialect")) {
 		cell tmp;
 		make_literal(&tmp, find_in_pool("trealla"));
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		return 1;
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "bounded")) {
 		cell tmp;
 		make_literal(&tmp, g_false_s);
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		return 1;
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "cpu_count")) {
 		cell tmp;
 		make_int(&tmp, q->m->cpu_count);
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		return 1;
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "version")) {
 		unsigned v1 = 0;
 		sscanf(VERSION, "v%u", &v1);
 		cell tmp;
 		make_int(&tmp, v1);
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		return 1;
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "version_data")) {
 		unsigned v1 = 0, v2 = 0, v3 = 0;
 		sscanf(VERSION, "v%u.%u.%u", &v1, &v2, &v3);
@@ -4999,14 +4986,16 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		make_literal(&tmp[4], g_nil_s);
 		tmp[0].arity = 4;
 		tmp[0].nbr_cells = 5;
-		set_var(q, p2, p2_ctx, tmp, q->st.curr_frame);
-		return 1;
+		return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
+	} else if (!strcmp(GET_STR(p1), "version_git")) {
+		cell tmp;
+		make_literal(&tmp, find_in_pool(VERSION));
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "argv")) {
 		if (g_avc == g_ac) {
 			cell tmp;
 			make_literal(&tmp, g_nil_s);
-			set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-			return 1;
+			return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		}
 
 		int i = g_avc;
@@ -5020,8 +5009,7 @@ static int fn_iso_current_prolog_flag_2(query *q)
 
 		cell *l = end_list(q);
 		fix_list(l);
-		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
-		return 1;
+		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
 	throw_error(q, p1, "domain_error", "flag");
