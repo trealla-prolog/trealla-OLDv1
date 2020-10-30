@@ -76,3 +76,10 @@ foldl_([], [], [], [], _, V, V).
 foldl_([H1|T1], [H2|T2], [H3|T3], [H4|T4], Goal, V0, V) :-
 	call(Goal, H1, H2, H3, H4, V0, V1),
 	foldl_(T1, T2, T3, T4, Goal, V1, V).
+
+subsumes_term(G,S) :-
+	\+ \+ (
+		term_variables(S, V1),
+		G = S,
+		term_variables(S, V2),
+		V2 == V1).

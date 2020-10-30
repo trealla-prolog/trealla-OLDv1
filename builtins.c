@@ -506,8 +506,10 @@ static cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	deep_copy2_to_tmp(q, p1, p1_ctx);
 
 	if (g_varno != g->nbr_vars) {
-		if (!create_vars(q, g_varno-g->nbr_vars))
+		if (!create_vars(q, g_varno-g->nbr_vars)) {
+			throw_error(q, p1, "resource_error", "too_many_vars");
 			return NULL;
+		}
 	}
 
 	return q->tmp_heap;
@@ -4079,55 +4081,62 @@ static int fn_iso_univ_2(query *q)
 	return unify(q, p2, p2_ctx, l, p1_ctx);
 }
 
-static int do_collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, cell **slots)
+static void collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells)
 {
-	int cnt = 0;
-
-	for (idx_t i = 0; i < nbr_cells; i++, p1++) {
+	for (idx_t i = 0; i < nbr_cells;) {
 		cell *c = deref(q, p1, p1_ctx);
 
 		if (is_structure(c)) {
-			cnt += do_collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1, slots);
+			collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1);
 		} else if (is_variable(c)) {
-			assert(c->var_nbr < MAX_ARITY);
-
-			if (!slots[c->var_nbr]) {
-				slots[c->var_nbr] = c;
-				cnt++;
+			for (size_t i = 0; i < g_tab_idx; i++) {
+				if ((g_tab1[i] == q->latest_ctx) && (g_tab2[i] == c->var_nbr)) {
+					i++; p1++;
+					continue;
+				}
 			}
-		}
-	}
 
-	return cnt;
+			g_tab1[g_tab_idx] = q->latest_ctx;
+			g_tab2[g_tab_idx] = c->var_nbr;
+			g_tab_idx++;
+		}
+
+		i += p1->nbr_cells;
+		p1 += p1->nbr_cells;
+	}
 }
 
 static int fn_iso_term_variables_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
-
-	cell *slots[MAX_ARITY] = {0};
-	int cnt = 0;
+	frame *g = GET_FRAME(q->st.curr_frame);
+	g_varno = g->nbr_vars;
+	g_tab_idx = 0;
 
 	if (is_structure(p1))
-		cnt = do_collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
+		collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1);
 	else
-		cnt = do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
+		collect_vars(q, p1, p1_ctx, p1->nbr_cells);
 
+	unsigned cnt = g_tab_idx;
 	cell *tmp = calloc((cnt*2)+1, sizeof(cell));
-	int idx = 0;
+	unsigned idx = 0;
 
 	if (cnt) {
-		int done = 0;
+		unsigned done = 0;
 
-		for (unsigned i = 0; i < MAX_ARITY; i++) {
-			if (!slots[i])
-				continue;
-
+		for (unsigned i = 0; i < cnt; i++) {
 			make_literal(tmp+idx++, g_dot_s);
 			tmp[idx-1].arity = 2;
 			tmp[idx-1].nbr_cells = ((cnt-done)*2)+1;
-			tmp[idx++] = *slots[i];
+			cell tmp2;
+			tmp2.val_type = TYPE_VARIABLE;
+			tmp2.nbr_cells = 1;
+			tmp2.flags = FLAG_FRESH;
+			tmp2.val_off = g_anon_s;
+			tmp2.var_nbr = g_varno++;
+			tmp[idx++] = tmp2;
 			done++;
 		}
 
@@ -4136,6 +4145,25 @@ static int fn_iso_term_variables_2(query *q)
 		tmp[0].nbr_cells = idx;
 	} else {
 		make_literal(tmp+idx++, g_nil_s);
+	}
+
+	if (cnt) {
+		if (!(g_varno = create_vars(q, cnt))) {
+			throw_error(q, p1, "resource_error", "too_many_vars");
+			return 0;
+		}
+
+		for (unsigned i = 0; i < cnt; i++) {
+			slot *e = GET_SLOT(g, g_varno);
+			e->ctx = g_tab1[i];
+			e->c.var_nbr = g_tab2[i];
+			e->c.val_type = TYPE_VARIABLE;
+			e->c.nbr_cells = 1;
+			e->c.arity = 0;
+			e->c.flags = FLAG_FRESH;
+			e->c.val_off = g_anon_s;
+			g_varno++;
+		}
 	}
 
 	if (is_variable(p2)) {
@@ -8314,6 +8342,28 @@ static int fn_predicate_property_2(query *q)
 	return 0;
 }
 
+static int do_collect_vars3(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, cell **slots)
+{
+	int cnt = 0;
+
+	for (idx_t i = 0; i < nbr_cells; i++, p1++) {
+		cell *c = deref(q, p1, p1_ctx);
+
+		if (is_structure(c)) {
+			cnt += do_collect_vars3(q, c+1, q->latest_ctx, c->nbr_cells-1, slots);
+		} else if (is_variable(c)) {
+			assert(c->var_nbr < MAX_ARITY);
+
+			if (!slots[c->var_nbr]) {
+				slots[c->var_nbr] = c;
+				cnt++;
+			}
+		}
+	}
+
+	return cnt;
+}
+
 static int fn_numbervars_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -8321,9 +8371,9 @@ static int fn_numbervars_1(query *q)
 	cell *slots[MAX_ARITY] = {0};
 
 	if (is_structure(p1))
-		do_collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
+		do_collect_vars3(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
 	else
-		do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
+		do_collect_vars3(q, p1, p1_ctx, p1->nbr_cells, slots);
 
 	q->nv_mask = 0;
 	unsigned end = q->nv_start = 0;
@@ -8348,9 +8398,9 @@ static int fn_numbervars_3(query *q)
 	cell *slots[MAX_ARITY] = {0};
 
 	if (is_structure(p1))
-		do_collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
+		do_collect_vars3(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
 	else
-		do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
+		do_collect_vars3(q, p1, p1_ctx, p1->nbr_cells, slots);
 
 	q->nv_mask = 0;
 	unsigned end = q->nv_start = p2->val_num;
