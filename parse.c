@@ -3020,6 +3020,13 @@ module *create_module(const char *name)
 	make_rule(m, "call(G) :- G.");
 	make_rule(m, "format(F) :- format(F, []).");
 
+	make_rule(m, "subsumes_term(G,S) :- "					\
+		"\\+ \\+ ( "											\
+		"term_variables(S, V1), "							\
+		"G = S, "											\
+		"term_variables(V1, V2), "							\
+		"V2 == V1).");
+
 	make_rule(m, "chars_base64(Plain,Base64,_) :- base64(Plain,Base64).");
 	make_rule(m, "chars_urlenc(Plain,Url,_) :- urlenc(Plain,Url).");
 
