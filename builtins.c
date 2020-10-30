@@ -4036,12 +4036,45 @@ static int fn_iso_univ_2(query *q)
 		unsigned arity = 0;
 		idx_t save_p2_ctx = p2_ctx;
 		init_tmp_heap(q);
+		frame *g = GET_FRAME(q->st.curr_frame);
+		g_varno = g->nbr_vars;
+		g_tab_idx = 0;
 
 		while (is_list(l)) {
 			cell *h = LIST_HEAD(l);
 			h = deref(q, h, save_p2_ctx);
 			cell *tmp = alloc_tmp_heap(q, h->nbr_cells);
-			copy_cells(tmp, h, h->nbr_cells);
+
+			if (is_variable(h)) {
+				frame *g = GET_FRAME(q->latest_ctx);
+				slot *e = GET_SLOT(g, h->var_nbr);
+				idx_t slot_nbr = e - q->slots;
+				int found = 0;
+				unsigned i;
+
+				for (i = 0; i < g_tab_idx; i++) {
+					if (g_tab1[i] == slot_nbr) {
+						found = 1;
+						break;
+					}
+				}
+
+				if (!found) {
+					create_vars(q, 1);
+					slot *e = GET_SLOT(g, g_varno);
+					e->ctx = q->latest_ctx;
+					e->c = *h;
+					g_tab1[i] = slot_nbr;
+					g_tab2[i] = g_varno++;
+					g_tab_idx++;
+				}
+
+				copy_cells(tmp, h, 1);
+				tmp->var_nbr = g_tab2[i];
+				tmp->flags |= FLAG_FRESH;
+			} else
+				copy_cells(tmp, h, h->nbr_cells);
+
 			l = LIST_TAIL(l);
 			l = deref(q, l, save_p2_ctx);
 			save_p2_ctx = q->latest_ctx;
