@@ -357,7 +357,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 
 		head = running ? deref(q, head, c_ctx) : head;
 		idx_t head_ctx = q->latest_ctx;
-		int parens = is_structure(head) && (!strcmp(GET_STR(head), ",") || !strcmp(GET_STR(head), ";") || !strcmp(GET_STR(head), "->"));
+		int parens = is_structure(head) && (!strcmp(GET_STR(head), ",") || !strcmp(GET_STR(head), ";") || !strcmp(GET_STR(head), "->") || !strcmp(GET_STR(head), "-->"));
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
 		dst += write_term_to_buf(q, dst, dstlen, head, head_ctx, running, 0, depth+1);
 		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
@@ -465,7 +465,8 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 					const char *s = GET_STR(tmp);
 
 					if (!strcmp(s, ",") || !strcmp(s, ";") ||
-						!strcmp(s, "->") || !strcmp(s, ":-"))
+						!strcmp(s, "->") || !strcmp(s, ":-") ||
+						!strcmp(s, "-->"))
 						parens = 1;
 				}
 
