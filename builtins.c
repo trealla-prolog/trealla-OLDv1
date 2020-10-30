@@ -4059,17 +4059,23 @@ static int fn_iso_univ_2(query *q)
 					}
 				}
 
+				cell v = *h;
+				v.var_nbr = g_varno;
+				v.flags |= FLAG_FRESH;
+
 				if (!found) {
-					create_vars(q, 1);
-					slot *e = GET_SLOT(g, g_varno);
-					e->ctx = q->latest_ctx;
-					e->c = *h;
+					if (!create_vars(q, 1)) {
+						throw_error(q, p2, "resource_error", "too_many_vars");
+						return 0;
+					}
+
+					set_var(q, &v, q->st.curr_frame, h, q->latest_ctx);
 					g_tab1[i] = slot_nbr;
 					g_tab2[i] = g_varno++;
 					g_tab_idx++;
 				}
 
-				copy_cells(tmp, h, 1);
+				copy_cells(tmp, &v, 1);
 				tmp->var_nbr = g_tab2[i];
 				tmp->flags |= FLAG_FRESH;
 			} else
@@ -4094,7 +4100,7 @@ static int fn_iso_univ_2(query *q)
 		tmp->arity = arity;
 		cell *tmp2 = alloc_heap(q, nbr_cells);
 		copy_cells(tmp2, tmp, nbr_cells);
-		return unify(q, p1, p1_ctx, tmp2, p2_ctx);
+		return unify(q, p1, p1_ctx, tmp2, q->st.curr_frame);
 	}
 
 	cell tmp = *p1;
