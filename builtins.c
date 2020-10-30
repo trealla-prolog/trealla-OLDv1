@@ -4162,6 +4162,7 @@ static int fn_iso_term_variables_2(query *q)
 			e->c.arity = 0;
 			e->c.flags = FLAG_FRESH;
 			e->c.val_off = g_anon_s;
+			e->c.attrs = NULL;
 			g_varno++;
 		}
 	}
