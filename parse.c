@@ -1580,7 +1580,7 @@ static void parser_dcg_rewrite(parser *p)
 	frame *g = GET_FRAME(0);
 	cell *tmp = NULL;
 
-	for (unsigned i = 0; i < p2->nbr_vars; i++) {
+	for (unsigned i = 0; i < p2->t->nbr_vars; i++) {
 		slot *e = GET_SLOT(g, i);
 
 		if (is_empty(&e->c))
@@ -1618,7 +1618,6 @@ static void parser_dcg_rewrite(parser *p)
 	}
 
 	destroy_parser(p2);
-
 	idx_t nbr_cells = tmp->nbr_cells;
 	p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
 	copy_cells(p->t->cells, tmp, nbr_cells);

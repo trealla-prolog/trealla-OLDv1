@@ -1,7 +1,5 @@
 :- module(dcgs, [ dcg_translate/2 ]).
 
-:- use_module(library(lists)).
-
 dcg_translate(TermIn, Term) :-
 	nonvar(TermIn),
 	dcg_rule(TermIn, (Head :- Body)),
@@ -54,14 +52,13 @@ dcg_constr([]).        % 7.14.1
 dcg_constr([_|_]).     % 7.14.2 - terminal sequence
 dcg_constr(( _, _ )).  % 7.14.3 - concatenation
 dcg_constr(( _ ; _ )). % 7.14.4 - alternative
-                       % 7.14.5 - if-then-else
 dcg_constr(( _'|'_ )). % 7.14.6 - alternative
 dcg_constr({_}).       % 7.14.7
 dcg_constr(call(_)).   % 7.14.8
 dcg_constr(phrase(_)). % 7.14.9
 dcg_constr(!).         % 7.14.10
-% dcg_constr(\+ _).    % 7.14.11 - not (existence implementation dep.)
-% dcg_constr((_->_)).  % 7.14.12 - if-then (existence implementation dep.)
+%%dcg_constr(\+ _).    % 7.14.11 - not (existence implementation dep.)
+dcg_constr((_->_)).  % 7.14.12 - if-then (existence implementation dep.)
 
 % The principal functor of the first argument indicates
 % the construct to be expanded.
