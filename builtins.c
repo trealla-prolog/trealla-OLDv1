@@ -4043,7 +4043,6 @@ static int fn_iso_univ_2(query *q)
 		while (is_list(l)) {
 			cell *h = LIST_HEAD(l);
 			h = deref(q, h, save_p2_ctx);
-			cell *tmp = alloc_tmp_heap(q, h->nbr_cells);
 
 			if (is_variable(h) && (q->latest_ctx != q->st.curr_frame)) {
 				frame *g = GET_FRAME(q->latest_ctx);
@@ -4075,11 +4074,30 @@ static int fn_iso_univ_2(query *q)
 					g_tab_idx++;
 				}
 
+				cell *tmp = alloc_tmp_heap(q, 1);
 				copy_cells(tmp, &v, 1);
 				tmp->var_nbr = g_tab2[i];
 				tmp->flags |= FLAG_FRESH;
-			} else
+			} else if (is_structure(h)) {
+				if (!create_vars(q, 1)) {
+					throw_error(q, p2, "resource_error", "too_many_vars");
+					return 0;
+				}
+
+				cell v;
+				v.val_type = TYPE_VARIABLE;
+				v.nbr_cells = 1;
+				v.arity = 0;
+				v.flags = FLAG_FRESH;
+				v.var_nbr = g_varno++;
+				v.val_off = g_anon_s;
+				set_var(q, &v, q->st.curr_frame, h, q->latest_ctx);
+				cell *tmp = alloc_tmp_heap(q, 1);
+				copy_cells(tmp, &v, 1);
+			} else {
+				cell *tmp = alloc_tmp_heap(q, h->nbr_cells);
 				copy_cells(tmp, h, h->nbr_cells);
+			}
 
 			l = LIST_TAIL(l);
 			l = deref(q, l, save_p2_ctx);
@@ -4479,17 +4497,13 @@ static void db_log(query *q, clause *r, enum log_type l)
 
 	switch(l) {
 		case LOG_ASSERTA: {
-			size_t len = write_term_to_buf(q, NULL, 0, r->t.cells, q->st.curr_frame, 1, 0, 0);
-			char *dst = malloc(len+1);
-			write_term_to_buf(q, dst, len+1, r->t.cells, q->st.curr_frame, 1, 0, 0);
+			char *dst = write_term_to_strbuf(q, r->t.cells, q->st.curr_frame);
 			uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
 			fprintf(q->m->fp, "a_(%s,'%s').\n", dst, tmpbuf);
 			free(dst);
 			break;
 		} case LOG_ASSERTZ: {
-			size_t len = write_term_to_buf(q, NULL, 0, r->t.cells, q->st.curr_frame, 1, 0, 0);
-			char *dst = malloc(len+1);
-			write_term_to_buf(q, dst, len+1, r->t.cells, q->st.curr_frame, 1, 0, 0);
+			char *dst = write_term_to_strbuf(q, r->t.cells, q->st.curr_frame);
 			uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
 			fprintf(q->m->fp, "z_(%s,'%s').\n", dst, tmpbuf);
 			free(dst);
@@ -6738,9 +6752,7 @@ static int fn_write_term_to_chars_3(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	size_t len = write_term_to_buf(q, NULL, 0, p1, p1_ctx, 1, 0, 0);
-	char *dst = malloc(len+1);
-	write_term_to_buf(q, dst, len+1, p1, p1_ctx, 1, 0, 0);
+	char *dst = write_term_to_strbuf(q, p1, p1_ctx);
 	idx_t offset;
 
 	if (is_in_pool(dst, &offset)) {
@@ -7946,9 +7958,7 @@ static int fn_term_hash_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 	GET_NEXT_ARG(p2,integer_or_var);
-	size_t len = write_term_to_buf(q, NULL, 0, p1, p1_ctx, 1, 0, 0);
-	char *dst = malloc(len+1);
-	write_term_to_buf(q, dst, len+1, p1, p1_ctx, 1, 0, 0);
+	char *dst = write_term_to_strbuf(q, p1, p1_ctx);
 	cell tmp;
 	make_int(&tmp, do_jenkins_one_at_a_time_hash(dst));
 	free(dst);
