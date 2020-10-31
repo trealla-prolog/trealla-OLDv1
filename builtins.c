@@ -4124,6 +4124,16 @@ static int fn_iso_univ_2(query *q)
 		tmp->arity = arity;
 		cell *tmp2 = alloc_heap(q, nbr_cells);
 		copy_cells(tmp2, tmp, nbr_cells);
+
+		if (is_structure(tmp2)) {
+			if ((tmp2->fn = get_builtin(q->m, GET_STR(tmp2), arity)) != NULL)
+				tmp2->flags |= FLAG_BUILTIN;
+			else {
+				tmp2->match = find_matching_rule_quiet(q->m, tmp2);
+				tmp2->flags &= ~FLAG_BUILTIN;
+			}
+		}
+
 		return unify(q, p1, p1_ctx, tmp2, q->st.curr_frame);
 	}
 

@@ -320,7 +320,7 @@ static rule *find_rule(module *m, cell *c)
 	return NULL;
 }
 
-rule *find_matching_rule(module *m, cell *c)
+static rule *find_matching_rule_internal(module *m, cell *c, int quiet)
 {
 	module *save_m = m;
 	module *tmp_m = NULL;
@@ -328,7 +328,7 @@ rule *find_matching_rule(module *m, cell *c)
 	while (m) {
 		rule *h = find_rule(m, c);
 
-		if (h && (m != save_m) && !h->is_public && strcmp(GET_STR(c), "dynamic")) {
+		if (!quiet && h && (m != save_m) && !h->is_public && strcmp(GET_STR(c), "dynamic")) {
 			fprintf(stdout, "Error: not a public method %s/%u\n", GET_STR(c), c->arity);
 			break;
 		}
@@ -343,6 +343,16 @@ rule *find_matching_rule(module *m, cell *c)
 	}
 
 	return NULL;
+}
+
+rule *find_matching_rule(module *m, cell *c)
+{
+	return find_matching_rule_internal(m, c, 0);
+}
+
+rule *find_matching_rule_quiet(module *m, cell *c)
+{
+	return find_matching_rule_internal(m, c, 1);
 }
 
 rule *find_functor(module *m, const char *name, unsigned arity)
