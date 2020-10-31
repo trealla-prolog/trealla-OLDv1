@@ -735,6 +735,9 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 
 void clear_term(term *t)
 {
+	if (!t)
+		return;
+
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
 
@@ -1565,7 +1568,6 @@ static void parser_dcg_rewrite(parser *p)
 	char *src = malloc(len+=256);
 	snprintf(src, len, "dcg_translate((%s),_TermOut).", dst);
 	free(dst);
-	//printf("*** %s\n", src);
 
 	// Being conservative here and using temp parser/query objects...
 
@@ -1578,7 +1580,7 @@ static void parser_dcg_rewrite(parser *p)
 	query_execute(q, p2->t);
 	free(src);
 	frame *g = GET_FRAME(0);
-	cell *tmp = NULL;
+	src = NULL;
 
 	for (unsigned i = 0; i < p2->t->nbr_vars; i++) {
 		slot *e = GET_SLOT(g, i);
@@ -1598,19 +1600,16 @@ static void parser_dcg_rewrite(parser *p)
 		if (strcmp(p2->vartab.var_name[i], "_TermOut"))
 			continue;
 
-		//printf("### [%u] ", i);
-		//write_term(q, stdout, c, q->latest_ctx, 1, 0, 0);
-		//printf("\n");
-
-		cell *tmp2 = deep_copy_to_tmp(q, c, q->latest_ctx);
-		tmp = calloc(tmp2->nbr_cells, sizeof(cell));
-		copy_cells(tmp, tmp2, tmp2->nbr_cells);
+		size_t len = write_term_to_buf(q, NULL, 0, c, q->latest_ctx, 1, 0, 0);
+		src = malloc(len+10);
+		write_term_to_buf(q, src, len+1, c, q->latest_ctx, 1, 0, 0);
+		strcat(src, ".");
 		break;
 	}
 
 	destroy_query(q);
 
-	if (!tmp) {
+	if (!src) {
 		fprintf(stdout, "Error: syntax error, dcg_translate, line nbr %d\n", p2->line_nbr);
 		destroy_parser(p2);
 		p->error = 1;
@@ -1618,12 +1617,18 @@ static void parser_dcg_rewrite(parser *p)
 	}
 
 	destroy_parser(p2);
-	idx_t nbr_cells = tmp->nbr_cells;
-	p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
-	copy_cells(p->t->cells, tmp, nbr_cells);
-	p->t->nbr_cells = nbr_cells + 1;
-	p->t->cidx = nbr_cells;
-	free(tmp);
+	p2 = create_parser(p->m);
+	p2->srcptr = src;
+	p2->command = 0;
+	parser_tokenize(p2, 0, 0);
+	parser_attach(p2, 0);
+	free(src);
+
+	clear_term(p->t);
+	free(p->t);
+	p->t = p2->t;
+	p2->t = NULL;
+	destroy_parser(p2);
 	parser_assign_vars(p);
 }
 
