@@ -534,6 +534,14 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 	return dst - save_dst;
 }
 
+char *write_term_to_strbuf(query *q, cell *c, idx_t c_ctx)
+{
+	size_t len = write_term_to_buf(q, NULL, 0, c, c_ctx, 1, 0, 0);
+	char *buf = malloc(len+10);
+	write_term_to_buf(q, buf, len+1, c, c_ctx, 1, 0, 0);
+	return buf;
+}
+
 void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, int depth)
 {
 	size_t len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, depth);

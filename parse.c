@@ -1562,11 +1562,9 @@ static void parser_dcg_rewrite(parser *p)
 		return;
 
 	query *q = create_query(p->m, 0);
-	size_t len = write_term_to_buf(q, NULL, 0, t->cells, 0, 1, 0, 0);
-	char *dst = malloc(len+1);
-	write_term_to_buf(q, dst, len+1, t->cells, 0, 1, 0, 0);
-	char *src = malloc(len+=256);
-	snprintf(src, len, "dcg_translate((%s),_TermOut).", dst);
+	char *dst = write_term_to_strbuf(q, t->cells, 0);
+	char *src = malloc(strlen(dst)+256);
+	sprintf(src, "dcg_translate((%s),_TermOut).", dst);
 	free(dst);
 
 	// Being conservative here and using temp parser/query objects...
@@ -1600,9 +1598,7 @@ static void parser_dcg_rewrite(parser *p)
 		if (strcmp(p2->vartab.var_name[i], "_TermOut"))
 			continue;
 
-		size_t len = write_term_to_buf(q, NULL, 0, c, q->latest_ctx, 1, 0, 0);
-		src = malloc(len+10);
-		write_term_to_buf(q, src, len+1, c, q->latest_ctx, 1, 0, 0);
+		src = write_term_to_strbuf(q, c, q->latest_ctx);
 		strcat(src, ".");
 		break;
 	}
