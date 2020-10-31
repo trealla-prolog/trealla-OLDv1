@@ -1506,8 +1506,9 @@ static int attach_ops(parser *p, idx_t start_idx)
 			last_idx = i;
 			c->nbr_cells += (c+1)->nbr_cells;
 			i += c->nbr_cells;
+			idx_t off = (idx_t)((c+1)-p->t->cells);
 
-			if (((idx_t)((c+1)-p->t->cells)) >= p->t->cidx) {
+			if (off >= p->t->cidx) {
 				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
 				//p->error = 1;
 				c->arity = 0;
@@ -1520,7 +1521,9 @@ static int attach_ops(parser *p, idx_t start_idx)
 		// Infix...
 
 		if (!(c->flags&OP_XF) && !(c->flags&OP_YF)) {
-			if (((idx_t)((c+1)-p->t->cells)) >= p->t->cidx) {
+			idx_t off = (idx_t)((c+1)-p->t->cells);
+
+			if (off >= p->t->cidx) {
 				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
 				//p->error = 1;
 				return 0;
