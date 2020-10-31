@@ -1039,8 +1039,7 @@ static void directives(parser *p, term *t)
 			if (!strcmp(name, "between") ||
 				!strcmp(name, "terms") ||
 				!strcmp(name, "types") ||
-				!strcmp(name, "files") ||
-				!strcmp(name, "dcgs"))
+				!strcmp(name, "files"))
 				return;
 
 			for (library *lib = g_libs; lib->name; lib++) {
@@ -3367,7 +3366,8 @@ prolog *pl_create()
 #if USE_LDLIBS
 	for (library *lib = g_libs; lib->name; lib++) {
 		if (!strcmp(lib->name, "apply") || !strcmp(lib->name, "lists") ||
-			!strcmp(lib->name, "http") || !strcmp(lib->name, "atts")) {
+			!strcmp(lib->name, "http") || !strcmp(lib->name, "atts") ||
+			!strcmp(lib->name, "dcgs")) {
 			size_t len = lib->end-lib->start;
 			char *src = malloc(len+1);
 			memcpy(src, lib->start, len);
@@ -3381,6 +3381,7 @@ prolog *pl_create()
 	module_load_file(pl->m, "library/lists.pl");
 	module_load_file(pl->m, "library/http.pl");
 	module_load_file(pl->m, "library/atts.pl");
+	module_load_file(pl->m, "library/dcgs.pl");
 #endif
 
 	pl->m->prebuilt = 0;
