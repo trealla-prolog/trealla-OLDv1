@@ -491,7 +491,7 @@ static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	tmp->nbr_cells = tmp_heap_used(q) - save_idx;
 }
 
-static cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx)
+cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
 	init_tmp_heap(q);
 	frame *g = GET_FRAME(q->st.curr_frame);
@@ -9104,8 +9104,7 @@ static int fn_use_module_1(query *q)
 		if (!strcmp(name, "between") ||
 			!strcmp(name, "terms") ||
 			!strcmp(name, "types") ||
-			!strcmp(name, "files") ||
-			!strcmp(name, "dcgs"))
+			!strcmp(name, "files"))
 			return 1;
 
 		for (library *lib = g_libs; lib->name; lib++) {
@@ -9136,10 +9135,11 @@ static int fn_use_module_1(query *q)
 static int fn_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	module *m = find_module(GET_STR(p1));
+	const char *name = GET_STR(p1);
+	module *m = find_module(name);
 
 	if (!m) {
-		throw_error(q, p1, "type_error", "module");
+		throw_error(q, p1, "domain_error", "module");
 		return 0;
 	}
 

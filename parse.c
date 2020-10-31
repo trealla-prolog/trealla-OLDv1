@@ -895,10 +895,11 @@ void destroy_query(query *q)
 static void dump_vars(query *q, parser *p)
 {
 	frame *g = GET_FRAME(0);
-	slot *e = GET_SLOT(g, 0);
 	int any = 0;
 
-	for (unsigned i = 0; i < p->nbr_vars; i++, e++) {
+	for (unsigned i = 0; i < p->nbr_vars; i++) {
+		slot *e = GET_SLOT(g, i);
+
 		if (is_empty(&e->c))
 			continue;
 
@@ -1546,9 +1547,6 @@ int parser_attach(parser *p, int start_idx)
 	return !p->error;
 }
 
-// Don't mess with this, it is currently subject to great change and
-// maybe even a complete rewrite is on the cards...
-
 static void parser_dcg_rewrite(parser *p)
 {
 	p->in_dcg = 0;
@@ -1560,252 +1558,74 @@ static void parser_dcg_rewrite(parser *p)
 	if (strcmp(GET_STR(t->cells), "-->") || (t->cells->arity != 2))
 		return;
 
-	cell *phrase = t->cells + 1;
-	idx_t save_nbr_cells = 1 + (t->nbr_cells * 10);
-	cell *tmp = calloc(save_nbr_cells, sizeof(cell));
-	*tmp = t->cells[0];
-	tmp->val_off = find_in_pool(":-");
-	idx_t nbr_cells = 1;
-	int cnt = 0, head = 1, insert = 0, did_insert = 0;
-	char v[20];
+	query *q = create_query(p->m, 0);
+	size_t len = write_term_to_buf(q, NULL, 0, t->cells, 0, 1, 0, 0);
+	char *dst = malloc(len+1);
+	write_term_to_buf(q, dst, len+1, t->cells, 0, 1, 0, 0);
+	char *src = malloc(len+=256);
+	snprintf(src, len, "dcg_translate((%s),_TermOut).", dst);
+	free(dst);
+	//printf("*** %s\n", src);
 
+	// Being conservative here and using temp parser/query objects...
 
-	while ((phrase - t->cells) < t->cidx) {
-		if (phrase->arity && head && !strcmp(GET_STR(phrase), ",")) {
-			phrase++;
-			insert++;
+	parser *p2 = create_parser(p->m);
+	p2->srcptr = src;
+	p2->command = 0;
+	parser_tokenize(p2, 0, 0);
+	parser_attach(p2, 0);
+	parser_xref(p2, p2->t, NULL);
+	query_execute(q, p2->t);
+	free(src);
+	frame *g = GET_FRAME(0);
+	cell *tmp = NULL;
+
+	for (unsigned i = 0; i < p2->nbr_vars; i++) {
+		slot *e = GET_SLOT(g, i);
+
+		if (is_empty(&e->c))
 			continue;
-		}
 
-		if (phrase->arity && !strcmp(GET_STR(phrase), ",")) {
-			tmp[nbr_cells++] = *phrase;
-			phrase++;
+		q->latest_ctx = e->ctx;
+		cell *c;
+
+		if (is_indirect(&e->c)) {
+			c = e->c.val_ptr;
+			q->latest_ctx = e->ctx;
+		} else
+			c = deref(q, &e->c, e->ctx);
+
+		if (strcmp(p2->vartab.var_name[i], "_TermOut"))
 			continue;
-		}
 
-		if (phrase->arity && !strcmp(GET_STR(phrase), ";")) {
-			tmp[nbr_cells++] = *phrase;
-			phrase++;
-			continue;
-		}
+		//printf("### [%u] ", i);
+		//write_term(q, stdout, c, q->latest_ctx, 1, 0, 0);
+		//printf("\n");
 
-		if (phrase->arity && !strcmp(GET_STR(phrase), "->")) {
-			tmp[nbr_cells++] = *phrase;
-			phrase++;
-			continue;
-		}
-
-		int last = ((phrase+phrase->nbr_cells) - t->cells) >= t->cidx;
-		if (did_insert) last = 0;
-
-		if (is_literal(phrase) && !strcmp(GET_STR(phrase), "!")) {
-			idx_t len = phrase->nbr_cells;
-			cell *phrase2 = phrase + phrase->nbr_cells;
-
-			if (last && ((phrase2 - t->cells) >= t->cidx)) {
-				tmp[nbr_cells].val_type = TYPE_LITERAL;
-				tmp[nbr_cells].val_off = find_in_pool(",");
-				tmp[nbr_cells].nbr_cells = 1 + (len+1) + 3;
-				tmp[nbr_cells].arity = 2;
-				tmp[nbr_cells].flags = FLAG_BUILTIN | OP_XFY;
-				nbr_cells++;
-			}
-
-			nbr_cells += copy_cells(tmp+nbr_cells, phrase, len);
-			phrase += phrase->nbr_cells;
-
-			if (last && ((phrase - t->cells) >= t->cidx)) {
-				tmp[nbr_cells+0].val_type = TYPE_LITERAL;
-				tmp[nbr_cells+0].val_off = find_in_pool("=");
-				tmp[nbr_cells+0].nbr_cells = 3;
-				tmp[nbr_cells+0].arity = 2;
-				tmp[nbr_cells+0].flags = FLAG_BUILTIN | OP_XFX;
-
-				tmp[nbr_cells+1].val_type = TYPE_VARIABLE;
-				tmp[nbr_cells+1].nbr_cells = 1;
-				tmp[nbr_cells+1].arity = 0;
-				sprintf(v, "S_");
-				tmp[nbr_cells+1].val_off = find_in_pool(v);
-
-				tmp[nbr_cells+2].val_type = TYPE_VARIABLE;
-				tmp[nbr_cells+2].nbr_cells = 1;
-				tmp[nbr_cells+2].arity = 0;
-				sprintf(v, "S%d_", cnt++);
-				tmp[nbr_cells+2].val_off = find_in_pool(v);
-
-				nbr_cells += 3;
-			}
-
-			continue;
-		}
-
-		if (phrase->arity && !strcmp(GET_STR(phrase), "{}")) {
-			idx_t len = phrase->nbr_cells - 1;
-			cell *phrase2 = phrase + phrase->nbr_cells;
-
-			if (last && ((phrase2 - t->cells) >= t->cidx)) {
-				tmp[nbr_cells].val_type = TYPE_LITERAL;
-				tmp[nbr_cells].val_off = find_in_pool(",");
-				tmp[nbr_cells].nbr_cells = 1 + (len+1) + 3;
-				tmp[nbr_cells].arity = 2;
-				tmp[nbr_cells].flags = FLAG_BUILTIN | OP_XFY;
-				nbr_cells++;
-			}
-
-			nbr_cells += copy_cells(tmp+nbr_cells, phrase+1, len);
-			phrase += phrase->nbr_cells;
-
-			if (last && ((phrase - t->cells) >= t->cidx)) {
-				tmp[nbr_cells+0].val_type = TYPE_LITERAL;
-				tmp[nbr_cells+0].val_off = find_in_pool("=");
-				tmp[nbr_cells+0].nbr_cells = 3;
-				tmp[nbr_cells+0].arity = 2;
-				tmp[nbr_cells+0].flags = FLAG_BUILTIN | OP_XFX;
-
-				tmp[nbr_cells+1].val_type = TYPE_VARIABLE;
-				tmp[nbr_cells+1].nbr_cells = 1;
-				tmp[nbr_cells+1].arity = 0;
-				sprintf(v, "S_");
-				tmp[nbr_cells+1].val_off = find_in_pool(v);
-
-				tmp[nbr_cells+2].val_type = TYPE_VARIABLE;
-				tmp[nbr_cells+2].nbr_cells = 1;
-				tmp[nbr_cells+2].arity = 0;
-				sprintf(v, "S%d_", cnt++);
-				tmp[nbr_cells+2].val_off = find_in_pool(v);
-
-				nbr_cells += 3;
-			}
-
-			continue;
-		}
-
-		if (is_iso_list(phrase) && insert) {
-			tmp[nbr_cells].val_type = TYPE_LITERAL;
-			tmp[nbr_cells+0].flags = FLAG_BUILTIN | OP_XFX;
-			tmp[nbr_cells].nbr_cells = 1 + 5 + 0;   // +?
-			tmp[nbr_cells].arity = 2;
-			tmp[nbr_cells].val_off = find_in_pool(",");
-			nbr_cells++;
-
-			tmp[nbr_cells+0].val_type = TYPE_LITERAL;
-			tmp[nbr_cells+0].val_off = find_in_pool("=");
-			tmp[nbr_cells+0].nbr_cells = 5;
-			tmp[nbr_cells+0].arity = 2;
-			tmp[nbr_cells+0].flags = FLAG_BUILTIN | OP_XFX;
-
-			tmp[nbr_cells+1].val_type = TYPE_VARIABLE;
-			tmp[nbr_cells+1].nbr_cells = 1;
-			tmp[nbr_cells+1].arity = 0;
-			sprintf(v, "S_");
-			tmp[nbr_cells+1].val_off = find_in_pool(v);
-
-			tmp[nbr_cells+2] = phrase[0];
-			tmp[nbr_cells+2].nbr_cells = 3;
-			tmp[nbr_cells+2].arity = 2;
-
-			tmp[nbr_cells+3] = phrase[1];
-
-			tmp[nbr_cells+4].val_type = TYPE_VARIABLE;
-			tmp[nbr_cells+4].nbr_cells = 1;
-			tmp[nbr_cells+4].arity = 0;
-			sprintf(v, "S%d_", cnt+1);
-			tmp[nbr_cells+4].val_off = find_in_pool(v);
-
-			nbr_cells += 5;
-			phrase += phrase->nbr_cells;
-			did_insert = 1;
-			insert = 0;
-		} else if (is_iso_list(phrase)) {
-			int len = phrase[0].nbr_cells - 1;
-			tmp[nbr_cells+0].val_type = TYPE_LITERAL;
-			tmp[nbr_cells+0].val_off = find_in_pool("=");
-			tmp[nbr_cells+0].nbr_cells = 2 + len + 1;
-			tmp[nbr_cells+0].arity = 2;
-			tmp[nbr_cells+0].flags = FLAG_BUILTIN | OP_XFX;
-
-			tmp[nbr_cells+1].val_type = TYPE_VARIABLE;
-			tmp[nbr_cells+1].nbr_cells = 1;
-			tmp[nbr_cells+1].arity = 0;
-			sprintf(v, "S%d_", cnt++);
-			tmp[nbr_cells+1].val_off = find_in_pool(v);
-
-			copy_cells(tmp+nbr_cells+2, phrase, len);
-
-			tmp[nbr_cells+2+len].val_type = TYPE_VARIABLE;
-			tmp[nbr_cells+2+len].nbr_cells = 1;
-			tmp[nbr_cells+2+len].arity = 0;
-			if (last && !did_insert) { sprintf(v, "S_"); last = 0; }
-			else sprintf(v, "S%d_", cnt);
-			tmp[nbr_cells+2+len].val_off = find_in_pool(v);
-			tmp[nbr_cells+2+len].flags = 0;
-
-			nbr_cells += 2 + len + 1;
-			phrase += phrase->nbr_cells;
-		} else if (is_nil(phrase)) {
-			tmp[nbr_cells+0].val_type = TYPE_LITERAL;
-			tmp[nbr_cells+0].val_off = find_in_pool("=");
-			tmp[nbr_cells+0].nbr_cells = 3;
-			tmp[nbr_cells+0].arity = 2;
-			tmp[nbr_cells+0].flags = FLAG_BUILTIN | OP_XFX;
-
-			tmp[nbr_cells+1].val_type = TYPE_VARIABLE;
-			tmp[nbr_cells+1].nbr_cells = 1;
-			tmp[nbr_cells+1].arity = 0;
-			sprintf(v, "S%d_", cnt);
-			tmp[nbr_cells+1].val_off = find_in_pool(v);
-
-			tmp[nbr_cells+2].val_type = TYPE_VARIABLE;
-			tmp[nbr_cells+2].nbr_cells = 1;
-			tmp[nbr_cells+2].arity = 0;
-			sprintf(v, "S_");
-			tmp[nbr_cells+2].val_off = find_in_pool(v);
-
-			nbr_cells += 3;
-			phrase += phrase->nbr_cells;
-		} else {
-			copy_cells(tmp+nbr_cells, phrase, phrase->nbr_cells);
-
-			tmp[nbr_cells+phrase->nbr_cells+0].val_type = TYPE_VARIABLE;
-			tmp[nbr_cells+phrase->nbr_cells+0].nbr_cells = 1;
-			tmp[nbr_cells+phrase->nbr_cells+0].arity = 0;
-			sprintf(v, "S%d_", cnt);
-			tmp[nbr_cells+phrase->nbr_cells+0].val_off = find_in_pool(v);
-
-			tmp[nbr_cells+phrase->nbr_cells+1].val_type = TYPE_VARIABLE;
-			tmp[nbr_cells+phrase->nbr_cells+1].nbr_cells = 1;
-			tmp[nbr_cells+phrase->nbr_cells+1].arity = 0;
-			if (head || last) { sprintf(v, "S_"); last = 0; }
-			else sprintf(v, "S%d_", ++cnt);
-			tmp[nbr_cells+phrase->nbr_cells+1].val_off = find_in_pool(v);
-
-			tmp[nbr_cells].nbr_cells += 2;
-			tmp[nbr_cells].arity += 2;
-			nbr_cells += 2;
-
-			nbr_cells += phrase->nbr_cells;
-			phrase += phrase->nbr_cells;
-		}
-
-		head = 0;
+		cell *tmp2 = deep_copy_to_tmp(q, c, q->latest_ctx);
+		tmp = calloc(tmp2->nbr_cells, sizeof(cell));
+		copy_cells(tmp, tmp2, tmp2->nbr_cells);
+		break;
 	}
 
-#if 1
-	// This is a magic fix...
-	tmp[nbr_cells].val_type = TYPE_LITERAL;
-	tmp[nbr_cells].val_off = g_true_s;
-	tmp[nbr_cells].nbr_cells = 1;
-	tmp[nbr_cells].arity = 0;
-	tmp[nbr_cells].flags = FLAG_BUILTIN;
-	nbr_cells++;
-#endif
+	destroy_query(q);
 
-	tmp->nbr_cells = nbr_cells;
+	if (!tmp) {
+		fprintf(stdout, "Error: syntax error, dcg_translate, line nbr %d\n", p2->line_nbr);
+		destroy_parser(p2);
+		p->error = 1;
+		return;
+	}
+
+	destroy_parser(p2);
+
+	idx_t nbr_cells = tmp->nbr_cells;
 	p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
 	copy_cells(p->t->cells, tmp, nbr_cells);
-	p->t->nbr_cells = nbr_cells;
+	p->t->nbr_cells = nbr_cells + 1;
 	p->t->cidx = nbr_cells;
 	free(tmp);
+	parser_assign_vars(p);
 }
 
 static cell *make_literal(parser *p, idx_t offset)
@@ -2115,7 +1935,7 @@ static int get_token(parser *p, int last_op)
 		src++;
 	}
 
-	if ((*src == '%') && !p->fp) {
+	while ((*src == '%') && !p->fp) {
 		while (*src && (*src != '\n'))
 			src++;
 
@@ -2123,6 +1943,13 @@ static int get_token(parser *p, int last_op)
 			p->line_nbr++;
 
 		src++;
+
+		while (isspace(*src)) {
+			if (*src == '\n')
+				p->line_nbr++;
+
+			src++;
+		}
 	}
 
 	while ((!*src || (*src == '%')) && p->fp) {
@@ -2468,8 +2295,8 @@ int parser_tokenize(parser *p, int args, int consing)
 			(*p->srcptr != ',') && (*p->srcptr != ')') && (*p->srcptr != ']') &&
 				(*p->srcptr != '|')) {
 			if (parser_attach(p, 0)) {
-				parser_dcg_rewrite(p);
 				parser_assign_vars(p);
+				parser_dcg_rewrite(p);
 
 				if (p->consulting && !p->skip)
 					if (!assertz_to_db(p->m, p->t, 1)) {
@@ -2788,8 +2615,8 @@ static int parser_run(parser *p, const char *src, int dump)
 		return 0;
 
 	if (p->command) {
-		parser_dcg_rewrite(p);
 		parser_assign_vars(p);
+		parser_dcg_rewrite(p);
 	}
 
 	parser_xref(p, p->t, NULL);
@@ -3366,8 +3193,8 @@ prolog *pl_create()
 #if USE_LDLIBS
 	for (library *lib = g_libs; lib->name; lib++) {
 		if (!strcmp(lib->name, "apply") || !strcmp(lib->name, "lists") ||
-			!strcmp(lib->name, "http") || !strcmp(lib->name, "atts") ||
-			!strcmp(lib->name, "dcgs")) {
+			!strcmp(lib->name, "dcgs") ||
+			!strcmp(lib->name, "http") || !strcmp(lib->name, "atts") ) {
 			size_t len = lib->end-lib->start;
 			char *src = malloc(len+1);
 			memcpy(src, lib->start, len);

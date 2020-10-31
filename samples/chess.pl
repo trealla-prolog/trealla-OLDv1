@@ -52,9 +52,9 @@ play :-
 play.
 
 test_play -->
-    execute_command(e2e4), {!},
-    execute_command(d2d3), {!},
-    execute_command(c1e3), {!},
+    execute_command(e2e4), !,
+    execute_command(d2d3), !,
+    execute_command(c1e3), !,
     execute_command(quit).
 
 play(Board) :-
@@ -685,4 +685,3 @@ book( [ state(white, WhiteKing, WhiteKingRook, WhiteQueenRook), % e2e4  e7e5
 
 opposite(white, black).
 opposite(black, white).
-
