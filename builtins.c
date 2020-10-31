@@ -127,6 +127,15 @@ static void get_params(query *q, idx_t *p1, idx_t *p2)
 	if (p2) *p2 = ch->v2;
 }
 
+static void make_variable(cell *tmp, idx_t off)
+{
+	tmp->val_type = TYPE_VARIABLE;
+	tmp->nbr_cells = 1;
+	tmp->arity = tmp->flags = 0;
+	tmp->val_off = off;
+	tmp->var_nbr = 0;
+}
+
 static void make_int(cell *tmp, int_t v)
 {
 	tmp->val_type = TYPE_INTEGER;
@@ -4085,12 +4094,9 @@ static int fn_iso_univ_2(query *q)
 				}
 
 				cell v;
-				v.val_type = TYPE_VARIABLE;
-				v.nbr_cells = 1;
-				v.arity = 0;
-				v.flags = FLAG_FRESH;
+				make_variable(&v, g_anon_s);
+				v.flags |= FLAG_FRESH;
 				v.var_nbr = g_varno++;
-				v.val_off = g_anon_s;
 				set_var(q, &v, q->st.curr_frame, h, q->latest_ctx);
 				cell *tmp = alloc_tmp_heap(q, 1);
 				copy_cells(tmp, &v, 1);
