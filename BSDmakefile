@@ -65,7 +65,7 @@ dict.o: library/dict.pl
 	$(LD) -m elf_x86_64 -r -b binary -o dict.o library/dict.pl
 
 dcgs.o: library/dcgs.pl
-	$(LD) $(OSFLAG) -r -b binary -o dcgs.o library/dcgs.pl
+	$(LD) -m elf_x86_64 -r -b binary -o dcgs.o library/dcgs.pl
 
 lists.o: library/lists.pl
 	$(LD) -m elf_x86_64 -r -b binary -o lists.o library/lists.pl
