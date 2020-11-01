@@ -2265,10 +2265,10 @@ static int get_token(parser *p, int last_op)
 	return 1;
 }
 
-int scan_is_chars_list(query *q, cell *l, idx_t l_ctx)
+size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx)
 {
 	idx_t save_ctx = q ? q->latest_ctx : l_ctx;
-	int is_chars_list = 0;
+	size_t is_chars_list = 0;
 
 	while (is_iso_list(l)) {
 		cell *h = LIST_HEAD(l);
@@ -2280,13 +2280,14 @@ int scan_is_chars_list(query *q, cell *l, idx_t l_ctx)
 		}
 
 		const char *src = GET_STR(c);
+		size_t len = len_char_utf8(src);
 
-		if (len_char_utf8(src) != LEN_STR(c)) {
+		if (len != LEN_STR(c)) {
 			is_chars_list = 0;
 			break;
 		}
 
-		is_chars_list = 1;
+		is_chars_list += len;
 		l = LIST_TAIL(l);
 		l = q ? deref(q, l, l_ctx) : l;
 		if (q) l_ctx = q->latest_ctx;

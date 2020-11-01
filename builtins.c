@@ -9109,20 +9109,29 @@ static int fn_put_chars_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
+	size_t len;
 
 	if (is_string(p1)) {
 		const char *src = GET_STR(p1);
 		size_t len = LEN_STR(p1);
 		net_write(src, len, str);
-	} else if (scan_is_chars_list(q, p1, p1_ctx)) {
+	} else if ((len = scan_is_chars_list(q, p1, p1_ctx)) > 0) {
+		char *dstbuf = malloc(len + 1);
+		char *dst = dstbuf;
+
 		while (is_list(p1)) {
 			cell *h = LIST_HEAD(p1);
 			h = deref(q, h, p1_ctx);
-			net_write(GET_STR(h), LEN_STR(h), str);
+			memcpy(dst, GET_STR(h), LEN_STR(h));
+			dst += LEN_STR(h);
 			p1 = LIST_TAIL(p1);
 			p1 = deref(q, p1, p1_ctx);
 			p1_ctx = q->latest_ctx;
 		}
+
+		*dst = '\0';
+		net_write(dstbuf, len, str);
+		free(dstbuf);
 	} else {
 		throw_error(q, p1, "type_error", "chars");
 		return 0;
