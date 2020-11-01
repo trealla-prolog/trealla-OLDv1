@@ -4196,7 +4196,8 @@ static int fn_iso_term_variables_2(query *q)
 		collect_vars(q, p1, p1_ctx, p1->nbr_cells);
 
 	const unsigned cnt = g_tab_idx;
-	cell *tmp = calloc((cnt*2)+1, sizeof(cell));
+	init_tmp_heap(q);
+	cell *tmp = alloc_tmp_heap(q, (cnt*2)+1);
 	unsigned idx = 0;
 
 	if (cnt) {
@@ -4254,7 +4255,6 @@ static int fn_iso_term_variables_2(query *q)
 		cell *save = tmp;
 		tmp = alloc_heap(q, idx);
 		copy_cells(tmp, save, idx);
-		free(save);
 		set_var(q, p2, p2_ctx, tmp, q->st.curr_frame);
 		return 1;
 	}
