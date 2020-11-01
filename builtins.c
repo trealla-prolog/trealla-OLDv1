@@ -9124,7 +9124,7 @@ static int fn_put_chars_2(query *q)
 			p1_ctx = q->latest_ctx;
 		}
 	} else {
-		throw_error(q, p1, "type_error", "string");
+		throw_error(q, p1, "type_error", "chars");
 		return 0;
 	}
 
