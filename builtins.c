@@ -4210,7 +4210,12 @@ static int fn_iso_term_variables_2(query *q)
 			cell v;
 			make_variable(&v, g_anon_s);
 			v.flags |= FLAG_FRESH;
-			v.var_nbr = g_varno++;
+
+			if (g_tab1[i] != q->st.curr_frame)
+				v.var_nbr = g_varno++;
+			else
+				v.var_nbr = g_tab2[i];
+
 			tmp[idx++] = v;
 			done++;
 		}
@@ -4222,14 +4227,18 @@ static int fn_iso_term_variables_2(query *q)
 		make_literal(tmp+idx++, g_nil_s);
 
 	if (cnt) {
+		unsigned new_vars = g_varno - g->nbr_vars;
 		g_varno = g->nbr_vars;
 
-		if (!create_vars(q, cnt)) {
+		if (!create_vars(q, new_vars)) {
 			throw_error(q, p1, "resource_error", "too_many_vars");
 			return 0;
 		}
 
 		for (unsigned i = 0; i < cnt; i++) {
+			if (g_tab1[i] == q->st.curr_frame)
+				continue;
+
 			cell v, tmp2;
 			make_variable(&v, g_anon_s);
 			v.flags |= FLAG_FRESH;
