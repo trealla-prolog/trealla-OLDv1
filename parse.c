@@ -743,6 +743,20 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 	m->use_persist = 1;
 }
 
+void clear_term_nodelete(term *t)
+{
+	if (!t)
+		return;
+
+	for (idx_t i = 0; i < t->cidx; i++) {
+		cell *c = t->cells + i;
+		c->val_type = TYPE_EMPTY;
+		c->val_str = NULL;
+	}
+
+	t->cidx = 0;
+}
+
 void clear_term(term *t)
 {
 	if (!t)
@@ -755,6 +769,7 @@ void clear_term(term *t)
 			free(c->val_str);
 
 		c->val_type = TYPE_EMPTY;
+		c->val_str = NULL;
 	}
 
 	t->cidx = 0;
@@ -783,6 +798,14 @@ parser *create_parser(module *m)
 	p->line_nbr = 1;
 	p->m = m;
 	return p;
+}
+
+void destroy_parser_nodelete(parser *p)
+{
+	clear_term_nodelete(p->t);
+	free(p->token);
+	free(p->t);
+	free(p);
 }
 
 void destroy_parser(parser *p)
@@ -1566,16 +1589,15 @@ int parser_attach(parser *p, int start_idx)
 static void parser_dcg_rewrite(parser *p)
 {
 	p->in_dcg = 0;
-	term *t = p->t;
 
-	if (!is_literal(t->cells))
+	if (!is_literal(p->t->cells))
 		return;
 
-	if (strcmp(GET_STR(t->cells), "-->") || (t->cells->arity != 2))
+	if (strcmp(GET_STR(p->t->cells), "-->") || (p->t->cells->arity != 2))
 		return;
 
 	query *q = create_query(p->m, 0);
-	char *dst = write_term_to_strbuf(q, t->cells, 0);
+	char *dst = write_term_to_strbuf(q, p->t->cells, 0);
 	char *src = malloc(strlen(dst)+256);
 	sprintf(src, "dcg_translate((%s),_TermOut).", dst);
 	free(dst);
@@ -1617,15 +1639,15 @@ static void parser_dcg_rewrite(parser *p)
 	}
 
 	destroy_query(q);
+	int line_nbr = p2->line_nbr;
+	destroy_parser_nodelete(p2);
 
 	if (!src) {
-		fprintf(stdout, "Error: syntax error, dcg_translate, line nbr %d\n", p2->line_nbr);
-		destroy_parser(p2);
+		fprintf(stdout, "Error: syntax error, dcg_translate, line nbr %d\n", line_nbr);
 		p->error = 1;
 		return;
 	}
 
-	destroy_parser(p2);
 	p2 = create_parser(p->m);
 	p2->srcptr = src;
 	p2->command = 0;
@@ -1636,6 +1658,7 @@ static void parser_dcg_rewrite(parser *p)
 	clear_term(p->t);
 	free(p->t);
 	p->t = p2->t;
+	p->nbr_vars = p2->nbr_vars;
 	p2->t = NULL;
 	destroy_parser(p2);
 	parser_assign_vars(p);
