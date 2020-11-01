@@ -4158,20 +4158,23 @@ static void collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells)
 {
 	for (idx_t i = 0; i < nbr_cells;) {
 		cell *c = deref(q, p1, p1_ctx);
+		int found = 0;
 
 		if (is_structure(c)) {
 			collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1);
 		} else if (is_variable(c)) {
-			for (size_t i = 0; i < g_tab_idx; i++) {
-				if ((g_tab1[i] == q->latest_ctx) && (g_tab2[i] == c->var_nbr)) {
-					i++; p1++;
-					continue;
+			for (size_t idx = 0; idx < g_tab_idx; idx++) {
+				if ((g_tab1[idx] == q->latest_ctx) && (g_tab2[idx] == c->var_nbr)) {
+					found = 1;
+					break;
 				}
 			}
 
-			g_tab1[g_tab_idx] = q->latest_ctx;
-			g_tab2[g_tab_idx] = c->var_nbr;
-			g_tab_idx++;
+			if (!found) {
+				g_tab1[g_tab_idx] = q->latest_ctx;
+				g_tab2[g_tab_idx] = c->var_nbr;
+				g_tab_idx++;
+			}
 		}
 
 		i += p1->nbr_cells;
@@ -4192,7 +4195,7 @@ static int fn_iso_term_variables_2(query *q)
 	else
 		collect_vars(q, p1, p1_ctx, p1->nbr_cells);
 
-	unsigned cnt = g_tab_idx;
+	const unsigned cnt = g_tab_idx;
 	cell *tmp = calloc((cnt*2)+1, sizeof(cell));
 	unsigned idx = 0;
 
@@ -4200,43 +4203,41 @@ static int fn_iso_term_variables_2(query *q)
 		unsigned done = 0;
 
 		for (unsigned i = 0; i < cnt; i++) {
-			make_literal(tmp+idx++, g_dot_s);
-			tmp[idx-1].arity = 2;
-			tmp[idx-1].nbr_cells = ((cnt-done)*2)+1;
-			cell tmp2;
-			tmp2.val_type = TYPE_VARIABLE;
-			tmp2.nbr_cells = 1;
-			tmp2.flags = FLAG_FRESH;
-			tmp2.val_off = g_anon_s;
-			tmp2.var_nbr = g_varno++;
-			tmp[idx++] = tmp2;
+			make_literal(tmp+idx, g_dot_s);
+			tmp[idx].arity = 2;
+			tmp[idx].nbr_cells = ((cnt-done)*2)+1;
+			idx++;
+			cell v;
+			make_variable(&v, g_anon_s);
+			v.flags |= FLAG_FRESH;
+			v.var_nbr = g_varno++;
+			tmp[idx++] = v;
 			done++;
 		}
 
 		make_literal(tmp+idx++, g_nil_s);
 		tmp[0].arity = 2;
 		tmp[0].nbr_cells = idx;
-	} else {
+	} else
 		make_literal(tmp+idx++, g_nil_s);
-	}
 
 	if (cnt) {
-		if (!(g_varno = create_vars(q, cnt))) {
+		g_varno = g->nbr_vars;
+
+		if (!create_vars(q, cnt)) {
 			throw_error(q, p1, "resource_error", "too_many_vars");
 			return 0;
 		}
 
 		for (unsigned i = 0; i < cnt; i++) {
-			slot *e = GET_SLOT(g, g_varno);
-			e->ctx = g_tab1[i];
-			e->c.var_nbr = g_tab2[i];
-			e->c.val_type = TYPE_VARIABLE;
-			e->c.nbr_cells = 1;
-			e->c.arity = 0;
-			e->c.flags = FLAG_FRESH;
-			e->c.val_off = g_anon_s;
-			e->c.attrs = NULL;
-			g_varno++;
+			cell v, tmp2;
+			make_variable(&v, g_anon_s);
+			v.flags |= FLAG_FRESH;
+			v.var_nbr = g_varno++;
+			make_variable(&tmp2, g_anon_s);
+			tmp2.flags |= FLAG_FRESH;
+			tmp2.var_nbr = g_tab2[i];
+			set_var(q, &v, q->st.curr_frame, &tmp2, g_tab1[i]);
 		}
 	}
 
