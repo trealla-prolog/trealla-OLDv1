@@ -486,4 +486,4 @@ void fix_list(cell *c);
 module *module_load_text(module *m, const char *src);
 void make_indirect(cell *tmp, cell *c);
 cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx);
-char *write_term_to_strbuf(query *q, cell *c, idx_t c_ctx);
+char *write_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);

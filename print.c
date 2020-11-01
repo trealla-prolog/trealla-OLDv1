@@ -38,6 +38,9 @@ static int needs_quote(module *m, const char *src, size_t srclen)
 
 		if ((iscntrl(ch) || isspace(ch) || ispunct(ch)) && (ch != '_'))
 			return 1;
+
+		if ((ch == '\'') || (ch == '"') || (ch == '`'))
+			return 1;
 	}
 
 	return 0;
@@ -534,11 +537,11 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 	return dst - save_dst;
 }
 
-char *write_term_to_strbuf(query *q, cell *c, idx_t c_ctx)
+char *write_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 {
-	size_t len = write_term_to_buf(q, NULL, 0, c, c_ctx, 1, 0, 0);
+	size_t len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 0);
 	char *buf = malloc(len+10);
-	write_term_to_buf(q, buf, len+1, c, c_ctx, 1, 0, 0);
+	write_term_to_buf(q, buf, len+1, c, c_ctx, running, 0, 0);
 	return buf;
 }
 

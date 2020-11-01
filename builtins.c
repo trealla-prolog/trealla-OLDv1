@@ -4523,13 +4523,13 @@ static void db_log(query *q, clause *r, enum log_type l)
 
 	switch(l) {
 		case LOG_ASSERTA: {
-			char *dst = write_term_to_strbuf(q, r->t.cells, q->st.curr_frame);
+			char *dst = write_term_to_strbuf(q, r->t.cells, q->st.curr_frame, 1);
 			uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
 			fprintf(q->m->fp, "a_(%s,'%s').\n", dst, tmpbuf);
 			free(dst);
 			break;
 		} case LOG_ASSERTZ: {
-			char *dst = write_term_to_strbuf(q, r->t.cells, q->st.curr_frame);
+			char *dst = write_term_to_strbuf(q, r->t.cells, q->st.curr_frame, 1);
 			uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
 			fprintf(q->m->fp, "z_(%s,'%s').\n", dst, tmpbuf);
 			free(dst);
@@ -6778,7 +6778,7 @@ static int fn_write_term_to_chars_3(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	char *dst = write_term_to_strbuf(q, p1, p1_ctx);
+	char *dst = write_term_to_strbuf(q, p1, p1_ctx, 1);
 	idx_t offset;
 
 	if (is_in_pool(dst, &offset)) {
@@ -7984,7 +7984,7 @@ static int fn_term_hash_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 	GET_NEXT_ARG(p2,integer_or_var);
-	char *dst = write_term_to_strbuf(q, p1, p1_ctx);
+	char *dst = write_term_to_strbuf(q, p1, p1_ctx, 1);
 	cell tmp;
 	make_int(&tmp, do_jenkins_one_at_a_time_hash(dst));
 	free(dst);
