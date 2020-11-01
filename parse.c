@@ -2267,12 +2267,12 @@ static int get_token(parser *p, int last_op)
 
 int scan_list(query *q, cell *l, idx_t l_ctx)
 {
-	idx_t save_ctx = l_ctx;
+	idx_t save_ctx = q ? q->latest_ctx : l_ctx;
 	int is_chars_list = 0;
 
 	while (is_iso_list(l)) {
 		cell *h = LIST_HEAD(l);
-		cell *c = q ? deref(q, h, save_ctx) : h;
+		cell *c = q ? deref(q, h, l_ctx) : h;
 
 		if (!is_atom(c)) {
 			is_chars_list = 0;
@@ -2288,8 +2288,8 @@ int scan_list(query *q, cell *l, idx_t l_ctx)
 
 		is_chars_list = 1;
 		l = LIST_TAIL(l);
-		l = q ? deref(q, l, save_ctx) : l;
-		if (q) save_ctx = q->latest_ctx;
+		l = q ? deref(q, l, l_ctx) : l;
+		if (q) l_ctx = q->latest_ctx;
 	}
 
 	if (is_variable(l))
