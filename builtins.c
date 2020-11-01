@@ -1454,6 +1454,7 @@ static int fn_iso_current_input_1(query *q)
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_int(&tmp, q->current_input);
+	tmp.flags |= FLAG_STREAM | FLAG_HEX;
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return 1;
 }
@@ -1463,6 +1464,7 @@ static int fn_iso_current_output_1(query *q)
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_int(&tmp, q->current_output);
+	tmp.flags |= FLAG_STREAM | FLAG_HEX;
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return 1;
 }
@@ -6767,30 +6769,14 @@ static int fn_read_term_from_chars_3(query *q)
 
 static int fn_write_term_to_chars_3(query *q)
 {
-	GET_FIRST_ARG(p2,any);
-	GET_NEXT_ARG(p1,any);
-	GET_NEXT_ARG(p3,any);
+	GET_FIRST_ARG(p_term,any);
+	GET_NEXT_ARG(p_opts,any);
+	GET_NEXT_ARG(p_chars,any);
 
-	if (is_number(p1)) {
-		char tmpbuf[256], *dst = tmpbuf;
-		write_term_to_buf(q, dst, sizeof(tmpbuf), p1, p1_ctx, 1, 0, 0);
-		cell tmp = make_cstring(q, dst);
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	}
-
-	char *dst = write_term_to_strbuf(q, p1, p1_ctx, 1);
-	idx_t offset;
-
-	if (is_in_pool(dst, &offset)) {
-		cell tmp;
-		make_literal(&tmp, offset);
-		free(dst);
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else {
-		cell tmp = make_cstring(q, dst);
-		free(dst);
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	}
+	char *dst = write_term_to_strbuf(q, p_term, p_term_ctx, 1);
+	cell tmp = make_string(dst, strlen(dst));
+	free(dst);
+	return unify(q, p_chars, p_chars_ctx, &tmp, q->st.curr_frame);
 }
 
 static int fn_is_list_1(query *q)
@@ -9117,6 +9103,34 @@ static int fn_iso_length_2(query *q)
 	return 0;
 }
 
+static int fn_put_chars_2(query *q)
+{
+	GET_FIRST_ARG(pstr,stream);
+	int n = get_stream(q, pstr);
+	stream *str = &g_streams[n];
+	GET_NEXT_ARG(p1,any);
+
+	if (is_string(p1)) {
+		const char *src = GET_STR(p1);
+		size_t len = LEN_STR(p1);
+		net_write(src, len, str);
+	} else if (scan_list(q, p1, p1_ctx)) {
+		while (is_list(p1)) {
+			cell *h = LIST_HEAD(p1);
+			h = deref(q, h, p1_ctx);
+			net_write(GET_STR(h), LEN_STR(h), str);
+			p1 = LIST_TAIL(p1);
+			p1 = deref(q, p1, p1_ctx);
+			p1_ctx = q->latest_ctx;
+		}
+	} else {
+		throw_error(q, p1, "type_error", "string");
+		return 0;
+	}
+
+	return !ferror(str->fp);
+}
+
 static int fn_use_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -9385,6 +9399,7 @@ static const struct builtins g_other_funcs[] =
 
 	// Miscellaneous...
 
+	{"$put_chars", 2, fn_put_chars_2, "+stream,+string"},
 	{"ignore", 1, fn_ignore_1, "+callable"},
 	{"format", 2, fn_format_2, "+string,+list"},
 	{"format", 3, fn_format_3, "+stream,+string,+list"},
