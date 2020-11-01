@@ -6769,9 +6769,9 @@ static int fn_read_term_from_chars_3(query *q)
 
 static int fn_write_term_to_chars_3(query *q)
 {
-	GET_FIRST_ARG(p_term,any);
+	GET_FIRST_ARG(p_chars,any);
+	GET_NEXT_ARG(p_term,any);
 	GET_NEXT_ARG(p_opts,any);
-	GET_NEXT_ARG(p_chars,any);
 
 	char *dst = write_term_to_strbuf(q, p_term, p_term_ctx, 1);
 	cell tmp = make_string(dst, strlen(dst));
