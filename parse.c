@@ -1606,6 +1606,7 @@ static void parser_dcg_rewrite(parser *p)
 	// Being conservative here and using temp parser/query objects...
 
 	parser *p2 = create_parser(p->m);
+	p2->skip = 1;
 	p2->srcptr = src;
 	p2->command = 0;
 	parser_tokenize(p2, 0, 0);
@@ -2580,7 +2581,7 @@ int parser_tokenize(parser *p, int args, int consing)
 			if ((strlen(p->token) < MAX_SMALL_STRING) && !p->string)
 				strcpy(c->val_chr, p->token);
 			else {
-				if (p->consulting)
+				if (p->consulting || p->skip)
 					c->flags |= FLAG_CONST_CSTRING;
 
 				c->flags |= FLAG_BLOB;
