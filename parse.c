@@ -2265,7 +2265,7 @@ static int get_token(parser *p, int last_op)
 	return 1;
 }
 
-int scan_list(query *q, cell *l, idx_t l_ctx)
+int scan_is_chars_list(query *q, cell *l, idx_t l_ctx)
 {
 	idx_t save_ctx = q ? q->latest_ctx : l_ctx;
 	int is_chars_list = 0;
@@ -2380,7 +2380,7 @@ int parser_tokenize(parser *p, int args, int consing)
 #if 0
 			// Before we can do this, DCG must recognize strings
 
-			if (scan_list(NULL, c, 0)) {
+			if (scan_is_chars_list(NULL, c, 0)) {
 				size_t dstlen = 0;
 				char *dst = 0;
 				cell *l = c;

@@ -9114,7 +9114,7 @@ static int fn_put_chars_2(query *q)
 		const char *src = GET_STR(p1);
 		size_t len = LEN_STR(p1);
 		net_write(src, len, str);
-	} else if (scan_list(q, p1, p1_ctx)) {
+	} else if (scan_is_chars_list(q, p1, p1_ctx)) {
 		while (is_list(p1)) {
 			cell *h = LIST_HEAD(p1);
 			h = deref(q, h, p1_ctx);
