@@ -9103,7 +9103,7 @@ static int fn_iso_length_2(query *q)
 	return 0;
 }
 
-static int fn_put_chars_2(query *q)
+static int fn_sys_put_chars_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -9408,7 +9408,7 @@ static const struct builtins g_other_funcs[] =
 
 	// Miscellaneous...
 
-	{"$put_chars", 2, fn_put_chars_2, "+stream,+string"},
+	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars"},
 	{"ignore", 1, fn_ignore_1, "+callable"},
 	{"format", 2, fn_format_2, "+string,+list"},
 	{"format", 3, fn_format_3, "+stream,+string,+list"},
