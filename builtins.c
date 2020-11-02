@@ -1019,7 +1019,7 @@ static int fn_iso_atom_codes_2(query *q)
 
 static int fn_iso_number_chars_2(query *q)
 {
-	GET_FIRST_ARG(p1,integer_or_var);
+	GET_FIRST_ARG(p1,number_or_var);
 	GET_NEXT_ARG(p2,list_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
@@ -1031,8 +1031,8 @@ static int fn_iso_number_chars_2(query *q)
 		cell *head = LIST_HEAD(p2);
 		cell *tail = LIST_TAIL(p2);
 		head = deref(q, head, p2_ctx);
-
-		int_t val = 0;
+		char tmpbuf[256];
+		char *dst = tmpbuf;
 
 		while (tail) {
 			if (!is_atom(head)) {
@@ -1043,13 +1043,7 @@ static int fn_iso_number_chars_2(query *q)
 			const char *src = GET_STR(head);
 			int ch = *src;
 
-			if (!isdigit(ch)) {
-				throw_error(q, head, "domain_error", "digit");
-				return 0;
-			}
-
-			val *= 10;
-			val += ch - '0';
+			*dst++ = ch;
 
 			if (is_literal(tail)) {
 				if (tail->val_off == g_nil_s)
@@ -1066,13 +1060,23 @@ static int fn_iso_number_chars_2(query *q)
 			head = deref(q, head, q->latest_ctx);
 		}
 
+		*dst = '\0';
+
+		char *end;
+		int_t val = strtoll(tmpbuf, &end, 10);
 		cell tmp;
-		make_int(&tmp, val);
+
+		if (*end) {
+			double f = strtod(tmpbuf, &end);
+			make_float(&tmp, f);
+		} else
+			make_int(&tmp, val);
+
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
 	char tmpbuf[256];
-	sprint_int(tmpbuf, sizeof(tmpbuf), p1->val_num, 10);
+	write_term_to_buf(q, tmpbuf, sizeof(tmpbuf), p1, p1_ctx, 1, 0, 0);
 	cell tmp = make_string(tmpbuf, strlen(tmpbuf));
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }

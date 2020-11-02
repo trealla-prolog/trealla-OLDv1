@@ -24,6 +24,7 @@
 #define is_atom_or_var(c) (is_atom(c) || is_variable(c))
 #define is_atom_or_int(c) (is_atom(c) || is_integer(c))
 #define is_atom_or_structure(c) (is_atom(c) || is_structure(c))
+#define is_number_or_var(c) (is_number(c) || is_variable(c))
 #define is_integer_or_var(c) (is_integer(c) || is_variable(c))
 #define is_integer_or_atom(c) (is_integer(c) || is_atom(c))
 #define is_nonvar(c) (!is_variable(c))
