@@ -3245,9 +3245,9 @@ prolog *pl_create()
 #else
 	module_load_file(pl->m, "library/apply.pl");
 	module_load_file(pl->m, "library/lists.pl");
+	module_load_file(pl->m, "library/dcgs.pl");
 	module_load_file(pl->m, "library/http.pl");
 	module_load_file(pl->m, "library/atts.pl");
-	module_load_file(pl->m, "library/dcgs.pl");
 #endif
 
 	pl->m->prebuilt = 0;
