@@ -104,7 +104,10 @@ testing framework.
 Special thanks to [Markus Triska](https://github.com/triska) for
 driving the use of packed UTF-8 strings for character-lists. For the
 idea of mmap()-ing files as strings. For his rigorous approach to types
-and for bug-checking.
+and for bug-checking. Also for use of his format_//2 library.
+
+Special thanks to [Jos De Roo](https://github.com/josd) for his testing
+against some classic Prolog examples.
 
 
 Strings
