@@ -6766,30 +6766,33 @@ static int fn_bwrite_2(query *q)
 	return 1;
 }
 
-static int fn_read_term_from_chars_3(query *q)
+static int fn_read_term_from_chars_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,any);
-	GET_NEXT_ARG(p3,any);
+	GET_FIRST_ARG(p_chars,any);
+	GET_NEXT_ARG(p_term,any);
 	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
-	const char *p = GET_STR(p1);
-	char *src = malloc(strlen(p)+10);
-	sprintf(src, "%s", p);
+	const char *p = GET_STR(p_chars);
+	size_t len = LEN_STR(p_chars);
+	char *src = malloc(len+10);
+	memcpy(src, p, len);
+	src[len] = '\0';
 
 	if (src[strlen(src)-1] != '.')
 		strcat(src, ".");
 
-	int ok = do_read_term(q, str, p2, p2_ctx, p3, p3_ctx, src);
+	cell tmp;
+	make_literal(&tmp, g_nil_s);
+	int ok = do_read_term(q, str, p_term, p_term_ctx, &tmp, q->st.curr_frame, src);
 	free(src);
 	return ok;
 }
 
 static int fn_write_term_to_chars_3(query *q)
 {
-	GET_FIRST_ARG(p_chars,any);
-	GET_NEXT_ARG(p_term,any);
-	GET_NEXT_ARG(p_opts,any);
+	GET_FIRST_ARG(p_term,any);
+	GET_NEXT_ARG(p_opts,list_or_nil);
+	GET_NEXT_ARG(p_chars,any);
 
 	char *dst = write_term_to_strbuf(q, p_term, p_term_ctx, 1);
 	cell tmp = make_string(dst, strlen(dst));
@@ -9478,8 +9481,8 @@ static const struct builtins g_other_funcs[] =
 	{"working_directory", 2, fn_working_directory_2, "-string,+string"},
 	{"chdir", 1, fn_chdir_1, "+string"},
 	{"name", 2, fn_iso_atom_codes_2, "?string,?list"},
-	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+string,-term,+list"},
-	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "-string,+term,+list"},
+	{"read_term_from_chars", 2, fn_read_term_from_chars_2, "+chars,-term"},
+	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "+term,+list,?chars"},
 	{"base64", 2, fn_base64_2, "?string,?string"},
 	{"urlenc", 2, fn_urlenc_2, "?string,?string"},
 	{"string_lower", 2, fn_string_lower_2, "?string,?string"},
