@@ -366,8 +366,6 @@ struct parser_ {
 	unsigned is_op;
 	unsigned skip:1;
 	unsigned command:1;
-	unsigned in_dcg:1;
-	unsigned dcg_passthru:1;
 };
 
 struct module_ {

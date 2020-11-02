@@ -1588,8 +1588,6 @@ int parser_attach(parser *p, int start_idx)
 
 static void parser_dcg_rewrite(parser *p)
 {
-	p->in_dcg = 0;
-
 	if (!is_literal(p->t->cells))
 		return;
 
@@ -1600,7 +1598,6 @@ static void parser_dcg_rewrite(parser *p)
 	char *dst = write_term_to_strbuf(q, p->t->cells, 0, -1);
 	char *src = malloc(strlen(dst)+256);
 	sprintf(src, "dcg_translate((%s),_TermOut).", dst);
-	//printf("*** %s\n", src);
 	free(dst);
 
 	// Being conservative here and using temp parser/query objects...
@@ -2353,16 +2350,6 @@ int parser_tokenize(parser *p, int args, int consing)
 			continue;
 		}
 
-		if (p->in_dcg && !p->quoted && !strcmp(p->token, "|") && !p->dcg_passthru)
-			strcpy(p->token, ";");
-		else if (p->in_dcg && !p->quoted && !strcmp(p->token, "{") && !p->dcg_passthru++)
-			;
-		else if (p->in_dcg && !p->quoted && !strcmp(p->token, "}") && !--p->dcg_passthru)
-			{}
-
-		if (!p->depth && !p->in_dcg && !p->quoted && !strcmp(p->token, "-->"))
-			p->in_dcg = 1;
-
 		if (!p->quoted && !strcmp(p->token, "[")) {
 			save_idx = p->t->cidx;
 			cell *c = make_literal(p, g_dot_s);
@@ -2542,9 +2529,6 @@ int parser_tokenize(parser *p, int args, int consing)
 		c->val_type = p->val_type;
 		c->flags = (uint16_t)optype;
 		c->precedence = precedence;
-
-		if (p->dcg_passthru)
-			c->flags |= FLAG_PASS_THRU;
 
 		if (p->val_type == TYPE_INTEGER) {
 			const char *src = p->token;
