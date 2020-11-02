@@ -1067,6 +1067,12 @@ static int fn_iso_number_chars_2(query *q)
 
 		if (*end) {
 			double f = strtod(tmpbuf, &end);
+
+			if (*end) {
+				throw_error(q, p2, "syntax_error", "number");
+				return 0;
+			}
+
 			make_float(&tmp, f);
 		} else
 			make_int(&tmp, val);
@@ -1129,6 +1135,12 @@ static int fn_iso_number_codes_2(query *q)
 
 		if (*end) {
 			double f = strtod(tmpbuf, &end);
+
+			if (*end) {
+				throw_error(q, p2, "syntax_error", "number");
+				return 0;
+			}
+
 			make_float(&tmp, f);
 		} else
 			make_int(&tmp, val);
