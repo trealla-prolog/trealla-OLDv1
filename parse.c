@@ -3041,6 +3041,41 @@ module *create_module(const char *name)
 		"phrase(P2, Ms, []),"								\
 		"close(Str).");
 
+	make_rule(m, "phrase(GRBody, S0) :-" \
+		"phrase(GRBody, S0, [])." \
+
+	"phrase(GRBody, S0, S) :-" \
+	"	(  var(GRBody) -> throw(error(instantiation_error, phrase/3))" \
+	"	;  dcg_constr(GRBody) -> phrase_(GRBody, S0, S)" \
+	"	;  functor(GRBody, _, _) -> call(GRBody, S0, S)" \
+	"	;  throw(error(type_error(callable, GRBody), phrase/3))" \
+	"	)." \
+
+	"phrase_([], S, S)." \
+	"phrase_(!, S, S)." \
+	"phrase_((A, B), S0, S) :-" \
+	"	phrase(A, S0, S1), phrase(B, S1, S)." \
+	"phrase_((A -> B ; C), S0, S) :-" \
+	"	!," \
+	"	(  phrase(A, S0, S1) ->" \
+	"	   phrase(B, S1, S)" \
+	"	;  phrase(C, S0, S)" \
+	"	)." \
+	"phrase_((A ; B), S0, S) :-" \
+	"	(  phrase(A, S0, S) ; phrase(B, S0, S)  )." \
+	"phrase_((A | B), S0, S) :-" \
+	"	(  phrase(A, S0, S) ; phrase(B, S0, S)  )." \
+	"phrase_({G}, S0, S) :-" \
+	"	(  call(G), S0 = S  )." \
+	"phrase_(call(G), S0, S) :-" \
+	"	call(G, S0, S)." \
+	"phrase_((A -> B), S0, S) :-" \
+	"	phrase((A -> B ; fail), S0, S)." \
+	"phrase_(phrase(NonTerminal), S0, S) :-" \
+	"	phrase(NonTerminal, S0, S)." \
+	"phrase_([T|Ts], S0, S) :-" \
+	"	append([T|Ts], S, S0).");
+
 	// This is an approximation... it needs a catcher
 
 	make_rule(m, "setup_call_cleanup(A,G,B) :- A, !, (G -> true ; (B, !, fail)).");

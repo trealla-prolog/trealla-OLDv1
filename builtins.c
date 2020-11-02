@@ -8961,6 +8961,7 @@ static int fn_call_nth_2(query *q)
 	return 1;
 }
 
+#if 0
 static int fn_call_dcg_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -8968,6 +8969,9 @@ static int fn_call_dcg_3(query *q)
 	GET_NEXT_ARG(p3,any);
 
 	if (is_list_or_nil(p1))
+		return unify(q, p1, p1_ctx, p2, p2_ctx);
+
+	if (is_literal(p1) && (p1->val_off == g_cut_s))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
 	if (is_structure(p1) && (p1->val_off == g_braces_s)) {
@@ -8992,6 +8996,7 @@ static int fn_phrase_3(query *q)
 	GET_NEXT_ARG(p3,list_or_nil_or_var);
 	return fn_call_dcg_3(q);
 }
+#endif
 
 static int do_length(query *q)
 {
@@ -9456,8 +9461,10 @@ static const struct builtins g_iso_funcs[] =
 	{"time", 1, fn_time_1, NULL},
 	{"trace", 0, fn_trace_0, NULL},
 
+#if 0
 	{"phrase", 3, fn_phrase_3, NULL},
 	{"call_dcg", 3, fn_call_dcg_3, NULL},
+#endif
 
 	{0}
 };
