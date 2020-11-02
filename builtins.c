@@ -6772,11 +6772,37 @@ static int fn_read_term_from_chars_2(query *q)
 	GET_NEXT_ARG(p_term,any);
 	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
-	const char *p = GET_STR(p_chars);
-	size_t len = LEN_STR(p_chars);
-	char *src = malloc(len+10);
-	memcpy(src, p, len);
-	src[len] = '\0';
+
+	char *src;
+	size_t len;
+
+	if (is_cstring(p_chars)) {
+		len = LEN_STR(p_chars);
+		src = malloc(len+1);
+		memcpy(src, GET_STR(p_chars), len);
+		src[len] = '\0';
+	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx)) > 0) {
+		src = malloc(len+1);
+		char *dst = src;
+
+		while (is_list(p_chars)) {
+			cell *h = LIST_HEAD(p_chars);
+			h = deref(q, h, p_chars_ctx);
+			const char *p = GET_STR(h);
+
+			int ch = peek_char_utf8(p);
+			dst += put_char_utf8(dst, ch);
+
+			p_chars = LIST_TAIL(p_chars);
+			p_chars = deref(q, p_chars, p_chars_ctx);
+			p_chars_ctx = q->latest_ctx;
+		}
+
+		*dst = '\0';
+	} else {
+		throw_error(q, p_chars, "type_error", "chars");
+		return 0;
+	}
 
 	if (src[strlen(src)-1] != '.')
 		strcat(src, ".");
@@ -6784,6 +6810,53 @@ static int fn_read_term_from_chars_2(query *q)
 	cell tmp;
 	make_literal(&tmp, g_nil_s);
 	int ok = do_read_term(q, str, p_term, p_term_ctx, &tmp, q->st.curr_frame, src);
+	free(src);
+	return ok;
+}
+
+static int fn_read_term_from_chars_3(query *q)
+{
+	GET_FIRST_ARG(p_chars,any);
+	GET_NEXT_ARG(p_opts,any);
+	GET_NEXT_ARG(p_term,any);
+	int n = get_named_stream("user_input");
+	stream *str = &g_streams[n];
+
+	char *src;
+	size_t len;
+
+	if (is_cstring(p_chars)) {
+		len = LEN_STR(p_chars);
+		src = malloc(len+1);
+		memcpy(src, GET_STR(p_chars), len);
+		src[len] = '\0';
+	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx)) > 0) {
+		src = malloc(len+1);
+		char *dst = src;
+
+		while (is_list(p_chars)) {
+			cell *h = LIST_HEAD(p_chars);
+			h = deref(q, h, p_chars_ctx);
+			const char *p = GET_STR(h);
+
+			int ch = peek_char_utf8(p);
+			dst += put_char_utf8(dst, ch);
+
+			p_chars = LIST_TAIL(p_chars);
+			p_chars = deref(q, p_chars, p_chars_ctx);
+			p_chars_ctx = q->latest_ctx;
+		}
+
+		*dst = '\0';
+	} else {
+		throw_error(q, p_chars, "type_error", "chars");
+		return 0;
+	}
+
+	if (src[strlen(src)-1] != '.')
+		strcat(src, ".");
+
+	int ok = do_read_term(q, str, p_term, p_term_ctx, p_opts, p_opts_ctx, src);
 	free(src);
 	return ok;
 }
@@ -9482,6 +9555,7 @@ static const struct builtins g_other_funcs[] =
 	{"chdir", 1, fn_chdir_1, "+string"},
 	{"name", 2, fn_iso_atom_codes_2, "?string,?list"},
 	{"read_term_from_chars", 2, fn_read_term_from_chars_2, "+chars,-term"},
+	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,+-term"},
 	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "+term,+list,?chars"},
 	{"base64", 2, fn_base64_2, "?string,?string"},
 	{"urlenc", 2, fn_urlenc_2, "?string,?string"},

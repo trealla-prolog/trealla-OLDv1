@@ -157,8 +157,9 @@ GNU-Prolog & SWI-Prolog
 Others
 ======
 
-	read_term_from_chars/3
-	write_term_to_chars/3
+	read_term_from_chars/2	# read_term_from_chars(+chars,-term)
+	read_term_from_chars/3	# read_term_from_chars(+chars,+opts,-term)
+	write_term_to_chars/3	# write_term_to_chars(+term,+opts,-chars)
 	chars_base64/3			# currently options are ignored
 	chars_urlenc/3			# currently options are ignored
 	hex_chars/2             # as number_chars, but in hex
