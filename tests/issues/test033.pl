@@ -1,4 +1,5 @@
 :-initialization(main).
+:- use_module(library(dcgs)).
 
 as --> [].
 as --> [a], as.

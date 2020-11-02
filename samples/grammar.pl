@@ -1,6 +1,6 @@
-% A grammar in DCG
+:- use_module(library(dcgs)).
 
-%%%%%%%%%%%%%%%%% Grammar %%%%%%%%%%%%%%%%%%%
+% A grammar in DCG
 
 sentence --> np, vp.
 np --> det, noun.

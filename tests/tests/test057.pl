@@ -1,6 +1,8 @@
-% A blocks grammar in DCG
-
 :-initialization(main).
+
+:- use_module(library(dcgs)).
+
+% A blocks grammar in DCG
 
 s --> vp.
 s --> qest.
