@@ -7131,22 +7131,23 @@ static int fn_srandom_1(query *q)
 
 static int fn_random_1(query *q)
 {
-	GET_FIRST_ARG(p1,integer_or_var);
+	GET_FIRST_ARG(p1_tmp,any);
+	cell p1 = calc(q, p1_tmp);
 
-	if (is_variable(p1)) {
+	if (is_variable(&p1)) {
 		cell tmp;
 		make_float(&tmp, ((double)random())/UINT32_MAX);
-		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		set_var(q, &p1, p1_tmp_ctx, &tmp, q->st.curr_frame);
 		return 1;
 	}
 
-	if (p1->val_num < 1) {
-		throw_error(q, p1, "domain_error", "positive_integer");
+	if (p1.val_num < 1) {
+		throw_error(q, &p1, "domain_error", "positive_integer");
 		return 0;
 	}
 
 	q->accum.val_type = TYPE_INTEGER;
-	q->accum.val_num = llabs((long long)(random()%p1->val_num));
+	q->accum.val_num = llabs((long long)(random()%p1.val_num));
 	return 1;
 }
 
