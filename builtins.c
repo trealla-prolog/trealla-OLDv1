@@ -7148,6 +7148,7 @@ static int fn_random_1(query *q)
 
 	q->accum.val_type = TYPE_INTEGER;
 	q->accum.val_num = llabs((long long)(random()%p1.val_num));
+	q->accum.val_den = 1;
 	return 1;
 }
 
@@ -7155,6 +7156,7 @@ static int fn_rand_0(query *q)
 {
 	q->accum.val_type = TYPE_INTEGER;
 	q->accum.val_num = random()%RAND_MAX;
+	q->accum.val_den = 1;
 	return 1;
 }
 
