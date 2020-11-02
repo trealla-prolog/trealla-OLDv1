@@ -71,8 +71,8 @@
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 :- module(format, [format_//2,
-                   xformat/2,
-                   xformat/3,
+                   format/2,
+                   format/3,
                    portray_clause/1,
                    portray_clause/2,
                    xlisting/1
@@ -371,11 +371,11 @@ digits(uppercase, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ").
    Impure I/O, implemented as a small wrapper over format_//2.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-xformat(Fs, Args) :-
+format(Fs, Args) :-
         current_output(Stream),
-        xformat(Stream, Fs, Args).
+        format(Stream, Fs, Args).
 
-xformat(Stream, Fs, Args) :-
+format(Stream, Fs, Args) :-
         phrase(format_(Fs, Args), Cs),
         % we use a specialised internal predicate that uses only a
         % single "write" operation for efficiency. It is equivalent to
@@ -462,7 +462,7 @@ portray_clause(Term) :-
 
 portray_clause(Stream, Term) :-
         phrase(portray_clause_(Term), Ls),
-        xformat(Stream, "~s", [Ls]).
+        format(Stream, "~s", [Ls]).
 
 portray_clause_(Term) -->
         { unique_variable_names(Term, VNs) },
