@@ -566,7 +566,7 @@ a :-
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-listing(PI) :-
+xlisting(PI) :-
         nonvar(PI),
         (   PI = Name/Arity0 ->
             Arity = Arity0
