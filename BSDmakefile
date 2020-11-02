@@ -20,7 +20,8 @@ OBJECTS = tpl.o history.o builtins.o library.o \
 	skiplist.o base64.o network.o utf8.o
 
 .ifndef NOLDLIBS
-OBJECTS += lists.o dict.o apply.o http.o atts.o error.o dcgs.o
+OBJECTS += lists.o dict.o apply.o http.o atts.o \
+	error.o dcgs.o format.o
 CFLAGS += -DUSE_LDLIBS=1
 .else
 CFLAGS += -DUSE_LDLIBS=0
@@ -66,6 +67,9 @@ dict.o: library/dict.pl
 
 dcgs.o: library/dcgs.pl
 	$(LD) -m elf_x86_64 -r -b binary -o dcgs.o library/dcgs.pl
+
+format.o: library/format.pl
+	$(LD) -m elf_x86_64 -r -b binary -o format.o library/format.pl
 
 lists.o: library/lists.pl
 	$(LD) -m elf_x86_64 -r -b binary -o lists.o library/lists.pl

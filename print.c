@@ -415,7 +415,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		if (c->arity && !strcmp(src, "{}")) braces = 1;
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
-		if (q->quoted && get_op(q->m, GET_STR(c), NULL, NULL, 0))
+		if (q->quoted && get_op(q->m, src, NULL, NULL, 0) && strcmp(src, "|"))
 			parens = 1;
 
 		if (parens)

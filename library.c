@@ -15,6 +15,8 @@ extern uint8_t _binary_library_error_pl_start[];
 extern uint8_t _binary_library_error_pl_end[];
 extern uint8_t _binary_library_dcgs_pl_start[];
 extern uint8_t _binary_library_dcgs_pl_end[];
+extern uint8_t _binary_library_format_pl_start[];
+extern uint8_t _binary_library_format_pl_end[];
 #endif
 
 library g_libs[] = {
@@ -26,6 +28,7 @@ library g_libs[] = {
      {"atts", _binary_library_atts_pl_start, _binary_library_atts_pl_end},
      {"error", _binary_library_error_pl_start, _binary_library_error_pl_end},
      {"dcgs", _binary_library_dcgs_pl_start, _binary_library_dcgs_pl_end},
+     {"format", _binary_library_format_pl_start, _binary_library_format_pl_end},
 #endif
      {0}
 };

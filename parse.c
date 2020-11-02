@@ -2456,7 +2456,7 @@ int parser_tokenize(parser *p, int args, int consing)
 			continue;
 		}
 
-		if (!p->quoted && consing && !strcmp(p->token, "|")) {
+		if (!p->was_quoted && consing && !strcmp(p->token, "|")) {
 			consing = 0;
 			continue;
 		}
@@ -3251,7 +3251,7 @@ prolog *pl_create()
 #if USE_LDLIBS
 	for (library *lib = g_libs; lib->name; lib++) {
 		if (!strcmp(lib->name, "apply") || !strcmp(lib->name, "lists") ||
-			!strcmp(lib->name, "dcgs") ||
+			!strcmp(lib->name, "dcgs") || !strcmp(lib->name, "format") ||
 			!strcmp(lib->name, "http") || !strcmp(lib->name, "atts") ) {
 			size_t len = lib->end-lib->start;
 			char *src = malloc(len+1);
@@ -3264,9 +3264,10 @@ prolog *pl_create()
 #else
 	module_load_file(pl->m, "library/apply.pl");
 	module_load_file(pl->m, "library/lists.pl");
-	module_load_file(pl->m, "library/dcgs.pl");
 	module_load_file(pl->m, "library/http.pl");
 	module_load_file(pl->m, "library/atts.pl");
+	module_load_file(pl->m, "library/dcgs.pl");
+	module_load_file(pl->m, "library/format.pl");
 #endif
 
 	pl->m->prebuilt = 0;
