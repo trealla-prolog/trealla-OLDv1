@@ -4,6 +4,8 @@
 	    list_bench_results/2	% +File, +Id
 	  ]).
 
+:- use_module(library(format)).
+
 %:- meta_predicate do_n(+, 0, -).
 
 %%	bench_peirera is det.
