@@ -32,7 +32,7 @@ read_chunks(S, Tmp, Data) :-
 read_chunks(_, Data, Data).
 
 read_body(S, Hdrs, Data) :-
-	dict:get(Hdrs, 'content-length', V, _),
+	dict:get(Hdrs, "content-length", V, _),
 	number_chars(Len, V),
 	bread(S, Len, Data).
 
@@ -59,7 +59,7 @@ http_open(UrlList, S, Opts) :-
 	read_response(S, Code),
 	findall(Hdr, read_header(S, Hdr), Hdrs),
 	append(Host, Path, Url),
-	dict:get(Hdrs, 'location', Location, Url),
+	dict:get(Hdrs, "location", Location, Url),
 	ignore(memberchk(status_code(Code), OptList)),
 	ignore(memberchk(headers(Hdrs), OptList)),
 	ignore(memberchk(final_url(Location), OptList)).
@@ -80,7 +80,7 @@ process(Url, S, Opts) :-
 		(Maj = 1, Min = 1)),
 	client(Url, Host, Path, S, OptList),
 	string_upper(Method, UMethod),
-	(memberchk(header('content-type', Ct), OptList) ->
+	(memberchk(header("content-type", Ct), OptList) ->
 		legacy_format(atom(Ctype), "Content-Type: ~w\r\n",[Ct]) ;
 		Ctype = '' ),
 	(nonvar(PostData) ->
@@ -99,14 +99,14 @@ http_get(Url, Data, Opts) :-
 	Opts2=[headers2(Hdrs)|Opts],
 	Opts3=[status_code2(Code)|Opts2],
 	process(Url, S, Opts3),
-	dict:get(Hdrs, 'transfer-encoding', TE, ''),
+	dict:get(Hdrs, "transfer-encoding", TE, ''),
 	( TE == "chunked" ->
 		read_chunks(S, '', Body) ;
 		read_body(S, Hdrs, Body)
 	),
 	close(S),
 	(memberchk(Code, [301,302]) ->
-		(dict:get(Hdrs, 'location', Loc, ''),
+		(dict:get(Hdrs, "location", Loc, ''),
 		http_get(Loc, Data, Opts))
 	;
 		(Data=Body,
