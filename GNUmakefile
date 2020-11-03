@@ -26,7 +26,7 @@ OBJECTS = tpl.o history.o builtins.o library.o \
 
 ifndef NOLDLIBS
 OBJECTS += lists.o dict.o apply.o http.o atts.o \
-	error.o dcgs.o format.o
+	error.o dcgs.o format.o charsio.o
 CFLAGS += -DUSE_LDLIBS=1
 else
 CFLAGS += -DUSE_LDLIBS=0
@@ -86,6 +86,9 @@ dcgs.o: library/dcgs.pl
 
 format.o: library/format.pl
 	$(LD) $(OSFLAG) -r -b binary -o format.o library/format.pl
+
+charsio.o: library/charsio.pl
+	$(LD) $(OSFLAG) -r -b binary -o charsio.o library/charsio.pl
 
 lists.o: library/lists.pl
 	$(LD) $(OSFLAG) -r -b binary -o lists.o library/lists.pl

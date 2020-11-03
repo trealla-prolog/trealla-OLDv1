@@ -3251,8 +3251,11 @@ prolog *pl_create()
 #if USE_LDLIBS
 	for (library *lib = g_libs; lib->name; lib++) {
 		if (!strcmp(lib->name, "apply") ||
-			//!strcmp(lib->name, "dcgs") || !strcmp(lib->name, "format") ||
-			//!strcmp(lib->name, "http") || !strcmp(lib->name, "atts") ||
+			//!strcmp(lib->name, "dcgs") ||
+			//!strcmp(lib->name, "charsio") ||
+			//!strcmp(lib->name, "format") ||
+			//!strcmp(lib->name, "http") ||
+			//!strcmp(lib->name, "atts") ||
 			!strcmp(lib->name, "lists")) {
 			size_t len = lib->end-lib->start;
 			char *src = malloc(len+1);
@@ -3265,6 +3268,7 @@ prolog *pl_create()
 #else
 	module_load_file(pl->m, "library/apply.pl");
 	//module_load_file(pl->m, "library/dcgs.pl");
+	//module_load_file(pl->m, "library/charsio.pl");
 	//module_load_file(pl->m, "library/format.pl");
 	//module_load_file(pl->m, "library/http.pl");
 	//module_load_file(pl->m, "library/atts.pl");
