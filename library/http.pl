@@ -80,7 +80,7 @@ process(Url, S, Opts) :-
 		(Maj = 1, Min = 1)),
 	client(Url, Host, Path, S, OptList),
 	string_upper(Method, UMethod),
-	(memberchk(header('content_type', Ct), OptList) ->
+	(memberchk(header('content-type', Ct), OptList) ->
 		legacy_format(atom(Ctype), "Content-Type: ~w\r\n",[Ct]) ;
 		Ctype = '' ),
 	(nonvar(PostData) ->
