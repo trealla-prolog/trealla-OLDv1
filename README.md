@@ -133,13 +133,14 @@ GNU-Prolog & SWI-Prolog
 	forall/2
 	msort/2
 	merge/3
-	format/[1-3]			# needs ':-use_module(library(format))'
+	format/[1-3]			# needs library(format)
 	predicate_property/2
 	numbervars/[1,3-4]
 	e/0
 	sleep/1
 	name/2
 	tab/[1,2]
+	absolute_file_name/[2,3] # no options supported
 
 	maplist/[1-4]			# autoloaded from library(apply)
 	foldl/[4-7]				# autoloaded from library(apply)

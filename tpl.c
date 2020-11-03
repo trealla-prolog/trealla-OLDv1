@@ -140,6 +140,7 @@ static int daemonize(int argc, char *argv[])
 int main(int ac, char *av[])
 {
 	const char *homedir;
+	g_argv0 = av[0];
 
 	if ((homedir = getenv("HOME")) == NULL)
 		homedir = ".";

@@ -7240,6 +7240,17 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 	return 1;
 }
 
+static int fn_absolute_file_name_3(query *q)
+{
+	GET_FIRST_ARG(p_abs,atom);
+	GET_NEXT_ARG(p_rel,variable);
+	char tmpbuf[PATH_MAX+1];
+	realpath(GET_STR(p_abs), tmpbuf);
+	cell tmp = make_cstring(q, tmpbuf);
+	set_var(q, p_rel, p_rel_ctx, &tmp, q->st.curr_frame);
+	return 1;
+}
+
 static int fn_consult_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
@@ -9514,6 +9525,7 @@ static const struct builtins g_iso_funcs[] =
 	{"listing", 1, fn_listing_1, NULL},
 	{"time", 1, fn_time_1, NULL},
 	{"trace", 0, fn_trace_0, NULL},
+	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL},
 
 #if 0
 	{"phrase", 3, fn_phrase_3, NULL},

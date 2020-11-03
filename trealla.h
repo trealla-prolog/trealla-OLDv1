@@ -20,5 +20,5 @@ void set_stats(prolog*);
 void set_opt(prolog*, int onoff);
 
 extern int g_tpl_interrupt, g_ac, g_avc;
-extern char **g_av;
+extern char **g_av, *g_argv0;
 extern const char *g_tpl_lib;
