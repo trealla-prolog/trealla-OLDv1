@@ -100,7 +100,7 @@ handle(C,'GET','/',Ver,Hdrs) :-
 	format(C, "<html><body><h1>Home</h1><h2>~w</h2></body></html>\n",[Hdrs]).
 handle(C,_,_,Ver,_) :-
 	format(C,"HTTP/~w 500 Server Error\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n",[Ver]),
-	bwrite(C, "<html><body><h1>500 Server Error</h1></body></html>\n").
+	bwrite(C,"<html><body><h1>500 Server Error</h1></body></html>\n").
 
 test10c :-
 	fork,
@@ -218,7 +218,7 @@ task53(T) :- format("Task ~w done~n",[T]).
 test53 :- between(1,4,I), fork, task53(I).
 test53 :-
 	forall(await, (recv(Msg), format("Got: ~w~n",[Msg]))),
-	format("Finished~n").
+	writeln('Finished').
 
 geturl(Url) :-
 	http_get(Url,_Data,[status_code(Code),final_url(Location)]), !,
