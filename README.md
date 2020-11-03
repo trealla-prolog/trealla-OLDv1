@@ -220,12 +220,6 @@ Others
 	clause/3
 	erase/1
 
-	http_get/3				# autoloaded from library(http)
-	http_post/4				# autoloaded from library(http)
-	http_put/4				# autoloaded from library(http)
-	http_delete/3			# autoloaded from library(http)
-	http_open/3				# autoloaded from library(http)
-
 	string_upper/2
 	string_lower/2
 
@@ -259,22 +253,10 @@ Note: consult/1 and load_files/2 support lists of files as args. Also
 support loading into modules eg. *consult(MOD:FILE-SPEC)*.
 
 
-A simple dictionary
-===================
-
-	:- use_module(library(dict)).
-
-	dict:set/4              # set(+dict,+name,+value,-dict)
-	dict:del/3              # del(+dict,+name,-dict)
-	dict:get/3              # get(+dict,+name,-value)
-	dict:get/4              # get(+dict,+name,-value,+default)
-	dict:lst/2              # lst(+dict,-values)
-
-
 Attributed variables		##NOT WORKING YET##
 ====================
 
-	:- use_module(library(atts)).	AUTOLOADED
+	:- use_module(library(atts)).
 
 Exporting...
 
@@ -291,6 +273,30 @@ Exporting...
 	get_atts(V, A)
 
 	attributed(V)
+
+
+A simple dictionary
+===================
+
+	:- use_module(library(dict)).
+
+	dict:set/4              # set(+dict,+name,+value,-dict)
+	dict:del/3              # del(+dict,+name,-dict)
+	dict:get/3              # get(+dict,+name,-value)
+	dict:get/4              # get(+dict,+name,-value,+default)
+	dict:lst/2              # lst(+dict,-values)
+
+
+HTTP 1.1
+========
+
+	:- use_module(library(http)).
+
+	http_get/3
+	http_post/4
+	http_put/4
+	http_delete/3
+	http_open/3
 
 
 Networking					##EXPERIMENTAL##
