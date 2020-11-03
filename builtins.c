@@ -6107,16 +6107,26 @@ static int fn_split_4(query *q)
 	GET_NEXT_ARG(p3,any);
 	GET_NEXT_ARG(p4,any);
 
-	if (is_nil(p1)) {
-		throw_error(q, p1, "type_error", "atom");
-		return 0;
+	if (is_nil(p1) || !strcmp(GET_STR(p1), "")) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+
+		if (!unify(q, p3, p3_ctx, &tmp, q->st.curr_frame))
+			return 0;
+
+		return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	}
 
 	const char *start = GET_STR(p1), *ptr;
 	int ch = peek_char_utf8(GET_STR(p2));
 
 	if ((ptr = strchr_utf8(start, ch)) != NULL) {
-		cell tmp = make_string(start, ptr-start);
+		cell tmp;
+
+		if (ptr != start)
+			tmp = make_string(start, ptr-start);
+		else
+			make_literal(&tmp, g_nil_s);
 
 		if (!unify(q, p3, p3_ctx, &tmp, q->st.curr_frame))
 			return 0;
@@ -6126,7 +6136,11 @@ static int fn_split_4(query *q)
 		while (isspace(*ptr))
 			ptr++;
 
-		tmp = make_string(ptr, LEN_STR(p1)-(ptr-start));
+		if (*ptr)
+			tmp = make_string(ptr, LEN_STR(p1)-(ptr-start));
+		else
+			make_literal(&tmp, g_nil_s);
+
 		return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -6134,7 +6148,7 @@ static int fn_split_4(query *q)
 		return 0;
 
 	cell tmp;
-	make_literal(&tmp, g_empty_s);
+	make_literal(&tmp, g_nil_s);
 	return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -6607,7 +6621,13 @@ static int fn_getline_1(query *q)
 	if (line[strlen(line)-1] == '\r')
 		line[strlen(line)-1] = '\0';
 
-	cell tmp = make_string(line, strlen(line));
+	cell tmp;
+
+	if (strlen(line))
+		tmp = make_string(line, strlen(line));
+	else
+		make_literal(&tmp, g_nil_s);
+
 	free(line);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
@@ -6644,7 +6664,13 @@ static int fn_getline_2(query *q)
 	if (line[strlen(line)-1] == '\r')
 		line[strlen(line)-1] = '\0';
 
-	cell tmp = make_string(line, strlen(line));
+	cell tmp;
+
+	if (strlen(line))
+		tmp = make_string(line, strlen(line));
+	else
+		make_literal(&tmp, g_nil_s);
+
 	free(line);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
@@ -6730,7 +6756,13 @@ static int fn_bread_3(query *q)
 	cell tmp1;
 	make_int(&tmp1, str->data_len);
 	set_var(q, p1, p1_ctx, &tmp1, q->st.curr_frame);
-	cell tmp2 = make_string(str->data, str->data_len);
+	cell tmp2;
+
+	if (str->data_len)
+		tmp2 = make_string(str->data, str->data_len);
+	else
+		make_literal(&tmp2, g_nil_s);
+
 	set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	free(str->data);
 	str->data = NULL;
@@ -8439,8 +8471,13 @@ static int fn_replace_4(query *q)
 	}
 
 	*dst = '\0';
-	cell tmp = make_cstring(q, dstbuf);
-	tmp.flags |= FLAG_STRING;
+	cell tmp;
+
+	if (strlen(dstbuf))
+		tmp = make_string(dstbuf, strlen(dstbuf));
+	else
+		make_literal(&tmp, g_nil_s);
+
 	free(dstbuf);
 	set_var(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	return 1;

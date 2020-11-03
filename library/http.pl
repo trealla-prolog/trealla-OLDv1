@@ -14,7 +14,7 @@ read_response(S, Code) :-
 read_header(S, Pair) :-
 	getline(S, Line),
 	split(Line,':', K, V),
-	(K \= '' -> true ; (!, fail)),
+	(K \= [] -> true ; (!, fail)),
 	string_lower(K, K2),
 	Pair=K2:V.
 read_header(S, Pair) :-
