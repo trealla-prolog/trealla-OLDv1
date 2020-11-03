@@ -140,7 +140,6 @@ GNU-Prolog & SWI-Prolog
 	sleep/1
 	name/2
 	tab/[1,2]
-	absolute_file_name/[2,3] # no options supported
 
 	maplist/[1-4]			# autoloaded from library(apply)
 	foldl/[4-7]				# autoloaded from library(apply)
@@ -210,6 +209,7 @@ Others
 	make_directory/1
 	working_directory/2
 	chdir/1
+	absolute_file_name/[2,3] # no options supported
 
 	current_key/1
 	recorda/2-3
