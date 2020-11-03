@@ -7539,9 +7539,19 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 		free(tmpbuf);
 		throw_error(q, c, "type_error", "structure");
 		return 0;
+	} else if (is_structure(str) && !strcmp(GET_STR(str),"atom")) {
+		cell *c = deref(q, str+1, str_ctx);
+		cell tmp = make_cstring(q, tmpbuf);
+		set_var(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	} else if (is_structure(str)) {
 		cell *c = deref(q, str+1, str_ctx);
-		cell tmp = make_string(tmpbuf, strlen(tmpbuf));
+		cell tmp;
+
+		if (strlen(tmpbuf))
+			tmp = make_string(tmpbuf, strlen(tmpbuf));
+		else
+			make_literal(&tmp, g_nil_s);
+
 		set_var(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	} else if (is_stream(str)) {
 		int n = get_stream(q, str);
