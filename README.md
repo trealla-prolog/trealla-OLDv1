@@ -10,7 +10,8 @@ A compact, efficient Prolog interpreter with ISO compliant aspirations.
 	Atoms are UTF-8 of unlimited length
 	The default double-quoted representation is *chars* list
 	Full-term just-in-time indexing
-	DCG capability
+	DCG via library(dcgs)
+	format_//2 via library(format)
 	REPL with history
 	MIT licensed
 
@@ -132,16 +133,16 @@ GNU-Prolog & SWI-Prolog
 	forall/2
 	msort/2
 	merge/3
-	format/1-3
+	format/[1-3]			# needs ':-use_module(library(format))'
 	predicate_property/2
-	numbervars/1,3-4
+	numbervars/[1,3-4]
 	e/0
 	sleep/1
 	name/2
-	tab/1-2
+	tab/[1,2]
 
-	maplist/1-4				# autoloaded from library(apply)
-	foldl/4-7				# autoloaded from library(apply)
+	maplist/[1-4]			# autoloaded from library(apply)
+	foldl/[4-7]				# autoloaded from library(apply)
 
 	read_term_from_atom/3	# use read_term_from_chars/3 instead
 	write_term_to_atom/3	# use write_term_to_chars/3 instead
@@ -168,7 +169,6 @@ Others
 	hex_chars/2             # as number_chars, but in hex
 	octal_chars/2           # as number_chars, but in octal
 
-	format(atom(A),...)
 	setup_call_cleanup/3
 	findall/4
 	atomic_concat/3
@@ -293,14 +293,6 @@ Exporting...
 	attributed(V)
 
 
-DCG							##UNDER DEVELOPMENT##
-===
-
-	call_dcg/3
-	phrase/2-3
-	phrase_from_file/2-3
-
-
 Networking					##EXPERIMENTAL##
 ==========
 
@@ -348,13 +340,13 @@ in the form of light-weight coroutines that run until they yield control,
 either explicitly or implicitly (when waiting on input or a timer)...
 
 	fork/0                  # parent fails, child continues
-	spawn/1-n               # concurrent form of call/1-n
+	spawn/[1-n]             # concurrent form of call/1-n
 	yield/0                 # voluntarily yield control
 	wait/0                  # parent should wait for children to finish
 	await/0                 # parent should wait for a message
 	send/1                  # apend term to parent queue
 	recv/1                  # pop term from queue
-	spawnlist/1-n           # concurrent form of maplist/1-n
+	spawnlist/[1-n]         # concurrent form of maplist/1-n
 
 Note: *send/1*, *sleep/1* and *delay/1* do implied yields. As does *getline/2*,
 *bread/3*, *bwrite/2* and *accept/2*.
@@ -373,6 +365,7 @@ and artificially set at 4). Excess tasks will be scheduled as tasks finish.
 An example:
 
 ```prolog
+:-use_module(library(format))
 geturl(Url) :-
 	http_get(Url,_Data,[status_code(Code),final_url(Location)]),
 	format("Job [~w] ~w ==> ~w done~n",[Url,Code,Location]).

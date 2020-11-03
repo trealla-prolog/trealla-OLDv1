@@ -1,3 +1,5 @@
+:- use_module(library(format)).
+
 test1 :-
 	\+ \+ true,
 	writeln(ok1).
@@ -7,7 +9,7 @@ test1 :-
 task2 :- writeln('OK about to throw'), throw(error(p1,p2)).
 
 test2 :-
-	( catch(task2,E,(format('OK caught: ~w~n', [E]),fail)) ->
+	( catch(task2,E,(format("OK caught: ~w~n", [E]),fail)) ->
 		writeln('OOPS no error') ; writeln('OK was error')
 	),
 	writeln('OK done').
@@ -15,7 +17,7 @@ test2 :-
 task3 :- writeln('OK here').
 
 test3 :-
-	( catch(task3,E,(format('wrong, caught: ~w~n', [E]),fail)) ->
+	( catch(task3,E,(format("wrong, caught: ~w~n", [E]),fail)) ->
 		writeln('OK no error') ; writeln('OOPS was error')
 	),
 	writeln('OK done').
@@ -74,7 +76,7 @@ test9 :-
 
 task10(C) :-
 	getline(C,L),
-	format('GOT: ~w\n', [L]),
+	format("GOT: ~w\n", [L]),
 	task10(C).
 
 test10a :-
@@ -89,16 +91,16 @@ test10a :-
 test10b :-
 	client('localhost:8080',_,_,S,[]),
 	between(1,1000000,I),
-		(format(S,'[~w] Hello, world~n',[I]) ->
+		(format(S,"[~w] Hello, world~n",[I]) ->
 			delay(1) ; (writeln(disconnected), !)),
 		fail.
 
 handle(C,'GET','/',Ver,Hdrs) :-
-	format(C,'HTTP/~w 200 Ok\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n',[Ver]),
-	format(C, '<html><body><h1>Home</h1><h2>~w</h2></body></html>\n',[Hdrs]).
+	format(C,"HTTP/~w 200 Ok\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n",[Ver]),
+	format(C, "<html><body><h1>Home</h1><h2>~w</h2></body></html>\n",[Hdrs]).
 handle(C,_,_,Ver,_) :-
-	format(C,'HTTP/~w 500 Server Error\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n',[Ver]),
-	bwrite(C, '<html><body><h1>500 Server Error</h1></body></html>\n').
+	format(C,"HTTP/~w 500 Server Error\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n",[Ver]),
+	bwrite(C, "<html><body><h1>500 Server Error</h1></body></html>\n").
 
 test10c :-
 	fork,
@@ -128,7 +130,7 @@ test11a :-
 test11b :-
 	client('localhost:8080',_,_,S,[udp(true)]),
 	between(1,1000000,I),
-		format(S,'[~w] Hello, world~n',[I]),
+		format(S,"[~w] Hello, world~n",[I]),
 		delay(100),
 		fail.
 
@@ -193,7 +195,7 @@ test18b :- assertz(f18(123),_), clause(f18(_),_,_).
 
 task50(T) :-
 	between(1,1000000,_),
-		format('Task ... ~w',[T]), nl,
+		format("Task ... ~w",[T]), nl,
 		sleep(T),
 		fail.
 
@@ -211,12 +213,12 @@ test52 :- sys_list(L), sort(L,L2),
 	read_term_from_atom(S,S2,[]), write_term(S2,[]), nl.
 
 task53(T) :- between(1,10,_), R is random(1000), delay(R), send({T,R}), fail.
-task53(T) :- format('Task ~w done~n',[T]).
+task53(T) :- format("Task ~w done~n",[T]).
 
 test53 :- between(1,4,I), fork, task53(I).
 test53 :-
-	forall(await, (recv(Msg), format('Got: ~w~n',[Msg]))),
-	format('Finished~n').
+	forall(await, (recv(Msg), format("Got: ~w~n",[Msg]))),
+	format("Finished~n").
 
 geturl(Url) :-
 	http_get(Url,_Data,[status_code(Code),final_url(Location)]), !,

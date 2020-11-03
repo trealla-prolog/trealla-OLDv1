@@ -6571,9 +6571,9 @@ static int fn_client_5(query *q)
 	if (nonblock)
 		net_set_nonblocking(str);
 
-	cell tmp = make_cstring(q, hostname);
+	cell tmp = make_string(hostname, strlen(hostname));
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	tmp = make_cstring(q, path);
+	tmp = make_string(path, strlen(path));
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	cell *tmp2 = alloc_heap(q, 1);
 	make_int(tmp2, n);
@@ -7236,7 +7236,6 @@ static int fn_consult_1(query *q)
 	return 1;
 }
 
-#if 0
 static int format_integer(char *dst, int_t v, int grouping, int sep, int decimals)
 {
 	char tmpbuf1[256], tmpbuf2[256];
@@ -7506,7 +7505,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 		return 0;
 	} else if (is_structure(str)) {
 		cell *c = deref(q, str+1, str_ctx);
-		cell tmp = make_cstring(q, tmpbuf);
+		cell tmp = make_string(tmpbuf, strlen(tmpbuf));
 		set_var(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	} else if (is_stream(str)) {
 		int n = get_stream(q, str);
@@ -7552,7 +7551,6 @@ static int fn_format_3(query *q)
 	GET_NEXT_ARG(p2,list_or_nil);
 	return do_format(q, pstr, pstr_ctx, p1, !is_nil(p2)?p2:NULL, p2_ctx);
 }
-#endif
 
 #if USE_OPENSSL
 static int fn_sha1_2(query *q)
@@ -9492,10 +9490,8 @@ static const struct builtins g_other_funcs[] =
 	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars"},
 	{"ignore", 1, fn_ignore_1, "+callable"},
 
-#if 0
-	{"format", 2, fn_format_2, "+string,+list"},
-	{"format", 3, fn_format_3, "+stream,+string,+list"},
-#endif
+	{"legacy_format", 2, fn_format_2, "+string,+list"},
+	{"legacy_format", 3, fn_format_3, "+stream,+string,+list"},
 
 	{"findall", 4, fn_findall_4, NULL},
 	{"rdiv", 2, fn_rdiv_2, "+integer,+integer"},
