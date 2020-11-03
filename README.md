@@ -287,6 +287,23 @@ A simple dictionary
 	dict:lst/2              # lst(+dict,-values)
 
 
+Definite Clause Grammars
+========================
+
+	:- use_module(library(dcgs)).
+
+DCG rules are translated automatically if this module is included.
+
+
+Format
+======
+
+	:- use_module(library(format)).
+
+	format_//2
+	format[2,3]
+
+
 HTTP 1.1
 ========
 
