@@ -371,7 +371,9 @@ and artificially set at 4). Excess tasks will be scheduled as tasks finish.
 An example:
 
 ```prolog
-:-use_module(library(format))
+:-use_module(library(format)).
+:-use_module(library(http)).
+
 geturl(Url) :-
 	http_get(Url,_Data,[status_code(Code),final_url(Location)]),
 	format("Job [~w] ~w ==> ~w done~n",[Url,Code,Location]).
