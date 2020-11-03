@@ -258,8 +258,6 @@ Attributed variables		##NOT WORKING YET##
 
 	:- use_module(library(atts)).
 
-Exporting...
-
 	get_attr(V, Module, Value)
 	put_attr(V, Module, Value)
 	del_attr(V, Module)
