@@ -6607,8 +6607,7 @@ static int fn_getline_1(query *q)
 	if (line[strlen(line)-1] == '\r')
 		line[strlen(line)-1] = '\0';
 
-	cell tmp = make_cstring(q, line);
-	tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(line, strlen(line));
 	free(line);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
@@ -6645,8 +6644,7 @@ static int fn_getline_2(query *q)
 	if (line[strlen(line)-1] == '\r')
 		line[strlen(line)-1] = '\0';
 
-	cell tmp = make_cstring(q, line);
-	tmp.flags |= FLAG_STRING;
+	cell tmp = make_string(line, strlen(line));
 	free(line);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
