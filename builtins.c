@@ -7397,7 +7397,7 @@ static int fn_absolute_file_name_3(query *q)
 		}
 	}
 
-	cell tmp = make_cstring(q, tmpbuf);
+	cell tmp = make_string(tmpbuf, strlen(tmpbuf));
 	free(tmpbuf);
 	set_var(q, p_rel, p_rel_ctx, &tmp, q->st.curr_frame);
 	return 1;
