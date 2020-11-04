@@ -7245,9 +7245,9 @@ static int fn_absolute_file_name_3(query *q)
 	GET_FIRST_ARG(p_abs,atom);
 	GET_NEXT_ARG(p_rel,variable);
 	GET_NEXT_ARG(p_opts,list_or_nil);
-	char tmpbuf[PATH_MAX+1];
-	realpath(GET_STR(p_abs), tmpbuf);
+	char *tmpbuf = realpath(GET_STR(p_abs), NULL);
 	cell tmp = make_cstring(q, tmpbuf);
+	free(tmpbuf);
 	set_var(q, p_rel, p_rel_ctx, &tmp, q->st.curr_frame);
 	return 1;
 }
