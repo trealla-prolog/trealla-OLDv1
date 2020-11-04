@@ -7245,7 +7245,55 @@ static int fn_absolute_file_name_3(query *q)
 	GET_FIRST_ARG(p_abs,atom);
 	GET_NEXT_ARG(p_rel,variable);
 	GET_NEXT_ARG(p_opts,list_or_nil);
-	char *tmpbuf = realpath(GET_STR(p_abs), NULL);
+	int expand = 0;
+
+	while (is_list(p_opts)) {
+		cell *h = LIST_HEAD(p_opts);
+		h = deref(q, h, p_opts_ctx);
+
+		if (is_structure(h) && (h->arity == 1)) {
+			if (!strcmp(GET_STR(h), "expand")) {
+				if (is_literal(h+1)) {
+					if (!strcmp(GET_STR(h+1), "true"))
+						expand = 1;
+				}
+			}
+		}
+
+		p_opts = LIST_TAIL(p_opts);
+		p_opts = deref(q, p_opts, p_opts_ctx);
+		p_opts_ctx = q->latest_ctx;
+	}
+
+	char *tmpbuf = NULL;
+	const char *src = GET_STR(p_abs);
+
+	if (expand && (*src == '$')) {
+		char envbuf[256];
+		char *dst = envbuf;
+		src++;
+
+		while (*src && (*src != '/'))
+			*dst++ = *src++;
+
+		if (*src == '/')
+			src++;
+
+		*dst = '\0';
+		char *ptr = getenv(envbuf);
+		tmpbuf = malloc(strlen(src)+strlen(ptr)+1);
+		dst = tmpbuf;
+		memcpy(tmpbuf, ptr, strlen(ptr));
+		dst += strlen(ptr);
+		*dst++ = '/';
+		memcpy(dst, src, strlen(src));
+	} else {
+		if ((tmpbuf = realpath(src, NULL)) == NULL) {
+			throw_error(q, p_abs, "domain_error", "not_a_valid_filespec");
+			return 0;
+		}
+	}
+
 	cell tmp = make_cstring(q, tmpbuf);
 	free(tmpbuf);
 	set_var(q, p_rel, p_rel_ctx, &tmp, q->st.curr_frame);
