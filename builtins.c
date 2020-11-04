@@ -7273,7 +7273,7 @@ static int fn_absolute_file_name_3(query *q)
 		char *dst = envbuf;
 		src++;
 
-		while (*src && (*src != '/'))
+		while (*src && (*src != '/') && ((dst-envbuf-1) != sizeof(envbuf)))
 			*dst++ = *src++;
 
 		if (*src == '/')
