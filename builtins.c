@@ -7390,8 +7390,7 @@ static int fn_absolute_file_name_3(query *q)
 		dst += strlen(ptr);
 		*dst++ = '/';
 		memcpy(dst, src, strlen(src));
-	} else {
-		if ((tmpbuf = realpath(src, NULL)) == NULL) {
+	} else {		if ((tmpbuf = realpath(src, NULL)) == NULL) {
 			throw_error(q, p_abs, "domain_error", "not_a_valid_filespec");
 			return 0;
 		}
@@ -8087,7 +8086,7 @@ static int fn_working_directory_2(query *q)
 	char *oldpath = getcwd(tmpbuf, sizeof(tmpbuf));
 	snprintf(tmpbuf2, sizeof(tmpbuf2), "%s%s", oldpath, PATH_SEP);
 	oldpath = tmpbuf2;
-	cell tmp = make_cstring(q, oldpath);
+	cell tmp = make_string(oldpath, strlen(oldpath));
 
 	if (is_atom(p2)) {
 		const char *pathname = GET_STR(p2);
