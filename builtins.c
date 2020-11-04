@@ -8091,7 +8091,7 @@ static int fn_working_directory_2(query *q)
 	if (is_atom(p2)) {
 		const char *pathname = GET_STR(p2);
 
-		if (!chdir(pathname))
+		if (chdir(pathname))
 			return 0;
 	}
 
