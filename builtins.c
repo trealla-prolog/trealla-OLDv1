@@ -761,61 +761,6 @@ static int fn_iso_callable_1(query *q)
 	return 1;
 }
 
-static int fn_iso_current_rule_1(query *q)
-{
-	GET_FIRST_ARG(p1,structure);
-
-	if (strcmp(GET_STR(p1), "/")) {
-		throw_error(q, p1, "type_error", "predicate_indicator");
-		return 0;
-	}
-
-	cell *pf = deref(q, p1+1,p1_ctx);
-	cell *pa = deref(q, p1+2, p1_ctx);
-
-	if (!is_atom(pf)) {
-		throw_error(q, p1, "type_error", "atom");
-		return 0;
-	}
-
-	if (!is_integer(pa)) {
-		throw_error(q, p1, "type_error", "integer");
-		return 0;
-	}
-
-	const char *functor = GET_STR(pf);
-	unsigned arity = pa->val_num;
-	module *m = q->m;
-
-	if (strchr(functor, ':')) {
-		char tmpbuf1[256], tmpbuf2[256];
-		tmpbuf1[0] = tmpbuf2[0] = '\0';
-		sscanf(functor, "%255[^:]:%255s", tmpbuf1, tmpbuf2);
-		tmpbuf1[sizeof(tmpbuf1)-1] = tmpbuf2[sizeof(tmpbuf2)-1] = '\0';
-		m = find_module(tmpbuf1);
-	}
-
-	if (!m)
-		m = q->m;
-
-	module *tmp_m = NULL;
-
-	while (m) {
-		if (find_functor(m, functor, arity))
-			return 1;
-
-		if (!tmp_m)
-			m = tmp_m = g_modules;
-		else
-			m = m->next;
-	}
-
-	if (check_builtin(q->m, functor, arity))
-		return 1;
-
-	return 0;
-}
-
 static int fn_iso_char_code_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
@@ -5042,6 +4987,66 @@ static int fn_iso_functor_3(query *q)
 	return 1;
 }
 
+static int fn_iso_current_rule_1(query *q)
+{
+	GET_FIRST_ARG(p1,structure);
+	int add_two = 0;
+
+	if (!strcmp(GET_STR(p1), "/"))
+		;
+	else if (!strcmp(GET_STR(p1), "//"))
+		add_two = 2;
+	else {
+		throw_error(q, p1, "type_error", "predicate_indicator");
+		return 0;
+	}
+
+	cell *pf = deref(q, p1+1,p1_ctx);
+	cell *pa = deref(q, p1+2, p1_ctx);
+
+	if (!is_atom(pf)) {
+		throw_error(q, p1, "type_error", "atom");
+		return 0;
+	}
+
+	if (!is_integer(pa)) {
+		throw_error(q, p1, "type_error", "integer");
+		return 0;
+	}
+
+	const char *functor = GET_STR(pf);
+	unsigned arity = pa->val_num + add_two;
+	module *m = q->m;
+
+	if (strchr(functor, ':')) {
+		char tmpbuf1[256], tmpbuf2[256];
+		tmpbuf1[0] = tmpbuf2[0] = '\0';
+		sscanf(functor, "%255[^:]:%255s", tmpbuf1, tmpbuf2);
+		tmpbuf1[sizeof(tmpbuf1)-1] = tmpbuf2[sizeof(tmpbuf2)-1] = '\0';
+		m = find_module(tmpbuf1);
+	}
+
+	if (!m)
+		m = q->m;
+
+	module *tmp_m = NULL;
+
+	while (m) {
+		if (find_functor(m, functor, arity))
+			return 1;
+
+		if (!tmp_m)
+			m = tmp_m = g_modules;
+		else
+			m = m->next;
+	}
+
+	if (check_builtin(q->m, functor, arity))
+		return 1;
+
+	return 0;
+}
+
 static int fn_iso_current_predicate_1(query *q)
 {
 	GET_FIRST_ARG(p_pi,structure);
@@ -5065,7 +5070,9 @@ static int fn_iso_current_predicate_1(query *q)
 	}
 
 	const char *f = GET_STR(p_pi+1);
-	rule *h = find_functor(q->m, f, arity);
+	cell tmp_f = *(p_pi+1);
+	tmp_f.arity = arity;
+	rule *h = find_matching_rule(q->m, &tmp_f);
 
 	if (h)
 		return 1;
