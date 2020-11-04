@@ -88,8 +88,8 @@ Invocation without any goal presents the REPL.
 What's missing, problems?
 =========================
 
-	there may be missing or incomplete ISO predicates
-	missing directives?
+	current_predicate/1 is non-backtrackable
+	current_op/3 is non-backtrackable
 	database is immediate update view, fix
 	modules may need more work
 	environment limit is 32K vars per frame
