@@ -8102,9 +8102,9 @@ static int fn_working_directory_2(query *q)
 
 static int fn_chdir_1(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
-	const char *filename = GET_STR(p1);
-	return !chdir(filename);
+	GET_FIRST_ARG(p_path,atom);
+	const char *pathname = GET_STR(p_path);
+	return !chdir(pathname);
 }
 
 static int fn_edin_skip_1(query *q)
@@ -9682,7 +9682,6 @@ static const struct builtins g_iso_funcs[] =
 	{"listing", 1, fn_listing_1, NULL},
 	{"time", 1, fn_time_1, NULL},
 	{"trace", 0, fn_trace_0, NULL},
-	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL},
 
 #if 0
 	{"phrase", 3, fn_phrase_3, NULL},
@@ -9759,6 +9758,7 @@ static const struct builtins g_other_funcs[] =
 	{"exists_directory", 1, fn_exists_directory_1, "+string"},
 	{"make_directory", 1, fn_make_directory_1, "+string"},
 	{"working_directory", 2, fn_working_directory_2, "-string,+string"},
+	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL},
 	{"chdir", 1, fn_chdir_1, "+string"},
 	{"name", 2, fn_iso_atom_codes_2, "?string,?list"},
 	{"read_term_from_chars", 2, fn_read_term_from_chars_2, "+chars,-term"},
