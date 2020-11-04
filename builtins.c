@@ -5131,6 +5131,13 @@ static int fn_iso_current_op_3(query *q)
 	return 1;
 }
 
+static int fn_iso_acyclic_term_1(query *q)
+{
+	GET_FIRST_ARG(p_term,any);
+	write_term_to_buf(q, NULL, 0, p_term, p_term_ctx, 1, 0, 0);
+	return !q->cycle_error;
+}
+
 static int fn_iso_current_prolog_flag_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -9658,6 +9665,7 @@ static const struct builtins g_iso_funcs[] =
 	{"$bagof", 3, fn_iso_bagof_3, NULL},
 	{"current_predicate", 1, fn_iso_current_predicate_1, NULL},
 	{"current_op", 3, fn_iso_current_op_3, NULL},
+	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL},
 
 	{"use_module", 1, fn_use_module_1, NULL},
 	{"module", 1, fn_module_1, NULL},
