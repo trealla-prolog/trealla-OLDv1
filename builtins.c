@@ -8080,24 +8080,24 @@ static int fn_make_directory_1(query *q)
 
 static int fn_working_directory_2(query *q)
 {
-	GET_FIRST_ARG(p1,variable);
-	GET_NEXT_ARG(p2,atom_or_var);
+	GET_FIRST_ARG(p_old,variable);
+	GET_NEXT_ARG(p_new,atom_or_var);
 	char tmpbuf[PATH_MAX], tmpbuf2[PATH_MAX];
 	char *oldpath = getcwd(tmpbuf, sizeof(tmpbuf));
 	snprintf(tmpbuf2, sizeof(tmpbuf2), "%s%s", oldpath, PATH_SEP);
 	oldpath = tmpbuf2;
 	cell tmp = make_string(oldpath, strlen(oldpath));
 
-	if (is_atom(p2)) {
-		const char *pathname = GET_STR(p2);
+	if (is_atom(p_new)) {
+		const char *pathname = GET_STR(p_new);
 
 		if (chdir(pathname)) {
-			throw_error(q, p2, "existence_error", "no_such_path");
+			throw_error(q, p_new, "existence_error", "no_such_path");
 			return 0;
 		}
 	}
 
-	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	return unify(q, p_old, p_old_ctx, &tmp, q->st.curr_frame);
 }
 
 static int fn_chdir_1(query *q)
