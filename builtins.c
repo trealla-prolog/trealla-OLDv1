@@ -5042,6 +5042,46 @@ static int fn_iso_functor_3(query *q)
 	return 1;
 }
 
+static int fn_iso_current_predicate_1(query *q)
+{
+	GET_FIRST_ARG(p1,structure);
+	unsigned arity = 0;
+
+	if (!strcmp(GET_STR(p1), "/")) {
+		cell *tmp_p1 = p1 + 1;
+		tmp_p1 += tmp_p1->nbr_cells;
+
+		if (is_integer(tmp_p1))
+			arity = tmp_p1->val_num;
+	} else if (!strcmp(GET_STR(p1), "//")) {
+		cell *tmp_p1 = p1 + 1;
+		tmp_p1 += tmp_p1->nbr_cells;
+
+		if (is_integer(tmp_p1))
+			arity = p1->val_num + 2;
+	} else {
+		throw_error(q, p1, "domain_error", "not_predicate_indicator");
+		return 0;
+	}
+
+	const char *f = GET_STR(p1+1);
+	rule *h = find_functor(q->m, f, arity);
+
+	if (h)
+		return 1;
+
+	if (check_builtin(q->m, f, arity))
+		return 1;
+
+	return 0;
+}
+
+static int fn_iso_current_op_3(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	return 0;
+}
+
 static int fn_iso_current_prolog_flag_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -8556,12 +8596,13 @@ static int fn_replace_4(query *q)
 static int fn_predicate_property_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	GET_NEXT_ARG(p2,atom_or_var)
+	GET_NEXT_ARG(p2,atom_or_var);
+	const char *f = GET_STR(p1);
 	cell tmp;
 
-	rule *h = find_functor(q->m, GET_STR(p1), p1->arity);
+	rule *h = find_functor(q->m, f, p1->arity);
 
-	if (check_builtin(q->m, GET_STR(p1), p1->arity)) {
+	if (check_builtin(q->m, f, p1->arity)) {
 		make_literal(&tmp, find_in_pool("built_in"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return 1;
@@ -9566,6 +9607,8 @@ static const struct builtins g_iso_funcs[] =
 	{"op", 3, fn_iso_op_3, NULL},
 	{"findall", 3, fn_iso_findall_3, NULL},
 	{"$bagof", 3, fn_iso_bagof_3, NULL},
+	{"current_predicate", 1, fn_iso_current_predicate_1, NULL},
+	{"current_op", 3, fn_iso_current_op_3, NULL},
 
 	{"use_module", 1, fn_use_module_1, NULL},
 	{"module", 1, fn_module_1, NULL},
