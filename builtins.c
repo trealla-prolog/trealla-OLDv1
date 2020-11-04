@@ -5044,27 +5044,27 @@ static int fn_iso_functor_3(query *q)
 
 static int fn_iso_current_predicate_1(query *q)
 {
-	GET_FIRST_ARG(p1,structure);
-	unsigned arity = 0;
+	GET_FIRST_ARG(p_pi,structure);
+	unsigned arity = UINT_MAX;
 
-	if (!strcmp(GET_STR(p1), "/")) {
-		cell *tmp_p1 = p1 + 1;
-		tmp_p1 += tmp_p1->nbr_cells;
+	if (!strcmp(GET_STR(p_pi), "/")) {
+		cell *tmp_p_pi = p_pi + 1;
+		tmp_p_pi += tmp_p_pi->nbr_cells;
 
-		if (is_integer(tmp_p1))
-			arity = tmp_p1->val_num;
-	} else if (!strcmp(GET_STR(p1), "//")) {
-		cell *tmp_p1 = p1 + 1;
-		tmp_p1 += tmp_p1->nbr_cells;
+		if (is_integer(tmp_p_pi))
+			arity = tmp_p_pi->val_num;
+	} else if (!strcmp(GET_STR(p_pi), "//")) {
+		cell *tmp_p_pi = p_pi + 1;
+		tmp_p_pi += tmp_p_pi->nbr_cells;
 
-		if (is_integer(tmp_p1))
-			arity = p1->val_num + 2;
+		if (is_integer(tmp_p_pi))
+			arity = p_pi->val_num + 2;
 	} else {
-		throw_error(q, p1, "domain_error", "not_predicate_indicator");
+		throw_error(q, p_pi, "domain_error", "not_predicate_indicator");
 		return 0;
 	}
 
-	const char *f = GET_STR(p1+1);
+	const char *f = GET_STR(p_pi+1);
 	rule *h = find_functor(q->m, f, arity);
 
 	if (h)
@@ -5078,8 +5078,57 @@ static int fn_iso_current_predicate_1(query *q)
 
 static int fn_iso_current_op_3(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
-	return 0;
+	GET_FIRST_ARG(p_prec,integer_or_var);
+	GET_NEXT_ARG(p_type,atom_or_var);
+	GET_NEXT_ARG(p_name,atom);
+	const char *sname = GET_STR(p_name);
+	int prefix = 0;
+
+	if (is_atom(p_type)) {
+		const char *stype = GET_STR(p_type);
+		prefix =
+			!strcmp(stype, "fx") ||
+			!strcmp(stype, "fy") ||
+			!strcmp(stype, "xf") ||
+			!strcmp(stype, "yf");
+	}
+
+	unsigned type = 0;
+	int user_op = 0;
+	int prec = get_op(q->m, sname, &type, &user_op, prefix);
+
+	if (!prec)
+		return 0;
+
+	if (is_variable(p_type)) {
+		cell tmp;
+
+		if (type == OP_FX)
+			make_small(&tmp, "fx");
+		else if (type == OP_FY)
+			make_small(&tmp, "fy");
+		else if (type == OP_YF)
+			make_small(&tmp, "yf");
+		else if (type == OP_XF)
+			make_small(&tmp, "xf");
+		else if (type == OP_YFX)
+			make_small(&tmp, "yfx");
+		else if (type == OP_XFY)
+			make_small(&tmp, "xfy");
+
+		if (!unify(q, p_type, p_type_ctx, &tmp, q->st.curr_frame))
+			return 0;
+	}
+
+	if (is_variable(p_prec)) {
+		cell tmp;
+		make_int(&tmp, prec);
+
+		if (!unify(q, p_prec, p_prec_ctx, &tmp, q->st.curr_frame))
+			return 0;
+	}
+
+	return 1;
 }
 
 static int fn_iso_current_prolog_flag_2(query *q)
