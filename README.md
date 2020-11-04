@@ -88,8 +88,8 @@ Invocation without any goal presents the REPL.
 What's missing, problems?
 =========================
 
-	there may be missing or incomplete ISO predicates
-	missing directives?
+	current_predicate/1 is non-backtrackable
+	current_op/3 is non-backtrackable
 	database is immediate update view, fix
 	modules may need more work
 	environment limit is 32K vars per frame
@@ -133,7 +133,7 @@ GNU-Prolog & SWI-Prolog
 	forall/2
 	msort/2
 	merge/3
-	format/[1-3]			# needs ':-use_module(library(format))'
+	format/[1-3]			# needs library(format)
 	predicate_property/2
 	numbervars/[1,3-4]
 	e/0
@@ -209,6 +209,7 @@ Others
 	make_directory/1
 	working_directory/2
 	chdir/1
+	absolute_file_name/[2,3] # expand(Bool) option, default is false
 
 	current_key/1
 	recorda/2-3

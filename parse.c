@@ -51,7 +51,7 @@ static int g_tpl_count = 0;
 const char *g_tpl_lib = NULL;
 
 int g_ac = 0, g_avc = 1;
-char **g_av = NULL;
+char **g_av = NULL, *g_argv0 = NULL;
 
 static struct op_table g_ops[] =
 {
@@ -3096,6 +3096,7 @@ module *create_module(const char *name)
 	make_rule(m, "term_to_atom(T,S) :- write_term_to_chars(S,T,[]).");
 	make_rule(m, "write_term_to_atom(S,T,Opts) :- write_term_to_chars(S,T,Opts).");
 	make_rule(m, "read_term_from_atom(S,T,Opts) :- read_term_from_chars(S,T,Opts).");
+	make_rule(m, "absolute_file_name(R,A) :- absolute_file_name(R,A,[]).");
 
 	// Other...
 

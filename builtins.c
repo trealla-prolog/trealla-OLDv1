@@ -761,61 +761,6 @@ static int fn_iso_callable_1(query *q)
 	return 1;
 }
 
-static int fn_iso_current_rule_1(query *q)
-{
-	GET_FIRST_ARG(p1,structure);
-
-	if (strcmp(GET_STR(p1), "/")) {
-		throw_error(q, p1, "type_error", "predicate_indicator");
-		return 0;
-	}
-
-	cell *pf = deref(q, p1+1,p1_ctx);
-	cell *pa = deref(q, p1+2, p1_ctx);
-
-	if (!is_atom(pf)) {
-		throw_error(q, p1, "type_error", "atom");
-		return 0;
-	}
-
-	if (!is_integer(pa)) {
-		throw_error(q, p1, "type_error", "integer");
-		return 0;
-	}
-
-	const char *functor = GET_STR(pf);
-	unsigned arity = pa->val_num;
-	module *m = q->m;
-
-	if (strchr(functor, ':')) {
-		char tmpbuf1[256], tmpbuf2[256];
-		tmpbuf1[0] = tmpbuf2[0] = '\0';
-		sscanf(functor, "%255[^:]:%255s", tmpbuf1, tmpbuf2);
-		tmpbuf1[sizeof(tmpbuf1)-1] = tmpbuf2[sizeof(tmpbuf2)-1] = '\0';
-		m = find_module(tmpbuf1);
-	}
-
-	if (!m)
-		m = q->m;
-
-	module *tmp_m = NULL;
-
-	while (m) {
-		if (find_functor(m, functor, arity))
-			return 1;
-
-		if (!tmp_m)
-			m = tmp_m = g_modules;
-		else
-			m = m->next;
-	}
-
-	if (check_builtin(q->m, functor, arity))
-		return 1;
-
-	return 0;
-}
-
 static int fn_iso_char_code_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
@@ -5042,6 +4987,164 @@ static int fn_iso_functor_3(query *q)
 	return 1;
 }
 
+static int fn_iso_current_rule_1(query *q)
+{
+	GET_FIRST_ARG(p1,structure);
+	int add_two = 0;
+
+	if (!strcmp(GET_STR(p1), "/"))
+		;
+	else if (!strcmp(GET_STR(p1), "//"))
+		add_two = 2;
+	else {
+		throw_error(q, p1, "type_error", "predicate_indicator");
+		return 0;
+	}
+
+	cell *pf = deref(q, p1+1,p1_ctx);
+	cell *pa = deref(q, p1+2, p1_ctx);
+
+	if (!is_atom(pf)) {
+		throw_error(q, p1, "type_error", "atom");
+		return 0;
+	}
+
+	if (!is_integer(pa)) {
+		throw_error(q, p1, "type_error", "integer");
+		return 0;
+	}
+
+	const char *functor = GET_STR(pf);
+	unsigned arity = pa->val_num + add_two;
+	module *m = q->m;
+
+	if (strchr(functor, ':')) {
+		char tmpbuf1[256], tmpbuf2[256];
+		tmpbuf1[0] = tmpbuf2[0] = '\0';
+		sscanf(functor, "%255[^:]:%255s", tmpbuf1, tmpbuf2);
+		tmpbuf1[sizeof(tmpbuf1)-1] = tmpbuf2[sizeof(tmpbuf2)-1] = '\0';
+		m = find_module(tmpbuf1);
+	}
+
+	if (!m)
+		m = q->m;
+
+	module *tmp_m = NULL;
+
+	while (m) {
+		if (find_functor(m, functor, arity))
+			return 1;
+
+		if (!tmp_m)
+			m = tmp_m = g_modules;
+		else
+			m = m->next;
+	}
+
+	if (check_builtin(q->m, functor, arity))
+		return 1;
+
+	return 0;
+}
+
+static int fn_iso_current_predicate_1(query *q)
+{
+	GET_FIRST_ARG(p_pi,structure);
+	unsigned arity = UINT_MAX;
+
+	if (!strcmp(GET_STR(p_pi), "/")) {
+		cell *tmp_p_pi = p_pi + 1;
+		tmp_p_pi += tmp_p_pi->nbr_cells;
+
+		if (is_integer(tmp_p_pi))
+			arity = tmp_p_pi->val_num;
+	} else if (!strcmp(GET_STR(p_pi), "//")) {
+		cell *tmp_p_pi = p_pi + 1;
+		tmp_p_pi += tmp_p_pi->nbr_cells;
+
+		if (is_integer(tmp_p_pi))
+			arity = p_pi->val_num + 2;
+	} else {
+		throw_error(q, p_pi, "domain_error", "not_predicate_indicator");
+		return 0;
+	}
+
+	const char *f = GET_STR(p_pi+1);
+	cell tmp_f = *(p_pi+1);
+	tmp_f.arity = arity;
+	rule *h = find_matching_rule(q->m, &tmp_f);
+
+	if (h)
+		return 1;
+
+	if (check_builtin(q->m, f, arity))
+		return 1;
+
+	return 0;
+}
+
+static int fn_iso_current_op_3(query *q)
+{
+	GET_FIRST_ARG(p_prec,integer_or_var);
+	GET_NEXT_ARG(p_type,atom_or_var);
+	GET_NEXT_ARG(p_name,atom);
+	const char *sname = GET_STR(p_name);
+	int prefix = 0;
+
+	if (is_atom(p_type)) {
+		const char *stype = GET_STR(p_type);
+		prefix =
+			!strcmp(stype, "fx") ||
+			!strcmp(stype, "fy") ||
+			!strcmp(stype, "xf") ||
+			!strcmp(stype, "yf");
+	}
+
+	unsigned type = 0;
+	int user_op = 0;
+	int prec = get_op(q->m, sname, &type, &user_op, prefix);
+
+	if (!prec)
+		return 0;
+
+	if (is_variable(p_type)) {
+		cell tmp;
+
+		if (type == OP_FX)
+			make_small(&tmp, "fx");
+		else if (type == OP_FY)
+			make_small(&tmp, "fy");
+		else if (type == OP_YF)
+			make_small(&tmp, "yf");
+		else if (type == OP_XF)
+			make_small(&tmp, "xf");
+		else if (type == OP_YFX)
+			make_small(&tmp, "yfx");
+		else if (type == OP_XFY)
+			make_small(&tmp, "xfy");
+
+		if (!unify(q, p_type, p_type_ctx, &tmp, q->st.curr_frame))
+			return 0;
+	}
+
+	if (is_variable(p_prec)) {
+		cell tmp;
+		make_int(&tmp, prec);
+
+		if (!unify(q, p_prec, p_prec_ctx, &tmp, q->st.curr_frame))
+			return 0;
+	}
+
+	return 1;
+}
+
+static int fn_iso_acyclic_term_1(query *q)
+{
+	GET_FIRST_ARG(p_term,any);
+	write_term_to_buf(q, NULL, 0, p_term, p_term_ctx, 1, 0, 0);
+	return !q->cycle_error;
+}
+
 static int fn_iso_current_prolog_flag_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -7240,6 +7343,65 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 	return 1;
 }
 
+static int fn_absolute_file_name_3(query *q)
+{
+	GET_FIRST_ARG(p_abs,atom);
+	GET_NEXT_ARG(p_rel,variable);
+	GET_NEXT_ARG(p_opts,list_or_nil);
+	int expand = 0;
+
+	while (is_list(p_opts)) {
+		cell *h = LIST_HEAD(p_opts);
+		h = deref(q, h, p_opts_ctx);
+
+		if (is_structure(h) && (h->arity == 1)) {
+			if (!strcmp(GET_STR(h), "expand")) {
+				if (is_literal(h+1)) {
+					if (!strcmp(GET_STR(h+1), "true"))
+						expand = 1;
+				}
+			}
+		}
+
+		p_opts = LIST_TAIL(p_opts);
+		p_opts = deref(q, p_opts, p_opts_ctx);
+		p_opts_ctx = q->latest_ctx;
+	}
+
+	char *tmpbuf = NULL;
+	const char *src = GET_STR(p_abs);
+
+	if (expand && (*src == '$')) {
+		char envbuf[256];
+		char *dst = envbuf;
+		src++;
+
+		while (*src && (*src != '/') && ((dst-envbuf-1) != sizeof(envbuf)))
+			*dst++ = *src++;
+
+		if (*src == '/')
+			src++;
+
+		*dst = '\0';
+		char *ptr = getenv(envbuf);
+		tmpbuf = malloc(strlen(src)+strlen(ptr)+1);
+		dst = tmpbuf;
+		memcpy(tmpbuf, ptr, strlen(ptr));
+		dst += strlen(ptr);
+		*dst++ = '/';
+		memcpy(dst, src, strlen(src));
+	} else {		if ((tmpbuf = realpath(src, NULL)) == NULL) {
+			throw_error(q, p_abs, "domain_error", "not_a_valid_filespec");
+			return 0;
+		}
+	}
+
+	cell tmp = make_string(tmpbuf, strlen(tmpbuf));
+	free(tmpbuf);
+	set_var(q, p_rel, p_rel_ctx, &tmp, q->st.curr_frame);
+	return 1;
+}
+
 static int fn_consult_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
@@ -7924,7 +8086,7 @@ static int fn_working_directory_2(query *q)
 	char *oldpath = getcwd(tmpbuf, sizeof(tmpbuf));
 	snprintf(tmpbuf2, sizeof(tmpbuf2), "%s%s", oldpath, PATH_SEP);
 	oldpath = tmpbuf2;
-	cell tmp = make_cstring(q, oldpath);
+	cell tmp = make_string(oldpath, strlen(oldpath));
 
 	if (is_atom(p2)) {
 		const char *pathname = GET_STR(p2);
@@ -8496,12 +8658,13 @@ static int fn_replace_4(query *q)
 static int fn_predicate_property_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	GET_NEXT_ARG(p2,atom_or_var)
+	GET_NEXT_ARG(p2,atom_or_var);
+	const char *f = GET_STR(p1);
 	cell tmp;
 
-	rule *h = find_functor(q->m, GET_STR(p1), p1->arity);
+	rule *h = find_functor(q->m, f, p1->arity);
 
-	if (check_builtin(q->m, GET_STR(p1), p1->arity)) {
+	if (check_builtin(q->m, f, p1->arity)) {
 		make_literal(&tmp, find_in_pool("built_in"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return 1;
@@ -9506,6 +9669,9 @@ static const struct builtins g_iso_funcs[] =
 	{"op", 3, fn_iso_op_3, NULL},
 	{"findall", 3, fn_iso_findall_3, NULL},
 	{"$bagof", 3, fn_iso_bagof_3, NULL},
+	{"current_predicate", 1, fn_iso_current_predicate_1, NULL},
+	{"current_op", 3, fn_iso_current_op_3, NULL},
+	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL},
 
 	{"use_module", 1, fn_use_module_1, NULL},
 	{"module", 1, fn_module_1, NULL},
@@ -9514,6 +9680,7 @@ static const struct builtins g_iso_funcs[] =
 	{"listing", 1, fn_listing_1, NULL},
 	{"time", 1, fn_time_1, NULL},
 	{"trace", 0, fn_trace_0, NULL},
+	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL},
 
 #if 0
 	{"phrase", 3, fn_phrase_3, NULL},
