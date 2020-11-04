@@ -2745,9 +2745,8 @@ int module_load_fp(module *m, FILE *fp)
 	}
 
 	ok = !p->error;
-	int halt = p->m->halt;
 	destroy_parser(p);
-	return ok && !halt;
+	return ok;
 }
 
 int module_load_file(module *m, const char *filename)
@@ -2789,16 +2788,14 @@ int module_load_file(module *m, const char *filename)
 
 	if (!fp) {
 		strncpy(tmpbuf, filename, sizeof(tmpbuf)); tmpbuf[sizeof(tmpbuf)-1] = '\0';
-		fprintf(stdout, "Error: file '%s.pl' does not exist\n", filename);
 		return 0;
 	}
 
 	free(m->filename);
 	m->filename = strdup(filename);
-	int ok = module_load_fp(m, fp);
+	module_load_fp(m, fp);
 	fclose(fp);
-
-	return ok;
+	return 1;
 }
 
 static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
