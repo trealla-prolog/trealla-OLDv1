@@ -5073,7 +5073,7 @@ static int fn_iso_current_predicate_1(query *q)
 	tmp_f.arity = arity;
 	rule *h = find_matching_rule(q->m, &tmp_f);
 
-	if (h)
+	if (h && !h->is_prebuilt)
 		return 1;
 
 #if 0
