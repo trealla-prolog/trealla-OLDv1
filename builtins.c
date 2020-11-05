@@ -5069,7 +5069,6 @@ static int fn_iso_current_predicate_1(query *q)
 		return 0;
 	}
 
-	const char *f = GET_STR(p_pi+1);
 	cell tmp_f = *(p_pi+1);
 	tmp_f.arity = arity;
 	rule *h = find_matching_rule(q->m, &tmp_f);
@@ -5078,6 +5077,8 @@ static int fn_iso_current_predicate_1(query *q)
 		return 1;
 
 #if 0
+	const char *f = GET_STR(p_pi+1);
+
 	if (check_builtin(q->m, f, arity))
 		return 1;
 #endif
