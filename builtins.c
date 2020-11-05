@@ -5070,6 +5070,18 @@ static int fn_iso_current_predicate_1(query *q)
 	}
 
 	const char *f = GET_STR(p_pi+1);
+
+	if ((!strcmp(f, "true") && (arity == 0)) ||
+		(!strcmp(f, "false") && (arity == 0)) ||
+		(!strcmp(f, "halt") && (arity == 0)) ||
+		(!strcmp(f, "halt") && (arity == 1)) ||
+		(!strcmp(f, "repeat") && (arity == 0)) ||
+		(!strcmp(f, ",") && (arity == 2)) ||
+		(!strcmp(f, ";") && (arity == 2)) ||
+		(!strcmp(f, "->") && (arity == 2)) ||
+		(!strcmp(f, "!") && (arity == 0)))
+		return 0;
+
 	cell tmp_f = *(p_pi+1);
 	tmp_f.arity = arity;
 	rule *h = find_matching_rule(q->m, &tmp_f);
