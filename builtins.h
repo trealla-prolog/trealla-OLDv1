@@ -30,6 +30,8 @@
 #define is_nonvar(c) (!is_variable(c))
 #define is_stream(c) (get_stream(q,c) >= 0)
 #define is_stream_or_structure(c) (is_structure(c) || is_stream(c))
+#define is_atom_or_list(c) (is_atom(c) || is_iso_list(c))
+#define is_atom_or_list_or_var(c) (is_atom(c) || is_iso_list(c) || is_variable(c))
 #define is_any(c) 1
 
 #define is_iso_list_or_nil(c) (is_iso_list(c) || is_nil(c))
