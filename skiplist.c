@@ -44,17 +44,25 @@ struct skiplist_ {
 skiplist *sl_create(int (*compkey)(const void*, const void*))
 {
 	skiplist *l = (skiplist*)calloc(1, sizeof(struct skiplist_));
-	l->header = new_node_of_level(MAX_LEVELS);
-	l->seed = (unsigned)(size_t)(l + clock());
-	l->level = 1;
+	if (l)
+	{
+		l->header = new_node_of_level(MAX_LEVELS);
+		if (!l->header)
+		{
+			free(l);
+			return NULL;
+		}
+		l->seed = (unsigned)(size_t)(l + clock());
+		l->level = 1;
 
-	for (int i = 0; i < MAX_LEVELS; i++)
-		l->header->forward[i] = NULL;
+		for (int i = 0; i < MAX_LEVELS; i++)
+			l->header->forward[i] = NULL;
 
-	l->header->nbr = 1;
-	l->header->bkt[0].key = NULL;
-	l->compkey = compkey;
-	l->count = 0;
+		l->header->nbr = 1;
+		l->header->bkt[0].key = NULL;
+		l->compkey = compkey;
+		l->count = 0;
+	}
 	return l;
 }
 

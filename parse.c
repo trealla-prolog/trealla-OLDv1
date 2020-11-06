@@ -499,6 +499,8 @@ static void reindex_rule(module *m, rule *h)
 {
     (void) m;
 	h->index = sl_create(compkey);
+	if(!h->index)
+		abort();
 
 	for (clause *r = h->head; r; r = r->next) {
 		cell *c = get_head(r->t.cells);
@@ -751,6 +753,8 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 
 	if (!h->index)
 		h->index = sl_create(compkey);
+	if (!h->index)
+		abort();
 }
 
 static void set_persist_in_db(module *m, const char *name, unsigned arity)
@@ -766,6 +770,8 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 
 	if (!h->index)
 		h->index = sl_create(compkey);
+	if (!h->index)
+		abort();
 
 	m->use_persist = 1;
 }
