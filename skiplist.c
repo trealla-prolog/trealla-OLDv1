@@ -211,6 +211,7 @@ int sl_set(skiplist *l, const void *key, const void *val)
 	}
 
 	q = new_node_of_level(k + 1);
+	if (!q) abort();
 	q->bkt[0].key = (void*)key;
 	q->bkt[0].val = (void*)val;
 	q->nbr = 1;
@@ -286,6 +287,7 @@ int sl_app(skiplist *l, const void *key, const void *val)
 	}
 
 	q = new_node_of_level(k + 1);
+	if (!q) abort();
 	q->bkt[0].key = (void*)key;
 	q->bkt[0].val = (void*)val;
 	q->nbr = 1;
