@@ -472,6 +472,7 @@ sliter *sl_findkey(skiplist *l, const void *key)
 
 	if (i >= MAX_ITERS) {
 		iter = malloc(sizeof(sliter));
+		if (!iter) abort();
 		iter->dynamic = 1;
 	}
 	else {
