@@ -814,6 +814,16 @@ static int fn_iso_atom_chars_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
+	if (is_variable(p2)) {
+		cell tmp = make_string(GET_STR(p1), LEN_STR(p1));
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (is_string(p2)) {
+		cell tmp = make_cstringn(q, GET_STR(p2), LEN_STR(p2));
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
 	if (!is_variable(p2)) {
 		cell *head = LIST_HEAD(p2);
 		cell *tail = LIST_TAIL(p2);
