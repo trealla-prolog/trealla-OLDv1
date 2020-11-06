@@ -199,7 +199,7 @@ int set_op(module *m, const char *name, unsigned val_type, unsigned precedence)
 	name = g_pool + find_in_pool(name);
 
 	for (; ptr->name; ptr++) {
-		if (!strcmp(ptr->name, name)) {
+		if (!strcmp(ptr->name, name) && (ptr->val_type == val_type)) {
 			ptr->name = name;
 			ptr->val_type = val_type;
 			ptr->precedence = precedence;
