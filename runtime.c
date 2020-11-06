@@ -58,7 +58,7 @@ static void check_trail(query *q)
 			}
 
 			q->trails = realloc(q->trails, sizeof(trail)*q->trails_size);
-			assert(q->trails);
+			if (!q->trails) abort();
 		}
 	}
 }
@@ -78,7 +78,7 @@ static void check_choice(query *q)
 			}
 
 			q->choices = realloc(q->choices, sizeof(choice)*q->choices_size);
-			assert(q->choices);
+			if (!q->choices) abort();
 		}
 	}
 }
@@ -100,7 +100,7 @@ static void check_frame(query *q)
 
 			assert(q->frames_size);
 			q->frames = realloc(q->frames, sizeof(frame)*q->frames_size);
-			assert(q->frames);
+			if (!q->frames) abort();
 			memset(q->frames+save_frame, 0, sizeof(frame)*(q->frames_size-save_frame));
 		}
 	}
@@ -124,7 +124,7 @@ static void check_slot(query *q, unsigned cnt)
 			}
 
 			q->slots = realloc(q->slots, sizeof(slot)*q->slots_size);
-			assert(q->slots);
+			if (!q->slots) abort();
 			memset(q->slots+save_slots, 0, sizeof(slot)*(q->slots_size-save_slots));
 		}
 	}
