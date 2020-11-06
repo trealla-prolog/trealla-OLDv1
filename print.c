@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <float.h>
+#include <assert.h>
 
 #ifdef _WIN32
 #define snprintf _snprintf
@@ -541,6 +542,7 @@ char *write_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 {
 	size_t len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 0);
 	char *buf = malloc(len+10);
+	assert(buf);
 	write_term_to_buf(q, buf, len+1, c, c_ctx, running, 0, 0);
 	return buf;
 }
@@ -555,6 +557,7 @@ void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 	}
 
 	char *dst = malloc(len+1);
+	assert(dst);
 	write_canonical_to_buf(q, dst, len+1, c, c_ctx, running, depth);
 	q->cycle_error = 0;
 	const char *src = dst;
@@ -584,6 +587,7 @@ void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int 
 	}
 
 	char *dst = malloc(len+1);
+	assert(dst);
 	write_canonical_to_buf(q, dst, len+1, c, c_ctx, running, depth);
 	q->cycle_error = 0;
 	const char *src = dst;
@@ -613,6 +617,7 @@ void write_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int runni
 	}
 
 	char *dst = malloc(len+1);
+	assert(dst);
 	write_term_to_buf(q, dst, len+1, c, c_ctx, running, cons, depth);
 	q->cycle_error = 0;
 	const char *src = dst;
@@ -642,6 +647,7 @@ void write_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int cons,
 	}
 
 	char *dst = malloc(len+1);
+	assert(dst);
 	write_term_to_buf(q, dst, len+1, c, c_ctx, running, cons, depth);
 	q->cycle_error = 0;
 	const char *src = dst;
