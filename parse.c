@@ -502,7 +502,7 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 		return NULL;
 	}
 
-	if (!is_quoted(c) && strchr(GET_STR(c), ':')) {
+	if (!is_quoted(c) && strchr(GET_STR(c), ':') && 0) {
 		const char *src = GET_STR(c);
 		char mod[256], name[256];
 		mod[0] = name[0] = '\0';
@@ -595,7 +595,7 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 		return NULL;
 	}
 
-	if (!is_quoted(c) && strchr(GET_STR(c), ':')) {
+	if (!is_quoted(c) && strchr(GET_STR(c), ':') && 0) {
 		const char *src = GET_STR(c);
 		char mod[256], name[256];
 		mod[0] = name[0] = '\0';
