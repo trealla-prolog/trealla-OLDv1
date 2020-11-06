@@ -16,7 +16,7 @@ for source in tests/tests/* tests/issues/*
 do
 	case "$source" in
 		*.pl)
-			cmd="$TPL -q --traditional "
+			cmd="$TPL -q --ns "
 			;;
 		*.sh)
 			cmd="env TPL=$TPL sh"

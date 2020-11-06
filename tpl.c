@@ -265,7 +265,7 @@ int main(int ac, char *av[])
 		fprintf(stderr, "  --ns\t\t\t- non-stop (to top-level)\n");
 	}
 
-	if (version && !quiet)
+	if ((version && !quiet) || ns)
 		return 0;
 
 	if (isatty(0))
