@@ -5,7 +5,8 @@
 a::b.
 
 X::Y :-
-	X = a,
-	Y = b.
+	X = c,
+	Y = d.
 
-main :- X::Y, writeln(['X=',X,'Y=',Y]).
+main :- X::Y, writeln(['X=',X,'Y=',Y]), fail.
+main :- halt.
