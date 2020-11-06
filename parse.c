@@ -2262,7 +2262,7 @@ static int get_token(parser *p, int last_op)
 	return 1;
 }
 
-size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx)
+size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, int tolerant)
 {
 	idx_t save_ctx = q ? q->latest_ctx : l_ctx;
 	size_t is_chars_list = 0;
@@ -2271,20 +2271,32 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx)
 		cell *h = LIST_HEAD(l);
 		cell *c = q ? deref(q, h, l_ctx) : h;
 
-		if (!is_atom(c)) {
+		if (is_integer(c) && !tolerant) {
+			is_chars_list = 0;
+			break;
+		} else if (!is_integer(c) && !is_atom(c)) {
 			is_chars_list = 0;
 			break;
 		}
 
-		const char *src = GET_STR(c);
-		size_t len = len_char_utf8(src);
+		if (is_integer(c)) {
+			int ch = c->val_num;
+			char tmp[20];
+			put_char_utf8(tmp, ch);
+			size_t len = len_char_utf8(tmp);
+			is_chars_list += len;
+		} else {
+			const char *src = GET_STR(c);
+			size_t len = len_char_utf8(src);
 
-		if (len != LEN_STR(c)) {
-			is_chars_list = 0;
-			break;
+			if (len != LEN_STR(c)) {
+				is_chars_list = 0;
+				break;
+			}
+
+			is_chars_list += len;
 		}
 
-		is_chars_list += len;
 		l = LIST_TAIL(l);
 		l = q ? deref(q, l, l_ctx) : l;
 		if (q) l_ctx = q->latest_ctx;
@@ -2364,36 +2376,6 @@ int parser_tokenize(parser *p, int args, int consing)
 			c = p->t->cells + save_idx;
 			c->nbr_cells = p->t->cidx - save_idx;
 			fix_list(c);
-
-#if 0
-			// Before we can do this, DCG must recognize strings
-
-			if (scan_is_chars_list(NULL, c, 0)) {
-				size_t dstlen = 0;
-				char *dst = 0;
-				cell *l = c;
-
-				while (is_list(l)) {
-					cell *h = LIST_HEAD(l);
-					dst += snprintf(dst, dstlen, "%s", GET_STR(h));
-					l = LIST_TAIL(l);
-				}
-
-				dstlen = dst - (char*)NULL;
-				char *tmpbuf = malloc(dstlen+1);
-				dst = tmpbuf;
-				l = c;
-
-				while (is_list(l)) {
-					cell *h = LIST_HEAD(l);
-					dst += snprintf(dst, dstlen, "%s", GET_STR(h));
-					l = LIST_TAIL(l);
-				}
-
-				free(tmpbuf);
-			}
-#endif
-
 			p->start_term = 0;
 			last_op = 0;
 			continue;

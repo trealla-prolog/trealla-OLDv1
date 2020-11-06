@@ -323,7 +323,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		return dst - save_dst;
 	}
 
-	int is_chars_list = scan_is_chars_list(q, c, c_ctx);
+	int is_chars_list = scan_is_chars_list(q, c, c_ctx, 0);
 
 	if (is_chars_list) {
 		cell *l = c;

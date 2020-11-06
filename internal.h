@@ -478,7 +478,7 @@ void call_attrs(query *q, cell *attrs);
 void alloc_list(query *q, const cell *c);
 void append_list(query *q, const cell *c);
 cell *end_list(query *q);
-size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx);
+size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, int tolerant);
 void consultall(parser *p, cell *l);
 void fix_list(cell *c);
 module *module_load_text(module *m, const char *src);

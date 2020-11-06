@@ -1502,10 +1502,15 @@ static char *chars_list_to_string(query *q, cell *p_chars, idx_t p_chars_ctx, si
 	while (is_list(p_chars)) {
 		cell *h = LIST_HEAD(p_chars);
 		h = deref(q, h, p_chars_ctx);
-		const char *p = GET_STR(h);
 
-		int ch = peek_char_utf8(p);
-		dst += put_char_utf8(dst, ch);
+		if (is_integer(h)) {
+			int ch = h->val_num;
+			dst += put_char_utf8(dst, ch);
+		} else {
+			const char *p = GET_STR(h);
+			int ch = peek_char_utf8(p);
+			dst += put_char_utf8(dst, ch);
+		}
 
 		p_chars = LIST_TAIL(p_chars);
 		p_chars = deref(q, p_chars, p_chars_ctx);
@@ -1532,7 +1537,7 @@ static int fn_iso_open_3(query *q)
 	}
 
 	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx);
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
 			throw_error(q, p1, "type_error", "atom");
@@ -1604,7 +1609,7 @@ static int fn_iso_open_4(query *q)
 		filename = GET_STR(p1);
 
 	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx);
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
 			throw_error(q, p1, "type_error", "atom");
@@ -6319,7 +6324,7 @@ static int fn_savefile_2(query *q)
 	char *src = NULL;
 
 	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx);
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
 			throw_error(q, p1, "type_error", "atom");
@@ -6346,7 +6351,7 @@ static int fn_loadfile_2(query *q)
 	char *src = NULL;
 
 	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx);
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
 			throw_error(q, p1, "type_error", "atom");
@@ -6395,7 +6400,7 @@ static int fn_getfile_2(query *q)
 	char *src = NULL;
 
 	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx);
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
 			throw_error(q, p1, "type_error", "atom");
@@ -7013,7 +7018,7 @@ static int fn_read_term_from_chars_2(query *q)
 		src = malloc(len+1);
 		memcpy(src, GET_STR(p_chars), len);
 		src[len] = '\0';
-	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx)) > 0) {
+	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx, 0)) > 0) {
 		if (!len) {
 			throw_error(q, p_chars, "type_error", "atom");
 			return 0;
@@ -7051,7 +7056,7 @@ static int fn_read_term_from_chars_3(query *q)
 		src = malloc(len+1);
 		memcpy(src, GET_STR(p_chars), len);
 		src[len] = '\0';
-	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx)) > 0) {
+	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx, 0)) > 0) {
 		if (!len) {
 			throw_error(q, p_chars, "type_error", "atom");
 			return 0;
@@ -8069,7 +8074,7 @@ static int fn_exists_file_1(query *q)
 	char *src = NULL;
 
 	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx);
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
 			throw_error(q, p1, "type_error", "atom");
@@ -8099,7 +8104,7 @@ static int fn_delete_file_1(query *q)
 	char *src = NULL;
 
 	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx);
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
 			throw_error(q, p1, "type_error", "atom");
@@ -8124,7 +8129,7 @@ static int fn_rename_file_2(query *q)
 	char *filename1, *filename2;
 
 	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx);
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
 			throw_error(q, p1, "type_error", "atom");
@@ -8137,7 +8142,7 @@ static int fn_rename_file_2(query *q)
 		filename1 = GET_STR(p1);
 
 	if (is_iso_list(p2)) {
-		size_t len = scan_is_chars_list(q, p2, p2_ctx);
+		size_t len = scan_is_chars_list(q, p2, p2_ctx, 1);
 
 		if (!len) {
 			throw_error(q, p2, "type_error", "atom");
@@ -8163,7 +8168,7 @@ static int fn_time_file_2(query *q)
 	char *src = NULL;
 
 	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx);
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
 			throw_error(q, p1, "type_error", "atom");
@@ -8197,7 +8202,7 @@ static int fn_size_file_2(query *q)
 	char *src = NULL;
 
 	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx);
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
 			throw_error(q, p1, "type_error", "atom");
@@ -8230,7 +8235,7 @@ static int fn_exists_directory_1(query *q)
 	char *src = NULL;
 
 	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx);
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
 			throw_error(q, p1, "type_error", "atom");
@@ -8264,7 +8269,7 @@ static int fn_make_directory_1(query *q)
 	char *src = NULL;
 
 	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx);
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
 			throw_error(q, p1, "type_error", "atom");
@@ -8302,7 +8307,7 @@ static int fn_working_directory_2(query *q)
 		char *src = NULL;
 
 		if (is_iso_list(p_new)) {
-			size_t len = scan_is_chars_list(q, p_new, p_new_ctx);
+			size_t len = scan_is_chars_list(q, p_new, p_new_ctx, 1);
 
 			if (!len) {
 				throw_error(q, p_new, "type_error", "atom");
@@ -8330,7 +8335,7 @@ static int fn_chdir_1(query *q)
 	char *src = NULL;
 
 	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx);
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
@@ -9644,7 +9649,7 @@ static int fn_sys_put_chars_2(query *q)
 		const char *src = GET_STR(p1);
 		size_t len = LEN_STR(p1);
 		net_write(src, len, str);
-	} else if ((len = scan_is_chars_list(q, p1, p1_ctx)) > 0) {
+	} else if ((len = scan_is_chars_list(q, p1, p1_ctx, 0)) > 0) {
 		char *src = chars_list_to_string(q, p1, p1_ctx, len);
 		net_write(src, len, str);
 		free(src);
