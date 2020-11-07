@@ -1139,14 +1139,7 @@ static void directives(parser *p, term *t)
 		while (is_literal(p1)) {
 			if (is_literal(p1) && !strcmp(GET_STR(p1), "/") && (p1->arity == 2)) {
 				cell *c_name = p1 + 1;
-
-				if (is_cstring(c_name)) {
-					idx_t off = find_in_pool(GET_STR(c_name));
-					c_name->val_off = off;
-					c_name->val_type = TYPE_LITERAL;
-				}
-
-				if (!is_literal(c_name)) return;
+				if (!is_atom(c_name)) return;
 				cell *c_arity = p1 + 2;
 				if (!is_integer(c_arity)) return;
 				set_dynamic_in_db(p->m, GET_STR(c_name), c_arity->val_num);
@@ -1164,14 +1157,7 @@ static void directives(parser *p, term *t)
 		while (is_literal(p1)) {
 			if (is_literal(p1) && !strcmp(GET_STR(p1), "/") && (p1->arity == 2)) {
 				cell *c_name = p1 + 1;
-
-				if (is_cstring(c_name)) {
-					idx_t off = find_in_pool(GET_STR(c_name));
-					c_name->val_off = off;
-					c_name->val_type = TYPE_LITERAL;
-				}
-
-				if (!is_literal(c_name)) return;
+				if (!is_atom(c_name)) return;
 				cell *c_arity = p1 + 2;
 				if (!is_integer(c_arity)) return;
 				const char *src = GET_STR(c_name);
@@ -1210,14 +1196,7 @@ static void directives(parser *p, term *t)
 		while (is_literal(p1)) {
 			if (is_literal(p1) && !strcmp(GET_STR(p1), "/") && (p1->arity == 2)) {
 				cell *c_name = p1 + 1;
-
-				if (is_cstring(c_name)) {
-					idx_t off = find_in_pool(GET_STR(c_name));
-					c_name->val_off = off;
-					c_name->val_type = TYPE_LITERAL;
-				}
-
-				if (!is_literal(c_name)) return;
+				if (!is_atom(c_name)) return;
 				cell *c_arity = p1 + 2;
 				if (!is_integer(c_arity)) return;
 				set_persist_in_db(p->m, GET_STR(c_name), c_arity->val_num);
