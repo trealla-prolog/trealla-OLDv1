@@ -18,5 +18,6 @@ bar.
 '$l_bar'.
 
 main :-
+	'$l_foo',
 	writeln(ok),
 	halt.
