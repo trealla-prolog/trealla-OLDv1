@@ -37,6 +37,9 @@ typedef __uint64_t uint_t;
 
 typedef uint32_t idx_t;
 
+// Sentinel Value
+#define ERR_IDX (~(idx_t)0)
+
 #define MAX_SMALL_STRING (MAX(sizeof(int_t),sizeof(void*))*2)
 #define MAX_VAR_POOL_SIZE 1000
 #define MAX_ARITY UCHAR_MAX
@@ -409,7 +412,6 @@ inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 cell *list_head(cell *l);
 cell *list_tail(cell *l, cell *tmp);
 
-int is_in_pool(const char *name, idx_t *offset);
 void set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
 int module_load_fp(module *m, FILE *fp);
@@ -462,7 +464,8 @@ cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx);
 cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix);
 void make_end(cell *tmp);
 int match_clause(query *q, cell *p1, idx_t p1_ctx);
-idx_t find_in_pool(const char *name);
+idx_t index_from_pool(const char *name);
+const char* cstr_from_pool(const char *name);
 void do_reduce(cell *n);
 unsigned create_vars(query *q, unsigned nbr);
 unsigned count_bits(uint64_t mask, unsigned bit);

@@ -5246,11 +5246,11 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		cell tmp;
 
 		if (q->m->flag.double_quote_atom)
-			make_literal(&tmp, find_in_pool("atom"));
+			make_literal(&tmp, index_from_pool("atom"));
 		else if (q->m->flag.double_quote_codes)
-			make_literal(&tmp, find_in_pool("codes"));
+			make_literal(&tmp, index_from_pool("codes"));
 		else if (q->m->flag.double_quote_chars)
-			make_literal(&tmp, find_in_pool("chars"));
+			make_literal(&tmp, index_from_pool("chars"));
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "character_escapes")) {
@@ -5275,14 +5275,14 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		cell tmp;
 
 		if (q->m->flag.rational_syntax_natural)
-			make_literal(&tmp, find_in_pool("natural"));
+			make_literal(&tmp, index_from_pool("natural"));
 		else
-			make_literal(&tmp, find_in_pool("compatibility"));
+			make_literal(&tmp, index_from_pool("compatibility"));
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "dialect")) {
 		cell tmp;
-		make_literal(&tmp, find_in_pool("trealla"));
+		make_literal(&tmp, index_from_pool("trealla"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "bounded")) {
 		cell tmp;
@@ -5302,7 +5302,7 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		unsigned v1 = 0, v2 = 0, v3 = 0;
 		sscanf(VERSION, "v%u.%u.%u", &v1, &v2, &v3);
 		cell *tmp = alloc_heap(q, 5);
-		make_literal(&tmp[0], find_in_pool("trealla"));
+		make_literal(&tmp[0], index_from_pool("trealla"));
 		make_int(&tmp[1], v1);
 		make_int(&tmp[2], v2);
 		make_int(&tmp[3], v3);
@@ -5312,7 +5312,7 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "version_git")) {
 		cell tmp;
-		make_literal(&tmp, find_in_pool(VERSION));
+		make_literal(&tmp, index_from_pool(VERSION));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "argv")) {
 		if (g_avc == g_ac) {
@@ -8986,49 +8986,49 @@ static int fn_predicate_property_2(query *q)
 	rule *h = find_functor(q->m, f, p1->arity);
 
 	if (check_builtin(q->m, f, p1->arity)) {
-		make_literal(&tmp, find_in_pool("built_in"));
+		make_literal(&tmp, index_from_pool("built_in"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return 1;
 	}
 
 	if (h && !h->is_dynamic) {
-		make_literal(&tmp, find_in_pool("built_in"));
+		make_literal(&tmp, index_from_pool("built_in"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return 1;
 	}
 
 	if (h && h->is_dynamic) {
-		make_literal(&tmp, find_in_pool("dynamic"));
+		make_literal(&tmp, index_from_pool("dynamic"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return 1;
 	}
 
 	if (h && h->is_persist) {
-		make_literal(&tmp, find_in_pool("persist"));
+		make_literal(&tmp, index_from_pool("persist"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return 1;
 	}
 
 	if (h && h->is_public) {
-		make_literal(&tmp, find_in_pool("public"));
+		make_literal(&tmp, index_from_pool("public"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return 1;
 	}
 
 	if (h && h->is_public) {
-		make_literal(&tmp, find_in_pool("exported"));
+		make_literal(&tmp, index_from_pool("exported"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return 1;
 	}
 
 	if (h) {
-		make_literal(&tmp, find_in_pool("visible"));
+		make_literal(&tmp, index_from_pool("visible"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return 1;
 	}
 
 	if (h) {
-		make_literal(&tmp, find_in_pool("static"));
+		make_literal(&tmp, index_from_pool("static"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return 1;
 	}

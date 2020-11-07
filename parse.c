@@ -122,46 +122,65 @@ static struct op_table g_ops[] =
 	{0}
 };
 
-int is_in_pool(const char *name, idx_t *val)
+
+static char* must_strdup(const char* src)
+{
+        char* ret = strdup(src);
+        if (!ret) abort();
+
+        return ret;
+}
+
+static idx_t is_in_pool(const char *name)
 {
 	idx_t offset = 0;
 
 	while (offset < g_pool_offset) {
 		if (!strcmp(g_pool+offset, name)) {
-			if (val)
-				*val = offset;
-
-			return 1;
+			return offset;
 		}
 
 		offset += strlen(g_pool+offset) + 1;
 	}
 
-	return 0;
+	return ERR_IDX;
 }
 
-idx_t find_in_pool(const char *name)
+static idx_t add_to_pool(const char *name)
 {
-	idx_t offset;
-
-	if (is_in_pool(name, &offset))
-		return offset;
-
-	offset = g_pool_offset;
+	idx_t offset = g_pool_offset;
 	size_t len = strlen(name);
 
 	if ((offset+len+1) >= g_pool_size) {
 		size_t nbytes = g_pool_size * 2;
-		g_pool = realloc(g_pool, nbytes);
-		if (!g_pool) abort();
+		char* tmp = realloc(g_pool, nbytes);
+		if (!tmp) return ERR_IDX;
+		g_pool = tmp;
 		memset(g_pool+g_pool_size, 0, nbytes-g_pool_size);
-		if (!g_pool) abort();
 		g_pool_size = nbytes;
 	}
 
 	strcpy(g_pool+offset, name);
 	g_pool_offset += len + 1;
 	return offset;
+}
+
+idx_t index_from_pool(const char *name)
+{
+	idx_t offset = is_in_pool(name);
+	if (offset != ERR_IDX)
+		return offset;
+
+	return add_to_pool(name);
+}
+
+const char* cstr_from_pool(const char *name)
+{
+	idx_t offset = index_from_pool(name);
+	if (offset == ERR_IDX)
+		return NULL;
+
+	return g_pool + offset;
 }
 
 int get_op(module *m, const char *name, unsigned *val_type, int *userop, int hint_prefix)
@@ -196,8 +215,10 @@ int get_op(module *m, const char *name, unsigned *val_type, int *userop, int hin
 
 int set_op(module *m, const char *name, unsigned val_type, unsigned precedence)
 {
+	name = cstr_from_pool(name);
+	if (!name) abort();
+
 	struct op_table *ptr = m->ops;
-	name = g_pool + find_in_pool(name);
 
 	for (; ptr->name; ptr++) {
 		if (!strcmp(ptr->name, name) && (ptr->val_type == val_type)) {
@@ -410,7 +431,9 @@ void set_multifile_in_db(module *m, const char *name, idx_t arity)
 {
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = find_in_pool(name);
+	tmp.val_off = index_from_pool(name);
+	if (tmp.val_off == ERR_IDX) abort();
+
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
@@ -423,7 +446,9 @@ static int is_multifile_in_db(const char *mod, const char *name, idx_t arity)
 	if (!m) return 0;
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = find_in_pool(name);
+	tmp.val_off = index_from_pool(name);
+	if (tmp.val_off == ERR_IDX) abort();
+
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) return 0;
@@ -544,7 +569,8 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 			set_multifile_in_db(m, name, c->arity);
 		}
 
-		c->val_off = find_in_pool(name);
+		c->val_off = index_from_pool(name);
+		if (c->val_off == ERR_IDX) abort();
 	}
 
 	rule *h = find_rule(m, c);
@@ -645,7 +671,8 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 			set_multifile_in_db(m, name, c->arity);
 		}
 
-		c->val_off = find_in_pool(name);
+		c->val_off = index_from_pool(name);
+		if (c->val_off == ERR_IDX) abort();
 	}
 
 	rule *h = find_rule(m, c);
@@ -749,7 +776,9 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = find_in_pool(name);
+	tmp.val_off = index_from_pool(name);
+	if (tmp.val_off == ERR_IDX) abort();
+
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
@@ -765,7 +794,8 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = find_in_pool(name);
+	tmp.val_off = index_from_pool(name);
+	if (tmp.val_off == ERR_IDX) abort();
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
@@ -1371,7 +1401,10 @@ void parser_xref(parser *p, term *t, rule *parent)
 			m = find_module(tmpbuf1);
 
 			if (m)
-				c->val_off = find_in_pool(tmpbuf2);
+			{
+				c->val_off = index_from_pool(tmpbuf2);
+				if (c->val_off == ERR_IDX) abort();
+			}
 			else
 				m = p->m;
 		}
@@ -1741,6 +1774,9 @@ static void parser_dcg_rewrite(parser *p)
 
 static cell *make_literal(parser *p, idx_t offset)
 {
+	if (offset == ERR_IDX)
+		return NULL;
+
 	cell *c = make_cell(p);
 	memset(c, 0, sizeof(cell));
 	c->val_type = TYPE_LITERAL;
@@ -2459,7 +2495,8 @@ int parser_tokenize(parser *p, int args, int consing)
 
 		if (!p->quoted && !strcmp(p->token, "{")) {
 			save_idx = p->t->cidx;
-			cell *c = make_literal(p, find_in_pool("{}"));
+			cell *c = make_literal(p, index_from_pool("{}"));
+			if (!c) abort();
 			c->arity = 1;
 			p->start_term = 1;
 			parser_tokenize(p, 0, 0);
@@ -2612,7 +2649,8 @@ int parser_tokenize(parser *p, int args, int consing)
 			if (p->was_quoted)
 				c->flags |= FLAG_QUOTED;
 
-			c->val_off = find_in_pool(p->token);
+			c->val_off = index_from_pool(p->token);
+			if (c->val_off == ERR_IDX) abort();
 		} else {
 			c->val_type = TYPE_CSTRING;
 
@@ -2636,8 +2674,7 @@ int parser_tokenize(parser *p, int args, int consing)
 					memcpy(c->val_str, p->token, p->len_str);
 					c->val_str[p->len_str] = '\0';
 				} else {
-					c->val_str = strdup(p->token);
-					if (!c->val_str) abort();
+					c->val_str = must_strdup(p->token);
 					c->len_str = strlen(p->token);
 				}
 			}
@@ -2853,7 +2890,7 @@ int module_load_file(module *m, const char *filename)
 	}
 
 	free(m->filename);
-	m->filename = strdup(filename);
+	m->filename = must_strdup(filename);
 	module_load_fp(m, fp);
 	fclose(fp);
 	return 1;
