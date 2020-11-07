@@ -511,8 +511,8 @@ have been added and not optimized.
 
 Note swipl also has the -O option which can give improved times.
 
-Note gprolog can also be compiled using 'gplc samples/sieve.pl' to
-achieve a significant speedup.
+Note gprolog can also be compiled using 'gplc -o sieve samples/sieve.pl'
+to achieve a significant speedup.
 
 Times for gprolog & scryer were done using the unix *time* command and
 thus include setup time, whereas the others were done with the predicate
