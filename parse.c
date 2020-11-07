@@ -889,13 +889,11 @@ query *create_query(module *m, int is_task)
 		q->trails_size = is_task ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
 
 		q->frames = calloc(q->frames_size, sizeof(frame));
-		if (!q->frames) goto ealloc;
 		q->slots = calloc(q->slots_size, sizeof(slot));
-		if (!q->slots) goto ealloc;
 		q->choices = calloc(q->choices_size, sizeof(choice));
-		if (!q->choices) goto ealloc;
 		q->trails = calloc(q->trails_size, sizeof(trail));
-		if (!q->trails) goto ealloc;
+		if (!q->frames || !q->slots || !q->choices || !q->trails)
+			goto ealloc;
 
 		// Allocate these later as needed...
 
