@@ -7550,7 +7550,7 @@ static int fn_consult_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
 
-	if (!is_list(p1)) {
+	if (!is_iso_list(p1)) {
 		if (!do_consult(q, p1, p1_ctx))
 			return 0;
 
