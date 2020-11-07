@@ -7475,6 +7475,20 @@ static int fn_absolute_file_name_3(query *q)
 	GET_NEXT_ARG(p_rel,variable);
 	GET_NEXT_ARG(p_opts,list_or_nil);
 	int expand = 0;
+	char *src = NULL, *filename;
+
+	if (is_iso_list(p_abs)) {
+		size_t len = scan_is_chars_list(q, p_abs, p_abs_ctx, 1);
+
+		if (!len) {
+			throw_error(q, p_abs, "type_error", "atom");
+			return 0;
+		}
+
+		src = chars_list_to_string(q, p_abs, p_abs_ctx, len);
+		filename = src;
+	} else
+		filename = GET_STR(p_abs);
 
 	while (is_list(p_opts)) {
 		cell *h = LIST_HEAD(p_opts);
@@ -7495,29 +7509,31 @@ static int fn_absolute_file_name_3(query *q)
 	}
 
 	char *tmpbuf = NULL;
-	const char *src = GET_STR(p_abs);
+	const char *s = filename;
 
-	if (expand && (*src == '$')) {
+	if (expand && (*s == '$')) {
 		char envbuf[256];
 		char *dst = envbuf;
-		src++;
+		s++;
 
-		while (*src && (*src != '/') && ((dst-envbuf-1) != sizeof(envbuf)))
-			*dst++ = *src++;
+		while (*s && (*s != '/') && ((dst-envbuf-1) != sizeof(envbuf)))
+			*dst++ = *s++;
 
-		if (*src == '/')
-			src++;
+		if (*s == '/')
+			s++;
 
 		*dst = '\0';
 		char *ptr = getenv(envbuf);
-		tmpbuf = malloc(strlen(src)+strlen(ptr)+1);
+		tmpbuf = malloc(strlen(s)+strlen(ptr)+1);
 		assert(tmpbuf);
 		dst = tmpbuf;
 		memcpy(tmpbuf, ptr, strlen(ptr));
 		dst += strlen(ptr);
 		*dst++ = '/';
-		memcpy(dst, src, strlen(src));
-	} else {		if ((tmpbuf = realpath(src, NULL)) == NULL) {
+		memcpy(dst, s, strlen(s));
+		dst[strlen(s)] = '\0';
+	} else {
+		if ((tmpbuf = realpath(s, NULL)) == NULL) {
 			throw_error(q, p_abs, "domain_error", "not_a_valid_filespec");
 			return 0;
 		}
@@ -7525,6 +7541,7 @@ static int fn_absolute_file_name_3(query *q)
 
 	cell tmp = make_string(tmpbuf, strlen(tmpbuf));
 	free(tmpbuf);
+	free(src);
 	set_var(q, p_rel, p_rel_ctx, &tmp, q->st.curr_frame);
 	return 1;
 }
