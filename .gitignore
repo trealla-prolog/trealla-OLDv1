@@ -11,3 +11,6 @@ tpl
 *.out
 *.kvs
 *.dbs
+*~
+*#
+*.gcda
