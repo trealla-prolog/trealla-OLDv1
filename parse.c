@@ -1127,7 +1127,7 @@ static void directives(parser *p, term *t)
 
 	if (!strcmp(dirname, "ensure_loaded") && (c->arity == 1)) {
 		cell *p1 = c + 1;
-		if (!is_literal(p1)) return;
+		if (!is_atom(p1)) return;
 		const char *name = GET_STR(p1);
 		module_load_file(p->m, name);
 		return;
