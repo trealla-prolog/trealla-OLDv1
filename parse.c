@@ -37,7 +37,7 @@ static const int CPU_COUNT = 4;
 #define JUST_IN_TIME_COUNT 50
 
 struct prolog_ {
-	module *m;
+	module *m, *curr_m;
 };
 
 stream g_streams[MAX_STREAMS] = {{0}};
@@ -2665,6 +2665,7 @@ static int parser_run(parser *p, const char *src, int dump)
 	}
 
 	int ok = !q->error;
+	p->m = q->m;
 	destroy_query(q);
 	module_purge(p->m);
 	return ok;
@@ -3173,9 +3174,10 @@ void set_opt(prolog *pl, int level) { pl->m->opt = level; }
 
 int pl_eval(prolog *pl, const char *src)
 {
-	parser *p = create_parser(pl->m);
+	parser *p = create_parser(pl->curr_m);
 	p->command = 1;
 	int ok = parser_run(p, src, 1);
+	pl->curr_m = p->m;
 	destroy_parser(p);
 	return ok;
 }
@@ -3240,6 +3242,7 @@ prolog *pl_create()
 	g_streams[2].mode = strdup("append");
 
 	pl->m = create_module("user");
+	pl->curr_m = pl->m;
 	pl->m->filename = strdup("~/.tpl_user");
 	pl->m->prebuilt = 1;
 

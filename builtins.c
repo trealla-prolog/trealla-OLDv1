@@ -9724,6 +9724,19 @@ static int fn_sys_put_chars_2(query *q)
 	return !ferror(str->fp);
 }
 
+static int fn_current_module_1(query *q)
+{
+	GET_FIRST_ARG(p1,atom_or_var);
+
+	if (is_atom(p1)) {
+		const char *name = GET_STR(p1);
+
+		return !strcmp(name, q->m->name);
+	}
+
+	return 0;
+}
+
 static int fn_use_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -9964,6 +9977,7 @@ static const struct builtins g_iso_funcs[] =
 	{"current_op", 3, fn_iso_current_op_3, NULL},
 	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL},
 
+	{"current_module", 1, fn_current_module_1, NULL},
 	{"use_module", 1, fn_use_module_1, NULL},
 	{"module", 1, fn_module_1, NULL},
 	{"consult", 1, fn_consult_1, NULL},
