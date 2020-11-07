@@ -7095,7 +7095,7 @@ static int fn_read_term_from_chars_3(query *q)
 
 	if (is_cstring(p_chars)) {
 		len = LEN_STR(p_chars);
-		src = malloc(len+1);
+		src = malloc(len+1+1);	// final +1 is for look-ahead
 		assert(src);
 		memcpy(src, GET_STR(p_chars), len);
 		src[len] = '\0';
