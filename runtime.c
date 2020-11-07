@@ -884,16 +884,27 @@ int match_clause(query *q, cell *p1, idx_t p1_ctx)
 static int match_rule(query *q)
 {
 	if (!q->retry) {
-		rule *h = q->st.curr_cell->match;
+		cell *c = q->st.curr_cell;
+		rule *h;
+
+		if (is_literal(c))
+			h = c->match;
+		else {
+			// For now convert it to a literal
+			idx_t off = find_in_pool(GET_STR(c));
+			c->val_off = off;
+			c->val_type = TYPE_LITERAL;
+			h = NULL;
+		}
 
 		if (!h) {
-			q->st.curr_cell->match = find_matching_rule(q->m, q->st.curr_cell);
-			h = q->st.curr_cell->match;
+			c->match = find_matching_rule(q->m, c);
+			h = c->match;
 
 			if (!h) {
-				if (!is_end(q->st.curr_cell) &&
-					!(is_literal(q->st.curr_cell) && !strcmp(GET_STR(q->st.curr_cell), "initialization")))
-					throw_error(q, q->st.curr_cell, "existence_error", "procedure");
+				if (!is_end(c) &&
+					!(is_literal(c) && !strcmp(GET_STR(c), "initialization")))
+					throw_error(q, c, "existence_error", "procedure");
 				else
 					q->error = 1;
 
@@ -902,7 +913,7 @@ static int match_rule(query *q)
 		}
 
 		if (h->index) {
-			cell *key = deep_clone_to_heap(q, q->st.curr_cell, q->st.curr_frame);
+			cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
 			int all_vars = 1, arity = key->arity;
 
 			for (cell *c = key + 1; arity--; c += c->nbr_cells) {
@@ -1004,7 +1015,7 @@ void run_query(query *q)
 		Trace(q, q->st.curr_cell, q->retry?REDO:q->resume?NEXT:CALL);
 
 		if (!(q->st.curr_cell->flags&FLAG_BUILTIN)) {
-			if (!is_literal(q->st.curr_cell)) {
+			if (!is_callable(q->st.curr_cell)) {
 				throw_error(q, q->st.curr_cell, "type_error", "callable");
 				break;
 			}

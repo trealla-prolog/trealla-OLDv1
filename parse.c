@@ -313,8 +313,13 @@ static rule *find_rule(module *m, cell *c)
 		if (h->is_abolished)
 			continue;
 
-		if ((h->val_off == c->val_off) && (h->arity == c->arity))
-			return h;
+		if (is_literal(c)) {
+			if ((h->val_off == c->val_off) && (h->arity == c->arity))
+				return h;
+		} else {
+			if (!strcmp(g_pool+h->val_off, GET_STR(c)) && !h->arity)
+				return h;
+		}
 	}
 
 	return NULL;
@@ -484,7 +489,7 @@ static int compkey(const void *ptr1, const void *ptr2)
 
 static void reindex_rule(module *m, rule *h)
 {
-        (void) m;
+    (void) m;
 	h->index = sl_create(compkey);
 
 	for (clause *r = h->head; r; r = r->next) {
@@ -495,6 +500,13 @@ static void reindex_rule(module *m, rule *h)
 
 clause *asserta_to_db(module *m, term *t, int consulting)
 {
+	if (is_cstring(t->cells)) {
+		cell *c = t->cells;
+		idx_t off = find_in_pool(GET_STR(c));
+		c->val_off = off;
+		c->val_type = TYPE_LITERAL;
+	}
+
 	cell *c = get_head(t->cells);
 
 	if (!c) {
@@ -588,6 +600,13 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 
 clause *assertz_to_db(module *m, term *t, int consulting)
 {
+	if (is_cstring(t->cells)) {
+		cell *c = t->cells;
+		idx_t off = find_in_pool(GET_STR(c));
+		c->val_off = off;
+		c->val_type = TYPE_LITERAL;
+	}
+
 	cell *c = get_head(t->cells);
 
 	if (!c) {
