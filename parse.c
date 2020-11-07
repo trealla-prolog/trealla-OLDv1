@@ -524,7 +524,7 @@ static int compkey(const void *ptr1, const void *ptr2)
 
 static void reindex_rule(module *m, rule *h)
 {
-    (void) m;
+	(void) m;
 	h->index = sl_create(compkey);
 	if(!h->index)
 		abort();
@@ -2898,7 +2898,7 @@ int module_load_file(module *m, const char *filename)
 
 static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 {
-        (void) dq;
+	(void) dq;
 	idx_t ctx = 0;
 	query q = {0};
 	q.m = m;
@@ -2954,11 +2954,11 @@ module *create_module(const char *name)
 	if (m)
 	{
 		m->name = strdup(name);
-		if (!m->name) goto ealloc;
 		m->next = g_modules;
 		g_modules = m;
 
 		m->p = create_parser(m);
+		if (!m->name) goto ealloc;
 		if (!m->p) goto ealloc;
 		m->flag.double_quote_chars = 1;
 		m->flag.character_escapes = 1;

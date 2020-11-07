@@ -533,14 +533,14 @@ void sl_dump(const skiplist *l, const char *(*f)(void*, const void*), void *p1)
     p = p->forward[0];
 
     while (p) {
-        q = p->forward[0];
-        printf("%6d: ", p->nbr);
+	q = p->forward[0];
+	printf("%6d: ", p->nbr);
 
-        for (int j = 0; j < p->nbr; j++)
-            printf("%s ", f(p1, p->bkt[j].key));
+	for (int j = 0; j < p->nbr; j++)
+	    printf("%s ", f(p1, p->bkt[j].key));
 
-        printf("\n");
-        p = q;
+	printf("\n");
+	p = q;
     }
 
     printf("\n");
