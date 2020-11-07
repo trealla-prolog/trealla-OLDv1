@@ -125,10 +125,10 @@ static struct op_table g_ops[] =
 
 static char* must_strdup(const char* src)
 {
-        char* ret = strdup(src);
-        if (!ret) abort();
+	char* ret = strdup(src);
+	if (!ret) abort();
 
-        return ret;
+	return ret;
 }
 
 static idx_t is_in_pool(const char *name)
@@ -3304,66 +3304,109 @@ int pl_consult(prolog *pl, const char *filename)
 	return module_load_file(pl->m, filename);
 }
 
+
+void* g_init(void)
+{
+	g_pool = calloc(g_pool_size=INITIAL_POOL_SIZE, 1);
+	if (g_pool)
+	{
+		g_pool_offset = 0;
+
+		g_false_s = index_from_pool("false");
+		g_true_s = index_from_pool("true");
+		g_empty_s = index_from_pool("");
+		g_anon_s = index_from_pool("_");
+		g_dot_s = index_from_pool(".");
+		g_cut_s = index_from_pool("!");
+		g_nil_s = index_from_pool("[]");
+		g_braces_s = index_from_pool("{}");
+		g_fail_s = index_from_pool("fail");
+		g_clause_s = index_from_pool(":-");
+		g_sys_elapsed_s = index_from_pool("$elapsed");
+		g_sys_queue_s = index_from_pool("$queue");
+		g_eof_s = index_from_pool("end_of_file");
+		g_lt_s = index_from_pool("<");
+		g_gt_s = index_from_pool(">");
+		g_eq_s = index_from_pool("=");
+
+		g_streams[0].fp = stdin;
+		g_streams[0].filename = must_strdup("stdin");
+		g_streams[0].name = must_strdup("user_input");
+		g_streams[0].mode = must_strdup("read");
+
+		g_streams[1].fp = stdout;
+		g_streams[1].filename = must_strdup("stdout");
+		g_streams[1].name = must_strdup("user_output");
+		g_streams[1].mode = must_strdup("append");
+
+		g_streams[2].fp = stderr;
+		g_streams[2].filename = must_strdup("stderr");
+		g_streams[2].name = must_strdup("user_error");
+		g_streams[2].mode = must_strdup("append");
+	}
+	return g_pool;
+}
+
+void g_destroy()
+{
+	for (int i = 0; i < MAX_STREAMS; i++) {
+		stream *str = &g_streams[i];
+
+		if (str->fp) {
+			if (i > 2)
+					fclose(str->fp);
+
+			free(str->filename);
+			free(str->mode);
+			free(str->name);
+			str->name = NULL;
+		}
+
+		if (str->p)
+			destroy_parser(str->p);
+
+		str->p = NULL;
+	}
+
+	memset(g_streams, 0, sizeof(g_streams));
+
+	while (g_modules) {
+		module *m = g_modules;
+		g_modules = m->next;
+		destroy_module(m);
+	}
+
+	free(g_pool);
+	g_pool = NULL;
+}
+
+
 prolog *pl_create()
 {
+	++g_tpl_count;
+	if (g_tpl_count == 1 && g_init() == NULL)
+		return NULL;
+
 	if (!g_tpl_lib)
 		g_tpl_lib = getenv("TPL_LIBRARY_PATH");
 
 	if (!g_tpl_lib)
 		g_tpl_lib = "library";
 
-	g_tpl_count++;
 	srandom(time(0)+clock()+getpid());
 	prolog *pl = calloc(1, sizeof(prolog));
 	if (!pl)
 	{
-		g_tpl_count--;
+		if (!--g_tpl_count)
+			g_destroy();
 		return NULL;
 	}
 
-	//PLANNED: cehteh: if (g_tpl_count == 1) {...
-	if (!g_pool) {
-		g_pool = calloc(g_pool_size=INITIAL_POOL_SIZE, 1);
-		if (!g_pool) abort();
-		g_pool_offset = 0;
-	}
-
-	g_false_s = find_in_pool("false");
-	g_true_s = find_in_pool("true");
-	g_empty_s = find_in_pool("");
-	g_anon_s = find_in_pool("_");
-	g_dot_s = find_in_pool(".");
-	g_cut_s = find_in_pool("!");
-	g_nil_s = find_in_pool("[]");
-	g_braces_s = find_in_pool("{}");
-	g_fail_s = find_in_pool("fail");
-	g_clause_s = find_in_pool(":-");
-	g_sys_elapsed_s = find_in_pool("$elapsed");
-	g_sys_queue_s = find_in_pool("$queue");
-	g_eof_s = find_in_pool("end_of_file");
-	g_lt_s = find_in_pool("<");
-	g_gt_s = find_in_pool(">");
-	g_eq_s = find_in_pool("=");
-
-	g_streams[0].fp = stdin;
-	g_streams[0].filename = strdup("stdin");  //TODO: cehteh: possibly easiest to have a strdup that aborts on error
-	g_streams[0].name = strdup("user_input");
-	g_streams[0].mode = strdup("read");
-
-	g_streams[1].fp = stdout;
-	g_streams[1].filename = strdup("stdout");
-	g_streams[1].name = strdup("user_output");
-	g_streams[1].mode = strdup("append");
-
-	g_streams[2].fp = stderr;
-	g_streams[2].filename = strdup("stderr");
-	g_streams[2].name = strdup("user_error");
-	g_streams[2].mode = strdup("append");
 
 	pl->m = create_module("user");
 	if (!pl->m) abort();
 	pl->curr_m = pl->m;
-	pl->m->filename = strdup("~/.tpl_user");
+	pl->m->filename = must_strdup("~/.tpl_user");
 	pl->m->prebuilt = 1;
 
 	set_multifile_in_db(pl->m, "term_expansion", 2);
@@ -3407,35 +3450,6 @@ void pl_destroy(prolog *pl)
 	destroy_module(pl->m);
 	free(pl);
 
-	if (!--g_tpl_count) {
-		for (int i = 0; i < MAX_STREAMS; i++) {
-			stream *str = &g_streams[i];
-
-			if (str->fp) {
-				if (i > 2)
-					fclose(str->fp);
-
-				free(str->filename);
-				free(str->mode);
-				free(str->name);
-				str->name = NULL;
-			}
-
-			if (str->p)
-				destroy_parser(str->p);
-
-			str->p = NULL;
-		}
-
-		memset(g_streams, 0, sizeof(g_streams));
-
-		while (g_modules) {
-			module *m = g_modules;
-			g_modules = m->next;
-			destroy_module(m);
-		}
-
-		free(g_pool);
-		g_pool = NULL;
-	}
+	if (!--g_tpl_count)
+		g_destroy();
 }
