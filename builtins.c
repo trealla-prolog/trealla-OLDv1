@@ -10161,15 +10161,3 @@ void *get_builtin(module *m, const char *name, unsigned arity)
 
 	return NULL;
 }
-
-void load_keywords(module *m)
-{
-	for (int idx = 0; g_iso_funcs[idx].name; idx++)
-		m->keywords[idx] = g_iso_funcs[idx].name;
-
-	if (m->iso_only)
-		return;
-
-	for (int idx = 0; g_other_funcs[idx].name; idx++)
-		m->keywords[idx] = g_other_funcs[idx].name;
-}
