@@ -117,7 +117,7 @@ static void check_slot(query *q, unsigned cnt)
 			idx_t save_slots = q->slots_size;
 			q->slots_size += q->slots_size / 2;
 
-			if ((sizeof(slot)*q->slots_size) > (1024LL*1024*1024)) {
+			if ((sizeof(slot)*q->slots_size) > (1024LL*1024*1024*2)) {
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_slot_space");
 				q->error = 1;
 				return;
@@ -1015,19 +1015,21 @@ void run_query(query *q)
 		Trace(q, q->st.curr_cell, q->retry?REDO:q->resume?NEXT:CALL);
 
 		if (!(q->st.curr_cell->flags&FLAG_BUILTIN)) {
-			if (!is_callable(q->st.curr_cell)) {
-				throw_error(q, q->st.curr_cell, "type_error", "callable");
-				break;
-			}
-
 			if (is_list(q->st.curr_cell)) {
 				consultall(q->m->p, q->st.curr_cell);
 				follow_me(q);
-			} else if (!match_rule(q)) {
-				q->retry = 1;
-				q->tot_retries++;
-				Trace(q, q->st.curr_cell, FAIL);
-				continue;
+			} else {
+				if (!is_callable(q->st.curr_cell)) {
+					throw_error(q, q->st.curr_cell, "type_error", "callable");
+					break;
+				}
+
+				if (!match_rule(q)) {
+					q->retry = 1;
+					q->tot_retries++;
+					Trace(q, q->st.curr_cell, FAIL);
+					continue;
+				}
 			}
 		} else {
 			if (!q->st.curr_cell->fn) {

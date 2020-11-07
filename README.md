@@ -466,21 +466,21 @@ Performance
 Elapsed time in seconds, smaller is better. Times are indicative only.
 Compiled with GCC 10.1.0 on Linux.
 
-	------------|---------|-----------|-----------|---------|
-	            |   tpl   |   swipl   |  gprolog  |   yap   |
-	            |  1.1.7  |   8.2.1   |    1.45   |   6.5   |
-	------------|---------|-----------|-----------|---------|
-	sieve       |   0.36  |   0.27    |   0.52    |   0.31  |
-	fibonacci   |   0.59  |   0.30    |   0.56    |   0.79  |
-	hanoi       |   1.15  |   0.39    |   1.18    |   0.85  |
-	queens      |   1.27  |   0.88    |   1.40    |   1.46  |
-	puzzle      |   0.35  |   0.17    |   0.28    |   0.22  |
-	chess       |  10.7   |   4.9     |   4.9     |   4.9   |
-	------------|---------|-----------|-----------|---------|
-	testindex1a |   1.35  |   1.31    |   0.70    |   4.94  |
-	testindex1b |   1.47  |   1.38    |   >300    |   5.10  |
-	testindex5  |   9.3   |  11.8     |   4.2     |  49.7   |
-	------------|---------|-----------|-----------|---------|
+	------------|---------|---------|-----------|-----------|---------|
+	            |   tpl   |   tpl   |   swipl   |  gprolog  |   yap   |
+	            |  1.1.7  | 1.2.99  |   8.2.1   |    1.45   |   6.5   |
+	------------|---------|---------|-----------|-----------|---------|
+	sieve       |   0.36  |   0.45  |   0.27    |   0.52    |   0.31  |
+	fibonacci   |   0.59  |   0.68  |   0.30    |   0.56    |   0.79  |
+	hanoi       |   1.15  |   2.04  |   0.39    |   1.18    |   0.85  |
+	queens      |   1.27  |   1.62  |   0.88    |   1.40    |   1.46  |
+	puzzle      |   0.35  |   0.48  |   0.17    |   0.28    |   0.22  |
+	chess       |  10.7   |  14.1   |   4.9     |   4.9     |   4.9   |
+	------------|---------|---------|-----------|-----------|---------|
+	testindex1a |   1.35  |   1.46  |   1.31    |   0.70    |   4.94  |
+	testindex1b |   1.47  |   1.61  |   1.38    |   >300    |   5.10  |
+	testindex5  |   9.3   |   9.64  |  11.8     |   4.2     |  49.7   |
+	------------|---------|---------|-----------|-----------|---------|
 
 	tpl -g "time(test5),halt" samples/sieve.pl -g
 	tpl -g "time(test),halt" samples/fib.pl
@@ -506,8 +506,8 @@ Compiled with GCC 10.1.0 on Linux.
 	time scryer-prolog -g test5,halt samples/sieve.pl
 	etc
 
-Note tpl is running slower than reported here, as new features added.
-These effects will be reviewed to see where improvements can be made.
+Note tpl is running slower than first reported here, as new features
+have been added and not optimized.
 
 Note swipl also has the -O option which can give improved times.
 
@@ -525,7 +525,7 @@ Yap came from *git clone https://github.com/vscosta/yap-6.3* and needs
 *cmake* installed.
 
 Scryer came from *cargo install scryer-prolog* (it takes a long time)
-and needs *m4* installed. I don't know if this a release or debug build.
+and needs *m4* installed. I don't know if this is a release or debug build.
 
 The Peirera (sic) benchmarks can be run:
 
