@@ -506,6 +506,14 @@ Compiled with GCC 10.1.0 on Linux.
 	time scryer-prolog -g test5,halt samples/sieve.pl
 	etc
 
+Note tpl is running slower than reported here, as new features added.
+These effects will be reviewed to see where improvements can be made.
+
+Note swipl also has the -O option which can give improved times.
+
+Note gprolog can also be compiled using 'gplc samples/sieve.pl' to
+achieve a significant speedup.
+
 Times for gprolog & scryer were done using the unix *time* command and
 thus include setup time, whereas the others were done with the predicate
 *time(Goal)*.
@@ -517,7 +525,7 @@ Yap came from *git clone https://github.com/vscosta/yap-6.3* and needs
 *cmake* installed.
 
 Scryer came from *cargo install scryer-prolog* (it takes a long time)
-and needs *m4* installed.
+and needs *m4* installed. I don't know if this a release or debug build.
 
 The Peirera (sic) benchmarks can be run:
 
