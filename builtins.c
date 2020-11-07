@@ -9728,13 +9728,36 @@ static int fn_current_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 
-	if (is_atom(p1)) {
-		const char *name = GET_STR(p1);
+	if (!q->retry) {
+		if (is_atom(p1)) {
+			const char *name = GET_STR(p1);
+			return !strcmp(name, q->m->name);
+		}
 
-		return !strcmp(name, q->m->name);
+		module *m = find_next_module(NULL);
+
+		if (!m)
+			return 0;
+
+		q->save_m = m;
+		make_choice(q);
+		cell tmp;
+		make_literal(&tmp, find_in_pool(m->name));
+		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		return 1;
 	}
 
-	return 0;
+	module *m = q->save_m->next;
+
+	if (!m)
+		return 0;
+
+	q->save_m = m;
+	make_choice(q);
+	cell tmp;
+	make_literal(&tmp, find_in_pool(m->name));
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	return 1;
 }
 
 static int fn_use_module_1(query *q)

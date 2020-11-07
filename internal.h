@@ -296,7 +296,7 @@ struct arena_ {
 
 struct query_ {
 	query *prev, *next, *parent;
-	module *m;
+	module *m, *save_m;
 	frame *frames;
 	slot *slots;
 	choice *choices;
@@ -419,6 +419,7 @@ int deconsult(const char *filename);
 module *create_module(const char *name);
 void destroy_module(module *m);
 module *find_module(const char *name);
+module *find_next_module(module *m);
 clause *asserta_to_db(module *m, term *t, int consulting);
 clause *assertz_to_db(module *m, term *t, int consulting);
 clause *retract_from_db(module *m, clause *r);

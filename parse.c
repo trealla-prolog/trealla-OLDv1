@@ -269,6 +269,14 @@ cell *list_tail(cell *l, cell *tmp)
 	return tmp;
 }
 
+module *find_next_module(module *m)
+{
+	if (!m)
+		return g_modules;
+
+	return m->next;
+}
+
 module *find_module(const char *name)
 {
 	for (module *m = g_modules; m; m = m->next) {
