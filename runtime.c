@@ -891,8 +891,8 @@ static int match_rule(query *q)
 			h = c->match;
 		else {
 			// For now convert it to a literal
-			idx_t off = find_in_pool(GET_STR(c));
-			c->val_off = off;
+			c->val_off = index_from_pool(GET_STR(c));
+                        if (c->val_off == ERR_IDX) abort();
 			c->val_type = TYPE_LITERAL;
 			h = NULL;
 		}

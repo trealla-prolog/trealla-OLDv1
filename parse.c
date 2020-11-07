@@ -539,8 +539,8 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 {
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
-		idx_t off = find_in_pool(GET_STR(c));
-		c->val_off = off;
+		c->val_off = index_from_pool(GET_STR(c));
+		if (c->val_off == ERR_IDX) abort();
 		c->val_type = TYPE_LITERAL;
 	}
 
@@ -641,8 +641,8 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 {
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
-		idx_t off = find_in_pool(GET_STR(c));
-		c->val_off = off;
+		c->val_off = index_from_pool(GET_STR(c));
+		if (c->val_off == ERR_IDX) abort();
 		c->val_type = TYPE_LITERAL;
 	}
 
