@@ -1081,7 +1081,7 @@ static void directives(parser *p, term *t)
 		return;
 	}
 
-	if (!strcmp(dirname, "use_module") && (c->arity == 1)) {
+	if (!strcmp(dirname, "use_module") && (c->arity == 2)) {
 		printf("Error: use_module/2 not implemented\n");
 	}
 
