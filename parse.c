@@ -3450,6 +3450,7 @@ prolog *pl_create()
 			!strcmp(lib->name, "lists")) {
 			size_t len = lib->end-lib->start;
 			char *src = malloc(len+1);
+                        ensure(src);
 			memcpy(src, lib->start, len);
 			src[len] = '\0';
 			module_load_text(pl->m, src);
