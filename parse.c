@@ -2036,7 +2036,8 @@ static int get_token(parser *p, int last_op)
 	char *dst = p->token;
 	int neg = 0;
 	p->val_type = TYPE_LITERAL;
-	p->string = p->was_quoted = p->quoted = p->is_variable = p->is_op = 0;
+        p->quoted = 0;
+	p->string = p->was_quoted =  p->is_variable = p->is_op = false;
 	*dst = '\0';
 
 	if (p->dq_consing && (*src == '"')) {
