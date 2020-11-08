@@ -8,4 +8,5 @@ main :-
 main :-
 	'$bar'(xyz).
 main :-
-	writeln(ok).
+	writeln(ok),
+	halt.
