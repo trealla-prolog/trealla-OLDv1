@@ -314,8 +314,10 @@ int net_getline(char **lineptr, size_t *n, stream *str)
 {
 #if USE_OPENSSL
 	if (str->ssl) {
-		if (!*lineptr)
+		if (!*lineptr) {
 			*lineptr = malloc(*n=1024);
+			ensure(*lineptr);
+		}
 
 		char *dst = *lineptr;
 		size_t dstlen = *n;
@@ -341,6 +343,7 @@ int net_getline(char **lineptr, size_t *n, stream *str)
 					size_t savelen = dst - *lineptr;
 					*n *= 2;
 					*lineptr = realloc(*lineptr, *n);
+					ensure(*lineptr);
 					dst = *lineptr + savelen;
 					dstlen = *n - savelen;
 				}
