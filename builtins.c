@@ -6410,6 +6410,7 @@ static int fn_savefile_2(query *q)
 		filename = GET_STR(p1);
 
 	FILE *fp = fopen(filename, "wb");
+	ensure(fp);
 	fwrite(GET_STR(p2), 1, LEN_STR(p2), fp);
 	fclose(fp);
 	free(src);
@@ -9267,11 +9268,13 @@ void do_db_load(module *m)
 
 	if (!stat(filename, &st)) {
 		FILE *fp = fopen(filename, "rb");
+		ensure(fp);
 		restore_db(m, fp);
 		fclose(fp);
 	}
 
 	m->fp = fopen(filename, "ab");
+	ensure(m->fp);
 }
 
 static int fn_db_load_0(query *q)
@@ -9297,6 +9300,7 @@ static int fn_db_save_0(query *q)
 	remove(filename);
 	rename(filename2, filename);
 	q->m->fp = fopen(filename, "ab");
+	ensure(q->m->fp);
 	return 1;
 }
 
