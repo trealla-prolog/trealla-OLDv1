@@ -22,7 +22,7 @@
 #include "utf8.h"
 
 static const unsigned INITIAL_TOKEN_SIZE = 100;
-static const unsigned INITIAL_POOL_SIZE = 4000;
+static const unsigned INITIAL_POOL_SIZE = 16000;
 static const unsigned INITIAL_NBR_CELLS = 100;
 static const unsigned INITIAL_NBR_HEAP = 8000;
 static const unsigned INITIAL_NBR_QUEUE = 1000;
@@ -151,9 +151,9 @@ static idx_t add_to_pool(const char *name)
 	idx_t offset = g_pool_offset;
 	size_t len = strlen(name);
 
-	if ((offset+len+1) >= g_pool_size) {
+	if ((offset+len+1+1) >= g_pool_size) {
 		size_t nbytes = g_pool_size * 2;
-		char* tmp = realloc(g_pool, nbytes);
+		char *tmp = realloc(g_pool, nbytes);
 		if (!tmp) return ERR_IDX;
 		g_pool = tmp;
 		memset(g_pool+g_pool_size, 0, nbytes-g_pool_size);
@@ -363,7 +363,8 @@ static rule *find_matching_rule_internal(module *m, cell *c, int quiet)
 	while (m) {
 		rule *h = find_rule(m, c);
 
-		if (!quiet && h && (m != save_m) && !h->is_public && strcmp(GET_STR(c), "dynamic")) {
+		if (!quiet && h && (m != save_m) && !h->is_public &&
+			strcmp(GET_STR(c), "dynamic") && strcmp(GET_STR(c), "module")) {
 			fprintf(stdout, "Error: not a public method %s/%u\n", GET_STR(c), c->arity);
 			break;
 		}
@@ -1419,7 +1420,8 @@ void parser_xref(parser *p, term *t, rule *parent)
 					c->flags |= FLAG_TAIL_REC;
 			}
 
-			if (h && (m != p->m) && !h->is_public && strcmp(GET_STR(c), "dynamic")) {
+			if (h && (m != p->m) && !h->is_public &&
+				strcmp(GET_STR(c), "dynamic") && strcmp(GET_STR(c), "module")) {
 				fprintf(stdout, "Error: not a public method %s/%u\n", GET_STR(c), c->arity);
 				//p->error = true;
 				break;
@@ -3320,8 +3322,7 @@ int pl_consult(prolog *pl, const char *filename)
 void* g_init(void)
 {
 	g_pool = calloc(g_pool_size=INITIAL_POOL_SIZE, 1);
-	if (g_pool)
-	{
+	if (g_pool)	{
 		g_pool_offset = 0;
 
 		g_false_s = index_from_pool("false");
@@ -3407,8 +3408,7 @@ prolog *pl_create()
 
 	srandom(time(0)+clock()+getpid());
 	prolog *pl = calloc(1, sizeof(prolog));
-	if (!pl)
-	{
+	if (!pl) {
 		if (!--g_tpl_count)
 			g_destroy();
 		return NULL;
