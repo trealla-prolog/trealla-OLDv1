@@ -8917,7 +8917,6 @@ static int fn_atomic_concat_3(query *q)
 		memcpy(dst+len1, src2, len2);
 		dst[nbytes] = '\0';
 		cell tmp = make_cstringn(q, dst, nbytes);
-		tmp.flags |= FLAG_STRING;
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		free(dst);
 		return 1;
