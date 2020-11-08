@@ -352,11 +352,12 @@ struct parser_ {
 	term *t;
 	char *token, *save_line, *srcptr;
 	size_t token_size, n_line, len_str;
-	int line_nbr, error, depth; //FIXME: cehteh: cant these be all unsigned?
 	int quoted;
+	int line_nbr, depth; //FIXME: cehteh: cant these be all unsigned?
 	unsigned nbr_vars;
 	uint8_t val_type;
 	int8_t dq_consing;
+	bool error;
 	bool was_quoted:1;
 	bool string:1;
 	bool run_init:1;
@@ -382,9 +383,9 @@ struct module_ {
 	struct op_table ops[MAX_USER_OPS+1];
         const char *keywords[1000];
 
-	struct {
+	struct { //cehteh: all as bitflags? check performance implications
 		int double_quote_codes, double_quote_chars, double_quote_atom;
-		int character_escapes;
+		bool character_escapes;
 		int rational_syntax_natural, prefer_rationals;
 	} flag;
 
@@ -423,8 +424,8 @@ module *create_module(const char *name);
 void destroy_module(module *m);
 module *find_module(const char *name);
 module *find_next_module(module *m);
-clause *asserta_to_db(module *m, term *t, int consulting);
-clause *assertz_to_db(module *m, term *t, int consulting);
+clause *asserta_to_db(module *m, term *t, bool consulting);
+clause *assertz_to_db(module *m, term *t, bool consulting);
 clause *retract_from_db(module *m, clause *r);
 clause *erase_from_db(module *m, uuid *ref);
 clause *find_in_db(module *m, uuid *ref);
@@ -438,7 +439,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 void make_choice(query *q);
 void make_barrier(query *q);
 void make_catcher(query *q, int type);
-void cut_me(query *q, int local_cut);
+void cut_me(query *q, bool local_cut);
 int check_builtin(module *m, const char *name, unsigned arity);
 void *get_builtin(module *m, const char *name, unsigned arity);
 void query_execute(query *q, term *t);
@@ -464,7 +465,7 @@ void run_query(query *q);
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx);
 cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix);
 void make_end(cell *tmp);
-int match_clause(query *q, cell *p1, idx_t p1_ctx);
+bool match_clause(query *q, cell *p1, idx_t p1_ctx);
 idx_t index_from_pool(const char *name);
 const char* cstr_from_pool(const char *name);
 void do_reduce(cell *n);

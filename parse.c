@@ -437,13 +437,13 @@ void set_multifile_in_db(module *m, const char *name, idx_t arity)
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
-	h->is_multifile = 1;
+	h->is_multifile = true;
 }
 
-static int is_multifile_in_db(const char *mod, const char *name, idx_t arity)
+static bool is_multifile_in_db(const char *mod, const char *name, idx_t arity)
 {
 	module *m = find_module(mod);
-	if (!m) return 0;
+	if (!m) return false;
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
@@ -451,8 +451,8 @@ static int is_multifile_in_db(const char *mod, const char *name, idx_t arity)
 
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
-	if (!h) return 0;
-	return h->is_multifile ? 1 : 0;
+	if (!h) return false;
+	return h->is_multifile ? true : false;
 }
 
 static int compkey(const void *ptr1, const void *ptr2)
@@ -535,7 +535,7 @@ static void reindex_rule(module *m, rule *h)
 	}
 }
 
-clause *asserta_to_db(module *m, term *t, int consulting)
+clause *asserta_to_db(module *m, term *t, bool consulting)
 {
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
@@ -586,16 +586,16 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 		h = create_rule(m, c);
 
 		if (!consulting) {
-			h->is_dynamic = 1;
+			h->is_dynamic = true;
 
 			if (m->make_public)
-				h->is_public = 1;
+				h->is_public = true;
 		}
 	}
 
 
 	if (m->prebuilt)
-		h->is_prebuilt = 1;
+		h->is_prebuilt = true;
 
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
@@ -629,7 +629,7 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 	t->cidx = 0;
 
 	if (h->is_persist)
-		r->t.is_persist = 1;
+		r->t.is_persist = true;
 
 	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1))
 		reindex_rule(m, h);
@@ -637,7 +637,7 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 	return r;
 }
 
-clause *assertz_to_db(module *m, term *t, int consulting)
+clause *assertz_to_db(module *m, term *t, bool consulting)
 {
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
@@ -688,14 +688,14 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 		h = create_rule(m, c);
 
 		if (!consulting)
-			h->is_dynamic = 1;
+			h->is_dynamic = true;
 
 		if (consulting && m->make_public)
-			h->is_public = 1;
+			h->is_public = true;
 	}
 
 	if (m->prebuilt)
-		h->is_prebuilt = 1;
+		h->is_prebuilt = true;
 
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
@@ -732,7 +732,7 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 	t->cidx = 0;
 
 	if (h->is_persist)
-		r->t.is_persist = 1;
+		r->t.is_persist = true;
 
 	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1))
 		reindex_rule(m, h);
@@ -743,7 +743,7 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 clause *retract_from_db(module *m, clause *r)
 {
 	r->parent->cnt--;
-	r->t.is_deleted = 1;
+	r->t.is_deleted = true;
 	m->dirty = 1;
 	return r;
 }
@@ -767,7 +767,7 @@ clause *erase_from_db(module *m, uuid *ref)
 {
 	clause *r = find_in_db(m, ref);
 	if (!r) return 0;
-	r->t.is_deleted = 1;
+	r->t.is_deleted = true;
 	m->dirty = 1;
 	return r;
 }
@@ -782,7 +782,7 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
-	h->is_dynamic = 1;
+	h->is_dynamic = true;
 
 	if (!h->index)
 		h->index = sl_create(compkey);
@@ -799,8 +799,8 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
-	h->is_dynamic = 1;
-	h->is_persist = 1;
+	h->is_dynamic = true;
+	h->is_persist = true;
 
 	if (!h->index)
 		h->index = sl_create(compkey);
@@ -865,7 +865,7 @@ parser *create_parser(module *m)
 		p->t = calloc(sizeof(term)+(sizeof(cell)*nbr_cells), 1);
 		if (!p->t) goto ealloc;
 		p->t->nbr_cells = nbr_cells;
-		p->start_term = 1;
+		p->start_term = true;
 		p->line_nbr = 1;
 		p->m = m;
 	}
@@ -951,7 +951,7 @@ query *create_task(query *q, cell *curr_cell)
 	{
 		subq->parent = q;
 		subq->st.fp = 1;
-		subq->is_task = 1;
+		subq->is_task = true;
 		subq->current_input = q->current_input;
 		subq->current_output = q->current_output;
 
@@ -1078,14 +1078,14 @@ void consultall(parser *p, cell *l)
 
 static void directives(parser *p, term *t)
 {
-	p->skip = 0;
+	p->skip = false;
 
 	if (!is_literal(t->cells))
 		return;
 
 	if (is_list(t->cells) && p->command) {
 		consultall(p, t->cells);
-		p->skip = 1;
+		p->skip = true;
 		return;
 	}
 
@@ -1100,7 +1100,7 @@ static void directives(parser *p, term *t)
 	const char *dirname = GET_STR(c);
 
 	if (!strcmp(dirname, "initialization") && (c->arity == 1)) {
-		p->run_init = 1;
+		p->run_init = true;
 		return;
 	}
 
@@ -1121,7 +1121,7 @@ static void directives(parser *p, term *t)
 
 		if (find_module(name)) {
 			fprintf(stdout, "Error: module already loaded: %s\n", name);
-			p->error = 1;
+			p->error = true;
 			return;
 		}
 
@@ -1144,7 +1144,7 @@ static void directives(parser *p, term *t)
 					tmp.arity += 2;
 
 				rule *h = create_rule(p->m, &tmp);
-				h->is_public = 1;
+				h->is_public = true;
 			}
 
 			p2 = LIST_TAIL(p2);
@@ -1256,7 +1256,7 @@ static void directives(parser *p, term *t)
 
 					if (!is_multifile_in_db(mod, name, c_arity->val_num)) {
 						fprintf(stdout, "Error: not multile %s:%s/%u\n", mod, name, (unsigned)c_arity->val_num);
-						p->error = 1;
+						p->error = true;
 						return;
 					}
 				}
@@ -1266,7 +1266,7 @@ static void directives(parser *p, term *t)
 				p1 += 1;
 			else {
 				fprintf(stdout, "Error: unknown module, line nbr %d\n", p->line_nbr);
-				p->error = 1;
+				p->error = true;
 				return;
 			}
 		}
@@ -1309,14 +1309,14 @@ static void directives(parser *p, term *t)
 				p->m->flag.double_quote_chars = 1;
 			} else {
 				fprintf(stdout, "Error: unknown value\n");
-				p->error = 1;
+				p->error = true;
 				return;
 			}
 		} else if (!strcmp(GET_STR(p1), "character_escapes")) {
 			if (!strcmp(GET_STR(p2), "true"))
-				p->m->flag.character_escapes = 1;
+				p->m->flag.character_escapes = true;
 			else if (!strcmp(GET_STR(p2), "false"))
-				p->m->flag.character_escapes = 0;
+				p->m->flag.character_escapes = false;
 		} else if (!strcmp(GET_STR(p1), "prefer_rationals")) {
 			if (!strcmp(GET_STR(p2), "true"))
 				p->m->flag.prefer_rationals = 1;
@@ -1339,7 +1339,7 @@ static void directives(parser *p, term *t)
 
 		if (!is_integer(p1) || !is_literal(p2) || !is_atom(p3)) {
 			fprintf(stdout, "Error: unknown op\n");
-			p->error = 1;
+			p->error = true;
 			return;
 		}
 
@@ -1421,7 +1421,7 @@ void parser_xref(parser *p, term *t, rule *parent)
 
 			if (h && (m != p->m) && !h->is_public && strcmp(GET_STR(c), "dynamic")) {
 				fprintf(stdout, "Error: not a public method %s/%u\n", GET_STR(c), c->arity);
-				//p->error = 1;
+				//p->error = true;
 				break;
 			}
 
@@ -1449,7 +1449,7 @@ static void parser_xref_db(parser *p)
 static void check_first_cut(parser *p)
 {
 	cell *c = get_body(p->t->cells);
-	int cut_only = 1;
+	int cut_only = true;
 
 	if (!c)
 		return;
@@ -1461,10 +1461,10 @@ static void check_first_cut(parser *p)
 		if (!strcmp(GET_STR(c), ","))
 			;
 		else if (!strcmp(GET_STR(c), "!")) {
-			p->t->first_cut = 1;
+			p->t->first_cut = true;
 			break;
 		} else {
-			cut_only = 0;
+			cut_only = false;
 			break;
 		}
 
@@ -1472,7 +1472,7 @@ static void check_first_cut(parser *p)
 	}
 
 	if (p->t->first_cut && cut_only)
-		p->t->cut_only = 1;
+		p->t->cut_only = true;
 }
 
 static idx_t get_varno(parser *p, const char *src)
@@ -1493,7 +1493,7 @@ static idx_t get_varno(parser *p, const char *src)
 
 	if ((offset+len+1) >= MAX_VAR_POOL_SIZE) {
 		fprintf(stdout, "Error: variable pool exhausted\n");
-		p->error = 1;
+		p->error = true;
 		return 0;
 	}
 
@@ -1503,13 +1503,13 @@ static idx_t get_varno(parser *p, const char *src)
 
 void parser_assign_vars(parser *p)
 {
-	p->start_term = 1;
+	p->start_term = true;
 	p->nbr_vars = 0;
 	memset(&p->vartab, 0, sizeof(p->vartab));
 	term *t = p->t;
 	t->nbr_vars = 0;
-	t->first_cut = 0;
-	t->cut_only = 0;
+	t->first_cut = false;
+	t->cut_only = false;
 
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
@@ -1521,7 +1521,7 @@ void parser_assign_vars(parser *p)
 
 		if (c->var_nbr == MAX_ARITY) {
 			fprintf(stdout, "Error: max vars per term reached\n");
-			p->error = 1;
+			p->error = true;
 			return;
 		}
 
@@ -1639,7 +1639,7 @@ static int attach_ops(parser *p, idx_t start_idx)
 
 			if (off >= p->t->cidx) {
 				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
-				//p->error = 1;
+				//p->error = true;
 				c->arity = 0;
 				return 0;
 			}
@@ -1654,7 +1654,7 @@ static int attach_ops(parser *p, idx_t start_idx)
 
 			if (off >= p->t->cidx) {
 				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
-				//p->error = 1;
+				//p->error = true;
 				return 0;
 			}
 
@@ -1711,9 +1711,9 @@ static void parser_dcg_rewrite(parser *p)
 
 	parser *p2 = create_parser(p->m);
 	if (!p2) abort();
-	p2->skip = 1;
+	p2->skip = true;
 	p2->srcptr = src;
-	p2->command = 0;
+	p2->command = false;
 	parser_tokenize(p2, 0, 0);
 	parser_attach(p2, 0);
 	parser_xref(p2, p2->t, NULL);
@@ -1751,14 +1751,14 @@ static void parser_dcg_rewrite(parser *p)
 
 	if (!src) {
 		fprintf(stdout, "Error: syntax error, dcg_translate, line nbr %d\n", line_nbr);
-		p->error = 1;
+		p->error = true;
 		return;
 	}
 
 	p2 = create_parser(p->m);
 	if (!p2) abort();
 	p2->srcptr = src;
-	p2->command = 0;
+	p2->command = false;
 	parser_tokenize(p2, 0, 0);
 	parser_attach(p2, 0);
 	free(src);
@@ -1895,7 +1895,7 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 			(isalpha(*s))  ||
 			0) {
 			fprintf(stdout, "Error: syntax error, parsing number, line %d\n", p->line_nbr);
-			p->error = 1;
+			p->error = true;
 		}
 
 		return 1;
@@ -1971,7 +1971,7 @@ static int get_hex(const char **srcptr, int n)
 const char *g_escapes = "\e\a\f\b\t\v\r\n";
 const char *g_anti_escapes = "eafbtvrn";
 
-static int get_escape(const char **_src, int *error)
+static int get_escape(const char **_src, bool *error)
 {
 	const char *src = *_src;
 	int ch = *src++;
@@ -1998,7 +1998,7 @@ static int get_escape(const char **_src, int *error)
 		if (!unicode && (*src++ != '\\')) {
 			fprintf(stdout, "Error: syntax error, closing \\ missing\n");
 			*_src = src;
-			*error = 1;
+			*error = true;
 			return 0;
 		}
 	}
@@ -2036,8 +2036,8 @@ static int get_token(parser *p, int last_op)
 	char *dst = p->token;
 	int neg = 0;
 	p->val_type = TYPE_LITERAL;
-        p->quoted = 0;
-	p->string = p->was_quoted =  p->is_variable = p->is_op = false;
+	p->quoted = 0;
+	p->string = p->was_quoted = p->is_variable = p->is_op = false;
 	*dst = '\0';
 
 	if (p->dq_consing && (*src == '"')) {
@@ -2063,7 +2063,7 @@ static int get_token(parser *p, int last_op)
 
 			if (p->error) {
 				fprintf(stdout, "Error: sysntax error, illegal character escape, line %d\n", p->line_nbr);
-				p->error = 1;
+				p->error = true;
 				return 0;
 			}
 		}
@@ -2136,13 +2136,13 @@ static int get_token(parser *p, int last_op)
 
 	do {
 		if (!p->comment && (src[0] == '/') && (src[1] == '*')) {
-			p->comment = 1;
+			p->comment = true;
 			src += 2;
 			continue;
 		}
 
 		if (p->comment && (src[0] == '*') && (src[1] == '/')) {
-			p->comment = 0;
+			p->comment = false;
 			src += 2;
 			p->srcptr = (char*)src;
 			return get_token(p, last_op);
@@ -2216,7 +2216,7 @@ static int get_token(parser *p, int last_op)
 
 	if ((*src == '"') || (*src == '`') || (*src == '\'')) {
 		p->quoted = *src++;
-		p->was_quoted = 1;
+		p->was_quoted = true;
 
 		if ((p->quoted == '"') && p->m->flag.double_quote_codes) {
 			*dst++ = '[';
@@ -2226,7 +2226,7 @@ static int get_token(parser *p, int last_op)
 			p->quoted = 0;
 			return 1;
 		} else if ((p->quoted == '"') && p->m->flag.double_quote_chars)
-			p->string = 1;
+			p->string = true;
 
 		for (;;) {
 			while (*src) {
@@ -2237,7 +2237,7 @@ static int get_token(parser *p, int last_op)
 						dst += put_char_utf8(dst, ch='[');
 						dst += put_char_utf8(dst, ch=']');
 						*dst = '\0';
-						p->was_quoted = p->string = 0;
+						p->was_quoted = p->string = false;
 					}
 
 					p->quoted = 0;
@@ -2255,7 +2255,7 @@ static int get_token(parser *p, int last_op)
 						}
 					} else {
 						fprintf(stdout, "Error: syntax error, illegal character escape, line %d\n", p->line_nbr);
-						p->error = 1;
+						p->error = true;
 						return 0;
 					}
 				}
@@ -2324,7 +2324,7 @@ static int get_token(parser *p, int last_op)
 		}
 
 		if (isupper(*p->token) || (*p->token == '_'))
-			p->is_variable = 1;
+			p->is_variable = true;
 		else if (get_op(p->m, p->token, NULL, NULL, 0))
 			p->is_op = 1;
 
@@ -2462,11 +2462,11 @@ int parser_tokenize(parser *p, int args, int consing)
 				if (p->consulting && !p->skip)
 					if (!assertz_to_db(p->m, p->t, 1)) {
 						printf("Error: '%s', line nbr %d\n", p->token, p->line_nbr);
-						p->error = 1;
+						p->error = true;
 					}
 			}
 
-			p->end_of_term = 1;
+			p->end_of_term = true;
 			last_op = 1;
 
 			if (p->one_shot)
@@ -2479,7 +2479,7 @@ int parser_tokenize(parser *p, int args, int consing)
 			save_idx = p->t->cidx;
 			cell *c = make_literal(p, g_dot_s);
 			c->arity = 2;
-			p->start_term = 1;
+			p->start_term = true;
 			parser_tokenize(p, 1, 1);
 
 			if (p->error)
@@ -2489,7 +2489,7 @@ int parser_tokenize(parser *p, int args, int consing)
 			c = p->t->cells + save_idx;
 			c->nbr_cells = p->t->cidx - save_idx;
 			fix_list(c);
-			p->start_term = 0;
+			p->start_term = false;
 			last_op = 0;
 			continue;
 		}
@@ -2499,7 +2499,7 @@ int parser_tokenize(parser *p, int args, int consing)
 			cell *c = make_literal(p, index_from_pool("{}"));
 			if (!c) abort();
 			c->arity = 1;
-			p->start_term = 1;
+			p->start_term = true;
 			parser_tokenize(p, 0, 0);
 
 			if (p->error)
@@ -2507,13 +2507,13 @@ int parser_tokenize(parser *p, int args, int consing)
 
 			c = p->t->cells+save_idx;
 			c->nbr_cells = p->t->cidx - save_idx;
-			p->start_term = 0;
+			p->start_term = false;
 			last_op = 0;
 			continue;
 		}
 
 		if (!p->quoted && !strcmp(p->token, "(")) {
-			p->start_term = 1;
+			p->start_term = true;
 			unsigned tmp_arity = parser_tokenize(p, is_func, 0);
 
 			if (p->error)
@@ -2527,14 +2527,14 @@ int parser_tokenize(parser *p, int args, int consing)
 
 			is_func = 0;
 			last_op = 0;
-			p->start_term = 0;
+			p->start_term = false;
 			continue;
 		}
 
 		if (!p->quoted && !strcmp(p->token, ",") && consing) {
 			cell *c = make_literal(p, g_dot_s);
 			c->arity = 2;
-			p->start_term = 1;
+			p->start_term = true;
 			last_op = 1;
 			continue;
 		}
@@ -2544,7 +2544,7 @@ int parser_tokenize(parser *p, int args, int consing)
 
 			if (arity > MAX_ARITY) {
 				fprintf(stdout, "Error: max arity reached, line %d: %s\n", p->line_nbr, p->srcptr);
-				p->error = 1;
+				p->error = true;
 				break;
 			}
 
@@ -2560,7 +2560,7 @@ int parser_tokenize(parser *p, int args, int consing)
 		if (!p->quoted && p->start_term &&
 			(!strcmp(p->token, ",") || !strcmp(p->token, "]") || !strcmp(p->token, ")") || !strcmp(p->token, "}"))) {
 			fprintf(stdout, "Error: syntax error, start of term expected, line %d: %s\n", p->line_nbr, p->srcptr);
-			p->error = 1;
+			p->error = true;
 			break;
 		}
 
@@ -2571,7 +2571,7 @@ int parser_tokenize(parser *p, int args, int consing)
 
 		if (p->is_variable && (*p->srcptr == '(')) {
 			fprintf(stdout, "Error: syntax error, line %d: %s\n", p->line_nbr, p->srcptr);
-			p->error = 1;
+			p->error = true;
 			break;
 		}
 
@@ -2613,12 +2613,12 @@ int parser_tokenize(parser *p, int args, int consing)
 #if 0
 		if (p->is_op && !precedence) {
 			fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, %s\n", p->line_nbr, p->token, p->srcptr);
-			p->error = 1;
+			p->error = true;
 			break;
 		}
 #endif
 
-		p->start_term = 0;
+		p->start_term = false;
 		cell *c = make_cell(p);
 		memset(c, 0, sizeof(cell));
 		c->nbr_cells = 1;
@@ -2745,7 +2745,7 @@ static int parser_run(parser *p, const char *src, int dump)
 	query_execute(q, p->t);
 
 	if (q->halt)
-		q->error = 0;
+		q->error = false;
 	else if (dump && !q->abort && q->status)
 		dump_vars(q, p);
 
@@ -2771,30 +2771,30 @@ static int parser_run(parser *p, const char *src, int dump)
 module *module_load_text(module *m, const char *src)
 {
 	parser *p = create_parser(m);
-	p->consulting = 1;
+	p->consulting = true;
 	p->srcptr = (char*)src;
 	parser_tokenize(p, 0, 0);
 
 	if (!p->error && !p->end_of_term && p->t->cidx) {
 		fprintf(stdout, "Error: syntax error, incomplete statement\n");
-		p->error = 1;
+		p->error = true;
 	}
 
 	if (!p->error) {
 		parser_xref_db(p);
 		int save = p->m->quiet;
 		p->m->quiet = 1;
-		p->m->halt = 0;
-		p->directive = 1;
+		p->m->halt = false;
+		p->directive = true;
 
 		if (p->run_init == 1) {
-			p->command = 1;
+			p->command = true;
 
 			if (parser_run(p, "initialization(G), G", 0))
-				p->m->halt = 1;
+				p->m->halt = true;
 		}
 
-		p->command = p->directive = 0;
+		p->command = p->directive = false;
 		p->m->quiet = save;
 	}
 
@@ -2806,7 +2806,7 @@ module *module_load_text(module *m, const char *src)
 int module_load_fp(module *m, FILE *fp)
 {
 	parser *p = create_parser(m);
-	p->consulting = 1;
+	p->consulting = true;
 	p->fp = fp;
 	int ok;
 
@@ -2823,23 +2823,23 @@ int module_load_fp(module *m, FILE *fp)
 
 	if (!p->error && !p->end_of_term && p->t->cidx) {
 		fprintf(stdout, "Error: syntax error, incomplete statement\n");
-		p->error = 1;
+		p->error = true;
 	}
 
 	if (!p->error) {
 		parser_xref_db(p);
 		int save = p->m->quiet;
 		p->m->quiet = 1;
-		p->directive = 1;
+		p->directive = true;
 
 		if (p->run_init == 1) {
-			p->command = 1;
+			p->command = true;
 
 			if (parser_run(p, "initialization(G), G", 0))
-				p->m->halt = 1;
+				p->m->halt = true;
 		}
 
-		p->command = p->directive = 0;
+		p->command = p->directive = false;
 		p->m->quiet = save;
 	}
 
@@ -2962,7 +2962,7 @@ module *create_module(const char *name)
 		if (!m->name) goto ealloc;
 		if (!m->p) goto ealloc;
 		m->flag.double_quote_chars = 1;
-		m->flag.character_escapes = 1;
+		m->flag.character_escapes = true;
 		m->flag.rational_syntax_natural = 0;
 		m->flag.prefer_rationals = 0;
 		m->user_ops = MAX_USER_OPS;
@@ -3274,12 +3274,12 @@ int deconsult(const char *filename)
 	return 1;
 }
 
-int get_halt(prolog *pl) { return pl->m->halt; }
+bool get_halt(prolog *pl) { return pl->m->halt; }
 int get_halt_code(prolog *pl) { return pl->m->halt_code; }
 int get_status(prolog *pl) { return pl->m->status; }
 int get_dump_vars(prolog *pl) { return pl->m->dump_vars; }
 
-void set_trace(prolog *pl) { pl->m->trace = 1; }
+void set_trace(prolog *pl) { pl->m->trace = true; }
 void set_quiet(prolog *pl) { pl->m->quiet = 1; }
 void set_stats(prolog *pl) { pl->m->stats = 1; }
 void set_opt(prolog *pl, int level) { pl->m->opt = level; }
@@ -3288,7 +3288,7 @@ int pl_eval(prolog *pl, const char *src)
 {
 	parser *p = create_parser(pl->curr_m);
 	if (!p) abort();
-	p->command = 1;
+	p->command = true;
 	int ok = parser_run(p, src, 1);
 	pl->curr_m = p->m;
 	destroy_parser(p);

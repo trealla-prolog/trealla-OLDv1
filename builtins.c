@@ -64,7 +64,7 @@ static int do_throw_term(query *q, cell *c);
 
 static int do_yield_0(query *q, int msecs)
 {
-	q->yielded = 1;
+	q->yielded = true;
 	q->tmo_msecs = get_time_in_usec() / 1000;
 	q->tmo_msecs += msecs;
 	make_choice(q);
@@ -674,7 +674,7 @@ static int fn_iso_fail_0(__attribute__((unused)) query *q)
 
 static int fn_iso_halt_0(query *q)
 {
-	q->halt_code = q->halt = q->error = 1;
+	q->halt_code = q->halt = q->error = true;
 	return 0;
 }
 
@@ -682,7 +682,7 @@ static int fn_iso_halt_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	q->halt_code = p1->val_num;
-	q->halt = q->error = 1;
+	q->halt = q->error = true;
 	return 0;
 }
 
@@ -1857,9 +1857,9 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	parser *p = str->p;
 	p->fp = str->fp;
 	p->t->cidx = 0;
-	p->start_term = 1;
-	p->one_shot = 1;
-	p->error = 0;
+	p->start_term = true;
+	p->one_shot = true;
+	p->error = false;
 	int flag_chars = q->m->flag.double_quote_chars;
 	int flag_codes = q->m->flag.double_quote_codes;
 	int flag_atom = q->m->flag.double_quote_atom;
@@ -1911,7 +1911,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 		break;
 	}
 
-	int save = q->m->flag.character_escapes;
+	bool save = q->m->flag.character_escapes;
 	q->m->flag.character_escapes = q->character_escapes;
 	parser_tokenize(p, 0, 0);
 	q->m->flag.character_escapes = save;
@@ -2085,8 +2085,8 @@ static int fn_iso_write_term_2(query *q)
 	if (q->nl)
 		net_write("\n", 1, str);
 
-	q->max_depth = q->quoted = q->nl = q->fullstop = 0;
-	q->ignore_ops = 0;
+	q->max_depth = q->quoted = q->nl = q->fullstop = false;
+	q->ignore_ops = false;
 	return !ferror(str->fp);
 }
 
@@ -2116,8 +2116,8 @@ static int fn_iso_write_term_3(query *q)
 	if (q->nl)
 		net_write("\n", 1, str);
 
-	q->max_depth = q->quoted = q->nl = q->fullstop = 0;
-	q->ignore_ops = 0;
+	q->max_depth = q->quoted = q->nl = q->fullstop = false;
+	q->ignore_ops = false;
 	return !ferror(str->fp);
 }
 
@@ -2229,18 +2229,18 @@ static int fn_iso_get_char_1(query *q)
 		return 0;
 	}
 
-	str->did_getc = 1;
+	str->did_getc = true;
 	str->ungetch = 0;
 
 	if (feof(str->fp)) {
-		str->did_getc = 0;
+		str->did_getc = false;
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (ch == '\n')
-		str->did_getc = 0;
+		str->did_getc = false;
 
 	char tmpbuf[10];
 	sprintf(tmpbuf, "%c", ch);
@@ -2269,18 +2269,18 @@ static int fn_iso_get_char_2(query *q)
 		return 0;
 	}
 
-	str->did_getc = 1;
+	str->did_getc = true;
 	str->ungetch = 0;
 
 	if (feof(str->fp)) {
-		str->did_getc = 0;
+		str->did_getc = false;
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (ch == '\n')
-		str->did_getc = 0;
+		str->did_getc = false;
 
 	char tmpbuf[10];
 	sprintf(tmpbuf, "%c", ch);
@@ -2308,11 +2308,11 @@ static int fn_iso_get_code_1(query *q)
 		return 0;
 	}
 
-	str->did_getc = 1;
+	str->did_getc = true;
 	str->ungetch = 0;
 
 	if ((ch == '\n') || (ch == EOF))
-		str->did_getc = 0;
+		str->did_getc = false;
 
 	cell tmp;
 	make_int(&tmp, ch);
@@ -2339,11 +2339,11 @@ static int fn_iso_get_code_2(query *q)
 		return 0;
 	}
 
-	str->did_getc = 1;
+	str->did_getc = true;
 	str->ungetch = 0;
 
 	if ((ch == '\n') || (ch == EOF))
-		str->did_getc = 0;
+		str->did_getc = false;
 
 	cell tmp;
 	make_int(&tmp, ch);
@@ -2369,11 +2369,11 @@ static int fn_iso_get_byte_1(query *q)
 		return 0;
 	}
 
-	str->did_getc = 1;
+	str->did_getc = true;
 	str->ungetch = 0;
 
 	if ((ch == '\n') || (ch == EOF))
-		str->did_getc = 0;
+		str->did_getc = false;
 
 	cell tmp;
 	make_int(&tmp, ch);
@@ -2400,11 +2400,11 @@ static int fn_iso_get_byte_2(query *q)
 		return 0;
 	}
 
-	str->did_getc = 1;
+	str->did_getc = true;
 	str->ungetch = 0;
 
 	if ((ch == '\n') || (ch == EOF))
-		str->did_getc = 0;
+		str->did_getc = false;
 
 	cell tmp;
 	make_int(&tmp, ch);
@@ -2551,9 +2551,9 @@ static void do_calc(query *q, cell *c)
 {
 	cell *save = q->st.curr_cell;
 	q->st.curr_cell = c;
-	q->calc = 1;
+	q->calc = true;
 	c->fn(q);
-	q->calc = 0;
+	q->calc = false;
 	q->st.curr_cell = save;
 }
 
@@ -3690,7 +3690,7 @@ static int cstring_cmp(const char *s1, size_t len1, const char *s2, size_t len2)
 static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
 {
 	if (depth == MAX_DEPTH) {
-		q->cycle_error = 1;
+		q->cycle_error = true;
 		return 0;
 	}
 
@@ -4457,7 +4457,7 @@ static void stash_me(query *q, term *t)
 		drop_choice(q);
 	else {
 		frame *g = GET_FRAME(q->st.curr_frame);
-		g->any_choices = 1;
+		g->any_choices = true;
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
 		ch->st.curr_clause = q->st.curr_clause;
@@ -4470,8 +4470,8 @@ static void stash_me(query *q, term *t)
 	g->curr_cell = NULL;
 	g->cgen = q->cgen;
 	g->overflow = 0;
-	g->any_choices = 0;
-	g->did_cut = 0;
+	g->any_choices = false;
+	g->did_cut = false;
 
 	q->st.sp += nbr_vars;
 }
@@ -4648,7 +4648,7 @@ static int do_abolish(query *q, cell *c)
 		r = save;
 	}
 
-	h->is_abolished = 1;
+	h->is_abolished = true;
 	sl_destroy(h->index);
 	h->index = NULL;
 	h->head = h->tail = NULL;
@@ -4988,7 +4988,7 @@ static int do_throw_term(query *q, cell *c)
 	fprintf(stdout, "\n");
 	q->m->dump_vars = 1;
 	q->exception = NULL;
-	q->error = 1;
+	q->error = true;
 	return 0;
 }
 
@@ -5375,9 +5375,9 @@ static int fn_iso_set_prolog_flag_2(query *q)
 		}
 	} else if (!strcmp(GET_STR(p1), "character_escapes")) {
 		if (!strcmp(GET_STR(p2), "true"))
-			q->m->flag.character_escapes = 1;
+			q->m->flag.character_escapes = true;
 		else if (!strcmp(GET_STR(p2), "false"))
-			q->m->flag.character_escapes = 0;
+			q->m->flag.character_escapes = false;
 	} else if (!strcmp(GET_STR(p1), "rational_syntax")) {
 		if (!strcmp(GET_STR(p2), "natural"))
 			q->m->flag.rational_syntax_natural = 1;
@@ -6038,7 +6038,7 @@ static int fn_sys_elapsed_0(query *q)
 
 static int fn_trace_0(query *q)
 {
-	q->trace = 1;
+	q->trace = true;
 	return 1;
 }
 
@@ -7286,8 +7286,8 @@ static int fn_spawn_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
 	query *task = create_task(q, tmp);
-	task->yielded = 1;
-	task->spawned = 1;
+	task->yielded = true;
+	task->spawned = true;
 	push_task(q->m, task);
 	return 1;
 }
@@ -7318,7 +7318,7 @@ static int fn_spawn_n(query *q)
 
 	cell *tmp = clone_to_heap(q, 0, tmp2, 0);
 	query *task = create_task(q, tmp);
-	task->yielded = task->spawned = 1;
+	task->yielded = task->spawned = true;
 	push_task(q->m, task);
 	return 1;
 }
@@ -7327,7 +7327,7 @@ static int fn_fork_0(query *q)
 {
 	cell *curr_cell = q->st.curr_cell + q->st.curr_cell->nbr_cells;
 	query *task = create_task(q, curr_cell);
-	task->yielded = 1;
+	task->yielded = true;
 	push_task(q->m, task);
 	return 0;
 }
@@ -7351,7 +7351,7 @@ static int fn_send_1(query *q)
 	}
 
 	alloc_queue(dstq, c);
-	q->yielded = 1;
+	q->yielded = true;
 	return 1;
 }
 
@@ -8434,15 +8434,15 @@ static int fn_edin_skip_1(query *q)
 	}
 
 	for (;;) {
-		str->did_getc = 1;
+		str->did_getc = true;
 		int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 		str->ungetch = 0;
 
 		if (feof(str->fp)) {
-			str->did_getc = 0;
+			str->did_getc = false;
 			break;
 		} else if (ch == '\n')
-			str->did_getc = 0;
+			str->did_getc = false;
 
 		if (ch == p1->val_num)
 			break;
@@ -8464,15 +8464,15 @@ static int fn_edin_skip_2(query *q)
 	}
 
 	for (;;) {
-		str->did_getc = 1;
+		str->did_getc = true;
 		int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 		str->ungetch = 0;
 
 		if (feof(str->fp)) {
-			str->did_getc = 0;
+			str->did_getc = false;
 			break;
 		} else if (ch == '\n')
-			str->did_getc = 0;
+			str->did_getc = false;
 
 		if (ch == p1->val_num)
 			break;
@@ -9188,7 +9188,7 @@ static void restore_db(module *m, FILE *fp)
 {
 	parser *p = create_parser(m);
 	query *q = create_query(m, 0);
-	p->one_shot = 1;
+	p->one_shot = true;
 	p->fp = fp;
 	m->loading = 1;
 

@@ -53,7 +53,7 @@ static void check_trail(query *q)
 
 			if ((sizeof(trail)*q->trails_size) > (1024LL*1024*1024)) {
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_trail_space");
-				q->error = 1;
+				q->error = true;
 				return;
 			}
 
@@ -73,7 +73,7 @@ static void check_choice(query *q)
 
 			if ((sizeof(choice)*q->choices_size) > (1024LL*1024*1024)) {
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_choice_space");
-				q->error = 1;
+				q->error = true;
 				return;
 			}
 
@@ -94,7 +94,7 @@ static void check_frame(query *q)
 
 			if ((sizeof(frame)*q->frames_size) > (1024LL*1024*1024)) {
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_frame_space");
-				q->error = 1;
+				q->error = true;
 				return;
 			}
 
@@ -119,7 +119,7 @@ static void check_slot(query *q, unsigned cnt)
 
 			if ((sizeof(slot)*q->slots_size) > (1024LL*1024*1024*2)) {
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_slot_space");
-				q->error = 1;
+				q->error = true;
 				return;
 			}
 
@@ -217,9 +217,9 @@ void make_choice(query *q)
 	choice *ch = q->choices + curr_choice;
 	ch->st = q->st;
 	ch->cgen = ++q->cgen;
-	ch->local_cut = 0;
-	ch->catchme1 = 0;
-	ch->catchme2 = 0;
+	ch->local_cut = false;
+	ch->catchme1 = false;
+	ch->catchme2 = false;
 	ch->pins = 0;
 
 	q->st.iter = NULL;
@@ -238,7 +238,7 @@ void make_barrier(query *q)
 	if (q->error) return;
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
-	ch->local_cut = 1;
+	ch->local_cut = true;
 }
 
 void make_catcher(query *q, int retry)
@@ -249,9 +249,9 @@ void make_catcher(query *q, int retry)
 	choice *ch = q->choices + curr_choice;
 
 	if (retry == 1)
-		ch->catchme1 = 1;
+		ch->catchme1 = true;
 	else if (retry == 2)
-		ch->catchme2 = 1;
+		ch->catchme2 = true;
 }
 
 static void trim_heap(query *q, const choice *ch)
@@ -348,7 +348,7 @@ void make_frame(query *q, unsigned nbr_vars, int last_match)
 	frame *g = GET_FRAME(q->st.curr_frame);
 
 	if (!last_match)
-		g->any_choices = 1;
+		g->any_choices = true;
 
 	idx_t new_frame = q->st.fp++;
 	g = GET_FRAME(new_frame);
@@ -356,8 +356,8 @@ void make_frame(query *q, unsigned nbr_vars, int last_match)
 	g->curr_cell = q->st.curr_cell;
 	g->cgen = q->cgen;
 	g->overflow = 0;
-	g->any_choices = 0;
-	g->did_cut = 0;
+	g->any_choices = false;
+	g->did_cut = false;
 
 	q->st.sp += nbr_vars;
 	q->st.curr_frame = new_frame;
@@ -369,8 +369,8 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	g->nbr_slots = nbr_vars;
 	g->nbr_vars = nbr_vars;
 	g->overflow = 0;
-	g->any_choices = 0;
-	g->did_cut = 0;
+	g->any_choices = true;
+	g->did_cut = false;
 
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
@@ -449,13 +449,13 @@ static void commit_me(query *q, term *t)
 	q->nv_mask = 0;
 }
 
-void cut_me(query *q, int local_cut)
+void cut_me(query *q, bool local_cut)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g->any_choices = !local_cut;	// ???
 
 	if (!local_cut)
-		g->did_cut = 1;
+		g->did_cut = true;
 
 	while (q->cp) {
 		idx_t curr_choice = q->cp - 1;
@@ -719,7 +719,7 @@ static const struct dispatch g_disp[] =
 int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
 {
 	if (depth == MAX_DEPTH) {
-		q->cycle_error = 1;
+		q->cycle_error = true;
 		return 1;
 	}
 
@@ -735,7 +735,7 @@ int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 
 	if (is_variable(p1)) {
 		if (is_structure(p2) && (p2_ctx >= q->st.curr_frame))
-			q->no_tco = 1;
+			q->no_tco = true;
 
 		set_var(q, p1, p1_ctx, p2, p2_ctx);
 		return 1;
@@ -743,7 +743,7 @@ int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 
 	if (is_variable(p2)) {
 		if (is_structure(p1) && (p1_ctx >= q->st.curr_frame))
-			q->no_tco = 1;
+			q->no_tco = true;
 
 		set_var(q, p2, p2_ctx, p1, p1_ctx);
 		return 1;
@@ -772,7 +772,7 @@ static void next_key(query *q)
 		q->st.curr_clause = q->st.curr_clause->next;
 }
 
-static int match_full(query *q, cell *p1, idx_t p1_ctx)
+static bool match_full(query *q, cell *p1, idx_t p1_ctx)
 {
 	cell *head = get_head(p1);
 	rule *h = find_matching_rule(q->m, head);
@@ -787,14 +787,14 @@ static int match_full(query *q, cell *p1, idx_t p1_ctx)
 	else {
 		if (!h->is_dynamic) {
 			throw_error(q, p1, "permission_error", "access_private_procedure");
-			return 0;
+			return false;
 		}
 
 		q->st.curr_clause = h->head;
 	}
 
 	if (!q->st.curr_clause)
-		return 0;
+		return false;
 
 	make_choice(q);
 
@@ -806,19 +806,19 @@ static int match_full(query *q, cell *p1, idx_t p1_ctx)
 		cell *c = t->cells;
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
-		q->no_tco = 0;
+		q->no_tco = false;
 
 		if (unify_structure(q, p1, p1_ctx, c, q->st.fp, 0))
-			return 1;
+			return true;
 
 		undo_me(q);
 	}
 
 	drop_choice(q);
-	return 0;
+	return false;
 }
 
-int match_clause(query *q, cell *p1, idx_t p1_ctx)
+bool match_clause(query *q, cell *p1, idx_t p1_ctx)
 {
 	if (q->retry)
 		q->st.curr_clause = q->st.curr_clause->next;
@@ -840,7 +840,7 @@ int match_clause(query *q, cell *p1, idx_t p1_ctx)
 
 			if (get_op(q->m, name, &tmp_optype, &tmp_userop, 0)) {
 				throw_error(q, p1, "permission_error", "access_control_structure");
-				return 0;
+				return false;
 			} else
 				set_dynamic_in_db(q->m, name, p1->arity);
 
@@ -849,7 +849,7 @@ int match_clause(query *q, cell *p1, idx_t p1_ctx)
 		else {
 			if (!h->is_dynamic) {
 				throw_error(q, p1, "permission_error", "access_private_procedure");
-				return 0;
+				return false;
 			}
 
 			q->st.curr_clause = h->head;
@@ -857,7 +857,7 @@ int match_clause(query *q, cell *p1, idx_t p1_ctx)
 	}
 
 	if (!q->st.curr_clause)
-		return 0;
+		return false;
 
 	make_choice(q);
 
@@ -869,19 +869,19 @@ int match_clause(query *q, cell *p1, idx_t p1_ctx)
 		cell *head = get_head(t->cells);
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
-		q->no_tco = 0;
+		q->no_tco = false;
 
 		if (unify_structure(q, p1, p1_ctx, head, q->st.fp, 0))
-			return 1;
+			return true;
 
 		undo_me(q);
 	}
 
 	drop_choice(q);
-	return 0;
+	return false;
 }
 
-static int match_rule(query *q)
+static bool match_rule(query *q)
 {
 	if (!q->retry) {
 		cell *c = q->st.curr_cell;
@@ -906,9 +906,9 @@ static int match_rule(query *q)
 					!(is_literal(c) && !strcmp(GET_STR(c), "initialization")))
 					throw_error(q, c, "existence_error", "procedure");
 				else
-					q->error = 1;
+					q->error = true;
 
-				return 0;
+				return false;
 			}
 		}
 
@@ -940,7 +940,7 @@ static int match_rule(query *q)
 		next_key(q);
 
 	if (!q->st.curr_clause)
-		return 0;
+		return false;
 
 	make_choice(q);
 
@@ -952,28 +952,28 @@ static int match_rule(query *q)
 		cell *head = get_head(t->cells);
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
-		q->no_tco = 0;
+		q->no_tco = false;
 
 		if (unify_structure(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp, 0)) {
 			Trace(q, q->st.curr_cell, EXIT);
 
 			if (q->error)
-				return 0;
+				return false;
 
 			commit_me(q, t);
-			return 1;
+			return true;
 		}
 
 		undo_me(q);
 	}
 
 	drop_choice(q);
-	return 0;
+	return false;
 }
 
 void run_query(query *q)
 {
-	q->yielded = 0;
+	q->yielded = false;
 
 	while (!q->error) {
 		if (g_tpl_interrupt) {
@@ -989,13 +989,13 @@ void run_query(query *q)
 
 			if (ch == 'a') {
 				g_tpl_interrupt = 0;
-				q->abort = 1;
+				q->abort = true;
 				break;
 			}
 
 			if (ch == 'e') {
 				signal(SIGINT, NULL);
-				q->halt = 1;
+				q->halt = true;
 				break;
 			}
 		}
@@ -1058,7 +1058,7 @@ void run_query(query *q)
 			follow_me(q);
 		}
 
-		q->resume = 0;
+		q->resume = false;
 		q->retry = 0;
 
 		while (!q->st.curr_cell || is_end(q->st.curr_cell)) {
@@ -1067,7 +1067,7 @@ void run_query(query *q)
 				return;
 			}
 
-			q->resume = 1;
+			q->resume = true;
 			follow_me(q);
 		}
 	}
@@ -1081,8 +1081,8 @@ void query_execute(query *q, term *t)
 	q->st.curr_frame = 0;
 	q->st.fp = 1;
 	q->time_started = get_time_in_usec();
-	q->abort = 0;
-	q->cycle_error = 0;
+	q->abort = false;
+	q->cycle_error = false;
 
 	frame *g = q->frames + q->st.curr_frame;
 	g->nbr_vars = t->nbr_vars;
