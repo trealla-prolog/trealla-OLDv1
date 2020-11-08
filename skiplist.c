@@ -5,6 +5,13 @@
 
 #include "skiplist.h"
 
+#ifdef NDEBUG
+#define message(fmt, ...)
+#else
+#define message(fmt, ...) fprintf(stderr, "%s:%d %s: " fmt "\n", __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+#endif
+#define ensure(cond, ...) do { if (!(cond)) {message( #cond " failed " __VA_ARGS__); abort();}} while (0)
+
 typedef struct keyval_ keyval_t;
 typedef struct slnode_ slnode_t;
 
@@ -211,7 +218,7 @@ int sl_set(skiplist *l, const void *key, const void *val)
 	}
 
 	q = new_node_of_level(k + 1);
-	if (!q) abort();
+	ensure(q);
 	q->bkt[0].key = (void*)key;
 	q->bkt[0].val = (void*)val;
 	q->nbr = 1;
@@ -287,7 +294,7 @@ int sl_app(skiplist *l, const void *key, const void *val)
 	}
 
 	q = new_node_of_level(k + 1);
-	if (!q) abort();
+	ensure(q);
 	q->bkt[0].key = (void*)key;
 	q->bkt[0].val = (void*)val;
 	q->nbr = 1;
@@ -472,7 +479,7 @@ sliter *sl_findkey(skiplist *l, const void *key)
 
 	if (i >= MAX_ITERS) {
 		iter = malloc(sizeof(sliter));
-		if (!iter) abort();
+		ensure(iter);
 		iter->dynamic = 1;
 	}
 	else {

@@ -47,9 +47,9 @@ int net_connect(const char *hostname, unsigned port, int udp, int nodelay)
 	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = udp ? SOCK_DGRAM : SOCK_STREAM;
-    hints.ai_flags = hostname ? 0 : AI_PASSIVE;
-    char svc[20];
-    sprintf(svc, "%u", port);
+	hints.ai_flags = hostname ? 0 : AI_PASSIVE;
+	char svc[20];
+	sprintf(svc, "%u", port);
 
 	if ((status = getaddrinfo(hostname, svc, &hints, &result)) != 0)
 		return -1;
@@ -60,10 +60,10 @@ int net_connect(const char *hostname, unsigned port, int udp, int nodelay)
 		if (fd == -1)
 		   continue;
 
-        int flag = 1;
-        setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *)&flag, sizeof(flag));
-        int flag2 = 1;
-        setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, (char *)&flag2, sizeof(flag2));
+		int flag = 1;
+		setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *)&flag, sizeof(flag));
+		int flag2 = 1;
+		setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, (char *)&flag2, sizeof(flag2));
 
 		if (connect(fd, rp->ai_addr, rp->ai_addrlen) != -1)
 			break;
@@ -89,16 +89,16 @@ int net_connect(const char *hostname, unsigned port, int udp, int nodelay)
 
 int net_server(const char *hostname, unsigned port, int udp, const char *keyfile, const char *certfile)
 {
-        (void) hostname;
+	(void) hostname;
 	struct addrinfo hints, *result, *rp;
 	int fd, status;
 
 	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = udp ? SOCK_DGRAM : SOCK_STREAM;
-        hints.ai_flags = AI_PASSIVE;
-        char svc[20];
-        sprintf(svc, "%u", port);
+	hints.ai_flags = AI_PASSIVE;
+	char svc[20];
+	sprintf(svc, "%u", port);
 
 	if ((status = getaddrinfo(NULL, svc, &hints, &result)) != 0) {
 		perror("getaddrinfo");
@@ -111,10 +111,10 @@ int net_server(const char *hostname, unsigned port, int udp, const char *keyfile
 		if (fd == -1)
 		   continue;
 
-        int flag = 1;
-        setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *)&flag, sizeof(flag));
-        int flag2 = 1;
-        setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, (char *)&flag2, sizeof(flag2));
+		int flag = 1;
+		setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *)&flag, sizeof(flag));
+		int flag2 = 1;
+		setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, (char *)&flag2, sizeof(flag2));
 
 		if (bind(fd, rp->ai_addr, rp->ai_addrlen) == 0)
 			break;
@@ -156,8 +156,8 @@ int net_server(const char *hostname, unsigned port, int udp, const char *keyfile
 		SSL_CTX_set_default_verify_paths(g_ctx);
 	}
 #else
-        (void) keyfile;
-        (void) certfile;
+	(void) keyfile;
+	(void) certfile;
 #endif
 
 	listen(fd, -1);
@@ -229,7 +229,7 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 			return NULL;
 		}
 	} else {
-        SSL_set_tlsext_host_name(ssl, hostname);
+		SSL_set_tlsext_host_name(ssl, hostname);
 
 		if (SSL_connect(ssl) <= 0) {
 			fprintf(stderr, "SSL_connect failed\n");
@@ -240,11 +240,11 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 	}
 	return ssl;
 #else
-        (void) fd;
-        (void) hostname;
-        (void) is_server;
-        (void) level;
-        (void) certfile;
+	(void) fd;
+	(void) hostname;
+	(void) is_server;
+	(void) level;
+	(void) certfile;
 	return NULL;
 #endif
 }
@@ -314,8 +314,10 @@ int net_getline(char **lineptr, size_t *n, stream *str)
 {
 #if USE_OPENSSL
 	if (str->ssl) {
-		if (!*lineptr)
+		if (!*lineptr) {
 			*lineptr = malloc(*n=1024);
+			ensure(*lineptr);
+		}
 
 		char *dst = *lineptr;
 		size_t dstlen = *n;
@@ -341,6 +343,7 @@ int net_getline(char **lineptr, size_t *n, stream *str)
 					size_t savelen = dst - *lineptr;
 					*n *= 2;
 					*lineptr = realloc(*lineptr, *n);
+					ensure(*lineptr);
 					dst = *lineptr + savelen;
 					dstlen = *n - savelen;
 				}
