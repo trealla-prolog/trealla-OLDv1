@@ -9759,7 +9759,7 @@ static int fn_current_module_1(query *q)
 		q->save_m = m;
 		make_choice(q);
 		cell tmp;
-		make_literal(&tmp, find_in_pool(m->name));
+		make_literal(&tmp, index_from_pool(m->name));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return 1;
 	}
@@ -9772,7 +9772,7 @@ static int fn_current_module_1(query *q)
 	q->save_m = m;
 	make_choice(q);
 	cell tmp;
-	make_literal(&tmp, find_in_pool(m->name));
+	make_literal(&tmp, index_from_pool(m->name));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return 1;
 }
