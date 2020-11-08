@@ -654,6 +654,12 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 		return NULL;
 	}
 
+	if (is_cstring(c)) {
+		c->val_off = index_from_pool(GET_STR(c));
+		if (c->val_off == ERR_IDX) abort();
+		c->val_type = TYPE_LITERAL;
+	}
+
 	if (!is_quoted(c) && strchr(GET_STR(c), ':') && 0) {
 		const char *src = GET_STR(c);
 		char mod[256], name[256];
