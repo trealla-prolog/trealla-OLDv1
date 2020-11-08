@@ -322,7 +322,7 @@ struct query_ {
 	uint8_t retry, halt_code, status;
 	uint8_t current_input, current_output;
 	int8_t quoted;
-	bool keysort:1;
+	//bool keysort:1;  //cehteh: unused?
 	bool resume:1;
 	bool no_tco:1;
 	bool error:1;
@@ -352,8 +352,8 @@ struct parser_ {
 	term *t;
 	char *token, *save_line, *srcptr;
 	size_t token_size, n_line, len_str;
-	int quoted;
 	int line_nbr, depth; //FIXME: cehteh: cant these be all unsigned?
+	int quoted;  //cehteh: can be unsigned?
 	unsigned nbr_vars;
 	uint8_t val_type;
 	int8_t dq_consing;
@@ -381,7 +381,7 @@ struct module_ {
 	parser *p;
 	FILE *fp;
 	struct op_table ops[MAX_USER_OPS+1];
-        const char *keywords[1000];
+	const char *keywords[1000];
 
 	struct { //cehteh: all as bitflags? check performance implications
 		int double_quote_codes, double_quote_chars, double_quote_atom;
@@ -390,7 +390,7 @@ struct module_ {
 	} flag;
 
 	int prebuilt, halt, halt_code, status, trace, quiet, dirty;
-	int user_ops, opt, stats, iso_only, use_persist, loading;
+	int user_ops, opt, stats, iso_only, use_persist, loading; //cehteh: stats can be bool
 	int make_public, dump_vars;  //note by cehteh: investigate: can these be unsigned (or bool)
 	unsigned cpu_count;
 };
