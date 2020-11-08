@@ -224,7 +224,7 @@ static cell *alloc_tmp_heap(query *q, idx_t nbr_cells)
 	while ((q->tmphp + nbr_cells) >= q->tmph_size) {
 		q->tmph_size += q->tmph_size / 2;
 		q->tmp_heap = realloc(q->tmp_heap, sizeof(cell)*q->tmph_size);
-		assert(q->tmp_heap);
+		ensure(q->tmp_heap);
 	}
 
 	cell *c = q->tmp_heap + q->tmphp;
@@ -251,7 +251,7 @@ static cell *alloc_heap(query *q, idx_t nbr_cells)
 
 	if ((q->st.hp + nbr_cells) >= q->h_size) {
 		arena *a = calloc(1, sizeof(arena));
-		assert(a);
+		ensure(a);
 		a->next = q->arenas;
 
 		if (q->h_size < nbr_cells) {
@@ -260,7 +260,7 @@ static cell *alloc_heap(query *q, idx_t nbr_cells)
 		}
 
 		a->heap = calloc(q->h_size, sizeof(cell));
-		assert(a->heap);
+		ensure(a->heap);
 		a->h_size = q->h_size;
 		a->nbr = q->st.anbr++;
 		q->arenas = a;
@@ -284,7 +284,7 @@ static cell *alloc_cstringn(query *q, const char *s, size_t n)
 	tmp->flags = FLAG_BLOB;
 	tmp->nbr_cells = 1;
 	tmp->val_str = malloc(n+1);
-	assert(tmp->val_str);
+	ensure(tmp->val_str);
 	memcpy(tmp->val_str, s, n);
 	tmp->val_str[n] = '\0';
 	tmp->len_str = n;
@@ -323,7 +323,7 @@ static cell *alloc_queue(query *q, const cell *c)
 	while ((q->qp[0]+c->nbr_cells) >= q->q_size[0]) {
 		q->q_size[0] += q->q_size[0] / 2;
 		q->queue[0] = realloc(q->queue[0], sizeof(cell)*q->q_size[0]);
-		assert(q->queue[0]);
+		ensure(q->queue[0]);
 	}
 
 	cell *dst = q->queue[0] + q->qp[0];
@@ -349,7 +349,7 @@ static cell *alloc_queuen(query *q, int qnbr, const cell *c)
 	while ((q->qp[qnbr]+c->nbr_cells) >= q->q_size[qnbr]) {
 		q->q_size[qnbr] += q->q_size[qnbr] / 2;
 		q->queue[qnbr] = realloc(q->queue[qnbr], sizeof(cell)*q->q_size[qnbr]);
-		assert(q->queue[qnbr]);
+		ensure(q->queue[qnbr]);
 	}
 
 	cell *dst = q->queue[qnbr] + q->qp[qnbr];
@@ -400,7 +400,7 @@ static cell tmp_cstringn(const char *s, size_t n)
 	tmp.val_type = TYPE_CSTRING;
 	tmp.flags = FLAG_BLOB;
 	tmp.val_str = malloc(n+1);
-	assert(tmp.val_str);
+	ensure(tmp.val_str);
 	memcpy(tmp.val_str, s, n);
 	tmp.val_str[n] = '\0';
 	tmp.len_str = n;
@@ -439,7 +439,7 @@ static cell make_string(const char *s, size_t n)
 	tmp.val_type = TYPE_CSTRING;
 	tmp.flags = FLAG_BLOB;
 	tmp.val_str = malloc(n+1);
-	assert(tmp.val_str);
+	ensure(tmp.val_str);
 	memcpy(tmp.val_str, s, n);
 	tmp.val_str[n] = '\0';
 	tmp.len_str = n;
@@ -467,7 +467,7 @@ static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 		if (is_blob(p1) && !is_const_cstring(p1)) {
 			size_t len = LEN_STR(p1);
 			tmp->val_str = malloc(len+1);
-			assert(tmp->val_str);
+			ensure(tmp->val_str);
 			memcpy(tmp->val_str, p1->val_str, len);
 			tmp->val_str[len] = '\0';
 			return;
@@ -553,7 +553,7 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 		if (is_blob(p1) && !is_const_cstring(p1)) {
 			size_t len = LEN_STR(p1);
 			tmp->val_str = malloc(len+1);
-			assert(tmp->val_str);
+			ensure(tmp->val_str);
 			memcpy(tmp->val_str, p1->val_str, len);
 			tmp->val_str[len] = '\0';
 		}
@@ -609,11 +609,11 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 	q->quoted = 1;
 	size_t len = write_term_to_buf(q, NULL, 0, &tmp, c_ctx, 1, 0, 0);
 	char *dst = malloc(len+1);
-	assert(dst);
+	ensure(dst);
 	write_term_to_buf(q, dst, len+1, &tmp, c_ctx, 1, 0, 0);
 	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q->st.curr_cell) + 20;
 	char *dst2 = malloc(len2+1);
-	assert(dst2);
+	ensure(dst2);
 	q->quoted = save_quoted;
 
 	if (is_variable(c)) {
@@ -844,7 +844,7 @@ static int fn_iso_atom_chars_2(query *q)
 
 		size_t bufsiz;
 		char *tmpbuf = malloc(bufsiz=256), *dst = tmpbuf;
-		assert(tmpbuf);
+		ensure(tmpbuf);
 		*tmpbuf = '\0';
 
 		while (tail) {
@@ -863,7 +863,7 @@ static int fn_iso_atom_chars_2(query *q)
 
 			if ((nlen+10) > bufsiz) {
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				assert(tmpbuf);
+				ensure(tmpbuf);
 				tmpbuf[nlen] = '\0';
 			}
 
@@ -927,7 +927,7 @@ static int fn_iso_atom_codes_2(query *q)
 
 		size_t nbytes;
 		char *tmpbuf = malloc(nbytes=256), *dst = tmpbuf;
-		assert(tmpbuf);
+		ensure(tmpbuf);
 
 		while (tail) {
 			tail = deref(q, tail, p2_ctx);
@@ -945,7 +945,7 @@ static int fn_iso_atom_codes_2(query *q)
 
 			if ((nlen+strlen(ch)) >= nbytes) {
 				tmpbuf = realloc(tmpbuf, nbytes*=2);
-				assert(tmpbuf);
+				ensure(tmpbuf);
 			}
 
 			dst = tmpbuf+nlen;
@@ -1321,7 +1321,7 @@ static int fn_iso_atom_concat_3(query *q)
 
 		size_t nbytes = len1 + len2;
 		char *dst = malloc(nbytes + 1);
-		assert(dst);
+		ensure(dst);
 		memcpy(dst, src1, len1);
 		memcpy(dst+len1, src2, len2);
 		dst[nbytes] = '\0';
@@ -1525,7 +1525,7 @@ static int fn_iso_set_stream_position_2(query *q)
 static char *chars_list_to_string(query *q, cell *p_chars, idx_t p_chars_ctx, size_t len)
 {
 	char *src = malloc(len+1);
-	assert(src);
+	ensure(src);
 	char *dst = src;
 
 	while (is_list(p_chars)) {
@@ -4701,7 +4701,7 @@ static int fn_iso_asserta_1(query *q)
 
 	if (nbr_cells > p->t->nbr_cells) {
 		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
-		assert(p->t);
+		ensure(p->t);
 		p->t->nbr_cells = nbr_cells;
 	}
 
@@ -4726,7 +4726,7 @@ static int fn_iso_assertz_1(query *q)
 
 	if (nbr_cells > p->t->nbr_cells) {
 		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
-		assert(p->t);
+		ensure(p->t);
 		p->t->nbr_cells = nbr_cells;
 	}
 
@@ -5663,7 +5663,7 @@ static int fn_iso_bagof_3(query *q)
 	if (!q->tmpq[q->st.qnbr]) {
 		idx_t nbr_cells = queuen_used(q);
 		q->tmpq[q->st.qnbr] = malloc(sizeof(cell)*nbr_cells);
-		assert(q->tmpq[q->st.qnbr]);
+		ensure(q->tmpq[q->st.qnbr]);
 		copy_cells(q->tmpq[q->st.qnbr], get_queuen(q), nbr_cells);
 		q->tmpq_size[q->st.qnbr] = nbr_cells;
 	}
@@ -5835,7 +5835,7 @@ static int do_asserta_2(query *q)
 
 	if (nbr_cells > p->t->nbr_cells) {
 		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
-		assert(p->t);
+		ensure(p->t);
 		p->t->nbr_cells = nbr_cells;
 	}
 
@@ -5885,7 +5885,7 @@ static int do_assertz_2(query *q)
 
 	if (nbr_cells > p->t->nbr_cells) {
 		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
-		assert(p->t);
+		ensure(p->t);
 		p->t->nbr_cells = nbr_cells;
 	}
 
@@ -6412,7 +6412,7 @@ static int fn_loadfile_2(query *q)
 	}
 
 	char *s = malloc(st.st_size+1);
-	assert(s);
+	ensure(s);
 
 	if (fread(s, 1, st.st_size, fp) != (size_t)st.st_size) {
 		throw_error(q, p1, "domain_error", "cannot_read");
@@ -6929,7 +6929,7 @@ static int fn_bread_3(query *q)
 	if (is_integer(p1) && (p1->val_num > 0)) {
 		if (!str->data) {
 			str->data = malloc(p1->val_num+1);
-			assert(str->data);
+			ensure(str->data);
 			str->data_len = 0;
 		}
 
@@ -6965,14 +6965,14 @@ static int fn_bread_3(query *q)
 	if (is_integer(p1)) {
 		if (!str->data) {
 			str->data = malloc((str->alloc_nbytes=1024*1)+1);
-			assert(str->data);
+			ensure(str->data);
 			str->data_len = 0;
 		}
 
 		size_t nbytes = net_read(str->data, str->alloc_nbytes, str);
 		str->data[nbytes] = '\0';
 		str->data = realloc(str->data, nbytes+1);
-		assert(str->data);
+		ensure(str->data);
 		cell tmp = make_string(str->data, nbytes);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(str->data);
@@ -6982,7 +6982,7 @@ static int fn_bread_3(query *q)
 
 	if (!str->data) {
 		str->data = malloc((str->alloc_nbytes=1024*1)+1);
-		assert(str->data);
+		ensure(str->data);
 		str->data_len = 0;
 	}
 
@@ -6997,7 +6997,7 @@ static int fn_bread_3(query *q)
 
 		if (str->alloc_nbytes == str->data_len) {
 			str->data = realloc(str->data, (str->alloc_nbytes*=2)+1);
-			assert(str->data);
+			ensure(str->data);
 		}
 	}
 
@@ -7057,7 +7057,7 @@ static int fn_read_term_from_chars_2(query *q)
 	if (is_cstring(p_chars)) {
 		len = LEN_STR(p_chars);
 		src = malloc(len+1);
-		assert(src);
+		ensure(src);
 		memcpy(src, GET_STR(p_chars), len);
 		src[len] = '\0';
 	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx, 0)) > 0) {
@@ -7096,7 +7096,7 @@ static int fn_read_term_from_chars_3(query *q)
 	if (is_cstring(p_chars)) {
 		len = LEN_STR(p_chars);
 		src = malloc(len+1+1);	// final +1 is for look-ahead
-		assert(src);
+		ensure(src);
 		memcpy(src, GET_STR(p_chars), len);
 		src[len] = '\0';
 	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx, 0)) > 0) {
@@ -7344,7 +7344,7 @@ static int fn_send_1(query *q)
 		if (is_blob(c2)) {
 			size_t nbytes = c2->len_str;
 			char *tmp = malloc(nbytes + 1);
-			assert(tmp);
+			ensure(tmp);
 			memcpy(tmp, c2->val_str, nbytes+1);
 			c2->val_str = tmp;
 		}
@@ -7525,7 +7525,7 @@ static int fn_absolute_file_name_3(query *q)
 		*dst = '\0';
 		char *ptr = getenv(envbuf);
 		tmpbuf = malloc(strlen(s)+strlen(ptr)+1);
-		assert(tmpbuf);
+		ensure(tmpbuf);
 		dst = tmpbuf;
 		memcpy(tmpbuf, ptr, strlen(ptr));
 		dst += strlen(ptr);
@@ -7610,7 +7610,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 	const char *src = srcbuf;
 	size_t bufsiz;
 	char *tmpbuf = malloc(bufsiz=strlen(src)+100);
-	assert(tmpbuf);
+	ensure(tmpbuf);
 	char *dst = tmpbuf;
 	cell *c = NULL;
 	size_t nbytes = bufsiz;
@@ -7709,7 +7709,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				assert(tmpbuf);
+				ensure(tmpbuf);
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -7727,7 +7727,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				assert(tmpbuf);
+				ensure(tmpbuf);
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -7748,7 +7748,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				assert(tmpbuf);
+				ensure(tmpbuf);
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -7766,7 +7766,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				assert(tmpbuf);
+				ensure(tmpbuf);
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -7784,7 +7784,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				assert(tmpbuf);
+				ensure(tmpbuf);
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -7802,7 +7802,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				assert(tmpbuf);
+				ensure(tmpbuf);
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -7825,7 +7825,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				assert(tmpbuf);
+				ensure(tmpbuf);
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -7984,7 +7984,7 @@ static int do_b64encode_2(query *q)
 	const char *str = GET_STR(p1);
 	size_t len = LEN_STR(p1);
 	char *dstbuf = malloc((len*3)+1);
-	assert(dstbuf);
+	ensure(dstbuf);
 	b64_encode(str, len, &dstbuf, 0, 0);
 	cell tmp = make_string(dstbuf, strlen(dstbuf));
 	free(dstbuf);
@@ -7998,7 +7998,7 @@ static int do_b64decode_2(query *q)
 	const char *str = GET_STR(p2);
 	size_t len = LEN_STR(p1);
 	char *dstbuf = malloc(len+1);
-	assert(dstbuf);
+	ensure(dstbuf);
 	b64_decode(str, len, &dstbuf);
 	cell tmp = make_string(dstbuf, strlen(dstbuf));
 	if (is_string(p1)) tmp.flags |= FLAG_STRING;
@@ -8066,7 +8066,7 @@ static int do_urlencode_2(query *q)
 	const char *str = GET_STR(p1);
 	size_t len = LEN_STR(p1);
 	char *dstbuf = malloc((len*3)+1);
-	assert(dstbuf);
+	ensure(dstbuf);
 	url_encode(str, len, dstbuf);
 	cell tmp = make_string(dstbuf, strlen(dstbuf));
 	free(dstbuf);
@@ -8080,7 +8080,7 @@ static int do_urldecode_2(query *q)
 	const char *str = GET_STR(p1);
 	size_t len = LEN_STR(p1);
 	char *dstbuf = malloc(len+1);
-	assert(dstbuf);
+	ensure(dstbuf);
 	url_decode(str, dstbuf);
 	cell tmp = make_string(dstbuf, strlen(dstbuf));
 	free(dstbuf);
@@ -8107,7 +8107,7 @@ static int fn_string_lower_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	size_t len = LEN_STR(p1);
 	char *tmps = malloc(len+1);
-	assert(tmps);
+	ensure(tmps);
 	memcpy(tmps, GET_STR(p1), len);
 	tmps[len] = '\0';
 	char *s = tmps;
@@ -8128,7 +8128,7 @@ static int fn_string_upper_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	size_t len = LEN_STR(p1);
 	char *tmps = malloc(len+1);
-	assert(tmps);
+	ensure(tmps);
 	memcpy(tmps, GET_STR(p1), len);
 	tmps[len] = '\0';
 	char *s = tmps;
@@ -8870,7 +8870,7 @@ static int fn_atomic_concat_3(query *q)
 
 		size_t nbytes = len1 + len2;
 		char *dst = malloc(nbytes + 1);
-		assert(dst);
+		ensure(dst);
 		memcpy(dst, src1, len1);
 		memcpy(dst+len1, src2, len2);
 		dst[nbytes] = '\0';
@@ -8929,7 +8929,7 @@ static int fn_replace_4(query *q)
 	int s1len = LEN_STR(p2);
 	int s2len = LEN_STR(p3);
 	char *dstbuf = (char*)malloc(dstlen + 1);
-	assert(dstbuf);
+	ensure(dstbuf);
 	char *dst = dstbuf;
 
 	while (srclen > 0) {
@@ -8938,7 +8938,7 @@ static int fn_replace_4(query *q)
 				size_t save_len = dst - dstbuf;
 				dstlen = ((save_len)*2) + s2len;
 				dstbuf = (char *)realloc(dstbuf, dstlen + 1);
-				assert(dstbuf);
+				ensure(dstbuf);
 				dst = dstbuf + save_len;
 			}
 
@@ -8952,7 +8952,7 @@ static int fn_replace_4(query *q)
 				size_t max_len = dst - dstbuf;
 				dstlen = max_len *= 2;
 				dstbuf = (char *)realloc(dstbuf, dstlen + 1);
-				assert(dstbuf);
+				ensure(dstbuf);
 				dst = dstbuf + max_len;
 			}
 
