@@ -123,7 +123,7 @@ static struct op_table g_ops[] =
 };
 
 
-static char* must_strdup(const char* src)
+static char* ensure_strdup(const char* src)
 {
 	char* ret = strdup(src);
 	ensure(ret);
@@ -172,6 +172,17 @@ idx_t index_from_pool(const char *name)
 		return offset;
 
 	return add_to_pool(name);
+}
+
+static idx_t ensure_index_from_pool(const char *name)
+{
+	idx_t offset = is_in_pool(name);
+	if (offset != ERR_IDX)
+		return offset;
+
+	offset = add_to_pool(name);
+	ensure(offset != ERR_IDX);
+	return offset;
 }
 
 const char* cstr_from_pool(const char *name)
@@ -2680,7 +2691,7 @@ int parser_tokenize(parser *p, int args, int consing)
 					memcpy(c->val_str, p->token, p->len_str);
 					c->val_str[p->len_str] = '\0';
 				} else {
-					c->val_str = must_strdup(p->token);
+					c->val_str = ensure_strdup(p->token);
 					c->len_str = strlen(p->token);
 				}
 			}
@@ -2897,7 +2908,7 @@ int module_load_file(module *m, const char *filename)
 	}
 
 	free(m->filename);
-	m->filename = must_strdup(filename);
+	m->filename = ensure_strdup(filename);
 	module_load_fp(m, fp);
 	fclose(fp);
 	return 1;
@@ -3329,37 +3340,37 @@ void* g_init(void)
 	if (g_pool)	{
 		g_pool_offset = 0;
 
-		g_false_s = index_from_pool("false");
-		g_true_s = index_from_pool("true");
-		g_empty_s = index_from_pool("");
-		g_anon_s = index_from_pool("_");
-		g_dot_s = index_from_pool(".");
-		g_cut_s = index_from_pool("!");
-		g_nil_s = index_from_pool("[]");
-		g_braces_s = index_from_pool("{}");
-		g_fail_s = index_from_pool("fail");
-		g_clause_s = index_from_pool(":-");
-		g_sys_elapsed_s = index_from_pool("$elapsed");
-		g_sys_queue_s = index_from_pool("$queue");
-		g_eof_s = index_from_pool("end_of_file");
-		g_lt_s = index_from_pool("<");
-		g_gt_s = index_from_pool(">");
-		g_eq_s = index_from_pool("=");
+		g_false_s = ensure_index_from_pool("false");
+		g_true_s = ensure_index_from_pool("true");
+		g_empty_s = ensure_index_from_pool("");
+		g_anon_s = ensure_index_from_pool("_");
+		g_dot_s = ensure_index_from_pool(".");
+		g_cut_s = ensure_index_from_pool("!");
+		g_nil_s = ensure_index_from_pool("[]");
+		g_braces_s = ensure_index_from_pool("{}");
+		g_fail_s = ensure_index_from_pool("fail");
+		g_clause_s = ensure_index_from_pool(":-");
+		g_sys_elapsed_s = ensure_index_from_pool("$elapsed");
+		g_sys_queue_s = ensure_index_from_pool("$queue");
+		g_eof_s = ensure_index_from_pool("end_of_file");
+		g_lt_s = ensure_index_from_pool("<");
+		g_gt_s = ensure_index_from_pool(">");
+		g_eq_s = ensure_index_from_pool("=");
 
 		g_streams[0].fp = stdin;
-		g_streams[0].filename = must_strdup("stdin");
-		g_streams[0].name = must_strdup("user_input");
-		g_streams[0].mode = must_strdup("read");
+		g_streams[0].filename = ensure_strdup("stdin");
+		g_streams[0].name = ensure_strdup("user_input");
+		g_streams[0].mode = ensure_strdup("read");
 
 		g_streams[1].fp = stdout;
-		g_streams[1].filename = must_strdup("stdout");
-		g_streams[1].name = must_strdup("user_output");
-		g_streams[1].mode = must_strdup("append");
+		g_streams[1].filename = ensure_strdup("stdout");
+		g_streams[1].name = ensure_strdup("user_output");
+		g_streams[1].mode = ensure_strdup("append");
 
 		g_streams[2].fp = stderr;
-		g_streams[2].filename = must_strdup("stderr");
-		g_streams[2].name = must_strdup("user_error");
-		g_streams[2].mode = must_strdup("append");
+		g_streams[2].filename = ensure_strdup("stderr");
+		g_streams[2].name = ensure_strdup("user_error");
+		g_streams[2].mode = ensure_strdup("append");
 	}
 	return g_pool;
 }
@@ -3422,7 +3433,7 @@ prolog *pl_create()
 	pl->m = create_module("user");
 	ensure(pl->m);
 	pl->curr_m = pl->m;
-	pl->m->filename = must_strdup("~/.tpl_user");
+	pl->m->filename = ensure_strdup("~/.tpl_user");
 	pl->m->prebuilt = 1;
 
 	set_multifile_in_db(pl->m, "term_expansion", 2);
