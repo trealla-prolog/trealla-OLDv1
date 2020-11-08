@@ -392,6 +392,7 @@ struct module_ {
 	int prebuilt, halt, halt_code, status, trace, quiet, dirty;
 	int user_ops, opt, stats, iso_only, use_persist, loading; //cehteh: stats can be bool
 	int make_public, dump_vars;  //note by cehteh: investigate: can these be unsigned (or bool)
+	bool error;
 	unsigned cpu_count;
 };
 

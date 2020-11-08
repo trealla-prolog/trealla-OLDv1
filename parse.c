@@ -2940,13 +2940,16 @@ static void make_rule(module *m, const char *src)
 {
 	m->prebuilt = 1;
 	parser *p = create_parser(m);
-	if (!p) abort();
-
-	p->consulting = 1;
-	p->srcptr = (char*)src;
-	parser_tokenize(p, 0, 0);
-	m->prebuilt = 0;
-	destroy_parser(p);
+	if (p)
+	{
+		p->consulting = true;
+		p->srcptr = (char*)src;
+		parser_tokenize(p, 0, 0);
+		m->prebuilt = 0;
+		destroy_parser(p);
+	} else {
+		m->error = true;
+	}
 }
 
 module *create_module(const char *name)
@@ -2967,8 +2970,8 @@ module *create_module(const char *name)
 		m->flag.prefer_rationals = 0;
 		m->user_ops = MAX_USER_OPS;
 		m->cpu_count = CPU_COUNT;
+		m->error = false;
 
-		//NOTE: cehteh: how to handle make_rule failures gracefully?
 		make_rule(m, "call(G) :- G.");
 		make_rule(m, "format(F) :- format(F, []).");
 
@@ -3205,10 +3208,18 @@ module *create_module(const char *name)
 		make_rule(m, "client(U,H,P,S) :- client(U,H,P,S,[]).");
 		make_rule(m, "server(H,S) :- server(H,S,[]).");
 
+		if (m->error)
+			goto ealloc;
+
 		parser *p = create_parser(m);
-		p->consulting = 1;
-		parser_xref_db(p);
-		destroy_parser(p);
+		if (p)
+		{
+			p->consulting = true;
+			parser_xref_db(p);
+			destroy_parser(p);
+		} else {
+			goto ealloc;
+		}
 	}
 	return m;
 ealloc:
