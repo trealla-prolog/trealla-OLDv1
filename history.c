@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <assert.h>
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -12,6 +13,15 @@
 
 #include <termios.h>
 #include <unistd.h>
+
+#ifdef NDEBUG
+#define message(fmt, ...)
+#define message_when(cond, ...)
+#else
+#define message(fmt, ...) fprintf(stderr, "%s:%d %s: " fmt "\n", __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+#define message_when(cond, ...) do { if (cond) {message(""__VA_ARGS__);}} while (0)
+#endif
+#define ensure(cond, ...) do { if (!(cond)) {message( #cond " failed " __VA_ARGS__); abort();}} while (0)
 
 int history_getch(void)
 {
@@ -40,6 +50,7 @@ LOOP:
 	if (cmd) {
 		size_t n = strlen(cmd) + strlen(line);
 		cmd = realloc(cmd, n+1);
+                ensure(cmd);
 		strcat(cmd, line);
 	} else {
 		cmd = line;

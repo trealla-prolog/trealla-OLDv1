@@ -58,7 +58,7 @@ static void check_trail(query *q)
 			}
 
 			q->trails = realloc(q->trails, sizeof(trail)*q->trails_size);
-			if (!q->trails) abort();
+			ensure(q->trails);
 		}
 	}
 }
@@ -78,7 +78,7 @@ static void check_choice(query *q)
 			}
 
 			q->choices = realloc(q->choices, sizeof(choice)*q->choices_size);
-			if (!q->choices) abort();
+			ensure(q->choices);
 		}
 	}
 }
@@ -100,7 +100,7 @@ static void check_frame(query *q)
 
 			assert(q->frames_size);
 			q->frames = realloc(q->frames, sizeof(frame)*q->frames_size);
-			if (!q->frames) abort();
+			ensure(q->frames);
 			memset(q->frames+save_frame, 0, sizeof(frame)*(q->frames_size-save_frame));
 		}
 	}
@@ -124,7 +124,7 @@ static void check_slot(query *q, unsigned cnt)
 			}
 
 			q->slots = realloc(q->slots, sizeof(slot)*q->slots_size);
-			if (!q->slots) abort();
+			ensure(q->slots);
 			memset(q->slots+save_slots, 0, sizeof(slot)*(q->slots_size-save_slots));
 		}
 	}
@@ -892,7 +892,7 @@ static bool match_rule(query *q)
 		else {
 			// For now convert it to a literal
 			c->val_off = index_from_pool(GET_STR(c));
-                        if (c->val_off == ERR_IDX) abort();
+                        ensure(c->val_off != ERR_IDX);
 			c->val_type = TYPE_LITERAL;
 			h = NULL;
 		}
