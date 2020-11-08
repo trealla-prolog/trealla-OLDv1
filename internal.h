@@ -51,6 +51,15 @@ typedef uint32_t idx_t;
 
 #define STREAM_BUFLEN 1024
 
+// Debug helpers
+#ifdef NDEBUG
+#define message(fmt, ...)
+#else
+#define message(fmt, ...) fprintf(stderr, "%s:%d %s: " fmt "\n", __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+#endif
+#define ensure(cond, ...) do { if (!(cond)) {message( #cond " failed " __VA_ARGS__); abort();}} while (0)
+
+
 #define GET_FRAME(i) (q->frames+(i))
 #define GET_SLOT(g,i) ((i) < g->nbr_slots ? q->slots+g->ctx+(i) : q->slots+g->overflow+((i)-g->nbr_slots))
 

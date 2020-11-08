@@ -8684,8 +8684,7 @@ static int fn_rdiv_2(query *q)
 
 static void do_real_to_fraction(double v, double accuracy, int_t *num, int_t *den)
 {
-	if (accuracy <= 0.0 || accuracy >= 1.0)
-		abort();
+	ensure(accuracy > 0.0 && accuracy < 1.0);
 
 	int_t sign = v < 0 ? -1 : 1;
 

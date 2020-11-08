@@ -126,7 +126,7 @@ static struct op_table g_ops[] =
 static char* must_strdup(const char* src)
 {
 	char* ret = strdup(src);
-	if (!ret) abort();
+	ensure(ret);
 
 	return ret;
 }
@@ -216,7 +216,7 @@ int get_op(module *m, const char *name, unsigned *val_type, int *userop, int hin
 int set_op(module *m, const char *name, unsigned val_type, unsigned precedence)
 {
 	name = cstr_from_pool(name);
-	if (!name) abort();
+	ensure(name);
 
 	struct op_table *ptr = m->ops;
 
@@ -414,7 +414,7 @@ static rule *get_rule(module *m)
 	}
 
 	rule *h = calloc(1, sizeof(rule));
-	if (!h) abort();
+	ensure(h);
 	h->next = m->head;
 	m->head = h;
 	return h;
@@ -433,7 +433,7 @@ void set_multifile_in_db(module *m, const char *name, idx_t arity)
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
-	if (tmp.val_off == ERR_IDX) abort();
+	ensure(tmp.val_off != ERR_IDX);
 
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
@@ -448,7 +448,7 @@ static bool is_multifile_in_db(const char *mod, const char *name, idx_t arity)
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
-	if (tmp.val_off == ERR_IDX) abort();
+	ensure(tmp.val_off != ERR_IDX);
 
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
@@ -527,8 +527,7 @@ static void reindex_rule(module *m, rule *h)
 {
 	(void) m;
 	h->index = sl_create(compkey);
-	if(!h->index)
-		abort();
+	ensure(h->index);
 
 	for (clause *r = h->head; r; r = r->next) {
 		cell *c = get_head(r->t.cells);
@@ -541,7 +540,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
 		c->val_off = index_from_pool(GET_STR(c));
-		if (c->val_off == ERR_IDX) abort();
+		ensure (c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
 	}
 
@@ -571,7 +570,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 		}
 
 		c->val_off = index_from_pool(name);
-		if (c->val_off == ERR_IDX) abort();
+		ensure(c->val_off != ERR_IDX);
 	}
 
 	rule *h = find_rule(m, c);
@@ -600,7 +599,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
-	if (!r) abort();
+	ensure (r);
 	r->parent = h;
 	memcpy(&r->t, t, sizeof(term));
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
@@ -643,7 +642,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
 		c->val_off = index_from_pool(GET_STR(c));
-		if (c->val_off == ERR_IDX) abort();
+		ensure(c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
 	}
 
@@ -656,7 +655,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 
 	if (is_cstring(c)) {
 		c->val_off = index_from_pool(GET_STR(c));
-		if (c->val_off == ERR_IDX) abort();
+		ensure(c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
 	}
 
@@ -679,7 +678,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 		}
 
 		c->val_off = index_from_pool(name);
-		if (c->val_off == ERR_IDX) abort();
+		ensure(c->val_off != ERR_IDX);
 	}
 
 	rule *h = find_rule(m, c);
@@ -706,7 +705,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
-	if (!r) abort();
+	ensure(r);
 	r->parent = h;
 	memcpy(&r->t, t, sizeof(term));
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
@@ -784,7 +783,7 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
-	if (tmp.val_off == ERR_IDX) abort();
+	ensure(tmp.val_off != ERR_IDX);
 
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
@@ -793,8 +792,7 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 
 	if (!h->index)
 		h->index = sl_create(compkey);
-	if (!h->index)
-		abort();
+	ensure(h->index);
 }
 
 static void set_persist_in_db(module *m, const char *name, unsigned arity)
@@ -802,7 +800,7 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
-	if (tmp.val_off == ERR_IDX) abort();
+	ensure(tmp.val_off == ERR_IDX);
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
@@ -811,8 +809,7 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 
 	if (!h->index)
 		h->index = sl_create(compkey);
-	if (!h->index)
-		abort();
+	ensure(h->index);
 
 	m->use_persist = 1;
 }
@@ -854,7 +851,7 @@ static cell *make_cell(parser *p)
 	if (p->t->cidx == p->t->nbr_cells) {
 		idx_t nbr_cells = p->t->nbr_cells * 2;
 		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*nbr_cells));
-		if (!p->t) abort();
+		ensure(p->t);
 		p->t->nbr_cells = nbr_cells;
 	}
 
@@ -1410,7 +1407,7 @@ void parser_xref(parser *p, term *t, rule *parent)
 			if (m)
 			{
 				c->val_off = index_from_pool(tmpbuf2);
-				if (c->val_off == ERR_IDX) abort();
+				ensure(c->val_off != ERR_IDX);
 			}
 			else
 				m = p->m;
@@ -1711,14 +1708,14 @@ static void parser_dcg_rewrite(parser *p)
 	query *q = create_query(p->m, 0);
 	char *dst = write_term_to_strbuf(q, p->t->cells, 0, -1);
 	char *src = malloc(strlen(dst)+256);
-	if (!src) abort();
+	ensure(src);
 	sprintf(src, "dcg_translate((%s),_TermOut).", dst);
 	free(dst);
 
 	// Being conservative here and using temp parser/query objects...
 
 	parser *p2 = create_parser(p->m);
-	if (!p2) abort();
+	ensure(p2);
 	p2->skip = true;
 	p2->srcptr = src;
 	p2->command = false;
@@ -1764,7 +1761,7 @@ static void parser_dcg_rewrite(parser *p)
 	}
 
 	p2 = create_parser(p->m);
-	if (!p2) abort();
+	ensure(p2);
 	p2->srcptr = src;
 	p2->command = false;
 	parser_tokenize(p2, 0, 0);
@@ -2204,7 +2201,7 @@ static int get_token(parser *p, int last_op)
 		if ((size_t)(src-tmpptr) >= p->token_size) {
 			size_t len = dst - p->token;
 			p->token = realloc(p->token, p->token_size*=2);
-			if (!p->token) abort();
+			ensure(p->token);
 			dst = p->token+len;
 		}
 
@@ -2273,7 +2270,7 @@ static int get_token(parser *p, int last_op)
 				if (len >= p->token_size) {
 					size_t len = dst - p->token;
 					p->token = realloc(p->token, p->token_size*=2);
-					if (!p->token) abort();
+					ensure(p->token);
 					dst = p->token+len;
 				}
 
@@ -2322,7 +2319,7 @@ static int get_token(parser *p, int last_op)
 			if (len >= p->token_size) {
 				size_t len = dst - p->token;
 				p->token = realloc(p->token, p->token_size*=2);
-				if (!p->token) abort();
+				ensure(p->token);
 				dst = p->token+len;
 			}
 
@@ -2363,7 +2360,7 @@ static int get_token(parser *p, int last_op)
 		if (len >= p->token_size) {
 			size_t len = dst - p->token;
 			p->token = realloc(p->token, p->token_size*=2);
-			if (!p->token) abort();
+			ensure(p->token);
 			dst = p->token+len;
 		}
 
@@ -2505,7 +2502,7 @@ int parser_tokenize(parser *p, int args, int consing)
 		if (!p->quoted && !strcmp(p->token, "{")) {
 			save_idx = p->t->cidx;
 			cell *c = make_literal(p, index_from_pool("{}"));
-			if (!c) abort();
+			ensure(c);
 			c->arity = 1;
 			p->start_term = true;
 			parser_tokenize(p, 0, 0);
@@ -2659,7 +2656,7 @@ int parser_tokenize(parser *p, int args, int consing)
 				c->flags |= FLAG_QUOTED;
 
 			c->val_off = index_from_pool(p->token);
-			if (c->val_off == ERR_IDX) abort();
+			ensure(c->val_off != ERR_IDX);
 		} else {
 			c->val_type = TYPE_CSTRING;
 
@@ -2679,7 +2676,7 @@ int parser_tokenize(parser *p, int args, int consing)
 				if (p->string) {
 					c->len_str = p->len_str;
 					c->val_str = malloc(p->len_str+1);
-					if (!c->val_str) abort();
+					ensure(c->val_str);
 					memcpy(c->val_str, p->token, p->len_str);
 					c->val_str[p->len_str] = '\0';
 				} else {
@@ -3307,7 +3304,7 @@ void set_opt(prolog *pl, int level) { pl->m->opt = level; }
 int pl_eval(prolog *pl, const char *src)
 {
 	parser *p = create_parser(pl->curr_m);
-	if (!p) abort();
+	ensure(p);
 	p->command = true;
 	int ok = parser_run(p, src, 1);
 	pl->curr_m = p->m;
@@ -3423,7 +3420,7 @@ prolog *pl_create()
 
 
 	pl->m = create_module("user");
-	if (!pl->m) abort();
+	ensure(pl->m);
 	pl->curr_m = pl->m;
 	pl->m->filename = must_strdup("~/.tpl_user");
 	pl->m->prebuilt = 1;
