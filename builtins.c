@@ -206,8 +206,10 @@ static void make_small(cell *tmp, const char *s)
 
 static void init_tmp_heap(query* q)
 {
-	if (!q->tmp_heap)
+	if (!q->tmp_heap) {
 		q->tmp_heap = calloc(q->tmph_size, sizeof(cell));
+		ensure(q->tmp_heap);
+	}
 
 	q->tmphp = 0;
 }
@@ -219,6 +221,7 @@ static cell *alloc_tmp_heap(query *q, idx_t nbr_cells)
 			q->tmph_size = nbr_cells;
 
 		q->tmp_heap = calloc(q->tmph_size, sizeof(cell));
+		ensure(q->tmp_heap);
 	}
 
 	while ((q->tmphp + nbr_cells) >= q->tmph_size) {
@@ -243,7 +246,9 @@ static cell *alloc_heap(query *q, idx_t nbr_cells)
 			q->h_size = nbr_cells;
 
 		arena *a = calloc(1, sizeof(arena));
+		ensure(a);
 		a->heap = calloc(q->h_size, sizeof(cell));
+		ensure(a->heap);
 		a->h_size = q->h_size;
 		a->nbr = q->st.anbr++;
 		q->arenas = a;
@@ -280,6 +285,7 @@ static cell *alloc_heap(query *q, idx_t nbr_cells)
 static cell *alloc_cstringn(query *q, const char *s, size_t n)
 {
 	cell *tmp = alloc_heap(q, 1);
+	ensure(tmp);
 	tmp->val_type = TYPE_CSTRING;
 	tmp->flags = FLAG_BLOB;
 	tmp->nbr_cells = 1;
@@ -317,8 +323,10 @@ static cell *pop_queue(query *q)
 
 static cell *alloc_queue(query *q, const cell *c)
 {
-	if (!q->queue[0])
+	if (!q->queue[0]) {
 		q->queue[0] = calloc(q->q_size[0], sizeof(cell));
+		ensure(q->queue[0]);
+	}
 
 	while ((q->qp[0]+c->nbr_cells) >= q->q_size[0]) {
 		q->q_size[0] += q->q_size[0] / 2;
@@ -343,8 +351,10 @@ static cell *get_queuen(query *q) { return q->queue[q->st.qnbr]; }
 
 static cell *alloc_queuen(query *q, int qnbr, const cell *c)
 {
-	if (!q->queue[qnbr])
+	if (!q->queue[qnbr]) {
 		q->queue[qnbr] = calloc(q->q_size[qnbr], sizeof(cell));
+		ensure(q->queue[qnbr]);
+	}
 
 	while ((q->qp[qnbr]+c->nbr_cells) >= q->q_size[qnbr]) {
 		q->q_size[qnbr] += q->q_size[qnbr] / 2;
@@ -366,6 +376,7 @@ void alloc_list(query *q, const cell *c)
 void append_list(query *q, const cell *c)
 {
 	cell *tmp = alloc_tmp_heap(q, 1+c->nbr_cells);
+	ensure(tmp);
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1 + c->nbr_cells;
 	tmp->val_off = g_dot_s;
@@ -377,11 +388,13 @@ void append_list(query *q, const cell *c)
 cell *end_list(query *q)
 {
 	cell *tmp = alloc_tmp_heap(q, 1);
+	ensure(tmp);
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1;
 	tmp->val_off = g_nil_s;
 	idx_t nbr_cells = tmp_heap_used(q);
 	tmp = alloc_heap(q, nbr_cells);
+	ensure(tmp);
 	copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
 	tmp->nbr_cells = nbr_cells;
 	init_tmp_heap(q);
@@ -417,14 +430,17 @@ static cell tmp_cstring(const char *s)
 
 static cell make_cstringn(query *q, const char *s, size_t n)
 {
-	cell tmp;
+	cell ret;
 
 	if (n < MAX_SMALL_STRING)
-		make_smalln(&tmp, s, n);
-	else
-		tmp = *alloc_cstringn(q, s, n);
+		make_smalln(&ret, s, n);
+	else {
+		cell *tmp = alloc_cstringn(q, s, n);
+		ensure(tmp);
+		ret = *tmp;
+	}
 
-	return tmp;
+	return ret;
 }
 
 static cell make_cstring(query *q, const char *s)
@@ -461,6 +477,7 @@ static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	p1 = deref(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
 	cell *tmp = alloc_tmp_heap(q, 1);
+	ensure(tmp);
 	copy_cells(tmp, p1, 1);
 
 	if (!is_structure(p1)) {
@@ -536,7 +553,9 @@ cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 static cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx)
 {
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx);
+	ensure(tmp);
 	cell *tmp2 = alloc_heap(q, tmp->nbr_cells);
+	ensure(tmp2);
 	copy_cells(tmp2, tmp, tmp->nbr_cells);
 	return tmp2;
 }
@@ -547,6 +566,7 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	p1 = deref(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
 	cell *tmp = alloc_tmp_heap(q, 1);
+	ensure(tmp);
 	copy_cells(tmp, p1, 1);
 
 	if (!is_structure(p1)) {
@@ -591,6 +611,7 @@ cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 {
 	p1 = deep_clone_to_tmp(q, p1, p1_ctx);
 	cell *tmp = alloc_heap(q, p1->nbr_cells);
+	ensure(tmp);
 	copy_cells(tmp, p1, p1->nbr_cells);
 	return tmp;
 }
@@ -1600,6 +1621,7 @@ static int fn_iso_open_3(query *q)
 	}
 
 	cell *tmp = alloc_heap(q, 1);
+	ensure(tmp);
 	make_int(tmp, n);
 	tmp->flags |= FLAG_STREAM | FLAG_HEX;
 	set_var(q, p3, p3_ctx, tmp, q->st.curr_frame);
@@ -1746,6 +1768,7 @@ static int fn_iso_open_4(query *q)
 #endif
 
 	cell *tmp = alloc_heap(q, 1);
+	ensure(tmp);
 	make_int(tmp, n);
 	tmp->flags |= FLAG_STREAM | FLAG_HEX;
 	set_var(q, p3, p3_ctx, tmp, q->st.curr_frame);
@@ -1928,6 +1951,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	q->m->flag.double_quote_atom = flag_atom;
 
 	cell *tmp = alloc_heap(q, p->t->cidx-1);
+	ensure(tmp);
 	copy_cells(tmp, p->t->cells, p->t->cidx-1);
 	return unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 }
@@ -4136,6 +4160,7 @@ static int fn_iso_univ_2(query *q)
 				}
 
 				cell *tmp = alloc_tmp_heap(q, 1);
+				ensure(tmp);
 				copy_cells(tmp, &v, 1);
 				tmp->var_nbr = g_tab2[i];
 				tmp->flags |= FLAG_FRESH;
@@ -4151,9 +4176,11 @@ static int fn_iso_univ_2(query *q)
 				v.var_nbr = g_varno++;
 				set_var(q, &v, q->st.curr_frame, h, q->latest_ctx);
 				cell *tmp = alloc_tmp_heap(q, 1);
+				ensure(tmp);
 				copy_cells(tmp, &v, 1);
 			} else {
 				cell *tmp = alloc_tmp_heap(q, h->nbr_cells);
+				ensure(tmp);
 				copy_cells(tmp, h, h->nbr_cells);
 			}
 
@@ -4175,6 +4202,7 @@ static int fn_iso_univ_2(query *q)
 		tmp->nbr_cells = nbr_cells;
 		tmp->arity = arity;
 		cell *tmp2 = alloc_heap(q, nbr_cells);
+		ensure(tmp2);
 		copy_cells(tmp2, tmp, nbr_cells);
 
 		if (is_structure(tmp2)) {
@@ -4250,6 +4278,7 @@ static int fn_iso_term_variables_2(query *q)
 	const unsigned cnt = g_tab_idx;
 	init_tmp_heap(q);
 	cell *tmp = alloc_tmp_heap(q, (cnt*2)+1);
+	ensure(tmp);
 	unsigned idx = 0;
 
 	if (cnt) {
@@ -4306,6 +4335,7 @@ static int fn_iso_term_variables_2(query *q)
 	if (is_variable(p2)) {
 		cell *save = tmp;
 		tmp = alloc_heap(q, idx);
+		ensure(tmp);
 		copy_cells(tmp, save, idx);
 		set_var(q, p2, p2_ctx, tmp, q->st.curr_frame);
 		return 1;
@@ -4319,6 +4349,7 @@ static int fn_iso_term_variables_2(query *q)
 static cell *clone2_to_tmp(query *q, cell *p1)
 {
 	cell *tmp = alloc_tmp_heap(q, p1->nbr_cells);
+	ensure(tmp);
 	copy_cells(tmp, p1, p1->nbr_cells);
 	cell *c = tmp;
 
@@ -4339,6 +4370,7 @@ static cell *clone_to_tmp(query *q, cell *p1)
 static cell *clone2_to_heap(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
 {
 	cell *tmp = alloc_heap(q, (prefix?1:0)+nbr_cells+suffix);
+	ensure(tmp);
 
 	if (prefix) {
 		// Needed for follow() to work
@@ -4367,6 +4399,7 @@ cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix)
 static cell *copy_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
 {
 	cell *tmp = alloc_heap(q, (prefix?1:0)+nbr_cells+suffix);
+	ensure(tmp);
 
 	if (prefix) {
 		// Needed for follow() to work
@@ -5040,6 +5073,7 @@ static int fn_iso_functor_3(query *q)
 		}
 
 		cell *tmp = alloc_heap(q, 1+arity);
+		ensure(tmp);
 		tmp[0].val_type = TYPE_LITERAL;
 		tmp[0].arity = arity;
 		tmp[0].nbr_cells = 1 + arity;
@@ -5302,6 +5336,7 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		unsigned v1 = 0, v2 = 0, v3 = 0;
 		sscanf(VERSION, "v%u.%u.%u", &v1, &v2, &v3);
 		cell *tmp = alloc_heap(q, 5);
+		ensure(tmp);
 		make_literal(&tmp[0], index_from_pool("trealla"));
 		make_int(&tmp[1], v1);
 		make_int(&tmp[2], v2);
@@ -5406,6 +5441,7 @@ static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 {
 	if (!nbr_cells || !c->nbr_cells) {
 		cell *c = alloc_tmp_heap(q, 1);
+		ensure(c);
 		make_literal(c, g_nil_s);
 		return c;
 	}
@@ -5512,6 +5548,7 @@ static int fn_sys_queue_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
+	ensure(tmp);
 	alloc_queue(q, tmp);
 	return 1;
 }
@@ -5521,6 +5558,7 @@ static int fn_sys_queuen_2(query *q)
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,any);
 	cell *tmp = deep_clone_to_tmp(q, p2, p2_ctx);
+	ensure(tmp);
 	alloc_queuen(q, p1->val_num, tmp);
 	return 1;
 }
@@ -5686,6 +5724,7 @@ static int fn_iso_bagof_3(query *q)
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			c->flags |= FLAG_DELETED;
 			cell *c1 = deep_clone_to_tmp(q, p1, q->st.curr_frame);
+			ensure(c1);
 			alloc_queuen(q, q->st.qnbr, c1);
 		}
 
@@ -6633,6 +6672,7 @@ static int fn_server_3(query *q)
 
 	net_set_nonblocking(str);
 	cell *tmp = alloc_heap(q, 1);
+	ensure(tmp);
 	make_int(tmp, n);
 	tmp->flags |= FLAG_STREAM | FLAG_HEX;
 	set_var(q, p2, p2_ctx, tmp, q->st.curr_frame);
@@ -6832,6 +6872,7 @@ static int fn_client_5(query *q)
 	tmp = make_string(path, strlen(path));
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	cell *tmp2 = alloc_heap(q, 1);
+	ensure(tmp2);
 	make_int(tmp2, n);
 	tmp2->flags |= FLAG_STREAM | FLAG_HEX;
 	set_var(q, p4, p4_ctx, tmp2, q->st.curr_frame);
