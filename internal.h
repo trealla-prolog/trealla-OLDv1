@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <limits.h>
 #include <sys/param.h>
@@ -36,6 +37,9 @@ typedef __uint64_t uint_t;
 #endif
 
 typedef uint32_t idx_t;
+
+// Sentinel Value
+#define ERR_IDX (~(idx_t)0)
 
 #define MAX_SMALL_STRING (MAX(sizeof(int_t),sizeof(void*))*2)
 #define MAX_VAR_POOL_SIZE 1000
@@ -188,10 +192,10 @@ typedef struct {
 typedef struct {
 	idx_t nbr_cells, cidx;
 	uint16_t nbr_vars;
-	unsigned first_cut:1;
-	unsigned cut_only:1;
-	unsigned is_deleted:1;
-	unsigned is_persist:1;
+	bool first_cut:1;
+	bool cut_only:1;
+	bool is_deleted:1;
+	bool is_persist:1;
 	cell cells[];
 } term;
 
@@ -210,12 +214,12 @@ struct rule_ {
 	uint32_t cnt;
 	idx_t val_off;
 	uint16_t arity;
-	unsigned is_prebuilt:1;
-	unsigned is_public:1;
-	unsigned is_dynamic:1;
-	unsigned is_persist:1;
-	unsigned is_multifile:1;
-	unsigned is_abolished:1;
+	bool is_prebuilt:1;
+	bool is_public:1;
+	bool is_dynamic:1;
+	bool is_persist:1;
+	bool is_multifile:1;
+	bool is_abolished:1;
 };
 
 struct builtins {
@@ -246,8 +250,8 @@ typedef struct {
 	module *m;
 	idx_t prev_frame, ctx, overflow, cgen;
 	uint16_t nbr_vars, nbr_slots;
-	unsigned any_choices:1;
-	unsigned did_cut:1;
+	bool any_choices:1;
+	bool did_cut:1;
 } frame;
 
 typedef struct {
@@ -259,11 +263,11 @@ typedef struct {
 	size_t data_len, alloc_nbytes;
 	int ungetch, srclen;
 	uint8_t level;
-	unsigned did_getc:1;
-	unsigned nodelay:1;
-	unsigned nonblock:1;
-	unsigned udp:1;
-	unsigned ssl:1;
+	bool did_getc:1;
+	bool nodelay:1;
+	bool nonblock:1;
+	bool udp:1;
+	bool ssl:1;
 } stream;
 
 typedef struct {
@@ -279,10 +283,10 @@ typedef struct {
 	idx_t v1, v2, cgen, overflow;
 	uint64_t pins;
 	uint16_t nbr_vars, nbr_slots;
-	unsigned local_cut:1;
-	unsigned any_choices:1;
-	unsigned catchme1:1;
-	unsigned catchme2:1;
+	bool local_cut:1;
+	bool any_choices:1;
+	bool catchme1:1;
+	bool catchme2:1;
 } choice;
 
 typedef struct arena_ arena;
@@ -318,22 +322,22 @@ struct query_ {
 	uint8_t retry, halt_code, status;
 	uint8_t current_input, current_output;
 	int8_t quoted;
-	unsigned keysort:1;
-	unsigned resume:1;
-	unsigned no_tco:1;
-	unsigned error:1;
-	unsigned trace:1;
-	unsigned calc:1;
-	unsigned yielded:1;
-	unsigned is_task:1;
-	unsigned nl:1;
-	unsigned fullstop:1;
-	unsigned ignore_ops:1;
-	unsigned character_escapes:1;
-	unsigned halt:1;
-	unsigned abort:1;
-	unsigned cycle_error:1;
-	unsigned spawned:1;
+	//bool keysort:1;  //cehteh: unused?
+	bool resume:1;
+	bool no_tco:1;
+	bool error:1;
+	bool trace:1;
+	bool calc:1;
+	bool yielded:1;
+	bool is_task:1;
+	bool nl:1;
+	bool fullstop:1;
+	bool ignore_ops:1;
+	bool character_escapes:1;
+	bool halt:1;
+	bool abort:1;
+	bool cycle_error:1;
+	bool spawned:1;
 };
 
 struct parser_ {
@@ -348,24 +352,25 @@ struct parser_ {
 	term *t;
 	char *token, *save_line, *srcptr;
 	size_t token_size, n_line, len_str;
-	int line_nbr, error, depth; //FIXME: cehteh: cant these be all unsigned?
-	int quoted;
+	int line_nbr, depth; //FIXME: cehteh: cant these be all unsigned?
+	int quoted;  //cehteh: can be unsigned?
 	unsigned nbr_vars;
 	uint8_t val_type;
 	int8_t dq_consing;
-	unsigned was_quoted:1;
-	unsigned string:1;
-	unsigned run_init:1;
-	unsigned directive:1;
-	unsigned consulting:1;
-	unsigned one_shot:1;
-	unsigned start_term:1;
-	unsigned end_of_term:1;
-	unsigned comment:1;
-	unsigned is_variable:1;
-	unsigned is_op;
-	unsigned skip:1;
-	unsigned command:1;
+	bool error;
+	bool was_quoted:1;
+	bool string:1;
+	bool run_init:1;
+	bool directive:1;
+	bool consulting:1;
+	bool one_shot:1;
+	bool start_term:1;
+	bool end_of_term:1;
+	bool comment:1;
+	bool is_variable:1;
+	bool is_op;
+	bool skip:1;
+	bool command:1;
 };
 
 struct module_ {
@@ -376,17 +381,18 @@ struct module_ {
 	parser *p;
 	FILE *fp;
 	struct op_table ops[MAX_USER_OPS+1];
-        const char *keywords[1000];
+	const char *keywords[1000];
 
-	struct {
+	struct { //cehteh: all as bitflags? check performance implications
 		int double_quote_codes, double_quote_chars, double_quote_atom;
-		int character_escapes;
+		bool character_escapes;
 		int rational_syntax_natural, prefer_rationals;
 	} flag;
 
 	int prebuilt, halt, halt_code, status, trace, quiet, dirty;
-	int user_ops, opt, stats, iso_only, use_persist, loading;
+	int user_ops, opt, stats, iso_only, use_persist, loading; //cehteh: stats can be bool
 	int make_public, dump_vars;  //note by cehteh: investigate: can these be unsigned (or bool)
+	bool error;
 	unsigned cpu_count;
 };
 
@@ -409,7 +415,6 @@ inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 cell *list_head(cell *l);
 cell *list_tail(cell *l, cell *tmp);
 
-int is_in_pool(const char *name, idx_t *offset);
 void set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
 int module_load_fp(module *m, FILE *fp);
@@ -420,8 +425,8 @@ module *create_module(const char *name);
 void destroy_module(module *m);
 module *find_module(const char *name);
 module *find_next_module(module *m);
-clause *asserta_to_db(module *m, term *t, int consulting);
-clause *assertz_to_db(module *m, term *t, int consulting);
+clause *asserta_to_db(module *m, term *t, bool consulting);
+clause *assertz_to_db(module *m, term *t, bool consulting);
 clause *retract_from_db(module *m, clause *r);
 clause *erase_from_db(module *m, uuid *ref);
 clause *find_in_db(module *m, uuid *ref);
@@ -435,7 +440,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 void make_choice(query *q);
 void make_barrier(query *q);
 void make_catcher(query *q, int type);
-void cut_me(query *q, int local_cut);
+void cut_me(query *q, bool local_cut);
 int check_builtin(module *m, const char *name, unsigned arity);
 void *get_builtin(module *m, const char *name, unsigned arity);
 void query_execute(query *q, term *t);
@@ -461,8 +466,9 @@ void run_query(query *q);
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx);
 cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix);
 void make_end(cell *tmp);
-int match_clause(query *q, cell *p1, idx_t p1_ctx);
-idx_t find_in_pool(const char *name);
+bool match_clause(query *q, cell *p1, idx_t p1_ctx);
+idx_t index_from_pool(const char *name);
+const char* cstr_from_pool(const char *name);
 void do_reduce(cell *n);
 unsigned create_vars(query *q, unsigned nbr);
 unsigned count_bits(uint64_t mask, unsigned bit);

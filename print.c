@@ -158,7 +158,7 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 		if (depth > 64)
 			dst += snprintf(dst, dstlen, "...");
 
-		q->cycle_error = 1;
+		q->cycle_error = true;
 		return dst - save_dst;
 	}
 
@@ -276,7 +276,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		if (depth > 64)
 			dst += snprintf(dst, dstlen, "...");
 
-		q->cycle_error = 1;
+		q->cycle_error = true;
 		return dst - save_dst;
 	}
 
@@ -559,14 +559,14 @@ void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 	char *dst = malloc(len+1);
 	assert(dst);
 	write_canonical_to_buf(q, dst, len+1, c, c_ctx, running, depth);
-	q->cycle_error = 0;
+	q->cycle_error = false;
 	const char *src = dst;
 
 	while (len) {
 		size_t nbytes = net_write(src, len, str);
 
 		if (feof(str->fp)) {
-			q->error = 1;
+			q->error = true;
 			return;
 		}
 
@@ -589,14 +589,14 @@ void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int 
 	char *dst = malloc(len+1);
 	assert(dst);
 	write_canonical_to_buf(q, dst, len+1, c, c_ctx, running, depth);
-	q->cycle_error = 0;
+	q->cycle_error = false;
 	const char *src = dst;
 
 	while (len) {
 		size_t nbytes = fwrite(src, 1, len, fp);
 
 		if (feof(fp)) {
-			q->error = 1;
+			q->error = true;
 			return;
 		}
 
@@ -619,14 +619,14 @@ void write_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int runni
 	char *dst = malloc(len+1);
 	assert(dst);
 	write_term_to_buf(q, dst, len+1, c, c_ctx, running, cons, depth);
-	q->cycle_error = 0;
+	q->cycle_error = false;
 	const char *src = dst;
 
 	while (len) {
 		size_t nbytes = net_write(src, len, str);
 
 		if (feof(str->fp)) {
-			q->error = 1;
+			q->error = true;
 			return;
 		}
 
@@ -649,14 +649,14 @@ void write_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int cons,
 	char *dst = malloc(len+1);
 	assert(dst);
 	write_term_to_buf(q, dst, len+1, c, c_ctx, running, cons, depth);
-	q->cycle_error = 0;
+	q->cycle_error = false;
 	const char *src = dst;
 
 	while (len) {
 		size_t nbytes = fwrite(src, 1, len, fp);
 
 		if (feof(fp)) {
-			q->error = 1;
+			q->error = true;
 			return;
 		}
 

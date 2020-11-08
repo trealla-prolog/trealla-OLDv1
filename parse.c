@@ -122,45 +122,65 @@ static struct op_table g_ops[] =
 	{0}
 };
 
-int is_in_pool(const char *name, idx_t *val)
+
+static char* must_strdup(const char* src)
+{
+	char* ret = strdup(src);
+	if (!ret) abort();
+
+	return ret;
+}
+
+static idx_t is_in_pool(const char *name)
 {
 	idx_t offset = 0;
 
 	while (offset < g_pool_offset) {
 		if (!strcmp(g_pool+offset, name)) {
-			if (val)
-				*val = offset;
-
-			return 1;
+			return offset;
 		}
 
 		offset += strlen(g_pool+offset) + 1;
 	}
 
-	return 0;
+	return ERR_IDX;
 }
 
-idx_t find_in_pool(const char *name)
+static idx_t add_to_pool(const char *name)
 {
-	idx_t offset;
-
-	if (is_in_pool(name, &offset))
-		return offset;
-
-	offset = g_pool_offset;
+	idx_t offset = g_pool_offset;
 	size_t len = strlen(name);
 
 	if ((offset+len+1) >= g_pool_size) {
 		size_t nbytes = g_pool_size * 2;
-		g_pool = realloc(g_pool, nbytes);
+		char* tmp = realloc(g_pool, nbytes);
+		if (!tmp) return ERR_IDX;
+		g_pool = tmp;
 		memset(g_pool+g_pool_size, 0, nbytes-g_pool_size);
-		if (!g_pool) abort();
 		g_pool_size = nbytes;
 	}
 
 	strcpy(g_pool+offset, name);
 	g_pool_offset += len + 1;
 	return offset;
+}
+
+idx_t index_from_pool(const char *name)
+{
+	idx_t offset = is_in_pool(name);
+	if (offset != ERR_IDX)
+		return offset;
+
+	return add_to_pool(name);
+}
+
+const char* cstr_from_pool(const char *name)
+{
+	idx_t offset = index_from_pool(name);
+	if (offset == ERR_IDX)
+		return NULL;
+
+	return g_pool + offset;
 }
 
 int get_op(module *m, const char *name, unsigned *val_type, int *userop, int hint_prefix)
@@ -195,8 +215,10 @@ int get_op(module *m, const char *name, unsigned *val_type, int *userop, int hin
 
 int set_op(module *m, const char *name, unsigned val_type, unsigned precedence)
 {
+	name = cstr_from_pool(name);
+	if (!name) abort();
+
 	struct op_table *ptr = m->ops;
-	name = g_pool + find_in_pool(name);
 
 	for (; ptr->name; ptr++) {
 		if (!strcmp(ptr->name, name) && (ptr->val_type == val_type)) {
@@ -391,6 +413,7 @@ static rule *get_rule(module *m)
 	}
 
 	rule *h = calloc(1, sizeof(rule));
+	if (!h) abort();
 	h->next = m->head;
 	m->head = h;
 	return h;
@@ -408,24 +431,28 @@ void set_multifile_in_db(module *m, const char *name, idx_t arity)
 {
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = find_in_pool(name);
+	tmp.val_off = index_from_pool(name);
+	if (tmp.val_off == ERR_IDX) abort();
+
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
-	h->is_multifile = 1;
+	h->is_multifile = true;
 }
 
-static int is_multifile_in_db(const char *mod, const char *name, idx_t arity)
+static bool is_multifile_in_db(const char *mod, const char *name, idx_t arity)
 {
 	module *m = find_module(mod);
-	if (!m) return 0;
+	if (!m) return false;
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = find_in_pool(name);
+	tmp.val_off = index_from_pool(name);
+	if (tmp.val_off == ERR_IDX) abort();
+
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
-	if (!h) return 0;
-	return h->is_multifile ? 1 : 0;
+	if (!h) return false;
+	return h->is_multifile ? true : false;
 }
 
 static int compkey(const void *ptr1, const void *ptr2)
@@ -497,8 +524,10 @@ static int compkey(const void *ptr1, const void *ptr2)
 
 static void reindex_rule(module *m, rule *h)
 {
-    (void) m;
+	(void) m;
 	h->index = sl_create(compkey);
+	if(!h->index)
+		abort();
 
 	for (clause *r = h->head; r; r = r->next) {
 		cell *c = get_head(r->t.cells);
@@ -506,12 +535,12 @@ static void reindex_rule(module *m, rule *h)
 	}
 }
 
-clause *asserta_to_db(module *m, term *t, int consulting)
+clause *asserta_to_db(module *m, term *t, bool consulting)
 {
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
-		idx_t off = find_in_pool(GET_STR(c));
-		c->val_off = off;
+		c->val_off = index_from_pool(GET_STR(c));
+		if (c->val_off == ERR_IDX) abort();
 		c->val_type = TYPE_LITERAL;
 	}
 
@@ -540,7 +569,8 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 			set_multifile_in_db(m, name, c->arity);
 		}
 
-		c->val_off = find_in_pool(name);
+		c->val_off = index_from_pool(name);
+		if (c->val_off == ERR_IDX) abort();
 	}
 
 	rule *h = find_rule(m, c);
@@ -556,19 +586,20 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 		h = create_rule(m, c);
 
 		if (!consulting) {
-			h->is_dynamic = 1;
+			h->is_dynamic = true;
 
 			if (m->make_public)
-				h->is_public = 1;
+				h->is_public = true;
 		}
 	}
 
 
 	if (m->prebuilt)
-		h->is_prebuilt = 1;
+		h->is_prebuilt = true;
 
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
+	if (!r) abort();
 	r->parent = h;
 	memcpy(&r->t, t, sizeof(term));
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
@@ -598,7 +629,7 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 	t->cidx = 0;
 
 	if (h->is_persist)
-		r->t.is_persist = 1;
+		r->t.is_persist = true;
 
 	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1))
 		reindex_rule(m, h);
@@ -606,12 +637,12 @@ clause *asserta_to_db(module *m, term *t, int consulting)
 	return r;
 }
 
-clause *assertz_to_db(module *m, term *t, int consulting)
+clause *assertz_to_db(module *m, term *t, bool consulting)
 {
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
-		idx_t off = find_in_pool(GET_STR(c));
-		c->val_off = off;
+		c->val_off = index_from_pool(GET_STR(c));
+		if (c->val_off == ERR_IDX) abort();
 		c->val_type = TYPE_LITERAL;
 	}
 
@@ -640,7 +671,8 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 			set_multifile_in_db(m, name, c->arity);
 		}
 
-		c->val_off = find_in_pool(name);
+		c->val_off = index_from_pool(name);
+		if (c->val_off == ERR_IDX) abort();
 	}
 
 	rule *h = find_rule(m, c);
@@ -656,17 +688,18 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 		h = create_rule(m, c);
 
 		if (!consulting)
-			h->is_dynamic = 1;
+			h->is_dynamic = true;
 
 		if (consulting && m->make_public)
-			h->is_public = 1;
+			h->is_public = true;
 	}
 
 	if (m->prebuilt)
-		h->is_prebuilt = 1;
+		h->is_prebuilt = true;
 
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
+	if (!r) abort();
 	r->parent = h;
 	memcpy(&r->t, t, sizeof(term));
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
@@ -699,7 +732,7 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 	t->cidx = 0;
 
 	if (h->is_persist)
-		r->t.is_persist = 1;
+		r->t.is_persist = true;
 
 	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1))
 		reindex_rule(m, h);
@@ -710,7 +743,7 @@ clause *assertz_to_db(module *m, term *t, int consulting)
 clause *retract_from_db(module *m, clause *r)
 {
 	r->parent->cnt--;
-	r->t.is_deleted = 1;
+	r->t.is_deleted = true;
 	m->dirty = 1;
 	return r;
 }
@@ -734,7 +767,7 @@ clause *erase_from_db(module *m, uuid *ref)
 {
 	clause *r = find_in_db(m, ref);
 	if (!r) return 0;
-	r->t.is_deleted = 1;
+	r->t.is_deleted = true;
 	m->dirty = 1;
 	return r;
 }
@@ -743,29 +776,36 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = find_in_pool(name);
+	tmp.val_off = index_from_pool(name);
+	if (tmp.val_off == ERR_IDX) abort();
+
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
-	h->is_dynamic = 1;
+	h->is_dynamic = true;
 
 	if (!h->index)
 		h->index = sl_create(compkey);
+	if (!h->index)
+		abort();
 }
 
 static void set_persist_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = find_in_pool(name);
+	tmp.val_off = index_from_pool(name);
+	if (tmp.val_off == ERR_IDX) abort();
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
-	h->is_dynamic = 1;
-	h->is_persist = 1;
+	h->is_dynamic = true;
+	h->is_persist = true;
 
 	if (!h->index)
 		h->index = sl_create(compkey);
+	if (!h->index)
+		abort();
 
 	m->use_persist = 1;
 }
@@ -817,30 +857,45 @@ static cell *make_cell(parser *p)
 parser *create_parser(module *m)
 {
 	parser *p = calloc(1, sizeof(parser));
-	p->token = calloc(p->token_size=INITIAL_TOKEN_SIZE+1, 1);
-	idx_t nbr_cells = INITIAL_NBR_CELLS;
-	p->t = calloc(sizeof(term)+(sizeof(cell)*nbr_cells), 1);
-	p->t->nbr_cells = nbr_cells;
-	p->start_term = 1;
-	p->line_nbr = 1;
-	p->m = m;
+	if (p)
+	{
+		p->token = calloc(p->token_size=INITIAL_TOKEN_SIZE+1, 1);
+		if (!p->token) goto ealloc;
+		idx_t nbr_cells = INITIAL_NBR_CELLS;
+		p->t = calloc(sizeof(term)+(sizeof(cell)*nbr_cells), 1);
+		if (!p->t) goto ealloc;
+		p->t->nbr_cells = nbr_cells;
+		p->start_term = true;
+		p->line_nbr = 1;
+		p->m = m;
+	}
 	return p;
+ealloc:
+	free(p->token);
+	free(p);
+	return NULL;
 }
 
 void destroy_parser_nodelete(parser *p)
 {
-	clear_term_nodelete(p->t);
-	free(p->token);
-	free(p->t);
-	free(p);
+	if (p)
+	{
+		clear_term_nodelete(p->t);
+		free(p->token);
+		free(p->t);
+		free(p);
+	}
 }
 
 void destroy_parser(parser *p)
 {
-	clear_term(p->t);
-	free(p->token);
-	free(p->t);
-	free(p);
+	if (p)
+	{
+		clear_term(p->t);
+		free(p->token);
+		free(p->t);
+		free(p);
+	}
 }
 
 query *create_query(module *m, int is_task)
@@ -848,69 +903,86 @@ query *create_query(module *m, int is_task)
 	static uint64_t g_query_id = 0;
 
 	query *q = calloc(1, sizeof(query));
-	q->qid = g_query_id++;
-	q->m = m;
-	q->trace = m->trace;
-	q->current_input = 0;		// STDIN
-	q->current_output = 1;		// STDOUT
+	if (q)
+	{
+		q->qid = g_query_id++;
+		q->m = m;
+		q->trace = m->trace;
+		q->current_input = 0;		// STDIN
+		q->current_output = 1;		// STDOUT
 
-	// Allocate these now...
+		// Allocate these now...
 
-	q->frames_size = is_task ? INITIAL_NBR_GOALS/10 : INITIAL_NBR_GOALS;
-	q->slots_size = is_task ? INITIAL_NBR_SLOTS/10 : INITIAL_NBR_SLOTS;
-	q->choices_size = is_task ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
-	q->trails_size = is_task ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
+		q->frames_size = is_task ? INITIAL_NBR_GOALS/10 : INITIAL_NBR_GOALS;
+		q->slots_size = is_task ? INITIAL_NBR_SLOTS/10 : INITIAL_NBR_SLOTS;
+		q->choices_size = is_task ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
+		q->trails_size = is_task ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
 
-	q->frames = calloc(q->frames_size, sizeof(frame));
-	q->slots = calloc(q->slots_size, sizeof(slot));
-	q->choices = calloc(q->choices_size, sizeof(choice));
-	q->trails = calloc(q->trails_size, sizeof(trail));
+		q->frames = calloc(q->frames_size, sizeof(frame));
+		q->slots = calloc(q->slots_size, sizeof(slot));
+		q->choices = calloc(q->choices_size, sizeof(choice));
+		q->trails = calloc(q->trails_size, sizeof(trail));
+		if (!q->frames || !q->slots || !q->choices || !q->trails)
+			goto ealloc;
 
-	// Allocate these later as needed...
+		// Allocate these later as needed...
 
-	q->h_size = is_task ? INITIAL_NBR_HEAP/10 : INITIAL_NBR_HEAP;
-	q->tmph_size = is_task ? INITIAL_NBR_CELLS/10 : INITIAL_NBR_CELLS;
+		q->h_size = is_task ? INITIAL_NBR_HEAP/10 : INITIAL_NBR_HEAP;
+		q->tmph_size = is_task ? INITIAL_NBR_CELLS/10 : INITIAL_NBR_CELLS;
 
-	for (int i = 0; i < MAX_QUEUES; i++)
-		q->q_size[i] = is_task ? INITIAL_NBR_QUEUE/10 : INITIAL_NBR_QUEUE;
+		for (int i = 0; i < MAX_QUEUES; i++)
+			q->q_size[i] = is_task ? INITIAL_NBR_QUEUE/10 : INITIAL_NBR_QUEUE;
 
+	}
 	return q;
+ealloc:
+	free (q->trails);
+	free (q->choices);
+	free (q->slots);
+	free (q->frames);
+	free (q);
+	return NULL;
 }
 
 query *create_task(query *q, cell *curr_cell)
 {
 	query *subq = create_query(q->m, 1);
-	subq->parent = q;
-	subq->st.fp = 1;
-	subq->is_task = 1;
-	subq->current_input = q->current_input;
-	subq->current_output = q->current_output;
+	if (subq)
+	{
+		subq->parent = q;
+		subq->st.fp = 1;
+		subq->is_task = true;
+		subq->current_input = q->current_input;
+		subq->current_output = q->current_output;
 
-	cell *tmp = clone_to_heap(subq, 0, curr_cell, 1);
-	idx_t nbr_cells = tmp->nbr_cells;
-	make_end(tmp+nbr_cells);
-	subq->st.curr_cell = tmp;
+		cell *tmp = clone_to_heap(subq, 0, curr_cell, 1); //cehteh: checkme
+		idx_t nbr_cells = tmp->nbr_cells;
+		make_end(tmp+nbr_cells);
+		subq->st.curr_cell = tmp;
 
-	frame *gsrc = GET_FRAME(q->st.curr_frame);
-	frame *gdst = subq->frames;
-	gdst->nbr_vars = gsrc->nbr_vars;
-	slot *e = GET_SLOT(gsrc, 0);
+		frame *gsrc = GET_FRAME(q->st.curr_frame);
+		frame *gdst = subq->frames;
+		gdst->nbr_vars = gsrc->nbr_vars;
+		slot *e = GET_SLOT(gsrc, 0);
 
-	for (unsigned i = 0; i < gsrc->nbr_vars; i++, e++) {
-		cell *c = deref(q, &e->c, e->ctx);
-		cell tmp = {0};
-		tmp.val_type = TYPE_VARIABLE;
-		tmp.var_nbr = i;
-		tmp.val_off = g_anon_s;
-		set_var(subq, &tmp, 0, c, q->latest_ctx);
+		for (unsigned i = 0; i < gsrc->nbr_vars; i++, e++) {
+			cell *c = deref(q, &e->c, e->ctx);
+			cell tmp = {0};
+			tmp.val_type = TYPE_VARIABLE;
+			tmp.var_nbr = i;
+			tmp.val_off = g_anon_s;
+			set_var(subq, &tmp, 0, c, q->latest_ctx);
+		}
+
+		subq->st.sp = gsrc->nbr_vars;
 	}
-
-	subq->st.sp = gsrc->nbr_vars;
 	return subq;
 }
 
 void destroy_query(query *q)
 {
+	if (!q) return;
+
 	free(q->trails);
 	free(q->choices);
 
@@ -1006,14 +1078,14 @@ void consultall(parser *p, cell *l)
 
 static void directives(parser *p, term *t)
 {
-	p->skip = 0;
+	p->skip = false;
 
 	if (!is_literal(t->cells))
 		return;
 
 	if (is_list(t->cells) && p->command) {
 		consultall(p, t->cells);
-		p->skip = 1;
+		p->skip = true;
 		return;
 	}
 
@@ -1028,7 +1100,7 @@ static void directives(parser *p, term *t)
 	const char *dirname = GET_STR(c);
 
 	if (!strcmp(dirname, "initialization") && (c->arity == 1)) {
-		p->run_init = 1;
+		p->run_init = true;
 		return;
 	}
 
@@ -1049,7 +1121,7 @@ static void directives(parser *p, term *t)
 
 		if (find_module(name)) {
 			fprintf(stdout, "Error: module already loaded: %s\n", name);
-			p->error = 1;
+			p->error = true;
 			return;
 		}
 
@@ -1072,7 +1144,7 @@ static void directives(parser *p, term *t)
 					tmp.arity += 2;
 
 				rule *h = create_rule(p->m, &tmp);
-				h->is_public = 1;
+				h->is_public = true;
 			}
 
 			p2 = LIST_TAIL(p2);
@@ -1184,7 +1256,7 @@ static void directives(parser *p, term *t)
 
 					if (!is_multifile_in_db(mod, name, c_arity->val_num)) {
 						fprintf(stdout, "Error: not multile %s:%s/%u\n", mod, name, (unsigned)c_arity->val_num);
-						p->error = 1;
+						p->error = true;
 						return;
 					}
 				}
@@ -1194,7 +1266,7 @@ static void directives(parser *p, term *t)
 				p1 += 1;
 			else {
 				fprintf(stdout, "Error: unknown module, line nbr %d\n", p->line_nbr);
-				p->error = 1;
+				p->error = true;
 				return;
 			}
 		}
@@ -1237,14 +1309,14 @@ static void directives(parser *p, term *t)
 				p->m->flag.double_quote_chars = 1;
 			} else {
 				fprintf(stdout, "Error: unknown value\n");
-				p->error = 1;
+				p->error = true;
 				return;
 			}
 		} else if (!strcmp(GET_STR(p1), "character_escapes")) {
 			if (!strcmp(GET_STR(p2), "true"))
-				p->m->flag.character_escapes = 1;
+				p->m->flag.character_escapes = true;
 			else if (!strcmp(GET_STR(p2), "false"))
-				p->m->flag.character_escapes = 0;
+				p->m->flag.character_escapes = false;
 		} else if (!strcmp(GET_STR(p1), "prefer_rationals")) {
 			if (!strcmp(GET_STR(p2), "true"))
 				p->m->flag.prefer_rationals = 1;
@@ -1267,7 +1339,7 @@ static void directives(parser *p, term *t)
 
 		if (!is_integer(p1) || !is_literal(p2) || !is_atom(p3)) {
 			fprintf(stdout, "Error: unknown op\n");
-			p->error = 1;
+			p->error = true;
 			return;
 		}
 
@@ -1329,7 +1401,10 @@ void parser_xref(parser *p, term *t, rule *parent)
 			m = find_module(tmpbuf1);
 
 			if (m)
-				c->val_off = find_in_pool(tmpbuf2);
+			{
+				c->val_off = index_from_pool(tmpbuf2);
+				if (c->val_off == ERR_IDX) abort();
+			}
 			else
 				m = p->m;
 		}
@@ -1346,7 +1421,7 @@ void parser_xref(parser *p, term *t, rule *parent)
 
 			if (h && (m != p->m) && !h->is_public && strcmp(GET_STR(c), "dynamic")) {
 				fprintf(stdout, "Error: not a public method %s/%u\n", GET_STR(c), c->arity);
-				//p->error = 1;
+				//p->error = true;
 				break;
 			}
 
@@ -1374,7 +1449,7 @@ static void parser_xref_db(parser *p)
 static void check_first_cut(parser *p)
 {
 	cell *c = get_body(p->t->cells);
-	int cut_only = 1;
+	int cut_only = true;
 
 	if (!c)
 		return;
@@ -1386,10 +1461,10 @@ static void check_first_cut(parser *p)
 		if (!strcmp(GET_STR(c), ","))
 			;
 		else if (!strcmp(GET_STR(c), "!")) {
-			p->t->first_cut = 1;
+			p->t->first_cut = true;
 			break;
 		} else {
-			cut_only = 0;
+			cut_only = false;
 			break;
 		}
 
@@ -1397,7 +1472,7 @@ static void check_first_cut(parser *p)
 	}
 
 	if (p->t->first_cut && cut_only)
-		p->t->cut_only = 1;
+		p->t->cut_only = true;
 }
 
 static idx_t get_varno(parser *p, const char *src)
@@ -1418,7 +1493,7 @@ static idx_t get_varno(parser *p, const char *src)
 
 	if ((offset+len+1) >= MAX_VAR_POOL_SIZE) {
 		fprintf(stdout, "Error: variable pool exhausted\n");
-		p->error = 1;
+		p->error = true;
 		return 0;
 	}
 
@@ -1428,13 +1503,13 @@ static idx_t get_varno(parser *p, const char *src)
 
 void parser_assign_vars(parser *p)
 {
-	p->start_term = 1;
+	p->start_term = true;
 	p->nbr_vars = 0;
 	memset(&p->vartab, 0, sizeof(p->vartab));
 	term *t = p->t;
 	t->nbr_vars = 0;
-	t->first_cut = 0;
-	t->cut_only = 0;
+	t->first_cut = false;
+	t->cut_only = false;
 
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
@@ -1446,7 +1521,7 @@ void parser_assign_vars(parser *p)
 
 		if (c->var_nbr == MAX_ARITY) {
 			fprintf(stdout, "Error: max vars per term reached\n");
-			p->error = 1;
+			p->error = true;
 			return;
 		}
 
@@ -1564,7 +1639,7 @@ static int attach_ops(parser *p, idx_t start_idx)
 
 			if (off >= p->t->cidx) {
 				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
-				//p->error = 1;
+				//p->error = true;
 				c->arity = 0;
 				return 0;
 			}
@@ -1579,7 +1654,7 @@ static int attach_ops(parser *p, idx_t start_idx)
 
 			if (off >= p->t->cidx) {
 				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
-				//p->error = 1;
+				//p->error = true;
 				return 0;
 			}
 
@@ -1628,15 +1703,17 @@ static void parser_dcg_rewrite(parser *p)
 	query *q = create_query(p->m, 0);
 	char *dst = write_term_to_strbuf(q, p->t->cells, 0, -1);
 	char *src = malloc(strlen(dst)+256);
+	if (!src) abort();
 	sprintf(src, "dcg_translate((%s),_TermOut).", dst);
 	free(dst);
 
 	// Being conservative here and using temp parser/query objects...
 
 	parser *p2 = create_parser(p->m);
-	p2->skip = 1;
+	if (!p2) abort();
+	p2->skip = true;
 	p2->srcptr = src;
-	p2->command = 0;
+	p2->command = false;
 	parser_tokenize(p2, 0, 0);
 	parser_attach(p2, 0);
 	parser_xref(p2, p2->t, NULL);
@@ -1674,13 +1751,14 @@ static void parser_dcg_rewrite(parser *p)
 
 	if (!src) {
 		fprintf(stdout, "Error: syntax error, dcg_translate, line nbr %d\n", line_nbr);
-		p->error = 1;
+		p->error = true;
 		return;
 	}
 
 	p2 = create_parser(p->m);
+	if (!p2) abort();
 	p2->srcptr = src;
-	p2->command = 0;
+	p2->command = false;
 	parser_tokenize(p2, 0, 0);
 	parser_attach(p2, 0);
 	free(src);
@@ -1696,6 +1774,9 @@ static void parser_dcg_rewrite(parser *p)
 
 static cell *make_literal(parser *p, idx_t offset)
 {
+	if (offset == ERR_IDX)
+		return NULL;
+
 	cell *c = make_cell(p);
 	memset(c, 0, sizeof(cell));
 	c->val_type = TYPE_LITERAL;
@@ -1814,7 +1895,7 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 			(isalpha(*s))  ||
 			0) {
 			fprintf(stdout, "Error: syntax error, parsing number, line %d\n", p->line_nbr);
-			p->error = 1;
+			p->error = true;
 		}
 
 		return 1;
@@ -1890,7 +1971,7 @@ static int get_hex(const char **srcptr, int n)
 const char *g_escapes = "\e\a\f\b\t\v\r\n";
 const char *g_anti_escapes = "eafbtvrn";
 
-static int get_escape(const char **_src, int *error)
+static int get_escape(const char **_src, bool *error)
 {
 	const char *src = *_src;
 	int ch = *src++;
@@ -1917,7 +1998,7 @@ static int get_escape(const char **_src, int *error)
 		if (!unicode && (*src++ != '\\')) {
 			fprintf(stdout, "Error: syntax error, closing \\ missing\n");
 			*_src = src;
-			*error = 1;
+			*error = true;
 			return 0;
 		}
 	}
@@ -1955,7 +2036,8 @@ static int get_token(parser *p, int last_op)
 	char *dst = p->token;
 	int neg = 0;
 	p->val_type = TYPE_LITERAL;
-	p->string = p->was_quoted = p->quoted = p->is_variable = p->is_op = 0;
+	p->quoted = 0;
+	p->string = p->was_quoted = p->is_variable = p->is_op = false;
 	*dst = '\0';
 
 	if (p->dq_consing && (*src == '"')) {
@@ -1981,7 +2063,7 @@ static int get_token(parser *p, int last_op)
 
 			if (p->error) {
 				fprintf(stdout, "Error: sysntax error, illegal character escape, line %d\n", p->line_nbr);
-				p->error = 1;
+				p->error = true;
 				return 0;
 			}
 		}
@@ -2054,13 +2136,13 @@ static int get_token(parser *p, int last_op)
 
 	do {
 		if (!p->comment && (src[0] == '/') && (src[1] == '*')) {
-			p->comment = 1;
+			p->comment = true;
 			src += 2;
 			continue;
 		}
 
 		if (p->comment && (src[0] == '*') && (src[1] == '/')) {
-			p->comment = 0;
+			p->comment = false;
 			src += 2;
 			p->srcptr = (char*)src;
 			return get_token(p, last_op);
@@ -2134,7 +2216,7 @@ static int get_token(parser *p, int last_op)
 
 	if ((*src == '"') || (*src == '`') || (*src == '\'')) {
 		p->quoted = *src++;
-		p->was_quoted = 1;
+		p->was_quoted = true;
 
 		if ((p->quoted == '"') && p->m->flag.double_quote_codes) {
 			*dst++ = '[';
@@ -2144,7 +2226,7 @@ static int get_token(parser *p, int last_op)
 			p->quoted = 0;
 			return 1;
 		} else if ((p->quoted == '"') && p->m->flag.double_quote_chars)
-			p->string = 1;
+			p->string = true;
 
 		for (;;) {
 			while (*src) {
@@ -2155,7 +2237,7 @@ static int get_token(parser *p, int last_op)
 						dst += put_char_utf8(dst, ch='[');
 						dst += put_char_utf8(dst, ch=']');
 						*dst = '\0';
-						p->was_quoted = p->string = 0;
+						p->was_quoted = p->string = false;
 					}
 
 					p->quoted = 0;
@@ -2173,7 +2255,7 @@ static int get_token(parser *p, int last_op)
 						}
 					} else {
 						fprintf(stdout, "Error: syntax error, illegal character escape, line %d\n", p->line_nbr);
-						p->error = 1;
+						p->error = true;
 						return 0;
 					}
 				}
@@ -2242,7 +2324,7 @@ static int get_token(parser *p, int last_op)
 		}
 
 		if (isupper(*p->token) || (*p->token == '_'))
-			p->is_variable = 1;
+			p->is_variable = true;
 		else if (get_op(p->m, p->token, NULL, NULL, 0))
 			p->is_op = 1;
 
@@ -2380,11 +2462,11 @@ int parser_tokenize(parser *p, int args, int consing)
 				if (p->consulting && !p->skip)
 					if (!assertz_to_db(p->m, p->t, 1)) {
 						printf("Error: '%s', line nbr %d\n", p->token, p->line_nbr);
-						p->error = 1;
+						p->error = true;
 					}
 			}
 
-			p->end_of_term = 1;
+			p->end_of_term = true;
 			last_op = 1;
 
 			if (p->one_shot)
@@ -2397,7 +2479,7 @@ int parser_tokenize(parser *p, int args, int consing)
 			save_idx = p->t->cidx;
 			cell *c = make_literal(p, g_dot_s);
 			c->arity = 2;
-			p->start_term = 1;
+			p->start_term = true;
 			parser_tokenize(p, 1, 1);
 
 			if (p->error)
@@ -2407,16 +2489,17 @@ int parser_tokenize(parser *p, int args, int consing)
 			c = p->t->cells + save_idx;
 			c->nbr_cells = p->t->cidx - save_idx;
 			fix_list(c);
-			p->start_term = 0;
+			p->start_term = false;
 			last_op = 0;
 			continue;
 		}
 
 		if (!p->quoted && !strcmp(p->token, "{")) {
 			save_idx = p->t->cidx;
-			cell *c = make_literal(p, find_in_pool("{}"));
+			cell *c = make_literal(p, index_from_pool("{}"));
+			if (!c) abort();
 			c->arity = 1;
-			p->start_term = 1;
+			p->start_term = true;
 			parser_tokenize(p, 0, 0);
 
 			if (p->error)
@@ -2424,13 +2507,13 @@ int parser_tokenize(parser *p, int args, int consing)
 
 			c = p->t->cells+save_idx;
 			c->nbr_cells = p->t->cidx - save_idx;
-			p->start_term = 0;
+			p->start_term = false;
 			last_op = 0;
 			continue;
 		}
 
 		if (!p->quoted && !strcmp(p->token, "(")) {
-			p->start_term = 1;
+			p->start_term = true;
 			unsigned tmp_arity = parser_tokenize(p, is_func, 0);
 
 			if (p->error)
@@ -2444,14 +2527,14 @@ int parser_tokenize(parser *p, int args, int consing)
 
 			is_func = 0;
 			last_op = 0;
-			p->start_term = 0;
+			p->start_term = false;
 			continue;
 		}
 
 		if (!p->quoted && !strcmp(p->token, ",") && consing) {
 			cell *c = make_literal(p, g_dot_s);
 			c->arity = 2;
-			p->start_term = 1;
+			p->start_term = true;
 			last_op = 1;
 			continue;
 		}
@@ -2461,7 +2544,7 @@ int parser_tokenize(parser *p, int args, int consing)
 
 			if (arity > MAX_ARITY) {
 				fprintf(stdout, "Error: max arity reached, line %d: %s\n", p->line_nbr, p->srcptr);
-				p->error = 1;
+				p->error = true;
 				break;
 			}
 
@@ -2477,7 +2560,7 @@ int parser_tokenize(parser *p, int args, int consing)
 		if (!p->quoted && p->start_term &&
 			(!strcmp(p->token, ",") || !strcmp(p->token, "]") || !strcmp(p->token, ")") || !strcmp(p->token, "}"))) {
 			fprintf(stdout, "Error: syntax error, start of term expected, line %d: %s\n", p->line_nbr, p->srcptr);
-			p->error = 1;
+			p->error = true;
 			break;
 		}
 
@@ -2488,7 +2571,7 @@ int parser_tokenize(parser *p, int args, int consing)
 
 		if (p->is_variable && (*p->srcptr == '(')) {
 			fprintf(stdout, "Error: syntax error, line %d: %s\n", p->line_nbr, p->srcptr);
-			p->error = 1;
+			p->error = true;
 			break;
 		}
 
@@ -2530,12 +2613,12 @@ int parser_tokenize(parser *p, int args, int consing)
 #if 0
 		if (p->is_op && !precedence) {
 			fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, %s\n", p->line_nbr, p->token, p->srcptr);
-			p->error = 1;
+			p->error = true;
 			break;
 		}
 #endif
 
-		p->start_term = 0;
+		p->start_term = false;
 		cell *c = make_cell(p);
 		memset(c, 0, sizeof(cell));
 		c->nbr_cells = 1;
@@ -2567,7 +2650,8 @@ int parser_tokenize(parser *p, int args, int consing)
 			if (p->was_quoted)
 				c->flags |= FLAG_QUOTED;
 
-			c->val_off = find_in_pool(p->token);
+			c->val_off = index_from_pool(p->token);
+			if (c->val_off == ERR_IDX) abort();
 		} else {
 			c->val_type = TYPE_CSTRING;
 
@@ -2587,10 +2671,11 @@ int parser_tokenize(parser *p, int args, int consing)
 				if (p->string) {
 					c->len_str = p->len_str;
 					c->val_str = malloc(p->len_str+1);
+					if (!c->val_str) abort();
 					memcpy(c->val_str, p->token, p->len_str);
 					c->val_str[p->len_str] = '\0';
 				} else {
-					c->val_str = strdup(p->token);
+					c->val_str = must_strdup(p->token);
 					c->len_str = strlen(p->token);
 				}
 			}
@@ -2660,7 +2745,7 @@ static int parser_run(parser *p, const char *src, int dump)
 	query_execute(q, p->t);
 
 	if (q->halt)
-		q->error = 0;
+		q->error = false;
 	else if (dump && !q->abort && q->status)
 		dump_vars(q, p);
 
@@ -2686,30 +2771,30 @@ static int parser_run(parser *p, const char *src, int dump)
 module *module_load_text(module *m, const char *src)
 {
 	parser *p = create_parser(m);
-	p->consulting = 1;
+	p->consulting = true;
 	p->srcptr = (char*)src;
 	parser_tokenize(p, 0, 0);
 
 	if (!p->error && !p->end_of_term && p->t->cidx) {
 		fprintf(stdout, "Error: syntax error, incomplete statement\n");
-		p->error = 1;
+		p->error = true;
 	}
 
 	if (!p->error) {
 		parser_xref_db(p);
 		int save = p->m->quiet;
 		p->m->quiet = 1;
-		p->m->halt = 0;
-		p->directive = 1;
+		p->m->halt = false;
+		p->directive = true;
 
 		if (p->run_init == 1) {
-			p->command = 1;
+			p->command = true;
 
 			if (parser_run(p, "initialization(G), G", 0))
-				p->m->halt = 1;
+				p->m->halt = true;
 		}
 
-		p->command = p->directive = 0;
+		p->command = p->directive = false;
 		p->m->quiet = save;
 	}
 
@@ -2721,7 +2806,7 @@ module *module_load_text(module *m, const char *src)
 int module_load_fp(module *m, FILE *fp)
 {
 	parser *p = create_parser(m);
-	p->consulting = 1;
+	p->consulting = true;
 	p->fp = fp;
 	int ok;
 
@@ -2738,23 +2823,23 @@ int module_load_fp(module *m, FILE *fp)
 
 	if (!p->error && !p->end_of_term && p->t->cidx) {
 		fprintf(stdout, "Error: syntax error, incomplete statement\n");
-		p->error = 1;
+		p->error = true;
 	}
 
 	if (!p->error) {
 		parser_xref_db(p);
 		int save = p->m->quiet;
 		p->m->quiet = 1;
-		p->directive = 1;
+		p->directive = true;
 
 		if (p->run_init == 1) {
-			p->command = 1;
+			p->command = true;
 
 			if (parser_run(p, "initialization(G), G", 0))
-				p->m->halt = 1;
+				p->m->halt = true;
 		}
 
-		p->command = p->directive = 0;
+		p->command = p->directive = false;
 		p->m->quiet = save;
 	}
 
@@ -2806,7 +2891,7 @@ int module_load_file(module *m, const char *filename)
 	}
 
 	free(m->filename);
-	m->filename = strdup(filename);
+	m->filename = must_strdup(filename);
 	module_load_fp(m, fp);
 	fclose(fp);
 	return 1;
@@ -2814,7 +2899,7 @@ int module_load_file(module *m, const char *filename)
 
 static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 {
-        (void) dq;
+	(void) dq;
 	idx_t ctx = 0;
 	query q = {0};
 	q.m = m;
@@ -2855,273 +2940,299 @@ static void make_rule(module *m, const char *src)
 {
 	m->prebuilt = 1;
 	parser *p = create_parser(m);
-	p->consulting = 1;
-	p->srcptr = (char*)src;
-	parser_tokenize(p, 0, 0);
-	m->prebuilt = 0;
-	destroy_parser(p);
+	if (p)
+	{
+		p->consulting = true;
+		p->srcptr = (char*)src;
+		parser_tokenize(p, 0, 0);
+		m->prebuilt = 0;
+		destroy_parser(p);
+	} else {
+		m->error = true;
+	}
 }
 
 module *create_module(const char *name)
 {
 	module *m = calloc(1, sizeof(module));
-	m->name = strdup(name);
-	m->next = g_modules;
-	g_modules = m;
+	if (m)
+	{
+		m->name = strdup(name);
+		m->next = g_modules;
+		g_modules = m;
 
-	m->p = create_parser(m);
-	m->flag.double_quote_chars = 1;
-	m->flag.character_escapes = 1;
-	m->flag.rational_syntax_natural = 0;
-	m->flag.prefer_rationals = 0;
-	m->user_ops = MAX_USER_OPS;
-	m->cpu_count = CPU_COUNT;
+		m->p = create_parser(m);
+		if (!m->name) goto ealloc;
+		if (!m->p) goto ealloc;
+		m->flag.double_quote_chars = 1;
+		m->flag.character_escapes = true;
+		m->flag.rational_syntax_natural = 0;
+		m->flag.prefer_rationals = 0;
+		m->user_ops = MAX_USER_OPS;
+		m->cpu_count = CPU_COUNT;
+		m->error = false;
 
-	make_rule(m, "call(G) :- G.");
-	make_rule(m, "format(F) :- format(F, []).");
+		make_rule(m, "call(G) :- G.");
+		make_rule(m, "format(F) :- format(F, []).");
 
-	make_rule(m, "subsumes_term(G,S) :- "					\
-		"\\+ \\+ ( "										\
-		"term_variables(S, V1), "							\
-		"G = S, "											\
-		"term_variables(V1, V2), "							\
-		"V2 == V1).");
+		make_rule(m, "subsumes_term(G,S) :- "			\
+			  "\\+ \\+ ( "					\
+			  "term_variables(S, V1), "			\
+			  "G = S, "					\
+			  "term_variables(V1, V2), "			\
+			  "V2 == V1).");
 
-	make_rule(m, "chars_base64(Plain,Base64,_) :- base64(Plain,Base64).");
-	make_rule(m, "chars_urlenc(Plain,Url,_) :- urlenc(Plain,Url).");
+		make_rule(m, "chars_base64(Plain,Base64,_) :- base64(Plain,Base64).");
+		make_rule(m, "chars_urlenc(Plain,Url,_) :- urlenc(Plain,Url).");
 
-	make_rule(m, "merge([], R, R) :- !.");
-	make_rule(m, "merge(R, [], R) :- !.");
-	make_rule(m, "merge([H1|T1], [H2|T2], Result) :- "		\
-		"compare(Delta, H1, H2), !, "						\
-		"merge(Delta, H1, H2, T1, T2, Result).");
+		make_rule(m, "merge([], R, R) :- !.");
+		make_rule(m, "merge(R, [], R) :- !.");
+		make_rule(m, "merge([H1|T1], [H2|T2], Result) :- "	\
+			  "compare(Delta, H1, H2), !, "			\
+			  "merge(Delta, H1, H2, T1, T2, Result).");
 
-	make_rule(m, "merge(>, H1, H2, T1, T2, [H2|R]) :- "		\
-		"merge([H1|T1], T2, R).");
-	make_rule(m, "merge(=, H1, _, T1, T2, [H1|R]) :- "		\
-		"merge(T1, T2, R).");
-	make_rule(m, "merge(<, H1, H2, T1, T2, [H1|R]) :- "		\
-		"merge(T1, [H2|T2], R).");
+		make_rule(m, "merge(>, H1, H2, T1, T2, [H2|R]) :- "	\
+			  "merge([H1|T1], T2, R).");
+		make_rule(m, "merge(=, H1, _, T1, T2, [H1|R]) :- "	\
+			  "merge(T1, T2, R).");
+		make_rule(m, "merge(<, H1, H2, T1, T2, [H1|R]) :- "	\
+			  "merge(T1, [H2|T2], R).");
 
-	make_rule(m, "sort(L, R) :- "							\
-		"length(L,N), "										\
-		"sort(N, L, _, R).");
+		make_rule(m, "sort(L, R) :- "				\
+			  "length(L,N), "				\
+			  "sort(N, L, _, R).");
 
-	make_rule(m, "sort(2, [X1, X2|L], L, R) :- !, "			\
-		"compare(Delta, X1, X2), "							\
-		"'$sort2'(Delta, X1, X2, R).");
-	make_rule(m, "sort(1, [X|L], L, [X]) :- !.");
-	make_rule(m, "sort(0, L, L, []) :- !.");
-	make_rule(m, "sort(N, L1, L3, R) :- "					\
-		"N1 is N // 2, "									\
-		"plus(N1, N2, N), "									\
-		"sort(N1, L1, L2, R1), "							\
-		"sort(N2, L2, L3, R2), "							\
-		"merge(R1, R2, R).");
+		make_rule(m, "sort(2, [X1, X2|L], L, R) :- !, "		\
+			  "compare(Delta, X1, X2), "			\
+			  "'$sort2'(Delta, X1, X2, R).");
+		make_rule(m, "sort(1, [X|L], L, [X]) :- !.");
+		make_rule(m, "sort(0, L, L, []) :- !.");
+		make_rule(m, "sort(N, L1, L3, R) :- "			\
+			  "N1 is N // 2, "				\
+			  "plus(N1, N2, N), "				\
+			  "sort(N1, L1, L2, R1), "			\
+			  "sort(N2, L2, L3, R2), "			\
+			  "merge(R1, R2, R).");
 
-	make_rule(m, "'$sort2'(<, X1, X2, [X1, X2]).");
-	make_rule(m, "'$sort2'(=, X1, _,  [X1]).");
-	make_rule(m, "'$sort2'(>, X1, X2, [X2, X1]).");
+		make_rule(m, "'$sort2'(<, X1, X2, [X1, X2]).");
+		make_rule(m, "'$sort2'(=, X1, _,  [X1]).");
+		make_rule(m, "'$sort2'(>, X1, X2, [X2, X1]).");
 
-	make_rule(m, "mmerge([], R, R) :- !.");
-	make_rule(m, "mmerge(R, [], R) :- !.");
-	make_rule(m, "mmerge([H1|T1], [H2|T2], Result) :- "		\
-		"compare(Delta, H1, H2), !, "						\
-		"mmerge(Delta, H1, H2, T1, T2, Result).");
+		make_rule(m, "mmerge([], R, R) :- !.");
+		make_rule(m, "mmerge(R, [], R) :- !.");
+		make_rule(m, "mmerge([H1|T1], [H2|T2], Result) :- "	\
+			  "compare(Delta, H1, H2), !, "			\
+			  "mmerge(Delta, H1, H2, T1, T2, Result).");
 
-	make_rule(m, "mmerge(>, H1, H2, T1, T2, [H2|R]) :- "	\
-		"mmerge([H1|T1], T2, R).");
-	make_rule(m, "mmerge(=, H1, H2, T1, T2, [H1|R]) :- "	\
-		"mmerge(T1, [H2|T2], R).");
-	make_rule(m, "mmerge(<, H1, H2, T1, T2, [H1|R]) :- "	\
-		"mmerge(T1, [H2|T2], R).");
+		make_rule(m, "mmerge(>, H1, H2, T1, T2, [H2|R]) :- "	\
+			  "mmerge([H1|T1], T2, R).");
+		make_rule(m, "mmerge(=, H1, H2, T1, T2, [H1|R]) :- "	\
+			  "mmerge(T1, [H2|T2], R).");
+		make_rule(m, "mmerge(<, H1, H2, T1, T2, [H1|R]) :- "	\
+			  "mmerge(T1, [H2|T2], R).");
 
-	make_rule(m, "msort(L, R) :- "							\
-		"length(L,N), "										\
-		"msort(N, L, _, R).");
+		make_rule(m, "msort(L, R) :- "				\
+			  "length(L,N), "				\
+			  "msort(N, L, _, R).");
 
-	make_rule(m, "msort(2, [X1, X2|L], L, R) :- !, "		\
-		"compare(Delta, X1, X2), "							\
-		"'$sort2'(Delta, X1, X2, R).");
-	make_rule(m, "msort(1, [X|L], L, [X]) :- !.");
-	make_rule(m, "msort(0, L, L, []) :- !.");
-	make_rule(m, "msort(N, L1, L3, R) :- "					\
-		"N1 is N // 2, "									\
-		"plus(N1, N2, N), "									\
-		"msort(N1, L1, L2, R1), "							\
-		"msort(N2, L2, L3, R2), "							\
-		"mmerge(R1, R2, R).");
+		make_rule(m, "msort(2, [X1, X2|L], L, R) :- !, "	\
+			  "compare(Delta, X1, X2), "			\
+			  "'$sort2'(Delta, X1, X2, R).");
+		make_rule(m, "msort(1, [X|L], L, [X]) :- !.");
+		make_rule(m, "msort(0, L, L, []) :- !.");
+		make_rule(m, "msort(N, L1, L3, R) :- "			\
+			  "N1 is N // 2, "				\
+			  "plus(N1, N2, N), "				\
+			  "msort(N1, L1, L2, R1), "			\
+			  "msort(N2, L2, L3, R2), "			\
+			  "mmerge(R1, R2, R).");
 
-	make_rule(m, "keycompare(Delta, (K1-_), (K2-_)) :- "	\
-		"(K1 @< K2 -> Delta = '<' ; "						\
-		"(K1 @> K2 -> Delta = '>' ; "						\
-		"Delta = '=').");
+		make_rule(m, "keycompare(Delta, (K1-_), (K2-_)) :- "	\
+			  "(K1 @< K2 -> Delta = '<' ; "			\
+			  "(K1 @> K2 -> Delta = '>' ; "			\
+			  "Delta = '=').");
 
-	make_rule(m, "keysort(L, R) :- "						\
-		"length(L,N), "										\
-		"keysort(N, L, _, R).");
+		make_rule(m, "keysort(L, R) :- "			\
+			  "length(L,N), "				\
+			  "keysort(N, L, _, R).");
 
-	make_rule(m, "keysort(2, [X1, X2|L], L, R) :- !, "		\
-		"keycompare(Delta, X1, X2), "						\
-		"'$sort2'(Delta, X1, X2, R).");
-	make_rule(m, "keysort(1, [X|L], L, [X]) :- !.");
-	make_rule(m, "keysort(0, L, L, []) :- !.");
-	make_rule(m, "keysort(N, L1, L3, R) :- "				\
-		"N1 is N // 2, "									\
-		"plus(N1, N2, N), "									\
-		"keysort(N1, L1, L2, R1), "							\
-		"keysort(N2, L2, L3, R2), "							\
-		"mmerge(R1, R2, R).");
+		make_rule(m, "keysort(2, [X1, X2|L], L, R) :- !, "	\
+			  "keycompare(Delta, X1, X2), "			\
+			  "'$sort2'(Delta, X1, X2, R).");
+		make_rule(m, "keysort(1, [X|L], L, [X]) :- !.");
+		make_rule(m, "keysort(0, L, L, []) :- !.");
+		make_rule(m, "keysort(N, L1, L3, R) :- "		\
+			  "N1 is N // 2, "				\
+			  "plus(N1, N2, N), "				\
+			  "keysort(N1, L1, L2, R1), "			\
+			  "keysort(N2, L2, L3, R2), "			\
+			  "mmerge(R1, R2, R).");
 
-	make_rule(m, "bagof(T,G,B) :- "							\
-		"copy_term('$bagof'(T,G,_),TMP_G),"					\
-		"TMP_G,"											\
-		"'$bagof'(T,G,B)=TMP_G.");
+		make_rule(m, "bagof(T,G,B) :- "				\
+			  "copy_term('$bagof'(T,G,_),TMP_G),"		\
+			  "TMP_G,"					\
+			  "'$bagof'(T,G,B)=TMP_G.");
 
-	make_rule(m, "setof(T,G,B) :- "							\
-		"copy_term('$bagof'(T,G,_),TMP_G),"					\
-		"TMP_G,"											\
-		"'$bagof'(T,G,TMP_B)=TMP_G,"						\
-		"sort(TMP_B,B).");
+		make_rule(m, "setof(T,G,B) :- "				\
+			  "copy_term('$bagof'(T,G,_),TMP_G),"		\
+			  "TMP_G,"					\
+			  "'$bagof'(T,G,TMP_B)=TMP_G,"			\
+			  "sort(TMP_B,B).");
 
-	make_rule(m, "call(G,P1) :- "							\
-		"copy_term('$calln'(G,P1),TMP_G),"					\
-		"'$calln'(G,P1)=TMP_G,"								\
-		"TMP_G.");
+		make_rule(m, "call(G,P1) :- "				\
+			  "copy_term('$calln'(G,P1),TMP_G),"		\
+			  "'$calln'(G,P1)=TMP_G,"			\
+			  "TMP_G.");
 
-	make_rule(m, "call(G,P1,P2) :- "						\
-		"copy_term('$calln'(G,P1,P2),TMP_G),"				\
-		"'$calln'(G,P1,P2)=TMP_G,"							\
-		"TMP_G.");
+		make_rule(m, "call(G,P1,P2) :- "			\
+			  "copy_term('$calln'(G,P1,P2),TMP_G),"		\
+			  "'$calln'(G,P1,P2)=TMP_G,"			\
+			  "TMP_G.");
 
-	make_rule(m, "call(G,P1,P2,P3) :- "						\
-		"copy_term('$calln'(G,P1,P2,P3),TMP_G),"			\
-		"'$calln'(G,P1,P2,P3)=TMP_G,"						\
-		"TMP_G.");
+		make_rule(m, "call(G,P1,P2,P3) :- "			\
+			  "copy_term('$calln'(G,P1,P2,P3),TMP_G),"	\
+			  "'$calln'(G,P1,P2,P3)=TMP_G,"			\
+			  "TMP_G.");
 
-	make_rule(m, "call(G,P1,P2,P3,P4) :- "					\
-		"copy_term('$calln'(G,P1,P2,P3,P4),TMP_G),"			\
-		"'$calln'(G,P1,P2,P3,P4)=TMP_G,"					\
-		"TMP_G.");
+		make_rule(m, "call(G,P1,P2,P3,P4) :- "			\
+			  "copy_term('$calln'(G,P1,P2,P3,P4),TMP_G),"	\
+			  "'$calln'(G,P1,P2,P3,P4)=TMP_G,"		\
+			  "TMP_G.");
 
-	make_rule(m, "spawn(G,P1) :- "							\
-		"copy_term('$spawnn'(G,P1),TMP_G),"					\
-		"'$spawnn'(G,P1)=TMP_G,"							\
-		"TMP_G.");
+		make_rule(m, "spawn(G,P1) :- "				\
+			  "copy_term('$spawnn'(G,P1),TMP_G),"		\
+			  "'$spawnn'(G,P1)=TMP_G,"			\
+			  "TMP_G.");
 
-	make_rule(m, "spawn(G,P1,P2) :- "						\
-		"copy_term('$spawnn'(G,P1,P2),TMP_G),"				\
-		"'$spawnn'(G,P1,P2)=TMP_G,"							\
-		"TMP_G.");
+		make_rule(m, "spawn(G,P1,P2) :- "			\
+			  "copy_term('$spawnn'(G,P1,P2),TMP_G),"	\
+			  "'$spawnn'(G,P1,P2)=TMP_G,"			\
+			  "TMP_G.");
 
-	make_rule(m, "spawn(G,P1,P2,P3) :- "					\
-		"copy_term('$spawnn'(G,P1,P2,P3),TMP_G),"			\
-		"'$spawnn'(G,P1,P2,P3)=TMP_G,"						\
-		"TMP_G.");
+		make_rule(m, "spawn(G,P1,P2,P3) :- "			\
+			  "copy_term('$spawnn'(G,P1,P2,P3),TMP_G),"	\
+			  "'$spawnn'(G,P1,P2,P3)=TMP_G,"		\
+			  "TMP_G.");
 
-	make_rule(m, "spawn(G,P1,P2,P3,P4) :- "					\
-		"copy_term('$spawnn'(G,P1,P2,P3,P4),TMP_G),"		\
-		"'$spawnn'(G,P1,P2,P3,P4)=TMP_G,"					\
-		"TMP_G.");
+		make_rule(m, "spawn(G,P1,P2,P3,P4) :- "			\
+			  "copy_term('$spawnn'(G,P1,P2,P3,P4),TMP_G),"	\
+			  "'$spawnn'(G,P1,P2,P3,P4)=TMP_G,"		\
+			  "TMP_G.");
 
-	make_rule(m, "phrase_from_file(P, Filename) :- "		\
-		"open(Filename, read, Str, [mmap(Ms)]),"			\
-		"copy_term(P, P2), P2=P,"							\
-		"phrase(P2, Ms, []),"								\
-		"close(Str).");
+		make_rule(m, "phrase_from_file(P, Filename) :- "	\
+			  "open(Filename, read, Str, [mmap(Ms)]),"	\
+			  "copy_term(P, P2), P2=P,"			\
+			  "phrase(P2, Ms, []),"				\
+			  "close(Str).");
 
-	make_rule(m, "phrase_from_file(P, Filename, Opts) :- "	\
-		"open(Filename, read, Str, [mmap(Ms)|Opts]),"		\
-		"copy_term(P, P2), P2=P,"							\
-		"phrase(P2, Ms, []),"								\
-		"close(Str).");
+		make_rule(m, "phrase_from_file(P, Filename, Opts) :- "	\
+			  "open(Filename, read, Str, [mmap(Ms)|Opts])," \
+			  "copy_term(P, P2), P2=P,"			\
+			  "phrase(P2, Ms, []),"				\
+			  "close(Str).");
 
-	make_rule(m, "phrase(GRBody, S0) :-" \
-		"phrase(GRBody, S0, [])." \
-		"phrase(GRBody, S0, S) :-" \
-		"  (  var(GRBody) -> throw(error(instantiation_error, phrase/3))" \
-		"  ;  dcg_constr(GRBody) -> phrase_(GRBody, S0, S)" \
-		"  ;  functor(GRBody, _, _) -> call(GRBody, S0, S)" \
-		"  ;  throw(error(type_error(callable, GRBody), phrase/3))" \
-		"  )." \
-		"" \
-		"phrase_([], S, S)." \
-		"phrase_(!, S, S)." \
-		"phrase_((A, B), S0, S) :-" \
-		"  phrase(A, S0, S1), phrase(B, S1, S)." \
-		"phrase_((A -> B ; C), S0, S) :-" \
-		"  !," \
-		"  (  phrase(A, S0, S1) ->" \
-		"    phrase(B, S1, S)" \
-		"  ;  phrase(C, S0, S)" \
-		"  )." \
-		"phrase_((A ; B), S0, S) :-" \
-		"  (  phrase(A, S0, S) ; phrase(B, S0, S)  )." \
-		"phrase_((A | B), S0, S) :-" \
-		"  (  phrase(A, S0, S) ; phrase(B, S0, S)  )." \
-		"phrase_({G}, S0, S) :-" \
-		"  (  call(G), S0 = S  )." \
-		"phrase_(call(G), S0, S) :-" \
-		"  call(G, S0, S)." \
-		"phrase_((A -> B), S0, S) :-" \
-		"  phrase((A -> B ; fail), S0, S)." \
-		"phrase_(phrase(NonTerminal), S0, S) :-" \
-		"  phrase(NonTerminal, S0, S)." \
-		"phrase_([T|Ts], S0, S) :-" \
-		"  append([T|Ts], S, S0).");
+		make_rule(m, "phrase(GRBody, S0) :-"			\
+			  "phrase(GRBody, S0, [])."			\
+			  "phrase(GRBody, S0, S) :-"			\
+			  "  (	var(GRBody) -> throw(error(instantiation_error, phrase/3))" \
+			  "  ;	dcg_constr(GRBody) -> phrase_(GRBody, S0, S)" \
+			  "  ;	functor(GRBody, _, _) -> call(GRBody, S0, S)" \
+			  "  ;	throw(error(type_error(callable, GRBody), phrase/3))" \
+			  "  )."					\
+			  ""						\
+			  "phrase_([], S, S)."				\
+			  "phrase_(!, S, S)."				\
+			  "phrase_((A, B), S0, S) :-"			\
+			  "  phrase(A, S0, S1), phrase(B, S1, S)."	\
+			  "phrase_((A -> B ; C), S0, S) :-"		\
+			  "  !,"					\
+			  "  (	phrase(A, S0, S1) ->"			\
+			  "    phrase(B, S1, S)"			\
+			  "  ;	phrase(C, S0, S)"			\
+			  "  )."					\
+			  "phrase_((A ; B), S0, S) :-"			\
+			  "  (	phrase(A, S0, S) ; phrase(B, S0, S)  )." \
+			  "phrase_((A | B), S0, S) :-"			\
+			  "  (	phrase(A, S0, S) ; phrase(B, S0, S)  )." \
+			  "phrase_({G}, S0, S) :-"			\
+			  "  (	call(G), S0 = S	 )."			\
+			  "phrase_(call(G), S0, S) :-"			\
+			  "  call(G, S0, S)."				\
+			  "phrase_((A -> B), S0, S) :-"			\
+			  "  phrase((A -> B ; fail), S0, S)."		\
+			  "phrase_(phrase(NonTerminal), S0, S) :-"	\
+			  "  phrase(NonTerminal, S0, S)."		\
+			  "phrase_([T|Ts], S0, S) :-"			\
+			  "  append([T|Ts], S, S0).");
 
-	// This is an approximation... it needs a catcher
+		// This is an approximation... it needs a catcher
 
-	make_rule(m, "setup_call_cleanup(A,G,B) :- A, !, (G -> true ; (B, !, fail)).");
+		make_rule(m, "setup_call_cleanup(A,G,B) :- A, !, (G -> true ; (B, !, fail)).");
 
-	// Edinburgh...
+		// Edinburgh...
 
-	make_rule(m, "tab(0) :- !.");
-	make_rule(m, "tab(N) :- put_code(32), M is N-1, tab(M).");
-	make_rule(m, "tab(_,0) :- !.");
-	make_rule(m, "tab(S,N) :- put_code(S,32), M is N-1, tab(S,M).");
-	make_rule(m, "get0(C) :- get_code(C).");
-	make_rule(m, "get0(S,C) :- get_code(S,C).");
-	make_rule(m, "display(T) :- write_canonical(T).");
-	make_rule(m, "display(S,T) :- write_canonical(S,T).");
-	make_rule(m, "put(C) :- put_code(C).");
-	make_rule(m, "put(S,C) :- put_code(S,C).");
-	make_rule(m, "see(F) :- open(F,read,S), set_input(S).");
-	make_rule(m, "tell(F) :- open(F,write,S), set_output(S).");
-	make_rule(m, "append(F) :- open(F,append,S), set_output(S).");
+		make_rule(m, "tab(0) :- !.");
+		make_rule(m, "tab(N) :- put_code(32), M is N-1, tab(M).");
+		make_rule(m, "tab(_,0) :- !.");
+		make_rule(m, "tab(S,N) :- put_code(S,32), M is N-1, tab(S,M).");
+		make_rule(m, "get0(C) :- get_code(C).");
+		make_rule(m, "get0(S,C) :- get_code(S,C).");
+		make_rule(m, "display(T) :- write_canonical(T).");
+		make_rule(m, "display(S,T) :- write_canonical(S,T).");
+		make_rule(m, "put(C) :- put_code(C).");
+		make_rule(m, "put(S,C) :- put_code(S,C).");
+		make_rule(m, "see(F) :- open(F,read,S), set_input(S).");
+		make_rule(m, "tell(F) :- open(F,write,S), set_output(S).");
+		make_rule(m, "append(F) :- open(F,append,S), set_output(S).");
 
-	// SWI or GNU
+		// SWI or GNU
 
-	make_rule(m, "current_key(K) :- variable(K), clause('$record_key'(K,_),_).");
-	make_rule(m, "recorda(K,V) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V)).");
-	make_rule(m, "recordz(K,V) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V)).");
-	make_rule(m, "recorded(K,V) :- nonvar(K), clause('$record_key'(K,V),_).");
-	make_rule(m, "recorda(K,V,R) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V),R).");
-	make_rule(m, "recordz(K,V,R) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V),R).");
-	make_rule(m, "recorded(K,V,R) :- nonvar(K), clause('$record_key'(K,V),_,R).");
+		make_rule(m, "current_key(K) :- variable(K), clause('$record_key'(K,_),_).");
+		make_rule(m, "recorda(K,V) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V)).");
+		make_rule(m, "recordz(K,V) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V)).");
+		make_rule(m, "recorded(K,V) :- nonvar(K), clause('$record_key'(K,V),_).");
+		make_rule(m, "recorda(K,V,R) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V),R).");
+		make_rule(m, "recordz(K,V,R) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V),R).");
+		make_rule(m, "recorded(K,V,R) :- nonvar(K), clause('$record_key'(K,V),_,R).");
 
-	make_rule(m, "succ(X,Y) :- integer(X), Y is X + 1, X >= 0, !.");
-	make_rule(m, "succ(X,Y) :- integer(Y), X is Y - 1, X >= 0.");
+		make_rule(m, "succ(X,Y) :- integer(X), Y is X + 1, X >= 0, !.");
+		make_rule(m, "succ(X,Y) :- integer(Y), X is Y - 1, X >= 0.");
 
-	make_rule(m, "term_to_atom(T,S) :- write_term_to_chars(S,T,[]).");
-	make_rule(m, "write_term_to_atom(S,T,Opts) :- write_term_to_chars(S,T,Opts).");
-	make_rule(m, "read_term_from_atom(S,T,Opts) :- read_term_from_chars(S,T,Opts).");
-	make_rule(m, "absolute_file_name(R,A) :- absolute_file_name(R,A,[]).");
+		make_rule(m, "term_to_atom(T,S) :- write_term_to_chars(S,T,[]).");
+		make_rule(m, "write_term_to_atom(S,T,Opts) :- write_term_to_chars(S,T,Opts).");
+		make_rule(m, "read_term_from_atom(S,T,Opts) :- read_term_from_chars(S,T,Opts).");
+		make_rule(m, "absolute_file_name(R,A) :- absolute_file_name(R,A,[]).");
 
-	// Other...
+		// Other...
 
-	make_rule(m, "client(U,H,P,S) :- client(U,H,P,S,[]).");
-	make_rule(m, "server(H,S) :- server(H,S,[]).");
+		make_rule(m, "client(U,H,P,S) :- client(U,H,P,S,[]).");
+		make_rule(m, "server(H,S) :- server(H,S,[]).");
 
-	parser *p = create_parser(m);
-	p->consulting = 1;
-	parser_xref_db(p);
-	destroy_parser(p);
+		if (m->error)
+			goto ealloc;
+
+		parser *p = create_parser(m);
+		if (p)
+		{
+			p->consulting = true;
+			parser_xref_db(p);
+			destroy_parser(p);
+		} else {
+			goto ealloc;
+		}
+	}
 	return m;
+ealloc:
+	destroy_parser(m->p);
+	free(m->name);
+	free(m);
+	return NULL;
 }
 
 void destroy_module(module *m)
 {
+	if (!m) return;
+
 	while (m->tasks) {
 		query *task = m->tasks->next;
 		destroy_query(m->tasks);
@@ -3174,12 +3285,12 @@ int deconsult(const char *filename)
 	return 1;
 }
 
-int get_halt(prolog *pl) { return pl->m->halt; }
+bool get_halt(prolog *pl) { return pl->m->halt; }
 int get_halt_code(prolog *pl) { return pl->m->halt_code; }
 int get_status(prolog *pl) { return pl->m->status; }
 int get_dump_vars(prolog *pl) { return pl->m->dump_vars; }
 
-void set_trace(prolog *pl) { pl->m->trace = 1; }
+void set_trace(prolog *pl) { pl->m->trace = true; }
 void set_quiet(prolog *pl) { pl->m->quiet = 1; }
 void set_stats(prolog *pl) { pl->m->stats = 1; }
 void set_opt(prolog *pl, int level) { pl->m->opt = level; }
@@ -3187,7 +3298,8 @@ void set_opt(prolog *pl, int level) { pl->m->opt = level; }
 int pl_eval(prolog *pl, const char *src)
 {
 	parser *p = create_parser(pl->curr_m);
-	p->command = 1;
+	if (!p) abort();
+	p->command = true;
 	int ok = parser_run(p, src, 1);
 	pl->curr_m = p->m;
 	destroy_parser(p);
@@ -3204,58 +3316,109 @@ int pl_consult(prolog *pl, const char *filename)
 	return module_load_file(pl->m, filename);
 }
 
+
+void* g_init(void)
+{
+	g_pool = calloc(g_pool_size=INITIAL_POOL_SIZE, 1);
+	if (g_pool)
+	{
+		g_pool_offset = 0;
+
+		g_false_s = index_from_pool("false");
+		g_true_s = index_from_pool("true");
+		g_empty_s = index_from_pool("");
+		g_anon_s = index_from_pool("_");
+		g_dot_s = index_from_pool(".");
+		g_cut_s = index_from_pool("!");
+		g_nil_s = index_from_pool("[]");
+		g_braces_s = index_from_pool("{}");
+		g_fail_s = index_from_pool("fail");
+		g_clause_s = index_from_pool(":-");
+		g_sys_elapsed_s = index_from_pool("$elapsed");
+		g_sys_queue_s = index_from_pool("$queue");
+		g_eof_s = index_from_pool("end_of_file");
+		g_lt_s = index_from_pool("<");
+		g_gt_s = index_from_pool(">");
+		g_eq_s = index_from_pool("=");
+
+		g_streams[0].fp = stdin;
+		g_streams[0].filename = must_strdup("stdin");
+		g_streams[0].name = must_strdup("user_input");
+		g_streams[0].mode = must_strdup("read");
+
+		g_streams[1].fp = stdout;
+		g_streams[1].filename = must_strdup("stdout");
+		g_streams[1].name = must_strdup("user_output");
+		g_streams[1].mode = must_strdup("append");
+
+		g_streams[2].fp = stderr;
+		g_streams[2].filename = must_strdup("stderr");
+		g_streams[2].name = must_strdup("user_error");
+		g_streams[2].mode = must_strdup("append");
+	}
+	return g_pool;
+}
+
+void g_destroy()
+{
+	for (int i = 0; i < MAX_STREAMS; i++) {
+		stream *str = &g_streams[i];
+
+		if (str->fp) {
+			if (i > 2)
+					fclose(str->fp);
+
+			free(str->filename);
+			free(str->mode);
+			free(str->name);
+			str->name = NULL;
+		}
+
+		if (str->p)
+			destroy_parser(str->p);
+
+		str->p = NULL;
+	}
+
+	memset(g_streams, 0, sizeof(g_streams));
+
+	while (g_modules) {
+		module *m = g_modules;
+		g_modules = m->next;
+		destroy_module(m);
+	}
+
+	free(g_pool);
+	g_pool = NULL;
+}
+
+
 prolog *pl_create()
 {
+	++g_tpl_count;
+	if (g_tpl_count == 1 && g_init() == NULL)
+		return NULL;
+
 	if (!g_tpl_lib)
 		g_tpl_lib = getenv("TPL_LIBRARY_PATH");
 
 	if (!g_tpl_lib)
 		g_tpl_lib = "library";
 
-	g_tpl_count++;
 	srandom(time(0)+clock()+getpid());
 	prolog *pl = calloc(1, sizeof(prolog));
-
-	if (!g_pool) {
-		g_pool = calloc(g_pool_size=INITIAL_POOL_SIZE, 1);
-		g_pool_offset = 0;
+	if (!pl)
+	{
+		if (!--g_tpl_count)
+			g_destroy();
+		return NULL;
 	}
 
-	g_false_s = find_in_pool("false");
-	g_true_s = find_in_pool("true");
-	g_empty_s = find_in_pool("");
-	g_anon_s = find_in_pool("_");
-	g_dot_s = find_in_pool(".");
-	g_cut_s = find_in_pool("!");
-	g_nil_s = find_in_pool("[]");
-	g_braces_s = find_in_pool("{}");
-	g_fail_s = find_in_pool("fail");
-	g_clause_s = find_in_pool(":-");
-	g_sys_elapsed_s = find_in_pool("$elapsed");
-	g_sys_queue_s = find_in_pool("$queue");
-	g_eof_s = find_in_pool("end_of_file");
-	g_lt_s = find_in_pool("<");
-	g_gt_s = find_in_pool(">");
-	g_eq_s = find_in_pool("=");
-
-	g_streams[0].fp = stdin;
-	g_streams[0].filename = strdup("stdin");
-	g_streams[0].name = strdup("user_input");
-	g_streams[0].mode = strdup("read");
-
-	g_streams[1].fp = stdout;
-	g_streams[1].filename = strdup("stdout");
-	g_streams[1].name = strdup("user_output");
-	g_streams[1].mode = strdup("append");
-
-	g_streams[2].fp = stderr;
-	g_streams[2].filename = strdup("stderr");
-	g_streams[2].name = strdup("user_error");
-	g_streams[2].mode = strdup("append");
 
 	pl->m = create_module("user");
+	if (!pl->m) abort();
 	pl->curr_m = pl->m;
-	pl->m->filename = strdup("~/.tpl_user");
+	pl->m->filename = must_strdup("~/.tpl_user");
 	pl->m->prebuilt = 1;
 
 	set_multifile_in_db(pl->m, "term_expansion", 2);
@@ -3294,38 +3457,11 @@ prolog *pl_create()
 
 void pl_destroy(prolog *pl)
 {
+	if (!pl) return;
+
 	destroy_module(pl->m);
 	free(pl);
 
-	if (!--g_tpl_count) {
-		for (int i = 0; i < MAX_STREAMS; i++) {
-			stream *str = &g_streams[i];
-
-			if (str->fp) {
-				if (i > 2)
-					fclose(str->fp);
-
-				free(str->filename);
-				free(str->mode);
-				free(str->name);
-				str->name = NULL;
-			}
-
-			if (str->p)
-				destroy_parser(str->p);
-
-			str->p = NULL;
-		}
-
-		memset(g_streams, 0, sizeof(g_streams));
-
-		while (g_modules) {
-			module *m = g_modules;
-			g_modules = m->next;
-			destroy_module(m);
-		}
-
-		free(g_pool);
-		g_pool = NULL;
-	}
+	if (!--g_tpl_count)
+		g_destroy();
 }

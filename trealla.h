@@ -1,4 +1,6 @@
 #pragma once
+#include <stdbool.h>
+#include <stdio.h>
 
 typedef struct prolog_ prolog;
 
@@ -10,7 +12,7 @@ int pl_consult(prolog*, const char *filename);
 int pl_consult_fp(prolog*, FILE *fp);
 
 int get_halt_code(prolog*);
-int get_halt(prolog*);
+bool get_halt(prolog*);
 int get_status(prolog*);
 int get_dump_vars(prolog*);
 
