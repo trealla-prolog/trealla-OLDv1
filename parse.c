@@ -2807,7 +2807,7 @@ module *module_load_text(module *m, const char *src)
 		if (p->run_init == 1) {
 			p->command = true;
 
-			if (parser_run(p, "retract(initialization(G)), G", 0))
+			if (parser_run(p, "initialization(G), G, retract(initialization(_))", 0))
 				p->m->halt = true;
 		}
 
@@ -2852,7 +2852,7 @@ int module_load_fp(module *m, FILE *fp)
 		if (p->run_init == 1) {
 			p->command = true;
 
-			if (parser_run(p, "retract(initialization(G)), G", 0))
+			if (parser_run(p, "initialization(G), G, retract(initialization(_))", 0))
 				p->m->halt = true;
 		}
 
