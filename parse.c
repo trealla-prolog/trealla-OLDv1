@@ -2750,6 +2750,7 @@ static int parser_run(parser *p, const char *src, int dump)
 
 	parser_xref(p, p->t, NULL);
 	query *q = create_query(p->m, 0);
+	q->run_init = p->run_init;
 	query_execute(q, p->t);
 
 	if (q->halt)
@@ -2798,7 +2799,7 @@ module *module_load_text(module *m, const char *src)
 		if (p->run_init == 1) {
 			p->command = true;
 
-			if (parser_run(p, "initialization(G), G", 0))
+			if (parser_run(p, "retract(initialization(G)), G", 0))
 				p->m->halt = true;
 		}
 
@@ -2843,7 +2844,7 @@ int module_load_fp(module *m, FILE *fp)
 		if (p->run_init == 1) {
 			p->command = true;
 
-			if (parser_run(p, "initialization(G), G", 0))
+			if (parser_run(p, "retract(initialization(G)), G", 0))
 				p->m->halt = true;
 		}
 

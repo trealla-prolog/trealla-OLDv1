@@ -785,7 +785,7 @@ static bool match_full(query *q, cell *p1, idx_t p1_ctx)
 	if (!h)
 		q->st.curr_clause = NULL;
 	else {
-		if (!h->is_dynamic) {
+		if (!h->is_dynamic && !q->run_init) {
 			throw_error(q, p1, "permission_error", "access_private_procedure");
 			return false;
 		}
@@ -847,7 +847,7 @@ bool match_clause(query *q, cell *p1, idx_t p1_ctx)
 			q->st.curr_clause = NULL;
 		}
 		else {
-			if (!h->is_dynamic) {
+			if (!h->is_dynamic && !q->run_init) {
 				throw_error(q, p1, "permission_error", "access_private_procedure");
 				return false;
 			}

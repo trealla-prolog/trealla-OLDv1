@@ -338,6 +338,7 @@ struct query_ {
 	bool abort:1;
 	bool cycle_error:1;
 	bool spawned:1;
+	bool run_init:1;
 };
 
 struct parser_ {
