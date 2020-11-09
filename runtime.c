@@ -14,10 +14,15 @@
 #include "internal.h"
 #include "history.h"
 #include "builtins.h"
+#include "cdebug.h"
 
 #define Trace if (q->trace /*&& !consulting*/) trace_call
 
 int g_tpl_interrupt = 0;
+
+#ifdef FAULTINJECT_ENABLED
+uint64_t FAULTINJECT_VAR;
+#endif
 
 typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 

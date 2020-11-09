@@ -38,10 +38,10 @@ tpl: $(OBJECTS)
 	$(CC) -o tpl $(OBJECTS) $(OPT) $(LDFLAGS)
 
 profile:
-	$(MAKE) 'OPT=$(OPT) -O0 -pg -DDEBUG'
+	$(MAKE) 'OPT=$(OPT) -O0 -pg -DDEBUG -DFAULTINJECT_VAR=g_faultinject'
 
 debug:
-	$(MAKE) 'OPT=$(OPT) -O0 -g -DDEBUG'
+	$(MAKE) 'OPT=$(OPT) -O0 -g -DDEBUG -DFAULTINJECT_VAR=g_faultinject'
 
 test:
 	./tests/run.sh

@@ -14,6 +14,7 @@
 
 #include "history.h"
 #include "trealla.h"
+#include "cdebug.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -145,6 +146,10 @@ int main(int ac, char *av[])
 	if ((homedir = getenv("HOME")) == NULL)
 		homedir = ".";
 
+#ifdef FAULTINJECT_ENABLED
+	FAULTINJECT_VAR = strtoul(getenv("FAULTSTART")?getenv("FAULTSTART"):"0", NULL, 0);
+#endif
+
 	char histfile[1024];
 	snprintf(histfile, sizeof(histfile), "%s/%s", homedir, ".tpl_history");
 
@@ -267,6 +272,10 @@ int main(int ac, char *av[])
 
 	if ((version && !quiet) || ns)
 		return 0;
+
+#ifdef FAULTINJECT_ENABLED
+	printf("CDEBUG FAULT INJECTION ENABLED!\n"); //Don't use this build for benchmarking and production
+#endif
 
 	if (isatty(0))
 		history_load(histfile);

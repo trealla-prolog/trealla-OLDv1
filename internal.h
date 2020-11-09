@@ -8,6 +8,7 @@
 #include "skiplist.h"
 #include "utf8.h"
 #include "trealla.h"
+#include "cdebug.h"
 
 #ifndef USE_OPENSSL
 #define USE_OPENSSL 0
@@ -50,16 +51,6 @@ typedef uint32_t idx_t;
 #define MAX_DEPTH 1000
 
 #define STREAM_BUFLEN 1024
-
-// Debug helpers
-#ifdef NDEBUG
-#define message(fmt, ...)
-#define message_when(cond, ...)
-#else
-#define message(fmt, ...) fprintf(stderr, "%s:%d %s: " fmt "\n", __FILE__, __LINE__, __func__, ## __VA_ARGS__)
-#define message_when(cond, ...) do { if (cond) {message(""__VA_ARGS__);}} while (0)
-#endif
-#define ensure(cond, ...) do { if (!(cond)) {message( #cond " failed " __VA_ARGS__); abort();}} while (0)
 
 
 #define GET_FRAME(i) (q->frames+(i))
