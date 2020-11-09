@@ -48,22 +48,46 @@ uint64_t get_time_in_usec(void)
 }
 #endif
 
+
+static idx_t alloc_grow(void** addr, size_t elem_size, idx_t min_elements, idx_t max_elements)
+{
+	assert(min_elements <= max_elements);
+	idx_t elements = max_elements;
+	void* mem;
+
+	do {
+		mem = realloc(*addr, elem_size * elements);
+		if (mem) break;
+		elements = min_elements + (elements-min_elements)/2;
+		message("memory pressure reduce %u to %u", max_elements, elements);
+	} while (elements != min_elements);
+
+	if (!mem)
+		return 0;
+
+	*addr = mem;
+	return elements;
+}
+
+
 static void check_trail(query *q)
 {
 	if (q->st.tp > q->max_trails) {
 		q->max_trails = q->st.tp;
 
 		if (q->st.tp >= q->trails_size) {
-			q->trails_size += q->trails_size / 2;
+			FAULTINJECT(throw_error(q, q->st.curr_cell, "resource_error", "out_of_trail_space");
+				    q->error = true; return);
 
-			if ((sizeof(trail)*q->trails_size) > (1024LL*1024*1024)) {
+			idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp + 2, q->trails_size*2);
+			if (!new_trailssize)
+			{
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_trail_space");
 				q->error = true;
 				return;
 			}
 
-			q->trails = realloc(q->trails, sizeof(trail)*q->trails_size);
-			ensure(q->trails);
+			q->trails_size = new_trailssize;
 		}
 	}
 }
@@ -74,16 +98,18 @@ static void check_choice(query *q)
 		q->max_choices = q->cp;
 
 		if (q->cp >= q->choices_size) {
-			q->choices_size += q->choices_size / 2;
+			FAULTINJECT(throw_error(q, q->st.curr_cell, "resource_error", "out_of_choice_space");
+				    q->error = true; return);
 
-			if ((sizeof(choice)*q->choices_size) > (1024LL*1024*1024)) {
+			idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp + 2, q->choices_size*2);
+			if (!new_choicessize)
+			{
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_choice_space");
 				q->error = true;
 				return;
 			}
 
-			q->choices = realloc(q->choices, sizeof(choice)*q->choices_size);
-			ensure(q->choices);
+			q->choices_size = new_choicessize;
 		}
 	}
 }
@@ -94,22 +120,23 @@ static void check_frame(query *q)
 		q->max_frames = q->st.fp;
 
 		if (q->st.fp >= q->frames_size) {
-			idx_t save_frame = q->frames_size;
-			q->frames_size += q->frames_size / 2;
+			FAULTINJECT(throw_error(q, q->st.curr_cell, "resource_error", "out_of_frame_space");
+				    q->error = true; return);
 
-			if ((sizeof(frame)*q->frames_size) > (1024LL*1024*1024)) {
+			idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp + 2, q->frames_size*2);
+			if (!new_framessize)
+			{
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_frame_space");
 				q->error = true;
 				return;
 			}
 
-			assert(q->frames_size);
-			q->frames = realloc(q->frames, sizeof(frame)*q->frames_size);
-			ensure(q->frames);
-			memset(q->frames+save_frame, 0, sizeof(frame)*(q->frames_size-save_frame));
+			memset(q->frames+q->frames_size, 0, sizeof(frame)*(new_framessize-q->frames_size));
+			q->frames_size = new_framessize;
 		}
 	}
 }
+
 
 static void check_slot(query *q, unsigned cnt)
 {
@@ -119,21 +146,23 @@ static void check_slot(query *q, unsigned cnt)
 		q->max_slots = q->st.sp;
 
 		while (nbr >= q->slots_size) {
-			idx_t save_slots = q->slots_size;
-			q->slots_size += q->slots_size / 2;
+			FAULTINJECT(throw_error(q, q->st.curr_cell, "resource_error", "out_of_slot_space");
+				    q->error = true; return);
 
-			if ((sizeof(slot)*q->slots_size) > (1024LL*1024*1024*2)) {
+			idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr + 2, q->slots_size*2>nbr+2?q->slots_size*2:nbr+2);
+			if (!new_slotssize)
+			{
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_slot_space");
 				q->error = true;
 				return;
 			}
 
-			q->slots = realloc(q->slots, sizeof(slot)*q->slots_size);
-			ensure(q->slots);
-			memset(q->slots+save_slots, 0, sizeof(slot)*(q->slots_size-save_slots));
+			memset(q->slots+q->slots_size, 0, sizeof(slot)*(new_slotssize-q->slots_size));
+			q->slots_size = new_slotssize;
 		}
 	}
 }
+
 
 static void trace_call(query *q, cell *c, box_t box)
 {
