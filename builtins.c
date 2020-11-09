@@ -1308,12 +1308,12 @@ static int fn_iso_atom_concat_3(query *q)
 		return do_atom_concat_3(q);
 
 	if (is_variable(p3)) {
-		if (q->m->flag.iso_strict ? !is_iso_atom(p1): !is_atom(p1)) {
+		if (q->m->flag.strict_iso ? !is_iso_atom(p1): !is_atom(p1)) {
 			throw_error(q, p1, "type_error", "atom");
 			return 0;
 		}
 
-		if (q->m->flag.iso_strict ? !is_iso_atom(p2): !is_atom(p2)) {
+		if (q->m->flag.strict_iso ? !is_iso_atom(p2): !is_atom(p2)) {
 			throw_error(q, p2, "type_error", "atom");
 			return 0;
 		}
@@ -1389,7 +1389,7 @@ static int fn_iso_atom_length_2(query *q)
 	GET_NEXT_ARG(p2,integer_or_var);
 	size_t len;
 
-	if (is_string(p1) && q->m->flag.iso_strict) {
+	if (is_string(p1) && q->m->flag.strict_iso) {
 		throw_error(q, p1, "type_error", "atom");
 		return -1;
 	}
@@ -5428,11 +5428,11 @@ static int fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.prefer_rationals = true;
 		else if (!strcmp(GET_STR(p2), "flase"))
 			q->m->flag.prefer_rationals = false;
-	} else if (!strcmp(GET_STR(p1), "iso_strict")) {
+	} else if (!strcmp(GET_STR(p1), "strict_iso")) {
 		if (!strcmp(GET_STR(p2), "true"))
-			q->m->flag.iso_strict = true;
+			q->m->flag.strict_iso = true;
 		else if (!strcmp(GET_STR(p2), "flase"))
-			q->m->flag.iso_strict = false;
+			q->m->flag.strict_iso = false;
 	} else {
 		throw_error(q, p1, "domain_error", "flag");
 		return 0;
