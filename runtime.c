@@ -826,7 +826,18 @@ bool match_clause(query *q, cell *p1, idx_t p1_ctx)
 		if (!strcmp(GET_STR(p1), ":-"))
 			return match_full(q, p1, p1_ctx);
 
-		rule *h = p1->match;
+		cell *c = p1;
+		rule *h;
+
+		if (is_literal(c))
+			h = c->match;
+		else {
+			// For now convert it to a literal
+			c->val_off = index_from_pool(GET_STR(c));
+			ensure(c->val_off != ERR_IDX);
+			c->val_type = TYPE_LITERAL;
+			h = NULL;
+		}
 
 		if (!h) {
 			p1->match = find_matching_rule(q->m, p1);
@@ -845,8 +856,7 @@ bool match_clause(query *q, cell *p1, idx_t p1_ctx)
 				set_dynamic_in_db(q->m, name, p1->arity);
 
 			q->st.curr_clause = NULL;
-		}
-		else {
+		} else {
 			if (!h->is_dynamic && !q->run_init) {
 				throw_error(q, p1, "permission_error", "access_private_procedure");
 				return false;
@@ -892,7 +902,7 @@ static bool match_rule(query *q)
 		else {
 			// For now convert it to a literal
 			c->val_off = index_from_pool(GET_STR(c));
-                        ensure(c->val_off != ERR_IDX);
+			ensure(c->val_off != ERR_IDX);
 			c->val_type = TYPE_LITERAL;
 			h = NULL;
 		}
