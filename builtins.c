@@ -10239,22 +10239,22 @@ static const struct builtins g_other_funcs[] =
 	{0}
 };
 
-int check_builtin(module *m, const char *name, unsigned arity)
+bool check_builtin(module *m, const char *name, unsigned arity)
 {
 	for (const struct builtins *ptr = g_iso_funcs; ptr->name; ptr++) {
 		if ((ptr->arity == arity) && !strcmp(ptr->name, name))
-			return 1;
+			return true;
 	}
 
 	if (m->iso_only)
-		return 0;
+		return false;
 
 	for (const struct builtins *ptr = g_other_funcs; ptr->name; ptr++) {
 		if ((ptr->arity == arity) && !strcmp(ptr->name, name))
-			return 1;
+			return true;
 	}
 
-	return 0;
+	return false;
 }
 
 void *get_builtin(module *m, const char *name, unsigned arity)

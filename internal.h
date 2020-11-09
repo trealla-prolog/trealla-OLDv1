@@ -466,9 +466,9 @@ void write_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int runni
 size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, int depth);
 void make_choice(query *q);
 void make_barrier(query *q);
-void make_catcher(query *q, int type);
+void make_catcher(query *q, unsigned type);
 void cut_me(query *q, bool local_cut);
-int check_builtin(module *m, const char *name, unsigned arity);
+bool check_builtin(module *m, const char *name, unsigned arity);
 void *get_builtin(module *m, const char *name, unsigned arity);
 void query_execute(query *q, term *t);
 cell *get_head(cell *c);
