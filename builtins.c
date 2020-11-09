@@ -4555,8 +4555,13 @@ static void uuid_gen(uuid *u)
 	static uint64_t s_last = 0, s_cnt = 0;
 	static uint64_t g_seed = 0;
 
+#ifdef NDEBUG
 	if (!g_seed)
 		g_seed = (uint64_t)time(0) & MASK_FINAL;
+#else
+	if (!g_seed)
+		g_seed = 0xdeadbeefULL & MASK_FINAL;
+#endif
 
 	uint64_t now = get_time_in_usec();
 	compare_and_zero(now, &s_last, &s_cnt);
