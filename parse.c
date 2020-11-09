@@ -3426,7 +3426,13 @@ prolog *pl_create()
 	if (!g_tpl_lib)
 		g_tpl_lib = "library";
 
+#ifdef NDEBUG
 	srandom(time(0)+clock()+getpid());
+#else
+	static unsigned seed = 0xdeadbeef;
+	srandom(++seed);
+#endif
+
 	prolog *pl = calloc(1, sizeof(prolog));
 	if (!pl) {
 		if (!--g_tpl_count)
