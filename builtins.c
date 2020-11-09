@@ -695,7 +695,8 @@ static int fn_iso_fail_0(__attribute__((unused)) query *q)
 
 static int fn_iso_halt_0(query *q)
 {
-	q->halt_code = q->halt = q->error = true;
+	q->halt_code = 0;
+	q->halt = q->error = true;
 	return 0;
 }
 

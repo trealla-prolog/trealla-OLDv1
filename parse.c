@@ -3309,9 +3309,9 @@ bool deconsult(const char *filename)
 }
 
 bool get_halt(prolog *pl) { return pl->m->halt; }
-bool get_halt_code(prolog *pl) { return pl->m->halt_code; }
 bool get_status(prolog *pl) { return pl->m->status; }
 bool get_dump_vars(prolog *pl) { return pl->m->dump_vars; }
+int get_halt_code(prolog *pl) { return pl->m->halt_code; }
 
 void set_trace(prolog *pl) { pl->m->trace = true; }
 void set_quiet(prolog *pl) { pl->m->quiet = 1; }

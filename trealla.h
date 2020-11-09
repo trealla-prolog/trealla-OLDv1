@@ -11,7 +11,7 @@ bool pl_eval(prolog*, const char *expr);
 bool pl_consult(prolog*, const char *filename);
 bool pl_consult_fp(prolog*, FILE *fp);
 
-bool get_halt_code(prolog*);
+int get_halt_code(prolog*);
 bool get_halt(prolog*);
 bool get_status(prolog*);
 bool get_dump_vars(prolog*);

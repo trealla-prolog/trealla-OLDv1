@@ -332,9 +332,8 @@ struct query_ {
 	idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
 	uint8_t current_input, current_output;
 	uint8_t retry;
-	int8_t quoted;	//TODO: cehteh: enum here
+	int8_t halt_code, quoted;	//TODO: cehteh: enum here
 	bool status:1;
-	bool halt_code:1;
 	bool resume:1;
 	bool no_tco:1;
 	bool error:1;
@@ -395,8 +394,9 @@ struct module_ {
 	FILE *fp;
 	struct op_table ops[MAX_USER_OPS+1];
 	const char *keywords[1000];
+	int8_t halt_code;
 
-	struct { //cehteh: all as bitflags? check performance implications
+	struct {
 		bool double_quote_codes:1;
 		bool double_quote_chars:1;
 		bool double_quote_atom:1;
@@ -410,7 +410,6 @@ struct module_ {
 	unsigned cpu_count;
 	bool prebuilt:1;
 	bool halt:1;
-	bool halt_code:1;
 	bool status:1;
 	bool trace:1;
 	bool quiet:1;
