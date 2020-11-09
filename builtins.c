@@ -1315,16 +1315,6 @@ static int fn_iso_atom_concat_3(query *q)
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,any);
 
-	if (is_variable(p1) && is_variable(p3)) {
-		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
-		return 0;
-	}
-
-	if (is_variable(p2) && is_variable(p3)) {
-		throw_error(q, p2, "instantiation_error", "not_sufficiently_instantiated");
-		return 0;
-	}
-
 	if (is_variable(p1) && is_variable(p2))
 		return do_atom_concat_3(q);
 
