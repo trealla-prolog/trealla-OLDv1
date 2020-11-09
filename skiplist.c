@@ -41,10 +41,18 @@ struct skiplist_ {
 
 #define MAX_LEVELS 32
 #define MAX_LEVEL (MAX_LEVELS - 1)
-#define new_node_of_level(x) (slnode_t*)malloc(sizeof(slnode_t) + ((x) * sizeof(slnode_t*)))
+
+inline static slnode_t*
+new_node_of_level(unsigned x)
+{
+	FAULTINJECT(return NULL);
+	return malloc(sizeof(slnode_t) + ((x) * sizeof(slnode_t*)));
+}
+
 
 skiplist *sl_create(int (*compkey)(const void*, const void*))
 {
+	FAULTINJECT(return NULL);
 	skiplist *l = (skiplist*)calloc(1, sizeof(struct skiplist_));
 	if (l)
 	{

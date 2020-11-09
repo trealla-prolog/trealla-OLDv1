@@ -55,6 +55,8 @@ static void check_trail(query *q)
 
 		if (q->st.tp >= q->trails_size) {
 			q->trails_size += q->trails_size / 2;
+			FAULTINJECT(throw_error(q, q->st.curr_cell, "resource_error", "out_of_trail_space");
+				    q->error = true; return);
 
 			if ((sizeof(trail)*q->trails_size) > (1024LL*1024*1024)) {
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_trail_space");
@@ -75,6 +77,8 @@ static void check_choice(query *q)
 
 		if (q->cp >= q->choices_size) {
 			q->choices_size += q->choices_size / 2;
+			FAULTINJECT(throw_error(q, q->st.curr_cell, "resource_error", "out_of_choice_space");
+				    q->error = true; return);
 
 			if ((sizeof(choice)*q->choices_size) > (1024LL*1024*1024)) {
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_choice_space");
@@ -96,6 +100,8 @@ static void check_frame(query *q)
 		if (q->st.fp >= q->frames_size) {
 			idx_t save_frame = q->frames_size;
 			q->frames_size += q->frames_size / 2;
+			FAULTINJECT(throw_error(q, q->st.curr_cell, "resource_error", "out_of_frame_space");
+				    q->error = true; return);
 
 			if ((sizeof(frame)*q->frames_size) > (1024LL*1024*1024)) {
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_frame_space");
