@@ -639,7 +639,7 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 
 	if (is_variable(c)) {
 		err_type = "instantiation_error";
-		snprintf(dst2, len2, "error(%s,%s/%u)", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s,%s/%u)", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (!strcmp(err_type, "type_error")) {
 		const char *t = expected;
 		if (!strncmp(t,"iso_",4)) t = t+4;
@@ -647,11 +647,11 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 		strcpy(tmpbuf, t);
 		char *ptr = strchr(tmpbuf, '_');
 		if (ptr) *ptr = '\0';
-		snprintf(dst2, len2, "error(%s(%s,%s))", err_type, tmpbuf, dst);
+		snprintf(dst2, len2+1, "error(%s(%s,%s))", err_type, tmpbuf, dst);
 	} else if (c->arity) {
-		snprintf(dst2, len2, "error(%s(%s,(%s)/%u),%s/%u)", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),%s/%u)", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else {
-		snprintf(dst2, len2, "error(%s(%s,%s),%s/%u)", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s(%s,%s),%s/%u)", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	}
 
 	parser *p = q->m->p;
@@ -1314,6 +1314,16 @@ static int fn_iso_atom_concat_3(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,any);
+
+	if (is_variable(p1) && is_variable(p3)) {
+		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
+		return 0;
+	}
+
+	if (is_variable(p2) && is_variable(p3)) {
+		throw_error(q, p2, "instantiation_error", "not_sufficiently_instantiated");
+		return 0;
+	}
 
 	if (is_variable(p1) && is_variable(p2))
 		return do_atom_concat_3(q);
