@@ -97,8 +97,6 @@ static struct op_table g_ops[] =
 	{"-", OP_YFX, 500},
 	{"?", OP_FX, 500},
 
-	{"rdiv", OP_YFX, 400},
-
 	{"*", OP_YFX, 400},
 	{"/", OP_YFX, 400},
 	{"//", OP_YFX, 400},
