@@ -396,9 +396,13 @@ struct module_ {
 	const char *keywords[1000];
 
 	struct { //cehteh: all as bitflags? check performance implications
-		int double_quote_codes, double_quote_chars, double_quote_atom;
-		bool character_escapes;
-		int rational_syntax_natural, prefer_rationals;
+		bool double_quote_codes:1;
+		bool double_quote_chars:1;
+		bool double_quote_atom:1;
+		bool character_escapes:1;
+		bool rational_syntax_natural:1;
+		bool prefer_rationals:1;
+		bool iso_strict:1;
 	} flag;
 
 	int prebuilt, halt, halt_code, status, trace, quiet, dirty;

@@ -1314,14 +1314,14 @@ static void directives(parser *p, term *t)
 
 		if (!strcmp(GET_STR(p1), "double_quotes")) {
 			if (!strcmp(GET_STR(p2), "atom")) {
-				p->m->flag.double_quote_chars = p->m->flag.double_quote_codes = 0;
-				p->m->flag.double_quote_atom = 1;
+				p->m->flag.double_quote_chars = p->m->flag.double_quote_codes = false;
+				p->m->flag.double_quote_atom = true;
 			} else if (!strcmp(GET_STR(p2), "codes")) {
-				p->m->flag.double_quote_chars = p->m->flag.double_quote_atom = 0;
-				p->m->flag.double_quote_codes = 1;
+				p->m->flag.double_quote_chars = p->m->flag.double_quote_atom = false;
+				p->m->flag.double_quote_codes = true;
 			} else if (!strcmp(GET_STR(p2), "chars")) {
-				p->m->flag.double_quote_atom = p->m->flag.double_quote_codes = 0;
-				p->m->flag.double_quote_chars = 1;
+				p->m->flag.double_quote_atom = p->m->flag.double_quote_codes = false;
+				p->m->flag.double_quote_chars = true;
 			} else {
 				fprintf(stdout, "Error: unknown value\n");
 				p->error = true;
@@ -1334,14 +1334,19 @@ static void directives(parser *p, term *t)
 				p->m->flag.character_escapes = false;
 		} else if (!strcmp(GET_STR(p1), "prefer_rationals")) {
 			if (!strcmp(GET_STR(p2), "true"))
-				p->m->flag.prefer_rationals = 1;
+				p->m->flag.prefer_rationals = true;
 			else if (!strcmp(GET_STR(p2), "false"))
-				p->m->flag.prefer_rationals = 0;
+				p->m->flag.prefer_rationals = false;
+		} else if (!strcmp(GET_STR(p1), "iso_strict")) {
+			if (!strcmp(GET_STR(p2), "true"))
+				p->m->flag.iso_strict = true;
+			else if (!strcmp(GET_STR(p2), "false"))
+				p->m->flag.iso_strict = false;
 		} else if (!strcmp(GET_STR(p1), "rational_syntax")) {
 			if (!strcmp(GET_STR(p2), "natural"))
-				p->m->flag.rational_syntax_natural = 1;
+				p->m->flag.rational_syntax_natural = true;
 			else if (!strcmp(GET_STR(p2), "compatibility"))
-				p->m->flag.rational_syntax_natural = 0;
+				p->m->flag.rational_syntax_natural = false;
 		} else {
 			fprintf(stdout, "Warning: unknown flag: %s\n", GET_STR(p1));
 		}

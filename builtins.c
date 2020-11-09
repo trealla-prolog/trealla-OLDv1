@@ -5396,14 +5396,14 @@ static int fn_iso_set_prolog_flag_2(query *q)
 
 	if (!strcmp(GET_STR(p1), "double_quotes")) {
 		if (!strcmp(GET_STR(p2), "atom")) {
-			q->m->flag.double_quote_atom = 1;
-			q->m->flag.double_quote_chars = q->m->flag.double_quote_codes = 0;
+			q->m->flag.double_quote_atom = true;
+			q->m->flag.double_quote_chars = q->m->flag.double_quote_codes = false;
 		} else if (!strcmp(GET_STR(p2), "codes")) {
-			q->m->flag.double_quote_codes = 1;
-			q->m->flag.double_quote_chars = q->m->flag.double_quote_atom = 0;
+			q->m->flag.double_quote_codes = true;
+			q->m->flag.double_quote_chars = q->m->flag.double_quote_atom = false;
 		} else if (!strcmp(GET_STR(p2), "chars")) {
-			q->m->flag.double_quote_chars = 1;
-			q->m->flag.double_quote_atom = q->m->flag.double_quote_codes = 0;
+			q->m->flag.double_quote_chars = true;
+			q->m->flag.double_quote_atom = q->m->flag.double_quote_codes = false;
 		} else {
 		throw_error(q, p2, "domain_error", "unknown");
 			return 0;
@@ -5415,14 +5415,19 @@ static int fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.character_escapes = false;
 	} else if (!strcmp(GET_STR(p1), "rational_syntax")) {
 		if (!strcmp(GET_STR(p2), "natural"))
-			q->m->flag.rational_syntax_natural = 1;
+			q->m->flag.rational_syntax_natural = true;
 		else if (!strcmp(GET_STR(p2), "compatibility"))
-			q->m->flag.rational_syntax_natural = 0;
+			q->m->flag.rational_syntax_natural = false;
 	} else if (!strcmp(GET_STR(p1), "prefer_rationals")) {
 		if (!strcmp(GET_STR(p2), "true"))
-			q->m->flag.prefer_rationals = 1;
+			q->m->flag.prefer_rationals = true;
 		else if (!strcmp(GET_STR(p2), "flase"))
-			q->m->flag.prefer_rationals = 0;
+			q->m->flag.prefer_rationals = false;
+	} else if (!strcmp(GET_STR(p1), "iso_strict")) {
+		if (!strcmp(GET_STR(p2), "true"))
+			q->m->flag.iso_strict = true;
+		else if (!strcmp(GET_STR(p2), "flase"))
+			q->m->flag.iso_strict = false;
 	} else {
 		throw_error(q, p1, "domain_error", "flag");
 		return 0;
