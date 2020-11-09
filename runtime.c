@@ -931,11 +931,12 @@ static bool match_rule(query *q)
 
 		if (h->index) {
 			cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
-			unsigned all_vars = 1, arity = key->arity;
+			unsigned arity = key->arity;
+			bool all_vars = true;
 
 			for (cell *c = key + 1; arity--; c += c->nbr_cells) {
 				if (!is_variable(c)) {
-					all_vars = 0;
+					all_vars = false;
 					break;
 				}
 			}

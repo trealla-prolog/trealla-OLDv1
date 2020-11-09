@@ -539,7 +539,7 @@ static void reindex_rule(rule *h)
 
 	for (clause *r = h->head; r; r = r->next) {
 		cell *c = get_head(r->t.cells);
-		sl_set(h->index, c, r);
+		sl_app(h->index, c, r);
 	}
 }
 
@@ -629,7 +629,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 	if (!h->tail)
 		h->tail = r;
 
-	if (h->index && (c->arity > 0)) {
+	if (h->index && (h->arity > 0)) {
 		cell *c = get_head(r->t.cells);
 		sl_set(h->index, c, r);
 	}
@@ -738,7 +738,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 	if (!h->head)
 		h->head = r;
 
-	if (h->index && (c->arity > 0)) {
+	if (h->index && (h->arity > 0)) {
 		cell *c = get_head(r->t.cells);
 		sl_app(h->index, c, r);
 	}
