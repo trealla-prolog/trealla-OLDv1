@@ -534,9 +534,8 @@ static int compkey(const void *ptr1, const void *ptr2)
 	return 0;
 }
 
-static void reindex_rule(module *m, rule *h)
+static void reindex_rule(rule *h)
 {
-	(void) m;
 	h->index = sl_create(compkey);
 	ensure(h->index);
 
@@ -643,7 +642,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 		r->t.is_persist = true;
 
 	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1))
-		reindex_rule(m, h);
+		reindex_rule(h);
 
 	return r;
 }
@@ -752,7 +751,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 		r->t.is_persist = true;
 
 	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1))
-		reindex_rule(m, h);
+		reindex_rule(h);
 
 	return r;
 }
@@ -801,9 +800,10 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	if (!h) h = create_rule(m, &tmp);
 	h->is_dynamic = true;
 
-	if (!h->index)
+	if (!h->index) {
 		h->index = sl_create(compkey);
-	ensure(h->index);
+		ensure(h->index);
+	}
 }
 
 static void set_persist_in_db(module *m, const char *name, unsigned arity)
@@ -818,9 +818,10 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 	h->is_dynamic = true;
 	h->is_persist = true;
 
-	if (!h->index)
+	if (!h->index) {
 		h->index = sl_create(compkey);
-	ensure(h->index);
+		ensure(h->index);
+	}
 
 	m->use_persist = 1;
 }
