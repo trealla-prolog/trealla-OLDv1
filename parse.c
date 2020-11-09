@@ -1338,11 +1338,6 @@ static void directives(parser *p, term *t)
 				p->m->flag.prefer_rationals = true;
 			else if (!strcmp(GET_STR(p2), "false"))
 				p->m->flag.prefer_rationals = false;
-		} else if (!strcmp(GET_STR(p1), "strict_iso")) {
-			if (!strcmp(GET_STR(p2), "true"))
-				p->m->flag.strict_iso = true;
-			else if (!strcmp(GET_STR(p2), "false"))
-				p->m->flag.strict_iso = false;
 		} else if (!strcmp(GET_STR(p1), "rational_syntax")) {
 			if (!strcmp(GET_STR(p2), "natural"))
 				p->m->flag.rational_syntax_natural = true;

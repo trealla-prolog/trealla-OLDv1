@@ -403,7 +403,6 @@ struct module_ {
 		bool character_escapes:1;
 		bool rational_syntax_natural:1;
 		bool prefer_rationals:1;
-		bool strict_iso:1;
 	} flag;
 
 	unsigned user_ops;
