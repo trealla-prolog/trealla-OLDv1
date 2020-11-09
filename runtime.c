@@ -768,7 +768,7 @@ static void next_key(query *q)
 			q->st.curr_clause = NULL;
 			q->st.iter = NULL;
 		}
-	} else
+	} else if (q->st.curr_clause)
 		q->st.curr_clause = q->st.curr_clause->next;
 }
 
