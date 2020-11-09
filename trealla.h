@@ -7,14 +7,14 @@ typedef struct prolog_ prolog;
 prolog *pl_create();
 void pl_destroy(prolog*);
 
-int pl_eval(prolog*, const char *expr);
-int pl_consult(prolog*, const char *filename);
-int pl_consult_fp(prolog*, FILE *fp);
+bool pl_eval(prolog*, const char *expr);
+bool pl_consult(prolog*, const char *filename);
+bool pl_consult_fp(prolog*, FILE *fp);
 
-int get_halt_code(prolog*);
+bool get_halt_code(prolog*);
 bool get_halt(prolog*);
-int get_status(prolog*);
-int get_dump_vars(prolog*);
+bool get_status(prolog*);
+bool get_dump_vars(prolog*);
 
 void set_trace(prolog*);
 void set_quiet(prolog*);

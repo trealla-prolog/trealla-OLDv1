@@ -314,10 +314,10 @@ static void trim_heap(query *q, const choice *ch)
 
 }
 
-int retry_choice(query *q)
+bool retry_choice(query *q)
 {
 	if (!q->cp)
-		return 0;
+		return false;
 
 	idx_t curr_choice = drop_choice(q);
 	const choice *ch = q->choices + curr_choice;
@@ -334,7 +334,7 @@ int retry_choice(query *q)
 	g->nbr_slots = ch->nbr_slots;
 	g->any_choices = ch->any_choices;
 	g->overflow = ch->overflow;
-	return 1;
+	return true;
 }
 
 idx_t drop_choice(query *q)
@@ -607,15 +607,15 @@ void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		e->c = *v;
 }
 
-int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth);
+bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth);
 
-static int unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
+static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
 {
 	if (p1->arity != p2->arity)
-		return 0;
+		return false;
 
 	if (p1->val_off != p2->val_off)
-		return 0;
+		return false;
 
 	unsigned arity = p1->arity;
 	p1++; p2++;
@@ -627,32 +627,32 @@ static int unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_
 		idx_t c2_ctx = q->latest_ctx;
 
 		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
-			return 0;
+			return false;
 
 		p1 += p1->nbr_cells;
 		p2 += p2->nbr_cells;
 	}
 
-	return 1;
+	return true;
 }
 
-static int unify_int(cell *p1, cell *p2)
+static bool unify_int(cell *p1, cell *p2)
 {
 	if (is_rational(p2))
 		return (p1->val_num == p2->val_num) && (p1->val_den == p2->val_den);
 
-	return 0;
+	return false;
 }
 
-static int unify_float(cell *p1, cell *p2)
+static bool unify_float(cell *p1, cell *p2)
 {
 	if (is_float(p2))
 		return p1->val_flt == p2->val_flt;
 
-	return 0;
+	return false;
 }
 
-static int unify_literal(cell *p1, cell *p2)
+static bool unify_literal(cell *p1, cell *p2)
 {
 	if (is_literal(p2))
 		return p1->val_off == p2->val_off;
@@ -660,10 +660,10 @@ static int unify_literal(cell *p1, cell *p2)
 	if (is_cstring(p2) && (LEN_STR(p1) == LEN_STR(p2)))
 		return !memcmp(GET_STR(p2), g_pool+p1->val_off, LEN_STR(p1));
 
-	return 0;
+	return false;
 }
 
-static int unify_cstring(cell *p1, cell *p2)
+static bool unify_cstring(cell *p1, cell *p2)
 {
 	if (is_cstring(p2) && (LEN_STR(p1) == LEN_STR(p2)))
 		return !memcmp(GET_STR(p1), GET_STR(p2), LEN_STR(p1));
@@ -671,10 +671,10 @@ static int unify_cstring(cell *p1, cell *p2)
 	if (is_literal(p2) && (LEN_STR(p1) == LEN_STR(p2)))
 		return !memcmp(GET_STR(p1), g_pool+p2->val_off, LEN_STR(p1));
 
-	return 0;
+	return false;
 }
 
-static int unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
+static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
 {
 	while (is_list(p1) && is_list(p2)) {
 		cell *h1 = LIST_HEAD(p1);
@@ -686,7 +686,7 @@ static int unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, 
 		idx_t c2_ctx = q->latest_ctx;
 
 		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
-			return 0;
+			return false;
 
 		p1 = LIST_TAIL(p1);
 		p1 = deref(q, p1, p1_ctx);
@@ -702,7 +702,7 @@ static int unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, 
 
 struct dispatch {
 	uint8_t val_type;
-	int (*fn)(cell*, cell*);
+	bool (*fn)(cell*, cell*);
 };
 
 static const struct dispatch g_disp[] =
@@ -716,11 +716,11 @@ static const struct dispatch g_disp[] =
 	{0}
 };
 
-int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
+bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
 {
 	if (depth == MAX_DEPTH) {
 		q->cycle_error = true;
-		return 1;
+		return true;
 	}
 
 	if (is_variable(p1) && is_variable(p2)) {
@@ -730,7 +730,7 @@ int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 			set_var(q, p1, p1_ctx, p2, p2_ctx);
 		else if (p2->var_nbr != p1->var_nbr)
 			set_var(q, p2, p2_ctx, p1, p1_ctx);
-		return 1;
+		return true;
 	}
 
 	if (is_variable(p1)) {
@@ -738,7 +738,7 @@ int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 			q->no_tco = true;
 
 		set_var(q, p1, p1_ctx, p2, p2_ctx);
-		return 1;
+		return true;
 	}
 
 	if (is_variable(p2)) {
@@ -746,7 +746,7 @@ int unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int
 			q->no_tco = true;
 
 		set_var(q, p2, p2_ctx, p1, p1_ctx);
-		return 1;
+		return true;
 	}
 
 	if (is_string(p1) && is_string(p2))

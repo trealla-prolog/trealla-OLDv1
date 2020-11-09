@@ -194,7 +194,7 @@ const char* cstr_from_pool(const char *name)
 	return g_pool + offset;
 }
 
-int get_op(module *m, const char *name, unsigned *val_type, int *userop, int hint_prefix)
+unsigned get_op(module *m, const char *name, unsigned *val_type, int *userop, int hint_prefix)
 {
 	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
 		if (hint_prefix && (ptr->val_type != OP_FX) && (ptr->val_type != OP_FY))
@@ -224,7 +224,7 @@ int get_op(module *m, const char *name, unsigned *val_type, int *userop, int hin
 	return 0;
 }
 
-int set_op(module *m, const char *name, unsigned val_type, unsigned precedence)
+bool set_op(module *m, const char *name, unsigned val_type, unsigned precedence)
 {
 	name = cstr_from_pool(name);
 	ensure(name);
@@ -236,18 +236,18 @@ int set_op(module *m, const char *name, unsigned val_type, unsigned precedence)
 			ptr->name = name;
 			ptr->val_type = val_type;
 			ptr->precedence = precedence;
-			return 1;
+			return true;
 		}
 	}
 
 	if (!m->user_ops)
-		return 0;
+		return false;
 
 	m->user_ops--;
 	ptr->name = name;
 	ptr->val_type = val_type;
 	ptr->precedence = precedence;
-	return 1;
+	return true;
 }
 
 module *g_modules = NULL;
@@ -1706,7 +1706,7 @@ static int attach_ops(parser *p, idx_t start_idx)
 	return 1;
 }
 
-int parser_attach(parser *p, int start_idx)
+bool parser_attach(parser *p, int start_idx)
 {
 	while (attach_ops(p, start_idx))
 		;
@@ -2460,7 +2460,7 @@ void fix_list(cell *c)
 	}
 }
 
-int parser_tokenize(parser *p, int args, int consing)
+unsigned parser_tokenize(parser *p, int args, int consing)
 {
 	int begin_idx = p->t->cidx;
 	int last_op = 1;
@@ -2742,7 +2742,7 @@ static void module_purge(module *m)
 	m->dirty = 0;
 }
 
-static int parser_run(parser *p, const char *src, int dump)
+static bool parser_run(parser *p, const char *src, int dump)
 {
 	p->srcptr = (char*)src;
 
@@ -2784,7 +2784,7 @@ static int parser_run(parser *p, const char *src, int dump)
 			(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
 	}
 
-	int ok = !q->error;
+	bool ok = !q->error;
 	p->m = q->m;
 	destroy_query(q);
 	module_purge(p->m);
@@ -2826,12 +2826,12 @@ module *module_load_text(module *m, const char *src)
 	return m;
 }
 
-int module_load_fp(module *m, FILE *fp)
+bool module_load_fp(module *m, FILE *fp)
 {
 	parser *p = create_parser(m);
 	p->consulting = true;
 	p->fp = fp;
-	int ok;
+	bool ok;
 
 	do {
 		if (getline(&p->save_line, &p->n_line, p->fp) == -1)
@@ -2871,7 +2871,7 @@ int module_load_fp(module *m, FILE *fp)
 	return ok;
 }
 
-int module_load_file(module *m, const char *filename)
+bool module_load_file(module *m, const char *filename)
 {
 	if (!strcmp(filename, "user")) {
 		for (int i = 0; i < MAX_STREAMS; i++) {
@@ -2910,14 +2910,14 @@ int module_load_file(module *m, const char *filename)
 
 	if (!fp) {
 		strncpy(tmpbuf, filename, sizeof(tmpbuf)); tmpbuf[sizeof(tmpbuf)-1] = '\0';
-		return 0;
+		return false;
 	}
 
 	free(m->filename);
 	m->filename = ensure_strdup(filename);
 	module_load_fp(m, fp);
 	fclose(fp);
-	return 1;
+	return true;
 }
 
 static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
@@ -2945,18 +2945,18 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 	}
 }
 
-int module_save_file(module *m, const char *filename)
+bool module_save_file(module *m, const char *filename)
 {
 	FILE *fp = fopen(filename, "w");
 
 	if (!fp) {
 		fprintf(stdout, "Error: file '%s' cannot be created\n", filename);
-		return 0;
+		return false;
 	}
 
 	module_save_fp(m, fp, 0, 0);
 	fclose(fp);
-	return 1;
+	return true;
 }
 
 static void make_rule(module *m, const char *src)
@@ -3300,25 +3300,25 @@ void destroy_module(module *m)
 	free(m);
 }
 
-int deconsult(const char *filename)
+bool deconsult(const char *filename)
 {
 	module *m = find_module(filename);
-	if (!m) return 0;
+	if (!m) return false;
 	destroy_module(m);
-	return 1;
+	return true;
 }
 
 bool get_halt(prolog *pl) { return pl->m->halt; }
-int get_halt_code(prolog *pl) { return pl->m->halt_code; }
-int get_status(prolog *pl) { return pl->m->status; }
-int get_dump_vars(prolog *pl) { return pl->m->dump_vars; }
+bool get_halt_code(prolog *pl) { return pl->m->halt_code; }
+bool get_status(prolog *pl) { return pl->m->status; }
+bool get_dump_vars(prolog *pl) { return pl->m->dump_vars; }
 
 void set_trace(prolog *pl) { pl->m->trace = true; }
 void set_quiet(prolog *pl) { pl->m->quiet = 1; }
 void set_stats(prolog *pl) { pl->m->stats = 1; }
 void set_opt(prolog *pl, int level) { pl->m->opt = level; }
 
-int pl_eval(prolog *pl, const char *src)
+bool pl_eval(prolog *pl, const char *src)
 {
 	parser *p = create_parser(pl->curr_m);
 	ensure(p);
@@ -3329,12 +3329,12 @@ int pl_eval(prolog *pl, const char *src)
 	return ok;
 }
 
-int pl_consult_fp(prolog *pl, FILE *fp)
+bool pl_consult_fp(prolog *pl, FILE *fp)
 {
 	return module_load_fp(pl->m, fp);
 }
 
-int pl_consult(prolog *pl, const char *filename)
+bool pl_consult(prolog *pl, const char *filename)
 {
 	return module_load_file(pl->m, filename);
 }
