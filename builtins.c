@@ -1308,12 +1308,12 @@ static int fn_iso_atom_concat_3(query *q)
 		return do_atom_concat_3(q);
 
 	if (is_variable(p3)) {
-		if (!is_atom(p1)) {
+		if (q->m->flag.iso_strict ? !is_iso_atom(p1): !is_atom(p1)) {
 			throw_error(q, p1, "type_error", "atom");
 			return 0;
 		}
 
-		if (!is_atom(p2)) {
+		if (q->m->flag.iso_strict ? !is_iso_atom(p2): !is_atom(p2)) {
 			throw_error(q, p2, "type_error", "atom");
 			return 0;
 		}
@@ -1389,7 +1389,7 @@ static int fn_iso_atom_length_2(query *q)
 	GET_NEXT_ARG(p2,integer_or_var);
 	size_t len;
 
-	if (is_string(p1)) {
+	if (is_string(p1) && q->m->flag.iso_strict) {
 		throw_error(q, p1, "type_error", "atom");
 		return -1;
 	}
