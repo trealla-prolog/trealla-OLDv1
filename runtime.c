@@ -14,12 +14,17 @@
 #include "internal.h"
 #include "history.h"
 #include "builtins.h"
+#include "cdebug.h"
 
 #define Trace if (q->trace /*&& !consulting*/) trace_call
 
 int g_tpl_interrupt = 0;
 
-enum { CALL, EXIT, REDO, NEXT, FAIL };
+#ifdef FAULTINJECT_ENABLED
+uint64_t FAULTINJECT_VAR;
+#endif
+
+typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 
 #ifdef _WIN32
 uint64_t get_time_in_usec(void)
@@ -130,7 +135,7 @@ static void check_slot(query *q, unsigned cnt)
 	}
 }
 
-static void trace_call(query *q, cell *c, int box)
+static void trace_call(query *q, cell *c, box_t box)
 {
 	if (!c->fn)
 		return;
@@ -241,7 +246,7 @@ void make_barrier(query *q)
 	ch->local_cut = true;
 }
 
-void make_catcher(query *q, int retry)
+void make_catcher(query *q, unsigned retry)
 {
 	make_choice(q);
 	if (q->error) return;
@@ -343,7 +348,7 @@ idx_t drop_choice(query *q)
 	return curr_choice;
 }
 
-void make_frame(query *q, unsigned nbr_vars, int last_match)
+static void make_frame(query *q, unsigned nbr_vars, bool last_match)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 
@@ -404,19 +409,19 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	q->tot_tcos++;
 }
 
-static int check_slots(const query *q, frame *g, term *t)
+static bool check_slots(const query *q, frame *g, term *t)
 {
 	if (t && (g->nbr_vars != t->nbr_vars))
-		return 0;
+		return false;
 
 	for (unsigned i = 0; i < g->nbr_vars; i++) {
 		slot *e = GET_SLOT(g, i);
 
 		if (is_indirect(&e->c) || is_string(&e->c))
-			return 0;
+			return false;
 	}
 
-	return 1;
+	return true;
 }
 
 static void commit_me(query *q, term *t)
@@ -424,9 +429,9 @@ static void commit_me(query *q, term *t)
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g->m = q->m;
 	q->m = q->st.curr_clause->m;
-	int last_match = (!q->st.curr_clause->next && !q->st.iter) || t->first_cut;
-	int recursive = (last_match || g->did_cut) && (q->st.curr_cell->flags&FLAG_TAIL_REC);
-	int tco = recursive && !g->any_choices && check_slots(q, g, t);
+	bool last_match = (!q->st.curr_clause->next && !q->st.iter) || t->first_cut;
+	bool recursive = (last_match || g->did_cut) && (q->st.curr_cell->flags&FLAG_TAIL_REC);
+	bool tco = recursive && !g->any_choices && check_slots(q, g, t);
 
 	if (last_match)
 		drop_choice(q);
@@ -494,10 +499,10 @@ static void follow_me(query *q)
 		q->st.curr_cell = q->st.curr_cell->val_ptr;
 }
 
-static int resume_frame(query *q)
+static bool resume_frame(query *q)
 {
 	if (!q->st.curr_frame)
-		return 0;
+		return false;
 
 	frame *g = GET_FRAME(q->st.curr_frame);
 
@@ -512,7 +517,7 @@ static int resume_frame(query *q)
 	g = GET_FRAME(q->st.curr_frame=g->prev_frame);
 	q->st.curr_cell = curr_cell;
 	q->m = g->m;
-	return 1;
+	return true;
 }
 
 void make_indirect(cell *tmp, cell *c)
@@ -607,9 +612,9 @@ void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		e->c = *v;
 }
 
-bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth);
+bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
 
-static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
+static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
 {
 	if (p1->arity != p2->arity)
 		return false;
@@ -674,7 +679,7 @@ static bool unify_cstring(cell *p1, cell *p2)
 	return false;
 }
 
-static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
+static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
 {
 	while (is_list(p1) && is_list(p2)) {
 		cell *h1 = LIST_HEAD(p1);
@@ -716,7 +721,7 @@ static const struct dispatch g_disp[] =
 	{0}
 };
 
-bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
+bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
 {
 	if (depth == MAX_DEPTH) {
 		q->cycle_error = true;
@@ -926,7 +931,7 @@ static bool match_rule(query *q)
 
 		if (h->index) {
 			cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
-			int all_vars = 1, arity = key->arity;
+			unsigned all_vars = 1, arity = key->arity;
 
 			for (cell *c = key + 1; arity--; c += c->nbr_cells) {
 				if (!is_variable(c)) {

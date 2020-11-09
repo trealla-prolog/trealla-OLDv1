@@ -8,6 +8,7 @@
 #include "skiplist.h"
 #include "utf8.h"
 #include "trealla.h"
+#include "cdebug.h"
 
 #ifndef USE_OPENSSL
 #define USE_OPENSSL 0
@@ -50,16 +51,6 @@ typedef uint32_t idx_t;
 #define MAX_DEPTH 1000
 
 #define STREAM_BUFLEN 1024
-
-// Debug helpers
-#ifdef NDEBUG
-#define message(fmt, ...)
-#define message_when(cond, ...)
-#else
-#define message(fmt, ...) fprintf(stderr, "%s:%d %s: " fmt "\n", __FILE__, __LINE__, __func__, ## __VA_ARGS__)
-#define message_when(cond, ...) do { if (cond) {message(""__VA_ARGS__);}} while (0)
-#endif
-#define ensure(cond, ...) do { if (!(cond)) {message( #cond " failed " __VA_ARGS__); abort();}} while (0)
 
 
 #define GET_FRAME(i) (q->frames+(i))
@@ -466,9 +457,9 @@ void write_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int runni
 size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, int depth);
 void make_choice(query *q);
 void make_barrier(query *q);
-void make_catcher(query *q, int type);
+void make_catcher(query *q, unsigned type);
 void cut_me(query *q, bool local_cut);
-int check_builtin(module *m, const char *name, unsigned arity);
+bool check_builtin(module *m, const char *name, unsigned arity);
 void *get_builtin(module *m, const char *name, unsigned arity);
 void query_execute(query *q, term *t);
 cell *get_head(cell *c);
