@@ -1,13 +1,13 @@
 #pragma once
 
 #include <stdint.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <limits.h>
 #include <sys/param.h>
 
 #include "skiplist.h"
 #include "utf8.h"
+#include "trealla.h"
 
 #ifndef USE_OPENSSL
 #define USE_OPENSSL 0
