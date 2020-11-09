@@ -827,11 +827,16 @@ static int fn_iso_char_code_2(query *q)
 
 static int fn_iso_atom_chars_2(query *q)
 {
-	GET_FIRST_ARG(p1,iso_atom_or_var);
+	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
 		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
+		return 0;
+	}
+
+	if (q->m->flag.strict_iso && !is_iso_atom(p1) && !is_variable(p1)) {
+		throw_error(q, p1, "type_error", "atom");
 		return 0;
 	}
 
@@ -921,11 +926,16 @@ static int fn_iso_atom_chars_2(query *q)
 
 static int fn_iso_atom_codes_2(query *q)
 {
-	GET_FIRST_ARG(p1,iso_atom_or_var);
+	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
 		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
+		return 0;
+	}
+
+	if (q->m->flag.strict_iso && !is_iso_atom(p1) && !is_variable(p1)) {
+		throw_error(q, p1, "type_error", "atom");
 		return 0;
 	}
 
@@ -1389,9 +1399,9 @@ static int fn_iso_atom_length_2(query *q)
 	GET_NEXT_ARG(p2,integer_or_var);
 	size_t len;
 
-	if (is_string(p1) && q->m->flag.strict_iso) {
+	if (q->m->flag.strict_iso && !is_iso_atom(p1)) {
 		throw_error(q, p1, "type_error", "atom");
-		return -1;
+		return 0;
 	}
 
 	if (is_blob(p1)) {
