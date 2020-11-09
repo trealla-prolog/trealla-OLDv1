@@ -324,16 +324,17 @@ struct query_ {
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
 	uint64_t nv_mask, step, qid;
 	uint64_t time_started;
-	int max_depth, tmo_msecs;
+	int max_depth, tmo_msecs; //cehteh: unsigned?
 	idx_t cp, tmphp, nv_start, latest_ctx, popp, cgen;
 	idx_t frames_size, slots_size, trails_size, choices_size;
 	idx_t max_choices, max_frames, max_slots, max_trails;
 	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;
 	idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
-	uint8_t retry, halt_code, status;
 	uint8_t current_input, current_output;
-	int8_t quoted;
-	//bool keysort:1;  //cehteh: unused?
+	uint8_t retry;
+	int8_t quoted;	//TODO: cehteh: enum here
+	bool status:1;
+	bool halt_code:1;
 	bool resume:1;
 	bool no_tco:1;
 	bool error:1;
@@ -405,11 +406,23 @@ struct module_ {
 		bool strict_iso:1;
 	} flag;
 
-	int prebuilt, halt, halt_code, status, trace, quiet, dirty;
-	int user_ops, opt, stats, iso_only, use_persist, loading; //cehteh: stats can be bool
-	int make_public, dump_vars;  //note by cehteh: investigate: can these be unsigned (or bool)
-	bool error;
+	unsigned user_ops;
 	unsigned cpu_count;
+	bool prebuilt:1;
+	bool halt:1;
+	bool halt_code:1;
+	bool status:1;
+	bool trace:1;
+	bool quiet:1;
+	bool dirty:1;
+	bool opt:1;
+	bool stats:1;
+	bool iso_only:1;
+	bool use_persist:1;
+	bool loading:1;
+	bool make_public:1;
+	bool dump_vars:1;
+	bool error:1;
 };
 
 extern idx_t g_empty_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
@@ -433,10 +446,10 @@ cell *list_tail(cell *l, cell *tmp);
 
 void set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
-int module_load_fp(module *m, FILE *fp);
-int module_load_file(module *m, const char *filename);
-int module_save_file(module *m, const char *filename);
-int deconsult(const char *filename);
+bool module_load_fp(module *m, FILE *fp);
+bool module_load_file(module *m, const char *filename);
+bool module_save_file(module *m, const char *filename);
+bool deconsult(const char *filename);
 module *create_module(const char *name);
 void destroy_module(module *m);
 module *find_module(const char *name);
@@ -446,7 +459,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting);
 clause *retract_from_db(module *m, clause *r);
 clause *erase_from_db(module *m, uuid *ref);
 clause *find_in_db(module *m, uuid *ref);
-int get_op(module *m, const char *name, unsigned *val_type, int *userop, int hint_prefix);
+unsigned get_op(module *m, const char *name, unsigned *val_type, int *userop, int hint_prefix);
 void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int depth);
 void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, int depth);
 size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int depth);
@@ -469,11 +482,11 @@ int call_me(query *q, cell *p1);
 void undo_me(query *q);
 parser *create_parser(module *m);
 void destroy_parser(parser *p);
-int parser_tokenize(parser *p, int args, int consing);
-int parser_attach(parser *p, int start_idx);
+unsigned parser_tokenize(parser *p, int args, int consing);
+bool parser_attach(parser *p, int start_idx);
 void parser_xref(parser *p, term *t, rule *parent);
 idx_t drop_choice(query *q);
-int retry_choice(query *q);
+bool retry_choice(query *q);
 void parser_assign_vars(parser *p);
 query *create_query(module *m, int sub_query);
 query *create_task(query *q, cell *curr_cell);
@@ -494,7 +507,7 @@ uint64_t get_time_in_usec(void);
 void clear_term(term *t);
 void do_db_load(module *m);
 void set_dynamic_in_db(module *m, const char *name, unsigned arity);
-int set_op(module *m, const char *name, unsigned val_type, unsigned precedence);
+bool set_op(module *m, const char *name, unsigned val_type, unsigned precedence);
 size_t sprint_int(char *dst, size_t size, int_t n, int base);
 void call_attrs(query *q, cell *attrs);
 void alloc_list(query *q, const cell *c);

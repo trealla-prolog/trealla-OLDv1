@@ -314,10 +314,10 @@ static void trim_heap(query *q, const choice *ch)
 
 }
 
-int retry_choice(query *q)
+bool retry_choice(query *q)
 {
 	if (!q->cp)
-		return 0;
+		return false;
 
 	idx_t curr_choice = drop_choice(q);
 	const choice *ch = q->choices + curr_choice;
@@ -334,7 +334,7 @@ int retry_choice(query *q)
 	g->nbr_slots = ch->nbr_slots;
 	g->any_choices = ch->any_choices;
 	g->overflow = ch->overflow;
-	return 1;
+	return true;
 }
 
 idx_t drop_choice(query *q)
