@@ -204,7 +204,7 @@ int sl_set(skiplist *l, const void *key, const void *val)
 
 		// Don't drop this unless you are 100% sure:
 
-#if 0
+#if 1
 		while ((imid < p->nbr) && (l->compkey(p->bkt[imid].key, key) == 0))
 			imid++;
 
@@ -280,7 +280,7 @@ int sl_app(skiplist *l, const void *key, const void *val)
 
 		// Don't drop this unless you are 100% sure:
 
-#if 0
+#if 1
 		while ((imid < p->nbr) && (l->compkey(p->bkt[imid].key, key) == 0))
 			imid++;
 

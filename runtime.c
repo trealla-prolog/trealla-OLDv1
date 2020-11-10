@@ -926,6 +926,17 @@ bool match_clause(query *q, cell *p1, idx_t p1_ctx)
 	return false;
 }
 
+#if 0
+static const char *dump_key(void *p, const void *p1)
+{
+	query *q = (query*)p;
+	cell *c = (cell*)p1;
+	static char tmpbuf[1024];
+	write_term_to_buf(q, tmpbuf, sizeof(tmpbuf), c, q->st.curr_frame, 0, 0, 0);
+	return tmpbuf;
+}
+#endif
+
 static bool match_rule(query *q)
 {
 	if (!q->retry) {
@@ -972,6 +983,14 @@ static bool match_rule(query *q)
 
 			if (!all_vars) {
 				q->st.iter = sl_findkey(h->index, key);
+
+#if 0
+				printf("*** key: iter:%p ", q->st.iter);
+				write_term(q, stdout, key, q->st.curr_frame, 0, 0, 0);
+				printf("\n");
+				sl_dump(h->index, dump_key, q);
+#endif
+
 				next_key(q);
 			} else {
 				q->st.curr_clause = h->head;
