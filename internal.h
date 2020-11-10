@@ -14,6 +14,10 @@
 #define USE_OPENSSL 0
 #endif
 
+#ifndef USE_BIGNUM
+#define USE_BIGNUM 0
+#endif
+
 #ifndef USE_LIBRESSL
 #define USE_LIBRESSL 0
 #endif
@@ -38,6 +42,10 @@ typedef __uint64_t uint_t;
 #endif
 
 typedef uint32_t idx_t;
+
+#ifdef USE_BIGNUM
+#include <gmp.h>
+#endif
 
 // Sentinel Value
 #define ERR_IDX (~(idx_t)0)
@@ -96,6 +104,7 @@ enum {
 	TYPE_LITERAL,
 	TYPE_CSTRING,
 	TYPE_INTEGER,
+	TYPE_BIGNUM,
 	TYPE_FLOAT,
 	TYPE_INDIRECT,
 	TYPE_END
@@ -155,6 +164,12 @@ struct cell_ {
 		struct {
 			double val_flt;
 		};
+
+#ifdef USE_BIGNUM
+		struct {
+			mpz_t val_mpz;
+		};
+#endif
 
 		struct {
 			char val_chr[MAX_SMALL_STRING];
