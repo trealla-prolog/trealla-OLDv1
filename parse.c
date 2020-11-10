@@ -135,7 +135,7 @@ static idx_t is_in_pool(const char *name)
 	const void *val;
 
 	if (sl_get(g_symtab, name, &val))
-		return (idx_t)(uint_t)val;
+		return (idx_t)(unsigned long long)val;
 
 	return ERR_IDX;
 }
@@ -158,7 +158,7 @@ static idx_t add_to_pool(const char *name)
 	strcpy(g_pool+offset, name);
 	g_pool_offset += len + 1;
 	const char *key = strdup(name);
-	sl_set(g_symtab, key, (void*)(int_t)offset);
+	sl_set(g_symtab, key, (void*)(unsigned long long)offset);
 	return offset;
 }
 
