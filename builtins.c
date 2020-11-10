@@ -4164,6 +4164,9 @@ static int fn_iso_univ_2(query *q)
 						return 0;
 					}
 
+					h = LIST_HEAD(l);
+					h = deref(q, h, save_p2_ctx);
+
 					set_var(q, &v, q->st.curr_frame, h, q->latest_ctx);
 					g_tab1[i] = slot_nbr;
 					g_tab2[i] = g_varno++;
@@ -4181,6 +4184,8 @@ static int fn_iso_univ_2(query *q)
 					return 0;
 				}
 
+				h = LIST_HEAD(l);
+				h = deref(q, h, save_p2_ctx);
 				cell v;
 				make_variable(&v, g_anon_s);
 				v.flags |= FLAG_FRESH;
@@ -5087,6 +5092,10 @@ static int fn_iso_functor_3(query *q)
 			throw_error(q, p3, "resource_error", "too_many_vars");
 			return 0;
 		}
+
+		GET_FIRST_ARG(p1,any);
+		GET_NEXT_ARG(p2,any);
+		GET_NEXT_ARG(p3,any);
 
 		cell *tmp = alloc_heap(q, 1+arity);
 		ensure(tmp);
