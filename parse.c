@@ -3343,7 +3343,7 @@ void* g_init(void)
 	FAULTINJECT(return NULL);
 	g_pool = calloc(g_pool_size=INITIAL_POOL_SIZE, 1);
 	if (g_pool)	{
-		g_symtab = sl_create((int(*)(const void*,const void*))&strcmp);
+		g_symtab = sl_create2((int(*)(const void*,const void*))&strcmp, (void(*)(void*))&free);
 		g_pool_offset = 0;
 
 		g_false_s = ensure_index_from_pool("false");
@@ -3410,7 +3410,7 @@ void g_destroy()
 		destroy_module(m);
 	}
 
-	sl_destroy_with_deleter(g_symtab, (void(*)(void*))&free);
+	sl_destroy(g_symtab);
 	free(g_pool);
 	g_pool = NULL;
 }
