@@ -18,3 +18,4 @@ void sl_done(sliter *i);
 size_t sl_count(const skiplist *l);
 void sl_dump(const skiplist *l, const char *(*f)(void *p, const void* k), void *p);
 void sl_destroy(skiplist *l);
+void sl_destroy_with_deleter(skiplist *l, void (*delkey)(void*));

@@ -101,6 +101,30 @@ void sl_destroy(skiplist *l)
 	free(l);
 }
 
+void sl_destroy_with_deleter(skiplist *l, void (*delkey)(void*))
+{
+	if (!l)
+		return;
+
+	slnode_t *p, *q;
+	p = l->header;
+	q = p->forward[0];
+	free(p);
+	p = q;
+
+	while (p) {
+		q = p->forward[0];
+
+		for (int j = 0; j < p->nbr; j++)
+			delkey(p->bkt[j].key);
+
+		free(p);
+		p = q;
+	}
+
+	free(l);
+}
+
 size_t sl_count(const skiplist *l) { return l->count; }
 
 static int binary_search(const skiplist *l, const keyval_t n[], const void *key, int imin, int imax)

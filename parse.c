@@ -132,15 +132,10 @@ static char* ensure_strdup(const char* src)
 
 static idx_t is_in_pool(const char *name)
 {
-	idx_t offset = 0;
+	const void *val;
 
-	while (offset < g_pool_offset) {
-		if (!strcmp(g_pool+offset, name)) {
-			return offset;
-		}
-
-		offset += strlen(g_pool+offset) + 1;
-	}
+	if (sl_get(g_symtab, name, &val))
+		return (idx_t)(uint_t)val;
 
 	return ERR_IDX;
 }
@@ -162,6 +157,8 @@ static idx_t add_to_pool(const char *name)
 
 	strcpy(g_pool+offset, name);
 	g_pool_offset += len + 1;
+	const char *key = strdup(name);
+	sl_set(g_symtab, key, (void*)(int_t)offset);
 	return offset;
 }
 
@@ -3346,7 +3343,7 @@ void* g_init(void)
 	FAULTINJECT(return NULL);
 	g_pool = calloc(g_pool_size=INITIAL_POOL_SIZE, 1);
 	if (g_pool)	{
-		g_symtab = sl_create(strcmp);
+		g_symtab = sl_create((int(*)(const void*,const void*))&strcmp);
 		g_pool_offset = 0;
 
 		g_false_s = ensure_index_from_pool("false");
@@ -3413,7 +3410,7 @@ void g_destroy()
 		destroy_module(m);
 	}
 
-	sl_destroy(g_symtab);
+	sl_destroy_with_deleter(g_symtab, (void(*)(void*))&free);
 	free(g_pool);
 	g_pool = NULL;
 }
