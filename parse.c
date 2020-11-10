@@ -41,6 +41,7 @@ struct prolog_ {
 };
 
 stream g_streams[MAX_STREAMS] = {{0}};
+skiplist *g_symtab = NULL;
 char *g_pool = NULL;
 idx_t g_empty_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s;
@@ -3345,6 +3346,7 @@ void* g_init(void)
 	FAULTINJECT(return NULL);
 	g_pool = calloc(g_pool_size=INITIAL_POOL_SIZE, 1);
 	if (g_pool)	{
+		g_symtab = sl_create(strcmp);
 		g_pool_offset = 0;
 
 		g_false_s = ensure_index_from_pool("false");
@@ -3411,6 +3413,7 @@ void g_destroy()
 		destroy_module(m);
 	}
 
+	sl_destroy(g_symtab);
 	free(g_pool);
 	g_pool = NULL;
 }
