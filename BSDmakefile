@@ -27,11 +27,6 @@ CFLAGS += -DUSE_LDLIBS=1
 CFLAGS += -DUSE_LDLIBS=0
 .endif
 
-.ifdef GMP
-CFLAGS += -DUSE_BIGNUM=1
-LDFLAGS += -lgmp
-.endif
-
 all: tpl
 
 tpl: $(OBJECTS)
@@ -45,9 +40,6 @@ debug:
 
 test:
 	./tests/run.sh
-
-valgrind:
-	./tests/run_valgrind.sh
 
 clean:
 	rm -f tpl *.o *.out gmon.* *.core

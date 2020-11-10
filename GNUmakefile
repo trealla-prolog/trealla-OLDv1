@@ -20,11 +20,6 @@ CFLAGS += -flto=$(LTO)
 LDFLAGS += -flto=$(LTO)
 endif
 
-ifdef GMP
-CFLAGS += -DUSE_BIGNUM=1
-LDFLAGS += -lgmp
-endif
-
 OBJECTS = tpl.o history.o builtins.o library.o \
 	parse.o print.o runtime.o \
 	skiplist.o base64.o network.o utf8.o
@@ -50,9 +45,6 @@ debug:
 
 test:
 	./tests/run.sh
-
-valgrind:
-	./tests/run_valgrind.sh
 
 clean:
 	rm -f tpl *.o *.out gmon.* *.core
