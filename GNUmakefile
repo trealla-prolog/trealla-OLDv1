@@ -52,22 +52,25 @@ test:
 	./tests/run.sh
 
 clean:
-	rm -f tpl *.o *.out gmon.* *.core core core.* faultinject*
+	rm -f tpl *.o gmon.* vgcore.* *.core core core.* faultinject*
 
 # from [gcc|clang] -MM *.c
 
 base64.o: base64.c base64.h
-builtins.o: builtins.c trealla.h internal.h skiplist.h utf8.h network.h \
- base64.h builtins.h
-history.o: history.c history.h utf8.h
+builtins.o: builtins.c trealla.h internal.h skiplist.h utf8.h cdebug.h \
+  network.h base64.h library.h builtins.h
+history.o: history.c history.h utf8.h cdebug.h
 library.o: library.c library.h
-network.o: network.c internal.h skiplist.h utf8.h network.h
-parse.o: parse.c internal.h skiplist.h utf8.h history.h library.h \
- trealla.h builtins.h
-print.o: print.c internal.h skiplist.h utf8.h builtins.h network.h
-runtime.o: runtime.c internal.h skiplist.h utf8.h history.h builtins.h
-skiplist.o: skiplist.c skiplist.h
-tpl.o: tpl.c history.h trealla.h
+network.o: network.c internal.h skiplist.h utf8.h trealla.h cdebug.h \
+  network.h
+parse.o: parse.c internal.h skiplist.h utf8.h trealla.h cdebug.h \
+  history.h library.h builtins.h
+print.o: print.c internal.h skiplist.h utf8.h trealla.h cdebug.h \
+  builtins.h network.h
+runtime.o: runtime.c internal.h skiplist.h utf8.h trealla.h cdebug.h \
+  history.h builtins.h
+skiplist.o: skiplist.c skiplist.h cdebug.h
+tpl.o: tpl.c history.h trealla.h cdebug.h
 utf8.o: utf8.c utf8.h
 
 # Library modules
