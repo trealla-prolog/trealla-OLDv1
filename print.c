@@ -499,6 +499,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		idx_t rhs_ctx = q->latest_ctx;
 		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "\\+");
+		space += !strcmp(src, "-") && is_rational(rhs) && (rhs->val_num < 0);
 		int parens = is_structure(rhs) && !strcmp(GET_STR(rhs), ",");
 		dst += snprintf(dst, dstlen, "%s", src);
 		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
