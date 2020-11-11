@@ -164,19 +164,13 @@ struct cell_ {
 			int_t val_den;
 		};
 
-		struct {
-			double val_flt;
-		};
+		double val_flt;
+		char val_chr[MAX_SMALL_STRING];
+		cell *val_ptr;
 
 #if USE_GMP
-		struct {
-			mpz_t val_mpz;
-		};
+		mpz_t val_mpz;
 #endif
-
-		struct {
-			char val_chr[MAX_SMALL_STRING];
-		};
 
 		struct {
 			char *val_str;
@@ -197,10 +191,6 @@ struct cell_ {
 				idx_t var_nbr;			// used with TYPE_VAR
 				idx_t cgen;				// used with cuts
 			};
-		};
-
-		struct {
-			cell *val_ptr;
 		};
 	};
 };
