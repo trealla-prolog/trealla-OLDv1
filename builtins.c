@@ -2586,16 +2586,17 @@ static void do_calc(query *q, cell *c, idx_t c_ctx)
 {
 	cell *save = q->st.curr_cell;
 	idx_t save_ctx = q->st.curr_frame;
+	bool save_calc = q->calc;
 	q->st.curr_cell = c;
 	q->st.curr_frame = c_ctx;
 	q->calc = true;
 	c->fn(q);
-	q->calc = false;
+	q->calc = save_calc;
 	q->st.curr_cell = save;
 	q->st.curr_frame = save_ctx;
 }
 
-#define calc(q,c) !(c->flags&FLAG_BUILTIN) ? *c : (do_calc(q,c,q->latest_ctx), q->accum)
+#define calc(q,c) !(c->flags&FLAG_BUILTIN) ? *c : (do_calc(q,c,c##_ctx), q->accum)
 
 static int_t gcd(int_t num, int_t remainder)
 {
