@@ -50,7 +50,7 @@ do
         echo "crashed with exit code $EXIT_CODE"
         mv faultinject.stderr faultinject$FAULTSTART.stderr
         mv faultinject.stdout faultinject$FAULTSTART.stdout
-        gdb -batch -ex bt -e "$TPL" -c core >faultinject$FAULTSTART.bt
+        gdb -batch -ex 'bt full' "$TPL" core >faultinject$FAULTSTART.bt
         if test -z "$keep_going"; then
             exit 1
         fi
