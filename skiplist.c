@@ -55,11 +55,9 @@ skiplist *sl_create2(int (*compkey)(const void*, const void*), void(*delkey)(voi
 {
 	FAULTINJECT(return NULL);
 	skiplist *l = (skiplist*)calloc(1, sizeof(struct skiplist_));
-	if (l)
-	{
+	if (l) {
 		l->header = new_node_of_level(MAX_LEVELS);
-		if (!l->header)
-		{
+		if (!l->header) {
 			free(l);
 			return NULL;
 		}
@@ -561,14 +559,14 @@ void sl_dump(const skiplist *l, const char *(*f)(void*, const void*), void *p1)
     p = p->forward[0];
 
     while (p) {
-	q = p->forward[0];
-	printf("%6d: ", p->nbr);
+		q = p->forward[0];
+		printf("%6d: ", p->nbr);
 
-	for (int j = 0; j < p->nbr; j++)
-	    printf("%s ", f(p1, p->bkt[j].key));
+		for (int j = 0; j < p->nbr; j++)
+			printf("%s ", f(p1, p->bkt[j].key));
 
-	printf("\n");
-	p = q;
+		printf("\n");
+		p = q;
     }
 
     printf("\n");
