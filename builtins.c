@@ -40,7 +40,6 @@
 #include "openssl/sha.h"
 #endif
 
-#define CHECK_OVERFLOW 1
 #define MAX_VARS 32768
 
 #ifndef _WIN32

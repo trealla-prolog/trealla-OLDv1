@@ -1818,8 +1818,13 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 
 	// TODO: check for integer overflow
 
+#if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
+	__int128_t v = 0;
+#else
+	uint_t v = 0;
+#endif
+
 	if ((*s == '0') && (s[1] == 'b')) {
-		uint_t v = 0;
 		s += 2;
 
 		while ((*s == '0') || (*s == '1')) {
@@ -1827,6 +1832,14 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 
 			if (*s == '1')
 				v |= 1;
+
+#if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
+			if ((v > INT64_MAX) || (v < INT64_MIN)) {
+				fprintf(stdout, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
+				p->error = true;
+				return -1;
+			}
+#endif
 
 			s++;
 		}
@@ -1838,12 +1851,20 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 	}
 
 	if ((*s == '0') && (s[1] == 'o')) {
-		uint_t v = 0;
 		s += 2;
 
 		while ((*s >= '0') && (*s <= '7')) {
 			v *= 8;
 			v += *s - '0';
+
+#if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
+			if ((v > INT64_MAX) || (v < INT64_MIN)) {
+				fprintf(stdout, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
+				p->error = true;
+				return -1;
+			}
+#endif
+
 			s++;
 		}
 
@@ -1854,7 +1875,6 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 	}
 
 	if ((*s == '0') && (s[1] == 'x')) {
-		uint_t v = 0;
 		s += 2;
 
 		while (((*s >= '0') && (*s <= '9')) || ((toupper(*s) >= 'A') && (toupper(*s) <= 'F'))) {
@@ -1865,6 +1885,14 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 			else
 				v += *s - '0';
 
+#if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
+			if ((v > INT64_MAX) || (v < INT64_MIN)) {
+				fprintf(stdout, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
+				p->error = true;
+				return -1;
+			}
+#endif
+
 			s++;
 		}
 
@@ -1874,12 +1902,20 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 		return 1;
 	}
 
-	int_t v = 0;
 	char *tmpptr = (char*)s;
 
 	while ((*s >= '0') && (*s <= '9')) {
 		v *= 10;
 		v += *s - '0';
+
+#if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
+		if ((v > INT64_MAX) || (v < INT64_MIN)) {
+			fprintf(stdout, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
+			p->error = true;
+			return -1;
+		}
+#endif
+
 		s++;
 	}
 
@@ -1898,10 +1934,7 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 		*srcptr = tmpptr;
 		s = *srcptr;
 
-		if (
-			(*s == '(') ||
-			(isalpha(*s))  ||
-			0) {
+		if ((*s == '(') || (isalpha(*s)) || 0) {
 			fprintf(stdout, "Error: syntax error, parsing number, line %d\n", p->line_nbr);
 			p->error = true;
 		}
