@@ -131,7 +131,7 @@ static void check_frame(query *q)
 				return;
 			}
 
-			memset(q->frames+q->frames_size, 0, sizeof(frame)*(new_framessize-q->frames_size));
+			//memset(q->frames+q->frames_size, 0, sizeof(frame)*(new_framessize-q->frames_size));
 			q->frames_size = new_framessize;
 		}
 	}
