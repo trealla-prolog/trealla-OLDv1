@@ -146,7 +146,7 @@ static idx_t add_to_pool(const char *name)
 	size_t len = strlen(name);
 
 	if ((offset+len+1+1) >= g_pool_size) {
-		FAULTINJECT(return ERR_IDX);
+		FAULTINJECT(errno = ENOMEM; return ERR_IDX);
 		size_t nbytes = g_pool_size * 2;
 		char *tmp = realloc(g_pool, nbytes);
 		if (!tmp) return ERR_IDX;
@@ -419,7 +419,7 @@ static rule *get_rule(module *m)
 
 static rule *create_rule(module *m, cell *c)
 {
-	FAULTINJECT(return NULL);
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	rule *h = get_rule(m);
 	h->val_off = c->val_off;
 	h->arity = c->arity;
@@ -859,7 +859,7 @@ static cell *make_cell(parser *p)
 
 parser *create_parser(module *m)
 {
-	FAULTINJECT(return NULL);
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	parser *p = calloc(1, sizeof(parser));
 	if (p)
 	{
@@ -906,7 +906,7 @@ query *create_query(module *m, int is_task)
 {
 	static uint64_t g_query_id = 0;
 
-	FAULTINJECT(return NULL);
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	query *q = calloc(1, sizeof(query));
 	if (q)
 	{
@@ -2963,7 +2963,7 @@ static void make_rule(module *m, const char *src)
 
 module *create_module(const char *name)
 {
-	FAULTINJECT(return NULL);
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	module *m = calloc(1, sizeof(module));
 	if (m)
 	{
@@ -3414,7 +3414,7 @@ error:
 
 prolog *pl_create()
 {
-	FAULTINJECT(return NULL);
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	++g_tpl_count;
 	if (g_tpl_count == 1 && g_init() == NULL)
 		return NULL;

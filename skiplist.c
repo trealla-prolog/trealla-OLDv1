@@ -46,14 +46,14 @@ struct skiplist_ {
 inline static slnode_t*
 new_node_of_level(unsigned x)
 {
-	FAULTINJECT(return NULL);
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	return malloc(sizeof(slnode_t) + ((x) * sizeof(slnode_t*)));
 }
 
 
 skiplist *sl_create2(int (*compkey)(const void*, const void*), void(*delkey)(void*))
 {
-	FAULTINJECT(return NULL);
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	skiplist *l = (skiplist*)calloc(1, sizeof(struct skiplist_));
 	if (l) {
 		l->header = new_node_of_level(MAX_LEVELS);
