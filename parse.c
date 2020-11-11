@@ -1816,6 +1816,8 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 		return 1;
 	}
 
+	// TODO: check for integer overflow
+
 	if ((*s == '0') && (s[1] == 'b')) {
 		uint_t v = 0;
 		s += 2;
@@ -2634,7 +2636,9 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 
 		if (p->val_type == TYPE_INTEGER) {
 			const char *src = p->token;
-			parse_number(p, &src, &c->val_num, &c->val_den);
+
+			if (parse_number(p, &src, &c->val_num, &c->val_den)) {
+			}
 
 			if (strstr(p->token, "0o"))
 				c->flags |= FLAG_OCTAL;
