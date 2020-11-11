@@ -3405,6 +3405,8 @@ void* g_init(void)
 	if (g_pool) {
 		errno = 0;
 		g_symtab = sl_create2((int(*)(const void*,const void*))&strcmp, (void(*)(void*))&free);
+		if (errno) goto error;
+
 		g_pool_offset = 0;
 
 		g_false_s = index_from_pool("false");
