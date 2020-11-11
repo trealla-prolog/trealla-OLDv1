@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
+#include <errno.h>
 
 #ifdef _WIN32
 #include <io.h>
@@ -159,7 +160,12 @@ int main(int ac, char *av[])
 	int version = 0, quiet = 0, daemon = 0;
 	int ns = 0;
 	void *pl = pl_create();
-	ensure(pl);
+	if (!pl)
+	{
+		fprintf(stderr, "Failed to create the prolog system: %s\n", strerror(errno));
+		return 1;
+	}
+
 	set_opt(pl, 1);
 
 	for (i = 1; i < ac; i++) {
