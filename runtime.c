@@ -157,7 +157,7 @@ static void check_slot(query *q, unsigned cnt)
 				return;
 			}
 
-			memset(q->slots+q->slots_size, 0, sizeof(slot)*(new_slotssize-q->slots_size));
+			//memset(q->slots+q->slots_size, 0, sizeof(slot)*(new_slotssize-q->slots_size));
 			q->slots_size = new_slotssize;
 		}
 	}
