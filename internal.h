@@ -5,11 +5,6 @@
 #include <limits.h>
 #include <sys/param.h>
 
-#include "skiplist.h"
-#include "utf8.h"
-#include "trealla.h"
-#include "cdebug.h"
-
 #ifndef USE_OPENSSL
 #define USE_OPENSSL 0
 #endif
@@ -26,6 +21,14 @@
 #define USE_INT32 0
 #endif
 
+#ifndef USE_GMP
+#define USE_GMP 0
+#endif
+
+#if USE_GMP
+#include <gmp.h>
+#endif
+
 #if USE_INT128
 typedef __int128_t int_t;
 typedef __uint128_t uint_t;
@@ -38,6 +41,11 @@ typedef __uint64_t uint_t;
 #endif
 
 typedef uint32_t idx_t;
+
+#include "skiplist.h"
+#include "utf8.h"
+#include "trealla.h"
+#include "cdebug.h"
 
 // Sentinel Value
 #define ERR_IDX (~(idx_t)0)
@@ -58,14 +66,15 @@ typedef uint32_t idx_t;
 
 // Primary type...
 
+#define is_empty(c) ((c)->val_type == TYPE_EMPTY)
+#define is_variable(c) ((c)->val_type == TYPE_VARIABLE)
 #define is_literal(c) ((c)->val_type == TYPE_LITERAL)
 #define is_cstring(c) ((c)->val_type == TYPE_CSTRING)
-#define is_variable(c) ((c)->val_type == TYPE_VARIABLE)
-#define is_empty(c) ((c)->val_type == TYPE_EMPTY)
-#define is_end(c) ((c)->val_type == TYPE_END)
-#define is_indirect(c) ((c)->val_type == TYPE_INDIRECT)
-#define is_float(c) ((c)->val_type == TYPE_FLOAT)
 #define is_rational(c) ((c)->val_type == TYPE_INTEGER)
+#define is_bignum(c) ((c)->val_type == TYPE_BIGNUM)
+#define is_float(c) ((c)->val_type == TYPE_FLOAT)
+#define is_indirect(c) ((c)->val_type == TYPE_INDIRECT)
+#define is_end(c) ((c)->val_type == TYPE_END)
 
 // Derived type...
 
@@ -90,12 +99,15 @@ typedef uint32_t idx_t;
 #define GET_STR(c) ((c)->val_type != TYPE_CSTRING ? (g_pool+(c)->val_off) : (c)->flags&FLAG_BLOB ? (c)->val_str : (c)->val_chr)
 #define LEN_STR(c) ((c)->flags&FLAG_BLOB ? (c)->len_str : strlen(GET_STR(c)))
 
+// If changing the order of these: see runtime.c dispatch table
+
 enum {
 	TYPE_EMPTY=0,
 	TYPE_VARIABLE,
 	TYPE_LITERAL,
 	TYPE_CSTRING,
 	TYPE_INTEGER,
+	TYPE_BIGNUM,
 	TYPE_FLOAT,
 	TYPE_INDIRECT,
 	TYPE_END
@@ -155,6 +167,12 @@ struct cell_ {
 		struct {
 			double val_flt;
 		};
+
+#if USE_GMP
+		struct {
+			mpz_t val_gmp;
+		};
+#endif
 
 		struct {
 			char val_chr[MAX_SMALL_STRING];

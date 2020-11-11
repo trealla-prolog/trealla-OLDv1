@@ -15,6 +15,11 @@ else ifdef INT32
 CFLAGS += -DUSE_INT32=1
 endif
 
+ifdef GMP
+CFLAGS += -DUSE_GMP=1
+LDFLAGS += -lgmp
+endif
+
 ifdef LTO
 CFLAGS += -flto=$(LTO)
 LDFLAGS += -flto=$(LTO)

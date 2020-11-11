@@ -746,6 +746,7 @@ static const struct dispatch g_disp[] =
 	{TYPE_LITERAL, unify_literal},
 	{TYPE_CSTRING, unify_cstring},
 	{TYPE_INTEGER, unify_int},
+	{TYPE_BIGNUM, NULL},
 	{TYPE_FLOAT, unify_float},
 	{0}
 };

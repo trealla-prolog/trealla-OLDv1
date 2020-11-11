@@ -15,6 +15,11 @@ CFLAGS += -DUSE_INT128=1
 CFLAGS += -DUSE_INT32=1
 .endif
 
+.ifdef GMP
+CFLAGS += -DUSE_GMP=1
+LDFLAGS += -lgmp
+.endif
+
 OBJECTS = tpl.o history.o builtins.o library.o \
 	parse.o print.o runtime.o \
 	skiplist.o base64.o network.o utf8.o
