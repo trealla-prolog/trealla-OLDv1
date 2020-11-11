@@ -60,7 +60,7 @@ static idx_t alloc_grow(void** addr, size_t elem_size, idx_t min_elements, idx_t
 		if (mem) break;
 		elements = min_elements + (elements-min_elements)/2;
 		message("memory pressure reduce %u to %u", max_elements, elements);
-	} while (elements != min_elements);
+	} while (elements > min_elements);
 
 	if (!mem)
 		return 0;
@@ -79,7 +79,7 @@ static void check_trail(query *q)
 			FAULTINJECT(throw_error(q, q->st.curr_cell, "resource_error", "out_of_trail_space");
 				    q->error = true; return);
 
-			idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp + 2, q->trails_size*2);
+			idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size*2);
 			if (!new_trailssize)
 			{
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_trail_space");
@@ -101,7 +101,7 @@ static void check_choice(query *q)
 			FAULTINJECT(throw_error(q, q->st.curr_cell, "resource_error", "out_of_choice_space");
 				    q->error = true; return);
 
-			idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp + 2, q->choices_size*2);
+			idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size*2);
 			if (!new_choicessize)
 			{
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_choice_space");
@@ -123,7 +123,7 @@ static void check_frame(query *q)
 			FAULTINJECT(throw_error(q, q->st.curr_cell, "resource_error", "out_of_frame_space");
 				    q->error = true; return);
 
-			idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp + 2, q->frames_size*2);
+			idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size*2);
 			if (!new_framessize)
 			{
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_frame_space");
@@ -148,7 +148,7 @@ static void check_slot(query *q, unsigned cnt)
 			FAULTINJECT(throw_error(q, q->st.curr_cell, "resource_error", "out_of_slot_space");
 				    q->error = true; return);
 
-			idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr + 2, q->slots_size*2>nbr+2?q->slots_size*2:nbr+2);
+			idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, q->slots_size*2>nbr?q->slots_size*2:nbr);
 			if (!new_slotssize)
 			{
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_slot_space");

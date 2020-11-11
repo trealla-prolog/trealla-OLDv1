@@ -52,7 +52,7 @@ test:
 	./tests/run.sh
 
 clean:
-	rm -f tpl *.o *.out gmon.* *.core
+	rm -f tpl *.o *.out gmon.* *.core core core.* faultinject*
 
 # from [gcc|clang] -MM *.c
 

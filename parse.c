@@ -146,7 +146,7 @@ static idx_t add_to_pool(const char *name)
 	size_t len = strlen(name);
 
 	if ((offset+len+1+1) >= g_pool_size) {
-		FAULTINJECT(return ERR_IDX);
+		FAULTINJECT(errno = ENOMEM; return ERR_IDX);
 		size_t nbytes = g_pool_size * 2;
 		char *tmp = realloc(g_pool, nbytes);
 		if (!tmp) return ERR_IDX;
@@ -169,17 +169,6 @@ idx_t index_from_pool(const char *name)
 		return offset;
 
 	return add_to_pool(name);
-}
-
-static idx_t ensure_index_from_pool(const char *name)
-{
-	idx_t offset = is_in_pool(name);
-	if (offset != ERR_IDX)
-		return offset;
-
-	offset = add_to_pool(name);
-	ensure(offset != ERR_IDX);
-	return offset;
 }
 
 const char* cstr_from_pool(const char *name)
@@ -430,7 +419,7 @@ static rule *get_rule(module *m)
 
 static rule *create_rule(module *m, cell *c)
 {
-	FAULTINJECT(return NULL);
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	rule *h = get_rule(m);
 	h->val_off = c->val_off;
 	h->arity = c->arity;
@@ -870,7 +859,7 @@ static cell *make_cell(parser *p)
 
 parser *create_parser(module *m)
 {
-	FAULTINJECT(return NULL);
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	parser *p = calloc(1, sizeof(parser));
 	if (p)
 	{
@@ -917,7 +906,7 @@ query *create_query(module *m, int is_task)
 {
 	static uint64_t g_query_id = 0;
 
-	FAULTINJECT(return NULL);
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	query *q = calloc(1, sizeof(query));
 	if (q)
 	{
@@ -2974,7 +2963,7 @@ static void make_rule(module *m, const char *src)
 
 module *create_module(const char *name)
 {
-	FAULTINJECT(return NULL);
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	module *m = calloc(1, sizeof(module));
 	if (m)
 	{
@@ -3338,49 +3327,6 @@ bool pl_consult(prolog *pl, const char *filename)
 }
 
 
-void* g_init(void)
-{
-	FAULTINJECT(return NULL);
-	g_pool = calloc(g_pool_size=INITIAL_POOL_SIZE, 1);
-	if (g_pool)	{
-		g_symtab = sl_create2((int(*)(const void*,const void*))&strcmp, (void(*)(void*))&free);
-		g_pool_offset = 0;
-
-		g_false_s = ensure_index_from_pool("false");
-		g_true_s = ensure_index_from_pool("true");
-		g_empty_s = ensure_index_from_pool("");
-		g_anon_s = ensure_index_from_pool("_");
-		g_dot_s = ensure_index_from_pool(".");
-		g_cut_s = ensure_index_from_pool("!");
-		g_nil_s = ensure_index_from_pool("[]");
-		g_braces_s = ensure_index_from_pool("{}");
-		g_fail_s = ensure_index_from_pool("fail");
-		g_clause_s = ensure_index_from_pool(":-");
-		g_sys_elapsed_s = ensure_index_from_pool("$elapsed");
-		g_sys_queue_s = ensure_index_from_pool("$queue");
-		g_eof_s = ensure_index_from_pool("end_of_file");
-		g_lt_s = ensure_index_from_pool("<");
-		g_gt_s = ensure_index_from_pool(">");
-		g_eq_s = ensure_index_from_pool("=");
-
-		g_streams[0].fp = stdin;
-		g_streams[0].filename = ensure_strdup("stdin");
-		g_streams[0].name = ensure_strdup("user_input");
-		g_streams[0].mode = ensure_strdup("read");
-
-		g_streams[1].fp = stdout;
-		g_streams[1].filename = ensure_strdup("stdout");
-		g_streams[1].name = ensure_strdup("user_output");
-		g_streams[1].mode = ensure_strdup("append");
-
-		g_streams[2].fp = stderr;
-		g_streams[2].filename = ensure_strdup("stderr");
-		g_streams[2].name = ensure_strdup("user_error");
-		g_streams[2].mode = ensure_strdup("append");
-	}
-	return g_pool;
-}
-
 void g_destroy()
 {
 	for (int i = 0; i < MAX_STREAMS; i++) {
@@ -3415,10 +3361,60 @@ void g_destroy()
 	g_pool = NULL;
 }
 
+void* g_init(void)
+{
+	FAULTINJECT(errno = ENOMEM; return NULL);
+	g_pool = calloc(g_pool_size=INITIAL_POOL_SIZE, 1);
+	if (g_pool) {
+		errno = 0;
+		g_symtab = sl_create2((int(*)(const void*,const void*))&strcmp, (void(*)(void*))&free);
+		g_pool_offset = 0;
+
+		g_false_s = index_from_pool("false");
+		g_true_s = index_from_pool("true");
+		g_empty_s = index_from_pool("");
+		g_anon_s = index_from_pool("_");
+		g_dot_s = index_from_pool(".");
+		g_cut_s = index_from_pool("!");
+		g_nil_s = index_from_pool("[]");
+		g_braces_s = index_from_pool("{}");
+		g_fail_s = index_from_pool("fail");
+		g_clause_s = index_from_pool(":-");
+		g_sys_elapsed_s = index_from_pool("$elapsed");
+		g_sys_queue_s = index_from_pool("$queue");
+		g_eof_s = index_from_pool("end_of_file");
+		g_lt_s = index_from_pool("<");
+		g_gt_s = index_from_pool(">");
+		g_eq_s = index_from_pool("=");
+
+		g_streams[0].fp = stdin;
+		g_streams[0].filename = strdup("stdin");
+		g_streams[0].name = strdup("user_input");
+		g_streams[0].mode = strdup("read");
+
+		g_streams[1].fp = stdout;
+		g_streams[1].filename = strdup("stdout");
+		g_streams[1].name = strdup("user_output");
+		g_streams[1].mode = strdup("append");
+
+		g_streams[2].fp = stderr;
+		g_streams[2].filename = strdup("stderr");
+		g_streams[2].name = strdup("user_error");
+		g_streams[2].mode = strdup("append");
+
+		if (errno)
+			goto error;
+	}
+	return g_pool;
+
+error:
+	g_destroy();
+	return NULL;
+}
 
 prolog *pl_create()
 {
-	FAULTINJECT(return NULL);
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	++g_tpl_count;
 	if (g_tpl_count == 1 && g_init() == NULL)
 		return NULL;

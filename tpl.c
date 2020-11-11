@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
+#include <errno.h>
 
 #ifdef _WIN32
 #include <io.h>
@@ -148,6 +149,8 @@ int main(int ac, char *av[])
 
 #ifdef FAULTINJECT_ENABLED
 	FAULTINJECT_VAR = strtoul(getenv("FAULTSTART")?getenv("FAULTSTART"):"0", NULL, 0);
+	static bool faultinject_is_off;
+	faultinject_is_off = !FAULTINJECT_VAR;
 #endif
 
 	char histfile[1024];
@@ -157,7 +160,12 @@ int main(int ac, char *av[])
 	int version = 0, quiet = 0, daemon = 0;
 	int ns = 0;
 	void *pl = pl_create();
-	ensure(pl);
+	if (!pl)
+	{
+		fprintf(stderr, "Failed to create the prolog system: %s\n", strerror(errno));
+		return 1;
+	}
+
 	set_opt(pl, 1);
 
 	for (i = 1; i < ac; i++) {
@@ -240,11 +248,19 @@ int main(int ac, char *av[])
 	if (goal) {
 		if (!pl_eval(pl, goal)) {
 			pl_destroy(pl);
+#ifdef FAULTINJECT_ENABLED
+			if (faultinject_is_off)
+				fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_VAR);
+#endif
 			return 1;
 		}
 
 		if (get_halt(pl) || ns) {
 			pl_destroy(pl);
+#ifdef FAULTINJECT_ENABLED
+			if (faultinject_is_off)
+				fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_VAR);
+#endif
 			return 1;
 		}
 	}
@@ -304,5 +320,11 @@ int main(int ac, char *av[])
 
 	int halt_code = get_halt_code(pl);
 	pl_destroy(pl);
+
+#ifdef FAULTINJECT_ENABLED
+	if (faultinject_is_off)
+		fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_VAR);
+#endif
+
 	return halt_code;
 }

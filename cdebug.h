@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-
+#include<errno.h>
 
 #ifdef NDEBUG
 #define message(fmt, ...)
@@ -17,7 +17,7 @@
 #if !defined(NDEBUG) && defined(FAULTINJECT_VAR)
 extern uint64_t FAULTINJECT_VAR;
 #define FAULTINJECT_ENABLED
-#define FAULTINJECT(...) do {if (!--FAULTINJECT_VAR){ __VA_ARGS__; }} while (0)
+#define FAULTINJECT(...) do {if (!--FAULTINJECT_VAR){ message("injecting fault: " #__VA_ARGS__); __VA_ARGS__; }} while (0)
 #define FAULTINJECT_WHEN(cond, ...) do {if ((cond) &&!--FAULTINJECT_VAR){ __VA_ARGS__; }} while (0)
 #define FAULTINJECT_ONCE(cond,...) do {static bool tried = false; if (!tried && (cond)) { tried = true; FAULTINJECT(__VA_ARGS__);}} while (0)
 #else
