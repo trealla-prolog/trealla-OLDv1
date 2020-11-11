@@ -413,7 +413,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		int dq = 0, braces = 0, parens = 0;
 		if (is_string(c)) dq = quote = 1;
 		if (q->quoted < 0) quote = 0;
-		if (c->arity && !strcmp(src, "{}")) braces = 1;
+		if (c->arity && is_literal(c) && !strcmp(src, "{}")) braces = 1;
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
 		if (q->quoted && get_op(q->m, src, NULL, NULL, 0) && strcmp(src, "|"))
