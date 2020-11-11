@@ -281,13 +281,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 	}
 
 	if (is_rational(c)) {
-		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY)) && (running <= 0)) {
-			dst += snprintf(dst, dstlen, "%s0x", c->val_num<0?"-":"");
-			dst += sprint_int(dst, dstlen, c->val_num, 16);
-		} else if ((c->flags & FLAG_OCTAL) && !running) {
-			dst += snprintf(dst, dstlen, "%s0o", c->val_num<0?"-":"");
-			dst += sprint_int(dst, dstlen, c->val_num, 8);
-		} else if (c->val_den != 1) {
+		if (c->val_den != 1) {
 			if (q->m->flag.rational_syntax_natural) {
 				dst += sprint_int(dst, dstlen, c->val_num, 10);
 				dst += snprintf(dst, dstlen, "/");
@@ -302,6 +296,13 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 
 		return dst - save_dst;
 	}
+
+#if USE_GMP
+	if (is_bignum(c)) {
+		dst += gmp_snprintf(dst, dstlen, "%Zd", &c->val_mpz);
+		return dst - save_dst;
+	}
+#endif
 
 	if (is_float(c) && (c->val_flt == M_PI)) {
 		dst += snprintf(dst, dstlen, "%s", "3.141592653589793");

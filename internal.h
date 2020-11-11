@@ -170,7 +170,7 @@ struct cell_ {
 
 #if USE_GMP
 		struct {
-			mpz_t val_gmp;
+			mpz_t val_mpz;
 		};
 #endif
 
