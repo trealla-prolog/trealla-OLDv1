@@ -7,10 +7,9 @@
 
 main :-
     solve_equation(2^(2*x)-5*2^(x+1)+16 = 0,x,_=Z),
-    writeln(Z),
+    write(Z), nl,
     Y is Z,
-    write(Y),
-    nl,
+    write(Y), nl,
     fail.
 main :-
     halt.
