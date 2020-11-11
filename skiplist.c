@@ -181,7 +181,7 @@ static int random_level(unsigned *seedp)
 	return lvl < MAX_LEVEL ? lvl : MAX_LEVEL;
 }
 
-int sl_set(skiplist *l, const void *key, const void *val)
+bool sl_set(skiplist *l, const void *key, const void *val)
 {
 	slnode_t *update[MAX_LEVELS];
 	slnode_t *p, *q;
@@ -210,7 +210,7 @@ int sl_set(skiplist *l, const void *key, const void *val)
 			p->bkt[j].val = (void*)val;
 			p->nbr++;
 			l->count++;
-			return 1;
+			return true;
 		}
 
 		// Don't drop this unless you are 100% sure:
@@ -237,7 +237,8 @@ int sl_set(skiplist *l, const void *key, const void *val)
 	}
 
 	q = new_node_of_level(k + 1);
-	ensure(q);
+	if (!q) return false;
+
 	q->bkt[0].key = (void*)key;
 	q->bkt[0].val = (void*)val;
 	q->nbr = 1;
@@ -254,10 +255,10 @@ int sl_set(skiplist *l, const void *key, const void *val)
 		p->forward[k] = q;
 	}
 
-	return 1;
+	return true;
 }
 
-int sl_app(skiplist *l, const void *key, const void *val)
+bool sl_app(skiplist *l, const void *key, const void *val)
 {
 	slnode_t *update[MAX_LEVELS];
 	slnode_t *p, *q;
@@ -286,7 +287,7 @@ int sl_app(skiplist *l, const void *key, const void *val)
 			p->bkt[j].val = (void*)val;
 			p->nbr++;
 			l->count++;
-			return 1;
+			return true;
 		}
 
 		// Don't drop this unless you are 100% sure:
@@ -313,7 +314,8 @@ int sl_app(skiplist *l, const void *key, const void *val)
 	}
 
 	q = new_node_of_level(k + 1);
-	ensure(q);
+	if (!q) return false;
+
 	q->bkt[0].key = (void*)key;
 	q->bkt[0].val = (void*)val;
 	q->nbr = 1;
@@ -330,10 +332,10 @@ int sl_app(skiplist *l, const void *key, const void *val)
 		p->forward[k] = q;
 	}
 
-	return 1;
+	return true;
 }
 
-int sl_get(const skiplist *l, const void *key, const void **val)
+bool sl_get(const skiplist *l, const void *key, const void **val)
 {
 	int k;
 	slnode_t *p, *q = 0;
@@ -345,18 +347,18 @@ int sl_get(const skiplist *l, const void *key, const void **val)
 	}
 
 	if (!(q = p->forward[0]))
-		return 0;
+		return false;
 
 	int imid = binary_search(l, q->bkt, key, 0, q->nbr - 1);
 
 	if (imid < 0)
-		return 0;
+		return false;
 
 	*val = q->bkt[imid].val;
-	return 1;
+	return true;
 }
 
-int sl_del(skiplist *l, const void *key)
+bool sl_del(skiplist *l, const void *key)
 {
 	int k, m;
 	slnode_t *update[MAX_LEVELS];
@@ -371,12 +373,12 @@ int sl_del(skiplist *l, const void *key)
 	}
 
 	if (!(q = p->forward[0]))
-		return 0;
+		return false;
 
 	int imid = binary_search(l, q->bkt, key, 0, q->nbr - 1);
 
 	if (imid < 0)
-		return 0;
+		return false;
 
 	while (imid < (q->nbr - 1)) {
 		q->bkt[imid] = q->bkt[imid + 1];
@@ -387,7 +389,7 @@ int sl_del(skiplist *l, const void *key)
 	l->count--;
 
 	if (q->nbr)
-		return 1;
+		return true;
 
 	m = l->level - 1;
 
@@ -407,7 +409,7 @@ int sl_del(skiplist *l, const void *key)
 		m--;
 
 	l->level = m + 1;
-	return 1;
+	return true;
 }
 
 void sl_iterate(const skiplist *l, int (*f)(void*, const void*, const void*), void *p1)
@@ -514,21 +516,21 @@ sliter *sl_findkey(skiplist *l, const void *key)
 	return iter;
 }
 
-int sl_nextkey(sliter *iter, void **val)
+bool sl_nextkey(sliter *iter, void **val)
 {
 	if (!iter->p) {
 		sl_done(iter);
-		return 0;
+		return false;
 	}
 
 	if (iter->idx < iter->p->nbr) {
 		if (iter->l->compkey(iter->p->bkt[iter->idx].key, iter->key) != 0) {
 			sl_done(iter);
-			return 0;
+			return false;
 		}
 
 		*val = iter->p->bkt[iter->idx++].val;
-		return 1;
+		return true;
 	}
 
 	iter->p = iter->p->forward[0];
@@ -538,7 +540,7 @@ int sl_nextkey(sliter *iter, void **val)
 		return sl_nextkey(iter, val);
 
 	sl_done(iter);
-	return 0;
+	return true;
 }
 
 void sl_done(sliter *iter)
