@@ -2,6 +2,7 @@
 
 keep_going=
 direction=1
+show=
 
 if test "$1" = "-k"; then
     keep_going=true
@@ -12,6 +13,12 @@ if test "$1" = "-r"; then
     direction="-1"
     shift
 fi
+
+if test "$1" = "-s"; then
+    show=true
+    shift
+fi
+
 
 TPL="$1"
 
@@ -51,6 +58,9 @@ do
         mv faultinject.stderr faultinject$FAULTSTART.stderr
         mv faultinject.stdout faultinject$FAULTSTART.stdout
         gdb -batch -ex 'bt full' "$TPL" core >faultinject$FAULTSTART.bt
+        if test "$show"; then
+            less faultinject$FAULTSTART.bt
+        fi
         if test -z "$keep_going"; then
             exit 1
         fi
