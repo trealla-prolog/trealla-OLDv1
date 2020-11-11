@@ -2582,17 +2582,20 @@ static int fn_iso_peek_byte_2(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static void do_calc(query *q, cell *c)
+static void do_calc(query *q, cell *c, idx_t c_ctx)
 {
 	cell *save = q->st.curr_cell;
+	idx_t save_ctx = q->st.curr_frame;
 	q->st.curr_cell = c;
+	q->st.curr_frame = c_ctx;
 	q->calc = true;
 	c->fn(q);
 	q->calc = false;
 	q->st.curr_cell = save;
+	q->st.curr_frame = save_ctx;
 }
 
-#define calc(q,c) !(c->flags&FLAG_BUILTIN) ? *c : (do_calc(q, c), q->accum)
+#define calc(q,c) !(c->flags&FLAG_BUILTIN) ? *c : (do_calc(q,c,q->latest_ctx), q->accum)
 
 static int_t gcd(int_t num, int_t remainder)
 {
