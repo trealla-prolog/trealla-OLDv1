@@ -518,6 +518,9 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		int lhs_prec2 = is_literal(lhs) && !lhs->arity ? get_op(q->m, GET_STR(lhs), NULL, NULL, 0) : 0;
 		int rhs_prec1 = is_literal(rhs) ? get_op(q->m, GET_STR(rhs), NULL, NULL, 0) : 0;
 		int rhs_prec2 = is_literal(rhs) && !rhs->arity ? get_op(q->m, GET_STR(rhs), NULL, NULL, 0) : 0;
+		//printf("\n*** c=%s prec=%d\n", GET_STR(c), my_prec);
+		//printf("*** lhs=%s prec=%d\n", GET_STR(lhs), lhs_prec1);
+		//printf("*** rhs=%s prec=%d\n", GET_STR(rhs), rhs_prec1);
 		int parens = 0;//depth && strcmp(src, ",") && strcmp(src, "is") && strcmp(src, "->");
 		int lhs_parens = lhs_prec1 > my_prec;
 		lhs_parens |= lhs_prec2;
@@ -526,10 +529,13 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		if (lhs_parens) dst += snprintf(dst, dstlen, "%s", ")");
 		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "-->") || !strcmp(src, "=..") || !*src;
 		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
+
 		dst += snprintf(dst, dstlen, "%s", src);
 		if (!*src) space = 0;
 		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
+
 		int rhs_parens = rhs_prec1 > my_prec;
+		rhs_parens |= rhs_prec1 && lhs_prec1 && (rhs_prec1 != lhs_prec1);
 		rhs_parens |= rhs_prec2;
 		if (rhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
 		dst += write_term_to_buf(q, dst, dstlen, rhs, rhs_ctx, running, 0, depth+1);
