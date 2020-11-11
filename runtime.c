@@ -131,7 +131,6 @@ static void check_frame(query *q)
 				return;
 			}
 
-			//memset(q->frames+q->frames_size, 0, sizeof(frame)*(new_framessize-q->frames_size));
 			q->frames_size = new_framessize;
 		}
 	}
@@ -145,7 +144,7 @@ static void check_slot(query *q, unsigned cnt)
 	if (nbr > q->max_slots) {
 		q->max_slots = q->st.sp;
 
-		while (nbr >= q->slots_size) {
+		if (nbr >= q->slots_size) {
 			FAULTINJECT(throw_error(q, q->st.curr_cell, "resource_error", "out_of_slot_space");
 				    q->error = true; return);
 
@@ -157,7 +156,6 @@ static void check_slot(query *q, unsigned cnt)
 				return;
 			}
 
-			//memset(q->slots+q->slots_size, 0, sizeof(slot)*(new_slotssize-q->slots_size));
 			q->slots_size = new_slotssize;
 		}
 	}
