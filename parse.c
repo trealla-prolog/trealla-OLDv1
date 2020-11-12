@@ -3405,7 +3405,7 @@ void* g_init(void)
 	g_pool = calloc(g_pool_size=INITIAL_POOL_SIZE, 1);
 	if (g_pool) {
 		errno = 0;
-		g_symtab = sl_create2((int(*)(const void*,const void*))&strcmp, (void(*)(void*))&free);
+		g_symtab = sl_create2((void*)strcmp, free);
 		if (errno) goto error;
 
 		g_pool_offset = 0;
