@@ -411,7 +411,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 
 		slot *from = GET_SLOT(new_g, 0);
 		slot *to = GET_SLOT(g, 0);
-		memcpy(to, from, sizeof(slot)*nbr_vars);
+		memmove(to, from, sizeof(slot)*nbr_vars);
 		q->st.sp = g->ctx + nbr_vars;
 	} else {
 		g->ctx = q->st.sp;
