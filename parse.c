@@ -1810,8 +1810,6 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 		return 1;
 	}
 
-	// TODO: check for integer overflow
-
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 	__int128_t v = 0;
 #else
