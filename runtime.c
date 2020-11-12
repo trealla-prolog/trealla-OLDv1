@@ -69,7 +69,6 @@ static idx_t alloc_grow(void** addr, size_t elem_size, idx_t min_elements, idx_t
 	return elements;
 }
 
-
 static void check_trail(query *q)
 {
 	if (q->st.tp > q->max_trails) {
@@ -80,8 +79,7 @@ static void check_trail(query *q)
 				    q->error = true; return);
 
 			idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size*2);
-			if (!new_trailssize)
-			{
+			if (!new_trailssize) {
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_trail_space");
 				q->error = true;
 				return;
@@ -102,8 +100,7 @@ static void check_choice(query *q)
 				    q->error = true; return);
 
 			idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size*2);
-			if (!new_choicessize)
-			{
+			if (!new_choicessize) {
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_choice_space");
 				q->error = true;
 				return;
@@ -124,8 +121,7 @@ static void check_frame(query *q)
 				    q->error = true; return);
 
 			idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size*2);
-			if (!new_framessize)
-			{
+			if (!new_framessize) {
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_frame_space");
 				q->error = true;
 				return;
@@ -135,7 +131,6 @@ static void check_frame(query *q)
 		}
 	}
 }
-
 
 static void check_slot(query *q, unsigned cnt)
 {
@@ -149,8 +144,7 @@ static void check_slot(query *q, unsigned cnt)
 				    q->error = true; return);
 
 			idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, q->slots_size*2>nbr?q->slots_size*2:nbr);
-			if (!new_slotssize)
-			{
+			if (!new_slotssize) {
 				throw_error(q, q->st.curr_cell, "resource_error", "out_of_slot_space");
 				q->error = true;
 				return;
@@ -160,7 +154,6 @@ static void check_slot(query *q, unsigned cnt)
 		}
 	}
 }
-
 
 static void trace_call(query *q, cell *c, box_t box)
 {
