@@ -2243,7 +2243,7 @@ static int get_token(parser *p, int last_op)
 		strncpy(dst, tmpptr, src-tmpptr);
 		dst[src-tmpptr] = '\0';
 
-		if (strchr(dst, '.') || strchr(dst, 'e') || strchr(dst, 'E'))
+		if ((strchr(dst, '.') || strchr(dst, 'e') || strchr(dst, 'E')) && !strchr(dst, '\''))
 			p->val_type = TYPE_FLOAT;
 		else
 			p->val_type = TYPE_INTEGER;
@@ -2669,8 +2669,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 		if (p->val_type == TYPE_INTEGER) {
 			const char *src = p->token;
 
-			if (parse_number(p, &src, &c->val_num, &c->val_den)) {
-			}
+			parse_number(p, &src, &c->val_num, &c->val_den);
 
 			if (strstr(p->token, "0o"))
 				c->flags |= FLAG_OCTAL;
