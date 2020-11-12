@@ -402,7 +402,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	g->did_cut = false;
 
 	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
+	const choice *ch = q->choices + curr_choice;
 	q->st.sp = ch->st.sp;
 
 	if (!q->no_tco && q->m->opt) {
@@ -439,7 +439,7 @@ static bool check_slots(const query *q, frame *g, term *t)
 		return false;
 
 	for (unsigned i = 0; i < g->nbr_vars; i++) {
-		slot *e = GET_SLOT(g, i);
+		const slot *e = GET_SLOT(g, i);
 
 		if (is_indirect(&e->c) || is_string(&e->c))
 			return false;
