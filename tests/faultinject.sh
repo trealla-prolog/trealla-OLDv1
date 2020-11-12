@@ -5,6 +5,7 @@ direction=1
 valgrind=
 show=
 quiet=
+filter=
 
 while test "$1" != "${1#-}"
 do
@@ -30,6 +31,10 @@ do
         quiet=true
         show=
         shift
+        ;;
+    -f)
+        filter="$2"
+        shift 2
         ;;
     --)
         break
@@ -65,37 +70,49 @@ then
     FAULTEND=0
 fi
 
+case "$filter" in
+*ABRT|*abrt)
+    filter=134
+    ;;
+*SEGV|*segv)
+    filter=139
+    ;;
+esac
+
+
 while test "$FAULTSTART" -ne "$FAULTEND"
 do
     "$@" 2>faultinject.stderr >faultinject.stdout
     EXIT_CODE="$?"
     if test "$EXIT_CODE" -gt 127; then
-        case $EXIT_CODE in
-        134)
-            echo "Faultinject $FAULTSTART crashed with SIGABRT"
-            ;;
-        139)
-            echo "Faultinject $FAULTSTART crashed with SIGSEGV"
-            ;;
-        *)
-            echo "Faultinject $FAULTSTART crashed with $EXIT_CODE"
-            ;;
-        esac
-        if test -z "$quiet" ; then
-            gdb -batch -ex 'bt full' "$TPL" core >faultinject$FAULTSTART.bt
-            mv faultinject.stderr faultinject$FAULTSTART.stderr
-            mv faultinject.stdout faultinject$FAULTSTART.stdout
-        fi
-        vglog=
-        if test "$valgrind" ; then
-            vglog=faultinject$FAULTSTART.vg
-            valgrind --log-file=$vglog "$@"
-        fi
-        if test "$show"; then
-            less faultinject$FAULTSTART.bt $vglog faultinject$FAULTSTART.stderr faultinject$FAULTSTART.stdout
-        fi
-        if test -z "$keep_going"; then
-            exit 1
+        if test ! "$filter" -o "$filter" = "$EXIT_CODE"; then
+            case $EXIT_CODE in
+            134)
+                echo "Faultinject $FAULTSTART crashed with SIGABRT"
+                ;;
+            139)
+                echo "Faultinject $FAULTSTART crashed with SIGSEGV"
+                ;;
+            *)
+                echo "Faultinject $FAULTSTART crashed with $EXIT_CODE"
+                ;;
+            esac
+            if test -z "$quiet" ; then
+                gdb -batch -ex 'bt full' "$TPL" core >faultinject$FAULTSTART.bt
+                mv faultinject.stderr faultinject$FAULTSTART.stderr
+                mv faultinject.stdout faultinject$FAULTSTART.stdout
+            fi
+            vglog=
+            if test "$valgrind" ; then
+                vglog=faultinject$FAULTSTART.vg
+                valgrind --log-file=$vglog "$@"
+            fi
+            if test "$show"; then
+                less faultinject$FAULTSTART.bt $vglog faultinject$FAULTSTART.stderr faultinject$FAULTSTART.stdout
+            fi
+            if test -z "$keep_going"; then
+                exit 1
+            fi
         fi
     fi
     rm -f faultinject.stderr faultinject.stdout
