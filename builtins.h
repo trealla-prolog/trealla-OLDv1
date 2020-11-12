@@ -45,8 +45,10 @@ inline static cell *deref_var(query *q, cell *c, idx_t c_ctx)
 	slot *e = GET_SLOT(g, c->var_nbr);
 
 	while (is_variable(&e->c)) {
-		g = GET_FRAME(c_ctx=e->ctx);
-		e = GET_SLOT(g, (c=&e->c)->var_nbr);
+		c_ctx = e->ctx;
+		c = &e->c;
+		g = GET_FRAME(c_ctx);
+		e = GET_SLOT(g, c->var_nbr);
 	}
 
 	if (is_empty(&e->c))

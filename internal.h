@@ -62,7 +62,7 @@ typedef uint32_t idx_t;
 #define CHECK_OVERFLOW 1
 
 #define GET_FRAME(i) (q->frames+(i))
-#define GET_SLOT(g,i) ((i) < g->nbr_slots ? q->slots+g->ctx+(i) : q->slots+g->overflow+((i)-g->nbr_slots))
+#define GET_SLOT(g,i) ((i) < g->nbr_slots ? (q->slots+g->ctx+(i)) : (q->slots+g->overflow+((i)-g->nbr_slots)))
 
 // Primary type...
 
