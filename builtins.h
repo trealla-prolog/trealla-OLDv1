@@ -41,7 +41,7 @@
 
 inline static cell *deref_var(query *q, cell *c, idx_t c_ctx)
 {
-	frame *g = GET_FRAME(c_ctx);
+	const frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
 
 	while (is_variable(&e->c)) {
