@@ -4,6 +4,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <float.h>
+#include <assert.h>
 #include <sys/time.h>
 #include <sys/errno.h>
 
@@ -124,6 +125,7 @@ static struct op_table g_ops[] =
 
 static char* ensure_strdup(const char* src)
 {
+	assert(src);
 	char* ret = strdup(src);
 	ensure(ret);
 
@@ -173,6 +175,8 @@ idx_t index_from_pool(const char *name)
 
 unsigned get_op(module *m, const char *name, unsigned *optype, int *userop, int hint_prefix)
 {
+	ensure(m && name);
+
 	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
 		if (hint_prefix && (ptr->optype != OP_FX) && (ptr->optype != OP_FY))
 			continue;
@@ -203,6 +207,8 @@ unsigned get_op(module *m, const char *name, unsigned *optype, int *userop, int 
 
 bool set_op(module *m, const char *name, unsigned optype, unsigned precedence)
 {
+	ensure (m && name);
+
 	unsigned ot = 0, prec = 0;
 	int userop = 0;
 	int hint = IS_PREFIX(optype);
@@ -241,6 +247,8 @@ module *g_modules = NULL;
 
 cell *list_head(cell *l)
 {
+	assert(l);
+
 	if (!is_string(l))
 		return l + 1;
 
@@ -261,6 +269,9 @@ cell *list_head(cell *l)
 
 cell *list_tail(cell *l, cell *tmp)
 {
+	if (!l) return NULL;
+	assert(tmp);
+
 	if (!is_string(l)) {
 		cell *h = l + 1;
 		return h + h->nbr_cells;
@@ -299,6 +310,8 @@ module *find_next_module(module *m)
 
 module *find_module(const char *name)
 {
+	assert(name);
+
 	for (module *m = g_modules; m; m = m->next) {
 		if (!strcmp(m->name, name))
 			return m;
@@ -309,6 +322,8 @@ module *find_module(const char *name)
 
 cell *get_head(cell *c)
 {
+	assert(c);
+
 	if (!is_literal(c))
 		return NULL;
 
@@ -320,6 +335,8 @@ cell *get_head(cell *c)
 
 cell *get_body(cell *c)
 {
+	assert(c);
+
 	if (!is_literal(c))
 		return NULL;
 
@@ -337,6 +354,9 @@ cell *get_body(cell *c)
 
 static rule *find_rule(module *m, cell *c)
 {
+	assert(m);
+	assert(c);
+
 	for (rule *h = m->head; h; h = h->next) {
 		if (h->is_abolished)
 			continue;
@@ -355,6 +375,8 @@ static rule *find_rule(module *m, cell *c)
 
 static rule *find_matching_rule_internal(module *m, cell *c, int quiet)
 {
+	assert(c);
+
 	module *save_m = m;
 	module *tmp_m = NULL;
 
@@ -391,6 +413,8 @@ rule *find_matching_rule_quiet(module *m, cell *c)
 
 rule *find_functor(module *m, const char *name, unsigned arity)
 {
+	assert(m && name);
+
 	for (rule *h = m->head; h; h = h->next) {
 		if (h->is_abolished)
 			continue;
@@ -404,6 +428,8 @@ rule *find_functor(module *m, const char *name, unsigned arity)
 
 static rule *get_rule(module *m)
 {
+	assert(m);
+
 	for (rule *h = m->head; h; h = h->next) {
 		if (h->is_abolished) {
 			memset(h, 0, sizeof(rule));
@@ -411,6 +437,7 @@ static rule *get_rule(module *m)
 		}
 	}
 
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	rule *h = calloc(1, sizeof(rule));
 	ensure(h);
 	h->next = m->head;
@@ -420,7 +447,8 @@ static rule *get_rule(module *m)
 
 static rule *create_rule(module *m, cell *c)
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
+	assert(m && c);
+
 	rule *h = get_rule(m);
 	h->val_off = c->val_off;
 	h->arity = c->arity;
@@ -430,6 +458,7 @@ static rule *create_rule(module *m, cell *c)
 void set_multifile_in_db(module *m, const char *name, idx_t arity)
 {
 	if (!m) return;
+	assert(name);
 
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
@@ -443,6 +472,8 @@ void set_multifile_in_db(module *m, const char *name, idx_t arity)
 
 static bool is_multifile_in_db(const char *mod, const char *name, idx_t arity)
 {
+	assert(mod);
+
 	module *m = find_module(mod);
 	if (!m) return false;
 	cell tmp;
@@ -457,6 +488,8 @@ static bool is_multifile_in_db(const char *mod, const char *name, idx_t arity)
 
 static int compkey(const void *ptr1, const void *ptr2)
 {
+	assert(ptr1 && ptr2);
+
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
 
@@ -524,6 +557,7 @@ static int compkey(const void *ptr1, const void *ptr2)
 
 static void reindex_rule(rule *h)
 {
+	assert(h);
 	h->index = sl_create(compkey);
 	ensure(h->index);
 
