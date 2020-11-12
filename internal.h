@@ -494,7 +494,6 @@ cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix);
 void make_end(cell *tmp);
 bool match_clause(query *q, cell *p1, idx_t p1_ctx);
 idx_t index_from_pool(const char *name);
-const char* cstr_from_pool(const char *name);
 void do_reduce(cell *n);
 unsigned create_vars(query *q, unsigned nbr);
 unsigned count_bits(uint64_t mask, unsigned bit);

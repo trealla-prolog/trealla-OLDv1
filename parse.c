@@ -171,15 +171,6 @@ idx_t index_from_pool(const char *name)
 	return add_to_pool(name);
 }
 
-const char* cstr_from_pool(const char *name)
-{
-	idx_t offset = index_from_pool(name);
-	if (offset == ERR_IDX)
-		return NULL;
-
-	return g_pool + offset;
-}
-
 unsigned get_op(module *m, const char *name, unsigned *val_type, int *userop, int hint_prefix)
 {
 	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
@@ -212,9 +203,6 @@ unsigned get_op(module *m, const char *name, unsigned *val_type, int *userop, in
 
 bool set_op(module *m, const char *name, unsigned val_type, unsigned precedence)
 {
-	name = cstr_from_pool(name);
-	ensure(name);
-
 	struct op_table *ptr = m->ops;
 
 	for (; ptr->name; ptr++) {
@@ -230,7 +218,7 @@ bool set_op(module *m, const char *name, unsigned val_type, unsigned precedence)
 		return false;
 
 	m->user_ops--;
-	ptr->name = name;
+	ptr->name = strdup(name);
 	ptr->val_type = val_type;
 	ptr->precedence = precedence;
 	return true;
@@ -3045,6 +3033,9 @@ void destroy_module(module *m)
 
 	if (m->fp)
 		fclose(m->fp);
+
+	for (struct op_table *ptr = m->ops; ptr->name; ptr++)
+		free((void*)ptr->name);
 
 	destroy_parser(m->p);
 	free(m->filename);
