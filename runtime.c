@@ -188,14 +188,14 @@ static void trace_call(query *q, cell *c, box_t box)
 static void unwind_trail(query *q, const choice *ch)
 {
 	while (q->st.tp > ch->st.tp) {
-		trail *tr = q->trails + --q->st.tp;
+		const trail *tr = q->trails + --q->st.tp;
 
 		if (ch->pins) {
 			if (ch->pins & (1 << tr->var_nbr))
 				continue;
 		}
 
-		frame *g = GET_FRAME(tr->ctx);
+		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = NULL;
@@ -208,14 +208,12 @@ static void trim_trail(query *q)
 	const choice *ch = q->choices + curr_choice;
 
 	while (q->st.tp > ch->st.tp) {
-		trail *tr = q->trails + q->st.tp - 1;
+		const trail *tr = q->trails + q->st.tp - 1;
 
-		if (tr->ctx == q->st.curr_frame) {
-			q->st.tp--;
-			continue;
-		}
+		if (tr->ctx != q->st.curr_frame)
+			break;
 
-		break;
+		q->st.tp--;
 	}
 }
 
@@ -343,7 +341,6 @@ static void trim_heap(query *q, const choice *ch)
 		c->val_type = TYPE_EMPTY;
 		c->attrs = NULL;
 	}
-
 }
 
 bool retry_choice(query *q)
