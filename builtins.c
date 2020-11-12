@@ -1513,7 +1513,13 @@ static int fn_iso_set_stream_position_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,integer);
-	return !fseeko(str->fp, p1->val_num, SEEK_SET);
+
+	if (fseeko(str->fp, p1->val_num, SEEK_SET)) {
+		throw_error(q, p1, "domain_error", "position error");
+		return 0;
+	}
+
+	return 1;
 }
 
 static char *chars_list_to_string(query *q, cell *p_chars, idx_t p_chars_ctx, size_t len)
