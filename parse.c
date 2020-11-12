@@ -422,7 +422,6 @@ void set_multifile_in_db(module *m, const char *name, idx_t arity)
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
 	ensure(tmp.val_off != ERR_IDX);
-
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
@@ -437,7 +436,6 @@ static bool is_multifile_in_db(const char *mod, const char *name, idx_t arity)
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
 	ensure(tmp.val_off != ERR_IDX);
-
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) return false;
@@ -529,6 +527,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 		c->val_off = index_from_pool(GET_STR(c));
 		ensure (c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
+		c->flags = 0;
 	}
 
 	cell *c = get_head(t->cells);
@@ -536,6 +535,13 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 	if (!c) {
 		fprintf(stdout, "Error: not a fact or clause\n");
 		return NULL;
+	}
+
+	if (is_cstring(c)) {
+		c->val_off = index_from_pool(GET_STR(c));
+		ensure(c->val_off != ERR_IDX);
+		c->val_type = TYPE_LITERAL;
+		c->flags = 0;
 	}
 
 	if (!is_quoted(c) && strchr(GET_STR(c), ':') && 0) {
@@ -631,6 +637,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 		c->val_off = index_from_pool(GET_STR(c));
 		ensure(c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
+		c->flags = 0;
 	}
 
 	cell *c = get_head(t->cells);
@@ -644,6 +651,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 		c->val_off = index_from_pool(GET_STR(c));
 		ensure(c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
+		c->flags = 0;
 	}
 
 	if (!is_quoted(c) && strchr(GET_STR(c), ':') && 0) {
@@ -773,7 +781,6 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
 	ensure(tmp.val_off != ERR_IDX);
-
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
