@@ -1515,7 +1515,7 @@ static int fn_iso_set_stream_position_2(query *q)
 	GET_NEXT_ARG(p1,integer);
 
 	if (fseeko(str->fp, p1->val_num, SEEK_SET)) {
-		throw_error(q, p1, "domain_error", "position error");
+		throw_error(q, p1, "domain_error", "position");
 		return 0;
 	}
 
