@@ -373,7 +373,7 @@ static rule *find_rule(module *m, cell *c)
 	return NULL;
 }
 
-static rule *find_matching_rule_internal(module *m, cell *c, int quiet)
+static rule *find_matching_rule_internal(module *m, cell *c, bool quiet)
 {
 	assert(c);
 
@@ -403,12 +403,12 @@ static rule *find_matching_rule_internal(module *m, cell *c, int quiet)
 
 rule *find_matching_rule(module *m, cell *c)
 {
-	return find_matching_rule_internal(m, c, 0);
+	return find_matching_rule_internal(m, c, false);
 }
 
 rule *find_matching_rule_quiet(module *m, cell *c)
 {
-	return find_matching_rule_internal(m, c, 1);
+	return find_matching_rule_internal(m, c, true);
 }
 
 rule *find_functor(module *m, const char *name, unsigned arity)
@@ -2817,15 +2817,15 @@ static bool parser_run(parser *p, const char *src, int dump)
 	p->srcptr = (char*)src;
 
 	if (!parser_tokenize(p, 0, 0))
-		return 0;
+		return false;
 
 	if (p->skip) {
 		p->m->status = 1;
-		return 1;
+		return true;
 	}
 
 	if (!parser_attach(p, 0))
-		return 0;
+		return false;
 
 	if (p->command) {
 		parser_assign_vars(p, 0);
@@ -3044,14 +3044,14 @@ bool module_save_file(module *m, const char *filename)
 
 static void make_rule(module *m, const char *src)
 {
-	m->prebuilt = 1;
+	m->prebuilt = true;
 	parser *p = create_parser(m);
 	if (p)
 	{
 		p->consulting = true;
 		p->srcptr = (char*)src;
 		parser_tokenize(p, 0, 0);
-		m->prebuilt = 0;
+		m->prebuilt = false;
 		destroy_parser(p);
 	} else {
 		m->error = true;
@@ -3546,7 +3546,7 @@ prolog *pl_create()
 		if (pl->m) {
 			//cehteh: add api to set things in a module?
 			pl->m->filename = strdup("~/.tpl_user");
-			pl->m->prebuilt = 1;
+			pl->m->prebuilt = true;
 		}
 
 		set_multifile_in_db(pl->m, "term_expansion", 2);
@@ -3581,7 +3581,7 @@ prolog *pl_create()
 #endif
 
 		if (pl->m)
-			pl->m->prebuilt = 0;
+			pl->m->prebuilt = false;
 
 		if (!pl->m || pl->m->error || !pl->m->filename) {
 			pl_destroy(pl);
