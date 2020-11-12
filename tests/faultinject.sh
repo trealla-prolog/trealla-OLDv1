@@ -59,7 +59,7 @@ do
         mv faultinject.stdout faultinject$FAULTSTART.stdout
         gdb -batch -ex 'bt full' "$TPL" core >faultinject$FAULTSTART.bt
         if test "$show"; then
-            less faultinject$FAULTSTART.bt
+            less faultinject$FAULTSTART.bt faultinject$FAULTSTART.stderr faultinject$FAULTSTART.stdout
         fi
         if test -z "$keep_going"; then
             exit 1

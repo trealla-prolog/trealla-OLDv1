@@ -428,6 +428,8 @@ static rule *create_rule(module *m, cell *c)
 
 void set_multifile_in_db(module *m, const char *name, idx_t arity)
 {
+	if (!m) return;
+
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
@@ -777,6 +779,8 @@ clause *erase_from_db(module *m, uuid *ref)
 
 void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 {
+	if (!m) return;
+
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
@@ -857,39 +861,6 @@ static cell *make_cell(parser *p)
 	return p->t->cells + p->t->cidx++;
 }
 
-parser *create_parser(module *m)
-{
-	FAULTINJECT(errno = ENOMEM; return NULL);
-	parser *p = calloc(1, sizeof(parser));
-	if (p)
-	{
-		p->token = calloc(p->token_size=INITIAL_TOKEN_SIZE+1, 1);
-		if (!p->token) goto ealloc;
-		idx_t nbr_cells = INITIAL_NBR_CELLS;
-		p->t = calloc(sizeof(term)+(sizeof(cell)*nbr_cells), 1);
-		if (!p->t) goto ealloc;
-		p->t->nbr_cells = nbr_cells;
-		p->start_term = true;
-		p->line_nbr = 1;
-		p->m = m;
-	}
-	return p;
-ealloc:
-	free(p->token);
-	free(p);
-	return NULL;
-}
-
-void destroy_parser_nodelete(parser *p)
-{
-	if (p)
-	{
-		clear_term_nodelete(p->t);
-		free(p->token);
-		free(p->t);
-		free(p);
-	}
-}
 
 void destroy_parser(parser *p)
 {
@@ -902,86 +873,36 @@ void destroy_parser(parser *p)
 	}
 }
 
-query *create_query(module *m, int is_task)
+parser *create_parser(module *m)
 {
-	static uint64_t g_query_id = 0;
-
 	FAULTINJECT(errno = ENOMEM; return NULL);
-	query *q = calloc(1, sizeof(query));
-	if (q)
+	parser *p = calloc(1, sizeof(parser));
+	if (p)
 	{
-		q->qid = g_query_id++;
-		q->m = m;
-		q->trace = m->trace;
-		q->current_input = 0;		// STDIN
-		q->current_output = 1;		// STDOUT
-
-		// Allocate these now...
-
-		q->frames_size = is_task ? INITIAL_NBR_GOALS/10 : INITIAL_NBR_GOALS;
-		q->slots_size = is_task ? INITIAL_NBR_SLOTS/10 : INITIAL_NBR_SLOTS;
-		q->choices_size = is_task ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
-		q->trails_size = is_task ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
-
-		q->frames = calloc(q->frames_size, sizeof(frame));
-		q->slots = calloc(q->slots_size, sizeof(slot));
-		q->choices = calloc(q->choices_size, sizeof(choice));
-		q->trails = calloc(q->trails_size, sizeof(trail));
-		if (!q->frames || !q->slots || !q->choices || !q->trails)
-			goto ealloc;
-
-		// Allocate these later as needed...
-
-		q->h_size = is_task ? INITIAL_NBR_HEAP/10 : INITIAL_NBR_HEAP;
-		q->tmph_size = is_task ? INITIAL_NBR_CELLS/10 : INITIAL_NBR_CELLS;
-
-		for (int i = 0; i < MAX_QUEUES; i++)
-			q->q_size[i] = is_task ? INITIAL_NBR_QUEUE/10 : INITIAL_NBR_QUEUE;
-
+		p->token = calloc(p->token_size=INITIAL_TOKEN_SIZE+1, 1);
+		idx_t nbr_cells = INITIAL_NBR_CELLS;
+		p->t = calloc(sizeof(term)+(sizeof(cell)*nbr_cells), 1);
+		p->t->nbr_cells = nbr_cells;
+		p->start_term = true;
+		p->line_nbr = 1;
+		p->m = m;
+		if (!p->token || !p->t) {
+			destroy_parser(p);
+			p = NULL;
+		}
 	}
-	return q;
-ealloc:
-	free (q->trails);
-	free (q->choices);
-	free (q->slots);
-	free (q->frames);
-	free (q);
-	return NULL;
+	return p;
 }
 
-query *create_task(query *q, cell *curr_cell)
+void destroy_parser_nodelete(parser *p)
 {
-	query *subq = create_query(q->m, 1);
-	if (subq)
+	if (p)
 	{
-		subq->parent = q;
-		subq->st.fp = 1;
-		subq->is_task = true;
-		subq->current_input = q->current_input;
-		subq->current_output = q->current_output;
-
-		cell *tmp = clone_to_heap(subq, 0, curr_cell, 1); //cehteh: checkme
-		idx_t nbr_cells = tmp->nbr_cells;
-		make_end(tmp+nbr_cells);
-		subq->st.curr_cell = tmp;
-
-		frame *gsrc = GET_FRAME(q->st.curr_frame);
-		frame *gdst = subq->frames;
-		gdst->nbr_vars = gsrc->nbr_vars;
-		slot *e = GET_SLOT(gsrc, 0);
-
-		for (unsigned i = 0; i < gsrc->nbr_vars; i++, e++) {
-			cell *c = deref(q, &e->c, e->ctx);
-			cell tmp = {0};
-			tmp.val_type = TYPE_VARIABLE;
-			tmp.var_nbr = i;
-			tmp.val_off = g_anon_s;
-			set_var(subq, &tmp, 0, c, q->latest_ctx);
-		}
-
-		subq->st.sp = gsrc->nbr_vars;
+		clear_term_nodelete(p->t);
+		free(p->token);
+		free(p->t);
+		free(p);
 	}
-	return subq;
 }
 
 void destroy_query(query *q)
@@ -1030,6 +951,83 @@ void destroy_query(query *q)
 	free(q->slots);
 	free(q->tmp_heap);
 	free(q);
+}
+
+query *create_query(module *m, int is_task)
+{
+	static uint64_t g_query_id = 0;
+
+	FAULTINJECT(errno = ENOMEM; return NULL);
+	query *q = calloc(1, sizeof(query));
+	if (q)
+	{
+		q->qid = g_query_id++;
+		q->m = m;
+		q->trace = m->trace;
+		q->current_input = 0;		// STDIN
+		q->current_output = 1;		// STDOUT
+
+		// Allocate these now...
+
+		q->frames_size = is_task ? INITIAL_NBR_GOALS/10 : INITIAL_NBR_GOALS;
+		q->slots_size = is_task ? INITIAL_NBR_SLOTS/10 : INITIAL_NBR_SLOTS;
+		q->choices_size = is_task ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
+		q->trails_size = is_task ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
+
+		q->frames = calloc(q->frames_size, sizeof(frame));
+		q->slots = calloc(q->slots_size, sizeof(slot));
+		q->choices = calloc(q->choices_size, sizeof(choice));
+		q->trails = calloc(q->trails_size, sizeof(trail));
+
+		// Allocate these later as needed...
+
+		q->h_size = is_task ? INITIAL_NBR_HEAP/10 : INITIAL_NBR_HEAP;
+		q->tmph_size = is_task ? INITIAL_NBR_CELLS/10 : INITIAL_NBR_CELLS;
+
+		for (int i = 0; i < MAX_QUEUES; i++)
+			q->q_size[i] = is_task ? INITIAL_NBR_QUEUE/10 : INITIAL_NBR_QUEUE;
+
+		if (errno) {
+			destroy_query (q);
+			q = NULL;
+		}
+	}
+	return q;
+}
+
+query *create_task(query *q, cell *curr_cell)
+{
+	query *subq = create_query(q->m, 1);
+	if (subq)
+	{
+		subq->parent = q;
+		subq->st.fp = 1;
+		subq->is_task = true;
+		subq->current_input = q->current_input;
+		subq->current_output = q->current_output;
+
+		cell *tmp = clone_to_heap(subq, 0, curr_cell, 1); //cehteh: checkme
+		idx_t nbr_cells = tmp->nbr_cells;
+		make_end(tmp+nbr_cells);
+		subq->st.curr_cell = tmp;
+
+		frame *gsrc = GET_FRAME(q->st.curr_frame);
+		frame *gdst = subq->frames;
+		gdst->nbr_vars = gsrc->nbr_vars;
+		slot *e = GET_SLOT(gsrc, 0);
+
+		for (unsigned i = 0; i < gsrc->nbr_vars; i++, e++) {
+			cell *c = deref(q, &e->c, e->ctx);
+			cell tmp = {0};
+			tmp.val_type = TYPE_VARIABLE;
+			tmp.var_nbr = i;
+			tmp.val_off = g_anon_s;
+			set_var(subq, &tmp, 0, c, q->latest_ctx);
+		}
+
+		subq->st.sp = gsrc->nbr_vars;
+	}
+	return subq;
 }
 
 static void dump_vars(query *q, parser *p)
@@ -1707,6 +1705,7 @@ static void parser_dcg_rewrite(parser *p)
 		return;
 
 	query *q = create_query(p->m, 0);
+	ensure(q);
 	char *dst = write_term_to_strbuf(q, p->t->cells, 0, -1);
 	char *src = malloc(strlen(dst)+256);
 	ensure(src);
@@ -2785,6 +2784,7 @@ static bool parser_run(parser *p, const char *src, int dump)
 
 	parser_xref(p, p->t, NULL);
 	query *q = create_query(p->m, 0);
+	ensure(q);
 	q->run_init = p->run_init;
 	query_execute(q, p->t);
 
@@ -2814,6 +2814,8 @@ static bool parser_run(parser *p, const char *src, int dump)
 
 module *module_load_text(module *m, const char *src)
 {
+	if (!m) return NULL;
+
 	parser *p = create_parser(m);
 	ensure(p);
 	p->consulting = true;
@@ -2850,6 +2852,8 @@ module *module_load_text(module *m, const char *src)
 
 bool module_load_fp(module *m, FILE *fp)
 {
+	if (!m) return false;
+
 	parser *p = create_parser(m);
 	ensure(p);
 	p->consulting = true;
@@ -2896,6 +2900,8 @@ bool module_load_fp(module *m, FILE *fp)
 
 bool module_load_file(module *m, const char *filename)
 {
+	if (!m) return false;
+
 	if (!strcmp(filename, "user")) {
 		for (int i = 0; i < MAX_STREAMS; i++) {
 			stream *str = &g_streams[i];
@@ -2945,6 +2951,8 @@ bool module_load_file(module *m, const char *filename)
 
 static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 {
+	if (!m) return;
+
 	(void) dq;
 	idx_t ctx = 0;
 	query q = {0};
@@ -2970,6 +2978,8 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 
 bool module_save_file(module *m, const char *filename)
 {
+	if (!m) return false;
+
 	FILE *fp = fopen(filename, "w");
 
 	if (!fp) {
@@ -2998,6 +3008,52 @@ static void make_rule(module *m, const char *src)
 	}
 }
 
+void destroy_module(module *m)
+{
+	if (!m) return;
+
+	while (m->tasks) {
+		query *task = m->tasks->next;
+		destroy_query(m->tasks);
+		m->tasks = task;
+	}
+
+	for (rule *h = m->head; h;) {
+		rule *save = h->next;
+
+		for (clause *r = h->head; r;) {
+			clause *save = r->next;
+			clear_term(&r->t);
+			free(r);
+			r = save;
+		}
+
+		sl_destroy(h->index);
+		free(h);
+		h = save;
+	}
+
+	if(g_modules == m) {
+		g_modules = m->next;
+	} else {
+		for (module *tmp = g_modules; tmp; tmp = tmp->next) {
+			if(tmp->next == m) {
+				tmp->next = m->next;
+				break;
+			}
+		}
+	}
+
+	if (m->fp)
+		fclose(m->fp);
+
+	destroy_parser(m->p);
+	free(m->filename);
+	free(m->name);
+	free(m);
+}
+
+
 module *create_module(const char *name)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
@@ -3009,8 +3065,6 @@ module *create_module(const char *name)
 		g_modules = m;
 
 		m->p = create_parser(m);
-		if (!m->name) goto ealloc;
-		if (!m->p) goto ealloc;
 		m->flag.double_quote_chars = 1;
 		m->flag.character_escapes = true;
 		m->flag.rational_syntax_natural = 0;
@@ -3255,8 +3309,6 @@ module *create_module(const char *name)
 		make_rule(m, "client(U,H,P,S) :- client(U,H,P,S,[]).");
 		make_rule(m, "server(H,S) :- server(H,S,[]).");
 
-		if (m->error)
-			goto ealloc;
 
 		parser *p = create_parser(m);
 		if (p)
@@ -3264,65 +3316,16 @@ module *create_module(const char *name)
 			p->consulting = true;
 			parser_xref_db(p);
 			destroy_parser(p);
-		} else {
-			goto ealloc;
+		}
+
+		if (!m->name || !m->p || m->error || !p) {
+			destroy_module(m);
+			m = NULL;
 		}
 	}
 	return m;
-ealloc:
-	destroy_parser(m->p);
-	free(m->name);
-	free(m);
-	return NULL;
 }
 
-void destroy_module(module *m)
-{
-	if (!m) return;
-
-	while (m->tasks) {
-		query *task = m->tasks->next;
-		destroy_query(m->tasks);
-		m->tasks = task;
-	}
-
-	for (rule *h = m->head; h;) {
-		rule *save = h->next;
-
-		for (clause *r = h->head; r;) {
-			clause *save = r->next;
-			clear_term(&r->t);
-			free(r);
-			r = save;
-		}
-
-		sl_destroy(h->index);
-		free(h);
-		h = save;
-	}
-
-	module *last = NULL;
-
-	for (module *tmp = g_modules; tmp; tmp = tmp->next) {
-		if (!strcmp(tmp->name, m->name)) {
-			if (last)
-				last->next = m->next;
-			else
-				g_modules = m->next;
-
-			break;
-		} else
-			last = tmp;
-	}
-
-	if (m->fp)
-		fclose(m->fp);
-
-	destroy_parser(m->p);
-	free(m->filename);
-	free(m->name);
-	free(m);
-}
 
 bool deconsult(const char *filename)
 {
@@ -3388,9 +3391,7 @@ void g_destroy()
 	memset(g_streams, 0, sizeof(g_streams));
 
 	while (g_modules) {
-		module *m = g_modules;
-		g_modules = m->next;
-		destroy_module(m);
+		destroy_module(g_modules);
 	}
 
 	sl_destroy(g_symtab);
@@ -3405,6 +3406,8 @@ void* g_init(void)
 	if (g_pool) {
 		errno = 0;
 		g_symtab = sl_create2((int(*)(const void*,const void*))&strcmp, (void(*)(void*))&free);
+		if (errno) goto error;
+
 		g_pool_offset = 0;
 
 		g_false_s = index_from_pool("false");
@@ -3449,6 +3452,18 @@ error:
 	return NULL;
 }
 
+
+void pl_destroy(prolog *pl)
+{
+	if (!pl) return;
+
+	destroy_module(pl->m);
+	free(pl);
+
+	if (!--g_tpl_count)
+		g_destroy();
+}
+
 prolog *pl_create()
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
@@ -3470,61 +3485,58 @@ prolog *pl_create()
 #endif
 
 	prolog *pl = calloc(1, sizeof(prolog));
-	if (!pl) {
-		if (!--g_tpl_count)
-			g_destroy();
-		return NULL;
-	}
+	if (pl) {
 
+		pl->m = create_module("user");
+		pl->curr_m = pl->m;
 
-	pl->m = create_module("user");
-	ensure(pl->m);
-	pl->curr_m = pl->m;
-	pl->m->filename = ensure_strdup("~/.tpl_user");
-	pl->m->prebuilt = 1;
+		if (pl->m) {
+			//cehteh: add api to set things in a module?
+			pl->m->filename = strdup("~/.tpl_user");
+			pl->m->prebuilt = 1;
+		}
 
-	set_multifile_in_db(pl->m, "term_expansion", 2);
-	set_dynamic_in_db(pl->m, "term_expansion", 2);
+		set_multifile_in_db(pl->m, "term_expansion", 2);
+		set_dynamic_in_db(pl->m, "term_expansion", 2);
 
 #if USE_LDLIBS
-	for (library *lib = g_libs; lib->name; lib++) {
-		if (!strcmp(lib->name, "apply") ||
-			//!strcmp(lib->name, "dcgs") ||
-			//!strcmp(lib->name, "charsio") ||
-			//!strcmp(lib->name, "format") ||
-			//!strcmp(lib->name, "http") ||
-			//!strcmp(lib->name, "atts") ||
-			!strcmp(lib->name, "lists")) {
-			size_t len = lib->end-lib->start;
-			char *src = malloc(len+1);
-			ensure(src);
-			memcpy(src, lib->start, len);
-			src[len] = '\0';
-			module_load_text(pl->m, src);
-			free(src);
+		for (library *lib = g_libs; lib->name; lib++) {
+			if (!strcmp(lib->name, "apply") ||
+			    //!strcmp(lib->name, "dcgs") ||
+			    //!strcmp(lib->name, "charsio") ||
+			    //!strcmp(lib->name, "format") ||
+			    //!strcmp(lib->name, "http") ||
+			    //!strcmp(lib->name, "atts") ||
+			    !strcmp(lib->name, "lists")) {
+				size_t len = lib->end-lib->start;
+				char *src = malloc(len+1);
+				ensure(src); //cehteh: checkthis
+				memcpy(src, lib->start, len);
+				src[len] = '\0';
+				module_load_text(pl->m, src);
+				free(src);
+			}
 		}
-	}
 #else
-	module_load_file(pl->m, "library/apply.pl");
-	//module_load_file(pl->m, "library/dcgs.pl");
-	//module_load_file(pl->m, "library/charsio.pl");
-	//module_load_file(pl->m, "library/format.pl");
-	//module_load_file(pl->m, "library/http.pl");
-	//module_load_file(pl->m, "library/atts.pl");
-	module_load_file(pl->m, "library/lists.pl");
+		module_load_file(pl->m, "library/apply.pl");
+		//module_load_file(pl->m, "library/dcgs.pl");
+		//module_load_file(pl->m, "library/charsio.pl");
+		//module_load_file(pl->m, "library/format.pl");
+		//module_load_file(pl->m, "library/http.pl");
+		//module_load_file(pl->m, "library/atts.pl");
+		module_load_file(pl->m, "library/lists.pl");
 #endif
 
-	pl->m->prebuilt = 0;
+		if (pl->m)
+			pl->m->prebuilt = 0;
+
+		if (!pl->m || pl->m->error || !pl->m->filename) {
+			pl_destroy(pl);
+			pl = NULL;
+		}
+
+	}
+
 	return pl;
 }
 
-void pl_destroy(prolog *pl)
-{
-	if (!pl) return;
-
-	destroy_module(pl->m);
-	free(pl);
-
-	if (!--g_tpl_count)
-		g_destroy();
-}
