@@ -8629,8 +8629,12 @@ static idx_t do_jenkins_one_at_a_time_hash(const char *key)
 
 static int fn_term_hash_2(query *q)
 {
-	GET_FIRST_ARG(p1,nonvar);
+	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer_or_var);
+
+	if (is_variable(p1))
+		return 1;
+
 	char *dst = write_term_to_strbuf(q, p1, p1_ctx, 1);
 	cell tmp;
 	make_int(&tmp, do_jenkins_one_at_a_time_hash(dst));
