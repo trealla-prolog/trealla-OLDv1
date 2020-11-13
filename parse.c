@@ -538,7 +538,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
 		idx_t off = index_from_pool(GET_STR(c));
-		if (is_blob(c)) free(c->val_str);
+		if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
 		c->val_off = off;
 		ensure (c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
@@ -554,7 +554,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 
 	if (is_cstring(c)) {
 		idx_t off = index_from_pool(GET_STR(c));
-		if (is_blob(c)) free(c->val_str);
+		if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
 		c->val_off = off;
 		ensure(c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
@@ -652,7 +652,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
 		idx_t off = index_from_pool(GET_STR(c));
-		if (is_blob(c)) free(c->val_str);
+		if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
 		c->val_off = off;
 		ensure(c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
@@ -668,7 +668,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 
 	if (is_cstring(c)) {
 		idx_t off = index_from_pool(GET_STR(c));
-		if (is_blob(c)) free(c->val_str);
+		if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
 		c->val_off = off;
 		ensure(c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;

@@ -857,7 +857,7 @@ bool match_clause(query *q, cell *p1, idx_t p1_ctx)
 		else {
 			// For now convert it to a literal
 			idx_t off = index_from_pool(GET_STR(c));
-			if (is_blob(c)) free(c->val_str);
+			if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
 			c->val_off = off;
 			ensure(c->val_off != ERR_IDX);
 			c->val_type = TYPE_LITERAL;
@@ -939,7 +939,7 @@ static bool match_rule(query *q)
 		else {
 			// For now convert it to a literal
 			idx_t off = index_from_pool(GET_STR(c));
-			if (is_blob(c)) free(c->val_str);
+			if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
 			c->val_off = off;
 			ensure(c->val_off != ERR_IDX);
 			c->val_type = TYPE_LITERAL;
