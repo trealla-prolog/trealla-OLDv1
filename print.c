@@ -405,9 +405,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		return dst - save_dst;
 	}
 
-	int optype = (c->flags & OP_FX) | (c->flags & OP_FY) | (c->flags & OP_XF) |
-		(c->flags & OP_YF) | (c->flags & OP_XFX) |
-		(c->flags & OP_YFX) | (c->flags & OP_XFY);
+	int optype = (c->flags >> 12);
 
 	if (q->ignore_ops || !optype) {
 		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quote(q->m, src, LEN_STR(c));
@@ -489,13 +487,13 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 
 			dst += snprintf(dst, dstlen, "%s", braces?"}":")");
 		}
-	} else if ((c->flags & OP_XF) || (c->flags & OP_YF)) {
+	} else if (IS_XF(c) || IS_YF(c)) {
 		cell *lhs = c + 1;
 		lhs = running ? deref(q, lhs, c_ctx) : lhs;
 		idx_t lhs_ctx = q->latest_ctx;
 		dst += write_term_to_buf(q, dst, dstlen, lhs, lhs_ctx, running, 0, depth+1);
 		dst += snprintf(dst, dstlen, "%s", src);
-	} else if ((c->flags & OP_FX) || (c->flags & OP_FY)) {
+	} else if (IS_FX(c) || IS_FY(c)) {
 		cell *rhs = c + 1;
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		idx_t rhs_ctx = q->latest_ctx;

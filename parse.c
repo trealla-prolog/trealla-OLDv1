@@ -118,7 +118,7 @@ static struct op_table g_ops[] =
 
 	//{"$", OP_FX, 1},
 
-	{0}
+	{0,0,0}
 };
 
 
@@ -171,44 +171,56 @@ idx_t index_from_pool(const char *name)
 	return add_to_pool(name);
 }
 
-unsigned get_op(module *m, const char *name, unsigned *val_type, int *userop, int hint_prefix)
+unsigned get_op(module *m, const char *name, unsigned *optype, int *userop, int hint_prefix)
 {
 	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
-		if (hint_prefix && (ptr->val_type != OP_FX) && (ptr->val_type != OP_FY))
+		if (hint_prefix && (ptr->optype != OP_FX) && (ptr->optype != OP_FY))
 			continue;
 
 		if (!strcmp(ptr->name, name)) {
-			if (val_type) *val_type = ptr->val_type;
+			if (optype) *optype = ptr->optype;
 			if (userop) *userop = 1;
 			return ptr->precedence;
 		}
 	}
 
 	for (const struct op_table *ptr = g_ops; ptr->name; ptr++) {
-		if (hint_prefix && (ptr->val_type != OP_FX) && (ptr->val_type != OP_FY))
+		if (hint_prefix && (ptr->optype != OP_FX) && (ptr->optype != OP_FY))
 			continue;
 
 		if (!strcmp(ptr->name, name)) {
-			if (val_type) *val_type = ptr->val_type;
+			if (optype) *optype = ptr->optype;
 			if (userop) *userop = 0;
 			return ptr->precedence;
 		}
 	}
 
 	if (hint_prefix)
-		return get_op(m, name, val_type, userop, 0);
+		return get_op(m, name, optype, userop, 0);
 
 	return 0;
 }
 
-bool set_op(module *m, const char *name, unsigned val_type, unsigned precedence)
+bool set_op(module *m, const char *name, unsigned optype, unsigned precedence)
 {
+	unsigned ot = 0, prec = 0;
+	int userop = 0;
+
+	if ((prec = get_op(m, name, &ot, &userop, 0)) != 0) {
+		//printf("*** get_op '%s' prec=%u (%u), ot=%u (%u)\n", name, prec, precedence, ot, optype);
+
+		if (ot == optype) {
+			//printf("*** redefine '%s'\n", name);
+			return true;
+		}
+	}
+
 	struct op_table *ptr = m->ops;
 
 	for (; ptr->name; ptr++) {
-		if (!strcmp(ptr->name, name) && (ptr->val_type == val_type)) {
+		if (!strcmp(ptr->name, name) && (ptr->optype == optype)) {
 			ptr->name = name;
-			ptr->val_type = val_type;
+			ptr->optype = optype;
 			ptr->precedence = precedence;
 			return true;
 		}
@@ -219,7 +231,7 @@ bool set_op(module *m, const char *name, unsigned val_type, unsigned precedence)
 
 	m->user_ops--;
 	ptr->name = strdup(name);
-	ptr->val_type = val_type;
+	ptr->optype = optype;
 	ptr->precedence = precedence;
 	return true;
 }
@@ -1375,6 +1387,8 @@ static void directives(parser *p, term *t)
 			fprintf(stdout, "Error: could not set op\n");
 			return;
 		}
+
+		return;
 	}
 }
 
@@ -1590,7 +1604,7 @@ static int attach_ops(parser *p, idx_t start_idx)
 			continue;
 		}
 
-		if ((c->flags&OP_XFY) || (c->flags&OP_FY)) {
+		if (IS_XFY(c) || IS_FY(c)) {
 			if (c->precedence <= lowest) {
 				lowest = c->precedence;
 				work_idx = i;
@@ -1638,7 +1652,7 @@ static int attach_ops(parser *p, idx_t start_idx)
 
 		// Prefix...
 
-		if ((c->flags&OP_FX) || (c->flags&OP_FY)) {
+		if (IS_FX(c) || IS_FY(c)) {
 			last_idx = i;
 			c->nbr_cells += (c+1)->nbr_cells;
 			i += c->nbr_cells;
@@ -1656,7 +1670,7 @@ static int attach_ops(parser *p, idx_t start_idx)
 
 		// Infix...
 
-		if (!(c->flags&OP_XF) && !(c->flags&OP_YF)) {
+		if (!IS_XF(c) && !IS_YF(c)) {
 			idx_t off = (idx_t)((c+1)-p->t->cells);
 
 			if (off >= p->t->cidx) {
@@ -1672,7 +1686,7 @@ static int attach_ops(parser *p, idx_t start_idx)
 
 		cell save = *c;
 
-		if (!(c->flags&OP_XF) && !(c->flags&OP_YF))
+		if (!IS_XF(c) && !IS_YF(c))
 			save.nbr_cells += (c+1)->nbr_cells;
 
 		cell *c_last = p->t->cells + last_idx;
@@ -2327,7 +2341,7 @@ static int get_token(parser *p, int last_op)
 			int userop = 0;
 
 			if (get_op(p->m, p->token, NULL, &userop, 0)) {
-				if (userop)
+				//if (userop)
 					p->is_op = 1;
 
 				if (!strcmp(p->token, ","))
@@ -2620,7 +2634,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 		int userop = 0;
 		int precedence = get_op(p->m, p->token, &optype, &userop, last_op);
 
-		if (p->quoted && !userop) {
+		if (p->quoted /*&& !userop*/) {
 			optype = 0;
 			precedence = 0;
 		}
@@ -2664,7 +2678,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 		memset(c, 0, sizeof(cell));
 		c->nbr_cells = 1;
 		c->val_type = p->val_type;
-		c->flags = (uint16_t)optype;
+		SET_OP(c,optype);
 		c->precedence = precedence;
 
 		if (p->val_type == TYPE_INTEGER) {

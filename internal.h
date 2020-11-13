@@ -53,7 +53,7 @@ typedef uint32_t idx_t;
 #define MAX_SMALL_STRING (MAX(sizeof(int_t),sizeof(void*))*2)
 #define MAX_VAR_POOL_SIZE 1000
 #define MAX_ARITY UCHAR_MAX
-#define MAX_USER_OPS 100
+#define MAX_USER_OPS 200
 #define MAX_QUEUES 16
 #define MAX_STREAMS 64
 #define MAX_DEPTH 1000
@@ -132,16 +132,28 @@ enum {
 	FLAG_DUP_CSTRING=FLAG_OCTAL,		// used with TYPE_CSTRING
 	FLAG_QUOTED=FLAG_BINARY,			// used with TYPE_CSTRING
 
-	//FLAG_SPARE1=1<<8,
-
-	OP_FX=1<<9,
-	OP_FY=1<<10,
-	OP_XF=1<<11,
-	OP_YF=1<<12,
-	OP_YFX=1<<13,
-	OP_XFX=1<<14,
-	OP_XFY=1<<15
+	FLAG_END=1<<11
 };
+
+// The OP types are stored in the high 4 bits of the flag
+
+#define	OP_FX 1
+#define	OP_FY 2
+#define	OP_XF 3
+#define	OP_YF 4
+#define	OP_YFX 5
+#define	OP_XFX 6
+#define	OP_XFY 7
+
+#define IS_FX(c) ((c->flags>>12) == OP_FX)
+#define IS_FY(c) ((c->flags>>12) == OP_FY)
+#define IS_XF(c) ((c->flags>>12) == OP_XF)
+#define IS_YF(c) ((c->flags>>12) == OP_YF)
+#define IS_YFX(c) ((c->flags>>12) == OP_YFX)
+#define IS_XFX(c) ((c->flags>>12) == OP_XFX)
+#define IS_XFY(c) ((c->flags>>12) == OP_XFY)
+
+#define SET_OP(c,optype) (c)->flags |= (((uint16_t)(optype))<<12)
 
 typedef struct module_ module;
 typedef struct query_ query;
@@ -241,7 +253,7 @@ struct builtins {
 
 struct op_table {
 	const char *name;
-	unsigned val_type;
+	unsigned optype;
 	unsigned precedence;
 };
 
@@ -456,7 +468,8 @@ clause *assertz_to_db(module *m, term *t, bool consulting);
 clause *retract_from_db(module *m, clause *r);
 clause *erase_from_db(module *m, uuid *ref);
 clause *find_in_db(module *m, uuid *ref);
-unsigned get_op(module *m, const char *name, unsigned *val_type, int *userop, int hint_prefix);
+unsigned get_op(module *m, const char *name, unsigned *optype, int *userop, int hint_prefix);
+bool set_op(module *m, const char *name, unsigned optype, unsigned precedence);
 void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int depth);
 void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, int depth);
 size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int depth);
@@ -503,7 +516,6 @@ uint64_t get_time_in_usec(void);
 void clear_term(term *t);
 void do_db_load(module *m);
 void set_dynamic_in_db(module *m, const char *name, unsigned arity);
-bool set_op(module *m, const char *name, unsigned val_type, unsigned precedence);
 size_t sprint_int(char *dst, size_t size, int_t n, int base);
 void call_attrs(query *q, cell *attrs);
 void alloc_list(query *q, const cell *c);
