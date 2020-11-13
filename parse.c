@@ -21,11 +21,11 @@
 #include "builtins.h"
 #include "utf8.h"
 
-static const unsigned INITIAL_TOKEN_SIZE = 100;
-static const unsigned INITIAL_POOL_SIZE = 16000;
-static const unsigned INITIAL_NBR_CELLS = 100;
-static const unsigned INITIAL_NBR_HEAP = 8000;
-static const unsigned INITIAL_NBR_QUEUE = 1000;
+static const unsigned INITIAL_TOKEN_SIZE = 100;		// bytes
+static const unsigned INITIAL_POOL_SIZE = 8000;		// bytes
+static const unsigned INITIAL_NBR_CELLS = 100;		// cells
+static const unsigned INITIAL_NBR_HEAP = 8000;		// cells
+static const unsigned INITIAL_NBR_QUEUE = 1000;		// cells
 
 static const unsigned INITIAL_NBR_GOALS = 1000;
 static const unsigned INITIAL_NBR_SLOTS = 1000;
@@ -145,7 +145,7 @@ static idx_t add_to_pool(const char *name)
 	idx_t offset = g_pool_offset;
 	size_t len = strlen(name);
 
-	if ((offset+len+1+1) >= g_pool_size) {
+	while ((offset+len+1+1) >= g_pool_size) {
 		FAULTINJECT(errno = ENOMEM; return ERR_IDX);
 		size_t nbytes = g_pool_size * 2;
 		char *tmp = realloc(g_pool, nbytes);
