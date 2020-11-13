@@ -145,6 +145,8 @@ enum {
 #define	OP_XFX 6
 #define	OP_XFY 7
 
+#define IS_PREFIX(op) ((op==OP_FX)||(op==OP_FY))
+
 #define IS_FX(c) ((c->flags>>12) == OP_FX)
 #define IS_FY(c) ((c->flags>>12) == OP_FY)
 #define IS_XF(c) ((c->flags>>12) == OP_XF)

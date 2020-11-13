@@ -205,8 +205,9 @@ bool set_op(module *m, const char *name, unsigned optype, unsigned precedence)
 {
 	unsigned ot = 0, prec = 0;
 	int userop = 0;
+	int hint = IS_PREFIX(optype);
 
-	if ((prec = get_op(m, name, &ot, &userop, 0)) != 0) {
+	if ((prec = get_op(m, name, &ot, &userop, hint)) != 0) {
 		//printf("*** get_op '%s' prec=%u (%u), ot=%u (%u)\n", name, prec, precedence, ot, optype);
 
 		if (ot == optype) {
