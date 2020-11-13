@@ -1730,7 +1730,7 @@ static int fn_iso_open_4(query *q)
 	else
 		prot = PROT_WRITE;
 
-	if (is_variable(mmap_var)) {
+	if (mmap_var && is_variable(mmap_var)) {
 		struct stat st = {0};
 		stat(filename, &st);
 		size_t len = st.st_size;
