@@ -1485,26 +1485,18 @@ static int fn_iso_stream_property_2(query *q)
 		c = deref(q, c, q->latest_ctx);
 		cell tmp;
 		make_int(&tmp, ftello(str->fp));
-
-		if (!unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame))
-			return 0;
-
-		return 1;
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (!strcmp(GET_STR(p1), "line_count") && str->p) {
+	if (!strcmp(GET_STR(p1), "line_count")) {
 		cell *c = p1 + 1;
 		c = deref(q, c, q->latest_ctx);
 		cell tmp;
-		make_int(&tmp, str->p->line_nbr);
-
-		if (!unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame))
-			return 0;
-
-		return 1;
+		make_int(&tmp, str->p?str->p->line_nbr:0);
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
 
-	return 1;
+	return 0;
 }
 
 static int fn_iso_set_stream_position_2(query *q)
