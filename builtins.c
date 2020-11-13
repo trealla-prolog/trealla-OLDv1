@@ -7555,6 +7555,11 @@ static int fn_absolute_file_name_3(query *q)
 
 		*dst = '\0';
 		char *ptr = getenv(envbuf);
+		if (!ptr) {
+			throw_error(q, p_abs, "existence_error", "not_a_valid_environment_variable");
+			return 0;
+		}
+
 		tmpbuf = malloc(strlen(s)+strlen(ptr)+1);
 		ensure(tmpbuf);
 		dst = tmpbuf;
@@ -7563,6 +7568,16 @@ static int fn_absolute_file_name_3(query *q)
 		*dst++ = '/';
 		memcpy(dst, s, strlen(s));
 		dst[strlen(s)] = '\0';
+		char *tmpbuf2;
+
+		if ((tmpbuf2 = realpath(tmpbuf, NULL)) == NULL) {
+			throw_error(q, p_abs, "domain_error", "not_a_valid_filespec");
+			free(tmpbuf);
+			return 0;
+		}
+
+		free(tmpbuf);
+		tmpbuf = tmpbuf2;
 	} else {
 		if ((tmpbuf = realpath(s, NULL)) == NULL) {
 			throw_error(q, p_abs, "domain_error", "not_a_valid_filespec");
