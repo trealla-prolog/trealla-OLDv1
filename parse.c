@@ -973,10 +973,8 @@ query *create_query(module *m, int is_task)
 {
 	static uint64_t g_query_id = 0;
 
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	query *q = calloc(1, sizeof(query));
-	if (q)
-	{
+	if (q) {
 		q->qid = g_query_id++;
 		q->m = m;
 		q->trace = m->trace;
@@ -1008,6 +1006,8 @@ query *create_query(module *m, int is_task)
 			q = NULL;
 		}
 	}
+
+	ensure(q);
 	return q;
 }
 
