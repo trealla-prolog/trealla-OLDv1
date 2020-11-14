@@ -1472,7 +1472,7 @@ static int fn_iso_set_output_1(query *q)
 
 static int fn_iso_stream_property_2(query *q)
 {
-	GET_FIRST_ARG(pstr,stream);
+	GET_FIRST_ARG(pstr,stream_or_var);
 	GET_NEXT_ARG(p1,structure);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
@@ -1480,6 +1480,11 @@ static int fn_iso_stream_property_2(query *q)
 	if (p1->arity != 1) {
 		throw_error(q, p1, "type_error", "property");
 		return 0;
+	}
+
+	if (!strcmp(GET_STR(p1), "alias")) {
+		cell *c = p1 + 1;
+		c = deref(q, c, q->latest_ctx);
 	}
 
 	if (!strcmp(GET_STR(p1), "position")) {
