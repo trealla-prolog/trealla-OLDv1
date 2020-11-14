@@ -136,7 +136,7 @@ static idx_t is_in_pool(const char *name)
 {
 	const void *val;
 
-	if (sl_get(g_symtab, name, &val))
+	if (sl_get(g_symtab, name, &val))  //NOTE: cehteh: is sl_get robust when the name == NULL?
 		return (idx_t)(unsigned long)val;
 
 	return ERR_IDX;
@@ -144,6 +144,8 @@ static idx_t is_in_pool(const char *name)
 
 static idx_t add_to_pool(const char *name)
 {
+	if (!name) return ERR_IDX;
+
 	idx_t offset = g_pool_offset;
 	size_t len = strlen(name);
 
@@ -450,6 +452,7 @@ static rule *create_rule(module *m, cell *c)
 	assert(m && c);
 
 	rule *h = get_rule(m);
+	if (!h) return NULL;
 	h->val_off = c->val_off;
 	h->arity = c->arity;
 	return h;
@@ -467,7 +470,10 @@ void set_multifile_in_db(module *m, const char *name, idx_t arity)
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
-	h->is_multifile = true;
+	if (h)
+		h->is_multifile = true;
+	else
+		m->error = true;  //cehteh: not 100% sure about this
 }
 
 static bool is_multifile_in_db(const char *mod, const char *name, idx_t arity)
@@ -479,7 +485,8 @@ static bool is_multifile_in_db(const char *mod, const char *name, idx_t arity)
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
-	ensure(tmp.val_off != ERR_IDX);
+	if (tmp.val_off == ERR_IDX) return false;
+
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) return false;
@@ -839,12 +846,16 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
-	h->is_dynamic = true;
+	if (h) {
+		h->is_dynamic = true;
 
-	if (!h->index) {
-		h->index = sl_create(compkey);
-		ensure(h->index);
+		if (!h->index) {
+			h->index = sl_create(compkey);
+		}
 	}
+
+	if (!h || !h->index)
+		m->error = true;  //cehteh: not 100% sure about this
 }
 
 static void set_persist_in_db(module *m, const char *name, unsigned arity)
@@ -2780,7 +2791,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 
 static void module_purge(module *m)
 {
-	if (!m->dirty)
+	if (!m || !m->dirty)
 		return;
 
 	for (rule *h = m->head; h; h = h->next) {
@@ -2833,31 +2844,33 @@ static bool parser_run(parser *p, const char *src, int dump)
 	}
 
 	parser_xref(p, p->t, NULL);
+	bool ok = false;
 	query *q = create_query(p->m, 0);
-	ensure(q);
-	q->run_init = p->run_init;
-	query_execute(q, p->t);
+	if (q) {
+		q->run_init = p->run_init;
+		query_execute(q, p->t);
 
-	if (q->halt)
-		q->error = false;
-	else if (dump && !q->abort && q->status)
-		dump_vars(q, p);
+		if (q->halt)
+			q->error = false;
+		else if (dump && !q->abort && q->status)
+			dump_vars(q, p);
 
-	p->m->halt = q->halt;
-	p->m->halt_code = q->halt_code;
-	p->m->status = q->status;
+		p->m->halt = q->halt;
+		p->m->halt_code = q->halt_code;
+		p->m->status = q->status;
 
-	if (!p->m->quiet && !p->directive && dump && q->m->stats) {
-		fprintf(stdout,
-			"Goals %llu, Matches %llu, Max frames %u, Max choices %u, Max trails: %u, Backtracks %llu, TCOs:%llu\n",
-			(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
-			q->max_frames, q->max_choices, q->max_trails,
-			(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
+		if (!p->m->quiet && !p->directive && dump && q->m->stats) {
+			fprintf(stdout,
+				"Goals %llu, Matches %llu, Max frames %u, Max choices %u, Max trails: %u, Backtracks %llu, TCOs:%llu\n",
+				(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
+				q->max_frames, q->max_choices, q->max_trails,
+				(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
+		}
+
+		ok = !q->error;
+		p->m = q->m;
+		destroy_query(q);
 	}
-
-	bool ok = !q->error;
-	p->m = q->m;
-	destroy_query(q);
 	module_purge(p->m);
 	return ok;
 }
@@ -2867,7 +2880,8 @@ module *module_load_text(module *m, const char *src)
 	if (!m) return NULL;
 
 	parser *p = create_parser(m);
-	ensure(p);
+	if (!p) return NULL;
+
 	p->consulting = true;
 	p->srcptr = (char*)src;
 	parser_tokenize(p, 0, 0);
@@ -3044,6 +3058,8 @@ bool module_save_file(module *m, const char *filename)
 
 static void make_rule(module *m, const char *src)
 {
+	if (!m) return;
+
 	m->prebuilt = true;
 	parser *p = create_parser(m);
 	if (p)
