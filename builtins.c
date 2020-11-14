@@ -1493,7 +1493,8 @@ static int fn_iso_stream_property_2(query *q)
 		cell tmp;
 		make_int(&tmp, n);
 		tmp.flags |= FLAG_HEX;
-		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		return 1;
 	}
 
 	if (!is_stream(pstr)) {
