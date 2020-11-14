@@ -3318,8 +3318,8 @@ module *create_module(const char *name)
 		make_rule(m, "succ(X,Y) :- integer(Y), X is Y - 1, X >= 0.");
 
 		make_rule(m, "term_to_atom(T,S) :- write_term_to_chars(S,T,[]).");
-		make_rule(m, "write_term_to_atom(S,T,Opts) :- write_term_to_chars(S,T,Opts).");
-		make_rule(m, "read_term_from_atom(S,T,Opts) :- read_term_from_chars(S,T,Opts).");
+		make_rule(m, "write_term_to_atom(S,T,Opts) :- write_term_to_chars(S,Opts,T).");
+		make_rule(m, "read_term_from_atom(S,T,Opts) :- read_term_from_chars(S,Opts,T).");
 		make_rule(m, "absolute_file_name(R,A) :- absolute_file_name(R,A,[]).");
 
 		// Other...

@@ -7086,7 +7086,6 @@ static int fn_read_term_from_chars_2(query *q)
 	GET_NEXT_ARG(p_term,any);
 	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
-
 	char *src;
 	size_t len;
 
