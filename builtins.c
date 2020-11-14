@@ -1819,7 +1819,35 @@ static int fn_iso_nl_1(query *q)
 	return !ferror(str->fp);
 }
 
-static void parse_read_params(query *q, cell *p, cell **vars, cell **sings)
+static void collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells)
+{
+	for (idx_t i = 0; i < nbr_cells;) {
+		cell *c = deref(q, p1, p1_ctx);
+		int found = 0;
+
+		if (is_structure(c)) {
+			collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1);
+		} else if (is_variable(c)) {
+			for (size_t idx = 0; idx < g_tab_idx; idx++) {
+				if ((g_tab1[idx] == q->latest_ctx) && (g_tab2[idx] == c->var_nbr)) {
+					found = 1;
+					break;
+				}
+			}
+
+			if (!found) {
+				g_tab1[g_tab_idx] = q->latest_ctx;
+				g_tab2[g_tab_idx] = c->var_nbr;
+				g_tab_idx++;
+			}
+		}
+
+		i += p1->nbr_cells;
+		p1 += p1->nbr_cells;
+	}
+}
+
+static void parse_read_params(query *q, cell *p, cell **vars, idx_t *vars_ctx, cell **varnames, idx_t *varnames_ctx, cell **sings, idx_t *sings_ctx)
 {
 	if (!is_structure(p))
 		return;
@@ -1840,10 +1868,15 @@ static void parse_read_params(query *q, cell *p, cell **vars, cell **sings)
 				q->m->flag.double_quote_codes = 1;
 			}
 		}
-	} else if (!strcmp(GET_STR(p), "variable_names")) {
+	} else if (!strcmp(GET_STR(p), "variables")) {
 		if (vars) *vars = NULL;
+		if (vars_ctx) *vars_ctx = q->st.curr_frame;
+	} else if (!strcmp(GET_STR(p), "variable_names")) {
+		if (varnames) *varnames = NULL;
+		if (varnames_ctx) *varnames_ctx = q->st.curr_frame;
 	} else if (!strcmp(GET_STR(p), "singletons")) {
 		if (sings) *sings = NULL;
+		if (sings_ctx) *sings_ctx = q->st.curr_frame;
 	}
 }
 
@@ -1861,12 +1894,13 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	int flag_chars = q->m->flag.double_quote_chars;
 	int flag_codes = q->m->flag.double_quote_codes;
 	int flag_atom = q->m->flag.double_quote_atom;
-	cell *vars = NULL, *sings = NULL;
+	cell *vars = NULL, *varnames = NULL, *sings = NULL;
+	idx_t vars_ctx, varnames_ctx, sings_ctx;
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
 		cell *c = deref(q, h, p2_ctx);
-		parse_read_params(q, c, &vars, &sings);
+		parse_read_params(q, c, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx);
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
@@ -1929,6 +1963,63 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	cell *tmp = alloc_heap(q, p->t->cidx-1);
 	ensure(tmp);
 	copy_cells(tmp, p->t->cells, p->t->cidx-1);
+
+	frame *g = GET_FRAME(q->st.curr_frame);
+	g_varno = g->nbr_vars;
+	g_tab_idx = 0;
+
+	if (vars) {
+		if (is_structure(tmp))
+			collect_vars(q, tmp+1, q->st.curr_frame, tmp->nbr_cells-1);
+		else
+			collect_vars(q, tmp, q->st.curr_frame, tmp->nbr_cells);
+
+		const unsigned cnt = g_tab_idx;
+		init_tmp_heap(q);
+		cell *tmp = alloc_tmp_heap(q, (cnt*2)+1);
+		ensure(tmp);
+		unsigned idx = 0;
+
+		if (cnt) {
+			unsigned done = 0;
+
+			for (unsigned i = 0; i < cnt; i++) {
+				make_literal(tmp+idx, g_dot_s);
+				tmp[idx].arity = 2;
+				tmp[idx].nbr_cells = ((cnt-done)*2)+1;
+				idx++;
+				cell v;
+				make_variable(&v, g_anon_s);
+				v.flags |= FLAG_FRESH;
+
+				if (g_tab1[i] != q->st.curr_frame)
+					v.var_nbr = g_varno++;
+				else
+					v.var_nbr = g_tab2[i];
+
+				tmp[idx++] = v;
+				done++;
+			}
+
+			make_literal(tmp+idx++, g_nil_s);
+			tmp[0].arity = 2;
+			tmp[0].nbr_cells = idx;
+		} else
+			make_literal(tmp+idx++, g_nil_s);
+
+		cell *save = tmp;
+		tmp = alloc_heap(q, idx);
+		ensure(tmp);
+		copy_cells(tmp, save, idx);
+		unify(q, vars, vars_ctx, tmp, q->st.curr_frame);
+	}
+
+	if (varnames) {
+	}
+
+	if (sings) {
+	}
+
 	return unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 }
 
@@ -4217,34 +4308,6 @@ static int fn_iso_univ_2(query *q)
 	cell *l = end_list(q);
 	fix_list(l);
 	return unify(q, p2, p2_ctx, l, p1_ctx);
-}
-
-static void collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells)
-{
-	for (idx_t i = 0; i < nbr_cells;) {
-		cell *c = deref(q, p1, p1_ctx);
-		int found = 0;
-
-		if (is_structure(c)) {
-			collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1);
-		} else if (is_variable(c)) {
-			for (size_t idx = 0; idx < g_tab_idx; idx++) {
-				if ((g_tab1[idx] == q->latest_ctx) && (g_tab2[idx] == c->var_nbr)) {
-					found = 1;
-					break;
-				}
-			}
-
-			if (!found) {
-				g_tab1[g_tab_idx] = q->latest_ctx;
-				g_tab2[g_tab_idx] = c->var_nbr;
-				g_tab_idx++;
-			}
-		}
-
-		i += p1->nbr_cells;
-		p1 += p1->nbr_cells;
-	}
 }
 
 static int fn_iso_term_variables_2(query *q)
