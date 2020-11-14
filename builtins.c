@@ -1963,36 +1963,31 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	if (!parser_attach(p, 0))
 		return 0;
 
-	//parser_assign_vars(p, g->nbr_vars);
+	frame *g = GET_FRAME(q->st.curr_frame);
+	parser_assign_vars(p, g->nbr_vars);
 	parser_xref(p, p->t, NULL);
 	q->m->flag.double_quote_chars = flag_chars;
 	q->m->flag.double_quote_codes = flag_codes;
 	q->m->flag.double_quote_atom = flag_atom;
 
-	//printf("*** p->nbr_vars = %u\n", p->nbr_vars);
+	if (!create_vars(q, p->nbr_vars)) {
+		throw_error(q, p1, "resource_error", "too_many_vars");
+		return 0;
+	}
 
 	cell *tmp = p->t->cells;
+	tmp->nbr_cells = p->t->cidx-1;
 
-#if 0
 	if (p->nbr_vars) {
 		g_tab_idx = 0;
 		if (is_structure(tmp))
 			collect_vars(q, tmp+1, q->st.curr_frame, tmp->nbr_cells-1);
 		else
 			collect_vars(q, tmp, q->st.curr_frame, tmp->nbr_cells);
-
-		printf("*** g_tab_idx = %u\n", (unsigned)g_tab_idx);
-
-		if (!create_vars(q, p->nbr_vars)) {
-			throw_error(q, p1, "resource_error", "too_many_vars");
-			return 0;
-		}
 	}
-#endif
 
 	if (vars) {
 		const unsigned cnt = g_tab_idx;
-		printf("*** cnt=%u\n", cnt);
 		init_tmp_heap(q);
 		cell *tmp = alloc_tmp_heap(q, (cnt*2)+1);
 		ensure(tmp);
@@ -2002,7 +1997,6 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 			unsigned done = 0;
 
 			for (unsigned i = 0; i < cnt; i++) {
-				printf("*** got %s / %u\n", g_pool+g_tab3[i], g_tab2[i]);
 				make_literal(tmp+idx, g_dot_s);
 				tmp[idx].arity = 2;
 				tmp[idx].nbr_cells = ((cnt-done)*2)+1;

@@ -1539,7 +1539,8 @@ void parser_assign_vars(parser *p, unsigned start)
 		if (!is_variable(c))
 			continue;
 
-		c->var_nbr = start + get_varno(p, GET_STR(c));
+		c->var_nbr = get_varno(p, GET_STR(c));
+		c->var_nbr += start;
 
 		if (c->var_nbr == MAX_ARITY) {
 			fprintf(stdout, "Error: max vars per term reached\n");
