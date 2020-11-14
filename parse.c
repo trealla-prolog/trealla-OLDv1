@@ -6,7 +6,6 @@
 #include <float.h>
 #include <assert.h>
 #include <sys/time.h>
-#include <sys/errno.h>
 
 #ifdef _WIN32
 #include <io.h>
@@ -1033,10 +1032,11 @@ query *create_query(module *m, int is_task)
 		q->choices_size = is_task ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
 		q->trails_size = is_task ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
 
-		q->frames = calloc(q->frames_size, sizeof(frame));
-		q->slots = calloc(q->slots_size, sizeof(slot));
-		q->choices = calloc(q->choices_size, sizeof(choice));
-		q->trails = calloc(q->trails_size, sizeof(trail));
+                bool error = false;
+		CHECK_SENTINEL(q->frames = calloc(q->frames_size, sizeof(frame)), NULL);
+		CHECK_SENTINEL(q->slots = calloc(q->slots_size, sizeof(slot)), NULL);
+		CHECK_SENTINEL(q->choices = calloc(q->choices_size, sizeof(choice)), NULL);
+		CHECK_SENTINEL(q->trails = calloc(q->trails_size, sizeof(trail)), NULL);
 
 		// Allocate these later as needed...
 
@@ -1046,7 +1046,7 @@ query *create_query(module *m, int is_task)
 		for (int i = 0; i < MAX_QUEUES; i++)
 			q->q_size[i] = is_task ? INITIAL_NBR_QUEUE/10 : INITIAL_NBR_QUEUE;
 
-		if (!q->frames || !q->slots || !q->choices || !q->trails) {
+		if (error) {
 			destroy_query (q);
 			q = NULL;
 		}
