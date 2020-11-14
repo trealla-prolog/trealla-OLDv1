@@ -4371,6 +4371,16 @@ static int fn_iso_univ_2(query *q)
 		idx_t nbr_cells = tmp_heap_used(q);
 		cell *tmp = get_tmp_heap(q, 0);
 
+		if (is_cstring(tmp)) {
+			cell *c = tmp;
+			idx_t off = index_from_pool(GET_STR(c));
+			//if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
+			c->val_off = off;
+			ensure (c->val_off != ERR_IDX);
+			c->val_type = TYPE_LITERAL;
+			c->flags = 0;
+		}
+
 		if (!is_literal(tmp) && arity) {
 			throw_error(q, tmp, "type_error", "atom");
 			return 0;
