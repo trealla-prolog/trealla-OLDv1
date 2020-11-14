@@ -1912,7 +1912,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	int flag_codes = q->m->flag.double_quote_codes;
 	int flag_atom = q->m->flag.double_quote_atom;
 	cell *vars = NULL, *varnames = NULL, *sings = NULL;
-	idx_t vars_ctx, varnames_ctx, sings_ctx;
+	idx_t vars_ctx = 0, varnames_ctx = 0, sings_ctx = 0;
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
