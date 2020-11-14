@@ -1523,7 +1523,7 @@ static idx_t get_varno(parser *p, const char *src)
 	return i;
 }
 
-void parser_assign_vars(parser *p)
+void parser_assign_vars(parser *p, unsigned start)
 {
 	p->start_term = true;
 	p->nbr_vars = 0;
@@ -1539,7 +1539,7 @@ void parser_assign_vars(parser *p)
 		if (!is_variable(c))
 			continue;
 
-		c->var_nbr = get_varno(p, GET_STR(c));
+		c->var_nbr = start + get_varno(p, GET_STR(c));
 
 		if (c->var_nbr == MAX_ARITY) {
 			fprintf(stdout, "Error: max vars per term reached\n");
@@ -1792,7 +1792,7 @@ static void parser_dcg_rewrite(parser *p)
 	p->nbr_vars = p2->nbr_vars;
 	p2->t = NULL;
 	destroy_parser(p2);
-	parser_assign_vars(p);
+	parser_assign_vars(p, 0);
 }
 
 static cell *make_literal(parser *p, idx_t offset)
@@ -2512,7 +2512,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 			(*p->srcptr != ',') && (*p->srcptr != ')') && (*p->srcptr != ']') &&
 				(*p->srcptr != '|')) {
 			if (parser_attach(p, 0)) {
-				parser_assign_vars(p);
+				parser_assign_vars(p, 0);
 				parser_dcg_rewrite(p);
 
 				if (p->consulting && !p->skip)
@@ -2793,7 +2793,7 @@ static bool parser_run(parser *p, const char *src, int dump)
 		return 0;
 
 	if (p->command) {
-		parser_assign_vars(p);
+		parser_assign_vars(p, 0);
 		parser_dcg_rewrite(p);
 	}
 

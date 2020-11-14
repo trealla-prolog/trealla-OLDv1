@@ -431,6 +431,7 @@ static cell make_string(const char *s, size_t n)
 static unsigned g_varno;
 static size_t g_tab_idx;
 static idx_t g_tab1[64000];
+static idx_t g_tab3[64000];
 static unsigned g_tab2[64000];
 
 static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
@@ -1838,6 +1839,7 @@ static void collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells)
 			if (!found) {
 				g_tab1[g_tab_idx] = q->latest_ctx;
 				g_tab2[g_tab_idx] = c->var_nbr;
+				g_tab3[g_tab_idx] = c->val_off;
 				g_tab_idx++;
 			}
 		}
@@ -1869,14 +1871,20 @@ static void parse_read_params(query *q, cell *p, cell **vars, idx_t *vars_ctx, c
 			}
 		}
 	} else if (!strcmp(GET_STR(p), "variables")) {
-		if (vars) *vars = NULL;
-		if (vars_ctx) *vars_ctx = q->st.curr_frame;
+		if (is_variable(p+1)) {
+			if (vars) *vars = p+1;
+			if (vars_ctx) *vars_ctx = q->st.curr_frame;
+		}
 	} else if (!strcmp(GET_STR(p), "variable_names")) {
-		if (varnames) *varnames = NULL;
-		if (varnames_ctx) *varnames_ctx = q->st.curr_frame;
+		if (is_variable(p+1)) {
+			if (varnames) *varnames = p+1;
+			if (varnames_ctx) *varnames_ctx = q->st.curr_frame;
+		}
 	} else if (!strcmp(GET_STR(p), "singletons")) {
-		if (sings) *sings = NULL;
-		if (sings_ctx) *sings_ctx = q->st.curr_frame;
+		if (is_variable(p+1)) {
+			if (sings) *sings = p+1;
+			if (sings_ctx) *sings_ctx = q->st.curr_frame;
+		}
 	}
 }
 
@@ -1955,26 +1963,36 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	if (!parser_attach(p, 0))
 		return 0;
 
+	//parser_assign_vars(p, g->nbr_vars);
 	parser_xref(p, p->t, NULL);
 	q->m->flag.double_quote_chars = flag_chars;
 	q->m->flag.double_quote_codes = flag_codes;
 	q->m->flag.double_quote_atom = flag_atom;
 
-	cell *tmp = alloc_heap(q, p->t->cidx-1);
-	ensure(tmp);
-	copy_cells(tmp, p->t->cells, p->t->cidx-1);
+	//printf("*** p->nbr_vars = %u\n", p->nbr_vars);
 
-	frame *g = GET_FRAME(q->st.curr_frame);
-	g_varno = g->nbr_vars;
-	g_tab_idx = 0;
+	cell *tmp = p->t->cells;
 
-	if (vars) {
+#if 0
+	if (p->nbr_vars) {
+		g_tab_idx = 0;
 		if (is_structure(tmp))
 			collect_vars(q, tmp+1, q->st.curr_frame, tmp->nbr_cells-1);
 		else
 			collect_vars(q, tmp, q->st.curr_frame, tmp->nbr_cells);
 
+		printf("*** g_tab_idx = %u\n", (unsigned)g_tab_idx);
+
+		if (!create_vars(q, p->nbr_vars)) {
+			throw_error(q, p1, "resource_error", "too_many_vars");
+			return 0;
+		}
+	}
+#endif
+
+	if (vars) {
 		const unsigned cnt = g_tab_idx;
+		printf("*** cnt=%u\n", cnt);
 		init_tmp_heap(q);
 		cell *tmp = alloc_tmp_heap(q, (cnt*2)+1);
 		ensure(tmp);
@@ -1984,19 +2002,14 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 			unsigned done = 0;
 
 			for (unsigned i = 0; i < cnt; i++) {
+				printf("*** got %s / %u\n", g_pool+g_tab3[i], g_tab2[i]);
 				make_literal(tmp+idx, g_dot_s);
 				tmp[idx].arity = 2;
 				tmp[idx].nbr_cells = ((cnt-done)*2)+1;
 				idx++;
 				cell v;
-				make_variable(&v, g_anon_s);
-				v.flags |= FLAG_FRESH;
-
-				if (g_tab1[i] != q->st.curr_frame)
-					v.var_nbr = g_varno++;
-				else
-					v.var_nbr = g_tab2[i];
-
+				make_variable(&v, g_tab3[i]);
+				v.var_nbr = g_tab2[i];
 				tmp[idx++] = v;
 				done++;
 			}
@@ -2011,7 +2024,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 		tmp = alloc_heap(q, idx);
 		ensure(tmp);
 		copy_cells(tmp, save, idx);
-		unify(q, vars, vars_ctx, tmp, q->st.curr_frame);
+		//unify(q, vars, vars_ctx, tmp, q->st.curr_frame);
 	}
 
 	if (varnames) {
@@ -2020,6 +2033,9 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	if (sings) {
 	}
 
+	tmp = alloc_heap(q, p->t->cidx-1);
+	ensure(tmp);
+	copy_cells(tmp, p->t->cells, p->t->cidx-1);
 	return unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 }
 
@@ -4792,7 +4808,7 @@ static int fn_iso_asserta_1(query *q)
 	}
 
 	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
-	parser_assign_vars(p);
+	parser_assign_vars(p, 0);
 	clause *r = asserta_to_db(q->m, p->t, 0);
 	if (!r) return 0;
 	uuid_gen(&r->u);
@@ -4817,7 +4833,7 @@ static int fn_iso_assertz_1(query *q)
 	}
 
 	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
-	parser_assign_vars(p);
+	parser_assign_vars(p, 0);
 	clause *r = assertz_to_db(q->m, p->t, 0);
 	if (!r) return 0;
 	uuid_gen(&r->u);
@@ -5936,7 +5952,7 @@ static int do_asserta_2(query *q)
 	}
 
 	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
-	parser_assign_vars(p);
+	parser_assign_vars(p, 0);
 	clause *r = asserta_to_db(q->m, p->t, 0);
 	if (!r) return 0;
 
@@ -5986,7 +6002,7 @@ static int do_assertz_2(query *q)
 	}
 
 	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
-	parser_assign_vars(p);
+	parser_assign_vars(p, 0);
 	clause *r = assertz_to_db(q->m, p->t, 0);
 	if (!r) return 0;
 

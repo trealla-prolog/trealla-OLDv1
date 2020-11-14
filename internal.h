@@ -499,7 +499,7 @@ bool parser_attach(parser *p, int start_idx);
 void parser_xref(parser *p, term *t, rule *parent);
 idx_t drop_choice(query *q);
 bool retry_choice(query *q);
-void parser_assign_vars(parser *p);
+void parser_assign_vars(parser *p, unsigned start);
 query *create_query(module *m, int sub_query);
 query *create_task(query *q, cell *curr_cell);
 void destroy_query(query *q);
