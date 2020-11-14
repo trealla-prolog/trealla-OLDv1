@@ -4,8 +4,8 @@
 #include <time.h>
 #include <ctype.h>
 #include <float.h>
+#include <assert.h>
 #include <sys/time.h>
-#include <sys/errno.h>
 
 #ifdef _WIN32
 #include <io.h>
@@ -124,6 +124,7 @@ static struct op_table g_ops[] =
 
 static char* ensure_strdup(const char* src)
 {
+	assert(src);
 	char* ret = strdup(src);
 	ensure(ret);
 
@@ -134,7 +135,7 @@ static idx_t is_in_pool(const char *name)
 {
 	const void *val;
 
-	if (sl_get(g_symtab, name, &val))
+	if (sl_get(g_symtab, name, &val))  //NOTE: cehteh: is sl_get robust when the name == NULL?
 		return (idx_t)(unsigned long)val;
 
 	return ERR_IDX;
@@ -142,6 +143,8 @@ static idx_t is_in_pool(const char *name)
 
 static idx_t add_to_pool(const char *name)
 {
+	if (!name) return ERR_IDX;
+
 	idx_t offset = g_pool_offset;
 	size_t len = strlen(name);
 
@@ -173,6 +176,8 @@ idx_t index_from_pool(const char *name)
 
 unsigned get_op(module *m, const char *name, unsigned *optype, int *userop, int hint_prefix)
 {
+	ensure(m && name);
+
 	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
 		if (hint_prefix && (ptr->optype != OP_FX) && (ptr->optype != OP_FY))
 			continue;
@@ -203,6 +208,8 @@ unsigned get_op(module *m, const char *name, unsigned *optype, int *userop, int 
 
 bool set_op(module *m, const char *name, unsigned optype, unsigned precedence)
 {
+	ensure (m && name);
+
 	unsigned ot = 0, prec = 0;
 	int userop = 0;
 	int hint = IS_PREFIX(optype);
@@ -241,6 +248,8 @@ module *g_modules = NULL;
 
 cell *list_head(cell *l)
 {
+	assert(l);
+
 	if (!is_string(l))
 		return l + 1;
 
@@ -261,6 +270,9 @@ cell *list_head(cell *l)
 
 cell *list_tail(cell *l, cell *tmp)
 {
+	if (!l) return NULL;
+	assert(tmp);
+
 	if (!is_string(l)) {
 		cell *h = l + 1;
 		return h + h->nbr_cells;
@@ -299,6 +311,8 @@ module *find_next_module(module *m)
 
 module *find_module(const char *name)
 {
+	assert(name);
+
 	for (module *m = g_modules; m; m = m->next) {
 		if (!strcmp(m->name, name))
 			return m;
@@ -309,6 +323,8 @@ module *find_module(const char *name)
 
 cell *get_head(cell *c)
 {
+	assert(c);
+
 	if (!is_literal(c))
 		return NULL;
 
@@ -320,6 +336,8 @@ cell *get_head(cell *c)
 
 cell *get_body(cell *c)
 {
+	assert(c);
+
 	if (!is_literal(c))
 		return NULL;
 
@@ -337,6 +355,9 @@ cell *get_body(cell *c)
 
 static rule *find_rule(module *m, cell *c)
 {
+	assert(m);
+	assert(c);
+
 	for (rule *h = m->head; h; h = h->next) {
 		if (h->is_abolished)
 			continue;
@@ -353,8 +374,10 @@ static rule *find_rule(module *m, cell *c)
 	return NULL;
 }
 
-static rule *find_matching_rule_internal(module *m, cell *c, int quiet)
+static rule *find_matching_rule_internal(module *m, cell *c, bool quiet)
 {
+	assert(c);
+
 	module *save_m = m;
 	module *tmp_m = NULL;
 
@@ -381,16 +404,18 @@ static rule *find_matching_rule_internal(module *m, cell *c, int quiet)
 
 rule *find_matching_rule(module *m, cell *c)
 {
-	return find_matching_rule_internal(m, c, 0);
+	return find_matching_rule_internal(m, c, false);
 }
 
 rule *find_matching_rule_quiet(module *m, cell *c)
 {
-	return find_matching_rule_internal(m, c, 1);
+	return find_matching_rule_internal(m, c, true);
 }
 
 rule *find_functor(module *m, const char *name, unsigned arity)
 {
+	assert(m && name);
+
 	for (rule *h = m->head; h; h = h->next) {
 		if (h->is_abolished)
 			continue;
@@ -404,6 +429,8 @@ rule *find_functor(module *m, const char *name, unsigned arity)
 
 static rule *get_rule(module *m)
 {
+	assert(m);
+
 	for (rule *h = m->head; h; h = h->next) {
 		if (h->is_abolished) {
 			memset(h, 0, sizeof(rule));
@@ -411,6 +438,7 @@ static rule *get_rule(module *m)
 		}
 	}
 
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	rule *h = calloc(1, sizeof(rule));
 	ensure(h);
 	h->next = m->head;
@@ -420,8 +448,10 @@ static rule *get_rule(module *m)
 
 static rule *create_rule(module *m, cell *c)
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
+	assert(m && c);
+
 	rule *h = get_rule(m);
+	if (!h) return NULL;
 	h->val_off = c->val_off;
 	h->arity = c->arity;
 	return h;
@@ -430,6 +460,7 @@ static rule *create_rule(module *m, cell *c)
 void set_multifile_in_db(module *m, const char *name, idx_t arity)
 {
 	if (!m) return;
+	assert(name);
 
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
@@ -438,17 +469,23 @@ void set_multifile_in_db(module *m, const char *name, idx_t arity)
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
-	h->is_multifile = true;
+	if (h)
+		h->is_multifile = true;
+	else
+		m->error = true;  //cehteh: not 100% sure about this
 }
 
 static bool is_multifile_in_db(const char *mod, const char *name, idx_t arity)
 {
+	assert(mod);
+
 	module *m = find_module(mod);
 	if (!m) return false;
 	cell tmp;
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
-	ensure(tmp.val_off != ERR_IDX);
+	if (tmp.val_off == ERR_IDX) return false;
+
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) return false;
@@ -457,6 +494,8 @@ static bool is_multifile_in_db(const char *mod, const char *name, idx_t arity)
 
 static int compkey(const void *ptr1, const void *ptr2)
 {
+	assert(ptr1 && ptr2);
+
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
 
@@ -466,25 +505,17 @@ static int compkey(const void *ptr1, const void *ptr2)
 				return -1;
 			else if (p1->val_num > p2->val_num)
 				return 1;
-			else
-				return 0;
-		} else if (is_variable(p2))
-			return 0;
+		}
 	} else if (is_float(p1)) {
 		if (is_float(p2)) {
 			if (p1->val_flt < p2->val_flt)
 				return -1;
 			else if (p1->val_flt > p2->val_flt)
 				return 1;
-			else
-				return 0;
-		} else if (is_variable(p2))
-			return 0;
+		}
 	} else if (is_atom(p1)) {
 		if (is_atom(p2))
 			return strcmp(GET_STR(p1), GET_STR(p2));
-		else if (is_variable(p2))
-			return 0;
 	} else if (is_structure(p1)) {
 		if (is_structure(p2)) {
 			if (p1->arity < p2->arity)
@@ -510,20 +541,15 @@ static int compkey(const void *ptr1, const void *ptr2)
 				p1 += p1->nbr_cells;
 				p2 += p2->nbr_cells;
 			}
-
-			return 0;
-		} else if (is_variable(p2))
-			return 0;
-	} else if (is_variable(p1))
-		return 0;
-	else
-		return 0;
+		}
+	}
 
 	return 0;
 }
 
 static void reindex_rule(rule *h)
 {
+	assert(h);
 	h->index = sl_create(compkey);
 	ensure(h->index);
 
@@ -805,12 +831,16 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
-	h->is_dynamic = true;
+	if (h) {
+		h->is_dynamic = true;
 
-	if (!h->index) {
-		h->index = sl_create(compkey);
-		ensure(h->index);
+		if (!h->index) {
+			h->index = sl_create(compkey);
+		}
 	}
+
+	if (!h || !h->index)
+		m->error = true;  //cehteh: not 100% sure about this
 }
 
 static void set_persist_in_db(module *m, const char *name, unsigned arity)
@@ -988,10 +1018,11 @@ query *create_query(module *m, int is_task)
 		q->choices_size = is_task ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
 		q->trails_size = is_task ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
 
-		q->frames = calloc(q->frames_size, sizeof(frame));
-		q->slots = calloc(q->slots_size, sizeof(slot));
-		q->choices = calloc(q->choices_size, sizeof(choice));
-		q->trails = calloc(q->trails_size, sizeof(trail));
+                bool error = false;
+		CHECK_SENTINEL(q->frames = calloc(q->frames_size, sizeof(frame)), NULL);
+		CHECK_SENTINEL(q->slots = calloc(q->slots_size, sizeof(slot)), NULL);
+		CHECK_SENTINEL(q->choices = calloc(q->choices_size, sizeof(choice)), NULL);
+		CHECK_SENTINEL(q->trails = calloc(q->trails_size, sizeof(trail)), NULL);
 
 		// Allocate these later as needed...
 
@@ -1001,7 +1032,7 @@ query *create_query(module *m, int is_task)
 		for (int i = 0; i < MAX_QUEUES; i++)
 			q->q_size[i] = is_task ? INITIAL_NBR_QUEUE/10 : INITIAL_NBR_QUEUE;
 
-		if (!q->frames || !q->slots || !q->choices || !q->trails) {
+		if (error) {
 			destroy_query (q);
 			q = NULL;
 		}
@@ -2746,7 +2777,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 
 static void module_purge(module *m)
 {
-	if (!m->dirty)
+	if (!m || !m->dirty)
 		return;
 
 	for (rule *h = m->head; h; h = h->next) {
@@ -2783,15 +2814,15 @@ static bool parser_run(parser *p, const char *src, int dump)
 	p->srcptr = (char*)src;
 
 	if (!parser_tokenize(p, 0, 0))
-		return 0;
+		return false;
 
 	if (p->skip) {
 		p->m->status = 1;
-		return 1;
+		return true;
 	}
 
 	if (!parser_attach(p, 0))
-		return 0;
+		return false;
 
 	if (p->command) {
 		parser_assign_vars(p, 0);
@@ -2799,31 +2830,33 @@ static bool parser_run(parser *p, const char *src, int dump)
 	}
 
 	parser_xref(p, p->t, NULL);
+	bool ok = false;
 	query *q = create_query(p->m, 0);
-	ensure(q);
-	q->run_init = p->run_init;
-	query_execute(q, p->t);
+	if (q) {
+		q->run_init = p->run_init;
+		query_execute(q, p->t);
 
-	if (q->halt)
-		q->error = false;
-	else if (dump && !q->abort && q->status)
-		dump_vars(q, p);
+		if (q->halt)
+			q->error = false;
+		else if (dump && !q->abort && q->status)
+			dump_vars(q, p);
 
-	p->m->halt = q->halt;
-	p->m->halt_code = q->halt_code;
-	p->m->status = q->status;
+		p->m->halt = q->halt;
+		p->m->halt_code = q->halt_code;
+		p->m->status = q->status;
 
-	if (!p->m->quiet && !p->directive && dump && q->m->stats) {
-		fprintf(stdout,
-			"Goals %llu, Matches %llu, Max frames %u, Max choices %u, Max trails: %u, Backtracks %llu, TCOs:%llu\n",
-			(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
-			q->max_frames, q->max_choices, q->max_trails,
-			(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
+		if (!p->m->quiet && !p->directive && dump && q->m->stats) {
+			fprintf(stdout,
+				"Goals %llu, Matches %llu, Max frames %u, Max choices %u, Max trails: %u, Backtracks %llu, TCOs:%llu\n",
+				(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
+				q->max_frames, q->max_choices, q->max_trails,
+				(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
+		}
+
+		ok = !q->error;
+		p->m = q->m;
+		destroy_query(q);
 	}
-
-	bool ok = !q->error;
-	p->m = q->m;
-	destroy_query(q);
 	module_purge(p->m);
 	return ok;
 }
@@ -2833,7 +2866,8 @@ module *module_load_text(module *m, const char *src)
 	if (!m) return NULL;
 
 	parser *p = create_parser(m);
-	ensure(p);
+	if (!p) return NULL;
+
 	p->consulting = true;
 	p->srcptr = (char*)src;
 	parser_tokenize(p, 0, 0);
@@ -3010,14 +3044,16 @@ bool module_save_file(module *m, const char *filename)
 
 static void make_rule(module *m, const char *src)
 {
-	m->prebuilt = 1;
+	if (!m) return;
+
+	m->prebuilt = true;
 	parser *p = create_parser(m);
 	if (p)
 	{
 		p->consulting = true;
 		p->srcptr = (char*)src;
 		parser_tokenize(p, 0, 0);
-		m->prebuilt = 0;
+		m->prebuilt = false;
 		destroy_parser(p);
 	} else {
 		m->error = true;
@@ -3423,52 +3459,49 @@ void* g_init(void)
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	g_pool = calloc(g_pool_size=INITIAL_POOL_SIZE, 1);
 	if (g_pool) {
-		errno = 0;
-		g_symtab = sl_create2((void*)strcmp, free);
-		if (errno) goto error;
+		bool error = false;
+		CHECK_SENTINEL(g_symtab = sl_create2((void*)strcmp, free), NULL);
 
 		g_pool_offset = 0;
 
-		g_false_s = index_from_pool("false");
-		g_true_s = index_from_pool("true");
-		g_empty_s = index_from_pool("");
-		g_anon_s = index_from_pool("_");
-		g_dot_s = index_from_pool(".");
-		g_cut_s = index_from_pool("!");
-		g_nil_s = index_from_pool("[]");
-		g_braces_s = index_from_pool("{}");
-		g_fail_s = index_from_pool("fail");
-		g_clause_s = index_from_pool(":-");
-		g_sys_elapsed_s = index_from_pool("$elapsed");
-		g_sys_queue_s = index_from_pool("$queue");
-		g_eof_s = index_from_pool("end_of_file");
-		g_lt_s = index_from_pool("<");
-		g_gt_s = index_from_pool(">");
-		g_eq_s = index_from_pool("=");
+		CHECK_SENTINEL(g_false_s = index_from_pool("false"), ERR_IDX);
+		CHECK_SENTINEL(g_true_s = index_from_pool("true"), ERR_IDX);
+		CHECK_SENTINEL(g_empty_s = index_from_pool(""), ERR_IDX);
+		CHECK_SENTINEL(g_anon_s = index_from_pool("_"), ERR_IDX);
+		CHECK_SENTINEL(g_dot_s = index_from_pool("."), ERR_IDX);
+		CHECK_SENTINEL(g_cut_s = index_from_pool("!"), ERR_IDX);
+		CHECK_SENTINEL(g_nil_s = index_from_pool("[]"), ERR_IDX);
+		CHECK_SENTINEL(g_braces_s = index_from_pool("{}"), ERR_IDX);
+		CHECK_SENTINEL(g_fail_s = index_from_pool("fail"), ERR_IDX);
+		CHECK_SENTINEL(g_clause_s = index_from_pool(":-"), ERR_IDX);
+		CHECK_SENTINEL(g_sys_elapsed_s = index_from_pool("$elapsed"), ERR_IDX);
+		CHECK_SENTINEL(g_sys_queue_s = index_from_pool("$queue"), ERR_IDX);
+		CHECK_SENTINEL(g_eof_s = index_from_pool("end_of_file"), ERR_IDX);
+		CHECK_SENTINEL(g_lt_s = index_from_pool("<"), ERR_IDX);
+		CHECK_SENTINEL(g_gt_s = index_from_pool(">"), ERR_IDX);
+		CHECK_SENTINEL(g_eq_s = index_from_pool("="), ERR_IDX);
 
 		g_streams[0].fp = stdin;
-		g_streams[0].filename = strdup("stdin");
-		g_streams[0].name = strdup("user_input");
-		g_streams[0].mode = strdup("read");
+		CHECK_SENTINEL(g_streams[0].filename = strdup("stdin"), NULL);
+		CHECK_SENTINEL(g_streams[0].name = strdup("user_input"), NULL);
+		CHECK_SENTINEL(g_streams[0].mode = strdup("read"), NULL);
 
 		g_streams[1].fp = stdout;
-		g_streams[1].filename = strdup("stdout");
-		g_streams[1].name = strdup("user_output");
-		g_streams[1].mode = strdup("append");
+		CHECK_SENTINEL(g_streams[1].filename = strdup("stdout"), NULL);
+		CHECK_SENTINEL(g_streams[1].name = strdup("user_output"), NULL);
+		CHECK_SENTINEL(g_streams[1].mode = strdup("append"), NULL);
 
 		g_streams[2].fp = stderr;
-		g_streams[2].filename = strdup("stderr");
-		g_streams[2].name = strdup("user_error");
-		g_streams[2].mode = strdup("append");
+		CHECK_SENTINEL(g_streams[2].filename = strdup("stderr"), NULL);
+		CHECK_SENTINEL(g_streams[2].name = strdup("user_error"), NULL);
+		CHECK_SENTINEL(g_streams[2].mode = strdup("append"), NULL);
 
-		if (errno)
-			goto error;
+		if (error) {
+			g_destroy();
+			return NULL;
+		}
 	}
 	return g_pool;
-
-error:
-	g_destroy();
-	return NULL;
 }
 
 
@@ -3512,7 +3545,7 @@ prolog *pl_create()
 		if (pl->m) {
 			//cehteh: add api to set things in a module?
 			pl->m->filename = strdup("~/.tpl_user");
-			pl->m->prebuilt = 1;
+			pl->m->prebuilt = true;
 		}
 
 		set_multifile_in_db(pl->m, "term_expansion", 2);
@@ -3547,7 +3580,7 @@ prolog *pl_create()
 #endif
 
 		if (pl->m)
-			pl->m->prebuilt = 0;
+			pl->m->prebuilt = false;
 
 		if (!pl->m || pl->m->error || !pl->m->filename) {
 			pl_destroy(pl);
