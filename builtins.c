@@ -1472,32 +1472,49 @@ static int fn_iso_set_output_1(query *q)
 
 static int fn_iso_stream_property_2(query *q)
 {
-	GET_FIRST_ARG(pstr,stream_or_var);
-	GET_NEXT_ARG(p1,structure);
-	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	GET_FIRST_ARG(pstr,any);
+	GET_NEXT_ARG(p1,any);
 
 	if (p1->arity != 1) {
 		throw_error(q, p1, "type_error", "property");
 		return 0;
 	}
 
-	if (!strcmp(GET_STR(p1), "alias")) {
+	if (!strcmp(GET_STR(p1), "alias") && is_variable(pstr)) {
 		cell *c = p1 + 1;
-		c = deref(q, c, q->latest_ctx);
+		c = deref(q, c, p1_ctx);
+
+		if (!is_atom(c)) {
+			throw_error(q, c, "type_error", "atom");
+			return 0;
+		}
+
+		int n = get_named_stream(GET_STR(c));
+		cell tmp;
+		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (!strcmp(GET_STR(p1), "position")) {
+	if (!is_stream(pstr)) {
+		throw_error(q, p1, "type_error", "stream");
+		return 0;
+	}
+
+	int n = get_stream(q, pstr);
+	stream *str = &g_streams[n];
+
+	if (!strcmp(GET_STR(p1), "position") && !is_variable(pstr)) {
 		cell *c = p1 + 1;
-		c = deref(q, c, q->latest_ctx);
+		c = deref(q, c, p1_ctx);
 		cell tmp;
 		make_int(&tmp, ftello(str->fp));
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (!strcmp(GET_STR(p1), "line_count")) {
+	if (!strcmp(GET_STR(p1), "line_count") && !is_variable(pstr)) {
 		cell *c = p1 + 1;
-		c = deref(q, c, q->latest_ctx);
+		c = deref(q, c, p1_ctx);
 		cell tmp;
 		make_int(&tmp, str->p?str->p->line_nbr:0);
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
