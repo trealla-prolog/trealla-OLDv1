@@ -25,7 +25,7 @@ static int needs_quote(module *m, const char *src, size_t srclen)
 	if (!strcmp(src, ",") || !strcmp(src, ".") || !strcmp(src, "|"))
 		return 1;
 
-	if (!*src || isupper(*src) || isdigit(*src))
+	if (!*src || isupper(*src) || isdigit(*src) || (*src == '_'))
 		return 1;
 
 	if (!strcmp(src, "[]") || !strcmp(src, "!"))
