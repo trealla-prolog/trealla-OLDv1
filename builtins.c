@@ -1819,7 +1819,7 @@ static int fn_iso_nl_1(query *q)
 	return !ferror(str->fp);
 }
 
-static void parse_read_params(query *q, cell *p)
+static void parse_read_params(query *q, cell *p, cell **vars, cell **sings)
 {
 	if (!is_structure(p))
 		return;
@@ -1840,6 +1840,10 @@ static void parse_read_params(query *q, cell *p)
 				q->m->flag.double_quote_codes = 1;
 			}
 		}
+	} else if (!strcmp(GET_STR(p), "variable_names")) {
+		if (vars) *vars = NULL;
+	} else if (!strcmp(GET_STR(p), "singletons")) {
+		if (sings) *sings = NULL;
 	}
 }
 
@@ -1857,11 +1861,12 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	int flag_chars = q->m->flag.double_quote_chars;
 	int flag_codes = q->m->flag.double_quote_codes;
 	int flag_atom = q->m->flag.double_quote_atom;
+	cell *vars = NULL, *sings = NULL;
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
 		cell *c = deref(q, h, p2_ctx);
-		parse_read_params(q, c);
+		parse_read_params(q, c, &vars, &sings);
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
@@ -10156,7 +10161,7 @@ static const struct builtins g_other_funcs[] =
 	{"chdir", 1, fn_chdir_1, "+string"},
 	{"name", 2, fn_iso_atom_codes_2, "?string,?list"},
 	{"read_term_from_chars", 2, fn_read_term_from_chars_2, "+chars,-term"},
-	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,+-term"},
+	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,+opts,+term"},
 	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "+term,+list,?chars"},
 	{"base64", 2, fn_base64_2, "?string,?string"},
 	{"urlenc", 2, fn_urlenc_2, "?string,?string"},
