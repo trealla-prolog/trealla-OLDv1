@@ -99,6 +99,12 @@ typedef uint32_t idx_t;
 #define GET_STR(c) ((c)->val_type != TYPE_CSTRING ? (g_pool+(c)->val_off) : (c)->flags&FLAG_BLOB ? (c)->val_str : (c)->val_chr)
 #define LEN_STR(c) ((c)->flags&FLAG_BLOB ? (c)->len_str : strlen(GET_STR(c)))
 
+// Wrap an assignment that's expected to return anything but the given sentinel value.
+// when the sentinel otherwise does some (optional) error handling action
+// default action is 'error=true' to indicate an error happened
+#define CHECK_SENTINEL(expr, err_sentinel, ...) CHECK_SENTINEL_((expr), err_sentinel, ## __VA_ARGS__, error=true)
+#define CHECK_SENTINEL_(expr, err_sentinel, on_error, ...) do { if((expr) == err_sentinel){on_error;}} while (0)
+
 // If changing the order of these: see runtime.c dispatch table
 
 enum {

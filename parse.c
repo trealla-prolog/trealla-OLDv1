@@ -3473,52 +3473,49 @@ void* g_init(void)
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	g_pool = calloc(g_pool_size=INITIAL_POOL_SIZE, 1);
 	if (g_pool) {
-		errno = 0;
-		g_symtab = sl_create2((void*)strcmp, free);
-		if (errno) goto error;
+		bool error = false;
+		CHECK_SENTINEL(g_symtab = sl_create2((void*)strcmp, free), NULL);
 
 		g_pool_offset = 0;
 
-		g_false_s = index_from_pool("false");
-		g_true_s = index_from_pool("true");
-		g_empty_s = index_from_pool("");
-		g_anon_s = index_from_pool("_");
-		g_dot_s = index_from_pool(".");
-		g_cut_s = index_from_pool("!");
-		g_nil_s = index_from_pool("[]");
-		g_braces_s = index_from_pool("{}");
-		g_fail_s = index_from_pool("fail");
-		g_clause_s = index_from_pool(":-");
-		g_sys_elapsed_s = index_from_pool("$elapsed");
-		g_sys_queue_s = index_from_pool("$queue");
-		g_eof_s = index_from_pool("end_of_file");
-		g_lt_s = index_from_pool("<");
-		g_gt_s = index_from_pool(">");
-		g_eq_s = index_from_pool("=");
+		CHECK_SENTINEL(g_false_s = index_from_pool("false"), ERR_IDX);
+		CHECK_SENTINEL(g_true_s = index_from_pool("true"), ERR_IDX);
+		CHECK_SENTINEL(g_empty_s = index_from_pool(""), ERR_IDX);
+		CHECK_SENTINEL(g_anon_s = index_from_pool("_"), ERR_IDX);
+		CHECK_SENTINEL(g_dot_s = index_from_pool("."), ERR_IDX);
+		CHECK_SENTINEL(g_cut_s = index_from_pool("!"), ERR_IDX);
+		CHECK_SENTINEL(g_nil_s = index_from_pool("[]"), ERR_IDX);
+		CHECK_SENTINEL(g_braces_s = index_from_pool("{}"), ERR_IDX);
+		CHECK_SENTINEL(g_fail_s = index_from_pool("fail"), ERR_IDX);
+		CHECK_SENTINEL(g_clause_s = index_from_pool(":-"), ERR_IDX);
+		CHECK_SENTINEL(g_sys_elapsed_s = index_from_pool("$elapsed"), ERR_IDX);
+		CHECK_SENTINEL(g_sys_queue_s = index_from_pool("$queue"), ERR_IDX);
+		CHECK_SENTINEL(g_eof_s = index_from_pool("end_of_file"), ERR_IDX);
+		CHECK_SENTINEL(g_lt_s = index_from_pool("<"), ERR_IDX);
+		CHECK_SENTINEL(g_gt_s = index_from_pool(">"), ERR_IDX);
+		CHECK_SENTINEL(g_eq_s = index_from_pool("="), ERR_IDX);
 
 		g_streams[0].fp = stdin;
-		g_streams[0].filename = strdup("stdin");
-		g_streams[0].name = strdup("user_input");
-		g_streams[0].mode = strdup("read");
+		CHECK_SENTINEL(g_streams[0].filename = strdup("stdin"), NULL);
+		CHECK_SENTINEL(g_streams[0].name = strdup("user_input"), NULL);
+		CHECK_SENTINEL(g_streams[0].mode = strdup("read"), NULL);
 
 		g_streams[1].fp = stdout;
-		g_streams[1].filename = strdup("stdout");
-		g_streams[1].name = strdup("user_output");
-		g_streams[1].mode = strdup("append");
+		CHECK_SENTINEL(g_streams[1].filename = strdup("stdout"), NULL);
+		CHECK_SENTINEL(g_streams[1].name = strdup("user_output"), NULL);
+		CHECK_SENTINEL(g_streams[1].mode = strdup("append"), NULL);
 
 		g_streams[2].fp = stderr;
-		g_streams[2].filename = strdup("stderr");
-		g_streams[2].name = strdup("user_error");
-		g_streams[2].mode = strdup("append");
+		CHECK_SENTINEL(g_streams[2].filename = strdup("stderr"), NULL);
+		CHECK_SENTINEL(g_streams[2].name = strdup("user_error"), NULL);
+		CHECK_SENTINEL(g_streams[2].mode = strdup("append"), NULL);
 
-		if (errno)
-			goto error;
+		if (error) {
+			g_destroy();
+			return NULL;
+		}
 	}
 	return g_pool;
-
-error:
-	g_destroy();
-	return NULL;
 }
 
 
