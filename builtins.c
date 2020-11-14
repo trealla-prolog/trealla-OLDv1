@@ -1999,8 +1999,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 			for (unsigned i = 0; i < cnt; i++) {
 				make_literal(tmp+idx, g_dot_s);
 				tmp[idx].arity = 2;
-				tmp[idx].nbr_cells = ((cnt-done)*2)+1;
-				idx++;
+				tmp[idx++].nbr_cells = ((cnt-done)*2)+1;
 				cell v;
 				make_variable(&v, g_tab3[i]);
 				v.var_nbr = g_tab2[i];
@@ -2022,6 +2021,46 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	}
 
 	if (varnames) {
+		const unsigned cnt = g_tab_idx;
+		init_tmp_heap(q);
+		cell *tmp = alloc_tmp_heap(q, (cnt*4)+1);
+		ensure(tmp);
+		unsigned idx = 0;
+
+		if (cnt) {
+			unsigned done = 0;
+
+			for (unsigned i = 0; i < cnt; i++) {
+				make_literal(tmp+idx, g_dot_s);
+				tmp[idx].arity = 2;
+				tmp[idx++].nbr_cells = ((cnt-done)*2)+1;
+				cell v;
+				make_literal(&v, index_from_pool("="));
+				v.flags |= FLAG_BUILTIN;
+				v.fn = fn_iso_unify_2;
+				v.arity = 2;
+				v.nbr_cells = 3;
+				SET_OP(&v,OP_XFX);
+				tmp[idx++] = v;
+				make_literal(&v, g_tab3[i]);
+				tmp[idx++] = v;
+				make_variable(&v, g_tab3[i]);
+				v.var_nbr = g_tab2[i];
+				tmp[idx++] = v;
+				done++;
+			}
+
+			make_literal(tmp+idx++, g_nil_s);
+			tmp[0].arity = 2;
+			tmp[0].nbr_cells = idx;
+		} else
+			make_literal(tmp+idx++, g_nil_s);
+
+		cell *save = tmp;
+		tmp = alloc_heap(q, idx);
+		ensure(tmp);
+		copy_cells(tmp, save, idx);
+		unify(q, varnames, varnames_ctx, tmp, q->st.curr_frame);
 	}
 
 	if (sings) {
