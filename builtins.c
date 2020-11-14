@@ -433,6 +433,7 @@ static size_t g_tab_idx;
 static idx_t g_tab1[64000];
 static idx_t g_tab3[64000];
 static unsigned g_tab2[64000];
+static unsigned g_tab4[64000];
 
 static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
@@ -1831,6 +1832,7 @@ static void collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells)
 		} else if (is_variable(c)) {
 			for (size_t idx = 0; idx < g_tab_idx; idx++) {
 				if ((g_tab1[idx] == q->latest_ctx) && (g_tab2[idx] == c->var_nbr)) {
+					g_tab4[g_tab_idx]++;
 					found = 1;
 					break;
 				}
@@ -1840,6 +1842,7 @@ static void collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells)
 				g_tab1[g_tab_idx] = q->latest_ctx;
 				g_tab2[g_tab_idx] = c->var_nbr;
 				g_tab3[g_tab_idx] = c->val_off;
+				g_tab4[g_tab_idx] = 1;
 				g_tab_idx++;
 			}
 		}
@@ -1980,10 +1983,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 
 	if (p->nbr_vars) {
 		g_tab_idx = 0;
-		if (is_structure(tmp))
-			collect_vars(q, tmp+1, q->st.curr_frame, tmp->nbr_cells-1);
-		else
-			collect_vars(q, tmp, q->st.curr_frame, tmp->nbr_cells);
+		collect_vars(q, tmp, q->st.curr_frame, tmp->nbr_cells);
 	}
 
 	if (vars) {
@@ -2018,7 +2018,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 		tmp = alloc_heap(q, idx);
 		ensure(tmp);
 		copy_cells(tmp, save, idx);
-		//unify(q, vars, vars_ctx, tmp, q->st.curr_frame);
+		unify(q, vars, vars_ctx, tmp, q->st.curr_frame);
 	}
 
 	if (varnames) {
@@ -4327,12 +4327,7 @@ static int fn_iso_term_variables_2(query *q)
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g_varno = g->nbr_vars;
 	g_tab_idx = 0;
-
-	if (is_structure(p1))
-		collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1);
-	else
-		collect_vars(q, p1, p1_ctx, p1->nbr_cells);
-
+	collect_vars(q, p1, p1_ctx, p1->nbr_cells);
 	const unsigned cnt = g_tab_idx;
 	init_tmp_heap(q);
 	cell *tmp = alloc_tmp_heap(q, (cnt*2)+1);
@@ -7227,6 +7222,43 @@ static int fn_read_term_from_chars_3(query *q)
 	return ok;
 }
 
+static int fn_read_term_from_atom_3(query *q)
+{
+	GET_FIRST_ARG(p_chars,any);
+	GET_NEXT_ARG(p_term,any);
+	GET_NEXT_ARG(p_opts,any);
+	int n = get_named_stream("user_input");
+	stream *str = &g_streams[n];
+
+	char *src;
+	size_t len;
+
+	if (is_cstring(p_chars)) {
+		len = LEN_STR(p_chars);
+		src = malloc(len+1+1);	// final +1 is for look-ahead
+		ensure(src);
+		memcpy(src, GET_STR(p_chars), len);
+		src[len] = '\0';
+	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx, 0)) > 0) {
+		if (!len) {
+			throw_error(q, p_chars, "type_error", "atom");
+			return 0;
+		}
+
+		src = chars_list_to_string(q, p_chars, p_chars_ctx, len);
+	} else {
+		throw_error(q, p_chars, "type_error", "chars");
+		return 0;
+	}
+
+	if (src[strlen(src)-1] != '.')
+		strcat(src, ".");
+
+	int ok = do_read_term(q, str, p_term, p_term_ctx, p_opts, p_opts_ctx, src);
+	free(src);
+	return ok;
+}
+
 static int fn_write_term_to_chars_3(query *q)
 {
 	GET_FIRST_ARG(p_term,any);
@@ -9187,12 +9219,7 @@ static int fn_numbervars_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	cell *slots[MAX_ARITY] = {0};
-
-	if (is_structure(p1))
-		do_collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
-	else
-		do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
-
+	do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
 	q->nv_mask = 0;
 	unsigned end = q->nv_start = 0;
 
@@ -9213,12 +9240,7 @@ static int fn_numbervars_3(query *q)
 	GET_NEXT_ARG(p2,integer)
 	GET_NEXT_ARG(p3,integer_or_var)
 	cell *slots[MAX_ARITY] = {0};
-
-	if (is_structure(p1))
-		do_collect_vars(q, p1+1, p1_ctx, p1->nbr_cells-1, slots);
-	else
-		do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
-
+	do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
 	q->nv_mask = 0;
 	unsigned end = q->nv_start = p2->val_num;
 
@@ -10234,6 +10256,7 @@ static const struct builtins g_other_funcs[] =
 	{"name", 2, fn_iso_atom_codes_2, "?string,?list"},
 	{"read_term_from_chars", 2, fn_read_term_from_chars_2, "+chars,-term"},
 	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,+opts,+term"},
+	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+chars,-term,+opts"},
 	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "+term,+list,?chars"},
 	{"base64", 2, fn_base64_2, "?string,?string"},
 	{"urlenc", 2, fn_urlenc_2, "?string,?string"},
