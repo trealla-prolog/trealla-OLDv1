@@ -505,25 +505,17 @@ static int compkey(const void *ptr1, const void *ptr2)
 				return -1;
 			else if (p1->val_num > p2->val_num)
 				return 1;
-			else
-				return 0;
-		} else if (is_variable(p2))
-			return 0;
+		}
 	} else if (is_float(p1)) {
 		if (is_float(p2)) {
 			if (p1->val_flt < p2->val_flt)
 				return -1;
 			else if (p1->val_flt > p2->val_flt)
 				return 1;
-			else
-				return 0;
-		} else if (is_variable(p2))
-			return 0;
+		}
 	} else if (is_atom(p1)) {
 		if (is_atom(p2))
 			return strcmp(GET_STR(p1), GET_STR(p2));
-		else if (is_variable(p2))
-			return 0;
 	} else if (is_structure(p1)) {
 		if (is_structure(p2)) {
 			if (p1->arity < p2->arity)
@@ -549,14 +541,8 @@ static int compkey(const void *ptr1, const void *ptr2)
 				p1 += p1->nbr_cells;
 				p2 += p2->nbr_cells;
 			}
-
-			return 0;
-		} else if (is_variable(p2))
-			return 0;
-	} else if (is_variable(p1))
-		return 0;
-	else
-		return 0;
+		}
+	}
 
 	return 0;
 }
