@@ -1875,18 +1875,24 @@ static void parse_read_params(query *q, cell *p, cell **vars, idx_t *vars_ctx, c
 		}
 	} else if (!strcmp(GET_STR(p), "variables")) {
 		if (is_variable(p+1)) {
-			if (vars) *vars = p+1;
-			if (vars_ctx) *vars_ctx = q->st.curr_frame;
+			cell *v = p+1;
+			v = deref(q, v, q->st.curr_frame);
+			if (vars) *vars = v;
+			if (vars_ctx) *vars_ctx = q->latest_ctx;
 		}
 	} else if (!strcmp(GET_STR(p), "variable_names")) {
 		if (is_variable(p+1)) {
-			if (varnames) *varnames = p+1;
-			if (varnames_ctx) *varnames_ctx = q->st.curr_frame;
+			cell *v = p+1;
+			v = deref(q, v, q->st.curr_frame);
+			if (varnames) *varnames = v;
+			if (varnames_ctx) *varnames_ctx = q->latest_ctx;
 		}
 	} else if (!strcmp(GET_STR(p), "singletons")) {
 		if (is_variable(p+1)) {
-			if (sings) *sings = p+1;
-			if (sings_ctx) *sings_ctx = q->st.curr_frame;
+			cell *v = p+1;
+			v = deref(q, v, q->st.curr_frame);
+			if (sings) *sings = v;
+			if (sings_ctx) *sings_ctx = q->latest_ctx;
 		}
 	}
 }
@@ -2017,7 +2023,8 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 		tmp = alloc_heap(q, idx);
 		ensure(tmp);
 		copy_cells(tmp, save, idx);
-		unify(q, vars, vars_ctx, tmp, q->st.curr_frame);
+		tmp->nbr_cells = idx;
+		set_var(q, vars, vars_ctx, tmp, q->st.curr_frame);
 	}
 
 	if (varnames) {
@@ -2060,7 +2067,8 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 		tmp = alloc_heap(q, idx);
 		ensure(tmp);
 		copy_cells(tmp, save, idx);
-		unify(q, varnames, varnames_ctx, tmp, q->st.curr_frame);
+		tmp->nbr_cells = idx;
+		set_var(q, varnames, varnames_ctx, tmp, q->st.curr_frame);
 	}
 
 	if (sings) {
@@ -2106,7 +2114,8 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 		tmp = alloc_heap(q, idx);
 		ensure(tmp);
 		copy_cells(tmp, save, idx);
-		unify(q, sings, sings_ctx, tmp, q->st.curr_frame);
+		tmp->nbr_cells = idx;
+		set_var(q, sings, sings_ctx, tmp, q->st.curr_frame);
 	}
 
 	tmp = alloc_heap(q, p->t->cidx-1);
