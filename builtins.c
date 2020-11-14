@@ -1587,7 +1587,7 @@ static int fn_iso_open_3(query *q)
 	free(src);
 
 	if (!str->fp) {
-		throw_error(q, p1, "existence_error", "cannot_open_file");
+		throw_error(q, p1, "existence_error", "filespec");
 		return 0;
 	}
 
@@ -1710,7 +1710,7 @@ static int fn_iso_open_4(query *q)
 	free(src);
 
 	if (!str->fp) {
-		throw_error(q, p1, "existence_error", "cannot_open_file");
+		throw_error(q, p1, "existence_error", "filespec");
 		return 0;
 	}
 
@@ -7466,7 +7466,7 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 		deconsult(src);
 
 		if (!module_load_file(q->m, src)) {
-			throw_error(q, p1, "existence_error", "cannot_open_file");
+			throw_error(q, p1, "existence_error", "filespec");
 			return 0;
 		}
 
@@ -7474,7 +7474,7 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 	}
 
 	if (strcmp(GET_STR(p1), ":")) {
-		throw_error(q, p1, "type_error", "not_a_file_spec");
+		throw_error(q, p1, "type_error", "filespec");
 		return 0;
 	}
 
@@ -7482,7 +7482,7 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 	cell *file = deref(q, p1+2, p1_ctx);
 
 	if (!is_atom(mod) || !is_atom(file)) {
-		throw_error(q, p1, "type_error", "not_a_file_spec");
+		throw_error(q, p1, "type_error", "filespec");
 		return 0;
 	}
 
@@ -7492,7 +7492,7 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 	tmp_m->make_public = 1;
 
 	if (!module_load_file(tmp_m, src)) {
-		throw_error(q, p1, "existence_error", "cannot_open_file");
+		throw_error(q, p1, "existence_error", "filespec");
 		destroy_module(tmp_m);
 		return 0;
 	}
@@ -7556,7 +7556,7 @@ static int fn_absolute_file_name_3(query *q)
 		*dst = '\0';
 		char *ptr = getenv(envbuf);
 		if (!ptr) {
-			throw_error(q, p_abs, "existence_error", "not_a_valid_environment_variable");
+			throw_error(q, p_abs, "existence_error", "environment_variable");
 			return 0;
 		}
 
@@ -7571,7 +7571,7 @@ static int fn_absolute_file_name_3(query *q)
 		char *tmpbuf2;
 
 		if ((tmpbuf2 = realpath(tmpbuf, NULL)) == NULL) {
-			throw_error(q, p_abs, "domain_error", "not_a_valid_filespec");
+			throw_error(q, p_abs, "existence_error", "filespec");
 			free(tmpbuf);
 			return 0;
 		}
@@ -7580,7 +7580,7 @@ static int fn_absolute_file_name_3(query *q)
 		tmpbuf = tmpbuf2;
 	} else {
 		if ((tmpbuf = realpath(s, NULL)) == NULL) {
-			throw_error(q, p_abs, "domain_error", "not_a_valid_filespec");
+			throw_error(q, p_abs, "existence_error", "filespec");
 			return 0;
 		}
 	}
