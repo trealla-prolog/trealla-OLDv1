@@ -1331,7 +1331,7 @@ static int fn_iso_atom_concat_3(query *q)
 
 		char *dst = strndup(GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
 		cell tmp = make_cstring(dst);
-		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		free(dst);
 		return 1;
 	}
