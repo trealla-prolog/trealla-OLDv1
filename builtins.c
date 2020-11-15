@@ -4658,33 +4658,6 @@ static int fn_iso_copy_term_2(query *q)
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
-static void stash_me(query *q, term *t)
-{
-	int last_match = !q->st.curr_clause->next && !q->st.iter;
-
-	if (last_match)
-		drop_choice(q);
-	else {
-		frame *g = GET_FRAME(q->st.curr_frame);
-		g->any_choices = true;
-		idx_t curr_choice = q->cp - 1;
-		choice *ch = q->choices + curr_choice;
-		ch->st.curr_clause = q->st.curr_clause;
-	}
-
-	unsigned nbr_vars = t->nbr_vars;
-	idx_t new_frame = q->st.fp++;
-	frame *g = GET_FRAME(new_frame);
-	g->prev_frame = q->st.curr_frame;
-	g->curr_cell = NULL;
-	g->cgen = q->cgen;
-	g->overflow = 0;
-	g->any_choices = false;
-	g->did_cut = false;
-
-	q->st.sp += nbr_vars;
-}
-
 static int fn_iso_clause_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
@@ -4704,7 +4677,8 @@ static int fn_iso_clause_2(query *q)
 		}
 
 		if (ok) {
-			stash_me(q, t);
+			bool last_match = !q->st.curr_clause->next && !q->st.iter;
+			stash_me(q, t, last_match);
 			return 1;
 		}
 
@@ -4816,6 +4790,9 @@ static int fn_iso_retract_1(query *q)
 
 	if (!match_clause(q, p1, p1_ctx))
 		return 0;
+
+	term *t = &q->st.curr_clause->t;
+	stash_me(q, t, false);
 
 	clause *r = retract_from_db(q->m, q->st.curr_clause);
 	if (!r) return 0;
@@ -6041,7 +6018,8 @@ static int fn_clause_3(query *q)
 		}
 
 		if (ok) {
-			stash_me(q, t);
+			bool last_match = !q->st.curr_clause->next && !q->st.iter;
+			stash_me(q, t, last_match);
 			return 1;
 		}
 

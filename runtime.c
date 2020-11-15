@@ -471,6 +471,31 @@ static void commit_me(query *q, term *t)
 	q->nv_mask = 0;
 }
 
+void stash_me(query *q, term *t, bool last_match)
+{
+	if (last_match)
+		drop_choice(q);
+	else {
+		frame *g = GET_FRAME(q->st.curr_frame);
+		g->any_choices = true;
+		idx_t curr_choice = q->cp - 1;
+		choice *ch = q->choices + curr_choice;
+		ch->st.curr_clause = q->st.curr_clause;
+	}
+
+	unsigned nbr_vars = t->nbr_vars;
+	idx_t new_frame = q->st.fp++;
+	frame *g = GET_FRAME(new_frame);
+	g->prev_frame = q->st.curr_frame;
+	g->curr_cell = NULL;
+	g->cgen = q->cgen;
+	g->overflow = 0;
+	g->any_choices = false;
+	g->did_cut = false;
+
+	q->st.sp += nbr_vars;
+}
+
 void cut_me(query *q, bool local_cut)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
