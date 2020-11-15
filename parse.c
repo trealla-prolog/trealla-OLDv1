@@ -667,7 +667,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 	if (h->is_persist)
 		r->t.is_persist = true;
 
-	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1))
+	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1) && !m->noindex)
 		reindex_rule(h);
 
 	return r;
@@ -782,7 +782,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 	if (h->is_persist)
 		r->t.is_persist = true;
 
-	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1))
+	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1) && !m->noindex)
 		reindex_rule(h);
 
 	return r;
@@ -834,13 +834,12 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	if (h) {
 		h->is_dynamic = true;
 
-		if (!h->index) {
+		if (!h->index && !m->noindex)
 			h->index = sl_create(compkey);
-		}
 	}
 
-	if (!h || !h->index)
-		m->error = true;  //cehteh: not 100% sure about this
+	if (!h)
+		m->error = true;
 }
 
 static void set_persist_in_db(module *m, const char *name, unsigned arity)
@@ -855,10 +854,8 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 	h->is_dynamic = true;
 	h->is_persist = true;
 
-	if (!h->index) {
+	if (!h->index && !m->noindex)
 		h->index = sl_create(compkey);
-		ensure(h->index);
-	}
 
 	m->use_persist = 1;
 }
@@ -3396,6 +3393,7 @@ int get_halt_code(prolog *pl) { return pl->m->halt_code; }
 void set_trace(prolog *pl) { pl->m->trace = true; }
 void set_quiet(prolog *pl) { pl->m->quiet = 1; }
 void set_stats(prolog *pl) { pl->m->stats = 1; }
+void set_noindex(prolog *pl) { pl->m->noindex = 1; }
 void set_opt(prolog *pl, int level) { pl->m->opt = level; }
 
 bool pl_eval(prolog *pl, const char *src)

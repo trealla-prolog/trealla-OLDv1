@@ -19,6 +19,7 @@ bool get_dump_vars(prolog*);
 void set_trace(prolog*);
 void set_quiet(prolog*);
 void set_stats(prolog*);
+void set_noindex(prolog*);
 void set_opt(prolog*, int onoff);
 
 extern int g_tpl_interrupt, g_ac, g_avc;

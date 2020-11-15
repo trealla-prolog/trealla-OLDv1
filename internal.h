@@ -434,6 +434,7 @@ struct module_ {
 	bool dirty:1;
 	bool opt:1;
 	bool stats:1;
+	bool noindex:1;
 	bool iso_only:1;
 	bool use_persist:1;
 	bool loading:1;

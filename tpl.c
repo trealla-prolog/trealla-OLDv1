@@ -189,6 +189,8 @@ int main(int ac, char *av[])
 			set_trace(pl);
 		else if (!strcmp(av[i], "--stats"))
 			set_stats(pl);
+		else if (!strcmp(av[i], "--noindex"))
+			set_noindex(pl);
 		else if (!strcmp(av[i], "--ns"))
 			ns = 1;
 		else if (!strcmp(av[i], "-d") || !strcmp(av[i], "--daemon"))
@@ -269,29 +271,30 @@ int main(int ac, char *av[])
 		printf("Trealla ProLog (c) Infradig 2020, %s\n", VERSION);
 
 	if ((version == 2) && !quiet) {
-		fprintf(stderr, "Usage:\n");
-		fprintf(stderr, "  tpl [options] [files] [-- args]\n");
-		fprintf(stderr, "Options:\n");
-		fprintf(stderr, "  -f file\t\t- consult file\n");
-		fprintf(stderr, "  -g goal\t\t- query goal (only used once)\n");
-		fprintf(stderr, "  --library path\t- alt to TPL_LIBRARY_PATH env variable\n");
-		fprintf(stderr, "  -v, --version\t\t- print version info and exit\n");
-		fprintf(stderr, "  -h, --help\t\t- print help info and exit\n");
-		fprintf(stderr, "  -O0, --noopt\t\t- turn off optimization\n");
-		fprintf(stderr, "  -q, --quiet\t\t- quiet mode\n");
-		fprintf(stderr, "  -t, --trace\t\t- trace mode\n");
-		fprintf(stderr, "  -d, --daemon\t\t- daemonize\n");
-		fprintf(stderr, "  -w, --watchdog\t- create watchdog\n");
-		fprintf(stderr, "  --consult\t\t- consult from STDIN\n");
-		fprintf(stderr, "  --stats\t\t- print stats\n");
-		fprintf(stderr, "  --ns\t\t\t- non-stop (to top-level)\n");
+		fprintf(stdout, "Usage:\n");
+		fprintf(stdout, "  tpl [options] [files] [-- args]\n");
+		fprintf(stdout, "Options:\n");
+		fprintf(stdout, "  -f file\t\t- consult file\n");
+		fprintf(stdout, "  -g goal\t\t- query goal (only used once)\n");
+		fprintf(stdout, "  --library path\t- alt to TPL_LIBRARY_PATH env variable\n");
+		fprintf(stdout, "  -v, --version\t\t- print version info and exit\n");
+		fprintf(stdout, "  -h, --help\t\t- print help info and exit\n");
+		fprintf(stdout, "  -O0, --noopt\t\t- turn off optimization\n");
+		fprintf(stdout, "  -q, --quiet\t\t- quiet mode\n");
+		fprintf(stdout, "  -t, --trace\t\t- trace mode\n");
+		fprintf(stdout, "  -d, --daemon\t\t- daemonize\n");
+		fprintf(stdout, "  -w, --watchdog\t- create watchdog\n");
+		fprintf(stdout, "  --consult\t\t- consult from STDIN\n");
+		fprintf(stdout, "  --stats\t\t- print stats\n");
+		fprintf(stdout, "  --noindex\t\t- don't use tern indexing\n");
+		fprintf(stdout, "  --ns\t\t\t- non-stop (to top-level)\n");
 	}
 
 	if ((version && !quiet) || ns)
 		return 0;
 
 #ifdef FAULTINJECT_ENABLED
-	printf("CDEBUG FAULT INJECTION ENABLED!\n"); //Don't use this build for benchmarking and production
+	fprintf(stderr, "CDEBUG FAULT INJECTION ENABLED!\n"); //Don't use this build for benchmarking and production
 #endif
 
 	if (isatty(0))

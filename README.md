@@ -76,6 +76,7 @@ where options can be:
 	-w, --watchdog     - create watchdog
 	--stats            - print stats
 	--consult          - consult from STDIN
+	--noindex          - don't use term indexing
 	--ns               - non-stop (don't drop to REPL)
 
 For example:
