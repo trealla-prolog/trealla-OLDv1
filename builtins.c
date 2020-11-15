@@ -1773,9 +1773,6 @@ static int fn_iso_open_4(query *q)
 
 static int fn_iso_close_1(query *q)
 {
-	if (q->retry)
-		return 0;
-
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];

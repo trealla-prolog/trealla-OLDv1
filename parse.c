@@ -910,8 +910,7 @@ static cell *make_cell(parser *p)
 
 void destroy_parser(parser *p)
 {
-	if (p)
-	{
+	if (p) {
 		clear_term(p->t);
 		free(p->token);
 		free(p->t);
@@ -923,8 +922,7 @@ parser *create_parser(module *m)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	parser *p = calloc(1, sizeof(parser));
-	if (p)
-	{
+	if (p) {
 		p->token = calloc(p->token_size=INITIAL_TOKEN_SIZE+1, 1);
 		idx_t nbr_cells = INITIAL_NBR_CELLS;
 		p->t = calloc(sizeof(term)+(sizeof(cell)*nbr_cells), 1);
@@ -942,8 +940,7 @@ parser *create_parser(module *m)
 
 void destroy_parser_nodelete(parser *p)
 {
-	if (p)
-	{
+	if (p) {
 		clear_term_nodelete(p->t);
 		free(p->token);
 		free(p->t);
@@ -1045,8 +1042,7 @@ query *create_query(module *m, int is_task)
 query *create_task(query *q, cell *curr_cell)
 {
 	query *subq = create_query(q->m, 1);
-	if (subq)
-	{
+	if (subq) {
 		subq->parent = q;
 		subq->st.fp = 1;
 		subq->is_task = true;
