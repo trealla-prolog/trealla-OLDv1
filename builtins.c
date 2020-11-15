@@ -1517,7 +1517,7 @@ static int fn_iso_stream_property_2(query *q)
 		cell *c = p1 + 1;
 		c = deref(q, c, p1_ctx);
 		cell tmp;
-		make_int(&tmp, str->p?str->p->line_nbr:0);
+		make_int(&tmp, str->p?str->p->line_nbr:1);
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
 
