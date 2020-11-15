@@ -1959,6 +1959,24 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 					return 0;
 				}
 
+				if (vars) {
+					cell tmp;
+					make_literal(&tmp, g_nil_s);
+					set_var(q, vars, vars_ctx, &tmp, q->st.curr_frame);
+				}
+
+				if (varnames) {
+					cell tmp;
+					make_literal(&tmp, g_nil_s);
+					set_var(q, varnames, varnames_ctx, &tmp, q->st.curr_frame);
+				}
+
+				if (sings) {
+					cell tmp;
+					make_literal(&tmp, g_nil_s);
+					set_var(q, sings, sings_ctx, &tmp, q->st.curr_frame);
+				}
+
 				//destroy_parser(p);
 				//str->p = NULL;
 				cell tmp;
