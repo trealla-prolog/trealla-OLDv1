@@ -386,7 +386,7 @@ static rule *find_matching_rule_internal(module *m, cell *c, bool quiet)
 
 		if (!quiet && h && (m != save_m) && !h->is_public &&
 			strcmp(GET_STR(c), "dynamic") && strcmp(GET_STR(c), "module")) {
-			fprintf(stdout, "Error: not a public method %s/%u\n", GET_STR(c), c->arity);
+			fprintf(stderr, "Error: not a public method %s/%u\n", GET_STR(c), c->arity);
 			break;
 		}
 
@@ -574,7 +574,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 	cell *c = get_head(t->cells);
 
 	if (!c) {
-		fprintf(stdout, "Error: not a fact or clause\n");
+		fprintf(stderr, "Error: not a fact or clause\n");
 		return NULL;
 	}
 
@@ -596,7 +596,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 		m = find_module(mod);
 
 		if (!m) {
-			fprintf(stdout, "Error: unknown module: %s\n", mod);
+			fprintf(stderr, "Error: unknown module: %s\n", mod);
 			return NULL;
 		}
 
@@ -613,7 +613,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 
 	if (h && !consulting) {
 		if (!h->is_dynamic) {
-			fprintf(stdout, "Error: not a fact or clause\n");
+			fprintf(stderr, "Error: not a fact or clause\n");
 			return NULL;
 		}
 	}
@@ -688,7 +688,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 	cell *c = get_head(t->cells);
 
 	if (!c) {
-		fprintf(stdout, "Error: no fact or clause head\n");
+		fprintf(stderr, "Error: no fact or clause head\n");
 		return NULL;
 	}
 
@@ -710,7 +710,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 		m = find_module(mod);
 
 		if (!m) {
-			fprintf(stdout, "Error: unknown module: %s\n", mod);
+			fprintf(stderr, "Error: unknown module: %s\n", mod);
 			return NULL;
 		}
 
@@ -727,7 +727,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 
 	if (h && !consulting) {
 		if (!h->is_dynamic) {
-			fprintf(stdout, "Error: not a fact or clause\n");
+			fprintf(stderr, "Error: not a fact or clause\n");
 			return NULL;
 		}
 	}
@@ -1166,7 +1166,7 @@ static void directives(parser *p, term *t)
 		const char *name = GET_STR(p1);
 
 		if (find_module(name)) {
-			fprintf(stdout, "Error: module already loaded: %s\n", name);
+			fprintf(stderr, "Error: module already loaded: %s\n", name);
 			p->error = true;
 			return;
 		}
@@ -1301,7 +1301,7 @@ static void directives(parser *p, term *t)
 					mod[sizeof(mod)-1] = name[sizeof(name)-1] = '\0';
 
 					if (!is_multifile_in_db(mod, name, c_arity->val_num)) {
-						fprintf(stdout, "Error: not multile %s:%s/%u\n", mod, name, (unsigned)c_arity->val_num);
+						fprintf(stderr, "Error: not multile %s:%s/%u\n", mod, name, (unsigned)c_arity->val_num);
 						p->error = true;
 						return;
 					}
@@ -1311,7 +1311,7 @@ static void directives(parser *p, term *t)
 			} else if (!strcmp(GET_STR(p1), ","))
 				p1 += 1;
 			else {
-				fprintf(stdout, "Error: unknown module, line nbr %d\n", p->line_nbr);
+				fprintf(stderr, "Error: unknown module, line nbr %d\n", p->line_nbr);
 				p->error = true;
 				return;
 			}
@@ -1354,7 +1354,7 @@ static void directives(parser *p, term *t)
 				p->m->flag.double_quote_atom = p->m->flag.double_quote_codes = false;
 				p->m->flag.double_quote_chars = true;
 			} else {
-				fprintf(stdout, "Error: unknown value\n");
+				fprintf(stderr, "Error: unknown value\n");
 				p->error = true;
 				return;
 			}
@@ -1384,7 +1384,7 @@ static void directives(parser *p, term *t)
 		cell *p1 = c + 1, *p2 = c + 2, *p3 = c + 3;
 
 		if (!is_integer(p1) || !is_literal(p2) || !is_atom(p3)) {
-			fprintf(stdout, "Error: unknown op\n");
+			fprintf(stderr, "Error: unknown op\n");
 			p->error = true;
 			return;
 		}
@@ -1407,12 +1407,12 @@ static void directives(parser *p, term *t)
 		else if (!strcmp(spec, "yfx"))
 			optype = OP_YFX;
 		else {
-			fprintf(stdout, "Error: unknown op spec val_type\n");
+			fprintf(stderr, "Error: unknown op spec val_type\n");
 			return;
 		}
 
 		if (!set_op(p->m, GET_STR(p3), optype, p1->val_num)) {
-			fprintf(stdout, "Error: could not set op\n");
+			fprintf(stderr, "Error: could not set op\n");
 			return;
 		}
 
@@ -1469,7 +1469,7 @@ void parser_xref(parser *p, term *t, rule *parent)
 
 			if (h && (m != p->m) && !h->is_public &&
 				strcmp(GET_STR(c), "dynamic") && strcmp(GET_STR(c), "module")) {
-				fprintf(stdout, "Error: not a public method %s/%u\n", GET_STR(c), c->arity);
+				fprintf(stderr, "Error: not a public method %s/%u\n", GET_STR(c), c->arity);
 				//p->error = true;
 				break;
 			}
@@ -1541,7 +1541,7 @@ static idx_t get_varno(parser *p, const char *src)
 	size_t len = strlen(src);
 
 	if ((offset+len+1) >= MAX_VAR_POOL_SIZE) {
-		fprintf(stdout, "Error: variable pool exhausted\n");
+		fprintf(stderr, "Error: variable pool exhausted\n");
 		p->error = true;
 		return 0;
 	}
@@ -1570,7 +1570,7 @@ void parser_assign_vars(parser *p, unsigned start)
 		c->var_nbr += start;
 
 		if (c->var_nbr == MAX_ARITY) {
-			fprintf(stdout, "Error: max vars per term reached\n");
+			fprintf(stderr, "Error: max vars per term reached\n");
 			p->error = true;
 			return;
 		}
@@ -1688,7 +1688,7 @@ static int attach_ops(parser *p, idx_t start_idx)
 			idx_t off = (idx_t)((c+1)-p->t->cells);
 
 			if (off >= p->t->cidx) {
-				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
+				//fprintf(stderr, "Error: missing operand to '%s'\n", GET_STR(c));
 				//p->error = true;
 				c->arity = 0;
 				return 0;
@@ -1703,7 +1703,7 @@ static int attach_ops(parser *p, idx_t start_idx)
 			idx_t off = (idx_t)((c+1)-p->t->cells);
 
 			if (off >= p->t->cidx) {
-				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
+				//fprintf(stderr, "Error: missing operand to '%s'\n", GET_STR(c));
 				//p->error = true;
 				return 0;
 			}
@@ -1801,7 +1801,7 @@ static void parser_dcg_rewrite(parser *p)
 	destroy_parser_nodelete(p2);
 
 	if (!src) {
-		fprintf(stdout, "Error: syntax error, dcg_translate, line nbr %d\n", line_nbr);
+		fprintf(stderr, "Error: syntax error, dcg_translate, line nbr %d\n", line_nbr);
 		p->error = true;
 		return;
 	}
@@ -1878,7 +1878,7 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			if ((v > INT64_MAX) || (v < INT64_MIN)) {
-				fprintf(stdout, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
+				fprintf(stderr, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
 				p->error = true;
 				return -1;
 			}
@@ -1902,7 +1902,7 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			if ((v > INT64_MAX) || (v < INT64_MIN)) {
-				fprintf(stdout, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
+				fprintf(stderr, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
 				p->error = true;
 				return -1;
 			}
@@ -1930,7 +1930,7 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			if ((v > INT64_MAX) || (v < INT64_MIN)) {
-				fprintf(stdout, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
+				fprintf(stderr, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
 				p->error = true;
 				return -1;
 			}
@@ -1953,7 +1953,7 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		if ((v > INT64_MAX) || (v < INT64_MIN)) {
-			fprintf(stdout, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
+			fprintf(stderr, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
 			p->error = true;
 			return -1;
 		}
@@ -1978,7 +1978,7 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 		s = *srcptr;
 
 		if ((*s == '(') || (isalpha(*s)) || 0) {
-			fprintf(stdout, "Error: syntax error, parsing number, line %d\n", p->line_nbr);
+			fprintf(stderr, "Error: syntax error, parsing number, line %d\n", p->line_nbr);
 			p->error = true;
 		}
 
@@ -2080,7 +2080,7 @@ static int get_escape(const char **_src, bool *error)
 		}
 
 		if (!unicode && (*src++ != '\\')) {
-			fprintf(stdout, "Error: syntax error, closing \\ missing\n");
+			fprintf(stderr, "Error: syntax error, closing \\ missing\n");
 			*_src = src;
 			*error = true;
 			return 0;
@@ -2146,7 +2146,7 @@ static int get_token(parser *p, int last_op)
 			ch = get_escape(&src, &p->error);
 
 			if (p->error) {
-				fprintf(stdout, "Error: sysntax error, illegal character escape, line %d\n", p->line_nbr);
+				fprintf(stderr, "Error: sysntax error, illegal character escape, line %d\n", p->line_nbr);
 				p->error = true;
 				return 0;
 			}
@@ -2338,7 +2338,7 @@ static int get_token(parser *p, int last_op)
 							break;
 						}
 					} else {
-						fprintf(stdout, "Error: syntax error, illegal character escape, line %d\n", p->line_nbr);
+						fprintf(stderr, "Error: syntax error, illegal character escape, line %d\n", p->line_nbr);
 						p->error = true;
 						return 0;
 					}
@@ -2627,7 +2627,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 			arity++;
 
 			if (arity > MAX_ARITY) {
-				fprintf(stdout, "Error: max arity reached, line %d: %s\n", p->line_nbr, p->srcptr);
+				fprintf(stderr, "Error: max arity reached, line %d: %s\n", p->line_nbr, p->srcptr);
 				p->error = true;
 				break;
 			}
@@ -2643,7 +2643,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 
 		if (!p->quoted && p->start_term &&
 			(!strcmp(p->token, ",") || !strcmp(p->token, "]") || !strcmp(p->token, ")") || !strcmp(p->token, "}"))) {
-			fprintf(stdout, "Error: syntax error, start of term expected, line %d: %s\n", p->line_nbr, p->srcptr);
+			fprintf(stderr, "Error: syntax error, start of term expected, line %d: %s\n", p->line_nbr, p->srcptr);
 			p->error = true;
 			break;
 		}
@@ -2654,7 +2654,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 		}
 
 		if (p->is_variable && (*p->srcptr == '(')) {
-			fprintf(stdout, "Error: syntax error, line %d: %s\n", p->line_nbr, p->srcptr);
+			fprintf(stderr, "Error: syntax error, line %d: %s\n", p->line_nbr, p->srcptr);
 			p->error = true;
 			break;
 		}
@@ -2696,7 +2696,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 
 #if 0
 		if (p->is_op && !precedence) {
-			fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, %s\n", p->line_nbr, p->token, p->srcptr);
+			fprintf(stderr, "Error: syntax error, or operator expected, line %d: %s, %s\n", p->line_nbr, p->token, p->srcptr);
 			p->error = true;
 			break;
 		}
@@ -2869,7 +2869,7 @@ module *module_load_text(module *m, const char *src)
 	parser_tokenize(p, 0, 0);
 
 	if (!p->error && !p->end_of_term && p->t->cidx) {
-		fprintf(stdout, "Error: syntax error, incomplete statement\n");
+		fprintf(stderr, "Error: syntax error, incomplete statement\n");
 		p->error = true;
 	}
 
@@ -2918,7 +2918,7 @@ bool module_load_fp(module *m, FILE *fp)
 	free(p->save_line);
 
 	if (!p->error && !p->end_of_term && p->t->cidx) {
-		fprintf(stdout, "Error: syntax error, incomplete statement\n");
+		fprintf(stderr, "Error: syntax error, incomplete statement\n");
 		p->error = true;
 	}
 
@@ -3029,7 +3029,7 @@ bool module_save_file(module *m, const char *filename)
 	FILE *fp = fopen(filename, "w");
 
 	if (!fp) {
-		fprintf(stdout, "Error: file '%s' cannot be created\n", filename);
+		fprintf(stderr, "Error: file '%s' cannot be created\n", filename);
 		return false;
 	}
 
