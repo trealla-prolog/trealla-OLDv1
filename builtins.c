@@ -6245,14 +6245,14 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 
 static int fn_listing_1(query *q)
 {
-	GET_FIRST_ARG(p1,literal);
+	GET_FIRST_ARG(p1,any);
 	idx_t name = p1->val_off;
 	unsigned arity = -1;
 
 	if (p1->arity) {
 		cell *p2 = p1 + 1;
 
-		if (!is_literal(p2)) {
+		if (!is_atom(p2)) {
 			throw_error(q, p2, "type_error", "atom");
 			q->error = 1;
 			return 0;
@@ -6266,7 +6266,7 @@ static int fn_listing_1(query *q)
 			return 0;
 		}
 
-		name = p2->val_off;
+		name = index_from_pool(GET_STR(p2));
 		arity = p3->val_num;
 
 		if (!strcmp(GET_STR(p1), "//"))
