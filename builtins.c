@@ -2045,15 +2045,18 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 			make_literal(tmp+idx++, g_nil_s);
 			tmp[0].arity = 2;
 			tmp[0].nbr_cells = idx;
-		} else
-			make_literal(tmp+idx++, g_nil_s);
 
-		cell *save = tmp;
-		tmp = alloc_heap(q, idx);
-		ensure(tmp);
-		copy_cells(tmp, save, idx);
-		tmp->nbr_cells = idx;
-		set_var(q, vars, vars_ctx, tmp, q->st.curr_frame);
+			cell *save = tmp;
+			tmp = alloc_heap(q, idx);
+			ensure(tmp);
+			copy_cells(tmp, save, idx);
+			tmp->nbr_cells = idx;
+			set_var(q, vars, vars_ctx, tmp, q->st.curr_frame);
+		} else {
+			cell tmp;
+			make_literal(&tmp, g_nil_s);
+			set_var(q, vars, vars_ctx, &tmp, q->st.curr_frame);
+		}
 	}
 
 	if (varnames) {
@@ -2089,15 +2092,18 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 			make_literal(tmp+idx++, g_nil_s);
 			tmp[0].arity = 2;
 			tmp[0].nbr_cells = idx;
-		} else
-			make_literal(tmp+idx++, g_nil_s);
 
-		cell *save = tmp;
-		tmp = alloc_heap(q, idx);
-		ensure(tmp);
-		copy_cells(tmp, save, idx);
-		tmp->nbr_cells = idx;
-		set_var(q, varnames, varnames_ctx, tmp, q->st.curr_frame);
+			cell *save = tmp;
+			tmp = alloc_heap(q, idx);
+			ensure(tmp);
+			copy_cells(tmp, save, idx);
+			tmp->nbr_cells = idx;
+			set_var(q, varnames, varnames_ctx, tmp, q->st.curr_frame);
+		} else {
+			cell tmp;
+			make_literal(&tmp, g_nil_s);
+			set_var(q, varnames, varnames_ctx, &tmp, q->st.curr_frame);
+		}
 	}
 
 	if (sings) {
@@ -2136,15 +2142,18 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 			make_literal(tmp+idx++, g_nil_s);
 			tmp[0].arity = 2;
 			tmp[0].nbr_cells = idx;
-		} else
-			make_literal(tmp+idx++, g_nil_s);
 
-		cell *save = tmp;
-		tmp = alloc_heap(q, idx);
-		ensure(tmp);
-		copy_cells(tmp, save, idx);
-		tmp->nbr_cells = idx;
-		set_var(q, sings, sings_ctx, tmp, q->st.curr_frame);
+			cell *save = tmp;
+			tmp = alloc_heap(q, idx);
+			ensure(tmp);
+			copy_cells(tmp, save, idx);
+			tmp->nbr_cells = idx;
+			set_var(q, sings, sings_ctx, tmp, q->st.curr_frame);
+		} else {
+			cell tmp;
+			make_literal(&tmp, g_nil_s);
+			set_var(q, sings, sings_ctx, &tmp, q->st.curr_frame);
+		}
 	}
 
 	tmp = alloc_heap(q, p->t->cidx-1);
