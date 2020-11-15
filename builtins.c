@@ -1959,8 +1959,8 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 					return 0;
 				}
 
-				destroy_parser(p);
-				str->p = NULL;
+				//destroy_parser(p);
+				//str->p = NULL;
 				cell tmp;
 				make_literal(&tmp, g_eof_s);
 				return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -2062,7 +2062,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 			for (unsigned i = 0; i < cnt; i++) {
 				make_literal(tmp+idx, g_dot_s);
 				tmp[idx].arity = 2;
-				tmp[idx++].nbr_cells = ((cnt-done)*2)+1;
+				tmp[idx++].nbr_cells = ((cnt-done)*4)+1;
 				cell v;
 				make_literal(&v, index_from_pool("="));
 				v.flags |= FLAG_BUILTIN;
@@ -2109,7 +2109,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 
 				make_literal(tmp+idx, g_dot_s);
 				tmp[idx].arity = 2;
-				tmp[idx++].nbr_cells = ((cnt-done)*2)+1;
+				tmp[idx++].nbr_cells = ((cnt-done)*4)+1;
 				cell v;
 				make_literal(&v, index_from_pool("="));
 				v.flags |= FLAG_BUILTIN;
