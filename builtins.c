@@ -1896,21 +1896,21 @@ static void parse_read_params(query *q, cell *p, cell **vars, idx_t *vars_ctx, c
 	} else if (!strcmp(GET_STR(p), "variables")) {
 		if (is_variable(p+1)) {
 			cell *v = p+1;
-			v = deref(q, v, q->st.curr_frame);
+			v = deref(q, v, q->latest_ctx);
 			if (vars) *vars = v;
 			if (vars_ctx) *vars_ctx = q->latest_ctx;
 		}
 	} else if (!strcmp(GET_STR(p), "variable_names")) {
 		if (is_variable(p+1)) {
 			cell *v = p+1;
-			v = deref(q, v, q->st.curr_frame);
+			v = deref(q, v, q->latest_ctx);
 			if (varnames) *varnames = v;
 			if (varnames_ctx) *varnames_ctx = q->latest_ctx;
 		}
 	} else if (!strcmp(GET_STR(p), "singletons")) {
 		if (is_variable(p+1)) {
 			cell *v = p+1;
-			v = deref(q, v, q->st.curr_frame);
+			v = deref(q, v, q->latest_ctx);
 			if (sings) *sings = v;
 			if (sings_ctx) *sings_ctx = q->latest_ctx;
 		}
