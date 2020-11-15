@@ -1778,7 +1778,7 @@ static int fn_iso_close_1(query *q)
 	stream *str = &g_streams[n];
 
 	if (str->p)
-		destroy_parser(str->p);
+		destroy_parser_nodelete(str->p);
 
 	if (n <= 2)
 		return 0;
@@ -1960,6 +1960,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 				}
 
 				destroy_parser(p);
+				str->p = NULL;
 				cell tmp;
 				make_literal(&tmp, g_eof_s);
 				return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -1991,6 +1992,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 
 	if (!parser_attach(p, 0))
 		return 0;
+
 
 	frame *g = GET_FRAME(q->st.curr_frame);
 	parser_assign_vars(p, g->nbr_vars);
@@ -5260,7 +5262,11 @@ static int fn_iso_functor_3(query *q)
 		tmp[0].val_type = TYPE_LITERAL;
 		tmp[0].arity = arity;
 		tmp[0].nbr_cells = 1 + arity;
-		tmp[0].val_off = p2->val_off;
+
+		if (is_cstring(p2))
+			tmp[0].val_off = index_from_pool(GET_STR(p2));
+		else
+			tmp[0].val_off = p2->val_off;
 
 		for (unsigned i = 1; i <= arity; i++) {
 			tmp[i].val_type = TYPE_VARIABLE;

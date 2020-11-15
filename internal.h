@@ -500,6 +500,7 @@ int call_me(query *q, cell *p1);
 void undo_me(query *q);
 parser *create_parser(module *m);
 void destroy_parser(parser *p);
+void destroy_parser_nodelete(parser *p);
 unsigned parser_tokenize(parser *p, int args, int consing);
 bool parser_attach(parser *p, int start_idx);
 void parser_xref(parser *p, term *t, rule *parent);
