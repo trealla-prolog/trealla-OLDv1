@@ -1778,7 +1778,7 @@ static int fn_iso_close_1(query *q)
 	stream *str = &g_streams[n];
 
 	if (str->p)
-		destroy_parser_nodelete(str->p);
+		destroy_parser(str->p);
 
 	if (n <= 2)
 		return 0;
