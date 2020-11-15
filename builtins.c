@@ -1993,7 +1993,6 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	if (!parser_attach(p, 0))
 		return 0;
 
-
 	frame *g = GET_FRAME(q->st.curr_frame);
 	parser_assign_vars(p, g->nbr_vars);
 	parser_xref(p, p->t, NULL);
