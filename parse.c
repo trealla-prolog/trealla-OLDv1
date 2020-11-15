@@ -386,7 +386,7 @@ static rule *find_matching_rule_internal(module *m, cell *c, bool quiet)
 
 		if (!quiet && h && (m != save_m) && !h->is_public &&
 			strcmp(GET_STR(c), "dynamic") && strcmp(GET_STR(c), "module")) {
-			fprintf(stdout, "Warning: not a public method %s/%u\n", GET_STR(c), c->arity);
+			fprintf(stdout, "Warning: match not a public method %s/%u\n", GET_STR(c), c->arity);
 			break;
 		}
 
@@ -1469,7 +1469,7 @@ void parser_xref(parser *p, term *t, rule *parent)
 
 			if (h && (m != p->m) && !h->is_public &&
 				strcmp(GET_STR(c), "dynamic") && strcmp(GET_STR(c), "module")) {
-				fprintf(stdout, "Warning: not a public method %s/%u\n", GET_STR(c), c->arity);
+				//fprintf(stdout, "Warning: xref not a public method %s/%u\n", GET_STR(c), c->arity);
 				//p->error = true;
 				break;
 			}
