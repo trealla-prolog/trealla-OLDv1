@@ -1493,6 +1493,8 @@ static void parser_xref_db(parser *p)
 		for (clause *r = h->head; r; r = r->next)
 			parser_xref(p, &r->t, h);
 	}
+
+	p->end_of_term = false;
 }
 
 static void check_first_cut(parser *p)

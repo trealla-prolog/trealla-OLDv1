@@ -2040,7 +2040,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	}
 
 	if (vars) {
-		const unsigned cnt = g_tab_idx;
+		unsigned cnt = g_tab_idx;
 		init_tmp_heap(q);
 		cell *tmp = alloc_tmp_heap(q, (cnt*2)+1);
 		ensure(tmp);
@@ -2049,7 +2049,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 		if (cnt) {
 			unsigned done = 0;
 
-			for (unsigned i = 0; i < cnt; i++) {
+			for (unsigned i = 0; i < g_tab_idx; i++) {
 				make_literal(tmp+idx, g_dot_s);
 				tmp[idx].arity = 2;
 				tmp[idx++].nbr_cells = ((cnt-done)*2)+1;
@@ -2078,7 +2078,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	}
 
 	if (varnames) {
-		const unsigned cnt = g_tab_idx;
+		unsigned cnt = g_tab_idx;
 		init_tmp_heap(q);
 		cell *tmp = alloc_tmp_heap(q, (cnt*4)+1);
 		ensure(tmp);
@@ -2087,7 +2087,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 		if (cnt) {
 			unsigned done = 0;
 
-			for (unsigned i = 0; i < cnt; i++) {
+			for (unsigned i = 0; i < g_tab_idx; i++) {
 				make_literal(tmp+idx, g_dot_s);
 				tmp[idx].arity = 2;
 				tmp[idx++].nbr_cells = ((cnt-done)*4)+1;
@@ -2125,16 +2125,24 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	}
 
 	if (sings) {
-		const unsigned cnt = g_tab_idx;
+		unsigned cnt = 0;
 		init_tmp_heap(q);
 		cell *tmp = alloc_tmp_heap(q, (cnt*4)+1);
 		ensure(tmp);
 		unsigned idx = 0;
 
+		for (unsigned i = 0; i < g_tab_idx; i++) {
+			if (g_tab4[i] != 1)
+				continue;
+
+			cnt++;
+		}
+
+
 		if (cnt) {
 			unsigned done = 0;
 
-			for (unsigned i = 0; i < cnt; i++) {
+			for (unsigned i = 0; i < g_tab_idx; i++) {
 				if (g_tab4[i] != 1)
 					continue;
 
