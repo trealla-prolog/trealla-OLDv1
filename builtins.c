@@ -1490,6 +1490,12 @@ static int fn_iso_stream_property_2(query *q)
 		}
 
 		int n = get_named_stream(GET_STR(c));
+
+		if (n < 0) {
+			throw_error(q, c, "type_error", "stream");
+			return 0;
+		}
+
 		cell tmp;
 		make_int(&tmp, n);
 		tmp.flags |= FLAG_STREAM | FLAG_HEX;
