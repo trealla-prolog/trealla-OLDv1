@@ -1987,11 +1987,19 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	parser_tokenize(p, 0, 0);
 	q->m->flag.character_escapes = save;
 
-	if (p->error)
+	if (p->error) {
+		q->m->flag.double_quote_chars = flag_chars;
+		q->m->flag.double_quote_codes = flag_codes;
+		q->m->flag.double_quote_atom = flag_atom;
 		return 0;
+	}
 
-	if (!parser_attach(p, 0))
+	if (!parser_attach(p, 0)) {
+		q->m->flag.double_quote_chars = flag_chars;
+		q->m->flag.double_quote_codes = flag_codes;
+		q->m->flag.double_quote_atom = flag_atom;
 		return 0;
+	}
 
 	frame *g = GET_FRAME(q->st.curr_frame);
 	parser_assign_vars(p, g->nbr_vars);
