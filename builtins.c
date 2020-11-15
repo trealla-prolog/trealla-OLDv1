@@ -1492,7 +1492,7 @@ static int fn_iso_stream_property_2(query *q)
 		int n = get_named_stream(GET_STR(c));
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_STREAM | FLAG_HEX;
 		set_var(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
 		return 1;
 	}
