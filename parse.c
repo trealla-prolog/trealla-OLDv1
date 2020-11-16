@@ -782,10 +782,8 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 	if (h->is_persist)
 		r->t.is_persist = true;
 
-	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1) && !m->noindex) {
-		//printf("*** create_index %s\n", GET_STR(c));
+	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1) && !m->noindex)
 		reindex_rule(h);
-	}
 
 	return r;
 }
