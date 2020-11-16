@@ -1642,10 +1642,12 @@ void parser_assign_vars(parser *p, unsigned start)
 		directives(p, p->t);
 }
 
-static int attach_ops(parser *p, idx_t start_idx)
+static bool attach_ops(parser *p, idx_t start_idx)
 {
-	idx_t lowest = INT_MAX, work_idx;
-	int do_work = 0;
+        assert(p);
+
+	idx_t lowest = IDX_MAX, work_idx;
+	bool do_work = false;
 
 	for (idx_t i = start_idx; i < p->t->cidx;) {
 		cell *c = p->t->cells + i;
@@ -1664,13 +1666,13 @@ static int attach_ops(parser *p, idx_t start_idx)
 			if (c->precedence <= lowest) {
 				lowest = c->precedence;
 				work_idx = i;
-				do_work = 1;
+				do_work = true;
 			}
 		} else {
 			if (c->precedence < lowest) {
 				lowest = c->precedence;
 				work_idx = i;
-				do_work = 1;
+				do_work = true;
 			}
 		}
 
@@ -1678,7 +1680,7 @@ static int attach_ops(parser *p, idx_t start_idx)
 	}
 
 	if (!do_work)
-		return 0;
+		return false;
 
 	idx_t last_idx = 0;
 
@@ -1716,9 +1718,9 @@ static int attach_ops(parser *p, idx_t start_idx)
 
 			if (off >= p->t->cidx) {
 				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
-				//p->error = true;
-				c->arity = 0;
-				return 0;
+				p->error = true;
+                                c->arity = 0;
+				return false;
 			}
 
 			continue;
@@ -1731,8 +1733,8 @@ static int attach_ops(parser *p, idx_t start_idx)
 
 			if (off >= p->t->cidx) {
 				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
-				//p->error = true;
-				return 0;
+				p->error = true;
+                                return false;
 			}
 
 			c->arity = 2;
@@ -1758,7 +1760,7 @@ static int attach_ops(parser *p, idx_t start_idx)
 		break;
 	}
 
-	return 1;
+	return true;
 }
 
 bool parser_attach(parser *p, int start_idx)
