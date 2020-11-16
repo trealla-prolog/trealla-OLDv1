@@ -735,7 +735,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 		h->index = NULL;
 	}
 
-	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1))
+	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1) && !m->noindex && !h->is_noindex)
 		reindex_rule(h);
 #endif
 
