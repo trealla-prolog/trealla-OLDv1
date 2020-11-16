@@ -499,48 +499,41 @@ static int compkey(const void *ptr1, const void *ptr2)
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
 
-	if (is_integer(p1)) {
-		if (is_integer(p2)) {
-			if (p1->val_num < p2->val_num)
-				return -1;
-			else if (p1->val_num > p2->val_num)
-				return 1;
-		}
-	} else if (is_float(p1)) {
-		if (is_float(p2)) {
-			if (p1->val_flt < p2->val_flt)
-				return -1;
-			else if (p1->val_flt > p2->val_flt)
-				return 1;
-		}
-	} else if (is_atom(p1)) {
-		if (is_atom(p2))
-			return strcmp(GET_STR(p1), GET_STR(p2));
-	} else if (is_structure(p1)) {
-		if (is_structure(p2)) {
-			if (p1->arity < p2->arity)
-				return -1;
+	if (is_integer(p1) && is_integer(p2)) {
+		if (p1->val_num < p2->val_num)
+			return -1;
+		else if (p1->val_num > p2->val_num)
+			return 1;
+	} else if (is_float(p1) && is_float(p2)) {
+		if (p1->val_flt < p2->val_flt)
+			return -1;
+		else if (p1->val_flt > p2->val_flt)
+			return 1;
+	} else if (is_atom(p1) && is_atom(p2)) {
+		return strcmp(GET_STR(p1), GET_STR(p2));
+	} else if (is_structure(p1) && is_structure(p2)) {
+		if (p1->arity < p2->arity)
+			return -1;
 
-			if (p1->arity > p2->arity)
-				return 1;
+		if (p1->arity > p2->arity)
+			return 1;
 
-			int i = strcmp(GET_STR(p1), GET_STR(p2));
+		int i = strcmp(GET_STR(p1), GET_STR(p2));
+
+		if (i != 0)
+			return i;
+
+		int arity = p1->arity;
+		p1++; p2++;
+
+		while (arity--) {
+			int i = compkey(p1, p2);
 
 			if (i != 0)
 				return i;
 
-			int arity = p1->arity;
-			p1++; p2++;
-
-			while (arity--) {
-				int i = compkey(p1, p2);
-
-				if (i != 0)
-					return i;
-
-				p1 += p1->nbr_cells;
-				p2 += p2->nbr_cells;
-			}
+			p1 += p1->nbr_cells;
+			p2 += p2->nbr_cells;
 		}
 	}
 
@@ -667,7 +660,16 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 	if (h->is_persist)
 		r->t.is_persist = true;
 
-	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1) && !m->noindex)
+	if (!h->index && h->arity && is_structure(c+1))
+		h->is_noindex = true;
+
+	if (h->index && h->arity && is_structure(c+1)) {
+		h->is_noindex = true;
+		sl_destroy(h->index);
+		h->index = NULL;
+	}
+
+	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1) && !m->noindex && !h->is_noindex)
 		reindex_rule(h);
 
 	return r;
@@ -782,7 +784,16 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 	if (h->is_persist)
 		r->t.is_persist = true;
 
-	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1) && !m->noindex)
+	if (!h->index && h->arity && is_structure(c+1))
+		h->is_noindex = true;
+
+	if (h->index && h->arity && is_structure(c+1)) {
+		h->is_noindex = true;
+		sl_destroy(h->index);
+		h->index = NULL;
+	}
+
+	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1) && !m->noindex && !h->is_noindex)
 		reindex_rule(h);
 
 	return r;
@@ -3391,9 +3402,9 @@ bool get_dump_vars(prolog *pl) { return pl->m->dump_vars; }
 int get_halt_code(prolog *pl) { return pl->m->halt_code; }
 
 void set_trace(prolog *pl) { pl->m->trace = true; }
-void set_quiet(prolog *pl) { pl->m->quiet = 1; }
-void set_stats(prolog *pl) { pl->m->stats = 1; }
-void set_noindex(prolog *pl) { pl->m->noindex = 1; }
+void set_quiet(prolog *pl) { pl->m->quiet = true; }
+void set_stats(prolog *pl) { pl->m->stats = true; }
+void set_noindex(prolog *pl) { pl->m->noindex = true; }
 void set_opt(prolog *pl, int level) { pl->m->opt = level; }
 
 bool pl_eval(prolog *pl, const char *src)

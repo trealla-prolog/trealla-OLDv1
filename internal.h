@@ -250,6 +250,7 @@ struct rule_ {
 	bool is_persist:1;
 	bool is_multifile:1;
 	bool is_abolished:1;
+	bool is_noindex:1;
 };
 
 struct builtins {
