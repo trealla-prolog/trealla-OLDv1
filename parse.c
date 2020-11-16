@@ -914,12 +914,19 @@ static cell *make_cell(parser *p)
 {
 	if (p->t->cidx == p->t->nbr_cells) {
 		idx_t nbr_cells = p->t->nbr_cells * 2;
-		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*nbr_cells));
-		ensure(p->t);
+
+		term *t = realloc(p->t, sizeof(term)+(sizeof(cell)*nbr_cells));
+		if (!t) {
+			p->error = true;
+			return NULL;
+		}
+		p->t = t;
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	return p->t->cells + p->t->cidx++;
+	cell *ret = p->t->cells + p->t->cidx++;
+	*ret = (cell){0};
+	return ret;
 }
 
 
