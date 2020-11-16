@@ -432,6 +432,7 @@ static rule *get_rule(module *m)
 	assert(m);
 
 	for (rule *h = m->head; h; h = h->next) {
+                //PLANNED: cehteh: make a freelist of abolished rules to remove this iteration over all rules
 		if (h->is_abolished) {
 			memset(h, 0, sizeof(rule));
 			return h;
@@ -440,9 +441,10 @@ static rule *get_rule(module *m)
 
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	rule *h = calloc(1, sizeof(rule));
-	ensure(h);
-	h->next = m->head;
-	m->head = h;
+	if (h) {
+                h->next = m->head;
+                m->head = h;
+        }
 	return h;
 }
 
@@ -576,9 +578,10 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	if (is_cstring(c)) {
 		idx_t off = index_from_pool(GET_STR(c));
+		if(off == ERR_IDX)
+                        return NULL;
 		if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
 		c->val_off = off;
-		ensure(c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
 		c->flags = 0;
 	}
@@ -627,6 +630,9 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		}
 	}
 
+        if (!h)
+                return NULL;
+
 #if 0 //cehteh: assertz had a slightly different implementation of the above
 	// ad: go with this one, assertz was the definitive version since asserta is hardly used
 
@@ -646,7 +652,10 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
-	ensure (r);
+        if (!r) {
+                h->is_abolished = true; //cehteh: maybe implement destroy_rule(h);
+                return NULL;
+        }
 	r->parent = h;
 	memcpy(&r->t, t, sizeof(term));
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
@@ -704,6 +713,7 @@ static void assert_commit(module *m, term *t, clause *r, rule *h, bool append)
 clause *asserta_to_db(module *m, term *t, bool consulting)
 {
 	clause *r = assert_begin(m, t, consulting);
+        if (!r) return NULL;
 	rule *h = r->parent;
 
 	r->next = h->head;
@@ -745,6 +755,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 clause *assertz_to_db(module *m, term *t, bool consulting)
 {
 	clause *r = assert_begin(m, t, consulting);
+        if (!r) return NULL;
 	rule *h = r->parent;
 
 	//cehteh: was only in assertz	r->t.cidx = nbr_cells; which is	 r->t.cidx = t->cidx; ... left commented out still works
