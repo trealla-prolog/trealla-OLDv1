@@ -1449,7 +1449,13 @@ void parser_xref(parser *p, term *t, rule *parent)
 			continue;
 		}
 
-		if (strchr(functor, ':')) {
+		unsigned optype;
+		int userop, hint_prefix = c->arity == 1;
+
+		if (c->arity && get_op(m, functor, &optype, &userop, hint_prefix))
+			SET_OP(c, optype);
+
+		if (strchr(functor+1, ':')) {
 			char tmpbuf1[256], tmpbuf2[256];
 			tmpbuf1[0] = tmpbuf2[0] = '\0';
 			sscanf(functor, "%255[^:]:%255s", tmpbuf1, tmpbuf2);
@@ -2722,7 +2728,6 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 
 		if (p->val_type == TYPE_INTEGER) {
 			const char *src = p->token;
-
 			parse_number(p, &src, &c->val_num, &c->val_den);
 
 			if (strstr(p->token, "0o"))
