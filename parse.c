@@ -670,13 +670,15 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 #if USE_ASSERT_COMMIT == 1
 //cehteh: there is some bug: the peirera benchmark hangs on arg(16) for no oblivious reason (the sl_set/sl_app is not the cause) I haven't investigated this further, possibly corrupted stack or so
-static void assert_commit(term *t, clause *r, rule *h)
+static void assert_commit(module *m, term *t, clause *r, rule *h, bool append)
 {
 	cell *c = get_head(t->cells);
 
 	if (h->index && (h->arity > 0)) {
-		sl_set(h->index, c, r); // used by asserta
-		//sl_app(h->index, c, r); // used by assertz
+		if (!append)
+			sl_set(h->index, c, r);
+		else
+			sl_app(h->index, c, r);
 	}
 
 	t->cidx = 0;
@@ -712,19 +714,26 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 		h->tail = r;
 
 #if USE_ASSERT_COMMIT == 1
-	assert_commit(t, r, h);
+	assert_commit(m, t, r, h, false);
 #else
-	// fallback w/o bug
 	cell *c = get_head(r->t.cells);
-	if (h->index && (h->arity > 0)) {
+
+	if (h->index && (h->arity > 0))
 		sl_set(h->index, c, r);
-		//sl_app(h->index, c, r);
-	}
 
 	t->cidx = 0;
 
 	if (h->is_persist)
 		r->t.is_persist = true;
+
+	if (!h->index && h->arity && is_structure(c+1))
+		h->is_noindex = true;
+
+	if (h->index && h->arity && is_structure(c+1)) {
+		h->is_noindex = true;
+		sl_destroy(h->index);
+		h->index = NULL;
+	}
 
 	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1))
 		reindex_rule(h);
@@ -750,14 +759,12 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 		h->head = r;
 
 #if USE_ASSERT_COMMIT == 1
-	assert_commit(t, r, h);
+	assert_commit(m, t, r, h, true);
 #else
-	// fallback w/o bug
 	cell *c = get_head(r->t.cells);
-	if (h->index && (h->arity > 0)) {
-		//sl_set(h->index, c, r);
+
+	if (h->index && (h->arity > 0))
 		sl_app(h->index, c, r);
-	}
 
 	t->cidx = 0;
 
