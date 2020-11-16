@@ -1179,6 +1179,11 @@ static void directives(parser *p, term *t)
 		}
 
 		p->m = create_module(name);
+                if (!p->m) {
+			fprintf(stdout, "Error: module creation failed: %s\n", name);
+			p->error = true;
+			return;
+		}
 
 		while (is_iso_list(p2)) {
 			cell *head = LIST_HEAD(p2);
@@ -1197,6 +1202,7 @@ static void directives(parser *p, term *t)
 					tmp.arity += 2;
 
 				rule *h = create_rule(p->m, &tmp);
+                                ensure(h); //FIXME: cehteh: needs handling
 				h->is_public = true;
 			}
 
