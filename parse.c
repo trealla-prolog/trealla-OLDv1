@@ -674,7 +674,7 @@ static void assert_commit(module *m, term *t, clause *r, rule *h, bool append)
 {
 	cell *c = get_head(t->cells);
 
-	if (h->index && (h->arity > 0)) {
+	if (h->index && h->arity) {
 		if (!append)
 			sl_set(h->index, c, r);
 		else
@@ -718,7 +718,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 #else
 	cell *c = get_head(r->t.cells);
 
-	if (h->index && (h->arity > 0))
+	if (h->index && h->arity)
 		sl_set(h->index, c, r);
 
 	t->cidx = 0;
@@ -763,7 +763,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 #else
 	cell *c = get_head(r->t.cells);
 
-	if (h->index && (h->arity > 0))
+	if (h->index && h->arity)
 		sl_app(h->index, c, r);
 
 	t->cidx = 0;
