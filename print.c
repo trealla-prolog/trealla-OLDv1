@@ -28,7 +28,7 @@ static int needs_quote(module *m, const char *src, size_t srclen)
 	if (!*src || isupper(*src) || isdigit(*src) || (*src == '_'))
 		return 1;
 
-	if (!strcmp(src, "[]") || !strcmp(src, "!"))
+	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!"))
 		return 0;
 
 	if (get_op(m, src, NULL, NULL, 0))
@@ -412,7 +412,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		int dq = 0, braces = 0, parens = 0;
 		if (is_string(c)) dq = quote = 1;
 		if (q->quoted < 0) quote = 0;
-		if (c->arity && is_literal(c) && !strcmp(src, "{}")) braces = 1;
+		if ((c->arity == 1) && is_literal(c) && !strcmp(src, "{}")) braces = 1;
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
 		if (q->quoted && get_op(q->m, src, NULL, NULL, 0) && strcmp(src, "|"))
