@@ -432,7 +432,7 @@ static rule *get_rule(module *m)
 	assert(m);
 
 	for (rule *h = m->head; h; h = h->next) {
-                //PLANNED: cehteh: make a freelist of abolished rules to remove this iteration over all rules
+		//PLANNED: cehteh: make a freelist of abolished rules to remove this iteration over all rules
 		if (h->is_abolished) {
 			memset(h, 0, sizeof(rule));
 			return h;
@@ -442,9 +442,9 @@ static rule *get_rule(module *m)
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	rule *h = calloc(1, sizeof(rule));
 	if (h) {
-                h->next = m->head;
-                m->head = h;
-        }
+		h->next = m->head;
+		m->head = h;
+	}
 	return h;
 }
 
@@ -579,7 +579,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	if (is_cstring(c)) {
 		idx_t off = index_from_pool(GET_STR(c));
 		if(off == ERR_IDX)
-                        return NULL;
+			return NULL;
 		if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
 		c->val_off = off;
 		c->val_type = TYPE_LITERAL;
@@ -630,8 +630,8 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		}
 	}
 
-        if (!h)
-                return NULL;
+	if (!h)
+		return NULL;
 
 #if 0 //cehteh: assertz had a slightly different implementation of the above
 	// ad: go with this one, assertz was the definitive version since asserta is hardly used
@@ -652,10 +652,10 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
-        if (!r) {
-                h->is_abolished = true; //cehteh: maybe implement destroy_rule(h);
-                return NULL;
-        }
+	if (!r) {
+		h->is_abolished = true; //cehteh: maybe implement destroy_rule(h);
+		return NULL;
+	}
 	r->parent = h;
 	memcpy(&r->t, t, sizeof(term));
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
@@ -713,7 +713,7 @@ static void assert_commit(module *m, term *t, clause *r, rule *h, bool append)
 clause *asserta_to_db(module *m, term *t, bool consulting)
 {
 	clause *r = assert_begin(m, t, consulting);
-        if (!r) return NULL;
+	if (!r) return NULL;
 	rule *h = r->parent;
 
 	r->next = h->head;
@@ -755,7 +755,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 clause *assertz_to_db(module *m, term *t, bool consulting)
 {
 	clause *r = assert_begin(m, t, consulting);
-        if (!r) return NULL;
+	if (!r) return NULL;
 	rule *h = r->parent;
 
 	//cehteh: was only in assertz	r->t.cidx = nbr_cells; which is	 r->t.cidx = t->cidx; ... left commented out still works
@@ -937,6 +937,7 @@ parser *create_parser(module *m)
 		p->start_term = true;
 		p->line_nbr = 1;
 		p->m = m;
+		p->error = false;
 		if (!p->token || !p->t) {
 			destroy_parser(p);
 			p = NULL;
@@ -1179,7 +1180,7 @@ static void directives(parser *p, term *t)
 		}
 
 		p->m = create_module(name);
-                if (!p->m) {
+		if (!p->m) {
 			fprintf(stdout, "Error: module creation failed: %s\n", name);
 			p->error = true;
 			return;
@@ -1202,7 +1203,7 @@ static void directives(parser *p, term *t)
 					tmp.arity += 2;
 
 				rule *h = create_rule(p->m, &tmp);
-                                ensure(h); //FIXME: cehteh: needs handling
+				ensure(h); //FIXME: cehteh: needs handling
 				h->is_public = true;
 			}
 
@@ -1632,7 +1633,8 @@ void parser_assign_vars(parser *p, unsigned start)
 
 
 	cell *c = make_cell(p);
-	memset(c, 0, sizeof(cell));
+	ensure(c);
+	memset(c, 0, sizeof(cell)); //cehteh: make_cell should return a initialized cell?
 	c->val_type = TYPE_END;
 	c->nbr_cells = 1;
 
@@ -1719,7 +1721,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			if (off >= p->t->cidx) {
 				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
 				p->error = true;
-                                c->arity = 0;
+				c->arity = 0;
 				return false;
 			}
 
@@ -1734,7 +1736,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			if (off >= p->t->cidx) {
 				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
 				p->error = true;
-                                return false;
+				return false;
 			}
 
 			c->arity = 2;
