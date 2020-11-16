@@ -2522,9 +2522,9 @@ void fix_list(cell *c)
 
 	while (is_iso_list(c)) {
 		c->nbr_cells = cnt;
-		c = c + 1;
-		c = c + c->nbr_cells;
+		c = c + 1;					// skip .
 		cnt -= 1 + c->nbr_cells;
+		c = c + c->nbr_cells;		// skip head
 	}
 }
 
