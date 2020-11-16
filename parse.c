@@ -552,8 +552,11 @@ static void reindex_rule(rule *h)
 	}
 }
 
-clause *asserta_to_db(module *m, term *t, bool consulting)
+
+static clause* assert_begin(module *m, term *t, bool consulting)
 {
+	assert(m && t);
+
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
 		idx_t off = index_from_pool(GET_STR(c));
@@ -580,6 +583,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 		c->flags = 0;
 	}
 
+#if 0  //cehteh: dead code because of the  --->	     && 0
 	if (!is_quoted(c) && strchr(GET_STR(c), ':') && 0) {
 		const char *src = GET_STR(c);
 		char mod[256], name[256];
@@ -601,6 +605,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 		c->val_off = index_from_pool(name);
 		ensure(c->val_off != ERR_IDX);
 	}
+#endif
 
 	rule *h = find_rule(m, c);
 
@@ -622,9 +627,21 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 		}
 	}
 
+#if 0 //cehteh: assertz had a slightly different implementation of the above
+	if (!h) {
+		h = create_rule(m, c);
+
+		if (!consulting)
+			h->is_dynamic = true;
+
+		if (consulting && m->make_public)
+			h->is_public = true;
+	}
+#endif
 
 	if (m->prebuilt)
 		h->is_prebuilt = true;
+
 
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
@@ -632,6 +649,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 	r->parent = h;
 	memcpy(&r->t, t, sizeof(term));
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
+	//cehteh: only assertz r->t.cidx = nbr_cells;
 	r->m = m;
 
 	if (!consulting) {
@@ -643,16 +661,21 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 		}
 	}
 
-	r->next = h->head;
-	h->head = r;
-	h->cnt++;
+	return r;
+}
 
-	if (!h->tail)
-		h->tail = r;
+
+#define USE_ASSERT_COMMIT 0 //cehteh: experiment
+
+#if USE_ASSERT_COMMIT == 1
+//cehteh: there is some bug: the peirera benchmark hangs on arg(16) for no oblivious reason (the sl_set/sl_app is not the cause) I haven't investigated this further, possibly corrupted stack or so
+static void assert_commit(term *t, clause *r, rule *h)
+{
+	cell *c = get_head(t->cells);
 
 	if (h->index && (h->arity > 0)) {
-		cell *c = get_head(r->t.cells);
-		sl_set(h->index, c, r);
+		sl_set(h->index, c, r); // used by asserta
+		//sl_app(h->index, c, r); // used by assertz
 	}
 
 	t->cidx = 0;
@@ -671,99 +694,50 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 
 	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1) && !m->noindex && !h->is_noindex)
 		reindex_rule(h);
+}
+#endif
+
+
+clause *asserta_to_db(module *m, term *t, bool consulting)
+{
+	clause *r = assert_begin(m, t, consulting);
+	rule *h = r->parent;
+
+	r->next = h->head;
+	h->head = r;
+	h->cnt++;
+
+	if (!h->tail)
+		h->tail = r;
+
+#if USE_ASSERT_COMMIT == 1
+	assert_commit(t, r, h);
+#else
+	// fallback w/o bug
+	cell *c = get_head(r->t.cells);
+	if (h->index && (h->arity > 0)) {
+		sl_set(h->index, c, r);
+		//sl_app(h->index, c, r);
+	}
+
+	t->cidx = 0;
+
+	if (h->is_persist)
+		r->t.is_persist = true;
+
+	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1))
+		reindex_rule(h);
+#endif
 
 	return r;
 }
 
 clause *assertz_to_db(module *m, term *t, bool consulting)
 {
-	if (is_cstring(t->cells)) {
-		cell *c = t->cells;
-		idx_t off = index_from_pool(GET_STR(c));
-		if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
-		c->val_off = off;
-		ensure(c->val_off != ERR_IDX);
-		c->val_type = TYPE_LITERAL;
-		c->flags = 0;
-	}
+	clause *r = assert_begin(m, t, consulting);
+	rule *h = r->parent;
 
-	cell *c = get_head(t->cells);
-
-	if (!c) {
-		fprintf(stdout, "Error: no fact or clause head\n");
-		return NULL;
-	}
-
-	if (is_cstring(c)) {
-		idx_t off = index_from_pool(GET_STR(c));
-		if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
-		c->val_off = off;
-		ensure(c->val_off != ERR_IDX);
-		c->val_type = TYPE_LITERAL;
-		c->flags = 0;
-	}
-
-	if (!is_quoted(c) && strchr(GET_STR(c), ':') && 0) {
-		const char *src = GET_STR(c);
-		char mod[256], name[256];
-		mod[0] = name[0] = '\0';
-		sscanf(src, "%255[^:]:%255s", mod, name);
-		mod[sizeof(mod)-1] = name[sizeof(name)-1] = '\0';
-		m = find_module(mod);
-
-		if (!m) {
-			fprintf(stdout, "Error: unknown module: %s\n", mod);
-			return NULL;
-		}
-
-		if (!is_multifile_in_db(mod, name, c->arity)) {
-			fprintf(stdout, "Warning: not declared multifile %s:%s/%u\n", mod, name, (unsigned)c->arity);
-			set_multifile_in_db(m, name, c->arity);
-		}
-
-		c->val_off = index_from_pool(name);
-		ensure(c->val_off != ERR_IDX);
-	}
-
-	rule *h = find_rule(m, c);
-
-	if (h && !consulting) {
-		if (!h->is_dynamic) {
-			fprintf(stdout, "Error: not a fact or clause\n");
-			return NULL;
-		}
-	}
-
-	if (!h) {
-		h = create_rule(m, c);
-
-		if (!consulting)
-			h->is_dynamic = true;
-
-		if (consulting && m->make_public)
-			h->is_public = true;
-	}
-
-	if (m->prebuilt)
-		h->is_prebuilt = true;
-
-	int nbr_cells = t->cidx;
-	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
-	ensure(r);
-	r->parent = h;
-	memcpy(&r->t, t, sizeof(term));
-	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
-	r->t.cidx = nbr_cells;
-	r->m = m;
-
-	if (!consulting) {
-		for (idx_t i = 0; i < r->t.cidx; i++) {
-			cell *c = r->t.cells + i;
-
-			if (is_blob(c) && is_const_cstring(c))
-				c->flags |= FLAG_DUP_CSTRING;
-		}
-	}
+	//cehteh: was only in assertz	r->t.cidx = nbr_cells; which is	 r->t.cidx = t->cidx; ... left commented out still works
 
 	if (h->tail)
 		h->tail->next = r;
@@ -774,8 +748,13 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 	if (!h->head)
 		h->head = r;
 
+#if USE_ASSERT_COMMIT == 1
+	assert_commit(t, r, h);
+#else
+	// fallback w/o bug
+	cell *c = get_head(r->t.cells);
 	if (h->index && (h->arity > 0)) {
-		cell *c = get_head(r->t.cells);
+		//sl_set(h->index, c, r);
 		sl_app(h->index, c, r);
 	}
 
@@ -795,6 +774,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 
 	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1) && !m->noindex && !h->is_noindex)
 		reindex_rule(h);
+#endif
 
 	return r;
 }
