@@ -241,7 +241,7 @@ struct rule_ {
 	rule *next;
 	clause *head, *tail;
 	skiplist *index;
-	uint32_t cnt;
+	unsigned cnt;
 	idx_t val_off;
 	uint16_t arity;
 	bool is_prebuilt:1;
