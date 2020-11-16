@@ -791,7 +791,7 @@ clause *retract_from_db(module *m, clause *r)
 {
 	r->parent->cnt--;
 	r->t.is_deleted = true;
-	m->dirty = 1;
+	m->dirty = true;
 	return r;
 }
 
@@ -815,7 +815,7 @@ clause *erase_from_db(module *m, uuid *ref)
 	clause *r = find_in_db(m, ref);
 	if (!r) return 0;
 	r->t.is_deleted = true;
-	m->dirty = 1;
+	m->dirty = true;
 	return r;
 }
 
@@ -856,7 +856,7 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 	if (!h->index && !m->noindex)
 		h->index = sl_create(compkey);
 
-	m->use_persist = 1;
+	m->use_persist = true;
 }
 
 void clear_term_nodelete(term *t)
@@ -2881,11 +2881,11 @@ module *module_load_text(module *m, const char *src)
 	if (!p->error) {
 		parser_xref_db(p);
 		int save = p->m->quiet;
-		p->m->quiet = 1;
+		p->m->quiet = true;
 		p->m->halt = false;
 		p->directive = true;
 
-		if (p->run_init == 1) {
+		if (p->run_init == true) {
 			p->command = true;
 
 			if (parser_run(p, "initialization(G), G, retract(initialization(_))", 0))
@@ -2930,7 +2930,7 @@ bool module_load_fp(module *m, FILE *fp)
 	if (!p->error) {
 		parser_xref_db(p);
 		int save = p->m->quiet;
-		p->m->quiet = 1;
+		p->m->quiet = true;
 		p->directive = true;
 
 		if (p->run_init == 1) {
