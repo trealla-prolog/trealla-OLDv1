@@ -1311,7 +1311,7 @@ static void directives(parser *p, term *t)
 			} else if (!strcmp(GET_STR(p1), ","))
 				p1 += 1;
 			else {
-				fprintf(stdout, "Error: unknown multifile, line nbr %d\n", p->line_nbr);
+				fprintf(stdout, "Warning: unknown multifile, line nbr %d\n", p->line_nbr);
 				//p->error = true;
 				return;
 			}
