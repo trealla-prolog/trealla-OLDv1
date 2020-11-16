@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include<errno.h>
+#include <errno.h>
 
 #ifdef NDEBUG
 #define message(fmt, ...)

@@ -432,6 +432,7 @@ static rule *get_rule(module *m)
 	assert(m);
 
 	for (rule *h = m->head; h; h = h->next) {
+		//PLANNED: cehteh: make a freelist of abolished rules to remove this iteration over all rules
 		if (h->is_abolished) {
 			memset(h, 0, sizeof(rule));
 			return h;
@@ -440,9 +441,10 @@ static rule *get_rule(module *m)
 
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	rule *h = calloc(1, sizeof(rule));
-	ensure(h);
-	h->next = m->head;
-	m->head = h;
+	if (h) {
+		h->next = m->head;
+		m->head = h;
+	}
 	return h;
 }
 
@@ -576,9 +578,10 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	if (is_cstring(c)) {
 		idx_t off = index_from_pool(GET_STR(c));
+		if(off == ERR_IDX)
+			return NULL;
 		if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
 		c->val_off = off;
-		ensure(c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
 		c->flags = 0;
 	}
@@ -618,6 +621,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	if (!h) {
 		h = create_rule(m, c);
+		if (!h) return NULL;
 
 		if (!consulting) {
 			h->is_dynamic = true;
@@ -627,11 +631,15 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		}
 	}
 
+	if (!h)
+		return NULL;
+
 #if 0 //cehteh: assertz had a slightly different implementation of the above
 	// ad: go with this one, assertz was the definitive version since asserta is hardly used
 
 	if (!h) {
 		h = create_rule(m, c);
+		if (!h) return NULL;
 
 		if (!consulting)
 			h->is_dynamic = true;
@@ -646,7 +654,10 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
-	ensure (r);
+	if (!r) {
+		h->is_abolished = true; //cehteh: maybe implement destroy_rule(h);
+		return NULL;
+	}
 	r->parent = h;
 	memcpy(&r->t, t, sizeof(term));
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
@@ -704,6 +715,7 @@ static void assert_commit(module *m, term *t, clause *r, rule *h, bool append)
 clause *asserta_to_db(module *m, term *t, bool consulting)
 {
 	clause *r = assert_begin(m, t, consulting);
+	if (!r) return NULL;
 	rule *h = r->parent;
 
 	r->next = h->head;
@@ -745,6 +757,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 clause *assertz_to_db(module *m, term *t, bool consulting)
 {
 	clause *r = assert_begin(m, t, consulting);
+	if (!r) return NULL;
 	rule *h = r->parent;
 
 	//cehteh: was only in assertz	r->t.cidx = nbr_cells; which is	 r->t.cidx = t->cidx; ... left commented out still works
@@ -833,8 +846,10 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	if (h) {
 		h->is_dynamic = true;
 
-		if (!h->index && !m->noindex)
-			h->index = sl_create(compkey);
+		if (!h->index && !m->noindex) {
+			if (!(h->index = sl_create(compkey)))
+				m->error = true;
+		}
 	}
 
 	if (!h)
@@ -850,13 +865,17 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
-	h->is_dynamic = true;
-	h->is_persist = true;
+	if (h) {
+		h->is_dynamic = true;
+		h->is_persist = true;
 
-	if (!h->index && !m->noindex)
-		h->index = sl_create(compkey);
+		if (!h->index && !m->noindex)
+			h->index = sl_create(compkey);
 
-	m->use_persist = true;
+		m->use_persist = true;
+	} else {
+		m->error = true;
+	}
 }
 
 void clear_term_nodelete(term *t)
@@ -895,12 +914,19 @@ static cell *make_cell(parser *p)
 {
 	if (p->t->cidx == p->t->nbr_cells) {
 		idx_t nbr_cells = p->t->nbr_cells * 2;
-		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*nbr_cells));
-		ensure(p->t);
+
+		term *t = realloc(p->t, sizeof(term)+(sizeof(cell)*nbr_cells));
+		if (!t) {
+			p->error = true;
+			return NULL;
+		}
+		p->t = t;
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	return p->t->cells + p->t->cidx++;
+	cell *ret = p->t->cells + p->t->cidx++;
+	*ret = (cell){0};
+	return ret;
 }
 
 
@@ -926,6 +952,7 @@ parser *create_parser(module *m)
 		p->start_term = true;
 		p->line_nbr = 1;
 		p->m = m;
+		p->error = false;
 		if (!p->token || !p->t) {
 			destroy_parser(p);
 			p = NULL;
@@ -1168,6 +1195,11 @@ static void directives(parser *p, term *t)
 		}
 
 		p->m = create_module(name);
+		if (!p->m) {
+			fprintf(stdout, "Error: module creation failed: %s\n", name);
+			p->error = true;
+			return;
+		}
 
 		while (is_iso_list(p2)) {
 			cell *head = LIST_HEAD(p2);
@@ -1186,6 +1218,13 @@ static void directives(parser *p, term *t)
 					tmp.arity += 2;
 
 				rule *h = create_rule(p->m, &tmp);
+				if (!h) {
+					//fprintf(stdout, "Error: rule creation failed\n");
+					destroy_module(p->m);
+					p->m = NULL;
+					p->error = true;
+					return;
+				}
 				h->is_public = true;
 			}
 
@@ -1330,6 +1369,10 @@ static void directives(parser *p, term *t)
 				cell *c_arity = p1 + 2;
 				if (!is_integer(c_arity)) return;
 				set_persist_in_db(p->m, GET_STR(c_name), c_arity->val_num);
+				if (p->m->error) {
+					p->error = true;
+					return;
+				}
 				p1 += p1->nbr_cells;
 			} else if (!strcmp(GET_STR(p1), ","))
 				p1 += 1;
@@ -1615,7 +1658,8 @@ void parser_assign_vars(parser *p, unsigned start)
 
 
 	cell *c = make_cell(p);
-	memset(c, 0, sizeof(cell));
+	ensure(c);
+	memset(c, 0, sizeof(cell)); //cehteh: make_cell should return a initialized cell?
 	c->val_type = TYPE_END;
 	c->nbr_cells = 1;
 
@@ -1625,10 +1669,12 @@ void parser_assign_vars(parser *p, unsigned start)
 		directives(p, p->t);
 }
 
-static int attach_ops(parser *p, idx_t start_idx)
+static bool attach_ops(parser *p, idx_t start_idx)
 {
-	idx_t lowest = INT_MAX, work_idx;
-	int do_work = 0;
+	assert(p);
+
+	idx_t lowest = IDX_MAX, work_idx;
+	bool do_work = false;
 
 	for (idx_t i = start_idx; i < p->t->cidx;) {
 		cell *c = p->t->cells + i;
@@ -1647,13 +1693,13 @@ static int attach_ops(parser *p, idx_t start_idx)
 			if (c->precedence <= lowest) {
 				lowest = c->precedence;
 				work_idx = i;
-				do_work = 1;
+				do_work = true;
 			}
 		} else {
 			if (c->precedence < lowest) {
 				lowest = c->precedence;
 				work_idx = i;
-				do_work = 1;
+				do_work = true;
 			}
 		}
 
@@ -1661,7 +1707,7 @@ static int attach_ops(parser *p, idx_t start_idx)
 	}
 
 	if (!do_work)
-		return 0;
+		return false;
 
 	idx_t last_idx = 0;
 
@@ -1699,9 +1745,9 @@ static int attach_ops(parser *p, idx_t start_idx)
 
 			if (off >= p->t->cidx) {
 				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
-				//p->error = true;
+				p->error = true;
 				c->arity = 0;
-				return 0;
+				return false;
 			}
 
 			continue;
@@ -1714,8 +1760,8 @@ static int attach_ops(parser *p, idx_t start_idx)
 
 			if (off >= p->t->cidx) {
 				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
-				//p->error = true;
-				return 0;
+				p->error = true;
+				return false;
 			}
 
 			c->arity = 2;
@@ -1741,7 +1787,7 @@ static int attach_ops(parser *p, idx_t start_idx)
 		break;
 	}
 
-	return 1;
+	return true;
 }
 
 bool parser_attach(parser *p, int start_idx)
@@ -2538,6 +2584,7 @@ void fix_list(cell *c)
 
 unsigned parser_tokenize(parser *p, int args, int consing)
 {
+	assert(p);
 	int begin_idx = p->t->cidx;
 	int last_op = 1;
 	unsigned arity = 1;
@@ -2556,6 +2603,8 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 			if (parser_attach(p, 0)) {
 				parser_assign_vars(p, 0);
 				parser_dcg_rewrite(p);
+				if (p->error)
+					break;
 
 				if (p->consulting && !p->skip)
 					if (!assertz_to_db(p->m, p->t, 1)) {
@@ -2913,46 +2962,47 @@ bool module_load_fp(module *m, FILE *fp)
 {
 	if (!m) return false;
 
+	bool ok = false;
 	parser *p = create_parser(m);
-	ensure(p);
-	p->consulting = true;
-	p->fp = fp;
-	bool ok;
+	if (p) {
+		p->consulting = true;
+		p->fp = fp;
 
-	do {
-		if (getline(&p->save_line, &p->n_line, p->fp) == -1)
-			break;
+		do {
+			if (getline(&p->save_line, &p->n_line, p->fp) == -1)
+				break;
 
-		p->srcptr = p->save_line;
-		ok = parser_tokenize(p, 0, 0);
-	}
-	 while (ok);
+			p->srcptr = p->save_line;
+			ok = parser_tokenize(p, 0, 0);
+		}
+		while (ok);
 
-	free(p->save_line);
+		free(p->save_line);
 
-	if (!p->error && !p->end_of_term && p->t->cidx) {
-		fprintf(stdout, "Error: syntax error, incomplete statement\n");
-		p->error = true;
-	}
-
-	if (!p->error) {
-		parser_xref_db(p);
-		int save = p->m->quiet;
-		p->m->quiet = true;
-		p->directive = true;
-
-		if (p->run_init == 1) {
-			p->command = true;
-
-			if (parser_run(p, "initialization(G), G, retract(initialization(_))", 0))
-				p->m->halt = true;
+		if (!p->error && !p->end_of_term && p->t->cidx) {
+			fprintf(stdout, "Error: syntax error, incomplete statement\n");
+			p->error = true;
 		}
 
-		p->command = p->directive = false;
-		p->m->quiet = save;
-	}
+		if (!p->error) {
+			parser_xref_db(p);
+			int save = p->m->quiet;
+			p->m->quiet = true;
+			p->directive = true;
 
-	ok = !p->error;
+			if (p->run_init == 1) {
+				p->command = true;
+
+				if (parser_run(p, "initialization(G), G, retract(initialization(_))", 0))
+					p->m->halt = true;
+			}
+
+			p->command = p->directive = false;
+			p->m->quiet = save;
+		}
+
+		ok = !p->error;
+	}
 	destroy_parser(p);
 	return ok;
 }
@@ -3552,49 +3602,48 @@ prolog *pl_create()
 
 	prolog *pl = calloc(1, sizeof(prolog));
 	if (pl) {
-
 		pl->m = create_module("user");
-		pl->curr_m = pl->m;
-
 		if (pl->m) {
+			pl->curr_m = pl->m;
+
 			//cehteh: add api to set things in a module?
 			pl->m->filename = strdup("~/.tpl_user");
 			pl->m->prebuilt = true;
-		}
 
-		set_multifile_in_db(pl->m, "term_expansion", 2);
-		set_dynamic_in_db(pl->m, "term_expansion", 2);
+			set_multifile_in_db(pl->m, "term_expansion", 2);
+			set_dynamic_in_db(pl->m, "term_expansion", 2);
 
 #if USE_LDLIBS
-		for (library *lib = g_libs; lib->name; lib++) {
-			if (!strcmp(lib->name, "apply") ||
-			    //!strcmp(lib->name, "dcgs") ||
-			    //!strcmp(lib->name, "charsio") ||
-			    //!strcmp(lib->name, "format") ||
-			    //!strcmp(lib->name, "http") ||
-			    //!strcmp(lib->name, "atts") ||
-			    !strcmp(lib->name, "lists")) {
-				size_t len = lib->end-lib->start;
-				char *src = malloc(len+1);
-				ensure(src); //cehteh: checkthis
-				memcpy(src, lib->start, len);
-				src[len] = '\0';
-				module_load_text(pl->m, src);
-				free(src);
+			for (library *lib = g_libs; lib->name; lib++) {
+				if (!strcmp(lib->name, "apply") ||
+				    //!strcmp(lib->name, "dcgs") ||
+				    //!strcmp(lib->name, "charsio") ||
+				    //!strcmp(lib->name, "format") ||
+				    //!strcmp(lib->name, "http") ||
+				    //!strcmp(lib->name, "atts") ||
+				    !strcmp(lib->name, "lists")) {
+					size_t len = lib->end-lib->start;
+					char *src = malloc(len+1);
+					ensure(src); //cehteh: checkthis
+					memcpy(src, lib->start, len);
+					src[len] = '\0';
+					assert(pl->m);
+					module_load_text(pl->m, src);
+					free(src);
+				}
 			}
-		}
 #else
-		module_load_file(pl->m, "library/apply.pl");
-		//module_load_file(pl->m, "library/dcgs.pl");
-		//module_load_file(pl->m, "library/charsio.pl");
-		//module_load_file(pl->m, "library/format.pl");
-		//module_load_file(pl->m, "library/http.pl");
-		//module_load_file(pl->m, "library/atts.pl");
-		module_load_file(pl->m, "library/lists.pl");
+			module_load_file(pl->m, "library/apply.pl");
+			//module_load_file(pl->m, "library/dcgs.pl");
+			//module_load_file(pl->m, "library/charsio.pl");
+			//module_load_file(pl->m, "library/format.pl");
+			//module_load_file(pl->m, "library/http.pl");
+			//module_load_file(pl->m, "library/atts.pl");
+			module_load_file(pl->m, "library/lists.pl");
 #endif
 
-		if (pl->m)
 			pl->m->prebuilt = false;
+		}
 
 		if (!pl->m || pl->m->error || !pl->m->filename) {
 			pl_destroy(pl);

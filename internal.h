@@ -49,6 +49,7 @@ typedef uint32_t idx_t;
 
 // Sentinel Value
 #define ERR_IDX (~(idx_t)0)
+#define IDX_MAX (ERR_IDX-1)
 
 #define MAX_SMALL_STRING (MAX(sizeof(int_t),sizeof(void*))*2)
 #define MAX_VAR_POOL_SIZE 1000

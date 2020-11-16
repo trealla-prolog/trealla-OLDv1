@@ -9487,6 +9487,7 @@ static void restore_db(module *m, FILE *fp)
 {
 	parser *p = create_parser(m);
 	query *q = create_query(m, 0);
+	ensure(q);
 	p->one_shot = true;
 	p->fp = fp;
 	m->loading = 1;
