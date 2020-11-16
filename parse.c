@@ -621,6 +621,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	if (!h) {
 		h = create_rule(m, c);
+		if (!h) return NULL;
 
 		if (!consulting) {
 			h->is_dynamic = true;
@@ -638,6 +639,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	if (!h) {
 		h = create_rule(m, c);
+		if (!h) return NULL;
 
 		if (!consulting)
 			h->is_dynamic = true;
@@ -844,8 +846,10 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	if (h) {
 		h->is_dynamic = true;
 
-		if (!h->index && !m->noindex)
-			h->index = sl_create(compkey);
+		if (!h->index && !m->noindex) {
+			if (!(h->index = sl_create(compkey)))
+				m->error = true;
+		}
 	}
 
 	if (!h)
@@ -861,13 +865,17 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 	tmp.arity = arity;
 	rule *h = find_rule(m, &tmp);
 	if (!h) h = create_rule(m, &tmp);
-	h->is_dynamic = true;
-	h->is_persist = true;
+	if (h) {
+		h->is_dynamic = true;
+		h->is_persist = true;
 
-	if (!h->index && !m->noindex)
-		h->index = sl_create(compkey);
+		if (!h->index && !m->noindex)
+			h->index = sl_create(compkey);
 
-	m->use_persist = true;
+		m->use_persist = true;
+	} else {
+		m->error = true;
+	}
 }
 
 void clear_term_nodelete(term *t)
@@ -1203,7 +1211,13 @@ static void directives(parser *p, term *t)
 					tmp.arity += 2;
 
 				rule *h = create_rule(p->m, &tmp);
-				ensure(h); //FIXME: cehteh: needs handling
+				if (!h) {
+					//fprintf(stdout, "Error: rule creation failed\n");
+					destroy_module(p->m);
+					p->m = NULL;
+					p->error = true;
+					return;
+				}
 				h->is_public = true;
 			}
 
@@ -1348,6 +1362,10 @@ static void directives(parser *p, term *t)
 				cell *c_arity = p1 + 2;
 				if (!is_integer(c_arity)) return;
 				set_persist_in_db(p->m, GET_STR(c_name), c_arity->val_num);
+				if (p->m->error) {
+					p->error = true;
+					return;
+				}
 				p1 += p1->nbr_cells;
 			} else if (!strcmp(GET_STR(p1), ","))
 				p1 += 1;
@@ -2937,46 +2955,47 @@ bool module_load_fp(module *m, FILE *fp)
 {
 	if (!m) return false;
 
+	bool ok = false;
 	parser *p = create_parser(m);
-	ensure(p);
-	p->consulting = true;
-	p->fp = fp;
-	bool ok;
+	if (p) {
+		p->consulting = true;
+		p->fp = fp;
 
-	do {
-		if (getline(&p->save_line, &p->n_line, p->fp) == -1)
-			break;
+		do {
+			if (getline(&p->save_line, &p->n_line, p->fp) == -1)
+				break;
 
-		p->srcptr = p->save_line;
-		ok = parser_tokenize(p, 0, 0);
-	}
-	 while (ok);
+			p->srcptr = p->save_line;
+			ok = parser_tokenize(p, 0, 0);
+		}
+		while (ok);
 
-	free(p->save_line);
+		free(p->save_line);
 
-	if (!p->error && !p->end_of_term && p->t->cidx) {
-		fprintf(stdout, "Error: syntax error, incomplete statement\n");
-		p->error = true;
-	}
-
-	if (!p->error) {
-		parser_xref_db(p);
-		int save = p->m->quiet;
-		p->m->quiet = true;
-		p->directive = true;
-
-		if (p->run_init == 1) {
-			p->command = true;
-
-			if (parser_run(p, "initialization(G), G, retract(initialization(_))", 0))
-				p->m->halt = true;
+		if (!p->error && !p->end_of_term && p->t->cidx) {
+			fprintf(stdout, "Error: syntax error, incomplete statement\n");
+			p->error = true;
 		}
 
-		p->command = p->directive = false;
-		p->m->quiet = save;
-	}
+		if (!p->error) {
+			parser_xref_db(p);
+			int save = p->m->quiet;
+			p->m->quiet = true;
+			p->directive = true;
 
-	ok = !p->error;
+			if (p->run_init == 1) {
+				p->command = true;
+
+				if (parser_run(p, "initialization(G), G, retract(initialization(_))", 0))
+					p->m->halt = true;
+			}
+
+			p->command = p->directive = false;
+			p->m->quiet = save;
+		}
+
+		ok = !p->error;
+	}
 	destroy_parser(p);
 	return ok;
 }
