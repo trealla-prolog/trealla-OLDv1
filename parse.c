@@ -1449,7 +1449,7 @@ void parser_xref(parser *p, term *t, rule *parent)
 			SET_OP(c, optype);
 		}
 
-		if (strchr(functor+1, ':')) {
+		if ((functor[0] != ':') && strchr(functor+1, ':')) {
 			char tmpbuf1[256], tmpbuf2[256];
 			tmpbuf1[0] = tmpbuf2[0] = '\0';
 			sscanf(functor, "%255[^:]:%255s", tmpbuf1, tmpbuf2);
@@ -2400,7 +2400,7 @@ static int get_token(parser *p, int last_op)
 
 	if (isalpha_utf8(ch) || (ch == '_')) {
 		while (isalnum_utf8(ch) || (ch == '_') ||
-			((ch == ':') && find_module(p->token))) {
+			((ch == ':') && (*src != ':') && find_module(p->token))) {
 			ch = get_char_utf8(&src);
 
 			size_t len = (dst-p->token) + put_len_utf8(ch) + 1;
