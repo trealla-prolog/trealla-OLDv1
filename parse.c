@@ -1646,7 +1646,7 @@ void parser_assign_vars(parser *p, unsigned start)
 
 static bool attach_ops(parser *p, idx_t start_idx)
 {
-        assert(p);
+	assert(p);
 
 	idx_t lowest = IDX_MAX, work_idx;
 	bool do_work = false;
@@ -2559,6 +2559,7 @@ void fix_list(cell *c)
 
 unsigned parser_tokenize(parser *p, int args, int consing)
 {
+	assert(p);
 	int begin_idx = p->t->cidx;
 	int last_op = 1;
 	unsigned arity = 1;
@@ -2577,6 +2578,8 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 			if (parser_attach(p, 0)) {
 				parser_assign_vars(p, 0);
 				parser_dcg_rewrite(p);
+				if (p->error)
+					break;
 
 				if (p->consulting && !p->skip)
 					if (!assertz_to_db(p->m, p->t, 1)) {
@@ -3573,49 +3576,48 @@ prolog *pl_create()
 
 	prolog *pl = calloc(1, sizeof(prolog));
 	if (pl) {
-
 		pl->m = create_module("user");
-		pl->curr_m = pl->m;
-
 		if (pl->m) {
+			pl->curr_m = pl->m;
+
 			//cehteh: add api to set things in a module?
 			pl->m->filename = strdup("~/.tpl_user");
 			pl->m->prebuilt = true;
-		}
 
-		set_multifile_in_db(pl->m, "term_expansion", 2);
-		set_dynamic_in_db(pl->m, "term_expansion", 2);
+			set_multifile_in_db(pl->m, "term_expansion", 2);
+			set_dynamic_in_db(pl->m, "term_expansion", 2);
 
 #if USE_LDLIBS
-		for (library *lib = g_libs; lib->name; lib++) {
-			if (!strcmp(lib->name, "apply") ||
-			    //!strcmp(lib->name, "dcgs") ||
-			    //!strcmp(lib->name, "charsio") ||
-			    //!strcmp(lib->name, "format") ||
-			    //!strcmp(lib->name, "http") ||
-			    //!strcmp(lib->name, "atts") ||
-			    !strcmp(lib->name, "lists")) {
-				size_t len = lib->end-lib->start;
-				char *src = malloc(len+1);
-				ensure(src); //cehteh: checkthis
-				memcpy(src, lib->start, len);
-				src[len] = '\0';
-				module_load_text(pl->m, src);
-				free(src);
+			for (library *lib = g_libs; lib->name; lib++) {
+				if (!strcmp(lib->name, "apply") ||
+				    //!strcmp(lib->name, "dcgs") ||
+				    //!strcmp(lib->name, "charsio") ||
+				    //!strcmp(lib->name, "format") ||
+				    //!strcmp(lib->name, "http") ||
+				    //!strcmp(lib->name, "atts") ||
+				    !strcmp(lib->name, "lists")) {
+					size_t len = lib->end-lib->start;
+					char *src = malloc(len+1);
+					ensure(src); //cehteh: checkthis
+					memcpy(src, lib->start, len);
+					src[len] = '\0';
+					assert(pl->m);
+					module_load_text(pl->m, src);
+					free(src);
+				}
 			}
-		}
 #else
-		module_load_file(pl->m, "library/apply.pl");
-		//module_load_file(pl->m, "library/dcgs.pl");
-		//module_load_file(pl->m, "library/charsio.pl");
-		//module_load_file(pl->m, "library/format.pl");
-		//module_load_file(pl->m, "library/http.pl");
-		//module_load_file(pl->m, "library/atts.pl");
-		module_load_file(pl->m, "library/lists.pl");
+			module_load_file(pl->m, "library/apply.pl");
+			//module_load_file(pl->m, "library/dcgs.pl");
+			//module_load_file(pl->m, "library/charsio.pl");
+			//module_load_file(pl->m, "library/format.pl");
+			//module_load_file(pl->m, "library/http.pl");
+			//module_load_file(pl->m, "library/atts.pl");
+			module_load_file(pl->m, "library/lists.pl");
 #endif
 
-		if (pl->m)
 			pl->m->prebuilt = false;
+		}
 
 		if (!pl->m || pl->m->error || !pl->m->filename) {
 			pl_destroy(pl);
