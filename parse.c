@@ -628,6 +628,8 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	}
 
 #if 0 //cehteh: assertz had a slightly different implementation of the above
+	// ad: go with this one, assertz was the definitive version since asserta is hardly used
+
 	if (!h) {
 		h = create_rule(m, c);
 
@@ -641,7 +643,6 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	if (m->prebuilt)
 		h->is_prebuilt = true;
-
 
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
