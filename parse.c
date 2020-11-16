@@ -1433,8 +1433,9 @@ void parser_xref(parser *p, term *t, rule *parent)
 		int userop, hint_prefix = c->arity == 1;
 
 		if (c->arity && strcmp(functor, "{}") &&
-				get_op(m, functor, &optype, &userop, hint_prefix))
-			SET_OP(c, optype);
+				get_op(m, functor, &optype, &userop, hint_prefix)) {
+			;//SET_OP(c, optype);
+		}
 
 		if (strchr(functor+1, ':')) {
 			char tmpbuf1[256], tmpbuf2[256];
