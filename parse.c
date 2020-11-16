@@ -1023,7 +1023,7 @@ query *create_query(module *m, int is_task)
 		q->choices_size = is_task ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
 		q->trails_size = is_task ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
 
-                bool error = false;
+		bool error = false;
 		CHECK_SENTINEL(q->frames = calloc(q->frames_size, sizeof(frame)), NULL);
 		CHECK_SENTINEL(q->slots = calloc(q->slots_size, sizeof(slot)), NULL);
 		CHECK_SENTINEL(q->choices = calloc(q->choices_size, sizeof(choice)), NULL);
@@ -3447,7 +3447,9 @@ void g_destroy()
 			free(str->filename);
 			free(str->mode);
 			free(str->name);
+			str->filename = NULL;
 			str->name = NULL;
+			str->mode = NULL;
 		}
 
 		if (str->p)
@@ -3463,7 +3465,9 @@ void g_destroy()
 	}
 
 	sl_destroy(g_symtab);
+	g_symtab = NULL;
 	free(g_pool);
+	g_pool_offset = 0;
 	g_pool = NULL;
 }
 
@@ -3475,39 +3479,39 @@ void* g_init(void)
 		bool error = false;
 		CHECK_SENTINEL(g_symtab = sl_create2((void*)strcmp, free), NULL);
 
-		g_pool_offset = 0;
+		if (!error) {
+			CHECK_SENTINEL(g_false_s = index_from_pool("false"), ERR_IDX);
+			CHECK_SENTINEL(g_true_s = index_from_pool("true"), ERR_IDX);
+			CHECK_SENTINEL(g_empty_s = index_from_pool(""), ERR_IDX);
+			CHECK_SENTINEL(g_anon_s = index_from_pool("_"), ERR_IDX);
+			CHECK_SENTINEL(g_dot_s = index_from_pool("."), ERR_IDX);
+			CHECK_SENTINEL(g_cut_s = index_from_pool("!"), ERR_IDX);
+			CHECK_SENTINEL(g_nil_s = index_from_pool("[]"), ERR_IDX);
+			CHECK_SENTINEL(g_braces_s = index_from_pool("{}"), ERR_IDX);
+			CHECK_SENTINEL(g_fail_s = index_from_pool("fail"), ERR_IDX);
+			CHECK_SENTINEL(g_clause_s = index_from_pool(":-"), ERR_IDX);
+			CHECK_SENTINEL(g_sys_elapsed_s = index_from_pool("$elapsed"), ERR_IDX);
+			CHECK_SENTINEL(g_sys_queue_s = index_from_pool("$queue"), ERR_IDX);
+			CHECK_SENTINEL(g_eof_s = index_from_pool("end_of_file"), ERR_IDX);
+			CHECK_SENTINEL(g_lt_s = index_from_pool("<"), ERR_IDX);
+			CHECK_SENTINEL(g_gt_s = index_from_pool(">"), ERR_IDX);
+			CHECK_SENTINEL(g_eq_s = index_from_pool("="), ERR_IDX);
 
-		CHECK_SENTINEL(g_false_s = index_from_pool("false"), ERR_IDX);
-		CHECK_SENTINEL(g_true_s = index_from_pool("true"), ERR_IDX);
-		CHECK_SENTINEL(g_empty_s = index_from_pool(""), ERR_IDX);
-		CHECK_SENTINEL(g_anon_s = index_from_pool("_"), ERR_IDX);
-		CHECK_SENTINEL(g_dot_s = index_from_pool("."), ERR_IDX);
-		CHECK_SENTINEL(g_cut_s = index_from_pool("!"), ERR_IDX);
-		CHECK_SENTINEL(g_nil_s = index_from_pool("[]"), ERR_IDX);
-		CHECK_SENTINEL(g_braces_s = index_from_pool("{}"), ERR_IDX);
-		CHECK_SENTINEL(g_fail_s = index_from_pool("fail"), ERR_IDX);
-		CHECK_SENTINEL(g_clause_s = index_from_pool(":-"), ERR_IDX);
-		CHECK_SENTINEL(g_sys_elapsed_s = index_from_pool("$elapsed"), ERR_IDX);
-		CHECK_SENTINEL(g_sys_queue_s = index_from_pool("$queue"), ERR_IDX);
-		CHECK_SENTINEL(g_eof_s = index_from_pool("end_of_file"), ERR_IDX);
-		CHECK_SENTINEL(g_lt_s = index_from_pool("<"), ERR_IDX);
-		CHECK_SENTINEL(g_gt_s = index_from_pool(">"), ERR_IDX);
-		CHECK_SENTINEL(g_eq_s = index_from_pool("="), ERR_IDX);
+			g_streams[0].fp = stdin;
+			CHECK_SENTINEL(g_streams[0].filename = strdup("stdin"), NULL);
+			CHECK_SENTINEL(g_streams[0].name = strdup("user_input"), NULL);
+			CHECK_SENTINEL(g_streams[0].mode = strdup("read"), NULL);
 
-		g_streams[0].fp = stdin;
-		CHECK_SENTINEL(g_streams[0].filename = strdup("stdin"), NULL);
-		CHECK_SENTINEL(g_streams[0].name = strdup("user_input"), NULL);
-		CHECK_SENTINEL(g_streams[0].mode = strdup("read"), NULL);
+			g_streams[1].fp = stdout;
+			CHECK_SENTINEL(g_streams[1].filename = strdup("stdout"), NULL);
+			CHECK_SENTINEL(g_streams[1].name = strdup("user_output"), NULL);
+			CHECK_SENTINEL(g_streams[1].mode = strdup("append"), NULL);
 
-		g_streams[1].fp = stdout;
-		CHECK_SENTINEL(g_streams[1].filename = strdup("stdout"), NULL);
-		CHECK_SENTINEL(g_streams[1].name = strdup("user_output"), NULL);
-		CHECK_SENTINEL(g_streams[1].mode = strdup("append"), NULL);
-
-		g_streams[2].fp = stderr;
-		CHECK_SENTINEL(g_streams[2].filename = strdup("stderr"), NULL);
-		CHECK_SENTINEL(g_streams[2].name = strdup("user_error"), NULL);
-		CHECK_SENTINEL(g_streams[2].mode = strdup("append"), NULL);
+			g_streams[2].fp = stderr;
+			CHECK_SENTINEL(g_streams[2].filename = strdup("stderr"), NULL);
+			CHECK_SENTINEL(g_streams[2].name = strdup("user_error"), NULL);
+			CHECK_SENTINEL(g_streams[2].mode = strdup("append"), NULL);
+		}
 
 		if (error) {
 			g_destroy();
