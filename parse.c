@@ -2400,7 +2400,11 @@ static int get_token(parser *p, int last_op)
 
 	if (isalpha_utf8(ch) || (ch == '_')) {
 		while (isalnum_utf8(ch) || (ch == '_') ||
-			((ch == ':') && (*src != ':') && find_module(p->token))) {
+			((ch == ':') && find_module(p->token))) {
+
+			if ((src[0] == ':') && (src[1] == ':'))	// HACK
+				break;
+
 			ch = get_char_utf8(&src);
 
 			size_t len = (dst-p->token) + put_len_utf8(ch) + 1;
