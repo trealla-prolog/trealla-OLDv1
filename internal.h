@@ -162,6 +162,7 @@ enum {
 #define IS_XFY(c) ((c->flags>>12) == OP_XFY)
 
 #define SET_OP(c,optype) (c)->flags |= (((uint16_t)(optype))<<12)
+#define IS_OP(c) ((c)->flags >> 12)
 
 typedef struct module_ module;
 typedef struct query_ query;

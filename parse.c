@@ -1440,9 +1440,9 @@ void parser_xref(parser *p, term *t, rule *parent)
 		unsigned optype;
 		int userop, hint_prefix = c->arity == 1;
 
-		if (c->arity && strcmp(functor, "{}") &&
+		if ((c->arity == 2) && !IS_OP(c) && strcmp(functor, "{}") &&
 				get_op(m, functor, &optype, &userop, hint_prefix)) {
-			;//SET_OP(c, optype);
+			SET_OP(c, optype);
 		}
 
 		if (strchr(functor+1, ':')) {
