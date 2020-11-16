@@ -1281,23 +1281,27 @@ static void directives(parser *p, term *t)
 		cell *p1 = c + 1;
 
 		while (is_literal(p1)) {
-			if (is_literal(p1) && !strcmp(GET_STR(p1), "/") && (p1->arity == 2)) {
+			if (is_literal(p1) && (!strcmp(GET_STR(p1), "/") || !strcmp(GET_STR(p1), "//")) && (p1->arity == 2)) {
 				cell *c_name = p1 + 1;
 				if (!is_atom(c_name)) return;
 				cell *c_arity = p1 + 2;
 				if (!is_integer(c_arity)) return;
 				const char *src = GET_STR(c_name);
+				unsigned arity = c_arity->val_num;
+
+				if (!strcmp(GET_STR(p1), "//"))
+					arity += 2;
 
 				if (!strchr(src, ':')) {
-					set_multifile_in_db(p->m, src, c_arity->val_num);
+					set_multifile_in_db(p->m, src, arity);
 				} else {
 					char mod[256], name[256];
 					mod[0] = name[0] = '\0';
 					sscanf(src, "%255[^:]:%255s", mod, name);
 					mod[sizeof(mod)-1] = name[sizeof(name)-1] = '\0';
 
-					if (!is_multifile_in_db(mod, name, c_arity->val_num)) {
-						fprintf(stdout, "Error: not multile %s:%s/%u\n", mod, name, (unsigned)c_arity->val_num);
+					if (!is_multifile_in_db(mod, name, arity)) {
+						fprintf(stdout, "Error: not multile %s:%s/%u\n", mod, name, (unsigned)arity);
 						p->error = true;
 						return;
 					}
@@ -1307,8 +1311,8 @@ static void directives(parser *p, term *t)
 			} else if (!strcmp(GET_STR(p1), ","))
 				p1 += 1;
 			else {
-				fprintf(stdout, "Error: unknown module, line nbr %d\n", p->line_nbr);
-				p->error = true;
+				fprintf(stdout, "Error: unknown multifile, line nbr %d\n", p->line_nbr);
+				//p->error = true;
 				return;
 			}
 		}
