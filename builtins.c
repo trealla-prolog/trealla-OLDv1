@@ -4505,8 +4505,6 @@ static int fn_iso_term_variables_2(query *q)
 	ensure(tmp);
 	unsigned idx = 0;
 
-	//printf("*** here cnt=%u\n", cnt);
-
 	if (cnt) {
 		unsigned done = 0;
 
@@ -4534,8 +4532,6 @@ static int fn_iso_term_variables_2(query *q)
 	} else
 		make_literal(tmp+idx++, g_nil_s);
 
-	//printf("*** here1 new_vars=%u\n", g_varno - g->nbr_vars);
-
 	if (cnt) {
 		unsigned new_vars = g_varno - g->nbr_vars;
 		g_varno = g->nbr_vars;
@@ -4560,8 +4556,6 @@ static int fn_iso_term_variables_2(query *q)
 		}
 	}
 
-	//printf("*** here2 %u\n", idx);
-
 	if (is_variable(p2)) {
 		cell *tmp2 = alloc_heap(q, idx);
 		ensure(tmp2);
@@ -4569,8 +4563,6 @@ static int fn_iso_term_variables_2(query *q)
 		set_var(q, p2, p2_ctx, tmp2, q->st.curr_frame);
 		return 1;
 	}
-
-	//printf("*** here3\n");
 
 	int ok = unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 	free(tmp);
