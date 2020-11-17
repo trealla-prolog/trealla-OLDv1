@@ -771,9 +771,7 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 			if (!(h->index = sl_create(compkey)))
 				m->error = true;
 		}
-	}
-
-	if (!h)
+	} else
 		m->error = true;
 }
 
@@ -791,12 +789,12 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 		h->is_persist = true;
 
 		if (!h->index && !m->noindex)
-			h->index = sl_create(compkey);
+			if (!(h->index = sl_create(compkey)))
+				m->error = true;
 
 		m->use_persist = true;
-	} else {
+	} else
 		m->error = true;
-	}
 }
 
 void clear_term_nodelete(term *t)
