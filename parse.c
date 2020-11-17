@@ -121,13 +121,11 @@ static struct op_table g_ops[] =
 	{0,0,0}
 };
 
-
 static char* ensure_strdup(const char* src)
 {
 	assert(src);
 	char* ret = strdup(src);
 	ensure(ret);
-
 	return ret;
 }
 
