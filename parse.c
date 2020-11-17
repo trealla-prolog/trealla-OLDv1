@@ -1393,6 +1393,14 @@ void parser_xref(parser *p, term *t, rule *parent)
 		const char *functor = GET_STR(c);
 		module *m = p->m;
 
+		unsigned optype;
+		int userop, hint_prefix = c->arity == 1;
+
+		if ((c->arity == 2) && !GET_OP(c) && strcmp(functor, "{}") &&
+				get_op(m, functor, &optype, &userop, hint_prefix)) {
+			SET_OP(c, optype);
+		}
+
 		if ((c->fn = get_builtin(m, functor, c->arity)) != NULL) {
 			c->flags |= FLAG_BUILTIN;
 			continue;
@@ -1401,14 +1409,6 @@ void parser_xref(parser *p, term *t, rule *parent)
 		if (check_builtin(m, functor, c->arity)) {
 			c->flags |= FLAG_BUILTIN;
 			continue;
-		}
-
-		unsigned optype;
-		int userop, hint_prefix = c->arity == 1;
-
-		if ((c->arity == 2) && !GET_OP(c) && strcmp(functor, "{}") &&
-				get_op(m, functor, &optype, &userop, hint_prefix)) {
-			SET_OP(c, optype);
 		}
 
 		if ((functor[0] != ':') && strchr(functor+1, ':')) {

@@ -4483,6 +4483,7 @@ static int fn_iso_univ_2(query *q)
 	cell tmp = *p1;
 	tmp.nbr_cells = 1;
 	tmp.arity = 0;
+	CLR_OP(&tmp);
 	alloc_list(q, &tmp);
 	unsigned arity = p1->arity;
 	p1++;
@@ -5324,6 +5325,7 @@ static int fn_iso_functor_3(query *q)
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = p1->val_off;
 	tmp.nbr_cells = 1;
+	CLR_OP(&tmp);
 
 	if (is_string(p2))
 		tmp.val_off = g_dot_s;
