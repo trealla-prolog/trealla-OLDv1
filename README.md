@@ -111,6 +111,12 @@ and for bug-checking. Also for use of his format_//2 library.
 Special thanks to [Jos De Roo](https://github.com/josd) for his testing
 against some classic Prolog examples.
 
+Special thanks to [Christian Thaeter](https://github.com/cehteh) for his
+ongoing work with code cleanup and development ideas.
+
+Special thanks to [Paulo Moura](https://github.com/pmoura) for his patience
+and sleuthing in the ongoing quest for Trealla to run his LogTalk project.
+
 
 Strings
 =======
