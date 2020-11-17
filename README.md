@@ -100,6 +100,9 @@ What's missing, problems?
 Acknowledgements
 ================
 
+This project started in March 2020 and it would not be where it is today
+without help from these people:
+
 Special thanks to [Xin Wang](https://github.com/dram) for providing the
 testing framework.
 
@@ -109,7 +112,7 @@ idea of mmap()-ing files as strings. For his rigorous approach to types
 and for bug-checking. Also for use of his format_//2 library.
 
 Special thanks to [Jos De Roo](https://github.com/josd) for his testing
-against some classic Prolog examples.
+against some classic Prolog examples and his EYE project.
 
 Special thanks to [Christian Thaeter](https://github.com/cehteh) for his
 ongoing work with code cleanup and development ideas.
