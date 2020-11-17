@@ -5043,6 +5043,16 @@ static int fn_iso_call_n(query *q)
 	tmp2->nbr_cells = tmp_heap_used(q);
 	tmp2->arity = arity;
 
+	if (is_cstring(tmp2)) {
+		cell *c = tmp2;
+		idx_t off = index_from_pool(GET_STR(c));
+		if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
+		c->val_off = off;
+		ensure (c->val_off != ERR_IDX);
+		c->val_type = TYPE_LITERAL;
+		c->flags = 0;
+	}
+
 	if ((tmp2->fn = get_builtin(q->m, GET_STR(tmp2), arity)) != NULL)
 		tmp2->flags |= FLAG_BUILTIN;
 	else {
