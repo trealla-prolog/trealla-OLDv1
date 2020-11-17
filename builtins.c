@@ -4344,6 +4344,7 @@ static int fn_iso_univ_2(query *q)
 		cell tmp = *p1;
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;
+		CLR_OP(&tmp);
 		alloc_list(q, &tmp);
 		unsigned arity = p1->arity;
 		p1++;

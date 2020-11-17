@@ -405,7 +405,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		return dst - save_dst;
 	}
 
-	int optype = (c->flags >> 12);
+	int optype = GET_OP(c);
 
 	if (q->ignore_ops || !optype) {
 		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quote(q->m, src, LEN_STR(c));
