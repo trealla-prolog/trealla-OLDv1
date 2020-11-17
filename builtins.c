@@ -5275,7 +5275,7 @@ static int fn_iso_functor_3(query *q)
 			return 0;
 		}
 
-		if ((p3->val_num <= 0) || (p3->val_num > MAX_ARITY/2)){
+		if ((p3->val_num < 0) || (p3->val_num > MAX_ARITY/2)){
 			throw_error(q, p3, "domain_error", "integer");
 			return 0;
 		}
@@ -5283,9 +5283,11 @@ static int fn_iso_functor_3(query *q)
 		unsigned arity = p3->val_num;
 		unsigned var_nbr;
 
-		if (!(var_nbr = create_vars(q, arity))) {
-			throw_error(q, p3, "resource_error", "too_many_vars");
-			return 0;
+		if (arity) {
+			if (!(var_nbr = create_vars(q, arity))) {
+				throw_error(q, p3, "resource_error", "too_many_vars");
+				return 0;
+			}
 		}
 
 		GET_FIRST_ARG(p1,any);
