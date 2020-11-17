@@ -5283,11 +5283,9 @@ static int fn_iso_functor_3(query *q)
 		unsigned arity = p3->val_num;
 		unsigned var_nbr;
 
-		if (arity) {
-			if (!(var_nbr = create_vars(q, arity))) {
-				throw_error(q, p3, "resource_error", "too_many_vars");
-				return 0;
-			}
+		if (!(var_nbr = create_vars(q, arity))) {
+			throw_error(q, p3, "resource_error", "too_many_vars");
+			return 0;
 		}
 
 		GET_FIRST_ARG(p1,any);
