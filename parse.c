@@ -681,7 +681,7 @@ static void assert_commit(module *m, term *t, clause *r, rule *h, bool append)
 		h->index = NULL;
 	}
 
-	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1) && !m->noindex && !h->is_noindex)
+	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !m->noindex && !h->is_noindex)
 		reindex_rule(h);
 }
 

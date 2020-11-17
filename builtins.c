@@ -4459,6 +4459,11 @@ static int fn_iso_univ_2(query *q)
 
 		tmp->nbr_cells = nbr_cells;
 		tmp->arity = arity;
+		unsigned optype;
+
+		if (get_op(q->m, GET_STR(tmp), &optype, NULL, tmp->arity==1))
+			SET_OP(tmp, optype);
+
 		cell *tmp2 = alloc_heap(q, nbr_cells);
 		ensure(tmp2);
 		copy_cells(tmp2, tmp, nbr_cells);
