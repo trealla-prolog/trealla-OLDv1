@@ -3326,6 +3326,11 @@ module *create_module(const char *name)
 			  "'$calln'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"		\
 			  "TMP_G.");
 
+		make_rule(m, "call(G,P1,P2,P3,P4,P5,P6,P7) :- "			\
+			  "copy_term('$calln'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"	\
+			  "'$calln'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"		\
+			  "TMP_G.");
+
 		make_rule(m, "spawn(G,P1) :- "				\
 			  "copy_term('$spawnn'(G,P1),TMP_G),"		\
 			  "'$spawnn'(G,P1)=TMP_G,"			\
@@ -3354,6 +3359,11 @@ module *create_module(const char *name)
 		make_rule(m, "spawn(G,P1,P2,P3,P4,P5,P6) :- "			\
 			  "copy_term('$spawnn'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
 			  "'$spawnn'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"		\
+			  "TMP_G.");
+
+		make_rule(m, "spawn(G,P1,P2,P3,P4,P5,P6,P7) :- "			\
+			  "copy_term('$spawnn'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"	\
+			  "'$spawnn'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"		\
 			  "TMP_G.");
 
 		make_rule(m, "phrase_from_file(P, Filename) :- "	\
