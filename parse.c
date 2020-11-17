@@ -586,7 +586,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		c->flags = 0;
 	}
 
-#if 0  //cehteh: dead code because of the  --->	     && 0
+#if 0  //cehteh: dead code because of the  --->	     && 0  // LEAVE
 	if (!is_quoted(c) && strchr(GET_STR(c), ':') && 0) {
 		const char *src = GET_STR(c);
 		char mod[256], name[256];
@@ -623,31 +623,12 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		h = create_rule(m, c);
 		if (!h) return NULL;
 
-		if (!consulting) {
-			h->is_dynamic = true;
-
-			if (m->make_public)
-				h->is_public = true;
-		}
-	}
-
-	if (!h)
-		return NULL;
-
-#if 0 //cehteh: assertz had a slightly different implementation of the above
-	// ad: go with this one, assertz was the definitive version since asserta is hardly used
-
-	if (!h) {
-		h = create_rule(m, c);
-		if (!h) return NULL;
-
 		if (!consulting)
 			h->is_dynamic = true;
 
 		if (consulting && m->make_public)
 			h->is_public = true;
 	}
-#endif
 
 	if (m->prebuilt)
 		h->is_prebuilt = true;
@@ -655,13 +636,13 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	int nbr_cells = t->cidx;
 	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
 	if (!r) {
-		h->is_abolished = true; //cehteh: maybe implement destroy_rule(h);
+		h->is_abolished = true;
 		return NULL;
 	}
+
 	r->parent = h;
 	memcpy(&r->t, t, sizeof(term));
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
-	//cehteh: only assertz r->t.cidx = nbr_cells;
 	r->m = m;
 
 	if (!consulting) {
@@ -677,11 +658,6 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 }
 
 
-#define USE_ASSERT_COMMIT 1 //cehteh: experiment
-
-#if USE_ASSERT_COMMIT == 1
-//cehteh: there is some bug: the peirera benchmark hangs on arg(16) for no oblivious reason (the sl_set/sl_app is not the cause) I haven't investigated this further, possibly corrupted stack or so
-//ad: fixed
 static void assert_commit(module *m, term *t, clause *r, rule *h, bool append)
 {
 	cell *c = get_head(r->t.cells);
@@ -710,8 +686,6 @@ static void assert_commit(module *m, term *t, clause *r, rule *h, bool append)
 	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1) && !m->noindex && !h->is_noindex)
 		reindex_rule(h);
 }
-#endif
-
 
 clause *asserta_to_db(module *m, term *t, bool consulting)
 {
@@ -726,32 +700,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 	if (!h->tail)
 		h->tail = r;
 
-#if USE_ASSERT_COMMIT == 1
 	assert_commit(m, t, r, h, false);
-#else
-	cell *c = get_head(r->t.cells);
-
-	if (h->index && h->arity)
-		sl_set(h->index, c, r);
-
-	t->cidx = 0;
-
-	if (h->is_persist)
-		r->t.is_persist = true;
-
-	if (!h->index && h->arity && is_structure(c+1))
-		h->is_noindex = true;
-
-	if (h->index && h->arity && is_structure(c+1)) {
-		h->is_noindex = true;
-		sl_destroy(h->index);
-		h->index = NULL;
-	}
-
-	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1) && !m->noindex && !h->is_noindex)
-		reindex_rule(h);
-#endif
-
 	return r;
 }
 
@@ -760,8 +709,6 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 	clause *r = assert_begin(m, t, consulting);
 	if (!r) return NULL;
 	rule *h = r->parent;
-
-	//cehteh: was only in assertz	r->t.cidx = nbr_cells; which is	 r->t.cidx = t->cidx; ... left commented out still works
 
 	if (h->tail)
 		h->tail->next = r;
@@ -772,32 +719,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 	if (!h->head)
 		h->head = r;
 
-#if USE_ASSERT_COMMIT == 1
 	assert_commit(m, t, r, h, true);
-#else
-	cell *c = get_head(r->t.cells);
-
-	if (h->index && h->arity)
-		sl_app(h->index, c, r);
-
-	t->cidx = 0;
-
-	if (h->is_persist)
-		r->t.is_persist = true;
-
-	if (!h->index && h->arity && is_structure(c+1))
-		h->is_noindex = true;
-
-	if (h->index && h->arity && is_structure(c+1)) {
-		h->is_noindex = true;
-		sl_destroy(h->index);
-		h->index = NULL;
-	}
-
-	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !is_structure(c+1) && !m->noindex && !h->is_noindex)
-		reindex_rule(h);
-#endif
-
 	return r;
 }
 
