@@ -677,13 +677,14 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 }
 
 
-#define USE_ASSERT_COMMIT 0 //cehteh: experiment
+#define USE_ASSERT_COMMIT 1 //cehteh: experiment
 
 #if USE_ASSERT_COMMIT == 1
 //cehteh: there is some bug: the peirera benchmark hangs on arg(16) for no oblivious reason (the sl_set/sl_app is not the cause) I haven't investigated this further, possibly corrupted stack or so
+//ad: fixed
 static void assert_commit(module *m, term *t, clause *r, rule *h, bool append)
 {
-	cell *c = get_head(t->cells);
+	cell *c = get_head(r->t.cells);
 
 	if (h->index && h->arity) {
 		if (!append)
