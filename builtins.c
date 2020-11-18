@@ -5553,7 +5553,7 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "cpu_count")) {
 		cell tmp;
-		make_int(&tmp, q->m->cpu_count);
+		make_int(&tmp, g_cpu_count);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "version")) {
 		unsigned v1 = 0;
@@ -5614,7 +5614,7 @@ static int fn_iso_set_prolog_flag_2(query *q)
 	}
 
 	if (!strcmp(GET_STR(p1), "cpu_count") && is_integer(p2)) {
-		q->m->cpu_count = p2->val_num;
+		g_cpu_count = p2->val_num;
 		return 1;
 	}
 
@@ -7497,7 +7497,7 @@ static int fn_wait_0(query *q)
 			if (task->spawned) {
 				spawn_cnt++;
 
-				if (spawn_cnt >= q->m->cpu_count)
+				if (spawn_cnt >= g_cpu_count)
 					break;
 			}
 
@@ -7540,7 +7540,7 @@ static int fn_await_0(query *q)
 			if (task->spawned) {
 				spawn_cnt++;
 
-				if (spawn_cnt >= q->m->cpu_count)
+				if (spawn_cnt >= g_cpu_count)
 					break;
 			}
 

@@ -433,7 +433,6 @@ struct module_ {
 	} flag;
 
 	unsigned user_ops;
-	unsigned cpu_count;
 	bool prebuilt:1;
 	bool halt:1;
 	bool status:1;
@@ -457,6 +456,7 @@ extern idx_t g_gt_s, g_eq_s, g_sys_elapsed_s, g_sys_queue_s, g_braces_s;
 extern stream g_streams[MAX_STREAMS];
 extern module *g_modules;
 extern char *g_pool;
+extern unsigned g_cpu_count;
 
 inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 {

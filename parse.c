@@ -32,8 +32,6 @@ static const unsigned INITIAL_NBR_SLOTS = 1000;
 static const unsigned INITIAL_NBR_CHOICES = 1000;
 static const unsigned INITIAL_NBR_TRAILS = 1000;
 
-static const int CPU_COUNT = 4;
-
 #define JUST_IN_TIME_COUNT 50
 
 struct prolog_ {
@@ -46,6 +44,7 @@ char *g_pool = NULL;
 idx_t g_empty_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s;
 idx_t g_sys_elapsed_s, g_sys_queue_s, g_false_s, g_braces_s;
+unsigned g_cpu_count = 4;
 
 static idx_t g_pool_offset = 0, g_pool_size = 0;
 static int g_tpl_count = 0;
@@ -3103,7 +3102,6 @@ module *create_module(const char *name)
 		m->flag.rational_syntax_natural = 0;
 		m->flag.prefer_rationals = 0;
 		m->user_ops = MAX_USER_OPS;
-		m->cpu_count = CPU_COUNT;
 		m->error = false;
 
 		make_rule(m, "call(G) :- G.");
