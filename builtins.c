@@ -4345,11 +4345,14 @@ static int fn_iso_univ_2(query *q)
 	}
 
 	if (is_variable(p2)) {
-		cell tmp = *p1;
-		tmp.nbr_cells = 1;
-		tmp.arity = 0;
-		CLR_OP(&tmp);
-		alloc_list(q, &tmp);
+		cell *tmp = deep_copy_to_heap(q, p1, p1_ctx);
+		unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
+		cell tmp2 = *tmp;
+		tmp2.nbr_cells = 1;
+		tmp2.arity = 0;
+		CLR_OP(&tmp2);
+		alloc_list(q, &tmp2);
+		p1 = tmp;
 		unsigned arity = p1->arity;
 		p1++;
 
@@ -4360,94 +4363,29 @@ static int fn_iso_univ_2(query *q)
 
 		cell *l = end_list(q);
 		fix_list(l);
-		return unify(q, p2, p2_ctx, l, p1_ctx);
+		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
 	if (is_variable(p1)) {
-		cell *l = p2;
+		cell *tmp = deep_copy_to_tmp(q, p2, p2_ctx);
+		unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
+		p2 = tmp;
 		unsigned arity = 0;
-		idx_t save_p2_ctx = p2_ctx;
-		init_tmp_heap(q);
-		frame *g = GET_FRAME(q->st.curr_frame);
-		g_varno = g->nbr_vars;
-		g_tab_idx = 0;
+		idx_t save = tmp_heap_used(q);
 
-		while (is_list(l)) {
-			cell *h = LIST_HEAD(l);
-			h = deref(q, h, save_p2_ctx);
-
-			if (is_variable(h) && (q->latest_ctx != q->st.curr_frame)) {
-				frame *g = GET_FRAME(q->latest_ctx);
-				slot *e = GET_SLOT(g, h->var_nbr);
-				idx_t slot_nbr = e - q->slots;
-				int found = 0;
-				unsigned i;
-
-				for (i = 0; i < g_tab_idx; i++) {
-					if (g_tab1[i] == slot_nbr) {
-						found = 1;
-						break;
-					}
-				}
-
-				cell v = *h;
-				v.var_nbr = g_varno;
-				v.flags |= FLAG_FRESH;
-
-				if (!found) {
-					if (!create_vars(q, 1)) {
-						throw_error(q, p2, "resource_error", "too_many_vars");
-						return 0;
-					}
-
-					h = LIST_HEAD(l);
-					h = deref(q, h, save_p2_ctx);
-
-					set_var(q, &v, q->st.curr_frame, h, q->latest_ctx);
-					g_tab1[i] = slot_nbr;
-					g_tab2[i] = g_varno++;
-					g_tab_idx++;
-				}
-
-				cell *tmp = alloc_tmp_heap(q, 1);
-				ensure(tmp);
-				copy_cells(tmp, &v, 1);
-				tmp->var_nbr = g_tab2[i];
-				tmp->flags |= FLAG_FRESH;
-			} else if (is_structure(h)) {
-				if (!create_vars(q, 1)) {
-					throw_error(q, p2, "resource_error", "too_many_vars");
-					return 0;
-				}
-
-				h = LIST_HEAD(l);
-				h = deref(q, h, save_p2_ctx);
-				cell v;
-				make_variable(&v, g_anon_s);
-				v.flags |= FLAG_FRESH;
-				v.var_nbr = g_varno++;
-				set_var(q, &v, q->st.curr_frame, h, q->latest_ctx);
-				cell *tmp = alloc_tmp_heap(q, 1);
-				ensure(tmp);
-				copy_cells(tmp, &v, 1);
-			} else {
-				cell *tmp = alloc_tmp_heap(q, h->nbr_cells);
-				ensure(tmp);
-				copy_cells(tmp, h, h->nbr_cells);
-			}
-
-			l = LIST_TAIL(l);
-			l = deref(q, l, save_p2_ctx);
-			save_p2_ctx = q->latest_ctx;
+		while (is_list(p2)) {
+			cell *h = LIST_HEAD(p2);
+			cell *c = alloc_tmp_heap(q, h->nbr_cells);
+			copy_cells(c, h, h->nbr_cells);
+			p2 = LIST_TAIL(p2);
 			arity++;
 		}
 
 		arity--;
-		idx_t nbr_cells = tmp_heap_used(q);
-		cell *tmp = get_tmp_heap(q, 0);
+		cell *tmp2 = get_tmp_heap(q, save);
 
-		if (is_cstring(tmp)) {
-			cell *c = tmp;
+		if (is_cstring(tmp2) && arity) {
+			cell *c = tmp2;
 			idx_t off = index_from_pool(GET_STR(c));
 			//if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
 			c->val_off = off;
@@ -4456,32 +4394,27 @@ static int fn_iso_univ_2(query *q)
 			c->flags = 0;
 		}
 
-		if (!is_literal(tmp) && arity) {
-			throw_error(q, tmp, "type_error", "atom");
+		if (!is_literal(tmp2) && arity) {
+			throw_error(q, tmp2, "type_error", "atom");
 			return 0;
 		}
 
+		idx_t nbr_cells = nbr_cells = tmp_heap_used(q) - save;
+		tmp = alloc_heap(q, nbr_cells);
+		copy_cells(tmp, tmp2, nbr_cells);
 		tmp->nbr_cells = nbr_cells;
 		tmp->arity = arity;
-		unsigned optype;
 
-		if (get_op(q->m, GET_STR(tmp), &optype, NULL, tmp->arity==1))
-			SET_OP(tmp, optype);
-
-		cell *tmp2 = alloc_heap(q, nbr_cells);
-		ensure(tmp2);
-		copy_cells(tmp2, tmp, nbr_cells);
-
-		if (is_structure(tmp2)) {
-			if ((tmp2->fn = get_builtin(q->m, GET_STR(tmp2), arity)) != NULL)
-				tmp2->flags |= FLAG_BUILTIN;
+		if (is_callable(tmp)) {
+			if ((tmp->fn = get_builtin(q->m, GET_STR(tmp), tmp->arity)) != NULL)
+				tmp->flags |= FLAG_BUILTIN;
 			else {
-				tmp2->match = find_matching_rule_quiet(q->m, tmp2);
-				tmp2->flags &= ~FLAG_BUILTIN;
+				tmp->match = find_matching_rule_quiet(q->m, tmp);
+				tmp->flags &= ~FLAG_BUILTIN;
 			}
 		}
 
-		return unify(q, p1, p1_ctx, tmp2, q->st.curr_frame);
+		return unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	}
 
 	cell tmp = *p1;
