@@ -3214,6 +3214,11 @@ module *create_module(const char *name)
 			  "'$bagof'(T,G,TMP_B)=TMP_G,"			\
 			  "sort(TMP_B,B).");
 
+		make_rule(m, "catch(G,E,C) :- "				\
+			  "copy_term('$catch'(G,E,C),TMP_G),"		\
+			  "'$catch'(G,E,C)=TMP_G,"			\
+			  "TMP_G.");
+
 		make_rule(m, "call(G,P1) :- "				\
 			  "copy_term('$calln'(G,P1),TMP_G),"		\
 			  "'$calln'(G,P1)=TMP_G,"			\

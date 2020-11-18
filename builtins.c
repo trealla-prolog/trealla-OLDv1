@@ -5200,8 +5200,7 @@ static int fn_iso_catch_3(query *q)
 	if (q->retry == 2) {
 		q->retry = 0;
 		cell *tmp = clone_to_heap(q, 1, p3, 1);
-		idx_t nbr_cells = 1 + p3->nbr_cells;
-		make_end_return(tmp+nbr_cells, q->st.curr_cell);
+		make_end_return(tmp+1+p3->nbr_cells, q->st.curr_cell);
 		make_catcher(q, 2);
 		q->st.curr_cell = tmp;
 		return 1;
@@ -5211,8 +5210,7 @@ static int fn_iso_catch_3(query *q)
 		return 0;
 
 	cell *tmp = clone_to_heap(q, 1, p1, 1);
-	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	make_end_return(tmp+1+p1->nbr_cells, q->st.curr_cell);
 	make_catcher(q, 1);
 	q->st.curr_cell = tmp;
 	return 1;
@@ -10175,8 +10173,8 @@ static const struct builtins g_iso_funcs[] =
 	{";", 2, fn_iso_disjunction_2, NULL},
 	{"\\+", 1, fn_iso_negation_1, NULL},
 	{"once", 1, fn_iso_once_1, NULL},
-	{"catch", 3, fn_iso_catch_3, NULL},
 	{"throw", 1, fn_iso_throw_1, NULL},
+	{"$catch", 3, fn_iso_catch_3, NULL},
 	{"$calln", 2, fn_iso_call_n, NULL},
 	{"$calln", 3, fn_iso_call_n, NULL},
 	{"$calln", 4, fn_iso_call_n, NULL},
