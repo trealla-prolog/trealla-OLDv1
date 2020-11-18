@@ -191,12 +191,22 @@ struct cell_ {
 			int_t val_den;
 		};
 
-		double val_flt;
-		char val_chr[MAX_SMALL_STRING];
-		cell *val_ptr;
+		struct {
+			double val_flt;
+		};
+
+		struct {
+			char val_chr[MAX_SMALL_STRING];
+		};
+
+		struct {
+			cell *val_ptr;
+		};
 
 #if USE_GMP
-		mpz_t val_mpz;
+		struct {
+			mpz_t val_mpz;
+		};
 #endif
 
 		struct {
