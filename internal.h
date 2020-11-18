@@ -25,6 +25,10 @@
 #define USE_GMP 0
 #endif
 
+#ifndef USE_LDLIBS
+#define USE_LDLIBS 0
+#endif
+
 #if USE_GMP
 #include <gmp.h>
 #endif

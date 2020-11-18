@@ -1,12 +1,10 @@
 GIT_VERSION := "$(shell git describe --abbrev=4 --dirty --always --tags)"
-CFLAGS = -Isrc -I/usr/local/include -DUSE_OPENSSL=$(USE_OPENSSL) -DVERSION='$(GIT_VERSION)' -O3 $(OPT) -Wall -Wextra -D_GNU_SOURCE
+CFLAGS = -Isrc -I/usr/local/include -DVERSION='$(GIT_VERSION)' -O3 $(OPT) -Wall -Wextra -D_GNU_SOURCE
 LDFLAGS = -lreadline -L/usr/local/lib -lm
 
 ifndef NOSSL
-USE_OPENSSL = 1
+CFLAGS += -DUSE_OPENSSL=1
 LDFLAGS += -lssl -lcrypto
-else
-USE_OPENSSL = 0
 endif
 
 ifdef INT128
@@ -33,8 +31,6 @@ ifndef NOLDLIBS
 OBJECTS += lists.o dict.o apply.o http.o atts.o \
 	error.o dcgs.o format.o charsio.o
 CFLAGS += -DUSE_LDLIBS=1
-else
-CFLAGS += -DUSE_LDLIBS=0
 endif
 
 all: tpl
