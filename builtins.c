@@ -9825,43 +9825,6 @@ static int fn_call_nth_2(query *q)
 	return 1;
 }
 
-#if 0
-static int fn_call_dcg_3(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
-	GET_NEXT_ARG(p3,any);
-
-	if (is_list_or_nil(p1))
-		return unify(q, p1, p1_ctx, p2, p2_ctx);
-
-	if (is_literal(p1) && (p1->val_off == g_cut_s))
-		return unify(q, p1, p1_ctx, p2, p2_ctx);
-
-	if (is_structure(p1) && (p1->val_off == g_braces_s)) {
-		if (!unify(q, p2, p2_ctx, p3, p3_ctx))
-			return 0;
-
-		p1 = p1 + 1;
-		cell *tmp = clone_to_heap(q, 1, p1, 1);
-		idx_t nbr_cells = 1 + p1->nbr_cells;
-		make_end_return(tmp+nbr_cells, q->st.curr_cell);
-		q->st.curr_cell = tmp;
-		return 1;
-	}
-
-	return fn_iso_call_n(q);
-}
-
-static int fn_phrase_3(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,list_or_nil_or_var);
-	GET_NEXT_ARG(p3,list_or_nil_or_var);
-	return fn_call_dcg_3(q);
-}
-#endif
-
 static int do_length(query *q)
 {
 	GET_FIRST_ARG(p1,any);
