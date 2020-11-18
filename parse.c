@@ -583,8 +583,8 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		c->flags = 0;
 	}
 
-#if 0  //cehteh: dead code because of the  --->	     && 0  // LEAVE
-	if (!is_quoted(c) && strchr(GET_STR(c), ':') && 0) {
+#if 0
+	if (!is_quoted(c) && strchr(GET_STR(c), ':')) {
 		const char *src = GET_STR(c);
 		char mod[256], name[256];
 		mod[0] = name[0] = '\0';
@@ -1095,7 +1095,7 @@ static void directives(parser *p, term *t)
 		cell *p1 = c + 1;
 		if (!is_literal(p1)) return;
 		const char *name = GET_STR(p1);
-		int save_line_nbr = p->line_nbr;
+		unsigned save_line_nbr = p->line_nbr;
 		module_load_file(p->m, name);
 		p->line_nbr = save_line_nbr;
 		return;
@@ -1268,7 +1268,7 @@ static void directives(parser *p, term *t)
 			} else if (!strcmp(GET_STR(p1), ","))
 				p1 += 1;
 			else {
-				fprintf(stdout, "Warning: unknown multifile, line nbr %d\n", p->line_nbr);
+				fprintf(stdout, "Warning: unknown multifile, line nbr %u\n", p->line_nbr);
 				//p->error = true;
 				return;
 			}
@@ -1775,7 +1775,7 @@ static void parser_dcg_rewrite(parser *p)
 	destroy_parser_nodelete(p2);
 
 	if (!src) {
-		fprintf(stdout, "Error: syntax error, dcg_translate, line nbr %d\n", line_nbr);
+		fprintf(stdout, "Error: syntax error, dcg_translate, line nbr %u\n", line_nbr);
 		p->error = true;
 		return;
 	}
@@ -1812,7 +1812,6 @@ static cell *make_literal(parser *p, idx_t offset)
 
 static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *val_den)
 {
-	module *m = p->m;
 	*val_den = 1;
 	const char *s = *srcptr;
 	int neg = 0;
@@ -1940,10 +1939,14 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 	if (neg) *val_num = -*val_num;
 	int try_rational = 0;
 
-	if (((*s == 'r') || (*s == 'R')) && 0)
+#if 0
+	module *m = p->m;
+
+	if ((*s == 'r') || (*s == 'R'))
 		try_rational = 1;
 	else if ((*s == '/') && m->flag.rational_syntax_natural)
 		try_rational = 1;
+#endif
 
 	if (!try_rational) {
 		strtod(tmpptr, &tmpptr);
@@ -2526,7 +2529,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 
 				if (p->consulting && !p->skip)
 					if (!assertz_to_db(p->m, p->t, 1)) {
-						printf("Error: '%s', line nbr %d\n", p->token, p->line_nbr);
+						printf("Error: '%s', line nbr %u\n", p->token, p->line_nbr);
 						p->error = true;
 					}
 			}

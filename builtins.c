@@ -497,10 +497,12 @@ cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	g_varno = g->nbr_vars;
 	g_tab_idx = 0;
 
-	if (is_variable(p1) && 0) {
+#if 0
+	if (is_variable(p1)) {
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
+#endif
 
 	deep_copy2_to_tmp(q, p1, p1_ctx);
 
@@ -562,10 +564,12 @@ static cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
 	init_tmp_heap(q);
 
-	if (is_variable(p1) && 0) {
+#if 0
+	if (is_variable(p1)) {
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
+#endif
 
 	deep_clone2_to_tmp(q, p1, p1_ctx);
 	return q->tmp_heap;
@@ -3953,7 +3957,7 @@ static int cstring_cmp(const char *s1, size_t len1, const char *s2, size_t len2)
 	return 0;
 }
 
-static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, int depth)
+static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
 {
 	if (depth == MAX_DEPTH) {
 		q->cycle_error = true;
@@ -5752,14 +5756,17 @@ static int fn_sys_list_1(query *q)
 
 	frame *g = GET_FRAME(q->st.curr_frame);
 	unsigned new_varno = g->nbr_vars;
+
+#if 0
 	cell *c = l;
 
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
-		if (is_variable(c) && 0) {
+		if (is_variable(c)) {
 			c->var_nbr = new_varno++;
 			c->flags = FLAG_FRESH;
 		}
 	}
+#endif
 
 	if (new_varno != g->nbr_vars) {
 		if (!create_vars(q, new_varno-g->nbr_vars)) {
@@ -7489,7 +7496,7 @@ static query *pop_task(module *m, query *task)
 static int fn_wait_0(query *q)
 {
 	while (!g_tpl_interrupt && q->m->tasks) {
-		int_t now = get_time_in_usec() / 1000;
+		uint_t now = get_time_in_usec() / 1000;
 		query *task = q->m->tasks;
 		unsigned did_something = 0, spawn_cnt = 0;
 
@@ -7532,7 +7539,7 @@ static int fn_wait_0(query *q)
 static int fn_await_0(query *q)
 {
 	while (!g_tpl_interrupt && q->m->tasks) {
-		int_t now = get_time_in_usec() / 1000;
+		uint_t now = get_time_in_usec() / 1000;
 		query *task = q->m->tasks;
 		unsigned did_something = 0, spawn_cnt = 0;
 

@@ -150,7 +150,7 @@ static size_t plain(char *dst, size_t dstlen, const char *src, size_t srclen)
 	return len;
 }
 
-size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int depth)
+size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
 	char *save_dst = dst;
 
@@ -268,7 +268,7 @@ static char *varformat(unsigned nbr)
 	return tmpbuf;
 }
 
-size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, int depth)
+size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth)
 {
 	char *save_dst = dst;
 
@@ -550,7 +550,7 @@ char *write_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 	return buf;
 }
 
-void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, int depth)
+void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
 	size_t len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, depth);
 
@@ -580,7 +580,7 @@ void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 	free(dst);
 }
 
-void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int depth)
+void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
 	size_t len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, depth);
 
@@ -610,7 +610,7 @@ void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int 
 	free(dst);
 }
 
-void write_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, int cons, int depth)
+void write_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, int cons, unsigned depth)
 {
 	size_t len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, cons, depth);
 
@@ -640,7 +640,7 @@ void write_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int runni
 	free(dst);
 }
 
-void write_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int cons, int depth)
+void write_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int cons, unsigned depth)
 {
 	size_t len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, cons, depth);
 

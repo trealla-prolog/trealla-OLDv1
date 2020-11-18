@@ -90,13 +90,13 @@ typedef uint32_t idx_t;
 #define is_string(c) (is_cstring(c) && (c)->flags&FLAG_STRING)
 #define is_blob(c) (is_cstring(c) && ((c)->flags&FLAG_BLOB))
 #define is_list(c) (is_iso_list(c) || is_string(c))
-#define is_integer(c) (((c)->val_type == TYPE_INTEGER) && ((c)->val_den == 1))
-#define is_const_cstring(c) (is_cstring(c) && ((c)->flags&FLAG_CONST_CSTRING))
-#define is_dup_cstring(c) (is_cstring(c) && ((c)->flags&FLAG_DUP_CSTRING))
+#define is_integer(c) (is_rational(c) && ((c)->val_den == 1))
+#define is_const_cstring(c) (is_cstring(c) && ((c)->flags & FLAG_CONST_CSTRING))
+#define is_dup_cstring(c) (is_cstring(c) && ((c)->flags & FLAG_DUP_CSTRING))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
-#define is_quoted(c) ((c)->flags&FLAG_QUOTED)
-#define is_fresh(c) ((c)->flags&FLAG_FRESH)
-#define is_anon(c) ((c)->flags&FLAG_ANON)
+#define is_quoted(c) ((c)->flags & FLAG_QUOTED)
+#define is_fresh(c) ((c)->flags & FLAG_FRESH)
+#define is_anon(c) ((c)->flags & FLAG_ANON)
 #define is_op(c) (c->flags && 0xFF00)
 
 // These 2 assume literal or cstring types...
@@ -156,18 +156,18 @@ enum {
 #define	OP_XFX 6
 #define	OP_XFY 7
 
-#define IS_PREFIX(op) ((op==OP_FX)||(op==OP_FY))
+#define IS_PREFIX(op) ((op == OP_FX) || (op == OP_FY))
 
-#define IS_FX(c) ((c->flags>>12) == OP_FX)
-#define IS_FY(c) ((c->flags>>12) == OP_FY)
-#define IS_XF(c) ((c->flags>>12) == OP_XF)
-#define IS_YF(c) ((c->flags>>12) == OP_YF)
-#define IS_YFX(c) ((c->flags>>12) == OP_YFX)
-#define IS_XFX(c) ((c->flags>>12) == OP_XFX)
-#define IS_XFY(c) ((c->flags>>12) == OP_XFY)
+#define IS_FX(c) ((c->flags >> 12) == OP_FX)
+#define IS_FY(c) ((c->flags >> 12) == OP_FY)
+#define IS_XF(c) ((c->flags >> 12) == OP_XF)
+#define IS_YF(c) ((c->flags >> 12) == OP_YF)
+#define IS_YFX(c) ((c->flags >> 12) == OP_YFX)
+#define IS_XFX(c) ((c->flags >> 12) == OP_XFX)
+#define IS_XFY(c) ((c->flags >> 12) == OP_XFY)
 
-#define SET_OP(c,optype) (c)->flags |= (((uint16_t)(optype))<<12)
-#define CLR_OP(c) ((c)->flags &= ~((uint16_t)(0xF<<12)))
+#define SET_OP(c,optype) (c)->flags |= (((uint16_t)(optype)) << 12)
+#define CLR_OP(c) ((c)->flags &= ~((uint16_t)(0xF << 12)))
 #define GET_OP(c) ((c)->flags >> 12)
 
 typedef struct module_ module;
@@ -351,7 +351,7 @@ struct query_ {
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
 	uint64_t nv_mask, step, qid;
 	uint64_t time_started;
-	int max_depth, tmo_msecs; //cehteh: unsigned?
+	unsigned max_depth, tmo_msecs;
 	idx_t cp, tmphp, nv_start, latest_ctx, popp, cgen;
 	idx_t frames_size, slots_size, trails_size, choices_size;
 	idx_t max_choices, max_frames, max_slots, max_trails;
@@ -391,8 +391,8 @@ struct parser_ {
 	term *t;
 	char *token, *save_line, *srcptr;
 	size_t token_size, n_line, len_str;
-	int line_nbr, depth; //FIXME: cehteh: cant these be all unsigned?
-	int quoted;  //cehteh: can be unsigned?
+	unsigned line_nbr, depth;
+	int quoted;				// C character is an int
 	unsigned nbr_vars;
 	uint8_t val_type;
 	int8_t dq_consing;
@@ -487,12 +487,12 @@ clause *erase_from_db(module *m, uuid *ref);
 clause *find_in_db(module *m, uuid *ref);
 unsigned get_op(module *m, const char *name, unsigned *optype, int *userop, int hint_prefix);
 bool set_op(module *m, const char *name, unsigned optype, unsigned precedence);
-void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int depth);
-void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, int depth);
-size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int depth);
-void write_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int cons, int depth);
-void write_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, int cons, int depth);
-size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, int depth);
+void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, unsigned depth);
+void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, unsigned depth);
+size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, unsigned depth);
+void write_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
+void write_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
+size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
 void make_choice(query *q);
 void make_barrier(query *q);
 void make_catcher(query *q, unsigned type);
