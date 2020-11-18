@@ -168,7 +168,7 @@ static void trace_call(query *q, cell *c, box_t box)
 	if (!strcmp(src, ",") || !strcmp(src, ";") || !strcmp(src, "->"))
 		return;
 
-	fprintf(stderr, " [%llu] ", (unsigned long long)q->step);
+	fprintf(stderr, " [%llu] ", (unsigned long long)q->step++);
 	fprintf(stderr, "%s ", box==CALL?"CALL":box==EXIT?"EXIT":box==REDO?"REDO":box==NEXT?isatty(2)?"\e[32mNEXT\e[0m":"NEXT":isatty(2)?"\e[31mFAIL\e[0m":"FAIL");
 
 #if DEBUG
@@ -1104,7 +1104,6 @@ void run_query(query *q)
 		}
 
 		q->tot_goals++;
-		q->step++;
 		Trace(q, q->st.curr_cell, q->retry?REDO:q->resume?NEXT:CALL);
 
 		if (!(q->st.curr_cell->flags&FLAG_BUILTIN)) {
@@ -1127,7 +1126,6 @@ void run_query(query *q)
 		} else {
 			if (!q->st.curr_cell->fn) {
 				q->tot_goals--;
-				q->step--;
 				q->st.curr_cell++;					// NO-OP
 				continue;
 			}
