@@ -3111,11 +3111,11 @@ module *create_module(const char *name)
 		make_rule(m, "unify_with_occurs_check(X,X) :- acyclic_term(X).");
 
 		make_rule(m, "subsumes_term(G,S) :- "			\
-			  "\\+ \\+ ( "					\
-			  "term_variables(S, V1), "			\
-			  "G = S, "					\
-			  "term_variables(V1, V2), "			\
-			  "V2 == V1).");
+			"\\+ \\+ ( "					\
+			"term_variables(S, V1), "			\
+			"G = S, "					\
+			"term_variables(V1, V2), "			\
+			"V2 == V1).");
 
 		make_rule(m, "chars_base64(Plain,Base64,_) :- base64(Plain,Base64).");
 		make_rule(m, "chars_urlenc(Plain,Url,_) :- urlenc(Plain,Url).");
@@ -3123,31 +3123,31 @@ module *create_module(const char *name)
 		make_rule(m, "merge([], R, R) :- !.");
 		make_rule(m, "merge(R, [], R) :- !.");
 		make_rule(m, "merge([H1|T1], [H2|T2], Result) :- "	\
-			  "compare(Delta, H1, H2), !, "			\
-			  "merge(Delta, H1, H2, T1, T2, Result).");
+			"compare(Delta, H1, H2), !, "			\
+			"merge(Delta, H1, H2, T1, T2, Result).");
 
 		make_rule(m, "merge(>, H1, H2, T1, T2, [H2|R]) :- "	\
-			  "merge([H1|T1], T2, R).");
+			"merge([H1|T1], T2, R).");
 		make_rule(m, "merge(=, H1, _, T1, T2, [H1|R]) :- "	\
-			  "merge(T1, T2, R).");
+			"merge(T1, T2, R).");
 		make_rule(m, "merge(<, H1, H2, T1, T2, [H1|R]) :- "	\
-			  "merge(T1, [H2|T2], R).");
+			"merge(T1, [H2|T2], R).");
 
 		make_rule(m, "sort(L, R) :- "				\
-			  "length(L,N), "				\
-			  "sort(N, L, _, R).");
+			"length(L,N), "				\
+			"sort(N, L, _, R).");
 
 		make_rule(m, "sort(2, [X1, X2|L], L, R) :- !, "		\
-			  "compare(Delta, X1, X2), "			\
-			  "'$sort2'(Delta, X1, X2, R).");
+			"compare(Delta, X1, X2), "			\
+			"'$sort2'(Delta, X1, X2, R).");
 		make_rule(m, "sort(1, [X|L], L, [X]) :- !.");
 		make_rule(m, "sort(0, L, L, []) :- !.");
 		make_rule(m, "sort(N, L1, L3, R) :- "			\
-			  "N1 is N // 2, "				\
-			  "plus(N1, N2, N), "				\
-			  "sort(N1, L1, L2, R1), "			\
-			  "sort(N2, L2, L3, R2), "			\
-			  "merge(R1, R2, R).");
+			"N1 is N // 2, "				\
+			"plus(N1, N2, N), "				\
+			"sort(N1, L1, L2, R1), "			\
+			"sort(N2, L2, L3, R2), "			\
+			"merge(R1, R2, R).");
 
 		make_rule(m, "'$sort2'(<, X1, X2, [X1, X2]).");
 		make_rule(m, "'$sort2'(=, X1, _,  [X1]).");
@@ -3156,184 +3156,184 @@ module *create_module(const char *name)
 		make_rule(m, "mmerge([], R, R) :- !.");
 		make_rule(m, "mmerge(R, [], R) :- !.");
 		make_rule(m, "mmerge([H1|T1], [H2|T2], Result) :- "	\
-			  "compare(Delta, H1, H2), !, "			\
-			  "mmerge(Delta, H1, H2, T1, T2, Result).");
+			"compare(Delta, H1, H2), !, "			\
+			"mmerge(Delta, H1, H2, T1, T2, Result).");
 
 		make_rule(m, "mmerge(>, H1, H2, T1, T2, [H2|R]) :- "	\
-			  "mmerge([H1|T1], T2, R).");
+			"mmerge([H1|T1], T2, R).");
 		make_rule(m, "mmerge(=, H1, H2, T1, T2, [H1|R]) :- "	\
-			  "mmerge(T1, [H2|T2], R).");
+			"mmerge(T1, [H2|T2], R).");
 		make_rule(m, "mmerge(<, H1, H2, T1, T2, [H1|R]) :- "	\
-			  "mmerge(T1, [H2|T2], R).");
+			"mmerge(T1, [H2|T2], R).");
 
 		make_rule(m, "msort(L, R) :- "				\
-			  "length(L,N), "				\
-			  "msort(N, L, _, R).");
+			"length(L,N), "				\
+			"msort(N, L, _, R).");
 
 		make_rule(m, "msort(2, [X1, X2|L], L, R) :- !, "	\
-			  "compare(Delta, X1, X2), "			\
-			  "'$sort2'(Delta, X1, X2, R).");
+			"compare(Delta, X1, X2), "			\
+			"'$sort2'(Delta, X1, X2, R).");
 		make_rule(m, "msort(1, [X|L], L, [X]) :- !.");
 		make_rule(m, "msort(0, L, L, []) :- !.");
 		make_rule(m, "msort(N, L1, L3, R) :- "			\
-			  "N1 is N // 2, "				\
-			  "plus(N1, N2, N), "				\
-			  "msort(N1, L1, L2, R1), "			\
-			  "msort(N2, L2, L3, R2), "			\
-			  "mmerge(R1, R2, R).");
+			"N1 is N // 2, "				\
+			"plus(N1, N2, N), "				\
+			"msort(N1, L1, L2, R1), "			\
+			"msort(N2, L2, L3, R2), "			\
+			"mmerge(R1, R2, R).");
 
 		make_rule(m, "keycompare(Delta, (K1-_), (K2-_)) :- "	\
-			  "(K1 @< K2 -> Delta = '<' ; "			\
-			  "(K1 @> K2 -> Delta = '>' ; "			\
-			  "Delta = '=').");
+			"(K1 @< K2 -> Delta = '<' ; "			\
+			"(K1 @> K2 -> Delta = '>' ; "			\
+			"Delta = '=').");
 
 		make_rule(m, "keysort(L, R) :- "			\
-			  "length(L,N), "				\
-			  "keysort(N, L, _, R).");
+			"length(L,N), "				\
+			"keysort(N, L, _, R).");
 
 		make_rule(m, "keysort(2, [X1, X2|L], L, R) :- !, "	\
-			  "keycompare(Delta, X1, X2), "			\
-			  "'$sort2'(Delta, X1, X2, R).");
+			"keycompare(Delta, X1, X2), "			\
+			"'$sort2'(Delta, X1, X2, R).");
 		make_rule(m, "keysort(1, [X|L], L, [X]) :- !.");
 		make_rule(m, "keysort(0, L, L, []) :- !.");
 		make_rule(m, "keysort(N, L1, L3, R) :- "		\
-			  "N1 is N // 2, "				\
-			  "plus(N1, N2, N), "				\
-			  "keysort(N1, L1, L2, R1), "			\
-			  "keysort(N2, L2, L3, R2), "			\
-			  "mmerge(R1, R2, R).");
+			"N1 is N // 2, "				\
+			"plus(N1, N2, N), "				\
+			"keysort(N1, L1, L2, R1), "			\
+			"keysort(N2, L2, L3, R2), "			\
+			"mmerge(R1, R2, R).");
 
 		make_rule(m, "bagof(T,G,B) :- "				\
-			  "copy_term('$bagof'(T,G,_),TMP_G),"		\
-			  "TMP_G,"					\
-			  "'$bagof'(T,G,B)=TMP_G.");
+			"copy_term('$bagof'(T,G,_),TMP_G),"		\
+			"TMP_G,"					\
+			"'$bagof'(T,G,B)=TMP_G.");
 
 		make_rule(m, "setof(T,G,B) :- "				\
-			  "copy_term('$bagof'(T,G,_),TMP_G),"		\
-			  "TMP_G,"					\
-			  "'$bagof'(T,G,TMP_B)=TMP_G,"			\
-			  "sort(TMP_B,B).");
+			"copy_term('$bagof'(T,G,_),TMP_G),"		\
+			"TMP_G,"					\
+			"'$bagof'(T,G,TMP_B)=TMP_G,"			\
+			"sort(TMP_B,B).");
 
 		make_rule(m, "catch(G,E,C) :- "				\
-			  "copy_term('$catch'(G,E,C),TMP_G),"		\
-			  "'$catch'(G,E,C)=TMP_G,"			\
-			  "TMP_G.");
+			"copy_term('$catch'(G,E,C),TMP_G),"		\
+			"'$catch'(G,E,C)=TMP_G,"			\
+			"TMP_G.");
 
 		make_rule(m, "call(G,P1) :- "				\
-			  "copy_term('$calln'(G,P1),TMP_G),"		\
-			  "'$calln'(G,P1)=TMP_G,"			\
-			  "TMP_G.");
+			"copy_term('$calln'(G,P1),TMP_G),"		\
+			"'$calln'(G,P1)=TMP_G,"			\
+			"TMP_G.");
 
 		make_rule(m, "call(G,P1,P2) :- "			\
-			  "copy_term('$calln'(G,P1,P2),TMP_G),"		\
-			  "'$calln'(G,P1,P2)=TMP_G,"			\
-			  "TMP_G.");
+			"copy_term('$calln'(G,P1,P2),TMP_G),"		\
+			"'$calln'(G,P1,P2)=TMP_G,"			\
+			"TMP_G.");
 
 		make_rule(m, "call(G,P1,P2,P3) :- "			\
-			  "copy_term('$calln'(G,P1,P2,P3),TMP_G),"	\
-			  "'$calln'(G,P1,P2,P3)=TMP_G,"			\
-			  "TMP_G.");
+			"copy_term('$calln'(G,P1,P2,P3),TMP_G),"	\
+			"'$calln'(G,P1,P2,P3)=TMP_G,"			\
+			"TMP_G.");
 
 		make_rule(m, "call(G,P1,P2,P3,P4) :- "			\
-			  "copy_term('$calln'(G,P1,P2,P3,P4),TMP_G),"	\
-			  "'$calln'(G,P1,P2,P3,P4)=TMP_G,"		\
-			  "TMP_G.");
+			"copy_term('$calln'(G,P1,P2,P3,P4),TMP_G),"	\
+			"'$calln'(G,P1,P2,P3,P4)=TMP_G,"		\
+			"TMP_G.");
 
 		make_rule(m, "call(G,P1,P2,P3,P4,P5) :- "			\
-			  "copy_term('$calln'(G,P1,P2,P3,P4,P5),TMP_G),"	\
-			  "'$calln'(G,P1,P2,P3,P4,P5)=TMP_G,"		\
-			  "TMP_G.");
+			"copy_term('$calln'(G,P1,P2,P3,P4,P5),TMP_G),"	\
+			"'$calln'(G,P1,P2,P3,P4,P5)=TMP_G,"		\
+			"TMP_G.");
 
 		make_rule(m, "call(G,P1,P2,P3,P4,P5,P6) :- "			\
-			  "copy_term('$calln'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
-			  "'$calln'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"		\
-			  "TMP_G.");
+			"copy_term('$calln'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
+			"'$calln'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"		\
+			"TMP_G.");
 
 		make_rule(m, "call(G,P1,P2,P3,P4,P5,P6,P7) :- "			\
-			  "copy_term('$calln'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"	\
-			  "'$calln'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"		\
-			  "TMP_G.");
+			"copy_term('$calln'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"	\
+			"'$calln'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"		\
+			"TMP_G.");
 
 		make_rule(m, "spawn(G,P1) :- "				\
-			  "copy_term('$spawnn'(G,P1),TMP_G),"		\
-			  "'$spawnn'(G,P1)=TMP_G,"			\
-			  "TMP_G.");
+			"copy_term('$spawnn'(G,P1),TMP_G),"		\
+			"'$spawnn'(G,P1)=TMP_G,"			\
+			"TMP_G.");
 
 		make_rule(m, "spawn(G,P1,P2) :- "			\
-			  "copy_term('$spawnn'(G,P1,P2),TMP_G),"	\
-			  "'$spawnn'(G,P1,P2)=TMP_G,"			\
-			  "TMP_G.");
+			"copy_term('$spawnn'(G,P1,P2),TMP_G),"	\
+			"'$spawnn'(G,P1,P2)=TMP_G,"			\
+			"TMP_G.");
 
 		make_rule(m, "spawn(G,P1,P2,P3) :- "			\
-			  "copy_term('$spawnn'(G,P1,P2,P3),TMP_G),"	\
-			  "'$spawnn'(G,P1,P2,P3)=TMP_G,"		\
-			  "TMP_G.");
+			"copy_term('$spawnn'(G,P1,P2,P3),TMP_G),"	\
+			"'$spawnn'(G,P1,P2,P3)=TMP_G,"		\
+			"TMP_G.");
 
 		make_rule(m, "spawn(G,P1,P2,P3,P4) :- "			\
-			  "copy_term('$spawnn'(G,P1,P2,P3,P4),TMP_G),"	\
-			  "'$spawnn'(G,P1,P2,P3,P4)=TMP_G,"		\
-			  "TMP_G.");
+			"copy_term('$spawnn'(G,P1,P2,P3,P4),TMP_G),"	\
+			"'$spawnn'(G,P1,P2,P3,P4)=TMP_G,"		\
+			"TMP_G.");
 
 		make_rule(m, "spawn(G,P1,P2,P3,P4,P5) :- "			\
-			  "copy_term('$spawnn'(G,P1,P2,P3,P4,P5),TMP_G),"	\
-			  "'$spawnn'(G,P1,P2,P3,P4,P5)=TMP_G,"		\
-			  "TMP_G.");
+			"copy_term('$spawnn'(G,P1,P2,P3,P4,P5),TMP_G),"	\
+			"'$spawnn'(G,P1,P2,P3,P4,P5)=TMP_G,"		\
+			"TMP_G.");
 
 		make_rule(m, "spawn(G,P1,P2,P3,P4,P5,P6) :- "			\
-			  "copy_term('$spawnn'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
-			  "'$spawnn'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"		\
-			  "TMP_G.");
+			"copy_term('$spawnn'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
+			"'$spawnn'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"		\
+			"TMP_G.");
 
 		make_rule(m, "spawn(G,P1,P2,P3,P4,P5,P6,P7) :- "			\
-			  "copy_term('$spawnn'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"	\
-			  "'$spawnn'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"		\
-			  "TMP_G.");
+			"copy_term('$spawnn'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"	\
+			"'$spawnn'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"		\
+			"TMP_G.");
 
 		make_rule(m, "phrase_from_file(P, Filename) :- "	\
-			  "open(Filename, read, Str, [mmap(Ms)]),"	\
-			  "copy_term(P, P2), P2=P,"			\
-			  "phrase(P2, Ms, []),"				\
-			  "close(Str).");
+			"open(Filename, read, Str, [mmap(Ms)]),"	\
+			"copy_term(P, P2), P2=P,"			\
+			"phrase(P2, Ms, []),"				\
+			"close(Str).");
 
 		make_rule(m, "phrase_from_file(P, Filename, Opts) :- "	\
-			  "open(Filename, read, Str, [mmap(Ms)|Opts])," \
-			  "copy_term(P, P2), P2=P,"			\
-			  "phrase(P2, Ms, []),"				\
-			  "close(Str).");
+			"open(Filename, read, Str, [mmap(Ms)|Opts])," \
+			"copy_term(P, P2), P2=P,"			\
+			"phrase(P2, Ms, []),"				\
+			"close(Str).");
 
 		make_rule(m, "phrase(GRBody, S0) :-"			\
-			  "phrase(GRBody, S0, [])."			\
-			  "phrase(GRBody, S0, S) :-"			\
-			  "  (	var(GRBody) -> throw(error(instantiation_error, phrase/3))" \
-			  "  ;	dcg_constr(GRBody) -> phrase_(GRBody, S0, S)" \
-			  "  ;	functor(GRBody, _, _) -> call(GRBody, S0, S)" \
-			  "  ;	throw(error(type_error(callable, GRBody), phrase/3))" \
-			  "  )."					\
-			  ""						\
-			  "phrase_([], S, S)."				\
-			  "phrase_(!, S, S)."				\
-			  "phrase_((A, B), S0, S) :-"			\
-			  "  phrase(A, S0, S1), phrase(B, S1, S)."	\
-			  "phrase_((A -> B ; C), S0, S) :-"		\
-			  "  !,"					\
-			  "  (	phrase(A, S0, S1) ->"			\
-			  "    phrase(B, S1, S)"			\
-			  "  ;	phrase(C, S0, S)"			\
-			  "  )."					\
-			  "phrase_((A ; B), S0, S) :-"			\
-			  "  (	phrase(A, S0, S) ; phrase(B, S0, S)  )." \
-			  "phrase_((A | B), S0, S) :-"			\
-			  "  (	phrase(A, S0, S) ; phrase(B, S0, S)  )." \
-			  "phrase_({G}, S0, S) :-"			\
-			  "  (	call(G), S0 = S	 )."			\
-			  "phrase_(call(G), S0, S) :-"			\
-			  "  call(G, S0, S)."				\
-			  "phrase_((A -> B), S0, S) :-"			\
-			  "  phrase((A -> B ; fail), S0, S)."		\
-			  "phrase_(phrase(NonTerminal), S0, S) :-"	\
-			  "  phrase(NonTerminal, S0, S)."		\
-			  "phrase_([T|Ts], S0, S) :-"			\
-			  "  append([T|Ts], S, S0).");
+			"phrase(GRBody, S0, [])."			\
+			"phrase(GRBody, S0, S) :-"			\
+			"  (	var(GRBody) -> throw(error(instantiation_error, phrase/3))" \
+			"  ;	dcg_constr(GRBody) -> phrase_(GRBody, S0, S)" \
+			"  ;	functor(GRBody, _, _) -> call(GRBody, S0, S)" \
+			"  ;	throw(error(type_error(callable, GRBody), phrase/3))" \
+			"  )."					\
+			""						\
+			"phrase_([], S, S)."				\
+			"phrase_(!, S, S)."				\
+			"phrase_((A, B), S0, S) :-"			\
+			"  phrase(A, S0, S1), phrase(B, S1, S)."	\
+			"phrase_((A -> B ; C), S0, S) :-"		\
+			"  !,"					\
+			"  (	phrase(A, S0, S1) ->"			\
+			"    phrase(B, S1, S)"			\
+			"  ;	phrase(C, S0, S)"			\
+			"  )."					\
+			"phrase_((A ; B), S0, S) :-"			\
+			"  (	phrase(A, S0, S) ; phrase(B, S0, S)  )." \
+			"phrase_((A | B), S0, S) :-"			\
+			"  (	phrase(A, S0, S) ; phrase(B, S0, S)  )." \
+			"phrase_({G}, S0, S) :-"			\
+			"  (	call(G), S0 = S	 )."			\
+			"phrase_(call(G), S0, S) :-"			\
+			"  call(G, S0, S)."				\
+			"phrase_((A -> B), S0, S) :-"			\
+			"  phrase((A -> B ; fail), S0, S)."		\
+			"phrase_(phrase(NonTerminal), S0, S) :-"	\
+			"  phrase(NonTerminal, S0, S)."		\
+			"phrase_([T|Ts], S0, S) :-"			\
+			"  append([T|Ts], S, S0).");
 
 		// This is an approximation... it needs a catcher
 
