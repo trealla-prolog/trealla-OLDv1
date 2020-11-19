@@ -434,6 +434,7 @@ static idx_t g_tab1[64000];
 static idx_t g_tab3[64000];
 static idx_t g_tab2[64000];
 static idx_t g_tab4[64000];
+static uint8_t g_tab5[64000];
 
 static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
@@ -1873,6 +1874,7 @@ static void collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells)
 				g_tab2[g_tab_idx] = c->var_nbr;
 				g_tab3[g_tab_idx] = c->val_off;
 				g_tab4[g_tab_idx] = 1;
+				g_tab5[g_tab_idx] = is_anon(c) ? 1 : 0;
 				g_tab_idx++;
 			}
 		}
@@ -2088,16 +2090,26 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	}
 
 	if (varnames) {
-		unsigned cnt = g_tab_idx;
+		unsigned cnt = 0;
 		init_tmp_heap(q);
 		cell *tmp = alloc_tmp_heap(q, (cnt*4)+1);
 		ensure(tmp);
 		unsigned idx = 0;
 
+		for (unsigned i = 0; i < g_tab_idx; i++) {
+			if (g_tab5[i])
+				continue;
+
+			cnt++;
+		}
+
 		if (cnt) {
 			unsigned done = 0;
 
 			for (unsigned i = 0; i < g_tab_idx; i++) {
+				if (g_tab5[i])
+					continue;
+
 				make_literal(tmp+idx, g_dot_s);
 				tmp[idx].arity = 2;
 				tmp[idx++].nbr_cells = ((cnt-done)*4)+1;
@@ -2145,6 +2157,9 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 			if (g_tab4[i] != 1)
 				continue;
 
+			if (varnames && (g_tab5[i]))
+				continue;
+
 			cnt++;
 		}
 
@@ -2153,6 +2168,9 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 
 			for (unsigned i = 0; i < g_tab_idx; i++) {
 				if (g_tab4[i] != 1)
+					continue;
+
+				if (varnames && (g_tab5[i]))
 					continue;
 
 				make_literal(tmp+idx, g_dot_s);
