@@ -1938,8 +1938,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 
 	parser *p = str->p;
 	p->fp = str->fp;
-	p->t->cidx = 0;
-	p->start_term = true;
+	parser_reset(p);
 	p->one_shot = true;
 	p->error = false;
 	int flag_chars = q->m->flag.double_quote_chars;

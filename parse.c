@@ -1716,6 +1716,12 @@ bool parser_attach(parser *p, int start_idx)
 	return !p->error;
 }
 
+void parser_reset(parser *p)
+{
+	p->t->cidx = 0;
+	p->start_term = true;
+}
+
 static void parser_dcg_rewrite(parser *p)
 {
 	if (!is_literal(p->t->cells))
@@ -1781,7 +1787,7 @@ static void parser_dcg_rewrite(parser *p)
 	//p2 = create_parser(p->m);
 	//ensure(p2);
 #else
-	p2->t->cidx = 0;
+	parser_reset(p2);
 #endif
 
 	p2->srcptr = src;

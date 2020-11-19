@@ -524,6 +524,7 @@ void destroy_parser_nodelete(parser *p);
 unsigned parser_tokenize(parser *p, int args, int consing);
 bool parser_attach(parser *p, int start_idx);
 void parser_xref(parser *p, term *t, rule *parent);
+void parser_reset(parser *p);
 idx_t drop_choice(query *q);
 bool retry_choice(query *q);
 void parser_assign_vars(parser *p, unsigned start);
