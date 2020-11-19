@@ -597,10 +597,12 @@ char *write_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 
 void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
+#if 0
 	if (!q->nv_mask && !depth) {
 		do_numbervars(q, c, c_ctx, 0);
 		q->nv_start = -1;
 	}
+#endif
 
 	size_t len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, depth);
 
@@ -637,10 +639,12 @@ void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 
 void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
+#if 0
 	if (!q->nv_mask && !depth) {
 		do_numbervars(q, c, c_ctx, 0);
 		q->nv_start = -1;
 	}
+#endif
 
 	size_t len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, depth);
 
