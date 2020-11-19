@@ -159,6 +159,26 @@ static char *varformat(unsigned nbr)
 	return tmpbuf;
 }
 
+static int find_binding(query *q, idx_t var_nbr, idx_t var_ctx)
+{
+	frame *g = GET_FRAME(q->st.curr_frame);
+
+	for (unsigned i = 0; i < g->nbr_vars; i++) {
+		slot *e = GET_SLOT(g, i);
+
+		if (!is_variable(&e->c))
+			continue;
+
+		if (e->ctx != var_ctx)
+			continue;
+
+		if (e->c.var_nbr == var_nbr)
+			return i;
+	}
+
+	return -1;
+}
+
 size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
 	char *save_dst = dst;
@@ -215,8 +235,10 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 		return dst - save_dst;
 	}
 
-	if (is_variable(c) && (running>0) && ((1ULL << c->var_nbr) & q->nv_mask)) {
-		dst += snprintf(dst, dstlen, "'$VAR'(%u)", q->nv_start + count_bits(q->nv_mask, c->var_nbr));
+	int var_nbr = -1;
+
+	if (is_variable(c) && (running>0) && ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)) {
+		dst += snprintf(dst, dstlen, "'$VAR'(%u)", q->nv_start + count_bits(q->nv_mask, var_nbr));
 		return dst - save_dst;
 	}
 

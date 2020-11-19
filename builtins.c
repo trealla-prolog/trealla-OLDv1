@@ -9301,15 +9301,15 @@ static int fn_predicate_property_2(query *q)
 	return 0;
 }
 
-static int do_collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, cell **slots)
+static int do_collect_vars(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 {
 	int cnt = 0;
 
 	for (idx_t i = 0; i < nbr_cells; i++, p1++) {
-		cell *c = deref(q, p1, p1_ctx);
+		cell *c = p1;
 
 		if (is_structure(c)) {
-			cnt += do_collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1, slots);
+			cnt += do_collect_vars(q, c+1, c->nbr_cells-1, slots);
 		} else if (is_variable(c)) {
 			assert(c->var_nbr < MAX_ARITY);
 
@@ -9323,13 +9323,14 @@ static int do_collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, ce
 	return cnt;
 }
 
-static int fn_numbervars_1(query *q)
+unsigned do_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 {
-	GET_FIRST_ARG(p1,any);
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx);
+	unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	cell *slots[MAX_ARITY] = {0};
-	do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
+	do_collect_vars(q, tmp, tmp->nbr_cells, slots);
 	q->nv_mask = 0;
-	unsigned end = q->nv_start = 0;
+	unsigned end = q->nv_start = start;
 
 	for (unsigned i = 0; i < MAX_ARITY; i++) {
 		if (!slots[i])
@@ -9339,6 +9340,13 @@ static int fn_numbervars_1(query *q)
 		end++;
 	}
 
+	return end;
+}
+
+static int fn_numbervars_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	do_numbervars(q, p1, p1_ctx, 0);
 	return 1;
 }
 
@@ -9347,22 +9355,10 @@ static int fn_numbervars_3(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer)
 	GET_NEXT_ARG(p3,integer_or_var)
-	cell *slots[MAX_ARITY] = {0};
-	do_collect_vars(q, p1, p1_ctx, p1->nbr_cells, slots);
-	q->nv_mask = 0;
-	unsigned end = q->nv_start = p2->val_num;
-
-	for (unsigned i = 0; i < MAX_ARITY; i++) {
-		if (!slots[i])
-			continue;
-
-		q->nv_mask |= 1ULL << slots[i]->var_nbr;
-		end++;
-	}
-
-	cell tmp;
-	make_int(&tmp, end);
-	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+	unsigned end = do_numbervars(q, p1, p1_ctx, p2->val_num);
+	cell tmp2;
+	make_int(&tmp2, end);
+	return unify(q, p3, p3_ctx, &tmp2, q->st.curr_frame);
 }
 
 unsigned count_bits(uint64_t mask, unsigned bit)
