@@ -2045,11 +2045,10 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 
 	cell *tmp = p->t->cells;
 	tmp->nbr_cells = p->t->cidx-1;
+	g_tab_idx = 0;
 
-	if (p->nbr_vars) {
-		g_tab_idx = 0;
+	if (p->nbr_vars)
 		collect_vars(q, tmp, q->st.curr_frame, tmp->nbr_cells);
-	}
 
 	if (vars) {
 		unsigned cnt = g_tab_idx;
