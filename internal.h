@@ -362,7 +362,8 @@ struct query_ {
 	uint64_t nv_mask, step, qid;
 	uint64_t time_started;
 	unsigned max_depth, tmo_msecs;
-	idx_t cp, tmphp, nv_start, latest_ctx, popp, cgen;
+	int nv_start;
+	idx_t cp, tmphp, latest_ctx, popp, cgen;
 	idx_t frames_size, slots_size, trails_size, choices_size;
 	idx_t max_choices, max_frames, max_slots, max_trails;
 	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;

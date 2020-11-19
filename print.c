@@ -237,8 +237,23 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 
 	int var_nbr = -1;
 
-	if (is_variable(c) && (running>0) && ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)) {
+	if (is_variable(c) && (running>0) && (q->nv_start >= 0) && ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)) {
 		dst += snprintf(dst, dstlen, "'$VAR'(%u)", q->nv_start + count_bits(q->nv_mask, var_nbr));
+		return dst - save_dst;
+	}
+
+	if (is_variable(c) && (running>0) && (q->nv_start == -1) && ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)) {
+		unsigned n = count_bits(q->nv_mask, var_nbr);
+
+		if (n <= 26)
+			dst += snprintf(dst, dstlen, "%c", 'A'+n);
+		else if (n <= (26*2))
+			dst += snprintf(dst, dstlen, "%c1", 'A'+n);
+		else if (n <= (26*3))
+			dst += snprintf(dst, dstlen, "%c2", 'A'+n);
+		else
+			dst += snprintf(dst, dstlen, "%c3", 'A'+n);
+
 		return dst - save_dst;
 	}
 
@@ -582,6 +597,11 @@ char *write_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 
 void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
+	if (!q->nv_mask && !depth) {
+		do_numbervars(q, c, c_ctx, 0);
+		q->nv_start = -1;
+	}
+
 	size_t len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, depth);
 
 	if (q->cycle_error) {
@@ -594,6 +614,11 @@ void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 	write_canonical_to_buf(q, dst, len+1, c, c_ctx, running, depth);
 	q->cycle_error = false;
 	const char *src = dst;
+
+	if ((q->nv_start == -1) && !depth) {
+		q->nv_mask = 0;
+		q->nv_start = 0;
+	}
 
 	while (len) {
 		size_t nbytes = net_write(src, len, str);
@@ -612,6 +637,11 @@ void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 
 void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
+	if (!q->nv_mask && !depth) {
+		do_numbervars(q, c, c_ctx, 0);
+		q->nv_start = -1;
+	}
+
 	size_t len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, depth);
 
 	if (q->cycle_error) {
@@ -624,6 +654,11 @@ void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, unsi
 	write_canonical_to_buf(q, dst, len+1, c, c_ctx, running, depth);
 	q->cycle_error = false;
 	const char *src = dst;
+
+	if ((q->nv_start == -1) && !depth) {
+		q->nv_mask = 0;
+		q->nv_start = 0;
+	}
 
 	while (len) {
 		size_t nbytes = fwrite(src, 1, len, fp);
