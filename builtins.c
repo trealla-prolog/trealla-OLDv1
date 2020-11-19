@@ -2272,6 +2272,7 @@ static int fn_iso_write_2(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
 	write_term_to_stream(q, str, p1, p1_ctx, 1, 0, 0);
+	fflush(str->fp);
 	return !ferror(str->fp);
 }
 
@@ -2296,6 +2297,7 @@ static int fn_iso_writeq_2(query *q)
 	int save = q->quoted;
 	q->quoted = 1;
 	write_term_to_stream(q, str, p1, p1_ctx, 1, 0, 1);
+	fflush(str->fp);
 	q->quoted = save;
 	return !ferror(str->fp);
 }
@@ -2316,6 +2318,7 @@ static int fn_iso_write_canonical_2(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
 	write_canonical(q, str->fp, p1, p1_ctx, 1, 0);
+	fflush(str->fp);
 	return !ferror(str->fp);
 }
 
@@ -2366,8 +2369,10 @@ static int fn_iso_write_term_2(query *q)
 	if (q->fullstop)
 		net_write(".", 1, str);
 
-	if (q->nl)
+	if (q->nl) {
 		net_write("\n", 1, str);
+		fflush(str->fp);
+	}
 
 	q->max_depth = q->quoted = q->nl = q->fullstop = false;
 	q->ignore_ops = false;
@@ -2397,8 +2402,10 @@ static int fn_iso_write_term_3(query *q)
 	if (q->fullstop)
 		net_write(".", 1, str);
 
-	if (q->nl)
+	if (q->nl) {
 		net_write("\n", 1, str);
+		fflush(str->fp);
+	}
 
 	q->max_depth = q->quoted = q->nl = q->fullstop = false;
 	q->ignore_ops = false;
@@ -9323,7 +9330,7 @@ static int do_collect_vars(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 {
 	int cnt = 0;
 
-	for (idx_t i = 0; i < nbr_cells; i++, p1++) {
+	for (idx_t i = 0; i < nbr_cells;) {
 		cell *c = p1;
 
 		if (is_structure(c)) {
@@ -9336,6 +9343,9 @@ static int do_collect_vars(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 				cnt++;
 			}
 		}
+
+		i += p1->nbr_cells;
+		p1 += p1->nbr_cells;
 	}
 
 	return cnt;
