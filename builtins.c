@@ -432,8 +432,8 @@ static unsigned g_varno;
 static size_t g_tab_idx;
 static idx_t g_tab1[64000];
 static idx_t g_tab3[64000];
-static unsigned g_tab2[64000];
-static unsigned g_tab4[64000];
+static idx_t g_tab2[64000];
+static idx_t g_tab4[64000];
 
 static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
@@ -2147,7 +2147,6 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 
 			cnt++;
 		}
-
 
 		if (cnt) {
 			unsigned done = 0;
