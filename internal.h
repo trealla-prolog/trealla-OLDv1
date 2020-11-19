@@ -421,6 +421,7 @@ struct parser_ {
 	bool is_op;
 	bool skip:1;
 	bool command:1;
+	bool read_term:1;
 };
 
 struct module_ {

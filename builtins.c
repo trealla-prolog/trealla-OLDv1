@@ -628,6 +628,7 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 	p->srcptr = dst2;
 	parser_tokenize(p, 0, 0);
 	parser_attach(p, 0);
+	parser_assign_vars(p, 0);
 	//parser_xref(p, p->t, NULL);
 	do_throw_term(q, p->t->cells);
 	clear_term(p->t);
@@ -2016,7 +2017,9 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 
 	bool save = q->m->flag.character_escapes;
 	q->m->flag.character_escapes = q->character_escapes;
+	p->read_term = 1;
 	parser_tokenize(p, 0, 0);
+	p->read_term = 0;
 	q->m->flag.character_escapes = save;
 
 	if (p->error) {
@@ -2026,19 +2029,13 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 		return 0;
 	}
 
-	if (!parser_attach(p, 0)) {
-		q->m->flag.double_quote_chars = flag_chars;
-		q->m->flag.double_quote_codes = flag_codes;
-		q->m->flag.double_quote_atom = flag_atom;
-		return 0;
-	}
+	q->m->flag.double_quote_chars = flag_chars;
+	q->m->flag.double_quote_codes = flag_codes;
+	q->m->flag.double_quote_atom = flag_atom;
 
 	frame *g = GET_FRAME(q->st.curr_frame);
 	parser_assign_vars(p, g->nbr_vars);
 	parser_xref(p, p->t, NULL);
-	q->m->flag.double_quote_chars = flag_chars;
-	q->m->flag.double_quote_codes = flag_codes;
-	q->m->flag.double_quote_atom = flag_atom;
 
 	if (!create_vars(q, p->nbr_vars)) {
 		throw_error(q, p1, "resource_error", "too_many_vars");

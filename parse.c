@@ -1738,9 +1738,7 @@ static void parser_dcg_rewrite(parser *p)
 	ensure(p2);
 	p2->skip = true;
 	p2->srcptr = src;
-	p2->command = false;
 	parser_tokenize(p2, 0, 0);
-	parser_attach(p2, 0);
 	parser_xref(p2, p2->t, NULL);
 	query_execute(q, p2->t);
 	free(src);
@@ -1783,9 +1781,7 @@ static void parser_dcg_rewrite(parser *p)
 	p2 = create_parser(p->m);
 	ensure(p2);
 	p2->srcptr = src;
-	p2->command = false;
 	parser_tokenize(p2, 0, 0);
-	parser_attach(p2, 0);
 	free(src);
 
 	clear_term(p->t);
@@ -2522,9 +2518,11 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 			(*p->srcptr != ',') && (*p->srcptr != ')') && (*p->srcptr != ']') &&
 				(*p->srcptr != '|')) {
 			if (parser_attach(p, 0)) {
-				parser_assign_vars(p, 0);
 				if (p->error)
 					break;
+
+				if (!p->read_term)
+					parser_assign_vars(p, 0);
 
 				if (p->consulting && !p->skip) {
 					parser_dcg_rewrite(p);
@@ -2805,10 +2803,10 @@ static bool parser_run(parser *p, const char *src, int dump)
 	if (!parser_attach(p, 0))
 		return false;
 
-	if (p->command) {
-		parser_assign_vars(p, 0);
+	parser_assign_vars(p, 0);
+
+	if (p->command)
 		parser_dcg_rewrite(p);
-	}
 
 	parser_xref(p, p->t, NULL);
 	bool ok = false;
