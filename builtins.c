@@ -2272,7 +2272,6 @@ static int fn_iso_write_2(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
 	write_term_to_stream(q, str, p1, p1_ctx, 1, 0, 0);
-	fflush(str->fp);
 	return !ferror(str->fp);
 }
 
@@ -2297,7 +2296,6 @@ static int fn_iso_writeq_2(query *q)
 	int save = q->quoted;
 	q->quoted = 1;
 	write_term_to_stream(q, str, p1, p1_ctx, 1, 0, 1);
-	fflush(str->fp);
 	q->quoted = save;
 	return !ferror(str->fp);
 }
@@ -2318,7 +2316,6 @@ static int fn_iso_write_canonical_2(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
 	write_canonical(q, str->fp, p1, p1_ctx, 1, 0);
-	fflush(str->fp);
 	return !ferror(str->fp);
 }
 

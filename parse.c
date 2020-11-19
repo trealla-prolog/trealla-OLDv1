@@ -2523,15 +2523,17 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 				(*p->srcptr != '|')) {
 			if (parser_attach(p, 0)) {
 				parser_assign_vars(p, 0);
-				parser_dcg_rewrite(p);
 				if (p->error)
 					break;
 
-				if (p->consulting && !p->skip)
+				if (p->consulting && !p->skip) {
+					parser_dcg_rewrite(p);
+
 					if (!assertz_to_db(p->m, p->t, 1)) {
 						printf("Error: '%s', line nbr %u\n", p->token, p->line_nbr);
 						p->error = true;
 					}
+				}
 			}
 
 			p->end_of_term = true;
