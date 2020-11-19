@@ -20,6 +20,8 @@
 #define DBL_DECIMAL_DIG DBL_DIG
 #endif
 
+static uint64_t s_mask1 = 0, s_mask2 = 0;
+
 static int needs_quote(module *m, const char *src, size_t srclen)
 {
 	if (!strcmp(src, ",") || !strcmp(src, ".") || !strcmp(src, "|"))
@@ -235,7 +237,7 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 		return dst - save_dst;
 	}
 
-	int var_nbr = -1;
+	int var_nbr = 0;
 
 	if (is_variable(c) && (running>0) && (q->nv_start >= 0) && ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)) {
 		dst += snprintf(dst, dstlen, "'$VAR'(%u)", q->nv_start + count_bits(q->nv_mask, var_nbr));
@@ -243,16 +245,34 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 	}
 
 	if (is_variable(c) && (running>0) && (q->nv_start == -1) && ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)) {
-		unsigned n = count_bits(q->nv_mask, var_nbr);
+		for (unsigned i = 0; i < 64; i++) {
+			if ((1ULL << i) & q->nv_mask)
+				break;
 
-		if (n <= 26)
-			dst += snprintf(dst, dstlen, "%c", 'A'+n);
-		else if (n <= (26*2))
-			dst += snprintf(dst, dstlen, "%c1", 'A'+n);
-		else if (n <= (26*3))
-			dst += snprintf(dst, dstlen, "%c2", 'A'+n);
+			var_nbr--;
+		}
+
+		if (!dstlen) {
+			if (!(s_mask1 & (1ULL << var_nbr)))
+				s_mask1 |= 1ULL << var_nbr;
+			else
+				s_mask2 |= 1ULL << var_nbr;
+		}
+
+		if (dstlen && !(s_mask2 & (1ULL << var_nbr)))
+			dst += snprintf(dst, dstlen, "%c", '_');
+		else if (var_nbr < 26)
+			dst += snprintf(dst, dstlen, "%c", 'A'+(var_nbr%26));
+		else if (var_nbr <= ((26*2)-1))
+			dst += snprintf(dst, dstlen, "%c1", 'A'+(var_nbr%26));
+		else if (var_nbr <= ((26*3)-1))
+			dst += snprintf(dst, dstlen, "%c2", 'A'+(var_nbr%26));
+		else if (var_nbr <= ((26*4)-1))
+			dst += snprintf(dst, dstlen, "%c3", 'A'+(var_nbr%26));
+		else if (var_nbr <= ((26*5)-1))
+			dst += snprintf(dst, dstlen, "%c4", 'A'+(var_nbr%26));
 		else
-			dst += snprintf(dst, dstlen, "%c3", 'A'+n);
+			dst += snprintf(dst, dstlen, "%c5", 'A'+(var_nbr%26));
 
 		return dst - save_dst;
 	}
@@ -595,12 +615,15 @@ char *write_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 	return buf;
 }
 
+#define PRETTY_VARS 1
+
 void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
-#if 0
+#if PRETTY_VARS
 	if (!q->nv_mask && !depth) {
 		do_numbervars(q, c, c_ctx, 0);
 		q->nv_start = -1;
+		s_mask1 = s_mask2 = 0;
 	}
 #endif
 
@@ -639,10 +662,11 @@ void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 
 void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
-#if 0
+#if PRETTY_VARS
 	if (!q->nv_mask && !depth) {
 		do_numbervars(q, c, c_ctx, 0);
 		q->nv_start = -1;
+		s_mask1 = s_mask2 = 0;
 	}
 #endif
 
