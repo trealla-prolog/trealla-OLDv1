@@ -402,7 +402,7 @@ struct parser_ {
 	term *t;
 	char *token, *save_line, *srcptr;
 	size_t token_size, n_line, len_str;
-	unsigned line_nbr, depth;
+	unsigned line_nbr, depth, read_term;
 	int quoted;				// C character is an int
 	unsigned nbr_vars;
 	uint8_t val_type;
@@ -421,7 +421,6 @@ struct parser_ {
 	bool is_op;
 	bool skip:1;
 	bool command:1;
-	bool read_term:1;
 };
 
 struct module_ {

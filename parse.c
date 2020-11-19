@@ -2521,8 +2521,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 				if (p->error)
 					break;
 
-				if (!p->read_term)
-					parser_assign_vars(p, 0);
+				parser_assign_vars(p, p->read_term);
 
 				if (p->consulting && !p->skip) {
 					parser_dcg_rewrite(p);
