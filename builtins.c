@@ -2015,24 +2015,21 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 		break;
 	}
 
-	frame *g = GET_FRAME(q->st.curr_frame);
 	bool save = q->m->flag.character_escapes;
 	q->m->flag.character_escapes = q->character_escapes;
+
+	frame *g = GET_FRAME(q->st.curr_frame);
 	p->read_term = g->nbr_vars;
 	parser_tokenize(p, 0, 0);
 	p->read_term = 0;
+
 	q->m->flag.character_escapes = save;
-
-	if (p->error) {
-		q->m->flag.double_quote_chars = flag_chars;
-		q->m->flag.double_quote_codes = flag_codes;
-		q->m->flag.double_quote_atom = flag_atom;
-		return 0;
-	}
-
 	q->m->flag.double_quote_chars = flag_chars;
 	q->m->flag.double_quote_codes = flag_codes;
 	q->m->flag.double_quote_atom = flag_atom;
+
+	if (p->error)
+		return 0;
 
 	parser_xref(p, p->t, NULL);
 
