@@ -430,7 +430,7 @@ static cell make_string(const char *s, size_t n)
 
 // TO-DO: clean this up...
 static unsigned g_varno;
-static size_t g_tab_idx;
+static idx_t g_tab_idx;
 static idx_t g_tab1[64000];
 static idx_t g_tab3[64000];
 static idx_t g_tab2[64000];
@@ -1856,14 +1856,14 @@ static int fn_iso_nl_1(query *q)
 
 static void collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells)
 {
-	for (idx_t i = 0; i < nbr_cells;) {
+	for (unsigned i = 0; i < nbr_cells;) {
 		cell *c = deref(q, p1, p1_ctx);
 		int found = 0;
 
 		if (is_structure(c)) {
 			collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1);
 		} else if (is_variable(c)) {
-			for (size_t idx = 0; idx < g_tab_idx; idx++) {
+			for (unsigned idx = 0; idx < g_tab_idx; idx++) {
 				if ((g_tab1[idx] == q->latest_ctx) && (g_tab2[idx] == c->var_nbr)) {
 					g_tab4[idx]++;
 					found = 1;

@@ -1769,17 +1769,21 @@ static void parser_dcg_rewrite(parser *p)
 	}
 
 	destroy_query(q);
-	int line_nbr = p2->line_nbr;
-	destroy_parser_nodelete(p2);
 
 	if (!src) {
-		fprintf(stdout, "Error: syntax error, dcg_translate, line nbr %u\n", line_nbr);
+		destroy_parser_nodelete(p2);
 		p->error = true;
 		return;
 	}
 
-	p2 = create_parser(p->m);
-	ensure(p2);
+#if 0
+	//destroy_parser_nodelete(p2);
+	//p2 = create_parser(p->m);
+	//ensure(p2);
+#else
+	p2->t->cidx = 0;
+#endif
+
 	p2->srcptr = src;
 	parser_tokenize(p2, 0, 0);
 	free(src);
@@ -1790,7 +1794,6 @@ static void parser_dcg_rewrite(parser *p)
 	p->nbr_vars = p2->nbr_vars;
 	p2->t = NULL;
 	destroy_parser(p2);
-	parser_assign_vars(p, 0);
 }
 
 static cell *make_literal(parser *p, idx_t offset)
