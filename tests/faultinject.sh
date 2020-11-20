@@ -8,6 +8,9 @@ quiet=
 filter=
 cont=
 timeout=60
+input=
+
+export TPL="${TPL:-./tpl}"
 
 while test "$1" != "${1#-}"
 do
@@ -35,11 +38,11 @@ do
         show=
         shift
         ;;
-    -t|--timeout) # Set a timeout (in seconds) for the tests
+    -t|--timeout) #<timeout> Set a timeout (in seconds) for the tests
         timeout="$(( 0 + $2 ))"
         shift 2
         ;;
-    -f|--filter) # Filter only the given failures (segv, abort, timeout) can appear multiple times
+    -f|--filter) #<filter> Filter only the given failures (segv, abort, timeout), can appear multiple times
         case "$2" in
         *ABRT|*abrt|*abort|134)
             filter="134,$filter"
@@ -56,6 +59,10 @@ do
         esac
         shift 2
         ;;
+    -i|--input) #<file> read tests to execute from file (or - for stdin)
+        input="$2"
+        shift 2
+        ;;
     -c|--continue) # Continue with the previously failed iteration
         keep_going=
         cont=true
@@ -67,10 +74,10 @@ fault injection driver
 
 Usage:
 
- $0 [options] [-- <command> [arguments..]]
+  $0 [options..] [-- <command> [arguments..]]
 
-Options:
-$(sed 's/ *\([-|[:alpha:]]*\)[^)]*) *# \(.*\)/  \1\n     \2\n/p;d' < "$0")
+Options are:
+$(sed 's/ *\([-|[:alpha:]]*\)[^)]*) *#\([^ ]*\) *\(.*\)/  \1 \2\n     \3\n/p;d' < "$0")
 
 EOF
         exit 0;
@@ -82,7 +89,7 @@ EOF
     esac
 done
 
-if test -z "$1"; then
+if test -z "$input" -a -z "$1"; then
         cat <<EOF
 fault injection driver
 
@@ -93,100 +100,128 @@ EOF
     exit 0
 fi
 
-TPL="$1"
-export FAULTSTART
-
-if test "$cont" -a -f faultinject_state
-then
-    . ./faultinject_state
-else
-    FAULTSTART='' "$@" 2>faultinject.stderr
-    EXIT_CODE="$?"
-    if test $EXIT_CODE -gt 127
-    then
-        echo "initial run crashed"
-        exit 1
-    fi
-
-    FAULTEND=$(awk '/CDEBUG FAULT INJECTION MAX/{print $5}' faultinject.stderr)
-
-    if test -z "$FAULTEND"
-    then
-        echo "couldn't find the maximum number of fault injections"
-        exit 1
-    fi
-
-    if test "$direction" = 1
-    then
-        FAULTSTART=1
-    else
-        FAULTSTART=$FAULTEND
-        FAULTEND=0
-    fi
-    echo "Testing from $FAULTSTART to $FAULTEND"
-fi
-
-ulimit -S -c unlimited
-
 FAULTS=0
 
-while test "$FAULTSTART" -ne "$FAULTEND"
-do
-    cat <<EOF >faultinject_state
+ITERATION=1
+
+case "$input" in
+-)
+    cat
+    ;;
+?*)
+    cat "$input"
+    ;;
+'')
+    echo "$*"
+    ;;
+esac | while read test; do
+
+    test="${test%%#*}"
+    if test -z "$test"; then
+        continue
+    fi
+
+    export FAULTSTART
+
+    test=$(eval echo "$test")
+    PROGRAM="${test%% *}"
+    echo "Testing: $test"
+
+    if test "$cont" -a -f faultinject_state
+    then
+        . ./faultinject_state
+    else
+        (
+            ulimit -S -t $timeout
+            FAULTSTART='' $test 2>faultinject.stderr >/dev/null
+        )
+        EXIT_CODE="$?"
+        if test $EXIT_CODE -gt 127
+        then
+            echo "initial run did not complete"
+            exit 1
+        fi
+
+        FAULTEND=$(awk '/CDEBUG FAULT INJECTION MAX/{print $5}' faultinject.stderr)
+
+        if test -z "$FAULTEND"
+        then
+            echo "couldn't find the maximum number of fault injections"
+            exit 1
+        fi
+
+        if test "$direction" = 1
+        then
+            FAULTSTART=1
+        else
+            FAULTSTART=$FAULTEND
+            FAULTEND=0
+        fi
+        echo "Testing from $FAULTSTART to $FAULTEND"
+    fi
+
+    while test "$FAULTSTART" -ne "$FAULTEND"
+    do
+        cat <<EOF >faultinject_state
 FAULTSTART=$FAULTSTART
 FAULTEND=$FAULTEND
 direction=$direction
 EOF
-    echo "Faultinject $FAULTSTART"
-    echo "        $*"
+        echo "Faultinject $FAULTSTART"
+        echo "        $test"
 
-    (
-        ulimit -S -t $timeout
-        "$@" 2>faultinject.stderr >faultinject.stdout
-    )
-    EXIT_CODE="$?"
+        (
+            ulimit -S -c unlimited
+            ulimit -S -t $timeout
+            $test 2>faultinject.stderr >faultinject.stdout
+        )
+        EXIT_CODE="$?"
 
-    if test "$EXIT_CODE" -gt 127; then
-        if test ! "$filter" || expr "$filter" : ".*$EXIT_CODE,.*"; then
-            FAULTS=$((FAULTS + 1))
-            case $EXIT_CODE in
-            134)
-                echo "                crashed with SIGABRT"
-                ;;
-            152)
-                echo "                crashed with TIMEOUT"
-                ;;
-            139)
-                echo "                crashed with SIGSEGV"
-                ;;
-            *)
-                echo "                crashed with exit-code $EXIT_CODE"
-                ;;
-            esac | tee -a faultinject$FAULTSTART.stderr
-            if test -z "$quiet" ; then
-                tail -1 faultinject$FAULTSTART.stderr >faultinject$FAULTSTART.bt
-                gdb -batch -ex 'bt full' "$TPL" core >>faultinject$FAULTSTART.bt
-                mv faultinject.stderr faultinject$FAULTSTART.stderr
-                mv faultinject.stdout faultinject$FAULTSTART.stdout
+        if test "$EXIT_CODE" -gt 127; then
+            if test ! "$filter" || expr "$filter" : ".*$EXIT_CODE,.*"; then
+                FAULTS=$((FAULTS + 1))
+                case $EXIT_CODE in
+                134)
+                    echo "                crashed with SIGABRT"
+                    ;;
+                152)
+                    echo "                crashed with TIMEOUT"
+                    ;;
+                139)
+                    echo "                crashed with SIGSEGV"
+                    ;;
+                *)
+                    echo "                crashed with exit-code $EXIT_CODE"
+                    ;;
+                esac | tee -a faultinject${ITERATION}_${FAULTSTART}.stderr
+                if test -z "$quiet" ; then
+                    tail -1 faultinject${ITERATION}_${FAULTSTART}.stderr >faultinject${ITERATION}_${FAULTSTART}.bt
+                    gdb -batch -ex 'bt full' "$PROGRAM" core >>faultinject${ITERATION}_${FAULTSTART}.bt
+                    mv faultinject.stderr faultinject${ITERATION}_${FAULTSTART}.stderr
+                    mv faultinject.stdout faultinject${ITERATION}_${FAULTSTART}.stdout
+                fi
+                vglog=
+                if test "$valgrind" ; then
+                    vglog=faultinject${ITERATION}_${FAULTSTART}.vg
+                    valgrind --log-file=$vglog $test
+                fi
+                if test "$show"; then
+                    less faultinject${ITERATION}_${FAULTSTART}.bt $vglog faultinject${ITERATION}_${FAULTSTART}.stderr faultinject${ITERATION}_${FAULTSTART}.stdout
+                fi
+                if test -z "$keep_going"; then
+                    exit 1
+                fi
             fi
-            vglog=
-            if test "$valgrind" ; then
-                vglog=faultinject$FAULTSTART.vg
-                valgrind --log-file=$vglog "$@"
-            fi
-            if test "$show"; then
-                less faultinject$FAULTSTART.bt $vglog faultinject$FAULTSTART.stderr faultinject$FAULTSTART.stdout
-            fi
-            if test -z "$keep_going"; then
-                exit 1
-            fi
+        else
+            echo "                OK with exit-code $EXIT_CODE"
         fi
-    else
-        echo "                OK with exit-code $EXIT_CODE"
-    fi
 
-    rm -f faultinject.stderr faultinject.stdout
-    FAULTSTART=$((FAULTSTART + direction))
+        rm -f faultinject.stderr faultinject.stdout
+        FAULTSTART=$((FAULTSTART + direction))
+    done
+
+    echo "Found $FAULTS crashes"
+
+    ITERATION=$((ITERATION + 1))
 done
 
-echo "Found $FAULTS crashes"
