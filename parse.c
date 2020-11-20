@@ -769,9 +769,10 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	if (h) {
 		h->is_dynamic = true;
 
-		if (!h->index && !m->noindex) {
-			if (!(h->index = sl_create(compkey)))
-				m->error = true;
+		if (!h->index
+		    && !m->noindex
+		    && !(h->index = sl_create(compkey))) {
+			m->error = true;
 		}
 	} else
 		m->error = true;
@@ -790,9 +791,11 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 		h->is_dynamic = true;
 		h->is_persist = true;
 
-		if (!h->index && !m->noindex)
-			if (!(h->index = sl_create(compkey)))
-				m->error = true;
+		if (!h->index
+		    && !m->noindex
+		    && !(h->index = sl_create(compkey))) {
+			m->error = true;
+		}
 
 		m->use_persist = true;
 	} else
@@ -3004,9 +3007,9 @@ bool module_load_file(module *m, const char *filename)
 
 	free(m->filename);
 	m->filename = ensure_strdup(filename);
-	module_load_fp(m, fp);
+	bool ok = module_load_fp(m, fp);
 	fclose(fp);
-	return true;
+	return ok;
 }
 
 static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
@@ -3449,9 +3452,9 @@ void set_opt(prolog *pl, int level) { pl->m->opt = level; }
 bool pl_eval(prolog *pl, const char *src)
 {
 	parser *p = create_parser(pl->curr_m);
-	ensure(p);
+	if (!p) return false;
 	p->command = true;
-	int ok = parser_run(p, src, 1);
+	bool ok = parser_run(p, src, 1);
 	pl->curr_m = p->m;
 	destroy_parser(p);
 	return ok;
