@@ -4938,6 +4938,7 @@ static void do_assign_vars(parser *p, idx_t nbr_cells)
 				sprintf(tmpbuf, "%c%d", ch, n);
 
 			c->val_off = index_from_pool(tmpbuf);
+			//printf("*** %u = %u => %s <= %s\n",  var_nbr, c->val_off, g_pool+c->val_off, tmpbuf);
 			c->flags = 0;
 		}
 	}

@@ -22,7 +22,8 @@
 #include "utf8.h"
 
 static const unsigned INITIAL_TOKEN_SIZE = 100;		// bytes
-static const unsigned INITIAL_POOL_SIZE = 8000;		// bytes
+static const unsigned INITIAL_POOL_SIZE = 64000;	// bytes
+
 static const unsigned INITIAL_NBR_CELLS = 100;		// cells
 static const unsigned INITIAL_NBR_HEAP = 8000;		// cells
 static const unsigned INITIAL_NBR_QUEUE = 1000;		// cells
@@ -132,7 +133,7 @@ static idx_t is_in_pool(const char *name)
 {
 	const void *val;
 
-	if (sl_get(g_symtab, name, &val))  //NOTE: cehteh: is sl_get robust when the name == NULL?
+	if (sl_get(g_symtab, name, &val))
 		return (idx_t)(unsigned long)val;
 
 	return ERR_IDX;
@@ -141,7 +142,6 @@ static idx_t is_in_pool(const char *name)
 static idx_t add_to_pool(const char *name)
 {
 	if (!name) return ERR_IDX;
-
 	idx_t offset = g_pool_offset;
 	size_t len = strlen(name);
 
@@ -164,7 +164,9 @@ static idx_t add_to_pool(const char *name)
 
 idx_t index_from_pool(const char *name)
 {
+	if (!name) return ERR_IDX;
 	idx_t offset = is_in_pool(name);
+
 	if (offset != ERR_IDX)
 		return offset;
 
