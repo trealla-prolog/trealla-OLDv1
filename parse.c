@@ -1398,8 +1398,10 @@ void parser_xref(parser *p, term *t, rule *parent)
 		unsigned optype;
 		int userop, hint_prefix = c->arity == 1;
 
-		if ((c->arity == 2) && !GET_OP(c) && strcmp(functor, "{}") &&
-				get_op(m, functor, &optype, &userop, hint_prefix)) {
+		if ((c->arity == 2)
+		    && !GET_OP(c)
+		    && strcmp(functor, "{}")
+		    && get_op(m, functor, &optype, &userop, hint_prefix)) {
 			SET_OP(c, optype);
 		}
 
@@ -2542,9 +2544,13 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 
 		//fprintf(stdout, "Debug: token '%s' quoted=%d, val_type=%u, op=%d, lastop=%d\n", p->token, p->quoted, p->val_type, p->is_op, last_op);
 
-		if (!p->quoted && !strcmp(p->token, ".") && (*p->srcptr != '(') &&
-			(*p->srcptr != ',') && (*p->srcptr != ')') && (*p->srcptr != ']') &&
-				(*p->srcptr != '|')) {
+		if (!p->quoted
+		    && !strcmp(p->token, ".")
+		    && (*p->srcptr != '(')
+		    && (*p->srcptr != ',')
+		    && (*p->srcptr != ')')
+		    && (*p->srcptr != ']')
+		    && (*p->srcptr != '|')) {
 			if (parser_attach(p, 0)) {
 				parser_assign_vars(p, p->read_term);
 
