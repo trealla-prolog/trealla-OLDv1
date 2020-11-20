@@ -4893,20 +4893,20 @@ static int fn_iso_abolish_1(query *q)
 	return do_abolish(q, &tmp);
 }
 
-static int fn_iso_asserta_1(query *q)
+static unsigned count_non_anons(uint8_t *mask, unsigned bit)
 {
-	GET_FIRST_ARG(p1,callable);
-	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
-	idx_t nbr_cells = tmp->nbr_cells;
-	parser *p = q->m->p;
+	unsigned bits = 0;
 
-	if (nbr_cells > p->t->nbr_cells) {
-		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
-		ensure(p->t);
-		p->t->nbr_cells = nbr_cells;
+	for (unsigned i = 0; i < bit; i++) {
+		if (mask[i] > 1)
+			bits++;
 	}
 
-	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
+	return bits;
+}
+
+static void do_assign(parser *p, idx_t nbr_cells)
+{
 	parser_assign_vars(p, 0);
 	uint8_t vars[MAX_ARITY] = {0};
 
@@ -4921,23 +4921,41 @@ static int fn_iso_asserta_1(query *q)
 		cell *c = p->t->cells+i;
 
 		if (is_variable(c)) {
+			unsigned var_nbr = count_non_anons(vars, c->var_nbr);
+
 			char ch = 'A';
-			ch += c->var_nbr % 26;
-			unsigned n = c->var_nbr / 26;
+			ch += var_nbr % 26;
+			unsigned n = var_nbr / 26;
 			char tmpbuf[20];
 
 			if (vars[c->var_nbr] == 1)
 				sprintf(tmpbuf, "%s", "_");
-			else if (c->var_nbr < 26)
+			else if (var_nbr < 26)
 				sprintf(tmpbuf, "%c", ch);
 			else
-				sprintf(tmpbuf, "%c%u", ch, n);
+				sprintf(tmpbuf, "%c%d", ch, n);
 
 			c->val_off = index_from_pool(tmpbuf);
 			c->flags = 0;
 		}
 	}
+}
 
+static int fn_iso_asserta_1(query *q)
+{
+	GET_FIRST_ARG(p1,callable);
+	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
+	idx_t nbr_cells = tmp->nbr_cells;
+	parser *p = q->m->p;
+
+	if (nbr_cells > p->t->nbr_cells) {
+		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
+		ensure(p->t);
+		p->t->nbr_cells = nbr_cells;
+	}
+
+	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
+	do_assign(p, nbr_cells);
 	clause *r = asserta_to_db(q->m, p->t, 0);
 	if (!r) return 0;
 	uuid_gen(&r->u);
@@ -4962,37 +4980,7 @@ static int fn_iso_assertz_1(query *q)
 	}
 
 	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
-	parser_assign_vars(p, 0);
-	uint8_t vars[MAX_ARITY] = {0};
-
-	for (idx_t i = 0; i < nbr_cells; i++) {
-		cell *c = p->t->cells+i;
-
-		if (is_variable(c))
-			vars[c->var_nbr]++;
-	}
-
-	for (idx_t i = 0; i < nbr_cells; i++) {
-		cell *c = p->t->cells+i;
-
-		if (is_variable(c)) {
-			char ch = 'A';
-			ch += c->var_nbr % 26;
-			unsigned n = (unsigned)c->var_nbr / 26;
-			char tmpbuf[20];
-
-			if (vars[c->var_nbr] == 1)
-				sprintf(tmpbuf, "%s", "_");
-			else if (c->var_nbr < 26)
-				sprintf(tmpbuf, "%c", ch);
-			else
-				sprintf(tmpbuf, "%c%d", ch, n);
-
-			c->val_off = index_from_pool(tmpbuf);
-			c->flags = 0;
-		}
-	}
-
+	do_assign(p, nbr_cells);
 	clause *r = assertz_to_db(q->m, p->t, 0);
 	if (!r) return 0;
 	uuid_gen(&r->u);

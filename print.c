@@ -182,6 +182,18 @@ static int find_binding(query *q, idx_t var_nbr, idx_t var_ctx)
 #define PRETTY_VARS 1
 uint8_t s_mask1[MAX_ARITY] = {0}, s_mask2[MAX_ARITY] = {0};
 
+static unsigned count_non_anons(uint8_t *mask, unsigned bit)
+{
+	unsigned bits = 0;
+
+	for (unsigned i = 0; i < bit; i++) {
+		if (mask[i])
+			bits++;
+	}
+
+	return bits;
+}
+
 size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
 	if (!depth)
@@ -261,13 +273,15 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 				s_mask2[var_nbr] = 1;
 		}
 
+		unsigned nbr = count_non_anons(s_mask2, var_nbr);
+
 		char ch = 'A';
-		ch += var_nbr % 26;
-		unsigned n = (unsigned)var_nbr / 26;
+		ch += nbr % 26;
+		unsigned n = (unsigned)nbr / 26;
 
 		if (dstlen && !(s_mask2[var_nbr]))
 			dst += snprintf(dst, dstlen, "%s", "_");
-		else if (var_nbr < 26)
+		else if (nbr < 26)
 			dst += snprintf(dst, dstlen, "%c", ch);
 		else
 			dst += snprintf(dst, dstlen, "%c%u", ch, n);
