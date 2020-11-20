@@ -247,6 +247,7 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 	}
 
 	if (is_variable(c) && (running>0) && (q->nv_start == -1) && ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)) {
+#if 0
 		for (unsigned i = 0; i < 64; i++) {
 			if ((1ULL << i) & q->nv_mask)
 				break;
@@ -261,20 +262,22 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 				s_mask2 |= 1ULL << var_nbr;
 		}
 
+		int ch = 'A';
+		ch += var_nbr % 26;
+
 		if (dstlen && !(s_mask2 & (1ULL << var_nbr)))
 			dst += snprintf(dst, dstlen, "%c", '_');
 		else if (var_nbr < 26)
-			dst += snprintf(dst, dstlen, "%c", 'A'+(var_nbr%26));
-		else if (var_nbr <= ((26*2)-1))
-			dst += snprintf(dst, dstlen, "%c1", 'A'+(var_nbr%26));
-		else if (var_nbr <= ((26*3)-1))
-			dst += snprintf(dst, dstlen, "%c2", 'A'+(var_nbr%26));
-		else if (var_nbr <= ((26*4)-1))
-			dst += snprintf(dst, dstlen, "%c3", 'A'+(var_nbr%26));
-		else if (var_nbr <= ((26*5)-1))
-			dst += snprintf(dst, dstlen, "%c4", 'A'+(var_nbr%26));
-		else
-			dst += snprintf(dst, dstlen, "%c5", 'A'+(var_nbr%26));
+			dst += snprintf(dst, dstlen, "%c", ch);
+		else {
+			int n = var_nbr / 26;
+			dst += snprintf(dst, dstlen, "%c", ch);
+			dst += snprintf(dst, dstlen, "%d", n);
+		}
+#else
+		dst += snprintf(dst, dstlen, "_%d", var_nbr);
+
+#endif
 
 		return dst - save_dst;
 	}

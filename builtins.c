@@ -1723,6 +1723,7 @@ static int fn_iso_open_4(query *q)
 		p4_ctx = q->latest_ctx;
 	}
 
+
 	if (oldstr) {
 		int fd = fileno(oldstr->fp);
 
