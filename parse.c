@@ -173,7 +173,6 @@ idx_t index_from_pool(const char *name)
 	return add_to_pool(name);
 }
 
-//cehteh: eventually typedef unsigned precendence_t; ?
 unsigned get_op(module *m, const char *name, unsigned *optype, int *userop, int hint_prefix)
 {
 	assert(m);
