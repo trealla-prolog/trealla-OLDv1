@@ -628,7 +628,7 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 	p->srcptr = dst2;
 	parser_tokenize(p, 0, 0);
 	parser_attach(p, 0);
-	parser_assign_vars(p, 0);
+	parser_assign_vars(p, 0, false);
 	//parser_xref(p, p->t, NULL);
 	do_throw_term(q, p->t->cells);
 	clear_term(p->t);
@@ -4907,7 +4907,7 @@ static unsigned count_non_anons(uint8_t *mask, unsigned bit)
 
 static void do_assign_vars(parser *p, idx_t nbr_cells)
 {
-	parser_rebase_vars(p, 0);
+	parser_assign_vars(p, 0, true);
 	uint8_t vars[MAX_ARITY] = {0};
 
 	for (idx_t i = 0; i < nbr_cells; i++) {
@@ -6121,7 +6121,7 @@ static int do_asserta_2(query *q)
 	}
 
 	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
-	parser_assign_vars(p, 0);
+	do_assign_vars(p, nbr_cells);
 	clause *r = asserta_to_db(q->m, p->t, 0);
 	if (!r) return 0;
 
@@ -6171,7 +6171,7 @@ static int do_assertz_2(query *q)
 	}
 
 	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
-	parser_assign_vars(p, 0);
+	do_assign_vars(p, nbr_cells);
 	clause *r = assertz_to_db(q->m, p->t, 0);
 	if (!r) return 0;
 
