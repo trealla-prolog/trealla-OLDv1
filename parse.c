@@ -1600,6 +1600,77 @@ void parser_assign_vars(parser *p, unsigned start)
 		directives(p, p->t);
 }
 
+void parser_rebase_vars(parser *p, unsigned start)
+{
+	if (!p || p->error)
+		return;
+
+	p->start_term = true;
+	p->nbr_vars = 0;
+	memset(&p->vartab, 0, sizeof(p->vartab));
+	term *t = p->t;
+	t->nbr_vars = 0;
+	t->first_cut = false;
+	t->cut_only = false;
+
+	for (idx_t i = 0; i < t->cidx; i++) {
+		cell *c = t->cells + i;
+
+		if (!is_variable(c))
+			continue;
+
+		char tmpbuf[20];
+		snprintf(tmpbuf, sizeof(tmpbuf), "_V%u", c->var_nbr);
+		c->var_nbr = get_varno(p, tmpbuf);
+		c->var_nbr += start;
+
+		if (c->var_nbr == MAX_ARITY) {
+			fprintf(stdout, "Error: max vars per term reached\n");
+			p->error = true;
+			return;
+		}
+
+		p->vartab.var_name[c->var_nbr] = GET_STR(c);
+
+		if (p->vartab.var_used[c->var_nbr]++ == 0) {
+			c->flags |= FLAG_FIRST_USE;
+			t->nbr_vars++;
+			p->nbr_vars++;
+		}
+	}
+
+	for (idx_t i = 0; i < t->nbr_vars; i++) {
+		if (p->consulting && (p->vartab.var_used[i] == 1) &&
+			(p->vartab.var_name[i][strlen(p->vartab.var_name[i])-1] != '_') &&
+			(*p->vartab.var_name[i] != '_')) {
+			if (!p->m->quiet)
+				fprintf(stdout, "Warning: singleton: %s, line %d\n", p->vartab.var_name[i], (int)p->line_nbr);
+		}
+	}
+
+	for (idx_t i = 0; i < t->cidx; i++) {
+		cell *c = t->cells + i;
+
+		if (!is_variable(c))
+			continue;
+
+		if (c->val_off == g_anon_s)
+			c->flags |= FLAG_ANON;
+	}
+
+
+	cell *c = make_cell(p);
+	ensure(c);
+	memset(c, 0, sizeof(cell)); //cehteh: make_cell should return a initialized cell?
+	c->val_type = TYPE_END;
+	c->nbr_cells = 1;
+
+	check_first_cut(p);
+
+	if (p->consulting)
+		directives(p, p->t);
+}
+
 static bool attach_ops(parser *p, idx_t start_idx)
 {
 	assert(p);

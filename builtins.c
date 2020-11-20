@@ -4907,40 +4907,42 @@ static unsigned count_non_anons(uint8_t *mask, unsigned bit)
 
 static void do_assign_vars(parser *p, idx_t nbr_cells)
 {
-	parser_assign_vars(p, 0);
+	parser_rebase_vars(p, 0);
 	uint8_t vars[MAX_ARITY] = {0};
 
 	for (idx_t i = 0; i < nbr_cells; i++) {
 		cell *c = p->t->cells+i;
 
-		if (is_variable(c)) {
-			assert(c->var_nbr < MAX_ARITY);
-			vars[c->var_nbr]++;
-		}
+		if (!is_variable(c))
+			continue;
+
+		assert(c->var_nbr < MAX_ARITY);
+		vars[c->var_nbr]++;
 	}
 
 	for (idx_t i = 0; i < nbr_cells; i++) {
 		cell *c = p->t->cells+i;
 
-		if (is_variable(c)) {
-			unsigned var_nbr = count_non_anons(vars, c->var_nbr);
+		if (!is_variable(c))
+			continue;
 
-			char ch = 'A';
-			ch += var_nbr % 26;
-			unsigned n = var_nbr / 26;
-			char tmpbuf[20];
+		unsigned var_nbr = count_non_anons(vars, c->var_nbr);
 
-			if (vars[c->var_nbr] == 1)
-				sprintf(tmpbuf, "%s", "_");
-			else if (var_nbr < 26)
-				sprintf(tmpbuf, "%c", ch);
-			else
-				sprintf(tmpbuf, "%c%d", ch, n);
+		char ch = 'A';
+		ch += var_nbr % 26;
+		unsigned n = var_nbr / 26;
+		char tmpbuf[20];
 
-			c->val_off = index_from_pool(tmpbuf);
-			//printf("*** %u = %u => %s <= %s\n",  var_nbr, c->val_off, g_pool+c->val_off, tmpbuf);
-			c->flags = 0;
-		}
+		if (vars[c->var_nbr] == 1)
+			sprintf(tmpbuf, "%s", "_");
+		else if (var_nbr < 26)
+			sprintf(tmpbuf, "%c", ch);
+		else
+			sprintf(tmpbuf, "%c%d", ch, n);
+
+		c->val_off = index_from_pool(tmpbuf);
+		//printf("*** %u = %u => %s <= %s\n",  var_nbr, c->val_off, g_pool+c->val_off, tmpbuf);
+		c->flags = 0;
 	}
 }
 

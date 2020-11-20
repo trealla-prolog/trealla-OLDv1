@@ -529,6 +529,7 @@ void parser_reset(parser *p);
 idx_t drop_choice(query *q);
 bool retry_choice(query *q);
 void parser_assign_vars(parser *p, unsigned start);
+void parser_rebase_vars(parser *p, unsigned start);
 query *create_query(module *m, int sub_query);
 query *create_task(query *q, cell *curr_cell);
 void destroy_query(query *q);
