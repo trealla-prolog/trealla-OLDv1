@@ -177,7 +177,7 @@ static void trace_call(query *q, cell *c, box_t box)
 #endif
 
 	int save_depth = q->max_depth;
-	q->max_depth = 100;
+	q->max_depth = 1000;
 	write_term(q, stderr, c, q->st.curr_frame, -1, 0, 0);
 	fprintf(stderr, "\n");
 	q->max_depth = save_depth;

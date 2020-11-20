@@ -292,8 +292,8 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 		cell *l = c;
 
 		while (is_list(l)) {
-			if (cnt > 64) {
-				dst += snprintf(dst, dstlen, "...");
+			if ((cnt > 256) && (running < 0)) {
+				dst += snprintf(dst, dstlen, "|...");
 				return dst - save_dst;
 			}
 
@@ -422,8 +422,8 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 			return dst - save_dst;
 		}
 
-		if (q->max_depth && (depth >= q->max_depth)) {
-			dst += snprintf(dst, dstlen, "%s", "...");
+		if (q->max_depth && (depth >= q->max_depth) && (running < 0)) {
+			dst += snprintf(dst, dstlen, "%s", "|...");
 			return dst - save_dst;
 		}
 
@@ -514,13 +514,13 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		if (braces)
 			;
 		else if (quote) {
-			if ((running < 0) && is_blob(c) && (len_str > 128))
-				len_str = 128;
+			if ((running < 0) && is_blob(c) && (len_str > 256))
+				len_str = 256;
 
 			dst += formatted(dst, dstlen, src, LEN_STR(c));
 
-			if ((running < 0) && is_blob(c) && (len_str == 128))
-				dst += snprintf(dst, dstlen, "%s", "...");
+			if ((running < 0) && is_blob(c) && (len_str == 256))
+				dst += snprintf(dst, dstlen, "%s", "|...");
 		} else
 			dst += plain(dst, dstlen, src, LEN_STR(c));
 
