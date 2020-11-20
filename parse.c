@@ -155,6 +155,7 @@ static idx_t add_to_pool(const char *name)
 		g_pool_size = nbytes;
 	}
 
+	//printf("*** add_to_pool %u ==> %s\n", offset, name);
 	strcpy(g_pool+offset, name);
 	g_pool_offset += len + 1;
 	const char *key = strdup(name);

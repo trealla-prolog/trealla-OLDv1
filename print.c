@@ -150,15 +150,6 @@ static size_t plain(char *dst, size_t dstlen, const char *src, size_t srclen)
 	return len;
 }
 
-static char *varformat(unsigned nbr)
-{
-	static char tmpbuf[80];
-	char *dst = tmpbuf;
-	dst += sprintf(dst, "%c", 'A'+nbr%26);
-	if ((nbr/26) > 0) sprintf(dst, "%u", nbr/26);
-	return tmpbuf;
-}
-
 static int find_binding(query *q, idx_t var_nbr, idx_t var_ctx)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
@@ -345,6 +336,15 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 
 	dst += snprintf(dst, dstlen, ")");
 	return dst - save_dst;
+}
+
+static char *varformat(unsigned nbr)
+{
+	static char tmpbuf[80];
+	char *dst = tmpbuf;
+	dst += sprintf(dst, "%c", 'A'+nbr%26);
+	if ((nbr/26) > 0) sprintf(dst, "%u", nbr/26);
+	return tmpbuf;
 }
 
 size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth)
