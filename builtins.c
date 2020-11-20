@@ -4905,7 +4905,7 @@ static unsigned count_non_anons(uint8_t *mask, unsigned bit)
 	return bits;
 }
 
-static void do_assign(parser *p, idx_t nbr_cells)
+static void do_assign_vars(parser *p, idx_t nbr_cells)
 {
 	parser_assign_vars(p, 0);
 	uint8_t vars[MAX_ARITY] = {0};
@@ -4913,8 +4913,10 @@ static void do_assign(parser *p, idx_t nbr_cells)
 	for (idx_t i = 0; i < nbr_cells; i++) {
 		cell *c = p->t->cells+i;
 
-		if (is_variable(c))
+		if (is_variable(c)) {
+			assert(c->var_nbr < MAX_ARITY);
 			vars[c->var_nbr]++;
+		}
 	}
 
 	for (idx_t i = 0; i < nbr_cells; i++) {
@@ -4955,7 +4957,7 @@ static int fn_iso_asserta_1(query *q)
 	}
 
 	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
-	do_assign(p, nbr_cells);
+	do_assign_vars(p, nbr_cells);
 	clause *r = asserta_to_db(q->m, p->t, 0);
 	if (!r) return 0;
 	uuid_gen(&r->u);
@@ -4980,7 +4982,7 @@ static int fn_iso_assertz_1(query *q)
 	}
 
 	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
-	do_assign(p, nbr_cells);
+	do_assign_vars(p, nbr_cells);
 	clause *r = assertz_to_db(q->m, p->t, 0);
 	if (!r) return 0;
 	uuid_gen(&r->u);

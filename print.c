@@ -179,7 +179,6 @@ static int find_binding(query *q, idx_t var_nbr, idx_t var_ctx)
 	return -1;
 }
 
-#define PRETTY_VARS 1
 uint8_t s_mask1[MAX_ARITY] = {0}, s_mask2[MAX_ARITY] = {0};
 
 static unsigned count_non_anons(uint8_t *mask, unsigned bit)
@@ -642,14 +641,12 @@ char *write_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 
 void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
-#if PRETTY_VARS
 	if (!depth) {
 		do_numbervars(q, c, c_ctx, 0);
 		q->nv_start = -1;
 		memset(s_mask1, 0, MAX_ARITY);
 		memset(s_mask2, 0, MAX_ARITY);
 	}
-#endif
 
 	size_t len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, depth);
 
@@ -685,14 +682,12 @@ void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 
 void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
-#if PRETTY_VARS
 	if (!depth) {
 		do_numbervars(q, c, c_ctx, 0);
 		q->nv_start = -1;
 		memset(s_mask1, 0, MAX_ARITY);
 		memset(s_mask2, 0, MAX_ARITY);
 	}
-#endif
 
 	size_t len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, depth);
 
