@@ -12,54 +12,86 @@ timeout=60
 while test "$1" != "${1#-}"
 do
     case "$1" in
-    -k|--keep-going)
+    -k|--keep-going) # Do not stop at first crash
         keep_going=true
+        cont=
         shift
         ;;
-    -r|--reverse)
+    -r|--reverse) # Run fault injection tests in reverse direction
         direction="-1"
         shift
         ;;
-    -s|--show)
+    -s|--show) # Start 'less' for each failed test to inspect the results (use :n/:p to go through files)
         show=true
         quiet=
         shift
         ;;
-    -g|--valgrind)
+    -g|--valgrind) # Add a valgrind report
         valgrind=true
         shift
         ;;
-    -q|--quiet)
+    -q|--quiet) # Don't keep reports
         quiet=true
         show=
         shift
         ;;
-    -t|--timeout)
+    -t|--timeout) # Set a timeout (in seconds) for the tests
         timeout="$(( 0 + $2 ))"
         shift 2
         ;;
-    -f|--filter)
-        filter="$2"
-        shift 2
-        case "$filter" in
-        *ABRT|*abrt)
-            filter=134
+    -f|--filter) # Filter only the given failures (segv, abort, timeout) can appear multiple times
+        case "$2" in
+        *ABRT|*abrt|*abort|134)
+            filter="134,$filter"
             ;;
-        *SEGV|*segv)
-            filter=139
+        *SEGV|*segv|139)
+            filter="139,$filter"
             ;;
+        *TIMEOUT|*timeout|152)
+            filter="152,$filter"
+            ;;
+        *)
+            echo "Illegal filter expression: $2" 1>&2
+            exit 1;
         esac
+        shift 2
         ;;
-    -c|--continue)
+    -c|--continue) # Continue with the previously failed iteration
+        keep_going=
         cont=true
         shift
         ;;
-    --)
+    -h|--help) # Show this help
+        cat <<EOF
+fault injection driver
+
+Usage:
+
+ $0 [options] [-- <command> [arguments..]]
+
+Options:
+$(sed 's/ *\([-|[:alpha:]]*\)[^)]*) *# \(.*\)/  \1\n     \2\n/p;d' < "$0")
+
+EOF
+        exit 0;
+        ;;
+    --) # Stop processing commandline arguments
         shift
         break
         ;;
     esac
 done
+
+if test -z "$1"; then
+        cat <<EOF
+fault injection driver
+
+Usage:
+  $0 [options..] [-- <command> [arguments..]]
+  $0 --help
+EOF
+    exit 0
+fi
 
 TPL="$1"
 export FAULTSTART
@@ -115,7 +147,7 @@ EOF
     EXIT_CODE="$?"
 
     if test "$EXIT_CODE" -gt 127; then
-        if test ! "$filter" -o "$filter" = "$EXIT_CODE"; then
+        if test ! "$filter" || expr "$filter" : ".*$EXIT_CODE,.*"; then
             FAULTS=$((FAULTS + 1))
             case $EXIT_CODE in
             134)
