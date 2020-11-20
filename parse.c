@@ -2096,8 +2096,11 @@ static int is_matching_pair(char **dst, char **src, int lh, int rh)
 }
 
 
-static int get_token(parser *p, int last_op)
+static bool get_token(parser *p, int last_op)
 {
+	if (!p || p->error)
+		return false;
+
 	const char *src = p->srcptr;
 	char *dst = p->token;
 	int neg = 0;
@@ -2111,14 +2114,14 @@ static int get_token(parser *p, int last_op)
 		*dst = '\0';
 		p->srcptr = (char*)++src;
 		p->dq_consing = 0;
-		return 1;
+		return true;
 	}
 
 	if (p->dq_consing < 0) {
 		*dst++ = ',';
 		*dst = '\0';
 		p->dq_consing = 1;
-		return 1;
+		return true;
 	}
 
 	if (p->dq_consing) {
@@ -2130,7 +2133,7 @@ static int get_token(parser *p, int last_op)
 			if (p->error) {
 				fprintf(stdout, "Error: sysntax error, illegal character escape, line %d\n", p->line_nbr);
 				p->error = true;
-				return 0;
+				return false;
 			}
 		}
 
@@ -2139,7 +2142,7 @@ static int get_token(parser *p, int last_op)
 		p->srcptr = (char*)src;
 		p->val_type = TYPE_INTEGER;
 		p->dq_consing = -1;
-		return 1;
+		return true;
 	}
 
 	while (isspace(*src)) {
@@ -2171,7 +2174,7 @@ static int get_token(parser *p, int last_op)
 			p->line_nbr++;
 
 		if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
-			return 0;
+			return false;
 		}
 
 		p->srcptr = p->save_line;
@@ -2194,11 +2197,11 @@ static int get_token(parser *p, int last_op)
 
 	if (!*src) {
 		p->srcptr = (char*)src;
-		return 0;
+		return false;
 	}
 
 	if (*src == '%')
-		return 0;
+		return false;
 
 	do {
 		if (!p->comment && (src[0] == '/') && (src[1] == '*')) {
@@ -2220,7 +2223,7 @@ static int get_token(parser *p, int last_op)
 		if (!*src && p->comment && p->fp) {
 			if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
 				p->srcptr = (char*)src;
-				return 1;
+				return true;
 			}
 
 			src = p->srcptr = p->save_line;
@@ -2275,7 +2278,7 @@ static int get_token(parser *p, int last_op)
 			p->val_type = TYPE_INTEGER;
 
 		p->srcptr = (char*)src;
-		return 1;
+		return true;
 	}
 
 	// Quoted strings...
@@ -2290,7 +2293,7 @@ static int get_token(parser *p, int last_op)
 			p->srcptr = (char*)src;
 			p->dq_consing = 1;
 			p->quoted = 0;
-			return 1;
+			return true;
 		} else if ((p->quoted == '"') && p->m->flag.double_quote_chars)
 			p->string = true;
 
@@ -2322,7 +2325,7 @@ static int get_token(parser *p, int last_op)
 					} else {
 						fprintf(stdout, "Error: syntax error, illegal character escape, line %d\n", p->line_nbr);
 						p->error = true;
-						return 0;
+						return false;
 					}
 				}
 
@@ -2342,7 +2345,7 @@ static int get_token(parser *p, int last_op)
 			if (p->quoted && p->fp) {
 				if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
 					p->srcptr = (char*)src;
-					return 1;
+					return true;
 				}
 
 				src = p->srcptr = p->save_line;
@@ -2362,13 +2365,15 @@ static int get_token(parser *p, int last_op)
 
 			p->len_str = dst - p->token;
 			p->srcptr = (char*)src;
-			return 1;
+			return true;
 		}
 	}
 
 	int ch = peek_char_utf8(src);
 
 	// Atoms...
+
+	ensure(!p->error, "fallen through from above");
 
 	if (isalpha_utf8(ch) || (ch == '_')) {
 		while (isalnum_utf8(ch) || (ch == '_') ||
@@ -2399,7 +2404,7 @@ static int get_token(parser *p, int last_op)
 			p->is_op = 1;
 
 		p->srcptr = (char*)src;
-		return 1;
+		return true;
 	}
 
 	if (is_matching_pair(&dst, (char**)&src, '[',']') ||
@@ -2442,7 +2447,7 @@ static int get_token(parser *p, int last_op)
 	}
 
 	p->srcptr = (char*)src;
-	return 1;
+	return true;
 }
 
 size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, int tolerant)
