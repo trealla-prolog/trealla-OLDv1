@@ -6211,7 +6211,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 			if (r->t.is_deleted)
 				continue;
 
-			write_term(q, fp, r->t.cells, q->st.curr_frame, 0, 0, 0);
+			write_term(q, fp, r->t.cells, q->st.curr_frame, 1, 0, 0);
 			fprintf(fp, ".\n");
 		}
 	}
