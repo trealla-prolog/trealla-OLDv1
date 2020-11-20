@@ -964,18 +964,22 @@ static const char *dump_key(void *p, const void *p1)
 
 static bool match_rule(query *q)
 {
+	assert(q);
 	if (!q->retry) {
 		cell *c = q->st.curr_cell;
 		rule *h;
 
-		if (is_literal(c))
+		if (is_literal(c)) {
 			h = c->match;
-		else {
+		} else {
 			// For now convert it to a literal
-			idx_t off = index_from_pool(GET_STR(c));
+			c->val_off = index_from_pool(GET_STR(c));
+			if (c->val_off == ERR_IDX) {
+				q->error = true;
+				return false;
+			}
+
 			if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
-			c->val_off = off;
-			ensure(c->val_off != ERR_IDX);
 			c->val_type = TYPE_LITERAL;
 			c->flags = 0;
 			h = NULL;
@@ -986,14 +990,18 @@ static bool match_rule(query *q)
 			h = c->match;
 
 			if (!h) {
-				if (!is_end(c) &&
-					!(is_literal(c) && !strcmp(GET_STR(c), "initialization")))
+				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(c), "initialization")))
 					throw_error(q, c, "existence_error", "procedure");
 				else
 					q->error = true;
 
 				return false;
 			}
+		}
+
+		if (!h) {
+			q->error = true;
+			return false;
 		}
 
 		if (h->index) {

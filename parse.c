@@ -171,9 +171,11 @@ idx_t index_from_pool(const char *name)
 	return add_to_pool(name);
 }
 
+//cehteh: eventually typedef unsigned precendence_t; ?
 unsigned get_op(module *m, const char *name, unsigned *optype, int *userop, int hint_prefix)
 {
-	ensure(m && name);
+	assert(m);
+	assert(name);
 
 	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
 		if (hint_prefix && (ptr->optype != OP_FX) && (ptr->optype != OP_FY))
@@ -554,7 +556,8 @@ static void reindex_rule(rule *h)
 
 static clause* assert_begin(module *m, term *t, bool consulting)
 {
-	assert(m && t);
+	if (!m || !t)
+		return NULL;
 
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
@@ -766,9 +769,10 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	if (h) {
 		h->is_dynamic = true;
 
-		if (!h->index && !m->noindex) {
-			if (!(h->index = sl_create(compkey)))
-				m->error = true;
+		if (!h->index
+		    && !m->noindex
+		    && !(h->index = sl_create(compkey))) {
+			m->error = true;
 		}
 	} else
 		m->error = true;
@@ -787,9 +791,11 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 		h->is_dynamic = true;
 		h->is_persist = true;
 
-		if (!h->index && !m->noindex)
-			if (!(h->index = sl_create(compkey)))
-				m->error = true;
+		if (!h->index
+		    && !m->noindex
+		    && !(h->index = sl_create(compkey))) {
+			m->error = true;
+		}
 
 		m->use_persist = true;
 	} else
@@ -1395,8 +1401,10 @@ void parser_xref(parser *p, term *t, rule *parent)
 		unsigned optype;
 		int userop, hint_prefix = c->arity == 1;
 
-		if ((c->arity == 2) && !GET_OP(c) && strcmp(functor, "{}") &&
-				get_op(m, functor, &optype, &userop, hint_prefix)) {
+		if ((c->arity == 2)
+		    && !GET_OP(c)
+		    && strcmp(functor, "{}")
+		    && get_op(m, functor, &optype, &userop, hint_prefix)) {
 			SET_OP(c, optype);
 		}
 
@@ -1523,6 +1531,9 @@ static idx_t get_varno(parser *p, const char *src)
 
 void parser_assign_vars(parser *p, unsigned start)
 {
+	if (!p || p->error)
+		return;
+
 	p->start_term = true;
 	p->nbr_vars = 0;
 	memset(&p->vartab, 0, sizeof(p->vartab));
@@ -1724,6 +1735,9 @@ void parser_reset(parser *p)
 
 static void parser_dcg_rewrite(parser *p)
 {
+	if (!p || p->error)
+		return;
+
 	if (!is_literal(p->t->cells))
 		return;
 
@@ -1804,6 +1818,11 @@ static void parser_dcg_rewrite(parser *p)
 
 static cell *make_literal(parser *p, idx_t offset)
 {
+	if (!p || p->error)
+		return NULL;
+
+	assert(p->m); //if (!p->m) return NULL; ? is p->m expected to hold a reference in all (non-error) cases?
+
 	if (offset == ERR_IDX)
 		return NULL;
 
@@ -2096,8 +2115,11 @@ static int is_matching_pair(char **dst, char **src, int lh, int rh)
 }
 
 
-static int get_token(parser *p, int last_op)
+static bool get_token(parser *p, int last_op)
 {
+	if (!p || p->error)
+		return false;
+
 	const char *src = p->srcptr;
 	char *dst = p->token;
 	int neg = 0;
@@ -2111,14 +2133,14 @@ static int get_token(parser *p, int last_op)
 		*dst = '\0';
 		p->srcptr = (char*)++src;
 		p->dq_consing = 0;
-		return 1;
+		return true;
 	}
 
 	if (p->dq_consing < 0) {
 		*dst++ = ',';
 		*dst = '\0';
 		p->dq_consing = 1;
-		return 1;
+		return true;
 	}
 
 	if (p->dq_consing) {
@@ -2130,7 +2152,7 @@ static int get_token(parser *p, int last_op)
 			if (p->error) {
 				fprintf(stdout, "Error: sysntax error, illegal character escape, line %d\n", p->line_nbr);
 				p->error = true;
-				return 0;
+				return false;
 			}
 		}
 
@@ -2139,7 +2161,7 @@ static int get_token(parser *p, int last_op)
 		p->srcptr = (char*)src;
 		p->val_type = TYPE_INTEGER;
 		p->dq_consing = -1;
-		return 1;
+		return true;
 	}
 
 	while (isspace(*src)) {
@@ -2171,7 +2193,7 @@ static int get_token(parser *p, int last_op)
 			p->line_nbr++;
 
 		if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
-			return 0;
+			return false;
 		}
 
 		p->srcptr = p->save_line;
@@ -2194,11 +2216,11 @@ static int get_token(parser *p, int last_op)
 
 	if (!*src) {
 		p->srcptr = (char*)src;
-		return 0;
+		return false;
 	}
 
 	if (*src == '%')
-		return 0;
+		return false;
 
 	do {
 		if (!p->comment && (src[0] == '/') && (src[1] == '*')) {
@@ -2220,7 +2242,7 @@ static int get_token(parser *p, int last_op)
 		if (!*src && p->comment && p->fp) {
 			if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
 				p->srcptr = (char*)src;
-				return 1;
+				return true;
 			}
 
 			src = p->srcptr = p->save_line;
@@ -2275,7 +2297,7 @@ static int get_token(parser *p, int last_op)
 			p->val_type = TYPE_INTEGER;
 
 		p->srcptr = (char*)src;
-		return 1;
+		return true;
 	}
 
 	// Quoted strings...
@@ -2290,7 +2312,7 @@ static int get_token(parser *p, int last_op)
 			p->srcptr = (char*)src;
 			p->dq_consing = 1;
 			p->quoted = 0;
-			return 1;
+			return true;
 		} else if ((p->quoted == '"') && p->m->flag.double_quote_chars)
 			p->string = true;
 
@@ -2322,7 +2344,7 @@ static int get_token(parser *p, int last_op)
 					} else {
 						fprintf(stdout, "Error: syntax error, illegal character escape, line %d\n", p->line_nbr);
 						p->error = true;
-						return 0;
+						return false;
 					}
 				}
 
@@ -2342,7 +2364,7 @@ static int get_token(parser *p, int last_op)
 			if (p->quoted && p->fp) {
 				if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
 					p->srcptr = (char*)src;
-					return 1;
+					return true;
 				}
 
 				src = p->srcptr = p->save_line;
@@ -2362,13 +2384,15 @@ static int get_token(parser *p, int last_op)
 
 			p->len_str = dst - p->token;
 			p->srcptr = (char*)src;
-			return 1;
+			return true;
 		}
 	}
 
 	int ch = peek_char_utf8(src);
 
 	// Atoms...
+
+	ensure(!p->error, "fallen through from above");
 
 	if (isalpha_utf8(ch) || (ch == '_')) {
 		while (isalnum_utf8(ch) || (ch == '_') ||
@@ -2399,7 +2423,7 @@ static int get_token(parser *p, int last_op)
 			p->is_op = 1;
 
 		p->srcptr = (char*)src;
-		return 1;
+		return true;
 	}
 
 	if (is_matching_pair(&dst, (char**)&src, '[',']') ||
@@ -2442,7 +2466,7 @@ static int get_token(parser *p, int last_op)
 	}
 
 	p->srcptr = (char*)src;
-	return 1;
+	return true;
 }
 
 size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, int tolerant)
@@ -2523,19 +2547,20 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 
 		//fprintf(stdout, "Debug: token '%s' quoted=%d, val_type=%u, op=%d, lastop=%d\n", p->token, p->quoted, p->val_type, p->is_op, last_op);
 
-		if (!p->quoted && !strcmp(p->token, ".") && (*p->srcptr != '(') &&
-			(*p->srcptr != ',') && (*p->srcptr != ')') && (*p->srcptr != ']') &&
-				(*p->srcptr != '|')) {
+		if (!p->quoted
+		    && !strcmp(p->token, ".")
+		    && (*p->srcptr != '(')
+		    && (*p->srcptr != ',')
+		    && (*p->srcptr != ')')
+		    && (*p->srcptr != ']')
+		    && (*p->srcptr != '|')) {
 			if (parser_attach(p, 0)) {
-				if (p->error)
-					break;
-
 				parser_assign_vars(p, p->read_term);
 
 				if (p->consulting && !p->skip) {
 					parser_dcg_rewrite(p);
 
-					if (!assertz_to_db(p->m, p->t, 1)) {
+					if (!p->error && !assertz_to_db(p->m, p->t, 1)) {
 						printf("Error: '%s', line nbr %u\n", p->token, p->line_nbr);
 						p->error = true;
 					}
@@ -2982,9 +3007,9 @@ bool module_load_file(module *m, const char *filename)
 
 	free(m->filename);
 	m->filename = ensure_strdup(filename);
-	module_load_fp(m, fp);
+	bool ok = module_load_fp(m, fp);
 	fclose(fp);
-	return true;
+	return ok;
 }
 
 static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
@@ -3427,9 +3452,9 @@ void set_opt(prolog *pl, int level) { pl->m->opt = level; }
 bool pl_eval(prolog *pl, const char *src)
 {
 	parser *p = create_parser(pl->curr_m);
-	ensure(p);
+	if (!p) return false;
 	p->command = true;
-	int ok = parser_run(p, src, 1);
+	bool ok = parser_run(p, src, 1);
 	pl->curr_m = p->m;
 	destroy_parser(p);
 	return ok;
