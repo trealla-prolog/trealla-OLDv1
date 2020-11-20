@@ -2353,7 +2353,11 @@ static int fn_iso_write_term_2(query *q)
 	}
 
 	q->latest_ctx = p1_ctx;
-	write_term_to_stream(q, str, p1, p1_ctx, 1, 0, q->quoted?1:0);
+
+	if (q->ignore_ops)
+		write_canonical_to_stream(q, str, p1, p1_ctx, 1, 0);
+	else
+		write_term_to_stream(q, str, p1, p1_ctx, 1, 0, q->quoted?1:0);
 
 	if (q->fullstop)
 		net_write(".", 1, str);
