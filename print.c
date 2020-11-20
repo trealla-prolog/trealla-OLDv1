@@ -273,7 +273,6 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 			dst += snprintf(dst, dstlen, "%c%u", ch, n);
 #else
 		dst += snprintf(dst, dstlen, "_V%d", var_nbr);
-
 #endif
 
 		return dst - save_dst;
