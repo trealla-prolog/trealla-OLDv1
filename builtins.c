@@ -4908,6 +4908,36 @@ static int fn_iso_asserta_1(query *q)
 
 	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
 	parser_assign_vars(p, 0);
+	uint8_t vars[MAX_ARITY] = {0};
+
+	for (idx_t i = 0; i < nbr_cells; i++) {
+		cell *c = p->t->cells+i;
+
+		if (is_variable(c))
+			vars[c->var_nbr]++;
+	}
+
+	for (idx_t i = 0; i < nbr_cells; i++) {
+		cell *c = p->t->cells+i;
+
+		if (is_variable(c)) {
+			char ch = 'A';
+			ch += c->var_nbr % 26;
+			unsigned n = c->var_nbr / 26;
+			char tmpbuf[20];
+
+			if (vars[c->var_nbr] == 1)
+				sprintf(tmpbuf, "%s", "_");
+			else if (c->var_nbr < 26)
+				sprintf(tmpbuf, "%c", ch);
+			else
+				sprintf(tmpbuf, "%c%u", ch, n);
+
+			c->val_off = index_from_pool(tmpbuf);
+			c->flags = 0;
+		}
+	}
+
 	clause *r = asserta_to_db(q->m, p->t, 0);
 	if (!r) return 0;
 	uuid_gen(&r->u);
@@ -4933,6 +4963,35 @@ static int fn_iso_assertz_1(query *q)
 
 	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
 	parser_assign_vars(p, 0);
+	uint8_t vars[MAX_ARITY] = {0};
+
+	for (idx_t i = 0; i < nbr_cells; i++) {
+		cell *c = p->t->cells+i;
+
+		if (is_variable(c))
+			vars[c->var_nbr]++;
+	}
+
+	for (idx_t i = 0; i < nbr_cells; i++) {
+		cell *c = p->t->cells+i;
+
+		if (is_variable(c)) {
+			char ch = 'A';
+			ch += c->var_nbr % 26;
+			unsigned n = (unsigned)c->var_nbr / 26;
+			char tmpbuf[20];
+
+			if (vars[c->var_nbr] == 1)
+				sprintf(tmpbuf, "%s", "_");
+			else if (c->var_nbr < 26)
+				sprintf(tmpbuf, "%c", ch);
+			else
+				sprintf(tmpbuf, "%c%d", ch, n);
+
+			c->val_off = index_from_pool(tmpbuf);
+		}
+	}
+
 	clause *r = assertz_to_db(q->m, p->t, 0);
 	if (!r) return 0;
 	uuid_gen(&r->u);
@@ -6211,7 +6270,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 			if (r->t.is_deleted)
 				continue;
 
-			write_term(q, fp, r->t.cells, q->st.curr_frame, 1, 0, 0);
+			write_term(q, fp, r->t.cells, q->st.curr_frame, 0, 0, 0);
 			fprintf(fp, ".\n");
 		}
 	}
