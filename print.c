@@ -191,9 +191,6 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 	char *save_dst = dst;
 
 	if (depth > MAX_DEPTH) {
-		if (depth > 64)
-			dst += snprintf(dst, dstlen, "...");
-
 		q->cycle_error = true;
 		return dst - save_dst;
 	}
@@ -346,9 +343,6 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 	char *save_dst = dst;
 
 	if (depth > MAX_DEPTH) {
-		if (depth > 64)
-			dst += snprintf(dst, dstlen, "...");
-
 		q->cycle_error = true;
 		return dst - save_dst;
 	}
@@ -420,9 +414,14 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 	// FIXME make non-recursive
 
 	const char *src = GET_STR(c);
-	int print_list = 0;
+	unsigned print_list = 0, cnt = 0;
 
 	while (is_iso_list(c)) {
+		if (cnt++ > MAX_DEPTH) {
+			q->cycle_error = true;
+			return dst - save_dst;
+		}
+
 		if (q->max_depth && (depth >= q->max_depth)) {
 			dst += snprintf(dst, dstlen, "%s", "...");
 			return dst - save_dst;
@@ -443,6 +442,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
 		dst += write_term_to_buf(q, dst, dstlen, head, head_ctx, running, 0, depth+1);
 		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
+
 		cell *tail = LIST_TAIL(c);
 		tail = running ? deref(q, tail, c_ctx) : tail;
 		c_ctx = q->latest_ctx;
