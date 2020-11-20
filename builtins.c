@@ -4989,6 +4989,7 @@ static int fn_iso_assertz_1(query *q)
 				sprintf(tmpbuf, "%c%d", ch, n);
 
 			c->val_off = index_from_pool(tmpbuf);
+			c->flags = 0;
 		}
 	}
 
