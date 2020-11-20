@@ -171,9 +171,11 @@ idx_t index_from_pool(const char *name)
 	return add_to_pool(name);
 }
 
+//cehteh: eventually typedef unsigned precendence_t; ?
 unsigned get_op(module *m, const char *name, unsigned *optype, int *userop, int hint_prefix)
 {
-	ensure(m && name);
+	assert(m);
+	assert(name);
 
 	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
 		if (hint_prefix && (ptr->optype != OP_FX) && (ptr->optype != OP_FY))
@@ -554,7 +556,8 @@ static void reindex_rule(rule *h)
 
 static clause* assert_begin(module *m, term *t, bool consulting)
 {
-	assert(m && t);
+	if (!m || !t)
+		return NULL;
 
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
@@ -1523,6 +1526,9 @@ static idx_t get_varno(parser *p, const char *src)
 
 void parser_assign_vars(parser *p, unsigned start)
 {
+	if (!p || p->error)
+		return;
+
 	p->start_term = true;
 	p->nbr_vars = 0;
 	memset(&p->vartab, 0, sizeof(p->vartab));
@@ -1724,6 +1730,9 @@ void parser_reset(parser *p)
 
 static void parser_dcg_rewrite(parser *p)
 {
+	if (!p || p->error)
+		return;
+
 	if (!is_literal(p->t->cells))
 		return;
 
@@ -1804,6 +1813,11 @@ static void parser_dcg_rewrite(parser *p)
 
 static cell *make_literal(parser *p, idx_t offset)
 {
+	if (!p || p->error)
+		return NULL;
+
+	assert(p->m); //if (!p->m) return NULL; ? is p->m expected to hold a reference in all (non-error) cases?
+
 	if (offset == ERR_IDX)
 		return NULL;
 
@@ -2532,15 +2546,12 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 			(*p->srcptr != ',') && (*p->srcptr != ')') && (*p->srcptr != ']') &&
 				(*p->srcptr != '|')) {
 			if (parser_attach(p, 0)) {
-				if (p->error)
-					break;
-
 				parser_assign_vars(p, p->read_term);
 
 				if (p->consulting && !p->skip) {
 					parser_dcg_rewrite(p);
 
-					if (!assertz_to_db(p->m, p->t, 1)) {
+					if (!p->error && !assertz_to_db(p->m, p->t, 1)) {
 						printf("Error: '%s', line nbr %u\n", p->token, p->line_nbr);
 						p->error = true;
 					}
