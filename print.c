@@ -253,7 +253,7 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 			var_nbr--;
 		}
 
-#if 0
+#if 1
 		if (!dstlen) {
 			if (!(s_mask1[var_nbr]))
 				s_mask1[var_nbr] = 1;
@@ -262,21 +262,14 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 		}
 
 		char ch = 'A';
-		ch += var_nbr / 26;
-		unsigned n = (unsigned)var_nbr % 26;
-
-		static int max_var = 0;
-
-		if (var_nbr > max_var) {
-			printf("*** %d = %c%u\n", var_nbr, ch, n);
-			max_var = var_nbr;
-		}
+		ch += var_nbr % 26;
+		unsigned n = (unsigned)var_nbr / 26;
 
 		if (dstlen && !(s_mask2[var_nbr]))
 			dst += snprintf(dst, dstlen, "%s", "_");
-		else if (dstlen && (var_nbr < 26))
+		else if (var_nbr < 26)
 			dst += snprintf(dst, dstlen, "%c", ch);
-		else if (dstlen)
+		else
 			dst += snprintf(dst, dstlen, "%c%u", ch, n);
 #else
 		dst += snprintf(dst, dstlen, "_V%d", var_nbr);
@@ -654,7 +647,7 @@ void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 
 	char *dst = malloc(len*2+1);
 	ensure(dst);
-	write_canonical_to_buf(q, dst, len+1, c, c_ctx, running, depth);
+	len = write_canonical_to_buf(q, dst, len+1, c, c_ctx, running, depth);
 	const char *src = dst;
 
 	if ((q->nv_start == -1) && !depth) {
@@ -697,7 +690,7 @@ void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, unsi
 
 	char *dst = malloc(len*2+1);
 	ensure(dst);
-	write_canonical_to_buf(q, dst, len+1, c, c_ctx, running, depth);
+	len = write_canonical_to_buf(q, dst, len+1, c, c_ctx, running, depth);
 	const char *src = dst;
 
 	if ((q->nv_start == -1) && !depth) {
@@ -731,7 +724,7 @@ void write_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int runni
 
 	char *dst = malloc(len+1);
 	ensure(dst);
-	write_term_to_buf(q, dst, len+1, c, c_ctx, running, cons, depth);
+	len = write_term_to_buf(q, dst, len+1, c, c_ctx, running, cons, depth);
 	const char *src = dst;
 
 	while (len) {
@@ -760,7 +753,7 @@ void write_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int cons,
 
 	char *dst = malloc(len+1);
 	ensure(dst);
-	write_term_to_buf(q, dst, len+1, c, c_ctx, running, cons, depth);
+	len = write_term_to_buf(q, dst, len+1, c, c_ctx, running, cons, depth);
 	const char *src = dst;
 
 	while (len) {
