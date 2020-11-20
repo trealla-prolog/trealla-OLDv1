@@ -7,33 +7,38 @@ show=
 quiet=
 filter=
 cont=
+timeout=60
 
 while test "$1" != "${1#-}"
 do
     case "$1" in
-    -k)
+    -k|--keep-going)
         keep_going=true
         shift
         ;;
-    -r)
+    -r|--reverse)
         direction="-1"
         shift
         ;;
-    -s)
+    -s|--show)
         show=true
         quiet=
         shift
         ;;
-    -g)
+    -g|--valgrind)
         valgrind=true
         shift
         ;;
-    -q)
+    -q|--quiet)
         quiet=true
         show=
         shift
         ;;
-    -f)
+    -t|--timeout)
+        timeout="$(( 0 + $2 ))"
+        shift 2
+        ;;
+    -f|--filter)
         filter="$2"
         shift 2
         case "$filter" in
@@ -45,7 +50,7 @@ do
             ;;
         esac
         ;;
-    -c)
+    -c|--continue)
         cont=true
         shift
         ;;
@@ -103,14 +108,21 @@ EOF
     echo "Faultinject $FAULTSTART"
     echo "        $*"
 
-    "$@" 2>faultinject.stderr >faultinject.stdout
+    (
+        ulimit -S -t $timeout
+        "$@" 2>faultinject.stderr >faultinject.stdout
+    )
     EXIT_CODE="$?"
+
     if test "$EXIT_CODE" -gt 127; then
         if test ! "$filter" -o "$filter" = "$EXIT_CODE"; then
             FAULTS=$((FAULTS + 1))
             case $EXIT_CODE in
             134)
                 echo "                crashed with SIGABRT"
+                ;;
+            152)
+                echo "                crashed with TIMEOUT"
                 ;;
             139)
                 echo "                crashed with SIGSEGV"
@@ -140,6 +152,7 @@ EOF
     else
         echo "                OK with exit-code $EXIT_CODE"
     fi
+
     rm -f faultinject.stderr faultinject.stdout
     FAULTSTART=$((FAULTSTART + direction))
 done
