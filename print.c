@@ -20,7 +20,7 @@
 #define DBL_DECIMAL_DIG DBL_DIG
 #endif
 
-static uint64_t s_mask1 = 0, s_mask2 = 0;
+uint8_t s_mask1[MAX_ARITY] = {0}, s_mask2[MAX_ARITY] = {0};
 
 static int needs_quote(module *m, const char *src, size_t srclen)
 {
@@ -247,25 +247,25 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 	}
 
 	if (is_variable(c) && (running>0) && (q->nv_start == -1) && ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)) {
-#if 0
-		for (unsigned i = 0; i < 64; i++) {
-			if ((1ULL << i) & q->nv_mask)
+		for (unsigned i = 0; i < MAX_ARITY; i++) {
+			if (q->nv_mask[i])
 				break;
 
 			var_nbr--;
 		}
 
+#if 0
 		if (!dstlen) {
-			if (!(s_mask1 & (1ULL << var_nbr)))
-				s_mask1 |= 1ULL << var_nbr;
+			if (!(s_mask1[var_nbr]))
+				s_mask1[var_nbr] = 1;
 			else
-				s_mask2 |= 1ULL << var_nbr;
+				s_mask2[var_nbr] = 1;
 		}
 
 		int ch = 'A';
 		ch += var_nbr % 26;
 
-		if (dstlen && !(s_mask2 & (1ULL << var_nbr)))
+		if (dstlen && !(s_mask2[var_nbr]))
 			dst += snprintf(dst, dstlen, "%c", '_');
 		else if (var_nbr < 26)
 			dst += snprintf(dst, dstlen, "%c", ch);
@@ -498,7 +498,7 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		if (parens)
 			dst += snprintf(dst, dstlen, "%s", "(");
 
-		if (running && is_variable(c) && ((1ULL << c->var_nbr) & q->nv_mask)) {
+		if (running && is_variable(c) && q->nv_mask[c->var_nbr]) {
 			dst += snprintf(dst, dstlen, "%s", varformat(q->nv_start + count_bits(q->nv_mask, c->var_nbr)));
 			return dst - save_dst;
 		}
@@ -633,10 +633,11 @@ char *write_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
 #if PRETTY_VARS
-	if (!q->nv_mask && !depth) {
+	if (!depth) {
 		do_numbervars(q, c, c_ctx, 0);
 		q->nv_start = -1;
-		s_mask1 = s_mask2 = 0;
+		memset(s_mask1, 0, MAX_ARITY);
+		memset(s_mask2, 0, MAX_ARITY);
 	}
 #endif
 
@@ -653,7 +654,7 @@ void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 	const char *src = dst;
 
 	if ((q->nv_start == -1) && !depth) {
-		q->nv_mask = 0;
+		memset(q->nv_mask, 0, MAX_ARITY);
 		q->nv_start = 0;
 	}
 
@@ -675,10 +676,11 @@ void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
 #if PRETTY_VARS
-	if (!q->nv_mask && !depth) {
+	if (!depth) {
 		do_numbervars(q, c, c_ctx, 0);
 		q->nv_start = -1;
-		s_mask1 = s_mask2 = 0;
+		memset(s_mask1, 0, MAX_ARITY);
+		memset(s_mask2, 0, MAX_ARITY);
 	}
 #endif
 
@@ -695,7 +697,7 @@ void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, unsi
 	const char *src = dst;
 
 	if ((q->nv_start == -1) && !depth) {
-		q->nv_mask = 0;
+		memset(q->nv_mask, 0, MAX_ARITY);
 		q->nv_start = 0;
 	}
 

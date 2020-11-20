@@ -9351,14 +9351,14 @@ unsigned do_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 	unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	cell *slots[MAX_ARITY] = {0};
 	do_collect_vars(q, tmp, tmp->nbr_cells, slots);
-	q->nv_mask = 0;
+	memset(q->nv_mask, 0, MAX_ARITY);
 	unsigned end = q->nv_start = start;
 
 	for (unsigned i = 0; i < MAX_ARITY; i++) {
 		if (!slots[i])
 			continue;
 
-		q->nv_mask |= 1ULL << slots[i]->var_nbr;
+		q->nv_mask[slots[i]->var_nbr] = 1;
 		end++;
 	}
 
@@ -9383,12 +9383,12 @@ static int fn_numbervars_3(query *q)
 	return unify(q, p3, p3_ctx, &tmp2, q->st.curr_frame);
 }
 
-unsigned count_bits(uint64_t mask, unsigned bit)
+unsigned count_bits(uint8_t *mask, unsigned bit)
 {
 	unsigned bits = 0;
 
 	for (unsigned i = 0; i < bit; i++) {
-		if ((1ULL << i) & mask)
+		if (mask[i])
 			bits++;
 	}
 

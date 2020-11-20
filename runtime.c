@@ -473,7 +473,7 @@ static void commit_me(query *q, term *t)
 	else
 		q->st.curr_cell = get_body(t->cells);
 
-	q->nv_mask = 0;
+	memset(q->nv_mask, 0, MAX_ARITY);
 }
 
 void stash_me(query *q, term *t, bool last_match)
