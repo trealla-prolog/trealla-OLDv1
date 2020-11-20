@@ -20,8 +20,6 @@
 #define DBL_DECIMAL_DIG DBL_DIG
 #endif
 
-uint8_t s_mask1[MAX_ARITY] = {0}, s_mask2[MAX_ARITY] = {0};
-
 static int needs_quote(module *m, const char *src, size_t srclen)
 {
 	if (!strcmp(src, ",") || !strcmp(src, ".") || !strcmp(src, "|"))
@@ -182,6 +180,7 @@ static int find_binding(query *q, idx_t var_nbr, idx_t var_ctx)
 }
 
 #define PRETTY_VARS 1
+uint8_t s_mask1[MAX_ARITY] = {0}, s_mask2[MAX_ARITY] = {0};
 
 size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
@@ -262,20 +261,25 @@ size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 				s_mask2[var_nbr] = 1;
 		}
 
-		int ch = 'A';
-		ch += var_nbr % 26;
+		char ch = 'A';
+		ch += var_nbr / 26;
+		unsigned n = (unsigned)var_nbr % 26;
+
+		static int max_var = 0;
+
+		if (var_nbr > max_var) {
+			printf("*** %d = %c%u\n", var_nbr, ch, n);
+			max_var = var_nbr;
+		}
 
 		if (dstlen && !(s_mask2[var_nbr]))
-			dst += snprintf(dst, dstlen, "%c", '_');
-		else if (var_nbr < 26)
+			dst += snprintf(dst, dstlen, "%s", "_");
+		else if (dstlen && (var_nbr < 26))
 			dst += snprintf(dst, dstlen, "%c", ch);
-		else {
-			int n = var_nbr / 26;
-			dst += snprintf(dst, dstlen, "%c", ch);
-			dst += snprintf(dst, dstlen, "%d", n);
-		}
+		else if (dstlen)
+			dst += snprintf(dst, dstlen, "%c%u", ch, n);
 #else
-		dst += snprintf(dst, dstlen, "_%d", var_nbr);
+		dst += snprintf(dst, dstlen, "_V%d", var_nbr);
 
 #endif
 
@@ -648,7 +652,7 @@ void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 		len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, depth+1);
 	}
 
-	char *dst = malloc(len+1);
+	char *dst = malloc(len*2+1);
 	ensure(dst);
 	write_canonical_to_buf(q, dst, len+1, c, c_ctx, running, depth);
 	const char *src = dst;
@@ -691,7 +695,7 @@ void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, unsi
 		len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, depth+1);
 	}
 
-	char *dst = malloc(len+1);
+	char *dst = malloc(len*2+1);
 	ensure(dst);
 	write_canonical_to_buf(q, dst, len+1, c, c_ctx, running, depth);
 	const char *src = dst;
