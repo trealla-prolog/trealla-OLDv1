@@ -91,6 +91,8 @@ fi
 
 ulimit -S -c unlimited
 
+FAULTS=0
+
 while test "$FAULTSTART" -ne "$FAULTEND"
 do
     cat <<EOF >faultinject_state
@@ -98,20 +100,23 @@ FAULTSTART=$FAULTSTART
 FAULTEND=$FAULTEND
 direction=$direction
 EOF
+    echo "Faultinject $FAULTSTART"
+    echo "        $*"
 
     "$@" 2>faultinject.stderr >faultinject.stdout
     EXIT_CODE="$?"
     if test "$EXIT_CODE" -gt 127; then
         if test ! "$filter" -o "$filter" = "$EXIT_CODE"; then
+            FAULTS=$((FAULTS + 1))
             case $EXIT_CODE in
             134)
-                echo "Faultinject $FAULTSTART crashed with SIGABRT"
+                echo "                crashed with SIGABRT"
                 ;;
             139)
-                echo "Faultinject $FAULTSTART crashed with SIGSEGV"
+                echo "                crashed with SIGSEGV"
                 ;;
             *)
-                echo "Faultinject $FAULTSTART crashed with $EXIT_CODE"
+                echo "                crashed with exit-code $EXIT_CODE"
                 ;;
             esac | tee -a faultinject$FAULTSTART.stderr
             if test -z "$quiet" ; then
@@ -132,7 +137,11 @@ EOF
                 exit 1
             fi
         fi
+    else
+        echo "                OK with exit-code $EXIT_CODE"
     fi
     rm -f faultinject.stderr faultinject.stdout
     FAULTSTART=$((FAULTSTART + direction))
 done
+
+echo "Found $FAULTS crashes"
