@@ -178,7 +178,7 @@ static void trace_call(query *q, cell *c, box_t box)
 
 	int save_depth = q->max_depth;
 	q->max_depth = 1000;
-	write_term(q, stderr, c, q->st.curr_frame, -1);
+	print_term(q, stderr, c, q->st.curr_frame, -1);
 	fprintf(stderr, "\n");
 	fflush(stderr);
 	q->max_depth = save_depth;
@@ -1022,7 +1022,7 @@ static bool match_rule(query *q)
 
 #if 0
 				printf("*** key: iter:%p ", q->st.iter);
-				write_term(q, stdout, key, q->st.curr_frame, 0);
+				print_term(q, stdout, key, q->st.curr_frame, 0);
 				printf("\n");
 				sl_dump(h->index, dump_key, q);
 #endif

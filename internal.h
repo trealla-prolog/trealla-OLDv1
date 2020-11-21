@@ -501,9 +501,9 @@ unsigned get_op(module *m, const char *name, unsigned *optype, int *userop, int 
 bool set_op(module *m, const char *name, unsigned optype, unsigned precedence);
 size_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, unsigned depth);
 size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
-void write_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
+void print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
 void print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
-void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
+void print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
 void print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
 void make_choice(query *q);
 void make_barrier(query *q);

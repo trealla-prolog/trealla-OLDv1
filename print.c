@@ -669,7 +669,7 @@ void print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 	free(dst);
 }
 
-void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
+void print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 {
 	q->nv_start = -1;
 	memset(s_mask1, 0, MAX_ARITY);
@@ -751,7 +751,7 @@ void print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int runni
 	free(dst);
 }
 
-void write_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
+void print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 {
 	size_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 0);
 

@@ -1051,7 +1051,7 @@ static void dump_vars(query *q, parser *p)
 		fprintf(stdout, " %s = ", p->vartab.var_name[i]);
 		int save = q->quoted;
 		q->quoted = 1;
-		write_term(q, stdout, c, q->latest_ctx, -1);
+		print_canonical(q, stdout, c, q->latest_ctx, -1);
 		q->quoted = save;
 		any++;
 	}
@@ -3038,9 +3038,9 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 				continue;
 
 			if (canonical)
-				write_canonical(&q, fp, r->t.cells, ctx, 0);
+				print_canonical(&q, fp, r->t.cells, ctx, 0);
 			else
-				write_term(&q, fp, r->t.cells, ctx, 0);
+				print_canonical(&q, fp, r->t.cells, ctx, 0);
 
 			fprintf(fp, "\n");
 		}
