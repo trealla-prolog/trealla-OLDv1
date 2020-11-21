@@ -671,6 +671,7 @@ void print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 
 void print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 {
+	do_numbervars(q, c, c_ctx, 0);
 	q->nv_start = -1;
 	memset(s_mask1, 0, MAX_ARITY);
 	memset(s_mask2, 0, MAX_ARITY);
