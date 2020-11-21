@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# may need OS specific config
+SIGABRT=134
+SIGSEGV=139
+TIMEOUT=152
+
 keep_going=
 direction=1
 valgrind=
@@ -7,7 +12,7 @@ show=
 quiet=
 filter=
 cont=
-timeout=60
+timeoutctl=auto
 input=
 
 export TPL="${TPL:-./tpl}"
@@ -38,20 +43,24 @@ do
         show=
         shift
         ;;
-    -t|--timeout) #<timeout> Set a timeout (in seconds) for the tests
-        timeout="$(( 0 + $2 ))"
+    -t|--timeout) #<timeout> Set a timeout (in seconds or the word 'auto') for the tests
+        if test "$2" = "auto"; then
+            timeoutctl="auto"
+        else
+            timeoutctl="$(( 0 + $2 ))"
+        fi
         shift 2
         ;;
     -f|--filter) #<filter> Filter only the given failures (segv, abort, timeout), can appear multiple times
         case "$2" in
-        *ABRT|*abrt|*abort|134)
-            filter="134,$filter"
+        *ABRT|*abrt|*abort|$SIGABRT)
+            filter="$SIGABRT,$filter"
             ;;
-        *SEGV|*segv|139)
-            filter="139,$filter"
+        *SEGV|*segv|$SIGSEGV)
+            filter="$SIGSEGV,$filter"
             ;;
-        *TIMEOUT|*timeout|152)
-            filter="152,$filter"
+        *TIMEOUT|*timeout|$TIMEOUT)
+            filter="$TIMEOUT,$filter"
             ;;
         *)
             echo "Illegal filter expression: $2" 1>&2
@@ -125,21 +134,26 @@ esac | while read test; do
 
     test=$(eval echo "$test")
     PROGRAM="${test%% *}"
-    echo "Testing: $test"
 
     if test "$cont" -a -f faultinject_state
     then
         . ./faultinject_state
+        if test "$pending_test" != "$test"; then
+            continue
+        else
+            cont=
+        fi
     else
+        echo "Testing: $test"
+        starttime=$(awk 'BEGIN {srand(); print srand()}') # tricky, portable hack
         (
-            ulimit -S -t $timeout
             FAULTSTART='' $test 2>faultinject.stderr >/dev/null
         )
         EXIT_CODE="$?"
         if test $EXIT_CODE -gt 127
         then
             echo "initial run did not complete"
-            exit 1
+            continue
         fi
 
         FAULTEND=$(awk '/CDEBUG FAULT INJECTION MAX/{print $5}' faultinject.stderr)
@@ -147,7 +161,14 @@ esac | while read test; do
         if test -z "$FAULTEND"
         then
             echo "couldn't find the maximum number of fault injections"
-            exit 1
+            continue
+        fi
+
+        if test "$timeoutctl" = "auto"; then
+            timeout=$(( $(awk 'BEGIN {srand(); print srand()}') - starttime + 2 ))
+            echo "Set auto timeout to: $timeout"
+        else
+            timeout=$timeoutctl
         fi
 
         if test "$direction" = 1
@@ -166,6 +187,7 @@ esac | while read test; do
 FAULTSTART=$FAULTSTART
 FAULTEND=$FAULTEND
 direction=$direction
+pending_test="$test"
 EOF
         echo "Faultinject $FAULTSTART"
         echo "        $test"
@@ -181,13 +203,13 @@ EOF
             if test ! "$filter" || expr "$filter" : ".*$EXIT_CODE,.*"; then
                 FAULTS=$((FAULTS + 1))
                 case $EXIT_CODE in
-                134)
+                $SIGABRT)
                     echo "                crashed with SIGABRT"
                     ;;
-                152)
+                $TIMEOUT)
                     echo "                crashed with TIMEOUT"
                     ;;
-                139)
+                $SIGSEGV)
                     echo "                crashed with SIGSEGV"
                     ;;
                 *)
