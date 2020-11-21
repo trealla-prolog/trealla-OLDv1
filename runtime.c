@@ -169,11 +169,19 @@ static void trace_call(query *q, cell *c, box_t box)
 		return;
 
 	fprintf(stderr, " [%llu] ", (unsigned long long)q->step++);
-	fprintf(stderr, "%s ", box==CALL?"CALL":box==EXIT?"EXIT":box==REDO?"REDO":box==NEXT?isatty(2)?"\e[32mNEXT\e[0m":"NEXT":isatty(2)?"\e[31mFAIL\e[0m":"FAIL");
+	fprintf(stderr, "%s ",
+		box == CALL ? "CALL" :
+		box == EXIT ? "EXIT" :
+		box == REDO ? "REDO" :
+		box == NEXT ? (isatty(2)?"\e[32mNEXT\e[0m" : "NEXT") :
+		box == FAIL ? (isatty(2) ? "\e[31mFAIL\e[0m" : "FAIL") :
+		"????");
 
 #if DEBUG
 	frame *g = GET_FRAME(q->st.curr_frame);
-	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u:tp%u:cp%u:fp%u:sp%u:hp%u} ", q->st.curr_frame, g->nbr_vars, g->nbr_slots, g->any_choices, q->st.tp, q->cp, q->st.fp, q->st.sp, q->st.hp);
+	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u:tp%u:cp%u:fp%u:sp%u:hp%u} ",
+		q->st.curr_frame, g->nbr_vars, g->nbr_slots, g->any_choices,
+		q->st.tp, q->cp, q->st.fp, q->st.sp, q->st.hp);
 #endif
 
 	int save_depth = q->max_depth;
@@ -350,6 +358,8 @@ bool retry_choice(query *q)
 	idx_t curr_choice = drop_choice(q);
 	const choice *ch = q->choices + curr_choice;
 	unwind_trail(q, ch);
+
+	Trace(q, q->st.curr_cell, FAIL);
 
 	if (ch->catchme2)
 		return retry_choice(q);
@@ -1103,8 +1113,9 @@ void run_query(query *q)
 		}
 
 		if (q->retry) {
-			if (!retry_choice(q))
+			if (!retry_choice(q)) {
 				break;
+			}
 		}
 
 		if (is_variable(q->st.curr_cell)) {
@@ -1128,7 +1139,6 @@ void run_query(query *q)
 				if (!match_rule(q)) {
 					q->retry = 1;
 					q->tot_retries++;
-					Trace(q, q->st.curr_cell, FAIL);
 					continue;
 				}
 			}
@@ -1146,7 +1156,6 @@ void run_query(query *q)
 					break;
 
 				q->tot_retries++;
-				Trace(q, q->st.curr_cell, FAIL);
 				continue;
 			}
 
