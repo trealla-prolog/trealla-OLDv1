@@ -287,7 +287,7 @@ int main(int ac, char *av[])
 		fprintf(stdout, "  -w, --watchdog\t- create watchdog\n");
 		fprintf(stdout, "  --consult\t\t- consult from STDIN\n");
 		fprintf(stdout, "  --stats\t\t- print stats\n");
-		fprintf(stdout, "  --noindex\t\t- don't use tern indexing\n");
+		fprintf(stdout, "  --noindex\t\t- don't use term indexing\n");
 		fprintf(stdout, "  --ns\t\t\t- non-stop (to top-level)\n");
 	}
 
