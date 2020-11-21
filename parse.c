@@ -3150,7 +3150,7 @@ module *create_module(const char *name)
 
 		make_rule(m, "call(G) :- G.");
 		make_rule(m, "format(F) :- format(F, []).");
-		make_rule(m, "unify_with_occurs_check(X,X) :- acyclic_term(X).");
+		make_rule(m, "unify_with_occurs_check(X, X) :- acyclic_term(X).");
 
 		make_rule(m, "subsumes_term(G,S) :- "			\
 			"\\+ \\+ ( "					\
