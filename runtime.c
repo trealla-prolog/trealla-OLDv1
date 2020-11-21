@@ -826,7 +826,7 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 	if (is_list(p1) && is_list(p2))
 		return unify_list(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 
-	if (p1->arity)
+	if (p1->arity || p2->arity)
 		return unify_structure(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 
 	return g_disp[p1->val_type].fn(p1, p2);
