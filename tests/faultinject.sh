@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# may need OS specific config
+SIGABRT=134
+SIGSEGV=139
+TIMEOUT=152
+
 keep_going=
 direction=1
 valgrind=
@@ -7,14 +12,19 @@ show=
 quiet=
 filter=
 cont=
-timeout=60
+timeoutctl=auto
 input=
+backtraceinject=
 
 export TPL="${TPL:-./tpl}"
 
 while test "$1" != "${1#-}"
 do
     case "$1" in
+    -b|--backtrace-inject) # get a backtrace of the injection by aborting there
+        backtraceinject=true
+        shift
+        ;;
     -k|--keep-going) # Do not stop at first crash
         keep_going=true
         cont=
@@ -38,20 +48,24 @@ do
         show=
         shift
         ;;
-    -t|--timeout) #<timeout> Set a timeout (in seconds) for the tests
-        timeout="$(( 0 + $2 ))"
+    -t|--timeout) #<timeout> Set a timeout (in seconds or the word 'auto') for the tests
+        if test "$2" = "auto"; then
+            timeoutctl="auto"
+        else
+            timeoutctl="$(( 0 + $2 ))"
+        fi
         shift 2
         ;;
     -f|--filter) #<filter> Filter only the given failures (segv, abort, timeout), can appear multiple times
         case "$2" in
-        *ABRT|*abrt|*abort|134)
-            filter="134,$filter"
+        *ABRT|*abrt|*abort|$SIGABRT)
+            filter="$SIGABRT,$filter"
             ;;
-        *SEGV|*segv|139)
-            filter="139,$filter"
+        *SEGV|*segv|$SIGSEGV)
+            filter="$SIGSEGV,$filter"
             ;;
-        *TIMEOUT|*timeout|152)
-            filter="152,$filter"
+        *TIMEOUT|*timeout|$TIMEOUT)
+            filter="$TIMEOUT,$filter"
             ;;
         *)
             echo "Illegal filter expression: $2" 1>&2
@@ -125,21 +139,26 @@ esac | while read test; do
 
     test=$(eval echo "$test")
     PROGRAM="${test%% *}"
-    echo "Testing: $test"
 
     if test "$cont" -a -f faultinject_state
     then
         . ./faultinject_state
+        if test "$pending_test" != "$test"; then
+            continue
+        else
+            cont=
+        fi
     else
+        echo "Testing: $test"
+        starttime=$(awk 'BEGIN {srand(); print srand()}') # tricky, portable hack
         (
-            ulimit -S -t $timeout
             FAULTSTART='' $test 2>faultinject.stderr >/dev/null
         )
         EXIT_CODE="$?"
         if test $EXIT_CODE -gt 127
         then
             echo "initial run did not complete"
-            exit 1
+            continue
         fi
 
         FAULTEND=$(awk '/CDEBUG FAULT INJECTION MAX/{print $5}' faultinject.stderr)
@@ -147,7 +166,14 @@ esac | while read test; do
         if test -z "$FAULTEND"
         then
             echo "couldn't find the maximum number of fault injections"
-            exit 1
+            continue
+        fi
+
+        if test "$timeoutctl" = "auto"; then
+            timeout=$(( $(awk 'BEGIN {srand(); print srand()}') - starttime + 2 ))
+            echo "Set auto timeout to: $timeout"
+        else
+            timeout=$timeoutctl
         fi
 
         if test "$direction" = 1
@@ -166,6 +192,7 @@ esac | while read test; do
 FAULTSTART=$FAULTSTART
 FAULTEND=$FAULTEND
 direction=$direction
+pending_test="$test"
 EOF
         echo "Faultinject $FAULTSTART"
         echo "        $test"
@@ -181,19 +208,20 @@ EOF
             if test ! "$filter" || expr "$filter" : ".*$EXIT_CODE,.*"; then
                 FAULTS=$((FAULTS + 1))
                 case $EXIT_CODE in
-                134)
+                $SIGABRT)
                     echo "                crashed with SIGABRT"
                     ;;
-                152)
+                $TIMEOUT)
                     echo "                crashed with TIMEOUT"
                     ;;
-                139)
+                $SIGSEGV)
                     echo "                crashed with SIGSEGV"
                     ;;
                 *)
                     echo "                crashed with exit-code $EXIT_CODE"
                     ;;
                 esac | tee -a faultinject${ITERATION}_${FAULTSTART}.stderr
+
                 if test -z "$quiet" ; then
                     tail -1 faultinject${ITERATION}_${FAULTSTART}.stderr >faultinject${ITERATION}_${FAULTSTART}.bt
                     gdb -batch -ex 'bt full' "$PROGRAM" core >>faultinject${ITERATION}_${FAULTSTART}.bt
@@ -205,8 +233,21 @@ EOF
                     vglog=faultinject${ITERATION}_${FAULTSTART}.vg
                     valgrind --log-file=$vglog $test
                 fi
+
+                inject_bt=
+                if test -z "$quiet" -a "$backtraceinject" ; then
+                    (
+                        ulimit -S -c unlimited
+                        ulimit -S -t $timeout
+                        FAULTABORT=true $test 2>faultinject.inject_stderr >/dev/null
+                    )
+                    inject_bt=faultinject${ITERATION}_${FAULTSTART}.inject_bt
+                    tail -1 faultinject.inject_stderr >$inject_bt
+                    gdb -batch -ex 'bt' "$PROGRAM" core >>$inject_bt
+                fi
+
                 if test "$show"; then
-                    less faultinject${ITERATION}_${FAULTSTART}.bt $vglog faultinject${ITERATION}_${FAULTSTART}.stderr faultinject${ITERATION}_${FAULTSTART}.stdout
+                    less $inject_bt faultinject${ITERATION}_${FAULTSTART}.bt $vglog faultinject${ITERATION}_${FAULTSTART}.stderr faultinject${ITERATION}_${FAULTSTART}.stdout
                 fi
                 if test -z "$keep_going"; then
                     exit 1
@@ -216,7 +257,7 @@ EOF
             echo "                OK with exit-code $EXIT_CODE"
         fi
 
-        rm -f faultinject.stderr faultinject.stdout
+        rm -f faultinject.inject_stderr faultinject.stderr faultinject.stdout
         FAULTSTART=$((FAULTSTART + direction))
     done
 

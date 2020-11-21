@@ -148,9 +148,10 @@ int main(int ac, char *av[])
 		homedir = ".";
 
 #ifdef FAULTINJECT_ENABLED
-	FAULTINJECT_VAR = strtoul(getenv("FAULTSTART")?getenv("FAULTSTART"):"0", NULL, 0);
+	FAULTINJECT_NAME.counter = strtoul(getenv("FAULTSTART")?getenv("FAULTSTART"):"0", NULL, 0);
+	FAULTINJECT_NAME.abort = getenv("FAULTABORT")?true:false;
 	static bool faultinject_is_off;
-	faultinject_is_off = !FAULTINJECT_VAR;
+	faultinject_is_off = !FAULTINJECT_NAME.counter;
 #endif
 
 	char histfile[1024];
@@ -252,7 +253,7 @@ int main(int ac, char *av[])
 			pl_destroy(pl);
 #ifdef FAULTINJECT_ENABLED
 			if (faultinject_is_off)
-				fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_VAR);
+				fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_NAME.counter);
 #endif
 			return 1;
 		}
@@ -261,7 +262,7 @@ int main(int ac, char *av[])
 			pl_destroy(pl);
 #ifdef FAULTINJECT_ENABLED
 			if (faultinject_is_off)
-				fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_VAR);
+				fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_NAME.counter);
 #endif
 			return 1;
 		}
@@ -326,7 +327,7 @@ int main(int ac, char *av[])
 
 #ifdef FAULTINJECT_ENABLED
 	if (faultinject_is_off)
-		fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_VAR);
+		fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_NAME.counter);
 #endif
 
 	return halt_code;

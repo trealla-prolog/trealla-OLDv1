@@ -21,7 +21,7 @@
 int g_tpl_interrupt = 0;
 
 #ifdef FAULTINJECT_ENABLED
-uint64_t FAULTINJECT_VAR;
+faultinject_t FAULTINJECT_NAME;
 #endif
 
 typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
