@@ -1208,7 +1208,7 @@ static void directives(parser *p, term *t)
 			snprintf(dstbuf, sizeof(dstbuf), "%s/", g_tpl_lib);
 			char *dst = dstbuf + strlen(dstbuf);
 			idx_t ctx = 0;
-			write_term_to_buf(&q, dst, sizeof(dstbuf)-strlen(g_tpl_lib), p1, ctx, 1, 0, 0);
+			print_term_to_buf(&q, dst, sizeof(dstbuf)-strlen(g_tpl_lib), p1, ctx, 1, 0, 0);
 			name = dstbuf;
 		}
 
@@ -1754,7 +1754,7 @@ static void parser_dcg_rewrite(parser *p)
 
 	query *q = create_query(p->m, 0);
 	ensure(q);
-	char *dst = write_term_to_strbuf(q, p->t->cells, 0, -1);
+	char *dst = print_term_to_strbuf(q, p->t->cells, 0, -1);
 	char *src = malloc(strlen(dst)+256);
 	ensure(src);
 	sprintf(src, "dcg_translate((%s),_TermOut).", dst);
@@ -1791,7 +1791,7 @@ static void parser_dcg_rewrite(parser *p)
 		if (strcmp(p2->vartab.var_name[i], "_TermOut"))
 			continue;
 
-		src = write_term_to_strbuf(q, c, q->latest_ctx, -1);
+		src = print_term_to_strbuf(q, c, q->latest_ctx, -1);
 		strcat(src, ".");
 		break;
 	}

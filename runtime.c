@@ -958,7 +958,7 @@ static const char *dump_key(void *p, const void *p1)
 	query *q = (query*)p;
 	cell *c = (cell*)p1;
 	static char tmpbuf[1024];
-	write_term_to_buf(q, tmpbuf, sizeof(tmpbuf), c, q->st.curr_frame, 0, 0, 0);
+	print_term_to_buf(q, tmpbuf, sizeof(tmpbuf), c, q->st.curr_frame, 0, 0, 0);
 	return tmpbuf;
 }
 #endif
