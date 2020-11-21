@@ -14,12 +14,17 @@ filter=
 cont=
 timeoutctl=auto
 input=
+backtraceinject=
 
 export TPL="${TPL:-./tpl}"
 
 while test "$1" != "${1#-}"
 do
     case "$1" in
+    -b|--backtrace-inject) # get a backtrace of the injection by aborting there
+        backtraceinject=true
+        shift
+        ;;
     -k|--keep-going) # Do not stop at first crash
         keep_going=true
         cont=
@@ -216,6 +221,7 @@ EOF
                     echo "                crashed with exit-code $EXIT_CODE"
                     ;;
                 esac | tee -a faultinject${ITERATION}_${FAULTSTART}.stderr
+
                 if test -z "$quiet" ; then
                     tail -1 faultinject${ITERATION}_${FAULTSTART}.stderr >faultinject${ITERATION}_${FAULTSTART}.bt
                     gdb -batch -ex 'bt full' "$PROGRAM" core >>faultinject${ITERATION}_${FAULTSTART}.bt
@@ -227,8 +233,21 @@ EOF
                     vglog=faultinject${ITERATION}_${FAULTSTART}.vg
                     valgrind --log-file=$vglog $test
                 fi
+
+                inject_bt=
+                if test -z "$quiet" -a "$backtraceinject" ; then
+                    (
+                        ulimit -S -c unlimited
+                        ulimit -S -t $timeout
+                        FAULTABORT=true $test 2>faultinject.inject_stderr >/dev/null
+                    )
+                    inject_bt=faultinject${ITERATION}_${FAULTSTART}.inject_bt
+                    tail -1 faultinject.inject_stderr >$inject_bt
+                    gdb -batch -ex 'bt' "$PROGRAM" core >>$inject_bt
+                fi
+
                 if test "$show"; then
-                    less faultinject${ITERATION}_${FAULTSTART}.bt $vglog faultinject${ITERATION}_${FAULTSTART}.stderr faultinject${ITERATION}_${FAULTSTART}.stdout
+                    less $inject_bt faultinject${ITERATION}_${FAULTSTART}.bt $vglog faultinject${ITERATION}_${FAULTSTART}.stderr faultinject${ITERATION}_${FAULTSTART}.stdout
                 fi
                 if test -z "$keep_going"; then
                     exit 1
@@ -238,7 +257,7 @@ EOF
             echo "                OK with exit-code $EXIT_CODE"
         fi
 
-        rm -f faultinject.stderr faultinject.stdout
+        rm -f faultinject.inject_stderr faultinject.stderr faultinject.stdout
         FAULTSTART=$((FAULTSTART + direction))
     done
 
