@@ -186,7 +186,7 @@ static unsigned count_non_anons(uint8_t *mask, unsigned bit)
 
 size_t write_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
-	if (!depth)
+	if (!depth && !dstlen)
 		q->cycle_error = false;
 
 	char *save_dst = dst;
@@ -349,7 +349,7 @@ static char *varformat(unsigned nbr)
 
 size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth)
 {
-	if (!depth)
+	if (!depth && !dstlen)
 		q->cycle_error = false;
 
 	char *save_dst = dst;
@@ -710,6 +710,12 @@ void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 char *write_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 {
 	size_t len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 0);
+
+	if (q->cycle_error) {
+		running = 0;
+		len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 1);
+	}
+
 	char *buf = malloc(len+10);
 	ensure(buf);
 	len = write_term_to_buf(q, buf, len+1, c, c_ctx, running, 0, 0);
