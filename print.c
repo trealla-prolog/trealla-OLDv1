@@ -564,6 +564,9 @@ size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 
 				dst += print_term_to_buf(q, dst, dstlen, tmp, tmp_ctx, running, 0, depth+1);
 
+				if (q->cycle_error)
+					break;
+
 				if (parens)
 					dst += snprintf(dst, dstlen, "%s", ")");
 

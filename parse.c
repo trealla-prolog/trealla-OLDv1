@@ -1051,13 +1051,15 @@ static void dump_vars(query *q, parser *p)
 		fprintf(stdout, " %s = ", p->vartab.var_name[i]);
 		int save = q->quoted;
 		q->quoted = 1;
-		print_canonical(q, stdout, c, q->latest_ctx, -1);
+		print_term(q, stdout, c, q->latest_ctx, -1);
 		q->quoted = save;
 		any++;
 	}
 
-	if (any)
+	if (any) {
 		fprintf(stdout, ".\n");
+		fflush(stdout);
+	}
 
 	q->m->dump_vars = any;
 }

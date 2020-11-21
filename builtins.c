@@ -1843,6 +1843,7 @@ static int fn_iso_nl_0(__attribute__((unused)) query *q)
 	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
 	fputc('\n', str->fp);
+	fflush(str->fp);
 	return !ferror(str->fp);
 }
 
@@ -1852,6 +1853,7 @@ static int fn_iso_nl_1(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	fputc('\n', str->fp);
+	fflush(str->fp);
 	return !ferror(str->fp);
 }
 
@@ -6462,6 +6464,7 @@ static int fn_writeln_1(query *q)
 	stream *str = &g_streams[n];
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	fputc('\n', str->fp);
+	fflush(str->fp);
 	return !ferror(str->fp);
 }
 
