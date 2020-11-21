@@ -120,4 +120,4 @@ $TPL -g halt tests/issues/test094.pl
 $TPL -g halt tests/issues/test108.pl
 $TPL -g halt tests/issues/test116.pl
 $TPL -g halt samples/sudoku.pl
-$TPL -g bench_peirera,halt samples/broken/peirera.pl
+# this doesnt scale: $TPL -g bench_peirera,halt samples/broken/peirera.pl
