@@ -2254,7 +2254,7 @@ static int fn_iso_write_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
-	write_term_to_stream(q, str, p1, p1_ctx, 1, 0, 0);
+	write_term_to_stream(q, str, p1, p1_ctx, 1);
 	return !ferror(str->fp);
 }
 
@@ -2264,7 +2264,7 @@ static int fn_iso_write_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
-	write_term_to_stream(q, str, p1, p1_ctx, 1, 0, 0);
+	write_term_to_stream(q, str, p1, p1_ctx, 1);
 	return !ferror(str->fp);
 }
 
@@ -2275,7 +2275,7 @@ static int fn_iso_writeq_1(query *q)
 	stream *str = &g_streams[n];
 	int save = q->quoted;
 	q->quoted = 1;
-	write_term_to_stream(q, str, p1, p1_ctx, 1, 0, 1);
+	write_term_to_stream(q, str, p1, p1_ctx, 1);
 	q->quoted = save;
 	return !ferror(str->fp);
 }
@@ -2288,7 +2288,7 @@ static int fn_iso_writeq_2(query *q)
 	GET_NEXT_ARG(p1,any);
 	int save = q->quoted;
 	q->quoted = 1;
-	write_term_to_stream(q, str, p1, p1_ctx, 1, 0, 1);
+	write_term_to_stream(q, str, p1, p1_ctx, 1);
 	q->quoted = save;
 	return !ferror(str->fp);
 }
@@ -2358,7 +2358,7 @@ static int fn_iso_write_term_2(query *q)
 	if (q->ignore_ops)
 		write_canonical_to_stream(q, str, p1, p1_ctx, 1);
 	else
-		write_term_to_stream(q, str, p1, p1_ctx, 1, 0, q->quoted?1:0);
+		write_term_to_stream(q, str, p1, p1_ctx, 1);
 
 	if (q->fullstop)
 		net_write(".", 1, str);
@@ -2391,7 +2391,7 @@ static int fn_iso_write_term_3(query *q)
 	}
 
 	q->latest_ctx = p1_ctx;
-	write_term_to_stream(q, str, p1, p1_ctx, 1, 0, q->quoted?1:0);
+	write_term_to_stream(q, str, p1, p1_ctx, 1);
 
 	if (q->fullstop)
 		net_write(".", 1, str);
@@ -5246,7 +5246,7 @@ static int do_throw_term(query *q, cell *c)
 	}
 
 	fprintf(stdout, "Error: uncaught exception... ");
-	write_term(q, stdout, c, c_ctx, 1, 0);
+	write_term(q, stdout, c, c_ctx, 1);
 	fprintf(stdout, "\n");
 	q->m->dump_vars = 1;
 	q->exception = NULL;
@@ -6225,7 +6225,7 @@ static void save_db(FILE *fp, query *q, int logging)
 			if (logging)
 				fprintf(fp, "z_(");
 
-			write_term(q, fp, r->t.cells, q->st.curr_frame, 0, 0);
+			write_term(q, fp, r->t.cells, q->st.curr_frame, 0);
 
 			if (logging) {
 				char tmpbuf[256];
@@ -6264,7 +6264,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 			if (r->t.is_deleted)
 				continue;
 
-			write_term(q, fp, r->t.cells, q->st.curr_frame, 0, 0);
+			write_term(q, fp, r->t.cells, q->st.curr_frame, 0);
 			fprintf(fp, ".\n");
 		}
 	}
@@ -6459,7 +6459,7 @@ static int fn_writeln_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
-	write_term_to_stream(q, str, p1, p1_ctx, 1, 0, 0);
+	write_term_to_stream(q, str, p1, p1_ctx, 1);
 	fputc('\n', str->fp);
 	return !ferror(str->fp);
 }

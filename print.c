@@ -716,18 +716,18 @@ char *write_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 	return buf;
 }
 
-void write_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, int cons, unsigned depth)
+void write_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running)
 {
-	size_t len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, cons, depth);
+	size_t len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 0);
 
 	if (q->cycle_error) {
 		running = 0;
-		len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, cons, depth+1);
+		len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 1);
 	}
 
 	char *dst = malloc(len+1);
 	ensure(dst);
-	len = write_term_to_buf(q, dst, len+1, c, c_ctx, running, cons, depth);
+	len = write_term_to_buf(q, dst, len+1, c, c_ctx, running, 0, 0);
 	const char *src = dst;
 
 	while (len) {
@@ -745,18 +745,18 @@ void write_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int runni
 	free(dst);
 }
 
-void write_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int cons)
+void write_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 {
-	size_t len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, cons, 0);
+	size_t len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 0);
 
 	if (q->cycle_error) {
 		running = 0;
-		len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, cons, 1);
+		len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 1);
 	}
 
 	char *dst = malloc(len+1);
 	ensure(dst);
-	len = write_term_to_buf(q, dst, len+1, c, c_ctx, running, cons, 0);
+	len = write_term_to_buf(q, dst, len+1, c, c_ctx, running, 0, 0);
 	const char *src = dst;
 
 	while (len) {
