@@ -5505,6 +5505,7 @@ static int fn_iso_current_op_3(query *q)
 static int fn_iso_acyclic_term_1(query *q)
 {
 	GET_FIRST_ARG(p_term,any);
+	q->cycle_error = false;
 	print_term_to_buf(q, NULL, 0, p_term, p_term_ctx, 1, 0, 0);
 	return !q->cycle_error;
 }
