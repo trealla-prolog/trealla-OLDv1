@@ -786,9 +786,12 @@ static const struct dispatch g_disp[] =
 
 bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
 {
-	if (depth == MAX_DEPTH) {
+	if (!depth)
+		q->cycle_error = false;
+
+	if (depth >= MAX_DEPTH) {
 		q->cycle_error = true;
-		return true;
+		return false;
 	}
 
 	if (is_variable(p1) && is_variable(p2)) {
