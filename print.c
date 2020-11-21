@@ -630,37 +630,26 @@ size_t write_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 	return dst - save_dst;
 }
 
-char *write_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
+void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running)
 {
-	size_t len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 0);
-	char *buf = malloc(len+10);
-	ensure(buf);
-	write_term_to_buf(q, buf, len+1, c, c_ctx, running, 0, 0);
-	return buf;
-}
+	do_numbervars(q, c, c_ctx, 0);
+	q->nv_start = -1;
+	memset(s_mask1, 0, MAX_ARITY);
+	memset(s_mask2, 0, MAX_ARITY);
 
-void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, unsigned depth)
-{
-	if (!depth) {
-		do_numbervars(q, c, c_ctx, 0);
-		q->nv_start = -1;
-		memset(s_mask1, 0, MAX_ARITY);
-		memset(s_mask2, 0, MAX_ARITY);
-	}
-
-	size_t len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, depth);
+	size_t len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 0);
 
 	if (q->cycle_error) {
 		running = 0;
-		len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, depth+1);
+		len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 1);
 	}
 
 	char *dst = malloc(len*2+1);
 	ensure(dst);
-	len = write_canonical_to_buf(q, dst, len+1, c, c_ctx, running, depth);
+	len = write_canonical_to_buf(q, dst, len+1, c, c_ctx, running, 0);
 	const char *src = dst;
 
-	if ((q->nv_start == -1) && !depth) {
+	if (q->nv_start == -1) {
 		memset(q->nv_mask, 0, MAX_ARITY);
 		q->nv_start = 0;
 	}
@@ -680,28 +669,25 @@ void write_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 	free(dst);
 }
 
-void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, unsigned depth)
+void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 {
-	if (!depth) {
-		do_numbervars(q, c, c_ctx, 0);
-		q->nv_start = -1;
-		memset(s_mask1, 0, MAX_ARITY);
-		memset(s_mask2, 0, MAX_ARITY);
-	}
+	q->nv_start = -1;
+	memset(s_mask1, 0, MAX_ARITY);
+	memset(s_mask2, 0, MAX_ARITY);
 
-	size_t len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, depth);
+	size_t len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 0);
 
 	if (q->cycle_error) {
 		running = 0;
-		len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, depth+1);
+		len = write_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 1);
 	}
 
 	char *dst = malloc(len*2+1);
 	ensure(dst);
-	len = write_canonical_to_buf(q, dst, len+1, c, c_ctx, running, depth);
+	len = write_canonical_to_buf(q, dst, len+1, c, c_ctx, running, 0);
 	const char *src = dst;
 
-	if ((q->nv_start == -1) && !depth) {
+	if (q->nv_start == -1) {
 		memset(q->nv_mask, 0, MAX_ARITY);
 		q->nv_start = 0;
 	}
@@ -719,6 +705,15 @@ void write_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, unsi
 	}
 
 	free(dst);
+}
+
+char *write_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
+{
+	size_t len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 0);
+	char *buf = malloc(len+10);
+	ensure(buf);
+	len = write_term_to_buf(q, buf, len+1, c, c_ctx, running, 0, 0);
+	return buf;
 }
 
 void write_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running, int cons, unsigned depth)
@@ -750,18 +745,18 @@ void write_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int runni
 	free(dst);
 }
 
-void write_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int cons, unsigned depth)
+void write_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running, int cons)
 {
-	size_t len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, cons, depth);
+	size_t len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, cons, 0);
 
 	if (q->cycle_error) {
 		running = 0;
-		len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, cons, depth+1);
+		len = write_term_to_buf(q, NULL, 0, c, c_ctx, running, cons, 1);
 	}
 
 	char *dst = malloc(len+1);
 	ensure(dst);
-	len = write_term_to_buf(q, dst, len+1, c, c_ctx, running, cons, depth);
+	len = write_term_to_buf(q, dst, len+1, c, c_ctx, running, cons, 0);
 	const char *src = dst;
 
 	while (len) {

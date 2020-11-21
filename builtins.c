@@ -2298,7 +2298,7 @@ static int fn_iso_write_canonical_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
-	write_canonical(q, str->fp, p1, p1_ctx, 1, 0);
+	write_canonical(q, str->fp, p1, p1_ctx, 1);
 	return !ferror(str->fp);
 }
 
@@ -2308,7 +2308,7 @@ static int fn_iso_write_canonical_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
-	write_canonical(q, str->fp, p1, p1_ctx, 1, 0);
+	write_canonical(q, str->fp, p1, p1_ctx, 1);
 	return !ferror(str->fp);
 }
 
@@ -2356,7 +2356,7 @@ static int fn_iso_write_term_2(query *q)
 	q->latest_ctx = p1_ctx;
 
 	if (q->ignore_ops)
-		write_canonical_to_stream(q, str, p1, p1_ctx, 1, 0);
+		write_canonical_to_stream(q, str, p1, p1_ctx, 1);
 	else
 		write_term_to_stream(q, str, p1, p1_ctx, 1, 0, q->quoted?1:0);
 
@@ -5246,7 +5246,7 @@ static int do_throw_term(query *q, cell *c)
 	}
 
 	fprintf(stdout, "Error: uncaught exception... ");
-	write_term(q, stdout, c, c_ctx, 1, 0, 0);
+	write_term(q, stdout, c, c_ctx, 1, 0);
 	fprintf(stdout, "\n");
 	q->m->dump_vars = 1;
 	q->exception = NULL;
@@ -6225,7 +6225,7 @@ static void save_db(FILE *fp, query *q, int logging)
 			if (logging)
 				fprintf(fp, "z_(");
 
-			write_term(q, fp, r->t.cells, q->st.curr_frame, 0, 0, 0);
+			write_term(q, fp, r->t.cells, q->st.curr_frame, 0, 0);
 
 			if (logging) {
 				char tmpbuf[256];
@@ -6264,7 +6264,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 			if (r->t.is_deleted)
 				continue;
 
-			write_term(q, fp, r->t.cells, q->st.curr_frame, 0, 0, 0);
+			write_term(q, fp, r->t.cells, q->st.curr_frame, 0, 0);
 			fprintf(fp, ".\n");
 		}
 	}
