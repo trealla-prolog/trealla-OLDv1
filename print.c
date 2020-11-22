@@ -152,11 +152,10 @@ static size_t plain(char *dst, size_t dstlen, const char *src, size_t srclen)
 
 static int find_binding(query *q, idx_t var_nbr, idx_t var_ctx)
 {
-	frame *g = GET_FRAME(q->st.curr_frame);
+	const frame *g = GET_FRAME(q->st.curr_frame);
+	const slot *e = GET_SLOT(g, 0);
 
-	for (unsigned i = 0; i < g->nbr_vars; i++) {
-		slot *e = GET_SLOT(g, i);
-
+	for (unsigned i = 0; i < g->nbr_vars; i++, e++) {
 		if (!is_variable(&e->c))
 			continue;
 
@@ -172,7 +171,7 @@ static int find_binding(query *q, idx_t var_nbr, idx_t var_ctx)
 
 static uint8_t s_mask1[MAX_ARITY] = {0}, s_mask2[MAX_ARITY] = {0};
 
-static unsigned count_non_anons(uint8_t *mask, unsigned bit)
+static unsigned count_non_anons(const uint8_t *mask, unsigned bit)
 {
 	unsigned bits = 0;
 
@@ -242,12 +241,17 @@ size_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 
 	int var_nbr = 0;
 
-	if (is_variable(c) && (running>0) && (q->nv_start >= 0) && ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)) {
+	if (is_variable(c)
+		&& (running>0) && (q->nv_start >= 0)
+		&& ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)) {
 		dst += snprintf(dst, dstlen, "'$VAR'(%u)", q->nv_start + count_bits(q->nv_mask, var_nbr));
 		return dst - save_dst;
 	}
 
-	if (is_variable(c) && (running>0) && (q->nv_start == -1) && ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)) {
+	if (is_variable(c)
+		&& (running>0) && (q->nv_start == -1)
+		&& ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)) {
+
 		for (unsigned i = 0; i < MAX_ARITY; i++) {
 			if (q->nv_mask[i])
 				break;

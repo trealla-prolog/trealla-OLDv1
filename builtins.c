@@ -9440,7 +9440,7 @@ static int fn_numbervars_3(query *q)
 	return unify(q, p3, p3_ctx, &tmp2, q->st.curr_frame);
 }
 
-unsigned count_bits(uint8_t *mask, unsigned bit)
+unsigned count_bits(const uint8_t *mask, unsigned bit)
 {
 	unsigned bits = 0;
 

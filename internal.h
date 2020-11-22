@@ -540,7 +540,7 @@ bool match_clause(query *q, cell *p1, idx_t p1_ctx);
 idx_t index_from_pool(const char *name);
 void do_reduce(cell *n);
 unsigned create_vars(query *q, unsigned nbr);
-unsigned count_bits(uint8_t *mask, unsigned bit);
+unsigned count_bits(const uint8_t *mask, unsigned bit);
 void try_me(const query *q, unsigned vars);
 void throw_error(query *q, cell *c, const char *err_type, const char *expected);
 uint64_t get_time_in_usec(void);
