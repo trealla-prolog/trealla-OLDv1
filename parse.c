@@ -1096,7 +1096,7 @@ static void directives(parser *p, term *t)
 
 	const char *dirname = GET_STR(c);
 
-	if (!strcmp(dirname, "initialization") && (c->arity == 1)) {
+	if (!strcmp(dirname, "initialization") && (c->arity <= 2)) {
 		p->run_init = true;
 		return;
 	}
@@ -1603,9 +1603,6 @@ void parser_assign_vars(parser *p, unsigned start, bool rebase)
 	c->nbr_cells = 1;
 
 	check_first_cut(p);
-
-	if (p->consulting)
-		directives(p, p->t);
 }
 
 static bool attach_ops(parser *p, idx_t start_idx)
@@ -2569,6 +2566,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 
 				if (p->consulting && !p->skip) {
 					parser_dcg_rewrite(p);
+					directives(p, p->t);
 
 					if (!p->error && !assertz_to_db(p->m, p->t, 1)) {
 						printf("Error: '%s', line nbr %u\n", p->token, p->line_nbr);
@@ -2954,7 +2952,7 @@ bool module_load_fp(module *m, FILE *fp)
 			p->m->quiet = true;
 			p->directive = true;
 
-			if (p->run_init == 1) {
+			if (p->run_init == true) {
 				p->command = true;
 
 				if (parser_run(p, "initialization(G), G, retract(initialization(_))", 0))
