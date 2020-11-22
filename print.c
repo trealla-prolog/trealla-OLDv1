@@ -170,7 +170,7 @@ static int find_binding(query *q, idx_t var_nbr, idx_t var_ctx)
 	return -1;
 }
 
-uint8_t s_mask1[MAX_ARITY] = {0}, s_mask2[MAX_ARITY] = {0};
+static uint8_t s_mask1[MAX_ARITY] = {0}, s_mask2[MAX_ARITY] = {0};
 
 static unsigned count_non_anons(uint8_t *mask, unsigned bit)
 {
