@@ -7752,47 +7752,6 @@ static int fn_rand_1(query *q)
 	return 1;
 }
 
-static int do_consult(query *q, cell *p1, idx_t p1_ctx)
-{
-	if (is_atom(p1)) {
-		const char *src = GET_STR(p1);
-		deconsult(src);
-
-		if (!module_load_file(q->m, src)) {
-			throw_error(q, p1, "existence_error", "filespec");
-			return 0;
-		}
-
-		return 1;
-	}
-
-	if (strcmp(GET_STR(p1), ":")) {
-		throw_error(q, p1, "type_error", "filespec");
-		return 0;
-	}
-
-	cell *mod = deref(q, p1+1, p1_ctx);
-	cell *file = deref(q, p1+2, p1_ctx);
-
-	if (!is_atom(mod) || !is_atom(file)) {
-		throw_error(q, p1, "type_error", "filespec");
-		return 0;
-	}
-
-	module *tmp_m = create_module(GET_STR(mod));
-	const char *src = GET_STR(file);
-	deconsult(src);
-	tmp_m->make_public = 1;
-
-	if (!module_load_file(tmp_m, src)) {
-		throw_error(q, p1, "existence_error", "filespec");
-		destroy_module(tmp_m);
-		return 0;
-	}
-
-	return 1;
-}
-
 static int fn_absolute_file_name_3(query *q)
 {
 	GET_FIRST_ARG(p_abs,atom);
@@ -7882,6 +7841,47 @@ static int fn_absolute_file_name_3(query *q)
 	free(tmpbuf);
 	free(src);
 	set_var(q, p_rel, p_rel_ctx, &tmp, q->st.curr_frame);
+	return 1;
+}
+
+static int do_consult(query *q, cell *p1, idx_t p1_ctx)
+{
+	if (is_atom(p1)) {
+		const char *src = GET_STR(p1);
+		deconsult(src);
+
+		if (!module_load_file(q->m, src)) {
+			throw_error(q, p1, "existence_error", "filespec");
+			return 0;
+		}
+
+		return 1;
+	}
+
+	if (strcmp(GET_STR(p1), ":")) {
+		throw_error(q, p1, "type_error", "filespec");
+		return 0;
+	}
+
+	cell *mod = deref(q, p1+1, p1_ctx);
+	cell *file = deref(q, p1+2, p1_ctx);
+
+	if (!is_atom(mod) || !is_atom(file)) {
+		throw_error(q, p1, "type_error", "filespec");
+		return 0;
+	}
+
+	module *tmp_m = create_module(GET_STR(mod));
+	const char *src = GET_STR(file);
+	deconsult(src);
+	tmp_m->make_public = 1;
+
+	if (!module_load_file(tmp_m, src)) {
+		throw_error(q, p1, "existence_error", "filespec");
+		destroy_module(tmp_m);
+		return 0;
+	}
+
 	return 1;
 }
 
