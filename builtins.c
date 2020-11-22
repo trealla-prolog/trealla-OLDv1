@@ -8698,7 +8698,7 @@ static int fn_make_directory_1(query *q)
 
 	struct stat st = {0};
 
-	if (stat(filename, &st)) {
+	if (!stat(filename, &st)) {
 		free(src);
 		return 0;
 	}
