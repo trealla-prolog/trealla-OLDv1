@@ -87,6 +87,8 @@ For example:
 
 Invocation without any goal presents the REPL.
 
+The default path to the library is relative to the executable location.
+
 
 What's missing, problems?
 =========================
