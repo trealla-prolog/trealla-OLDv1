@@ -1262,36 +1262,16 @@ static void directives(parser *p, term *t)
 			name = dstbuf;
 		}
 
-		module_load_file(p->m, name);
-		return;
-	}
-
-	if (!strcmp(dirname, "ensure_loaded") && (c->arity == 1)) {
-		cell *p1 = c + 1;
-		if (!is_atom(p1)) return;
-		const char *name = GET_STR(p1);
-		char tmpbuf[1024];
-
-		if (!strncmp(name, "../", 3)) {
-			strcpy(tmpbuf, p->m->filename);
-			char *ptr = tmpbuf + strlen(tmpbuf) - 1;
-
-			while ((ptr != tmpbuf) && (*ptr != '/'))
-				ptr--;
-
-			*ptr++ = '/';
-			*ptr = '\0';
-			strcat(ptr, name);
-		} else
-			strcpy(tmpbuf, name);
+		char *tmpbuf = relative_to(p->m->filename, name);
 
 		if (!module_load_file(p->m, tmpbuf)) {
 			fprintf(stdout, "Error: not found: %s\n", tmpbuf);
+			free(tmpbuf);
 			p->error = true;
 			return;
 		}
 
-		return;
+		free(tmpbuf);
 	}
 
 	if (!strcmp(dirname, "dynamic") && (c->arity >= 1)) {
