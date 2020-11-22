@@ -3033,38 +3033,38 @@ bool module_load_file(module *m, const char *filename)
 		}
 	}
 
-	char tmpbuf[1024];
-	strncpy(tmpbuf, filename, sizeof(tmpbuf)); tmpbuf[sizeof(tmpbuf)-1] = '\0';
+	char *tmpbuf = malloc(strlen(filename) + 20);
+	strcpy(tmpbuf, filename);
+	char *realbuf = NULL;
 
-	FILE *fp = fopen(tmpbuf, "r");
-
-	if (!fp) {
-		strncpy(tmpbuf, filename, sizeof(tmpbuf)); tmpbuf[sizeof(tmpbuf)-1] = '\0';
+	if (!(realbuf = realpath(tmpbuf, NULL))) {
+		strcpy(tmpbuf, filename);
 		strcat(tmpbuf, ".pro");
-		fp = fopen(tmpbuf, "r");
 	}
 
-	if (!fp) {
-		strncpy(tmpbuf, filename, sizeof(tmpbuf)); tmpbuf[sizeof(tmpbuf)-1] = '\0';
+	if (!(realbuf = realpath(tmpbuf, NULL))) {
+		strcpy(tmpbuf, filename);
 		strcat(tmpbuf, ".pl");
-		fp = fopen(tmpbuf, "r");
 	}
 
-	if (!fp) {
-		strncpy(tmpbuf, filename, sizeof(tmpbuf)); tmpbuf[sizeof(tmpbuf)-1] = '\0';
+	if (!(realbuf = realpath(tmpbuf, NULL))) {
+		strcpy(tmpbuf, filename);
 		strcat(tmpbuf, ".P");
-		fp = fopen(tmpbuf, "r");
 	}
 
+	free(tmpbuf);
+	FILE *fp = fopen(realbuf, "r");
+
 	if (!fp) {
-		strncpy(tmpbuf, filename, sizeof(tmpbuf)); tmpbuf[sizeof(tmpbuf)-1] = '\0';
-		return false;
+		free(realbuf);
+		return 0;
 	}
 
 	free(m->filename);
-	m->filename = ensure_strdup(filename);
+	m->filename = ensure_strdup(realbuf);
 	bool ok = module_load_fp(m, fp);
 	fclose(fp);
+	free(realbuf);
 	return ok;
 }
 
