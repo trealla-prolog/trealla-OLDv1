@@ -7759,6 +7759,8 @@ static int fn_absolute_file_name_3(query *q)
 	GET_NEXT_ARG(p_opts,list_or_nil);
 	int expand = 0;
 	char *src = NULL, *filename;
+	char *here = q->m->filename;
+	char *cwd = here;
 
 	if (is_iso_list(p_abs)) {
 		size_t len = scan_is_chars_list(q, p_abs, p_abs_ctx, 1);
@@ -7783,6 +7785,9 @@ static int fn_absolute_file_name_3(query *q)
 					if (!strcmp(GET_STR(h+1), "true"))
 						expand = 1;
 				}
+			} else if (!strcmp(GET_STR(h), "relative_to")) {
+				if (is_atom(h+1))
+					cwd = GET_STR(h+1);
 			}
 		}
 
@@ -7823,7 +7828,7 @@ static int fn_absolute_file_name_3(query *q)
 		char *tmpbuf2;
 
 		if ((tmpbuf2 = realpath(tmpbuf, NULL)) == NULL) {
-			tmpbuf = realpath("./", NULL);
+			tmpbuf = realpath(cwd, NULL);
 			char *tmp = malloc(strlen(tmpbuf)+1+strlen(s)+1);
 			sprintf(tmp, "%s/%s", tmpbuf, s);
 			free(tmpbuf);
@@ -7834,13 +7839,16 @@ static int fn_absolute_file_name_3(query *q)
 		tmpbuf = tmpbuf2;
 	} else {
 		if ((tmpbuf = realpath(s, NULL)) == NULL) {
-			tmpbuf = realpath("./", NULL);
+			tmpbuf = realpath(cwd, NULL);
 			char *tmp = malloc(strlen(tmpbuf)+1+strlen(s)+1);
 			sprintf(tmp, "%s/%s", tmpbuf, s);
 			free(tmpbuf);
 			tmpbuf = tmp;
 		}
 	}
+
+	if (cwd != here)
+		free(cwd);
 
 	cell tmp = make_string(tmpbuf, strlen(tmpbuf));
 	free(tmpbuf);

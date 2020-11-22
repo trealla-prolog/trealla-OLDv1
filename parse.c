@@ -3652,7 +3652,7 @@ prolog *pl_create()
 			pl->curr_m = pl->m;
 
 			//cehteh: add api to set things in a module?
-			pl->m->filename = strdup("~/.tpl_user");
+			pl->m->filename = strdup("./");
 			pl->m->prebuilt = true;
 
 			set_multifile_in_db(pl->m, "term_expansion", 2);
