@@ -7823,17 +7823,22 @@ static int fn_absolute_file_name_3(query *q)
 		char *tmpbuf2;
 
 		if ((tmpbuf2 = realpath(tmpbuf, NULL)) == NULL) {
-			throw_error(q, p_abs, "existence_error", "filespec");
+			tmpbuf = realpath("./", NULL);
+			char *tmp = malloc(strlen(tmpbuf)+1+strlen(s)+1);
+			sprintf(tmp, "%s/%s", tmpbuf, s);
 			free(tmpbuf);
-			return 0;
+			tmpbuf = tmp;
 		}
 
 		free(tmpbuf);
 		tmpbuf = tmpbuf2;
 	} else {
 		if ((tmpbuf = realpath(s, NULL)) == NULL) {
-			throw_error(q, p_abs, "existence_error", "filespec");
-			return 0;
+			tmpbuf = realpath("./", NULL);
+			char *tmp = malloc(strlen(tmpbuf)+1+strlen(s)+1);
+			sprintf(tmp, "%s/%s", tmpbuf, s);
+			free(tmpbuf);
+			tmpbuf = tmp;
 		}
 	}
 
