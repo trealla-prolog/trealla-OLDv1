@@ -1262,7 +1262,11 @@ static void directives(parser *p, term *t)
 			name = dstbuf;
 		}
 
+		//printf("*** rel='%s', name='%s'\n", p->m->filename, name);
+
 		char *tmpbuf = relative_to(p->m->filename, name);
+
+		//printf("*** rel='%s', name='%s', tmpbuf='%s'\n", p->m->filename, name, tmpbuf);
 
 		if (!module_load_file(p->m, tmpbuf)) {
 			fprintf(stdout, "Error: not found: %s\n", tmpbuf);
@@ -3184,6 +3188,7 @@ module *create_module(const char *name)
 	module *m = calloc(1, sizeof(module));
 	if (m)
 	{
+		m->filename = strdup("./");
 		m->name = strdup(name);
 		m->next = g_modules;
 		g_modules = m;
