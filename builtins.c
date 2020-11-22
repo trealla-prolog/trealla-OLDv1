@@ -10030,6 +10030,7 @@ static int fn_sys_put_chars_2(query *q)
 		char *src = chars_list_to_string(q, p1, p1_ctx, len);
 		net_write(src, len, str);
 		free(src);
+	} else if (is_nil(p1)) {
 	} else {
 		throw_error(q, p1, "type_error", "chars");
 		return 0;
