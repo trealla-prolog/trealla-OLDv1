@@ -1262,11 +1262,7 @@ static void directives(parser *p, term *t)
 			name = dstbuf;
 		}
 
-		//printf("*** rel='%s', name='%s'\n", p->m->filename, name);
-
 		char *tmpbuf = relative_to(p->m->filename, name);
-
-		//printf("*** rel='%s', name='%s', tmpbuf='%s'\n", p->m->filename, name, tmpbuf);
 
 		if (!module_load_file(p->m, tmpbuf)) {
 			fprintf(stdout, "Error: not found: %s\n", tmpbuf);

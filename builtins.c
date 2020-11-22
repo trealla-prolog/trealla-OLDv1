@@ -7863,11 +7863,15 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 		const char *src = GET_STR(p1);
 		deconsult(src);
 
-		if (!module_load_file(q->m, src)) {
+		char *tmpbuf = relative_to(q->m->filename, src);
+
+		if (!module_load_file(q->m, tmpbuf)) {
 			throw_error(q, p1, "existence_error", "filespec");
+			free(tmpbuf);
 			return 0;
 		}
 
+		free(tmpbuf);
 		return 1;
 	}
 
@@ -7888,13 +7892,16 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 	const char *src = GET_STR(file);
 	deconsult(src);
 	tmp_m->make_public = 1;
+	char *tmpbuf = relative_to(q->m->filename, src);
 
 	if (!module_load_file(tmp_m, src)) {
 		throw_error(q, p1, "existence_error", "filespec");
 		destroy_module(tmp_m);
+		free(tmpbuf);
 		return 0;
 	}
 
+	free(tmpbuf);
 	return 1;
 }
 
@@ -10135,7 +10142,9 @@ static int fn_use_module_1(query *q)
 		name = dstbuf;
 	}
 
-	module_load_file(q->m, name);
+	char *tmpbuf = relative_to(q->m->filename, name);
+	module_load_file(q->m, tmpbuf);
+	free(tmpbuf);
 	return 1;
 }
 
