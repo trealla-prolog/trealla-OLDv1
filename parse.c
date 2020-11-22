@@ -1116,7 +1116,9 @@ static void directives(parser *p, term *t)
 			while ((ptr != tmpbuf) && (*ptr != '/'))
 				ptr--;
 
-			*ptr++ = '/';
+			if (ptr != tmpbuf)
+				*ptr++ = '/';
+
 			*ptr = '\0';
 			strcat(ptr, name);
 		} else
@@ -1145,7 +1147,9 @@ static void directives(parser *p, term *t)
 			while ((ptr != tmpbuf) && (*ptr != '/'))
 				ptr--;
 
-			*ptr++ = '/';
+			if (ptr != tmpbuf)
+				*ptr++ = '/';
+
 			*ptr = '\0';
 			strcat(ptr, name);
 		} else
