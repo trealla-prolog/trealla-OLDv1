@@ -221,7 +221,7 @@ Others
 	make_directory/1
 	working_directory/2
 	chdir/1
-	absolute_file_name/[2,3] # expand(Bool) option, default is false
+	absolute_file_name/[2,3] # expand(Bool) & relative_to(file) options
 
 	current_key/1
 	recorda/2-3
