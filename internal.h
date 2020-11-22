@@ -561,3 +561,4 @@ cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx);
 char *print_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
 void stash_me(query *q, term *t, bool last_match);
 unsigned do_numbervars(query *q, cell *c, idx_t c_ctx, unsigned start);
+char *relative_to(const char *basefile, const char *relfile);

@@ -1073,6 +1073,28 @@ void consultall(parser *p, cell *l)
 	}
 }
 
+char *relative_to(const char *basefile, const char *relfile)
+{
+	char *tmpbuf = malloc(strlen(basefile) + strlen(relfile) + 256);
+
+	if (!strncmp(relfile, "../", 3)) {
+		strcpy(tmpbuf, basefile);
+		char *ptr = tmpbuf + strlen(tmpbuf) - 1;
+
+		while ((ptr != tmpbuf) && (*ptr != '/'))
+			ptr--;
+
+		if (ptr != tmpbuf)
+			*ptr++ = '/';
+
+		*ptr = '\0';
+		strcat(ptr, relfile);
+	} else
+		strcpy(tmpbuf, relfile);
+
+	return tmpbuf;
+}
+
 static void directives(parser *p, term *t)
 {
 	p->skip = false;
@@ -1106,31 +1128,17 @@ static void directives(parser *p, term *t)
 		if (!is_literal(p1)) return;
 		const char *name = GET_STR(p1);
 		unsigned save_line_nbr = p->line_nbr;
-
-		char tmpbuf[1024];
-
-		if (!strncmp(name, "../", 3)) {
-			strcpy(tmpbuf, p->m->filename);
-			char *ptr = tmpbuf + strlen(tmpbuf) - 1;
-
-			while ((ptr != tmpbuf) && (*ptr != '/'))
-				ptr--;
-
-			if (ptr != tmpbuf)
-				*ptr++ = '/';
-
-			*ptr = '\0';
-			strcat(ptr, name);
-		} else
-			strcpy(tmpbuf, name);
+		char *tmpbuf = relative_to(p->m->filename, name);
 
 		if (!module_load_file(p->m, tmpbuf)) {
 			fprintf(stdout, "Error: not found: %s\n", tmpbuf);
+			free(tmpbuf);
 			p->error = true;
 			return;
 		}
 
 		p->line_nbr = save_line_nbr;
+		free(tmpbuf);
 		return;
 	}
 
@@ -1138,29 +1146,16 @@ static void directives(parser *p, term *t)
 		cell *p1 = c + 1;
 		if (!is_atom(p1)) return;
 		const char *name = GET_STR(p1);
-		char tmpbuf[1024];
-
-		if (!strncmp(name, "../", 3)) {
-			strcpy(tmpbuf, p->m->filename);
-			char *ptr = tmpbuf + strlen(tmpbuf) - 1;
-
-			while ((ptr != tmpbuf) && (*ptr != '/'))
-				ptr--;
-
-			if (ptr != tmpbuf)
-				*ptr++ = '/';
-
-			*ptr = '\0';
-			strcat(ptr, name);
-		} else
-			strcpy(tmpbuf, name);
+		char *tmpbuf = relative_to(p->m->filename, name);
 
 		if (!module_load_file(p->m, tmpbuf)) {
 			fprintf(stdout, "Error: not found: %s\n", tmpbuf);
+			free(tmpbuf);
 			p->error = true;
 			return;
 		}
 
+		free(tmpbuf);
 		return;
 	}
 
