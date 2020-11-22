@@ -4976,7 +4976,7 @@ static int fn_iso_asserta_1(query *q)
 static int fn_iso_assertz_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx);
 	idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->m->p;
 
