@@ -49,7 +49,7 @@ unsigned g_cpu_count = 4;
 
 static idx_t g_pool_offset = 0, g_pool_size = 0;
 static int g_tpl_count = 0;
-const char *g_tpl_lib = NULL;
+char *g_tpl_lib = NULL;
 
 int g_ac = 0, g_avc = 1;
 char **g_av = NULL, *g_argv0 = NULL;

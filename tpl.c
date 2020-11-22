@@ -144,6 +144,17 @@ int main(int ac, char *av[])
 	const char *homedir;
 	g_argv0 = av[0];
 
+	g_tpl_lib = realpath(av[0], NULL);
+	char *src = g_tpl_lib + strlen(g_tpl_lib)-1;;
+
+	while ((src != g_tpl_lib) && (*src != '/'))
+		src--;
+
+	*src = '\0';
+	g_tpl_lib = realloc((char*)g_tpl_lib, strlen(g_tpl_lib)+40);
+	strcat(g_tpl_lib, "/library");
+	//printf("*** %s\n", g_tpl_lib);
+
 	if ((homedir = getenv("HOME")) == NULL)
 		homedir = ".";
 
