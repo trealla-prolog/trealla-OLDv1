@@ -935,8 +935,17 @@ void destroy_query(query *q)
 	for (int i = 0; i < MAX_QUEUES; i++)
 		free(q->queue[i]);
 
-	free(q->frames);
+	slot *e = q->slots;
+
+	for (idx_t i = 0; i < q->st.sp; i++, e++) {
+		cell *c = &e->c;
+
+		if (is_blob(c) && !is_const_cstring(c))
+			free(c->val_str);
+	}
+
 	free(q->slots);
+	free(q->frames);
 	free(q->tmp_heap);
 	free(q);
 }
