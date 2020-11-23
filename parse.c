@@ -560,7 +560,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
 		idx_t off = index_from_pool(GET_STR(c));
-		if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
+		if (is_nonconst_blob(c)) free(c->val_str);
 		c->val_off = off;
 		ensure (c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
@@ -578,7 +578,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		idx_t off = index_from_pool(GET_STR(c));
 		if(off == ERR_IDX)
 			return NULL;
-		if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
+		if (is_nonconst_blob(c)) free(c->val_str);
 		c->val_off = off;
 		c->val_type = TYPE_LITERAL;
 		c->flags = 0;
@@ -910,7 +910,7 @@ void destroy_query(query *q)
 		for (idx_t i = 0; i < a->hp; i++) {
 			cell *c = a->heap + i;
 
-			if (is_blob(c) && !is_const_cstring(c))
+			if (is_nonconst_blob(c))
 				free(c->val_str);
 			else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 				stream *str = &g_streams[c->val_num];
@@ -940,7 +940,7 @@ void destroy_query(query *q)
 	for (idx_t i = 0; i < q->st.sp; i++, e++) {
 		cell *c = &e->c;
 
-		if (is_blob(c) && !is_const_cstring(c))
+		if (is_nonconst_blob(c))
 			free(c->val_str);
 	}
 

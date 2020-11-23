@@ -205,7 +205,7 @@ static void unwind_trail(query *q, const choice *ch)
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
 
-		if (is_blob(&e->c) && !is_const_cstring(&e->c))
+		if (is_nonconst_blob(&e->c))
 			free(e->c.val_str);
 
 		e->c.val_type = TYPE_EMPTY;
@@ -304,7 +304,7 @@ static void trim_heap(query *q, const choice *ch)
 		for (idx_t i = 0; i < a->hp; i++) {
 			cell *c = a->heap + i;
 
-			if (is_blob(c) && !is_const_cstring(c)) {
+			if (is_nonconst_blob(c)) {
 				free(c->val_str);
 			} else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 				stream *str = &g_streams[c->val_num];
@@ -334,7 +334,7 @@ static void trim_heap(query *q, const choice *ch)
 	for (idx_t i = ch->st.hp; a && (i < a->hp); i++) {
 		cell *c = a->heap + i;
 
-		if (is_blob(c) && !is_const_cstring(c)) {
+		if (is_nonconst_blob(c)) {
 			free(c->val_str);
 		} else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 			stream *str = &g_streams[c->val_num];
@@ -643,11 +643,17 @@ void set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 
 	if (is_structure(v))
 		make_indirect(&e->c, v);
-	else if (is_blob(v) && !is_const_cstring(v)) {
+	else if (is_nonconst_blob(v)) {
 		e->c = *v;
-		e->c.val_str = malloc(v->len_str+1);
-		memcpy(e->c.val_str, v->val_str, v->len_str);
-		e->c.val_str[v->len_str] = '\0';
+
+		if (is_tmp(v)) {
+			v->val_str = NULL;
+			e->c.flags &= ~FLAG_TMP;
+		} else {
+			e->c.val_str = malloc(v->len_str+1);
+			memcpy(e->c.val_str, v->val_str, v->len_str);
+			e->c.val_str[v->len_str] = '\0';
+		}
 	} else
 		e->c = *v;
 
@@ -679,11 +685,17 @@ void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 
 	if (v->arity && !is_string(v))
 		make_indirect(&e->c, v);
-	else if (is_blob(v) && !is_const_cstring(v)) {
+	else if (is_nonconst_blob(v)) {
 		e->c = *v;
-		e->c.val_str = malloc(v->len_str+1);
-		memcpy(e->c.val_str, v->val_str, v->len_str);
-		e->c.val_str[v->len_str] = '\0';
+
+		if (is_tmp(v)) {
+			v->val_str = NULL;
+			e->c.flags &= ~FLAG_TMP;
+		} else {
+			e->c.val_str = malloc(v->len_str+1);
+			memcpy(e->c.val_str, v->val_str, v->len_str);
+			e->c.val_str[v->len_str] = '\0';
+		}
 	} else
 		e->c = *v;
 }
@@ -919,7 +931,7 @@ bool match_clause(query *q, cell *p1, idx_t p1_ctx)
 		else {
 			// For now convert it to a literal
 			idx_t off = index_from_pool(GET_STR(c));
-			if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
+			if (is_nonconst_blob(c)) free(c->val_str);
 			c->val_off = off;
 			ensure(c->val_off != ERR_IDX);
 			c->val_type = TYPE_LITERAL;
@@ -1007,7 +1019,7 @@ static bool match_rule(query *q)
 				return false;
 			}
 
-			if (is_blob(c) && !is_const_cstring(c)) free(c->val_str);
+			if (is_nonconst_blob(c)) free(c->val_str);
 			c->val_type = TYPE_LITERAL;
 			c->flags = 0;
 			h = NULL;
