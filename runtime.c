@@ -204,6 +204,10 @@ static void unwind_trail(query *q, const choice *ch)
 
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
+
+		if (is_blob(&e->c) && !is_const_cstring(&e->c))
+			free(e->c.val_str);
+
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = NULL;
 	}
