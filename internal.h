@@ -130,16 +130,16 @@ enum {
 	FLAG_HEX=1<<1,						// used with TYPE_INTEGER
 	FLAG_OCTAL=1<<2,					// used with TYPE_INTEGER
 	FLAG_BINARY=1<<3,					// used with TYPE_INTEGER
-	FLAG_TAIL_REC=1<<4,
-	FLAG_PASS_THRU=1<<5,
-	FLAG_BLOB=1<<6,
-	FLAG_STRING=1<<7,
+	FLAG_STREAM=1<<4,					// used with TYPE_INTEGER
+	FLAG_TAIL_REC=1<<5,
+	FLAG_BLOB=1<<6,						// used with TYPE_CSTRING
+	FLAG_STRING=1<<7,					// used with TYPE_CSTRING
+	FLAG_TMP=1<<8,						// used with TYPE_CSTRING
 
 	FLAG_DELETED=FLAG_HEX,				// used by bagof
 	FLAG_FIRST_USE=FLAG_HEX,			// used with TYPE_VARIABLE
 	FLAG_ANON=FLAG_OCTAL,				// used with TYPE_VARIABLE
 	FLAG_FRESH=FLAG_BINARY,				// used with TYPE_VARIABLE
-	FLAG_STREAM=FLAG_TAIL_REC,			// used with TYPE_INTEGER
 	FLAG_CONST=FLAG_HEX,				// used with TYPE_CSTRING
 	FLAG_DUP=FLAG_OCTAL,				// used with TYPE_CSTRING
 	FLAG_QUOTED=FLAG_BINARY,			// used with TYPE_CSTRING
