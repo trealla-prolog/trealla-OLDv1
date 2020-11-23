@@ -1861,9 +1861,9 @@ static void parser_dcg_rewrite(parser *p)
 	}
 
 #if 0
-	//destroy_parser_nodelete(p2);
-	//p2 = create_parser(p->m);
-	//ensure(p2);
+	destroy_parser_nodelete(p2);
+	p2 = create_parser(p->m);
+	ensure(p2);
 #else
 	parser_reset(p2);
 #endif
