@@ -155,7 +155,6 @@ static idx_t add_to_pool(const char *name)
 		g_pool_size = nbytes;
 	}
 
-	//printf("*** add_to_pool %u ==> %s\n", offset, name);
 	strcpy(g_pool+offset, name);
 	g_pool_offset += len + 1;
 	const char *key = strdup(name);
@@ -216,12 +215,9 @@ bool set_op(module *m, const char *name, unsigned optype, unsigned precedence)
 	int hint = IS_PREFIX(optype);
 
 	if ((prec = get_op(m, name, &ot, &userop, hint)) != 0) {
-		//printf("*** get_op '%s' prec=%u (%u), ot=%u (%u)\n", name, prec, precedence, ot, optype);
 
-		if (ot == optype) {
-			//printf("*** redefine '%s'\n", name);
+		if (ot == optype)
 			return true;
-		}
 	}
 
 	struct op_table *ptr = m->ops;
@@ -1148,7 +1144,7 @@ static void directives(parser *p, term *t)
 		const char *name = GET_STR(p1);
 		char *tmpbuf = relative_to(p->m->filename, name);
 
-		printf("*** ensure %s\n", tmpbuf);
+		//printf("*** ensure %s\n", tmpbuf);
 
 		if (!module_load_file(p->m, tmpbuf)) {
 			fprintf(stdout, "Error: not found: %s\n", tmpbuf);
@@ -1266,13 +1262,19 @@ static void directives(parser *p, term *t)
 
 		char *tmpbuf = relative_to(p->m->filename, name);
 
+		//printf("*** library p->m->filename = %s, name = %s, tmpbuf = %s\n", p->m->filename, name, tmpbuf);
+		char *save = strdup(p->m->filename);
+
 		if (!module_load_file(p->m, tmpbuf)) {
 			fprintf(stdout, "Error: not found: %s\n", tmpbuf);
 			free(tmpbuf);
+			free(save);
 			p->error = true;
 			return;
 		}
 
+		free(p->m->filename);
+		p->m->filename = save;
 		free(tmpbuf);
 	}
 
@@ -2978,7 +2980,7 @@ bool module_load_fp(module *m, FILE *fp, const char *filename)
 	parser *p = create_parser(m);
 	if (p) {
 		free(p->m->filename);
-		printf("*** load filename = %s\n", filename);
+		//printf("*** loading filename = %s\n", filename);
 		p->m->filename = ensure_strdup(filename);
 		p->consulting = true;
 		p->fp = fp;
