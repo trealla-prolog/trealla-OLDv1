@@ -445,8 +445,13 @@ static idx_t g_tab2[64000];
 static idx_t g_tab4[64000];
 static uint8_t g_tab5[64000];
 
-static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
+static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth)
 {
+	if (depth >= MAX_DEPTH) {
+		q->cycle_error = 1;
+		return;
+	}
+
 	idx_t save_idx = tmp_heap_used(q);
 	p1 = deref(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
@@ -492,7 +497,7 @@ static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 
 	while (arity--) {
 		cell *c = deref(q, p1, p1_ctx);
-		deep_copy2_to_tmp(q, c, q->latest_ctx);
+		deep_copy2_to_tmp(q, c, q->latest_ctx, depth+1);
 		p1 += p1->nbr_cells;
 	}
 
@@ -514,7 +519,8 @@ cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	}
 #endif
 
-	deep_copy2_to_tmp(q, p1, p1_ctx);
+	q->cycle_error = 0;
+	deep_copy2_to_tmp(q, p1, p1_ctx, 0);
 
 	if (g_varno != g->nbr_vars) {
 		if (!create_vars(q, g_varno-g->nbr_vars)) {
@@ -536,8 +542,13 @@ static cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx)
 	return tmp2;
 }
 
-static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
+static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth)
 {
+	if (depth >= MAX_DEPTH) {
+		q->cycle_error = 1;
+		return;
+	}
+
 	idx_t save_idx = tmp_heap_used(q);
 	p1 = deref(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
@@ -562,7 +573,7 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 
 	while (arity--) {
 		cell *c = deref(q, p1, p1_ctx);
-		deep_clone2_to_tmp(q, c, q->latest_ctx);
+		deep_clone2_to_tmp(q, c, q->latest_ctx, depth+1);
 		p1 += p1->nbr_cells;
 	}
 
@@ -581,7 +592,8 @@ static cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	}
 #endif
 
-	deep_clone2_to_tmp(q, p1, p1_ctx);
+	q->cycle_error = 0;
+	deep_clone2_to_tmp(q, p1, p1_ctx, 0);
 	return q->tmp_heap;
 }
 
@@ -4402,6 +4414,10 @@ static int fn_iso_univ_2(query *q)
 
 	if (is_variable(p2)) {
 		cell *tmp = deep_copy_to_heap(q, p1, p1_ctx);
+
+		if (q->cycle_error)
+				return 0;
+
 		unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 		cell tmp2 = *tmp;
 		tmp2.nbr_cells = 1;
@@ -4696,6 +4712,9 @@ static int fn_iso_copy_term_2(query *q)
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
 	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx);
+
+	if (q->cycle_error)
+			return 0;
 
 	if (!tmp) {
 		throw_error(q, p1, "resource_error", "too_many_vars");
@@ -9894,6 +9913,10 @@ static int fn_del_attrs_1(query *q)
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
+
+	if (q->cycle_error)
+			return 0;
+
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->var_nbr);
 	e->c.attrs = tmp;
@@ -9905,6 +9928,10 @@ static int fn_put_attrs_2(query *q)
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
+
+	if (q->cycle_error)
+			return 0;
+
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->var_nbr);
 	e->c.attrs = tmp;
