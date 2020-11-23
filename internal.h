@@ -484,7 +484,7 @@ cell *list_tail(cell *l, cell *tmp);
 
 void set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
-bool module_load_fp(module *m, FILE *fp);
+bool module_load_fp(module *m, FILE *fp, const char *filename);
 bool module_load_file(module *m, const char *filename);
 bool module_save_file(module *m, const char *filename);
 bool deconsult(const char *filename);

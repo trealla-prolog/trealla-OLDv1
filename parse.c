@@ -1148,6 +1148,8 @@ static void directives(parser *p, term *t)
 		const char *name = GET_STR(p1);
 		char *tmpbuf = relative_to(p->m->filename, name);
 
+		printf("*** ensure %s\n", tmpbuf);
+
 		if (!module_load_file(p->m, tmpbuf)) {
 			fprintf(stdout, "Error: not found: %s\n", tmpbuf);
 			free(tmpbuf);
@@ -2968,13 +2970,16 @@ module *module_load_text(module *m, const char *src)
 	return m;
 }
 
-bool module_load_fp(module *m, FILE *fp)
+bool module_load_fp(module *m, FILE *fp, const char *filename)
 {
 	if (!m) return false;
 
 	bool ok = false;
 	parser *p = create_parser(m);
 	if (p) {
+		free(p->m->filename);
+		printf("*** load filename = %s\n", filename);
+		p->m->filename = ensure_strdup(filename);
 		p->consulting = true;
 		p->fp = fp;
 
@@ -3013,6 +3018,7 @@ bool module_load_fp(module *m, FILE *fp)
 
 		ok = !p->error;
 	}
+
 	destroy_parser(p);
 	return ok;
 }
@@ -3026,7 +3032,7 @@ bool module_load_file(module *m, const char *filename)
 			stream *str = &g_streams[i];
 
 			if (!strcmp(str->name, "user_input")) {
-				int ok = module_load_fp(m, str->fp);
+				int ok = module_load_fp(m, str->fp, "./");
 				clearerr(str->fp);
 				return ok;
 			}
@@ -3060,9 +3066,7 @@ bool module_load_file(module *m, const char *filename)
 		return 0;
 	}
 
-	free(m->filename);
-	m->filename = ensure_strdup(realbuf);
-	bool ok = module_load_fp(m, fp);
+	bool ok = module_load_fp(m, fp, realbuf);
 	fclose(fp);
 	free(realbuf);
 	return ok;
@@ -3517,9 +3521,9 @@ bool pl_eval(prolog *pl, const char *src)
 	return ok;
 }
 
-bool pl_consult_fp(prolog *pl, FILE *fp)
+bool pl_consult_fp(prolog *pl, FILE *fp, const char *filename)
 {
-	return module_load_fp(pl->m, fp);
+	return module_load_fp(pl->m, fp, filename);
 }
 
 bool pl_consult(prolog *pl, const char *filename)
@@ -3636,8 +3640,19 @@ prolog *pl_create()
 	if (!g_tpl_lib)
 		g_tpl_lib = getenv("TPL_LIBRARY_PATH");
 
-	if (!g_tpl_lib)
-		g_tpl_lib = "library";
+	if (!g_tpl_lib) {
+		g_tpl_lib = realpath(g_argv0, NULL);
+		char *src = g_tpl_lib + strlen(g_tpl_lib)-1;
+
+		while ((src != g_tpl_lib) && (*src != '/'))
+			src--;
+
+		*src = '\0';
+		g_tpl_lib = realloc((char*)g_tpl_lib, strlen(g_tpl_lib)+40);
+		strcat(g_tpl_lib, "/library");
+	}
+
+	//printf("Library: %s\n", g_tpl_lib);
 
 #ifdef NDEBUG
 	srandom(time(0)+clock()+getpid());
