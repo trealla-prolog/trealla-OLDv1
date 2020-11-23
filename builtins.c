@@ -7817,7 +7817,7 @@ static int fn_absolute_file_name_3(query *q)
 			return 0;
 		}
 
-		tmpbuf = malloc(strlen(s)+strlen(ptr)+1);
+		tmpbuf = malloc(strlen(s)+1+strlen(ptr)+1);
 		ensure(tmpbuf);
 		dst = tmpbuf;
 		strcpy(tmpbuf, ptr);
