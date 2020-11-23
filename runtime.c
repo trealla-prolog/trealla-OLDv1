@@ -639,7 +639,12 @@ void set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 
 	if (is_structure(v))
 		make_indirect(&e->c, v);
-	else
+	else if (is_blob(v) && !is_const_cstring(v)) {
+		e->c = *v;
+		e->c.val_str = malloc(v->len_str+1);
+		memcpy(e->c.val_str, v->val_str, v->len_str);
+		e->c.val_str[v->len_str] = '\0';
+	} else
 		e->c = *v;
 
 	if (frozen)
@@ -670,7 +675,12 @@ void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 
 	if (v->arity && !is_string(v))
 		make_indirect(&e->c, v);
-	else
+	else if (is_blob(v) && !is_const_cstring(v)) {
+		e->c = *v;
+		e->c.val_str = malloc(v->len_str+1);
+		memcpy(e->c.val_str, v->val_str, v->len_str);
+		e->c.val_str[v->len_str] = '\0';
+	} else
 		e->c = *v;
 }
 
