@@ -1771,6 +1771,7 @@ static int fn_iso_open_4(query *q)
 		tmp.val_type = TYPE_CSTRING;
 		tmp.flags = FLAG_BLOB|FLAG_STRING|FLAG_CONST_CSTRING;
 		tmp.nbr_cells = 1;
+		tmp.arity = 2;
 		tmp.val_str = addr;
 		tmp.len_str = len;
 		unify(q, mmap_var, mmap_ctx, &tmp, q->st.curr_frame);
