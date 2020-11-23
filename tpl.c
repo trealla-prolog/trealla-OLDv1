@@ -235,7 +235,7 @@ int main(int ac, char *av[])
 		} else if (av[i][0] == '-') {
 			continue;
 		} else if (do_lib) {
-			g_tpl_lib = av[i];
+			g_tpl_lib = strdup(av[i]);
 			do_lib = 0;
 		} else if (do_goal) {
 			do_goal = 0;

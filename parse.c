@@ -3648,19 +3648,26 @@ prolog *pl_create()
 	if (g_tpl_count == 1 && g_init() == NULL)
 		return NULL;
 
-	if (!g_tpl_lib)
-		g_tpl_lib = getenv("TPL_LIBRARY_PATH");
+	if (!g_tpl_lib) {
+		char *ptr = getenv("TPL_LIBRARY_PATH");
+
+		if (ptr)
+			g_tpl_lib = strdup(ptr);
+	}
 
 	if (!g_tpl_lib) {
 		g_tpl_lib = realpath(g_argv0, NULL);
-		char *src = g_tpl_lib + strlen(g_tpl_lib)-1;
 
-		while ((src != g_tpl_lib) && (*src != '/'))
-			src--;
+		if (g_tpl_lib) {
+			char *src = g_tpl_lib + strlen(g_tpl_lib) - 1;
 
-		*src = '\0';
-		g_tpl_lib = realloc((char*)g_tpl_lib, strlen(g_tpl_lib)+40);
-		strcat(g_tpl_lib, "/library");
+			while ((src != g_tpl_lib) && (*src != '/'))
+				src--;
+
+			*src = '\0';
+			g_tpl_lib = realloc(g_tpl_lib, strlen(g_tpl_lib)+40);
+			strcat(g_tpl_lib, "/library");
+		}
 	}
 
 	//printf("Library: %s\n", g_tpl_lib);
