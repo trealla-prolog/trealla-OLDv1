@@ -7820,11 +7820,10 @@ static int fn_absolute_file_name_3(query *q)
 		tmpbuf = malloc(strlen(s)+strlen(ptr)+1);
 		ensure(tmpbuf);
 		dst = tmpbuf;
-		memcpy(tmpbuf, ptr, strlen(ptr));
+		strcpy(tmpbuf, ptr);
 		dst += strlen(ptr);
 		*dst++ = '/';
-		memcpy(dst, s, strlen(s));
-		dst[strlen(s)] = '\0';
+		strcpy(dst, s);
 		char *tmpbuf2;
 
 		if ((tmpbuf2 = realpath(tmpbuf, NULL)) == NULL) {
