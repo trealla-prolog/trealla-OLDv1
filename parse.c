@@ -1267,9 +1267,14 @@ static void directives(parser *p, term *t)
 
 		if (!module_load_file(p->m, tmpbuf)) {
 			fprintf(stdout, "Error: not found: %s\n", tmpbuf);
-			free(tmpbuf);
-			free(save);
+
+			if (p->m->filename != save) {
+				free(p->m->filename);
+				p->m->filename = save;
+			}
+
 			p->error = true;
+			free(tmpbuf);
 			return;
 		}
 
@@ -2981,7 +2986,7 @@ bool module_load_fp(module *m, FILE *fp, const char *filename)
 	if (p) {
 		free(p->m->filename);
 		//printf("*** loading filename = %s\n", filename);
-		p->m->filename = ensure_strdup(filename);
+		p->m->filename = strdup(filename);
 		p->consulting = true;
 		p->fp = fp;
 
@@ -3047,17 +3052,12 @@ bool module_load_file(module *m, const char *filename)
 
 	if (!(realbuf = realpath(tmpbuf, NULL))) {
 		strcpy(tmpbuf, filename);
-		strcat(tmpbuf, ".pro");
-	}
-
-	if (!(realbuf = realpath(tmpbuf, NULL))) {
-		strcpy(tmpbuf, filename);
 		strcat(tmpbuf, ".pl");
-	}
 
-	if (!(realbuf = realpath(tmpbuf, NULL))) {
-		strcpy(tmpbuf, filename);
-		strcat(tmpbuf, ".P");
+		if (!(realbuf = realpath(tmpbuf, NULL))) {
+			free(tmpbuf);
+			return 0;
+		}
 	}
 
 	free(tmpbuf);
@@ -3670,7 +3670,6 @@ prolog *pl_create()
 			pl->curr_m = pl->m;
 
 			//cehteh: add api to set things in a module?
-			pl->m->filename = strdup("./");
 			pl->m->prebuilt = true;
 
 			set_multifile_in_db(pl->m, "term_expansion", 2);

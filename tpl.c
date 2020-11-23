@@ -199,8 +199,10 @@ int main(int ac, char *av[])
 	}
 
 	if (daemon) {
-		if (!daemonize(ac, av))
+		if (!daemonize(ac, av)) {
+			pl_destroy(pl);
 			return 0;
+		}
 	} else
 		signal(SIGINT, &sigfn);
 
@@ -213,6 +215,7 @@ int main(int ac, char *av[])
 
 		if ((av[i][0] == '-') && did_load) {
 			fprintf(stderr, "Error: options entered after files\n");
+			pl_destroy(pl);
 			return 0;
 		}
 
@@ -291,8 +294,10 @@ int main(int ac, char *av[])
 		fprintf(stdout, "  --ns\t\t\t- non-stop (to top-level)\n");
 	}
 
-	if ((version && !quiet) || ns)
+	if ((version && !quiet) || ns) {
+		pl_destroy(pl);
 		return 0;
+	}
 
 #ifdef FAULTINJECT_ENABLED
 	fprintf(stderr, "CDEBUG FAULT INJECTION ENABLED!\n"); //Don't use this build for benchmarking and production
