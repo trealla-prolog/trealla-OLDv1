@@ -2001,10 +2001,10 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 				return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 			}
 
-			if (p->save_line[strlen(p->save_line)-1] == '\n')
+			if (*p->save_line && (p->save_line[strlen(p->save_line)-1] == '\n'))
 				p->save_line[strlen(p->save_line)-1] = '\0';
 
-			if (p->save_line[strlen(p->save_line)-1] == '\r')
+			if (*p->save_line && (p->save_line[strlen(p->save_line)-1] == '\r'))
 				p->save_line[strlen(p->save_line)-1] = '\0';
 
 			if (!strlen(p->save_line))
