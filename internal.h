@@ -91,8 +91,8 @@ typedef uint32_t idx_t;
 #define is_blob(c) (is_cstring(c) && ((c)->flags&FLAG_BLOB))
 #define is_list(c) (is_iso_list(c) || is_string(c))
 #define is_integer(c) (is_rational(c) && ((c)->val_den == 1))
-#define is_const_cstring(c) (is_cstring(c) && ((c)->flags & FLAG_CONST_CSTRING))
-#define is_dup_cstring(c) (is_cstring(c) && ((c)->flags & FLAG_DUP_CSTRING))
+#define is_const_cstring(c) (is_cstring(c) && ((c)->flags & FLAG_CONST))
+#define is_dup_cstring(c) (is_cstring(c) && ((c)->flags & FLAG_DUP))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
 #define is_quoted(c) ((c)->flags & FLAG_QUOTED)
 #define is_fresh(c) ((c)->flags & FLAG_FRESH)
@@ -139,8 +139,8 @@ enum {
 	FLAG_ANON=FLAG_OCTAL,				// used with TYPE_VARIABLE
 	FLAG_FRESH=FLAG_BINARY,				// used with TYPE_VARIABLE
 	FLAG_STREAM=FLAG_TAIL_REC,			// used with TYPE_INTEGER
-	FLAG_CONST_CSTRING=FLAG_HEX,		// used with TYPE_CSTRING
-	FLAG_DUP_CSTRING=FLAG_OCTAL,		// used with TYPE_CSTRING
+	FLAG_CONST=FLAG_HEX,				// used with TYPE_CSTRING
+	FLAG_DUP=FLAG_OCTAL,				// used with TYPE_CSTRING
 	FLAG_QUOTED=FLAG_BINARY,			// used with TYPE_CSTRING
 
 	FLAG_END=1<<11
