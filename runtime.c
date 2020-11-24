@@ -871,10 +871,10 @@ static void next_key(query *q)
 static bool match_full(query *q, cell *p1, idx_t p1_ctx)
 {
 	cell *head = get_head(p1);
-	rule *h = find_matching_rule(q->m, head);
+	predicate *h = find_matching_predicate(q->m, head);
 
 	if (!h) {
-		head->match = find_matching_rule(q->m, head);
+		head->match = find_matching_predicate(q->m, head);
 		h = head->match;
 	}
 
@@ -923,7 +923,7 @@ bool match_clause(query *q, cell *p1, idx_t p1_ctx)
 			return match_full(q, p1, p1_ctx);
 
 		cell *c = p1;
-		rule *h;
+		predicate *h;
 
 		if (is_literal(c))
 			h = c->match;
@@ -939,7 +939,7 @@ bool match_clause(query *q, cell *p1, idx_t p1_ctx)
 		}
 
 		if (!h) {
-			p1->match = find_matching_rule(q->m, p1);
+			p1->match = find_matching_predicate(q->m, p1);
 			h = p1->match;
 		}
 
@@ -1006,7 +1006,7 @@ static bool match_rule(query *q)
 	assert(q);
 	if (!q->retry) {
 		cell *c = q->st.curr_cell;
-		rule *h;
+		predicate *h;
 
 		if (is_literal(c)) {
 			h = c->match;
@@ -1025,7 +1025,7 @@ static bool match_rule(query *q)
 		}
 
 		if (!h) {
-			c->match = find_matching_rule(q->m, c);
+			c->match = find_matching_predicate(q->m, c);
 			h = c->match;
 
 			if (!h) {

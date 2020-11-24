@@ -4497,7 +4497,7 @@ static int fn_iso_univ_2(query *q)
 			if ((tmp->fn = get_builtin(q->m, GET_STR(tmp), tmp->arity)) != NULL)
 				tmp->flags |= FLAG_BUILTIN;
 			else {
-				tmp->match = find_matching_rule_quiet(q->m, tmp);
+				tmp->match = find_matching_predicate_quiet(q->m, tmp);
 				tmp->flags &= ~FLAG_BUILTIN;
 			}
 		}
@@ -4885,7 +4885,7 @@ static int fn_iso_retract_1(query *q)
 static int fn_iso_retractall_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	rule *h = find_matching_rule(q->m, p1);
+	predicate *h = find_matching_predicate(q->m, p1);
 
 	if (!h) {
 		//set_dynamic_in_db(q->m, GET_STR(p1), p1->arity);
@@ -4900,7 +4900,7 @@ static int fn_iso_retractall_1(query *q)
 
 static int do_abolish(query *q, cell *c)
 {
-	rule *h = find_matching_rule(q->m, c);
+	predicate *h = find_matching_predicate(q->m, c);
 	if (!h) return 1;
 
 	if (!h->is_dynamic) {
@@ -5153,7 +5153,7 @@ static int fn_iso_call_n(query *q)
 	if ((tmp2->fn = get_builtin(q->m, GET_STR(tmp2), arity)) != NULL)
 		tmp2->flags |= FLAG_BUILTIN;
 	else {
-		tmp2->match = find_matching_rule(q->m, tmp2);
+		tmp2->match = find_matching_predicate(q->m, tmp2);
 		tmp2->flags &= ~FLAG_BUILTIN;
 	}
 
@@ -5526,7 +5526,7 @@ static int fn_iso_current_predicate_1(query *q)
 
 	cell tmp_f = *(p_pi+1);
 	tmp_f.arity = arity;
-	rule *h = find_matching_rule(q->m, &tmp_f);
+	predicate *h = find_matching_predicate(q->m, &tmp_f);
 
 	if (h && !h->is_prebuilt)
 		return 1;
@@ -6339,7 +6339,7 @@ static void save_db(FILE *fp, query *q, int logging)
 	int save = q->quoted;
 	q->quoted = 1;
 
-	for (rule *h = q->m->head; h; h = h->next) {
+	for (predicate *h = q->m->head; h; h = h->next) {
 		if (h->is_prebuilt)
 			continue;
 
@@ -6378,7 +6378,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 {
 	module *m = q->st.curr_clause ? q->st.curr_clause->m : q->m;
 
-	for (rule *h = m->head; h; h = h->next) {
+	for (predicate *h = m->head; h; h = h->next) {
 		if (h->is_prebuilt)
 			continue;
 
@@ -7789,7 +7789,7 @@ static int fn_spawn_n(query *q)
 	if ((tmp2->fn = get_builtin(q->m, GET_STR(tmp2), arity)) != NULL)
 		tmp2->flags |= FLAG_BUILTIN;
 	else {
-		tmp2->match = find_matching_rule(q->m, tmp2);
+		tmp2->match = find_matching_predicate(q->m, tmp2);
 		tmp2->flags &= ~FLAG_BUILTIN;
 	}
 
@@ -9687,7 +9687,7 @@ static int fn_predicate_property_2(query *q)
 	const char *f = GET_STR(p1);
 	cell tmp;
 
-	rule *h = find_functor(q->m, f, p1->arity);
+	predicate *h = find_functor(q->m, f, p1->arity);
 
 	if (check_builtin(q->m, f, p1->arity)) {
 		make_literal(&tmp, index_from_pool("built_in"));

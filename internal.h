@@ -176,7 +176,7 @@ enum {
 
 typedef struct module_ module;
 typedef struct query_ query;
-typedef struct rule_ rule;
+typedef struct predicate_ predicate;
 typedef struct clause_ clause;
 typedef struct cell_ cell;
 typedef struct parser_ parser;
@@ -221,7 +221,7 @@ struct cell_ {
 		struct {
 			union {
 				int (*fn)(query*);
-				rule *match;
+				predicate *match;
 				cell *attrs;
 				uint16_t precedence;
 			};
@@ -251,15 +251,15 @@ typedef struct {
 } term;
 
 struct clause_ {
-	rule *parent;
+	predicate *parent;
 	clause *next;
 	module *m;
 	uuid u;
 	term t;
 };
 
-struct rule_ {
-	rule *next;
+struct predicate_ {
+	predicate *next;
 	clause *head, *tail;
 	skiplist *index;
 	unsigned cnt;
@@ -432,7 +432,7 @@ struct module_ {
 	module *next;
 	query *tasks;
 	char *name, *filename;
-	rule *head, *tail;
+	predicate *head, *tail;
 	parser *p;
 	FILE *fp;
 	struct op_table ops[MAX_USER_OPS+1];
@@ -518,9 +518,9 @@ void *get_builtin(module *m, const char *name, unsigned arity);
 void query_execute(query *q, term *t);
 cell *get_head(cell *c);
 cell *get_body(cell *c);
-rule *find_matching_rule(module *m, cell *c);
-rule *find_matching_rule_quiet(module *m, cell *c);
-rule *find_functor(module *m, const char *name, unsigned arity);
+predicate *find_matching_predicate(module *m, cell *c);
+predicate *find_matching_predicate_quiet(module *m, cell *c);
+predicate *find_functor(module *m, const char *name, unsigned arity);
 int call_me(query *q, cell *p1);
 void undo_me(query *q);
 parser *create_parser(module *m);
@@ -528,7 +528,7 @@ void destroy_parser(parser *p);
 void destroy_parser_nodelete(parser *p);
 unsigned parser_tokenize(parser *p, bool args, bool consing);
 bool parser_attach(parser *p, idx_t start_idx);
-void parser_xref(parser *p, term *t, rule *parent);
+void parser_xref(parser *p, term *t, predicate *parent);
 void parser_reset(parser *p);
 idx_t drop_choice(query *q);
 bool retry_choice(query *q);

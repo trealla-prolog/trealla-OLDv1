@@ -349,12 +349,12 @@ cell *get_body(cell *c)
 	return c;
 }
 
-static rule *find_rule(module *m, cell *c)
+static predicate *find_predicate(module *m, cell *c)
 {
 	assert(m);
 	assert(c);
 
-	for (rule *h = m->head; h; h = h->next) {
+	for (predicate *h = m->head; h; h = h->next) {
 		if (h->is_abolished)
 			continue;
 
@@ -370,7 +370,7 @@ static rule *find_rule(module *m, cell *c)
 	return NULL;
 }
 
-static rule *find_matching_rule_internal(module *m, cell *c, bool quiet)
+static predicate *find_matching_predicate_internal(module *m, cell *c, bool quiet)
 {
 	assert(c);
 
@@ -378,7 +378,7 @@ static rule *find_matching_rule_internal(module *m, cell *c, bool quiet)
 	module *tmp_m = NULL;
 
 	while (m) {
-		rule *h = find_rule(m, c);
+		predicate *h = find_predicate(m, c);
 
 		if (!quiet && h && (m != save_m) && !h->is_public &&
 			strcmp(GET_STR(c), "dynamic") && strcmp(GET_STR(c), "module")) {
@@ -398,21 +398,21 @@ static rule *find_matching_rule_internal(module *m, cell *c, bool quiet)
 	return NULL;
 }
 
-rule *find_matching_rule(module *m, cell *c)
+predicate *find_matching_predicate(module *m, cell *c)
 {
-	return find_matching_rule_internal(m, c, false);
+	return find_matching_predicate_internal(m, c, false);
 }
 
-rule *find_matching_rule_quiet(module *m, cell *c)
+predicate *find_matching_predicate_quiet(module *m, cell *c)
 {
-	return find_matching_rule_internal(m, c, true);
+	return find_matching_predicate_internal(m, c, true);
 }
 
-rule *find_functor(module *m, const char *name, unsigned arity)
+predicate *find_functor(module *m, const char *name, unsigned arity)
 {
 	assert(m && name);
 
-	for (rule *h = m->head; h; h = h->next) {
+	for (predicate *h = m->head; h; h = h->next) {
 		if (h->is_abolished)
 			continue;
 
@@ -423,20 +423,20 @@ rule *find_functor(module *m, const char *name, unsigned arity)
 	return NULL;
 }
 
-static rule *get_rule(module *m)
+static predicate *get_predicate(module *m)
 {
 	assert(m);
 
-	for (rule *h = m->head; h; h = h->next) {
+	for (predicate *h = m->head; h; h = h->next) {
 		//PLANNED: cehteh: make a freelist of abolished rules to remove this iteration over all rules
 		if (h->is_abolished) {
-			memset(h, 0, sizeof(rule));
+			memset(h, 0, sizeof(predicate));
 			return h;
 		}
 	}
 
 	FAULTINJECT(errno = ENOMEM; return NULL);
-	rule *h = calloc(1, sizeof(rule));
+	predicate *h = calloc(1, sizeof(predicate));
 	if (h) {
 		h->next = m->head;
 		m->head = h;
@@ -444,11 +444,11 @@ static rule *get_rule(module *m)
 	return h;
 }
 
-static rule *create_rule(module *m, cell *c)
+static predicate *create_predicate(module *m, cell *c)
 {
 	assert(m && c);
 
-	rule *h = get_rule(m);
+	predicate *h = get_predicate(m);
 	if (!h) return NULL;
 	h->val_off = c->val_off;
 	h->arity = c->arity;
@@ -465,8 +465,8 @@ void set_multifile_in_db(module *m, const char *name, idx_t arity)
 	tmp.val_off = index_from_pool(name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
-	rule *h = find_rule(m, &tmp);
-	if (!h) h = create_rule(m, &tmp);
+	predicate *h = find_predicate(m, &tmp);
+	if (!h) h = create_predicate(m, &tmp);
 	if (h)
 		h->is_multifile = true;
 	else
@@ -485,7 +485,7 @@ static bool is_multifile_in_db(const char *mod, const char *name, idx_t arity)
 	if (tmp.val_off == ERR_IDX) return false;
 
 	tmp.arity = arity;
-	rule *h = find_rule(m, &tmp);
+	predicate *h = find_predicate(m, &tmp);
 	if (!h) return false;
 	return h->is_multifile ? true : false;
 }
@@ -538,7 +538,7 @@ static int compkey(const void *ptr1, const void *ptr2)
 	return 0;
 }
 
-static void reindex_rule(rule *h)
+static void reindex_predicate(predicate *h)
 {
 	assert(h);
 	h->index = sl_create(compkey);
@@ -607,7 +607,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	}
 #endif
 
-	rule *h = find_rule(m, c);
+	predicate *h = find_predicate(m, c);
 
 	if (h && !consulting) {
 		if (!h->is_dynamic) {
@@ -617,7 +617,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	}
 
 	if (!h) {
-		h = create_rule(m, c);
+		h = create_predicate(m, c);
 		if (!h) return NULL;
 
 		if (!consulting)
@@ -655,7 +655,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 }
 
 
-static void assert_commit(module *m, term *t, clause *r, rule *h, bool append)
+static void assert_commit(module *m, term *t, clause *r, predicate *h, bool append)
 {
 	cell *c = get_head(r->t.cells);
 
@@ -681,14 +681,14 @@ static void assert_commit(module *m, term *t, clause *r, rule *h, bool append)
 	}
 
 	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !m->noindex && !h->is_noindex)
-		reindex_rule(h);
+		reindex_predicate(h);
 }
 
 clause *asserta_to_db(module *m, term *t, bool consulting)
 {
 	clause *r = assert_begin(m, t, consulting);
 	if (!r) return NULL;
-	rule *h = r->parent;
+	predicate *h = r->parent;
 
 	r->next = h->head;
 	h->head = r;
@@ -705,7 +705,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 {
 	clause *r = assert_begin(m, t, consulting);
 	if (!r) return NULL;
-	rule *h = r->parent;
+	predicate *h = r->parent;
 
 	if (h->tail)
 		h->tail->next = r;
@@ -730,7 +730,7 @@ clause *retract_from_db(module *m, clause *r)
 
 clause *find_in_db(module *m, uuid *ref)
 {
-	for (rule *h = m->head; h; h = h->next) {
+	for (predicate *h = m->head; h; h = h->next) {
 		for (clause *r = h->head ; r; r = r->next) {
 			if (r->t.is_deleted)
 				continue;
@@ -761,8 +761,8 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	tmp.val_off = index_from_pool(name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
-	rule *h = find_rule(m, &tmp);
-	if (!h) h = create_rule(m, &tmp);
+	predicate *h = find_predicate(m, &tmp);
+	if (!h) h = create_predicate(m, &tmp);
 	if (h) {
 		h->is_dynamic = true;
 
@@ -782,8 +782,8 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 	tmp.val_off = index_from_pool(name);
 	ensure(tmp.val_off == ERR_IDX);
 	tmp.arity = arity;
-	rule *h = find_rule(m, &tmp);
-	if (!h) h = create_rule(m, &tmp);
+	predicate *h = find_predicate(m, &tmp);
+	if (!h) h = create_predicate(m, &tmp);
 	if (h) {
 		h->is_dynamic = true;
 		h->is_persist = true;
@@ -1198,9 +1198,9 @@ static void directives(parser *p, term *t)
 				if (!strcmp(GET_STR(head), "//"))
 					tmp.arity += 2;
 
-				rule *h = create_rule(p->m, &tmp);
+				predicate *h = create_predicate(p->m, &tmp);
 				if (!h) {
-					//fprintf(stdout, "Error: rule creation failed\n");
+					//fprintf(stdout, "Error: predicate creation failed\n");
 					destroy_module(p->m);
 					p->m = NULL;
 					p->error = true;
@@ -1455,7 +1455,7 @@ static void directives(parser *p, term *t)
 	}
 }
 
-void parser_xref(parser *p, term *t, rule *parent)
+void parser_xref(parser *p, term *t, predicate *parent)
 {
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
@@ -1505,7 +1505,7 @@ void parser_xref(parser *p, term *t, rule *parent)
 		module *tmp_m = NULL;
 
 		while (m) {
-			rule *h = find_rule(m, c);
+			predicate *h = find_predicate(m, c);
 
 			if ((c+c->nbr_cells) >= (t->cells+t->cidx-1)) {
 				if (parent && (h == parent))
@@ -1534,7 +1534,7 @@ void parser_xref(parser *p, term *t, rule *parent)
 
 static void parser_xref_db(parser *p)
 {
-	for (rule *h = p->m->head; h; h = h->next) {
+	for (predicate *h = p->m->head; h; h = h->next) {
 		for (clause *r = h->head; r; r = r->next)
 			parser_xref(p, &r->t, h);
 	}
@@ -2867,7 +2867,7 @@ static void module_purge(module *m)
 	if (!m || !m->dirty)
 		return;
 
-	for (rule *h = m->head; h; h = h->next) {
+	for (predicate *h = m->head; h; h = h->next) {
 		clause *last = NULL;
 
 		for (clause *r = h->head; r;) {
@@ -3096,7 +3096,7 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 	query q = {0};
 	q.m = m;
 
-	for (rule *h = m->head; h; h = h->next) {
+	for (predicate *h = m->head; h; h = h->next) {
 		if (h->is_prebuilt)
 			continue;
 
@@ -3158,8 +3158,8 @@ void destroy_module(module *m)
 		m->tasks = task;
 	}
 
-	for (rule *h = m->head; h;) {
-		rule *save = h->next;
+	for (predicate *h = m->head; h;) {
+		predicate *save = h->next;
 
 		for (clause *r = h->head; r;) {
 			clause *save = r->next;
