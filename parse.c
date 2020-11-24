@@ -1825,7 +1825,8 @@ static void parser_dcg_rewrite(parser *p)
 	sprintf(src, "dcg_translate((%s),_TermOut).", dst);
 	free(dst);
 
-	// Being conservative here and using temp parser/query objects...
+	// Being conservative here (for now) and using
+	// temp parser/query objects...
 
 	parser *p2 = create_parser(p->m);
 	ensure(p2);
@@ -1869,10 +1870,11 @@ static void parser_dcg_rewrite(parser *p)
 		return;
 	}
 
-#if 0
-	destroy_parser_nodelete(p2);
+#if 1
+	destroy_parser(p2);
 	p2 = create_parser(p->m);
 	ensure(p2);
+	p2->skip = true;
 #else
 	parser_reset(p2);
 #endif
