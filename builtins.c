@@ -646,7 +646,7 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 
 	parser *p = q->m->p;
 	p->srcptr = dst2;
-	parser_tokenize(p, 0, 0);
+	parser_tokenize(p, false, false);
 	parser_attach(p, 0);
 	parser_assign_vars(p, 0, false);
 	//parser_xref(p, p->t, NULL);
@@ -2069,7 +2069,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 
 	frame *g = GET_FRAME(q->st.curr_frame);
 	p->read_term = g->nbr_vars;
-	parser_tokenize(p, 0, 0);
+	parser_tokenize(p, false, false);
 	p->read_term = 0;
 
 	q->m->flag.character_escapes = save;
@@ -4606,7 +4606,7 @@ static cell *clone_to_tmp(query *q, cell *p1)
 	return clone2_to_tmp(q, p1);
 }
 
-static cell *clone2_to_heap(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
+static cell *clone2_to_heap(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
 {
 	cell *tmp = alloc_heap(q, (prefix?1:0)+nbr_cells+suffix);
 	ensure(tmp);
@@ -4630,12 +4630,12 @@ static cell *clone2_to_heap(query *q, int prefix, cell *p1, idx_t nbr_cells, idx
 	return tmp;
 }
 
-cell *clone_to_heap(query *q, int prefix, cell *p1, idx_t suffix)
+cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix)
 {
 	return clone2_to_heap(q, prefix, p1, p1->nbr_cells, suffix);
 }
 
-static cell *copy_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
+static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
 {
 	cell *tmp = alloc_heap(q, (prefix?1:0)+nbr_cells+suffix);
 	ensure(tmp);
@@ -4692,7 +4692,7 @@ static cell *copy_to_heap2(query *q, int prefix, cell *p1, idx_t nbr_cells, idx_
 	return tmp;
 }
 
-cell *copy_to_heap(query *q, int prefix, cell *p1, idx_t suffix)
+cell *copy_to_heap(query *q, bool prefix, cell *p1, idx_t suffix)
 {
 	return copy_to_heap2(q, prefix, p1, p1->nbr_cells, suffix);
 }
@@ -5509,7 +5509,7 @@ static int fn_iso_current_op_3(query *q)
 	GET_NEXT_ARG(p_type,atom_or_var);
 	GET_NEXT_ARG(p_name,atom);
 	const char *sname = GET_STR(p_name);
-	int prefix = 0;
+	bool prefix = false;
 
 	if (is_atom(p_type)) {
 		const char *stype = GET_STR(p_type);
@@ -5521,7 +5521,7 @@ static int fn_iso_current_op_3(query *q)
 	}
 
 	unsigned type = 0;
-	int user_op = 0;
+	bool user_op = false;
 	int prec = get_op(q->m, sname, &type, &user_op, prefix);
 
 	if (!prec)
@@ -6069,10 +6069,10 @@ static int fn_iso_op_3(query *q)
 		return 0;
 	}
 
-	int tmp_userop = 0;
+	bool tmp_userop = false;
 	unsigned tmp_optype = 0;
 
-	int ok = get_op(q->m, GET_STR(p3), &tmp_optype, &tmp_userop, 0);
+	int ok = get_op(q->m, GET_STR(p3), &tmp_optype, &tmp_userop, false);
 
 	if (ok && !tmp_userop) {
 		throw_error(q, p3, "permission_error", "can't_create_op");
@@ -9667,7 +9667,7 @@ static int fn_char_type_2(query *q)
 static void restore_db(module *m, FILE *fp)
 {
 	parser *p = create_parser(m);
-	query *q = create_query(m, 0);
+	query *q = create_query(m, false);
 	ensure(q);
 	p->one_shot = true;
 	p->fp = fp;
@@ -9678,7 +9678,7 @@ static void restore_db(module *m, FILE *fp)
 			break;
 
 		p->srcptr = p->save_line;
-		parser_tokenize(p, 0, 0);
+		parser_tokenize(p, false, false);
 		parser_xref(p, p->t, NULL);
 		query_execute(q, p->t);
 		clear_term(p->t);

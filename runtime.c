@@ -946,10 +946,10 @@ bool match_clause(query *q, cell *p1, idx_t p1_ctx)
 
 		if (!h) {
 			const char *name = GET_STR(p1);
-			int tmp_userop = 0;
+			bool tmp_userop = false;
 			unsigned tmp_optype = 0;
 
-			if (get_op(q->m, name, &tmp_optype, &tmp_userop, 0)) {
+			if (get_op(q->m, name, &tmp_optype, &tmp_userop, false)) {
 				throw_error(q, p1, "permission_error", "access_control_structure");
 				return false;
 			} else

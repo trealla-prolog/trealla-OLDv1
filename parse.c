@@ -173,7 +173,7 @@ idx_t index_from_pool(const char *name)
 	return add_to_pool(name);
 }
 
-unsigned get_op(module *m, const char *name, unsigned *optype, int *userop, int hint_prefix)
+unsigned get_op(module *m, const char *name, unsigned *optype, bool *userop, bool hint_prefix)
 {
 	assert(m);
 	assert(name);
@@ -184,7 +184,7 @@ unsigned get_op(module *m, const char *name, unsigned *optype, int *userop, int 
 
 		if (!strcmp(ptr->name, name)) {
 			if (optype) *optype = ptr->optype;
-			if (userop) *userop = 1;
+			if (userop) *userop = true;
 			return ptr->precedence;
 		}
 	}
@@ -195,13 +195,13 @@ unsigned get_op(module *m, const char *name, unsigned *optype, int *userop, int 
 
 		if (!strcmp(ptr->name, name)) {
 			if (optype) *optype = ptr->optype;
-			if (userop) *userop = 0;
+			if (userop) *userop = false;
 			return ptr->precedence;
 		}
 	}
 
 	if (hint_prefix)
-		return get_op(m, name, optype, userop, 0);
+		return get_op(m, name, optype, userop, false);
 
 	return 0;
 }
@@ -211,7 +211,7 @@ bool set_op(module *m, const char *name, unsigned optype, unsigned precedence)
 	ensure (m && name);
 
 	unsigned ot = 0, prec = 0;
-	int userop = 0;
+	bool userop = false;
 	int hint = IS_PREFIX(optype);
 
 	if ((prec = get_op(m, name, &ot, &userop, hint)) != 0) {
@@ -950,7 +950,7 @@ void destroy_query(query *q)
 	free(q);
 }
 
-query *create_query(module *m, int is_task)
+query *create_query(module *m, bool is_task)
 {
 	static uint64_t g_query_id = 0;
 
@@ -995,7 +995,7 @@ query *create_query(module *m, int is_task)
 
 query *create_task(query *q, cell *curr_cell)
 {
-	query *subq = create_query(q->m, 1);
+	query *subq = create_query(q->m, true);
 	if (subq) {
 		subq->parent = q;
 		subq->st.fp = 1;
@@ -1469,7 +1469,7 @@ void parser_xref(parser *p, term *t, rule *parent)
 		module *m = p->m;
 
 		unsigned optype;
-		int userop, hint_prefix = c->arity == 1;
+		bool userop, hint_prefix = c->arity == 1;
 
 		if ((c->arity == 2)
 		    && !GET_OP(c)
@@ -1792,7 +1792,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 	return true;
 }
 
-bool parser_attach(parser *p, int start_idx)
+bool parser_attach(parser *p, idx_t start_idx)
 {
 	while (attach_ops(p, start_idx))
 		;
@@ -1817,7 +1817,7 @@ static void parser_dcg_rewrite(parser *p)
 	if (strcmp(GET_STR(p->t->cells), "-->") || (p->t->cells->arity != 2))
 		return;
 
-	query *q = create_query(p->m, 0);
+	query *q = create_query(p->m, false);
 	ensure(q);
 	char *dst = print_term_to_strbuf(q, p->t->cells, 0, -1);
 	char *src = malloc(strlen(dst)+256);
@@ -1831,7 +1831,7 @@ static void parser_dcg_rewrite(parser *p)
 	ensure(p2);
 	p2->skip = true;
 	p2->srcptr = src;
-	parser_tokenize(p2, 0, 0);
+	parser_tokenize(p2, false, false);
 	parser_xref(p2, p2->t, NULL);
 	query_execute(q, p2->t);
 	free(src);
@@ -1878,7 +1878,7 @@ static void parser_dcg_rewrite(parser *p)
 #endif
 
 	p2->srcptr = src;
-	parser_tokenize(p2, 0, 0);
+	parser_tokenize(p2, false, false);
 	free(src);
 
 	clear_term(p->t);
@@ -2444,11 +2444,11 @@ static bool get_token(parser *p, int last_op)
 				continue;
 			}
 
-			int userop = 0;
+			bool userop = false;
 
-			if (get_op(p->m, p->token, NULL, &userop, 0)) {
+			if (get_op(p->m, p->token, NULL, &userop, false)) {
 				//if (userop)
-					p->is_op = 1;
+					p->is_op = true;
 
 				if (!strcmp(p->token, ","))
 					p->quoted = 1;
@@ -2493,7 +2493,7 @@ static bool get_token(parser *p, int last_op)
 		if (isupper(*p->token) || (*p->token == '_'))
 			p->is_variable = true;
 		else if (get_op(p->m, p->token, NULL, NULL, 0))
-			p->is_op = 1;
+			p->is_op = true;
 
 		p->srcptr = (char*)src;
 		return true;
@@ -2513,7 +2513,7 @@ static bool get_token(parser *p, int last_op)
 	}
 
 	static const char *s_delims = "(){}[]|_, `'\"\t\r\n";
-	p->is_op = 1;
+	p->is_op = true;
 
 	while (*src) {
 		ch = get_char_utf8(&src);
@@ -2605,13 +2605,12 @@ void fix_list(cell *c)
 	}
 }
 
-unsigned parser_tokenize(parser *p, int args, int consing)
+unsigned parser_tokenize(parser *p, bool args, bool consing)
 {
 	assert(p);
-	int begin_idx = p->t->cidx;
-	int last_op = 1;
+	idx_t begin_idx = p->t->cidx, save_idx = 0;
+	bool last_op = true, is_func = false;
 	unsigned arity = 1;
-	int is_func = 0, save_idx = 0;
 	p->depth++;
 
 	while (get_token(p, last_op)) {
@@ -2642,7 +2641,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 			}
 
 			p->end_of_term = true;
-			last_op = 1;
+			last_op = true;
 
 			if (p->one_shot)
 				break;
@@ -2655,7 +2654,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 			cell *c = make_literal(p, g_dot_s);
 			c->arity = 2;
 			p->start_term = true;
-			parser_tokenize(p, 1, 1);
+			parser_tokenize(p, true, true);
 
 			if (p->error)
 				break;
@@ -2665,7 +2664,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 			c->nbr_cells = p->t->cidx - save_idx;
 			fix_list(c);
 			p->start_term = false;
-			last_op = 0;
+			last_op = false;
 			continue;
 		}
 
@@ -2675,7 +2674,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 			ensure(c);
 			c->arity = 1;
 			p->start_term = true;
-			parser_tokenize(p, 0, 0);
+			parser_tokenize(p, false, false);
 
 			if (p->error)
 				break;
@@ -2683,13 +2682,13 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 			c = p->t->cells+save_idx;
 			c->nbr_cells = p->t->cidx - save_idx;
 			p->start_term = false;
-			last_op = 0;
+			last_op = false;
 			continue;
 		}
 
 		if (!p->quoted && !strcmp(p->token, "(")) {
 			p->start_term = true;
-			unsigned tmp_arity = parser_tokenize(p, is_func, 0);
+			unsigned tmp_arity = parser_tokenize(p, is_func, false);
 
 			if (p->error)
 				break;
@@ -2700,8 +2699,8 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 				c->nbr_cells = p->t->cidx - save_idx;
 			}
 
-			is_func = 0;
-			last_op = 0;
+			is_func = false;
+			last_op = false;
 			p->start_term = false;
 			continue;
 		}
@@ -2710,7 +2709,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 			cell *c = make_literal(p, g_dot_s);
 			c->arity = 2;
 			p->start_term = true;
-			last_op = 1;
+			last_op = true;
 			continue;
 		}
 
@@ -2723,7 +2722,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 				break;
 			}
 
-			last_op = 1;
+			last_op = true;
 			continue;
 		}
 
@@ -2751,7 +2750,7 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 		}
 
 		unsigned optype = 0;
-		int userop = 0;
+		bool userop = false;
 		int precedence = get_op(p->m, p->token, &optype, &userop, last_op);
 
 		if (p->quoted /*&& !userop*/) {
@@ -2780,8 +2779,8 @@ unsigned parser_tokenize(parser *p, int args, int consing)
 		int func = (p->val_type == TYPE_LITERAL) && !optype && (*p->srcptr == '(');
 
 		if (func) {
-			is_func = 1;
-			p->is_op = 0;
+			is_func = true;
+			p->is_op = false;
 			save_idx = p->t->cidx;
 		}
 
@@ -2899,7 +2898,7 @@ static bool parser_run(parser *p, const char *src, int dump)
 {
 	p->srcptr = (char*)src;
 
-	if (!parser_tokenize(p, 0, 0))
+	if (!parser_tokenize(p, false, false))
 		return false;
 
 	if (p->skip) {
@@ -2917,7 +2916,7 @@ static bool parser_run(parser *p, const char *src, int dump)
 
 	parser_xref(p, p->t, NULL);
 	bool ok = false;
-	query *q = create_query(p->m, 0);
+	query *q = create_query(p->m, false);
 	if (q) {
 		q->run_init = p->run_init;
 		query_execute(q, p->t);
@@ -2956,7 +2955,7 @@ module *module_load_text(module *m, const char *src)
 
 	p->consulting = true;
 	p->srcptr = (char*)src;
-	parser_tokenize(p, 0, 0);
+	parser_tokenize(p, false, false);
 
 	if (!p->error && !p->end_of_term && p->t->cidx) {
 		fprintf(stdout, "Error: syntax error, incomplete statement\n");
@@ -3004,7 +3003,7 @@ bool module_load_fp(module *m, FILE *fp, const char *filename)
 				break;
 
 			p->srcptr = p->save_line;
-			ok = parser_tokenize(p, 0, 0);
+			ok = parser_tokenize(p, false, false);
 		}
 		while (ok);
 
@@ -3136,7 +3135,7 @@ static void make_rule(module *m, const char *src)
 	{
 		p->consulting = true;
 		p->srcptr = (char*)src;
-		parser_tokenize(p, 0, 0);
+		parser_tokenize(p, false, false);
 		m->prebuilt = false;
 		destroy_parser(p);
 	} else {
