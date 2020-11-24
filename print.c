@@ -85,7 +85,7 @@ size_t sprint_int(char *dst, size_t size, int_t n, int base)
 	return dst - save_dst;
 }
 
-static size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen)
+static size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen, bool dq)
 {
 	extern const char *g_escapes;
 	extern const char *g_anti_escapes;
@@ -102,10 +102,10 @@ static size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen
 			}
 
 			len += 2;
-		} else if (ch == '\'') {
+		} else if (ch == (dq?'"':'\'')) {
 			if (dstlen) {
 				*dst++ = '\\';
-				*dst++ = '\'';
+				*dst++ = ch;
 			}
 
 			len += 2;
@@ -327,7 +327,7 @@ size_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 	int dq = 0, quote = !is_variable(c) && needs_quote(q->m, src, LEN_STR(c));
 	if (is_string(c)) dq = quote = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
-	dst += formatted(dst, dstlen, src, LEN_STR(c));
+	dst += formatted(dst, dstlen, src, LEN_STR(c), dq);
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 
 	if (!is_structure(c))
@@ -423,7 +423,7 @@ size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		while (is_list(l)) {
 			cell *h = LIST_HEAD(l);
 			cell *c = deref(q, h, c_ctx);
-			dst += formatted(dst, dstlen, GET_STR(c), LEN_STR(c));
+			dst += formatted(dst, dstlen, GET_STR(c), LEN_STR(c), false);
 			l = LIST_TAIL(l);
 			l = deref(q, l, c_ctx);
 			c_ctx = q->latest_ctx;
@@ -488,7 +488,7 @@ size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 			while (is_list(l)) {
 				dst += snprintf(dst, dstlen, "%s", ",");
 				cell *h = LIST_HEAD(l);
-				dst += formatted(dst, dstlen, GET_STR(h), LEN_STR(h));
+				dst += formatted(dst, dstlen, GET_STR(h), LEN_STR(h), false);
 				l = LIST_TAIL(l);
 			}
 
@@ -539,7 +539,7 @@ size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 			if ((running < 0) && is_blob(c) && (len_str > 256))
 				len_str = 256;
 
-			dst += formatted(dst, dstlen, src, LEN_STR(c));
+			dst += formatted(dst, dstlen, src, LEN_STR(c), dq);
 
 			if ((running < 0) && is_blob(c) && (len_str == 256))
 				dst += snprintf(dst, dstlen, "%s", "|...");
