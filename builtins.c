@@ -7913,12 +7913,20 @@ static int fn_date_time_7(query *q)
 
 static int fn_shell_1(query *q)
 {
-	return 0;
+	GET_FIRST_ARG(p1,atom);
+	system(GET_STR(p1));
+	return 1;
 }
 
 static int fn_shell_2(query *q)
 {
-	return 0;
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,variable);
+	int status = system(GET_STR(p1));
+	cell tmp;
+	make_int(&tmp, status);
+	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	return 1;
 }
 
 static uint_t g_seed = 0;
