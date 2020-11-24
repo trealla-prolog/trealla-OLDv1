@@ -242,7 +242,8 @@ Others
 	now/0                   # function returning C-time in secs as integer
 	now/1                   # now (-integer) C-time in secs as integer
 	get_time/1              # get_time(-variable) C-time in secs as float
-	srandom/1               # seed(+integer) seed random number generator
+	set_seed/1              # set_seed(+integer) set random number seed
+	get_seed/1              # get_seed(-integer) get random number seed
 	rand/0                  # function returning integer [0,RAND_MAX]
 	rand/1                  # integer(-integer) integer [0,RAND_MAX]
 	delay/1                 # delay(+integer) sleep for ms

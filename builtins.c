@@ -7863,10 +7863,28 @@ static int fn_log10_1(query *q)
 	return 1;
 }
 
-static int fn_srandom_1(query *q)
+static uint64_t g_seed = 0;
+#define random_M 0x7FFFFFFFL
+
+static double rnd(void)
+{
+	g_seed = ((g_seed * 2743) + 5923) & random_M;
+	return((double)g_seed / (double)random_M);
+}
+
+static int fn_set_seed_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	srandom(p1->val_num);
+	g_seed = p1->val_num;
+	return 1;
+}
+
+static int fn_get_seed_1(query *q)
+{
+	GET_FIRST_ARG(p1,variable);
+	cell tmp;
+	make_int(&tmp, g_seed);
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return 1;
 }
 
@@ -7877,7 +7895,7 @@ static int fn_random_1(query *q)
 
 	if (is_variable(&p1)) {
 		cell tmp;
-		make_float(&tmp, ((double)random())/UINT32_MAX);
+		make_float(&tmp, rnd());
 		set_var(q, &p1, p1_tmp_ctx, &tmp, q->st.curr_frame);
 		return 1;
 	}
@@ -7888,7 +7906,7 @@ static int fn_random_1(query *q)
 	}
 
 	q->accum.val_type = TYPE_INTEGER;
-	q->accum.val_num = llabs((long long)(random()%p1.val_num));
+	q->accum.val_num = llabs((long long)((uint_t)rnd() % p1.val_num));
 	q->accum.val_den = 1;
 	return 1;
 }
@@ -7896,7 +7914,7 @@ static int fn_random_1(query *q)
 static int fn_rand_0(query *q)
 {
 	q->accum.val_type = TYPE_INTEGER;
-	q->accum.val_num = random()%RAND_MAX;
+	q->accum.val_num = (uint_t)rnd() % RAND_MAX;
 	q->accum.val_den = 1;
 	return 1;
 }
@@ -10622,7 +10640,9 @@ static const struct builtins g_other_funcs[] =
 	{"random", 1, fn_random_1, "?integer"},
 	{"rand", 1, fn_rand_1, "?integer"},
 	{"rand", 0, fn_rand_0, NULL},
-	{"srandom", 1, fn_srandom_1, "+integer"},
+	{"srandom", 1, fn_set_seed_1, "+integer"},
+	{"set_seed", 1, fn_set_seed_1, "+integer"},
+	{"get_seed", 1, fn_get_seed_1, "-integer"},
 	{"between", 3, fn_between_3, "+integer,+integer,-integer"},
 	{"log10", 1, fn_log10_1, "+integer"},
 	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list"},

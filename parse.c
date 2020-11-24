@@ -3676,13 +3676,6 @@ prolog *pl_create()
 
 	//printf("Library: %s\n", g_tpl_lib);
 
-#ifdef NDEBUG
-	srandom(time(0)+clock()+getpid());
-#else
-	static unsigned seed = 0xdeadbeef;
-	srandom(++seed);
-#endif
-
 	prolog *pl = calloc(1, sizeof(prolog));
 	if (pl) {
 		pl->m = create_module("user");
