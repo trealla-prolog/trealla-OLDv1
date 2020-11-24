@@ -4,6 +4,19 @@
 
 typedef struct prolog_ prolog;
 
+typedef enum {
+//PLANNED:	pl_halt    = -4,
+//PLANNED:	pl_abort   = -3,
+//PLANNED:	pl_yield   = -2,
+//PLANNED:	pl_error   = -1,
+	pl_halt    =  0,
+	pl_abort   =  0,
+	pl_yield   =  0,
+	pl_error   =  0,
+	pl_failure =  0,
+	pl_success =  1,
+} prolog_state;
+
 prolog *pl_create();
 void pl_destroy(prolog*);
 
