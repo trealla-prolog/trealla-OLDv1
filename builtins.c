@@ -7863,6 +7863,64 @@ static int fn_log10_1(query *q)
 	return 1;
 }
 
+static int fn_pid_1(query *q)
+{
+	GET_FIRST_ARG(p1,variable);
+	cell tmp;
+	make_int(&tmp, getpid());
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	return 1;
+}
+
+static int fn_wall_time_1(query *q)
+{
+	GET_FIRST_ARG(p1,variable);
+	cell tmp;
+	make_int(&tmp, time(NULL));
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	return 1;
+}
+
+static int fn_date_time_7(query *q)
+{
+	GET_FIRST_ARG(p1,variable);
+	GET_NEXT_ARG(p2,variable);
+	GET_NEXT_ARG(p3,variable);
+	GET_NEXT_ARG(p4,variable);
+	GET_NEXT_ARG(p5,variable);
+	GET_NEXT_ARG(p6,variable);
+	GET_NEXT_ARG(p7,variable);
+	struct tm tm;
+	time_t now = time(NULL);
+	tm = *localtime(&now);
+	cell tmp;
+	make_int(&tmp, tm.tm_year+1900);
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	make_int(&tmp, tm.tm_mon+1);
+	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	make_int(&tmp, tm.tm_mday);
+	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+	make_int(&tmp, tm.tm_hour);
+	set_var(q, p4, p4_ctx, &tmp, q->st.curr_frame);
+	make_int(&tmp, tm.tm_min);
+	set_var(q, p5, p5_ctx, &tmp, q->st.curr_frame);
+	make_int(&tmp, tm.tm_sec);
+	set_var(q, p6, p6_ctx, &tmp, q->st.curr_frame);
+	make_int(&tmp, 0);
+	set_var(q, p7, p7_ctx, &tmp, q->st.curr_frame);
+	return 1;
+}
+
+static int fn_shell_1(query *q)
+{
+	return 0;
+}
+
+static int fn_shell_2(query *q)
+{
+	return 0;
+}
+
 static uint_t g_seed = 0;
 #define random_M 0x7FFFFFFFL
 
@@ -10643,6 +10701,11 @@ static const struct builtins g_other_funcs[] =
 	{"srandom", 1, fn_set_seed_1, "+integer"},
 	{"set_seed", 1, fn_set_seed_1, "+integer"},
 	{"get_seed", 1, fn_get_seed_1, "-integer"},
+	{"pid", 1, fn_pid_1, "-integer"},
+	{"shell", 1, fn_shell_1, "+atom"},
+	{"shell", 2, fn_shell_2, "+atom,??"},
+	{"wall_time", 1, fn_wall_time_1, "-integer"},
+	{"date_time", 7, fn_date_time_7, "-yyyy,-m,-d,-h,--m,-s,-ms"},
 	{"between", 3, fn_between_3, "+integer,+integer,-integer"},
 	{"log10", 1, fn_log10_1, "+integer"},
 	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list"},
