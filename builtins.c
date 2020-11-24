@@ -8812,11 +8812,19 @@ static int fn_access_file_2(query *q)
 		amode = W_OK;
 	else if (!strcmp(mode, "append"))
 		amode = W_OK;
+	else if (!strcmp(mode, "execute"))
+		amode = X_OK;
+	else if (!strcmp(mode, "none"))
+		return 1;
+	else {
+		throw_error(q, p2, "domain_error", "mode");
+		return 0;
+	}
 
 	struct stat st = {0};
 	int status = stat(filename, &st);
 
-	if (status && (!strcmp(mode, "read") || !strcmp(mode, "exist") || !strcmp(mode, "none")))
+	if (status && (!strcmp(mode, "read") || !strcmp(mode, "exist") || !strcmp(mode, "execute") || !strcmp(mode, "none")))
 		return 0;
 
 	if (status && (!strcmp(mode, "write") || !strcmp(mode, "append")))
