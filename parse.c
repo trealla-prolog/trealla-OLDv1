@@ -2394,7 +2394,7 @@ static bool get_token(parser *p, int last_op)
 			while (*src) {
 				int ch = get_char_utf8(&src);
 
-				if ((p->quoted == '\'') && (ch == p->quoted) && (*src == ch)) {
+				if ((ch == p->quoted) && (*src == ch)) {
 					ch = *src++;
 				} else if (ch == p->quoted) {
 					if ((ch == '"') && !*p->token && p->string) {
