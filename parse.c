@@ -305,6 +305,18 @@ module *find_next_module(module *m)
 	return m->next;
 }
 
+static module *find_filename(const char *name)
+{
+	assert(name);
+
+	for (module *m = g_modules; m; m = m->next) {
+		if (!strcmp(m->filename, name))
+			return m;
+	}
+
+	return NULL;
+}
+
 module *find_module(const char *name)
 {
 	assert(name);
@@ -1152,7 +1164,9 @@ static void directives(parser *p, term *t)
 		const char *name = GET_STR(p1);
 		char *tmpbuf = relative_to(p->m->filename, name);
 
-		//printf("*** ensure %s\n", tmpbuf);
+		if (find_filename(tmpbuf)) {
+			return;
+		}
 
 		if (!module_load_file(p->m, tmpbuf)) {
 			fprintf(stdout, "Error: not found: %s\n", tmpbuf);
