@@ -2945,7 +2945,10 @@ static bool parser_run(parser *p, const char *src, int dump)
 		p->m = q->m;
 		destroy_query(q);
 	}
-	module_purge(p->m);
+
+	if (dump)
+		module_purge(p->m);
+
 	return ok;
 }
 
