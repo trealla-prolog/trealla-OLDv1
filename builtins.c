@@ -7863,7 +7863,7 @@ static int fn_log10_1(query *q)
 	return 1;
 }
 
-static uint64_t g_seed = 0;
+static uint_t g_seed = 0;
 #define random_M 0x7FFFFFFFL
 
 static double rnd(void)
