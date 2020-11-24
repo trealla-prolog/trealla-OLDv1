@@ -7906,7 +7906,7 @@ static int fn_random_1(query *q)
 	}
 
 	q->accum.val_type = TYPE_INTEGER;
-	q->accum.val_num = llabs((long long)((uint_t)rnd() % p1.val_num));
+	q->accum.val_num = llabs((long long)((int_t)(rnd() * RAND_MAX) % p1.val_num));
 	q->accum.val_den = 1;
 	return 1;
 }
@@ -7914,7 +7914,7 @@ static int fn_random_1(query *q)
 static int fn_rand_0(query *q)
 {
 	q->accum.val_type = TYPE_INTEGER;
-	q->accum.val_num = (uint_t)rnd() % RAND_MAX;
+	q->accum.val_num = (int_t)rnd() * RAND_MAX;
 	q->accum.val_den = 1;
 	return 1;
 }
@@ -7923,7 +7923,7 @@ static int fn_rand_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
-	make_int(&tmp, random()%RAND_MAX);
+	make_int(&tmp, rnd() * RAND_MAX);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return 1;
 }
