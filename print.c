@@ -5,7 +5,6 @@
 #include <ctype.h>
 #include <math.h>
 #include <float.h>
-#include <assert.h>
 
 #ifdef _WIN32
 #define snprintf _snprintf

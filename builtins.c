@@ -7,7 +7,6 @@
 #include <math.h>
 #include <float.h>
 #include <errno.h>
-#include <assert.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 
@@ -447,7 +446,7 @@ static uint8_t g_tab5[64000];
 
 static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth)
 {
-	if (depth >= MAX_DEPTH) {
+	if (depth >= 64000) {
 		q->cycle_error = 1;
 		return;
 	}
@@ -498,6 +497,7 @@ static void deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth)
 	while (arity--) {
 		cell *c = deref(q, p1, p1_ctx);
 		deep_copy2_to_tmp(q, c, q->latest_ctx, depth+1);
+		if (q->cycle_error) return;
 		p1 += p1->nbr_cells;
 	}
 
@@ -521,6 +521,7 @@ cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 
 	q->cycle_error = 0;
 	deep_copy2_to_tmp(q, p1, p1_ctx, 0);
+	if (q->cycle_error) return NULL;
 
 	if (g_varno != g->nbr_vars) {
 		if (!create_vars(q, g_varno-g->nbr_vars)) {
@@ -535,6 +536,7 @@ cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 static cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx)
 {
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx);
+	if (q->cycle_error) return NULL;
 	ensure(tmp);
 	cell *tmp2 = alloc_heap(q, tmp->nbr_cells);
 	ensure(tmp2);
@@ -544,7 +546,7 @@ static cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx)
 
 static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth)
 {
-	if (depth >= MAX_DEPTH) {
+	if (depth >= 64000) {
 		q->cycle_error = 1;
 		return;
 	}
@@ -574,6 +576,7 @@ static void deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth)
 	while (arity--) {
 		cell *c = deref(q, p1, p1_ctx);
 		deep_clone2_to_tmp(q, c, q->latest_ctx, depth+1);
+		if (q->cycle_error) return;
 		p1 += p1->nbr_cells;
 	}
 
@@ -594,12 +597,14 @@ static cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 
 	q->cycle_error = 0;
 	deep_clone2_to_tmp(q, p1, p1_ctx, 0);
+	if (q->cycle_error) return NULL;
 	return q->tmp_heap;
 }
 
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 {
 	p1 = deep_clone_to_tmp(q, p1, p1_ctx);
+	if (q->cycle_error) return NULL;
 	cell *tmp = alloc_heap(q, p1->nbr_cells);
 	ensure(tmp);
 	copy_cells(tmp, p1, p1->nbr_cells);
@@ -4415,9 +4420,12 @@ static int fn_iso_univ_2(query *q)
 	if (is_variable(p2)) {
 		cell *tmp = deep_copy_to_heap(q, p1, p1_ctx);
 
-		if (q->cycle_error)
-				return 0;
+		if (q->cycle_error) {
+			throw_error(q, p1, "resource_error", "cyclic_term");
+			return 0;
+		}
 
+		if (!tmp) return 0;
 		unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 		cell tmp2 = *tmp;
 		tmp2.nbr_cells = 1;
@@ -4440,6 +4448,13 @@ static int fn_iso_univ_2(query *q)
 
 	if (is_variable(p1)) {
 		cell *tmp = deep_copy_to_tmp(q, p2, p2_ctx);
+
+		if (q->cycle_error) {
+			throw_error(q, p1, "resource_error", "cyclic_term");
+			return 0;
+		}
+
+		if (!tmp) return 0;
 		unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 		p2 = tmp;
 		unsigned arity = 0;
@@ -4712,9 +4727,6 @@ static int fn_iso_copy_term_2(query *q)
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
 	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx);
-
-	if (q->cycle_error)
-			return 0;
 
 	if (!tmp) {
 		throw_error(q, p1, "resource_error", "too_many_vars");
@@ -5006,6 +5018,12 @@ static int fn_iso_asserta_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
+
+	if (q->cycle_error) {
+		throw_error(q, p1, "resource_error", "cyclic_term");
+		return 0;
+	}
+
 	idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->m->p;
 
@@ -5031,6 +5049,12 @@ static int fn_iso_assertz_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx);
+
+	if (q->cycle_error) {
+		throw_error(q, p1, "resource_error", "cyclic_term");
+		return 0;
+	}
+
 	idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->m->p;
 
@@ -5314,6 +5338,12 @@ static int fn_iso_throw_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	cell *c = deep_clone_to_tmp(q, p1, p1_ctx);
+
+	if (q->cycle_error) {
+		throw_error(q, p1, "resource_error", "cyclic_term");
+		return 0;
+	}
+
 	q->latest_ctx = q->st.curr_frame;
 
 	if (has_vars(q, c, p1_ctx)) {
@@ -5846,6 +5876,12 @@ static int fn_sys_queue_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
+
+	if (q->cycle_error) {
+		throw_error(q, p1, "resource_error", "cyclic_term");
+		return 0;
+	}
+
 	ensure(tmp);
 	alloc_queue(q, tmp);
 	return 1;
@@ -5856,6 +5892,12 @@ static int fn_sys_queuen_2(query *q)
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,any);
 	cell *tmp = deep_clone_to_tmp(q, p2, p2_ctx);
+
+	if (q->cycle_error) {
+		throw_error(q, p1, "resource_error", "cyclic_term");
+		return 0;
+	}
+
 	ensure(tmp);
 	alloc_queuen(q, p1->val_num, tmp);
 	return 1;
@@ -6022,6 +6064,12 @@ static int fn_iso_bagof_3(query *q)
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			c->flags |= FLAG_DELETED;
 			cell *c1 = deep_clone_to_tmp(q, p1, q->st.curr_frame);
+
+			if (q->cycle_error) {
+				throw_error(q, p1, "resource_error", "cyclic_term");
+				return 0;
+			}
+
 			ensure(c1);
 			alloc_queuen(q, q->st.qnbr, c1);
 		}
@@ -6169,6 +6217,12 @@ static int do_asserta_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,atom_or_var);
 	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
+
+	if (q->cycle_error) {
+		throw_error(q, p1, "resource_error", "cyclic_term");
+		return 0;
+	}
+
 	idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->m->p;
 
@@ -6220,6 +6274,12 @@ static int do_assertz_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,atom_or_var);
 	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
+
+	if (q->cycle_error) {
+		throw_error(q, p1, "resource_error", "cyclic_term");
+		return 0;
+	}
+
 	idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->m->p;
 
@@ -7688,6 +7748,12 @@ static int fn_spawn_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
+
+	if (q->cycle_error) {
+		throw_error(q, p1, "resource_error", "cyclic_term");
+		return 0;
+	}
+
 	query *task = create_task(q, tmp);
 	task->yielded = true;
 	task->spawned = true;
@@ -7740,6 +7806,11 @@ static int fn_send_1(query *q)
 	GET_FIRST_ARG(p1,nonvar);
 	query *dstq = q->parent ? q->parent : q;
 	cell *c = deep_clone_to_tmp(q, p1, p1_ctx);
+
+	if (q->cycle_error) {
+		throw_error(q, p1, "resource_error", "cyclic_term");
+		return 0;
+	}
 
 	for (idx_t i = 0; i < c->nbr_cells; i++) {
 		cell *c2 = c + i;
@@ -9555,6 +9626,12 @@ static int do_collect_vars(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 unsigned do_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 {
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx);
+
+	if (q->cycle_error) {
+		throw_error(q, p1, "resource_error", "cyclic_term");
+		return 0;
+	}
+
 	unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	cell *slots[MAX_ARITY] = {0};
 	do_collect_vars(q, tmp, tmp->nbr_cells, slots);
@@ -9914,8 +9991,10 @@ static int fn_del_attrs_1(query *q)
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
 
-	if (q->cycle_error)
-			return 0;
+	if (q->cycle_error) {
+		throw_error(q, p1, "resource_error", "cyclic_term");
+		return 0;
+	}
 
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->var_nbr);
@@ -9929,8 +10008,10 @@ static int fn_put_attrs_2(query *q)
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
 
-	if (q->cycle_error)
-			return 0;
+	if (q->cycle_error) {
+		throw_error(q, p1, "resource_error", "cyclic_term");
+		return 0;
+	}
 
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->var_nbr);

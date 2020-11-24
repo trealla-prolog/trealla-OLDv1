@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <limits.h>
+#include <assert.h>
 #include <sys/param.h>
 
 #ifndef USE_OPENSSL
@@ -104,7 +105,7 @@ typedef uint32_t idx_t;
 
 // These 2 assume literal or cstring types...
 
-#define GET_STR(c) ((c)->val_type != TYPE_CSTRING ? (g_pool+(c)->val_off) : (c)->flags&FLAG_BLOB ? (c)->val_str : (c)->val_chr)
+#define GET_STR(c) ((c)->val_type != TYPE_CSTRING ? (g_pool+(c)->val_off) : (c)->flags&FLAG_BLOB ? (assert((c)->val_str), (c)->val_str) : (c)->val_chr)
 #define LEN_STR(c) ((c)->flags&FLAG_BLOB ? (c)->len_str : strlen(GET_STR(c)))
 
 // Wrap an assignment that's expected to return anything but the given sentinel value.
