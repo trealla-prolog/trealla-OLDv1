@@ -8783,6 +8783,48 @@ static int fn_string_upper_2(query *q)
 	return ok;
 }
 
+static int fn_access_file_2(query *q)
+{
+	GET_FIRST_ARG(p1,atom_or_list);
+	GET_NEXT_ARG(p2,atom);
+	const char *filename;
+	char *src = NULL;
+
+	if (is_iso_list(p1)) {
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
+
+		if (!len) {
+			throw_error(q, p1, "type_error", "atom");
+			return 0;
+		}
+
+		src = chars_list_to_string(q, p1, p1_ctx, len);
+		filename = src;
+	} else
+		filename = GET_STR(p1);
+
+	const char *mode = GET_STR(p2);
+	int amode = R_OK;
+
+	if (!strcmp(mode, "read"))
+		amode = R_OK;
+	else if (!strcmp(mode, "write"))
+		amode = W_OK;
+	else if (!strcmp(mode, "append"))
+		amode = W_OK;
+
+	struct stat st = {0};
+	int status = stat(filename, &st);
+
+	if (status && (!strcmp(mode, "read") || !strcmp(mode, "exist") || !strcmp(mode, "none")))
+		return 0;
+
+	if (status && (!strcmp(mode, "write") || !strcmp(mode, "append")))
+		return 1;
+
+	return !access(filename, amode);
+}
+
 static int fn_exists_file_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -10734,6 +10776,7 @@ static const struct builtins g_other_funcs[] =
 	{"rename_file", 2, fn_rename_file_2, "+string,+string"},
 	{"delete_file", 1, fn_delete_file_1, "+string"},
 	{"exists_file", 1, fn_exists_file_1, "+string"},
+	{"access_file", 2, fn_access_file_2, "+string,+mode"},
 	{"time_file", 2, fn_time_file_2, "+string,-real"},
 	{"size_file", 2, fn_size_file_2, "+string,-integer"},
 	{"exists_directory", 1, fn_exists_directory_1, "+string"},

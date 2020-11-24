@@ -224,6 +224,7 @@ Others
 	working_directory/2
 	chdir/1
 	absolute_file_name/[2,3] # expand(Bool) & relative_to(file) options
+	access_file/2
 
 	current_key/1
 	recorda/2-3
