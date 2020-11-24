@@ -626,8 +626,8 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 	size_t len = print_term_to_buf(q, NULL, 0, &tmp, c_ctx, 1, 0, 0);
 	char *dst = malloc(len+1);
 	ensure(dst);
-	print_term_to_buf(q, dst, len+1, &tmp, c_ctx, 1, 0, 0);
-	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q->st.curr_cell) + 20;
+	len = print_term_to_buf(q, dst, len+1, &tmp, c_ctx, 1, 0, 0);
+	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q->st.curr_cell) + 1024;
 	char *dst2 = malloc(len2+1);
 	ensure(dst2);
 	q->quoted = save_quoted;
@@ -638,7 +638,7 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 	} else if (!strcmp(err_type, "type_error")) {
 		const char *t = expected;
 		if (!strncmp(t,"iso_",4)) t = t+4;
-		char tmpbuf[1024];
+		char tmpbuf[1024*8];
 		strcpy(tmpbuf, t);
 		char *ptr = strchr(tmpbuf, '_');
 		if (ptr) *ptr = '\0';
@@ -652,8 +652,9 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 	parser *p = q->m->p;
 	p->srcptr = dst2;
 	parser_tokenize(p, false, false);
+	frame *g = GET_FRAME(q->st.curr_frame);
 	parser_attach(p, 0);
-	parser_assign_vars(p, 0, false);
+	parser_assign_vars(p, g->nbr_vars, false);
 	//parser_xref(p, p->t, NULL);
 	do_throw_term(q, p->t->cells);
 	clear_term(p->t);
@@ -5337,6 +5338,13 @@ static int do_throw_term(query *q, cell *c)
 static int fn_iso_throw_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
+
+#if 0
+	printf("*** throw %s/%u\n", GET_STR(p1), p1->arity);
+	print_term(q, stdout, p1, p1_ctx, 0);
+	printf("\n");
+#endif
+
 	cell *c = deep_clone_to_tmp(q, p1, p1_ctx);
 
 	if (q->cycle_error) {
@@ -5344,7 +5352,7 @@ static int fn_iso_throw_1(query *q)
 		return 0;
 	}
 
-	q->latest_ctx = q->st.curr_frame;
+	q->latest_ctx = p1_ctx;
 
 	if (has_vars(q, c, p1_ctx)) {
 		throw_error(q, c, "instantiation_error", "instantiated");
@@ -9772,9 +9780,9 @@ void do_db_load(module *m)
 	if (!m->use_persist)
 		return;
 
-	char filename[1024];
+	char filename[1024*4];
 	snprintf(filename, sizeof(filename), "%s.db", m->name);
-	char filename2[1024];
+	char filename2[1024*4];
 	snprintf(filename2, sizeof(filename2), "%s.TMP", m->name);
 	struct stat st;
 
@@ -9806,9 +9814,9 @@ static int fn_db_save_0(query *q)
 		return 0;
 
 	fclose(q->m->fp);
-	char filename[1024];
+	char filename[1024*4];
 	snprintf(filename, sizeof(filename), "%s.db", q->m->name);
-	char filename2[1024];
+	char filename2[1024*4];
 	snprintf(filename2, sizeof(filename2), "%s.TMP", q->m->name);
 	FILE *fp = fopen(filename2, "wb");
 	if (!fp) return 0;
@@ -10319,7 +10327,7 @@ static int fn_use_module_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	if (!is_literal(p1)) return 0;
 	const char *name = GET_STR(p1);
-	char dstbuf[1024*2];
+	char dstbuf[1024*4];
 
 	if (!strcmp(name, "library")) {
 		p1 = p1 + 1;
