@@ -68,70 +68,67 @@ static idx_t alloc_grow(void** addr, size_t elem_size, idx_t min_elements, idx_t
 	return elements;
 }
 
-static void check_trail(query *q)
+static USE_RESULT prolog_state check_trail(query *q)
 {
 	if (q->st.tp > q->max_trails) {
 		q->max_trails = q->st.tp;
 
 		if (q->st.tp >= q->trails_size) {
-			FAULTINJECT(throw_error(q, q->st.curr_cell, "resource_error", "out_of_trail_space");
-				    q->error = true; return);
+			FAULTINJECT(errno = ENOMEM; q->error = true; return pl_error);
 
 			idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size*2);
 			if (!new_trailssize) {
-				throw_error(q, q->st.curr_cell, "resource_error", "out_of_trail_space");
 				q->error = true;
-				return;
+				return pl_error;
 			}
 
 			q->trails_size = new_trailssize;
 		}
 	}
+	return pl_success;
 }
 
-static void check_choice(query *q)
+static USE_RESULT prolog_state check_choice(query *q)
 {
 	if (q->cp > q->max_choices) {
 		q->max_choices = q->cp;
 
 		if (q->cp >= q->choices_size) {
-			FAULTINJECT(throw_error(q, q->st.curr_cell, "resource_error", "out_of_choice_space");
-				    q->error = true; return);
+			FAULTINJECT(errno = ENOMEM; q->error = true; return pl_error);
 
 			idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size*2);
 			if (!new_choicessize) {
-				throw_error(q, q->st.curr_cell, "resource_error", "out_of_choice_space");
 				q->error = true;
-				return;
+				return pl_error;
 			}
 
 			q->choices_size = new_choicessize;
 		}
 	}
+	return pl_success;
 }
 
-static void check_frame(query *q)
+static USE_RESULT prolog_state check_frame(query *q)
 {
 	if (q->st.fp > q->max_frames) {
 		q->max_frames = q->st.fp;
 
 		if (q->st.fp >= q->frames_size) {
-			FAULTINJECT(throw_error(q, q->st.curr_cell, "resource_error", "out_of_frame_space");
-				    q->error = true; return);
+			FAULTINJECT(errno = ENOMEM; q->error = true; return pl_error);
 
 			idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size*2);
 			if (!new_framessize) {
-				throw_error(q, q->st.curr_cell, "resource_error", "out_of_frame_space");
 				q->error = true;
-				return;
+				return pl_error;
 			}
 
 			q->frames_size = new_framessize;
 		}
 	}
+	return pl_success;
 }
 
-static void check_slot(query *q, unsigned cnt)
+static USE_RESULT prolog_state check_slot(query *q, unsigned cnt)
 {
 	idx_t nbr = q->st.sp + cnt + MAX_ARITY;
 
@@ -139,19 +136,18 @@ static void check_slot(query *q, unsigned cnt)
 		q->max_slots = q->st.sp;
 
 		if (nbr >= q->slots_size) {
-			FAULTINJECT(throw_error(q, q->st.curr_cell, "resource_error", "out_of_slot_space");
-				    q->error = true; return);
+			FAULTINJECT(errno = ENOMEM; q->error = true; return pl_error);
 
 			idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, q->slots_size*2>nbr?q->slots_size*2:nbr);
 			if (!new_slotssize) {
-				throw_error(q, q->st.curr_cell, "resource_error", "out_of_slot_space");
 				q->error = true;
-				return;
+				return pl_error;
 			}
 
 			q->slots_size = new_slotssize;
 		}
 	}
+	return pl_success;
 }
 
 static void trace_call(query *q, cell *c, box_t box)
