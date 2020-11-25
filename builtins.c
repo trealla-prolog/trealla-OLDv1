@@ -369,6 +369,20 @@ void append_list(query *q, const cell *c)
 	copy_cells(tmp, c, c->nbr_cells);
 }
 
+static cell *end_list2(query *q, cell *c)
+{
+	cell *tmp = alloc_tmp_heap(q, c->nbr_cells);
+	ensure(tmp);
+	copy_cells(tmp, c, c->nbr_cells);
+	idx_t nbr_cells = tmp_heap_used(q);
+	tmp = alloc_heap(q, nbr_cells);
+	ensure(tmp);
+	copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
+	tmp->nbr_cells = nbr_cells;
+	init_tmp_heap(q);
+	return tmp;
+}
+
 cell *end_list(query *q)
 {
 	cell *tmp = alloc_tmp_heap(q, 1);
@@ -5800,7 +5814,7 @@ static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells, cell *tail, idx
 				tail_ctx = q->latest_ctx;
 			}
 		} else if (!is_nil(tail))
-			append_list(q, tail);
+			return end_list2(q, tail);
 	}
 
 	return end_list(q);
@@ -5954,7 +5968,7 @@ static int fn_findall_4(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
-	GET_NEXT_ARG(p4,list_or_nil);
+	GET_NEXT_ARG(p4,any);
 
 	if (!q->retry) {
 		q->st.qnbr++;
