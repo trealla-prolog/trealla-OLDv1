@@ -354,6 +354,7 @@ static predicate *find_predicate(module *m, cell *c)
 	assert(m);
 	assert(c);
 
+#if 1
 	for (predicate *h = m->head; h; h = h->next) {
 		if (h->is_abolished)
 			continue;
@@ -366,6 +367,16 @@ static predicate *find_predicate(module *m, cell *c)
 				return h;
 		}
 	}
+#else
+	c->flags |= FLAG_KEY;
+	sliter *iter = sl_findkey(m->index, c);
+	predicate *h;
+
+	while (sl_nextkey(iter, (void*)&h)) {
+		if (!h->is_abolished)
+			return h;
+	}
+#endif
 
 	return NULL;
 }
@@ -412,6 +423,7 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 {
 	assert(m && name);
 
+#if 0
 	for (predicate *h = m->head; h; h = h->next) {
 		if (h->is_abolished)
 			continue;
@@ -419,6 +431,14 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 		if (!strcmp(g_pool+h->key.val_off, name) && (h->key.arity == arity))
 			return h;
 	}
+#else
+	cell tmp = {0};
+	tmp.nbr_cells = 1;
+	tmp.val_type = TYPE_LITERAL;
+	tmp.val_off = is_in_pool(name);
+	tmp.arity = arity;
+	return find_predicate(m, &tmp);
+#endif
 
 	return NULL;
 }
@@ -426,14 +446,6 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 static predicate *get_predicate(module *m)
 {
 	assert(m);
-
-	for (predicate *h = m->head; h; h = h->next) {
-		//PLANNED: cehteh: make a freelist of abolished rules to remove this iteration over all rules
-		if (h->is_abolished) {
-			h->is_abolished = false;
-			return h;
-		}
-	}
 
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	predicate *h = calloc(1, sizeof(predicate));
@@ -447,10 +459,13 @@ static predicate *get_predicate(module *m)
 static predicate *create_predicate(module *m, cell *c)
 {
 	assert(m && c);
+	c->flags |= FLAG_KEY;
 
+	assert(is_literal(c));
 	predicate *h = get_predicate(m);
 	if (!h) return NULL;
 	h->key = *c;
+	sl_set(m->index, &h->key, h);
 	return h;
 }
 
@@ -506,6 +521,11 @@ static int compkey(const void *ptr1, const void *ptr2)
 			return -1;
 		else if (p1->val_flt > p2->val_flt)
 			return 1;
+	} else if (is_key(p1) && is_key(p2)) {
+		if (p1->val_off == p2->val_off)
+			return 0;
+
+		return strcmp(GET_STR(p1), GET_STR(p2));
 	} else if (is_atom(p1) && is_atom(p2)) {
 		return strcmp(GET_STR(p1), GET_STR(p2));
 	} else if (is_structure(p1) && is_structure(p2)) {
@@ -515,10 +535,12 @@ static int compkey(const void *ptr1, const void *ptr2)
 		if (p1->arity > p2->arity)
 			return 1;
 
-		int i = strcmp(GET_STR(p1), GET_STR(p2));
+		if (p1->val_off != p2->val_off) {
+			int i = strcmp(GET_STR(p1), GET_STR(p2));
 
-		if (i != 0)
-			return i;
+			if (i != 0)
+				return i;
+		}
 
 		int arity = p1->arity;
 		p1++; p2++;
@@ -1197,7 +1219,8 @@ static void directives(parser *p, term *t)
 				if (!strcmp(GET_STR(head), "//"))
 					tmp.arity += 2;
 
-				predicate *h = create_predicate(p->m, &tmp);
+				predicate *h = find_predicate(p->m, &tmp);
+				if (!h) h = create_predicate(p->m, &tmp);
 				if (!h) {
 					//fprintf(stdout, "Error: predicate creation failed\n");
 					destroy_module(p->m);

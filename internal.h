@@ -101,6 +101,7 @@ typedef uint32_t idx_t;
 #define is_quoted(c) ((c)->flags & FLAG_QUOTED)
 #define is_fresh(c) ((c)->flags & FLAG_FRESH)
 #define is_anon(c) ((c)->flags & FLAG_ANON)
+#define is_key(c) (is_literal((c)) && ((c)->flags & FLAG_KEY))
 #define is_op(c) (c->flags && 0xFF00)
 
 // These 2 assume literal or cstring types...
@@ -138,6 +139,7 @@ enum {
 	FLAG_BLOB=1<<6,						// used with TYPE_CSTRING
 	FLAG_STRING=1<<7,					// used with TYPE_CSTRING
 	FLAG_TMP=1<<8,						// used with TYPE_CSTRING
+	FLAG_KEY=1<<9,						// used with keys
 
 	FLAG_DELETED=FLAG_HEX,				// used by bagof
 	FLAG_FIRST_USE=FLAG_HEX,			// used with TYPE_VARIABLE

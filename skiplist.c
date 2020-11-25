@@ -518,6 +518,9 @@ sliter *sl_findkey(skiplist *l, const void *key)
 
 bool sl_nextkey(sliter *iter, void **val)
 {
+	if (!iter)
+		return false;
+
 	if (!iter->p) {
 		sl_done(iter);
 		return false;
