@@ -4596,9 +4596,7 @@ static int fn_iso_term_variables_2(query *q)
 		return 1;
 	}
 
-	int ok = unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
-	free(tmp);
-	return ok;
+	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
 static cell *clone2_to_tmp(query *q, cell *p1)
