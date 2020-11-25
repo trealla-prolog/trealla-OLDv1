@@ -101,6 +101,7 @@ typedef uint32_t idx_t;
 #define is_quoted(c) ((c)->flags & FLAG_QUOTED)
 #define is_fresh(c) ((c)->flags & FLAG_FRESH)
 #define is_anon(c) ((c)->flags & FLAG_ANON)
+#define is_builtin(c) ((c)->flags & FLAG_BUILTIN)
 #define is_key(c) (is_literal((c)) && ((c)->flags & FLAG_KEY))
 #define is_op(c) (c->flags && 0xFF00)
 

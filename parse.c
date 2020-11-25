@@ -3450,7 +3450,7 @@ module *create_module(const char *name)
 		make_rule(m, "put(S,C) :- put_code(S,C).");
 		make_rule(m, "see(F) :- open(F,read,S), set_input(S).");
 		make_rule(m, "tell(F) :- open(F,write,S), set_output(S).");
-		//make_rule(m, "append(F) :- open(F,append,S), set_output(S).");
+		make_rule(m, "append(F) :- open(F,append,S), set_output(S).");
 
 		// SWI or GNU
 

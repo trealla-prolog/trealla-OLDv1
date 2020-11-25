@@ -162,6 +162,9 @@ static void trace_call(query *q, cell *c, box_t box)
 	if (is_empty(c))
 		return;
 
+	if ((c)->flags & FLAG_BUILTIN)
+		return;
+
 	const char *src = GET_STR(c);
 
 	if (!strcmp(src, ",") || !strcmp(src, ";") || !strcmp(src, "->"))
