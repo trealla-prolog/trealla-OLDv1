@@ -354,6 +354,28 @@ static predicate *find_predicate(module *m, cell *c)
 	assert(m);
 	assert(c);
 
+#if 0
+	cell tmp = *c;
+	tmp.flags = FLAG_KEY;
+
+	if (is_cstring(c)) {
+		printf("*** Here1\n");
+		tmp.val_type = TYPE_LITERAL;
+		tmp.val_off = index_from_pool(GET_STR(c));
+	}
+
+	sliter *iter = sl_findkey(m->index, &tmp);
+	predicate *h;
+
+	while (sl_nextkey(iter, (void*)&h)) {
+		//printf("*** FOUND [%u] key: %s/%u, found: %s/%u\n", c->val_type, GET_STR(c), c->arity, GET_STR(&h->key), h->key.arity);
+		if (!h->is_abolished)
+			return h;
+	}
+
+	return NULL;
+#endif
+
 #if 1
 	for (predicate *h = m->head; h; h = h->next) {
 		if (h->is_abolished)
@@ -366,16 +388,6 @@ static predicate *find_predicate(module *m, cell *c)
 			if (!strcmp(g_pool+h->key.val_off, GET_STR(c)) && !h->key.arity)
 				return h;
 		}
-	}
-#else
-	cell tmp = *c;
-	tmp.flags |= FLAG_KEY;
-	sliter *iter = sl_findkey(m->index, &tmp);
-	predicate *h;
-
-	while (sl_nextkey(iter, (void*)&h)) {
-		if (!h->is_abolished)
-			return h;
 	}
 #endif
 
@@ -427,7 +439,7 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 	cell tmp = {0};
 	tmp.nbr_cells = 1;
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = is_in_pool(name);
+	tmp.val_off = index_from_pool(name);
 	tmp.arity = arity;
 	return find_predicate(m, &tmp);
 }
@@ -443,7 +455,15 @@ static predicate *create_predicate(module *m, cell *c)
 	h->next = m->head;
 	m->head = h;
 	h->key = *c;
-	h->key.flags |= FLAG_KEY;
+	h->key.flags = FLAG_KEY;
+
+	if (is_cstring(c)) {
+		printf("*** Here2\n");
+		h->key.val_type = TYPE_LITERAL;
+		h->key.val_off = index_from_pool(GET_STR(c));
+	}
+
+	//printf("*** CREATE [%u] key: %s/%u, found: %s/%u\n", c->val_type, GET_STR(c), c->arity, GET_STR(&h->key), h->key.arity);
 	sl_set(m->index, &h->key, h);
 	return h;
 }
@@ -500,7 +520,7 @@ static int compkey(const void *ptr1, const void *ptr2)
 			return -1;
 		else if (p1->val_flt > p2->val_flt)
 			return 1;
-	} else if (is_key(p1) && is_key(p2)) {
+	} else if (is_key(p1) && is_key(p2) && (p1->arity == p2->arity)) {
 		if (p1->val_off == p2->val_off)
 			return 0;
 
@@ -582,30 +602,6 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		c->val_type = TYPE_LITERAL;
 		c->flags = 0;
 	}
-
-#if 0
-	if (!is_quoted(c) && strchr(GET_STR(c), ':')) {
-		const char *src = GET_STR(c);
-		char mod[256], name[256];
-		mod[0] = name[0] = '\0';
-		sscanf(src, "%255[^:]:%255s", mod, name);
-		mod[sizeof(mod)-1] = name[sizeof(name)-1] = '\0';
-		m = find_module(mod);
-
-		if (!m) {
-			fprintf(stdout, "Error: unknown module: %s\n", mod);
-			return NULL;
-		}
-
-		if (!is_multifile_in_db(mod, name, c->arity)) {
-			fprintf(stdout, "Warning: not declared multifile %s:%s/%u\n", mod, name, (unsigned)c->arity);
-			set_multifile_in_db(m, name, c->arity);
-		}
-
-		c->val_off = index_from_pool(name);
-		ensure(c->val_off != ERR_IDX);
-	}
-#endif
 
 	predicate *h = find_predicate(m, c);
 
@@ -3470,7 +3466,7 @@ module *create_module(const char *name)
 		make_rule(m, "put(S,C) :- put_code(S,C).");
 		make_rule(m, "see(F) :- open(F,read,S), set_input(S).");
 		make_rule(m, "tell(F) :- open(F,write,S), set_output(S).");
-		make_rule(m, "append(F) :- open(F,append,S), set_output(S).");
+		//make_rule(m, "append(F) :- open(F,append,S), set_output(S).");
 
 		// SWI or GNU
 
