@@ -5789,11 +5789,34 @@ typedef struct {
 
 static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells, cell *tail, idx_t tail_ctx)
 {
-	if (!nbr_cells || !c->nbr_cells) {
+	if ((!nbr_cells || !c->nbr_cells) && !tail) {
 		cell *c = alloc_tmp_heap(q, 1);
 		ensure(c);
 		make_literal(c, g_nil_s);
 		return c;
+	}
+
+	if (!nbr_cells || !c->nbr_cells) {
+		if (is_list(tail)) {
+			cell *h = LIST_HEAD(tail);
+			h = deref(q, h, tail_ctx);
+			alloc_list(q, h);
+			tail = LIST_TAIL(tail);
+			tail = deref(q, tail, tail_ctx);
+			tail_ctx = q->latest_ctx;
+
+			while (is_list(tail)) {
+				cell *h = LIST_HEAD(tail);
+				h = deref(q, h, tail_ctx);
+				append_list(q, h);
+				tail = LIST_TAIL(tail);
+				tail = deref(q, tail, tail_ctx);
+				tail_ctx = q->latest_ctx;
+			}
+		} else if (!is_nil(tail))
+			alloc_list(q, tail);
+
+		return end_list(q);
 	}
 
 	alloc_list(q, c);
