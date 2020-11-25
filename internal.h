@@ -262,9 +262,8 @@ struct predicate_ {
 	predicate *next;
 	clause *head, *tail;
 	skiplist *index;
+	cell key;
 	unsigned cnt;
-	idx_t val_off;
-	uint16_t arity;
 	bool is_prebuilt:1;
 	bool is_public:1;
 	bool is_dynamic:1;

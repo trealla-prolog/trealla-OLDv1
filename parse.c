@@ -359,10 +359,10 @@ static predicate *find_predicate(module *m, cell *c)
 			continue;
 
 		if (is_literal(c)) {
-			if ((h->val_off == c->val_off) && (h->arity == c->arity))
+			if ((h->key.val_off == c->val_off) && (h->key.arity == c->arity))
 				return h;
 		} else {
-			if (!strcmp(g_pool+h->val_off, GET_STR(c)) && !h->arity)
+			if (!strcmp(g_pool+h->key.val_off, GET_STR(c)) && !h->key.arity)
 				return h;
 		}
 	}
@@ -416,7 +416,7 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 		if (h->is_abolished)
 			continue;
 
-		if (!strcmp(g_pool+h->val_off, name) && (h->arity == arity))
+		if (!strcmp(g_pool+h->key.val_off, name) && (h->key.arity == arity))
 			return h;
 	}
 
@@ -450,8 +450,7 @@ static predicate *create_predicate(module *m, cell *c)
 
 	predicate *h = get_predicate(m);
 	if (!h) return NULL;
-	h->val_off = c->val_off;
-	h->arity = c->arity;
+	h->key = *c;
 	return h;
 }
 
@@ -659,7 +658,7 @@ static void assert_commit(module *m, term *t, clause *r, predicate *h, bool appe
 {
 	cell *c = get_head(r->t.cells);
 
-	if (h->index && h->arity) {
+	if (h->index && h->key.arity) {
 		if (!append)
 			sl_set(h->index, c, r);
 		else
@@ -671,16 +670,16 @@ static void assert_commit(module *m, term *t, clause *r, predicate *h, bool appe
 	if (h->is_persist)
 		r->t.is_persist = true;
 
-	if (!h->index && h->arity && is_structure(c+1))
+	if (!h->index && h->key.arity && is_structure(c+1))
 		h->is_noindex = true;
 
-	if (h->index && h->arity && is_structure(c+1)) {
+	if (h->index && h->key.arity && is_structure(c+1)) {
 		h->is_noindex = true;
 		sl_destroy(h->index);
 		h->index = NULL;
 	}
 
-	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->arity && !m->noindex && !h->is_noindex)
+	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->key.arity && !m->noindex && !h->is_noindex)
 		reindex_predicate(h);
 }
 

@@ -6382,10 +6382,10 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 		if (h->is_prebuilt)
 			continue;
 
-		if (name != h->val_off)
+		if (name != h->key.val_off)
 			continue;
 
-		if ((arity != h->arity) && (arity != -1U))
+		if ((arity != h->key.arity) && (arity != -1U))
 			continue;
 
 		for (clause *r = h->head; r; r = r->next) {
