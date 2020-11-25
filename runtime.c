@@ -162,7 +162,7 @@ static void trace_call(query *q, cell *c, box_t box)
 	if (is_empty(c))
 		return;
 
-	if ((c)->flags & FLAG_BUILTIN)
+	if (is_builtin(c))
 		return;
 
 	const char *src = GET_STR(c);
