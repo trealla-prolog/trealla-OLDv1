@@ -368,7 +368,8 @@ static predicate *find_predicate(module *m, cell *c)
 		}
 	}
 #else
-	c->flags |= FLAG_KEY;
+	cell tmp = *c;
+	tmp.flags |= FLAG_KEY;
 	sliter *iter = sl_findkey(m->index, c);
 	predicate *h;
 
@@ -423,48 +424,26 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 {
 	assert(m && name);
 
-#if 0
-	for (predicate *h = m->head; h; h = h->next) {
-		if (h->is_abolished)
-			continue;
-
-		if (!strcmp(g_pool+h->key.val_off, name) && (h->key.arity == arity))
-			return h;
-	}
-#else
 	cell tmp = {0};
 	tmp.nbr_cells = 1;
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = is_in_pool(name);
 	tmp.arity = arity;
 	return find_predicate(m, &tmp);
-#endif
-
-	return NULL;
-}
-
-static predicate *get_predicate(module *m)
-{
-	assert(m);
-
-	FAULTINJECT(errno = ENOMEM; return NULL);
-	predicate *h = calloc(1, sizeof(predicate));
-	if (h) {
-		h->next = m->head;
-		m->head = h;
-	}
-	return h;
 }
 
 static predicate *create_predicate(module *m, cell *c)
 {
 	assert(m && c);
-	c->flags |= FLAG_KEY;
 
 	assert(is_literal(c));
-	predicate *h = get_predicate(m);
+	FAULTINJECT(errno = ENOMEM; return NULL);
+	predicate *h = calloc(1, sizeof(predicate));
 	if (!h) return NULL;
+	h->next = m->head;
+	m->head = h;
 	h->key = *c;
+	h->key.flags |= FLAG_KEY;
 	sl_set(m->index, &h->key, h);
 	return h;
 }
