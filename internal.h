@@ -434,6 +434,7 @@ struct module_ {
 	predicate *head, *tail;
 	parser *p;
 	FILE *fp;
+	skiplist *index;
 	struct op_table ops[MAX_USER_OPS+1];
 	const char *keywords[1000];
 	int8_t halt_code;

@@ -3157,6 +3157,8 @@ void destroy_module(module *m)
 		m->tasks = task;
 	}
 
+	sl_destroy(m->index);
+
 	for (predicate *h = m->head; h;) {
 		predicate *save = h->next;
 
@@ -3207,7 +3209,11 @@ module *create_module(const char *name)
 		m->next = g_modules;
 		g_modules = m;
 
+		m->index = sl_create(compkey);
+		ensure(m->index);
 		m->p = create_parser(m);
+		ensure(m->p);
+
 		m->flag.double_quote_chars = 1;
 		m->flag.character_escapes = true;
 		m->flag.rational_syntax_natural = 0;
