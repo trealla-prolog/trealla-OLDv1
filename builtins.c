@@ -7996,26 +7996,26 @@ static int fn_rand_1(query *q)
 
 static int fn_absolute_file_name_3(query *q)
 {
-	GET_FIRST_ARG(p_abs,atom);
-	GET_NEXT_ARG(p_rel,variable);
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,variable);
 	GET_NEXT_ARG(p_opts,list_or_nil);
 	int expand = 0;
 	char *src = NULL, *filename;
 	char *here = q->m->filename;
 	char *cwd = here;
 
-	if (is_iso_list(p_abs)) {
-		size_t len = scan_is_chars_list(q, p_abs, p_abs_ctx, 1);
+	if (is_iso_list(p1)) {
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
-			throw_error(q, p_abs, "type_error", "atom");
+			throw_error(q, p1, "type_error", "atom");
 			return 0;
 		}
 
-		src = chars_list_to_string(q, p_abs, p_abs_ctx, len);
+		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = GET_STR(p_abs);
+		filename = GET_STR(p1);
 
 	while (is_list(p_opts)) {
 		cell *h = LIST_HEAD(p_opts);
@@ -8055,7 +8055,7 @@ static int fn_absolute_file_name_3(query *q)
 		*dst = '\0';
 		char *ptr = getenv(envbuf);
 		if (!ptr) {
-			throw_error(q, p_abs, "existence_error", "environment_variable");
+			throw_error(q, p1, "existence_error", "environment_variable");
 			return 0;
 		}
 
@@ -8105,7 +8105,7 @@ static int fn_absolute_file_name_3(query *q)
 	tmp.flags |= FLAG_TMP;
 	free(tmpbuf);
 	free(src);
-	set_var(q, p_rel, p_rel_ctx, &tmp, q->st.curr_frame);
+	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	return 1;
 }
 
