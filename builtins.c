@@ -5564,7 +5564,7 @@ static int fn_iso_current_op_3(query *q)
 		return 0;
 
 	if (is_variable(p_type)) {
-		cell tmp;
+		cell tmp = {0};
 
 		if (type == OP_FX)
 			make_small(&tmp, "fx");
@@ -5578,6 +5578,8 @@ static int fn_iso_current_op_3(query *q)
 			make_small(&tmp, "yfx");
 		else if (type == OP_XFY)
 			make_small(&tmp, "xfy");
+		else if (type == OP_XFX)
+			make_small(&tmp, "xfx");
 
 		if (!unify(q, p_type, p_type_ctx, &tmp, q->st.curr_frame))
 			return 0;
