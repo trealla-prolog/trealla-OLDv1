@@ -354,42 +354,25 @@ static predicate *find_predicate(module *m, cell *c)
 	assert(m);
 	assert(c);
 
-#if 0
 	cell tmp = *c;
+	tmp.val_type = TYPE_LITERAL;
 	tmp.flags = FLAG_KEY;
+	tmp.nbr_cells = 1;
 
 	if (is_cstring(c)) {
-		printf("*** Here1\n");
 		tmp.val_type = TYPE_LITERAL;
 		tmp.val_off = index_from_pool(GET_STR(c));
 	}
 
 	sliter *iter = sl_findkey(m->index, &tmp);
-	predicate *h;
+	predicate *h = NULL;
 
 	while (sl_nextkey(iter, (void*)&h)) {
-		//printf("*** FOUND [%u] key: %s/%u, found: %s/%u\n", c->val_type, GET_STR(c), c->arity, GET_STR(&h->key), h->key.arity);
-		if (!h->is_abolished)
+		if (!h->is_abolished) {
+			sl_done(iter);
 			return h;
-	}
-
-	return NULL;
-#endif
-
-#if 1
-	for (predicate *h = m->head; h; h = h->next) {
-		if (h->is_abolished)
-			continue;
-
-		if (is_literal(c)) {
-			if ((h->key.val_off == c->val_off) && (h->key.arity == c->arity))
-				return h;
-		} else {
-			if (!strcmp(g_pool+h->key.val_off, GET_STR(c)) && !h->key.arity)
-				return h;
 		}
 	}
-#endif
 
 	return NULL;
 }
@@ -437,7 +420,6 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 	assert(m && name);
 
 	cell tmp = {0};
-	tmp.nbr_cells = 1;
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
 	tmp.arity = arity;
@@ -447,23 +429,18 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 static predicate *create_predicate(module *m, cell *c)
 {
 	assert(m && c);
-
 	assert(is_literal(c));
+
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	predicate *h = calloc(1, sizeof(predicate));
-	if (!h) return NULL;
+	ensure(h);
 	h->next = m->head;
 	m->head = h;
+
 	h->key = *c;
+	h->key.val_type = TYPE_LITERAL;
 	h->key.flags = FLAG_KEY;
-
-	if (is_cstring(c)) {
-		printf("*** Here2\n");
-		h->key.val_type = TYPE_LITERAL;
-		h->key.val_off = index_from_pool(GET_STR(c));
-	}
-
-	//printf("*** CREATE [%u] key: %s/%u, found: %s/%u\n", c->val_type, GET_STR(c), c->arity, GET_STR(&h->key), h->key.arity);
+	h->key.nbr_cells = 1;
 	sl_set(m->index, &h->key, h);
 	return h;
 }
@@ -473,7 +450,7 @@ void set_multifile_in_db(module *m, const char *name, idx_t arity)
 	if (!m) return;
 	assert(name);
 
-	cell tmp;
+	cell tmp = {0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
 	ensure(tmp.val_off != ERR_IDX);
@@ -492,11 +469,11 @@ static bool is_multifile_in_db(const char *mod, const char *name, idx_t arity)
 
 	module *m = find_module(mod);
 	if (!m) return false;
-	cell tmp;
+
+	cell tmp = {0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
 	if (tmp.val_off == ERR_IDX) return false;
-
 	tmp.arity = arity;
 	predicate *h = find_predicate(m, &tmp);
 	if (!h) return false;
@@ -520,12 +497,23 @@ static int compkey(const void *ptr1, const void *ptr2)
 			return -1;
 		else if (p1->val_flt > p2->val_flt)
 			return 1;
-	} else if (is_key(p1) && is_key(p2) && (p1->arity == p2->arity)) {
-		if (p1->val_off == p2->val_off)
-			return 0;
+	} else if (is_key(p1) && is_key(p2)) {
+		if (p1->arity == p2->arity) {
+			if (p1->val_off == p2->val_off)
+				return 0;
+		}
 
-		return strcmp(GET_STR(p1), GET_STR(p2));
-	} else if (is_atom(p1) && is_atom(p2)) {
+		int ok = strcmp(GET_STR(p1), GET_STR(p2));
+		if (ok) return ok;
+
+		if (p1->arity < p2->arity)
+			return -1;
+
+		if (p1->arity > p2->arity)
+			return 1;
+
+		return 0;
+	} else if (is_atom(p1) && is_atom(p2) && (p1->arity == p2->arity)) {
 		return strcmp(GET_STR(p1), GET_STR(p2));
 	} else if (is_structure(p1) && is_structure(p2)) {
 		if (p1->arity < p2->arity)
@@ -605,16 +593,14 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	predicate *h = find_predicate(m, c);
 
-	if (h && !consulting) {
-		if (!h->is_dynamic) {
-			fprintf(stdout, "Error: not a fact or clause\n");
-			return NULL;
-		}
+	if (h && !consulting && !h->is_dynamic) {
+		fprintf(stdout, "Error: not dynamic '%s'/%u\n", GET_STR(c), c->arity);
+		return NULL;
 	}
 
 	if (!h) {
 		h = create_predicate(m, c);
-		if (!h) return NULL;
+		ensure(h);
 
 		if (!consulting)
 			h->is_dynamic = true;
@@ -752,20 +738,20 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 {
 	if (!m) return;
 
-	cell tmp;
+	cell tmp = {0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
 	predicate *h = find_predicate(m, &tmp);
 	if (!h) h = create_predicate(m, &tmp);
+
 	if (h) {
 		h->is_dynamic = true;
 
-		if (!h->index
-		    && !m->noindex
-		    && !(h->index = sl_create(compkey))) {
-			m->error = true;
+		if (!h->index && !m->noindex) {
+			h->index = sl_create(compkey);
+			ensure(h->index);
 		}
 	} else
 		m->error = true;
@@ -773,13 +759,14 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 
 static void set_persist_in_db(module *m, const char *name, unsigned arity)
 {
-	cell tmp;
+	cell tmp = {0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(name);
 	ensure(tmp.val_off == ERR_IDX);
 	tmp.arity = arity;
 	predicate *h = find_predicate(m, &tmp);
 	if (!h) h = create_predicate(m, &tmp);
+
 	if (h) {
 		h->is_dynamic = true;
 		h->is_persist = true;
@@ -1265,8 +1252,6 @@ static void directives(parser *p, term *t)
 		}
 
 		char *tmpbuf = relative_to(p->m->filename, name);
-
-		//printf("*** library p->m->filename = %s, name = %s, tmpbuf = %s\n", p->m->filename, name, tmpbuf);
 		char *save = strdup(p->m->filename);
 
 		if (!module_load_file(p->m, tmpbuf)) {
@@ -2995,7 +2980,6 @@ bool module_load_fp(module *m, FILE *fp, const char *filename)
 	parser *p = create_parser(m);
 	if (p) {
 		free(p->m->filename);
-		//printf("*** loading filename = %s\n", filename);
 		p->m->filename = strdup(filename);
 		p->consulting = true;
 		p->fp = fp;

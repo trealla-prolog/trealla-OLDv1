@@ -543,7 +543,7 @@ bool sl_nextkey(sliter *iter, void **val)
 		return sl_nextkey(iter, val);
 
 	sl_done(iter);
-	return true;
+	return false;
 }
 
 void sl_done(sliter *iter)

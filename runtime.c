@@ -873,7 +873,7 @@ static bool match_full(query *q, cell *p1, idx_t p1_ctx)
 	cell *head = get_head(p1);
 	predicate *h = find_matching_predicate(q->m, head);
 
-	if (!h) {
+	if (!h) {	// ??????
 		head->match = find_matching_predicate(q->m, head);
 		h = head->match;
 	}
