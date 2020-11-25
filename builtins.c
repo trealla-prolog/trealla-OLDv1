@@ -5770,7 +5770,7 @@ typedef struct {
 }
  sslot;
 
-static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
+static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells, cell *tail, idx_t tail_ctx)
 {
 	if (!nbr_cells || !c->nbr_cells) {
 		cell *c = alloc_tmp_heap(q, 1);
@@ -5789,12 +5789,26 @@ static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 		c += c->nbr_cells;
 	}
 
+	if (tail) {
+		if (is_list(tail)) {
+			while (is_list(tail)) {
+				cell *h = LIST_HEAD(tail);
+				h = deref(q, h, tail_ctx);
+				append_list(q, h);
+				tail = LIST_TAIL(tail);
+				tail = deref(q, tail, tail_ctx);
+				tail_ctx = q->latest_ctx;
+			}
+		} else if (!is_nil(tail))
+			append_list(q, tail);
+	}
+
 	return end_list(q);
 }
 
 static void do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 {
-	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
+	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q), NULL, 0);
 	fix_list(l);
 
 	frame *g = GET_FRAME(q->st.curr_frame);
@@ -5819,11 +5833,9 @@ static void do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 	init_queuen(q);
 }
 
-static void do_sys_listn2(query *q, cell *p1, idx_t p1_ctx, cell *tail)
+static void do_sys_listn2(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
-	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
-	l->nbr_cells--;	// drop []
-	l[l->nbr_cells++] = *tail;
+	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q), p2, p2_ctx);
 	fix_list(l);
 
 	frame *g = GET_FRAME(q->st.curr_frame);
@@ -5851,7 +5863,7 @@ static void do_sys_listn2(query *q, cell *p1, idx_t p1_ctx, cell *tail)
 static int fn_sys_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	cell *l = convert_to_list(q, get_queue(q), queue_used(q));
+	cell *l = convert_to_list(q, get_queue(q), queue_used(q), NULL, 0);
 	fix_list(l);
 
 	frame *g = GET_FRAME(q->st.curr_frame);
@@ -5942,7 +5954,7 @@ static int fn_findall_4(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
-	GET_NEXT_ARG(p4,variable);
+	GET_NEXT_ARG(p4,list_or_nil);
 
 	if (!q->retry) {
 		q->st.qnbr++;
@@ -5959,7 +5971,7 @@ static int fn_findall_4(query *q)
 		return 1;
 	}
 
-	do_sys_listn2(q, p3, p3_ctx, p4);
+	do_sys_listn2(q, p3, p3_ctx, p4, p4_ctx);
 	q->st.qnbr--;
 	return 1;
 }
@@ -6092,7 +6104,7 @@ static int fn_iso_bagof_3(query *q)
 	}
 
 	unpin_vars(q);
-	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
+	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q), NULL, 0);
 	fix_list(l);
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
