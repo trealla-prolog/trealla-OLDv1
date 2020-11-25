@@ -189,6 +189,7 @@ static void make_literal(cell *tmp, idx_t offset)
 
 static void make_smalln(cell *tmp, const char *s, size_t n)
 {
+	assert(n < MAX_SMALL_STRING);
 	tmp->val_type = TYPE_CSTRING;
 	tmp->nbr_cells = 1;
 	tmp->arity = 0;
@@ -404,8 +405,10 @@ static cell make_cstringn(const char *s, size_t n)
 	cell tmp;
 
 	if (n < MAX_SMALL_STRING) {
-		make_smalln(&tmp, s, n);
-		return tmp;
+		if (!memchr(s, 0, n)) {
+			make_smalln(&tmp, s, n);
+			return tmp;
+		}
 	}
 
 	tmp.val_type = TYPE_CSTRING;
