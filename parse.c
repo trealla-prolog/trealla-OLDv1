@@ -430,7 +430,7 @@ static predicate *get_predicate(module *m)
 	for (predicate *h = m->head; h; h = h->next) {
 		//PLANNED: cehteh: make a freelist of abolished rules to remove this iteration over all rules
 		if (h->is_abolished) {
-			memset(h, 0, sizeof(predicate));
+			h->is_abolished = false;
 			return h;
 		}
 	}
