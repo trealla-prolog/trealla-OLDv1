@@ -370,7 +370,7 @@ static predicate *find_predicate(module *m, cell *c)
 #else
 	cell tmp = *c;
 	tmp.flags |= FLAG_KEY;
-	sliter *iter = sl_findkey(m->index, c);
+	sliter *iter = sl_findkey(m->index, &tmp);
 	predicate *h;
 
 	while (sl_nextkey(iter, (void*)&h)) {
