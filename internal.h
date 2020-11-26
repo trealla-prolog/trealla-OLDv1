@@ -390,7 +390,6 @@ struct query_ {
 	bool fullstop:1;
 	bool ignore_ops:1;
 	bool character_escapes:1;
-	bool numbervars:1;
 	bool halt:1;
 	bool abort:1;
 	bool cycle_error:1;
