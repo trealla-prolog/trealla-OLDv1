@@ -564,7 +564,6 @@ void consultall(parser *p, cell *l);
 void fix_list(cell *c);
 module *module_load_text(module *m, const char *src);
 void make_indirect(cell *tmp, cell *c);
-cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx);
 char *print_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
 void stash_me(query *q, term *t, bool last_match);
 unsigned fake_numbervars(query *q, cell *c, idx_t c_ctx, unsigned start);
