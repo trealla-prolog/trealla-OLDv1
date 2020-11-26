@@ -116,6 +116,9 @@ typedef uint32_t idx_t;
 #define CHECK_SENTINEL(expr, err_sentinel, ...) CHECK_SENTINEL_((expr), err_sentinel, ## __VA_ARGS__, error=true)
 #define CHECK_SENTINEL_(expr, err_sentinel, on_error, ...) do { if((expr) == err_sentinel){on_error;}} while (0)
 
+#define may_error(expr) CHECK_SENTINEL(expr, pl_error, return pl_error)
+//PLANNED: #define may_throw(expr, err_type, expected) CHECK_SENTINEL(expr, pl_error, throw_error(q, c, err_type, expected); return pl_error)
+
 // If changing the order of these: see runtime.c dispatch table
 
 enum {
@@ -223,7 +226,7 @@ struct cell_ {
 
 		struct {
 			union {
-				int (*fn)(query*);
+				prolog_state (*fn)(query*);
 				predicate *match;
 				cell *attrs;
 				uint16_t precedence;
@@ -279,7 +282,7 @@ struct predicate_ {
 struct builtins {
 	const char *name;
 	unsigned arity;
-	int (*fn)(query*);
+	prolog_state (*fn)(query*);
 	const char *help;
 };
 
@@ -489,7 +492,7 @@ inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 cell *list_head(cell *l);
 cell *list_tail(cell *l, cell *tmp);
 
-void set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
+prolog_state set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
 bool module_load_fp(module *m, FILE *fp, const char *filename);
 bool module_load_file(module *m, const char *filename);
@@ -512,9 +515,9 @@ void print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
 void print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
 void print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
 void print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
-void make_choice(query *q);
-void make_barrier(query *q);
-void make_catcher(query *q, unsigned type);
+USE_RESULT prolog_state make_choice(query *q);
+USE_RESULT prolog_state make_barrier(query *q);
+USE_RESULT prolog_state make_catcher(query *q, unsigned type);
 void cut_me(query *q, bool local_cut);
 bool check_builtin(module *m, const char *name, unsigned arity);
 void *get_builtin(module *m, const char *name, unsigned arity);
@@ -543,7 +546,7 @@ void run_query(query *q);
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx);
 cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix);
 void make_end(cell *tmp);
-bool match_clause(query *q, cell *p1, idx_t p1_ctx);
+USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx);
 idx_t index_from_pool(const char *name);
 void do_reduce(cell *n);
 unsigned create_vars(query *q, unsigned nbr);

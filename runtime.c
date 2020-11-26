@@ -234,10 +234,12 @@ void try_me(const query *q, unsigned nbr_vars)
 	}
 }
 
-void make_choice(query *q)
+prolog_state make_choice(query *q)
 {
-	check_frame(q);
-	check_choice(q);
+	assert(q);
+
+	may_error(check_frame(q));
+	may_error(check_choice(q));
 
 	idx_t curr_choice = q->cp++;
 	choice *ch = q->choices + curr_choice;
@@ -255,22 +257,23 @@ void make_choice(query *q)
 	ch->nbr_slots = g->nbr_slots;
 	ch->any_choices = g->any_choices;
 	ch->overflow = g->overflow;
-	check_slot(q, g->nbr_vars);
+	may_error(check_slot(q, g->nbr_vars));
+
+	return pl_success;
 }
 
-void make_barrier(query *q)
+prolog_state make_barrier(query *q)
 {
-	make_choice(q);
-	if (q->error) return;
+	may_error(make_choice(q));
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 	ch->local_cut = true;
+	return pl_success;
 }
 
-void make_catcher(query *q, unsigned retry)
+prolog_state make_catcher(query *q, unsigned retry)
 {
-	make_choice(q);
-	if (q->error) return;
+	may_error(make_choice(q));
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 
@@ -278,6 +281,7 @@ void make_catcher(query *q, unsigned retry)
 		ch->catchme1 = true;
 	else if (retry == 2)
 		ch->catchme2 = true;
+	return pl_success;
 }
 
 static void trim_heap(query *q, const choice *ch)
@@ -628,7 +632,7 @@ unsigned create_vars(query *q, unsigned cnt)
 	return var_nbr;
 }
 
-void set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
+prolog_state set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 {
 	frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
@@ -659,12 +663,13 @@ void set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		call_attrs(q, frozen);
 
 	if (!q->cp)
-		return;
+		return pl_success;
 
-	check_trail(q);
+	may_error (check_trail(q));
 	trail *tr = q->trails + q->st.tp++;
 	tr->var_nbr = c->var_nbr;
 	tr->ctx = c_ctx;
+	return pl_success;
 }
 
 void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
@@ -867,7 +872,7 @@ static void next_key(query *q)
 		q->st.curr_clause = q->st.curr_clause->next;
 }
 
-static bool match_full(query *q, cell *p1, idx_t p1_ctx)
+static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx)
 {
 	cell *head = get_head(p1);
 	predicate *h = find_matching_predicate(q->m, head);
@@ -882,17 +887,16 @@ static bool match_full(query *q, cell *p1, idx_t p1_ctx)
 	else {
 		if (!h->is_dynamic && !q->run_init) {
 			throw_error(q, p1, "permission_error", "access_private_procedure");
-			return false;
+			return pl_error;
 		}
 
 		q->st.curr_clause = h->head;
 	}
 
 	if (!q->st.curr_clause)
-		return false;
+		return pl_failure;
 
-	make_choice(q);
-
+	may_error(make_choice(q));
 	for (; q->st.curr_clause; q->st.curr_clause = q->st.curr_clause->next) {
 		if (q->st.curr_clause->t.deleted)
 			continue;
@@ -904,16 +908,16 @@ static bool match_full(query *q, cell *p1, idx_t p1_ctx)
 		q->no_tco = false;
 
 		if (unify_structure(q, p1, p1_ctx, c, q->st.fp, 0))
-			return true;
+			return pl_success;
 
 		undo_me(q);
 	}
 
 	drop_choice(q);
-	return false;
+	return pl_failure;
 }
 
-bool match_clause(query *q, cell *p1, idx_t p1_ctx)
+USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx)
 {
 	if (q->retry)
 		q->st.curr_clause = q->st.curr_clause->next;
@@ -949,7 +953,7 @@ bool match_clause(query *q, cell *p1, idx_t p1_ctx)
 
 			if (get_op(q->m, name, &tmp_optype, &tmp_userop, false)) {
 				throw_error(q, p1, "permission_error", "access_control_structure");
-				return false;
+				return pl_error;
 			} else
 				set_dynamic_in_db(q->m, name, p1->arity);
 
@@ -957,7 +961,7 @@ bool match_clause(query *q, cell *p1, idx_t p1_ctx)
 		} else {
 			if (!h->is_dynamic && !q->run_init) {
 				throw_error(q, p1, "permission_error", "access_private_procedure");
-				return false;
+				return pl_error;
 			}
 
 			q->st.curr_clause = h->head;
@@ -965,9 +969,9 @@ bool match_clause(query *q, cell *p1, idx_t p1_ctx)
 	}
 
 	if (!q->st.curr_clause)
-		return false;
+		return pl_failure;
 
-	make_choice(q);
+	may_error(make_choice(q));
 
 	for (; q->st.curr_clause; q->st.curr_clause = q->st.curr_clause->next) {
 		if (q->st.curr_clause->t.deleted)
@@ -980,13 +984,13 @@ bool match_clause(query *q, cell *p1, idx_t p1_ctx)
 		q->no_tco = false;
 
 		if (unify_structure(q, p1, p1_ctx, head, q->st.fp, 0))
-			return true;
+			return pl_success;
 
 		undo_me(q);
 	}
 
 	drop_choice(q);
-	return false;
+	return pl_failure;
 }
 
 #if 0
@@ -1000,7 +1004,7 @@ static const char *dump_key(void *p, const void *p1)
 }
 #endif
 
-static bool match_rule(query *q)
+static USE_RESULT prolog_state match_rule(query *q)
 {
 	assert(q);
 	if (!q->retry) {
@@ -1014,7 +1018,7 @@ static bool match_rule(query *q)
 			c->val_off = index_from_pool(GET_STR(c));
 			if (c->val_off == ERR_IDX) {
 				q->error = true;
-				return false;
+				return pl_error;
 			}
 
 			if (is_nonconst_blob(c)) free(c->val_str);
@@ -1033,13 +1037,13 @@ static bool match_rule(query *q)
 				else
 					q->error = true;
 
-				return false;
+				return pl_error;
 			}
 		}
 
 		if (!h) {
 			q->error = true;
-			return false;
+			return pl_error;
 		}
 
 		if (h->index) {
@@ -1079,10 +1083,9 @@ static bool match_rule(query *q)
 		next_key(q);
 
 	if (!q->st.curr_clause)
-		return false;
+		return pl_failure;
 
-	make_choice(q);
-
+	may_error(make_choice(q));
 	for (; q->st.curr_clause; next_key(q)) {
 		if (q->st.curr_clause->t.deleted)
 			continue;
@@ -1097,17 +1100,17 @@ static bool match_rule(query *q)
 			Trace(q, q->st.curr_cell, EXIT);
 
 			if (q->error)
-				return false;
+				return pl_error;
 
 			commit_me(q, t);
-			return true;
+			return pl_success;
 		}
 
 		undo_me(q);
 	}
 
 	drop_choice(q);
-	return false;
+	return pl_failure;
 }
 
 void run_query(query *q)
