@@ -3449,9 +3449,12 @@ module *create_module(const char *name)
 			"phrase_([T|Ts], S0, S) :-"			\
 			"  append([T|Ts], S, S0).");
 
+		make_rule(m, "findall_app_([], L, L).");
+		make_rule(m, "findall_app_([H|T], L, [H|R]) :- findall_app_(T, L, R).");
+
 		make_rule(m, "findall(Template, Goal, List, Tail) :- "	\
 			"findall(Template, Goal, List0), "					\
-			"append(List0, Tail, List).");
+			"findall_app_(List0, Tail, List).");
 
 		// This is an approximation... it needs a catcher
 
