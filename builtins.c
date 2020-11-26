@@ -4889,7 +4889,7 @@ static int fn_iso_retract_1(query *q)
 	clause *r = retract_from_db(q->m, q->st.curr_clause);
 	if (!r) return 0;
 
-	if (!q->m->loading && r->t.is_persist)
+	if (!q->m->loading && r->t.persist)
 		db_log(q, r, LOG_ERASE);
 
 	return 1;
@@ -4922,7 +4922,7 @@ static int do_abolish(query *q, cell *c)
 	}
 
 	for (clause *r = h->head; r;) {
-		if (!q->m->loading && r->t.is_persist && !r->t.is_deleted)
+		if (!q->m->loading && r->t.persist && !r->t.deleted)
 			db_log(q, r, LOG_ERASE);
 
 		clause *save = r->next;
@@ -5053,7 +5053,7 @@ static int fn_iso_asserta_1(query *q)
 	if (!r) return 0;
 	uuid_gen(&r->u);
 
-	if (!q->m->loading && r->t.is_persist)
+	if (!q->m->loading && r->t.persist)
 		db_log(q, r, LOG_ASSERTA);
 
 	return 1;
@@ -5084,7 +5084,7 @@ static int fn_iso_assertz_1(query *q)
 	if (!r) return 0;
 	uuid_gen(&r->u);
 
-	if (!q->m->loading && r->t.is_persist)
+	if (!q->m->loading && r->t.persist)
 		db_log(q, r, LOG_ASSERTZ);
 
 	return 1;
@@ -6110,7 +6110,7 @@ static int fn_erase_1(query *q)
 	clause *r = erase_from_db(q->m, &u);
 	if (!r) return 0;
 
-	if (!q->m->loading && r->t.is_persist)
+	if (!q->m->loading && r->t.persist)
 		db_log(q, r, LOG_ERASE);
 
 	return 1;
@@ -6216,7 +6216,7 @@ static int do_asserta_2(query *q)
 		set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	}
 
-	if (!q->m->loading && r->t.is_persist)
+	if (!q->m->loading && r->t.persist)
 		db_log(q, r, LOG_ASSERTA);
 
 	return 1;
@@ -6273,7 +6273,7 @@ static int do_assertz_2(query *q)
 		set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	}
 
-	if (!q->m->loading && r->t.is_persist)
+	if (!q->m->loading && r->t.persist)
 		db_log(q, r, LOG_ASSERTZ);
 
 	return 1;
@@ -6306,7 +6306,7 @@ static void save_db(FILE *fp, query *q, int logging)
 			continue;
 
 		for (clause *r = h->head; r; r = r->next) {
-			if (r->t.is_deleted)
+			if (r->t.deleted)
 				continue;
 
 			if (logging)
@@ -6348,7 +6348,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 			continue;
 
 		for (clause *r = h->head; r; r = r->next) {
-			if (r->t.is_deleted)
+			if (r->t.deleted)
 				continue;
 
 			print_term(q, fp, r->t.cells, q->st.curr_frame, 0);

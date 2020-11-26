@@ -900,7 +900,7 @@ static bool match_full(query *q, cell *p1, idx_t p1_ctx)
 	make_choice(q);
 
 	for (; q->st.curr_clause; q->st.curr_clause = q->st.curr_clause->next) {
-		if (q->st.curr_clause->t.is_deleted)
+		if (q->st.curr_clause->t.deleted)
 			continue;
 
 		term *t = &q->st.curr_clause->t;
@@ -976,7 +976,7 @@ bool match_clause(query *q, cell *p1, idx_t p1_ctx)
 	make_choice(q);
 
 	for (; q->st.curr_clause; q->st.curr_clause = q->st.curr_clause->next) {
-		if (q->st.curr_clause->t.is_deleted)
+		if (q->st.curr_clause->t.deleted)
 			continue;
 
 		term *t = &q->st.curr_clause->t;
@@ -1090,7 +1090,7 @@ static bool match_rule(query *q)
 	make_choice(q);
 
 	for (; q->st.curr_clause; next_key(q)) {
-		if (q->st.curr_clause->t.is_deleted)
+		if (q->st.curr_clause->t.deleted)
 			continue;
 
 		term *t = &q->st.curr_clause->t;

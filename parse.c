@@ -651,7 +651,7 @@ static void assert_commit(module *m, term *t, clause *r, predicate *h, bool appe
 	t->cidx = 0;
 
 	if (h->is_persist)
-		r->t.is_persist = true;
+		r->t.persist = true;
 
 	if (!h->index && h->key.arity && is_structure(c+1))
 		h->is_noindex = true;
@@ -705,7 +705,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 clause *retract_from_db(module *m, clause *r)
 {
 	r->parent->cnt--;
-	r->t.is_deleted = true;
+	r->t.deleted = true;
 	m->dirty = true;
 	return r;
 }
@@ -714,7 +714,7 @@ clause *find_in_db(module *m, uuid *ref)
 {
 	for (predicate *h = m->head; h; h = h->next) {
 		for (clause *r = h->head ; r; r = r->next) {
-			if (r->t.is_deleted)
+			if (r->t.deleted)
 				continue;
 
 			if (!memcmp(&r->u, ref, sizeof(uuid)))
@@ -729,7 +729,7 @@ clause *erase_from_db(module *m, uuid *ref)
 {
 	clause *r = find_in_db(m, ref);
 	if (!r) return 0;
-	r->t.is_deleted = true;
+	r->t.deleted = true;
 	m->dirty = true;
 	return r;
 }
@@ -2855,7 +2855,7 @@ static void module_purge(module *m)
 		clause *last = NULL;
 
 		for (clause *r = h->head; r;) {
-			if (!r->t.is_deleted) {
+			if (!r->t.deleted) {
 				last = r;
 				r = r->next;
 				continue;
@@ -3099,7 +3099,7 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 			continue;
 
 		for (clause *r = h->head; r; r = r->next) {
-			if (r->t.is_deleted)
+			if (r->t.deleted)
 				continue;
 
 			if (canonical)
