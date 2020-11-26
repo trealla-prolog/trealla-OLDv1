@@ -3868,7 +3868,7 @@ static int fn_iso_mod_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-			q->accum.val_num = llabs((long long)(p1.val_num % p2.val_num));
+		q->accum.val_num = llabs((long long)(p1.val_num % p2.val_num));
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");

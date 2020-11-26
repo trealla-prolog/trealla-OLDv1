@@ -316,6 +316,11 @@ int main(int ac, char *av[])
 			break;
 		}
 
+		if (!line[0] || (line[0] == '\n')) {
+			free(line);
+			continue;
+		}
+
 		pl_eval(pl, line);
 		free(line);
 
