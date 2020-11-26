@@ -6473,33 +6473,29 @@ static USE_RESULT prolog_state fn_statistics_2(query *q)
 static USE_RESULT prolog_state fn_sleep_1(query *q)
 {
 	if (q->retry)
-		return 1;
+		return pl_success;
 
 	GET_FIRST_ARG(p1,integer);
 
-	if (q->is_task) {
-		do_yield_0(q, p1->val_num*1000);
-		return 0;
-	}
+	if (q->is_task)
+		return do_yield_0(q, p1->val_num*1000);
 
 	sleep((unsigned)p1->val_num);
-	return 1;
+	return pl_success;
 }
 
 static USE_RESULT prolog_state fn_delay_1(query *q)
 {
 	if (q->retry)
-		return 1;
+		return pl_success;
 
 	GET_FIRST_ARG(p1,integer);
 
-	if (q->is_task) {
-		do_yield_0(q, p1->val_num);
-		return 0;
-	}
+	if (q->is_task)
+		return do_yield_0(q, p1->val_num);
 
 	msleep((unsigned)p1->val_num);
-	return 1;
+	return pl_success;
 }
 
 static USE_RESULT prolog_state fn_busy_1(query *q)
@@ -7291,7 +7287,7 @@ static USE_RESULT prolog_state fn_getline_2(query *q)
 			return 0;
 		}
 
-		return 0;
+		return pl_failure;
 	}
 
 	if (line[strlen(line)-1] == '\n')
@@ -7309,7 +7305,7 @@ static USE_RESULT prolog_state fn_getline_2(query *q)
 		make_literal(&tmp, g_nil_s);
 
 	free(line);
-	int ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	prolog_state ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
 	return ok;
 }
