@@ -89,6 +89,8 @@ Invocation without any goal presents the REPL.
 
 The default path to the library is relative to the executable location.
 
+The file "~/.tplrc" is consulted on startup.
+
 
 What's missing, problems?
 =========================

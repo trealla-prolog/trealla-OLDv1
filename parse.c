@@ -3042,6 +3042,17 @@ bool module_load_file(module *m, const char *filename)
 
 	char *tmpbuf = malloc(strlen(filename) + 20);
 	strcpy(tmpbuf, filename);
+
+	if (tmpbuf[0] == '~') {
+		const char *ptr = getenv("HOME");
+
+		if (ptr) {
+			tmpbuf = realloc(tmpbuf, strlen(ptr) + 10 + strlen(filename) + 20);
+			strcpy(tmpbuf, ptr);
+			strcat(tmpbuf, filename+1);
+		}
+	}
+
 	char *realbuf = NULL;
 
 	if (!(realbuf = realpath(tmpbuf, NULL))) {
