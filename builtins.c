@@ -9812,7 +9812,7 @@ static int fn_numbervars_3(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer)
 	GET_NEXT_ARG(p3,integer_or_var)
-	unsigned cnt = real_numbervars(q, p1, p1_ctx, p2->val_num);
+	unsigned cnt = real_numbervars(q, p1, p1_ctx, q->nv_start=p2->val_num);
 	cell tmp2;
 	make_int(&tmp2, p2->val_num+cnt);
 	return unify(q, p3, p3_ctx, &tmp2, q->st.curr_frame);
