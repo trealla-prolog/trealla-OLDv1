@@ -348,6 +348,7 @@ size_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 	return dst - save_dst;
 }
 
+#if 0
 static char *varformat(unsigned nbr)
 {
 	static char tmpbuf[80];
@@ -356,6 +357,7 @@ static char *varformat(unsigned nbr)
 	if ((nbr/26) > 0) sprintf(dst, "%u", nbr/26);
 	return tmpbuf;
 }
+#endif
 
 size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth)
 {
@@ -517,8 +519,12 @@ size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		if (parens)
 			dst += snprintf(dst, dstlen, "%s", "(");
 
-		if (running && is_variable(c) && q->nv_mask[c->var_nbr]) {
-			dst += snprintf(dst, dstlen, "%s", varformat(q->nv_start + count_bits(q->nv_mask, c->var_nbr)));
+		int var_nbr;
+
+		if (running && is_variable(c)
+			&& ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)
+			&& q->nv_mask[var_nbr]) {
+			dst += snprintf(dst, dstlen, "'$VAR'(%u)", q->nv_start + count_bits(q->nv_mask, var_nbr));
 			return dst - save_dst;
 		}
 
