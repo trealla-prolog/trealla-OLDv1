@@ -648,14 +648,14 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 	free(dst);
 }
 
-static int fn_iso_unify_2(query *q)
+static USE_RESULT prolog_state fn_iso_unify_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	return unify(q, p1, p1_ctx, p2, p2_ctx);
 }
 
-static int fn_iso_notunify_2(query *q)
+static USE_RESULT prolog_state fn_iso_notunify_2(query *q)
 {
 	return !fn_iso_unify_2(q);
 }
@@ -666,24 +666,24 @@ static USE_RESULT prolog_state fn_iso_repeat_0(query *q)
 	return pl_success;
 }
 
-static int fn_iso_true_0(__attribute__((unused)) query *q)
+static USE_RESULT prolog_state fn_iso_true_0(__attribute__((unused)) query *q)
 {
 	return 1;
 }
 
-static int fn_iso_fail_0(__attribute__((unused)) query *q)
+static USE_RESULT prolog_state fn_iso_fail_0(__attribute__((unused)) query *q)
 {
 	return 0;
 }
 
-static int fn_iso_halt_0(query *q)
+static USE_RESULT prolog_state fn_iso_halt_0(query *q)
 {
 	q->halt_code = 0;
 	q->halt = q->error = true;
 	return 0;
 }
 
-static int fn_iso_halt_1(query *q)
+static USE_RESULT prolog_state fn_iso_halt_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	q->halt_code = p1->val_num;
@@ -691,37 +691,37 @@ static int fn_iso_halt_1(query *q)
 	return 0;
 }
 
-static int fn_iso_number_1(query *q)
+static USE_RESULT prolog_state fn_iso_number_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return is_number(p1);
 }
 
-static int fn_iso_atom_1(query *q)
+static USE_RESULT prolog_state fn_iso_atom_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return is_iso_atom(p1);
 }
 
-static int fn_iso_compound_1(query *q)
+static USE_RESULT prolog_state fn_iso_compound_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return is_compound(p1) ? 1 : 0;
 }
 
-static int fn_iso_atomic_1(query *q)
+static USE_RESULT prolog_state fn_iso_atomic_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return is_atomic(p1);
 }
 
-static int fn_iso_var_1(query *q)
+static USE_RESULT prolog_state fn_iso_var_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return is_variable(p1);
 }
 
-static int fn_iso_nonvar_1(query *q)
+static USE_RESULT prolog_state fn_iso_nonvar_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return !is_variable(p1);
@@ -750,25 +750,25 @@ static int has_vars(query *q, cell *c, idx_t c_ctx)
 	return 0;
 }
 
-static int fn_iso_ground_1(query *q)
+static USE_RESULT prolog_state fn_iso_ground_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return !has_vars(q, p1, p1_ctx);
 }
 
-static int fn_iso_cut_0(query *q)
+static USE_RESULT prolog_state fn_iso_cut_0(query *q)
 {
 	cut_me(q, 0);
 	return 1;
 }
 
-static int fn_local_cut_0(query *q)
+static USE_RESULT prolog_state fn_local_cut_0(query *q)
 {
 	cut_me(q, 1);
 	return 1;
 }
 
-static int fn_iso_callable_1(query *q)
+static USE_RESULT prolog_state fn_iso_callable_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
@@ -778,7 +778,7 @@ static int fn_iso_callable_1(query *q)
 	return 1;
 }
 
-static int fn_iso_char_code_2(query *q)
+static USE_RESULT prolog_state fn_iso_char_code_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
@@ -809,7 +809,7 @@ static int fn_iso_char_code_2(query *q)
 	return ch == p2->val_num;
 }
 
-static int fn_iso_atom_chars_2(query *q)
+static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
@@ -920,7 +920,7 @@ static int fn_iso_atom_chars_2(query *q)
 	return ok;
 }
 
-static int fn_iso_atom_codes_2(query *q)
+static USE_RESULT prolog_state fn_iso_atom_codes_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
@@ -1018,7 +1018,7 @@ static int fn_iso_atom_codes_2(query *q)
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
-static int fn_iso_number_chars_2(query *q)
+static USE_RESULT prolog_state fn_iso_number_chars_2(query *q)
 {
 	GET_FIRST_ARG(p1,number_or_var);
 	GET_NEXT_ARG(p2,list_or_var);
@@ -1090,7 +1090,7 @@ static int fn_iso_number_chars_2(query *q)
 	return ok;
 }
 
-static int fn_iso_number_codes_2(query *q)
+static USE_RESULT prolog_state fn_iso_number_codes_2(query *q)
 {
 	GET_FIRST_ARG(p1,number_or_var);
 	GET_NEXT_ARG(p2,iso_list_or_var);
@@ -1310,7 +1310,7 @@ static USE_RESULT prolog_state do_atom_concat_3(query *q)
 	return pl_success;
 }
 
-static int fn_iso_atom_concat_3(query *q)
+static USE_RESULT prolog_state fn_iso_atom_concat_3(query *q)
 {
 	if (q->retry)
 		return do_atom_concat_3(q);
@@ -1401,7 +1401,7 @@ static int fn_iso_atom_concat_3(query *q)
 	return 1;
 }
 
-static int fn_iso_atom_length_2(query *q)
+static USE_RESULT prolog_state fn_iso_atom_length_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,integer_or_var);
@@ -1479,7 +1479,7 @@ static int get_stream(query *q, cell *p1)
 	return p1->val_num;
 }
 
-static int fn_iso_current_input_1(query *q)
+static USE_RESULT prolog_state fn_iso_current_input_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
@@ -1489,7 +1489,7 @@ static int fn_iso_current_input_1(query *q)
 	return 1;
 }
 
-static int fn_iso_current_output_1(query *q)
+static USE_RESULT prolog_state fn_iso_current_output_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
@@ -1499,21 +1499,21 @@ static int fn_iso_current_output_1(query *q)
 	return 1;
 }
 
-static int fn_iso_set_input_1(query *q)
+static USE_RESULT prolog_state fn_iso_set_input_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	q->current_input = get_stream(q, pstr);
 	return 1;
 }
 
-static int fn_iso_set_output_1(query *q)
+static USE_RESULT prolog_state fn_iso_set_output_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	q->current_output = get_stream(q, pstr);
 	return 1;
 }
 
-static int fn_iso_stream_property_2(query *q)
+static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 {
 	GET_FIRST_ARG(pstr,any);
 	GET_NEXT_ARG(p1,any);
@@ -1573,7 +1573,7 @@ static int fn_iso_stream_property_2(query *q)
 	return 0;
 }
 
-static int fn_iso_set_stream_position_2(query *q)
+static USE_RESULT prolog_state fn_iso_set_stream_position_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -1616,7 +1616,7 @@ static char *chars_list_to_string(query *q, cell *p_chars, idx_t p_chars_ctx, si
 	return src;
 }
 
-static int fn_iso_open_3(query *q)
+static USE_RESULT prolog_state fn_iso_open_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom);
@@ -1673,7 +1673,7 @@ static int fn_iso_open_3(query *q)
 	return 1;
 }
 
-static int fn_iso_open_4(query *q)
+static USE_RESULT prolog_state fn_iso_open_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
 	GET_NEXT_ARG(p2,atom);
@@ -1822,7 +1822,7 @@ static int fn_iso_open_4(query *q)
 	return 1;
 }
 
-static int fn_iso_close_1(query *q)
+static USE_RESULT prolog_state fn_iso_close_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -1843,14 +1843,14 @@ static int fn_iso_close_1(query *q)
 	return 1;
 }
 
-static int fn_iso_at_end_of_stream_0(__attribute__((unused)) query *q)
+static USE_RESULT prolog_state fn_iso_at_end_of_stream_0(__attribute__((unused)) query *q)
 {
 	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
 	return feof(str->fp) || ferror(str->fp);
 }
 
-static int fn_iso_at_end_of_stream_1(query *q)
+static USE_RESULT prolog_state fn_iso_at_end_of_stream_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -1858,7 +1858,7 @@ static int fn_iso_at_end_of_stream_1(query *q)
 	return feof(str->fp) || ferror(str->fp);
 }
 
-static int fn_iso_flush_output_0(__attribute__((unused)) query *q)
+static USE_RESULT prolog_state fn_iso_flush_output_0(__attribute__((unused)) query *q)
 {
 	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
@@ -1866,7 +1866,7 @@ static int fn_iso_flush_output_0(__attribute__((unused)) query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_flush_output_1(query *q)
+static USE_RESULT prolog_state fn_iso_flush_output_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -1875,7 +1875,7 @@ static int fn_iso_flush_output_1(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_nl_0(__attribute__((unused)) query *q)
+static USE_RESULT prolog_state fn_iso_nl_0(__attribute__((unused)) query *q)
 {
 	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
@@ -1884,7 +1884,7 @@ static int fn_iso_nl_0(__attribute__((unused)) query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_nl_1(query *q)
+static USE_RESULT prolog_state fn_iso_nl_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -1971,7 +1971,7 @@ static void parse_read_params(query *q, cell *p, cell **vars, idx_t *vars_ctx, c
 	}
 }
 
-static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, char *src)
+static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, char *src)
 {
 	if (!str->p)
 		str->p = create_parser(q->m);
@@ -2249,7 +2249,7 @@ static int do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2,
 	return unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 }
 
-static int fn_iso_read_1(query *q)
+static USE_RESULT prolog_state fn_iso_read_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream("user_input");
@@ -2259,7 +2259,7 @@ static int fn_iso_read_1(query *q)
 	return do_read_term(q, str, p1, p1_ctx, &tmp, q->st.curr_frame, NULL);
 }
 
-static int fn_iso_read_2(query *q)
+static USE_RESULT prolog_state fn_iso_read_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2270,7 +2270,7 @@ static int fn_iso_read_2(query *q)
 	return do_read_term(q, str, p1, p1_ctx, &tmp, q->st.curr_frame, NULL);
 }
 
-static int fn_iso_read_term_2(query *q)
+static USE_RESULT prolog_state fn_iso_read_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
@@ -2279,7 +2279,7 @@ static int fn_iso_read_term_2(query *q)
 	return do_read_term(q, str, p1, p1_ctx, p2, p2_ctx, NULL);
 }
 
-static int fn_iso_read_term_3(query *q)
+static USE_RESULT prolog_state fn_iso_read_term_3(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2289,7 +2289,7 @@ static int fn_iso_read_term_3(query *q)
 	return do_read_term(q, str, p1, p1_ctx, p2, p2_ctx, NULL);
 }
 
-static int fn_iso_write_1(query *q)
+static USE_RESULT prolog_state fn_iso_write_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream("user_output");
@@ -2298,7 +2298,7 @@ static int fn_iso_write_1(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_write_2(query *q)
+static USE_RESULT prolog_state fn_iso_write_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2308,7 +2308,7 @@ static int fn_iso_write_2(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_writeq_1(query *q)
+static USE_RESULT prolog_state fn_iso_writeq_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream("user_output");
@@ -2320,7 +2320,7 @@ static int fn_iso_writeq_1(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_writeq_2(query *q)
+static USE_RESULT prolog_state fn_iso_writeq_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2333,7 +2333,7 @@ static int fn_iso_writeq_2(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_write_canonical_1(query *q)
+static USE_RESULT prolog_state fn_iso_write_canonical_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream("user_output");
@@ -2342,7 +2342,7 @@ static int fn_iso_write_canonical_1(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_write_canonical_2(query *q)
+static USE_RESULT prolog_state fn_iso_write_canonical_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2377,7 +2377,7 @@ static void parse_write_params(query *q, cell *p)
 	}
 }
 
-static int fn_iso_write_term_2(query *q)
+static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -2413,7 +2413,7 @@ static int fn_iso_write_term_2(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_write_term_3(query *q)
+static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2446,7 +2446,7 @@ static int fn_iso_write_term_3(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_put_char_1(query *q)
+static USE_RESULT prolog_state fn_iso_put_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	int n = get_named_stream("user_output");
@@ -2459,7 +2459,7 @@ static int fn_iso_put_char_1(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_put_char_2(query *q)
+static USE_RESULT prolog_state fn_iso_put_char_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2473,7 +2473,7 @@ static int fn_iso_put_char_2(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_put_code_1(query *q)
+static USE_RESULT prolog_state fn_iso_put_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	int n = get_named_stream("user_output");
@@ -2485,7 +2485,7 @@ static int fn_iso_put_code_1(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_put_code_2(query *q)
+static USE_RESULT prolog_state fn_iso_put_code_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2498,7 +2498,7 @@ static int fn_iso_put_code_2(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_put_byte_1(query *q)
+static USE_RESULT prolog_state fn_iso_put_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	int n = get_named_stream("user_output");
@@ -2516,7 +2516,7 @@ static int fn_iso_put_byte_1(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_put_byte_2(query *q)
+static USE_RESULT prolog_state fn_iso_put_byte_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2535,7 +2535,7 @@ static int fn_iso_put_byte_2(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_iso_get_char_1(query *q)
+static USE_RESULT prolog_state fn_iso_get_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	int n = get_named_stream("user_input");
@@ -2574,7 +2574,7 @@ static int fn_iso_get_char_1(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_iso_get_char_2(query *q)
+static USE_RESULT prolog_state fn_iso_get_char_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2614,7 +2614,7 @@ static int fn_iso_get_char_2(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_iso_get_code_1(query *q)
+static USE_RESULT prolog_state fn_iso_get_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
 	int n = get_named_stream("user_input");
@@ -2644,7 +2644,7 @@ static int fn_iso_get_code_1(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_iso_get_code_2(query *q)
+static USE_RESULT prolog_state fn_iso_get_code_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2675,7 +2675,7 @@ static int fn_iso_get_code_2(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_iso_get_byte_1(query *q)
+static USE_RESULT prolog_state fn_iso_get_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	int n = get_named_stream("user_input");
@@ -2705,7 +2705,7 @@ static int fn_iso_get_byte_1(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_iso_get_byte_2(query *q)
+static USE_RESULT prolog_state fn_iso_get_byte_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2736,7 +2736,7 @@ static int fn_iso_get_byte_2(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_iso_peek_char_1(query *q)
+static USE_RESULT prolog_state fn_iso_peek_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream("user_input");
@@ -2764,7 +2764,7 @@ static int fn_iso_peek_char_1(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_iso_peek_char_2(query *q)
+static USE_RESULT prolog_state fn_iso_peek_char_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2794,7 +2794,7 @@ static int fn_iso_peek_char_2(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_iso_peek_code_1(query *q)
+static USE_RESULT prolog_state fn_iso_peek_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream("user_input");
@@ -2813,7 +2813,7 @@ static int fn_iso_peek_code_1(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_iso_peek_code_2(query *q)
+static USE_RESULT prolog_state fn_iso_peek_code_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2833,7 +2833,7 @@ static int fn_iso_peek_code_2(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_iso_peek_byte_1(query *q)
+static USE_RESULT prolog_state fn_iso_peek_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream("user_input");
@@ -2852,7 +2852,7 @@ static int fn_iso_peek_byte_1(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_iso_peek_byte_2(query *q)
+static USE_RESULT prolog_state fn_iso_peek_byte_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2918,7 +2918,7 @@ void do_reduce(cell *n)
 
 #define reduce(c) if ((c)->val_den != 1) do_reduce(c)
 
-static int fn_iso_is_2(query *q)
+static USE_RESULT prolog_state fn_iso_is_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -2960,7 +2960,7 @@ static int fn_iso_is_2(query *q)
 	return 0;
 }
 
-static int fn_iso_float_1(query *q)
+static USE_RESULT prolog_state fn_iso_float_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 
@@ -2986,7 +2986,7 @@ static int fn_iso_float_1(query *q)
 	return is_float(p1_tmp);
 }
 
-static int fn_iso_integer_1(query *q)
+static USE_RESULT prolog_state fn_iso_integer_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 
@@ -3014,7 +3014,7 @@ static int fn_iso_integer_1(query *q)
 	return is_integer(p1_tmp);
 }
 
-static int fn_iso_abs_1(query *q)
+static USE_RESULT prolog_state fn_iso_abs_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3032,7 +3032,7 @@ static int fn_iso_abs_1(query *q)
 	return 1;
 }
 
-static int fn_iso_sign_1(query *q)
+static USE_RESULT prolog_state fn_iso_sign_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3050,7 +3050,7 @@ static int fn_iso_sign_1(query *q)
 	return 1;
 }
 
-static int fn_iso_positive_1(query *q)
+static USE_RESULT prolog_state fn_iso_positive_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3058,7 +3058,7 @@ static int fn_iso_positive_1(query *q)
 	return 1;
 }
 
-static int fn_iso_negative_1(query *q)
+static USE_RESULT prolog_state fn_iso_negative_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3076,21 +3076,21 @@ static int fn_iso_negative_1(query *q)
 	return 1;
 }
 
-static int fn_iso_pi_0(query *q)
+static USE_RESULT prolog_state fn_iso_pi_0(query *q)
 {
 	q->accum.val_flt = M_PI;
 	q->accum.val_type = TYPE_FLOAT;
 	return 1;
 }
 
-static int fn_iso_e_0(query *q)
+static USE_RESULT prolog_state fn_iso_e_0(query *q)
 {
 	q->accum.val_flt = M_E;
 	q->accum.val_type = TYPE_FLOAT;
 	return 1;
 }
 
-static int fn_iso_add_2(query *q)
+static USE_RESULT prolog_state fn_iso_add_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3142,7 +3142,7 @@ static int fn_iso_add_2(query *q)
 	return 1;
 }
 
-static int fn_iso_sub_2(query *q)
+static USE_RESULT prolog_state fn_iso_sub_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3194,7 +3194,7 @@ static int fn_iso_sub_2(query *q)
 	return 1;
 }
 
-static int fn_iso_mul_2(query *q)
+static USE_RESULT prolog_state fn_iso_mul_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3247,7 +3247,7 @@ static int fn_iso_mul_2(query *q)
 	return 1;
 }
 
-static int fn_iso_exp_1(query *q)
+static USE_RESULT prolog_state fn_iso_exp_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3266,7 +3266,7 @@ static int fn_iso_exp_1(query *q)
 	return 1;
 }
 
-static int fn_iso_sqrt_1(query *q)
+static USE_RESULT prolog_state fn_iso_sqrt_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3285,7 +3285,7 @@ static int fn_iso_sqrt_1(query *q)
 	return 1;
 }
 
-static int fn_iso_log_1(query *q)
+static USE_RESULT prolog_state fn_iso_log_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3304,7 +3304,7 @@ static int fn_iso_log_1(query *q)
 	return 1;
 }
 
-static int fn_iso_truncate_1(query *q)
+static USE_RESULT prolog_state fn_iso_truncate_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3340,7 +3340,7 @@ static int fn_iso_truncate_1(query *q)
 	return 1;
 }
 
-static int fn_iso_round_1(query *q)
+static USE_RESULT prolog_state fn_iso_round_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3376,7 +3376,7 @@ static int fn_iso_round_1(query *q)
 	return 1;
 }
 
-static int fn_iso_ceiling_1(query *q)
+static USE_RESULT prolog_state fn_iso_ceiling_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3412,7 +3412,7 @@ static int fn_iso_ceiling_1(query *q)
 	return 1;
 }
 
-static int fn_iso_float_integer_part_1(query *q)
+static USE_RESULT prolog_state fn_iso_float_integer_part_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3448,7 +3448,7 @@ static int fn_iso_float_integer_part_1(query *q)
 	return 1;
 }
 
-static int fn_iso_float_fractional_part_1(query *q)
+static USE_RESULT prolog_state fn_iso_float_fractional_part_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3484,7 +3484,7 @@ static int fn_iso_float_fractional_part_1(query *q)
 	return 1;
 }
 
-static int fn_iso_floor_1(query *q)
+static USE_RESULT prolog_state fn_iso_floor_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3520,7 +3520,7 @@ static int fn_iso_floor_1(query *q)
 	return 1;
 }
 
-static int fn_iso_sin_1(query *q)
+static USE_RESULT prolog_state fn_iso_sin_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3539,7 +3539,7 @@ static int fn_iso_sin_1(query *q)
 	return 1;
 }
 
-static int fn_iso_cos_1(query *q)
+static USE_RESULT prolog_state fn_iso_cos_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3558,7 +3558,7 @@ static int fn_iso_cos_1(query *q)
 	return 1;
 }
 
-static int fn_iso_tan_1(query *q)
+static USE_RESULT prolog_state fn_iso_tan_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3577,7 +3577,7 @@ static int fn_iso_tan_1(query *q)
 	return 1;
 }
 
-static int fn_iso_asin_1(query *q)
+static USE_RESULT prolog_state fn_iso_asin_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3596,7 +3596,7 @@ static int fn_iso_asin_1(query *q)
 	return 1;
 }
 
-static int fn_iso_acos_1(query *q)
+static USE_RESULT prolog_state fn_iso_acos_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3615,7 +3615,7 @@ static int fn_iso_acos_1(query *q)
 	return 1;
 }
 
-static int fn_iso_atan_1(query *q)
+static USE_RESULT prolog_state fn_iso_atan_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3634,7 +3634,7 @@ static int fn_iso_atan_1(query *q)
 	return 1;
 }
 
-static int fn_iso_atan_2(query *q)
+static USE_RESULT prolog_state fn_iso_atan_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3661,7 +3661,7 @@ static int fn_iso_atan_2(query *q)
 	return 1;
 }
 
-static int fn_iso_copysign_2(query *q)
+static USE_RESULT prolog_state fn_iso_copysign_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3696,7 +3696,7 @@ static int fn_iso_copysign_2(query *q)
 	return 1;
 }
 
-static int fn_iso_pow_2(query *q)
+static USE_RESULT prolog_state fn_iso_pow_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3723,7 +3723,7 @@ static int fn_iso_pow_2(query *q)
 	return 1;
 }
 
-static int fn_iso_powi_2(query *q)
+static USE_RESULT prolog_state fn_iso_powi_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3773,7 +3773,7 @@ static int fn_iso_powi_2(query *q)
 	return 1;
 }
 
-static int fn_iso_divide_2(query *q)
+static USE_RESULT prolog_state fn_iso_divide_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3806,7 +3806,7 @@ static int fn_iso_divide_2(query *q)
 	return 1;
 }
 
-static int fn_iso_divint_2(query *q)
+static USE_RESULT prolog_state fn_iso_divint_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3824,7 +3824,7 @@ static int fn_iso_divint_2(query *q)
 	return 1;
 }
 
-static int fn_iso_div_2(query *q)
+static USE_RESULT prolog_state fn_iso_div_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3842,7 +3842,7 @@ static int fn_iso_div_2(query *q)
 	return 1;
 }
 
-static int fn_iso_mod_2(query *q)
+static USE_RESULT prolog_state fn_iso_mod_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3860,7 +3860,7 @@ static int fn_iso_mod_2(query *q)
 	return 1;
 }
 
-static int fn_iso_max_2(query *q)
+static USE_RESULT prolog_state fn_iso_max_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3884,7 +3884,7 @@ static int fn_iso_max_2(query *q)
 	return 1;
 }
 
-static int fn_iso_min_2(query *q)
+static USE_RESULT prolog_state fn_iso_min_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3908,7 +3908,7 @@ static int fn_iso_min_2(query *q)
 	return 1;
 }
 
-static int fn_iso_xor_2(query *q)
+static USE_RESULT prolog_state fn_iso_xor_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3926,7 +3926,7 @@ static int fn_iso_xor_2(query *q)
 	return 1;
 }
 
-static int fn_iso_and_2(query *q)
+static USE_RESULT prolog_state fn_iso_and_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3944,7 +3944,7 @@ static int fn_iso_and_2(query *q)
 	return 1;
 }
 
-static int fn_iso_or_2(query *q)
+static USE_RESULT prolog_state fn_iso_or_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3962,7 +3962,7 @@ static int fn_iso_or_2(query *q)
 	return 1;
 }
 
-static int fn_iso_shl_2(query *q)
+static USE_RESULT prolog_state fn_iso_shl_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3980,7 +3980,7 @@ static int fn_iso_shl_2(query *q)
 	return 1;
 }
 
-static int fn_iso_shr_2(query *q)
+static USE_RESULT prolog_state fn_iso_shr_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -3998,7 +3998,7 @@ static int fn_iso_shr_2(query *q)
 	return 1;
 }
 
-static int fn_iso_neg_1(query *q)
+static USE_RESULT prolog_state fn_iso_neg_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -4148,49 +4148,49 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, uns
 	return 0;
 }
 
-static int fn_iso_seq_2(query *q)
+static USE_RESULT prolog_state fn_iso_seq_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	return compare(q, p1, p1_ctx, p2, p2_ctx, 0) == 0;
 }
 
-static int fn_iso_sne_2(query *q)
+static USE_RESULT prolog_state fn_iso_sne_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	return compare(q, p1, p1_ctx, p2, p2_ctx, 0) != 0;
 }
 
-static int fn_iso_slt_2(query *q)
+static USE_RESULT prolog_state fn_iso_slt_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	return compare(q, p1, p1_ctx, p2, p2_ctx, 0) < 0;
 }
 
-static int fn_iso_sle_2(query *q)
+static USE_RESULT prolog_state fn_iso_sle_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	return compare(q, p1, p1_ctx, p2, p2_ctx, 0) <= 0;
 }
 
-static int fn_iso_sgt_2(query *q)
+static USE_RESULT prolog_state fn_iso_sgt_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	return compare(q, p1, p1_ctx, p2, p2_ctx, 0) > 0;
 }
 
-static int fn_iso_sge_2(query *q)
+static USE_RESULT prolog_state fn_iso_sge_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	return compare(q, p1, p1_ctx, p2, p2_ctx, 0) >= 0;
 }
 
-static int fn_iso_compare_3(query *q)
+static USE_RESULT prolog_state fn_iso_compare_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -4202,7 +4202,7 @@ static int fn_iso_compare_3(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_iso_neq_2(query *q)
+static USE_RESULT prolog_state fn_iso_neq_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -4226,7 +4226,7 @@ static int fn_iso_neq_2(query *q)
 	return 0;
 }
 
-static int fn_iso_nne_2(query *q)
+static USE_RESULT prolog_state fn_iso_nne_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -4250,7 +4250,7 @@ static int fn_iso_nne_2(query *q)
 	return 0;
 }
 
-static int fn_iso_nge_2(query *q)
+static USE_RESULT prolog_state fn_iso_nge_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -4274,7 +4274,7 @@ static int fn_iso_nge_2(query *q)
 	return 0;
 }
 
-static int fn_iso_ngt_2(query *q)
+static USE_RESULT prolog_state fn_iso_ngt_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -4298,7 +4298,7 @@ static int fn_iso_ngt_2(query *q)
 	return 0;
 }
 
-static int fn_iso_nle_2(query *q)
+static USE_RESULT prolog_state fn_iso_nle_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -4322,7 +4322,7 @@ static int fn_iso_nle_2(query *q)
 	return 0;
 }
 
-static int fn_iso_nlt_2(query *q)
+static USE_RESULT prolog_state fn_iso_nlt_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -4405,7 +4405,7 @@ static USE_RESULT prolog_state fn_iso_arg_3(query *q)
 	return pl_failure;
 }
 
-static int fn_iso_univ_2(query *q)
+static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_var);
@@ -4518,7 +4518,7 @@ static int fn_iso_univ_2(query *q)
 	return unify(q, p2, p2_ctx, l, p1_ctx);
 }
 
-static int fn_iso_term_variables_2(query *q)
+static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
@@ -4706,7 +4706,7 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, idx_t suffix)
 	return copy_to_heap2(q, prefix, p1, p1->nbr_cells, suffix);
 }
 
-static int fn_iso_copy_term_2(query *q)
+static USE_RESULT prolog_state fn_iso_copy_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -4730,7 +4730,7 @@ static int fn_iso_copy_term_2(query *q)
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
-static int fn_iso_clause_2(query *q)
+static USE_RESULT prolog_state fn_iso_clause_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable_or_var);
@@ -4856,7 +4856,7 @@ static void db_log(query *q, clause *r, enum log_type l)
 	q->quoted = save;
 }
 
-static int fn_iso_retract_1(query *q)
+static USE_RESULT prolog_state fn_iso_retract_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
@@ -4875,7 +4875,7 @@ static int fn_iso_retract_1(query *q)
 	return 1;
 }
 
-static int fn_iso_retractall_1(query *q)
+static USE_RESULT prolog_state fn_iso_retractall_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	predicate *h = find_matching_predicate(q->m, p1);
@@ -4919,7 +4919,7 @@ static int do_abolish(query *q, cell *c)
 	return 1;
 }
 
-static int fn_iso_abolish_1(query *q)
+static USE_RESULT prolog_state fn_iso_abolish_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
@@ -5008,7 +5008,7 @@ static void do_assign_vars(parser *p, idx_t nbr_cells)
 	}
 }
 
-static int fn_iso_asserta_1(query *q)
+static USE_RESULT prolog_state fn_iso_asserta_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
@@ -5039,7 +5039,7 @@ static int fn_iso_asserta_1(query *q)
 	return 1;
 }
 
-static int fn_iso_assertz_1(query *q)
+static USE_RESULT prolog_state fn_iso_assertz_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
@@ -5116,7 +5116,7 @@ int call_me(query *q, cell *p1)
 	return 1;
 }
 
-static int fn_iso_call_n(query *q)
+static USE_RESULT prolog_state fn_iso_call_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	clone_to_tmp(q, p1);
@@ -5156,7 +5156,7 @@ static int fn_iso_call_n(query *q)
 	return 1;
 }
 
-static int fn_iso_ifthen_2(query *q)
+static USE_RESULT prolog_state fn_iso_ifthen_2(query *q)
 {
 	if (q->retry)
 		return 0;
@@ -5223,7 +5223,7 @@ static USE_RESULT prolog_state fn_iso_disjunction_2(query *q)
 	return pl_success;
 }
 
-static int fn_iso_negation_1(query *q)
+static USE_RESULT prolog_state fn_iso_negation_1(query *q)
 {
 	if (q->retry)
 		return 1;
@@ -5239,7 +5239,7 @@ static int fn_iso_negation_1(query *q)
 	return 1;
 }
 
-static int fn_iso_once_1(query *q)
+static USE_RESULT prolog_state fn_iso_once_1(query *q)
 {
 	if (q->retry)
 		return 0;
@@ -5255,7 +5255,7 @@ static int fn_iso_once_1(query *q)
 	return 1;
 }
 
-static int fn_ignore_1(query *q)
+static USE_RESULT prolog_state fn_ignore_1(query *q)
 {
 	if (q->retry)
 		return 1;
@@ -5271,7 +5271,7 @@ static int fn_ignore_1(query *q)
 	return 1;
 }
 
-static int fn_iso_catch_3(query *q)
+static USE_RESULT prolog_state fn_iso_catch_3(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,any);
@@ -5328,7 +5328,7 @@ static int do_throw_term(query *q, cell *c)
 	return 0;
 }
 
-static int fn_iso_throw_1(query *q)
+static USE_RESULT prolog_state fn_iso_throw_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
@@ -5358,7 +5358,7 @@ static int fn_iso_throw_1(query *q)
 	return fn_iso_catch_3(q);
 }
 
-static int fn_iso_functor_3(query *q)
+static USE_RESULT prolog_state fn_iso_functor_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -5435,7 +5435,7 @@ static int fn_iso_functor_3(query *q)
 	return 1;
 }
 
-static int fn_iso_current_rule_1(query *q)
+static USE_RESULT prolog_state fn_iso_current_rule_1(query *q)
 {
 	GET_FIRST_ARG(p1,structure);
 	int add_two = 0;
@@ -5495,7 +5495,7 @@ static int fn_iso_current_rule_1(query *q)
 	return 0;
 }
 
-static int fn_iso_current_predicate_1(query *q)
+static USE_RESULT prolog_state fn_iso_current_predicate_1(query *q)
 {
 	GET_FIRST_ARG(p_pi,structure);
 	unsigned arity = UINT_MAX;
@@ -5534,7 +5534,7 @@ static int fn_iso_current_predicate_1(query *q)
 	return 0;
 }
 
-static int fn_iso_current_op_3(query *q)
+static USE_RESULT prolog_state fn_iso_current_op_3(query *q)
 {
 	GET_FIRST_ARG(p_prec,integer_or_var);
 	GET_NEXT_ARG(p_type,atom_or_var);
@@ -5591,7 +5591,7 @@ static int fn_iso_current_op_3(query *q)
 	return 1;
 }
 
-static int fn_iso_acyclic_term_1(query *q)
+static USE_RESULT prolog_state fn_iso_acyclic_term_1(query *q)
 {
 	GET_FIRST_ARG(p_term,any);
 	q->cycle_error = false;
@@ -5599,7 +5599,7 @@ static int fn_iso_acyclic_term_1(query *q)
 	return !q->cycle_error;
 }
 
-static int fn_iso_current_prolog_flag_2(query *q)
+static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,any);
@@ -5701,7 +5701,7 @@ static int fn_iso_current_prolog_flag_2(query *q)
 	return 0;
 }
 
-static int fn_iso_set_prolog_flag_2(query *q)
+static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -5845,7 +5845,7 @@ static int fn_sys_list_1(query *q)
 	return !q->cycle_error;
 }
 
-static int fn_sys_queue_1(query *q)
+static USE_RESULT prolog_state fn_sys_queue_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
@@ -5860,7 +5860,7 @@ static int fn_sys_queue_1(query *q)
 	return 1;
 }
 
-static int fn_sys_queuen_2(query *q)
+static USE_RESULT prolog_state fn_sys_queuen_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,any);
@@ -5876,7 +5876,7 @@ static int fn_sys_queuen_2(query *q)
 	return 1;
 }
 
-static int fn_iso_findall_3(query *q)
+static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
@@ -6068,7 +6068,7 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
-static int fn_iso_op_3(query *q)
+static USE_RESULT prolog_state fn_iso_op_3(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,atom);
@@ -6114,7 +6114,7 @@ static int fn_iso_op_3(query *q)
 	return 1;
 }
 
-static int fn_erase_1(query *q)
+static USE_RESULT prolog_state fn_erase_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	uuid u;
@@ -6128,7 +6128,7 @@ static int fn_erase_1(query *q)
 	return 1;
 }
 
-static int fn_instance_2(query *q)
+static USE_RESULT prolog_state fn_instance_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,any);
@@ -6139,7 +6139,7 @@ static int fn_instance_2(query *q)
 	return unify(q, p2, p2_ctx, r->t.cells, q->st.curr_frame);
 }
 
-static int fn_clause_3(query *q)
+static USE_RESULT prolog_state fn_clause_3(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable_or_var);
@@ -6234,14 +6234,14 @@ static int do_asserta_2(query *q)
 	return 1;
 }
 
-static int fn_asserta_2(query *q)
+static USE_RESULT prolog_state fn_asserta_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 	GET_NEXT_ARG(p2,variable);
 	return do_asserta_2(q);
 }
 
-static int fn_sys_asserta_2(query *q)
+static USE_RESULT prolog_state fn_sys_asserta_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 	GET_NEXT_ARG(p2,atom);
@@ -6291,14 +6291,14 @@ static int do_assertz_2(query *q)
 	return 1;
 }
 
-static int fn_assertz_2(query *q)
+static USE_RESULT prolog_state fn_assertz_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 	GET_NEXT_ARG(p2,variable);
 	return do_assertz_2(q);
 }
 
-static int fn_sys_assertz_2(query *q)
+static USE_RESULT prolog_state fn_sys_assertz_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 	GET_NEXT_ARG(p2,atom);
@@ -6339,7 +6339,7 @@ static void save_db(FILE *fp, query *q, int logging)
 	q->quoted = save;
 }
 
-static int fn_listing_0(query *q)
+static USE_RESULT prolog_state fn_listing_0(query *q)
 {
 	save_db(stdout, q, 0);
 	return 1;
@@ -6369,7 +6369,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 	}
 }
 
-static int fn_listing_1(query *q)
+static USE_RESULT prolog_state fn_listing_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	idx_t name = p1->val_off;
@@ -6403,12 +6403,12 @@ static int fn_listing_1(query *q)
 	return 1;
 }
 
-static int fn_sys_timer_0(query *q)
+static USE_RESULT prolog_state fn_sys_timer_0(query *q)
 {
 	q->time_started = get_time_in_usec();
 	return 1;
 }
-static int fn_sys_elapsed_0(query *q)
+static USE_RESULT prolog_state fn_sys_elapsed_0(query *q)
 {
 	uint64_t elapsed = get_time_in_usec();
 	elapsed -= q->time_started;
@@ -6416,13 +6416,13 @@ static int fn_sys_elapsed_0(query *q)
 	return 1;
 }
 
-static int fn_trace_0(query *q)
+static USE_RESULT prolog_state fn_trace_0(query *q)
 {
 	q->trace = true;
 	return 1;
 }
 
-static int fn_time_1(query *q)
+static USE_RESULT prolog_state fn_time_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	fn_sys_timer_0(q);
@@ -6434,7 +6434,7 @@ static int fn_time_1(query *q)
 	return 1;
 }
 
-static int fn_statistics_2(query *q)
+static USE_RESULT prolog_state fn_statistics_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,list_or_var);
@@ -6470,7 +6470,7 @@ static int fn_statistics_2(query *q)
 	return 0;
 }
 
-static int fn_sleep_1(query *q)
+static USE_RESULT prolog_state fn_sleep_1(query *q)
 {
 	if (q->retry)
 		return 1;
@@ -6486,7 +6486,7 @@ static int fn_sleep_1(query *q)
 	return 1;
 }
 
-static int fn_delay_1(query *q)
+static USE_RESULT prolog_state fn_delay_1(query *q)
 {
 	if (q->retry)
 		return 1;
@@ -6502,7 +6502,7 @@ static int fn_delay_1(query *q)
 	return 1;
 }
 
-static int fn_busy_1(query *q)
+static USE_RESULT prolog_state fn_busy_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	int_t elapse = p1->val_num;
@@ -6524,7 +6524,7 @@ static int fn_busy_1(query *q)
 	return 1;
 }
 
-static int fn_now_0(query *q)
+static USE_RESULT prolog_state fn_now_0(query *q)
 {
 	int_t secs = get_time_in_usec() / 1000 / 1000;
 	q->accum.val_type = TYPE_INTEGER;
@@ -6532,7 +6532,7 @@ static int fn_now_0(query *q)
 	return 1;
 }
 
-static int fn_now_1(query *q)
+static USE_RESULT prolog_state fn_now_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	int_t secs = get_time_in_usec() / 1000 / 1000;
@@ -6542,7 +6542,7 @@ static int fn_now_1(query *q)
 	return 1;
 }
 
-static int fn_get_time_1(query *q)
+static USE_RESULT prolog_state fn_get_time_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	double v = ((double)get_time_in_usec()) / 1000 / 1000;
@@ -6552,7 +6552,7 @@ static int fn_get_time_1(query *q)
 	return 1;
 }
 
-static int fn_writeln_1(query *q)
+static USE_RESULT prolog_state fn_writeln_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream("user_output");
@@ -6611,7 +6611,7 @@ static USE_RESULT prolog_state fn_between_3(query *q)
 	return pl_success;
 }
 
-static int fn_forall_2(query *q)
+static USE_RESULT prolog_state fn_forall_2(query *q)
 {
 	if (q->retry)
 		return 1;
@@ -6627,7 +6627,7 @@ static int fn_forall_2(query *q)
 	return 1;
 }
 
-static int fn_split_atom_4(query *q)
+static USE_RESULT prolog_state fn_split_atom_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom);
@@ -6677,7 +6677,7 @@ static int fn_split_atom_4(query *q)
 	return unify(q, p4, p4_ctx, l, q->st.curr_frame);
 }
 
-static int fn_split_4(query *q)
+static USE_RESULT prolog_state fn_split_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom);
@@ -6736,7 +6736,7 @@ static int fn_split_4(query *q)
 	return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_savefile_2(query *q)
+static USE_RESULT prolog_state fn_savefile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom);
@@ -6764,7 +6764,7 @@ static int fn_savefile_2(query *q)
 	return 1;
 }
 
-static int fn_loadfile_2(query *q)
+static USE_RESULT prolog_state fn_loadfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,variable);
@@ -6815,7 +6815,7 @@ static int fn_loadfile_2(query *q)
 	return 1;
 }
 
-static int fn_getfile_2(query *q)
+static USE_RESULT prolog_state fn_getfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,variable);
@@ -6908,7 +6908,7 @@ static void parse_host(const char *src, char *hostname, char *path, unsigned *po
 	path[4095] = '\0';
 }
 
-static int fn_server_3(query *q)
+static USE_RESULT prolog_state fn_server_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,variable);
@@ -7088,7 +7088,7 @@ static USE_RESULT prolog_state fn_accept_2(query *q)
 	return pl_success;
 }
 
-static int fn_client_5(query *q)
+static USE_RESULT prolog_state fn_client_5(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,variable);
@@ -7229,7 +7229,7 @@ static int fn_client_5(query *q)
 	return 1;
 }
 
-static int fn_getline_1(query *q)
+static USE_RESULT prolog_state fn_getline_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream("user_input");
@@ -7268,7 +7268,7 @@ static int fn_getline_1(query *q)
 	return ok;
 }
 
-static int fn_getline_2(query *q)
+static USE_RESULT prolog_state fn_getline_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,any);
@@ -7314,7 +7314,7 @@ static int fn_getline_2(query *q)
 	return ok;
 }
 
-static int fn_bread_3(query *q)
+static USE_RESULT prolog_state fn_bread_3(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,integer_or_var);
@@ -7417,7 +7417,7 @@ static int fn_bread_3(query *q)
 	return 1;
 }
 
-static int fn_bwrite_2(query *q)
+static USE_RESULT prolog_state fn_bwrite_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,atom);
@@ -7444,7 +7444,7 @@ static int fn_bwrite_2(query *q)
 	return 1;
 }
 
-static int fn_read_term_from_chars_2(query *q)
+static USE_RESULT prolog_state fn_read_term_from_chars_2(query *q)
 {
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_term,any);
@@ -7481,7 +7481,7 @@ static int fn_read_term_from_chars_2(query *q)
 	return ok;
 }
 
-static int fn_read_term_from_chars_3(query *q)
+static USE_RESULT prolog_state fn_read_term_from_chars_3(query *q)
 {
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_opts,any);
@@ -7518,7 +7518,7 @@ static int fn_read_term_from_chars_3(query *q)
 	return ok;
 }
 
-static int fn_read_term_from_atom_3(query *q)
+static USE_RESULT prolog_state fn_read_term_from_atom_3(query *q)
 {
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_term,any);
@@ -7555,7 +7555,7 @@ static int fn_read_term_from_atom_3(query *q)
 	return ok;
 }
 
-static int fn_write_term_to_chars_3(query *q)
+static USE_RESULT prolog_state fn_write_term_to_chars_3(query *q)
 {
 	GET_FIRST_ARG(p_term,any);
 	GET_NEXT_ARG(p2,list_or_nil);
@@ -7581,7 +7581,7 @@ static int fn_write_term_to_chars_3(query *q)
 	return ok;
 }
 
-static int fn_is_list_1(query *q)
+static USE_RESULT prolog_state fn_is_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
@@ -7598,7 +7598,7 @@ static int fn_is_list_1(query *q)
 	return is_nil(p1);
 }
 
-static int fn_is_stream_1(query *q)
+static USE_RESULT prolog_state fn_is_stream_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return is_stream(p1);
@@ -7628,7 +7628,7 @@ static query *pop_task(module *m, query *task)
 	return task->next;
 }
 
-static int fn_wait_0(query *q)
+static USE_RESULT prolog_state fn_wait_0(query *q)
 {
 	while (!g_tpl_interrupt && q->m->tasks) {
 		uint_t now = get_time_in_usec() / 1000;
@@ -7723,7 +7723,7 @@ static USE_RESULT prolog_state fn_await_0(query *q)
 	return pl_success;
 }
 
-static int fn_yield_0(query *q)
+static USE_RESULT prolog_state fn_yield_0(query *q)
 {
 	if (q->retry)
 		return 1;
@@ -7731,7 +7731,7 @@ static int fn_yield_0(query *q)
 	return do_yield_0(q, 0);
 }
 
-static int fn_spawn_1(query *q)
+static USE_RESULT prolog_state fn_spawn_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
@@ -7748,7 +7748,7 @@ static int fn_spawn_1(query *q)
 	return 1;
 }
 
-static int fn_spawn_n(query *q)
+static USE_RESULT prolog_state fn_spawn_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	clone_to_tmp(q, p1);
@@ -7779,7 +7779,7 @@ static int fn_spawn_n(query *q)
 	return 1;
 }
 
-static int fn_fork_0(query *q)
+static USE_RESULT prolog_state fn_fork_0(query *q)
 {
 	cell *curr_cell = q->st.curr_cell + q->st.curr_cell->nbr_cells;
 	query *task = create_task(q, curr_cell);
@@ -7788,7 +7788,7 @@ static int fn_fork_0(query *q)
 	return 0;
 }
 
-static int fn_send_1(query *q)
+static USE_RESULT prolog_state fn_send_1(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 	query *dstq = q->parent ? q->parent : q;
@@ -7816,14 +7816,14 @@ static int fn_send_1(query *q)
 	return 1;
 }
 
-static int fn_recv_1(query *q)
+static USE_RESULT prolog_state fn_recv_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell *c = pop_queue(q);
 	return unify(q, p1, p1_ctx, c, q->st.curr_frame);
 }
 
-static int fn_log10_1(query *q)
+static USE_RESULT prolog_state fn_log10_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -7933,7 +7933,7 @@ static int fn_get_seed_1(query *q)
 	return 1;
 }
 
-static int fn_random_1(query *q)
+static USE_RESULT prolog_state fn_random_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -7956,7 +7956,7 @@ static int fn_random_1(query *q)
 	return 1;
 }
 
-static int fn_rand_0(query *q)
+static USE_RESULT prolog_state fn_rand_0(query *q)
 {
 	q->accum.val_type = TYPE_INTEGER;
 	q->accum.val_num = (int_t)rnd() * RAND_MAX;
@@ -7964,7 +7964,7 @@ static int fn_rand_0(query *q)
 	return 1;
 }
 
-static int fn_rand_1(query *q)
+static USE_RESULT prolog_state fn_rand_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
@@ -7973,7 +7973,7 @@ static int fn_rand_1(query *q)
 	return 1;
 }
 
-static int fn_absolute_file_name_3(query *q)
+static USE_RESULT prolog_state fn_absolute_file_name_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,variable);
@@ -8137,7 +8137,7 @@ static int do_consult(query *q, cell *p1, idx_t p1_ctx)
 	return 1;
 }
 
-static int fn_consult_1(query *q)
+static USE_RESULT prolog_state fn_consult_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
 
@@ -8490,14 +8490,14 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 	return 1;
 }
 
-static int fn_format_2(query *q)
+static USE_RESULT prolog_state fn_format_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,list_or_nil);
 	return do_format(q, NULL, 0, p1, !is_nil(p2)?p2:NULL, p2_ctx);
 }
 
-static int fn_format_3(query *q)
+static USE_RESULT prolog_state fn_format_3(query *q)
 {
 	GET_FIRST_ARG(pstr,stream_or_structure);
 	GET_NEXT_ARG(p1,atom);
@@ -8506,7 +8506,7 @@ static int fn_format_3(query *q)
 }
 
 #if USE_OPENSSL
-static int fn_sha1_2(query *q)
+static USE_RESULT prolog_state fn_sha1_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -8530,7 +8530,7 @@ static int fn_sha1_2(query *q)
 	return ok;
 }
 
-static int fn_sha256_2(query *q)
+static USE_RESULT prolog_state fn_sha256_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -8554,7 +8554,7 @@ static int fn_sha256_2(query *q)
 	return ok;
 }
 
-static int fn_sha512_2(query *q)
+static USE_RESULT prolog_state fn_sha512_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -8614,7 +8614,7 @@ static int do_b64decode_2(query *q)
 	return ok;
 }
 
-static int fn_base64_2(query *q)
+static USE_RESULT prolog_state fn_base64_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -8701,7 +8701,7 @@ static int do_urldecode_2(query *q)
 	return ok;
 }
 
-static int fn_urlenc_2(query *q)
+static USE_RESULT prolog_state fn_urlenc_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -8715,7 +8715,7 @@ static int fn_urlenc_2(query *q)
 	return 0;
 }
 
-static int fn_string_lower_2(query *q)
+static USE_RESULT prolog_state fn_string_lower_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -8739,7 +8739,7 @@ static int fn_string_lower_2(query *q)
 	return ok;
 }
 
-static int fn_string_upper_2(query *q)
+static USE_RESULT prolog_state fn_string_upper_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -8813,7 +8813,7 @@ static int fn_access_file_2(query *q)
 	return !access(filename, amode);
 }
 
-static int fn_exists_file_1(query *q)
+static USE_RESULT prolog_state fn_exists_file_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	const char *filename;
@@ -8843,7 +8843,7 @@ static int fn_exists_file_1(query *q)
 	return 1;
 }
 
-static int fn_delete_file_1(query *q)
+static USE_RESULT prolog_state fn_delete_file_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	const char *filename;
@@ -8867,7 +8867,7 @@ static int fn_delete_file_1(query *q)
 	return 1;
 }
 
-static int fn_rename_file_2(query *q)
+static USE_RESULT prolog_state fn_rename_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom_or_list);
@@ -8906,7 +8906,7 @@ static int fn_rename_file_2(query *q)
 	return ok;
 }
 
-static int fn_time_file_2(query *q)
+static USE_RESULT prolog_state fn_time_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,variable);
@@ -8940,7 +8940,7 @@ static int fn_time_file_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_size_file_2(query *q)
+static USE_RESULT prolog_state fn_size_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,variable);
@@ -8974,7 +8974,7 @@ static int fn_size_file_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_exists_directory_1(query *q)
+static USE_RESULT prolog_state fn_exists_directory_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	const char *filename;
@@ -9008,7 +9008,7 @@ static int fn_exists_directory_1(query *q)
 	return 1;
 }
 
-static int fn_make_directory_1(query *q)
+static USE_RESULT prolog_state fn_make_directory_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	const char *filename;
@@ -9038,7 +9038,7 @@ static int fn_make_directory_1(query *q)
 	return !mkdir(filename, 0777);
 }
 
-static int fn_working_directory_2(query *q)
+static USE_RESULT prolog_state fn_working_directory_2(query *q)
 {
 	GET_FIRST_ARG(p_old,variable);
 	GET_NEXT_ARG(p_new,atom_or_list_or_var);
@@ -9077,7 +9077,7 @@ static int fn_working_directory_2(query *q)
 	return ok;
 }
 
-static int fn_chdir_1(query *q)
+static USE_RESULT prolog_state fn_chdir_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	const char *filename;
@@ -9095,7 +9095,7 @@ static int fn_chdir_1(query *q)
 	return ok;
 }
 
-static int fn_edin_skip_1(query *q)
+static USE_RESULT prolog_state fn_edin_skip_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	int n = get_named_stream("user_input");
@@ -9124,7 +9124,7 @@ static int fn_edin_skip_1(query *q)
 	return 1;
 }
 
-static int fn_edin_skip_2(query *q)
+static USE_RESULT prolog_state fn_edin_skip_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -9154,7 +9154,7 @@ static int fn_edin_skip_2(query *q)
 	return 1;
 }
 
-static int fn_edin_tab_1(query *q)
+static USE_RESULT prolog_state fn_edin_tab_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -9173,7 +9173,7 @@ static int fn_edin_tab_1(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_edin_tab_2(query *q)
+static USE_RESULT prolog_state fn_edin_tab_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	GET_FIRST_ARG(p1_tmp,any);
@@ -9193,7 +9193,7 @@ static int fn_edin_tab_2(query *q)
 	return !ferror(str->fp);
 }
 
-static int fn_edin_seen_0(query *q)
+static USE_RESULT prolog_state fn_edin_seen_0(query *q)
 {
 	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
@@ -9214,7 +9214,7 @@ static int fn_edin_seen_0(query *q)
 	return 1;
 }
 
-static int fn_edin_told_0(query *q)
+static USE_RESULT prolog_state fn_edin_told_0(query *q)
 {
 	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
@@ -9235,7 +9235,7 @@ static int fn_edin_told_0(query *q)
 	return 1;
 }
 
-static int fn_edin_seeing_1(query *q)
+static USE_RESULT prolog_state fn_edin_seeing_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	char *name = q->current_input==0?"user":g_streams[q->current_input].name;
@@ -9245,7 +9245,7 @@ static int fn_edin_seeing_1(query *q)
 	return 1;
 }
 
-static int fn_edin_telling_1(query *q)
+static USE_RESULT prolog_state fn_edin_telling_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	char *name =q->current_output==1?"user":g_streams[q->current_output].name;
@@ -9271,7 +9271,7 @@ static idx_t do_jenkins_one_at_a_time_hash(const char *key)
 	return hash;
 }
 
-static int fn_term_hash_2(query *q)
+static USE_RESULT prolog_state fn_term_hash_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer_or_var);
@@ -9286,7 +9286,7 @@ static int fn_term_hash_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_hex_chars_2(query *q)
+static USE_RESULT prolog_state fn_hex_chars_2(query *q)
 {
 	GET_FIRST_ARG(p2,integer_or_var);
 	GET_NEXT_ARG(p1,atom_or_var);
@@ -9318,7 +9318,7 @@ static int fn_hex_chars_2(query *q)
 	return p1_val == p2->val_num;
 }
 
-static int fn_octal_chars_2(query *q)
+static USE_RESULT prolog_state fn_octal_chars_2(query *q)
 {
 	GET_FIRST_ARG(p2,integer_or_var);
 	GET_NEXT_ARG(p1,atom_or_var);
@@ -9350,7 +9350,7 @@ static int fn_octal_chars_2(query *q)
 	return p1_val == p2->val_num;
 }
 
-static int fn_rdiv_2(query *q)
+static USE_RESULT prolog_state fn_rdiv_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -9417,13 +9417,13 @@ static void do_real_to_fraction(double v, double accuracy, int_t *num, int_t *de
 	return;
 }
 
-static int fn_atom_1(query *q)
+static USE_RESULT prolog_state fn_atom_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return is_string(p1);
 }
 
-static int fn_rational_1(query *q)
+static USE_RESULT prolog_state fn_rational_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 
@@ -9451,7 +9451,7 @@ static int fn_rational_1(query *q)
 	return is_rational(p1_tmp);
 }
 
-static int fn_getenv_2(query *q)
+static USE_RESULT prolog_state fn_getenv_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var)
@@ -9467,7 +9467,7 @@ static int fn_getenv_2(query *q)
 	return ok;
 }
 
-static int fn_setenv_2(query *q)
+static USE_RESULT prolog_state fn_setenv_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_int)
@@ -9483,14 +9483,14 @@ static int fn_setenv_2(query *q)
 	return 1;
 }
 
-static int fn_unsetenv_1(query *q)
+static USE_RESULT prolog_state fn_unsetenv_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	unsetenv(GET_STR(p1));
 	return 1;
 }
 
-static int fn_uuid_1(query *q)
+static USE_RESULT prolog_state fn_uuid_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
     uuid u;
@@ -9504,7 +9504,7 @@ static int fn_uuid_1(query *q)
 	return 1;
 }
 
-static int fn_atomic_concat_3(query *q)
+static USE_RESULT prolog_state fn_atomic_concat_3(query *q)
 {
 	if (q->retry)
 		return do_atom_concat_3(q);
@@ -9609,7 +9609,7 @@ static int fn_atomic_concat_3(query *q)
 	return 1;
 }
 
-static int fn_replace_4(query *q)
+static USE_RESULT prolog_state fn_replace_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom);
@@ -9671,7 +9671,7 @@ static int fn_replace_4(query *q)
 	return 1;
 }
 
-static int fn_predicate_property_2(query *q)
+static USE_RESULT prolog_state fn_predicate_property_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -9821,14 +9821,14 @@ static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned end)
 	return cnt;
 }
 
-static int fn_numbervars_1(query *q)
+static USE_RESULT prolog_state fn_numbervars_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	real_numbervars(q, p1, p1_ctx, 0);
 	return 1;
 }
 
-static int fn_numbervars_3(query *q)
+static USE_RESULT prolog_state fn_numbervars_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer)
@@ -9851,7 +9851,7 @@ unsigned count_bits(const uint8_t *mask, unsigned bit)
 	return bits;
 }
 
-static int fn_var_number_2(query *q)
+static USE_RESULT prolog_state fn_var_number_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,integer_or_var)
@@ -9861,7 +9861,7 @@ static int fn_var_number_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static int fn_char_type_2(query *q)
+static USE_RESULT prolog_state fn_char_type_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_int);
 	GET_NEXT_ARG(p2,atom);
@@ -9966,13 +9966,13 @@ void do_db_load(module *m)
 	ensure(m->fp);
 }
 
-static int fn_db_load_0(query *q)
+static USE_RESULT prolog_state fn_db_load_0(query *q)
 {
 	do_db_load(q->m);
 	return 1;
 }
 
-static int fn_db_save_0(query *q)
+static USE_RESULT prolog_state fn_db_save_0(query *q)
 {
 	if (!q->m->fp)
 		return 0;
@@ -9993,7 +9993,7 @@ static int fn_db_save_0(query *q)
 	return 1;
 }
 
-static int fn_abolish_2(query *q)
+static USE_RESULT prolog_state fn_abolish_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,integer);
@@ -10002,7 +10002,7 @@ static int fn_abolish_2(query *q)
 	return do_abolish(q, &tmp);
 }
 
-static int fn_sys_lt_2(query *q)
+static USE_RESULT prolog_state fn_sys_lt_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
@@ -10014,7 +10014,7 @@ static int fn_sys_lt_2(query *q)
 	return 1;
 }
 
-static int fn_plus_3(query *q)
+static USE_RESULT prolog_state fn_plus_3(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
@@ -10074,7 +10074,7 @@ static int fn_plus_3(query *q)
 	return p3->val_num == p1->val_num + p2->val_num;
 }
 
-static int fn_limit_2(query *q)
+static USE_RESULT prolog_state fn_limit_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,callable);
@@ -10088,7 +10088,7 @@ static int fn_limit_2(query *q)
 	return 1;
 }
 
-static int fn_sys_gt_2(query *q)
+static USE_RESULT prolog_state fn_sys_gt_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
@@ -10099,7 +10099,7 @@ static int fn_sys_gt_2(query *q)
 	return 1;
 }
 
-static int fn_offset_2(query *q)
+static USE_RESULT prolog_state fn_offset_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,callable);
@@ -10121,7 +10121,7 @@ void call_attrs(query *q, cell *attrs)
 	q->st.curr_cell = tmp;
 }
 
-static int fn_freeze_2(query *q)
+static USE_RESULT prolog_state fn_freeze_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
@@ -10141,7 +10141,7 @@ static int fn_freeze_2(query *q)
 	return 1;
 }
 
-static int fn_frozen_2(query *q)
+static USE_RESULT prolog_state fn_frozen_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,any);
@@ -10157,7 +10157,7 @@ static int fn_frozen_2(query *q)
 	return unify(q, p2, p2_ctx, e->c.attrs, q->st.curr_frame);
 }
 
-static int fn_del_attrs_1(query *q)
+static USE_RESULT prolog_state fn_del_attrs_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,list_or_nil);
@@ -10174,7 +10174,7 @@ static int fn_del_attrs_1(query *q)
 	return 1;
 }
 
-static int fn_put_attrs_2(query *q)
+static USE_RESULT prolog_state fn_put_attrs_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,list_or_nil);
@@ -10191,7 +10191,7 @@ static int fn_put_attrs_2(query *q)
 	return 1;
 }
 
-static int fn_get_attrs_2(query *q)
+static USE_RESULT prolog_state fn_get_attrs_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,variable);
@@ -10209,7 +10209,7 @@ static int fn_get_attrs_2(query *q)
 	return 1;
 }
 
-static int fn_sys_ne_2(query *q)
+static USE_RESULT prolog_state fn_sys_ne_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
@@ -10221,7 +10221,7 @@ static int fn_sys_ne_2(query *q)
 	return 1;
 }
 
-static int fn_call_nth_2(query *q)
+static USE_RESULT prolog_state fn_call_nth_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,integer_or_var);
@@ -10423,7 +10423,7 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 	return pl_error;
 }
 
-static int fn_sys_put_chars_2(query *q)
+static USE_RESULT prolog_state fn_sys_put_chars_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -10485,7 +10485,7 @@ static USE_RESULT prolog_state fn_current_module_1(query *q)
 	return pl_success;
 }
 
-static int fn_use_module_1(query *q)
+static USE_RESULT prolog_state fn_use_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	if (!is_literal(p1)) return 0;
@@ -10538,7 +10538,7 @@ static int fn_use_module_1(query *q)
 	return 1;
 }
 
-static int fn_module_1(query *q)
+static USE_RESULT prolog_state fn_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	const char *name = GET_STR(p1);
