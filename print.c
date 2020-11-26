@@ -248,13 +248,6 @@ size_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 	int var_nbr = 0;
 
 	if (is_variable(c)
-		&& (running>0) && (q->nv_start >= 0)
-		&& ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)) {
-		dst += snprintf(dst, dstlen, "'$VAR'(%u)", q->nv_start + count_bits(q->nv_mask, var_nbr));
-		return dst - save_dst;
-	}
-
-	if (is_variable(c)
 		&& (running>0) && (q->nv_start == -1)
 		&& ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)) {
 
@@ -348,8 +341,7 @@ size_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 	return dst - save_dst;
 }
 
-#if 0
-static char *varformat(unsigned nbr)
+/* static */ char *varformat(unsigned nbr)
 {
 	static char tmpbuf[80];
 	char *dst = tmpbuf;
@@ -357,7 +349,6 @@ static char *varformat(unsigned nbr)
 	if ((nbr/26) > 0) sprintf(dst, "%u", nbr/26);
 	return tmpbuf;
 }
-#endif
 
 size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth)
 {
@@ -519,15 +510,6 @@ size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		if (parens)
 			dst += snprintf(dst, dstlen, "%s", "(");
 
-		int var_nbr;
-
-		if (running && is_variable(c)
-			&& ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)
-			&& q->nv_mask[var_nbr]) {
-			dst += snprintf(dst, dstlen, "'$VAR'(%u)", q->nv_start + count_bits(q->nv_mask, var_nbr));
-			return dst - save_dst;
-		}
-
 		if (running && is_variable(c)
 			/*&& ((c_ctx != q->st.curr_frame) || is_fresh(c) || (running > 0))*/) {
 			frame *g = GET_FRAME(c_ctx);
@@ -651,7 +633,7 @@ size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 
 void print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running)
 {
-	do_numbervars(q, c, c_ctx, 0);
+	fake_numbervars(q, c, c_ctx, 0);
 	q->nv_start = -1;
 	memset(s_mask1, 0, MAX_ARITY);
 	memset(s_mask2, 0, MAX_ARITY);
@@ -690,7 +672,7 @@ void print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 
 void print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 {
-	do_numbervars(q, c, c_ctx, 0);
+	fake_numbervars(q, c, c_ctx, 0);
 	q->nv_start = -1;
 	memset(s_mask1, 0, MAX_ARITY);
 	memset(s_mask2, 0, MAX_ARITY);

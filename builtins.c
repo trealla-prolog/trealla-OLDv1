@@ -9687,15 +9687,15 @@ static int fn_predicate_property_2(query *q)
 	return 0;
 }
 
-static int do_collect_vars(query *q, cell *p1, idx_t nbr_cells, cell **slots)
+static unsigned fake_collect_vars(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 {
-	int cnt = 0;
+	unsigned cnt = 0;
 
 	for (idx_t i = 0; i < nbr_cells;) {
 		cell *c = p1;
 
 		if (is_structure(c)) {
-			cnt += do_collect_vars(q, c+1, c->nbr_cells-1, slots);
+			cnt += fake_collect_vars(q, c+1, c->nbr_cells-1, slots);
 		} else if (is_variable(c)) {
 			assert(c->var_nbr < MAX_ARITY);
 
@@ -9712,7 +9712,7 @@ static int do_collect_vars(query *q, cell *p1, idx_t nbr_cells, cell **slots)
 	return cnt;
 }
 
-unsigned do_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
+unsigned fake_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 {
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx);
 
@@ -9723,7 +9723,7 @@ unsigned do_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 
 	unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	cell *slots[MAX_ARITY] = {0};
-	do_collect_vars(q, tmp, tmp->nbr_cells, slots);
+	fake_collect_vars(q, tmp, tmp->nbr_cells, slots);
 	memset(q->nv_mask, 0, MAX_ARITY);
 	unsigned end = q->nv_start = start;
 
@@ -9738,10 +9738,41 @@ unsigned do_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 	return end;
 }
 
+static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned end)
+{
+	unsigned cnt = 0;
+	p1 = deref(q, p1, p1_ctx);
+	p1_ctx = q->latest_ctx;
+
+	if (!is_structure(p1))
+		return cnt;
+
+	unsigned arity = p1->arity;
+	p1++;
+
+	while (arity--) {
+		cell *c = deref(q, p1, p1_ctx);
+
+		if (is_variable(c)) {
+			cell *tmp = alloc_heap(q, 2);
+			make_structure(tmp+0, index_from_pool("$VAR"), NULL, 1, 1);
+			make_int(tmp+1, end++);
+			tmp->flags |= FLAG_QUOTED;
+			unify(q, c, q->latest_ctx, tmp, q->st.curr_frame);
+			cnt++;
+		} else
+			cnt += real_numbervars(q, c, q->latest_ctx, end);
+
+		p1 += p1->nbr_cells;
+	}
+
+	return cnt;
+}
+
 static int fn_numbervars_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	do_numbervars(q, p1, p1_ctx, 0);
+	real_numbervars(q, p1, p1_ctx, 0);
 	return 1;
 }
 
@@ -9750,9 +9781,9 @@ static int fn_numbervars_3(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer)
 	GET_NEXT_ARG(p3,integer_or_var)
-	unsigned end = do_numbervars(q, p1, p1_ctx, p2->val_num);
+	unsigned cnt = real_numbervars(q, p1, p1_ctx, p2->val_num);
 	cell tmp2;
-	make_int(&tmp2, end);
+	make_int(&tmp2, p2->val_num+cnt);
 	return unify(q, p3, p3_ctx, &tmp2, q->st.curr_frame);
 }
 
