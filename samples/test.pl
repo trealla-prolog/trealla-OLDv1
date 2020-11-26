@@ -232,12 +232,12 @@ test54 :-
 
 test55 :-
 	L = ["www.google.com","www.bing.com","www.duckduckgo.com"],
-	maplist(spawn(geturl),L),
+	maplist(task(geturl),L),
 	wait, writeln('Finished').
 
 test56 :-
 	L = ["www.google.com","www.bing.com","www.duckduckgo.com"],
-	spawnlist(geturl,L),
+	tasklist(geturl,L),
 	writeln('Finished').
 
 test57 :-

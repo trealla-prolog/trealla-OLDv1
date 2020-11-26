@@ -25,25 +25,25 @@ maplist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s]) :-
 	call(Goal, X1, X2, X3, X4),
 	maplist(Goal, X1s, X2s, X3s, X4s).
 
-spawnlist(_, []), wait.
-spawnlist(Goal, [X1|X1s]) :-
-	spawn(Goal, X1),
-	spawnlist(Goal, X1s).
+tasklist(_, []), wait.
+tasklist(Goal, [X1|X1s]) :-
+	task(Goal, X1),
+	tasklist(Goal, X1s).
 
-spawnlist(_, [], []), wait.
-spawnlist(Goal, [X1|X1s], [X2|X2s]) :-
-	spawn(Goal, X1, X2),
-	spawnlist(Goal, X1s, X2s).
+tasklist(_, [], []), wait.
+tasklist(Goal, [X1|X1s], [X2|X2s]) :-
+	task(Goal, X1, X2),
+	tasklist(Goal, X1s, X2s).
 
-spawnlist(_, [], [], []), wait.
-spawnlist(Goal, [X1|X1s], [X2|X2s], [X3|X3s]) :-
-	spawn(Goal, X1, X2, X3),
-	spawnlist(Goal, X1s, X2s, X3s).
+tasklist(_, [], [], []), wait.
+tasklist(Goal, [X1|X1s], [X2|X2s], [X3|X3s]) :-
+	task(Goal, X1, X2, X3),
+	tasklist(Goal, X1s, X2s, X3s).
 
-spawnlist(_, [], [], [], []), wait.
-spawnlist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s]) :-
-	spawn(Goal, X1, X2, X3, X4),
-	spawnlist(Goal, X1s, X2s, X3s, X4s).
+tasklist(_, [], [], [], []), wait.
+tasklist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s]) :-
+	task(Goal, X1, X2, X3, X4),
+	tasklist(Goal, X1s, X2s, X3s, X4s).
 
 foldl(Goal, List, V0, V) :-
 	foldl_(List, Goal, V0, V).

@@ -386,25 +386,25 @@ in the form of light-weight coroutines that run until they yield control,
 either explicitly or implicitly (when waiting on input or a timer)...
 
 	fork/0                  # parent fails, child continues
-	spawn/[1-n]             # concurrent form of call/1-n
+	task/[1-n]             # concurrent form of call/1-n
 	yield/0                 # voluntarily yield control
 	wait/0                  # parent should wait for children to finish
 	await/0                 # parent should wait for a message
 	send/1                  # apend term to parent queue
 	recv/1                  # pop term from queue
-	spawnlist/[1-n]         # concurrent form of maplist/1-n
+	tasklist/[1-n]         # concurrent form of maplist/1-n
 
 Note: *send/1*, *sleep/1* and *delay/1* do implied yields. As does *getline/2*,
 *bread/3*, *bwrite/2* and *accept/2*.
 
-Note: *spawn/n* acts as if defined as:
+Note: *task/n* acts as if defined as:
 
-	spawn(G) :- fork, call(G).
-	spawn(G,P1) :- fork, call(G,P1).
-	spawn(G,P1,P2) :- fork, call(G,P1,P2).
+	task(G) :- fork, call(G).
+	task(G,P1) :- fork, call(G,P1).
+	task(G,P1,P2) :- fork, call(G,P1,P2).
 	...
 
-In practice *spawn* calls a special version of *fork/0* that limits
+In practice *task* calls a special version of *fork/0* that limits
 the number of such concurrent tasks (see the *cpu_count* flag, initially
 and artificially set at 4). Excess tasks will be scheduled as tasks finish.
 
@@ -429,7 +429,7 @@ test54 :-
 
 test55 :-
 	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
-	maplist(spawn(geturl),L),
+	maplist(task(geturl),L),
 	wait,
 	writeln('Finished').
 
@@ -437,7 +437,7 @@ test55 :-
 
 test56 :-
 	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
-	spawnlist(geturl,L),
+	tasklist(geturl,L),
 	writeln('Finished').
 ```
 

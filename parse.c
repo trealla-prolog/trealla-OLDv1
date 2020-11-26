@@ -3368,39 +3368,39 @@ module *create_module(const char *name)
 			"'$calln'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"		\
 			"TMP_G.");
 
-		make_rule(m, "spawn(G,P1) :- "				\
-			"copy_term('$spawnn'(G,P1),TMP_G),"		\
-			"'$spawnn'(G,P1)=TMP_G,"			\
+		make_rule(m, "task(G,P1) :- "				\
+			"copy_term('$taskn'(G,P1),TMP_G),"		\
+			"'$taskn'(G,P1)=TMP_G,"			\
 			"TMP_G.");
 
-		make_rule(m, "spawn(G,P1,P2) :- "			\
-			"copy_term('$spawnn'(G,P1,P2),TMP_G),"	\
-			"'$spawnn'(G,P1,P2)=TMP_G,"			\
+		make_rule(m, "task(G,P1,P2) :- "			\
+			"copy_term('$taskn'(G,P1,P2),TMP_G),"	\
+			"'$taskn'(G,P1,P2)=TMP_G,"			\
 			"TMP_G.");
 
-		make_rule(m, "spawn(G,P1,P2,P3) :- "			\
-			"copy_term('$spawnn'(G,P1,P2,P3),TMP_G),"	\
-			"'$spawnn'(G,P1,P2,P3)=TMP_G,"		\
+		make_rule(m, "task(G,P1,P2,P3) :- "			\
+			"copy_term('$taskn'(G,P1,P2,P3),TMP_G),"	\
+			"'$taskn'(G,P1,P2,P3)=TMP_G,"		\
 			"TMP_G.");
 
-		make_rule(m, "spawn(G,P1,P2,P3,P4) :- "			\
-			"copy_term('$spawnn'(G,P1,P2,P3,P4),TMP_G),"	\
-			"'$spawnn'(G,P1,P2,P3,P4)=TMP_G,"		\
+		make_rule(m, "task(G,P1,P2,P3,P4) :- "			\
+			"copy_term('$taskn'(G,P1,P2,P3,P4),TMP_G),"	\
+			"'$taskn'(G,P1,P2,P3,P4)=TMP_G,"		\
 			"TMP_G.");
 
-		make_rule(m, "spawn(G,P1,P2,P3,P4,P5) :- "			\
-			"copy_term('$spawnn'(G,P1,P2,P3,P4,P5),TMP_G),"	\
-			"'$spawnn'(G,P1,P2,P3,P4,P5)=TMP_G,"		\
+		make_rule(m, "task(G,P1,P2,P3,P4,P5) :- "			\
+			"copy_term('$taskn'(G,P1,P2,P3,P4,P5),TMP_G),"	\
+			"'$taskn'(G,P1,P2,P3,P4,P5)=TMP_G,"		\
 			"TMP_G.");
 
-		make_rule(m, "spawn(G,P1,P2,P3,P4,P5,P6) :- "			\
-			"copy_term('$spawnn'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
-			"'$spawnn'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"		\
+		make_rule(m, "task(G,P1,P2,P3,P4,P5,P6) :- "			\
+			"copy_term('$taskn'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
+			"'$taskn'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"		\
 			"TMP_G.");
 
-		make_rule(m, "spawn(G,P1,P2,P3,P4,P5,P6,P7) :- "			\
-			"copy_term('$spawnn'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"	\
-			"'$spawnn'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"		\
+		make_rule(m, "task(G,P1,P2,P3,P4,P5,P6,P7) :- "			\
+			"copy_term('$taskn'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"	\
+			"'$taskn'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"		\
 			"TMP_G.");
 
 		make_rule(m, "phrase_from_file(P, Filename) :- "	\
