@@ -2849,6 +2849,8 @@ static void module_purge(module *m)
 	if (!m || !m->dirty)
 		return;
 
+	unsigned cnt = 0;
+
 	for (predicate *h = m->head; h; h = h->next) {
 		clause *last = NULL;
 
@@ -2872,8 +2874,12 @@ static void module_purge(module *m)
 			clear_term(&r->t);
 			free(r);
 			r = next;
+			cnt++;
 		}
 	}
+
+	if (!m->quiet)
+		printf("Purge %u deleted rules\n", cnt);
 
 	m->dirty = 0;
 }
