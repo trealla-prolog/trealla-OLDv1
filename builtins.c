@@ -7549,10 +7549,21 @@ static int fn_read_term_from_atom_3(query *q)
 static int fn_write_term_to_chars_3(query *q)
 {
 	GET_FIRST_ARG(p_term,any);
-	GET_NEXT_ARG(p_opts,list_or_nil);
+	GET_NEXT_ARG(p2,list_or_nil);
 	GET_NEXT_ARG(p_chars,any);
 
+	while (is_list(p2)) {
+		cell *h = LIST_HEAD(p2);
+		cell *c = deref(q, h, p2_ctx);
+		parse_write_params(q, c);
+		p2 = LIST_TAIL(p2);
+		p2 = deref(q, p2, p2_ctx);
+		p2_ctx = q->latest_ctx;
+	}
+
 	char *dst = print_term_to_strbuf(q, p_term, p_term_ctx, 1);
+	q->max_depth = q->quoted = q->nl = q->fullstop = false;
+	q->ignore_ops = false;
 	cell tmp = make_string(dst, strlen(dst));
 	tmp.flags |= FLAG_TMP;
 	free(dst);
