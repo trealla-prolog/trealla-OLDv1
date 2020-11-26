@@ -386,13 +386,13 @@ in the form of light-weight coroutines that run until they yield control,
 either explicitly or implicitly (when waiting on input or a timer)...
 
 	fork/0                  # parent fails, child continues
-	task/[1-n]             # concurrent form of call/1-n
+	task/[1-n]              # concurrent form of call/1-n
 	yield/0                 # voluntarily yield control
 	wait/0                  # parent should wait for children to finish
 	await/0                 # parent should wait for a message
 	send/1                  # apend term to parent queue
 	recv/1                  # pop term from queue
-	tasklist/[1-n]         # concurrent form of maplist/1-n
+	tasklist/[1-n]          # concurrent form of maplist/1-n
 
 Note: *send/1*, *sleep/1* and *delay/1* do implied yields. As does *getline/2*,
 *bread/3*, *bwrite/2* and *accept/2*.
