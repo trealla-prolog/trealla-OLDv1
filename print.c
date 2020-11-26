@@ -36,10 +36,7 @@ static int needs_quote(module *m, const char *src, size_t srclen)
 	while (srclen--) {
 		int ch = get_char_utf8(&src);
 
-		if ((iscntrl(ch) || isspace(ch) || ispunct(ch)) && (ch != '_'))
-			return 1;
-
-		if ((ch == '\'') || (ch == '"') || (ch == '`'))
+		if (!isalnum(ch) && (ch != '_'))
 			return 1;
 	}
 
@@ -498,7 +495,6 @@ size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 	}
 
 	int optype = GET_OP(c);
-	static cell *orig_c = NULL;
 
 	if (q->ignore_ops || !optype) {
 		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quote(q->m, src, LEN_STR(c));
@@ -507,8 +503,8 @@ size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 		if (q->quoted < 0) quote = 0;
 		if ((c->arity == 1) && is_literal(c) && !strcmp(src, "{}")) braces = 1;
 
-		if (running && is_literal(c) && !strcmp(GET_STR(c), "$VAR")) {
-			dst += snprintf(dst, dstlen, "%s", varformat(orig_c->var_nbr));
+		if (running && is_literal(c) && !strcmp(GET_STR(c), "$VAR") && 0) {
+			dst += snprintf(dst, dstlen, "%s", varformat(c->var_nbr));
 			return dst - save_dst;
 		}
 
@@ -551,7 +547,6 @@ size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 			dst += snprintf(dst, dstlen, "%s", braces?"{":"(");
 
 			for (c++; arity--; c += c->nbr_cells) {
-				orig_c = c;
 				cell *tmp = running ? deref(q, c, c_ctx) : c;
 				idx_t tmp_ctx = q->latest_ctx;
 				int parens = 0;

@@ -9753,8 +9753,16 @@ unsigned fake_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned end)
 {
 	unsigned cnt = 0;
-	p1 = deref(q, p1, p1_ctx);
-	p1_ctx = q->latest_ctx;
+
+	if (is_variable(p1)) {
+		cell *tmp = alloc_heap(q, 2);
+		make_structure(tmp+0, index_from_pool("$VAR"), NULL, 1, 1);
+		make_int(tmp+1, end++);
+		tmp->flags |= FLAG_QUOTED;
+		unify(q, p1, q->latest_ctx, tmp, q->st.curr_frame);
+		cnt++;
+		return cnt;
+	}
 
 	if (!is_structure(p1))
 		return cnt;
@@ -9770,9 +9778,9 @@ static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned end)
 			make_structure(tmp+0, index_from_pool("$VAR"), NULL, 1, 1);
 			make_int(tmp+1, end++);
 			tmp->flags |= FLAG_QUOTED;
-			unify(q, c, q->latest_ctx, tmp, q->st.curr_frame);
+			set_var(q, c, q->latest_ctx, tmp, q->st.curr_frame);
 			cnt++;
-		} else
+		} else if (is_structure(c))
 			cnt += real_numbervars(q, c, q->latest_ctx, end);
 
 		p1 += p1->nbr_cells;
