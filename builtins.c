@@ -3885,8 +3885,14 @@ static int fn_iso_max_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_num = p1.val_num >= p2.val_num ? p1.val_num : p2.val_num;
+	if (is_rational(&p1) && is_rational(&p2)) {
+		cell s1, s2;
+		s1.val_num = p1.val_num * p2.val_den;
+		s1.val_den = p1.val_den * p2.val_den;
+		s2.val_num = p2.val_num * p1.val_den;
+		s2.val_den = p2.val_den * p1.val_den;
+		if (s1.val_num >= s2.val_num) q->accum = s1;
+		else q->accum = s2;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
@@ -3903,8 +3909,14 @@ static int fn_iso_min_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_num = p1.val_num <= p2.val_num ? p1.val_num : p2.val_num;
+	if (is_rational(&p1) && is_rational(&p2)) {
+		cell s1, s2;
+		s1.val_num = p1.val_num * p2.val_den;
+		s1.val_den = p1.val_den * p2.val_den;
+		s2.val_num = p2.val_num * p1.val_den;
+		s2.val_den = p2.val_den * p1.val_den;
+		if (s1.val_num <= s2.val_num) q->accum = s1;
+		else q->accum = s2;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
 		throw_error(q, &p1, "type_error", "integer");
