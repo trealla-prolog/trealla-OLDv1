@@ -3415,6 +3415,9 @@ module *create_module(const char *name)
 			"phrase(P2, Ms, []),"				\
 			"close(Str).");
 
+		make_rule(m, "'$append'([], L, L).");
+		make_rule(m, "'$append'([H|T], L, [H|R]) :- '$append'(T, L, R).");
+
 		make_rule(m, "phrase(GRBody, S0) :-"			\
 			"phrase(GRBody, S0, [])."			\
 			"phrase(GRBody, S0, S) :-"			\
@@ -3447,14 +3450,11 @@ module *create_module(const char *name)
 			"phrase_(phrase(NonTerminal), S0, S) :-"	\
 			"  phrase(NonTerminal, S0, S)."		\
 			"phrase_([T|Ts], S0, S) :-"			\
-			"  append([T|Ts], S, S0).");
-
-		make_rule(m, "findall_app_([], L, L).");
-		make_rule(m, "findall_app_([H|T], L, [H|R]) :- findall_app_(T, L, R).");
+			"  '$append'([T|Ts], S, S0).");
 
 		make_rule(m, "findall(Template, Goal, List, Tail) :- "	\
 			"findall(Template, Goal, List0), "					\
-			"findall_app_(List0, Tail, List).");
+			"'$append'(List0, Tail, List).");
 
 		// This is an approximation... it needs a catcher
 
