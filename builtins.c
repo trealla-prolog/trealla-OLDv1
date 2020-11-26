@@ -9759,7 +9759,7 @@ static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned end)
 		make_structure(tmp+0, index_from_pool("$VAR"), NULL, 1, 1);
 		make_int(tmp+1, end++);
 		tmp->flags |= FLAG_QUOTED;
-		unify(q, p1, q->latest_ctx, tmp, q->st.curr_frame);
+		set_var(q, p1, q->latest_ctx, tmp, q->st.curr_frame);
 		cnt++;
 		return cnt;
 	}
