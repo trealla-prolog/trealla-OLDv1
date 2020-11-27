@@ -50,8 +50,10 @@ extern faultinject_t FAULTINJECT_NAME;
 #ifdef __GNUC__
 // clang defines __GNUC__ as well
 #define USE_RESULT __attribute__ ((__warn_unused_result__))
+#define DISCARD_RESULT (void)!
 #else
 #define USE_RESULT
+#define DISCARD_RESULT
 #endif
 
 #endif

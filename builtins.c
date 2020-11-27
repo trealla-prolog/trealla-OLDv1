@@ -519,8 +519,7 @@ static cell *deep_copy_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx, bool nonloc
 
 	if (g_varno != g->nbr_vars) {
 		if (!create_vars(q, g_varno-g->nbr_vars)) {
-			prolog_state unused = throw_error(q, p1, "resource_error", "too_many_vars");
-			(void) unused;
+			DISCARD_RESULT throw_error(q, p1, "resource_error", "too_many_vars");
 			return NULL;
 		}
 	}
@@ -643,8 +642,7 @@ USE_RESULT prolog_state throw_error(query *q, cell *c, const char *err_type, con
 	parser_attach(p, 0);
 	parser_assign_vars(p, g->nbr_vars, false);
 	//parser_xref(p, p->t, NULL);
-	prolog_state unused = do_throw_term(q, p->t->cells);
-	(void) unused;
+	DISCARD_RESULT do_throw_term(q, p->t->cells);
 	//TODO: cehteh: exception handling needs review
 	clear_term(p->t);
 	free(dst2);
@@ -4591,8 +4589,7 @@ static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx
 
 	if (g_varno != g->nbr_vars) {
 		if (!create_vars(q, g_varno-g->nbr_vars)) {
-			prolog_state unused = throw_error(q, p1, "resource_error", "too_many_vars");
-			(void) unused;
+			DISCARD_RESULT throw_error(q, p1, "resource_error", "too_many_vars");
 			return NULL;
 		}
 	}
