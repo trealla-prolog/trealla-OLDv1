@@ -889,8 +889,7 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx)
 		q->st.curr_clause = NULL;
 	else {
 		if (!h->is_dynamic && !q->run_init) {
-			throw_error(q, p1, "permission_error", "access_private_procedure");
-			return pl_error;
+			return throw_error(q, p1, "permission_error", "access_private_procedure");
 		}
 
 		q->st.curr_clause = h->head;
@@ -955,16 +954,14 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx)
 			unsigned tmp_optype = 0;
 
 			if (get_op(q->m, name, &tmp_optype, &tmp_userop, false)) {
-				throw_error(q, p1, "permission_error", "access_control_structure");
-				return pl_error;
+				return throw_error(q, p1, "permission_error", "access_control_structure");
 			} else
 				set_dynamic_in_db(q->m, name, p1->arity);
 
 			q->st.curr_clause = NULL;
 		} else {
 			if (!h->is_dynamic && !q->run_init) {
-				throw_error(q, p1, "permission_error", "access_private_procedure");
-				return pl_error;
+				return throw_error(q, p1, "permission_error", "access_private_procedure");
 			}
 
 			q->st.curr_clause = h->head;
@@ -1036,7 +1033,7 @@ static USE_RESULT prolog_state match_rule(query *q)
 
 			if (!h) {
 				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(c), "initialization")))
-					throw_error(q, c, "existence_error", "procedure");
+					return throw_error(q, c, "existence_error", "procedure");
 				else
 					q->error = true;
 
@@ -1116,7 +1113,7 @@ static USE_RESULT prolog_state match_rule(query *q)
 	return pl_failure;
 }
 
-void run_query(query *q)
+prolog_state run_query(query *q)
 {
 	q->yielded = false;
 
@@ -1165,7 +1162,7 @@ void run_query(query *q)
 				follow_me(q);
 			} else {
 				if (!is_callable(q->st.curr_cell)) {
-					throw_error(q, q->st.curr_cell, "type_error", "callable");
+					return throw_error(q, q->st.curr_cell, "type_error", "callable");
 					break;
 				}
 
@@ -1206,16 +1203,17 @@ void run_query(query *q)
 		while (!q->st.curr_cell || is_end(q->st.curr_cell)) {
 			if (!resume_frame(q)) {
 				q->status = 1;
-				return;
+				return pl_success; // cehteh: ok?
 			}
 
 			q->resume = true;
 			follow_me(q);
 		}
 	}
+	return pl_success; // cehteh: ok?
 }
 
-void query_execute(query *q, term *t)
+prolog_state query_execute(query *q, term *t)
 {
 	q->m->dump_vars = 0;
 	q->st.curr_cell = t->cells;
@@ -1229,7 +1227,8 @@ void query_execute(query *q, term *t)
 	frame *g = q->frames + q->st.curr_frame;
 	g->nbr_vars = t->nbr_vars;
 	g->nbr_slots = t->nbr_vars;
-	run_query(q);
+	prolog_state ret = run_query(q);
 	sl_done(q->st.iter);
+	return ret;
 }
 
