@@ -3318,19 +3318,19 @@ module *create_module(const char *name)
 			"mmerge(R1, R2, R).");
 
 		make_rule(m, "bagof(T,G,B) :- "				\
-			"copy_term('$bagof'(T,G,_),TMP_G),"		\
-			"TMP_G,"					\
+			"copy_term('$bagof'(T,G,B),TMP_G),"		\
+			"TMP_G,"								\
 			"'$bagof'(T,G,B)=TMP_G.");
 
 		make_rule(m, "setof(T,G,B) :- "				\
-			"copy_term('$bagof'(T,G,_),TMP_G),"		\
-			"TMP_G,"					\
+			"copy_term('$bagof'(T,G,B),TMP_G),"		\
+			"TMP_G,"								\
 			"'$bagof'(T,G,TMP_B)=TMP_G,"			\
 			"sort(TMP_B,B).");
 
 		make_rule(m, "catch(G,E,C) :- "				\
 			"copy_term('$catch'(G,E,C),TMP_G),"		\
-			"'$catch'(G,E,C)=TMP_G,"			\
+			"'$catch'(G,E,C)=TMP_G,"				\
 			"TMP_G.");
 
 		make_rule(m, "call(G,P1) :- "				\
