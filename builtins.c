@@ -79,7 +79,7 @@ static double rat_to_float(cell *n)
 }
 #endif
 
-static int do_throw_term(query *q, cell *c);
+static USE_RESULT prolog_state do_throw_term(query *q, cell *c);
 
 static USE_RESULT prolog_state do_yield_0(query *q, int msecs)
 {
@@ -597,7 +597,7 @@ cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 	return tmp;
 }
 
-void throw_error(query *q, cell *c, const char *err_type, const char *expected)
+USE_RESULT prolog_state throw_error(query *q, cell *c, const char *err_type, const char *expected)
 {
 	cell tmp;
 
@@ -642,10 +642,12 @@ void throw_error(query *q, cell *c, const char *err_type, const char *expected)
 	parser_attach(p, 0);
 	parser_assign_vars(p, g->nbr_vars, false);
 	//parser_xref(p, p->t, NULL);
-	do_throw_term(q, p->t->cells);
+	prolog_state ret = do_throw_term(q, p->t->cells);
+	//TODO: cehteh: exception handling needs review
 	clear_term(p->t);
 	free(dst2);
 	free(dst);
+	return ret;
 }
 
 static USE_RESULT prolog_state fn_iso_unify_2(query *q)
@@ -5299,7 +5301,7 @@ static USE_RESULT prolog_state fn_iso_catch_3(query *q)
 	return 1;
 }
 
-static int do_throw_term(query *q, cell *c)
+static USE_RESULT prolog_state do_throw_term(query *q, cell *c)
 {
 	idx_t c_ctx = q->latest_ctx;
 	q->exception = c;
@@ -5316,7 +5318,7 @@ static int do_throw_term(query *q, cell *c)
 			continue;
 
 		q->exception = NULL;
-		return 1;
+		return pl_success;
 	}
 
 	fprintf(stdout, "Error: uncaught exception... ");
@@ -5325,7 +5327,7 @@ static int do_throw_term(query *q, cell *c)
 	q->m->dump_vars = 1;
 	q->exception = NULL;
 	q->error = true;
-	return 0;
+	return pl_error;
 }
 
 static USE_RESULT prolog_state fn_iso_throw_1(query *q)
