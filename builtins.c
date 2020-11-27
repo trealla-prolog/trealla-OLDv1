@@ -6006,7 +6006,7 @@ static int fn_iso_bagof_3(query *q)
 	make_choice(q);
 	uint64_t p1_vars = get_vars(p1, p1_ctx);
 	uint64_t p2_vars = get_vars(p2, p2_ctx);
-	uint64_t mask = (p1_vars^p2_vars) & ~xs_vars;
+	uint64_t mask = p1_vars ^ p2_vars ^ xs_vars;
 	pin_vars(q, mask);
 	idx_t nbr_cells = q->tmpq_size[q->st.qnbr];
 
