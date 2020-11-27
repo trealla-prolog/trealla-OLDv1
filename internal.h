@@ -142,7 +142,7 @@ enum {
 	FLAG_TMP=1<<8,						// used with TYPE_CSTRING
 	FLAG_KEY=1<<9,						// used with keys
 
-	FLAG_DELETED=FLAG_KEY,				// used by bagof
+	FLAG_PROCESSED=FLAG_KEY,				// used by bagof
 	FLAG_FIRST_USE=FLAG_HEX,			// used with TYPE_VARIABLE
 	FLAG_ANON=FLAG_OCTAL,				// used with TYPE_VARIABLE
 	FLAG_FRESH=FLAG_BINARY,				// used with TYPE_VARIABLE

@@ -447,7 +447,7 @@ static idx_t g_tab2[64000];
 static idx_t g_tab4[64000];
 static uint8_t g_tab5[64000];
 
-static void deep_copy2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx, unsigned depth)
+static void deep_copy2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only)
 {
 	if (depth >= 64000) {
 		q->cycle_error = 1;
@@ -474,6 +474,9 @@ static void deep_copy2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx, unsigned de
 		if (!is_variable(p1))
 			return;
 
+		if (nonlocals_only && (p1_ctx == q->st.curr_frame))
+			return ;
+
 		frame *g = GET_FRAME(p1_ctx);
 		slot *e = GET_SLOT(g, p1->var_nbr);
 		idx_t slot_nbr = e - q->slots;
@@ -499,7 +502,7 @@ static void deep_copy2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx, unsigned de
 
 	while (arity--) {
 		cell *c = deref(q, p1, p1_ctx);
-		deep_copy2_to_tmp_heap(q, c, q->latest_ctx, depth+1);
+		deep_copy2_to_tmp_heap(q, c, q->latest_ctx, depth+1, nonlocals_only);
 		if (q->cycle_error) return;
 		p1 += p1->nbr_cells;
 	}
@@ -508,22 +511,15 @@ static void deep_copy2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx, unsigned de
 	tmp->nbr_cells = tmp_heap_used(q) - save_idx;
 }
 
-static cell *deep_copy_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx)
+static cell *deep_copy_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only)
 {
 	init_tmp_heap(q);
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g_varno = g->nbr_vars;
 	g_tab_idx = 0;
 
-#if 0
-	if (is_variable(p1)) {
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-	}
-#endif
-
 	q->cycle_error = 0;
-	deep_copy2_to_tmp_heap(q, p1, p1_ctx, 0);
+	deep_copy2_to_tmp_heap(q, p1, p1_ctx, 0, nonlocals_only);
 	if (q->cycle_error) return NULL;
 
 	if (g_varno != g->nbr_vars) {
@@ -536,9 +532,9 @@ static cell *deep_copy_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx)
 	return q->tmp_heap;
 }
 
-static cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx)
+static cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only)
 {
-	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx);
+	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, nonlocals_only);
 	if (q->cycle_error) return NULL;
 	ensure(tmp);
 	cell *tmp2 = alloc_heap(q, tmp->nbr_cells);
@@ -4434,7 +4430,7 @@ static int fn_iso_univ_2(query *q)
 	}
 
 	if (is_variable(p2)) {
-		cell *tmp = deep_copy_to_heap(q, p1, p1_ctx);
+		cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false);
 
 		if (q->cycle_error) {
 			throw_error(q, p1, "resource_error", "cyclic_term");
@@ -4463,7 +4459,7 @@ static int fn_iso_univ_2(query *q)
 	}
 
 	if (is_variable(p1)) {
-		cell *tmp = deep_copy_to_tmp_heap(q, p2, p2_ctx);
+		cell *tmp = deep_copy_to_tmp_heap(q, p2, p2_ctx, false);
 
 		if (q->cycle_error) {
 			throw_error(q, p1, "resource_error", "cyclic_term");
@@ -4740,7 +4736,7 @@ static int fn_iso_copy_term_2(query *q)
 	if (!has_vars(q, p1, p1_ctx) && !is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
-	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx);
+	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false);
 
 	if (!tmp) {
 		throw_error(q, p1, "resource_error", "too_many_vars");
@@ -5062,7 +5058,7 @@ static int fn_iso_asserta_1(query *q)
 static int fn_iso_assertz_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx);
+	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 
 	if (q->cycle_error) {
 		throw_error(q, p1, "resource_error", "cyclic_term");
@@ -6024,7 +6020,7 @@ static int fn_iso_bagof_3(query *q)
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
 
-		if (c->flags & FLAG_DELETED)
+		if (c->flags & FLAG_PROCESSED)
 			continue;
 
 		try_me(q, MAX_ARITY);
@@ -6035,14 +6031,9 @@ static int fn_iso_bagof_3(query *q)
 				return 0;
 			}
 
-			c->flags |= FLAG_DELETED;
+			c->flags |= FLAG_PROCESSED;
 
-#if 1
-			cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
-#else
-			cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx);
-#endif
-
+			cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, true);
 			ensure(tmp);
 			alloc_queuen(q, q->st.qnbr, tmp);
 		}
@@ -9747,7 +9738,7 @@ static unsigned fake_collect_vars(query *q, cell *p1, idx_t nbr_cells, cell **sl
 
 unsigned fake_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 {
-	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx);
+	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 
 	if (q->cycle_error) {
 		throw_error(q, p1, "resource_error", "cyclic_term");
