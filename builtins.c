@@ -70,32 +70,6 @@ static int do_yield_0(query *q, int msecs)
 	return 0;
 }
 
-static void pin_vars(query *q, uint64_t mask)
-{
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
-	ch->pins = mask;
-}
-
-static void unpin_vars(query *q)
-{
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
-	frame *g = GET_FRAME(q->st.curr_frame);
-	uint64_t mask = 1;
-
-	for (unsigned i = 0; i < g->nbr_vars; i++, mask <<= 1) {
-		if (!(ch->pins & mask))
-			continue;
-
-		slot *e = GET_SLOT(g, i);
-		e->c.val_type = TYPE_EMPTY;
-		e->c.attrs = NULL;
-	}
-
-	ch->pins = 0;
-}
-
 static void set_pinned(query *q, int i)
 {
 	idx_t curr_choice = q->cp - 1;
@@ -5959,6 +5933,32 @@ static cell *skip_existentials(cell *p2, uint64_t *xs)
 	}
 
 	return p2;
+}
+
+static void pin_vars(query *q, uint64_t mask)
+{
+	idx_t curr_choice = q->cp - 1;
+	choice *ch = q->choices + curr_choice;
+	ch->pins = mask;
+}
+
+static void unpin_vars(query *q)
+{
+	idx_t curr_choice = q->cp - 1;
+	choice *ch = q->choices + curr_choice;
+	frame *g = GET_FRAME(q->st.curr_frame);
+	uint64_t mask = 1;
+
+	for (unsigned i = 0; i < g->nbr_vars; i++, mask <<= 1) {
+		if (!(ch->pins & mask))
+			continue;
+
+		slot *e = GET_SLOT(g, i);
+		e->c.val_type = TYPE_EMPTY;
+		e->c.attrs = NULL;
+	}
+
+	ch->pins = 0;
 }
 
 static int fn_iso_bagof_3(query *q)
