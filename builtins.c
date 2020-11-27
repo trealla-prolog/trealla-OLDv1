@@ -4694,9 +4694,9 @@ static void uuid_gen(uuid *u)
 static char *uuid_to_buf(const uuid *u, char *buf, size_t buflen)
 {
 	snprintf(buf, buflen, "%016llX-%04llX-%012llX",
-		(unsigned long long)u->u1,
-		(unsigned long long)(u->u2 >> 48),
-		(unsigned long long)(u->u2 & MASK_FINAL));
+		 (unsigned long long)u->u1,
+		 (unsigned long long)(u->u2 >> 48),
+		 (unsigned long long)(u->u2 & MASK_FINAL));
 
 	return buf;
 }
@@ -4729,26 +4729,26 @@ static void db_log(query *q, clause *r, enum log_type l)
 {
 	int save = q->quoted;
 	char tmpbuf[256];
+	char *dst;
 	q->quoted = 2;
 
 	switch(l) {
-		case LOG_ASSERTA: {
-			char *dst = print_term_to_strbuf(q, r->t.cells, q->st.curr_frame, 1);
-			uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
-			fprintf(q->m->fp, "a_(%s,'%s').\n", dst, tmpbuf);
-			free(dst);
-			break;
-		} case LOG_ASSERTZ: {
-			char *dst = print_term_to_strbuf(q, r->t.cells, q->st.curr_frame, 1);
-			uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
-			fprintf(q->m->fp, "z_(%s,'%s').\n", dst, tmpbuf);
-			free(dst);
-			break;
-		} case LOG_ERASE: {
-			uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
-			fprintf(q->m->fp, "e_('%s').\n", tmpbuf);
-			break;
-		}
+	case LOG_ASSERTA:
+		dst = print_term_to_strbuf(q, r->t.cells, q->st.curr_frame, 1);
+		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
+		fprintf(q->m->fp, "a_(%s,'%s').\n", dst, tmpbuf);
+		free(dst);
+		break;
+	case LOG_ASSERTZ:
+		dst = print_term_to_strbuf(q, r->t.cells, q->st.curr_frame, 1);
+		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
+		fprintf(q->m->fp, "z_(%s,'%s').\n", dst, tmpbuf);
+		free(dst);
+		break;
+	case LOG_ERASE:
+		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
+		fprintf(q->m->fp, "e_('%s').\n", tmpbuf);
+		break;
 	}
 
 	q->quoted = save;
@@ -5636,8 +5636,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 typedef struct {
 	cell *c, *orig_c;
 	idx_t ctx, orig_ctx;
-}
- sslot;
+} sslot;
 
 static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 {
@@ -5898,7 +5897,7 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 	idx_t nbr_cells = q->tmpq_size[q->st.qnbr];
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
-		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
+	     nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
 
 		if (c->flags & FLAG_PROCESSED)
 			continue;
@@ -9252,7 +9251,7 @@ static USE_RESULT prolog_state fn_rational_1(query *q)
 static USE_RESULT prolog_state fn_getenv_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,atom_or_var)
+	GET_NEXT_ARG(p2,atom_or_var);
 	const char *value = getenv(GET_STR(p1));
 
 	if (!value)
@@ -9268,7 +9267,7 @@ static USE_RESULT prolog_state fn_getenv_2(query *q)
 static USE_RESULT prolog_state fn_setenv_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,atom_or_int)
+	GET_NEXT_ARG(p2,atom_or_int);
 
 	if (is_atom(p2)) {
 		setenv(GET_STR(p1), GET_STR(p2), 1);
@@ -9291,10 +9290,10 @@ static USE_RESULT prolog_state fn_unsetenv_1(query *q)
 static USE_RESULT prolog_state fn_uuid_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-    uuid u;
-    uuid_gen(&u);
-    char tmpbuf[128];
-    uuid_to_buf(&u, tmpbuf, sizeof(tmpbuf));
+	uuid u;
+	uuid_gen(&u);
+	char tmpbuf[128];
+	uuid_to_buf(&u, tmpbuf, sizeof(tmpbuf));
 	cell tmp = make_cstring(tmpbuf);
 	tmp.flags |= FLAG_TMP;
 	tmp.flags |= FLAG_STRING;
@@ -9626,8 +9625,8 @@ static USE_RESULT prolog_state fn_numbervars_1(query *q)
 static USE_RESULT prolog_state fn_numbervars_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,integer)
-	GET_NEXT_ARG(p3,integer_or_var)
+	GET_NEXT_ARG(p2,integer);
+	GET_NEXT_ARG(p3,integer_or_var);
 	unsigned cnt = real_numbervars(q, p1, p1_ctx, q->nv_start=p2->val_num);
 	cell tmp2;
 	make_int(&tmp2, p2->val_num+cnt);
@@ -9649,7 +9648,7 @@ unsigned count_bits(const uint8_t *mask, unsigned bit)
 static USE_RESULT prolog_state fn_var_number_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	GET_NEXT_ARG(p2,integer_or_var)
+	GET_NEXT_ARG(p2,integer_or_var);
 	unsigned pos = count_bits(q->nv_mask, p1->var_nbr);
 	cell tmp;
 	make_int(&tmp, q->nv_start+pos);
@@ -10291,10 +10290,10 @@ static USE_RESULT prolog_state fn_use_module_1(query *q)
 			return pl_success;
 		}
 
-		if (!strcmp(name, "between") ||
-			!strcmp(name, "terms") ||
-			!strcmp(name, "types") ||
-			!strcmp(name, "files"))
+		if (!strcmp(name, "between")
+		    || !strcmp(name, "terms")
+		    || !strcmp(name, "types")
+		    || !strcmp(name, "files"))
 			return pl_success;
 
 		for (library *lib = g_libs; lib->name; lib++) {
