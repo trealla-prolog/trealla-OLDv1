@@ -5957,18 +5957,16 @@ static uint64_t get_vars(cell *p, __attribute__((unused)) idx_t p_ctx)
 	return mask;
 }
 
-static cell *skip_existentials(const query *q, cell *p2, uint64_t *xs)
+static cell *skip_existentials(cell *p2, uint64_t *xs)
 {
 	while (is_structure(p2) && !strcmp(GET_STR(p2), "^")) {
-		cell *c = p2 + 1;
-
+		cell *c = ++p2;
 		assert(c->var_nbr < 64);
 
 		if (is_variable(c))
-			*xs |= 1 << c->var_nbr;
+			*xs |= 1ULL << c->var_nbr;
 
-		p2 += 1 + c->nbr_cells;
-		return skip_existentials(q, p2, xs);
+		p2 += c->nbr_cells;
 	}
 
 	return p2;
@@ -5980,7 +5978,7 @@ static int fn_iso_bagof_3(query *q)
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
 	uint64_t xs_vars = 0;
-	p2 = skip_existentials(q, p2, &xs_vars);
+	p2 = skip_existentials(p2, &xs_vars);
 
 	// First time thru generate all solutions
 
@@ -6033,15 +6031,20 @@ static int fn_iso_bagof_3(query *q)
 		try_me(q, g->nbr_vars);
 
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
-			c->flags |= FLAG_DELETED;
-			cell *tmp = deep_clone_to_tmp_heap(q, p1, q->st.curr_frame);
-			ensure(tmp);
-
 			if (q->cycle_error) {
 				throw_error(q, p1, "resource_error", "cyclic_term");
 				return 0;
 			}
 
+			c->flags |= FLAG_DELETED;
+
+#if 1
+			cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
+#else
+			cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx);
+#endif
+
+			ensure(tmp);
 			alloc_queuen(q, q->st.qnbr, tmp);
 		}
 
