@@ -527,7 +527,7 @@ cell *get_body(cell *c);
 predicate *find_matching_predicate(module *m, cell *c);
 predicate *find_matching_predicate_quiet(module *m, cell *c);
 predicate *find_functor(module *m, const char *name, unsigned arity);
-int call_me(query *q, cell *p1);
+USE_RESULT prolog_state call_me(query *q, cell *p1);
 void undo_me(query *q);
 parser *create_parser(module *m);
 void destroy_parser(parser *p);
