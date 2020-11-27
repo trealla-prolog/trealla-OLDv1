@@ -602,6 +602,9 @@ unsigned create_vars(query *q, unsigned cnt)
 
 	unsigned var_nbr = g->nbr_vars;
 
+	if (check_slot(q, cnt) == pl_error)
+		return 0;
+
 	if ((g->ctx + g->nbr_slots) >= q->st.sp) {
 		g->nbr_slots += cnt;
 		q->st.sp = g->ctx + g->nbr_slots;
