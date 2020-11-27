@@ -6019,7 +6019,6 @@ static int fn_iso_bagof_3(query *q)
 	uint64_t p2_vars = get_vars(p2, p2_ctx);
 	uint64_t mask = (p1_vars^p2_vars) & ~xs_vars;
 	pin_vars(q, mask);
-	frame *g = GET_FRAME(q->st.curr_frame);
 	idx_t nbr_cells = q->tmpq_size[q->st.qnbr];
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
@@ -6028,7 +6027,7 @@ static int fn_iso_bagof_3(query *q)
 		if (c->flags & FLAG_DELETED)
 			continue;
 
-		try_me(q, g->nbr_vars);
+		try_me(q, MAX_ARITY);
 
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			if (q->cycle_error) {

@@ -515,7 +515,7 @@ size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 			dst += snprintf(dst, dstlen, "%s", "(");
 
 		if (running && is_variable(c)
-			/*&& ((c_ctx != q->st.curr_frame) || is_fresh(c) || (running > 0))*/) {
+			&& ((c_ctx != q->st.curr_frame) || is_fresh(c) || (running > 0))) {
 			frame *g = GET_FRAME(c_ctx);
 			slot *e = GET_SLOT(g, c->var_nbr);
 			idx_t slot_nbr = e - q->slots;
