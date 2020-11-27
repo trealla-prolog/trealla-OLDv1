@@ -6035,13 +6035,13 @@ static int fn_iso_bagof_3(query *q)
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			c->flags |= FLAG_DELETED;
 			cell *c1 = deep_clone_to_tmp_heap(q, p1, q->st.curr_frame);
+			ensure(c1);
 
 			if (q->cycle_error) {
 				throw_error(q, p1, "resource_error", "cyclic_term");
 				return 0;
 			}
 
-			ensure(c1);
 			alloc_queuen(q, q->st.qnbr, c1);
 		}
 
