@@ -519,7 +519,8 @@ static cell *deep_copy_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx, bool nonloc
 
 	if (g_varno != g->nbr_vars) {
 		if (!create_vars(q, g_varno-g->nbr_vars)) {
-			throw_error(q, p1, "resource_error", "too_many_vars");
+			prolog_state unused = throw_error(q, p1, "resource_error", "too_many_vars");
+			(void) unused;
 			return NULL;
 		}
 	}
@@ -642,12 +643,13 @@ USE_RESULT prolog_state throw_error(query *q, cell *c, const char *err_type, con
 	parser_attach(p, 0);
 	parser_assign_vars(p, g->nbr_vars, false);
 	//parser_xref(p, p->t, NULL);
-	prolog_state ret = do_throw_term(q, p->t->cells);
+	prolog_state unused = do_throw_term(q, p->t->cells);
+	(void) unused;
 	//TODO: cehteh: exception handling needs review
 	clear_term(p->t);
 	free(dst2);
 	free(dst);
-	return ret;
+	return pl_error;
 }
 
 static USE_RESULT prolog_state fn_iso_unify_2(query *q)
@@ -786,8 +788,7 @@ static USE_RESULT prolog_state fn_iso_char_code_2(query *q)
 	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
-		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
-		return 0;
+		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 	}
 
 	if (is_variable(p2)) {
@@ -817,13 +818,11 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
-		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
-		return 0;
+		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 	}
 
 	if (!is_iso_atom(p1) && !is_variable(p1)) {
-		throw_error(q, p1, "type_error", "atom");
-		return 0;
+		return throw_error(q, p1, "type_error", "atom");
 	}
 
 	if (is_variable(p1) && is_nil(p2)) {
@@ -871,8 +870,7 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 
 			if (!is_atom(head)) {
 				free(tmpbuf);
-				throw_error(q, head, "type_error", "atom");
-				return 0;
+				return throw_error(q, head, "type_error", "atom");
 			}
 
 			const char *src = GET_STR(head);
@@ -896,8 +894,7 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 			}
 
 			if (!is_list(tail)) {
-				throw_error(q, tail, "type_error", "list");
-				return 0;
+				return throw_error(q, tail, "type_error", "list");
 			}
 
 			head = LIST_HEAD(tail);
@@ -928,13 +925,11 @@ static USE_RESULT prolog_state fn_iso_atom_codes_2(query *q)
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
-		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
-		return 0;
+		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 	}
 
 	if (!is_iso_atom(p1) && !is_variable(p1)) {
-		throw_error(q, p1, "type_error", "atom");
-		return 0;
+		return throw_error(q, p1, "type_error", "atom");
 	}
 
 	if (!is_variable(p2) && is_nil(p2)) {
@@ -963,8 +958,7 @@ static USE_RESULT prolog_state fn_iso_atom_codes_2(query *q)
 			p2_ctx = q->latest_ctx;
 
 			if (!is_integer(head)) {
-				throw_error(q, head, "type_error", "integer");
-				return 0;
+				return throw_error(q, head, "type_error", "integer");
 			}
 
 			int_t val = head->val_num;
@@ -987,8 +981,7 @@ static USE_RESULT prolog_state fn_iso_atom_codes_2(query *q)
 			}
 
 			if (!is_list(tail)) {
-				throw_error(q, tail, "type_error", "list");
-				return 0;
+				return throw_error(q, tail, "type_error", "list");
 			}
 
 			head = LIST_HEAD(tail);
@@ -1026,8 +1019,7 @@ static USE_RESULT prolog_state fn_iso_number_chars_2(query *q)
 	GET_NEXT_ARG(p2,list_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
-		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
-		return 0;
+		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 	}
 
 	if (!is_variable(p2)) {
@@ -1039,8 +1031,7 @@ static USE_RESULT prolog_state fn_iso_number_chars_2(query *q)
 
 		while (tail) {
 			if (!is_atom(head)) {
-				throw_error(q, head, "type_error", "atom");
-				return 0;
+				return throw_error(q, head, "type_error", "atom");
 			}
 
 			const char *src = GET_STR(head);
@@ -1054,8 +1045,7 @@ static USE_RESULT prolog_state fn_iso_number_chars_2(query *q)
 			}
 
 			if (!is_list(tail)) {
-				throw_error(q, tail, "type_error", "list");
-				return 0;
+				return throw_error(q, tail, "type_error", "list");
 			}
 
 			head = LIST_HEAD(tail);
@@ -1072,8 +1062,7 @@ static USE_RESULT prolog_state fn_iso_number_chars_2(query *q)
 			double f = strtod(tmpbuf, &end);
 
 			if (*end) {
-				throw_error(q, p2, "syntax_error", "number");
-				return 0;
+				return throw_error(q, p2, "syntax_error", "number");
 			}
 
 			make_float(&tmp, f);
@@ -1098,8 +1087,7 @@ static USE_RESULT prolog_state fn_iso_number_codes_2(query *q)
 	GET_NEXT_ARG(p2,iso_list_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
-		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
-		return 0;
+		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 	}
 
 	if (!is_variable(p2)) {
@@ -1111,8 +1099,7 @@ static USE_RESULT prolog_state fn_iso_number_codes_2(query *q)
 
 		while (tail) {
 			if (!is_integer(head)) {
-				throw_error(q, head, "type_error", "integer");
-				return 0;
+				return throw_error(q, head, "type_error", "integer");
 			}
 
 			int ch = head->val_num;
@@ -1125,8 +1112,7 @@ static USE_RESULT prolog_state fn_iso_number_codes_2(query *q)
 			}
 
 			if (!is_list(tail)) {
-				throw_error(q, tail, "type_error", "list");
-				return 0;
+				return throw_error(q, tail, "type_error", "list");
 			}
 
 			head = LIST_HEAD(tail);
@@ -1143,8 +1129,7 @@ static USE_RESULT prolog_state fn_iso_number_codes_2(query *q)
 			double f = strtod(tmpbuf, &end);
 
 			if (*end) {
-				throw_error(q, p2, "syntax_error", "number");
-				return 0;
+				return throw_error(q, p2, "syntax_error", "number");
 			}
 
 			make_float(&tmp, f);
@@ -1326,13 +1311,11 @@ static USE_RESULT prolog_state fn_iso_atom_concat_3(query *q)
 
 	if (is_variable(p3)) {
 		if (!is_iso_atom(p1)) {
-			throw_error(q, p1, "type_error", "atom");
-			return 0;
+			return throw_error(q, p1, "type_error", "atom");
 		}
 
 		if (!is_iso_atom(p2)) {
-			throw_error(q, p2, "type_error", "atom");
-			return 0;
+			return throw_error(q, p2, "type_error", "atom");
 		}
 
 		const char *src1, *src2;
@@ -1410,8 +1393,7 @@ static USE_RESULT prolog_state fn_iso_atom_length_2(query *q)
 	size_t len;
 
 	if (!is_iso_atom(p1)) {
-		throw_error(q, p1, "type_error", "atom");
-		return 0;
+		return throw_error(q, p1, "type_error", "atom");
 	}
 
 	if (is_blob(p1)) {
@@ -1456,7 +1438,7 @@ static int get_stream(query *q, cell *p1)
 		int n = get_named_stream(GET_STR(p1));
 
 		if (n < 0) {
-			throw_error(q, p1, "type_error", "stream");
+			return throw_error(q, p1, "type_error", "stream");
 			return -1;
 		}
 
@@ -1464,17 +1446,17 @@ static int get_stream(query *q, cell *p1)
 	}
 
 	if (!is_integer(p1) || !(p1->flags&FLAG_STREAM)) {
-		throw_error(q, p1, "type_error", "stream");
+		return throw_error(q, p1, "type_error", "stream");
 		return -1;
 	}
 
 	if ((p1->val_num < 0) || (p1->val_num >= MAX_STREAMS)) {
-		throw_error(q, p1, "type_error", "stream");
+		return throw_error(q, p1, "type_error", "stream");
 		return -1;
 	}
 
 	if (!g_streams[p1->val_num].fp) {
-		throw_error(q, p1, "type_error", "stream");
+		return throw_error(q, p1, "type_error", "stream");
 		return -1;
 	}
 
@@ -1521,8 +1503,7 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 	GET_NEXT_ARG(p1,any);
 
 	if (p1->arity != 1) {
-		throw_error(q, p1, "type_error", "property");
-		return 0;
+		return throw_error(q, p1, "type_error", "property");
 	}
 
 	if (!strcmp(GET_STR(p1), "alias") && is_variable(pstr)) {
@@ -1530,15 +1511,13 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		c = deref(q, c, p1_ctx);
 
 		if (!is_atom(c)) {
-			throw_error(q, c, "type_error", "atom");
-			return 0;
+			return throw_error(q, c, "type_error", "atom");
 		}
 
 		int n = get_named_stream(GET_STR(c));
 
 		if (n < 0) {
-			throw_error(q, c, "type_error", "stream");
-			return 0;
+			return throw_error(q, c, "type_error", "stream");
 		}
 
 		cell tmp;
@@ -1549,8 +1528,7 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 	}
 
 	if (!is_stream(pstr)) {
-		throw_error(q, p1, "type_error", "stream");
-		return 0;
+		return throw_error(q, p1, "type_error", "stream");
 	}
 
 	int n = get_stream(q, pstr);
@@ -1583,8 +1561,7 @@ static USE_RESULT prolog_state fn_iso_set_stream_position_2(query *q)
 	GET_NEXT_ARG(p1,integer);
 
 	if (fseeko(str->fp, p1->val_num, SEEK_SET)) {
-		throw_error(q, p1, "domain_error", "position");
-		return 0;
+		return throw_error(q, p1, "domain_error", "position");
 	}
 
 	return pl_success;
@@ -1629,16 +1606,14 @@ static USE_RESULT prolog_state fn_iso_open_3(query *q)
 	char *src = NULL;
 
 	if (n < 0) {
-		throw_error(q, p1, "resource_error", "too_many_open_streams");
-		return 0;
+		return throw_error(q, p1, "resource_error", "too_many_open_streams");
 	}
 
 	if (is_iso_list(p1)) {
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
-			throw_error(q, p1, "type_error", "atom");
-			return 0;
+			return throw_error(q, p1, "type_error", "atom");
 		}
 
 		src = chars_list_to_string(q, p1, p1_ctx, len);
@@ -1663,8 +1638,7 @@ static USE_RESULT prolog_state fn_iso_open_3(query *q)
 	free(src);
 
 	if (!str->fp) {
-		throw_error(q, p1, "existence_error", "filespec");
-		return 0;
+		return throw_error(q, p1, "existence_error", "filespec");
 	}
 
 	cell *tmp = alloc_heap(q, 1);
@@ -1686,8 +1660,7 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 	char *src = NULL;
 
 	if (n < 0) {
-		throw_error(q, p1, "resource_error", "too_many_open_streams");
-		return 0;
+		return throw_error(q, p1, "resource_error", "too_many_open_streams");
 	}
 
 	const char *filename;
@@ -1697,8 +1670,7 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 		int oldn = get_stream(q, p1+1);
 
 		if (oldn < 0) {
-			throw_error(q, p1, "type_error", "not_a_stream");
-			return 0;
+			return throw_error(q, p1, "type_error", "not_a_stream");
 		}
 
 		stream *oldstr = &g_streams[oldn];
@@ -1710,8 +1682,7 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
-			throw_error(q, p1, "type_error", "atom");
-			return 0;
+			return throw_error(q, p1, "type_error", "atom");
 		}
 
 		src = chars_list_to_string(q, p1, p1_ctx, len);
@@ -1787,8 +1758,7 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 	free(src);
 
 	if (!str->fp) {
-		throw_error(q, p1, "existence_error", "filespec");
-		return 0;
+		return throw_error(q, p1, "existence_error", "filespec");
 	}
 
 #if USE_MMAP
@@ -2075,8 +2045,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 	parser_xref(p, p->t, NULL);
 
 	if (!create_vars(q, p->nbr_vars)) {
-		throw_error(q, p1, "resource_error", "too_many_vars");
-		return 0;
+		return throw_error(q, p1, "resource_error", "too_many_vars");
 	}
 
 	cell *tmp = p->t->cells;
@@ -2508,8 +2477,7 @@ static USE_RESULT prolog_state fn_iso_put_byte_1(query *q)
 	int ch = (int)p1->val_num;
 
 	if ((ch > 255) || (ch < 0)) {
-		throw_error(q, p1, "type_error", "byte");
-		return 0;
+		return throw_error(q, p1, "type_error", "byte");
 	}
 
 	char tmpbuf[20];
@@ -2527,8 +2495,7 @@ static USE_RESULT prolog_state fn_iso_put_byte_2(query *q)
 	int ch = (int)p1->val_num;
 
 	if ((ch > 255) || (ch < 0)) {
-		throw_error(q, p1, "type_error", "byte");
-		return 0;
+		return throw_error(q, p1, "type_error", "byte");
 	}
 
 	char tmpbuf[20];
@@ -2958,8 +2925,7 @@ static USE_RESULT prolog_state fn_iso_is_2(query *q)
 	if (is_atom(p1) && is_number(&p2) && !strcmp(GET_STR(p1), "inf"))
 		return is_float(&p2) ? isinf(p2.val_flt) : 0;
 
-	throw_error(q, p1, "type_error", "number");
-	return 0;
+	return throw_error(q, p1, "type_error", "number");
 }
 
 static USE_RESULT prolog_state fn_iso_float_1(query *q)
@@ -2969,7 +2935,7 @@ static USE_RESULT prolog_state fn_iso_float_1(query *q)
 	if (q->calc) {
 		cell p1 = calc(q, p1_tmp);
 
-		if is_float(&p1) {
+		if (is_float(&p1)) {
 			q->accum.val_flt = p1.val_flt;
 			q->accum.val_type = TYPE_FLOAT;
 			return pl_success;
@@ -2981,8 +2947,7 @@ static USE_RESULT prolog_state fn_iso_float_1(query *q)
 			return pl_success;
 		}
 
-		throw_error(q, &p1, "type_error", "integer_or_float");
-		return 0;
+		return throw_error(q, &p1, "type_error", "integer_or_float");
 	}
 
 	return is_float(p1_tmp);
@@ -2995,7 +2960,7 @@ static USE_RESULT prolog_state fn_iso_integer_1(query *q)
 	if (q->calc) {
 		cell p1 = calc(q, p1_tmp);
 
-		if is_float(&p1) {
+		if (is_float(&p1)) {
 			q->accum.val_num = (int_t)p1.val_flt;
 			q->accum.val_den = 1;
 			q->accum.val_type = TYPE_INTEGER;
@@ -3009,8 +2974,7 @@ static USE_RESULT prolog_state fn_iso_integer_1(query *q)
 			return pl_success;
 		}
 
-		throw_error(q, &p1, "type_error", "integer_or_float");
-		return 0;
+		return throw_error(q, &p1, "type_error", "integer_or_float");
 	}
 
 	return is_integer(p1_tmp);
@@ -3024,11 +2988,10 @@ static USE_RESULT prolog_state fn_iso_abs_1(query *q)
 
 	if (is_integer(&p1))
 		q->accum.val_num = llabs((long long)p1.val_num);
-	else if is_float(&p1)
+	else if (is_float(&p1))
 		q->accum.val_flt = fabs(p1.val_flt);
 	else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3042,11 +3005,10 @@ static USE_RESULT prolog_state fn_iso_sign_1(query *q)
 
 	if (is_integer(&p1))
 		q->accum.val_num = p1.val_num < 0 ? -1 : p1.val_num > 0  ? 1 : 0;
-	else if is_float(&p1)
-		q->accum.val_flt = p1.val_flt < 0 ? -1 : p1.val_flt > 0  ? 1 : 0;
+	else if (is_float(&p1))
+				q->accum.val_flt = p1.val_flt < 0 ? -1 : p1.val_flt > 0  ? 1 : 0;
 	else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3071,8 +3033,7 @@ static USE_RESULT prolog_state fn_iso_negative_1(query *q)
 	else if (is_float(&p1))
 		q->accum.val_flt = -p1.val_flt;
 	else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3104,21 +3065,19 @@ static USE_RESULT prolog_state fn_iso_add_2(query *q)
 		__int128_t tmp = (__int128_t)p1.val_num + p2.val_num;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
+			return throw_error(q, &p1, "domain_error", "integer_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-		int64_t tmp = (int64_t)p1.val_num + p2.val_num;
+			int64_t tmp = (int64_t)p1.val_num + p2.val_num;
 
-		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
-		} else {
+			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+				return throw_error(q, &p1, "domain_error", "integer_overflow");
+			} else {
 #endif
-			q->accum.val_num = p1.val_num + p2.val_num;
-			q->accum.val_type = TYPE_INTEGER;
+				q->accum.val_num = p1.val_num + p2.val_num;
+				q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		}
+			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
@@ -3137,8 +3096,7 @@ static USE_RESULT prolog_state fn_iso_add_2(query *q)
 		q->accum.val_flt = p1.val_flt + p2.val_num;
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3156,21 +3114,19 @@ static USE_RESULT prolog_state fn_iso_sub_2(query *q)
 		__int128_t tmp = (__int128_t)p1.val_num - p2.val_num;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
+			return throw_error(q, &p1, "domain_error", "integer_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-		int64_t tmp = (int64_t)p1.val_num - p2.val_num;
+			int64_t tmp = (int64_t)p1.val_num - p2.val_num;
 
-		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
-		} else {
+			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+				return throw_error(q, &p1, "domain_error", "integer_overflow");
+			} else {
 #endif
-			q->accum.val_num = p1.val_num - p2.val_num;
-			q->accum.val_type = TYPE_INTEGER;
+				q->accum.val_num = p1.val_num - p2.val_num;
+				q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		}
+			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
@@ -3189,8 +3145,7 @@ static USE_RESULT prolog_state fn_iso_sub_2(query *q)
 		q->accum.val_flt = p1.val_flt - p2.val_num;
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3208,21 +3163,19 @@ static USE_RESULT prolog_state fn_iso_mul_2(query *q)
 		__int128_t tmp = (__int128_t)p1.val_num * p2.val_num;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
+			return throw_error(q, &p1, "domain_error", "integer_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-		int64_t tmp = (int64_t)p1.val_num * p2.val_num;
+			int64_t tmp = (int64_t)p1.val_num * p2.val_num;
 
-		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
-		} else {
+			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+				return throw_error(q, &p1, "domain_error", "integer_overflow");
+			} else {
 #endif
-			q->accum.val_num = p1.val_num * p2.val_num;
-			q->accum.val_type = TYPE_INTEGER;
+				q->accum.val_num = p1.val_num * p2.val_num;
+				q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		}
+			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
@@ -3242,8 +3195,7 @@ static USE_RESULT prolog_state fn_iso_mul_2(query *q)
 		q->accum.val_flt = p1.val_flt * p2.val_num;
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3261,8 +3213,7 @@ static USE_RESULT prolog_state fn_iso_exp_1(query *q)
 		q->accum.val_flt = exp(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3280,8 +3231,7 @@ static USE_RESULT prolog_state fn_iso_sqrt_1(query *q)
 		q->accum.val_flt = sqrt(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3299,8 +3249,7 @@ static USE_RESULT prolog_state fn_iso_log_1(query *q)
 		q->accum.val_flt = log(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3316,27 +3265,24 @@ static USE_RESULT prolog_state fn_iso_truncate_1(query *q)
 		__int128_t tmp = p1.val_flt;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
+			return throw_error(q, &p1, "domain_error", "integer_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-		int64_t tmp = p1.val_flt;
+			int64_t tmp = p1.val_flt;
 
-		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
-		} else {
+			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+				return throw_error(q, &p1, "domain_error", "integer_overflow");
+			} else {
 #endif
-			q->accum.val_num = (int_t)p1.val_flt;
-			q->accum.val_type = TYPE_INTEGER;
+				q->accum.val_num = (int_t)p1.val_flt;
+				q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		}
+			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
 	} else {
-		throw_error(q, &p1, "type_error", "float");
-		return 0;
+		return throw_error(q, &p1, "type_error", "float");
 	}
 
 	return pl_success;
@@ -3352,27 +3298,24 @@ static USE_RESULT prolog_state fn_iso_round_1(query *q)
 		__int128_t tmp = round(p1.val_flt);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
+			return throw_error(q, &p1, "domain_error", "integer_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-		int64_t tmp = round(p1.val_flt);
+			int64_t tmp = round(p1.val_flt);
 
-		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
-		} else {
+			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+				return throw_error(q, &p1, "domain_error", "integer_overflow");
+			} else {
 #endif
-			q->accum.val_num = (int_t)round(p1.val_flt);
-			q->accum.val_type = TYPE_INTEGER;
+				q->accum.val_num = (int_t)round(p1.val_flt);
+				q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		}
+			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
 	} else {
-		throw_error(q, &p1, "type_error", "float");
-		return 0;
+		return throw_error(q, &p1, "type_error", "float");
 	}
 
 	return pl_success;
@@ -3388,27 +3331,24 @@ static USE_RESULT prolog_state fn_iso_ceiling_1(query *q)
 		__int128_t tmp = ceil(p1.val_flt);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
+			return throw_error(q, &p1, "domain_error", "integer_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-		int64_t tmp = ceil(p1.val_flt);
+			int64_t tmp = ceil(p1.val_flt);
 
-		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
-		} else {
+			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+				return throw_error(q, &p1, "domain_error", "integer_overflow");
+			} else {
 #endif
-			q->accum.val_num = (int_t)ceil(p1.val_flt);
-			q->accum.val_type = TYPE_INTEGER;
+				q->accum.val_num = (int_t)ceil(p1.val_flt);
+				q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		}
+			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
 	} else {
-		throw_error(q, &p1, "type_error", "float");
-		return 0;
+		return throw_error(q, &p1, "type_error", "float");
 	}
 
 	return pl_success;
@@ -3424,27 +3364,24 @@ static USE_RESULT prolog_state fn_iso_float_integer_part_1(query *q)
 		__int128_t tmp = p1.val_flt;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
+			return throw_error(q, &p1, "domain_error", "integer_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-		int64_t tmp = p1.val_flt;
+			int64_t tmp = p1.val_flt;
 
-		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
-		} else {
+			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+				return throw_error(q, &p1, "domain_error", "integer_overflow");
+			} else {
 #endif
-			q->accum.val_flt = (int_t)p1.val_flt;
-			q->accum.val_type = TYPE_FLOAT;
+				q->accum.val_flt = (int_t)p1.val_flt;
+				q->accum.val_type = TYPE_FLOAT;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		}
+			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
 	} else {
-		throw_error(q, &p1, "type_error", "float");
-		return 0;
+		return throw_error(q, &p1, "type_error", "float");
 	}
 
 	return pl_success;
@@ -3460,27 +3397,24 @@ static USE_RESULT prolog_state fn_iso_float_fractional_part_1(query *q)
 		__int128_t tmp = p1.val_flt - (__int64_t)p1.val_flt;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
+			return throw_error(q, &p1, "domain_error", "integer_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-		int64_t tmp = p1.val_flt - (int64_t)p1.val_flt;
+			int64_t tmp = p1.val_flt - (int64_t)p1.val_flt;
 
-		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
-		} else {
+			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+				return throw_error(q, &p1, "domain_error", "integer_overflow");
+			} else {
 #endif
-			q->accum.val_flt = p1.val_flt - (int_t)p1.val_flt;
-			q->accum.val_type = TYPE_FLOAT;
+				q->accum.val_flt = p1.val_flt - (int_t)p1.val_flt;
+				q->accum.val_type = TYPE_FLOAT;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		}
+			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
 	} else {
-		throw_error(q, &p1, "type_error", "float");
-		return 0;
+		return throw_error(q, &p1, "type_error", "float");
 	}
 
 	return pl_success;
@@ -3496,27 +3430,24 @@ static USE_RESULT prolog_state fn_iso_floor_1(query *q)
 		__int128_t tmp = floor(p1.val_flt);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
+			return throw_error(q, &p1, "domain_error", "integer_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-		int64_t tmp = floor(p1.val_flt);
+			int64_t tmp = floor(p1.val_flt);
 
-		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
-		} else {
+			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+				return throw_error(q, &p1, "domain_error", "integer_overflow");
+			} else {
 #endif
-			q->accum.val_num = (int_t)floor(p1.val_flt);
-			q->accum.val_type = TYPE_INTEGER;
+				q->accum.val_num = (int_t)floor(p1.val_flt);
+				q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		}
+			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
 	} else {
-		throw_error(q, &p1, "type_error", "float");
-		return 0;
+		return throw_error(q, &p1, "type_error", "float");
 	}
 
 	return pl_success;
@@ -3534,8 +3465,7 @@ static USE_RESULT prolog_state fn_iso_sin_1(query *q)
 		q->accum.val_flt = sin(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3553,8 +3483,7 @@ static USE_RESULT prolog_state fn_iso_cos_1(query *q)
 		q->accum.val_flt = cos(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3572,8 +3501,7 @@ static USE_RESULT prolog_state fn_iso_tan_1(query *q)
 		q->accum.val_flt = tan(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3591,8 +3519,7 @@ static USE_RESULT prolog_state fn_iso_asin_1(query *q)
 		q->accum.val_flt = asin(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3610,8 +3537,7 @@ static USE_RESULT prolog_state fn_iso_acos_1(query *q)
 		q->accum.val_flt = acos(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3629,8 +3555,7 @@ static USE_RESULT prolog_state fn_iso_atan_1(query *q)
 		q->accum.val_flt = atan(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3656,8 +3581,7 @@ static USE_RESULT prolog_state fn_iso_atan_2(query *q)
 		q->accum.val_flt = atan2(p1.val_flt, p2.val_num);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3691,8 +3615,7 @@ static USE_RESULT prolog_state fn_iso_copysign_2(query *q)
 		q->accum.val_flt = copysign(p1.val_flt, p2.val_num);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3718,8 +3641,7 @@ static USE_RESULT prolog_state fn_iso_pow_2(query *q)
 		q->accum.val_flt = pow(p1.val_flt, p2.val_num);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3737,21 +3659,19 @@ static USE_RESULT prolog_state fn_iso_powi_2(query *q)
 		__int128_t tmp = pow(p1.val_num,p2.val_num);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
+			return throw_error(q, &p1, "domain_error", "integer_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-		int64_t tmp = pow(p1.val_num,p2.val_num);
+			int64_t tmp = pow(p1.val_num,p2.val_num);
 
-		if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-			throw_error(q, &p1, "domain_error", "integer_overflow");
-			return 0;
-		} else {
+			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+				return throw_error(q, &p1, "domain_error", "integer_overflow");
+			} else {
 #endif
-			q->accum.val_num = (int_t)pow(p1.val_num,p2.val_num);
-			q->accum.val_type = TYPE_INTEGER;
+				q->accum.val_num = (int_t)pow(p1.val_num,p2.val_num);
+				q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		}
+			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
@@ -3768,8 +3688,7 @@ static USE_RESULT prolog_state fn_iso_powi_2(query *q)
 		q->accum.val_flt = pow(p1.val_flt, p2.val_num);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3801,8 +3720,7 @@ static USE_RESULT prolog_state fn_iso_divide_2(query *q)
 		q->accum.val_flt = p1.val_flt / p2.val_num;
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -3819,8 +3737,7 @@ static USE_RESULT prolog_state fn_iso_divint_2(query *q)
 		q->accum.val_num = p1.val_num / p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
-		throw_error(q, &p1, "type_error", "integer");
-		return 0;
+		return throw_error(q, &p1, "type_error", "integer");
 	}
 
 	return pl_success;
@@ -3837,8 +3754,7 @@ static USE_RESULT prolog_state fn_iso_div_2(query *q)
 		q->accum.val_num = (p1.val_num - llabs((long long)(p1.val_num % p2.val_num))) / p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
-		throw_error(q, &p1, "type_error", "integer");
-		return 0;
+		return throw_error(q, &p1, "type_error", "integer");
 	}
 
 	return pl_success;
@@ -3855,8 +3771,7 @@ static USE_RESULT prolog_state fn_iso_mod_2(query *q)
 		q->accum.val_num = llabs((long long)(p1.val_num % p2.val_num));
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
-		throw_error(q, &p1, "type_error", "integer");
-		return 0;
+		return throw_error(q, &p1, "type_error", "integer");
 	}
 
 	return pl_success;
@@ -3879,8 +3794,7 @@ static USE_RESULT prolog_state fn_iso_max_2(query *q)
 		else q->accum = s2;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
-		throw_error(q, &p1, "type_error", "integer");
-		return 0;
+		return throw_error(q, &p1, "type_error", "integer");
 	}
 
 	return pl_success;
@@ -3903,8 +3817,7 @@ static USE_RESULT prolog_state fn_iso_min_2(query *q)
 		else q->accum = s2;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
-		throw_error(q, &p1, "type_error", "integer");
-		return 0;
+		return throw_error(q, &p1, "type_error", "integer");
 	}
 
 	return pl_success;
@@ -3921,8 +3834,7 @@ static USE_RESULT prolog_state fn_iso_xor_2(query *q)
 		q->accum.val_num = p1.val_num ^ p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
-		throw_error(q, &p1, "type_error", "integer");
-		return 0;
+		return throw_error(q, &p1, "type_error", "integer");
 	}
 
 	return pl_success;
@@ -3939,8 +3851,7 @@ static USE_RESULT prolog_state fn_iso_and_2(query *q)
 		q->accum.val_num = p1.val_num & p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
-		throw_error(q, &p1, "type_error", "integer");
-		return 0;
+		return throw_error(q, &p1, "type_error", "integer");
 	}
 
 	return pl_success;
@@ -3957,8 +3868,7 @@ static USE_RESULT prolog_state fn_iso_or_2(query *q)
 		q->accum.val_num = p1.val_num | p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
-		throw_error(q, &p1, "type_error", "integer");
-		return 0;
+		return throw_error(q, &p1, "type_error", "integer");
 	}
 
 	return pl_success;
@@ -3975,8 +3885,7 @@ static USE_RESULT prolog_state fn_iso_shl_2(query *q)
 		q->accum.val_num = p1.val_num << p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
-		throw_error(q, &p1, "type_error", "integer");
-		return 0;
+		return throw_error(q, &p1, "type_error", "integer");
 	}
 
 	return pl_success;
@@ -3993,8 +3902,7 @@ static USE_RESULT prolog_state fn_iso_shr_2(query *q)
 		q->accum.val_num = p1.val_num >> p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
-		throw_error(q, &p1, "type_error", "integer");
-		return 0;
+		return throw_error(q, &p1, "type_error", "integer");
 	}
 
 	return pl_success;
@@ -4009,8 +3917,7 @@ static USE_RESULT prolog_state fn_iso_neg_1(query *q)
 		q->accum.val_num = ~p1.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
-		throw_error(q, &p1, "type_error", "integer");
-		return 0;
+		return throw_error(q, &p1, "type_error", "integer");
 	}
 
 	return pl_success;
@@ -4224,8 +4131,7 @@ static USE_RESULT prolog_state fn_iso_neq_2(query *q)
 	else if (is_float(&p1) && is_integer(&p2))
 		return p1.val_flt == p2.val_num;
 
-	throw_error(q, &p1, "type_error", "number");
-	return 0;
+	return throw_error(q, &p1, "type_error", "number");
 }
 
 static USE_RESULT prolog_state fn_iso_nne_2(query *q)
@@ -4248,8 +4154,7 @@ static USE_RESULT prolog_state fn_iso_nne_2(query *q)
 	else if (is_float(&p1) && is_integer(&p2))
 		return p1.val_flt != p2.val_num;
 
-	throw_error(q, &p1, "type_error", "number");
-	return 0;
+	return throw_error(q, &p1, "type_error", "number");
 }
 
 static USE_RESULT prolog_state fn_iso_nge_2(query *q)
@@ -4272,8 +4177,7 @@ static USE_RESULT prolog_state fn_iso_nge_2(query *q)
 	else if (is_float(&p1) && is_integer(&p2))
 		return p1.val_flt >= p2.val_num;
 
-	throw_error(q, &p1, "type_error", "number");
-	return 0;
+	return throw_error(q, &p1, "type_error", "number");
 }
 
 static USE_RESULT prolog_state fn_iso_ngt_2(query *q)
@@ -4296,8 +4200,7 @@ static USE_RESULT prolog_state fn_iso_ngt_2(query *q)
 	else if (is_float(&p1) && is_integer(&p2))
 		return p1.val_flt > p2.val_num;
 
-	throw_error(q, &p1, "type_error", "number");
-	return 0;
+	return throw_error(q, &p1, "type_error", "number");
 }
 
 static USE_RESULT prolog_state fn_iso_nle_2(query *q)
@@ -4320,8 +4223,7 @@ static USE_RESULT prolog_state fn_iso_nle_2(query *q)
 	else if (is_float(&p1) && is_integer(&p2))
 		return p1.val_flt <= p2.val_num;
 
-	throw_error(q, &p1, "type_error", "number");
-	return 0;
+	return throw_error(q, &p1, "type_error", "number");
 }
 
 static USE_RESULT prolog_state fn_iso_nlt_2(query *q)
@@ -4344,8 +4246,7 @@ static USE_RESULT prolog_state fn_iso_nlt_2(query *q)
 	else if (is_float(&p1) && is_integer(&p2))
 		return p1.val_flt < p2.val_num;
 
-	throw_error(q, &p1, "type_error", "number");
-	return 0;
+	return throw_error(q, &p1, "type_error", "number");
 }
 
 static USE_RESULT prolog_state fn_iso_arg_3(query *q)
@@ -4374,7 +4275,7 @@ static USE_RESULT prolog_state fn_iso_arg_3(query *q)
 		}
 
 		if (arg_nbr < 0) {
-			throw_error(q, p1, "domain_error", "out_of_range");
+			return throw_error(q, p1, "domain_error", "out_of_range");
 			return pl_error;
 		}
 
@@ -4413,16 +4314,14 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 	GET_NEXT_ARG(p2,list_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
-		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
-		return 0;
+		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 	}
 
 	if (is_variable(p2)) {
 		cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false);
 
 		if (q->cycle_error) {
-			throw_error(q, p1, "resource_error", "cyclic_term");
-			return 0;
+			return throw_error(q, p1, "resource_error", "cyclic_term");
 		}
 
 		if (!tmp) return 0;
@@ -4449,8 +4348,7 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 		cell *tmp = deep_copy_to_tmp_heap(q, p2, p2_ctx, false);
 
 		if (q->cycle_error) {
-			throw_error(q, p1, "resource_error", "cyclic_term");
-			return 0;
+			return throw_error(q, p1, "resource_error", "cyclic_term");
 		}
 
 		if (!tmp) return 0;
@@ -4481,8 +4379,7 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 		}
 
 		if (!is_literal(tmp2) && arity) {
-			throw_error(q, tmp2, "type_error", "atom");
-			return 0;
+			return throw_error(q, tmp2, "type_error", "atom");
 		}
 
 		idx_t nbr_cells = nbr_cells = tmp_heap_used(q) - save;
@@ -4566,8 +4463,7 @@ static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 		g_varno = g->nbr_vars;
 
 		if (!create_vars(q, new_vars)) {
-			throw_error(q, p1, "resource_error", "too_many_vars");
-			return 0;
+			return throw_error(q, p1, "resource_error", "too_many_vars");
 		}
 
 		for (unsigned i = 0; i < cnt; i++) {
@@ -4695,7 +4591,8 @@ static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx
 
 	if (g_varno != g->nbr_vars) {
 		if (!create_vars(q, g_varno-g->nbr_vars)) {
-			throw_error(q, p1, "resource_error", "too_many_vars");
+			prolog_state unused = throw_error(q, p1, "resource_error", "too_many_vars");
+			(void) unused;
 			return NULL;
 		}
 	}
@@ -4725,8 +4622,7 @@ static USE_RESULT prolog_state fn_iso_copy_term_2(query *q)
 	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false);
 
 	if (!tmp) {
-		throw_error(q, p1, "resource_error", "too_many_vars");
-		return 0;
+		return throw_error(q, p1, "resource_error", "too_many_vars");
 	}
 
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
@@ -4926,29 +4822,25 @@ static USE_RESULT prolog_state fn_iso_abolish_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 
 	if (p1->arity != 2) {
-		throw_error(q, p1, "type_error", "indicator");
-		return 0;
+		return throw_error(q, p1, "type_error", "indicator");
 	}
 
 	const char *src = GET_STR(p1);
 
 	if (strcmp(src, "/")) {
-		throw_error(q, p1, "type_error", "indicator");
-		return 0;
+		return throw_error(q, p1, "type_error", "indicator");
 	}
 
 	cell *p1_name = p1 + 1;
 
 	if (!is_atom(p1_name)) {
-		throw_error(q, p1_name, "type_error", "atom");
-		return 0;
+		return throw_error(q, p1_name, "type_error", "atom");
 	}
 
 	cell *p1_arity = p1 + 2;
 
 	if (!is_integer(p1_arity)) {
-		throw_error(q, p1_arity, "type_error", "integer");
-		return 0;
+		return throw_error(q, p1_arity, "type_error", "integer");
 	}
 
 	cell tmp;
@@ -5016,8 +4908,7 @@ static USE_RESULT prolog_state fn_iso_asserta_1(query *q)
 	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 
 	if (q->cycle_error) {
-		throw_error(q, p1, "resource_error", "cyclic_term");
-		return 0;
+		return throw_error(q, p1, "resource_error", "cyclic_term");
 	}
 
 	idx_t nbr_cells = tmp->nbr_cells;
@@ -5047,8 +4938,7 @@ static USE_RESULT prolog_state fn_iso_assertz_1(query *q)
 	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 
 	if (q->cycle_error) {
-		throw_error(q, p1, "resource_error", "cyclic_term");
-		return 0;
+		return throw_error(q, p1, "resource_error", "cyclic_term");
 	}
 
 	idx_t nbr_cells = tmp->nbr_cells;
@@ -5081,8 +4971,7 @@ USE_RESULT prolog_state call_me(query *q, cell *p1)
 	idx_t p1_ctx = q->latest_ctx;
 
 	if (!is_callable(p1)) {
-		throw_error(q, p1, "type_error", "callable");
-		return 0;
+		return throw_error(q, p1, "type_error", "callable");
 	}
 
 	static const char *fudge = ",;->";
@@ -5095,8 +4984,7 @@ USE_RESULT prolog_state call_me(query *q, cell *p1)
 			cell *arg = deref(q, p, p1_ctx);
 
 			if (!is_callable(arg)) {
-				throw_error(q, arg, "type_error", "callable");
-				return 0;
+				return throw_error(q, arg, "type_error", "callable");
 			}
 
 			p += p->nbr_cells;
@@ -5343,15 +5231,13 @@ static USE_RESULT prolog_state fn_iso_throw_1(query *q)
 	cell *c = deep_clone_to_tmp_heap(q, p1, p1_ctx);
 
 	if (q->cycle_error) {
-		throw_error(q, p1, "resource_error", "cyclic_term");
-		return 0;
+		return throw_error(q, p1, "resource_error", "cyclic_term");
 	}
 
 	q->latest_ctx = p1_ctx;
 
 	if (has_vars(q, c, p1_ctx)) {
-		throw_error(q, c, "instantiation_error", "instantiated");
-		return 0;
+		return throw_error(q, c, "instantiation_error", "instantiated");
 	}
 
 	if (!do_throw_term(q, c))
@@ -5368,26 +5254,22 @@ static USE_RESULT prolog_state fn_iso_functor_3(query *q)
 
 	if (is_variable(p1)) {
 		if (!is_atom(p2)){
-			throw_error(q, p2, "type_error", "atom");
-			return 0;
+			return throw_error(q, p2, "type_error", "atom");
 		}
 
 		if (!is_integer(p3)){
-			throw_error(q, p3, "type_error", "integer");
-			return 0;
+			return throw_error(q, p3, "type_error", "integer");
 		}
 
 		if ((p3->val_num < 0) || (p3->val_num > MAX_ARITY/2)){
-			throw_error(q, p3, "domain_error", "integer");
-			return 0;
+			return throw_error(q, p3, "domain_error", "integer");
 		}
 
 		unsigned arity = p3->val_num;
 		unsigned var_nbr;
 
 		if (!(var_nbr = create_vars(q, arity))) {
-			throw_error(q, p3, "resource_error", "too_many_vars");
-			return 0;
+			return throw_error(q, p3, "resource_error", "too_many_vars");
 		}
 
 		GET_FIRST_ARG(p1,any);
@@ -5447,21 +5329,18 @@ static USE_RESULT prolog_state fn_iso_current_rule_1(query *q)
 	else if (!strcmp(GET_STR(p1), "//"))
 		add_two = 2;
 	else {
-		throw_error(q, p1, "type_error", "predicate_indicator");
-		return 0;
+		return throw_error(q, p1, "type_error", "predicate_indicator");
 	}
 
 	cell *pf = deref(q, p1+1,p1_ctx);
 	cell *pa = deref(q, p1+2, p1_ctx);
 
 	if (!is_atom(pf)) {
-		throw_error(q, p1, "type_error", "atom");
-		return 0;
+		return throw_error(q, p1, "type_error", "atom");
 	}
 
 	if (!is_integer(pa)) {
-		throw_error(q, p1, "type_error", "integer");
-		return 0;
+		return throw_error(q, p1, "type_error", "integer");
 	}
 
 	const char *functor = GET_STR(pf);
@@ -5515,8 +5394,7 @@ static USE_RESULT prolog_state fn_iso_current_predicate_1(query *q)
 		if (is_integer(tmp_p_pi))
 			arity = p_pi->val_num + 2;
 	} else {
-		throw_error(q, p_pi, "domain_error", "not_predicate_indicator");
-		return 0;
+		return throw_error(q, p_pi, "domain_error", "not_predicate_indicator");
 	}
 
 	cell tmp_f = *(p_pi+1);
@@ -5699,8 +5577,7 @@ static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
-	throw_error(q, p1, "domain_error", "flag");
-	return 0;
+	return throw_error(q, p1, "domain_error", "flag");
 }
 
 static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
@@ -5709,8 +5586,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 	GET_NEXT_ARG(p2,any);
 
 	if (!is_atom(p1)) {
-		throw_error(q, p1, "type_error", "atom");
-		return 0;
+		return throw_error(q, p1, "type_error", "atom");
 	}
 
 	if (!strcmp(GET_STR(p1), "cpu_count") && is_integer(p2)) {
@@ -5719,8 +5595,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 	}
 
 	if (!is_atom(p2)) {
-		throw_error(q, p2, "type_error", "atom");
-		return 0;
+		return throw_error(q, p2, "type_error", "atom");
 	}
 
 	if (!strcmp(GET_STR(p1), "double_quotes")) {
@@ -5734,8 +5609,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.double_quote_chars = true;
 			q->m->flag.double_quote_atom = q->m->flag.double_quote_codes = false;
 		} else {
-		throw_error(q, p2, "domain_error", "unknown");
-			return 0;
+			return throw_error(q, p2, "domain_error", "unknown");
 		}
 	} else if (!strcmp(GET_STR(p1), "character_escapes")) {
 		if (!strcmp(GET_STR(p2), "true"))
@@ -5753,8 +5627,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 		else if (!strcmp(GET_STR(p2), "flase"))
 			q->m->flag.prefer_rationals = false;
 	} else {
-		throw_error(q, p1, "domain_error", "flag");
-		return 0;
+		return throw_error(q, p1, "domain_error", "flag");
 	}
 
 	return pl_success;
@@ -5788,7 +5661,7 @@ static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 	return end_list(q);
 }
 
-static int do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
+static USE_RESULT prolog_state do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 {
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	fix_list(l);
@@ -5805,14 +5678,13 @@ static int do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 
 	if (new_varno != g->nbr_vars) {
 		if (!create_vars(q, new_varno-g->nbr_vars)) {
-			throw_error(q, p1, "resource_error", "too_many_vars");
-			return 0;
+			return throw_error(q, p1, "resource_error", "too_many_vars");
 		}
 	}
 
 	unify(q, p1, p1_ctx, l, q->st.curr_frame);
 	init_queuen(q);
-	return !q->cycle_error;
+	return !q->cycle_error; //cehteh: where..?
 }
 
 static USE_RESULT prolog_state fn_sys_list_1(query *q)
@@ -5837,8 +5709,7 @@ static USE_RESULT prolog_state fn_sys_list_1(query *q)
 
 	if (new_varno != g->nbr_vars) {
 		if (!create_vars(q, new_varno-g->nbr_vars)) {
-			throw_error(q, p1, "resource_error", "too_many_vars");
-			return 0;
+			return throw_error(q, p1, "resource_error", "too_many_vars");
 		}
 	}
 
@@ -5853,8 +5724,7 @@ static USE_RESULT prolog_state fn_sys_queue_1(query *q)
 	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
 
 	if (q->cycle_error) {
-		throw_error(q, p1, "resource_error", "cyclic_term");
-		return 0;
+		return throw_error(q, p1, "resource_error", "cyclic_term");
 	}
 
 	ensure(tmp);
@@ -5869,8 +5739,7 @@ static USE_RESULT prolog_state fn_sys_queuen_2(query *q)
 	cell *tmp = deep_copy_to_tmp_heap(q, p2, p2_ctx, true);
 
 	if (q->cycle_error) {
-		throw_error(q, p1, "resource_error", "cyclic_term");
-		return 0;
+		return throw_error(q, p1, "resource_error", "cyclic_term");
 	}
 
 	ensure(tmp);
@@ -6038,7 +5907,7 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			if (q->cycle_error) {
-				throw_error(q, p1, "resource_error", "cyclic_term");
+				return throw_error(q, p1, "resource_error", "cyclic_term");
 				return pl_error;
 			}
 
@@ -6094,8 +5963,7 @@ static USE_RESULT prolog_state fn_iso_op_3(query *q)
 	else if (!strcmp(spec, "yfx"))
 		optype = OP_YFX;
 	else {
-		throw_error(q, p2, "domain_error", "op_spec");
-		return 0;
+		return throw_error(q, p2, "domain_error", "op_spec");
 	}
 
 	bool tmp_userop = false;
@@ -6104,13 +5972,11 @@ static USE_RESULT prolog_state fn_iso_op_3(query *q)
 	int ok = get_op(q->m, GET_STR(p3), &tmp_optype, &tmp_userop, false);
 
 	if (ok && !tmp_userop) {
-		throw_error(q, p3, "permission_error", "can't_create_op");
-		return 0;
+		return throw_error(q, p3, "permission_error", "can't_create_op");
 	}
 
 	if (!set_op(q->m, GET_STR(p3), optype, p1->val_num)) {
-		throw_error(q, p3, "domain_error", "too_many_ops");
-		return 0;
+		return throw_error(q, p3, "domain_error", "too_many_ops");
 	}
 
 	return pl_success;
@@ -6200,8 +6066,7 @@ static USE_RESULT prolog_state do_asserta_2(query *q)
 	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
 
 	if (q->cycle_error) {
-		throw_error(q, p1, "resource_error", "cyclic_term");
-		return 0;
+		return throw_error(q, p1, "resource_error", "cyclic_term");
 	}
 
 	idx_t nbr_cells = tmp->nbr_cells;
@@ -6257,8 +6122,7 @@ static USE_RESULT prolog_state do_assertz_2(query *q)
 	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
 
 	if (q->cycle_error) {
-		throw_error(q, p1, "resource_error", "cyclic_term");
-		return 0;
+		return throw_error(q, p1, "resource_error", "cyclic_term");
 	}
 
 	idx_t nbr_cells = tmp->nbr_cells;
@@ -6381,17 +6245,15 @@ static USE_RESULT prolog_state fn_listing_1(query *q)
 		cell *p2 = p1 + 1;
 
 		if (!is_atom(p2)) {
-			throw_error(q, p2, "type_error", "atom");
 			q->error = 1;
-			return 0;
+			return throw_error(q, p2, "type_error", "atom");
 		}
 
 		cell *p3 = p2 + p2->nbr_cells;
 
 		if (!is_integer(p3)) {
-			throw_error(q, p3, "type_error", "integer");
 			q->error = 1;
-			return 0;
+			return throw_error(q, p3, "type_error", "integer");
 		}
 
 		name = index_from_pool(GET_STR(p2));
@@ -6576,8 +6438,7 @@ static USE_RESULT prolog_state fn_between_3(query *q)
 
 		return pl_success;
 	} else if (!q->retry && !is_variable(p3)) {
-		throw_error(q, p3, "type_error", "variable");
-		return 0;
+		return throw_error(q, p3, "type_error", "variable");
 	}
 
 	if (p1->val_num > p2->val_num)
@@ -6745,8 +6606,7 @@ static USE_RESULT prolog_state fn_savefile_2(query *q)
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
-			throw_error(q, p1, "type_error", "atom");
-			return 0;
+			return throw_error(q, p1, "type_error", "atom");
 		}
 
 		src = chars_list_to_string(q, p1, p1_ctx, len);
@@ -6773,8 +6633,7 @@ static USE_RESULT prolog_state fn_loadfile_2(query *q)
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
-			throw_error(q, p1, "type_error", "atom");
-			return 0;
+			return throw_error(q, p1, "type_error", "atom");
 		}
 
 		src = chars_list_to_string(q, p1, p1_ctx, len);
@@ -6786,8 +6645,7 @@ static USE_RESULT prolog_state fn_loadfile_2(query *q)
 	free(src);
 
 	if (!fp) {
-		throw_error(q, p1, "existence_error", "cannot_open_file");
-		return 0;
+		return throw_error(q, p1, "existence_error", "cannot_open_file");
 	}
 
 	struct stat st = {0};
@@ -6800,8 +6658,7 @@ static USE_RESULT prolog_state fn_loadfile_2(query *q)
 	ensure(s);
 
 	if (fread(s, 1, st.st_size, fp) != (size_t)st.st_size) {
-		throw_error(q, p1, "domain_error", "cannot_read");
-		return 0;
+		return throw_error(q, p1, "domain_error", "cannot_read");
 	}
 
 	s[st.st_size] = '\0';
@@ -6824,8 +6681,7 @@ static USE_RESULT prolog_state fn_getfile_2(query *q)
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
-			throw_error(q, p1, "type_error", "atom");
-			return 0;
+			return throw_error(q, p1, "type_error", "atom");
 		}
 
 		src = chars_list_to_string(q, p1, p1_ctx, len);
@@ -6837,9 +6693,8 @@ static USE_RESULT prolog_state fn_getfile_2(query *q)
 	free(src);
 
 	if (!fp) {
-		throw_error(q, p1, "existence_error", "cannot_open_file");
 		free(filename);
-		return 0;
+		return throw_error(q, p1, "existence_error", "cannot_open_file");
 	}
 
 	char *line = NULL;
@@ -6987,16 +6842,14 @@ static USE_RESULT prolog_state fn_server_3(query *q)
 	int fd = net_server(hostname, port, udp, ssl?keyfile:NULL, ssl?certfile:NULL);
 
 	if (fd == -1) {
-		throw_error(q, p1, "existence_error", "server_failed");
-		return 0;
+		return throw_error(q, p1, "existence_error", "server_failed");
 	}
 
 	int n = new_stream();
 
 	if (n < 0) {
-		throw_error(q, p1, "resource_error", "too_many_open_streams");
 		close(fd);
-		return 0;
+		return throw_error(q, p1, "resource_error", "too_many_open_streams");
 	}
 
 	stream *str = &g_streams[n];
@@ -7012,7 +6865,7 @@ static USE_RESULT prolog_state fn_server_3(query *q)
 	str->sslptr = NULL;
 
 	if (str->fp == NULL) {
-		throw_error(q, p1, "existence_error", "cannot_open_stream");
+		return throw_error(q, p1, "existence_error", "cannot_open_stream");
 		close(fd);
 	}
 
@@ -7047,9 +6900,8 @@ static USE_RESULT prolog_state fn_accept_2(query *q)
 	n = new_stream();
 
 	if (n < 0) {
-		throw_error(q, p1, "resource_error", "too_many_open_streams");
 		close(fd);
-		return 0;
+		return throw_error(q, p1, "resource_error", "too_many_open_streams");
 	}
 
 	stream *str2 = &g_streams[n];
@@ -7063,9 +6915,8 @@ static USE_RESULT prolog_state fn_accept_2(query *q)
 	str2->fp = fdopen(fd, "r+");
 
 	if (str2->fp == NULL) {
-		throw_error(q, p1, "existence_error", "cannot_open_stream");
 		close(fd);
-		return 0;
+		return throw_error(q, p1, "existence_error", "cannot_open_stream");
 	}
 
 	if (str->ssl) {
@@ -7179,9 +7030,8 @@ static USE_RESULT prolog_state fn_client_5(query *q)
 	int n = new_stream();
 
 	if (n < 0) {
-		throw_error(q, p1, "resource_error", "too_many_open_streams");
 		close(fd);
-		return 0;
+		return throw_error(q, p1, "resource_error", "too_many_open_streams");
 	}
 
 	stream *str = &g_streams[n];
@@ -7196,9 +7046,8 @@ static USE_RESULT prolog_state fn_client_5(query *q)
 	str->fp = fdopen(fd, "r+");
 
 	if (str->fp == NULL) {
-		throw_error(q, p1, "existence_error", "cannot_open_stream");
 		close(fd);
-		return 0;
+		return throw_error(q, p1, "existence_error", "cannot_open_stream");
 	}
 
 	if (ssl) {
@@ -7459,14 +7308,12 @@ static USE_RESULT prolog_state fn_read_term_from_chars_2(query *q)
 		src[len] = '\0';
 	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx, 0)) > 0) {
 		if (!len) {
-			throw_error(q, p_chars, "type_error", "atom");
-			return 0;
+			return throw_error(q, p_chars, "type_error", "atom");
 		}
 
 		src = chars_list_to_string(q, p_chars, p_chars_ctx, len);
 	} else {
-		throw_error(q, p_chars, "type_error", "chars");
-		return 0;
+		return throw_error(q, p_chars, "type_error", "chars");
 	}
 
 	if (src[strlen(src)-1] != '.')
@@ -7498,14 +7345,12 @@ static USE_RESULT prolog_state fn_read_term_from_chars_3(query *q)
 		src[len] = '\0';
 	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx, 0)) > 0) {
 		if (!len) {
-			throw_error(q, p_chars, "type_error", "atom");
-			return 0;
+			return throw_error(q, p_chars, "type_error", "atom");
 		}
 
 		src = chars_list_to_string(q, p_chars, p_chars_ctx, len);
 	} else {
-		throw_error(q, p_chars, "type_error", "chars");
-		return 0;
+		return throw_error(q, p_chars, "type_error", "chars");
 	}
 
 	if (src[strlen(src)-1] != '.')
@@ -7535,14 +7380,12 @@ static USE_RESULT prolog_state fn_read_term_from_atom_3(query *q)
 		src[len] = '\0';
 	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx, 0)) > 0) {
 		if (!len) {
-			throw_error(q, p_chars, "type_error", "atom");
-			return 0;
+			return throw_error(q, p_chars, "type_error", "atom");
 		}
 
 		src = chars_list_to_string(q, p_chars, p_chars_ctx, len);
 	} else {
-		throw_error(q, p_chars, "type_error", "chars");
-		return 0;
+		return throw_error(q, p_chars, "type_error", "chars");
 	}
 
 	if (src[strlen(src)-1] != '.')
@@ -7735,8 +7578,7 @@ static USE_RESULT prolog_state fn_spawn_1(query *q)
 	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
 
 	if (q->cycle_error) {
-		throw_error(q, p1, "resource_error", "cyclic_term");
-		return 0;
+		return throw_error(q, p1, "resource_error", "cyclic_term");
 	}
 
 	query *task = create_task(q, tmp);
@@ -7793,8 +7635,7 @@ static USE_RESULT prolog_state fn_send_1(query *q)
 	cell *c = deep_clone_to_tmp_heap(q, p1, p1_ctx);
 
 	if (q->cycle_error) {
-		throw_error(q, p1, "resource_error", "cyclic_term");
-		return 0;
+		return throw_error(q, p1, "resource_error", "cyclic_term");
 	}
 
 	for (idx_t i = 0; i < c->nbr_cells; i++) {
@@ -7833,8 +7674,7 @@ static USE_RESULT prolog_state fn_log10_1(query *q)
 		q->accum.val_flt = log10(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		throw_error(q, &p1, "type_error", "number");
-		return pl_error;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return pl_success;
@@ -7944,8 +7784,7 @@ static USE_RESULT prolog_state fn_random_1(query *q)
 	}
 
 	if (p1.val_num < 1) {
-		throw_error(q, &p1, "domain_error", "positive_integer");
-		return 0;
+		return throw_error(q, &p1, "domain_error", "positive_integer");
 	}
 
 	q->accum.val_type = TYPE_INTEGER;
@@ -7985,8 +7824,7 @@ static USE_RESULT prolog_state fn_absolute_file_name_3(query *q)
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
-			throw_error(q, p1, "type_error", "atom");
-			return 0;
+			return throw_error(q, p1, "type_error", "atom");
 		}
 
 		src = chars_list_to_string(q, p1, p1_ctx, len);
@@ -8032,8 +7870,7 @@ static USE_RESULT prolog_state fn_absolute_file_name_3(query *q)
 		*dst = '\0';
 		char *ptr = getenv(envbuf);
 		if (!ptr) {
-			throw_error(q, p1, "existence_error", "environment_variable");
-			return 0;
+			return throw_error(q, p1, "existence_error", "environment_variable");
 		}
 
 		tmpbuf = malloc(strlen(s)+1+strlen(ptr)+1);
@@ -8096,9 +7933,8 @@ static USE_RESULT prolog_state do_consult(query *q, cell *p1, idx_t p1_ctx)
 		char *tmpbuf = relative_to(q->m->filename, src);
 
 		if (!module_load_file(q->m, tmpbuf)) {
-			throw_error(q, p1, "existence_error", "filespec");
 			free(tmpbuf);
-			return 0;
+			return throw_error(q, p1, "existence_error", "filespec");
 		}
 
 		free(tmpbuf);
@@ -8106,16 +7942,14 @@ static USE_RESULT prolog_state do_consult(query *q, cell *p1, idx_t p1_ctx)
 	}
 
 	if (strcmp(GET_STR(p1), ":")) {
-		throw_error(q, p1, "type_error", "filespec");
-		return 0;
+		return throw_error(q, p1, "type_error", "filespec");
 	}
 
 	cell *mod = deref(q, p1+1, p1_ctx);
 	cell *file = deref(q, p1+2, p1_ctx);
 
 	if (!is_atom(mod) || !is_atom(file)) {
-		throw_error(q, p1, "type_error", "filespec");
-		return 0;
+		return throw_error(q, p1, "type_error", "filespec");
 	}
 
 	module *tmp_m = create_module(GET_STR(mod));
@@ -8125,10 +7959,9 @@ static USE_RESULT prolog_state do_consult(query *q, cell *p1, idx_t p1_ctx)
 	char *tmpbuf = relative_to(q->m->filename, src);
 
 	if (!module_load_file(tmp_m, src)) {
-		throw_error(q, p1, "existence_error", "filespec");
 		destroy_module(tmp_m);
 		free(tmpbuf);
-		return 0;
+		return throw_error(q, p1, "existence_error", "filespec");
 	}
 
 	free(tmpbuf);
@@ -8270,27 +8103,23 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 
 		if ((ch == 'a') && !is_atom(c)) {
 			free(tmpbuf);
-			throw_error(q, c, "type_error", "atom");
-			return 0;
+			return throw_error(q, c, "type_error", "atom");
 		}
 
 		if ((ch == 's') && !is_string(c)) {
 			free(tmpbuf);
-			throw_error(q, c, "type_error", "atom");
-			return 0;
+			return throw_error(q, c, "type_error", "atom");
 		}
 
 		if (((ch == 'd') || (ch == 'D')) && !is_integer(c)) {
 			free(tmpbuf);
-			throw_error(q, c, "type_error", "integer");
-			return 0;
+			return throw_error(q, c, "type_error", "integer");
 		}
 
 		if (ch == 'c') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
-				throw_error(q, c, "type_error", "integer");
-				return 0;
+				return throw_error(q, c, "type_error", "integer");
 			}
 
 			len = 10;
@@ -8307,8 +8136,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 		} else if ((ch == 'e') || (ch == 'E')) {
 			if (!is_float(c)) {
 				free(tmpbuf);
-				throw_error(q, c, "type_error", "float");
-				return 0;
+				return throw_error(q, c, "type_error", "float");
 			}
 
 			len = 40;
@@ -8328,8 +8156,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 		} else if (ch == 'f') {
 			if (!is_float(c)) {
 				free(tmpbuf);
-				throw_error(q, c, "type_error", "float");
-				return 0;
+				return throw_error(q, c, "type_error", "float");
 			}
 
 			len = 40;
@@ -8346,8 +8173,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 		} else if (ch == 'I') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
-				throw_error(q, c, "type_error", "integer");
-				return 0;
+				return throw_error(q, c, "type_error", "integer");
 			}
 
 			len = 40;
@@ -8364,8 +8190,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 		} else if (ch == 'd') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
-				throw_error(q, c, "type_error", "integer");
-				return 0;
+				return throw_error(q, c, "type_error", "integer");
 			}
 
 			len = 40;
@@ -8382,8 +8207,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 		} else if (ch == 'D') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
-				throw_error(q, c, "type_error", "integer");
-				return 0;
+				return throw_error(q, c, "type_error", "integer");
 			}
 
 			len = 40;
@@ -8440,8 +8264,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 		net_write(tmpbuf, len, str);
 	} else if (is_structure(str) && ((strcmp(GET_STR(str),"atom") && strcmp(GET_STR(str),"chars") && strcmp(GET_STR(str),"string")) || (str->arity > 1) || !is_variable(str+1))) {
 		free(tmpbuf);
-		throw_error(q, c, "type_error", "structure");
-		return 0;
+		return throw_error(q, c, "type_error", "structure");
 	} else if (is_structure(str) && !strcmp(GET_STR(str),"atom")) {
 		cell *c = deref(q, str+1, str_ctx);
 		cell tmp = make_cstring(tmpbuf);
@@ -8480,8 +8303,7 @@ static int do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx
 		}
 	} else {
 		free(tmpbuf);
-		throw_error(q, p1, "type_error", "stream");
-		return 0;
+		return throw_error(q, p1, "type_error", "stream");
 	}
 
 	free(tmpbuf);
@@ -8622,8 +8444,7 @@ static USE_RESULT prolog_state fn_base64_2(query *q)
 	else if (is_variable(p1) && (is_atom(p2) || is_string(p2)))
 		return do_b64decode_2(q);
 
-	throw_error(q, p1, "instantiation_error", "atom");
-	return 0;
+	return throw_error(q, p1, "instantiation_error", "atom");
 }
 
 static char *url_encode(const char *src, int len, char *dstbuf)
@@ -8709,8 +8530,7 @@ static USE_RESULT prolog_state fn_urlenc_2(query *q)
 	else if (is_variable(p1) && (is_atom(p2) || is_string(p2)))
 		return do_urldecode_2(q);
 
-	throw_error(q, p1, "instantiation_error", "atom");
-	return 0;
+	return throw_error(q, p1, "instantiation_error", "atom");
 }
 
 static USE_RESULT prolog_state fn_string_lower_2(query *q)
@@ -8772,8 +8592,7 @@ static USE_RESULT prolog_state fn_access_file_2(query *q)
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
-			throw_error(q, p1, "type_error", "atom");
-			return 0;
+			return throw_error(q, p1, "type_error", "atom");
 		}
 
 		src = chars_list_to_string(q, p1, p1_ctx, len);
@@ -8795,8 +8614,7 @@ static USE_RESULT prolog_state fn_access_file_2(query *q)
 	else if (!strcmp(mode, "none"))
 		return pl_success;
 	else {
-		throw_error(q, p2, "domain_error", "mode");
-		return 0;
+		return throw_error(q, p2, "domain_error", "mode");
 	}
 
 	struct stat st = {0};
@@ -8821,8 +8639,7 @@ static USE_RESULT prolog_state fn_exists_file_1(query *q)
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
-			throw_error(q, p1, "type_error", "atom");
-			return 0;
+			return throw_error(q, p1, "type_error", "atom");
 		}
 
 		src = chars_list_to_string(q, p1, p1_ctx, len);
@@ -8851,8 +8668,7 @@ static USE_RESULT prolog_state fn_delete_file_1(query *q)
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
-			throw_error(q, p1, "type_error", "atom");
-			return 0;
+			return throw_error(q, p1, "type_error", "atom");
 		}
 
 		src = chars_list_to_string(q, p1, p1_ctx, len);
@@ -8876,8 +8692,7 @@ static USE_RESULT prolog_state fn_rename_file_2(query *q)
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
-			throw_error(q, p1, "type_error", "atom");
-			return 0;
+			return throw_error(q, p1, "type_error", "atom");
 		}
 
 		src1 = chars_list_to_string(q, p1, p1_ctx, len);
@@ -8889,8 +8704,7 @@ static USE_RESULT prolog_state fn_rename_file_2(query *q)
 		size_t len = scan_is_chars_list(q, p2, p2_ctx, 1);
 
 		if (!len) {
-			throw_error(q, p2, "type_error", "atom");
-			return 0;
+			return throw_error(q, p2, "type_error", "atom");
 		}
 
 		src2 = chars_list_to_string(q, p2, p2_ctx, len);
@@ -8915,8 +8729,7 @@ static USE_RESULT prolog_state fn_time_file_2(query *q)
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
-			throw_error(q, p1, "type_error", "atom");
-			return 0;
+			return throw_error(q, p1, "type_error", "atom");
 		}
 
 		src = chars_list_to_string(q, p1, p1_ctx, len);
@@ -8927,9 +8740,8 @@ static USE_RESULT prolog_state fn_time_file_2(query *q)
 	struct stat st = {0};
 
 	if (stat(filename, &st)) {
-		throw_error(q, p1, "existence_error", "cannot_open_file");
 		free(src);
-		return 0;
+		return throw_error(q, p1, "existence_error", "cannot_open_file");
 	}
 
 	free(src);
@@ -8949,8 +8761,7 @@ static USE_RESULT prolog_state fn_size_file_2(query *q)
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
-			throw_error(q, p1, "type_error", "atom");
-			return 0;
+			return throw_error(q, p1, "type_error", "atom");
 		}
 
 		src = chars_list_to_string(q, p1, p1_ctx, len);
@@ -8961,9 +8772,8 @@ static USE_RESULT prolog_state fn_size_file_2(query *q)
 	struct stat st = {0};
 
 	if (stat(filename, &st)) {
-		throw_error(q, p1, "existence_error", "cannot_open_file");
 		free(src);
-		return 0;
+		return throw_error(q, p1, "existence_error", "cannot_open_file");
 	}
 
 	free(src);
@@ -8982,8 +8792,7 @@ static USE_RESULT prolog_state fn_exists_directory_1(query *q)
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
-			throw_error(q, p1, "type_error", "atom");
-			return 0;
+			return throw_error(q, p1, "type_error", "atom");
 		}
 
 		src = chars_list_to_string(q, p1, p1_ctx, len);
@@ -9016,8 +8825,7 @@ static USE_RESULT prolog_state fn_make_directory_1(query *q)
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
 
 		if (!len) {
-			throw_error(q, p1, "type_error", "atom");
-			return 0;
+			return throw_error(q, p1, "type_error", "atom");
 		}
 
 		src = chars_list_to_string(q, p1, p1_ctx, len);
@@ -9055,8 +8863,7 @@ static USE_RESULT prolog_state fn_working_directory_2(query *q)
 			size_t len = scan_is_chars_list(q, p_new, p_new_ctx, 1);
 
 			if (!len) {
-				throw_error(q, p_new, "type_error", "atom");
-				return 0;
+				return throw_error(q, p_new, "type_error", "atom");
 			}
 
 			src = chars_list_to_string(q, p_new, p_new_ctx, len);
@@ -9065,8 +8872,7 @@ static USE_RESULT prolog_state fn_working_directory_2(query *q)
 			filename = GET_STR(p_new);
 
 		if (chdir(filename)) {
-			throw_error(q, p_new, "existence_error", "no_such_path");
-			return 0;
+			return throw_error(q, p_new, "existence_error", "no_such_path");
 		}
 	}
 
@@ -9158,8 +8964,7 @@ static USE_RESULT prolog_state fn_edin_tab_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (!is_integer(&p1)) {
-		throw_error(q, &p1, "type_error", "integer");
-		return 0;
+		return throw_error(q, &p1, "type_error", "integer");
 	}
 
 	int n = get_named_stream("user_output");
@@ -9178,8 +8983,7 @@ static USE_RESULT prolog_state fn_edin_tab_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (!is_integer(&p1)) {
-		throw_error(q, &p1, "type_error", "integer");
-		return 0;
+		return throw_error(q, &p1, "type_error", "integer");
 	}
 
 	int n = get_stream(q, pstr);
@@ -9290,8 +9094,7 @@ static USE_RESULT prolog_state fn_hex_chars_2(query *q)
 	GET_NEXT_ARG(p1,atom_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
-		throw_error(q, p1, "instantiation_error", "atom");
-		return 0;
+		return throw_error(q, p1, "instantiation_error", "atom");
 	}
 
 	if (is_variable(p1)) {
@@ -9322,8 +9125,7 @@ static USE_RESULT prolog_state fn_octal_chars_2(query *q)
 	GET_NEXT_ARG(p1,atom_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
-		throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
-		return 0;
+		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 	}
 
 	if (is_variable(p1)) {
@@ -9362,8 +9164,7 @@ static USE_RESULT prolog_state fn_rdiv_2(query *q)
 		q->accum.val_den = p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
-		throw_error(q, &p1, "type_error", "integer");
-		return 0;
+		return throw_error(q, &p1, "type_error", "integer");
 	}
 
 	return pl_success;
@@ -9442,8 +9243,7 @@ static USE_RESULT prolog_state fn_rational_1(query *q)
 			return pl_success;
 		}
 
-		throw_error(q, &p1, "type_error", "number");
-		return 0;
+		return throw_error(q, &p1, "type_error", "number");
 	}
 
 	return is_rational(p1_tmp);
@@ -9516,13 +9316,11 @@ static USE_RESULT prolog_state fn_atomic_concat_3(query *q)
 
 	if (is_variable(p3)) {
 		if (!is_atomic(p1)) {
-			throw_error(q, p1, "type_error", "atomic");
-			return 0;
+			return throw_error(q, p1, "type_error", "atomic");
 		}
 
 		if (!is_atomic(p2)) {
-			throw_error(q, p2, "type_error", "atomic");
-			return 0;
+			return throw_error(q, p2, "type_error", "atomic");
 		}
 
 		const char *src1, *src2;
@@ -9759,8 +9557,7 @@ unsigned fake_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 
 	if (q->cycle_error) {
-		throw_error(q, p1, "resource_error", "cyclic_term");
-		return 0;
+		return throw_error(q, p1, "resource_error", "cyclic_term");
 	}
 
 	unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
@@ -10020,13 +9817,11 @@ static USE_RESULT prolog_state fn_plus_3(query *q)
 
 	if (is_variable(p1)) {
 		if (!is_integer(p2)) {
-			throw_error(q, p2, "type_error", "integer");
-			return 0;
+			return throw_error(q, p2, "type_error", "integer");
 		}
 
 		if (!is_integer(p3)) {
-			throw_error(q, p3, "type_error", "integer");
-			return 0;
+			return throw_error(q, p3, "type_error", "integer");
 		}
 
 		cell tmp;
@@ -10037,13 +9832,11 @@ static USE_RESULT prolog_state fn_plus_3(query *q)
 
 	if (is_variable(p2)) {
 		if (!is_integer(p1)) {
-			throw_error(q, p1, "type_error", "integer");
-			return 0;
+			return throw_error(q, p1, "type_error", "integer");
 		}
 
 		if (!is_integer(p3)) {
-			throw_error(q, p3, "type_error", "integer");
-			return 0;
+			return throw_error(q, p3, "type_error", "integer");
 		}
 
 		cell tmp;
@@ -10054,13 +9847,11 @@ static USE_RESULT prolog_state fn_plus_3(query *q)
 
 	if (is_variable(p3)) {
 		if (!is_integer(p2)) {
-			throw_error(q, p2, "type_error", "integer");
-			return 0;
+			return throw_error(q, p2, "type_error", "integer");
 		}
 
 		if (!is_integer(p1)) {
-			throw_error(q, p1, "type_error", "integer");
-			return 0;
+			return throw_error(q, p1, "type_error", "integer");
 		}
 
 		cell tmp;
@@ -10162,8 +9953,7 @@ static USE_RESULT prolog_state fn_del_attrs_1(query *q)
 	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
 
 	if (q->cycle_error) {
-		throw_error(q, p1, "resource_error", "cyclic_term");
-		return 0;
+		return throw_error(q, p1, "resource_error", "cyclic_term");
 	}
 
 	frame *g = GET_FRAME(p1_ctx);
@@ -10179,8 +9969,7 @@ static USE_RESULT prolog_state fn_put_attrs_2(query *q)
 	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
 
 	if (q->cycle_error) {
-		throw_error(q, p1, "resource_error", "cyclic_term");
-		return 0;
+		return throw_error(q, p1, "resource_error", "cyclic_term");
 	}
 
 	frame *g = GET_FRAME(p1_ctx);
@@ -10258,7 +10047,7 @@ static USE_RESULT prolog_state do_length(query *q)
 
 	if (nbr >= MAX_VARS) {
 		drop_choice(q);
-		throw_error(q, p2, "resource_error", "too_many_vars");
+		return throw_error(q, p2, "resource_error", "too_many_vars");
 		return pl_error;
 	}
 
@@ -10266,7 +10055,7 @@ static USE_RESULT prolog_state do_length(query *q)
 
 	if (!(var_nbr = create_vars(q, nbr))) {
 		drop_choice(q);
-		throw_error(q, p1, "resource_error", "too_many_vars");
+		return throw_error(q, p1, "resource_error", "too_many_vars");
 		return pl_error;
 	}
 
@@ -10338,7 +10127,7 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 
 	if (is_integer(p2) && !is_variable(p1)) {
 		if (p2->val_num < 0) {
-			throw_error(q, p2, "domain_error", "out_of_range");
+			return throw_error(q, p2, "domain_error", "out_of_range");
 			return pl_error;
 		}
 
@@ -10373,12 +10162,12 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 			return pl_success;
 
 		if (p2->val_num < 0) {
-			throw_error(q, p2, "domain_error", "positive_integers");
+			return throw_error(q, p2, "domain_error", "positive_integers");
 			return pl_error;
 		}
 
 		if (p2->val_num >= MAX_VARS) {
-			throw_error(q, p2, "resource_error", "too_many_vars");
+			return throw_error(q, p2, "resource_error", "too_many_vars");
 			return pl_error;
 		}
 
@@ -10394,7 +10183,7 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 		unsigned var_nbr;
 
 		if (!(var_nbr = create_vars(q, nbr))) {
-			throw_error(q, p2, "resource_error", "too_many_vars");
+			return throw_error(q, p2, "resource_error", "too_many_vars");
 			return pl_error;
 		}
 
@@ -10417,7 +10206,7 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 		return pl_success;
 	}
 
-	throw_error(q, p1, "type_error", "arg_invalid");
+	return throw_error(q, p1, "type_error", "arg_invalid");
 	return pl_error;
 }
 
@@ -10440,8 +10229,7 @@ static USE_RESULT prolog_state fn_sys_put_chars_2(query *q)
 	} else if (is_nil(p1)) {
 		;
 	} else {
-		throw_error(q, p1, "type_error", "chars");
-		return 0;
+		return throw_error(q, p1, "type_error", "chars");
 	}
 
 	return !ferror(str->fp);
@@ -10543,8 +10331,7 @@ static USE_RESULT prolog_state fn_module_1(query *q)
 	module *m = find_module(name);
 
 	if (!m) {
-		throw_error(q, p1, "domain_error", "module");
-		return 0;
+		return throw_error(q, p1, "domain_error", "module");
 	}
 
 	q->m = m;
