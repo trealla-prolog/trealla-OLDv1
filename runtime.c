@@ -217,21 +217,6 @@ static void unwind_trail(query *q, const choice *ch)
 	}
 }
 
-static void trim_trail(query *q)
-{
-	idx_t curr_choice = q->cp - 1;
-	const choice *ch = q->choices + curr_choice;
-
-	while (q->st.tp > ch->st.tp) {
-		const trail *tr = q->trails + q->st.tp - 1;
-
-		if (tr->ctx != q->st.curr_frame)
-			break;
-
-		q->st.tp--;
-	}
-}
-
 void undo_me(query *q)
 {
 	idx_t curr_choice = q->cp - 1;
@@ -407,6 +392,21 @@ static void make_frame(query *q, unsigned nbr_vars, bool last_match)
 
 	q->st.sp += nbr_vars;
 	q->st.curr_frame = new_frame;
+}
+
+static void trim_trail(query *q)
+{
+	idx_t curr_choice = q->cp - 1;
+	const choice *ch = q->choices + curr_choice;
+
+	while (q->st.tp > ch->st.tp) {
+		const trail *tr = q->trails + q->st.tp - 1;
+
+		if (tr->ctx != q->st.curr_frame)
+			break;
+
+		q->st.tp--;
+	}
 }
 
 static void reuse_frame(query *q, unsigned nbr_vars)

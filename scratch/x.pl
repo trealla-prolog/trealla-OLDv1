@@ -6,14 +6,13 @@ p(c(_,_,_)).
 
 test1 :-
 	bagof(P, p(P), Ps),
-	write(Ps), nl,
-	halt.
+	write(Ps), nl.
 
 test2 :-
 	setof(P, p(P), Ps),
-	write(Ps), nl,
-	halt.
+	write(Ps), nl.
 
 main :-
-	test1, test2,
+	test1,
+	test2,
 	halt.
