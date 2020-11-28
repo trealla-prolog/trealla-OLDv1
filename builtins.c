@@ -8049,9 +8049,7 @@ static int fn_absolute_file_name_3(query *q)
 		free(tmpbuf);
 		tmpbuf = tmpbuf2;
 	} else {
-		//printf("*** s = %s\n", s);
 		if ((tmpbuf = realpath(s, NULL)) == NULL) {
-			//printf("*** cwd = %s\n", cwd);
 			tmpbuf = realpath(cwd, NULL);
 
 			if (!tmpbuf)
