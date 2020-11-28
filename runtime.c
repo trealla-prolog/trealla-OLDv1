@@ -602,8 +602,7 @@ unsigned create_vars(query *q, unsigned cnt)
 
 	unsigned var_nbr = g->nbr_vars;
 
-	if (check_slot(q, cnt) == pl_error)
-		return 0;
+	may_error(check_slot(q, cnt));
 
 	if ((g->ctx + g->nbr_slots) >= q->st.sp) {
 		g->nbr_slots += cnt;
@@ -935,9 +934,9 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx)
 		else {
 			// For now convert it to a literal
 			idx_t off = index_from_pool(GET_STR(c));
+			may_idx_error(off);
 			if (is_nonconst_blob(c)) free(c->val_str);
 			c->val_off = off;
-			ensure(c->val_off != ERR_IDX);
 			c->val_type = TYPE_LITERAL;
 			c->flags = 0;
 			h = NULL;
