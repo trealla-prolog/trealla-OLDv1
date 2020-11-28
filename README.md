@@ -12,7 +12,7 @@ A compact, efficient Prolog interpreter with ISO compliant aspirations.
 	Full-term just-in-time indexing
 	DCG via library(dcgs)
 	format_//2 via library(format)
-	[Logtalk](https://logtalk.org/) compatible (still early testing)
+	Logtalk compatible (still early testing)
 	REPL with history
 	MIT licensed
 
