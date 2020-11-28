@@ -6644,9 +6644,16 @@ static USE_RESULT prolog_state fn_loadfile_2(query *q)
 
 	struct stat st = {0};
 
+#ifdef _POSIX_C_SOURCE
+	// the POSIX variant has no race
+	if (fstat(fileno(fp), &st)) {
+		return pl_error;
+	}
+#else
 	if (stat(filename, &st)) {
 		return pl_error;
 	}
+#endif
 
 	char *s = malloc(st.st_size+1);
 	if (!s) {
@@ -6655,6 +6662,8 @@ static USE_RESULT prolog_state fn_loadfile_2(query *q)
 	}
 
 	if (fread(s, 1, st.st_size, fp) != (size_t)st.st_size) {
+		free(s);
+		fclose(fp);
 		return throw_error(q, p1, "domain_error", "cannot_read");
 	}
 
