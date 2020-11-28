@@ -198,35 +198,29 @@ static void make_small(cell *tmp, const char *s)
 	make_smalln(tmp, s, n);
 }
 
-static void init_tmp_heap(query* q)
+static USE_RESULT cell *init_tmp_heap(query* q)
 {
 	if (!q->tmp_heap) {
 		q->tmp_heap = calloc(q->tmph_size, sizeof(cell));
-		ensure(q->tmp_heap);
+		if(!q->tmp_heap) return NULL;
 	}
 
 	q->tmphp = 0;
+	return q->tmp_heap;
 }
 
-static cell *alloc_tmp_heap(query *q, idx_t nbr_cells)
+static USE_RESULT cell *alloc_tmp_heap(query *q, idx_t nbr_cells)
 {
-	if (!q->tmp_heap) {
-		if (q->tmph_size < nbr_cells)
-			q->tmph_size = nbr_cells;
-
-		q->tmp_heap = calloc(q->tmph_size, sizeof(cell));
-		ensure(q->tmp_heap);
-	}
-
-	while ((q->tmphp + nbr_cells) >= q->tmph_size) {
-		q->tmph_size += q->tmph_size / 2;
-		q->tmp_heap = realloc(q->tmp_heap, sizeof(cell)*q->tmph_size);
-		ensure(q->tmp_heap);
+	idx_t new_size = q->tmphp + nbr_cells;
+	if (new_size >= q->tmph_size) {
+		size_t elements = alloc_grow((void**)&q->tmp_heap, sizeof(cell), new_size, new_size*2);
+		if (!elements) return NULL;
+		q->tmph_size = elements;
 	}
 
 	cell *c = q->tmp_heap + q->tmphp;
-	q->tmphp += nbr_cells;
-	memset(c, 0, sizeof(cell)*nbr_cells);
+	*c = (cell){};
+	q->tmphp = new_size;
 	return c;
 }
 
