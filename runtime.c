@@ -48,17 +48,17 @@ uint64_t get_time_in_usec(void)
 #endif
 
 
-static idx_t alloc_grow(void** addr, size_t elem_size, idx_t min_elements, idx_t max_elements)
+size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max_elements)
 {
 	assert(min_elements <= max_elements);
-	idx_t elements = max_elements;
+	size_t elements = max_elements;
 	void* mem;
 
 	do {
 		mem = realloc(*addr, elem_size * elements);
 		if (mem) break;
 		elements = min_elements + (elements-min_elements)/2;
-		message("memory pressure reduce %u to %u", max_elements, elements);
+		message("memory pressure reduce %lu to %lu", max_elements, elements);
 	} while (elements > min_elements);
 
 	if (!mem)
