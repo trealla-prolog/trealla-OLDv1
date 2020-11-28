@@ -898,7 +898,11 @@ void destroy_query(query *q)
 				stream *str = &g_streams[c->val_num];
 
 				if (str->fp) {
-					fclose(str->fp);
+					if ((str->fp != stdin)
+						&& (str->fp != stdout)
+						&& (str->fp != stderr))
+						fclose(str->fp);
+
 					free(str->filename);
 					free(str->mode);
 					free(str->data);
