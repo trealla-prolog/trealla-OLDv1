@@ -5961,11 +5961,12 @@ static void unpin_vars(query *q)
 	ch->pins = 0;
 }
 
-static int fn_iso_bagof_3(query *q)
+static int fn_iso_bagof_4(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
+	GET_NEXT_ARG(p4,any);
 	uint64_t xs_vars = 0;
 	p2 = skip_existentials(p2, &xs_vars);
 
@@ -6006,7 +6007,7 @@ static int fn_iso_bagof_3(query *q)
 	make_choice(q);
 	uint64_t p1_vars = get_vars(p1, p1_ctx);
 	uint64_t p2_vars = get_vars(p2, p2_ctx);
-	uint64_t mask = p1_vars ^ p2_vars ^ xs_vars;
+	uint64_t mask = (p1_vars ^ p2_vars) ^ xs_vars;
 	pin_vars(q, mask);
 	idx_t nbr_cells = q->tmpq_size[q->st.qnbr];
 
@@ -6044,6 +6045,8 @@ static int fn_iso_bagof_3(query *q)
 
 	// Return matching solutions
 
+	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
+	unify(q, p4, p4_ctx, tmp, q->st.curr_frame);
 	unpin_vars(q);
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	fix_list(l);
@@ -10699,7 +10702,7 @@ static const struct builtins g_iso_funcs[] =
 	{"set_prolog_flag", 2, fn_iso_set_prolog_flag_2, NULL},
 	{"op", 3, fn_iso_op_3, NULL},
 	{"findall", 3, fn_iso_findall_3, NULL},
-	{"$bagof", 3, fn_iso_bagof_3, NULL},
+	{"$bagof", 4, fn_iso_bagof_4, NULL},
 	{"current_predicate", 1, fn_iso_current_predicate_1, NULL},
 	{"current_op", 3, fn_iso_current_op_3, NULL},
 	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL},
