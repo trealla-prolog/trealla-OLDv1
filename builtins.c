@@ -729,13 +729,13 @@ static USE_RESULT prolog_state fn_iso_nonvar_1(query *q)
 	return !is_variable(p1);
 }
 
-static int has_vars(query *q, cell *c, idx_t c_ctx)
+static bool has_vars(query *q, cell *c, idx_t c_ctx)
 {
 	if (is_variable(c))
-		return 1;
+		return true;
 
 	if (!is_structure(c))
-		return 0;
+		return false;
 
 	unsigned arity = c->arity;
 	c++;
@@ -744,12 +744,12 @@ static int has_vars(query *q, cell *c, idx_t c_ctx)
 		cell *c2 = deref(q, c, c_ctx);
 
 		if (has_vars(q, c2, q->latest_ctx))
-			return 1;
+			return true;
 
 		c += c->nbr_cells;
 	}
 
-	return 0;
+	return false;
 }
 
 static USE_RESULT prolog_state fn_iso_ground_1(query *q)
