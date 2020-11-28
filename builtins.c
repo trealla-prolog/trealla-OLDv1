@@ -1813,7 +1813,7 @@ static int fn_iso_close_1(query *q)
 		destroy_parser(str->p);
 
 	if (n <= 2)
-		return 0;
+		return 1;
 
 	net_close(str);
 	free(str->filename);
