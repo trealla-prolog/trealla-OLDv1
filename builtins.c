@@ -340,37 +340,39 @@ static cell *alloc_queuen(query *q, int qnbr, const cell *c)
 	return dst;
 }
 
-void alloc_list(query *q, const cell *c)
+prolog_state alloc_list(query *q, const cell *c)
 {
-	init_tmp_heap(q);
-	append_list(q, c);
+	may_ptr_error(init_tmp_heap(q));
+	may_error(append_list(q, c));
+	return pl_success;
 }
 
-void append_list(query *q, const cell *c)
+prolog_state append_list(query *q, const cell *c)
 {
 	cell *tmp = alloc_tmp_heap(q, 1+c->nbr_cells);
-	ensure(tmp);
+	may_ptr_error(tmp);
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1 + c->nbr_cells;
 	tmp->val_off = g_dot_s;
 	tmp->arity = 2;
 	tmp++;
 	copy_cells(tmp, c, c->nbr_cells);
+	return pl_success;
 }
 
 cell *end_list(query *q)
 {
 	cell *tmp = alloc_tmp_heap(q, 1);
-	ensure(tmp);
+	if (!tmp) return NULL;
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1;
 	tmp->val_off = g_nil_s;
 	idx_t nbr_cells = tmp_heap_used(q);
 	tmp = alloc_heap(q, nbr_cells);
-	ensure(tmp);
+	if (!tmp) return NULL;
 	safe_copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
 	tmp->nbr_cells = nbr_cells;
-	init_tmp_heap(q);
+	//init_tmp_heap(q); // cehteh: superfluous?
 	fix_list(tmp);
 	return tmp;
 }
@@ -524,11 +526,11 @@ static cell *deep_copy_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx, bool nonloc
 static cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only)
 {
 	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, nonlocals_only);
-	if (q->cycle_error) return NULL;
-	ensure(tmp);
+	if (!tmp || q->cycle_error) return NULL;
+
 	cell *tmp2 = alloc_heap(q, tmp->nbr_cells);
-	ensure(tmp2);
-	copy_cells(tmp2, tmp, tmp->nbr_cells);
+	if (tmp2)
+		copy_cells(tmp2, tmp, tmp->nbr_cells);
 	return tmp2;
 }
 
