@@ -8057,10 +8057,13 @@ static int fn_absolute_file_name_3(query *q)
 			if (!tmpbuf)
 				return 0;
 
-			char *tmp = malloc(strlen(tmpbuf)+1+strlen(s)+1);
-			sprintf(tmp, "%s/%s", tmpbuf, s);
-			free(tmpbuf);
-			tmpbuf = tmp;
+			if (*s != '/') {
+				char *tmp = malloc(strlen(tmpbuf)+1+strlen(s)+1);
+				sprintf(tmp, "%s/%s", tmpbuf, s);
+				free(tmpbuf);
+				tmpbuf = tmp;
+			} else
+				tmpbuf = strdup(s);
 		}
 	}
 
