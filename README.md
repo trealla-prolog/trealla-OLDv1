@@ -12,6 +12,7 @@ A compact, efficient Prolog interpreter with ISO compliant aspirations.
 	Full-term just-in-time indexing
 	DCG via library(dcgs)
 	format_//2 via library(format)
+	[Logtalk](https://logtalk.org/) compatible (still early testing)
 	REPL with history
 	MIT licensed
 
@@ -124,7 +125,7 @@ Special thanks to [Christian Thaeter](https://github.com/cehteh) for his
 ongoing work with code cleanup and development ideas.
 
 Special thanks to [Paulo Moura](https://github.com/pmoura) for his patience
-and sleuthing in the ongoing quest for Trealla to run his LogTalk project.
+and sleuthing in the quest for Trealla to run his Loglalk project.
 
 
 Strings
