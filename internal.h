@@ -493,7 +493,7 @@ inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 cell *list_head(cell *l);
 cell *list_tail(cell *l, cell *tmp);
 
-size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max_elements);
+USE_RESULT size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max_elements);
 prolog_state set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
 bool module_load_fp(module *m, FILE *fp, const char *filename);

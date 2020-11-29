@@ -201,6 +201,7 @@ static void make_small(cell *tmp, const char *s)
 static USE_RESULT cell *init_tmp_heap(query* q)
 {
 	if (!q->tmp_heap) {
+		FAULTINJECT(errno = ENOMEM; return NULL);
 		q->tmp_heap = calloc(q->tmph_size, sizeof(cell));
 		if(!q->tmp_heap) return NULL;
 	}
@@ -229,6 +230,7 @@ static cell *get_tmp_heap(const query *q, idx_t i) { return q->tmp_heap + i; }
 
 static cell *alloc_heap(query *q, idx_t nbr_cells)
 {
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	if (!q->arenas) {
 		if (q->h_size < nbr_cells)
 			q->h_size = nbr_cells;
@@ -296,6 +298,7 @@ static cell *pop_queue(query *q)
 
 static cell *alloc_queue(query *q, const cell *c)
 {
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	if (!q->queue[0]) {
 		q->queue[0] = calloc(q->q_size[0], sizeof(cell));
 		ensure(q->queue[0]);
@@ -324,6 +327,7 @@ static cell *get_queuen(query *q) { return q->queue[q->st.qnbr]; }
 
 static cell *alloc_queuen(query *q, int qnbr, const cell *c)
 {
+	FAULTINJECT(errno = ENOMEM; return NULL);
 	if (!q->queue[qnbr]) {
 		q->queue[qnbr] = calloc(q->q_size[qnbr], sizeof(cell));
 		ensure(q->queue[qnbr]);
