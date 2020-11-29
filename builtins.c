@@ -1017,15 +1017,17 @@ static USE_RESULT prolog_state fn_iso_atom_codes_2(query *q)
 	const char *src = tmpbuf;
 	cell tmp;
 	make_int(&tmp, get_char_utf8(&src));
-	alloc_list(q, &tmp);
+	may_error(alloc_list(q, &tmp));
 
 	while (*src) {
 		cell tmp;
 		make_int(&tmp, get_char_utf8(&src));
-		append_list(q, &tmp);
+		may_error(append_list(q, &tmp));
 	}
 
 	cell *l = end_list(q);
+	may_ptr_error(l);
+	fix_list(l);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -1161,15 +1163,17 @@ static USE_RESULT prolog_state fn_iso_number_codes_2(query *q)
 	const char *src = tmpbuf;
 	cell tmp;
 	make_int(&tmp, *src);
-	alloc_list(q, &tmp);
+	may_error(alloc_list(q, &tmp));
 
 	while (*++src) {
 		cell tmp;
 		make_int(&tmp, *src);
-		append_list(q, &tmp);
+		may_error(append_list(q, &tmp));
 	}
 
 	cell *l = end_list(q);
+	may_ptr_error(l);
+	fix_list(l);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -2093,9 +2097,9 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 
 	if (vars) {
 		unsigned cnt = g_tab_idx;
-		init_tmp_heap(q);
+		may_ptr_error(init_tmp_heap(q));
 		cell *tmp = alloc_tmp_heap(q, (cnt*2)+1);
-		ensure(tmp);
+		may_ptr_error(tmp);
 		unsigned idx = 0;
 
 		if (cnt) {
