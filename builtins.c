@@ -5774,8 +5774,6 @@ static void do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 {
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	fix_list(l);
-
-#if 1
 	frame *g = GET_FRAME(q->st.curr_frame);
 	unsigned new_varno = g->nbr_vars;
 	cell *c = l;
@@ -5793,8 +5791,6 @@ static void do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 			return;
 		}
 	}
-
-#endif
 
 	unify(q, p1, p1_ctx, l, q->st.curr_frame);
 	init_queuen(q);
