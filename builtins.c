@@ -4994,7 +4994,7 @@ static void do_assign_vars(parser *p, idx_t nbr_cells)
 static int fn_iso_asserta_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
+	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 
 	if (q->cycle_error) {
 		throw_error(q, p1, "resource_error", "cyclic_term");
