@@ -9188,7 +9188,11 @@ static int fn_edin_seen_0(query *q)
 	if (n <= 2)
 		return 1;
 
-	fclose(str->fp ? str->fp : str->fp);
+	if ((str->fp != stdin)
+		&& (str->fp != stdout)
+		&& (str->fp != stderr))
+		fclose(str->fp);
+
 	free(str->filename);
 	free(str->mode);
 	free(str->name);
@@ -9205,7 +9209,11 @@ static int fn_edin_told_0(query *q)
 	if (n <= 2)
 		return 1;
 
-	fclose(str->fp ? str->fp : str->fp);
+	if ((str->fp != stdin)
+		&& (str->fp != stdout)
+		&& (str->fp != stderr))
+		fclose(str->fp);
+
 	free(str->filename);
 	free(str->mode);
 	free(str->name);

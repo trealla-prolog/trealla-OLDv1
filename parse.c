@@ -3568,8 +3568,10 @@ void g_destroy()
 		stream *str = &g_streams[i];
 
 		if (str->fp) {
-			if (i > 2)
-					fclose(str->fp);
+			if ((str->fp != stdin)
+				&& (str->fp != stdout)
+				&& (str->fp != stderr))
+				fclose(str->fp);
 
 			free(str->filename);
 			free(str->mode);
