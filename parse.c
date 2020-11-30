@@ -3321,6 +3321,11 @@ module *create_module(const char *name)
 			"keysort(N2, L2, L3, R2), "			\
 			"mmerge(R1, R2, R).");
 
+		make_rule(m, "findall(T,G,B) :- "				\
+			"copy_term('$findall'(T,G,B),TMP_G),"		\
+			"TMP_G,"								\
+			"'$findall'(T,G,B)=TMP_G.");
+
 		make_rule(m, "bagof(T,G,B) :- "				\
 			"copy_term('$bagof'(T,G,B),TMP_G),"		\
 			"TMP_G,"								\
