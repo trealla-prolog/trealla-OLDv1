@@ -52,6 +52,26 @@ static void msleep(int ms)
 }
 #endif
 
+static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
+{
+	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
+		*dst = *src;
+
+		// For now the safest thing is to make copies of allocated
+		// cstrings. Eventually move to a ref-counted strbuf.
+
+		if (is_nonconst_blob(dst)) {
+			size_t len = LEN_STR(dst);
+			dst->val_str = malloc(len+1);
+			ensure(dst->val_str);
+			memcpy(dst->val_str, src->val_str, len);
+			dst->val_str[len] = '\0';
+		}
+	}
+
+	return nbr_cells;
+}
+
 #if 0
 static double rat_to_float(cell *n)
 {
@@ -5010,7 +5030,7 @@ static int fn_iso_asserta_1(query *q)
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
+	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
 	do_assign_vars(p, nbr_cells);
 	clause *r = asserta_to_db(q->m, p->t, 0);
 	if (!r) return 0;
@@ -5041,7 +5061,7 @@ static int fn_iso_assertz_1(query *q)
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
+	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
 	do_assign_vars(p, nbr_cells);
 	clause *r = assertz_to_db(q->m, p->t, 0);
 	if (!r) return 0;
@@ -6194,7 +6214,7 @@ static int do_asserta_2(query *q)
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
+	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
 	do_assign_vars(p, nbr_cells);
 	clause *r = asserta_to_db(q->m, p->t, 0);
 	if (!r) return 0;
@@ -6251,7 +6271,7 @@ static int do_assertz_2(query *q)
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
+	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
 	do_assign_vars(p, nbr_cells);
 	clause *r = assertz_to_db(q->m, p->t, 0);
 	if (!r) return 0;
