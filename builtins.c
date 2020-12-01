@@ -314,7 +314,7 @@ static cell *alloc_queue(query *q, const cell *c)
 	}
 
 	cell *dst = q->queue[0] + q->qp[0];
-	q->qp[0] += copy_cells(dst, c, c->nbr_cells);
+	q->qp[0] += safe_copy_cells(dst, c, c->nbr_cells);
 	return dst;
 }
 
@@ -342,7 +342,7 @@ static cell *alloc_queuen(query *q, int qnbr, const cell *c)
 	}
 
 	cell *dst = q->queue[qnbr] + q->qp[qnbr];
-	q->qp[qnbr] += copy_cells(dst, c, c->nbr_cells);
+	q->qp[qnbr] += safe_copy_cells(dst, c, c->nbr_cells);
 	return dst;
 }
 
@@ -374,9 +374,10 @@ cell *end_list(query *q)
 	idx_t nbr_cells = tmp_heap_used(q);
 	tmp = alloc_heap(q, nbr_cells);
 	ensure(tmp);
-	copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
+	safe_copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
 	tmp->nbr_cells = nbr_cells;
 	init_tmp_heap(q);
+	fix_list(tmp);
 	return tmp;
 }
 
@@ -1014,7 +1015,6 @@ static int fn_iso_atom_codes_2(query *q)
 	}
 
 	cell *l = end_list(q);
-	fix_list(l);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -1166,7 +1166,6 @@ static int fn_iso_number_codes_2(query *q)
 	}
 
 	cell *l = end_list(q);
-	fix_list(l);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -4441,7 +4440,6 @@ static int fn_iso_univ_2(query *q)
 		}
 
 		cell *l = end_list(q);
-		fix_list(l);
 		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
@@ -4517,7 +4515,6 @@ static int fn_iso_univ_2(query *q)
 	}
 
 	cell *l = end_list(q);
-	fix_list(l);
 	return unify(q, p2, p2_ctx, l, p1_ctx);
 }
 
@@ -5697,7 +5694,6 @@ static int fn_iso_current_prolog_flag_2(query *q)
 		}
 
 		cell *l = end_list(q);
-		fix_list(l);
 		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
@@ -6467,7 +6463,6 @@ static int fn_statistics_2(query *q)
 		append_list(q, &tmp);
 		make_literal(&tmp, g_nil_s);
 		cell *l = end_list(q);
-		fix_list(l);
 		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
@@ -6678,7 +6673,6 @@ static int fn_split_atom_4(query *q)
 	}
 
 	l = end_list(q);
-	fix_list(l);
 	return unify(q, p4, p4_ctx, l, q->st.curr_frame);
 }
 
@@ -6886,7 +6880,6 @@ static int fn_getfile_2(query *q)
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else {
 		cell *l = end_list(q);
-		fix_list(l);
 		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
@@ -10292,7 +10285,6 @@ static int do_length(query *q)
 	}
 
 	cell *l = end_list(q);
-	fix_list(l);
 	set_var(q, p1, p1_ctx, l, q->st.curr_frame);
 	return 1;
 }
@@ -10422,7 +10414,6 @@ static int fn_iso_length_2(query *q)
 		}
 
 		cell *l = end_list(q);
-		fix_list(l);
 		set_var(q, p1, p1_ctx, l, q->st.curr_frame);
 		return 1;
 	}
@@ -10448,6 +10439,7 @@ static int fn_sys_put_chars_2(query *q)
 		net_write(src, len, str);
 		free(src);
 	} else if (is_nil(p1)) {
+		;
 	} else {
 		throw_error(q, p1, "type_error", "chars");
 		return 0;
