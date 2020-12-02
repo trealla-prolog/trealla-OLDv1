@@ -309,7 +309,6 @@ static void trim_heap(query *q, const choice *ch)
 			}
 
 			c->val_type = TYPE_EMPTY;
-			c->attrs = NULL;
 		}
 
 		arena *save = a;
@@ -339,7 +338,6 @@ static void trim_heap(query *q, const choice *ch)
 		}
 
 		c->val_type = TYPE_EMPTY;
-		c->attrs = NULL;
 	}
 }
 
