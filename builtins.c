@@ -5786,7 +5786,7 @@ static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 	return end_list(q);
 }
 
-static void do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
+static int do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 {
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	fix_list(l);
@@ -5804,12 +5804,13 @@ static void do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 	if (new_varno != g->nbr_vars) {
 		if (!create_vars(q, new_varno-g->nbr_vars)) {
 			throw_error(q, p1, "resource_error", "too_many_vars");
-			return;
+			return 0;
 		}
 	}
 
 	unify(q, p1, p1_ctx, l, q->st.curr_frame);
 	init_queuen(q);
+	return !q->cycle_error;
 }
 
 static int fn_sys_list_1(query *q)
@@ -5825,7 +5826,7 @@ static int fn_sys_list_1(query *q)
 	cell *c = l;
 
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
-		if (is_variable(c)) {
+		if (is_variable(c) && is_anon(c)) {
 			c->var_nbr = new_varno++;
 			c->flags = FLAG_FRESH;
 		}
@@ -5841,7 +5842,7 @@ static int fn_sys_list_1(query *q)
 
 	unify(q, p1, p1_ctx, l, q->st.curr_frame);
 	init_queue(q);
-	return 1;
+	return !q->cycle_error;
 }
 
 static int fn_sys_queue_1(query *q)
@@ -5863,7 +5864,7 @@ static int fn_sys_queuen_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,any);
-	cell *tmp = deep_clone_to_tmp_heap(q, p2, p2_ctx);
+	cell *tmp = deep_copy_to_tmp_heap(q, p2, p2_ctx, true);
 
 	if (q->cycle_error) {
 		throw_error(q, p1, "resource_error", "cyclic_term");
@@ -5898,7 +5899,7 @@ static int fn_iso_findall_3(query *q)
 
 	do_sys_listn(q, p3, p3_ctx);
 	q->st.qnbr--;
-	return 1;
+	return !q->cycle_error;
 }
 
 static int collect_local_vars(cell *p1, idx_t nbr_cells, cell **slots)
