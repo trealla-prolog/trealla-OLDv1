@@ -120,14 +120,6 @@ static struct op_table g_ops[] =
 	{0,0,0}
 };
 
-static char* ensure_strdup(const char* src)
-{
-	assert(src);
-	char* ret = strdup(src);
-	ensure(ret);
-	return ret;
-}
-
 static idx_t is_in_pool(const char *name)
 {
 	const void *val;
@@ -2817,29 +2809,23 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		} else {
 			c->val_type = TYPE_CSTRING;
 
-			if (p->string) {
-				c->flags |= FLAG_STRING;
-				c->arity = 2;
-			}
-
 			if ((strlen(p->token) < MAX_SMALL_STRING) && !p->string)
 				strcpy(c->val_chr, p->token);
 			else {
 				if (p->consulting || p->skip)
 					c->flags |= FLAG_CONST;
 
-				c->flags |= FLAG_BLOB;
-
 				if (p->string) {
-					c->len_str = p->len_str;
-					c->val_str = malloc(p->len_str+1);
-					ensure(c->val_str);
-					memcpy(c->val_str, p->token, p->len_str);
-					c->val_str[p->len_str] = '\0';
-				} else {
-					c->val_str = ensure_strdup(p->token);
-					c->len_str = strlen(p->token);
+					c->flags |= FLAG_STRING;
+					c->arity = 2;
 				}
+
+				c->flags |= FLAG_BLOB;
+				c->len_str = p->len_str;
+				c->val_str = malloc(p->len_str+1);
+				ensure(c->val_str);
+				memcpy(c->val_str, p->token, p->len_str);
+				c->val_str[p->len_str] = '\0';
 			}
 		}
 	}
