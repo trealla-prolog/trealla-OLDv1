@@ -7921,10 +7921,12 @@ static USE_RESULT prolog_state fn_absolute_file_name_3(query *q)
 		char *tmpbuf2;
 
 		if ((tmpbuf2 = realpath(tmpbuf, NULL)) == NULL) {
-			tmpbuf = realpath(cwd, NULL);
-			may_ptr_error(tmpbuf, free(tmpbuf));
+			if ((tmpbuf = realpath(cwd, NULL)) == NULL)
+				tmpbuf = realpath(".", NULL);
 
+			may_ptr_error(tmpbuf, free(tmpbuf));
 			char *tmp = malloc(strlen(tmpbuf)+1+strlen(s)+1);
+			may_ptr_error(tmp, free(tmpbuf));
 			sprintf(tmp, "%s/%s", tmpbuf, s);
 			free(tmpbuf);
 			tmpbuf = tmp;
@@ -7934,7 +7936,9 @@ static USE_RESULT prolog_state fn_absolute_file_name_3(query *q)
 		tmpbuf = tmpbuf2;
 	} else {
 		if ((tmpbuf = realpath(s, NULL)) == NULL) {
-			tmpbuf = realpath(cwd, NULL);
+			if ((tmpbuf = realpath(cwd, NULL)) == NULL)
+				tmpbuf = realpath(".", NULL);
+
 			may_ptr_error(tmpbuf);
 
 			if (*s != '/') {
