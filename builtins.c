@@ -497,8 +497,7 @@ static USE_RESULT cell *deep_copy2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx,
 
 		while (arity--) {
 			cell *c = deref(q, p1, p1_ctx);
-			if (!deep_copy2_to_tmp_heap(q, c, q->latest_ctx, depth+1, nonlocals_only)
-			    || q->cycle_error)
+			if (!deep_copy2_to_tmp_heap(q, c, q->latest_ctx, depth+1, nonlocals_only))
 				return NULL;
 			p1 += p1->nbr_cells;
 		}
@@ -561,11 +560,11 @@ static USE_RESULT cell *deep_clone2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx
 			if (is_nonconst_blob(p1)) {
 				size_t len = LEN_STR(p1);
 				tmp->val_str = malloc(len+1);
-				if (tmp->val_str) return NULL;
+				if (!tmp->val_str) return NULL;
 				memcpy(tmp->val_str, p1->val_str, len);
 				tmp->val_str[len] = '\0';
-				return tmp;
 			}
+			return tmp;
 		}
 
 		unsigned arity = p1->arity;
@@ -573,11 +572,9 @@ static USE_RESULT cell *deep_clone2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx
 
 		while (arity--) {
 			cell *c = deref(q, p1, p1_ctx);
-			if (deep_clone2_to_tmp_heap(q, c, q->latest_ctx, depth+1)) {
-				if (q->cycle_error) return NULL;
-				p1 += p1->nbr_cells;
-			} else
+			if (!deep_clone2_to_tmp_heap(q, c, q->latest_ctx, depth+1))
 				return NULL;
+			p1 += p1->nbr_cells;
 		}
 
 		tmp = get_tmp_heap(q, save_idx);
