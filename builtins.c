@@ -344,24 +344,26 @@ static cell *alloc_queuen(query *q, int qnbr, const cell *c)
 	return dst;
 }
 
-prolog_state alloc_list(query *q, const cell *c)
+// Defer check until end_list()
+
+void alloc_list(query *q, const cell *c)
 {
-	may_ptr_error(init_tmp_heap(q));
-	may_error(append_list(q, c));
-	return pl_success;
+	if (!init_tmp_heap(q)) return;
+	append_list(q, c);
 }
 
-prolog_state append_list(query *q, const cell *c)
+// Defer check until end_list()
+
+void append_list(query *q, const cell *c)
 {
 	cell *tmp = alloc_tmp_heap(q, 1+c->nbr_cells);
-	may_ptr_error(tmp);
+	if (!tmp) return;
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1 + c->nbr_cells;
 	tmp->val_off = g_dot_s;
 	tmp->arity = 2;
 	tmp++;
 	copy_cells(tmp, c, c->nbr_cells);
-	return pl_success;
 }
 
 cell *end_list(query *q)
@@ -1009,12 +1011,12 @@ static USE_RESULT prolog_state fn_iso_atom_codes_2(query *q)
 	const char *src = tmpbuf;
 	cell tmp;
 	make_int(&tmp, get_char_utf8(&src));
-	may_error(alloc_list(q, &tmp));
+	alloc_list(q, &tmp);
 
 	while (*src) {
 		cell tmp;
 		make_int(&tmp, get_char_utf8(&src));
-		may_error(append_list(q, &tmp));
+		append_list(q, &tmp);
 	}
 
 	cell *l = end_list(q);
@@ -1155,12 +1157,12 @@ static USE_RESULT prolog_state fn_iso_number_codes_2(query *q)
 	const char *src = tmpbuf;
 	cell tmp;
 	make_int(&tmp, *src);
-	may_error(alloc_list(q, &tmp));
+	alloc_list(q, &tmp);
 
 	while (*++src) {
 		cell tmp;
 		make_int(&tmp, *src);
-		may_error(append_list(q, &tmp));
+		append_list(q, &tmp);
 	}
 
 	cell *l = end_list(q);
@@ -4357,6 +4359,7 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 		}
 
 		cell *l = end_list(q);
+		may_ptr_error(l);
 		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
@@ -4430,6 +4433,7 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 	}
 
 	cell *l = end_list(q);
+	may_ptr_error(l);
 	return unify(q, p2, p2_ctx, l, p1_ctx);
 }
 
@@ -5590,6 +5594,7 @@ static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 		}
 
 		cell *l = end_list(q);
+		may_ptr_error(l);
 		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
@@ -5673,7 +5678,9 @@ static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 		c += c->nbr_cells;
 	}
 
-	return end_list(q);
+	cell *l = end_list(q);
+	may_ptr_error(l);
+	return l;
 }
 
 static USE_RESULT prolog_state do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
@@ -6345,6 +6352,7 @@ static USE_RESULT prolog_state fn_statistics_2(query *q)
 		append_list(q, &tmp);
 		make_literal(&tmp, g_nil_s);
 		cell *l = end_list(q);
+		may_ptr_error(l);
 		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
@@ -6552,6 +6560,7 @@ static USE_RESULT prolog_state fn_split_atom_4(query *q)
 	}
 
 	l = end_list(q);
+	may_ptr_error(l);
 	return unify(q, p4, p4_ctx, l, q->st.curr_frame);
 }
 
@@ -6765,6 +6774,7 @@ static USE_RESULT prolog_state fn_getfile_2(query *q)
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else {
 		cell *l = end_list(q);
+		may_ptr_error(l);
 		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
@@ -10134,6 +10144,7 @@ static USE_RESULT prolog_state do_length(query *q)
 	}
 
 	cell *l = end_list(q);
+	may_ptr_error(l);
 	set_var(q, p1, p1_ctx, l, q->st.curr_frame);
 	return pl_success;
 }
@@ -10259,6 +10270,7 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 		}
 
 		cell *l = end_list(q);
+		may_ptr_error(l);
 		set_var(q, p1, p1_ctx, l, q->st.curr_frame);
 		return pl_success;
 	}
