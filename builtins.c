@@ -5837,7 +5837,6 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 		make_int(tmp+nbr_cells++, q->st.qnbr);
 		nbr_cells += copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
-		q->tmpq[q->st.qnbr] = NULL;
 		init_queuen(q);
 		make_barrier(q);
 		q->st.curr_cell = tmp;
