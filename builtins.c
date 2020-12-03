@@ -160,8 +160,7 @@ void make_end(cell *tmp)
 {
 	tmp->val_type = TYPE_END;
 	tmp->nbr_cells = 1;
-	tmp->flags = 0;
-	tmp->arity = 0;
+	tmp->arity = tmp->flags = 0;
 	tmp->match = NULL;
 	tmp->val_ptr = NULL;
 }
@@ -176,8 +175,7 @@ static void make_literal(cell *tmp, idx_t offset)
 {
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1;
-	tmp->arity = 0;
-	tmp->flags = 0;
+	tmp->arity = tmp->flags = 0;
 	tmp->val_off = offset;
 }
 
@@ -186,8 +184,7 @@ static void make_smalln(cell *tmp, const char *s, size_t n)
 	assert(n < MAX_SMALL_STRING);
 	tmp->val_type = TYPE_CSTRING;
 	tmp->nbr_cells = 1;
-	tmp->arity = 0;
-	tmp->flags = 0;
+	tmp->arity = tmp->flags = 0;
 	memcpy(tmp->val_chr, s, n);
 	tmp->val_chr[n] = '\0';
 }
@@ -205,8 +202,9 @@ static USE_RESULT cell *init_tmp_heap(query* q)
 {
 	if (!q->tmp_heap) {
 		FAULTINJECT(errno = ENOMEM; return NULL);
-		q->tmp_heap = calloc(q->tmph_size, sizeof(cell));
+		q->tmp_heap = malloc(q->tmph_size * sizeof(cell));
 		if(!q->tmp_heap) return NULL;
+		*q->tmp_heap = (cell){0};
 	}
 
 	q->tmphp = 0;
@@ -223,7 +221,6 @@ static USE_RESULT cell *alloc_tmp_heap(query *q, idx_t nbr_cells)
 	}
 
 	cell *c = q->tmp_heap + q->tmphp;
-	*c = (cell){};
 	q->tmphp = new_size;
 	return c;
 }
@@ -272,7 +269,6 @@ static cell *alloc_heap(query *q, idx_t nbr_cells)
 	}
 
 	cell *c = q->arenas->heap + q->st.hp;
-	memset(c, 0, sizeof(cell)*nbr_cells);
 	q->st.hp += nbr_cells;
 	q->arenas->hp = q->st.hp;
 	return c;
@@ -371,6 +367,7 @@ void append_list(query *q, const cell *c)
 	tmp->nbr_cells = 1 + c->nbr_cells;
 	tmp->val_off = g_dot_s;
 	tmp->arity = 2;
+	tmp->flags = 0;
 	tmp++;
 	copy_cells(tmp, c, c->nbr_cells);
 }
@@ -382,6 +379,7 @@ USE_RESULT cell *end_list(query *q)
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1;
 	tmp->val_off = g_nil_s;
+	tmp->arity = tmp->flags = 0;
 	idx_t nbr_cells = tmp_heap_used(q);
 	tmp = alloc_heap(q, nbr_cells);
 	if (!tmp) return NULL;
@@ -4551,6 +4549,7 @@ static cell *clone2_to_heap(query *q, bool prefix, cell *p1, idx_t nbr_cells, id
 
 	if (prefix) {
 		// Needed for follow() to work
+		*tmp = (cell){0};
 		tmp->val_type = TYPE_EMPTY;
 		tmp->nbr_cells = 1;
 		tmp->flags = FLAG_BUILTIN;
@@ -4580,6 +4579,7 @@ static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx
 
 	if (prefix) {
 		// Needed for follow() to work
+		*tmp = (cell){0};
 		tmp->val_type = TYPE_EMPTY;
 		tmp->nbr_cells = 1;
 		tmp->flags = FLAG_BUILTIN;
@@ -5308,6 +5308,7 @@ static USE_RESULT prolog_state fn_iso_functor_3(query *q)
 
 		cell *tmp = alloc_heap(q, 1+arity);
 		ensure(tmp);
+		*tmp = (cell){0};
 		tmp[0].val_type = TYPE_LITERAL;
 		tmp[0].arity = arity;
 		tmp[0].nbr_cells = 1 + arity;
