@@ -757,13 +757,13 @@ static USE_RESULT prolog_state fn_iso_ground_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_cut_0(query *q)
 {
-	cut_me(q, 0);
+	cut_me(q, false);
 	return pl_success;
 }
 
 static USE_RESULT prolog_state fn_local_cut_0(query *q)
 {
-	cut_me(q, 1);
+	cut_me(q, true);
 	return pl_success;
 }
 
@@ -5966,7 +5966,7 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 
 	if (!queuen_used(q)) {
 		init_queuen(q);
-		cut_me(q, 0);
+		cut_me(q, false);
 		return pl_failure;
 	}
 
