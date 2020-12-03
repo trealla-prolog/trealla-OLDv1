@@ -547,8 +547,8 @@ static USE_RESULT cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool
 	if (!tmp || q->cycle_error) return NULL;
 
 	cell *tmp2 = alloc_heap(q, tmp->nbr_cells);
-	if (tmp2)
-		copy_cells(tmp2, tmp, tmp->nbr_cells);
+	if (!tmp2) return NULL;
+	copy_cells(tmp2, tmp, tmp->nbr_cells);
 	return tmp2;
 }
 
@@ -608,8 +608,8 @@ cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 	p1 = deep_clone_to_tmp_heap(q, p1, p1_ctx);
 	if (!p1 || q->cycle_error) return NULL;
 	cell *tmp = alloc_heap(q, p1->nbr_cells);
-	if (tmp)
-		copy_cells(tmp, p1, p1->nbr_cells);
+	if (!tmp) return NULL;
+	copy_cells(tmp, p1, p1->nbr_cells);
 	return tmp;
 }
 
