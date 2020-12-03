@@ -5647,11 +5647,6 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 	return pl_success;
 }
 
-typedef struct {
-	cell *c, *orig_c;
-	idx_t ctx, orig_ctx;
-} sslot;
-
 static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 {
 	if ((!nbr_cells || !c->nbr_cells)) {
@@ -5703,11 +5698,8 @@ static USE_RESULT prolog_state fn_sys_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell *l = convert_to_list(q, get_queue(q), queue_used(q));
-
-#if 0
 	frame *g = GET_FRAME(q->st.curr_frame);
 	unsigned new_varno = g->nbr_vars;
-
 	cell *c = l;
 
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
@@ -5722,7 +5714,6 @@ static USE_RESULT prolog_state fn_sys_list_1(query *q)
 			return throw_error(q, p1, "resource_error", "too_many_vars");
 		}
 	}
-#endif
 
 	return unify(q, p1, p1_ctx, l, q->st.curr_frame);
 }
