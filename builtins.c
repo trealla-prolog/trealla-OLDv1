@@ -5876,7 +5876,7 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 				return throw_error(q, p1, "resource_error", "cyclic_term");
 			}
 
-			cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, true);
+			cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 			ensure(tmp);
 			alloc_queuen(q, q->st.qnbr, tmp);
 		}
