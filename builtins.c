@@ -366,7 +366,7 @@ void append_list(query *q, const cell *c)
 	copy_cells(tmp, c, c->nbr_cells);
 }
 
-cell *end_list(query *q)
+USE_RESULT cell *end_list(query *q)
 {
 	cell *tmp = alloc_tmp_heap(q, 1);
 	if (!tmp) return NULL;
