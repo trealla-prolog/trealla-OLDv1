@@ -378,7 +378,6 @@ cell *end_list(query *q)
 	if (!tmp) return NULL;
 	safe_copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
 	tmp->nbr_cells = nbr_cells;
-	//init_tmp_heap(q); // cehteh: superfluous?
 	fix_list(tmp);
 	return tmp;
 }
