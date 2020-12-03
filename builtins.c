@@ -5843,6 +5843,11 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 		return pl_success;
 	}
 
+	if (q->tmpq[q->st.qnbr]) {
+		free(q->tmpq[q->st.qnbr]);
+		q->tmpq[q->st.qnbr] = NULL;
+	}
+
 	if (!queuen_used(q)) {
 		q->st.qnbr--;
 		cell tmp;
@@ -5885,6 +5890,9 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 	// Return matching solutions
 
 	drop_choice(q);
+	free(q->tmpq[q->st.qnbr]);
+	q->tmpq[q->st.qnbr] = NULL;
+
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	cell *tmp = deep_copy_to_heap(q, l, q->st.curr_frame, false);
 	return unify(q, p3, p3_ctx, tmp, q->st.curr_frame);
