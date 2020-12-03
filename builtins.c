@@ -5679,7 +5679,6 @@ static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 static USE_RESULT prolog_state do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 {
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
-	fix_list(l);
 	frame *g = GET_FRAME(q->st.curr_frame);
 	unsigned new_varno = g->nbr_vars;
 	cell *c = l;
@@ -5697,21 +5696,18 @@ static USE_RESULT prolog_state do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 		}
 	}
 
-	unify(q, p1, p1_ctx, l, q->st.curr_frame);
-	init_queuen(q);
-	return !q->cycle_error; //cehteh: where..?
+	return unify(q, p1, p1_ctx, l, q->st.curr_frame);
 }
 
 static USE_RESULT prolog_state fn_sys_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell *l = convert_to_list(q, get_queue(q), queue_used(q));
-	fix_list(l);
 
+#if 0
 	frame *g = GET_FRAME(q->st.curr_frame);
 	unsigned new_varno = g->nbr_vars;
 
-#if 0
 	cell *c = l;
 
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
@@ -5720,17 +5716,15 @@ static USE_RESULT prolog_state fn_sys_list_1(query *q)
 			c->flags = FLAG_FRESH;
 		}
 	}
-#endif
 
 	if (new_varno != g->nbr_vars) {
 		if (!create_vars(q, new_varno-g->nbr_vars)) {
 			return throw_error(q, p1, "resource_error", "too_many_vars");
 		}
 	}
+#endif
 
-	unify(q, p1, p1_ctx, l, q->st.curr_frame);
-	init_queue(q);
-	return !q->cycle_error;  //cehteh: where can the cycle error happen?
+	return unify(q, p1, p1_ctx, l, q->st.curr_frame);
 }
 
 static USE_RESULT prolog_state fn_sys_queue_1(query *q)
