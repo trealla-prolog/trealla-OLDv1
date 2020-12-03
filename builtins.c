@@ -5747,33 +5747,6 @@ static USE_RESULT prolog_state fn_sys_queuen_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT prolog_state fn_iso_findall_3(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,callable);
-	GET_NEXT_ARG(p3,any);
-
-	if (!q->retry) {
-		q->st.qnbr++;
-		assert(q->st.qnbr < MAX_QUEUES);
-		cell *tmp = clone_to_heap(q, true, p2, 2+p1->nbr_cells+1);
-		idx_t nbr_cells = 1 + p2->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
-		make_int(tmp+nbr_cells++, q->st.qnbr);
-		nbr_cells += copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
-		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
-		q->tmpq[q->st.qnbr] = NULL;
-		init_queuen(q);
-		make_barrier(q);
-		q->st.curr_cell = tmp;
-		return pl_success;
-	}
-
-	do_sys_listn(q, p3, p3_ctx);
-	q->st.qnbr--;
-	return pl_success;
-}
-
 static int collect_local_vars(cell *p1, idx_t nbr_cells, cell **slots)
 {
 	int cnt = 0;
@@ -5847,6 +5820,33 @@ static void unpin_vars(query *q)
 	}
 
 	ch->pins = 0;
+}
+
+static USE_RESULT prolog_state fn_iso_findall_3(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,callable);
+	GET_NEXT_ARG(p3,any);
+
+	if (!q->retry) {
+		q->st.qnbr++;
+		assert(q->st.qnbr < MAX_QUEUES);
+		cell *tmp = clone_to_heap(q, true, p2, 2+p1->nbr_cells+1);
+		idx_t nbr_cells = 1 + p2->nbr_cells;
+		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
+		make_int(tmp+nbr_cells++, q->st.qnbr);
+		nbr_cells += copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
+		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
+		q->tmpq[q->st.qnbr] = NULL;
+		init_queuen(q);
+		make_barrier(q);
+		q->st.curr_cell = tmp;
+		return pl_success;
+	}
+
+	do_sys_listn(q, p3, p3_ctx);
+	q->st.qnbr--;
+	return pl_success;
 }
 
 static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
@@ -5934,7 +5934,6 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 	unpin_vars(q);
 	unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
-	fix_list(l);
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
