@@ -63,7 +63,7 @@ static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 		if (is_nonconst_blob(dst)) {
 			size_t len = LEN_STR(dst);
 			dst->val_str = malloc(len+1);
-			ensure(dst->val_str);
+			if (!dst->val_str) return 0;
 			memcpy(dst->val_str, src->val_str, len);
 			dst->val_str[len] = '\0';
 		}
@@ -198,6 +198,9 @@ static void make_small(cell *tmp, const char *s)
 	make_smalln(tmp, s, n);
 }
 
+// The tmp heap is used for temporary allocations (a scratch-pad)
+// for work in progress. As such it can survive a realloc() call.
+
 static USE_RESULT cell *init_tmp_heap(query* q)
 {
 	if (!q->tmp_heap) {
@@ -227,6 +230,12 @@ static USE_RESULT cell *alloc_tmp_heap(query *q, idx_t nbr_cells)
 
 static idx_t tmp_heap_used(const query *q) { return q->tmphp; }
 static cell *get_tmp_heap(const query *q, idx_t i) { return q->tmp_heap + i; }
+
+// The heap is used for long-life allocations and a realloc() can't be
+// done as it will invalidate existing pointers. Build any compounds
+// first on the tmp heap, then allocate in one go here and copy in.
+// When more space is need allocate a new heap and keep them in the
+// arena list. Backtracking will garbage collect and free as needed.
 
 static cell *alloc_heap(query *q, idx_t nbr_cells)
 {
@@ -376,7 +385,10 @@ USE_RESULT cell *end_list(query *q)
 	idx_t nbr_cells = tmp_heap_used(q);
 	tmp = alloc_heap(q, nbr_cells);
 	if (!tmp) return NULL;
-	safe_copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
+
+	if (!safe_copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells))
+		return NULL;
+
 	tmp->nbr_cells = nbr_cells;
 	fix_list(tmp);
 	return tmp;
