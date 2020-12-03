@@ -5777,6 +5777,7 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 
 	if (!q->retry) {
 		q->st.qnbr++;
+		assert(q->st.qnbr < MAX_QUEUES);
 		cell *tmp = clone_to_heap(q, true, p2, 2+p1->nbr_cells+1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
@@ -5882,6 +5883,7 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 
 	if (!q->retry) {
 		q->st.qnbr++;
+		assert(q->st.qnbr < MAX_QUEUES);
 		cell *tmp = clone_to_heap(q, true, p2, 2+p2->nbr_cells+1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
@@ -5894,10 +5896,8 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 		return pl_success;
 	}
 
-	if (!queuen_used(q) && !q->tmpq[q->st.qnbr]) {
-		q->st.qnbr--;
+	if (!queuen_used(q) && !q->tmpq[q->st.qnbr])
 		return pl_failure;
-	}
 
 	// First retry takes a copy
 
