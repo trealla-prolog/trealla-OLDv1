@@ -5831,11 +5831,11 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 	if (!q->retry) {
 		q->st.qnbr++;
 		assert(q->st.qnbr < MAX_QUEUES);
-		cell *tmp = clone_to_heap(q, true, p2, 2+p1->nbr_cells+1);
+		cell *tmp = clone_to_heap(q, true, p2, 2+p2->nbr_cells+1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
+		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
-		nbr_cells += copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
+		nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		init_queuen(q);
 		make_barrier(q);
@@ -5843,9 +5843,52 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 		return pl_success;
 	}
 
-	do_sys_listn(q, p3, p3_ctx);
-	q->st.qnbr--;
-	return pl_success;
+	if (!queuen_used(q) && !q->tmpq[q->st.qnbr]) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+	}
+
+	// Retry takes a copy
+
+	if (!q->tmpq[q->st.qnbr]) {
+		idx_t nbr_cells = queuen_used(q);
+		q->tmpq[q->st.qnbr] = malloc(sizeof(cell)*nbr_cells);
+		ensure(q->tmpq[q->st.qnbr]);
+		copy_cells(q->tmpq[q->st.qnbr], get_queuen(q), nbr_cells);
+		q->tmpq_size[q->st.qnbr] = nbr_cells;
+	}
+
+	// Now grab match solutions
+
+	init_queuen(q);
+	may_error(make_choice(q));
+	idx_t nbr_cells = q->tmpq_size[q->st.qnbr];
+
+	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
+	     nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
+
+		try_me(q, MAX_ARITY);
+
+		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
+			if (q->cycle_error) {
+				return throw_error(q, p1, "resource_error", "cyclic_term");
+			}
+
+			cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, true);
+			ensure(tmp);
+			alloc_queuen(q, q->st.qnbr, tmp);
+		}
+
+		undo_me(q);
+	}
+
+	// Return matching solutions
+
+	drop_choice(q);
+	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
+	cell *tmp = deep_copy_to_heap(q, l, q->st.curr_frame, false);
+	return unify(q, p3, p3_ctx, tmp, q->st.curr_frame);
 }
 
 static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
