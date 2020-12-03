@@ -5843,7 +5843,7 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 		return pl_success;
 	}
 
-	if (!queuen_used(q) && !q->tmpq[q->st.qnbr]) {
+	if (!queuen_used(q)) {
 		q->st.qnbr--;
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
@@ -5852,19 +5852,17 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 
 	// Retry takes a copy
 
-	if (!q->tmpq[q->st.qnbr]) {
-		idx_t nbr_cells = queuen_used(q);
-		q->tmpq[q->st.qnbr] = malloc(sizeof(cell)*nbr_cells);
-		ensure(q->tmpq[q->st.qnbr]);
-		copy_cells(q->tmpq[q->st.qnbr], get_queuen(q), nbr_cells);
-		q->tmpq_size[q->st.qnbr] = nbr_cells;
-	}
+	idx_t nbr_cells = queuen_used(q);
+	q->tmpq[q->st.qnbr] = malloc(sizeof(cell)*nbr_cells);
+	ensure(q->tmpq[q->st.qnbr]);
+	copy_cells(q->tmpq[q->st.qnbr], get_queuen(q), nbr_cells);
+	q->tmpq_size[q->st.qnbr] = nbr_cells;
 
 	// Now grab match solutions
 
 	init_queuen(q);
 	may_error(make_choice(q));
-	idx_t nbr_cells = q->tmpq_size[q->st.qnbr];
+	nbr_cells = q->tmpq_size[q->st.qnbr];
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 	     nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
