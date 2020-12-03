@@ -301,25 +301,6 @@ static cell *pop_queue(query *q)
 	return c;
 }
 
-static cell *alloc_queue(query *q, const cell *c)
-{
-	FAULTINJECT(errno = ENOMEM; return NULL);
-	if (!q->queue[0]) {
-		q->queue[0] = calloc(q->q_size[0], sizeof(cell));
-		ensure(q->queue[0]);
-	}
-
-	while ((q->qp[0]+c->nbr_cells) >= q->q_size[0]) {
-		q->q_size[0] += q->q_size[0] / 2;
-		q->queue[0] = realloc(q->queue[0], sizeof(cell)*q->q_size[0]);
-		ensure(q->queue[0]);
-	}
-
-	cell *dst = q->queue[0] + q->qp[0];
-	q->qp[0] += safe_copy_cells(dst, c, c->nbr_cells);
-	return dst;
-}
-
 static void init_queuen(query* q)
 {
 	free(q->queue[q->st.qnbr]);
@@ -5762,7 +5743,7 @@ static USE_RESULT prolog_state fn_sys_queue_1(query *q)
 	}
 
 	ensure(tmp);
-	alloc_queue(q, tmp);
+	alloc_queuen(q, 0, tmp);
 	return pl_success;
 }
 
@@ -7710,7 +7691,7 @@ static USE_RESULT prolog_state fn_send_1(query *q)
 		}
 	}
 
-	alloc_queue(dstq, c);
+	alloc_queuen(dstq, 0, c);
 	q->yielded = true;
 	return pl_success;
 }
