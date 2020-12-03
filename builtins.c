@@ -5792,7 +5792,7 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 
 	do_sys_listn(q, p3, p3_ctx);
 	q->st.qnbr--;
-	return !q->cycle_error;  //cehteh: where can the cycle error happen?
+	return pl_success;
 }
 
 static int collect_local_vars(cell *p1, idx_t nbr_cells, cell **slots)
