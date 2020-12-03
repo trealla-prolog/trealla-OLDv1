@@ -5844,6 +5844,7 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 	}
 
 	if (!queuen_used(q) && !q->tmpq[q->st.qnbr]) {
+		q->st.qnbr--;
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
 		return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
