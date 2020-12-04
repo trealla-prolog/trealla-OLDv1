@@ -611,20 +611,13 @@ cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 
 prolog_state throw_error(query *q, cell *c, const char *err_type, const char *expected)
 {
-	cell tmp;
-
-	if (is_literal(c))
-		may_error(make_cstring(&tmp, GET_STR(c)));
-	else
-		tmp = *c;
-
 	idx_t c_ctx = q->latest_ctx;
 	int save_quoted = q->quoted;
 	q->quoted = 1;
-	size_t len = print_term_to_buf(q, NULL, 0, &tmp, c_ctx, 1, 0, 0);
+	size_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, 1, 0, 0);
 	char *dst = malloc(len+1);
 	ensure(dst);
-	len = print_term_to_buf(q, dst, len+1, &tmp, c_ctx, 1, 0, 0);
+	len = print_term_to_buf(q, dst, len+1, c, c_ctx, 1, 0, 0);
 	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q->st.curr_cell) + 1024;
 	char *dst2 = malloc(len2+1);
 	ensure(dst2);
