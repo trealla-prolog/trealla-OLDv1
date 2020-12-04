@@ -1,1 +1,1 @@
-Error: uncaught exception... error(type_error(callable,1))
+Error: uncaught exception... error(type_error(callable,1),main/0)

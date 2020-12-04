@@ -623,17 +623,21 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	ensure(dst2);
 	q->quoted = save_quoted;
 
+	if (!strncmp(expected, "iso_", 4))
+		expected += 4;
+
+	char tmpbuf[1024*4];
+	snprintf(tmpbuf, sizeof(tmpbuf), "%s", expected);
+	char *ptr;
+
+	if (!strcmp(err_type, "type_error") && (ptr = strchr(tmpbuf, '_')) != NULL)
+		*ptr = '\0';
+
+	expected = tmpbuf;
+
 	if (is_variable(c)) {
 		err_type = "instantiation_error";
 		snprintf(dst2, len2+1, "error(%s,%s/%u)", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
-	} else if (!strcmp(err_type, "type_error")) {
-		const char *t = expected;
-		if (!strncmp(t,"iso_",4)) t = t+4;
-		char tmpbuf[1024*8];
-		strcpy(tmpbuf, t);
-		char *ptr = strchr(tmpbuf, '_');
-		if (ptr) *ptr = '\0';
-		snprintf(dst2, len2+1, "error(%s(%s,%s))", err_type, tmpbuf, dst);
 	} else if (c->arity) {
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),%s/%u)", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else {
