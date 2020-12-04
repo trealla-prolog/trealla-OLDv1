@@ -96,7 +96,7 @@ static double rat_to_float(cell *n)
 
 static USE_RESULT bool do_throw_term(query *q, cell *c);
 
-static void do_yield_0(query *q, int msecs)
+static prolog_state do_yield_0(query *q, int msecs)
 {
 	q->yielded = true;
 	q->tmo_msecs = get_time_in_usec() / 1000;
