@@ -299,7 +299,14 @@ static void trim_heap(query *q, const choice *ch)
 			} else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 				stream *str = &g_streams[c->val_num];
 
-				if (str->fp) {
+				if ((str->fp)
+					&& (str->fp != stdin)
+					&& (str->fp != stdout)
+					&& (str->fp != stderr)) {
+
+					if (str->p)
+						destroy_parser(str->p);
+
 					fclose(str->fp);
 					free(str->filename);
 					free(str->mode);
@@ -328,7 +335,14 @@ static void trim_heap(query *q, const choice *ch)
 		} else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 			stream *str = &g_streams[c->val_num];
 
-			if (str->fp) {
+			if ((str->fp)
+				&& (str->fp != stdin)
+				&& (str->fp != stdout)
+				&& (str->fp != stderr)) {
+
+				if (str->p)
+					destroy_parser(str->p);
+
 				fclose(str->fp);
 				free(str->filename);
 				free(str->mode);

@@ -889,12 +889,15 @@ void destroy_query(query *q)
 			else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 				stream *str = &g_streams[c->val_num];
 
-				if (str->fp) {
-					if ((str->fp != stdin)
-						&& (str->fp != stdout)
-						&& (str->fp != stderr))
-						fclose(str->fp);
+				if (str->fp
+					&& (str->fp != stdin)
+					&& (str->fp != stdout)
+					&& (str->fp != stderr)) {
 
+					if (str->p)
+						destroy_parser(str->p);
+
+					fclose(str->fp);
 					free(str->filename);
 					free(str->mode);
 					free(str->data);

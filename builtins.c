@@ -1809,11 +1809,13 @@ static USE_RESULT prolog_state fn_iso_close_1(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 
+	if ((str->fp == stdin)
+		|| (str->fp == stdout)
+		|| (str->fp == stderr))
+		return pl_success;
+
 	if (str->p)
 		destroy_parser(str->p);
-
-	if (n <= 2)
-		return pl_success;
 
 	net_close(str);
 	free(str->filename);
@@ -2274,6 +2276,8 @@ static USE_RESULT prolog_state fn_iso_write_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
+	assert(str);
+	assert(str->fp);
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	return !ferror(str->fp);
 }
