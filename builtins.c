@@ -94,7 +94,7 @@ static double rat_to_float(cell *n)
 }
 #endif
 
-static USE_RESULT prolog_state do_throw_term(query *q, cell *c);
+static USE_RESULT bool do_throw_term(query *q, cell *c);
 
 static USE_RESULT prolog_state do_yield_0(query *q, int msecs)
 {
@@ -5228,7 +5228,7 @@ static USE_RESULT prolog_state fn_iso_catch_3(query *q)
 	return pl_success;
 }
 
-static USE_RESULT prolog_state do_throw_term(query *q, cell *c)
+static USE_RESULT bool do_throw_term(query *q, cell *c)
 {
 	idx_t c_ctx = q->latest_ctx;
 	q->exception = c;
@@ -5245,7 +5245,7 @@ static USE_RESULT prolog_state do_throw_term(query *q, cell *c)
 			continue;
 
 		q->exception = NULL;
-		return pl_success;
+		return true;
 	}
 
 	fprintf(stdout, "Error: uncaught exception... ");
@@ -5254,7 +5254,7 @@ static USE_RESULT prolog_state do_throw_term(query *q, cell *c)
 	q->m->dump_vars = 1;
 	q->exception = NULL;
 	q->error = true;
-	return pl_error;
+	return false;
 }
 
 static USE_RESULT prolog_state fn_iso_throw_1(query *q)
@@ -5280,7 +5280,9 @@ static USE_RESULT prolog_state fn_iso_throw_1(query *q)
 	if (has_vars(q, c, p1_ctx))
 		return throw_error(q, c, "instantiation_error", "instantiated");
 
-	may_error(do_throw_term(q, c));
+	if (!do_throw_term(q, c))
+		return pl_failure;
+
 	return fn_iso_catch_3(q);
 }
 
