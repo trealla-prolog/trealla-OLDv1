@@ -72,6 +72,21 @@ static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 	return nbr_cells;
 }
 
+static bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool tolerant)
+{
+	if (!is_list(p1) && !is_nil(p1))
+		return false;
+
+	while (is_list(p1)) {
+		LIST_HEAD(p1);
+		p1 = LIST_TAIL(p1);
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+	}
+
+	return is_nil(p1) || (tolerant && is_variable(p1));
+}
+
 #if 0
 static double rat_to_float(cell *n)
 {
@@ -4434,7 +4449,17 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,list_or_nil_or_var);
+	GET_NEXT_ARG(p2,any);
+
+	if (!is_variable(p2) && !is_valid_list(q, p2, p2_ctx, true))
+		return throw_error(q, p2, "type_error", "list");
+
+	if (!is_variable(p1) && (is_atom(p1) || is_number(p1))) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
+
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g_varno = g->nbr_vars;
 	g_tab_idx = 0;
@@ -4476,9 +4501,8 @@ static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 		unsigned new_vars = g_varno - g->nbr_vars;
 		g_varno = g->nbr_vars;
 
-		if (!create_vars(q, new_vars)) {
+		if (!create_vars(q, new_vars))
 			return throw_error(q, p1, "resource_error", "too_many_vars");
-		}
 
 		for (unsigned i = 0; i < cnt; i++) {
 			if (g_tab1[i] == q->st.curr_frame)
@@ -5240,24 +5264,24 @@ static USE_RESULT prolog_state fn_iso_throw_1(query *q)
 
 #if 0
 	printf("*** throw %s/%u\n", GET_STR(p1), p1->arity);
-	print_term(q, stdout, p1, p1_ctx, 0);
-	printf("\n");
+	printf("### "); print_term(q, stdout, p1, p1_ctx, 1);
+	printf("\n\n");
+
+	if (q->cycle_error)
+		return throw_error(q, p1, "resource_error", "cyclic_term");
 #endif
 
-	cell *c = deep_clone_to_tmp_heap(q, p1, p1_ctx);
+	cell *c = deep_clone_to_heap(q, p1, p1_ctx);
 
-	if (q->cycle_error) {
+	if (q->cycle_error)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
-	}
 
 	q->latest_ctx = p1_ctx;
 
-	if (has_vars(q, c, p1_ctx)) {
+	if (has_vars(q, c, p1_ctx))
 		return throw_error(q, c, "instantiation_error", "instantiated");
-	}
 
 	may_error(do_throw_term(q, c));
-
 	return fn_iso_catch_3(q);
 }
 
@@ -7503,18 +7527,7 @@ static USE_RESULT prolog_state fn_write_term_to_chars_3(query *q)
 static USE_RESULT prolog_state fn_is_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-
-	if (!is_list(p1) && !is_nil(p1))
-		return pl_failure;
-
-	while (is_list(p1)) {
-		LIST_HEAD(p1);
-		p1 = LIST_TAIL(p1);
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-	}
-
-	return is_nil(p1);
+	return is_valid_list(q, p1, p1_ctx, false);
 }
 
 static USE_RESULT prolog_state fn_is_stream_1(query *q)
