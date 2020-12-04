@@ -5276,8 +5276,10 @@ static USE_RESULT prolog_state fn_iso_throw_1(query *q)
 
 	q->latest_ctx = p1_ctx;
 
-	if (has_vars(q, c, p1_ctx))
-		return throw_error(q, c, "instantiation_error", "instantiated");
+	if (has_vars(q, c, p1_ctx)) {
+		throw_error(q, c, "instantiation_error", "instantiated");
+		return pl_failure;
+	}
 
 	if (!do_throw_term(q, c))
 		return pl_failure;
