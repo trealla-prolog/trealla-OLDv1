@@ -55,6 +55,7 @@ typedef uint32_t idx_t;
 // Sentinel Value
 #define ERR_IDX (~(idx_t)0)
 #define IDX_MAX (ERR_IDX-1)
+#define ERR_CYCLE_CMP -2
 
 #define MAX_SMALL_STRING (MAX(sizeof(int_t),sizeof(void*))*2)
 #define MAX_VAR_POOL_SIZE 1000
@@ -126,6 +127,7 @@ typedef uint32_t idx_t;
 #define may_error(expr, ...) CHECK_SENTINEL(expr, pl_error, __VA_ARGS__; return pl_error)
 #define may_idx_error(expr, ...) CHECK_SENTINEL(expr, ERR_IDX, __VA_ARGS__; return pl_error)
 #define may_ptr_error(expr, ...) CHECK_SENTINEL(expr, NULL, __VA_ARGS__; return pl_error)
+#define may_cycle_error(expr, ...) CHECK_SENTINEL(expr, ERR_CYCLE_CELL, __VA_ARGS__; return pl_cycle)
 
 // If changing the order of these: see runtime.c dispatch table
 
@@ -252,6 +254,8 @@ struct cell_ {
 		};
 	};
 };
+
+extern cell* ERR_CYCLE_CELL;
 
 typedef struct {
 	uint64_t u1, u2;
