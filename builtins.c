@@ -658,7 +658,7 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	clear_term(p->t);
 	free(dst2);
 	free(dst);
-	return pl_error;
+	return pl_failure;
 }
 
 static USE_RESULT prolog_state fn_iso_unify_2(query *q)
