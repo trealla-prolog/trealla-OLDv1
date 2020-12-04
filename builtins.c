@@ -637,28 +637,27 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 
 	if (is_variable(c)) {
 		err_type = "instantiation_error";
-		snprintf(dst2, len2+1, "error(%s,%s/%u)", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s,%s/%u).", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (c->arity && !is_list(c)) {
-		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),%s/%u)", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),%s/%u).", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else {
-		snprintf(dst2, len2+1, "error(%s(%s,%s),%s/%u)", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s(%s,%s),%s/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	}
 
 	//printf("*** %s\n", dst2);
 
 	parser *p = q->m->p;
 	p->srcptr = dst2;
-	parser_tokenize(p, false, false);
 	frame *g = GET_FRAME(q->st.curr_frame);
-	parser_attach(p, 0);
-	parser_assign_vars(p, g->nbr_vars, false);
-	//parser_xref(p, p->t, NULL);
+	p->read_term = g->nbr_vars;
+	parser_tokenize(p, false, false);
+	p->read_term = 0;
 	DISCARD_RESULT do_throw_term(q, p->t->cells);
 	//TODO: cehteh: exception handling needs review
-	clear_term(p->t);
+	//clear_term(p->t);
 	free(dst2);
 	free(dst);
-	return pl_failure;
+	return pl_success;
 }
 
 static USE_RESULT prolog_state fn_iso_unify_2(query *q)
