@@ -523,7 +523,7 @@ USE_RESULT prolog_state make_catcher(query *q, unsigned type);
 void cut_me(query *q, bool local_cut);
 bool check_builtin(module *m, const char *name, unsigned arity);
 void *get_builtin(module *m, const char *name, unsigned arity);
-USE_RESULT prolog_state query_execute(query *q, term *t);
+prolog_state query_execute(query *q, term *t);
 cell *get_head(cell *c);
 cell *get_body(cell *c);
 predicate *find_matching_predicate(module *m, cell *c);
