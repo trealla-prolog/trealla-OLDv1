@@ -4478,12 +4478,12 @@ static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 			tmp[idx].nbr_cells = ((cnt-done)*2)+1;
 			idx++;
 			cell v;
-			make_variable(&v, g_anon_s);
-			v.flags |= FLAG_FRESH;
+			make_variable(&v, g_tab3[i]);
 
-			if (g_tab1[i] != q->st.curr_frame)
+			if (g_tab1[i] != q->st.curr_frame) {
+				v.flags |= FLAG_FRESH;
 				v.var_nbr = g_varno++;
-			else
+			} else
 				v.var_nbr = g_tab2[i];
 
 			tmp[idx++] = v;
