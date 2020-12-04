@@ -366,6 +366,8 @@ struct arena_ {
 	unsigned nbr;
 };
 
+enum q_retry { QUERY_OK=0, QUERY_RETRY=1, QUERY_EXCEPTION=2 };
+
 struct query_ {
 	query *prev, *next, *parent;
 	module *m, *save_m;
@@ -390,7 +392,7 @@ struct query_ {
 	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;
 	idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
 	uint8_t current_input, current_output;
-	uint8_t retry;
+	enum q_retry retry;
 	int8_t halt_code, quoted;	//TODO: cehteh: enum here
 	bool status:1;
 	bool resume:1;

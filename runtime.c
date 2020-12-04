@@ -275,10 +275,11 @@ prolog_state make_catcher(query *q, unsigned retry)
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 
-	if (retry == 1)
+	if (retry == QUERY_RETRY)
 		ch->catchme1 = true;
-	else if (retry == 2)
+	else if (retry == QUERY_EXCEPTION)
 		ch->catchme2 = true;
+
 	return pl_success;
 }
 
@@ -1168,7 +1169,7 @@ prolog_state run_query(query *q)
 				}
 
 				if (!match_rule(q)) {
-					q->retry = 1;
+					q->retry = QUERY_RETRY;
 					q->tot_retries++;
 					continue;
 				}
@@ -1181,7 +1182,7 @@ prolog_state run_query(query *q)
 			}
 
 			if (!q->st.curr_cell->fn(q)) {
-				q->retry = 1;
+				q->retry = QUERY_RETRY;
 
 				if (q->yielded)
 					break;
@@ -1199,7 +1200,7 @@ prolog_state run_query(query *q)
 		}
 
 		q->resume = false;
-		q->retry = 0;
+		q->retry = QUERY_OK;
 
 		while (!q->st.curr_cell || is_end(q->st.curr_cell)) {
 			if (!resume_frame(q)) {
