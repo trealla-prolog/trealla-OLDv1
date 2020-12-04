@@ -96,13 +96,12 @@ static double rat_to_float(cell *n)
 
 static USE_RESULT bool do_throw_term(query *q, cell *c);
 
-static USE_RESULT prolog_state do_yield_0(query *q, int msecs)
+static void do_yield_0(query *q, int msecs)
 {
 	q->yielded = true;
 	q->tmo_msecs = get_time_in_usec() / 1000;
 	q->tmo_msecs += msecs;
 	may_error(make_choice(q));
-	return pl_yield;
 }
 
 static void set_pinned(query *q, int i)
@@ -2006,7 +2005,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 				if (q->is_task && !feof(str->fp)) {
 					clearerr(str->fp);
 					do_yield_0(q, 1);
-					return 0;
+					return pl_failure;
 				}
 
 				if (vars) {
@@ -2547,7 +2546,7 @@ static USE_RESULT prolog_state fn_iso_get_char_1(query *q)
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
 		do_yield_0(q, 1);
-		return 0;
+		return pl_failure;
 	}
 
 	str->did_getc = true;
@@ -2587,7 +2586,7 @@ static USE_RESULT prolog_state fn_iso_get_char_2(query *q)
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
 		do_yield_0(q, 1);
-		return 0;
+		return pl_failure;
 	}
 
 	str->did_getc = true;
@@ -2626,7 +2625,7 @@ static USE_RESULT prolog_state fn_iso_get_code_1(query *q)
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
 		do_yield_0(q, 1);
-		return 0;
+		return pl_failure;
 	}
 
 	str->did_getc = true;
@@ -2657,7 +2656,7 @@ static USE_RESULT prolog_state fn_iso_get_code_2(query *q)
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
 		do_yield_0(q, 1);
-		return 0;
+		return pl_failure;
 	}
 
 	str->did_getc = true;
@@ -2687,7 +2686,7 @@ static USE_RESULT prolog_state fn_iso_get_byte_1(query *q)
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
 		do_yield_0(q, 1);
-		return 0;
+		return pl_failure;
 	}
 
 	str->did_getc = true;
@@ -2718,7 +2717,7 @@ static USE_RESULT prolog_state fn_iso_get_byte_2(query *q)
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
 		do_yield_0(q, 1);
-		return 0;
+		return pl_failure;
 	}
 
 	str->did_getc = true;
@@ -2742,7 +2741,7 @@ static USE_RESULT prolog_state fn_iso_peek_char_1(query *q)
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
 		do_yield_0(q, 1);
-		return 0;
+		return pl_failure;
 	}
 
 	if (feof(str->fp)) {
@@ -2772,7 +2771,7 @@ static USE_RESULT prolog_state fn_iso_peek_char_2(query *q)
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
 		do_yield_0(q, 1);
-		return 0;
+		return pl_failure;
 	}
 
 	if (feof(str->fp)) {
@@ -2800,7 +2799,7 @@ static USE_RESULT prolog_state fn_iso_peek_code_1(query *q)
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
 		do_yield_0(q, 1);
-		return 0;
+		return pl_failure;
 	}
 
 	str->ungetch = ch;
@@ -2820,7 +2819,7 @@ static USE_RESULT prolog_state fn_iso_peek_code_2(query *q)
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
 		do_yield_0(q, 1);
-		return 0;
+		return pl_failure;
 	}
 
 	str->ungetch = ch;
@@ -2839,7 +2838,7 @@ static USE_RESULT prolog_state fn_iso_peek_byte_1(query *q)
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
 		do_yield_0(q, 1);
-		return 0;
+		return pl_failure;
 	}
 
 	str->ungetch = ch;
@@ -2859,7 +2858,7 @@ static USE_RESULT prolog_state fn_iso_peek_byte_2(query *q)
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
 		do_yield_0(q, 1);
-		return 0;
+		return pl_failure;
 	}
 
 	str->ungetch = ch;
@@ -6421,8 +6420,10 @@ static USE_RESULT prolog_state fn_sleep_1(query *q)
 
 	GET_FIRST_ARG(p1,integer);
 
-	if (q->is_task)
-		return do_yield_0(q, p1->val_num*1000);
+	if (q->is_task) {
+		do_yield_0(q, p1->val_num*1000);
+		return pl_failure;
+	}
 
 	sleep((unsigned)p1->val_num);
 	return pl_success;
@@ -6435,8 +6436,10 @@ static USE_RESULT prolog_state fn_delay_1(query *q)
 
 	GET_FIRST_ARG(p1,integer);
 
-	if (q->is_task)
-		return do_yield_0(q, p1->val_num);
+	if (q->is_task) {
+		do_yield_0(q, p1->val_num);
+		return pl_failure;
+	}
 
 	msleep((unsigned)p1->val_num);
 	return pl_success;
@@ -6986,7 +6989,7 @@ static USE_RESULT prolog_state fn_accept_2(query *q)
 	if (fd == -1) {
 		if (q->is_task) {
 			do_yield_0(q, 10);
-			return 0;
+			return pl_failure;
 		}
 
 		printf("*** here\n");
@@ -7235,7 +7238,7 @@ static USE_RESULT prolog_state fn_getline_2(query *q)
 		if (q->is_task && !feof(str->fp)) {
 			clearerr(str->fp);
 			do_yield_0(q, 1);
-			return 0;
+			return pl_failure;
 		}
 
 		return pl_failure;
@@ -7295,7 +7298,7 @@ static USE_RESULT prolog_state fn_bread_3(query *q)
 			if (q->is_task) {
 				clearerr(str->fp);
 				do_yield_0(q, 1);
-				return 0;
+				return pl_failure;
 			}
 		}
 
@@ -7661,7 +7664,8 @@ static USE_RESULT prolog_state fn_yield_0(query *q)
 	if (q->retry)
 		return pl_success;
 
-	return do_yield_0(q, 0);
+	do_yield_0(q, 0);
+	return pl_failure;
 }
 
 static USE_RESULT prolog_state fn_spawn_1(query *q)
