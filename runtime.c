@@ -659,13 +659,10 @@ prolog_state set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		e->c = *v;
 
 		if (is_tmp(v)) {
-			v->val_str = NULL;
+			TAKE_STR(v);
 			e->c.flags &= ~FLAG_TMP;
-		} else {
-			e->c.val_str = malloc(v->len_str+1);
-			memcpy(e->c.val_str, v->val_str, v->len_str);
-			e->c.val_str[v->len_str] = '\0';
-		}
+		} else
+			DUP_STR(&e->c,v);
 	} else
 		e->c = *v;
 
@@ -702,13 +699,10 @@ void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		e->c = *v;
 
 		if (is_tmp(v)) {
-			v->val_str = NULL;
+			TAKE_STR(v);
 			e->c.flags &= ~FLAG_TMP;
-		} else {
-			e->c.val_str = malloc(v->len_str+1);
-			memcpy(e->c.val_str, v->val_str, v->len_str);
-			e->c.val_str[v->len_str] = '\0';
-		}
+		} else
+			DUP_STR(&e->c,v);
 	} else
 		e->c = *v;
 }

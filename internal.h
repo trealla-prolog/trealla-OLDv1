@@ -107,9 +107,15 @@ typedef uint32_t idx_t;
 
 // These 2 assume literal or cstring types...
 
-#define GET_STR(c) ((c)->val_type != TYPE_CSTRING ? (g_pool+(c)->val_off) : (c)->flags&FLAG_BLOB ? (assert((c)->val_str), (c)->val_str) : (c)->val_chr)
-#define LEN_STR(c) ((c)->flags&FLAG_BLOB ? (c)->len_str : strlen(GET_STR(c)))
-#define FREE_STR(c) if (is_nonconst_blob(c)) free((c)->val_str)
+#define GET_STR(c) (!is_cstring(c) ? (g_pool+(c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
+#define LEN_STR(c) (is_blob(c) ? (c)->len_str : strlen(GET_STR(c)))
+#define FREE_STR(c) if (is_nonconst_blob(c)) { free((c)->val_str); }
+#define TAKE_STR(c) {(c)->val_str = NULL; }
+
+#define DUP_STR(c,v) {												\
+	(c)->val_str = malloc((v)->len_str+1); 							\
+	memcpy((c)->val_str, v->val_str, v->len_str); 					\
+	(c)->val_str[(v)->len_str] = '\0'; }
 
 // Wrap an assignment that's expected to return anything but the given sentinel value.
 // when the sentinel otherwise does some (optional) error handling action
@@ -147,7 +153,7 @@ enum {
 	FLAG_TMP=1<<8,						// used with TYPE_CSTRING
 	FLAG_KEY=1<<9,						// used with keys
 
-	FLAG_PROCESSED=FLAG_KEY,				// used by bagof
+	FLAG_PROCESSED=FLAG_KEY,			// used by bagof
 	FLAG_FIRST_USE=FLAG_HEX,			// used with TYPE_VARIABLE
 	FLAG_ANON=FLAG_OCTAL,				// used with TYPE_VARIABLE
 	FLAG_FRESH=FLAG_BINARY,				// used with TYPE_VARIABLE
