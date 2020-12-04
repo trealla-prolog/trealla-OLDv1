@@ -640,6 +640,8 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 		snprintf(dst2, len2+1, "error(%s(%s,%s),%s/%u)", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	}
 
+	//printf("*** %s\n", dst2);
+
 	parser *p = q->m->p;
 	p->srcptr = dst2;
 	parser_tokenize(p, false, false);
@@ -6353,7 +6355,7 @@ static USE_RESULT prolog_state fn_sys_elapsed_0(query *q)
 
 static USE_RESULT prolog_state fn_trace_0(query *q)
 {
-	q->trace = true;
+	q->trace = !q->trace;
 	return pl_success;
 }
 
