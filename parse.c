@@ -559,7 +559,8 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
 		idx_t off = index_from_pool(GET_STR(c));
-		if (is_nonconst_blob(c)) free(c->val_str);
+		if(off == ERR_IDX) return NULL;
+		FREE_STR(c);
 		c->val_off = off;
 		ensure (c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
@@ -575,9 +576,8 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	if (is_cstring(c)) {
 		idx_t off = index_from_pool(GET_STR(c));
-		if(off == ERR_IDX)
-			return NULL;
-		if (is_nonconst_blob(c)) free(c->val_str);
+		if(off == ERR_IDX) return NULL;
+		FREE_STR(c);
 		c->val_off = off;
 		c->val_type = TYPE_LITERAL;
 		c->flags = 0;
@@ -782,7 +782,6 @@ void clear_term_nodelete(term *t)
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
 		c->val_type = TYPE_EMPTY;
-		c->val_str = NULL;
 	}
 
 	t->cidx = 0;
@@ -800,7 +799,6 @@ void clear_term(term *t)
 			free(c->val_str);
 
 		c->val_type = TYPE_EMPTY;
-		c->val_str = NULL;
 	}
 
 	t->cidx = 0;
@@ -849,6 +847,7 @@ parser *create_parser(module *m)
 		p->line_nbr = 1;
 		p->m = m;
 		p->error = false;
+
 		if (!p->token || !p->t) {
 			destroy_parser(p);
 			p = NULL;
@@ -883,10 +882,9 @@ void destroy_query(query *q)
 	for (arena *a = q->arenas; a;) {
 		for (idx_t i = 0; i < a->hp; i++) {
 			cell *c = a->heap + i;
+			FREE_STR(c);
 
-			if (is_nonconst_blob(c))
-				free(c->val_str);
-			else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
+			if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 				stream *str = &g_streams[c->val_num];
 
 				if (str->fp
@@ -918,12 +916,8 @@ void destroy_query(query *q)
 
 	slot *e = q->slots;
 
-	for (idx_t i = 0; i < q->st.sp; i++, e++) {
-		cell *c = &e->c;
-
-		if (is_nonconst_blob(c))
-			free(c->val_str);
-	}
+	for (idx_t i = 0; i < q->st.sp; i++, e++)
+		FREE_STR(&e->c);
 
 	free(q->slots);
 	free(q->frames);

@@ -109,6 +109,7 @@ typedef uint32_t idx_t;
 
 #define GET_STR(c) ((c)->val_type != TYPE_CSTRING ? (g_pool+(c)->val_off) : (c)->flags&FLAG_BLOB ? (assert((c)->val_str), (c)->val_str) : (c)->val_chr)
 #define LEN_STR(c) ((c)->flags&FLAG_BLOB ? (c)->len_str : strlen(GET_STR(c)))
+#define FREE_STR(c) if (is_nonconst_blob(c)) free((c)->val_str)
 
 // Wrap an assignment that's expected to return anything but the given sentinel value.
 // when the sentinel otherwise does some (optional) error handling action

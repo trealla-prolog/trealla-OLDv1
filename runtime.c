@@ -205,10 +205,7 @@ static void unwind_trail(query *q, const choice *ch)
 
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
-
-		if (is_nonconst_blob(&e->c))
-			free(e->c.val_str);
-
+		FREE_STR(&e->c);
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = NULL;
 	}
@@ -293,10 +290,9 @@ static void trim_heap(query *q, const choice *ch)
 
 		for (idx_t i = 0; i < a->hp; i++) {
 			cell *c = a->heap + i;
+			FREE_STR(c);
 
-			if (is_nonconst_blob(c)) {
-				free(c->val_str);
-			} else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
+			if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 				stream *str = &g_streams[c->val_num];
 
 				if ((str->fp)
@@ -329,10 +325,9 @@ static void trim_heap(query *q, const choice *ch)
 
 	for (idx_t i = ch->st.hp; a && (i < a->hp); i++) {
 		cell *c = a->heap + i;
+		FREE_STR(c);
 
-		if (is_nonconst_blob(c)) {
-			free(c->val_str);
-		} else if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
+		if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 			stream *str = &g_streams[c->val_num];
 
 			if ((str->fp)
@@ -440,10 +435,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 
 		for (unsigned i = 0; i < nbr_vars; i++) {
 			slot *e = GET_SLOT(g, i);
-			cell *c = &e->c;
-
-			if (is_string(c) && !is_const_cstring(c))
-				free(c->val_str);
+			FREE_STR(&e->c);
 		}
 
 		slot *from = GET_SLOT(new_g, 0);
@@ -951,7 +943,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx)
 			// For now convert it to a literal
 			idx_t off = index_from_pool(GET_STR(c));
 			may_idx_error(off);
-			if (is_nonconst_blob(c)) free(c->val_str);
+			FREE_STR(c);
 			c->val_off = off;
 			c->val_type = TYPE_LITERAL;
 			c->flags = 0;
@@ -1036,15 +1028,14 @@ static USE_RESULT prolog_state match_rule(query *q)
 				return pl_error;
 			}
 
-			if (is_nonconst_blob(c)) free(c->val_str);
+			FREE_STR(c);
 			c->val_type = TYPE_LITERAL;
 			c->flags = 0;
 			h = NULL;
 		}
 
 		if (!h) {
-			c->match = find_matching_predicate(q->m, c);
-			h = c->match;
+			h = c->match = find_matching_predicate(q->m, c);
 
 			if (!h) {
 				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(c), "initialization")))
@@ -1101,6 +1092,7 @@ static USE_RESULT prolog_state match_rule(query *q)
 		return pl_failure;
 
 	may_error(make_choice(q));
+
 	for (; q->st.curr_clause; next_key(q)) {
 		if (q->st.curr_clause->t.deleted)
 			continue;
