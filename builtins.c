@@ -655,6 +655,7 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	DISCARD_RESULT do_throw_term(q, p->t->cells);
 	//TODO: cehteh: exception handling needs review
 	//clear_term(p->t);
+	p->t->cidx = 0;
 	free(dst2);
 	free(dst);
 	return pl_success;
