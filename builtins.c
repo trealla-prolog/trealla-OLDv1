@@ -486,13 +486,13 @@ static USE_RESULT cell *deep_copy2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx,
 			for (size_t i = 0; i < g_tab_idx; i++) {
 				if (g_tab1[i] == slot_nbr) {
 					tmp->var_nbr = g_tab2[i];
-					tmp->flags = FLAG_FRESH;
+					tmp->flags = FLAG2_FRESH;
 					return tmp;
 				}
 			}
 
 			tmp->var_nbr = g_varno;
-			tmp->flags = FLAG_FRESH;
+			tmp->flags = FLAG2_FRESH;
 			g_tab1[g_tab_idx] = slot_nbr;
 			g_tab2[g_tab_idx] = g_varno++;
 			g_tab_idx++;
@@ -1800,7 +1800,7 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 		void *addr = mmap(0, len, prot, MAP_PRIVATE, fd, 0);
 		cell tmp = {0};
 		tmp.val_type = TYPE_CSTRING;
-		tmp.flags = FLAG_BLOB|FLAG_STRING|FLAG_CONST;
+		tmp.flags = FLAG_BLOB|FLAG_STRING|FLAG2_CONST;
 		tmp.nbr_cells = 1;
 		tmp.arity = 2;
 		tmp.val_str = addr;
@@ -4481,7 +4481,7 @@ static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 			make_variable(&v, g_tab3[i]);
 
 			if (g_tab1[i] != q->st.curr_frame) {
-				v.flags |= FLAG_FRESH;
+				v.flags |= FLAG2_FRESH;
 				v.var_nbr = g_varno++;
 			} else
 				v.var_nbr = g_tab2[i];
@@ -4509,10 +4509,10 @@ static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 
 			cell v, tmp2;
 			make_variable(&v, g_anon_s);
-			v.flags |= FLAG_FRESH;
+			v.flags |= FLAG2_FRESH;
 			v.var_nbr = g_varno++;
 			make_variable(&tmp2, g_anon_s);
-			tmp2.flags |= FLAG_FRESH;
+			tmp2.flags |= FLAG2_FRESH;
 			tmp2.var_nbr = g_tab2[i];
 			set_var(q, &v, q->st.curr_frame, &tmp2, g_tab1[i]);
 		}
@@ -4538,7 +4538,7 @@ static cell *clone2_to_tmp(query *q, cell *p1)
 
 	for (idx_t i = 0; i < p1->nbr_cells; i++, c++) {
 		if (is_blob(c))
-			c->flags |= FLAG_CONST;
+			c->flags |= FLAG2_CONST;
 	}
 
 	return tmp;
@@ -4569,7 +4569,7 @@ static cell *clone2_to_heap(query *q, bool prefix, cell *p1, idx_t nbr_cells, id
 
 	for (idx_t i = 0; i < nbr_cells; i++, c++) {
 		if (is_blob(c))
-			c->flags |= FLAG_CONST;
+			c->flags |= FLAG2_CONST;
 	}
 
 	return tmp;
@@ -4602,7 +4602,7 @@ static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx
 		*dst = *src;
 
 		if (is_blob(src))
-			dst->flags |= FLAG_CONST;
+			dst->flags |= FLAG2_CONST;
 
 		if (!is_variable(src))
 			continue;
@@ -4625,7 +4625,7 @@ static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx
 			g_tab_idx++;
 		}
 
-		dst->flags = FLAG_FRESH;
+		dst->flags = FLAG2_FRESH;
 	}
 
 	if (g_varno != g->nbr_vars) {
@@ -5331,7 +5331,7 @@ static USE_RESULT prolog_state fn_iso_functor_3(query *q)
 			tmp[i].nbr_cells = 1;
 			tmp[i].var_nbr = var_nbr++;
 			tmp[i].val_off = g_anon_s;
-			tmp[i].flags = FLAG_FRESH;
+			tmp[i].flags = FLAG2_FRESH;
 		}
 
 		set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
@@ -5708,7 +5708,7 @@ static USE_RESULT prolog_state do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
 		if (is_variable(c) && is_anon(c)) {
 			c->var_nbr = new_varno++;
-			c->flags = FLAG_FRESH;
+			c->flags = FLAG2_FRESH;
 		}
 	}
 
@@ -5732,7 +5732,7 @@ static USE_RESULT prolog_state fn_sys_list_1(query *q)
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
 		if (is_variable(c) && is_anon(c)) {
 			c->var_nbr = new_varno++;
-			c->flags = FLAG_FRESH;
+			c->flags = FLAG2_FRESH;
 		}
 	}
 
@@ -5976,7 +5976,7 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 	     nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
 
-		if (c->flags & FLAG_PROCESSED)
+		if (c->flags & FLAG2_PROCESSED)
 			continue;
 
 		try_me(q, MAX_ARITY);
@@ -5986,7 +5986,7 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 				return throw_error(q, p1, "resource_error", "cyclic_term");
 			}
 
-			c->flags |= FLAG_PROCESSED;
+			c->flags |= FLAG2_PROCESSED;
 
 			cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, true);
 			ensure(tmp);
@@ -9697,7 +9697,7 @@ static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned end)
 		cell *tmp = alloc_heap(q, 2);
 		make_structure(tmp+0, index_from_pool("$VAR"), NULL, 1, 1);
 		make_int(tmp+1, end++);
-		tmp->flags |= FLAG_QUOTED;
+		tmp->flags |= FLAG2_QUOTED;
 		set_var(q, p1, q->latest_ctx, tmp, q->st.curr_frame);
 		cnt++;
 		return cnt;
@@ -9716,7 +9716,7 @@ static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned end)
 			cell *tmp = alloc_heap(q, 2);
 			make_structure(tmp+0, index_from_pool("$VAR"), NULL, 1, 1);
 			make_int(tmp+1, end++);
-			tmp->flags |= FLAG_QUOTED;
+			tmp->flags |= FLAG2_QUOTED;
 			set_var(q, c, q->latest_ctx, tmp, q->st.curr_frame);
 			cnt++;
 		} else if (is_structure(c))
@@ -10174,7 +10174,7 @@ static USE_RESULT prolog_state do_length(query *q)
 
 	tmp.val_type = TYPE_VARIABLE;
 	tmp.nbr_cells = 1;
-	tmp.flags = FLAG_FRESH;
+	tmp.flags = FLAG2_FRESH;
 	tmp.val_off = g_anon_s;
 	tmp.var_nbr = var_nbr++;
 	tmp.arity = 0;
@@ -10301,7 +10301,7 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 		tmp.val_type = TYPE_VARIABLE;
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;
-		tmp.flags = FLAG_FRESH;
+		tmp.flags = FLAG2_FRESH;
 		tmp.val_off = g_anon_s;
 		tmp.var_nbr = var_nbr++;
 		alloc_list(q, &tmp);

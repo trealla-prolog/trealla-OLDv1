@@ -273,7 +273,7 @@ cell *list_tail(cell *l, cell *tmp)
 
 	if ((l->len_str - n) != 0) {
 		tmp->val_type = TYPE_CSTRING;
-		tmp->flags = FLAG_BLOB|FLAG_CONST|FLAG_STRING;
+		tmp->flags = FLAG_BLOB|FLAG2_CONST|FLAG_STRING;
 		tmp->nbr_cells = 1;
 		tmp->arity = 2;
 		tmp->val_str = l->val_str + n;
@@ -621,7 +621,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 			cell *c = r->t.cells + i;
 
 			if (is_blob(c) && is_const_cstring(c))
-				c->flags |= FLAG_DUP;
+				c->flags |= FLAG2_DUP;
 		}
 	}
 
@@ -1609,7 +1609,7 @@ void parser_assign_vars(parser *p, unsigned start, bool rebase)
 		p->vartab.var_name[c->var_nbr] = GET_STR(c);
 
 		if (p->vartab.var_used[c->var_nbr]++ == 0) {
-			c->flags |= FLAG_FIRST_USE;
+			c->flags |= FLAG2_FIRST_USE;
 			t->nbr_vars++;
 			p->nbr_vars++;
 		}
@@ -1631,7 +1631,7 @@ void parser_assign_vars(parser *p, unsigned start, bool rebase)
 			continue;
 
 		if (c->val_off == g_anon_s)
-			c->flags |= FLAG_ANON;
+			c->flags |= FLAG2_ANON;
 	}
 
 
@@ -2796,7 +2796,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 				c->val_type = TYPE_VARIABLE;
 
 			if (p->was_quoted)
-				c->flags |= FLAG_QUOTED;
+				c->flags |= FLAG2_QUOTED;
 
 			c->val_off = index_from_pool(p->token);
 			ensure(c->val_off != ERR_IDX);
@@ -2807,7 +2807,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 				strcpy(c->val_chr, p->token);
 			else {
 				if (p->consulting || p->skip)
-					c->flags |= FLAG_CONST;
+					c->flags |= FLAG2_CONST;
 
 				if (p->string) {
 					c->flags |= FLAG_STRING;

@@ -88,21 +88,21 @@ typedef uint32_t idx_t;
 #define is_iso_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
 
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
-#define is_string(c) (is_cstring(c) && (c)->flags&FLAG_STRING)
-#define is_blob(c) (is_cstring(c) && ((c)->flags&FLAG_BLOB))
+#define is_string(c) ((c)->flags & FLAG_STRING)
+#define is_blob(c) ((c)->flags & FLAG_BLOB)
 #define is_list(c) (is_iso_list(c) || is_string(c))
 #define is_integer(c) (is_rational(c) && ((c)->val_den == 1))
-#define is_const_cstring(c) (is_cstring(c) && ((c)->flags & FLAG_CONST))
+#define is_const_cstring(c) (is_cstring(c) && ((c)->flags & FLAG2_CONST))
 #define is_tmp(c) ((c)->flags & FLAG_TMP)
-#define is_const_blob(c) (is_cstring(c) && ((c)->flags & FLAG_CONST) && ((c)->flags & FLAG_BLOB))
-#define is_nonconst_blob(c) (is_cstring(c) && !((c)->flags & FLAG_CONST) && ((c)->flags & FLAG_BLOB))
-#define is_dup_cstring(c) (is_cstring(c) && ((c)->flags & FLAG_DUP))
+#define is_const_blob(c) (((c)->flags & FLAG2_CONST) && is_blob(c))
+#define is_nonconst_blob(c) (is_cstring(c) && !((c)->flags & FLAG2_CONST) && is_blob(c))
+#define is_dup_cstring(c) (is_cstring(c) && ((c)->flags & FLAG2_DUP))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
-#define is_quoted(c) ((c)->flags & FLAG_QUOTED)
-#define is_fresh(c) ((c)->flags & FLAG_FRESH)
-#define is_anon(c) ((c)->flags & FLAG_ANON)
+#define is_quoted(c) ((c)->flags & FLAG2_QUOTED)
+#define is_fresh(c) ((c)->flags & FLAG2_FRESH)
+#define is_anon(c) ((c)->flags & FLAG2_ANON)
 #define is_builtin(c) ((c)->flags & FLAG_BUILTIN)
-#define is_key(c) (is_literal((c)) && ((c)->flags & FLAG_KEY))
+#define is_key(c) ((c)->flags & FLAG_KEY)
 #define is_op(c) (c->flags && 0xFF00)
 
 // These 2 assume literal or cstring types...
@@ -153,13 +153,16 @@ enum {
 	FLAG_TMP=1<<8,						// used with TYPE_CSTRING
 	FLAG_KEY=1<<9,						// used with keys
 
-	FLAG_PROCESSED=FLAG_KEY,			// used by bagof
-	FLAG_FIRST_USE=FLAG_HEX,			// used with TYPE_VARIABLE
-	FLAG_ANON=FLAG_OCTAL,				// used with TYPE_VARIABLE
-	FLAG_FRESH=FLAG_BINARY,				// used with TYPE_VARIABLE
-	FLAG_CONST=FLAG_HEX,				// used with TYPE_CSTRING
-	FLAG_DUP=FLAG_OCTAL,				// used with TYPE_CSTRING
-	FLAG_QUOTED=FLAG_BINARY,			// used with TYPE_CSTRING
+	// These are redefinitions and should only be used
+	// when the primary type is already checked...
+
+	FLAG2_PROCESSED=FLAG_KEY,			// used by bagof
+	FLAG2_FIRST_USE=FLAG_HEX,			// used with TYPE_VARIABLE
+	FLAG2_ANON=FLAG_OCTAL,				// used with TYPE_VARIABLE
+	FLAG2_FRESH=FLAG_BINARY,				// used with TYPE_VARIABLE
+	FLAG2_CONST=FLAG_HEX,				// used with TYPE_CSTRING
+	FLAG2_DUP=FLAG_OCTAL,				// used with TYPE_CSTRING
+	FLAG2_QUOTED=FLAG_BINARY,			// used with TYPE_CSTRING
 
 	FLAG_END=1<<11
 };
