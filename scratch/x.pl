@@ -1,8 +1,9 @@
 :- initialization(main).
 
-a((foo(X,Y),baz(X,Y)), 1).
+test(G,Error,Context) :- catch(G,error(Error,Context),writeln([Error,Context])).
 
 main :-
-	findall(A-N, a(A, N), L),
-	writeln(L),
+	test(term_variables(t,[_,_|a]),E,C),
+	writeln(E),
+	writeln(C),
 	halt.
