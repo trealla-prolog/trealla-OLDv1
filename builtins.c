@@ -4946,7 +4946,7 @@ USE_RESULT prolog_state call_me(query *q, cell *p1)
 
 	idx_t nbr_cells = tmp->nbr_cells;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
-	make_barrier(q);
+	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -5004,7 +5004,7 @@ static USE_RESULT prolog_state fn_iso_ifthen_2(query *q)
 	tmp[nbr_cells-1].cgen = q->cgen + 1;
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
-	make_barrier(q);
+	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -5025,7 +5025,7 @@ static USE_RESULT prolog_state do_ifthenelse(query *q, cell *p1, cell *p2, cell 
 	tmp[nbr_cells-1].cgen = q->cgen + 1;
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
-	make_barrier(q);
+	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -5069,7 +5069,7 @@ static USE_RESULT prolog_state fn_iso_negation_1(query *q)
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	tmp[nbr_cells-1].cgen = q->cgen + 1;
 	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
-	make_barrier(q);
+	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -5085,7 +5085,7 @@ static USE_RESULT prolog_state fn_iso_once_1(query *q)
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	tmp[nbr_cells-1].cgen = q->cgen + 1;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
-	make_barrier(q);
+	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -5101,7 +5101,7 @@ static USE_RESULT prolog_state fn_ignore_1(query *q)
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	tmp[nbr_cells-1].cgen = q->cgen + 1;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
-	make_barrier(q);
+	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -5121,7 +5121,7 @@ static USE_RESULT prolog_state fn_iso_catch_3(query *q)
 		q->retry = QUERY_OK;
 		cell *tmp = clone_to_heap(q, true, p3, 1);
 		make_end_return(tmp+1+p3->nbr_cells, q->st.curr_cell);
-		make_catcher(q, QUERY_EXCEPTION);
+		may_error(make_catcher(q, QUERY_EXCEPTION));
 		q->st.curr_cell = tmp;
 		return pl_success;
 	}
@@ -5133,7 +5133,7 @@ static USE_RESULT prolog_state fn_iso_catch_3(query *q)
 
 	cell *tmp = clone_to_heap(q, true, p1, 1);
 	make_end_return(tmp+1+p1->nbr_cells, q->st.curr_cell);
-	make_catcher(q, QUERY_RETRY);
+	may_error(make_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -5805,7 +5805,7 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 		nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		init_queuen(q);
-		make_barrier(q);
+		may_error(make_barrier(q));
 		q->st.curr_cell = tmp;
 		return pl_success;
 	}
@@ -5884,7 +5884,7 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 		nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		init_queuen(q);
-		make_barrier(q);
+		may_error(make_barrier(q));
 		q->st.curr_cell = tmp;
 		return pl_success;
 	}
@@ -6495,7 +6495,7 @@ static USE_RESULT prolog_state fn_forall_2(query *q)
 	clone_to_heap(q, false, p2, 1);
 	idx_t nbr_cells = 1 + p1->nbr_cells + p2->nbr_cells;
 	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
-	make_barrier(q);
+	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
