@@ -6496,8 +6496,11 @@ static USE_RESULT prolog_state fn_forall_2(query *q)
 
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
+
+	// FIXME...
 	cell *tmp = clone_to_heap(q, true, p1, 0);
 	may_ptr_error(clone_to_heap(q, false, p2, 1));
+
 	idx_t nbr_cells = 1 + p1->nbr_cells + p2->nbr_cells;
 	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 	may_error(make_barrier(q));
