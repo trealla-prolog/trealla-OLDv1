@@ -102,6 +102,7 @@ static prolog_state do_yield_0(query *q, int msecs)
 	q->tmo_msecs = get_time_in_usec() / 1000;
 	q->tmo_msecs += msecs;
 	may_error(make_choice(q));
+	return pl_failure;
 }
 
 static void set_pinned(query *q, int i)
@@ -291,12 +292,14 @@ static cell *alloc_heap(query *q, idx_t nbr_cells)
 //static idx_t heap_used(const query *q) { return q->st.hp; }
 //static cell *get_heap(const query *q, idx_t i) { return q->arenas->heap + i; }
 
+#if 0
 static void init_queue(query* q)
 {
 	free(q->queue[0]);
 	q->queue[0] = NULL;
 	q->qp[0] = 0;
 }
+#endif
 
 static idx_t queue_used(const query *q) { return q->qp[0]; }
 static cell *get_queue(query *q) { return q->queue[0]; }
@@ -2092,7 +2095,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 
 	if (sings) {
 		unsigned cnt = 0;
-		init_tmp_heap(q);
+		may_ptr_error(init_tmp_heap(q));
 		cell *tmp = alloc_tmp_heap(q, (cnt*4)+1);
 		ensure(tmp);
 		unsigned idx = 0;
@@ -4374,7 +4377,7 @@ static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 	g_tab_idx = 0;
 	collect_vars(q, p1, p1_ctx, p1->nbr_cells);
 	const unsigned cnt = g_tab_idx;
-	init_tmp_heap(q);
+	may_ptr_error(init_tmp_heap(q));
 	cell *tmp = alloc_tmp_heap(q, (cnt*2)+1);
 	ensure(tmp);
 	unsigned idx = 0;
@@ -4456,7 +4459,7 @@ static cell *clone2_to_tmp(query *q, cell *p1)
 
 static cell *clone_to_tmp(query *q, cell *p1)
 {
-	init_tmp_heap(q);
+	if (!init_tmp_heap(q)) return NULL;
 	return clone2_to_tmp(q, p1);
 }
 
@@ -5642,6 +5645,7 @@ static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 	return l;
 }
 
+#if 0
 static USE_RESULT prolog_state do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 {
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
@@ -5663,6 +5667,7 @@ static USE_RESULT prolog_state do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
 
 	return unify(q, p1, p1_ctx, l, q->st.curr_frame);
 }
+#endif
 
 static USE_RESULT prolog_state fn_sys_list_1(query *q)
 {
@@ -6299,7 +6304,7 @@ static USE_RESULT prolog_state fn_trace_0(query *q)
 static USE_RESULT prolog_state fn_time_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	fn_sys_timer_0(q);
+	DISCARD_RESULT fn_sys_timer_0(q);
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_elapsed_s, fn_sys_elapsed_0, 0, 0);
@@ -6492,7 +6497,7 @@ static USE_RESULT prolog_state fn_forall_2(query *q)
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 0);
-	clone_to_heap(q, false, p2, 1);
+	may_ptr_error(clone_to_heap(q, false, p2, 1));
 	idx_t nbr_cells = 1 + p1->nbr_cells + p2->nbr_cells;
 	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 	may_error(make_barrier(q));
@@ -7518,7 +7523,8 @@ static USE_RESULT prolog_state fn_wait_0(query *q)
 				continue;
 			}
 
-			run_query(task);
+			DISCARD_RESULT run_query(task);
+
 			task = task->next;
 			did_something = 1;
 		}
@@ -7561,7 +7567,7 @@ static USE_RESULT prolog_state fn_await_0(query *q)
 				continue;
 			}
 
-			run_query(task);
+			DISCARD_RESULT run_query(task);
 
 			if (!task->tmo_msecs && task->yielded) {
 				did_something = 1;
