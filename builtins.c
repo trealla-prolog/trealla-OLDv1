@@ -5192,6 +5192,7 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	char *dst = malloc(len+1);
 	ensure(dst);
 	len = print_term_to_buf(q, dst, len+1, c, c_ctx, 1, 0, 0);
+
 	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q->st.curr_cell) + 1024;
 	char *dst2 = malloc(len2+1);
 	ensure(dst2);
@@ -5200,7 +5201,7 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	if (!strncmp(expected, "iso_", 4))
 		expected += 4;
 
-	char tmpbuf[1024*4];
+	char tmpbuf[1024*8];
 	snprintf(tmpbuf, sizeof(tmpbuf), "%s", expected);
 	char *ptr;
 
@@ -5225,8 +5226,9 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	parser_tokenize(p, false, false);
 	p->read_term = 0;
 	prolog_state ok = pl_failure;
+	cell *e = p->t->cells;
 
-	if (find_exception_handler(q, p->t->cells, q->st.curr_frame))
+	if (find_exception_handler(q, e, q->st.curr_frame))
 		ok = fn_iso_catch_3(q);
 
 	//clear_term(p->t);
