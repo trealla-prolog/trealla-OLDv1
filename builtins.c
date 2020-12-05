@@ -6497,7 +6497,8 @@ static USE_RESULT prolog_state fn_forall_2(query *q)
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
 
-	// FIXME...
+	// FIXME... clone to tmp then alloc_heap / copy
+
 	cell *tmp = clone_to_heap(q, true, p1, 0);
 	may_ptr_error(clone_to_heap(q, false, p2, 1));
 
