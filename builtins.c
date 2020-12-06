@@ -5918,7 +5918,7 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
-	GET_NEXT_ARG(p3,any);
+	GET_NEXT_ARG(p3,list_or_var);
 
 	if (!is_variable(p3) && !is_valid_list(q, p3, p3_ctx, true))
 		return throw_error(q, p3, "type_error", "list");
