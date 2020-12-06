@@ -4308,9 +4308,8 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 
-	if (is_variable(p1) && is_variable(p2)) {
+	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
-	}
 
 	if (is_variable(p1) && is_nil(p2))
 		return throw_error(q, p2, "domain_error", "non_empty_list");
@@ -4319,9 +4318,8 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 		cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false);
 		may_ptr_error(tmp);
 
-		if (q->cycle_error) {
+		if (q->cycle_error)
 			return throw_error(q, p1, "resource_error", "cyclic_term");
-		}
 
 		unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 		cell tmp2 = *tmp;
@@ -4383,17 +4381,17 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 			c->flags = 0;
 		}
 
-		if (!is_literal(tmp2) && arity) {
+		if (!is_literal(tmp2) && arity)
 			return throw_error(q, tmp2, "type_error", "atom");
-		}
 
-		if (tmp2->arity && arity) {
+		if (tmp2->arity && arity)
 			return throw_error(q, tmp2, "type_error", "atom");
-		}
 
-		if (tmp2->arity) {
+		if (tmp2->arity)
 			return throw_error(q, tmp2, "type_error", "atomic");
-		}
+
+		if (arity > MAX_ARITY)
+			return throw_error(q, tmp2, "representation_error", "max_arity");
 
 		idx_t nbr_cells = nbr_cells = tmp_heap_used(q) - save;
 		tmp = alloc_heap(q, nbr_cells);
