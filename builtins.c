@@ -5115,8 +5115,10 @@ static USE_RESULT prolog_state fn_iso_catch_3(query *q)
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,callable);
 
-	if (q->retry && q->exception)
-		return unify(q, p2, p2_ctx, q->exception, q->st.curr_frame);
+	if (q->retry && q->exception) {
+		cell *e = q->exception;
+		return unify(q, p2, p2_ctx, e, q->st.curr_frame);
+	}
 
 	// Second time through? Try the recover goal...
 
