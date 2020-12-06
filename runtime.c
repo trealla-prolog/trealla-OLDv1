@@ -630,9 +630,6 @@ unsigned create_vars(query *q, unsigned cnt)
 		q->st.sp += cnt;
 	}
 
-	if (!check_slot(q, cnt))
-		return 0;
-
 	for (unsigned i = 0; i < cnt; i++) {
 		slot *e = GET_SLOT(g, g->nbr_vars+i);
 		e->c.val_type = TYPE_EMPTY;

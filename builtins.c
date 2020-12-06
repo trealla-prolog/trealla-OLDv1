@@ -5238,8 +5238,13 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	p->read_term = g->nbr_vars;
 	parser_tokenize(p, false, false);
 
-	if (!create_vars(q, p->nbr_vars))
-		return throw_error(q, c, "resource_error", "too_many_vars");
+	if (p->nbr_vars != g->nbr_vars) {
+		if (!create_vars(q, p->nbr_vars)) {
+			//return throw_error(q, c, "resource_error", "too_many_vars");
+			printf("Error: too many vars: %s\n", dst2);
+			return 0;
+		}
+	}
 
 	cell *tmp = deep_copy_to_heap(q, p->t->cells, q->st.curr_frame, false);
 	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
