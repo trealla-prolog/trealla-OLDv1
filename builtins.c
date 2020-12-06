@@ -4361,6 +4361,9 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 			arity++;
 		}
 
+		if (is_variable(p2))
+			return throw_error(q, p2, "instantiation_error", "list");
+
 		if (!is_nil(p2))
 			return throw_error(q, save_p2, "type_error", "list");
 
