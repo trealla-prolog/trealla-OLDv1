@@ -1990,8 +1990,10 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 
 	parser_xref(p, p->t, NULL);
 
-	if (!create_vars(q, p->nbr_vars))
-		return throw_error(q, p1, "resource_error", "too_many_vars");
+	if (p->nbr_vars) {
+		if (!create_vars(q, p->nbr_vars))
+			return throw_error(q, p1, "resource_error", "too_many_vars");
+	}
 
 	cell *tmp = p->t->cells;
 	tmp->nbr_cells = p->t->cidx-1;
@@ -4415,8 +4417,10 @@ static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 		unsigned new_vars = g_varno - g->nbr_vars;
 		g_varno = g->nbr_vars;
 
-		if (!create_vars(q, new_vars))
-			return throw_error(q, p1, "resource_error", "too_many_vars");
+		if (new_vars) {
+			if (!create_vars(q, new_vars))
+				return throw_error(q, p1, "resource_error", "too_many_vars");
+		}
 
 		for (unsigned i = 0; i < cnt; i++) {
 			if (g_tab1[i] == q->st.curr_frame)
@@ -5238,12 +5242,9 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	p->read_term = g->nbr_vars;
 	parser_tokenize(p, false, false);
 
-	if (p->nbr_vars != g->nbr_vars) {
-		if (!create_vars(q, p->nbr_vars)) {
-			//return throw_error(q, c, "resource_error", "too_many_vars");
-			printf("Error: too many vars: %s\n", dst2);
-			return 0;
-		}
+	if (p->nbr_vars != 0) {
+		if (!create_vars(q, p->nbr_vars))
+			return throw_error(q, c, "resource_error", "too_many_vars");
 	}
 
 	cell *tmp = deep_copy_to_heap(q, p->t->cells, q->st.curr_frame, false);
@@ -5280,10 +5281,12 @@ static USE_RESULT prolog_state fn_iso_functor_3(query *q)
 			return throw_error(q, p3, "domain_error", "integer");
 
 		unsigned arity = p3->val_num;
-		unsigned var_nbr;
+		unsigned var_nbr = 0;
 
-		if (!(var_nbr = create_vars(q, arity)))
-			return throw_error(q, p3, "resource_error", "too_many_vars");
+		if (arity) {
+			if (!(var_nbr = create_vars(q, arity)))
+				return throw_error(q, p3, "resource_error", "too_many_vars");
+		}
 
 		GET_FIRST_ARG(p1,any);
 		GET_NEXT_ARG(p2,any);
@@ -10091,11 +10094,13 @@ static USE_RESULT prolog_state do_length(query *q)
 		return throw_error(q, p2, "resource_error", "too_many_vars");
 	}
 
-	unsigned var_nbr;
+	unsigned var_nbr = 0;
 
-	if (!(var_nbr = create_vars(q, nbr))) {
-		drop_choice(q);
-		return throw_error(q, p1, "resource_error", "too_many_vars");
+	if (nbr) {
+		if (!(var_nbr = create_vars(q, nbr))) {
+			drop_choice(q);
+			return throw_error(q, p1, "resource_error", "too_many_vars");
+		}
 	}
 
 	tmp.val_type = TYPE_VARIABLE;
@@ -10214,10 +10219,12 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 			return pl_success;
 		}
 
-		unsigned var_nbr;
+		unsigned var_nbr = 0;
 
-		if (!(var_nbr = create_vars(q, nbr)))
-			return throw_error(q, p2, "resource_error", "too_many_vars");
+		if (nbr) {
+			if (!(var_nbr = create_vars(q, nbr)))
+				return throw_error(q, p2, "resource_error", "too_many_vars");
+		}
 
 		cell tmp;
 		tmp.val_type = TYPE_VARIABLE;
