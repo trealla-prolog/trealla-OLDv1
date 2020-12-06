@@ -826,7 +826,6 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 			cell *head = LIST_HEAD(p2);
 			cell *tail = LIST_TAIL(p2);
 			head = deref(q, head, p2_ctx);
-			p2_ctx = q->latest_ctx;
 
 			if (!is_atom(head) && is_variable(p1))
 				return throw_error(q, head, "type_error", "character");
@@ -863,7 +862,6 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 			cell *head = LIST_HEAD(p2);
 			cell *tail = LIST_TAIL(p2);
 			head = deref(q, head, p2_ctx);
-			p2_ctx = q->latest_ctx;
 
 			const char *src = GET_STR(head);
 			int nbytes = len_char_utf8(src);
@@ -936,23 +934,49 @@ static USE_RESULT prolog_state fn_iso_atom_codes_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (!is_variable(p2) && is_variable(p1)) {
-		cell *head = LIST_HEAD(p2);
-		cell *tail = LIST_TAIL(p2);
-		head = deref(q, head, p2_ctx);
+	// Verify the list
 
+	if (!is_variable(p2)) {
+		cell *save_p2 = p2;
+		idx_t save_p2_ctx = p2_ctx;
+
+		while (is_list(p2)) {
+			cell *head = LIST_HEAD(p2);
+			cell *tail = LIST_TAIL(p2);
+			head = deref(q, head, p2_ctx);
+
+			if (!is_integer(head) && is_variable(p1))
+				return throw_error(q, head, "type_error", "integer");
+
+			if (!is_integer(head) && !is_variable(head))
+				return throw_error(q, head, "type_error", "integer");
+
+			p2 = deref(q, tail, p2_ctx);
+			p2_ctx = q->latest_ctx;
+		}
+
+		if (!is_nil(p2) && !is_variable(p2))
+			return throw_error(q, p2, "type_error", "list");
+
+		p2 = save_p2;
+		p2_ctx = save_p2_ctx;
+	}
+
+	if (!is_variable(p2) && is_variable(p1)) {
 		size_t nbytes;
 		char *tmpbuf = malloc(nbytes=256), *dst = tmpbuf;
 		ensure(tmpbuf);
 
-		while (tail) {
-			tail = deref(q, tail, p2_ctx);
-			p2_ctx = q->latest_ctx;
-
-			if (!is_integer(head))
-				return throw_error(q, head, "type_error", "integer");
+		while (is_list(p2)) {
+			cell *head = LIST_HEAD(p2);
+			cell *tail = LIST_TAIL(p2);
+			head = deref(q, head, p2_ctx);
 
 			int_t val = head->val_num;
+
+			if (val < 0)
+				return throw_error(q, head, "representation_error", "character_code");
+
 			char ch[10];
 			put_char_utf8(ch, val);
 			size_t nlen = dst - tmpbuf;
@@ -966,18 +990,13 @@ static USE_RESULT prolog_state fn_iso_atom_codes_2(query *q)
 			strcpy(dst, ch);
 			dst += strlen(ch);
 
-			if (is_literal(tail)) {
-				if (tail->val_off == g_nil_s)
-					break;
-			}
+			p2 = deref(q, tail, p2_ctx);
+			p2_ctx = q->latest_ctx;
 
-			if (!is_list(tail))
-				return throw_error(q, tail, "type_error", "list");
-
-			head = LIST_HEAD(tail);
-			tail = LIST_TAIL(tail);
-			head = deref(q, head, q->latest_ctx);
 		}
+
+		if (!is_nil(p2))
+			return throw_error(q, p2, "type_error", "list");
 
 		cell tmp;
 		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf));
@@ -5263,6 +5282,8 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),%s/%u).", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (GET_OP(q->st.curr_cell)) {
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+	} else if (!strcmp(err_type, "representation_error")) {
+		snprintf(dst2, len2+1, "error(%s(%s),%s/%u).", err_type, expected, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else {
 		snprintf(dst2, len2+1, "error(%s(%s,%s),%s/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	}
