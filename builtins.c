@@ -4306,11 +4306,14 @@ static USE_RESULT prolog_state fn_iso_arg_3(query *q)
 static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,list_or_var);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
 		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 	}
+
+	if (is_variable(p1) && is_nil(p2))
+		return throw_error(q, p2, "domain_error", "non_empty_list");
 
 	if (is_variable(p2)) {
 		cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false);
