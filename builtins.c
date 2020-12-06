@@ -4344,9 +4344,8 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 		cell *tmp = deep_copy_to_tmp_heap(q, p2, p2_ctx, false);
 		may_ptr_error(tmp);
 
-		if (q->cycle_error) {
+		if (q->cycle_error)
 			return throw_error(q, p1, "resource_error", "cyclic_term");
-		}
 
 		unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 		p2 = tmp;
@@ -4360,6 +4359,9 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 			p2 = LIST_TAIL(p2);
 			arity++;
 		}
+
+		if (!is_nil(p2))
+			return throw_error(q, p2, "instantiation_error", "list");
 
 		arity--;
 		cell *tmp2 = get_tmp_heap(q, save);
@@ -5277,15 +5279,18 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 
 	expected = tmpbuf;
 
-	if (is_variable(c)) {
+	if (is_variable(c) && GET_OP(q->st.curr_cell)) {
+		err_type = "instantiation_error";
+		snprintf(dst2, len2+1, "error(%s,(%s)/%u).", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+	} else if (is_variable(c)) {
 		err_type = "instantiation_error";
 		snprintf(dst2, len2+1, "error(%s,%s/%u).", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
-	} else if (c->arity && !is_list(c) && 0) {
-		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),%s/%u).", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (GET_OP(q->st.curr_cell)) {
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (!strcmp(err_type, "representation_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s),%s/%u).", err_type, expected, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+	} else if (GET_OP(q->st.curr_cell)) {
+		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else {
 		snprintf(dst2, len2+1, "error(%s(%s,%s),%s/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	}
