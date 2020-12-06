@@ -4270,9 +4270,8 @@ static USE_RESULT prolog_state fn_iso_arg_3(query *q)
 			may_error(make_choice(q));
 		}
 
-		if (arg_nbr < 0) {
+		if (arg_nbr < 0)
 			return throw_error(q, p1, "domain_error", "out_of_range");
-		}
 
 		if ((arg_nbr == 0) || (arg_nbr > p2->arity))
 			return pl_failure;
@@ -4300,7 +4299,7 @@ static USE_RESULT prolog_state fn_iso_arg_3(query *q)
 		return pl_success;
 	}
 
-	return pl_failure;
+	return throw_error(q, p1, "instantiation_error", "number");
 }
 
 static USE_RESULT prolog_state fn_iso_univ_2(query *q)
