@@ -813,6 +813,36 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 		return ok;
 	}
 
+	if (!is_variable(p2)) {
+		cell *save_p2 = p2;
+		idx_t save_p2_ctx = p2_ctx;
+
+		while (is_list(p2)) {
+			cell *head = LIST_HEAD(p2);
+			cell *tail = LIST_TAIL(p2);
+			head = deref(q, head, p2_ctx);
+			p2_ctx = q->latest_ctx;
+
+			if (!is_atom(head))
+				return throw_error(q, head, "type_error", "character");
+
+			const char *src = GET_STR(head);
+			size_t len = len_char_utf8(src);
+
+			if (len < LEN_STR(head))
+				return throw_error(q, head, "type_error", "character");
+
+			p2 = deref(q, tail, p2_ctx);
+			p2_ctx = q->latest_ctx;
+		}
+
+		if (!is_nil(p2))
+			return throw_error(q, p2, "type_error", "list");
+
+		p2 = save_p2;
+		p2_ctx = save_p2_ctx;
+	}
+
 	if (!is_variable(p2) && is_variable(p1)) {
 		size_t bufsiz;
 		char *tmpbuf = malloc(bufsiz=256), *dst = tmpbuf;
@@ -824,11 +854,6 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 			cell *tail = LIST_TAIL(p2);
 			head = deref(q, head, p2_ctx);
 			p2_ctx = q->latest_ctx;
-
-			if (!is_atom(head)) {
-				free(tmpbuf);
-				return throw_error(q, head, "type_error", "character");
-			}
 
 			const char *src = GET_STR(head);
 			int nbytes = len_char_utf8(src);
