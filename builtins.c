@@ -836,7 +836,7 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 			p2_ctx = q->latest_ctx;
 		}
 
-		if (!is_nil(p2))
+		if (!is_nil(p2) && !is_variable(p2))
 			return throw_error(q, p2, "type_error", "list");
 
 		p2 = save_p2;
