@@ -4247,7 +4247,7 @@ static USE_RESULT prolog_state fn_iso_nlt_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_arg_3(query *q)
 {
-	GET_FIRST_ARG(p1,any);
+	GET_FIRST_ARG(p1,integer_or_var);
 	GET_NEXT_ARG(p2,compound);
 	GET_NEXT_ARG(p3,any);
 
@@ -4271,7 +4271,7 @@ static USE_RESULT prolog_state fn_iso_arg_3(query *q)
 		}
 
 		if (arg_nbr < 0)
-			return throw_error(q, p1, "domain_error", "out_of_range");
+			return throw_error(q, p1, "domain_error", "not_less_than_zero");
 
 		if ((arg_nbr == 0) || (arg_nbr > p2->arity))
 			return pl_failure;
