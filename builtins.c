@@ -5242,12 +5242,14 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	p->read_term = g->nbr_vars;
 	parser_tokenize(p, false, false);
 
-	if (p->nbr_vars != 0) {
+	if (p->nbr_vars) {
 		if (!create_vars(q, p->nbr_vars))
 			return throw_error(q, c, "resource_error", "too_many_vars");
 	}
 
-	cell *tmp = deep_copy_to_heap(q, p->t->cells, q->st.curr_frame, false);
+	cell *tmp = deep_copy_to_tmp_heap(q, p->t->cells, q->st.curr_frame, false);
+	destroy_parser(p);
+
 	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
 	copy_cells(e, tmp, tmp->nbr_cells);
 
@@ -5258,7 +5260,6 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	if (find_exception_handler(q, e))
 		ok = fn_iso_catch_3(q);
 
-	destroy_parser(p);
 	free(dst2);
 	free(dst);
 	return ok;
