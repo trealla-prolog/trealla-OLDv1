@@ -787,7 +787,9 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 		return pl_success;
 
 	if (is_variable(p1) && is_nil(p2)) {
-		return unify(q, p1, p1_ctx, p2, p2_ctx);
+		cell tmp;
+		make_literal(&tmp, g_empty_s);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (is_variable(p2) && !strcmp(GET_STR(p1), "")) {
