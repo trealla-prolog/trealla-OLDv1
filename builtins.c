@@ -4248,7 +4248,7 @@ static USE_RESULT prolog_state fn_iso_nlt_2(query *q)
 static USE_RESULT prolog_state fn_iso_arg_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,structure);
+	GET_NEXT_ARG(p2,compound);
 	GET_NEXT_ARG(p3,any);
 
 	if (is_integer(p1)) {
