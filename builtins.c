@@ -5116,7 +5116,7 @@ static USE_RESULT prolog_state fn_iso_catch_3(query *q)
 	GET_NEXT_ARG(p3,callable);
 
 	if (q->retry && q->exception) {
-		cell *e = q->exception;
+		cell *e = deep_copy_to_heap(q, q->exception, q->st.curr_frame, false);
 		return unify(q, p2, p2_ctx, e, q->st.curr_frame);
 	}
 
@@ -5228,14 +5228,8 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 
 	parser *p = q->m->p;
 	p->srcptr = dst2;
-	frame *g = GET_FRAME(q->st.curr_frame);
-	p->read_term = g->nbr_vars;
+	p->skip = 1;
 	parser_tokenize(p, false, false);
-	p->read_term = 0;
-
-	if (!create_vars(q, p->nbr_vars))
-		return throw_error(q, c, "resource_error", "too_many_vars");
-
 	cell *e = p->t->cells;
 
 	//printf("*** "); print_term(q, stdout, e, q->st.curr_frame, 1); printf("\n");
