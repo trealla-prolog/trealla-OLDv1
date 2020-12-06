@@ -4381,7 +4381,7 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 		}
 
 		if ((!is_literal(tmp2) && arity) || tmp2->arity) {
-			return throw_error(q, tmp2, "type_error", "atom");
+			return throw_error(q, tmp2, "type_error", "atomic");
 		}
 
 		idx_t nbr_cells = nbr_cells = tmp_heap_used(q) - save;
