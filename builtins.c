@@ -783,6 +783,9 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 	if (!is_iso_atom(p1) && !is_variable(p1))
 		return throw_error(q, p1, "type_error", "atom");
 
+	if (is_atom(p1) && !LEN_STR(p1) && is_nil(p2))
+		return pl_success;
+
 	if (is_variable(p1) && is_nil(p2)) {
 		cell tmp;
 		make_literal(&tmp, g_empty_s);
