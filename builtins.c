@@ -5334,10 +5334,10 @@ static USE_RESULT prolog_state fn_iso_functor_3(query *q)
 		if (!is_integer(p3))
 			return throw_error(q, p3, "type_error", "integer");
 
-		if ((p3->val_num < 0))
+		if (p3->val_num < 0)
 			return throw_error(q, p3, "domain_error", "not_less_than_zero");
 
-		if ((p3->val_num < 0))
+		if (p3->val_num > (MAX_ARITY/2))
 			return throw_error(q, p3, "representation_error", "max_arity");
 
 		if (!is_atom(p2) && (p3->val_num > 0))
