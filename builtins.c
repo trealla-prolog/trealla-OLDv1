@@ -4361,7 +4361,7 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 		}
 
 		if (!is_nil(p2))
-			return throw_error(q, p2, "instantiation_error", "list");
+			return throw_error(q, p2, "type_error", "list");
 
 		arity--;
 		cell *tmp2 = get_tmp_heap(q, save);
