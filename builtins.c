@@ -287,8 +287,8 @@ static cell *alloc_heap(query *q, idx_t nbr_cells)
 	return c;
 }
 
-//static idx_t heap_used(const query *q) { return q->st.hp; }
-//static cell *get_heap(const query *q, idx_t i) { return q->arenas->heap + i; }
+static idx_t heap_used(const query *q) { return q->st.hp; }
+static cell *get_heap(const query *q, idx_t i) { return q->arenas->heap + i; }
 
 #if 0
 static void init_queue(query* q)
@@ -6614,11 +6614,11 @@ static USE_RESULT prolog_state fn_forall_2(query *q)
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
 
-	// FIXME... clone to tmp then alloc_heap / copy
-
-	cell *tmp = clone_to_heap(q, true, p1, 0);
+	idx_t off = heap_used(q);
+	may_ptr_error(clone_to_heap(q, true, p1, 0));
 	may_ptr_error(clone_to_heap(q, false, p2, 1));
 
+	cell *tmp = get_heap(q, off);
 	idx_t nbr_cells = 1 + p1->nbr_cells + p2->nbr_cells;
 	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 	may_error(make_barrier(q));
@@ -10721,7 +10721,7 @@ static const struct builtins g_other_funcs[] =
 	{"is_list", 1, fn_is_list_1, "+term"},
 	{"list", 1, fn_is_list_1, "+term"},
 	{"is_stream", 1, fn_is_stream_1, "+term"},
-	{"forall", 2, fn_forall_2, "+term,+term"},
+	{"Xforall", 2, fn_forall_2, "+term,+term"},
 	{"term_hash", 2, fn_term_hash_2, "+term,?integer"},
 	{"rename_file", 2, fn_rename_file_2, "+string,+string"},
 	{"delete_file", 1, fn_delete_file_1, "+string"},
