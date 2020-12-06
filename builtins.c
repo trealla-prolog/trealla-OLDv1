@@ -1021,7 +1021,6 @@ static USE_RESULT prolog_state fn_iso_atom_codes_2(query *q)
 
 	cell *l = end_list(q);
 	may_ptr_error(l);
-	fix_list(l);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -1159,7 +1158,6 @@ static USE_RESULT prolog_state fn_iso_number_codes_2(query *q)
 
 	cell *l = end_list(q);
 	may_ptr_error(l);
-	fix_list(l);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
