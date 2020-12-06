@@ -5920,6 +5920,9 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,any);
 
+	if (!is_variable(p3) && !is_valid_list(q, p3, p3_ctx, true))
+		return throw_error(q, p3, "type_error", "list");
+
 	if (!q->retry) {
 		q->st.qnbr++;
 		assert(q->st.qnbr < MAX_QUEUES);
