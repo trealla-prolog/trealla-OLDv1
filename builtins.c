@@ -5334,10 +5334,13 @@ static USE_RESULT prolog_state fn_iso_functor_3(query *q)
 		if (!is_integer(p3))
 			return throw_error(q, p3, "type_error", "integer");
 
-		if ((p3->val_num < 0) || (p3->val_num > MAX_ARITY/2))
-			return throw_error(q, p3, "domain_error", "integer");
+		if ((p3->val_num < 0))
+			return throw_error(q, p3, "domain_error", "not_less_than_zero");
 
-		if (is_integer(p2) && (p3->val_num > 0))
+		if ((p3->val_num < 0))
+			return throw_error(q, p3, "representation_error", "max_arity");
+
+		if (!is_atom(p2) && (p3->val_num > 0))
 			return throw_error(q, p2, "type_error", "atom");
 
 		unsigned arity = p3->val_num;
@@ -5352,27 +5355,32 @@ static USE_RESULT prolog_state fn_iso_functor_3(query *q)
 		GET_NEXT_ARG(p2,any);
 		GET_NEXT_ARG(p3,any);
 
-		cell *tmp = alloc_heap(q, 1+arity);
-		ensure(tmp);
-		*tmp = (cell){0};
-		tmp[0].val_type = TYPE_LITERAL;
-		tmp[0].arity = arity;
-		tmp[0].nbr_cells = 1 + arity;
+		if (is_number(p2)) {
+			set_var(q, p1, p1_ctx, p2, p2_ctx);
+		} else {
+			cell *tmp = alloc_heap(q, 1+arity);
+			ensure(tmp);
+			*tmp = (cell){0};
+			tmp[0].val_type = TYPE_LITERAL;
+			tmp[0].arity = arity;
+			tmp[0].nbr_cells = 1 + arity;
 
-		if (is_cstring(p2))
-			tmp[0].val_off = index_from_pool(GET_STR(p2));
-		else
-			tmp[0].val_off = p2->val_off;
+			if (is_cstring(p2))
+				tmp[0].val_off = index_from_pool(GET_STR(p2));
+			else
+				tmp[0].val_off = p2->val_off;
 
-		for (unsigned i = 1; i <= arity; i++) {
-			tmp[i].val_type = TYPE_VARIABLE;
-			tmp[i].nbr_cells = 1;
-			tmp[i].var_nbr = var_nbr++;
-			tmp[i].val_off = g_anon_s;
-			tmp[i].flags = FLAG2_FRESH;
+			for (unsigned i = 1; i <= arity; i++) {
+				tmp[i].val_type = TYPE_VARIABLE;
+				tmp[i].nbr_cells = 1;
+				tmp[i].var_nbr = var_nbr++;
+				tmp[i].val_off = g_anon_s;
+				tmp[i].flags = FLAG2_FRESH;
+			}
+
+			set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
 		}
 
-		set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
 		return pl_success;
 	}
 
