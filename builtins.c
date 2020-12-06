@@ -4380,7 +4380,15 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 			c->flags = 0;
 		}
 
-		if ((!is_literal(tmp2) && arity) || tmp2->arity) {
+		if (!is_literal(tmp2) && arity) {
+			return throw_error(q, tmp2, "type_error", "atom");
+		}
+
+		if (tmp2->arity && arity) {
+			return throw_error(q, tmp2, "type_error", "atom");
+		}
+
+		if (tmp2->arity) {
 			return throw_error(q, tmp2, "type_error", "atomic");
 		}
 
