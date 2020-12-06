@@ -1,2 +1,2 @@
 1
-Error: uncaught exception... error(type_error(atom,1),=../)
+Error: uncaught exception... error(type_error(atom,1),(=..)/2)

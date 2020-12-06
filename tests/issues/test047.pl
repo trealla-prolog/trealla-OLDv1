@@ -1,4 +1,3 @@
 :-initialization(main).
 
-main :-
-	foo:bar.
+main :- foo:bar.

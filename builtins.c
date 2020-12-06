@@ -94,8 +94,6 @@ static double rat_to_float(cell *n)
 }
 #endif
 
-static USE_RESULT bool find_exception_handler(query *q, cell *c, idx_t c_ctx);
-
 static prolog_state do_yield_0(query *q, int msecs)
 {
 	q->yielded = true;
@@ -498,6 +496,10 @@ static USE_RESULT cell *deep_copy2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx,
 			g_tab1[g_tab_idx] = slot_nbr;
 			g_tab2[g_tab_idx] = g_varno++;
 			g_tab_idx++;
+
+			if (is_anon(p1))
+				tmp->flags |= FLAG2_ANON;
+
 			return tmp;
 		}
 
@@ -4747,7 +4749,7 @@ static USE_RESULT prolog_state do_abolish(query *q, cell *c)
 	if (!h) return pl_success;
 
 	if (!h->is_dynamic) {
-		fprintf(stderr, "Error: not dynamic '%s/%u'\n", GET_STR(c), c->arity);
+		fprintf(stdout, "Error: not dynamic '%s/%u'\n", GET_STR(c), c->arity);
 		return pl_error; // throw?
 	}
 
@@ -5143,7 +5145,7 @@ static USE_RESULT prolog_state fn_iso_catch_3(query *q)
 	return pl_success;
 }
 
-static USE_RESULT bool find_exception_handler(query *q, cell *e, idx_t e_ctx)
+static USE_RESULT bool find_exception_handler(query *q, cell *e)
 {
 	q->exception = e;
 
@@ -5158,14 +5160,16 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e, idx_t e_ctx)
 		if (!fn_iso_catch_3(q))
 			continue;
 
+		free(q->exception);
 		q->exception = NULL;
 		return true;
 	}
 
 	fprintf(stdout, "Error: uncaught exception... ");
-	print_term(q, stdout, e, e_ctx, 1);
+	print_term(q, stdout, e, q->st.curr_frame, 1);
 	fprintf(stdout, "\n");
 	q->m->dump_vars = 1;
+	free(q->exception);
 	q->exception = NULL;
 	q->error = true;
 	return false;
@@ -5182,7 +5186,7 @@ static USE_RESULT prolog_state fn_iso_throw_1(query *q)
 	if (has_vars(q, e, p1_ctx))
 		return throw_error(q, e, "instantiation_error", "instantiated");
 
-	if (!find_exception_handler(q, e, p1_ctx))
+	if (!find_exception_handler(q, e))
 		return pl_failure;
 
 	return fn_iso_catch_3(q);
@@ -5193,10 +5197,10 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	idx_t c_ctx = q->latest_ctx;
 	int save_quoted = q->quoted;
 	q->quoted = 1;
-	size_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, -1, 0, 0);
+	size_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, 1, 0, 0);
 	char *dst = malloc(len+1);
 	ensure(dst);
-	len = print_term_to_buf(q, dst, len+1, c, c_ctx, -1, 0, 0);
+	len = print_term_to_buf(q, dst, len+1, c, c_ctx, 1, 0, 0);
 
 	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q->st.curr_cell) + 1024;
 	char *dst2 = malloc(len2+1);
@@ -5220,11 +5224,13 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 		snprintf(dst2, len2+1, "error(%s,%s/%u).", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (c->arity && !is_list(c) && 0) {
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),%s/%u).", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+	} else if (GET_OP(q->st.curr_cell)) {
+		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else {
 		snprintf(dst2, len2+1, "error(%s(%s,%s),%s/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	}
 
-	printf("*** %s\n", dst2);
+	//printf("*** %s\n", dst2);
 
 	parser *p = create_parser(q->m);
 	p->srcptr = dst2;
@@ -5235,13 +5241,15 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	if (!create_vars(q, p->nbr_vars))
 		return throw_error(q, c, "resource_error", "too_many_vars");
 
-	cell *e = deep_copy_to_heap(q, p->t->cells, q->st.curr_frame, false);
+	cell *tmp = deep_copy_to_heap(q, p->t->cells, q->st.curr_frame, false);
+	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
+	copy_cells(e, tmp, tmp->nbr_cells);
 
-	printf("*** "); print_term(q, stdout, e, q->st.curr_frame, 1); printf("\n");
+	//printf("*** "); print_term(q, stdout, e, q->st.curr_frame, 1); printf("\n");
 
 	prolog_state ok = pl_failure;
 
-	if (find_exception_handler(q, e, q->st.curr_frame))
+	if (find_exception_handler(q, e))
 		ok = fn_iso_catch_3(q);
 
 	destroy_parser(p);
@@ -6300,7 +6308,7 @@ static USE_RESULT prolog_state fn_sys_elapsed_0(query *q)
 {
 	uint64_t elapsed = get_time_in_usec();
 	elapsed -= q->time_started;
-	fprintf(stderr, "Time elapsed %.03g secs\n", (double)elapsed/1000/1000);
+	fprintf(stdout, "Time elapsed %.03g secs\n", (double)elapsed/1000/1000);
 	return pl_success;
 }
 
@@ -8326,7 +8334,7 @@ static USE_RESULT prolog_state do_format(query *q, cell *str, idx_t str_ctx, cel
 			if (!nbytes) {
 				if (feof(str->fp) || ferror(str->fp)) {
 					free(tmpbuf);
-					fprintf(stderr, "Error: end of file on write\n");
+					fprintf(stdout, "Error: end of file on write\n");
 					return pl_error;
 				}
 			}
@@ -10070,7 +10078,7 @@ static USE_RESULT prolog_state do_length(query *q)
 	reset_value(q, p2_orig, p2_orig_ctx, &tmp, q->st.curr_frame);
 	may_error(make_choice(q));
 
-	if (is_anon(p1))
+	if (is_variable(p1) && is_anon(p1))
 		return pl_success;
 
 	if (nbr >= MAX_VARS) {
