@@ -4431,9 +4431,9 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
 
-	if (!is_variable(p2) && !is_valid_list(q, p2, p2_ctx, true))
+	if (is_list(p2) && !is_valid_list(q, p2, p2_ctx, true))
 		return throw_error(q, p2, "type_error", "list");
 
 	if (!is_variable(p1) && (is_atom(p1) || is_number(p1))) {
@@ -5918,9 +5918,9 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
-	GET_NEXT_ARG(p3,list_or_var);
+	GET_NEXT_ARG(p3,list_or_nil_or_var);
 
-	if (!is_variable(p3) && !is_valid_list(q, p3, p3_ctx, true))
+	if (is_list(p3) && !is_valid_list(q, p3, p3_ctx, true))
 		return throw_error(q, p3, "type_error", "list");
 
 	if (!q->retry) {
