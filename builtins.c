@@ -5328,14 +5328,17 @@ static USE_RESULT prolog_state fn_iso_functor_3(query *q)
 	GET_NEXT_ARG(p3,any);
 
 	if (is_variable(p1)) {
-		if (!is_atom(p2))
-			return throw_error(q, p2, "type_error", "atom");
+		if (!is_atomic(p2))
+			return throw_error(q, p2, "type_error", "atomic");
 
 		if (!is_integer(p3))
 			return throw_error(q, p3, "type_error", "integer");
 
 		if ((p3->val_num < 0) || (p3->val_num > MAX_ARITY/2))
 			return throw_error(q, p3, "domain_error", "integer");
+
+		if (is_integer(p2) && (p3->val_num > 0))
+			return throw_error(q, p2, "type_error", "atom");
 
 		unsigned arity = p3->val_num;
 		unsigned var_nbr = 0;
@@ -5374,10 +5377,16 @@ static USE_RESULT prolog_state fn_iso_functor_3(query *q)
 	}
 
 	cell tmp = {0};
-	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = p1->val_off;
-	tmp.nbr_cells = 1;
-	CLR_OP(&tmp);
+
+	if (is_integer(p1)) {
+		tmp = *p1;
+	}
+	else {
+		tmp.val_type = TYPE_LITERAL;
+		tmp.val_off = p1->val_off;
+		tmp.nbr_cells = 1;
+		CLR_OP(&tmp);
+	}
 
 	if (is_string(p2))
 		tmp.val_off = g_dot_s;
