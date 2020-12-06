@@ -1014,7 +1014,6 @@ static USE_RESULT prolog_state fn_iso_atom_codes_2(query *q)
 	alloc_list(q, &tmp);
 
 	while (*src) {
-		cell tmp;
 		make_int(&tmp, get_char_utf8(&src));
 		append_list(q, &tmp);
 	}
@@ -1151,7 +1150,6 @@ static USE_RESULT prolog_state fn_iso_number_codes_2(query *q)
 	alloc_list(q, &tmp);
 
 	while (*++src) {
-		cell tmp;
 		make_int(&tmp, *src);
 		append_list(q, &tmp);
 	}
