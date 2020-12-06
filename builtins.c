@@ -813,24 +813,21 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 		return ok;
 	}
 
-	if (!is_variable(p2)) {
-		cell *head = LIST_HEAD(p2);
-		cell *tail = LIST_TAIL(p2);
-		head = deref(q, head, p2_ctx);
-		q->latest_ctx = p2_ctx;
-
+	if (!is_variable(p2) && is_variable(p1)) {
 		size_t bufsiz;
 		char *tmpbuf = malloc(bufsiz=256), *dst = tmpbuf;
 		ensure(tmpbuf);
 		*tmpbuf = '\0';
 
-		while (tail) {
-			tail = deref(q, tail, p2_ctx);
+		while (is_list(p2)) {
+			cell *head = LIST_HEAD(p2);
+			cell *tail = LIST_TAIL(p2);
+			head = deref(q, head, p2_ctx);
 			p2_ctx = q->latest_ctx;
 
 			if (!is_atom(head)) {
 				free(tmpbuf);
-				return throw_error(q, head, "type_error", "atom");
+				return throw_error(q, head, "type_error", "character");
 			}
 
 			const char *src = GET_STR(head);
@@ -848,18 +845,12 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 			dst += nbytes;
 			*dst = '\0';
 
-			if (is_literal(tail)) {
-				if (tail->val_off == g_nil_s)
-					break;
-			}
-
-			if (!is_list(tail))
-				return throw_error(q, tail, "type_error", "list");
-
-			head = LIST_HEAD(tail);
-			tail = LIST_TAIL(tail);
-			head = deref(q, head, q->latest_ctx);
+			p2 = deref(q, tail, p2_ctx);
+			p2_ctx = q->latest_ctx;
 		}
+
+		if (!is_nil(p2))
+			return throw_error(q, p2, "type_error", "list");
 
 		cell tmp;
 		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf));
@@ -870,13 +861,20 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 		return ok;
 	}
 
-	const char *src = GET_STR(p1);
-	int nbytes = LEN_STR(p1);
+	if (is_variable(p2)) {
+		cell tmp;
+		may_error(make_string(&tmp, GET_STR(p1), LEN_STR(p1)));
+		tmp.flags |= FLAG_TMP;
+		int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		chk_cstring(&tmp);
+		return ok;
+	}
+
 	cell tmp;
-	may_error(make_string(&tmp, src, nbytes));
-	tmp.flags |= FLAG_TMP;
+	may_error(make_string(&tmp, GET_STR(p1), LEN_STR(p1)));
+	cell *tmp2 = alloc_heap(q, 1);
+	*tmp2 = tmp;
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	chk_cstring(&tmp);
 	return ok;
 }
 
