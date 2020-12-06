@@ -787,9 +787,7 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 		return pl_success;
 
 	if (is_variable(p1) && is_nil(p2)) {
-		cell tmp;
-		make_literal(&tmp, g_empty_s);
-		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		return unify(q, p1, p1_ctx, p2, p2_ctx);
 	}
 
 	if (is_variable(p2) && !strcmp(GET_STR(p1), "")) {
@@ -816,6 +814,8 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 		return ok;
 	}
 
+	// Verify the list
+
 	if (!is_variable(p2)) {
 		cell *save_p2 = p2;
 		idx_t save_p2_ctx = p2_ctx;
@@ -826,14 +826,19 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 			head = deref(q, head, p2_ctx);
 			p2_ctx = q->latest_ctx;
 
-			if (!is_atom(head))
+			if (!is_atom(head) && is_variable(p1))
 				return throw_error(q, head, "type_error", "character");
 
-			const char *src = GET_STR(head);
-			size_t len = len_char_utf8(src);
-
-			if (len < LEN_STR(head))
+			if (!is_atom(head) && !is_variable(head))
 				return throw_error(q, head, "type_error", "character");
+
+			if (is_atom(head)) {
+				const char *src = GET_STR(head);
+				size_t len = len_char_utf8(src);
+
+				if (len < LEN_STR(head))
+					return throw_error(q, head, "type_error", "character");
+			}
 
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
