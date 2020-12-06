@@ -188,8 +188,13 @@ static unsigned count_non_anons(const uint8_t *mask, unsigned bit)
 
 size_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, unsigned depth)
 {
-	if (!depth && !dstlen)
+	if (!depth && !dst && !dstlen) {
+		fake_numbervars(q, c, c_ctx, 0);
+		memset(s_mask1, 0, MAX_ARITY);
+		memset(s_mask2, 0, MAX_ARITY);
+		q->nv_start = -1;
 		q->cycle_error = false;
+	}
 
 	char *save_dst = dst;
 
@@ -635,13 +640,23 @@ size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 	return dst - save_dst;
 }
 
+char *print_canonical_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
+{
+	size_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 0);
+
+	if (q->cycle_error) {
+		running = 0;
+		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 1);
+	}
+
+	char *buf = malloc(len+10);
+	ensure(buf);
+	len = print_canonical_to_buf(q, buf, len+1, c, c_ctx, running, 0);
+	return buf;
+}
+
 void print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running)
 {
-	fake_numbervars(q, c, c_ctx, 0);
-	q->nv_start = -1;
-	memset(s_mask1, 0, MAX_ARITY);
-	memset(s_mask2, 0, MAX_ARITY);
-
 	size_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 0);
 
 	if (q->cycle_error) {
@@ -676,11 +691,6 @@ void print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 
 void print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 {
-	fake_numbervars(q, c, c_ctx, 0);
-	q->nv_start = -1;
-	memset(s_mask1, 0, MAX_ARITY);
-	memset(s_mask2, 0, MAX_ARITY);
-
 	size_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 0);
 
 	if (q->cycle_error) {

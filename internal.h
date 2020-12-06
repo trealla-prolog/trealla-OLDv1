@@ -523,12 +523,6 @@ clause *erase_from_db(module *m, uuid *ref);
 clause *find_in_db(module *m, uuid *ref);
 unsigned get_op(module *m, const char *name, unsigned *optype, bool *userop, bool hint_prefix);
 bool set_op(module *m, const char *name, unsigned optype, unsigned precedence);
-size_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, unsigned depth);
-size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
-void print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
-void print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
-void print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
-void print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
 USE_RESULT prolog_state make_choice(query *q);
 USE_RESULT prolog_state make_barrier(query *q);
 USE_RESULT prolog_state make_catcher(query *q, unsigned type);
@@ -581,7 +575,17 @@ void consultall(parser *p, cell *l);
 void fix_list(cell *c);
 module *module_load_text(module *m, const char *src);
 void make_indirect(cell *tmp, cell *c);
-char *print_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
 void stash_me(query *q, term *t, bool last_match);
 unsigned fake_numbervars(query *q, cell *c, idx_t c_ctx, unsigned start);
 char *relative_to(const char *basefile, const char *relfile);
+
+size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
+void print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
+void print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
+char *print_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
+
+size_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, unsigned depth);
+void print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
+char *print_canonical_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
+void print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
+

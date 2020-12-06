@@ -5193,10 +5193,10 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	idx_t c_ctx = q->latest_ctx;
 	int save_quoted = q->quoted;
 	q->quoted = 1;
-	size_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, 1, 0, 0);
+	size_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, -1, 0, 0);
 	char *dst = malloc(len+1);
 	ensure(dst);
-	len = print_term_to_buf(q, dst, len+1, c, c_ctx, 1, 0, 0);
+	len = print_term_to_buf(q, dst, len+1, c, c_ctx, -1, 0, 0);
 
 	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q->st.curr_cell) + 1024;
 	char *dst2 = malloc(len2+1);
@@ -5228,7 +5228,7 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 
 	parser *p = q->m->p;
 	p->srcptr = dst2;
-	p->skip = 1;
+	p->skip = true;
 	parser_tokenize(p, false, false);
 	cell *e = p->t->cells;
 
