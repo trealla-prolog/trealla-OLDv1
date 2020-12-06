@@ -5246,7 +5246,9 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 static USE_RESULT prolog_state fn_iso_throw_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	cell *e = deep_clone_to_tmp_heap(q, p1, p1_ctx);
+	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
+	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
+	copy_cells(e, tmp, tmp->nbr_cells);
 
 	if (q->cycle_error)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
@@ -5318,12 +5320,8 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 
 	cell *tmp = deep_copy_to_tmp_heap(q, p->t->cells, q->st.curr_frame, false);
 	destroy_parser(p);
-
 	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
 	copy_cells(e, tmp, tmp->nbr_cells);
-
-	//printf("*** "); print_term(q, stdout, e, q->st.curr_frame, 1); printf("\n");
-
 	prolog_state ok = pl_failure;
 
 	if (find_exception_handler(q, e))
