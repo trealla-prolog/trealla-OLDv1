@@ -4351,6 +4351,7 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 		p2 = tmp;
 		unsigned arity = 0;
 		idx_t save = tmp_heap_used(q);
+		cell *save_p2 = p2;
 
 		while (is_list(p2)) {
 			cell *h = LIST_HEAD(p2);
@@ -4361,7 +4362,7 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 		}
 
 		if (!is_nil(p2))
-			return throw_error(q, p2, "type_error", "list");
+			return throw_error(q, save_p2, "type_error", "list");
 
 		arity--;
 		cell *tmp2 = get_tmp_heap(q, save);
