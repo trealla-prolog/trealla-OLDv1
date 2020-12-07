@@ -887,23 +887,23 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx)
 	}
 
 	if (!h)
-		q->st.curr_clause = NULL;
+		q->st.curr_clause2 = NULL;
 	else {
 		if (!h->is_dynamic && !q->run_init)
 			return throw_error(q, p1, "permission_error", "access_private_procedure");
 
-		q->st.curr_clause = h->head;
+		q->st.curr_clause2 = h->head;
 	}
 
-	if (!q->st.curr_clause)
+	if (!q->st.curr_clause2)
 		return pl_failure;
 
 	may_error(make_choice(q));
-	for (; q->st.curr_clause; q->st.curr_clause = q->st.curr_clause->next) {
-		if (q->st.curr_clause->t.deleted)
+	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
+		if (q->st.curr_clause2->t.deleted)
 			continue;
 
-		term *t = &q->st.curr_clause->t;
+		term *t = &q->st.curr_clause2->t;
 		cell *c = t->cells;
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
@@ -925,7 +925,7 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx)
 USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool retract)
 {
 	if (q->retry)
-		q->st.curr_clause = q->st.curr_clause->next;
+		q->st.curr_clause2 = q->st.curr_clause2->next;
 	else {
 		// Match HEAD :- BODY
 
@@ -963,26 +963,26 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool retr
 			} else
 				set_dynamic_in_db(q->m, name, p1->arity);
 
-			q->st.curr_clause = NULL;
+			q->st.curr_clause2 = NULL;
 		} else {
 			if (!h->is_dynamic && !q->run_init) {
 				return throw_error(q, p1, "permission_error", "access_private_procedure");
 			}
 
-			q->st.curr_clause = h->head;
+			q->st.curr_clause2 = h->head;
 		}
 	}
 
-	if (!q->st.curr_clause)
+	if (!q->st.curr_clause2)
 		return pl_failure;
 
 	may_error(make_choice(q));
 
-	for (; q->st.curr_clause; q->st.curr_clause = q->st.curr_clause->next) {
-		if (q->st.curr_clause->t.deleted)
+	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
+		if (q->st.curr_clause2->t.deleted)
 			continue;
 
-		term *t = &q->st.curr_clause->t;
+		term *t = &q->st.curr_clause2->t;
 		cell *head = get_head(t->cells);
 		cell *body = get_logical_body(t->cells);
 

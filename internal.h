@@ -340,7 +340,7 @@ typedef struct {
 
 typedef struct {
 	cell *curr_cell;
-	clause *curr_clause;
+	clause *curr_clause, *curr_clause2;
 	sliter *iter;
 	idx_t curr_frame, fp, hp, tp, sp;
 	uint8_t anbr, qnbr;

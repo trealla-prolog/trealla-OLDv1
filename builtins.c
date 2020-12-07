@@ -4821,7 +4821,7 @@ static USE_RESULT prolog_state fn_iso_clause_2(query *q)
 	GET_NEXT_ARG(p2,callable_or_var);
 
 	while (match_clause(q, p1, p1_ctx, false)) {
-		term *t = &q->st.curr_clause->t;
+		term *t = &q->st.curr_clause2->t;
 		cell *body = get_body(t->cells);
 		int ok;
 
@@ -4834,7 +4834,7 @@ static USE_RESULT prolog_state fn_iso_clause_2(query *q)
 		}
 
 		if (ok) {
-			bool last_match = !q->st.curr_clause->next && !q->st.iter;
+			bool last_match = !q->st.curr_clause2->next && !q->st.iter;
 			stash_me(q, t, last_match);
 			return pl_success;
 		}
@@ -4954,10 +4954,10 @@ static USE_RESULT prolog_state fn_iso_retract_1(query *q)
 	if (match != pl_success)
 		return match;
 
-	term *t = &q->st.curr_clause->t;
+	term *t = &q->st.curr_clause2->t;
 	stash_me(q, t, false);
 
-	clause *r = retract_from_db(q->m, q->st.curr_clause);
+	clause *r = retract_from_db(q->m, q->st.curr_clause2);
 	may_ptr_error(r);
 
 	if (!q->m->loading && r->t.persist)
@@ -6358,12 +6358,12 @@ static USE_RESULT prolog_state fn_clause_3(query *q)
 				break;
 
 			char tmpbuf[128];
-			uuid_to_buf(&q->st.curr_clause->u, tmpbuf, sizeof(tmpbuf));
+			uuid_to_buf(&q->st.curr_clause2->u, tmpbuf, sizeof(tmpbuf));
 			cell tmp;
 			may_error(make_cstring(&tmp, tmpbuf));
 			tmp.flags |= FLAG_TMP;
 			set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
-			t = &q->st.curr_clause->t;
+			t = &q->st.curr_clause2->t;
 		}
 
 		cell *body = get_body(t->cells);
@@ -6378,7 +6378,7 @@ static USE_RESULT prolog_state fn_clause_3(query *q)
 		}
 
 		if (ok) {
-			bool last_match = !q->st.curr_clause->next && !q->st.iter;
+			bool last_match = !q->st.curr_clause2->next && !q->st.iter;
 			stash_me(q, t, last_match);
 			return pl_success;
 		}
