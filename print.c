@@ -69,7 +69,11 @@ size_t sprint_int(char *dst, size_t size, int_t n, int base)
 	if ((n < 0) && (base == 10)) {
 		if (size) *dst++ = '-'; else dst++;
 
+#if USE_INT32
+		if (n == INT32_MIN)
+#else
 		if (n == INT64_MIN)
+#endif
 			n = imaxabs(n+1) - 1;
 		else
 			n = imaxabs(n);
