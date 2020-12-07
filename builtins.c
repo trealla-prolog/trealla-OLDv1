@@ -978,28 +978,32 @@ static USE_RESULT prolog_state fn_iso_number_chars_2(query *q)
 
 		*dst = '\0';
 		cell tmp;
+		const char *src = tmpbuf;
 
-		if ((tmpbuf[0] == '0') && (tmpbuf[1] == '\'')) {
-			int val = peek_char_utf8(&tmpbuf[2]);
+		while (isspace(*src))
+			src++;
+
+		if ((src[0] == '0') && (src[1] == '\'')) {
+			int val = peek_char_utf8(src+2);
 			make_int(&tmp, val);
-		} else if ((tmpbuf[0] == '0') && (tmpbuf[1] == 'x')) {
+		} else if ((src[0] == '0') && (src[1] == 'x')) {
 			char *end;
-			int_t val = strtoll(tmpbuf+2, &end, 16);
+			int_t val = strtoll(src+2, &end, 16);
 			make_int(&tmp, val);
-		} else if ((tmpbuf[0] == '0') && (tmpbuf[1] == 'o')) {
+		} else if ((src[0] == '0') && (src[1] == 'o')) {
 			char *end;
-			int_t val = strtoll(tmpbuf+2, &end, 8);
+			int_t val = strtoll(src+2, &end, 8);
 			make_int(&tmp, val);
-		} else if ((tmpbuf[0] == '0') && (tmpbuf[1] == 'b')) {
+		} else if ((src[0] == '0') && (src[1] == 'b')) {
 			char *end;
-			int_t val = strtoll(tmpbuf+2, &end, 2);
+			int_t val = strtoll(src+2, &end, 2);
 			make_int(&tmp, val);
 		} else {
 			char *end;
-			int_t val = strtoll(tmpbuf, &end, 10);
+			int_t val = strtoll(src, &end, 10);
 
 			if (*end) {
-				double f = strtod(tmpbuf, &end);
+				double f = strtod(src, &end);
 
 				if (*end) {
 					make_smalln(&tmp, end, 1);
