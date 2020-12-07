@@ -979,6 +979,7 @@ static USE_RESULT prolog_state fn_iso_number_chars_2(query *q)
 		*dst = '\0';
 		cell tmp;
 		const char *src = tmpbuf;
+		char *end = NULL;
 
 		while (isspace(*src))
 			src++;
@@ -990,16 +991,30 @@ static USE_RESULT prolog_state fn_iso_number_chars_2(query *q)
 			char *end;
 			int_t val = strtoll(src+2, &end, 16);
 			make_int(&tmp, val);
+
+			if (*end) {
+				make_smalln(&tmp, end, 1);
+				return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
+			}
 		} else if ((src[0] == '0') && (src[1] == 'o')) {
 			char *end;
 			int_t val = strtoll(src+2, &end, 8);
 			make_int(&tmp, val);
+
+			if (*end) {
+				make_smalln(&tmp, end, 1);
+				return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
+			}
 		} else if ((src[0] == '0') && (src[1] == 'b')) {
 			char *end;
 			int_t val = strtoll(src+2, &end, 2);
 			make_int(&tmp, val);
+
+			if (*end) {
+				make_smalln(&tmp, end, 1);
+				return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
+			}
 		} else {
-			char *end;
 			int_t val = strtoll(src, &end, 10);
 
 			if (*end) {
