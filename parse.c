@@ -343,6 +343,9 @@ cell *get_logical_body(cell *c)
 	if (!body)
 		return NULL;
 
+	// A body of just 'true' is equivalent to no body at all,
+	// and of course vice-versa.
+
 	if (!body->arity && is_literal(body) && (body->val_off == g_true_s))
 		return NULL;
 
