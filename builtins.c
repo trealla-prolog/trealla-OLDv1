@@ -5463,12 +5463,12 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 
 	expected = tmpbuf;
 
-	if (is_variable(c) && GET_OP(q->st.curr_cell)) {
+	//if (is_variable(c) && GET_OP(q->st.curr_cell)) {
+	//	err_type = "instantiation_error";
+	//	snprintf(dst2, len2+1, "error(%s,(%s)/%u).", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+	if (is_variable(c)) {
 		err_type = "instantiation_error";
-		snprintf(dst2, len2+1, "error(%s,(%s)/%u).", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
-	} else if (is_variable(c)) {
-		err_type = "instantiation_error";
-		snprintf(dst2, len2+1, "error(%s,%s/%u).", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s).", err_type);
 	} else if (!strcmp(err_type, "representation_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s),%s/%u).", err_type, expected, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (!strcmp(err_type, "evaluation_error")) {
@@ -10154,6 +10154,35 @@ static USE_RESULT prolog_state fn_sys_lt_2(query *q)
 	return pl_success;
 }
 
+static USE_RESULT prolog_state fn_succ_2(query *q)
+{
+	GET_FIRST_ARG(p1,integer_or_var);
+	GET_NEXT_ARG(p2,integer_or_var);
+
+	if (is_variable(p1) && is_variable(p2))
+		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
+
+	if (is_integer(p1) && (p1->val_num < 0))
+		return throw_error(q, p1, "domain_error", "not_less_than_zero");
+
+	if (is_integer(p2) && (p2->val_num < 0))
+		return throw_error(q, p2, "domain_error", "not_less_than_zero");
+
+	if (is_variable(p2)) {
+		cell tmp;
+		make_int(&tmp, p1->val_num+1);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (is_variable(p1)) {
+		cell tmp;
+		make_int(&tmp, p2->val_num-1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	return p1->val_num == (p2->val_num - 1);
+}
+
 static USE_RESULT prolog_state fn_plus_3(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
@@ -10973,6 +11002,7 @@ static const struct builtins g_other_funcs[] =
 	{"limit", 2, fn_limit_2, "+integer,+callable"},
 	{"offset", 2, fn_offset_2, "+integer,+callable"},
 	{"plus", 3, fn_plus_3, "?integer,?integer,?integer"},
+	{"succ", 2, fn_succ_2, "?integer,?integer"},
 
 	{"freeze", 2, fn_freeze_2, "+variable,+callable"},
 	{"frozen", 2, fn_frozen_2, "+variable,+callable"},

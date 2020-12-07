@@ -3472,9 +3472,6 @@ module *create_module(const char *name)
 		make_rule(m, "recordz(K,V,R) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V),R).");
 		make_rule(m, "recorded(K,V,R) :- nonvar(K), clause('$record_key'(K,V),_,R).");
 
-		make_rule(m, "succ(X,Y) :- integer(X), Y is X + 1, X >= 0, !.");
-		make_rule(m, "succ(X,Y) :- integer(Y), X is Y - 1, X >= 0.");
-
 		make_rule(m, "term_to_atom(T,S) :- write_term_to_chars(S,T,[]).");
 		make_rule(m, "write_term_to_atom(S,T,Opts) :- write_term_to_chars(S,Opts,T).");
 		make_rule(m, "read_term_from_atom(S,T,Opts) :- read_term_from_chars(S,Opts,T).");
