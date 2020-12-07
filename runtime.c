@@ -510,7 +510,7 @@ void stash_me(query *q, term *t, bool last_match)
 		g->any_choices = true;
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
-		ch->st.curr_clause = q->st.curr_clause;
+		ch->st.curr_clause2 = q->st.curr_clause2;
 	}
 
 	unsigned nbr_vars = t->nbr_vars;
@@ -922,7 +922,7 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx)
 // Match HEAD.
 // Match HEAD :- true.
 
-USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool retract)
+USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_retract)
 {
 	if (q->retry)
 		q->st.curr_clause2 = q->st.curr_clause2->next;
@@ -988,7 +988,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool retr
 
 		// Retract(HEAD) should ignore rules
 
-		if (body && retract)
+		if (body && is_retract)
 			continue;
 
 		try_me(q, t->nbr_vars);
@@ -1016,7 +1016,7 @@ static const char *dump_key(void *p, const void *p1)
 }
 #endif
 
-static USE_RESULT prolog_state match_rule(query *q)
+static USE_RESULT prolog_state match_rule_head_or_fact(query *q)
 {
 	assert(q);
 	if (!q->retry) {
@@ -1178,7 +1178,7 @@ prolog_state run_query(query *q)
 					break;
 				}
 
-				if (!match_rule(q)) {
+				if (!match_rule_head_or_fact(q)) {
 					q->retry = QUERY_RETRY;
 					q->tot_retries++;
 					continue;
