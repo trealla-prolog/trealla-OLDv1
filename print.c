@@ -69,6 +69,12 @@ size_t sprint_int(char *dst, size_t size, int_t n, int base)
 	if ((n < 0) && (base == 10)) {
 		if (size) *dst++ = '-'; else dst++;
 
+		// NOTE: according to the man pages...
+		//
+		//		"Trying to take the absolute value of
+		// 		the most negative integer is not defined."
+		//
+
 #if USE_INT32
 		if (n == INT32_MIN)
 #else
