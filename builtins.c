@@ -1209,8 +1209,12 @@ static USE_RESULT prolog_state fn_iso_number_codes_2(query *q)
 			if (!is_integer(head))
 				return throw_error(q, head, "type_error", "integer");
 
-			int ch = head->val_num;
-			*dst++ = ch;
+			int val = head->val_num;
+
+			if (val < 0)
+				return throw_error(q, head, "representation_error", "character_code");
+
+			*dst++ =val;
 
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;

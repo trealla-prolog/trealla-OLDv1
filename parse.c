@@ -2196,7 +2196,7 @@ static bool get_token(parser *p, int last_op)
 			ch = get_escape(&src, &p->error);
 
 			if (p->error) {
-				fprintf(stdout, "Error: sysntax error, illegal character escape, line %d\n", p->line_nbr);
+				fprintf(stdout, "Error: syntax error, illegal character escape, line %d\n", p->line_nbr);
 				p->error = true;
 				return false;
 			}
