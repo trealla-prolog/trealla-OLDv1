@@ -554,7 +554,7 @@ USE_RESULT prolog_state run_query(query *q);
 USE_RESULT cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx);
 USE_RESULT cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix);
 void make_end(cell *tmp);
-USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool retract);
+USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx);
 idx_t index_from_pool(const char *name);
 void do_reduce(cell *n);
 unsigned create_vars(query *q, unsigned nbr);

@@ -4829,7 +4829,7 @@ static USE_RESULT prolog_state fn_iso_clause_2(query *q)
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable_or_var);
 
-	while (match_clause(q, p1, p1_ctx, false)) {
+	while (match_clause(q, p1, p1_ctx)) {
 		term *t = &q->st.curr_clause->t;
 		cell *body = get_body(t->cells);
 		int ok;
@@ -4954,7 +4954,7 @@ static USE_RESULT prolog_state fn_iso_retract_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
-	prolog_state match = match_clause(q, p1, p1_ctx, true);
+	prolog_state match = match_clause(q, p1, p1_ctx);
 	if (match != pl_success)
 		return match;
 
@@ -6358,7 +6358,7 @@ static USE_RESULT prolog_state fn_clause_3(query *q)
 			may_ptr_error(r);
 			t = &r->t;
 		} else {
-			if (!match_clause(q, p1, p1_ctx, false))
+			if (!match_clause(q, p1, p1_ctx))
 				break;
 
 			char tmpbuf[128];
