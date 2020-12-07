@@ -313,32 +313,27 @@ cell *get_head(cell *c)
 {
 	assert(c);
 
-	if (!is_literal(c))
-		return c;
+	if (is_literal(c) && (c->val_off == g_clause_s))
+		return c + 1;
 
-	if (c->val_off != g_clause_s)
-		return c;
-
-	return c + 1;
+	return c;
 }
 
 cell *get_body(cell *c)
 {
 	assert(c);
 
-	if (!is_literal(c))
+	if (is_literal(c) && (c->val_off == g_clause_s)) {
+		c = c + 1;
+		c += c->nbr_cells;
+
+		if (is_end(c))
+			return NULL;
+
 		return c;
+	}
 
-	if (c->val_off != g_clause_s)
-		return NULL;
-
-	c = c + 1;
-	c += c->nbr_cells;
-
-	if (is_end(c))
-		return NULL;
-
-	return c;
+	return NULL;
 }
 
 cell *get_logical_body(cell *c)
