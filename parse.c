@@ -858,6 +858,7 @@ parser *create_parser(module *m)
 		p->line_nbr = 1;
 		p->m = m;
 		p->error = false;
+		p->flag = m->flag;
 
 		if (!p->token || !p->t) {
 			destroy_parser(p);
@@ -947,7 +948,6 @@ query *create_query(module *m, bool is_task)
 		q->trace = m->trace;
 		q->current_input = 0;		// STDIN
 		q->current_output = 1;		// STDOUT
-		q->character_escapes = m->flag.character_escapes;
 
 		// Allocate these now...
 
@@ -1399,6 +1399,7 @@ static void directives(parser *p, term *t)
 			fprintf(stdout, "Warning: unknown flag: %s\n", GET_STR(p1));
 		}
 
+		p->flag = p->m->flag;
 		return;
 	}
 
@@ -2026,7 +2027,7 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 
 	if ((*s == 'r') || (*s == 'R'))
 		try_rational = 1;
-	else if ((*s == '/') && m->flag.rational_syntax_natural)
+	else if ((*s == '/') && p->flag.rational_syntax_natural)
 		try_rational = 1;
 #endif
 
@@ -2204,7 +2205,7 @@ static bool get_token(parser *p, int last_op)
 	if (p->dq_consing) {
 		int ch = get_char_utf8(&src);
 
-		if ((ch == '\\') && p->m->flag.character_escapes) {
+		if ((ch == '\\') && p->flag.character_escapes) {
 			ch = get_escape(&src, &p->error);
 
 			if (p->error) {
@@ -2370,14 +2371,14 @@ static bool get_token(parser *p, int last_op)
 		p->quoted = *src++;
 		p->was_quoted = true;
 
-		if ((p->quoted == '"') && p->m->flag.double_quote_codes) {
+		if ((p->quoted == '"') && p->flag.double_quote_codes) {
 			*dst++ = '[';
 			*dst = '\0';
 			p->srcptr = (char*)src;
 			p->dq_consing = 1;
 			p->quoted = 0;
 			return true;
-		} else if ((p->quoted == '"') && p->m->flag.double_quote_chars)
+		} else if ((p->quoted == '"') && p->flag.double_quote_chars)
 			p->string = true;
 
 		for (;;) {
@@ -2398,7 +2399,7 @@ static bool get_token(parser *p, int last_op)
 					break;
 				}
 
-				if ((ch == '\\') /* && p->m->flag.character_escapes*/) {
+				if ((ch == '\\') && p->flag.character_escapes) {
 					int ch2 = *src;
 					ch = get_escape(&src, &p->error);
 

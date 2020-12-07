@@ -368,6 +368,16 @@ struct arena_ {
 
 enum q_retry { QUERY_OK=0, QUERY_RETRY=1, QUERY_EXCEPTION=2 };
 
+typedef struct char_flags_ {
+	bool double_quote_codes:1;
+	bool double_quote_chars:1;
+	bool double_quote_atom:1;
+	bool character_escapes:1;
+	bool rational_syntax_natural:1;
+	bool prefer_rationals:1;
+} char_flags;
+
+
 struct query_ {
 	query *prev, *next, *parent;
 	module *m, *save_m;
@@ -391,6 +401,7 @@ struct query_ {
 	idx_t max_choices, max_frames, max_slots, max_trails;
 	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;
 	idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
+	char_flags flag;
 	uint8_t current_input, current_output;
 	enum q_retry retry;
 	int8_t halt_code, quoted;	//TODO: cehteh: enum here
@@ -405,7 +416,6 @@ struct query_ {
 	bool nl:1;
 	bool fullstop:1;
 	bool ignore_ops:1;
-	bool character_escapes:1;
 	bool halt:1;
 	bool abort:1;
 	bool cycle_error:1;
@@ -425,6 +435,7 @@ struct parser_ {
 	term *t;
 	char *token, *save_line, *srcptr;
 	size_t token_size, n_line, len_str;
+	char_flags flag;
 	unsigned line_nbr, depth, read_term;
 	int quoted;				// C character is an int
 	unsigned nbr_vars;
@@ -457,15 +468,7 @@ struct module_ {
 	struct op_table ops[MAX_USER_OPS+1];
 	const char *keywords[1000];
 	int8_t halt_code;
-
-	struct {
-		bool double_quote_codes:1;
-		bool double_quote_chars:1;
-		bool double_quote_atom:1;
-		bool character_escapes:1;
-		bool rational_syntax_natural:1;
-		bool prefer_rationals:1;
-	} flag;
+	char_flags flag;
 
 	unsigned user_ops;
 	bool prebuilt:1;

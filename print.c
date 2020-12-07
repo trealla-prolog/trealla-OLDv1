@@ -232,7 +232,7 @@ size_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 			dst += snprintf(dst, dstlen, "%s0o", c->val_num<0?"-":"");
 			dst += sprint_int(dst, dstlen, c->val_num, 8);
 		} else if (c->val_den != 1) {
-			if (q->m->flag.rational_syntax_natural) {
+			if (q->flag.rational_syntax_natural) {
 				dst += sprint_int(dst, dstlen, c->val_num, 10);
 				dst += snprintf(dst, dstlen, "%s", "/");
 				dst += sprint_int(dst, dstlen, c->val_den, 10);
@@ -387,7 +387,7 @@ size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 
 	if (is_rational(c)) {
 		if (c->val_den != 1) {
-			if (q->m->flag.rational_syntax_natural) {
+			if (q->flag.rational_syntax_natural) {
 				dst += sprint_int(dst, dstlen, c->val_num, 10);
 				dst += snprintf(dst, dstlen, "/");
 				dst += sprint_int(dst, dstlen, c->val_den, 10);

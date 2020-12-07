@@ -2048,44 +2048,44 @@ static void collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells)
 	}
 }
 
-static void parse_read_params(query *q, cell *p, cell **vars, idx_t *vars_ctx, cell **varnames, idx_t *varnames_ctx, cell **sings, idx_t *sings_ctx)
+static void parse_read_params(query *q, parser *p, cell *c, cell **vars, idx_t *vars_ctx, cell **varnames, idx_t *varnames_ctx, cell **sings, idx_t *sings_ctx)
 {
-	if (!is_structure(p))
+	if (!is_structure(c))
 		return;
 
-	if (!strcmp(GET_STR(p), "character_escapes")) {
-		if (is_literal(p+1))
-			q->character_escapes = !strcmp(GET_STR(p+1), "true");
-	} else if (!strcmp(GET_STR(p), "double_quotes")) {
-		if (is_literal(p+1)) {
-			if (!strcmp(GET_STR(p+1), "atom")) {
-				q->m->flag.double_quote_codes = q->m->flag.double_quote_chars = 0;
-				q->m->flag.double_quote_atom = 1;
-			} else if (!strcmp(GET_STR(p+1), "chars")) {
-				q->m->flag.double_quote_atom = q->m->flag.double_quote_codes = 0;
-				q->m->flag.double_quote_chars = 1;
-			} else if (!strcmp(GET_STR(p+1), "codes")) {
-				q->m->flag.double_quote_atom = q->m->flag.double_quote_chars = 0;
-				q->m->flag.double_quote_codes = 1;
+	if (!strcmp(GET_STR(c), "character_escapes")) {
+		if (is_literal(c+1))
+			p->flag.character_escapes = !strcmp(GET_STR(c+1), "true");
+	} else if (!strcmp(GET_STR(c), "double_quotes")) {
+		if (is_literal(c+1)) {
+			if (!strcmp(GET_STR(c+1), "atom")) {
+				p->flag.double_quote_codes = p->flag.double_quote_chars = 0;
+				p->flag.double_quote_atom = 1;
+			} else if (!strcmp(GET_STR(c+1), "chars")) {
+				p->flag.double_quote_atom = p->flag.double_quote_codes = 0;
+				p->flag.double_quote_chars = 1;
+			} else if (!strcmp(GET_STR(c+1), "codes")) {
+				p->flag.double_quote_atom = p->flag.double_quote_chars = 0;
+				p->flag.double_quote_codes = 1;
 			}
 		}
-	} else if (!strcmp(GET_STR(p), "variables")) {
-		if (is_variable(p+1)) {
-			cell *v = p+1;
+	} else if (!strcmp(GET_STR(c), "variables")) {
+		if (is_variable(c+1)) {
+			cell *v = c+1;
 			v = deref(q, v, q->latest_ctx);
 			if (vars) *vars = v;
 			if (vars_ctx) *vars_ctx = q->latest_ctx;
 		}
-	} else if (!strcmp(GET_STR(p), "variable_names")) {
-		if (is_variable(p+1)) {
-			cell *v = p+1;
+	} else if (!strcmp(GET_STR(c), "variable_names")) {
+		if (is_variable(c+1)) {
+			cell *v = c+1;
 			v = deref(q, v, q->latest_ctx);
 			if (varnames) *varnames = v;
 			if (varnames_ctx) *varnames_ctx = q->latest_ctx;
 		}
-	} else if (!strcmp(GET_STR(p), "singletons")) {
-		if (is_variable(p+1)) {
-			cell *v = p+1;
+	} else if (!strcmp(GET_STR(c), "singletons")) {
+		if (is_variable(c+1)) {
+			cell *v = c+1;
 			v = deref(q, v, q->latest_ctx);
 			if (sings) *sings = v;
 			if (sings_ctx) *sings_ctx = q->latest_ctx;
@@ -2103,16 +2103,13 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 	parser_reset(p);
 	p->one_shot = true;
 	p->error = false;
-	int flag_chars = q->m->flag.double_quote_chars;
-	int flag_codes = q->m->flag.double_quote_codes;
-	int flag_atom = q->m->flag.double_quote_atom;
 	cell *vars = NULL, *varnames = NULL, *sings = NULL;
 	idx_t vars_ctx = 0, varnames_ctx = 0, sings_ctx = 0;
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
 		cell *c = deref(q, h, p2_ctx);
-		parse_read_params(q, c, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx);
+		parse_read_params(q, p, c, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx);
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
@@ -2176,18 +2173,10 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 		break;
 	}
 
-	bool save = q->m->flag.character_escapes;
-	q->m->flag.character_escapes = q->character_escapes;
-
 	frame *g = GET_FRAME(q->st.curr_frame);
 	p->read_term = g->nbr_vars;
 	parser_tokenize(p, false, false);
 	p->read_term = 0;
-
-	q->m->flag.character_escapes = save;
-	q->m->flag.double_quote_chars = flag_chars;
-	q->m->flag.double_quote_codes = flag_codes;
-	q->m->flag.double_quote_atom = flag_atom;
 
 	if (p->error)
 		return pl_error;
@@ -2476,28 +2465,28 @@ static USE_RESULT prolog_state fn_iso_write_canonical_2(query *q)
 	return !ferror(str->fp);
 }
 
-static void parse_write_params(query *q, cell *p)
-{	if (!is_literal(p))
+static void parse_write_params(query *q, cell *c)
+{	if (!is_literal(c))
 		return;
 
-	if (!is_structure(p))
+	if (!is_structure(c))
 		return;
 
-	if (!strcmp(GET_STR(p), "max_depth")) {
-		if (is_integer(p+1))
-			q->max_depth = p[1].val_num;
-	} else if (!strcmp(GET_STR(p), "fullstop")) {
-		if (is_literal(p+1))
-			q->fullstop = !strcmp(GET_STR(p+1), "true");
-	} else if (!strcmp(GET_STR(p), "nl")) {
-		if (is_literal(p+1))
-			q->nl = !strcmp(GET_STR(p+1), "true");
-	} else if (!strcmp(GET_STR(p), "quoted")) {
-		if (is_literal(p+1))
-			q->quoted = !strcmp(GET_STR(p+1), "true");
-	} else if (!strcmp(GET_STR(p), "ignore_ops")) {
-		if (is_literal(p+1))
-			q->ignore_ops = !strcmp(GET_STR(p+1), "true");
+	if (!strcmp(GET_STR(c), "max_depth")) {
+		if (is_integer(c+1))
+			q->max_depth = c[1].val_num;
+	} else if (!strcmp(GET_STR(c), "fullstop")) {
+		if (is_literal(c+1))
+			q->fullstop = !strcmp(GET_STR(c+1), "true");
+	} else if (!strcmp(GET_STR(c), "nl")) {
+		if (is_literal(c+1))
+			q->nl = !strcmp(GET_STR(c+1), "true");
+	} else if (!strcmp(GET_STR(c), "quoted")) {
+		if (is_literal(c+1))
+			q->quoted = !strcmp(GET_STR(c+1), "true");
+	} else if (!strcmp(GET_STR(c), "ignore_ops")) {
+		if (is_literal(c+1))
+			q->ignore_ops = !strcmp(GET_STR(c+1), "true");
 	}
 }
 
@@ -2507,6 +2496,7 @@ static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 	GET_NEXT_ARG(p2,any);
 	int n = get_named_stream("user_output");
 	stream *str = &g_streams[n];
+	q->flag = q->m->flag;
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
@@ -2544,6 +2534,7 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
+	q->flag = q->m->flag;
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
@@ -7764,6 +7755,7 @@ static USE_RESULT prolog_state fn_write_term_to_chars_3(query *q)
 	GET_FIRST_ARG(p_term,any);
 	GET_NEXT_ARG(p2,list_or_nil);
 	GET_NEXT_ARG(p_chars,any);
+	q->flag = q->m->flag;
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
