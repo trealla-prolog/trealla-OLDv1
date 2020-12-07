@@ -5776,6 +5776,25 @@ static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 		cell tmp;
 		make_int(&tmp, MAX_ARITY);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+#if USE_INT32
+	} else if (!strcmp(GET_STR(p1), "max_integer")) {
+		cell tmp;
+		make_int(&tmp, INT32_MAX);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	} else if (!strcmp(GET_STR(p1), "min_integer")) {
+		cell tmp;
+		make_int(&tmp, INT32_MIN);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+#else
+	} else if (!strcmp(GET_STR(p1), "max_integer")) {
+		cell tmp;
+		make_int(&tmp, INT64_MAX);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	} else if (!strcmp(GET_STR(p1), "min_integer")) {
+		cell tmp;
+		make_int(&tmp, INT64_MIN);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+#endif
 	} else if (!strcmp(GET_STR(p1), "cpu_count")) {
 		cell tmp;
 		make_int(&tmp, g_cpu_count);
