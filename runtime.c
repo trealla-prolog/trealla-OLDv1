@@ -874,6 +874,8 @@ static void next_key(query *q)
 		q->st.curr_clause = q->st.curr_clause->next;
 }
 
+// Match HEAD :- BODY.
+
 static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx)
 {
 	cell *head = get_head(p1);
@@ -887,9 +889,8 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx)
 	if (!h)
 		q->st.curr_clause = NULL;
 	else {
-		if (!h->is_dynamic && !q->run_init) {
+		if (!h->is_dynamic && !q->run_init)
 			return throw_error(q, p1, "permission_error", "access_private_procedure");
-		}
 
 		q->st.curr_clause = h->head;
 	}
@@ -918,12 +919,17 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx)
 	return pl_failure;
 }
 
+// Match HEAD.
+// Match HEAD :- true.
+
 USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool retract)
 {
 	if (q->retry)
 		q->st.curr_clause = q->st.curr_clause->next;
 	else {
-		if (!strcmp(GET_STR(p1), ":-"))
+		// Match HEAD :- BODY
+
+		if (is_literal(p1) && (p1->val_off == g_clause_s))
 			return match_full(q, p1, p1_ctx);
 
 		cell *c = p1;
@@ -978,10 +984,9 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool retr
 
 		term *t = &q->st.curr_clause->t;
 		cell *head = get_head(t->cells);
-		cell *body = get_body(t->cells);
+		cell *body = get_logical_body(t->cells);
 
-		if (body && (body->val_off == g_true_s))
-			body = NULL;
+		// Retract(HEAD) should ignore rules
 
 		if (body && retract && 0)
 			continue;

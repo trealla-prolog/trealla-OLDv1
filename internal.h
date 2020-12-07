@@ -532,6 +532,7 @@ void *get_builtin(module *m, const char *name, unsigned arity);
 prolog_state query_execute(query *q, term *t);
 cell *get_head(cell *c);
 cell *get_body(cell *c);
+cell *get_logical_body(cell *c);
 predicate *find_matching_predicate(module *m, cell *c);
 predicate *find_matching_predicate_quiet(module *m, cell *c);
 predicate *find_functor(module *m, const char *name, unsigned arity);

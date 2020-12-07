@@ -4953,8 +4953,13 @@ static void db_log(query *q, clause *r, enum log_type l)
 static USE_RESULT prolog_state fn_iso_retract_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
+	cell *body = get_logical_body(p1);
+
+	if (!body)
+		p1 = get_head(p1);
 
 	prolog_state match = match_clause(q, p1, p1_ctx, true);
+
 	if (match != pl_success)
 		return match;
 

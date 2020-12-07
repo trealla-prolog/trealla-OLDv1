@@ -314,7 +314,7 @@ cell *get_head(cell *c)
 	assert(c);
 
 	if (!is_literal(c))
-		return NULL;
+		return c;
 
 	if (c->val_off != g_clause_s)
 		return c;
@@ -327,7 +327,7 @@ cell *get_body(cell *c)
 	assert(c);
 
 	if (!is_literal(c))
-		return NULL;
+		return c;
 
 	if (c->val_off != g_clause_s)
 		return NULL;
@@ -336,6 +336,19 @@ cell *get_body(cell *c)
 	c += c->nbr_cells;
 
 	if (is_end(c))
+		return NULL;
+
+	return c;
+}
+
+cell *get_logical_body(cell *c)
+{
+	cell *body = get_body(c);
+
+	if (!body)
+		return NULL;
+
+	if (!body->arity && is_literal(body) && (body->val_off == g_true_s))
 		return NULL;
 
 	return c;
