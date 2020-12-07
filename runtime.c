@@ -980,7 +980,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool retr
 		cell *head = get_head(t->cells);
 		cell *body = get_body(t->cells);
 
-		if (body && retract)
+		if (body && retract && 0)
 			continue;
 
 		try_me(q, t->nbr_vars);
