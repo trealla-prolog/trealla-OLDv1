@@ -3195,13 +3195,13 @@ static USE_RESULT prolog_state fn_iso_add_2(query *q)
 		__int128_t tmp = (__int128_t)p1.val_num + p2.val_num;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			return throw_error(q, &p1, "domain_error", "integer_overflow");
+			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = (int64_t)p1.val_num + p2.val_num;
 
 			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-				return throw_error(q, &p1, "domain_error", "integer_overflow");
+				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
 				q->accum.val_num = p1.val_num + p2.val_num;
@@ -3244,13 +3244,13 @@ static USE_RESULT prolog_state fn_iso_sub_2(query *q)
 		__int128_t tmp = (__int128_t)p1.val_num - p2.val_num;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			return throw_error(q, &p1, "domain_error", "integer_overflow");
+			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = (int64_t)p1.val_num - p2.val_num;
 
 			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-				return throw_error(q, &p1, "domain_error", "integer_overflow");
+				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
 				q->accum.val_num = p1.val_num - p2.val_num;
@@ -3293,13 +3293,13 @@ static USE_RESULT prolog_state fn_iso_mul_2(query *q)
 		__int128_t tmp = (__int128_t)p1.val_num * p2.val_num;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			return throw_error(q, &p1, "domain_error", "integer_overflow");
+			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = (int64_t)p1.val_num * p2.val_num;
 
 			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-				return throw_error(q, &p1, "domain_error", "integer_overflow");
+				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
 				q->accum.val_num = p1.val_num * p2.val_num;
@@ -3395,13 +3395,13 @@ static USE_RESULT prolog_state fn_iso_truncate_1(query *q)
 		__int128_t tmp = p1.val_flt;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			return throw_error(q, &p1, "domain_error", "integer_overflow");
+			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = p1.val_flt;
 
 			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-				return throw_error(q, &p1, "domain_error", "integer_overflow");
+				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
 				q->accum.val_num = (int_t)p1.val_flt;
@@ -3428,13 +3428,13 @@ static USE_RESULT prolog_state fn_iso_round_1(query *q)
 		__int128_t tmp = round(p1.val_flt);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			return throw_error(q, &p1, "domain_error", "integer_overflow");
+			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = round(p1.val_flt);
 
 			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-				return throw_error(q, &p1, "domain_error", "integer_overflow");
+				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
 				q->accum.val_num = (int_t)round(p1.val_flt);
@@ -3461,13 +3461,13 @@ static USE_RESULT prolog_state fn_iso_ceiling_1(query *q)
 		__int128_t tmp = ceil(p1.val_flt);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			return throw_error(q, &p1, "domain_error", "integer_overflow");
+			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = ceil(p1.val_flt);
 
 			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-				return throw_error(q, &p1, "domain_error", "integer_overflow");
+				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
 				q->accum.val_num = (int_t)ceil(p1.val_flt);
@@ -3494,13 +3494,13 @@ static USE_RESULT prolog_state fn_iso_float_integer_part_1(query *q)
 		__int128_t tmp = p1.val_flt;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			return throw_error(q, &p1, "domain_error", "integer_overflow");
+			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = p1.val_flt;
 
 			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-				return throw_error(q, &p1, "domain_error", "integer_overflow");
+				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
 				q->accum.val_flt = (int_t)p1.val_flt;
@@ -3527,13 +3527,13 @@ static USE_RESULT prolog_state fn_iso_float_fractional_part_1(query *q)
 		__int128_t tmp = p1.val_flt - (__int64_t)p1.val_flt;
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			return throw_error(q, &p1, "domain_error", "integer_overflow");
+			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = p1.val_flt - (int64_t)p1.val_flt;
 
 			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-				return throw_error(q, &p1, "domain_error", "integer_overflow");
+				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
 				q->accum.val_flt = p1.val_flt - (int_t)p1.val_flt;
@@ -3560,13 +3560,13 @@ static USE_RESULT prolog_state fn_iso_floor_1(query *q)
 		__int128_t tmp = floor(p1.val_flt);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			return throw_error(q, &p1, "domain_error", "integer_overflow");
+			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = floor(p1.val_flt);
 
 			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-				return throw_error(q, &p1, "domain_error", "integer_overflow");
+				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
 				q->accum.val_num = (int_t)floor(p1.val_flt);
@@ -3789,13 +3789,13 @@ static USE_RESULT prolog_state fn_iso_powi_2(query *q)
 		__int128_t tmp = pow(p1.val_num,p2.val_num);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			return throw_error(q, &p1, "domain_error", "integer_overflow");
+			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = pow(p1.val_num,p2.val_num);
 
 			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-				return throw_error(q, &p1, "domain_error", "integer_overflow");
+				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
 				q->accum.val_num = (int_t)pow(p1.val_num,p2.val_num);
@@ -5763,6 +5763,10 @@ static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 	} else if (!strcmp(GET_STR(p1), "dialect")) {
 		cell tmp;
 		make_literal(&tmp, index_from_pool("trealla"));
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	} else if (!strcmp(GET_STR(p1), "integer_rounding_function")) {
+		cell tmp;
+		make_literal(&tmp, index_from_pool("toward_zero"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "bounded")) {
 		cell tmp;
