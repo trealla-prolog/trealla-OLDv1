@@ -947,6 +947,7 @@ query *create_query(module *m, bool is_task)
 		q->trace = m->trace;
 		q->current_input = 0;		// STDIN
 		q->current_output = 1;		// STDOUT
+		q->character_escapes = m->flag.character_escapes;
 
 		// Allocate these now...
 
@@ -2397,7 +2398,7 @@ static bool get_token(parser *p, int last_op)
 					break;
 				}
 
-				if ((ch == '\\') && p->m->flag.character_escapes) {
+				if ((ch == '\\') /* && p->m->flag.character_escapes*/) {
 					int ch2 = *src;
 					ch = get_escape(&src, &p->error);
 
