@@ -2,6 +2,8 @@
 
 :- initialization(main).
 
+:- use_module(library(format)).
+
 main :-
     solve('METHINKS IT IS LIKE A WEASEL'),
     halt.
@@ -27,7 +29,7 @@ random_alpha(Ch) :-                 % generate a single random character
 
 evolve(Evolution, Probability, Target, mutation(Score, Value)) :-
     atom_codes(Val, Value),
-    format('evolution=~w score=~w value=~q~n', [Evolution, Score, Val]),
+    format("evolution=~w score=~w value=~q~n", [Evolution, Score, Val]),
     (   Score = 0
     ->  true
     ;   evolve(Evolution, Probability, Target, Value)
