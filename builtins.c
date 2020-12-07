@@ -1220,6 +1220,9 @@ static USE_RESULT prolog_state fn_iso_number_codes_2(query *q)
 			p2_ctx = q->latest_ctx;
 		}
 
+		if (!is_nil(p2))
+			return throw_error(q, p2, "type_error", "list");
+
 		*dst = '\0';
 		cell tmp;
 		const char *src = tmpbuf;
