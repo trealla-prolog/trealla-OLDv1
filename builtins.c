@@ -3058,7 +3058,7 @@ static USE_RESULT prolog_state fn_iso_is_2(query *q)
 	if (is_atom(p1) && is_number(&p2) && !strcmp(GET_STR(p1), "inf"))
 		return is_float(&p2) ? isinf(p2.val_flt) : 0;
 
-	return throw_error(q, p1, "type_error", "number");
+	return pl_failure;
 }
 
 static USE_RESULT prolog_state fn_iso_float_1(query *q)
