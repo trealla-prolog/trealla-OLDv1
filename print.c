@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <float.h>
+#include <inttypes.h>
 
 #ifdef _WIN32
 #define snprintf _snprintf
@@ -46,7 +47,6 @@ static int needs_quote(module *m, const char *src, size_t srclen)
 static size_t _sprint_int(char *dst, size_t size, int_t n, int base)
 {
 	const char *save_dst = dst;
-
 	if ((n / base) > 0)
 		dst += _sprint_int(dst, size, n / base, base);
 
@@ -58,7 +58,7 @@ static size_t _sprint_int(char *dst, size_t size, int_t n, int base)
 	} else
 		n2 += '0';
 
-	if (size) *dst++ = (char)n2; else dst++;
+	if (size) *dst++ = n2; else dst++;
 	return dst - save_dst;
 }
 
@@ -68,7 +68,7 @@ size_t sprint_int(char *dst, size_t size, int_t n, int base)
 
 	if ((n < 0) && (base == 10)) {
 		if (size) *dst++ = '-'; else dst++;
-		n = llabs((long long)n);
+		n = imaxabs(n+1) - 1;
 	}
 
 	if (n == 0) {
