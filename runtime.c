@@ -978,11 +978,6 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx)
 
 		term *t = &q->st.curr_clause->t;
 		cell *head = get_head(t->cells);
-		cell *body = get_body(t->cells);
-
-		if (body)
-			continue;
-
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
 		q->no_tco = false;
