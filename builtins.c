@@ -1164,53 +1164,111 @@ static USE_RESULT prolog_state fn_iso_atom_codes_2(query *q)
 static USE_RESULT prolog_state fn_iso_number_codes_2(query *q)
 {
 	GET_FIRST_ARG(p1,number_or_var);
-	GET_NEXT_ARG(p2,iso_list_or_var);
+	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
 
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 
+	// Verify the list
+
 	if (!is_variable(p2)) {
-		cell *head = LIST_HEAD(p2);
-		cell *tail = LIST_TAIL(p2);
-		head = deref(q, head, p2_ctx);
+		cell *save_p2 = p2;
+		idx_t save_p2_ctx = p2_ctx;
+
+		while (is_list(p2)) {
+			cell *head = LIST_HEAD(p2);
+			cell *tail = LIST_TAIL(p2);
+			head = deref(q, head, p2_ctx);
+
+			if (!is_integer(head) && is_variable(p1))
+				return throw_error(q, head, "type_error", "integer");
+
+			if (!is_integer(head) && !is_variable(head))
+				return throw_error(q, head, "type_error", "integer");
+
+			p2 = deref(q, tail, p2_ctx);
+			p2_ctx = q->latest_ctx;
+		}
+
+		if (!is_nil(p2) && !is_variable(p2))
+			return throw_error(q, p2, "type_error", "list");
+
+		p2 = save_p2;
+		p2_ctx = save_p2_ctx;
+	}
+
+	if (!is_variable(p2) && is_variable(p1)) {
 		char tmpbuf[256];
 		char *dst = tmpbuf;
 
-		while (tail) {
+		while (is_list(p2)) {
+			cell *head = LIST_HEAD(p2);
+			cell *tail = LIST_TAIL(p2);
+			head = deref(q, head, p2_ctx);
+
 			if (!is_integer(head))
 				return throw_error(q, head, "type_error", "integer");
 
 			int ch = head->val_num;
-
 			*dst++ = ch;
 
-			if (is_literal(tail)) {
-				if (tail->val_off == g_nil_s)
-					break;
-			}
-
-			if (!is_list(tail))
-				return throw_error(q, tail, "type_error", "list");
-
-			head = LIST_HEAD(tail);
-			tail = LIST_TAIL(tail);
-			head = deref(q, head, q->latest_ctx);
+			p2 = deref(q, tail, p2_ctx);
+			p2_ctx = q->latest_ctx;
 		}
 
 		*dst = '\0';
-		char *end;
-		int_t val = strtoll(tmpbuf, &end, 10);
 		cell tmp;
+		const char *src = tmpbuf;
+		char *end = NULL;
 
-		if (*end) {
-			double f = strtod(tmpbuf, &end);
+		while (isspace(*src))
+			src++;
 
-			if (*end)
-				return throw_error(q, p2, "syntax_error", "number");
-
-			make_float(&tmp, f);
-		} else
+		if ((src[0] == '0') && (src[1] == '\'')) {
+			int val = peek_char_utf8(src+2);
 			make_int(&tmp, val);
+		} else if ((src[0] == '0') && (src[1] == 'x')) {
+			char *end;
+			int_t val = strtoll(src+2, &end, 16);
+			make_int(&tmp, val);
+
+			if (*end) {
+				make_smalln(&tmp, end, 1);
+				return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
+			}
+		} else if ((src[0] == '0') && (src[1] == 'o')) {
+			char *end;
+			int_t val = strtoll(src+2, &end, 8);
+			make_int(&tmp, val);
+
+			if (*end) {
+				make_smalln(&tmp, end, 1);
+				return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
+			}
+		} else if ((src[0] == '0') && (src[1] == 'b')) {
+			char *end;
+			int_t val = strtoll(src+2, &end, 2);
+			make_int(&tmp, val);
+
+			if (*end) {
+				make_smalln(&tmp, end, 1);
+				return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
+			}
+		} else {
+			int_t val = strtoll(src, &end, 10);
+
+			if (*end) {
+				double f = strtod(src, &end);
+
+				if (*end) {
+					make_smalln(&tmp, end, 1);
+					return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
+				}
+
+				make_float(&tmp, f);
+			} else
+				make_int(&tmp, val);
+		}
 
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
