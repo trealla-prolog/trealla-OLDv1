@@ -764,19 +764,18 @@ static USE_RESULT prolog_state fn_iso_char_code_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (is_variable(p1)) {
+	if (is_integer(p2)) {
 		if (p2->val_num < 0)
-			return throw_error(q, p1, "representation_error", "character_code");
+			return throw_error(q, p2, "representation_error", "character_code");
+	}
 
+	if (is_variable(p1)) {
 		char tmpbuf[256];
 		put_char_utf8(tmpbuf, p2->val_num);
 		cell tmp;
 		make_small(&tmp, tmpbuf);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
-
-	if (p2->val_num < 0)
-		return throw_error(q, p1, "representation_error", "character_code");
 
 	const char *src = GET_STR(p1);
 	size_t len = len_char_utf8(src);
