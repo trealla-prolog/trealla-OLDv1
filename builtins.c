@@ -5468,7 +5468,7 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	//	snprintf(dst2, len2+1, "error(%s,(%s)/%u).", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	if (is_variable(c)) {
 		err_type = "instantiation_error";
-		snprintf(dst2, len2+1, "error(%s).", err_type);
+		snprintf(dst2, len2+1, "error(%s,%s).", err_type, expected);
 	} else if (!strcmp(err_type, "representation_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s),%s/%u).", err_type, expected, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (!strcmp(err_type, "evaluation_error")) {
