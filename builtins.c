@@ -5770,7 +5770,7 @@ static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "bounded")) {
 		cell tmp;
-		make_literal(&tmp, g_false_s);
+		make_literal(&tmp, g_true_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "max_arity")) {
 		cell tmp;
