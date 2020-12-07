@@ -988,7 +988,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool retr
 
 		// Retract(HEAD) should ignore rules
 
-		if (body && retract && 0)
+		if (body && retract)
 			continue;
 
 		try_me(q, t->nbr_vars);

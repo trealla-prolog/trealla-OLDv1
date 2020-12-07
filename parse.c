@@ -346,7 +346,7 @@ cell *get_logical_body(cell *c)
 	if (!body->arity && is_literal(body) && (body->val_off == g_true_s))
 		return NULL;
 
-	return c;
+	return body;
 }
 
 static predicate *find_predicate(module *m, cell *c)
