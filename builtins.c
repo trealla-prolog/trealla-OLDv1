@@ -1553,6 +1553,9 @@ static USE_RESULT prolog_state fn_iso_atom_length_2(query *q)
 	if (!is_iso_atom(p1))
 		return throw_error(q, p1, "type_error", "atom");
 
+	if (is_integer(p2) && (p2->val_num < 0))
+		return throw_error(q, p2, "domain_error", "not_less_than_zero");
+
 	if (is_blob(p1)) {
 		const char *p = GET_STR(p1);
 		len = substrlen_utf8(p, p+p1->len_str);
