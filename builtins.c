@@ -3876,6 +3876,9 @@ static USE_RESULT prolog_state fn_iso_divint_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
+		if (p2.val_num == 0)
+			return throw_error(q, &p1, "evaluation_error", "zero_divisior");
+
 		q->accum.val_num = p1.val_num / p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
@@ -3893,6 +3896,9 @@ static USE_RESULT prolog_state fn_iso_div_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
+		if (p2.val_num == 0)
+			return throw_error(q, &p1, "evaluation_error", "zero_divisior");
+
 		q->accum.val_num = (p1.val_num - llabs((long long)(p1.val_num % p2.val_num))) / p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
@@ -3910,6 +3916,9 @@ static USE_RESULT prolog_state fn_iso_mod_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
+		if (p2.val_num == 0)
+			return throw_error(q, &p1, "evaluation_error", "zero_divisior");
+
 		q->accum.val_num = llabs((long long)(p1.val_num % p2.val_num));
 		q->accum.val_type = TYPE_INTEGER;
 	} else {
