@@ -99,6 +99,13 @@ static size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen
 			}
 
 			len += 2;
+		} else if (!dq && (ch == '\'')) {
+			if (dstlen) {
+				*dst++ = '\'';
+				*dst++ = ch;
+			}
+
+			len += 2;
 		} else if (ch == (dq?'"':'\'')) {
 			if (dstlen) {
 				*dst++ = '\\';

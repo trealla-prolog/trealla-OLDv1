@@ -3440,7 +3440,7 @@ module *create_module(const char *name)
 			"findall(Template, Goal, List0), "					\
 			"'$append'(List0, Tail, List).");
 
-		make_rule(m, "forall(Cond,Action) :- \\+ (Cond, \\+ Action).");
+		//make_rule(m, "forall(Cond,Action) :- \\+ (Cond, \\+ Action).");
 
 		// This is an approximation... it needs a catcher
 

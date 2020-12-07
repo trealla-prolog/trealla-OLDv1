@@ -894,19 +894,138 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 		return ok;
 	}
 
+	cell tmp;
+	may_error(make_string(&tmp, GET_STR(p1), LEN_STR(p1)));
+
 	if (is_variable(p2)) {
-		cell tmp;
-		may_error(make_string(&tmp, GET_STR(p1), LEN_STR(p1)));
 		tmp.flags |= FLAG_TMP;
 		int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		chk_cstring(&tmp);
 		return ok;
 	}
 
-	cell tmp;
-	may_error(make_string(&tmp, GET_STR(p1), LEN_STR(p1)));
 	cell *tmp2 = alloc_heap(q, 1);
 	*tmp2 = tmp;
+	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	return ok;
+}
+
+static USE_RESULT prolog_state fn_iso_number_chars_2(query *q)
+{
+	GET_FIRST_ARG(p1,number_or_var);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
+
+	if (is_variable(p1) && is_variable(p2))
+		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
+
+	// Verify the list
+
+	if (!is_variable(p2)) {
+		cell *save_p2 = p2;
+		idx_t save_p2_ctx = p2_ctx;
+
+		while (is_list(p2)) {
+			cell *head = LIST_HEAD(p2);
+			cell *tail = LIST_TAIL(p2);
+			head = deref(q, head, p2_ctx);
+
+			if (!is_atom(head) && is_variable(p1))
+				return throw_error(q, head, "type_error", "character");
+
+			if (!is_atom(head) && !is_variable(head))
+				return throw_error(q, head, "type_error", "character");
+
+			if (is_atom(head)) {
+				const char *src = GET_STR(head);
+				size_t len = len_char_utf8(src);
+
+				if (len < LEN_STR(head))
+					return throw_error(q, head, "type_error", "character");
+			}
+
+			p2 = deref(q, tail, p2_ctx);
+			p2_ctx = q->latest_ctx;
+		}
+
+		if (!is_nil(p2) && !is_variable(p2))
+			return throw_error(q, p2, "type_error", "list");
+
+		p2 = save_p2;
+		p2_ctx = save_p2_ctx;
+	}
+
+	if (!is_variable(p2) && is_variable(p1)) {
+		char tmpbuf[256];
+		char *dst = tmpbuf;
+
+		while (is_list(p2)) {
+			cell *head = LIST_HEAD(p2);
+			cell *tail = LIST_TAIL(p2);
+			head = deref(q, head, p2_ctx);
+
+			if (!is_atom(head))
+				return throw_error(q, head, "type_error", "atom");
+
+			const char *src = GET_STR(head);
+			int ch = *src;
+			*dst++ = ch;
+			p2 = deref(q, tail, p2_ctx);
+			p2_ctx = q->latest_ctx;
+		}
+
+		if (!is_nil(p2))
+			return throw_error(q, p2, "type_error", "list");
+
+		*dst = '\0';
+		cell tmp;
+
+		if ((tmpbuf[0] == '0') && (tmpbuf[1] == '\'')) {
+			int val = peek_char_utf8(&tmpbuf[2]);
+			make_int(&tmp, val);
+		} else if ((tmpbuf[0] == '0') && (tmpbuf[1] == 'x')) {
+			char *end;
+			int_t val = strtoll(tmpbuf+2, &end, 16);
+			make_int(&tmp, val);
+		} else if ((tmpbuf[0] == '0') && (tmpbuf[1] == 'o')) {
+			char *end;
+			int_t val = strtoll(tmpbuf+2, &end, 8);
+			make_int(&tmp, val);
+		} else if ((tmpbuf[0] == '0') && (tmpbuf[1] == 'b')) {
+			char *end;
+			int_t val = strtoll(tmpbuf+2, &end, 2);
+			make_int(&tmp, val);
+		} else {
+			char *end;
+			int_t val = strtoll(tmpbuf, &end, 10);
+
+			if (*end) {
+				double f = strtod(tmpbuf, &end);
+
+				if (*end) {
+					make_smalln(&tmp, end, 1);
+					return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
+				}
+
+				make_float(&tmp, f);
+			} else
+				make_int(&tmp, val);
+		}
+
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	char tmpbuf[256];
+	print_term_to_buf(q, tmpbuf, sizeof(tmpbuf), p1, p1_ctx, 1, 0, 0);
+	cell tmp;
+	may_error(make_string(&tmp, tmpbuf, strlen(tmpbuf)));
+
+	if (is_variable(p2)) {
+		tmp.flags |= FLAG_TMP;
+		int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		chk_cstring(&tmp);
+		return ok;
+	}
+
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	return ok;
 }
@@ -1021,71 +1140,6 @@ static USE_RESULT prolog_state fn_iso_atom_codes_2(query *q)
 	cell *l = end_list(q);
 	may_ptr_error(l);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
-}
-
-static USE_RESULT prolog_state fn_iso_number_chars_2(query *q)
-{
-	GET_FIRST_ARG(p1,number_or_var);
-	GET_NEXT_ARG(p2,list_or_var);
-
-	if (is_variable(p1) && is_variable(p2))
-		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
-
-	if (!is_variable(p2)) {
-		cell *head = LIST_HEAD(p2);
-		cell *tail = LIST_TAIL(p2);
-		head = deref(q, head, p2_ctx);
-		char tmpbuf[256];
-		char *dst = tmpbuf;
-
-		while (tail) {
-			if (!is_atom(head))
-				return throw_error(q, head, "type_error", "atom");
-
-			const char *src = GET_STR(head);
-			int ch = *src;
-
-			*dst++ = ch;
-
-			if (is_literal(tail)) {
-				if (tail->val_off == g_nil_s)
-					break;
-			}
-
-			if (!is_list(tail))
-				return throw_error(q, tail, "type_error", "list");
-
-			head = LIST_HEAD(tail);
-			tail = LIST_TAIL(tail);
-			head = deref(q, head, q->latest_ctx);
-		}
-
-		*dst = '\0';
-		char *end;
-		int_t val = strtoll(tmpbuf, &end, 10);
-		cell tmp;
-
-		if (*end) {
-			double f = strtod(tmpbuf, &end);
-
-			if (*end)
-				return throw_error(q, p2, "syntax_error", "number");
-
-			make_float(&tmp, f);
-		} else
-			make_int(&tmp, val);
-
-		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	}
-
-	char tmpbuf[256];
-	print_term_to_buf(q, tmpbuf, sizeof(tmpbuf), p1, p1_ctx, 1, 0, 0);
-	cell tmp;
-	may_error(make_string(&tmp, tmpbuf, strlen(tmpbuf)));
-	tmp.flags |= FLAG_TMP;
-	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	chk_cstring(&tmp);
-	return ok;
 }
 
 static USE_RESULT prolog_state fn_iso_number_codes_2(query *q)
@@ -5297,6 +5351,8 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 		snprintf(dst2, len2+1, "error(%s,%s/%u).", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (!strcmp(err_type, "representation_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s),%s/%u).", err_type, expected, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+	} else if (!strcmp(err_type, "syntax_error")) {
+		snprintf(dst2, len2+1, "error(%s((%s,%s)),%s/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (GET_OP(q->st.curr_cell)) {
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (GET_OP(q->st.curr_cell)) {
@@ -10721,7 +10777,7 @@ static const struct builtins g_other_funcs[] =
 	{"is_list", 1, fn_is_list_1, "+term"},
 	{"list", 1, fn_is_list_1, "+term"},
 	{"is_stream", 1, fn_is_stream_1, "+term"},
-	{"Xforall", 2, fn_forall_2, "+term,+term"},
+	{"forall", 2, fn_forall_2, "+term,+term"},
 	{"term_hash", 2, fn_term_hash_2, "+term,?integer"},
 	{"rename_file", 2, fn_rename_file_2, "+string,+string"},
 	{"delete_file", 1, fn_delete_file_1, "+string"},
