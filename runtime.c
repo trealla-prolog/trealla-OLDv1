@@ -918,7 +918,7 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx)
 	return pl_failure;
 }
 
-USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx)
+USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool retract)
 {
 	if (q->retry)
 		q->st.curr_clause = q->st.curr_clause->next;
@@ -978,6 +978,11 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx)
 
 		term *t = &q->st.curr_clause->t;
 		cell *head = get_head(t->cells);
+		cell *body = get_body(t->cells);
+
+		if (body && retract)
+			continue;
+
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
 		q->no_tco = false;
