@@ -753,6 +753,11 @@ static USE_RESULT prolog_state fn_iso_char_code_2(query *q)
 
 	if (is_variable(p2)) {
 		const char *src = GET_STR(p1);
+		size_t len = len_char_utf8(src);
+
+		if (len != LEN_STR(p1))
+			return throw_error(q, p1, "type_error", "character");
+
 		int ch = peek_char_utf8(src);
 		cell tmp;
 		make_int(&tmp, ch);
@@ -768,6 +773,11 @@ static USE_RESULT prolog_state fn_iso_char_code_2(query *q)
 	}
 
 	const char *src = GET_STR(p1);
+	size_t len = len_char_utf8(src);
+
+	if (len != LEN_STR(p1))
+		return throw_error(q, p1, "type_error", "character");
+
 	int ch = peek_char_utf8(src);
 	return ch == p2->val_num;
 }
