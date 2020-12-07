@@ -10175,6 +10175,9 @@ static USE_RESULT prolog_state fn_succ_2(query *q)
 	}
 
 	if (is_variable(p1)) {
+		if (p2->val_num == 0)
+			return 0;
+
 		cell tmp;
 		make_int(&tmp, p2->val_num-1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
