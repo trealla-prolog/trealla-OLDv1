@@ -20,28 +20,28 @@
 #define DBL_DECIMAL_DIG DBL_DIG
 #endif
 
-static int needs_quote(module *m, const char *src, size_t srclen)
+static bool needs_quote(module *m, const char *src, size_t srclen)
 {
 	if (!strcmp(src, ",") || !strcmp(src, ".") || !strcmp(src, "|"))
-		return 1;
+		return true;
 
 	if (!*src || isupper(*src) || isdigit(*src) || (*src == '_'))
-		return 1;
+		return true;
 
 	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!"))
-		return 0;
+		return false;
 
 	if (get_op(m, src, NULL, NULL, false))
-		return 0;
+		return false;
 
 	while (srclen--) {
 		int ch = get_char_utf8(&src);
 
 		if (!isalnum(ch) && (ch != '_'))
-			return 1;
+			return true;
 	}
 
-	return 0;
+	return false;
 }
 
 static size_t _sprint_int(char *dst, size_t size, int_t n, int base)
