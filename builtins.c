@@ -5468,6 +5468,8 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	if (is_variable(c)) {
 		err_type = "instantiation_error";
 		snprintf(dst2, len2+1, "error(%s,%s).", err_type, expected);
+	} else if (!strcmp(err_type, "instantiation_error")) {
+		snprintf(dst2, len2+1, "error(%s,%s/%u).", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (!strcmp(err_type, "representation_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s),%s/%u).", err_type, expected, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (!strcmp(err_type, "evaluation_error")) {
@@ -7787,6 +7789,27 @@ static USE_RESULT prolog_state fn_is_list_1(query *q)
 static USE_RESULT prolog_state fn_mustbe_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
+
+	if (is_valid_list(q, p1, p1_ctx, true)
+		&& !is_valid_list(q, p1, p1_ctx, false))
+		return throw_error(q, p1, "instantiation_error", "tail_is_a_variable");
+
+	if (!is_valid_list(q, p1, p1_ctx, false))
+		return throw_error(q, p1, "type_error", "list");
+
+	return pl_success;
+}
+
+static USE_RESULT prolog_state fn_mustbe_list_or_var_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+
+	if (is_variable(p1))
+		return pl_success;
+
+	if (is_valid_list(q, p1, p1_ctx, true)
+		&& !is_valid_list(q, p1, p1_ctx, false))
+		return throw_error(q, p1, "instantiation_error", "tail_is_a_variable");
 
 	if (!is_valid_list(q, p1, p1_ctx, false))
 		return throw_error(q, p1, "type_error", "list");
@@ -10984,6 +11007,7 @@ static const struct builtins g_other_funcs[] =
 	{"split", 4, fn_split_4, "+string,+string,?left,?right"},
 	{"is_list", 1, fn_is_list_1, "+term"},
 	{"mustbe_list", 1, fn_mustbe_list_1, "+term"},
+	{"mustbe_list_or_var", 1, fn_mustbe_list_or_var_1, "+term"},
 	{"list", 1, fn_is_list_1, "+term"},
 	{"is_stream", 1, fn_is_stream_1, "+term"},
 	{"forall", 2, fn_forall_2, "+term,+term"},
