@@ -179,7 +179,7 @@ static int find_binding(query *q, idx_t var_nbr, idx_t var_ctx)
 	const frame *g = GET_FRAME(q->st.curr_frame);
 	const slot *e = GET_SLOT(g, 0);
 
-	for (unsigned i = 0; i < g->nbr_vars; i++, e++) {
+	for (idx_t i = 0; i < g->nbr_vars; i++, e++) {
 		if (!is_variable(&e->c))
 			continue;
 
@@ -190,7 +190,7 @@ static int find_binding(query *q, idx_t var_nbr, idx_t var_ctx)
 			return i;
 	}
 
-	return -1;
+	return ERR_IDX;
 }
 
 static uint8_t s_mask1[MAX_ARITY] = {0}, s_mask2[MAX_ARITY] = {0};
@@ -268,11 +268,11 @@ size_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 		return dst - save_dst;
 	}
 
-	int var_nbr = 0;
+	idx_t var_nbr = 0;
 
 	if (is_variable(c)
 		&& (running>0) && (q->nv_start == -1)
-		&& ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != -1)) {
+		&& ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != ERR_IDX)) {
 
 		for (unsigned i = 0; i < MAX_ARITY; i++) {
 			if (q->nv_mask[i])
