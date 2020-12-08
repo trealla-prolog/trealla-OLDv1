@@ -3172,6 +3172,8 @@ static USE_RESULT prolog_state fn_iso_negative_1(query *q)
 		q->accum.val_num = -p1.val_num;
 	else if (is_float(&p1))
 		q->accum.val_flt = -p1.val_flt;
+	else if (is_variable(&p1))
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	else
 		return throw_error(q, &p1, "type_error", "number");
 
@@ -3234,6 +3236,8 @@ static USE_RESULT prolog_state fn_iso_add_2(query *q)
 	} else if (is_float(&p1) && is_integer(&p2)) {
 		q->accum.val_flt = p1.val_flt + p2.val_num;
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3283,6 +3287,8 @@ static USE_RESULT prolog_state fn_iso_sub_2(query *q)
 	} else if (is_float(&p1) && is_integer(&p2)) {
 		q->accum.val_flt = p1.val_flt - p2.val_num;
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3333,6 +3339,8 @@ static USE_RESULT prolog_state fn_iso_mul_2(query *q)
 	} else if (is_float(&p1) && is_integer(&p2)) {
 		q->accum.val_flt = p1.val_flt * p2.val_num;
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3351,6 +3359,8 @@ static USE_RESULT prolog_state fn_iso_exp_1(query *q)
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = exp(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3369,6 +3379,8 @@ static USE_RESULT prolog_state fn_iso_sqrt_1(query *q)
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = sqrt(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3387,6 +3399,8 @@ static USE_RESULT prolog_state fn_iso_log_1(query *q)
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = log(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3420,6 +3434,8 @@ static USE_RESULT prolog_state fn_iso_truncate_1(query *q)
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "float");
 	}
@@ -3453,6 +3469,8 @@ static USE_RESULT prolog_state fn_iso_round_1(query *q)
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "float");
 	}
@@ -3486,6 +3504,8 @@ static USE_RESULT prolog_state fn_iso_ceiling_1(query *q)
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "float");
 	}
@@ -3519,6 +3539,8 @@ static USE_RESULT prolog_state fn_iso_float_integer_part_1(query *q)
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "float");
 	}
@@ -3552,6 +3574,8 @@ static USE_RESULT prolog_state fn_iso_float_fractional_part_1(query *q)
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "float");
 	}
@@ -3585,6 +3609,8 @@ static USE_RESULT prolog_state fn_iso_floor_1(query *q)
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 		}
 #endif
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "float");
 	}
@@ -3603,6 +3629,8 @@ static USE_RESULT prolog_state fn_iso_sin_1(query *q)
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = sin(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3621,6 +3649,8 @@ static USE_RESULT prolog_state fn_iso_cos_1(query *q)
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = cos(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3639,6 +3669,8 @@ static USE_RESULT prolog_state fn_iso_tan_1(query *q)
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = tan(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3657,6 +3689,8 @@ static USE_RESULT prolog_state fn_iso_asin_1(query *q)
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = asin(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3675,6 +3709,8 @@ static USE_RESULT prolog_state fn_iso_acos_1(query *q)
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = acos(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3693,6 +3729,8 @@ static USE_RESULT prolog_state fn_iso_atan_1(query *q)
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = atan(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3719,6 +3757,8 @@ static USE_RESULT prolog_state fn_iso_atan_2(query *q)
 	} else if (is_float(&p1) && is_integer(&p2)) {
 		q->accum.val_flt = atan2(p1.val_flt, p2.val_num);
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3753,6 +3793,8 @@ static USE_RESULT prolog_state fn_iso_copysign_2(query *q)
 	} else if (is_float(&p1) && is_rational(&p2)) {
 		q->accum.val_flt = copysign(p1.val_flt, p2.val_num);
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3779,6 +3821,8 @@ static USE_RESULT prolog_state fn_iso_pow_2(query *q)
 	} else if (is_float(&p1) && is_integer(&p2)) {
 		q->accum.val_flt = pow(p1.val_flt, p2.val_num);
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3826,6 +3870,8 @@ static USE_RESULT prolog_state fn_iso_powi_2(query *q)
 	} else if (is_float(&p1) && is_integer(&p2)) {
 		q->accum.val_flt = pow(p1.val_flt, p2.val_num);
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3870,6 +3916,8 @@ static USE_RESULT prolog_state fn_iso_divide_2(query *q)
 
 		q->accum.val_flt = p1.val_flt / p2.val_num;
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "number");
 	}
@@ -3890,6 +3938,8 @@ static USE_RESULT prolog_state fn_iso_divint_2(query *q)
 
 		q->accum.val_num = p1.val_num / p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "integer");
 	}
@@ -3910,6 +3960,8 @@ static USE_RESULT prolog_state fn_iso_div_2(query *q)
 
 		q->accum.val_num = (p1.val_num - llabs((long long)(p1.val_num % p2.val_num))) / p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "integer");
 	}
@@ -3930,6 +3982,8 @@ static USE_RESULT prolog_state fn_iso_mod_2(query *q)
 
 		q->accum.val_num = llabs((long long)(p1.val_num % p2.val_num));
 		q->accum.val_type = TYPE_INTEGER;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "integer");
 	}
@@ -3953,6 +4007,8 @@ static USE_RESULT prolog_state fn_iso_max_2(query *q)
 		if (s1.val_num >= s2.val_num) q->accum = s1;
 		else q->accum = s2;
 		q->accum.val_type = TYPE_INTEGER;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "integer");
 	}
@@ -3976,6 +4032,8 @@ static USE_RESULT prolog_state fn_iso_min_2(query *q)
 		if (s1.val_num <= s2.val_num) q->accum = s1;
 		else q->accum = s2;
 		q->accum.val_type = TYPE_INTEGER;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "integer");
 	}
@@ -3993,6 +4051,8 @@ static USE_RESULT prolog_state fn_iso_xor_2(query *q)
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = p1.val_num ^ p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "integer");
 	}
@@ -4010,6 +4070,8 @@ static USE_RESULT prolog_state fn_iso_and_2(query *q)
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = p1.val_num & p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "integer");
 	}
@@ -4027,6 +4089,8 @@ static USE_RESULT prolog_state fn_iso_or_2(query *q)
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = p1.val_num | p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "integer");
 	}
@@ -4044,6 +4108,8 @@ static USE_RESULT prolog_state fn_iso_shl_2(query *q)
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = p1.val_num << p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "integer");
 	}
@@ -4061,6 +4127,8 @@ static USE_RESULT prolog_state fn_iso_shr_2(query *q)
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = p1.val_num >> p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "integer");
 	}
@@ -4076,6 +4144,8 @@ static USE_RESULT prolog_state fn_iso_neg_1(query *q)
 	if (is_integer(&p1)) {
 		q->accum.val_num = ~p1.val_num;
 		q->accum.val_type = TYPE_INTEGER;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "integer");
 	}
