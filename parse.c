@@ -2310,9 +2310,9 @@ static bool get_token(parser *p, int last_op)
 	}
 	 while (*src && p->comment);
 
-	// Signed numbers...
+	// -ve numbers (note there are no explicitly +ve numbers)
 
-	if (((*src == '-') /*|| (*src == '+')*/) && last_op) {
+	if ((*src == '-') && last_op) {
 		const char *save_src = src++;
 
 		while (isspace(*src)) {
@@ -2334,7 +2334,7 @@ static bool get_token(parser *p, int last_op)
 	const char *tmpptr = src;
 	int_t v = 0, d = 1;
 
-	if ((*src != '-') /*&& (*src != '+')*/ && parse_number(p, &src, &v, &d)) {
+	if ((*src != '-') && parse_number(p, &src, &v, &d)) {
 		if (neg)
 			*dst++ = '-';
 
