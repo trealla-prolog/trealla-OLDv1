@@ -7784,6 +7784,16 @@ static USE_RESULT prolog_state fn_is_list_1(query *q)
 	return is_valid_list(q, p1, p1_ctx, false);
 }
 
+static USE_RESULT prolog_state fn_mustbe_list_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+
+	if (!is_valid_list(q, p1, p1_ctx, false))
+		return throw_error(q, p1, "type_error", "list");
+
+	return pl_success;
+}
+
 static USE_RESULT prolog_state fn_is_stream_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -10973,6 +10983,7 @@ static const struct builtins g_other_funcs[] =
 	{"split_atom", 4, fn_split_atom_4, "+string,+sep,+pad,-list"},
 	{"split", 4, fn_split_4, "+string,+string,?left,?right"},
 	{"is_list", 1, fn_is_list_1, "+term"},
+	{"mustbe_list", 1, fn_mustbe_list_1, "+term"},
 	{"list", 1, fn_is_list_1, "+term"},
 	{"is_stream", 1, fn_is_stream_1, "+term"},
 	{"forall", 2, fn_forall_2, "+term,+term"},

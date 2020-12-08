@@ -3250,6 +3250,7 @@ module *create_module(const char *name)
 
 		make_rule(m, "sort(L, R) :- "							\
 			"instantiated(L, R), "								\
+			"mustbe_list(L), "									\
 			"length(L,N), "										\
 			"sort(N, L, _, R).");
 
@@ -3288,6 +3289,7 @@ module *create_module(const char *name)
 
 		make_rule(m, "msort(L, R) :- "							\
 			"instantiated(L, R), "								\
+			"mustbe_list(L), "									\
 			"length(L,N), "										\
 			"msort(N, L, _, R).");
 
