@@ -6027,7 +6027,7 @@ static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 	}
 
 	cell *l = end_list(q);
-	may_ptr_error(l);
+	ensure(l);
 	return l;
 }
 
