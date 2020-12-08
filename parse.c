@@ -3308,8 +3308,23 @@ module *create_module(const char *name)
 			"mmerge(R1, R2, R).");
 
 		make_rule(m, "'$msort2'(<, X1, X2, [X1, X2]).");
-		make_rule(m, "'$msort2'(=, X1, X2, [X2, X1]).");
+		make_rule(m, "'$msort2'(=, X1, X2, [X1, X2]).");
 		make_rule(m, "'$msort2'(>, X1, X2, [X2, X1]).");
+
+		// keymerge...
+
+		make_rule(m, "keymerge([], R, R) :- !.");
+		make_rule(m, "keymerge(R, [], R) :- !.");
+		make_rule(m, "keymerge([H1|T1], [H2|T2], Result) :- "		\
+			"keycompare(Delta, H1, H2), !, "						\
+			"keymerge(Delta, H1, H2, T1, T2, Result).");
+
+		make_rule(m, "keymerge(>, H1, H2, T1, T2, [H2|R]) :- "	\
+			"keymerge([H1|T1], T2, R).");
+		make_rule(m, "keymerge(=, H1, H2, T1, T2, [H1|R]) :- "	\
+			"keymerge(T1, [H2|T2], R).");
+		make_rule(m, "keymerge(<, H1, H2, T1, T2, [H1|R]) :- "	\
+			"keymerge(T1, [H2|T2], R).");
 
 		// keysort...
 
@@ -3335,7 +3350,7 @@ module *create_module(const char *name)
 			"plus(N1, N2, N), "									\
 			"keysort(N1, L1, L2, R1), "							\
 			"keysort(N2, L2, L3, R2), "							\
-			"mmerge(R1, R2, R).");
+			"keymerge(R1, R2, R).");
 
 		// findall...
 
