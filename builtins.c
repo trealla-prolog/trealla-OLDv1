@@ -7786,6 +7786,35 @@ static USE_RESULT prolog_state fn_is_list_1(query *q)
 	return is_valid_list(q, p1, p1_ctx, false);
 }
 
+static USE_RESULT prolog_state fn_mustbe_pairlist_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+
+	if (is_valid_list(q, p1, p1_ctx, true)
+		&& !is_valid_list(q, p1, p1_ctx, false))
+		return throw_error(q, p1, "instantiation_error", "tail_is_a_variable");
+
+	if (!is_valid_list(q, p1, p1_ctx, false))
+		return throw_error(q, p1, "type_error", "list");
+
+	while (is_list(p1)) {
+		cell *h = LIST_HEAD(p1);
+		h = deref(q, h, p1_ctx);
+
+		if (is_variable(h))
+			return throw_error(q, h, "instantiation_error", "not_sufficiently_instantiated");
+
+		if (!is_literal(h) || (h->arity != 2) || (h->val_off != index_from_pool("-")))
+			return throw_error(q, h, "type_error", "pair");
+
+		p1 = LIST_TAIL(p1);
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+	}
+
+	return pl_success;
+}
+
 static USE_RESULT prolog_state fn_mustbe_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -11006,6 +11035,7 @@ static const struct builtins g_other_funcs[] =
 	{"split_atom", 4, fn_split_atom_4, "+string,+sep,+pad,-list"},
 	{"split", 4, fn_split_4, "+string,+string,?left,?right"},
 	{"is_list", 1, fn_is_list_1, "+term"},
+	{"mustbe_pairlist", 1, fn_mustbe_pairlist_1, "+pair"},
 	{"mustbe_list", 1, fn_mustbe_list_1, "+term"},
 	{"mustbe_list_or_var", 1, fn_mustbe_list_or_var_1, "+term"},
 	{"list", 1, fn_is_list_1, "+term"},
