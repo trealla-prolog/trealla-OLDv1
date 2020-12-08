@@ -3327,7 +3327,7 @@ module *create_module(const char *name)
 
 		make_rule(m, "keysort(2, [X1, X2|L], L, R) :- !, "		\
 			"keycompare(Delta, X1, X2), "						\
-			"'$sort2'(Delta, X1, X2, R).");
+			"'$msort2'(Delta, X1, X2, R).");
 		make_rule(m, "keysort(1, [X|L], L, [X]) :- !.");
 		make_rule(m, "keysort(0, L, L, []) :- !.");
 		make_rule(m, "keysort(N, L1, L3, R) :- "				\
