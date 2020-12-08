@@ -3335,9 +3335,8 @@ module *create_module(const char *name)
 
 		make_rule(m, "keysort(L, R) :- "						\
 			"instantiated(L, R), "								\
-			"mustbe_list(L), "									\
 			"mustbe_pairlist(L), "									\
-			"mustbe_list_or_var(R), "							\
+			"mustbe_pairlist_or_var(R), "							\
 			"length(L,N), "										\
 			"keysort(N, L, _, R).");
 
