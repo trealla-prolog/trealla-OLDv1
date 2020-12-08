@@ -44,11 +44,11 @@ static bool needs_quote(module *m, const char *src, size_t srclen)
 	return false;
 }
 
-static size_t _sprint_int(char *dst, size_t size, int_t n, int base)
+static size_t sprint_int_(char *dst, size_t size, int_t n, int base)
 {
 	const char *save_dst = dst;
 	if ((n / base) > 0)
-		dst += _sprint_int(dst, size, n / base, base);
+		dst += sprint_int_(dst, size, n / base, base);
 
 	int n2 = n % base;
 
@@ -91,7 +91,7 @@ size_t sprint_int(char *dst, size_t size, int_t n, int base)
 		return dst - save_dst;
 	}
 
-	dst += _sprint_int(dst, size, n, base);
+	dst += sprint_int_(dst, size, n, base);
 	if (size) *dst = '\0';
 	return dst - save_dst;
 }
