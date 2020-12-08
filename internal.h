@@ -373,6 +373,7 @@ typedef struct char_flags_ {
 	bool double_quote_chars:1;
 	bool double_quote_atom:1;
 	bool character_escapes:1;
+	bool char_conversion:1;
 	bool rational_syntax_natural:1;
 	bool prefer_rationals:1;
 	bool debug:1;

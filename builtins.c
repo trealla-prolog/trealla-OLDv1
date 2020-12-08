@@ -5842,6 +5842,24 @@ static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 			make_literal(&tmp, index_from_pool("chars"));
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	} else if (!strcmp(GET_STR(p1), "char_conversion")) {
+		cell tmp;
+
+		if (q->m->flag.char_conversion)
+			make_literal(&tmp, index_from_pool("on"));
+		else
+			make_literal(&tmp, index_from_pool("off"));
+
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	} else if (!strcmp(GET_STR(p1), "debug")) {
+		cell tmp;
+
+		if (q->m->flag.debug)
+			make_literal(&tmp, index_from_pool("on"));
+		else
+			make_literal(&tmp, index_from_pool("off"));
+
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "character_escapes")) {
 		cell tmp;
 
