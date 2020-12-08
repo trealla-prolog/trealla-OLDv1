@@ -10186,6 +10186,27 @@ static USE_RESULT prolog_state fn_succ_2(query *q)
 	return p1->val_num == (p2->val_num - 1);
 }
 
+static USE_RESULT prolog_state fn_instantiated_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+
+	if (is_variable(p1))
+		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
+
+	return pl_success;
+}
+
+static USE_RESULT prolog_state fn_instantiated_2(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,any);
+
+	if (is_variable(p1) && is_variable(p2))
+		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
+
+	return pl_success;
+}
+
 static USE_RESULT prolog_state fn_plus_3(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
@@ -11033,6 +11054,9 @@ static const struct builtins g_other_funcs[] =
 	{"yield", 0, fn_yield_0, NULL},
 	{"send", 1, fn_send_1, "+term"},
 	{"recv", 1, fn_recv_1, "?term"},
+
+	{"instantiated", 1, fn_instantiated_1, "+term"},
+	{"instantiated", 2, fn_instantiated_2, "+term,+term"},
 
 	// Used for database log
 

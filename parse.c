@@ -3243,33 +3243,33 @@ module *create_module(const char *name)
 
 		make_rule(m, "merge([], R, R) :- !.");
 		make_rule(m, "merge(R, [], R) :- !.");
-		make_rule(m, "merge([H1|T1], [H2|T2], Result) :- "	\
-			"compare(Delta, H1, H2), !, "			\
+		make_rule(m, "merge([H1|T1], [H2|T2], Result) :- "		\
+			"compare(Delta, H1, H2), !, "						\
 			"merge(Delta, H1, H2, T1, T2, Result).");
 
-		make_rule(m, "merge(>, H1, H2, T1, T2, [H2|R]) :- "	\
+		make_rule(m, "merge(>, H1, H2, T1, T2, [H2|R]) :- "		\
 			"merge([H1|T1], T2, R).");
-		make_rule(m, "merge(=, H1, _, T1, T2, [H1|R]) :- "	\
+		make_rule(m, "merge(=, H1, _, T1, T2, [H1|R]) :- "		\
 			"merge(T1, T2, R).");
-		make_rule(m, "merge(<, H1, H2, T1, T2, [H1|R]) :- "	\
+		make_rule(m, "merge(<, H1, H2, T1, T2, [H1|R]) :- "		\
 			"merge(T1, [H2|T2], R).");
 
 		// sort...
 
-		make_rule(m, "sort(L, R) :- "				\
-			"length(L,N), "				\
+		make_rule(m, "sort(L, R) :- "							\
+			"length(L,N), "										\
 			"sort(N, L, _, R).");
 
-		make_rule(m, "sort(2, [X1, X2|L], L, R) :- !, "		\
-			"compare(Delta, X1, X2), "			\
+		make_rule(m, "sort(2, [X1, X2|L], L, R) :- !, "			\
+			"compare(Delta, X1, X2), "							\
 			"'$sort2'(Delta, X1, X2, R).");
 		make_rule(m, "sort(1, [X|L], L, [X]) :- !.");
 		make_rule(m, "sort(0, L, L, []) :- !.");
-		make_rule(m, "sort(N, L1, L3, R) :- "			\
-			"N1 is N // 2, "				\
-			"plus(N1, N2, N), "				\
-			"sort(N1, L1, L2, R1), "			\
-			"sort(N2, L2, L3, R2), "			\
+		make_rule(m, "sort(N, L1, L3, R) :- "					\
+			"N1 is N // 2, "									\
+			"plus(N1, N2, N), "									\
+			"sort(N1, L1, L2, R1), "							\
+			"sort(N2, L2, L3, R2), "							\
 			"merge(R1, R2, R).");
 
 		make_rule(m, "'$sort2'(<, X1, X2, [X1, X2]).");
@@ -3280,8 +3280,8 @@ module *create_module(const char *name)
 
 		make_rule(m, "mmerge([], R, R) :- !.");
 		make_rule(m, "mmerge(R, [], R) :- !.");
-		make_rule(m, "mmerge([H1|T1], [H2|T2], Result) :- "	\
-			"compare(Delta, H1, H2), !, "			\
+		make_rule(m, "mmerge([H1|T1], [H2|T2], Result) :- "		\
+			"compare(Delta, H1, H2), !, "						\
 			"mmerge(Delta, H1, H2, T1, T2, Result).");
 
 		make_rule(m, "mmerge(>, H1, H2, T1, T2, [H2|R]) :- "	\
@@ -3293,20 +3293,20 @@ module *create_module(const char *name)
 
 		// msort...
 
-		make_rule(m, "msort(L, R) :- "				\
-			"length(L,N), "				\
+		make_rule(m, "msort(L, R) :- "							\
+			"length(L,N), "										\
 			"msort(N, L, _, R).");
 
-		make_rule(m, "msort(2, [X1, X2|L], L, R) :- !, "	\
-			"compare(Delta, X1, X2), "			\
+		make_rule(m, "msort(2, [X1, X2|L], L, R) :- !, "		\
+			"compare(Delta, X1, X2), "							\
 			"'$msort2'(Delta, X1, X2, R).");
 		make_rule(m, "msort(1, [X|L], L, [X]) :- !.");
 		make_rule(m, "msort(0, L, L, []) :- !.");
-		make_rule(m, "msort(N, L1, L3, R) :- "			\
-			"N1 is N // 2, "				\
-			"plus(N1, N2, N), "				\
-			"msort(N1, L1, L2, R1), "			\
-			"msort(N2, L2, L3, R2), "			\
+		make_rule(m, "msort(N, L1, L3, R) :- "					\
+			"N1 is N // 2, "									\
+			"plus(N1, N2, N), "									\
+			"msort(N1, L1, L2, R1), "							\
+			"msort(N2, L2, L3, R2), "							\
 			"mmerge(R1, R2, R).");
 
 		make_rule(m, "'$msort2'(<, X1, X2, [X1, X2]).");
@@ -3316,24 +3316,24 @@ module *create_module(const char *name)
 		// keysort...
 
 		make_rule(m, "keycompare(Delta, (K1-_), (K2-_)) :- "	\
-			"(K1 @< K2 -> Delta = '<' ; "			\
-			"(K1 @> K2 -> Delta = '>' ; "			\
+			"(K1 @< K2 -> Delta = '<' ; "						\
+			"(K1 @> K2 -> Delta = '>' ; "						\
 			"Delta = '=').");
 
-		make_rule(m, "keysort(L, R) :- "			\
-			"length(L,N), "				\
+		make_rule(m, "keysort(L, R) :- "						\
+			"length(L,N), "										\
 			"keysort(N, L, _, R).");
 
-		make_rule(m, "keysort(2, [X1, X2|L], L, R) :- !, "	\
-			"keycompare(Delta, X1, X2), "			\
+		make_rule(m, "keysort(2, [X1, X2|L], L, R) :- !, "		\
+			"keycompare(Delta, X1, X2), "						\
 			"'$sort2'(Delta, X1, X2, R).");
 		make_rule(m, "keysort(1, [X|L], L, [X]) :- !.");
 		make_rule(m, "keysort(0, L, L, []) :- !.");
-		make_rule(m, "keysort(N, L1, L3, R) :- "		\
-			"N1 is N // 2, "				\
-			"plus(N1, N2, N), "				\
-			"keysort(N1, L1, L2, R1), "			\
-			"keysort(N2, L2, L3, R2), "			\
+		make_rule(m, "keysort(N, L1, L3, R) :- "				\
+			"N1 is N // 2, "									\
+			"plus(N1, N2, N), "									\
+			"keysort(N1, L1, L2, R1), "							\
+			"keysort(N2, L2, L3, R2), "							\
 			"mmerge(R1, R2, R).");
 
 		// findall...
