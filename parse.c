@@ -3221,11 +3221,11 @@ module *create_module(const char *name)
 		make_rule(m, "format(F) :- format(F, []).");
 		make_rule(m, "unify_with_occurs_check(X, X) :- acyclic_term(X).");
 
-		make_rule(m, "subsumes_term(G,S) :- "			\
-			"\\+ \\+ ( "					\
-			"term_variables(S, V1), "			\
-			"G = S, "					\
-			"term_variables(V1, V2), "			\
+		make_rule(m, "subsumes_term(G,S) :- "					\
+			"\\+ \\+ ( "										\
+			"term_variables(S, V1), "							\
+			"G = S, "											\
+			"term_variables(V1, V2), "							\
 			"V2 == V1).");
 
 		make_rule(m, "chars_base64(Plain,Base64,_) :- base64(Plain,Base64).");
@@ -3342,149 +3342,149 @@ module *create_module(const char *name)
 
 		// bagof...
 
-		make_rule(m, "bagof(T,G,B) :- "				\
-			"copy_term('$bagof'(T,G,B),TMP_G),"		\
-			"TMP_G,"								\
+		make_rule(m, "bagof(T,G,B) :- "							\
+			"copy_term('$bagof'(T,G,B),TMP_G),"					\
+			"TMP_G,"											\
 			"'$bagof'(T,G,B)=TMP_G.");
 
 		// setof...
 
-		make_rule(m, "setof(T,G,B) :- "				\
-			"copy_term('$bagof'(T,G,B),TMP_G),"		\
-			"TMP_G,"								\
-			"'$bagof'(T,G,TMP_B)=TMP_G,"			\
+		make_rule(m, "setof(T,G,B) :- "							\
+			"copy_term('$bagof'(T,G,B),TMP_G),"					\
+			"TMP_G,"											\
+			"'$bagof'(T,G,TMP_B)=TMP_G,"						\
 			"sort(TMP_B,B).");
 
 		// catch...
 
-		make_rule(m, "catch(G,E,C) :- "				\
-			"copy_term('$catch'(G,E,C),TMP_G),"		\
-			"'$catch'(G,E,C)=TMP_G,"				\
+		make_rule(m, "catch(G,E,C) :- "							\
+			"copy_term('$catch'(G,E,C),TMP_G),"					\
+			"'$catch'(G,E,C)=TMP_G,"							\
 			"TMP_G.");
 
 		// calln...
 
-		make_rule(m, "call(G,P1) :- "				\
-			"copy_term('$calln'(G,P1),TMP_G),"		\
-			"'$calln'(G,P1)=TMP_G,"			\
+		make_rule(m, "call(G,P1) :- "							\
+			"copy_term('$calln'(G,P1),TMP_G),"					\
+			"'$calln'(G,P1)=TMP_G,"								\
 			"TMP_G.");
 
-		make_rule(m, "call(G,P1,P2) :- "			\
-			"copy_term('$calln'(G,P1,P2),TMP_G),"		\
-			"'$calln'(G,P1,P2)=TMP_G,"			\
+		make_rule(m, "call(G,P1,P2) :- "						\
+			"copy_term('$calln'(G,P1,P2),TMP_G),"				\
+			"'$calln'(G,P1,P2)=TMP_G,"							\
 			"TMP_G.");
 
-		make_rule(m, "call(G,P1,P2,P3) :- "			\
-			"copy_term('$calln'(G,P1,P2,P3),TMP_G),"	\
-			"'$calln'(G,P1,P2,P3)=TMP_G,"			\
+		make_rule(m, "call(G,P1,P2,P3) :- "						\
+			"copy_term('$calln'(G,P1,P2,P3),TMP_G),"			\
+			"'$calln'(G,P1,P2,P3)=TMP_G,"						\
 			"TMP_G.");
 
-		make_rule(m, "call(G,P1,P2,P3,P4) :- "			\
-			"copy_term('$calln'(G,P1,P2,P3,P4),TMP_G),"	\
-			"'$calln'(G,P1,P2,P3,P4)=TMP_G,"		\
+		make_rule(m, "call(G,P1,P2,P3,P4) :- "					\
+			"copy_term('$calln'(G,P1,P2,P3,P4),TMP_G),"			\
+			"'$calln'(G,P1,P2,P3,P4)=TMP_G,"					\
 			"TMP_G.");
 
-		make_rule(m, "call(G,P1,P2,P3,P4,P5) :- "			\
-			"copy_term('$calln'(G,P1,P2,P3,P4,P5),TMP_G),"	\
-			"'$calln'(G,P1,P2,P3,P4,P5)=TMP_G,"		\
+		make_rule(m, "call(G,P1,P2,P3,P4,P5) :- "				\
+			"copy_term('$calln'(G,P1,P2,P3,P4,P5),TMP_G),"		\
+			"'$calln'(G,P1,P2,P3,P4,P5)=TMP_G,"					\
 			"TMP_G.");
 
 		make_rule(m, "call(G,P1,P2,P3,P4,P5,P6) :- "			\
 			"copy_term('$calln'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
-			"'$calln'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"		\
+			"'$calln'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"				\
 			"TMP_G.");
 
 		make_rule(m, "call(G,P1,P2,P3,P4,P5,P6,P7) :- "			\
-			"copy_term('$calln'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"	\
-			"'$calln'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"		\
+			"copy_term('$calln'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"\
+			"'$calln'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"			\
 			"TMP_G.");
 
 		// taskn...
 
-		make_rule(m, "task(G,P1) :- "				\
-			"copy_term('$taskn'(G,P1),TMP_G),"		\
-			"'$taskn'(G,P1)=TMP_G,"			\
+		make_rule(m, "task(G,P1) :- "							\
+			"copy_term('$taskn'(G,P1),TMP_G),"					\
+			"'$taskn'(G,P1)=TMP_G,"								\
 			"TMP_G.");
 
-		make_rule(m, "task(G,P1,P2) :- "			\
-			"copy_term('$taskn'(G,P1,P2),TMP_G),"	\
-			"'$taskn'(G,P1,P2)=TMP_G,"			\
+		make_rule(m, "task(G,P1,P2) :- "						\
+			"copy_term('$taskn'(G,P1,P2),TMP_G),"				\
+			"'$taskn'(G,P1,P2)=TMP_G,"							\
 			"TMP_G.");
 
-		make_rule(m, "task(G,P1,P2,P3) :- "			\
-			"copy_term('$taskn'(G,P1,P2,P3),TMP_G),"	\
-			"'$taskn'(G,P1,P2,P3)=TMP_G,"		\
+		make_rule(m, "task(G,P1,P2,P3) :- "						\
+			"copy_term('$taskn'(G,P1,P2,P3),TMP_G),"			\
+			"'$taskn'(G,P1,P2,P3)=TMP_G,"						\
 			"TMP_G.");
 
-		make_rule(m, "task(G,P1,P2,P3,P4) :- "			\
-			"copy_term('$taskn'(G,P1,P2,P3,P4),TMP_G),"	\
-			"'$taskn'(G,P1,P2,P3,P4)=TMP_G,"		\
+		make_rule(m, "task(G,P1,P2,P3,P4) :- "					\
+			"copy_term('$taskn'(G,P1,P2,P3,P4),TMP_G),"			\
+			"'$taskn'(G,P1,P2,P3,P4)=TMP_G,"					\
 			"TMP_G.");
 
-		make_rule(m, "task(G,P1,P2,P3,P4,P5) :- "			\
-			"copy_term('$taskn'(G,P1,P2,P3,P4,P5),TMP_G),"	\
-			"'$taskn'(G,P1,P2,P3,P4,P5)=TMP_G,"		\
+		make_rule(m, "task(G,P1,P2,P3,P4,P5) :- "				\
+			"copy_term('$taskn'(G,P1,P2,P3,P4,P5),TMP_G),"		\
+			"'$taskn'(G,P1,P2,P3,P4,P5)=TMP_G,"					\
 			"TMP_G.");
 
 		make_rule(m, "task(G,P1,P2,P3,P4,P5,P6) :- "			\
 			"copy_term('$taskn'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
-			"'$taskn'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"		\
+			"'$taskn'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"				\
 			"TMP_G.");
 
 		make_rule(m, "task(G,P1,P2,P3,P4,P5,P6,P7) :- "			\
-			"copy_term('$taskn'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"	\
-			"'$taskn'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"		\
+			"copy_term('$taskn'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"\
+			"'$taskn'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"			\
 			"TMP_G.");
 
 		// phrase...
 
-		make_rule(m, "phrase_from_file(P, Filename) :- "	\
-			"open(Filename, read, Str, [mmap(Ms)]),"	\
-			"copy_term(P, P2), P2=P,"			\
-			"phrase(P2, Ms, []),"				\
+		make_rule(m, "phrase_from_file(P, Filename) :- "		\
+			"open(Filename, read, Str, [mmap(Ms)]),"			\
+			"copy_term(P, P2), P2=P,"							\
+			"phrase(P2, Ms, []),"								\
 			"close(Str).");
 
 		make_rule(m, "phrase_from_file(P, Filename, Opts) :- "	\
-			"open(Filename, read, Str, [mmap(Ms)|Opts])," \
-			"copy_term(P, P2), P2=P,"			\
-			"phrase(P2, Ms, []),"				\
+			"open(Filename, read, Str, [mmap(Ms)|Opts])," 		\
+			"copy_term(P, P2), P2=P,"							\
+			"phrase(P2, Ms, []),"								\
 			"close(Str).");
 
 		make_rule(m, "'$append'([], L, L).");
 		make_rule(m, "'$append'([H|T], L, [H|R]) :- '$append'(T, L, R).");
 
-		make_rule(m, "phrase(GRBody, S0) :-"			\
-			"phrase(GRBody, S0, [])."			\
-			"phrase(GRBody, S0, S) :-"			\
-			"  (	var(GRBody) -> throw(error(instantiation_error, phrase/3))" \
-			"  ;	dcg_constr(GRBody) -> phrase_(GRBody, S0, S)" \
-			"  ;	functor(GRBody, _, _) -> call(GRBody, S0, S)" \
-			"  ;	throw(error(type_error(callable, GRBody), phrase/3))" \
-			"  )."					\
-			""						\
-			"phrase_([], S, S)."				\
-			"phrase_(!, S, S)."				\
-			"phrase_((A, B), S0, S) :-"			\
-			"  phrase(A, S0, S1), phrase(B, S1, S)."	\
-			"phrase_((A -> B ; C), S0, S) :-"		\
-			"  !,"					\
-			"  (	phrase(A, S0, S1) ->"			\
-			"    phrase(B, S1, S)"			\
-			"  ;	phrase(C, S0, S)"			\
-			"  )."					\
-			"phrase_((A ; B), S0, S) :-"			\
-			"  (	phrase(A, S0, S) ; phrase(B, S0, S)  )." \
-			"phrase_((A | B), S0, S) :-"			\
-			"  (	phrase(A, S0, S) ; phrase(B, S0, S)  )." \
-			"phrase_({G}, S0, S) :-"			\
-			"  (	call(G), S0 = S	 )."			\
-			"phrase_(call(G), S0, S) :-"			\
-			"  call(G, S0, S)."				\
-			"phrase_((A -> B), S0, S) :-"			\
-			"  phrase((A -> B ; fail), S0, S)."		\
-			"phrase_(phrase(NonTerminal), S0, S) :-"	\
-			"  phrase(NonTerminal, S0, S)."		\
-			"phrase_([T|Ts], S0, S) :-"			\
+		make_rule(m, "phrase(GRBody, S0) :-"					\
+			"phrase(GRBody, S0, [])."							\
+			"phrase(GRBody, S0, S) :-"							\
+			"  (	var(GRBody) -> throw(error(instantiation_error, phrase/3))"	\
+			"  ;	dcg_constr(GRBody) -> phrase_(GRBody, S0, S)" 				\
+			"  ;	functor(GRBody, _, _) -> call(GRBody, S0, S)" 				\
+			"  ;	throw(error(type_error(callable, GRBody), phrase/3))" 		\
+			"  )."												\
+			""													\
+			"phrase_([], S, S)."								\
+			"phrase_(!, S, S)."									\
+			"phrase_((A, B), S0, S) :-"							\
+			"  phrase(A, S0, S1), phrase(B, S1, S)."			\
+			"phrase_((A -> B ; C), S0, S) :-"					\
+			"  !,"												\
+			"  (	phrase(A, S0, S1) ->"						\
+			"    phrase(B, S1, S)"								\
+			"  ;	phrase(C, S0, S)"							\
+			"  )."												\
+			"phrase_((A ; B), S0, S) :-"						\
+			"  (	phrase(A, S0, S) ; phrase(B, S0, S)  )." 	\
+			"phrase_((A | B), S0, S) :-"						\
+			"  (	phrase(A, S0, S) ; phrase(B, S0, S)  )." 	\
+			"phrase_({G}, S0, S) :-"							\
+			"  (	call(G), S0 = S	 )."						\
+			"phrase_(call(G), S0, S) :-"						\
+			"  call(G, S0, S)."									\
+			"phrase_((A -> B), S0, S) :-"						\
+			"  phrase((A -> B ; fail), S0, S)."					\
+			"phrase_(phrase(NonTerminal), S0, S) :-"			\
+			"  phrase(NonTerminal, S0, S)."						\
+			"phrase_([T|Ts], S0, S) :-"							\
 			"  '$append'([T|Ts], S, S0).");
 
 		//make_rule(m, "forall(Cond,Action) :- \\+ (Cond, \\+ Action).");
