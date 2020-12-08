@@ -3319,6 +3319,9 @@ module *create_module(const char *name)
 			"Delta = '=').");
 
 		make_rule(m, "keysort(L, R) :- "						\
+			"instantiated(L, R), "								\
+			"mustbe_list(L), "									\
+			"mustbe_list_or_var(R), "							\
 			"length(L,N), "										\
 			"keysort(N, L, _, R).");
 
