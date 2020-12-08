@@ -2312,11 +2312,13 @@ static bool get_token(parser *p, int last_op)
 
 	// (+/-)tive numbers...
 
+#if 0
 	if (p->start_term && !p->t->cidx && (*src == '+')) {
 		p->error = true;
 		p->srcptr = (char*)src;
 		return false;
 	}
+#endif
 
 	if (((*src == '-') || (*src == '+')) && last_op) {
 		const char *save_src = src++;
