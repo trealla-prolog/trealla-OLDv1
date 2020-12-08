@@ -4331,9 +4331,16 @@ static USE_RESULT prolog_state fn_iso_sge_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_compare_3(query *q)
 {
-	GET_FIRST_ARG(p1,any);
+	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,any);
+
+	if (is_atom(p1)) {
+		if (strcmp(GET_STR(p1), "<")
+			&& strcmp(GET_STR(p1), ">")
+			&& strcmp(GET_STR(p1), "="))
+			return throw_error(q, p1, "domain_error", "order");
+	}
 
 	int status = compare(q, p2, p2_ctx, p3, p3_ctx, 0);
 	cell tmp;
