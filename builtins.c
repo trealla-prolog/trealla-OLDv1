@@ -10653,7 +10653,7 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 
 	if (is_integer(p2) && !is_variable(p1)) {
 		if (p2->val_num < 0)
-			return throw_error(q, p2, "domain_error", "out_of_range");
+			return throw_error(q, p2, "domain_error", "not_less_than_zero");
 
 		if (p2->val_num == 0) {
 			cell tmp;
@@ -10682,14 +10682,14 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 
 
 	if (is_variable(p1) && is_integer(p2)) {
-		if (is_anon(p1))
-			return pl_success;
-
 		if (p2->val_num < 0)
-			return throw_error(q, p2, "domain_error", "positive_integers");
+			return throw_error(q, p2, "domain_error", "not_less_than_zero");
 
 		if (p2->val_num >= MAX_VARS)
 			return throw_error(q, p2, "resource_error", "too_many_vars");
+
+		if (is_anon(p1))
+			return pl_success;
 
 		idx_t nbr = p2->val_num;
 
