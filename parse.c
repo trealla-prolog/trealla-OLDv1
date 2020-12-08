@@ -3239,6 +3239,8 @@ module *create_module(const char *name)
 		make_rule(m, "chars_base64(Plain,Base64,_) :- base64(Plain,Base64).");
 		make_rule(m, "chars_urlenc(Plain,Url,_) :- urlenc(Plain,Url).");
 
+		// merge...
+
 		make_rule(m, "merge([], R, R) :- !.");
 		make_rule(m, "merge(R, [], R) :- !.");
 		make_rule(m, "merge([H1|T1], [H2|T2], Result) :- "	\
@@ -3251,6 +3253,8 @@ module *create_module(const char *name)
 			"merge(T1, T2, R).");
 		make_rule(m, "merge(<, H1, H2, T1, T2, [H1|R]) :- "	\
 			"merge(T1, [H2|T2], R).");
+
+		// sort...
 
 		make_rule(m, "sort(L, R) :- "				\
 			"length(L,N), "				\
@@ -3272,6 +3276,8 @@ module *create_module(const char *name)
 		make_rule(m, "'$sort2'(=, X1, _,  [X1]).");
 		make_rule(m, "'$sort2'(>, X1, X2, [X2, X1]).");
 
+		// mmerge...
+
 		make_rule(m, "mmerge([], R, R) :- !.");
 		make_rule(m, "mmerge(R, [], R) :- !.");
 		make_rule(m, "mmerge([H1|T1], [H2|T2], Result) :- "	\
@@ -3285,13 +3291,15 @@ module *create_module(const char *name)
 		make_rule(m, "mmerge(<, H1, H2, T1, T2, [H1|R]) :- "	\
 			"mmerge(T1, [H2|T2], R).");
 
+		// msort...
+
 		make_rule(m, "msort(L, R) :- "				\
 			"length(L,N), "				\
 			"msort(N, L, _, R).");
 
 		make_rule(m, "msort(2, [X1, X2|L], L, R) :- !, "	\
 			"compare(Delta, X1, X2), "			\
-			"'$sort2'(Delta, X1, X2, R).");
+			"'$msort2'(Delta, X1, X2, R).");
 		make_rule(m, "msort(1, [X|L], L, [X]) :- !.");
 		make_rule(m, "msort(0, L, L, []) :- !.");
 		make_rule(m, "msort(N, L1, L3, R) :- "			\
@@ -3300,6 +3308,12 @@ module *create_module(const char *name)
 			"msort(N1, L1, L2, R1), "			\
 			"msort(N2, L2, L3, R2), "			\
 			"mmerge(R1, R2, R).");
+
+		make_rule(m, "'$msort2'(<, X1, X2, [X1, X2]).");
+		make_rule(m, "'$msort2'(=, X1, X2, [X2, X1]).");
+		make_rule(m, "'$msort2'(>, X1, X2, [X2, X1]).");
+
+		// keysort...
 
 		make_rule(m, "keycompare(Delta, (K1-_), (K2-_)) :- "	\
 			"(K1 @< K2 -> Delta = '<' ; "			\
@@ -3322,10 +3336,20 @@ module *create_module(const char *name)
 			"keysort(N2, L2, L3, R2), "			\
 			"mmerge(R1, R2, R).");
 
+		// findall...
+
+		make_rule(m, "findall(Template, Goal, List, Tail) :- "	\
+			"findall(Template, Goal, List0), "					\
+			"'$append'(List0, Tail, List).");
+
+		// bagof...
+
 		make_rule(m, "bagof(T,G,B) :- "				\
 			"copy_term('$bagof'(T,G,B),TMP_G),"		\
 			"TMP_G,"								\
 			"'$bagof'(T,G,B)=TMP_G.");
+
+		// setof...
 
 		make_rule(m, "setof(T,G,B) :- "				\
 			"copy_term('$bagof'(T,G,B),TMP_G),"		\
@@ -3333,10 +3357,14 @@ module *create_module(const char *name)
 			"'$bagof'(T,G,TMP_B)=TMP_G,"			\
 			"sort(TMP_B,B).");
 
+		// catch...
+
 		make_rule(m, "catch(G,E,C) :- "				\
 			"copy_term('$catch'(G,E,C),TMP_G),"		\
 			"'$catch'(G,E,C)=TMP_G,"				\
 			"TMP_G.");
+
+		// calln...
 
 		make_rule(m, "call(G,P1) :- "				\
 			"copy_term('$calln'(G,P1),TMP_G),"		\
@@ -3373,6 +3401,8 @@ module *create_module(const char *name)
 			"'$calln'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"		\
 			"TMP_G.");
 
+		// taskn...
+
 		make_rule(m, "task(G,P1) :- "				\
 			"copy_term('$taskn'(G,P1),TMP_G),"		\
 			"'$taskn'(G,P1)=TMP_G,"			\
@@ -3407,6 +3437,8 @@ module *create_module(const char *name)
 			"copy_term('$taskn'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"	\
 			"'$taskn'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"		\
 			"TMP_G.");
+
+		// phrase...
 
 		make_rule(m, "phrase_from_file(P, Filename) :- "	\
 			"open(Filename, read, Str, [mmap(Ms)]),"	\
@@ -3456,10 +3488,6 @@ module *create_module(const char *name)
 			"  phrase(NonTerminal, S0, S)."		\
 			"phrase_([T|Ts], S0, S) :-"			\
 			"  '$append'([T|Ts], S, S0).");
-
-		make_rule(m, "findall(Template, Goal, List, Tail) :- "	\
-			"findall(Template, Goal, List0), "					\
-			"'$append'(List0, Tail, List).");
 
 		//make_rule(m, "forall(Cond,Action) :- \\+ (Cond, \\+ Action).");
 
