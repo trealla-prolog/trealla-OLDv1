@@ -5761,6 +5761,8 @@ static USE_RESULT prolog_state fn_iso_current_predicate_1(query *q)
 	return pl_failure;
 }
 
+// FIXME: this needs to backtrack
+
 static USE_RESULT prolog_state fn_iso_current_op_3(query *q)
 {
 	GET_FIRST_ARG(p_prec,integer_or_var);
