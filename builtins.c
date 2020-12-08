@@ -8021,7 +8021,10 @@ static USE_RESULT prolog_state fn_mustbe_list_or_var_1(query *q)
 	if (is_variable(p1))
 		return pl_success;
 
-	return fn_mustbe_list_1(q);
+	if (!is_valid_list(q, p1, p1_ctx, true))
+		return throw_error(q, p1, "type_error", "list");
+
+	return pl_success;
 }
 
 static USE_RESULT prolog_state fn_is_stream_1(query *q)
