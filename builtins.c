@@ -5971,7 +5971,11 @@ static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "unknown")) {
 		cell tmp;
-		make_literal(&tmp, g_fail_s);
+		make_literal(&tmp,
+			q->m->flag.unknown == 1 ? index_from_pool("error") :
+			q->m->flag.unknown == 2 ? index_from_pool("warning") :
+			q->m->flag.unknown == 3 ? index_from_pool("changeable") :
+			index_from_pool("fail"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -6005,54 +6009,81 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.double_quote_chars = true;
 			q->m->flag.double_quote_atom = q->m->flag.double_quote_codes = false;
 		} else {
-			return throw_error(q, p2, "domain_error", "unknown");
+			cell *tmp = alloc_heap(q, 3);
+			make_structure(tmp, index_from_pool("+"), fn_iso_add_2, 2, 2);
+			tmp[1] = *p1; tmp[1].nbr_cells = 1;
+			tmp[2] = *p2; tmp[2].nbr_cells = 1;
+			return throw_error(q, tmp, "domain_error", "flag_value");
 		}
 	} else if (!strcmp(GET_STR(p1), "character_escapes")) {
 		if (!strcmp(GET_STR(p2), "true"))
 			q->m->flag.character_escapes = true;
 		else if (!strcmp(GET_STR(p2), "false"))
 			q->m->flag.character_escapes = false;
-	} else if (!strcmp(GET_STR(p1), "rational_syntax")) {
-		if (!strcmp(GET_STR(p2), "natural"))
-			q->m->flag.rational_syntax_natural = true;
-		else if (!strcmp(GET_STR(p2), "compatibility"))
-			q->m->flag.rational_syntax_natural = false;
-	} else if (!strcmp(GET_STR(p1), "prefer_rationals")) {
-		if (!strcmp(GET_STR(p2), "true"))
-			q->m->flag.prefer_rationals = true;
-		else if (!strcmp(GET_STR(p2), "flase"))
-			q->m->flag.prefer_rationals = false;
-	} else if (!strcmp(GET_STR(p1), "debug")) {
-		if (!strcmp(GET_STR(p2), "true"))
-			q->m->flag.debug = true;
-		else if (!strcmp(GET_STR(p2), "false"))
-			q->m->flag.debug = false;
 		else {
-#if 0
-			char tmpbuf[1024];
-			snprintf(tmpbuf, sizeof(tmpbuf), "%s+%s", GET_STR(p1), GET_STR(p2));
-			cell tmp;
-			make_literal(&tmp, index_from_pool(tmpbuf));
-			return throw_error(q, &tmp, "domain_error", "flag_value");
-#else
 			cell *tmp = alloc_heap(q, 3);
 			make_structure(tmp, index_from_pool("+"), fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
-#endif
+		}
+	} else if (!strcmp(GET_STR(p1), "char_conversion")) {
+		if (!strcmp(GET_STR(p2), "true") || !strcmp(GET_STR(p2), "on"))
+			q->m->flag.char_conversion = true;
+		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
+			q->m->flag.char_conversion = false;
+		else {
+			cell *tmp = alloc_heap(q, 3);
+			make_structure(tmp, index_from_pool("+"), fn_iso_add_2, 2, 2);
+			tmp[1] = *p1; tmp[1].nbr_cells = 1;
+			tmp[2] = *p2; tmp[2].nbr_cells = 1;
+			return throw_error(q, tmp, "domain_error", "flag_value");
+		}
+	} else if (!strcmp(GET_STR(p1), "rational_syntax")) {
+		if (!strcmp(GET_STR(p2), "natural"))
+			q->m->flag.rational_syntax_natural = true;
+		else if (!strcmp(GET_STR(p2), "compatibility"))
+			q->m->flag.rational_syntax_natural = false;
+		else {
+			cell *tmp = alloc_heap(q, 3);
+			make_structure(tmp, index_from_pool("+"), fn_iso_add_2, 2, 2);
+			tmp[1] = *p1; tmp[1].nbr_cells = 1;
+			tmp[2] = *p2; tmp[2].nbr_cells = 1;
+			return throw_error(q, tmp, "domain_error", "flag_value");
+		}
+	} else if (!strcmp(GET_STR(p1), "prefer_rationals")) {
+		if (!strcmp(GET_STR(p2), "true"))
+			q->m->flag.prefer_rationals = true;
+		else if (!strcmp(GET_STR(p2), "flase"))
+			q->m->flag.prefer_rationals = false;
+		else {
+			cell *tmp = alloc_heap(q, 3);
+			make_structure(tmp, index_from_pool("+"), fn_iso_add_2, 2, 2);
+			tmp[1] = *p1; tmp[1].nbr_cells = 1;
+			tmp[2] = *p2; tmp[2].nbr_cells = 1;
+			return throw_error(q, tmp, "domain_error", "flag_value");
+		}
+	} else if (!strcmp(GET_STR(p1), "debug")) {
+		if (!strcmp(GET_STR(p2), "true") || !strcmp(GET_STR(p2), "on"))
+			q->m->flag.debug = true;
+		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
+			q->m->flag.debug = false;
+		else {
+			cell *tmp = alloc_heap(q, 3);
+			make_structure(tmp, index_from_pool("+"), fn_iso_add_2, 2, 2);
+			tmp[1] = *p1; tmp[1].nbr_cells = 1;
+			tmp[2] = *p2; tmp[2].nbr_cells = 1;
+			return throw_error(q, tmp, "domain_error", "flag_value");
 		}
 	} else if (!strcmp(GET_STR(p1), "unknown")) {
 		if (!strcmp(GET_STR(p2), "fail")) {
-			;
+			q->m->flag.unknown = 0;
 		} else if (!strcmp(GET_STR(p2), "error")) {
-			;
+			q->m->flag.unknown = 1;
 		} else if (!strcmp(GET_STR(p2), "warning")) {
-			;
-		} else if (!strcmp(GET_STR(p2), "error")) {
-			;
+			q->m->flag.unknown = 2;
 		} else if (!strcmp(GET_STR(p2), "changeable")) {
-			;
+			q->m->flag.unknown = 3;
 		}
 	} else if (!strcmp(GET_STR(p1),"bounded")
 		|| !strcmp(GET_STR(p1),"max_arity")
