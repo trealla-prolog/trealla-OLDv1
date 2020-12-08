@@ -6010,11 +6010,19 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 		else if (!strcmp(GET_STR(p2), "false"))
 			q->m->flag.debug = false;
 		else {
+#if 0
 			char tmpbuf[1024];
 			snprintf(tmpbuf, sizeof(tmpbuf), "%s+%s", GET_STR(p1), GET_STR(p2));
 			cell tmp;
 			make_literal(&tmp, index_from_pool(tmpbuf));
 			return throw_error(q, &tmp, "domain_error", "flag_value");
+#else
+			cell *tmp = alloc_heap(q, 3);
+			make_structure(tmp, index_from_pool("+"), fn_iso_add_2, 2, 2);
+			tmp[1] = *p1; tmp[1].nbr_cells = 1;
+			tmp[2] = *p2; tmp[2].nbr_cells = 1;
+			return throw_error(q, tmp, "domain_error", "flag_value");
+#endif
 		}
 	} else if (!strcmp(GET_STR(p1), "unknown")) {
 		if (!strcmp(GET_STR(p2), "fail")) {
