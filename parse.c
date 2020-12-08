@@ -1903,7 +1903,7 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 		neg = 1;
 		s++;
 	} else if (*s == '+')
-		s++;
+		return 0;
 
 	if (!isdigit(*s))
 		return 0;
@@ -2310,17 +2310,9 @@ static bool get_token(parser *p, int last_op)
 	}
 	 while (*src && p->comment);
 
-	// (+/-)tive numbers...
+	// Signed numbers...
 
-#if 0
-	if (p->start_term && !p->t->cidx && (*src == '+')) {
-		p->error = true;
-		p->srcptr = (char*)src;
-		return false;
-	}
-#endif
-
-	if (((*src == '-') || (*src == '+')) && last_op) {
+	if (((*src == '-') /*|| (*src == '+')*/) && last_op) {
 		const char *save_src = src++;
 
 		while (isspace(*src)) {
@@ -2342,7 +2334,7 @@ static bool get_token(parser *p, int last_op)
 	const char *tmpptr = src;
 	int_t v = 0, d = 1;
 
-	if ((*src != '-') && (*src != '+') && parse_number(p, &src, &v, &d)) {
+	if ((*src != '-') /*&& (*src != '+')*/ && parse_number(p, &src, &v, &d)) {
 		if (neg)
 			*dst++ = '-';
 
