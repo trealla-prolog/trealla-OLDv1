@@ -55,6 +55,7 @@ typedef uint32_t idx_t;
 // Sentinel Value
 #define ERR_IDX (~(idx_t)0)
 #define IDX_MAX (ERR_IDX-1)
+#define ERR_CYCLE_CMP -2
 
 #define MAX_SMALL_STRING (MAX(sizeof(int_t),sizeof(void*))*2)
 #define MAX_VAR_POOL_SIZE 1000
@@ -126,6 +127,7 @@ typedef uint32_t idx_t;
 #define may_error(expr, ...) CHECK_SENTINEL(expr, pl_error, __VA_ARGS__; return pl_error)
 #define may_idx_error(expr, ...) CHECK_SENTINEL(expr, ERR_IDX, __VA_ARGS__; return pl_error)
 #define may_ptr_error(expr, ...) CHECK_SENTINEL(expr, NULL, __VA_ARGS__; return pl_error)
+#define may_cycle_error(expr, ...) CHECK_SENTINEL(expr, ERR_CYCLE_CELL, __VA_ARGS__; return pl_cycle)
 
 // If changing the order of these: see runtime.c dispatch table
 
@@ -252,6 +254,8 @@ struct cell_ {
 		};
 	};
 };
+
+extern cell* ERR_CYCLE_CELL;
 
 typedef struct {
 	uint64_t u1, u2;
@@ -586,13 +590,13 @@ void stash_me(query *q, term *t, bool last_match);
 unsigned fake_numbervars(query *q, cell *c, idx_t c_ctx, unsigned start);
 char *relative_to(const char *basefile, const char *relfile);
 
-size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
-void print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
-void print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
+ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
+prolog_state print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
+prolog_state print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
 char *print_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
 
-size_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, unsigned depth);
-void print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
+ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, unsigned depth);
+prolog_state print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
 char *print_canonical_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
-void print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
+prolog_state print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
 
