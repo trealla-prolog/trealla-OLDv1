@@ -6014,7 +6014,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 			snprintf(tmpbuf, sizeof(tmpbuf), "%s+%s", GET_STR(p1), GET_STR(p2));
 			cell tmp;
 			make_literal(&tmp, index_from_pool(tmpbuf));
-			return throw_error(q, &tmp, "domain_error", "prolog_flag");
+			return throw_error(q, &tmp, "domain_error", "flag_value");
 		}
 	} else if (!strcmp(GET_STR(p1), "unknown")) {
 		if (!strcmp(GET_STR(p2), "fail")) {
@@ -6028,8 +6028,18 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 		} else if (!strcmp(GET_STR(p2), "changeable")) {
 			;
 		}
-	} else
-		return throw_error(q, p1, "permission_error", "prolog_flag");
+	} else if (!strcmp(GET_STR(p1),"bounded")
+		|| !strcmp(GET_STR(p1),"max_arity")
+		|| !strcmp(GET_STR(p1),"max_integer")
+		|| !strcmp(GET_STR(p1),"min_integer")
+		|| !strcmp(GET_STR(p1),"version")
+		|| !strcmp(GET_STR(p1),"version_data")
+		|| !strcmp(GET_STR(p1),"version_git")
+		|| !strcmp(GET_STR(p1),"dialect")
+		)
+		return throw_error(q, p1, "permission_error", "modify,flag");
+	else
+		return throw_error(q, p1, "domain_error", "prolog_flag");
 
 	return pl_success;
 }
