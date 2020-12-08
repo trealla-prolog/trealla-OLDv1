@@ -248,10 +248,10 @@ size_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t
 	}
 
 	if (is_float(c) && (c->val_flt == M_PI)) {
-		dst += snprintf(dst, dstlen, "%s", "3.141592653589793");
+		dst += snprintf(dst, dstlen, "3.141592653589793");
 		return dst - save_dst;
 	} else if (is_float(c) && (c->val_flt == M_E)) {
-		dst += snprintf(dst, dstlen, "%s", "2.718281828459045");
+		dst += snprintf(dst, dstlen, "2.718281828459045");
 		return dst - save_dst;
 	} else if (is_float(c)) {
 		char tmpbuf[256];
@@ -410,10 +410,10 @@ size_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ct
 #endif
 
 	if (is_float(c) && (c->val_flt == M_PI)) {
-		dst += snprintf(dst, dstlen, "%s", "3.141592653589793");
+		dst += snprintf(dst, dstlen, "3.141592653589793");
 		return dst - save_dst;
 	} else if (is_float(c) && (c->val_flt == M_E)) {
-		dst += snprintf(dst, dstlen, "%s", "2.718281828459045");
+		dst += snprintf(dst, dstlen, "2.718281828459045");
 		return dst - save_dst;
 	} else if (is_float(c)) {
 		char tmpbuf[256];
