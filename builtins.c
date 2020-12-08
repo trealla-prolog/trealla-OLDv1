@@ -4570,8 +4570,7 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 	if (is_variable(p2)) {
 		cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false);
 		may_ptr_error(tmp);
-
-		if (tmp == ERR_CYCLE_CELL) {
+		if (tmp == ERR_CYCLE_CELL)
 			return throw_error(q, p1, "resource_error", "cyclic_term");
 
 		unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
@@ -4597,8 +4596,7 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 	if (is_variable(p1)) {
 		cell *tmp = deep_copy_to_tmp_heap(q, p2, p2_ctx, false);
 		may_ptr_error(tmp);
-
-		if (tmp == ERR_CYCLE_CELL) {
+		if (tmp == ERR_CYCLE_CELL)
 			return throw_error(q, p1, "resource_error", "cyclic_term");
 
 		unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
@@ -5191,7 +5189,7 @@ static USE_RESULT prolog_state fn_iso_asserta_1(query *q)
 	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 	may_ptr_error(tmp);
 
-	if (tmp == ERR_CYCLE_CELL) {
+	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	idx_t nbr_cells = tmp->nbr_cells;
@@ -5221,7 +5219,7 @@ static USE_RESULT prolog_state fn_iso_assertz_1(query *q)
 	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 	may_ptr_error(tmp);
 
-	if (tmp == ERR_CYCLE_CELL) {
+	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	idx_t nbr_cells = tmp->nbr_cells;
@@ -5596,7 +5594,7 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	may_ptr_error(tmp);
 	destroy_parser(p);
 	if (tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, "resource_error", "cyclic_term");
+		return throw_error(q, c, "resource_error", "cyclic_term");
 
 	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
 	may_ptr_error(e);
@@ -6212,7 +6210,7 @@ static USE_RESULT prolog_state fn_sys_queue_1(query *q)
 	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
 	may_ptr_error(tmp);
 
-	if (tmp == ERR_CYCLE_CELL) {
+	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	ensure(tmp);
@@ -6226,8 +6224,7 @@ static USE_RESULT prolog_state fn_sys_queuen_2(query *q)
 	GET_NEXT_ARG(p2,any);
 	cell *tmp = deep_copy_to_tmp_heap(q, p2, p2_ctx, true);
 	may_ptr_error(tmp);
-
-	if (tmp == ERR_CYCLE_CELL) {
+	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	ensure(tmp);
@@ -6602,8 +6599,7 @@ static USE_RESULT prolog_state do_asserta_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
 	may_ptr_error(tmp);
-
-	if (tmp == ERR_CYCLE_CELL) {
+	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	idx_t nbr_cells = tmp->nbr_cells;
@@ -6660,7 +6656,7 @@ static USE_RESULT prolog_state do_assertz_2(query *q)
 	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
 	may_ptr_error(tmp);
 
-	if (tmp == ERR_CYCLE_CELL) {
+	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	idx_t nbr_cells = tmp->nbr_cells;
@@ -8194,8 +8190,7 @@ static USE_RESULT prolog_state fn_spawn_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
 	may_ptr_error(tmp);
-
-	if (tmp == ERR_CYCLE_CELL) {
+	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	query *task = create_task(q, tmp);
@@ -8252,7 +8247,7 @@ static USE_RESULT prolog_state fn_send_1(query *q)
 	cell *c = deep_clone_to_tmp_heap(q, p1, p1_ctx);
 	may_ptr_error(c);
 
-	if (c == ERR_CYCLE_CELL) {
+	if (c == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	for (idx_t i = 0; i < c->nbr_cells; i++) {
@@ -10171,8 +10166,7 @@ unsigned fake_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 {
 	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 	ensure(tmp);
-
-	if (tmp == ERR_CYCLE_CELL) {
+	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
@@ -10617,8 +10611,7 @@ static USE_RESULT prolog_state fn_del_attrs_1(query *q)
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
 	may_ptr_error(tmp);
-
-	if (tmp == ERR_CYCLE_CELL) {
+	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	frame *g = GET_FRAME(p1_ctx);
@@ -10633,8 +10626,7 @@ static USE_RESULT prolog_state fn_put_attrs_2(query *q)
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
 	may_ptr_error(tmp);
-
-	if (tmp == ERR_CYCLE_CELL) {
+	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	frame *g = GET_FRAME(p1_ctx);
