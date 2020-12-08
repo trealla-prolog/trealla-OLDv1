@@ -5957,7 +5957,7 @@ static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	return throw_error(q, p1, "domain_error", "flag");
+	return throw_error(q, p1, "domain_error", "prolog_flag");
 }
 
 static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
@@ -5973,7 +5973,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 		return pl_success;
 	}
 
-	if (!is_atom(p2))
+	if (!is_atom(p2) && !is_integer(p2))
 		return throw_error(q, p2, "type_error", "atom");
 
 	if (!strcmp(GET_STR(p1), "double_quotes")) {
@@ -6004,6 +6004,18 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.prefer_rationals = true;
 		else if (!strcmp(GET_STR(p2), "flase"))
 			q->m->flag.prefer_rationals = false;
+	} else if (!strcmp(GET_STR(p1), "debug")) {
+		if (!strcmp(GET_STR(p2), "true"))
+			q->m->flag.debug = true;
+		else if (!strcmp(GET_STR(p2), "false"))
+			q->m->flag.debug = false;
+		else {
+			char tmpbuf[1024];
+			snprintf(tmpbuf, sizeof(tmpbuf), "%s+%s", GET_STR(p1), GET_STR(p2));
+			cell tmp;
+			make_literal(&tmp, index_from_pool(tmpbuf));
+			return throw_error(q, &tmp, "domain_error", "prolog_flag");
+		}
 	} else if (!strcmp(GET_STR(p1), "unknown")) {
 		if (!strcmp(GET_STR(p2), "fail")) {
 			;
@@ -6016,9 +6028,8 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 		} else if (!strcmp(GET_STR(p2), "changeable")) {
 			;
 		}
-	} else {
-		return throw_error(q, p1, "domain_error", "flag");
-	}
+	} else
+		return throw_error(q, p1, "permission_error", "prolog_flag");
 
 	return pl_success;
 }

@@ -375,6 +375,7 @@ typedef struct char_flags_ {
 	bool character_escapes:1;
 	bool rational_syntax_natural:1;
 	bool prefer_rationals:1;
+	bool debug:1;
 } char_flags;
 
 
