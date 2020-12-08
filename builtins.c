@@ -5951,6 +5951,10 @@ static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 		cell *l = end_list(q);
 		may_ptr_error(l);
 		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
+	} else if (!strcmp(GET_STR(p1), "unknown")) {
+		cell tmp;
+		make_literal(&tmp, g_fail_s);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
 	return throw_error(q, p1, "domain_error", "flag");
@@ -6000,6 +6004,18 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.prefer_rationals = true;
 		else if (!strcmp(GET_STR(p2), "flase"))
 			q->m->flag.prefer_rationals = false;
+	} else if (!strcmp(GET_STR(p1), "unknown")) {
+		if (!strcmp(GET_STR(p2), "fail")) {
+			;
+		} else if (!strcmp(GET_STR(p2), "error")) {
+			;
+		} else if (!strcmp(GET_STR(p2), "warning")) {
+			;
+		} else if (!strcmp(GET_STR(p2), "error")) {
+			;
+		} else if (!strcmp(GET_STR(p2), "changeable")) {
+			;
+		}
 	} else {
 		return throw_error(q, p1, "domain_error", "flag");
 	}
