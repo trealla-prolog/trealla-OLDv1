@@ -1665,14 +1665,20 @@ void parser_assign_vars(parser *p, unsigned start, bool rebase)
 
 static cell *insert_here(parser *p, idx_t c_idx, idx_t p1_idx)
 {
-#if 1
 	cell *c = p->t->cells + c_idx;
+
+#if 1
 	return c;
 #else
-	make_room(p);
-	cell *c = p->t->cells + c_idx;
 	cell *p1 = p->t->cells + p1_idx;
-	//printf("*** here: %s\n", GET_STR(p1));
+	printf("*** here: %s\n", GET_STR(p1));
+
+	if (!p->consulting)
+		return c;
+
+	make_room(p);
+	c = p->t->cells + c_idx;
+	p1 = p->t->cells + p1_idx;
 
 	cell *last = p->t->cells + (p->t->cidx  - 1);
 	idx_t cells_to_move = p->t->cidx - p1_idx;
@@ -1682,11 +1688,12 @@ static cell *insert_here(parser *p, idx_t c_idx, idx_t p1_idx)
 		*dst-- = *last--;
 
 	p1->val_type = TYPE_LITERAL;
-	p1->flags = FLAG_BUILTIN;
-	p1->fn = NULL;
+	//p1->flags = FLAG_BUILTIN;
+	//p1->fn = NULL;
 	p1->val_off = index_from_pool("call");
 	p1->nbr_cells = 2;
 	p1->arity = 1;
+
 	c->nbr_cells++;
 	p->t->cidx++;
 	return c;

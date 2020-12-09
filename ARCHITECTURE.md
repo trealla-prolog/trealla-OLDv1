@@ -52,6 +52,7 @@ Where *val_type* is TYPE_VAR.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
 Where *val_off* is into the symbol table.
+Where *slot_nbr* is the index into the frame
 
 
 Rational
