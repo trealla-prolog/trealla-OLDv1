@@ -296,7 +296,7 @@ static void trim_heap(query *q, const choice *ch)
 			if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 				stream *str = &g_streams[c->val_num];
 
-				if ((str->fp)
+				if ((str->fp && !str->aliased)
 					&& (str->fp != stdin)
 					&& (str->fp != stdout)
 					&& (str->fp != stderr)) {
@@ -331,7 +331,7 @@ static void trim_heap(query *q, const choice *ch)
 		if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 			stream *str = &g_streams[c->val_num];
 
-			if ((str->fp)
+			if ((str->fp && !str->aliased)
 				&& (str->fp != stdin)
 				&& (str->fp != stdout)
 				&& (str->fp != stderr)) {

@@ -906,7 +906,7 @@ void destroy_query(query *q)
 			if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
 				stream *str = &g_streams[c->val_num];
 
-				if (str->fp
+				if ((str->fp && !str->aliased)
 					&& (str->fp != stdin)
 					&& (str->fp != stdout)
 					&& (str->fp != stderr)) {

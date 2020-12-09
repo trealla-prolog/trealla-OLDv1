@@ -340,6 +340,7 @@ typedef struct {
 	bool nonblock:1;
 	bool udp:1;
 	bool ssl:1;
+	bool aliased:1;
 } stream;
 
 typedef struct {

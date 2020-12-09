@@ -1869,6 +1869,7 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 				name = deref(q, name, q->latest_ctx);
 				free(str->name);
 				str->name = strdup(GET_STR(name));
+				str->aliased = 1;
 			} else if (!strcmp(GET_STR(c), "type")) {
 				cell *name = c + 1;
 				name = deref(q, name, q->latest_ctx);
