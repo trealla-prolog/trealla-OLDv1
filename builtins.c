@@ -1861,6 +1861,9 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 		cell *h = LIST_HEAD(p4);
 		cell *c = deref(q, h, p4_ctx);
 
+		if (is_variable(c))
+			return throw_error(q, c, "instantiation_error", "args_not_sufficiently_instantiated");
+
 		if (is_structure(c) && (c->arity == 1)) {
 			if (!strcmp(GET_STR(c), "mmap")) {
 #if USE_MMAP
@@ -1888,6 +1891,9 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 		p4 = LIST_TAIL(p4);
 		p4 = deref(q, p4, p4_ctx);
 		p4_ctx = q->latest_ctx;
+
+		if (is_variable(p4))
+			return throw_error(q, p4, "instantiation_error", "args_not_sufficiently_instantiated");
 	}
 
 
