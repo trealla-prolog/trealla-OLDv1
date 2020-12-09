@@ -1892,7 +1892,8 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 				else if (is_atom(name) && !strcmp(GET_STR(name), "text"))
 					binary = 0;
 			}
-		}
+		} else
+			return throw_error(q, c, "domain_error", "stream_option");
 
 		p4 = LIST_TAIL(p4);
 		p4 = deref(q, p4, p4_ctx);
@@ -1901,7 +1902,6 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 		if (is_variable(p4))
 			return throw_error(q, p4, "instantiation_error", "args_not_sufficiently_instantiated");
 	}
-
 
 	if (oldstr) {
 		int fd = fileno(oldstr->fp);
