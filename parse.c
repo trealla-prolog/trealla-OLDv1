@@ -1663,41 +1663,58 @@ void parser_assign_vars(parser *p, unsigned start, bool rebase)
 	check_first_cut(p);
 }
 
-static cell *insert_here(parser *p, idx_t c_idx, idx_t p1_idx)
+static cell *insert_here(parser *p, cell *c, cell *p1)
 {
-	cell *c = p->t->cells + c_idx;
-
-#if 1
-	return c;
-#else
-	cell *p1 = p->t->cells + p1_idx;
-	printf("*** here: %s\n", GET_STR(p1));
-
-	if (!p->consulting)
-		return c;
-
+	idx_t c_idx = c - p->t->cells, p1_idx = p1 - p->t->cells;
 	make_room(p);
-	c = p->t->cells + c_idx;
-	p1 = p->t->cells + p1_idx;
 
-	cell *last = p->t->cells + (p->t->cidx  - 1);
+	cell *last = p->t->cells + (p->t->cidx - 1);
 	idx_t cells_to_move = p->t->cidx - p1_idx;
 	cell *dst = last + 1;
 
 	while (cells_to_move--)
 		*dst-- = *last--;
 
+	p1 = p->t->cells + p1_idx;
 	p1->val_type = TYPE_LITERAL;
-	//p1->flags = FLAG_BUILTIN;
-	//p1->fn = NULL;
+	p1->flags = FLAG_BUILTIN;
+	p1->fn = NULL;
 	p1->val_off = index_from_pool("call");
 	p1->nbr_cells = 2;
 	p1->arity = 1;
 
-	c->nbr_cells++;
 	p->t->cidx++;
-	return c;
-#endif
+	return p->t->cells + c_idx;
+}
+
+void promote_naked_vars(parser *p)
+{
+	idx_t nbr_cells = p->t->cidx;
+	cell *c = p->t->cells;
+
+	for (idx_t i = 0; i < nbr_cells; i += c->nbr_cells, c += c->nbr_cells) {
+		if (IS_XFX(c) || IS_XFY(c)) {
+			if (!strcmp(GET_STR(c), ",")
+			|| !strcmp(GET_STR(c), ";")
+			|| !strcmp(GET_STR(c), ":-")) {
+				cell *lhs = c + 1;
+
+				if (is_variable(lhs)) {
+					c = insert_here(p, c, lhs);
+					lhs = c + 1;
+				}
+
+				cell *rhs = lhs + lhs->nbr_cells;
+
+				if (is_variable(lhs)) {
+					c = insert_here(p, c, rhs);
+				}
+
+				c = lhs;
+				i = c - p->t->cells;
+			}
+		}
+	}
 }
 
 static bool attach_ops(parser *p, idx_t start_idx)
@@ -1772,7 +1789,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			last_idx = i;
 			c->nbr_cells += (c+1)->nbr_cells;
 			i += c->nbr_cells;
-			idx_t off = (idx_t)((c+1)-p->t->cells);
+			idx_t off = (idx_t)((c+1) - p->t->cells);
 
 			if (off >= p->t->cidx) {
 				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
@@ -1814,24 +1831,6 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 		*c = save;
 		c->nbr_cells += (c+1)->nbr_cells;
-
-		if (IS_XFX(c) || IS_XFY(c)) {
-			if (!strcmp(GET_STR(c), ",")
-				|| !strcmp(GET_STR(c), ";")) {
-				cell *lhs = c + 1;
-
-				if (is_variable(lhs)) {
-					c = insert_here(p, c - p->t->cells, lhs - p->t->cells);
-					lhs = c + 1;
-				}
-
-				cell *rhs = lhs + lhs->nbr_cells;
-
-				if (is_variable(rhs))
-					c = insert_here(p, c - p->t->cells, rhs - p->t->cells);
-			}
-		}
-
 		i += c->nbr_cells;
 		break;
 	}
@@ -2680,6 +2679,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 				parser_assign_vars(p, p->read_term, false);
 
 				if (p->consulting && !p->skip) {
+					promote_naked_vars(p);
 					parser_dcg_rewrite(p);
 					directives(p, p->t);
 

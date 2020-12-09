@@ -589,6 +589,7 @@ void make_indirect(cell *tmp, cell *c);
 void stash_me(query *q, term *t, bool last_match);
 unsigned fake_numbervars(query *q, cell *c, idx_t c_ctx, unsigned start);
 char *relative_to(const char *basefile, const char *relfile);
+void promote_naked_vars(parser *p);
 
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
 prolog_state print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
