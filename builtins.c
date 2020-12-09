@@ -1760,7 +1760,7 @@ static char *chars_list_to_string(query *q, cell *p_chars, idx_t p_chars_ctx, si
 
 static USE_RESULT prolog_state fn_iso_open_3(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_list);
+	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,variable);
 	const char *filename;
@@ -1779,8 +1779,10 @@ static USE_RESULT prolog_state fn_iso_open_3(query *q)
 
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
-	} else
+	} else if (is_atom(p1))
 		filename = GET_STR(p1);
+	else
+		return throw_error(q, p1, "domain_error", "source_sink");
 
 	stream *str = &g_streams[n];
 	str->filename = strdup(filename);
@@ -1795,6 +1797,8 @@ static USE_RESULT prolog_state fn_iso_open_3(query *q)
 		str->fp = fopen(filename, "a");
 	else if (!strcmp(mode, "update"))
 		str->fp = fopen(filename, "r+");
+	else
+		return throw_error(q, p2, "domain_error", "io_mode");
 
 	free(src);
 
@@ -1833,8 +1837,10 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 
 		stream *oldstr = &g_streams[oldn];
 		filename = oldstr->filename;
-	} else
+	} else if (is_atom(p1))
 		filename = GET_STR(p1);
+	else
+		return throw_error(q, p1, "domain_error", "source_sink");
 
 	if (is_iso_list(p1)) {
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
@@ -1908,6 +1914,8 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 			str->fp = fdopen(fd, binary?"ab":"a");
 		else if (!strcmp(mode, "update"))
 			str->fp = fdopen(fd, binary?"rb+":"r+");
+		else
+			return throw_error(q, p2, "domain_error", "io_mode");
 	} else {
 		if (!strcmp(mode, "read"))
 			str->fp = fopen(filename, binary?"rb":"r");
@@ -1917,6 +1925,8 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 			str->fp = fopen(filename, binary?"ab":"a");
 		else if (!strcmp(mode, "update"))
 			str->fp = fopen(filename, binary?"rb+":"r+");
+		else
+			return throw_error(q, p2, "domain_error", "io_mode");
 	}
 
 	free(src);
@@ -5578,6 +5588,8 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	if (is_variable(c)) {
 		err_type = "instantiation_error";
 		snprintf(dst2, len2+1, "error(%s,%s).", err_type, expected);
+	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "variable")) {
+		snprintf(dst2, len2+1, "error(%s(%s),%s/%u).", "uninstantiation_error", dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (!strcmp(err_type, "instantiation_error")) {
 		snprintf(dst2, len2+1, "error(%s,%s/%u).", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (!strcmp(err_type, "representation_error")) {
