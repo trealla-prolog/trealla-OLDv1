@@ -816,7 +816,7 @@ void clear_term(term *t)
 	t->cidx = 0;
 }
 
-static cell *make_cell(parser *p)
+static bool make_room(parser *p)
 {
 	if (p->t->cidx == p->t->nbr_cells) {
 		idx_t nbr_cells = p->t->nbr_cells * 2;
@@ -824,17 +824,23 @@ static cell *make_cell(parser *p)
 		term *t = realloc(p->t, sizeof(term)+(sizeof(cell)*nbr_cells));
 		if (!t) {
 			p->error = true;
-			return NULL;
+			return false;
 		}
+
 		p->t = t;
 		p->t->nbr_cells = nbr_cells;
 	}
 
+	return true;
+}
+
+static cell *make_cell(parser *p)
+{
+	make_room(p);
 	cell *ret = p->t->cells + p->t->cidx++;
 	*ret = (cell){0};
 	return ret;
 }
-
 
 void destroy_parser(parser *p)
 {
@@ -1657,6 +1663,35 @@ void parser_assign_vars(parser *p, unsigned start, bool rebase)
 	check_first_cut(p);
 }
 
+static cell *insert_here(parser *p, idx_t c_idx, idx_t p1_idx)
+{
+	make_room(p);
+	cell *c = p->t->cells + c_idx;
+	cell *p1 = p->t->cells + p1_idx;
+	printf("*** here: %s\n", GET_STR(p1));
+
+	cell *last = p->t->cells + (p->t->cidx  - 1);
+	idx_t cells_to_move = p->t->cidx - p1_idx;
+	cell *dst = last - 1;
+
+	while (cells_to_move--)
+		*dst-- = *last--;
+
+	cell save = *p1;
+	p1->val_type = TYPE_LITERAL;
+	p1->flags = FLAG_BUILTIN;
+	p1->fn = NULL;
+	p1->val_off = index_from_pool("call");
+	p1->nbr_cells = 2;
+	p1->arity = 1;
+	c->nbr_cells++;
+
+	p1++;
+	*p1 = save;
+
+	return c;
+}
+
 static bool attach_ops(parser *p, idx_t start_idx)
 {
 	assert(p);
@@ -1772,6 +1807,24 @@ static bool attach_ops(parser *p, idx_t start_idx)
 		*c = save;
 		c->nbr_cells += (c+1)->nbr_cells;
 		i += c->nbr_cells;
+
+		if (IS_XFX(c) || IS_XFY(c)) {
+			if (!strcmp(GET_STR(c), ",")
+				|| !strcmp(GET_STR(c), ";")
+			) {
+				cell *lhs = c + 1;
+
+				if (0 && is_variable(lhs))
+					c = insert_here(p, c - p->t->cells, lhs - p->t->cells);
+
+				lhs = c + 1;
+				cell *rhs = lhs + lhs->nbr_cells;
+
+				if (0 && is_variable(rhs))
+					c = insert_here(p, c - p->t->cells, rhs - p->t->cells);
+			}
+		}
+
 		break;
 	}
 
