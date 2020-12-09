@@ -1665,19 +1665,24 @@ void parser_assign_vars(parser *p, unsigned start, bool rebase)
 
 static cell *insert_here(parser *p, idx_t c_idx, idx_t p1_idx)
 {
-	make_room(p);
+#if 1
 	cell *c = p->t->cells + c_idx;
 	cell *p1 = p->t->cells + p1_idx;
 	printf("*** here: %s\n", GET_STR(p1));
+	return c;
+#else
+	make_room(p);
+	cell *c = p->t->cells + c_idx;
+	cell *p1 = p->t->cells + p1_idx;
+	//printf("*** here: %s\n", GET_STR(p1));
 
 	cell *last = p->t->cells + (p->t->cidx  - 1);
 	idx_t cells_to_move = p->t->cidx - p1_idx;
-	cell *dst = last - 1;
+	cell *dst = last + 1;
 
 	while (cells_to_move--)
 		*dst-- = *last--;
 
-	cell save = *p1;
 	p1->val_type = TYPE_LITERAL;
 	p1->flags = FLAG_BUILTIN;
 	p1->fn = NULL;
@@ -1685,11 +1690,9 @@ static cell *insert_here(parser *p, idx_t c_idx, idx_t p1_idx)
 	p1->nbr_cells = 2;
 	p1->arity = 1;
 	c->nbr_cells++;
-
-	p1++;
-	*p1 = save;
-
+	p->t->cidx++;
 	return c;
+#endif
 }
 
 static bool attach_ops(parser *p, idx_t start_idx)
@@ -1806,25 +1809,25 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 		*c = save;
 		c->nbr_cells += (c+1)->nbr_cells;
-		i += c->nbr_cells;
 
 		if (IS_XFX(c) || IS_XFY(c)) {
 			if (!strcmp(GET_STR(c), ",")
-				|| !strcmp(GET_STR(c), ";")
-			) {
+				|| !strcmp(GET_STR(c), ";")) {
 				cell *lhs = c + 1;
 
-				if (0 && is_variable(lhs))
+				if (is_variable(lhs)) {
 					c = insert_here(p, c - p->t->cells, lhs - p->t->cells);
+					lhs = c + 1;
+				}
 
-				lhs = c + 1;
 				cell *rhs = lhs + lhs->nbr_cells;
 
-				if (0 && is_variable(rhs))
+				if (is_variable(rhs))
 					c = insert_here(p, c - p->t->cells, rhs - p->t->cells);
 			}
 		}
 
+		i += c->nbr_cells;
 		break;
 	}
 
@@ -3271,7 +3274,6 @@ module *create_module(const char *name)
 		m->user_ops = MAX_USER_OPS;
 		m->error = false;
 
-		make_rule(m, "call(G) :- G.");
 		make_rule(m, "format(F) :- format(F, []).");
 		make_rule(m, "unify_with_occurs_check(X, X) :- acyclic_term(X).");
 
@@ -3416,14 +3418,14 @@ module *create_module(const char *name)
 
 		make_rule(m, "bagof(T,G,B) :- "							\
 			"copy_term('$bagof'(T,G,B),TMP_G),"					\
-			"TMP_G,"											\
+			"call(TMP_G),"											\
 			"'$bagof'(T,G,B)=TMP_G.");
 
 		// setof...
 
 		make_rule(m, "setof(T,G,B) :- "							\
 			"copy_term('$bagof'(T,G,B),TMP_G),"					\
-			"TMP_G,"											\
+			"call(TMP_G),"											\
 			"'$bagof'(T,G,TMP_B)=TMP_G,"						\
 			"sort(TMP_B,B).");
 
@@ -3432,81 +3434,81 @@ module *create_module(const char *name)
 		make_rule(m, "catch(G,E,C) :- "							\
 			"copy_term('$catch'(G,E,C),TMP_G),"					\
 			"'$catch'(G,E,C)=TMP_G,"							\
-			"TMP_G.");
+			"call(TMP_G).");
 
 		// calln...
 
 		make_rule(m, "call(G,P1) :- "							\
 			"copy_term('$calln'(G,P1),TMP_G),"					\
 			"'$calln'(G,P1)=TMP_G,"								\
-			"TMP_G.");
+			"call(TMP_G).");
 
 		make_rule(m, "call(G,P1,P2) :- "						\
 			"copy_term('$calln'(G,P1,P2),TMP_G),"				\
 			"'$calln'(G,P1,P2)=TMP_G,"							\
-			"TMP_G.");
+			"call(TMP_G).");
 
 		make_rule(m, "call(G,P1,P2,P3) :- "						\
 			"copy_term('$calln'(G,P1,P2,P3),TMP_G),"			\
 			"'$calln'(G,P1,P2,P3)=TMP_G,"						\
-			"TMP_G.");
+			"call(TMP_G).");
 
 		make_rule(m, "call(G,P1,P2,P3,P4) :- "					\
 			"copy_term('$calln'(G,P1,P2,P3,P4),TMP_G),"			\
 			"'$calln'(G,P1,P2,P3,P4)=TMP_G,"					\
-			"TMP_G.");
+			"call(TMP_G).");
 
 		make_rule(m, "call(G,P1,P2,P3,P4,P5) :- "				\
 			"copy_term('$calln'(G,P1,P2,P3,P4,P5),TMP_G),"		\
 			"'$calln'(G,P1,P2,P3,P4,P5)=TMP_G,"					\
-			"TMP_G.");
+			"call(TMP_G).");
 
 		make_rule(m, "call(G,P1,P2,P3,P4,P5,P6) :- "			\
 			"copy_term('$calln'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
 			"'$calln'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"				\
-			"TMP_G.");
+			"call(TMP_G).");
 
 		make_rule(m, "call(G,P1,P2,P3,P4,P5,P6,P7) :- "			\
 			"copy_term('$calln'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"\
 			"'$calln'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"			\
-			"TMP_G.");
+			"call(TMP_G).");
 
 		// taskn...
 
 		make_rule(m, "task(G,P1) :- "							\
 			"copy_term('$taskn'(G,P1),TMP_G),"					\
 			"'$taskn'(G,P1)=TMP_G,"								\
-			"TMP_G.");
+			"call(TMP_G).");
 
 		make_rule(m, "task(G,P1,P2) :- "						\
 			"copy_term('$taskn'(G,P1,P2),TMP_G),"				\
 			"'$taskn'(G,P1,P2)=TMP_G,"							\
-			"TMP_G.");
+			"call(TMP_G).");
 
 		make_rule(m, "task(G,P1,P2,P3) :- "						\
 			"copy_term('$taskn'(G,P1,P2,P3),TMP_G),"			\
 			"'$taskn'(G,P1,P2,P3)=TMP_G,"						\
-			"TMP_G.");
+			"call(TMP_G).");
 
 		make_rule(m, "task(G,P1,P2,P3,P4) :- "					\
 			"copy_term('$taskn'(G,P1,P2,P3,P4),TMP_G),"			\
 			"'$taskn'(G,P1,P2,P3,P4)=TMP_G,"					\
-			"TMP_G.");
+			"call(TMP_G).");
 
 		make_rule(m, "task(G,P1,P2,P3,P4,P5) :- "				\
 			"copy_term('$taskn'(G,P1,P2,P3,P4,P5),TMP_G),"		\
 			"'$taskn'(G,P1,P2,P3,P4,P5)=TMP_G,"					\
-			"TMP_G.");
+			"call(TMP_G).");
 
 		make_rule(m, "task(G,P1,P2,P3,P4,P5,P6) :- "			\
 			"copy_term('$taskn'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
 			"'$taskn'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"				\
-			"TMP_G.");
+			"call(TMP_G).");
 
 		make_rule(m, "task(G,P1,P2,P3,P4,P5,P6,P7) :- "			\
 			"copy_term('$taskn'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"\
 			"'$taskn'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"			\
-			"TMP_G.");
+			"call(TMP_G).");
 
 		// phrase...
 

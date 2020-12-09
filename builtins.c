@@ -10996,7 +10996,7 @@ static const struct builtins g_iso_funcs[] =
 	{":-", 2, NULL, NULL},
 	{":-", 1, NULL, NULL},
 	{",", 2, NULL, NULL},
-	//{"call", 1, NULL, NULL},
+	{"call", 1, NULL, NULL},
 
 	{"->", 2, fn_iso_ifthen_2, NULL},
 	{";", 2, fn_iso_disjunction_2, NULL},
