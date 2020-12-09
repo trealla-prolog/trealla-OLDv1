@@ -1978,6 +1978,8 @@ static USE_RESULT prolog_state fn_iso_at_end_of_stream_0(__attribute__((unused))
 {
 	int n = get_named_stream("user_input");
 	stream *str = &g_streams[n];
+	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
+	str->ungetch = ch;
 	return feof(str->fp) || ferror(str->fp);
 }
 
@@ -1986,6 +1988,8 @@ static USE_RESULT prolog_state fn_iso_at_end_of_stream_1(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
+	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
+	str->ungetch = ch;
 	return feof(str->fp) || ferror(str->fp);
 }
 
