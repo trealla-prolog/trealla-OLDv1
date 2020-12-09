@@ -1667,8 +1667,6 @@ static cell *insert_here(parser *p, idx_t c_idx, idx_t p1_idx)
 {
 #if 1
 	cell *c = p->t->cells + c_idx;
-	cell *p1 = p->t->cells + p1_idx;
-	printf("*** here: %s\n", GET_STR(p1));
 	return c;
 #else
 	make_room(p);
