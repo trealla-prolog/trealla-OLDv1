@@ -5475,8 +5475,6 @@ static USE_RESULT prolog_state fn_iso_catch_3(query *q)
 		return pl_success;
 	}
 
-	q->did_throw = false;
-
 	if (q->retry)
 		return pl_failure;
 
