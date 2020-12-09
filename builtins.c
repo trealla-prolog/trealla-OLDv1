@@ -2996,7 +2996,7 @@ static USE_RESULT prolog_state fn_iso_peek_byte_2(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static void do_calc(query *q, cell *c, idx_t c_ctx)
+static void do_calc_(query *q, cell *c, idx_t c_ctx)
 {
 	cell *save = q->st.curr_cell;
 	idx_t save_ctx = q->st.curr_frame;
@@ -3012,7 +3012,8 @@ static void do_calc(query *q, cell *c, idx_t c_ctx)
 		q->st.curr_cell = save;
 }
 
-#define calc(q,c) !(c->flags&FLAG_BUILTIN) ? *c : (do_calc(q,c,c##_ctx), q->accum)
+#define calc_(q,c) !(c->flags&FLAG_BUILTIN) ? *c : (do_calc_(q,c,c##_ctx), q->accum)
+#define calc(q,c) calc_(q, c); if (q->did_throw) return pl_success;
 
 static int_t gcd(int_t num, int_t remainder)
 {
@@ -3050,9 +3051,6 @@ static USE_RESULT prolog_state fn_iso_is_2(query *q)
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p2 = calc(q, p2_tmp);
 	p2.nbr_cells = 1;
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_variable(p1) && is_rational(&p2)) {
 		reduce(&p2);
@@ -3092,9 +3090,6 @@ static USE_RESULT prolog_state fn_iso_float_1(query *q)
 	if (q->calc) {
 		cell p1 = calc(q, p1_tmp);
 
-		if (q->did_throw)
-			return pl_success;
-
 		if (is_float(&p1)) {
 			q->accum.val_flt = p1.val_flt;
 			q->accum.val_type = TYPE_FLOAT;
@@ -3120,9 +3115,6 @@ static USE_RESULT prolog_state fn_iso_integer_1(query *q)
 	if (q->calc) {
 		cell p1 = calc(q, p1_tmp);
 
-		if (q->did_throw)
-			return pl_success;
-
 		if (is_float(&p1)) {
 			q->accum.val_num = (int_t)p1.val_flt;
 			q->accum.val_den = 1;
@@ -3147,10 +3139,6 @@ static USE_RESULT prolog_state fn_iso_abs_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	q->accum.val_type = p1.val_type;
 
 	if (is_integer(&p1))
@@ -3167,10 +3155,6 @@ static USE_RESULT prolog_state fn_iso_sign_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	q->accum.val_type = p1.val_type;
 
 	if (is_integer(&p1))
@@ -3187,10 +3171,6 @@ static USE_RESULT prolog_state fn_iso_positive_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	q->accum = p1;
 	return pl_success;
 }
@@ -3199,10 +3179,6 @@ static USE_RESULT prolog_state fn_iso_negative_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	q->accum.val_type = p1.val_type;
 
 	if (is_rational(&p1))
@@ -3236,14 +3212,7 @@ static USE_RESULT prolog_state fn_iso_add_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
@@ -3294,14 +3263,7 @@ static USE_RESULT prolog_state fn_iso_sub_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
@@ -3352,14 +3314,7 @@ static USE_RESULT prolog_state fn_iso_mul_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if ((is_integer(&p1)) && is_integer(&p2)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
@@ -3411,9 +3366,6 @@ static USE_RESULT prolog_state fn_iso_exp_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (q->did_throw)
-		return pl_success;
-
 	if (is_rational(&p1)) {
 		q->accum.val_flt = exp((double)p1.val_num/p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
@@ -3433,9 +3385,6 @@ static USE_RESULT prolog_state fn_iso_sqrt_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_rational(&p1)) {
 		q->accum.val_flt = sqrt((double)p1.val_num/p1.val_den);
@@ -3457,9 +3406,6 @@ static USE_RESULT prolog_state fn_iso_log_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (q->did_throw)
-		return pl_success;
-
 	if (is_rational(&p1)) {
 		q->accum.val_flt = log((double)p1.val_num/p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
@@ -3479,9 +3425,6 @@ static USE_RESULT prolog_state fn_iso_truncate_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_float(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
@@ -3518,9 +3461,6 @@ static USE_RESULT prolog_state fn_iso_round_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (q->did_throw)
-		return pl_success;
-
 	if (is_float(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		__int128_t tmp = round(p1.val_flt);
@@ -3555,9 +3495,6 @@ static USE_RESULT prolog_state fn_iso_ceiling_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_float(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
@@ -3594,9 +3531,6 @@ static USE_RESULT prolog_state fn_iso_float_integer_part_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (q->did_throw)
-		return pl_success;
-
 	if (is_float(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		__int128_t tmp = p1.val_flt;
@@ -3631,9 +3565,6 @@ static USE_RESULT prolog_state fn_iso_float_fractional_part_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_float(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
@@ -3670,9 +3601,6 @@ static USE_RESULT prolog_state fn_iso_floor_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (q->did_throw)
-		return pl_success;
-
 	if (is_float(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		__int128_t tmp = floor(p1.val_flt);
@@ -3708,9 +3636,6 @@ static USE_RESULT prolog_state fn_iso_sin_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (q->did_throw)
-		return pl_success;
-
 	if (is_rational(&p1)) {
 		q->accum.val_flt = sin((double)p1.val_num/p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
@@ -3730,9 +3655,6 @@ static USE_RESULT prolog_state fn_iso_cos_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_rational(&p1)) {
 		q->accum.val_flt = cos((double)p1.val_num/p1.val_den);
@@ -3754,9 +3676,6 @@ static USE_RESULT prolog_state fn_iso_tan_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (q->did_throw)
-		return pl_success;
-
 	if (is_rational(&p1)) {
 		q->accum.val_flt = tan((double)p1.val_num/p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
@@ -3776,9 +3695,6 @@ static USE_RESULT prolog_state fn_iso_asin_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_rational(&p1)) {
 		q->accum.val_flt = asin((double)p1.val_num/p1.val_den);
@@ -3800,9 +3716,6 @@ static USE_RESULT prolog_state fn_iso_acos_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (q->did_throw)
-		return pl_success;
-
 	if (is_rational(&p1)) {
 		q->accum.val_flt = acos((double)p1.val_num/p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
@@ -3822,9 +3735,6 @@ static USE_RESULT prolog_state fn_iso_atan_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_rational(&p1)) {
 		q->accum.val_flt = atan((double)p1.val_num/p1.val_den);
@@ -3846,14 +3756,7 @@ static USE_RESULT prolog_state fn_iso_atan_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_rational(&p1) && is_rational(&p2)) {
 		q->accum.val_flt = atan2((double)p1.val_num/p1.val_den, (double)p2.val_num/p2.val_den);
@@ -3881,14 +3784,7 @@ static USE_RESULT prolog_state fn_iso_copysign_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_rational(&p1) && is_rational(&p2)) {
 		q->accum = p1;
@@ -3924,14 +3820,7 @@ static USE_RESULT prolog_state fn_iso_pow_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_rational(&p1) && is_rational(&p2)) {
 		q->accum.val_flt = pow((double)p1.val_num/p1.val_den, (double)p2.val_num/p2.val_den);
@@ -3959,14 +3848,7 @@ static USE_RESULT prolog_state fn_iso_powi_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
@@ -4015,14 +3897,7 @@ static USE_RESULT prolog_state fn_iso_divide_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		if (p2.val_num == 0)
@@ -4068,14 +3943,7 @@ static USE_RESULT prolog_state fn_iso_divint_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		if (p2.val_num == 0)
@@ -4097,14 +3965,7 @@ static USE_RESULT prolog_state fn_iso_div_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		if (p2.val_num == 0)
@@ -4126,14 +3987,7 @@ static USE_RESULT prolog_state fn_iso_mod_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		if (p2.val_num == 0)
@@ -4155,14 +4009,7 @@ static USE_RESULT prolog_state fn_iso_max_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_rational(&p1) && is_rational(&p2)) {
 		cell s1, s2;
@@ -4187,14 +4034,7 @@ static USE_RESULT prolog_state fn_iso_min_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_rational(&p1) && is_rational(&p2)) {
 		cell s1, s2;
@@ -4219,14 +4059,7 @@ static USE_RESULT prolog_state fn_iso_xor_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = p1.val_num ^ p2.val_num;
@@ -4245,14 +4078,7 @@ static USE_RESULT prolog_state fn_iso_and_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = p1.val_num & p2.val_num;
@@ -4271,14 +4097,7 @@ static USE_RESULT prolog_state fn_iso_or_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = p1.val_num | p2.val_num;
@@ -4297,14 +4116,7 @@ static USE_RESULT prolog_state fn_iso_shl_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = p1.val_num << p2.val_num;
@@ -4323,14 +4135,7 @@ static USE_RESULT prolog_state fn_iso_shr_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = p1.val_num >> p2.val_num;
@@ -4348,9 +4153,6 @@ static USE_RESULT prolog_state fn_iso_neg_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1)) {
 		q->accum.val_num = ~p1.val_num;
@@ -4573,14 +4375,7 @@ static USE_RESULT prolog_state fn_iso_neq_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_num == p2.val_num;
@@ -4603,14 +4398,7 @@ static USE_RESULT prolog_state fn_iso_nne_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_num != p2.val_num;
@@ -4633,14 +4421,7 @@ static USE_RESULT prolog_state fn_iso_nge_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_num >= p2.val_num;
@@ -4663,14 +4444,7 @@ static USE_RESULT prolog_state fn_iso_ngt_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_num > p2.val_num;
@@ -4693,14 +4467,7 @@ static USE_RESULT prolog_state fn_iso_nle_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_num <= p2.val_num;
@@ -4723,14 +4490,7 @@ static USE_RESULT prolog_state fn_iso_nlt_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_num < p2.val_num;
@@ -8537,9 +8297,6 @@ static USE_RESULT prolog_state fn_log10_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (q->did_throw)
-		return pl_success;
-
 	if (is_integer(&p1)) {
 		q->accum.val_flt = log10(p1.val_num);
 		q->accum.val_type = TYPE_FLOAT;
@@ -8648,9 +8405,6 @@ static USE_RESULT prolog_state fn_random_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_variable(&p1)) {
 		cell tmp;
@@ -9835,9 +9589,6 @@ static USE_RESULT prolog_state fn_edin_tab_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (q->did_throw)
-		return pl_success;
-
 	if (!is_integer(&p1))
 		return throw_error(q, &p1, "type_error", "integer");
 
@@ -9855,9 +9606,6 @@ static USE_RESULT prolog_state fn_edin_tab_2(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (!is_integer(&p1))
 		return throw_error(q, &p1, "type_error", "integer");
@@ -10033,14 +9781,7 @@ static USE_RESULT prolog_state fn_rdiv_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
-
-	if (q->did_throw)
-		return pl_success;
-
 	cell p2 = calc(q, p2_tmp);
-
-	if (q->did_throw)
-		return pl_success;
 
 	if (is_rational(&p1) && is_rational(&p2)) {
 		p1.val_num *= p2.val_den;
@@ -10112,9 +9853,6 @@ static USE_RESULT prolog_state fn_rational_1(query *q)
 
 	if (q->calc) {
 		cell p1 = calc(q, p1_tmp);
-
-		if (q->did_throw)
-			return pl_success;
 
 		if (is_rational(&p1)) {
 			reduce(&p1);
