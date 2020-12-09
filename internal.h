@@ -417,6 +417,7 @@ struct query_ {
 	bool resume:1;
 	bool no_tco:1;
 	bool error:1;
+	bool did_throw:1;
 	bool trace:1;
 	bool calc:1;
 	bool yielded:1;
@@ -536,7 +537,7 @@ unsigned get_op(module *m, const char *name, unsigned *optype, bool *userop, boo
 bool set_op(module *m, const char *name, unsigned optype, unsigned precedence);
 USE_RESULT prolog_state make_choice(query *q);
 USE_RESULT prolog_state make_barrier(query *q);
-USE_RESULT prolog_state make_catcher(query *q, unsigned type);
+USE_RESULT prolog_state make_catcher(query *q, enum q_retry type);
 void cut_me(query *q, bool local_cut);
 bool check_builtin(module *m, const char *name, unsigned arity);
 void *get_builtin(module *m, const char *name, unsigned arity);

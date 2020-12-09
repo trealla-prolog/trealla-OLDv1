@@ -3006,8 +3006,10 @@ static void do_calc(query *q, cell *c, idx_t c_ctx)
 	q->calc = true;
 	c->fn(q);
 	q->calc = save_calc;
-	q->st.curr_cell = save;
 	q->st.curr_frame = save_ctx;
+
+	if (!q->did_throw)
+		q->st.curr_cell = save;
 }
 
 #define calc(q,c) !(c->flags&FLAG_BUILTIN) ? *c : (do_calc(q,c,c##_ctx), q->accum)
@@ -3049,8 +3051,8 @@ static USE_RESULT prolog_state fn_iso_is_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 	p2.nbr_cells = 1;
 
-	if (q->error)
-		return pl_error;
+	if (q->did_throw)
+		return pl_success;
 
 	if (is_variable(p1) && is_rational(&p2)) {
 		reduce(&p2);
@@ -5473,6 +5475,8 @@ static USE_RESULT prolog_state fn_iso_catch_3(query *q)
 		return pl_success;
 	}
 
+	q->did_throw = false;
+
 	if (q->retry)
 		return pl_failure;
 
@@ -5539,6 +5543,7 @@ static USE_RESULT prolog_state fn_iso_throw_1(query *q)
 
 prolog_state throw_error(query *q, cell *c, const char *err_type, const char *expected)
 {
+	q->did_throw = 1;
 	idx_t c_ctx = q->latest_ctx;
 	int save_quoted = q->quoted;
 	q->quoted = 1;

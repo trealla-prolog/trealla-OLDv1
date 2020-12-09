@@ -269,7 +269,7 @@ prolog_state make_barrier(query *q)
 	return pl_success;
 }
 
-prolog_state make_catcher(query *q, unsigned retry)
+prolog_state make_catcher(query *q, enum q_retry retry)
 {
 	may_error(make_choice(q));
 	idx_t curr_choice = q->cp - 1;
@@ -1166,6 +1166,7 @@ prolog_state run_query(query *q)
 		}
 
 		q->tot_goals++;
+		q->did_throw = 0;
 		Trace(q, q->st.curr_cell, q->retry?REDO:q->resume?NEXT:CALL);
 
 		if (!(q->st.curr_cell->flags&FLAG_BUILTIN)) {
