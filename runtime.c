@@ -232,57 +232,6 @@ void try_me(const query *q, unsigned nbr_vars)
 	}
 }
 
-prolog_state make_choice(query *q)
-{
-	assert(q);
-
-	may_error(check_frame(q));
-	may_error(check_choice(q));
-
-	idx_t curr_choice = q->cp++;
-	choice *ch = q->choices + curr_choice;
-	ch->st = q->st;
-	ch->cgen = ++q->cgen;
-	ch->local_cut = false;
-	ch->catchme1 = false;
-	ch->catchme2 = false;
-	ch->pins = 0;
-
-	q->st.iter = NULL;
-
-	frame *g = GET_FRAME(q->st.curr_frame);
-	ch->nbr_vars = g->nbr_vars;
-	ch->nbr_slots = g->nbr_slots;
-	ch->any_choices = g->any_choices;
-	ch->overflow = g->overflow;
-	may_error(check_slot(q, g->nbr_vars));
-
-	return pl_success;
-}
-
-prolog_state make_barrier(query *q)
-{
-	may_error(make_choice(q));
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
-	ch->local_cut = true;
-	return pl_success;
-}
-
-prolog_state make_catcher(query *q, enum q_retry retry)
-{
-	may_error(make_choice(q));
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
-
-	if (retry == QUERY_RETRY)
-		ch->catchme1 = true;
-	else if (retry == QUERY_EXCEPTION)
-		ch->catchme2 = true;
-
-	return pl_success;
-}
-
 static void trim_heap(query *q, const choice *ch)
 {
 	for (arena *a = q->arenas; a;) {
@@ -524,6 +473,57 @@ void stash_me(query *q, term *t, bool last_match)
 	g->did_cut = false;
 
 	q->st.sp += nbr_vars;
+}
+
+prolog_state make_choice(query *q)
+{
+	assert(q);
+
+	may_error(check_frame(q));
+	may_error(check_choice(q));
+
+	idx_t curr_choice = q->cp++;
+	choice *ch = q->choices + curr_choice;
+	ch->st = q->st;
+	ch->cgen = ++q->cgen;
+	ch->local_cut = false;
+	ch->catchme1 = false;
+	ch->catchme2 = false;
+	ch->pins = 0;
+
+	q->st.iter = NULL;
+
+	frame *g = GET_FRAME(q->st.curr_frame);
+	may_error(check_slot(q, g->nbr_vars));
+	ch->nbr_vars = g->nbr_vars;
+	ch->nbr_slots = g->nbr_slots;
+	ch->any_choices = g->any_choices;
+	ch->overflow = g->overflow;
+
+	return pl_success;
+}
+
+prolog_state make_barrier(query *q)
+{
+	may_error(make_choice(q));
+	idx_t curr_choice = q->cp - 1;
+	choice *ch = q->choices + curr_choice;
+	ch->local_cut = true;
+	return pl_success;
+}
+
+prolog_state make_catcher(query *q, enum q_retry retry)
+{
+	may_error(make_choice(q));
+	idx_t curr_choice = q->cp - 1;
+	choice *ch = q->choices + curr_choice;
+
+	if (retry == QUERY_RETRY)
+		ch->catchme1 = true;
+	else if (retry == QUERY_EXCEPTION)
+		ch->catchme2 = true;
+
+	return pl_success;
 }
 
 void cut_me(query *q, bool local_cut)
