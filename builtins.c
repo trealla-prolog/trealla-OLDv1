@@ -5388,7 +5388,7 @@ static USE_RESULT prolog_state fn_iso_ifthen_2(query *q)
 	GET_NEXT_ARG(p2,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_local_cut_s, fn_local_cut_0, 0, 0);
 	tmp[nbr_cells-1].cgen = q->cgen + 1;
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
@@ -5409,7 +5409,7 @@ static USE_RESULT prolog_state do_ifthenelse(query *q, cell *p1, cell *p2, cell 
 
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_local_cut_s, fn_local_cut_0, 0, 0);
 	tmp[nbr_cells-1].cgen = q->cgen + 1;
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
@@ -5454,7 +5454,7 @@ static USE_RESULT prolog_state fn_iso_negation_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_local_cut_s, fn_local_cut_0, 0, 0);
 	tmp[nbr_cells-1].cgen = q->cgen + 1;
 	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 	may_error(make_barrier(q));
@@ -5470,7 +5470,7 @@ static USE_RESULT prolog_state fn_iso_once_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_local_cut_s, fn_local_cut_0, 0, 0);
 	tmp[nbr_cells-1].cgen = q->cgen + 1;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
@@ -5486,7 +5486,7 @@ static USE_RESULT prolog_state fn_ignore_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_local_cut_s, fn_local_cut_0, 0, 0);
 	tmp[nbr_cells-1].cgen = q->cgen + 1;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));

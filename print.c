@@ -28,7 +28,7 @@ static bool needs_quote(module *m, const char *src, size_t srclen)
 	if (!*src || isupper(*src) || isdigit(*src) || (*src == '_'))
 		return true;
 
-	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!"))
+	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!") || !strcmp(src, "¡"))
 		return false;
 
 	if (get_op(m, src, NULL, NULL, false))
