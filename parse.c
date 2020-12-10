@@ -43,7 +43,7 @@ idx_t g_sys_elapsed_s, g_sys_queue_s, g_local_cut_s, g_braces_s;
 unsigned g_cpu_count = 4;
 
 static idx_t g_pool_offset = 0, g_pool_size = 0;
-static volatile int g_tpl_count = 0;				// Make atomic if threads
+static volatile int g_tpl_count = 0;				// FIXME atomic
 char *g_tpl_lib = NULL;
 
 int g_ac = 0, g_avc = 1;
@@ -942,7 +942,7 @@ void destroy_query(query *q)
 
 query *create_query(module *m, bool is_task)
 {
-	static uint64_t g_query_id = 0;
+	static volatile uint64_t g_query_id = 0;		// FIXME atomic
 
 	query *q = calloc(1, sizeof(query));
 	if (q) {
