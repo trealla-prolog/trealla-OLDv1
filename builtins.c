@@ -3361,7 +3361,7 @@ static USE_RESULT prolog_state fn_iso_sub_2(query *q)
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3413,7 +3413,7 @@ static USE_RESULT prolog_state fn_iso_mul_2(query *q)
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3433,7 +3433,7 @@ static USE_RESULT prolog_state fn_iso_exp_1(query *q)
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3453,7 +3453,7 @@ static USE_RESULT prolog_state fn_iso_sqrt_1(query *q)
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3473,7 +3473,7 @@ static USE_RESULT prolog_state fn_iso_log_1(query *q)
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3508,7 +3508,7 @@ static USE_RESULT prolog_state fn_iso_truncate_1(query *q)
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "float");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3543,7 +3543,7 @@ static USE_RESULT prolog_state fn_iso_round_1(query *q)
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "float");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3578,7 +3578,7 @@ static USE_RESULT prolog_state fn_iso_ceiling_1(query *q)
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "float");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3613,7 +3613,7 @@ static USE_RESULT prolog_state fn_iso_float_integer_part_1(query *q)
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "float");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3648,7 +3648,7 @@ static USE_RESULT prolog_state fn_iso_float_fractional_part_1(query *q)
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "float");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3683,7 +3683,7 @@ static USE_RESULT prolog_state fn_iso_floor_1(query *q)
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "float");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3703,7 +3703,7 @@ static USE_RESULT prolog_state fn_iso_sin_1(query *q)
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3723,7 +3723,7 @@ static USE_RESULT prolog_state fn_iso_cos_1(query *q)
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3743,7 +3743,7 @@ static USE_RESULT prolog_state fn_iso_tan_1(query *q)
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3763,7 +3763,7 @@ static USE_RESULT prolog_state fn_iso_asin_1(query *q)
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3783,7 +3783,7 @@ static USE_RESULT prolog_state fn_iso_acos_1(query *q)
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3803,7 +3803,7 @@ static USE_RESULT prolog_state fn_iso_atan_1(query *q)
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3831,7 +3831,7 @@ static USE_RESULT prolog_state fn_iso_atan_2(query *q)
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3867,7 +3867,7 @@ static USE_RESULT prolog_state fn_iso_copysign_2(query *q)
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3895,7 +3895,7 @@ static USE_RESULT prolog_state fn_iso_pow_2(query *q)
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3944,7 +3944,7 @@ static USE_RESULT prolog_state fn_iso_powi_2(query *q)
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -3990,7 +3990,7 @@ static USE_RESULT prolog_state fn_iso_divide_2(query *q)
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -4451,7 +4451,7 @@ static USE_RESULT prolog_state fn_iso_neq_2(query *q)
 	else if (is_float(&p1) && is_integer(&p2))
 		return p1.val_flt == p2.val_num;
 
-	return throw_error(q, &p1, "type_error", "number");
+	return throw_error(q, &p1, "type_error", "evaluable");
 }
 
 static USE_RESULT prolog_state fn_iso_nne_2(query *q)
@@ -4474,7 +4474,7 @@ static USE_RESULT prolog_state fn_iso_nne_2(query *q)
 	else if (is_float(&p1) && is_integer(&p2))
 		return p1.val_flt != p2.val_num;
 
-	return throw_error(q, &p1, "type_error", "number");
+	return throw_error(q, &p1, "type_error", "evaluable");
 }
 
 static USE_RESULT prolog_state fn_iso_nge_2(query *q)
@@ -4497,7 +4497,7 @@ static USE_RESULT prolog_state fn_iso_nge_2(query *q)
 	else if (is_float(&p1) && is_integer(&p2))
 		return p1.val_flt >= p2.val_num;
 
-	return throw_error(q, &p1, "type_error", "number");
+	return throw_error(q, &p1, "type_error", "evaluable");
 }
 
 static USE_RESULT prolog_state fn_iso_ngt_2(query *q)
@@ -4520,7 +4520,7 @@ static USE_RESULT prolog_state fn_iso_ngt_2(query *q)
 	else if (is_float(&p1) && is_integer(&p2))
 		return p1.val_flt > p2.val_num;
 
-	return throw_error(q, &p1, "type_error", "number");
+	return throw_error(q, &p1, "type_error", "evaluable");
 }
 
 static USE_RESULT prolog_state fn_iso_nle_2(query *q)
@@ -4543,7 +4543,7 @@ static USE_RESULT prolog_state fn_iso_nle_2(query *q)
 	else if (is_float(&p1) && is_integer(&p2))
 		return p1.val_flt <= p2.val_num;
 
-	return throw_error(q, &p1, "type_error", "number");
+	return throw_error(q, &p1, "type_error", "evaluable");
 }
 
 static USE_RESULT prolog_state fn_iso_nlt_2(query *q)
@@ -4566,7 +4566,7 @@ static USE_RESULT prolog_state fn_iso_nlt_2(query *q)
 	else if (is_float(&p1) && is_integer(&p2))
 		return p1.val_flt < p2.val_num;
 
-	return throw_error(q, &p1, "type_error", "number");
+	return throw_error(q, &p1, "type_error", "evaluable");
 }
 
 static USE_RESULT prolog_state fn_iso_arg_3(query *q)
@@ -8362,7 +8362,7 @@ static USE_RESULT prolog_state fn_log10_1(query *q)
 		q->accum.val_flt = log10(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else {
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return pl_success;
@@ -9940,7 +9940,7 @@ static USE_RESULT prolog_state fn_rational_1(query *q)
 			return pl_success;
 		}
 
-		return throw_error(q, &p1, "type_error", "number");
+		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
 	return is_rational(p1_tmp);
