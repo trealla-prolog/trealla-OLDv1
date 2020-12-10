@@ -1,4 +1,4 @@
-:- initialization(main).
+:- initialization((main2)).
 
 clean_text_input :-
 	clean_file('test_input.text', _).
@@ -16,6 +16,14 @@ clean_file(File, Path) :-
 	;	true
 	).
 
+clean_file(Alias, File, Path) :-
+	% the alias may be associated with a stream opened for a different file
+	(	stream_property(Stream, alias(Alias)) ->
+		close(Stream)
+	;	true
+	),
+	clean_file(File, Path).
+
 write_text_contents(Stream, Contents) :-
 	(	atom(Contents) ->
 		write(Stream, Contents)
@@ -26,6 +34,16 @@ write_text_contents_list([], _).
 write_text_contents_list([Atom| Atoms], Stream) :-
 	write(Stream, Atom),
 	write_text_contents_list(Atoms, Stream).
+
+set_text_input(Alias, Contents, Options) :-
+	clean_file(Alias, 'test_input.text', Path),
+	open(Path, write, WriteStream, [type(text)]),
+	write_text_contents(WriteStream, Contents),
+	close(WriteStream),
+	open(Path, read, _, [type(text),alias(Alias)| Options]).
+
+set_text_input(Alias, Contents) :-
+	set_text_input(Alias, Contents, []).
 
 set_text_input(Contents) :-
 	clean_file('test_input.text', Path),
@@ -53,17 +71,30 @@ get_text_contents(Stream, Expected, Contents) :-
 	get_chars(Stream, Chars, Limit),
 	atom_chars(Contents, Chars).
 
+check_text_input(Alias, Expected) :-
+	get_text_contents(Alias, Expected, Contents),
+	clean_text_input,
+	Expected == Contents.
+
 check_text_input(Expected) :-
 	current_input(Stream),
 	get_text_contents(Stream, Expected, Contents),
 	clean_text_input,
 	Expected == Contents.
 
-main :-
+main1 :-
 	set_text_input('qwerty'),
 	get_char(Char),
 	Char == 'q',
 	check_text_input('werty'),
+	write(ok), nl,
+	halt.
+
+main2 :-
+	set_text_input(st_i, 'qwerty'),
+	get_char(st_i, Char),
+	Char == 'q',
+	check_text_input(st_i, 'werty'),
 	write(ok), nl,
 	halt.
 
