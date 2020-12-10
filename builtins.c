@@ -441,15 +441,6 @@ static USE_RESULT prolog_state make_string(cell *d, const char *s, size_t n)
 	return pl_success;
 }
 
-// TO-DO: clean this up...
-static unsigned g_varno;
-static idx_t g_tab_idx;
-static idx_t g_tab1[64000];
-static idx_t g_tab3[64000];
-static idx_t g_tab2[64000];
-static idx_t g_tab4[64000];
-static uint8_t g_tab5[64000];
-
 static USE_RESULT cell *deep_copy2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
@@ -485,19 +476,19 @@ static USE_RESULT cell *deep_copy2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx,
 			slot *e = GET_SLOT(g, p1->var_nbr);
 			idx_t slot_nbr = e - q->slots;
 
-			for (size_t i = 0; i < g_tab_idx; i++) {
-				if (g_tab1[i] == slot_nbr) {
-					tmp->var_nbr = g_tab2[i];
+			for (size_t i = 0; i < q->m->pl->tab_idx; i++) {
+				if (q->m->pl->tab1[i] == slot_nbr) {
+					tmp->var_nbr = q->m->pl->tab2[i];
 					tmp->flags = FLAG2_FRESH;
 					return tmp;
 				}
 			}
 
-			tmp->var_nbr = g_varno;
+			tmp->var_nbr = q->m->pl->varno;
 			tmp->flags = FLAG2_FRESH;
-			g_tab1[g_tab_idx] = slot_nbr;
-			g_tab2[g_tab_idx] = g_varno++;
-			g_tab_idx++;
+			q->m->pl->tab1[q->m->pl->tab_idx] = slot_nbr;
+			q->m->pl->tab2[q->m->pl->tab_idx] = q->m->pl->varno++;
+			q->m->pl->tab_idx++;
 
 			if (is_anon(p1))
 				tmp->flags |= FLAG2_ANON;
@@ -526,15 +517,15 @@ static USE_RESULT cell *deep_copy_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx, 
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	if (init_tmp_heap(q)){
 		frame *g = GET_FRAME(q->st.curr_frame);
-		g_varno = g->nbr_vars;
-		g_tab_idx = 0;
+		q->m->pl->varno = g->nbr_vars;
+		q->m->pl->tab_idx = 0;
 
 		q->cycle_error = 0;
 		cell* rec = deep_copy2_to_tmp_heap(q, p1, p1_ctx, 0, nonlocals_only);
 		if (!rec || rec == ERR_CYCLE_CELL) return rec;
 
-		if (g_varno != g->nbr_vars) {
-			if (!create_vars(q, g_varno-g->nbr_vars)) {
+		if (q->m->pl->varno != g->nbr_vars) {
+			if (!create_vars(q, q->m->pl->varno-g->nbr_vars)) {
 				DISCARD_RESULT throw_error(q, p1, "resource_error", "too_many_vars");
 				return NULL;
 			}
@@ -2081,21 +2072,21 @@ static void collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells)
 		if (is_structure(c)) {
 			collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1);
 		} else if (is_variable(c)) {
-			for (unsigned idx = 0; idx < g_tab_idx; idx++) {
-				if ((g_tab1[idx] == q->latest_ctx) && (g_tab2[idx] == c->var_nbr)) {
-					g_tab4[idx]++;
+			for (unsigned idx = 0; idx < q->m->pl->tab_idx; idx++) {
+				if ((q->m->pl->tab1[idx] == q->latest_ctx) && (q->m->pl->tab2[idx] == c->var_nbr)) {
+					q->m->pl->tab4[idx]++;
 					found = 1;
 					break;
 				}
 			}
 
 			if (!found) {
-				g_tab1[g_tab_idx] = q->latest_ctx;
-				g_tab2[g_tab_idx] = c->var_nbr;
-				g_tab3[g_tab_idx] = c->val_off;
-				g_tab4[g_tab_idx] = 1;
-				g_tab5[g_tab_idx] = is_anon(c) ? 1 : 0;
-				g_tab_idx++;
+				q->m->pl->tab1[q->m->pl->tab_idx] = q->latest_ctx;
+				q->m->pl->tab2[q->m->pl->tab_idx] = c->var_nbr;
+				q->m->pl->tab3[q->m->pl->tab_idx] = c->val_off;
+				q->m->pl->tab4[q->m->pl->tab_idx] = 1;
+				q->m->pl->tab5[q->m->pl->tab_idx] = is_anon(c) ? 1 : 0;
+				q->m->pl->tab_idx++;
 			}
 		}
 
@@ -2246,13 +2237,13 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 
 	cell *tmp = p->t->cells;
 	tmp->nbr_cells = p->t->cidx-1;
-	g_tab_idx = 0;
+	q->m->pl->tab_idx = 0;
 
 	if (p->nbr_vars)
 		collect_vars(q, tmp, q->st.curr_frame, tmp->nbr_cells);
 
 	if (vars) {
-		unsigned cnt = g_tab_idx;
+		unsigned cnt = q->m->pl->tab_idx;
 		may_ptr_error(init_tmp_heap(q));
 		cell *tmp = alloc_tmp_heap(q, (cnt*2)+1);
 		may_ptr_error(tmp);
@@ -2261,13 +2252,13 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 		if (cnt) {
 			unsigned done = 0;
 
-			for (unsigned i = 0; i < g_tab_idx; i++) {
+			for (unsigned i = 0; i < q->m->pl->tab_idx; i++) {
 				make_literal(tmp+idx, g_dot_s);
 				tmp[idx].arity = 2;
 				tmp[idx++].nbr_cells = ((cnt-done)*2)+1;
 				cell v;
-				make_variable(&v, g_tab3[i]);
-				v.var_nbr = g_tab2[i];
+				make_variable(&v, q->m->pl->tab3[i]);
+				v.var_nbr = q->m->pl->tab2[i];
 				tmp[idx++] = v;
 				done++;
 			}
@@ -2296,8 +2287,8 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 		may_ptr_error(tmp);
 		unsigned idx = 0;
 
-		for (unsigned i = 0; i < g_tab_idx; i++) {
-			if (g_tab5[i])
+		for (unsigned i = 0; i < q->m->pl->tab_idx; i++) {
+			if (q->m->pl->tab5[i])
 				continue;
 
 			cnt++;
@@ -2306,8 +2297,8 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 		if (cnt) {
 			unsigned done = 0;
 
-			for (unsigned i = 0; i < g_tab_idx; i++) {
-				if (g_tab5[i])
+			for (unsigned i = 0; i < q->m->pl->tab_idx; i++) {
+				if (q->m->pl->tab5[i])
 					continue;
 
 				make_literal(tmp+idx, g_dot_s);
@@ -2321,10 +2312,10 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 				v.nbr_cells = 3;
 				SET_OP(&v,OP_XFX);
 				tmp[idx++] = v;
-				make_literal(&v, g_tab3[i]);
+				make_literal(&v, q->m->pl->tab3[i]);
 				tmp[idx++] = v;
-				make_variable(&v, g_tab3[i]);
-				v.var_nbr = g_tab2[i];
+				make_variable(&v, q->m->pl->tab3[i]);
+				v.var_nbr = q->m->pl->tab2[i];
 				tmp[idx++] = v;
 				done++;
 			}
@@ -2353,11 +2344,11 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 		ensure(tmp);
 		unsigned idx = 0;
 
-		for (unsigned i = 0; i < g_tab_idx; i++) {
-			if (g_tab4[i] != 1)
+		for (unsigned i = 0; i < q->m->pl->tab_idx; i++) {
+			if (q->m->pl->tab4[i] != 1)
 				continue;
 
-			if (varnames && (g_tab5[i]))
+			if (varnames && (q->m->pl->tab5[i]))
 				continue;
 
 			cnt++;
@@ -2366,11 +2357,11 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 		if (cnt) {
 			unsigned done = 0;
 
-			for (unsigned i = 0; i < g_tab_idx; i++) {
-				if (g_tab4[i] != 1)
+			for (unsigned i = 0; i < q->m->pl->tab_idx; i++) {
+				if (q->m->pl->tab4[i] != 1)
 					continue;
 
-				if (varnames && (g_tab5[i]))
+				if (varnames && (q->m->pl->tab5[i]))
 					continue;
 
 				make_literal(tmp+idx, g_dot_s);
@@ -2384,10 +2375,10 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 				v.nbr_cells = 3;
 				SET_OP(&v,OP_XFX);
 				tmp[idx++] = v;
-				make_literal(&v, g_tab3[i]);
+				make_literal(&v, q->m->pl->tab3[i]);
 				tmp[idx++] = v;
-				make_variable(&v, g_tab3[i]);
-				v.var_nbr = g_tab2[i];
+				make_variable(&v, q->m->pl->tab3[i]);
+				v.var_nbr = q->m->pl->tab2[i];
 				tmp[idx++] = v;
 				done++;
 			}
@@ -4747,10 +4738,10 @@ static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 	}
 
 	frame *g = GET_FRAME(q->st.curr_frame);
-	g_varno = g->nbr_vars;
-	g_tab_idx = 0;
+	q->m->pl->varno = g->nbr_vars;
+	q->m->pl->tab_idx = 0;
 	collect_vars(q, p1, p1_ctx, p1->nbr_cells);
-	const unsigned cnt = g_tab_idx;
+	const unsigned cnt = q->m->pl->tab_idx;
 	may_ptr_error(init_tmp_heap(q));
 	cell *tmp = alloc_tmp_heap(q, (cnt*2)+1);
 	ensure(tmp);
@@ -4765,13 +4756,13 @@ static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 			tmp[idx].nbr_cells = ((cnt-done)*2)+1;
 			idx++;
 			cell v;
-			make_variable(&v, g_tab3[i]);
+			make_variable(&v, q->m->pl->tab3[i]);
 
-			if (g_tab1[i] != q->st.curr_frame) {
+			if (q->m->pl->tab1[i] != q->st.curr_frame) {
 				v.flags |= FLAG2_FRESH;
-				v.var_nbr = g_varno++;
+				v.var_nbr = q->m->pl->varno++;
 			} else
-				v.var_nbr = g_tab2[i];
+				v.var_nbr = q->m->pl->tab2[i];
 
 			tmp[idx++] = v;
 			done++;
@@ -4784,8 +4775,8 @@ static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 		make_literal(tmp+idx++, g_nil_s);
 
 	if (cnt) {
-		unsigned new_vars = g_varno - g->nbr_vars;
-		g_varno = g->nbr_vars;
+		unsigned new_vars = q->m->pl->varno - g->nbr_vars;
+		q->m->pl->varno = g->nbr_vars;
 
 		if (new_vars) {
 			if (!create_vars(q, new_vars))
@@ -4793,17 +4784,17 @@ static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 		}
 
 		for (unsigned i = 0; i < cnt; i++) {
-			if (g_tab1[i] == q->st.curr_frame)
+			if (q->m->pl->tab1[i] == q->st.curr_frame)
 				continue;
 
 			cell v, tmp2;
 			make_variable(&v, g_anon_s);
 			v.flags |= FLAG2_FRESH;
-			v.var_nbr = g_varno++;
+			v.var_nbr = q->m->pl->varno++;
 			make_variable(&tmp2, g_anon_s);
 			tmp2.flags |= FLAG2_FRESH;
-			tmp2.var_nbr = g_tab2[i];
-			set_var(q, &v, q->st.curr_frame, &tmp2, g_tab1[i]);
+			tmp2.var_nbr = q->m->pl->tab2[i];
+			set_var(q, &v, q->st.curr_frame, &tmp2, q->m->pl->tab1[i]);
 		}
 	}
 
@@ -4884,8 +4875,8 @@ static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx
 
 	cell *src = p1, *dst = tmp+(prefix?1:0);
 	frame *g = GET_FRAME(q->st.curr_frame);
-	g_varno = g->nbr_vars;
-	g_tab_idx = 0;
+	q->m->pl->varno = g->nbr_vars;
+	q->m->pl->tab_idx = 0;
 
 	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
 		*dst = *src;
@@ -4900,25 +4891,25 @@ static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx
 		idx_t slot_nbr = e - q->slots;
 		int found = 0;
 
-		for (size_t i = 0; i < g_tab_idx; i++) {
-			if (g_tab1[i] == slot_nbr) {
-				dst->var_nbr = g_tab2[i];
+		for (size_t i = 0; i < q->m->pl->tab_idx; i++) {
+			if (q->m->pl->tab1[i] == slot_nbr) {
+				dst->var_nbr = q->m->pl->tab2[i];
 				break;
 			}
 		}
 
 		if (!found) {
-			dst->var_nbr = g_varno;
-			g_tab1[g_tab_idx] = slot_nbr;
-			g_tab2[g_tab_idx] = g_varno++;
-			g_tab_idx++;
+			dst->var_nbr = q->m->pl->varno;
+			q->m->pl->tab1[q->m->pl->tab_idx] = slot_nbr;
+			q->m->pl->tab2[q->m->pl->tab_idx] = q->m->pl->varno++;
+			q->m->pl->tab_idx++;
 		}
 
 		dst->flags = FLAG2_FRESH;
 	}
 
-	if (g_varno != g->nbr_vars) {
-		if (!create_vars(q, g_varno-g->nbr_vars)) {
+	if (q->m->pl->varno != g->nbr_vars) {
+		if (!create_vars(q, q->m->pl->varno-g->nbr_vars)) {
 			DISCARD_RESULT throw_error(q, p1, "resource_error", "too_many_vars");
 			return NULL;
 		}

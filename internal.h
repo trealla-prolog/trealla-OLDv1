@@ -499,6 +499,13 @@ struct module_ {
 
 struct prolog_ {
 	module *m, *curr_m;
+	unsigned varno;
+	idx_t tab_idx;
+	idx_t tab1[64000];
+	idx_t tab3[64000];
+	idx_t tab2[64000];
+	idx_t tab4[64000];
+	uint8_t tab5[64000];
 };
 
 extern idx_t g_empty_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
