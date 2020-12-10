@@ -121,6 +121,7 @@ typedef uint32_t idx_t;
 
 #define GET_STR(c) (!is_cstring(c) ? (g_pool+(c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
 #define LEN_STR(c) (is_blob(c) ? (c)->len_str : strlen(GET_STR(c)))
+
 #define FREE_STR(c) if (is_nonconst_blob(c)) { free((c)->val_str); }
 #define TAKE_STR(c) {(c)->val_str = NULL; }
 
@@ -128,6 +129,8 @@ typedef uint32_t idx_t;
 	(c)->val_str = malloc((v)->len_str+1); 							\
 	memcpy((c)->val_str, v->val_str, v->len_str); 					\
 	(c)->val_str[(v)->len_str] = '\0'; }
+
+#define GET_POOL(off) (g_pool + off)
 
 // Wrap an assignment that's expected to return anything but the given sentinel value.
 // when the sentinel otherwise does some (optional) error handling action
