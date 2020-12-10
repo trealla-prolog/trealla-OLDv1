@@ -1881,8 +1881,11 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 				cell *name = c + 1;
 				name = deref(q, name, q->latest_ctx);
 
+				if (!is_atom(name))
+					return throw_error(q, c, "domain_error", "stream_option");
+
 				if (get_named_stream(GET_STR(name)) >= 0)
-					return throw_error(q, c, "permission_error", "open_source_sink");
+					return throw_error(q, c, "permission_error", "open,source_sink");
 
 				free(str->name);
 				str->name = strdup(GET_STR(name));
@@ -1913,22 +1916,22 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 		if (!strcmp(mode, "read"))
 			str->fp = fdopen(fd, binary?"rb":"r");
 		else if (!strcmp(mode, "write"))
-			str->fp = fdopen(fd, binary?"wbx":"wx");
+			str->fp = fdopen(fd, binary?"wb":"w");
 		else if (!strcmp(mode, "append"))
-			str->fp = fdopen(fd, binary?"abx":"ax");
+			str->fp = fdopen(fd, binary?"ab":"a");
 		else if (!strcmp(mode, "update"))
-			str->fp = fdopen(fd, binary?"rb+x":"r+x");
+			str->fp = fdopen(fd, binary?"rb+":"r+");
 		else
 			return throw_error(q, p2, "domain_error", "io_mode");
 	} else {
 		if (!strcmp(mode, "read"))
 			str->fp = fopen(filename, binary?"rb":"r");
 		else if (!strcmp(mode, "write"))
-			str->fp = fopen(filename, binary?"wbx":"wx");
+			str->fp = fopen(filename, binary?"wb":"w");
 		else if (!strcmp(mode, "append"))
-			str->fp = fopen(filename, binary?"abx":"ax");
+			str->fp = fopen(filename, binary?"ab":"a");
 		else if (!strcmp(mode, "update"))
-			str->fp = fopen(filename, binary?"rb+x":"r+x");
+			str->fp = fopen(filename, binary?"rb+":"r+");
 		else
 			return throw_error(q, p2, "domain_error", "io_mode");
 	}
