@@ -538,6 +538,8 @@ void cut_me(query *q, bool local_cut)
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
 
+		//printf("*** ch->cgen=%u, g->cgen=%u\n", ch->cgen, g->cgen);
+
 		if (ch->cgen < g->cgen)
 			break;
 

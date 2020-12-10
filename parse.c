@@ -1687,7 +1687,7 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 	return p->t->cells + c_idx;
 }
 
-void promote_naked_vars(parser *p)
+void term_to_body_conversion(parser *p)
 {
 	idx_t nbr_cells = p->t->cidx;
 	cell *c = p->t->cells;
@@ -1696,6 +1696,7 @@ void promote_naked_vars(parser *p)
 		if (IS_XFX(c) || IS_XFY(c)) {
 			if (!strcmp(GET_STR(c), ",")
 			|| !strcmp(GET_STR(c), ";")
+			|| !strcmp(GET_STR(c), "->")
 			|| !strcmp(GET_STR(c), ":-")) {
 				cell *lhs = c + 1;
 
@@ -2679,7 +2680,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 				parser_assign_vars(p, p->read_term, false);
 
 				if (p->consulting && !p->skip) {
-					promote_naked_vars(p);
+					term_to_body_conversion(p);
 					parser_dcg_rewrite(p);
 					directives(p, p->t);
 
