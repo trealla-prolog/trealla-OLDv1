@@ -1665,6 +1665,8 @@ static USE_RESULT prolog_state fn_iso_set_output_1(query *q)
 	return pl_success;
 }
 
+// FIXME: make backtrackable over streams
+
 static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 {
 	GET_FIRST_ARG(pstr,any);
@@ -8468,7 +8470,15 @@ static USE_RESULT prolog_state fn_absolute_file_name_3(query *q)
 	GET_NEXT_ARG(p_opts,list_or_nil);
 	int expand = 0;
 	char *src = NULL, *filename;
-	char *here = q->m->filename;
+	char *here = strdup(q->m->filename);
+
+	char *ptr = here + strlen(here) - 1;
+
+	while (*ptr && (*ptr != '/')) {
+		ptr--;
+		*ptr = '\0';
+	}
+
 	char *cwd = here;
 
 	if (is_iso_list(p1)) {
