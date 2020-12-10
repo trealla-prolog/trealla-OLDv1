@@ -8634,7 +8634,7 @@ static USE_RESULT prolog_state do_consult(query *q, cell *p1, idx_t p1_ctx)
 	if (!is_atom(mod) || !is_atom(file))
 		return throw_error(q, p1, "type_error", "filespec");
 
-	module *tmp_m = create_module(GET_STR(mod));
+	module *tmp_m = create_module(q->m->pl, GET_STR(mod));
 	const char *src = GET_STR(file);
 	deconsult(src);
 	tmp_m->make_public = 1;

@@ -34,10 +34,6 @@ static const unsigned INITIAL_NBR_TRAILS = 1000;
 
 #define JUST_IN_TIME_COUNT 50
 
-struct prolog_ {
-	module *m, *curr_m;
-};
-
 stream g_streams[MAX_STREAMS] = {{0}};
 skiplist *g_symtab = NULL;
 char *g_pool = NULL;
@@ -1170,7 +1166,7 @@ static void directives(parser *p, term *t)
 			return;
 		}
 
-		p->m = create_module(name);
+		p->m = create_module(p->m->pl, name);
 		if (!p->m) {
 			fprintf(stdout, "Error: module creation failed: %s\n", name);
 			p->error = true;
@@ -3257,12 +3253,13 @@ void destroy_module(module *m)
 }
 
 
-module *create_module(const char *name)
+module *create_module(prolog *pl, const char *name)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	module *m = calloc(1, sizeof(module));
 	if (m)
 	{
+		m->pl = pl;
 		m->filename = strdup("./");
 		m->name = strdup(name);
 		m->next = g_modules;
@@ -3811,8 +3808,9 @@ prolog *pl_create()
 
 	prolog *pl = calloc(1, sizeof(prolog));
 	if (pl) {
-		pl->m = create_module("user");
+		pl->m = create_module(pl, "user");
 		if (pl->m) {
+			pl->m->pl = pl;
 			pl->curr_m = pl->m;
 
 			//cehteh: add api to set things in a module?

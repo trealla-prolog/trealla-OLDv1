@@ -385,7 +385,6 @@ typedef struct char_flags_ {
 	unsigned unknown:2;
 } char_flags;
 
-
 struct query_ {
 	query *prev, *next, *parent;
 	module *m, *save_m;
@@ -468,6 +467,7 @@ struct parser_ {
 
 struct module_ {
 	module *next;
+	prolog *pl;
 	query *tasks;
 	char *name, *filename;
 	predicate *head, *tail;
@@ -497,6 +497,10 @@ struct module_ {
 	bool error:1;
 };
 
+struct prolog_ {
+	module *m, *curr_m;
+};
+
 extern idx_t g_empty_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 extern idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_false_s, g_local_cut_s;
 extern idx_t g_gt_s, g_eq_s, g_sys_elapsed_s, g_sys_queue_s, g_braces_s;
@@ -524,7 +528,7 @@ bool module_load_fp(module *m, FILE *fp, const char *filename);
 bool module_load_file(module *m, const char *filename);
 bool module_save_file(module *m, const char *filename);
 bool deconsult(const char *filename);
-module *create_module(const char *name);
+module *create_module(prolog *pl, const char *name);
 void destroy_module(module *m);
 module *find_module(const char *name);
 module *find_next_module(module *m);
