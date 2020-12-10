@@ -1803,7 +1803,7 @@ static USE_RESULT prolog_state fn_iso_open_3(query *q)
 	free(src);
 
 	if (!str->fp)
-		return throw_error(q, p1, "existence_error", "filespec");
+		return throw_error(q, p1, "existence_error", "source_sink");
 
 	cell *tmp = alloc_heap(q, 1);
 	ensure(tmp);
@@ -1880,6 +1880,10 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 			} else if (!strcmp(GET_STR(c), "alias")) {
 				cell *name = c + 1;
 				name = deref(q, name, q->latest_ctx);
+
+				if (get_named_stream(GET_STR(name)) >= 0)
+					return throw_error(q, c, "permission_error", "open_source_sink");
+
 				free(str->name);
 				str->name = strdup(GET_STR(name));
 				str->aliased = 1;
@@ -1909,22 +1913,22 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 		if (!strcmp(mode, "read"))
 			str->fp = fdopen(fd, binary?"rb":"r");
 		else if (!strcmp(mode, "write"))
-			str->fp = fdopen(fd, binary?"wb":"w");
+			str->fp = fdopen(fd, binary?"wbx":"wx");
 		else if (!strcmp(mode, "append"))
-			str->fp = fdopen(fd, binary?"ab":"a");
+			str->fp = fdopen(fd, binary?"abx":"ax");
 		else if (!strcmp(mode, "update"))
-			str->fp = fdopen(fd, binary?"rb+":"r+");
+			str->fp = fdopen(fd, binary?"rb+x":"r+x");
 		else
 			return throw_error(q, p2, "domain_error", "io_mode");
 	} else {
 		if (!strcmp(mode, "read"))
 			str->fp = fopen(filename, binary?"rb":"r");
 		else if (!strcmp(mode, "write"))
-			str->fp = fopen(filename, binary?"wb":"w");
+			str->fp = fopen(filename, binary?"wbx":"wx");
 		else if (!strcmp(mode, "append"))
-			str->fp = fopen(filename, binary?"ab":"a");
+			str->fp = fopen(filename, binary?"abx":"ax");
 		else if (!strcmp(mode, "update"))
-			str->fp = fopen(filename, binary?"rb+":"r+");
+			str->fp = fopen(filename, binary?"rb+x":"r+x");
 		else
 			return throw_error(q, p2, "domain_error", "io_mode");
 	}
@@ -1932,7 +1936,7 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 	free(src);
 
 	if (!str->fp)
-		return throw_error(q, p1, "existence_error", "filespec");
+		return throw_error(q, p1, "existence_error", "source_sink");
 
 #if USE_MMAP
 	int prot = 0;
