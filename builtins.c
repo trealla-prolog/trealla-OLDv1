@@ -4988,25 +4988,22 @@ static void compare_and_zero(uint64_t v1, uint64_t *v2, uint64_t *v)
 
 #define MASK_FINAL 0x0000FFFFFFFFFFFF // Final 48 bits
 
-static void uuid_gen(uuid *u)
+static void uuid_gen(prolog *pl, uuid *u)
 {
-	static uint64_t s_last = 0, s_cnt = 0;
-	static uint64_t g_seed = 0;
-
 #ifdef NDEBUG
-	if (!g_seed)
-		g_seed = (uint64_t)time(0) & MASK_FINAL;
+	if (!pl->seed)
+		pl->seed = (uint64_t)time(0) & MASK_FINAL;
 #else
-	if (!g_seed)
-		g_seed = 0xdeadbeefULL & MASK_FINAL;
+	if (!pl->seed)
+		pl->seed = 0xdeadbeefULL & MASK_FINAL;
 #endif
 
 	uint64_t now = get_time_in_usec();
-	compare_and_zero(now, &s_last, &s_cnt);
+	compare_and_zero(now, &pl->s_last, &pl->s_cnt);
 	u->u1 = now;
-	u->u2 = s_cnt++;
+	u->u2 = pl->s_cnt++;
 	u->u2 <<= 48;
-	u->u2 |= g_seed;
+	u->u2 |= pl->seed;
 }
 
 static char *uuid_to_buf(const uuid *u, char *buf, size_t buflen)
@@ -5249,7 +5246,7 @@ static USE_RESULT prolog_state fn_iso_asserta_1(query *q)
 	do_assign_vars(p, nbr_cells);
 	clause *r = asserta_to_db(q->m, p->t, 0);
 	may_ptr_error(r);
-	uuid_gen(&r->u);
+	uuid_gen(q->m->pl, &r->u);
 
 	if (!q->m->loading && r->t.persist)
 		db_log(q, r, LOG_ASSERTA);
@@ -5280,7 +5277,7 @@ static USE_RESULT prolog_state fn_iso_assertz_1(query *q)
 	do_assign_vars(p, nbr_cells);
 	clause *r = assertz_to_db(q->m, p->t, 0);
 	may_ptr_error(r);
-	uuid_gen(&r->u);
+	uuid_gen(q->m->pl, &r->u);
 
 	if (!q->m->loading && r->t.persist)
 		db_log(q, r, LOG_ASSERTZ);
@@ -9962,7 +9959,7 @@ static USE_RESULT prolog_state fn_uuid_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	uuid u;
-	uuid_gen(&u);
+	uuid_gen(q->m->pl, &u);
 	char tmpbuf[128];
 	uuid_to_buf(&u, tmpbuf, sizeof(tmpbuf));
 	cell tmp;

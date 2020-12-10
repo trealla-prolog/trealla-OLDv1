@@ -30,6 +30,10 @@
 #define USE_LDLIBS 0
 #endif
 
+#ifndef USE_THREADS
+#define USE_THREADS 0
+#endif
+
 #if USE_GMP
 #include <gmp.h>
 #endif
@@ -43,6 +47,13 @@ typedef __uint32_t uint_t;
 #else
 typedef __int64_t int_t;
 typedef __uint64_t uint_t;
+#endif
+
+#if (__STDC_VERSION__ >= 201112L) && USE_THREADS
+#include <stdatomic.h>
+#define atomic_t _Atomic
+#else
+#define atomic_t volatile
 #endif
 
 typedef uint32_t idx_t;
@@ -498,14 +509,15 @@ struct module_ {
 };
 
 struct prolog_ {
-	module *m, *curr_m;
-	unsigned varno;
-	idx_t tab_idx;
 	idx_t tab1[64000];
 	idx_t tab3[64000];
 	idx_t tab2[64000];
 	idx_t tab4[64000];
 	uint8_t tab5[64000];
+	module *m, *curr_m;
+	uint64_t s_last, s_cnt, seed;
+	unsigned varno;
+	idx_t tab_idx;
 };
 
 extern idx_t g_empty_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
