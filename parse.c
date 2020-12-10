@@ -43,7 +43,7 @@ idx_t g_sys_elapsed_s, g_sys_queue_s, g_local_cut_s, g_braces_s;
 unsigned g_cpu_count = 4;
 
 static idx_t g_pool_offset = 0, g_pool_size = 0;
-static int g_tpl_count = 0;
+static volatile int g_tpl_count = 0;				// Make atomic if threads
 char *g_tpl_lib = NULL;
 
 int g_ac = 0, g_avc = 1;
@@ -243,7 +243,7 @@ cell *list_head(cell *l)
 	if (!n)
 		n = 1;
 
-	static cell tmp;
+	static cell tmp;				// FIXME
 	tmp.val_type = TYPE_CSTRING;
 	tmp.nbr_cells = 1;
 	tmp.flags = 0;
@@ -3778,8 +3778,7 @@ void pl_destroy(prolog *pl)
 prolog *pl_create()
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
-	++g_tpl_count;
-	if (g_tpl_count == 1 && g_init() == NULL)
+	if (!g_tpl_count++ && (g_init() == NULL))
 		return NULL;
 
 	if (!g_tpl_lib) {
