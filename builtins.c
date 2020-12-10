@@ -2012,8 +2012,12 @@ static USE_RESULT prolog_state fn_iso_at_end_of_stream_0(__attribute__((unused))
 {
 	int n = q->current_input;
 	stream *str = &g_streams[n];
-	//int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
-	//str->ungetch = ch;
+
+	if (!str->socket) {
+		int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
+		str->ungetch = ch;
+	}
+
 	return feof(str->fp) || ferror(str->fp);
 }
 
@@ -2022,8 +2026,12 @@ static USE_RESULT prolog_state fn_iso_at_end_of_stream_1(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
-	//int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
-	//str->ungetch = ch;
+
+	if (!str->socket) {
+		int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
+		str->ungetch = ch;
+	}
+
 	return feof(str->fp) || ferror(str->fp);
 }
 
@@ -7510,6 +7518,7 @@ static USE_RESULT prolog_state fn_accept_2(query *q)
 	str2->filename = strdup(str->filename);
 	str2->name = strdup(str->name);
 	str2->mode = strdup("update");
+	str->socket = true;
 	str2->nodelay = str->nodelay;
 	str2->nonblock = str->nonblock;
 	str2->udp = str->udp;
@@ -7640,6 +7649,7 @@ static USE_RESULT prolog_state fn_client_5(query *q)
 	str->filename = strdup(GET_STR(p1));
 	str->name = strdup(hostname);
 	str->mode = strdup("update");
+	str->socket = true;
 	str->nodelay = nodelay;
 	str->nonblock = nonblock;
 	str->udp = udp;

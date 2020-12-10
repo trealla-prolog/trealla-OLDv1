@@ -347,6 +347,7 @@ typedef struct {
 	int ungetch, srclen;
 	uint8_t level;
 	bool did_getc:1;
+	bool socket:1;
 	bool nodelay:1;
 	bool nonblock:1;
 	bool udp:1;
