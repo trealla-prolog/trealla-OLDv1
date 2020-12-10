@@ -41,13 +41,13 @@ idx_t g_empty_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
 idx_t g_sys_elapsed_s, g_sys_queue_s, g_local_cut_s, g_braces_s;
 unsigned g_cpu_count = 4;
+module *g_modules = NULL;
+char *g_tpl_lib = NULL;
+int g_ac = 0, g_avc = 1;
+char **g_av = NULL, *g_argv0 = NULL;
 
 static idx_t g_pool_offset = 0, g_pool_size = 0;
 static atomic_t int g_tpl_count = 0;
-char *g_tpl_lib = NULL;
-
-int g_ac = 0, g_avc = 1;
-char **g_av = NULL, *g_argv0 = NULL;
 
 static struct op_table g_ops[] =
 {
@@ -228,8 +228,6 @@ bool set_op(module *m, const char *name, unsigned optype, unsigned precedence)
 	ptr->precedence = precedence;
 	return true;
 }
-
-module *g_modules = NULL;
 
 cell *list_head(cell *l)
 {
