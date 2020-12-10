@@ -1591,6 +1591,9 @@ static int get_named_stream(const char *name)
 
 		if (!strcmp(str->name, name))
 			return i;
+
+		if (!strcmp(str->filename, name))
+			return i;
 	}
 
 	return -1;
@@ -1692,6 +1695,24 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		make_int(&tmp, n);
 		tmp.flags |= FLAG_STREAM | FLAG_HEX;
 		return unify(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (!strcmp(GET_STR(p1), "file_name") && is_variable(pstr)) {
+		cell *c = p1 + 1;
+		c = deref(q, c, p1_ctx);
+
+		if (!is_atom(c))
+			return throw_error(q, c, "type_error", "atom");
+
+		int n = get_named_stream(GET_STR(c));
+
+		if (n < 0)
+			return 0;
+
+		cell tmp;
+		make_int(&tmp, n);
+		tmp.flags |= FLAG_STREAM | FLAG_HEX;
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (!is_stream(pstr))
@@ -1998,7 +2019,7 @@ static USE_RESULT prolog_state fn_iso_close_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_at_end_of_stream_0(__attribute__((unused)) query *q)
 {
-	int n = get_named_stream("user_input");
+	int n = q->current_input;
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 	str->ungetch = ch;
@@ -2017,7 +2038,7 @@ static USE_RESULT prolog_state fn_iso_at_end_of_stream_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_flush_output_0(__attribute__((unused)) query *q)
 {
-	int n = get_named_stream("user_output");
+	int n = q->current_output;
 	stream *str = &g_streams[n];
 	fflush(str->fp);
 	return !ferror(str->fp);
@@ -2034,7 +2055,7 @@ static USE_RESULT prolog_state fn_iso_flush_output_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_nl_0(__attribute__((unused)) query *q)
 {
-	int n = get_named_stream("user_output");
+	int n = q->current_output;
 	stream *str = &g_streams[n];
 	fputc('\n', str->fp);
 	fflush(str->fp);
@@ -2398,7 +2419,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 static USE_RESULT prolog_state fn_iso_read_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream("user_input");
+	int n = q->current_input;
 	stream *str = &g_streams[n];
 	cell tmp;
 	make_literal(&tmp, g_nil_s);
@@ -2420,7 +2441,7 @@ static USE_RESULT prolog_state fn_iso_read_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
-	int n = get_named_stream("user_input");
+	int n = q->current_input;
 	stream *str = &g_streams[n];
 	return do_read_term(q, str, p1, p1_ctx, p2, p2_ctx, NULL);
 }
@@ -2438,7 +2459,7 @@ static USE_RESULT prolog_state fn_iso_read_term_3(query *q)
 static USE_RESULT prolog_state fn_iso_write_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream("user_output");
+	int n = q->current_output;
 	stream *str = &g_streams[n];
 	assert(str);
 	assert(str->fp);
@@ -2459,7 +2480,7 @@ static USE_RESULT prolog_state fn_iso_write_2(query *q)
 static USE_RESULT prolog_state fn_iso_writeq_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream("user_output");
+	int n = q->current_output;
 	stream *str = &g_streams[n];
 	int save = q->quoted;
 	q->quoted = 1;
@@ -2484,7 +2505,7 @@ static USE_RESULT prolog_state fn_iso_writeq_2(query *q)
 static USE_RESULT prolog_state fn_iso_write_canonical_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream("user_output");
+	int n = q->current_output;
 	stream *str = &g_streams[n];
 	print_canonical(q, str->fp, p1, p1_ctx, 1);
 	return !ferror(str->fp);
@@ -2529,7 +2550,7 @@ static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	int n = get_named_stream("user_output");
+	int n = q->current_output;
 	stream *str = &g_streams[n];
 	q->flag = q->m->flag;
 
@@ -2599,7 +2620,7 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 static USE_RESULT prolog_state fn_iso_put_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	int n = get_named_stream("user_output");
+	int n = q->current_output;
 	stream *str = &g_streams[n];
 	const char *src = GET_STR(p1);
 	int ch = get_char_utf8(&src);
@@ -2626,7 +2647,7 @@ static USE_RESULT prolog_state fn_iso_put_char_2(query *q)
 static USE_RESULT prolog_state fn_iso_put_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	int n = get_named_stream("user_output");
+	int n = q->current_output;
 	stream *str = &g_streams[n];
 	int ch = (int)p1->val_num;
 	char tmpbuf[20];
@@ -2651,7 +2672,7 @@ static USE_RESULT prolog_state fn_iso_put_code_2(query *q)
 static USE_RESULT prolog_state fn_iso_put_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	int n = get_named_stream("user_output");
+	int n = q->current_output;
 	stream *str = &g_streams[n];
 	int ch = (int)p1->val_num;
 
@@ -2684,7 +2705,7 @@ static USE_RESULT prolog_state fn_iso_put_byte_2(query *q)
 static USE_RESULT prolog_state fn_iso_get_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
-	int n = get_named_stream("user_input");
+	int n = q->current_input;
 	stream *str = &g_streams[n];
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
@@ -2763,7 +2784,7 @@ static USE_RESULT prolog_state fn_iso_get_char_2(query *q)
 static USE_RESULT prolog_state fn_iso_get_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
-	int n = get_named_stream("user_input");
+	int n = q->current_input;
 	stream *str = &g_streams[n];
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
@@ -2824,7 +2845,7 @@ static USE_RESULT prolog_state fn_iso_get_code_2(query *q)
 static USE_RESULT prolog_state fn_iso_get_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
-	int n = get_named_stream("user_input");
+	int n = q->current_input;
 	stream *str = &g_streams[n];
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
@@ -2885,7 +2906,7 @@ static USE_RESULT prolog_state fn_iso_get_byte_2(query *q)
 static USE_RESULT prolog_state fn_iso_peek_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream("user_input");
+	int n = q->current_input;
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 
@@ -2943,7 +2964,7 @@ static USE_RESULT prolog_state fn_iso_peek_char_2(query *q)
 static USE_RESULT prolog_state fn_iso_peek_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream("user_input");
+	int n = q->current_input;
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 
@@ -2982,7 +3003,7 @@ static USE_RESULT prolog_state fn_iso_peek_code_2(query *q)
 static USE_RESULT prolog_state fn_iso_peek_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream("user_input");
+	int n = q->current_input;
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : net_getc(str);
 
@@ -6994,7 +7015,7 @@ static USE_RESULT prolog_state fn_get_time_1(query *q)
 static USE_RESULT prolog_state fn_writeln_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream("user_output");
+	int n = q->current_output;
 	stream *str = &g_streams[n];
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	fputc('\n', str->fp);
@@ -7676,7 +7697,7 @@ static USE_RESULT prolog_state fn_client_5(query *q)
 static USE_RESULT prolog_state fn_getline_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = get_named_stream("user_input");
+	int n = q->current_input;
 	stream *str = &g_streams[n];
 	char *line = NULL;
 	size_t len = 0;
@@ -7894,7 +7915,7 @@ static USE_RESULT prolog_state fn_read_term_from_chars_2(query *q)
 {
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_term,any);
-	int n = get_named_stream("user_input");
+	int n = q->current_input;
 	stream *str = &g_streams[n];
 	char *src;
 	size_t len;
@@ -7929,7 +7950,7 @@ static USE_RESULT prolog_state fn_read_term_from_chars_3(query *q)
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_opts,any);
 	GET_NEXT_ARG(p_term,any);
-	int n = get_named_stream("user_input");
+	int n = q->current_input;
 	stream *str = &g_streams[n];
 
 	char *src;
@@ -7963,7 +7984,7 @@ static USE_RESULT prolog_state fn_read_term_from_atom_3(query *q)
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_term,any);
 	GET_NEXT_ARG(p_opts,any);
-	int n = get_named_stream("user_input");
+	int n = q->current_input;
 	stream *str = &g_streams[n];
 
 	char *src;
@@ -8918,7 +8939,7 @@ static USE_RESULT prolog_state do_format(query *q, cell *str, idx_t str_ctx, cel
 	size_t len = dst - tmpbuf;
 
 	if (str == NULL) {
-		int n = get_named_stream("user_output");
+		int n = q->current_output;
 		stream *str = &g_streams[n];
 		net_write(tmpbuf, len, str);
 	} else if (is_structure(str) && ((strcmp(GET_STR(str),"atom") && strcmp(GET_STR(str),"chars") && strcmp(GET_STR(str),"string")) || (str->arity > 1) || !is_variable(str+1))) {
@@ -9560,7 +9581,7 @@ static USE_RESULT prolog_state fn_chdir_1(query *q)
 static USE_RESULT prolog_state fn_edin_skip_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	int n = get_named_stream("user_input");
+	int n = q->current_input;
 	stream *str = &g_streams[n];
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
@@ -9624,7 +9645,7 @@ static USE_RESULT prolog_state fn_edin_tab_1(query *q)
 	if (!is_integer(&p1))
 		return throw_error(q, &p1, "type_error", "integer");
 
-	int n = get_named_stream("user_output");
+	int n = q->current_output;
 	stream *str = &g_streams[n];
 
 	for (int i = 0; i < p1.val_num; i++)
@@ -9653,7 +9674,7 @@ static USE_RESULT prolog_state fn_edin_tab_2(query *q)
 
 static USE_RESULT prolog_state fn_edin_seen_0(query *q)
 {
-	int n = get_named_stream("user_input");
+	int n = q->current_input;
 	stream *str = &g_streams[n];
 
 	if (n <= 2)
@@ -9674,7 +9695,7 @@ static USE_RESULT prolog_state fn_edin_seen_0(query *q)
 
 static USE_RESULT prolog_state fn_edin_told_0(query *q)
 {
-	int n = get_named_stream("user_output");
+	int n = q->current_output;
 	stream *str = &g_streams[n];
 
 	if (n <= 2)
