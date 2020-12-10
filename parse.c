@@ -229,7 +229,7 @@ bool set_op(module *m, const char *name, unsigned optype, unsigned precedence)
 	return true;
 }
 
-cell *list_head(cell *l)
+cell *list_head(cell *l, cell *tmp)
 {
 	assert(l);
 
@@ -241,14 +241,13 @@ cell *list_head(cell *l)
 	if (!n)
 		n = 1;
 
-	static cell tmp;				// FIXME
-	tmp.val_type = TYPE_CSTRING;
-	tmp.nbr_cells = 1;
-	tmp.flags = 0;
-	tmp.arity = 0;
-	memcpy(tmp.val_chr, l->val_str, n);
-	tmp.val_chr[n] = '\0';
-	return &tmp;
+	tmp->val_type = TYPE_CSTRING;
+	tmp->nbr_cells = 1;
+	tmp->flags = 0;
+	tmp->arity = 0;
+	memcpy(tmp->val_chr, l->val_str, n);
+	tmp->val_chr[n] = '\0';
+	return tmp;
 }
 
 cell *list_tail(cell *l, cell *tmp)
@@ -1061,6 +1060,8 @@ static void dump_vars(query *q, parser *p)
 
 void consultall(parser *p, cell *l)
 {
+	LIST_HANDLER(l);
+
 	while (is_list(l)) {
 		cell *h = LIST_HEAD(l);
 		module_load_file(p->m, GET_STR(h));
@@ -1172,6 +1173,8 @@ static void directives(parser *p, term *t)
 			p->error = true;
 			return;
 		}
+
+		LIST_HANDLER(p2);
 
 		while (is_iso_list(p2)) {
 			cell *head = LIST_HEAD(p2);
@@ -2592,6 +2595,7 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, int tolerant)
 {
 	idx_t save_ctx = q ? q->latest_ctx : l_ctx;
 	size_t is_chars_list = 0;
+	LIST_HANDLER(l);
 
 	while (is_iso_list(l)) {
 		cell *h = LIST_HEAD(l);

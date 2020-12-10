@@ -79,6 +79,8 @@ static bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool tolerant)
 	if (!is_list(p1) && !is_nil(p1))
 		return false;
 
+	LIST_HANDLER(p1);
+
 	while (is_list(p1)) {
 		LIST_HEAD(p1);
 		p1 = LIST_TAIL(p1);
@@ -831,6 +833,7 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 	if (!is_variable(p2)) {
 		cell *save_p2 = p2;
 		idx_t save_p2_ctx = p2_ctx;
+		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
@@ -867,6 +870,7 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 		char *tmpbuf = malloc(bufsiz=256), *dst = tmpbuf;
 		ensure(tmpbuf);
 		*tmpbuf = '\0';
+		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
@@ -933,6 +937,7 @@ static USE_RESULT prolog_state fn_iso_number_chars_2(query *q)
 	if (!is_variable(p2)) {
 		cell *save_p2 = p2;
 		idx_t save_p2_ctx = p2_ctx;
+		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
@@ -967,6 +972,7 @@ static USE_RESULT prolog_state fn_iso_number_chars_2(query *q)
 	if (!is_variable(p2) && is_variable(p1)) {
 		char tmpbuf[256];
 		char *dst = tmpbuf;
+		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
@@ -1087,6 +1093,7 @@ static USE_RESULT prolog_state fn_iso_atom_codes_2(query *q)
 	if (!is_variable(p2)) {
 		cell *save_p2 = p2;
 		idx_t save_p2_ctx = p2_ctx;
+		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
@@ -1114,6 +1121,7 @@ static USE_RESULT prolog_state fn_iso_atom_codes_2(query *q)
 		size_t nbytes;
 		char *tmpbuf = malloc(nbytes=256), *dst = tmpbuf;
 		ensure(tmpbuf);
+		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
@@ -1184,6 +1192,7 @@ static USE_RESULT prolog_state fn_iso_number_codes_2(query *q)
 	if (!is_variable(p2)) {
 		cell *save_p2 = p2;
 		idx_t save_p2_ctx = p2_ctx;
+		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
@@ -1210,6 +1219,7 @@ static USE_RESULT prolog_state fn_iso_number_codes_2(query *q)
 	if (!is_variable(p2) && is_variable(p1)) {
 		char tmpbuf[256];
 		char *dst = tmpbuf;
+		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
@@ -1749,6 +1759,7 @@ static char *chars_list_to_string(query *q, cell *p_chars, idx_t p_chars_ctx, si
 	char *src = malloc(len+1);
 	ensure(src);
 	char *dst = src;
+	LIST_HANDLER(p_chars);
 
 	while (is_list(p_chars)) {
 		cell *h = LIST_HEAD(p_chars);
@@ -1876,6 +1887,8 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 	cell *mmap_var = NULL;
 	idx_t mmap_ctx = 0;
 #endif
+
+	LIST_HANDLER(p4);
 
 	while (is_list(p4)) {
 		cell *h = LIST_HEAD(p4);
@@ -2160,6 +2173,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 	p->error = false;
 	cell *vars = NULL, *varnames = NULL, *sings = NULL;
 	idx_t vars_ctx = 0, varnames_ctx = 0, sings_ctx = 0;
+	LIST_HANDLER(p2);
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
@@ -2552,6 +2566,7 @@ static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 	int n = q->current_output;
 	stream *str = &g_streams[n];
 	q->flag = q->m->flag;
+	LIST_HANDLER(p2);
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
@@ -2590,6 +2605,7 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 	GET_NEXT_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	q->flag = q->m->flag;
+	LIST_HANDLER(p2);
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
@@ -4288,6 +4304,9 @@ static int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, uns
 		return 1;
 
 	if (is_list(p1) && is_list(p2)) {
+		LIST_HANDLER(p1);
+		LIST_HANDLER(p2);
+
 		while (is_list(p1) && is_list(p2)) {
 			cell *h1 = LIST_HEAD(p1);
 			h1 = deref(q, h1, p1_ctx);
@@ -4655,6 +4674,7 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 		unsigned arity = 0;
 		idx_t save = tmp_heap_used(q);
 		cell *save_p2 = p2;
+		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
 			cell *h = LIST_HEAD(p2);
@@ -7383,6 +7403,7 @@ static USE_RESULT prolog_state fn_server_3(query *q)
 	unsigned port = 80;
 	strcpy(hostname, "localhost");
 	path[0] = '\0';
+	LIST_HANDLER(p3);
 
 	while (is_list(p3)) {
 		cell *h = LIST_HEAD(p3);
@@ -7560,6 +7581,7 @@ static USE_RESULT prolog_state fn_client_5(query *q)
 	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, level = 0;
 	hostname[0] = path[0] = '\0';
 	unsigned port = 80;
+	LIST_HANDLER(p5);
 
 	while (is_list(p5)) {
 		cell *h = LIST_HEAD(p5);
@@ -8017,6 +8039,7 @@ static USE_RESULT prolog_state fn_write_term_to_chars_3(query *q)
 	GET_NEXT_ARG(p2,list_or_nil);
 	GET_NEXT_ARG(p_chars,any);
 	q->flag = q->m->flag;
+	LIST_HANDLER(p2);
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
@@ -8055,6 +8078,8 @@ static USE_RESULT prolog_state fn_mustbe_pairlist_1(query *q)
 
 	if (!is_valid_list(q, p1, p1_ctx, false))
 		return throw_error(q, p1, "type_error", "list");
+
+	LIST_HANDLER(p1);
 
 	while (is_list(p1)) {
 		cell *h = LIST_HEAD(p1);
@@ -8511,6 +8536,8 @@ static USE_RESULT prolog_state fn_absolute_file_name_3(query *q)
 	} else
 		filename = GET_STR(p1);
 
+	LIST_HANDLER(p_opts);
+
 	while (is_list(p_opts)) {
 		cell *h = LIST_HEAD(p_opts);
 		h = deref(q, h, p_opts_ctx);
@@ -8658,6 +8685,8 @@ static USE_RESULT prolog_state fn_consult_1(query *q)
 		return pl_success;
 	}
 
+	LIST_HANDLER(p1);
+
 	while (is_list(p1)) {
 		cell *h = LIST_HEAD(p1);
 		cell *c = deref(q, h, p1_ctx);
@@ -8764,6 +8793,8 @@ static USE_RESULT prolog_state do_format(query *q, cell *str, idx_t str_ctx, cel
 
 		if (!p2 || !is_list(p2))
 			break;
+
+		LIST_HANDLER(p2);
 
 		cell *head = LIST_HEAD(p2);
 		c = deref(q, head, p2_ctx);
@@ -10837,6 +10868,8 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 		} else {
 			cell *l = p1;
 
+		LIST_HANDLER(l);
+
 			while (is_list(l)) {
 				LIST_HEAD(l);
 				l = LIST_TAIL(l);
@@ -10868,6 +10901,8 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 			cnt = strlen_utf8(p1->val_str);
 		} else {
 			cell *l = p1;
+
+			LIST_HANDLER(l);
 
 			while (is_list(l)) {
 				LIST_HEAD(l);

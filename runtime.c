@@ -776,6 +776,9 @@ static bool unify_cstring(cell *p1, cell *p2)
 
 static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
 {
+	LIST_HANDLER(p1);
+	LIST_HANDLER(p2);
+
 	while (is_list(p1) && is_list(p2)) {
 		cell *h1 = LIST_HEAD(p1);
 		cell *c1 = deref(q, h1, p1_ctx);

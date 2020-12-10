@@ -535,10 +535,11 @@ inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 	return nbr_cells;
 }
 
-#define LIST_HEAD(l) list_head(l); cell l##_tmp
-#define LIST_TAIL(l) list_tail(l, &l##_tmp)
+#define LIST_HANDLER(l) cell l##_h_tmp; cell l##_t_tmp
+#define LIST_HEAD(l) list_head(l, &l##_h_tmp)
+#define LIST_TAIL(l) list_tail(l, &l##_t_tmp)
 
-cell *list_head(cell *l);
+cell *list_head(cell *l, cell *tmp);
 cell *list_tail(cell *l, cell *tmp);
 
 USE_RESULT size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max_elements);

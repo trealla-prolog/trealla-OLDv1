@@ -318,6 +318,8 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 		int cnt = 0;
 		cell *l = c;
 
+		LIST_HANDLER(l);
+
 		while (is_list(l)) {
 			if ((cnt > 256) && (running < 0)) {
 				dst += snprintf(dst, dstlen, "|...");
@@ -437,6 +439,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	if (is_chars_list) {
 		cell *l = c;
 		dst += snprintf(dst, dstlen, "%s", "\"");
+		LIST_HANDLER(l);
 
 		while (is_list(l)) {
 			cell *h = LIST_HEAD(l);
@@ -465,6 +468,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			dst += snprintf(dst, dstlen, "%s", "|...");
 			return dst - save_dst;
 		}
+
+		LIST_HANDLER(c);
 
 		cell *head = LIST_HEAD(c);
 
@@ -505,6 +510,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			continue;
 		} else if (is_string(tail)) {
 			cell *l = tail;
+			LIST_HANDLER(l);
 
 			while (is_list(l)) {
 				dst += snprintf(dst, dstlen, "%s", ",");
