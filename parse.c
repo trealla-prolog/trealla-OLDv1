@@ -951,6 +951,7 @@ query *create_query(module *m, bool is_task)
 		q->trace = m->trace;
 		q->current_input = 0;		// STDIN
 		q->current_output = 1;		// STDOUT
+		q->current_error = 1;		// STDERR
 
 		// Allocate these now...
 
@@ -992,6 +993,7 @@ query *create_task(query *q, cell *curr_cell)
 		subq->is_task = true;
 		subq->current_input = q->current_input;
 		subq->current_output = q->current_output;
+		subq->current_error = q->current_error;
 
 		cell *tmp = clone_to_heap(subq, 0, curr_cell, 1); //cehteh: checkme
 		idx_t nbr_cells = tmp->nbr_cells;

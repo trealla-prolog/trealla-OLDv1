@@ -420,7 +420,7 @@ struct query_ {
 	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;
 	idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
 	char_flags flag;
-	uint8_t current_input, current_output;
+	uint8_t current_input, current_output, current_error;
 	enum q_retry retry;
 	int8_t halt_code, quoted;	//TODO: cehteh: enum here
 	bool status:1;
