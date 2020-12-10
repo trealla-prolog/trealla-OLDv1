@@ -5754,11 +5754,11 @@ static USE_RESULT prolog_state fn_iso_functor_3(query *q)
 		tmp.val_type = TYPE_LITERAL;
 		tmp.val_off = p1->val_off;
 		tmp.nbr_cells = 1;
-		CLR_OP(&tmp);
+		//CLR_OP(&tmp);
 	}
 
-	if (is_string(p2))
-		tmp.val_off = g_dot_s;
+	//if (is_string(p2))			// ????
+		//tmp.val_off = g_dot_s;
 
 	if (!unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 		return pl_failure;
