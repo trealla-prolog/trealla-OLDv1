@@ -1871,29 +1871,26 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 			return throw_error(q, c, "instantiation_error", "args_not_sufficiently_instantiated");
 
 		if (is_structure(c) && (c->arity == 1)) {
+			cell *name = c + 1;
+			name = deref(q, name, q->latest_ctx);
+
+			if (!is_atom(name))
+				return throw_error(q, c, "domain_error", "stream_option");
+
+			if (get_named_stream(GET_STR(name)) >= 0)
+				return throw_error(q, c, "permission_error", "open,source_sink");
+
 			if (!strcmp(GET_STR(c), "mmap")) {
 #if USE_MMAP
-				mmap_var = c + 1;
+				mmap_var = name;
 				mmap_var = deref(q, mmap_var, q->latest_ctx);
 				mmap_ctx = q->latest_ctx;
 #endif
 			} else if (!strcmp(GET_STR(c), "alias")) {
-				cell *name = c + 1;
-				name = deref(q, name, q->latest_ctx);
-
-				if (!is_atom(name))
-					return throw_error(q, c, "domain_error", "stream_option");
-
-				if (get_named_stream(GET_STR(name)) >= 0)
-					return throw_error(q, c, "permission_error", "open,source_sink");
-
 				free(str->name);
 				str->name = strdup(GET_STR(name));
 				str->aliased = 1;
 			} else if (!strcmp(GET_STR(c), "type")) {
-				cell *name = c + 1;
-				name = deref(q, name, q->latest_ctx);
-
 				if (is_atom(name) && !strcmp(GET_STR(name), "binary"))
 					binary = 1;
 				else if (is_atom(name) && !strcmp(GET_STR(name), "text"))
