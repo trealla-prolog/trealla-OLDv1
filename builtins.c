@@ -1596,13 +1596,13 @@ static int get_named_stream(const char *name)
 	return -1;
 }
 
-static int get_stream(query *q, cell *p1)
+static int get_stream(__attribute__((unused)) query *q, cell *p1)
 {
 	if (is_atom(p1)) {
 		int n = get_named_stream(GET_STR(p1));
 
 		if (n < 0) {
-			DISCARD_RESULT throw_error(q, p1, "type_error", "stream");
+			//DISCARD_RESULT throw_error(q, p1, "type_error", "stream");
 			return -1;
 		}
 
@@ -1610,17 +1610,17 @@ static int get_stream(query *q, cell *p1)
 	}
 
 	if (!is_integer(p1) || !(p1->flags&FLAG_STREAM)) {
-		DISCARD_RESULT throw_error(q, p1, "type_error", "stream");
+		//DISCARD_RESULT throw_error(q, p1, "type_error", "stream");
 		return -1;
 	}
 
 	if ((p1->val_num < 0) || (p1->val_num >= MAX_STREAMS)) {
-		DISCARD_RESULT throw_error(q, p1, "type_error", "stream");
+		//DISCARD_RESULT throw_error(q, p1, "type_error", "stream");
 		return -1;
 	}
 
 	if (!g_streams[p1->val_num].fp) {
-		DISCARD_RESULT throw_error(q, p1, "type_error", "stream");
+		//DISCARD_RESULT throw_error(q, p1, "type_error", "stream");
 		return -1;
 	}
 
