@@ -3666,6 +3666,15 @@ bool pl_consult(prolog *pl, const char *filename)
 	return module_load_file(pl->m, filename);
 }
 
+bool pl_preconsult(prolog *pl, const char *filename)
+{
+	if (!pl_consult(pl, filename))
+		return false;
+
+	free(pl->m->filename);
+	pl->m->filename = strdup("./");
+	return true;
+}
 
 void g_destroy()
 {

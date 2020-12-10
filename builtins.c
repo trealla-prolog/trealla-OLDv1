@@ -1673,7 +1673,8 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 	if (p1->arity != 1)
 		return throw_error(q, p1, "type_error", "property");
 
-	if (!strcmp(GET_STR(p1), "alias") && is_variable(pstr)) {
+	if (!strcmp(GET_STR(p1), "alias")
+		&& (is_variable(pstr) || (is_stream(pstr)))) {
 		cell *c = p1 + 1;
 		c = deref(q, c, p1_ctx);
 
@@ -1688,8 +1689,7 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		cell tmp;
 		make_int(&tmp, n);
 		tmp.flags |= FLAG_STREAM | FLAG_HEX;
-		set_var(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
-		return pl_success;
+		return unify(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (!is_stream(pstr))
