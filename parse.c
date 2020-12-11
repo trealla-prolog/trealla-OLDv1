@@ -2613,10 +2613,10 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, int tolerant)
 			size_t len = len_char_utf8(tmp);
 			is_chars_list += len;
 		} else {
-			const char *src = QUERY_GET_STR(c);
+			const char *src = GET_STR(c);
 			size_t len = len_char_utf8(src);
 
-			if (len != QUERY_LEN_STR(c)) {
+			if (len != LEN_STR(c)) {
 				is_chars_list = 0;
 				break;
 			}

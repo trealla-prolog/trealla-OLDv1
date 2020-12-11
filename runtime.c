@@ -164,7 +164,7 @@ static void trace_call(query *q, cell *c, box_t box)
 		return;
 #endif
 
-	const char *src = QUERY_GET_STR(c);
+	const char *src = GET_STR(c);
 
 	if (!strcmp(src, ",") || !strcmp(src, ";") || !strcmp(src, "->"))
 		return;
@@ -757,19 +757,19 @@ static bool unify_literal(query *q, cell *p1, cell *p2)
 	if (is_literal(p2))
 		return p1->val_off == p2->val_off;
 
-	if (is_cstring(p2) && (QUERY_LEN_STR(p1) == QUERY_LEN_STR(p2)))
-		return !memcmp(QUERY_GET_STR(p2), QUERY_GET_POOL(p1->val_off), QUERY_LEN_STR(p1));
+	if (is_cstring(p2) && (LEN_STR(p1) == LEN_STR(p2)))
+		return !memcmp(GET_STR(p2), QUERY_GET_POOL(p1->val_off), LEN_STR(p1));
 
 	return false;
 }
 
 static bool unify_cstring(query *q, cell *p1, cell *p2)
 {
-	if (is_cstring(p2) && (QUERY_LEN_STR(p1) == QUERY_LEN_STR(p2)))
-		return !memcmp(QUERY_GET_STR(p1), QUERY_GET_STR(p2), QUERY_LEN_STR(p1));
+	if (is_cstring(p2) && (LEN_STR(p1) == LEN_STR(p2)))
+		return !memcmp(GET_STR(p1), GET_STR(p2), LEN_STR(p1));
 
-	if (is_literal(p2) && (QUERY_LEN_STR(p1) == QUERY_LEN_STR(p2)))
-		return !memcmp(QUERY_GET_STR(p1), QUERY_GET_POOL(p2->val_off), QUERY_LEN_STR(p1));
+	if (is_literal(p2) && (LEN_STR(p1) == LEN_STR(p2)))
+		return !memcmp(GET_STR(p1), QUERY_GET_POOL(p2->val_off), LEN_STR(p1));
 
 	return false;
 }
@@ -944,7 +944,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_r
 			h = c->match;
 		else {
 			// For now convert it to a literal
-			idx_t off = index_from_pool(q->m->pl, QUERY_GET_STR(c));
+			idx_t off = index_from_pool(q->m->pl, GET_STR(c));
 			may_idx_error(off);
 			FREE_STR(c);
 			c->val_off = off;
@@ -959,7 +959,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_r
 		}
 
 		if (!h) {
-			const char *name = QUERY_GET_STR(p1);
+			const char *name = GET_STR(p1);
 			bool tmp_userop = false;
 			unsigned tmp_optype = 0;
 
@@ -1032,7 +1032,7 @@ static USE_RESULT prolog_state match_rule_head_or_fact(query *q)
 			h = c->match;
 		} else {
 			// For now convert it to a literal
-			c->val_off = index_from_pool(q->m->pl, QUERY_GET_STR(c));
+			c->val_off = index_from_pool(q->m->pl, GET_STR(c));
 			if (c->val_off == ERR_IDX) {
 				q->error = true;
 				return pl_error;
@@ -1048,7 +1048,7 @@ static USE_RESULT prolog_state match_rule_head_or_fact(query *q)
 			h = c->match = find_matching_predicate(q->m, c);
 
 			if (!h) {
-				if (!is_end(c) && !(is_literal(c) && !strcmp(QUERY_GET_STR(c), "initialization")))
+				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(c), "initialization")))
 					return throw_error(q, c, "existence_error", "procedure");
 				else
 					q->error = true;
