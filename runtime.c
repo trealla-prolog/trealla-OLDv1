@@ -883,52 +883,53 @@ static void next_key(query *q)
 
 static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx, bool is_retract)
 {
-	cell *head = get_head(p1);
-	predicate *h = find_matching_predicate(q->m, head);
+	if (q->retry) {
+		q->st.curr_clause2 = q->st.curr_clause2->next;
+	} else {
+		cell *head = get_head(p1);
+		predicate *h = find_matching_predicate(q->m, head);
 
-	if (!h) {	// ??????
-		head->match = find_matching_predicate(q->m, head);
-		h = head->match;
-	}
-
-	if (!h)
-		q->st.curr_clause2 = NULL;
-	else {
-		if (!h->is_dynamic && !q->run_init) {
-			if (is_retract)
-				return throw_error(q, p1, "permission_error", "modify,static_procedure");
-			else
-				return throw_error(q, p1, "permission_error", "access,private_procedure");
+		if (!h) {	// ??????
+			head->match = find_matching_predicate(q->m, head);
+			h = head->match;
 		}
 
-		q->st.curr_clause2 = h->head;
+		if (!h)
+			q->st.curr_clause2 = NULL;
+		else {
+			if (!h->is_dynamic && !q->run_init) {
+				if (is_retract)
+					return throw_error(q, p1, "permission_error", "modify,static_procedure");
+				else
+					return throw_error(q, p1, "permission_error", "access,private_procedure");
+			}
+
+			q->st.curr_clause2 = h->head;
+		}
 	}
 
 	if (!q->st.curr_clause2)
 		return pl_failure;
 
 	may_error(make_choice(q));
+	cell *p1_body = get_logical_body(p1);
+	cell *orig_p1 = p1;
+
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
 		if (q->st.curr_clause2->t.deleted)
 			continue;
 
 		term *t = &q->st.curr_clause2->t;
 		bool needs_true = false;
+		p1 = orig_p1;
 
-		cell *body = get_logical_body(t->cells);
-		idx_t body_ctx;
+		//printf("*** "); print_term(q, stdout, t->cells, q->st.curr_frame, 0); printf("\n");
 
-		if (!body) {
-			body = get_logical_body(p1);
-			body = deref(q, body, p1_ctx);
-			body_ctx = q->latest_ctx;
+		cell *t_body = get_logical_body(t->cells);
 
-			if (body) {
-				if (is_variable(body) || (is_literal(body) && (body->val_off = g_true_s))) {
-					p1 = get_head(p1);
-					needs_true = true;
-				}
-			}
+		if (is_variable(p1_body) && !t_body) {
+			p1 = get_head(p1);
+			needs_true = true;
 		}
 
 		try_me(q, t->nbr_vars);
@@ -936,12 +937,14 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx, bool
 		q->no_tco = false;
 
 		if (unify_structure(q, p1, p1_ctx, t->cells, q->st.fp, 0)) {
-			if (needs_true && is_variable(body)) {
+			if (needs_true) {
+				p1_body = deref(q, p1_body, p1_ctx);
+				idx_t p1_body_ctx = q->latest_ctx;
 				cell tmp = {0};
 				tmp.val_type = TYPE_LITERAL;
 				tmp.nbr_cells = 1;
 				tmp.val_off = g_true_s;
-				set_var(q, body, body_ctx, &tmp, q->st.curr_frame);
+				set_var(q, p1_body, p1_body_ctx, &tmp, q->st.curr_frame);
 			}
 
 			return pl_success;
@@ -959,12 +962,15 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx, bool
 
 USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_retract)
 {
-	if (q->retry)
+	if (q->retry) {
+		if (is_literal(p1) && (p1->val_off == g_clause_s))
+			return match_full(q, p1, p1_ctx, is_retract);
+
 		q->st.curr_clause2 = q->st.curr_clause2->next;
-	else {
+	} else {
 		// Match HEAD :- BODY
 
-		if (is_literal(p1) && (p1->val_off == g_clause_s))
+		if (get_logical_body(p1))
 			return match_full(q, p1, p1_ctx, is_retract);
 
 		cell *c = p1;

@@ -5108,15 +5108,17 @@ static USE_RESULT prolog_state fn_iso_retract_1(query *q)
 static USE_RESULT prolog_state fn_iso_retractall_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	predicate *h = find_matching_predicate(q->m, p1);
+	predicate *h = find_matching_predicate(q->m, get_head(p1));
 
 	if (!h) {
 		//set_dynamic_in_db(q->m, GET_STR(p1), p1->arity);
 		return pl_success;
 	}
 
-	while (fn_iso_retract_1(q))
+	while (fn_iso_retract_1(q)) {
+		q->retry = QUERY_RETRY;
 		retry_choice(q);
+	}
 
 	return pl_success;
 }
