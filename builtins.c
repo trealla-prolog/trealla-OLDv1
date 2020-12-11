@@ -1062,6 +1062,7 @@ static USE_RESULT prolog_state fn_iso_number_chars_2(query *q)
 	}
 
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	chk_cstring(&tmp);
 	return ok;
 }
 
