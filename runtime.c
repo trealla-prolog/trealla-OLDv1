@@ -893,14 +893,19 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx, bool
 			h = head->match = find_matching_predicate(q->m, head);
 		}
 
-		if (!h)
+		if (!h) {
+			if (is_retract)
+				return throw_error(q, head, "permission_error", "modify,static_procedure");
+			else
+				return throw_error(q, head, "permission_error", "access,private_procedure");
+
 			q->st.curr_clause2 = NULL;
-		else {
+		} else {
 			if (!h->is_dynamic && !q->run_init) {
 				if (is_retract)
-					return throw_error(q, p1, "permission_error", "modify,static_procedure");
+					return throw_error(q, head, "permission_error", "modify,static_procedure");
 				else
-					return throw_error(q, p1, "permission_error", "access,private_procedure");
+					return throw_error(q, head, "permission_error", "access,private_procedure");
 			}
 
 			q->st.curr_clause2 = h->head;

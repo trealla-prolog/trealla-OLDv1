@@ -5633,7 +5633,7 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "evaluable")) {
 		snprintf(dst2, len2+1, "error(%s(%s,%s/%u),(%s)/%u).", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (!strcmp(err_type, "permission_error")) {
-		snprintf(dst2, len2+1, "error(%s(%s,%s/%u),(%s)/%u).", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),(%s)/%u).", err_type, expected, GET_STR(c), c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else {
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	}
