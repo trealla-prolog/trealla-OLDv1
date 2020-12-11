@@ -18,6 +18,11 @@ CFLAGS += -DUSE_GMP=1
 LDFLAGS += -lgmp
 endif
 
+ifdef THREADS
+CFLAGS += -DUSE_THREADS=1 -pthread
+LDFLAGS += -pthread
+endif
+
 ifdef LTO
 CFLAGS += -flto=$(LTO)
 LDFLAGS += -flto=$(LTO)
