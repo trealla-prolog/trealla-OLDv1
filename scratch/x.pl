@@ -1,14 +1,16 @@
-:- initialization(main).
+elk(X) :- moose(X).
 
 :- dynamic(legs/2).
-legs(A, 7) :- A, call(A).
+legs(A, 4) :- animal(A).
+legs(octopus, 8).
+legs(A, 6) :- insect(A).
+legs(spider, 8).
+legs(B, 2) :- bird(B).
 
-main :-
-	clause(legs(C,7), Body),
-	Body == (call(C),call(C)),
-	write(succeeded), nl,
-	halt.
+:- dynamic(insect/1).
+insect(ant).
+insect(bee).
 
-main :-
-	write(failed), nl,
-	halt.
+:- dynamic(foo/1).
+foo(X) :- call(X) -> call(X).
+foo(X) :- call(X), call(X).

@@ -6406,7 +6406,7 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 	nbr_cells = q->tmpq_size[q->st.qnbr];
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
-	     nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
+		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
 
 		try_me(q, MAX_ARITY);
 
