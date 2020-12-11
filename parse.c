@@ -115,8 +115,12 @@ static struct op_table g_ops[] =
 	{0,0,0}
 };
 
-// FIXME: make g_pool & g_symtab thread-safe, probably
-// by putting a mutex in the prolog object
+// FIXME: make g_pool & g_symtab thread-safe, probably by putting a
+// mutex in the prolog object.
+//
+// Alternatively put them in the prolog object as well. Any IPC between
+// prolog objects would then have to use serialized terms, or get
+// really clever.
 
 static skiplist *g_symtab = NULL;
 
