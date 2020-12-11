@@ -382,9 +382,10 @@ causes that clause to be saved to a per-module database on update
 Concurrency					##EXPERIMENTAL##
 ===========
 
-Trealla is single-threaded but cooperative multitasking is available
-in the form of light-weight coroutines that run until they yield control,
-either explicitly or implicitly (when waiting on input or a timer)...
+Trealla is single-threaded internally but cooperative multitasking is
+available in the form of light-weight coroutines that run until they
+yield control, either explicitly or implicitly (when waiting on input
+or a timer)...
 
 	fork/0                  # parent fails, child continues
 	task/[1-n]              # concurrent form of call/1-n
@@ -464,6 +465,19 @@ Job [www.google.com] 200 ==> www.google.com done
 Finished
 Time elapsed 0.33 secs
 ```
+
+Multiple* high level *prolog* objects can be created and assigned to
+operating system threads in a C-wrapper program by calling
+
+```c
+	prolog *pl = pl_create()
+	pl_consult(pl, filename)
+	pl_eval(pl, expr)
+	etc.
+```
+
+Each such *prolog* instance is thread-safe. Such instances could use
+Unix domain sockets for IPC.
 
 
 Rationals						##EXPERIMENTAL##
