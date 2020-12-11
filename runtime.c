@@ -948,7 +948,7 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx, bool
 				tmp.val_type = TYPE_LITERAL;
 				tmp.nbr_cells = 1;
 				tmp.val_off = g_true_s;
-				set_var(q, p1_body, p1_body_ctx, &tmp, q->st.curr_frame);
+				return unify(q, p1_body, p1_body_ctx, &tmp, q->st.curr_frame);
 			}
 
 			return pl_success;
