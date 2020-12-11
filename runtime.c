@@ -924,15 +924,17 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx, bool
 			continue;
 
 		term *t = &q->st.curr_clause2->t;
+		cell *c = t->cells;
 		bool needs_true = false;
 		p1 = orig_p1;
 
 		//printf("*** "); print_term(q, stdout, t->cells, q->st.curr_frame, 0); printf("\n");
 
-		cell *t_body = get_logical_body(t->cells);
+		cell *c_body = get_logical_body(c);
 
-		if (is_variable(p1_body) && !t_body) {
+		if (is_variable(p1_body) && !c_body) {
 			p1 = get_head(p1);
+			c = get_head(c);
 			needs_true = true;
 		}
 
@@ -940,7 +942,7 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx, bool
 		q->tot_matches++;
 		q->no_tco = false;
 
-		if (unify_structure(q, p1, p1_ctx, t->cells, q->st.fp, 0)) {
+		if (unify_structure(q, p1, p1_ctx, c, q->st.fp, 0)) {
 			if (needs_true) {
 				p1_body = deref(q, p1_body, p1_ctx);
 				idx_t p1_body_ctx = q->latest_ctx;
