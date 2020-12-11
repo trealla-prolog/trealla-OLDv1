@@ -115,26 +115,17 @@ static struct op_table g_ops[] =
 	{0,0,0}
 };
 
-// FIXME: make g_pool & g_symtab thread-safe, probably by putting a
-// mutex in the prolog object.
-//
-// Alternatively put them in the prolog object as well. Any IPC between
-// prolog objects would then have to use serialized terms, or get
-// really clever.
-
-static skiplist *g_symtab = NULL;
-
-static idx_t is_in_pool(__attribute__((unused)) module *m, const char *name)
+static idx_t is_in_pool(__attribute__((unused)) prolog *pl, const char *name)
 {
 	const void *val;
 
-	if (sl_get(g_symtab, name, &val))
+	if (sl_get(pl->symtab, name, &val))
 		return (idx_t)(unsigned long)val;
 
 	return ERR_IDX;
 }
 
-static idx_t add_to_pool(__attribute__((unused)) module *m, const char *name)
+static idx_t add_to_pool(__attribute__((unused)) prolog *pl, const char *name)
 {
 	if (!name) return ERR_IDX;
 	idx_t offset = g_pool_offset;
@@ -153,19 +144,19 @@ static idx_t add_to_pool(__attribute__((unused)) module *m, const char *name)
 	strcpy(g_pool+offset, name);
 	g_pool_offset += len + 1;
 	const char *key = strdup(name);
-	sl_set(g_symtab, key, (void*)(unsigned long)offset);
+	sl_set(pl->symtab, key, (void*)(unsigned long)offset);
 	return offset;
 }
 
-idx_t index_from_pool(module *m, const char *name)
+idx_t index_from_pool(prolog *pl, const char *name)
 {
 	if (!name) return ERR_IDX;
-	idx_t offset = is_in_pool(m, name);
+	idx_t offset = is_in_pool(pl, name);
 
 	if (offset != ERR_IDX)
 		return offset;
 
-	return add_to_pool(m, name);
+	return add_to_pool(pl, name);
 }
 
 unsigned get_op(module *m, const char *name, unsigned *optype, bool *userop, bool hint_prefix)
@@ -365,7 +356,7 @@ static predicate *find_predicate(module *m, cell *c)
 
 	if (is_cstring(c)) {
 		tmp.val_type = TYPE_LITERAL;
-		tmp.val_off = index_from_pool(m, GET_STR(c));
+		tmp.val_off = index_from_pool(m->pl, GET_STR(c));
 	}
 
 	sliter *iter = sl_findkey(m->index, &tmp);
@@ -425,7 +416,7 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 
 	cell tmp = {0};
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = index_from_pool(m, name);
+	tmp.val_off = index_from_pool(m->pl, name);
 	tmp.arity = arity;
 	return find_predicate(m, &tmp);
 }
@@ -456,7 +447,7 @@ void set_multifile_in_db(module *m, const char *name, idx_t arity)
 
 	cell tmp = {0};
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = index_from_pool(m, name);
+	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
 	predicate *h = find_predicate(m, &tmp);
@@ -476,7 +467,7 @@ static bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, id
 
 	cell tmp = {0};
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = index_from_pool(m, name);
+	tmp.val_off = index_from_pool(m->pl, name);
 	if (tmp.val_off == ERR_IDX) return false;
 	tmp.arity = arity;
 	predicate *h = find_predicate(m, &tmp);
@@ -570,7 +561,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
-		idx_t off = index_from_pool(m, GET_STR(c));
+		idx_t off = index_from_pool(m->pl, GET_STR(c));
 		if(off == ERR_IDX) return NULL;
 		FREE_STR(c);
 		c->val_off = off;
@@ -587,7 +578,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	}
 
 	if (is_cstring(c)) {
-		idx_t off = index_from_pool(m, GET_STR(c));
+		idx_t off = index_from_pool(m->pl, GET_STR(c));
 		if(off == ERR_IDX) return NULL;
 		FREE_STR(c);
 		c->val_off = off;
@@ -744,7 +735,7 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 
 	cell tmp = {0};
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = index_from_pool(m, name);
+	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
 	predicate *h = find_predicate(m, &tmp);
@@ -765,7 +756,7 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp = {0};
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = index_from_pool(m, name);
+	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off == ERR_IDX);
 	tmp.arity = arity;
 	predicate *h = find_predicate(m, &tmp);
@@ -1496,7 +1487,7 @@ void parser_xref(parser *p, term *t, predicate *parent)
 
 			if (m)
 			{
-				c->val_off = index_from_pool(p->m, tmpbuf2);
+				c->val_off = index_from_pool(p->m->pl, tmpbuf2);
 				ensure(c->val_off != ERR_IDX);
 			}
 			else
@@ -1685,7 +1676,7 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 	p1->val_type = TYPE_LITERAL;
 	p1->flags = FLAG_BUILTIN;
 	p1->fn = NULL;
-	p1->val_off = index_from_pool(p->m, "call");
+	p1->val_off = index_from_pool(p->m->pl, "call");
 	p1->nbr_cells = 2;
 	p1->arity = 1;
 
@@ -2728,7 +2719,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quoted && !strcmp(p->token, "{")) {
 			save_idx = p->t->cidx;
-			cell *c = make_literal(p, index_from_pool(p->m, "{}"));
+			cell *c = make_literal(p, index_from_pool(p->m->pl, "{}"));
 			ensure(c);
 			c->arity = 1;
 			p->start_term = true;
@@ -2881,7 +2872,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			if (p->was_quoted)
 				c->flags |= FLAG2_QUOTED;
 
-			c->val_off = index_from_pool(p->m, p->token);
+			c->val_off = index_from_pool(p->m->pl, p->token);
 			ensure(c->val_off != ERR_IDX);
 		} else {
 			c->val_type = TYPE_CSTRING;
@@ -3716,8 +3707,8 @@ static void g_destroy(prolog *pl)
 		destroy_module(pl->modules);
 	}
 
-	sl_destroy(g_symtab);
-	g_symtab = NULL;
+	sl_destroy(pl->symtab);
+	pl->symtab = NULL;
 	free(g_pool);
 	g_pool_offset = 0;
 	g_pool = NULL;
@@ -3729,26 +3720,26 @@ static void* g_init(prolog *pl)
 	g_pool = calloc(g_pool_size=INITIAL_POOL_SIZE, 1);
 	if (g_pool) {
 		bool error = false;
-		CHECK_SENTINEL(g_symtab = sl_create2((void*)strcmp, free), NULL);
+		CHECK_SENTINEL(pl->symtab = sl_create2((void*)strcmp, free), NULL);
 
 		if (!error) {
-			CHECK_SENTINEL(g_false_s = index_from_pool(pl->m, "false"), ERR_IDX);
-			CHECK_SENTINEL(g_true_s = index_from_pool(pl->m, "true"), ERR_IDX);
-			CHECK_SENTINEL(g_empty_s = index_from_pool(pl->m, ""), ERR_IDX);
-			CHECK_SENTINEL(g_anon_s = index_from_pool(pl->m, "_"), ERR_IDX);
-			CHECK_SENTINEL(g_dot_s = index_from_pool(pl->m, "."), ERR_IDX);
-			CHECK_SENTINEL(g_cut_s = index_from_pool(pl->m, "!"), ERR_IDX);
-			CHECK_SENTINEL(g_local_cut_s = index_from_pool(pl->m, "¡"), ERR_IDX);
-			CHECK_SENTINEL(g_nil_s = index_from_pool(pl->m, "[]"), ERR_IDX);
-			CHECK_SENTINEL(g_braces_s = index_from_pool(pl->m, "{}"), ERR_IDX);
-			CHECK_SENTINEL(g_fail_s = index_from_pool(pl->m, "fail"), ERR_IDX);
-			CHECK_SENTINEL(g_clause_s = index_from_pool(pl->m, ":-"), ERR_IDX);
-			CHECK_SENTINEL(g_sys_elapsed_s = index_from_pool(pl->m, "$elapsed"), ERR_IDX);
-			CHECK_SENTINEL(g_sys_queue_s = index_from_pool(pl->m, "$queue"), ERR_IDX);
-			CHECK_SENTINEL(g_eof_s = index_from_pool(pl->m, "end_of_file"), ERR_IDX);
-			CHECK_SENTINEL(g_lt_s = index_from_pool(pl->m, "<"), ERR_IDX);
-			CHECK_SENTINEL(g_gt_s = index_from_pool(pl->m, ">"), ERR_IDX);
-			CHECK_SENTINEL(g_eq_s = index_from_pool(pl->m, "="), ERR_IDX);
+			CHECK_SENTINEL(g_false_s = index_from_pool(pl, "false"), ERR_IDX);
+			CHECK_SENTINEL(g_true_s = index_from_pool(pl, "true"), ERR_IDX);
+			CHECK_SENTINEL(g_empty_s = index_from_pool(pl, ""), ERR_IDX);
+			CHECK_SENTINEL(g_anon_s = index_from_pool(pl, "_"), ERR_IDX);
+			CHECK_SENTINEL(g_dot_s = index_from_pool(pl, "."), ERR_IDX);
+			CHECK_SENTINEL(g_cut_s = index_from_pool(pl, "!"), ERR_IDX);
+			CHECK_SENTINEL(g_local_cut_s = index_from_pool(pl, "¡"), ERR_IDX);
+			CHECK_SENTINEL(g_nil_s = index_from_pool(pl, "[]"), ERR_IDX);
+			CHECK_SENTINEL(g_braces_s = index_from_pool(pl, "{}"), ERR_IDX);
+			CHECK_SENTINEL(g_fail_s = index_from_pool(pl, "fail"), ERR_IDX);
+			CHECK_SENTINEL(g_clause_s = index_from_pool(pl, ":-"), ERR_IDX);
+			CHECK_SENTINEL(g_sys_elapsed_s = index_from_pool(pl, "$elapsed"), ERR_IDX);
+			CHECK_SENTINEL(g_sys_queue_s = index_from_pool(pl, "$queue"), ERR_IDX);
+			CHECK_SENTINEL(g_eof_s = index_from_pool(pl, "end_of_file"), ERR_IDX);
+			CHECK_SENTINEL(g_lt_s = index_from_pool(pl, "<"), ERR_IDX);
+			CHECK_SENTINEL(g_gt_s = index_from_pool(pl, ">"), ERR_IDX);
+			CHECK_SENTINEL(g_eq_s = index_from_pool(pl, "="), ERR_IDX);
 
 			g_streams[0].fp = stdin;
 			CHECK_SENTINEL(g_streams[0].filename = strdup("stdin"), NULL);
