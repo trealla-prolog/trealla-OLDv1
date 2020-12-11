@@ -964,14 +964,20 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_r
 			unsigned tmp_optype = 0;
 
 			if (get_op(q->m, name, &tmp_optype, &tmp_userop, false)) {
-				return throw_error(q, p1, "permission_error", "access_control_structure");
+				if (is_retract)
+					return throw_error(q, p1, "permission_error", "modify,control_structure");
+				else
+					return throw_error(q, p1, "permission_error", "access,control_structure");
 			} else
 				set_dynamic_in_db(q->m, name, p1->arity);
 
 			q->st.curr_clause2 = NULL;
 		} else {
 			if (!h->is_dynamic && !q->run_init) {
-				return throw_error(q, p1, "permission_error", "access_private_procedure");
+				if (is_retract)
+					return throw_error(q, p1, "permission_error", "modify,static_procedure");
+				else
+					return throw_error(q, p1, "permission_error", "access,private_procedure");
 			}
 
 			q->st.curr_clause2 = h->head;
