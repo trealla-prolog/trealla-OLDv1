@@ -6,8 +6,9 @@
 typedef struct skiplist_ skiplist;
 typedef struct sliter_ sliter;
 
-skiplist *sl_create(int (*compkey)(const void*, const void*));
-skiplist *sl_create2(int (*compkey)(const void*, const void*), void (*delkey)(void*));
+skiplist *sl_create(int (*compkey)(const void *p, const void*, const void*));
+skiplist *sl_create1(int (*compkey)(const void *p, const void*, const void*), const void *p);
+skiplist *sl_create2(int (*compkey)(const void*, const void*, const void*), void (*delkey)(void*));
 bool sl_set(skiplist *l, const void *k, const void *v);
 bool sl_app(skiplist *l, const void *k, const void *v);
 bool sl_get(const skiplist *l, const void *k, const void **v);

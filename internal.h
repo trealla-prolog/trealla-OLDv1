@@ -119,8 +119,13 @@ typedef uint32_t idx_t;
 
 // These 2 assume literal or cstring types...
 
-#define GET_STR(c) (!is_cstring(c) ? (g_pool+(c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
-#define LEN_STR(c) (is_blob(c) ? (c)->len_str : strlen(GET_STR(c)))
+#define QUERY_GET_STR(c) (!is_cstring(c) ? (q->m->pl->pool+(c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
+#define PARSER_GET_STR(c) (!is_cstring(c) ? (p->m->pl->pool+(c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
+#define MODULE_GET_STR(c) (!is_cstring(c) ? (m->pl->pool+(c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
+
+#define QUERY_LEN_STR(c) (is_blob(c) ? (c)->len_str : strlen(QUERY_GET_STR(c)))
+#define PARSER_LEN_STR(c) (is_blob(c) ? (c)->len_str : strlen(PARSER_GET_STR(c)))
+#define MODULE_LEN_STR(c) (is_blob(c) ? (c)->len_str : strlen(MODULE_GET_STR(c)))
 
 #define FREE_STR(c) if (is_nonconst_blob(c)) { free((c)->val_str); }
 #define TAKE_STR(c) {(c)->val_str = NULL; }
@@ -130,7 +135,9 @@ typedef uint32_t idx_t;
 	memcpy((c)->val_str, v->val_str, v->len_str); 					\
 	(c)->val_str[(v)->len_str] = '\0'; }
 
-#define GET_POOL(off) (g_pool + off)
+#define QUERY_GET_POOL(off) (q->m->pl->pool + off)
+#define MODULE_GET_POOL(off) (m->pl->pool + off)
+#define PARSER_GET_POOL(off) (p->m->pl->pool + off)
 
 // Wrap an assignment that's expected to return anything but the given sentinel value.
 // when the sentinel otherwise does some (optional) error handling action
@@ -522,8 +529,9 @@ struct prolog_ {
 	module *m, *curr_m;
 	uint64_t s_last, s_cnt, seed;
 	skiplist *symtab;
+	char *pool;
+	idx_t pool_offset, pool_size, tab_idx;
 	unsigned varno;
-	idx_t tab_idx;
 };
 
 extern idx_t g_empty_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;

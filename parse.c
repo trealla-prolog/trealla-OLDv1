@@ -43,8 +43,6 @@ char *g_tpl_lib = NULL;
 int g_ac = 0, g_avc = 1;
 char **g_av = NULL, *g_argv0 = NULL;
 
-char *g_pool = NULL;
-static idx_t g_pool_offset = 0, g_pool_size = 0;
 static atomic_t int g_tpl_count = 0;
 
 static struct op_table g_ops[] =
@@ -125,24 +123,24 @@ static idx_t is_in_pool(__attribute__((unused)) prolog *pl, const char *name)
 	return ERR_IDX;
 }
 
-static idx_t add_to_pool(__attribute__((unused)) prolog *pl, const char *name)
+static idx_t add_to_pool(prolog *pl, const char *name)
 {
 	if (!name) return ERR_IDX;
-	idx_t offset = g_pool_offset;
+	idx_t offset = pl->pool_offset;
 	size_t len = strlen(name);
 
-	while ((offset+len+1+1) >= g_pool_size) {
+	while ((offset+len+1+1) >= pl->pool_size) {
 		FAULTINJECT(errno = ENOMEM; return ERR_IDX);
-		size_t nbytes = g_pool_size * 2;
-		char *tmp = realloc(g_pool, nbytes);
+		size_t nbytes = pl->pool_size * 2;
+		char *tmp = realloc(pl->pool, nbytes);
 		if (!tmp) return ERR_IDX;
-		g_pool = tmp;
-		memset(g_pool+g_pool_size, 0, nbytes-g_pool_size);
-		g_pool_size = nbytes;
+		pl->pool = tmp;
+		memset(pl->pool + pl->pool_size, 0, nbytes - pl->pool_size);
+		pl->pool_size = nbytes;
 	}
 
-	strcpy(g_pool+offset, name);
-	g_pool_offset += len + 1;
+	strcpy(pl->pool + offset, name);
+	pl->pool_offset += len + 1;
 	const char *key = strdup(name);
 	sl_set(pl->symtab, key, (void*)(unsigned long)offset);
 	return offset;
@@ -356,7 +354,7 @@ static predicate *find_predicate(module *m, cell *c)
 
 	if (is_cstring(c)) {
 		tmp.val_type = TYPE_LITERAL;
-		tmp.val_off = index_from_pool(m->pl, GET_STR(c));
+		tmp.val_off = index_from_pool(m->pl, MODULE_GET_STR(c));
 	}
 
 	sliter *iter = sl_findkey(m->index, &tmp);
@@ -383,8 +381,8 @@ static predicate *find_matching_predicate_internal(module *m, cell *c, bool quie
 		predicate *h = find_predicate(m, c);
 
 		if (!quiet && h && (m != save_m) && !h->is_public &&
-			strcmp(GET_STR(c), "dynamic") && strcmp(GET_STR(c), "module")) {
-			fprintf(stdout, "Warning: match not a public method %s/%u\n", GET_STR(c), c->arity);
+			strcmp(MODULE_GET_STR(c), "dynamic") && strcmp(MODULE_GET_STR(c), "module")) {
+			fprintf(stdout, "Warning: match not a public method %s/%u\n", MODULE_GET_STR(c), c->arity);
 			break;
 		}
 
@@ -475,12 +473,13 @@ static bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, id
 	return h->is_multifile ? true : false;
 }
 
-static int compkey(const void *ptr1, const void *ptr2)
+static int compkey(const void *p, const void *ptr1, const void *ptr2)
 {
 	assert(ptr1 && ptr2);
 
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
+	const module *m = (const module*)p;
 
 	if (is_integer(p1) && is_integer(p2)) {
 		if (p1->val_num < p2->val_num)
@@ -498,7 +497,7 @@ static int compkey(const void *ptr1, const void *ptr2)
 				return 0;
 		}
 
-		int ok = strcmp(GET_STR(p1), GET_STR(p2));
+		int ok = strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
 		if (ok) return ok;
 
 		if (p1->arity < p2->arity)
@@ -509,7 +508,7 @@ static int compkey(const void *ptr1, const void *ptr2)
 
 		return 0;
 	} else if (is_atom(p1) && is_atom(p2) && (p1->arity == p2->arity)) {
-		return strcmp(GET_STR(p1), GET_STR(p2));
+		return strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
 	} else if (is_structure(p1) && is_structure(p2)) {
 		if (p1->arity < p2->arity)
 			return -1;
@@ -518,7 +517,7 @@ static int compkey(const void *ptr1, const void *ptr2)
 			return 1;
 
 		if (p1->val_off != p2->val_off) {
-			int i = strcmp(GET_STR(p1), GET_STR(p2));
+			int i = strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
 
 			if (i != 0)
 				return i;
@@ -528,7 +527,7 @@ static int compkey(const void *ptr1, const void *ptr2)
 		p1++; p2++;
 
 		while (arity--) {
-			int i = compkey(p1, p2);
+			int i = compkey(m, p1, p2);
 
 			if (i != 0)
 				return i;
@@ -541,10 +540,10 @@ static int compkey(const void *ptr1, const void *ptr2)
 	return 0;
 }
 
-static void reindex_predicate(predicate *h)
+static void reindex_predicate(module *m, predicate *h)
 {
 	assert(h);
-	h->index = sl_create(compkey);
+	h->index = sl_create1(compkey, m);
 	ensure(h->index);
 
 	for (clause *r = h->head; r; r = r->next) {
@@ -561,7 +560,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
-		idx_t off = index_from_pool(m->pl, GET_STR(c));
+		idx_t off = index_from_pool(m->pl, MODULE_GET_STR(c));
 		if(off == ERR_IDX) return NULL;
 		FREE_STR(c);
 		c->val_off = off;
@@ -578,7 +577,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	}
 
 	if (is_cstring(c)) {
-		idx_t off = index_from_pool(m->pl, GET_STR(c));
+		idx_t off = index_from_pool(m->pl, MODULE_GET_STR(c));
 		if(off == ERR_IDX) return NULL;
 		FREE_STR(c);
 		c->val_off = off;
@@ -589,7 +588,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	predicate *h = find_predicate(m, c);
 
 	if (h && !consulting && !h->is_dynamic) {
-		fprintf(stdout, "Error: not dynamic '%s'/%u\n", GET_STR(c), c->arity);
+		fprintf(stdout, "Error: not dynamic '%s'/%u\n", MODULE_GET_STR(c), c->arity);
 		return NULL;
 	}
 
@@ -658,7 +657,7 @@ static void assert_commit(module *m, term *t, clause *r, predicate *h, bool appe
 	}
 
 	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->key.arity && !m->noindex && !h->is_noindex)
-		reindex_predicate(h);
+		reindex_predicate(m, h);
 }
 
 clause *asserta_to_db(module *m, term *t, bool consulting)
@@ -745,7 +744,7 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 		h->is_dynamic = true;
 
 		if (!h->index && !m->noindex) {
-			h->index = sl_create(compkey);
+			h->index = sl_create1(compkey, m);
 			ensure(h->index);
 		}
 	} else
@@ -768,7 +767,7 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 
 		if (!h->index
 		    && !m->noindex
-		    && !(h->index = sl_create(compkey))) {
+		    && !(h->index = sl_create1(compkey, m))) {
 			m->error = true;
 		}
 
@@ -1062,7 +1061,7 @@ void consultall(parser *p, cell *l)
 
 	while (is_list(l)) {
 		cell *h = LIST_HEAD(l);
-		module_load_file(p->m, GET_STR(h));
+		module_load_file(p->m, PARSER_GET_STR(h));
 		l = LIST_TAIL(l);
 	}
 }
@@ -1102,7 +1101,7 @@ static void directives(parser *p, term *t)
 		return;
 	}
 
-	if (strcmp(GET_STR(t->cells), ":-") || (t->cells->arity != 1))
+	if (strcmp(PARSER_GET_STR(t->cells), ":-") || (t->cells->arity != 1))
 		return;
 
 	cell *c = t->cells + 1;
@@ -1110,7 +1109,7 @@ static void directives(parser *p, term *t)
 	if (!is_literal(c))
 		return;
 
-	const char *dirname = GET_STR(c);
+	const char *dirname = PARSER_GET_STR(c);
 
 	if (!strcmp(dirname, "initialization") && (c->arity <= 2)) {
 		p->run_init = true;
@@ -1120,7 +1119,7 @@ static void directives(parser *p, term *t)
 	if (!strcmp(dirname, "include") && (c->arity == 1)) {
 		cell *p1 = c + 1;
 		if (!is_literal(p1)) return;
-		const char *name = GET_STR(p1);
+		const char *name = PARSER_GET_STR(p1);
 		unsigned save_line_nbr = p->line_nbr;
 		char *tmpbuf = relative_to(p->m->filename, name);
 
@@ -1139,7 +1138,7 @@ static void directives(parser *p, term *t)
 	if (!strcmp(dirname, "ensure_loaded") && (c->arity == 1)) {
 		cell *p1 = c + 1;
 		if (!is_atom(p1)) return;
-		const char *name = GET_STR(p1);
+		const char *name = PARSER_GET_STR(p1);
 		char *tmpbuf = relative_to(p->m->filename, name);
 		deconsult(p->m->pl, tmpbuf);
 
@@ -1157,7 +1156,7 @@ static void directives(parser *p, term *t)
 	if (!strcmp(dirname, "module") && (c->arity == 2)) {
 		cell *p1 = c + 1, *p2 = c + 2;
 		if (!is_literal(p1)) return;
-		const char *name = GET_STR(p1);
+		const char *name = PARSER_GET_STR(p1);
 
 		if (find_module(p->m->pl, name)) {
 			fprintf(stdout, "Error: module already loaded: %s\n", name);
@@ -1178,7 +1177,7 @@ static void directives(parser *p, term *t)
 			cell *head = LIST_HEAD(p2);
 
 			if (is_structure(head)) {
-				if (strcmp(GET_STR(head), "/") && strcmp(GET_STR(head), "//"))
+				if (strcmp(PARSER_GET_STR(head), "/") && strcmp(PARSER_GET_STR(head), "//"))
 					return;
 
 				cell *f = head+1, *a = f+1;
@@ -1187,7 +1186,7 @@ static void directives(parser *p, term *t)
 				cell tmp = *f;
 				tmp.arity = a->val_num;
 
-				if (!strcmp(GET_STR(head), "//"))
+				if (!strcmp(PARSER_GET_STR(head), "//"))
 					tmp.arity += 2;
 
 				predicate *h = find_predicate(p->m, &tmp);
@@ -1215,13 +1214,13 @@ static void directives(parser *p, term *t)
 	if (!strcmp(dirname, "use_module") && (c->arity == 1)) {
 		cell *p1 = c + 1;
 		if (!is_literal(p1)) return;
-		const char *name = GET_STR(p1);
+		const char *name = PARSER_GET_STR(p1);
 		char dstbuf[1024*2];
 
 		if (!strcmp(name, "library")) {
 			p1 = p1 + 1;
 			if (!is_literal(p1)) return;
-			name = GET_STR(p1);
+			name = PARSER_GET_STR(p1);
 			module *m;
 
 			if ((m = find_module(p->m->pl, name)) != NULL) {
@@ -1285,14 +1284,14 @@ static void directives(parser *p, term *t)
 		cell *p1 = c + 1;
 
 		while (is_literal(p1)) {
-			if (is_literal(p1) && !strcmp(GET_STR(p1), "/") && (p1->arity == 2)) {
+			if (is_literal(p1) && !strcmp(PARSER_GET_STR(p1), "/") && (p1->arity == 2)) {
 				cell *c_name = p1 + 1;
 				if (!is_atom(c_name)) return;
 				cell *c_arity = p1 + 2;
 				if (!is_integer(c_arity)) return;
-				set_dynamic_in_db(p->m, GET_STR(c_name), c_arity->val_num);
+				set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
 				p1 += p1->nbr_cells;
-			} else if (!strcmp(GET_STR(p1), ","))
+			} else if (!strcmp(PARSER_GET_STR(p1), ","))
 				p1 += 1;
 		}
 
@@ -1303,15 +1302,15 @@ static void directives(parser *p, term *t)
 		cell *p1 = c + 1;
 
 		while (is_literal(p1)) {
-			if (is_literal(p1) && (!strcmp(GET_STR(p1), "/") || !strcmp(GET_STR(p1), "//")) && (p1->arity == 2)) {
+			if (is_literal(p1) && (!strcmp(PARSER_GET_STR(p1), "/") || !strcmp(PARSER_GET_STR(p1), "//")) && (p1->arity == 2)) {
 				cell *c_name = p1 + 1;
 				if (!is_atom(c_name)) return;
 				cell *c_arity = p1 + 2;
 				if (!is_integer(c_arity)) return;
-				const char *src = GET_STR(c_name);
+				const char *src = PARSER_GET_STR(c_name);
 				unsigned arity = c_arity->val_num;
 
-				if (!strcmp(GET_STR(p1), "//"))
+				if (!strcmp(PARSER_GET_STR(p1), "//"))
 					arity += 2;
 
 				if (!strchr(src, ':')) {
@@ -1330,7 +1329,7 @@ static void directives(parser *p, term *t)
 				}
 
 				p1 += p1->nbr_cells;
-			} else if (!strcmp(GET_STR(p1), ","))
+			} else if (!strcmp(PARSER_GET_STR(p1), ","))
 				p1 += 1;
 			else {
 				fprintf(stdout, "Warning: unknown multifile, line nbr %u\n", p->line_nbr);
@@ -1346,18 +1345,18 @@ static void directives(parser *p, term *t)
 		cell *p1 = c + 1;
 
 		while (is_literal(p1)) {
-			if (is_literal(p1) && !strcmp(GET_STR(p1), "/") && (p1->arity == 2)) {
+			if (is_literal(p1) && !strcmp(PARSER_GET_STR(p1), "/") && (p1->arity == 2)) {
 				cell *c_name = p1 + 1;
 				if (!is_atom(c_name)) return;
 				cell *c_arity = p1 + 2;
 				if (!is_integer(c_arity)) return;
-				set_persist_in_db(p->m, GET_STR(c_name), c_arity->val_num);
+				set_persist_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
 				if (p->m->error) {
 					p->error = true;
 					return;
 				}
 				p1 += p1->nbr_cells;
-			} else if (!strcmp(GET_STR(p1), ","))
+			} else if (!strcmp(PARSER_GET_STR(p1), ","))
 				p1 += 1;
 		}
 
@@ -1369,14 +1368,14 @@ static void directives(parser *p, term *t)
 		if (!is_literal(p1)) return;
 		if (!is_literal(p2)) return;
 
-		if (!strcmp(GET_STR(p1), "double_quotes")) {
-			if (!strcmp(GET_STR(p2), "atom")) {
+		if (!strcmp(PARSER_GET_STR(p1), "double_quotes")) {
+			if (!strcmp(PARSER_GET_STR(p2), "atom")) {
 				p->m->flag.double_quote_chars = p->m->flag.double_quote_codes = false;
 				p->m->flag.double_quote_atom = true;
-			} else if (!strcmp(GET_STR(p2), "codes")) {
+			} else if (!strcmp(PARSER_GET_STR(p2), "codes")) {
 				p->m->flag.double_quote_chars = p->m->flag.double_quote_atom = false;
 				p->m->flag.double_quote_codes = true;
-			} else if (!strcmp(GET_STR(p2), "chars")) {
+			} else if (!strcmp(PARSER_GET_STR(p2), "chars")) {
 				p->m->flag.double_quote_atom = p->m->flag.double_quote_codes = false;
 				p->m->flag.double_quote_chars = true;
 			} else {
@@ -1384,23 +1383,23 @@ static void directives(parser *p, term *t)
 				p->error = true;
 				return;
 			}
-		} else if (!strcmp(GET_STR(p1), "character_escapes")) {
-			if (!strcmp(GET_STR(p2), "true"))
+		} else if (!strcmp(PARSER_GET_STR(p1), "character_escapes")) {
+			if (!strcmp(PARSER_GET_STR(p2), "true"))
 				p->m->flag.character_escapes = true;
-			else if (!strcmp(GET_STR(p2), "false"))
+			else if (!strcmp(PARSER_GET_STR(p2), "false"))
 				p->m->flag.character_escapes = false;
-		} else if (!strcmp(GET_STR(p1), "prefer_rationals")) {
-			if (!strcmp(GET_STR(p2), "true"))
+		} else if (!strcmp(PARSER_GET_STR(p1), "prefer_rationals")) {
+			if (!strcmp(PARSER_GET_STR(p2), "true"))
 				p->m->flag.prefer_rationals = true;
-			else if (!strcmp(GET_STR(p2), "false"))
+			else if (!strcmp(PARSER_GET_STR(p2), "false"))
 				p->m->flag.prefer_rationals = false;
-		} else if (!strcmp(GET_STR(p1), "rational_syntax")) {
-			if (!strcmp(GET_STR(p2), "natural"))
+		} else if (!strcmp(PARSER_GET_STR(p1), "rational_syntax")) {
+			if (!strcmp(PARSER_GET_STR(p2), "natural"))
 				p->m->flag.rational_syntax_natural = true;
-			else if (!strcmp(GET_STR(p2), "compatibility"))
+			else if (!strcmp(PARSER_GET_STR(p2), "compatibility"))
 				p->m->flag.rational_syntax_natural = false;
 		} else {
-			fprintf(stdout, "Warning: unknown flag: %s\n", GET_STR(p1));
+			fprintf(stdout, "Warning: unknown flag: %s\n", PARSER_GET_STR(p1));
 		}
 
 		p->flag = p->m->flag;
@@ -1417,7 +1416,7 @@ static void directives(parser *p, term *t)
 		}
 
 		unsigned optype;
-		const char *spec = GET_STR(p2);
+		const char *spec = PARSER_GET_STR(p2);
 
 		if (!strcmp(spec, "fx"))
 			optype = OP_FX;
@@ -1438,7 +1437,7 @@ static void directives(parser *p, term *t)
 			return;
 		}
 
-		if (!set_op(p->m, GET_STR(p3), optype, p1->val_num)) {
+		if (!set_op(p->m, PARSER_GET_STR(p3), optype, p1->val_num)) {
 			fprintf(stdout, "Error: could not set op\n");
 			return;
 		}
@@ -1455,7 +1454,7 @@ void parser_xref(parser *p, term *t, predicate *parent)
 		if (!is_literal(c))
 			continue;
 
-		const char *functor = GET_STR(c);
+		const char *functor = PARSER_GET_STR(c);
 		module *m = p->m;
 
 		unsigned optype;
@@ -1505,8 +1504,8 @@ void parser_xref(parser *p, term *t, predicate *parent)
 			}
 
 			if (h && (m != p->m) && !h->is_public &&
-				strcmp(GET_STR(c), "dynamic") && strcmp(GET_STR(c), "module")) {
-				//fprintf(stdout, "Warning: xref not a public method %s/%u\n", GET_STR(c), c->arity);
+				strcmp(PARSER_GET_STR(c), "dynamic") && strcmp(PARSER_GET_STR(c), "module")) {
+				//fprintf(stdout, "Warning: xref not a public method %s/%u\n", PARSER_GET_STR(c), c->arity);
 				//p->error = true;
 				break;
 			}
@@ -1546,9 +1545,9 @@ static void check_first_cut(parser *p)
 		if (!(c->flags&FLAG_BUILTIN))
 			break;
 
-		if (!strcmp(GET_STR(c), ","))
+		if (!strcmp(PARSER_GET_STR(c), ","))
 			;
-		else if (!strcmp(GET_STR(c), "!")) {
+		else if (!strcmp(PARSER_GET_STR(c), "!")) {
 			p->t->first_cut = true;
 			break;
 		} else {
@@ -1613,7 +1612,7 @@ void parser_assign_vars(parser *p, unsigned start, bool rebase)
 			snprintf(tmpbuf, sizeof(tmpbuf), "_V%u", c->var_nbr);
 			c->var_nbr = get_varno(p, tmpbuf);
 		} else
-			c->var_nbr = get_varno(p, GET_STR(c));
+			c->var_nbr = get_varno(p, PARSER_GET_STR(c));
 
 		c->var_nbr += start;
 
@@ -1623,7 +1622,7 @@ void parser_assign_vars(parser *p, unsigned start, bool rebase)
 			return;
 		}
 
-		p->vartab.var_name[c->var_nbr] = GET_STR(c);
+		p->vartab.var_name[c->var_nbr] = PARSER_GET_STR(c);
 
 		if (p->vartab.var_used[c->var_nbr]++ == 0) {
 			c->flags |= FLAG2_FIRST_USE;
@@ -1691,10 +1690,10 @@ void term_to_body_conversion(parser *p)
 
 	for (idx_t i = 0; i < nbr_cells; i += c->nbr_cells, c += c->nbr_cells) {
 		if (IS_XFX(c) || IS_XFY(c)) {
-			if (!strcmp(GET_STR(c), ",")
-			|| !strcmp(GET_STR(c), ";")
-			|| !strcmp(GET_STR(c), "->")
-			|| !strcmp(GET_STR(c), ":-")) {
+			if (!strcmp(PARSER_GET_STR(c), ",")
+			|| !strcmp(PARSER_GET_STR(c), ";")
+			|| !strcmp(PARSER_GET_STR(c), "->")
+			|| !strcmp(PARSER_GET_STR(c), ":-")) {
 				cell *lhs = c + 1;
 
 				if (is_variable(lhs)) {
@@ -1790,7 +1789,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			idx_t off = (idx_t)((c+1) - p->t->cells);
 
 			if (off >= p->t->cidx) {
-				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
+				//fprintf(stdout, "Error: missing operand to '%s'\n", PARSER_GET_STR(c));
 				p->error = true;
 				c->arity = 0;
 				return false;
@@ -1805,7 +1804,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			idx_t off = (idx_t)((c+1)-p->t->cells);
 
 			if (off >= p->t->cidx) {
-				//fprintf(stdout, "Error: missing operand to '%s'\n", GET_STR(c));
+				//fprintf(stdout, "Error: missing operand to '%s'\n", PARSER_GET_STR(c));
 				p->error = true;
 				return false;
 			}
@@ -1858,7 +1857,7 @@ static void parser_dcg_rewrite(parser *p)
 	if (!is_literal(p->t->cells))
 		return;
 
-	if (strcmp(GET_STR(p->t->cells), "-->") || (p->t->cells->arity != 2))
+	if (strcmp(PARSER_GET_STR(p->t->cells), "-->") || (p->t->cells->arity != 2))
 		return;
 
 	query *q = create_query(p->m, false);
@@ -2614,10 +2613,10 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, int tolerant)
 			size_t len = len_char_utf8(tmp);
 			is_chars_list += len;
 		} else {
-			const char *src = GET_STR(c);
+			const char *src = QUERY_GET_STR(c);
 			size_t len = len_char_utf8(src);
 
-			if (len != LEN_STR(c)) {
+			if (len != QUERY_LEN_STR(c)) {
 				is_chars_list = 0;
 				break;
 			}
@@ -3267,7 +3266,7 @@ module *create_module(prolog *pl, const char *name)
 		m->next = m->pl->modules;
 		m->pl->modules = m;
 
-		m->index = sl_create(compkey);
+		m->index = sl_create1(compkey, m);
 		ensure(m->index);
 		m->p = create_parser(m);
 		ensure(m->p);
@@ -3709,18 +3708,23 @@ static void g_destroy(prolog *pl)
 
 	sl_destroy(pl->symtab);
 	pl->symtab = NULL;
-	free(g_pool);
-	g_pool_offset = 0;
-	g_pool = NULL;
+	free(pl->pool);
+	pl->pool_offset = 0;
+	pl->pool = NULL;
 }
 
-static void* g_init(prolog *pl)
+static int my_strcmp(__attribute__((unused)) const void *p, const void *k1, const void *k2)
+{
+	return strcmp(k1, k2);
+}
+
+static bool g_init(prolog *pl)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
-	g_pool = calloc(g_pool_size=INITIAL_POOL_SIZE, 1);
-	if (g_pool) {
+	pl->pool = calloc(pl->pool_size=INITIAL_POOL_SIZE, 1);
+	if (pl->pool) {
 		bool error = false;
-		CHECK_SENTINEL(pl->symtab = sl_create2((void*)strcmp, free), NULL);
+		CHECK_SENTINEL(pl->symtab = sl_create2((void*)my_strcmp, free), NULL);
 
 		if (!error) {
 			CHECK_SENTINEL(g_false_s = index_from_pool(pl, "false"), ERR_IDX);
@@ -3762,7 +3766,7 @@ static void* g_init(prolog *pl)
 			return NULL;
 		}
 	}
-	return g_pool;
+	return pl->pool ? true : false;
 }
 
 
@@ -3783,7 +3787,7 @@ prolog *pl_create()
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	prolog *pl = calloc(1, sizeof(prolog));
 
-	if (!g_tpl_count++ && (g_init(pl) == NULL)) {
+	if (!g_tpl_count++ && !g_init(pl)) {
 		free(pl);
 		return NULL;
 	}

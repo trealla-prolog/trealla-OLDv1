@@ -339,11 +339,11 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 		c = end_list(q);
 	}
 
-	const char *src = GET_STR(c);
-	int dq = 0, quote = !is_variable(c) && needs_quote(q->m, src, LEN_STR(c));
+	const char *src = QUERY_GET_STR(c);
+	int dq = 0, quote = !is_variable(c) && needs_quote(q->m, src, QUERY_LEN_STR(c));
 	if (is_string(c)) dq = quote = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
-	dst += formatted(dst, dstlen, src, LEN_STR(c), dq);
+	dst += formatted(dst, dstlen, src, QUERY_LEN_STR(c), dq);
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 
 	if (!is_structure(c))
@@ -444,7 +444,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		while (is_list(l)) {
 			cell *h = LIST_HEAD(l);
 			cell *c = deref(q, h, c_ctx);
-			dst += formatted(dst, dstlen, GET_STR(c), LEN_STR(c), false);
+			dst += formatted(dst, dstlen, QUERY_GET_STR(c), QUERY_LEN_STR(c), false);
 			l = LIST_TAIL(l);
 			l = deref(q, l, c_ctx);
 			c_ctx = q->latest_ctx;
@@ -456,7 +456,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 	// FIXME make non-recursive
 
-	const char *src = GET_STR(c);
+	const char *src = QUERY_GET_STR(c);
 	unsigned print_list = 0, cnt = 0;
 
 	while (is_iso_list(c)) {
@@ -478,10 +478,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 		head = running ? deref(q, head, c_ctx) : head;
 		idx_t head_ctx = q->latest_ctx;
-		bool special_op = (!strcmp(GET_STR(head), ",")
-			|| !strcmp(GET_STR(head), ";")
-			|| !strcmp(GET_STR(head), "->")
-			|| !strcmp(GET_STR(head), "-->"));
+		bool special_op = (!strcmp(QUERY_GET_STR(head), ",")
+			|| !strcmp(QUERY_GET_STR(head), ";")
+			|| !strcmp(QUERY_GET_STR(head), "->")
+			|| !strcmp(QUERY_GET_STR(head), "-->"));
 		int parens = is_structure(head) && special_op;
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
 		ssize_t res = print_term_to_buf(q, dst, dstlen, head, head_ctx, running, 0, depth+1);
@@ -494,7 +494,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		c_ctx = q->latest_ctx;
 
 		if (is_literal(tail) && !is_structure(tail)) {
-			src = GET_STR(tail);
+			src = QUERY_GET_STR(tail);
 
 			if (strcmp(src, "[]")) {
 				dst += snprintf(dst, dstlen, "%s", "|");
@@ -515,7 +515,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			while (is_list(l)) {
 				dst += snprintf(dst, dstlen, "%s", ",");
 				cell *h = LIST_HEAD(l);
-				dst += formatted(dst, dstlen, GET_STR(h), LEN_STR(h), false);
+				dst += formatted(dst, dstlen, QUERY_GET_STR(h), QUERY_LEN_STR(h), false);
 				l = LIST_TAIL(l);
 			}
 
@@ -536,7 +536,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	int optype = GET_OP(c);
 
 	if (q->ignore_ops || !optype) {
-		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quote(q->m, src, LEN_STR(c));
+		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quote(q->m, src, QUERY_LEN_STR(c));
 		int dq = 0, braces = 0, parens = 0;
 		if (is_string(c)) dq = quote = 1;
 		if (q->quoted < 0) quote = 0;
@@ -562,7 +562,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			return dst - save_dst;
 		}
 
-		int len_str = LEN_STR(c);
+		int len_str = QUERY_LEN_STR(c);
 
 		if (braces)
 			;
@@ -570,12 +570,12 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			if ((running < 0) && is_blob(c) && (len_str > 256))
 				len_str = 256;
 
-			dst += formatted(dst, dstlen, src, LEN_STR(c), dq);
+			dst += formatted(dst, dstlen, src, QUERY_LEN_STR(c), dq);
 
 			if ((running < 0) && is_blob(c) && (len_str == 256))
 				dst += snprintf(dst, dstlen, "%s", "|...");
 		} else
-			dst += plain(dst, dstlen, src, LEN_STR(c));
+			dst += plain(dst, dstlen, src, QUERY_LEN_STR(c));
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
@@ -592,7 +592,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 				int parens = 0;
 
 				if (!braces && is_literal(tmp)) {
-					const char *s = GET_STR(tmp);
+					const char *s = QUERY_GET_STR(tmp);
 
 					if (!strcmp(s, ",") || !strcmp(s, ";") ||
 						!strcmp(s, "->") || !strcmp(s, ":-") ||
@@ -635,7 +635,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		idx_t rhs_ctx = q->latest_ctx;
 		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "\\+");
 		space += !strcmp(src, "-") && is_rational(rhs) && (rhs->val_num < 0);
-		int parens = is_structure(rhs) && !strcmp(GET_STR(rhs), ",");
+		int parens = is_structure(rhs) && !strcmp(QUERY_GET_STR(rhs), ",");
 		dst += snprintf(dst, dstlen, "%s", src);
 		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
@@ -650,14 +650,14 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		idx_t lhs_ctx = q->latest_ctx;
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		idx_t rhs_ctx = q->latest_ctx;
-		int my_prec = get_op(q->m, GET_STR(c), NULL, NULL, false);
-		int lhs_prec1 = is_literal(lhs) ? get_op(q->m, GET_STR(lhs), NULL, NULL, false) : 0;
-		int lhs_prec2 = is_literal(lhs) && !lhs->arity ? get_op(q->m, GET_STR(lhs), NULL, NULL, false) : 0;
-		int rhs_prec1 = is_literal(rhs) ? get_op(q->m, GET_STR(rhs), NULL, NULL, false) : 0;
-		int rhs_prec2 = is_literal(rhs) && !rhs->arity ? get_op(q->m, GET_STR(rhs), NULL, NULL, false) : 0;
-		//printf("\n*** c=%s prec=%d\n", GET_STR(c), my_prec);
-		//printf("*** lhs=%s prec=%d\n", GET_STR(lhs), lhs_prec1);
-		//printf("*** rhs=%s prec=%d\n", GET_STR(rhs), rhs_prec1);
+		int my_prec = get_op(q->m, QUERY_GET_STR(c), NULL, NULL, false);
+		int lhs_prec1 = is_literal(lhs) ? get_op(q->m, QUERY_GET_STR(lhs), NULL, NULL, false) : 0;
+		int lhs_prec2 = is_literal(lhs) && !lhs->arity ? get_op(q->m, QUERY_GET_STR(lhs), NULL, NULL, false) : 0;
+		int rhs_prec1 = is_literal(rhs) ? get_op(q->m, QUERY_GET_STR(rhs), NULL, NULL, false) : 0;
+		int rhs_prec2 = is_literal(rhs) && !rhs->arity ? get_op(q->m, QUERY_GET_STR(rhs), NULL, NULL, false) : 0;
+		//printf("\n*** c=%s prec=%d\n", QUERY_GET_STR(c), my_prec);
+		//printf("*** lhs=%s prec=%d\n", QUERY_GET_STR(lhs), lhs_prec1);
+		//printf("*** rhs=%s prec=%d\n", QUERY_GET_STR(rhs), rhs_prec1);
 		int parens = 0;//depth && strcmp(src, ",") && strcmp(src, "is") && strcmp(src, "->");
 		int lhs_parens = lhs_prec1 > my_prec;
 		lhs_parens |= lhs_prec2;

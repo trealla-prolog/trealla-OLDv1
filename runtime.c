@@ -164,7 +164,7 @@ static void trace_call(query *q, cell *c, box_t box)
 		return;
 #endif
 
-	const char *src = GET_STR(c);
+	const char *src = QUERY_GET_STR(c);
 
 	if (!strcmp(src, ",") || !strcmp(src, ";") || !strcmp(src, "->"))
 		return;
@@ -736,7 +736,7 @@ static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2
 	return true;
 }
 
-static bool unify_int(cell *p1, cell *p2)
+static bool unify_int(__attribute__((unused)) query *q, cell *p1, cell *p2)
 {
 	if (is_rational(p2))
 		return (p1->val_num == p2->val_num) && (p1->val_den == p2->val_den);
@@ -744,7 +744,7 @@ static bool unify_int(cell *p1, cell *p2)
 	return false;
 }
 
-static bool unify_float(cell *p1, cell *p2)
+static bool unify_float(__attribute__((unused)) query *q, cell *p1, cell *p2)
 {
 	if (is_float(p2))
 		return p1->val_flt == p2->val_flt;
@@ -752,24 +752,24 @@ static bool unify_float(cell *p1, cell *p2)
 	return false;
 }
 
-static bool unify_literal(cell *p1, cell *p2)
+static bool unify_literal(query *q, cell *p1, cell *p2)
 {
 	if (is_literal(p2))
 		return p1->val_off == p2->val_off;
 
-	if (is_cstring(p2) && (LEN_STR(p1) == LEN_STR(p2)))
-		return !memcmp(GET_STR(p2), GET_POOL(p1->val_off), LEN_STR(p1));
+	if (is_cstring(p2) && (QUERY_LEN_STR(p1) == QUERY_LEN_STR(p2)))
+		return !memcmp(QUERY_GET_STR(p2), QUERY_GET_POOL(p1->val_off), QUERY_LEN_STR(p1));
 
 	return false;
 }
 
-static bool unify_cstring(cell *p1, cell *p2)
+static bool unify_cstring(query *q, cell *p1, cell *p2)
 {
-	if (is_cstring(p2) && (LEN_STR(p1) == LEN_STR(p2)))
-		return !memcmp(GET_STR(p1), GET_STR(p2), LEN_STR(p1));
+	if (is_cstring(p2) && (QUERY_LEN_STR(p1) == QUERY_LEN_STR(p2)))
+		return !memcmp(QUERY_GET_STR(p1), QUERY_GET_STR(p2), QUERY_LEN_STR(p1));
 
-	if (is_literal(p2) && (LEN_STR(p1) == LEN_STR(p2)))
-		return !memcmp(GET_STR(p1), GET_POOL(p2->val_off), LEN_STR(p1));
+	if (is_literal(p2) && (QUERY_LEN_STR(p1) == QUERY_LEN_STR(p2)))
+		return !memcmp(QUERY_GET_STR(p1), QUERY_GET_POOL(p2->val_off), QUERY_LEN_STR(p1));
 
 	return false;
 }
@@ -805,7 +805,7 @@ static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx,
 
 struct dispatch {
 	uint8_t val_type;
-	bool (*fn)(cell*, cell*);
+	bool (*fn)(query*, cell*, cell*);
 };
 
 static const struct dispatch g_disp[] =
@@ -857,7 +857,7 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 	}
 
 	if (is_string(p1) && is_string(p2))
-		return unify_cstring(p1, p2);
+		return unify_cstring(q, p1, p2);
 
 	if (is_list(p1) && is_list(p2))
 		return unify_list(q, p1, p1_ctx, p2, p2_ctx, depth+1);
@@ -865,7 +865,7 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 	if (p1->arity || p2->arity)
 		return unify_structure(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 
-	return g_disp[p1->val_type].fn(p1, p2);
+	return g_disp[p1->val_type].fn(q, p1, p2);
 }
 
 static void next_key(query *q)
@@ -944,7 +944,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_r
 			h = c->match;
 		else {
 			// For now convert it to a literal
-			idx_t off = index_from_pool(q->m->pl, GET_STR(c));
+			idx_t off = index_from_pool(q->m->pl, QUERY_GET_STR(c));
 			may_idx_error(off);
 			FREE_STR(c);
 			c->val_off = off;
@@ -959,7 +959,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_r
 		}
 
 		if (!h) {
-			const char *name = GET_STR(p1);
+			const char *name = QUERY_GET_STR(p1);
 			bool tmp_userop = false;
 			unsigned tmp_optype = 0;
 
@@ -1032,7 +1032,7 @@ static USE_RESULT prolog_state match_rule_head_or_fact(query *q)
 			h = c->match;
 		} else {
 			// For now convert it to a literal
-			c->val_off = index_from_pool(q->m->pl, GET_STR(c));
+			c->val_off = index_from_pool(q->m->pl, QUERY_GET_STR(c));
 			if (c->val_off == ERR_IDX) {
 				q->error = true;
 				return pl_error;
@@ -1048,7 +1048,7 @@ static USE_RESULT prolog_state match_rule_head_or_fact(query *q)
 			h = c->match = find_matching_predicate(q->m, c);
 
 			if (!h) {
-				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(c), "initialization")))
+				if (!is_end(c) && !(is_literal(c) && !strcmp(QUERY_GET_STR(c), "initialization")))
 					return throw_error(q, c, "existence_error", "procedure");
 				else
 					q->error = true;
