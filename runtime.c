@@ -890,8 +890,7 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx, bool
 		predicate *h = find_matching_predicate(q->m, head);
 
 		if (!h) {	// ??????
-			head->match = find_matching_predicate(q->m, head);
-			h = head->match;
+			h = head->match = find_matching_predicate(q->m, head);
 		}
 
 		if (!h)
@@ -990,8 +989,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_r
 		}
 
 		if (!h) {
-			p1->match = find_matching_predicate(q->m, p1);
-			h = p1->match;
+			h = p1->match = find_matching_predicate(q->m, p1);
 		}
 
 		if (!h) {
