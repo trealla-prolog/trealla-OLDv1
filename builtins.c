@@ -1052,8 +1052,8 @@ static USE_RESULT prolog_state fn_iso_number_chars_2(query *q)
 	char tmpbuf[256];
 	print_term_to_buf(q, tmpbuf, sizeof(tmpbuf), p1, p1_ctx, 1, 0, 0);
 	cell tmp;
-	tmp.flags |= FLAG_TMP;
 	may_error(make_string(&tmp, tmpbuf, strlen(tmpbuf)));
+	tmp.flags |= FLAG_TMP;
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
 	return ok;
