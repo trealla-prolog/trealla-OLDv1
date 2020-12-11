@@ -913,12 +913,39 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx, bool
 			continue;
 
 		term *t = &q->st.curr_clause2->t;
+		bool needs_true = false;
+
+		cell *body = get_logical_body(t->cells);
+		idx_t body_ctx;
+
+		if (!body) {
+			body = get_logical_body(p1);
+			body = deref(q, body, p1_ctx);
+			body_ctx = q->latest_ctx;
+
+			if (body) {
+				if (is_variable(body) || (is_literal(body) && (body->val_off = g_true_s))) {
+					p1 = get_head(p1);
+					needs_true = true;
+				}
+			}
+		}
+
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
 		q->no_tco = false;
 
-		if (unify_structure(q, p1, p1_ctx, t->cells, q->st.fp, 0))
+		if (unify_structure(q, p1, p1_ctx, t->cells, q->st.fp, 0)) {
+			if (needs_true && is_variable(body)) {
+				cell tmp = {0};
+				tmp.val_type = TYPE_LITERAL;
+				tmp.nbr_cells = 1;
+				tmp.val_off = g_true_s;
+				set_var(q, body, body_ctx, &tmp, q->st.curr_frame);
+			}
+
 			return pl_success;
+		}
 
 		undo_me(q);
 	}
