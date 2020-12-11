@@ -944,7 +944,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_r
 			h = c->match;
 		else {
 			// For now convert it to a literal
-			idx_t off = index_from_pool(GET_STR(c));
+			idx_t off = index_from_pool(q->m, GET_STR(c));
 			may_idx_error(off);
 			FREE_STR(c);
 			c->val_off = off;
@@ -1032,7 +1032,7 @@ static USE_RESULT prolog_state match_rule_head_or_fact(query *q)
 			h = c->match;
 		} else {
 			// For now convert it to a literal
-			c->val_off = index_from_pool(GET_STR(c));
+			c->val_off = index_from_pool(q->m, GET_STR(c));
 			if (c->val_off == ERR_IDX) {
 				q->error = true;
 				return pl_error;

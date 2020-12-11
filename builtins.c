@@ -2327,7 +2327,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 				tmp[idx].arity = 2;
 				tmp[idx++].nbr_cells = ((cnt-done)*4)+1;
 				cell v;
-				make_literal(&v, index_from_pool("="));
+				make_literal(&v, index_from_pool(q->m, "="));
 				v.flags |= FLAG_BUILTIN;
 				v.fn = fn_iso_unify_2;
 				v.arity = 2;
@@ -2390,7 +2390,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 				tmp[idx].arity = 2;
 				tmp[idx++].nbr_cells = ((cnt-done)*4)+1;
 				cell v;
-				make_literal(&v, index_from_pool("="));
+				make_literal(&v, index_from_pool(q->m, "="));
 				v.flags |= FLAG_BUILTIN;
 				v.fn = fn_iso_unify_2;
 				v.arity = 2;
@@ -4695,7 +4695,7 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 
 		if (is_cstring(tmp2) && arity) {
 			cell *c = tmp2;
-			idx_t off = index_from_pool(GET_STR(c));
+			idx_t off = index_from_pool(q->m, GET_STR(c));
 			//if (is_nonconst_blob(c)) free(c->val_str);
 			c->val_off = off;
 			ensure (c->val_off != ERR_IDX);
@@ -5245,7 +5245,7 @@ static void do_assign_vars(parser *p, idx_t nbr_cells)
 		else
 			sprintf(tmpbuf, "%c%d", ch, n);
 
-		c->val_off = index_from_pool(tmpbuf);
+		c->val_off = index_from_pool(p->m, tmpbuf);
 		//printf("*** %u = %u => %s <= %s\n",  var_nbr, c->val_off, GET_POOL(c->val_off), tmpbuf);
 		c->flags = 0;
 	}
@@ -5374,7 +5374,7 @@ static USE_RESULT prolog_state fn_iso_call_n(query *q)
 
 	if (is_cstring(tmp2)) {
 		cell *c = tmp2;
-		idx_t off = index_from_pool(GET_STR(c));
+		idx_t off = index_from_pool(q->m, GET_STR(c));
 		if (is_nonconst_blob(c)) free(c->val_str);
 		c->val_off = off;
 		ensure (c->val_off != ERR_IDX);
@@ -5722,7 +5722,7 @@ static USE_RESULT prolog_state fn_iso_functor_3(query *q)
 			tmp[0].nbr_cells = 1 + arity;
 
 			if (is_cstring(p2))
-				tmp[0].val_off = index_from_pool(GET_STR(p2));
+				tmp[0].val_off = index_from_pool(q->m, GET_STR(p2));
 			else
 				tmp[0].val_off = p2->val_off;
 
@@ -5930,29 +5930,29 @@ static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 		cell tmp;
 
 		if (q->m->flag.double_quote_atom)
-			make_literal(&tmp, index_from_pool("atom"));
+			make_literal(&tmp, index_from_pool(q->m, "atom"));
 		else if (q->m->flag.double_quote_codes)
-			make_literal(&tmp, index_from_pool("codes"));
+			make_literal(&tmp, index_from_pool(q->m, "codes"));
 		else if (q->m->flag.double_quote_chars)
-			make_literal(&tmp, index_from_pool("chars"));
+			make_literal(&tmp, index_from_pool(q->m, "chars"));
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "char_conversion")) {
 		cell tmp;
 
 		if (q->m->flag.char_conversion)
-			make_literal(&tmp, index_from_pool("on"));
+			make_literal(&tmp, index_from_pool(q->m, "on"));
 		else
-			make_literal(&tmp, index_from_pool("off"));
+			make_literal(&tmp, index_from_pool(q->m, "off"));
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "debug")) {
 		cell tmp;
 
 		if (q->m->flag.debug)
-			make_literal(&tmp, index_from_pool("on"));
+			make_literal(&tmp, index_from_pool(q->m, "on"));
 		else
-			make_literal(&tmp, index_from_pool("off"));
+			make_literal(&tmp, index_from_pool(q->m, "off"));
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "character_escapes")) {
@@ -5977,18 +5977,18 @@ static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 		cell tmp;
 
 		if (q->m->flag.rational_syntax_natural)
-			make_literal(&tmp, index_from_pool("natural"));
+			make_literal(&tmp, index_from_pool(q->m, "natural"));
 		else
-			make_literal(&tmp, index_from_pool("compatibility"));
+			make_literal(&tmp, index_from_pool(q->m, "compatibility"));
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "dialect")) {
 		cell tmp;
-		make_literal(&tmp, index_from_pool("trealla"));
+		make_literal(&tmp, index_from_pool(q->m, "trealla"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "integer_rounding_function")) {
 		cell tmp;
-		make_literal(&tmp, index_from_pool("toward_zero"));
+		make_literal(&tmp, index_from_pool(q->m, "toward_zero"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "bounded")) {
 		cell tmp;
@@ -6032,7 +6032,7 @@ static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 		sscanf(VERSION, "v%u.%u.%u", &v1, &v2, &v3);
 		cell *tmp = alloc_heap(q, 5);
 		ensure(tmp);
-		make_literal(&tmp[0], index_from_pool("trealla"));
+		make_literal(&tmp[0], index_from_pool(q->m, "trealla"));
 		make_int(&tmp[1], v1);
 		make_int(&tmp[2], v2);
 		make_int(&tmp[3], v3);
@@ -6042,7 +6042,7 @@ static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 		return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "version_git")) {
 		cell tmp;
-		make_literal(&tmp, index_from_pool(VERSION));
+		make_literal(&tmp, index_from_pool(q->m, VERSION));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "argv")) {
 		if (g_avc == g_ac) {
@@ -6067,10 +6067,10 @@ static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 	} else if (!strcmp(GET_STR(p1), "unknown")) {
 		cell tmp;
 		make_literal(&tmp,
-			q->m->flag.unknown == 1 ? index_from_pool("error") :
-			q->m->flag.unknown == 2 ? index_from_pool("warning") :
-			q->m->flag.unknown == 3 ? index_from_pool("changeable") :
-			index_from_pool("fail"));
+			q->m->flag.unknown == 1 ? index_from_pool(q->m, "error") :
+			q->m->flag.unknown == 2 ? index_from_pool(q->m, "warning") :
+			q->m->flag.unknown == 3 ? index_from_pool(q->m, "changeable") :
+			index_from_pool(q->m, "fail"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -6105,7 +6105,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.double_quote_atom = q->m->flag.double_quote_codes = false;
 		} else {
 			cell *tmp = alloc_heap(q, 3);
-			make_structure(tmp, index_from_pool("+"), fn_iso_add_2, 2, 2);
+			make_structure(tmp, index_from_pool(q->m, "+"), fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
@@ -6117,7 +6117,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.character_escapes = false;
 		else {
 			cell *tmp = alloc_heap(q, 3);
-			make_structure(tmp, index_from_pool("+"), fn_iso_add_2, 2, 2);
+			make_structure(tmp, index_from_pool(q->m, "+"), fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
@@ -6129,7 +6129,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.char_conversion = false;
 		else {
 			cell *tmp = alloc_heap(q, 3);
-			make_structure(tmp, index_from_pool("+"), fn_iso_add_2, 2, 2);
+			make_structure(tmp, index_from_pool(q->m, "+"), fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
@@ -6141,7 +6141,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.rational_syntax_natural = false;
 		else {
 			cell *tmp = alloc_heap(q, 3);
-			make_structure(tmp, index_from_pool("+"), fn_iso_add_2, 2, 2);
+			make_structure(tmp, index_from_pool(q->m, "+"), fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
@@ -6153,7 +6153,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.prefer_rationals = false;
 		else {
 			cell *tmp = alloc_heap(q, 3);
-			make_structure(tmp, index_from_pool("+"), fn_iso_add_2, 2, 2);
+			make_structure(tmp, index_from_pool(q->m, "+"), fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
@@ -6165,7 +6165,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.debug = false;
 		else {
 			cell *tmp = alloc_heap(q, 3);
-			make_structure(tmp, index_from_pool("+"), fn_iso_add_2, 2, 2);
+			make_structure(tmp, index_from_pool(q->m, "+"), fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
@@ -6857,7 +6857,7 @@ static USE_RESULT prolog_state fn_listing_1(query *q)
 			return throw_error(q, p3, "type_error", "integer");
 		}
 
-		name = index_from_pool(GET_STR(p2));
+		name = index_from_pool(q->m, GET_STR(p2));
 		arity = p3->val_num;
 
 		if (!strcmp(GET_STR(p1), "//"))
@@ -8078,7 +8078,7 @@ static USE_RESULT prolog_state fn_mustbe_pairlist_1(query *q)
 		if (is_variable(h))
 			return throw_error(q, h, "instantiation_error", "not_sufficiently_instantiated");
 
-		if (!is_literal(h) || (h->arity != 2) || (h->val_off != index_from_pool("-")))
+		if (!is_literal(h) || (h->arity != 2) || (h->val_off != index_from_pool(q->m, "-")))
 			return throw_error(q, h, "type_error", "pair");
 
 		p1 = LIST_TAIL(p1);
@@ -10177,49 +10177,49 @@ static USE_RESULT prolog_state fn_predicate_property_2(query *q)
 	predicate *h = find_functor(q->m, f, p1->arity);
 
 	if (check_builtin(q->m, f, p1->arity)) {
-		make_literal(&tmp, index_from_pool("built_in"));
+		make_literal(&tmp, index_from_pool(q->m, "built_in"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
 	if (h && !h->is_dynamic) {
-		make_literal(&tmp, index_from_pool("built_in"));
+		make_literal(&tmp, index_from_pool(q->m, "built_in"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
 	if (h && h->is_dynamic) {
-		make_literal(&tmp, index_from_pool("dynamic"));
+		make_literal(&tmp, index_from_pool(q->m, "dynamic"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
 	if (h && h->is_persist) {
-		make_literal(&tmp, index_from_pool("persist"));
+		make_literal(&tmp, index_from_pool(q->m, "persist"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
 	if (h && h->is_public) {
-		make_literal(&tmp, index_from_pool("public"));
+		make_literal(&tmp, index_from_pool(q->m, "public"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
 	if (h && h->is_public) {
-		make_literal(&tmp, index_from_pool("exported"));
+		make_literal(&tmp, index_from_pool(q->m, "exported"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
 	if (h) {
-		make_literal(&tmp, index_from_pool("visible"));
+		make_literal(&tmp, index_from_pool(q->m, "visible"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
 	if (h) {
-		make_literal(&tmp, index_from_pool("static"));
+		make_literal(&tmp, index_from_pool(q->m, "static"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
@@ -10282,7 +10282,7 @@ static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned end)
 
 	if (is_variable(p1)) {
 		cell *tmp = alloc_heap(q, 2);
-		make_structure(tmp+0, index_from_pool("$VAR"), NULL, 1, 1);
+		make_structure(tmp+0, index_from_pool(q->m, "$VAR"), NULL, 1, 1);
 		make_int(tmp+1, end++);
 		tmp->flags |= FLAG2_QUOTED;
 		set_var(q, p1, q->latest_ctx, tmp, q->st.curr_frame);
@@ -10301,7 +10301,7 @@ static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned end)
 
 		if (is_variable(c)) {
 			cell *tmp = alloc_heap(q, 2);
-			make_structure(tmp+0, index_from_pool("$VAR"), NULL, 1, 1);
+			make_structure(tmp+0, index_from_pool(q->m, "$VAR"), NULL, 1, 1);
 			make_int(tmp+1, end++);
 			tmp->flags |= FLAG2_QUOTED;
 			set_var(q, c, q->latest_ctx, tmp, q->st.curr_frame);
@@ -10998,7 +10998,7 @@ static USE_RESULT prolog_state fn_current_module_1(query *q)
 		q->save_m = m;
 		may_error(make_choice(q));
 		cell tmp;
-		make_literal(&tmp, index_from_pool(m->name));
+		make_literal(&tmp, index_from_pool(q->m, m->name));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
@@ -11011,7 +11011,7 @@ static USE_RESULT prolog_state fn_current_module_1(query *q)
 	q->save_m = m;
 	may_error(make_choice(q));
 	cell tmp;
-	make_literal(&tmp, index_from_pool(m->name));
+	make_literal(&tmp, index_from_pool(q->m, m->name));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }

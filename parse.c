@@ -40,13 +40,14 @@ idx_t g_empty_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
 idx_t g_sys_elapsed_s, g_sys_queue_s, g_local_cut_s, g_braces_s;
 unsigned g_cpu_count = 4;
-module *g_modules = NULL;
 char *g_tpl_lib = NULL;
 int g_ac = 0, g_avc = 1;
 char **g_av = NULL, *g_argv0 = NULL;
 
 char *g_pool = NULL;
 static idx_t g_pool_offset = 0, g_pool_size = 0;
+
+module *g_modules = NULL;	// FIXME: move to prolog object
 
 static atomic_t int g_tpl_count = 0;
 
@@ -118,7 +119,10 @@ static struct op_table g_ops[] =
 	{0,0,0}
 };
 
-static idx_t is_in_pool(const char *name)
+// FIXME: make g_pool thread-safe, probably by putting
+// a mutex in the prolog object
+
+static idx_t is_in_pool(__attribute__((unused)) module *m, const char *name)
 {
 	const void *val;
 
@@ -128,7 +132,7 @@ static idx_t is_in_pool(const char *name)
 	return ERR_IDX;
 }
 
-static idx_t add_to_pool(const char *name)
+static idx_t add_to_pool(__attribute__((unused)) module *m, const char *name)
 {
 	if (!name) return ERR_IDX;
 	idx_t offset = g_pool_offset;
@@ -151,15 +155,15 @@ static idx_t add_to_pool(const char *name)
 	return offset;
 }
 
-idx_t index_from_pool(const char *name)
+idx_t index_from_pool(module *m, const char *name)
 {
 	if (!name) return ERR_IDX;
-	idx_t offset = is_in_pool(name);
+	idx_t offset = is_in_pool(m, name);
 
 	if (offset != ERR_IDX)
 		return offset;
 
-	return add_to_pool(name);
+	return add_to_pool(m, name);
 }
 
 unsigned get_op(module *m, const char *name, unsigned *optype, bool *userop, bool hint_prefix)
@@ -359,7 +363,7 @@ static predicate *find_predicate(module *m, cell *c)
 
 	if (is_cstring(c)) {
 		tmp.val_type = TYPE_LITERAL;
-		tmp.val_off = index_from_pool(GET_STR(c));
+		tmp.val_off = index_from_pool(m, GET_STR(c));
 	}
 
 	sliter *iter = sl_findkey(m->index, &tmp);
@@ -419,7 +423,7 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 
 	cell tmp = {0};
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = index_from_pool(name);
+	tmp.val_off = index_from_pool(m, name);
 	tmp.arity = arity;
 	return find_predicate(m, &tmp);
 }
@@ -450,7 +454,7 @@ void set_multifile_in_db(module *m, const char *name, idx_t arity)
 
 	cell tmp = {0};
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = index_from_pool(name);
+	tmp.val_off = index_from_pool(m, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
 	predicate *h = find_predicate(m, &tmp);
@@ -470,7 +474,7 @@ static bool is_multifile_in_db(const char *mod, const char *name, idx_t arity)
 
 	cell tmp = {0};
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = index_from_pool(name);
+	tmp.val_off = index_from_pool(m, name);
 	if (tmp.val_off == ERR_IDX) return false;
 	tmp.arity = arity;
 	predicate *h = find_predicate(m, &tmp);
@@ -564,7 +568,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
-		idx_t off = index_from_pool(GET_STR(c));
+		idx_t off = index_from_pool(m, GET_STR(c));
 		if(off == ERR_IDX) return NULL;
 		FREE_STR(c);
 		c->val_off = off;
@@ -581,7 +585,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	}
 
 	if (is_cstring(c)) {
-		idx_t off = index_from_pool(GET_STR(c));
+		idx_t off = index_from_pool(m, GET_STR(c));
 		if(off == ERR_IDX) return NULL;
 		FREE_STR(c);
 		c->val_off = off;
@@ -738,7 +742,7 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 
 	cell tmp = {0};
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = index_from_pool(name);
+	tmp.val_off = index_from_pool(m, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
 	predicate *h = find_predicate(m, &tmp);
@@ -759,7 +763,7 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp = {0};
 	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = index_from_pool(name);
+	tmp.val_off = index_from_pool(m, name);
 	ensure(tmp.val_off == ERR_IDX);
 	tmp.arity = arity;
 	predicate *h = find_predicate(m, &tmp);
@@ -1490,7 +1494,7 @@ void parser_xref(parser *p, term *t, predicate *parent)
 
 			if (m)
 			{
-				c->val_off = index_from_pool(tmpbuf2);
+				c->val_off = index_from_pool(p->m, tmpbuf2);
 				ensure(c->val_off != ERR_IDX);
 			}
 			else
@@ -1679,7 +1683,7 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 	p1->val_type = TYPE_LITERAL;
 	p1->flags = FLAG_BUILTIN;
 	p1->fn = NULL;
-	p1->val_off = index_from_pool("call");
+	p1->val_off = index_from_pool(p->m, "call");
 	p1->nbr_cells = 2;
 	p1->arity = 1;
 
@@ -2722,7 +2726,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quoted && !strcmp(p->token, "{")) {
 			save_idx = p->t->cidx;
-			cell *c = make_literal(p, index_from_pool("{}"));
+			cell *c = make_literal(p, index_from_pool(p->m, "{}"));
 			ensure(c);
 			c->arity = 1;
 			p->start_term = true;
@@ -2875,7 +2879,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			if (p->was_quoted)
 				c->flags |= FLAG2_QUOTED;
 
-			c->val_off = index_from_pool(p->token);
+			c->val_off = index_from_pool(p->m, p->token);
 			ensure(c->val_off != ERR_IDX);
 		} else {
 			c->val_type = TYPE_CSTRING;
@@ -3717,7 +3721,7 @@ void g_destroy()
 	g_pool = NULL;
 }
 
-void* g_init(void)
+static void* g_init(prolog *pl)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	g_pool = calloc(g_pool_size=INITIAL_POOL_SIZE, 1);
@@ -3726,23 +3730,23 @@ void* g_init(void)
 		CHECK_SENTINEL(g_symtab = sl_create2((void*)strcmp, free), NULL);
 
 		if (!error) {
-			CHECK_SENTINEL(g_false_s = index_from_pool("false"), ERR_IDX);
-			CHECK_SENTINEL(g_true_s = index_from_pool("true"), ERR_IDX);
-			CHECK_SENTINEL(g_empty_s = index_from_pool(""), ERR_IDX);
-			CHECK_SENTINEL(g_anon_s = index_from_pool("_"), ERR_IDX);
-			CHECK_SENTINEL(g_dot_s = index_from_pool("."), ERR_IDX);
-			CHECK_SENTINEL(g_cut_s = index_from_pool("!"), ERR_IDX);
-			CHECK_SENTINEL(g_local_cut_s = index_from_pool("¡"), ERR_IDX);
-			CHECK_SENTINEL(g_nil_s = index_from_pool("[]"), ERR_IDX);
-			CHECK_SENTINEL(g_braces_s = index_from_pool("{}"), ERR_IDX);
-			CHECK_SENTINEL(g_fail_s = index_from_pool("fail"), ERR_IDX);
-			CHECK_SENTINEL(g_clause_s = index_from_pool(":-"), ERR_IDX);
-			CHECK_SENTINEL(g_sys_elapsed_s = index_from_pool("$elapsed"), ERR_IDX);
-			CHECK_SENTINEL(g_sys_queue_s = index_from_pool("$queue"), ERR_IDX);
-			CHECK_SENTINEL(g_eof_s = index_from_pool("end_of_file"), ERR_IDX);
-			CHECK_SENTINEL(g_lt_s = index_from_pool("<"), ERR_IDX);
-			CHECK_SENTINEL(g_gt_s = index_from_pool(">"), ERR_IDX);
-			CHECK_SENTINEL(g_eq_s = index_from_pool("="), ERR_IDX);
+			CHECK_SENTINEL(g_false_s = index_from_pool(pl->m, "false"), ERR_IDX);
+			CHECK_SENTINEL(g_true_s = index_from_pool(pl->m, "true"), ERR_IDX);
+			CHECK_SENTINEL(g_empty_s = index_from_pool(pl->m, ""), ERR_IDX);
+			CHECK_SENTINEL(g_anon_s = index_from_pool(pl->m, "_"), ERR_IDX);
+			CHECK_SENTINEL(g_dot_s = index_from_pool(pl->m, "."), ERR_IDX);
+			CHECK_SENTINEL(g_cut_s = index_from_pool(pl->m, "!"), ERR_IDX);
+			CHECK_SENTINEL(g_local_cut_s = index_from_pool(pl->m, "¡"), ERR_IDX);
+			CHECK_SENTINEL(g_nil_s = index_from_pool(pl->m, "[]"), ERR_IDX);
+			CHECK_SENTINEL(g_braces_s = index_from_pool(pl->m, "{}"), ERR_IDX);
+			CHECK_SENTINEL(g_fail_s = index_from_pool(pl->m, "fail"), ERR_IDX);
+			CHECK_SENTINEL(g_clause_s = index_from_pool(pl->m, ":-"), ERR_IDX);
+			CHECK_SENTINEL(g_sys_elapsed_s = index_from_pool(pl->m, "$elapsed"), ERR_IDX);
+			CHECK_SENTINEL(g_sys_queue_s = index_from_pool(pl->m, "$queue"), ERR_IDX);
+			CHECK_SENTINEL(g_eof_s = index_from_pool(pl->m, "end_of_file"), ERR_IDX);
+			CHECK_SENTINEL(g_lt_s = index_from_pool(pl->m, "<"), ERR_IDX);
+			CHECK_SENTINEL(g_gt_s = index_from_pool(pl->m, ">"), ERR_IDX);
+			CHECK_SENTINEL(g_eq_s = index_from_pool(pl->m, "="), ERR_IDX);
 
 			g_streams[0].fp = stdin;
 			CHECK_SENTINEL(g_streams[0].filename = strdup("stdin"), NULL);
@@ -3783,8 +3787,12 @@ void pl_destroy(prolog *pl)
 prolog *pl_create()
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
-	if (!g_tpl_count++ && (g_init() == NULL))
+	prolog *pl = calloc(1, sizeof(prolog));
+
+	if (!g_tpl_count++ && (g_init(pl) == NULL)) {
+		free(pl);
 		return NULL;
+	}
 
 	if (!g_tpl_lib) {
 		char *ptr = getenv("TPL_LIBRARY_PATH");
@@ -3810,61 +3818,57 @@ prolog *pl_create()
 
 	//printf("Library: %s\n", g_tpl_lib);
 
-	prolog *pl = calloc(1, sizeof(prolog));
-	if (pl) {
-		pl->m = create_module(pl, "user");
-		if (pl->m) {
-			pl->m->pl = pl;
-			pl->curr_m = pl->m;
+	pl->m = create_module(pl, "user");
+	if (pl->m) {
+		pl->m->pl = pl;
+		pl->curr_m = pl->m;
 
-			//cehteh: add api to set things in a module?
-			pl->m->prebuilt = true;
+		//cehteh: add api to set things in a module?
+		pl->m->prebuilt = true;
 
-			pl->s_last = 0;
-			pl->s_cnt = 0;
-			pl->seed = 0;
+		pl->s_last = 0;
+		pl->s_cnt = 0;
+		pl->seed = 0;
 
 
-			set_multifile_in_db(pl->m, "term_expansion", 2);
-			set_dynamic_in_db(pl->m, "term_expansion", 2);
+		set_multifile_in_db(pl->m, "term_expansion", 2);
+		set_dynamic_in_db(pl->m, "term_expansion", 2);
 
 #if USE_LDLIBS
-			for (library *lib = g_libs; lib->name; lib++) {
-				if (!strcmp(lib->name, "apply") ||
-				    //!strcmp(lib->name, "dcgs") ||
-				    //!strcmp(lib->name, "charsio") ||
-				    //!strcmp(lib->name, "format") ||
-				    //!strcmp(lib->name, "http") ||
-				    //!strcmp(lib->name, "atts") ||
-				    !strcmp(lib->name, "lists")) {
-					size_t len = lib->end-lib->start;
-					char *src = malloc(len+1);
-					ensure(src); //cehteh: checkthis
-					memcpy(src, lib->start, len);
-					src[len] = '\0';
-					assert(pl->m);
-					module_load_text(pl->m, src);
-					free(src);
-				}
+		for (library *lib = g_libs; lib->name; lib++) {
+			if (!strcmp(lib->name, "apply") ||
+				//!strcmp(lib->name, "dcgs") ||
+				//!strcmp(lib->name, "charsio") ||
+				//!strcmp(lib->name, "format") ||
+				//!strcmp(lib->name, "http") ||
+				//!strcmp(lib->name, "atts") ||
+				!strcmp(lib->name, "lists")) {
+				size_t len = lib->end-lib->start;
+				char *src = malloc(len+1);
+				ensure(src); //cehteh: checkthis
+				memcpy(src, lib->start, len);
+				src[len] = '\0';
+				assert(pl->m);
+				module_load_text(pl->m, src);
+				free(src);
 			}
+		}
 #else
-			module_load_file(pl->m, "library/apply.pl");
-			//module_load_file(pl->m, "library/dcgs.pl");
-			//module_load_file(pl->m, "library/charsio.pl");
-			//module_load_file(pl->m, "library/format.pl");
-			//module_load_file(pl->m, "library/http.pl");
-			//module_load_file(pl->m, "library/atts.pl");
-			module_load_file(pl->m, "library/lists.pl");
+		module_load_file(pl->m, "library/apply.pl");
+		//module_load_file(pl->m, "library/dcgs.pl");
+		//module_load_file(pl->m, "library/charsio.pl");
+		//module_load_file(pl->m, "library/format.pl");
+		//module_load_file(pl->m, "library/http.pl");
+		//module_load_file(pl->m, "library/atts.pl");
+		module_load_file(pl->m, "library/lists.pl");
 #endif
 
-			pl->m->prebuilt = false;
-		}
+		pl->m->prebuilt = false;
+	}
 
-		if (!pl->m || pl->m->error || !pl->m->filename) {
-			pl_destroy(pl);
-			pl = NULL;
-		}
-
+	if (!pl->m || pl->m->error || !pl->m->filename) {
+		pl_destroy(pl);
+		pl = NULL;
 	}
 
 	return pl;
