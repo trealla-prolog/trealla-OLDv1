@@ -5791,7 +5791,7 @@ static USE_RESULT prolog_state fn_iso_current_rule_1(query *q)
 		tmpbuf1[0] = tmpbuf2[0] = '\0';
 		sscanf(functor, "%255[^:]:%255s", tmpbuf1, tmpbuf2);
 		tmpbuf1[sizeof(tmpbuf1)-1] = tmpbuf2[sizeof(tmpbuf2)-1] = '\0';
-		m = find_module(tmpbuf1);
+		m = find_module(q->m->pl, tmpbuf1);
 	}
 
 	if (!m)
@@ -5804,7 +5804,7 @@ static USE_RESULT prolog_state fn_iso_current_rule_1(query *q)
 			return pl_success;
 
 		if (!tmp_m)
-			m = tmp_m = g_modules;
+			m = tmp_m = q->m->pl->modules;
 		else
 			m = m->next;
 	}
@@ -8627,7 +8627,7 @@ static USE_RESULT prolog_state do_consult(query *q, cell *p1, idx_t p1_ctx)
 {
 	if (is_atom(p1)) {
 		const char *src = GET_STR(p1);
-		deconsult(src);
+		deconsult(q->m->pl, src);
 
 		char *tmpbuf = relative_to(q->m->filename, src);
 
@@ -8651,7 +8651,7 @@ static USE_RESULT prolog_state do_consult(query *q, cell *p1, idx_t p1_ctx)
 
 	module *tmp_m = create_module(q->m->pl, GET_STR(mod));
 	const char *src = GET_STR(file);
-	deconsult(src);
+	deconsult(q->m->pl, src);
 	tmp_m->make_public = 1;
 	char *tmpbuf = relative_to(q->m->filename, src);
 
@@ -10990,7 +10990,7 @@ static USE_RESULT prolog_state fn_current_module_1(query *q)
 			return !strcmp(name, q->m->name);
 		}
 
-		module *m = find_next_module(NULL);
+		module *m = find_next_module(q->m->pl, NULL);
 
 		if (!m)
 			return pl_failure;
@@ -11029,7 +11029,7 @@ static USE_RESULT prolog_state fn_use_module_1(query *q)
 		name = GET_STR(p1);
 		module *m;
 
-		if ((m = find_module(name)) != NULL) {
+		if ((m = find_module(q->m->pl, name)) != NULL) {
 			if (!m->fp)
 				do_db_load(m);
 
@@ -11073,7 +11073,7 @@ static USE_RESULT prolog_state fn_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	const char *name = GET_STR(p1);
-	module *m = find_module(name);
+	module *m = find_module(q->m->pl, name);
 
 	if (!m)
 		return throw_error(q, p1, "domain_error", "module");

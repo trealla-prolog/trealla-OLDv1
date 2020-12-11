@@ -35,7 +35,6 @@ static const unsigned INITIAL_NBR_TRAILS = 1000;
 #define JUST_IN_TIME_COUNT 50
 
 stream g_streams[MAX_STREAMS] = {{0}};
-skiplist *g_symtab = NULL;
 idx_t g_empty_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
 idx_t g_sys_elapsed_s, g_sys_queue_s, g_local_cut_s, g_braces_s;
@@ -46,9 +45,6 @@ char **g_av = NULL, *g_argv0 = NULL;
 
 char *g_pool = NULL;
 static idx_t g_pool_offset = 0, g_pool_size = 0;
-
-module *g_modules = NULL;	// FIXME: move to prolog object
-
 static atomic_t int g_tpl_count = 0;
 
 static struct op_table g_ops[] =
@@ -119,8 +115,10 @@ static struct op_table g_ops[] =
 	{0,0,0}
 };
 
-// FIXME: make g_pool thread-safe, probably by putting
-// a mutex in the prolog object
+// FIXME: make g_pool & g_symtab thread-safe, probably
+// by putting a mutex in the prolog object
+
+static skiplist *g_symtab = NULL;
 
 static idx_t is_in_pool(__attribute__((unused)) module *m, const char *name)
 {
@@ -288,19 +286,19 @@ cell *list_tail(cell *l, cell *tmp)
 	return tmp;
 }
 
-module *find_next_module(module *m)
+module *find_next_module(prolog *pl, module *m)
 {
 	if (!m)
-		return g_modules;
+		return pl->modules;
 
 	return m->next;
 }
 
-module *find_module(const char *name)
+module *find_module(prolog *pl, const char *name)
 {
 	assert(name);
 
-	for (module *m = g_modules; m; m = m->next) {
+	for (module *m = pl->modules; m; m = m->next) {
 		if (!strcmp(m->name, name))
 			return m;
 	}
@@ -399,7 +397,7 @@ static predicate *find_matching_predicate_internal(module *m, cell *c, bool quie
 			return h;
 
 		if (!tmp_m)
-			m = tmp_m = g_modules;
+			m = tmp_m = m->pl->modules;
 		else
 			m = m->next;
 	}
@@ -465,11 +463,11 @@ void set_multifile_in_db(module *m, const char *name, idx_t arity)
 		m->error = true;  //cehteh: not 100% sure about this
 }
 
-static bool is_multifile_in_db(const char *mod, const char *name, idx_t arity)
+static bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, idx_t arity)
 {
 	assert(mod);
 
-	module *m = find_module(mod);
+	module *m = find_module(pl, mod);
 	if (!m) return false;
 
 	cell tmp = {0};
@@ -1148,7 +1146,7 @@ static void directives(parser *p, term *t)
 		if (!is_atom(p1)) return;
 		const char *name = GET_STR(p1);
 		char *tmpbuf = relative_to(p->m->filename, name);
-		deconsult(tmpbuf);
+		deconsult(p->m->pl, tmpbuf);
 
 		if (!module_load_file(p->m, tmpbuf)) {
 			fprintf(stdout, "Error: not found: %s\n", tmpbuf);
@@ -1166,7 +1164,7 @@ static void directives(parser *p, term *t)
 		if (!is_literal(p1)) return;
 		const char *name = GET_STR(p1);
 
-		if (find_module(name)) {
+		if (find_module(p->m->pl, name)) {
 			fprintf(stdout, "Error: module already loaded: %s\n", name);
 			p->error = true;
 			return;
@@ -1231,7 +1229,7 @@ static void directives(parser *p, term *t)
 			name = GET_STR(p1);
 			module *m;
 
-			if ((m = find_module(name)) != NULL) {
+			if ((m = find_module(p->m->pl, name)) != NULL) {
 				if (!m->fp)
 					do_db_load(m);
 
@@ -1329,7 +1327,7 @@ static void directives(parser *p, term *t)
 					sscanf(src, "%255[^:]:%255s", mod, name);
 					mod[sizeof(mod)-1] = name[sizeof(name)-1] = '\0';
 
-					if (!is_multifile_in_db(mod, name, arity)) {
+					if (!is_multifile_in_db(p->m->pl, mod, name, arity)) {
 						fprintf(stdout, "Error: not multile %s:%s/%u\n", mod, name, (unsigned)arity);
 						p->error = true;
 						return;
@@ -1490,7 +1488,7 @@ void parser_xref(parser *p, term *t, predicate *parent)
 			tmpbuf1[0] = tmpbuf2[0] = '\0';
 			sscanf(functor, "%255[^:]:%255s", tmpbuf1, tmpbuf2);
 			tmpbuf1[sizeof(tmpbuf1)-1] = tmpbuf2[sizeof(tmpbuf2)-1] = '\0';
-			m = find_module(tmpbuf1);
+			m = find_module(p->m->pl, tmpbuf1);
 
 			if (m)
 			{
@@ -1524,7 +1522,7 @@ void parser_xref(parser *p, term *t, predicate *parent)
 			}
 
 			if (!tmp_m)
-				m = tmp_m = g_modules;
+				m = tmp_m = m->pl->modules;
 			else
 				m = m->next;
 		}
@@ -2523,7 +2521,7 @@ static bool get_token(parser *p, int last_op)
 
 	if (isalpha_utf8(ch) || (ch == '_')) {
 		while (isalnum_utf8(ch) || (ch == '_') ||
-			((ch == ':') && find_module(p->token))) {
+			((ch == ':') && find_module(p->m->pl, p->token))) {
 
 			if ((src[0] == ':') && (src[1] == ':'))	// HACK
 				break;
@@ -3238,10 +3236,10 @@ void destroy_module(module *m)
 		h = save;
 	}
 
-	if(g_modules == m) {
-		g_modules = m->next;
+	if (m->pl->modules == m) {
+		m->pl->modules = m->next;
 	} else {
-		for (module *tmp = g_modules; tmp; tmp = tmp->next) {
+		for (module *tmp = m->pl->modules; tmp; tmp = tmp->next) {
 			if(tmp->next == m) {
 				tmp->next = m->next;
 				break;
@@ -3271,8 +3269,8 @@ module *create_module(prolog *pl, const char *name)
 		m->pl = pl;
 		m->filename = strdup("./");
 		m->name = strdup(name);
-		m->next = g_modules;
-		g_modules = m;
+		m->next = m->pl->modules;
+		m->pl->modules = m;
 
 		m->index = sl_create(compkey);
 		ensure(m->index);
@@ -3633,9 +3631,9 @@ module *create_module(prolog *pl, const char *name)
 }
 
 
-bool deconsult(const char *filename)
+bool deconsult(prolog *pl, const char *filename)
 {
-	module *m = find_module(filename);
+	module *m = find_module(pl, filename);
 	if (!m) return false;
 	destroy_module(m);
 	return true;
@@ -3683,7 +3681,7 @@ bool pl_preconsult(prolog *pl, const char *filename)
 	return true;
 }
 
-void g_destroy()
+static void g_destroy(prolog *pl)
 {
 	for (int i = 0; i < MAX_STREAMS; i++) {
 		stream *str = &g_streams[i];
@@ -3710,8 +3708,8 @@ void g_destroy()
 
 	memset(g_streams, 0, sizeof(g_streams));
 
-	while (g_modules) {
-		destroy_module(g_modules);
+	while (pl->modules) {
+		destroy_module(pl->modules);
 	}
 
 	sl_destroy(g_symtab);
@@ -3765,7 +3763,7 @@ static void* g_init(prolog *pl)
 		}
 
 		if (error) {
-			g_destroy();
+			g_destroy(pl);
 			return NULL;
 		}
 	}
@@ -3778,10 +3776,11 @@ void pl_destroy(prolog *pl)
 	if (!pl) return;
 
 	destroy_module(pl->m);
-	free(pl);
 
 	if (!--g_tpl_count)
-		g_destroy();
+		g_destroy(pl);
+
+	free(pl);
 }
 
 prolog *pl_create()
