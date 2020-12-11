@@ -5083,7 +5083,14 @@ static void db_log(query *q, clause *r, enum log_type l)
 static USE_RESULT prolog_state fn_iso_retract_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
+	cell *head = get_head(p1);
 	cell *body = get_logical_body(p1);
+
+	if (is_variable(head))
+		return throw_error(q, head, "instantiation_error", "not_sufficiently_instantiated");
+
+	if (!is_callable(head))
+		return throw_error(q, head, "type_error", "callable");
 
 	if (!body)
 		p1 = get_head(p1);
