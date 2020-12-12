@@ -1686,6 +1686,7 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 void term_to_body_conversion(parser *p)
 {
 	cell *c = p->t->cells;
+	bool any = false;
 
 	for (idx_t i = 0; i < p->t->cidx; i += c->nbr_cells, c += c->nbr_cells) {
 		if (IS_XFX(c) || IS_XFY(c)) {
@@ -1698,17 +1699,36 @@ void term_to_body_conversion(parser *p)
 				if (is_variable(lhs)) {
 					c = insert_here(p, c, lhs);
 					lhs = c + 1;
+					any = true;
 				}
 
 				cell *rhs = lhs + lhs->nbr_cells;
 
 				if (is_variable(rhs)) {
 					c = insert_here(p, c, rhs);
+					any = true;
 				}
 
 				c = lhs;
 				i = c - p->t->cells;
 			}
+		}
+	}
+
+	if (!any)
+		return;
+
+	c = p->t->cells;
+
+	for (idx_t i = 0; i < p->t->cidx; i += c->nbr_cells, c += c->nbr_cells) {
+		if (IS_XFX(c) || IS_XFY(c)) {
+			if (!strcmp(PARSER_GET_STR(c), ",")
+				|| !strcmp(PARSER_GET_STR(c), ";")
+				|| !strcmp(PARSER_GET_STR(c), "->")
+				|| !strcmp(PARSER_GET_STR(c), ":-")) {
+			}
+
+			c->nbr_cells = p->t->cidx - i;
 		}
 	}
 }
