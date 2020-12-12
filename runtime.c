@@ -903,6 +903,13 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx, bool
 		predicate *h = find_matching_predicate(q->m, head);
 
 		if (!h) {
+			if (get_builtin(q->m, GET_STR(head), head->arity)) {
+				if (is_retract)
+					return throw_error(q, head, "permission_error", "modify,static_procedure");
+				else
+					return throw_error(q, head, "permission_error", "access,private_procedure");
+			}
+
 			q->st.curr_clause2 = NULL;
 			return false;
 		} else {
@@ -999,6 +1006,13 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_r
 		predicate *h = find_matching_predicate(q->m, p1);
 
 		if (!h) {
+			if (get_builtin(q->m, GET_STR(p1), p1->arity)) {
+				if (is_retract)
+					return throw_error(q, p1, "permission_error", "modify,static_procedure");
+				else
+					return throw_error(q, p1, "permission_error", "access,private_procedure");
+			}
+
 			q->st.curr_clause2 = NULL;
 			return pl_failure;
 		} else {
