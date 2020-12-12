@@ -5556,7 +5556,7 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 		return true;
 	}
 
-	fprintf(stdout, "uncaught exception... ");
+	fprintf(stdout, "uncaught exception: ");
 	q->quoted = 1;
 	print_term(q, stdout, e, q->st.curr_frame, 1);
 	fprintf(stdout, "\n");
