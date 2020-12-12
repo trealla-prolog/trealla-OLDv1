@@ -5118,7 +5118,11 @@ static USE_RESULT prolog_state fn_iso_retractall_1(query *q)
 	predicate *h = find_matching_predicate(q->m, get_head(p1));
 
 	if (!h) {
-		//set_dynamic_in_db(q->m, GET_STR(p1), p1->arity);
+		cell *head = get_head(p1);
+
+		if (get_builtin(q->m, GET_STR(head), head->arity))
+			return throw_error(q, head, "permission_error", "modify,static_procedure");
+
 		return pl_success;
 	}
 
