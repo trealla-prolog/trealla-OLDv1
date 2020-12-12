@@ -1691,9 +1691,9 @@ void term_to_body_conversion(parser *p)
 	for (idx_t i = 0; i < nbr_cells; i += c->nbr_cells, c += c->nbr_cells) {
 		if (IS_XFX(c) || IS_XFY(c)) {
 			if (!strcmp(PARSER_GET_STR(c), ",")
-			|| !strcmp(PARSER_GET_STR(c), ";")
-			|| !strcmp(PARSER_GET_STR(c), "->")
-			|| !strcmp(PARSER_GET_STR(c), ":-")) {
+				|| !strcmp(PARSER_GET_STR(c), ";")
+				|| !strcmp(PARSER_GET_STR(c), "->")
+				|| !strcmp(PARSER_GET_STR(c), ":-")) {
 				cell *lhs = c + 1;
 
 				if (is_variable(lhs)) {
