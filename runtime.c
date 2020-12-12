@@ -887,19 +887,24 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx, bool
 		q->st.curr_clause2 = q->st.curr_clause2->next;
 	} else {
 		cell *head = get_head(p1);
-		predicate *h = find_matching_predicate(q->m, head);
 
-		if (!h) {	// ??????
-			h = head->match = find_matching_predicate(q->m, head);
+		cell *c = head;
+
+		if (!is_literal(c)) {
+			// For now convert it to a literal
+			idx_t off = index_from_pool(q->m->pl, GET_STR(c));
+			may_idx_error(off);
+			FREE_STR(c);
+			c->val_off = off;
+			c->val_type = TYPE_LITERAL;
+			c->flags = 0;
 		}
 
-		if (!h) {
-			if (is_retract)
-				return throw_error(q, head, "permission_error", "modify,static_procedure");
-			else
-				return throw_error(q, head, "permission_error", "access,private_procedure");
+		predicate *h = find_matching_predicate(q->m, head);
 
+		if (!h) {
 			q->st.curr_clause2 = NULL;
+			return false;
 		} else {
 			if (!h->is_dynamic && !q->run_init) {
 				if (is_retract)
@@ -980,11 +985,8 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_r
 			return match_full(q, p1, p1_ctx, is_retract);
 
 		cell *c = p1;
-		predicate *h;
 
-		if (is_literal(c))
-			h = c->match;
-		else {
+		if (!is_literal(c)) {
 			// For now convert it to a literal
 			idx_t off = index_from_pool(q->m->pl, GET_STR(c));
 			may_idx_error(off);
@@ -992,27 +994,13 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_r
 			c->val_off = off;
 			c->val_type = TYPE_LITERAL;
 			c->flags = 0;
-			h = NULL;
 		}
 
-		if (!h) {
-			h = p1->match = find_matching_predicate(q->m, p1);
-		}
+		predicate *h = find_matching_predicate(q->m, p1);
 
 		if (!h) {
-			const char *name = GET_STR(p1);
-			bool tmp_userop = false;
-			unsigned tmp_optype = 0;
-
-			if (get_op(q->m, name, &tmp_optype, &tmp_userop, false)) {
-				if (is_retract)
-					return throw_error(q, p1, "permission_error", "modify,control_structure");
-				else
-					return throw_error(q, p1, "permission_error", "access,control_structure");
-			} else
-				set_dynamic_in_db(q->m, name, p1->arity);
-
 			q->st.curr_clause2 = NULL;
+			return pl_failure;
 		} else {
 			if (!h->is_dynamic && !q->run_init) {
 				if (is_retract)
