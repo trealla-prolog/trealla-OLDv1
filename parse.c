@@ -1685,10 +1685,9 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 
 void term_to_body_conversion(parser *p)
 {
-	idx_t nbr_cells = p->t->cidx;
 	cell *c = p->t->cells;
 
-	for (idx_t i = 0; i < nbr_cells; i += c->nbr_cells, c += c->nbr_cells) {
+	for (idx_t i = 0; i < p->t->cidx; i += c->nbr_cells, c += c->nbr_cells) {
 		if (IS_XFX(c) || IS_XFY(c)) {
 			if (!strcmp(PARSER_GET_STR(c), ",")
 				|| !strcmp(PARSER_GET_STR(c), ";")
@@ -1703,7 +1702,7 @@ void term_to_body_conversion(parser *p)
 
 				cell *rhs = lhs + lhs->nbr_cells;
 
-				if (is_variable(lhs)) {
+				if (is_variable(rhs)) {
 					c = insert_here(p, c, rhs);
 				}
 
