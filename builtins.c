@@ -8384,7 +8384,7 @@ static USE_RESULT prolog_state fn_date_time_7(query *q)
 	GET_NEXT_ARG(p7,variable);
 	struct tm tm;
 	time_t now = time(NULL);
-	tm = *localtime(&now);
+	localtime_r(&now, &tm);
 	cell tmp;
 	make_int(&tmp, tm.tm_year+1900);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
