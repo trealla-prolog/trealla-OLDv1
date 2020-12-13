@@ -1098,7 +1098,10 @@ static USE_RESULT prolog_state match_rule_head_or_fact(query *q)
 
 			if (!h) {
 				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(c), "initialization")))
-					return throw_error(q, c, "existence_error", "procedure");
+					if (q->m->flag.unknown == 1)
+						return throw_error(q, c, "existence_error", "procedure");
+					else
+						return pl_failure;
 				else
 					q->error = true;
 

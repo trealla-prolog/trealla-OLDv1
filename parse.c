@@ -3278,6 +3278,7 @@ module *create_module(prolog *pl, const char *name)
 		m->p = create_parser(m);
 		ensure(m->p);
 
+		m->flag.unknown = 1;
 		m->flag.double_quote_chars = 1;
 		m->flag.character_escapes = true;
 		m->flag.rational_syntax_natural = 0;
