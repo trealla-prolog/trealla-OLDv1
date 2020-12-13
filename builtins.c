@@ -5266,7 +5266,7 @@ static USE_RESULT prolog_state fn_iso_asserta_1(query *q)
 	}
 
 	p->t->cidx = safe_copy_cells(q, p->t->cells, tmp, nbr_cells);
-	term_to_body_conversion(p);
+	parser_term_to_body(p);
 	do_assign_vars(p, nbr_cells);
 	clause *r = asserta_to_db(q->m, p->t, 0);
 	may_ptr_error(r);
@@ -5297,7 +5297,7 @@ static USE_RESULT prolog_state fn_iso_assertz_1(query *q)
 	}
 
 	p->t->cidx = safe_copy_cells(q, p->t->cells, tmp, nbr_cells);
-	term_to_body_conversion(p);
+	parser_term_to_body(p);
 	do_assign_vars(p, nbr_cells);
 	clause *r = assertz_to_db(q->m, p->t, 0);
 	may_ptr_error(r);
@@ -6674,7 +6674,7 @@ static USE_RESULT prolog_state do_asserta_2(query *q)
 	}
 
 	p->t->cidx = safe_copy_cells(q, p->t->cells, tmp, nbr_cells);
-	term_to_body_conversion(p);
+	parser_term_to_body(p);
 	do_assign_vars(p, nbr_cells);
 	clause *r = asserta_to_db(q->m, p->t, 0);
 	may_ptr_error(r);
@@ -6732,7 +6732,7 @@ static USE_RESULT prolog_state do_assertz_2(query *q)
 	}
 
 	p->t->cidx = safe_copy_cells(q, p->t->cells, tmp, nbr_cells);
-	term_to_body_conversion(p);
+	parser_term_to_body(p);
 	do_assign_vars(p, nbr_cells);
 	clause *r = assertz_to_db(q->m, p->t, 0);
 	may_ptr_error(r);

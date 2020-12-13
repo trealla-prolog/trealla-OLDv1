@@ -1683,7 +1683,7 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 	return p->t->cells + c_idx;
 }
 
-static cell *term_to_body_conversion2(parser *p, cell *c)
+static cell *term_to_body_conversion(parser *p, cell *c)
 {
 	idx_t c_idx = c - p->t->cells;
 
@@ -1698,7 +1698,7 @@ static cell *term_to_body_conversion2(parser *p, cell *c)
 				c = insert_here(p, c, lhs);
 				lhs = c + 1;
 			} else
-				lhs = term_to_body_conversion2(p, lhs);
+				lhs = term_to_body_conversion(p, lhs);
 
 			cell *rhs = lhs + lhs->nbr_cells;
 			c = p->t->cells + c_idx;
@@ -1706,7 +1706,7 @@ static cell *term_to_body_conversion2(parser *p, cell *c)
 			if (is_variable(rhs))
 				c = insert_here(p, c, rhs);
 			else
-				rhs = term_to_body_conversion2(p, rhs);
+				rhs = term_to_body_conversion(p, rhs);
 
 			c->nbr_cells = 1 + lhs->nbr_cells + rhs->nbr_cells;
 		}
@@ -1715,9 +1715,9 @@ static cell *term_to_body_conversion2(parser *p, cell *c)
 	return p->t->cells + c_idx;
 }
 
-void term_to_body_conversion(parser *p)
+void parser_term_to_body(parser *p)
 {
-	term_to_body_conversion2(p, p->t->cells);
+	term_to_body_conversion(p, p->t->cells);
 	p->t->cells->nbr_cells = p->t->cidx - 1;
 }
 
@@ -2684,7 +2684,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 				parser_assign_vars(p, p->read_term, false);
 
 				if (p->consulting && !p->skip) {
-					term_to_body_conversion(p);
+					parser_term_to_body(p);
 					parser_dcg_rewrite(p);
 					directives(p, p->t);
 
