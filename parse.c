@@ -1683,6 +1683,29 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 	return p->t->cells + c_idx;
 }
 
+cell *check_body_callable(parser *p, cell *c)
+{
+	if (IS_XFX(c) || IS_XFY(c)) {
+		if (!strcmp(PARSER_GET_STR(c), ",")
+			|| !strcmp(PARSER_GET_STR(c), ";")
+			|| !strcmp(PARSER_GET_STR(c), "->")
+			|| !strcmp(PARSER_GET_STR(c), ":-")) {
+			cell *lhs = c + 1;
+			cell *tmp;
+
+			if ((tmp = check_body_callable(p, lhs)) != NULL)
+				return tmp;
+
+			cell *rhs = lhs + lhs->nbr_cells;
+
+			if ((tmp = check_body_callable(p, rhs)) != NULL)
+				return tmp;
+		}
+	}
+
+	return !is_callable(c) && !is_variable(c) ? c : NULL;
+}
+
 static cell *term_to_body_conversion(parser *p, cell *c)
 {
 	idx_t c_idx = c - p->t->cells;

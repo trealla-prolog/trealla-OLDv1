@@ -5266,6 +5266,11 @@ static USE_RESULT prolog_state fn_iso_asserta_1(query *q)
 	if (body && !is_callable(body))
 		return throw_error(q, body, "type_error", "callable");
 
+	cell *tmp2;
+
+	if (body && ((tmp2 = check_body_callable(q->m->p, body)) != NULL))
+		return throw_error(q, tmp2, "type_error", "callable");
+
 	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 	may_ptr_error(tmp);
 
@@ -5326,6 +5331,11 @@ static USE_RESULT prolog_state fn_iso_assertz_1(query *q)
 
 	if (body && !is_callable(body))
 		return throw_error(q, body, "type_error", "callable");
+
+	cell *tmp2;
+
+	if (body && ((tmp2 = check_body_callable(q->m->p, body)) != NULL))
+		return throw_error(q, tmp2, "type_error", "callable");
 
 	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 	may_ptr_error(tmp);
@@ -6734,6 +6744,11 @@ static USE_RESULT prolog_state do_asserta_2(query *q)
 	if (body && !is_callable(body))
 		return throw_error(q, body, "type_error", "callable");
 
+	cell *tmp2;
+
+	if (body && ((tmp2 = check_body_callable(q->m->p, body)) != NULL))
+		return throw_error(q, tmp2, "type_error", "callable");
+
 	GET_NEXT_ARG(p2,atom_or_var);
 	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
 	may_ptr_error(tmp);
@@ -6820,6 +6835,11 @@ static USE_RESULT prolog_state do_assertz_2(query *q)
 
 	if (body && !is_callable(body))
 		return throw_error(q, body, "type_error", "callable");
+
+	cell *tmp2;
+
+	if (body && ((tmp2 = check_body_callable(q->m->p, body)) != NULL))
+		return throw_error(q, tmp2, "type_error", "callable");
 
 	GET_NEXT_ARG(p2,atom_or_var);
 	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
