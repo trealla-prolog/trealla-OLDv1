@@ -5393,10 +5393,28 @@ USE_RESULT prolog_state call_me(query *q, cell *p1)
 	if (!is_callable(p1))
 		return throw_error(q, p1, "type_error", "callable");
 
+#if 0
+	static const char *fudge = ",;->";
+
+	if (is_structure(p1) && is_op(p1) && strstr(fudge,GET_STR(p1))) {
+		unsigned arity = p1->arity;
+		cell *p = p1 + 1;
+
+		while (arity--) {
+			cell *arg = deref(q, p, p1_ctx);
+
+			if (!is_callable(arg))
+				return throw_error(q, arg, "type_error", "callable");
+
+			p += p->nbr_cells;
+		}
+	}
+#else
 	cell *tmp2;
 
 	if ((tmp2 = check_body_callable(q->m->p, p1)) != NULL)
 		return throw_error(q, tmp2, "type_error", "callable");
+#endif
 
 	cell *tmp;
 
@@ -5429,7 +5447,6 @@ static USE_RESULT prolog_state fn_iso_call_n(query *q)
 	cell *tmp2 = get_tmp_heap(q, 0);
 	tmp2->nbr_cells = tmp_heap_used(q);
 	tmp2->arity = arity;
-	tmp2->flags = 0;
 
 	if (is_cstring(tmp2)) {
 		cell *c = tmp2;
@@ -5441,35 +5458,15 @@ static USE_RESULT prolog_state fn_iso_call_n(query *q)
 		c->flags = 0;
 	}
 
-	if ((tmp2->fn = get_builtin(q->m, GET_STR(tmp2), arity)) != NULL) {
+	if ((tmp2->fn = get_builtin(q->m, GET_STR(tmp2), arity)) != NULL)
 		tmp2->flags |= FLAG_BUILTIN;
-		unsigned optype;
-		bool userop;
-
-		if (get_op(q->m, GET_STR(tmp2), &optype, &userop, false))
-			SET_OP(tmp2, optype);
-	} else if (check_builtin(q->m, GET_STR(tmp2), arity)) {
-		tmp2->flags |= FLAG_BUILTIN;
-		unsigned optype;
-		bool userop;
-
-		if (get_op(q->m, GET_STR(tmp2), &optype, &userop, false))
-			SET_OP(tmp2, optype);
-	} else {
+	else {
 		tmp2->match = find_matching_predicate(q->m, tmp2);
 		tmp2->flags &= ~FLAG_BUILTIN;
 	}
 
 	cell *tmp = clone_to_heap(q, true, tmp2, 1);
 	make_end_return(tmp+1+tmp2->nbr_cells, q->st.curr_cell);
-
-#if 0
-	cell *tmp3;
-
-	if ((tmp3 = check_body_callable(q->m->p, tmp)) != NULL)
-		return throw_error(q, tmp3, "type_error", "callable");
-#endif
-
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
