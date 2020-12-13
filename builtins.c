@@ -10214,15 +10214,15 @@ static USE_RESULT prolog_state fn_predicate_property_2(query *q)
 	const char *f = GET_STR(p1);
 	cell tmp;
 
-	predicate *h = find_functor(q->m, f, p1->arity);
-
 	if (check_builtin(q->m, f, p1->arity)) {
 		make_literal(&tmp, index_from_pool(q->m->pl, "built_in"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
-	if (h && !h->is_dynamic) {
+	predicate *h = find_functor(q->m, f, p1->arity);
+
+	if (h && !h->is_dynamic && !is_variable(p2)) {
 		make_literal(&tmp, index_from_pool(q->m->pl, "built_in"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
@@ -10253,13 +10253,13 @@ static USE_RESULT prolog_state fn_predicate_property_2(query *q)
 	}
 
 	if (h) {
-		make_literal(&tmp, index_from_pool(q->m->pl, "visible"));
+		make_literal(&tmp, index_from_pool(q->m->pl, "static"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
 	if (h) {
-		make_literal(&tmp, index_from_pool(q->m->pl, "static"));
+		make_literal(&tmp, index_from_pool(q->m->pl, "visible"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
