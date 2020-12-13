@@ -434,7 +434,8 @@ struct query_ {
 	char_flags flag;
 	uint8_t current_input, current_output, current_error;
 	enum q_retry retry;
-	int8_t halt_code, quoted;	//TODO: cehteh: enum here
+	int8_t halt_code;
+	int8_t quoted;
 	bool status:1;
 	bool resume:1;
 	bool no_tco:1;

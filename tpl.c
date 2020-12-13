@@ -255,21 +255,23 @@ int main(int ac, char *av[])
 
 	if (goal) {
 		if (!pl_eval(pl, goal)) {
+			int halt_code = get_halt_code(pl);
 			pl_destroy(pl);
 #ifdef FAULTINJECT_ENABLED
 			if (faultinject_is_off)
 				fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_NAME.counter);
 #endif
-			return 1;
+			return halt_code;
 		}
 
 		if (get_halt(pl) || ns) {
+			int halt_code = get_halt_code(pl);
 			pl_destroy(pl);
 #ifdef FAULTINJECT_ENABLED
 			if (faultinject_is_off)
 				fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_NAME.counter);
 #endif
-			return 1;
+			return halt_code;
 		}
 	}
 
