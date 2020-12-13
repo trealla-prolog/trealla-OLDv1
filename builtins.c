@@ -5458,12 +5458,33 @@ static USE_RESULT prolog_state fn_iso_call_n(query *q)
 		c->flags = 0;
 	}
 
+#if 0
 	if ((tmp2->fn = get_builtin(q->m, GET_STR(tmp2), arity)) != NULL)
 		tmp2->flags |= FLAG_BUILTIN;
 	else {
 		tmp2->match = find_matching_predicate(q->m, tmp2);
 		tmp2->flags &= ~FLAG_BUILTIN;
 	}
+#else
+	if ((tmp2->fn = get_builtin(q->m, GET_STR(tmp2), arity)) != NULL) {
+		tmp2->flags |= FLAG_BUILTIN;
+		unsigned optype;
+		bool userop;
+
+		if (get_op(q->m, GET_STR(tmp2), &optype, &userop, false))
+			SET_OP(tmp2, optype);
+	} else if (check_builtin(q->m, GET_STR(tmp2), arity)) {
+		tmp2->flags |= FLAG_BUILTIN;
+		unsigned optype;
+		bool userop;
+
+		if (get_op(q->m, GET_STR(tmp2), &optype, &userop, false))
+			SET_OP(tmp2, optype);
+	} else {
+		tmp2->match = find_matching_predicate(q->m, tmp2);
+		tmp2->flags &= ~FLAG_BUILTIN;
+	}
+#endif
 
 	cell *tmp = clone_to_heap(q, true, tmp2, 1);
 	make_end_return(tmp+1+tmp2->nbr_cells, q->st.curr_cell);
