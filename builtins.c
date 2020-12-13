@@ -5253,6 +5253,16 @@ static void do_assign_vars(parser *p, idx_t nbr_cells)
 static USE_RESULT prolog_state fn_iso_asserta_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
+	cell *head = get_head(p1);
+
+	if (get_builtin(q->m, GET_STR(head), head->arity))
+		return throw_error(q, head, "permission_error", "static_procedure");
+
+	cell *body = get_body(p1);
+
+	if (body && !is_callable(body))
+		return throw_error(q, body, "type_error", "callable");
+
 	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 	may_ptr_error(tmp);
 
@@ -5301,6 +5311,16 @@ static USE_RESULT prolog_state fn_iso_asserta_1(query *q)
 static USE_RESULT prolog_state fn_iso_assertz_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
+	cell *head = get_head(p1);
+
+	if (get_builtin(q->m, GET_STR(head), head->arity))
+		return throw_error(q, head, "permission_error", "static_procedure");
+
+	cell *body = get_body(p1);
+
+	if (body && !is_callable(body))
+		return throw_error(q, body, "type_error", "callable");
+
 	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 	may_ptr_error(tmp);
 
@@ -6695,6 +6715,16 @@ static USE_RESULT prolog_state fn_clause_3(query *q)
 static USE_RESULT prolog_state do_asserta_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
+	cell *head = get_head(p1);
+
+	if (get_builtin(q->m, GET_STR(head), head->arity))
+		return throw_error(q, head, "permission_error", "static_procedure");
+
+	cell *body = get_body(p1);
+
+	if (body && !is_callable(body))
+		return throw_error(q, body, "type_error", "callable");
+
 	GET_NEXT_ARG(p2,atom_or_var);
 	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
 	may_ptr_error(tmp);
@@ -6769,6 +6799,16 @@ static USE_RESULT prolog_state fn_sys_asserta_2(query *q)
 static USE_RESULT prolog_state do_assertz_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
+	cell *head = get_head(p1);
+
+	if (get_builtin(q->m, GET_STR(head), head->arity))
+		return throw_error(q, head, "permission_error", "static_procedure");
+
+	cell *body = get_body(p1);
+
+	if (body && !is_callable(body))
+		return throw_error(q, body, "type_error", "callable");
+
 	GET_NEXT_ARG(p2,atom_or_var);
 	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
 	may_ptr_error(tmp);
