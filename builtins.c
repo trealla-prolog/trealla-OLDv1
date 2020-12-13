@@ -5448,7 +5448,6 @@ static USE_RESULT prolog_state fn_iso_call_n(query *q)
 
 		if (get_op(q->m, GET_STR(tmp2), &optype, &userop, false))
 			SET_OP(tmp2, optype);
-
 	} else if (check_builtin(q->m, GET_STR(tmp2), arity)) {
 		tmp2->flags |= FLAG_BUILTIN;
 		unsigned optype;
@@ -5456,7 +5455,6 @@ static USE_RESULT prolog_state fn_iso_call_n(query *q)
 
 		if (get_op(q->m, GET_STR(tmp2), &optype, &userop, false))
 			SET_OP(tmp2, optype);
-
 	} else {
 		tmp2->match = find_matching_predicate(q->m, tmp2);
 		tmp2->flags &= ~FLAG_BUILTIN;
