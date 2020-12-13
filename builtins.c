@@ -5677,7 +5677,7 @@ static USE_RESULT prolog_state fn_iso_throw_1(query *q)
 
 prolog_state throw_error(query *q, cell *c, const char *err_type, const char *expected)
 {
-	q->did_throw = 1;
+	q->did_throw = true;
 	idx_t c_ctx = q->latest_ctx;
 	int save_quoted = q->quoted;
 	q->quoted = 1;

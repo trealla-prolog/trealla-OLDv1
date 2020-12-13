@@ -1223,7 +1223,7 @@ prolog_state run_query(query *q)
 		}
 
 		q->tot_goals++;
-		q->did_throw = 0;
+		q->did_throw = false;
 		Trace(q, q->st.curr_cell, q->retry?REDO:q->resume?NEXT:CALL);
 
 		if (!(q->st.curr_cell->flags&FLAG_BUILTIN)) {
