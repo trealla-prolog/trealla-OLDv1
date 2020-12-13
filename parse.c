@@ -2682,9 +2682,9 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		    && (*p->srcptr != '|')) {
 			if (parser_attach(p, 0)) {
 				parser_assign_vars(p, p->read_term, false);
+				parser_term_to_body(p);
 
 				if (p->consulting && !p->skip) {
-					parser_term_to_body(p);
 					parser_dcg_rewrite(p);
 					directives(p, p->t);
 
