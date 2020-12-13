@@ -1683,34 +1683,42 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 	return p->t->cells + c_idx;
 }
 
-void term_to_body_conversion(parser *p)
+static cell *term_to_body_conversion2(parser *p, cell *c)
 {
-	cell *c = p->t->cells;
+	idx_t c_idx = c - p->t->cells;
 
-	for (idx_t i = 0; i < p->t->cidx; i += c->nbr_cells, c += c->nbr_cells) {
-		if (IS_XFX(c) || IS_XFY(c)) {
-			if (!strcmp(PARSER_GET_STR(c), ",")
-				|| !strcmp(PARSER_GET_STR(c), ";")
-				|| !strcmp(PARSER_GET_STR(c), "->")
-				|| !strcmp(PARSER_GET_STR(c), ":-")) {
-				cell *lhs = c + 1;
+	if (IS_XFX(c) || IS_XFY(c)) {
+		if (!strcmp(PARSER_GET_STR(c), ",")
+			|| !strcmp(PARSER_GET_STR(c), ";")
+			|| !strcmp(PARSER_GET_STR(c), "->")
+			|| !strcmp(PARSER_GET_STR(c), ":-")) {
+			cell *lhs = c + 1;
 
-				if (is_variable(lhs)) {
-					c = insert_here(p, c, lhs);
-					lhs = c + 1;
-				}
+			if (is_variable(lhs)) {
+				c = insert_here(p, c, lhs);
+				lhs = c + 1;
+			} else
+				lhs = term_to_body_conversion2(p, lhs);
 
-				cell *rhs = lhs + lhs->nbr_cells;
+			cell *rhs = lhs + lhs->nbr_cells;
+			c = p->t->cells + c_idx;
 
-				if (is_variable(rhs)) {
-					c = insert_here(p, c, rhs);
-				}
+			if (is_variable(rhs))
+				c = insert_here(p, c, rhs);
+			else
+				rhs = term_to_body_conversion2(p, rhs);
 
-				c = lhs;
-				i = c - p->t->cells;
-			}
+			c->nbr_cells = 1 + lhs->nbr_cells + rhs->nbr_cells;
 		}
 	}
+
+	return p->t->cells + c_idx;
+}
+
+void term_to_body_conversion(parser *p)
+{
+	term_to_body_conversion2(p, p->t->cells);
+	p->t->cells->nbr_cells = p->t->cidx - 1;
 }
 
 static bool attach_ops(parser *p, idx_t start_idx)

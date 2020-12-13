@@ -210,7 +210,6 @@ iterations(I0, _Name, Action, Control, I) :-
 	I is round(I0*(Target/(TestTime-OverHead))),
 	true.
 
-
 do_n(N, Goal, Time) :-
 	get_cpu_time(T0),
 	(   between(1,N,_),
