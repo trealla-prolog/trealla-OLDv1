@@ -5127,6 +5127,9 @@ static USE_RESULT prolog_state fn_iso_retractall_1(query *q)
 	}
 
 	while (fn_iso_retract_1(q)) {
+		if (q->did_throw)
+			return pl_success;
+
 		q->retry = QUERY_RETRY;
 		retry_choice(q);
 	}
