@@ -2588,11 +2588,12 @@ static bool get_token(parser *p, int last_op)
 		return (dst - p->token) != 0;
 	}
 
-	static const char *s_delims = "(){}[]|_, `'\"\t\r\n";
+	static const char *s_delims = "!(){}[]|_, `'\"\t\r\n";
 	p->is_op = true;
 
 	while (*src) {
 		ch = get_char_utf8(&src);
+
 		size_t len = (dst-p->token) + put_len_utf8(ch) + 1;
 
 		if (len >= p->token_size) {
