@@ -5270,8 +5270,19 @@ static USE_RESULT prolog_state fn_iso_asserta_1(query *q)
 	parser_term_to_body(p);
 	cell *h = get_head(p->t->cells);
 
-	// FIXME: convert cstring to literal
-	if (!is_literal(h) && !is_cstring(h))
+	if (is_cstring(h)) {
+		h->val_off = index_from_pool(q->m->pl, GET_STR(h));
+		if (h->val_off == ERR_IDX) {
+			q->error = true;
+			return pl_error;
+		}
+
+		FREE_STR(h);
+		h->val_type = TYPE_LITERAL;
+		h->flags = 0;
+	}
+
+	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
 
 	clause *r = asserta_to_db(q->m, p->t, 0);
@@ -5307,8 +5318,19 @@ static USE_RESULT prolog_state fn_iso_assertz_1(query *q)
 	parser_term_to_body(p);
 	cell *h = get_head(p->t->cells);
 
-	// FIXME: convert cstring to literal
-	if (!is_literal(h) && !is_cstring(h))
+	if (is_cstring(h)) {
+		h->val_off = index_from_pool(q->m->pl, GET_STR(h));
+		if (h->val_off == ERR_IDX) {
+			q->error = true;
+			return pl_error;
+		}
+
+		FREE_STR(h);
+		h->val_type = TYPE_LITERAL;
+		h->flags = 0;
+	}
+
+	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
 
 	clause *r = assertz_to_db(q->m, p->t, 0);
@@ -6690,8 +6712,19 @@ static USE_RESULT prolog_state do_asserta_2(query *q)
 	parser_term_to_body(p);
 	cell *h = get_head(p->t->cells);
 
-	// FIXME: convert cstring to literal
-	if (!is_literal(h) && !is_cstring(h))
+	if (is_cstring(h)) {
+		h->val_off = index_from_pool(q->m->pl, GET_STR(h));
+		if (h->val_off == ERR_IDX) {
+			q->error = true;
+			return pl_error;
+		}
+
+		FREE_STR(h);
+		h->val_type = TYPE_LITERAL;
+		h->flags = 0;
+	}
+
+	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
 
 	clause *r = asserta_to_db(q->m, p->t, 0);
@@ -6754,8 +6787,19 @@ static USE_RESULT prolog_state do_assertz_2(query *q)
 	parser_term_to_body(p);
 	cell *h = get_head(p->t->cells);
 
-	// FIXME: convert cstring to literal
-	if (!is_literal(h) && !is_cstring(h))
+	if (is_cstring(h)) {
+		h->val_off = index_from_pool(q->m->pl, GET_STR(h));
+		if (h->val_off == ERR_IDX) {
+			q->error = true;
+			return pl_error;
+		}
+
+		FREE_STR(h);
+		h->val_type = TYPE_LITERAL;
+		h->flags = 0;
+	}
+
+	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
 
 	clause *r = assertz_to_db(q->m, p->t, 0);
