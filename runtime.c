@@ -913,7 +913,7 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx, bool
 			q->st.curr_clause2 = NULL;
 			return false;
 		} else {
-			if (!h->is_dynamic && !q->run_init) {
+			if (!h->is_dynamic) {
 				if (is_retract)
 					return throw_error(q, head, "permission_error", "modify,static_procedure");
 				else
@@ -1016,7 +1016,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_r
 			q->st.curr_clause2 = NULL;
 			return pl_failure;
 		} else {
-			if (!h->is_dynamic && !q->run_init) {
+			if (!h->is_dynamic) {
 				if (is_retract)
 					return throw_error(q, p1, "permission_error", "modify,static_procedure");
 				else
