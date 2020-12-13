@@ -5255,8 +5255,11 @@ static USE_RESULT prolog_state fn_iso_asserta_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *head = get_head(p1);
 
+	if (is_variable(head))
+		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
+
 	if (get_builtin(q->m, GET_STR(head), head->arity))
-		return throw_error(q, head, "permission_error", "static_procedure");
+		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 	cell *body = get_body(p1);
 
@@ -5313,8 +5316,11 @@ static USE_RESULT prolog_state fn_iso_assertz_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *head = get_head(p1);
 
+	if (is_variable(head))
+		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
+
 	if (get_builtin(q->m, GET_STR(head), head->arity))
-		return throw_error(q, head, "permission_error", "static_procedure");
+		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 	cell *body = get_body(p1);
 
@@ -6717,8 +6723,11 @@ static USE_RESULT prolog_state do_asserta_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	cell *head = get_head(p1);
 
+	if (is_variable(head))
+		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
+
 	if (get_builtin(q->m, GET_STR(head), head->arity))
-		return throw_error(q, head, "permission_error", "static_procedure");
+		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 	cell *body = get_body(p1);
 
@@ -6801,8 +6810,11 @@ static USE_RESULT prolog_state do_assertz_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	cell *head = get_head(p1);
 
+	if (is_variable(head))
+		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
+
 	if (get_builtin(q->m, GET_STR(head), head->arity))
-		return throw_error(q, head, "permission_error", "static_procedure");
+		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 	cell *body = get_body(p1);
 
