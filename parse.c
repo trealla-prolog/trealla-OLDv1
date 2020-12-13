@@ -2688,6 +2688,20 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 					parser_dcg_rewrite(p);
 					directives(p, p->t);
 
+					cell *h = get_head(p->t->cells);
+
+					if (is_cstring(h)) {
+						h->val_off = index_from_pool(p->m->pl, PARSER_GET_STR(h));
+						if (h->val_off == ERR_IDX) {
+							p->error = true;
+							break;
+						}
+
+						FREE_STR(h);
+						h->val_type = TYPE_LITERAL;
+						h->flags = 0;
+					}
+
 					if (!p->error && !assertz_to_db(p->m, p->t, 1)) {
 						printf("Error: '%s', line nbr %u\n", p->token, p->line_nbr);
 						p->error = true;
