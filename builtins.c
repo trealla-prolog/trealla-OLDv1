@@ -2688,24 +2688,49 @@ static bool parse_write_params(query *q, cell *c)
 		return false;
 	}
 
+	if (strcmp(GET_STR(c), "variable_names") && is_variable(c+1)) {
+		DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
+		return false;
+	}
+
 	if (!strcmp(GET_STR(c), "max_depth")) {
 		if (is_integer(c+1))
 			q->max_depth = c[1].val_num;
 	} else if (!strcmp(GET_STR(c), "fullstop")) {
-		if (is_literal(c+1))
-			q->fullstop = !strcmp(GET_STR(c+1), "true");
+		if (!is_literal(c+1) || (strcmp(GET_STR(c+1), "true") && strcmp(GET_STR(c+1), "false"))) {
+			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
+			return false;
+		}
+
+		q->fullstop = !strcmp(GET_STR(c+1), "true");
 	} else if (!strcmp(GET_STR(c), "nl")) {
-		if (is_literal(c+1))
-			q->nl = !strcmp(GET_STR(c+1), "true");
+		if (!is_literal(c+1) || (strcmp(GET_STR(c+1), "true") && strcmp(GET_STR(c+1), "false"))) {
+			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
+			return false;
+		}
+
+		q->nl = !strcmp(GET_STR(c+1), "true");
 	} else if (!strcmp(GET_STR(c), "quoted")) {
-		if (is_literal(c+1))
-			q->quoted = !strcmp(GET_STR(c+1), "true");
+		if (!is_literal(c+1) || (strcmp(GET_STR(c+1), "true") && strcmp(GET_STR(c+1), "false"))) {
+			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
+			return false;
+		}
+
+		q->quoted = !strcmp(GET_STR(c+1), "true");
 	} else if (!strcmp(GET_STR(c), "ignore_ops")) {
-		if (is_literal(c+1))
-			q->ignore_ops = !strcmp(GET_STR(c+1), "true");
+		if (!is_literal(c+1) || (strcmp(GET_STR(c+1), "true") && strcmp(GET_STR(c+1), "false"))) {
+			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
+			return false;
+		}
+
+		q->ignore_ops = !strcmp(GET_STR(c+1), "true");
 	} else if (!strcmp(GET_STR(c), "numbervars")) {
-		if (is_literal(c+1))
-			q->numbervars = !strcmp(GET_STR(c+1), "true");
+		if (!is_literal(c+1) || (strcmp(GET_STR(c+1), "true") && strcmp(GET_STR(c+1), "false"))) {
+			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
+			return false;
+		}
+
+		q->numbervars = !strcmp(GET_STR(c+1), "true");
 	} else if (!strcmp(GET_STR(c), "variable_names")) {
 		//if (is_literal(c+1))
 		//	q->numbervars = !strcmp(GET_STR(c+1), "true");
