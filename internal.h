@@ -119,20 +119,20 @@ typedef uint32_t idx_t;
 
 // These 2 assume literal or cstring types...
 
-#define GET_STR(c) (!is_cstring(c) ? (q->m->pl->pool+(c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
+#define GET_STR(c) (!is_cstring(c) ? (q->m->pl->pool + (c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
 #define LEN_STR(c) (is_blob(c) ? (c)->len_str : strlen(GET_STR(c)))
 
-#define PARSER_GET_STR(c) (!is_cstring(c) ? (p->m->pl->pool+(c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
+#define PARSER_GET_STR(c) (!is_cstring(c) ? (p->m->pl->pool + (c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
 #define PARSER_LEN_STR(c) (is_blob(c) ? (c)->len_str : strlen(PARSER_GET_STR(c)))
 
-#define MODULE_GET_STR(c) (!is_cstring(c) ? (m->pl->pool+(c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
+#define MODULE_GET_STR(c) (!is_cstring(c) ? (m->pl->pool + (c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
 #define MODULE_LEN_STR(c) (is_blob(c) ? (c)->len_str : strlen(MODULE_GET_STR(c)))
 
 #define FREE_STR(c) if (is_nonconst_blob(c)) { free((c)->val_str); }
 #define TAKE_STR(c) {(c)->val_str = NULL; }
 
 #define DUP_STR(c,v) {												\
-	(c)->val_str = malloc((v)->len_str+1); 							\
+	(c)->val_str = malloc((v)->len_str + 1);						\
 	memcpy((c)->val_str, v->val_str, v->len_str); 					\
 	(c)->val_str[(v)->len_str] = '\0'; }
 

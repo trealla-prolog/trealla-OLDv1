@@ -4707,6 +4707,8 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 		if (is_callable(tmp)) {
 			if ((tmp->fn = get_builtin(q->m, GET_STR(tmp), tmp->arity)) != NULL)
 				tmp->flags |= FLAG_BUILTIN;
+			else if (check_builtin(q->m, GET_STR(tmp), tmp->arity))
+				tmp->flags |= FLAG_BUILTIN;
 			else {
 				tmp->match = find_matching_predicate_quiet(q->m, tmp);
 				tmp->flags &= ~FLAG_BUILTIN;
@@ -5120,7 +5122,7 @@ static USE_RESULT prolog_state fn_iso_retractall_1(query *q)
 	if (!h) {
 		cell *head = get_head(p1);
 
-		if (get_builtin(q->m, GET_STR(head), head->arity))
+		if (check_builtin(q->m, GET_STR(head), head->arity))
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 		return pl_success;
@@ -5258,7 +5260,7 @@ static USE_RESULT prolog_state fn_iso_asserta_1(query *q)
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
 
-	if (get_builtin(q->m, GET_STR(head), head->arity))
+	if (check_builtin(q->m, GET_STR(head), head->arity))
 		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 	cell *body = get_body(p1);
@@ -5324,7 +5326,7 @@ static USE_RESULT prolog_state fn_iso_assertz_1(query *q)
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
 
-	if (get_builtin(q->m, GET_STR(head), head->arity))
+	if (check_builtin(q->m, GET_STR(head), head->arity))
 		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 	cell *body = get_body(p1);
@@ -6745,7 +6747,7 @@ static USE_RESULT prolog_state do_asserta_2(query *q)
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
 
-	if (get_builtin(q->m, GET_STR(head), head->arity))
+	if (check_builtin(q->m, GET_STR(head), head->arity))
 		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 	cell *body = get_body(p1);
@@ -6837,7 +6839,7 @@ static USE_RESULT prolog_state do_assertz_2(query *q)
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
 
-	if (get_builtin(q->m, GET_STR(head), head->arity))
+	if (check_builtin(q->m, GET_STR(head), head->arity))
 		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 	cell *body = get_body(p1);
@@ -8433,6 +8435,8 @@ static USE_RESULT prolog_state fn_spawn_n(query *q)
 	tmp2->arity = arity;
 
 	if ((tmp2->fn = get_builtin(q->m, GET_STR(tmp2), arity)) != NULL)
+		tmp2->flags |= FLAG_BUILTIN;
+	else if (check_builtin(q->m, GET_STR(tmp2), arity))
 		tmp2->flags |= FLAG_BUILTIN;
 	else {
 		tmp2->match = find_matching_predicate(q->m, tmp2);

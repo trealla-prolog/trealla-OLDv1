@@ -352,10 +352,8 @@ static predicate *find_predicate(module *m, cell *c)
 	tmp.flags = FLAG_KEY;
 	tmp.nbr_cells = 1;
 
-	if (is_cstring(c)) {
-		tmp.val_type = TYPE_LITERAL;
+	if (is_cstring(c))
 		tmp.val_off = index_from_pool(m->pl, MODULE_GET_STR(c));
-	}
 
 	sliter *iter = sl_findkey(m->index, &tmp);
 	predicate *h = NULL;
@@ -434,6 +432,10 @@ static predicate *create_predicate(module *m, cell *c)
 	h->key.val_type = TYPE_LITERAL;
 	h->key.flags = FLAG_KEY;
 	h->key.nbr_cells = 1;
+
+	if (is_cstring(c))
+		h->key.val_off = index_from_pool(m->pl, MODULE_GET_STR(c));
+
 	sl_set(m->index, &h->key, h);
 	return h;
 }
@@ -473,13 +475,13 @@ static bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, id
 	return h->is_multifile ? true : false;
 }
 
-static int compkey(const void *p, const void *ptr1, const void *ptr2)
+static int compkey(const void *param, const void *ptr1, const void *ptr2)
 {
 	assert(ptr1 && ptr2);
 
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
-	const module *m = (const module*)p;
+	const module *m = (const module*)param;
 
 	if (is_integer(p1) && is_integer(p2)) {
 		if (p1->val_num < p2->val_num)
