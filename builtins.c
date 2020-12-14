@@ -52,6 +52,14 @@ static void msleep(int ms)
 }
 #endif
 
+#define CHECK_CALC()							\
+	if (!q->calc) {								\
+		if (q->flag.unknown == 0)				\
+			return false;						\
+		else									\
+			return throw_error(q, q->st.curr_cell, "existence_error", "procedure");	\
+	}
+
 cell* ERR_CYCLE_CELL = &(cell){};
 
 static idx_t safe_copy_cells(query *q, cell *dst, const cell *src, idx_t nbr_cells)
@@ -3178,6 +3186,7 @@ static USE_RESULT prolog_state fn_iso_integer_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_abs_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 	q->accum.val_type = p1.val_type;
@@ -3194,6 +3203,7 @@ static USE_RESULT prolog_state fn_iso_abs_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_sign_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 	q->accum.val_type = p1.val_type;
@@ -3210,6 +3220,7 @@ static USE_RESULT prolog_state fn_iso_sign_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_positive_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 	q->accum = p1;
@@ -3218,6 +3229,7 @@ static USE_RESULT prolog_state fn_iso_positive_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_negative_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 	q->accum.val_type = p1.val_type;
@@ -3236,6 +3248,7 @@ static USE_RESULT prolog_state fn_iso_negative_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_pi_0(query *q)
 {
+	CHECK_CALC();
 	q->accum.val_flt = M_PI;
 	q->accum.val_type = TYPE_FLOAT;
 	return pl_success;
@@ -3243,6 +3256,7 @@ static USE_RESULT prolog_state fn_iso_pi_0(query *q)
 
 static USE_RESULT prolog_state fn_iso_e_0(query *q)
 {
+	CHECK_CALC();
 	q->accum.val_flt = M_E;
 	q->accum.val_type = TYPE_FLOAT;
 	return pl_success;
@@ -3250,6 +3264,7 @@ static USE_RESULT prolog_state fn_iso_e_0(query *q)
 
 static USE_RESULT prolog_state fn_iso_add_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3301,6 +3316,7 @@ static USE_RESULT prolog_state fn_iso_add_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_sub_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3352,6 +3368,7 @@ static USE_RESULT prolog_state fn_iso_sub_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_mul_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3404,6 +3421,7 @@ static USE_RESULT prolog_state fn_iso_mul_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_exp_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -3424,6 +3442,7 @@ static USE_RESULT prolog_state fn_iso_exp_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_sqrt_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -3444,6 +3463,7 @@ static USE_RESULT prolog_state fn_iso_sqrt_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_log_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -3464,6 +3484,7 @@ static USE_RESULT prolog_state fn_iso_log_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_truncate_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -3499,6 +3520,7 @@ static USE_RESULT prolog_state fn_iso_truncate_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_round_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -3534,6 +3556,7 @@ static USE_RESULT prolog_state fn_iso_round_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_ceiling_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -3569,6 +3592,7 @@ static USE_RESULT prolog_state fn_iso_ceiling_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_float_integer_part_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -3604,6 +3628,7 @@ static USE_RESULT prolog_state fn_iso_float_integer_part_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_float_fractional_part_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -3639,6 +3664,7 @@ static USE_RESULT prolog_state fn_iso_float_fractional_part_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_floor_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -3674,6 +3700,7 @@ static USE_RESULT prolog_state fn_iso_floor_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_sin_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -3694,6 +3721,7 @@ static USE_RESULT prolog_state fn_iso_sin_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_cos_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -3714,6 +3742,7 @@ static USE_RESULT prolog_state fn_iso_cos_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_tan_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -3734,6 +3763,7 @@ static USE_RESULT prolog_state fn_iso_tan_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_asin_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -3754,6 +3784,7 @@ static USE_RESULT prolog_state fn_iso_asin_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_acos_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -3774,6 +3805,7 @@ static USE_RESULT prolog_state fn_iso_acos_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_atan_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -3794,6 +3826,7 @@ static USE_RESULT prolog_state fn_iso_atan_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_atan_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3822,6 +3855,7 @@ static USE_RESULT prolog_state fn_iso_atan_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_copysign_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3858,6 +3892,7 @@ static USE_RESULT prolog_state fn_iso_copysign_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_pow_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3886,6 +3921,7 @@ static USE_RESULT prolog_state fn_iso_pow_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_powi_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3935,6 +3971,7 @@ static USE_RESULT prolog_state fn_iso_powi_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_divide_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -3981,6 +4018,7 @@ static USE_RESULT prolog_state fn_iso_divide_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_divint_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -4003,6 +4041,7 @@ static USE_RESULT prolog_state fn_iso_divint_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_div_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -4025,6 +4064,7 @@ static USE_RESULT prolog_state fn_iso_div_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_mod_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -4047,6 +4087,7 @@ static USE_RESULT prolog_state fn_iso_mod_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_max_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -4072,6 +4113,7 @@ static USE_RESULT prolog_state fn_iso_max_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_min_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -4097,6 +4139,7 @@ static USE_RESULT prolog_state fn_iso_min_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_xor_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -4116,6 +4159,7 @@ static USE_RESULT prolog_state fn_iso_xor_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_and_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -4135,6 +4179,7 @@ static USE_RESULT prolog_state fn_iso_and_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_or_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -4154,6 +4199,7 @@ static USE_RESULT prolog_state fn_iso_or_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_shl_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -4173,6 +4219,7 @@ static USE_RESULT prolog_state fn_iso_shl_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_shr_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
@@ -4192,6 +4239,7 @@ static USE_RESULT prolog_state fn_iso_shr_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_neg_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -5720,7 +5768,7 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 		snprintf(dst2, len2+1, "error(%s(%s,%s/%u),(%s)/%u).", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (!strcmp(err_type, "permission_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),(%s)/%u).", err_type, expected, GET_STR(c), c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
-	} else if (GET_OP(c)) {
+	} else if (IS_OP(c)) {
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else {
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
@@ -6275,6 +6323,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 	else
 		return throw_error(q, p1, "domain_error", "prolog_flag");
 
+	q->flag = q->m->flag;
 	return pl_success;
 }
 
@@ -8495,6 +8544,7 @@ static USE_RESULT prolog_state fn_recv_1(query *q)
 
 static USE_RESULT prolog_state fn_log10_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -8604,6 +8654,7 @@ static USE_RESULT prolog_state fn_get_seed_1(query *q)
 
 static USE_RESULT prolog_state fn_random_1(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
@@ -9979,6 +10030,7 @@ static USE_RESULT prolog_state fn_octal_chars_2(query *q)
 
 static USE_RESULT prolog_state fn_rdiv_2(query *q)
 {
+	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
