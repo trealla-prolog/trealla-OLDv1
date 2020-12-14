@@ -2857,6 +2857,12 @@ static USE_RESULT prolog_state fn_iso_get_char_1(query *q)
 	int n = q->current_input;
 	stream *str = &g_streams[n];
 
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
+	}
+
 	if (str->at_end_of_file && !str->eof_action_error) {
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
@@ -2915,6 +2921,12 @@ static USE_RESULT prolog_state fn_iso_get_char_2(query *q)
 	if (strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
 
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
+	}
+
 	if (str->at_end_of_file && !str->eof_action_error) {
 		str->past_end_of_file = 1;
 		cell tmp;
@@ -2968,6 +2980,12 @@ static USE_RESULT prolog_state fn_iso_get_code_1(query *q)
 	GET_FIRST_ARG(p1,integer_or_var);
 	int n = q->current_input;
 	stream *str = &g_streams[n];
+
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
+	}
 
 	if (str->at_end_of_file && !str->eof_action_error) {
 		cell tmp;
@@ -3024,6 +3042,12 @@ static USE_RESULT prolog_state fn_iso_get_code_2(query *q)
 
 	if (strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
+
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
+	}
 
 	if (str->at_end_of_file && !str->eof_action_error) {
 		cell tmp;
@@ -3189,6 +3213,12 @@ static USE_RESULT prolog_state fn_iso_peek_char_1(query *q)
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
+	}
+
 	if (str->at_end_of_file && !str->eof_action_error) {
 		cell tmp;
 		make_int(&tmp, -1);
@@ -3233,6 +3263,12 @@ static USE_RESULT prolog_state fn_iso_peek_char_2(query *q)
 	if (strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
 
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
+	}
+
 	if (str->at_end_of_file && !str->eof_action_error) {
 		cell tmp;
 		make_int(&tmp, -1);
@@ -3276,6 +3312,12 @@ static USE_RESULT prolog_state fn_iso_peek_code_1(query *q)
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
+	}
+
 	if (str->at_end_of_file && !str->eof_action_error) {
 		cell tmp;
 		make_int(&tmp, -1);
@@ -3310,6 +3352,12 @@ static USE_RESULT prolog_state fn_iso_peek_code_2(query *q)
 
 	if (strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
+
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
+	}
 
 	if (str->at_end_of_file && !str->eof_action_error) {
 		cell tmp;
