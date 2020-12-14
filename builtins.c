@@ -2000,6 +2000,15 @@ static USE_RESULT prolog_state fn_iso_close_1(query *q)
 		|| (str->fp == stderr))
 		return pl_success;
 
+	if (q->current_input == n)
+		q->current_input = 0;
+
+	if (q->current_output == n)
+		q->current_output = 1;
+
+	if (q->current_error == n)
+		q->current_error = 2;
+
 	if (str->p)
 		destroy_parser(str->p);
 

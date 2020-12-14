@@ -947,7 +947,7 @@ query *create_query(module *m, bool is_task)
 		q->trace = m->trace;
 		q->current_input = 0;		// STDIN
 		q->current_output = 1;		// STDOUT
-		q->current_error = 1;		// STDERR
+		q->current_error = 2;		// STDERR
 		q->flag = m->flag;
 
 		// Allocate these now...
