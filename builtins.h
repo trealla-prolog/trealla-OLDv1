@@ -37,6 +37,7 @@
 #define is_in_character_or_var(c) (is_in_character(c) || is_variable(c))
 #define is_in_byte(c) (is_integer(c) && (c->val_num >= -1) && (c->val_num < 256))
 #define is_in_byte_or_var(c) (is_in_byte(c) || is_variable(c))
+#define is_byte(c) (is_integer(c) && (c->val_num >= 0) && (c->val_num < 256))
 #define is_any(c) 1
 
 #define is_iso_list_or_nil(c) (is_iso_list(c) || is_nil(c))

@@ -2812,10 +2812,9 @@ static USE_RESULT prolog_state fn_iso_put_code_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_put_byte_1(query *q)
 {
-	GET_FIRST_ARG(p1,integer);
+	GET_FIRST_ARG(p1,byte);
 	int n = q->current_output;
 	stream *str = &g_streams[n];
-	int ch = (int)p1->val_num;
 
 	if (!str->binary) {
 		cell tmp;
@@ -2823,9 +2822,7 @@ static USE_RESULT prolog_state fn_iso_put_byte_1(query *q)
 		return throw_error(q, &tmp, "permission_error", "output,text_stream");
 	}
 
-	if ((ch > 255) || (ch < 0))
-		return throw_error(q, p1, "type_error", "byte");
-
+	int ch = (int)p1->val_num;
 	char tmpbuf[20];
 	snprintf(tmpbuf, sizeof(tmpbuf), "%c", ch);
 	net_write(tmpbuf, 1, str);
@@ -2837,7 +2834,7 @@ static USE_RESULT prolog_state fn_iso_put_byte_2(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
-	GET_NEXT_ARG(p1,integer);
+	GET_NEXT_ARG(p1,byte);
 
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "output,stream");
@@ -2846,10 +2843,6 @@ static USE_RESULT prolog_state fn_iso_put_byte_2(query *q)
 		return throw_error(q, pstr, "permission_error", "output,text_stream");
 
 	int ch = (int)p1->val_num;
-
-	if ((ch > 255) || (ch < 0))
-		return throw_error(q, p1, "type_error", "byte");
-
 	char tmpbuf[20];
 	snprintf(tmpbuf, sizeof(tmpbuf), "%c", ch);
 	net_write(tmpbuf, 1, str);
