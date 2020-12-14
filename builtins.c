@@ -2823,7 +2823,7 @@ static USE_RESULT prolog_state fn_iso_put_byte_1(query *q)
 
 	char tmpbuf[20];
 	snprintf(tmpbuf, sizeof(tmpbuf), "%c", ch);
-	net_write(tmpbuf, strlen(tmpbuf), str);
+	net_write(tmpbuf, 1, str);
 	return !ferror(str->fp);
 }
 
@@ -2847,7 +2847,7 @@ static USE_RESULT prolog_state fn_iso_put_byte_2(query *q)
 
 	char tmpbuf[20];
 	snprintf(tmpbuf, sizeof(tmpbuf), "%c", ch);
-	net_write(tmpbuf, strlen(tmpbuf), str);
+	net_write(tmpbuf, 1, str);
 	return !ferror(str->fp);
 }
 
