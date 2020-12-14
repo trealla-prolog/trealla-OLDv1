@@ -3271,7 +3271,7 @@ static USE_RESULT prolog_state fn_iso_peek_char_1(query *q)
 
 	if (str->at_end_of_file && !str->eof_action_error) {
 		cell tmp;
-		make_int(&tmp, -1);
+		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -3321,7 +3321,7 @@ static USE_RESULT prolog_state fn_iso_peek_char_2(query *q)
 
 	if (str->at_end_of_file && !str->eof_action_error) {
 		cell tmp;
-		make_int(&tmp, -1);
+		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
