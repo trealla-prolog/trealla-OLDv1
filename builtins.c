@@ -2687,8 +2687,11 @@ static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 	int n = q->current_output;
 	stream *str = &g_streams[n];
 
-	if (!strcmp(str->mode, "read"))
-		return throw_error(q, p1, "permission_error", "output,stream");
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
+	}
 
 	q->flag = q->m->flag;
 	LIST_HANDLER(p2);
@@ -2742,6 +2745,12 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "output,stream");
+
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
+	}
 
 	q->flag = q->m->flag;
 	LIST_HANDLER(p2);
