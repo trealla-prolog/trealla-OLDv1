@@ -2755,6 +2755,13 @@ static USE_RESULT prolog_state fn_iso_put_char_1(query *q)
 	GET_FIRST_ARG(p1,atom);
 	int n = q->current_output;
 	stream *str = &g_streams[n];
+
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
+	}
+
 	const char *src = GET_STR(p1);
 	int ch = get_char_utf8(&src);
 	char tmpbuf[20];
@@ -2773,6 +2780,12 @@ static USE_RESULT prolog_state fn_iso_put_char_2(query *q)
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "output,stream");
 
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
+	}
+
 	const char *src = GET_STR(p1);
 	int ch = get_char_utf8(&src);
 	char tmpbuf[20];
@@ -2786,6 +2799,16 @@ static USE_RESULT prolog_state fn_iso_put_code_1(query *q)
 	GET_FIRST_ARG(p1,integer);
 	int n = q->current_output;
 	stream *str = &g_streams[n];
+
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
+	}
+
+	if (is_integer(p1) && (p1->val_num <= -1))
+		return throw_error(q, p1, "representation_error", "character_code");
+
 	int ch = (int)p1->val_num;
 	char tmpbuf[20];
 	put_char_utf8(tmpbuf, ch);
@@ -2802,6 +2825,15 @@ static USE_RESULT prolog_state fn_iso_put_code_2(query *q)
 
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "output,stream");
+
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
+	}
+
+	if (is_integer(p1) && (p1->val_num <= -1))
+		return throw_error(q, p1, "representation_error", "character_code");
 
 	int ch = (int)p1->val_num;
 	char tmpbuf[20];
@@ -2822,6 +2854,9 @@ static USE_RESULT prolog_state fn_iso_put_byte_1(query *q)
 		return throw_error(q, &tmp, "permission_error", "output,text_stream");
 	}
 
+	if (is_integer(p1) && (p1->val_num <= -1))
+		return throw_error(q, p1, "representation_error", "character_code");
+
 	int ch = (int)p1->val_num;
 	char tmpbuf[20];
 	snprintf(tmpbuf, sizeof(tmpbuf), "%c", ch);
@@ -2841,6 +2876,9 @@ static USE_RESULT prolog_state fn_iso_put_byte_2(query *q)
 
 	if (!str->binary)
 		return throw_error(q, pstr, "permission_error", "output,text_stream");
+
+	if (is_integer(p1) && (p1->val_num <= -1))
+		return throw_error(q, p1, "representation_error", "character_code");
 
 	int ch = (int)p1->val_num;
 	char tmpbuf[20];
