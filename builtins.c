@@ -2572,8 +2572,13 @@ static USE_RESULT prolog_state fn_iso_write_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = q->current_output;
 	stream *str = &g_streams[n];
-	assert(str);
-	assert(str->fp);
+
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
+	}
+
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	return !ferror(str->fp);
 }
@@ -2588,6 +2593,12 @@ static USE_RESULT prolog_state fn_iso_write_2(query *q)
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "output,stream");
 
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
+	}
+
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	return !ferror(str->fp);
 }
@@ -2597,6 +2608,13 @@ static USE_RESULT prolog_state fn_iso_writeq_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = q->current_output;
 	stream *str = &g_streams[n];
+
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
+	}
+
 	bool saveq = q->quoted;
 	q->quoted = q->numbervars = true;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
@@ -2614,6 +2632,12 @@ static USE_RESULT prolog_state fn_iso_writeq_2(query *q)
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "output,stream");
 
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
+	}
+
 	bool save = q->quoted;
 	q->quoted = q->numbervars = true;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
@@ -2626,6 +2650,13 @@ static USE_RESULT prolog_state fn_iso_write_canonical_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = q->current_output;
 	stream *str = &g_streams[n];
+
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
+	}
+
 	print_canonical(q, str->fp, p1, p1_ctx, 1);
 	return !ferror(str->fp);
 }
@@ -2639,6 +2670,12 @@ static USE_RESULT prolog_state fn_iso_write_canonical_2(query *q)
 
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "output,stream");
+
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
+	}
 
 	print_canonical(q, str->fp, p1, p1_ctx, 1);
 	return !ferror(str->fp);
