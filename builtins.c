@@ -6584,7 +6584,7 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
-	GET_NEXT_ARG(p3,any);
+	GET_NEXT_ARG(p3,list_or_nil_or_var);
 	uint64_t xs_vars = 0;
 	p2 = skip_existentials(q, p2, &xs_vars);
 
