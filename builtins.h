@@ -33,6 +33,8 @@
 #define is_stream_or_structure(c) (is_stream(c) || is_structure(c))
 #define is_atom_or_list(c) (is_atom(c) || is_iso_list(c))
 #define is_atom_or_list_or_var(c) (is_atom(c) || is_iso_list(c) || is_variable(c))
+#define is_in_character(c) (is_atom(c))
+#define is_in_character_or_var(c) (is_in_character(c) || is_variable(c))
 #define is_in_byte(c) (is_integer(c) && (c->val_num >= -1) && (c->val_num < 256))
 #define is_in_byte_or_var(c) (is_in_byte(c) || is_variable(c))
 #define is_any(c) 1

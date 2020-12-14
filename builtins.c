@@ -2853,7 +2853,7 @@ static USE_RESULT prolog_state fn_iso_put_byte_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_get_char_1(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_var);
+	GET_FIRST_ARG(p1,in_character_or_var);
 	int n = q->current_input;
 	stream *str = &g_streams[n];
 
@@ -2910,7 +2910,7 @@ static USE_RESULT prolog_state fn_iso_get_char_2(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
-	GET_NEXT_ARG(p1,atom_or_var);
+	GET_NEXT_ARG(p1,in_character_or_var);
 
 	if (strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
@@ -3184,7 +3184,7 @@ static USE_RESULT prolog_state fn_iso_get_byte_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_peek_char_1(query *q)
 {
-	GET_FIRST_ARG(p1,any);
+	GET_FIRST_ARG(p1,in_character_or_var);
 	int n = q->current_input;
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
@@ -3228,7 +3228,7 @@ static USE_RESULT prolog_state fn_iso_peek_char_2(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
-	GET_NEXT_ARG(p1,any);
+	GET_NEXT_ARG(p1,in_character_or_var);
 
 	if (strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
