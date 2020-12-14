@@ -2756,6 +2756,9 @@ static USE_RESULT prolog_state fn_iso_put_char_1(query *q)
 	int n = q->current_output;
 	stream *str = &g_streams[n];
 
+	if (!strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "output,stream");
+
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
