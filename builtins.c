@@ -2025,6 +2025,29 @@ static USE_RESULT prolog_state fn_iso_close_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,list_or_nil);
+
+	LIST_HANDLER(p1);
+
+	while (is_list(p1)) {
+		cell *h = LIST_HEAD(p1);
+		h = deref(q, h, p1_ctx);
+
+		if (!is_structure(h)
+			|| strcmp(GET_STR(h), "force")
+			|| strcmp(GET_STR(h+1), "true"))
+			return throw_error(q, h, "domain_error", "close_option");
+
+		p1 = LIST_TAIL(p1);
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+	}
+
+	if (is_variable(p1))
+		return throw_error(q, p1, "instantiation_error", "close_option");
+
+	if (!is_nil(p1))
+		return throw_error(q, p1, "type_error", "list");
+
 	return fn_iso_close_1(q);
 }
 
