@@ -3362,7 +3362,7 @@ static USE_RESULT prolog_state fn_iso_peek_code_1(query *q)
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 
-	if (is_integer(p1) && (p1->val_num < 0))
+	if (is_integer(p1) && (p1->val_num < -1))
 		return throw_error(q, p1, "representation_error", "in_character_code");
 
 	if (str->binary) {
@@ -3403,7 +3403,7 @@ static USE_RESULT prolog_state fn_iso_peek_code_2(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,integer_or_var);
 
-	if (is_integer(p1) && (p1->val_num < 0))
+	if (is_integer(p1) && (p1->val_num < -1))
 		return throw_error(q, p1, "representation_error", "in_character_code");
 
 	if (strcmp(str->mode, "read"))
