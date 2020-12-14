@@ -2822,7 +2822,7 @@ static USE_RESULT prolog_state fn_iso_put_byte_1(query *q)
 		return throw_error(q, p1, "type_error", "byte");
 
 	char tmpbuf[20];
-	put_char_utf8(tmpbuf, ch);
+	snprintf(tmpbuf, sizeof(tmpbuf), "%c", ch);
 	net_write(tmpbuf, strlen(tmpbuf), str);
 	return !ferror(str->fp);
 }
@@ -2846,7 +2846,7 @@ static USE_RESULT prolog_state fn_iso_put_byte_2(query *q)
 		return throw_error(q, p1, "type_error", "byte");
 
 	char tmpbuf[20];
-	put_char_utf8(tmpbuf, ch);
+	snprintf(tmpbuf, sizeof(tmpbuf), "%c", ch);
 	net_write(tmpbuf, strlen(tmpbuf), str);
 	return !ferror(str->fp);
 }
@@ -3116,9 +3116,6 @@ static USE_RESULT prolog_state fn_iso_get_byte_1(query *q)
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (ch == '\n')
-		str->did_getc = false;
-
 	cell tmp;
 	make_int(&tmp, ch);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -3173,9 +3170,6 @@ static USE_RESULT prolog_state fn_iso_get_byte_2(query *q)
 		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
-
-	if (ch == '\n')
-		str->did_getc = false;
 
 	cell tmp;
 	make_int(&tmp, ch);
