@@ -2021,6 +2021,13 @@ static USE_RESULT prolog_state fn_iso_close_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT prolog_state fn_iso_close_2(query *q)
+{
+	GET_FIRST_ARG(pstr,stream);
+	GET_NEXT_ARG(p1,list_or_nil);
+	return fn_iso_close_1(q);
+}
+
 static USE_RESULT prolog_state fn_iso_at_end_of_stream_0(__attribute__((unused)) query *q)
 {
 	int n = q->current_input;
@@ -11337,6 +11344,7 @@ static const struct builtins g_iso_funcs[] =
 	{"open", 3, fn_iso_open_3, NULL},
 	{"open", 4, fn_iso_open_4, NULL},
 	{"close", 1, fn_iso_close_1, NULL},
+	{"close", 2, fn_iso_close_2, NULL},
 	{"read_term", 2, fn_iso_read_term_2, NULL},
 	{"read_term", 3, fn_iso_read_term_3, NULL},
 	{"read", 1, fn_iso_read_1, NULL},
