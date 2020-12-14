@@ -2644,12 +2644,12 @@ static USE_RESULT prolog_state fn_iso_write_canonical_2(query *q)
 	return !ferror(str->fp);
 }
 
-static void parse_write_params(query *q, cell *c)
-{	if (!is_literal(c))
-		return;
-
-	if (!is_structure(c))
-		return;
+static bool parse_write_params(query *q, cell *c)
+{
+	if (!is_literal(c) || !is_structure(c)) {
+		DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
+		return false;
+	}
 
 	if (!strcmp(GET_STR(c), "max_depth")) {
 		if (is_integer(c+1))
@@ -2669,7 +2669,15 @@ static void parse_write_params(query *q, cell *c)
 	} else if (!strcmp(GET_STR(c), "numbervars")) {
 		if (is_literal(c+1))
 			q->numbervars = !strcmp(GET_STR(c+1), "true");
+	} else if (!strcmp(GET_STR(c), "variable_names")) {
+		//if (is_literal(c+1))
+		//	q->numbervars = !strcmp(GET_STR(c+1), "true");
+	} else {
+		DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
+		return false;
 	}
+
+	return true;
 }
 
 static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
@@ -2687,12 +2695,21 @@ static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
-		cell *c = deref(q, h, p2_ctx);
-		parse_write_params(q, c);
+		h = deref(q, h, p2_ctx);
+
+		if (is_variable(h))
+			return throw_error(q, h, "type_error", "list");
+
+		if (!parse_write_params(q, h))
+			return pl_success;
+
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
+
+	if (!is_nil(p2))
+		return throw_error(q, p2, "type_error", "list");
 
 	q->latest_ctx = p1_ctx;
 
@@ -2731,12 +2748,21 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
-		cell *c = deref(q, h, p2_ctx);
-		parse_write_params(q, c);
+		h = deref(q, h, p2_ctx);
+
+		if (is_variable(h))
+			return throw_error(q, h, "type_error", "list");
+
+		if (!parse_write_params(q, h))
+			return pl_success;
+
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
+
+	if (!is_nil(p2))
+		return throw_error(q, p2, "type_error", "list");
 
 	q->latest_ctx = p1_ctx;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
