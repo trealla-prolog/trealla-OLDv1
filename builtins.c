@@ -2597,10 +2597,10 @@ static USE_RESULT prolog_state fn_iso_writeq_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = q->current_output;
 	stream *str = &g_streams[n];
-	int save = q->quoted;
-	q->quoted = 1;
+	bool saveq = q->quoted;
+	q->quoted = q->numbervars = true;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
-	q->quoted = save;
+	q->quoted = saveq;
 	return !ferror(str->fp);
 }
 
@@ -2614,8 +2614,8 @@ static USE_RESULT prolog_state fn_iso_writeq_2(query *q)
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "output,stream");
 
-	int save = q->quoted;
-	q->quoted = 1;
+	bool save = q->quoted;
+	q->quoted = q->numbervars = true;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	q->quoted = save;
 	return !ferror(str->fp);
@@ -2666,13 +2666,16 @@ static void parse_write_params(query *q, cell *c)
 	} else if (!strcmp(GET_STR(c), "ignore_ops")) {
 		if (is_literal(c+1))
 			q->ignore_ops = !strcmp(GET_STR(c+1), "true");
+	} else if (!strcmp(GET_STR(c), "numbervars")) {
+		if (is_literal(c+1))
+			q->numbervars = !strcmp(GET_STR(c+1), "true");
 	}
 }
 
 static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
+	GET_NEXT_ARG(p2,list_or_nil);
 	int n = q->current_output;
 	stream *str = &g_streams[n];
 
@@ -2708,6 +2711,7 @@ static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 
 	q->max_depth = q->quoted = q->nl = q->fullstop = false;
 	q->ignore_ops = false;
+	q->numbervars = false;
 	return !ferror(str->fp);
 }
 
@@ -2717,7 +2721,7 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
+	GET_NEXT_ARG(p2,list_or_nil);
 
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "output,stream");
