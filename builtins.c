@@ -6586,10 +6586,8 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,list_or_nil_or_var);
 
-	if (is_list(p3)) {
-		if (!is_valid_list(q, p3, p3_ctx, false))
+	if (is_list(p3) && !is_valid_list(q, p3, p3_ctx, true))
 		return throw_error(q, p3, "type_error", "list");
-	}
 
 	uint64_t xs_vars = 0;
 	p2 = skip_existentials(q, p2, &xs_vars);
