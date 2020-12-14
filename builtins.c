@@ -2760,11 +2760,11 @@ static bool parse_write_params(query *q, cell *c)
 
 			if (is_literal(h)) {
 				if (!is_atom(h+1)) {
-					DISCARD_RESULT throw_error(q, h, "domain_error", "write_option");
+					DISCARD_RESULT throw_error(q, c1, "domain_error", "write_option");
 					return false;
 				}
 				if (!is_variable(h+2)) {
-					DISCARD_RESULT throw_error(q, h, "domain_error", "write_option");
+					DISCARD_RESULT throw_error(q, c1, "domain_error", "write_option");
 					return false;
 				}
 			}
