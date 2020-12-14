@@ -2211,40 +2211,39 @@ static void parse_read_params(query *q, parser *p, cell *c, cell **vars, idx_t *
 	if (!is_structure(c))
 		return;
 
+	cell *c1 = deref(q, c+1, q->latest_ctx);
+
 	if (!strcmp(GET_STR(c), "character_escapes")) {
-		if (is_literal(c+1))
-			p->flag.character_escapes = !strcmp(GET_STR(c+1), "true");
+		if (is_literal(c1))
+			p->flag.character_escapes = !strcmp(GET_STR(c1), "true");
 	} else if (!strcmp(GET_STR(c), "double_quotes")) {
-		if (is_literal(c+1)) {
-			if (!strcmp(GET_STR(c+1), "atom")) {
+		if (is_literal(c1)) {
+			if (!strcmp(GET_STR(c1), "atom")) {
 				p->flag.double_quote_codes = p->flag.double_quote_chars = 0;
 				p->flag.double_quote_atom = 1;
-			} else if (!strcmp(GET_STR(c+1), "chars")) {
+			} else if (!strcmp(GET_STR(c1), "chars")) {
 				p->flag.double_quote_atom = p->flag.double_quote_codes = 0;
 				p->flag.double_quote_chars = 1;
-			} else if (!strcmp(GET_STR(c+1), "codes")) {
+			} else if (!strcmp(GET_STR(c1), "codes")) {
 				p->flag.double_quote_atom = p->flag.double_quote_chars = 0;
 				p->flag.double_quote_codes = 1;
 			}
 		}
 	} else if (!strcmp(GET_STR(c), "variables")) {
-		if (is_variable(c+1)) {
-			cell *v = c+1;
-			v = deref(q, v, q->latest_ctx);
+		if (is_variable(c1)) {
+			cell *v = c1;
 			if (vars) *vars = v;
 			if (vars_ctx) *vars_ctx = q->latest_ctx;
 		}
 	} else if (!strcmp(GET_STR(c), "variable_names")) {
-		if (is_variable(c+1)) {
-			cell *v = c+1;
-			v = deref(q, v, q->latest_ctx);
+		if (is_variable(c1)) {
+			cell *v = c1;
 			if (varnames) *varnames = v;
 			if (varnames_ctx) *varnames_ctx = q->latest_ctx;
 		}
 	} else if (!strcmp(GET_STR(c), "singletons")) {
-		if (is_variable(c+1)) {
-			cell *v = c+1;
-			v = deref(q, v, q->latest_ctx);
+		if (is_variable(c1)) {
+			cell *v = c1;
 			if (sings) *sings = v;
 			if (sings_ctx) *sings_ctx = q->latest_ctx;
 		}
@@ -2683,57 +2682,68 @@ static USE_RESULT prolog_state fn_iso_write_canonical_2(query *q)
 
 static bool parse_write_params(query *q, cell *c)
 {
+	if (is_variable(c)) {
+		DISCARD_RESULT throw_error(q, c, "instantiation_error", "write_option");
+		return false;
+	}
+
 	if (!is_literal(c) || !is_structure(c)) {
 		DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 		return false;
 	}
 
-	if (strcmp(GET_STR(c), "variable_names") && is_variable(c+1)) {
-		DISCARD_RESULT throw_error(q, c, "instantiation_error", "write_option");
+	cell *c1 = deref(q,c+1, q->latest_ctx);
+
+	if (is_variable(c1)) {
+		DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 		return false;
 	}
 
 	if (!strcmp(GET_STR(c), "max_depth")) {
-		if (is_integer(c+1))
+		if (is_integer(c1))
 			q->max_depth = c[1].val_num;
 	} else if (!strcmp(GET_STR(c), "fullstop")) {
-		if (!is_literal(c+1) || (strcmp(GET_STR(c+1), "true") && strcmp(GET_STR(c+1), "false"))) {
+		if (!is_literal(c1) || (strcmp(GET_STR(c1), "true") && strcmp(GET_STR(c1), "false"))) {
 			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 			return false;
 		}
 
-		q->fullstop = !strcmp(GET_STR(c+1), "true");
+		q->fullstop = !strcmp(GET_STR(c1), "true");
 	} else if (!strcmp(GET_STR(c), "nl")) {
-		if (!is_literal(c+1) || (strcmp(GET_STR(c+1), "true") && strcmp(GET_STR(c+1), "false"))) {
+		if (!is_literal(c1) || (strcmp(GET_STR(c1), "true") && strcmp(GET_STR(c1), "false"))) {
 			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 			return false;
 		}
 
-		q->nl = !strcmp(GET_STR(c+1), "true");
+		q->nl = !strcmp(GET_STR(c1), "true");
 	} else if (!strcmp(GET_STR(c), "quoted")) {
-		if (!is_literal(c+1) || (strcmp(GET_STR(c+1), "true") && strcmp(GET_STR(c+1), "false"))) {
+		if (!is_literal(c1) || (strcmp(GET_STR(c1), "true") && strcmp(GET_STR(c1), "false"))) {
 			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 			return false;
 		}
 
-		q->quoted = !strcmp(GET_STR(c+1), "true");
+		q->quoted = !strcmp(GET_STR(c1), "true");
 	} else if (!strcmp(GET_STR(c), "ignore_ops")) {
-		if (!is_literal(c+1) || (strcmp(GET_STR(c+1), "true") && strcmp(GET_STR(c+1), "false"))) {
+		if (!is_literal(c1) || (strcmp(GET_STR(c1), "true") && strcmp(GET_STR(c1), "false"))) {
 			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 			return false;
 		}
 
-		q->ignore_ops = !strcmp(GET_STR(c+1), "true");
+		q->ignore_ops = !strcmp(GET_STR(c1), "true");
 	} else if (!strcmp(GET_STR(c), "numbervars")) {
-		if (!is_literal(c+1) || (strcmp(GET_STR(c+1), "true") && strcmp(GET_STR(c+1), "false"))) {
+		if (!is_literal(c1) || (strcmp(GET_STR(c1), "true") && strcmp(GET_STR(c1), "false"))) {
 			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 			return false;
 		}
 
-		q->numbervars = !strcmp(GET_STR(c+1), "true");
+		q->numbervars = !strcmp(GET_STR(c1), "true");
 	} else if (!strcmp(GET_STR(c), "variable_names")) {
-		//if (is_literal(c+1))
-		//	q->numbervars = !strcmp(GET_STR(c+1), "true");
+		if (!is_list_or_nil(c1)) {
+			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
+			return false;
+		}
+
+		// TODO: write_term variable_names
 	} else {
 		DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 		return false;
@@ -2756,14 +2766,12 @@ static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 	}
 
 	q->flag = q->m->flag;
+	cell *p2_orig = p2;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
 		h = deref(q, h, p2_ctx);
-
-		if (is_variable(h))
-			return throw_error(q, h, "type_error", "list");
 
 		if (!parse_write_params(q, h))
 			return pl_success;
@@ -2774,7 +2782,7 @@ static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 	}
 
 	if (!is_nil(p2))
-		return throw_error(q, p2, "type_error", "list");
+		return throw_error(q, p2_orig, "type_error", "list");
 
 	q->latest_ctx = p1_ctx;
 
@@ -2815,14 +2823,12 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 	}
 
 	q->flag = q->m->flag;
+	cell *p2_orig = p2;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
 		h = deref(q, h, p2_ctx);
-
-		if (is_variable(h))
-			return throw_error(q, h, "type_error", "list");
 
 		if (!parse_write_params(q, h))
 			return pl_success;
@@ -2833,7 +2839,7 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 	}
 
 	if (!is_nil(p2))
-		return throw_error(q, p2, "type_error", "list");
+		return throw_error(q, p2_orig, "type_error", "list");
 
 	q->latest_ctx = p1_ctx;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
