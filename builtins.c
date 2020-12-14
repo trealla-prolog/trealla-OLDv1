@@ -2755,15 +2755,16 @@ static USE_RESULT prolog_state fn_iso_put_char_1(query *q)
 	GET_FIRST_ARG(p1,atom);
 	int n = q->current_output;
 	stream *str = &g_streams[n];
-
-	if (!strcmp(str->mode, "read"))
-		return throw_error(q, pstr, "permission_error", "output,stream");
+	size_t len = len_char_utf8(GET_STR(p1));
 
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
+
+	if (len != LEN_STR(p1))
+		return throw_error(q, p1, "type_error", "character");
 
 	const char *src = GET_STR(p1);
 	int ch = get_char_utf8(&src);
@@ -2779,6 +2780,7 @@ static USE_RESULT prolog_state fn_iso_put_char_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,atom);
+	size_t len = len_char_utf8(GET_STR(p1));
 
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "output,stream");
@@ -2788,6 +2790,9 @@ static USE_RESULT prolog_state fn_iso_put_char_2(query *q)
 		make_int(&tmp, n);
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
+
+	if (len != LEN_STR(p1))
+		return throw_error(q, p1, "type_error", "character");
 
 	const char *src = GET_STR(p1);
 	int ch = get_char_utf8(&src);
