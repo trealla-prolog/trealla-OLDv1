@@ -2693,6 +2693,7 @@ static bool parse_write_params(query *q, cell *c)
 	}
 
 	cell *c1 = deref(q,c+1, q->latest_ctx);
+	idx_t c1_ctx = q->latest_ctx;
 
 	if (is_variable(c1)) {
 		DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
@@ -2744,6 +2745,45 @@ static bool parse_write_params(query *q, cell *c)
 		}
 
 		// TODO: write_term variable_names
+
+		cell *c1_orig = c1;
+		LIST_HANDLER(c1);
+
+		while (is_list(c1)) {
+			cell *h = LIST_HEAD(c1);
+			h = deref(q, h, c1_ctx);
+
+			if (!is_structure(h)) {
+				DISCARD_RESULT throw_error(q, c1, "domain_error", "write_option");
+				return false;
+			}
+
+			if (is_literal(h)) {
+				if (!is_atom(h+1)) {
+					DISCARD_RESULT throw_error(q, h, "domain_error", "write_option");
+					return false;
+				}
+				if (!is_variable(h+2)) {
+					DISCARD_RESULT throw_error(q, h, "domain_error", "write_option");
+					return false;
+				}
+			}
+
+			c1 = LIST_TAIL(c1);
+			c1 = deref(q, c1, c1_ctx);
+			c1_ctx = q->latest_ctx;
+		}
+
+		if (is_variable(c1)) {
+			DISCARD_RESULT throw_error(q, c1_orig, "instantiation_error", "write_option");
+			return false;
+		}
+
+		if (!is_nil(c1)) {
+			DISCARD_RESULT throw_error(q, c, "type_error", "list");
+			return false;
+		}
+
 	} else {
 		DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 		return false;
