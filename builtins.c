@@ -2689,7 +2689,7 @@ static bool parse_write_params(query *q, cell *c)
 	}
 
 	if (strcmp(GET_STR(c), "variable_names") && is_variable(c+1)) {
-		DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
+		DISCARD_RESULT throw_error(q, c, "instantiation_error", "write_option");
 		return false;
 	}
 
