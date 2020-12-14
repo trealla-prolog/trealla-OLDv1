@@ -5749,6 +5749,9 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	if (!strcmp(err_type, "type_error") && (ptr = strchr(tmpbuf, '_')) != NULL)
 		*ptr = '\0';
 
+	if (!strcmp(err_type, "type_error") && !strcmp(expected, "stream"))
+		err_type = "existence_error";
+
 	expected = tmpbuf;
 
 	if (is_variable(c)) {
