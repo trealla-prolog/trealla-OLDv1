@@ -1937,10 +1937,18 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 				str->name = strdup(GET_STR(name));
 				str->aliased = 1;
 			} else if (!strcmp(GET_STR(c), "type")) {
-				if (is_atom(name) && !strcmp(GET_STR(name), "binary"))
+				if (is_atom(name) && !strcmp(GET_STR(name), "binary")) {
+					str->binary = true;
 					binary = 1;
-				else if (is_atom(name) && !strcmp(GET_STR(name), "text"))
+				} else if (is_atom(name) && !strcmp(GET_STR(name), "text"))
 					binary = 0;
+			} else if (!strcmp(GET_STR(c), "eof_action")) {
+				if (is_atom(name) && !strcmp(GET_STR(name), "error"))
+					str->eof_action_error = true;
+				else if (is_atom(name) && !strcmp(GET_STR(name), "eof_code"))
+					str->eof_action_eof_code = true;
+				else if (is_atom(name) && !strcmp(GET_STR(name), "reset"))
+					str->eof_action_reset = true;
 			}
 		} else
 			return throw_error(q, c, "domain_error", "stream_option");
@@ -2789,6 +2797,12 @@ static USE_RESULT prolog_state fn_iso_put_byte_1(query *q)
 	stream *str = &g_streams[n];
 	int ch = (int)p1->val_num;
 
+	if (!str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "output,text_stream");
+	}
+
 	if ((ch > 255) || (ch < 0))
 		return throw_error(q, p1, "type_error", "byte");
 
@@ -2808,6 +2822,9 @@ static USE_RESULT prolog_state fn_iso_put_byte_2(query *q)
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "output,stream");
 
+	if (!str->binary)
+		return throw_error(q, pstr, "permission_error", "output,text_stream");
+
 	int ch = (int)p1->val_num;
 
 	if ((ch > 255) || (ch < 0))
@@ -2824,6 +2841,18 @@ static USE_RESULT prolog_state fn_iso_get_char_1(query *q)
 	GET_FIRST_ARG(p1,atom_or_var);
 	int n = q->current_input;
 	stream *str = &g_streams[n];
+
+	if (str->at_end_of_file && !str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (str->at_end_of_file && str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
+	}
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
 		printf("| ");
@@ -2843,8 +2872,9 @@ static USE_RESULT prolog_state fn_iso_get_char_1(query *q)
 
 	if (feof(str->fp)) {
 		str->did_getc = false;
+		str->at_end_of_file = !str->eof_action_reset;
 		cell tmp;
-		make_literal(&tmp, g_eof_s);
+		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -2868,6 +2898,18 @@ static USE_RESULT prolog_state fn_iso_get_char_2(query *q)
 	if (strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
 
+	if (str->at_end_of_file && !str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (str->at_end_of_file && str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
+	}
+
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
 		printf("| ");
 		fflush(str->fp);
@@ -2886,8 +2928,9 @@ static USE_RESULT prolog_state fn_iso_get_char_2(query *q)
 
 	if (feof(str->fp)) {
 		str->did_getc = false;
+		str->at_end_of_file = !str->eof_action_reset;
 		cell tmp;
-		make_literal(&tmp, g_eof_s);
+		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -2907,6 +2950,18 @@ static USE_RESULT prolog_state fn_iso_get_code_1(query *q)
 	int n = q->current_input;
 	stream *str = &g_streams[n];
 
+	if (str->at_end_of_file && !str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (str->at_end_of_file && str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
+	}
+
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
 		printf("| ");
 		fflush(str->fp);
@@ -2922,6 +2977,14 @@ static USE_RESULT prolog_state fn_iso_get_code_1(query *q)
 
 	str->did_getc = true;
 	str->ungetch = 0;
+
+	if (feof(str->fp)) {
+		str->did_getc = false;
+		str->at_end_of_file = !str->eof_action_reset;
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
 
 	if ((ch == '\n') || (ch == EOF))
 		str->did_getc = false;
@@ -2941,6 +3004,18 @@ static USE_RESULT prolog_state fn_iso_get_code_2(query *q)
 	if (strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
 
+	if (str->at_end_of_file && !str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (str->at_end_of_file && str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
+	}
+
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
 		printf("| ");
 		fflush(str->fp);
@@ -2957,7 +3032,15 @@ static USE_RESULT prolog_state fn_iso_get_code_2(query *q)
 	str->did_getc = true;
 	str->ungetch = 0;
 
-	if ((ch == '\n') || (ch == EOF))
+	if (feof(str->fp)) {
+		str->did_getc = false;
+		str->at_end_of_file = !str->eof_action_reset;
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (ch == '\n')
 		str->did_getc = false;
 
 	cell tmp;
@@ -2967,9 +3050,27 @@ static USE_RESULT prolog_state fn_iso_get_code_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_get_byte_1(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_var);
+	GET_FIRST_ARG(p1,in_byte_or_var);
 	int n = q->current_input;
 	stream *str = &g_streams[n];
+
+	if (!str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,text_stream");
+	}
+
+	if (str->at_end_of_file && !str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (str->at_end_of_file && str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
+	}
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
 		printf("| ");
@@ -2987,7 +3088,15 @@ static USE_RESULT prolog_state fn_iso_get_byte_1(query *q)
 	str->did_getc = true;
 	str->ungetch = 0;
 
-	if ((ch == '\n') || (ch == EOF))
+	if (feof(str->fp)) {
+		str->did_getc = false;
+		str->at_end_of_file = !str->eof_action_reset;
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (ch == '\n')
 		str->did_getc = false;
 
 	cell tmp;
@@ -3000,10 +3109,26 @@ static USE_RESULT prolog_state fn_iso_get_byte_2(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
-	GET_NEXT_ARG(p1,atom_or_var);
+	GET_NEXT_ARG(p1,in_byte_or_var);
 
 	if (strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
+
+	if (!str->binary)
+		return throw_error(q, pstr, "permission_error", "input,text_stream");
+
+	if (str->at_end_of_file && !str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (str->at_end_of_file && str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
+	}
+
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
 		printf("| ");
@@ -3021,7 +3146,15 @@ static USE_RESULT prolog_state fn_iso_get_byte_2(query *q)
 	str->did_getc = true;
 	str->ungetch = 0;
 
-	if ((ch == '\n') || (ch == EOF))
+	if (feof(str->fp)) {
+		str->did_getc = false;
+		str->at_end_of_file = !str->eof_action_reset;
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (ch == '\n')
 		str->did_getc = false;
 
 	cell tmp;
@@ -3036,6 +3169,18 @@ static USE_RESULT prolog_state fn_iso_peek_char_1(query *q)
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 
+	if (str->at_end_of_file && !str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (str->at_end_of_file && str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
+	}
+
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
 		do_yield_0(q, 1);
@@ -3045,7 +3190,7 @@ static USE_RESULT prolog_state fn_iso_peek_char_1(query *q)
 	if (feof(str->fp)) {
 		clearerr(str->fp);
 		cell tmp;
-		make_literal(&tmp, g_eof_s);
+		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -3067,6 +3212,18 @@ static USE_RESULT prolog_state fn_iso_peek_char_2(query *q)
 	if (strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
 
+	if (str->at_end_of_file && !str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (str->at_end_of_file && str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
+	}
+
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
@@ -3078,7 +3235,7 @@ static USE_RESULT prolog_state fn_iso_peek_char_2(query *q)
 	if (feof(str->fp)) {
 		clearerr(str->fp);
 		cell tmp;
-		make_literal(&tmp, g_eof_s);
+		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -3092,10 +3249,22 @@ static USE_RESULT prolog_state fn_iso_peek_char_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_peek_code_1(query *q)
 {
-	GET_FIRST_ARG(p1,any);
+	GET_FIRST_ARG(p1,integer_or_var);
 	int n = q->current_input;
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
+
+	if (str->at_end_of_file && !str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (str->at_end_of_file && str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
+	}
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
@@ -3114,10 +3283,22 @@ static USE_RESULT prolog_state fn_iso_peek_code_2(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
-	GET_NEXT_ARG(p1,any);
+	GET_NEXT_ARG(p1,integer_or_var);
 
 	if (strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
+
+	if (str->at_end_of_file && !str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (str->at_end_of_file && str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
+	}
 
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 
@@ -3125,6 +3306,14 @@ static USE_RESULT prolog_state fn_iso_peek_code_2(query *q)
 		clearerr(str->fp);
 		do_yield_0(q, 1);
 		return pl_failure;
+	}
+
+	if (feof(str->fp)) {
+		str->did_getc = false;
+		str->at_end_of_file = !str->eof_action_reset;
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
 	str->ungetch = ch;
@@ -3135,15 +3324,35 @@ static USE_RESULT prolog_state fn_iso_peek_code_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_peek_byte_1(query *q)
 {
-	GET_FIRST_ARG(p1,any);
+	GET_FIRST_ARG(p1,in_byte_or_var);
 	int n = q->current_input;
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : net_getc(str);
+
+	if (str->at_end_of_file && !str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (str->at_end_of_file && str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
+	}
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
 		do_yield_0(q, 1);
 		return pl_failure;
+	}
+
+	if (feof(str->fp)) {
+		str->did_getc = false;
+		str->at_end_of_file = !str->eof_action_reset;
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
 	str->ungetch = ch;
@@ -3157,10 +3366,22 @@ static USE_RESULT prolog_state fn_iso_peek_byte_2(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
-	GET_NEXT_ARG(p1,any);
+	GET_NEXT_ARG(p1,in_byte_or_var);
 
 	if (strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
+
+	if (str->at_end_of_file && !str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (str->at_end_of_file && str->eof_action_error) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
+	}
 
 	int ch = str->ungetch ? str->ungetch : net_getc(str);
 
@@ -3168,6 +3389,14 @@ static USE_RESULT prolog_state fn_iso_peek_byte_2(query *q)
 		clearerr(str->fp);
 		do_yield_0(q, 1);
 		return pl_failure;
+	}
+
+	if (feof(str->fp)) {
+		str->did_getc = false;
+		str->at_end_of_file = !str->eof_action_reset;
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
 	str->ungetch = ch;
@@ -5877,7 +6106,8 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	snprintf(tmpbuf, sizeof(tmpbuf), "%s", expected);
 	char *ptr;
 
-	if (!strcmp(err_type, "type_error") && (ptr = strchr(tmpbuf, '_')) != NULL)
+	if (!strcmp(err_type, "type_error")
+		&& ((ptr = strstr(tmpbuf, "_or")) != NULL))
 		*ptr = '\0';
 
 	if (!strcmp(err_type, "type_error") && !strcmp(expected, "stream"))

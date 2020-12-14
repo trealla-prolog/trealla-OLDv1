@@ -358,6 +358,11 @@ typedef struct {
 	size_t data_len, alloc_nbytes;
 	int ungetch, srclen;
 	uint8_t level;
+	bool at_end_of_file:1;
+	bool eof_action_error:1;
+	bool eof_action_eof_code:1;
+	bool eof_action_reset:1;
+	bool binary:1;
 	bool did_getc:1;
 	bool socket:1;
 	bool nodelay:1;
