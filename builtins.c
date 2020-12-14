@@ -3150,7 +3150,6 @@ static USE_RESULT prolog_state fn_iso_get_byte_2(query *q)
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
-
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
 		printf("| ");
 		fflush(str->fp);
