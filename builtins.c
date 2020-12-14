@@ -2137,6 +2137,10 @@ static USE_RESULT prolog_state fn_iso_nl_1(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
+
+	if (!strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "output,stream");
+
 	fputc('\n', str->fp);
 	fflush(str->fp);
 	return !ferror(str->fp);
@@ -5836,8 +5840,10 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 		snprintf(dst2, len2+1, "error(%s((%s,%s)),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "evaluable")) {
 		snprintf(dst2, len2+1, "error(%s(%s,%s/%u),(%s)/%u).", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
-	} else if (!strcmp(err_type, "permission_error")) {
+	} else if (!strcmp(err_type, "permission_error") && c->arity) {
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),(%s)/%u).", err_type, expected, GET_STR(c), c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+	} else if (!strcmp(err_type, "permission_error")) {
+		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, GET_STR(c), GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else if (IS_OP(c)) {
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	} else {
