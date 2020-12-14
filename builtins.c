@@ -1847,6 +1847,7 @@ static USE_RESULT prolog_state fn_iso_open_3(query *q)
 	str->filename = strdup(filename);
 	str->name = strdup(filename);
 	str->mode = strdup(mode);
+	str->eof_action_eof_code = true;
 
 	if (!strcmp(mode, "read"))
 		str->fp = fopen(filename, "r");
@@ -1915,6 +1916,7 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 	str->filename = strdup(filename);
 	str->name = strdup(filename);
 	str->mode = strdup(mode);
+	str->eof_action_eof_code = true;
 	int binary = 0;
 
 #if USE_MMAP
@@ -1958,12 +1960,15 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 				} else if (is_atom(name) && !strcmp(GET_STR(name), "text"))
 					binary = 0;
 			} else if (!strcmp(GET_STR(c), "eof_action")) {
-				if (is_atom(name) && !strcmp(GET_STR(name), "error"))
+				if (is_atom(name) && !strcmp(GET_STR(name), "error")) {
+					str->eof_action_eof_code = false;
 					str->eof_action_error = true;
-				else if (is_atom(name) && !strcmp(GET_STR(name), "eof_code"))
+				} else if (is_atom(name) && !strcmp(GET_STR(name), "eof_code"))
 					str->eof_action_eof_code = true;
-				else if (is_atom(name) && !strcmp(GET_STR(name), "reset"))
+				else if (is_atom(name) && !strcmp(GET_STR(name), "reset")) {
+					str->eof_action_eof_code = false;
 					str->eof_action_reset = true;
+				}
 			}
 		} else
 			return throw_error(q, c, "domain_error", "stream_option");
@@ -2895,7 +2900,7 @@ static USE_RESULT prolog_state fn_iso_get_char_1(query *q)
 	if (feof(str->fp)) {
 		str->did_getc = false;
 		str->at_end_of_file = !str->eof_action_reset;
-		str->past_end_of_file = !str->eof_action_eof_code;
+		str->past_end_of_file = str->eof_action_eof_code;
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -2959,7 +2964,7 @@ static USE_RESULT prolog_state fn_iso_get_char_2(query *q)
 	if (feof(str->fp)) {
 		str->did_getc = false;
 		str->at_end_of_file = !str->eof_action_reset;
-		str->past_end_of_file = !str->eof_action_eof_code;
+		str->past_end_of_file = str->eof_action_eof_code;
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -2981,7 +2986,7 @@ static USE_RESULT prolog_state fn_iso_get_code_1(query *q)
 	int n = q->current_input;
 	stream *str = &g_streams[n];
 
-	if (is_integer(p1) && (p1->val_num < 0))
+	if (is_integer(p1) && (p1->val_num < -1))
 		return throw_error(q, p1, "representation_error", "in_character_code");
 
 	if (str->binary) {
@@ -3022,7 +3027,7 @@ static USE_RESULT prolog_state fn_iso_get_code_1(query *q)
 	if (feof(str->fp)) {
 		str->did_getc = false;
 		str->at_end_of_file = !str->eof_action_reset;
-		str->past_end_of_file = !str->eof_action_eof_code;
+		str->past_end_of_file = str->eof_action_eof_code;
 		cell tmp;
 		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -3043,7 +3048,7 @@ static USE_RESULT prolog_state fn_iso_get_code_2(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,integer_or_var);
 
-	if (is_integer(p1) && (p1->val_num < 0))
+	if (is_integer(p1) && (p1->val_num < -1))
 		return throw_error(q, p1, "representation_error", "in_character_code");
 
 	if (strcmp(str->mode, "read"))
@@ -3087,7 +3092,7 @@ static USE_RESULT prolog_state fn_iso_get_code_2(query *q)
 	if (feof(str->fp)) {
 		str->did_getc = false;
 		str->at_end_of_file = !str->eof_action_reset;
-		str->past_end_of_file = !str->eof_action_eof_code;
+		str->past_end_of_file = str->eof_action_eof_code;
 		cell tmp;
 		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -3145,7 +3150,7 @@ static USE_RESULT prolog_state fn_iso_get_byte_1(query *q)
 	if (feof(str->fp)) {
 		str->did_getc = false;
 		str->at_end_of_file = !str->eof_action_reset;
-		str->past_end_of_file = !str->eof_action_eof_code;
+		str->past_end_of_file = str->eof_action_eof_code;
 		cell tmp;
 		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -3201,7 +3206,7 @@ static USE_RESULT prolog_state fn_iso_get_byte_2(query *q)
 	if (feof(str->fp)) {
 		str->did_getc = false;
 		str->at_end_of_file = !str->eof_action_reset;
-		str->past_end_of_file = !str->eof_action_eof_code;
+		str->past_end_of_file = str->eof_action_eof_code;
 		cell tmp;
 		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
