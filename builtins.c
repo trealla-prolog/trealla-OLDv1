@@ -2507,6 +2507,10 @@ static USE_RESULT prolog_state fn_iso_read_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
+
+	if (strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "input,stream");
+
 	cell tmp;
 	make_literal(&tmp, g_nil_s);
 	return do_read_term(q, str, p1, p1_ctx, &tmp, q->st.curr_frame, NULL);
@@ -2528,6 +2532,10 @@ static USE_RESULT prolog_state fn_iso_read_term_3(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
+
+	if (strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "input,stream");
+
 	return do_read_term(q, str, p1, p1_ctx, p2, p2_ctx, NULL);
 }
 
@@ -2548,6 +2556,10 @@ static USE_RESULT prolog_state fn_iso_write_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
+
+	if (!strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "output,stream");
+
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	return !ferror(str->fp);
 }
@@ -2570,6 +2582,10 @@ static USE_RESULT prolog_state fn_iso_writeq_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
+
+	if (!strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "output,stream");
+
 	int save = q->quoted;
 	q->quoted = 1;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
@@ -2592,6 +2608,10 @@ static USE_RESULT prolog_state fn_iso_write_canonical_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
+
+	if (!strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "output,stream");
+
 	print_canonical(q, str->fp, p1, p1_ctx, 1);
 	return !ferror(str->fp);
 }
@@ -2627,6 +2647,10 @@ static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 	GET_NEXT_ARG(p2,any);
 	int n = q->current_output;
 	stream *str = &g_streams[n];
+
+	if (!strcmp(str->mode, "read"))
+		return throw_error(q, p1, "permission_error", "output,stream");
+
 	q->flag = q->m->flag;
 	LIST_HANDLER(p2);
 
@@ -2666,6 +2690,10 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
+
+	if (!strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "output,stream");
+
 	q->flag = q->m->flag;
 	LIST_HANDLER(p2);
 
@@ -2713,6 +2741,10 @@ static USE_RESULT prolog_state fn_iso_put_char_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,atom);
+
+	if (!strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "output,stream");
+
 	const char *src = GET_STR(p1);
 	int ch = get_char_utf8(&src);
 	char tmpbuf[20];
@@ -2739,6 +2771,10 @@ static USE_RESULT prolog_state fn_iso_put_code_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,integer);
+
+	if (!strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "output,stream");
+
 	int ch = (int)p1->val_num;
 	char tmpbuf[20];
 	put_char_utf8(tmpbuf, ch);
@@ -2768,6 +2804,10 @@ static USE_RESULT prolog_state fn_iso_put_byte_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,integer);
+
+	if (!strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "output,stream");
+
 	int ch = (int)p1->val_num;
 
 	if ((ch > 255) || (ch < 0))
@@ -2824,6 +2864,9 @@ static USE_RESULT prolog_state fn_iso_get_char_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,atom_or_var);
+
+	if (strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "input,stream");
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
 		printf("| ");
@@ -2895,6 +2938,9 @@ static USE_RESULT prolog_state fn_iso_get_code_2(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,integer_or_var);
 
+	if (strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "input,stream");
+
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
 		printf("| ");
 		fflush(str->fp);
@@ -2956,6 +3002,9 @@ static USE_RESULT prolog_state fn_iso_get_byte_2(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,atom_or_var);
 
+	if (strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "input,stream");
+
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
 		printf("| ");
 		fflush(str->fp);
@@ -3015,6 +3064,9 @@ static USE_RESULT prolog_state fn_iso_peek_char_2(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
 
+	if (strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "input,stream");
+
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
@@ -3063,6 +3115,10 @@ static USE_RESULT prolog_state fn_iso_peek_code_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
+
+	if (strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "input,stream");
+
 	int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
@@ -3102,6 +3158,10 @@ static USE_RESULT prolog_state fn_iso_peek_byte_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,any);
+
+	if (strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "input,stream");
+
 	int ch = str->ungetch ? str->ungetch : net_getc(str);
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
