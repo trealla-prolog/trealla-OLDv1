@@ -2754,17 +2754,17 @@ static bool parse_write_params(query *q, cell *c)
 			h = deref(q, h, c1_ctx);
 
 			if (!is_structure(h)) {
-				DISCARD_RESULT throw_error(q, c1, "domain_error", "write_option");
+				DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 				return false;
 			}
 
 			if (is_literal(h)) {
 				if (!is_atom(h+1)) {
-					DISCARD_RESULT throw_error(q, c1, "domain_error", "write_option");
+					DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 					return false;
 				}
 				if (!is_variable(h+2)) {
-					DISCARD_RESULT throw_error(q, c1, "domain_error", "write_option");
+					DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 					return false;
 				}
 			}
