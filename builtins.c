@@ -2781,6 +2781,9 @@ static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 		p2_ctx = q->latest_ctx;
 	}
 
+	if (is_variable(p2))
+		return throw_error(q, p2_orig, "instantiation_error", "write_option");
+
 	if (!is_nil(p2))
 		return throw_error(q, p2_orig, "type_error", "list");
 
@@ -2837,6 +2840,9 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
+
+	if (is_variable(p2))
+		return throw_error(q, p2_orig, "instantiation_error", "write_option");
 
 	if (!is_nil(p2))
 		return throw_error(q, p2_orig, "type_error", "list");
