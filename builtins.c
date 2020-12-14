@@ -3457,6 +3457,12 @@ static USE_RESULT prolog_state fn_iso_peek_byte_1(query *q)
 	stream *str = &g_streams[n];
 	int ch = str->ungetch ? str->ungetch : net_getc(str);
 
+	if (!str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,text_stream");
+	}
+
 	if (str->at_end_of_file && !str->eof_action_error) {
 		cell tmp;
 		make_int(&tmp, -1);
@@ -3499,6 +3505,12 @@ static USE_RESULT prolog_state fn_iso_peek_byte_2(query *q)
 
 	if (strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
+
+	if (!str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,text_stream");
+	}
 
 	if (str->at_end_of_file && !str->eof_action_error) {
 		cell tmp;
