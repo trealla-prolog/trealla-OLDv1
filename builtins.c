@@ -1663,8 +1663,13 @@ static USE_RESULT prolog_state fn_iso_current_output_1(query *q)
 static USE_RESULT prolog_state fn_iso_set_input_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
-	q->current_input = get_stream(q, pstr);
-	stream *str = &g_streams[q->current_input];
+	int n = get_stream(q, pstr);
+	stream *str = &g_streams[n];
+
+	if (strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "input,stream");
+
+	q->current_input = n;
 	str->aliased = 1;
 	return pl_success;
 }
@@ -1672,8 +1677,13 @@ static USE_RESULT prolog_state fn_iso_set_input_1(query *q)
 static USE_RESULT prolog_state fn_iso_set_output_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
-	q->current_output = get_stream(q, pstr);
-	stream *str = &g_streams[q->current_output];
+	int n = get_stream(q, pstr);
+	stream *str = &g_streams[n];
+
+	if (!strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "output,stream");
+
+	q->current_output = n;
 	str->aliased = 1;
 	return pl_success;
 }
