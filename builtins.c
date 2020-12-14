@@ -1624,22 +1624,40 @@ static int get_stream(__attribute__((unused)) query *q, cell *p1)
 
 static USE_RESULT prolog_state fn_iso_current_input_1(query *q)
 {
-	GET_FIRST_ARG(p1,variable);
-	cell tmp;
-	make_int(&tmp, q->current_input);
-	tmp.flags |= FLAG_STREAM | FLAG_HEX;
-	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	GET_FIRST_ARG(pstr,any);
+
+	if (is_variable(pstr)) {
+		cell tmp;
+		make_int(&tmp, q->current_input);
+		tmp.flags |= FLAG_STREAM | FLAG_HEX;
+		set_var(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
+		return pl_success;
+	}
+
+	if (!is_stream(pstr))
+		return throw_error(q, pstr, "domain_error", "stream");
+
+	int n = get_stream(q, pstr);
+	return n == q->current_input ? pl_success : pl_failure;
 }
 
 static USE_RESULT prolog_state fn_iso_current_output_1(query *q)
 {
-	GET_FIRST_ARG(p1,variable);
-	cell tmp;
-	make_int(&tmp, q->current_output);
-	tmp.flags |= FLAG_STREAM | FLAG_HEX;
-	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	GET_FIRST_ARG(pstr,any);
+
+	if (is_variable(pstr)) {
+		cell tmp;
+		make_int(&tmp, q->current_output);
+		tmp.flags |= FLAG_STREAM | FLAG_HEX;
+		set_var(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
+		return pl_success;
+	}
+
+	if (!is_stream(pstr))
+		return throw_error(q, pstr, "domain_error", "stream");
+
+	int n = get_stream(q, pstr);
+	return n == q->current_output ? pl_success : pl_failure;
 }
 
 static USE_RESULT prolog_state fn_iso_set_input_1(query *q)
