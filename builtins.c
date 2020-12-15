@@ -2614,10 +2614,10 @@ static USE_RESULT prolog_state fn_iso_writeq_1(query *q)
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
-	bool saveq = q->quoted;
-	q->quoted = q->numbervars = true;
+	int saveq = q->quoted;
+	q->quoted = 1;
+	q->numbervars = true;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
-	q->numbervars = false;
 	q->quoted = saveq;
 	return !ferror(str->fp);
 }
@@ -2638,10 +2638,10 @@ static USE_RESULT prolog_state fn_iso_writeq_2(query *q)
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
-	bool save = q->quoted;
-	q->quoted = q->numbervars = true;
+	int save = q->quoted;
+	q->quoted = 1;
+	q->numbervars = true;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
-	q->numbervars = false;
 	q->quoted = save;
 	return !ferror(str->fp);
 }
@@ -2849,7 +2849,6 @@ static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 
 	q->max_depth = q->quoted = q->nl = q->fullstop = false;
 	q->ignore_ops = false;
-	q->numbervars = false;
 	q->variable_names = NULL;
 	return !ferror(str->fp);
 }
@@ -2906,7 +2905,6 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 
 	q->max_depth = q->quoted = q->nl = q->fullstop = false;
 	q->ignore_ops = false;
-	q->numbervars = false;
 	q->variable_names = NULL;
 	return !ferror(str->fp);
 }
@@ -8907,7 +8905,6 @@ static USE_RESULT prolog_state fn_write_term_to_chars_3(query *q)
 	char *dst = print_term_to_strbuf(q, p_term, p_term_ctx, 1);
 	q->max_depth = q->quoted = q->nl = q->fullstop = false;
 	q->ignore_ops = false;
-	q->numbervars = false;
 	q->variable_names = NULL;
 	cell tmp;
 	may_error(make_string(&tmp, dst, strlen(dst)), free(dst));
@@ -11167,6 +11164,7 @@ static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned end)
 		p1 += p1->nbr_cells;
 	}
 
+	q->numbervars = true;
 	return cnt;
 }
 
