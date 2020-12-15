@@ -655,6 +655,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		idx_t rhs_ctx = q->latest_ctx;
 		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "\\+");
 		space += !strcmp(src, "-") && is_rational(rhs) && (rhs->val_num < 0);
+		if (!strcmp(src, "-") && !is_rational(rhs)) dst += snprintf(dst, dstlen, "%s", " ");
 		int parens = is_structure(rhs) && !strcmp(GET_STR(rhs), ",");
 		dst += snprintf(dst, dstlen, "%s", src);
 		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
@@ -689,6 +690,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 		dst += snprintf(dst, dstlen, "%s", src);
 		if (!*src) space = 0;
+		space += is_rational(rhs) && (rhs->val_num < 0);
 		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
 
 		int rhs_parens = rhs_prec1 > my_prec;
