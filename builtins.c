@@ -2206,10 +2206,12 @@ static void collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells)
 	}
 }
 
-static void parse_read_params(query *q, parser *p, cell *c, cell **vars, idx_t *vars_ctx, cell **varnames, idx_t *varnames_ctx, cell **sings, idx_t *sings_ctx)
+static bool parse_read_params(query *q, parser *p, cell *c, cell **vars, idx_t *vars_ctx, cell **varnames, idx_t *varnames_ctx, cell **sings, idx_t *sings_ctx)
 {
-	if (!is_structure(c))
-		return;
+	if (!is_structure(c)) {
+		DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
+		return false;
+	}
 
 	cell *c1 = deref(q, c+1, q->latest_ctx);
 
@@ -2247,7 +2249,12 @@ static void parse_read_params(query *q, parser *p, cell *c, cell **vars, idx_t *
 			if (sings) *sings = v;
 			if (sings_ctx) *sings_ctx = q->latest_ctx;
 		}
+	} else {
+		DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
+		return false;
 	}
+
+	return true;
 }
 
 static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, char *src)
@@ -2271,7 +2278,9 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 		if (is_variable(h))
 			return throw_error(q, p2, "instantiation_error", "read_option");
 
-		parse_read_params(q, p, h, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx);
+		if (!parse_read_params(q, p, h, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx))
+			return pl_success;
+
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
