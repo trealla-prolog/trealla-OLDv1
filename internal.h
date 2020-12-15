@@ -422,8 +422,8 @@ struct query_ {
 	slot *slots;
 	choice *choices;
 	trail *trails;
-	cell *last_arg, *tmpq[MAX_QUEUES], *exception;
-	cell *tmp_heap, *queue[MAX_QUEUES];
+	cell *tmp_heap, *last_arg, *exception, *variable_names;
+	cell *queue[MAX_QUEUES], *tmpq[MAX_QUEUES];
 	arena *arenas;
 	cell accum;
 	state st;
@@ -433,7 +433,7 @@ struct query_ {
 	uint64_t time_started;
 	unsigned max_depth, tmo_msecs;
 	int nv_start;
-	idx_t cp, tmphp, latest_ctx, popp, cgen;
+	idx_t cp, tmphp, latest_ctx, popp, cgen, variable_names_ctx;
 	idx_t frames_size, slots_size, trails_size, choices_size;
 	idx_t max_choices, max_frames, max_slots, max_trails;
 	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;
