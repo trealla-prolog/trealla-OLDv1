@@ -2281,7 +2281,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 		}
 #endif
 
-		if (!src) {
+		if (!src && (!p->srcptr || !*p->srcptr || (*p->srcptr == '\n'))) {
 			if (net_getline(&p->save_line, &p->n_line, str) == -1) {
 				if (q->is_task && !feof(str->fp)) {
 					clearerr(str->fp);
@@ -2325,7 +2325,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 				continue;
 
 			p->srcptr = p->save_line;
-		} else
+		} else if (src)
 			p->srcptr = src;
 
 		break;
