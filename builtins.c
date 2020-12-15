@@ -2682,7 +2682,7 @@ static USE_RESULT prolog_state fn_iso_write_canonical_2(query *q)
 	return !ferror(str->fp);
 }
 
-static bool parse_write_params(query *q, cell *c)
+static bool parse_write_params(query *q, cell *c, cell **vnames, idx_t *vnames_ctx)
 {
 	if (is_variable(c)) {
 		DISCARD_RESULT throw_error(q, c, "instantiation_error", "write_option");
@@ -2787,8 +2787,8 @@ static bool parse_write_params(query *q, cell *c)
 			return false;
 		}
 
-		q->variable_names = c1_orig;
-		q->variable_names_ctx = c1_orig_ctx;
+		if (vnames) *vnames = c1_orig;
+		if (vnames_ctx) *vnames_ctx = c1_orig_ctx;
 	} else {
 		DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 		return false;
@@ -2811,14 +2811,15 @@ static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 	}
 
 	q->flag = q->m->flag;
-	cell *p2_orig = p2;
+	cell *p2_orig = p2, *vnames;
+	idx_t vnames_ctx;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
 		h = deref(q, h, p2_ctx);
 
-		if (!parse_write_params(q, h))
+		if (!parse_write_params(q, h, &vnames, &vnames_ctx))
 			return pl_success;
 
 		p2 = LIST_TAIL(p2);
@@ -2833,6 +2834,8 @@ static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 		return throw_error(q, p2_orig, "type_error", "list");
 
 	q->latest_ctx = p1_ctx;
+	q->variable_names = vnames;
+	q->variable_names_ctx = vnames_ctx;
 
 	if (q->ignore_ops)
 		print_canonical_to_stream(q, str, p1, p1_ctx, 1);
@@ -2871,14 +2874,15 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 	}
 
 	q->flag = q->m->flag;
-	cell *p2_orig = p2;
+	cell *p2_orig = p2, *vnames;
+	idx_t vnames_ctx;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
 		h = deref(q, h, p2_ctx);
 
-		if (!parse_write_params(q, h))
+		if (!parse_write_params(q, h, &vnames, &vnames_ctx))
 			return pl_success;
 
 		p2 = LIST_TAIL(p2);
@@ -2893,6 +2897,8 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 		return throw_error(q, p2_orig, "type_error", "list");
 
 	q->latest_ctx = p1_ctx;
+	q->variable_names = vnames;
+	q->variable_names_ctx = vnames_ctx;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 
 	if (q->fullstop)
@@ -2905,7 +2911,6 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 
 	q->max_depth = q->quoted = q->nl = q->fullstop = false;
 	q->ignore_ops = false;
-	q->variable_names = NULL;
 	return !ferror(str->fp);
 }
 
@@ -8896,7 +8901,7 @@ static USE_RESULT prolog_state fn_write_term_to_chars_3(query *q)
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
 		cell *c = deref(q, h, p2_ctx);
-		parse_write_params(q, c);
+		parse_write_params(q, c, NULL, NULL);
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
