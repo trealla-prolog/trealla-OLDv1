@@ -2266,12 +2266,22 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
-		cell *c = deref(q, h, p2_ctx);
-		parse_read_params(q, p, c, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx);
+		h = deref(q, h, p2_ctx);
+
+		if (is_variable(h))
+			return throw_error(q, p2, "instantiation_error", "read_option");
+
+		parse_read_params(q, p, h, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx);
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
+
+	if (is_variable(p2))
+		return throw_error(q, p2, "instantiation_error", "read_option");
+
+	if (!is_nil(p2))
+		return throw_error(q, p2, "type_error", "list");
 
 	for (;;) {
 #if 0
