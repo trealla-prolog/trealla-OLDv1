@@ -2680,7 +2680,7 @@ static USE_RESULT prolog_state fn_iso_write_canonical_2(query *q)
 	return !ferror(str->fp);
 }
 
-static bool parse_write_params(query *q, cell *c)
+static bool parse_write_params(query *q, cell *c, cell **varnames, idx_t *varnames_ctx)
 {
 	if (is_variable(c)) {
 		DISCARD_RESULT throw_error(q, c, "instantiation_error", "write_option");
@@ -2747,6 +2747,7 @@ static bool parse_write_params(query *q, cell *c)
 		// TODO: write_term variable_names
 
 		cell *c1_orig = c1;
+		idx_t c1_ctx_orig = c1_ctx;
 		LIST_HANDLER(c1);
 
 		while (is_list(c1)) {
@@ -2784,6 +2785,8 @@ static bool parse_write_params(query *q, cell *c)
 			return false;
 		}
 
+		if (varnames) *varnames = c1_orig;
+		if (varnames_ctx) *varnames_ctx = c1_ctx_orig;
 	} else {
 		DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 		return false;
@@ -2813,7 +2816,7 @@ static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 		cell *h = LIST_HEAD(p2);
 		h = deref(q, h, p2_ctx);
 
-		if (!parse_write_params(q, h))
+		if (!parse_write_params(q, h, NULL, NULL))
 			return pl_success;
 
 		p2 = LIST_TAIL(p2);
@@ -2873,7 +2876,7 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 		cell *h = LIST_HEAD(p2);
 		h = deref(q, h, p2_ctx);
 
-		if (!parse_write_params(q, h))
+		if (!parse_write_params(q, h, NULL, NULL))
 			return pl_success;
 
 		p2 = LIST_TAIL(p2);
@@ -8890,7 +8893,7 @@ static USE_RESULT prolog_state fn_write_term_to_chars_3(query *q)
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
 		cell *c = deref(q, h, p2_ctx);
-		parse_write_params(q, c);
+		parse_write_params(q, c, NULL, NULL);
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
