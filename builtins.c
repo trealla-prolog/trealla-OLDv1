@@ -2301,7 +2301,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 #endif
 
 		if (!src && (!p->srcptr || !*p->srcptr || (*p->srcptr == '\n'))) {
-			if (net_getline(&p->save_line, &p->n_line, str) == -1) {
+			if (getline(&p->save_line, &p->n_line, str->fp) == -1) {
 				if (q->is_task && !feof(str->fp)) {
 					clearerr(str->fp);
 					do_yield_0(q, 1);
