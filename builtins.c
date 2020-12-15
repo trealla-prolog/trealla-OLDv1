@@ -2542,6 +2542,13 @@ static USE_RESULT prolog_state fn_iso_read_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int n = q->current_input;
 	stream *str = &g_streams[n];
+
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
+	}
+
 	cell tmp;
 	make_literal(&tmp, g_nil_s);
 	return do_read_term(q, str, p1, p1_ctx, &tmp, q->st.curr_frame, NULL);
@@ -2557,6 +2564,12 @@ static USE_RESULT prolog_state fn_iso_read_2(query *q)
 	if (strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
 
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
+	}
+
 	cell tmp;
 	make_literal(&tmp, g_nil_s);
 	return do_read_term(q, str, p1, p1_ctx, &tmp, q->st.curr_frame, NULL);
@@ -2568,6 +2581,13 @@ static USE_RESULT prolog_state fn_iso_read_term_2(query *q)
 	GET_NEXT_ARG(p2,list_or_nil);
 	int n = q->current_input;
 	stream *str = &g_streams[n];
+
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
+	}
+
 	return do_read_term(q, str, p1, p1_ctx, p2, p2_ctx, NULL);
 }
 
@@ -2581,6 +2601,12 @@ static USE_RESULT prolog_state fn_iso_read_term_3(query *q)
 
 	if (strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
+
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
+	}
 
 	return do_read_term(q, str, p1, p1_ctx, p2, p2_ctx, NULL);
 }
