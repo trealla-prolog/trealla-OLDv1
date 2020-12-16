@@ -1057,7 +1057,7 @@ static const char *dump_key(void *p, const void *p1)
 }
 #endif
 
-static USE_RESULT prolog_state match_rule_head_or_fact(query *q)
+static USE_RESULT prolog_state match_head(query *q)
 {
 	assert(q);
 	if (!q->retry) {
@@ -1223,7 +1223,7 @@ prolog_state run_query(query *q)
 					break;
 				}
 
-				if (!match_rule_head_or_fact(q)) {
+				if (!match_head(q)) {
 					q->retry = QUERY_RETRY;
 					q->tot_retries++;
 					continue;
