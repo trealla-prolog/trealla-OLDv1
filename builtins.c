@@ -6157,12 +6157,7 @@ static USE_RESULT prolog_state fn_iso_asserta_1(query *q)
 	if (check_builtin(q->m, GET_STR(head), head->arity))
 		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
-	cell *body = get_body(p1);
-
-	if (body && !is_callable(body))
-		return throw_error(q, body, "type_error", "callable");
-
-	cell *tmp2;
+	cell *tmp2, *body = get_body(p1);
 
 	if (body && ((tmp2 = check_body_callable(q->m->p, body)) != NULL))
 		return throw_error(q, tmp2, "type_error", "callable");
@@ -6223,12 +6218,7 @@ static USE_RESULT prolog_state fn_iso_assertz_1(query *q)
 	if (check_builtin(q->m, GET_STR(head), head->arity))
 		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
-	cell *body = get_body(p1);
-
-	if (body && !is_callable(body))
-		return throw_error(q, body, "type_error", "callable");
-
-	cell *tmp2;
+	cell *tmp2, *body = get_body(p1);
 
 	if (body && ((tmp2 = check_body_callable(q->m->p, body)) != NULL))
 		return throw_error(q, tmp2, "type_error", "callable");
