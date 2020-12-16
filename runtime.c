@@ -881,7 +881,7 @@ static void next_key(query *q)
 
 // Match HEAD :- BODY.
 
-static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx)
+static USE_RESULT prolog_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 {
 	if (q->retry) {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
@@ -973,7 +973,7 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx)
 USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_retract)
 {
 	if (is_retract && get_logical_body(p1))
-		return match_full(q, p1, p1_ctx);
+		return match_rule(q, p1, p1_ctx);
 
 	if (q->retry) {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
