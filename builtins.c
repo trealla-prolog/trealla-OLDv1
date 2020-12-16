@@ -2310,6 +2310,9 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 #endif
 
 		if (!src && (!p->srcptr || !*p->srcptr || (*p->srcptr == '\n'))) {
+			if (str->eof_action_eof_code)
+				clearerr(str->fp);
+
 			if (getline(&p->save_line, &p->n_line, str->fp) == -1) {
 				if (q->is_task && !feof(str->fp)) {
 					clearerr(str->fp);
@@ -2338,8 +2341,14 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 				//destroy_parser(p);
 				//str->p = NULL;
 
+				str->at_end_of_file = true;
+
 				if (str->eof_action_eof_code)
-					clearerr(str->fp);
+					str->past_end_of_file = true;
+				else if (str->eof_action_error) {
+					str->past_end_of_file = true;
+					return throw_error(q, p2, "permission_error", "input,past_end_of_stream");
+				}
 
 				cell tmp;
 				make_literal(&tmp, g_eof_s);
