@@ -1220,7 +1220,6 @@ prolog_state run_query(query *q)
 			} else {
 				if (!is_callable(q->st.curr_cell)) {
 					return throw_error(q, q->st.curr_cell, "type_error", "callable");
-					break;
 				}
 
 				if (!match_head(q)) {
@@ -1259,20 +1258,21 @@ prolog_state run_query(query *q)
 
 		while (!q->st.curr_cell || is_end(q->st.curr_cell)) {
 			if (!resume_frame(q)) {
-				q->status = 1;
-				return pl_success; // cehteh: ok?
+				q->status = true;
+				return pl_success;
 			}
 
 			q->resume = true;
 			follow_me(q);
 		}
 	}
-	return pl_success; // cehteh: ok?
+
+	return pl_success;
 }
 
 prolog_state query_execute(query *q, term *t)
 {
-	q->m->dump_vars = 0;
+	q->m->dump_vars = false;
 	q->st.curr_cell = t->cells;
 	q->st.sp = t->nbr_vars;
 	q->st.curr_frame = 0;
