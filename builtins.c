@@ -3773,12 +3773,15 @@ static void do_calc_(query *q, cell *c, idx_t c_ctx)
 	q->st.curr_cell = c;
 	q->st.curr_frame = c_ctx;
 	q->calc = true;
-	c->fn(q);
-	q->calc = save_calc;
-	q->st.curr_frame = save_ctx;
 
-	if (!q->did_throw)
+	c->fn(q);
+
+	q->calc = save_calc;
+
+	if (!q->did_throw) {
 		q->st.curr_cell = save;
+		q->st.curr_frame = save_ctx;
+	}
 }
 
 #define calc_(q,c) !(c->flags&FLAG_BUILTIN) ? *c : (do_calc_(q,c,c##_ctx), q->accum)
