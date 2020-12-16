@@ -3798,6 +3798,7 @@ static bool g_init(prolog *pl)
 			CHECK_SENTINEL(g_streams[0].filename = strdup("stdin"), NULL);
 			CHECK_SENTINEL(g_streams[0].name = strdup("user_input"), NULL);
 			CHECK_SENTINEL(g_streams[0].mode = strdup("read"), NULL);
+			g_streams[0].eof_action_eof_code = true;
 
 			g_streams[1].fp = stdout;
 			CHECK_SENTINEL(g_streams[1].filename = strdup("stdout"), NULL);

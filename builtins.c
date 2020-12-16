@@ -2338,6 +2338,9 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 				//destroy_parser(p);
 				//str->p = NULL;
 
+				if (str->eof_action_eof_code)
+					clearerr(str->fp);
+
 				cell tmp;
 				make_literal(&tmp, g_eof_s);
 				return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
