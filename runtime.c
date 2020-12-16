@@ -881,7 +881,7 @@ static void next_key(query *q)
 
 // Match HEAD :- BODY.
 
-static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx, bool is_retract)
+static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx)
 {
 	if (q->retry) {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
@@ -903,22 +903,14 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx, bool
 		predicate *h = find_matching_predicate(q->m, head);
 
 		if (!h) {
-			if (check_builtin(q->m, GET_STR(head), head->arity)) {
-				if (is_retract)
-					return throw_error(q, head, "permission_error", "modify,static_procedure");
-				else
-					return throw_error(q, head, "permission_error", "access,private_procedure");
-			}
+			if (check_builtin(q->m, GET_STR(head), head->arity))
+				return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 			q->st.curr_clause2 = NULL;
 			return false;
 		} else {
-			if (!h->is_dynamic) {
-				if (is_retract)
-					return throw_error(q, head, "permission_error", "modify,static_procedure");
-				else
-					return throw_error(q, head, "permission_error", "access,private_procedure");
-			}
+			if (!h->is_dynamic)
+				return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 			q->st.curr_clause2 = h->head;
 		}
@@ -980,17 +972,12 @@ static USE_RESULT prolog_state match_full(query *q, cell *p1, idx_t p1_ctx, bool
 
 USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_retract)
 {
-	if (q->retry) {
-		if (is_literal(p1) && (p1->val_off == g_clause_s))
-			return match_full(q, p1, p1_ctx, is_retract);
+	if (is_retract && get_logical_body(p1))
+		return match_full(q, p1, p1_ctx);
 
+	if (q->retry) {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
 	} else {
-		// Match HEAD :- BODY
-
-		if (get_logical_body(p1))
-			return match_full(q, p1, p1_ctx, is_retract);
-
 		cell *c = p1;
 
 		if (!is_literal(c)) {
