@@ -6488,24 +6488,34 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 	if (is_variable(c)) {
 		err_type = "instantiation_error";
 		snprintf(dst2, len2+1, "error(%s,%s).", err_type, expected);
+
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "variable")) {
 		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", "uninstantiation_error", dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+
 	} else if (!strcmp(err_type, "instantiation_error")) {
 		snprintf(dst2, len2+1, "error(%s,(%s)/%u).", err_type, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+
 	} else if (!strcmp(err_type, "representation_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+
 	} else if (!strcmp(err_type, "evaluation_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+
 	} else if (!strcmp(err_type, "syntax_error")) {
 		snprintf(dst2, len2+1, "error(%s((%s,%s)),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "evaluable")) {
-		snprintf(dst2, len2+1, "error(%s(%s,%s/%u),(%s)/%u).", err_type, expected, dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s(%s,%s/%u),(%s)/%u).", err_type, expected, is_callable(c)?GET_STR(c):dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+
 	} else if (!strcmp(err_type, "permission_error") && c->arity) {
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),(%s)/%u).", err_type, expected, GET_STR(c), c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+
 	} else if (!strcmp(err_type, "permission_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, GET_STR(c), GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+
 	} else if (IS_OP(c)) {
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+
 	} else {
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	}
