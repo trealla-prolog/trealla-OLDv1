@@ -2236,18 +2236,27 @@ static bool parse_read_params(query *q, parser *p, cell *c, cell **vars, idx_t *
 			cell *v = c1;
 			if (vars) *vars = v;
 			if (vars_ctx) *vars_ctx = q->latest_ctx;
+		} else {
+			DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
+			return false;
 		}
 	} else if (!strcmp(GET_STR(c), "variable_names")) {
 		if (is_variable(c1)) {
 			cell *v = c1;
 			if (varnames) *varnames = v;
 			if (varnames_ctx) *varnames_ctx = q->latest_ctx;
+		} else {
+			DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
+			return false;
 		}
 	} else if (!strcmp(GET_STR(c), "singletons")) {
 		if (is_variable(c1)) {
 			cell *v = c1;
 			if (sings) *sings = v;
 			if (sings_ctx) *sings_ctx = q->latest_ctx;
+		} else {
+			DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
+			return false;
 		}
 	} else {
 		DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
