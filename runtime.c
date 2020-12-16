@@ -1022,7 +1022,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_r
 		term *t = &q->st.curr_clause2->t;
 		cell *head = get_head(t->cells);
 		cell *body = get_logical_body(t->cells);
-		bool is_dir = is_directive(t->cells);
+		bool is_dir = check_directive(t->cells);
 
 		// Retract(HEAD) should ignore rules (and directives)
 

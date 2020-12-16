@@ -307,7 +307,7 @@ bool is_rule(const cell *c)
 	return false;
 }
 
-bool is_directive(const cell *c)
+bool check_directive(const cell *c)
 {
 	if (is_rule(c) && (c->arity == 1))
 		return true;
@@ -358,6 +358,7 @@ static predicate *find_predicate(module *m, cell *c)
 {
 	assert(m);
 	assert(c);
+	bool is_dir = check_directive(c);
 
 	cell tmp = *c;
 	tmp.val_type = TYPE_LITERAL;
@@ -371,10 +372,16 @@ static predicate *find_predicate(module *m, cell *c)
 	predicate *h = NULL;
 
 	while (sl_nextkey(iter, (void*)&h)) {
-		if (!h->is_abolished) {
-			sl_done(iter);
-			return h;
+		if (h->is_abolished)
+			continue;
+
+		sl_done(iter);
+
+		if (is_dir != h->check_directive) {
+			;//break;
 		}
+
+		return h;
 	}
 
 	return NULL;
@@ -383,6 +390,7 @@ static predicate *find_predicate(module *m, cell *c)
 static predicate *find_matching_predicate_internal(module *m, cell *c, bool quiet)
 {
 	assert(c);
+	bool is_dir = check_directive(c);
 
 	module *save_m = m;
 	module *tmp_m = NULL;
@@ -396,8 +404,13 @@ static predicate *find_matching_predicate_internal(module *m, cell *c, bool quie
 			break;
 		}
 
-		if (h)
+		if (h) {
+			if (is_dir != h->check_directive) {
+				;//break;
+			}
+
 			return h;
+		}
 
 		if (!tmp_m)
 			m = tmp_m = m->pl->modules;
@@ -609,6 +622,9 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	if (!h) {
 		h = create_predicate(m, c);
 		ensure(h);
+
+		if (check_directive(t->cells))
+			h->check_directive = true;
 
 		if (!consulting)
 			h->is_dynamic = true;
@@ -1461,6 +1477,77 @@ static void directives(parser *p, term *t)
 	}
 }
 
+static void parser_xref_cell(parser *p, term *t, cell *c, predicate *parent)
+{
+	const char *functor = PARSER_GET_STR(c);
+	module *m = p->m;
+
+	unsigned optype;
+	bool userop, hint_prefix = c->arity == 1;
+
+	if ((c->arity == 2)
+		&& !GET_OP(c)
+		&& strcmp(functor, "{}")
+		&& get_op(m, functor, &optype, &userop, hint_prefix)) {
+		SET_OP(c, optype);
+	}
+
+	if ((c->fn = get_builtin(m, functor, c->arity)) != NULL) {
+		c->flags |= FLAG_BUILTIN;
+		return;
+	}
+
+	if (check_builtin(m, functor, c->arity)) {
+		c->flags |= FLAG_BUILTIN;
+		return;
+	}
+
+	if ((functor[0] != ':') && strchr(functor+1, ':')) {
+		char tmpbuf1[256], tmpbuf2[256];
+		tmpbuf1[0] = tmpbuf2[0] = '\0';
+		sscanf(functor, "%255[^:]:%255s", tmpbuf1, tmpbuf2);
+		tmpbuf1[sizeof(tmpbuf1)-1] = tmpbuf2[sizeof(tmpbuf2)-1] = '\0';
+		m = find_module(p->m->pl, tmpbuf1);
+
+		if (m)
+		{
+			c->val_off = index_from_pool(p->m->pl, tmpbuf2);
+			ensure(c->val_off != ERR_IDX);
+		}
+		else
+			m = p->m;
+	}
+
+	module *tmp_m = NULL;
+
+	while (m) {
+		predicate *h = find_predicate(m, c);
+
+		if ((c+c->nbr_cells) >= (t->cells+t->cidx-1)) {
+			if (parent && (h == parent))
+				c->flags |= FLAG_TAIL_REC;
+		}
+
+		if (h) {
+			if ((m != p->m) && !h->is_public
+				&& strcmp(PARSER_GET_STR(c), "dynamic")
+				&& strcmp(PARSER_GET_STR(c), "module")) {
+				//fprintf(stdout, "Warning: xref not a public method %s/%u\n", PARSER_GET_STR(c), c->arity);
+				//p->error = true;
+				break;
+			}
+
+			c->match = h;
+			break;
+		}
+
+		if (!tmp_m)
+			m = tmp_m = m->pl->modules;
+		else
+			m = m->next;
+	}
+}
+
 void parser_xref(parser *p, term *t, predicate *parent)
 {
 	for (idx_t i = 0; i < t->cidx; i++) {
@@ -1469,72 +1556,7 @@ void parser_xref(parser *p, term *t, predicate *parent)
 		if (!is_literal(c))
 			continue;
 
-		const char *functor = PARSER_GET_STR(c);
-		module *m = p->m;
-
-		unsigned optype;
-		bool userop, hint_prefix = c->arity == 1;
-
-		if ((c->arity == 2)
-		    && !GET_OP(c)
-		    && strcmp(functor, "{}")
-		    && get_op(m, functor, &optype, &userop, hint_prefix)) {
-			SET_OP(c, optype);
-		}
-
-		if ((c->fn = get_builtin(m, functor, c->arity)) != NULL) {
-			c->flags |= FLAG_BUILTIN;
-			continue;
-		}
-
-		if (check_builtin(m, functor, c->arity)) {
-			c->flags |= FLAG_BUILTIN;
-			continue;
-		}
-
-		if ((functor[0] != ':') && strchr(functor+1, ':')) {
-			char tmpbuf1[256], tmpbuf2[256];
-			tmpbuf1[0] = tmpbuf2[0] = '\0';
-			sscanf(functor, "%255[^:]:%255s", tmpbuf1, tmpbuf2);
-			tmpbuf1[sizeof(tmpbuf1)-1] = tmpbuf2[sizeof(tmpbuf2)-1] = '\0';
-			m = find_module(p->m->pl, tmpbuf1);
-
-			if (m)
-			{
-				c->val_off = index_from_pool(p->m->pl, tmpbuf2);
-				ensure(c->val_off != ERR_IDX);
-			}
-			else
-				m = p->m;
-		}
-
-		module *tmp_m = NULL;
-
-		while (m) {
-			predicate *h = find_predicate(m, c);
-
-			if ((c+c->nbr_cells) >= (t->cells+t->cidx-1)) {
-				if (parent && (h == parent))
-					c->flags |= FLAG_TAIL_REC;
-			}
-
-			if (h && (m != p->m) && !h->is_public &&
-				strcmp(PARSER_GET_STR(c), "dynamic") && strcmp(PARSER_GET_STR(c), "module")) {
-				//fprintf(stdout, "Warning: xref not a public method %s/%u\n", PARSER_GET_STR(c), c->arity);
-				//p->error = true;
-				break;
-			}
-
-			if (h) {
-				c->match = h;
-				break;
-			}
-
-			if (!tmp_m)
-				m = tmp_m = m->pl->modules;
-			else
-				m = m->next;
-		}
+		parser_xref_cell(p, t, c, parent);
 	}
 }
 

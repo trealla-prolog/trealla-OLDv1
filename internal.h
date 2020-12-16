@@ -315,6 +315,7 @@ struct predicate_ {
 	bool is_multifile:1;
 	bool is_abolished:1;
 	bool is_noindex:1;
+	bool check_directive:1;
 };
 
 struct builtins {
@@ -589,7 +590,7 @@ void cut_me(query *q, bool local_cut);
 bool check_builtin(module *m, const char *name, unsigned arity);
 void *get_builtin(module *m, const char *name, unsigned arity);
 prolog_state query_execute(query *q, term *t);
-bool is_directive(const cell *c);
+bool check_directive(const cell *c);
 bool is_rule(const cell *c);
 cell *get_head(cell *c);
 cell *get_body(cell *c);
