@@ -3782,7 +3782,14 @@ static void do_calc_(query *q, cell *c, idx_t c_ctx)
 }
 
 #define calc_(q,c) !(c->flags&FLAG_BUILTIN) ? *c : (do_calc_(q,c,c##_ctx), q->accum)
-#define calc(q,c) calc_(q, c); if (q->did_throw) return pl_success;
+
+#define calc(q,c) calc_(q, c); 				\
+	if (q->did_throw)						\
+		return pl_success; 					\
+	else if (is_variable(c))				\
+		return throw_error(q, c, "instantiation_error", "number"); \
+	else if (is_callable(c) && !is_builtin(c))				\
+		return throw_error(q, c, "type_error", "evaluable")
 
 static int_t gcd(int_t num, int_t remainder)
 {
