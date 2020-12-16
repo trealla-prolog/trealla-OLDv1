@@ -881,13 +881,12 @@ static void next_key(query *q)
 
 // Match HEAD :- BODY.
 
-static USE_RESULT prolog_state match_rule(query *q, cell *p1, idx_t p1_ctx)
+USE_RESULT prolog_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 {
 	if (q->retry) {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
 	} else {
 		cell *head = get_head(p1);
-
 		cell *c = head;
 
 		if (!is_literal(c)) {
@@ -936,7 +935,7 @@ static USE_RESULT prolog_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 
 		cell *c_body = get_logical_body(c);
 
-		if (is_variable(p1_body) && !c_body) {
+		if (p1_body && is_variable(p1_body) && !c_body) {
 			p1 = get_head(p1);
 			c = get_head(c);
 			needs_true = true;
@@ -972,9 +971,6 @@ static USE_RESULT prolog_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 
 USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_retract)
 {
-	if (is_retract && get_logical_body(p1))
-		return match_rule(q, p1, p1_ctx);
-
 	if (q->retry) {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
 	} else {
@@ -1027,9 +1023,12 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_r
 		cell *head = get_head(t->cells);
 		cell *body = get_logical_body(t->cells);
 
-		// Retract(HEAD) should ignore rules
+		// Retract(HEAD) should ignore rules (and directives)
 
 		if (is_retract && body)
+			continue;
+
+		if (is_retract && is_directive(t->cells))
 			continue;
 
 		try_me(q, t->nbr_vars);

@@ -299,11 +299,25 @@ module *find_module(prolog *pl, const char *name)
 	return NULL;
 }
 
+bool is_rule(const cell *c)
+{
+	if (is_structure(c) && (c->val_off == g_clause_s))
+		return true;
+
+	return false;
+}
+
+bool is_directive(const cell *c)
+{
+	if (is_rule(c) && (c->arity == 1))
+		return true;
+
+	return false;
+}
+
 cell *get_head(cell *c)
 {
-	assert(c);
-
-	if (is_literal(c) && (c->val_off == g_clause_s))
+	if (is_rule(c))
 		return c + 1;
 
 	return c;
@@ -311,9 +325,7 @@ cell *get_head(cell *c)
 
 cell *get_body(cell *c)
 {
-	assert(c);
-
-	if (is_literal(c) && (c->val_off == g_clause_s)) {
+	if (is_rule(c) && (c->arity == 2)) {
 		c = c + 1;
 		c += c->nbr_cells;
 
@@ -3070,7 +3082,7 @@ module *module_load_text(module *m, const char *src)
 		if (p->run_init == true) {
 			p->command = true;
 
-			if (parser_run(p, "initialization(G), retract(initialization(_)), G", 0))
+			if (parser_run(p, "(:- initialization(G)), retract((:- initialization(_))), G", 0))
 				p->m->halt = true;
 		}
 
@@ -3120,7 +3132,7 @@ bool module_load_fp(module *m, FILE *fp, const char *filename)
 			if (p->run_init == true) {
 				p->command = true;
 
-				if (parser_run(p, "initialization(G), retract(initialization(_)), G", 0))
+				if (parser_run(p, "(:- initialization(G)), retract((:- initialization(_))), G", 0))
 					p->m->halt = true;
 			}
 

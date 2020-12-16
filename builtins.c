@@ -5980,7 +5980,6 @@ static USE_RESULT prolog_state fn_iso_retract_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	cell *head = get_head(p1);
-	cell *body = get_logical_body(p1);
 
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "not_sufficiently_instantiated");
@@ -5988,10 +5987,12 @@ static USE_RESULT prolog_state fn_iso_retract_1(query *q)
 	if (!is_callable(head))
 		return throw_error(q, head, "type_error", "callable");
 
-	if (!body)
-		p1 = get_head(p1);
+	prolog_state match;
 
-	prolog_state match = match_clause(q, p1, p1_ctx, true);
+	if (is_rule(p1))
+		match = match_rule(q, p1, p1_ctx);
+	else
+		match = match_clause(q, p1, p1_ctx, true);
 
 	if (match != pl_success)
 		return match;
