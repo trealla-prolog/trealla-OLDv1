@@ -31,6 +31,7 @@
 #define is_stream(c) (get_stream(q,c) >= 0)
 #define is_stream_or_var(c) (is_stream(c) || is_variable(c))
 #define is_stream_or_structure(c) (is_stream(c) || is_structure(c))
+#define is_list_or_atom(c) (is_atom(c) || is_iso_list(c))
 #define is_atom_or_list(c) (is_atom(c) || is_iso_list(c))
 #define is_atom_or_list_or_var(c) (is_atom(c) || is_iso_list(c) || is_variable(c))
 #define is_in_character(c) (is_atom(c))

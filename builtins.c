@@ -7544,7 +7544,10 @@ static USE_RESULT prolog_state fn_iso_op_3(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,atom);
-	GET_NEXT_ARG(p3,atom);
+	GET_NEXT_ARG(p3,list_or_atom);
+
+	if ((p1->val_num < 0) || (p1->val_num > 1200))
+		return throw_error(q, p1, "domain_error", "operator_priority");
 
 	unsigned optype;
 	const char *spec = GET_STR(p2);
@@ -7564,7 +7567,7 @@ static USE_RESULT prolog_state fn_iso_op_3(query *q)
 	else if (!strcmp(spec, "yfx"))
 		optype = OP_YFX;
 	else
-		return throw_error(q, p2, "domain_error", "op_spec");
+		return throw_error(q, p2, "domain_error", "operator_specifier");
 
 	bool tmp_userop = false;
 	unsigned tmp_optype = 0;
