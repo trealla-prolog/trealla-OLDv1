@@ -6039,10 +6039,8 @@ static USE_RESULT prolog_state do_abolish(query *q, cell *c)
 	predicate *h = find_matching_predicate(q->m, c);
 	if (!h) return pl_success;
 
-	if (!h->is_dynamic) {
-		fprintf(stdout, "Error: not dynamic '%s/%u'\n", GET_STR(c), c->arity);
-		return pl_error; // throw?
-	}
+	if (!h->is_dynamic)
+		return throw_error(q, c, "permission_error", "modify,static_procedure");
 
 	for (clause *r = h->head; r;) {
 		if (!q->m->loading && r->t.persist && !r->t.deleted)
@@ -6075,14 +6073,22 @@ static USE_RESULT prolog_state fn_iso_abolish_1(query *q)
 		return throw_error(q, p1, "type_error", "predicate_indicator");
 
 	cell *p1_name = p1 + 1;
+	p1_name = deref(q, p1_name, p1_ctx);
 
 	if (!is_atom(p1_name))
 		return throw_error(q, p1_name, "type_error", "atom");
 
 	cell *p1_arity = p1 + 2;
+	p1_arity = deref(q, p1_arity, p1_ctx);
 
 	if (!is_integer(p1_arity))
 		return throw_error(q, p1_arity, "type_error", "integer");
+
+	if (p1_arity->val_num < 0)
+		return throw_error(q, p1_arity, "domain_error", "not_less_than_zero");
+
+	if (p1_arity->val_num > MAX_ARITY)
+		return throw_error(q, p1_arity, "representation_error", "max_arity");
 
 	if (check_builtin(q->m, GET_STR(p1_name), p1_arity->val_num)) {
 		cell tmp[MAX_ARITY] = {0};
