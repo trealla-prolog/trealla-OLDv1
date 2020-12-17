@@ -12124,7 +12124,7 @@ static USE_RESULT prolog_state fn_module_1(query *q)
 static const struct builtins g_iso_funcs[] =
 {
 	{":-", 2, NULL, NULL},
-	{":-", 1, NULL, NULL},
+	//{":-", 1, NULL, NULL},
 	{",", 2, NULL, NULL},
 	{"call", 1, NULL, NULL},
 

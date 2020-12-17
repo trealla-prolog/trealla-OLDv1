@@ -301,7 +301,7 @@ module *find_module(prolog *pl, const char *name)
 
 bool check_rule(const cell *c)
 {
-	if (is_structure(c) && (c->val_off == g_clause_s))
+	if (is_structure(c) && (c->val_off == g_clause_s) && (c->arity == 2))
 		return true;
 
 	return false;
@@ -309,7 +309,7 @@ bool check_rule(const cell *c)
 
 bool check_directive(const cell *c)
 {
-	if (check_rule(c) && (c->arity == 1))
+	if (is_structure(c) && (c->val_off == g_clause_s) && (c->arity == 1))
 		return true;
 
 	return false;
@@ -325,7 +325,7 @@ cell *get_head(cell *c)
 
 cell *get_body(cell *c)
 {
-	if (check_rule(c) && (c->arity == 2)) {
+	if (check_rule(c)) {
 		c = c + 1;
 		c += c->nbr_cells;
 
@@ -384,7 +384,6 @@ static predicate *find_predicate(module *m, cell *c)
 static predicate *find_matching_predicate_internal(module *m, cell *c, bool quiet)
 {
 	assert(c);
-	bool is_dir = check_directive(c);
 
 	module *save_m = m;
 	module *tmp_m = NULL;
@@ -392,19 +391,15 @@ static predicate *find_matching_predicate_internal(module *m, cell *c, bool quie
 	while (m) {
 		predicate *h = find_predicate(m, c);
 
-		if (!quiet && h && (m != save_m) && !h->is_public &&
-			strcmp(MODULE_GET_STR(c), "dynamic") && strcmp(MODULE_GET_STR(c), "module")) {
+		if (!quiet && h && (m != save_m) && !h->is_public
+			&& strcmp(MODULE_GET_STR(c), "dynamic")
+			&& strcmp(MODULE_GET_STR(c), "module")) {
 			fprintf(stdout, "Warning: match not a public method %s/%u\n", MODULE_GET_STR(c), c->arity);
 			break;
 		}
 
-		if (h) {
-			if (is_dir != h->check_directive) {
-				;//break;
-			}
-
+		if (h)
 			return h;
-		}
 
 		if (!tmp_m)
 			m = tmp_m = m->pl->modules;
@@ -592,7 +587,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	cell *c = t->cells;
 
-	//if (!check_directive(c))
+	if (!check_directive(c))
 		c = get_head(t->cells);
 
 	if (!c) {
@@ -3015,7 +3010,7 @@ static void module_purge(module *m)
 	}
 
 	if (!m->quiet)
-		printf("Purge %u deleted rules\n", cnt);
+		printf("%% Purge %u deleted rules\n", cnt);
 
 	m->dirty = 0;
 }
@@ -3912,6 +3907,7 @@ prolog *pl_create()
 
 		set_multifile_in_db(pl->m, "term_expansion", 2);
 		set_dynamic_in_db(pl->m, "term_expansion", 2);
+		set_dynamic_in_db(pl->m, ":-", 1);
 		set_dynamic_in_db(pl->m, "initialization", 1);
 
 #if USE_LDLIBS
