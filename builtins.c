@@ -6001,7 +6001,7 @@ static USE_RESULT prolog_state fn_iso_retract_1(query *q)
 	stash_me(q, &r->t, false);
 
 	retract_from_db(q->m, r);
-	r->t.gen = ++q->st.gen;
+	r->t.gen = r->parent->gen;
 
 	if (!q->m->loading && r->t.persist)
 		db_log(q, r, LOG_ERASE);
@@ -6042,7 +6042,7 @@ static USE_RESULT prolog_state do_abolish(query *q, cell *c)
 	if (!h->is_dynamic)
 		return throw_error(q, c, "permission_error", "modify,static_procedure");
 
-	uint64_t gen = ++q->st.gen;
+	uint64_t gen = h->gen;
 
 	for (clause *r = h->head; r;) {
 		if (!q->m->loading && r->t.persist && !r->t.deleted)

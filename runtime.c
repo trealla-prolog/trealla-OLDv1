@@ -1097,6 +1097,8 @@ static USE_RESULT prolog_state match_head(query *q)
 			return pl_error;
 		}
 
+		h->gen++;
+
 		if (h->index) {
 			cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
 			unsigned arity = key->arity;
@@ -1139,7 +1141,8 @@ static USE_RESULT prolog_state match_head(query *q)
 	may_error(make_choice(q));
 
 	for (; q->st.curr_clause; next_key(q)) {
-		if (q->st.curr_clause->t.deleted)
+		if (q->st.curr_clause->t.deleted &&
+			(q->st.curr_clause->t.gen < q->st.curr_clause->parent->gen))
 			continue;
 
 		term *t = &q->st.curr_clause->t;

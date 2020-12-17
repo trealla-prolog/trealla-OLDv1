@@ -380,7 +380,6 @@ typedef struct {
 	cell *curr_cell;
 	clause *curr_clause, *curr_clause2;
 	sliter *iter;
-	uint64_t gen;
 	idx_t curr_frame, fp, hp, tp, sp;
 	uint8_t anbr, qnbr;
 } state;
@@ -431,10 +430,9 @@ struct query_ {
 	arena *arenas;
 	cell accum;
 	state st;
-	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
 	uint8_t nv_mask[MAX_ARITY];
-	uint64_t step, qid;
-	uint64_t time_started;
+	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
+	uint64_t step, qid, time_started;
 	unsigned max_depth, tmo_msecs;
 	int nv_start;
 	idx_t cp, tmphp, latest_ctx, popp, cgen, variable_names_ctx;
