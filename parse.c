@@ -2722,6 +2722,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 	assert(p);
 	idx_t begin_idx = p->t->cidx, save_idx = 0;
 	bool last_op = true, is_func = false, was_consing = false;
+	bool last_bar = false;
 	unsigned arity = 1;
 	p->depth++;
 
@@ -2858,15 +2859,26 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
+		if (!p->was_quoted && consing && p->start_term && !strcmp(p->token, "|")) {
+			p->error = true;
+			break;
+		}
+
 		if (!p->was_quoted && was_consing && consing && !strcmp(p->token, "|")) {
 			p->error = true;
 			break;
 		}
 
 		if (!p->was_quoted && consing && !strcmp(p->token, "|")) {
+			last_bar = true;
 			was_consing = true;
 			//consing = false;
 			continue;
+		}
+
+		if (!p->was_quoted && was_consing && last_bar && !strcmp(p->token, "]")) {
+			p->error = true;
+			break;
 		}
 
 		if (!p->quoted && p->start_term &&
@@ -2985,6 +2997,8 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 				c->val_str[p->len_str] = '\0';
 			}
 		}
+
+		last_bar = false;
 	}
 
 	p->depth--;
