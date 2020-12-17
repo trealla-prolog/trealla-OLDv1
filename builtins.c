@@ -6066,26 +6066,30 @@ static USE_RESULT prolog_state fn_iso_abolish_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
-	if (p1->arity != 2) {
-		return throw_error(q, p1, "type_error", "indicator");
-	}
+	if (p1->arity != 2)
+		return throw_error(q, p1, "type_error", "predicate_indicator");
 
 	const char *src = GET_STR(p1);
 
-	if (strcmp(src, "/")) {
-		return throw_error(q, p1, "type_error", "indicator");
-	}
+	if (strcmp(src, "/"))
+		return throw_error(q, p1, "type_error", "predicate_indicator");
 
 	cell *p1_name = p1 + 1;
 
-	if (!is_atom(p1_name)) {
+	if (!is_atom(p1_name))
 		return throw_error(q, p1_name, "type_error", "atom");
-	}
 
 	cell *p1_arity = p1 + 2;
 
-	if (!is_integer(p1_arity)) {
+	if (!is_integer(p1_arity))
 		return throw_error(q, p1_arity, "type_error", "integer");
+
+	if (check_builtin(q->m, GET_STR(p1_name), p1_arity->val_num)) {
+		cell tmp[MAX_ARITY] = {0};
+		tmp[0] = *p1_name;
+		tmp[0].arity = p1_arity->val_num;
+		tmp[0].nbr_cells = 1 + p1_arity->val_num;
+		return throw_error(q, tmp, "permission_error", "modify,static_procedure");
 	}
 
 	cell tmp;
