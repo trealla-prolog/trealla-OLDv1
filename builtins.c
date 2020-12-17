@@ -2376,8 +2376,11 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 	parser_tokenize(p, false, false);
 	p->read_term = 0;
 
-	if (p->error)
-		return pl_error;
+	if (p->error) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return throw_error(q, &tmp, "syntax_error", "read_term");
+	}
 
 	parser_xref(p, p->t, NULL);
 

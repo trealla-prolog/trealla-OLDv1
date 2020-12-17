@@ -2254,7 +2254,7 @@ static int get_escape(const char **_src, bool *error)
 		}
 
 		if (!unicode && (*src++ != '\\')) {
-			fprintf(stdout, "Error: syntax error, closing \\ missing\n");
+			//fprintf(stdout, "Error: syntax error, closing \\ missing\n");
 			*_src = src;
 			*error = true;
 			return 0;
@@ -2323,7 +2323,7 @@ static bool get_token(parser *p, int last_op)
 			ch = get_escape(&src, &p->error);
 
 			if (p->error) {
-				fprintf(stdout, "Error: syntax error, illegal character escape, line %d\n", p->line_nbr);
+				//fprintf(stdout, "Error: syntax error, illegal character escape, line %d\n", p->line_nbr);
 				p->error = true;
 				return false;
 			}
@@ -2525,7 +2525,7 @@ static bool get_token(parser *p, int last_op)
 							break;
 						}
 					} else {
-						fprintf(stdout, "Error: syntax error, illegal character escape, line %d\n", p->line_nbr);
+						//fprintf(stdout, "Error: syntax error, illegal character escape, line %d\n", p->line_nbr);
 						p->error = true;
 						return false;
 					}
@@ -2721,7 +2721,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 {
 	assert(p);
 	idx_t begin_idx = p->t->cidx, save_idx = 0;
-	bool last_op = true, is_func = false;
+	bool last_op = true, is_func = false, was_consing = false;
 	unsigned arity = 1;
 	p->depth++;
 
@@ -2833,6 +2833,11 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quoted && !strcmp(p->token, ",") && consing) {
+			if (was_consing) {
+				p->error = true;
+				break;
+			}
+
 			cell *c = make_literal(p, g_dot_s);
 			c->arity = 2;
 			p->start_term = true;
@@ -2853,14 +2858,20 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
+		if (!p->was_quoted && was_consing && consing && !strcmp(p->token, "|")) {
+			p->error = true;
+			break;
+		}
+
 		if (!p->was_quoted && consing && !strcmp(p->token, "|")) {
-			consing = 0;
+			was_consing = true;
+			//consing = false;
 			continue;
 		}
 
 		if (!p->quoted && p->start_term &&
 			(!strcmp(p->token, ",") || !strcmp(p->token, "]") || !strcmp(p->token, ")") || !strcmp(p->token, "}"))) {
-			fprintf(stdout, "Error: syntax error, start of term expected, line %d: %s\n", p->line_nbr, p->srcptr);
+			//fprintf(stdout, "Error: syntax error, start of term expected, line %d: %s\n", p->line_nbr, p->srcptr);
 			p->error = true;
 			break;
 		}
@@ -2871,7 +2882,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (p->is_variable && (*p->srcptr == '(')) {
-			fprintf(stdout, "Error: syntax error, line %d: %s\n", p->line_nbr, p->srcptr);
+			//fprintf(stdout, "Error: syntax error, line %d: %s\n", p->line_nbr, p->srcptr);
 			p->error = true;
 			break;
 		}
@@ -2913,7 +2924,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 #if 0
 		if (p->is_op && !precedence) {
-			fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, %s\n", p->line_nbr, p->token, p->srcptr);
+			//fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, %s\n", p->line_nbr, p->token, p->srcptr);
 			p->error = true;
 			break;
 		}
@@ -3024,8 +3035,10 @@ static bool parser_run(parser *p, const char *src, int dump)
 {
 	p->srcptr = (char*)src;
 
-	if (!parser_tokenize(p, false, false))
+	if (!parser_tokenize(p, false, false) || p->error) {
+		fprintf(stdout, "Error: syntax error\n");
 		return false;
+	}
 
 	if (p->skip) {
 		p->m->status = 1;
