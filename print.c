@@ -174,6 +174,30 @@ static size_t plain(char *dst, size_t dstlen, const char *src, size_t srclen)
 	return len;
 }
 
+static void reformat_float(char *tmpbuf)
+{
+	char tmpbuf2[256];
+	strcpy(tmpbuf2, tmpbuf);
+	const char *src = tmpbuf2;
+	char *dst = tmpbuf;
+
+	if (*src == '-')
+		*dst++ = *src++;
+
+	while (isdigit(*src))
+		*dst++ = *src++;
+
+	if (*src != '.') {
+		*dst++ = '.';
+		*dst++ = '0';
+	}
+
+	while (*src)
+		*dst++ = *src++;
+
+	*dst = '\0';
+}
+
 static int find_binding(query *q, idx_t var_nbr, idx_t var_ctx)
 {
 	const frame *g = GET_FRAME(q->st.curr_frame);
@@ -259,9 +283,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 		if (ptr && (strlen(ptr+1) > 1))
 			sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, c->val_flt);
 
-		if (!strchr(tmpbuf, '.') && !strchr(tmpbuf, 'e') && !strchr(tmpbuf, 'E'))
-			strcat(tmpbuf, ".0");
-
+		reformat_float(tmpbuf);
 		dst += snprintf(dst, dstlen, "%s", tmpbuf);
 		return dst - save_dst;
 	}
@@ -427,9 +449,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		if (ptr && (strlen(ptr+1) > 1))
 			sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, c->val_flt);
 
-		if (!strchr(tmpbuf, '.') && !strchr(tmpbuf, 'e') && !strchr(tmpbuf, 'E'))
-			strcat(tmpbuf, ".0");
-
+		reformat_float(tmpbuf);
 		dst += snprintf(dst, dstlen, "%s", tmpbuf);
 		return dst - save_dst;
 	}
