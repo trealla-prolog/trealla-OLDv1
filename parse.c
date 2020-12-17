@@ -2019,6 +2019,11 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 	} else if (*s == '+')
 		return 0;
 
+	if ((*s == '.') && isdigit(s[1])) {
+		p->error = true;
+		return -1;
+	}
+
 	if (!isdigit(*s))
 		return 0;
 
@@ -2048,7 +2053,9 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			if ((v > INT64_MAX) || (v < INT64_MIN)) {
-				fprintf(stdout, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
+				if (p->consulting)
+					fprintf(stdout, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
+
 				p->error = true;
 				return -1;
 			}
@@ -2072,7 +2079,9 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			if ((v > INT64_MAX) || (v < INT64_MIN)) {
-				fprintf(stdout, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
+				if (p->consulting)
+					fprintf(stdout, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
+
 				p->error = true;
 				return -1;
 			}
@@ -2100,7 +2109,9 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			if ((v > INT64_MAX) || (v < INT64_MIN)) {
-				fprintf(stdout, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
+				if (p->consulting)
+					fprintf(stdout, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
+
 				p->error = true;
 				return -1;
 			}
@@ -2123,7 +2134,9 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		if ((v > INT64_MAX) || (v < INT64_MIN)) {
-			fprintf(stdout, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
+			if (p->consulting)
+				fprintf(stdout, "Error: integer overflow, parsing number, line %d\n", p->line_nbr);
+
 			p->error = true;
 			return -1;
 		}
@@ -2147,13 +2160,24 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 
 	if (!try_rational) {
 		strtod(tmpptr, &tmpptr);
-		if (tmpptr[-1] == '.') tmpptr--;
+
+		if ((tmpptr[-1] == '.') && (isprint(*tmpptr))) {
+			p->error = 1;
+			return -1;
+		}
+
+		if (tmpptr[-1] == '.')
+			tmpptr--;
+
 		*srcptr = tmpptr;
 		s = *srcptr;
 
-		if ((*s == '(') || (isalpha(*s)) || 0) {
-			fprintf(stdout, "Error: syntax error, parsing number, line %d\n", p->line_nbr);
+		if ((*s == '(') || (isalpha(*s))) {
+			if (p->consulting)
+				fprintf(stdout, "Error: syntax error, parsing number, line %d\n", p->line_nbr);
+
 			p->error = true;
+			return -1;
 		}
 
 		return 1;
@@ -2323,7 +2347,9 @@ static bool get_token(parser *p, int last_op)
 			ch = get_escape(&src, &p->error);
 
 			if (p->error) {
-				//fprintf(stdout, "Error: syntax error, illegal character escape, line %d\n", p->line_nbr);
+				if (p->consulting)
+					fprintf(stdout, "Error: syntax error, illegal character escape, line %d\n", p->line_nbr);
+
 				p->error = true;
 				return false;
 			}
@@ -2525,7 +2551,9 @@ static bool get_token(parser *p, int last_op)
 							break;
 						}
 					} else {
-						//fprintf(stdout, "Error: syntax error, illegal character escape, line %d\n", p->line_nbr);
+						if (p->consulting)
+							fprintf(stdout, "Error: syntax error, illegal character escape, line %d\n", p->line_nbr);
+
 						p->error = true;
 						return false;
 					}
@@ -2883,7 +2911,9 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quoted && p->start_term &&
 			(!strcmp(p->token, ",") || !strcmp(p->token, "]") || !strcmp(p->token, ")") || !strcmp(p->token, "}"))) {
-			//fprintf(stdout, "Error: syntax error, start of term expected, line %d: %s\n", p->line_nbr, p->srcptr);
+			if (p->consulting)
+				fprintf(stdout, "Error: syntax error, start of term expected, line %d: %s\n", p->line_nbr, p->srcptr);
+
 			p->error = true;
 			break;
 		}
@@ -2894,7 +2924,9 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (p->is_variable && (*p->srcptr == '(')) {
-			//fprintf(stdout, "Error: syntax error, line %d: %s\n", p->line_nbr, p->srcptr);
+			if (p->consulting)
+				fprintf(stdout, "Error: syntax error, line %d: %s\n", p->line_nbr, p->srcptr);
+
 			p->error = true;
 			break;
 		}
@@ -2936,7 +2968,9 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 #if 0
 		if (p->is_op && !precedence) {
-			//fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, %s\n", p->line_nbr, p->token, p->srcptr);
+			if (p->consulting)
+				fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, %s\n", p->line_nbr, p->token, p->srcptr);
+
 			p->error = true;
 			break;
 		}
@@ -3050,7 +3084,9 @@ static bool parser_run(parser *p, const char *src, int dump)
 	p->srcptr = (char*)src;
 
 	if (!parser_tokenize(p, false, false) || p->error) {
-		fprintf(stdout, "Error: syntax error\n");
+		if (p->command)
+			fprintf(stdout, "Error: syntax error\n");
+
 		return false;
 	}
 
