@@ -7140,6 +7140,8 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
 		}
+
+		q->m->p->flag = q->m->flag;
 	} else if (!strcmp(GET_STR(p1), "character_escapes")) {
 		if (!strcmp(GET_STR(p2), "true"))
 			q->m->flag.character_escapes = true;

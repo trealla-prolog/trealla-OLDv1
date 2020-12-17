@@ -2295,11 +2295,11 @@ static bool get_token(parser *p, int last_op)
 
 	const char *src = p->srcptr;
 	char *dst = p->token;
+	*dst = '\0';
 	int neg = 0;
 	p->val_type = TYPE_LITERAL;
 	p->quoted = 0;
 	p->string = p->was_quoted = p->is_variable = p->is_op = false;
-	*dst = '\0';
 
 	if (p->dq_consing && (*src == '"')) {
 		*dst++ = ']';
@@ -2481,10 +2481,18 @@ static bool get_token(parser *p, int last_op)
 
 		if ((p->quoted == '"') && p->flag.double_quote_codes) {
 			*dst++ = '[';
+
+			if (*src == p->quoted) {
+				*dst++ = ']';
+				*dst = '\0';
+				p->srcptr = (char*)++src;
+				return true;
+			}
+
 			*dst = '\0';
-			p->srcptr = (char*)src;
 			p->dq_consing = 1;
 			p->quoted = 0;
+			p->srcptr = (char*)src;
 			return true;
 		} else if ((p->quoted == '"') && p->flag.double_quote_chars)
 			p->string = true;
@@ -3341,7 +3349,6 @@ module *create_module(prolog *pl, const char *name)
 		m->flag.character_escapes = true;
 		m->user_ops = MAX_USER_OPS;
 		m->error = false;
-
 
 		m->index = sl_create1(compkey, m);
 		ensure(m->index);
