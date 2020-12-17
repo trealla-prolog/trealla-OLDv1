@@ -5989,7 +5989,7 @@ static USE_RESULT prolog_state fn_iso_retract_1(query *q)
 
 	prolog_state match;
 
-	if (is_rule(p1))
+	if (check_rule(p1))
 		match = match_rule(q, p1, p1_ctx);
 	else
 		match = match_clause(q, p1, p1_ctx, true);

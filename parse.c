@@ -299,7 +299,7 @@ module *find_module(prolog *pl, const char *name)
 	return NULL;
 }
 
-bool is_rule(const cell *c)
+bool check_rule(const cell *c)
 {
 	if (is_structure(c) && (c->val_off == g_clause_s))
 		return true;
@@ -309,7 +309,7 @@ bool is_rule(const cell *c)
 
 bool check_directive(const cell *c)
 {
-	if (is_rule(c) && (c->arity == 1))
+	if (check_rule(c) && (c->arity == 1))
 		return true;
 
 	return false;
@@ -317,7 +317,7 @@ bool check_directive(const cell *c)
 
 cell *get_head(cell *c)
 {
-	if (is_rule(c))
+	if (check_rule(c))
 		return c + 1;
 
 	return c;
@@ -325,7 +325,7 @@ cell *get_head(cell *c)
 
 cell *get_body(cell *c)
 {
-	if (is_rule(c) && (c->arity == 2)) {
+	if (check_rule(c) && (c->arity == 2)) {
 		c = c + 1;
 		c += c->nbr_cells;
 
@@ -358,7 +358,6 @@ static predicate *find_predicate(module *m, cell *c)
 {
 	assert(m);
 	assert(c);
-	bool is_dir = check_directive(c);
 
 	cell tmp = *c;
 	tmp.val_type = TYPE_LITERAL;
@@ -376,11 +375,6 @@ static predicate *find_predicate(module *m, cell *c)
 			continue;
 
 		sl_done(iter);
-
-		if (is_dir != h->check_directive) {
-			;//break;
-		}
-
 		return h;
 	}
 
@@ -596,7 +590,10 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		c->flags = 0;
 	}
 
-	cell *c = get_head(t->cells);
+	cell *c = t->cells;
+
+	//if (!check_directive(c))
+		c = get_head(t->cells);
 
 	if (!c) {
 		fprintf(stdout, "Error: not a fact or clause\n");

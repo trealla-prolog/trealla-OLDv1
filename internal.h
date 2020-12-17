@@ -591,7 +591,7 @@ bool check_builtin(module *m, const char *name, unsigned arity);
 void *get_builtin(module *m, const char *name, unsigned arity);
 prolog_state query_execute(query *q, term *t);
 bool check_directive(const cell *c);
-bool is_rule(const cell *c);
+bool check_rule(const cell *c);
 cell *get_head(cell *c);
 cell *get_body(cell *c);
 cell *get_logical_body(cell *c);
