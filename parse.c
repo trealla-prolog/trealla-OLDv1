@@ -2161,11 +2161,6 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 	if (!try_rational) {
 		strtod(tmpptr, &tmpptr);
 
-		if ((tmpptr[-1] == '.') && (isprint(*tmpptr))) {
-			p->error = 1;
-			return -1;
-		}
-
 		if (tmpptr[-1] == '.')
 			tmpptr--;
 
