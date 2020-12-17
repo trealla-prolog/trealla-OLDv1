@@ -3336,19 +3336,17 @@ module *create_module(prolog *pl, const char *name)
 		m->name = strdup(name);
 		m->next = m->pl->modules;
 		m->pl->modules = m;
+		m->flag.unknown = 1;
+		m->flag.double_quote_chars = true;
+		m->flag.character_escapes = true;
+		m->user_ops = MAX_USER_OPS;
+		m->error = false;
+
 
 		m->index = sl_create1(compkey, m);
 		ensure(m->index);
 		m->p = create_parser(m);
 		ensure(m->p);
-
-		m->flag.unknown = 1;
-		m->flag.double_quote_chars = 1;
-		m->flag.character_escapes = true;
-		m->flag.rational_syntax_natural = 0;
-		m->flag.prefer_rationals = 0;
-		m->user_ops = MAX_USER_OPS;
-		m->error = false;
 
 		make_rule(m, "format(F) :- format(F, []).");
 		make_rule(m, "unify_with_occurs_check(X, X) :- acyclic_term(X).");

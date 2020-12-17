@@ -2221,14 +2221,14 @@ static bool parse_read_params(query *q, parser *p, cell *c, cell **vars, idx_t *
 	} else if (!strcmp(GET_STR(c), "double_quotes")) {
 		if (is_literal(c1)) {
 			if (!strcmp(GET_STR(c1), "atom")) {
-				p->flag.double_quote_codes = p->flag.double_quote_chars = 0;
-				p->flag.double_quote_atom = 1;
+				p->flag.double_quote_codes = p->flag.double_quote_chars = false;
+				p->flag.double_quote_atom = true;
 			} else if (!strcmp(GET_STR(c1), "chars")) {
-				p->flag.double_quote_atom = p->flag.double_quote_codes = 0;
-				p->flag.double_quote_chars = 1;
+				p->flag.double_quote_atom = p->flag.double_quote_codes = false;
+				p->flag.double_quote_chars = true;
 			} else if (!strcmp(GET_STR(c1), "codes")) {
-				p->flag.double_quote_atom = p->flag.double_quote_chars = 0;
-				p->flag.double_quote_codes = 1;
+				p->flag.double_quote_atom = p->flag.double_quote_chars = false;
+				p->flag.double_quote_codes = true;
 			}
 		}
 	} else if (!strcmp(GET_STR(c), "variables")) {
@@ -4744,10 +4744,12 @@ static USE_RESULT prolog_state fn_iso_pow_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
+#if 0
 	if (is_rational(&p1)) {
 		if (p1.val_num == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 	}
+#endif
 
 	if (is_rational(&p1) && is_rational(&p2)) {
 		q->accum.val_flt = pow((double)p1.val_num/p1.val_den, (double)p2.val_num/p2.val_den);
@@ -4778,10 +4780,12 @@ static USE_RESULT prolog_state fn_iso_powi_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
+#if 0
 	if (is_integer(&p1)) {
 		if (p1.val_num == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 	}
+#endif
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
@@ -7121,14 +7125,14 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 
 	if (!strcmp(GET_STR(p1), "double_quotes")) {
 		if (!strcmp(GET_STR(p2), "atom")) {
-			q->m->flag.double_quote_atom = true;
 			q->m->flag.double_quote_chars = q->m->flag.double_quote_codes = false;
+			q->m->flag.double_quote_atom = true;
 		} else if (!strcmp(GET_STR(p2), "codes")) {
-			q->m->flag.double_quote_codes = true;
 			q->m->flag.double_quote_chars = q->m->flag.double_quote_atom = false;
+			q->m->flag.double_quote_codes = true;
 		} else if (!strcmp(GET_STR(p2), "chars")) {
-			q->m->flag.double_quote_chars = true;
 			q->m->flag.double_quote_atom = q->m->flag.double_quote_codes = false;
+			q->m->flag.double_quote_chars = true;
 		} else {
 			cell *tmp = alloc_heap(q, 3);
 			make_structure(tmp, index_from_pool(q->m->pl, "+"), fn_iso_add_2, 2, 2);
