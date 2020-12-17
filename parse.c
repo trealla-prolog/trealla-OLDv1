@@ -199,8 +199,7 @@ bool set_op(module *m, const char *name, unsigned optype, unsigned precedence)
 	int hint = IS_PREFIX(optype);
 
 	if ((prec = get_op(m, name, &ot, &userop, hint)) != 0) {
-
-		if (ot == optype)
+		if ((ot == optype) && precedence)
 			return true;
 	}
 
@@ -208,7 +207,6 @@ bool set_op(module *m, const char *name, unsigned optype, unsigned precedence)
 
 	for (; ptr->name; ptr++) {
 		if (!strcmp(ptr->name, name) && (ptr->optype == optype)) {
-			ptr->name = name;
 			ptr->optype = optype;
 			ptr->precedence = precedence;
 			return true;

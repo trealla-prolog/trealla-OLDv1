@@ -7546,7 +7546,7 @@ static USE_RESULT prolog_state fn_iso_op_3(query *q)
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,list_or_atom);
 
-	if ((p1->val_num < 0) || (p1->val_num > 1200))
+	if (is_integer(p1) && ((p1->val_num < 0) || (p1->val_num > 1200)))
 		return throw_error(q, p1, "domain_error", "operator_priority");
 
 	unsigned optype;
@@ -7572,9 +7572,9 @@ static USE_RESULT prolog_state fn_iso_op_3(query *q)
 	bool tmp_userop = false;
 	unsigned tmp_optype = 0;
 
-	int ok = get_op(q->m, GET_STR(p3), &tmp_optype, &tmp_userop, false);
+	int prec = get_op(q->m, GET_STR(p3), &tmp_optype, &tmp_userop, false);
 
-	if (ok && !tmp_userop)
+	if (prec && !tmp_userop)
 		return throw_error(q, p3, "permission_error", "can't_create_op");
 
 	if (!set_op(q->m, GET_STR(p3), optype, p1->val_num))
