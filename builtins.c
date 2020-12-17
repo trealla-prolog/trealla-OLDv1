@@ -5997,11 +5997,11 @@ static USE_RESULT prolog_state fn_iso_retract_1(query *q)
 	if (match != pl_success)
 		return match;
 
-	term *t = &q->st.curr_clause2->t;
-	stash_me(q, t, false);
+	clause *r = q->st.curr_clause2;
+	stash_me(q, &r->t, false);
 
-	clause *r = retract_from_db(q->m, q->st.curr_clause2);
-	may_ptr_error(r);
+	retract_from_db(q->m, r);
+	r->t.gen = ++q->st.gen;
 
 	if (!q->m->loading && r->t.persist)
 		db_log(q, r, LOG_ERASE);
@@ -6042,16 +6042,19 @@ static USE_RESULT prolog_state do_abolish(query *q, cell *c)
 	if (!h->is_dynamic)
 		return throw_error(q, c, "permission_error", "modify,static_procedure");
 
+	uint64_t gen = ++q->st.gen;
+
 	for (clause *r = h->head; r;) {
 		if (!q->m->loading && r->t.persist && !r->t.deleted)
 			db_log(q, r, LOG_ERASE);
 
-		clause *save = r->next;
-		clear_term(&r->t);
-		free(r);
-		r = save;
+		r->t.gen = gen;
+		r->t.deleted = true;
+		r = r->next;
 	}
 
+	q->m->dirty = true;
+	h->gen = gen;
 	h->is_abolished = true;
 	sl_destroy(h->index);
 	h->index = NULL;

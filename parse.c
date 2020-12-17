@@ -718,12 +718,11 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 	return r;
 }
 
-clause *retract_from_db(module *m, clause *r)
+void retract_from_db(module *m, clause *r)
 {
 	r->parent->cnt--;
 	r->t.deleted = true;
 	m->dirty = true;
-	return r;
 }
 
 clause *find_in_db(module *m, uuid *ref)

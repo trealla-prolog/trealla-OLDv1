@@ -285,6 +285,7 @@ typedef struct {
 } uuid;
 
 typedef struct {
+	uint64_t gen;
 	idx_t nbr_cells, cidx;
 	uint16_t nbr_vars;
 	bool first_cut:1;
@@ -307,6 +308,7 @@ struct predicate_ {
 	clause *head, *tail;
 	skiplist *index;
 	cell key;
+	uint64_t gen;
 	unsigned cnt;
 	bool is_prebuilt:1;
 	bool is_public:1;
@@ -378,6 +380,7 @@ typedef struct {
 	cell *curr_cell;
 	clause *curr_clause, *curr_clause2;
 	sliter *iter;
+	uint64_t gen;
 	idx_t curr_frame, fp, hp, tp, sp;
 	uint8_t anbr, qnbr;
 } state;
@@ -578,7 +581,7 @@ module *find_module(prolog *pl, const char *name);
 module *find_next_module(prolog *pl, module *m);
 clause *asserta_to_db(module *m, term *t, bool consulting);
 clause *assertz_to_db(module *m, term *t, bool consulting);
-clause *retract_from_db(module *m, clause *r);
+void retract_from_db(module *m, clause *r);
 clause *erase_from_db(module *m, uuid *ref);
 clause *find_in_db(module *m, uuid *ref);
 unsigned get_op(module *m, const char *name, unsigned *optype, bool *userop, bool hint_prefix);
