@@ -4744,6 +4744,11 @@ static USE_RESULT prolog_state fn_iso_pow_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
+	if (is_rational(&p1)) {
+		if (p1.val_num == 0)
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+	}
+
 	if (is_rational(&p1) && is_rational(&p2)) {
 		q->accum.val_flt = pow((double)p1.val_num/p1.val_den, (double)p2.val_num/p2.val_den);
 		q->accum.val_type = TYPE_FLOAT;
@@ -4772,6 +4777,11 @@ static USE_RESULT prolog_state fn_iso_powi_2(query *q)
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
+
+	if (is_integer(&p1)) {
+		if (p1.val_num == 0)
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+	}
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
