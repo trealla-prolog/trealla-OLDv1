@@ -5031,7 +5031,7 @@ static USE_RESULT prolog_state fn_iso_max_2(query *q)
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_rational(&p1) && is_float(&p2)) {
 		double f1 = (double)p1.val_num;
-		f1 /= p1.val_den;
+		if (p1.val_den) f1 /= p1.val_den;
 
 		if (f1 > p2.val_flt)
 			q->accum = p1;
@@ -5039,7 +5039,7 @@ static USE_RESULT prolog_state fn_iso_max_2(query *q)
 			q->accum = p2;
 	} else if (is_rational(&p2) && is_float(&p1)) {
 		double f2 = (double)p2.val_num;
-		f2 /= p2.val_den;
+		if (p2.val_den) f2 /= p2.val_den;
 
 		if (f2 > p1.val_flt)
 			q->accum = p2;
@@ -5080,7 +5080,7 @@ static USE_RESULT prolog_state fn_iso_min_2(query *q)
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_rational(&p1) && is_float(&p2)) {
 		double f1 = (double)p1.val_num;
-		f1 /= p1.val_den;
+		if (p1.val_den) f1 /= p1.val_den;
 
 		if (f1 < p2.val_flt)
 			q->accum = p1;
@@ -5088,7 +5088,7 @@ static USE_RESULT prolog_state fn_iso_min_2(query *q)
 			q->accum = p2;
 	} else if (is_rational(&p2) && is_float(&p1)) {
 		double f2 = (double)p2.val_num;
-		f2 /= p2.val_den;
+		if (p1.val_den) f2 /= p1.val_den;
 
 		if (f2 < p1.val_flt)
 			q->accum = p2;
