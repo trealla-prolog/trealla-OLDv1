@@ -2310,6 +2310,10 @@ static int get_escape(const char **_src, bool *error)
 			*error = true;
 			return 0;
 		}
+	} else if ((ch != '\\') && (ch != '"') && (ch != '\'') && (ch != '\r') && (ch != '\n')) {
+		*_src = src;
+		*error = true;
+		return 0;
 	}
 
 	*_src = src;
