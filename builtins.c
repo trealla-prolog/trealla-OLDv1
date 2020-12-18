@@ -4590,6 +4590,9 @@ static USE_RESULT prolog_state fn_iso_sin_1(query *q)
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
+	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "undefined");
+
 	return pl_success;
 }
 
@@ -4610,6 +4613,9 @@ static USE_RESULT prolog_state fn_iso_cos_1(query *q)
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
+
+	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
 }
@@ -4632,6 +4638,9 @@ static USE_RESULT prolog_state fn_iso_tan_1(query *q)
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
+	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "undefined");
+
 	return pl_success;
 }
 
@@ -4652,6 +4661,9 @@ static USE_RESULT prolog_state fn_iso_asin_1(query *q)
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
+
+	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
 }
@@ -4674,6 +4686,9 @@ static USE_RESULT prolog_state fn_iso_acos_1(query *q)
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
+	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "undefined");
+
 	return pl_success;
 }
 
@@ -4694,6 +4709,9 @@ static USE_RESULT prolog_state fn_iso_atan_1(query *q)
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
+
+	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
 }
@@ -4723,6 +4741,9 @@ static USE_RESULT prolog_state fn_iso_atan_2(query *q)
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
+
+	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
 }
@@ -4797,6 +4818,9 @@ static USE_RESULT prolog_state fn_iso_pow_2(query *q)
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
+	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "undefined");
+
 	return pl_success;
 }
 
@@ -4854,6 +4878,9 @@ static USE_RESULT prolog_state fn_iso_powi_2(query *q)
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
+	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "undefined");
+
 	return pl_success;
 }
 
@@ -4900,6 +4927,9 @@ static USE_RESULT prolog_state fn_iso_divide_2(query *q)
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
+
+	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
 }
