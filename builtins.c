@@ -4112,6 +4112,14 @@ static USE_RESULT prolog_state fn_iso_negative_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT prolog_state fn_iso_epsilon_0(query *q)
+{
+	CHECK_CALC();
+	q->accum.val_flt = DBL_EPSILON;
+	q->accum.val_type = TYPE_FLOAT;
+	return pl_success;
+}
+
 static USE_RESULT prolog_state fn_iso_pi_0(query *q)
 {
 	CHECK_CALC();
@@ -12322,6 +12330,7 @@ static const struct builtins g_iso_funcs[] =
 	{"sign", 1, fn_iso_sign_1, NULL},
 	{"=", 2, fn_iso_unify_2, NULL},
 	{"\\=", 2, fn_iso_notunify_2, NULL},
+	{"epsilon", 0, fn_iso_epsilon_0, NULL},
 	{"pi", 0, fn_iso_pi_0, NULL},
 	{"e", 0, fn_iso_e_0, NULL},
 	{"+", 2, fn_iso_add_2, NULL},
