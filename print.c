@@ -162,7 +162,7 @@ static size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen
 	return len;
 }
 
-static size_t plain(char *dst, size_t dstlen, const char *src, size_t srclen)
+static size_t plain(char *dst, size_t dstlen, const char *src, size_t srclen, __attribute__((unused)) bool dq)
 {
 	size_t len = 0;
 
@@ -372,7 +372,12 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 	int dq = 0, quote = !is_variable(c) && needs_quote(q->m, src, LEN_STR(c));
 	if (is_string(c)) dq = quote = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
-	dst += formatted(dst, dstlen, src, LEN_STR(c), dq);
+
+	if (quote)
+		dst += formatted(dst, dstlen, src, LEN_STR(c), dq);
+	else
+		dst += plain(dst, dstlen, src, LEN_STR(c), dq);
+
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 
 	if (!is_structure(c))
@@ -622,7 +627,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			if ((running < 0) && is_blob(c) && (len_str == 256))
 				dst += snprintf(dst, dstlen, "%s", "|...");
 		} else
-			dst += plain(dst, dstlen, src, LEN_STR(c));
+			dst += plain(dst, dstlen, src, LEN_STR(c), false);
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
