@@ -2064,6 +2064,14 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 			s++;
 		}
 
+		if (isdigit(*s)) {
+			if (p->consulting)
+				fprintf(stdout, "Error: syntax error, parsing binary number, line %d\n", p->line_nbr);
+
+			p->error = true;
+			return -1;
+		}
+
 		*((uint_t*)val_num) = v;
 		if (neg) *val_num = -*val_num;
 		*srcptr = s;
@@ -2088,6 +2096,14 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 #endif
 
 			s++;
+		}
+
+		if (isdigit(*s)) {
+			if (p->consulting)
+				fprintf(stdout, "Error: syntax error, parsing octal number, line %d\n", p->line_nbr);
+
+			p->error = true;
+			return -1;
 		}
 
 		*((uint_t*)val_num) = v;
@@ -2120,6 +2136,14 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 			s++;
 		}
 
+		if (isalpha(*s)) {
+			if (p->consulting)
+				fprintf(stdout, "Error: syntax error, parsing hex number, line %d\n", p->line_nbr);
+
+			p->error = true;
+			return -1;
+		}
+
 		*((uint_t*)val_num) = v;
 		if (neg) *val_num = -*val_num;
 		*srcptr = s;
@@ -2143,6 +2167,14 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 #endif
 
 		s++;
+	}
+
+	if (isalpha(*s)) {
+		if (p->consulting)
+			fprintf(stdout, "Error: syntax error, parsing number, line %d\n", p->line_nbr);
+
+		p->error = true;
+		return -1;
 	}
 
 	*((uint_t*)val_num) = v;
