@@ -133,7 +133,7 @@ static size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen
 				*dst++ = 'x';
 			}
 
-			size_t n = snprintf(dst, dstlen, "%d", ch);
+			size_t n = snprintf(dst, dstlen, "%u", ch);
 			len += n;
 			if (dstlen) dst += n;
 
