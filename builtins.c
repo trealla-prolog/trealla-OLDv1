@@ -2373,7 +2373,9 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 
 	frame *g = GET_FRAME(q->st.curr_frame);
 	p->read_term = g->nbr_vars;
+	p->do_read_term = true;
 	parser_tokenize(p, false, false);
+	p->do_read_term = false;
 	p->read_term = 0;
 
 	if (p->error) {
