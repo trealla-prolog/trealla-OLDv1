@@ -2306,6 +2306,24 @@ static int is_matching_pair(char **dst, char **src, int lh, int rh)
 	return 1;
 }
 
+static bool valid_float(const char *src)
+{
+	if (*src == '-')
+		src++;
+
+	while (isdigit(*src))
+		src++;
+
+	if (*src != '.')
+		return false;
+
+	src++;
+
+	if (!isdigit(*src))
+		return false;
+
+	return true;
+}
 
 static bool get_token(parser *p, int last_op)
 {
@@ -2485,9 +2503,17 @@ static bool get_token(parser *p, int last_op)
 		strncpy(dst, tmpptr, src-tmpptr);
 		dst[src-tmpptr] = '\0';
 
-		if ((strchr(dst, '.') || strchr(dst, 'e') || strchr(dst, 'E')) && !strchr(dst, '\''))
+		if ((strchr(dst, '.') || strchr(dst, 'e') || strchr(dst, 'E')) && !strchr(dst, '\'')) {
+			if (!valid_float(p->token)) {
+				if (p->consulting)
+					fprintf(stdout, "Error: syntax error, float, line %d\n", p->line_nbr);
+
+				p->error = true;
+				return false;
+			}
+
 			p->val_type = TYPE_FLOAT;
-		else
+		} else
 			p->val_type = TYPE_INTEGER;
 
 		p->srcptr = (char*)src;
