@@ -9389,7 +9389,7 @@ static USE_RESULT prolog_state fn_yield_0(query *q)
 	return pl_failure;
 }
 
-static USE_RESULT prolog_state fn_spawn_1(query *q)
+static USE_RESULT prolog_state fn_task_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
@@ -9404,7 +9404,7 @@ static USE_RESULT prolog_state fn_spawn_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT prolog_state fn_spawn_n(query *q)
+static USE_RESULT prolog_state fn_task_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	clone_to_tmp(q, p1);
@@ -12527,14 +12527,14 @@ static const struct builtins g_other_funcs[] =
 #endif
 
 	{"fork", 0, fn_fork_0, NULL},
-	{"spawn", 1, fn_spawn_1, "+callable"},
-	{"$spawnn", 2, fn_spawn_n, "+callable,+term,..."},
-	{"$spawnn", 3, fn_spawn_n, "+callable,+term,..."},
-	{"$spawnn", 4, fn_spawn_n, "+callable,+term,..."},
-	{"$spawnn", 5, fn_spawn_n, "+callable,+term,..."},
-	{"$spawnn", 6, fn_spawn_n, "+callable,+term,..."},
-	{"$spawnn", 7, fn_spawn_n, "+callable,+term,..."},
-	{"$spawnn", 8, fn_spawn_n, "+callable,+term,..."},
+	{"task", 1, fn_task_1, "+callable"},
+	{"$taskn", 2, fn_task_n, "+callable,+term,..."},
+	{"$taskn", 3, fn_task_n, "+callable,+term,..."},
+	{"$taskn", 4, fn_task_n, "+callable,+term,..."},
+	{"$taskn", 5, fn_task_n, "+callable,+term,..."},
+	{"$taskn", 6, fn_task_n, "+callable,+term,..."},
+	{"$taskn", 7, fn_task_n, "+callable,+term,..."},
+	{"$taskn", 8, fn_task_n, "+callable,+term,..."},
 	{"wait", 0, fn_wait_0, NULL},
 	{"await", 0, fn_await_0, NULL},
 	{"yield", 0, fn_yield_0, NULL},
