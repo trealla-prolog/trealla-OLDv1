@@ -4941,7 +4941,7 @@ static USE_RESULT prolog_state fn_iso_div_2(query *q)
 		if (p2.val_num == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
-		q->accum.val_num = (p1.val_num - llabs((long long)(p1.val_num % p2.val_num))) / p2.val_num;
+		q->accum.val_num = floor((double)p1.val_num/p2.val_num);
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
