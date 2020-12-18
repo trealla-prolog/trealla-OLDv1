@@ -373,7 +373,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 	if (is_string(c)) dq = quote = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 
-	if (quote)
+	if (quote || q->quoted)
 		dst += formatted(dst, dstlen, src, LEN_STR(c), dq);
 	else
 		dst += plain(dst, dstlen, src, LEN_STR(c), dq);
@@ -618,7 +618,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 		if (braces)
 			;
-		else if (quote) {
+		else if (quote || q->quoted) {
 			if ((running < 0) && is_blob(c) && (len_str > 256))
 				len_str = 256;
 

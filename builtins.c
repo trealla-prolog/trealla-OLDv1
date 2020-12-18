@@ -2355,11 +2355,13 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 				return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 			}
 
+#if 0
 			if (*p->save_line && (p->save_line[strlen(p->save_line)-1] == '\n'))
 				p->save_line[strlen(p->save_line)-1] = '\0';
 
 			if (*p->save_line && (p->save_line[strlen(p->save_line)-1] == '\r'))
 				p->save_line[strlen(p->save_line)-1] = '\0';
+#endif
 
 			if (!strlen(p->save_line))
 				continue;
