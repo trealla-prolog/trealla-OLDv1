@@ -4867,7 +4867,7 @@ static USE_RESULT prolog_state fn_iso_divide_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		if (p2.val_num == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_flt = (double)p1.val_num / p2.val_num;
 		q->accum.val_type = TYPE_FLOAT;
@@ -4879,19 +4879,19 @@ static USE_RESULT prolog_state fn_iso_divide_2(query *q)
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_integer(&p1) && is_float(&p2)) {
 		if (p2.val_flt == 0.0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_flt = (double)p1.val_num / p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_float(&p2)) {
 		if (p2.val_flt == 0.0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_flt = p1.val_flt / p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_integer(&p2)) {
 		if (p2.val_num == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_flt = p1.val_flt / p2.val_num;
 		q->accum.val_type = TYPE_FLOAT;
@@ -4914,7 +4914,7 @@ static USE_RESULT prolog_state fn_iso_divint_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		if (p2.val_num == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_num = p1.val_num / p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
@@ -4939,7 +4939,7 @@ static USE_RESULT prolog_state fn_iso_div_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		if (p2.val_num == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_num = (p1.val_num - llabs((long long)(p1.val_num % p2.val_num))) / p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
@@ -4964,7 +4964,7 @@ static USE_RESULT prolog_state fn_iso_mod_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		if (p2.val_num == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_num = llabs((long long)(p1.val_num % p2.val_num));
 		q->accum.val_type = TYPE_INTEGER;
