@@ -141,6 +141,13 @@ static size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen
 				*dst++ = '\\';
 
 			len += 3;
+		} else if (ch == '\\') {
+			if (dstlen) {
+				*dst++ = '\\';
+				*dst++ = ch;
+			}
+
+			len += 2;
 		} else {
 			if (dstlen)
 				*dst++ = ch;
