@@ -58,7 +58,7 @@ LOOP:
 		}
 
 		if (ch == 0) {
-			//*dst++ = '\n';
+			strcat(cmd, "\n");
 			prompt = " |\t";
 			goto LOOP;
 		}

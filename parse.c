@@ -2605,7 +2605,7 @@ static bool get_token(parser *p, int last_op)
 					if (!p->error) {
 						if (ch2 == '\n') {
 							p->line_nbr++;
-							break;
+							continue;
 						}
 					} else {
 						if (p->consulting && !p->do_read_term)
