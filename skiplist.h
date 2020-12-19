@@ -17,6 +17,8 @@ void sl_iterate(const skiplist *l, int (*callback)(void *p, const void *k, const
 void sl_find(const skiplist *l, const void *k, int (*f)(void *p, const void *k, const void *v), void *p);
 sliter *sl_findkey(skiplist *l, const void *k);
 bool sl_nextkey(sliter *i, void **v);
+sliter *sl_first(skiplist *l);
+bool sl_next(sliter *i, void **v);
 void sl_done(sliter *i);
 size_t sl_count(const skiplist *l);
 void sl_dump(const skiplist *l, const char *(*f)(void *p, const void* k), void *p);

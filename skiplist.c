@@ -478,6 +478,61 @@ void sl_find(const skiplist *l, const void *key, int (*f)(void*, const void*, co
 	}
 }
 
+sliter *sl_first(skiplist *l)
+{
+	sliter *iter;
+	int i = 0;
+
+	while (i < MAX_ITERS) {
+		if (!l->iter[i].busy)
+			break;
+
+		i++;
+	}
+
+	if (i >= MAX_ITERS) {
+		iter = malloc(sizeof(sliter));
+		ensure(iter);
+		iter->dynamic = 1;
+	}
+	else {
+		iter = &l->iter[i];
+		iter->dynamic = 0;
+		iter->busy = 1;
+	}
+
+	iter->key = NULL;
+	iter->l = (skiplist*)l;
+	iter->p = l->header->forward[0];
+	iter->idx = 0;
+	return iter;
+}
+
+bool sl_next(sliter *iter, void **val)
+{
+	if (!iter)
+		return false;
+
+	if (!iter->p) {
+		sl_done(iter);
+		return false;
+	}
+
+	if (iter->idx < iter->p->nbr) {
+		*val = iter->p->bkt[iter->idx++].val;
+		return true;
+	}
+
+	iter->p = iter->p->forward[0];
+	iter->idx = 0;
+
+	if (iter->p)
+		return sl_next(iter, val);
+
+	sl_done(iter);
+	return false;
+}
+
 sliter *sl_findkey(skiplist *l, const void *key)
 {
 	slnode_t *p, *q = 0;
