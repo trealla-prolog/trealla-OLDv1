@@ -1872,10 +1872,10 @@ static bool attach_ops(parser *p, idx_t start_idx)
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term)) {
 					fprintf(stdout, "Error: missing operand to '%s'\n", PARSER_GET_STR(c));
 					p->error = true;
-					c->arity = 0;
-					return true;
 				}
-			}
+
+				c->arity = 0;
+				return false;			}
 
 			continue;
 		}
@@ -1886,10 +1886,12 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			idx_t off = (idx_t)((c+1)-p->t->cells);
 
 			if (off >= p->t->cidx) {
-				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term)) {
 					fprintf(stdout, "Warning: missing operand to '%s'\n", PARSER_GET_STR(c));
+					p->error = true;
+				}
 
-				p->error = true;
+				c->arity = 0;
 				return false;
 			}
 
