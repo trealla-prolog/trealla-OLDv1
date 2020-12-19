@@ -1779,7 +1779,10 @@ static USE_RESULT prolog_state fn_iso_set_stream_position_2(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
-	GET_NEXT_ARG(p1,integer);
+	GET_NEXT_ARG(p1,any);
+
+	if (!is_integer(p1))
+		return throw_error(q, p1, "domain_error", "stream_position");
 
 	if (fseeko(str->fp, p1->val_num, SEEK_SET))
 		return throw_error(q, p1, "domain_error", "position");
