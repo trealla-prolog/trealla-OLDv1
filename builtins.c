@@ -6962,63 +6962,63 @@ static USE_RESULT prolog_state fn_iso_current_rule_1(query *q)
 	return pl_failure;
 }
 
-#if 0
-bool search_functor(module *m, cell *name, cell *arity, idx_t n)
+static bool search_functor(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
-	idx_t i = 0;
+	if (!q->retry)
+		q->st.iter = sl_first(q->m->index);
 
-	sliter *iter = sl_findkey(m->index, &tmp);
+	DISCARD_RESULT make_choice(q);
 	predicate *h = NULL;
 
-	while (sl_nextkey(iter, (void*)&h)) {
+	while (sl_next(q->st.iter, (void*)&h)) {
 		if (h->is_abolished)
 			continue;
 
-		sl_done(iter);
-		return h;
+		try_me(q, 2);
+		cell tmpn;
+		make_literal(&tmpn, h->key.val_off);
+		cell tmpa;
+		make_int(&tmpa, h->key.arity);
+
+		if (unify(q, p1, p1_ctx, &tmpn, q->st.fp)
+			&& unify(q, p2, p2_ctx, &tmpa, q->st.fp)) {
+			return true;
+		}
+
+		undo_me(q);
 	}
 
+	sl_done(q->st.iter);
+	drop_choice(q);
 	return false;
 }
-#endif
 
 // FIXME: this needs to backtrack
 
 static USE_RESULT prolog_state fn_iso_current_predicate_1(query *q)
 {
 	GET_FIRST_ARG(p_pi,structure);
-	unsigned arity = UINT_MAX;
+	cell *p1, *p2;
+	idx_t p1_ctx, p2_ctx;
 
-	if (!strcmp(GET_STR(p_pi), "/")) {
-		cell *tmp_p_pi = p_pi + 1;
-		tmp_p_pi += tmp_p_pi->nbr_cells;
+	p1 = p_pi + 1;
+	p1 = deref(q, p1, p_pi_ctx);
+	p1_ctx = q->latest_ctx;
 
-		if (is_integer(tmp_p_pi))
-			arity = tmp_p_pi->val_num;
-	} else if (!strcmp(GET_STR(p_pi), "//")) {
-		cell *tmp_p_pi = p_pi + 1;
-		tmp_p_pi += tmp_p_pi->nbr_cells;
+	if (!is_atom(p1) && !is_variable(p1))
+		return throw_error(q, p1, "domain_error", "not_predicate_indicator");
 
-		if (is_integer(tmp_p_pi))
-			arity = p_pi->val_num + 2;
-	} else
-		return throw_error(q, p_pi, "domain_error", "not_predicate_indicator");
+	p2 = p1 + 1;
+	p2 = deref(q, p2, p_pi_ctx);
+	p2_ctx = q->latest_ctx;
 
-	cell tmp_f = *(p_pi+1);
-	tmp_f.arity = arity;
-	predicate *h = find_matching_predicate(q->m, &tmp_f);
+	if (!is_integer(p2) && !is_variable(p2))
+		return throw_error(q, p1, "domain_error", "not_predicate_indicator");
 
-	if (h && !h->is_prebuilt)
-		return pl_success;
+	if (!search_functor(q, p1, p1_ctx, p2, p2_ctx))
+		return pl_failure;
 
-#if 0
-	const char *f = GET_STR(p_pi+1);
-
-	if (check_builtin(q->m, f, arity))
-		return pl_success;
-#endif
-
-	return pl_failure;
+	return pl_success;
 }
 
 // FIXME: this needs to backtrack

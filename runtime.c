@@ -491,7 +491,7 @@ prolog_state make_choice(query *q)
 	ch->catchme2 = false;
 	ch->pins = 0;
 
-	q->st.iter = NULL;
+	//q->st.iter = NULL;
 
 	frame *g = GET_FRAME(q->st.curr_frame);
 	may_error(check_slot(q, g->nbr_vars));
