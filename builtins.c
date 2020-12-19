@@ -1708,7 +1708,7 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 	GET_NEXT_ARG(p1,any);
 
 	if (p1->arity != 1)
-		return throw_error(q, p1, "type_error", "property");
+		return throw_error(q, p1, "domain_error", "stream_property");
 
 	if (!strcmp(GET_STR(p1), "alias")
 		&& (is_variable(pstr) || (is_stream(pstr)))) {
