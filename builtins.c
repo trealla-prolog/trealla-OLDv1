@@ -12272,6 +12272,28 @@ static USE_RESULT prolog_state fn_sys_put_chars_2(query *q)
 	return !ferror(str->fp);
 }
 
+static USE_RESULT prolog_state fn_gcd_2(query *q)
+{
+	CHECK_CALC();
+	GET_FIRST_ARG(p1_tmp,any);
+	GET_NEXT_ARG(p2_tmp,any);
+	cell p1 = calc(q, p1_tmp);
+	cell p2 = calc(q, p2_tmp);
+
+	if (is_integer(&p1) && is_integer(&p2)) {
+		q->accum.val_num = gcd(p1.val_num, p2.val_num);
+		q->accum.val_type = TYPE_INTEGER;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else if (!is_integer(&p1)) {
+		return throw_error(q, &p1, "type_error", "integer");
+	} else if (!is_integer(&p2)) {
+		return throw_error(q, &p2, "type_error", "integer");
+	}
+
+	return pl_success;
+}
+
 static USE_RESULT prolog_state fn_current_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
@@ -12686,6 +12708,7 @@ static const struct builtins g_other_funcs[] =
 	{"offset", 2, fn_offset_2, "+integer,+callable"},
 	{"plus", 3, fn_plus_3, "?integer,?integer,?integer"},
 	{"succ", 2, fn_succ_2, "?integer,?integer"},
+	{"gcd", 2, fn_gcd_2, "?integer,?integer"},
 
 	{"freeze", 2, fn_freeze_2, "+variable,+callable"},
 	{"frozen", 2, fn_frozen_2, "+variable,+callable"},
