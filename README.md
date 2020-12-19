@@ -202,6 +202,7 @@ Others
 	rational/1
 	rationalize/1
 	rdiv/2
+	gcd/2
 	char_type/2
 	code_type/2
 	uuid/1					# generates non-standard UUID
