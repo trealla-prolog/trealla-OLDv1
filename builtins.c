@@ -7815,6 +7815,10 @@ static USE_RESULT prolog_state fn_iso_op_3(query *q)
 	if (is_integer(p1) && ((p1->val_num < 0) || (p1->val_num > 1200)))
 		return throw_error(q, p1, "domain_error", "operator_priority");
 
+	if (!strcmp(GET_STR(p3), "|"))
+		return throw_error(q, p3, "permission_error", "create,operator");
+
+
 	unsigned optype;
 	const char *spec = GET_STR(p2);
 
