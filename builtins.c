@@ -4867,18 +4867,30 @@ static USE_RESULT prolog_state fn_iso_pow_2(query *q)
 		if (p2.val_den == 0)
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 
+		if ((p1.val_num == 0) && (p2.val_num < 0))
+			return throw_error(q, &p2, "evaluation_error", "undefined");
+
 		q->accum.val_flt = pow((double)p1.val_num / p1.val_den, (double)p2.val_num / p2.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_rational(&p1) && is_float(&p2)) {
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
+		if ((p1.val_num == 0) && (p2.val_flt < 0.0))
+			return throw_error(q, &p2, "evaluation_error", "undefined");
+
 		q->accum.val_flt = pow((double)p1.val_num / p1.val_den, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_float(&p2)) {
+		if ((p1.val_flt == 0.0) && (p2.val_flt < 0.0))
+			return throw_error(q, &p2, "evaluation_error", "undefined");
+
 		q->accum.val_flt = pow(p1.val_flt, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_integer(&p2)) {
+		if ((p1.val_flt == 0.0) && (p2.val_num < 0))
+			return throw_error(q, &p2, "evaluation_error", "undefined");
+
 		q->accum.val_flt = pow(p1.val_flt, p2.val_num);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
