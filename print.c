@@ -104,7 +104,7 @@ static size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen
 
 	while (srclen--) {
 		int ch = *src++;
-		const char *ptr = strchr(g_escapes, ch);
+		const char *ptr = ch != ' ' ? strchr(g_escapes, ch) : NULL;
 
 		if (ch && ptr) {
 			if (dstlen) {
