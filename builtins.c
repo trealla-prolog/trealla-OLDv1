@@ -7084,12 +7084,12 @@ static USE_RESULT prolog_state fn_iso_current_rule_1(query *q)
 static bool search_functor(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
 	if (!q->retry)
-		q->st.iter = sl_first(q->m->index);
+		q->st.iter2 = sl_first(q->m->index);
 
 	DISCARD_RESULT make_choice(q);
 	predicate *h = NULL;
 
-	while (sl_next(q->st.iter, (void*)&h)) {
+	while (sl_next(q->st.iter2, (void*)&h)) {
 		if (h->is_abolished)
 			continue;
 
@@ -7106,7 +7106,7 @@ static bool search_functor(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_
 		undo_me(q);
 	}
 
-	sl_done(q->st.iter);
+	sl_done(q->st.iter2);
 	drop_choice(q);
 	return false;
 }
