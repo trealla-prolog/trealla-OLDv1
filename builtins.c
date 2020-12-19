@@ -1713,8 +1713,7 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		return throw_error(q, p1, "domain_error", "stream_property");
 	}
 
-	if (!strcmp(GET_STR(p1), "alias")
-		&& (is_variable(pstr) || (is_stream(pstr)))) {
+	if (!strcmp(GET_STR(p1), "alias") && is_variable(pstr)) {
 		cell *c = p1 + 1;
 		c = deref(q, c, p1_ctx);
 
@@ -1761,6 +1760,30 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		c = deref(q, c, p1_ctx);
 		cell tmp;
 		may_error(make_cstring(&tmp, str->filename));
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (!strcmp(GET_STR(p1), "mode")) {
+		cell *c = p1 + 1;
+		c = deref(q, c, p1_ctx);
+		cell tmp;
+		may_error(make_cstring(&tmp, str->mode));
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (!strcmp(GET_STR(p1), "alias")) {
+		cell *c = p1 + 1;
+		c = deref(q, c, p1_ctx);
+		cell tmp;
+		may_error(make_cstring(&tmp, str->name));
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (!strcmp(GET_STR(p1), "type")) {
+		cell *c = p1 + 1;
+		c = deref(q, c, p1_ctx);
+		cell tmp;
+		may_error(make_cstring(&tmp, str->binary?"binary":"text"));
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
 
