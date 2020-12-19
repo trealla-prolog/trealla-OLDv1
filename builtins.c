@@ -4315,7 +4315,7 @@ static USE_RESULT prolog_state fn_iso_exp_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = exp((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = exp((double)p1.val_num / p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = exp(p1.val_flt);
@@ -4339,7 +4339,7 @@ static USE_RESULT prolog_state fn_iso_sqrt_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = sqrt((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = sqrt((double)p1.val_num / p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = sqrt(p1.val_flt);
@@ -4363,7 +4363,7 @@ static USE_RESULT prolog_state fn_iso_log_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = log((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = log((double)p1.val_num / p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = log(p1.val_flt);
@@ -4615,7 +4615,7 @@ static USE_RESULT prolog_state fn_iso_sin_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = sin((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = sin((double)p1.val_num / p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = sin(p1.val_flt);
@@ -4642,7 +4642,7 @@ static USE_RESULT prolog_state fn_iso_cos_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = cos((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = cos((double)p1.val_num / p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = cos(p1.val_flt);
@@ -4669,7 +4669,7 @@ static USE_RESULT prolog_state fn_iso_tan_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = tan((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = tan((double)p1.val_num / p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = tan(p1.val_flt);
@@ -4696,7 +4696,7 @@ static USE_RESULT prolog_state fn_iso_asin_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = asin((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = asin((double)p1.val_num / p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = asin(p1.val_flt);
@@ -4723,7 +4723,7 @@ static USE_RESULT prolog_state fn_iso_acos_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = acos((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = acos((double)p1.val_num / p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = acos(p1.val_flt);
@@ -4750,7 +4750,7 @@ static USE_RESULT prolog_state fn_iso_atan_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = atan((double)p1.val_num/p1.val_den);
+		q->accum.val_flt = atan((double)p1.val_num / p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = atan(p1.val_flt);
@@ -4782,13 +4782,13 @@ static USE_RESULT prolog_state fn_iso_atan_2(query *q)
 		if (p2.val_den == 0)
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 
-		q->accum.val_flt = atan2((double)p1.val_num/p1.val_den, (double)p2.val_num/p2.val_den);
+		q->accum.val_flt = atan2((double)p1.val_num / p1.val_den, (double)p2.val_num / p2.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_rational(&p1) && is_float(&p2)) {
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = atan2((double)p1.val_num/p1.val_den, p2.val_flt);
+		q->accum.val_flt = atan2((double)p1.val_num / p1.val_den, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_float(&p2)) {
 		q->accum.val_flt = atan2(p1.val_flt, p2.val_flt);
@@ -4867,13 +4867,13 @@ static USE_RESULT prolog_state fn_iso_pow_2(query *q)
 		if (p2.val_den == 0)
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 
-		q->accum.val_flt = pow((double)p1.val_num/p1.val_den, (double)p2.val_num/p2.val_den);
+		q->accum.val_flt = pow((double)p1.val_num / p1.val_den, (double)p2.val_num / p2.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_rational(&p1) && is_float(&p2)) {
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = pow((double)p1.val_num/p1.val_den, p2.val_flt);
+		q->accum.val_flt = pow((double)p1.val_num / p1.val_den, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_float(&p2)) {
 		q->accum.val_flt = pow(p1.val_flt, p2.val_flt);
@@ -4936,13 +4936,13 @@ static USE_RESULT prolog_state fn_iso_powi_2(query *q)
 		if (p2.val_den == 0)
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 
-		q->accum.val_flt = pow((double)p1.val_num/p1.val_den, (double)p2.val_num/p2.val_den);
+		q->accum.val_flt = pow((double)p1.val_num / p1.val_den, (double)p2.val_num / p2.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_rational(&p1) && is_float(&p2)) {
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = pow((double)p1.val_num/p1.val_den, p2.val_flt);
+		q->accum.val_flt = pow((double)p1.val_num / p1.val_den, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_float(&p2)) {
 		q->accum.val_flt = pow(p1.val_flt, p2.val_flt);
@@ -5049,7 +5049,7 @@ static USE_RESULT prolog_state fn_iso_div_2(query *q)
 		if (p2.val_num == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
-		q->accum.val_num = floor((double)p1.val_num/p2.val_num);
+		q->accum.val_num = floor((double)p1.val_num / p2.val_num);
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
