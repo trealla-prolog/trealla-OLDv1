@@ -315,6 +315,7 @@ struct predicate_ {
 	bool is_dynamic:1;
 	bool is_persist:1;
 	bool is_multifile:1;
+	bool is_discontiguous:1;
 	bool is_abolished:1;
 	bool is_noindex:1;
 	bool check_directive:1;
@@ -630,7 +631,6 @@ USE_RESULT prolog_state throw_error(query *q, cell *c, const char *err_type, con
 uint64_t get_time_in_usec(void);
 void clear_term(term *t);
 void do_db_load(module *m);
-void set_dynamic_in_db(module *m, const char *name, unsigned arity);
 size_t sprint_int(char *dst, size_t size, int_t n, int base);
 void call_attrs(query *q, cell *attrs);
 void alloc_list(query *q, const cell *c);

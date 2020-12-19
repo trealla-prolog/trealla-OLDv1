@@ -1874,8 +1874,10 @@ static bool attach_ops(parser *p, idx_t start_idx)
 					p->error = true;
 				}
 
+				c->flags = 0;
 				c->arity = 0;
-				return false;			}
+				return false;
+			}
 
 			continue;
 		}
@@ -1891,6 +1893,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 					p->error = true;
 				}
 
+				c->flags = 0;
 				c->arity = 0;
 				return false;
 			}

@@ -7113,23 +7113,29 @@ static bool search_functor(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_
 
 static USE_RESULT prolog_state fn_iso_current_predicate_1(query *q)
 {
-	GET_FIRST_ARG(p_pi,structure);
+	GET_FIRST_ARG(p_pi,any);
 	cell *p1, *p2;
 	idx_t p1_ctx, p2_ctx;
+
+	if (p_pi->arity != 2)
+		return throw_error(q, p_pi, "type_error", "predicate_indicator");
+
+	if (strcmp(GET_STR(p_pi), "/"))
+		return throw_error(q, p_pi, "type_error", "predicate_indicator");
 
 	p1 = p_pi + 1;
 	p1 = deref(q, p1, p_pi_ctx);
 	p1_ctx = q->latest_ctx;
 
 	if (!is_atom(p1) && !is_variable(p1))
-		return throw_error(q, p1, "domain_error", "not_predicate_indicator");
+		return throw_error(q, p_pi, "type_error", "predicate_indicator");
 
 	p2 = p1 + 1;
 	p2 = deref(q, p2, p_pi_ctx);
 	p2_ctx = q->latest_ctx;
 
-	if (!is_integer(p2) && !is_variable(p2))
-		return throw_error(q, p1, "domain_error", "not_predicate_indicator");
+	if ((!is_integer(p2) || (p2->val_num < 0)) && !is_variable(p2))
+		return throw_error(q, p_pi, "type_error", "predicate_indicator");
 
 	if (!search_functor(q, p1, p1_ctx, p2, p2_ctx))
 		return pl_failure;
