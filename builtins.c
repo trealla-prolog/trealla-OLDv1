@@ -4423,19 +4423,19 @@ static USE_RESULT prolog_state fn_iso_round_1(query *q)
 
 	if (is_float(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = round(p1.val_flt);
+		__int128_t tmp = rint(p1.val_flt);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-			int64_t tmp = round(p1.val_flt);
+			int64_t tmp = rint(p1.val_flt);
 
 			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
 				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
-				q->accum.val_num = (int_t)round(p1.val_flt);
+				q->accum.val_num = (int_t)rint(p1.val_flt);
 				q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			}
