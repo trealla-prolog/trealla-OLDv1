@@ -1707,8 +1707,11 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 	GET_FIRST_ARG(pstr,any);
 	GET_NEXT_ARG(p1,any);
 
-	if (p1->arity != 1)
+	if (p1->arity != 1) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
 		return throw_error(q, p1, "domain_error", "stream_property");
+	}
 
 	if (!strcmp(GET_STR(p1), "alias")
 		&& (is_variable(pstr) || (is_stream(pstr)))) {
@@ -4355,9 +4358,15 @@ static USE_RESULT prolog_state fn_iso_sqrt_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
+		if (p1.val_num < 0)
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
 		q->accum.val_flt = sqrt((double)p1.val_num / p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1)) {
+		if (p1.val_flt == -1)
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
 		q->accum.val_flt = sqrt(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_variable(&p1)) {
@@ -4376,12 +4385,18 @@ static USE_RESULT prolog_state fn_iso_log_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
+		if (p1.val_num <= 0)
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
 		q->accum.val_flt = log((double)p1.val_num / p1.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1)) {
+		if (p1.val_flt <= 0.0)
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
 		q->accum.val_flt = log(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_variable(&p1)) {
@@ -4514,26 +4529,8 @@ static USE_RESULT prolog_state fn_iso_float_integer_part_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_float(&p1)) {
-#if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = p1.val_flt;
-
-		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			return throw_error(q, &p1, "evaluation_error", "int_overflow");
-		} else {
-#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-			int64_t tmp = p1.val_flt;
-
-			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-				return throw_error(q, &p1, "evaluation_error", "int_overflow");
-			} else {
-#endif
-				q->accum.val_flt = (int_t)p1.val_flt;
-				q->accum.val_type = TYPE_FLOAT;
-#if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-			}
-#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-		}
-#endif
+		q->accum.val_flt = (int_t)p1.val_flt;
+		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (is_rational(&p1)) {
@@ -4552,26 +4549,8 @@ static USE_RESULT prolog_state fn_iso_float_fractional_part_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_float(&p1)) {
-#if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = p1.val_flt - (__int64_t)p1.val_flt;
-
-		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
-			return throw_error(q, &p1, "evaluation_error", "int_overflow");
-		} else {
-#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-			int64_t tmp = p1.val_flt - (int64_t)p1.val_flt;
-
-			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
-				return throw_error(q, &p1, "evaluation_error", "int_overflow");
-			} else {
-#endif
-				q->accum.val_flt = p1.val_flt - (int_t)p1.val_flt;
-				q->accum.val_type = TYPE_FLOAT;
-#if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-			}
-#elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-		}
-#endif
+		q->accum.val_flt = p1.val_flt - (int_t)p1.val_flt;
+		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (is_rational(&p1)) {
@@ -6890,7 +6869,7 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),(%s)/%u).", err_type, expected, GET_STR(c), c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 
 	} else if (!strcmp(err_type, "permission_error")) {
-		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, GET_STR(c), GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 
 	} else if (IS_OP(c)) {
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
@@ -9711,6 +9690,8 @@ static USE_RESULT prolog_state fn_log10_1(query *q)
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = log10(p1.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
