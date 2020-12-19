@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -4013,6 +4012,19 @@ static USE_RESULT prolog_state fn_iso_float_1(query *q)
 
 		if (is_integer(&p1)) {
 			q->accum.val_flt = (double)p1.val_num;
+			q->accum.val_type = TYPE_FLOAT;
+			return pl_success;
+		}
+
+		if (is_rational(&p1)) {
+			if (p1.val_num != 0) {
+				if (p1.val_den == 0)
+					return throw_error(q, &p1, "evaluation_error", "undefined");
+
+				q->accum.val_flt = (double)p1.val_num / p1.val_den;
+			} else
+				q->accum.val_flt = 0.0;
+
 			q->accum.val_type = TYPE_FLOAT;
 			return pl_success;
 		}

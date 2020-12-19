@@ -33,7 +33,7 @@ static const unsigned INITIAL_NBR_CHOICES = 1000;
 static const unsigned INITIAL_NBR_TRAILS = 1000;
 
 #define JUST_IN_TIME_COUNT 50
-#define DUMP_ERRS 1
+#define DUMP_ERRS 0
 
 stream g_streams[MAX_STREAMS] = {{0}};
 idx_t g_empty_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
