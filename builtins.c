@@ -6975,9 +6975,8 @@ static bool search_functor(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_
 			continue;
 
 		try_me(q, 2);
-		cell tmpn;
+		cell tmpn, tmpa;
 		make_literal(&tmpn, h->key.val_off);
-		cell tmpa;
 		make_int(&tmpa, h->key.arity);
 
 		if (unify(q, p1, p1_ctx, &tmpn, q->st.fp)
