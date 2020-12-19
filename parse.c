@@ -2950,6 +2950,14 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quoted && !strcmp(p->token, ",") && consing) {
+			if (*p->srcptr == ',') {
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					fprintf(stdout, "Error: syntax error missing element\n");
+
+				p->error = true;
+				break;
+			}
+
 			if (was_consing) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: syntax error parsing list1\n");
@@ -2966,6 +2974,14 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quoted && !strcmp(p->token, ",") && args) {
+			if (*p->srcptr == ',') {
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					fprintf(stdout, "Error: syntax error missing arg\n");
+
+				p->error = true;
+				break;
+			}
+
 			arity++;
 
 			if (arity > MAX_ARITY) {
