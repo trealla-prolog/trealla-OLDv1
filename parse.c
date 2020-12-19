@@ -1239,7 +1239,8 @@ static void directives(parser *p, term *t)
 	}
 
 	if (!strcmp(dirname, "use_module") && (c->arity == 2)) {
-		printf("Error: use_module/2 not implemented\n");
+		if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+			printf("Error: use_module/2 not implemented\n");
 	}
 
 	if (!strcmp(dirname, "use_module") && (c->arity == 1)) {
@@ -1415,7 +1416,9 @@ static void directives(parser *p, term *t)
 				p->m->flag.double_quote_atom = p->m->flag.double_quote_codes = false;
 				p->m->flag.double_quote_chars = true;
 			} else {
-				fprintf(stdout, "Error: unknown value\n");
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					fprintf(stdout, "Error: unknown value\n");
+
 				p->error = true;
 				return;
 			}
@@ -1446,7 +1449,9 @@ static void directives(parser *p, term *t)
 		cell *p1 = c + 1, *p2 = c + 2, *p3 = c + 3;
 
 		if (!is_integer(p1) || !is_literal(p2) || !is_atom(p3)) {
-			fprintf(stdout, "Error: unknown op\n");
+			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+				fprintf(stdout, "Error: unknown op\n");
+
 			p->error = true;
 			return;
 		}
@@ -1469,12 +1474,15 @@ static void directives(parser *p, term *t)
 		else if (!strcmp(spec, "yfx"))
 			optype = OP_YFX;
 		else {
-			fprintf(stdout, "Error: unknown op spec val_type\n");
+			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+				fprintf(stdout, "Error: unknown op spec val_type\n");
 			return;
 		}
 
 		if (!set_op(p->m, PARSER_GET_STR(p3), optype, p1->val_num)) {
-			fprintf(stdout, "Error: could not set op\n");
+			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+				fprintf(stdout, "Error: could not set op\n");
+
 			return;
 		}
 
@@ -1861,10 +1869,12 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			idx_t off = (idx_t)((c+1) - p->t->cells);
 
 			if (off >= p->t->cidx) {
-				fprintf(stdout, "Error: missing operand to '%s'\n", PARSER_GET_STR(c));
-				p->error = true;
-				c->arity = 0;
-				return false;
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term)) {
+					fprintf(stdout, "Error: missing operand to '%s'\n", PARSER_GET_STR(c));
+					p->error = true;
+					c->arity = 0;
+					return true;
+				}
 			}
 
 			continue;
@@ -1876,7 +1886,9 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			idx_t off = (idx_t)((c+1)-p->t->cells);
 
 			if (off >= p->t->cidx) {
-				fprintf(stdout, "Error: missing operand to '%s'\n", PARSER_GET_STR(c));
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					fprintf(stdout, "Warning: missing operand to '%s'\n", PARSER_GET_STR(c));
+
 				p->error = true;
 				return false;
 			}
@@ -2097,7 +2109,8 @@ static int get_escape(const char **_src, bool *error)
 		}
 
 		if (!unicode && (*src++ != '\\')) {
-			//fprintf(stdout, "Error: syntax error, closing \\ missing\n");
+			//if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+			//	fprintf(stdout, "Error: syntax error, closing \\ missing\n");
 			*_src = src;
 			*error = true;
 			return 0;
