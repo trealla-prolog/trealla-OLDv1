@@ -6253,6 +6253,7 @@ static USE_RESULT prolog_state fn_iso_abolish_1(query *q)
 	cell tmp;
 	tmp = *p1_name;
 	tmp.arity = p1_arity->val_num;
+	CLR_OP(&tmp);
 	return do_abolish(q, &tmp);
 }
 
@@ -6888,6 +6889,7 @@ static USE_RESULT prolog_state fn_iso_functor_3(query *q)
 	cell tmp = *p1;
 	tmp.nbr_cells = 1;
 	tmp.arity = 0;
+	CLR_OP(&tmp);
 
 	if (is_string(p1)) {
 		tmp.val_type = TYPE_LITERAL;
@@ -6959,6 +6961,26 @@ static USE_RESULT prolog_state fn_iso_current_rule_1(query *q)
 
 	return pl_failure;
 }
+
+#if 0
+bool search_functor(module *m, cell *name, cell *arity, idx_t n)
+{
+	idx_t i = 0;
+
+	sliter *iter = sl_findkey(m->index, &tmp);
+	predicate *h = NULL;
+
+	while (sl_nextkey(iter, (void*)&h)) {
+		if (h->is_abolished)
+			continue;
+
+		sl_done(iter);
+		return h;
+	}
+
+	return false;
+}
+#endif
 
 // FIXME: this needs to backtrack
 
@@ -11702,6 +11724,7 @@ static USE_RESULT prolog_state fn_abolish_2(query *q)
 	GET_NEXT_ARG(p2,integer);
 	cell tmp = *p1;
 	tmp.arity = p2->val_num;
+	CLR_OP(&tmp);
 	return do_abolish(q, &tmp);
 }
 
