@@ -2023,6 +2023,95 @@ static cell *make_literal(parser *p, idx_t offset)
 	return c;
 }
 
+static int get_octal(const char **srcptr)
+{
+	const char *src = *srcptr;
+	int v = 0;
+
+	while (*src == '0')
+		src++;
+
+	while ((*src >= '0') && (*src <= '7')) {
+		v *= 8;
+		char ch = *src++;
+		v += ch - '0';
+	}
+
+	*srcptr = src;
+	return v;
+}
+
+static int get_hex(const char **srcptr, int n)
+{
+	const char *src = *srcptr;
+	int v = 0;
+
+	while ((n > 0) && (*src == '0')) {
+		src++; n--;
+	}
+
+	while ((n > 0) && (((*src >= '0') && (*src <= '9')) ||
+		((*src >= 'a') && (*src <= 'f')) ||
+		((*src >= 'A') && (*src <= 'F')))) {
+		v *= 16;
+		char ch = *src++;
+		n--;
+
+		if ((ch >= 'a') && (ch <= 'f'))
+			v += 10 + (ch - 'a');
+		else if ((ch >= 'A') && (ch <= 'F'))
+			v += 10 + (ch - 'A');
+		else
+			v += ch - '0';
+	}
+
+	*srcptr = src;
+	return v;
+}
+
+const char *g_escapes = "\e\a\f\b\t\v\r\n\x20\x7F";
+const char *g_anti_escapes = "eafbtvrnsd";
+
+static int get_escape(const char **_src, bool *error)
+{
+	const char *src = *_src;
+	int ch = *src++;
+	const char *ptr = strchr(g_anti_escapes, ch);
+
+	if (ptr)
+		ch = g_escapes[ptr-g_anti_escapes];
+	else if (isdigit(ch) || (ch == 'x') || (ch == 'u') || (ch == 'U')) {
+		int unicode = 0;
+
+		if (ch == 'U') {
+			ch = get_hex(&src, 8);
+			unicode = 1;
+		} else if (ch == 'u') {
+			ch = get_hex(&src, 4);
+			unicode = 1;
+		} else if (ch == 'x')
+			ch = get_hex(&src, 999);
+		else {
+			src--;
+			ch = get_octal(&src);
+		}
+
+		if (!unicode && (*src++ != '\\')) {
+			//fprintf(stdout, "Error: syntax error, closing \\ missing\n");
+			*_src = src;
+			*error = true;
+			return 0;
+		}
+	} else if ((ch != '\\') && (ch != '"') && (ch != '\'') && (ch != '\r') && (ch != '\n')) {
+		*_src = src;
+		*error = true;
+		return 0;
+	}
+
+	*_src = src;
+	return ch;
+}
+
 static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *val_den)
 {
 	*val_den = 1;
@@ -2048,7 +2137,14 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 
 	if ((*s == '0') && (s[1] == '\'')) {
 		s += 2;
-		int v = get_char_utf8(&s);
+		int v;
+
+		if (*s == '\\') {
+			s++;
+			v = get_escape(&s, &p->error);
+		} else
+			v = get_char_utf8(&s);
+
 		*val_num = v;
 		if (neg) *val_num = -*val_num;
 		*srcptr = s;
@@ -2248,95 +2344,6 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 	*val_den = tmp.val_den;
 	*srcptr = s;
 	return 1;
-}
-
-static int get_octal(const char **srcptr)
-{
-	const char *src = *srcptr;
-	int v = 0;
-
-	while (*src == '0')
-		src++;
-
-	while ((*src >= '0') && (*src <= '7')) {
-		v *= 8;
-		char ch = *src++;
-		v += ch - '0';
-	}
-
-	*srcptr = src;
-	return v;
-}
-
-static int get_hex(const char **srcptr, int n)
-{
-	const char *src = *srcptr;
-	int v = 0;
-
-	while ((n > 0) && (*src == '0')) {
-		src++; n--;
-	}
-
-	while ((n > 0) && (((*src >= '0') && (*src <= '9')) ||
-		((*src >= 'a') && (*src <= 'f')) ||
-		((*src >= 'A') && (*src <= 'F')))) {
-		v *= 16;
-		char ch = *src++;
-		n--;
-
-		if ((ch >= 'a') && (ch <= 'f'))
-			v += 10 + (ch - 'a');
-		else if ((ch >= 'A') && (ch <= 'F'))
-			v += 10 + (ch - 'A');
-		else
-			v += ch - '0';
-	}
-
-	*srcptr = src;
-	return v;
-}
-
-const char *g_escapes = "\e\a\f\b\t\v\r\n";
-const char *g_anti_escapes = "eafbtvrn";
-
-static int get_escape(const char **_src, bool *error)
-{
-	const char *src = *_src;
-	int ch = *src++;
-	const char *ptr = strchr(g_anti_escapes, ch);
-
-	if (ptr)
-		ch = g_escapes[ptr-g_anti_escapes];
-	else if (isdigit(ch) || (ch == 'x') || (ch == 'u') || (ch == 'U')) {
-		int unicode = 0;
-
-		if (ch == 'U') {
-			ch = get_hex(&src, 8);
-			unicode = 1;
-		} else if (ch == 'u') {
-			ch = get_hex(&src, 4);
-			unicode = 1;
-		} else if (ch == 'x')
-			ch = get_hex(&src, 999);
-		else {
-			src--;
-			ch = get_octal(&src);
-		}
-
-		if (!unicode && (*src++ != '\\')) {
-			//fprintf(stdout, "Error: syntax error, closing \\ missing\n");
-			*_src = src;
-			*error = true;
-			return 0;
-		}
-	} else if ((ch != '\\') && (ch != '"') && (ch != '\'') && (ch != '\r') && (ch != '\n')) {
-		*_src = src;
-		*error = true;
-		return 0;
-	}
-
-	*_src = src;
-	return ch;
 }
 
 static int is_matching_pair(char **dst, char **src, int lh, int rh)
