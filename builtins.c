@@ -1756,6 +1756,14 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 
+	if (!strcmp(GET_STR(p1), "file_name")) {
+		cell *c = p1 + 1;
+		c = deref(q, c, p1_ctx);
+		cell tmp;
+		may_error(make_cstring(&tmp, str->filename));
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
 	if (!strcmp(GET_STR(p1), "end_of_stream") && is_stream(pstr)) {
 		cell *c = p1 + 1;
 		c = deref(q, c, p1_ctx);
