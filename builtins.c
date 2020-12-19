@@ -4767,7 +4767,7 @@ static USE_RESULT prolog_state fn_iso_atan_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT prolog_state fn_iso_atan_2(query *q)
+static USE_RESULT prolog_state fn_iso_atan2_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -4776,6 +4776,9 @@ static USE_RESULT prolog_state fn_iso_atan_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_rational(&p1) && is_rational(&p2)) {
+		if ((p1.val_num == 0) && (p2.val_num == 0))
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
@@ -4785,16 +4788,28 @@ static USE_RESULT prolog_state fn_iso_atan_2(query *q)
 		q->accum.val_flt = atan2((double)p1.val_num / p1.val_den, (double)p2.val_num / p2.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_rational(&p1) && is_float(&p2)) {
+		if ((p1.val_num == 0) && (p2.val_flt == 0.0))
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
 		q->accum.val_flt = atan2((double)p1.val_num / p1.val_den, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1) && is_float(&p2)) {
+		if ((p1.val_flt == 0.0) && (p2.val_num == 0))
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
 		q->accum.val_flt = atan2(p1.val_flt, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_integer(&p2)) {
-		q->accum.val_flt = atan2(p1.val_flt, p2.val_num);
+	} else if (is_float(&p1) && is_rational(&p2)) {
+		if ((p1.val_flt == 0.0) && (p2.val_num == 0))
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
+		if (p2.val_den == 0)
+			return throw_error(q, &p2, "evaluation_error", "undefined");
+
+		q->accum.val_flt = atan2(p1.val_flt, (double)p2.val_num / p2.val_den);
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
@@ -12567,7 +12582,7 @@ static const struct builtins g_iso_funcs[] =
 	{"asin", 1, fn_iso_asin_1, NULL},
 	{"acos", 1, fn_iso_acos_1, NULL},
 	{"atan", 1, fn_iso_atan_1, NULL},
-	{"atan2", 2, fn_iso_atan_2, NULL},
+	{"atan2", 2, fn_iso_atan2_2, NULL},
 	{"copysign", 2, fn_iso_copysign_2, NULL},
 	{"truncate", 1, fn_iso_truncate_1, NULL},
 	{"round", 1, fn_iso_round_1, NULL},
