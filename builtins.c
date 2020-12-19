@@ -7841,7 +7841,7 @@ static USE_RESULT prolog_state fn_iso_op_3(query *q)
 	int prec = get_op(q->m, GET_STR(p3), &tmp_optype, &tmp_userop, false);
 
 	if (prec && !tmp_userop)
-		return throw_error(q, p3, "permission_error", "can't_create_op");
+		return throw_error(q, p3, "permission_error", "modify,operator");
 
 	if (!set_op(q->m, GET_STR(p3), optype, p1->val_num))
 		return throw_error(q, p3, "domain_error", "too_many_ops");
