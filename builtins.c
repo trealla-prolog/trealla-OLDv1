@@ -914,11 +914,24 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 		return ok;
 	}
 
-	cell tmp;
-	may_error(make_string(&tmp, GET_STR(p1), LEN_STR(p1)));
-	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	chk_cstring(&tmp);
-	return ok;
+	const char *src = GET_STR(p1);
+	bool first = true;
+
+	while (*src) {
+		size_t len = len_char_utf8(src);
+		cell tmp2;
+		make_smalln(&tmp2, src, len);
+		src += len;
+
+		if (first) {
+			first = false;
+			alloc_list(q, &tmp2);
+		} else
+			append_list(q, &tmp2);
+	}
+
+	cell *tmp = end_list(q);
+	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
 static USE_RESULT prolog_state fn_iso_number_chars_2(query *q)
