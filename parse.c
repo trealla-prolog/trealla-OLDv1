@@ -453,7 +453,7 @@ static predicate *create_predicate(module *m, cell *c)
 	return h;
 }
 
-void set_multifile_in_db(module *m, const char *name, idx_t arity)
+static void set_multifile_in_db(module *m, const char *name, idx_t arity)
 {
 	if (!m) return;
 	assert(name);
@@ -748,7 +748,7 @@ clause *erase_from_db(module *m, uuid *ref)
 	return r;
 }
 
-void set_dynamic_in_db(module *m, const char *name, unsigned arity)
+static void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 {
 	if (!m) return;
 
@@ -762,6 +762,29 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 
 	if (h) {
 		h->is_dynamic = true;
+
+		if (!h->index && !m->noindex) {
+			h->index = sl_create1(compkey, m);
+			ensure(h->index);
+		}
+	} else
+		m->error = true;
+}
+
+void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
+{
+	if (!m) return;
+
+	cell tmp = {0};
+	tmp.val_type = TYPE_LITERAL;
+	tmp.val_off = index_from_pool(m->pl, name);
+	ensure(tmp.val_off != ERR_IDX);
+	tmp.arity = arity;
+	predicate *h = find_predicate(m, &tmp);
+	if (!h) h = create_predicate(m, &tmp);
+
+	if (h) {
+		h->is_discontiguous = true;
 
 		if (!h->index && !m->noindex) {
 			h->index = sl_create1(compkey, m);
@@ -1313,7 +1336,7 @@ static void directives(parser *p, term *t)
 		free(tmpbuf);
 	}
 
-	if (!strcmp(dirname, "dynamic") && (c->arity >= 1)) {
+	if (!strcmp(dirname, "dynamic") && (c->arity >= 1) && (!is_list(c+1))) {
 		cell *p1 = c + 1;
 
 		while (is_literal(p1)) {
@@ -1331,7 +1354,25 @@ static void directives(parser *p, term *t)
 		return;
 	}
 
-	if (!strcmp(dirname, "multifile") && (c->arity >= 1)) {
+	if (!strcmp(dirname, "discontiguous") && (c->arity >= 1) && (!is_list(c+1))) {
+		cell *p1 = c + 1;
+
+		while (is_literal(p1)) {
+			if (is_literal(p1) && !strcmp(PARSER_GET_STR(p1), "/") && (p1->arity == 2)) {
+				cell *c_name = p1 + 1;
+				if (!is_atom(c_name)) return;
+				cell *c_arity = p1 + 2;
+				if (!is_integer(c_arity)) return;
+				set_discontiguous_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
+				p1 += p1->nbr_cells;
+			} else if (!strcmp(PARSER_GET_STR(p1), ","))
+				p1 += 1;
+		}
+
+		return;
+	}
+
+	if (!strcmp(dirname, "multifile") && (c->arity >= 1) && (!is_list(c+1))) {
 		cell *p1 = c + 1;
 
 		while (is_literal(p1)) {
@@ -1378,7 +1419,7 @@ static void directives(parser *p, term *t)
 		return;
 	}
 
-	if (!strcmp(dirname, "persist") && (c->arity >= 1)) {
+	if (!strcmp(dirname, "persist") && (c->arity >= 1) && (!is_list(c+1))) {
 		cell *p1 = c + 1;
 
 		while (is_literal(p1)) {
