@@ -491,7 +491,7 @@ prolog_state make_choice(query *q)
 	ch->catchme2 = false;
 	ch->pins = 0;
 
-	q->st.iter = NULL;	// Don't tremove this
+	q->st.iter = NULL;	// Don't remove this
 
 	frame *g = GET_FRAME(q->st.curr_frame);
 	may_error(check_slot(q, g->nbr_vars));
@@ -1203,10 +1203,12 @@ prolog_state run_query(query *q)
 			}
 		}
 
+#if 1
 		if (is_variable(q->st.curr_cell)) {
 			if (!call_me(q, q->st.curr_cell))
 				continue;
 		}
+#endif
 
 		q->tot_goals++;
 		q->did_throw = false;

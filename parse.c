@@ -1826,6 +1826,20 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 		}
 	}
 
+	if (IS_FY(c)) {
+			if (!strcmp(PARSER_GET_STR(c), "\\+")) {
+			cell *rhs = c + 1;
+
+			if (is_variable(rhs)) {
+				c = insert_here(p, c, rhs);
+				rhs = c + 1;
+			} else
+				rhs = term_to_body_conversion(p, rhs);
+
+			c->nbr_cells = 1 + rhs->nbr_cells;
+		}
+	}
+
 	return p->t->cells + c_idx;
 }
 
