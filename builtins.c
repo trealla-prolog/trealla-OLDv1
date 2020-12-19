@@ -4397,6 +4397,8 @@ static USE_RESULT prolog_state fn_iso_truncate_1(query *q)
 #endif
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else if (is_rational(&p1)) {
+		return throw_error(q, &p1, "type_error", "float");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
@@ -4433,6 +4435,8 @@ static USE_RESULT prolog_state fn_iso_round_1(query *q)
 #endif
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else if (is_rational(&p1)) {
+		return throw_error(q, &p1, "type_error", "float");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
@@ -4469,6 +4473,8 @@ static USE_RESULT prolog_state fn_iso_ceiling_1(query *q)
 #endif
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else if (is_rational(&p1)) {
+		return throw_error(q, &p1, "type_error", "float");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
@@ -4505,6 +4511,8 @@ static USE_RESULT prolog_state fn_iso_float_integer_part_1(query *q)
 #endif
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else if (is_rational(&p1)) {
+		return throw_error(q, &p1, "type_error", "float");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
@@ -4541,6 +4549,8 @@ static USE_RESULT prolog_state fn_iso_float_fractional_part_1(query *q)
 #endif
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else if (is_rational(&p1)) {
+		return throw_error(q, &p1, "type_error", "float");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
@@ -4577,6 +4587,8 @@ static USE_RESULT prolog_state fn_iso_floor_1(query *q)
 #endif
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else if (is_rational(&p1)) {
+		return throw_error(q, &p1, "type_error", "float");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
