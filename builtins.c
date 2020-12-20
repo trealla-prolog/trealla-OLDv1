@@ -6307,8 +6307,11 @@ static USE_RESULT prolog_state do_abolish(query *q, cell *c)
 	predicate *h = find_matching_predicate(q->m, c);
 	if (!h) return pl_success;
 
-	if (!h->is_dynamic)
-		return throw_error(q, c, "permission_error", "modify,static_procedure");
+	if (!h->is_dynamic) {
+		cell tmp = *c;
+		tmp.arity = 0;
+		return throw_error(q, &tmp, "permission_error", "modify,static_procedure");
+	}
 
 	uint64_t gen = h->gen;
 

@@ -449,7 +449,7 @@ static predicate *create_predicate(module *m, cell *c)
 	if (is_cstring(c))
 		h->key.val_off = index_from_pool(m->pl, MODULE_GET_STR(c));
 
-	sl_set(m->index, &h->key, h);
+	sl_app(m->index, &h->key, h);
 	return h;
 }
 
