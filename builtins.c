@@ -7109,7 +7109,6 @@ static bool search_functor(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_
 		undo_me(q);
 	}
 
-	sl_done(q->st.iter2);
 	drop_choice(q);
 	return false;
 }

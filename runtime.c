@@ -549,10 +549,8 @@ void cut_me(query *q, bool local_cut)
 			q->st.qnbr = ch->st.qnbr;
 		}
 
-		if (ch->st.iter) {
+		if (ch->st.iter)
 			sl_done(ch->st.iter);
-			ch->st.iter = NULL;
-		}
 
 		q->cp--;
 
@@ -1113,9 +1111,6 @@ static USE_RESULT prolog_state match_head(query *q)
 			if (!all_vars) {
 				q->st.iter = sl_findkey(h->index, key);
 
-				if (!q->st.iter)
-					return pl_failure;
-
 #if 0
 				printf("*** key: iter:%p ", q->st.iter);
 				print_term(q, stdout, key, q->st.curr_frame, 0);
@@ -1126,13 +1121,9 @@ static USE_RESULT prolog_state match_head(query *q)
 				next_key(q);
 			} else {
 				q->st.curr_clause = h->head;
-				sl_done(q->st.iter);
-				q->st.iter = NULL;
 			}
 		} else {
 			q->st.curr_clause = h->head;
-			sl_done(q->st.iter);
-			q->st.iter = NULL;
 		}
 	} else
 		next_key(q);

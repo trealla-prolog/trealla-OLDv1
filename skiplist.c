@@ -496,6 +496,7 @@ sliter *sl_first(skiplist *l)
 		ensure(iter);
 	} else {
 		iter = l->iters;
+		iter->dead = false;
 		l->iters = iter->next;
 	}
 
@@ -508,13 +509,10 @@ sliter *sl_first(skiplist *l)
 
 bool sl_next(sliter *iter, void **val)
 {
-	if (!iter)
+	if (!iter || !iter->p)
 		return false;
 
-	if (!iter->p) {
-		sl_done(iter);
-		return false;
-	}
+	assert(!iter->dead);
 
 	if (iter->idx < iter->p->nbr) {
 		*val = iter->p->bkt[iter->idx++].val;
@@ -559,6 +557,7 @@ sliter *sl_findkey(skiplist *l, const void *key)
 		ensure(iter);
 	} else {
 		iter = l->iters;
+		iter->dead = false;
 		l->iters = iter->next;
 	}
 
@@ -571,13 +570,10 @@ sliter *sl_findkey(skiplist *l, const void *key)
 
 bool sl_nextkey(sliter *iter, void **val)
 {
-	if (!iter)
+	if (!iter || !iter->p)
 		return false;
 
-	if (!iter->p) {
-		sl_done(iter);
-		return false;
-	}
+	assert(!iter->dead);
 
 	if (iter->idx < iter->p->nbr) {
 		if (iter->l->compkey(iter->l->p, iter->p->bkt[iter->idx].key, iter->key) != 0) {
@@ -601,8 +597,10 @@ bool sl_nextkey(sliter *iter, void **val)
 
 void sl_done(sliter *iter)
 {
-	if (!iter || iter->dead)
+	if (!iter)
 		return;
+
+	assert(!iter->dead);
 
 	iter->dead = true;
 	iter->next = iter->l->iters;

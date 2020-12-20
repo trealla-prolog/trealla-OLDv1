@@ -673,7 +673,7 @@ static void assert_commit(module *m, term *t, clause *r, predicate *h, bool appe
 
 	if (h->index && h->key.arity && is_structure(c+1)) {
 		h->is_noindex = true;
-		sl_destroy(h->index);
+		//sl_destroy(h->index);
 		h->index = NULL;
 	}
 
@@ -808,10 +808,9 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 		h->is_dynamic = true;
 		h->is_persist = true;
 
-		if (!h->index
-		    && !m->noindex
-		    && !(h->index = sl_create1(compkey, m))) {
-			m->error = true;
+		if (!h->index && !m->noindex) {
+			h->index = sl_create1(compkey, m);
+			ensure(h->index);
 		}
 
 		m->use_persist = true;
