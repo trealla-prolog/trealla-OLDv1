@@ -6140,7 +6140,7 @@ static USE_RESULT prolog_state fn_iso_clause_2(query *q)
 		}
 
 		if (ok) {
-			bool last_match = !q->st.curr_clause2->next && !q->st.iter;
+			bool last_match = !q->st.curr_clause2->next && !q->st.iter2;
 			stash_me(q, t, last_match);
 			return pl_success;
 		}
@@ -7950,7 +7950,7 @@ static USE_RESULT prolog_state fn_clause_3(query *q)
 		}
 
 		if (ok) {
-			bool last_match = !q->st.curr_clause2->next && !q->st.iter;
+			bool last_match = !q->st.curr_clause2->next && !q->st.iter2;
 			stash_me(q, t, last_match);
 			return pl_success;
 		}
