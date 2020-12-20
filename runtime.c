@@ -425,7 +425,7 @@ static void commit_me(query *q, term *t)
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g->m = q->m;
 	q->m = q->st.curr_clause->m;
-	bool last_match = (!q->st.curr_clause->next /*&& !q->st.iter*/) || t->first_cut;
+	bool last_match = !q->st.curr_clause->next || t->first_cut;
 	bool recursive = (last_match || g->did_cut) && (q->st.curr_cell->flags&FLAG_TAIL_REC);
 	bool tco = recursive && !g->any_choices && check_slots(q, g, t);
 
