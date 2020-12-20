@@ -12,8 +12,8 @@
 
 % These are our database records:
 
-:- dynamic auth_session/2.
-:- persist auth_user/2.
+:- dynamic(auth_session/2).
+:- persist(auth_user/2).
 
 adduser(User, Pass) :-
 	\+ auth_user(User, _),

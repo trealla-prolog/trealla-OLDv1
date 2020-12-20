@@ -113,7 +113,7 @@ performance of SIM-I vs.  Prolog-20.
 
 % SWI-Prolog hooks:
 
-%:- op(1150, fx, [public, mode]).
+%:- op(1150, fx, [dynamic, public, mode]).
 
 %public(_).
 %mode(_).

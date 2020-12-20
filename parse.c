@@ -58,15 +58,15 @@ static struct op_table g_ops[] =
 	{"*->", OP_XFY, 1050},
 	{",", OP_XFY, 1000},
 
-	{"op", OP_FX, 1150},
-	{"public", OP_FX, 1150},			// NOT USED
-	{"dynamic", OP_FX, 1150},
-	{"persist", OP_FX, 1150},
-	{"initialization", OP_FX, 1150},
-	{"set_prolog_flag", OP_FX, 1150},
-	{"module", OP_FX, 1150},
-	{"use_module", OP_FX, 1150},
-	{"ensure_loaded", OP_FX, 1150},
+	//{"op", OP_FX, 1150},
+	//{"public", OP_FX, 1150},			// NOT USED
+	//{"dynamic", OP_FX, 1150},
+	//{"persist", OP_FX, 1150},
+	//{"initialization", OP_FX, 1150},
+	//{"set_prolog_flag", OP_FX, 1150},
+	//{"module", OP_FX, 1150},
+	//{"use_module", OP_FX, 1150},
+	//{"ensure_loaded", OP_FX, 1150},
 
 	{"\\+", OP_FY, 900},
 	{"is", OP_XFX, 700},
