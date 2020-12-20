@@ -24,10 +24,11 @@ struct slnode_ {
 };
 
 struct sliter_ {
+	sliter *next;
 	skiplist *l;
 	slnode_t *p;
 	const void *key;
-	int idx, dynamic, busy;
+	int idx;
 };
 
 struct skiplist_ {
@@ -35,7 +36,7 @@ struct skiplist_ {
 	int (*compkey)(const void *p, const void*, const void*);
 	void (*delkey)(void*);
 	const void *p;
-	sliter iter[MAX_ITERS];
+	sliter *iters;
 	size_t count;
 	int level;
 	unsigned seed;
@@ -118,6 +119,12 @@ void sl_destroy(skiplist *l)
 
 		free(p);
 		p = q;
+	}
+
+	while (l->iters) {
+		sliter *iter = l->iters;
+		l->iters = iter->next;
+		free(iter);
 	}
 
 	free(l);
@@ -481,24 +488,13 @@ void sl_find(const skiplist *l, const void *key, int (*f)(void*, const void*, co
 sliter *sl_first(skiplist *l)
 {
 	sliter *iter;
-	int i = 0;
 
-	while (i < MAX_ITERS) {
-		if (!l->iter[i].busy)
-			break;
-
-		i++;
-	}
-
-	if (i >= MAX_ITERS) {
+	if (!l->iters) {
 		iter = malloc(sizeof(sliter));
 		ensure(iter);
-		iter->dynamic = 1;
-	}
-	else {
-		iter = &l->iter[i];
-		iter->dynamic = 0;
-		iter->busy = 1;
+	} else {
+		iter = l->iters;
+		l->iters = iter->next;
 	}
 
 	iter->key = NULL;
@@ -555,24 +551,13 @@ sliter *sl_findkey(skiplist *l, const void *key)
 		return NULL;
 
 	sliter *iter;
-	int i = 0;
 
-	while (i < MAX_ITERS) {
-		if (!l->iter[i].busy)
-			break;
-
-		i++;
-	}
-
-	if (i >= MAX_ITERS) {
+	if (!l->iters) {
 		iter = malloc(sizeof(sliter));
 		ensure(iter);
-		iter->dynamic = 1;
-	}
-	else {
-		iter = &l->iter[i];
-		iter->dynamic = 0;
-		iter->busy = 1;
+	} else {
+		iter = l->iters;
+		l->iters = iter->next;
 	}
 
 	iter->key = key;
@@ -617,10 +602,8 @@ void sl_done(sliter *iter)
 	if (!iter)
 		return;
 
-	if (iter->dynamic)
-		free(iter);
-	else
-		iter->busy = 0;
+	iter->next = iter->l->iters;
+	iter->l->iters = iter;
 }
 
 void sl_dump(const skiplist *l, const char *(*f)(void*, const void*), void *p1)
