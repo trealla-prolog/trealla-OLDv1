@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <math.h>
+#include <assert.h>
 
 #include "skiplist.h"
 #include "cdebug.h"
@@ -29,6 +30,7 @@ struct sliter_ {
 	slnode_t *p;
 	const void *key;
 	int idx;
+	bool dead;
 };
 
 struct skiplist_ {
@@ -490,7 +492,7 @@ sliter *sl_first(skiplist *l)
 	sliter *iter;
 
 	if (!l->iters) {
-		iter = malloc(sizeof(sliter));
+		iter = calloc(1, sizeof(sliter));
 		ensure(iter);
 	} else {
 		iter = l->iters;
@@ -553,7 +555,7 @@ sliter *sl_findkey(skiplist *l, const void *key)
 	sliter *iter;
 
 	if (!l->iters) {
-		iter = malloc(sizeof(sliter));
+		iter = calloc(1, sizeof(sliter));
 		ensure(iter);
 	} else {
 		iter = l->iters;
@@ -599,9 +601,10 @@ bool sl_nextkey(sliter *iter, void **val)
 
 void sl_done(sliter *iter)
 {
-	if (!iter)
+	if (!iter || iter->dead)
 		return;
 
+	iter->dead = true;
 	iter->next = iter->l->iters;
 	iter->l->iters = iter;
 }

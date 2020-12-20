@@ -425,7 +425,7 @@ static void commit_me(query *q, term *t)
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g->m = q->m;
 	q->m = q->st.curr_clause->m;
-	bool last_match = (!q->st.curr_clause->next && !q->st.iter) || t->first_cut;
+	bool last_match = (!q->st.curr_clause->next /*&& !q->st.iter*/) || t->first_cut;
 	bool recursive = (last_match || g->did_cut) && (q->st.curr_cell->flags&FLAG_TAIL_REC);
 	bool tco = recursive && !g->any_choices && check_slots(q, g, t);
 
@@ -868,17 +868,6 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 	return g_disp[p1->val_type].fn(q, p1, p2);
 }
 
-static void next_key(query *q)
-{
-	if (q->st.iter) {
-		if (!sl_nextkey(q->st.iter, (void**)&q->st.curr_clause)) {
-			q->st.curr_clause = NULL;
-			q->st.iter = NULL;
-		}
-	} else if (q->st.curr_clause)
-		q->st.curr_clause = q->st.curr_clause->next;
-}
-
 // Match HEAD :- BODY.
 
 USE_RESULT prolog_state match_rule(query *q, cell *p1, idx_t p1_ctx)
@@ -1053,9 +1042,19 @@ static const char *dump_key(void *p, const void *p1)
 }
 #endif
 
+static void next_key(query *q)
+{
+	if (q->st.iter) {
+		if (!sl_nextkey(q->st.iter, (void**)&q->st.curr_clause)) {
+			q->st.curr_clause = NULL;
+			q->st.iter = NULL;
+		}
+	} else if (q->st.curr_clause)
+		q->st.curr_clause = q->st.curr_clause->next;
+}
+
 static USE_RESULT prolog_state match_head(query *q)
 {
-	assert(q);
 	if (!q->retry) {
 		cell *c = q->st.curr_cell;
 		predicate *h;
@@ -1114,6 +1113,9 @@ static USE_RESULT prolog_state match_head(query *q)
 			if (!all_vars) {
 				q->st.iter = sl_findkey(h->index, key);
 
+				if (!q->st.iter)
+					return pl_failure;
+
 #if 0
 				printf("*** key: iter:%p ", q->st.iter);
 				print_term(q, stdout, key, q->st.curr_frame, 0);
@@ -1170,6 +1172,7 @@ static USE_RESULT prolog_state match_head(query *q)
 
 prolog_state run_query(query *q)
 {
+	assert(q);
 	q->yielded = false;
 
 	while (!q->error) {
