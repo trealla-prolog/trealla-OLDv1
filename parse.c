@@ -59,7 +59,7 @@ static struct op_table g_ops[] =
 	{",", OP_XFY, 1000},
 
 	//{"op", OP_FX, 1150},
-	//{"public", OP_FX, 1150},			// NOT USED
+	//{"public", OP_FX, 1150},
 	//{"dynamic", OP_FX, 1150},
 	//{"persist", OP_FX, 1150},
 	//{"initialization", OP_FX, 1150},
@@ -1336,6 +1336,25 @@ static void directives(parser *p, term *t)
 		free(tmpbuf);
 	}
 
+	if (!strcmp(dirname, "dynamic") && is_list(c+1)) {
+		cell *p1 = c + 1;
+		LIST_HANDLER(p1);
+
+		while (is_list(p1)) {
+			cell *h = LIST_HEAD(p1);
+
+			if (is_literal(h) && !strcmp(PARSER_GET_STR(h), "/") && (h->arity == 2)) {
+				cell *c_name = h + 1;
+				if (!is_atom(c_name)) continue;
+				cell *c_arity = h + 2;
+				if (!is_integer(c_arity)) continue;
+				set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
+			}
+
+			p1 = LIST_TAIL(p1);
+		}
+	}
+
 	if (!strcmp(dirname, "dynamic") && (c->arity >= 1) && (!is_list(c+1))) {
 		cell *p1 = c + 1;
 
@@ -1354,6 +1373,25 @@ static void directives(parser *p, term *t)
 		return;
 	}
 
+	if (!strcmp(dirname, "dynamic") && is_list(c+1)) {
+		cell *p1 = c + 1;
+		LIST_HANDLER(p1);
+
+		while (is_list(p1)) {
+			cell *h = LIST_HEAD(p1);
+
+			if (is_literal(h) && !strcmp(PARSER_GET_STR(h), "/") && (h->arity == 2)) {
+				cell *c_name = h + 1;
+				if (!is_atom(c_name)) continue;
+				cell *c_arity = h + 2;
+				if (!is_integer(c_arity)) continue;
+				set_discontiguous_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
+			}
+
+			p1 = LIST_TAIL(p1);
+		}
+	}
+
 	if (!strcmp(dirname, "discontiguous") && (c->arity >= 1) && (!is_list(c+1))) {
 		cell *p1 = c + 1;
 
@@ -1370,6 +1408,46 @@ static void directives(parser *p, term *t)
 		}
 
 		return;
+	}
+
+	if (!strcmp(dirname, "dynamic") && is_list(c+1)) {
+		cell *p1 = c + 1;
+		LIST_HANDLER(p1);
+
+		while (is_list(p1)) {
+			cell *h = LIST_HEAD(p1);
+
+			if (is_literal(h) && !strcmp(PARSER_GET_STR(h), "/") && (h->arity == 2)) {
+				cell *c_name = h + 1;
+				if (!is_atom(c_name)) continue;
+				cell *c_arity = h + 2;
+				if (!is_integer(c_arity)) continue;
+				const char *src = PARSER_GET_STR(c_name);
+				unsigned arity = c_arity->val_num;
+
+				if (!strcmp(PARSER_GET_STR(p1), "//"))
+					arity += 2;
+
+				if (!strchr(src, ':')) {
+					set_multifile_in_db(p->m, src, arity);
+				} else {
+					char mod[256], name[256];
+					mod[0] = name[0] = '\0';
+					sscanf(src, "%255[^:]:%255s", mod, name);
+					mod[sizeof(mod)-1] = name[sizeof(name)-1] = '\0';
+
+					if (!is_multifile_in_db(p->m->pl, mod, name, arity)) {
+						if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+							fprintf(stdout, "Error: not multile %s:%s/%u\n", mod, name, (unsigned)arity);
+
+						p->error = true;
+						return;
+					}
+				}
+			}
+
+			p1 = LIST_TAIL(p1);
+		}
 	}
 
 	if (!strcmp(dirname, "multifile") && (c->arity >= 1) && (!is_list(c+1))) {
@@ -1489,7 +1567,7 @@ static void directives(parser *p, term *t)
 	if (!strcmp(dirname, "op") && (c->arity == 3)) {
 		cell *p1 = c + 1, *p2 = c + 2, *p3 = c + 3;
 
-		if (!is_integer(p1) || !is_literal(p2) || !is_atom(p3)) {
+		if (!is_integer(p1) || !is_literal(p2) || (!is_atom(p3) && !is_list(p3))) {
 			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 				fprintf(stdout, "Error: unknown op\n");
 
@@ -1520,11 +1598,30 @@ static void directives(parser *p, term *t)
 			return;
 		}
 
-		if (!set_op(p->m, PARSER_GET_STR(p3), optype, p1->val_num)) {
-			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
-				fprintf(stdout, "Error: could not set op\n");
+		LIST_HANDLER(p3);
 
-			return;
+		while (is_list(p3)) {
+			cell *h = LIST_HEAD(p3);
+
+			if (is_atom(h)) {
+				if (!set_op(p->m, PARSER_GET_STR(h), optype, p1->val_num)) {
+					if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+						fprintf(stdout, "Error: could not set op\n");
+
+					continue;
+				}
+			}
+
+			p3 = LIST_TAIL(p3);
+		}
+
+		if (is_atom(p3) && !is_nil(p3)) {
+			if (!set_op(p->m, PARSER_GET_STR(p3), optype, p1->val_num)) {
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					fprintf(stdout, "Error: could not set op\n");
+
+				return;
+			}
 		}
 
 		return;

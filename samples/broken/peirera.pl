@@ -4,10 +4,7 @@
 	    list_bench_results/2	% +File, +Id
 	  ]).
 
-:- op(1150, fx, dynamic).
-:- op(1150, fx, public).
-:- op(1150, fx, mode).
-
+:- op(1150, fx, [dynamic,public,mode]).
 :- use_module(library(format)).
 
 %:- meta_predicate do_n(+, 0, -).
