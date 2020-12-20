@@ -306,7 +306,7 @@ struct clause_ {
 struct predicate_ {
 	predicate *next;
 	clause *head, *tail;
-	skiplist *index;
+	skiplist *index, *index_save;
 	cell key;
 	uint64_t gen;
 	unsigned cnt;

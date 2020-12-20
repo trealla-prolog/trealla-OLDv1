@@ -673,7 +673,8 @@ static void assert_commit(module *m, term *t, clause *r, predicate *h, bool appe
 
 	if (h->index && h->key.arity && is_structure(c+1)) {
 		h->is_noindex = true;
-		//sl_destroy(h->index);
+		h->index_save = h->index;
+		//sl_destroy(h->index);		// might kill outstanding sliters
 		h->index = NULL;
 	}
 
@@ -3556,6 +3557,7 @@ void destroy_module(module *m)
 		}
 
 		sl_destroy(h->index);
+		sl_destroy(h->index_save);
 		free(h);
 		h = save;
 	}
