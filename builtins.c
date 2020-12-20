@@ -6244,7 +6244,7 @@ static void db_log(query *q, clause *r, enum log_type l)
 	q->quoted = save;
 }
 
-static USE_RESULT prolog_state fn_iso_retract_1(query *q)
+static USE_RESULT prolog_state do_retract(query *q, bool retract)
 {
 	GET_FIRST_ARG(p1,callable);
 	cell *head = get_head(p1);
@@ -6260,7 +6260,7 @@ static USE_RESULT prolog_state fn_iso_retract_1(query *q)
 	if (check_rule(p1))
 		match = match_rule(q, p1, p1_ctx);
 	else
-		match = match_clause(q, p1, p1_ctx, true);
+		match = match_clause(q, p1, p1_ctx, retract);
 
 	if (match != pl_success)
 		return match;
@@ -6277,6 +6277,11 @@ static USE_RESULT prolog_state fn_iso_retract_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT prolog_state fn_iso_retract_1(query *q)
+{
+	return do_retract(q, true);
+}
+
 static USE_RESULT prolog_state fn_iso_retractall_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
@@ -6291,7 +6296,7 @@ static USE_RESULT prolog_state fn_iso_retractall_1(query *q)
 		return pl_success;
 	}
 
-	while (fn_iso_retract_1(q)) {
+	while (do_retract(q, false)) {
 		if (q->did_throw)
 			return pl_success;
 
