@@ -2412,7 +2412,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 				p->save_line[strlen(p->save_line)-1] = '\0';
 #endif
 
-			if (!strlen(p->save_line))
+			if (!strlen(p->save_line) || (*p->save_line == '\n'))
 				continue;
 
 			p->srcptr = p->save_line;
@@ -2607,6 +2607,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 		}
 	}
 
+	//assert(p->t->cidx);
 	tmp = alloc_heap(q, p->t->cidx-1);
 	ensure(tmp);
 	copy_cells(tmp, p->t->cells, p->t->cidx-1);
