@@ -1,0 +1,30 @@
+logtalk_tester
+==============
+
+-p gnu
+
+% 147 test sets: 144 completed, 3 skipped, 0 broken, 0 timeouts, 0 crashes
+% 2003 tests: 46 skipped, 1905 passed, 52 failed
+%
+% Batch testing ended @ 2020-12-16 11:30:14
+
+-p swi
+
+% 147 test sets: 146 completed, 1 skipped, 0 broken, 0 timeouts, 0 crashes
+% 2025 tests: 30 skipped, 1807 passed, 188 failed
+%
+% Batch testing ended @ 2020-12-16 11:33:48
+
+-p yap
+
+% 147 test sets: 144 completed, 0 skipped, 1 broken, 0 timeouts, 2 crashes
+% 1983 tests: 30 skipped, 1654 passed, 299 failed
+%
+% Batch testing ended @ 2020-12-16 11:41:31
+
+-p trealla
+
+% 147 test sets: 140 completed, 2 skipped, 1 broken, 1 timeouts, 3 crashes
+% 1927 tests: 44 skipped, 1698 passed, 185 failed
+%
+% Batch testing ended @ 2020-12-21 09:17:14
