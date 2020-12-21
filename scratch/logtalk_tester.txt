@@ -25,6 +25,6 @@ logtalk_tester
 -p trealla
 
 % 147 test sets: 140 completed, 2 skipped, 1 broken, 1 timeouts, 3 crashes
-% 1927 tests: 44 skipped, 1698 passed, 185 failed
+% 1927 tests: 44 skipped, 1699 passed, 184 failed
 %
-% Batch testing ended @ 2020-12-21 09:17:14
+% Batch testing ended @ 2020-12-21 10:35:35
