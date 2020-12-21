@@ -12373,7 +12373,13 @@ static USE_RESULT prolog_state fn_current_module_1(query *q)
 	if (!q->retry) {
 		if (is_atom(p1)) {
 			const char *name = GET_STR(p1);
-			return !strcmp(name, q->m->name);
+			module *m = find_module(q->m->pl, name);
+
+			if (!m)
+				return false;
+
+			q->m = m;
+			return pl_success;
 		}
 
 		module *m = find_next_module(q->m->pl, NULL);
