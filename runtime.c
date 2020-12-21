@@ -956,7 +956,7 @@ USE_RESULT prolog_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 // Match HEAD.
 // Match HEAD :- true.
 
-USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_retract)
+USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retract)
 {
 	if (q->retry) {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
@@ -977,7 +977,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_r
 
 		if (!h) {
 			if (check_builtin(q->m, GET_STR(p1), p1->arity)) {
-				if (is_retract)
+				if (is_retract != DO_CLAUSE)
 					return throw_error(q, p1, "permission_error", "modify,static_procedure");
 				else
 					return throw_error(q, p1, "permission_error", "access,private_procedure");
@@ -987,7 +987,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_r
 			return pl_failure;
 		} else {
 			if (!h->is_dynamic) {
-				if (is_retract)
+				if (is_retract != DO_CLAUSE)
 					return throw_error(q, p1, "permission_error", "modify,static_procedure");
 				else
 					return throw_error(q, p1, "permission_error", "access,private_procedure");
@@ -1012,7 +1012,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool is_r
 
 		// Retract(HEAD) should ignore rules (and directives)
 
-		if (is_retract && body)
+		if ((is_retract == DO_RETRACT) && body)
 			continue;
 
 		try_me(q, t->nbr_vars);

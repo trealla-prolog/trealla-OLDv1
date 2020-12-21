@@ -568,6 +568,8 @@ inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 cell *list_head(cell *l, cell *tmp);
 cell *list_tail(cell *l, cell *tmp);
 
+enum {DO_CLAUSE, DO_RETRACT, DO_RETRACTALL};
+
 USE_RESULT size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max_elements);
 prolog_state set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
@@ -621,7 +623,7 @@ USE_RESULT cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx);
 USE_RESULT cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix);
 void make_end(cell *tmp);
 USE_RESULT prolog_state match_rule(query *q, cell *p1, idx_t p1_ctx);
-USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, bool retract);
+USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, int retract);
 idx_t index_from_pool(prolog *pl, const char *name);
 void do_reduce(cell *n);
 unsigned create_vars(query *q, unsigned nbr);
