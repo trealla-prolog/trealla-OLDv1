@@ -1268,7 +1268,7 @@ static void directives(parser *p, term *t)
 
 	if (!strcmp(dirname, "use_module") && (c->arity == 1)) {
 		cell *p1 = c + 1;
-		if (!is_atom(p1)) return;
+		if (!is_literal(p1)) return;
 		const char *name = PARSER_GET_STR(p1);
 		char dstbuf[1024*2];
 
