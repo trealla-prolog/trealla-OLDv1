@@ -12378,7 +12378,7 @@ static USE_RESULT prolog_state fn_current_module_1(query *q)
 			if (!m)
 				return false;
 
-			q->m = m;
+			//q->m = m;
 			return pl_success;
 		}
 
