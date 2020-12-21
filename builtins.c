@@ -12405,7 +12405,7 @@ static USE_RESULT prolog_state fn_current_module_1(query *q)
 static USE_RESULT prolog_state fn_use_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	if (!is_literal(p1)) return pl_error;
+	if (!is_atom(p1)) return pl_error;
 	const char *name = GET_STR(p1);
 	char dstbuf[1024*4];
 
