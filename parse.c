@@ -1167,22 +1167,22 @@ static void directives(parser *p, term *t)
 	while (is_list(p1)) {
 		cell *h = LIST_HEAD(p1);
 
-		if (is_literal(h) && !strcmp(PARSER_GET_STR(h), "/") && (h->arity == 2)) {
+			if (is_literal(h) && (!strcmp(PARSER_GET_STR(h), "/") || !strcmp(PARSER_GET_STR(h), "//")) && (h->arity == 2)) {
 			cell *c_name = h + 1;
 			if (!is_atom(c_name)) continue;
 			cell *c_arity = h + 2;
 			if (!is_integer(c_arity)) continue;
+			unsigned arity = c_arity->val_num;
+
+			if (!strcmp(PARSER_GET_STR(h), "//"))
+				arity += 2;
 
 			if (!strcmp(dirname, "dynamic")) {
-				set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
-			} else if (!strcmp(dirname, "persists")) {
-				set_persist_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
+				set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), arity);
+			} else if (!strcmp(dirname, "persist")) {
+				set_persist_in_db(p->m, PARSER_GET_STR(c_name), arity);
 			} else if (!strcmp(dirname, "multifile")) {
 				const char *src = PARSER_GET_STR(c_name);
-				unsigned arity = c_arity->val_num;
-
-				if (!strcmp(PARSER_GET_STR(p1), "//"))
-					arity += 2;
 
 				if (!strchr(src, ':')) {
 					set_multifile_in_db(p->m, src, arity);
@@ -1194,14 +1194,14 @@ static void directives(parser *p, term *t)
 
 					if (!is_multifile_in_db(p->m->pl, mod, name, arity)) {
 						if (DUMP_ERRS || (p->consulting && !p->do_read_term))
-							fprintf(stdout, "Error: not multile %s:%s/%u\n", mod, name, (unsigned)arity);
+							fprintf(stdout, "Error: not multile %s:%s/%u\n", mod, name, arity);
 
 						p->error = true;
 						return;
 					}
 				}
 			} else if (!strcmp(dirname, "discontiguous")) {
-				set_discontiguous_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
+				set_discontiguous_in_db(p->m, PARSER_GET_STR(c_name), arity);
 			}
 		}
 
@@ -1209,19 +1209,25 @@ static void directives(parser *p, term *t)
 	}
 
 	while (is_literal(p1)) {
-		if (is_literal(p1) && !strcmp(PARSER_GET_STR(p1), "/") && (p1->arity == 2)) {
+		if ((!strcmp(PARSER_GET_STR(p1), "/") || !strcmp(PARSER_GET_STR(p1), "/")) && (p1->arity == 2)) {
 			cell *c_name = p1 + 1;
 			if (!is_atom(c_name)) return;
 			cell *c_arity = p1 + 2;
 			if (!is_integer(c_arity)) return;
+			unsigned arity = c_arity->val_num;
+
+			if (!strcmp(PARSER_GET_STR(p1), "//"))
+				arity += 2;
 
 			//if (!strcmp(dirname, "dynamic")) {
-			//	set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
+			//	set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), arity);
 			//}
 
 			p1 += p1->nbr_cells;
-		} else if (!strcmp(PARSER_GET_STR(p1), ","))
+		} else if (!strcmp(PARSER_GET_STR(p1), ",") && (p1->arity == 2))
 			p1 += 1;
+		else
+			break;
 	}
 
 	return;
@@ -1438,12 +1444,17 @@ static void directives(parser *p, term *t)
 		while (is_list(p1)) {
 			cell *h = LIST_HEAD(p1);
 
-			if (is_literal(h) && !strcmp(PARSER_GET_STR(h), "/") && (h->arity == 2)) {
+			if (is_literal(h) && (!strcmp(PARSER_GET_STR(h), "/") || !strcmp(PARSER_GET_STR(h), "//")) && (h->arity == 2)) {
 				cell *c_name = h + 1;
 				if (!is_atom(c_name)) continue;
 				cell *c_arity = h + 2;
 				if (!is_integer(c_arity)) continue;
-				set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
+				unsigned arity = c_arity->val_num;
+
+				if (!strcmp(PARSER_GET_STR(h), "//"))
+					arity += 2;
+
+				set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), arity);
 			}
 
 			p1 = LIST_TAIL(p1);
@@ -1454,7 +1465,7 @@ static void directives(parser *p, term *t)
 		cell *p1 = c + 1;
 
 		while (is_literal(p1)) {
-			if (is_literal(p1) && !strcmp(PARSER_GET_STR(p1), "/") && (p1->arity == 2)) {
+			if (is_literal(p1) && (!strcmp(PARSER_GET_STR(p1), "/") || !strcmp(PARSER_GET_STR(p1), "//")) && (p1->arity == 2)) {
 				cell *c_name = p1 + 1;
 				if (!is_atom(c_name)) return;
 				cell *c_arity = p1 + 2;
@@ -1475,12 +1486,18 @@ static void directives(parser *p, term *t)
 		while (is_list(p1)) {
 			cell *h = LIST_HEAD(p1);
 
-			if (is_literal(h) && !strcmp(PARSER_GET_STR(h), "/") && (h->arity == 2)) {
+			if (is_literal(h) && (!strcmp(PARSER_GET_STR(h), "/") || !strcmp(PARSER_GET_STR(h), "//")) && (h->arity == 2)) {
 				cell *c_name = h + 1;
 				if (!is_atom(c_name)) continue;
 				cell *c_arity = h + 2;
 				if (!is_integer(c_arity)) continue;
-				set_discontiguous_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
+
+				unsigned arity = c_arity->val_num;
+
+				if (!strcmp(PARSER_GET_STR(h), "//"))
+					arity += 2;
+
+				set_discontiguous_in_db(p->m, PARSER_GET_STR(c_name), arity);
 			}
 
 			p1 = LIST_TAIL(p1);
@@ -1491,12 +1508,17 @@ static void directives(parser *p, term *t)
 		cell *p1 = c + 1;
 
 		while (is_literal(p1)) {
-			if (is_literal(p1) && !strcmp(PARSER_GET_STR(p1), "/") && (p1->arity == 2)) {
+			if (is_literal(p1) && (!strcmp(PARSER_GET_STR(p1), "/") || !strcmp(PARSER_GET_STR(p1), "//")) && (p1->arity == 2)) {
 				cell *c_name = p1 + 1;
 				if (!is_atom(c_name)) return;
 				cell *c_arity = p1 + 2;
 				if (!is_integer(c_arity)) return;
-				set_discontiguous_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
+				unsigned arity = c_arity->val_num;
+
+				if (!strcmp(PARSER_GET_STR(p1), "//"))
+					arity += 2;
+
+				set_discontiguous_in_db(p->m, PARSER_GET_STR(c_name), arity);
 				p1 += p1->nbr_cells;
 			} else if (!strcmp(PARSER_GET_STR(p1), ","))
 				p1 += 1;
@@ -1512,7 +1534,7 @@ static void directives(parser *p, term *t)
 		while (is_list(p1)) {
 			cell *h = LIST_HEAD(p1);
 
-			if (is_literal(h) && !strcmp(PARSER_GET_STR(h), "/") && (h->arity == 2)) {
+			if (is_literal(h) && (!strcmp(PARSER_GET_STR(h), "/") || !strcmp(PARSER_GET_STR(h), "//")) && (h->arity == 2)) {
 				cell *c_name = h + 1;
 				if (!is_atom(c_name)) continue;
 				cell *c_arity = h + 2;
@@ -1520,7 +1542,7 @@ static void directives(parser *p, term *t)
 				const char *src = PARSER_GET_STR(c_name);
 				unsigned arity = c_arity->val_num;
 
-				if (!strcmp(PARSER_GET_STR(p1), "//"))
+				if (!strcmp(PARSER_GET_STR(h), "//"))
 					arity += 2;
 
 				if (!strchr(src, ':')) {
@@ -1604,7 +1626,12 @@ static void directives(parser *p, term *t)
 				if (!is_atom(c_name)) continue;
 				cell *c_arity = h + 2;
 				if (!is_integer(c_arity)) continue;
-				set_persist_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
+				unsigned arity = c_arity->val_num;
+
+				if (!strcmp(PARSER_GET_STR(h), "//"))
+					arity += 2;
+
+				set_persist_in_db(p->m, PARSER_GET_STR(c_name), arity);
 			}
 
 			p1 = LIST_TAIL(p1);
@@ -1615,12 +1642,17 @@ static void directives(parser *p, term *t)
 		cell *p1 = c + 1;
 
 		while (is_literal(p1)) {
-			if (is_literal(p1) && !strcmp(PARSER_GET_STR(p1), "/") && (p1->arity == 2)) {
+			if (is_literal(p1) && (!strcmp(PARSER_GET_STR(p1), "/") || !strcmp(PARSER_GET_STR(p1), "//")) && (p1->arity == 2)) {
 				cell *c_name = p1 + 1;
 				if (!is_atom(c_name)) return;
 				cell *c_arity = p1 + 2;
 				if (!is_integer(c_arity)) return;
-				set_persist_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
+				unsigned arity = c_arity->val_num;
+
+				if (!strcmp(PARSER_GET_STR(p1), "//"))
+					arity += 2;
+
+				set_persist_in_db(p->m, PARSER_GET_STR(c_name), arity);
 				if (p->m->error) {
 					p->error = true;
 					return;
