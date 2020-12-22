@@ -510,6 +510,7 @@ struct module_ {
 	parser *p;
 	FILE *fp;
 	skiplist *index;
+	const char *tmp_filename;
 	struct op_table ops[MAX_USER_OPS+1];
 	const char *keywords[1000];
 	int8_t halt_code;

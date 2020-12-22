@@ -1203,8 +1203,29 @@ static void directives(parser *p, term *t)
 
 	if (!strcmp(dirname, "module") && (c->arity == 2)) {
 		cell *p2 = c + 2;
-		if (!is_literal(p1)) return;
-		const char *name = PARSER_GET_STR(p1);
+		const char *name = "";
+		char tmpbuf[1024];
+
+		if (is_variable(p1)) {
+			snprintf(tmpbuf, sizeof(tmpbuf), "%s", p->m->tmp_filename);
+			char *ptr = tmpbuf + strlen(tmpbuf) - 1;
+
+			while (*ptr && (*ptr != '.') && (ptr != tmpbuf))
+				ptr--;
+
+			if (*ptr == '.')
+				*ptr = '\0';
+
+			name = tmpbuf;
+		} else if (!is_atom(p1)) {
+			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+				fprintf(stdout, "Error: module name not an atom\n");
+
+			p->error = true;
+			return;
+		} else
+			name = PARSER_GET_STR(p1);
+
 		module *tmp_m;
 
 		if ((tmp_m = find_module(p->m->pl, name)) != NULL) {
@@ -3434,6 +3455,7 @@ bool module_load_fp(module *m, FILE *fp, const char *filename)
 bool module_load_file(module *m, const char *filename)
 {
 	if (!m) return false;
+	m->tmp_filename = filename;
 
 	if (!strcmp(filename, "user")) {
 		for (int i = 0; i < MAX_STREAMS; i++) {
