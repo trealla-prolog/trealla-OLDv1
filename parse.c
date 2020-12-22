@@ -1254,6 +1254,7 @@ static void directives(parser *p, term *t)
 					p->error = true;
 					return;
 				}
+
 				h->is_public = true;
 			}
 
