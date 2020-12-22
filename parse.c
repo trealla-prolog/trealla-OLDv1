@@ -1132,6 +1132,101 @@ char *relative_to(const char *basefile, const char *relfile)
 	return tmpbuf;
 }
 
+#if 0
+static void directives(parser *p, term *t)
+{
+	p->skip = false;
+
+	if (!is_literal(t->cells))
+		return;
+
+	if (is_list(t->cells) && p->command) {
+		consultall(p, t->cells);
+		p->skip = true;
+		return;
+	}
+
+	if (strcmp(PARSER_GET_STR(t->cells), ":-") || (t->cells->arity != 1))
+		return;
+
+	cell *c = t->cells + 1;
+
+	if (!is_literal(c))
+		return;
+
+	const char *dirname = PARSER_GET_STR(c);
+
+	if (!strcmp(dirname, "initialization") && (c->arity <= 2)) {
+		p->run_init = true;
+		return;
+	}
+
+	cell *p1 = c + 1;
+	LIST_HANDLER(p1);
+
+	while (is_list(p1)) {
+		cell *h = LIST_HEAD(p1);
+
+		if (is_literal(h) && !strcmp(PARSER_GET_STR(h), "/") && (h->arity == 2)) {
+			cell *c_name = h + 1;
+			if (!is_atom(c_name)) continue;
+			cell *c_arity = h + 2;
+			if (!is_integer(c_arity)) continue;
+
+			if (!strcmp(dirname, "dynamic")) {
+				set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
+			} else if (!strcmp(dirname, "persists")) {
+				set_persist_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
+			} else if (!strcmp(dirname, "multifile")) {
+				const char *src = PARSER_GET_STR(c_name);
+				unsigned arity = c_arity->val_num;
+
+				if (!strcmp(PARSER_GET_STR(p1), "//"))
+					arity += 2;
+
+				if (!strchr(src, ':')) {
+					set_multifile_in_db(p->m, src, arity);
+				} else {
+					char mod[256], name[256];
+					mod[0] = name[0] = '\0';
+					sscanf(src, "%255[^:]:%255s", mod, name);
+					mod[sizeof(mod)-1] = name[sizeof(name)-1] = '\0';
+
+					if (!is_multifile_in_db(p->m->pl, mod, name, arity)) {
+						if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+							fprintf(stdout, "Error: not multile %s:%s/%u\n", mod, name, (unsigned)arity);
+
+						p->error = true;
+						return;
+					}
+				}
+			} else if (!strcmp(dirname, "discontiguous")) {
+				set_discontiguous_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
+			}
+		}
+
+		p1 = LIST_TAIL(p1);
+	}
+
+	while (is_literal(p1)) {
+		if (is_literal(p1) && !strcmp(PARSER_GET_STR(p1), "/") && (p1->arity == 2)) {
+			cell *c_name = p1 + 1;
+			if (!is_atom(c_name)) return;
+			cell *c_arity = p1 + 2;
+			if (!is_integer(c_arity)) return;
+
+			//if (!strcmp(dirname, "dynamic")) {
+			//	set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
+			//}
+
+			p1 += p1->nbr_cells;
+		} else if (!strcmp(PARSER_GET_STR(p1), ","))
+			p1 += 1;
+	}
+
+	return;
+}
+#else
 static void directives(parser *p, term *t)
 {
 	p->skip = false;
@@ -1646,6 +1741,7 @@ static void directives(parser *p, term *t)
 		return;
 	}
 }
+#endif
 
 static void parser_xref_cell(parser *p, term *t, cell *c, predicate *parent)
 {
