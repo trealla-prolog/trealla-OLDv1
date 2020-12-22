@@ -2412,8 +2412,10 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 				p->save_line[strlen(p->save_line)-1] = '\0';
 #endif
 
-			if (!strlen(p->save_line) || (*p->save_line == '\n'))
+			if (!strlen(p->save_line) || (*p->save_line == '\r') || (*p->save_line == '\n')) {
+				p->line_nbr++;
 				continue;
+			}
 
 			p->srcptr = p->save_line;
 		} else if (src)

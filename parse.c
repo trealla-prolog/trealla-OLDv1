@@ -1373,7 +1373,7 @@ static void directives(parser *p, term *t)
 		return;
 	}
 
-	if (!strcmp(dirname, "dynamic") && is_list(c+1)) {
+	if (!strcmp(dirname, "discontiguous") && is_list(c+1)) {
 		cell *p1 = c + 1;
 		LIST_HANDLER(p1);
 
@@ -1410,7 +1410,7 @@ static void directives(parser *p, term *t)
 		return;
 	}
 
-	if (!strcmp(dirname, "dynamic") && is_list(c+1)) {
+	if (!strcmp(dirname, "multifile") && is_list(c+1)) {
 		cell *p1 = c + 1;
 		LIST_HANDLER(p1);
 
@@ -1495,6 +1495,25 @@ static void directives(parser *p, term *t)
 		}
 
 		return;
+	}
+
+	if (!strcmp(dirname, "persist") && is_list(c+1)) {
+		cell *p1 = c + 1;
+		LIST_HANDLER(p1);
+
+		while (is_list(p1)) {
+			cell *h = LIST_HEAD(p1);
+
+			if (is_literal(h) && !strcmp(PARSER_GET_STR(h), "/") && (h->arity == 2)) {
+				cell *c_name = h + 1;
+				if (!is_atom(c_name)) continue;
+				cell *c_arity = h + 2;
+				if (!is_integer(c_arity)) continue;
+				set_persist_in_db(p->m, PARSER_GET_STR(c_name), c_arity->val_num);
+			}
+
+			p1 = LIST_TAIL(p1);
+		}
 	}
 
 	if (!strcmp(dirname, "persist") && (c->arity >= 1) && (!is_list(c+1))) {
