@@ -1162,6 +1162,287 @@ static void directives(parser *p, term *t)
 	}
 
 	cell *p1 = c + 1;
+
+	if (!strcmp(dirname, "include") && (p1->arity == 1)) {
+		if (!is_atom(p1)) return;
+		const char *name = PARSER_GET_STR(p1);
+		unsigned save_line_nbr = p->line_nbr;
+		char *tmpbuf = relative_to(p->m->filename, name);
+
+		if (!module_load_file(p->m, tmpbuf)) {
+			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+				fprintf(stdout, "Error: not found: %s\n", tmpbuf);
+
+			free(tmpbuf);
+			p->error = true;
+			return;
+		}
+
+		p->line_nbr = save_line_nbr;
+		free(tmpbuf);
+		return;
+	}
+
+	if (!strcmp(dirname, "ensure_loaded") && (c->arity == 1)) {
+		if (!is_atom(p1)) return;
+		const char *name = PARSER_GET_STR(p1);
+		char *tmpbuf = relative_to(p->m->filename, name);
+		deconsult(p->m->pl, tmpbuf);
+
+		if (!module_load_file(p->m, tmpbuf)) {
+			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+				fprintf(stdout, "Error: not found: %s\n", tmpbuf);
+
+			free(tmpbuf);
+			p->error = true;
+			return;
+		}
+
+		free(tmpbuf);
+		return;
+	}
+
+	if (!strcmp(dirname, "module") && (c->arity == 2)) {
+		cell *p2 = c + 2;
+		if (!is_literal(p1)) return;
+		const char *name = PARSER_GET_STR(p1);
+
+		if (find_module(p->m->pl, name)) {
+			//if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+			//	fprintf(stdout, "Error: module already loaded: %s\n", name);
+			//
+			//p->error = true;
+			return;
+		}
+
+		p->m = create_module(p->m->pl, name);
+		if (!p->m) {
+			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+				fprintf(stdout, "Error: module creation failed: %s\n", name);
+
+			p->error = true;
+			return;
+		}
+
+		LIST_HANDLER(p2);
+
+		while (is_iso_list(p2)) {
+			cell *head = LIST_HEAD(p2);
+
+			if (is_structure(head)) {
+				if (strcmp(PARSER_GET_STR(head), "/") && strcmp(PARSER_GET_STR(head), "//"))
+					return;
+
+				cell *f = head+1, *a = f+1;
+				if (!is_literal(f)) return;
+				if (!is_integer(a)) return;
+				cell tmp = *f;
+				tmp.arity = a->val_num;
+
+				if (!strcmp(PARSER_GET_STR(head), "//"))
+					tmp.arity += 2;
+
+				predicate *h = find_predicate(p->m, &tmp);
+				if (!h) h = create_predicate(p->m, &tmp);
+				if (!h) {
+					destroy_module(p->m);
+					p->m = NULL;
+					if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+						fprintf(stdout, "Error: predicate creation failed\n");
+
+					p->error = true;
+					return;
+				}
+				h->is_public = true;
+			}
+
+			p2 = LIST_TAIL(p2);
+		}
+
+		return;
+	}
+
+	if (!strcmp(dirname, "use_module") && (c->arity == 2)) {
+		if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+			printf("Error: use_module/2 not implemented\n");
+	}
+
+	if (!strcmp(dirname, "use_module") && (c->arity == 1)) {
+		if (!is_atom(p1) && !is_structure(p1)) return;
+		const char *name = PARSER_GET_STR(p1);
+		char dstbuf[1024*2];
+
+		if (!strcmp(name, "library")) {
+			p1 = p1 + 1;
+			if (!is_literal(p1)) return;
+			name = PARSER_GET_STR(p1);
+			module *m;
+
+			if ((m = find_module(p->m->pl, name)) != NULL) {
+				if (!m->fp)
+					do_db_load(m);
+
+				return;
+			}
+
+			if (!strcmp(name, "between") ||
+				!strcmp(name, "terms") ||
+				!strcmp(name, "types") ||
+				!strcmp(name, "files"))
+				return;
+
+			for (library *lib = g_libs; lib->name; lib++) {
+				if (strcmp(lib->name, name))
+					continue;
+
+				char *src = strndup((const char*)lib->start, (lib->end-lib->start));
+				m = module_load_text(p->m, src);
+				free(src);
+
+				if (m != p->m)
+					do_db_load(m);
+
+				return;
+			}
+
+			query q = {0};
+			q.m = p->m;
+			snprintf(dstbuf, sizeof(dstbuf), "%s/", g_tpl_lib);
+			char *dst = dstbuf + strlen(dstbuf);
+			idx_t ctx = 0;
+			print_term_to_buf(&q, dst, sizeof(dstbuf)-strlen(g_tpl_lib), p1, ctx, 1, 0, 0);
+			name = dstbuf;
+		}
+
+		char *tmpbuf = relative_to(p->m->filename, name);
+		char *save = strdup(p->m->filename);
+
+		if (!module_load_file(p->m, tmpbuf)) {
+			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+				fprintf(stdout, "Error: using module file: %s\n", tmpbuf);
+
+			if (p->m->filename != save) {
+				free(p->m->filename);
+				p->m->filename = save;
+			}
+
+			p->error = true;
+			free(tmpbuf);
+			return;
+		}
+
+		free(p->m->filename);
+		p->m->filename = save;
+		free(tmpbuf);
+	}
+
+	if (!strcmp(dirname, "set_prolog_flag") && (c->arity == 2)) {
+		cell *p2 = c + 2;
+		if (!is_literal(p2)) return;
+
+		if (!strcmp(PARSER_GET_STR(p1), "double_quotes")) {
+			if (!strcmp(PARSER_GET_STR(p2), "atom")) {
+				p->m->flag.double_quote_chars = p->m->flag.double_quote_codes = false;
+				p->m->flag.double_quote_atom = true;
+			} else if (!strcmp(PARSER_GET_STR(p2), "codes")) {
+				p->m->flag.double_quote_chars = p->m->flag.double_quote_atom = false;
+				p->m->flag.double_quote_codes = true;
+			} else if (!strcmp(PARSER_GET_STR(p2), "chars")) {
+				p->m->flag.double_quote_atom = p->m->flag.double_quote_codes = false;
+				p->m->flag.double_quote_chars = true;
+			} else {
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					fprintf(stdout, "Error: unknown value\n");
+
+				p->error = true;
+				return;
+			}
+		} else if (!strcmp(PARSER_GET_STR(p1), "character_escapes")) {
+			if (!strcmp(PARSER_GET_STR(p2), "true"))
+				p->m->flag.character_escapes = true;
+			else if (!strcmp(PARSER_GET_STR(p2), "false"))
+				p->m->flag.character_escapes = false;
+		} else if (!strcmp(PARSER_GET_STR(p1), "prefer_rationals")) {
+			if (!strcmp(PARSER_GET_STR(p2), "true"))
+				p->m->flag.prefer_rationals = true;
+			else if (!strcmp(PARSER_GET_STR(p2), "false"))
+				p->m->flag.prefer_rationals = false;
+		} else if (!strcmp(PARSER_GET_STR(p1), "rational_syntax")) {
+			if (!strcmp(PARSER_GET_STR(p2), "natural"))
+				p->m->flag.rational_syntax_natural = true;
+			else if (!strcmp(PARSER_GET_STR(p2), "compatibility"))
+				p->m->flag.rational_syntax_natural = false;
+		} else {
+			fprintf(stdout, "Warning: unknown flag: %s\n", PARSER_GET_STR(p1));
+		}
+
+		p->flag = p->m->flag;
+		return;
+	}
+
+	if (!strcmp(dirname, "op") && (c->arity == 3)) {
+		cell *p2 = c + 2, *p3 = c + 3;
+
+		if (!is_integer(p1) || !is_literal(p2) || (!is_atom(p3) && !is_list(p3))) {
+			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+				fprintf(stdout, "Error: unknown op\n");
+
+			p->error = true;
+			return;
+		}
+
+		unsigned optype;
+		const char *spec = PARSER_GET_STR(p2);
+
+		if (!strcmp(spec, "fx"))
+			optype = OP_FX;
+		else if (!strcmp(spec, "fy"))
+			optype = OP_FY;
+		else if (!strcmp(spec, "xf"))
+			optype = OP_XF;
+		else if (!strcmp(spec, "xfx"))
+			optype = OP_XFX;
+		else if (!strcmp(spec, "xfy"))
+			optype = OP_XFY;
+		else if (!strcmp(spec, "yf"))
+			optype = OP_YF;
+		else if (!strcmp(spec, "yfx"))
+			optype = OP_YFX;
+		else {
+			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+				fprintf(stdout, "Error: unknown op spec val_type\n");
+			return;
+		}
+
+		LIST_HANDLER(p3);
+
+		while (is_list(p3)) {
+			cell *h = LIST_HEAD(p3);
+
+			if (is_atom(h)) {
+				if (!set_op(p->m, PARSER_GET_STR(h), optype, p1->val_num)) {
+					if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+						fprintf(stdout, "Error: could not set op\n");
+
+					continue;
+				}
+			}
+
+			p3 = LIST_TAIL(p3);
+		}
+
+		if (is_atom(p3) && !is_nil(p3)) {
+			if (!set_op(p->m, PARSER_GET_STR(p3), optype, p1->val_num)) {
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					fprintf(stdout, "Error: could not set op\n");
+
+				return;
+			}
+		}
+
+		return;
+	}
+
 	LIST_HANDLER(p1);
 
 	while (is_list(p1)) {
@@ -1176,6 +1457,8 @@ static void directives(parser *p, term *t)
 
 			if (!strcmp(PARSER_GET_STR(h), "//"))
 				arity += 2;
+
+			//printf("*** %s => %s / %u\n", dirname, PARSER_GET_STR(c_name), arity);
 
 			if (!strcmp(dirname, "dynamic")) {
 				set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), arity);
@@ -1208,6 +1491,9 @@ static void directives(parser *p, term *t)
 		p1 = LIST_TAIL(p1);
 	}
 
+	if (is_nil(p1))
+		return;
+
 	while (is_literal(p1)) {
 		if ((!strcmp(PARSER_GET_STR(p1), "/") || !strcmp(PARSER_GET_STR(p1), "/")) && (p1->arity == 2)) {
 			cell *c_name = p1 + 1;
@@ -1219,9 +1505,32 @@ static void directives(parser *p, term *t)
 			if (!strcmp(PARSER_GET_STR(p1), "//"))
 				arity += 2;
 
-			//if (!strcmp(dirname, "dynamic")) {
-			//	set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), arity);
-			//}
+			if (!strcmp(dirname, "dynamic")) {
+				set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), arity);
+			} else if (!strcmp(dirname, "persist")) {
+				set_persist_in_db(p->m, PARSER_GET_STR(c_name), arity);
+			} else if (!strcmp(dirname, "multifile")) {
+				const char *src = PARSER_GET_STR(c_name);
+
+				if (!strchr(src, ':')) {
+					set_multifile_in_db(p->m, src, arity);
+				} else {
+					char mod[256], name[256];
+					mod[0] = name[0] = '\0';
+					sscanf(src, "%255[^:]:%255s", mod, name);
+					mod[sizeof(mod)-1] = name[sizeof(name)-1] = '\0';
+
+					if (!is_multifile_in_db(p->m->pl, mod, name, arity)) {
+						if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+							fprintf(stdout, "Error: not multile %s:%s/%u\n", mod, name, arity);
+
+						p->error = true;
+						return;
+					}
+				}
+			} else if (!strcmp(dirname, "discontiguous")) {
+				set_discontiguous_in_db(p->m, PARSER_GET_STR(c_name), arity);
+			}
 
 			p1 += p1->nbr_cells;
 		} else if (!strcmp(PARSER_GET_STR(p1), ",") && (p1->arity == 2))
@@ -1308,10 +1617,10 @@ static void directives(parser *p, term *t)
 		const char *name = PARSER_GET_STR(p1);
 
 		if (find_module(p->m->pl, name)) {
-			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
-				fprintf(stdout, "Error: module already loaded: %s\n", name);
-
-			p->error = true;
+			//if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+			//	fprintf(stdout, "Error: module already loaded: %s\n", name);
+			//
+			//p->error = true;
 			return;
 		}
 
@@ -1369,7 +1678,7 @@ static void directives(parser *p, term *t)
 
 	if (!strcmp(dirname, "use_module") && (c->arity == 1)) {
 		cell *p1 = c + 1;
-		if (!is_literal(p1)) return;
+		if (!is_atom(p1) && !is_structure(p1)) return;
 		const char *name = PARSER_GET_STR(p1);
 		char dstbuf[1024*2];
 
@@ -1420,7 +1729,7 @@ static void directives(parser *p, term *t)
 
 		if (!module_load_file(p->m, tmpbuf)) {
 			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
-				fprintf(stdout, "Error: not found: %s\n", tmpbuf);
+				fprintf(stdout, "Error: using module file: %s\n", tmpbuf);
 
 			if (p->m->filename != save) {
 				free(p->m->filename);
