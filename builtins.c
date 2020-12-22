@@ -12458,9 +12458,22 @@ static USE_RESULT prolog_state fn_use_module_1(query *q)
 		name = dstbuf;
 	}
 
+	char *save = strdup(q->m->filename);
 	char *tmpbuf = relative_to(q->m->filename, name);
-	module_load_file(q->m, tmpbuf);
+
+	if (!module_load_file(q->m, tmpbuf)) {
+		fprintf(stdout, "Error: using module file: %s\n", tmpbuf);
+		free(tmpbuf);
+
+		if (q->m->filename != save)
+			free(q->m->filename);
+
+		q->m->filename = save;
+		return pl_failure;
+	}
+
 	free(tmpbuf);
+	q->m->filename = save;
 	return pl_success;
 }
 

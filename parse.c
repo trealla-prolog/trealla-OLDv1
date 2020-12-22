@@ -1205,12 +1205,14 @@ static void directives(parser *p, term *t)
 		cell *p2 = c + 2;
 		if (!is_literal(p1)) return;
 		const char *name = PARSER_GET_STR(p1);
+		module *tmp_m;
 
-		if (find_module(p->m->pl, name)) {
+		if ((tmp_m = find_module(p->m->pl, name)) != NULL) {
 			//if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 			//	fprintf(stdout, "Error: module already loaded: %s\n", name);
 			//
 			//p->error = true;
+			p->m = tmp_m;
 			return;
 		}
 
