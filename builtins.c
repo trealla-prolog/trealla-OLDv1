@@ -12379,31 +12379,24 @@ static USE_RESULT prolog_state fn_current_module_1(query *q)
 			module *m = find_module(q->m->pl, name);
 
 			if (!m)
-				return false;
+				return pl_failure;
 
-			//q->m = m;
 			return pl_success;
 		}
 
-		module *m = find_next_module(q->m->pl, NULL);
-
-		if (!m)
-			return pl_failure;
-
-		q->save_m = m;
 		may_error(make_choice(q));
+		module *m = q->save_m = find_next_module(q->m->pl, NULL);
 		cell tmp;
 		make_literal(&tmp, index_from_pool(q->m->pl, m->name));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
 
-	module *m = q->save_m->next;
+	module *m = q->save_m = q->save_m->next;
 
 	if (!m)
 		return pl_failure;
 
-	q->save_m = m;
 	may_error(make_choice(q));
 	cell tmp;
 	make_literal(&tmp, index_from_pool(q->m->pl, m->name));

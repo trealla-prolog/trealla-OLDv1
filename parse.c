@@ -3625,8 +3625,6 @@ module *create_module(prolog *pl, const char *name)
 		m->pl = pl;
 		m->filename = strdup("./");
 		m->name = strdup(name);
-		m->next = m->pl->modules;
-		m->pl->modules = m;
 		m->flag.unknown = 1;
 		m->flag.double_quote_chars = true;
 		m->flag.character_escapes = true;
@@ -3967,7 +3965,6 @@ module *create_module(prolog *pl, const char *name)
 		make_rule(m, "client(U,H,P,S) :- client(U,H,P,S,[]).");
 		make_rule(m, "server(H,S) :- server(H,S,[]).");
 
-
 		parser *p = create_parser(m);
 		if (p)
 		{
@@ -3980,7 +3977,11 @@ module *create_module(prolog *pl, const char *name)
 			destroy_module(m);
 			m = NULL;
 		}
+
+		m->next = pl->modules;
+		pl->modules = m;
 	}
+
 	return m;
 }
 
@@ -4179,21 +4180,17 @@ prolog *pl_create()
 
 	pl->m = create_module(pl, "user");
 	if (pl->m) {
-		pl->m->pl = pl;
 		pl->curr_m = pl->m;
-
-		//cehteh: add api to set things in a module?
-		pl->m->prebuilt = true;
-
 		pl->s_last = 0;
 		pl->s_cnt = 0;
 		pl->seed = 0;
 
-
 		set_multifile_in_db(pl->m, "term_expansion", 2);
 		set_dynamic_in_db(pl->m, "term_expansion", 2);
-		set_dynamic_in_db(pl->m, ":-", 1);
 		set_dynamic_in_db(pl->m, "initialization", 1);
+		set_dynamic_in_db(pl->m, ":-", 1);
+
+		pl->m->prebuilt = true;
 
 #if USE_LDLIBS
 		for (library *lib = g_libs; lib->name; lib++) {
