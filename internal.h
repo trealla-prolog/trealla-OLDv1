@@ -549,7 +549,7 @@ struct prolog_ {
 	unsigned varno;
 };
 
-extern idx_t g_empty_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
+extern idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 extern idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_false_s, g_local_cut_s;
 extern idx_t g_gt_s, g_eq_s, g_sys_elapsed_s, g_sys_queue_s, g_braces_s;
 extern stream g_streams[MAX_STREAMS];
@@ -601,6 +601,7 @@ bool check_rule(const cell *c);
 cell *get_head(cell *c);
 cell *get_body(cell *c);
 cell *get_logical_body(cell *c);
+predicate *find_predicate(module *m, cell *c);
 predicate *find_matching_predicate(module *m, cell *c);
 predicate *find_matching_predicate_quiet(module *m, cell *c);
 predicate *find_functor(module *m, const char *name, unsigned arity);

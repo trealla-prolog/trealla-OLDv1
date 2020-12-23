@@ -1074,7 +1074,7 @@ static USE_RESULT prolog_state match_head(query *q)
 		}
 
 		if (!h) {
-			h = c->match = find_matching_predicate(q->m, c);
+			h = find_matching_predicate(q->m, c);
 
 			if (!h) {
 				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(c), "initialization")))
@@ -1086,12 +1086,8 @@ static USE_RESULT prolog_state match_head(query *q)
 					q->error = true;
 
 				return pl_error;
-			}
-		}
-
-		if (!h) {
-			q->error = true;
-			return pl_error;
+			} else
+				c->match = h;
 		}
 
 		h->gen++;

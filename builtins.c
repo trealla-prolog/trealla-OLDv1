@@ -6651,6 +6651,25 @@ static USE_RESULT prolog_state fn_iso_call_n(query *q)
 	return pl_success;
 }
 
+static USE_RESULT prolog_state fn_iso_invoke_2(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,callable);
+
+	module *m = find_module(q->m->pl, GET_STR(p1));
+	if (!m) return throw_error(q, q->st.curr_cell, "existence_error", "procedure");
+	predicate *h = find_predicate(m, p2);
+	if (!h) return throw_error(q, q->st.curr_cell, "existence_error", "procedure");
+
+	cell *tmp = clone_to_heap(q, true, p2, 1);
+	idx_t nbr_cells = 1;
+	tmp[nbr_cells].match = h;
+	nbr_cells += p2->nbr_cells;
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	q->st.curr_cell = tmp;
+	return pl_success;
+}
+
 static USE_RESULT prolog_state fn_iso_ifthen_2(query *q)
 {
 	if (q->retry)
@@ -12492,6 +12511,7 @@ static const struct builtins g_iso_funcs[] =
 	{",", 2, NULL, NULL},
 	{"call", 1, NULL, NULL},
 
+	{":", 2, fn_iso_invoke_2, NULL},
 	{"->", 2, fn_iso_ifthen_2, NULL},
 	{";", 2, fn_iso_disjunction_2, NULL},
 	{"\\+", 1, fn_iso_negation_1, NULL},
