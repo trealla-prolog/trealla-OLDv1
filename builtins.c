@@ -12477,6 +12477,13 @@ static USE_RESULT prolog_state fn_use_module_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT prolog_state fn_use_module_2(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,list_or_nil);
+	return fn_use_module_1(q);
+}
+
 static USE_RESULT prolog_state fn_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -12668,6 +12675,7 @@ static const struct builtins g_iso_funcs[] =
 
 	{"current_module", 1, fn_current_module_1, NULL},
 	{"use_module", 1, fn_use_module_1, NULL},
+	{"use_module", 2, fn_use_module_2, NULL},
 	{"module", 1, fn_module_1, NULL},
 	{"consult", 1, fn_consult_1, NULL},
 	{"listing", 0, fn_listing_0, NULL},

@@ -1285,12 +1285,7 @@ static void directives(parser *p, term *t)
 		return;
 	}
 
-	if (!strcmp(dirname, "use_module") && (c->arity == 2)) {
-		if (DUMP_ERRS || (p->consulting && !p->do_read_term))
-			printf("Error: use_module/2 not implemented\n");
-	}
-
-	if (!strcmp(dirname, "use_module") && (c->arity == 1)) {
+	if (!strcmp(dirname, "use_module") && (c->arity >= 1)) {
 		if (!is_atom(p1) && !is_structure(p1)) return;
 		const char *name = PARSER_GET_STR(p1);
 		char dstbuf[1024*2];
