@@ -1327,7 +1327,7 @@ static USE_RESULT prolog_state fn_iso_sub_atom_5(query *q)
 	GET_NEXT_ARG(p3,integer_or_var);
 	GET_NEXT_ARG(p4,integer_or_var);
 	GET_NEXT_ARG(p5,atom_or_var);
-	size_t before = 0, len = 1;
+	size_t before = 0, len = 0;
 
 	if (is_integer(p2) && (p2->val_num < 0))
 		return throw_error(q, p2, "domain_error", "not_less_than_zero");
@@ -1367,7 +1367,7 @@ static USE_RESULT prolog_state fn_iso_sub_atom_5(query *q)
 
 	if (len > (LEN_STR(p1)-before)) {
 		before++;
-		len = 1;
+		len = 0;
 	}
 
 	if (before > LEN_STR(p1)) {
@@ -1428,7 +1428,7 @@ static USE_RESULT prolog_state fn_iso_sub_atom_5(query *q)
 			return pl_success;
 		}
 
-		len = 1;
+		len = 0;
 	}
 
 	drop_choice(q);
