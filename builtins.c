@@ -1329,6 +1329,15 @@ static USE_RESULT prolog_state fn_iso_sub_atom_5(query *q)
 	GET_NEXT_ARG(p5,atom_or_var);
 	size_t before = 0, len = 0;
 
+	if (is_integer(p2) && (p2->val_num < 0))
+		return throw_error(q, p2, "domain_error", "not_less_than_zero");
+
+	if (is_integer(p3) && (p3->val_num < 0))
+		return throw_error(q, p3, "domain_error", "not_less_than_zero");
+
+	if (is_integer(p4) && (p4->val_num < 0))
+		return throw_error(q, p4, "domain_error", "not_less_than_zero");
+
 	if (!q->retry) {
 		may_error(make_choice(q));
 
