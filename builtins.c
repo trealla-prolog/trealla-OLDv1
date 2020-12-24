@@ -1384,21 +1384,21 @@ static USE_RESULT prolog_state fn_iso_sub_atom_5(query *q)
 			make_int(&tmp, i);
 
 			if (!unify(q, p2, p2_ctx, &tmp, q->st.curr_frame)) {
-				retry_choice(q);
+				drop_choice(q);
 				continue;
 			}
 
 			make_int(&tmp, j);
 
 			if (!unify(q, p3, p3_ctx, &tmp, q->st.curr_frame)) {
-				retry_choice(q);
+				drop_choice(q);
 				continue;
 			}
 
 			make_int(&tmp, LEN_STR(p1)-i-j);
 
 			if (!unify(q, p4, p4_ctx, &tmp, q->st.curr_frame)) {
-				retry_choice(q);
+				drop_choice(q);
 				continue;
 			}
 
@@ -1408,7 +1408,7 @@ static USE_RESULT prolog_state fn_iso_sub_atom_5(query *q)
 
 			if (!unify(q, p5, p5_ctx, &tmp, q->st.curr_frame)) {
 				chk_cstring(&tmp);
-				retry_choice(q);
+				drop_choice(q);
 				continue;
 			}
 
