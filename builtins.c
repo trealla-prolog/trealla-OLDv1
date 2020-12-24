@@ -1329,15 +1329,6 @@ static USE_RESULT prolog_state fn_iso_sub_atom_5(query *q)
 	GET_NEXT_ARG(p5,atom_or_var);
 	size_t before = 0, len = 0;
 
-	if (is_integer(p2) && (p2->val_num < 0))
-		return throw_error(q, p2, "domain_error", "not_less_than_zero");
-
-	if (is_integer(p3) && (p3->val_num < 0))
-		return throw_error(q, p3, "domain_error", "not_less_than_zero");
-
-	if (is_integer(p4) && (p4->val_num < 0))
-		return throw_error(q, p4, "domain_error", "not_less_than_zero");
-
 	if (!q->retry) {
 		may_error(make_choice(q));
 
@@ -1375,30 +1366,33 @@ static USE_RESULT prolog_state fn_iso_sub_atom_5(query *q)
 		return pl_failure;
 	}
 
+	int any = 0;
+
 	for (size_t i = before; i <= LEN_STR(p1); i++) {
-		for (size_t j = len; j <= LEN_STR(p1); j++) {
+		for (size_t j = len; j <= (LEN_STR(p1)-i); j++) {
 			cell tmp;
+			any = 1;
 
 			set_params(q, i, j+1);
 			may_error(make_choice(q));
 			make_int(&tmp, i);
 
 			if (!unify(q, p2, p2_ctx, &tmp, q->st.curr_frame)) {
-				drop_choice(q);
+				retry_choice(q);
 				continue;
 			}
 
 			make_int(&tmp, j);
 
 			if (!unify(q, p3, p3_ctx, &tmp, q->st.curr_frame)) {
-				drop_choice(q);
+				retry_choice(q);
 				continue;
 			}
 
 			make_int(&tmp, LEN_STR(p1)-i-j);
 
 			if (!unify(q, p4, p4_ctx, &tmp, q->st.curr_frame)) {
-				drop_choice(q);
+				retry_choice(q);
 				continue;
 			}
 
@@ -1408,11 +1402,12 @@ static USE_RESULT prolog_state fn_iso_sub_atom_5(query *q)
 
 			if (!unify(q, p5, p5_ctx, &tmp, q->st.curr_frame)) {
 				chk_cstring(&tmp);
-				drop_choice(q);
+				retry_choice(q);
 				continue;
 			}
 
 			chk_cstring(&tmp);
+			any++;
 			return pl_success;
 		}
 	}
