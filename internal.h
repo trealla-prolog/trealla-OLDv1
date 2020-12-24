@@ -485,6 +485,7 @@ struct parser_ {
 	uint8_t val_type;
 	int8_t dq_consing;
 	bool error;
+	bool already_loaded:1;
 	bool do_read_term:1;
 	bool was_quoted:1;
 	bool string:1;

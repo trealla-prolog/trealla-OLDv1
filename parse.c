@@ -1232,7 +1232,7 @@ static void directives(parser *p, term *t)
 			//if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 			//	fprintf(stdout, "Error: module already loaded: %s\n", name);
 			//
-			//p->error = true;
+			p->already_loaded = true;
 			p->m = tmp_m;
 			return;
 		}
@@ -2954,6 +2954,9 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 					parser_dcg_rewrite(p);
 					directives(p, p->t);
 
+					if (p->already_loaded)
+						break;
+
 					cell *h = get_head(p->t->cells);
 
 					if (is_cstring(h)) {
@@ -3296,8 +3299,9 @@ static void module_purge(module *m)
 static bool parser_run(parser *p, const char *src, int dump)
 {
 	p->srcptr = (char*)src;
+	parser_tokenize(p, false, false);
 
-	if (!parser_tokenize(p, false, false) || p->error) {
+	if (p->error) {
 		if (p->command)
 			fprintf(stdout, "Error: syntax error\n");
 
@@ -3363,7 +3367,7 @@ module *module_load_text(module *m, const char *src)
 	p->srcptr = (char*)src;
 	parser_tokenize(p, false, false);
 
-	if (!p->error && !p->end_of_term && p->t->cidx) {
+	if (!p->error && !p->already_loaded && !p->end_of_term && p->t->cidx) {
 		if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 			fprintf(stdout, "Error: syntax error, incomplete statement\n");
 
@@ -3410,20 +3414,21 @@ bool module_load_fp(module *m, FILE *fp, const char *filename)
 				break;
 
 			p->srcptr = p->save_line;
-			ok = parser_tokenize(p, false, false);
+			parser_tokenize(p, false, false);
+			ok = !p->error;
 		}
-		while (ok);
+		while (ok && !p->already_loaded);
 
 		free(p->save_line);
 
-		if (!p->error && !p->end_of_term && p->t->cidx) {
+		if (!p->error && !p->already_loaded && !p->end_of_term && p->t->cidx) {
 			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 				fprintf(stdout, "Error: syntax error, incomplete statement\n");
 
 			p->error = true;
 		}
 
-		if (!p->error) {
+		if (!p->error && !p->already_loaded) {
 			parser_xref_db(p);
 			int save = p->m->quiet;
 			p->m->quiet = true;
