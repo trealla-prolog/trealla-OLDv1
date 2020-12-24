@@ -1375,12 +1375,9 @@ static USE_RESULT prolog_state fn_iso_sub_atom_5(query *q)
 		return pl_failure;
 	}
 
-	int any = 0;
-
 	for (size_t i = before; i <= LEN_STR(p1); i++) {
 		for (size_t j = len; j <= LEN_STR(p1); j++) {
 			cell tmp;
-			any = 1;
 
 			set_params(q, i, j+1);
 			may_error(make_choice(q));
@@ -1416,7 +1413,6 @@ static USE_RESULT prolog_state fn_iso_sub_atom_5(query *q)
 			}
 
 			chk_cstring(&tmp);
-			any++;
 			return pl_success;
 		}
 	}
