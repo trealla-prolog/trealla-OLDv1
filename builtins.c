@@ -1368,10 +1368,9 @@ static USE_RESULT prolog_state fn_iso_sub_atom_5(query *q)
 
 	for (size_t i = before; i <= LEN_STR(p1); i++) {
 		for (size_t j = len; j <= (LEN_STR(p1)-i); j++) {
-			cell tmp;
-
 			set_params(q, i, j+1);
 			may_error(make_choice(q));
+			cell tmp;
 			make_int(&tmp, i);
 
 			if (!unify(q, p2, p2_ctx, &tmp, q->st.curr_frame)) {
@@ -1393,8 +1392,8 @@ static USE_RESULT prolog_state fn_iso_sub_atom_5(query *q)
 				continue;
 			}
 
-			const char *src = GET_STR(p1) + i;
-			may_error(make_cstringn(&tmp, src, j));
+			const char *src = GET_STR(p1);
+			may_error(make_cstringn(&tmp, src+i, j));
 			tmp.flags |= FLAG_TMP;
 
 			if (!unify(q, p5, p5_ctx, &tmp, q->st.curr_frame)) {
