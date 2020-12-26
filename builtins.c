@@ -10791,11 +10791,18 @@ static USE_RESULT prolog_state fn_directory_files_2(query *q)
 
 	struct dirent *dire = readdir(dirp);
 	cell tmp;
-	may_error(make_string(&tmp, dire->d_name, strlen(dire->d_name)));
+
+	if (is_string(p1))
+		may_error(make_string(&tmp, dire->d_name, strlen(dire->d_name)));
+	else
+		may_error(make_cstringn(&tmp, dire->d_name, strlen(dire->d_name)));
 	alloc_list(q, &tmp);
 
 	for (dire = readdir(dirp); dire; dire = readdir(dirp)) {
-		may_error(make_string(&tmp, dire->d_name, strlen(dire->d_name)));
+		if (is_string(p1))
+			may_error(make_string(&tmp, dire->d_name, strlen(dire->d_name)));
+		else
+			may_error(make_cstringn(&tmp, dire->d_name, strlen(dire->d_name)));
 		append_list(q, &tmp);
 	}
 
