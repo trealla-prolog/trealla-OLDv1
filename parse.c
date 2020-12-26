@@ -2493,7 +2493,7 @@ static bool get_token(parser *p, int last_op)
 	*dst = '\0';
 	int neg = 0;
 	p->val_type = TYPE_LITERAL;
-	p->quoted = 0;
+	p->quote_char = 0;
 	p->string = p->was_quoted = p->is_variable = p->is_op = false;
 
 	if (p->dq_consing && (*src == '"')) {
@@ -2681,13 +2681,13 @@ static bool get_token(parser *p, int last_op)
 	// Quoted strings...
 
 	if ((*src == '"') || (*src == '`') || (*src == '\'')) {
-		p->quoted = *src++;
+		p->quote_char = *src++;
 		p->was_quoted = true;
 
-		if ((p->quoted == '"') && p->flag.double_quote_codes) {
+		if ((p->quote_char == '"') && p->flag.double_quote_codes) {
 			*dst++ = '[';
 
-			if (*src == p->quoted) {
+			if (*src == p->quote_char) {
 				*dst++ = ']';
 				*dst = '\0';
 				p->srcptr = (char*)++src;
@@ -2696,19 +2696,19 @@ static bool get_token(parser *p, int last_op)
 
 			*dst = '\0';
 			p->dq_consing = 1;
-			p->quoted = 0;
+			p->quote_char = 0;
 			p->srcptr = (char*)src;
 			return true;
-		} else if ((p->quoted == '"') && p->flag.double_quote_chars)
+		} else if ((p->quote_char == '"') && p->flag.double_quote_chars)
 			p->string = true;
 
 		for (;;) {
 			while (*src) {
 				int ch = get_char_utf8(&src);
 
-				if ((ch == p->quoted) && (*src == ch)) {
+				if ((ch == p->quote_char) && (*src == ch)) {
 					ch = *src++;
-				} else if (ch == p->quoted) {
+				} else if (ch == p->quote_char) {
 					if ((ch == '"') && !*p->token && p->string) {
 						dst += put_char_utf8(dst, ch='[');
 						dst += put_char_utf8(dst, ch=']');
@@ -2716,7 +2716,7 @@ static bool get_token(parser *p, int last_op)
 						p->was_quoted = p->string = false;
 					}
 
-					p->quoted = 0;
+					p->quote_char = 0;
 					break;
 				}
 
@@ -2751,7 +2751,7 @@ static bool get_token(parser *p, int last_op)
 				*dst = '\0';
 			}
 
-			if (p->quoted && p->fp) {
+			if (p->quote_char && p->fp) {
 				if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
 					p->srcptr = (char*)src;
 					return true;
@@ -2768,9 +2768,9 @@ static bool get_token(parser *p, int last_op)
 					p->is_op = true;
 
 				if (!strcmp(p->token, ","))
-					p->quoted = 1;
+					p->quote_char = 1;
 			} else
-				p->quoted = 1;
+				p->quote_char = 1;
 
 			p->len_str = dst - p->token;
 			p->srcptr = (char*)src;
@@ -2937,9 +2937,9 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		if (p->error)
 			break;
 
-		//fprintf(stdout, "Debug: token '%s' quoted=%d, val_type=%u, op=%d, lastop=%d\n", p->token, p->quoted, p->val_type, p->is_op, last_op);
+		//fprintf(stdout, "Debug: token '%s' quoted=%d, val_type=%u, op=%d, lastop=%d\n", p->token, p->quote_char, p->val_type, p->is_op, last_op);
 
-		if (!p->quoted
+		if (!p->quote_char
 		    && !strcmp(p->token, ".")
 		    && (*p->srcptr != '(')
 		    && (*p->srcptr != ',')
@@ -2989,7 +2989,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
-		if (!p->quoted && !strcmp(p->token, "[")) {
+		if (!p->quote_char && !strcmp(p->token, "[")) {
 			save_idx = p->t->cidx;
 			cell *c = make_literal(p, g_dot_s);
 			c->arity = 2;
@@ -3009,7 +3009,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
-		if (!p->quoted && !strcmp(p->token, "{")) {
+		if (!p->quote_char && !strcmp(p->token, "{")) {
 			save_idx = p->t->cidx;
 			cell *c = make_literal(p, index_from_pool(p->m->pl, "{}"));
 			ensure(c);
@@ -3028,7 +3028,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
-		if (!p->quoted && !strcmp(p->token, "(")) {
+		if (!p->quote_char && !strcmp(p->token, "(")) {
 			p->start_term = true;
 			unsigned tmp_arity = parser_tokenize(p, is_func, false);
 			last_bar = false;
@@ -3048,7 +3048,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
-		if (!p->quoted && !strcmp(p->token, ",") && consing) {
+		if (!p->quote_char && !strcmp(p->token, ",") && consing) {
 			if (*p->srcptr == ',') {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: syntax error missing element\n");
@@ -3072,7 +3072,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
-		if (!p->quoted && !strcmp(p->token, ",") && args) {
+		if (!p->quote_char && !strcmp(p->token, ",") && args) {
 			if (*p->srcptr == ',') {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: syntax error missing arg\n");
@@ -3126,7 +3126,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			break;
 		}
 
-		if (!p->quoted && p->start_term &&
+		if (!p->quote_char && p->start_term &&
 			(!strcmp(p->token, ",") || !strcmp(p->token, "]") || !strcmp(p->token, ")") || !strcmp(p->token, "}"))) {
 			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 				fprintf(stdout, "Error: syntax error, start of term expected, line %d: %s\n", p->line_nbr, p->srcptr);
@@ -3135,7 +3135,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			break;
 		}
 
-		if (!p->quoted && (!strcmp(p->token, ")") || !strcmp(p->token, "]") || !strcmp(p->token, "}"))) {
+		if (!p->quote_char && (!strcmp(p->token, ")") || !strcmp(p->token, "]") || !strcmp(p->token, "}"))) {
 			parser_attach(p, begin_idx);
 			return arity;
 		}
@@ -3152,7 +3152,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		bool userop = false;
 		int precedence = get_op(p->m, p->token, &optype, &userop, last_op);
 
-		if (p->quoted /*&& !userop*/) {
+		if (p->quote_char /*&& !userop*/) {
 			optype = 0;
 			precedence = 0;
 		}
@@ -3171,7 +3171,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			p->val_type = TYPE_LITERAL;
 			optype = 0;
 			precedence = 0;
-			p->quoted = 0;
+			p->quote_char = 0;
 		}
 
 		last_op = strcmp(p->token, ")") && precedence;

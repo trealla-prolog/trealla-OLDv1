@@ -480,7 +480,7 @@ struct parser_ {
 	size_t token_size, n_line, len_str;
 	char_flags flag;
 	unsigned line_nbr, depth, read_term;
-	int quoted;				// C character is an int
+	int quote_char;							// C character is an int
 	unsigned nbr_vars;
 	uint8_t val_type;
 	int8_t dq_consing;
