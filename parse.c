@@ -2768,9 +2768,9 @@ static bool get_token(parser *p, int last_op)
 					p->is_op = true;
 
 				if (!strcmp(p->token, ","))
-					p->quote_char = 1;					// ?????
+					p->was_quoted = true;				// ?????
 			} else
-				p->quote_char = 1;						// ?????
+				p->was_quoted = true;					// ?????
 
 			p->len_str = dst - p->token;
 			p->srcptr = (char*)src;
