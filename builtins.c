@@ -25,6 +25,7 @@
 #include <sys/mman.h>
 #endif
 #define PATH_SEP "/"
+#include <dirent.h>
 #endif
 
 #include "trealla.h"
@@ -10756,6 +10757,54 @@ static USE_RESULT prolog_state fn_exists_file_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT prolog_state fn_directory_files_2(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,variable);
+	const char *filename;
+	char *src = NULL;
+
+	if (is_iso_list(p1)) {
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
+
+		if (!len)
+			return throw_error(q, p1, "type_error", "atom");
+
+		src = chars_list_to_string(q, p1, p1_ctx, len);
+		filename = src;
+	} else
+		filename = GET_STR(p1);
+
+	struct stat st = {0};
+
+	if (stat(filename, &st)) {
+		free(src);
+		return throw_error(q, p1, "existence_error", "directory");
+	}
+
+	DIR *dirp = opendir(filename);
+
+	if (!dirp) {
+		free(src);
+		return throw_error(q, p1, "existence_error", "directory");
+	}
+
+	struct dirent *dire = readdir(dirp);
+	cell tmp;
+	may_error(make_string(&tmp, dire->d_name, strlen(dire->d_name)));
+	alloc_list(q, &tmp);
+
+	for (dire = readdir(dirp); dire; dire = readdir(dirp)) {
+		may_error(make_string(&tmp, dire->d_name, strlen(dire->d_name)));
+		append_list(q, &tmp);
+	}
+
+	closedir(dirp);
+	free(src);
+	cell *tmp2 = end_list(q);
+	return unify(q, p2, p2_ctx, tmp2, q->st.curr_frame);
+}
+
 static USE_RESULT prolog_state fn_delete_file_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -12781,6 +12830,7 @@ static const struct builtins g_other_funcs[] =
 	{"forall", 2, fn_forall_2, "+term,+term"},
 	{"term_hash", 2, fn_term_hash_2, "+term,?integer"},
 	{"rename_file", 2, fn_rename_file_2, "+string,+string"},
+	{"directory_files", 2, fn_directory_files_2, "+pathname,-list"},
 	{"delete_file", 1, fn_delete_file_1, "+string"},
 	{"exists_file", 1, fn_exists_file_1, "+string"},
 	{"access_file", 2, fn_access_file_2, "+string,+mode"},

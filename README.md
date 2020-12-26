@@ -218,6 +218,7 @@ Others
 	setenv/2
 	unsetenv/1
 
+	directory_files/2
 	delete_file/1
 	exists_file/1
 	rename_file/2
