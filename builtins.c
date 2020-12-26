@@ -10803,6 +10803,7 @@ static USE_RESULT prolog_state fn_directory_files_2(query *q)
 			may_error(make_string(&tmp, dire->d_name, strlen(dire->d_name)));
 		else
 			may_error(make_cstringn(&tmp, dire->d_name, strlen(dire->d_name)));
+
 		append_list(q, &tmp);
 	}
 
