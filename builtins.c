@@ -2009,7 +2009,7 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 				return throw_error(q, c, "domain_error", "stream_option");
 
 			if (get_named_stream(GET_STR(name)) >= 0)
-				return throw_error(q, name, "permission_error", "open,source_sink");
+				return throw_error(q, c, "permission_error", "open,source_sink");
 
 			if (!strcmp(GET_STR(c), "mmap")) {
 #if USE_MMAP
