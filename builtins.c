@@ -6881,11 +6881,6 @@ static USE_RESULT prolog_state fn_iso_throw_1(query *q)
 	may_ptr_error(e);
 	copy_cells(e, tmp, tmp->nbr_cells);
 
-#if 0
-	if (has_vars(q, e, p1_ctx))
-		return throw_error(q, e, "instantiation_error", "instantiated");
-#endif
-
 	if (!find_exception_handler(q, e))
 		return pl_failure;
 
