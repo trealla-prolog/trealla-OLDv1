@@ -6329,16 +6329,13 @@ static USE_RESULT prolog_state fn_iso_retractall_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT prolog_state do_abolish(query *q, cell *c)
+static USE_RESULT prolog_state do_abolish(query *q, cell *c_orig, cell *c)
 {
 	predicate *h = find_matching_predicate(q->m, c);
 	if (!h) return pl_success;
 
-	if (!h->is_dynamic) {
-		cell tmp = *c;
-		tmp.arity = 0;
-		return throw_error(q, &tmp, "permission_error", "modify,static_procedure");
-	}
+	if (!h->is_dynamic)
+		return throw_error(q, c_orig, "permission_error", "modify,static_procedure");
 
 	uint64_t gen = h->gen;
 
@@ -6391,19 +6388,14 @@ static USE_RESULT prolog_state fn_iso_abolish_1(query *q)
 	if (p1_arity->val_num > MAX_ARITY)
 		return throw_error(q, p1_arity, "representation_error", "max_arity");
 
-	if (check_builtin(q->m, GET_STR(p1_name), p1_arity->val_num)) {
-		cell tmp[MAX_ARITY] = {0};
-		tmp[0] = *p1_name;
-		tmp[0].arity = p1_arity->val_num;
-		tmp[0].nbr_cells = 1 + p1_arity->val_num;
-		return throw_error(q, tmp, "permission_error", "modify,static_procedure");
-	}
+	if (check_builtin(q->m, GET_STR(p1_name), p1_arity->val_num))
+		return throw_error(q, p1, "permission_error", "modify,static_procedure");
 
 	cell tmp;
 	tmp = *p1_name;
 	tmp.arity = p1_arity->val_num;
 	CLR_OP(&tmp);
-	return do_abolish(q, &tmp);
+	return do_abolish(q, p1, &tmp);
 }
 
 static unsigned count_non_anons(uint8_t *mask, unsigned bit)
@@ -6941,9 +6933,6 @@ prolog_state throw_error(query *q, cell *c, const char *err_type, const char *ex
 
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "evaluable")) {
 		snprintf(dst2, len2+1, "error(%s(%s,%s/%u),(%s)/%u).", err_type, expected, is_callable(c)?GET_STR(c):dst, c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
-
-	} else if (!strcmp(err_type, "permission_error") && c->arity) {
-		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),(%s)/%u).", err_type, expected, GET_STR(c), c->arity, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 
 	} else if (!strcmp(err_type, "permission_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
@@ -11905,7 +11894,7 @@ static USE_RESULT prolog_state fn_abolish_2(query *q)
 	cell tmp = *p1;
 	tmp.arity = p2->val_num;
 	CLR_OP(&tmp);
-	return do_abolish(q, &tmp);
+	return do_abolish(q, &tmp, &tmp);
 }
 
 static USE_RESULT prolog_state fn_sys_lt_2(query *q)
