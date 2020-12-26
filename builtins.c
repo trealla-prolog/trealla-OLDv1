@@ -6873,7 +6873,7 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 static USE_RESULT prolog_state fn_iso_throw_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
+	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
@@ -6881,8 +6881,10 @@ static USE_RESULT prolog_state fn_iso_throw_1(query *q)
 	may_ptr_error(e);
 	copy_cells(e, tmp, tmp->nbr_cells);
 
+#if 0
 	if (has_vars(q, e, p1_ctx))
 		return throw_error(q, e, "instantiation_error", "instantiated");
+#endif
 
 	if (!find_exception_handler(q, e))
 		return pl_failure;
