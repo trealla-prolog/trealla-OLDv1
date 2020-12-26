@@ -10712,19 +10712,26 @@ static USE_RESULT prolog_state fn_access_file_2(query *q)
 		amode = W_OK;
 	else if (!strcmp(mode, "execute"))
 		amode = X_OK;
-	else if (!strcmp(mode, "none"))
+	else if (!strcmp(mode, "none")) {
+		free(src);
 		return pl_success;
-	else
+	} else {
+		free(src);
 		return throw_error(q, p2, "domain_error", "mode");
+	}
 
 	struct stat st = {0};
 	int status = stat(filename, &st);
 
-	if (status && (!strcmp(mode, "read") || !strcmp(mode, "exist") || !strcmp(mode, "execute") || !strcmp(mode, "none")))
+	if (status && (!strcmp(mode, "read") || !strcmp(mode, "exist") || !strcmp(mode, "execute") || !strcmp(mode, "none"))) {
+		free(src);
 		return pl_failure;
+	}
 
-	if (status && (!strcmp(mode, "write") || !strcmp(mode, "append")))
+	if (status && (!strcmp(mode, "write") || !strcmp(mode, "append"))) {
+		free(src);
 		return pl_success;
+	}
 
 	return !access(filename, amode);
 }
@@ -10748,8 +10755,12 @@ static USE_RESULT prolog_state fn_exists_file_1(query *q)
 
 	struct stat st = {0};
 
-	if (stat(filename, &st))
+	if (stat(filename, &st)) {
+		free(src);
 		return pl_failure;
+	}
+
+	free(src);
 
 	if ((st.st_mode & S_IFMT) != S_IFREG)
 		return pl_failure;
@@ -10871,10 +10882,18 @@ static USE_RESULT prolog_state fn_rename_file_2(query *q)
 	} else
 		filename2 = GET_STR(p2);
 
-	int ok = !rename(filename1, filename2);
+	struct stat st = {0};
+
+	if (stat(filename1, &st)) {
+		free(src1);
+		free(src2);
+		return throw_error(q, p1, "existence_error", "file");
+	}
+
+	bool ok = !rename(filename1, filename2);
 	free(src1);
 	free(src2);
-	return ok;
+	return ok ? pl_success : pl_failure;
 }
 
 static USE_RESULT prolog_state fn_time_file_2(query *q)
