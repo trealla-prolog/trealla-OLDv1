@@ -10759,7 +10759,7 @@ static USE_RESULT prolog_state fn_exists_file_1(query *q)
 
 static USE_RESULT prolog_state fn_directory_files_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,variable);
 	const char *filename;
 	char *src = NULL;
