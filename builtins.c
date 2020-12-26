@@ -10787,6 +10787,13 @@ static USE_RESULT prolog_state fn_delete_file_1(query *q)
 	} else
 		filename = GET_STR(p1);
 
+	struct stat st = {0};
+
+	if (stat(filename, &st)) {
+		free(src);
+		return throw_error(q, p1, "existence_error", "file");
+	}
+
 	remove(filename);
 	free(src);
 	return pl_success;
@@ -10849,7 +10856,7 @@ static USE_RESULT prolog_state fn_time_file_2(query *q)
 
 	if (stat(filename, &st)) {
 		free(src);
-		return throw_error(q, p1, "existence_error", "cannot_open_file");
+		return throw_error(q, p1, "existence_error", "file");
 	}
 
 	free(src);
@@ -10861,7 +10868,7 @@ static USE_RESULT prolog_state fn_time_file_2(query *q)
 static USE_RESULT prolog_state fn_size_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
-	GET_NEXT_ARG(p2,variable);
+	GET_NEXT_ARG(p2,integer_or_var);
 	const char *filename;
 	char *src = NULL;
 
@@ -10880,7 +10887,7 @@ static USE_RESULT prolog_state fn_size_file_2(query *q)
 
 	if (stat(filename, &st)) {
 		free(src);
-		return throw_error(q, p1, "existence_error", "cannot_open_file");
+		return throw_error(q, p1, "existence_error", "file");
 	}
 
 	free(src);
@@ -10976,7 +10983,7 @@ static USE_RESULT prolog_state fn_working_directory_2(query *q)
 			filename = GET_STR(p_new);
 
 		if (chdir(filename))
-			return throw_error(q, p_new, "existence_error", "no_such_path");
+			return throw_error(q, p_new, "existence_error", "path");
 	}
 
 	int ok = unify(q, p_old, p_old_ctx, &tmp, q->st.curr_frame);
