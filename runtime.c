@@ -1205,12 +1205,12 @@ prolog_state run_query(query *q)
 		Trace(q, q->st.curr_cell, q->retry?REDO:q->resume?NEXT:CALL);
 
 		if (!(q->st.curr_cell->flags&FLAG_BUILTIN)) {
-			if (is_list(q->st.curr_cell)) {
+			if (is_iso_list(q->st.curr_cell)) {
 				consultall(q->m->p, q->st.curr_cell);
 				follow_me(q);
 			} else {
-				if (!is_callable(q->st.curr_cell))
-					return throw_error(q, q->st.curr_cell, "type_error", "callable");
+				//if (!is_callable(q->st.curr_cell))
+				//	return throw_error(q, q->st.curr_cell, "type_error", "callable");
 
 				if (!match_head(q)) {
 					q->retry = QUERY_RETRY;
