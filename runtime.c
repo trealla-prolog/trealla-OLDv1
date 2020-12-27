@@ -1209,10 +1209,9 @@ prolog_state run_query(query *q)
 				consultall(q->m->p, q->st.curr_cell);
 				follow_me(q);
 			} else {
-				//if (!is_callable(q->st.curr_cell))
-				//	return throw_error(q, q->st.curr_cell, "type_error", "callable");
-
-				if (!match_head(q)) {
+				if (!is_callable(q->st.curr_cell))
+					DISCARD_RESULT throw_error(q, q->st.curr_cell, "type_error", "callable");
+				else if (match_head(q) != pl_success) {
 					q->retry = QUERY_RETRY;
 					q->tot_retries++;
 					continue;
