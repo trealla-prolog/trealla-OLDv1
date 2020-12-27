@@ -6799,7 +6799,7 @@ static USE_RESULT prolog_state fn_ignore_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_catch_3(query *q)
 {
-	GET_FIRST_ARG(p1,callable);
+	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,callable);
 
