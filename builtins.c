@@ -11030,7 +11030,7 @@ static USE_RESULT prolog_state fn_make_directory_1(query *q)
 static USE_RESULT prolog_state fn_working_directory_2(query *q)
 {
 	GET_FIRST_ARG(p_old,variable);
-	GET_NEXT_ARG(p_new,list_or_var);
+	GET_NEXT_ARG(p_new,atom_or_list_or_var);
 	char tmpbuf[PATH_MAX], tmpbuf2[PATH_MAX];
 	char *oldpath = getcwd(tmpbuf, sizeof(tmpbuf));
 	snprintf(tmpbuf2, sizeof(tmpbuf2), "%s%s", oldpath, PATH_SEP);
