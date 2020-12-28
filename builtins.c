@@ -1748,6 +1748,38 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		may_error(make_choice(q));
 	}
 
+	if (p1->arity > 1) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return throw_error(q, p1, "domain_error", "stream_property");
+	}
+
+	if (!strcmp(GET_STR(p1), "input") && is_variable(pstr)) {
+		int n = q->save_stream_idx;
+		stream *str = &g_streams[n];
+
+		if (strcmp(str->mode, "read"))
+			return pl_failure;
+
+		cell tmp;
+		make_int(&tmp, n);
+		tmp.flags |= FLAG_STREAM | FLAG_HEX;
+		return unify(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (!strcmp(GET_STR(p1), "output") && is_variable(pstr)) {
+		int n = q->save_stream_idx;
+		stream *str = &g_streams[n];
+
+		if (!strcmp(str->mode, "read"))
+			return pl_failure;
+
+		cell tmp;
+		make_int(&tmp, n);
+		tmp.flags |= FLAG_STREAM | FLAG_HEX;
+		return unify(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
+	}
+
 	if (p1->arity != 1) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
