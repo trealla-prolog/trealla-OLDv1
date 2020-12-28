@@ -439,7 +439,7 @@ struct query_ {
 	idx_t cp, tmphp, latest_ctx, popp, cgen, variable_names_ctx;
 	idx_t frames_size, slots_size, trails_size, choices_size;
 	idx_t max_choices, max_frames, max_slots, max_trails;
-	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;
+	idx_t h_size, tmph_size, tot_heaps, tot_heapsize, save_stream_idx;
 	idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
 	char_flags flag;
 	uint8_t current_input, current_output, current_error;

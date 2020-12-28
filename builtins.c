@@ -1720,12 +1720,33 @@ static USE_RESULT prolog_state fn_iso_set_output_1(query *q)
 	return pl_success;
 }
 
-// FIXME: make backtrackable over streams
+// FIXME: make backtrackable over streams & stream properties
 
 static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 {
 	GET_FIRST_ARG(pstr,any);
 	GET_NEXT_ARG(p1,any);
+
+	if (!q->retry)
+		q->save_stream_idx = 0;
+	else if (is_variable(pstr)) {
+		if (++q->save_stream_idx == MAX_STREAMS)
+			return false;
+	}
+
+	if (is_variable(pstr)) {
+		while (q->save_stream_idx < MAX_STREAMS) {
+			if (g_streams[q->save_stream_idx].fp)
+				break;
+
+			q->save_stream_idx++;
+		}
+
+		if (q->save_stream_idx == MAX_STREAMS)
+			return pl_failure;
+
+		may_error(make_choice(q));
+	}
 
 	if (p1->arity != 1) {
 		cell tmp;
@@ -1733,10 +1754,21 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		return throw_error(q, p1, "domain_error", "stream_property");
 	}
 
-	if (!strcmp(GET_STR(p1), "alias") && is_variable(pstr)) {
-		cell *c = p1 + 1;
-		c = deref(q, c, p1_ctx);
+	cell *c = p1 + 1;
+	c = deref(q, c, p1_ctx);
 
+	if (!strcmp(GET_STR(p1), "alias") && is_variable(pstr) && is_variable(c)) {
+		int n = q->save_stream_idx;
+		stream *str = &g_streams[n];
+		cell tmp;
+		may_error(make_cstring(&tmp, str->name));
+		if (!unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame)) return pl_failure;
+		make_int(&tmp, n);
+		tmp.flags |= FLAG_STREAM | FLAG_HEX;
+		return unify(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (!strcmp(GET_STR(p1), "alias") && is_variable(pstr)) {
 		if (!is_atom(c))
 			return throw_error(q, c, "type_error", "atom");
 
@@ -1751,10 +1783,18 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		return unify(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (!strcmp(GET_STR(p1), "file_name") && is_variable(pstr)) {
-		cell *c = p1 + 1;
-		c = deref(q, c, p1_ctx);
+	if (!strcmp(GET_STR(p1), "file_name") && is_variable(pstr) && is_variable(c)) {
+		int n = q->save_stream_idx;
+		stream *str = &g_streams[n];
+		cell tmp;
+		may_error(make_cstring(&tmp, str->filename));
+		if (!unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame)) return pl_failure;
+		make_int(&tmp, n);
+		tmp.flags |= FLAG_STREAM | FLAG_HEX;
+		return unify(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
+	}
 
+	if (!strcmp(GET_STR(p1), "file_name") && is_variable(pstr)) {
 		if (!is_atom(c))
 			return throw_error(q, c, "type_error", "atom");
 
@@ -1766,7 +1806,7 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		cell tmp;
 		make_int(&tmp, n);
 		tmp.flags |= FLAG_STREAM | FLAG_HEX;
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		return unify(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (!is_stream(pstr))
@@ -1776,40 +1816,30 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 	stream *str = &g_streams[n];
 
 	if (!strcmp(GET_STR(p1), "file_name")) {
-		cell *c = p1 + 1;
-		c = deref(q, c, p1_ctx);
 		cell tmp;
 		may_error(make_cstring(&tmp, str->filename));
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (!strcmp(GET_STR(p1), "mode")) {
-		cell *c = p1 + 1;
-		c = deref(q, c, p1_ctx);
 		cell tmp;
 		may_error(make_cstring(&tmp, str->mode));
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (!strcmp(GET_STR(p1), "alias")) {
-		cell *c = p1 + 1;
-		c = deref(q, c, p1_ctx);
 		cell tmp;
 		may_error(make_cstring(&tmp, str->name));
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (!strcmp(GET_STR(p1), "type")) {
-		cell *c = p1 + 1;
-		c = deref(q, c, p1_ctx);
 		cell tmp;
 		may_error(make_cstring(&tmp, str->binary?"binary":"text"));
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (!strcmp(GET_STR(p1), "end_of_stream") && is_stream(pstr)) {
-		cell *c = p1 + 1;
-		c = deref(q, c, p1_ctx);
 		cell tmp;
 
 		if (str->past_end_of_file)
@@ -1823,16 +1853,12 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 	}
 
 	if (!strcmp(GET_STR(p1), "position") && !is_variable(pstr)) {
-		cell *c = p1 + 1;
-		c = deref(q, c, p1_ctx);
 		cell tmp;
 		make_int(&tmp, ftello(str->fp));
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (!strcmp(GET_STR(p1), "line_count") && !is_variable(pstr)) {
-		cell *c = p1 + 1;
-		c = deref(q, c, p1_ctx);
 		cell tmp;
 		make_int(&tmp, str->p?str->p->line_nbr:1);
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
