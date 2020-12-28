@@ -10023,7 +10023,12 @@ static USE_RESULT prolog_state fn_absolute_file_name_3(query *q)
 		free(cwd);
 
 	cell tmp;
-	may_error(make_string(&tmp, tmpbuf, strlen(tmpbuf)), free(tmpbuf); free(src));
+
+	if (is_string(p1))
+		may_error(make_string(&tmp, tmpbuf, strlen(tmpbuf)), free(tmpbuf); free(src));
+	else
+		may_error(make_cstringn(&tmp, tmpbuf, strlen(tmpbuf)), free(tmpbuf); free(src));
+
 	free(tmpbuf);
 	free(src);
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -11025,7 +11030,7 @@ static USE_RESULT prolog_state fn_make_directory_1(query *q)
 static USE_RESULT prolog_state fn_working_directory_2(query *q)
 {
 	GET_FIRST_ARG(p_old,variable);
-	GET_NEXT_ARG(p_new,atom_or_list_or_var);
+	GET_NEXT_ARG(p_new,list_or_var);
 	char tmpbuf[PATH_MAX], tmpbuf2[PATH_MAX];
 	char *oldpath = getcwd(tmpbuf, sizeof(tmpbuf));
 	snprintf(tmpbuf2, sizeof(tmpbuf2), "%s%s", oldpath, PATH_SEP);
@@ -11050,6 +11055,8 @@ static USE_RESULT prolog_state fn_working_directory_2(query *q)
 
 		if (chdir(filename))
 			return throw_error(q, p_new, "existence_error", "path");
+
+		free(src);
 	}
 
 	int ok = unify(q, p_old, p_old_ctx, &tmp, q->st.curr_frame);
