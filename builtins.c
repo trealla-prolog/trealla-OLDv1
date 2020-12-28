@@ -1724,8 +1724,11 @@ static USE_RESULT prolog_state fn_iso_set_output_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 {
-	GET_FIRST_ARG(pstr,stream_or_var);
+	GET_FIRST_ARG(pstr,any);
 	GET_NEXT_ARG(p1,any);
+
+	if (!is_stream_or_var(pstr))
+		return throw_error(q, pstr, "domain_error", "stream");
 
 	if (!q->retry)
 		q->save_stream_idx = 0;
