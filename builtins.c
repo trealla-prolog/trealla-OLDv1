@@ -9908,7 +9908,7 @@ static USE_RESULT prolog_state fn_rand_1(query *q)
 static USE_RESULT prolog_state fn_absolute_file_name_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,variable);
+	GET_NEXT_ARG(p2,atom_or_var);
 	GET_NEXT_ARG(p_opts,list_or_nil);
 	int expand = 0;
 	char *src = NULL, *filename;
@@ -10031,8 +10031,7 @@ static USE_RESULT prolog_state fn_absolute_file_name_3(query *q)
 
 	free(tmpbuf);
 	free(src);
-	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
 static USE_RESULT prolog_state do_consult(query *q, cell *p1, idx_t p1_ctx)
