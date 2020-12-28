@@ -1724,7 +1724,7 @@ static USE_RESULT prolog_state fn_iso_set_output_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 {
-	GET_FIRST_ARG(pstr,any);
+	GET_FIRST_ARG(pstr,stream_or_var);
 	GET_NEXT_ARG(p1,any);
 
 	if (!q->retry)
