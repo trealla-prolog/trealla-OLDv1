@@ -1862,6 +1862,22 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
 
+	if (!strcmp(GET_STR(p1), "newline")) {
+		cell tmp;
+#ifdef _WIN32
+		may_error(make_cstring(&tmp, "dos"));
+#else
+		may_error(make_cstring(&tmp, "posix"));
+#endif
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (!strcmp(GET_STR(p1), "eof_action")) {
+		cell tmp;
+		may_error(make_cstring(&tmp, str->eof_action_eof_code?"eof_code":str->eof_action_error?"error":str->eof_action_reset?"reset":"???"));
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
 	if (!strcmp(GET_STR(p1), "alias")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->name));
