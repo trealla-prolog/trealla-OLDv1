@@ -1720,8 +1720,7 @@ static USE_RESULT prolog_state fn_iso_set_output_1(query *q)
 	return pl_success;
 }
 
-// FIXME: make backtrackable over streams & stream properties
-
+#if 1
 static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 {
 	GET_FIRST_ARG(pstr,any);
@@ -1917,6 +1916,23 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 
 	return pl_failure;
 }
+#else
+static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
+{
+	GET_FIRST_ARG(pstr,any);
+	GET_NEXT_ARG(p1,any);
+
+	// if not retry iterate over all streams outputing a
+	// a list of each stream-property pair
+
+	// match stream-property pair as supplied against list
+	// output and a match & delete it from list
+
+	// when no more fail
+
+	return pl_failure;
+}
+#endif
 
 static USE_RESULT prolog_state fn_iso_set_stream_position_2(query *q)
 {
