@@ -241,27 +241,6 @@ static void trim_heap(query *q, const choice *ch)
 		for (idx_t i = 0; i < a->hp; i++) {
 			cell *c = a->heap + i;
 			FREE_STR(c);
-
-			if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
-				stream *str = &g_streams[c->val_num];
-
-				if ((str->fp && !str->aliased)
-					&& (str->fp != stdin)
-					&& (str->fp != stdout)
-					&& (str->fp != stderr)) {
-
-					if (str->p)
-						destroy_parser(str->p);
-
-					fclose(str->fp);
-					free(str->filename);
-					free(str->mode);
-					free(str->data);
-					free(str->name);
-					memset(str, 0, sizeof(stream));
-				}
-			}
-
 			c->val_type = TYPE_EMPTY;
 		}
 
@@ -276,27 +255,6 @@ static void trim_heap(query *q, const choice *ch)
 	for (idx_t i = ch->st.hp; a && (i < a->hp); i++) {
 		cell *c = a->heap + i;
 		FREE_STR(c);
-
-		if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
-			stream *str = &g_streams[c->val_num];
-
-			if ((str->fp && !str->aliased)
-				&& (str->fp != stdin)
-				&& (str->fp != stdout)
-				&& (str->fp != stderr)) {
-
-				if (str->p)
-					destroy_parser(str->p);
-
-				fclose(str->fp);
-				free(str->filename);
-				free(str->mode);
-				free(str->data);
-				free(str->name);
-				memset(str, 0, sizeof(stream));
-			}
-		}
-
 		c->val_type = TYPE_EMPTY;
 	}
 }
@@ -986,7 +944,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, int is_re
 			q->st.curr_clause2 = NULL;
 			return pl_failure;
 		} else {
-			if (!h->is_dynamic) {
+			if (!h->is_dynamic && (is_retract != DO_RETRACTALL_FORCE)) {
 				if (is_retract != DO_CLAUSE)
 					return throw_error(q, p1, "permission_error", "modify,static_procedure");
 				else

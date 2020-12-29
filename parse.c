@@ -935,26 +935,6 @@ void destroy_query(query *q)
 		for (idx_t i = 0; i < a->hp; i++) {
 			cell *c = a->heap + i;
 			FREE_STR(c);
-
-			if (is_integer(c) && ((c)->flags&FLAG_STREAM)) {
-				stream *str = &g_streams[c->val_num];
-
-				if ((str->fp && !str->aliased)
-					&& (str->fp != stdin)
-					&& (str->fp != stdout)
-					&& (str->fp != stderr)) {
-
-					if (str->p)
-						destroy_parser(str->p);
-
-					fclose(str->fp);
-					free(str->filename);
-					free(str->mode);
-					free(str->data);
-					free(str->name);
-					memset(str, 0, sizeof(stream));
-				}
-			}
 		}
 
 		arena *save = a;
@@ -986,9 +966,6 @@ query *create_query(module *m, bool is_task)
 		q->qid = g_query_id++;
 		q->m = m;
 		q->trace = m->trace;
-		q->current_input = 0;		// STDIN
-		q->current_output = 1;		// STDOUT
-		q->current_error = 2;		// STDERR
 		q->flag = m->flag;
 
 		// Allocate these now...
@@ -1029,9 +1006,6 @@ query *create_task(query *q, cell *curr_cell)
 		subq->parent = q;
 		subq->st.fp = 1;
 		subq->is_task = true;
-		subq->current_input = q->current_input;
-		subq->current_output = q->current_output;
-		subq->current_error = q->current_error;
 
 		cell *tmp = clone_to_heap(subq, 0, curr_cell, 1); //cehteh: checkme
 		idx_t nbr_cells = tmp->nbr_cells;
@@ -4190,6 +4164,13 @@ prolog *pl_create()
 		pl->s_last = 0;
 		pl->s_cnt = 0;
 		pl->seed = 0;
+		pl->current_input = 0;		// STDIN
+		pl->current_output = 1;		// STDOUT
+		pl->current_error = 2;		// STDERR
+
+		stream_assert(pl->m, 0);
+		stream_assert(pl->m, 1);
+		stream_assert(pl->m, 2);
 
 		set_multifile_in_db(pl->m, "term_expansion", 2);
 		set_dynamic_in_db(pl->m, "term_expansion", 2);

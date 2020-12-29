@@ -374,7 +374,6 @@ typedef struct {
 	bool nonblock:1;
 	bool udp:1;
 	bool ssl:1;
-	bool aliased:1;
 } stream;
 
 typedef struct {
@@ -439,10 +438,9 @@ struct query_ {
 	idx_t cp, tmphp, latest_ctx, popp, cgen, variable_names_ctx;
 	idx_t frames_size, slots_size, trails_size, choices_size;
 	idx_t max_choices, max_frames, max_slots, max_trails;
-	idx_t h_size, tmph_size, tot_heaps, tot_heapsize, save_stream_idx;
+	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;
 	idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
 	char_flags flag;
-	uint8_t current_input, current_output, current_error;
 	enum q_retry retry;
 	int8_t halt_code;
 	int8_t quoted;
@@ -548,6 +546,7 @@ struct prolog_ {
 	char *pool;
 	idx_t pool_offset, pool_size, tab_idx;
 	unsigned varno;
+	uint8_t current_input, current_output, current_error;
 };
 
 extern idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
@@ -570,7 +569,7 @@ inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 cell *list_head(cell *l, cell *tmp);
 cell *list_tail(cell *l, cell *tmp);
 
-enum {DO_CLAUSE, DO_RETRACT, DO_RETRACTALL};
+enum {DO_CLAUSE, DO_RETRACT, DO_RETRACTALL, DO_RETRACTALL_FORCE};
 
 USE_RESULT size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max_elements);
 prolog_state set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
@@ -651,6 +650,7 @@ unsigned fake_numbervars(query *q, cell *c, idx_t c_ctx, unsigned start);
 char *relative_to(const char *basefile, const char *relfile);
 void parser_term_to_body(parser *p);
 cell *check_body_callable(parser *p, cell *c);
+void stream_assert(module *m, int n);
 
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
 prolog_state print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);

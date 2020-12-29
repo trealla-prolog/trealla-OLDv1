@@ -1636,7 +1636,7 @@ static int get_stream(__attribute__((unused)) query *q, cell *p1)
 		return n;
 	}
 
-	if (!is_integer(p1) || !(p1->flags&FLAG_STREAM)) {
+	if (!is_integer(p1)) {
 		//DISCARD_RESULT throw_error(q, p1, "type_error", "stream");
 		return -1;
 	}
@@ -1660,7 +1660,7 @@ static USE_RESULT prolog_state fn_iso_current_input_1(query *q)
 
 	if (is_variable(pstr)) {
 		cell tmp;
-		make_int(&tmp, q->current_input);
+		make_int(&tmp, q->m->pl->current_input);
 		tmp.flags |= FLAG_STREAM | FLAG_HEX;
 		set_var(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
@@ -1670,7 +1670,7 @@ static USE_RESULT prolog_state fn_iso_current_input_1(query *q)
 		return throw_error(q, pstr, "domain_error", "stream");
 
 	int n = get_stream(q, pstr);
-	return n == q->current_input ? pl_success : pl_failure;
+	return n == q->m->pl->current_input ? pl_success : pl_failure;
 }
 
 static USE_RESULT prolog_state fn_iso_current_output_1(query *q)
@@ -1679,7 +1679,7 @@ static USE_RESULT prolog_state fn_iso_current_output_1(query *q)
 
 	if (is_variable(pstr)) {
 		cell tmp;
-		make_int(&tmp, q->current_output);
+		make_int(&tmp, q->m->pl->current_output);
 		tmp.flags |= FLAG_STREAM | FLAG_HEX;
 		set_var(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
@@ -1689,7 +1689,7 @@ static USE_RESULT prolog_state fn_iso_current_output_1(query *q)
 		return throw_error(q, pstr, "domain_error", "stream");
 
 	int n = get_stream(q, pstr);
-	return n == q->current_output ? pl_success : pl_failure;
+	return n == q->m->pl->current_output ? pl_success : pl_failure;
 }
 
 static USE_RESULT prolog_state fn_iso_set_input_1(query *q)
@@ -1701,8 +1701,7 @@ static USE_RESULT prolog_state fn_iso_set_input_1(query *q)
 	if (strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
 
-	q->current_input = n;
-	str->aliased = 1;
+	q->m->pl->current_input = n;
 	return pl_success;
 }
 
@@ -1715,208 +1714,9 @@ static USE_RESULT prolog_state fn_iso_set_output_1(query *q)
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "output,stream");
 
-	q->current_output = n;
-	str->aliased = 1;
+	q->m->pl->current_output = n;
 	return pl_success;
 }
-
-#if 1
-static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
-{
-	GET_FIRST_ARG(pstr,any);
-	GET_NEXT_ARG(p1,any);
-
-	if (!is_stream_or_var(pstr))
-		return throw_error(q, pstr, "domain_error", "stream");
-
-	if (!q->retry)
-		q->save_stream_idx = 0;
-	else if (is_variable(pstr)) {
-		if (++q->save_stream_idx == MAX_STREAMS)
-			return false;
-	}
-
-	if (is_variable(pstr)) {
-		while (q->save_stream_idx < MAX_STREAMS) {
-			if (g_streams[q->save_stream_idx].fp)
-				break;
-
-			q->save_stream_idx++;
-		}
-
-		if (q->save_stream_idx == MAX_STREAMS)
-			return pl_failure;
-
-		may_error(make_choice(q));
-	}
-
-	if (p1->arity > 1) {
-		cell tmp;
-		make_literal(&tmp, g_nil_s);
-		return throw_error(q, p1, "domain_error", "stream_property");
-	}
-
-	if (!strcmp(GET_STR(p1), "input") && is_variable(pstr)) {
-		int n = q->save_stream_idx;
-		stream *str = &g_streams[n];
-
-		if (strcmp(str->mode, "read"))
-			return pl_failure;
-
-		cell tmp;
-		make_int(&tmp, n);
-		tmp.flags |= FLAG_STREAM | FLAG_HEX;
-		return unify(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (!strcmp(GET_STR(p1), "output") && is_variable(pstr)) {
-		int n = q->save_stream_idx;
-		stream *str = &g_streams[n];
-
-		if (!strcmp(str->mode, "read"))
-			return pl_failure;
-
-		cell tmp;
-		make_int(&tmp, n);
-		tmp.flags |= FLAG_STREAM | FLAG_HEX;
-		return unify(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (p1->arity != 1) {
-		cell tmp;
-		make_literal(&tmp, g_nil_s);
-		return throw_error(q, p1, "domain_error", "stream_property");
-	}
-
-	cell *c = p1 + 1;
-	c = deref(q, c, p1_ctx);
-
-	if (!strcmp(GET_STR(p1), "alias") && is_variable(pstr) && is_variable(c)) {
-		int n = q->save_stream_idx;
-		stream *str = &g_streams[n];
-		cell tmp;
-		may_error(make_cstring(&tmp, str->name));
-		if (!unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame)) return pl_failure;
-		make_int(&tmp, n);
-		tmp.flags |= FLAG_STREAM | FLAG_HEX;
-		return unify(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (!strcmp(GET_STR(p1), "alias") && is_variable(pstr)) {
-		if (!is_atom(c))
-			return throw_error(q, c, "type_error", "atom");
-
-		int n = get_named_stream(GET_STR(c));
-
-		if (n < 0)
-			return 0;
-
-		cell tmp;
-		make_int(&tmp, n);
-		tmp.flags |= FLAG_STREAM | FLAG_HEX;
-		return unify(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (!strcmp(GET_STR(p1), "file_name") && is_variable(pstr) && is_variable(c)) {
-		int n = q->save_stream_idx;
-		stream *str = &g_streams[n];
-		cell tmp;
-		may_error(make_cstring(&tmp, str->filename));
-		if (!unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame)) return pl_failure;
-		make_int(&tmp, n);
-		tmp.flags |= FLAG_STREAM | FLAG_HEX;
-		return unify(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (!strcmp(GET_STR(p1), "file_name") && is_variable(pstr)) {
-		if (!is_atom(c))
-			return throw_error(q, c, "type_error", "atom");
-
-		int n = get_named_stream(GET_STR(c));
-
-		if (n < 0)
-			return 0;
-
-		cell tmp;
-		make_int(&tmp, n);
-		tmp.flags |= FLAG_STREAM | FLAG_HEX;
-		return unify(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (!is_stream(pstr))
-		return throw_error(q, p1, "type_error", "stream");
-
-	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
-
-	if (!strcmp(GET_STR(p1), "file_name")) {
-		cell tmp;
-		may_error(make_cstring(&tmp, str->filename));
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (!strcmp(GET_STR(p1), "mode")) {
-		cell tmp;
-		may_error(make_cstring(&tmp, str->mode));
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (!strcmp(GET_STR(p1), "newline")) {
-		cell tmp;
-#ifdef _WIN32
-		may_error(make_cstring(&tmp, "dos"));
-#else
-		may_error(make_cstring(&tmp, "posix"));
-#endif
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (!strcmp(GET_STR(p1), "eof_action")) {
-		cell tmp;
-		may_error(make_cstring(&tmp, str->eof_action_eof_code?"eof_code":str->eof_action_error?"error":str->eof_action_reset?"reset":"???"));
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (!strcmp(GET_STR(p1), "alias")) {
-		cell tmp;
-		may_error(make_cstring(&tmp, str->name));
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (!strcmp(GET_STR(p1), "type")) {
-		cell tmp;
-		may_error(make_cstring(&tmp, str->binary?"binary":"text"));
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (!strcmp(GET_STR(p1), "end_of_stream") && is_stream(pstr)) {
-		cell tmp;
-
-		if (str->past_end_of_file)
-			make_literal(&tmp, index_from_pool(q->m->pl, "past"));
-		else if (str->at_end_of_file)
-			make_literal(&tmp, index_from_pool(q->m->pl, "at"));
-		else
-			make_literal(&tmp, index_from_pool(q->m->pl, "not"));
-
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (!strcmp(GET_STR(p1), "position") && !is_variable(pstr)) {
-		cell tmp;
-		make_int(&tmp, ftello(str->fp));
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (!strcmp(GET_STR(p1), "line_count") && !is_variable(pstr)) {
-		cell tmp;
-		make_int(&tmp, str->p?str->p->line_nbr:1);
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
-	}
-
-	return pl_failure;
-}
-#endif
 
 static USE_RESULT prolog_state fn_iso_set_stream_position_2(query *q)
 {
@@ -1961,6 +1761,186 @@ static char *chars_list_to_string(query *q, cell *p_chars, idx_t p_chars_ctx, si
 
 	*dst = '\0';
 	return src;
+}
+
+static void compare_and_zero(uint64_t v1, uint64_t *v2, uint64_t *v)
+{
+	if (v1 != *v2) {
+		*v2 = v1;
+		*v = 0;
+	}
+}
+
+#define MASK_FINAL 0x0000FFFFFFFFFFFF // Final 48 bits
+
+static void uuid_gen(prolog *pl, uuid *u)
+{
+#ifdef NDEBUG
+	if (!pl->seed)
+		pl->seed = (uint64_t)time(0) & MASK_FINAL;
+#else
+	if (!pl->seed)
+		pl->seed = 0xdeadbeefULL & MASK_FINAL;
+#endif
+
+	uint64_t now = get_time_in_usec();
+	compare_and_zero(now, &pl->s_last, &pl->s_cnt);
+	u->u1 = now;
+	u->u2 = pl->s_cnt++;
+	u->u2 <<= 48;
+	u->u2 |= pl->seed;
+}
+
+static char *uuid_to_buf(const uuid *u, char *buf, size_t buflen)
+{
+	snprintf(buf, buflen, "%016llX-%04llX-%012llX",
+		 (unsigned long long)u->u1,
+		 (unsigned long long)(u->u2 >> 48),
+		 (unsigned long long)(u->u2 & MASK_FINAL));
+
+	return buf;
+}
+
+static int uuid_from_buf(const char *s, uuid *u)
+{
+	if (!s) {
+		uuid tmp = {0};
+		*u = tmp;
+		return 0;
+	}
+
+	unsigned long long p1 = 0, p2 = 0, p3 = 0;
+
+	if (sscanf(s, "%llX%*c%llX%*c%llX", &p1, &p2, &p3) != 3) {
+		uuid tmp = {0};
+		*u = tmp;
+		return 0;
+	}
+
+	u->u1 = p1;
+	u->u2 = p2 << 48;
+	u->u2 |= p3 & MASK_FINAL;
+	return 1;
+}
+
+enum log_type { LOG_ASSERTA=1, LOG_ASSERTZ=2, LOG_ERASE=3 };
+
+static void db_log(query *q, clause *r, enum log_type l)
+{
+	int save = q->quoted;
+	char tmpbuf[256];
+	char *dst;
+	q->quoted = 2;
+
+	switch(l) {
+	case LOG_ASSERTA:
+		dst = print_term_to_strbuf(q, r->t.cells, q->st.curr_frame, 1);
+		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
+		fprintf(q->m->fp, "a_(%s,'%s').\n", dst, tmpbuf);
+		free(dst);
+		break;
+	case LOG_ASSERTZ:
+		dst = print_term_to_strbuf(q, r->t.cells, q->st.curr_frame, 1);
+		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
+		fprintf(q->m->fp, "z_(%s,'%s').\n", dst, tmpbuf);
+		free(dst);
+		break;
+	case LOG_ERASE:
+		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
+		fprintf(q->m->fp, "e_('%s').\n", tmpbuf);
+		break;
+	}
+
+	q->quoted = save;
+}
+
+static USE_RESULT prolog_state do_retract(query *q, cell *p1, idx_t p1_ctx, int is_retract)
+{
+	cell *head = get_head(p1);
+
+	if (is_variable(head))
+		return throw_error(q, head, "instantiation_error", "not_sufficiently_instantiated");
+
+	if (!is_callable(head))
+		return throw_error(q, head, "type_error", "callable");
+
+	prolog_state match;
+
+	if (check_rule(p1))
+		match = match_rule(q, p1, p1_ctx);
+	else
+		match = match_clause(q, p1, p1_ctx, is_retract);
+
+	if (match != pl_success)
+		return match;
+
+	clause *r = q->st.curr_clause2;
+	stash_me(q, &r->t, false);
+
+	retract_from_db(q->m, r);
+	r->t.gen = r->parent->gen;
+
+	if (!q->m->loading && r->t.persist)
+		db_log(q, r, LOG_ERASE);
+
+	return pl_success;
+}
+
+void stream_assert(module *m, int n)
+{
+	stream *str = &g_streams[n];
+	char tmpbuf[1024*8];
+	char *dst = tmpbuf;
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, file_name('%s')).\n", n, str->filename);
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, alias('%s')).\n", n, str->name);
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, mode('%s')).\n", n, str->mode);
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, type('%s')).\n", n, str->binary ? "binary" : "text");
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, reposition('%s')).\n", n, (n < 3) || str->socket ? "false" : "true");
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, end_of_stream('%s')).\n", n, str->past_end_of_file ? "past" : str->at_end_of_file ? "at" : "not");
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, eof_action('%s')).\n", n, str->eof_action_eof_code ? "eof_code" : str->eof_action_error ? "error" : str->eof_action_reset ? "reset" : "none");
+
+	if (!strcmp(str->mode, "read"))
+		dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, input).\n", n);
+	else
+		dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, output).\n", n);
+
+#ifdef _WIN32
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, newline(dos)).\n", n);
+#else
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, newline(posix)).\n", n);
+#endif
+
+	parser *p = create_parser(m);
+	p->srcptr = tmpbuf;
+	p->consulting = true;
+	parser_tokenize(p, false, false);
+	destroy_parser(p);
+}
+
+static void stream_retract(query *q, int n)
+{
+	cell *tmp = alloc_heap(q, 3);
+	make_literal(tmp+0, index_from_pool(q->m->pl, "stream_property"));
+	make_int(tmp+1, n);
+	make_variable(tmp+2, g_anon_s);
+	tmp[2].var_nbr = create_vars(q, 1);
+	tmp->nbr_cells = 3;
+	tmp->arity = 2;
+
+	predicate *h = find_matching_predicate(q->m, tmp);
+
+	if (!h) {
+		DISCARD_RESULT throw_error(q, tmp, "existence_error", "procedure");
+		return;
+	}
+
+	while (do_retract(q, tmp, q->st.curr_frame, DO_RETRACTALL_FORCE)) {
+		if (q->did_throw)
+			return;
+
+		q->retry = QUERY_RETRY;
+		retry_choice(q);
+	}
 }
 
 static USE_RESULT prolog_state fn_iso_open_3(query *q)
@@ -2010,6 +1990,8 @@ static USE_RESULT prolog_state fn_iso_open_3(query *q)
 
 	if (!str->fp)
 		return throw_error(q, p1, "existence_error", "source_sink");
+
+	stream_assert(q->m, n);
 
 	cell *tmp = alloc_heap(q, 1);
 	ensure(tmp);
@@ -2098,7 +2080,6 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 			} else if (!strcmp(GET_STR(c), "alias")) {
 				free(str->name);
 				str->name = strdup(GET_STR(name));
-				str->aliased = 1;
 			} else if (!strcmp(GET_STR(c), "type")) {
 				if (is_atom(name) && !strcmp(GET_STR(name), "binary")) {
 					str->binary = true;
@@ -2183,6 +2164,7 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 	}
 #endif
 
+	stream_assert(q->m, n);
 	cell *tmp = alloc_heap(q, 1);
 	ensure(tmp);
 	make_int(tmp, n);
@@ -2202,18 +2184,19 @@ static USE_RESULT prolog_state fn_iso_close_1(query *q)
 		|| (str->fp == stderr))
 		return pl_success;
 
-	if (q->current_input == n)
-		q->current_input = 0;
+	if (q->m->pl->current_input == n)
+		q->m->pl->current_input = 0;
 
-	if (q->current_output == n)
-		q->current_output = 1;
+	if (q->m->pl->current_output == n)
+		q->m->pl->current_output = 1;
 
-	if (q->current_error == n)
-		q->current_error = 2;
+	if (q->m->pl->current_error == n)
+		q->m->pl->current_error = 2;
 
 	if (str->p)
 		destroy_parser(str->p);
 
+	stream_retract(q, n);
 	net_close(str);
 	free(str->filename);
 	free(str->mode);
@@ -2255,7 +2238,7 @@ static USE_RESULT prolog_state fn_iso_close_2(query *q)
 
 static USE_RESULT prolog_state fn_iso_at_end_of_stream_0(__attribute__((unused)) query *q)
 {
-	int n = q->current_input;
+	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (!str->socket) {
@@ -2282,7 +2265,7 @@ static USE_RESULT prolog_state fn_iso_at_end_of_stream_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_flush_output_0(__attribute__((unused)) query *q)
 {
-	int n = q->current_output;
+	int n = q->m->pl->current_output;
 	stream *str = &g_streams[n];
 	fflush(str->fp);
 	return !ferror(str->fp);
@@ -2299,7 +2282,7 @@ static USE_RESULT prolog_state fn_iso_flush_output_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_nl_0(__attribute__((unused)) query *q)
 {
-	int n = q->current_output;
+	int n = q->m->pl->current_output;
 	stream *str = &g_streams[n];
 	fputc('\n', str->fp);
 	fflush(str->fp);
@@ -2717,7 +2700,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 static USE_RESULT prolog_state fn_iso_read_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = q->current_input;
+	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -2756,7 +2739,7 @@ static USE_RESULT prolog_state fn_iso_read_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
-	int n = q->current_input;
+	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -2791,7 +2774,7 @@ static USE_RESULT prolog_state fn_iso_read_term_3(query *q)
 static USE_RESULT prolog_state fn_iso_write_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = q->current_output;
+	int n = q->m->pl->current_output;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -2827,7 +2810,7 @@ static USE_RESULT prolog_state fn_iso_write_2(query *q)
 static USE_RESULT prolog_state fn_iso_writeq_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = q->current_output;
+	int n = q->m->pl->current_output;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -2871,7 +2854,7 @@ static USE_RESULT prolog_state fn_iso_writeq_2(query *q)
 static USE_RESULT prolog_state fn_iso_write_canonical_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = q->current_output;
+	int n = q->m->pl->current_output;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -3023,7 +3006,7 @@ static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
-	int n = q->current_output;
+	int n = q->m->pl->current_output;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -3139,7 +3122,7 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 static USE_RESULT prolog_state fn_iso_put_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	int n = q->current_output;
+	int n = q->m->pl->current_output;
 	stream *str = &g_streams[n];
 	size_t len = len_char_utf8(GET_STR(p1));
 
@@ -3191,7 +3174,7 @@ static USE_RESULT prolog_state fn_iso_put_char_2(query *q)
 static USE_RESULT prolog_state fn_iso_put_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	int n = q->current_output;
+	int n = q->m->pl->current_output;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -3239,7 +3222,7 @@ static USE_RESULT prolog_state fn_iso_put_code_2(query *q)
 static USE_RESULT prolog_state fn_iso_put_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,byte);
-	int n = q->current_output;
+	int n = q->m->pl->current_output;
 	stream *str = &g_streams[n];
 
 	if (!str->binary) {
@@ -3284,7 +3267,7 @@ static USE_RESULT prolog_state fn_iso_put_byte_2(query *q)
 static USE_RESULT prolog_state fn_iso_get_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_character_or_var);
-	int n = q->current_input;
+	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -3423,7 +3406,7 @@ static USE_RESULT prolog_state fn_iso_get_char_2(query *q)
 static USE_RESULT prolog_state fn_iso_get_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
-	int n = q->current_input;
+	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (is_integer(p1) && (p1->val_num < -1))
@@ -3565,7 +3548,7 @@ static USE_RESULT prolog_state fn_iso_get_code_2(query *q)
 static USE_RESULT prolog_state fn_iso_get_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_byte_or_var);
-	int n = q->current_input;
+	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (!str->binary) {
@@ -3692,7 +3675,7 @@ static USE_RESULT prolog_state fn_iso_get_byte_2(query *q)
 static USE_RESULT prolog_state fn_iso_peek_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_character_or_var);
-	int n = q->current_input;
+	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -3815,7 +3798,7 @@ static USE_RESULT prolog_state fn_iso_peek_char_2(query *q)
 static USE_RESULT prolog_state fn_iso_peek_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
-	int n = q->current_input;
+	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (is_integer(p1) && (p1->val_num < -1))
@@ -3937,7 +3920,7 @@ static USE_RESULT prolog_state fn_iso_peek_code_2(query *q)
 static USE_RESULT prolog_state fn_iso_peek_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_byte_or_var);
-	int n = q->current_input;
+	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (!str->binary) {
@@ -6253,133 +6236,10 @@ static USE_RESULT prolog_state fn_iso_clause_2(query *q)
 	return pl_failure;
 }
 
-static void compare_and_zero(uint64_t v1, uint64_t *v2, uint64_t *v)
-{
-	if (v1 != *v2) {
-		*v2 = v1;
-		*v = 0;
-	}
-}
-
-#define MASK_FINAL 0x0000FFFFFFFFFFFF // Final 48 bits
-
-static void uuid_gen(prolog *pl, uuid *u)
-{
-#ifdef NDEBUG
-	if (!pl->seed)
-		pl->seed = (uint64_t)time(0) & MASK_FINAL;
-#else
-	if (!pl->seed)
-		pl->seed = 0xdeadbeefULL & MASK_FINAL;
-#endif
-
-	uint64_t now = get_time_in_usec();
-	compare_and_zero(now, &pl->s_last, &pl->s_cnt);
-	u->u1 = now;
-	u->u2 = pl->s_cnt++;
-	u->u2 <<= 48;
-	u->u2 |= pl->seed;
-}
-
-static char *uuid_to_buf(const uuid *u, char *buf, size_t buflen)
-{
-	snprintf(buf, buflen, "%016llX-%04llX-%012llX",
-		 (unsigned long long)u->u1,
-		 (unsigned long long)(u->u2 >> 48),
-		 (unsigned long long)(u->u2 & MASK_FINAL));
-
-	return buf;
-}
-
-static int uuid_from_buf(const char *s, uuid *u)
-{
-	if (!s) {
-		uuid tmp = {0};
-		*u = tmp;
-		return 0;
-	}
-
-	unsigned long long p1 = 0, p2 = 0, p3 = 0;
-
-	if (sscanf(s, "%llX%*c%llX%*c%llX", &p1, &p2, &p3) != 3) {
-		uuid tmp = {0};
-		*u = tmp;
-		return 0;
-	}
-
-	u->u1 = p1;
-	u->u2 = p2 << 48;
-	u->u2 |= p3 & MASK_FINAL;
-	return 1;
-}
-
-enum log_type { LOG_ASSERTA=1, LOG_ASSERTZ=2, LOG_ERASE=3 };
-
-static void db_log(query *q, clause *r, enum log_type l)
-{
-	int save = q->quoted;
-	char tmpbuf[256];
-	char *dst;
-	q->quoted = 2;
-
-	switch(l) {
-	case LOG_ASSERTA:
-		dst = print_term_to_strbuf(q, r->t.cells, q->st.curr_frame, 1);
-		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
-		fprintf(q->m->fp, "a_(%s,'%s').\n", dst, tmpbuf);
-		free(dst);
-		break;
-	case LOG_ASSERTZ:
-		dst = print_term_to_strbuf(q, r->t.cells, q->st.curr_frame, 1);
-		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
-		fprintf(q->m->fp, "z_(%s,'%s').\n", dst, tmpbuf);
-		free(dst);
-		break;
-	case LOG_ERASE:
-		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
-		fprintf(q->m->fp, "e_('%s').\n", tmpbuf);
-		break;
-	}
-
-	q->quoted = save;
-}
-
-static USE_RESULT prolog_state do_retract(query *q, int is_retract)
-{
-	GET_FIRST_ARG(p1,callable);
-	cell *head = get_head(p1);
-
-	if (is_variable(head))
-		return throw_error(q, head, "instantiation_error", "not_sufficiently_instantiated");
-
-	if (!is_callable(head))
-		return throw_error(q, head, "type_error", "callable");
-
-	prolog_state match;
-
-	if (check_rule(p1))
-		match = match_rule(q, p1, p1_ctx);
-	else
-		match = match_clause(q, p1, p1_ctx, is_retract);
-
-	if (match != pl_success)
-		return match;
-
-	clause *r = q->st.curr_clause2;
-	stash_me(q, &r->t, false);
-
-	retract_from_db(q->m, r);
-	r->t.gen = r->parent->gen;
-
-	if (!q->m->loading && r->t.persist)
-		db_log(q, r, LOG_ERASE);
-
-	return pl_success;
-}
-
 static USE_RESULT prolog_state fn_iso_retract_1(query *q)
 {
-	return do_retract(q, DO_RETRACT);
+	GET_FIRST_ARG(p1,callable);
+	return do_retract(q, p1, p1_ctx, DO_RETRACT);
 }
 
 static USE_RESULT prolog_state fn_iso_retractall_1(query *q)
@@ -6396,7 +6256,7 @@ static USE_RESULT prolog_state fn_iso_retractall_1(query *q)
 		return pl_success;
 	}
 
-	while (do_retract(q, DO_RETRACTALL)) {
+	while (do_retract(q, p1, p1_ctx, DO_RETRACTALL)) {
 		if (q->did_throw)
 			return pl_success;
 
@@ -8510,7 +8370,7 @@ static USE_RESULT prolog_state fn_get_time_1(query *q)
 static USE_RESULT prolog_state fn_writeln_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = q->current_output;
+	int n = q->m->pl->current_output;
 	stream *str = &g_streams[n];
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	fputc('\n', str->fp);
@@ -9191,7 +9051,7 @@ static USE_RESULT prolog_state fn_client_5(query *q)
 static USE_RESULT prolog_state fn_getline_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = q->current_input;
+	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
 	char *line = NULL;
 	size_t len = 0;
@@ -9404,7 +9264,7 @@ static USE_RESULT prolog_state fn_read_term_from_chars_2(query *q)
 {
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_term,any);
-	int n = q->current_input;
+	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
 	char *src;
 	size_t len;
@@ -9439,7 +9299,7 @@ static USE_RESULT prolog_state fn_read_term_from_chars_3(query *q)
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_opts,any);
 	GET_NEXT_ARG(p_term,any);
-	int n = q->current_input;
+	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	char *src;
@@ -9473,7 +9333,7 @@ static USE_RESULT prolog_state fn_read_term_from_atom_3(query *q)
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_term,any);
 	GET_NEXT_ARG(p_opts,any);
-	int n = q->current_input;
+	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	char *src;
@@ -10446,7 +10306,7 @@ static USE_RESULT prolog_state do_format(query *q, cell *str, idx_t str_ctx, cel
 	size_t len = dst - tmpbuf;
 
 	if (str == NULL) {
-		int n = q->current_output;
+		int n = q->m->pl->current_output;
 		stream *str = &g_streams[n];
 		net_write(tmpbuf, len, str);
 	} else if (is_structure(str) && ((strcmp(GET_STR(str),"atom") && strcmp(GET_STR(str),"chars") && strcmp(GET_STR(str),"string")) || (str->arity > 1) || !is_variable(str+1))) {
@@ -11161,7 +11021,7 @@ static USE_RESULT prolog_state fn_chdir_1(query *q)
 static USE_RESULT prolog_state fn_edin_skip_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	int n = q->current_input;
+	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
@@ -11225,7 +11085,7 @@ static USE_RESULT prolog_state fn_edin_tab_1(query *q)
 	if (!is_integer(&p1))
 		return throw_error(q, &p1, "type_error", "integer");
 
-	int n = q->current_output;
+	int n = q->m->pl->current_output;
 	stream *str = &g_streams[n];
 
 	for (int i = 0; i < p1.val_num; i++)
@@ -11254,7 +11114,7 @@ static USE_RESULT prolog_state fn_edin_tab_2(query *q)
 
 static USE_RESULT prolog_state fn_edin_seen_0(query *q)
 {
-	int n = q->current_input;
+	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (n <= 2)
@@ -11269,13 +11129,13 @@ static USE_RESULT prolog_state fn_edin_seen_0(query *q)
 	free(str->mode);
 	free(str->name);
 	memset(str, 0, sizeof(stream));
-	q->current_input = 0;
+	q->m->pl->current_input = 0;
 	return pl_success;
 }
 
 static USE_RESULT prolog_state fn_edin_told_0(query *q)
 {
-	int n = q->current_output;
+	int n = q->m->pl->current_output;
 	stream *str = &g_streams[n];
 
 	if (n <= 2)
@@ -11290,14 +11150,14 @@ static USE_RESULT prolog_state fn_edin_told_0(query *q)
 	free(str->mode);
 	free(str->name);
 	memset(str, 0, sizeof(stream));
-	q->current_output = 0;
+	q->m->pl->current_output = 0;
 	return pl_success;
 }
 
 static USE_RESULT prolog_state fn_edin_seeing_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	char *name = q->current_input==0?"user":g_streams[q->current_input].name;
+	char *name = q->m->pl->current_input==0?"user":g_streams[q->m->pl->current_input].name;
 	cell tmp;
 	may_error(make_cstring(&tmp, name));
 	tmp.flags |= FLAG_TMP;
@@ -11308,7 +11168,7 @@ static USE_RESULT prolog_state fn_edin_seeing_1(query *q)
 static USE_RESULT prolog_state fn_edin_telling_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	char *name =q->current_output==1?"user":g_streams[q->current_output].name;
+	char *name =q->m->pl->current_output==1?"user":g_streams[q->m->pl->current_output].name;
 	cell tmp;
 	may_error(make_cstring(&tmp, name));
 	tmp.flags |= FLAG_TMP;
@@ -12781,7 +12641,6 @@ static const struct builtins g_iso_funcs[] =
 	{"current_output", 1, fn_iso_current_output_1, NULL},
 	{"set_input", 1, fn_iso_set_input_1, NULL},
 	{"set_output", 1, fn_iso_set_output_1, NULL},
-	{"stream_property", 2, fn_iso_stream_property_2, NULL},
 
 	{"abolish", 1, fn_iso_abolish_1, NULL},
 	{"asserta", 1, fn_iso_asserta_1, NULL},
