@@ -1929,6 +1929,7 @@ static void stream_retract(query *q, int n)
 	tmp[2].var_nbr = create_vars(q, 1);
 	tmp->nbr_cells = 3;
 	tmp->arity = 2;
+	q->retry = QUERY_OK;
 
 	predicate *h = find_matching_predicate(q->m, tmp);
 
@@ -1944,6 +1945,8 @@ static void stream_retract(query *q, int n)
 		q->retry = QUERY_RETRY;
 		retry_choice(q);
 	}
+
+	q->retry = QUERY_OK;
 }
 
 static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
@@ -1961,11 +1964,28 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 	}
 
 	if (!q->retry) {
+		cell tmp;
+		make_literal(&tmp, index_from_pool(q->m->pl, "$stream_property"));
+		tmp.nbr_cells = 1;
+		tmp.arity = 2;
+
+		predicate *h = find_matching_predicate(q->m, &tmp);
+		if (!h) return pl_failure;
+
+		for (clause *r = h->head; r;) {
+			clause *save = r->next;
+			free(r);
+			r = save;
+		}
+
+		sl_destroy(h->index);
+		h->index = NULL;
+		h->head = NULL;
+
 		for (int i = 0; i < MAX_STREAMS; i++) {
 			if (!g_streams[i].fp)
 				continue;
 
-			stream_retract(q, i);
 			stream_assert(q, i);
 		}
 	}
@@ -6312,13 +6332,12 @@ static USE_RESULT prolog_state do_abolish(query *q, cell *c_orig, cell *c)
 
 	uint64_t gen = h->gen;
 
-	for (clause *r = h->head; r;) {
+	for (clause *r = h->head; r; r = r->next) {
 		if (!q->m->loading && r->t.persist && !r->t.deleted)
 			db_log(q, r, LOG_ERASE);
 
 		r->t.gen = gen;
 		r->t.deleted = true;
-		r = r->next;
 	}
 
 	q->m->dirty = true;
