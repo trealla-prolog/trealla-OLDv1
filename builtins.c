@@ -1961,7 +1961,7 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 	}
 
 	if (!q->retry) {
-		for (unsigned i = 0; i < MAX_STREAMS; i++) {
+		for (int i = 0; i < MAX_STREAMS; i++) {
 			if (!g_streams[i].fp)
 				continue;
 
@@ -1970,7 +1970,9 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		}
 	}
 
-	return pl_failure;
+	cell *tmp = deep_clone_to_tmp_heap(q, q->st.curr_cell, q->st.curr_frame);
+	tmp->val_off = index_from_pool(q->m->pl, "$stream_property");
+	return match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE);
 }
 
 static USE_RESULT prolog_state fn_iso_open_3(query *q)
