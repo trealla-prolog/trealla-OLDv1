@@ -424,7 +424,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	}
 
 	if (is_rational(c)) {
-		if (c->val_den != 1) {
+		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY))) {
+			dst += snprintf(dst, dstlen, "%s0x", c->val_num<0?"-":"");
+			dst += sprint_int(dst, dstlen, c->val_num, 16);
+		} else if (c->val_den != 1) {
 			if (q->flag.rational_syntax_natural) {
 				dst += sprint_int(dst, dstlen, c->val_num, 10);
 				dst += snprintf(dst, dstlen, "/");

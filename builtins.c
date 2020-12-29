@@ -1972,7 +1972,13 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 
 	cell *tmp = deep_clone_to_tmp_heap(q, q->st.curr_cell, q->st.curr_frame);
 	tmp->val_off = index_from_pool(q->m->pl, "$stream_property");
-	return match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE);
+
+	if (!match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE))
+		return pl_failure;
+
+	GET_FIRST_ARG(pstrx,any);
+	pstrx->flags |= FLAG_STREAM | FLAG_HEX;
+	return pl_success;
 }
 
 static USE_RESULT prolog_state fn_iso_open_3(query *q)
