@@ -1974,6 +1974,7 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		if (h) {
 			for (clause *r = h->head; r;) {
 				clause *save = r->next;
+				clear_term(&r->t);
 				free(r);
 				r = save;
 			}
