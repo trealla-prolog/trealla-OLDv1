@@ -4168,10 +4168,6 @@ prolog *pl_create()
 		pl->current_output = 1;		// STDOUT
 		pl->current_error = 2;		// STDERR
 
-		stream_assert(pl->m, 0);
-		stream_assert(pl->m, 1);
-		stream_assert(pl->m, 2);
-
 		set_multifile_in_db(pl->m, "term_expansion", 2);
 		set_dynamic_in_db(pl->m, "term_expansion", 2);
 		set_dynamic_in_db(pl->m, "initialization", 1);

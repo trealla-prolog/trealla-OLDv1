@@ -1636,7 +1636,7 @@ static int get_stream(__attribute__((unused)) query *q, cell *p1)
 		return n;
 	}
 
-	if (!is_integer(p1)) {
+	if (!is_integer(p1) || !(p1->flags&FLAG_STREAM)) {
 		//DISCARD_RESULT throw_error(q, p1, "type_error", "stream");
 		return -1;
 	}
@@ -1886,31 +1886,33 @@ static USE_RESULT prolog_state do_retract(query *q, cell *p1, idx_t p1_ctx, int 
 	return pl_success;
 }
 
-void stream_assert(module *m, int n)
+static void stream_assert(query *q, int n)
 {
 	stream *str = &g_streams[n];
 	char tmpbuf[1024*8];
 	char *dst = tmpbuf;
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, file_name('%s')).\n", n, str->filename);
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, alias('%s')).\n", n, str->name);
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, mode('%s')).\n", n, str->mode);
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, type('%s')).\n", n, str->binary ? "binary" : "text");
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, reposition('%s')).\n", n, (n < 3) || str->socket ? "false" : "true");
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, end_of_stream('%s')).\n", n, str->past_end_of_file ? "past" : str->at_end_of_file ? "at" : "not");
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, eof_action('%s')).\n", n, str->eof_action_eof_code ? "eof_code" : str->eof_action_error ? "error" : str->eof_action_reset ? "reset" : "none");
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "$stream_property(%d, file_name('%s')).\n", n, str->filename);
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "$stream_property(%d, alias('%s')).\n", n, str->name);
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "$stream_property(%d, mode('%s')).\n", n, str->mode);
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "$stream_property(%d, type('%s')).\n", n, str->binary ? "binary" : "text");
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "$stream_property(%d, line_nbr(%i)).\n", n, str->p->line_nbr);
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "$stream_property(%d, position(%llu)).\n", n, (unsigned long long)ftello(str->fp));
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "$stream_property(%d, reposition('%s')).\n", n, (n < 3) || str->socket ? "false" : "true");
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "$stream_property(%d, end_of_stream('%s')).\n", n, str->past_end_of_file ? "past" : str->at_end_of_file ? "at" : "not");
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "$stream_property(%d, eof_action('%s')).\n", n, str->eof_action_eof_code ? "eof_code" : str->eof_action_error ? "error" : str->eof_action_reset ? "reset" : "none");
 
 	if (!strcmp(str->mode, "read"))
-		dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, input).\n", n);
+		dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "$stream_property(%d, input).\n", n);
 	else
-		dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, output).\n", n);
+		dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "$stream_property(%d, output).\n", n);
 
 #ifdef _WIN32
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, newline(dos)).\n", n);
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "$stream_property(%d, newline(dos)).\n", n);
 #else
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "stream_property(%d, newline(posix)).\n", n);
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "$stream_property(%d, newline(posix)).\n", n);
 #endif
 
-	parser *p = create_parser(m);
+	parser *p = create_parser(q->m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
 	parser_tokenize(p, false, false);
@@ -1920,7 +1922,7 @@ void stream_assert(module *m, int n)
 static void stream_retract(query *q, int n)
 {
 	cell *tmp = alloc_heap(q, 3);
-	make_literal(tmp+0, index_from_pool(q->m->pl, "stream_property"));
+	make_literal(tmp+0, index_from_pool(q->m->pl, "$stream_property"));
 	make_int(tmp+1, n);
 	make_variable(tmp+2, g_anon_s);
 	tmp[2].var_nbr = create_vars(q, 1);
@@ -1941,6 +1943,24 @@ static void stream_retract(query *q, int n)
 		q->retry = QUERY_RETRY;
 		retry_choice(q);
 	}
+}
+
+static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
+{
+	GET_FIRST_ARG(pstr,any);
+	GET_NEXT_ARG(p1,any);
+
+	if (!q->retry) {
+		for (unsigned i = 0; i < MAX_STREAMS; i++) {
+			if (!g_streams[i].fp)
+				continue;
+
+			stream_retract(q, i);
+			stream_assert(q, i);
+		}
+	}
+
+	return pl_failure;
 }
 
 static USE_RESULT prolog_state fn_iso_open_3(query *q)
@@ -1990,8 +2010,6 @@ static USE_RESULT prolog_state fn_iso_open_3(query *q)
 
 	if (!str->fp)
 		return throw_error(q, p1, "existence_error", "source_sink");
-
-	stream_assert(q->m, n);
 
 	cell *tmp = alloc_heap(q, 1);
 	ensure(tmp);
@@ -2164,7 +2182,6 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 	}
 #endif
 
-	stream_assert(q->m, n);
 	cell *tmp = alloc_heap(q, 1);
 	ensure(tmp);
 	make_int(tmp, n);
@@ -12641,6 +12658,7 @@ static const struct builtins g_iso_funcs[] =
 	{"current_output", 1, fn_iso_current_output_1, NULL},
 	{"set_input", 1, fn_iso_set_input_1, NULL},
 	{"set_output", 1, fn_iso_set_output_1, NULL},
+	{"stream_property", 2, fn_iso_stream_property_2, NULL},
 
 	{"abolish", 1, fn_iso_abolish_1, NULL},
 	{"asserta", 1, fn_iso_asserta_1, NULL},
