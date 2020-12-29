@@ -1911,7 +1911,7 @@ static void stream_assert(query *q, int n)
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, newline(posix)).\n", n);
 #endif
 
-	printf("*** %s\n", tmpbuf);
+	//printf("*** %s\n", tmpbuf);
 
 	parser *p = create_parser(q->m);
 	p->srcptr = tmpbuf;
