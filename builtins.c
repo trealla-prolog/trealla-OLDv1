@@ -1970,17 +1970,18 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		tmp.arity = 2;
 
 		predicate *h = find_matching_predicate(q->m, &tmp);
-		if (!h) return pl_failure;
 
-		for (clause *r = h->head; r;) {
-			clause *save = r->next;
-			free(r);
-			r = save;
+		if (h) {
+			for (clause *r = h->head; r;) {
+				clause *save = r->next;
+				free(r);
+				r = save;
+			}
+
+			sl_destroy(h->index);
+			h->index = NULL;
+			h->head = NULL;
 		}
-
-		sl_destroy(h->index);
-		h->index = NULL;
-		h->head = NULL;
 
 		for (int i = 0; i < MAX_STREAMS; i++) {
 			if (!g_streams[i].fp)
