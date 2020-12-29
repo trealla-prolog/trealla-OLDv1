@@ -1983,6 +1983,7 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 			sl_destroy(h->index);
 			h->index = NULL;
 			h->head = NULL;
+			h->tail = NULL;
 		}
 
 		for (int i = 0; i < MAX_STREAMS; i++) {
@@ -2127,7 +2128,7 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 			if (!is_atom(name))
 				return throw_error(q, c, "domain_error", "stream_option");
 
-			if (get_named_stream(GET_STR(name)) >= 0)
+			if (get_named_stream(GET_STR(name)) >= 0)	// ???????
 				return throw_error(q, c, "permission_error", "open,source_sink");
 
 			if (!strcmp(GET_STR(c), "mmap")) {
