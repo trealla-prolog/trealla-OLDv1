@@ -1610,13 +1610,10 @@ static int get_named_stream(const char *name)
 	for (int i = 0; i < MAX_STREAMS; i++) {
 		stream *str = &g_streams[i];
 
-		if (!str->name)
-			continue;
-
-		if (!strcmp(str->name, name))
+		if (str->name && !strcmp(str->name, name))
 			return i;
 
-		if (!strcmp(str->filename, name))
+		if (str->filename && !strcmp(str->filename, name))
 			return i;
 	}
 
@@ -1921,6 +1918,7 @@ static void stream_assert(query *q, int n)
 	destroy_parser(p);
 }
 
+#if 0
 static void stream_retract(query *q, int n)
 {
 	cell *tmp = alloc_heap(q, 3);
@@ -1949,6 +1947,7 @@ static void stream_retract(query *q, int n)
 
 	q->retry = QUERY_OK;
 }
+#endif
 
 static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 {
@@ -2255,7 +2254,7 @@ static USE_RESULT prolog_state fn_iso_close_1(query *q)
 	if (str->p)
 		destroy_parser(str->p);
 
-	stream_retract(q, n);
+	//stream_retract(q, n);
 	net_close(str);
 	free(str->filename);
 	free(str->mode);
