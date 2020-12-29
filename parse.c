@@ -4171,6 +4171,7 @@ prolog *pl_create()
 		set_multifile_in_db(pl->m, "term_expansion", 2);
 		set_dynamic_in_db(pl->m, "term_expansion", 2);
 		set_dynamic_in_db(pl->m, "initialization", 1);
+		set_dynamic_in_db(pl->m, "$stream_property", 2);
 		set_dynamic_in_db(pl->m, ":-", 1);
 
 		pl->m->prebuilt = true;
