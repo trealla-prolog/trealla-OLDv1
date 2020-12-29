@@ -944,7 +944,7 @@ USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, int is_re
 			q->st.curr_clause2 = NULL;
 			return pl_failure;
 		} else {
-			if (!h->is_dynamic && (is_retract != DO_RETRACTALL_FORCE)) {
+			if (!h->is_dynamic) {
 				if (is_retract != DO_CLAUSE)
 					return throw_error(q, p1, "permission_error", "modify,static_procedure");
 				else

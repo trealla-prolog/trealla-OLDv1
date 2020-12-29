@@ -1937,7 +1937,7 @@ static void stream_retract(query *q, int n)
 		return;
 	}
 
-	while (do_retract(q, tmp, q->st.curr_frame, DO_RETRACTALL_FORCE)) {
+	while (do_retract(q, tmp, q->st.curr_frame, DO_RETRACTALL)) {
 		if (q->did_throw)
 			return;
 
