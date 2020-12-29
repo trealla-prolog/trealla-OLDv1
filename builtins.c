@@ -1920,7 +1920,6 @@ static void stream_assert(query *q, int n)
 	destroy_parser(p);
 }
 
-#if 1
 static void stream_retract(query *q, int n)
 {
 	cell *tmp = alloc_heap(q, 3);
@@ -1943,13 +1942,14 @@ static void stream_retract(query *q, int n)
 		if (q->did_throw)
 			return;
 
+		//printf("*** closed %d\n", n);
+
 		q->retry = QUERY_RETRY;
 		retry_choice(q);
 	}
 
 	q->retry = QUERY_OK;
 }
-#endif
 
 static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 {
