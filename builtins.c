@@ -1891,14 +1891,14 @@ static void stream_assert(query *q, int n)
 	off_t pos = ftello(str->fp);
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, file_name('%s')).\n", n, str->filename);
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, alias('%s')).\n", n, str->name);
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, mode('%s')).\n", n, str->mode);
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, encoding('%s')).\n", n, "utf8");
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, type('%s')).\n", n, str->binary ? "binary" : "text");
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, mode(%s)).\n", n, str->mode);
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, encoding(%s)).\n", n, "utf8");
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, type(%s)).\n", n, str->binary ? "binary" : "text");
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, line_nbr(%i)).\n", n, str->p ? str->p->line_nbr : 1);
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, position(%llu)).\n", n, (unsigned long long)(pos != -1 ? pos : 0));
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, reposition('%s')).\n", n, (n < 3) || str->socket ? "false" : "true");
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, end_of_stream('%s')).\n", n, str->past_end_of_file ? "past" : str->at_end_of_file ? "at" : "not");
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, eof_action('%s')).\n", n, str->eof_action_eof_code ? "eof_code" : str->eof_action_error ? "error" : str->eof_action_reset ? "reset" : "none");
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, reposition(%s)).\n", n, (n < 3) || str->socket ? "false" : "true");
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, end_of_stream(%s)).\n", n, str->past_end_of_file ? "past" : str->at_end_of_file ? "at" : "not");
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, eof_action(%s)).\n", n, str->eof_action_eof_code ? "eof_code" : str->eof_action_error ? "error" : str->eof_action_reset ? "reset" : "none");
 
 	if (!strcmp(str->mode, "read"))
 		dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, input).\n", n);
@@ -1911,6 +1911,8 @@ static void stream_assert(query *q, int n)
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, newline(posix)).\n", n);
 #endif
 
+	printf("*** %s\n", tmpbuf);
+
 	parser *p = create_parser(q->m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
@@ -1918,7 +1920,7 @@ static void stream_assert(query *q, int n)
 	destroy_parser(p);
 }
 
-#if 0
+#if 1
 static void stream_retract(query *q, int n)
 {
 	cell *tmp = alloc_heap(q, 3);
@@ -1937,7 +1939,7 @@ static void stream_retract(query *q, int n)
 		return;
 	}
 
-	while (do_retract(q, tmp, q->st.curr_frame, DO_RETRACTALL)) {
+	while (do_retract(q, tmp, q->st.curr_frame, DO_RETRACT)) {
 		if (q->did_throw)
 			return;
 
@@ -2254,7 +2256,7 @@ static USE_RESULT prolog_state fn_iso_close_1(query *q)
 	if (str->p)
 		destroy_parser(str->p);
 
-	//stream_retract(q, n);
+	stream_retract(q, n);
 	net_close(str);
 	free(str->filename);
 	free(str->mode);
