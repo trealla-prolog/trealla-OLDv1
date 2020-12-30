@@ -1976,6 +1976,98 @@ static void stream_retract(query *q, int n)
 	q->retry = QUERY_OK;
 }
 
+static USE_RESULT prolog_state do_stream_property(query *q)
+{
+	GET_FIRST_ARG(pstr,any);
+	GET_NEXT_ARG(p1,any);
+
+	int n = get_stream(q, pstr);
+	stream *str = &g_streams[n];
+	cell *c = p1 + 1;
+	c = deref(q, c, p1_ctx);
+
+	if (!strcmp(GET_STR(p1), "file_name")) {
+		cell tmp;
+		may_error(make_cstring(&tmp, str->filename));
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (!strcmp(GET_STR(p1), "alias")) {
+		cell tmp;
+		may_error(make_cstring(&tmp, str->name));
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (!strcmp(GET_STR(p1), "mode")) {
+		cell tmp;
+		may_error(make_cstring(&tmp, str->mode));
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (!strcmp(GET_STR(p1), "type")) {
+		cell tmp;
+		may_error(make_cstring(&tmp, str->binary ? "binary" : "text"));
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (!strcmp(GET_STR(p1), "reposition")) {
+		cell tmp;
+		may_error(make_cstring(&tmp, str->socket || (n <= 2) ? "false" : "true"));
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (!strcmp(GET_STR(p1), "encoding")) {
+		cell tmp;
+		may_error(make_cstring(&tmp, "utf8"));
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (!strcmp(GET_STR(p1), "newline")) {
+		cell tmp;
+#ifdef _WIN32
+		may_error(make_cstring(&tmp, "dos"));
+#else
+		may_error(make_cstring(&tmp, "unix"));
+#endif
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (!strcmp(GET_STR(p1), "input")) {
+		return !strcmp(str->mode, "read");
+	}
+
+	if (!strcmp(GET_STR(p1), "output")) {
+		return strcmp(str->mode, "read");
+	}
+
+	if (!strcmp(GET_STR(p1), "end_of_stream") && is_stream(pstr)) {
+		cell tmp;
+
+		if (str->past_end_of_file)
+			make_literal(&tmp, index_from_pool(q->m->pl, "past"));
+		else if (str->at_end_of_file)
+			make_literal(&tmp, index_from_pool(q->m->pl, "at"));
+		else
+			make_literal(&tmp, index_from_pool(q->m->pl, "not"));
+
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (!strcmp(GET_STR(p1), "position") && !is_variable(pstr)) {
+		cell tmp;
+		make_int(&tmp, ftello(str->fp));
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (!strcmp(GET_STR(p1), "line_count") && !is_variable(pstr)) {
+		cell tmp;
+		make_int(&tmp, str->p?str->p->line_nbr:1);
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
+	return pl_failure;
+}
+
 static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 {
 	GET_FIRST_ARG(pstr,any);
@@ -1989,6 +2081,9 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		make_literal(&tmp, g_nil_s);
 		return throw_error(q, p1, "domain_error", "stream_property");
 	}
+
+	if (!is_variable(pstr) && !is_variable(p1))
+		return do_stream_property(q);
 
 	if (!q->retry) {
 		cell tmp;
