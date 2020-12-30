@@ -1889,10 +1889,10 @@ static void stream_assert(query *q, int n)
 	char tmpbuf[1024*8];
 	char *dst = tmpbuf;
 	off_t pos = ftello(str->fp);
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, file_name('%s')).\n", n, str->filename);
-	if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, file_name('%s')).\n", str->name, str->filename);
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, alias('%s')).\n", n, str->name);
 	if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, alias('%s')).\n", str->name,  str->name);
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, file_name('%s')).\n", n, str->filename);
+	if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, file_name('%s')).\n", str->name, str->filename);
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, mode(%s)).\n", n, str->mode);
 	if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, mode(%s)).\n", str->name, str->mode);
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, encoding(%s)).\n", n, "utf8");
@@ -1987,6 +1987,7 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		tmp.arity = 2;
 
 		predicate *h = find_matching_predicate(q->m, &tmp);
+		h->is_noindex = true;
 
 		if (h) {
 			for (clause *r = h->head; r;) {
@@ -2017,7 +2018,10 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		return pl_failure;
 
 	GET_FIRST_ARG(pstrx,any);
-	pstrx->flags |= FLAG_STREAM | FLAG_HEX;
+
+	if (is_integer(pstrx))
+		pstrx->flags |= FLAG_STREAM | FLAG_HEX;
+
 	return pl_success;
 }
 
