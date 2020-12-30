@@ -1919,8 +1919,8 @@ static void stream_assert(query *q, int n)
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, type(%s)).\n", n, str->binary ? "binary" : "text");
 	//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, type(%s)).\n", str->name, str->binary ? "binary" : "text");
 
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, line_nbr(%i)).\n", n, str->p ? str->p->line_nbr : 1);
-	//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, line_nbr(%i)).\n", str->name, str->p ? str->p->line_nbr : 1);
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, line_count(%i)).\n", n, str->p ? str->p->line_nbr : 1);
+	//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, line_count(%i)).\n", str->name, str->p ? str->p->line_nbr : 1);
 
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, position(%llu)).\n", n, (unsigned long long)(pos != -1 ? pos : 0));
 	//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, position(%llu)).\n", str->name, (unsigned long long)(pos != -1 ? pos : 0));
