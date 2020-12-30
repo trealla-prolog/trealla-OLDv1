@@ -1644,11 +1644,25 @@ static int get_stream(__attribute__((unused)) query *q, cell *p1)
 	}
 
 	if (!g_streams[p1->val_num].fp) {
-		//DISCARD_RESULT throw_error(q, p1, "type_error", "stream");
+		//DISCARD_RESULT throw_error(q, p1, "existence_error", "stream");
 		return -1;
 	}
 
 	return p1->val_num;
+}
+
+static bool closed_stream(__attribute__((unused)) query *q, cell *p1)
+{
+	if (!(p1->flags&FLAG_STREAM))
+		return false;
+
+	if ((p1->val_num < 0) || (p1->val_num >= MAX_STREAMS))
+		return false;
+
+	if (g_streams[p1->val_num].fp)
+		return false;
+
+	return true;
 }
 
 static USE_RESULT prolog_state fn_iso_current_input_1(query *q)
@@ -2068,13 +2082,39 @@ static USE_RESULT prolog_state do_stream_property(query *q)
 	return pl_failure;
 }
 
+static void purge_stream_properties(query *q)
+{
+	cell tmp;
+	make_literal(&tmp, index_from_pool(q->m->pl, "$stream_property"));
+	tmp.nbr_cells = 1;
+	tmp.arity = 2;
+
+	predicate *h = find_matching_predicate(q->m, &tmp);
+
+	if (h) {
+		for (clause *r = h->head; r;) {
+			clause *save = r->next;
+			clear_term(&r->t);
+			free(r);
+			r = save;
+		}
+
+		h->head = NULL;
+		h->tail = NULL;
+	}
+}
+
 static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 {
 	GET_FIRST_ARG(pstr,any);
 	GET_NEXT_ARG(p1,any);
 
-	if (!is_stream_or_var(pstr))
-		return throw_error(q, pstr, "domain_error", "stream");
+	if (!is_stream_or_var(pstr)) {
+		if (closed_stream(q, pstr))
+			return throw_error(q, pstr, "existence_error", "stream");
+		else
+			return throw_error(q, pstr, "domain_error", "stream");
+	}
 
 	if (p1->arity > 1) {
 		cell tmp;
@@ -2086,26 +2126,7 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		return do_stream_property(q);
 
 	if (!q->retry) {
-		cell tmp;
-		make_literal(&tmp, index_from_pool(q->m->pl, "$stream_property"));
-		tmp.nbr_cells = 1;
-		tmp.arity = 2;
-
-		predicate *h = find_matching_predicate(q->m, &tmp);
-
-		if (h) {
-			for (clause *r = h->head; r;) {
-				clause *save = r->next;
-				clear_term(&r->t);
-				free(r);
-				r = save;
-			}
-
-			sl_destroy(h->index);
-			h->index = NULL;
-			h->head = NULL;
-			h->tail = NULL;
-		}
+		purge_stream_properties(q);
 
 		for (int i = 0; i < MAX_STREAMS; i++) {
 			if (!g_streams[i].fp)
@@ -2118,8 +2139,12 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 	cell *tmp = deep_clone_to_tmp_heap(q, q->st.curr_cell, q->st.curr_frame);
 	tmp->val_off = index_from_pool(q->m->pl, "$stream_property");
 
-	if (!match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE))
+	if (!match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE)) {
+		if (q->retry)
+			purge_stream_properties(q);
+
 		return pl_failure;
+	}
 
 	GET_FIRST_ARG(pstrx,any);
 
