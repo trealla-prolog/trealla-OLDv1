@@ -749,29 +749,6 @@ clause *erase_from_db(module *m, uuid *ref)
 	return r;
 }
 
-static void set_dynamic_in_db(module *m, const char *name, unsigned arity)
-{
-	if (!m) return;
-
-	cell tmp = {0};
-	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = index_from_pool(m->pl, name);
-	ensure(tmp.val_off != ERR_IDX);
-	tmp.arity = arity;
-	predicate *h = find_predicate(m, &tmp);
-	if (!h) h = create_predicate(m, &tmp);
-
-	if (h) {
-		h->is_dynamic = true;
-
-		if (!h->index && !m->noindex) {
-			h->index = sl_create1(compkey, m);
-			ensure(h->index);
-		}
-	} else
-		m->error = true;
-}
-
 static void set_noindex_in_db(module *m, const char *name, unsigned arity)
 {
 	if (!m) return;
@@ -802,8 +779,26 @@ void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
 	predicate *h = find_predicate(m, &tmp);
 	if (!h) h = create_predicate(m, &tmp);
 
-	if (h) {
+	if (h)
 		h->is_discontiguous = true;
+	else
+		m->error = true;
+}
+
+static void set_dynamic_in_db(module *m, const char *name, unsigned arity)
+{
+	if (!m) return;
+
+	cell tmp = {0};
+	tmp.val_type = TYPE_LITERAL;
+	tmp.val_off = index_from_pool(m->pl, name);
+	ensure(tmp.val_off != ERR_IDX);
+	tmp.arity = arity;
+	predicate *h = find_predicate(m, &tmp);
+	if (!h) h = create_predicate(m, &tmp);
+
+	if (h) {
+		h->is_dynamic = true;
 
 		if (!h->index && !m->noindex) {
 			h->index = sl_create1(compkey, m);
