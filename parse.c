@@ -4098,6 +4098,7 @@ static bool g_init(prolog *pl)
 			CHECK_SENTINEL(g_lt_s = index_from_pool(pl, "<"), ERR_IDX);
 			CHECK_SENTINEL(g_gt_s = index_from_pool(pl, ">"), ERR_IDX);
 			CHECK_SENTINEL(g_eq_s = index_from_pool(pl, "="), ERR_IDX);
+			CHECK_SENTINEL(index_from_pool(pl, "$stream_property"), ERR_IDX);
 
 			g_streams[0].fp = stdin;
 			CHECK_SENTINEL(g_streams[0].filename = strdup("stdin"), NULL);
