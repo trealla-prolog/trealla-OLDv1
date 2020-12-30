@@ -1987,7 +1987,6 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		tmp.arity = 2;
 
 		predicate *h = find_matching_predicate(q->m, &tmp);
-		h->is_noindex = true;
 
 		if (h) {
 			for (clause *r = h->head; r;) {

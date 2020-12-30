@@ -772,6 +772,24 @@ static void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 		m->error = true;
 }
 
+static void set_noindex_in_db(module *m, const char *name, unsigned arity)
+{
+	if (!m) return;
+
+	cell tmp = {0};
+	tmp.val_type = TYPE_LITERAL;
+	tmp.val_off = index_from_pool(m->pl, name);
+	ensure(tmp.val_off != ERR_IDX);
+	tmp.arity = arity;
+	predicate *h = find_predicate(m, &tmp);
+	if (!h) h = create_predicate(m, &tmp);
+
+	if (h)
+		h->is_noindex = true;
+	else
+		m->error = true;
+}
+
 void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
 {
 	if (!m) return;
@@ -4172,6 +4190,7 @@ prolog *pl_create()
 		set_dynamic_in_db(pl->m, "term_expansion", 2);
 		set_dynamic_in_db(pl->m, "initialization", 1);
 		set_dynamic_in_db(pl->m, "$stream_property", 2);
+		set_noindex_in_db(pl->m, "$stream_property", 2);
 		set_dynamic_in_db(pl->m, ":-", 1);
 
 		pl->m->prebuilt = true;
