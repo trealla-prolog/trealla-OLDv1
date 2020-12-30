@@ -2054,6 +2054,19 @@ static USE_RESULT prolog_state do_stream_property(query *q)
 		return strcmp(str->mode, "read");
 	}
 
+	if (!strcmp(GET_STR(p1), "eof_action") && is_stream(pstr)) {
+		cell tmp;
+
+		if (str->eof_action_eof_code)
+			make_literal(&tmp, index_from_pool(q->m->pl, "eof_code"));
+		else if (str->eof_action_error)
+			make_literal(&tmp, index_from_pool(q->m->pl, "error"));
+		else
+			make_literal(&tmp, index_from_pool(q->m->pl, "reset"));
+
+		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+	}
+
 	if (!strcmp(GET_STR(p1), "end_of_stream") && is_stream(pstr)) {
 		cell tmp;
 
@@ -2184,7 +2197,7 @@ static USE_RESULT prolog_state fn_iso_open_3(query *q)
 	str->filename = strdup(filename);
 	str->name = strdup(filename);
 	str->mode = strdup(mode);
-	str->eof_action_eof_code = true;
+	str->eof_action_reset = true;
 
 	if (!strcmp(mode, "read"))
 		str->fp = fopen(filename, "r");
@@ -2253,7 +2266,7 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 	str->filename = strdup(filename);
 	str->name = strdup(filename);
 	str->mode = strdup(mode);
-	str->eof_action_eof_code = true;
+	str->eof_action_reset = true;
 	int binary = 0;
 
 #if USE_MMAP
