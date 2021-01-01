@@ -1905,49 +1905,25 @@ static void stream_assert(query *q, int n)
 	off_t pos = ftello(str->fp);
 
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, alias('%s')).\n", n, str->name);
-	//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, alias('%s')).\n", str->name,  str->name);
-
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, file_name('%s')).\n", n, str->filename);
-	//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, file_name('%s')).\n", str->name, str->filename);
-
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, mode(%s)).\n", n, str->mode);
-	//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, mode(%s)).\n", str->name, str->mode);
-
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, encoding(%s)).\n", n, "utf8");
-	//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, encoding(%s)).\n", str->name, "utf8");
-
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, type(%s)).\n", n, str->binary ? "binary" : "text");
-	//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, type(%s)).\n", str->name, str->binary ? "binary" : "text");
-
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, line_count(%i)).\n", n, str->p ? str->p->line_nbr : 1);
-	//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, line_count(%i)).\n", str->name, str->p ? str->p->line_nbr : 1);
-
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, position(%llu)).\n", n, (unsigned long long)(pos != -1 ? pos : 0));
-	//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, position(%llu)).\n", str->name, (unsigned long long)(pos != -1 ? pos : 0));
-
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, reposition(%s)).\n", n, (n < 3) || str->socket ? "false" : "true");
-	//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, reposition(%s)).\n", str->name, (n < 3) || str->socket ? "false" : "true");
-
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, end_of_stream(%s)).\n", n, str->past_end_of_file ? "past" : str->at_end_of_file ? "at" : "not");
-	//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, end_of_stream(%s)).\n", str->name, str->past_end_of_file ? "past" : str->at_end_of_file ? "at" : "not");
-
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, eof_action(%s)).\n", n, str->eof_action_eof_code ? "eof_code" : str->eof_action_error ? "error" : str->eof_action_reset ? "reset" : "none");
-	//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, eof_action(%s)).\n", str->name, str->eof_action_eof_code ? "eof_code" : str->eof_action_error ? "error" : str->eof_action_reset ? "reset" : "none");
 
-	if (!strcmp(str->mode, "read")) {
+	if (!strcmp(str->mode, "read"))
 		dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, input).\n", n);
-		//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, input).\n", str->name);
-	} else {
+	else
 		dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, output).\n", n);
-		//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, output).\n", str->name);
-	}
 
 #ifdef _WIN32
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, newline(dos)).\n", n);
-	//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, newline(dos)).\n", str->name);
 #else
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, newline(posix)).\n", n);
-	//if (strcmp(str->filename, str->name)) dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%s, newline(posix)).\n", str->name);
 #endif
 
 	//printf("*** %s\n", tmpbuf);
@@ -2159,11 +2135,13 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		return pl_failure;
 	}
 
+	term *t = &q->st.curr_clause2->t;
 	GET_FIRST_ARG(pstrx,any);
 
 	if (is_integer(pstrx))
 		pstrx->flags |= FLAG_STREAM | FLAG_HEX;
 
+	stash_me(q, t, false);
 	return pl_success;
 }
 

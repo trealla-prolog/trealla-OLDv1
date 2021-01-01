@@ -4185,10 +4185,11 @@ prolog *pl_create()
 		pl->current_error = 2;		// STDERR
 
 		set_multifile_in_db(pl->m, "term_expansion", 2);
+		set_noindex_in_db(pl->m, "$stream_property", 2);
+
+		set_dynamic_in_db(pl->m, "$stream_property", 2);
 		set_dynamic_in_db(pl->m, "term_expansion", 2);
 		set_dynamic_in_db(pl->m, "initialization", 1);
-		set_dynamic_in_db(pl->m, "$stream_property", 2);
-		set_noindex_in_db(pl->m, "$stream_property", 2);
 		set_dynamic_in_db(pl->m, ":-", 1);
 
 		pl->m->prebuilt = true;
