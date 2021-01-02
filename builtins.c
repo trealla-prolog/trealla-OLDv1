@@ -8420,6 +8420,7 @@ static USE_RESULT prolog_state fn_sys_timer_0(query *q)
 	q->time_started = get_time_in_usec();
 	return pl_success;
 }
+
 static USE_RESULT prolog_state fn_sys_elapsed_0(query *q)
 {
 	uint64_t elapsed = get_time_in_usec();
