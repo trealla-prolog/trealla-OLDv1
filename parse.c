@@ -1931,7 +1931,37 @@ static bool attach_ops(parser *p, idx_t start_idx)
 		c->val_type = TYPE_LITERAL;
 		c->arity = 1;
 
+#if 0
+		if (IS_XFX(c) && ((i+2) < (p->t->cidx-1))) {
+			cell *rhs = c + 2;
+
+			if ((IS_XFX(rhs)) && (rhs->precedence == c->precedence)) {
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					fprintf(stdout, "Error: operator clash\n");
+
+				p->error = true;
+				c->flags = 0;
+				c->arity = 0;
+				return false;
+			}
+		}
+#endif
+
 		// Prefix...
+
+		if (IS_FX(c) || IS_FX(c)) {
+			cell *rhs = c + 1;
+
+			if ((IS_FX(rhs) || IS_XF(rhs)) && (rhs->precedence == c->precedence)) {
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					fprintf(stdout, "Error: operator clash\n");
+
+				p->error = true;
+				c->flags = 0;
+				c->arity = 0;
+				return false;
+			}
+		}
 
 		if (IS_FX(c) || IS_FY(c)) {
 			last_idx = i;
@@ -1940,7 +1970,9 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			idx_t off = (idx_t)((c+1) - p->t->cells);
 
 			if (off >= p->t->cidx) {
-				fprintf(stdout, "Error: missing operand to '%s'\n", PARSER_GET_STR(c));
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					fprintf(stdout, "Error: missing operand to '%s'\n", PARSER_GET_STR(c));
+
 				p->error = true;
 				c->flags = 0;
 				c->arity = 0;
@@ -1956,7 +1988,9 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			idx_t off = (idx_t)((c+1)-p->t->cells);
 
 			if (off >= p->t->cidx) {
-				fprintf(stdout, "Warning: missing operand to '%s'\n", PARSER_GET_STR(c));
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					fprintf(stdout, "Error: missing operand to '%s'\n", PARSER_GET_STR(c));
+
 				p->error = true;
 				c->flags = 0;
 				c->arity = 0;
@@ -1969,6 +2003,20 @@ static bool attach_ops(parser *p, idx_t start_idx)
 		// Infix and Postfix...
 
 		cell save = *c;
+
+		if (IS_XF(c) || IS_YF(c)) {
+			cell *rhs = c + 1;
+
+			if ((IS_XF(rhs) || IS_YF(rhs)) && (rhs->precedence == c->precedence)) {
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					fprintf(stdout, "Error: operator clash: %s\n", PARSER_GET_STR(c));
+
+				p->error = true;
+				c->flags = 0;
+				c->arity = 0;
+				return false;
+			}
+		}
 
 		if (!IS_XF(c) && !IS_YF(c))
 			save.nbr_cells += (c+1)->nbr_cells;
@@ -2805,6 +2853,18 @@ static bool get_token(parser *p, int last_op)
 			p->is_variable = true;
 		else if (get_op(p->m, p->token, NULL, NULL, 0))
 			p->is_op = true;
+
+		if (isspace(ch)) {
+			p->srcptr = (char*)src;
+			src = eat_space(p);
+
+			if (!p->is_op && (*src == '(')) {
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, %s\n", p->line_nbr, p->token, p->srcptr);
+
+				p->error = true;
+			}
+		}
 
 		p->srcptr = (char*)src;
 		return true;
