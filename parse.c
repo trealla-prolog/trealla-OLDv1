@@ -2470,6 +2470,63 @@ static bool valid_float(const char *src)
 	return true;
 }
 
+static const char *eat_space(parser *p)
+{
+	const char *src = p->srcptr;
+
+	while (isspace(*src)) {
+		if (*src == '\n')
+			p->line_nbr++;
+
+		src++;
+	}
+
+	while ((*src == '%') && !p->fp) {
+		while (*src && (*src != '\n'))
+			src++;
+
+		if (*src == '\n')
+			p->line_nbr++;
+
+		src++;
+
+		while (isspace(*src)) {
+			if (*src == '\n')
+				p->line_nbr++;
+
+			src++;
+		}
+	}
+
+	while ((!*src || (*src == '%')) && p->fp) {
+		if (*src == '%')
+			p->line_nbr++;
+
+		if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
+			return NULL;
+		}
+
+		p->srcptr = p->save_line;
+		src = p->srcptr;
+
+		while (isspace(*src)) {
+			if (*src == '\n')
+				p->line_nbr++;
+
+			src++;
+		}
+	}
+
+	while (isspace(*src)) {
+		if (*src == '\n')
+			p->line_nbr++;
+
+		src++;
+	}
+
+	return src;
+}
+
 static bool get_token(parser *p, int last_op)
 {
 	if (!p || p->error)
@@ -2521,63 +2578,13 @@ static bool get_token(parser *p, int last_op)
 		return true;
 	}
 
-	while (isspace(*src)) {
-		if (*src == '\n')
-			p->line_nbr++;
-
-		src++;
-	}
-
-	while ((*src == '%') && !p->fp) {
-		while (*src && (*src != '\n'))
-			src++;
-
-		if (*src == '\n')
-			p->line_nbr++;
-
-		src++;
-
-		while (isspace(*src)) {
-			if (*src == '\n')
-				p->line_nbr++;
-
-			src++;
-		}
-	}
-
-	while ((!*src || (*src == '%')) && p->fp) {
-		if (*src == '%')
-			p->line_nbr++;
-
-		if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
-			return false;
-		}
-
-		p->srcptr = p->save_line;
-		src = p->srcptr;
-
-		while (isspace(*src)) {
-			if (*src == '\n')
-				p->line_nbr++;
-
-			src++;
-		}
-	}
-
-	while (isspace(*src)) {
-		if (*src == '\n')
-			p->line_nbr++;
-
-		src++;
-	}
+	if (!(src = eat_space(p)))
+		return false;
 
 	if (!*src) {
 		p->srcptr = (char*)src;
 		return false;
 	}
-
-	if (*src == '%')
-		return false;
 
 	do {
 		if (!p->comment && (src[0] == '/') && (src[1] == '*')) {
