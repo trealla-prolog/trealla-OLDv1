@@ -10238,6 +10238,7 @@ static USE_RESULT prolog_state fn_consult_1(query *q)
 	return pl_success;
 }
 
+#if 0
 static int format_integer(char *dst, int_t v, int grouping, int sep, int decimals)
 {
 	char tmpbuf1[256], tmpbuf2[256];
@@ -10570,6 +10571,7 @@ static USE_RESULT prolog_state fn_format_3(query *q)
 	GET_NEXT_ARG(p2,list_or_nil);
 	return do_format(q, pstr, pstr_ctx, p1, !is_nil(p2)?p2:NULL, p2_ctx);
 }
+#endif
 
 #if USE_OPENSSL
 static USE_RESULT prolog_state fn_sha1_2(query *q)
@@ -12925,11 +12927,6 @@ static const struct builtins g_iso_funcs[] =
 	{"time", 1, fn_time_1, NULL},
 	{"trace", 0, fn_trace_0, NULL},
 
-#if 0
-	{"phrase", 3, fn_phrase_3, NULL},
-	{"call_dcg", 3, fn_call_dcg_3, NULL},
-#endif
-
 	{0}
 };
 
@@ -12951,8 +12948,10 @@ static const struct builtins g_other_funcs[] =
 	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars"},
 	{"ignore", 1, fn_ignore_1, "+callable"},
 
-	{"legacy_format", 2, fn_format_2, "+string,+list"},
-	{"legacy_format", 3, fn_format_3, "+stream,+string,+list"},
+#if 0
+	{"format", 2, fn_format_2, "+string,+list"},
+	{"format", 3, fn_format_3, "+stream,+string,+list"},
+#endif
 
 	{"rdiv", 2, fn_rdiv_2, "+integer,+integer"},
 	{"rational", 1, fn_rational_1, "+number"},
