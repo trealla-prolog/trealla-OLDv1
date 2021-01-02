@@ -2121,7 +2121,10 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 			if (!g_streams[i].fp)
 				continue;
 
-			stream_assert(q, i);
+			stream *str = &g_streams[i];
+
+			if (!str->socket)
+				stream_assert(q, i);
 		}
 	}
 
@@ -2395,7 +2398,9 @@ static USE_RESULT prolog_state fn_iso_close_1(query *q)
 	if (str->p)
 		destroy_parser(str->p);
 
-	stream_retract(q, n);
+	if (!str->socket)
+		stream_retract(q, n);
+
 	net_close(str);
 	free(str->filename);
 	free(str->mode);
@@ -10238,7 +10243,7 @@ static USE_RESULT prolog_state fn_consult_1(query *q)
 	return pl_success;
 }
 
-#if 0
+#if 1
 static int format_integer(char *dst, int_t v, int grouping, int sep, int decimals)
 {
 	char tmpbuf1[256], tmpbuf2[256];
@@ -12948,9 +12953,9 @@ static const struct builtins g_other_funcs[] =
 	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars"},
 	{"ignore", 1, fn_ignore_1, "+callable"},
 
-#if 0
-	{"format", 2, fn_format_2, "+string,+list"},
-	{"format", 3, fn_format_3, "+stream,+string,+list"},
+#if 1
+	{"legacy_format", 2, fn_format_2, "+string,+list"},
+	{"legacy_format", 3, fn_format_3, "+stream,+string,+list"},
 #endif
 
 	{"rdiv", 2, fn_rdiv_2, "+integer,+integer"},
