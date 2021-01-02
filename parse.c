@@ -3551,16 +3551,14 @@ static void make_rule(module *m, const char *src)
 
 	m->prebuilt = true;
 	parser *p = create_parser(m);
-	if (p)
-	{
+	if (p) {
 		p->consulting = true;
 		p->srcptr = (char*)src;
 		parser_tokenize(p, false, false);
 		m->prebuilt = false;
 		destroy_parser(p);
-	} else {
+	} else
 		m->error = true;
-	}
 }
 
 void destroy_module(module *m)
@@ -3965,8 +3963,7 @@ module *create_module(prolog *pl, const char *name)
 		make_rule(m, "server(H,S) :- server(H,S,[]).");
 
 		parser *p = create_parser(m);
-		if (p)
-		{
+		if (p) {
 			p->consulting = true;
 			parser_xref_db(p);
 			destroy_parser(p);
