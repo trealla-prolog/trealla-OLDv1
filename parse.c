@@ -3732,8 +3732,8 @@ module *create_module(prolog *pl, const char *name)
 
 		make_rule(m, "keymerge([], R, R) :- !.");
 		make_rule(m, "keymerge(R, [], R) :- !.");
-		make_rule(m, "keymerge([H1|T1], [H2|T2], Result) :- "		\
-			"keycompare(Delta, H1, H2), !, "						\
+		make_rule(m, "keymerge([H1|T1], [H2|T2], Result) :- "	\
+			"keycompare(Delta, H1, H2), !, "					\
 			"keymerge(Delta, H1, H2, T1, T2, Result).");
 
 		make_rule(m, "keymerge(>, H1, H2, T1, T2, [H2|R]) :- "	\
@@ -3752,8 +3752,8 @@ module *create_module(prolog *pl, const char *name)
 
 		make_rule(m, "keysort(L, R) :- "						\
 			"instantiated(L, R), "								\
-			"mustbe_pairlist(L), "									\
-			"mustbe_pairlist_or_var(R), "							\
+			"mustbe_pairlist(L), "								\
+			"mustbe_pairlist_or_var(R), "						\
 			"length(L,N), "										\
 			"keysort(N, L, _, R).");
 
@@ -3886,41 +3886,41 @@ module *create_module(prolog *pl, const char *name)
 			"close(Str).");
 
 		make_rule(m, "'$append'([], L, L).");
-		make_rule(m, "'$append'([H|T], L, [H|R]) :- '$append'(T, L, R).");
+		make_rule(m, "'$append'([H|T], L, [H|R]) :- "			\
+			"'$append'(T, L, R).");
 
 		make_rule(m, "phrase(GRBody, S0) :-"					\
 			"phrase(GRBody, S0, [])."							\
 			"phrase(GRBody, S0, S) :-"							\
-			"  (	var(GRBody) -> throw(error(instantiation_error, phrase/3))"	\
-			"  ;	dcg_constr(GRBody) -> phrase_(GRBody, S0, S)" 				\
-			"  ;	functor(GRBody, _, _) -> call(GRBody, S0, S)" 				\
-			"  ;	throw(error(type_error(callable, GRBody), phrase/3))" 		\
-			"  )."												\
-			""													\
+			" ( var(GRBody) -> "								\
+			" throw(error(instantiation_error, phrase/3))"		\
+			" ; dcg_constr(GRBody) -> phrase_(GRBody, S0, S)"	\
+			" ; functor(GRBody, _, _) -> call(GRBody, S0, S)"	\
+			" ; throw(error(type_error(callable, GRBody), phrase/3))" \
+			")."												\
 			"phrase_([], S, S)."								\
 			"phrase_(!, S, S)."									\
 			"phrase_((A, B), S0, S) :-"							\
 			"  phrase(A, S0, S1), phrase(B, S1, S)."			\
 			"phrase_((A -> B ; C), S0, S) :-"					\
-			"  !,"												\
-			"  (	phrase(A, S0, S1) ->"						\
-			"    phrase(B, S1, S)"								\
-			"  ;	phrase(C, S0, S)"							\
-			"  )."												\
+			" !,"												\
+			" (phrase(A, S0, S1) ->"							\
+			"  phrase(B, S1, S) ; phrase(C, S0, S)"				\
+			" )."												\
 			"phrase_((A ; B), S0, S) :-"						\
-			"  (	phrase(A, S0, S) ; phrase(B, S0, S)  )." 	\
+			" (phrase(A, S0, S) ; phrase(B, S0, S))." 			\
 			"phrase_((A | B), S0, S) :-"						\
-			"  (	phrase(A, S0, S) ; phrase(B, S0, S)  )." 	\
+			" (phrase(A, S0, S) ; phrase(B, S0, S))." 			\
 			"phrase_({G}, S0, S) :-"							\
-			"  (	call(G), S0 = S	 )."						\
+			" (call(G), S0 = S)."								\
 			"phrase_(call(G), S0, S) :-"						\
-			"  call(G, S0, S)."									\
+			" call(G, S0, S)."									\
 			"phrase_((A -> B), S0, S) :-"						\
-			"  phrase((A -> B ; fail), S0, S)."					\
+			" phrase((A -> B ; fail), S0, S)."					\
 			"phrase_(phrase(NonTerminal), S0, S) :-"			\
-			"  phrase(NonTerminal, S0, S)."						\
+			" phrase(NonTerminal, S0, S)."						\
 			"phrase_([T|Ts], S0, S) :-"							\
-			"  '$append'([T|Ts], S, S0).");
+			" '$append'([T|Ts], S, S0).");
 
 		//make_rule(m, "forall(Cond,Action) :- \\+ (Cond, \\+ Action).");
 
