@@ -11524,15 +11524,14 @@ static void do_real_to_fraction(double v, double accuracy, int_t *num, int_t *de
 	int_t denominator = 1;
 	int_t numerator;
 
-	do
-	{
+	do {
 		z = 1.0 / (z - (int_t) z);
 		int_t tmp = denominator;
 		denominator = denominator * (int_t)z + previous_denominator;
 		previous_denominator = tmp;
 		numerator = v * denominator;
 	}
-	while (fabs(v-(double)numerator/denominator) > maxError && (z != (int_t)z));
+	 while (fabs(v-(double)numerator/denominator) > maxError && (z != (int_t)z));
 
 	*num = (n * denominator + numerator) * sign;
 	*den = denominator;

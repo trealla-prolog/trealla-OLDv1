@@ -1580,8 +1580,7 @@ static void parser_xref_cell(parser *p, term *t, cell *c, predicate *parent)
 		tmpbuf1[sizeof(tmpbuf1)-1] = tmpbuf2[sizeof(tmpbuf2)-1] = '\0';
 		m = find_module(p->m->pl, tmpbuf1);
 
-		if (m)
-		{
+		if (m) {
 			c->val_off = index_from_pool(p->m->pl, tmpbuf2);
 			ensure(c->val_off != ERR_IDX);
 		}
@@ -3618,8 +3617,7 @@ module *create_module(prolog *pl, const char *name)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	module *m = calloc(1, sizeof(module));
-	if (m)
-	{
+	if (m) {
 		m->pl = pl;
 		m->filename = strdup("./");
 		m->name = strdup(name);
