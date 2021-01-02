@@ -13112,8 +13112,6 @@ void load_builtins(bool iso_only)
 
 bool check_builtin(const char *name, unsigned arity)
 {
-	assert(g_bi_index);
-
 	sliter *iter = sl_findkey(g_bi_index, name);
 	const struct builtins *ptr;
 
@@ -13127,8 +13125,6 @@ bool check_builtin(const char *name, unsigned arity)
 
 void *get_builtin(const char *name, unsigned arity)
 {
-	assert(g_bi_index);
-
 	sliter *iter = sl_findkey(g_bi_index, name);
 	const struct builtins *ptr;
 
