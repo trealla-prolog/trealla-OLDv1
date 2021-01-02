@@ -6149,9 +6149,9 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 		tmp->arity = arity;
 
 		if (is_callable(tmp)) {
-			if ((tmp->fn = get_builtin(q->m, GET_STR(tmp), tmp->arity)) != NULL)
+			if ((tmp->fn = get_builtin(GET_STR(tmp), tmp->arity)) != NULL)
 				tmp->flags |= FLAG_BUILTIN;
-			else if (check_builtin(q->m, GET_STR(tmp), tmp->arity))
+			else if (check_builtin(GET_STR(tmp), tmp->arity))
 				tmp->flags |= FLAG_BUILTIN;
 			else {
 				tmp->match = find_matching_predicate_quiet(q->m, tmp);
@@ -6449,7 +6449,7 @@ static USE_RESULT prolog_state fn_iso_retractall_1(query *q)
 	if (!h) {
 		cell *head = get_head(p1);
 
-		if (check_builtin(q->m, GET_STR(head), head->arity))
+		if (check_builtin(GET_STR(head), head->arity))
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 		return pl_success;
@@ -6524,7 +6524,7 @@ static USE_RESULT prolog_state fn_iso_abolish_1(query *q)
 	if (p1_arity->val_num > MAX_ARITY)
 		return throw_error(q, p1_arity, "representation_error", "max_arity");
 
-	if (check_builtin(q->m, GET_STR(p1_name), p1_arity->val_num))
+	if (check_builtin(GET_STR(p1_name), p1_arity->val_num))
 		return throw_error(q, p1, "permission_error", "modify,static_procedure");
 
 	cell tmp;
@@ -6595,7 +6595,7 @@ static USE_RESULT prolog_state fn_iso_asserta_1(query *q)
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
 
-	if (check_builtin(q->m, GET_STR(head), head->arity))
+	if (check_builtin(GET_STR(head), head->arity))
 		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 	cell *tmp2, *body = get_body(p1);
@@ -6656,7 +6656,7 @@ static USE_RESULT prolog_state fn_iso_assertz_1(query *q)
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
 
-	if (check_builtin(q->m, GET_STR(head), head->arity))
+	if (check_builtin(GET_STR(head), head->arity))
 		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 	cell *tmp2, *body = get_body(p1);
@@ -6767,14 +6767,14 @@ static USE_RESULT prolog_state fn_iso_call_n(query *q)
 		c->flags = 0;
 	}
 
-	if ((tmp2->fn = get_builtin(q->m, GET_STR(tmp2), arity)) != NULL) {
+	if ((tmp2->fn = get_builtin(GET_STR(tmp2), arity)) != NULL) {
 		tmp2->flags |= FLAG_BUILTIN;
 		unsigned optype;
 		bool userop;
 
 		if (get_op(q->m, GET_STR(tmp2), &optype, &userop, false))
 			SET_OP(tmp2, optype);
-	} else if (check_builtin(q->m, GET_STR(tmp2), arity)) {
+	} else if (check_builtin(GET_STR(tmp2), arity)) {
 		tmp2->flags |= FLAG_BUILTIN;
 		unsigned optype;
 		bool userop;
@@ -7250,7 +7250,7 @@ static USE_RESULT prolog_state fn_iso_current_rule_1(query *q)
 			m = m->next;
 	}
 
-	if (check_builtin(q->m, functor, arity))
+	if (check_builtin(functor, arity))
 		return pl_success;
 
 	return pl_failure;
@@ -8142,7 +8142,7 @@ static USE_RESULT prolog_state do_asserta_2(query *q)
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
 
-	if (check_builtin(q->m, GET_STR(head), head->arity))
+	if (check_builtin(GET_STR(head), head->arity))
 		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 	cell *body = get_body(p1);
@@ -8234,7 +8234,7 @@ static USE_RESULT prolog_state do_assertz_2(query *q)
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
 
-	if (check_builtin(q->m, GET_STR(head), head->arity))
+	if (check_builtin(GET_STR(head), head->arity))
 		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 	cell *body = get_body(p1);
@@ -9831,9 +9831,9 @@ static USE_RESULT prolog_state fn_task_n(query *q)
 	tmp2->nbr_cells = tmp_heap_used(q);
 	tmp2->arity = arity;
 
-	if ((tmp2->fn = get_builtin(q->m, GET_STR(tmp2), arity)) != NULL)
+	if ((tmp2->fn = get_builtin(GET_STR(tmp2), arity)) != NULL)
 		tmp2->flags |= FLAG_BUILTIN;
-	else if (check_builtin(q->m, GET_STR(tmp2), arity))
+	else if (check_builtin(GET_STR(tmp2), arity))
 		tmp2->flags |= FLAG_BUILTIN;
 	else {
 		tmp2->match = find_matching_predicate(q->m, tmp2);
@@ -11794,7 +11794,7 @@ static USE_RESULT prolog_state fn_predicate_property_2(query *q)
 	const char *f = GET_STR(p1);
 	cell tmp;
 
-	if (check_builtin(q->m, f, p1->arity)) {
+	if (check_builtin(f, p1->arity)) {
 		make_literal(&tmp, index_from_pool(q->m->pl, "built_in"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
@@ -13096,36 +13096,44 @@ static const struct builtins g_other_funcs[] =
 	{0}
 };
 
-bool check_builtin(module *m, const char *name, unsigned arity)
+void load_builtins(bool iso_only)
 {
 	for (const struct builtins *ptr = g_iso_funcs; ptr->name; ptr++) {
-		if ((ptr->arity == arity) && !strcmp(ptr->name, name))
-			return true;
+		sl_app(g_bi_index, ptr->name, ptr);
 	}
 
-	if (m->iso_only)
-		return false;
+	if (iso_only)
+		return;
 
 	for (const struct builtins *ptr = g_other_funcs; ptr->name; ptr++) {
-		if ((ptr->arity == arity) && !strcmp(ptr->name, name))
+		sl_app(g_bi_index, ptr->name, ptr);
+	}
+}
+
+bool check_builtin(const char *name, unsigned arity)
+{
+	assert(g_bi_index);
+
+	sliter *iter = sl_findkey(g_bi_index, name);
+	const struct builtins *ptr;
+
+	while (sl_nextkey(iter, (void**)&ptr)) {
+		if (ptr->arity == arity)
 			return true;
 	}
 
 	return false;
 }
 
-void *get_builtin(module *m, const char *name, unsigned arity)
+void *get_builtin(const char *name, unsigned arity)
 {
-	for (const struct builtins *ptr = g_iso_funcs; ptr->name; ptr++) {
-		if ((ptr->arity == arity) && !strcmp(ptr->name, name))
-			return ptr->fn;
-	}
+	assert(g_bi_index);
 
-	if (m->iso_only)
-		return NULL;
+	sliter *iter = sl_findkey(g_bi_index, name);
+	const struct builtins *ptr;
 
-	for (const struct builtins *ptr = g_other_funcs; ptr->name; ptr++) {
-		if ((ptr->arity == arity) && !strcmp(ptr->name, name))
+	while (sl_nextkey(iter, (void**)&ptr)) {
+		if (ptr->arity == arity)
 			return ptr->fn;
 	}
 
