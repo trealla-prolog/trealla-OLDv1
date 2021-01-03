@@ -1931,22 +1931,6 @@ static bool attach_ops(parser *p, idx_t start_idx)
 		c->val_type = TYPE_LITERAL;
 		c->arity = 1;
 
-#if 0
-		if (IS_XFX(c) && ((i+2) < (p->t->cidx-1))) {
-			cell *rhs = c + 2;
-
-			if ((IS_XFX(rhs)) && (rhs->precedence == c->precedence)) {
-				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
-					fprintf(stdout, "Error: operator clash\n");
-
-				p->error = true;
-				c->flags = 0;
-				c->arity = 0;
-				return false;
-			}
-		}
-#endif
-
 		// Prefix...
 
 		if (IS_FX(c) || IS_FX(c)) {
@@ -2031,6 +2015,23 @@ static bool attach_ops(parser *p, idx_t start_idx)
 		*c = save;
 		c->nbr_cells += (c+1)->nbr_cells;
 		i += c->nbr_cells;
+
+#if 0
+		if (IS_XFX(c)) {
+			cell *rhs = c + c->nbr_cells;
+
+			if ((i < p->t->cidx) && (IS_XFX(rhs)) && (rhs->precedence == c->precedence)) {
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
+
+				p->error = true;
+				c->flags = 0;
+				c->arity = 0;
+				return false;
+			}
+		}
+#endif
+
 		break;
 	}
 

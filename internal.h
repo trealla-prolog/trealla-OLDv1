@@ -203,17 +203,17 @@ enum {
 
 #define IS_PREFIX(op) ((op == OP_FX) || (op == OP_FY))
 
-#define IS_FX(c) ((c->flags >> 12) == OP_FX)
-#define IS_FY(c) ((c->flags >> 12) == OP_FY)
-#define IS_XF(c) ((c->flags >> 12) == OP_XF)
-#define IS_YF(c) ((c->flags >> 12) == OP_YF)
-#define IS_YFX(c) ((c->flags >> 12) == OP_YFX)
-#define IS_XFX(c) ((c->flags >> 12) == OP_XFX)
-#define IS_XFY(c) ((c->flags >> 12) == OP_XFY)
+#define IS_FX(c) (GET_OP(c) == OP_FX)
+#define IS_FY(c) (GET_OP(c) == OP_FY)
+#define IS_XF(c) (GET_OP(c) == OP_XF)
+#define IS_YF(c) (GET_OP(c) == OP_YF)
+#define IS_YFX(c) (GET_OP(c) == OP_YFX)
+#define IS_XFX(c) (GET_OP(c) == OP_XFX)
+#define IS_XFY(c) (GET_OP(c) == OP_XFY)
 
-#define SET_OP(c,optype) (c)->flags |= (((uint16_t)(optype)) << 12)
-#define CLR_OP(c) ((c)->flags &= ~((uint16_t)(0xF << 12)))
-#define GET_OP(c) ((c)->flags >> 12)
+#define SET_OP(c,op) ((c)->flags |= (((uint16_t)(op)) << 12))
+#define CLR_OP(c) ((c)->flags &= ~((uint16_t)(0xF) << 12))
+#define GET_OP(c) (((c)->flags >> 12) & 0xF)
 #define IS_OP(c) (GET_OP(c) != 0 ? true : false)
 
 typedef struct module_ module;
