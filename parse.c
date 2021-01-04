@@ -161,7 +161,6 @@ idx_t index_from_pool(prolog *pl, const char *name)
 
 unsigned get_op(module *m, const char *name, unsigned *optype, bool *userop, bool hint_prefix)
 {
-	assert(m);
 	assert(name);
 
 	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
@@ -227,8 +226,6 @@ bool set_op(module *m, const char *name, unsigned optype, unsigned precedence)
 
 cell *list_head(cell *l, cell *tmp)
 {
-	assert(l);
-
 	if (!is_string(l))
 		return l + 1;
 
@@ -249,7 +246,6 @@ cell *list_head(cell *l, cell *tmp)
 cell *list_tail(cell *l, cell *tmp)
 {
 	if (!l) return NULL;
-	assert(tmp);
 
 	if (!is_string(l)) {
 		cell *h = l + 1;
@@ -289,8 +285,6 @@ module *find_next_module(prolog *pl, module *m)
 
 module *find_module(prolog *pl, const char *name)
 {
-	assert(name);
-
 	for (module *m = pl->modules; m; m = m->next) {
 		if (!strcmp(m->name, name))
 			return m;
@@ -356,9 +350,6 @@ cell *get_logical_body(cell *c)
 
 predicate *find_predicate(module *m, cell *c)
 {
-	assert(m);
-	assert(c);
-
 	cell tmp = *c;
 	tmp.val_type = TYPE_LITERAL;
 	tmp.flags = FLAG_KEY;
@@ -383,8 +374,6 @@ predicate *find_predicate(module *m, cell *c)
 
 static predicate *find_matching_predicate_internal(module *m, cell *c, bool quiet)
 {
-	assert(c);
-
 	module *save_m = m;
 	module *tmp_m = NULL;
 
@@ -422,8 +411,6 @@ predicate *find_matching_predicate_quiet(module *m, cell *c)
 
 predicate *find_functor(module *m, const char *name, unsigned arity)
 {
-	assert(m && name);
-
 	cell tmp = {0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
@@ -433,7 +420,6 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 
 static predicate *create_predicate(module *m, cell *c)
 {
-	assert(m && c);
 	assert(is_literal(c));
 
 	FAULTINJECT(errno = ENOMEM; return NULL);
@@ -456,7 +442,6 @@ static predicate *create_predicate(module *m, cell *c)
 
 static void set_multifile_in_db(module *m, const char *name, idx_t arity)
 {
-	if (!m) return;
 	assert(name);
 
 	cell tmp = {0};
@@ -474,8 +459,6 @@ static void set_multifile_in_db(module *m, const char *name, idx_t arity)
 
 static bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, idx_t arity)
 {
-	assert(mod);
-
 	module *m = find_module(pl, mod);
 	if (!m) return false;
 
@@ -558,7 +541,6 @@ static int compkey(const void *param, const void *ptr1, const void *ptr2)
 
 static void reindex_predicate(module *m, predicate *h)
 {
-	assert(h);
 	h->index = sl_create1(compkey, m);
 	ensure(h->index);
 
@@ -571,9 +553,6 @@ static void reindex_predicate(module *m, predicate *h)
 
 static clause* assert_begin(module *m, term *t, bool consulting)
 {
-	if (!m || !t)
-		return NULL;
-
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
 		idx_t off = index_from_pool(m->pl, MODULE_GET_STR(c));
@@ -1867,8 +1846,6 @@ void parser_term_to_body(parser *p)
 
 static bool attach_ops(parser *p, idx_t start_idx)
 {
-	assert(p);
-
 	idx_t lowest = IDX_MAX, work_idx;
 	bool do_work = false;
 
@@ -2054,10 +2031,7 @@ void parser_reset(parser *p)
 
 static void parser_dcg_rewrite(parser *p)
 {
-	if (!p || p->error)
-		return;
-
-	if (!is_literal(p->t->cells))
+	if (p->error || !is_literal(p->t->cells))
 		return;
 
 	if (strcmp(PARSER_GET_STR(p->t->cells), "-->") || (p->t->cells->arity != 2))
@@ -2139,14 +2113,6 @@ static void parser_dcg_rewrite(parser *p)
 
 static cell *make_literal(parser *p, idx_t offset)
 {
-	if (!p || p->error)
-		return NULL;
-
-	assert(p->m); //if (!p->m) return NULL; ? is p->m expected to hold a reference in all (non-error) cases?
-
-	if (offset == ERR_IDX)
-		return NULL;
-
 	cell *c = make_cell(p);
 	c->val_type = TYPE_LITERAL;
 	c->nbr_cells = 1;
@@ -2578,7 +2544,7 @@ static const char *eat_space(parser *p)
 
 static bool get_token(parser *p, int last_op)
 {
-	if (!p || p->error)
+	if (p->error)
 		return false;
 
 	const char *src = p->srcptr;
@@ -2981,7 +2947,6 @@ void fix_list(cell *c)
 
 unsigned parser_tokenize(parser *p, bool args, bool consing)
 {
-	assert(p);
 	idx_t begin_idx = p->t->cidx, save_idx = 0;
 	bool last_op = true, is_func = false, was_consing = false;
 	bool last_bar = false;
