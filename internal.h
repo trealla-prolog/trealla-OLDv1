@@ -211,7 +211,7 @@ enum {
 #define IS_XFX(c) (GET_OP(c) == OP_XFX)
 #define IS_XFY(c) (GET_OP(c) == OP_XFY)
 
-#define SET_OP(c,op) ((c)->flags |= (((uint16_t)(op)) << 12))
+#define SET_OP(c,op) (CLR_OP(c), (c)->flags |= (((uint16_t)(op)) << 12))
 #define CLR_OP(c) ((c)->flags &= ~((uint16_t)(0xF) << 12))
 #define GET_OP(c) (((c)->flags >> 12) & 0xF)
 #define IS_OP(c) (GET_OP(c) != 0 ? true : false)

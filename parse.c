@@ -2016,7 +2016,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 		c->nbr_cells += (c+1)->nbr_cells;
 		i += c->nbr_cells;
 
-#if 1
+#if 0
 		if (IS_XFX(c)) {
 			cell *rhs = c + c->nbr_cells;
 
@@ -3305,7 +3305,6 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 
 		last_bar = false;
-		printf("*** %s / %u\n", PARSER_GET_STR(c), GET_OP(c));
 	}
 
 	p->depth--;
