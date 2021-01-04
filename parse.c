@@ -2016,11 +2016,12 @@ static bool attach_ops(parser *p, idx_t start_idx)
 		c->nbr_cells += (c+1)->nbr_cells;
 		i += c->nbr_cells;
 
-#if 0
 		if (IS_XFX(c)) {
 			cell *rhs = c + c->nbr_cells;
 
-			if ((i < p->t->cidx) && (IS_XFX(rhs)) && (rhs->precedence == c->precedence)) {
+			if ((i < p->t->cidx)
+				&& (IS_XFX(rhs))
+				&& (rhs->precedence == c->precedence)) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
 
@@ -2030,7 +2031,6 @@ static bool attach_ops(parser *p, idx_t start_idx)
 				return false;
 			}
 		}
-#endif
 
 		break;
 	}
@@ -3125,6 +3125,10 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			p->start_term = true;
 			last_op = true;
 			continue;
+		}
+
+		if (!p->quote_char && args && !strcmp(p->token, ",")) {
+			parser_attach(p, begin_idx);
 		}
 
 		if (!p->quote_char && !strcmp(p->token, ",") && args) {
