@@ -1847,7 +1847,7 @@ void parser_term_to_body(parser *p)
 static bool attach_ops(parser *p, idx_t start_idx)
 {
 	idx_t lowest = IDX_MAX, work_idx;
-	bool do_work = false;
+	bool do_work = false, right_le = false, left_le = false;
 
 	for (idx_t i = start_idx; i < p->t->cidx;) {
 		cell *c = p->t->cells + i;
@@ -1862,7 +1862,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			continue;
 		}
 
-		if (IS_XFY(c) || IS_FY(c)) {
+		if (right_le) {
 			if (c->precedence <= lowest) {
 				lowest = c->precedence;
 				work_idx = i;
@@ -1875,6 +1875,18 @@ static bool attach_ops(parser *p, idx_t start_idx)
 				do_work = true;
 			}
 		}
+
+		if (IS_XFY(c) || IS_FY(c))
+			right_le = true;
+
+		if (IS_XFX(c) || IS_YFX(c) || IS_FX(c))
+			right_le = false;
+
+		if (IS_YFX(c) || IS_YF(c))
+			left_le = true;
+
+		if (IS_XFX(c) || IS_XFY(c) || IS_XF(c))
+			left_le = false;
 
 		i++;
 	}
@@ -1982,6 +1994,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			}
 		}
 #endif
+
 		if (!IS_XF(c) && !IS_YF(c))
 			save.nbr_cells += (c+1)->nbr_cells;
 
