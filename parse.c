@@ -1910,6 +1910,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 		// Prefix...
 
+#if 1
 		if (IS_FX(c) || IS_FX(c)) {
 			cell *rhs = c + 1;
 
@@ -1923,6 +1924,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 				return false;
 			}
 		}
+#endif
 
 		if (IS_FX(c) || IS_FY(c)) {
 			last_idx = i;
@@ -1965,6 +1967,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 		cell save = *c;
 
+#if 1
 		if (IS_XF(c) || IS_YF(c)) {
 			cell *rhs = c + 1;
 
@@ -1978,7 +1981,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 				return false;
 			}
 		}
-
+#endif
 		if (!IS_XF(c) && !IS_YF(c))
 			save.nbr_cells += (c+1)->nbr_cells;
 
@@ -1993,6 +1996,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 		c->nbr_cells += (c+1)->nbr_cells;
 		i += c->nbr_cells;
 
+#if 1
 		if (IS_XFX(c)) {
 			cell *rhs = c + c->nbr_cells;
 
@@ -2008,6 +2012,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 				return false;
 			}
 		}
+#endif
 
 		break;
 	}
