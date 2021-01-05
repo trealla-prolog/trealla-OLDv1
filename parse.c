@@ -1845,13 +1845,8 @@ static bool attach_ops(parser *p, idx_t start_idx)
 	for (idx_t i = start_idx; i < p->t->cidx;) {
 		const cell *c = p->t->cells + i;
 
-		if (c->nbr_cells > 1) {
+		if ((c->nbr_cells > 1) || !is_literal(c) || !c->precedence) {
 			i += c->nbr_cells;
-			continue;
-		}
-
-		if (!is_literal(c) || !c->precedence) {
-			i++;
 			continue;
 		}
 
@@ -1873,21 +1868,15 @@ static bool attach_ops(parser *p, idx_t start_idx)
 	for (idx_t i = start_idx; i < p->t->cidx;) {
 		cell *c = p->t->cells + i;
 
-		if (c->nbr_cells > 1) {
+		if ((c->nbr_cells > 1) || !is_literal(c) || !c->precedence) {
 			last_idx = i;
 			i += c->nbr_cells;
 			continue;
 		}
 
-		if (!is_literal(c) || !c->precedence) {
-			last_idx = i;
-			i++;
-			continue;
-		}
-
 		if ((c->precedence != lowest) || (i != work_idx)) {
 			last_idx = i;
-			i++;
+			i += c->nbr_cells;
 			continue;
 		}
 
@@ -1899,7 +1888,17 @@ static bool attach_ops(parser *p, idx_t start_idx)
 		if (IS_FX(c)) {
 			cell *rhs = c + 1;
 
-			if ((IS_FX(rhs) || IS_XF(rhs)) && (rhs->precedence == c->precedence)) {
+			if (IS_FX(rhs) && (rhs->precedence == c->precedence)) {
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					fprintf(stdout, "Error: operator clash\n");
+
+				p->error = true;
+				return false;
+			}
+
+			rhs += rhs->nbr_cells;
+
+			if (IS_XF(rhs) && (rhs->precedence == c->precedence)) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: operator clash\n");
 
@@ -1922,7 +1921,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 				return false;
 			}
 
-			continue;
+			break;
 		}
 
 		// Infix...
@@ -1943,8 +1942,6 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 		// Infix and Postfix...
 
-		cell save = *c;
-
 		if (IS_XF(c) || IS_YF(c)) {
 			cell *rhs = c + 1;
 
@@ -1958,31 +1955,44 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			}
 		}
 
-		if (!IS_XF(c) && !IS_YF(c))
+		cell save = *c;
+
+		if (IS_XF(c) || IS_YF(c)) {
+			cell *c_last = p->t->cells + last_idx;
+			save.nbr_cells += c_last->nbr_cells;
+			idx_t cells_to_move = c_last->nbr_cells;
+			c_last = c - 1;
+
+			while (cells_to_move--)
+				*c-- = *c_last--;
+
+			*c = save;
+			i += c->nbr_cells;
+		} else {
 			save.nbr_cells += (c+1)->nbr_cells;
+			cell *c_last = p->t->cells + last_idx;
+			idx_t cells_to_move = c_last->nbr_cells;
+			c_last = c - 1;
 
-		cell *c_last = p->t->cells + last_idx;
-		idx_t cells_to_move = c_last->nbr_cells;
-		c_last = c - 1;
+			while (cells_to_move--)
+				*c-- = *c_last--;
 
-		while (cells_to_move--)
-			*c-- = *c_last--;
+			*c = save;
+			c->nbr_cells += (c+1)->nbr_cells;
+			i += c->nbr_cells;
 
-		*c = save;
-		c->nbr_cells += (c+1)->nbr_cells;
-		i += c->nbr_cells;
+			if (IS_XFX(c)) {
+				cell *rhs = c + c->nbr_cells;
 
-		if (IS_XFX(c)) {
-			cell *rhs = c + c->nbr_cells;
+				if ((i < p->t->cidx)
+					&& (IS_XFX(rhs))
+					&& (rhs->precedence == c->precedence)) {
+					if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+						fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
 
-			if ((i < p->t->cidx)
-				&& (IS_XFX(rhs))
-				&& (rhs->precedence == c->precedence)) {
-				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
-					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
-
-				p->error = true;
-				return false;
+					p->error = true;
+					return false;
+				}
 			}
 		}
 
