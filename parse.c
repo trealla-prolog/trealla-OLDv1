@@ -1850,7 +1850,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 	bool do_work = false, bind_le = false;
 
 	for (idx_t i = start_idx; i < p->t->cidx;) {
-		cell *c = p->t->cells + i;
+		const cell *c = p->t->cells + i;
 
 		if (c->nbr_cells > 1) {
 			i += c->nbr_cells;
@@ -1862,25 +1862,13 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			continue;
 		}
 
-		if (bind_le) {
-			if (c->precedence <= lowest) {
-				lowest = c->precedence;
-				work_idx = i;
-				do_work = true;
-			}
-		} else {
-			if (c->precedence < lowest) {
-				lowest = c->precedence;
-				work_idx = i;
-				do_work = true;
-			}
+		if (bind_le ? c->precedence <= lowest : c->precedence < lowest) {
+			lowest = c->precedence;
+			work_idx = i;
+			do_work = true;
 		}
 
-		if (IS_XFY(c) || IS_FY(c))
-			bind_le = true;
-		else
-			bind_le = false;
-
+		bind_le = IS_XFY(c) || IS_FY(c) ? true : false;
 		i++;
 	}
 
@@ -1922,7 +1910,6 @@ static bool attach_ops(parser *p, idx_t start_idx)
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: operator clash\n");
 
-				c->flags = 0; c->arity = 0;
 				p->error = true;
 				return false;
 			}
@@ -1938,7 +1925,6 @@ static bool attach_ops(parser *p, idx_t start_idx)
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: missing operand to '%s'\n", PARSER_GET_STR(c));
 
-				c->flags = 0; c->arity = 0;
 				p->error = true;
 				return false;
 			}
@@ -1955,7 +1941,6 @@ static bool attach_ops(parser *p, idx_t start_idx)
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: missing operand to '%s'\n", PARSER_GET_STR(c));
 
-				c->flags = 0; c->arity = 0;
 				p->error = true;
 				return false;
 			}
@@ -1975,8 +1960,6 @@ static bool attach_ops(parser *p, idx_t start_idx)
 					fprintf(stdout, "Error: operator clash: %s\n", PARSER_GET_STR(c));
 
 				p->error = true;
-				c->flags = 0;
-				c->arity = 0;
 				return false;
 			}
 		}
@@ -2005,8 +1988,6 @@ static bool attach_ops(parser *p, idx_t start_idx)
 					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
 
 				p->error = true;
-				c->flags = 0;
-				c->arity = 0;
 				return false;
 			}
 		}
