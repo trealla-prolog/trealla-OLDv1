@@ -1896,7 +1896,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 		// Prefix...
 
-		if (IS_FX(c) || IS_FX(c)) {
+		if (IS_FX(c)) {
 			cell *rhs = c + 1;
 
 			if ((IS_FX(rhs) || IS_XF(rhs)) && (rhs->precedence == c->precedence)) {
