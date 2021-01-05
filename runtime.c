@@ -60,7 +60,8 @@ size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max
 		if (mem) break;
 		elements = min_elements + (elements-min_elements)/2;
 		message("memory pressure reduce %lu to %lu", max_elements, elements);
-	} while (elements > min_elements);
+	}
+	 while (elements > min_elements);
 
 	if (!mem)
 		return 0;
@@ -435,8 +436,6 @@ void stash_me(query *q, term *t, bool last_match)
 
 prolog_state make_choice(query *q)
 {
-	assert(q);
-
 	may_error(check_frame(q));
 	may_error(check_choice(q));
 
@@ -579,7 +578,6 @@ unsigned create_vars(query *q, unsigned cnt)
 	} else if ((g->overflow + (g->nbr_vars-g->nbr_slots)) == q->st.sp) {
 		q->st.sp += cnt;
 	} else {
-		//assert(0);
 		idx_t save_overflow = g->overflow;
 		g->overflow = q->st.sp;
 		idx_t cnt2 = g->nbr_vars-g->nbr_slots;
@@ -1117,7 +1115,6 @@ static USE_RESULT prolog_state match_head(query *q)
 
 prolog_state run_query(query *q)
 {
-	assert(q);
 	q->yielded = false;
 
 	while (!q->error) {
