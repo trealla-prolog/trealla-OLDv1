@@ -1948,7 +1948,8 @@ static bool attach_ops(parser *p, idx_t start_idx)
 		if (IS_XF(c) || IS_YF(c)) {
 			cell *rhs = c + 1;
 
-			if ((IS_XF(rhs) || IS_YF(rhs)) && (rhs->precedence == c->precedence)) {
+			if ((IS_XF(rhs) || IS_YF(rhs))
+				&& (rhs->precedence == c->precedence)) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: operator clash: %s\n", PARSER_GET_STR(c));
 
@@ -1962,7 +1963,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 		cell *c_last = p->t->cells + last_idx;
 		idx_t cells_to_move = c_last->nbr_cells;
-		c_last = c-1;
+		c_last = c - 1;
 
 		while (cells_to_move--)
 			*c-- = *c_last--;
