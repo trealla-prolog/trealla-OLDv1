@@ -386,8 +386,8 @@ typedef struct {
 
 typedef struct {
 	state st;
-	idx_t v1, v2, cgen, overflow;
 	uint64_t pins;
+	idx_t v1, v2, cgen, overflow;
 	uint16_t nbr_vars, nbr_slots;
 	bool local_cut:1;
 	bool any_choices:1;
@@ -430,7 +430,6 @@ struct query_ {
 	arena *arenas;
 	cell accum;
 	state st;
-	uint8_t nv_mask[MAX_ARITY];
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
 	uint64_t step, qid, time_started;
 	unsigned max_depth, tmo_msecs;
@@ -440,6 +439,7 @@ struct query_ {
 	idx_t max_choices, max_frames, max_slots, max_trails;
 	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;
 	idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
+	uint8_t nv_mask[MAX_ARITY];
 	char_flags flag;
 	enum q_retry retry;
 	int8_t halt_code;

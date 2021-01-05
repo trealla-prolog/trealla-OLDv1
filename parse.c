@@ -6,13 +6,6 @@
 #include <float.h>
 #include <sys/time.h>
 
-#ifdef _WIN32
-#include <io.h>
-#define isatty _isatty
-#else
-#include <unistd.h>
-#endif
-
 #include "internal.h"
 #include "history.h"
 #include "library.h"

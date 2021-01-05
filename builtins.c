@@ -60,7 +60,7 @@ static void msleep(int ms)
 			return throw_error(q, q->st.curr_cell, "existence_error", "procedure");	\
 	}
 
-cell* ERR_CYCLE_CELL = &(cell){};
+cell *ERR_CYCLE_CELL = &(cell){};
 
 static idx_t safe_copy_cells(query *q, cell *dst, const cell *src, idx_t nbr_cells)
 {
