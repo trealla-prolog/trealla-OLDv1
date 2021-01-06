@@ -3081,9 +3081,8 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
-		if (!p->quote_char && args && !strcmp(p->token, ",")) {
+		if (!p->quote_char && args && !strcmp(p->token, ","))
 			parser_attach(p, begin_idx, args);
-		}
 
 		if (!p->quote_char && !strcmp(p->token, ",") && args) {
 			if (*p->srcptr == ',') {
