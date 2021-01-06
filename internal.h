@@ -71,7 +71,7 @@ typedef uint32_t idx_t;
 #define MAX_SMALL_STRING (MAX(sizeof(int_t),sizeof(void*))*2)
 #define MAX_VAR_POOL_SIZE 1000
 #define MAX_ARITY UCHAR_MAX
-#define MAX_USER_OPS 200
+#define MAX_USER_OPS 250
 #define MAX_QUEUES 16
 #define MAX_STREAMS 1024
 #define MAX_DEPTH 10000
@@ -611,7 +611,6 @@ parser *create_parser(module *m);
 void destroy_parser(parser *p);
 void destroy_parser_nodelete(parser *p);
 unsigned parser_tokenize(parser *p, bool args, bool consing);
-bool parser_attach(parser *p, idx_t start_idx);
 void parser_xref(parser *p, term *t, predicate *parent);
 void parser_reset(parser *p);
 idx_t drop_choice(query *q);

@@ -186,7 +186,7 @@ unsigned get_op(module *m, const char *name, unsigned *optype, bool *userop, boo
 
 bool set_op(module *m, const char *name, unsigned optype, unsigned precedence)
 {
-	ensure (m && name);
+	assert(name);
 
 	unsigned ot = 0, prec = 0;
 	bool userop = false;
@@ -1378,12 +1378,12 @@ static void directives(parser *p, term *t)
 			optype = OP_FY;
 		else if (!strcmp(spec, "xf"))
 			optype = OP_XF;
+		else if (!strcmp(spec, "yf"))
+			optype = OP_YF;
 		else if (!strcmp(spec, "xfx"))
 			optype = OP_XFX;
 		else if (!strcmp(spec, "xfy"))
 			optype = OP_XFY;
-		else if (!strcmp(spec, "yf"))
-			optype = OP_YF;
 		else if (!strcmp(spec, "yfx"))
 			optype = OP_YFX;
 		else {
@@ -1837,7 +1837,7 @@ void parser_term_to_body(parser *p)
 	p->t->cells->nbr_cells = p->t->cidx - 1;
 }
 
-static bool attach_ops(parser *p, idx_t start_idx)
+static bool attach_ops(parser *p, idx_t start_idx, bool args)
 {
 	idx_t lowest = IDX_MAX, work_idx;
 	bool do_work = false, bind_le = false;
@@ -1867,6 +1867,8 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 	for (idx_t i = start_idx; i < p->t->cidx;) {
 		cell *c = p->t->cells + i;
+
+		//printf("*** OP0 %s type=%u, optype=%u, prec=%u\n", PARSER_GET_STR(c), c->val_type, GET_OP(c), c->precedence);
 
 		if ((c->nbr_cells > 1) || !is_literal(c) || !c->precedence) {
 			last_idx = i;
@@ -1942,10 +1944,10 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 		// Infix and Postfix...
 
-		if (IS_XF(c) || IS_YF(c)) {
+		if (IS_XF(c) /*|| IS_YF(c)*/) {
 			cell *rhs = c + 1;
 
-			if ((IS_XF(rhs) || IS_YF(rhs))
+			if ((IS_XF(rhs) /*|| IS_YF(rhs)*/)
 				&& (rhs->precedence == c->precedence)) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: operator clash: %s\n", PARSER_GET_STR(c));
@@ -1967,7 +1969,6 @@ static bool attach_ops(parser *p, idx_t start_idx)
 				*c-- = *c_last--;
 
 			*c = save;
-			i += c->nbr_cells;
 		} else {
 			save.nbr_cells += (c+1)->nbr_cells;
 			cell *c_last = p->t->cells + last_idx;
@@ -1979,6 +1980,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 			*c = save;
 			c->nbr_cells += (c+1)->nbr_cells;
+			c->arity = 2;
 			i += c->nbr_cells;
 
 			if (IS_XFX(c)) {
@@ -2002,9 +2004,9 @@ static bool attach_ops(parser *p, idx_t start_idx)
 	return true;
 }
 
-bool parser_attach(parser *p, idx_t start_idx)
+bool parser_attach(parser *p, idx_t start_idx, bool args)
 {
-	while (attach_ops(p, start_idx))
+	while (attach_ops(p, start_idx, args))
 		;
 
 	return !p->error;
@@ -2953,7 +2955,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		    && (*p->srcptr != ')')
 		    && (*p->srcptr != ']')
 		    && (*p->srcptr != '|')) {
-			if (parser_attach(p, 0)) {
+			if (parser_attach(p, 0, args)) {
 				parser_assign_vars(p, p->read_term, false);
 				parser_term_to_body(p);
 
@@ -3080,7 +3082,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && args && !strcmp(p->token, ",")) {
-			parser_attach(p, begin_idx);
+			parser_attach(p, begin_idx, args);
 		}
 
 		if (!p->quote_char && !strcmp(p->token, ",") && args) {
@@ -3147,7 +3149,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && (!strcmp(p->token, ")") || !strcmp(p->token, "]") || !strcmp(p->token, "}"))) {
-			parser_attach(p, begin_idx);
+			parser_attach(p, begin_idx, args);
 			return arity;
 		}
 
@@ -3168,13 +3170,23 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			precedence = 0;
 		}
 
-		if (precedence && (
-			(*p->srcptr == ',') || (*p->srcptr == ')') ||
+#if 1
+		if (precedence
+			&& (optype != OP_XF) && (optype != OP_YF)
+			&& ((*p->srcptr == ',') || (*p->srcptr == ')') ||
 			(*p->srcptr == '|') || (*p->srcptr == ']') ||
 			(*p->srcptr == '}') )) {
 			optype = 0;
 			precedence = 0;
 		}
+
+		if (precedence
+			&& ((optype == OP_XF) || (optype == OP_YF))
+			&& last_op) {
+			optype = 0;
+			precedence = 0;
+		}
+#endif
 
 		// Operators in canonical form..
 
@@ -3324,7 +3336,7 @@ static bool parser_run(parser *p, const char *src, int dump)
 		return true;
 	}
 
-	if (!parser_attach(p, 0))
+	if (!parser_attach(p, 0, false))
 		return false;
 
 	parser_assign_vars(p, 0, false);
