@@ -202,6 +202,8 @@ enum {
 #define	OP_XFY 7
 
 #define IS_PREFIX(op) ((op == OP_FX) || (op == OP_FY))
+#define IS_POSTFIX(op) ((op == OP_XF) || (op == OP_YF))
+#define IS_INFIX(op) ((op == OP_XFX) || (op == OP_XFY) || (op == OP_YFX))
 
 #define IS_FX(c) (GET_OP(c) == OP_FX)
 #define IS_FY(c) (GET_OP(c) == OP_FY)
