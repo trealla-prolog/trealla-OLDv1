@@ -205,6 +205,10 @@ enum {
 #define IS_POSTFIX(op) ((op == OP_XF) || (op == OP_YF))
 #define IS_INFIX(op) ((op == OP_XFX) || (op == OP_XFY) || (op == OP_YFX))
 
+#define CELL_PREFIX(c) IS_PREFIX(GET_OP(c))
+#define CELL_POSTFIX(c) IS_POSTFIX(GET_OP(c))
+#define CELL_INFIX(c) IS_INFIX(GET_OP(c))
+
 #define IS_FX(c) (GET_OP(c) == OP_FX)
 #define IS_FY(c) (GET_OP(c) == OP_FY)
 #define IS_XF(c) (GET_OP(c) == OP_XF)
