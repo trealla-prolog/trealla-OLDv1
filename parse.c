@@ -1943,14 +1943,14 @@ static bool attach_ops(parser *p, idx_t start_idx, bool args)
 		cell save = *c;
 
 		if (IS_XF(c) || IS_YF(c)) {
-			cell *c_last = p->t->cells + last_idx;
-			save.nbr_cells += c_last->nbr_cells;
+			cell *lhs = p->t->cells + last_idx;
+			save.nbr_cells += lhs->nbr_cells;
 			save.arity = 1;
-			idx_t cells_to_move = c_last->nbr_cells;
-			c_last = c - 1;
+			idx_t cells_to_move = lhs->nbr_cells;
+			lhs = c - 1;
 
 			while (cells_to_move--)
-				*c-- = *c_last--;
+				*c-- = *lhs--;
 
 			*c = save;
 			break;
@@ -1970,13 +1970,13 @@ static bool attach_ops(parser *p, idx_t start_idx, bool args)
 			return false;
 		}
 
-		cell *c_last = p->t->cells + last_idx;
-		save.nbr_cells += c_last->nbr_cells;
-		idx_t cells_to_move = c_last->nbr_cells;
-		c_last = c - 1;
+		cell *lhs = p->t->cells + last_idx;
+		save.nbr_cells += lhs->nbr_cells;
+		idx_t cells_to_move = lhs->nbr_cells;
+		lhs = c - 1;
 
 		while (cells_to_move--)
-			*c-- = *c_last--;
+			*c-- = *lhs--;
 
 		*c = save;
 		c->nbr_cells += rhs->nbr_cells;
@@ -1984,10 +1984,10 @@ static bool attach_ops(parser *p, idx_t start_idx, bool args)
 		i += 1 + rhs->nbr_cells;
 
 		if (IS_XFX(c)) {
-			cell *rhs = c + c->nbr_cells;
+			cell *next = c + c->nbr_cells;
 
 			if ((i < p->t->cidx)
-				&& (IS_XFX(rhs))
+				&& (IS_XFX(next))
 				&& (rhs->precedence == c->precedence)) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
