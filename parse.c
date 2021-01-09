@@ -1837,7 +1837,7 @@ void parser_term_to_body(parser *p)
 	p->t->cells->nbr_cells = p->t->cidx - 1;
 }
 
-static bool attach_ops(parser *p, idx_t start_idx, bool args)
+static bool attach_ops(parser *p, idx_t start_idx)
 {
 	idx_t lowest = IDX_MAX, work_idx, end_idx = p->t->cidx - 1;
 	bool do_work = false, bind_le = false;
@@ -1849,22 +1849,6 @@ static bool attach_ops(parser *p, idx_t start_idx, bool args)
 			i += c->nbr_cells;
 			continue;
 		}
-
-#if 0
-		if (args && (i == start_idx) && (CELL_POSTFIX(c) || CELL_INFIX(c))) {
-			c->precedence = 0;
-			i++;
-			continue;
-		}
-
-		if (args && (i == end_idx) && (CELL_PREFIX(c) || CELL_INFIX(c))) {
-			c->precedence = 0;
-			i++;
-			continue;
-		}
-#endif
-
-		// Stand-alone operators
 
 		if ((i == start_idx) && (i == end_idx)) {
 			c->precedence = 0;
@@ -2018,9 +2002,9 @@ static bool attach_ops(parser *p, idx_t start_idx, bool args)
 	return true;
 }
 
-static bool parser_attach(parser *p, idx_t start_idx, bool args)
+static bool parser_attach(parser *p, idx_t start_idx)
 {
-	while (attach_ops(p, start_idx, args))
+	while (attach_ops(p, start_idx))
 		;
 
 	return !p->error;
@@ -2969,7 +2953,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		    && (*p->srcptr != ')')
 		    && (*p->srcptr != ']')
 		    && (*p->srcptr != '|')) {
-			if (parser_attach(p, 0, args)) {
+			if (parser_attach(p, 0)) {
 				parser_assign_vars(p, p->read_term, false);
 				parser_term_to_body(p);
 
@@ -3096,7 +3080,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && args && !strcmp(p->token, ",")) {
-			parser_attach(p, arg_idx, args);
+			parser_attach(p, arg_idx);
 			arg_idx = p->t->cidx;
 
 			if (*p->srcptr == ',') {
@@ -3162,7 +3146,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && (!strcmp(p->token, ")") || !strcmp(p->token, "]") || !strcmp(p->token, "}"))) {
-			parser_attach(p, begin_idx, args);
+			parser_attach(p, begin_idx);
 			return arity;
 		}
 
@@ -3349,7 +3333,7 @@ static bool parser_run(parser *p, const char *src, int dump)
 		return true;
 	}
 
-	if (!parser_attach(p, 0, false))
+	if (!parser_attach(p, 0))
 		return false;
 
 	parser_assign_vars(p, 0, false);
