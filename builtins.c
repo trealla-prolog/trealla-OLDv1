@@ -7330,7 +7330,7 @@ static USE_RESULT prolog_state fn_iso_current_op_3(query *q)
 	GET_NEXT_ARG(p_type,atom_or_var);
 	GET_NEXT_ARG(p_name,atom);
 	const char *sname = GET_STR(p_name);
-	bool prefix = false;
+	bool prefix = q->retry ? true : false;
 
 	if (is_atom(p_type)) {
 		const char *stype = GET_STR(p_type);
@@ -7339,6 +7339,8 @@ static USE_RESULT prolog_state fn_iso_current_op_3(query *q)
 			!strcmp(stype, "fy") ||
 			!strcmp(stype, "xf") ||
 			!strcmp(stype, "yf");
+	} else if (!q->retry) {
+		may_error(make_choice(q));
 	}
 
 	unsigned type = 0;
