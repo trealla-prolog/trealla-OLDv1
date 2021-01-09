@@ -543,7 +543,6 @@ static void reindex_predicate(module *m, predicate *h)
 	}
 }
 
-
 static clause* assert_begin(module *m, term *t, bool consulting)
 {
 	if (is_cstring(t->cells)) {
@@ -623,7 +622,6 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	return r;
 }
-
 
 static void assert_commit(module *m, term *t, clause *r, predicate *h, bool append)
 {
@@ -1728,7 +1726,6 @@ void parser_assign_vars(parser *p, unsigned start, bool rebase)
 		if (c->val_off == g_anon_s)
 			c->flags |= FLAG2_ANON;
 	}
-
 
 	cell *c = make_cell(p);
 	ensure(c);
@@ -3638,7 +3635,6 @@ void destroy_module(module *m)
 	free(m);
 }
 
-
 module *create_module(prolog *pl, const char *name)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
@@ -4006,7 +4002,6 @@ module *create_module(prolog *pl, const char *name)
 	return m;
 }
 
-
 bool deconsult(prolog *pl, const char *filename)
 {
 	module *m = find_module(pl, filename);
@@ -4157,7 +4152,6 @@ static bool g_init(prolog *pl)
 	}
 	return pl->pool ? true : false;
 }
-
 
 void pl_destroy(prolog *pl)
 {

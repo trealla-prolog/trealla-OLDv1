@@ -792,7 +792,6 @@ prolog_state print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_c
 	return pl_success;
 }
 
-
 prolog_state print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 {
 	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 0);

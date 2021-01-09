@@ -47,7 +47,6 @@ uint64_t get_time_in_usec(void)
 }
 #endif
 
-
 size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max_elements)
 {
 	assert(min_elements <= max_elements);
