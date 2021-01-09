@@ -1898,7 +1898,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 			if (IS_FX(rhs) && (rhs->precedence == c->precedence)) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
-					fprintf(stdout, "Error: operator clash\n");
+					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
 
 				p->error = true;
 				return false;
@@ -1908,7 +1908,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 			if (IS_XF(rhs) && (rhs->precedence == c->precedence)) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
-					fprintf(stdout, "Error: operator clash\n");
+					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
 
 				p->error = true;
 				return false;
@@ -1922,7 +1922,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 			if (off > end_idx) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
-					fprintf(stdout, "Error: missing operand to '%s'\n", PARSER_GET_STR(c));
+					fprintf(stdout, "Error: missing operand to '%s', line nbr %d\n", PARSER_GET_STR(c), p->line_nbr);
 
 				p->error = true;
 				return false;
@@ -1938,7 +1938,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 		if (IS_XF(rhs) && (rhs->precedence == c->precedence)) {
 			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
-				fprintf(stdout, "Error: operator clash\n");
+					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
 
 			p->error = true;
 			return false;
@@ -1963,7 +1963,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 		if (off > end_idx) {
 			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
-				fprintf(stdout, "Error: missing operand to '%s'\n", PARSER_GET_STR(c));
+				fprintf(stdout, "Error: missing operand to '%s', line nbr %d\n", PARSER_GET_STR(c), p->line_nbr);
 
 			p->error = true;
 			return false;
