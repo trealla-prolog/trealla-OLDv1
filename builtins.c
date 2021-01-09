@@ -7769,7 +7769,7 @@ static USE_RESULT prolog_state fn_sys_queuen_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,any);
-	cell *tmp = deep_copy_to_tmp_heap(q, p2, p2_ctx, true);
+	cell *tmp = deep_clone_to_tmp_heap(q, p2, p2_ctx);
 	may_ptr_error(tmp);
 	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
@@ -7900,19 +7900,15 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 	init_queuen(q);
 	may_error(make_choice(q));
 	nbr_cells = q->tmpq_size[q->st.qnbr];
+	frame *g = GET_FRAME(q->st.curr_frame);
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
-
-		try_me(q, MAX_ARITY);
+		try_me(q, g->nbr_vars);
 
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
-			if (q->cycle_error)
-				return throw_error(q, p1, "resource_error", "cyclic_term");
-
 			cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 			may_ptr_error(tmp);
-			may_cycle_error(tmp);
 			alloc_queuen(q, q->st.qnbr, tmp);
 		}
 
@@ -7982,6 +7978,7 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 	uint64_t mask = p1_vars ^ p2_vars ^ xs_vars;
 	pin_vars(q, mask);
 	idx_t nbr_cells = q->tmpq_size[q->st.qnbr];
+	frame *g = GET_FRAME(q->st.curr_frame);
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 	     nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
@@ -7989,14 +7986,12 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 		if (c->flags & FLAG2_PROCESSED)
 			continue;
 
-		try_me(q, MAX_ARITY);
+		try_me(q, g->nbr_vars);
 
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			c->flags |= FLAG2_PROCESSED;
-
 			cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, true);
 			may_ptr_error(tmp);
-			may_cycle_error(tmp);
 			alloc_queuen(q, q->st.qnbr, tmp);
 		}
 
