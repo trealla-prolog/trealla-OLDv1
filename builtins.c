@@ -6774,18 +6774,18 @@ static USE_RESULT prolog_state fn_iso_call_n(query *q)
 
 	if ((tmp2->fn = get_builtin(GET_STR(tmp2), arity)) != NULL) {
 		tmp2->flags |= FLAG_BUILTIN;
-		unsigned optype;
+		unsigned specifier;
 		bool userop;
 
-		if (get_op(q->m, GET_STR(tmp2), &optype, &userop, false))
-			SET_OP(tmp2, optype);
+		if (get_op(q->m, GET_STR(tmp2), &specifier, &userop, false))
+			SET_OP(tmp2, specifier);
 	} else if (check_builtin(GET_STR(tmp2), arity)) {
 		tmp2->flags |= FLAG_BUILTIN;
-		unsigned optype;
+		unsigned specifier;
 		bool userop;
 
-		if (get_op(q->m, GET_STR(tmp2), &optype, &userop, false))
-			SET_OP(tmp2, optype);
+		if (get_op(q->m, GET_STR(tmp2), &specifier, &userop, false))
+			SET_OP(tmp2, specifier);
 	} else {
 		tmp2->match = find_matching_predicate(q->m, tmp2);
 		tmp2->flags &= ~FLAG_BUILTIN;
@@ -8038,23 +8038,23 @@ static USE_RESULT prolog_state fn_iso_op_3(query *q)
 		return throw_error(q, p3, "permission_error", "create,operator");
 
 
-	unsigned optype;
+	unsigned specifier;
 	const char *spec = GET_STR(p2);
 
 	if (!strcmp(spec, "fx"))
-		optype = OP_FX;
+		specifier = OP_FX;
 	else if (!strcmp(spec, "fy"))
-		optype = OP_FY;
+		specifier = OP_FY;
 	else if (!strcmp(spec, "xf"))
-		optype = OP_XF;
+		specifier = OP_XF;
 	else if (!strcmp(spec, "xfx"))
-		optype = OP_XFX;
+		specifier = OP_XFX;
 	else if (!strcmp(spec, "xfy"))
-		optype = OP_XFY;
+		specifier = OP_XFY;
 	else if (!strcmp(spec, "yf"))
-		optype = OP_YF;
+		specifier = OP_YF;
 	else if (!strcmp(spec, "yfx"))
-		optype = OP_YFX;
+		specifier = OP_YFX;
 	else
 		return throw_error(q, p2, "domain_error", "operator_specifier");
 
@@ -8066,7 +8066,7 @@ static USE_RESULT prolog_state fn_iso_op_3(query *q)
 	if (pri && !tmp_userop)
 		return throw_error(q, p3, "permission_error", "modify,operator");
 
-	if (!set_op(q->m, GET_STR(p3), optype, p1->val_num))
+	if (!set_op(q->m, GET_STR(p3), specifier, p1->val_num))
 		return throw_error(q, p3, "domain_error", "too_many_ops");
 
 	return pl_success;

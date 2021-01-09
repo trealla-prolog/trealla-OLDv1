@@ -152,56 +152,56 @@ idx_t index_from_pool(prolog *pl, const char *name)
 	return add_to_pool(pl, name);
 }
 
-unsigned get_op(module *m, const char *name, unsigned *optype, bool *userop, bool hint_prefix)
+unsigned get_op(module *m, const char *name, unsigned *specifier, bool *userop, bool hint_prefix)
 {
 	assert(name);
 
 	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
-		if (hint_prefix && (ptr->optype != OP_FX) && (ptr->optype != OP_FY))
+		if (hint_prefix && (ptr->specifier != OP_FX) && (ptr->specifier != OP_FY))
 			continue;
 
 		if (!strcmp(ptr->name, name)) {
-			if (optype) *optype = ptr->optype;
+			if (specifier) *specifier = ptr->specifier;
 			if (userop) *userop = true;
 			return ptr->priority;
 		}
 	}
 
 	for (const struct op_table *ptr = g_ops; ptr->name; ptr++) {
-		if (hint_prefix && (ptr->optype != OP_FX) && (ptr->optype != OP_FY))
+		if (hint_prefix && (ptr->specifier != OP_FX) && (ptr->specifier != OP_FY))
 			continue;
 
 		if (!strcmp(ptr->name, name)) {
-			if (optype) *optype = ptr->optype;
+			if (specifier) *specifier = ptr->specifier;
 			if (userop) *userop = false;
 			return ptr->priority;
 		}
 	}
 
 	if (hint_prefix)
-		return get_op(m, name, optype, userop, false);
+		return get_op(m, name, specifier, userop, false);
 
 	return 0;
 }
 
-bool set_op(module *m, const char *name, unsigned optype, unsigned priority)
+bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 {
 	assert(name);
 
 	unsigned ot = 0, pri = 0;
 	bool userop = false;
-	int hint = IS_PREFIX(optype);
+	int hint = IS_PREFIX(specifier);
 
 	if ((pri = get_op(m, name, &ot, &userop, hint)) != 0) {
-		if ((ot == optype) && priority)
+		if ((ot == specifier) && priority)
 			return true;
 	}
 
 	struct op_table *ptr = m->ops;
 
 	for (; ptr->name; ptr++) {
-		if (!strcmp(ptr->name, name) && (ptr->optype == optype)) {
-			ptr->optype = optype;
+		if (!strcmp(ptr->name, name) && (ptr->specifier == specifier)) {
+			ptr->specifier = specifier;
 			ptr->priority = priority;
 			return true;
 		}
@@ -212,7 +212,7 @@ bool set_op(module *m, const char *name, unsigned optype, unsigned priority)
 
 	m->user_ops--;
 	ptr->name = strdup(name);
-	ptr->optype = optype;
+	ptr->specifier = specifier;
 	ptr->priority = priority;
 	return true;
 }
@@ -1369,23 +1369,23 @@ static void directives(parser *p, term *t)
 			return;
 		}
 
-		unsigned optype;
+		unsigned specifier;
 		const char *spec = PARSER_GET_STR(p2);
 
 		if (!strcmp(spec, "fx"))
-			optype = OP_FX;
+			specifier = OP_FX;
 		else if (!strcmp(spec, "fy"))
-			optype = OP_FY;
+			specifier = OP_FY;
 		else if (!strcmp(spec, "xf"))
-			optype = OP_XF;
+			specifier = OP_XF;
 		else if (!strcmp(spec, "yf"))
-			optype = OP_YF;
+			specifier = OP_YF;
 		else if (!strcmp(spec, "xfx"))
-			optype = OP_XFX;
+			specifier = OP_XFX;
 		else if (!strcmp(spec, "xfy"))
-			optype = OP_XFY;
+			specifier = OP_XFY;
 		else if (!strcmp(spec, "yfx"))
-			optype = OP_YFX;
+			specifier = OP_YFX;
 		else {
 			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 				fprintf(stdout, "Error: unknown op spec val_type\n");
@@ -1398,7 +1398,7 @@ static void directives(parser *p, term *t)
 			cell *h = LIST_HEAD(p3);
 
 			if (is_atom(h)) {
-				if (!set_op(p->m, PARSER_GET_STR(h), optype, p1->val_num)) {
+				if (!set_op(p->m, PARSER_GET_STR(h), specifier, p1->val_num)) {
 					if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 						fprintf(stdout, "Error: could not set op\n");
 
@@ -1410,7 +1410,7 @@ static void directives(parser *p, term *t)
 		}
 
 		if (is_atom(p3) && !is_nil(p3)) {
-			if (!set_op(p->m, PARSER_GET_STR(p3), optype, p1->val_num)) {
+			if (!set_op(p->m, PARSER_GET_STR(p3), specifier, p1->val_num)) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: could not set op\n");
 
@@ -1525,14 +1525,14 @@ static void parser_xref_cell(parser *p, term *t, cell *c, predicate *parent)
 	const char *functor = PARSER_GET_STR(c);
 	module *m = p->m;
 
-	unsigned optype;
+	unsigned specifier;
 	bool userop, hint_prefix = c->arity == 1;
 
 	if ((c->arity == 2)
 		&& !GET_OP(c)
 		&& strcmp(functor, "{}")
-		&& get_op(m, functor, &optype, &userop, hint_prefix)) {
-		SET_OP(c, optype);
+		&& get_op(m, functor, &specifier, &userop, hint_prefix)) {
+		SET_OP(c, specifier);
 	}
 
 	if ((c->fn = get_builtin(functor, c->arity)) != NULL) {
@@ -1874,7 +1874,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 	for (idx_t i = start_idx; i <= end_idx;) {
 		cell *c = p->t->cells + i;
 
-		//printf("*** OP0 %s type=%u, optype=%u, pri=%u\n", PARSER_GET_STR(c), c->val_type, GET_OP(c), c->priority);
+		//printf("*** OP0 %s type=%u, specifier=%u, pri=%u\n", PARSER_GET_STR(c), c->val_type, GET_OP(c), c->priority);
 
 		if ((c->nbr_cells > 1) || !is_literal(c) || !c->priority) {
 			last_idx = i;
@@ -3158,29 +3158,29 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			break;
 		}
 
-		unsigned optype = 0;
+		unsigned specifier = 0;
 		bool userop = false;
-		int priority = get_op(p->m, p->token, &optype, &userop, last_op);
+		int priority = get_op(p->m, p->token, &specifier, &userop, last_op);
 
 		if (p->quote_char /*&& !userop*/) {
-			optype = 0;
+			specifier = 0;
 			priority = 0;
 		}
 
 		if (priority
-			&& (optype != OP_XF) && (optype != OP_YF)
+			&& (specifier != OP_XF) && (specifier != OP_YF)
 			&& ((*p->srcptr == ',') || (*p->srcptr == ')') ||
 			(*p->srcptr == '|') || (*p->srcptr == ']') ||
 			(*p->srcptr == '}') )) {
-			optype = 0;
+			specifier = 0;
 			priority = 0;
 		}
 
 #if 0
 		if (priority
-			&& ((optype == OP_XF) || (optype == OP_YF))
+			&& ((specifier == OP_XF) || (specifier == OP_YF))
 			&& last_op) {
-			optype = 0;
+			specifier = 0;
 			priority = 0;
 		}
 #endif
@@ -3189,13 +3189,13 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 		if (last_op && priority && (*p->srcptr == '(')) {
 			p->val_type = TYPE_LITERAL;
-			optype = 0;
+			specifier = 0;
 			priority = 0;
 			p->quote_char = 0;
 		}
 
 		last_op = strcmp(p->token, ")") && priority;
-		int func = (p->val_type == TYPE_LITERAL) && !optype && (*p->srcptr == '(');
+		int func = (p->val_type == TYPE_LITERAL) && !specifier && (*p->srcptr == '(');
 
 		if (func) {
 			is_func = true;
@@ -3217,7 +3217,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		cell *c = make_cell(p);
 		c->nbr_cells = 1;
 		c->val_type = p->val_type;
-		SET_OP(c,optype);
+		SET_OP(c,specifier);
 		c->priority = priority;
 
 		if (p->val_type == TYPE_INTEGER) {

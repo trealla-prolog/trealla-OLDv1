@@ -336,7 +336,7 @@ struct builtins {
 
 struct op_table {
 	const char *name;
-	unsigned optype;
+	unsigned specifier;
 	unsigned priority;
 };
 
@@ -593,8 +593,8 @@ clause *assertz_to_db(module *m, term *t, bool consulting);
 void retract_from_db(module *m, clause *r);
 clause *erase_from_db(module *m, uuid *ref);
 clause *find_in_db(module *m, uuid *ref);
-unsigned get_op(module *m, const char *name, unsigned *optype, bool *userop, bool hint_prefix);
-bool set_op(module *m, const char *name, unsigned optype, unsigned priority);
+unsigned get_op(module *m, const char *name, unsigned *specifier, bool *userop, bool hint_prefix);
+bool set_op(module *m, const char *name, unsigned specifier, unsigned priority);
 USE_RESULT prolog_state make_choice(query *q);
 USE_RESULT prolog_state make_barrier(query *q);
 USE_RESULT prolog_state make_catcher(query *q, enum q_retry type);
