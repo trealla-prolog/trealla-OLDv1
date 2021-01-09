@@ -1839,7 +1839,7 @@ void parser_term_to_body(parser *p)
 
 static bool attach_ops(parser *p, idx_t start_idx, bool args)
 {
-	idx_t lowest = IDX_MAX, work_idx;
+	idx_t lowest = IDX_MAX, work_idx, end_idx = p->t->cidx - 1;
 	bool do_work = false, bind_le = false;
 
 	for (idx_t i = start_idx; i < p->t->cidx;) {
@@ -1850,13 +1850,23 @@ static bool attach_ops(parser *p, idx_t start_idx, bool args)
 			continue;
 		}
 
+#if 0
 		if (args && (i == start_idx) && (CELL_POSTFIX(c) || CELL_INFIX(c))) {
 			c->precedence = 0;
 			i++;
 			continue;
 		}
 
-		if (args && (i == (p->t->cidx-1)) && (CELL_PREFIX(c) || CELL_INFIX(c))) {
+		if (args && (i == end_idx) && (CELL_PREFIX(c) || CELL_INFIX(c))) {
+			c->precedence = 0;
+			i++;
+			continue;
+		}
+#endif
+
+		// Stand-alone operators
+
+		if ((i == start_idx) && (i == end_idx)) {
 			c->precedence = 0;
 			i++;
 			continue;
@@ -1877,7 +1887,7 @@ static bool attach_ops(parser *p, idx_t start_idx, bool args)
 
 	idx_t last_idx = 0;
 
-	for (idx_t i = start_idx; i < p->t->cidx;) {
+	for (idx_t i = start_idx; i <= end_idx;) {
 		cell *c = p->t->cells + i;
 
 		//printf("*** OP0 %s type=%u, optype=%u, prec=%u\n", PARSER_GET_STR(c), c->val_type, GET_OP(c), c->precedence);
@@ -1924,10 +1934,9 @@ static bool attach_ops(parser *p, idx_t start_idx, bool args)
 		if (IS_FX(c) || IS_FY(c)) {
 			cell *rhs = c + 1;
 			c->nbr_cells += rhs->nbr_cells;
-			c->arity = 1;
 			idx_t off = (idx_t)(rhs - p->t->cells);
 
-			if (off >= p->t->cidx) {
+			if (off > end_idx) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: missing operand to '%s'\n", PARSER_GET_STR(c));
 
@@ -1940,12 +1949,20 @@ static bool attach_ops(parser *p, idx_t start_idx, bool args)
 
 		// Postfix...
 
+		cell *rhs = c + 1;
 		cell save = *c;
+
+		if (IS_XF(rhs) && (rhs->precedence == c->precedence)) {
+			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+				fprintf(stdout, "Error: operator clash\n");
+
+			p->error = true;
+			return false;
+		}
 
 		if (IS_XF(c) || IS_YF(c)) {
 			cell *lhs = p->t->cells + last_idx;
 			save.nbr_cells += lhs->nbr_cells;
-			save.arity = 1;
 			idx_t cells_to_move = lhs->nbr_cells;
 			lhs = c - 1;
 
@@ -1958,11 +1975,9 @@ static bool attach_ops(parser *p, idx_t start_idx, bool args)
 
 		// Infix...
 
-		cell *rhs = c + 1;
-
 		idx_t off = (idx_t)(rhs - p->t->cells);
 
-		if (off >= p->t->cidx) {
+		if (off > end_idx) {
 			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 				fprintf(stdout, "Error: missing operand to '%s'\n", PARSER_GET_STR(c));
 
@@ -1986,7 +2001,7 @@ static bool attach_ops(parser *p, idx_t start_idx, bool args)
 		if (IS_XFX(c)) {
 			cell *next = c + c->nbr_cells;
 
-			if ((i < p->t->cidx)
+			if ((i <= end_idx)
 				&& (IS_XFX(next))
 				&& (rhs->precedence == c->precedence)) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
@@ -2541,7 +2556,7 @@ static bool get_token(parser *p, int last_op)
 	int neg = 0;
 	p->val_type = TYPE_LITERAL;
 	p->quote_char = 0;
-	p->string = p->was_quoted = p->is_variable = p->is_op = false;
+	p->string = p->is_quoted = p->is_variable = p->is_op = false;
 
 	if (p->dq_consing && (*src == '"')) {
 		*dst++ = ']';
@@ -2679,7 +2694,7 @@ static bool get_token(parser *p, int last_op)
 
 	if ((*src == '"') || (*src == '`') || (*src == '\'')) {
 		p->quote_char = *src++;
-		p->was_quoted = true;
+		p->is_quoted = true;
 
 		if ((p->quote_char == '"') && p->flag.double_quote_codes) {
 			*dst++ = '[';
@@ -2710,7 +2725,7 @@ static bool get_token(parser *p, int last_op)
 						dst += put_char_utf8(dst, ch='[');
 						dst += put_char_utf8(dst, ch=']');
 						*dst = '\0';
-						p->was_quoted = p->string = false;
+						p->string = false;
 					}
 
 					p->quote_char = 0;
@@ -2935,7 +2950,7 @@ void fix_list(cell *c)
 
 unsigned parser_tokenize(parser *p, bool args, bool consing)
 {
-	idx_t begin_idx = p->t->cidx, save_idx = 0;
+	idx_t begin_idx = p->t->cidx, arg_idx = p->t->cidx, save_idx = 0;
 	bool last_op = true, is_func = false, was_consing = false;
 	bool last_bar = false;
 	unsigned arity = 1;
@@ -3080,10 +3095,10 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
-		if (!p->quote_char && args && !strcmp(p->token, ","))
-			parser_attach(p, begin_idx, args);
+		if (!p->quote_char && args && !strcmp(p->token, ",")) {
+			parser_attach(p, arg_idx, args);
+			arg_idx = p->t->cidx;
 
-		if (!p->quote_char && !strcmp(p->token, ",") && args) {
 			if (*p->srcptr == ',') {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: syntax error missing arg\n");
@@ -3106,7 +3121,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
-		if (!p->was_quoted && consing && p->start_term && !strcmp(p->token, "|")) {
+		if (!p->is_quoted && consing && p->start_term && !strcmp(p->token, "|")) {
 			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 				fprintf(stdout, "Error: syntax error parsing list2\n");
 
@@ -3114,7 +3129,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			break;
 		}
 
-		if (!p->was_quoted && was_consing && consing && !strcmp(p->token, "|")) {
+		if (!p->is_quoted && was_consing && consing && !strcmp(p->token, "|")) {
 			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 				fprintf(stdout, "Error: syntax error parsing list3\n");
 
@@ -3122,14 +3137,14 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			break;
 		}
 
-		if (!p->was_quoted && consing && !strcmp(p->token, "|")) {
+		if (!p->is_quoted && consing && !strcmp(p->token, "|")) {
 			last_bar = true;
 			was_consing = true;
 			//consing = false;
 			continue;
 		}
 
-		if (!p->was_quoted && was_consing && last_bar && !strcmp(p->token, "]")) {
+		if (!p->is_quoted && was_consing && last_bar && !strcmp(p->token, "]")) {
 			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 				fprintf(stdout, "Error: syntax error parsing list4\n");
 
@@ -3168,7 +3183,6 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			precedence = 0;
 		}
 
-#if 1
 		if (precedence
 			&& (optype != OP_XF) && (optype != OP_YF)
 			&& ((*p->srcptr == ',') || (*p->srcptr == ')') ||
@@ -3178,6 +3192,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			precedence = 0;
 		}
 
+#if 0
 		if (precedence
 			&& ((optype == OP_XF) || (optype == OP_YF))
 			&& last_op) {
@@ -3234,7 +3249,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 		else if (p->val_type == TYPE_FLOAT)
 			c->val_flt = atof(p->token);
-		else if ((!p->was_quoted || func || p->is_op || p->is_variable ||
+		else if ((!p->is_quoted || func || p->is_op || p->is_variable ||
 				check_builtin(p->token, 0)) && !p->string) {
 			if (func && !strcmp(p->token, "."))
 				c->precedence = 0;
@@ -3242,7 +3257,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			if (p->is_variable)
 				c->val_type = TYPE_VARIABLE;
 
-			if (p->was_quoted)
+			if (p->is_quoted)
 				c->flags |= FLAG2_QUOTED;
 
 			c->val_off = index_from_pool(p->m->pl, p->token);

@@ -491,7 +491,6 @@ struct parser_ {
 	bool error;
 	bool already_loaded:1;
 	bool do_read_term:1;
-	bool was_quoted:1;
 	bool string:1;
 	bool run_init:1;
 	bool directive:1;
@@ -500,6 +499,7 @@ struct parser_ {
 	bool start_term:1;
 	bool end_of_term:1;
 	bool comment:1;
+	bool is_quoted:1;
 	bool is_variable:1;
 	bool is_op:1;
 	bool skip:1;
