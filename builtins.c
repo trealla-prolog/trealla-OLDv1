@@ -8607,8 +8607,7 @@ static USE_RESULT prolog_state fn_between_3(query *q)
 			return pl_failure;
 
 		return pl_success;
-	} else if (!q->retry && !is_variable(p3))
-		return throw_error(q, p3, "type_error", "variable");
+	}
 
 	if (p1->val_num > p2->val_num)
 		return pl_failure;
@@ -12494,8 +12493,7 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 			cnt = strlen_utf8(p1->val_str);
 		} else {
 			cell *l = p1;
-
-		LIST_HANDLER(l);
+			LIST_HANDLER(l);
 
 			while (is_list(l)) {
 				LIST_HEAD(l);
@@ -12528,7 +12526,6 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 			cnt = strlen_utf8(p1->val_str);
 		} else {
 			cell *l = p1;
-
 			LIST_HANDLER(l);
 
 			while (is_list(l)) {
@@ -12565,10 +12562,8 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 
 		unsigned var_nbr = 0;
 
-		if (nbr) {
-			if (!(var_nbr = create_vars(q, nbr)))
-				return throw_error(q, p2, "resource_error", "too_many_vars");
-		}
+		if (!(var_nbr = create_vars(q, nbr)))
+			return throw_error(q, p2, "resource_error", "too_many_vars");
 
 		cell tmp;
 		tmp.val_type = TYPE_VARIABLE;
