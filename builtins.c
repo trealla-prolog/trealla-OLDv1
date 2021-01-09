@@ -7871,14 +7871,11 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 		nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		init_queuen(q);
+		free(q->tmpq[q->st.qnbr]);
+		q->tmpq[q->st.qnbr] = NULL;
 		may_error(make_barrier(q));
 		q->st.curr_cell = tmp;
 		return pl_success;
-	}
-
-	if (q->tmpq[q->st.qnbr]) {
-		free(q->tmpq[q->st.qnbr]);
-		q->tmpq[q->st.qnbr] = NULL;
 	}
 
 	if (!queuen_used(q)) {
@@ -7896,7 +7893,7 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 	copy_cells(q->tmpq[q->st.qnbr], get_queuen(q), nbr_cells);
 	q->tmpq_size[q->st.qnbr] = nbr_cells;
 
-	// Now grab match solutions
+	// Now grab matching solutions
 
 	init_queuen(q);
 	may_error(make_choice(q));
@@ -7912,7 +7909,8 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 				return throw_error(q, p1, "resource_error", "cyclic_term");
 
 			cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
-			ensure(tmp);
+			may_ptr_error(tmp);
+			may_cycle_error(tmp);
 			alloc_queuen(q, q->st.qnbr, tmp);
 		}
 
@@ -7927,9 +7925,7 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	q->st.qnbr--;
-	cell *tmp = deep_copy_to_heap(q, l, q->st.curr_frame, false);
-	may_ptr_error(tmp);
-	return unify(q, p3, p3_ctx, tmp, q->st.curr_frame);
+	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
 static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
@@ -7956,6 +7952,8 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 		nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		init_queuen(q);
+		free(q->tmpq[q->st.qnbr]);
+		q->tmpq[q->st.qnbr] = NULL;
 		may_error(make_barrier(q));
 		q->st.curr_cell = tmp;
 		return pl_success;
@@ -7968,13 +7966,13 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 
 	if (!q->tmpq[q->st.qnbr]) {
 		idx_t nbr_cells = queuen_used(q);
-		q->tmpq[q->st.qnbr] = malloc(sizeof(cell)*nbr_cells);  // cehteh: may leak on errors?
+		q->tmpq[q->st.qnbr] = malloc(sizeof(cell)*nbr_cells);
 		ensure(q->tmpq[q->st.qnbr]);
 		copy_cells(q->tmpq[q->st.qnbr], get_queuen(q), nbr_cells);
 		q->tmpq_size[q->st.qnbr] = nbr_cells;
 	}
 
-	// Now grab match solutions
+	// Now grab matching solutions
 
 	init_queuen(q);
 	may_error(make_choice(q));
@@ -7993,9 +7991,6 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 		try_me(q, MAX_ARITY);
 
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
-			if (q->cycle_error)
-				return throw_error(q, p1, "resource_error", "cyclic_term");  //TODO: can this happen?
-
 			c->flags |= FLAG2_PROCESSED;
 
 			cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, true);
@@ -8011,6 +8006,8 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 
 	if (!queuen_used(q)) {
 		init_queuen(q);
+		free(q->tmpq[q->st.qnbr]);
+		q->tmpq[q->st.qnbr] = NULL;
 		cut_me(q, false);
 		return pl_failure;
 	}
