@@ -2018,7 +2018,7 @@ static bool attach_ops(parser *p, idx_t start_idx, bool args)
 	return true;
 }
 
-bool parser_attach(parser *p, idx_t start_idx, bool args)
+static bool parser_attach(parser *p, idx_t start_idx, bool args)
 {
 	while (attach_ops(p, start_idx, args))
 		;
