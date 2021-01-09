@@ -463,6 +463,7 @@ static USE_RESULT cell *deep_copy2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx,
 	p1 = deref(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
 	cell *tmp = alloc_tmp_heap(q, 1);
+
 	if (tmp) {
 		copy_cells(tmp, p1, 1);
 
@@ -533,7 +534,7 @@ static USE_RESULT cell *deep_copy_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx, 
 		q->m->pl->tab_idx = 0;
 		q->cycle_error = 0;
 		cell* rec = deep_copy2_to_tmp_heap(q, p1, p1_ctx, 0, nonlocals_only);
-		if (!rec || rec == ERR_CYCLE_CELL) return rec;
+		if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 		int cnt = q->m->pl->varno - g->nbr_vars;
 
 		if (cnt) {
@@ -550,8 +551,7 @@ static USE_RESULT cell *deep_copy_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx, 
 static USE_RESULT cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only)
 {
 	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, nonlocals_only);
-	if (!tmp || tmp == ERR_CYCLE_CELL) return tmp;
-
+	if (!tmp || (tmp == ERR_CYCLE_CELL)) return tmp;
 	cell *tmp2 = alloc_heap(q, tmp->nbr_cells);
 	if (!tmp2) return NULL;
 	copy_cells(tmp2, tmp, tmp->nbr_cells);
