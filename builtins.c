@@ -7926,8 +7926,9 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 	q->tmpq[q->st.qnbr] = NULL;
 
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
-	cell *tmp = deep_copy_to_heap(q, l, q->st.curr_frame, false);
 	q->st.qnbr--;
+	cell *tmp = deep_copy_to_heap(q, l, q->st.curr_frame, false);
+	may_ptr_error(tmp);
 	return unify(q, p3, p3_ctx, tmp, q->st.curr_frame);
 }
 
