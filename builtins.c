@@ -2161,7 +2161,7 @@ static USE_RESULT prolog_state fn_iso_open_3(query *q)
 	char *src = NULL;
 
 	if (n < 0)
-		return throw_error(q, p1, "resource_error", "too_many_open_streams");
+		return throw_error(q, p1, "resource_error", "too_many_streams");
 
 	if (is_iso_list(p1)) {
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, 1);
@@ -2217,7 +2217,7 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 	char *src = NULL;
 
 	if (n < 0)
-		return throw_error(q, p1, "resource_error", "too_many_open_streams");
+		return throw_error(q, p1, "resource_error", "too_many_streams");
 
 	const char *filename;
 	stream *oldstr = NULL;
@@ -7924,7 +7924,6 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 	drop_choice(q);
 	free(q->tmpq[q->st.qnbr]);
 	q->tmpq[q->st.qnbr] = NULL;
-
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	q->st.qnbr--;
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
@@ -8066,7 +8065,7 @@ static USE_RESULT prolog_state fn_iso_op_3(query *q)
 		return throw_error(q, p3, "permission_error", "modify,operator");
 
 	if (!set_op(q->m, GET_STR(p3), specifier, p1->val_num))
-		return throw_error(q, p3, "domain_error", "too_many_ops");
+		return throw_error(q, p3, "resource_error", "too_many_ops");
 
 	return pl_success;
 }
@@ -9029,7 +9028,7 @@ static USE_RESULT prolog_state fn_server_3(query *q)
 
 	if (n < 0) {
 		close(fd);
-		return throw_error(q, p1, "resource_error", "too_many_open_streams");
+		return throw_error(q, p1, "resource_error", "too_many_streams");
 	}
 
 	stream *str = &g_streams[n];
@@ -9081,7 +9080,7 @@ static USE_RESULT prolog_state fn_accept_2(query *q)
 
 	if (n < 0) {
 		close(fd);
-		return throw_error(q, p1, "resource_error", "too_many_open_streams");
+		return throw_error(q, p1, "resource_error", "too_many_streams");
 	}
 
 	stream *str2 = &g_streams[n];
@@ -9213,7 +9212,7 @@ static USE_RESULT prolog_state fn_client_5(query *q)
 
 	if (n < 0) {
 		close(fd);
-		return throw_error(q, p1, "resource_error", "too_many_open_streams");
+		return throw_error(q, p1, "resource_error", "too_many_streams");
 	}
 
 	stream *str = &g_streams[n];
