@@ -1980,14 +1980,14 @@ static bool attach_ops(parser *p, idx_t start_idx)
 		*c = save;
 		c->nbr_cells += rhs->nbr_cells;
 		c->arity = 2;
-		i += 1 + rhs->nbr_cells;
 
 		if (IS_XFX(c)) {
 			cell *next = c + c->nbr_cells;
+			i = next - p->t->cells;
 
 			if ((i <= end_idx)
 				&& (IS_XFX(next))
-				&& (rhs->precedence == c->precedence)) {
+				&& (next->precedence == c->precedence)) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
 
