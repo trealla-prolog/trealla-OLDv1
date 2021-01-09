@@ -8012,7 +8012,6 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 
 	cell *tmp = deep_copy_to_heap(q, p2, p2_ctx, true);
 	may_ptr_error(tmp);
-	may_cycle_error(tmp);
 	unpin_vars(q);
 	unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
