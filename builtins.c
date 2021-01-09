@@ -490,19 +490,21 @@ static USE_RESULT cell *deep_copy2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx,
 				if (q->m->pl->tab1[i] == slot_nbr) {
 					tmp->var_nbr = q->m->pl->tab2[i];
 					tmp->flags = FLAG2_FRESH;
+					tmp->val_off = g_nil_s;
 					return tmp;
 				}
 			}
 
 			tmp->var_nbr = q->m->pl->varno;
 			tmp->flags = FLAG2_FRESH;
-			q->m->pl->tab1[q->m->pl->tab_idx] = slot_nbr;
-			q->m->pl->tab2[q->m->pl->tab_idx] = q->m->pl->varno++;
-			q->m->pl->tab_idx++;
+			tmp->val_off = g_nil_s;
 
 			if (is_anon(p1))
 				tmp->flags |= FLAG2_ANON;
 
+			q->m->pl->tab1[q->m->pl->tab_idx] = slot_nbr;
+			q->m->pl->tab2[q->m->pl->tab_idx] = q->m->pl->varno++;
+			q->m->pl->tab_idx++;
 			return tmp;
 		}
 
@@ -529,13 +531,13 @@ static USE_RESULT cell *deep_copy_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx, 
 		frame *g = GET_FRAME(q->st.curr_frame);
 		q->m->pl->varno = g->nbr_vars;
 		q->m->pl->tab_idx = 0;
-
 		q->cycle_error = 0;
 		cell* rec = deep_copy2_to_tmp_heap(q, p1, p1_ctx, 0, nonlocals_only);
 		if (!rec || rec == ERR_CYCLE_CELL) return rec;
+		int cnt = q->m->pl->varno - g->nbr_vars;
 
-		if (q->m->pl->varno != g->nbr_vars) {
-			if (!create_vars(q, q->m->pl->varno-g->nbr_vars)) {
+		if (cnt) {
+			if (!create_vars(q, cnt)) {
 				DISCARD_RESULT throw_error(q, p1, "resource_error", "too_many_vars");
 				return NULL;
 			}
