@@ -7760,7 +7760,6 @@ static USE_RESULT prolog_state fn_sys_queue_1(query *q)
 	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
-	ensure(tmp);
 	alloc_queuen(q, 0, tmp);
 	return pl_success;
 }
@@ -7771,10 +7770,10 @@ static USE_RESULT prolog_state fn_sys_queuen_2(query *q)
 	GET_NEXT_ARG(p2,any);
 	cell *tmp = deep_clone_to_tmp_heap(q, p2, p2_ctx);
 	may_ptr_error(tmp);
+
 	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
-	ensure(tmp);
 	alloc_queuen(q, p1->val_num, tmp);
 	return pl_success;
 }
