@@ -7326,14 +7326,23 @@ static USE_RESULT prolog_state fn_iso_current_predicate_1(query *q)
 
 static USE_RESULT prolog_state fn_iso_current_op_3(query *q)
 {
-	GET_FIRST_ARG(p_prec,integer_or_var);
-	GET_NEXT_ARG(p_type,atom_or_var);
-	GET_NEXT_ARG(p_name,atom);
+	GET_FIRST_ARG(p_pri,any);
+	GET_NEXT_ARG(p_spec,atom_or_var);
+	GET_NEXT_ARG(p_name,atom_or_var);
 	const char *sname = GET_STR(p_name);
 	bool prefix = q->retry ? true : false;
 
-	if (is_atom(p_type)) {
-		const char *stype = GET_STR(p_type);
+	if (!is_integer(p_pri) && !is_variable(p_pri))
+		return throw_error(q, p_pri, "domain_error", "operator_priority");
+
+	if (is_integer(p_pri) && (p_pri->val_num > 1200))
+		return throw_error(q, p_pri, "domain_error", "operator_priority");
+
+	if (is_atom(p_spec) && !CELL_INFIX(p_spec) && !CELL_POSTFIX(p_spec) && !CELL_PREFIX(p_spec))
+		return throw_error(q, p_spec, "domain_error", "operator_specifier");
+
+	if (is_atom(p_spec)) {
+		const char *stype = GET_STR(p_spec);
 		prefix =
 			!strcmp(stype, "fx") ||
 			!strcmp(stype, "fy") ||
@@ -7345,12 +7354,12 @@ static USE_RESULT prolog_state fn_iso_current_op_3(query *q)
 
 	unsigned type = 0;
 	bool user_op = false;
-	int prec = get_op(q->m, sname, &type, &user_op, prefix);
+	int pri = get_op(q->m, sname, &type, &user_op, prefix);
 
-	if (!prec)
+	if (!pri)
 		return pl_failure;
 
-	if (is_variable(p_type)) {
+	if (is_variable(p_spec)) {
 		cell tmp = {0};
 
 		if (type == OP_FX)
@@ -7368,15 +7377,15 @@ static USE_RESULT prolog_state fn_iso_current_op_3(query *q)
 		else if (type == OP_XFX)
 			make_small(&tmp, "xfx");
 
-		if (!unify(q, p_type, p_type_ctx, &tmp, q->st.curr_frame))
+		if (!unify(q, p_spec, p_spec_ctx, &tmp, q->st.curr_frame))
 			return pl_failure;
 	}
 
-	if (is_variable(p_prec)) {
+	if (is_variable(p_pri)) {
 		cell tmp;
-		make_int(&tmp, prec);
+		make_int(&tmp, pri);
 
-		if (!unify(q, p_prec, p_prec_ctx, &tmp, q->st.curr_frame))
+		if (!unify(q, p_pri, p_pri_ctx, &tmp, q->st.curr_frame))
 			return pl_failure;
 	}
 
@@ -8052,9 +8061,9 @@ static USE_RESULT prolog_state fn_iso_op_3(query *q)
 	bool tmp_userop = false;
 	unsigned tmp_optype = 0;
 
-	int prec = get_op(q->m, GET_STR(p3), &tmp_optype, &tmp_userop, false);
+	int pri = get_op(q->m, GET_STR(p3), &tmp_optype, &tmp_userop, false);
 
-	if (prec && !tmp_userop)
+	if (pri && !tmp_userop)
 		return throw_error(q, p3, "permission_error", "modify,operator");
 
 	if (!set_op(q->m, GET_STR(p3), optype, p1->val_num))

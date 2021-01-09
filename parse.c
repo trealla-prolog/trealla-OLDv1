@@ -163,7 +163,7 @@ unsigned get_op(module *m, const char *name, unsigned *optype, bool *userop, boo
 		if (!strcmp(ptr->name, name)) {
 			if (optype) *optype = ptr->optype;
 			if (userop) *userop = true;
-			return ptr->precedence;
+			return ptr->priority;
 		}
 	}
 
@@ -174,7 +174,7 @@ unsigned get_op(module *m, const char *name, unsigned *optype, bool *userop, boo
 		if (!strcmp(ptr->name, name)) {
 			if (optype) *optype = ptr->optype;
 			if (userop) *userop = false;
-			return ptr->precedence;
+			return ptr->priority;
 		}
 	}
 
@@ -184,16 +184,16 @@ unsigned get_op(module *m, const char *name, unsigned *optype, bool *userop, boo
 	return 0;
 }
 
-bool set_op(module *m, const char *name, unsigned optype, unsigned precedence)
+bool set_op(module *m, const char *name, unsigned optype, unsigned priority)
 {
 	assert(name);
 
-	unsigned ot = 0, prec = 0;
+	unsigned ot = 0, pri = 0;
 	bool userop = false;
 	int hint = IS_PREFIX(optype);
 
-	if ((prec = get_op(m, name, &ot, &userop, hint)) != 0) {
-		if ((ot == optype) && precedence)
+	if ((pri = get_op(m, name, &ot, &userop, hint)) != 0) {
+		if ((ot == optype) && priority)
 			return true;
 	}
 
@@ -202,7 +202,7 @@ bool set_op(module *m, const char *name, unsigned optype, unsigned precedence)
 	for (; ptr->name; ptr++) {
 		if (!strcmp(ptr->name, name) && (ptr->optype == optype)) {
 			ptr->optype = optype;
-			ptr->precedence = precedence;
+			ptr->priority = priority;
 			return true;
 		}
 	}
@@ -213,7 +213,7 @@ bool set_op(module *m, const char *name, unsigned optype, unsigned precedence)
 	m->user_ops--;
 	ptr->name = strdup(name);
 	ptr->optype = optype;
-	ptr->precedence = precedence;
+	ptr->priority = priority;
 	return true;
 }
 
@@ -1845,19 +1845,19 @@ static bool attach_ops(parser *p, idx_t start_idx)
 	for (idx_t i = start_idx; i < p->t->cidx;) {
 		cell *c = p->t->cells + i;
 
-		if ((c->nbr_cells > 1) || !is_literal(c) || !c->precedence) {
+		if ((c->nbr_cells > 1) || !is_literal(c) || !c->priority) {
 			i += c->nbr_cells;
 			continue;
 		}
 
 		if ((i == start_idx) && (i == end_idx)) {
-			c->precedence = 0;
+			c->priority = 0;
 			i++;
 			continue;
 		}
 
-		if (bind_le ? c->precedence <= lowest : c->precedence < lowest) {
-			lowest = c->precedence;
+		if (bind_le ? c->priority <= lowest : c->priority < lowest) {
+			lowest = c->priority;
 			work_idx = i;
 			do_work = true;
 		}
@@ -1874,15 +1874,15 @@ static bool attach_ops(parser *p, idx_t start_idx)
 	for (idx_t i = start_idx; i <= end_idx;) {
 		cell *c = p->t->cells + i;
 
-		//printf("*** OP0 %s type=%u, optype=%u, prec=%u\n", PARSER_GET_STR(c), c->val_type, GET_OP(c), c->precedence);
+		//printf("*** OP0 %s type=%u, optype=%u, pri=%u\n", PARSER_GET_STR(c), c->val_type, GET_OP(c), c->priority);
 
-		if ((c->nbr_cells > 1) || !is_literal(c) || !c->precedence) {
+		if ((c->nbr_cells > 1) || !is_literal(c) || !c->priority) {
 			last_idx = i;
 			i += c->nbr_cells;
 			continue;
 		}
 
-		if ((c->precedence != lowest) || (i != work_idx)) {
+		if ((c->priority != lowest) || (i != work_idx)) {
 			last_idx = i;
 			i += c->nbr_cells;
 			continue;
@@ -1896,7 +1896,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 		if (IS_FX(c)) {
 			cell *rhs = c + 1;
 
-			if (IS_FX(rhs) && (rhs->precedence == c->precedence)) {
+			if (IS_FX(rhs) && (rhs->priority == c->priority)) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
 
@@ -1906,7 +1906,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 			rhs += rhs->nbr_cells;
 
-			if (IS_XF(rhs) && (rhs->precedence == c->precedence)) {
+			if (IS_XF(rhs) && (rhs->priority == c->priority)) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
 
@@ -1936,7 +1936,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 		cell *rhs = c + 1;
 		cell save = *c;
 
-		if (IS_XF(rhs) && (rhs->precedence == c->precedence)) {
+		if (IS_XF(rhs) && (rhs->priority == c->priority)) {
 			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
 
@@ -1987,7 +1987,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 			if ((i <= end_idx)
 				&& (IS_XFX(next))
-				&& (next->precedence == c->precedence)) {
+				&& (next->priority == c->priority)) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
 
@@ -3160,41 +3160,41 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 		unsigned optype = 0;
 		bool userop = false;
-		int precedence = get_op(p->m, p->token, &optype, &userop, last_op);
+		int priority = get_op(p->m, p->token, &optype, &userop, last_op);
 
 		if (p->quote_char /*&& !userop*/) {
 			optype = 0;
-			precedence = 0;
+			priority = 0;
 		}
 
-		if (precedence
+		if (priority
 			&& (optype != OP_XF) && (optype != OP_YF)
 			&& ((*p->srcptr == ',') || (*p->srcptr == ')') ||
 			(*p->srcptr == '|') || (*p->srcptr == ']') ||
 			(*p->srcptr == '}') )) {
 			optype = 0;
-			precedence = 0;
+			priority = 0;
 		}
 
 #if 0
-		if (precedence
+		if (priority
 			&& ((optype == OP_XF) || (optype == OP_YF))
 			&& last_op) {
 			optype = 0;
-			precedence = 0;
+			priority = 0;
 		}
 #endif
 
 		// Operators in canonical form..
 
-		if (last_op && precedence && (*p->srcptr == '(')) {
+		if (last_op && priority && (*p->srcptr == '(')) {
 			p->val_type = TYPE_LITERAL;
 			optype = 0;
-			precedence = 0;
+			priority = 0;
 			p->quote_char = 0;
 		}
 
-		last_op = strcmp(p->token, ")") && precedence;
+		last_op = strcmp(p->token, ")") && priority;
 		int func = (p->val_type == TYPE_LITERAL) && !optype && (*p->srcptr == '(');
 
 		if (func) {
@@ -3204,7 +3204,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 
 #if 0
-		if (p->is_op && !precedence) {
+		if (p->is_op && !priority) {
 			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 				fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, %s\n", p->line_nbr, p->token, p->srcptr);
 
@@ -3218,7 +3218,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		c->nbr_cells = 1;
 		c->val_type = p->val_type;
 		SET_OP(c,optype);
-		c->precedence = precedence;
+		c->priority = priority;
 
 		if (p->val_type == TYPE_INTEGER) {
 			const char *src = p->token;
@@ -3236,7 +3236,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		else if ((!p->is_quoted || func || p->is_op || p->is_variable ||
 				check_builtin(p->token, 0)) && !p->string) {
 			if (func && !strcmp(p->token, "."))
-				c->precedence = 0;
+				c->priority = 0;
 
 			if (p->is_variable)
 				c->val_type = TYPE_VARIABLE;

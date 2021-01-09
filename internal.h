@@ -271,7 +271,7 @@ struct cell_ {
 				prolog_state (*fn)(query*);
 				predicate *match;
 				cell *attrs;
-				uint16_t precedence;
+				uint16_t priority;
 			};
 
 			idx_t val_off;
@@ -337,7 +337,7 @@ struct builtins {
 struct op_table {
 	const char *name;
 	unsigned optype;
-	unsigned precedence;
+	unsigned priority;
 };
 
 typedef struct {
@@ -594,7 +594,7 @@ void retract_from_db(module *m, clause *r);
 clause *erase_from_db(module *m, uuid *ref);
 clause *find_in_db(module *m, uuid *ref);
 unsigned get_op(module *m, const char *name, unsigned *optype, bool *userop, bool hint_prefix);
-bool set_op(module *m, const char *name, unsigned optype, unsigned precedence);
+bool set_op(module *m, const char *name, unsigned optype, unsigned priority);
 USE_RESULT prolog_state make_choice(query *q);
 USE_RESULT prolog_state make_barrier(query *q);
 USE_RESULT prolog_state make_catcher(query *q, enum q_retry type);
