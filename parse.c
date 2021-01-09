@@ -3790,9 +3790,9 @@ module *create_module(prolog *pl, const char *name)
 
 		// findall...
 
-		make_rule(m, "findall(Template, Goal, List, Tail) :- "	\
-			"findall(Template, Goal, List0), "					\
-			"'$append'(List0, Tail, List).");
+		make_rule(m, "findall(T, G, B, Tail) :- "				\
+			"findall(T, G, B0), "								\
+			"'$append'(B0, Tail, B).");
 
 		// bagof...
 
