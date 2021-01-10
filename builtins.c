@@ -7989,7 +7989,7 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			c->flags |= FLAG2_PROCESSED;
-			cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
+			cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, true);
 			may_ptr_error(tmp);
 			alloc_queuen(q, q->st.qnbr, tmp);
 		}
