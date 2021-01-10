@@ -30,7 +30,7 @@ Written in plain-old C.
 
 On Debian+ systems you may need to install GNU readline:
 
-	sudo apt install libreadline-dev
+	sudo apt install libssl-dev
 
 Then...
 
