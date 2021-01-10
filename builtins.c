@@ -7332,7 +7332,7 @@ static USE_RESULT prolog_state fn_iso_current_op_3(query *q)
 	GET_NEXT_ARG(p_spec,atom_or_var);
 	GET_NEXT_ARG(p_name,atom_or_var);
 	const char *sname = GET_STR(p_name);
-	bool prefix = q->retry ? true : false;
+	bool prefix = q->retry ? true : false;\
 
 	if (!is_integer(p_pri) && !is_variable(p_pri))
 		return throw_error(q, p_pri, "domain_error", "operator_priority");
@@ -7340,11 +7340,26 @@ static USE_RESULT prolog_state fn_iso_current_op_3(query *q)
 	if (is_integer(p_pri) && (p_pri->val_num > 1200))
 		return throw_error(q, p_pri, "domain_error", "operator_priority");
 
-	if (is_atom(p_spec)
-		&& strcmp(GET_STR(p_spec), "xfx")
-		&& strcmp(GET_STR(p_spec), "xfy")
-		&& strcmp(GET_STR(p_spec), "yfx"))
-		return throw_error(q, p_spec, "domain_error", "operator_specifier");
+	if (is_atom(p_spec)) {
+		const char *spec = GET_STR(p_spec);
+		
+		if (!strcmp(spec, "fx"))
+			;
+		else if (!strcmp(spec, "fy"))
+			;
+		else if (!strcmp(spec, "xf"))
+			;
+		else if (!strcmp(spec, "xfx"))
+			;
+		else if (!strcmp(spec, "xfy"))
+			;
+		else if (!strcmp(spec, "yf"))
+			;
+		else if (!strcmp(spec, "yfx"))
+			;
+			else
+			return throw_error(q, p_spec, "domain_error", "operator_specifier");
+		}
 
 	if (is_atom(p_spec)) {
 		const char *stype = GET_STR(p_spec);
