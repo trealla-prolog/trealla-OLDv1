@@ -7340,7 +7340,10 @@ static USE_RESULT prolog_state fn_iso_current_op_3(query *q)
 	if (is_integer(p_pri) && (p_pri->val_num > 1200))
 		return throw_error(q, p_pri, "domain_error", "operator_priority");
 
-	if (is_atom(p_spec) && !CELL_INFIX(p_spec) && !CELL_POSTFIX(p_spec) && !CELL_PREFIX(p_spec))
+	if (is_atom(p_spec)
+		&& strcmp(GET_STR(p_spec), "xfx")
+		&& strcmp(GET_STR(p_spec), "xfy")
+		&& strcmp(GET_STR(p_spec), "yfx"))
 		return throw_error(q, p_spec, "domain_error", "operator_specifier");
 
 	if (is_atom(p_spec)) {
