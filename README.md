@@ -28,7 +28,7 @@ Written in plain-old C.
 	git clone https://github.com/infradig/trealla.git
 	cd trealla
 
-On Debian systems you may need to install GNU readline:
+On Debian+ systems you may need to install GNU readline:
 
 	sudo apt install libreadline-dev
 
@@ -37,6 +37,10 @@ Then...
 	make
 
 Other systems may vary. There are no other dependencies except OpenSSL.
+On Debian+ systems you may need to install OpenSSL:
+
+	sudo apt install libreadline-dev
+
 To build without OpenSSL:
 
 	make NOSSL=1
