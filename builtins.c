@@ -7342,7 +7342,7 @@ static USE_RESULT prolog_state fn_iso_current_op_3(query *q)
 
 	if (is_atom(p_spec)) {
 		const char *spec = GET_STR(p_spec);
-		
+
 		if (!strcmp(spec, "fx"))
 			;
 		else if (!strcmp(spec, "fy"))
@@ -10121,7 +10121,7 @@ static USE_RESULT prolog_state fn_absolute_file_name_3(query *q)
 	const char *s = filename;
 
 	if (expand && (*s == '$')) {
-		char envbuf[256];
+		char envbuf[1024];
 		char *dst = envbuf;
 		s++;
 
@@ -10136,23 +10136,19 @@ static USE_RESULT prolog_state fn_absolute_file_name_3(query *q)
 		if (!ptr)
 			return throw_error(q, p1, "existence_error", "environment_variable");
 
-		tmpbuf = malloc(strlen(s)+1+strlen(ptr)+1);
+		tmpbuf = malloc(strlen(ptr)+1+strlen(s)+1);
 		may_ptr_error(tmpbuf);
-		dst = tmpbuf;
-		strcpy(tmpbuf, ptr);
-		dst += strlen(ptr);
-		*dst++ = '/';
-		strcpy(dst, s);
+		sprintf(tmpbuf, "%s/%s", ptr, s);
 		char *tmpbuf2;
 
 		if ((tmpbuf2 = realpath(tmpbuf, NULL)) == NULL) {
-			if ((tmpbuf = realpath(cwd, NULL)) == NULL)
-				tmpbuf = realpath(".", NULL);
+			if ((tmpbuf2 = realpath(cwd, NULL)) == NULL)
+				tmpbuf2 = realpath(".", NULL);
 
-			may_ptr_error(tmpbuf, free(tmpbuf));
-			char *tmp = malloc(strlen(tmpbuf)+1+strlen(s)+1);
-			may_ptr_error(tmp, free(tmpbuf));
-			sprintf(tmp, "%s/%s", tmpbuf, s);
+			may_ptr_error(tmpbuf2, free(tmpbuf2));
+			char *tmp = malloc(strlen(tmpbuf2)+1+strlen(s)+1);
+			may_ptr_error(tmp, free(tmpbuf2));
+			sprintf(tmp, "%s/%s", tmpbuf2, s);
 			free(tmpbuf);
 			tmpbuf = tmp;
 		}
