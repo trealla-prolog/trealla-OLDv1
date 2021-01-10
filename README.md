@@ -30,7 +30,7 @@ Written in plain-old C.
 
 On Debian+ systems you may need to install GNU readline:
 
-	sudo apt install libssl-dev
+	sudo apt install libreadline-dev
 
 Then...
 
@@ -39,7 +39,7 @@ Then...
 Other systems may vary. There are no other dependencies except OpenSSL.
 On Debian+ systems you may need to install OpenSSL:
 
-	sudo apt install libreadline-dev
+	sudo apt install libssl-dev
 
 To build without OpenSSL:
 
