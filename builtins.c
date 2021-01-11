@@ -10145,16 +10145,16 @@ static USE_RESULT prolog_state fn_absolute_file_name_3(query *q)
 			if ((tmpbuf2 = realpath(cwd, NULL)) == NULL)
 				tmpbuf2 = realpath(".", NULL);
 
-			may_ptr_error(tmpbuf2, free(tmpbuf2));
+			may_ptr_error(tmpbuf2, free(tmpbuf));
 			char *tmp = malloc(strlen(tmpbuf2)+1+strlen(s)+1);
 			may_ptr_error(tmp, free(tmpbuf2));
 			sprintf(tmp, "%s/%s", tmpbuf2, s);
 			free(tmpbuf);
 			tmpbuf = tmp;
+		} else {
+			free(tmpbuf);
+			tmpbuf = tmpbuf2;
 		}
-
-		free(tmpbuf);
-		tmpbuf = tmpbuf2;
 	} else {
 		if ((tmpbuf = realpath(s, NULL)) == NULL) {
 			if ((tmpbuf = realpath(cwd, NULL)) == NULL)
