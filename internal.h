@@ -177,6 +177,10 @@ enum {
 	FLAG_TMP=1<<8,						// used with TYPE_CSTRING
 	FLAG_KEY=1<<9,						// used with keys
 
+	FLAG_SPARE3=1<<10,
+	FLAG_SPARE2=1<<11,
+	FLAG_SPARE1=1<<12,
+
 	// These are redefinitions and should only be used
 	// when the primary type is already checked...
 
@@ -188,10 +192,10 @@ enum {
 	FLAG2_DUP=FLAG_OCTAL,				// used with TYPE_CSTRING
 	FLAG2_QUOTED=FLAG_BINARY,			// used with TYPE_CSTRING
 
-	FLAG_END=1<<11
+	FLAG_END=1<<13
 };
 
-// The OP types are stored in the high 4 bits of the flag
+// The OP types are stored in the high 3 bits of the flag (13-15)
 
 #define	OP_FX 1
 #define	OP_FY 2
@@ -217,9 +221,9 @@ enum {
 #define IS_XFX(c) (GET_OP(c) == OP_XFX)
 #define IS_XFY(c) (GET_OP(c) == OP_XFY)
 
-#define SET_OP(c,op) (CLR_OP(c), (c)->flags |= (((uint16_t)(op)) << 12))
-#define CLR_OP(c) ((c)->flags &= ~((uint16_t)(0xF) << 12))
-#define GET_OP(c) (((c)->flags >> 12) & 0xF)
+#define SET_OP(c,op) (CLR_OP(c), (c)->flags |= (((uint16_t)(op)) << 13))
+#define CLR_OP(c) ((c)->flags &= ~((uint16_t)(0xF) << 13))
+#define GET_OP(c) (((c)->flags >> 13) & 0xF)
 #define IS_OP(c) (GET_OP(c) != 0 ? true : false)
 
 typedef struct module_ module;
