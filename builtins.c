@@ -430,13 +430,15 @@ static USE_RESULT prolog_state make_cstring(cell *d, const char *s)
 
 static void chk_cstring(cell *c)
 {
+	// Eventually move to a ref-counted strbuf.
+
 	if (is_nonconst_blob(c) && is_tmp(c)) {
 		if (c->val_str)
 			free(c->val_str);
 	}
 }
 
-static USE_RESULT prolog_state make_string(cell *d, const char *s, size_t n)
+static USE_RESULT prolog_state make_stringn(cell *d, const char *s, size_t n)
 {
 	FAULTINJECT(errno = ENOMEM; return pl_error);
 	d->val_str = malloc(n+1);
@@ -449,6 +451,11 @@ static USE_RESULT prolog_state make_string(cell *d, const char *s, size_t n)
 	d->nbr_cells = 1;
 	d->arity = 2;
 	return pl_success;
+}
+
+static USE_RESULT prolog_state make_string(cell *d, const char *s)
+{
+	return make_stringn(d, s, strlen(s));
 }
 
 static USE_RESULT cell *deep_copy2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only)
@@ -822,7 +829,7 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 
 	if (is_variable(p2)) {
 		cell tmp;
-		may_error(make_string(&tmp, GET_STR(p1), LEN_STR(p1)));
+		may_error(make_stringn(&tmp, GET_STR(p1), LEN_STR(p1)));
 		int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		chk_cstring(&tmp);
 		return ok;
@@ -1065,7 +1072,7 @@ static USE_RESULT prolog_state fn_iso_number_chars_2(query *q)
 	char tmpbuf[256];
 	print_term_to_buf(q, tmpbuf, sizeof(tmpbuf), p1, p1_ctx, 1, 0, 0);
 	cell tmp;
-	may_error(make_string(&tmp, tmpbuf, strlen(tmpbuf)));
+	may_error(make_string(&tmp, tmpbuf));
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
 	return ok;
@@ -8744,7 +8751,7 @@ static USE_RESULT prolog_state fn_split_4(query *q)
 		cell tmp;
 
 		if (ptr != start)
-			may_error(make_string(&tmp, start, ptr-start));
+			may_error(make_stringn(&tmp, start, ptr-start));
 		else
 			make_literal(&tmp, g_nil_s);
 
@@ -8760,7 +8767,7 @@ static USE_RESULT prolog_state fn_split_4(query *q)
 			ptr++;
 
 		if (*ptr)
-			may_error(make_string(&tmp, ptr, LEN_STR(p1)-(ptr-start)));
+			may_error(make_stringn(&tmp, ptr, LEN_STR(p1)-(ptr-start)));
 		else
 			make_literal(&tmp, g_nil_s);
 
@@ -8852,7 +8859,7 @@ static USE_RESULT prolog_state fn_loadfile_2(query *q)
 	s[st.st_size] = '\0';
 	fclose(fp);
 	cell tmp;
-	may_error(make_string(&tmp, s, st.st_size), free(s));
+	may_error(make_stringn(&tmp, s, st.st_size), free(s));
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	free(s);
 	return pl_success;
@@ -9259,9 +9266,9 @@ static USE_RESULT prolog_state fn_client_5(query *q)
 		net_set_nonblocking(str);
 
 	cell tmp;
-	may_error(make_string(&tmp, hostname, strlen(hostname)));
+	may_error(make_string(&tmp, hostname));
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	may_error(make_string(&tmp, path, strlen(path)));
+	may_error(make_string(&tmp, path));
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	cell *tmp2 = alloc_heap(q, 1);
 	ensure(tmp2);
@@ -9299,7 +9306,7 @@ static USE_RESULT prolog_state fn_getline_1(query *q)
 	cell tmp;
 
 	if (strlen(line))
-		may_error(make_string(&tmp, line, strlen(line)), free(line));
+		may_error(make_string(&tmp, line), free(line));
 	else
 		make_literal(&tmp, g_nil_s);
 
@@ -9344,7 +9351,7 @@ static USE_RESULT prolog_state fn_getline_2(query *q)
 	cell tmp;
 
 	if (strlen(line))
-		may_error(make_string(&tmp, line, strlen(line)), free(line));
+		may_error(make_string(&tmp, line), free(line));
 	else
 		make_literal(&tmp, g_nil_s);
 
@@ -9393,7 +9400,7 @@ static USE_RESULT prolog_state fn_bread_3(query *q)
 		}
 
 		cell tmp;
-		may_error(make_string(&tmp, str->data, str->data_len), free(str->data));
+		may_error(make_stringn(&tmp, str->data, str->data_len), free(str->data));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(str->data);
 		str->data = NULL;
@@ -9412,7 +9419,7 @@ static USE_RESULT prolog_state fn_bread_3(query *q)
 		str->data = realloc(str->data, nbytes+1);
 		ensure(str->data);
 		cell tmp;
-		may_error(make_string(&tmp, str->data, nbytes), free(str->data));
+		may_error(make_stringn(&tmp, str->data, nbytes), free(str->data));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(str->data);
 		str->data = NULL;
@@ -9446,7 +9453,7 @@ static USE_RESULT prolog_state fn_bread_3(query *q)
 	cell tmp2;
 
 	if (str->data_len)
-		may_error(make_string(&tmp2, str->data, str->data_len), free(str->data));
+		may_error(make_stringn(&tmp2, str->data, str->data_len), free(str->data));
 	else
 		make_literal(&tmp2, g_nil_s);
 
@@ -9607,7 +9614,7 @@ static USE_RESULT prolog_state fn_write_term_to_chars_3(query *q)
 	q->ignore_ops = false;
 	q->variable_names = NULL;
 	cell tmp;
-	may_error(make_string(&tmp, dst, strlen(dst)), free(dst));
+	may_error(make_string(&tmp, dst), free(dst));
 	free(dst);
 	int ok = unify(q, p_chars, p_chars_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
@@ -10181,9 +10188,9 @@ static USE_RESULT prolog_state fn_absolute_file_name_3(query *q)
 	cell tmp;
 
 	if (is_string(p1))
-		may_error(make_string(&tmp, tmpbuf, strlen(tmpbuf)), free(tmpbuf); free(src));
+		may_error(make_string(&tmp, tmpbuf), free(tmpbuf); free(src));
 	else
-		may_error(make_cstringn(&tmp, tmpbuf, strlen(tmpbuf)), free(tmpbuf); free(src));
+		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf); free(src));
 
 	free(tmpbuf);
 	free(src);
@@ -10543,7 +10550,7 @@ static USE_RESULT prolog_state do_format(query *q, cell *str, idx_t str_ctx, cel
 		cell tmp;
 
 		if (strlen(tmpbuf))
-			may_error(make_string(&tmp, tmpbuf, strlen(tmpbuf)), free(tmpbuf));
+			may_error(make_string(&tmp, tmpbuf), free(tmpbuf));
 		else
 			make_literal(&tmp, g_nil_s);
 
@@ -10612,7 +10619,7 @@ static USE_RESULT prolog_state fn_sha1_2(query *q)
 	}
 
 	cell tmp;
-	may_error(make_string(&tmp, tmpbuf, strlen(tmpbuf)));
+	may_error(make_string(&tmp, tmpbuf));
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
 	return ok;
@@ -10636,7 +10643,7 @@ static USE_RESULT prolog_state fn_sha256_2(query *q)
 	}
 
 	cell tmp;
-	may_error(make_string(&tmp, tmpbuf, strlen(tmpbuf)));
+	may_error(make_string(&tmp, tmpbuf));
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
 	return ok;
@@ -10660,7 +10667,7 @@ static USE_RESULT prolog_state fn_sha512_2(query *q)
 	}
 
 	cell tmp;
-	may_error(make_string(&tmp, tmpbuf, strlen(tmpbuf)));
+	may_error(make_string(&tmp, tmpbuf));
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
 	return ok;
@@ -10677,7 +10684,7 @@ static int do_b64encode_2(query *q)
 	ensure(dstbuf);
 	b64_encode(str, len, &dstbuf, 0, 0);
 	cell tmp;
-	may_error(make_string(&tmp, dstbuf, strlen(dstbuf)), free(dstbuf));
+	may_error(make_string(&tmp, dstbuf), free(dstbuf));
 	free(dstbuf);
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
@@ -10694,7 +10701,7 @@ static int do_b64decode_2(query *q)
 	ensure(dstbuf);
 	b64_decode(str, len, &dstbuf);
 	cell tmp;
-	may_error(make_string(&tmp, dstbuf, strlen(dstbuf)), free(dstbuf));
+	may_error(make_string(&tmp, dstbuf), free(dstbuf));
 	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(dstbuf);
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -10764,7 +10771,7 @@ static USE_RESULT prolog_state do_urlencode_2(query *q)
 	ensure(dstbuf);
 	url_encode(str, len, dstbuf);
 	cell tmp;
-	may_error(make_string(&tmp, dstbuf, strlen(dstbuf)), free(dstbuf));
+	may_error(make_string(&tmp, dstbuf), free(dstbuf));
 	free(dstbuf);
 	prolog_state ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
@@ -10781,7 +10788,7 @@ static USE_RESULT prolog_state do_urldecode_2(query *q)
 	ensure(dstbuf);
 	url_decode(str, dstbuf);
 	cell tmp;
-	may_error(make_string(&tmp, dstbuf, strlen(dstbuf)), free(dstbuf));
+	may_error(make_string(&tmp, dstbuf), free(dstbuf));
 	free(dstbuf);
 	int ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
@@ -10818,7 +10825,7 @@ static USE_RESULT prolog_state fn_string_lower_2(query *q)
 	}
 
 	cell tmp;
-	may_error(make_string(&tmp, tmps, len), free(tmps));
+	may_error(make_stringn(&tmp, tmps, len), free(tmps));
 	free(tmps);
 	prolog_state ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
@@ -10842,7 +10849,7 @@ static USE_RESULT prolog_state fn_string_upper_2(query *q)
 	}
 
 	cell tmp;
-	may_error(make_string(&tmp, tmps, len), free(tmps));
+	may_error(make_stringn(&tmp, tmps, len), free(tmps));
 	free(tmps);
 	prolog_state ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
@@ -10970,16 +10977,16 @@ static USE_RESULT prolog_state fn_directory_files_2(query *q)
 	cell tmp;
 
 	if (is_string(p1))
-		may_error(make_string(&tmp, dire->d_name, strlen(dire->d_name)));
+		may_error(make_string(&tmp, dire->d_name));
 	else
-		may_error(make_cstringn(&tmp, dire->d_name, strlen(dire->d_name)));
+		may_error(make_cstring(&tmp, dire->d_name));
 	alloc_list(q, &tmp);
 
 	for (dire = readdir(dirp); dire; dire = readdir(dirp)) {
 		if (is_string(p1))
-			may_error(make_string(&tmp, dire->d_name, strlen(dire->d_name)));
+			may_error(make_string(&tmp, dire->d_name));
 		else
-			may_error(make_cstringn(&tmp, dire->d_name, strlen(dire->d_name)));
+			may_error(make_cstring(&tmp, dire->d_name));
 
 		append_list(q, &tmp);
 	}
@@ -11193,7 +11200,7 @@ static USE_RESULT prolog_state fn_working_directory_2(query *q)
 	snprintf(tmpbuf2, sizeof(tmpbuf2), "%s%s", oldpath, PATH_SEP);
 	oldpath = tmpbuf2;
 	cell tmp;
-	may_error(make_string(&tmp, oldpath, strlen(oldpath)));
+	may_error(make_string(&tmp, oldpath));
 
 	if (is_atom_or_list(p_new)) {
 		const char *filename;
@@ -11440,7 +11447,7 @@ static USE_RESULT prolog_state fn_hex_chars_2(query *q)
 		char tmpbuf[256];
 		sprintf(tmpbuf, "%llx", (long long)p2->val_num);
 		cell tmp;
-		may_error(make_string(&tmp, tmpbuf, strlen(tmpbuf)));
+		may_error(make_string(&tmp, tmpbuf));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
@@ -11470,7 +11477,7 @@ static USE_RESULT prolog_state fn_octal_chars_2(query *q)
 		char tmpbuf[256];
 		sprintf(tmpbuf, "%llo", (long long)p2->val_num);
 		cell tmp;
-		may_error(make_string(&tmp, tmpbuf, strlen(tmpbuf)));
+		may_error(make_string(&tmp, tmpbuf));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
@@ -11797,7 +11804,7 @@ static USE_RESULT prolog_state fn_replace_4(query *q)
 	cell tmp;
 
 	if (strlen(dstbuf))
-		may_error(make_string(&tmp, dstbuf, strlen(dstbuf)), free(dstbuf));
+		may_error(make_string(&tmp, dstbuf), free(dstbuf));
 	else
 		make_literal(&tmp, g_nil_s);
 
