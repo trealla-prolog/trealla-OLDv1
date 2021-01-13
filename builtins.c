@@ -4,8 +4,6 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
-#include <math.h>
-#include <float.h>
 #include <errno.h>
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -147,7 +145,7 @@ static void make_variable(cell *tmp, idx_t off)
 	tmp->var_nbr = 0;
 }
 
-static void make_int(cell *tmp, int_t v)
+void make_int(cell *tmp, int_t v)
 {
 	tmp->val_type = TYPE_INTEGER;
 	tmp->nbr_cells = 1;
@@ -156,7 +154,7 @@ static void make_int(cell *tmp, int_t v)
 	tmp->val_den = 1;
 }
 
-static void make_float(cell *tmp, double v)
+void make_float(cell *tmp, double v)
 {
 	tmp->val_type = TYPE_FLOAT;
 	tmp->nbr_cells = 1;
@@ -8201,7 +8199,7 @@ static USE_RESULT prolog_state fn_date_time_7(query *q)
 static USE_RESULT prolog_state fn_shell_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	system(GET_STR(p1));
+	DISCARD_RESULT system(GET_STR(p1));
 	return pl_success;
 }
 

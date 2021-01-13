@@ -129,6 +129,9 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 #define unify(q,p1,p1_ctx,p2,p2_ctx) \
 	unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0)
 
+extern void make_int(cell *tmp, int_t v);
+extern void make_float(cell *tmp, double v);
+
 #define calc_(q,c) !(c->flags&FLAG_BUILTIN) ? *c : (do_calc_(q,c,c##_ctx), q->accum)
 
 extern USE_RESULT prolog_state fn_iso_add_2(query *q);

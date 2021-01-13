@@ -11,23 +11,6 @@
 #include "internal.h"
 #include "builtins.h"
 
-static void make_int(cell *tmp, int_t v)
-{
-	tmp->val_type = TYPE_INTEGER;
-	tmp->nbr_cells = 1;
-	tmp->arity = tmp->flags = 0;
-	tmp->val_num = v;
-	tmp->val_den = 1;
-}
-
-static void make_float(cell *tmp, double v)
-{
-	tmp->val_type = TYPE_FLOAT;
-	tmp->nbr_cells = 1;
-	tmp->arity = tmp->flags = 0;
-	tmp->val_flt = v;
-}
-
 #define CHECK_CALC()							\
 	if (!q->calc) {								\
 		if (q->flag.unknown == 0)				\
