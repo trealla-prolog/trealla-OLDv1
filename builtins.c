@@ -11124,8 +11124,10 @@ bool check_builtin(const char *name, unsigned arity)
 	const struct builtins *ptr;
 
 	while (sl_nextkey(iter, (void**)&ptr)) {
-		if (ptr->arity == arity)
+		if (ptr->arity == arity) {
+			sl_done(iter);
 			return true;
+		}
 	}
 
 	return false;
@@ -11137,8 +11139,10 @@ void *get_builtin(const char *name, unsigned arity)
 	const struct builtins *ptr;
 
 	while (sl_nextkey(iter, (void**)&ptr)) {
-		if (ptr->arity == arity)
+		if (ptr->arity == arity) {
+			sl_done(iter);
 			return ptr->fn;
+		}
 	}
 
 	return NULL;
