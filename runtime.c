@@ -259,6 +259,12 @@ static void trim_heap(query *q, const choice *ch)
 	}
 }
 
+idx_t drop_choice(query *q)
+{
+	idx_t curr_choice = --q->cp;
+	return curr_choice;
+}
+
 bool retry_choice(query *q)
 {
 	if (!q->cp)
@@ -274,6 +280,7 @@ bool retry_choice(query *q)
 		return retry_choice(q);
 
 	trim_heap(q, ch);
+	sl_done(q->st.iter);
 	q->st = ch->st;
 
 	frame *g = GET_FRAME(q->st.curr_frame);
@@ -282,12 +289,6 @@ bool retry_choice(query *q)
 	g->any_choices = ch->any_choices;
 	g->overflow = ch->overflow;
 	return true;
-}
-
-idx_t drop_choice(query *q)
-{
-	idx_t curr_choice = --q->cp;
-	return curr_choice;
 }
 
 static void make_frame(query *q, unsigned nbr_vars, bool last_match)
@@ -383,13 +384,17 @@ static void commit_me(query *q, term *t)
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g->m = q->m;
 	q->m = q->st.curr_clause->m;
+	q->st.iter = NULL;
 	bool last_match = !q->st.curr_clause->next || t->first_cut;
 	bool recursive = (last_match || g->did_cut) && (q->st.curr_cell->flags&FLAG_TAIL_REC);
 	bool tco = recursive && !g->any_choices && check_slots(q, g, t);
 
-	if (last_match)
+	if (last_match) {
+		idx_t curr_choice = q->cp - 1;
+		choice *ch = q->choices + curr_choice;
+		sl_done(ch->st.iter);
 		drop_choice(q);
-	else {
+	} else {
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
 		ch->st.curr_clause = q->st.curr_clause;
@@ -447,8 +452,6 @@ prolog_state make_choice(query *q)
 	ch->catchme2 = false;
 	ch->pins = 0;
 
-	q->st.iter = NULL;	// Don't remove this
-
 	frame *g = GET_FRAME(q->st.curr_frame);
 	may_error(check_slot(q, g->nbr_vars));
 	ch->nbr_vars = g->nbr_vars;
@@ -505,9 +508,7 @@ void cut_me(query *q, bool local_cut)
 			q->st.qnbr = ch->st.qnbr;
 		}
 
-		if (ch->st.iter)
-			sl_done(ch->st.iter);
-
+		sl_done(ch->st.iter);
 		q->cp--;
 
 		if ((ch->local_cut && local_cut) &&
@@ -872,9 +873,6 @@ USE_RESULT prolog_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 		cell *c = t->cells;
 		bool needs_true = false;
 		p1 = orig_p1;
-
-		//printf("*** "); print_term(q, stdout, t->cells, q->st.curr_frame, 0); printf("\n");
-
 		cell *c_body = get_logical_body(c);
 
 		if (p1_body && is_variable(p1_body) && !c_body) {
@@ -1061,14 +1059,6 @@ static USE_RESULT prolog_state match_head(query *q)
 
 			if (!all_vars) {
 				q->st.iter = sl_findkey(h->index, key);
-
-#if 0
-				printf("*** key: iter:%p ", q->st.iter);
-				print_term(q, stdout, key, q->st.curr_frame, 0);
-				printf("\n");
-				sl_dump(h->index, dump_key, q);
-#endif
-
 				next_key(q);
 			} else {
 				q->st.curr_clause = h->head;

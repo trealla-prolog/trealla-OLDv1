@@ -4076,6 +4076,7 @@ static void g_destroy(prolog *pl)
 		destroy_module(pl->modules);
 	}
 
+	free(g_tpl_lib);
 	sl_destroy(g_bi_index);
 	sl_destroy(pl->symtab);
 	pl->symtab = NULL;
