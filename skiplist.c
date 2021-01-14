@@ -51,7 +51,7 @@ inline static slnode_t*
 new_node_of_level(unsigned x)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
-	return malloc(sizeof(slnode_t) + ((x) * sizeof(slnode_t*)));
+	return malloc(sizeof(slnode_t) + ((x+1) * sizeof(slnode_t*)));
 }
 
 
@@ -502,7 +502,7 @@ sliter *sl_first(skiplist *l)
 	}
 
 	iter->key = NULL;
-	iter->l = (skiplist*)l;
+	iter->l = l;
 	iter->p = l->header->forward[0];
 	iter->idx = 0;
 	return iter;
@@ -565,7 +565,7 @@ sliter *sl_findkey(skiplist *l, const void *key)
 	}
 
 	iter->key = key;
-	iter->l = (skiplist*)l;
+	iter->l = l;
 	iter->p = q;
 	iter->idx = imid;
 	return iter;
@@ -606,6 +606,7 @@ void sl_done(sliter *iter)
 		return;
 
 	assert(!iter->dead);
+
 	iter->dead = true;
 	iter->next = iter->l->iters;
 	iter->l->iters = iter;
