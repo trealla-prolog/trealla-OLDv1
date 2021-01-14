@@ -514,16 +514,18 @@ bool sl_next(sliter *iter, void **val)
 
 	assert(!iter->dead);
 
-	if (iter->idx < iter->p->nbr) {
-		*val = iter->p->bkt[iter->idx++].val;
-		return true;
+	for (;;) {
+		if (iter->idx < iter->p->nbr) {
+			*val = iter->p->bkt[iter->idx++].val;
+			return true;
+		}
+
+		iter->p = iter->p->forward[0];
+		iter->idx = 0;
+
+		if (!iter->p)
+			break;
 	}
-
-	iter->p = iter->p->forward[0];
-	iter->idx = 0;
-
-	if (iter->p)
-		return sl_next(iter, val);
 
 	sl_done(iter);
 	return false;
@@ -575,21 +577,23 @@ bool sl_nextkey(sliter *iter, void **val)
 
 	assert(!iter->dead);
 
-	if (iter->idx < iter->p->nbr) {
-		if (iter->l->compkey(iter->l->p, iter->p->bkt[iter->idx].key, iter->key) != 0) {
-			sl_done(iter);
-			return false;
+	for (;;) {
+		if (iter->idx < iter->p->nbr) {
+			if (iter->l->compkey(iter->l->p, iter->p->bkt[iter->idx].key, iter->key) != 0) {
+				sl_done(iter);
+				return false;
+			}
+
+			*val = iter->p->bkt[iter->idx++].val;
+			return true;
 		}
 
-		*val = iter->p->bkt[iter->idx++].val;
-		return true;
+		iter->p = iter->p->forward[0];
+		iter->idx = 0;
+
+		if (!iter->p)
+			break;
 	}
-
-	iter->p = iter->p->forward[0];
-	iter->idx = 0;
-
-	if (iter->p)
-		return sl_nextkey(iter, val);
 
 	sl_done(iter);
 	return false;
