@@ -838,7 +838,7 @@ char *print_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 	}
 
 	char *buf = malloc(len+10);
-	if (!buf) return NULL;
+	ensure(buf);
 	len = print_term_to_buf(q, buf, len+1, c, c_ctx, running, 0, 0);
 	q->numbervars = false;
 	return buf;
@@ -853,7 +853,7 @@ prolog_state print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, i
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 1);
 	}
 
-	char *dst = malloc(len+1);
+	char *dst = malloc(len+10);
 	may_ptr_error(dst);
 	len = print_term_to_buf(q, dst, len+1, c, c_ctx, running, 0, 0);
 	const char *src = dst;
@@ -885,7 +885,7 @@ prolog_state print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 1);
 	}
 
-	char *dst = malloc(len+1);
+	char *dst = malloc(len+10);
 	may_ptr_error(dst);
 	len = print_term_to_buf(q, dst, len+1, c, c_ctx, running, 0, 0);
 	const char *src = dst;
