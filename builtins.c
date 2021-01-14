@@ -4730,7 +4730,7 @@ static USE_RESULT prolog_state do_abolish(query *q, cell *c_orig, cell *c)
 	h->is_abolished = true;
 	sl_destroy(h->index);
 	h->index = NULL;
-	h->head = h->tail = NULL;
+	//h->head = h->tail = NULL;
 	h->cnt = 0;
 	return pl_success;
 }
