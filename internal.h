@@ -74,7 +74,7 @@ typedef uint32_t idx_t;
 #define MAX_USER_OPS 250
 #define MAX_QUEUES 16
 #define MAX_STREAMS 1024
-#define MAX_DEPTH 10000
+#define MAX_DEPTH 9000
 
 #define STREAM_BUFLEN 1024
 #define CHECK_OVERFLOW 1
