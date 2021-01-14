@@ -59,29 +59,30 @@ skiplist *sl_create2(int (*compkey)(const void *p, const void*, const void*), vo
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	skiplist *l = (skiplist*)calloc(1, sizeof(struct skiplist_));
-	if (l) {
-		l->header = new_node_of_level(MAX_LEVELS);
-		if (!l->header) {
-			free(l);
-			return NULL;
-		}
-#ifdef NDEBUG
-		l->seed = (unsigned)(size_t)(l + clock());
-#else
-		static unsigned seed = 0xdeadbeef;
-		l->seed = ++seed;
-#endif
-		l->level = 1;
+	if (!l) return NULL;
 
-		for (int i = 0; i < MAX_LEVELS; i++)
-			l->header->forward[i] = NULL;
-
-		l->header->nbr = 1;
-		l->header->bkt[0].key = NULL;
-		l->compkey = compkey;
-		l->delkey = delkey;
-		l->count = 0;
+	l->header = new_node_of_level(MAX_LEVELS);
+	if (!l->header) {
+		free(l);
+		return NULL;
 	}
+
+#ifdef NDEBUG
+	l->seed = (unsigned)(size_t)(l + clock());
+#else
+	static unsigned seed = 0xdeadbeef;
+	l->seed = ++seed;
+#endif
+
+	l->level = 1;
+
+	for (int i = 0; i < MAX_LEVELS; i++)
+		l->header->forward[i] = NULL;
+
+	l->header->nbr = 1;
+	l->header->bkt[0].key = NULL;
+	l->compkey = compkey;
+	l->delkey = delkey;
 	return l;
 }
 
@@ -605,7 +606,6 @@ void sl_done(sliter *iter)
 		return;
 
 	assert(!iter->dead);
-
 	iter->dead = true;
 	iter->next = iter->l->iters;
 	iter->l->iters = iter;
@@ -613,6 +613,9 @@ void sl_done(sliter *iter)
 
 void sl_dump(const skiplist *l, const char *(*f)(void*, const void*), void *p1)
 {
+	if (!l)
+		return;
+
     slnode_t *p, *q;
     p = l->header;
     p = p->forward[0];
