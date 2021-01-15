@@ -34,10 +34,6 @@
 #define USE_THREADS 0
 #endif
 
-#if USE_GMP
-#include <gmp.h>
-#endif
-
 #if USE_INT128
 typedef __int128_t int_t;
 typedef __uint128_t uint_t;
@@ -258,12 +254,6 @@ struct cell_ {
 		struct {
 			cell *val_ptr;
 		};
-
-#if USE_GMP
-		struct {
-			mpz_t val_mpz;
-		};
-#endif
 
 		struct {
 			char *val_str;
