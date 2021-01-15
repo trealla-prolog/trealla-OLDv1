@@ -55,7 +55,6 @@ typedef __uint64_t uint_t;
 typedef uint32_t idx_t;
 
 #include "skiplist.h"
-#include "utf8.h"
 #include "trealla.h"
 #include "cdebug.h"
 
