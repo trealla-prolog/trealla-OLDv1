@@ -11103,24 +11103,24 @@ extern const struct builtins g_arith_funcs[];
 void load_builtins(prolog *pl, bool iso_only)
 {
 	for (const struct builtins *ptr = g_iso_funcs; ptr->name; ptr++) {
-		sl_app(pl->bi_index, ptr->name, ptr);
+		sl_app(pl->funtab, ptr->name, ptr);
 	}
 
 	for (const struct builtins *ptr = g_arith_funcs; ptr->name; ptr++) {
-		sl_app(pl->bi_index, ptr->name, ptr);
+		sl_app(pl->funtab, ptr->name, ptr);
 	}
 
 	if (iso_only)
 		return;
 
 	for (const struct builtins *ptr = g_other_funcs; ptr->name; ptr++) {
-		sl_app(pl->bi_index, ptr->name, ptr);
+		sl_app(pl->funtab, ptr->name, ptr);
 	}
 }
 
 bool check_builtin(prolog *pl, const char *name, unsigned arity)
 {
-	sliter *iter = sl_findkey(pl->bi_index, name);
+	sliter *iter = sl_findkey(pl->funtab, name);
 	const struct builtins *ptr;
 
 	while (sl_nextkey(iter, (void**)&ptr)) {
@@ -11135,7 +11135,7 @@ bool check_builtin(prolog *pl, const char *name, unsigned arity)
 
 void *get_builtin(prolog *pl, const char *name, unsigned arity)
 {
-	sliter *iter = sl_findkey(pl->bi_index, name);
+	sliter *iter = sl_findkey(pl->funtab, name);
 	const struct builtins *ptr;
 
 	while (sl_nextkey(iter, (void**)&ptr)) {

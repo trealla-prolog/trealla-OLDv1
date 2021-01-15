@@ -540,7 +540,7 @@ struct prolog_ {
 	module *modules;
 	module *m, *curr_m;
 	uint64_t s_last, s_cnt, seed;
-	skiplist *symtab, *bi_index;
+	skiplist *symtab, *funtab;
 	char *pool;
 	idx_t pool_offset, pool_size, tab_idx;
 	unsigned varno;

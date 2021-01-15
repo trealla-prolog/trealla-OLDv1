@@ -4081,7 +4081,7 @@ static void g_destroy(prolog *pl)
 	}
 
 	free(g_tpl_lib);
-	sl_destroy(pl->bi_index);
+	sl_destroy(pl->funtab);
 	sl_destroy(pl->symtab);
 	pl->symtab = NULL;
 	free(pl->pool);
@@ -4195,9 +4195,9 @@ prolog *pl_create()
 		}
 	}
 
-	pl->bi_index = sl_create2((void*)my_strcmp, NULL);
+	pl->funtab = sl_create2((void*)my_strcmp, NULL);
 
-	if (pl->bi_index)
+	if (pl->funtab)
 		load_builtins(pl, false);
 
 	//printf("Library: %s\n", g_tpl_lib);
