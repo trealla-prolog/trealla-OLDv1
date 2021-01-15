@@ -540,7 +540,7 @@ struct prolog_ {
 	module *modules;
 	module *m, *curr_m;
 	uint64_t s_last, s_cnt, seed;
-	skiplist *symtab;
+	skiplist *symtab, *bi_index;
 	char *pool;
 	idx_t pool_offset, pool_size, tab_idx;
 	unsigned varno;
@@ -553,7 +553,6 @@ extern idx_t g_gt_s, g_eq_s, g_sys_elapsed_s, g_sys_queue_s, g_braces_s;
 extern stream g_streams[MAX_STREAMS];
 extern char *g_pool;
 extern unsigned g_cpu_count;
-extern skiplist *g_bi_index;
 
 inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 {
@@ -592,8 +591,8 @@ USE_RESULT prolog_state make_choice(query *q);
 USE_RESULT prolog_state make_barrier(query *q);
 USE_RESULT prolog_state make_catcher(query *q, enum q_retry type);
 void cut_me(query *q, bool local_cut);
-bool check_builtin(const char *name, unsigned arity);
-void *get_builtin(const char *name, unsigned arity);
+bool check_builtin(prolog *pl, const char *name, unsigned arity);
+void *get_builtin(prolog *pl, const char *name, unsigned arity);
 prolog_state query_execute(query *q, term *t);
 bool check_rule(const cell *c);
 cell *get_head(cell *c);
@@ -647,7 +646,7 @@ unsigned fake_numbervars(query *q, cell *c, idx_t c_ctx, unsigned start);
 char *relative_to(const char *basefile, const char *relfile);
 void parser_term_to_body(parser *p);
 cell *check_body_callable(parser *p, cell *c);
-void load_builtins(bool iso_only);
+void load_builtins(prolog *pl, bool iso_only);
 
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
 prolog_state print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);

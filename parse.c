@@ -28,7 +28,6 @@ static const unsigned INITIAL_NBR_TRAILS = 1000;
 #define JUST_IN_TIME_COUNT 50
 #define DUMP_ERRS 0
 
-skiplist *g_bi_index = NULL;
 stream g_streams[MAX_STREAMS] = {{0}};
 idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
@@ -1538,12 +1537,12 @@ static void parser_xref_cell(parser *p, term *t, cell *c, predicate *parent)
 		SET_OP(c, specifier);
 	}
 
-	if ((c->fn = get_builtin(functor, c->arity)) != NULL) {
+	if ((c->fn = get_builtin(p->m->pl, functor, c->arity)) != NULL) {
 		c->flags |= FLAG_BUILTIN;
 		return;
 	}
 
-	if (check_builtin(functor, c->arity)) {
+	if (check_builtin(p->m->pl, functor, c->arity)) {
 		c->flags |= FLAG_BUILTIN;
 		return;
 	}
@@ -3236,7 +3235,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		else if (p->val_type == TYPE_FLOAT)
 			c->val_flt = atof(p->token);
 		else if ((!p->is_quoted || func || p->is_op || p->is_variable ||
-				check_builtin(p->token, 0)) && !p->string) {
+				check_builtin(p->m->pl, p->token, 0)) && !p->string) {
 			if (func && !strcmp(p->token, "."))
 				c->priority = 0;
 
@@ -4082,7 +4081,7 @@ static void g_destroy(prolog *pl)
 	}
 
 	free(g_tpl_lib);
-	sl_destroy(g_bi_index);
+	sl_destroy(pl->bi_index);
 	sl_destroy(pl->symtab);
 	pl->symtab = NULL;
 	free(pl->pool);
@@ -4196,10 +4195,10 @@ prolog *pl_create()
 		}
 	}
 
-	g_bi_index = sl_create2((void*)my_strcmp, NULL);
+	pl->bi_index = sl_create2((void*)my_strcmp, NULL);
 
-	if (g_bi_index)
-		load_builtins(false);
+	if (pl->bi_index)
+		load_builtins(pl, false);
 
 	//printf("Library: %s\n", g_tpl_lib);
 
