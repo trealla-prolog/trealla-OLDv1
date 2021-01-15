@@ -1897,7 +1897,7 @@ static USE_RESULT prolog_state do_retract(query *q, cell *p1, idx_t p1_ctx, int 
 	return pl_success;
 }
 
-static void stream_assert(query *q, int n)
+static void add_stream_property(query *q, int n)
 {
 	stream *str = &g_streams[n];
 	char tmpbuf[1024*8];
@@ -1935,7 +1935,7 @@ static void stream_assert(query *q, int n)
 	destroy_parser(p);
 }
 
-static void stream_retract(query *q, int n)
+static void del_stream_property(query *q, int n)
 {
 	cell *tmp = alloc_on_heap(q, 3);
 	make_literal(tmp+0, g_stream_property_s);
@@ -2071,7 +2071,7 @@ static USE_RESULT prolog_state do_stream_property(query *q)
 	return pl_failure;
 }
 
-static void purge_stream_properties(query *q)
+static void clear_stream_properties(query *q)
 {
 	cell tmp;
 	make_literal(&tmp, g_stream_property_s);
@@ -2083,14 +2083,15 @@ static void purge_stream_properties(query *q)
 	if (h) {
 		for (clause *r = h->head; r;) {
 			clause *save = r->next;
-			clear_term(&r->t);
-			free(r);
+			r->t.deleted = true;
 			r = save;
 		}
-
-		h->head = NULL;
-		h->tail = NULL;
 	}
+
+	q->m->dirty = true;
+	sl_destroy(h->index);
+	h->index = NULL;
+	h->cnt = 0;
 }
 
 static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
@@ -2115,7 +2116,7 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		return do_stream_property(q);
 
 	if (!q->retry) {
-		purge_stream_properties(q);
+		clear_stream_properties(q);
 
 		for (int i = 0; i < MAX_STREAMS; i++) {
 			if (!g_streams[i].fp)
@@ -2124,7 +2125,7 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 			stream *str = &g_streams[i];
 
 			if (!str->socket)
-				stream_assert(q, i);
+				add_stream_property(q, i);
 		}
 	}
 
@@ -2133,7 +2134,7 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 
 	if (!match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE)) {
 		if (q->retry)
-			purge_stream_properties(q);
+			clear_stream_properties(q);
 
 		return pl_failure;
 	}
@@ -2399,7 +2400,7 @@ static USE_RESULT prolog_state fn_iso_close_1(query *q)
 		destroy_parser(str->p);
 
 	if (!str->socket)
-		stream_retract(q, n);
+		del_stream_property(q, n);
 
 	net_close(str);
 	free(str->filename);
@@ -4730,7 +4731,6 @@ static USE_RESULT prolog_state do_abolish(query *q, cell *c_orig, cell *c)
 	h->is_abolished = true;
 	sl_destroy(h->index);
 	h->index = NULL;
-	//h->head = h->tail = NULL;
 	h->cnt = 0;
 	return pl_success;
 }
