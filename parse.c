@@ -2968,13 +2968,14 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 					cell *h = get_head(p->t->cells);
 
 					if (is_cstring(h)) {
-						h->val_off = index_from_pool(p->m->pl, PARSER_GET_STR(h));
-						if (h->val_off == ERR_IDX) {
+						FREE_STR(h);
+						idx_t off = index_from_pool(p->m->pl, PARSER_GET_STR(h));
+						if (off == ERR_IDX) {
 							p->error = true;
 							break;
 						}
 
-						FREE_STR(h);
+						h->val_off = off;
 						h->val_type = TYPE_LITERAL;
 						h->flags = 0;
 					}

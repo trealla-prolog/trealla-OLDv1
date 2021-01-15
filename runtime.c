@@ -1014,13 +1014,14 @@ static USE_RESULT prolog_state match_head(query *q)
 			h = c->match;
 		} else {
 			// For now convert it to a literal
-			c->val_off = index_from_pool(q->m->pl, GET_STR(c));
-			if (c->val_off == ERR_IDX) {
+			idx_t off = index_from_pool(q->m->pl, GET_STR(c));
+			if (off == ERR_IDX) {
 				q->error = true;
 				return pl_error;
 			}
 
 			FREE_STR(c);
+			c->val_off = off;
 			c->val_type = TYPE_LITERAL;
 			c->flags = 0;
 			h = NULL;

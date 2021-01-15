@@ -4865,13 +4865,14 @@ static USE_RESULT prolog_state fn_iso_asserta_1(query *q)
 	cell *h = get_head(p->t->cells);
 
 	if (is_cstring(h)) {
-		h->val_off = index_from_pool(q->m->pl, GET_STR(h));
-		if (h->val_off == ERR_IDX) {
+		idx_t off = index_from_pool(q->m->pl, GET_STR(h));
+		if (off == ERR_IDX) {
 			q->error = true;
 			return pl_error;
 		}
 
 		FREE_STR(h);
+		h->val_off = off;
 		h->val_type = TYPE_LITERAL;
 		h->flags = 0;
 	}
@@ -4926,13 +4927,14 @@ static USE_RESULT prolog_state fn_iso_assertz_1(query *q)
 	cell *h = get_head(p->t->cells);
 
 	if (is_cstring(h)) {
-		h->val_off = index_from_pool(q->m->pl, GET_STR(h));
-		if (h->val_off == ERR_IDX) {
+		idx_t off = index_from_pool(q->m->pl, GET_STR(h));
+		if (off == ERR_IDX) {
 			q->error = true;
 			return pl_error;
 		}
 
 		FREE_STR(h);
+		h->val_off = off;
 		h->val_type = TYPE_LITERAL;
 		h->flags = 0;
 	}
@@ -6435,13 +6437,14 @@ static USE_RESULT prolog_state do_asserta_2(query *q)
 	cell *h = get_head(p->t->cells);
 
 	if (is_cstring(h)) {
-		h->val_off = index_from_pool(q->m->pl, GET_STR(h));
-		if (h->val_off == ERR_IDX) {
+		idx_t off = index_from_pool(q->m->pl, GET_STR(h));
+		if (off == ERR_IDX) {
 			q->error = true;
 			return pl_error;
 		}
 
 		FREE_STR(h);
+		h->val_off = off;
 		h->val_type = TYPE_LITERAL;
 		h->flags = 0;
 	}
@@ -6528,13 +6531,14 @@ static USE_RESULT prolog_state do_assertz_2(query *q)
 	cell *h = get_head(p->t->cells);
 
 	if (is_cstring(h)) {
-		h->val_off = index_from_pool(q->m->pl, GET_STR(h));
-		if (h->val_off == ERR_IDX) {
+		idx_t off = index_from_pool(q->m->pl, GET_STR(h));
+		if (off == ERR_IDX) {
 			q->error = true;
 			return pl_error;
 		}
 
 		FREE_STR(h);
+		h->val_off = off;
 		h->val_type = TYPE_LITERAL;
 		h->flags = 0;
 	}
