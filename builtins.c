@@ -7741,6 +7741,11 @@ static USE_RESULT prolog_state fn_read_term_from_chars_2(query *q)
 	} else
 		return throw_error(q, p_chars, "type_error", "chars");
 
+	const char *end_ptr = src + strlen(src) - 1;
+
+	while (isspace(*end_ptr) && (end_ptr != src))
+		end_ptr--;
+
 	if (src[strlen(src)-1] != '.')
 		strcat(src, ".");
 
@@ -7777,6 +7782,11 @@ static USE_RESULT prolog_state fn_read_term_from_chars_3(query *q)
 	} else
 		return throw_error(q, p_chars, "type_error", "chars");
 
+	const char *end_ptr = src + strlen(src) - 1;
+
+	while (isspace(*end_ptr) && (end_ptr != src))
+		end_ptr--;
+
 	if (src[strlen(src)-1] != '.')
 		strcat(src, ".");
 
@@ -7810,6 +7820,11 @@ static USE_RESULT prolog_state fn_read_term_from_atom_3(query *q)
 		src = chars_list_to_string(q, p_chars, p_chars_ctx, len);
 	} else
 		return throw_error(q, p_chars, "type_error", "chars");
+
+	const char *end_ptr = src + strlen(src) - 1;
+
+	while (isspace(*end_ptr) && (end_ptr != src))
+		end_ptr--;
 
 	if (src[strlen(src)-1] != '.')
 		strcat(src, ".");
