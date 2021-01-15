@@ -43,16 +43,20 @@ LOOP:
 	if (cmd) {
 		size_t n = strlen(cmd) + strlen(line);
 		cmd = realloc(cmd, n+1);
-                ensure(cmd);
+		ensure(cmd);
 		strcat(cmd, line);
 	} else {
 		cmd = line;
 	}
 
-	while (1) {
+	for (;;) {
 		int ch = get_char_utf8(&s);
+		const char *end_ptr = line + strlen(line) - 1;
 
-		if ((ch == 0) && (line[strlen(line)-1] == eol)) {
+		while (isspace(*end_ptr) && (end_ptr != line))
+			end_ptr--;
+
+		if ((ch == 0) && (*end_ptr == eol)) {
 			add_history(cmd);
 			break;
 		}
