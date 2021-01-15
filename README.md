@@ -88,7 +88,7 @@ where options can be:
 
 For example:
 
-	./tpl -g test2,halt samples/sieve
+	tpl -g test2,halt samples/sieve
 
 Invocation without any goal presents the REPL.
 
@@ -450,21 +450,21 @@ test56 :-
 ```
 
 ```console
-$ ./tpl samples/test -g "time(test54),halt"
+$ tpl samples/test -g "time(test54),halt"
 Job [www.google.com] 200 ==> www.google.com done
 Job [www.bing.com] 200 ==> www.bing.com done
 Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
 Finished
 Time elapsed 0.663 secs
 
-$ ./tpl samples/test -g "time(test55),halt"
+$ tpl samples/test -g "time(test55),halt"
 Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
 Job [www.bing.com] 200 ==> www.bing.com done
 Job [www.google.com] 200 ==> www.google.com done
 Finished
 Time elapsed 0.331 secs
 
-$ ./tpl samples/test -g "time(test56),halt"
+$ tpl samples/test -g "time(test56),halt"
 Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
 Job [www.bing.com] 200 ==> www.bing.com done
 Job [www.google.com] 200 ==> www.google.com done
@@ -504,3 +504,10 @@ the *rdiv/2* operator:
 	X = 1
 	yes
 
+
+Benchmarks
+==========
+
+The Peirera (sic) benchmarks may be run:
+
+  tpl -g bench_peirera,halt samples/broken/peirera.pl

@@ -532,17 +532,6 @@ static int compkey(const void *param, const void *ptr1, const void *ptr2)
 	return 0;
 }
 
-static void reindex_predicate(module *m, predicate *h)
-{
-	h->index = sl_create1(compkey, m);
-	ensure(h->index);
-
-	for (clause *r = h->head; r; r = r->next) {
-		cell *c = get_head(r->t.cells);
-		sl_app(h->index, c, r);
-	}
-}
-
 static clause* assert_begin(module *m, term *t, bool consulting)
 {
 	if (is_cstring(t->cells)) {
@@ -623,34 +612,50 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	return r;
 }
 
+static void reindex_predicate(module *m, predicate *h)
+{
+	h->index = sl_create1(compkey, m);
+	ensure(h->index);
+
+	for (clause *r = h->head; r; r = r->next) {
+		cell *c = get_head(r->t.cells);
+
+		if (!r->t.deleted)
+			sl_app(h->index, c, r);
+	}
+}
+
 static void assert_commit(module *m, term *t, clause *r, predicate *h, bool append)
 {
 	cell *c = get_head(r->t.cells);
-
-	if (h->index && h->key.arity) {
-		if (!append)
-			sl_set(h->index, c, r);
-		else
-			sl_app(h->index, c, r);
-	}
-
-	t->cidx = 0;
+	cell *p1 = c + 1;
 
 	if (h->is_persist)
 		r->t.persist = true;
 
-	if (!h->index && h->key.arity && is_structure(c+1))
-		h->is_noindex = true;
+	if (h->key.arity) {
+		if (!h->index && is_structure(p1))
+			h->is_noindex = true;
 
-	if (h->index && h->key.arity && is_structure(c+1)) {
-		h->is_noindex = true;
-		h->index_save = h->index;
-		//sl_destroy(h->index);		// might kill outstanding sliters
-		h->index = NULL;
+		if (h->index && is_structure(p1)) {
+			h->is_noindex = true;
+			h->index_save = h->index;
+			h->index = NULL;
+		}
+
+		if (!h->index && (h->cnt > JUST_IN_TIME_COUNT)
+			&& !m->noindex && !h->is_noindex)
+			reindex_predicate(m, h);
+
+		if (h->index) {
+			if (!append)
+				sl_set(h->index, c, r);
+			else
+				sl_app(h->index, c, r);
+		}
 	}
 
-	if (!h->index && (h->cnt > JUST_IN_TIME_COUNT) && h->key.arity && !m->noindex && !h->is_noindex)
-		reindex_predicate(m, h);
+	t->cidx = 0;
 }
 
 clause *asserta_to_db(module *m, term *t, bool consulting)
