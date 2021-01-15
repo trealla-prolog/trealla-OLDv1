@@ -227,7 +227,7 @@ static USE_RESULT cell *init_tmp_heap(query* q)
 	return q->tmp_heap;
 }
 
-static USE_RESULT cell *alloc_tmp_heap(query *q, idx_t nbr_cells)
+static USE_RESULT cell *alloc_on_tmp(query *q, idx_t nbr_cells)
 {
 	idx_t new_size = q->tmphp + nbr_cells;
 	if (new_size >= q->tmph_size) {
@@ -250,7 +250,7 @@ static cell *get_tmp_heap(const query *q, idx_t i) { return q->tmp_heap + i; }
 // When more space is need allocate a new heap and keep them in the
 // arena list. Backtracking will garbage collect and free as needed.
 
-static cell *alloc_heap(query *q, idx_t nbr_cells)
+static cell *alloc_on_heap(query *q, idx_t nbr_cells)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	if (!q->arenas) {
@@ -329,7 +329,7 @@ static void init_queuen(query* q)
 static idx_t queuen_used(const query *q) { return q->qp[q->st.qnbr]; }
 static cell *get_queuen(query *q) { return q->queue[q->st.qnbr]; }
 
-static cell *alloc_queuen(query *q, int qnbr, const cell *c)
+static cell *alloc_on_queuen(query *q, int qnbr, const cell *c)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	if (!q->queue[qnbr]) {
@@ -350,7 +350,7 @@ static cell *alloc_queuen(query *q, int qnbr, const cell *c)
 
 // Defer check until end_list()
 
-void alloc_list(query *q, const cell *c)
+void allocate_list_on_heap(query *q, const cell *c)
 {
 	if (!init_tmp_heap(q)) return;
 	append_list(q, c);
@@ -360,7 +360,7 @@ void alloc_list(query *q, const cell *c)
 
 void append_list(query *q, const cell *c)
 {
-	cell *tmp = alloc_tmp_heap(q, 1+c->nbr_cells);
+	cell *tmp = alloc_on_tmp(q, 1+c->nbr_cells);
 	if (!tmp) return;
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1 + c->nbr_cells;
@@ -373,14 +373,14 @@ void append_list(query *q, const cell *c)
 
 USE_RESULT cell *end_list(query *q)
 {
-	cell *tmp = alloc_tmp_heap(q, 1);
+	cell *tmp = alloc_on_tmp(q, 1);
 	if (!tmp) return NULL;
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1;
 	tmp->val_off = g_nil_s;
 	tmp->arity = tmp->flags = 0;
 	idx_t nbr_cells = tmp_heap_used(q);
-	tmp = alloc_heap(q, nbr_cells);
+	tmp = alloc_on_heap(q, nbr_cells);
 	if (!tmp) return NULL;
 
 	if (!safe_copy_cells(q, tmp, get_tmp_heap(q, 0), nbr_cells))
@@ -460,7 +460,7 @@ static USE_RESULT cell *deep_copy2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx,
 	idx_t save_idx = tmp_heap_used(q);
 	p1 = deref(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
-	cell *tmp = alloc_tmp_heap(q, 1);
+	cell *tmp = alloc_on_tmp(q, 1);
 
 	if (tmp) {
 		copy_cells(tmp, p1, 1);
@@ -550,13 +550,13 @@ static USE_RESULT cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool
 {
 	cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, nonlocals_only);
 	if (!tmp || (tmp == ERR_CYCLE_CELL)) return tmp;
-	cell *tmp2 = alloc_heap(q, tmp->nbr_cells);
+	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
 	if (!tmp2) return NULL;
 	copy_cells(tmp2, tmp, tmp->nbr_cells);
 	return tmp2;
 }
 
-static USE_RESULT cell *deep_clone2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx, unsigned depth)
+static USE_RESULT cell *deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	if (depth >= 64000) {
@@ -567,7 +567,7 @@ static USE_RESULT cell *deep_clone2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx
 	idx_t save_idx = tmp_heap_used(q);
 	p1 = deref(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
-	cell *tmp = alloc_tmp_heap(q, 1);
+	cell *tmp = alloc_on_tmp(q, 1);
 	if (tmp) {
 		copy_cells(tmp, p1, 1);
 
@@ -587,7 +587,7 @@ static USE_RESULT cell *deep_clone2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx
 
 		while (arity--) {
 			cell *c = deref(q, p1, p1_ctx);
-			cell* rec = deep_clone2_to_tmp_heap(q, c, q->latest_ctx, depth+1);
+			cell* rec = deep_clone2_to_tmp(q, c, q->latest_ctx, depth+1);
 			if (!rec || rec == ERR_CYCLE_CELL) return rec;
 			p1 += p1->nbr_cells;
 		}
@@ -598,11 +598,11 @@ static USE_RESULT cell *deep_clone2_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx
 	return tmp;
 }
 
-static USE_RESULT cell *deep_clone_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx)
+static USE_RESULT cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 {
 	if (init_tmp_heap(q)) {
 		q->cycle_error = 0;
-		cell *rec = deep_clone2_to_tmp_heap(q, p1, p1_ctx, 0);
+		cell *rec = deep_clone2_to_tmp(q, p1, p1_ctx, 0);
 		if (!rec || rec == ERR_CYCLE_CELL) return rec;
 	}
 	return q->tmp_heap;
@@ -610,9 +610,9 @@ static USE_RESULT cell *deep_clone_to_tmp_heap(query *q, cell *p1, idx_t p1_ctx)
 
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 {
-	p1 = deep_clone_to_tmp_heap(q, p1, p1_ctx);
+	p1 = deep_clone_to_tmp(q, p1, p1_ctx);
 	if (!p1 || p1 == ERR_CYCLE_CELL) return p1;
-	cell *tmp = alloc_heap(q, p1->nbr_cells);
+	cell *tmp = alloc_on_heap(q, p1->nbr_cells);
 	if (!tmp) return NULL;
 	copy_cells(tmp, p1, p1->nbr_cells);
 	return tmp;
@@ -926,7 +926,7 @@ static USE_RESULT prolog_state fn_iso_atom_chars_2(query *q)
 
 		if (first) {
 			first = false;
-			alloc_list(q, &tmp2);
+			allocate_list_on_heap(q, &tmp2);
 		} else
 			append_list(q, &tmp2);
 	}
@@ -1171,7 +1171,7 @@ static USE_RESULT prolog_state fn_iso_atom_codes_2(query *q)
 	const char *src = tmpbuf;
 	cell tmp;
 	make_int(&tmp, get_char_utf8(&src));
-	alloc_list(q, &tmp);
+	allocate_list_on_heap(q, &tmp);
 
 	while (*src) {
 		make_int(&tmp, get_char_utf8(&src));
@@ -1309,7 +1309,7 @@ static USE_RESULT prolog_state fn_iso_number_codes_2(query *q)
 	const char *src = tmpbuf;
 	cell tmp;
 	make_int(&tmp, *src);
-	alloc_list(q, &tmp);
+	allocate_list_on_heap(q, &tmp);
 
 	while (*++src) {
 		make_int(&tmp, *src);
@@ -1937,7 +1937,7 @@ static void stream_assert(query *q, int n)
 
 static void stream_retract(query *q, int n)
 {
-	cell *tmp = alloc_heap(q, 3);
+	cell *tmp = alloc_on_heap(q, 3);
 	make_literal(tmp+0, index_from_pool(q->m->pl, "$stream_property"));
 	make_int(tmp+1, n);
 	make_variable(tmp+2, g_anon_s);
@@ -2128,7 +2128,7 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 		}
 	}
 
-	cell *tmp = deep_clone_to_tmp_heap(q, q->st.curr_cell, q->st.curr_frame);
+	cell *tmp = deep_clone_to_tmp(q, q->st.curr_cell, q->st.curr_frame);
 	tmp->val_off = index_from_pool(q->m->pl, "$stream_property");
 
 	if (!match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE)) {
@@ -2196,7 +2196,7 @@ static USE_RESULT prolog_state fn_iso_open_3(query *q)
 	if (!str->fp)
 		return throw_error(q, p1, "existence_error", "source_sink");
 
-	cell *tmp = alloc_heap(q, 1);
+	cell *tmp = alloc_on_heap(q, 1);
 	ensure(tmp);
 	make_int(tmp, n);
 	tmp->flags |= FLAG_STREAM | FLAG_HEX;
@@ -2367,7 +2367,7 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 	}
 #endif
 
-	cell *tmp = alloc_heap(q, 1);
+	cell *tmp = alloc_on_heap(q, 1);
 	ensure(tmp);
 	make_int(tmp, n);
 	tmp->flags |= FLAG_STREAM | FLAG_HEX;
@@ -2738,7 +2738,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 	if (vars) {
 		unsigned cnt = q->m->pl->tab_idx;
 		may_ptr_error(init_tmp_heap(q));
-		cell *tmp = alloc_tmp_heap(q, (cnt*2)+1);
+		cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
 		may_ptr_error(tmp);
 		unsigned idx = 0;
 
@@ -2761,7 +2761,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 			tmp[0].nbr_cells = idx;
 
 			cell *save = tmp;
-			tmp = alloc_heap(q, idx);
+			tmp = alloc_on_heap(q, idx);
 			ensure(tmp);
 			copy_cells(tmp, save, idx);
 			tmp->nbr_cells = idx;
@@ -2776,7 +2776,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 	if (varnames) {
 		unsigned cnt = 0;
 		may_ptr_error(init_tmp_heap(q));
-		cell *tmp = alloc_tmp_heap(q, (cnt*4)+1);
+		cell *tmp = alloc_on_tmp(q, (cnt*4)+1);
 		may_ptr_error(tmp);
 		unsigned idx = 0;
 
@@ -2818,7 +2818,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 			tmp[0].nbr_cells = idx;
 
 			cell *save = tmp;
-			tmp = alloc_heap(q, idx);
+			tmp = alloc_on_heap(q, idx);
 			ensure(tmp);
 			copy_cells(tmp, save, idx);
 			tmp->nbr_cells = idx;
@@ -2833,7 +2833,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 	if (sings) {
 		unsigned cnt = 0;
 		may_ptr_error(init_tmp_heap(q));
-		cell *tmp = alloc_tmp_heap(q, (cnt*4)+1);
+		cell *tmp = alloc_on_tmp(q, (cnt*4)+1);
 		ensure(tmp);
 		unsigned idx = 0;
 
@@ -2881,7 +2881,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 			tmp[0].nbr_cells = idx;
 
 			cell *save = tmp;
-			tmp = alloc_heap(q, idx);
+			tmp = alloc_on_heap(q, idx);
 			ensure(tmp);
 			copy_cells(tmp, save, idx);
 			tmp->nbr_cells = idx;
@@ -2894,7 +2894,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 	}
 
 	//assert(p->t->cidx);
-	tmp = alloc_heap(q, p->t->cidx-1);
+	tmp = alloc_on_heap(q, p->t->cidx-1);
 	ensure(tmp);
 	copy_cells(tmp, p->t->cells, p->t->cidx-1);
 	p->t->cidx = 0;
@@ -4316,7 +4316,7 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 		tmp2.nbr_cells = 1;
 		tmp2.arity = 0;
 		CLR_OP(&tmp2);
-		alloc_list(q, &tmp2);
+		allocate_list_on_heap(q, &tmp2);
 		p1 = tmp;
 		unsigned arity = p1->arity;
 		p1++;
@@ -4346,7 +4346,7 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 
 		while (is_list(p2)) {
 			cell *h = LIST_HEAD(p2);
-			cell *c = alloc_tmp_heap(q, h->nbr_cells);
+			cell *c = alloc_on_tmp(q, h->nbr_cells);
 			copy_cells(c, h, h->nbr_cells);
 			p2 = LIST_TAIL(p2);
 			arity++;
@@ -4384,7 +4384,7 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 			return throw_error(q, tmp2, "representation_error", "max_arity");
 
 		idx_t nbr_cells = nbr_cells = tmp_heap_used(q) - save;
-		tmp = alloc_heap(q, nbr_cells);
+		tmp = alloc_on_heap(q, nbr_cells);
 		copy_cells(tmp, tmp2, nbr_cells);
 		tmp->nbr_cells = nbr_cells;
 		tmp->arity = arity;
@@ -4407,7 +4407,7 @@ static USE_RESULT prolog_state fn_iso_univ_2(query *q)
 	tmp.nbr_cells = 1;
 	tmp.arity = 0;
 	CLR_OP(&tmp);
-	alloc_list(q, &tmp);
+	allocate_list_on_heap(q, &tmp);
 	unsigned arity = p1->arity;
 	p1++;
 
@@ -4441,7 +4441,7 @@ static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 	collect_vars(q, p1, p1_ctx, p1->nbr_cells);
 	const unsigned cnt = q->m->pl->tab_idx;
 	may_ptr_error(init_tmp_heap(q));
-	cell *tmp = alloc_tmp_heap(q, (cnt*2)+1);
+	cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
 	ensure(tmp);
 	unsigned idx = 0;
 
@@ -4497,7 +4497,7 @@ static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 	}
 
 	if (is_variable(p2)) {
-		cell *tmp2 = alloc_heap(q, idx);
+		cell *tmp2 = alloc_on_heap(q, idx);
 		ensure(tmp2);
 		copy_cells(tmp2, tmp, idx);
 		set_var(q, p2, p2_ctx, tmp2, q->st.curr_frame);
@@ -4509,7 +4509,7 @@ static USE_RESULT prolog_state fn_iso_term_variables_2(query *q)
 
 static cell *clone2_to_tmp(query *q, cell *p1)
 {
-	cell *tmp = alloc_tmp_heap(q, p1->nbr_cells);
+	cell *tmp = alloc_on_tmp(q, p1->nbr_cells);
 	ensure(tmp);
 	copy_cells(tmp, p1, p1->nbr_cells);
 	cell *c = tmp;
@@ -4530,7 +4530,7 @@ static cell *clone_to_tmp(query *q, cell *p1)
 
 static cell *clone2_to_heap(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
 {
-	cell *tmp = alloc_heap(q, (prefix?1:0)+nbr_cells+suffix);
+	cell *tmp = alloc_on_heap(q, (prefix?1:0)+nbr_cells+suffix);
 	ensure(tmp);
 
 	if (prefix) {
@@ -4560,7 +4560,7 @@ cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix)
 
 static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
 {
-	cell *tmp = alloc_heap(q, (prefix?1:0)+nbr_cells+suffix);
+	cell *tmp = alloc_on_heap(q, (prefix?1:0)+nbr_cells+suffix);
 	ensure(tmp);
 
 	if (prefix) {
@@ -5395,7 +5395,7 @@ static USE_RESULT prolog_state fn_iso_functor_3(query *q)
 		if (is_number(p2)) {
 			set_var(q, p1, p1_ctx, p2, p2_ctx);
 		} else {
-			cell *tmp = alloc_heap(q, 1+arity);
+			cell *tmp = alloc_on_heap(q, 1+arity);
 			ensure(tmp);
 			*tmp = (cell){0};
 			tmp[0].val_type = TYPE_LITERAL;
@@ -5763,7 +5763,7 @@ static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 	} else if (!strcmp(GET_STR(p1), "version_data")) {
 		unsigned v1 = 0, v2 = 0, v3 = 0;
 		sscanf(VERSION, "v%u.%u.%u", &v1, &v2, &v3);
-		cell *tmp = alloc_heap(q, 5);
+		cell *tmp = alloc_on_heap(q, 5);
 		ensure(tmp);
 		make_literal(&tmp[0], index_from_pool(q->m->pl, "trealla"));
 		make_int(&tmp[1], v1);
@@ -5787,7 +5787,7 @@ static USE_RESULT prolog_state fn_iso_current_prolog_flag_2(query *q)
 		int i = g_avc;
 		cell tmp;
 		may_error(make_cstring(&tmp, g_av[i++]));
-		alloc_list(q, &tmp);
+		allocate_list_on_heap(q, &tmp);
 
 		while (i < g_ac) {
 			may_error(make_cstring(&tmp, g_av[i++]));
@@ -5837,7 +5837,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.double_quote_atom = q->m->flag.double_quote_codes = false;
 			q->m->flag.double_quote_chars = true;
 		} else {
-			cell *tmp = alloc_heap(q, 3);
+			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, index_from_pool(q->m->pl, "+"), fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
@@ -5851,7 +5851,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 		else if (!strcmp(GET_STR(p2), "false"))
 			q->m->flag.character_escapes = false;
 		else {
-			cell *tmp = alloc_heap(q, 3);
+			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, index_from_pool(q->m->pl, "+"), fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
@@ -5863,7 +5863,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
 			q->m->flag.char_conversion = false;
 		else {
-			cell *tmp = alloc_heap(q, 3);
+			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, index_from_pool(q->m->pl, "+"), fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
@@ -5875,7 +5875,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 		else if (!strcmp(GET_STR(p2), "compatibility"))
 			q->m->flag.rational_syntax_natural = false;
 		else {
-			cell *tmp = alloc_heap(q, 3);
+			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, index_from_pool(q->m->pl, "+"), fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
@@ -5887,7 +5887,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 		else if (!strcmp(GET_STR(p2), "flase"))
 			q->m->flag.prefer_rationals = false;
 		else {
-			cell *tmp = alloc_heap(q, 3);
+			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, index_from_pool(q->m->pl, "+"), fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
@@ -5899,7 +5899,7 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
 			q->m->flag.debug = false;
 		else {
-			cell *tmp = alloc_heap(q, 3);
+			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, index_from_pool(q->m->pl, "+"), fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
@@ -5935,13 +5935,13 @@ static USE_RESULT prolog_state fn_iso_set_prolog_flag_2(query *q)
 static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 {
 	if ((!nbr_cells || !c->nbr_cells)) {
-		cell *c = alloc_tmp_heap(q, 1);
+		cell *c = alloc_on_tmp(q, 1);
 		ensure(c);
 		make_literal(c, g_nil_s);
 		return c;
 	}
 
-	alloc_list(q, c);
+	allocate_list_on_heap(q, c);
 	nbr_cells -= c->nbr_cells;
 	c += c->nbr_cells;
 
@@ -6006,13 +6006,13 @@ static USE_RESULT prolog_state fn_sys_list_1(query *q)
 static USE_RESULT prolog_state fn_sys_queue_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
+	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
 	may_ptr_error(tmp);
 
 	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
-	alloc_queuen(q, 0, tmp);
+	alloc_on_queuen(q, 0, tmp);
 	return pl_success;
 }
 
@@ -6020,13 +6020,13 @@ static USE_RESULT prolog_state fn_sys_queuen_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,any);
-	cell *tmp = deep_clone_to_tmp_heap(q, p2, p2_ctx);
+	cell *tmp = deep_clone_to_tmp(q, p2, p2_ctx);
 	may_ptr_error(tmp);
 
 	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
-	alloc_queuen(q, p1->val_num, tmp);
+	alloc_on_queuen(q, p1->val_num, tmp);
 	return pl_success;
 }
 
@@ -6160,7 +6160,7 @@ static USE_RESULT prolog_state fn_iso_findall_3(query *q)
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, false);
 			may_ptr_error(tmp);
-			alloc_queuen(q, q->st.qnbr, tmp);
+			alloc_on_queuen(q, q->st.qnbr, tmp);
 		}
 
 		undo_me(q);
@@ -6243,7 +6243,7 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 			c->flags |= FLAG2_PROCESSED;
 			cell *tmp = deep_copy_to_tmp_heap(q, p1, p1_ctx, true);
 			may_ptr_error(tmp);
-			alloc_queuen(q, q->st.qnbr, tmp);
+			alloc_on_queuen(q, q->st.qnbr, tmp);
 		}
 
 		undo_me(q);
@@ -6415,7 +6415,7 @@ static USE_RESULT prolog_state do_asserta_2(query *q)
 		return throw_error(q, tmp2, "type_error", "callable");
 
 	GET_NEXT_ARG(p2,atom_or_var);
-	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
+	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
 	may_ptr_error(tmp);
 	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
@@ -6507,7 +6507,7 @@ static USE_RESULT prolog_state do_assertz_2(query *q)
 		return throw_error(q, tmp2, "type_error", "callable");
 
 	GET_NEXT_ARG(p2,atom_or_var);
-	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
+	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
 	may_ptr_error(tmp);
 
 	if (tmp == ERR_CYCLE_CELL)
@@ -6732,7 +6732,7 @@ static USE_RESULT prolog_state fn_statistics_2(query *q)
 		double elapsed = now - q->time_started;
 		cell tmp;
 		make_int(&tmp, elapsed/1000);
-		alloc_list(q, &tmp);
+		allocate_list_on_heap(q, &tmp);
 		append_list(q, &tmp);
 		make_literal(&tmp, g_nil_s);
 		cell *l = end_list(q);
@@ -6928,7 +6928,7 @@ static USE_RESULT prolog_state fn_split_atom_4(query *q)
 		may_error(make_cstringn(&tmp, start, ptr-start));
 
 		if (nbr++ == 1)
-			alloc_list(q, &tmp);
+			allocate_list_on_heap(q, &tmp);
 		else
 			append_list(q, &tmp);
 
@@ -6944,7 +6944,7 @@ static USE_RESULT prolog_state fn_split_atom_4(query *q)
 		may_error(make_cstring(&tmp, start));
 
 		if (!in_list)
-			alloc_list(q, &tmp);
+			allocate_list_on_heap(q, &tmp);
 		else
 			append_list(q, &tmp);
 	}
@@ -7140,7 +7140,7 @@ static USE_RESULT prolog_state fn_getfile_2(query *q)
 		tmp.flags |= FLAG_STRING;
 
 		if (nbr++ == 1)
-			alloc_list(q, &tmp);
+			allocate_list_on_heap(q, &tmp);
 		else
 			append_list(q, &tmp);
 
@@ -7294,7 +7294,7 @@ static USE_RESULT prolog_state fn_server_3(query *q)
 	}
 
 	net_set_nonblocking(str);
-	cell *tmp = alloc_heap(q, 1);
+	cell *tmp = alloc_on_heap(q, 1);
 	ensure(tmp);
 	make_int(tmp, n);
 	tmp->flags |= FLAG_STREAM | FLAG_HEX;
@@ -7497,7 +7497,7 @@ static USE_RESULT prolog_state fn_client_5(query *q)
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	may_error(make_string(&tmp, path));
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
-	cell *tmp2 = alloc_heap(q, 1);
+	cell *tmp2 = alloc_on_heap(q, 1);
 	ensure(tmp2);
 	make_int(tmp2, n);
 	tmp2->flags |= FLAG_STREAM | FLAG_HEX;
@@ -8060,7 +8060,7 @@ static USE_RESULT prolog_state fn_yield_0(query *q)
 static USE_RESULT prolog_state fn_task_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	cell *tmp = deep_clone_to_tmp_heap(q, p1, p1_ctx);
+	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
 	may_ptr_error(tmp);
 	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
@@ -8118,7 +8118,7 @@ static USE_RESULT prolog_state fn_send_1(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 	query *dstq = q->parent ? q->parent : q;
-	cell *c = deep_clone_to_tmp_heap(q, p1, p1_ctx);
+	cell *c = deep_clone_to_tmp(q, p1, p1_ctx);
 	may_ptr_error(c);
 
 	if (c == ERR_CYCLE_CELL)
@@ -8136,7 +8136,7 @@ static USE_RESULT prolog_state fn_send_1(query *q)
 		}
 	}
 
-	alloc_queuen(dstq, 0, c);
+	alloc_on_queuen(dstq, 0, c);
 	q->yielded = true;
 	return pl_success;
 }
@@ -9122,7 +9122,7 @@ static USE_RESULT prolog_state fn_directory_files_2(query *q)
 		may_error(make_string(&tmp, dire->d_name));
 	else
 		may_error(make_cstring(&tmp, dire->d_name));
-	alloc_list(q, &tmp);
+	allocate_list_on_heap(q, &tmp);
 
 	for (dire = readdir(dirp); dire; dire = readdir(dirp)) {
 		if (is_string(p1))
@@ -9977,7 +9977,7 @@ static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned end)
 	unsigned cnt = 0;
 
 	if (is_variable(p1)) {
-		cell *tmp = alloc_heap(q, 2);
+		cell *tmp = alloc_on_heap(q, 2);
 		make_structure(tmp+0, index_from_pool(q->m->pl, "$VAR"), NULL, 1, 1);
 		make_int(tmp+1, end++);
 		tmp->flags |= FLAG2_QUOTED;
@@ -9996,7 +9996,7 @@ static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned end)
 		cell *c = deref(q, p1, p1_ctx);
 
 		if (is_variable(c)) {
-			cell *tmp = alloc_heap(q, 2);
+			cell *tmp = alloc_on_heap(q, 2);
 			make_structure(tmp+0, index_from_pool(q->m->pl, "$VAR"), NULL, 1, 1);
 			make_int(tmp+1, end++);
 			tmp->flags |= FLAG2_QUOTED;
@@ -10510,7 +10510,7 @@ static USE_RESULT prolog_state do_length(query *q)
 	tmp.val_off = g_anon_s;
 	tmp.var_nbr = var_nbr++;
 	tmp.arity = 0;
-	alloc_list(q, &tmp);
+	allocate_list_on_heap(q, &tmp);
 
 	for (unsigned i = 1; i < nbr; i++) {
 		tmp.var_nbr = var_nbr++;
@@ -10633,7 +10633,7 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 		tmp.flags = FLAG2_FRESH;
 		tmp.val_off = g_anon_s;
 		tmp.var_nbr = var_nbr++;
-		alloc_list(q, &tmp);
+		allocate_list_on_heap(q, &tmp);
 
 		for (idx_t i = 1; i < nbr; i++) {
 			tmp.var_nbr = var_nbr++;

@@ -636,7 +636,7 @@ void clear_term(term *t);
 void do_db_load(module *m);
 size_t sprint_int(char *dst, size_t size, int_t n, int base);
 void call_attrs(query *q, cell *attrs);
-void alloc_list(query *q, const cell *c);
+void allocate_list_on_heap(query *q, const cell *c);
 void append_list(query *q, const cell *c);
 USE_RESULT cell *end_list(query *q);
 size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, int tolerant);
