@@ -286,28 +286,20 @@ module *find_module(prolog *pl, const char *name)
 	return NULL;
 }
 
-bool check_rule(const cell *c)
-{
-	if (is_structure(c) && (c->val_off == g_clause_s) && (c->arity == 2))
-		return true;
-
-	return false;
-}
-
-bool check_directive(const cell *c)
-{
-	if (is_structure(c) && (c->val_off == g_clause_s) && (c->arity == 1))
-		return true;
-
-	return false;
-}
-
 cell *get_head(cell *c)
 {
 	if (check_rule(c))
 		return c + 1;
 
 	return c;
+}
+
+bool check_rule(const cell *c)
+{
+	if (is_structure(c) && (c->val_off == g_clause_s) && (c->arity == 2))
+		return true;
+
+	return false;
 }
 
 cell *get_body(cell *c)
@@ -339,6 +331,14 @@ cell *get_logical_body(cell *c)
 		return NULL;
 
 	return body;
+}
+
+static bool check_directive(const cell *c)
+{
+	if (is_structure(c) && (c->val_off == g_clause_s) && (c->arity == 1))
+		return true;
+
+	return false;
 }
 
 predicate *find_predicate(module *m, cell *c)

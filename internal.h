@@ -595,7 +595,6 @@ void cut_me(query *q, bool local_cut);
 bool check_builtin(const char *name, unsigned arity);
 void *get_builtin(const char *name, unsigned arity);
 prolog_state query_execute(query *q, term *t);
-bool check_directive(const cell *c);
 bool check_rule(const cell *c);
 cell *get_head(cell *c);
 cell *get_body(cell *c);
