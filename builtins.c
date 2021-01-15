@@ -1938,7 +1938,7 @@ static void stream_assert(query *q, int n)
 static void stream_retract(query *q, int n)
 {
 	cell *tmp = alloc_on_heap(q, 3);
-	make_literal(tmp+0, index_from_pool(q->m->pl, "$stream_property"));
+	make_literal(tmp+0, g_stream_property_s);
 	make_int(tmp+1, n);
 	make_variable(tmp+2, g_anon_s);
 	tmp[2].var_nbr = create_vars(q, 1);
@@ -2074,7 +2074,7 @@ static USE_RESULT prolog_state do_stream_property(query *q)
 static void purge_stream_properties(query *q)
 {
 	cell tmp;
-	make_literal(&tmp, index_from_pool(q->m->pl, "$stream_property"));
+	make_literal(&tmp, g_stream_property_s);
 	tmp.nbr_cells = 1;
 	tmp.arity = 2;
 
@@ -2129,7 +2129,7 @@ static USE_RESULT prolog_state fn_iso_stream_property_2(query *q)
 	}
 
 	cell *tmp = deep_clone_to_tmp(q, q->st.curr_cell, q->st.curr_frame);
-	tmp->val_off = index_from_pool(q->m->pl, "$stream_property");
+	tmp->val_off = g_stream_property_s;
 
 	if (!match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE)) {
 		if (q->retry)
