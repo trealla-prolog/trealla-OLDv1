@@ -3531,6 +3531,10 @@ static USE_RESULT prolog_state fn_iso_get_char_1(query *q)
 	if (feof(str->fp)) {
 		str->did_getc = false;
 		str->at_end_of_file = str->eof_action != eof_action_reset;
+
+		if (str->eof_action == eof_action_reset)
+			clearerr(str->fp);
+
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -3594,6 +3598,10 @@ static USE_RESULT prolog_state fn_iso_get_char_2(query *q)
 	if (feof(str->fp)) {
 		str->did_getc = false;
 		str->at_end_of_file = str->eof_action != eof_action_reset;
+
+		if (str->eof_action == eof_action_reset)
+			clearerr(str->fp);
+
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -3661,11 +3669,7 @@ static USE_RESULT prolog_state fn_iso_get_code_1(query *q)
 			clearerr(str->fp);
 
 		cell tmp;
-
-		if (str->eof_action == eof_action_eof_code)
-			make_int(&tmp, -1);
-		else
-			make_literal(&tmp, g_eof_s);
+		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -3733,11 +3737,7 @@ static USE_RESULT prolog_state fn_iso_get_code_2(query *q)
 			clearerr(str->fp);
 
 		cell tmp;
-
-		if (str->eof_action == eof_action_eof_code)
-			make_int(&tmp, -1);
-		else
-			make_literal(&tmp, g_eof_s);
+		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -3798,11 +3798,7 @@ static USE_RESULT prolog_state fn_iso_get_byte_1(query *q)
 			clearerr(str->fp);
 
 		cell tmp;
-
-		if (str->eof_action == eof_action_eof_code)
-			make_int(&tmp, -1);
-		else
-			make_literal(&tmp, g_eof_s);
+		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -3861,12 +3857,7 @@ static USE_RESULT prolog_state fn_iso_get_byte_2(query *q)
 			clearerr(str->fp);
 
 		cell tmp;
-
-		if (str->eof_action == eof_action_eof_code)
-			make_int(&tmp, -1);
-		else
-			make_literal(&tmp, g_eof_s);
-
+		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -3911,7 +3902,7 @@ static USE_RESULT prolog_state fn_iso_peek_char_1(query *q)
 
 	if (feof(str->fp)) {
 		str->did_getc = false;
-		str->at_end_of_file = str->eof_action != eof_action_reset;
+		clearerr(str->fp);
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -3964,7 +3955,7 @@ static USE_RESULT prolog_state fn_iso_peek_char_2(query *q)
 
 	if (feof(str->fp)) {
 		str->did_getc = false;
-		str->at_end_of_file = str->eof_action != eof_action_reset;
+		clearerr(str->fp);
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -4022,14 +4013,10 @@ static USE_RESULT prolog_state fn_iso_peek_code_1(query *q)
 	}
 
 	if (feof(str->fp)) {
+		str->did_getc = false;
 		clearerr(str->fp);
 		cell tmp;
-
-		if (str->eof_action == eof_action_eof_code)
-			make_int(&tmp, -1);
-		else
-			make_literal(&tmp, g_eof_s);
-
+		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -4080,14 +4067,10 @@ static USE_RESULT prolog_state fn_iso_peek_code_2(query *q)
 	}
 
 	if (feof(str->fp)) {
+		str->did_getc = false;
 		clearerr(str->fp);
 		cell tmp;
-
-		if (str->eof_action == eof_action_eof_code)
-			make_int(&tmp, -1);
-		else
-			make_literal(&tmp, g_eof_s);
-
+		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -4133,12 +4116,7 @@ static USE_RESULT prolog_state fn_iso_peek_byte_1(query *q)
 	if (feof(str->fp)) {
 		clearerr(str->fp);
 		cell tmp;
-
-		if (str->eof_action == eof_action_eof_code)
-			make_int(&tmp, -1);
-		else
-			make_literal(&tmp, g_eof_s);
-
+		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -4188,12 +4166,7 @@ static USE_RESULT prolog_state fn_iso_peek_byte_2(query *q)
 	if (feof(str->fp)) {
 		clearerr(str->fp);
 		cell tmp;
-
-		if (str->eof_action == eof_action_eof_code)
-			make_int(&tmp, -1);
-		else
-			make_literal(&tmp, g_eof_s);
-
+		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
