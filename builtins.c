@@ -1917,7 +1917,9 @@ static void add_stream_property(query *q, int n)
 		;
 	else if (feof(str->fp)) {
 		clearerr(str->fp);
-		at_end_of_file = true;
+
+		if (str->eof_action != eof_action_reset)
+			at_end_of_file = true;
 	} else
 		str->ungetch = ch;
 
@@ -1987,7 +1989,6 @@ static USE_RESULT prolog_state do_stream_property(query *q)
 {
 	GET_FIRST_ARG(pstr,any);
 	GET_NEXT_ARG(p1,any);
-
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 	cell *c = p1 + 1;
@@ -2070,7 +2071,8 @@ static USE_RESULT prolog_state do_stream_property(query *q)
 			;
 		else if (feof(str->fp)) {
 			clearerr(str->fp);
-			at_end_of_file = true;
+			if (str->eof_action != eof_action_reset)
+				at_end_of_file = true;
 		} else
 			str->ungetch = ch;
 
@@ -2477,6 +2479,9 @@ static USE_RESULT prolog_state fn_iso_at_end_of_stream_0(__attribute__((unused))
 		str->ungetch = ch;
 	}
 
+	if (str->eof_action == eof_action_reset)
+		clearerr(str->fp);
+
 	return feof(str->fp) || ferror(str->fp);
 }
 
@@ -2490,6 +2495,9 @@ static USE_RESULT prolog_state fn_iso_at_end_of_stream_1(query *q)
 		int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 		str->ungetch = ch;
 	}
+
+	if (str->eof_action == eof_action_reset)
+		clearerr(str->fp);
 
 	return feof(str->fp) || ferror(str->fp);
 }
@@ -3959,13 +3967,6 @@ static USE_RESULT prolog_state fn_iso_peek_char_2(query *q)
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (str->p) {
-		if (str->p->srcptr && *str->p->srcptr) {
-			int ch = peek_char_utf8((const char*)str->p->srcptr);
-			str->ungetch = ch;
-		}
 	}
 
 	str->ungetch = ch;
