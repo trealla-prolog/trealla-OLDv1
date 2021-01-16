@@ -2297,12 +2297,14 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 					binary = 0;
 			} else if (!strcmp(GET_STR(c), "eof_action")) {
 				if (is_atom(name) && !strcmp(GET_STR(name), "error")) {
+					str->eof_action_reset = false;
 					str->eof_action_eof_code = false;
 					str->eof_action_error = true;
-				} else if (is_atom(name) && !strcmp(GET_STR(name), "eof_code"))
+				} else if (is_atom(name) && !strcmp(GET_STR(name), "eof_code")) {
+					str->eof_action_reset = false;
+					str->eof_action_error = false;
 					str->eof_action_eof_code = true;
-				else if (is_atom(name) && !strcmp(GET_STR(name), "reset")) {
-					str->eof_action_eof_code = false;
+				} else if (is_atom(name) && !strcmp(GET_STR(name), "reset")) {
 					str->eof_action_reset = true;
 				}
 			}
