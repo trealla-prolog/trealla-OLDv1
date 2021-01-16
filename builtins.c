@@ -490,6 +490,10 @@ static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsi
 				if (q->m->pl->tab1[i] == slot_nbr) {
 					tmp->var_nbr = q->m->pl->tab2[i];
 					tmp->flags = FLAG2_FRESH;
+
+					if (is_anon(p1))
+						tmp->flags |= FLAG2_ANON;
+
 					tmp->val_off = g_nil_s;
 					return tmp;
 				}
@@ -5415,7 +5419,7 @@ static USE_RESULT prolog_state fn_iso_functor_3(query *q)
 				tmp[i].nbr_cells = 1;
 				tmp[i].var_nbr = var_nbr++;
 				tmp[i].val_off = g_anon_s;
-				tmp[i].flags = FLAG2_FRESH;
+				tmp[i].flags = FLAG2_FRESH | FLAG2_ANON;
 			}
 
 			set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
@@ -5959,30 +5963,6 @@ static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 	return l;
 }
 
-#if 0
-static USE_RESULT prolog_state do_sys_listn(query *q, cell *p1, idx_t p1_ctx)
-{
-	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
-	frame *g = GET_FRAME(q->st.curr_frame);
-	unsigned new_varno = g->nbr_vars;
-	cell *c = l;
-
-	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
-		if (is_variable(c) && is_anon(c)) {
-			c->var_nbr = new_varno++;
-			c->flags = FLAG2_FRESH;
-		}
-	}
-
-	if (new_varno != g->nbr_vars) {
-		if (!create_vars(q, new_varno-g->nbr_vars))
-			return throw_error(q, p1, "resource_error", "too_many_vars");
-	}
-
-	return unify(q, p1, p1_ctx, l, q->st.curr_frame);
-}
-#endif
-
 static USE_RESULT prolog_state fn_sys_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
@@ -5994,7 +5974,7 @@ static USE_RESULT prolog_state fn_sys_list_1(query *q)
 	for (idx_t i = 0; i < l->nbr_cells; i++, c++) {
 		if (is_variable(c) && is_anon(c)) {
 			c->var_nbr = new_varno++;
-			c->flags = FLAG2_FRESH;
+			c->flags = FLAG2_FRESH | FLAG2_ANON;
 		}
 	}
 
@@ -10524,7 +10504,7 @@ static USE_RESULT prolog_state do_length(query *q)
 
 	tmp.val_type = TYPE_VARIABLE;
 	tmp.nbr_cells = 1;
-	tmp.flags = FLAG2_FRESH;
+	tmp.flags = FLAG2_FRESH | FLAG2_ANON;
 	tmp.val_off = g_anon_s;
 	tmp.var_nbr = var_nbr++;
 	tmp.arity = 0;
@@ -10648,7 +10628,7 @@ static USE_RESULT prolog_state fn_iso_length_2(query *q)
 		tmp.val_type = TYPE_VARIABLE;
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;
-		tmp.flags = FLAG2_FRESH;
+		tmp.flags = FLAG2_FRESH | FLAG2_ANON;
 		tmp.val_off = g_anon_s;
 		tmp.var_nbr = var_nbr++;
 		allocate_list_on_heap(q, &tmp);
