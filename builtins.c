@@ -1911,17 +1911,20 @@ static void add_stream_property(query *q, int n)
 	char *dst = tmpbuf;
 	off_t pos = ftello(str->fp);
 	bool at_end_of_file = false;
-	int ch = str->ungetch ? str->ungetch : net_getc(str);
 
-	if (str->ungetch)
-		;
-	else if (feof(str->fp)) {
-		clearerr(str->fp);
+	if (!str->at_end_of_file) {
+		int ch = str->ungetch ? str->ungetch : net_getc(str);
 
-		if (str->eof_action != eof_action_reset)
-			at_end_of_file = true;
-	} else
-		str->ungetch = ch;
+		if (str->ungetch)
+			;
+		else if (feof(str->fp)) {
+			clearerr(str->fp);
+
+			if (str->eof_action != eof_action_reset)
+				at_end_of_file = true;
+		} else
+			str->ungetch = ch;
+	}
 
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, alias('%s')).\n", n, str->name);
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, file_name('%s')).\n", n, str->filename);
@@ -2065,16 +2068,20 @@ static USE_RESULT prolog_state do_stream_property(query *q)
 
 	if (!strcmp(GET_STR(p1), "end_of_stream") && is_stream(pstr)) {
 		bool at_end_of_file = false;
-		int ch = str->ungetch ? str->ungetch : net_getc(str);
 
-		if (str->ungetch)
-			;
-		else if (feof(str->fp)) {
-			clearerr(str->fp);
-			if (str->eof_action != eof_action_reset)
-				at_end_of_file = true;
-		} else
-			str->ungetch = ch;
+		if (!str->at_end_of_file) {
+			int ch = str->ungetch ? str->ungetch : net_getc(str);
+
+			if (str->ungetch)
+				;
+			else if (feof(str->fp)) {
+				clearerr(str->fp);
+
+				if (str->eof_action != eof_action_reset)
+					at_end_of_file = true;
+			} else
+				str->ungetch = ch;
+		}
 
 		cell tmp;
 
@@ -2479,10 +2486,13 @@ static USE_RESULT prolog_state fn_iso_at_end_of_stream_0(__attribute__((unused))
 		str->ungetch = ch;
 	}
 
+	if (!feof(str->fp) && !ferror(str->fp))
+		return pl_failure;
+
 	if (str->eof_action == eof_action_reset)
 		clearerr(str->fp);
 
-	return feof(str->fp) || ferror(str->fp);
+	return pl_success;
 }
 
 static USE_RESULT prolog_state fn_iso_at_end_of_stream_1(query *q)
