@@ -2184,7 +2184,7 @@ static USE_RESULT prolog_state fn_iso_open_3(query *q)
 	str->filename = strdup(filename);
 	str->name = strdup(filename);
 	str->mode = strdup(mode);
-	str->eof_action_reset = true;
+	str->eof_action_reset = false;
 
 	if (!strcmp(mode, "read"))
 		str->fp = fopen(filename, "r");
@@ -2253,7 +2253,7 @@ static USE_RESULT prolog_state fn_iso_open_4(query *q)
 	str->filename = strdup(filename);
 	str->name = strdup(filename);
 	str->mode = strdup(mode);
-	str->eof_action_reset = true;
+	str->eof_action_reset = false;
 	int binary = 0;
 
 #if USE_MMAP

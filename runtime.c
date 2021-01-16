@@ -575,15 +575,14 @@ unsigned create_vars(query *q, unsigned cnt)
 	} else if (!g->overflow) {
 		g->overflow = q->st.sp;
 		q->st.sp += cnt;
-	} else if ((g->overflow + (g->nbr_vars-g->nbr_slots)) == q->st.sp) {
+	} else if ((g->overflow + (g->nbr_vars - g->nbr_slots)) == q->st.sp) {
 		q->st.sp += cnt;
 	} else {
 		idx_t save_overflow = g->overflow;
 		g->overflow = q->st.sp;
-		idx_t cnt2 = g->nbr_vars-g->nbr_slots;
+		idx_t cnt2 = g->nbr_vars - g->nbr_slots;
 		memmove(q->slots+g->overflow, q->slots+save_overflow, sizeof(slot)*cnt2);
-		q->st.sp += cnt2;
-		q->st.sp += cnt;
+		q->st.sp += cnt2 + cnt;
 	}
 
 	for (unsigned i = 0; i < cnt; i++) {
