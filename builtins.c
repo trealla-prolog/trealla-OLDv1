@@ -3016,6 +3016,7 @@ static USE_RESULT prolog_state fn_iso_write_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
@@ -3036,6 +3037,7 @@ static USE_RESULT prolog_state fn_iso_write_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
@@ -3052,6 +3054,7 @@ static USE_RESULT prolog_state fn_iso_writeq_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
@@ -3076,6 +3079,7 @@ static USE_RESULT prolog_state fn_iso_writeq_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
@@ -3096,6 +3100,7 @@ static USE_RESULT prolog_state fn_iso_write_canonical_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
@@ -3116,6 +3121,7 @@ static USE_RESULT prolog_state fn_iso_write_canonical_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
@@ -3248,6 +3254,7 @@ static USE_RESULT prolog_state fn_iso_write_term_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
@@ -3311,6 +3318,7 @@ static USE_RESULT prolog_state fn_iso_write_term_3(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
@@ -3365,6 +3373,7 @@ static USE_RESULT prolog_state fn_iso_put_char_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
@@ -3393,6 +3402,7 @@ static USE_RESULT prolog_state fn_iso_put_char_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
@@ -3416,6 +3426,7 @@ static USE_RESULT prolog_state fn_iso_put_code_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
@@ -3442,6 +3453,7 @@ static USE_RESULT prolog_state fn_iso_put_code_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
@@ -3464,6 +3476,7 @@ static USE_RESULT prolog_state fn_iso_put_byte_1(query *q)
 	if (!str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "output,text_stream");
 	}
 
