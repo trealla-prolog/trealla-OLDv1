@@ -279,10 +279,14 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 	if (is_float(c) && (c->val_flt == M_PI)) {
 		dst += snprintf(dst, dstlen, "3.141592653589793");
 		return dst - save_dst;
-	} else if (is_float(c) && (c->val_flt == M_E)) {
+	}
+
+	if (is_float(c) && (c->val_flt == M_E)) {
 		dst += snprintf(dst, dstlen, "2.718281828459045");
 		return dst - save_dst;
-	} else if (is_float(c)) {
+	}
+
+	if (is_float(c)) {
 		char tmpbuf[256];
 		sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, c->val_flt);
 		const char *ptr = strchr(tmpbuf, '.');
@@ -385,8 +389,8 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 
 	idx_t arity = c->arity;
 	dst += snprintf(dst, dstlen, "(");
-
 	bool cycle_error = false;
+
 	for (c++; arity--; c += c->nbr_cells) {
 		cell *tmp = running ? deref(q, c, c_ctx) : c;
 		ssize_t res = print_canonical_to_buf(q, dst, dstlen, tmp, q->latest_ctx, running, depth+1);
@@ -453,10 +457,14 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	if (is_float(c) && (c->val_flt == M_PI)) {
 		dst += snprintf(dst, dstlen, "3.141592653589793");
 		return dst - save_dst;
-	} else if (is_float(c) && (c->val_flt == M_E)) {
+	}
+
+	if (is_float(c) && (c->val_flt == M_E)) {
 		dst += snprintf(dst, dstlen, "2.718281828459045");
 		return dst - save_dst;
-	} else if (is_float(c)) {
+	}
+
+	if (is_float(c)) {
 		char tmpbuf[256];
 		sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG-1, c->val_flt);
 		const char *ptr = strchr(tmpbuf, '.');
@@ -581,7 +589,9 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			unsigned var_nbr = ((c+1)->val_num) - q->nv_start;
 			dst += snprintf(dst, dstlen, "%s", varformat(var_nbr));
 			return dst - save_dst;
-		} else if (running && is_variable(c) && q->variable_names) {
+		}
+
+		if (running && is_variable(c) && q->variable_names) {
 			cell *l = q->variable_names;
 			idx_t l_ctx = q->variable_names_ctx;
 			LIST_HANDLER(l);
