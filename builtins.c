@@ -2089,8 +2089,6 @@ static void clear_stream_properties(query *q)
 	}
 
 	q->m->dirty = true;
-	sl_destroy(h->index);
-	h->index = NULL;
 	h->cnt = 0;
 }
 

@@ -776,7 +776,7 @@ static void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	if (h) {
 		h->is_dynamic = true;
 
-		if (!h->index && !m->noindex) {
+		if (!h->index && !h->is_noindex && !m->noindex) {
 			h->index = sl_create1(compkey, m);
 			ensure(h->index);
 		}
@@ -798,7 +798,7 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 		h->is_dynamic = true;
 		h->is_persist = true;
 
-		if (!h->index && !m->noindex) {
+		if (!h->index && !h->is_noindex && !m->noindex) {
 			h->index = sl_create1(compkey, m);
 			ensure(h->index);
 		}
