@@ -352,6 +352,8 @@ typedef struct {
 	bool did_cut:1;
 } frame;
 
+enum { eof_action_eof_code, eof_action_error, eof_action_reset };
+
 typedef struct {
 	FILE *fp;
 	char *mode, *filename, *name, *data, *src;
@@ -360,12 +362,8 @@ typedef struct {
 	char srcbuf[STREAM_BUFLEN];
 	size_t data_len, alloc_nbytes;
 	int ungetch, srclen;
-	uint8_t level;
-	bool past_end_of_file:1;
+	uint8_t level, eof_action;
 	bool at_end_of_file:1;
-	bool eof_action_error:1;
-	bool eof_action_eof_code:1;
-	bool eof_action_reset:1;
 	bool binary:1;
 	bool did_getc:1;
 	bool socket:1;
