@@ -2678,15 +2678,17 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 #endif
 
 		if (!src && (!p->srcptr || !*p->srcptr || (*p->srcptr == '\n'))) {
-			if (str->eof_action == eof_action_eof_code)
-				clearerr(str->fp);
-
 			if (getline(&p->save_line, &p->n_line, str->fp) == -1) {
 				if (q->is_task && !feof(str->fp)) {
 					clearerr(str->fp);
 					do_yield_0(q, 1);
 					return pl_failure;
 				}
+
+				str->at_end_of_file = str->eof_action != eof_action_reset;
+
+				if (str->eof_action == eof_action_reset)
+					clearerr(str->fp);
 
 				if (vars) {
 					cell tmp;
@@ -2709,7 +2711,6 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 				//destroy_parser(p);
 				//str->p = NULL;
 
-				str->at_end_of_file = true;
 				cell tmp;
 				make_literal(&tmp, g_eof_s);
 				return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -2937,6 +2938,7 @@ static USE_RESULT prolog_state fn_iso_read_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
 	}
 
@@ -2958,6 +2960,7 @@ static USE_RESULT prolog_state fn_iso_read_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
 	}
 
@@ -2976,6 +2979,7 @@ static USE_RESULT prolog_state fn_iso_read_term_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
 	}
 
@@ -2996,6 +3000,7 @@ static USE_RESULT prolog_state fn_iso_read_term_3(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
 	}
 
