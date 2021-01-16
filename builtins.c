@@ -3510,6 +3510,7 @@ static USE_RESULT prolog_state fn_iso_get_char_1(query *q)
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -3577,6 +3578,7 @@ static USE_RESULT prolog_state fn_iso_get_char_2(query *q)
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -3637,6 +3639,7 @@ static USE_RESULT prolog_state fn_iso_get_code_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
 	}
 
@@ -3705,6 +3708,7 @@ static USE_RESULT prolog_state fn_iso_get_code_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
 	}
 
@@ -3772,6 +3776,7 @@ static USE_RESULT prolog_state fn_iso_get_byte_1(query *q)
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -3831,6 +3836,7 @@ static USE_RESULT prolog_state fn_iso_get_byte_2(query *q)
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -3889,6 +3895,7 @@ static USE_RESULT prolog_state fn_iso_peek_char_1(query *q)
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -3937,6 +3944,7 @@ static USE_RESULT prolog_state fn_iso_peek_char_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
 	}
 
@@ -3989,6 +3997,7 @@ static USE_RESULT prolog_state fn_iso_peek_code_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
 	}
 
@@ -4043,6 +4052,7 @@ static USE_RESULT prolog_state fn_iso_peek_code_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
 	}
 
@@ -4096,6 +4106,7 @@ static USE_RESULT prolog_state fn_iso_peek_byte_1(query *q)
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -4140,6 +4151,7 @@ static USE_RESULT prolog_state fn_iso_peek_byte_2(query *q)
 	if (!str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
 		return throw_error(q, &tmp, "permission_error", "input,text_stream");
 	}
 
