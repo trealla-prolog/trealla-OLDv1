@@ -2481,6 +2481,13 @@ static USE_RESULT prolog_state fn_iso_at_end_of_stream_0(__attribute__((unused))
 	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
 
+	if (str->p) {
+		if (str->p->srcptr && *str->p->srcptr) {
+			int ch = get_char_utf8((const char**)&str->p->srcptr);
+			str->ungetch = ch;
+		}
+	}
+
 	if (!str->socket) {
 		int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 		str->ungetch = ch;
@@ -2501,6 +2508,12 @@ static USE_RESULT prolog_state fn_iso_at_end_of_stream_1(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 
+	if (str->p) {
+		if (str->p->srcptr && *str->p->srcptr) {
+			int ch = get_char_utf8((const char**)&str->p->srcptr);
+			str->ungetch = ch;
+		}
+	}
 	if (!str->socket) {
 		int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 		str->ungetch = ch;
