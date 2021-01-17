@@ -6288,6 +6288,9 @@ static USE_RESULT prolog_state fn_iso_op_3(query *q)
 	if (!strcmp(GET_STR(p3), "|"))
 		return throw_error(q, p3, "permission_error", "create,operator");
 
+	if (!strcmp(GET_STR(p3), ","))
+		return throw_error(q, p3, "permission_error", "modify,operator");
+
 	unsigned specifier;
 	const char *spec = GET_STR(p2);
 
