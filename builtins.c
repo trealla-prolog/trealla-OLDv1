@@ -1717,7 +1717,7 @@ static USE_RESULT prolog_state fn_iso_set_input_1(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 
-	if (strcmp(str->mode, "read"))
+	if (strcmp(str->mode, "read") && strcmp(str->mode, "update"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
 
 	q->m->pl->current_input = n;
@@ -2521,7 +2521,7 @@ static USE_RESULT prolog_state fn_iso_at_end_of_stream_1(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 
-	if (strcmp(str->mode, "read"))
+	if (strcmp(str->mode, "read") && strcmp(str->mode, "update"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
 
 	if (str->p) {
