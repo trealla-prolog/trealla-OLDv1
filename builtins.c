@@ -2555,6 +2555,10 @@ static USE_RESULT prolog_state fn_iso_flush_output_1(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
+
+	if (!strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "output,stream");
+
 	fflush(str->fp);
 	return !ferror(str->fp);
 }
