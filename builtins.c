@@ -1912,7 +1912,7 @@ static void add_stream_property(query *q, int n)
 	off_t pos = ftello(str->fp);
 	bool at_end_of_file = false;
 
-	if (!str->at_end_of_file) {
+	if (!str->at_end_of_file && (n > 2)) {
 		if (str->p) {
 			if (str->p->srcptr && *str->p->srcptr) {
 				int ch = get_char_utf8((const char**)&str->p->srcptr);
@@ -2074,7 +2074,7 @@ static USE_RESULT prolog_state do_stream_property(query *q)
 	if (!strcmp(GET_STR(p1), "end_of_stream") && is_stream(pstr)) {
 		bool at_end_of_file = false;
 
-		if (!str->at_end_of_file) {
+		if (!str->at_end_of_file && (n > 2)) {
 			if (str->p) {
 				if (str->p->srcptr && *str->p->srcptr) {
 					int ch = get_char_utf8((const char**)&str->p->srcptr);
