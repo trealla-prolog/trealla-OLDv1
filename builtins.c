@@ -6284,7 +6284,7 @@ static prolog_state do_op(query *q, cell *p3)
 	if (!is_atom(p3))
 		return throw_error(q, p3, "type_error", "atom");
 
-	if (!strcmp(GET_STR(p3), "|") && !CELL_INFIX(p2) && (p1->val_num < 1001))
+	if (!strcmp(GET_STR(p3), "|") && (!CELL_INFIX(p2) || (p1->val_num < 1001)))
 		return throw_error(q, p3, "permission_error", "create,operator");
 
 	if (!strcmp(GET_STR(p3), "[]"))
@@ -6344,7 +6344,12 @@ static USE_RESULT prolog_state fn_iso_op_3(query *q)
 	while (is_list(p3)) {
 		cell *h = LIST_HEAD(p3);
 		h = deref(q, h, p3_ctx);
-		do_op(q, h);
+
+		prolog_state ok = do_op(q, h);
+
+		if (ok != pl_success)
+			return ok;
+
 		p3 = LIST_TAIL(p3);
 		p3 = deref(q, p3, p3_ctx);
 		p3_ctx = q->latest_ctx;
