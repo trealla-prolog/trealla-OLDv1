@@ -2521,6 +2521,9 @@ static USE_RESULT prolog_state fn_iso_at_end_of_stream_1(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 
+	if (strcmp(str->mode, "read"))
+		return throw_error(q, pstr, "permission_error", "input,stream");
+
 	if (str->p) {
 		if (str->p->srcptr && *str->p->srcptr) {
 			int ch = get_char_utf8((const char**)&str->p->srcptr);
