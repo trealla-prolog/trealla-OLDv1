@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdlib.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -1924,7 +1925,7 @@ static void add_stream_property(query *q, int n)
 
 		if (str->ungetch)
 			;
-		else if (feof(str->fp)) {
+		else if (feof(str->fp) || ferror(str->fp)) {
 			clearerr(str->fp);
 
 			if (str->eof_action != eof_action_reset)
@@ -2086,7 +2087,7 @@ static USE_RESULT prolog_state do_stream_property(query *q)
 
 			if (str->ungetch)
 				;
-			else if (feof(str->fp)) {
+			else if (feof(str->fp) || ferror(str->fp)) {
 				clearerr(str->fp);
 
 				if (str->eof_action != eof_action_reset)
@@ -2718,7 +2719,7 @@ static USE_RESULT prolog_state do_read_term(query *q, stream *str, cell *p1, idx
 
 		if (!src && (!p->srcptr || !*p->srcptr || (*p->srcptr == '\n'))) {
 			if (getline(&p->save_line, &p->n_line, str->fp) == -1) {
-				if (q->is_task && !feof(str->fp)) {
+				if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 					clearerr(str->fp);
 					do_yield_0(q, 1);
 					return pl_failure;
@@ -7561,7 +7562,7 @@ static USE_RESULT prolog_state fn_getline_2(query *q)
 	if (net_getline(&line, &len, str) == -1) {
 		free(line);
 
-		if (q->is_task && !feof(str->fp)) {
+		if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 			clearerr(str->fp);
 			do_yield_0(q, 1);
 			return pl_failure;
