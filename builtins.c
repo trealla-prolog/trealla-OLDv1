@@ -9908,6 +9908,12 @@ static USE_RESULT prolog_state fn_predicate_property_2(query *q)
 			return pl_success;
 	}
 
+	if (h && h->is_multifile) {
+		make_literal(&tmp, index_from_pool(q->m->pl, "multifile"));
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
+			return pl_success;
+	}
+
 	if (h && h->is_dynamic) {
 		make_literal(&tmp, index_from_pool(q->m->pl, "dynamic"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))

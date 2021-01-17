@@ -447,7 +447,7 @@ static void set_multifile_in_db(module *m, const char *name, idx_t arity)
 	if (h)
 		h->is_multifile = true;
 	else
-		m->error = true;  //cehteh: not 100% sure about this
+		m->error = true;
 }
 
 static bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, idx_t arity)
@@ -773,14 +773,9 @@ static void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	predicate *h = find_predicate(m, &tmp);
 	if (!h) h = create_predicate(m, &tmp);
 
-	if (h) {
+	if (h)
 		h->is_dynamic = true;
-
-		if (!h->index && !h->is_noindex && !m->noindex) {
-			h->index = sl_create1(compkey, m);
-			ensure(h->index);
-		}
-	} else
+	else
 		m->error = true;
 }
 
@@ -797,12 +792,6 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 	if (h) {
 		h->is_dynamic = true;
 		h->is_persist = true;
-
-		if (!h->index && !h->is_noindex && !m->noindex) {
-			h->index = sl_create1(compkey, m);
-			ensure(h->index);
-		}
-
 		m->use_persist = true;
 	} else
 		m->error = true;
