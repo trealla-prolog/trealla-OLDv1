@@ -1913,6 +1913,13 @@ static void add_stream_property(query *q, int n)
 	bool at_end_of_file = false;
 
 	if (!str->at_end_of_file) {
+		if (str->p) {
+			if (str->p->srcptr && *str->p->srcptr) {
+				int ch = get_char_utf8((const char**)&str->p->srcptr);
+				str->ungetch = ch;
+			}
+		}
+
 		int ch = str->ungetch ? str->ungetch : net_getc(str);
 
 		if (str->ungetch)
@@ -1947,8 +1954,6 @@ static void add_stream_property(query *q, int n)
 #else
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, newline(posix)).\n", n);
 #endif
-
-	//printf("*** %s\n", tmpbuf);
 
 	parser *p = create_parser(q->m);
 	p->srcptr = tmpbuf;
@@ -2070,6 +2075,13 @@ static USE_RESULT prolog_state do_stream_property(query *q)
 		bool at_end_of_file = false;
 
 		if (!str->at_end_of_file) {
+			if (str->p) {
+				if (str->p->srcptr && *str->p->srcptr) {
+					int ch = get_char_utf8((const char**)&str->p->srcptr);
+					str->ungetch = ch;
+				}
+			}
+
 			int ch = str->ungetch ? str->ungetch : net_getc(str);
 
 			if (str->ungetch)
@@ -2514,6 +2526,7 @@ static USE_RESULT prolog_state fn_iso_at_end_of_stream_1(query *q)
 			str->ungetch = ch;
 		}
 	}
+
 	if (!str->socket) {
 		int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 		str->ungetch = ch;
