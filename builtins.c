@@ -9898,6 +9898,8 @@ static USE_RESULT prolog_state fn_predicate_property_2(query *q)
 		make_literal(&tmp, index_from_pool(q->m->pl, "built_in"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
+		else
+			return throw_error(q, p2, "domain_error", "predicate_property");
 	}
 
 	predicate *h = find_functor(q->m, f, p1->arity);
@@ -9916,6 +9918,12 @@ static USE_RESULT prolog_state fn_predicate_property_2(query *q)
 
 	if (h && h->is_dynamic) {
 		make_literal(&tmp, index_from_pool(q->m->pl, "dynamic"));
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
+			return pl_success;
+	}
+
+	if (h && !h->is_dynamic) {
+		make_literal(&tmp, index_from_pool(q->m->pl, "static"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
