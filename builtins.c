@@ -2525,7 +2525,7 @@ static USE_RESULT prolog_state fn_iso_at_end_of_stream_1(query *q)
 	if (str->eof_action == eof_action_reset)
 		clearerr(str->fp);
 
-	return feof(str->fp) || ferror(str->fp);
+	return pl_success;
 }
 
 static USE_RESULT prolog_state fn_iso_flush_output_0(__attribute__((unused)) query *q)
