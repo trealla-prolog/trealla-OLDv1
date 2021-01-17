@@ -6276,16 +6276,21 @@ static USE_RESULT prolog_state fn_iso_bagof_3(query *q)
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
-static USE_RESULT prolog_state fn_iso_op_3(query *q)
+static prolog_state do_op(query *q, cell *p3)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,atom);
-	GET_NEXT_ARG(p3,list_or_atom);
 
-	if (is_integer(p1) && ((p1->val_num < 0) || (p1->val_num > 1200)))
-		return throw_error(q, p1, "domain_error", "operator_priority");
+	if (!is_atom(p3))
+		return throw_error(q, p3, "type_error", "atom");
 
-	if (!strcmp(GET_STR(p3), "|"))
+	if (!strcmp(GET_STR(p3), "|") && !CELL_INFIX(p2) && (p1->val_num < 1001))
+		return throw_error(q, p3, "permission_error", "create,operator");
+
+	if (!strcmp(GET_STR(p3), "[]"))
+		return throw_error(q, p3, "permission_error", "create,operator");
+
+	if (!strcmp(GET_STR(p3), "{}"))
 		return throw_error(q, p3, "permission_error", "create,operator");
 
 	if (!strcmp(GET_STR(p3), ","))
@@ -6321,6 +6326,32 @@ static USE_RESULT prolog_state fn_iso_op_3(query *q)
 
 	if (!set_op(q->m, GET_STR(p3), specifier, p1->val_num))
 		return throw_error(q, p3, "resource_error", "too_many_ops");
+
+	return pl_success;
+}
+
+static USE_RESULT prolog_state fn_iso_op_3(query *q)
+{
+	GET_FIRST_ARG(p1,integer);
+	GET_NEXT_ARG(p2,atom);
+	GET_NEXT_ARG(p3,list_or_atom);
+
+	if (is_integer(p1) && ((p1->val_num < 0) || (p1->val_num > 1200)))
+		return throw_error(q, p1, "domain_error", "operator_priority");
+
+	LIST_HANDLER(p3);
+
+	while (is_list(p3)) {
+		cell *h = LIST_HEAD(p3);
+		h = deref(q, h, p3_ctx);
+		do_op(q, h);
+		p3 = LIST_TAIL(p3);
+		p3 = deref(q, p3, p3_ctx);
+		p3_ctx = q->latest_ctx;
+	}
+
+	if (is_atom(p3))
+		return do_op(q, p3);
 
 	return pl_success;
 }
