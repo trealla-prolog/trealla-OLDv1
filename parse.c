@@ -4125,13 +4125,13 @@ static bool g_init(prolog *pl)
 			CHECK_SENTINEL(g_streams[1].filename = strdup("stdout"), NULL);
 			CHECK_SENTINEL(g_streams[1].name = strdup("user_output"), NULL);
 			CHECK_SENTINEL(g_streams[1].mode = strdup("append"), NULL);
-			g_streams[0].eof_action = eof_action_reset;
+			g_streams[1].eof_action = eof_action_reset;
 
 			g_streams[2].fp = stderr;
 			CHECK_SENTINEL(g_streams[2].filename = strdup("stderr"), NULL);
 			CHECK_SENTINEL(g_streams[2].name = strdup("user_error"), NULL);
 			CHECK_SENTINEL(g_streams[2].mode = strdup("append"), NULL);
-			g_streams[0].eof_action = eof_action_reset;
+			g_streams[2].eof_action = eof_action_reset;
 		}
 
 		if (error) {
