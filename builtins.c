@@ -6284,18 +6284,6 @@ static pl_state do_op(query *q, cell *p3)
 	if (!is_atom(p3))
 		return throw_error(q, p3, "type_error", "atom");
 
-	if (!strcmp(GET_STR(p3), "|") && (!CELL_INFIX(p2) || (p1->val_num < 1001)))
-		return throw_error(q, p3, "permission_error", "create,operator");
-
-	if (!strcmp(GET_STR(p3), "[]"))
-		return throw_error(q, p3, "permission_error", "create,operator");
-
-	if (!strcmp(GET_STR(p3), "{}"))
-		return throw_error(q, p3, "permission_error", "create,operator");
-
-	if (!strcmp(GET_STR(p3), ","))
-		return throw_error(q, p3, "permission_error", "modify,operator");
-
 	unsigned specifier;
 	const char *spec = GET_STR(p2);
 
@@ -6316,13 +6304,28 @@ static pl_state do_op(query *q, cell *p3)
 	else
 		return throw_error(q, p2, "domain_error", "operator_specifier");
 
+	if (!strcmp(GET_STR(p3), "|") && (!IS_INFIX(specifier) || (p1->val_num < 1001)))
+		return throw_error(q, p3, "permission_error", "create,operator");
+
+	if (!strcmp(GET_STR(p3), "[]"))
+		return throw_error(q, p3, "permission_error", "create,operator");
+
+	if (!strcmp(GET_STR(p3), "{}"))
+		return throw_error(q, p3, "permission_error", "create,operator");
+
+	if (!strcmp(GET_STR(p3), ","))
+		return throw_error(q, p3, "permission_error", "modify,operator");
+
 	bool tmp_userop = false;
 	unsigned tmp_optype = 0;
 
-	int pri = get_op(q->m, GET_STR(p3), &tmp_optype, &tmp_userop, false);
+	get_op(q->m, GET_STR(p3), &tmp_optype, &tmp_userop, false);
 
-	if (pri && !tmp_userop)
-		return throw_error(q, p3, "permission_error", "modify,operator");
+	if (IS_INFIX(specifier) && IS_POSTFIX(tmp_optype))
+		return throw_error(q, p3, "permission_error", "create,operator");
+
+	if (IS_POSTFIX(specifier) && IS_INFIX(tmp_optype))
+		return throw_error(q, p3, "permission_error", "create,operator");
 
 	if (!set_op(q->m, GET_STR(p3), specifier, p1->val_num))
 		return throw_error(q, p3, "resource_error", "too_many_ops");
@@ -6353,9 +6356,12 @@ static USE_RESULT pl_state fn_iso_op_3(query *q)
 		p3 = LIST_TAIL(p3);
 		p3 = deref(q, p3, p3_ctx);
 		p3_ctx = q->latest_ctx;
+
+		if (is_nil(p3))
+			return pl_success;
 	}
 
-	if (is_atom(p3) && !is_nil(p3))
+	if (is_atom(p3))
 		return do_op(q, p3);
 
 	return pl_success;
