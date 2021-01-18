@@ -371,12 +371,30 @@ digits(uppercase, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ").
    Impure I/O, implemented as a small wrapper over format_//2.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+/* Allow atom format string for compatability... AD 18/1/2020 */
+
 format(Fs, Args) :-
+        list(Fs),
         current_output(Stream),
         format(Stream, Fs, Args).
 
+format(Fs, Args) :-
+        current_output(Stream),
+        atom_chars(Fs,Fs2),
+        format(Stream, Fs2, Args).
+
 format(Stream, Fs, Args) :-
+        list(Fs),
         phrase(format_(Fs, Args), Cs),
+        % we use a specialised internal predicate that uses only a
+        % single "write" operation for efficiency. It is equivalent to
+        % maplist(put_char(Stream), Cs). It also works for binary streams.
+        '$put_chars'(Stream, Cs),
+        flush_output(Stream).
+
+format(Stream, Fs, Args) :-
+        atom_chars(Fs,Fs2),
+        phrase(format_(Fs2, Args), Cs),
         % we use a specialised internal predicate that uses only a
         % single "write" operation for efficiency. It is equivalent to
         % maplist(put_char(Stream), Cs). It also works for binary streams.
