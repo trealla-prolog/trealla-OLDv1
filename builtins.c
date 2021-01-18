@@ -2161,11 +2161,11 @@ static USE_RESULT pl_state fn_iso_stream_property_2(query *q)
 			return throw_error(q, pstr, "domain_error", "stream");
 	}
 
-	if (p1->arity > 1) {
-		cell tmp;
-		make_literal(&tmp, g_nil_s);
+	if (p1->arity > 1)
 		return throw_error(q, p1, "domain_error", "stream_property");
-	}
+
+	if (!is_variable(p1) && !is_callable(p1))
+		return throw_error(q, p1, "domain_error", "stream_property");
 
 	if (!is_variable(pstr) && !is_variable(p1))
 		return do_stream_property(q);
