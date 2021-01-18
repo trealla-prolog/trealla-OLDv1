@@ -172,6 +172,9 @@ cells([~,w|Fs], [Arg|Args], Tab, Es, VNs) --> !,
 cells([~,q|Fs], [Arg|Args], Tab, Es, VNs) --> !,
         { write_term_to_chars(Arg, [quoted(true),variable_names(VNs)], Chars) },
         cells(Fs, Args, Tab, [chars(Chars)|Es], VNs).
+cells([~,k|Fs], [Arg|Args], Tab, Es, VNs) --> !,
+        { write_canonical_to_chars(Arg, [quoted(true),variable_names(VNs)], Chars) },
+        cells(Fs, Args, Tab, [chars(Chars)|Es], VNs).
 cells([~,a|Fs], [Arg|Args], Tab, Es, VNs) --> !,
         { atom_chars(Arg, Chars) },
         cells(Fs, Args, Tab, [chars(Chars)|Es], VNs).
