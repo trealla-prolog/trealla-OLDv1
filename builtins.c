@@ -1905,7 +1905,7 @@ static USE_RESULT pl_state do_retract(query *q, cell *p1, idx_t p1_ctx, int is_r
 	return pl_success;
 }
 
-static void add_stream_property(query *q, int n)
+static void add_stream_properties(query *q, int n)
 {
 	stream *str = &g_streams[n];
 	char tmpbuf[1024*8];
@@ -1963,7 +1963,7 @@ static void add_stream_property(query *q, int n)
 	destroy_parser(p);
 }
 
-static void del_stream_property(query *q, int n)
+static void del_stream_properties(query *q, int n)
 {
 	cell *tmp = alloc_on_heap(q, 3);
 	make_literal(tmp+0, g_stream_property_s);
@@ -2123,7 +2123,7 @@ static USE_RESULT pl_state do_stream_property(query *q)
 	return pl_failure;
 }
 
-static void clear_stream_properties(query *q)
+static void clear_streams_properties(query *q)
 {
 	cell tmp;
 	make_literal(&tmp, g_stream_property_s);
@@ -2144,10 +2144,15 @@ static void clear_stream_properties(query *q)
 	h->cnt = 0;
 }
 
+static const char *s_properties =
+	"alias,file_name,mode,encoding,type,line_count,"			\
+	"position,reposition,end_of_stream,eof_action,"				\
+	"input,output,newline";
+
 static USE_RESULT pl_state fn_iso_stream_property_2(query *q)
 {
 	GET_FIRST_ARG(pstr,any);
-	GET_NEXT_ARG(p1,any);
+	GET_NEXT_ARG(p1,callable);
 
 	if (!is_stream_or_var(pstr)) {
 		if (closed_stream(q, pstr))
@@ -2166,7 +2171,7 @@ static USE_RESULT pl_state fn_iso_stream_property_2(query *q)
 		return do_stream_property(q);
 
 	if (!q->retry) {
-		clear_stream_properties(q);
+		clear_streams_properties(q);
 
 		for (int i = 0; i < MAX_STREAMS; i++) {
 			if (!g_streams[i].fp)
@@ -2175,7 +2180,7 @@ static USE_RESULT pl_state fn_iso_stream_property_2(query *q)
 			stream *str = &g_streams[i];
 
 			if (!str->socket)
-				add_stream_property(q, i);
+				add_stream_properties(q, i);
 		}
 	}
 
@@ -2183,8 +2188,10 @@ static USE_RESULT pl_state fn_iso_stream_property_2(query *q)
 	tmp->val_off = g_stream_property_s;
 
 	if (!match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE)) {
-		if (q->retry)
-			clear_stream_properties(q);
+		clear_streams_properties(q);
+
+		if (!strstr(s_properties, GET_STR(p1)))
+			return throw_error(q, p1, "domain_error", "stream_property");
 
 		return pl_failure;
 	}
@@ -2448,7 +2455,7 @@ static USE_RESULT pl_state fn_iso_close_1(query *q)
 		destroy_parser(str->p);
 
 	if (!str->socket)
-		del_stream_property(q, n);
+		del_stream_properties(q, n);
 
 	net_close(str);
 	free(str->filename);
