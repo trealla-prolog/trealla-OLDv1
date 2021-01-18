@@ -6355,7 +6355,7 @@ static USE_RESULT pl_state fn_iso_op_3(query *q)
 		p3_ctx = q->latest_ctx;
 	}
 
-	if (is_atom(p3))
+	if (is_atom(p3) && !is_nil(p3))
 		return do_op(q, p3);
 
 	return pl_success;
