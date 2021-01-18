@@ -28,7 +28,7 @@ bench_peirera(SpeedupOrName) :-
 list_bench_results(File, Id) :-
 	open(File, write, Out),
 	(   bench_result(Name, NetTime),
-	    format(Out, "bench_result(~q, ~q, ~q).~n", [Id, Name, NetTime]),
+	    format(Out, 'bench_result(~q, ~q, ~q).~n', [Id, Name, NetTime]),
 	    fail
 	;   close(Out)
 	).
@@ -189,7 +189,7 @@ bench_mark(Name, NetTime, Speedup) :-
 	NetTime is TestTime-OverHead,
         Average  is 1000000*NetTime/Iterations,
 
-	format("~w~t~22| took ~2f-~2f=~2f/~d = ~t~1f~60| usec/iter.~n",
+	format('~w~t~22| took ~2f-~2f=~2f/~d = ~t~1f~60| usec/iter.~n',
 	       [Name, TestTime, OverHead, NetTime, Iterations, Average]).
 
 
@@ -250,7 +250,7 @@ benches(Speedup) :-
     ;	findall(T, bench_result(_, T), TList),
 	length(TList, Len),
 	sumlist(TList, Sum),
-	format("~w benchmarks took ~w seconds~n", [Len, Sum])
+	format('~w benchmarks took ~w seconds~n', [Len, Sum])
     ).
 
 sumlist([], 0).
