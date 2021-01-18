@@ -261,7 +261,7 @@ struct cell_ {
 
 		struct {
 			union {
-				prolog_state (*fn)(query*);
+				pl_state (*fn)(query*);
 				predicate *match;
 				cell *attrs;
 				uint16_t priority;
@@ -323,7 +323,7 @@ struct predicate_ {
 struct builtins {
 	const char *name;
 	unsigned arity;
-	prolog_state (*fn)(query*);
+	pl_state (*fn)(query*);
 	const char *help;
 };
 
@@ -569,7 +569,7 @@ cell *list_tail(cell *l, cell *tmp);
 enum {DO_CLAUSE, DO_RETRACT, DO_RETRACTALL};
 
 USE_RESULT size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max_elements);
-prolog_state set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
+pl_state set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
 bool module_load_fp(module *m, FILE *fp, const char *filename);
 bool module_load_file(module *m, const char *filename);
@@ -586,13 +586,13 @@ clause *erase_from_db(module *m, uuid *ref);
 clause *find_in_db(module *m, uuid *ref);
 unsigned get_op(module *m, const char *name, unsigned *specifier, bool *userop, bool hint_prefix);
 bool set_op(module *m, const char *name, unsigned specifier, unsigned priority);
-USE_RESULT prolog_state make_choice(query *q);
-USE_RESULT prolog_state make_barrier(query *q);
-USE_RESULT prolog_state make_catcher(query *q, enum q_retry type);
+USE_RESULT pl_state make_choice(query *q);
+USE_RESULT pl_state make_barrier(query *q);
+USE_RESULT pl_state make_catcher(query *q, enum q_retry type);
 void cut_me(query *q, bool local_cut);
 bool check_builtin(prolog *pl, const char *name, unsigned arity);
 void *get_builtin(prolog *pl, const char *name, unsigned arity);
-prolog_state query_execute(query *q, term *t);
+pl_state query_execute(query *q, term *t);
 bool check_rule(const cell *c);
 cell *get_head(cell *c);
 cell *get_body(cell *c);
@@ -601,7 +601,7 @@ predicate *find_predicate(module *m, cell *c);
 predicate *find_matching_predicate(module *m, cell *c);
 predicate *find_matching_predicate_quiet(module *m, cell *c);
 predicate *find_functor(module *m, const char *name, unsigned arity);
-USE_RESULT prolog_state call_me(query *q, cell *p1);
+USE_RESULT pl_state call_me(query *q, cell *p1);
 void undo_me(query *q);
 parser *create_parser(module *m);
 void destroy_parser(parser *p);
@@ -615,18 +615,18 @@ void parser_assign_vars(parser *p, unsigned start, bool rebase);
 query *create_query(module *m, bool sub_query);
 query *create_task(query *q, cell *curr_cell);
 void destroy_query(query *q);
-USE_RESULT prolog_state run_query(query *q);
+USE_RESULT pl_state run_query(query *q);
 USE_RESULT cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx);
 USE_RESULT cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix);
 void make_end(cell *tmp);
-USE_RESULT prolog_state match_rule(query *q, cell *p1, idx_t p1_ctx);
-USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, int retract);
+USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx);
+USE_RESULT pl_state match_clause(query *q, cell *p1, idx_t p1_ctx, int retract);
 idx_t index_from_pool(prolog *pl, const char *name);
 void do_reduce(cell *n);
 unsigned create_vars(query *q, unsigned nbr);
 unsigned count_bits(const uint8_t *mask, unsigned bit);
 void try_me(const query *q, unsigned vars);
-USE_RESULT prolog_state throw_error(query *q, cell *c, const char *err_type, const char *expected);
+USE_RESULT pl_state throw_error(query *q, cell *c, const char *err_type, const char *expected);
 uint64_t get_time_in_usec(void);
 void clear_term(term *t);
 void do_db_load(module *m);
@@ -648,12 +648,12 @@ cell *check_body_callable(parser *p, cell *c);
 void load_builtins(prolog *pl, bool iso_only);
 
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
-prolog_state print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
-prolog_state print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
+pl_state print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
+pl_state print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
 char *print_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
 
 ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, unsigned depth);
-prolog_state print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
+pl_state print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
 char *print_canonical_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
-prolog_state print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
+pl_state print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
 

@@ -27,7 +27,7 @@ typedef enum {
 	pl_error   =  0,
 	pl_failure =  0,
 	pl_success =  1,
-} prolog_state;
+} pl_state;
 
 prolog *pl_create();
 void pl_destroy(prolog*);

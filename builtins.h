@@ -134,7 +134,7 @@ extern void make_float(cell *tmp, double v);
 
 #define calc_(q,c) !(c->flags&FLAG_BUILTIN) ? *c : (do_calc_(q,c,c##_ctx), q->accum)
 
-extern USE_RESULT prolog_state fn_iso_add_2(query *q);
+extern USE_RESULT pl_state fn_iso_add_2(query *q);
 extern int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
 extern void do_calc_(query *q, cell *c, idx_t c_ctx);
 

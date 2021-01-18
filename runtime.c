@@ -69,7 +69,7 @@ size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max
 	return elements;
 }
 
-static USE_RESULT prolog_state check_trail(query *q)
+static USE_RESULT pl_state check_trail(query *q)
 {
 	if (q->st.tp > q->max_trails) {
 		q->max_trails = q->st.tp;
@@ -89,7 +89,7 @@ static USE_RESULT prolog_state check_trail(query *q)
 	return pl_success;
 }
 
-static USE_RESULT prolog_state check_choice(query *q)
+static USE_RESULT pl_state check_choice(query *q)
 {
 	if (q->cp > q->max_choices) {
 		q->max_choices = q->cp;
@@ -109,7 +109,7 @@ static USE_RESULT prolog_state check_choice(query *q)
 	return pl_success;
 }
 
-static USE_RESULT prolog_state check_frame(query *q)
+static USE_RESULT pl_state check_frame(query *q)
 {
 	if (q->st.fp > q->max_frames) {
 		q->max_frames = q->st.fp;
@@ -129,7 +129,7 @@ static USE_RESULT prolog_state check_frame(query *q)
 	return pl_success;
 }
 
-static USE_RESULT prolog_state check_slot(query *q, unsigned cnt)
+static USE_RESULT pl_state check_slot(query *q, unsigned cnt)
 {
 	idx_t nbr = q->st.sp + cnt + MAX_ARITY;
 
@@ -438,7 +438,7 @@ void stash_me(query *q, term *t, bool last_match)
 	q->st.sp += nbr_vars;
 }
 
-prolog_state make_choice(query *q)
+pl_state make_choice(query *q)
 {
 	may_error(check_frame(q));
 	may_error(check_choice(q));
@@ -462,7 +462,7 @@ prolog_state make_choice(query *q)
 	return pl_success;
 }
 
-prolog_state make_barrier(query *q)
+pl_state make_barrier(query *q)
 {
 	may_error(make_choice(q));
 	idx_t curr_choice = q->cp - 1;
@@ -471,7 +471,7 @@ prolog_state make_barrier(query *q)
 	return pl_success;
 }
 
-prolog_state make_catcher(query *q, enum q_retry retry)
+pl_state make_catcher(query *q, enum q_retry retry)
 {
 	may_error(make_choice(q));
 	idx_t curr_choice = q->cp - 1;
@@ -595,7 +595,7 @@ unsigned create_vars(query *q, unsigned cnt)
 	return var_nbr;
 }
 
-prolog_state set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
+pl_state set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 {
 	frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
@@ -823,7 +823,7 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 
 // Match HEAD :- BODY.
 
-USE_RESULT prolog_state match_rule(query *q, cell *p1, idx_t p1_ctx)
+USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 {
 	if (q->retry) {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
@@ -908,7 +908,7 @@ USE_RESULT prolog_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 // Match HEAD.
 // Match HEAD :- true.
 
-USE_RESULT prolog_state match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retract)
+USE_RESULT pl_state match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retract)
 {
 	if (q->retry) {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
@@ -1003,7 +1003,7 @@ static void next_key(query *q)
 		q->st.curr_clause = q->st.curr_clause->next;
 }
 
-static USE_RESULT prolog_state match_head(query *q)
+static USE_RESULT pl_state match_head(query *q)
 {
 	if (!q->retry) {
 		cell *c = q->st.curr_cell;
@@ -1102,7 +1102,7 @@ static USE_RESULT prolog_state match_head(query *q)
 	return pl_failure;
 }
 
-prolog_state run_query(query *q)
+pl_state run_query(query *q)
 {
 	q->yielded = false;
 
@@ -1203,7 +1203,7 @@ prolog_state run_query(query *q)
 	return pl_success;
 }
 
-prolog_state query_execute(query *q, term *t)
+pl_state query_execute(query *q, term *t)
 {
 	q->m->dump_vars = false;
 	q->st.curr_cell = t->cells;
@@ -1217,7 +1217,7 @@ prolog_state query_execute(query *q, term *t)
 	frame *g = q->frames + q->st.curr_frame;
 	g->nbr_vars = t->nbr_vars;
 	g->nbr_slots = t->nbr_vars;
-	prolog_state ret = run_query(q);
+	pl_state ret = run_query(q);
 	sl_done(q->st.iter);
 	return ret;
 }

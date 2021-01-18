@@ -765,7 +765,7 @@ char *print_canonical_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 	return buf;
 }
 
-prolog_state print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running)
+pl_state print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running)
 {
 	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 0);
 
@@ -801,7 +801,7 @@ prolog_state print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_c
 	return pl_success;
 }
 
-prolog_state print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
+pl_state print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 {
 	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 0);
 
@@ -853,7 +853,7 @@ char *print_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 	return buf;
 }
 
-prolog_state print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running)
+pl_state print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running)
 {
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 0);
 
@@ -885,7 +885,7 @@ prolog_state print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, i
 	return pl_success;
 }
 
-prolog_state print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
+pl_state print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 {
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 0);
 
