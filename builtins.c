@@ -2152,7 +2152,7 @@ static const char *s_properties =
 static USE_RESULT pl_state fn_iso_stream_property_2(query *q)
 {
 	GET_FIRST_ARG(pstr,any);
-	GET_NEXT_ARG(p1,callable);
+	GET_NEXT_ARG(p1,any);
 
 	if (!is_stream_or_var(pstr)) {
 		if (closed_stream(q, pstr))
@@ -2190,7 +2190,7 @@ static USE_RESULT pl_state fn_iso_stream_property_2(query *q)
 	if (!match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE)) {
 		clear_streams_properties(q);
 
-		if (!strstr(s_properties, GET_STR(p1)))
+		if (is_callable(p1) && !strstr(s_properties, GET_STR(p1)))
 			return throw_error(q, p1, "domain_error", "stream_property");
 
 		return pl_failure;
