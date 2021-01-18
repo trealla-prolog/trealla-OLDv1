@@ -381,17 +381,8 @@ format(Fs, Args) :-
         format(Stream, Fs, Args).
 
 format(Stream, Fs, Args) :-
-        list(Fs),
-        phrase(format_(Fs, Args), Cs),
-        % we use a specialised internal predicate that uses only a
-        % single "write" operation for efficiency. It is equivalent to
-        % maplist(put_char(Stream), Cs). It also works for binary streams.
-        '$put_chars'(Stream, Cs),
-        flush_output(Stream).
-
-format(Stream, Fs1, Args) :-
-        atom_chars(Fs1, Fs),
-        phrase(format_(Fs, Args), Cs),
+        (atom(Fs) -> atom_chars(Fs, Chars) ; Chars = Fs),
+        phrase(format_(Chars, Args), Cs),
         % we use a specialised internal predicate that uses only a
         % single "write" operation for efficiency. It is equivalent to
         % maplist(put_char(Stream), Cs). It also works for binary streams.
