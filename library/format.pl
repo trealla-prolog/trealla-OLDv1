@@ -374,12 +374,6 @@ digits(uppercase, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ").
 /* Allow atom format string for compatability... AD 18/1/2020 */
 
 format(Fs, Args) :-
-        list(Fs),
-        current_output(Stream),
-        format(Stream, Fs, Args).
-
-format(Fs1, Args) :-
-        atom_chars(Fs1,Fs),
         current_output(Stream),
         format(Stream, Fs, Args).
 
@@ -393,7 +387,7 @@ format(Stream, Fs, Args) :-
         flush_output(Stream).
 
 format(Stream, Fs1, Args) :-
-        atom_chars(Fs1,Fs),
+        atom_chars(Fs1, Fs),
         phrase(format_(Fs, Args), Cs),
         % we use a specialised internal predicate that uses only a
         % single "write" operation for efficiency. It is equivalent to
