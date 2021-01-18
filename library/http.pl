@@ -3,6 +3,7 @@
 	http_request/5
 	]).
 
+:- use_module(library(format)).
 :- use_module(library(dict)).
 
 read_response(S, Code) :-
@@ -55,7 +56,7 @@ http_open(UrlList, S, Opts) :-
 		(Maj = 1, Min = 1)),
 	client(Host, _Host, _Path, S, OptList),
 	string_upper(Method, UMethod),
-	legacy_format(S,"~s /~s HTTP/~d.~d\r~nHost: ~s\r~nConnection: keep-alive\r~n\r~n", [UMethod,Path,Maj,Min,Host]),
+	legacy_format(S, "~s /~s HTTP/~d.~d\r~nHost: ~s\r~nConnection: keep-alive\r~n\r~n", [UMethod,Path,Maj,Min,Host]),
 	read_response(S, Code),
 	findall(Hdr, read_header(S, Hdr), Hdrs),
 	append(Host, Path, Url),
@@ -86,7 +87,7 @@ process(Url, S, Opts) :-
 	(nonvar(PostData) ->
 		(length(PostData, DataLen), legacy_format(atom(Clen), "Content-Length: ~d\r~n", [DataLen])) ;
 		Clen = '' ),
-	legacy_format(S,"~s /~s HTTP/~d.~d\r~nHost: ~s\r~nConnection: close\r~n~a~a\r~n", [UMethod,Path,Maj,Min,Host,Ctype,Clen]),
+	legacy_format(S, "~s /~s HTTP/~d.~d\r~nHost: ~s\r~nConnection: close\r~n~a~a\r~n", [UMethod,Path,Maj,Min,Host,Ctype,Clen]),
 	(nonvar(DataLen) -> bwrite(S, PostData) ; true),
 	read_response(S, Code),
 	findall(Hdr, read_header(S, Hdr), Hdrs),
