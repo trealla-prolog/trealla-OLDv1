@@ -1,0 +1,49 @@
+{
+  "uid" : "ab4e40e5da5b5a66",
+  "name" : "eddbali_set_prolog_flag_2_06",
+  "historyId" : "predicates/set_prolog_flag_2/tests.lgt:tests#eddbali_set_prolog_flag_2_06",
+  "time" : {
+    "start" : 1610970046000,
+    "stop" : 1610970046000,
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/set_prolog_flag_2/tests.lgt"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "ab4e40e5da5b5a66.json",
+  "parameterValues" : [ ]
+}

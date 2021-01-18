@@ -1,0 +1,6 @@
+[ {
+  "name" : "logtalk_tester",
+  "type" : "logtalk_tester",
+  "buildOrder" : 1,
+  "buildName" : "logtalk_allure_report#1"
+} ]

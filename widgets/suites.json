@@ -1,0 +1,114 @@
+{
+  "total" : 145,
+  "items" : [ {
+    "uid" : "668ae64c96f07851e57c5b34f489a5be",
+    "name" : "control/cut_0/tests.lgt",
+    "statistic" : {
+      "failed" : 18,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 3,
+      "unknown" : 0,
+      "total" : 21
+    }
+  }, {
+    "uid" : "b53facfc3ab369a6b285a9b84e571b6a",
+    "name" : "predicates/stream_property_2/tests.lgt",
+    "statistic" : {
+      "failed" : 14,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 20,
+      "unknown" : 0,
+      "total" : 34
+    }
+  }, {
+    "uid" : "c4f6bd72fb27abbb93d5281bfb6b5be2",
+    "name" : "functions/log_2/tests.lgt",
+    "statistic" : {
+      "failed" : 11,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 11
+    }
+  }, {
+    "uid" : "1f89ce235b903676b13870ef37232400",
+    "name" : "predicates/read_term_3/tests.lgt",
+    "statistic" : {
+      "failed" : 6,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 30,
+      "unknown" : 0,
+      "total" : 36
+    }
+  }, {
+    "uid" : "07c22e58394dfad0944e37c23ab3fab0",
+    "name" : "predicates/findall_4/tests.lgt",
+    "statistic" : {
+      "failed" : 6,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 7,
+      "unknown" : 0,
+      "total" : 13
+    }
+  }, {
+    "uid" : "41d6a19652e69674928f746fa8682efd",
+    "name" : "predicates/setup_call_cleanup_3/tests.lgt",
+    "statistic" : {
+      "failed" : 6,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 5,
+      "unknown" : 0,
+      "total" : 11
+    }
+  }, {
+    "uid" : "b0c0c3831561c7e387cea174904e8186",
+    "name" : "functions/power_2/tests.lgt",
+    "statistic" : {
+      "failed" : 5,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 9,
+      "unknown" : 0,
+      "total" : 14
+    }
+  }, {
+    "uid" : "aa2ce3debd21137a968b0a8e5dbaa990",
+    "name" : "predicates/setof_3/tests.lgt",
+    "statistic" : {
+      "failed" : 4,
+      "broken" : 0,
+      "skipped" : 1,
+      "passed" : 30,
+      "unknown" : 0,
+      "total" : 35
+    }
+  }, {
+    "uid" : "77f51bba0b9feeef5b993628c64bff45",
+    "name" : "predicates/format_2/tests.lgt",
+    "statistic" : {
+      "failed" : 3,
+      "broken" : 0,
+      "skipped" : 1,
+      "passed" : 12,
+      "unknown" : 0,
+      "total" : 16
+    }
+  }, {
+    "uid" : "72e51ed976a1c2716315051244abc016",
+    "name" : "predicates/format_3/tests.lgt",
+    "statistic" : {
+      "failed" : 3,
+      "broken" : 0,
+      "skipped" : 1,
+      "passed" : 12,
+      "unknown" : 0,
+      "total" : 16
+    }
+  } ]
+}
