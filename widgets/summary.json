@@ -1,5 +1,5 @@
 {
-  "reportName" : "Allure Report",
+  "reportName" : "Standards Compliance Report",
   "testRuns" : [ ],
   "statistic" : {
     "failed" : 125,
@@ -10,9 +10,9 @@
     "total" : 1911
   },
   "time" : {
-    "start" : 1611060155000,
-    "stop" : 1611061041000,
-    "duration" : 886000,
+    "start" : 1611090973000,
+    "stop" : 1611091652000,
+    "duration" : 679000,
     "minDuration" : 0,
     "maxDuration" : 0,
     "sumDuration" : 0
