@@ -1,0 +1,49 @@
+{
+  "uid" : "a95d1fd94d195fb1",
+  "name" : "iso_arithmetic_comparison_19",
+  "historyId" : "predicates/arithmetic_comparison/tests.lgt:tests#iso_arithmetic_comparison_19",
+  "time" : {
+    "start" : 1611026354000,
+    "stop" : 1611026354000,
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/arithmetic_comparison/tests.lgt"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "a95d1fd94d195fb1.json",
+  "parameterValues" : [ ]
+}

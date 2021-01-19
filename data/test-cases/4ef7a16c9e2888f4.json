@@ -1,0 +1,55 @@
+{
+  "uid" : "4ef7a16c9e2888f4",
+  "name" : "sics_open_4_16",
+  "historyId" : "predicates/open_4/tests.lgt:tests#sics_open_4_16",
+  "time" : {
+    "start" : 1611026613000,
+    "stop" : 1611026613000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Wrong error",
+  "statusTrace" : "error(permission_error(open,source_sink,alias/1),open/4)",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/open_4/tests.lgt"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "4ef7a16c9e2888f4.json",
+  "parameterValues" : [ ]
+}
