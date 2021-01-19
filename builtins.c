@@ -5001,7 +5001,7 @@ USE_RESULT pl_state call_me(query *q, cell *p1)
 	cell *tmp2;
 
 	if ((tmp2 = check_body_callable(q->m->p, p1)) != NULL)
-		return throw_error(q, tmp2, "type_error", "callable");
+		return throw_error(q, p1, "type_error", "callable");
 
 	cell *tmp;
 
@@ -5065,13 +5065,13 @@ static USE_RESULT pl_state fn_iso_call_n(query *q)
 
 	cell *tmp = clone_to_heap(q, true, tmp2, 1);
 	make_end_return(tmp+1+tmp2->nbr_cells, q->st.curr_cell);
-	q->st.curr_cell = tmp;
 
 	cell *tmp3;
 
 	if ((tmp3 = check_body_callable(q->m->p, tmp2)) != NULL)
 		return throw_error(q, tmp2, "type_error", "callable");
 
+	q->st.curr_cell = tmp;
 	return pl_success;
 }
 
@@ -8162,21 +8162,6 @@ static USE_RESULT pl_state fn_yield_0(query *q)
 	return pl_failure;
 }
 
-static USE_RESULT pl_state fn_task_1(query *q)
-{
-	GET_FIRST_ARG(p1,callable);
-	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
-	may_ptr_error(tmp);
-	if (tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, "resource_error", "cyclic_term");
-
-	query *task = create_task(q, tmp);
-	task->yielded = true;
-	task->spawned = true;
-	push_task(q->m, task);
-	return pl_success;
-}
-
 static USE_RESULT pl_state fn_task_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
@@ -10944,13 +10929,14 @@ static const struct builtins g_iso_funcs[] =
 	{"once", 1, fn_iso_once_1, NULL},
 	{"throw", 1, fn_iso_throw_1, NULL},
 	{"$catch", 3, fn_iso_catch_3, NULL},
-	{"$calln", 2, fn_iso_call_n, NULL},
-	{"$calln", 3, fn_iso_call_n, NULL},
-	{"$calln", 4, fn_iso_call_n, NULL},
-	{"$calln", 5, fn_iso_call_n, NULL},
-	{"$calln", 6, fn_iso_call_n, NULL},
-	{"$calln", 7, fn_iso_call_n, NULL},
-	{"$calln", 8, fn_iso_call_n, NULL},
+	{"$call", 1, fn_iso_call_n, NULL},
+	{"$call", 2, fn_iso_call_n, NULL},
+	{"$call", 3, fn_iso_call_n, NULL},
+	{"$call", 4, fn_iso_call_n, NULL},
+	{"$call", 5, fn_iso_call_n, NULL},
+	{"$call", 6, fn_iso_call_n, NULL},
+	{"$call", 7, fn_iso_call_n, NULL},
+	{"$call", 8, fn_iso_call_n, NULL},
 	{"repeat", 0, fn_iso_repeat_0, NULL},
 	{"true", 0, fn_iso_true_0, NULL},
 	{"fail", 0, fn_iso_fail_0, NULL},
@@ -11189,14 +11175,14 @@ static const struct builtins g_other_funcs[] =
 #endif
 
 	{"fork", 0, fn_fork_0, NULL},
-	{"task", 1, fn_task_1, "+callable"},
-	{"$taskn", 2, fn_task_n, "+callable,+term,..."},
-	{"$taskn", 3, fn_task_n, "+callable,+term,..."},
-	{"$taskn", 4, fn_task_n, "+callable,+term,..."},
-	{"$taskn", 5, fn_task_n, "+callable,+term,..."},
-	{"$taskn", 6, fn_task_n, "+callable,+term,..."},
-	{"$taskn", 7, fn_task_n, "+callable,+term,..."},
-	{"$taskn", 8, fn_task_n, "+callable,+term,..."},
+	{"$task", 1, fn_task_n, "+callable"},
+	{"$task", 2, fn_task_n, "+callable,+term,..."},
+	{"$task", 3, fn_task_n, "+callable,+term,..."},
+	{"$task", 4, fn_task_n, "+callable,+term,..."},
+	{"$task", 5, fn_task_n, "+callable,+term,..."},
+	{"$task", 6, fn_task_n, "+callable,+term,..."},
+	{"$task", 7, fn_task_n, "+callable,+term,..."},
+	{"$task", 8, fn_task_n, "+callable,+term,..."},
 	{"wait", 0, fn_wait_0, NULL},
 	{"await", 0, fn_await_0, NULL},
 	{"yield", 0, fn_yield_0, NULL},

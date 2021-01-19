@@ -3788,14 +3788,14 @@ module *create_module(prolog *pl, const char *name)
 
 	make_rule(m, "bagof(T,G,B) :- "							\
 		"copy_term('$bagof'(T,G,B),TMP_G),"					\
-		"call(TMP_G),"										\
+		"'$call'(TMP_G),"										\
 		"'$bagof'(T,G,B)=TMP_G.");
 
 	// setof...
 
 	make_rule(m, "setof(T,G,B) :- "							\
 		"copy_term('$bagof'(T,G,B),TMP_G),"					\
-		"call(TMP_G),"										\
+		"'$call'(TMP_G),"										\
 		"'$bagof'(T,G,TMP_B)=TMP_G,"						\
 		"sort(TMP_B,B).");
 
@@ -3804,81 +3804,91 @@ module *create_module(prolog *pl, const char *name)
 	make_rule(m, "catch(G,E,C) :- "							\
 		"copy_term('$catch'(G,E,C),TMP_G),"					\
 		"'$catch'(G,E,C)=TMP_G,"							\
-		"call(TMP_G).");
+		"'$call'(TMP_G).");
 
 	// calln...
 
+	make_rule(m, "call(G) :- "								\
+		"copy_term('$call'(G),TMP_G),"						\
+		"'$call'(G)=TMP_G,"								\
+		"'$call'(TMP_G).");
+
 	make_rule(m, "call(G,P1) :- "							\
-		"copy_term('$calln'(G,P1),TMP_G),"					\
-		"'$calln'(G,P1)=TMP_G,"								\
-		"call(TMP_G).");
+		"copy_term('$call'(G,P1),TMP_G),"					\
+		"'$call'(G,P1)=TMP_G,"								\
+		"'$call'(TMP_G).");
 
 	make_rule(m, "call(G,P1,P2) :- "						\
-		"copy_term('$calln'(G,P1,P2),TMP_G),"				\
-		"'$calln'(G,P1,P2)=TMP_G,"							\
-		"call(TMP_G).");
+		"copy_term('$call'(G,P1,P2),TMP_G),"				\
+		"'$call'(G,P1,P2)=TMP_G,"							\
+		"'$call'(TMP_G).");
 
 	make_rule(m, "call(G,P1,P2,P3) :- "						\
-		"copy_term('$calln'(G,P1,P2,P3),TMP_G),"			\
-		"'$calln'(G,P1,P2,P3)=TMP_G,"						\
-		"call(TMP_G).");
+		"copy_term('$call'(G,P1,P2,P3),TMP_G),"			\
+		"'$call'(G,P1,P2,P3)=TMP_G,"						\
+		"'$call'(TMP_G).");
 
 	make_rule(m, "call(G,P1,P2,P3,P4) :- "					\
-		"copy_term('$calln'(G,P1,P2,P3,P4),TMP_G),"			\
-		"'$calln'(G,P1,P2,P3,P4)=TMP_G,"					\
-		"call(TMP_G).");
+		"copy_term('$call'(G,P1,P2,P3,P4),TMP_G),"			\
+		"'$call'(G,P1,P2,P3,P4)=TMP_G,"					\
+		"'$call'(TMP_G).");
 
 	make_rule(m, "call(G,P1,P2,P3,P4,P5) :- "				\
-		"copy_term('$calln'(G,P1,P2,P3,P4,P5),TMP_G),"		\
-		"'$calln'(G,P1,P2,P3,P4,P5)=TMP_G,"					\
-		"call(TMP_G).");
+		"copy_term('$call'(G,P1,P2,P3,P4,P5),TMP_G),"		\
+		"'$call'(G,P1,P2,P3,P4,P5)=TMP_G,"					\
+		"'$call'(TMP_G).");
 
 	make_rule(m, "call(G,P1,P2,P3,P4,P5,P6) :- "			\
-		"copy_term('$calln'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
-		"'$calln'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"				\
-		"call(TMP_G).");
+		"copy_term('$call'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
+		"'$call'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"				\
+		"'$call'(TMP_G).");
 
 	make_rule(m, "call(G,P1,P2,P3,P4,P5,P6,P7) :- "			\
-		"copy_term('$calln'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"\
-		"'$calln'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"			\
-		"call(TMP_G).");
+		"copy_term('$call'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"\
+		"'$call'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"			\
+		"'$call'(TMP_G).");
 
 	// taskn...
 
+	make_rule(m, "task(G) :- "								\
+		"copy_term('$task'(G),TMP_G),"						\
+		"'$task'(G)=TMP_G,"								\
+		"'$call'(TMP_G).");
+
 	make_rule(m, "task(G,P1) :- "							\
-		"copy_term('$taskn'(G,P1),TMP_G),"					\
-		"'$taskn'(G,P1)=TMP_G,"								\
-		"call(TMP_G).");
+		"copy_term('$task'(G,P1),TMP_G),"					\
+		"'$task'(G,P1)=TMP_G,"								\
+		"'$call'(TMP_G).");
 
 	make_rule(m, "task(G,P1,P2) :- "						\
-		"copy_term('$taskn'(G,P1,P2),TMP_G),"				\
-		"'$taskn'(G,P1,P2)=TMP_G,"							\
-		"call(TMP_G).");
+		"copy_term('$task'(G,P1,P2),TMP_G),"				\
+		"'$task'(G,P1,P2)=TMP_G,"							\
+		"'$call'(TMP_G).");
 
 	make_rule(m, "task(G,P1,P2,P3) :- "						\
-		"copy_term('$taskn'(G,P1,P2,P3),TMP_G),"			\
-		"'$taskn'(G,P1,P2,P3)=TMP_G,"						\
-		"call(TMP_G).");
+		"copy_term('$task'(G,P1,P2,P3),TMP_G),"			\
+		"'$task'(G,P1,P2,P3)=TMP_G,"						\
+		"'$call'(TMP_G).");
 
 	make_rule(m, "task(G,P1,P2,P3,P4) :- "					\
-		"copy_term('$taskn'(G,P1,P2,P3,P4),TMP_G),"			\
-		"'$taskn'(G,P1,P2,P3,P4)=TMP_G,"					\
-		"call(TMP_G).");
+		"copy_term('$task'(G,P1,P2,P3,P4),TMP_G),"			\
+		"'$task'(G,P1,P2,P3,P4)=TMP_G,"					\
+		"'$call'(TMP_G).");
 
 	make_rule(m, "task(G,P1,P2,P3,P4,P5) :- "				\
-		"copy_term('$taskn'(G,P1,P2,P3,P4,P5),TMP_G),"		\
-		"'$taskn'(G,P1,P2,P3,P4,P5)=TMP_G,"					\
-		"call(TMP_G).");
+		"copy_term('$task'(G,P1,P2,P3,P4,P5),TMP_G),"		\
+		"'$task'(G,P1,P2,P3,P4,P5)=TMP_G,"					\
+		"'$call'(TMP_G).");
 
 	make_rule(m, "task(G,P1,P2,P3,P4,P5,P6) :- "			\
-		"copy_term('$taskn'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
-		"'$taskn'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"				\
-		"call(TMP_G).");
+		"copy_term('$task'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
+		"'$task'(G,P1,P2,P3,P4,P5,P6)=TMP_G,"				\
+		"'$call'(TMP_G).");
 
 	make_rule(m, "task(G,P1,P2,P3,P4,P5,P6,P7) :- "			\
-		"copy_term('$taskn'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"\
-		"'$taskn'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"			\
-		"call(TMP_G).");
+		"copy_term('$task'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"\
+		"'$task'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,"			\
+		"'$call'(TMP_G).");
 
 	// phrase...
 
