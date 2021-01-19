@@ -5017,6 +5017,31 @@ USE_RESULT pl_state call_me(query *q, cell *p1)
 	return pl_success;
 }
 
+static USE_RESULT pl_state fn_iso_call_1(query *q)
+{
+	GET_FIRST_ARG(p1,callable);
+
+	cell *tmp3;
+
+	if ((tmp3 = check_body_callable(q->m->p, p1)) != NULL)
+		return throw_error(q, p1, "type_error", "callable");
+
+	if (is_cstring(p1)) {
+		cell *c = p1;
+		idx_t off = index_from_pool(q->m->pl, GET_STR(c));
+		if (is_nonconst_blob(c)) free(c->val_str);
+		c->val_off = off;
+		ensure (c->val_off != ERR_IDX);
+		c->val_type = TYPE_LITERAL;
+		c->flags = 0;
+	}
+
+	cell *tmp = clone_to_heap(q, true, p1, 1);
+	make_end_return(tmp+1+p1->nbr_cells, q->st.curr_cell);
+	q->st.curr_cell = tmp;
+	return pl_success;
+}
+
 static USE_RESULT pl_state fn_iso_call_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
@@ -10929,7 +10954,7 @@ static const struct builtins g_iso_funcs[] =
 	{"once", 1, fn_iso_once_1, NULL},
 	{"throw", 1, fn_iso_throw_1, NULL},
 	{"$catch", 3, fn_iso_catch_3, NULL},
-	{"$call", 1, fn_iso_call_n, NULL},
+	{"$call", 1, fn_iso_call_1, NULL},
 	{"$call", 2, fn_iso_call_n, NULL},
 	{"$call", 3, fn_iso_call_n, NULL},
 	{"$call", 4, fn_iso_call_n, NULL},
