@@ -1,0 +1,55 @@
+{
+  "uid" : "bf2fb29fbc921e28",
+  "name" : "lgt_log_2_09",
+  "historyId" : "functions/log_2/tests.lgt:tests#lgt_log_2_09",
+  "time" : {
+    "start" : 1611095463000,
+    "stop" : 1611095463000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Wrong error",
+  "statusTrace" : "error(type_error(evaluable,log/2),(is)/2)",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/log_2/tests.lgt"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "bf2fb29fbc921e28.json",
+  "parameterValues" : [ ]
+}
