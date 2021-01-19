@@ -5006,12 +5006,12 @@ USE_RESULT pl_state call_me(query *q, cell *p1)
 	cell *tmp;
 
 	if (p1_ctx != q->st.curr_frame) {
-		tmp = copy_to_heap(q, 0, p1, 1);
+		tmp = copy_to_heap(q, false, p1, 1);
 		unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	} else
 		tmp = clone_to_heap(q, false, p1, 1);
 
-	idx_t nbr_cells = tmp->nbr_cells;
+	idx_t nbr_cells = 0 + p1->nbr_cells;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -5037,7 +5037,8 @@ static USE_RESULT pl_state fn_iso_call_1(query *q)
 	}
 
 	cell *tmp = clone_to_heap(q, true, p1, 1);
-	make_end_return(tmp+1+p1->nbr_cells, q->st.curr_cell);
+	idx_t nbr_cells = 1 + p1->nbr_cells;
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
