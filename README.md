@@ -1,7 +1,8 @@
 Trealla ProLog
 ==============
 
-A compact, efficient Prolog interpreter with ISO compliant aspirations.
+A compact, efficient Prolog interpreter with
+[ISO compliant](https://infradig.github.io/trealla/) aspirations.
 
 	Integers are 64-bit (optionally 32 or 128-bit)
 	Integer overflow detection
