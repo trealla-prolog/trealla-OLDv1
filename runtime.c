@@ -1137,12 +1137,10 @@ pl_state run_query(query *q)
 			}
 		}
 
-#if 1
 		if (is_variable(q->st.curr_cell)) {
 			if (!call_me(q, q->st.curr_cell))
 				continue;
 		}
-#endif
 
 		q->tot_goals++;
 		q->did_throw = false;
