@@ -4992,9 +4992,6 @@ static USE_RESULT pl_state fn_iso_assertz_1(query *q)
 
 USE_RESULT pl_state call_me(query *q, cell *p1)
 {
-	if (q->retry)
-		return pl_failure;
-
 	p1 = deref(q, p1, q->st.curr_frame);
 	idx_t p1_ctx = q->latest_ctx;
 
@@ -5016,7 +5013,6 @@ USE_RESULT pl_state call_me(query *q, cell *p1)
 
 	idx_t nbr_cells = tmp->nbr_cells;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
-	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
