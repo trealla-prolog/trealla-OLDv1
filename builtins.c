@@ -4992,9 +4992,6 @@ static USE_RESULT pl_state fn_iso_assertz_1(query *q)
 
 USE_RESULT pl_state call_me(query *q, cell *p1)
 {
-	if (q->retry)
-		return pl_failure;
-
 	p1 = deref(q, p1, q->st.curr_frame);
 	idx_t p1_ctx = q->latest_ctx;
 
@@ -5016,7 +5013,6 @@ USE_RESULT pl_state call_me(query *q, cell *p1)
 
 	idx_t nbr_cells = 0 + p1->nbr_cells;
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
-	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -6270,6 +6266,7 @@ static USE_RESULT pl_state fn_iso_bagof_3(query *q)
 	uint64_t mask = p1_vars ^ p2_vars ^ xs_vars;
 	pin_vars(q, mask);
 	idx_t nbr_cells = q->tmpq_size[q->st.qnbr];
+	bool unmatched = false;
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 	     nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
@@ -6284,7 +6281,8 @@ static USE_RESULT pl_state fn_iso_bagof_3(query *q)
 			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, true);
 			may_ptr_error(tmp);
 			alloc_on_queuen(q, q->st.qnbr, tmp);
-		}
+		} else
+			unmatched = true;
 
 		undo_me(q);
 	}
@@ -6306,6 +6304,10 @@ static USE_RESULT pl_state fn_iso_bagof_3(query *q)
 	unpin_vars(q);
 	unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
+
+	if (unmatched)
+		q->st.qnbr--;
+
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
