@@ -6309,8 +6309,10 @@ static USE_RESULT pl_state fn_iso_bagof_3(query *q)
 	unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 
-	if (!unmatched)
+	if (!unmatched) {
+		drop_choice(q);
 		q->st.qnbr--;
+	}
 
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
