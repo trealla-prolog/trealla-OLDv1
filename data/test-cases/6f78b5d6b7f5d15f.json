@@ -1,0 +1,51 @@
+{
+  "uid" : "6f78b5d6b7f5d15f",
+  "name" : "sics_atom_concat_3_12",
+  "historyId" : "predicates/atom_concat_3/tests.lgt:tests#sics_atom_concat_3_12",
+  "time" : {
+    "start" : 1611060519000,
+    "stop" : 1611060519000,
+    "duration" : 0
+  },
+  "status" : "skipped",
+  "statusMessage" : "Skipped test",
+  "statusTrace" : "",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/atom_concat_3/tests.lgt"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "6f78b5d6b7f5d15f.json",
+  "parameterValues" : [ ]
+}
