@@ -1,0 +1,49 @@
+{
+  "uid" : "2dfdd8f1f50d7309",
+  "name" : "eclipse_truncate_1_04",
+  "historyId" : "functions/truncate_1/tests.lgt:tests#eclipse_truncate_1_04",
+  "time" : {
+    "start" : 1611141430000,
+    "stop" : 1611141430000,
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/truncate_1/tests.lgt"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "2dfdd8f1f50d7309.json",
+  "parameterValues" : [ ]
+}

@@ -1,0 +1,55 @@
+{
+  "uid" : "68c5be5db3485d54",
+  "name" : "commons_findall_4_10",
+  "historyId" : "predicates/findall_4/tests.lgt:tests#commons_findall_4_10",
+  "time" : {
+    "start" : 1611141593000,
+    "stop" : 1611141593000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Success instead of error",
+  "statusTrace" : "",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/findall_4/tests.lgt"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "68c5be5db3485d54.json",
+  "parameterValues" : [ ]
+}

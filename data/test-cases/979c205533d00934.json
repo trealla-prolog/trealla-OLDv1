@@ -1,0 +1,55 @@
+{
+  "uid" : "979c205533d00934",
+  "name" : "iso_mod_2_03",
+  "historyId" : "functions/rem_2/tests.lgt:tests#iso_mod_2_03",
+  "time" : {
+    "start" : 1611141399000,
+    "stop" : 1611141399000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Error instead of success",
+  "statusTrace" : "assertion_failure(-1==1)",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/rem_2/tests.lgt"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "979c205533d00934.json",
+  "parameterValues" : [ ]
+}
