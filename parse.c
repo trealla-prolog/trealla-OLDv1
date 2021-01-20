@@ -1009,48 +1009,6 @@ query *create_task(query *q, cell *curr_cell)
 	return subq;
 }
 
-static void dump_vars(query *q, parser *p)
-{
-	frame *g = GET_FRAME(0);
-	int any = 0;
-
-	for (unsigned i = 0; i < p->nbr_vars; i++) {
-		slot *e = GET_SLOT(g, i);
-
-		if (is_empty(&e->c))
-			continue;
-
-		q->latest_ctx = e->ctx;
-		cell *c;
-
-		if (is_indirect(&e->c)) {
-			c = e->c.val_ptr;
-			q->latest_ctx = e->ctx;
-		} else
-			c = deref(q, &e->c, e->ctx);
-
-		if (!strcmp(p->vartab.var_name[i], "_"))
-			continue;
-
-		if (any)
-			fprintf(stdout, ",\n");
-
-		fprintf(stdout, "%s = ", p->vartab.var_name[i]);
-		int save = q->quoted;
-		q->quoted = 1;
-		print_term(q, stdout, c, q->latest_ctx, -2);
-		q->quoted = save;
-		any++;
-	}
-
-	if (any) {
-		fprintf(stdout, ".\n");
-		fflush(stdout);
-	}
-
-	q->m->dump_vars = any;
-}
-
 void consultall(parser *p, cell *l)
 {
 	LIST_HANDLER(l);
@@ -3336,14 +3294,10 @@ static bool parser_run(parser *p, const char *src, int dump)
 	if (!q)
 		return false;
 
+	q->p = p;
+	q->dump_vars = dump;
 	q->run_init = p->run_init;
 	query_execute(q, p->t);
-
-	if (q->halt)
-		q->error = false;
-	else if (dump && !q->abort && q->status)
-		dump_vars(q, p);
-
 	p->m->halt = q->halt;
 	p->m->halt_code = q->halt_code;
 	p->m->status = q->status;

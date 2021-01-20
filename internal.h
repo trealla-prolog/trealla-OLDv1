@@ -418,6 +418,7 @@ typedef struct char_flags_ {
 struct query_ {
 	query *prev, *next, *parent;
 	module *m, *save_m;
+	parser *p;
 	frame *frames;
 	slot *slots;
 	choice *choices;
@@ -441,6 +442,7 @@ struct query_ {
 	enum q_retry retry;
 	int8_t halt_code;
 	int8_t quoted;
+	bool dump_vars:1;
 	bool status:1;
 	bool resume:1;
 	bool no_tco:1;

@@ -1102,6 +1102,49 @@ static USE_RESULT pl_state match_head(query *q)
 	return pl_failure;
 }
 
+static void dump_vars(query *q)
+{
+	parser *p = q->p;
+	frame *g = GET_FRAME(0);
+	int any = 0;
+
+	for (unsigned i = 0; i < p->nbr_vars; i++) {
+		slot *e = GET_SLOT(g, i);
+
+		if (is_empty(&e->c))
+			continue;
+
+		q->latest_ctx = e->ctx;
+		cell *c;
+
+		if (is_indirect(&e->c)) {
+			c = e->c.val_ptr;
+			q->latest_ctx = e->ctx;
+		} else
+			c = deref(q, &e->c, e->ctx);
+
+		if (!strcmp(p->vartab.var_name[i], "_"))
+			continue;
+
+		if (any)
+			fprintf(stdout, ",\n");
+
+		fprintf(stdout, "%s = ", p->vartab.var_name[i]);
+		int save = q->quoted;
+		q->quoted = 1;
+		print_term(q, stdout, c, q->latest_ctx, -2);
+		q->quoted = save;
+		any++;
+	}
+
+	if (any) {
+		fprintf(stdout, ".\n");
+		fflush(stdout);
+	}
+
+	q->m->dump_vars = any;
+}
+
 pl_state run_query(query *q)
 {
 	q->yielded = false;
@@ -1121,13 +1164,13 @@ pl_state run_query(query *q)
 			if (ch == 'a') {
 				g_tpl_interrupt = 0;
 				q->abort = true;
-				break;
+				return pl_success;
 			}
 
 			if (ch == 'e') {
 				signal(SIGINT, NULL);
 				q->halt = true;
-				break;
+				return pl_success;
 			}
 		}
 
@@ -1189,6 +1232,28 @@ pl_state run_query(query *q)
 
 		while (!q->st.curr_cell || is_end(q->st.curr_cell)) {
 			if (!resume_frame(q)) {
+				dump_vars(q);
+				fflush(stdout);
+				int ch = history_getch();
+				printf("%c\n", ch);
+
+				if ((ch == 'r') || (ch == ';')) {
+					q->retry = QUERY_RETRY;
+					break;
+				}
+
+				if (ch == 'a') {
+					g_tpl_interrupt = 0;
+					q->abort = true;
+					return pl_success;
+				}
+
+				if (ch == 'e') {
+					signal(SIGINT, NULL);
+					q->halt = true;
+					return pl_success;
+				}
+
 				q->status = true;
 				return pl_success;
 			}
@@ -1197,6 +1262,11 @@ pl_state run_query(query *q)
 			follow_me(q);
 		}
 	}
+
+	if (q->halt)
+		q->error = false;
+	else if (q->dump_vars && !q->abort && q->status)
+		dump_vars(q);
 
 	return pl_success;
 }
