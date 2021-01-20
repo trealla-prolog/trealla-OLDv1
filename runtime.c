@@ -1232,7 +1232,7 @@ pl_state run_query(query *q)
 
 		while (!q->st.curr_cell || is_end(q->st.curr_cell)) {
 			if (!resume_frame(q)) {
-				if (q->cp && q->p) {
+				if (q->cp && q->p && !q->run_init) {
 					int ch = 0;
 					dump_vars(q);
 					fflush(stdout);
