@@ -153,16 +153,16 @@ static USE_RESULT pl_state check_slot(query *q, unsigned cnt)
 
 static void trace_call(query *q, cell *c, box_t box)
 {
-	if (!c->fn)
-		return;
-
-	if (is_empty(c))
+	if (!c || !c->fn || is_empty(c))
 		return;
 
 #if 0
 	if (is_builtin(c))
 		return;
 #endif
+
+	if (box == CALL)
+		box = q->retry?REDO:q->resume?NEXT:CALL;
 
 	const char *src = GET_STR(c);
 
@@ -1234,7 +1234,7 @@ pl_state run_query(query *q)
 
 		q->tot_goals++;
 		q->did_throw = false;
-		Trace(q, q->st.curr_cell, q->retry?REDO:q->resume?NEXT:CALL);
+		Trace(q, q->st.curr_cell, CALL);
 
 		if (!(q->st.curr_cell->flags&FLAG_BUILTIN)) {
 			if (is_iso_list(q->st.curr_cell)) {
