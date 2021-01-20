@@ -3333,31 +3333,32 @@ static bool parser_run(parser *p, const char *src, int dump)
 	parser_xref(p, p->t, NULL);
 	bool ok = false;
 	query *q = create_query(p->m, false);
-	if (q) {
-		q->run_init = p->run_init;
-		query_execute(q, p->t);
+	if (!q)
+		return false;
 
-		if (q->halt)
-			q->error = false;
-		else if (dump && !q->abort && q->status)
-			dump_vars(q, p);
+	q->run_init = p->run_init;
+	query_execute(q, p->t);
 
-		p->m->halt = q->halt;
-		p->m->halt_code = q->halt_code;
-		p->m->status = q->status;
+	if (q->halt)
+		q->error = false;
+	else if (dump && !q->abort && q->status)
+		dump_vars(q, p);
 
-		if (!p->m->quiet && !p->directive && dump && q->m->stats) {
-			fprintf(stdout,
-				"Goals %llu, Matches %llu, Max frames %u, Max choices %u, Max trails: %u, Backtracks %llu, TCOs:%llu\n",
-				(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
-				q->max_frames, q->max_choices, q->max_trails,
-				(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
-		}
+	p->m->halt = q->halt;
+	p->m->halt_code = q->halt_code;
+	p->m->status = q->status;
 
-		ok = !q->error;
-		p->m = q->m;
-		destroy_query(q);
+	if (!p->m->quiet && !p->directive && dump && q->m->stats) {
+		fprintf(stdout,
+			"Goals %llu, Matches %llu, Max frames %u, Max choices %u, Max trails: %u, Backtracks %llu, TCOs:%llu\n",
+			(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
+			q->max_frames, q->max_choices, q->max_trails,
+			(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
 	}
+
+	ok = !q->error;
+	p->m = q->m;
+	destroy_query(q);
 
 	if (dump && p->m->dirty)
 		module_purge(p->m);
