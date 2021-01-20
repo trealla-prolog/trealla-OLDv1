@@ -1145,39 +1145,47 @@ static void dump_vars(query *q)
 	q->m->dump_vars = any;
 }
 
+static bool check_interrupt(query *q)
+{
+	g_tpl_interrupt = 0;
+
+	for (;;) {
+		printf("\nAction (a)bort, (c)ontinue, (e)xit: ");
+		fflush(stdout);
+		int ch = history_getch();
+		printf("%c\n", ch);
+
+		if (ch == 'c')
+			return false;
+
+		if (ch == 'a') {
+			q->abort = true;
+			return true;
+		}
+
+		if (ch == 'e') {
+			signal(SIGINT, NULL);
+			q->halt = true;
+			return true;
+		}
+	}
+}
+
 pl_state run_query(query *q)
 {
 	q->yielded = false;
 
 	while (!q->error) {
 		if (g_tpl_interrupt) {
-			printf("\nAction (a)bort, (c)ontinue, (e)xit: ");
-			fflush(stdout);
-			int ch = history_getch();
-			printf("%c\n", ch);
-
-			if (ch == 'c') {
-				g_tpl_interrupt = 0;
+			if (check_interrupt(q))
+				return pl_success;
+			else
 				continue;
-			}
-
-			if (ch == 'a') {
-				g_tpl_interrupt = 0;
-				q->abort = true;
-				return pl_success;
-			}
-
-			if (ch == 'e') {
-				signal(SIGINT, NULL);
-				q->halt = true;
-				return pl_success;
-			}
 		}
 
 		if (q->retry) {
-			if (!retry_choice(q)) {
+			if (!retry_choice(q))
 				break;
-			}
 		}
 
 		if (is_variable(q->st.curr_cell)) {
