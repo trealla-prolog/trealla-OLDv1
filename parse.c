@@ -3743,7 +3743,7 @@ module *create_module(prolog *pl, const char *name)
 
 	make_rule(m, "bagof(T,G,B) :- "							\
 		"copy_term('$bagof'(T,G,B),TMP_G),"					\
-		"call(TMP_G),"										\
+		"'$call'(TMP_G),"										\
 		"'$bagof'(T,G,B)=TMP_G.");
 
 	// setof...
