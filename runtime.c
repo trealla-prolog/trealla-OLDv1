@@ -1102,7 +1102,7 @@ static USE_RESULT pl_state match_head(query *q)
 	return pl_failure;
 }
 
-static void dump_vars(query *q)
+static void dump_vars(query *q, bool partial)
 {
 	parser *p = q->p;
 	frame *g = GET_FRAME(0);
@@ -1137,7 +1137,7 @@ static void dump_vars(query *q)
 		any++;
 	}
 
-	if (any) {
+	if (any && !partial) {
 		fprintf(stdout, ".\n");
 		fflush(stdout);
 	}
@@ -1174,7 +1174,7 @@ static bool check_interrupt(query *q)
 static bool check_redo(query *q)
 {
 	int ch = 0;
-	dump_vars(q);
+	dump_vars(q, true);
 	fflush(stdout);
 
 	for (;;) {
@@ -1187,13 +1187,14 @@ static bool check_redo(query *q)
 			continue;
 		}
 
-		if ((ch == 'r') || (ch == ';')) {
+		if ((ch == 'r') || (ch == ' ') || (ch == ';')) {
+			printf("%c\n", ';');
 			q->retry = QUERY_RETRY;
 			break;
 		}
 
-		if (ch == 'a') {
-			g_tpl_interrupt = 0;
+		if ((ch == '\n') || (ch == 'a')) {
+			printf("%c\n", '.');
 			q->abort = true;
 			return true;
 		}
@@ -1222,8 +1223,12 @@ pl_state run_query(query *q)
 		}
 
 		if (q->retry) {
-			if (!retry_choice(q))
+			if (!retry_choice(q)) {
+				if (q->p && !q->run_init)
+					printf("true%c\n", '.');
+
 				break;
+			}
 		}
 
 		if (is_variable(q->st.curr_cell)) {
@@ -1300,7 +1305,7 @@ pl_state run_query(query *q)
 	if (q->halt)
 		q->error = false;
 	else if (q->dump_vars && !q->abort && q->status)
-		dump_vars(q);
+		dump_vars(q, false);
 
 	return pl_success;
 }
