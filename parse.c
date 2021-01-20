@@ -3295,7 +3295,7 @@ static bool parser_run(parser *p, const char *src, int dump)
 		return false;
 
 	q->p = p;
-	q->dump_vars = dump;
+	q->do_dump_vars = dump;
 	q->run_init = p->run_init;
 	query_execute(q, p->t);
 	p->m->halt = q->halt;
@@ -3967,7 +3967,7 @@ bool deconsult(prolog *pl, const char *filename)
 
 bool get_halt(prolog *pl) { return pl->m->halt; }
 bool get_status(prolog *pl) { return pl->m->status; }
-bool get_dump_vars(prolog *pl) { return pl->m->dump_vars; }
+bool get_dump_vars(prolog *pl) { return pl->did_dump_vars; }
 int get_halt_code(prolog *pl) { return pl->m->halt_code; }
 
 void set_trace(prolog *pl) { pl->m->trace = true; }

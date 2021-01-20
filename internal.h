@@ -442,7 +442,7 @@ struct query_ {
 	enum q_retry retry;
 	int8_t halt_code;
 	int8_t quoted;
-	bool dump_vars:1;
+	bool do_dump_vars:1;
 	bool status:1;
 	bool resume:1;
 	bool no_tco:1;
@@ -527,7 +527,6 @@ struct module_ {
 	bool use_persist:1;
 	bool loading:1;
 	bool make_public:1;
-	bool dump_vars:1;
 	bool error:1;
 };
 
@@ -545,6 +544,7 @@ struct prolog_ {
 	idx_t pool_offset, pool_size, tab_idx;
 	unsigned varno;
 	uint8_t current_input, current_output, current_error;
+	bool did_dump_vars;
 };
 
 extern idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;

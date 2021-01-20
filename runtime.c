@@ -1142,7 +1142,7 @@ static void dump_vars(query *q, bool partial)
 		fflush(stdout);
 	}
 
-	q->m->dump_vars = any;
+	q->m->pl->did_dump_vars = any;
 }
 
 static bool check_interrupt(query *q)
@@ -1174,10 +1174,18 @@ static bool check_interrupt(query *q)
 static bool check_redo(query *q)
 {
 	int ch = 0;
-	dump_vars(q, true);
+
+	if (q->do_dump_vars && q->cp) {
+		dump_vars(q, true);
+
+		if (!q->m->pl->did_dump_vars)
+			printf("true");
+	}
+
 	fflush(stdout);
 
 	for (;;) {
+		printf(" ");
 		ch = history_getch();
 		//printf("%c\n", ch);
 
@@ -1188,13 +1196,13 @@ static bool check_redo(query *q)
 		}
 
 		if ((ch == 'r') || (ch == ' ') || (ch == ';')) {
-			printf("%c\n", ' ');
+			printf("%c\n", ';');
 			q->retry = QUERY_RETRY;
 			break;
 		}
 
 		if ((ch == '\n') || (ch == 'a')) {
-			printf("%c\n", ' ');
+			printf("%c\n", '.');
 			q->abort = true;
 			return true;
 		}
@@ -1300,7 +1308,7 @@ pl_state run_query(query *q)
 
 	if (q->halt)
 		q->error = false;
-	else if (q->dump_vars && !q->abort && q->status)
+	else if (q->do_dump_vars && !q->abort && q->status)
 		dump_vars(q, false);
 
 	return pl_success;
@@ -1308,7 +1316,7 @@ pl_state run_query(query *q)
 
 pl_state query_execute(query *q, term *t)
 {
-	q->m->dump_vars = false;
+	q->m->pl->did_dump_vars = false;
 	q->st.curr_cell = t->cells;
 	q->st.sp = t->nbr_vars;
 	q->st.curr_frame = 0;

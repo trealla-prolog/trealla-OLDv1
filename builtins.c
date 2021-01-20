@@ -5294,7 +5294,7 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 	print_term(q, stdout, e, q->st.curr_frame, 1);
 	fprintf(stdout, "\n");
 	q->quoted = 1;
-	q->m->dump_vars = 1;
+	q->m->pl->did_dump_vars = true;
 	free(q->exception);
 	q->exception = NULL;
 	q->error = true;
