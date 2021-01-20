@@ -3750,7 +3750,7 @@ module *create_module(prolog *pl, const char *name)
 
 	make_rule(m, "setof(T,G,B) :- "							\
 		"copy_term('$bagof'(T,G,B),TMP_G),"					\
-		"call(TMP_G),"										\
+		"'$call'(TMP_G),"										\
 		"'$bagof'(T,G,TMP_B)=TMP_G,"						\
 		"sort(TMP_B,B).");
 
