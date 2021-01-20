@@ -1,0 +1,55 @@
+{
+  "uid" : "fd49d315fd3410d8",
+  "name" : "sics_set_stream_position_2_06",
+  "historyId" : "predicates/set_stream_position_2/tests.lgt:tests#sics_set_stream_position_2_06",
+  "time" : {
+    "start" : 1611108161000,
+    "stop" : 1611108161000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Success instead of error",
+  "statusTrace" : "",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/set_stream_position_2/tests.lgt"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "fd49d315fd3410d8.json",
+  "parameterValues" : [ ]
+}
