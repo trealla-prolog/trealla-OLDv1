@@ -1233,33 +1233,40 @@ pl_state run_query(query *q)
 		while (!q->st.curr_cell || is_end(q->st.curr_cell)) {
 			if (!resume_frame(q)) {
 				if (q->cp) {
+					int ch = 0;
 					dump_vars(q);
 					fflush(stdout);
-					int ch = history_getch();
-					printf("%c\n", ch);
 
-					while ((ch == 'h') || (ch == '?')) {
-						printf("\nAction (a)bort, (e)xit, (r)edo:\n");
-						fflush(stdout);
+					for (;;) {
 						ch = history_getch();
+						//printf("%c\n", ch);
+
+						if ((ch == 'h') || (ch == '?')) {
+							printf("Action (a)bort, (e)xit, (r)edo:\n");
+							fflush(stdout);
+							continue;
+						}
+
+						if ((ch == 'r') || (ch == ';')) {
+							q->retry = QUERY_RETRY;
+							break;
+						}
+
+						if (ch == 'a') {
+							g_tpl_interrupt = 0;
+							q->abort = true;
+							return pl_success;
+						}
+
+						if (ch == 'e') {
+							signal(SIGINT, NULL);
+							q->halt = true;
+							return pl_success;
+						}
 					}
 
-					if ((ch == 'r') || (ch == ';')) {
-						q->retry = QUERY_RETRY;
+					if ((ch == 'r') || (ch == ';'))
 						break;
-					}
-
-					if (ch == 'a') {
-						g_tpl_interrupt = 0;
-						q->abort = true;
-						return pl_success;
-					}
-
-					if (ch == 'e') {
-						signal(SIGINT, NULL);
-						q->halt = true;
-						return pl_success;
-					}
 				}
 
 				q->status = true;
