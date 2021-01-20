@@ -1188,13 +1188,13 @@ static bool check_redo(query *q)
 		}
 
 		if ((ch == 'r') || (ch == ' ') || (ch == ';')) {
-			printf("%c\n", ';');
+			printf("%c\n", ' ');
 			q->retry = QUERY_RETRY;
 			break;
 		}
 
 		if ((ch == '\n') || (ch == 'a')) {
-			printf("%c\n", '.');
+			printf("%c\n", ' ');
 			q->abort = true;
 			return true;
 		}
@@ -1223,12 +1223,8 @@ pl_state run_query(query *q)
 		}
 
 		if (q->retry) {
-			if (!retry_choice(q)) {
-				if (q->p && !q->run_init)
-					printf("true%c\n", '.');
-
+			if (!retry_choice(q))
 				break;
-			}
 		}
 
 		if (is_variable(q->st.curr_cell)) {
