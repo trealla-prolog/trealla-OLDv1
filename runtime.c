@@ -1171,11 +1171,49 @@ static bool check_interrupt(query *q)
 	}
 }
 
+static bool check_redo(query *q)
+{
+	int ch = 0;
+	dump_vars(q);
+	fflush(stdout);
+
+	for (;;) {
+		ch = history_getch();
+		//printf("%c\n", ch);
+
+		if ((ch == 'h') || (ch == '?')) {
+			printf("Action (a)bort, (e)xit, (r)edo:\n");
+			fflush(stdout);
+			continue;
+		}
+
+		if ((ch == 'r') || (ch == ';')) {
+			q->retry = QUERY_RETRY;
+			break;
+		}
+
+		if (ch == 'a') {
+			g_tpl_interrupt = 0;
+			q->abort = true;
+			return true;
+		}
+
+		if (ch == 'e') {
+			signal(SIGINT, NULL);
+			q->error = q->halt = true;
+			return true;
+		}
+	}
+
+	return false;
+}
+
 pl_state run_query(query *q)
 {
 	q->yielded = false;
+	bool done = false;
 
-	while (!q->error) {
+	while (!done && !q->error) {
 		if (g_tpl_interrupt) {
 			if (check_interrupt(q))
 				return pl_success;
@@ -1241,44 +1279,14 @@ pl_state run_query(query *q)
 		while (!q->st.curr_cell || is_end(q->st.curr_cell)) {
 			if (!resume_frame(q)) {
 				if (q->cp && q->p && !q->run_init) {
-					int ch = 0;
-					dump_vars(q);
-					fflush(stdout);
-
-					for (;;) {
-						ch = history_getch();
-						//printf("%c\n", ch);
-
-						if ((ch == 'h') || (ch == '?')) {
-							printf("Action (a)bort, (e)xit, (r)edo:\n");
-							fflush(stdout);
-							continue;
-						}
-
-						if ((ch == 'r') || (ch == ';')) {
-							q->retry = QUERY_RETRY;
-							break;
-						}
-
-						if (ch == 'a') {
-							g_tpl_interrupt = 0;
-							q->abort = true;
-							return pl_success;
-						}
-
-						if (ch == 'e') {
-							signal(SIGINT, NULL);
-							q->halt = true;
-							return pl_success;
-						}
-					}
-
-					if ((ch == 'r') || (ch == ';'))
+					if (check_redo(q))
+						return pl_success;
+					else
 						break;
 				}
 
-				q->status = true;
-				return pl_success;
+				done = q->status = true;
+				break;
 			}
 
 			q->resume = true;
