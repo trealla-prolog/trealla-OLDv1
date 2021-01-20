@@ -1232,26 +1232,34 @@ pl_state run_query(query *q)
 
 		while (!q->st.curr_cell || is_end(q->st.curr_cell)) {
 			if (!resume_frame(q)) {
-				dump_vars(q);
-				fflush(stdout);
-				int ch = history_getch();
-				printf("%c\n", ch);
+				if (q->cp) {
+					dump_vars(q);
+					fflush(stdout);
+					int ch = history_getch();
+					printf("%c\n", ch);
 
-				if ((ch == 'r') || (ch == ';')) {
-					q->retry = QUERY_RETRY;
-					break;
-				}
+					while ((ch == 'h') || (ch == '?')) {
+						printf("\nAction (a)bort, (e)xit, (r)edo:\n");
+						fflush(stdout);
+						ch = history_getch();
+					}
 
-				if (ch == 'a') {
-					g_tpl_interrupt = 0;
-					q->abort = true;
-					return pl_success;
-				}
+					if ((ch == 'r') || (ch == ';')) {
+						q->retry = QUERY_RETRY;
+						break;
+					}
 
-				if (ch == 'e') {
-					signal(SIGINT, NULL);
-					q->halt = true;
-					return pl_success;
+					if (ch == 'a') {
+						g_tpl_interrupt = 0;
+						q->abort = true;
+						return pl_success;
+					}
+
+					if (ch == 'e') {
+						signal(SIGINT, NULL);
+						q->halt = true;
+						return pl_success;
+					}
 				}
 
 				q->status = true;
