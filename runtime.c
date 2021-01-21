@@ -473,8 +473,8 @@ pl_state make_barrier(query *q)
 	frame *g = GET_FRAME(q->st.curr_frame);
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
-	ch->barrier = true;
 	ch->cgen = g->cgen = ++q->st.cgen;
+	ch->barrier = true;
 	return pl_success;
 }
 
