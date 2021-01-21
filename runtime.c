@@ -1310,6 +1310,8 @@ pl_state run_query(query *q)
 		q->error = false;
 	else if (q->do_dump_vars && !q->abort && q->status)
 		dump_vars(q, false);
+	else
+		q->m->pl->did_dump_vars = false;
 
 	return pl_success;
 }
