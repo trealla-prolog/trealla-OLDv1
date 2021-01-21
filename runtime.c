@@ -284,6 +284,7 @@ bool retry_choice(query *q)
 	q->st = ch->st;
 
 	frame *g = GET_FRAME(q->st.curr_frame);
+	g->cgen = ch->cgen;
 	g->nbr_vars = ch->nbr_vars;
 	g->nbr_slots = ch->nbr_slots;
 	g->any_choices = ch->any_choices;
