@@ -510,20 +510,10 @@ struct module_ {
 	skiplist *index;
 	const char *tmp_filename;
 	struct op_table ops[MAX_USER_OPS+1];
-	int8_t halt_code;
 	char_flags flag;
-
 	unsigned user_ops;
 	bool prebuilt:1;
-	bool halt:1;
-	bool status:1;
-	bool trace:1;
-	bool quiet:1;
 	bool dirty:1;
-	bool opt:1;
-	bool stats:1;
-	bool noindex:1;
-	bool iso_only:1;
 	bool use_persist:1;
 	bool loading:1;
 	bool make_public:1;
@@ -544,7 +534,16 @@ struct prolog_ {
 	idx_t pool_offset, pool_size, tab_idx;
 	unsigned varno;
 	uint8_t current_input, current_output, current_error;
-	bool did_dump_vars;
+	int8_t halt_code;
+	bool halt:1;
+	bool status:1;
+	bool did_dump_vars:1;
+	bool quiet:1;
+	bool opt:1;
+	bool stats:1;
+	bool noindex:1;
+	bool iso_only:1;
+	bool trace:1;
 };
 
 extern idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;

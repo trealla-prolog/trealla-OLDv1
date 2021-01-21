@@ -644,7 +644,7 @@ static void assert_commit(module *m, term *t, clause *r, predicate *h, bool appe
 		}
 
 		if (!h->index && (h->cnt > JUST_IN_TIME_COUNT)
-			&& !m->noindex && !h->is_noindex)
+			&& !m->pl->noindex && !h->is_noindex)
 			reindex_predicate(m, h);
 
 		if (h->index) {
@@ -943,7 +943,7 @@ query *create_query(module *m, bool is_task)
 	if (q) {
 		q->qid = g_query_id++;
 		q->m = m;
-		q->trace = m->trace;
+		q->trace = m->pl->trace;
 		q->flag = m->flag;
 
 		// Allocate these now...
@@ -1664,7 +1664,7 @@ void parser_assign_vars(parser *p, unsigned start, bool rebase)
 		if (p->consulting && !p->do_read_term && (p->vartab.var_used[i] == 1) &&
 			(p->vartab.var_name[i][strlen(p->vartab.var_name[i])-1] != '_') &&
 			(*p->vartab.var_name[i] != '_')) {
-			if (!p->m->quiet)
+			if (!p->m->pl->quiet)
 				fprintf(stdout, "Warning: singleton: %s, line %d\n", p->vartab.var_name[i], (int)p->line_nbr);
 		}
 	}
@@ -3257,7 +3257,7 @@ static void module_purge(module *m)
 		}
 	}
 
-	if (!m->quiet)
+	if (!m->pl->quiet)
 		printf("%% Purge %u deleted rules\n", cnt);
 
 	m->dirty = 0;
@@ -3276,7 +3276,7 @@ static bool parser_run(parser *p, const char *src, int dump)
 	}
 
 	if (p->skip) {
-		p->m->status = 1;
+		p->m->pl->status = 1;
 		return true;
 	}
 
@@ -3298,11 +3298,11 @@ static bool parser_run(parser *p, const char *src, int dump)
 	q->do_dump_vars = dump;
 	q->run_init = p->run_init;
 	query_execute(q, p->t);
-	p->m->halt = q->halt;
-	p->m->halt_code = q->halt_code;
-	p->m->status = q->status;
+	p->m->pl->halt = q->halt;
+	p->m->pl->halt_code = q->halt_code;
+	p->m->pl->status = q->status;
 
-	if (!p->m->quiet && !p->directive && dump && q->m->stats) {
+	if (!p->m->pl->quiet && !p->directive && dump && q->m->pl->stats) {
 		fprintf(stdout,
 			"Goals %llu, Matches %llu, Max frames %u, Max choices %u, Max trails: %u, Backtracks %llu, TCOs:%llu\n",
 			(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
@@ -3340,20 +3340,20 @@ module *module_load_text(module *m, const char *src)
 
 	if (!p->error) {
 		parser_xref_db(p);
-		int save = p->m->quiet;
-		p->m->quiet = true;
-		p->m->halt = false;
+		int save = p->m->pl->quiet;
+		p->m->pl->quiet = true;
+		p->m->pl->halt = false;
 		p->directive = true;
 
 		if (p->run_init == true) {
 			p->command = true;
 
 			if (parser_run(p, "(:- initialization(G)), retract((:- initialization(_))), G", 0))
-				p->m->halt = true;
+				p->m->pl->halt = true;
 		}
 
 		p->command = p->directive = false;
-		p->m->quiet = save;
+		p->m->pl->quiet = save;
 	}
 
 	m = p->m;
@@ -3394,19 +3394,19 @@ bool module_load_fp(module *m, FILE *fp, const char *filename)
 
 		if (!p->error && !p->already_loaded) {
 			parser_xref_db(p);
-			int save = p->m->quiet;
-			p->m->quiet = true;
+			int save = p->m->pl->quiet;
+			p->m->pl->quiet = true;
 			p->directive = true;
 
 			if (p->run_init == true) {
 				p->command = true;
 
 				if (parser_run(p, "(:- initialization(G)), retract((:- initialization(_))), G", 0))
-					p->m->halt = true;
+					p->m->pl->halt = true;
 			}
 
 			p->command = p->directive = false;
-			p->m->quiet = save;
+			p->m->pl->quiet = save;
 		}
 
 		ok = !p->error;
@@ -3965,16 +3965,16 @@ bool deconsult(prolog *pl, const char *filename)
 	return true;
 }
 
-bool get_halt(prolog *pl) { return pl->m->halt; }
-bool get_status(prolog *pl) { return pl->m->status; }
+bool get_halt(prolog *pl) { return pl->halt; }
+bool get_status(prolog *pl) { return pl->status; }
 bool get_dump_vars(prolog *pl) { return pl->did_dump_vars; }
-int get_halt_code(prolog *pl) { return pl->m->halt_code; }
+int get_halt_code(prolog *pl) { return pl->halt_code; }
 
-void set_trace(prolog *pl) { pl->m->trace = true; }
-void set_quiet(prolog *pl) { pl->m->quiet = true; }
-void set_stats(prolog *pl) { pl->m->stats = true; }
-void set_noindex(prolog *pl) { pl->m->noindex = true; }
-void set_opt(prolog *pl, int level) { pl->m->opt = level; }
+void set_trace(prolog *pl) { pl->trace = true; }
+void set_quiet(prolog *pl) { pl->quiet = true; }
+void set_stats(prolog *pl) { pl->stats = true; }
+void set_noindex(prolog *pl) { pl->noindex = true; }
+void set_opt(prolog *pl, int level) { pl->opt = level; }
 
 bool pl_eval(prolog *pl, const char *src)
 {

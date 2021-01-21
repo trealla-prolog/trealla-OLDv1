@@ -339,7 +339,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	const choice *ch = q->choices + curr_choice;
 	q->st.sp = ch->st.sp;
 
-	if (!q->no_tco && q->m->opt) {
+	if (!q->no_tco && q->m->pl->opt) {
 		frame *new_g = GET_FRAME(q->st.fp);
 
 		for (unsigned i = 0; i < nbr_vars; i++) {
