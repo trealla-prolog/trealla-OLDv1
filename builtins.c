@@ -4988,7 +4988,7 @@ static USE_RESULT pl_state fn_iso_assertz_1(query *q)
 
 USE_RESULT pl_state fn_call_0(query *q, cell *p1)
 {
-	printf("*** here call/0\n");
+	//printf("*** here call/0\n");
 
 	p1 = deref(q, p1, q->st.curr_frame);
 	idx_t p1_ctx = q->latest_ctx;
@@ -5207,7 +5207,7 @@ static USE_RESULT pl_state fn_iso_negation_1(query *q)
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_iso_cut_0, 0, 0);
-	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
 	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;

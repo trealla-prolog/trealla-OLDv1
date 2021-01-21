@@ -473,8 +473,9 @@ pl_state make_barrier(query *q)
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 	ch->barrier = true;
+	ch->cgen = ++q->st.cgen;
 	frame *g = GET_FRAME(q->st.curr_frame);
-	g->cgen = ++q->st.cgen;
+	g->cgen = ch->cgen;
 	return pl_success;
 }
 
@@ -502,7 +503,7 @@ void cut_me(query *q)
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
 
-		//printf("*** ch->cgen=%u, g->cgen=%u, q->cgen=%u\n", ch->cgen, g->cgen, q->cgen);
+		//printf("*** ch->cgen=%u, g->cgen=%u, q->cgen=%u\n", ch->cgen, g->cgen, q->st.cgen);
 
 		if (ch->cgen < g->cgen)
 			break;
