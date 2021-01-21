@@ -5001,9 +5001,6 @@ USE_RESULT pl_state fn_call_0(query *q, cell *p1)
 	if ((tmp2 = check_body_callable(q->m->p, p1)) != NULL)
 		return throw_error(q, p1, "type_error", "callable");
 
-	if (q->retry)
-		return pl_failure;
-
 	cell *tmp;
 
 	if (p1_ctx != q->st.curr_frame) {
@@ -5015,16 +5012,12 @@ USE_RESULT pl_state fn_call_0(query *q, cell *p1)
 	idx_t nbr_cells = 0 + p1->nbr_cells;
 	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
-	may_error(make_barrier(q));
 	return pl_success;
 }
 
 static USE_RESULT pl_state fn_iso_call_1(query *q)
 {
 	printf("*** here call/1\n");
-
-	if (q->retry)
-		return pl_failure;
 
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp3;
@@ -5046,7 +5039,6 @@ static USE_RESULT pl_state fn_iso_call_1(query *q)
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
-	may_error(make_barrier(q));
 	return pl_success;
 }
 

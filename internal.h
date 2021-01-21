@@ -384,12 +384,11 @@ typedef struct {
 typedef struct {
 	state st;
 	uint64_t pins;
-	idx_t v1, v2, cgen, overflow;
+	idx_t v1, v2, cgen, orig_cgen, overflow;
 	uint16_t nbr_vars, nbr_slots;
 	bool any_choices:1;
 	bool catchme1:1;
 	bool catchme2:1;
-	bool barrier:1;
 } choice;
 
 typedef struct arena_ arena;
