@@ -587,6 +587,7 @@ clause *find_in_db(module *m, uuid *ref);
 unsigned get_op(module *m, const char *name, unsigned *specifier, bool *userop, bool hint_prefix);
 bool set_op(module *m, const char *name, unsigned specifier, unsigned priority);
 USE_RESULT pl_state make_choice(query *q);
+USE_RESULT pl_state make_barrier(query *q);
 USE_RESULT pl_state make_catcher(query *q, enum q_retry type);
 USE_RESULT pl_state fn_iso_cut_0(query *q);
 void cut_me(query *q);

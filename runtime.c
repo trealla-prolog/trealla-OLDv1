@@ -463,6 +463,17 @@ pl_state make_choice(query *q)
 	return pl_success;
 }
 
+// A barrier is used when making a call, it
+// sets a new cgen so that cuts are contained
+
+pl_state make_barrier(query *q)
+{
+	may_error(make_choice(q));
+	frame *g = GET_FRAME(q->st.curr_frame);
+	g->cgen = ++q->st.cgen;
+	return pl_success;
+}
+
 pl_state make_catcher(query *q, enum q_retry retry)
 {
 	may_error(make_choice(q));
@@ -510,8 +521,15 @@ static void follow_me(query *q)
 {
 	q->st.curr_cell += q->st.curr_cell->nbr_cells;
 
-	while (q->st.curr_cell && is_end(q->st.curr_cell))
+	while (q->st.curr_cell && is_end(q->st.curr_cell)) {
+		// Call return must reset the cgen
+		if (q->st.curr_cell->val_ptr) {
+			frame *g = GET_FRAME(q->st.curr_frame);
+			g->cgen = q->st.curr_cell->cgen;
+		}
+
 		q->st.curr_cell = q->st.curr_cell->val_ptr;
+	}
 }
 
 static bool resume_frame(query *q)
