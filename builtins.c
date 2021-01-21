@@ -4988,6 +4988,7 @@ static USE_RESULT pl_state fn_iso_assertz_1(query *q)
 
 USE_RESULT pl_state call_me(query *q, cell *p1)
 {
+	printf("*** here call_me\n");
 	p1 = deref(q, p1, q->st.curr_frame);
 	idx_t p1_ctx = q->latest_ctx;
 
@@ -5015,6 +5016,11 @@ USE_RESULT pl_state call_me(query *q, cell *p1)
 
 static USE_RESULT pl_state fn_iso_call_1(query *q)
 {
+	printf("*** here call/1\n");
+
+	if (q->retry)
+		return pl_failure;
+
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp3;
 
@@ -5035,11 +5041,17 @@ static USE_RESULT pl_state fn_iso_call_1(query *q)
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
+	may_error(make_barrier(q));
 	return pl_success;
 }
 
 static USE_RESULT pl_state fn_iso_call_n(query *q)
 {
+	printf("*** here call/n\n");
+
+	if (q->retry)
+		return pl_failure;
+
 	GET_FIRST_ARG(p1,callable);
 	clone_to_tmp(q, p1);
 	unsigned arity = p1->arity;
@@ -5092,6 +5104,7 @@ static USE_RESULT pl_state fn_iso_call_n(query *q)
 		return throw_error(q, tmp2, "type_error", "callable");
 
 	q->st.curr_cell = tmp;
+	may_error(make_barrier(q));
 	return pl_success;
 }
 
