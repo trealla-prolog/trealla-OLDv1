@@ -389,6 +389,7 @@ typedef struct {
 	bool any_choices:1;
 	bool catchme1:1;
 	bool catchme2:1;
+	bool barrier:1;
 } choice;
 
 typedef struct arena_ arena;

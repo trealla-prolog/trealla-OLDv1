@@ -470,6 +470,9 @@ pl_state make_choice(query *q)
 pl_state make_barrier(query *q)
 {
 	may_error(make_choice(q));
+	idx_t curr_choice = q->cp - 1;
+	choice *ch = q->choices + curr_choice;
+	ch->barrier = true;
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g->cgen = ++q->st.cgen;
 	return pl_success;
@@ -1292,6 +1295,17 @@ pl_state run_query(query *q)
 
 		while (!q->st.curr_cell || is_end(q->st.curr_cell)) {
 			if (!resume_frame(q)) {
+
+				while (q->cp) {
+					idx_t curr_choice = q->cp - 1;
+					choice *ch = q->choices + curr_choice;
+
+					if (!ch->barrier)
+						break;
+
+					q->cp--;
+				}
+
 				if (q->cp && q->p && !q->run_init) {
 					if (check_redo(q))
 						return pl_success;
