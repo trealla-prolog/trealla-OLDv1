@@ -1241,7 +1241,7 @@ pl_state run_query(query *q)
 		}
 
 		if (is_variable(q->st.curr_cell)) {
-			if (!call_me(q, q->st.curr_cell))
+			if (!fn_call_0(q, q->st.curr_cell))
 				continue;
 		}
 
