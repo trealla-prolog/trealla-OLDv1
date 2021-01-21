@@ -534,12 +534,11 @@ struct prolog_ {
 	idx_t pool_offset, pool_size, tab_idx;
 	unsigned varno;
 	uint8_t current_input, current_output, current_error;
-	int8_t halt_code;
+	int8_t halt_code, opt;
 	bool halt:1;
 	bool status:1;
 	bool did_dump_vars:1;
 	bool quiet:1;
-	bool opt:1;
 	bool stats:1;
 	bool noindex:1;
 	bool iso_only:1;
