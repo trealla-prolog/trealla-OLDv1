@@ -302,7 +302,7 @@ static void make_frame(query *q, unsigned nbr_vars, bool last_match)
 	g = GET_FRAME(new_frame);
 	g->prev_frame = q->st.curr_frame;
 	g->curr_cell = q->st.curr_cell;
-	g->cgen = q->cgen;
+	g->cgen = ++q->st.cgen;
 	g->overflow = 0;
 	g->any_choices = false;
 	g->did_cut = false;
@@ -388,22 +388,21 @@ static void commit_me(query *q, term *t)
 	bool last_match = !q->st.curr_clause->next || t->first_cut;
 	bool recursive = (last_match || g->did_cut) && (q->st.curr_cell->flags&FLAG_TAIL_REC);
 	bool tco = recursive && !g->any_choices && check_slots(q, g, t);
-
-	if (last_match) {
-		idx_t curr_choice = q->cp - 1;
-		choice *ch = q->choices + curr_choice;
-		sl_done(ch->st.iter);
-		drop_choice(q);
-	} else {
-		idx_t curr_choice = q->cp - 1;
-		choice *ch = q->choices + curr_choice;
-		ch->st.curr_clause = q->st.curr_clause;
-	}
+	idx_t curr_choice = q->cp - 1;
+	choice *ch = q->choices + curr_choice;
 
 	if (tco && q->cp)
 		reuse_frame(q, t->nbr_vars);
 	else
 		make_frame(q, t->nbr_vars, last_match);
+
+	if (last_match) {
+		sl_done(ch->st.iter);
+		drop_choice(q);
+	} else {
+		ch->st.curr_clause = q->st.curr_clause;
+		ch->cgen = g->cgen;
+	}
 
 	if (t->cut_only)
 		q->st.curr_cell = NULL;
@@ -415,6 +414,8 @@ static void commit_me(query *q, term *t)
 
 void stash_me(query *q, term *t, bool last_match)
 {
+	idx_t cgen = ++q->st.cgen;
+
 	if (last_match)
 		drop_choice(q);
 	else {
@@ -423,6 +424,7 @@ void stash_me(query *q, term *t, bool last_match)
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
 		ch->st.curr_clause2 = q->st.curr_clause2;
+		ch->cgen = cgen;
 	}
 
 	unsigned nbr_vars = t->nbr_vars;
@@ -430,7 +432,7 @@ void stash_me(query *q, term *t, bool last_match)
 	frame *g = GET_FRAME(new_frame);
 	g->prev_frame = q->st.curr_frame;
 	g->curr_cell = NULL;
-	g->cgen = q->cgen;
+	g->cgen = cgen;
 	g->overflow = 0;
 	g->any_choices = false;
 	g->did_cut = false;
@@ -443,31 +445,21 @@ pl_state make_choice(query *q)
 	may_error(check_frame(q));
 	may_error(check_choice(q));
 
+	frame *g = GET_FRAME(q->st.curr_frame);
 	idx_t curr_choice = q->cp++;
 	choice *ch = q->choices + curr_choice;
 	ch->st = q->st;
-	ch->cgen = ++q->cgen;
-	ch->local_cut = false;
+	ch->cgen = g->cgen;
 	ch->catchme1 = false;
 	ch->catchme2 = false;
 	ch->pins = 0;
 
-	frame *g = GET_FRAME(q->st.curr_frame);
 	may_error(check_slot(q, g->nbr_vars));
 	ch->nbr_vars = g->nbr_vars;
 	ch->nbr_slots = g->nbr_slots;
 	ch->any_choices = g->any_choices;
 	ch->overflow = g->overflow;
 
-	return pl_success;
-}
-
-pl_state make_barrier(query *q)
-{
-	may_error(make_choice(q));
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
-	ch->local_cut = true;
 	return pl_success;
 }
 
@@ -485,13 +477,11 @@ pl_state make_catcher(query *q, enum q_retry retry)
 	return pl_success;
 }
 
-void cut_me(query *q, bool local_cut)
+void cut_me(query *q)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
-	g->any_choices = !local_cut;	// ???
-
-	if (!local_cut)
-		g->did_cut = true;
+	g->any_choices = true;	// ???
+	g->did_cut = true;
 
 	while (q->cp) {
 		idx_t curr_choice = q->cp - 1;
@@ -510,10 +500,6 @@ void cut_me(query *q, bool local_cut)
 
 		sl_done(ch->st.iter);
 		q->cp--;
-
-		if ((ch->local_cut && local_cut) &&
-			(ch->cgen == q->st.curr_cell->cgen))
-			break;
 	}
 
 	if (!q->cp)
