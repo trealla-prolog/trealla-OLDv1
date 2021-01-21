@@ -3588,7 +3588,7 @@ module *create_module(prolog *pl, const char *name)
 	m->pl = pl;
 	m->filename = strdup("./");
 	m->name = strdup(name);
-	m->flag.unknown = 1;
+	m->flag.unknown = UNK_ERROR;
 	m->flag.double_quote_chars = true;
 	m->flag.character_escapes = true;
 	m->user_ops = MAX_USER_OPS;

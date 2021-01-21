@@ -5862,9 +5862,9 @@ static USE_RESULT pl_state fn_iso_current_prolog_flag_2(query *q)
 	} else if (!strcmp(GET_STR(p1), "unknown")) {
 		cell tmp;
 		make_literal(&tmp,
-			q->m->flag.unknown == 1 ? index_from_pool(q->m->pl, "error") :
-			q->m->flag.unknown == 2 ? index_from_pool(q->m->pl, "warning") :
-			q->m->flag.unknown == 3 ? index_from_pool(q->m->pl, "changeable") :
+			q->m->flag.unknown == UNK_ERROR ? index_from_pool(q->m->pl, "error") :
+			q->m->flag.unknown == UNK_WARNING ? index_from_pool(q->m->pl, "warning") :
+			q->m->flag.unknown == UNK_CHANGEABLE ? index_from_pool(q->m->pl, "changeable") :
 			index_from_pool(q->m->pl, "fail"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
@@ -5969,13 +5969,13 @@ static USE_RESULT pl_state fn_iso_set_prolog_flag_2(query *q)
 		}
 	} else if (!strcmp(GET_STR(p1), "unknown")) {
 		if (!strcmp(GET_STR(p2), "fail")) {
-			q->m->flag.unknown = 0;
+			q->m->flag.unknown = UNK_FAIL;
 		} else if (!strcmp(GET_STR(p2), "error")) {
-			q->m->flag.unknown = 1;
+			q->m->flag.unknown = UNK_ERROR;
 		} else if (!strcmp(GET_STR(p2), "warning")) {
-			q->m->flag.unknown = 2;
+			q->m->flag.unknown = UNK_WARNING;
 		} else if (!strcmp(GET_STR(p2), "changeable")) {
-			q->m->flag.unknown = 3;
+			q->m->flag.unknown = UNK_CHANGEABLE;
 		}
 	} else if (!strcmp(GET_STR(p1),"bounded")
 		|| !strcmp(GET_STR(p1),"max_arity")

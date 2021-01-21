@@ -402,8 +402,10 @@ struct arena_ {
 };
 
 enum q_retry { QUERY_OK=0, QUERY_RETRY=1, QUERY_EXCEPTION=2 };
+enum unknowns { UNK_FAIL=0, UNK_ERROR=1, UNK_WARNING=2, UNK_CHANGEABLE=3 };
 
 typedef struct char_flags_ {
+	enum unknowns unknown;
 	bool double_quote_codes:1;
 	bool double_quote_chars:1;
 	bool double_quote_atom:1;
@@ -412,7 +414,6 @@ typedef struct char_flags_ {
 	bool rational_syntax_natural:1;
 	bool prefer_rationals:1;
 	bool debug:1;
-	unsigned unknown:2;		// FIXME: enum
 } char_flags;
 
 struct query_ {
