@@ -451,6 +451,7 @@ pl_state make_choice(query *q)
 	choice *ch = q->choices + curr_choice;
 	ch->st = q->st;
 	ch->orig_cgen = ch->cgen = g->cgen;
+	ch->barrier = false;
 	ch->catchme1 = false;
 	ch->catchme2 = false;
 	ch->pins = 0;
