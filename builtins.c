@@ -738,7 +738,13 @@ static USE_RESULT pl_state fn_iso_ground_1(query *q)
 
 USE_RESULT pl_state fn_iso_cut_0(query *q)
 {
-	cut_me(q);
+	cut_me(q, false);
+	return pl_success;
+}
+
+USE_RESULT pl_state fn_local_cut_0(query *q)
+{
+	cut_me(q, true);
 	return pl_success;
 }
 
@@ -5142,7 +5148,7 @@ static USE_RESULT pl_state fn_iso_ifthen_2(query *q)
 	GET_NEXT_ARG(p2,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_iso_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
@@ -5162,7 +5168,7 @@ static USE_RESULT pl_state do_ifthenelse(query *q, cell *p1, cell *p2, cell *p3)
 
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_iso_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
@@ -5206,7 +5212,7 @@ static USE_RESULT pl_state fn_iso_negation_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_iso_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
 	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
@@ -5222,7 +5228,7 @@ static USE_RESULT pl_state fn_iso_once_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_iso_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
@@ -5237,7 +5243,7 @@ static USE_RESULT pl_state fn_ignore_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_iso_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
@@ -6302,7 +6308,7 @@ static USE_RESULT pl_state fn_iso_bagof_3(query *q)
 		init_queuen(q);
 		free(q->tmpq[q->st.qnbr]);
 		q->tmpq[q->st.qnbr] = NULL;
-		cut_me(q);
+		cut_me(q, false);
 		return pl_failure;
 	}
 
@@ -10965,7 +10971,9 @@ static const struct builtins g_iso_funcs[] =
 	{",", 2, NULL, NULL},
 	//{"call", 1, NULL, NULL},
 
+	{"!", 0, fn_iso_cut_0, NULL},
 	{":", 2, fn_iso_invoke_2, NULL},
+	{"=..", 2, fn_iso_univ_2, NULL},
 	{"->", 2, fn_iso_ifthen_2, NULL},
 	{";", 2, fn_iso_disjunction_2, NULL},
 	{"\\+", 1, fn_iso_negation_1, NULL},
@@ -10999,12 +11007,10 @@ static const struct builtins g_iso_funcs[] =
 	{"atom_codes", 2, fn_iso_atom_codes_2, NULL},
 	{"number_chars", 2, fn_iso_number_chars_2, NULL},
 	{"number_codes", 2, fn_iso_number_codes_2, NULL},
-	{"!", 0, fn_iso_cut_0, NULL},
 	{"clause", 2, fn_iso_clause_2, NULL},
 	{"length", 2, fn_iso_length_2, NULL},
 	{"arg", 3, fn_iso_arg_3, NULL},
 	{"functor", 3, fn_iso_functor_3, NULL},
-	{"=..", 2, fn_iso_univ_2, NULL},
 	{"copy_term", 2, fn_iso_copy_term_2, NULL},
 	{"term_variables", 2, fn_iso_term_variables_2, NULL},
 	{"atom_length", 2, fn_iso_atom_length_2, NULL},

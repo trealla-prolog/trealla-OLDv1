@@ -493,7 +493,7 @@ pl_state make_catcher(query *q, enum q_retry retry)
 	return pl_success;
 }
 
-void cut_me(query *q)
+void cut_me(query *q, bool local_cut)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g->any_choices = true;	// ???
@@ -504,6 +504,9 @@ void cut_me(query *q)
 		choice *ch = q->choices + curr_choice;
 
 		//printf("*** ch->cgen=%u, g->cgen=%u, q->cgen=%u\n", ch->cgen, g->cgen, q->st.cgen);
+
+		if (!local_cut && ch->barrier && (ch->cgen == g->cgen))
+			break;
 
 		if (ch->cgen < g->cgen)
 			break;
