@@ -5023,13 +5023,6 @@ USE_RESULT pl_state fn_call_0(query *q, cell *p1)
 
 static USE_RESULT pl_state fn_iso_call_1(query *q)
 {
-	//printf("*** here call/1\n");
-
-	GET_FIRST_RAW_ARG(p1_raw,any);
-
-	if (is_variable(p1_raw))
-		return fn_call_0(q, p1_raw);
-
 	if (q->retry)
 		return pl_success;
 
