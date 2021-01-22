@@ -530,10 +530,13 @@ static void follow_me(query *q)
 	q->st.curr_cell += q->st.curr_cell->nbr_cells;
 
 	while (q->st.curr_cell && is_end(q->st.curr_cell)) {
-		// Call return must reset the cgen
+		// End return must reset the curr_cell
 		if (q->st.curr_cell->val_ptr) {
-			frame *g = GET_FRAME(q->st.curr_frame);
-			g->cgen = q->st.curr_cell->cgen;
+			// Call return must reset the cgen
+			if (q->st.curr_cell->cgen) {
+				frame *g = GET_FRAME(q->st.curr_frame);
+				g->cgen = q->st.curr_cell->cgen;
+			}
 		}
 
 		q->st.curr_cell = q->st.curr_cell->val_ptr;

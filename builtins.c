@@ -180,14 +180,20 @@ void make_end(cell *tmp)
 	tmp->arity = tmp->flags = 0;
 	tmp->match = NULL;
 	tmp->val_ptr = NULL;
+	tmp->cgen = 0;
 }
 
-static void make_end_return(query *q, cell *tmp, cell *c)
+static void make_end_return(cell *tmp, cell *c)
 {
 	make_end(tmp);
+	tmp->val_ptr = c + c->nbr_cells;
+}
+
+static void make_call_return(query *q, cell *tmp, cell *c)
+{
+	make_end_return(tmp, c);
 	frame *g = GET_FRAME(q->st.curr_frame);
 	tmp->cgen = g->cgen;
-	tmp->val_ptr = c + c->nbr_cells;
 }
 
 static void make_literal(cell *tmp, idx_t offset)
@@ -5019,7 +5025,7 @@ USE_RESULT pl_state fn_call_0(query *q, cell *p1)
 		tmp = clone_to_heap(q, false, p1, 1);
 
 	idx_t nbr_cells = 0 + p1->nbr_cells;
-	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
+	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -5048,7 +5054,7 @@ static USE_RESULT pl_state fn_iso_call_1(query *q)
 
 	cell *tmp = clone_to_heap(q, true, p1, 1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
+	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -5104,7 +5110,7 @@ static USE_RESULT pl_state fn_iso_call_n(query *q)
 	}
 
 	cell *tmp = clone_to_heap(q, true, tmp2, 1);
-	make_end_return(q, tmp+1+tmp2->nbr_cells, q->st.curr_cell);
+	make_call_return(q, tmp+1+tmp2->nbr_cells, q->st.curr_cell);
 	cell *tmp3;
 
 	if ((tmp3 = check_body_callable(q->m->p, tmp2)) != NULL)
@@ -5129,7 +5135,7 @@ static USE_RESULT pl_state fn_iso_invoke_2(query *q)
 	idx_t nbr_cells = 1;
 	tmp[nbr_cells].match = h;
 	nbr_cells += p2->nbr_cells;
-	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -5145,7 +5151,7 @@ static USE_RESULT pl_state fn_iso_ifthen_2(query *q)
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
-	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
+	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -5156,7 +5162,7 @@ static USE_RESULT pl_state do_ifthenelse(query *q, cell *p1, cell *p2, cell *p3)
 	if (q->retry) {
 		cell *tmp = clone_to_heap(q, true, p3, 1);
 		idx_t nbr_cells = 1 + p3->nbr_cells;
-		make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
+		make_end_return(tmp+nbr_cells, q->st.curr_cell);
 		q->st.curr_cell = tmp;
 		return pl_success;
 	}
@@ -5165,8 +5171,8 @@ static USE_RESULT pl_state do_ifthenelse(query *q, cell *p1, cell *p2, cell *p3)
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
-	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
-	may_error(make_barrier(q));
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	may_error(make_choice(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -5186,15 +5192,15 @@ static USE_RESULT pl_state fn_iso_disjunction_2(query *q)
 	if (q->retry) {
 		cell *tmp = clone_to_heap(q, true, p2, 1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
-		make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
+		make_end_return(tmp+nbr_cells, q->st.curr_cell);
 		q->st.curr_cell = tmp;
 		return pl_success;
 	}
 
 	cell *tmp = clone_to_heap(q, true, p1, 1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
-	may_error(make_barrier(q));
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	may_error(make_choice(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -5209,7 +5215,7 @@ static USE_RESULT pl_state fn_iso_negation_1(query *q)
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
-	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
+	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -5224,7 +5230,7 @@ static USE_RESULT pl_state fn_iso_once_1(query *q)
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
-	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
+	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -5239,7 +5245,7 @@ static USE_RESULT pl_state fn_ignore_1(query *q)
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
-	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
+	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -5261,7 +5267,7 @@ static USE_RESULT pl_state fn_iso_catch_3(query *q)
 	if (q->retry == QUERY_EXCEPTION) {
 		q->retry = QUERY_OK;
 		cell *tmp = clone_to_heap(q, true, p3, 1);
-		make_end_return(q, tmp+1+p3->nbr_cells, q->st.curr_cell);
+		make_end_return(tmp+1+p3->nbr_cells, q->st.curr_cell);
 		may_error(make_catcher(q, QUERY_EXCEPTION));
 		q->st.curr_cell = tmp;
 		return pl_success;
@@ -5273,7 +5279,7 @@ static USE_RESULT pl_state fn_iso_catch_3(query *q)
 	// First time through? Try the primary goal...
 
 	cell *tmp = clone_to_heap(q, true, p1, 1);
-	make_end_return(q, tmp+1+p1->nbr_cells, q->st.curr_cell);
+	make_end_return(tmp+1+p1->nbr_cells, q->st.curr_cell);
 	may_error(make_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -6806,7 +6812,7 @@ static USE_RESULT pl_state fn_time_1(query *q)
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_elapsed_s, fn_sys_elapsed_0, 0, 0);
-	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -10467,7 +10473,7 @@ static USE_RESULT pl_state fn_limit_2(query *q)
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_lt_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
 	make_int(tmp+nbr_cells++, p1->val_num);
-	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -10492,7 +10498,7 @@ static USE_RESULT pl_state fn_offset_2(query *q)
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_gt_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
 	make_int(tmp+nbr_cells++, p1->val_num);
-	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -10501,7 +10507,7 @@ void call_attrs(query *q, cell *attrs)
 {
 	cell *tmp = clone_to_heap(q, true, attrs, 1);
 	idx_t nbr_cells = 1 + attrs->nbr_cells;
-	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 }
 
@@ -10520,7 +10526,7 @@ static USE_RESULT pl_state fn_freeze_2(query *q)
 
 	cell *tmp = clone_to_heap(q, true, p2, 1);
 	idx_t nbr_cells = 1 + p2->nbr_cells;
-	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -10609,7 +10615,7 @@ static USE_RESULT pl_state fn_call_nth_2(query *q)
 	if (is_variable(p2)) {
 		cell *tmp = clone_to_heap(q, true, p1, 1);
 		idx_t nbr_cells = 1 + p1->nbr_cells;
-		make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
+		make_end_return(tmp+nbr_cells, q->st.curr_cell);
 		q->st.curr_cell = tmp;
 		return pl_success;
 	}
@@ -10619,7 +10625,7 @@ static USE_RESULT pl_state fn_call_nth_2(query *q)
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_ne_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
 	make_int(tmp+nbr_cells++, p2->val_num);
-	make_end_return(q, tmp+nbr_cells, q->st.curr_cell);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
