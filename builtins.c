@@ -10975,7 +10975,7 @@ static const struct builtins g_iso_funcs[] =
 	{"once", 1, fn_iso_once_1, NULL},
 	{"throw", 1, fn_iso_throw_1, NULL},
 	{"$catch", 3, fn_iso_catch_3, NULL},
-	{"call", 1, fn_iso_call_1, NULL},
+	{"$call", 1, fn_iso_call_1, NULL},
 	{"$call", 2, fn_iso_call_n, NULL},
 	{"$call", 3, fn_iso_call_n, NULL},
 	{"$call", 4, fn_iso_call_n, NULL},
