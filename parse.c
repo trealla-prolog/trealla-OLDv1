@@ -3847,20 +3847,20 @@ module *create_module(prolog *pl, const char *name)
 	// phrase...
 
 	make_rule(m, "phrase_from_file(P, Filename) :- "		\
-		"open(Filename, read, Str, [mmap(Ms)]),"			\
-		"copy_term(P, P2), P2=P,"							\
-		"phrase(P2, Ms, []),"								\
-		"close(Str).");
+		" open(Filename, read, Str, [mmap(Ms)]),"			\
+		" copy_term(P, P2), P2=P,"							\
+		" phrase(P2, Ms, []),"								\
+		" close(Str).");
 
 	make_rule(m, "phrase_from_file(P, Filename, Opts) :- "	\
-		"open(Filename, read, Str, [mmap(Ms)|Opts])," 		\
-		"copy_term(P, P2), P2=P,"							\
-		"phrase(P2, Ms, []),"								\
-		"close(Str).");
+		" open(Filename, read, Str, [mmap(Ms)|Opts])," 		\
+		" copy_term(P, P2), P2=P,"							\
+		" phrase(P2, Ms, []),"								\
+		" close(Str).");
 
 	make_rule(m, "'$append'([], L, L).");
 	make_rule(m, "'$append'([H|T], L, [H|R]) :- "			\
-		"'$append'(T, L, R).");
+		" '$append'(T, L, R).");
 
 	make_rule(m, "phrase(GRBody, S0) :-"					\
 		"phrase(GRBody, S0, [])."							\
@@ -3870,7 +3870,7 @@ module *create_module(prolog *pl, const char *name)
 		" ; dcg_constr(GRBody) -> phrase_(GRBody, S0, S)"	\
 		" ; functor(GRBody, _, _) -> call(GRBody, S0, S)"	\
 		" ; throw(error(type_error(callable, GRBody), phrase/3))" \
-		")."												\
+		" )."												\
 		"phrase_([], S, S)."								\
 		"phrase_(!, S, S)."									\
 		"phrase_((A, B), S0, S) :-"							\
