@@ -180,7 +180,7 @@ void make_end(cell *tmp)
 	tmp->arity = tmp->flags = 0;
 	tmp->match = NULL;
 	tmp->val_ptr = NULL;
-	tmp->cgen = 0;
+	tmp->cgen = ERR_IDX;
 }
 
 static void make_end_return(cell *tmp, cell *c)

@@ -535,7 +535,7 @@ static void follow_me(query *q)
 		// End return must reset the curr_cell
 		if (q->st.curr_cell->val_ptr) {
 			// Call return must reset the cgen
-			if (q->st.curr_cell->cgen) {
+			if (q->st.curr_cell->cgen != ERR_IDX) {
 				frame *g = GET_FRAME(q->st.curr_frame);
 				g->cgen = q->st.curr_cell->cgen;
 			}
