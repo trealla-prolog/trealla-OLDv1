@@ -3764,7 +3764,9 @@ module *create_module(prolog *pl, const char *name)
 	// calln...
 
 	make_rule(m, "call(G) :- "								\
-		"'$call'(G).");
+		"copy_term('$call'(G),TMP_G),"						\
+		"'$call'(TMP_G),"									\
+		"'$call'(G)=TMP_G.");
 
 	make_rule(m, "call(G,P1) :- "							\
 		"copy_term('$call'(G,P1),TMP_G),"					\

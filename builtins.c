@@ -5003,7 +5003,7 @@ USE_RESULT pl_state fn_call_0(query *q, cell *p1)
 	//printf("*** here call/0\n");
 
 	if (q->retry)
-		return pl_success;
+		return pl_failure;
 
 	p1 = deref(q, p1, q->st.curr_frame);
 	idx_t p1_ctx = q->latest_ctx;
@@ -5034,7 +5034,7 @@ USE_RESULT pl_state fn_call_0(query *q, cell *p1)
 static USE_RESULT pl_state fn_iso_call_1(query *q)
 {
 	if (q->retry)
-		return pl_success;
+		return pl_failure;
 
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp3;
@@ -5152,7 +5152,7 @@ static USE_RESULT pl_state fn_iso_ifthen_2(query *q)
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
-	may_error(make_choice(q));
+	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -5172,7 +5172,7 @@ static USE_RESULT pl_state do_ifthenelse(query *q, cell *p1, cell *p2, cell *p3)
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
-	may_error(make_choice(q));
+	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
