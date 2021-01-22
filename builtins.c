@@ -4999,7 +4999,6 @@ USE_RESULT pl_state fn_call_0(query *q, cell *p1)
 	if (q->retry)
 		return pl_success;
 
-
 	p1 = deref(q, p1, q->st.curr_frame);
 	idx_t p1_ctx = q->latest_ctx;
 
