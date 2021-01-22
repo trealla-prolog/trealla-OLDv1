@@ -394,8 +394,10 @@ static void commit_me(query *q, term *t)
 
 	if (tco && q->cp)
 		reuse_frame(q, t->nbr_vars);
-	else
+	else {
 		make_frame(q, t->nbr_vars, last_match);
+		g = GET_FRAME(q->st.curr_frame);
+	}
 
 	if (last_match) {
 		sl_done(ch->st.iter);
