@@ -5062,9 +5062,6 @@ static USE_RESULT pl_state fn_iso_call_1(query *q)
 
 static USE_RESULT pl_state fn_iso_call_n(query *q)
 {
-	if (q->retry)
-		return pl_success;
-
 	GET_FIRST_ARG(p1,callable);
 	clone_to_tmp(q, p1);
 	unsigned arity = p1->arity;
@@ -5116,7 +5113,6 @@ static USE_RESULT pl_state fn_iso_call_n(query *q)
 	if ((tmp3 = check_body_callable(q->m->p, tmp2)) != NULL)
 		return throw_error(q, tmp2, "type_error", "callable");
 
-	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
