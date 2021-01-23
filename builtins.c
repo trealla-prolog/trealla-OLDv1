@@ -6311,7 +6311,7 @@ static USE_RESULT pl_state fn_iso_bagof_3(query *q)
 		init_queuen(q);
 		free(q->tmpq[q->st.qnbr]);
 		q->tmpq[q->st.qnbr] = NULL;
-		cut_me(q, false);
+		drop_choice(q);
 		return pl_failure;
 	}
 
@@ -6324,6 +6324,9 @@ static USE_RESULT pl_state fn_iso_bagof_3(query *q)
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 
 	if (!unmatched) {
+		init_queuen(q);
+		free(q->tmpq[q->st.qnbr]);
+		q->tmpq[q->st.qnbr] = NULL;
 		drop_choice(q);
 		q->st.qnbr--;
 	}

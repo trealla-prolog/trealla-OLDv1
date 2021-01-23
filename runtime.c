@@ -513,12 +513,6 @@ void cut_me(query *q, bool local_cut)
 		if (ch->cgen < g->cgen)
 			break;
 
-		if (ch->st.qnbr != q->st.qnbr) {
-			free(q->tmpq[q->st.qnbr]);
-			q->tmpq[q->st.qnbr] = NULL;
-			q->st.qnbr = ch->st.qnbr;
-		}
-
 		sl_done(ch->st.iter);
 		q->cp--;
 	}
