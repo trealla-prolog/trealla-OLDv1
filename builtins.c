@@ -180,12 +180,20 @@ void make_end(cell *tmp)
 	tmp->arity = tmp->flags = 0;
 	tmp->match = NULL;
 	tmp->val_ptr = NULL;
+	tmp->cgen = ERR_IDX;
 }
 
 static void make_end_return(cell *tmp, cell *c)
 {
 	make_end(tmp);
 	tmp->val_ptr = c + c->nbr_cells;
+}
+
+static void make_call_return(query *q, cell *tmp, cell *c)
+{
+	make_end_return(tmp, c);
+	frame *g = GET_FRAME(q->st.curr_frame);
+	tmp->cgen = g->cgen;
 }
 
 static void make_literal(cell *tmp, idx_t offset)
@@ -734,13 +742,13 @@ static USE_RESULT pl_state fn_iso_ground_1(query *q)
 	return !has_vars(q, p1, p1_ctx);
 }
 
-static USE_RESULT pl_state fn_iso_cut_0(query *q)
+USE_RESULT pl_state fn_iso_cut_0(query *q)
 {
 	cut_me(q, false);
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_local_cut_0(query *q)
+USE_RESULT pl_state fn_local_cut_0(query *q)
 {
 	cut_me(q, true);
 	return pl_success;
@@ -4990,8 +4998,13 @@ static USE_RESULT pl_state fn_iso_assertz_1(query *q)
 	return pl_success;
 }
 
-USE_RESULT pl_state call_me(query *q, cell *p1)
+USE_RESULT pl_state fn_call_0(query *q, cell *p1)
 {
+	//printf("*** here call/0\n");
+
+	if (q->retry)
+		return pl_failure;
+
 	p1 = deref(q, p1, q->st.curr_frame);
 	idx_t p1_ctx = q->latest_ctx;
 
@@ -5012,15 +5025,18 @@ USE_RESULT pl_state call_me(query *q, cell *p1)
 		tmp = clone_to_heap(q, false, p1, 1);
 
 	idx_t nbr_cells = 0 + p1->nbr_cells;
-	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
+	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
 
 static USE_RESULT pl_state fn_iso_call_1(query *q)
 {
-	GET_FIRST_ARG(p1,callable);
+	if (q->retry)
+		return pl_failure;
 
+	GET_FIRST_ARG(p1,callable);
 	cell *tmp3;
 
 	if ((tmp3 = check_body_callable(q->m->p, p1)) != NULL)
@@ -5038,7 +5054,8 @@ static USE_RESULT pl_state fn_iso_call_1(query *q)
 
 	cell *tmp = clone_to_heap(q, true, p1, 1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
+	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -5090,8 +5107,7 @@ static USE_RESULT pl_state fn_iso_call_n(query *q)
 	}
 
 	cell *tmp = clone_to_heap(q, true, tmp2, 1);
-	make_end_return(tmp+1+tmp2->nbr_cells, q->st.curr_cell);
-
+	make_call_return(q, tmp+1+tmp2->nbr_cells, q->st.curr_cell);
 	cell *tmp3;
 
 	if ((tmp3 = check_body_callable(q->m->p, tmp2)) != NULL)
@@ -5129,10 +5145,9 @@ static USE_RESULT pl_state fn_iso_ifthen_2(query *q)
 	GET_NEXT_ARG(p2,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_local_cut_s, fn_local_cut_0, 0, 0);
-	tmp[nbr_cells-1].cgen = q->cgen + 1;
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
-	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -5150,8 +5165,7 @@ static USE_RESULT pl_state do_ifthenelse(query *q, cell *p1, cell *p2, cell *p3)
 
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_local_cut_s, fn_local_cut_0, 0, 0);
-	tmp[nbr_cells-1].cgen = q->cgen + 1;
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
@@ -5195,9 +5209,9 @@ static USE_RESULT pl_state fn_iso_negation_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_local_cut_s, fn_local_cut_0, 0, 0);
-	tmp[nbr_cells-1].cgen = q->cgen + 1;
-	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
+	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -5211,9 +5225,8 @@ static USE_RESULT pl_state fn_iso_once_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_local_cut_s, fn_local_cut_0, 0, 0);
-	tmp[nbr_cells-1].cgen = q->cgen + 1;
-	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
+	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -5227,9 +5240,8 @@ static USE_RESULT pl_state fn_ignore_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_local_cut_s, fn_local_cut_0, 0, 0);
-	tmp[nbr_cells-1].cgen = q->cgen + 1;
-	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
+	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -5381,10 +5393,16 @@ pl_state throw_error(query *q, cell *c, const char *err_type, const char *expect
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 
 	} else if (IS_OP(c)) {
-		snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+		if (!strcmp(GET_STR(q->st.curr_cell), "$call"))
+			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, "call", q->st.curr_cell->arity);
+		else
+			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 
 	} else {
-		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
+		if (!strcmp(GET_STR(q->st.curr_cell), "$call"))
+			snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, "call", q->st.curr_cell->arity);
+		else
+			snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	}
 
 	//printf("*** %s\n", dst2);
@@ -6991,7 +7009,7 @@ static USE_RESULT pl_state fn_forall_2(query *q)
 	cell *tmp = get_heap(q, off);
 	idx_t nbr_cells = 1 + p1->nbr_cells + p2->nbr_cells;
 	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
-	may_error(make_barrier(q));
+	may_error(make_choice(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -10954,9 +10972,11 @@ static const struct builtins g_iso_funcs[] =
 	{":-", 2, NULL, NULL},
 	//{":-", 1, NULL, NULL},
 	{",", 2, NULL, NULL},
-	{"call", 1, NULL, NULL},
+	//{"call", 1, NULL, NULL},
 
+	{"!", 0, fn_iso_cut_0, NULL},
 	{":", 2, fn_iso_invoke_2, NULL},
+	{"=..", 2, fn_iso_univ_2, NULL},
 	{"->", 2, fn_iso_ifthen_2, NULL},
 	{";", 2, fn_iso_disjunction_2, NULL},
 	{"\\+", 1, fn_iso_negation_1, NULL},
@@ -10990,12 +11010,10 @@ static const struct builtins g_iso_funcs[] =
 	{"atom_codes", 2, fn_iso_atom_codes_2, NULL},
 	{"number_chars", 2, fn_iso_number_chars_2, NULL},
 	{"number_codes", 2, fn_iso_number_codes_2, NULL},
-	{"!", 0, fn_iso_cut_0, NULL},
 	{"clause", 2, fn_iso_clause_2, NULL},
 	{"length", 2, fn_iso_length_2, NULL},
 	{"arg", 3, fn_iso_arg_3, NULL},
 	{"functor", 3, fn_iso_functor_3, NULL},
-	{"=..", 2, fn_iso_univ_2, NULL},
 	{"copy_term", 2, fn_iso_copy_term_2, NULL},
 	{"term_variables", 2, fn_iso_term_variables_2, NULL},
 	{"atom_length", 2, fn_iso_atom_length_2, NULL},

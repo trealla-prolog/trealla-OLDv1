@@ -31,7 +31,7 @@ static const unsigned INITIAL_NBR_TRAILS = 1000;
 stream g_streams[MAX_STREAMS] = {{0}};
 idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
-idx_t g_sys_elapsed_s, g_sys_queue_s, g_local_cut_s, g_braces_s;
+idx_t g_sys_elapsed_s, g_sys_queue_s, g_braces_s;
 idx_t g_stream_property_s;
 unsigned g_cpu_count = 4;
 char *g_tpl_lib = NULL;
@@ -1701,7 +1701,7 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 
 	p1 = p->t->cells + p1_idx;
 	p1->val_type = TYPE_LITERAL;
-	p1->flags = FLAG_BUILTIN;
+	p1->flags = 0;//FLAG_BUILTIN;
 	p1->fn = NULL;
 	p1->val_off = index_from_pool(p->m->pl, "call");
 	p1->nbr_cells = 2;
@@ -3743,14 +3743,14 @@ module *create_module(prolog *pl, const char *name)
 
 	make_rule(m, "bagof(T,G,B) :- "							\
 		"copy_term('$bagof'(T,G,B),TMP_G),"					\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$bagof'(T,G,B)=TMP_G.");
 
 	// setof...
 
 	make_rule(m, "setof(T,G,B) :- "							\
 		"copy_term('$bagof'(T,G,B),TMP_G),"					\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$bagof'(T,G,TMP_B)=TMP_G,"						\
 		"sort(TMP_B,B).");
 
@@ -3763,107 +3763,104 @@ module *create_module(prolog *pl, const char *name)
 
 	// calln...
 
-#if 0
 	make_rule(m, "call(G) :- "								\
-		"copy_term('G,TMP_G),"								\
-		"'G=TMP_G,"											\
-		"'$call'(TMP_G).");
-#endif
+		"copy_term('$call'(G),TMP_G),"						\
+		"'$call'(TMP_G),"									\
+		"'$call'(G)=TMP_G.");
 
 	make_rule(m, "call(G,P1) :- "							\
 		"copy_term('$call'(G,P1),TMP_G),"					\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$call'(G,P1)=TMP_G.");
 
 	make_rule(m, "call(G,P1,P2) :- "						\
 		"copy_term('$call'(G,P1,P2),TMP_G),"				\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$call'(G,P1,P2)=TMP_G.");
 
 	make_rule(m, "call(G,P1,P2,P3) :- "						\
 		"copy_term('$call'(G,P1,P2,P3),TMP_G),"				\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$call'(G,P1,P2,P3)=TMP_G.");
 
 	make_rule(m, "call(G,P1,P2,P3,P4) :- "					\
 		"copy_term('$call'(G,P1,P2,P3,P4),TMP_G),"			\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$call'(G,P1,P2,P3,P4)=TMP_G.");
 
 	make_rule(m, "call(G,P1,P2,P3,P4,P5) :- "				\
 		"copy_term('$call'(G,P1,P2,P3,P4,P5),TMP_G),"		\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$call'(G,P1,P2,P3,P4,P5)=TMP_G.");
-
 	make_rule(m, "call(G,P1,P2,P3,P4,P5,P6) :- "			\
 		"copy_term('$call'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$call'(G,P1,P2,P3,P4,P5,P6)=TMP_G.");
 
 	make_rule(m, "call(G,P1,P2,P3,P4,P5,P6,P7) :- "			\
 		"copy_term('$call'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"	\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$call'(G,P1,P2,P3,P4,P5,p6,P7)=TMP_G.");
 
 	// taskn...
 
 	make_rule(m, "task(G) :- "								\
 		"copy_term('$task'(G),TMP_G),"						\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$task'(G)=TMP_G.");
 
 	make_rule(m, "task(G,P1) :- "							\
 		"copy_term('$task'(G,P1),TMP_G),"					\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$task'(G,P1)=TMP_G.");
 
 	make_rule(m, "task(G,P1,P2) :- "						\
 		"copy_term('$task'(G,P1,P2),TMP_G),"				\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$task'(G,P1,P2)=TMP_G.");
 
 	make_rule(m, "task(G,P1,P2,P3) :- "						\
 		"copy_term('$task'(G,P1,P2,P3),TMP_G),"				\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$task'(G,P1,P2,P3)=TMP_G.");
 
 	make_rule(m, "task(G,P1,P2,P3,P4) :- "					\
 		"copy_term('$task'(G,P1,P2,P3,P4),TMP_G),"			\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$task'(G,P1,P2,P3,P4)=TMP_G.");
 
 	make_rule(m, "task(G,P1,P2,P3,P4,P5) :- "				\
 		"copy_term('$task'(G,P1,P2,P3,P4,P5),TMP_G),"		\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$task'(G,P1,P2,p3,P4,P5)=TMP_G.");
 
 	make_rule(m, "task(G,P1,P2,P3,P4,P5,P6) :- "			\
 		"copy_term('$task'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$task'(G,P1,P2,P3,P4,P5,P6)=TMP_G.");
 
 	make_rule(m, "task(G,P1,P2,P3,P4,P5,P6,P7) :- "			\
 		"copy_term('$task'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"	\
-		"'$call'(TMP_G),"										\
+		"'$call'(TMP_G),"									\
 		"'$task'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G.");
 
 	// phrase...
 
 	make_rule(m, "phrase_from_file(P, Filename) :- "		\
-		"open(Filename, read, Str, [mmap(Ms)]),"			\
-		"copy_term(P, P2), P2=P,"							\
-		"phrase(P2, Ms, []),"								\
-		"close(Str).");
+		" open(Filename, read, Str, [mmap(Ms)]),"			\
+		" copy_term(P, P2), P2=P,"							\
+		" phrase(P2, Ms, []),"								\
+		" close(Str).");
 
 	make_rule(m, "phrase_from_file(P, Filename, Opts) :- "	\
-		"open(Filename, read, Str, [mmap(Ms)|Opts])," 		\
-		"copy_term(P, P2), P2=P,"							\
-		"phrase(P2, Ms, []),"								\
-		"close(Str).");
+		" open(Filename, read, Str, [mmap(Ms)|Opts])," 		\
+		" copy_term(P, P2), P2=P,"							\
+		" phrase(P2, Ms, []),"								\
+		" close(Str).");
 
 	make_rule(m, "'$append'([], L, L).");
 	make_rule(m, "'$append'([H|T], L, [H|R]) :- "			\
-		"'$append'(T, L, R).");
+		" '$append'(T, L, R).");
 
 	make_rule(m, "phrase(GRBody, S0) :-"					\
 		"phrase(GRBody, S0, [])."							\
@@ -3873,7 +3870,7 @@ module *create_module(prolog *pl, const char *name)
 		" ; dcg_constr(GRBody) -> phrase_(GRBody, S0, S)"	\
 		" ; functor(GRBody, _, _) -> call(GRBody, S0, S)"	\
 		" ; throw(error(type_error(callable, GRBody), phrase/3))" \
-		")."												\
+		" )."												\
 		"phrase_([], S, S)."								\
 		"phrase_(!, S, S)."									\
 		"phrase_((A, B), S0, S) :-"							\
@@ -4069,7 +4066,6 @@ static bool g_init(prolog *pl)
 			CHECK_SENTINEL(g_anon_s = index_from_pool(pl, "_"), ERR_IDX);
 			CHECK_SENTINEL(g_dot_s = index_from_pool(pl, "."), ERR_IDX);
 			CHECK_SENTINEL(g_cut_s = index_from_pool(pl, "!"), ERR_IDX);
-			CHECK_SENTINEL(g_local_cut_s = index_from_pool(pl, "¡"), ERR_IDX);
 			CHECK_SENTINEL(g_nil_s = index_from_pool(pl, "[]"), ERR_IDX);
 			CHECK_SENTINEL(g_braces_s = index_from_pool(pl, "{}"), ERR_IDX);
 			CHECK_SENTINEL(g_fail_s = index_from_pool(pl, "fail"), ERR_IDX);

@@ -377,19 +377,19 @@ typedef struct {
 	cell *curr_cell;
 	clause *curr_clause, *curr_clause2;
 	sliter *iter, *iter2;
-	idx_t curr_frame, fp, hp, tp, sp;
+	idx_t curr_frame, fp, hp, tp, sp, cgen;
 	uint8_t anbr, qnbr;
 } state;
 
 typedef struct {
 	state st;
 	uint64_t pins;
-	idx_t v1, v2, cgen, overflow;
+	idx_t v1, v2, cgen, orig_cgen, overflow;
 	uint16_t nbr_vars, nbr_slots;
-	bool local_cut:1;
 	bool any_choices:1;
 	bool catchme1:1;
 	bool catchme2:1;
+	bool barrier:1;
 } choice;
 
 typedef struct arena_ arena;
@@ -433,7 +433,7 @@ struct query_ {
 	uint64_t step, qid, time_started;
 	unsigned max_depth, tmo_msecs;
 	int nv_start;
-	idx_t cp, tmphp, latest_ctx, popp, cgen, variable_names_ctx;
+	idx_t cp, tmphp, latest_ctx, popp, variable_names_ctx;
 	idx_t frames_size, slots_size, trails_size, choices_size;
 	idx_t max_choices, max_frames, max_slots, max_trails;
 	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;
@@ -547,7 +547,7 @@ struct prolog_ {
 };
 
 extern idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
-extern idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_false_s, g_local_cut_s;
+extern idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_false_s;
 extern idx_t g_gt_s, g_eq_s, g_sys_elapsed_s, g_sys_queue_s, g_braces_s;
 extern idx_t g_stream_property_s;
 extern stream g_streams[MAX_STREAMS];
@@ -602,7 +602,7 @@ predicate *find_predicate(module *m, cell *c);
 predicate *find_matching_predicate(module *m, cell *c);
 predicate *find_matching_predicate_quiet(module *m, cell *c);
 predicate *find_functor(module *m, const char *name, unsigned arity);
-USE_RESULT pl_state call_me(query *q, cell *p1);
+USE_RESULT pl_state fn_call_0(query *q, cell *p1);
 void undo_me(query *q);
 parser *create_parser(module *m);
 void destroy_parser(parser *p);
