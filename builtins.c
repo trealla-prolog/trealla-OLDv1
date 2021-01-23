@@ -5401,6 +5401,8 @@ pl_state throw_error(query *q, cell *c, const char *err_type, const char *expect
 	} else {
 		if (!strcmp(GET_STR(q->st.curr_cell), "$call"))
 			snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, "call", q->st.curr_cell->arity);
+		else if (!strcmp(GET_STR(q->st.curr_cell), "$catch"))
+			snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, "catch", q->st.curr_cell->arity);
 		else
 			snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	}
