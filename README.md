@@ -1,4 +1,4 @@
-Trealla ProLog
+Trealla Prolog
 ==============
 
 A compact, efficient Prolog interpreter with
