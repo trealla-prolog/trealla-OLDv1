@@ -5251,7 +5251,6 @@ static USE_RESULT pl_state fn_iso_catch_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	GET_NEXT_ARG(p3,callable);
 
 	if (q->retry && q->exception) {
 		cell *e = deep_copy_to_heap(q, q->exception, q->st.curr_frame, false);
@@ -5261,6 +5260,7 @@ static USE_RESULT pl_state fn_iso_catch_3(query *q)
 	// Second time through? Try the recover goal...
 
 	if (q->retry == QUERY_EXCEPTION) {
+		GET_NEXT_ARG(p3,callable);
 		q->retry = QUERY_OK;
 		cell *tmp = clone_to_heap(q, true, p3, 1);
 		make_end_return(tmp+1+p3->nbr_cells, q->st.curr_cell);
@@ -5403,6 +5403,8 @@ pl_state throw_error(query *q, cell *c, const char *err_type, const char *expect
 			snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, "call", q->st.curr_cell->arity);
 		else if (!strcmp(GET_STR(q->st.curr_cell), "$catch"))
 			snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, "catch", q->st.curr_cell->arity);
+		else if (!strcmp(GET_STR(q->st.curr_cell), "$bagof"))
+			snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, "bagof", q->st.curr_cell->arity);
 		else
 			snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	}
