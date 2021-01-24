@@ -192,6 +192,7 @@ Others
 	hex_chars/2             	# as number_chars, but in hex
 	octal_chars/2           	# as number_chars, but in octal
 
+	if/3, (*->)/2				# softcut
 	setup_call_cleanup/3
 	findall/4
 	atomic_concat/3
