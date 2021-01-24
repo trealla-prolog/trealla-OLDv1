@@ -5173,6 +5173,41 @@ static USE_RESULT pl_state do_ifthenelse(query *q, cell *p1, cell *p2, cell *p3)
 	return pl_success;
 }
 
+static USE_RESULT pl_state fn_iso_if_2(query *q)
+{
+	if (q->retry)
+		return pl_failure;
+
+	GET_FIRST_ARG(p1,callable);
+	GET_NEXT_ARG(p2,callable);
+	cell *tmp = clone_to_heap(q, true, p1, p2->nbr_cells+1);
+	idx_t nbr_cells = 1 + p1->nbr_cells;
+	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
+	may_error(make_barrier(q));
+	q->st.curr_cell = tmp;
+	return pl_success;
+}
+
+static USE_RESULT pl_state do_ifelse(query *q, cell *p1, cell *p2, cell *p3)
+{
+	if (q->retry) {
+		cell *tmp = clone_to_heap(q, true, p3, 1);
+		idx_t nbr_cells = 1 + p3->nbr_cells;
+		make_end_return(tmp+nbr_cells, q->st.curr_cell);
+		q->st.curr_cell = tmp;
+		return pl_success;
+	}
+
+	cell *tmp = clone_to_heap(q, true, p1, p2->nbr_cells+1);
+	idx_t nbr_cells = 1 + p1->nbr_cells;
+	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	may_error(make_barrier(q));
+	q->st.curr_cell = tmp;
+	return pl_success;
+}
+
 static USE_RESULT pl_state fn_iso_disjunction_2(query *q)
 {
 	if ((q->st.curr_cell+1)->fn == fn_iso_ifthen_2) {
@@ -5180,6 +5215,13 @@ static USE_RESULT pl_state fn_iso_disjunction_2(query *q)
 		cell *p2 = p1 + p1->nbr_cells;
 		cell *p3 = p2 + p2->nbr_cells;
 		return do_ifthenelse(q, p1, p2, p3);
+	}
+
+	if ((q->st.curr_cell+1)->fn == fn_iso_if_2) {
+		cell *p1 = q->st.curr_cell + 2;
+		cell *p2 = p1 + p1->nbr_cells;
+		cell *p3 = p2 + p2->nbr_cells;
+		return do_ifelse(q, p1, p2, p3);
 	}
 
 	GET_FIRST_ARG(p1,callable);
@@ -11109,6 +11151,8 @@ static const struct builtins g_iso_funcs[] =
 
 static const struct builtins g_other_funcs[] =
 {
+	{"*->", 2, fn_iso_if_2, NULL},
+
 	// Edinburgh...
 
 	{"seeing", 1, fn_edin_seeing_1, "-name"},
