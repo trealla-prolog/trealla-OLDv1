@@ -5180,7 +5180,7 @@ static USE_RESULT pl_state do_ifthenelse(query *q, cell *p1, cell *p2, cell *p3)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_if_2(query *q)
+static USE_RESULT pl_state fn_if_2(query *q)
 {
 	if (q->retry)
 		return pl_failure;
@@ -5217,6 +5217,14 @@ static USE_RESULT pl_state do_ifelse(query *q, cell *p1, cell *p2, cell *p3)
 	return pl_success;
 }
 
+static USE_RESULT pl_state fn_if_3(query *q)
+{
+	GET_FIRST_ARG(p1,callable);
+	GET_NEXT_ARG(p2,callable);
+	GET_NEXT_ARG(p3,callable);
+	return do_ifelse(q, p1, p2, p3);
+}
+
 static USE_RESULT pl_state fn_iso_disjunction_2(query *q)
 {
 	if ((q->st.curr_cell+1)->fn == fn_iso_ifthen_2) {
@@ -5226,7 +5234,7 @@ static USE_RESULT pl_state fn_iso_disjunction_2(query *q)
 		return do_ifthenelse(q, p1, p2, p3);
 	}
 
-	if ((q->st.curr_cell+1)->fn == fn_iso_if_2) {
+	if ((q->st.curr_cell+1)->fn == fn_if_2) {
 		cell *p1 = q->st.curr_cell + 2;
 		cell *p2 = p1 + p1->nbr_cells;
 		cell *p3 = p2 + p2->nbr_cells;
@@ -11160,7 +11168,8 @@ static const struct builtins g_iso_funcs[] =
 
 static const struct builtins g_other_funcs[] =
 {
-	{"*->", 2, fn_iso_if_2, NULL},
+	{"*->", 2, fn_if_2, NULL},
+	{"if", 3, fn_if_3, NULL},
 
 	// Edinburgh...
 
