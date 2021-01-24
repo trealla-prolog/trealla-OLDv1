@@ -390,6 +390,7 @@ typedef struct {
 	bool catchme1:1;
 	bool catchme2:1;
 	bool barrier:1;
+	bool soft_cut:1;
 } choice;
 
 typedef struct arena_ arena;
@@ -590,7 +591,7 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority);
 USE_RESULT pl_state make_choice(query *q);
 USE_RESULT pl_state make_barrier(query *q);
 USE_RESULT pl_state make_catcher(query *q, enum q_retry type);
-void cut_me(query *q, bool local_cut);
+void cut_me(query *q, bool local_cut, bool soft_cut);
 bool check_builtin(prolog *pl, const char *name, unsigned arity);
 void *get_builtin(prolog *pl, const char *name, unsigned arity);
 pl_state query_execute(query *q, term *t);

@@ -276,7 +276,7 @@ bool retry_choice(query *q)
 
 	Trace(q, q->st.curr_cell, FAIL);
 
-	if (ch->catchme2)
+	if (ch->catchme2 || ch->soft_cut)
 		return retry_choice(q);
 
 	trim_heap(q, ch);
@@ -454,6 +454,7 @@ pl_state make_choice(query *q)
 	ch->st = q->st;
 	ch->orig_cgen = ch->cgen = g->cgen;
 	ch->barrier = false;
+	ch->soft_cut = false;
 	ch->catchme1 = false;
 	ch->catchme2 = false;
 	ch->pins = 0;
@@ -495,7 +496,7 @@ pl_state make_catcher(query *q, enum q_retry retry)
 	return pl_success;
 }
 
-void cut_me(query *q, bool local_cut)
+void cut_me(query *q, bool local_cut, bool soft_cut)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g->any_choices = true;	// ???
@@ -506,6 +507,16 @@ void cut_me(query *q, bool local_cut)
 		choice *ch = q->choices + curr_choice;
 
 		//printf("*** ch->cgen=%u, g->cgen=%u, q->cgen=%u\n", ch->cgen, g->cgen, q->st.cgen);
+
+		while (soft_cut) {
+			if (ch->barrier && (ch->cgen == g->cgen)) {
+				ch->soft_cut = true;
+				g->cgen--;
+				return;
+			}
+
+			ch--;
+		}
 
 		if (!local_cut && ch->barrier && (ch->cgen == g->cgen))
 			break;

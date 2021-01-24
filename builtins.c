@@ -744,20 +744,19 @@ static USE_RESULT pl_state fn_iso_ground_1(query *q)
 
 USE_RESULT pl_state fn_iso_cut_0(query *q)
 {
-	cut_me(q, false);
+	cut_me(q, false, false);
 	return pl_success;
 }
 
 USE_RESULT pl_state fn_local_cut_0(query *q)
 {
-	cut_me(q, true);
+	cut_me(q, true, false);
 	return pl_success;
 }
 
 USE_RESULT pl_state fn_soft_cut_0(query *q)
 {
-	frame *g = GET_FRAME(q->st.curr_frame);
-	g->cgen -= 1;
+	cut_me(q, true, true);
 	return pl_success;
 }
 
