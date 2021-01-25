@@ -1924,6 +1924,7 @@ static void add_stream_properties(query *q, int n)
 	stream *str = &g_streams[n];
 	char tmpbuf[1024*8];
 	char *dst = tmpbuf;
+	*dst = '\0';
 	off_t pos = ftello(str->fp);
 	bool at_end_of_file = false;
 
@@ -4400,6 +4401,7 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 		while (is_list(p2)) {
 			cell *h = LIST_HEAD(p2);
 			cell *c = alloc_on_tmp(q, h->nbr_cells);
+			may_ptr_error(c);
 			copy_cells(c, h, h->nbr_cells);
 			p2 = LIST_TAIL(p2);
 			arity++;
@@ -4438,6 +4440,7 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 
 		idx_t nbr_cells = tmp_heap_used(q) - save;
 		tmp = alloc_on_heap(q, nbr_cells);
+		may_ptr_error(tmp);
 		copy_cells(tmp, tmp2, nbr_cells);
 		tmp->nbr_cells = nbr_cells;
 		tmp->arity = arity;
