@@ -4436,7 +4436,7 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 		if (arity > MAX_ARITY)
 			return throw_error(q, tmp2, "representation_error", "max_arity");
 
-		idx_t nbr_cells = nbr_cells = tmp_heap_used(q) - save;
+		idx_t nbr_cells = tmp_heap_used(q) - save;
 		tmp = alloc_on_heap(q, nbr_cells);
 		copy_cells(tmp, tmp2, nbr_cells);
 		tmp->nbr_cells = nbr_cells;
@@ -4444,9 +4444,7 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 		bool found = false;
 
 		if (is_callable(tmp)) {
-			if ((tmp->fn = get_builtin(q->m->pl, GET_STR(tmp), tmp->arity, &found)) != NULL)
-				tmp->flags |= FLAG_BUILTIN;
-			else if (found)
+			if ((tmp->fn = get_builtin(q->m->pl, GET_STR(tmp), tmp->arity, &found)), found)
 				tmp->flags |= FLAG_BUILTIN;
 			else {
 				tmp->match = find_matching_predicate_quiet(q->m, tmp);
@@ -4744,7 +4742,6 @@ static USE_RESULT pl_state fn_iso_retractall_1(query *q)
 	if (!h) {
 		cell *head = get_head(p1);
 		bool found = false;
-
 
 		if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found)
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
@@ -5104,7 +5101,7 @@ static USE_RESULT pl_state fn_iso_call_n(query *q)
 
 	bool found = false;
 
-	if ((tmp2->fn = get_builtin(q->m->pl, GET_STR(tmp2), arity, &found)) != NULL) {
+	if ((tmp2->fn = get_builtin(q->m->pl, GET_STR(tmp2), arity, &found)), found) {
 		tmp2->flags |= FLAG_BUILTIN;
 		unsigned specifier;
 		bool userop;
@@ -8314,9 +8311,7 @@ static USE_RESULT pl_state fn_task_n(query *q)
 	tmp2->arity = arity;
 	bool found = false;
 
-	if ((tmp2->fn = get_builtin(q->m->pl, GET_STR(tmp2), arity, &found)) != NULL)
-		tmp2->flags |= FLAG_BUILTIN;
-	else if (found)
+	if ((tmp2->fn = get_builtin(q->m->pl, GET_STR(tmp2), arity, &found)), found)
 		tmp2->flags |= FLAG_BUILTIN;
 	else {
 		tmp2->match = find_matching_predicate(q->m, tmp2);
@@ -10098,6 +10093,7 @@ static USE_RESULT pl_state fn_predicate_property_2(query *q)
 
 	if (get_builtin(q->m->pl, f, p1->arity, &found), found) {
 		make_literal(&tmp, index_from_pool(q->m->pl, "built_in"));
+
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 		else
