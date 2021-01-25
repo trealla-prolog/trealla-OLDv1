@@ -898,7 +898,7 @@ static USE_RESULT pl_state fn_iso_atom_chars_2(query *q)
 		size_t bufsiz;
 		char *tmpbuf = malloc(bufsiz=256), *dst = tmpbuf;
 		ensure(tmpbuf);
-		*tmpbuf = '\0';
+		*dst = '\0';
 		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
@@ -1005,6 +1005,7 @@ static USE_RESULT pl_state fn_iso_number_chars_2(query *q)
 	if (!is_variable(p2) && is_variable(p1)) {
 		char tmpbuf[256];
 		char *dst = tmpbuf;
+		*dst = '\0';
 		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
@@ -1147,6 +1148,7 @@ static USE_RESULT pl_state fn_iso_atom_codes_2(query *q)
 		size_t nbytes;
 		char *tmpbuf = malloc(nbytes=256), *dst = tmpbuf;
 		ensure(tmpbuf);
+		*dst = '\0';
 		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
@@ -1245,6 +1247,7 @@ static USE_RESULT pl_state fn_iso_number_codes_2(query *q)
 	if (!is_variable(p2) && is_variable(p1)) {
 		char tmpbuf[256];
 		char *dst = tmpbuf;
+		*dst = '\0';
 		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
@@ -8671,6 +8674,7 @@ static USE_RESULT pl_state do_format(query *q, cell *str, idx_t str_ctx, cell* p
 	char *tmpbuf = malloc(bufsiz=strlen(src)+100);
 	may_ptr_error(tmpbuf);
 	char *dst = tmpbuf;
+	*dst = '\0';
 	cell *c = NULL;
 	size_t nbytes = bufsiz;
 
@@ -8975,6 +8979,7 @@ static USE_RESULT pl_state fn_sha1_2(query *q)
 	SHA1((unsigned char*)str, LEN_STR(p1), digest);
 	char tmpbuf[512];
 	char *dst = tmpbuf;
+	*dst = '\0';
 	size_t buflen = sizeof(tmpbuf);
 
 	for (int i = 0; i < SHA_DIGEST_LENGTH; i++) {
@@ -8999,6 +9004,7 @@ static USE_RESULT pl_state fn_sha256_2(query *q)
 	SHA256((unsigned char*)str, LEN_STR(p1), digest);
 	char tmpbuf[512];
 	char *dst = tmpbuf;
+	*dst = '\0';
 	size_t buflen = sizeof(tmpbuf);
 
 	for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
@@ -9023,6 +9029,7 @@ static USE_RESULT pl_state fn_sha512_2(query *q)
 	SHA512((unsigned char*)str, LEN_STR(p1), digest);
 	char tmpbuf[512];
 	char *dst = tmpbuf;
+	*dst = '\0';
 	size_t buflen = sizeof(tmpbuf);
 
 	for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) {
