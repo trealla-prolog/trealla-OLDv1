@@ -866,7 +866,9 @@ USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 		predicate *h = find_matching_predicate(q->m, head);
 
 		if (!h) {
-			if (check_builtin(q->m->pl, GET_STR(head), head->arity))
+			bool found = false;
+
+			if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found)
 				return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 			q->st.curr_clause2 = NULL;
@@ -950,7 +952,9 @@ USE_RESULT pl_state match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retrac
 		predicate *h = find_matching_predicate(q->m, p1);
 
 		if (!h) {
-			if (check_builtin(q->m->pl, GET_STR(p1), p1->arity)) {
+			bool found = false;
+
+			if (get_builtin(q->m->pl, GET_STR(p1), p1->arity, &found), found) {
 				if (is_retract != DO_CLAUSE)
 					return throw_error(q, p1, "permission_error", "modify,static_procedure");
 				else

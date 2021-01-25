@@ -1485,12 +1485,14 @@ static void parser_xref_cell(parser *p, term *t, cell *c, predicate *parent)
 		SET_OP(c, specifier);
 	}
 
-	if ((c->fn = get_builtin(p->m->pl, functor, c->arity)) != NULL) {
+	bool found = false;
+
+	if ((c->fn = get_builtin(p->m->pl, functor, c->arity, &found)) != NULL) {
 		c->flags |= FLAG_BUILTIN;
 		return;
 	}
 
-	if (check_builtin(p->m->pl, functor, c->arity)) {
+	if (found) {
 		c->flags |= FLAG_BUILTIN;
 		return;
 	}
@@ -1855,7 +1857,8 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 			rhs += rhs->nbr_cells;
 
-			if (IS_XF(rhs) && (rhs->priority == c->priority)) {
+			if ((((idx_t)(rhs - p->t->cells)) < end_idx)
+				&& IS_XF(rhs) && (rhs->priority == c->priority)) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
 
@@ -3169,6 +3172,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		c->val_type = p->val_type;
 		SET_OP(c,specifier);
 		c->priority = priority;
+		bool found = false;
 
 		if (p->val_type == TYPE_INTEGER) {
 			const char *src = p->token;
@@ -3184,7 +3188,8 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		else if (p->val_type == TYPE_FLOAT)
 			c->val_flt = atof(p->token);
 		else if ((!p->is_quoted || func || p->is_op || p->is_variable ||
-				check_builtin(p->m->pl, p->token, 0)) && !p->string) {
+			(get_builtin(p->m->pl, p->token, 0, &found), found)) && !p->string) {
+
 			if (func && !strcmp(p->token, "."))
 				c->priority = 0;
 

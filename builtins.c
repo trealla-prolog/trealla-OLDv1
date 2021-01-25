@@ -4441,11 +4441,12 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 		copy_cells(tmp, tmp2, nbr_cells);
 		tmp->nbr_cells = nbr_cells;
 		tmp->arity = arity;
+		bool found = false;
 
 		if (is_callable(tmp)) {
-			if ((tmp->fn = get_builtin(q->m->pl, GET_STR(tmp), tmp->arity)) != NULL)
+			if ((tmp->fn = get_builtin(q->m->pl, GET_STR(tmp), tmp->arity, &found)) != NULL)
 				tmp->flags |= FLAG_BUILTIN;
-			else if (check_builtin(q->m->pl, GET_STR(tmp), tmp->arity))
+			else if (found)
 				tmp->flags |= FLAG_BUILTIN;
 			else {
 				tmp->match = find_matching_predicate_quiet(q->m, tmp);
@@ -4742,8 +4743,10 @@ static USE_RESULT pl_state fn_iso_retractall_1(query *q)
 
 	if (!h) {
 		cell *head = get_head(p1);
+		bool found = false;
 
-		if (check_builtin(q->m->pl, GET_STR(head), head->arity))
+
+		if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found)
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 		return pl_success;
@@ -4817,7 +4820,9 @@ static USE_RESULT pl_state fn_iso_abolish_1(query *q)
 	if (p1_arity->val_num > MAX_ARITY)
 		return throw_error(q, p1_arity, "representation_error", "max_arity");
 
-	if (check_builtin(q->m->pl, GET_STR(p1_name), p1_arity->val_num))
+	bool found = false;
+
+	if (get_builtin(q->m->pl, GET_STR(p1_name), p1_arity->val_num, &found), found)
 		return throw_error(q, p1, "permission_error", "modify,static_procedure");
 
 	cell tmp;
@@ -4888,7 +4893,9 @@ static USE_RESULT pl_state fn_iso_asserta_1(query *q)
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
 
-	if (check_builtin(q->m->pl, GET_STR(head), head->arity))
+	bool found = false;
+
+	if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found)
 		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 	cell *tmp2, *body = get_body(p1);
@@ -4950,7 +4957,9 @@ static USE_RESULT pl_state fn_iso_assertz_1(query *q)
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
 
-	if (check_builtin(q->m->pl, GET_STR(head), head->arity))
+	bool found = false;
+
+	if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found)
 		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 	cell *tmp2, *body = get_body(p1);
@@ -5093,14 +5102,16 @@ static USE_RESULT pl_state fn_iso_call_n(query *q)
 		c->flags = 0;
 	}
 
-	if ((tmp2->fn = get_builtin(q->m->pl, GET_STR(tmp2), arity)) != NULL) {
+	bool found = false;
+
+	if ((tmp2->fn = get_builtin(q->m->pl, GET_STR(tmp2), arity, &found)) != NULL) {
 		tmp2->flags |= FLAG_BUILTIN;
 		unsigned specifier;
 		bool userop;
 
 		if (get_op(q->m, GET_STR(tmp2), &specifier, &userop, false))
 			SET_OP(tmp2, specifier);
-	} else if (check_builtin(q->m->pl, GET_STR(tmp2), arity)) {
+	} else if (found) {
 		tmp2->flags |= FLAG_BUILTIN;
 		unsigned specifier;
 		bool userop;
@@ -5633,7 +5644,9 @@ static USE_RESULT pl_state fn_iso_current_rule_1(query *q)
 			m = m->next;
 	}
 
-	if (check_builtin(q->m->pl, functor, arity))
+	bool found = false;
+
+	if (get_builtin(q->m->pl, functor, arity, &found), found)
 		return pl_success;
 
 	return pl_failure;
@@ -6577,7 +6590,9 @@ static USE_RESULT pl_state do_asserta_2(query *q)
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
 
-	if (check_builtin(q->m->pl, GET_STR(head), head->arity))
+	bool found = false;
+
+	if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found)
 		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 	cell *body = get_body(p1);
@@ -6670,7 +6685,9 @@ static USE_RESULT pl_state do_assertz_2(query *q)
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
 
-	if (check_builtin(q->m->pl, GET_STR(head), head->arity))
+	bool found = false;
+
+	if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found)
 		return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 	cell *body = get_body(p1);
@@ -8295,10 +8312,11 @@ static USE_RESULT pl_state fn_task_n(query *q)
 	cell *tmp2 = get_tmp_heap(q, 0);
 	tmp2->nbr_cells = tmp_heap_used(q);
 	tmp2->arity = arity;
+	bool found = false;
 
-	if ((tmp2->fn = get_builtin(q->m->pl, GET_STR(tmp2), arity)) != NULL)
+	if ((tmp2->fn = get_builtin(q->m->pl, GET_STR(tmp2), arity, &found)) != NULL)
 		tmp2->flags |= FLAG_BUILTIN;
-	else if (check_builtin(q->m->pl, GET_STR(tmp2), arity))
+	else if (found)
 		tmp2->flags |= FLAG_BUILTIN;
 	else {
 		tmp2->match = find_matching_predicate(q->m, tmp2);
@@ -10076,8 +10094,9 @@ static USE_RESULT pl_state fn_predicate_property_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *f = GET_STR(p1);
 	cell tmp;
+	bool found = false;
 
-	if (check_builtin(q->m->pl, f, p1->arity)) {
+	if (get_builtin(q->m->pl, f, p1->arity, &found), found) {
 		make_literal(&tmp, index_from_pool(q->m->pl, "built_in"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
@@ -11344,7 +11363,7 @@ void load_builtins(prolog *pl, bool iso_only)
 	}
 }
 
-bool check_builtin(prolog *pl, const char *name, unsigned arity)
+void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found)
 {
 	sliter *iter = sl_findkey(pl->funtab, name);
 	const struct builtins *ptr;
@@ -11352,24 +11371,11 @@ bool check_builtin(prolog *pl, const char *name, unsigned arity)
 	while (sl_nextkey(iter, (void**)&ptr)) {
 		if (ptr->arity == arity) {
 			sl_done(iter);
-			return true;
-		}
-	}
-
-	return false;
-}
-
-void *get_builtin(prolog *pl, const char *name, unsigned arity)
-{
-	sliter *iter = sl_findkey(pl->funtab, name);
-	const struct builtins *ptr;
-
-	while (sl_nextkey(iter, (void**)&ptr)) {
-		if (ptr->arity == arity) {
-			sl_done(iter);
+			*found = true;
 			return ptr->fn;
 		}
 	}
 
+	*found = false;
 	return NULL;
 }
