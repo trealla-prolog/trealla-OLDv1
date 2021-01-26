@@ -4419,7 +4419,7 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 		arity--;
 		cell *tmp2 = get_tmp_heap(q, save);
 
-		if (is_cstring(tmp2) /*&& arity*/) {
+		if (is_cstring(tmp2)) {
 			cell *c = tmp2;
 			idx_t off = index_from_pool(q->m->pl, GET_STR(c));
 			//if (is_nonconst_blob(c)) free(c->val_str);
