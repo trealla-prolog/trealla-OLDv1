@@ -4419,7 +4419,7 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 		arity--;
 		cell *tmp2 = get_tmp_heap(q, save);
 
-		if (is_cstring(tmp2)) {
+		if (is_cstring(tmp2) /*&& arity*/) {
 			cell *c = tmp2;
 			idx_t off = index_from_pool(q->m->pl, GET_STR(c));
 			//if (is_nonconst_blob(c)) free(c->val_str);
@@ -4554,15 +4554,10 @@ static USE_RESULT pl_state fn_iso_term_variables_2(query *q)
 		}
 	}
 
-	if (is_variable(p2)) {
-		cell *tmp2 = alloc_on_heap(q, idx);
-		ensure(tmp2);
-		copy_cells(tmp2, tmp, idx);
-		set_var(q, p2, p2_ctx, tmp2, q->st.curr_frame);
-		return 1;
-	}
-
-	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
+	cell *tmp2 = alloc_on_heap(q, idx);
+	ensure(tmp2);
+	copy_cells(tmp2, tmp, idx);
+	return unify(q, p2, p2_ctx, tmp2, q->st.curr_frame);
 }
 
 static cell *clone2_to_tmp(query *q, cell *p1)
