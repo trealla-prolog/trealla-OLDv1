@@ -711,6 +711,9 @@ static USE_RESULT pl_state fn_iso_sin_1(query *q)
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
+	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "float_overflow");
+
 	if (is_float(&q->accum) && isnan(q->accum.val_flt))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
@@ -737,6 +740,9 @@ static USE_RESULT pl_state fn_iso_cos_1(query *q)
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
+
+	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "float_overflow");
 
 	if (is_float(&q->accum) && isnan(q->accum.val_flt))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
@@ -765,6 +771,9 @@ static USE_RESULT pl_state fn_iso_tan_1(query *q)
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
+	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "float_overflow");
+
 	if (is_float(&q->accum) && isnan(q->accum.val_flt))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
@@ -791,6 +800,9 @@ static USE_RESULT pl_state fn_iso_asin_1(query *q)
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
+
+	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "float_overflow");
 
 	if (is_float(&q->accum) && isnan(q->accum.val_flt))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
@@ -819,6 +831,9 @@ static USE_RESULT pl_state fn_iso_acos_1(query *q)
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
+	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "float_overflow");
+
 	if (is_float(&q->accum) && isnan(q->accum.val_flt))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
@@ -845,6 +860,9 @@ static USE_RESULT pl_state fn_iso_atan_1(query *q)
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
+
+	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "float_overflow");
 
 	if (is_float(&q->accum) && isnan(q->accum.val_flt))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
@@ -901,6 +919,189 @@ static USE_RESULT pl_state fn_iso_atan2_2(query *q)
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
+
+	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "float_overflow");
+
+	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "undefined");
+
+	return pl_success;
+}
+
+static USE_RESULT pl_state fn_sinh_1(query *q)
+{
+	CHECK_CALC();
+	GET_FIRST_ARG(p1_tmp,any);
+	cell p1 = calc(q, p1_tmp);
+
+	if (is_rational(&p1)) {
+		if (p1.val_den == 0)
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
+		q->accum.val_flt = sinh((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_float(&p1)) {
+		q->accum.val_flt = sinh(p1.val_flt);
+		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else {
+		return throw_error(q, &p1, "type_error", "evaluable");
+	}
+
+	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "float_overflow");
+
+	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "undefined");
+
+	return pl_success;
+}
+
+static USE_RESULT pl_state fn_cosh_1(query *q)
+{
+	CHECK_CALC();
+	GET_FIRST_ARG(p1_tmp,any);
+	cell p1 = calc(q, p1_tmp);
+
+	if (is_rational(&p1)) {
+		if (p1.val_den == 0)
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
+		q->accum.val_flt = cosh((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_float(&p1)) {
+		q->accum.val_flt = cosh(p1.val_flt);
+		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else {
+		return throw_error(q, &p1, "type_error", "evaluable");
+	}
+
+	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "float_overflow");
+
+	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "undefined");
+
+	return pl_success;
+}
+
+static USE_RESULT pl_state fn_tanh_1(query *q)
+{
+	CHECK_CALC();
+	GET_FIRST_ARG(p1_tmp,any);
+	cell p1 = calc(q, p1_tmp);
+
+	if (is_rational(&p1)) {
+		if (p1.val_den == 0)
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
+		q->accum.val_flt = tanh((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_float(&p1)) {
+		q->accum.val_flt = tanh(p1.val_flt);
+		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else {
+		return throw_error(q, &p1, "type_error", "evaluable");
+	}
+
+	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "float_overflow");
+
+	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "undefined");
+
+	return pl_success;
+}
+
+static USE_RESULT pl_state fn_asinh_1(query *q)
+{
+	CHECK_CALC();
+	GET_FIRST_ARG(p1_tmp,any);
+	cell p1 = calc(q, p1_tmp);
+
+	if (is_rational(&p1)) {
+		if (p1.val_den == 0)
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
+		q->accum.val_flt = asinh((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_float(&p1)) {
+		q->accum.val_flt = asinh(p1.val_flt);
+		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else {
+		return throw_error(q, &p1, "type_error", "evaluable");
+	}
+
+	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "float_overflow");
+
+	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "undefined");
+
+	return pl_success;
+}
+
+static USE_RESULT pl_state fn_acosh_1(query *q)
+{
+	CHECK_CALC();
+	GET_FIRST_ARG(p1_tmp,any);
+	cell p1 = calc(q, p1_tmp);
+
+	if (is_rational(&p1)) {
+		if (p1.val_den == 0)
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
+		q->accum.val_flt = acosh((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_float(&p1)) {
+		q->accum.val_flt = acosh(p1.val_flt);
+		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else {
+		return throw_error(q, &p1, "type_error", "evaluable");
+	}
+
+	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "float_overflow");
+
+	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "undefined");
+
+	return pl_success;
+}
+
+static USE_RESULT pl_state fn_atanh_1(query *q)
+{
+	CHECK_CALC();
+	GET_FIRST_ARG(p1_tmp,any);
+	cell p1 = calc(q, p1_tmp);
+
+	if (is_rational(&p1)) {
+		if (p1.val_den == 0)
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
+		q->accum.val_flt = atanh((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_float(&p1)) {
+		q->accum.val_flt = atanh(p1.val_flt);
+		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else {
+		return throw_error(q, &p1, "type_error", "evaluable");
+	}
+
+	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+		return throw_error(q, &p1, "evaluation_error", "float_overflow");
 
 	if (is_float(&q->accum) && isnan(q->accum.val_flt))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
@@ -1994,12 +2195,21 @@ const struct builtins g_arith_funcs[] =
 	{"exp", 1, fn_iso_exp_1, NULL},
 	{"sqrt", 1, fn_iso_sqrt_1, NULL},
 	{"log", 1, fn_iso_log_1, NULL},
+
 	{"sin", 1, fn_iso_sin_1, NULL},
 	{"cos", 1, fn_iso_cos_1, NULL},
 	{"tan", 1, fn_iso_tan_1, NULL},
 	{"asin", 1, fn_iso_asin_1, NULL},
 	{"acos", 1, fn_iso_acos_1, NULL},
 	{"atan", 1, fn_iso_atan_1, NULL},
+
+	{"sinh", 1, fn_sinh_1, NULL},
+	{"cosh", 1, fn_cosh_1, NULL},
+	{"tanh", 1, fn_tanh_1, NULL},
+	{"asinh", 1, fn_asinh_1, NULL},
+	{"acosh", 1, fn_acosh_1, NULL},
+	{"atanh", 1, fn_atanh_1, NULL},
+
 	{"atan2", 2, fn_iso_atan2_2, NULL},
 	{"copysign", 2, fn_iso_copysign_2, NULL},
 	{"truncate", 1, fn_iso_truncate_1, NULL},
