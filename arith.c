@@ -1952,6 +1952,69 @@ static USE_RESULT pl_state fn_iso_nlt_2(query *q)
 	return throw_error(q, &p1, "type_error", "evaluable");
 }
 
+static USE_RESULT pl_state fn_log_2(query *q)
+{
+	CHECK_CALC();
+	GET_FIRST_ARG(p1_tmp,any);
+	GET_NEXT_ARG(p2_tmp,any);
+	cell p1 = calc(q, p1_tmp);
+	cell p2 = calc(q, p2_tmp);
+
+	if (is_variable(&p1)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else if (is_variable(&p2)) {
+		return throw_error(q, &p2, "instantiation_error", "not_sufficiently_instantiated");
+	} else if (! is_integer(&p1) && ! is_float(&p1)) {
+		return throw_error(q, &p1, "type_error", "evaluable");
+	} else if (! is_integer(&p2) && ! is_float(&p2)){
+		return throw_error(q, &p2, "type_error", "evaluable");
+	}
+
+	if (is_integer(&p1)) {
+		if (p1.val_num == 0) {
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
+		} else if (p1.val_num < 0) {
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+		}
+	} else if (is_float(&p1)) {
+		if (p1.val_flt == 0.0) {
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
+		} else if (p1.val_flt < 0.0) {
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+		}
+	}
+
+	if (is_integer(&p2)) {
+		if (p2.val_num == 0) {
+			return throw_error(q, &p2, "evaluation_error", "zero_divisor");
+		} else if (p2.val_num < 0) {
+			return throw_error(q, &p2, "evaluation_error", "undefined");
+		}
+	} else if (is_float(&p2)) {
+		if (p2.val_flt == 0.0) {
+			return throw_error(q, &p2, "evaluation_error", "zero_divisor");
+		} else if (p2.val_flt < 0.0) {
+			return throw_error(q, &p2, "evaluation_error", "undefined");
+		}
+	}
+
+	if (is_integer(&p1) && is_integer(&p2)) {
+		q->accum.val_flt = log(p2.val_num) / log(p1.val_num);
+		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_integer(&p1) && is_float(&p2)) {
+		q->accum.val_flt = log(p2.val_flt) / log(p1.val_num);
+		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_float(&p1) && is_integer(&p2)) {
+		q->accum.val_flt = log(p2.val_num) / log(p1.val_flt);
+		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_float(&p1) && is_float(&p2)) {
+		q->accum.val_flt = log(p2.val_flt) / log(p1.val_flt);
+		q->accum.val_type = TYPE_FLOAT;
+	}
+
+	return pl_success;
+}
+
 static USE_RESULT pl_state fn_log10_1(query *q)
 {
 	CHECK_CALC();
@@ -2218,6 +2281,7 @@ const struct builtins g_arith_funcs[] =
 	{"floor", 1, fn_iso_floor_1, NULL},
 	{"float_integer_part", 1, fn_iso_float_integer_part_1, NULL},
 	{"float_fractional_part", 1, fn_iso_float_fractional_part_1, NULL},
+	{"log", 2, fn_log_2, "+number,+number"},
 	{"log10", 1, fn_log10_1, "+integer"},
 	{"random", 1, fn_random_1, "?integer"},
 	{"rand", 1, fn_rand_1, "?integer"},
