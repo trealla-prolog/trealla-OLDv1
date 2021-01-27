@@ -2021,14 +2021,26 @@ static USE_RESULT pl_state fn_log10_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (is_integer(&p1)) {
-		q->accum.val_flt = log10(p1.val_num);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1)) {
-		q->accum.val_flt = log10(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_variable(&p1)) {
+	if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else 	if (is_integer(&p1)) {
+		if (p1.val_num == 0) {
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
+		} else if (p1.val_num < 0) {
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+		} else {
+			q->accum.val_flt = log10(p1.val_num);
+			q->accum.val_type = TYPE_FLOAT;
+		}
+	} else if (is_float(&p1)) {
+		if (p1.val_flt == 0.0) {
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
+		} else if (p1.val_flt < 0.0) {
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+		} else {
+			q->accum.val_flt = log10(p1.val_flt);
+			q->accum.val_type = TYPE_FLOAT;
+		}
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
