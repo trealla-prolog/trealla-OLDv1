@@ -3903,9 +3903,7 @@ module *create_module(prolog *pl, const char *name)
 	//make_rule(m, "forall(Cond,Action) :- \\+ (Cond, \\+ Action).");
 
 	// This is an approximation...
-
-	//make_rule(m, "setup_call_cleanup(A,G,B) :- A, !, (G -> true ; (B, !, fail)).");
-	make_rule(m, "setup_call_cleanup(A,G,B) :- A, !, catch(ignore(G), _, true), B, !.");
+	make_rule(m, "setup_call_cleanup(S,G,C) :- S, !, catch(ignore(G), _, true), C, !.");
 
 	// Edinburgh...
 
@@ -3925,7 +3923,7 @@ module *create_module(prolog *pl, const char *name)
 
 	// SWI or GNU
 
-	make_rule(m, "current_key(K) :- variable(K), clause('$record_key'(K,_),_).");
+	make_rule(m, "current_key(K) :- var(K), clause('$record_key'(K,_),_).");
 	make_rule(m, "recorda(K,V) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V)).");
 	make_rule(m, "recordz(K,V) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V)).");
 	make_rule(m, "recorded(K,V) :- nonvar(K), clause('$record_key'(K,V),_).");
