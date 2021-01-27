@@ -534,12 +534,13 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 			ch -= 3;
 			cell *c = ch->st.curr_cell;
 			c = deref(q, c, q->st.curr_frame);
+			cell *p1 = deref(q, c+1, ch->st.curr_frame);
 
-			//printf("*** on_cleanup: ");
-			//print_term(q, stdout, c, ch->st.curr_frame, 1);
-			//printf("\n");
+			//printf("*** on_cleanup: (");
+			//print_term(q, stdout, p1, ch->st.curr_frame, 1);
+			//printf(")\n");
 
-			do_cleanup(q, c+1);
+			do_cleanup(q, p1);
 			return;
 		}
 	}

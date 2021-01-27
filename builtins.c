@@ -11033,10 +11033,9 @@ static USE_RESULT pl_state fn_module_1(query *q)
 
 void do_cleanup(query *q, cell *p1)
 {
-	cell *tmp = clone_to_heap(q, true, p1, 3);
+	cell *tmp = clone_to_heap(q, true, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_iso_cut_0, 0, 0);
-	make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
 	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 }
