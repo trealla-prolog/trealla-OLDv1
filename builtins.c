@@ -11063,7 +11063,7 @@ static USE_RESULT pl_state fn_sys_on_det_1(query *q)
 	} else {
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
-		ch->on_cut = true;
+		ch->on_cleanup = true;
 	}
 
 	return pl_success;

@@ -457,7 +457,7 @@ pl_state make_choice(query *q)
 	ch->soft_cut = false;
 	ch->catchme1 = false;
 	ch->catchme2 = false;
-	ch->on_cut = false;
+	ch->on_cleanup = false;
 	ch->pins = 0;
 
 	may_error(check_slot(q, g->nbr_vars));
@@ -525,8 +525,8 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 		if (ch->cgen < g->cgen)
 			break;
 
-		if (ch->on_cut) {
-			printf("*** on cut\n");
+		if (ch->on_cleanup) {
+			printf("*** on_cleanup\n");
 		}
 
 		sl_done(ch->st.iter);

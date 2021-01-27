@@ -391,7 +391,7 @@ typedef struct {
 	bool catchme2:1;
 	bool barrier:1;
 	bool soft_cut:1;
-	bool on_cut:1;
+	bool on_cleanup:1;
 } choice;
 
 typedef struct arena_ arena;
