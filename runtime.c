@@ -484,7 +484,7 @@ pl_state make_barrier(query *q)
 
 pl_state make_catcher(query *q, enum q_retry retry)
 {
-	may_error(make_choice(q));
+	may_error(make_barrier(q));
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 
