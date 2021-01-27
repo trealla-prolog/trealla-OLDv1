@@ -3902,9 +3902,10 @@ module *create_module(prolog *pl, const char *name)
 
 	//make_rule(m, "forall(Cond,Action) :- \\+ (Cond, \\+ Action).");
 
-	// This is an approximation... it needs a catcher
+	// This is an approximation...
 
-	make_rule(m, "setup_call_cleanup(A,G,B) :- A, !, (G -> true ; (B, !, fail)).");
+	//make_rule(m, "setup_call_cleanup(A,G,B) :- A, !, (G -> true ; (B, !, fail)).");
+	make_rule(m, "setup_call_cleanup(A,G,B) :- A, !, catch(ignore(G), _, true), B, !.");
 
 	// Edinburgh...
 
