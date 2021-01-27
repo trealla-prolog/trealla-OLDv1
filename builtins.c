@@ -5345,6 +5345,7 @@ static USE_RESULT pl_state fn_iso_catch_3(query *q)
 	make_end_return(tmp+1+p1->nbr_cells, q->st.curr_cell);
 	may_error(make_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;
+	q->save_cp = q->cp;
 	return pl_success;
 }
 
@@ -11030,6 +11031,40 @@ static USE_RESULT pl_state fn_module_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_state fn_sys_call_on_retry_1(query *q)
+{
+	GET_FIRST_ARG(p1,callable);
+
+	if (q->retry) {
+		cell *tmp = clone_to_heap(q, true, p1, 3);
+		idx_t nbr_cells = 1 + p1->nbr_cells;
+		make_structure(tmp+nbr_cells++, g_cut_s, fn_iso_cut_0, 0, 0);
+		make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
+		make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
+		q->st.curr_cell = tmp;
+		return pl_success;
+	}
+
+	may_error(make_choice(q));
+	return pl_success;
+}
+
+static USE_RESULT pl_state fn_sys_call_on_det_1(query *q)
+{
+	GET_FIRST_ARG(p1,callable);
+
+	if (q->cp == q->save_cp) {
+		cell *tmp = clone_to_heap(q, true, p1, 2);
+		idx_t nbr_cells = 1 + p1->nbr_cells;
+		make_structure(tmp+nbr_cells++, g_cut_s, fn_iso_cut_0, 0, 0);
+		make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
+		q->st.curr_cell = tmp;
+		return pl_success;
+	}
+
+	return pl_success;
+}
+
 static USE_RESULT pl_state fn_iso_compare_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
@@ -11181,6 +11216,9 @@ static const struct builtins g_iso_funcs[] =
 	{"listing", 1, fn_listing_1, NULL},
 	{"time", 1, fn_time_1, NULL},
 	{"trace", 0, fn_trace_0, NULL},
+
+	{"$call_on_retry", 1, fn_sys_call_on_retry_1, NULL},
+	{"$call_on_det", 1, fn_sys_call_on_det_1, NULL},
 
 	{0}
 };
