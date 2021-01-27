@@ -525,17 +525,23 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 		if (ch->cgen < g->cgen)
 			break;
 
+		sl_done(ch->st.iter);
+		q->cp--;
+
 		if (ch->on_cleanup) {
+			extern void do_cleanup(query *q, cell *p1);
+
 			ch -= 3;
 			cell *c = ch->st.curr_cell;
 			c = deref(q, c, q->st.curr_frame);
-			printf("*** on_cleanup: ");
-			print_term(q, stdout, c, q->st.curr_frame, 1);
-			printf("\n");
-		}
 
-		sl_done(ch->st.iter);
-		q->cp--;
+			//printf("*** on_cleanup: ");
+			//print_term(q, stdout, c, ch->st.curr_frame, 1);
+			//printf("\n");
+
+			do_cleanup(q, c+1);
+			return;
+		}
 	}
 
 	if (!q->cp)
