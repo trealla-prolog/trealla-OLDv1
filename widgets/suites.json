@@ -1,15 +1,15 @@
 {
   "total" : 153,
   "items" : [ {
-    "uid" : "b53facfc3ab369a6b285a9b84e571b6a",
-    "name" : "predicates/stream_property_2/tests.lgt",
+    "uid" : "41d6a19652e69674928f746fa8682efd",
+    "name" : "predicates/setup_call_cleanup_3/tests.lgt",
     "statistic" : {
-      "failed" : 14,
+      "failed" : 7,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 20,
+      "passed" : 4,
       "unknown" : 0,
-      "total" : 34
+      "total" : 11
     }
   }, {
     "uid" : "1f89ce235b903676b13870ef37232400",
@@ -34,28 +34,6 @@
       "total" : 13
     }
   }, {
-    "uid" : "c9415514cc0ebd11365c405f34f84bfc",
-    "name" : "predicates/length_2/tests.lgt",
-    "statistic" : {
-      "failed" : 6,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 7,
-      "unknown" : 0,
-      "total" : 13
-    }
-  }, {
-    "uid" : "41d6a19652e69674928f746fa8682efd",
-    "name" : "predicates/setup_call_cleanup_3/tests.lgt",
-    "statistic" : {
-      "failed" : 6,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 5,
-      "unknown" : 0,
-      "total" : 11
-    }
-  }, {
     "uid" : "b0c0c3831561c7e387cea174904e8186",
     "name" : "functions/power_2/tests.lgt",
     "statistic" : {
@@ -65,17 +43,6 @@
       "passed" : 9,
       "unknown" : 0,
       "total" : 14
-    }
-  }, {
-    "uid" : "8c73c52f73d2251c170a1d5ea8a8da8e",
-    "name" : "functions/log10_1/tests.lgt",
-    "statistic" : {
-      "failed" : 5,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 4,
-      "unknown" : 0,
-      "total" : 9
     }
   }, {
     "uid" : "aa2ce3debd21137a968b0a8e5dbaa990",
@@ -109,6 +76,39 @@
       "passed" : 12,
       "unknown" : 0,
       "total" : 16
+    }
+  }, {
+    "uid" : "72e51ed976a1c2716315051244abc016",
+    "name" : "predicates/format_3/tests.lgt",
+    "statistic" : {
+      "failed" : 3,
+      "broken" : 0,
+      "skipped" : 1,
+      "passed" : 12,
+      "unknown" : 0,
+      "total" : 16
+    }
+  }, {
+    "uid" : "c4f6bd72fb27abbb93d5281bfb6b5be2",
+    "name" : "functions/log_2/tests.lgt",
+    "statistic" : {
+      "failed" : 3,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 12,
+      "unknown" : 0,
+      "total" : 15
+    }
+  }, {
+    "uid" : "a2fad80d17ce7d2a9b0b4e4ff04007fe",
+    "name" : "functions/atanh_1/tests.lgt",
+    "statistic" : {
+      "failed" : 3,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 6,
+      "unknown" : 0,
+      "total" : 9
     }
   } ]
 }
