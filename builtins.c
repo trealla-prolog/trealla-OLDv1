@@ -11031,7 +11031,7 @@ static USE_RESULT pl_state fn_module_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_sys_call_on_retry_1(query *q)
+static USE_RESULT pl_state fn_sys_on_backtrack_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
@@ -11049,7 +11049,7 @@ static USE_RESULT pl_state fn_sys_call_on_retry_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_sys_call_on_det_1(query *q)
+static USE_RESULT pl_state fn_sys_on_det_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
@@ -11217,8 +11217,8 @@ static const struct builtins g_iso_funcs[] =
 	{"time", 1, fn_time_1, NULL},
 	{"trace", 0, fn_trace_0, NULL},
 
-	{"$call_on_retry", 1, fn_sys_call_on_retry_1, NULL},
-	{"$call_on_det", 1, fn_sys_call_on_det_1, NULL},
+	{"$on_backtrack", 1, fn_sys_on_backtrack_1, NULL},
+	{"$on_det", 1, fn_sys_on_det_1, NULL},
 
 	{0}
 };

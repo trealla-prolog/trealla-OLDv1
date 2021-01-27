@@ -3904,9 +3904,9 @@ module *create_module(prolog *pl, const char *name)
 
 	make_rule(m, "setup_call_cleanup(S,G,C) :-"				\
 		"S, !,"												\
-		"'$call_on_retry'(C),"								\
+		"'$on_backtrack'(C),"								\
 		"catch(G, _, fail),"								\
-		"'$call_on_det'(C).");
+		"'$on_det'(C).");
 
 	// Edinburgh...
 
