@@ -3906,7 +3906,7 @@ module *create_module(prolog *pl, const char *name)
 		"S, !,"												\
 		"'$on_backtrack'(C),"								\
 		"catch(G, _, fail),"								\
-		"'$on_det'(C).");
+		"'$is_det'(C).");
 
 	// Edinburgh...
 

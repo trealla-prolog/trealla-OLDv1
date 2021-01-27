@@ -11054,6 +11054,7 @@ static USE_RESULT pl_state fn_sys_on_det_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 
 	if (q->cp == q->save_cp) {
+		cut_me(q, false, false);
 		cell *tmp = clone_to_heap(q, true, p1, 2);
 		idx_t nbr_cells = 1 + p1->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_cut_s, fn_iso_cut_0, 0, 0);
@@ -11222,7 +11223,7 @@ static const struct builtins g_iso_funcs[] =
 	{"trace", 0, fn_trace_0, NULL},
 
 	{"$on_backtrack", 1, fn_sys_on_backtrack_1, NULL},
-	{"$on_det", 1, fn_sys_on_det_1, NULL},
+	{"$is_det", 1, fn_sys_on_det_1, NULL},
 
 	{0}
 };

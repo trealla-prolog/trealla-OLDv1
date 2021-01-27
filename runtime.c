@@ -526,7 +526,12 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 			break;
 
 		if (ch->on_cleanup) {
-			printf("*** on_cleanup\n");
+			ch -= 3;
+			cell *c = ch->st.curr_cell;
+			c = deref(q, c, q->st.curr_frame);
+			printf("*** on_cleanup: ");
+			print_term(q, stdout, c, q->st.curr_frame, 1);
+			printf("\n");
 		}
 
 		sl_done(ch->st.iter);
