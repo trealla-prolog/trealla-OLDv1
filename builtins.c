@@ -11060,6 +11060,10 @@ static USE_RESULT pl_state fn_sys_on_det_1(query *q)
 		make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
 		q->st.curr_cell = tmp;
 		return pl_success;
+	} else {
+		idx_t curr_choice = q->cp - 1;
+		choice *ch = q->choices + curr_choice;
+		ch->on_cut = true;
 	}
 
 	return pl_success;
