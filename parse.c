@@ -3911,7 +3911,7 @@ module *create_module(prolog *pl, const char *name)
 		"S, !, '$on_cut'(C), G, '$on_det'(C).");
 
 	make_rule(m, "partial_string(S, S2) :-"					\
-		"append(S, V, S2).");
+		"append(S, _, S2).");
 
 	// Edinburgh...
 
