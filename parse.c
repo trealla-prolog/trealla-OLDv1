@@ -3908,10 +3908,7 @@ module *create_module(prolog *pl, const char *name)
 		"'$call'(TMP_G).");
 
 	make_rule(m, "'$setup_call_cleanup'(S,G,C) :-"			\
-		"S, !,"												\
-		"'$on_cut'(C),"										\
-		"'$catch'(G, _, fail),"								\
-		"'$on_det'(C).");
+		"S, !, '$on_cut'(C), G, '$on_det'(C).");
 
 	// Edinburgh...
 
