@@ -1911,7 +1911,8 @@ static USE_RESULT pl_state do_retract(query *q, cell *p1, idx_t p1_ctx, int is_r
 		return match;
 
 	clause *r = q->st.curr_clause2;
-	stash_me(q, &r->t, false);
+	bool last_match = !q->st.curr_clause2->next || r->t.first_cut;
+	stash_me(q, &r->t, last_match);
 
 	retract_from_db(q->m, r);
 	r->t.gen = r->parent->gen;
