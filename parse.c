@@ -3903,6 +3903,11 @@ module *create_module(prolog *pl, const char *name)
 	//make_rule(m, "forall(Cond,Action) :- \\+ (Cond, \\+ Action).");
 
 	make_rule(m, "setup_call_cleanup(S,G,C) :-"				\
+		"copy_term('$setup_call_cleanup'(S,G,C),TMP_G),"	\
+		"'$setup_call_cleanup'(S,G,C)=TMP_G,"				\
+		"'$call'(TMP_G).");
+
+	make_rule(m, "'$setup_call_cleanup'(S,G,C) :-"			\
 		"S, !,"												\
 		"'$on_backtrack'(C),"								\
 		"catch(G, _, fail),"								\
