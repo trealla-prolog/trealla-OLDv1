@@ -419,7 +419,7 @@ void stash_me(query *q, term *t, bool last_match)
 {
 	idx_t cgen = q->st.cgen;
 
-	if (last_match && 0)
+	if (last_match)
 		drop_choice(q);
 	else {
 		frame *g = GET_FRAME(q->st.curr_frame);
