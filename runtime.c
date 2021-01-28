@@ -417,9 +417,9 @@ static void commit_me(query *q, term *t)
 
 void stash_me(query *q, term *t, bool last_match)
 {
-	idx_t cgen = ++q->st.cgen;
+	idx_t cgen = q->st.cgen;
 
-	if (last_match)
+	if (last_match && 0)
 		drop_choice(q);
 	else {
 		frame *g = GET_FRAME(q->st.curr_frame);
@@ -427,6 +427,7 @@ void stash_me(query *q, term *t, bool last_match)
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
 		ch->st.curr_clause2 = q->st.curr_clause2;
+		cgen = ++q->st.cgen;
 		ch->cgen = cgen;
 	}
 
