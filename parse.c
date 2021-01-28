@@ -3614,6 +3614,19 @@ module *create_module(prolog *pl, const char *name)
 		"term_variables(V1, V2), "							\
 		"V2 == V1).");
 
+	make_rule(m, "setup_call_cleanup(S,G,C) :-"				\
+		"copy_term('$setup_call_cleanup'(S,G,C),TMP_G),"	\
+		"'$setup_call_cleanup'(S,G,C)=TMP_G,"				\
+		"'$call'(TMP_G).");
+
+	make_rule(m, "'$setup_call_cleanup'(S,G,C) :-"			\
+		"S, !, '$on_cut'(C), G, '$on_det'(C).");
+
+	make_rule(m, "partial_string(S,S2) :-"					\
+		"append(S,_,S2).");
+
+	//make_rule(m, "forall(Cond,Action) :- \\+ (Cond, \\+ Action).");
+
 	make_rule(m, "chars_base64(Plain,Base64,_) :- base64(Plain,Base64).");
 	make_rule(m, "chars_urlenc(Plain,Url,_) :- urlenc(Plain,Url).");
 
@@ -3899,19 +3912,6 @@ module *create_module(prolog *pl, const char *name)
 		" phrase(NonTerminal, S0, S)."						\
 		"phrase_([T|Ts], S0, S) :-"							\
 		" '$append'([T|Ts], S, S0).");
-
-	//make_rule(m, "forall(Cond,Action) :- \\+ (Cond, \\+ Action).");
-
-	make_rule(m, "setup_call_cleanup(S, G, C) :-"			\
-		"copy_term('$setup_call_cleanup'(S, G, C), TMP_G),"	\
-		"'$setup_call_cleanup'(S, G, C)=TMP_G,"				\
-		"'$call'(TMP_G).");
-
-	make_rule(m, "'$setup_call_cleanup'(S, G, C) :-"		\
-		"S, !, '$on_cut'(C), G, '$on_det'(C).");
-
-	make_rule(m, "partial_string(S, S2) :-"					\
-		"append(S, _, S2).");
 
 	// Edinburgh...
 
