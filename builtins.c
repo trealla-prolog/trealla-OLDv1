@@ -11041,7 +11041,7 @@ void do_cleanup(query *q, cell *p1)
 	q->st.curr_cell = tmp;
 }
 
-static USE_RESULT pl_state fn_sys_on_backtrack_1(query *q)
+static USE_RESULT pl_state fn_sys_on_cut_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
@@ -11232,7 +11232,7 @@ static const struct builtins g_iso_funcs[] =
 	{"time", 1, fn_time_1, NULL},
 	{"trace", 0, fn_trace_0, NULL},
 
-	{"$on_backtrack", 1, fn_sys_on_backtrack_1, NULL},
+	{"$on_cut", 1, fn_sys_on_cut_1, NULL},
 	{"$is_det", 1, fn_sys_on_det_1, NULL},
 
 	{0}

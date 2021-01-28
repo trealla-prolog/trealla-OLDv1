@@ -3909,7 +3909,7 @@ module *create_module(prolog *pl, const char *name)
 
 	make_rule(m, "'$setup_call_cleanup'(S,G,C) :-"			\
 		"S, !,"												\
-		"'$on_backtrack'(C),"								\
+		"'$on_cut'(C),"								\
 		"catch(G, _, fail),"								\
 		"'$is_det'(C).");
 
