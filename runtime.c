@@ -534,10 +534,14 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 			extern void do_cleanup(query *q, cell *p1);
 
 			while (--ch) {
+				q->cp--;
+
 				if (ch->on_cut) {
+					ch->on_cut = false;
 					cell *c = ch->st.curr_cell;
 					c = deref(q, c,ch->st.curr_frame);
 					cell *p1 = deref(q, c+1, ch->st.curr_frame);
+					q->st.curr_frame = ch->st.curr_frame;
 
 					//printf("*** on_det: (");
 					//print_term(q, stdout, p1, ch->st.curr_frame, 1);
@@ -545,8 +549,10 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 
 					do_cleanup(q, p1);
 					return;
-					}
 				}
+			}
+
+			break;
 		}
 	}
 
