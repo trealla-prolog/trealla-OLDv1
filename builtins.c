@@ -11056,6 +11056,9 @@ static USE_RESULT pl_state fn_sys_on_cut_1(query *q)
 	}
 
 	may_error(make_choice(q));
+	idx_t curr_choice = q->cp - 1;
+	choice *ch = q->choices + curr_choice;
+	ch->on_cut = true;
 	return pl_success;
 }
 
@@ -11074,7 +11077,7 @@ static USE_RESULT pl_state fn_sys_on_det_1(query *q)
 	} else {
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
-		ch->on_cleanup = true;
+		ch->on_det = true;
 	}
 
 	return pl_success;
@@ -11233,7 +11236,7 @@ static const struct builtins g_iso_funcs[] =
 	{"trace", 0, fn_trace_0, NULL},
 
 	{"$on_cut", 1, fn_sys_on_cut_1, NULL},
-	{"$is_det", 1, fn_sys_on_det_1, NULL},
+	{"$on_det", 1, fn_sys_on_det_1, NULL},
 
 	{0}
 };
