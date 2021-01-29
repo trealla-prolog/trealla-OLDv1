@@ -11061,12 +11061,35 @@ void do_cleanup(query *q, cell *p1)
 	q->st.curr_cell = tmp;
 }
 
-static USE_RESULT pl_state fn_sys_on_det_1(query *q)
+static USE_RESULT pl_state fn_sys_on_det_0(query *q)
 {
-	GET_FIRST_ARG(p1,callable);
-
 	if (q->cp == q->save_cp) {
-		do_cleanup(q, p1);
+		idx_t curr_choice = q->cp - 1;
+		choice *ch = q->choices + curr_choice;
+
+		for (;;) {
+			if (ch->did_on_cut)
+				break;
+
+			if (ch->on_cut) {
+				ch->did_on_cut = true;
+				cell *c = ch->st.curr_cell;
+				c = deref(q, c,ch->st.curr_frame);
+				cell *p1 = deref(q, c+1, ch->st.curr_frame);
+				q->st.curr_frame = ch->st.curr_frame;
+
+				//printf("*** on_det: (");
+				//print_term(q, stdout, p1, ch->st.curr_frame, 1);
+				//printf(")\n");
+
+				do_cleanup(q, p1);
+				return pl_success;
+			}
+
+			ch--;
+		}
+
+		printf("*** no cleanup\n");
 		return pl_success;
 	} else {
 		idx_t curr_choice = q->cp - 1;
@@ -11230,7 +11253,7 @@ static const struct builtins g_iso_funcs[] =
 	{"trace", 0, fn_trace_0, NULL},
 
 	{"$on_cut", 1, fn_sys_on_cut_1, NULL},
-	{"$on_det", 1, fn_sys_on_det_1, NULL},
+	{"$on_det", 0, fn_sys_on_det_0, NULL},
 
 	{0}
 };

@@ -391,6 +391,7 @@ typedef struct {
 	bool catchme2:1;
 	bool barrier:1;
 	bool soft_cut:1;
+	bool did_on_cut:1;
 	bool on_cut:1;
 	bool on_det:1;
 } choice;
