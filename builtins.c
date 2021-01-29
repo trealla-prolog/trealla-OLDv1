@@ -561,7 +561,7 @@ static USE_RESULT cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx, bool 
 	return q->tmp_heap;
 }
 
-static USE_RESULT cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only)
+USE_RESULT cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only)
 {
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, nonlocals_only);
 	if (!tmp || (tmp == ERR_CYCLE_CELL)) return tmp;
@@ -11074,22 +11074,22 @@ static USE_RESULT pl_state fn_sys_chk_det_0(query *q)
 			if (ch->on_cut) {
 				ch->did_on_cut = true;
 				cell *c = ch->st.curr_cell;
-				c = deref(q, c,ch->st.curr_frame);
+				c = deref(q, c, ch->st.curr_frame);
 				cell *p1 = deref(q, c+1, ch->st.curr_frame);
-				q->st.curr_frame = ch->st.curr_frame;
 
 				//printf("*** chk_det: (");
 				//print_term(q, stdout, p1, ch->st.curr_frame, 1);
 				//(")\n");
 
-				do_cleanup(q, p1);
+				cell *tmp = deep_copy_to_heap(q, p1, ch->st.curr_frame, true);
+				do_cleanup(q, tmp);
 				return pl_success;
 			}
 
 			ch--;
 		}
 
-		printf("*** no cleanup\n");
+		assert(true);
 		return pl_success;
 	} else {
 		idx_t curr_choice = q->cp - 1;

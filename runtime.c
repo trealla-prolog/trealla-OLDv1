@@ -535,6 +535,8 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 
 		if (ch->on_det) {
 			extern void do_cleanup(query *q, cell *p1);
+			extern USE_RESULT cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only);
+
 			ch->on_det = false;
 
 			while (--ch) {
@@ -547,13 +549,13 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 					cell *c = ch->st.curr_cell;
 					c = deref(q, c,ch->st.curr_frame);
 					cell *p1 = deref(q, c+1, ch->st.curr_frame);
-					q->st.curr_frame = ch->st.curr_frame;
 
 					//printf("*** on_det: (");
 					//print_term(q, stdout, p1, ch->st.curr_frame, 1);
 					//printf(")\n");
 
-					do_cleanup(q, p1);
+					cell *tmp = deep_copy_to_heap(q, p1, ch->st.curr_frame, true);
+					do_cleanup(q, tmp);
 					break; //return;
 				}
 
