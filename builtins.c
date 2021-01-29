@@ -11032,14 +11032,6 @@ static USE_RESULT pl_state fn_module_1(query *q)
 	return pl_success;
 }
 
-void do_cleanup(query *q, cell *p1)
-{
-	cell *tmp = clone_to_heap(q, true, p1, 1);
-	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
-	q->st.curr_cell = tmp;
-}
-
 static USE_RESULT pl_state fn_sys_on_cut_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
@@ -11059,6 +11051,14 @@ static USE_RESULT pl_state fn_sys_on_cut_1(query *q)
 	choice *ch = q->choices + curr_choice;
 	ch->on_cut = true;
 	return pl_success;
+}
+
+void do_cleanup(query *q, cell *p1)
+{
+	cell *tmp = clone_to_heap(q, true, p1, 1);
+	idx_t nbr_cells = 1 + p1->nbr_cells;
+	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
+	q->st.curr_cell = tmp;
 }
 
 static USE_RESULT pl_state fn_sys_on_det_1(query *q)
