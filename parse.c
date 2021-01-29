@@ -3620,7 +3620,7 @@ module *create_module(prolog *pl, const char *name)
 		"'$call'(TMP_G).");
 
 	make_rule(m, "'$setup_call_cleanup'(S,G,C) :-"			\
-		"S, !, '$on_cut'(C), G, '$on_det'(C).");
+		"'$call'(S), !, '$on_cut'(C), '$call'(G), '$on_det'(C).");
 
 	make_rule(m, "partial_string(S,S2) :-"					\
 		"append(S,_,S2).");
