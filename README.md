@@ -24,7 +24,7 @@ deep-binding.
 Contributions
 =============
 
-Trealla is predominatly a vanity project, I had an itch to scratch  and
+Trealla is predominatly a vanity project, I had an itch to scratch and
 this is the result. While involement is welcome, it should be limited
 (mainly) at this time to issues, requests for features, and discussions.
 
