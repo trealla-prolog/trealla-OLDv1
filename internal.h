@@ -622,6 +622,7 @@ void destroy_query(query *q);
 USE_RESULT pl_state run_query(query *q);
 USE_RESULT cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx);
 USE_RESULT cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix);
+USE_RESULT cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only);
 void make_end(cell *tmp);
 USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx);
 USE_RESULT pl_state match_clause(query *q, cell *p1, idx_t p1_ctx, int retract);
