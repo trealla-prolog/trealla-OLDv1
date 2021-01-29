@@ -29,7 +29,7 @@ LDFLAGS += -flto=$(LTO)
 endif
 
 OBJECTS = tpl.o history.o \
-	arith.o builtins.o library.o \
+	arith.o builtins.o contrib.o library.o \
 	parse.o print.o runtime.o \
 	skiplist.o base64.o network.o utf8.o
 
@@ -58,10 +58,11 @@ clean:
 
 # from [gcc|clang] -MM *.c
 
-arith.o: arith.c trealla.h internal.h cdebug.h library.h builtins.h
+arith.o: arith.c trealla.h internal.h cdebug.h builtins.h
 base64.o: base64.c base64.h
 builtins.o: builtins.c trealla.h internal.h skiplist.h utf8.h cdebug.h \
-  network.h base64.h library.h builtins.h
+  network.h base64.h builtins.h
+contrib.o: contrib.c trealla.h internal.h cdebug.h builtins.h
 history.o: history.c history.h utf8.h cdebug.h
 library.o: library.c library.h
 network.o: network.c internal.h skiplist.h utf8.h trealla.h cdebug.h \

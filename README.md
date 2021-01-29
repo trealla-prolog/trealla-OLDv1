@@ -21,6 +21,22 @@ Trealla is not WAM-based. It uses tree-walking, structure-sharing and
 deep-binding.
 
 
+Contributions
+=============
+
+Trealla is predominatly a vanity project, I had an itch to scratch  and
+this is the result. While involement is welcome, it should be limited
+(mainly) at this time to issues, requests for features, and discussions.
+
+PRs relating to bugs, tests, examples and adding builtin functions are
+welcome. Builtin functions that are for compatability, novel or involve
+adding OS or other external interfaces should be in *contrib.c* initially
+and in the *devel* branch.
+
+PRs for architectural or stylistic changes will probably be ignored and
+should be discussed first.
+
+
 Building
 ========
 

@@ -11080,7 +11080,7 @@ static USE_RESULT pl_state fn_sys_on_det_0(query *q)
 
 				//printf("*** on_det: (");
 				//print_term(q, stdout, p1, ch->st.curr_frame, 1);
-				//printf(")\n");
+				//(")\n");
 
 				do_cleanup(q, p1);
 				return pl_success;
@@ -11418,6 +11418,7 @@ static const struct builtins g_other_funcs[] =
 };
 
 extern const struct builtins g_arith_funcs[];
+extern const struct builtins g_contrib_funcs[];
 
 void load_builtins(prolog *pl, bool iso_only)
 {
@@ -11433,6 +11434,10 @@ void load_builtins(prolog *pl, bool iso_only)
 		return;
 
 	for (const struct builtins *ptr = g_other_funcs; ptr->name; ptr++) {
+		sl_app(pl->funtab, ptr->name, ptr);
+	}
+
+	for (const struct builtins *ptr = g_contrib_funcs; ptr->name; ptr++) {
 		sl_app(pl->funtab, ptr->name, ptr);
 	}
 }
