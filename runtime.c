@@ -538,7 +538,6 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 			ch->on_det = false;
 
 			while (--ch) {
-				q->cp--;
 
 				if (ch->did_on_cut)
 					break;
@@ -555,8 +554,10 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 					//printf(")\n");
 
 					do_cleanup(q, p1);
-					return;
+					break; //return;
 				}
+
+				q->cp--;
 			}
 
 			break;
