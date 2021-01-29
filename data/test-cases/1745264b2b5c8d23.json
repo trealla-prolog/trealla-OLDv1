@@ -1,0 +1,55 @@
+{
+  "uid" : "1745264b2b5c8d23",
+  "name" : "iso_op_3_02",
+  "historyId" : "predicates/op_3/tests.lgt:tests#iso_op_3_02",
+  "time" : {
+    "start" : 1611927249000,
+    "stop" : 1611927249000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Failure instead of success",
+  "statusTrace" : "",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/op_3/tests.lgt"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "1745264b2b5c8d23.json",
+  "parameterValues" : [ ]
+}

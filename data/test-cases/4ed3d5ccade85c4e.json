@@ -1,0 +1,55 @@
+{
+  "uid" : "4ed3d5ccade85c4e",
+  "name" : "lgt_format_2_new_line_n",
+  "historyId" : "predicates/format_2/tests.lgt:tests#lgt_format_2_new_line_n",
+  "time" : {
+    "start" : 1611927136000,
+    "stop" : 1611927136000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Failure instead of success",
+  "statusTrace" : "",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/format_2/tests.lgt"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "4ed3d5ccade85c4e.json",
+  "parameterValues" : [ ]
+}
