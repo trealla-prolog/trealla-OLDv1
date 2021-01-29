@@ -5131,6 +5131,7 @@ static USE_RESULT pl_state fn_iso_call_n(query *q)
 		return throw_error(q, tmp2, "type_error", "callable");
 
 	q->st.curr_cell = tmp;
+	q->save_cp = q->cp;
 	return pl_success;
 }
 
@@ -5347,6 +5348,7 @@ static USE_RESULT pl_state fn_iso_catch_3(query *q)
 	make_end_return(tmp+1+p1->nbr_cells, q->st.curr_cell);
 	may_error(make_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;
+	q->save_cp = q->cp;
 	return pl_success;
 }
 
