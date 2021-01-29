@@ -1,6 +1,17 @@
 {
   "total" : 153,
   "items" : [ {
+    "uid" : "b53facfc3ab369a6b285a9b84e571b6a",
+    "name" : "predicates/stream_property_2/tests.lgt",
+    "statistic" : {
+      "failed" : 14,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 20,
+      "unknown" : 0,
+      "total" : 34
+    }
+  }, {
     "uid" : "41d6a19652e69674928f746fa8682efd",
     "name" : "predicates/setup_call_cleanup_3/tests.lgt",
     "statistic" : {
@@ -25,6 +36,17 @@
   }, {
     "uid" : "07c22e58394dfad0944e37c23ab3fab0",
     "name" : "predicates/findall_4/tests.lgt",
+    "statistic" : {
+      "failed" : 6,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 7,
+      "unknown" : 0,
+      "total" : 13
+    }
+  }, {
+    "uid" : "c9415514cc0ebd11365c405f34f84bfc",
+    "name" : "predicates/length_2/tests.lgt",
     "statistic" : {
       "failed" : 6,
       "broken" : 0,
@@ -87,28 +109,6 @@
       "passed" : 12,
       "unknown" : 0,
       "total" : 16
-    }
-  }, {
-    "uid" : "c4f6bd72fb27abbb93d5281bfb6b5be2",
-    "name" : "functions/log_2/tests.lgt",
-    "statistic" : {
-      "failed" : 3,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 12,
-      "unknown" : 0,
-      "total" : 15
-    }
-  }, {
-    "uid" : "a2fad80d17ce7d2a9b0b4e4ff04007fe",
-    "name" : "functions/atanh_1/tests.lgt",
-    "statistic" : {
-      "failed" : 3,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 6,
-      "unknown" : 0,
-      "total" : 9
     }
   } ]
 }
