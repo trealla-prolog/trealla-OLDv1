@@ -11089,7 +11089,6 @@ static USE_RESULT pl_state fn_sys_chk_det_0(query *q)
 			ch--;
 		}
 
-		assert(true);
 		return pl_success;
 	} else {
 		idx_t curr_choice = q->cp - 1;
