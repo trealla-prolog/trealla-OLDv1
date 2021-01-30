@@ -3622,7 +3622,9 @@ module *create_module(prolog *pl, const char *name)
 	make_rule(m, "'$setup_call_cleanup'(S,G,C) :- "			\
 		"'$call'((S,!)), "									\
 		"'$on_cut'(ignore(C)), "							\
-		"catch(G,E,'$call'((C,throw(E)))), "				\
+		"catch(G,Err, "										\
+			"(catch(ignore(C),_,true),throw(Err))"			\
+		"), "												\
 		"'$chk_det'.");
 
 	make_rule(m, "partial_string(S,P) :- append(S,_,P).");
