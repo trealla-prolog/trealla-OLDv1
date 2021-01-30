@@ -2453,12 +2453,8 @@ static const char *eat_space(parser *p)
 	}
 
 	while ((!*src || (*src == '%')) && p->fp) {
-		if (*src == '%')
-			p->line_nbr++;
-
-		if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
+		if (getline(&p->save_line, &p->n_line, p->fp) == -1)
 			return NULL;
-		}
 
 		p->srcptr = p->save_line;
 		src = p->srcptr;

@@ -2816,6 +2816,12 @@ static USE_RESULT pl_state do_read_term(query *q, stream *str, cell *p1, idx_t p
 	p->do_read_term = false;
 	p->read_term = 0;
 
+	if (!p->t->cidx) {
+		cell tmp;
+		make_literal(&tmp, g_eof_s);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
 	if (p->error) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
@@ -2994,7 +3000,6 @@ static USE_RESULT pl_state do_read_term(query *q, stream *str, cell *p1, idx_t p
 		}
 	}
 
-	//assert(p->t->cidx);
 	tmp = alloc_on_heap(q, p->t->cidx-1);
 	ensure(tmp);
 	copy_cells(tmp, p->t->cells, p->t->cidx-1);
