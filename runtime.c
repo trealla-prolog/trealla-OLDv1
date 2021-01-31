@@ -462,6 +462,7 @@ pl_state make_choice(query *q)
 	ch->catchme2 = false;
 	ch->did_on_cut = false;
 	ch->register_cleanup = false;
+	ch->register_term = false;
 	ch->chk_is_det = false;
 	ch->pins = 0;
 
