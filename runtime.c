@@ -461,8 +461,8 @@ pl_state make_choice(query *q)
 	ch->catchme1 = false;
 	ch->catchme2 = false;
 	ch->did_on_cut = false;
-	ch->on_cut = false;
-	ch->on_det = false;
+	ch->register_cleanup = false;
+	ch->chk_is_det = false;
 	ch->pins = 0;
 
 	may_error(check_slot(q, g->nbr_vars));
@@ -533,22 +533,22 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 		sl_done(ch->st.iter);
 		q->cp--;
 
-		if (ch->on_det) {
+		if (ch->chk_is_det) {
 			extern void do_cleanup(query *q, cell *p1);
-			ch->on_det = false;
+			ch->chk_is_det = false;
 
 			while (--ch) {
 
 				if (ch->did_on_cut)
 					break;
 
-				if (ch->on_cut) {
+				if (ch->register_cleanup) {
 					ch->did_on_cut = true;
 					cell *c = ch->st.curr_cell;
 					c = deref(q, c,ch->st.curr_frame);
 					cell *p1 = deref(q, c+1, ch->st.curr_frame);
 
-					//printf("*** on_cut: (");
+					//printf("*** register_cleanup: (");
 					//print_term(q, stdout, p1, ch->st.curr_frame, 1);
 					//printf(")\n");
 

@@ -392,8 +392,9 @@ typedef struct {
 	bool barrier:1;
 	bool soft_cut:1;
 	bool did_on_cut:1;
-	bool on_cut:1;
-	bool on_det:1;
+	bool register_cleanup:1;
+	bool register_term:1;
+	bool chk_is_det:1;
 } choice;
 
 typedef struct arena_ arena;

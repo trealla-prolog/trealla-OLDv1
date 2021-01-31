@@ -3621,7 +3621,7 @@ module *create_module(prolog *pl, const char *name)
 
 	make_rule(m, "'$setup_call_cleanup'(S,G,C) :- "			\
 		"'$call'((S,!)), "									\
-		"'$register_hook'(\\+ \\+ (C,!)), "					\
+		"'$register_cleanup'(\\+ \\+ (C,!)), "					\
 		"catch(G,Err, "										\
 			"(catch(\\+ \\+ (C,!),_,true),throw(Err))"		\
 		"), "												\
@@ -3881,9 +3881,11 @@ module *create_module(prolog *pl, const char *name)
 		" phrase(P2, Ms, []),"								\
 		" close(Str).");
 
-	make_rule(m, "phrase_to_stream(NT, Str) :- "			\
-		"phrase(NT, Chars), "								\
-		"'$put_chars'(Str, Chars).");
+	// Temporary mockup...
+
+	make_rule(m, "phrase_to_stream(GRBody, Str) :- "		\
+		"phrase(GRBody, S0), "								\
+		"'$put_chars'(Str, S0).");
 
 	make_rule(m, "'$append'([], L, L).");
 	make_rule(m, "'$append'([H|T], L, [H|R]) :- "			\

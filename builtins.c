@@ -11039,11 +11039,20 @@ static USE_RESULT pl_state fn_module_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_sys_register_hook_1(query *q)
+static USE_RESULT pl_state fn_sys_register_term_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
+	may_error(make_choice(q));
+	idx_t curr_choice = q->cp - 1;
+	choice *ch = q->choices + curr_choice;
+	ch->register_term = true;
+	return pl_success;
+}
 
+static USE_RESULT pl_state fn_sys_register_cleanup_1(query *q)
+{
 	if (q->retry) {
+		GET_FIRST_ARG(p1,callable);
 		cell *tmp = clone_to_heap(q, true, p1, 3);
 		idx_t nbr_cells = 1 + p1->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_cut_s, fn_iso_cut_0, 0, 0);
@@ -11056,7 +11065,7 @@ static USE_RESULT pl_state fn_sys_register_hook_1(query *q)
 	may_error(make_choice(q));
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
-	ch->on_cut = true;
+	ch->register_cleanup = true;
 	return pl_success;
 }
 
@@ -11078,7 +11087,7 @@ static USE_RESULT pl_state fn_sys_chk_is_det_0(query *q)
 			if (ch->did_on_cut)
 				break;
 
-			if (ch->on_cut) {
+			if (ch->register_cleanup) {
 				ch->did_on_cut = true;
 				cell *c = ch->st.curr_cell;
 				c = deref(q, c, ch->st.curr_frame);
@@ -11100,7 +11109,7 @@ static USE_RESULT pl_state fn_sys_chk_is_det_0(query *q)
 	} else {
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
-		ch->on_det = true;
+		ch->chk_is_det = true;
 	}
 
 	return pl_success;
@@ -11258,7 +11267,8 @@ static const struct builtins g_iso_funcs[] =
 	{"time", 1, fn_time_1, NULL},
 	{"trace", 0, fn_trace_0, NULL},
 
-	{"$register_hook", 1, fn_sys_register_hook_1, NULL},
+	{"$register_cleanup", 1, fn_sys_register_cleanup_1, NULL},
+	{"$register_term", 1, fn_sys_register_term_1, NULL},
 	{"$chk_is_det", 0, fn_sys_chk_is_det_0, NULL},
 
 	{0}
