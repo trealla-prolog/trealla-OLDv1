@@ -3881,6 +3881,10 @@ module *create_module(prolog *pl, const char *name)
 		" phrase(P2, Ms, []),"								\
 		" close(Str).");
 
+	make_rule(m, "phrase_to_stream(NT, Str) :- "			\
+		"phrase(NT, Chars), "								\
+		"'$put_chars'(Str, Chars).");
+
 	make_rule(m, "'$append'([], L, L).");
 	make_rule(m, "'$append'([H|T], L, [H|R]) :- "			\
 		" '$append'(T, L, R).");
