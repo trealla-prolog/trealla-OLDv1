@@ -2428,6 +2428,8 @@ static const char *eat_space(parser *p)
 {
 	const char *src = p->srcptr;
 
+LOOP:
+
 	while (isspace(*src)) {
 		if (*src == '\n')
 			p->line_nbr++;
@@ -2450,6 +2452,8 @@ static const char *eat_space(parser *p)
 
 			src++;
 		}
+
+		goto LOOP;
 	}
 
 	while ((!*src || (*src == '%')) && p->fp) {
@@ -2465,7 +2469,36 @@ static const char *eat_space(parser *p)
 
 			src++;
 		}
+
+		goto LOOP;
 	}
+
+	do {
+		if (!p->comment && (src[0] == '/') && (src[1] == '*')) {
+			p->comment = true;
+			src += 2;
+			continue;
+		}
+
+		if (p->comment && (src[0] == '*') && (src[1] == '/')) {
+			p->comment = false;
+			src += 2;
+			goto LOOP;
+		}
+
+		if (p->comment)
+			src++;
+
+		if (!*src && p->comment && p->fp) {
+			if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
+				return NULL;
+			}
+
+			src = p->srcptr = p->save_line;
+			p->line_nbr++;
+		}
+	}
+	 while (*src && p->comment);
 
 	while (isspace(*src)) {
 		if (*src == '\n')
@@ -2535,35 +2568,6 @@ static bool get_token(parser *p, int last_op)
 		p->srcptr = (char*)src;
 		return false;
 	}
-
-	do {
-		if (!p->comment && (src[0] == '/') && (src[1] == '*')) {
-			p->comment = true;
-			src += 2;
-			continue;
-		}
-
-		if (p->comment && (src[0] == '*') && (src[1] == '/')) {
-			p->comment = false;
-			src += 2;
-			p->srcptr = (char*)src;
-			return get_token(p, last_op);
-		}
-
-		if (p->comment)
-			src++;
-
-		if (!*src && p->comment && p->fp) {
-			if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
-				p->srcptr = (char*)src;
-				return true;
-			}
-
-			src = p->srcptr = p->save_line;
-				p->line_nbr++;
-		}
-	}
-	 while (*src && p->comment);
 
 	// -ve numbers (note there are no explicitly +ve numbers)
 
