@@ -11258,7 +11258,7 @@ static const struct builtins g_iso_funcs[] =
 	{"time", 1, fn_time_1, NULL},
 	{"trace", 0, fn_trace_0, NULL},
 
-	{"$on_cut_or_backtrack", 1, fn_sys_on_cut_or_backtrack_1, NULL},
+	{"$on_commit_or_backtrack", 1, fn_sys_on_cut_or_backtrack_1, NULL},
 	{"$chk_is_det", 0, fn_sys_chk_is_det_0, NULL},
 
 	{0}
