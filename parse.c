@@ -3621,7 +3621,7 @@ module *create_module(prolog *pl, const char *name)
 
 	make_rule(m, "'$setup_call_cleanup'(S,G,C) :- "			\
 		"'$call'((S,!)), "									\
-		"'$on_commit_or_backtrack'(\\+ \\+ (C,!)), "			\
+		"'$register_hook'(\\+ \\+ (C,!)), "					\
 		"catch(G,Err, "										\
 			"(catch(\\+ \\+ (C,!),_,true),throw(Err))"		\
 		"), "												\
