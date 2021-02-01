@@ -5129,7 +5129,7 @@ static USE_RESULT pl_state fn_iso_call_n(query *q)
 	}
 
 	cell *tmp = clone_to_heap(q, true, tmp2, 1);
-	make_call_return(q, tmp+1+tmp2->nbr_cells, q->st.curr_cell);
+	make_end_return(tmp+1+tmp2->nbr_cells, q->st.curr_cell);
 	cell *tmp3;
 
 	if ((tmp3 = check_body_callable(q->m->p, tmp2)) != NULL)
@@ -5181,7 +5181,7 @@ static USE_RESULT pl_state do_ifthenelse(query *q, cell *p1, cell *p2, cell *p3)
 	if (q->retry) {
 		cell *tmp = clone_to_heap(q, true, p3, 1);
 		idx_t nbr_cells = 1 + p3->nbr_cells;
-		make_end_return(tmp+nbr_cells, q->st.curr_cell);
+		make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
 		q->st.curr_cell = tmp;
 		return pl_success;
 	}
@@ -5190,7 +5190,7 @@ static USE_RESULT pl_state do_ifthenelse(query *q, cell *p1, cell *p2, cell *p3)
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
-	make_end_return(tmp+nbr_cells, q->st.curr_cell);
+	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -5218,7 +5218,7 @@ static USE_RESULT pl_state do_ifelse(query *q, cell *p1, cell *p2, cell *p3)
 	if (q->retry) {
 		cell *tmp = clone_to_heap(q, true, p3, 1);
 		idx_t nbr_cells = 1 + p3->nbr_cells;
-		make_end_return(tmp+nbr_cells, q->st.curr_cell);
+		make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
 		q->st.curr_cell = tmp;
 		return pl_success;
 	}
@@ -11057,7 +11057,7 @@ static USE_RESULT pl_state fn_sys_register_cleanup_1(query *q)
 		idx_t nbr_cells = 1 + p1->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_cut_s, fn_iso_cut_0, 0, 0);
 		make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
-		make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
+		make_end_return(tmp+nbr_cells, q->st.curr_cell);
 		q->st.curr_cell = tmp;
 		return pl_success;
 	}
@@ -11073,7 +11073,7 @@ void do_cleanup(query *q, cell *p1)
 {
 	cell *tmp = clone_to_heap(q, true, p1, 1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_call_return(q, tmp+nbr_cells, q->st.curr_cell);
+	make_end_return(tmp+nbr_cells, q->st.curr_cell);
 	q->st.curr_cell = tmp;
 }
 
