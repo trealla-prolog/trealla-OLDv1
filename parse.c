@@ -3886,15 +3886,17 @@ module *create_module(prolog *pl, const char *name)
 		" '$append'(T, L, R).");
 
 	make_rule(m, "phrase(GRBody, S0) :-"					\
-		"phrase(GRBody, S0, [])."							\
-		"phrase(GRBody, S0, S) :-"							\
+		"phrase(GRBody, S0, []).");
+
+	make_rule(m, "phrase(GRBody, S0, S) :-"					\
 		" ( var(GRBody) -> "								\
 		" throw(error(instantiation_error, phrase/3))"		\
 		" ; dcg_constr(GRBody) -> phrase_(GRBody, S0, S)"	\
 		" ; functor(GRBody, _, _) -> call(GRBody, S0, S)"	\
 		" ; throw(error(type_error(callable, GRBody), phrase/3))" \
-		" )."												\
-		"phrase_([], S, S)."								\
+		" ).");
+
+	make_rule(m, "phrase_([], S, S)."						\
 		"phrase_(!, S, S)."									\
 		"phrase_((A, B), S0, S) :-"							\
 		"  phrase(A, S0, S1), phrase(B, S1, S)."			\
