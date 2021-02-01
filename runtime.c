@@ -335,7 +335,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	g->nbr_slots = nbr_vars;
 	g->nbr_vars = nbr_vars;
 	g->overflow = 0;
-	g->any_choices = true;
+	g->any_choices = false;
 	g->did_cut = false;
 
 	idx_t curr_choice = q->cp - 1;
@@ -394,9 +394,11 @@ static void commit_me(query *q, term *t)
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 
-	if (tco && q->cp)
+	//printf("*** rec=%d, g->any_choices=%d, check_slots=%d\n", recursive, g->any_choices, check_slots(q, g, t));
+
+	if (tco /*&& q->cp*/) {
 		reuse_frame(q, t->nbr_vars);
-	else {
+	} else {
 		make_frame(q, t->nbr_vars, last_match);
 		g = GET_FRAME(q->st.curr_frame);
 	}
