@@ -475,7 +475,7 @@ pl_state make_choice(query *q)
 	return pl_success;
 }
 
-// A barrier is used when making a call, it
+// A barrier is used when making a call/1, it
 // sets a new cgen so that cuts are contained
 
 pl_state make_barrier(query *q)
