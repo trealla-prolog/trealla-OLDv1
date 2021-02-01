@@ -341,10 +341,11 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	idx_t curr_choice = q->cp - 1;
 	const choice *ch = q->choices + curr_choice;
 	q->st.sp = ch->st.sp;
+	frame *new_g = GET_FRAME(q->st.fp);
+
+	// See if we can reclaim the slots as well... what about trails?
 
 	if (!q->no_tco && q->m->pl->opt) {
-		frame *new_g = GET_FRAME(q->st.fp);
-
 		for (unsigned i = 0; i < nbr_vars; i++) {
 			slot *e = GET_SLOT(g, i);
 			FREE_STR(&e->c);
@@ -355,8 +356,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 		memmove(to, from, sizeof(slot)*nbr_vars);
 		q->st.sp = g->ctx + nbr_vars;
 	} else {
-		g->ctx = q->st.sp;
-		q->st.sp += nbr_vars;
+		g->ctx = new_g->ctx;
 	}
 
 	if (q->cp)
