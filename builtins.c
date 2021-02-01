@@ -5309,8 +5309,10 @@ static USE_RESULT pl_state fn_iso_once_1(query *q)
 
 static USE_RESULT pl_state fn_ignore_1(query *q)
 {
-	if (q->retry)
+	if (q->retry) {
+		// reset the g->cgen how?
 		return pl_success;
+	}
 
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 2);
