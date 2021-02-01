@@ -294,7 +294,7 @@ bool retry_choice(query *q)
 	return true;
 }
 
-static void make_frame(query *q, unsigned nbr_vars, bool last_match)
+static frame *make_frame(query *q, unsigned nbr_vars, bool last_match)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 
@@ -312,6 +312,8 @@ static void make_frame(query *q, unsigned nbr_vars, bool last_match)
 
 	q->st.sp += nbr_vars;
 	q->st.curr_frame = new_frame;
+	g = GET_FRAME(q->st.curr_frame);
+	return g;
 }
 
 static void trim_trail(query *q)
@@ -359,11 +361,6 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 		g->ctx = new_g->ctx;
 	}
 
-	if (q->cp)
-		trim_trail(q);
-	else
-		q->st.tp = 0;
-
 	q->tot_tcos++;
 }
 
@@ -389,8 +386,8 @@ static void commit_me(query *q, term *t)
 	q->m = q->st.curr_clause->m;
 	q->st.iter = NULL;
 	bool last_match = !q->st.curr_clause->next || t->first_cut;
-	bool recursive = (last_match || g->did_cut) && (q->st.curr_cell->flags&FLAG_TAIL_REC);
-	bool tco = recursive && !g->any_choices && check_slots(q, g, t);
+	bool recursive = (q->st.curr_cell->flags&FLAG_TAIL_REC);
+	bool tco = (last_match || g->did_cut) && recursive && !g->any_choices && check_slots(q, g, t);
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 
@@ -399,13 +396,17 @@ static void commit_me(query *q, term *t)
 	if (tco /*&& q->cp*/) {
 		reuse_frame(q, t->nbr_vars);
 	} else {
-		make_frame(q, t->nbr_vars, last_match);
-		g = GET_FRAME(q->st.curr_frame);
+		g = make_frame(q, t->nbr_vars, last_match);
 	}
 
 	if (last_match) {
 		sl_done(ch->st.iter);
 		drop_choice(q);
+
+		if (q->cp)
+			trim_trail(q);
+		else
+			q->st.tp = 0;
 	} else {
 		ch->st.curr_clause = q->st.curr_clause;
 		ch->cgen = g->cgen;

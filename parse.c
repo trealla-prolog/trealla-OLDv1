@@ -3621,7 +3621,7 @@ module *create_module(prolog *pl, const char *name)
 
 	make_rule(m, "'$setup_call_cleanup'(S,G,C) :- "			\
 		"'$call'((S,!)), "									\
-		"'$register_cleanup'(\\+ \\+ (C,!)), "					\
+		"'$register_cleanup'(\\+ \\+ (C,!)), "				\
 		"catch(G,Err, "										\
 			"(catch(\\+ \\+ (C,!),_,true),throw(Err))"		\
 		"), "												\
