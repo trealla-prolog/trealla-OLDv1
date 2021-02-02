@@ -564,16 +564,11 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 static void follow_me(query *q)
 {
 	q->st.curr_cell += q->st.curr_cell->nbr_cells;
+	frame *g = GET_CURR_FRAME();
 
 	while (q->st.curr_cell && is_end(q->st.curr_cell)) {
-		// End return must reset the curr_cell
-		if (q->st.curr_cell->val_ptr) {
-			// Call return must reset the cgen
-			if (q->st.curr_cell->cgen != ERR_IDX) {
-				frame *g = GET_CURR_FRAME();
-				g->cgen = q->st.curr_cell->cgen;
-			}
-		}
+		if (q->st.curr_cell->cgen != ERR_IDX)
+			g->cgen = q->st.curr_cell->cgen;
 
 		q->st.curr_cell = q->st.curr_cell->val_ptr;
 	}
