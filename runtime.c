@@ -338,7 +338,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	g->nbr_vars = nbr_vars;
 	g->overflow = 0;
 	g->any_choices = false;
-	g->did_cut = false;
+	g->did_cut = true;
 
 	idx_t curr_choice = q->cp - 1;
 	const choice *ch = q->choices + curr_choice;
@@ -510,7 +510,9 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 	g->any_choices = true;	// ???
-	g->did_cut = true;
+
+	if (!local_cut)
+		g->did_cut = true;
 
 	while (q->cp) {
 		idx_t curr_choice = q->cp - 1;
