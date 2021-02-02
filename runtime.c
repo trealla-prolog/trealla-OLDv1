@@ -304,7 +304,7 @@ static frame *make_frame(query *q, unsigned nbr_vars, bool last_match)
 	idx_t new_frame = q->st.fp++;
 	g = GET_FRAME(new_frame);
 	g->prev_frame = q->st.curr_frame;
-	g->curr_cell = q->st.curr_cell;
+	g->prev_cell = q->st.curr_cell;
 	g->cgen = ++q->st.cgen;
 	g->overflow = 0;
 	g->any_choices = false;
@@ -440,7 +440,7 @@ void stash_me(query *q, term *t, bool last_match)
 	idx_t new_frame = q->st.fp++;
 	frame *g = GET_FRAME(new_frame);
 	g->prev_frame = q->st.curr_frame;
-	g->curr_cell = NULL;
+	g->prev_cell = NULL;
 	g->cgen = cgen;
 	g->overflow = 0;
 	g->any_choices = false;
@@ -600,11 +600,11 @@ static bool resume_frame(query *q)
 #if 0
 	int det = check_slots(q, g, NULL);
 
-	if (det && !g->any_choices && (q->st.curr_frame == (q->st.fp-1)) && q->m->opt)
+	if (!g->any_choices && (q->st.curr_frame == (q->st.fp-1)) && q->m->pl->opt && det)
 		q->st.fp--;
 #endif
 
-	cell *curr_cell = g->curr_cell;
+	cell *curr_cell = g->prev_cell;
 	g = GET_FRAME(q->st.curr_frame=g->prev_frame);
 	q->st.curr_cell = curr_cell;
 	q->m = g->m;

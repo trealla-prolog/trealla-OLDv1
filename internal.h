@@ -344,7 +344,7 @@ typedef struct {
 } slot;
 
 typedef struct {
-	cell *curr_cell;
+	cell *prev_cell;
 	module *m;
 	idx_t prev_frame, ctx, overflow, cgen;
 	uint16_t nbr_vars, nbr_slots;
