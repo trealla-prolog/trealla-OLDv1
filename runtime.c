@@ -294,15 +294,10 @@ bool retry_choice(query *q)
 	return true;
 }
 
-static frame *make_frame(query *q, unsigned nbr_vars, bool last_match)
+static frame *make_frame(query *q, unsigned nbr_vars)
 {
-	frame *g = GET_FRAME(q->st.curr_frame);
-
-	if (!last_match)
-		g->any_choices = true;
-
 	idx_t new_frame = q->st.fp++;
-	g = GET_FRAME(new_frame);
+	frame *g = GET_FRAME(new_frame);
 	g->prev_frame = q->st.curr_frame;
 	g->prev_cell = q->st.curr_cell;
 	g->cgen = ++q->st.cgen;
@@ -391,10 +386,13 @@ static void commit_me(query *q, term *t)
 
 	//printf("*** tco=%d, rec=%d, last_match=%d, g->any_choices=%d, check_slots=%d\n", tco, recursive, last_match, g->any_choices, check_slots(q, g, t));
 
+	if (!last_match)
+		g->any_choices = true;
+
 	if (tco) {
 		reuse_frame(q, t->nbr_vars);
 	} else {
-		g = make_frame(q, t->nbr_vars, last_match);
+		g = make_frame(q, t->nbr_vars);
 	}
 
 	if (last_match) {
