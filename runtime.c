@@ -391,9 +391,9 @@ static void commit_me(query *q, term *t)
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 
-	//printf("*** rec=%d, g->any_choices=%d, check_slots=%d\n", recursive, g->any_choices, check_slots(q, g, t));
+	//printf("*** tco=%d, rec=%d, last_match=%d, g->any_choices=%d, check_slots=%d\n", tco, recursive, last_match, g->any_choices, check_slots(q, g, t));
 
-	if (tco /*&& q->cp*/) {
+	if (tco) {
 		reuse_frame(q, t->nbr_vars);
 	} else {
 		g = make_frame(q, t->nbr_vars, last_match);
