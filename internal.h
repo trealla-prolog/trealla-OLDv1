@@ -348,7 +348,6 @@ typedef struct {
 	module *m;
 	idx_t prev_frame, ctx, overflow, cgen;
 	uint16_t nbr_vars, nbr_slots;
-	bool any_choices:1;
 } frame;
 
 enum { eof_action_eof_code, eof_action_error, eof_action_reset };
@@ -385,7 +384,6 @@ typedef struct {
 	uint64_t pins;
 	idx_t v1, v2, cgen, orig_cgen, overflow;
 	uint16_t nbr_vars, nbr_slots;
-	bool any_choices:1;
 	bool catchme1:1;
 	bool catchme2:1;
 	bool barrier:1;

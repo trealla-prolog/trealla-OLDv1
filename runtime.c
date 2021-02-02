@@ -151,6 +151,19 @@ static USE_RESULT pl_state check_slot(query *q, unsigned cnt)
 	return pl_success;
 }
 
+// Note: in commit there is a provisional choice point
+// that we should skip over, hence the '2' ...
+
+static bool any_choices(query *q, frame *g, bool in_commit)
+{
+	if (q->cp < (in_commit ? 2 : 1))
+		return false;
+
+	idx_t curr_choice = q->cp - (in_commit ? 2 : 1);
+	const choice *ch = q->choices + curr_choice;
+	return ch->cgen >= g->cgen ? true : false;
+}
+
 static void trace_call(query *q, cell *c, box_t box)
 {
 	if (!c || !c->fn || is_empty(c))
@@ -181,7 +194,7 @@ static void trace_call(query *q, cell *c, box_t box)
 #if DEBUG
 	frame *g = GET_FRAME(q->st.curr_frame);
 	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u:tp%u:cp%u:fp%u:sp%u:hp%u} ",
-		q->st.curr_frame, g->nbr_vars, g->nbr_slots, g->any_choices,
+		q->st.curr_frame, g->nbr_vars, g->nbr_slots, any_choices(q, g, false),
 		q->st.tp, q->cp, q->st.fp, q->st.sp, q->st.hp);
 #endif
 
@@ -289,7 +302,6 @@ bool retry_choice(query *q)
 	g->cgen = ch->orig_cgen;
 	g->nbr_vars = ch->nbr_vars;
 	g->nbr_slots = ch->nbr_slots;
-	g->any_choices = ch->any_choices;
 	g->overflow = ch->overflow;
 	return true;
 }
@@ -302,7 +314,6 @@ static frame *make_frame(query *q, unsigned nbr_vars)
 	g->prev_cell = q->st.curr_cell;
 	g->cgen = ++q->st.cgen;
 	g->overflow = 0;
-	g->any_choices = false;
 
 	q->st.sp += nbr_vars;
 	q->st.curr_frame = new_frame;
@@ -331,7 +342,6 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	g->nbr_slots = nbr_vars;
 	g->nbr_vars = nbr_vars;
 	g->overflow = 0;
-	g->any_choices = false;
 
 	idx_t curr_choice = q->cp - 1;
 	const choice *ch = q->choices + curr_choice;
@@ -380,14 +390,11 @@ static void commit_me(query *q, term *t)
 	q->st.iter = NULL;
 	bool last_match = !q->st.curr_clause->next || t->first_cut;
 	bool recursive = last_match && (q->st.curr_cell->flags&FLAG_TAIL_REC);
-	bool tco = !g->any_choices && recursive && check_slots(q, g, t);
+	bool tco = recursive && !any_choices(q, g, true) && check_slots(q, g, t);
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 
-	//printf("*** tco=%d, rec=%d, last_match=%d, g->any_choices=%d, check_slots=%d\n", tco, recursive, last_match, g->any_choices, check_slots(q, g, t));
-
-	if (!last_match)
-		g->any_choices = true;
+	//printf("*** tco=%d, rec=%d, last_match=%d, any_choices=%d, check_slots=%d\n", tco, recursive, last_match, any_choices(q, g, true), check_slots(q, g, t));
 
 	if (tco) {
 		reuse_frame(q, t->nbr_vars);
@@ -423,8 +430,6 @@ void stash_me(query *q, term *t, bool last_match)
 	if (last_match)
 		drop_choice(q);
 	else {
-		frame *g = GET_FRAME(q->st.curr_frame);
-		g->any_choices = true;
 		idx_t curr_choice = q->cp - 1;
 		choice *ch = q->choices + curr_choice;
 		ch->st.curr_clause2 = q->st.curr_clause2;
@@ -439,7 +444,6 @@ void stash_me(query *q, term *t, bool last_match)
 	g->prev_cell = NULL;
 	g->cgen = cgen;
 	g->overflow = 0;
-	g->any_choices = false;
 
 	q->st.sp += nbr_vars;
 }
@@ -467,7 +471,6 @@ pl_state make_choice(query *q)
 	may_error(check_slot(q, g->nbr_vars));
 	ch->nbr_vars = g->nbr_vars;
 	ch->nbr_slots = g->nbr_slots;
-	ch->any_choices = g->any_choices;
 	ch->overflow = g->overflow;
 
 	return pl_success;
@@ -504,10 +507,6 @@ pl_state make_catcher(query *q, enum q_retry retry)
 void cut_me(query *q, bool local_cut, bool soft_cut)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
-
-	if (!local_cut) {
-		g->any_choices = true;	// ?????
-	}
 
 	while (q->cp) {
 		idx_t curr_choice = q->cp - 1;
@@ -597,7 +596,7 @@ static bool resume_frame(query *q)
 #if 0
 	int det = check_slots(q, g, NULL);
 
-	if (!g->any_choices && (q->st.curr_frame == (q->st.fp-1)) && q->m->pl->opt && det)
+	if ((q->st.curr_frame == (q->st.fp-1)) && q->m->pl->opt && !any_choices(q, g, false) && det)
 		q->st.fp--;
 #endif
 
