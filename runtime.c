@@ -308,7 +308,6 @@ static frame *make_frame(query *q, unsigned nbr_vars, bool last_match)
 	g->cgen = ++q->st.cgen;
 	g->overflow = 0;
 	g->any_choices = false;
-	g->last_match = false;
 
 	q->st.sp += nbr_vars;
 	q->st.curr_frame = new_frame;
@@ -338,7 +337,6 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	g->nbr_vars = nbr_vars;
 	g->overflow = 0;
 	g->any_choices = false;
-	g->last_match = false;
 
 	idx_t curr_choice = q->cp - 1;
 	const choice *ch = q->choices + curr_choice;
@@ -387,7 +385,7 @@ static void commit_me(query *q, term *t)
 	q->st.iter = NULL;
 	bool last_match = !q->st.curr_clause->next || t->first_cut;
 	bool recursive = (q->st.curr_cell->flags&FLAG_TAIL_REC);
-	bool tco = last_match && g->last_match && recursive && !g->any_choices && check_slots(q, g, t);
+	bool tco = last_match && recursive && !g->any_choices && check_slots(q, g, t);
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 
@@ -400,7 +398,6 @@ static void commit_me(query *q, term *t)
 	}
 
 	if (last_match) {
-		g->last_match = true;
 		sl_done(ch->st.iter);
 		drop_choice(q);
 
@@ -445,7 +442,6 @@ void stash_me(query *q, term *t, bool last_match)
 	g->cgen = cgen;
 	g->overflow = 0;
 	g->any_choices = false;
-	g->last_match = false;
 
 	q->st.sp += nbr_vars;
 }
@@ -510,10 +506,10 @@ pl_state make_catcher(query *q, enum q_retry retry)
 void cut_me(query *q, bool local_cut, bool soft_cut)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
-	g->any_choices = true;	// ???
 
-	if (!local_cut)
-		g->last_match = true;
+	if (!local_cut) {
+		g->any_choices = true;	// ?????
+	}
 
 	while (q->cp) {
 		idx_t curr_choice = q->cp - 1;
