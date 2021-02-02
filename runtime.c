@@ -151,7 +151,7 @@ static USE_RESULT pl_state check_slot(query *q, unsigned cnt)
 	return pl_success;
 }
 
-// Note: in commit there is a provisional choice point
+// Note: when in commit there is a provisional choice point
 // that we should skip over, hence the '2' ...
 
 static bool any_choices(query *q, frame *g, bool in_commit)
@@ -594,9 +594,8 @@ static bool resume_frame(query *q)
 	frame *g = GET_FRAME(q->st.curr_frame);
 
 #if 0
-	int det = check_slots(q, g, NULL);
-
-	if ((q->st.curr_frame == (q->st.fp-1)) && q->m->pl->opt && !any_choices(q, g, false) && det)
+	if ((q->st.curr_frame == (q->st.fp-1)) && q->m->pl->opt
+		&& !any_choices(q, g, false) && check_slots(q, g, NULL))
 		q->st.fp--;
 #endif
 
