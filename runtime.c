@@ -340,9 +340,9 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	g->nbr_vars = nbr_vars;
 	g->overflow = 0;
 
+	const frame *new_g = GET_FRAME(q->st.fp);
 	const choice *ch = GET_CURR_CHOICE();
 	q->st.sp = ch->st.sp;
-	frame *new_g = GET_FRAME(q->st.fp);
 
 	// See if we can reclaim the slots as well... what about trails?
 
@@ -352,7 +352,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 			FREE_STR(&e->c);
 		}
 
-		slot *from = GET_SLOT(new_g, 0);
+		const slot *from = GET_SLOT(new_g, 0);
 		slot *to = GET_SLOT(g, 0);
 		memmove(to, from, sizeof(slot)*nbr_vars);
 		q->st.sp = g->ctx + nbr_vars;
@@ -447,7 +447,7 @@ pl_state make_choice(query *q)
 	may_error(check_frame(q));
 	may_error(check_choice(q));
 
-	frame *g = GET_CURR_FRAME();
+	const frame *g = GET_CURR_FRAME();
 	idx_t curr_choice = q->cp++;
 	choice *ch = GET_CHOICE(curr_choice);
 	ch->st = q->st;
@@ -559,6 +559,8 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 		q->st.tp = 0;
 }
 
+// Continue to next term in body
+
 static void follow_me(query *q)
 {
 	q->st.curr_cell += q->st.curr_cell->nbr_cells;
@@ -577,6 +579,8 @@ static void follow_me(query *q)
 	}
 }
 
+// Reached end of body, return to previous frame
+
 static bool resume_frame(query *q)
 {
 	if (!q->st.curr_frame)
@@ -590,9 +594,9 @@ static bool resume_frame(query *q)
 		q->st.fp--;
 #endif
 
-	cell *curr_cell = g->prev_cell;
-	g = GET_FRAME(q->st.curr_frame=g->prev_frame);
-	q->st.curr_cell = curr_cell;
+	q->st.curr_cell = g->prev_cell;
+	q->st.curr_frame = g->prev_frame;
+	g = GET_CURR_FRAME();
 	q->m = g->m;
 	return true;
 }
