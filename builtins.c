@@ -109,30 +109,26 @@ static pl_state do_yield_0(query *q, int msecs)
 
 static void set_pinned(query *q, int i)
 {
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
+	choice *ch = GET_CURR_CHOICE();
 	ch->pins |= 1ULL << i;
 }
 
 static int is_pinned(query *q, int i)
 {
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
+	choice *ch = GET_CURR_CHOICE();
 	return ch->pins & (1ULL << i) ? 1 : 0;
 }
 
 static void set_params(query *q, idx_t p1, idx_t p2)
 {
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
+	choice *ch = GET_CURR_CHOICE();
 	ch->v1 = p1;
 	ch->v2 = p2;
 }
 
 static void get_params(query *q, idx_t *p1, idx_t *p2)
 {
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
+	choice *ch = GET_CURR_CHOICE();
 	if (p1) *p1 = ch->v1;
 	if (p2) *p2 = ch->v2;
 }
@@ -192,7 +188,7 @@ static void make_end_return(cell *tmp, cell *c)
 static void make_call_return(query *q, cell *tmp, cell *c)
 {
 	make_end_return(tmp, c);
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 	tmp->cgen = g->cgen;
 }
 
@@ -543,7 +539,7 @@ static USE_RESULT cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx, bool 
 	if (!init_tmp_heap(q))
 		return NULL;
 
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 	q->m->pl->varno = g->nbr_vars;
 	q->m->pl->tab_idx = 0;
 	q->cycle_error = 0;
@@ -2809,7 +2805,7 @@ static USE_RESULT pl_state do_read_term(query *q, stream *str, cell *p1, idx_t p
 		break;
 	}
 
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 	p->read_term = g->nbr_vars;
 	p->do_read_term = true;
 	parser_tokenize(p, false, false);
@@ -4499,7 +4495,7 @@ static USE_RESULT pl_state fn_iso_term_variables_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 	q->m->pl->varno = g->nbr_vars;
 	q->m->pl->tab_idx = 0;
 	collect_vars(q, p1, p1_ctx, p1->nbr_cells);
@@ -4631,7 +4627,7 @@ static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx
 	}
 
 	cell *src = p1, *dst = tmp+(prefix?1:0);
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 	q->m->pl->varno = g->nbr_vars;
 	q->m->pl->tab_idx = 0;
 
@@ -5364,9 +5360,9 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 	q->exception = e;
 
 	while (retry_choice(q)) {
-		choice *ch = q->choices + q->cp;
+		choice *ch = GET_CHOICE(q->cp);
 
-		if (!ch->catchme1)
+		if (!ch->catchme_retry)
 			continue;
 
 		q->retry = QUERY_EXCEPTION;
@@ -5492,7 +5488,7 @@ pl_state throw_error(query *q, cell *c, const char *err_type, const char *expect
 	parser *p = create_parser(q->m);
 	may_ptr_error(p);
 	p->srcptr = dst2;
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 	p->read_term = g->nbr_vars;
 	parser_tokenize(p, false, false);
 
@@ -6124,7 +6120,7 @@ static USE_RESULT pl_state fn_sys_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell *l = convert_to_list(q, get_queue(q), queue_used(q));
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 	unsigned new_varno = g->nbr_vars;
 	cell *c = l;
 
@@ -6221,16 +6217,14 @@ static cell *skip_existentials(query *q, cell *p2, uint64_t *xs)
 
 static void pin_vars(query *q, uint64_t mask)
 {
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
+	choice *ch = GET_CURR_CHOICE();
 	ch->pins = mask;
 }
 
 static void unpin_vars(query *q)
 {
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
-	frame *g = GET_FRAME(q->st.curr_frame);
+	choice *ch = GET_CURR_CHOICE();
+	frame *g = GET_CURR_FRAME();
 	uint64_t mask = 1;
 
 	for (unsigned i = 0; i < g->nbr_vars; i++, mask <<= 1) {
@@ -11045,8 +11039,7 @@ static USE_RESULT pl_state fn_sys_register_term_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	may_error(make_choice(q));
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
+	choice *ch = GET_CURR_CHOICE();
 	ch->register_term = true;
 	return pl_success;
 }
@@ -11065,8 +11058,7 @@ static USE_RESULT pl_state fn_sys_register_cleanup_1(query *q)
 	}
 
 	may_error(make_choice(q));
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
+	choice *ch = GET_CURR_CHOICE();
 	ch->register_cleanup = true;
 	return pl_success;
 }
@@ -11082,8 +11074,7 @@ void do_cleanup(query *q, cell *p1)
 static USE_RESULT pl_state fn_sys_chk_is_det_0(query *q)
 {
 	if (q->cp == q->save_cp) {
-		idx_t curr_choice = q->cp - 1;
-		choice *ch = q->choices + curr_choice;
+		choice *ch = GET_CURR_CHOICE();
 
 		for (;;) {
 			if (ch->did_on_cut)
@@ -11109,8 +11100,7 @@ static USE_RESULT pl_state fn_sys_chk_is_det_0(query *q)
 
 		return pl_success;
 	} else {
-		idx_t curr_choice = q->cp - 1;
-		choice *ch = q->choices + curr_choice;
+		choice *ch = GET_CURR_CHOICE();
 		ch->chk_is_det = true;
 	}
 

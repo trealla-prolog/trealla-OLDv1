@@ -74,7 +74,12 @@ typedef uint32_t idx_t;
 #define STREAM_BUFLEN 1024
 #define CHECK_OVERFLOW 1
 
+#define GET_CHOICE(i) (q->choices+(i))
+#define GET_CURR_CHOICE() GET_CHOICE(q->cp-1)
+
 #define GET_FRAME(i) (q->frames+(i))
+#define GET_CURR_FRAME(i) GET_FRAME(q->st.curr_frame)
+
 #define GET_SLOT(g,i) ((i) < g->nbr_slots ? (q->slots+g->ctx+(i)) : (q->slots+g->overflow+((i)-g->nbr_slots)))
 
 // Primary type...
@@ -384,8 +389,8 @@ typedef struct {
 	uint64_t pins;
 	idx_t v1, v2, cgen, orig_cgen, overflow;
 	uint16_t nbr_vars, nbr_slots;
-	bool catchme1:1;
-	bool catchme2:1;
+	bool catchme_retry:1;
+	bool catchme_exception:1;
 	bool barrier:1;
 	bool soft_cut:1;
 	bool did_on_cut:1;

@@ -159,8 +159,7 @@ static bool any_choices(query *q, frame *g, bool in_commit)
 	if (q->cp < (in_commit ? 2 : 1))
 		return false;
 
-	idx_t curr_choice = q->cp - (in_commit ? 2 : 1);
-	const choice *ch = q->choices + curr_choice;
+	const choice *ch = GET_CHOICE(q->cp - (in_commit ? 2 : 1));
 	return ch->cgen >= g->cgen ? true : false;
 }
 
@@ -192,7 +191,7 @@ static void trace_call(query *q, cell *c, box_t box)
 		"????");
 
 #if DEBUG
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u:tp%u:cp%u:fp%u:sp%u:hp%u} ",
 		q->st.curr_frame, g->nbr_vars, g->nbr_slots, any_choices(q, g, false),
 		q->st.tp, q->cp, q->st.fp, q->st.sp, q->st.hp);
@@ -226,8 +225,7 @@ static void unwind_trail(query *q, const choice *ch)
 
 void undo_me(query *q)
 {
-	idx_t curr_choice = q->cp - 1;
-	const choice *ch = q->choices + curr_choice;
+	const choice *ch = GET_CURR_CHOICE();
 	unwind_trail(q, ch);
 }
 
@@ -284,21 +282,21 @@ bool retry_choice(query *q)
 		return false;
 
 	idx_t curr_choice = drop_choice(q);
-	const choice *ch = q->choices + curr_choice;
+	const choice *ch = GET_CHOICE(curr_choice);
 	unwind_trail(q, ch);
 
 	Trace(q, q->st.curr_cell, FAIL);
 
 	// TO-DO: Watch for stack, make non-recursive...
 
-	if (ch->catchme2 || ch->soft_cut || ch->did_on_cut)
+	if (ch->catchme_exception || ch->soft_cut || ch->did_on_cut)
 		return retry_choice(q);
 
 	trim_heap(q, ch);
 	sl_done(q->st.iter);
 	q->st = ch->st;
 
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 	g->cgen = ch->orig_cgen;
 	g->nbr_vars = ch->nbr_vars;
 	g->nbr_slots = ch->nbr_slots;
@@ -323,8 +321,7 @@ static frame *make_frame(query *q, unsigned nbr_vars)
 
 static void trim_trail(query *q)
 {
-	idx_t curr_choice = q->cp - 1;
-	const choice *ch = q->choices + curr_choice;
+	const choice *ch = GET_CURR_CHOICE();
 
 	while (q->st.tp > ch->st.tp) {
 		const trail *tr = q->trails + q->st.tp - 1;
@@ -338,13 +335,12 @@ static void trim_trail(query *q)
 
 static void reuse_frame(query *q, unsigned nbr_vars)
 {
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 	g->nbr_slots = nbr_vars;
 	g->nbr_vars = nbr_vars;
 	g->overflow = 0;
 
-	idx_t curr_choice = q->cp - 1;
-	const choice *ch = q->choices + curr_choice;
+	const choice *ch = GET_CURR_CHOICE();
 	q->st.sp = ch->st.sp;
 	frame *new_g = GET_FRAME(q->st.fp);
 
@@ -384,15 +380,14 @@ static bool check_slots(const query *q, frame *g, term *t)
 
 static void commit_me(query *q, term *t)
 {
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 	g->m = q->m;
 	q->m = q->st.curr_clause->m;
 	q->st.iter = NULL;
 	bool last_match = !q->st.curr_clause->next || t->first_cut;
 	bool recursive = last_match && (q->st.curr_cell->flags&FLAG_TAIL_REC);
 	bool tco = recursive && !any_choices(q, g, true) && check_slots(q, g, t);
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
+	choice *ch = GET_CURR_CHOICE();
 
 	//printf("*** tco=%d, rec=%d, last_match=%d, any_choices=%d, check_slots=%d\n", tco, recursive, last_match, any_choices(q, g, true), check_slots(q, g, t));
 
@@ -430,8 +425,7 @@ void stash_me(query *q, term *t, bool last_match)
 	if (last_match)
 		drop_choice(q);
 	else {
-		idx_t curr_choice = q->cp - 1;
-		choice *ch = q->choices + curr_choice;
+		choice *ch = GET_CURR_CHOICE();
 		ch->st.curr_clause2 = q->st.curr_clause2;
 		cgen = ++q->st.cgen;
 		ch->cgen = cgen;
@@ -453,15 +447,15 @@ pl_state make_choice(query *q)
 	may_error(check_frame(q));
 	may_error(check_choice(q));
 
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 	idx_t curr_choice = q->cp++;
-	choice *ch = q->choices + curr_choice;
+	choice *ch = GET_CHOICE(curr_choice);
 	ch->st = q->st;
 	ch->orig_cgen = ch->cgen = g->cgen;
 	ch->barrier = false;
 	ch->soft_cut = false;
-	ch->catchme1 = false;
-	ch->catchme2 = false;
+	ch->catchme_retry = false;
+	ch->catchme_exception = false;
 	ch->did_on_cut = false;
 	ch->register_cleanup = false;
 	ch->register_term = false;
@@ -482,9 +476,8 @@ pl_state make_choice(query *q)
 pl_state make_barrier(query *q)
 {
 	may_error(make_choice(q));
-	frame *g = GET_FRAME(q->st.curr_frame);
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
+	frame *g = GET_CURR_FRAME();
+	choice *ch = GET_CURR_CHOICE();
 	ch->cgen = g->cgen = ++q->st.cgen;
 	ch->barrier = true;
 	return pl_success;
@@ -493,24 +486,22 @@ pl_state make_barrier(query *q)
 pl_state make_catcher(query *q, enum q_retry retry)
 {
 	may_error(make_barrier(q));
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = q->choices + curr_choice;
+	choice *ch = GET_CURR_CHOICE();
 
 	if (retry == QUERY_RETRY)
-		ch->catchme1 = true;
+		ch->catchme_retry = true;
 	else if (retry == QUERY_EXCEPTION)
-		ch->catchme2 = true;
+		ch->catchme_exception = true;
 
 	return pl_success;
 }
 
 void cut_me(query *q, bool local_cut, bool soft_cut)
 {
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 
 	while (q->cp) {
-		idx_t curr_choice = q->cp - 1;
-		choice *ch = q->choices + curr_choice;
+		choice *ch = GET_CURR_CHOICE();
 
 		//printf("*** ch->cgen=%u, g->cgen=%u, q->cgen=%u\n", ch->cgen, g->cgen, q->st.cgen);
 
@@ -577,7 +568,7 @@ static void follow_me(query *q)
 		if (q->st.curr_cell->val_ptr) {
 			// Call return must reset the cgen
 			if (q->st.curr_cell->cgen != ERR_IDX) {
-				frame *g = GET_FRAME(q->st.curr_frame);
+				frame *g = GET_CURR_FRAME();
 				g->cgen = q->st.curr_cell->cgen;
 			}
 		}
@@ -591,7 +582,7 @@ static bool resume_frame(query *q)
 	if (!q->st.curr_frame)
 		return false;
 
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 
 #if 0
 	if ((q->st.curr_frame == (q->st.fp-1)) && q->m->pl->opt
@@ -617,7 +608,7 @@ void make_indirect(cell *tmp, cell *c)
 
 unsigned create_vars(query *q, unsigned cnt)
 {
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 
 	if (!cnt)
 		return g->nbr_vars;
@@ -1350,8 +1341,7 @@ pl_state run_query(query *q)
 			if (!resume_frame(q)) {
 
 				while (q->cp) {
-					idx_t curr_choice = q->cp - 1;
-					choice *ch = q->choices + curr_choice;
+					choice *ch = GET_CURR_CHOICE();
 
 					if (!ch->barrier)
 						break;
