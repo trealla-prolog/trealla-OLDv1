@@ -349,7 +349,7 @@ typedef struct {
 	idx_t prev_frame, ctx, overflow, cgen;
 	uint16_t nbr_vars, nbr_slots;
 	bool any_choices:1;
-	bool did_cut:1;
+	bool last_match:1;
 } frame;
 
 enum { eof_action_eof_code, eof_action_error, eof_action_reset };
