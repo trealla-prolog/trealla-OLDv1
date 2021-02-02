@@ -379,8 +379,8 @@ static void commit_me(query *q, term *t)
 	q->m = q->st.curr_clause->m;
 	q->st.iter = NULL;
 	bool last_match = !q->st.curr_clause->next || t->first_cut;
-	bool recursive = (q->st.curr_cell->flags&FLAG_TAIL_REC);
-	bool tco = last_match && recursive && !g->any_choices && check_slots(q, g, t);
+	bool recursive = last_match && (q->st.curr_cell->flags&FLAG_TAIL_REC);
+	bool tco = !g->any_choices && recursive && check_slots(q, g, t);
 	idx_t curr_choice = q->cp - 1;
 	choice *ch = q->choices + curr_choice;
 
