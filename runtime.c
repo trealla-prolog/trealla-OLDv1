@@ -405,7 +405,7 @@ static void commit_me(query *q, term *t)
 	else
 		g = make_frame(q, t->nbr_vars);
 
-	if (last_match) {
+	if (last_match || t->cut_only) {
 		sl_done(ch->st.iter);
 		drop_choice(q);
 		trim_trail(q);
