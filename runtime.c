@@ -322,6 +322,11 @@ static frame *make_frame(query *q, unsigned nbr_vars)
 
 static void trim_trail(query *q)
 {
+	if (!q->cp) {
+		q->st.tp = 0;
+		return;
+	}
+
 	const choice *ch = GET_CURR_CHOICE();
 
 	while (q->st.tp > ch->st.tp) {
@@ -395,20 +400,15 @@ static void commit_me(query *q, term *t)
 		tco, q->no_tco, recursive, last_match, any_choices(q, g, true), check_slots(q, g, t));
 #endif
 
-	if (tco) {
+	if (tco)
 		reuse_frame(q, t->nbr_vars);
-	} else {
+	else
 		g = make_frame(q, t->nbr_vars);
-	}
 
 	if (last_match) {
 		sl_done(ch->st.iter);
 		drop_choice(q);
-
-		if (q->cp)
-			trim_trail(q);
-		else
-			q->st.tp = 0;
+		trim_trail(q);
 	} else {
 		ch->st.curr_clause = q->st.curr_clause;
 		ch->cgen = g->cgen;
