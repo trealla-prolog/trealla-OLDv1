@@ -159,7 +159,8 @@ static bool any_choices(query *q, frame *g, bool in_commit)
 	if (q->cp < (in_commit ? 2 : 1))
 		return false;
 
-	const choice *ch = GET_CHOICE(q->cp - (in_commit ? 2 : 1));
+	idx_t curr_choice = q->cp - (in_commit ? 2 : 1);
+	const choice *ch = GET_CHOICE(curr_choice);
 	return ch->cgen >= g->cgen ? true : false;
 }
 
