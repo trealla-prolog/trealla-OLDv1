@@ -390,7 +390,10 @@ static void commit_me(query *q, term *t)
 	bool tco = !q->no_tco && recursive && !any_choices(q, g, true) && check_slots(q, g, t);
 	choice *ch = GET_CURR_CHOICE();
 
-	//printf("*** tco=%d, rec=%d, last_match=%d, any_choices=%d, check_slots=%d\n", tco, recursive, last_match, any_choices(q, g, true), check_slots(q, g, t));
+#if 0
+	printf("*** tco=%d, rec=%d, last_match=%d, any_choices=%d, check_slots=%d\n",
+		tco, recursive, last_match, any_choices(q, g, true), check_slots(q, g, t));
+#endif
 
 	if (tco) {
 		reuse_frame(q, t->nbr_vars);
@@ -471,8 +474,8 @@ pl_state make_choice(query *q)
 	return pl_success;
 }
 
-// A barrier is used when making a call/1, it
-// sets a new cgen so that cuts are contained
+// A barrier is used when making a call/1, it sets a
+// new choice generation so that cuts are contained...
 
 pl_state make_barrier(query *q)
 {
@@ -503,8 +506,6 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 
 	while (q->cp) {
 		choice *ch = GET_CURR_CHOICE();
-
-		//printf("*** ch->cgen=%u, g->cgen=%u, q->cgen=%u\n", ch->cgen, g->cgen, q->st.cgen);
 
 		while (soft_cut) {
 			if (ch->barrier && (ch->cgen == g->cgen)) {
