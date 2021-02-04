@@ -10214,7 +10214,7 @@ unsigned fake_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 	return end;
 }
 
-static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned end)
+static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, int end)
 {
 	unsigned cnt = 0;
 

@@ -391,13 +391,13 @@ static void commit_me(query *q, term *t)
 	q->m = q->st.curr_clause->m;
 	q->st.iter = NULL;
 	bool last_match = !q->st.curr_clause->next || t->first_cut;
-	bool recursive = (q->st.curr_cell->flags&FLAG_TAIL_REC);
+	bool recursive = q->st.curr_cell->flags & FLAG_TAIL_REC;
 	bool tco = !q->no_tco && last_match && recursive && !any_choices(q, g, true) && check_slots(q, g, t);
 	choice *ch = GET_CURR_CHOICE();
 
 #if 0
 	printf("*** tco=%d, q->no_tco=%d, rec=%d, last_match=%d, any_choices=%d, check_slots=%d\n",
-		tco, q->no_tco, recursive, last_match, any_choices(q, g, true), check_slots(q, g, t));
+		tco, q->no_tco, last_match, recursive, any_choices(q, g, true), check_slots(q, g, t));
 #endif
 
 	if (tco)
