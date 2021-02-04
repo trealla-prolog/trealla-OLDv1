@@ -11073,11 +11073,11 @@ static USE_RESULT pl_state fn_sys_chk_is_det_0(query *q)
 		choice *ch = GET_CURR_CHOICE();
 
 		for (;;) {
-			if (ch->did_on_cut)
-				break;
-
 			if (ch->register_cleanup) {
-				ch->did_on_cut = true;
+				if (ch->did_cleanup)
+					break;
+
+				ch->did_cleanup = true;
 				cell *c = ch->st.curr_cell;
 				c = deref(q, c, ch->st.curr_frame);
 				cell *p1 = deref(q, c+1, ch->st.curr_frame);

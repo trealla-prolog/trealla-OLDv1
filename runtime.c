@@ -290,7 +290,7 @@ bool retry_choice(query *q)
 
 	// TO-DO: Watch for stack, make non-recursive...
 
-	if (ch->catchme_exception || ch->soft_cut || ch->did_on_cut)
+	if (ch->catchme_exception || ch->soft_cut || ch->did_cleanup)
 		return retry_choice(q);
 
 	trim_heap(q, ch);
@@ -456,7 +456,7 @@ pl_state make_choice(query *q)
 	ch->soft_cut = false;
 	ch->catchme_retry = false;
 	ch->catchme_exception = false;
-	ch->did_on_cut = false;
+	ch->did_cleanup = false;
 	ch->register_cleanup = false;
 	ch->register_term = false;
 	ch->chk_is_det = false;
@@ -527,12 +527,11 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 			ch->chk_is_det = false;
 
 			while (--ch) {
-
-				if (ch->did_on_cut)
-					break;
-
 				if (ch->register_cleanup) {
-					ch->did_on_cut = true;
+					if (ch->did_cleanup)
+						break;
+
+					ch->did_cleanup = true;
 					cell *c = ch->st.curr_cell;
 					c = deref(q, c,ch->st.curr_frame);
 					cell *p1 = deref(q, c+1, ch->st.curr_frame);

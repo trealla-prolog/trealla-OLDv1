@@ -394,7 +394,7 @@ typedef struct {
 	bool catchme_exception:1;
 	bool barrier:1;
 	bool soft_cut:1;
-	bool did_on_cut:1;
+	bool did_cleanup:1;
 	bool register_cleanup:1;
 	bool register_term:1;
 	bool chk_is_det:1;
