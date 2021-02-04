@@ -11084,7 +11084,7 @@ static USE_RESULT pl_state fn_sys_chk_is_det_0(query *q)
 
 				//printf("*** chk_det: (");
 				//print_term(q, stdout, p1, ch->st.curr_frame, 1);
-				//(")\n");
+				//printf(")\n");
 
 				cell *tmp = deep_copy_to_heap(q, p1, ch->st.curr_frame, true);
 				do_cleanup(q, tmp);
