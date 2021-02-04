@@ -294,6 +294,7 @@ typedef struct {
 	uint16_t nbr_vars;
 	bool first_cut:1;
 	bool cut_only:1;
+	bool is_fact:1;
 	bool deleted:1;
 	bool persist:1;
 	cell cells[];

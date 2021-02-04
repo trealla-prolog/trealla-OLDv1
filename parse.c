@@ -1685,8 +1685,8 @@ void parser_assign_vars(parser *p, unsigned start, bool rebase)
 	ensure(c);
 	c->val_type = TYPE_END;
 	c->nbr_cells = 1;
-
 	check_first_cut(p);
+	p->t->is_fact = !get_logical_body(p->t->cells);
 }
 
 static cell *insert_here(parser *p, cell *c, cell *p1)

@@ -414,12 +414,8 @@ static void commit_me(query *q, term *t)
 		ch->cgen = g->cgen;
 	}
 
-	if (t->cut_only)
-		q->st.curr_cell = NULL;
-	else
-		q->st.curr_cell = get_body(t->cells);
-
-	memset(q->nv_mask, 0, MAX_ARITY);
+	q->st.curr_cell = get_body(t->cells);
+	//memset(q->nv_mask, 0, MAX_ARITY);
 }
 
 void stash_me(query *q, term *t, bool last_match)
