@@ -371,13 +371,19 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 
 static bool check_slots(const query *q, frame *g, term *t)
 {
-	if (t && (g->nbr_vars != t->nbr_vars))
+	if (g->nbr_vars != t->nbr_vars)
 		return false;
 
 	for (unsigned i = 0; i < g->nbr_vars; i++) {
 		const slot *e = GET_SLOT(g, i);
 
-		if (is_indirect(&e->c) || is_string(&e->c))
+		if (is_nonconst_blob(&e->c))
+			return false;
+
+		if (is_indirect(&e->c))
+			return false;
+
+		if (is_list(&e->c))
 			return false;
 	}
 
@@ -581,8 +587,11 @@ static bool resume_frame(query *q)
 	frame *g = GET_CURR_FRAME();
 
 #if 0
-	if ((q->st.curr_frame == (q->st.fp-1)) && q->m->pl->opt
-		&& !any_choices(q, g, false) && check_slots(q, g, NULL))
+	term *t = &q->st.curr_clause->t;
+
+	if ((q->st.curr_frame == (q->st.fp-1))
+		&& q->m->pl->opt && t->tail_rec
+		&& !any_choices(q, g, false) && check_slots(q, g, t))
 		q->st.fp--;
 #endif
 

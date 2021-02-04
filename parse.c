@@ -1518,8 +1518,10 @@ static void parser_xref_cell(parser *p, term *t, cell *c, predicate *parent)
 		predicate *h = find_predicate(m, c);
 
 		if ((c+c->nbr_cells) >= (t->cells+t->cidx-1)) {
-			if (parent && (h == parent))
+			if (parent && (h == parent)) {
 				c->flags |= FLAG_TAIL_REC;
+				t->tail_rec = true;
+			}
 		}
 
 		if (h) {

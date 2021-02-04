@@ -297,6 +297,7 @@ typedef struct {
 	bool is_fact:1;
 	bool deleted:1;
 	bool persist:1;
+	bool tail_rec:1;
 	cell cells[];
 } term;
 
