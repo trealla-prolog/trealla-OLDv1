@@ -114,6 +114,8 @@ typedef uint32_t idx_t;
 #define is_fresh(c) ((c)->flags & FLAG2_FRESH)
 #define is_anon(c) ((c)->flags & FLAG2_ANON)
 #define is_builtin(c) ((c)->flags & FLAG_BUILTIN)
+#define is_tail(c) ((c)->flags & FLAG_TAIL)
+#define is_tail_recursive(c) ((c)->flags & FLAG_TAIL_REC)
 #define is_key(c) ((c)->flags & FLAG_KEY)
 #define is_op(c) (c->flags && 0xFF00)
 
@@ -172,12 +174,12 @@ enum {
 	FLAG_BINARY=1<<3,					// used with TYPE_INTEGER
 	FLAG_STREAM=1<<4,					// used with TYPE_INTEGER
 	FLAG_TAIL_REC=1<<5,
-	FLAG_BLOB=1<<6,						// used with TYPE_CSTRING
-	FLAG_STRING=1<<7,					// used with TYPE_CSTRING
-	FLAG_TMP=1<<8,						// used with TYPE_CSTRING
-	FLAG_KEY=1<<9,						// used with keys
+	FLAG_TAIL=1<<6,
+	FLAG_BLOB=1<<7,						// used with TYPE_CSTRING
+	FLAG_STRING=1<<8,					// used with TYPE_CSTRING
+	FLAG_TMP=1<<9,						// used with TYPE_CSTRING
+	FLAG_KEY=1<<10,						// used with keys
 
-	FLAG_SPARE3=1<<10,
 	FLAG_SPARE2=1<<11,
 	FLAG_SPARE1=1<<12,
 

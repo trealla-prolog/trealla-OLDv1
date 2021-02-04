@@ -394,8 +394,8 @@ static void commit_me(query *q, term *t)
 	q->m = q->st.curr_clause->m;
 	q->st.iter = NULL;
 	bool last_match = !q->st.curr_clause->next || t->first_cut;
-	bool recursive = q->st.curr_cell->flags & FLAG_TAIL_REC;
-	bool tco = !q->no_tco && last_match && recursive && !any_choices(q, g, true) && check_slots(q, g, t);
+	bool recursive = is_tail_recursive(q->st.curr_cell);
+	bool tco = last_match && recursive && !any_choices(q, g, true) && check_slots(q, g, t);
 	choice *ch = GET_CURR_CHOICE();
 
 #if 0
@@ -403,7 +403,7 @@ static void commit_me(query *q, term *t)
 		tco, q->no_tco, last_match, recursive, any_choices(q, g, true), check_slots(q, g, t));
 #endif
 
-	if (tco)
+	if (!q->no_tco && tco)
 		reuse_frame(q, t->nbr_vars);
 	else
 		g = make_frame(q, t->nbr_vars);
