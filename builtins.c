@@ -11093,8 +11093,6 @@ static USE_RESULT pl_state fn_sys_chk_is_det_0(query *q)
 
 			ch--;
 		}
-
-		return pl_success;
 	} else {
 		choice *ch = GET_CURR_CHOICE();
 		ch->chk_is_det = true;
