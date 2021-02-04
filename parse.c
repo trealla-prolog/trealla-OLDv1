@@ -404,7 +404,7 @@ predicate *find_matching_predicate_quiet(module *m, cell *c)
 
 predicate *find_functor(module *m, const char *name, unsigned arity)
 {
-	cell tmp = {0};
+	cell tmp = (cell){0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
 	tmp.arity = arity;
@@ -437,7 +437,7 @@ static void set_multifile_in_db(module *m, const char *name, idx_t arity)
 {
 	assert(name);
 
-	cell tmp = {0};
+	cell tmp = (cell){0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
@@ -455,7 +455,7 @@ static bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, id
 	module *m = find_module(pl, mod);
 	if (!m) return false;
 
-	cell tmp = {0};
+	cell tmp = (cell){0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
 	if (tmp.val_off == ERR_IDX) return false;
@@ -729,7 +729,7 @@ static void set_noindex_in_db(module *m, const char *name, unsigned arity)
 {
 	if (!m) return;
 
-	cell tmp = {0};
+	cell tmp = (cell){0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
@@ -747,7 +747,7 @@ void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
 {
 	if (!m) return;
 
-	cell tmp = {0};
+	cell tmp = (cell){0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
@@ -765,7 +765,7 @@ static void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 {
 	if (!m) return;
 
-	cell tmp = {0};
+	cell tmp = (cell){0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
@@ -781,7 +781,7 @@ static void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 
 static void set_persist_in_db(module *m, const char *name, unsigned arity)
 {
-	cell tmp = {0};
+	cell tmp = (cell){0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off == ERR_IDX);
@@ -997,7 +997,7 @@ query *create_task(query *q, cell *curr_cell)
 
 		for (unsigned i = 0; i < gsrc->nbr_vars; i++, e++) {
 			cell *c = deref(q, &e->c, e->ctx);
-			cell tmp = {0};
+			cell tmp = (cell){0};
 			tmp.val_type = TYPE_VARIABLE;
 			tmp.var_nbr = i;
 			tmp.val_off = g_anon_s;
@@ -1233,7 +1233,7 @@ static void directives(parser *p, term *t)
 				return;
 			}
 
-			query q = {0};
+			query q = (query){0};
 			q.m = p->m;
 			snprintf(dstbuf, sizeof(dstbuf), "%s/", g_tpl_lib);
 			char *dst = dstbuf + strlen(dstbuf);
@@ -3486,7 +3486,7 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 {
 	(void) dq;
 	idx_t ctx = 0;
-	query q = {0};
+	query q = (query){0};
 	q.m = m;
 
 	for (predicate *h = m->head; h; h = h->next) {

@@ -395,15 +395,20 @@ static void commit_me(query *q, term *t)
 	q->st.iter = NULL;
 	bool last_match = !q->st.curr_clause->next || t->first_cut;
 	bool recursive = is_tail_recursive(q->st.curr_cell);
-	bool tco = last_match && recursive && !any_choices(q, g, true) && check_slots(q, g, t);
+	bool tco = !q->no_tco && recursive && !any_choices(q, g, true) && check_slots(q, g, t);
 	choice *ch = GET_CURR_CHOICE();
 
 #if 0
-	printf("*** tco=%d, q->no_tco=%d, rec=%d, last_match=%d, any_choices=%d, check_slots=%d\n",
+	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, check_slots=%d\n",
 		tco, q->no_tco, last_match, recursive, any_choices(q, g, true), check_slots(q, g, t));
 #endif
 
-	if (!q->no_tco && tco)
+	if (tco && !last_match) {
+		//printf("*** here1\n");
+		ch->tail_rec = true;
+	}
+
+	if (tco && last_match)
 		reuse_frame(q, t->nbr_vars);
 	else
 		g = make_frame(q, t->nbr_vars);
@@ -453,17 +458,9 @@ pl_state make_choice(query *q)
 	const frame *g = GET_CURR_FRAME();
 	idx_t curr_choice = q->cp++;
 	choice *ch = GET_CHOICE(curr_choice);
-	ch->st = q->st;
+	*ch = (choice){0};
 	ch->orig_cgen = ch->cgen = g->cgen;
-	ch->barrier = false;
-	ch->soft_cut = false;
-	ch->catchme_retry = false;
-	ch->catchme_exception = false;
-	ch->did_cleanup = false;
-	ch->register_cleanup = false;
-	ch->register_term = false;
-	ch->chk_is_det = false;
-	ch->pins = 0;
+	ch->st = q->st;
 
 	may_error(check_slot(q, g->nbr_vars));
 	ch->nbr_vars = g->nbr_vars;
@@ -552,6 +549,12 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 			}
 
 			break;
+		}
+
+		if (ch->tail_rec) {
+			frame *g_prev = GET_FRAME(g->prev_frame);
+			g->prev_frame = g_prev->prev_frame;
+			*g_prev = *g;
 		}
 	}
 
@@ -940,7 +943,7 @@ USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 			if (needs_true) {
 				p1_body = deref(q, p1_body, p1_ctx);
 				idx_t p1_body_ctx = q->latest_ctx;
-				cell tmp = {0};
+				cell tmp = (cell){0};
 				tmp.val_type = TYPE_LITERAL;
 				tmp.nbr_cells = 1;
 				tmp.val_off = g_true_s;
