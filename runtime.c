@@ -380,7 +380,7 @@ static bool check_slots(const query *q, frame *g, term *t)
 		if (is_indirect(&e->c))
 			return false;
 
-		if (is_list(&e->c))
+		if (is_string(&e->c))
 			return false;
 	}
 
@@ -403,10 +403,12 @@ static void commit_me(query *q, term *t)
 		tco, q->no_tco, last_match, recursive, any_choices(q, g, true), check_slots(q, g, t));
 #endif
 
+#if 0
 	if (tco && !last_match) {
-		//printf("*** here1\n");
+		printf("*** here1\n");
 		ch->tail_rec = true;
 	}
+#endif
 
 	if (tco && last_match)
 		reuse_frame(q, t->nbr_vars);
@@ -546,12 +548,18 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 			break;
 		}
 
+#if 0
 		if (ch->tail_rec) {
+			printf("*** here2\n");
 			frame *g_prev = GET_FRAME(g->prev_frame);
 			g->prev_frame = g_prev->prev_frame;
+			g->prev_cell = g_prev->prev_cell;
 			*g_prev = *g;
+			q->st.curr_frame--;
+			q->st.fp--;
 			q->tot_tcos++;
 		}
+#endif
 	}
 
 	if (!q->cp)
