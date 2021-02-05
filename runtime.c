@@ -380,7 +380,7 @@ static bool check_slots(const query *q, frame *g, term *t)
 		if (is_indirect(&e->c))
 			return false;
 
-		if (is_string(&e->c))
+		if (is_list(&e->c))
 			return false;
 	}
 
