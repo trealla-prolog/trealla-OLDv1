@@ -840,6 +840,9 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 		return false;
 	}
 
+	if (p1_ctx == q->st.curr_frame)
+		q->no_tco = true;
+
 	if (is_variable(p1) && is_variable(p2)) {
 		if (p2_ctx > p1_ctx)
 			set_var(q, p2, p2_ctx, p1, p1_ctx);
@@ -856,9 +859,6 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 	}
 
 	if (is_variable(p2)) {
-		if (is_structure(p1) && (p1_ctx == q->st.curr_frame))
-			q->no_tco = true;
-
 		set_var(q, p2, p2_ctx, p1, p1_ctx);
 		return true;
 	}
