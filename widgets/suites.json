@@ -15,10 +15,10 @@
     "uid" : "1f89ce235b903676b13870ef37232400",
     "name" : "predicates/read_term_3/tests.lgt",
     "statistic" : {
-      "failed" : 7,
+      "failed" : 6,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 29,
+      "passed" : 30,
       "unknown" : 0,
       "total" : 36
     }
