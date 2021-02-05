@@ -8,16 +8,16 @@ fib(N,R) :-
     R is R1 + R2.
 
 test :-
-	fib(30,F),
-	F=1346269,
-	write('fib(30)='), write(F), write(' PASSED'), nl.
+    fib(30,F),
+    F =:= 1346269,
+    write('fib(30)='), write(F), write(' PASSED'), nl.
 
 test1 :-
-	fib(35,F),
-	F=14930352,
-	write('fib(35)='), write(F), write(' PASSED'), nl.
+    fib(35,F),
+    F =:= 14930352,
+    write('fib(35)='), write(F), write(' PASSED'), nl.
 
 test2 :-
-	fib(40,F),
-	F=165580141,
-	write('fib(40)='), write(F), write(' PASSED'), nl.
+    fib(40,F),
+    F =:= 165580141,
+    write('fib(40)='), write(F), write(' PASSED'), nl.
