@@ -1,8 +1,7 @@
 test :-
     fib(40,F),
     F =:= 165580141,
-    write('PASS'),
-    nl,
+	write('fib(40)='), write(F), write(' PASSED'), nl.
     halt.
 
 fib(A,B) :-
