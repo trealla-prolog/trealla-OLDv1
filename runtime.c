@@ -550,6 +550,7 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 			frame *g_prev = GET_FRAME(g->prev_frame);
 			g->prev_frame = g_prev->prev_frame;
 			*g_prev = *g;
+			q->tot_tcos++;
 		}
 	}
 
@@ -842,15 +843,12 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 	}
 
 	if (is_variable(p1)) {
-		if (is_structure(p2) && (p2_ctx >= q->st.curr_frame))
-			q->no_tco = true;
-
 		set_var(q, p1, p1_ctx, p2, p2_ctx);
 		return true;
 	}
 
 	if (is_variable(p2)) {
-		if (is_structure(p1) && (p1_ctx >= q->st.curr_frame))
+		if (is_structure(p1) && (p1_ctx == q->st.curr_frame))
 			q->no_tco = true;
 
 		set_var(q, p2, p2_ctx, p1, p1_ctx);
