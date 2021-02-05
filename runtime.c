@@ -535,11 +535,6 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 					cell *c = ch->st.curr_cell;
 					c = deref(q, c,ch->st.curr_frame);
 					cell *p1 = deref(q, c+1, ch->st.curr_frame);
-
-					//printf("*** register_cleanup: (");
-					//print_term(q, stdout, p1, ch->st.curr_frame, 1);
-					//printf(")\n");
-
 					cell *tmp = deep_copy_to_heap(q, p1, ch->st.curr_frame, true);
 					do_cleanup(q, tmp);
 					break;
