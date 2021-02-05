@@ -737,6 +737,35 @@ static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2
 	return true;
 }
 
+static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
+{
+	LIST_HANDLER(p1);
+	LIST_HANDLER(p2);
+
+	while (is_list(p1) && is_list(p2)) {
+		cell *h1 = LIST_HEAD(p1);
+		cell *c1 = deref(q, h1, p1_ctx);
+		idx_t c1_ctx = q->latest_ctx;
+
+		cell *h2 = LIST_HEAD(p2);
+		cell *c2 = deref(q, h2, p2_ctx);
+		idx_t c2_ctx = q->latest_ctx;
+
+		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
+			return false;
+
+		p1 = LIST_TAIL(p1);
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+
+		p2 = LIST_TAIL(p2);
+		p2 = deref(q, p2, p2_ctx);
+		p2_ctx = q->latest_ctx;
+	}
+
+	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1);
+}
+
 static bool unify_int(__attribute__((unused)) query *q, cell *p1, cell *p2)
 {
 	if (is_rational(p2))
@@ -773,35 +802,6 @@ static bool unify_cstring(query *q, cell *p1, cell *p2)
 		return !memcmp(GET_STR(p1), QUERY_GET_POOL(p2->val_off), LEN_STR(p1));
 
 	return false;
-}
-
-static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
-{
-	LIST_HANDLER(p1);
-	LIST_HANDLER(p2);
-
-	while (is_list(p1) && is_list(p2)) {
-		cell *h1 = LIST_HEAD(p1);
-		cell *c1 = deref(q, h1, p1_ctx);
-		idx_t c1_ctx = q->latest_ctx;
-
-		cell *h2 = LIST_HEAD(p2);
-		cell *c2 = deref(q, h2, p2_ctx);
-		idx_t c2_ctx = q->latest_ctx;
-
-		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
-			return false;
-
-		p1 = LIST_TAIL(p1);
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-
-		p2 = LIST_TAIL(p2);
-		p2 = deref(q, p2, p2_ctx);
-		p2_ctx = q->latest_ctx;
-	}
-
-	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 }
 
 struct dispatch {
