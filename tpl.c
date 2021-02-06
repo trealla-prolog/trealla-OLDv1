@@ -276,7 +276,7 @@ int main(int ac, char *av[])
 	}
 
 	if (!quiet)
-		printf("Trealla ProLog (c) Infradig 2020, %s\n", VERSION);
+		printf("Trealla Prolog (c) Infradig 2020, %s\n", VERSION);
 
 	if ((version == 2) && !quiet) {
 		fprintf(stdout, "Usage:\n");
