@@ -101,10 +101,6 @@ The file "~/.tplrc" is consulted on startup.
 What's missing, problems?
 =========================
 
-	current_predicate/1 is non-backtrackable
-	current_op/3 is non-backtrackable
-	database is immediate update view, fix
-	modules may need more work
 	environment limit is 32K vars per frame
 	implement attributed variables
 
