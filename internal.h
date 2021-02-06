@@ -242,7 +242,7 @@ struct cell_ {
 	uint16_t flags;
 	idx_t nbr_cells;
 
-	// The following unions are based off 'val_type' ...
+	// Tagged union based off 'val_type' ...
 
 	union {
 		struct {
@@ -279,7 +279,7 @@ struct cell_ {
 
 			union {
 				idx_t var_nbr;			// used with TYPE_VAR
-				idx_t cgen;				// used with cuts
+				idx_t cgen;				// choice generation
 			};
 		};
 	};
