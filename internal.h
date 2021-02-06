@@ -289,7 +289,7 @@ typedef struct {
 } uuid;
 
 typedef struct {
-	uint64_t gen;
+	uint64_t ugen;
 	idx_t nbr_cells, cidx;
 	uint16_t nbr_vars;
 	bool first_cut:1;
@@ -314,7 +314,7 @@ struct predicate_ {
 	clause *head, *tail;
 	skiplist *index, *index_save;
 	cell key;
-	uint64_t gen;
+	uint64_t ugen;
 	unsigned cnt;
 	bool is_prebuilt:1;
 	bool is_public:1;

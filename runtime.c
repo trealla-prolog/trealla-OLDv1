@@ -1101,7 +1101,7 @@ static USE_RESULT pl_state match_head(query *q)
 				c->match = h;
 		}
 
-		h->gen++;
+		h->ugen++;
 
 		if (h->index) {
 			cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
@@ -1134,7 +1134,7 @@ static USE_RESULT pl_state match_head(query *q)
 
 	for (; q->st.curr_clause; next_key(q)) {
 		if (q->st.curr_clause->t.deleted &&
-			(q->st.curr_clause->t.gen < q->st.curr_clause->parent->gen))
+			(q->st.curr_clause->t.ugen < q->st.curr_clause->parent->ugen))
 			continue;
 
 		term *t = &q->st.curr_clause->t;
