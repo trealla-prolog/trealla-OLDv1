@@ -598,6 +598,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	r->parent = h;
 	memcpy(&r->t, t, sizeof(term));
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
+	r->t.ugen_created = ++m->pl->ugen;
 	r->m = m;
 
 	if (!consulting) {
@@ -698,6 +699,7 @@ void retract_from_db(module *m, clause *r)
 {
 	r->parent->cnt--;
 	r->t.deleted = true;
+	r->t.ugen_deleted = ++m->pl->ugen;
 	m->dirty = true;
 }
 
