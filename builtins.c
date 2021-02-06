@@ -4767,18 +4767,15 @@ static USE_RESULT pl_state do_abolish(query *q, cell *c_orig, cell *c)
 	if (!h->is_dynamic)
 		return throw_error(q, c_orig, "permission_error", "modify,static_procedure");
 
-	uint64_t gen = h->gen;
-
 	for (clause *r = h->head; r; r = r->next) {
 		if (!q->m->loading && r->t.persist && !r->t.deleted)
 			db_log(q, r, LOG_ERASE);
 
-		r->t.gen = gen;
+		r->t.gen = h->gen;
 		r->t.deleted = true;
 	}
 
 	q->m->dirty = true;
-	h->gen = gen;
 	h->is_abolished = true;
 	sl_destroy(h->index);
 	h->index = NULL;
