@@ -184,8 +184,8 @@ static void make_call(query *q, cell *tmp)
 	make_end(tmp);
 	cell *c = q->st.curr_cell;
 	frame *g = GET_CURR_FRAME();
-	tmp->cgen = g->cgen;
 	tmp->val_ptr = c + c->nbr_cells;
+	tmp->cgen = g->cgen;
 }
 
 static void make_literal(cell *tmp, idx_t offset)

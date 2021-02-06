@@ -260,6 +260,7 @@ struct cell_ {
 
 		struct {
 			cell *val_ptr;
+			idx_t cgen;				// choice generation
 		};
 
 		struct {
@@ -272,15 +273,11 @@ struct cell_ {
 				pl_state (*fn)(query*);
 				predicate *match;
 				cell *attrs;
-				uint16_t priority;
+				uint16_t priority;	// used in parsing operators
 			};
 
 			idx_t val_off;
-
-			union {
-				idx_t var_nbr;			// used with TYPE_VAR
-				idx_t cgen;				// choice generation
-			};
+			idx_t var_nbr;			// used with TYPE_VAR
 		};
 	};
 };
