@@ -8,12 +8,14 @@ insect(bee).
 % logical update semantics should be:
 %
 %   ant
+%   here
 %   bee
 
 main :-
     retract(insect(X)),
         write(X), nl,
         retract(insect(bee)),
+        write(here), nl,
         fail.
 main :-
     halt.

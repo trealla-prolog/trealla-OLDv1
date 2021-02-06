@@ -298,6 +298,7 @@ bool retry_choice(query *q)
 	q->st = ch->st;
 
 	frame *g = GET_CURR_FRAME();
+	g->ugen_started = ch->ugen;
 	g->cgen = ch->orig_cgen;
 	g->nbr_vars = ch->nbr_vars;
 	g->nbr_slots = ch->nbr_slots;
@@ -457,10 +458,11 @@ pl_state make_choice(query *q)
 	may_error(check_frame(q));
 	may_error(check_choice(q));
 
-	const frame *g = GET_CURR_FRAME();
+	frame *g = GET_CURR_FRAME();
 	idx_t curr_choice = q->cp++;
 	choice *ch = GET_CHOICE(curr_choice);
 	*ch = (choice){0};
+	ch->ugen = g->ugen_started;
 	ch->orig_cgen = ch->cgen = g->cgen;
 	ch->st = q->st;
 
@@ -879,9 +881,7 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 
 USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 {
-	if (q->retry) {
-		q->st.curr_clause2 = q->st.curr_clause2->next;
-	} else {
+	if (!q->retry) {
 		cell *head = get_head(p1);
 		cell *c = head;
 
@@ -911,6 +911,11 @@ USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 
 			q->st.curr_clause2 = h->head;
 		}
+
+		frame *g = GET_FRAME(q->st.curr_frame);
+		g->ugen_started = q->m->pl->ugen;
+	} else {
+		q->st.curr_clause2 = q->st.curr_clause2->next;
 	}
 
 	if (!q->st.curr_clause2)
@@ -921,8 +926,21 @@ USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 	cell *orig_p1 = p1;
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
-		if (q->st.curr_clause2->t.deleted)
+		if (q->st.curr_clause2->t.deleted) {
+			frame *g = GET_FRAME(q->st.curr_frame);
+
+#if 0
+			printf("*** pl->ugen=%llu, g->ugen_started=%llu, c->ugen_created=%llu, c->ugen_deleted=%llu\n",
+				(long long unsigned)q->m->pl->ugen,
+				(long long unsigned)g->ugen_started,
+				(long long unsigned)q->st.curr_clause2->t.ugen_created,
+				(long long unsigned)q->st.curr_clause2->t.ugen_deleted);
+#endif
+
+			if ((g->ugen_started <= q->st.curr_clause2->t.ugen_created)
+				|| (g->ugen_started >= q->st.curr_clause2->t.ugen_deleted))
 			continue;
+		}
 
 		term *t = &q->st.curr_clause2->t;
 		cell *c = t->cells;
@@ -966,9 +984,7 @@ USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 
 USE_RESULT pl_state match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retract)
 {
-	if (q->retry) {
-		q->st.curr_clause2 = q->st.curr_clause2->next;
-	} else {
+	if (!q->retry) {
 		cell *c = p1;
 
 		if (!is_literal(c)) {
@@ -1005,6 +1021,11 @@ USE_RESULT pl_state match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retrac
 
 			q->st.curr_clause2 = h->head;
 		}
+
+		frame *g = GET_FRAME(q->st.curr_frame);
+		g->ugen_started = q->m->pl->ugen;
+	} else {
+		q->st.curr_clause2 = q->st.curr_clause2->next;
 	}
 
 	if (!q->st.curr_clause2)
@@ -1013,8 +1034,21 @@ USE_RESULT pl_state match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retrac
 	may_error(make_choice(q));
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
-		if (q->st.curr_clause2->t.deleted)
+		if (q->st.curr_clause2->t.deleted) {
+			frame *g = GET_FRAME(q->st.curr_frame);
+
+#if 0
+			printf("*** pl->ugen=%llu, g->ugen_started=%llu, c->ugen_created=%llu, c->ugen_deleted=%llu\n",
+				(long long unsigned)q->m->pl->ugen,
+				(long long unsigned)g->ugen_started,
+				(long long unsigned)q->st.curr_clause2->t.ugen_created,
+				(long long unsigned)q->st.curr_clause2->t.ugen_deleted);
+#endif
+
+			if ((g->ugen_started <= q->st.curr_clause2->t.ugen_created)
+				|| (g->ugen_started >= q->st.curr_clause2->t.ugen_deleted))
 			continue;
+		}
 
 		term *t = &q->st.curr_clause2->t;
 		cell *head = get_head(t->cells);
@@ -1101,8 +1135,6 @@ static USE_RESULT pl_state match_head(query *q)
 				c->match = h;
 		}
 
-		h->ugen++;
-
 		if (h->index) {
 			cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
 			unsigned arity = key->arity;
@@ -1124,6 +1156,9 @@ static USE_RESULT pl_state match_head(query *q)
 		} else {
 			q->st.curr_clause = h->head;
 		}
+
+		frame *g = GET_FRAME(q->st.curr_frame);
+		g->ugen_started = q->m->pl->ugen;
 	} else
 		next_key(q);
 
@@ -1133,9 +1168,21 @@ static USE_RESULT pl_state match_head(query *q)
 	may_error(make_choice(q));
 
 	for (; q->st.curr_clause; next_key(q)) {
-		if (q->st.curr_clause->t.deleted &&
-			(q->st.curr_clause->t.ugen < q->st.curr_clause->parent->ugen))
+		if (q->st.curr_clause->t.deleted) {
+			frame *g = GET_FRAME(q->st.curr_frame);
+
+#if 0
+			printf("*** pl->ugen=%llu, g->ugen_started=%llu, c->ugen_created=%llu, c->ugen_deleted=%llu\n",
+				(long long unsigned)q->m->pl->ugen,
+				(long long unsigned)g->ugen_started,
+				(long long unsigned)q->st.curr_clause->t.ugen_created,
+				(long long unsigned)q->st.curr_clause->t.ugen_deleted);
+#endif
+
+			if ((g->ugen_started <= q->st.curr_clause->t.ugen_created)
+				|| (g->ugen_started >= q->st.curr_clause->t.ugen_deleted))
 			continue;
+		}
 
 		term *t = &q->st.curr_clause->t;
 		cell *head = get_head(t->cells);

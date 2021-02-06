@@ -289,7 +289,7 @@ typedef struct {
 } uuid;
 
 typedef struct {
-	uint64_t ugen;
+	uint64_t ugen_created, ugen_deleted;
 	idx_t nbr_cells, cidx;
 	uint16_t nbr_vars;
 	bool first_cut:1;
@@ -314,7 +314,6 @@ struct predicate_ {
 	clause *head, *tail;
 	skiplist *index, *index_save;
 	cell key;
-	uint64_t ugen;
 	unsigned cnt;
 	bool is_prebuilt:1;
 	bool is_public:1;
@@ -353,6 +352,7 @@ typedef struct {
 typedef struct {
 	cell *prev_cell;
 	module *m;
+	uint64_t ugen_started;
 	idx_t prev_frame, ctx, overflow, cgen;
 	uint16_t nbr_vars, nbr_slots;
 } frame;
@@ -388,7 +388,7 @@ typedef struct {
 
 typedef struct {
 	state st;
-	uint64_t pins;
+	uint64_t pins, ugen;
 	idx_t v1, v2, cgen, orig_cgen, overflow;
 	uint16_t nbr_vars, nbr_slots;
 	bool catchme_retry:1;
@@ -542,6 +542,7 @@ struct prolog_ {
 	uint64_t s_last, s_cnt, seed;
 	skiplist *symtab, *funtab;
 	char *pool;
+	uint64_t ugen;
 	idx_t pool_offset, pool_size, tab_idx;
 	unsigned varno;
 	uint8_t current_input, current_output, current_error;

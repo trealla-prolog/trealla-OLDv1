@@ -1905,9 +1905,7 @@ static USE_RESULT pl_state do_retract(query *q, cell *p1, idx_t p1_ctx, int is_r
 	clause *r = q->st.curr_clause2;
 	bool last_match = !q->st.curr_clause2->next && 0;
 	stash_me(q, &r->t, last_match);
-
 	retract_from_db(q->m, r);
-	r->t.ugen = r->parent->ugen;
 
 	if (!q->m->loading && r->t.persist)
 		db_log(q, r, LOG_ERASE);
@@ -4771,7 +4769,7 @@ static USE_RESULT pl_state do_abolish(query *q, cell *c_orig, cell *c)
 		if (!q->m->loading && r->t.persist && !r->t.deleted)
 			db_log(q, r, LOG_ERASE);
 
-		r->t.ugen = h->ugen;
+		r->t.ugen_deleted = ++q->m->pl->ugen;
 		r->t.deleted = true;
 	}
 
