@@ -295,7 +295,6 @@ typedef struct {
 	bool first_cut:1;
 	bool cut_only:1;
 	bool is_fact:1;
-	bool deleted:1;
 	bool persist:1;
 	bool tail_rec:1;
 	cell cells[];

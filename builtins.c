@@ -2144,7 +2144,7 @@ static void clear_streams_properties(query *q)
 	if (h) {
 		for (clause *r = h->head; r;) {
 			clause *save = r->next;
-			r->t.deleted = true;
+			r->t.ugen_deleted = ++q->m->pl->ugen;
 			r = save;
 		}
 	}
@@ -4766,11 +4766,10 @@ static USE_RESULT pl_state do_abolish(query *q, cell *c_orig, cell *c)
 		return throw_error(q, c_orig, "permission_error", "modify,static_procedure");
 
 	for (clause *r = h->head; r; r = r->next) {
-		if (!q->m->loading && r->t.persist && !r->t.deleted)
+		if (!q->m->loading && r->t.persist && !r->t.ugen_deleted)
 			db_log(q, r, LOG_ERASE);
 
 		r->t.ugen_deleted = ++q->m->pl->ugen;
-		r->t.deleted = true;
 	}
 
 	q->m->dirty = true;
@@ -6780,7 +6779,7 @@ static void save_db(FILE *fp, query *q, int logging)
 			continue;
 
 		for (clause *r = h->head; r; r = r->next) {
-			if (r->t.deleted)
+			if (r->t.ugen_deleted)
 				continue;
 
 			if (logging)
@@ -6822,7 +6821,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 			continue;
 
 		for (clause *r = h->head; r; r = r->next) {
-			if (r->t.deleted)
+			if (r->t.ugen_deleted)
 				continue;
 
 			print_term(q, fp, r->t.cells, q->st.curr_frame, 0);

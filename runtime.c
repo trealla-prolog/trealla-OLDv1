@@ -877,6 +877,32 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 	return g_disp[p1->val_type].fn(q, p1, p2);
 }
 
+static bool CHECK_UPDATE_VIEW(__attribute__((unused)) query *q, clause *c)
+{
+#if 0
+	printf("*** pl->ugen=%llu, g->ugen_started=%llu, c->ugen_created=%llu, c->ugen_deleted=%llu\n",
+		(long long unsigned)q->m->pl->ugen,
+		(long long unsigned)g->ugen_started,
+		(long long unsigned)c->t.ugen_created,
+		(long long unsigned)c->t.ugen_deleted);
+#endif
+
+	frame *g = GET_FRAME(q->st.curr_frame);
+
+	if (c->t.ugen_created > g->ugen_started) {
+		//printf("*** ignore created\n");
+		return false;
+	}
+
+	if (c->t.ugen_deleted
+		&& (c->t.ugen_deleted <= g->ugen_started)) {
+		//printf("*** ignore deleted\n");
+		return false;
+	}
+
+	return true;
+}
+
 // Match HEAD :- BODY.
 
 USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx)
@@ -926,21 +952,9 @@ USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 	cell *orig_p1 = p1;
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
-		if (q->st.curr_clause2->t.deleted) {
-			frame *g = GET_FRAME(q->st.curr_frame);
 
-#if 0
-			printf("*** pl->ugen=%llu, g->ugen_started=%llu, c->ugen_created=%llu, c->ugen_deleted=%llu\n",
-				(long long unsigned)q->m->pl->ugen,
-				(long long unsigned)g->ugen_started,
-				(long long unsigned)q->st.curr_clause2->t.ugen_created,
-				(long long unsigned)q->st.curr_clause2->t.ugen_deleted);
-#endif
-
-			if ((g->ugen_started <= q->st.curr_clause2->t.ugen_created)
-				|| (g->ugen_started >= q->st.curr_clause2->t.ugen_deleted))
+		if (!CHECK_UPDATE_VIEW(q, q->st.curr_clause2))
 			continue;
-		}
 
 		term *t = &q->st.curr_clause2->t;
 		cell *c = t->cells;
@@ -1034,21 +1048,9 @@ USE_RESULT pl_state match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retrac
 	may_error(make_choice(q));
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
-		if (q->st.curr_clause2->t.deleted) {
-			frame *g = GET_FRAME(q->st.curr_frame);
 
-#if 0
-			printf("*** pl->ugen=%llu, g->ugen_started=%llu, c->ugen_created=%llu, c->ugen_deleted=%llu\n",
-				(long long unsigned)q->m->pl->ugen,
-				(long long unsigned)g->ugen_started,
-				(long long unsigned)q->st.curr_clause2->t.ugen_created,
-				(long long unsigned)q->st.curr_clause2->t.ugen_deleted);
-#endif
-
-			if ((g->ugen_started <= q->st.curr_clause2->t.ugen_created)
-				|| (g->ugen_started >= q->st.curr_clause2->t.ugen_deleted))
+		if (!CHECK_UPDATE_VIEW(q, q->st.curr_clause2))
 			continue;
-		}
 
 		term *t = &q->st.curr_clause2->t;
 		cell *head = get_head(t->cells);
@@ -1168,21 +1170,9 @@ static USE_RESULT pl_state match_head(query *q)
 	may_error(make_choice(q));
 
 	for (; q->st.curr_clause; next_key(q)) {
-		if (q->st.curr_clause->t.deleted) {
-			frame *g = GET_FRAME(q->st.curr_frame);
 
-#if 0
-			printf("*** pl->ugen=%llu, g->ugen_started=%llu, c->ugen_created=%llu, c->ugen_deleted=%llu\n",
-				(long long unsigned)q->m->pl->ugen,
-				(long long unsigned)g->ugen_started,
-				(long long unsigned)q->st.curr_clause->t.ugen_created,
-				(long long unsigned)q->st.curr_clause->t.ugen_deleted);
-#endif
-
-			if ((g->ugen_started <= q->st.curr_clause->t.ugen_created)
-				|| (g->ugen_started >= q->st.curr_clause->t.ugen_deleted))
+		if (!CHECK_UPDATE_VIEW(q, q->st.curr_clause))
 			continue;
-		}
 
 		term *t = &q->st.curr_clause->t;
 		cell *head = get_head(t->cells);
@@ -1445,6 +1435,7 @@ pl_state query_execute(query *q, term *t)
 	frame *g = q->frames + q->st.curr_frame;
 	g->nbr_vars = t->nbr_vars;
 	g->nbr_slots = t->nbr_vars;
+	g->ugen_started = ++q->m->pl->ugen;
 	pl_state ret = run_query(q);
 	sl_done(q->st.iter);
 	return ret;

@@ -621,7 +621,7 @@ static void reindex_predicate(module *m, predicate *h)
 	for (clause *r = h->head; r; r = r->next) {
 		cell *c = get_head(r->t.cells);
 
-		if (!r->t.deleted)
+		if (!r->t.ugen_deleted)
 			sl_app(h->index, c, r);
 	}
 }
@@ -698,7 +698,6 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 void retract_from_db(module *m, clause *r)
 {
 	r->parent->cnt--;
-	r->t.deleted = true;
 	r->t.ugen_deleted = ++m->pl->ugen;
 	m->dirty = true;
 }
@@ -707,7 +706,7 @@ clause *find_in_db(module *m, uuid *ref)
 {
 	for (predicate *h = m->head; h; h = h->next) {
 		for (clause *r = h->head ; r; r = r->next) {
-			if (r->t.deleted)
+			if (r->t.ugen_deleted)
 				continue;
 
 			if (!memcmp(&r->u, ref, sizeof(uuid)))
@@ -722,7 +721,7 @@ clause *erase_from_db(module *m, uuid *ref)
 {
 	clause *r = find_in_db(m, ref);
 	if (!r) return 0;
-	r->t.deleted = true;
+	r->t.ugen_deleted = ++m->pl->ugen;
 	m->dirty = true;
 	return r;
 }
@@ -3245,7 +3244,7 @@ static void module_purge(module *m)
 		clause *last = NULL;
 
 		for (clause *r = h->head; r;) {
-			if (!r->t.deleted) {
+			if (!r->t.ugen_deleted) {
 				last = r;
 				r = r->next;
 				continue;
@@ -3496,7 +3495,7 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 			continue;
 
 		for (clause *r = h->head; r; r = r->next) {
-			if (r->t.deleted)
+			if (r->t.ugen_deleted)
 				continue;
 
 			if (canonical)
