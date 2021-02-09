@@ -2145,7 +2145,7 @@ static void clear_streams_properties(query *q)
 	if (h) {
 		for (clause *r = h->head; r;) {
 			clause *save = r->next;
-			r->t.ugen_erased = ++q->m->pl->ugen;
+			retract_from_db(q->m, r);
 			add_to_dirty_list(q, r);
 			r = save;
 		}
@@ -4770,7 +4770,7 @@ static USE_RESULT pl_state do_abolish(query *q, cell *c_orig, cell *c)
 		if (!q->m->loading && r->t.persist && !r->t.ugen_erased)
 			db_log(q, r, LOG_ERASE);
 
-		r->t.ugen_erased = ++q->m->pl->ugen;
+		retract_from_db(q->m, r);
 		add_to_dirty_list(q, r);
 	}
 

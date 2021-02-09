@@ -732,8 +732,8 @@ static void purge_dirty_list(query *q)
 		if (r->owner->tail == r)
 			r->owner->tail = r->prev;
 
-		clear_term(&r->t);
-		free(r);
+		//clear_term(&r->t);
+		//free(r);
 		free(j);
 		cnt++;
 	}
