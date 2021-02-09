@@ -711,6 +711,37 @@ void add_to_dirty_list(query *q, clause *r)
 	q->dirty_list = j;
 }
 
+static void purge_dirty_list(query *q)
+{
+	unsigned cnt = 0;
+
+	while (q->dirty_list) {
+		dirty *j = q->dirty_list;
+		q->dirty_list = j->next;
+		clause *r = j->r;
+
+		if (r->prev)
+			r->prev->next = r->next;
+
+		if (r->next)
+			r->next->prev = r->prev;
+
+		if (r->owner->head == r)
+			r->owner->head = r->next;
+
+		if (r->owner->tail == r)
+			r->owner->tail = r->prev;
+
+		clear_term(&r->t);
+		free(r);
+		free(j);
+		cnt++;
+	}
+
+	if (!q->m->pl->quiet && cnt)
+		fprintf(stdout, "%% Purged %u items\n", cnt);
+}
+
 void retract_from_db(module *m, clause *r)
 {
 	r->owner->cnt--;
@@ -947,35 +978,7 @@ void destroy_query(query *q)
 	free(q->slots);
 	free(q->frames);
 	free(q->tmp_heap);
-
-	unsigned cnt = 0;
-
-	while (q->dirty_list) {
-		dirty *j = q->dirty_list;
-		q->dirty_list = j->next;
-		clause *r = j->r;
-
-		if (r->prev)
-			r->prev->next = r->next;
-
-		if (r->next)
-			r->next->prev = r->prev;
-
-		if (r->owner->head == r)
-			r->owner->head = r->next;
-
-		if (r->owner->tail == r)
-			r->owner->tail = r->prev;
-
-		clear_term(&r->t);
-		free(r);
-		free(j);
-		cnt++;
-	}
-
-	if (!q->m->pl->quiet && cnt)
-		fprintf(stdout, "%% Purged %u items\n", cnt);
-
+	purge_dirty_list(q);
 	free(q);
 }
 
