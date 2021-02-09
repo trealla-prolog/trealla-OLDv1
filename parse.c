@@ -665,6 +665,9 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 	if (!r) return NULL;
 	predicate *h = r->owner;
 
+	if (h->head)
+		h->head->prev = r;
+
 	r->next = h->head;
 	h->head = r;
 	h->cnt++;
@@ -685,6 +688,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 	if (h->tail)
 		h->tail->next = r;
 
+	r->prev = h->tail;
 	h->tail = r;
 	h->cnt++;
 
@@ -695,12 +699,22 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 	return r;
 }
 
+void add_to_dirty_list(query *q, clause *r)
+{
+	if (r->t.is_dirty)
+		return;
+
+	r->t.is_dirty = true;
+	dirty *j = malloc(sizeof(dirty));
+	j->r = r;
+	j->next = q->dirty_list;
+	q->dirty_list = j;
+}
+
 void retract_from_db(module *m, clause *r)
 {
 	r->owner->cnt--;
 	r->t.ugen_erased = ++m->pl->ugen;
-	r->owner->dirty = true;
-	m->dirty = true;
 }
 
 clause *find_in_db(module *m, uuid *ref)
@@ -723,8 +737,6 @@ clause *erase_from_db(module *m, uuid *ref)
 	clause *r = find_in_db(m, ref);
 	if (!r) return 0;
 	r->t.ugen_erased = ++m->pl->ugen;
-	r->owner->dirty = true;
-	m->dirty = true;
 	return r;
 }
 
@@ -935,6 +947,35 @@ void destroy_query(query *q)
 	free(q->slots);
 	free(q->frames);
 	free(q->tmp_heap);
+
+	unsigned cnt = 0;
+
+	while (q->dirty_list) {
+		dirty *j = q->dirty_list;
+		q->dirty_list = j->next;
+		clause *r = j->r;
+
+		if (r->prev)
+			r->prev->next = r->next;
+
+		if (r->next)
+			r->next->prev = r->prev;
+
+		if (r->owner->head == r)
+			r->owner->head = r->next;
+
+		if (r->owner->tail == r)
+			r->owner->tail = r->prev;
+
+		clear_term(&r->t);
+		free(r);
+		free(j);
+		cnt++;
+	}
+
+	if (!q->m->pl->quiet && cnt)
+		fprintf(stdout, "%% Purged %u items\n", cnt);
+
 	free(q);
 }
 
@@ -3238,47 +3279,6 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 	return !p->error;
 }
 
-static void module_purge(module *m)
-{
-	unsigned cnt = 0;
-
-	for (predicate *h = m->head; h; h = h->next) {
-		if (!h->dirty)
-			continue;
-
-		h->dirty = false;
-		clause *last = NULL;
-
-		for (clause *r = h->head; r;) {
-			if (!r->t.ugen_erased) {
-				last = r;
-				r = r->next;
-				continue;
-			}
-
-			if (h->head == r)
-				h->head = r->next;
-
-			if (h->tail == r)
-				h->tail = last;
-
-			if (last)
-				last->next = r->next;
-
-			clause *next = r->next;
-			clear_term(&r->t);
-			free(r);
-			r = next;
-			cnt++;
-		}
-	}
-
-	if (!m->pl->quiet)
-		printf("%% Purge %u deleted rules\n", cnt);
-
-	m->dirty = 0;
-}
-
 static bool parser_run(parser *p, const char *src, int dump)
 {
 	p->srcptr = (char*)src;
@@ -3329,10 +3329,6 @@ static bool parser_run(parser *p, const char *src, int dump)
 	ok = !q->error;
 	p->m = q->m;
 	destroy_query(q);
-
-	if (dump && p->m->dirty)
-		module_purge(p->m);
-
 	return ok;
 }
 
@@ -3560,6 +3556,7 @@ void destroy_module(module *m)
 		predicate *save = h->next;
 
 		for (clause *r = h->head; r;) {
+			assert(!r->t.is_dirty);
 			clause *save = r->next;
 			clear_term(&r->t);
 			free(r);

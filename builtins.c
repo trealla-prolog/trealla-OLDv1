@@ -1903,9 +1903,10 @@ static USE_RESULT pl_state do_retract(query *q, cell *p1, idx_t p1_ctx, int is_r
 		return match;
 
 	clause *r = q->st.curr_clause2;
-	bool last_match = !q->st.curr_clause2->next && 0;
+	bool last_match = !q->st.curr_clause2->next && 0;	// ?????
 	stash_me(q, &r->t, last_match);
 	retract_from_db(q->m, r);
+	add_to_dirty_list(q, r);
 
 	if (!q->m->loading && r->t.persist)
 		db_log(q, r, LOG_ERASE);
@@ -2145,13 +2146,11 @@ static void clear_streams_properties(query *q)
 		for (clause *r = h->head; r;) {
 			clause *save = r->next;
 			r->t.ugen_erased = ++q->m->pl->ugen;
+			add_to_dirty_list(q, r);
 			r = save;
 		}
-
-		h->dirty = true;
 	}
 
-	q->m->dirty = true;
 	h->cnt = 0;
 }
 
@@ -4772,10 +4771,9 @@ static USE_RESULT pl_state do_abolish(query *q, cell *c_orig, cell *c)
 			db_log(q, r, LOG_ERASE);
 
 		r->t.ugen_erased = ++q->m->pl->ugen;
+		add_to_dirty_list(q, r);
 	}
 
-	h->dirty = true;
-	q->m->dirty = true;
 	h->is_abolished = true;
 	sl_destroy(h->index);
 	h->index = NULL;

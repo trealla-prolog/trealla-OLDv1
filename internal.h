@@ -297,12 +297,13 @@ typedef struct {
 	bool is_fact:1;
 	bool persist:1;
 	bool tail_rec:1;
+	bool is_dirty:1;
 	cell cells[];
 } term;
 
 struct clause_ {
 	predicate *owner;
-	clause *next;
+	clause *prev, *next;
 	module *m;
 	uuid u;
 	term t;
@@ -323,7 +324,6 @@ struct predicate_ {
 	bool is_abolished:1;
 	bool is_noindex:1;
 	bool check_directive:1;
-	bool dirty:1;
 };
 
 struct builtins {
@@ -426,6 +426,13 @@ typedef struct char_flags_ {
 	bool debug:1;
 } char_flags;
 
+typedef struct dirty_ dirty;
+
+struct dirty_ {
+	clause *r;
+	dirty *next;
+};
+
 struct query_ {
 	query *prev, *next, *parent;
 	module *m, *save_m;
@@ -437,6 +444,7 @@ struct query_ {
 	cell *tmp_heap, *last_arg, *exception, *variable_names;
 	cell *queue[MAX_QUEUES], *tmpq[MAX_QUEUES];
 	arena *arenas;
+	dirty *dirty_list;
 	cell accum;
 	state st;
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
@@ -524,7 +532,6 @@ struct module_ {
 	char_flags flag;
 	unsigned user_ops;
 	bool prebuilt:1;
-	bool dirty:1;
 	bool use_persist:1;
 	bool loading:1;
 	bool make_public:1;
@@ -658,6 +665,7 @@ char *relative_to(const char *basefile, const char *relfile);
 void parser_term_to_body(parser *p);
 cell *check_body_callable(parser *p, cell *c);
 void load_builtins(prolog *pl, bool iso_only);
+void add_to_dirty_list(query *q, clause *r);
 
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
 pl_state print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
