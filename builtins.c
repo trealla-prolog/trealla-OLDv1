@@ -2147,6 +2147,8 @@ static void clear_streams_properties(query *q)
 			r->t.ugen_erased = ++q->m->pl->ugen;
 			r = save;
 		}
+
+		h->dirty = true;
 	}
 
 	q->m->dirty = true;
@@ -4772,6 +4774,7 @@ static USE_RESULT pl_state do_abolish(query *q, cell *c_orig, cell *c)
 		r->t.ugen_erased = ++q->m->pl->ugen;
 	}
 
+	h->dirty = true;
 	q->m->dirty = true;
 	h->is_abolished = true;
 	sl_destroy(h->index);

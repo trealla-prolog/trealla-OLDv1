@@ -699,6 +699,7 @@ void retract_from_db(module *m, clause *r)
 {
 	r->owner->cnt--;
 	r->t.ugen_erased = ++m->pl->ugen;
+	r->owner->dirty = true;
 	m->dirty = true;
 }
 
@@ -722,6 +723,7 @@ clause *erase_from_db(module *m, uuid *ref)
 	clause *r = find_in_db(m, ref);
 	if (!r) return 0;
 	r->t.ugen_erased = ++m->pl->ugen;
+	r->owner->dirty = true;
 	m->dirty = true;
 	return r;
 }
@@ -3241,6 +3243,10 @@ static void module_purge(module *m)
 	unsigned cnt = 0;
 
 	for (predicate *h = m->head; h; h = h->next) {
+		if (!h->dirty)
+			continue;
+
+		h->dirty = false;
 		clause *last = NULL;
 
 		for (clause *r = h->head; r;) {
