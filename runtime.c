@@ -889,16 +889,11 @@ static bool CHECK_UPDATE_VIEW(__attribute__((unused)) query *q, clause *c)
 
 	frame *g = GET_FRAME(q->st.curr_frame);
 
-	if (c->t.ugen_created > g->ugen) {
-		//printf("*** ignore created\n");
+	if (c->t.ugen_created > g->ugen)
 		return false;
-	}
 
-	if (c->t.ugen_erased
-		&& (c->t.ugen_erased <= g->ugen)) {
-		//printf("*** ignore deleted\n");
+	if (c->t.ugen_erased && (c->t.ugen_erased <= g->ugen))
 		return false;
-	}
 
 	return true;
 }

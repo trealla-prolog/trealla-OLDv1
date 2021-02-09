@@ -302,7 +302,7 @@ typedef struct {
 
 struct clause_ {
 	predicate *owner;
-	clause *next;
+	clause *next, *junk;
 	module *m;
 	uuid u;
 	term t;
@@ -436,6 +436,7 @@ struct query_ {
 	cell *tmp_heap, *last_arg, *exception, *variable_names;
 	cell *queue[MAX_QUEUES], *tmpq[MAX_QUEUES];
 	arena *arenas;
+	clause *junk;
 	cell accum;
 	state st;
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
