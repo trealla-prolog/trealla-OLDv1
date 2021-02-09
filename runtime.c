@@ -298,7 +298,7 @@ bool retry_choice(query *q)
 	q->st = ch->st;
 
 	frame *g = GET_CURR_FRAME();
-	g->ugen_started = ch->ugen;
+	g->ugen = ch->ugen;
 	g->cgen = ch->orig_cgen;
 	g->nbr_vars = ch->nbr_vars;
 	g->nbr_slots = ch->nbr_slots;
@@ -462,7 +462,7 @@ pl_state make_choice(query *q)
 	idx_t curr_choice = q->cp++;
 	choice *ch = GET_CHOICE(curr_choice);
 	*ch = (choice){0};
-	ch->ugen = g->ugen_started;
+	ch->ugen = g->ugen;
 	ch->orig_cgen = ch->cgen = g->cgen;
 	ch->st = q->st;
 
@@ -880,22 +880,22 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 static bool CHECK_UPDATE_VIEW(__attribute__((unused)) query *q, clause *c)
 {
 #if 0
-	printf("*** pl->ugen=%llu, g->ugen_started=%llu, c->ugen_created=%llu, c->ugen_deleted=%llu\n",
+	printf("*** pl->ugen=%llu, g->ugen=%llu, cl->ugen_created=%llu, cl->ugen_erased=%llu\n",
 		(long long unsigned)q->m->pl->ugen,
-		(long long unsigned)g->ugen_started,
+		(long long unsigned)g->ugen,
 		(long long unsigned)c->t.ugen_created,
-		(long long unsigned)c->t.ugen_deleted);
+		(long long unsigned)c->t.ugen_erased);
 #endif
 
 	frame *g = GET_FRAME(q->st.curr_frame);
 
-	if (c->t.ugen_created > g->ugen_started) {
+	if (c->t.ugen_created > g->ugen) {
 		//printf("*** ignore created\n");
 		return false;
 	}
 
-	if (c->t.ugen_deleted
-		&& (c->t.ugen_deleted <= g->ugen_started)) {
+	if (c->t.ugen_erased
+		&& (c->t.ugen_erased <= g->ugen)) {
 		//printf("*** ignore deleted\n");
 		return false;
 	}
@@ -939,7 +939,7 @@ USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 		}
 
 		frame *g = GET_FRAME(q->st.curr_frame);
-		g->ugen_started = q->m->pl->ugen;
+		g->ugen = q->m->pl->ugen;
 	} else {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
 	}
@@ -1037,7 +1037,7 @@ USE_RESULT pl_state match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retrac
 		}
 
 		frame *g = GET_FRAME(q->st.curr_frame);
-		g->ugen_started = q->m->pl->ugen;
+		g->ugen = q->m->pl->ugen;
 	} else {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
 	}
@@ -1160,7 +1160,7 @@ static USE_RESULT pl_state match_head(query *q)
 		}
 
 		frame *g = GET_FRAME(q->st.curr_frame);
-		g->ugen_started = q->m->pl->ugen;
+		g->ugen = q->m->pl->ugen;
 	} else
 		next_key(q);
 
@@ -1435,7 +1435,7 @@ pl_state query_execute(query *q, term *t)
 	frame *g = q->frames + q->st.curr_frame;
 	g->nbr_vars = t->nbr_vars;
 	g->nbr_slots = t->nbr_vars;
-	g->ugen_started = ++q->m->pl->ugen;
+	g->ugen = ++q->m->pl->ugen;
 	pl_state ret = run_query(q);
 	sl_done(q->st.iter);
 	return ret;

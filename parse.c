@@ -595,7 +595,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		return NULL;
 	}
 
-	r->parent = h;
+	r->owner = h;
 	memcpy(&r->t, t, sizeof(term));
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
 	r->t.ugen_created = ++m->pl->ugen;
@@ -621,7 +621,7 @@ static void reindex_predicate(module *m, predicate *h)
 	for (clause *r = h->head; r; r = r->next) {
 		cell *c = get_head(r->t.cells);
 
-		if (!r->t.ugen_deleted)
+		if (!r->t.ugen_erased)
 			sl_app(h->index, c, r);
 	}
 }
@@ -663,7 +663,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 {
 	clause *r = assert_begin(m, t, consulting);
 	if (!r) return NULL;
-	predicate *h = r->parent;
+	predicate *h = r->owner;
 
 	r->next = h->head;
 	h->head = r;
@@ -680,7 +680,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 {
 	clause *r = assert_begin(m, t, consulting);
 	if (!r) return NULL;
-	predicate *h = r->parent;
+	predicate *h = r->owner;
 
 	if (h->tail)
 		h->tail->next = r;
@@ -697,8 +697,8 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 
 void retract_from_db(module *m, clause *r)
 {
-	r->parent->cnt--;
-	r->t.ugen_deleted = ++m->pl->ugen;
+	r->owner->cnt--;
+	r->t.ugen_erased = ++m->pl->ugen;
 	m->dirty = true;
 }
 
@@ -706,7 +706,7 @@ clause *find_in_db(module *m, uuid *ref)
 {
 	for (predicate *h = m->head; h; h = h->next) {
 		for (clause *r = h->head ; r; r = r->next) {
-			if (r->t.ugen_deleted)
+			if (r->t.ugen_erased)
 				continue;
 
 			if (!memcmp(&r->u, ref, sizeof(uuid)))
@@ -721,7 +721,7 @@ clause *erase_from_db(module *m, uuid *ref)
 {
 	clause *r = find_in_db(m, ref);
 	if (!r) return 0;
-	r->t.ugen_deleted = ++m->pl->ugen;
+	r->t.ugen_erased = ++m->pl->ugen;
 	m->dirty = true;
 	return r;
 }
@@ -3244,7 +3244,7 @@ static void module_purge(module *m)
 		clause *last = NULL;
 
 		for (clause *r = h->head; r;) {
-			if (!r->t.ugen_deleted) {
+			if (!r->t.ugen_erased) {
 				last = r;
 				r = r->next;
 				continue;
@@ -3495,7 +3495,7 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 			continue;
 
 		for (clause *r = h->head; r; r = r->next) {
-			if (r->t.ugen_deleted)
+			if (r->t.ugen_erased)
 				continue;
 
 			if (canonical)

@@ -289,7 +289,7 @@ typedef struct {
 } uuid;
 
 typedef struct {
-	uint64_t ugen_created, ugen_deleted;
+	uint64_t ugen_created, ugen_erased;
 	idx_t nbr_cells, cidx;
 	uint16_t nbr_vars;
 	bool first_cut:1;
@@ -301,7 +301,7 @@ typedef struct {
 } term;
 
 struct clause_ {
-	predicate *parent;
+	predicate *owner;
 	clause *next;
 	module *m;
 	uuid u;
@@ -351,7 +351,7 @@ typedef struct {
 typedef struct {
 	cell *prev_cell;
 	module *m;
-	uint64_t ugen_started;
+	uint64_t ugen;
 	idx_t prev_frame, ctx, overflow, cgen;
 	uint16_t nbr_vars, nbr_slots;
 } frame;
