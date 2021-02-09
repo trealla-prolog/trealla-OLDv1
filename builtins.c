@@ -220,7 +220,7 @@ static USE_RESULT cell *init_tmp_heap(query* q)
 	if (!q->tmp_heap) {
 		FAULTINJECT(errno = ENOMEM; return NULL);
 		q->tmp_heap = malloc(q->tmph_size * sizeof(cell));
-		if(!q->tmp_heap) return NULL;
+		if (!q->tmp_heap) return NULL;
 		*q->tmp_heap = (cell){0};
 	}
 
@@ -10407,7 +10407,7 @@ static USE_RESULT pl_state fn_db_save_0(query *q)
 	if (!q->m->fp)
 		return pl_failure;
 
-	if(strlen(q->m->name) >= 1024*4-4)
+	if (strlen(q->m->name) >= 1024*4-4)
 		return pl_error;
 
 	fclose(q->m->fp);

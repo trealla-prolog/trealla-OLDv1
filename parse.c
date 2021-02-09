@@ -537,7 +537,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	if (is_cstring(t->cells)) {
 		cell *c = t->cells;
 		idx_t off = index_from_pool(m->pl, MODULE_GET_STR(c));
-		if(off == ERR_IDX) return NULL;
+		if (off == ERR_IDX) return NULL;
 		FREE_STR(c);
 		c->val_off = off;
 		ensure (c->val_off != ERR_IDX);
@@ -557,7 +557,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 	if (is_cstring(c)) {
 		idx_t off = index_from_pool(m->pl, MODULE_GET_STR(c));
-		if(off == ERR_IDX) return NULL;
+		if (off == ERR_IDX) return NULL;
 		FREE_STR(c);
 		c->val_off = off;
 		c->val_type = TYPE_LITERAL;
@@ -3576,7 +3576,7 @@ void destroy_module(module *m)
 		m->pl->modules = m->next;
 	} else {
 		for (module *tmp = m->pl->modules; tmp; tmp = tmp->next) {
-			if(tmp->next == m) {
+			if (tmp->next == m) {
 				tmp->next = m->next;
 				break;
 			}
