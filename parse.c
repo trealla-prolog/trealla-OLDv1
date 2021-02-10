@@ -3320,7 +3320,8 @@ static bool parser_run(parser *p, const char *src, int dump)
 			(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
 	}
 
-	purge_dirty_list(q);
+	if (dump)
+		purge_dirty_list(q);
 
 	ok = !q->error;
 	p->m = q->m;
