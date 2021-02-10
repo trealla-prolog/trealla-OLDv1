@@ -699,23 +699,23 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 	return r;
 }
 
-static void retract_from_db(module *m, clause *r)
+static bool retract_from_db(module *m, clause *r)
 {
+	if (r->t.ugen_erased)
+		return false;
+
 	r->owner->cnt--;
 	r->t.ugen_erased = ++m->pl->ugen;
+	return true;
 }
 
 void add_to_dirty_list(query *q, clause *r)
 {
-	if (r->t.ugen_erased)
+	if (!retract_from_db(q->m, r))
 		return;
 
-	retract_from_db(q->m, r);
-
-	dirty *j = malloc(sizeof(dirty));
-	j->r = r;
-	j->next = q->dirty_list;
-	q->dirty_list = j;
+	r->dirty = q->dirty_list;
+	q->dirty_list = r;
 }
 
 static void purge_dirty_list(query *q)
@@ -723,9 +723,8 @@ static void purge_dirty_list(query *q)
 	unsigned cnt = 0;
 
 	while (q->dirty_list) {
-		dirty *j = q->dirty_list;
-		q->dirty_list = j->next;
-		clause *r = j->r;
+		clause *r = q->dirty_list;
+		q->dirty_list = r->dirty;
 
 		if (r->prev)
 			r->prev->next = r->next;
@@ -739,9 +738,8 @@ static void purge_dirty_list(query *q)
 		if (r->owner->tail == r)
 			r->owner->tail = r->prev;
 
-		//clear_term(&r->t);
-		//free(r);
-		free(j);
+		clear_term(&r->t);
+		free(r);
 		cnt++;
 	}
 
@@ -976,7 +974,6 @@ void destroy_query(query *q)
 	free(q->slots);
 	free(q->frames);
 	free(q->tmp_heap);
-	purge_dirty_list(q);
 	free(q);
 }
 
@@ -3303,11 +3300,10 @@ static bool parser_run(parser *p, const char *src, int dump)
 		parser_dcg_rewrite(p);
 
 	parser_xref(p, p->t, NULL);
+
 	bool ok = false;
 	query *q = create_query(p->m, false);
-	if (!q)
-		return false;
-
+	if (!q) return false;
 	q->p = p;
 	q->do_dump_vars = dump;
 	q->run_init = p->run_init;
@@ -3323,6 +3319,8 @@ static bool parser_run(parser *p, const char *src, int dump)
 			q->max_frames, q->max_choices, q->max_trails,
 			(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
 	}
+
+	purge_dirty_list(q);
 
 	ok = !q->error;
 	p->m = q->m;
@@ -3374,7 +3372,6 @@ module *module_load_text(module *m, const char *src)
 bool module_load_fp(module *m, FILE *fp, const char *filename)
 {
 	if (!m) return false;
-
 	bool ok = false;
 	parser *p = create_parser(m);
 	if (!p) return false;
@@ -3427,7 +3424,6 @@ bool module_load_fp(module *m, FILE *fp, const char *filename)
 bool module_load_file(module *m, const char *filename)
 {
 	if (!m) return false;
-
 	m->tmp_filename = filename;
 
 	if (!strcmp(filename, "user")) {
@@ -3509,7 +3505,6 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 bool module_save_file(module *m, const char *filename)
 {
 	if (!m) return false;
-
 	FILE *fp = fopen(filename, "w");
 
 	if (!fp) {

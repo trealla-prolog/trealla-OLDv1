@@ -302,7 +302,7 @@ typedef struct {
 
 struct clause_ {
 	predicate *owner;
-	clause *prev, *next;
+	clause *prev, *next, *dirty;
 	module *m;
 	uuid u;
 	term t;
@@ -425,13 +425,6 @@ typedef struct char_flags_ {
 	bool debug:1;
 } char_flags;
 
-typedef struct dirty_ dirty;
-
-struct dirty_ {
-	clause *r;
-	dirty *next;
-};
-
 struct query_ {
 	query *prev, *next, *parent;
 	module *m, *save_m;
@@ -443,7 +436,7 @@ struct query_ {
 	cell *tmp_heap, *last_arg, *exception, *variable_names;
 	cell *queue[MAX_QUEUES], *tmpq[MAX_QUEUES];
 	arena *arenas;
-	dirty *dirty_list;
+	clause *dirty_list;
 	cell accum;
 	state st;
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
