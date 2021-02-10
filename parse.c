@@ -718,10 +718,8 @@ void add_to_dirty_list(query *q, clause *r)
 	q->dirty_list = r;
 }
 
-static void purge_dirty_list(query *q)
+static void query_purge_dirty_list(query *q)
 {
-	unsigned cnt = 0;
-
 	while (q->dirty_list) {
 		clause *r = q->dirty_list;
 		q->dirty_list = r->dirty;
@@ -738,13 +736,19 @@ static void purge_dirty_list(query *q)
 		if (r->owner->tail == r)
 			r->owner->tail = r->prev;
 
+		r->dirty = q->m->dirty_list;
+		q->m->dirty_list = r;
+	}
+}
+
+static void module_purge_dirty_list(module *m)
+{
+	while (m->dirty_list) {
+		clause *r = m->dirty_list;
+		m->dirty_list = r->dirty;
 		clear_term(&r->t);
 		free(r);
-		cnt++;
 	}
-
-	if (!q->m->pl->quiet && cnt)
-		fprintf(stdout, "%% Purged %u items\n", cnt);
 }
 
 clause *find_in_db(module *m, uuid *ref)
@@ -3320,8 +3324,10 @@ static bool parser_run(parser *p, const char *src, int dump)
 			(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
 	}
 
+	query_purge_dirty_list(q);
+
 	if (dump)
-		purge_dirty_list(q);
+		module_purge_dirty_list(q->m);
 
 	ok = !q->error;
 	p->m = q->m;
@@ -3535,6 +3541,8 @@ static void make_rule(module *m, const char *src)
 void destroy_module(module *m)
 {
 	if (!m) return;
+
+	module_purge_dirty_list(m);
 
 	while (m->tasks) {
 		query *task = m->tasks->next;

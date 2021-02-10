@@ -519,6 +519,7 @@ struct module_ {
 	parser *p;
 	FILE *fp;
 	skiplist *index;
+	clause *dirty_list;
 	const char *tmp_filename;
 	struct op_table ops[MAX_USER_OPS+1];
 	char_flags flag;
