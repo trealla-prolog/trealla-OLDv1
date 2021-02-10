@@ -704,6 +704,9 @@ void add_to_dirty_list(query *q, clause *r)
 	if (r->t.ugen_erased)
 		return;
 
+	r->owner->cnt--;
+	r->t.ugen_erased = ++q->m->pl->ugen;
+
 	dirty *j = malloc(sizeof(dirty));
 	j->r = r;
 	j->next = q->dirty_list;
@@ -739,15 +742,6 @@ static void purge_dirty_list(query *q)
 
 	if (!q->m->pl->quiet && cnt)
 		fprintf(stdout, "%% Purged %u items\n", cnt);
-}
-
-void retract_from_db(module *m, clause *r)
-{
-	if (r->t.ugen_erased)
-		return;
-
-	r->owner->cnt--;
-	r->t.ugen_erased = ++m->pl->ugen;
 }
 
 clause *find_in_db(module *m, uuid *ref)
