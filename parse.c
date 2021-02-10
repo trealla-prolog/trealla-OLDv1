@@ -711,6 +711,7 @@ void add_to_dirty_list(query *q, clause *r)
 		return;
 
 	retract_from_db(q->m, r);
+
 	dirty *j = malloc(sizeof(dirty));
 	j->r = r;
 	j->next = q->dirty_list;
@@ -3590,7 +3591,7 @@ module *create_module(prolog *pl, const char *name)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	module *m = calloc(1, sizeof(module));
-	if (!m) return NULL;
+	ensure(m);
 
 	m->pl = pl;
 	m->filename = strdup("./");
@@ -4052,9 +4053,8 @@ static void g_destroy(prolog *pl)
 
 	memset(g_streams, 0, sizeof(g_streams));
 
-	while (pl->modules) {
+	while (pl->modules)
 		destroy_module(pl->modules);
-	}
 
 	free(g_tpl_lib);
 	sl_destroy(pl->funtab);
