@@ -1,0 +1,55 @@
+{
+  "uid" : "df72dcaff1f3dd4a",
+  "name" : "commons_forall_2_06",
+  "historyId" : "predicates/forall_2/tests.lgt::tests:tests#commons_forall_2_06",
+  "time" : {
+    "start" : 1612933716000,
+    "stop" : 1612933716000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Success instead of failure",
+  "statusTrace" : "",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/forall_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "df72dcaff1f3dd4a.json",
+  "parameterValues" : [ ]
+}

@@ -1,114 +1,114 @@
 {
   "total" : 153,
   "items" : [ {
-    "uid" : "9c2a877710404a0e8482b3a5ff5544f9",
-    "name" : "control/call_1/tests.lgt",
+    "uid" : "e96278ed9288bacdb418cbcc943c2f26",
+    "name" : "predicates/stream_property_2/tests.lgt::tests",
     "statistic" : {
-      "failed" : 1,
+      "failed" : 14,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 0,
+      "passed" : 20,
       "unknown" : 0,
-      "total" : 1
+      "total" : 34
     }
   }, {
-    "uid" : "315a48850d0a753418bf59768e374ecb",
-    "name" : "control/catch_3/tests.lgt",
+    "uid" : "8d72f33464c61a169f6282af0f2f0181",
+    "name" : "predicates/read_term_3/tests.lgt::tests",
     "statistic" : {
-      "failed" : 1,
+      "failed" : 6,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 0,
+      "passed" : 30,
       "unknown" : 0,
-      "total" : 1
+      "total" : 36
     }
   }, {
-    "uid" : "917484c9cabcded6d80e5853b3fa9371",
-    "name" : "control/conjunction_2/tests.lgt",
+    "uid" : "e8a334ca3e0bebcbd1687a3840012f9f",
+    "name" : "predicates/findall_4/tests.lgt::tests",
     "statistic" : {
-      "failed" : 1,
+      "failed" : 6,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 0,
+      "passed" : 7,
       "unknown" : 0,
-      "total" : 1
+      "total" : 13
     }
   }, {
-    "uid" : "668ae64c96f07851e57c5b34f489a5be",
-    "name" : "control/cut_0/tests.lgt",
+    "uid" : "6984bae94e7678c9d6f1b911bb94461e",
+    "name" : "predicates/length_2/tests.lgt::tests",
     "statistic" : {
-      "failed" : 1,
+      "failed" : 6,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 0,
+      "passed" : 7,
       "unknown" : 0,
-      "total" : 1
+      "total" : 13
     }
   }, {
-    "uid" : "8607eb65e049f2e42659e1e192a138f2",
-    "name" : "control/disjunction_2/tests.lgt",
+    "uid" : "66531f3ea2959ae15834864899b891ba",
+    "name" : "functions/power_2/tests.lgt::tests",
     "statistic" : {
-      "failed" : 1,
+      "failed" : 5,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 0,
+      "passed" : 9,
       "unknown" : 0,
-      "total" : 1
+      "total" : 14
     }
   }, {
-    "uid" : "b4e2e5bfe89571f3e9dd34e6fd2de3ab",
-    "name" : "control/fail_0/tests.lgt",
+    "uid" : "fe889f4ed1e23b13cb890295efdd6049",
+    "name" : "predicates/setof_3/tests.lgt::tests",
     "statistic" : {
-      "failed" : 1,
+      "failed" : 4,
       "broken" : 0,
-      "skipped" : 0,
-      "passed" : 0,
+      "skipped" : 1,
+      "passed" : 30,
       "unknown" : 0,
-      "total" : 1
+      "total" : 35
     }
   }, {
-    "uid" : "8774585c3d71c473d6cf3034ae63492d",
-    "name" : "control/false_0/tests.lgt",
+    "uid" : "22d1df207ffb1a4f80e4edbc5e8c3ea9",
+    "name" : "functions/integer_power_2/tests.lgt::tests",
     "statistic" : {
-      "failed" : 1,
+      "failed" : 3,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 0,
+      "passed" : 14,
       "unknown" : 0,
-      "total" : 1
+      "total" : 17
     }
   }, {
-    "uid" : "6c54643ed4c9b85d0c180f9cf3dbd385",
-    "name" : "control/if_3/tests.lgt",
+    "uid" : "dd82f0b51a196f10db178e28f30765c1",
+    "name" : "predicates/format_2/tests.lgt::tests",
     "statistic" : {
-      "failed" : 1,
+      "failed" : 3,
       "broken" : 0,
-      "skipped" : 0,
-      "passed" : 0,
+      "skipped" : 1,
+      "passed" : 12,
       "unknown" : 0,
-      "total" : 1
+      "total" : 16
     }
   }, {
-    "uid" : "492de76c35d0b100421143defe8a0777",
-    "name" : "control/if_then_2/tests.lgt",
+    "uid" : "bb8e106369c9e4f92fe1145b40d7d18a",
+    "name" : "predicates/format_3/tests.lgt::tests",
     "statistic" : {
-      "failed" : 1,
+      "failed" : 3,
       "broken" : 0,
-      "skipped" : 0,
-      "passed" : 0,
+      "skipped" : 1,
+      "passed" : 12,
       "unknown" : 0,
-      "total" : 1
+      "total" : 16
     }
   }, {
-    "uid" : "ca80768489c37c395315390eeb1d5b23",
-    "name" : "control/if_then_else_3/tests.lgt",
+    "uid" : "911b4cde90c22dfd46d05a09a800b432",
+    "name" : "predicates/between_3/tests.lgt::tests",
     "statistic" : {
-      "failed" : 1,
+      "failed" : 3,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 0,
+      "passed" : 10,
       "unknown" : 0,
-      "total" : 1
+      "total" : 13
     }
   } ]
 }
