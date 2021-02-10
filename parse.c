@@ -901,51 +901,48 @@ static cell *make_cell(parser *p)
 
 void destroy_parser(parser *p)
 {
-	if (p) {
-		clear_term(p->t);
-		free(p->token);
-		free(p->t);
-		free(p);
-	}
+	if (!p) return;
+	clear_term(p->t);
+	free(p->token);
+	free(p->t);
+	free(p);
 }
 
 parser *create_parser(module *m)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	parser *p = calloc(1, sizeof(parser));
-	if (p) {
-		p->token = calloc(p->token_size=INITIAL_TOKEN_SIZE+1, 1);
-		idx_t nbr_cells = INITIAL_NBR_CELLS;
-		p->t = calloc(sizeof(term)+(sizeof(cell)*nbr_cells), 1);
-		p->t->nbr_cells = nbr_cells;
-		p->start_term = true;
-		p->line_nbr = 1;
-		p->m = m;
-		p->error = false;
-		p->flag = m->flag;
+	ensure(p);
+	p->token = calloc(p->token_size=INITIAL_TOKEN_SIZE+1, 1);
+	idx_t nbr_cells = INITIAL_NBR_CELLS;
+	p->t = calloc(sizeof(term)+(sizeof(cell)*nbr_cells), 1);
+	p->t->nbr_cells = nbr_cells;
+	p->start_term = true;
+	p->line_nbr = 1;
+	p->m = m;
+	p->error = false;
+	p->flag = m->flag;
 
-		if (!p->token || !p->t) {
-			destroy_parser(p);
-			p = NULL;
-		}
+	if (!p->token || !p->t) {
+		destroy_parser(p);
+		p = NULL;
 	}
+
 	return p;
 }
 
 void destroy_parser_nodelete(parser *p)
 {
-	if (p) {
-		clear_term_nodelete(p->t);
-		free(p->token);
-		free(p->t);
-		free(p);
-	}
+	if (!p) return;
+	clear_term_nodelete(p->t);
+	free(p->token);
+	free(p->t);
+	free(p);
 }
 
 void destroy_query(query *q)
 {
 	if (!q) return;
-
 	free(q->trails);
 	free(q->choices);
 
@@ -987,72 +984,69 @@ query *create_query(module *m, bool is_task)
 	static atomic_t uint64_t g_query_id = 0;
 
 	query *q = calloc(1, sizeof(query));
-	if (q) {
-		q->qid = g_query_id++;
-		q->m = m;
-		q->trace = m->pl->trace;
-		q->flag = m->flag;
+	ensure(q);
+	q->qid = g_query_id++;
+	q->m = m;
+	q->trace = m->pl->trace;
+	q->flag = m->flag;
 
-		// Allocate these now...
+	// Allocate these now...
 
-		q->frames_size = is_task ? INITIAL_NBR_GOALS/10 : INITIAL_NBR_GOALS;
-		q->slots_size = is_task ? INITIAL_NBR_SLOTS/10 : INITIAL_NBR_SLOTS;
-		q->choices_size = is_task ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
-		q->trails_size = is_task ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
+	q->frames_size = is_task ? INITIAL_NBR_GOALS/10 : INITIAL_NBR_GOALS;
+	q->slots_size = is_task ? INITIAL_NBR_SLOTS/10 : INITIAL_NBR_SLOTS;
+	q->choices_size = is_task ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
+	q->trails_size = is_task ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
 
-		bool error = false;
-		CHECK_SENTINEL(q->frames = calloc(q->frames_size, sizeof(frame)), NULL);
-		CHECK_SENTINEL(q->slots = calloc(q->slots_size, sizeof(slot)), NULL);
-		CHECK_SENTINEL(q->choices = calloc(q->choices_size, sizeof(choice)), NULL);
-		CHECK_SENTINEL(q->trails = calloc(q->trails_size, sizeof(trail)), NULL);
+	bool error = false;
+	CHECK_SENTINEL(q->frames = calloc(q->frames_size, sizeof(frame)), NULL);
+	CHECK_SENTINEL(q->slots = calloc(q->slots_size, sizeof(slot)), NULL);
+	CHECK_SENTINEL(q->choices = calloc(q->choices_size, sizeof(choice)), NULL);
+	CHECK_SENTINEL(q->trails = calloc(q->trails_size, sizeof(trail)), NULL);
 
-		// Allocate these later as needed...
+	// Allocate these later as needed...
 
-		q->h_size = is_task ? INITIAL_NBR_HEAP/10 : INITIAL_NBR_HEAP;
-		q->tmph_size = is_task ? INITIAL_NBR_CELLS/10 : INITIAL_NBR_CELLS;
+	q->h_size = is_task ? INITIAL_NBR_HEAP/10 : INITIAL_NBR_HEAP;
+	q->tmph_size = is_task ? INITIAL_NBR_CELLS/10 : INITIAL_NBR_CELLS;
 
-		for (int i = 0; i < MAX_QUEUES; i++)
-			q->q_size[i] = is_task ? INITIAL_NBR_QUEUE/10 : INITIAL_NBR_QUEUE;
+	for (int i = 0; i < MAX_QUEUES; i++)
+		q->q_size[i] = is_task ? INITIAL_NBR_QUEUE/10 : INITIAL_NBR_QUEUE;
 
-		if (error) {
-			destroy_query (q);
-			q = NULL;
-		}
+	if (error) {
+		destroy_query (q);
+		q = NULL;
 	}
 
-	ensure(q);
 	return q;
 }
 
 query *create_task(query *q, cell *curr_cell)
 {
 	query *subq = create_query(q->m, true);
-	if (subq) {
-		subq->parent = q;
-		subq->st.fp = 1;
-		subq->is_task = true;
+	if (!subq) return NULL;
+	subq->parent = q;
+	subq->st.fp = 1;
+	subq->is_task = true;
 
-		cell *tmp = clone_to_heap(subq, 0, curr_cell, 1); //cehteh: checkme
-		idx_t nbr_cells = tmp->nbr_cells;
-		make_end(tmp+nbr_cells);
-		subq->st.curr_cell = tmp;
+	cell *tmp = clone_to_heap(subq, 0, curr_cell, 1); //cehteh: checkme
+	idx_t nbr_cells = tmp->nbr_cells;
+	make_end(tmp+nbr_cells);
+	subq->st.curr_cell = tmp;
 
-		frame *gsrc = GET_FRAME(q->st.curr_frame);
-		frame *gdst = subq->frames;
-		gdst->nbr_vars = gsrc->nbr_vars;
-		slot *e = GET_SLOT(gsrc, 0);
+	frame *gsrc = GET_FRAME(q->st.curr_frame);
+	frame *gdst = subq->frames;
+	gdst->nbr_vars = gsrc->nbr_vars;
+	slot *e = GET_SLOT(gsrc, 0);
 
-		for (unsigned i = 0; i < gsrc->nbr_vars; i++, e++) {
-			cell *c = deref(q, &e->c, e->ctx);
-			cell tmp = (cell){0};
-			tmp.val_type = TYPE_VARIABLE;
-			tmp.var_nbr = i;
-			tmp.val_off = g_anon_s;
-			set_var(subq, &tmp, 0, c, q->latest_ctx);
-		}
-
-		subq->st.sp = gsrc->nbr_vars;
+	for (unsigned i = 0; i < gsrc->nbr_vars; i++, e++) {
+		cell *c = deref(q, &e->c, e->ctx);
+		cell tmp = (cell){0};
+		tmp.val_type = TYPE_VARIABLE;
+		tmp.var_nbr = i;
+		tmp.val_off = g_anon_s;
+		set_var(subq, &tmp, 0, c, q->latest_ctx);
 	}
+
+	subq->st.sp = gsrc->nbr_vars;
 	return subq;
 }
 
@@ -3382,51 +3376,49 @@ bool module_load_fp(module *m, FILE *fp, const char *filename)
 
 	bool ok = false;
 	parser *p = create_parser(m);
-	if (p) {
-		free(p->m->filename);
-		p->m->filename = strdup(filename);
-		p->consulting = true;
-		p->fp = fp;
+	if (!p) return false;
+	free(p->m->filename);
+	p->m->filename = strdup(filename);
+	p->consulting = true;
+	p->fp = fp;
 
-		do {
-			if (getline(&p->save_line, &p->n_line, p->fp) == -1)
-				break;
+	do {
+		if (getline(&p->save_line, &p->n_line, p->fp) == -1)
+			break;
 
-			p->srcptr = p->save_line;
-			parser_tokenize(p, false, false);
-			ok = !p->error;
-		}
-		while (ok && !p->already_loaded);
-
-		free(p->save_line);
-
-		if (!p->error && !p->already_loaded && !p->end_of_term && p->t->cidx) {
-			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
-				fprintf(stdout, "Error: syntax error, incomplete statement\n");
-
-			p->error = true;
-		}
-
-		if (!p->error && !p->already_loaded) {
-			parser_xref_db(p);
-			int save = p->m->pl->quiet;
-			p->m->pl->quiet = true;
-			p->directive = true;
-
-			if (p->run_init == true) {
-				p->command = true;
-
-				if (parser_run(p, "(:- initialization(G)), retract((:- initialization(_))), G", 0))
-					p->m->pl->halt = true;
-			}
-
-			p->command = p->directive = false;
-			p->m->pl->quiet = save;
-		}
-
+		p->srcptr = p->save_line;
+		parser_tokenize(p, false, false);
 		ok = !p->error;
 	}
+	 while (ok && !p->already_loaded);
 
+	free(p->save_line);
+
+	if (!p->error && !p->already_loaded && !p->end_of_term && p->t->cidx) {
+		if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+			fprintf(stdout, "Error: syntax error, incomplete statement\n");
+
+		p->error = true;
+	}
+
+	if (!p->error && !p->already_loaded) {
+		parser_xref_db(p);
+		int save = p->m->pl->quiet;
+		p->m->pl->quiet = true;
+		p->directive = true;
+
+		if (p->run_init == true) {
+			p->command = true;
+
+			if (parser_run(p, "(:- initialization(G)), retract((:- initialization(_))), G", 0))
+				p->m->pl->halt = true;
+		}
+
+		p->command = p->directive = false;
+		p->m->pl->quiet = save;
+	}
+
+	ok = !p->error;
 	destroy_parser(p);
 	return ok;
 }
