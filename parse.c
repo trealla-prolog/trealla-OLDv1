@@ -1625,7 +1625,7 @@ static void check_first_cut(parser *p)
 
 		if (!strcmp(PARSER_GET_STR(c), ","))
 			;
-		else if (!strcmp(PARSER_GET_STR(c), "!")) {
+		else if (!IS_OP(c) && !strcmp(PARSER_GET_STR(c), "!")) {
 			p->t->first_cut = true;
 			break;
 		} else {

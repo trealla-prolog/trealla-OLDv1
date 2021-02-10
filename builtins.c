@@ -2147,9 +2147,9 @@ static void clear_streams_properties(query *q)
 			add_to_dirty_list(q, r);
 			r = save;
 		}
-	}
 
-	h->cnt = 0;
+		h->cnt = 0;
+	}
 }
 
 static const char *s_properties =
