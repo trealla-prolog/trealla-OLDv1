@@ -905,8 +905,8 @@ static cell *make_cell(parser *p)
 void destroy_parser(parser *p)
 {
 	if (!p) return;
-	clear_term(p->t);
 	free(p->token);
+	clear_term(p->t);
 	free(p->t);
 	free(p);
 }
