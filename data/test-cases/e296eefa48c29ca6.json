@@ -1,0 +1,55 @@
+{
+  "uid" : "e296eefa48c29ca6",
+  "name" : "iso_unify_with_occurs_check_2_12",
+  "historyId" : "predicates/unify_with_occurs_check_2/tests.lgt::tests:tests#iso_unify_with_occurs_check_2_12",
+  "time" : {
+    "start" : 1613043919000,
+    "stop" : 1613043919008,
+    "duration" : 8
+  },
+  "status" : "failed",
+  "statusMessage" : "Success instead of failure",
+  "statusTrace" : "",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/unify_with_occurs_check_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "e296eefa48c29ca6.json",
+  "parameterValues" : [ ]
+}
