@@ -67,8 +67,9 @@ select1(X,L,L1) :- append(L2,[X|L3],L), append(L2,L3,L1).
 	(~b => f) & ((b & f) => ~i) & ((i | ~b) => ~f) => (i & f)
 */
 
+:- set_prolog_flag(double_quotes, codes).  % for presentation
+
 main :-
-    set_prolog_flag(double_quotes, codes),  % this is output
 	prove0((a | ~ a ), Proof),
 	write(Proof), nl,
 	halt.

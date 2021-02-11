@@ -1,17 +1,3 @@
-/*
- Sample theorems to prove:
-
-    ((a => b) => a) => a
-    a | ~ a
-    (~(~a) => a) & (a => ~(~a))
-    ((a & b) => ~((~a | ~b))) & (~((~a | ~b)) => (a & b))
-    a & b | a & ~b | ~a & b | ~a & ~c
-    (~b => f) & ((b & f) => ~i) & ((i | ~b) => ~f) => b
-    (~b => f) & ((b & f) => ~i) & ((i | ~b) => ~f) => (i & f)
-*/
-
-:- set_prolog_flag(double_quotes, codes).
-
 % http://jens-otten.de/tutorial_cade19/
 
 % -----------------------------------------------------------------
@@ -67,3 +53,16 @@ prove(G > D, rneg(G > D, P)) :- select1(~A ,D,D1), !,
 select1(X,L,L1) :- append(L2,[X|L3],L), append(L2,L3,L1).
 % -----------------------------------------------------------------
 
+/*
+ Sample theorems to prove:
+
+    ((a => b) => a) => a
+    a | ~ a
+    (~(~a) => a) & (a => ~(~a))
+    ((a & b) => ~((~a | ~b))) & (~((~a | ~b)) => (a & b))
+    a & b | a & ~b | ~a & b | ~a & ~c
+    (~b => f) & ((b & f) => ~i) & ((i | ~b) => ~f) => b
+    (~b => f) & ((b & f) => ~i) & ((i | ~b) => ~f) => (i & f)
+*/
+
+:- set_prolog_flag(double_quotes, codes).  % for presentation
