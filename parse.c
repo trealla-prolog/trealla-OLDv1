@@ -102,7 +102,6 @@ static struct op_table g_ops[] =
 	{"\\", OP_FY, 200},
 	{"-", OP_FY, 200},
 	{"+", OP_FY, 200},
-	{"+", OP_FY, 200},
 
 	//{"$", OP_FX, 1},
 

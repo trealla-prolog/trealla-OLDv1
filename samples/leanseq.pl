@@ -11,8 +11,8 @@
 :- op(1100, xfy, '|').  % disjunction
 :- op(1110, xfy, =>).   % implication
 %:- op( 500, fy, !).     % universal quantifier:  ![X]:
-:- op( 500, fy, ?).     % existential quantifier:  ?[X]:
-:- op( 500,xfy, :).
+%:- op( 500, fy, ?).     % existential quantifier:  ?[X]:
+%:- op( 500,xfy, :).
 
 % -----------------------------------------------------------------
 prove0(F, P) :- prove([] > [F], P).
