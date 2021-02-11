@@ -1903,7 +1903,7 @@ static USE_RESULT pl_state do_retract(query *q, cell *p1, idx_t p1_ctx, int is_r
 		return match;
 
 	clause *r = q->st.curr_clause2;
-	bool last_match = !q->st.curr_clause2->next && 0;	// ?????
+	bool last_match = !q->st.curr_clause2->next && (is_retract == DO_RETRACT);
 	stash_me(q, &r->t, last_match);
 	add_to_dirty_list(q, r);
 
@@ -1990,7 +1990,7 @@ static void del_stream_properties(query *q, int n)
 		return;
 	}
 
-	while (do_retract(q, tmp, q->st.curr_frame, DO_RETRACT)) {
+	while (do_retract(q, tmp, q->st.curr_frame, DO_STREAM_RETRACT)) {
 		if (q->did_throw)
 			return;
 
@@ -2056,13 +2056,11 @@ static USE_RESULT pl_state do_stream_property(query *q)
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (!strcmp(GET_STR(p1), "input")) {
+	if (!strcmp(GET_STR(p1), "input"))
 		return !strcmp(str->mode, "read");
-	}
 
-	if (!strcmp(GET_STR(p1), "output")) {
+	if (!strcmp(GET_STR(p1), "output"))
 		return strcmp(str->mode, "read");
-	}
 
 	if (!strcmp(GET_STR(p1), "eof_action") && is_stream(pstr)) {
 		cell tmp;
