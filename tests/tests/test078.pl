@@ -71,7 +71,7 @@ select1(X,L,L1) :- append(L2,[X|L3],L), append(L2,L3,L1).
 :- set_prolog_flag(double_quotes, codes).  % for presentation
 
 main :-
-	prove0((a | ~ a), Proof),
+	prove0((a | ~a), Proof),
 	write(Proof), nl,
 	halt.
 

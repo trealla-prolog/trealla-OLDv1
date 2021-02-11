@@ -65,7 +65,7 @@ select1(X,L,L1) :- append(L2,[X|L3],L), append(L2,L3,L1).
     (~b => f) & ((b & f) => ~i) & ((i | ~b) => ~f) => b
     (~b => f) & ((b & f) => ~i) & ((i | ~b) => ~f) => (i & f)
 
-    ?- prove0((a | ~ a), Proof).
+    ?- prove0((a | ~a), Proof).
     Proof = ror([]>[a|~a],rneg([]>[a,~a],ax([a]>[a],a))).
 
 */
