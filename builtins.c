@@ -1994,8 +1994,6 @@ static void del_stream_properties(query *q, int n)
 		if (q->did_throw)
 			return;
 
-		//printf("*** closed %d\n", n);
-
 		q->retry = QUERY_RETRY;
 		retry_choice(q);
 	}
@@ -4868,7 +4866,6 @@ static void do_assign_vars(parser *p, idx_t nbr_cells)
 			sprintf(tmpbuf, "%c%d", ch, n);
 
 		c->val_off = index_from_pool(p->m->pl, tmpbuf);
-		//printf("*** %u = %u => %s <= %s\n",  var_nbr, c->val_off, PARSER_GET_POOL(c->val_off), tmpbuf);
 		c->flags = 0;
 	}
 }
@@ -5003,8 +5000,6 @@ static USE_RESULT pl_state fn_iso_assertz_1(query *q)
 
 USE_RESULT pl_state fn_call_0(query *q, cell *p1)
 {
-	//printf("*** here call/0\n");
-
 	if (q->retry)
 		return pl_failure;
 
@@ -5470,8 +5465,6 @@ pl_state throw_error(query *q, cell *c, const char *err_type, const char *expect
 		else
 			snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 	}
-
-	//printf("*** %s\n", dst2);
 
 	parser *p = create_parser(q->m);
 	may_ptr_error(p);
@@ -7503,7 +7496,7 @@ static USE_RESULT pl_state fn_accept_2(query *q)
 			return pl_failure;
 		}
 
-		printf("*** here\n");
+		//printf("*** here\n");
 		return pl_failure;
 	}
 
