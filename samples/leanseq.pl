@@ -1,4 +1,5 @@
 % http://jens-otten.de/tutorial_cade19/
+% https://www.philipzucker.com/javascript-automated-proving/
 
 % -----------------------------------------------------------------
 % leanseq.pl - A sequent calculus prover implemented in Prolog
