@@ -244,8 +244,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 		fake_numbervars(q, c, c_ctx, 0);
 		memset(s_mask1, 0, MAX_ARITY);
 		memset(s_mask2, 0, MAX_ARITY);
-		q->nv_start = -1; //NOTE: cehteh: is there some more elegant way to pass state around? s_mask and
-				  //              nv_start? structptr as parameter, reentrant?
+		q->nv_start = -1;
 	}
 
 	char *save_dst = dst;

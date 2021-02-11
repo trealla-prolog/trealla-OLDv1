@@ -102,6 +102,7 @@ static struct op_table g_ops[] =
 	{"\\", OP_FY, 200},
 	{"-", OP_FY, 200},
 	{"+", OP_FY, 200},
+	{"+", OP_FY, 200},
 
 	//{"$", OP_FX, 1},
 
@@ -2533,16 +2534,17 @@ LOOP:
 			goto LOOP;
 		}
 
+		if (*src == '\n')
+			p->line_nbr++;
+
 		if (p->comment)
 			src++;
 
 		if (!*src && p->comment && p->fp) {
-			if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
+			if (getline(&p->save_line, &p->n_line, p->fp) == -1)
 				return NULL;
-			}
 
 			src = p->srcptr = p->save_line;
-			p->line_nbr++;
 		}
 	}
 	 while (*src && p->comment);
@@ -2873,7 +2875,7 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, int tolerant)
 	size_t is_chars_list = 0;
 	LIST_HANDLER(l);
 
-	while (is_iso_list(l)) {
+	while (is_iso_list(l) && q->m->flag.double_quote_chars) {
 		cell *h = LIST_HEAD(l);
 		cell *c = q ? deref(q, h, l_ctx) : h;
 
