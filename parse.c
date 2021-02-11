@@ -2805,7 +2805,7 @@ static bool get_token(parser *p, int last_op)
 
 		if (isupper(*p->token) || (*p->token == '_'))
 			p->is_variable = true;
-		else if (get_op(p->m, p->token, NULL, NULL, 0))
+		else if (get_op(p->m, p->token, NULL, NULL, false))
 			p->is_op = true;
 
 		if (isspace(ch)) {
@@ -3162,6 +3162,10 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		unsigned specifier = 0;
 		bool userop = false;
 		int priority = get_op(p->m, p->token, &specifier, &userop, last_op);
+
+		if (!strcmp(p->token, "!") &&
+			((*p->srcptr == ',') || (*p->srcptr == '.')))
+			p->quote_char = true;
 
 		if (p->quote_char /*&& !userop*/) {
 			specifier = 0;
