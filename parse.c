@@ -3937,7 +3937,7 @@ module *create_module(prolog *pl, const char *name)
 
 	make_rule(m, "phrase_to_stream(P, Stream) :- "			\
 		" phrase(P, Chars, []),"							\
-		" '$put_chars'(Stream, Chars).");
+		" maplist(bwrite(Stream), Chars).");
 
 	// Edinburgh...
 
