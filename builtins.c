@@ -2600,14 +2600,17 @@ static USE_RESULT pl_state fn_iso_nl_1(query *q)
 	return !ferror(str->fp);
 }
 
-static void collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells)
+static bool collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, int depth)
 {
+	if (depth > MAX_DEPTH)
+		return false;
+
 	for (unsigned i = 0; i < nbr_cells;) {
 		cell *c = deref(q, p1, p1_ctx);
 		int found = 0;
 
 		if (is_structure(c)) {
-			collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1);
+			collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1, depth+1);
 		} else if (is_variable(c)) {
 			for (unsigned idx = 0; idx < q->m->pl->tab_idx; idx++) {
 				if ((q->m->pl->tab1[idx] == q->latest_ctx) && (q->m->pl->tab2[idx] == c->var_nbr)) {
@@ -2630,6 +2633,8 @@ static void collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells)
 		i += p1->nbr_cells;
 		p1 += p1->nbr_cells;
 	}
+
+	return true;
 }
 
 static bool parse_read_params(query *q, parser *p, cell *c, cell **vars, idx_t *vars_ctx, cell **varnames, idx_t *varnames_ctx, cell **sings, idx_t *sings_ctx)
@@ -2825,7 +2830,7 @@ static USE_RESULT pl_state do_read_term(query *q, stream *str, cell *p1, idx_t p
 	q->m->pl->tab_idx = 0;
 
 	if (p->nbr_vars)
-		collect_vars(q, tmp, q->st.curr_frame, tmp->nbr_cells);
+		collect_vars(q, tmp, q->st.curr_frame, tmp->nbr_cells, 0);
 
 	if (vars) {
 		unsigned cnt = q->m->pl->tab_idx;
@@ -4487,7 +4492,7 @@ static USE_RESULT pl_state fn_iso_term_variables_2(query *q)
 	frame *g = GET_CURR_FRAME();
 	q->m->pl->varno = g->nbr_vars;
 	q->m->pl->tab_idx = 0;
-	collect_vars(q, p1, p1_ctx, p1->nbr_cells);
+	collect_vars(q, p1, p1_ctx, p1->nbr_cells, 0);
 	const unsigned cnt = q->m->pl->tab_idx;
 	may_ptr_error(init_tmp_heap(q));
 	cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
@@ -10148,15 +10153,18 @@ static USE_RESULT pl_state fn_predicate_property_2(query *q)
 	return pl_failure;
 }
 
-static unsigned fake_collect_vars(query *q, cell *p1, idx_t nbr_cells, cell **slots)
+static unsigned fake_collect_vars(query *q, cell *p1, idx_t nbr_cells, cell **slots, int depth)
 {
+	if (depth > MAX_DEPTH)
+		return 0;
+
 	unsigned cnt = 0;
 
 	for (idx_t i = 0; i < nbr_cells;) {
 		cell *c = p1;
 
 		if (is_structure(c)) {
-			cnt += fake_collect_vars(q, c+1, c->nbr_cells-1, slots);
+			cnt += fake_collect_vars(q, c+1, c->nbr_cells-1, slots, depth+1);
 		} else if (is_variable(c)) {
 			assert(c->var_nbr < MAX_ARITY);
 
@@ -10182,7 +10190,7 @@ unsigned fake_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 
 	unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	cell *slots[MAX_ARITY] = {0};
-	fake_collect_vars(q, tmp, tmp->nbr_cells, slots);
+	fake_collect_vars(q, tmp, tmp->nbr_cells, slots, 0);
 	memset(q->nv_mask, 0, MAX_ARITY);
 	unsigned end = q->nv_start = start;
 
