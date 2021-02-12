@@ -951,7 +951,7 @@ static USE_RESULT pl_state fn_sinh_1(query *q)
 	}
 
 	if (is_float(&q->accum) && isinf(q->accum.val_flt))
-		return throw_error(q, &p1, "evaluation_error", "undefined");
+		return throw_error(q, &p1, "evaluation_error", "float_overflow");
 
 	if (is_float(&q->accum) && isnan(q->accum.val_flt))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
@@ -981,7 +981,7 @@ static USE_RESULT pl_state fn_cosh_1(query *q)
 	}
 
 	if (is_float(&q->accum) && isinf(q->accum.val_flt))
-		return throw_error(q, &p1, "evaluation_error", "undefined");
+		return throw_error(q, &p1, "evaluation_error", "float_overflow");
 
 	if (is_float(&q->accum) && isnan(q->accum.val_flt))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
@@ -1011,7 +1011,7 @@ static USE_RESULT pl_state fn_tanh_1(query *q)
 	}
 
 	if (is_float(&q->accum) && isinf(q->accum.val_flt))
-		return throw_error(q, &p1, "evaluation_error", "undefined");
+		return throw_error(q, &p1, "evaluation_error", "float_overflow");
 
 	if (is_float(&q->accum) && isnan(q->accum.val_flt))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
