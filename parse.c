@@ -3933,6 +3933,12 @@ module *create_module(prolog *pl, const char *name)
 		"phrase_([T|Ts], S0, S) :-"							\
 		" '$append'([T|Ts], S, S0).");
 
+	// This is a start...
+
+	make_rule(m, "phrase_to_stream(P, Stream) :- "			\
+		" phrase(P, V, []),"								\
+		" '$put_chars'(Stream, V).");
+
 	// Edinburgh...
 
 	make_rule(m, "tab(0) :- !.");
