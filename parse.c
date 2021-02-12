@@ -3621,10 +3621,11 @@ module *create_module(prolog *pl, const char *name)
 
 	make_rule(m, "subsumes_term(G,S) :- "					\
 		"\\+ \\+ ( "										\
-		"term_variables(S, V1), "							\
-		"G = S, "											\
-		"term_variables(V1, V2), "							\
-		"V2 == V1).");
+		" term_variables(S, V1), "							\
+		" G = S, "											\
+		" term_variables(V1, V2), "							\
+		" V2 == V1"											\
+		").");
 
 	make_rule(m, "setup_call_cleanup(S,G,C) :- "			\
 		"copy_term('$setup_call_cleanup'(S,G,C),TMP_G), "	\
@@ -3635,7 +3636,7 @@ module *create_module(prolog *pl, const char *name)
 		"'$call'((S,!)), "									\
 		"'$register_cleanup'(\\+ \\+ (C,!)), "				\
 		"catch(G,Err, "										\
-			"(catch(\\+ \\+ (C,!),_,true),throw(Err))"		\
+		" (catch(\\+ \\+ (C,!),_,true),throw(Err))"		\
 		"), "												\
 		"'$chk_is_det'.");
 
