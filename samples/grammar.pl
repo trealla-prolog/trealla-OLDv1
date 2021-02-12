@@ -17,5 +17,5 @@ det --> [a].
     Generate all possible sentences...
 */
 
-main :- phrase_to_stream(sentence,user_output), nl, fail.
+main :- phrase(sentence,X), write(X), nl, fail.
 main.
