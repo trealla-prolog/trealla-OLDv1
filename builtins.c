@@ -10890,7 +10890,7 @@ static USE_RESULT pl_state fn_sys_put_chars_2(query *q)
 	GET_NEXT_ARG(p1,any);
 	size_t len;
 
-	if (is_atom(p1)) {
+	if (is_cstring(p1)) {
 		const char *src = GET_STR(p1);
 		size_t len = LEN_STR(p1);
 		net_write(src, len, str);
