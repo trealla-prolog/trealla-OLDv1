@@ -388,24 +388,19 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 
 	idx_t arity = c->arity;
 	dst += snprintf(dst, dstlen, "(");
-	bool cycle_error = false;
 
 	for (c++; arity--; c += c->nbr_cells) {
 		cell *tmp = running ? deref(q, c, c_ctx) : c;
 		ssize_t res = print_canonical_to_buf(q, dst, dstlen, tmp, q->latest_ctx, running, depth+1);
-		if (res >= 0)
-			dst += res;
-		else {
-			dst += ~res;
-			cycle_error = true;
-		}
+		if (res < 0) return -1;
+		dst += res;
 
 		if (arity)
 			dst += snprintf(dst, dstlen, ",");
 	}
 
 	dst += snprintf(dst, dstlen, ")");
-	return !cycle_error?dst - save_dst: ~(dst - save_dst);
+	return dst - save_dst;
 }
 
 static char *varformat(unsigned nbr)
@@ -419,12 +414,10 @@ static char *varformat(unsigned nbr)
 
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth)
 {
-	bool cycle_error = false;
 	char *save_dst = dst;
 
-	if (depth > MAX_DEPTH) {
+	if (depth > MAX_DEPTH)
 		return -1;
-	}
 
 	if (is_rational(c)) {
 		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY))) {
@@ -527,7 +520,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		int parens = is_structure(head) && special_op;
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
 		ssize_t res = print_term_to_buf(q, dst, dstlen, head, head_ctx, running, 0, depth+1);
-		assert(res >= 0); //cehteh: can this fail?
+		if (res < 0) return -1;
 		dst += res;
 		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
 
@@ -541,7 +534,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			if (strcmp(src, "[]")) {
 				dst += snprintf(dst, dstlen, "%s", "|");
 				ssize_t res = print_term_to_buf(q, dst, dstlen, tail, c_ctx, running, 1, depth+1);
-				assert(res >= 0); //cehteh: can this fail?
+				if (res < 0) return -1;
 				dst += res;
 			}
 		} else if (is_iso_list(tail)) {
@@ -565,7 +558,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		} else {
 			dst += snprintf(dst, dstlen, "%s", "|");
 			ssize_t res = print_term_to_buf(q, dst, dstlen, tail, c_ctx, running, 1, depth+1);
-			assert(res >= 0); //cehteh: can this fail?
+			if (res < 0) return -1;
 			dst += res;
 		}
 
@@ -667,13 +660,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 					dst += snprintf(dst, dstlen, "%s", "(");
 
 				ssize_t res = print_term_to_buf(q, dst, dstlen, tmp, tmp_ctx, running, 0, depth+1);
-				if (res >= 0) {
-					dst += res;
-				} else {
-					dst += ~res;
-					cycle_error = true;
-					break;
-				}
+				if (res < 0) return -1;
+				dst += res;
 
 				if (parens)
 					dst += snprintf(dst, dstlen, "%s", ")");
@@ -689,7 +677,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		lhs = running ? deref(q, lhs, c_ctx) : lhs;
 		idx_t lhs_ctx = q->latest_ctx;
 		ssize_t res = print_term_to_buf(q, dst, dstlen, lhs, lhs_ctx, running, 0, depth+1);
-		assert(res >= 0); //cehteh: can this fail?
+		if (res < 0) return -1;
 		dst += res;
 		dst += snprintf(dst, dstlen, "%s", src);
 	} else if (IS_FX(c) || IS_FY(c)) {
@@ -704,7 +692,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
 		ssize_t res = print_term_to_buf(q, dst, dstlen, rhs, rhs_ctx, running, 0, depth+1);
-		assert(res >= 0); //cehteh: can this fail?
+		if (res < 0) return -1;
 		dst += res;
 		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
 	} else {
@@ -726,7 +714,9 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		int lhs_parens = lhs_prec1 > my_prec;
 		lhs_parens |= lhs_prec2;
 		if (parens || lhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
-		dst += print_term_to_buf(q, dst, dstlen, lhs, lhs_ctx, running, 0, depth+1);
+		ssize_t res = print_term_to_buf(q, dst, dstlen, lhs, lhs_ctx, running, 0, depth+1);
+		if (res < 0) return -1;
+		dst += res;
 		if (lhs_parens) dst += snprintf(dst, dstlen, "%s", ")");
 		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "-->") || !strcmp(src, "=..") || !*src;
 		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
@@ -740,37 +730,42 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		rhs_parens |= rhs_prec1 && lhs_prec1 && (rhs_prec1 != lhs_prec1);
 		rhs_parens |= rhs_prec2;
 		if (rhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
-		ssize_t res = print_term_to_buf(q, dst, dstlen, rhs, rhs_ctx, running, 0, depth+1);
-		assert(res >= 0); //cehteh: can this fail?
+		res = print_term_to_buf(q, dst, dstlen, rhs, rhs_ctx, running, 0, depth+1);
+		if (res < 0) return -1;
 		dst += res;
 		if (parens || rhs_parens) dst += snprintf(dst, dstlen, "%s", ")");
 	}
 
-	return !cycle_error?dst - save_dst: ~(dst - save_dst);
+	return dst - save_dst;
 }
 
 char *print_canonical_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 {
+	bool cycle_error = false;
 	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 0);
 
 	if (len < 0) {
 		running = 0;
 		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 1);
+		cycle_error = true;
 	}
 
 	char *buf = malloc(len+10);
 	ensure(buf);
 	len = print_canonical_to_buf(q, buf, len+1, c, c_ctx, running, 0);
+	q->cycle_error = cycle_error;
 	return buf;
 }
 
 pl_state print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running)
 {
+	bool cycle_error = false;
 	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 0);
 
 	if (len < 0) {
 		running = 0;
 		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 1);
+		cycle_error = true;
 	}
 
 	char *dst = malloc(len*2+1); //cehteh: why *2?
@@ -789,6 +784,7 @@ pl_state print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, 
 		if (feof(str->fp)) {
 			q->error = true;
 			free(dst);
+			q->cycle_error = cycle_error;
 			return pl_error; //cehteh: need a pl_eof error?
 		}
 
@@ -797,16 +793,19 @@ pl_state print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, 
 	}
 
 	free(dst);
+	q->cycle_error = cycle_error;
 	return pl_success;
 }
 
 pl_state print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 {
+	bool cycle_error = false;
 	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 0);
 
 	if (len < 0) {
 		running = 0;
 		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 1);
+		cycle_error = true;
 	}
 
 	char *dst = malloc(len*2+1); //cehteh: why *2?
@@ -825,6 +824,7 @@ pl_state print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 		if (feof(fp)) {
 			q->error = true;
 			free(dst);
+			q->cycle_error = cycle_error;
 			return pl_error;
 		}
 
@@ -833,32 +833,38 @@ pl_state print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 	}
 
 	free(dst);
+	q->cycle_error = cycle_error;
 	return pl_success;
 }
 
 char *print_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 {
+	bool cycle_error = false;
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 0);
 
 	if (len < 0) {
 		running = 0;
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 1);
+		cycle_error = true;
 	}
 
 	char *buf = malloc(len+10);
 	ensure(buf);
 	len = print_term_to_buf(q, buf, len+1, c, c_ctx, running, 0, 0);
 	q->numbervars = false;
+	q->cycle_error = cycle_error;
 	return buf;
 }
 
 pl_state print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running)
 {
+	bool cycle_error = false;
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 0);
 
 	if (len < 0) {
 		running = 0;
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 1);
+		cycle_error = true;
 	}
 
 	char *dst = malloc(len+10);
@@ -872,6 +878,7 @@ pl_state print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int r
 		if (feof(str->fp)) {
 			q->error = true;
 			free(dst);
+			q->cycle_error = cycle_error;
 			return pl_error;
 		}
 
@@ -881,16 +888,19 @@ pl_state print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int r
 
 	free(dst);
 	q->numbervars = false;
+	q->cycle_error = cycle_error;
 	return pl_success;
 }
 
 pl_state print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 {
+	bool cycle_error = false;
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 0);
 
 	if (len < 0) {
 		running = 0;
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 1);
+		cycle_error = true;
 	}
 
 	char *dst = malloc(len+10);
@@ -904,6 +914,7 @@ pl_state print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 		if (feof(fp)) {
 			q->error = true;
 			free(dst);
+			q->cycle_error = cycle_error;
 			return pl_error;
 		}
 
@@ -913,5 +924,6 @@ pl_state print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 
 	free(dst);
 	q->numbervars = false;
+	q->cycle_error = cycle_error;
 	return pl_success;
 }

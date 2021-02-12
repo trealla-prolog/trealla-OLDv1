@@ -454,7 +454,7 @@ static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsi
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	if (depth >= 64000) {
-		q->cycle_error = 1;
+		q->cycle_error = true;
 		return ERR_CYCLE_CELL;
 	}
 
@@ -538,7 +538,7 @@ static USE_RESULT cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx, bool 
 	frame *g = GET_CURR_FRAME();
 	q->m->pl->varno = g->nbr_vars;
 	q->m->pl->tab_idx = 0;
-	q->cycle_error = 0;
+	q->cycle_error = false;
 	cell* rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, nonlocals_only);
 	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 	int cnt = q->m->pl->varno - g->nbr_vars;
@@ -567,7 +567,7 @@ static USE_RESULT cell *deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx, uns
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	if (depth >= 64000) {
-		q->cycle_error = 1;
+		q->cycle_error = true;
 		return ERR_CYCLE_CELL;
 	}
 
@@ -610,7 +610,7 @@ static USE_RESULT cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	if (!init_tmp_heap(q))
 		return NULL;
 
-	q->cycle_error = 0;
+	q->cycle_error = false;
 	cell *rec = deep_clone2_to_tmp(q, p1, p1_ctx, 0);
 	if (!rec || rec == ERR_CYCLE_CELL) return rec;
 	return q->tmp_heap;
@@ -5788,8 +5788,8 @@ static USE_RESULT pl_state fn_iso_current_op_3(query *q)
 static USE_RESULT pl_state fn_iso_acyclic_term_1(query *q)
 {
 	GET_FIRST_ARG(p_term,any);
-	q->cycle_error = false;
-	print_term_to_buf(q, NULL, 0, p_term, p_term_ctx, 1, 0, 0);
+	ssize_t res = print_term_to_buf(q, NULL, 0, p_term, p_term_ctx, 1, 0, 0);
+	if (res < 0) q->cycle_error = true;
 	return !q->cycle_error;
 }
 
