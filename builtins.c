@@ -1255,7 +1255,7 @@ static USE_RESULT pl_state fn_iso_number_codes_2(query *q)
 			if (val < 0)
 				return throw_error(q, head, "representation_error", "character_code");
 
-			*dst++ =val;
+			*dst++ = val;
 
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
