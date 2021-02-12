@@ -5034,9 +5034,6 @@ USE_RESULT pl_state fn_call_0(query *q, cell *p1)
 
 static USE_RESULT pl_state fn_iso_call_1(query *q)
 {
-	if (q->retry)
-		return pl_failure;
-
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp3;
 
@@ -5056,7 +5053,6 @@ static USE_RESULT pl_state fn_iso_call_1(query *q)
 	cell *tmp = clone_to_heap(q, true, p1, 1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_call(q, tmp+nbr_cells);
-	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	q->save_cp = q->cp;
 	return pl_success;
