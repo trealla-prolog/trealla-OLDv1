@@ -5024,7 +5024,6 @@ USE_RESULT pl_state fn_call_0(query *q, cell *p1)
 
 	idx_t nbr_cells = 0 + p1->nbr_cells;
 	make_call(q, tmp+nbr_cells);
-	//may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -5146,7 +5145,7 @@ static USE_RESULT pl_state fn_iso_ifthen_2(query *q)
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
 	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_call(q, tmp+nbr_cells);
-	may_error(make_barrier(q));			// Why needed?
+	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
