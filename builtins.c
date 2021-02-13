@@ -10197,16 +10197,16 @@ unsigned fake_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 	return end;
 }
 
-static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, int end)
+static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, int *end)
 {
 	unsigned cnt = 0;
 
 	if (is_variable(p1)) {
 		cell *tmp = alloc_on_heap(q, 2);
 		make_structure(tmp+0, index_from_pool(q->m->pl, "$VAR"), NULL, 1, 1);
-		make_int(tmp+1, end++);
+		make_int(tmp+1, *end); *end = *end + 1;
 		tmp->flags |= FLAG2_QUOTED;
-		set_var(q, p1, q->latest_ctx, tmp, q->st.curr_frame);
+		set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
 		cnt++;
 		return cnt;
 	}
@@ -10223,7 +10223,7 @@ static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, int end)
 		if (is_variable(c)) {
 			cell *tmp = alloc_on_heap(q, 2);
 			make_structure(tmp+0, index_from_pool(q->m->pl, "$VAR"), NULL, 1, 1);
-			make_int(tmp+1, end++);
+			make_int(tmp+1, *end); *end = *end + 1;
 			tmp->flags |= FLAG2_QUOTED;
 			set_var(q, c, q->latest_ctx, tmp, q->st.curr_frame);
 			cnt++;
@@ -10240,7 +10240,8 @@ static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, int end)
 static USE_RESULT pl_state fn_numbervars_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	real_numbervars(q, p1, p1_ctx, 0);
+	int end = 0;
+	real_numbervars(q, p1, p1_ctx, &end);
 	return pl_success;
 }
 
@@ -10249,7 +10250,8 @@ static USE_RESULT pl_state fn_numbervars_3(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer);
 	GET_NEXT_ARG(p3,integer_or_var);
-	unsigned cnt = real_numbervars(q, p1, p1_ctx, q->nv_start=p2->val_num);
+	int end = q->nv_start = p2->val_num;
+	unsigned cnt = real_numbervars(q, p1, p1_ctx, &end);
 	cell tmp;
 	make_int(&tmp, p2->val_num+cnt);
 	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
