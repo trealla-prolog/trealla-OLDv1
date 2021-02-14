@@ -291,8 +291,10 @@ static cell *alloc_on_heap(query *q, idx_t nbr_cells)
 	return c;
 }
 
+#if 0
 static idx_t heap_used(const query *q) { return q->st.hp; }
 static cell *get_heap(const query *q, idx_t i) { return q->arenas->heap + i; }
+#endif
 
 #if 0
 static void init_queue(query* q)
@@ -7055,6 +7057,7 @@ static USE_RESULT pl_state fn_between_3(query *q)
 	return pl_success;
 }
 
+#if 0
 static USE_RESULT pl_state fn_forall_2(query *q)
 {
 	if (q->retry)
@@ -7074,6 +7077,7 @@ static USE_RESULT pl_state fn_forall_2(query *q)
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
+#endif
 
 static USE_RESULT pl_state fn_split_atom_4(query *q)
 {
@@ -11307,7 +11311,7 @@ static const struct builtins g_other_funcs[] =
 	{"mustbe_list_or_var", 1, fn_mustbe_list_or_var_1, "+term"},
 	{"list", 1, fn_is_list_1, "+term"},
 	{"is_stream", 1, fn_is_stream_1, "+term"},
-	{"forall", 2, fn_forall_2, "+term,+term"},
+	//{"forall", 2, fn_forall_2, "+term,+term"},
 	{"term_hash", 2, fn_term_hash_2, "+term,?integer"},
 	{"rename_file", 2, fn_rename_file_2, "+string,+string"},
 	{"directory_files", 2, fn_directory_files_2, "+pathname,-list"},

@@ -3643,7 +3643,7 @@ module *create_module(prolog *pl, const char *name)
 	make_rule(m, "partial_string(S,P) :- append(S,_,P).");
 	make_rule(m, "partial_string(S,P,V) :- append(S,V,P).");
 
-	//make_rule(m, "forall(Cond,Action) :- \\+ (Cond, \\+ Action).");
+	make_rule(m, "forall(Cond,Action) :- \\+ (Cond, \\+ Action).");
 
 	make_rule(m, "chars_base64(Plain,Base64,_) :- base64(Plain,Base64).");
 	make_rule(m, "chars_urlenc(Plain,Url,_) :- urlenc(Plain,Url).");
