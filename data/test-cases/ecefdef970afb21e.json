@@ -1,0 +1,55 @@
+{
+  "uid" : "ecefdef970afb21e",
+  "name" : "eclipse_call_N_26",
+  "historyId" : "predicates/call_N/tests.lgt::tests:tests#eclipse_call_N_26",
+  "time" : {
+    "start" : 1613371196000,
+    "stop" : 1613371196000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Failure instead of success",
+  "statusTrace" : "",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/call_N/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "ecefdef970afb21e.json",
+  "parameterValues" : [ ]
+}

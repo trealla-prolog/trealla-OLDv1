@@ -1,0 +1,51 @@
+{
+  "uid" : "acb5eb8ef44451c3",
+  "name" : "iso_unify_2_12",
+  "historyId" : "predicates/unify_2/tests.lgt::tests:tests#iso_unify_2_12",
+  "time" : {
+    "start" : 1613371411000,
+    "stop" : 1613371411000,
+    "duration" : 0
+  },
+  "status" : "skipped",
+  "statusMessage" : "Skipped test",
+  "statusTrace" : "",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/unify_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "acb5eb8ef44451c3.json",
+  "parameterValues" : [ ]
+}

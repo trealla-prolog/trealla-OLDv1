@@ -1,0 +1,55 @@
+{
+  "uid" : "7ea8fabf05d7281d",
+  "name" : "iso_is_2_24",
+  "historyId" : "predicates/is_2/tests.lgt::tests:tests#iso_is_2_24",
+  "time" : {
+    "start" : 1613371284000,
+    "stop" : 1613371284000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Error instead of success",
+  "statusTrace" : "assertion_failure(''=~=1.2874603271484375e-05)",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/is_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "7ea8fabf05d7281d.json",
+  "parameterValues" : [ ]
+}
