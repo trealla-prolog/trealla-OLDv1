@@ -11058,6 +11058,9 @@ void do_cleanup(query *q, cell *p1)
 
 static USE_RESULT pl_state fn_sys_chk_is_det_0(query *q)
 {
+	if (q->retry)
+		return pl_success;
+
 	if (q->cp == q->save_cp) {
 		choice *ch = GET_CURR_CHOICE();
 
@@ -11075,6 +11078,7 @@ static USE_RESULT pl_state fn_sys_chk_is_det_0(query *q)
 				//print_term(q, stdout, p1, ch->st.curr_frame, 1);
 				//printf(")\n");
 
+				may_error(make_barrier(q));
 				cell *tmp = deep_copy_to_heap(q, p1, ch->st.curr_frame, true);
 				do_cleanup(q, tmp);
 				return pl_success;
