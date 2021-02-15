@@ -3045,6 +3045,23 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
+		if (!p->quote_char && args && !consing && p->is_op
+			&& strcmp(p->token, ",")
+			&& strcmp(p->token, "|")
+			) {
+			unsigned specifier = 0;
+			bool userop = false;
+			unsigned priority = get_op(p->m, p->token, &specifier, &userop, last_op);
+
+			if (!last_op && (priority > 1000)) {
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					fprintf(stdout, "Error: suggest parens around operator '%s', line %d: %s\n", p->token, p->line_nbr, p->srcptr);
+
+				p->error = true;
+				break;
+			}
+		}
+
 		if (!p->quote_char && !strcmp(p->token, ",") && consing) {
 			if (*p->srcptr == ',') {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))

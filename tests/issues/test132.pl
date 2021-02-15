@@ -20,13 +20,13 @@
 
 main :-
     % assuming the negation of the query so that it can be discharged when the query succeeds
-    assertz(re(b,X) -: not_re(c,X)),
-    assertz(re(c,X) -: not_re(b,X)),
+    assertz((re(b,X) -: not_re(c,X))),
+    assertz((re(c,X) -: not_re(b,X))),
     % query
     assertz((re(b,X),re(c,X) -: goal)),
     retina,
-    retract(re(b,X) -: not_re(c,X)),
-    retract(re(c,X) -: not_re(b,X)),
+    retract((re(b,X) -: not_re(c,X))),
+    retract((re(c,X) -: not_re(b,X))),
     write('true.'),
     nl.
 
