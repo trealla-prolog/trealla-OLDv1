@@ -3634,7 +3634,7 @@ module *create_module(prolog *pl, const char *name)
 		"'$call'((S,!)), "									\
 		"'$register_cleanup'((C,!)), "						\
 		"catch(G,Err, "										\
-		" (catch((\\+ \\+ (C,!)),_,true),throw(Err))"		\
+		" (catch((\\+ \\+ C),_,true),throw(Err))"		\
 		"), "												\
 		"'$chk_is_det'.");
 
