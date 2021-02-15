@@ -435,8 +435,6 @@ static predicate *create_predicate(module *m, cell *c)
 
 static void set_multifile_in_db(module *m, const char *name, idx_t arity)
 {
-	assert(name);
-
 	cell tmp = (cell){0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
@@ -776,8 +774,6 @@ clause *erase_from_db(module *m, uuid *ref)
 
 static void set_noindex_in_db(module *m, const char *name, unsigned arity)
 {
-	if (!m) return;
-
 	cell tmp = (cell){0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
@@ -794,8 +790,6 @@ static void set_noindex_in_db(module *m, const char *name, unsigned arity)
 
 void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
 {
-	if (!m) return;
-
 	cell tmp = (cell){0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
@@ -812,8 +806,6 @@ void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
 
 static void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 {
-	if (!m) return;
-
 	cell tmp = (cell){0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
@@ -904,7 +896,6 @@ static cell *make_cell(parser *p)
 
 void destroy_parser(parser *p)
 {
-	if (!p) return;
 	free(p->token);
 	clear_term(p->t);
 	free(p->t);
@@ -936,7 +927,6 @@ parser *create_parser(module *m)
 
 void destroy_parser_nodelete(parser *p)
 {
-	if (!p) return;
 	clear_term_nodelete(p->t);
 	free(p->token);
 	free(p->t);
@@ -945,7 +935,6 @@ void destroy_parser_nodelete(parser *p)
 
 void destroy_query(query *q)
 {
-	if (!q) return;
 	free(q->trails);
 	free(q->choices);
 
@@ -3342,8 +3331,6 @@ static bool parser_run(parser *p, const char *src, int dump)
 
 module *module_load_text(module *m, const char *src)
 {
-	if (!m) return NULL;
-
 	parser *p = create_parser(m);
 	if (!p) return NULL;
 
@@ -3383,7 +3370,6 @@ module *module_load_text(module *m, const char *src)
 
 bool module_load_fp(module *m, FILE *fp, const char *filename)
 {
-	if (!m) return false;
 	bool ok = false;
 	parser *p = create_parser(m);
 	if (!p) return false;
@@ -3435,7 +3421,6 @@ bool module_load_fp(module *m, FILE *fp, const char *filename)
 
 bool module_load_file(module *m, const char *filename)
 {
-	if (!m) return false;
 	m->tmp_filename = filename;
 
 	if (!strcmp(filename, "user")) {
@@ -3516,7 +3501,6 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 
 bool module_save_file(module *m, const char *filename)
 {
-	if (!m) return false;
 	FILE *fp = fopen(filename, "w");
 
 	if (!fp) {
@@ -3545,8 +3529,6 @@ static void make_rule(module *m, const char *src)
 
 void destroy_module(module *m)
 {
-	if (!m) return;
-
 	module_purge_dirty_list(m);
 
 	while (m->tasks) {
