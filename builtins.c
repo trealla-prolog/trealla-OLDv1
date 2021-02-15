@@ -11058,37 +11058,38 @@ void do_cleanup(query *q, cell *p1)
 
 static USE_RESULT pl_state fn_sys_chk_is_det_0(query *q)
 {
+	if (q->cp != q->save_cp) {
+		choice *ch = GET_CURR_CHOICE();
+		ch->chk_is_det = true;
+		return pl_success;
+	}
+
 	if (q->retry)
 		return pl_success;
 
-	if (q->cp == q->save_cp) {
-		choice *ch = GET_CURR_CHOICE();
+	choice *ch = GET_CURR_CHOICE();
 
-		for (;;) {
-			if (ch->register_cleanup) {
-				if (ch->did_cleanup)
-					break;
+	for (;;) {
+		if (ch->register_cleanup) {
+			if (ch->did_cleanup)
+				break;
 
-				ch->did_cleanup = true;
-				cell *c = ch->st.curr_cell;
-				c = deref(q, c, ch->st.curr_frame);
-				cell *p1 = deref(q, c+1, ch->st.curr_frame);
+			ch->did_cleanup = true;
+			cell *c = ch->st.curr_cell;
+			c = deref(q, c, ch->st.curr_frame);
+			cell *p1 = deref(q, c+1, ch->st.curr_frame);
 
-				//printf("*** chk_det: (");
-				//print_term(q, stdout, p1, ch->st.curr_frame, 1);
-				//printf(")\n");
+			//printf("*** chk_det: (");
+			//print_term(q, stdout, p1, ch->st.curr_frame, 1);
+			//printf(")\n");
 
-				may_error(make_barrier(q));
-				cell *tmp = deep_copy_to_heap(q, p1, ch->st.curr_frame, true);
-				do_cleanup(q, tmp);
-				return pl_success;
-			}
-
-			ch--;
+			may_error(make_barrier(q));
+			cell *tmp = deep_copy_to_heap(q, p1, ch->st.curr_frame, true);
+			do_cleanup(q, tmp);
+			return pl_success;
 		}
-	} else {
-		choice *ch = GET_CURR_CHOICE();
-		ch->chk_is_det = true;
+
+		ch--;
 	}
 
 	return pl_success;
