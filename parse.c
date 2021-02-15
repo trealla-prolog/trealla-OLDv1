@@ -3047,7 +3047,6 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quote_char && args && !consing && p->is_op
 			&& strcmp(p->token, ",")
-			&& strcmp(p->token, "|")
 			) {
 			unsigned specifier = 0;
 			bool userop = false;
