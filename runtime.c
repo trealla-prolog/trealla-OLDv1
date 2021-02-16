@@ -1307,6 +1307,21 @@ static bool check_redo(query *q)
 	return false;
 }
 
+static bool outstanding_choices(query *q)
+{
+	choice *ch = GET_CURR_CHOICE();
+
+	for (;;) {
+		if (!ch->register_cleanup)
+			break;
+
+		ch--;
+		q->cp--;
+	}
+
+	return q->cp;
+}
+
 pl_state run_query(query *q)
 {
 	q->yielded = false;
@@ -1387,7 +1402,7 @@ pl_state run_query(query *q)
 					q->cp--;
 				}
 
-				if (q->cp && q->p && !q->run_init) {
+				if (outstanding_choices(q) && q->p && !q->run_init) {
 					if (check_redo(q))
 						return pl_success;
 					else
