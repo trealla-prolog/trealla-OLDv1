@@ -11085,8 +11085,7 @@ static USE_RESULT pl_state fn_sys_chk_is_det_0(query *q)
 			//printf(")\n");
 
 			may_error(make_barrier(q));
-			cell *tmp = deep_copy_to_heap(q, p1, ch->st.curr_frame, true);
-			do_cleanup(q, tmp);
+			do_cleanup(q, p1);
 			return pl_success;
 		}
 
