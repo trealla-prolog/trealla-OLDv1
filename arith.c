@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <float.h>
+#include <fenv.h>
 #include <errno.h>
 
 #include "trealla.h"
@@ -549,6 +550,13 @@ static USE_RESULT pl_state fn_iso_round_1(query *q)
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
+			double f = fabs(p1.val_flt);
+
+			if ((f - floor(f)) > 0.5)
+				fesetround(FE_TONEAREST);
+			else
+				fesetround(FE_UPWARD);
+
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = rint(p1.val_flt);
 
@@ -556,7 +564,7 @@ static USE_RESULT pl_state fn_iso_round_1(query *q)
 				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
-				q->accum.val_num = (int_t)rint(p1.val_flt);
+				q->accum.val_num = rint(p1.val_flt);
 				q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			}
@@ -1388,9 +1396,6 @@ static USE_RESULT pl_state fn_iso_mod_2(query *q)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_num = (long long)(p1.val_num % p2.val_num);
-
-		if ((p1.val_num < 0) || (p2.val_num <0))
-			q->accum.val_num = -q->accum.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
