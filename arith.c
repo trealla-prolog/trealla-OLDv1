@@ -558,13 +558,13 @@ static USE_RESULT pl_state fn_iso_round_1(query *q)
 				fesetround(FE_UPWARD);
 
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-			int64_t tmp = rint(p1.val_flt);
+			int64_t tmp = nearbyintf(p1.val_flt);
 
 			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
 				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
-				q->accum.val_num = rint(p1.val_flt);
+				q->accum.val_num = nearbyintf(p1.val_flt);
 				q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			}
