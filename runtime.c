@@ -1309,6 +1309,9 @@ static bool check_redo(query *q)
 
 static bool outstanding_choices(query *q)
 {
+	if (!q->cp)
+		return false;
+
 	choice *ch = GET_CURR_CHOICE();
 
 	for (;;) {
