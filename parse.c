@@ -2654,6 +2654,7 @@ static bool get_token(parser *p, int last_op)
 				return false;
 			}
 
+			if (neg) p->num = -p->num;
 			p->val_type = TYPE_FLOAT;
 		} else
 			p->val_type = TYPE_INTEGER;
