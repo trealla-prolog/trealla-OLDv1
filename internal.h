@@ -485,6 +485,7 @@ struct parser_ {
 	module *m;
 	term *t;
 	char *token, *save_line, *srcptr;
+	int_t num, den;
 	size_t token_size, n_line, len_str;
 	char_flags flag;
 	unsigned line_nbr, depth, read_term;

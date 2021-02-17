@@ -2185,9 +2185,10 @@ static int get_escape(const char **_src, bool *error)
 	return ch;
 }
 
-static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *val_den)
+static int parse_number(parser *p, const char **srcptr)
 {
-	*val_den = 1;
+	p->num = 0;
+	p->den = 1;
 	const char *s = *srcptr;
 	int neg = 0;
 
@@ -2218,8 +2219,8 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 		} else
 			v = get_char_utf8(&s);
 
-		*val_num = v;
-		if (neg) *val_num = -*val_num;
+		p->num = v;
+		if (neg) p->num = -p->num;
 		*srcptr = s;
 		return 1;
 	}
@@ -2260,8 +2261,8 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 			return -1;
 		}
 
-		*((uint_t*)val_num) = v;
-		if (neg) *val_num = -*val_num;
+		p->num = (int_t)v;
+		if (neg) p->num = -p->num;
 		*srcptr = s;
 		return 1;
 	}
@@ -2294,8 +2295,8 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 			return -1;
 		}
 
-		*((uint_t*)val_num) = v;
-		if (neg) *val_num = -*val_num;
+		p->num = (int_t)v;
+		if (neg) p->num = -p->num;
 		*srcptr = s;
 		return 1;
 	}
@@ -2332,8 +2333,8 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 			return -1;
 		}
 
-		*((uint_t*)val_num) = v;
-		if (neg) *val_num = -*val_num;
+		p->num = (int_t)v;
+		if (neg) p->num = -p->num;
 		*srcptr = s;
 		return 1;
 	}
@@ -2365,8 +2366,8 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 		return -1;
 	}
 
-	*((uint_t*)val_num) = v;
-	if (neg) *val_num = -*val_num;
+	p->num = (int_t)v;
+	if (neg) p->num = -p->num;
 	int try_rational = 0;
 
 #if 0
@@ -2407,14 +2408,13 @@ static int parse_number(parser *p, const char **srcptr, int_t *val_num, int_t *v
 		s++;
 	}
 
-	*((uint_t*)val_den) = v;
-
+	p->den = v;
 	cell tmp;
-	tmp.val_num = *val_num;
-	tmp.val_den = *val_den;
+	tmp.val_num = p->num;
+	tmp.val_den = p->den;
 	do_reduce(&tmp);
-	*val_num = tmp.val_num;
-	*val_den = tmp.val_den;
+	p->num = tmp.val_num;
+	p->den = tmp.val_den;
 	*srcptr = s;
 	return 1;
 }
@@ -2628,9 +2628,8 @@ static bool get_token(parser *p, int last_op)
 	// Numbers...
 
 	const char *tmpptr = src;
-	int_t v = 0, d = 1;
 
-	if ((*src != '-') && parse_number(p, &src, &v, &d)) {
+	if ((*src != '-') && parse_number(p, &src)) {
 		if (neg)
 			*dst++ = '-';
 
@@ -3233,7 +3232,9 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 		if (p->val_type == TYPE_INTEGER) {
 			const char *src = p->token;
-			parse_number(p, &src, &c->val_num, &c->val_den);
+			parse_number(p, &src);
+			c->val_num = p->num;
+			c->val_den = p->den;
 
 			if (strstr(p->token, "0o"))
 				c->flags |= FLAG_OCTAL;
