@@ -2544,7 +2544,7 @@ static bool get_token(parser *p, int last_op)
 	char *dst = p->token;
 	*dst = '\0';
 	int neg = 0;
-	p->val_type = TYPE_LITERAL;
+	p->v.val_type = TYPE_LITERAL;
 	p->quote_char = 0;
 	p->string = p->is_quoted = p->is_variable = p->is_op = false;
 
@@ -2582,7 +2582,7 @@ static bool get_token(parser *p, int last_op)
 		*dst = '\0';
 		p->srcptr = (char*)src;
 		p->v.val_num = ch;
-		p->val_type = TYPE_INTEGER;
+		p->v.val_type = TYPE_INTEGER;
 		p->dq_consing = -1;
 		return true;
 	}
@@ -2643,10 +2643,10 @@ static bool get_token(parser *p, int last_op)
 				return false;
 			}
 
-			p->val_type = TYPE_FLOAT;
+			p->v.val_type = TYPE_FLOAT;
 		} else {
 			if (neg) p->v.val_num = -p->v.val_num;
-			p->val_type = TYPE_INTEGER;
+			p->v.val_type = TYPE_INTEGER;
 		}
 
 		p->srcptr = (char*)src;
@@ -2923,7 +2923,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		if (p->error)
 			break;
 
-		//fprintf(stdout, "Debug: token '%s' quoted=%d, val_type=%u, op=%d, lastop=%d\n", p->token, p->quote_char, p->val_type, p->is_op, last_op);
+		//fprintf(stdout, "Debug: token '%s' quoted=%d, val_type=%u, op=%d, lastop=%d\n", p->token, p->quote_char, p->v.val_type, p->is_op, last_op);
 
 		if (!p->quote_char
 		    && !strcmp(p->token, ".")
@@ -3188,14 +3188,14 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		// Operators in canonical form..
 
 		if (last_op && priority && (*p->srcptr == '(')) {
-			p->val_type = TYPE_LITERAL;
+			p->v.val_type = TYPE_LITERAL;
 			specifier = 0;
 			priority = 0;
 			p->quote_char = 0;
 		}
 
 		last_op = strcmp(p->token, ")") && priority;
-		int func = (p->val_type == TYPE_LITERAL) && !specifier && (*p->srcptr == '(');
+		int func = (p->v.val_type == TYPE_LITERAL) && !specifier && (*p->srcptr == '(');
 
 		if (func) {
 			is_func = true;
@@ -3216,12 +3216,12 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		p->start_term = false;
 		cell *c = make_cell(p);
 		c->nbr_cells = 1;
-		c->val_type = p->val_type;
+		c->val_type = p->v.val_type;
 		SET_OP(c,specifier);
 		c->priority = priority;
 		bool found = false;
 
-		if (p->val_type == TYPE_INTEGER) {
+		if (p->v.val_type == TYPE_INTEGER) {
 			c->val_num = p->v.val_num;
 			c->val_den = p->v.val_den;
 
@@ -3232,7 +3232,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			else if (strstr(p->token, "0b"))
 				c->flags |= FLAG_BINARY;
 		}
-		else if (p->val_type == TYPE_FLOAT)
+		else if (p->v.val_type == TYPE_FLOAT)
 			c->val_flt = atof(p->token);
 		else if ((!p->is_quoted || func || p->is_op || p->is_variable ||
 			(get_builtin(p->m->pl, p->token, 0, &found), found)) && !p->string) {

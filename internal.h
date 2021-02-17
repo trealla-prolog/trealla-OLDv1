@@ -491,7 +491,6 @@ struct parser_ {
 	unsigned line_nbr, depth, read_term;
 	int quote_char;
 	unsigned nbr_vars;
-	uint8_t val_type;
 	int8_t dq_consing;
 	bool error;
 	bool already_loaded:1;
