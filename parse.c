@@ -2220,7 +2220,7 @@ static int parse_number(parser *p, const char **srcptr)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 	__int128_t v = 0;
 #else
-	uint_t v = 0;
+	int_t v = 0;
 #endif
 
 	if ((*s == '0') && (s[1] == 'b')) {
@@ -2370,7 +2370,7 @@ static int parse_number(parser *p, const char **srcptr)
 	if (!try_rational) {
 		strtod(tmpptr, &tmpptr);
 
-		if (tmpptr[-1] == '.')
+		if ((tmpptr[-1] == '.')  || isspace(tmpptr[-1]))
 			tmpptr--;
 
 		*srcptr = tmpptr;
@@ -2396,7 +2396,7 @@ static int parse_number(parser *p, const char **srcptr)
 		s++;
 	}
 
-	p->den = v;
+	p->den = (int_t)v;
 	cell tmp;
 	tmp.val_num = p->num;
 	tmp.val_den = p->den;
