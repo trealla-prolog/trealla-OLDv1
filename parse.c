@@ -2213,6 +2213,7 @@ static int parse_number(parser *p, const char **srcptr)
 		} else
 			v = get_char_utf8(&s);
 
+		p->v.val_type = TYPE_INTEGER;
 		p->v.val_num = v;
 		*srcptr = s;
 		return 1;
@@ -2254,6 +2255,7 @@ static int parse_number(parser *p, const char **srcptr)
 			return -1;
 		}
 
+		p->v.val_type = TYPE_INTEGER;
 		p->v.flags |= FLAG_BINARY;
 		p->v.val_num = (int_t)v;
 		*srcptr = s;
@@ -2288,6 +2290,7 @@ static int parse_number(parser *p, const char **srcptr)
 			return -1;
 		}
 
+		p->v.val_type = TYPE_INTEGER;
 		p->v.flags |= FLAG_OCTAL;
 		p->v.val_num = (int_t)v;
 		*srcptr = s;
@@ -2326,6 +2329,7 @@ static int parse_number(parser *p, const char **srcptr)
 			return -1;
 		}
 
+		p->v.val_type = TYPE_INTEGER;
 		p->v.flags |= FLAG_HEX;
 		p->v.val_num = (int_t)v;
 		*srcptr = s;
@@ -2359,6 +2363,7 @@ static int parse_number(parser *p, const char **srcptr)
 		return -1;
 	}
 
+	p->v.val_type = TYPE_INTEGER;
 	p->v.val_num = (int_t)v;
 	int try_rational = 0;
 
@@ -2623,9 +2628,6 @@ static bool get_token(parser *p, int last_op)
 	const char *tmpptr = src;
 
 	if ((*src != '-') && parse_number(p, &src)) {
-		if (neg)
-			*dst++ = '-';
-
 		// There is room for a number...
 
 		if ((size_t)(src-tmpptr) >= p->token_size) {
@@ -2648,9 +2650,9 @@ static bool get_token(parser *p, int last_op)
 			}
 
 			p->v.val_type = TYPE_FLOAT;
+			p->v.val_flt = atof(p->token);
 		} else {
 			if (neg) p->v.val_num = -p->v.val_num;
-			p->v.val_type = TYPE_INTEGER;
 		}
 
 		p->srcptr = (char*)src;
@@ -3230,9 +3232,9 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			c->val_den = p->v.val_den;
 			c->flags = p->v.flags;
 		}
-		else if (p->v.val_type == TYPE_FLOAT)
-			c->val_flt = atof(p->token);
-		else if ((!p->is_quoted || func || p->is_op || p->is_variable ||
+		else if (p->v.val_type == TYPE_FLOAT) {
+			c->val_flt = p->v.val_flt;
+		} else if ((!p->is_quoted || func || p->is_op || p->is_variable ||
 			(get_builtin(p->m->pl, p->token, 0, &found), found)) && !p->string) {
 
 			if (func && !strcmp(p->token, "."))
