@@ -2187,8 +2187,8 @@ static int get_escape(const char **_src, bool *error)
 
 static int parse_number(parser *p, const char **srcptr)
 {
-	p->num = 0;
-	p->den = 1;
+	p->v.val_num = 0;
+	p->v.val_den = 1;
 	const char *s = *srcptr;
 
 	if ((*s == '.') && isdigit(s[1])) {
@@ -2212,7 +2212,7 @@ static int parse_number(parser *p, const char **srcptr)
 		} else
 			v = get_char_utf8(&s);
 
-		p->num = v;
+		p->v.val_num = v;
 		*srcptr = s;
 		return 1;
 	}
@@ -2253,7 +2253,7 @@ static int parse_number(parser *p, const char **srcptr)
 			return -1;
 		}
 
-		p->num = (int_t)v;
+		p->v.val_num = (int_t)v;
 		*srcptr = s;
 		return 1;
 	}
@@ -2286,7 +2286,7 @@ static int parse_number(parser *p, const char **srcptr)
 			return -1;
 		}
 
-		p->num = (int_t)v;
+		p->v.val_num = (int_t)v;
 		*srcptr = s;
 		return 1;
 	}
@@ -2323,7 +2323,7 @@ static int parse_number(parser *p, const char **srcptr)
 			return -1;
 		}
 
-		p->num = (int_t)v;
+		p->v.val_num = (int_t)v;
 		*srcptr = s;
 		return 1;
 	}
@@ -2355,7 +2355,7 @@ static int parse_number(parser *p, const char **srcptr)
 		return -1;
 	}
 
-	p->num = (int_t)v;
+	p->v.val_num = (int_t)v;
 	int try_rational = 0;
 
 #if 0
@@ -2396,13 +2396,13 @@ static int parse_number(parser *p, const char **srcptr)
 		s++;
 	}
 
-	p->den = (int_t)v;
+	p->v.val_den = (int_t)v;
 	cell tmp;
-	tmp.val_num = p->num;
-	tmp.val_den = p->den;
+	tmp.val_num = p->v.val_num;
+	tmp.val_den = p->v.val_den;
 	do_reduce(&tmp);
-	p->num = tmp.val_num;
-	p->den = tmp.val_den;
+	p->v.val_num = tmp.val_num;
+	p->v.val_den = tmp.val_den;
 	*srcptr = s;
 	return 1;
 }
@@ -2581,7 +2581,7 @@ static bool get_token(parser *p, int last_op)
 		dst += sprintf(dst, "%u", ch);
 		*dst = '\0';
 		p->srcptr = (char*)src;
-		p->num = ch;
+		p->v.val_num = ch;
 		p->val_type = TYPE_INTEGER;
 		p->dq_consing = -1;
 		return true;
@@ -2645,7 +2645,7 @@ static bool get_token(parser *p, int last_op)
 
 			p->val_type = TYPE_FLOAT;
 		} else {
-			if (neg) p->num = -p->num;
+			if (neg) p->v.val_num = -p->v.val_num;
 			p->val_type = TYPE_INTEGER;
 		}
 
@@ -3222,8 +3222,8 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		bool found = false;
 
 		if (p->val_type == TYPE_INTEGER) {
-			c->val_num = p->num;
-			c->val_den = p->den;
+			c->val_num = p->v.val_num;
+			c->val_den = p->v.val_den;
 
 			if (strstr(p->token, "0o"))
 				c->flags |= FLAG_OCTAL;
