@@ -2355,6 +2355,13 @@ static int parse_number(parser *p, const char **srcptr)
 		s++;
 	}
 
+	if ((*s == '.') && isdigit(s[1])) {
+		p->v.val_type = TYPE_FLOAT;
+		p->v.val_flt = strtod(s=tmpptr, &tmpptr);
+		*srcptr = tmpptr;
+		return 1;
+	}
+
 	if (isalpha(*s)) {
 		if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 			fprintf(stdout, "Error: syntax error, parsing number, line %d\n", p->line_nbr);
@@ -2628,8 +2635,6 @@ static bool get_token(parser *p, int last_op)
 	const char *tmpptr = src;
 
 	if ((*src != '-') && parse_number(p, &src)) {
-		// There is room for a number...
-
 		if ((size_t)(src-tmpptr) >= p->token_size) {
 			size_t len = dst - p->token;
 			p->token = realloc(p->token, p->token_size*=2);
@@ -2649,8 +2654,7 @@ static bool get_token(parser *p, int last_op)
 				return false;
 			}
 
-			p->v.val_type = TYPE_FLOAT;
-			p->v.val_flt = atof(p->token);
+			if (neg) p->v.val_flt = -p->v.val_flt;
 		} else {
 			if (neg) p->v.val_num = -p->v.val_num;
 		}
