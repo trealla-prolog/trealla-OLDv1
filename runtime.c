@@ -77,7 +77,7 @@ static USE_RESULT pl_state check_trail(query *q)
 		if (q->st.tp >= q->trails_size) {
 			FAULTINJECT(errno = ENOMEM; q->error = true; return pl_error);
 
-			idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size*2);
+			idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size*3/2);
 			if (!new_trailssize) {
 				q->error = true;
 				return pl_error;
@@ -97,7 +97,7 @@ static USE_RESULT pl_state check_choice(query *q)
 		if (q->cp >= q->choices_size) {
 			FAULTINJECT(errno = ENOMEM; q->error = true; return pl_error);
 
-			idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size*2);
+			idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size*3/2);
 			if (!new_choicessize) {
 				q->error = true;
 				return pl_error;
@@ -117,7 +117,7 @@ static USE_RESULT pl_state check_frame(query *q)
 		if (q->st.fp >= q->frames_size) {
 			FAULTINJECT(errno = ENOMEM; q->error = true; return pl_error);
 
-			idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size*2);
+			idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size*3/2);
 			if (!new_framessize) {
 				q->error = true;
 				return pl_error;
@@ -139,7 +139,7 @@ static USE_RESULT pl_state check_slot(query *q, unsigned cnt)
 		if (nbr >= q->slots_size) {
 			FAULTINJECT(errno = ENOMEM; q->error = true; return pl_error);
 
-			idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, q->slots_size*2>nbr?q->slots_size*2:nbr);
+			idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, q->slots_size*3/2>nbr?q->slots_size*3/2:nbr);
 			if (!new_slotssize) {
 				q->error = true;
 				return pl_error;

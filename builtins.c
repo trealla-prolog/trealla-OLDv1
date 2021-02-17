@@ -260,7 +260,7 @@ static cell *alloc_on_heap(query *q, idx_t nbr_cells)
 
 		arena *a = calloc(1, sizeof(arena));
 		ensure(a);
-		a->heap = calloc(q->h_size, sizeof(cell));	// ad: why calloc?
+		a->heap = calloc(q->h_size, sizeof(cell));
 		ensure(a->heap);
 		a->h_size = q->h_size;
 		a->nbr = q->st.anbr++;
@@ -277,7 +277,7 @@ static cell *alloc_on_heap(query *q, idx_t nbr_cells)
 			q->h_size += nbr_cells / 2;
 		}
 
-		a->heap = calloc(q->h_size, sizeof(cell));	// ad: why calloc?
+		a->heap = calloc(q->h_size, sizeof(cell));
 		ensure(a->heap);
 		a->h_size = q->h_size;
 		a->nbr = q->st.anbr++;
