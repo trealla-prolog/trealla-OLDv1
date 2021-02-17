@@ -2189,6 +2189,7 @@ static int parse_number(parser *p, const char **srcptr)
 {
 	p->v.val_num = 0;
 	p->v.val_den = 1;
+	p->v.flags = 0;
 	const char *s = *srcptr;
 
 	if ((*s == '.') && isdigit(s[1])) {
@@ -2253,6 +2254,7 @@ static int parse_number(parser *p, const char **srcptr)
 			return -1;
 		}
 
+		p->v.flags |= FLAG_BINARY;
 		p->v.val_num = (int_t)v;
 		*srcptr = s;
 		return 1;
@@ -2286,6 +2288,7 @@ static int parse_number(parser *p, const char **srcptr)
 			return -1;
 		}
 
+		p->v.flags |= FLAG_OCTAL;
 		p->v.val_num = (int_t)v;
 		*srcptr = s;
 		return 1;
@@ -2323,6 +2326,7 @@ static int parse_number(parser *p, const char **srcptr)
 			return -1;
 		}
 
+		p->v.flags |= FLAG_HEX;
 		p->v.val_num = (int_t)v;
 		*srcptr = s;
 		return 1;
@@ -3224,13 +3228,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		if (p->v.val_type == TYPE_INTEGER) {
 			c->val_num = p->v.val_num;
 			c->val_den = p->v.val_den;
-
-			if (strstr(p->token, "0o"))
-				c->flags |= FLAG_OCTAL;
-			else if (strstr(p->token, "0x"))
-				c->flags |= FLAG_HEX;
-			else if (strstr(p->token, "0b"))
-				c->flags |= FLAG_BINARY;
+			c->flags = p->v.flags;
 		}
 		else if (p->v.val_type == TYPE_FLOAT)
 			c->val_flt = atof(p->token);
