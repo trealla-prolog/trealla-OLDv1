@@ -2190,13 +2190,6 @@ static int parse_number(parser *p, const char **srcptr)
 	p->num = 0;
 	p->den = 1;
 	const char *s = *srcptr;
-	int neg = 0;
-
-	if (*s == '-') {
-		neg = 1;
-		s++;
-	} else if (*s == '+')
-		return 0;
 
 	if ((*s == '.') && isdigit(s[1])) {
 		if (DUMP_ERRS || (p->consulting && !p->do_read_term))
@@ -2220,7 +2213,6 @@ static int parse_number(parser *p, const char **srcptr)
 			v = get_char_utf8(&s);
 
 		p->num = v;
-		if (neg) p->num = -p->num;
 		*srcptr = s;
 		return 1;
 	}
@@ -2262,7 +2254,6 @@ static int parse_number(parser *p, const char **srcptr)
 		}
 
 		p->num = (int_t)v;
-		if (neg) p->num = -p->num;
 		*srcptr = s;
 		return 1;
 	}
@@ -2296,7 +2287,6 @@ static int parse_number(parser *p, const char **srcptr)
 		}
 
 		p->num = (int_t)v;
-		if (neg) p->num = -p->num;
 		*srcptr = s;
 		return 1;
 	}
@@ -2334,7 +2324,6 @@ static int parse_number(parser *p, const char **srcptr)
 		}
 
 		p->num = (int_t)v;
-		if (neg) p->num = -p->num;
 		*srcptr = s;
 		return 1;
 	}
@@ -2367,7 +2356,6 @@ static int parse_number(parser *p, const char **srcptr)
 	}
 
 	p->num = (int_t)v;
-	if (neg) p->num = -p->num;
 	int try_rational = 0;
 
 #if 0
@@ -2593,6 +2581,7 @@ static bool get_token(parser *p, int last_op)
 		dst += sprintf(dst, "%u", ch);
 		*dst = '\0';
 		p->srcptr = (char*)src;
+		p->num = ch;
 		p->val_type = TYPE_INTEGER;
 		p->dq_consing = -1;
 		return true;
@@ -2654,10 +2643,11 @@ static bool get_token(parser *p, int last_op)
 				return false;
 			}
 
-			if (neg) p->num = -p->num;
 			p->val_type = TYPE_FLOAT;
-		} else
+		} else {
+			if (neg) p->num = -p->num;
 			p->val_type = TYPE_INTEGER;
+		}
 
 		p->srcptr = (char*)src;
 		return true;
@@ -3232,8 +3222,6 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		bool found = false;
 
 		if (p->val_type == TYPE_INTEGER) {
-			const char *src = p->token;
-			parse_number(p, &src);
 			c->val_num = p->num;
 			c->val_den = p->den;
 
