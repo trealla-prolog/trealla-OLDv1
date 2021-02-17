@@ -2185,7 +2185,7 @@ static int get_escape(const char **_src, bool *error)
 	return ch;
 }
 
-static int parse_number(parser *p, const char **srcptr)
+static int parse_number(parser *p, const char **srcptr, bool neg)
 {
 	p->v.val_num = 0;
 	p->v.val_den = 1;
@@ -2215,6 +2215,7 @@ static int parse_number(parser *p, const char **srcptr)
 
 		p->v.val_type = TYPE_INTEGER;
 		p->v.val_num = v;
+		if (neg) p->v.val_num = -p->v.val_num;
 		*srcptr = s;
 		return 1;
 	}
@@ -2258,6 +2259,7 @@ static int parse_number(parser *p, const char **srcptr)
 		p->v.val_type = TYPE_INTEGER;
 		p->v.flags |= FLAG_BINARY;
 		p->v.val_num = (int_t)v;
+		if (neg) p->v.val_num = -p->v.val_num;
 		*srcptr = s;
 		return 1;
 	}
@@ -2293,6 +2295,7 @@ static int parse_number(parser *p, const char **srcptr)
 		p->v.val_type = TYPE_INTEGER;
 		p->v.flags |= FLAG_OCTAL;
 		p->v.val_num = (int_t)v;
+		if (neg) p->v.val_num = -p->v.val_num;
 		*srcptr = s;
 		return 1;
 	}
@@ -2332,6 +2335,7 @@ static int parse_number(parser *p, const char **srcptr)
 		p->v.val_type = TYPE_INTEGER;
 		p->v.flags |= FLAG_HEX;
 		p->v.val_num = (int_t)v;
+		if (neg) p->v.val_num = -p->v.val_num;
 		*srcptr = s;
 		return 1;
 	}
@@ -2358,6 +2362,7 @@ static int parse_number(parser *p, const char **srcptr)
 	if ((*s == '.') && isdigit(s[1])) {
 		p->v.val_type = TYPE_FLOAT;
 		p->v.val_flt = strtod(s=tmpptr, &tmpptr);
+		if (neg) p->v.val_flt = -p->v.val_flt;
 		*srcptr = tmpptr;
 		return 1;
 	}
@@ -2372,6 +2377,7 @@ static int parse_number(parser *p, const char **srcptr)
 
 	p->v.val_type = TYPE_INTEGER;
 	p->v.val_num = (int_t)v;
+		if (neg) p->v.val_num = -p->v.val_num;
 	int try_rational = 0;
 
 #if 0
@@ -2419,6 +2425,7 @@ static int parse_number(parser *p, const char **srcptr)
 	do_reduce(&tmp);
 	p->v.val_num = tmp.val_num;
 	p->v.val_den = tmp.val_den;
+	if (neg) p->v.val_num = -p->v.val_num;
 	*srcptr = s;
 	return 1;
 }
@@ -2559,7 +2566,7 @@ static bool get_token(parser *p, int last_op)
 	const char *src = p->srcptr;
 	char *dst = p->token;
 	*dst = '\0';
-	int neg = 0;
+	bool neg = false;
 	p->v.val_type = TYPE_LITERAL;
 	p->quote_char = 0;
 	p->string = p->is_quoted = p->is_variable = p->is_op = false;
@@ -2625,7 +2632,7 @@ static bool get_token(parser *p, int last_op)
 
 		if (isdigit(*src)) {
 			if (*save_src == '-')
-				neg = 1;
+				neg = true;
 		} else
 			src = save_src;
 	}
@@ -2634,7 +2641,7 @@ static bool get_token(parser *p, int last_op)
 
 	const char *tmpptr = src;
 
-	if ((*src != '-') && parse_number(p, &src)) {
+	if ((*src != '-') && parse_number(p, &src, neg)) {
 		if ((size_t)(src-tmpptr) >= p->token_size) {
 			size_t len = dst - p->token;
 			p->token = realloc(p->token, p->token_size*=2);
@@ -2653,10 +2660,6 @@ static bool get_token(parser *p, int last_op)
 				p->error = true;
 				return false;
 			}
-
-			if (neg) p->v.val_flt = -p->v.val_flt;
-		} else {
-			if (neg) p->v.val_num = -p->v.val_num;
 		}
 
 		p->srcptr = (char*)src;
