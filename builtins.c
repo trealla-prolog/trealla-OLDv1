@@ -254,6 +254,8 @@ static cell *get_tmp_heap(const query *q, idx_t i) { return q->tmp_heap + i; }
 static cell *alloc_on_heap(query *q, idx_t nbr_cells)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
+	q->no_tco = true;
+
 	if (!q->arenas) {
 		if (q->h_size < nbr_cells)
 			q->h_size = nbr_cells;
