@@ -399,13 +399,15 @@ static USE_RESULT pl_state make_cstringn(cell *d, const char *s, size_t n)
 	if (n < MAX_SMALL_STRING) {
 		if (!memchr(s, 0, n)) {
 			make_smalln(d, s, n);
+			d->flags &= ~FLAG_TMP;
 			return pl_success;
 		}
 	}
 
 	FAULTINJECT(errno = ENOMEM; return pl_error);
-	d->val_str = malloc(n+1);
-	may_ptr_error(d->val_str);
+	char *str = malloc(n+1);
+	may_ptr_error(str);
+	d->val_str = str;
 	d->val_type = TYPE_CSTRING;
 	d->flags = FLAG_BLOB;
 	d->nbr_cells = 1;
@@ -435,8 +437,9 @@ static void chk_cstring(cell *c)
 static USE_RESULT pl_state make_stringn(cell *d, const char *s, size_t n)
 {
 	FAULTINJECT(errno = ENOMEM; return pl_error);
-	d->val_str = malloc(n+1);
-	may_ptr_error(d->val_str);
+	char *str = malloc(n+1);
+	may_ptr_error(str);
+	d->val_str = str;
 	d->val_type = TYPE_CSTRING;
 	d->flags = FLAG_BLOB | FLAG_STRING | FLAG_TMP;
 	memcpy(d->val_str, s, n);
@@ -1529,8 +1532,8 @@ static USE_RESULT pl_state fn_iso_atom_concat_3(query *q)
 			len1 = LEN_STR(p1);
 		} else {
 			print_term_to_buf(q, tmpbuf1, sizeof(tmpbuf1), p1, p1_ctx, 1, 0, 0);
-			len1 = strlen(tmpbuf1);
 			src1 = tmpbuf1;
+			len1 = strlen(tmpbuf1);
 		}
 
 		if (is_atom(p2)) {
@@ -1538,8 +1541,8 @@ static USE_RESULT pl_state fn_iso_atom_concat_3(query *q)
 			len2 = LEN_STR(p2);
 		} else {
 			print_term_to_buf(q, tmpbuf2, sizeof(tmpbuf2), p2, p2_ctx, 1, 0, 0);
-			len2 = strlen(tmpbuf2);
 			src2 = tmpbuf2;
+			len2 = strlen(tmpbuf2);
 		}
 
 		size_t nbytes = len1 + len2;
@@ -8542,7 +8545,9 @@ static USE_RESULT pl_state fn_absolute_file_name_3(query *q)
 
 	free(tmpbuf);
 	free(src);
-	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	chk_cstring(&tmp);
+	return ok;
 }
 
 static USE_RESULT pl_state do_consult(query *q, cell *p1, idx_t p1_ctx)
@@ -9332,6 +9337,7 @@ static USE_RESULT pl_state fn_directory_files_2(query *q)
 		may_error(make_string(&tmp, dire->d_name));
 	else
 		may_error(make_cstring(&tmp, dire->d_name));
+
 	allocate_list_on_heap(q, &tmp);
 
 	for (dire = readdir(dirp); dire; dire = readdir(dirp)) {
@@ -9346,7 +9352,9 @@ static USE_RESULT pl_state fn_directory_files_2(query *q)
 	closedir(dirp);
 	free(src);
 	cell *tmp2 = end_list(q);
-	return unify(q, p2, p2_ctx, tmp2, q->st.curr_frame);
+	int ok = unify(q, p2, p2_ctx, tmp2, q->st.curr_frame);
+	chk_cstring(&tmp);
+	return ok;
 }
 
 static USE_RESULT pl_state fn_delete_file_1(query *q)
@@ -9561,16 +9569,20 @@ static USE_RESULT pl_state fn_working_directory_2(query *q)
 		if (is_iso_list(p_new)) {
 			size_t len = scan_is_chars_list(q, p_new, p_new_ctx, 1);
 
-			if (!len)
+			if (!len) {
+				chk_cstring(&tmp);
 				return throw_error(q, p_new, "type_error", "atom");
+			}
 
 			src = chars_list_to_string(q, p_new, p_new_ctx, len);
 			filename = src;
 		} else
 			filename = GET_STR(p_new);
 
-		if (chdir(filename))
+		if (chdir(filename)) {
+			chk_cstring(&tmp);
 			return throw_error(q, p_new, "existence_error", "path");
+		}
 
 		free(src);
 	}

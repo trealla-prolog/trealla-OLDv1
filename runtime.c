@@ -47,7 +47,7 @@ uint64_t get_time_in_usec(void)
 }
 #endif
 
-size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max_elements)
+size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements, size_t max_elements)
 {
 	assert(min_elements <= max_elements);
 	FAULTINJECT(errno = ENOMEM; return 0);
@@ -667,16 +667,17 @@ pl_state set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 
 	if (is_structure(v))
 		make_indirect(&e->c, v);
-	else if (is_nonconst_blob(v)) {
+	else {
 		e->c = *v;
 
-		if (is_tmp(v)) {
-			TAKE_STR(v);
-			e->c.flags &= ~FLAG_TMP;
-		} else
-			DUP_STR(&e->c,v);
-	} else
-		e->c = *v;
+		if (is_nonconst_blob(v)) {
+			if (is_tmp(v)) {
+				TAKE_STR(v);
+				e->c.flags &= ~FLAG_TMP;
+			} else
+				DUP_STR(&e->c,v);
+		}
+	}
 
 	if (frozen)
 		call_attrs(q, frozen);
