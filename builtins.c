@@ -482,8 +482,9 @@ static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsi
 		if (!is_structure(p1)) {
 			if (is_nonconst_blob(p1)) {
 				size_t len = LEN_STR(p1);
-				tmp->val_str = malloc(len+1);
-				if (!tmp->val_str) return NULL;
+				char *str = malloc(len+1);
+				if (!str) return NULL;
+				tmp->val_str = str;
 				memcpy(tmp->val_str, p1->val_str, len);
 				tmp->val_str[len] = '\0';
 				return tmp;
@@ -593,8 +594,9 @@ static USE_RESULT cell *deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx, uns
 		if (!is_structure(p1)) {
 			if (is_nonconst_blob(p1)) {
 				size_t len = LEN_STR(p1);
-				tmp->val_str = malloc(len+1);
-				if (!tmp->val_str) return NULL;
+				char *str = malloc(len+1);
+				if (!str) return NULL;
+				tmp->val_str = str;
 				memcpy(tmp->val_str, p1->val_str, len);
 				tmp->val_str[len] = '\0';
 			}
