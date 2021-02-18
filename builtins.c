@@ -54,7 +54,7 @@ static void msleep(int ms)
 
 cell *ERR_CYCLE_CELL = &(cell){};
 
-static idx_t safe_copy_cells(query *q, cell *dst, const cell *src, idx_t nbr_cells)
+static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 {
 	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
 		*dst = *src;
@@ -63,7 +63,7 @@ static idx_t safe_copy_cells(query *q, cell *dst, const cell *src, idx_t nbr_cel
 		// cstrings. Eventually move to a ref-counted strbuf.
 
 		if (is_nonconst_blob(dst)) {
-			size_t len = LEN_STR(dst);
+			size_t len = dst->len_str;
 			dst->val_str = malloc(len+1);
 			if (!dst->val_str) return 0;
 			memcpy(dst->val_str, src->val_str, len);
@@ -347,7 +347,7 @@ static cell *alloc_on_queuen(query *q, int qnbr, const cell *c)
 	}
 
 	cell *dst = q->queue[qnbr] + q->qp[qnbr];
-	q->qp[qnbr] += safe_copy_cells(q, dst, c, c->nbr_cells);
+	q->qp[qnbr] += safe_copy_cells(dst, c, c->nbr_cells);
 	return dst;
 }
 
@@ -385,10 +385,7 @@ USE_RESULT cell *end_list(query *q)
 	idx_t nbr_cells = tmp_heap_used(q);
 	tmp = alloc_on_heap(q, nbr_cells);
 	if (!tmp) return NULL;
-
-	if (!copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells))
-		return NULL;
-
+	copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
 	tmp->nbr_cells = nbr_cells;
 	fix_list(tmp);
 	return tmp;
@@ -574,7 +571,7 @@ USE_RESULT cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonloc
 	if (!tmp || (tmp == ERR_CYCLE_CELL)) return tmp;
 	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
 	if (!tmp2) return NULL;
-	if (!copy_cells(tmp2, tmp, tmp->nbr_cells)) return NULL;
+	copy_cells(tmp2, tmp, tmp->nbr_cells);
 	return tmp2;
 }
 
@@ -637,7 +634,7 @@ cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 	if (!p1 || p1 == ERR_CYCLE_CELL) return p1;
 	cell *tmp = alloc_on_heap(q, p1->nbr_cells);
 	if (!tmp) return NULL;
-	if (!copy_cells(tmp, p1, p1->nbr_cells)) return NULL;
+	copy_cells(tmp, p1, p1->nbr_cells);
 	return tmp;
 }
 
