@@ -574,7 +574,7 @@ USE_RESULT cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonloc
 	if (!tmp || (tmp == ERR_CYCLE_CELL)) return tmp;
 	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
 	if (!tmp2) return NULL;
-	copy_cells(tmp2, tmp, tmp->nbr_cells);
+	if (!copy_cells(tmp2, tmp, tmp->nbr_cells)) return NULL;
 	return tmp2;
 }
 
@@ -637,7 +637,7 @@ cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 	if (!p1 || p1 == ERR_CYCLE_CELL) return p1;
 	cell *tmp = alloc_on_heap(q, p1->nbr_cells);
 	if (!tmp) return NULL;
-	copy_cells(tmp, p1, p1->nbr_cells);
+	if (!copy_cells(tmp, p1, p1->nbr_cells)) return NULL;
 	return tmp;
 }
 
@@ -5323,8 +5323,9 @@ static USE_RESULT pl_state fn_iso_catch_3(query *q)
 	GET_NEXT_ARG(p2,any);
 
 	if (q->retry && q->exception) {
-		cell *e = deep_copy_to_heap(q, q->exception, q->st.curr_frame, false);
-		return unify(q, p2, p2_ctx, e, q->st.curr_frame);
+		cell *tmp = deep_copy_to_heap(q, q->exception, q->st.curr_frame, false);
+		may_ptr_error(tmp);
+		return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 	}
 
 	// Second time through? Try the recover goal...
