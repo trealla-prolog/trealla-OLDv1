@@ -399,7 +399,6 @@ static USE_RESULT pl_state make_cstringn(cell *d, const char *s, size_t n)
 	if (n < MAX_SMALL_STRING) {
 		if (!memchr(s, 0, n)) {
 			make_smalln(d, s, n);
-			d->flags &= ~FLAG_TMP;
 			return pl_success;
 		}
 	}
@@ -409,7 +408,7 @@ static USE_RESULT pl_state make_cstringn(cell *d, const char *s, size_t n)
 	may_ptr_error(str);
 	d->val_str = str;
 	d->val_type = TYPE_CSTRING;
-	d->flags = FLAG_BLOB;
+	d->flags = FLAG_BLOB | FLAG_TMP;
 	d->nbr_cells = 1;
 	memcpy(d->val_str, s, n);
 	d->val_str[n] = '\0';
@@ -431,6 +430,9 @@ static void chk_cstring(cell *c)
 	if (is_nonconst_blob(c) && is_tmp(c)) {
 		if (c->val_str)
 			free(c->val_str);
+
+		c->flags &= ~FLAG_TMP;
+		c->flags |= FLAG2_CONST;
 	}
 }
 
@@ -848,7 +850,6 @@ static USE_RESULT pl_state fn_iso_atom_chars_2(query *q)
 	if (is_string(p2)) {
 		cell tmp;
 		may_error(make_cstringn(&tmp, GET_STR(p2), LEN_STR(p2)));
-		tmp.flags |= FLAG_TMP;
 		int ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		chk_cstring(&tmp);
 		return ok;
@@ -907,7 +908,7 @@ static USE_RESULT pl_state fn_iso_atom_chars_2(query *q)
 			int nbytes = len_char_utf8(src);
 			size_t nlen = dst - tmpbuf;
 
-			if ((nlen+10) > bufsiz) {
+			while ((nlen+10) > bufsiz) {
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
 				ensure(tmpbuf);
 				tmpbuf[nlen] = '\0';
@@ -927,7 +928,6 @@ static USE_RESULT pl_state fn_iso_atom_chars_2(query *q)
 
 		cell tmp;
 		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf));
-		tmp.flags |= FLAG_TMP;
 		free(tmpbuf);
 		int ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		chk_cstring(&tmp);
@@ -1142,8 +1142,8 @@ static USE_RESULT pl_state fn_iso_atom_codes_2(query *q)
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
-		size_t nbytes;
-		char *tmpbuf = malloc(nbytes=256), *dst = tmpbuf;
+		size_t bufsiz;
+		char *tmpbuf = malloc(bufsiz=256), *dst = tmpbuf;
 		ensure(tmpbuf);
 		*dst = '\0';
 		LIST_HANDLER(p2);
@@ -1162,8 +1162,8 @@ static USE_RESULT pl_state fn_iso_atom_codes_2(query *q)
 			put_char_utf8(ch, val);
 			size_t nlen = dst - tmpbuf;
 
-			if ((nlen+strlen(ch)) >= nbytes) {
-				tmpbuf = realloc(tmpbuf, nbytes*=2);
+			while ((nlen+strlen(ch)) >= bufsiz) {
+				tmpbuf = realloc(tmpbuf, bufsiz*=2);
 				ensure(tmpbuf);
 			}
 
@@ -1181,7 +1181,6 @@ static USE_RESULT pl_state fn_iso_atom_codes_2(query *q)
 
 		cell tmp;
 		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf));
-		tmp.flags |= FLAG_TMP;
 		free(tmpbuf);
 		int ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		chk_cstring(&tmp);
@@ -1428,7 +1427,6 @@ static USE_RESULT pl_state fn_iso_sub_atom_5(query *q)
 			}
 
 			may_error(make_cstringn(&tmp, src+i, j));
-			tmp.flags |= FLAG_TMP;
 
 			if (is_atom(p5) && !strcmp(GET_STR(p5), GET_STR(&tmp))) {
 				chk_cstring(&tmp);
@@ -1490,11 +1488,9 @@ static USE_RESULT pl_state do_atom_concat_3(query *q)
 	GET_RAW_ARG(2,p2_raw);
 	cell tmp;
 	may_error(make_cstring(&tmp, dst1), free(dst1));
-	tmp.flags |= FLAG_TMP;
 	free(dst1);
 	reset_value(q, p1_raw, p1_raw_ctx, &tmp, q->st.curr_frame);
 	may_error(make_cstring(&tmp, dst2), free(dst2));
-	tmp.flags |= FLAG_TMP;
 	reset_value(q, p2_raw, p2_raw_ctx, &tmp, q->st.curr_frame);
 	free(dst2);
 
@@ -1553,7 +1549,6 @@ static USE_RESULT pl_state fn_iso_atom_concat_3(query *q)
 		dst[nbytes] = '\0';
 		cell tmp;
 		may_error(make_cstringn(&tmp, dst, nbytes), free(dst));
-		tmp.flags |= FLAG_TMP;
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		free(dst);
 		return pl_success;
@@ -1566,7 +1561,6 @@ static USE_RESULT pl_state fn_iso_atom_concat_3(query *q)
 		char *dst = strndup(GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
 		cell tmp;
 		may_error(make_cstring(&tmp, dst), free(dst));
-		tmp.flags |= FLAG_TMP;
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		free(dst);
 		return pl_success;
@@ -1579,7 +1573,6 @@ static USE_RESULT pl_state fn_iso_atom_concat_3(query *q)
 		char *dst = strdup(GET_STR(p3)+LEN_STR(p1));
 		cell tmp;
 		may_error (make_cstring(&tmp, dst), free(dst));
-		tmp.flags |= FLAG_TMP;
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(dst);
 		return pl_success;
@@ -2018,37 +2011,49 @@ static USE_RESULT pl_state do_stream_property(query *q)
 	if (!strcmp(GET_STR(p1), "file_name")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->filename));
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		int ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		chk_cstring(&tmp);
+		return ok;
 	}
 
 	if (!strcmp(GET_STR(p1), "alias")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->name));
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		int ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		chk_cstring(&tmp);
+		return ok;
 	}
 
 	if (!strcmp(GET_STR(p1), "mode")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->mode));
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		int ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		chk_cstring(&tmp);
+		return ok;
 	}
 
 	if (!strcmp(GET_STR(p1), "type")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->binary ? "binary" : "text"));
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		int ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		chk_cstring(&tmp);
+		return ok;
 	}
 
 	if (!strcmp(GET_STR(p1), "reposition")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->socket || (n <= 2) ? "false" : "true"));
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		int ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		chk_cstring(&tmp);
+		return ok;
 	}
 
 	if (!strcmp(GET_STR(p1), "encoding")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, "utf8"));
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		int ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		chk_cstring(&tmp);
+		return ok;
 	}
 
 	if (!strcmp(GET_STR(p1), "newline")) {
@@ -2058,7 +2063,9 @@ static USE_RESULT pl_state do_stream_property(query *q)
 #else
 		may_error(make_cstring(&tmp, "unix"));
 #endif
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		int ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		chk_cstring(&tmp);
+		return ok;
 	}
 
 	if (!strcmp(GET_STR(p1), "input"))
@@ -5937,7 +5944,9 @@ static USE_RESULT pl_state fn_iso_current_prolog_flag_2(query *q)
 
 		cell *l = end_list(q);
 		may_ptr_error(l);
-		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
+		int ok = unify(q, p2, p2_ctx, l, q->st.curr_frame);
+		chk_cstring(&tmp);
+		return ok;
 	} else if (!strcmp(GET_STR(p1), "unknown")) {
 		cell tmp;
 		make_literal(&tmp,
@@ -6536,7 +6545,6 @@ static USE_RESULT pl_state fn_clause_3(query *q)
 			uuid_to_buf(&q->st.curr_clause2->u, tmpbuf, sizeof(tmpbuf));
 			cell tmp;
 			may_error(make_cstring(&tmp, tmpbuf));
-			tmp.flags |= FLAG_TMP;
 			set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 			t = &q->st.curr_clause2->t;
 		}
@@ -6637,7 +6645,6 @@ static USE_RESULT pl_state do_asserta_2(query *q)
 		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
 		cell tmp2;
 		may_error(make_cstring(&tmp2, tmpbuf));
-		tmp2.flags |= FLAG_TMP;
 		set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	}
 
@@ -6733,7 +6740,6 @@ static USE_RESULT pl_state do_assertz_2(query *q)
 		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
 		cell tmp2;
 		may_error(make_cstring(&tmp2, tmpbuf));
-		tmp2.flags |= FLAG_TMP;
 		set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	}
 
@@ -7317,8 +7323,7 @@ static USE_RESULT pl_state fn_getfile_2(query *q)
 		}
 
 		cell tmp;
-		may_error(make_cstringn(&tmp, line, len));
-		tmp.flags |= FLAG_STRING;
+		may_error(make_stringn(&tmp, line, len));
 
 		if (nbr++ == 1)
 			allocate_list_on_heap(q, &tmp);
@@ -8897,7 +8902,6 @@ static USE_RESULT pl_state do_format(query *q, cell *str, idx_t str_ctx, cell* p
 		cell *c = deref(q, str+1, str_ctx);
 		cell tmp;
 		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf));
-		tmp.flags |= FLAG_TMP;
 		set_var(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	} else if (is_structure(str)) {
 		cell *c = deref(q, str+1, str_ctx);
@@ -9752,7 +9756,6 @@ static USE_RESULT pl_state fn_edin_seeing_1(query *q)
 	char *name = q->m->pl->current_input==0?"user":g_streams[q->m->pl->current_input].name;
 	cell tmp;
 	may_error(make_cstring(&tmp, name));
-	tmp.flags |= FLAG_TMP;
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
@@ -9763,7 +9766,6 @@ static USE_RESULT pl_state fn_edin_telling_1(query *q)
 	char *name =q->m->pl->current_output==1?"user":g_streams[q->m->pl->current_output].name;
 	cell tmp;
 	may_error(make_cstring(&tmp, name));
-	tmp.flags |= FLAG_TMP;
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
@@ -9876,7 +9878,6 @@ static USE_RESULT pl_state fn_getenv_2(query *q)
 
 	cell tmp;
 	may_error(make_cstring(&tmp, (char*)value));
-	tmp.flags |= FLAG_TMP;
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
 	return ok;
@@ -9913,9 +9914,7 @@ static USE_RESULT pl_state fn_uuid_1(query *q)
 	char tmpbuf[128];
 	uuid_to_buf(&u, tmpbuf, sizeof(tmpbuf));
 	cell tmp;
-	may_error(make_cstring(&tmp, tmpbuf));
-	tmp.flags |= FLAG_TMP;
-	tmp.flags |= FLAG_STRING;
+	may_error(make_string(&tmp, tmpbuf));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
@@ -9981,7 +9980,6 @@ static USE_RESULT pl_state fn_atomic_concat_3(query *q)
 		dst[nbytes] = '\0';
 		cell tmp;
 		may_error(make_cstringn(&tmp, dst, nbytes), free(dst));
-		tmp.flags |= FLAG_TMP;
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		free(dst);
 		return pl_success;
@@ -9993,9 +9991,7 @@ static USE_RESULT pl_state fn_atomic_concat_3(query *q)
 
 		char *dst = strndup(GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
 		cell tmp;
-		may_error(make_cstring(&tmp, dst), free(dst));
-		tmp.flags |= FLAG_TMP;
-		tmp.flags |= FLAG_STRING;
+		may_error(make_string(&tmp, dst), free(dst));
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		free(dst);
 		return pl_success;
@@ -10007,9 +10003,7 @@ static USE_RESULT pl_state fn_atomic_concat_3(query *q)
 
 		char *dst = strdup(GET_STR(p3)+LEN_STR(p1));
 		cell tmp;
-		may_error(make_cstring(&tmp, dst), free(dst));
-		tmp.flags |= FLAG_TMP;
-		tmp.flags |= FLAG_STRING;
+		may_error(make_string(&tmp, dst), free(dst));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		free(dst);
 		return pl_success;
