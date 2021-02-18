@@ -427,7 +427,6 @@ static void commit_me(query *q, term *t)
 
 	q->st.curr_cell = get_body(t->cells);
 	//memset(q->nv_mask, 0, MAX_ARITY);
-	q->no_tco = false;
 }
 
 void stash_me(query *q, term *t, bool last_match)
@@ -967,6 +966,7 @@ USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
+		q->no_tco = false;
 
 		if (unify_structure(q, p1, p1_ctx, c, q->st.fp, 0)) {
 			if (needs_true) {
@@ -1059,6 +1059,7 @@ USE_RESULT pl_state match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retrac
 
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
+		q->no_tco = false;
 
 		if (unify_structure(q, p1, p1_ctx, head, q->st.fp, 0))
 			return pl_success;
@@ -1173,6 +1174,7 @@ static USE_RESULT pl_state match_head(query *q)
 		cell *head = get_head(t->cells);
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
+		q->no_tco = false;
 
 		if (unify_structure(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp, 0)) {
 			Trace(q, q->st.curr_cell, EXIT);
