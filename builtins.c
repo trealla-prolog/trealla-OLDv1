@@ -425,8 +425,11 @@ static void chk_for_tmp(cell *c)
 	// Eventually move to a ref-counted strbuf.
 
 	if (is_nonconst_blob(c) && is_tmp(c)) {
-		if (c->val_str)
+		if (c->val_str) {
 			free(c->val_str);
+			c->val_str = NULL;
+			c->len_str = 0;
+		}
 
 		c->flags &= ~FLAG_TMP;
 		c->flags |= FLAG2_CONST;
