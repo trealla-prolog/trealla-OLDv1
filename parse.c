@@ -2185,6 +2185,9 @@ static int get_escape(const char **_src, bool *error)
 	return ch;
 }
 
+#define isbdigit(ch) (((ch) >= '0') && ((ch) <= '1'))
+#define isodigit(ch) (((ch) >= '0') && ((ch) <= '7'))
+
 static int parse_number(parser *p, const char **srcptr, bool neg)
 {
 	p->v.val_num = 0;
@@ -2229,11 +2232,9 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 	if ((*s == '0') && (s[1] == 'b')) {
 		s += 2;
 
-		while ((*s == '0') || (*s == '1')) {
+		while (isbdigit(*s)) {
 			v <<= 1;
-
-			if (*s == '1')
-				v |= 1;
+			v += *s - '0';
 
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			if ((v > INT64_MAX) || (v < INT64_MIN)) {
@@ -2248,7 +2249,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 			s++;
 		}
 
-		if (isdigit(*s)) {
+		if (isdigit(*s) || isalpha(*s)) {
 			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 				fprintf(stdout, "Error: syntax error, parsing binary number, line %d\n", p->line_nbr);
 
@@ -2267,8 +2268,8 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 	if ((*s == '0') && (s[1] == 'o')) {
 		s += 2;
 
-		while ((*s >= '0') && (*s <= '7')) {
-			v *= 8;
+		while (isodigit(*s)) {
+			v <<= 3;
 			v += *s - '0';
 
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
@@ -2284,7 +2285,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 			s++;
 		}
 
-		if (isdigit(*s)) {
+		if (isdigit(*s) || isalpha(*s)) {
 			if (DUMP_ERRS || (p->consulting && !p->do_read_term))
 				fprintf(stdout, "Error: syntax error, parsing octal number, line %d\n", p->line_nbr);
 
@@ -2303,8 +2304,8 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 	if ((*s == '0') && (s[1] == 'x')) {
 		s += 2;
 
-		while (((*s >= '0') && (*s <= '9')) || ((toupper(*s) >= 'A') && (toupper(*s) <= 'F'))) {
-			v *= 16;
+		while (isxdigit(*s)) {
+			v <<= 4;
 
 			if ((toupper(*s) >= 'A') && (toupper(*s) <= 'F'))
 				v += 10 + (toupper(*s) - 'A');
@@ -2342,7 +2343,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 	char *tmpptr = (char*)s;
 
-	while ((*s >= '0') && (*s <= '9')) {
+	while (isdigit(*s)) {
 		v *= 10;
 		v += *s - '0';
 
