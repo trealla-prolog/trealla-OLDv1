@@ -8998,8 +8998,7 @@ static USE_RESULT pl_state fn_sha1_2(query *q)
 	}
 
 	cell tmp;
-	may_error(make_cstring(&tmp, tmpbuf));
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	may_error(make_string(&tmp, tmpbuf));
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_for_tmp(&tmp);
 	return ok;
@@ -9024,8 +9023,7 @@ static USE_RESULT pl_state fn_sha256_2(query *q)
 	}
 
 	cell tmp;
-	may_error(make_cstring(&tmp, tmpbuf));
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	may_error(make_string(&tmp, tmpbuf));
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_for_tmp(&tmp);
 	return ok;
@@ -9050,8 +9048,7 @@ static USE_RESULT pl_state fn_sha512_2(query *q)
 	}
 
 	cell tmp;
-	may_error(make_cstring(&tmp, tmpbuf));
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	may_error(make_string(&tmp, tmpbuf));
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_for_tmp(&tmp);
 	return ok;
@@ -9068,8 +9065,7 @@ static int do_b64encode_2(query *q)
 	ensure(dstbuf);
 	b64_encode(str, len, &dstbuf, 0, 0);
 	cell tmp;
-	may_error(make_cstring(&tmp, dstbuf), free(dstbuf));
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	may_error(make_string(&tmp, dstbuf), free(dstbuf));
 	free(dstbuf);
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_for_tmp(&tmp);
@@ -9086,8 +9082,7 @@ static int do_b64decode_2(query *q)
 	ensure(dstbuf);
 	b64_decode(str, len, &dstbuf);
 	cell tmp;
-	may_error(make_cstring(&tmp, dstbuf), free(dstbuf));
-	if (is_string(p2)) tmp.flags |= FLAG_STRING;
+	may_error(make_string(&tmp, dstbuf), free(dstbuf));
 	free(dstbuf);
 	int ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	chk_for_tmp(&tmp);
