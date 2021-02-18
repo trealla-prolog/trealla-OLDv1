@@ -393,23 +393,33 @@ static USE_RESULT pl_state make_cstringn(cell *d, const char *s, size_t n)
 	}
 
 	FAULTINJECT(errno = ENOMEM; return pl_error);
-	char *str = malloc(n+1);
-	may_ptr_error(str);
-	d->val_str = str;
+	SET_STR(d,s,n);
 	d->val_type = TYPE_CSTRING;
 	d->flags = FLAG_BLOB | FLAG_TMP;
 	d->nbr_cells = 1;
-	memcpy(d->val_str, s, n);
-	d->val_str[n] = '\0';
-	d->len_str = n;
 	d->arity = 0;
 	return pl_success;
 }
 
 static USE_RESULT pl_state make_cstring(cell *d, const char *s)
 {
-	size_t n = strlen(s);
-	return make_cstringn(d, s, n);
+	return make_cstringn(d, s, strlen(s));
+}
+
+static USE_RESULT pl_state make_stringn(cell *d, const char *s, size_t n)
+{
+	FAULTINJECT(errno = ENOMEM; return pl_error);
+	SET_STR(d,s,n);
+	d->val_type = TYPE_CSTRING;
+	d->flags = FLAG_BLOB | FLAG_STRING | FLAG_TMP;
+	d->nbr_cells = 1;
+	d->arity = 2;
+	return pl_success;
+}
+
+static USE_RESULT pl_state make_string(cell *d, const char *s)
+{
+	return make_stringn(d, s, strlen(s));
 }
 
 static void chk_for_tmp(cell *c)
@@ -434,27 +444,6 @@ static void chk_struct_for_tmp(cell *s)
 
 	for (idx_t i = 0; i < s->nbr_cells; i++, c++)
 		chk_for_tmp(c);
-}
-
-static USE_RESULT pl_state make_stringn(cell *d, const char *s, size_t n)
-{
-	FAULTINJECT(errno = ENOMEM; return pl_error);
-	char *str = malloc(n+1);
-	may_ptr_error(str);
-	d->val_str = str;
-	d->val_type = TYPE_CSTRING;
-	d->flags = FLAG_BLOB | FLAG_STRING | FLAG_TMP;
-	memcpy(d->val_str, s, n);
-	d->val_str[n] = '\0';
-	d->len_str = n;
-	d->nbr_cells = 1;
-	d->arity = 2;
-	return pl_success;
-}
-
-static USE_RESULT pl_state make_string(cell *d, const char *s)
-{
-	return make_stringn(d, s, strlen(s));
 }
 
 static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only)

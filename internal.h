@@ -139,6 +139,12 @@ typedef uint32_t idx_t;
 	memcpy((c)->val_str, v->val_str, v->len_str); 					\
 	(c)->val_str[(v)->len_str] = '\0'; }
 
+#define SET_STR(c,str,len) {										\
+	(c)->val_str = malloc(len + 1);									\
+	memcpy((c)->val_str, str, len); 								\
+	(c)->val_str[len] = '\0';										\
+	(c)->len_str = len; }
+
 #define QUERY_GET_POOL(off) (q->m->pl->pool + off)
 #define MODULE_GET_POOL(off) (m->pl->pool + off)
 #define PARSER_GET_POOL(off) (p->m->pl->pool + off)
