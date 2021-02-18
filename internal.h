@@ -132,16 +132,20 @@ typedef uint32_t idx_t;
 #define MODULE_LEN_STR(c) (is_blob(c) ? (c)->len_str : strlen(MODULE_GET_STR(c)))
 
 #define FREE_STR(c) if (is_nonconst_blob(c)) { free((c)->val_str); }
-#define TAKE_STR(c) {(c)->val_str = NULL; }
+#define TAKE_STR(c) { (c)->val_str = NULL; }
 
 #define DUP_STR(c,v) {												\
-	(c)->val_str = malloc((v)->len_str + 1);						\
-	memcpy((c)->val_str, v->val_str, v->len_str); 					\
+	char *str = malloc((v)->len_str + 1);							\
+	may_ptr_error(str);												\
+	memcpy(str, (v)->val_str, (v)->len_str);						\
+	(c)->val_str = str;												\
 	(c)->val_str[(v)->len_str] = '\0'; }
 
-#define SET_STR(c,str,len) {										\
-	(c)->val_str = malloc(len + 1);									\
-	memcpy((c)->val_str, str, len); 								\
+#define SET_STR(c,s,len) {											\
+	char *str = malloc(len + 1);									\
+	may_ptr_error(str);												\
+	memcpy(str, s, len); 											\
+	(c)->val_str = str;												\
 	(c)->val_str[len] = '\0';										\
 	(c)->len_str = len; }
 
@@ -588,7 +592,7 @@ enum {DO_CLAUSE, DO_RETRACT, DO_STREAM_RETRACT, DO_RETRACTALL};
 
 USE_RESULT size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max_elements);
 pl_state set_var(query *q, cell *c, idx_t ctx, cell *v, idx_t v_ctx);
-void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
+pl_state reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
 bool module_load_fp(module *m, FILE *fp, const char *filename);
 bool module_load_file(module *m, const char *filename);
 bool module_save_file(module *m, const char *filename);

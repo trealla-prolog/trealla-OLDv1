@@ -692,7 +692,7 @@ pl_state set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 	return pl_success;
 }
 
-void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
+pl_state reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 {
 	frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
@@ -718,6 +718,8 @@ void reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 			DUP_STR(&e->c,v);
 	} else
 		e->c = *v;
+
+	return pl_success;
 }
 
 bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);

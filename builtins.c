@@ -411,7 +411,8 @@ static USE_RESULT pl_state make_stringn(cell *d, const char *s, size_t n)
 	FAULTINJECT(errno = ENOMEM; return pl_error);
 	SET_STR(d,s,n);
 	d->val_type = TYPE_CSTRING;
-	d->flags = FLAG_BLOB | FLAG_STRING | FLAG_TMP;
+	d->flags = FLAG_BLOB | FLAG_TMP;
+	d->flags |= FLAG_STRING;
 	d->nbr_cells = 1;
 	d->arity = 2;
 	return pl_success;
@@ -427,12 +428,7 @@ static void chk_for_tmp(cell *c)
 	// Eventually move to a ref-counted strbuf.
 
 	if (is_nonconst_blob(c) && is_tmp(c)) {
-		if (c->val_str) {
-			free(c->val_str);
-			c->val_str = NULL;
-			c->len_str = 0;
-		}
-
+		FREE_STR(c);
 		c->flags &= ~FLAG_TMP;
 		c->flags |= FLAG2_CONST;
 	}
@@ -465,12 +461,7 @@ static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsi
 
 		if (!is_structure(p1)) {
 			if (is_nonconst_blob(p1)) {
-				size_t len = LEN_STR(p1);
-				char *str = malloc(len+1);
-				if (!str) return NULL;
-				tmp->val_str = str;
-				memcpy(tmp->val_str, p1->val_str, len);
-				tmp->val_str[len] = '\0';
+				DUP_STR(tmp,p1);
 				return tmp;
 			}
 
@@ -576,14 +567,9 @@ static USE_RESULT cell *deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx, uns
 		copy_cells(tmp, p1, 1);
 
 		if (!is_structure(p1)) {
-			if (is_nonconst_blob(p1)) {
-				size_t len = LEN_STR(p1);
-				char *str = malloc(len+1);
-				if (!str) return NULL;
-				tmp->val_str = str;
-				memcpy(tmp->val_str, p1->val_str, len);
-				tmp->val_str[len] = '\0';
-			}
+			if (is_nonconst_blob(p1))
+				DUP_STR(tmp,p1);
+
 			return tmp;
 		}
 
@@ -8342,13 +8328,8 @@ static USE_RESULT pl_state fn_send_1(query *q)
 	for (idx_t i = 0; i < c->nbr_cells; i++) {
 		cell *c2 = c + i;
 
-		if (is_blob(c2)) {
-			size_t nbytes = c2->len_str;
-			char *tmp = malloc(nbytes + 1);
-			ensure(tmp);
-			memcpy(tmp, c2->val_str, nbytes+1);
-			c2->val_str = tmp;
-		}
+		if (is_nonconst_blob(c2))
+			DUP_STR(c2,c+1);
 	}
 
 	alloc_on_queuen(dstq, 0, c);
@@ -10793,7 +10774,7 @@ static USE_RESULT pl_state fn_iso_length_2(query *q)
 		unsigned cnt = 0;
 
 		if (is_string(p1)) {
-			cnt = strlen_utf8(p1->val_str);
+			cnt = strlen_utf8(GET_STR(p1));
 		} else {
 			cell *l = p1;
 			LIST_HANDLER(l);
@@ -10826,7 +10807,7 @@ static USE_RESULT pl_state fn_iso_length_2(query *q)
 		int cnt = 0;
 
 		if (is_string(p1)) {
-			cnt = strlen_utf8(p1->val_str);
+			cnt = strlen_utf8(GET_STR(p1));
 		} else {
 			cell *l = p1;
 			LIST_HANDLER(l);
