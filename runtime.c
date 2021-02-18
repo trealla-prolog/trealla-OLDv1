@@ -966,7 +966,6 @@ USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
-		q->no_tco = false;
 
 		if (unify_structure(q, p1, p1_ctx, c, q->st.fp, 0)) {
 			if (needs_true) {
@@ -1059,7 +1058,6 @@ USE_RESULT pl_state match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retrac
 
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
-		q->no_tco = false;
 
 		if (unify_structure(q, p1, p1_ctx, head, q->st.fp, 0))
 			return pl_success;
