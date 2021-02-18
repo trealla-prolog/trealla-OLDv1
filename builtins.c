@@ -9212,8 +9212,7 @@ static USE_RESULT pl_state fn_string_lower_2(query *q)
 	}
 
 	cell tmp;
-	may_error(make_cstringn(&tmp, tmps, len), free(tmps));
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	may_error(make_stringn(&tmp, tmps, len), free(tmps));
 	free(tmps);
 	pl_state ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_for_tmp(&tmp);
@@ -9237,8 +9236,7 @@ static USE_RESULT pl_state fn_string_upper_2(query *q)
 	}
 
 	cell tmp;
-	may_error(make_cstringn(&tmp, tmps, len), free(tmps));
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	may_error(make_stringn(&tmp, tmps, len), free(tmps));
 	free(tmps);
 	pl_state ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_for_tmp(&tmp);
