@@ -2208,6 +2208,7 @@ static USE_RESULT pl_state fn_iso_stream_property_2(query *q)
 	tmp->val_off = g_stream_property_s;
 
 	if (!match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE)) {
+		chk_struct_for_tmp(tmp);
 		clear_streams_properties(q);
 
 		if (is_callable(p1) && !strstr(s_properties, GET_STR(p1)))
@@ -2216,6 +2217,7 @@ static USE_RESULT pl_state fn_iso_stream_property_2(query *q)
 		return pl_failure;
 	}
 
+	chk_struct_for_tmp(tmp);
 	term *t = &q->st.curr_clause2->t;
 	GET_FIRST_ARG(pstrx,any);
 
@@ -4407,6 +4409,7 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 			return throw_error(q, p1, "resource_error", "cyclic_term");
 
 		unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
+		chk_struct_for_tmp(tmp);
 		p2 = tmp;
 		unsigned arity = 0;
 		idx_t save = tmp_heap_used(q);
@@ -4922,7 +4925,8 @@ static USE_RESULT pl_state fn_iso_asserta_1(query *q)
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
+	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
+	chk_struct_for_tmp(tmp);
 	do_assign_vars(p, nbr_cells);
 	parser_term_to_body(p);
 	cell *h = get_head(p->t->cells);
@@ -4986,7 +4990,8 @@ static USE_RESULT pl_state fn_iso_assertz_1(query *q)
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
+	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
+	chk_struct_for_tmp(tmp);
 	do_assign_vars(p, nbr_cells);
 	parser_term_to_body(p);
 	cell *h = get_head(p->t->cells);
@@ -5391,7 +5396,7 @@ static USE_RESULT pl_state fn_iso_throw_1(query *q)
 
 	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
 	may_ptr_error(e);
-	copy_cells(e, tmp, tmp->nbr_cells);
+	safe_copy_cells(e, tmp, tmp->nbr_cells);
 
 	if (!find_exception_handler(q, e))
 		return pl_failure;
@@ -5498,7 +5503,7 @@ pl_state throw_error(query *q, cell *c, const char *err_type, const char *expect
 
 	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
 	may_ptr_error(e);
-	copy_cells(e, tmp, tmp->nbr_cells);
+	safe_copy_cells(e, tmp, tmp->nbr_cells);
 	pl_state ok = pl_failure;
 
 	if (find_exception_handler(q, e))
@@ -6603,7 +6608,7 @@ static USE_RESULT pl_state do_asserta_2(query *q)
 		return throw_error(q, tmp2, "type_error", "callable");
 
 	GET_NEXT_ARG(p2,atom_or_var);
-	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
 	may_ptr_error(tmp);
 	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
@@ -6617,7 +6622,8 @@ static USE_RESULT pl_state do_asserta_2(query *q)
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
+	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
+	chk_struct_for_tmp(tmp);
 	do_assign_vars(p, nbr_cells);
 	parser_term_to_body(p);
 	cell *h = get_head(p->t->cells);
@@ -6697,7 +6703,7 @@ static USE_RESULT pl_state do_assertz_2(query *q)
 		return throw_error(q, tmp2, "type_error", "callable");
 
 	GET_NEXT_ARG(p2,atom_or_var);
-	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
 	may_ptr_error(tmp);
 
 	if (tmp == ERR_CYCLE_CELL)
@@ -6712,7 +6718,8 @@ static USE_RESULT pl_state do_assertz_2(query *q)
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
+	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
+	chk_struct_for_tmp(tmp);
 	do_assign_vars(p, nbr_cells);
 	parser_term_to_body(p);
 	cell *h = get_head(p->t->cells);
@@ -10207,6 +10214,7 @@ unsigned fake_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
+	chk_struct_for_tmp(tmp);
 	cell *slots[MAX_ARITY] = {0};
 	fake_collect_vars(q, tmp, tmp->nbr_cells, slots, 0);
 	memset(q->nv_mask, 0, MAX_ARITY);
