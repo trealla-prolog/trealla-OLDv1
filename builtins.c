@@ -59,16 +59,8 @@ static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
 		*dst = *src;
 
-		// For now the safest thing is to make copies of allocated
-		// cstrings. Eventually move to a ref-counted strbuf.
-
-		if (is_nonconst_blob(dst)) {
-			size_t len = dst->len_str;
-			dst->val_str = malloc(len+1);
-			if (!dst->val_str) return 0;
-			memcpy(dst->val_str, src->val_str, len);
-			dst->val_str[len] = '\0';
-		}
+		if (is_nonconst_blob(dst))
+			DUP_STR(dst,src)
 	}
 
 	return nbr_cells;
