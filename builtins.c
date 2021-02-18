@@ -842,9 +842,8 @@ static USE_RESULT pl_state fn_iso_atom_chars_2(query *q)
 	if (is_variable(p2)) {
 		cell tmp;
 		may_error(make_stringn(&tmp, GET_STR(p1), LEN_STR(p1)));
-		int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		chk_cstring(&tmp);
-		return ok;
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		return pl_success;
 	}
 
 	if (is_string(p2)) {
@@ -8978,7 +8977,8 @@ static USE_RESULT pl_state fn_sha1_2(query *q)
 	}
 
 	cell tmp;
-	may_error(make_string(&tmp, tmpbuf));
+	may_error(make_cstring(&tmp, tmpbuf));
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
 	return ok;
@@ -9003,7 +9003,8 @@ static USE_RESULT pl_state fn_sha256_2(query *q)
 	}
 
 	cell tmp;
-	may_error(make_string(&tmp, tmpbuf));
+	may_error(make_cstring(&tmp, tmpbuf));
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
 	return ok;
@@ -9028,7 +9029,8 @@ static USE_RESULT pl_state fn_sha512_2(query *q)
 	}
 
 	cell tmp;
-	may_error(make_string(&tmp, tmpbuf));
+	may_error(make_cstring(&tmp, tmpbuf));
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
 	return ok;
@@ -9045,7 +9047,8 @@ static int do_b64encode_2(query *q)
 	ensure(dstbuf);
 	b64_encode(str, len, &dstbuf, 0, 0);
 	cell tmp;
-	may_error(make_string(&tmp, dstbuf), free(dstbuf));
+	may_error(make_cstring(&tmp, dstbuf), free(dstbuf));
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(dstbuf);
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
@@ -9057,15 +9060,15 @@ static int do_b64decode_2(query *q)
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,atom);
 	const char *str = GET_STR(p2);
-	size_t len = LEN_STR(p1);
+	size_t len = LEN_STR(p2);
 	char *dstbuf = malloc(len+1);
 	ensure(dstbuf);
 	b64_decode(str, len, &dstbuf);
 	cell tmp;
-	may_error(make_string(&tmp, dstbuf), free(dstbuf));
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+	may_error(make_cstring(&tmp, dstbuf), free(dstbuf));
+	if (is_string(p2)) tmp.flags |= FLAG_STRING;
 	free(dstbuf);
-	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	int ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
 	return ok;
 }
@@ -9132,7 +9135,8 @@ static USE_RESULT pl_state do_urlencode_2(query *q)
 	ensure(dstbuf);
 	url_encode(str, len, dstbuf);
 	cell tmp;
-	may_error(make_string(&tmp, dstbuf), free(dstbuf));
+	may_error(make_cstring(&tmp, dstbuf), free(dstbuf));
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(dstbuf);
 	pl_state ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
@@ -9143,13 +9147,14 @@ static USE_RESULT pl_state do_urldecode_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,atom);
-	const char *str = GET_STR(p1);
-	size_t len = LEN_STR(p1);
+	const char *str = GET_STR(p2);
+	size_t len = LEN_STR(p2);
 	char *dstbuf = malloc(len+1);
 	ensure(dstbuf);
 	url_decode(str, dstbuf);
 	cell tmp;
-	may_error(make_string(&tmp, dstbuf), free(dstbuf));
+	may_error(make_cstring(&tmp, dstbuf), free(dstbuf));
+	if (is_string(p2)) tmp.flags |= FLAG_STRING;
 	free(dstbuf);
 	int ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
@@ -9186,7 +9191,8 @@ static USE_RESULT pl_state fn_string_lower_2(query *q)
 	}
 
 	cell tmp;
-	may_error(make_stringn(&tmp, tmps, len), free(tmps));
+	may_error(make_cstringn(&tmp, tmps, len), free(tmps));
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(tmps);
 	pl_state ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
@@ -9210,7 +9216,8 @@ static USE_RESULT pl_state fn_string_upper_2(query *q)
 	}
 
 	cell tmp;
-	may_error(make_stringn(&tmp, tmps, len), free(tmps));
+	may_error(make_cstringn(&tmp, tmps, len), free(tmps));
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	free(tmps);
 	pl_state ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
@@ -9356,9 +9363,7 @@ static USE_RESULT pl_state fn_directory_files_2(query *q)
 	closedir(dirp);
 	free(src);
 	cell *tmp2 = end_list(q);
-	int ok = unify(q, p2, p2_ctx, tmp2, q->st.curr_frame);
-	chk_cstring(&tmp);
-	return ok;
+	return unify(q, p2, p2_ctx, tmp2, q->st.curr_frame);
 }
 
 static USE_RESULT pl_state fn_delete_file_1(query *q)
@@ -9878,6 +9883,7 @@ static USE_RESULT pl_state fn_getenv_2(query *q)
 
 	cell tmp;
 	may_error(make_cstring(&tmp, (char*)value));
+	if (is_string(p1)) tmp.flags |= FLAG_STRING;
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	chk_cstring(&tmp);
 	return ok;
