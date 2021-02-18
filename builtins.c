@@ -10217,7 +10217,7 @@ unsigned fake_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
-	unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
+	unify(q, p1, p1_ctx, tmp, q->st.curr_frame);	// undo???
 	cell *slots[MAX_ARITY] = {0};
 	fake_collect_vars(q, tmp, tmp->nbr_cells, slots, 0);
 	memset(q->nv_mask, 0, MAX_ARITY);
