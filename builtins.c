@@ -2407,12 +2407,12 @@ static USE_RESULT pl_state fn_iso_open_4(query *q)
 		void *addr = mmap(0, len, prot, MAP_PRIVATE, fd, 0);
 		cell tmp = {0};
 		tmp.val_type = TYPE_CSTRING;
-		tmp.flags = FLAG_BLOB|FLAG_STRING|FLAG2_CONST;
+		tmp.flags = FLAG_BLOB | FLAG_STRING | FLAG2_CONST;
 		tmp.nbr_cells = 1;
 		tmp.arity = 2;
 		tmp.val_str = addr;
 		tmp.len_str = len;
-		unify(q, mmap_var, mmap_ctx, &tmp, q->st.curr_frame);
+		set_var(q, mmap_var, mmap_ctx, &tmp, q->st.curr_frame);
 	}
 #endif
 

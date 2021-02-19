@@ -142,16 +142,16 @@ typedef uint32_t idx_t;
 	(c)->val_str[(v)->len_str] = '\0'; }
 
 #define SET_STR(c,s,len) {											\
-	char *str = malloc(len + 1);									\
+	char *str = malloc((len) + 1);									\
 	may_ptr_error(str);												\
 	memcpy(str, s, len); 											\
 	(c)->val_str = str;												\
 	(c)->val_str[len] = '\0';										\
 	(c)->len_str = len; }
 
-#define QUERY_GET_POOL(off) (q->m->pl->pool + off)
-#define MODULE_GET_POOL(off) (m->pl->pool + off)
-#define PARSER_GET_POOL(off) (p->m->pl->pool + off)
+#define QUERY_GET_POOL(off) (q->m->pl->pool + (off))
+#define MODULE_GET_POOL(off) (m->pl->pool + (off))
+#define PARSER_GET_POOL(off) (p->m->pl->pool + (off))
 
 // Wrap an assignment that's expected to return anything but the given sentinel value.
 // when the sentinel otherwise does some (optional) error handling action

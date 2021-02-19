@@ -252,7 +252,7 @@ cell *list_tail(cell *l, cell *tmp)
 
 	if ((l->len_str - n) != 0) {
 		tmp->val_type = TYPE_CSTRING;
-		tmp->flags = FLAG_BLOB|FLAG2_CONST|FLAG_STRING;
+		tmp->flags = FLAG_BLOB | FLAG2_CONST | FLAG_STRING;
 		tmp->nbr_cells = 1;
 		tmp->arity = 2;
 		tmp->val_str = l->val_str + n;
