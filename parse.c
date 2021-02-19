@@ -838,19 +838,6 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 		m->error = true;
 }
 
-void clear_term_nodelete(term *t)
-{
-	if (!t)
-		return;
-
-	for (idx_t i = 0; i < t->cidx; i++) {
-		cell *c = t->cells + i;
-		c->val_type = TYPE_EMPTY;
-	}
-
-	t->cidx = 0;
-}
-
 void clear_term(term *t)
 {
 	if (!t)
@@ -923,14 +910,6 @@ parser *create_parser(module *m)
 	}
 
 	return p;
-}
-
-void destroy_parser_nodelete(parser *p)
-{
-	clear_term_nodelete(p->t);
-	free(p->token);
-	free(p->t);
-	free(p);
 }
 
 void destroy_query(query *q)
@@ -2060,7 +2039,7 @@ static void parser_dcg_rewrite(parser *p)
 	destroy_query(q);
 
 	if (!src) {
-		destroy_parser_nodelete(p2);
+		destroy_parser(p2);
 		p->error = true;
 		return;
 	}

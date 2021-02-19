@@ -624,7 +624,6 @@ USE_RESULT pl_state fn_call_0(query *q, cell *p1);
 void undo_me(query *q);
 parser *create_parser(module *m);
 void destroy_parser(parser *p);
-void destroy_parser_nodelete(parser *p);
 unsigned parser_tokenize(parser *p, bool args, bool consing);
 void parser_xref(parser *p, term *t, predicate *parent);
 void parser_reset(parser *p);
