@@ -674,7 +674,12 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		}
 	} else if (IS_XF(c) || IS_YF(c)) {
 		cell *lhs = c + 1;
-		assert((lhs-c) < c->nbr_cells);
+
+		if ((lhs-c) >= c->nbr_cells) {
+			dst += snprintf(dst, dstlen, "(%s)/%u", src, c->arity);
+			return dst - save_dst;
+		}
+
 		lhs = running ? deref(q, lhs, c_ctx) : lhs;
 		idx_t lhs_ctx = q->latest_ctx;
 		ssize_t res = print_term_to_buf(q, dst, dstlen, lhs, lhs_ctx, running, 0, depth+1);
