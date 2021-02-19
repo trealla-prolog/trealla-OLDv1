@@ -603,7 +603,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		for (idx_t i = 0; i < r->t.cidx; i++) {
 			cell *c = r->t.cells + i;
 
-			if (is_blob(c) && is_const_cstring(c))
+			if (is_const_blob(c))
 				c->flags |= FLAG2_DUP;
 		}
 	}
