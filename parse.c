@@ -846,8 +846,8 @@ void clear_term(term *t)
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
 
-		if (is_blob(c) && !is_dup_cstring(c))
-			free(c->val_str);
+		if (!is_dup_cstring(c))
+			FORCE_FREE_STR(c);
 
 		c->val_type = TYPE_EMPTY;
 	}
