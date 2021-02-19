@@ -84,6 +84,6 @@ void history_load(const char *filename)
 void history_save(void)
 {
 	write_history(g_filename);
-	rl_clear_history();
+	//rl_clear_history();
 	clear_history();
 }
