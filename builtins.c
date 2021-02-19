@@ -433,14 +433,6 @@ static void chk_for_tmp_blob(cell *c)
 	}
 }
 
-static void chk_struct_for_tmp_blobs(cell *s)
-{
-	cell *c = s;
-
-	for (idx_t i = 0; i < s->nbr_cells; i++, c++)
-		chk_for_tmp_blob(c);
-}
-
 static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
@@ -459,11 +451,6 @@ static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsi
 		copy_cells(tmp, p1, 1);
 
 		if (!is_structure(p1)) {
-			if (is_nonconst_blob(p1)) {
-				DUP_STR(tmp,p1);
-				return tmp;
-			}
-
 			if (!is_variable(p1))
 				return tmp;
 
@@ -546,7 +533,7 @@ USE_RESULT cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonloc
 	if (!tmp || (tmp == ERR_CYCLE_CELL)) return tmp;
 	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
 	if (!tmp2) return NULL;
-	copy_cells(tmp2, tmp, tmp->nbr_cells);
+	safe_copy_cells(tmp2, tmp, tmp->nbr_cells);
 	return tmp2;
 }
 
@@ -565,12 +552,8 @@ static USE_RESULT cell *deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx, uns
 	if (tmp) {
 		copy_cells(tmp, p1, 1);
 
-		if (!is_structure(p1)) {
-			if (is_nonconst_blob(p1))
-				DUP_STR(tmp,p1);
-
+		if (!is_structure(p1))
 			return tmp;
-		}
 
 		unsigned arity = p1->arity;
 		p1++;
@@ -605,7 +588,7 @@ cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 	if (!p1 || p1 == ERR_CYCLE_CELL) return p1;
 	cell *tmp = alloc_on_heap(q, p1->nbr_cells);
 	if (!tmp) return NULL;
-	copy_cells(tmp, p1, p1->nbr_cells);
+	safe_copy_cells(tmp, p1, p1->nbr_cells);
 	return tmp;
 }
 
@@ -2179,7 +2162,6 @@ static USE_RESULT pl_state fn_iso_stream_property_2(query *q)
 	tmp->val_off = g_stream_property_s;
 
 	if (!match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE)) {
-		chk_struct_for_tmp_blobs(tmp);
 		clear_streams_properties(q);
 
 		if (is_callable(p1) && !strstr(s_properties, GET_STR(p1)))
@@ -2188,7 +2170,6 @@ static USE_RESULT pl_state fn_iso_stream_property_2(query *q)
 		return pl_failure;
 	}
 
-	chk_struct_for_tmp_blobs(tmp);
 	term *t = &q->st.curr_clause2->t;
 	GET_FIRST_ARG(pstrx,any);
 
@@ -4380,7 +4361,6 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 			return throw_error(q, p1, "resource_error", "cyclic_term");
 
 		unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
-		chk_struct_for_tmp_blobs(tmp);
 		p2 = tmp;
 		unsigned arity = 0;
 		idx_t save = tmp_heap_used(q);
@@ -4896,7 +4876,6 @@ static USE_RESULT pl_state fn_iso_asserta_1(query *q)
 	}
 
 	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
-	chk_struct_for_tmp_blobs(tmp);
 	do_assign_vars(p, nbr_cells);
 	parser_term_to_body(p);
 	cell *h = get_head(p->t->cells);
@@ -4961,7 +4940,6 @@ static USE_RESULT pl_state fn_iso_assertz_1(query *q)
 	}
 
 	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
-	chk_struct_for_tmp_blobs(tmp);
 	do_assign_vars(p, nbr_cells);
 	parser_term_to_body(p);
 	cell *h = get_head(p->t->cells);
@@ -5367,7 +5345,6 @@ static USE_RESULT pl_state fn_iso_throw_1(query *q)
 	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
 	may_ptr_error(e);
 	safe_copy_cells(e, tmp, tmp->nbr_cells);
-	chk_struct_for_tmp_blobs(tmp);
 
 	if (!find_exception_handler(q, e))
 		return pl_failure;
@@ -5475,7 +5452,6 @@ pl_state throw_error(query *q, cell *c, const char *err_type, const char *expect
 	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
 	may_ptr_error(e);
 	safe_copy_cells(e, tmp, tmp->nbr_cells);
-	chk_struct_for_tmp_blobs(tmp);
 	pl_state ok = pl_failure;
 
 	if (find_exception_handler(q, e))
@@ -5927,7 +5903,6 @@ static USE_RESULT pl_state fn_iso_current_prolog_flag_2(query *q)
 		cell *l = end_list(q);
 		may_ptr_error(l);
 		int ok = unify(q, p2, p2_ctx, l, q->st.curr_frame);
-		chk_struct_for_tmp_blobs(l);
 		return ok;
 	} else if (!strcmp(GET_STR(p1), "unknown")) {
 		cell tmp;
@@ -6595,7 +6570,6 @@ static USE_RESULT pl_state do_asserta_2(query *q)
 	}
 
 	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
-	chk_struct_for_tmp_blobs(tmp);
 	do_assign_vars(p, nbr_cells);
 	parser_term_to_body(p);
 	cell *h = get_head(p->t->cells);
@@ -6691,7 +6665,6 @@ static USE_RESULT pl_state do_assertz_2(query *q)
 	}
 
 	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
-	chk_struct_for_tmp_blobs(tmp);
 	do_assign_vars(p, nbr_cells);
 	parser_term_to_body(p);
 	cell *h = get_head(p->t->cells);
@@ -7123,7 +7096,6 @@ static USE_RESULT pl_state fn_split_atom_4(query *q)
 	l = end_list(q);
 	may_ptr_error(l);
 	int ok = unify(q, p4, p4_ctx, l, q->st.curr_frame);
-	chk_struct_for_tmp_blobs(l);
 	return ok;
 }
 
@@ -9339,7 +9311,6 @@ static USE_RESULT pl_state fn_directory_files_2(query *q)
 	free(src);
 	cell *l = end_list(q);
 	int ok = unify(q, p2, p2_ctx, l, q->st.curr_frame);
-	chk_struct_for_tmp_blobs(l);
 	return ok;
 }
 
@@ -10187,7 +10158,6 @@ unsigned fake_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 		end++;
 	}
 
-	chk_struct_for_tmp_blobs(tmp);
 	return end;
 }
 
