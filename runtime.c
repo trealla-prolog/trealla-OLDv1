@@ -357,6 +357,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 		for (unsigned i = 0; i < nbr_vars; i++) {
 			slot *e = GET_SLOT(g, i);
 			FREE_STR(&e->c);
+			e->c.val_type = TYPE_EMPTY;
 		}
 
 		const slot *from = GET_SLOT(new_g, 0);

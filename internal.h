@@ -130,7 +130,7 @@ typedef uint32_t idx_t;
 #define MODULE_GET_STR(c) (!is_cstring(c) ? (m->pl->pool + (c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
 #define MODULE_LEN_STR(c) (is_blob(c) ? (c)->len_str : strlen(MODULE_GET_STR(c)))
 
-#define FREE_STR(c) if (is_nonconst_blob(c)) { free((c)->val_str); }
+#define FREE_STR(c) if (is_nonconst_blob(c)) { free((c)->val_str); (c)->val_str = NULL; }
 #define TAKE_STR(c) { (c)->val_str = NULL; }
 
 #define DUP_STR(c,v) {												\

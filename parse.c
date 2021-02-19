@@ -3271,11 +3271,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 				}
 
 				c->flags |= FLAG_BLOB;
-				c->len_str = p->len_str;
-				c->val_str = malloc(p->len_str+1);
-				ensure(c->val_str);
-				memcpy(c->val_str, p->token, p->len_str);
-				c->val_str[p->len_str] = '\0';
+				SET_STR(c, p->token, p->len_str);
 			}
 		}
 
