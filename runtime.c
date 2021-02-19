@@ -674,6 +674,7 @@ pl_state set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 			if (is_tmp(v)) {
 				TAKE_STR(v);
 				e->c.flags &= ~FLAG_TMP;
+				v->val_type = TYPE_EMPTY;
 			} else
 				DUP_STR(&e->c,v);
 		}
@@ -708,16 +709,18 @@ pl_state reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 
 	if (v->arity && !is_string(v))
 		make_indirect(&e->c, v);
-	else if (is_nonconst_blob(v)) {
+	else {
 		e->c = *v;
 
-		if (is_tmp(v)) {
-			TAKE_STR(v);
-			e->c.flags &= ~FLAG_TMP;
-		} else
-			DUP_STR(&e->c,v);
-	} else
-		e->c = *v;
+		if (is_nonconst_blob(v)) {
+			if (is_tmp(v)) {
+				TAKE_STR(v);
+				e->c.flags &= ~FLAG_TMP;
+				v->val_type = TYPE_EMPTY;
+			} else
+				DUP_STR(&e->c,v);
+		}
+	}
 
 	return pl_success;
 }
