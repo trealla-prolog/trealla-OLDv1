@@ -4654,6 +4654,30 @@ static USE_RESULT pl_state fn_iso_copy_term_2(query *q)
 	if (!has_vars(q, p1, p1_ctx) && !is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
+	// FIXME: copy attributes
+
+	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false);
+
+	if (!tmp || tmp == ERR_CYCLE_CELL)
+		return throw_error(q, p1, "resource_error", "too_many_vars");
+
+	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
+}
+
+static USE_RESULT pl_state fn_copy_term_nat_2(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,any);
+
+	if (is_variable(p1) && is_variable(p2))
+		return pl_success;
+
+	if (is_atomic(p1) && is_variable(p2))
+		return unify(q, p1, p1_ctx, p2, p2_ctx);
+
+	if (!has_vars(q, p1, p1_ctx) && !is_variable(p2))
+		return unify(q, p1, p1_ctx, p2, p2_ctx);
+
 	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false);
 
 	if (!tmp || tmp == ERR_CYCLE_CELL)
@@ -11243,6 +11267,7 @@ static const struct builtins g_other_funcs[] =
 	{"abolish", 2, fn_abolish_2, NULL},
 	{"assert", 1, fn_iso_assertz_1, NULL},
 
+	{"copy_term_nat", 2, fn_copy_term_nat_2, NULL},
 	{"string", 1, fn_atom_1, "+term"},
 	{"atomic_concat", 3, fn_atomic_concat_3, NULL},
 	{"replace", 4, fn_replace_4, "+orig,+from,+to,-new"},

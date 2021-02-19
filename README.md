@@ -190,7 +190,8 @@ Others
 	partial_string/2			# partial_string(+string,-string)
 	partial_string/3			# partial_string(+string,-string,-var)
 	if/3, (*->)/2				# softcut
-	setup_call_cleanup/3
+	setup_call_cleanup/3		# setup_call_cleanup(:Setup,:Goal,:Cleanup)
+	copy_term_nat/2				# doesn't copy attrs
 	findall/4
 	atomic_concat/3
 	var_number/2
