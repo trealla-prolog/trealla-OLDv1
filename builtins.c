@@ -446,62 +446,60 @@ static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsi
 	p1_ctx = q->latest_ctx;
 
 	cell *tmp = alloc_on_tmp(q, 1);
+	if (!tmp) return NULL;
+	copy_cells(tmp, p1, 1);
 
-	if (tmp) {
-		copy_cells(tmp, p1, 1);
-
-		if (!is_structure(p1)) {
-			if (!is_variable(p1))
-				return tmp;
-
-			if (nonlocals_only && (p1_ctx <= q->st.curr_frame))
-				return tmp;
-
-			frame *g = GET_FRAME(p1_ctx);
-			slot *e = GET_SLOT(g, p1->var_nbr);
-			idx_t slot_nbr = e - q->slots;
-
-			for (size_t i = 0; i < q->m->pl->tab_idx; i++) {
-				if (q->m->pl->tab1[i] == slot_nbr) {
-					tmp->var_nbr = q->m->pl->tab2[i];
-					tmp->flags = FLAG2_FRESH;
-
-					if (is_anon(p1))
-						tmp->flags |= FLAG2_ANON;
-
-					tmp->val_off = g_nil_s;
-					tmp->attrs = e->c.attrs;
-					return tmp;
-				}
-			}
-
-			tmp->var_nbr = q->m->pl->varno;
-			tmp->flags = FLAG2_FRESH;
-			tmp->val_off = g_nil_s;
-			tmp->attrs = e->c.attrs;
-
-			if (is_anon(p1))
-				tmp->flags |= FLAG2_ANON;
-
-			q->m->pl->tab1[q->m->pl->tab_idx] = slot_nbr;
-			q->m->pl->tab2[q->m->pl->tab_idx] = q->m->pl->varno++;
-			q->m->pl->tab_idx++;
+	if (!is_structure(p1)) {
+		if (!is_variable(p1))
 			return tmp;
+
+		if (nonlocals_only && (p1_ctx <= q->st.curr_frame))
+			return tmp;
+
+		frame *g = GET_FRAME(p1_ctx);
+		slot *e = GET_SLOT(g, p1->var_nbr);
+		idx_t slot_nbr = e - q->slots;
+
+		for (size_t i = 0; i < q->m->pl->tab_idx; i++) {
+			if (q->m->pl->tab1[i] == slot_nbr) {
+				tmp->var_nbr = q->m->pl->tab2[i];
+				tmp->flags = FLAG2_FRESH;
+
+				if (is_anon(p1))
+					tmp->flags |= FLAG2_ANON;
+
+				tmp->val_off = g_nil_s;
+				tmp->attrs = e->c.attrs;
+				return tmp;
+			}
 		}
 
-		unsigned arity = p1->arity;
-		p1++;
+		tmp->var_nbr = q->m->pl->varno;
+		tmp->flags = FLAG2_FRESH;
+		tmp->val_off = g_nil_s;
+		tmp->attrs = e->c.attrs;
 
-		while (arity--) {
-			cell *c = deref(q, p1, p1_ctx);
-			cell *rec = deep_copy2_to_tmp(q, c, q->latest_ctx, depth+1, nonlocals_only, copy_attrs);
-			if (!rec || rec == ERR_CYCLE_CELL) return rec;
-			p1 += p1->nbr_cells;
-		}
+		if (is_anon(p1))
+			tmp->flags |= FLAG2_ANON;
 
-		tmp = get_tmp_heap(q, save_idx);
-		tmp->nbr_cells = tmp_heap_used(q) - save_idx;
+		q->m->pl->tab1[q->m->pl->tab_idx] = slot_nbr;
+		q->m->pl->tab2[q->m->pl->tab_idx] = q->m->pl->varno++;
+		q->m->pl->tab_idx++;
+		return tmp;
 	}
+
+	unsigned arity = p1->arity;
+	p1++;
+
+	while (arity--) {
+		cell *c = deref(q, p1, p1_ctx);
+		cell *rec = deep_copy2_to_tmp(q, c, q->latest_ctx, depth+1, nonlocals_only, copy_attrs);
+		if (!rec || rec == ERR_CYCLE_CELL) return rec;
+		p1 += p1->nbr_cells;
+	}
+
+	tmp = get_tmp_heap(q, save_idx);
+	tmp->nbr_cells = tmp_heap_used(q) - save_idx;
 	return tmp;
 }
 
@@ -551,25 +549,24 @@ static USE_RESULT cell *deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx, uns
 	p1 = deref(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
 	cell *tmp = alloc_on_tmp(q, 1);
-	if (tmp) {
-		copy_cells(tmp, p1, 1);
+	if (!tmp) return NULL;
+	copy_cells(tmp, p1, 1);
 
-		if (!is_structure(p1))
-			return tmp;
+	if (!is_structure(p1))
+		return tmp;
 
-		unsigned arity = p1->arity;
-		p1++;
+	unsigned arity = p1->arity;
+	p1++;
 
-		while (arity--) {
-			cell *c = deref(q, p1, p1_ctx);
-			cell *rec = deep_clone2_to_tmp(q, c, q->latest_ctx, depth+1);
-			if (!rec || rec == ERR_CYCLE_CELL) return rec;
-			p1 += p1->nbr_cells;
-		}
-
-		tmp = get_tmp_heap(q, save_idx);
-		tmp->nbr_cells = tmp_heap_used(q) - save_idx;
+	while (arity--) {
+		cell *c = deref(q, p1, p1_ctx);
+		cell *rec = deep_clone2_to_tmp(q, c, q->latest_ctx, depth+1);
+		if (!rec || rec == ERR_CYCLE_CELL) return rec;
+		p1 += p1->nbr_cells;
 	}
+
+	tmp = get_tmp_heap(q, save_idx);
+	tmp->nbr_cells = tmp_heap_used(q) - save_idx;
 	return tmp;
 }
 
