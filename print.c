@@ -570,7 +570,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 	int optype = GET_OP(c);
 
-	if (q->ignore_ops || !optype) {
+	if (q->ignore_ops || !optype || !c->arity) {
 		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quote(q->m, src, LEN_STR(c));
 		int dq = 0, braces = 0, parens = 0;
 		if (is_string(c)) dq = quote = 1;
@@ -674,12 +674,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		}
 	} else if (IS_XF(c) || IS_YF(c)) {
 		cell *lhs = c + 1;
-
-		if ((lhs-c) >= c->nbr_cells) {
-			dst += snprintf(dst, dstlen, "(%s)/%u", src, c->arity);
-			return dst - save_dst;
-		}
-
 		lhs = running ? deref(q, lhs, c_ctx) : lhs;
 		idx_t lhs_ctx = q->latest_ctx;
 		ssize_t res = print_term_to_buf(q, dst, dstlen, lhs, lhs_ctx, running, 0, depth+1);
@@ -688,12 +682,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		dst += snprintf(dst, dstlen, "%s", src);
 	} else if (IS_FX(c) || IS_FY(c)) {
 		cell *rhs = c + 1;
-
-		if ((rhs-c) >= c->nbr_cells) {
-			dst += snprintf(dst, dstlen, "(%s)/%u", src, c->arity);
-			return dst - save_dst;
-		}
-
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		idx_t rhs_ctx = q->latest_ctx;
 		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "\\+");
@@ -709,19 +697,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
 	} else {
 		cell *lhs = c + 1;
-
-		if ((lhs-c) >= c->nbr_cells) {
-			dst += snprintf(dst, dstlen, "(%s)/%u", src, c->arity);
-			return dst - save_dst;
-		}
-
 		cell *rhs = lhs + lhs->nbr_cells;
-
-		if ((rhs-c) >= c->nbr_cells) {
-			dst += snprintf(dst, dstlen, "(%s)/%u", src, c->arity);
-			return dst - save_dst;
-		}
-
 		lhs = running ? deref(q, lhs, c_ctx) : lhs;
 		idx_t lhs_ctx = q->latest_ctx;
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
