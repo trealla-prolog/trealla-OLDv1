@@ -433,7 +433,7 @@ static void chk_for_tmp_blob(cell *c)
 	}
 }
 
-static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only)
+static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only, bool copy_attrs)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	if (depth >= 64000) {
@@ -470,6 +470,7 @@ static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsi
 						tmp->flags |= FLAG2_ANON;
 
 					tmp->val_off = g_nil_s;
+					tmp->attrs = e->c.attrs;
 					return tmp;
 				}
 			}
@@ -477,6 +478,7 @@ static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsi
 			tmp->var_nbr = q->m->pl->varno;
 			tmp->flags = FLAG2_FRESH;
 			tmp->val_off = g_nil_s;
+			tmp->attrs = e->c.attrs;
 
 			if (is_anon(p1))
 				tmp->flags |= FLAG2_ANON;
@@ -492,7 +494,7 @@ static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsi
 
 		while (arity--) {
 			cell *c = deref(q, p1, p1_ctx);
-			cell *rec = deep_copy2_to_tmp(q, c, q->latest_ctx, depth+1, nonlocals_only);
+			cell *rec = deep_copy2_to_tmp(q, c, q->latest_ctx, depth+1, nonlocals_only, copy_attrs);
 			if (!rec || rec == ERR_CYCLE_CELL) return rec;
 			p1 += p1->nbr_cells;
 		}
@@ -503,7 +505,7 @@ static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsi
 	return tmp;
 }
 
-static USE_RESULT cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only)
+static USE_RESULT cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	if (!init_tmp_heap(q))
@@ -513,7 +515,7 @@ static USE_RESULT cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx, bool 
 	q->m->pl->varno = g->nbr_vars;
 	q->m->pl->tab_idx = 0;
 	q->cycle_error = false;
-	cell* rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, nonlocals_only);
+	cell* rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, nonlocals_only, copy_attrs);
 	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 	int cnt = q->m->pl->varno - g->nbr_vars;
 
@@ -527,9 +529,9 @@ static USE_RESULT cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx, bool 
 	return q->tmp_heap;
 }
 
-USE_RESULT cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only)
+USE_RESULT cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
 {
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, nonlocals_only);
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, nonlocals_only, copy_attrs);
 	if (!tmp || (tmp == ERR_CYCLE_CELL)) return tmp;
 	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
 	if (!tmp2) return NULL;
@@ -4329,7 +4331,7 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 		return throw_error(q, p2, "domain_error", "non_empty_list");
 
 	if (is_variable(p2)) {
-		cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false);
+		cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, false);
 		may_ptr_error(tmp);
 		if (tmp == ERR_CYCLE_CELL)
 			return throw_error(q, p1, "resource_error", "cyclic_term");
@@ -4355,7 +4357,7 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 	}
 
 	if (is_variable(p1)) {
-		cell *tmp = deep_copy_to_tmp(q, p2, p2_ctx, false);
+		cell *tmp = deep_copy_to_tmp(q, p2, p2_ctx, false, false);
 		may_ptr_error(tmp);
 		if (tmp == ERR_CYCLE_CELL)
 			return throw_error(q, p1, "resource_error", "cyclic_term");
@@ -4654,9 +4656,7 @@ static USE_RESULT pl_state fn_iso_copy_term_2(query *q)
 	if (!has_vars(q, p1, p1_ctx) && !is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
-	// FIXME: copy attributes
-
-	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false);
+	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, true);
 
 	if (!tmp || tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "too_many_vars");
@@ -4678,7 +4678,7 @@ static USE_RESULT pl_state fn_copy_term_nat_2(query *q)
 	if (!has_vars(q, p1, p1_ctx) && !is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
-	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false);
+	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, false);
 
 	if (!tmp || tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "too_many_vars");
@@ -4884,7 +4884,7 @@ static USE_RESULT pl_state fn_iso_asserta_1(query *q)
 	if (body && ((tmp2 = check_body_callable(q->m->p, body)) != NULL))
 		return throw_error(q, tmp2, "type_error", "callable");
 
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
 	may_ptr_error(tmp);
 
 	if (tmp == ERR_CYCLE_CELL)
@@ -4948,7 +4948,7 @@ static USE_RESULT pl_state fn_iso_assertz_1(query *q)
 	if (body && ((tmp2 = check_body_callable(q->m->p, body)) != NULL))
 		return throw_error(q, tmp2, "type_error", "callable");
 
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
 	may_ptr_error(tmp);
 
 	if (tmp == ERR_CYCLE_CELL)
@@ -5297,7 +5297,7 @@ static USE_RESULT pl_state fn_iso_catch_3(query *q)
 	GET_NEXT_ARG(p2,any);
 
 	if (q->retry && q->exception) {
-		cell *tmp = deep_copy_to_heap(q, q->exception, q->st.curr_frame, false);
+		cell *tmp = deep_copy_to_heap(q, q->exception, q->st.curr_frame, false, false);
 		may_ptr_error(tmp);
 		return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 	}
@@ -5362,7 +5362,7 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 static USE_RESULT pl_state fn_iso_throw_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
 	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
@@ -5467,7 +5467,7 @@ pl_state throw_error(query *q, cell *c, const char *err_type, const char *expect
 			return throw_error(q, c, "resource_error", "too_many_vars");
 	}
 
-	cell *tmp = deep_copy_to_tmp(q, p->t->cells, q->st.curr_frame, false);
+	cell *tmp = deep_copy_to_tmp(q, p->t->cells, q->st.curr_frame, false, false);
 	may_ptr_error(tmp);
 	destroy_parser(p);
 	if (tmp == ERR_CYCLE_CELL)
@@ -6262,7 +6262,7 @@ static USE_RESULT pl_state fn_iso_findall_3(query *q)
 		try_me(q, MAX_ARITY);
 
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
-			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
+			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
 			may_ptr_error(tmp);
 			alloc_on_queuen(q, q->st.qnbr, tmp);
 		}
@@ -6345,7 +6345,7 @@ static USE_RESULT pl_state fn_iso_bagof_3(query *q)
 
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			c->flags |= FLAG2_PROCESSED;
-			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, true);
+			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, true, false);
 			may_ptr_error(tmp);
 			alloc_on_queuen(q, q->st.qnbr, tmp);
 		} else
@@ -6366,7 +6366,7 @@ static USE_RESULT pl_state fn_iso_bagof_3(query *q)
 
 	// Return matching solutions
 
-	cell *tmp = deep_copy_to_heap(q, p2, p2_ctx, true);
+	cell *tmp = deep_copy_to_heap(q, p2, p2_ctx, true, false);
 	may_ptr_error(tmp);
 	unpin_vars(q);
 	unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
@@ -6579,7 +6579,7 @@ static USE_RESULT pl_state do_asserta_2(query *q)
 		return throw_error(q, tmp2, "type_error", "callable");
 
 	GET_NEXT_ARG(p2,atom_or_var);
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
 	may_ptr_error(tmp);
 	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
@@ -6673,7 +6673,7 @@ static USE_RESULT pl_state do_assertz_2(query *q)
 		return throw_error(q, tmp2, "type_error", "callable");
 
 	GET_NEXT_ARG(p2,atom_or_var);
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
 	may_ptr_error(tmp);
 
 	if (tmp == ERR_CYCLE_CELL)
@@ -10163,7 +10163,7 @@ static unsigned fake_collect_vars(query *q, cell *p1, idx_t nbr_cells, cell **sl
 
 unsigned fake_numbervars(query *q, cell *p1, idx_t p1_ctx, unsigned start)
 {
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
 	ensure(tmp);
 	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
