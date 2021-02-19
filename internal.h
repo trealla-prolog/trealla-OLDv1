@@ -108,7 +108,7 @@ typedef uint32_t idx_t;
 #define is_tmp(c) ((c)->flags & FLAG_TMP)
 #define is_const_blob(c) (is_blob(c) && ((c)->flags & FLAG2_CONST))
 #define is_nonconst_blob(c) (is_blob(c) && !((c)->flags & FLAG2_CONST))
-#define is_dup_cstring(c) (is_cstring(c) && ((c)->flags & FLAG2_DUP))
+#define is_dup_cstring(c) (is_blob(c) && ((c)->flags & FLAG2_DUP))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
 #define is_quoted(c) ((c)->flags & FLAG2_QUOTED)
 #define is_fresh(c) ((c)->flags & FLAG2_FRESH)
