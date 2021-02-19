@@ -102,13 +102,14 @@ typedef uint32_t idx_t;
 
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
 #define is_string(c) ((c)->flags & FLAG_STRING)
-#define is_blob(c) (is_cstring(c) && (c)->flags & FLAG_BLOB)
+#define is_blob(c) ((c)->flags & FLAG_BLOB)
 #define is_list(c) (is_iso_list(c) || is_string(c))
 #define is_integer(c) (is_rational(c) && ((c)->val_den == 1))
-#define is_tmp(c) (((c)->flags & FLAG_TMP) && is_blob(c))
+#define is_const_cstring(c) (is_cstring(c) && ((c)->flags & FLAG2_CONST))
+#define is_tmp(c) ((c)->flags & FLAG_TMP)
 #define is_const_blob(c) (((c)->flags & FLAG2_CONST) && is_blob(c))
-#define is_nonconst_blob(c) (!((c)->flags & FLAG2_CONST) && is_blob(c))
-#define is_dup_cstring(c) (((c)->flags & FLAG2_DUP) && is_blob(c))
+#define is_nonconst_blob(c) (is_cstring(c) && !((c)->flags & FLAG2_CONST) && is_blob(c))
+#define is_dup_cstring(c) (is_cstring(c) && ((c)->flags & FLAG2_DUP))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
 #define is_quoted(c) ((c)->flags & FLAG2_QUOTED)
 #define is_fresh(c) ((c)->flags & FLAG2_FRESH)
@@ -130,7 +131,7 @@ typedef uint32_t idx_t;
 #define MODULE_GET_STR(c) (!is_cstring(c) ? (m->pl->pool + (c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
 #define MODULE_LEN_STR(c) (is_blob(c) ? (c)->len_str : strlen(MODULE_GET_STR(c)))
 
-#define FREE_STR(c) if (is_nonconst_blob(c)) { free((c)->val_str); (c)->val_str = NULL; }
+#define FREE_STR(c) if (is_nonconst_blob(c)) { free((c)->val_str); }
 #define TAKE_STR(c) { (c)->val_str = NULL; }
 
 #define DUP_STR(c,v) {												\

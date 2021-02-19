@@ -252,7 +252,7 @@ cell *list_tail(cell *l, cell *tmp)
 
 	if ((l->len_str - n) != 0) {
 		tmp->val_type = TYPE_CSTRING;
-		tmp->flags = FLAG_BLOB | FLAG2_CONST | FLAG_STRING;
+		tmp->flags = FLAG_BLOB|FLAG2_CONST|FLAG_STRING;
 		tmp->nbr_cells = 1;
 		tmp->arity = 2;
 		tmp->val_str = l->val_str + n;
@@ -603,7 +603,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		for (idx_t i = 0; i < r->t.cidx; i++) {
 			cell *c = r->t.cells + i;
 
-			if (is_const_blob(c))
+			if (is_blob(c) && is_const_cstring(c))
 				c->flags |= FLAG2_DUP;
 		}
 	}
@@ -3271,7 +3271,11 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 				}
 
 				c->flags |= FLAG_BLOB;
-				SET_STR(c, p->token, p->len_str);
+				c->len_str = p->len_str;
+				c->val_str = malloc(p->len_str+1);
+				ensure(c->val_str);
+				memcpy(c->val_str, p->token, p->len_str);
+				c->val_str[p->len_str] = '\0';
 			}
 		}
 
