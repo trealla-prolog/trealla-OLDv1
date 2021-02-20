@@ -60,9 +60,7 @@ static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 
 	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
 		*dst = *src;
-
-		if (is_strbuf(dst))
-			DUP_STR(dst,src)
+		INCR_REF(src);
 	}
 
 	return nbr_cells;
@@ -427,10 +425,8 @@ static USE_RESULT pl_state make_string(cell *d, const char *s)
 
 static void chk_for_tmp_blob(cell *c)
 {
-	if (is_tmp(c)) {
-		FREE_STR(c);
-		c->val_type = TYPE_EMPTY;
-	}
+	DECR_REF(c);
+	c->val_type = TYPE_EMPTY;
 }
 
 static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only, bool copy_attrs)
@@ -4908,9 +4904,9 @@ static USE_RESULT pl_state fn_iso_asserta_1(query *q)
 			return pl_error;
 		}
 
-		FREE_STR(h);
-		h->val_off = off;
+		DECR_REF(h);
 		h->val_type = TYPE_LITERAL;
+		h->val_off = off;
 		h->flags = 0;
 	}
 
@@ -4972,9 +4968,9 @@ static USE_RESULT pl_state fn_iso_assertz_1(query *q)
 			return pl_error;
 		}
 
-		FREE_STR(h);
-		h->val_off = off;
+		DECR_REF(h);
 		h->val_type = TYPE_LITERAL;
+		h->val_off = off;
 		h->flags = 0;
 	}
 
@@ -6602,9 +6598,9 @@ static USE_RESULT pl_state do_asserta_2(query *q)
 			return pl_error;
 		}
 
-		FREE_STR(h);
-		h->val_off = off;
+		DECR_REF(h);
 		h->val_type = TYPE_LITERAL;
+		h->val_off = off;
 		h->flags = 0;
 	}
 
@@ -6697,9 +6693,9 @@ static USE_RESULT pl_state do_assertz_2(query *q)
 			return pl_error;
 		}
 
-		FREE_STR(h);
-		h->val_off = off;
+		DECR_REF(h);
 		h->val_type = TYPE_LITERAL;
+		h->val_off = off;
 		h->flags = 0;
 	}
 
@@ -8319,9 +8315,7 @@ static USE_RESULT pl_state fn_send_1(query *q)
 
 	for (idx_t i = 0; i < c->nbr_cells; i++) {
 		cell *c2 = c + i;
-
-		if (is_strbuf(c2))
-			DUP_STR(c2,c+1);
+		INCR_REF(c2);
 	}
 
 	alloc_on_queuen(dstq, 0, c);

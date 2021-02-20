@@ -536,10 +536,9 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		cell *c = t->cells;
 		idx_t off = index_from_pool(m->pl, MODULE_GET_STR(c));
 		if (off == ERR_IDX) return NULL;
-		FREE_STR(c);
-		c->val_off = off;
-		ensure (c->val_off != ERR_IDX);
+		DECR_REF(c);
 		c->val_type = TYPE_LITERAL;
+		c->val_off = off;
 		c->flags = 0;
 	}
 
@@ -556,9 +555,9 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	if (is_cstring(c)) {
 		idx_t off = index_from_pool(m->pl, MODULE_GET_STR(c));
 		if (off == ERR_IDX) return NULL;
-		FREE_STR(c);
-		c->val_off = off;
+		DECR_REF(c);
 		c->val_type = TYPE_LITERAL;
+		c->val_off = off;
 		c->flags = 0;
 	}
 
@@ -602,9 +601,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	if (!consulting) {
 		for (idx_t i = 0; i < r->t.cidx; i++) {
 			cell *c = r->t.cells + i;
-
-			if (is_static(c))
-				c->flags |= FLAG2_DUP;
+			INCR_REF(c);
 		}
 	}
 
@@ -845,10 +842,7 @@ void clear_term(term *t)
 
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
-
-		if (!is_dup_cstring(c))
-			FORCE_FREE_STR(c);
-
+		DECR_REF(c);
 		c->val_type = TYPE_EMPTY;
 	}
 
@@ -926,7 +920,7 @@ void destroy_query(query *q)
 	for (arena *a = q->arenas; a;) {
 		for (idx_t i = 0; i < a->hp; i++) {
 			cell *c = a->heap + i;
-			FREE_STR(c);
+			DECR_REF(c);
 		}
 
 		arena *save = a;
@@ -941,7 +935,7 @@ void destroy_query(query *q)
 	slot *e = q->slots;
 
 	for (idx_t i = 0; i < q->st.sp; i++, e++)
-		FREE_STR(&e->c);
+		DECR_REF(&e->c);
 
 	free(q->slots);
 	free(q->frames);
@@ -2939,15 +2933,15 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 					cell *h = get_head(p->t->cells);
 
 					if (is_cstring(h)) {
-						FREE_STR(h);
 						idx_t off = index_from_pool(p->m->pl, PARSER_GET_STR(h));
 						if (off == ERR_IDX) {
 							p->error = true;
 							break;
 						}
 
-						h->val_off = off;
+						DECR_REF(h);
 						h->val_type = TYPE_LITERAL;
+						h->val_off = off;
 						h->flags = 0;
 					}
 
@@ -3250,7 +3244,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 				}
 
 				c->flags |= FLAG_BLOB;
-				SET_STR(c, p->token, p->str_len);
+				SET_STR(c, p->token, p->str_len, 0);
 			}
 		}
 

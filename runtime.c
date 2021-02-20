@@ -218,7 +218,7 @@ static void unwind_trail(query *q, const choice *ch)
 
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
-		FREE_STR(&e->c);
+		DECR_REF(&e->c);
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = NULL;
 	}
@@ -252,7 +252,7 @@ static void trim_heap(query *q, const choice *ch)
 
 		for (idx_t i = 0; i < a->hp; i++) {
 			cell *c = a->heap + i;
-			FREE_STR(c);
+			DECR_REF(c);
 			c->val_type = TYPE_EMPTY;
 		}
 
@@ -266,7 +266,7 @@ static void trim_heap(query *q, const choice *ch)
 
 	for (idx_t i = ch->st.hp; a && (i < a->hp); i++) {
 		cell *c = a->heap + i;
-		FREE_STR(c);
+		DECR_REF(c);
 		c->val_type = TYPE_EMPTY;
 	}
 }
@@ -356,7 +356,9 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	if (!q->no_tco && q->m->pl->opt) {
 		for (unsigned i = 0; i < nbr_vars; i++) {
 			slot *e = GET_SLOT(g, i);
-			FREE_STR(&e->c);
+			DECR_REF(&e->c);
+			e->c.val_type = TYPE_EMPTY;
+			e->c.attrs = NULL;
 		}
 
 		const slot *from = GET_SLOT(new_g, 0);
@@ -669,15 +671,7 @@ pl_state set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		make_indirect(&e->c, v);
 	else {
 		e->c = *v;
-
-		if (is_strbuf(v)) {
-			if (is_tmp(v)) {
-				TAKE_STR(v);
-				e->c.flags &= ~FLAG_TMP;
-				v->val_type = TYPE_EMPTY;
-			} else
-				DUP_STR(&e->c,v);
-		}
+		INCR_REF(v);
 	}
 
 	if (frozen)
@@ -711,15 +705,7 @@ pl_state reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		make_indirect(&e->c, v);
 	else {
 		e->c = *v;
-
-		if (is_strbuf(v)) {
-			if (is_tmp(v)) {
-				TAKE_STR(v);
-				e->c.flags &= ~FLAG_TMP;
-				v->val_type = TYPE_EMPTY;
-			} else
-				DUP_STR(&e->c,v);
-		}
+		INCR_REF(v);
 	}
 
 	return pl_success;
@@ -916,9 +902,9 @@ USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 			// For now convert it to a literal
 			idx_t off = index_from_pool(q->m->pl, GET_STR(c));
 			may_idx_error(off);
-			FREE_STR(c);
-			c->val_off = off;
+			DECR_REF(c);
 			c->val_type = TYPE_LITERAL;
+			c->val_off = off;
 			c->flags = 0;
 		}
 
@@ -1005,9 +991,9 @@ USE_RESULT pl_state match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retrac
 			// For now convert it to a literal
 			idx_t off = index_from_pool(q->m->pl, GET_STR(c));
 			may_idx_error(off);
-			FREE_STR(c);
-			c->val_off = off;
+			DECR_REF(c);
 			c->val_type = TYPE_LITERAL;
+			c->val_off = off;
 			c->flags = 0;
 		}
 
@@ -1112,9 +1098,9 @@ static USE_RESULT pl_state match_head(query *q)
 				return pl_error;
 			}
 
-			FREE_STR(c);
-			c->val_off = off;
+			DECR_REF(c);
 			c->val_type = TYPE_LITERAL;
+			c->val_off = off;
 			c->flags = 0;
 			h = NULL;
 		}

@@ -145,12 +145,12 @@ typedef struct {
 	)															\
 	}
 
-#define INC_REF(c) 												\
+#define INCR_REF(c) 												\
 	if (is_strbuf(c)) {											\
 		(c)->val_strb->refcnt++;								\
 	}
 
-#define DEC_REF(c)												\
+#define DECR_REF(c)												\
 	if (is_strbuf(c)) {											\
 		if (!(--(c)->val_strb->refcnt))	{						\
 			free((c)->val_strb);								\
