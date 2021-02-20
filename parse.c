@@ -3235,9 +3235,6 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			if ((strlen(p->token) < MAX_SMALL_STRING) && !p->string)
 				strcpy(c->val_chr, p->token);
 			else {
-				if (p->consulting || p->skip)
-					c->flags |= FLAG2_STATIC;
-
 				if (p->string) {
 					c->flags |= FLAG_STRING;
 					c->arity = 2;

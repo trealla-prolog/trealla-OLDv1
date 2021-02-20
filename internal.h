@@ -134,17 +134,6 @@ typedef struct {
 	(c)->strb_off = off;										\
 	}
 
-#define DUP_STR(c,d,off) {										\
-	( is_literal(c) ? (c)->val_off = (d)->val_off);				\
-	: is_strbuf(c) ? ((c)->val_strb = (d)->val_strb;			\
-		(c)->val_strb->refcnt++;								\
-		(c)->strb_off = off;									\
-	: is_static(c) ? (c)->val_str = (d)->val_str + (off);		\
-		(c)->str_len = (d)->str_len - (off);					\
-	: strcpy((c)->val_chr, (d)->val_chr);						\
-	)															\
-	}
-
 #define INCR_REF(c) 											\
 	if (is_strbuf(c)) {											\
 		(c)->val_strb->refcnt++;								\
