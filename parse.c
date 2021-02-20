@@ -222,7 +222,8 @@ cell *list_head(cell *l, cell *tmp)
 	if (!is_string(l))
 		return l + 1;
 
-	size_t n = len_char_utf8(l->val_str);
+	const char *src = is_static(l) ? l->val_str : (char*)l->val_strb->cstr + l->strb_off;
+	size_t n = len_char_utf8(src);
 
 	if (!n)
 		n = 1;
@@ -231,7 +232,7 @@ cell *list_head(cell *l, cell *tmp)
 	tmp->nbr_cells = 1;
 	tmp->flags = 0;
 	tmp->arity = 0;
-	memcpy(tmp->val_chr, l->val_str, n);
+	memcpy(tmp->val_chr, src, n);
 	tmp->val_chr[n] = '\0';
 	return tmp;
 }
@@ -245,13 +246,23 @@ cell *list_tail(cell *l, cell *tmp)
 		return h + h->nbr_cells;
 	}
 
-	size_t n = len_char_utf8(l->val_str);
+	const char *src = is_static(l) ? l->val_str : (char*)l->val_strb->cstr;
+	size_t len = is_static(l) ? (size_t)l->str_len : (size_t)l->val_strb->len - l->strb_off;
+	size_t n = len_char_utf8(src);
 
 	if (!n)
 		n = 1;
 
-	if ((l->str_len - n) != 0) {
-		tmp->val_type = TYPE_CSTRING;
+	if ((len - n) == 0) {
+		tmp->val_type = TYPE_LITERAL;
+		tmp->nbr_cells = 1;
+		tmp->arity = 0;
+		tmp->flags = 0;
+		tmp->val_off = g_nil_s;
+		return tmp;
+	}
+
+	if (is_static(l)) {
 		tmp->flags = FLAG_BLOB | FLAG2_STATIC | FLAG_STRING;
 		tmp->nbr_cells = 1;
 		tmp->arity = 2;
@@ -260,11 +271,8 @@ cell *list_tail(cell *l, cell *tmp)
 		return tmp;
 	}
 
-	tmp->val_type = TYPE_LITERAL;
-	tmp->nbr_cells = 1;
-	tmp->arity = 0;
-	tmp->flags = 0;
-	tmp->val_off = g_nil_s;
+	*tmp = *l;
+	tmp->strb_off += n;
 	return tmp;
 }
 
