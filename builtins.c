@@ -5463,12 +5463,15 @@ pl_state throw_error(query *q, cell *c, const char *err_type, const char *expect
 	cell *tmp = deep_copy_to_tmp(q, p->t->cells, q->st.curr_frame, false, false);
 	may_ptr_error(tmp);
 	destroy_parser(p);
-	if (tmp == ERR_CYCLE_CELL)
+	if (tmp == ERR_CYCLE_CELL) {
+		destroy_parser(p);
 		return throw_error(q, c, "resource_error", "cyclic_term");
+	}
 
 	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
 	may_ptr_error(e);
 	safe_copy_cells(e, tmp, tmp->nbr_cells);
+	destroy_parser(p);
 	pl_state ok = pl_failure;
 
 	if (find_exception_handler(q, e))
