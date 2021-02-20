@@ -102,7 +102,7 @@ typedef uint32_t idx_t;
 
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
 #define is_string(c) ((c)->flags & FLAG_STRING)
-#define is_blob(c) (is_cstring(c) && ((c)->flags & FLAG_BLOB))
+#define is_blob(c) ((c)->flags & FLAG_BLOB)
 #define is_list(c) (is_iso_list(c) || is_string(c))
 #define is_integer(c) (is_rational(c) && ((c)->val_den == 1))
 #define is_static(c) (is_blob(c) && ((c)->flags & FLAG2_STATIC))
