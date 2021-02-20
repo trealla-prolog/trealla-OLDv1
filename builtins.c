@@ -791,6 +791,7 @@ static USE_RESULT pl_state fn_iso_atom_chars_2(query *q)
 		cell tmp;
 		may_error(make_stringn(&tmp, GET_STR(p1), LEN_STR(p1)));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		DECR_REF(&tmp);
 		return pl_success;
 	}
 
@@ -1437,8 +1438,10 @@ static USE_RESULT pl_state do_atom_concat_3(query *q)
 	may_error(make_cstring(&tmp, dst1), free(dst1));
 	free(dst1);
 	reset_value(q, p1_raw, p1_raw_ctx, &tmp, q->st.curr_frame);
+	DECR_REF(&tmp);
 	may_error(make_cstring(&tmp, dst2), free(dst2));
 	reset_value(q, p2_raw, p2_raw_ctx, &tmp, q->st.curr_frame);
+	DECR_REF(&tmp);
 	free(dst2);
 
 	if (!done)
@@ -1497,6 +1500,7 @@ static USE_RESULT pl_state fn_iso_atom_concat_3(query *q)
 		cell tmp;
 		may_error(make_cstringn(&tmp, dst, nbytes), free(dst));
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+		DECR_REF(&tmp);
 		free(dst);
 		return pl_success;
 	}
@@ -1509,6 +1513,7 @@ static USE_RESULT pl_state fn_iso_atom_concat_3(query *q)
 		cell tmp;
 		may_error(make_cstring(&tmp, dst), free(dst));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		DECR_REF(&tmp);
 		free(dst);
 		return pl_success;
 	}
@@ -1521,6 +1526,7 @@ static USE_RESULT pl_state fn_iso_atom_concat_3(query *q)
 		cell tmp;
 		may_error (make_cstring(&tmp, dst), free(dst));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		DECR_REF(&tmp);
 		free(dst);
 		return pl_success;
 	}
@@ -6514,6 +6520,7 @@ static USE_RESULT pl_state fn_clause_3(query *q)
 			cell tmp;
 			may_error(make_cstring(&tmp, tmpbuf));
 			set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+			DECR_REF(&tmp);
 			t = &q->st.curr_clause2->t;
 		}
 
@@ -6614,6 +6621,7 @@ static USE_RESULT pl_state do_asserta_2(query *q)
 		cell tmp2;
 		may_error(make_cstring(&tmp2, tmpbuf));
 		set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
+		DECR_REF(&tmp2);
 	}
 
 	if (!q->m->loading && r->t.persist)
@@ -6709,6 +6717,7 @@ static USE_RESULT pl_state do_assertz_2(query *q)
 		cell tmp2;
 		may_error(make_cstring(&tmp2, tmpbuf));
 		set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
+		DECR_REF(&tmp2);
 	}
 
 	if (!q->m->loading && r->t.persist)
@@ -7244,6 +7253,7 @@ static USE_RESULT pl_state fn_loadfile_2(query *q)
 	cell tmp;
 	may_error(make_stringn(&tmp, s, st.st_size), free(s));
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	DECR_REF(&tmp);
 	free(s);
 	return pl_success;
 }
@@ -7650,8 +7660,10 @@ static USE_RESULT pl_state fn_client_5(query *q)
 	cell tmp;
 	may_error(make_string(&tmp, hostname));
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	DECR_REF(&tmp);
 	may_error(make_string(&tmp, path));
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+	DECR_REF(&tmp);
 	cell *tmp2 = alloc_on_heap(q, 1);
 	ensure(tmp2);
 	make_int(tmp2, n);
@@ -7784,6 +7796,7 @@ static USE_RESULT pl_state fn_bread_3(query *q)
 		cell tmp;
 		may_error(make_stringn(&tmp, str->data, str->data_len), free(str->data));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		DECR_REF(&tmp);
 		free(str->data);
 		str->data = NULL;
 		return pl_success;
@@ -7803,6 +7816,7 @@ static USE_RESULT pl_state fn_bread_3(query *q)
 		cell tmp;
 		may_error(make_stringn(&tmp, str->data, nbytes), free(str->data));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		DECR_REF(&tmp);
 		free(str->data);
 		str->data = NULL;
 		return pl_success;
@@ -7840,6 +7854,7 @@ static USE_RESULT pl_state fn_bread_3(query *q)
 		make_literal(&tmp2, g_nil_s);
 
 	set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
+	DECR_REF(&tmp2);
 	free(str->data);
 	str->data = NULL;
 	return pl_success;
@@ -8865,6 +8880,7 @@ static USE_RESULT pl_state do_format(query *q, cell *str, idx_t str_ctx, cell* p
 		cell tmp;
 		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf));
 		set_var(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		DECR_REF(&tmp);
 	} else if (is_structure(str)) {
 		cell *c = deref(q, str+1, str_ctx);
 		cell tmp;
@@ -8875,6 +8891,7 @@ static USE_RESULT pl_state do_format(query *q, cell *str, idx_t str_ctx, cell* p
 			make_literal(&tmp, g_nil_s);
 
 		set_var(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		DECR_REF(&tmp);
 	} else if (is_stream(str)) {
 		int n = get_stream(q, str);
 		stream *str = &g_streams[n];
@@ -9719,6 +9736,7 @@ static USE_RESULT pl_state fn_edin_seeing_1(query *q)
 	cell tmp;
 	may_error(make_cstring(&tmp, name));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	DECR_REF(&tmp);
 	return pl_success;
 }
 
@@ -9729,6 +9747,7 @@ static USE_RESULT pl_state fn_edin_telling_1(query *q)
 	cell tmp;
 	may_error(make_cstring(&tmp, name));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	DECR_REF(&tmp);
 	return pl_success;
 }
 
@@ -9777,6 +9796,7 @@ static USE_RESULT pl_state fn_hex_chars_2(query *q)
 		cell tmp;
 		may_error(make_string(&tmp, tmpbuf));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		DECR_REF(&tmp);
 		return pl_success;
 	}
 
@@ -9807,6 +9827,7 @@ static USE_RESULT pl_state fn_octal_chars_2(query *q)
 		cell tmp;
 		may_error(make_string(&tmp, tmpbuf));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		DECR_REF(&tmp);
 		return pl_success;
 	}
 
@@ -9879,6 +9900,7 @@ static USE_RESULT pl_state fn_uuid_1(query *q)
 	cell tmp;
 	may_error(make_string(&tmp, tmpbuf));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	DECR_REF(&tmp);
 	return pl_success;
 }
 
@@ -9944,6 +9966,7 @@ static USE_RESULT pl_state fn_atomic_concat_3(query *q)
 		cell tmp;
 		may_error(make_cstringn(&tmp, dst, nbytes), free(dst));
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+		DECR_REF(&tmp);
 		free(dst);
 		return pl_success;
 	}
@@ -9956,6 +9979,7 @@ static USE_RESULT pl_state fn_atomic_concat_3(query *q)
 		cell tmp;
 		may_error(make_string(&tmp, dst), free(dst));
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+		DECR_REF(&tmp);
 		free(dst);
 		return pl_success;
 	}
@@ -9968,6 +9992,7 @@ static USE_RESULT pl_state fn_atomic_concat_3(query *q)
 		cell tmp;
 		may_error(make_string(&tmp, dst), free(dst));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		DECR_REF(&tmp);
 		free(dst);
 		return pl_success;
 	}
@@ -10039,6 +10064,7 @@ static USE_RESULT pl_state fn_replace_4(query *q)
 
 	free(dstbuf);
 	set_var(q, p4, p4_ctx, &tmp, q->st.curr_frame);
+	DECR_REF(&tmp);
 	return pl_success;
 }
 

@@ -224,10 +224,6 @@ cell *list_head(cell *l, cell *tmp)
 
 	const char *src = is_static(l) ? l->val_str : (char*)l->val_strb->cstr + l->strb_off;
 	size_t n = len_char_utf8(src);
-
-	if (!n)
-		n = 1;
-
 	tmp->val_type = TYPE_CSTRING;
 	tmp->nbr_cells = 1;
 	tmp->flags = 0;
@@ -250,8 +246,8 @@ cell *list_tail(cell *l, cell *tmp)
 	size_t len = is_static(l) ? (size_t)l->str_len : (size_t)l->val_strb->len - l->strb_off;
 	size_t n = len_char_utf8(src);
 
-	if (!n)
-		n = 1;
+	//if (!n)
+	//	n = 1;
 
 	if ((len - n) == 0) {
 		tmp->val_type = TYPE_LITERAL;
