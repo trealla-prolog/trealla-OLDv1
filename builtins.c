@@ -395,9 +395,9 @@ static USE_RESULT pl_state make_cstringn(cell *d, const char *s, size_t n)
 	}
 
 	FAULTINJECT(errno = ENOMEM; return pl_error);
-	SET_STR(d,s,n);
+	SET_STR(d,s,n,0);
 	d->val_type = TYPE_CSTRING;
-	d->flags = FLAG_BLOB | FLAG_TMP;
+	d->flags = FLAG_BLOB;
 	d->nbr_cells = 1;
 	d->arity = 0;
 	return pl_success;
@@ -411,9 +411,9 @@ static USE_RESULT pl_state make_cstring(cell *d, const char *s)
 static USE_RESULT pl_state make_stringn(cell *d, const char *s, size_t n)
 {
 	FAULTINJECT(errno = ENOMEM; return pl_error);
-	SET_STR(d,s,n);
+	SET_STR(d,s,n,0);
 	d->val_type = TYPE_CSTRING;
-	d->flags = FLAG_BLOB | FLAG_TMP;
+	d->flags = FLAG_BLOB;
 	d->flags |= FLAG_STRING;
 	d->nbr_cells = 1;
 	d->arity = 2;
@@ -2387,7 +2387,7 @@ static USE_RESULT pl_state fn_iso_open_4(query *q)
 		void *addr = mmap(0, len, prot, MAP_PRIVATE, fd, 0);
 		cell tmp = {0};
 		tmp.val_type = TYPE_CSTRING;
-		tmp.flags = FLAG_BLOB | FLAG_STRING | FLAG2_CONST;
+		tmp.flags = FLAG_BLOB | FLAG_STRING | FLAG2_STATIC;
 		tmp.nbr_cells = 1;
 		tmp.arity = 2;
 		tmp.val_str = addr;
@@ -4534,7 +4534,7 @@ static cell *clone2_to_tmp(query *q, cell *p1)
 
 	for (idx_t i = 0; i < p1->nbr_cells; i++, c++) {
 		if (is_blob(c))
-			c->flags |= FLAG2_CONST;
+			c->flags |= FLAG2_STATIC;
 	}
 
 	return tmp;
@@ -4565,7 +4565,7 @@ static cell *clone2_to_heap(query *q, bool prefix, cell *p1, idx_t nbr_cells, id
 
 	for (idx_t i = 0; i < nbr_cells; i++, c++) {
 		if (is_blob(c))
-			c->flags |= FLAG2_CONST;
+			c->flags |= FLAG2_STATIC;
 	}
 
 	return tmp;
@@ -4598,7 +4598,7 @@ static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx
 		*dst = *src;
 
 		if (is_blob(src))
-			dst->flags |= FLAG2_CONST;
+			dst->flags |= FLAG2_STATIC;
 
 		if (!is_variable(src))
 			continue;

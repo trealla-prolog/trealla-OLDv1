@@ -252,7 +252,7 @@ cell *list_tail(cell *l, cell *tmp)
 
 	if ((l->str_len - n) != 0) {
 		tmp->val_type = TYPE_CSTRING;
-		tmp->flags = FLAG_BLOB | FLAG2_CONST | FLAG_STRING;
+		tmp->flags = FLAG_BLOB | FLAG2_STATIC | FLAG_STRING;
 		tmp->nbr_cells = 1;
 		tmp->arity = 2;
 		tmp->val_str = l->val_str + n;
@@ -3242,7 +3242,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 				strcpy(c->val_chr, p->token);
 			else {
 				if (p->consulting || p->skip)
-					c->flags |= FLAG2_CONST;
+					c->flags |= FLAG2_STATIC;
 
 				if (p->string) {
 					c->flags |= FLAG_STRING;

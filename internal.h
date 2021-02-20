@@ -105,9 +105,8 @@ typedef uint32_t idx_t;
 #define is_blob(c) (is_cstring(c) && ((c)->flags & FLAG_BLOB))
 #define is_list(c) (is_iso_list(c) || is_string(c))
 #define is_integer(c) (is_rational(c) && ((c)->val_den == 1))
-#define is_tmp(c) ((c)->flags & FLAG_TMP)
-#define is_static(c) (is_blob(c) && ((c)->flags & FLAG2_CONST))
-#define is_strbuf(c) (is_blob(c) && !((c)->flags & FLAG2_CONST))
+#define is_static(c) (is_blob(c) && ((c)->flags & FLAG2_STATIC))
+#define is_strbuf(c) (is_blob(c) && !((c)->flags & FLAG2_STATIC))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
 #define is_quoted(c) ((c)->flags & FLAG2_QUOTED)
 #define is_fresh(c) ((c)->flags & FLAG2_FRESH)
@@ -117,7 +116,6 @@ typedef uint32_t idx_t;
 #define is_tail_recursive(c) ((c)->flags & FLAG_TAIL_REC)
 #define is_key(c) ((c)->flags & FLAG_KEY)
 #define is_op(c) (c->flags && 0xFF00)
-#define is_strbuf(c) is_strbuf(c)
 
 typedef struct {
 	size_t len;
@@ -125,27 +123,27 @@ typedef struct {
 	char cstr[];
 } strbuf;
 
-#define SET_STR(c,s,len,off) {									\
-	char *strb = malloc(sizeof(strbuf) + (len) + 1);			\
+#define SET_STR(c,s,n,off) {									\
+	strbuf *strb = malloc(sizeof(strbuf) + (n) + 1);			\
 	may_ptr_error(strb);										\
-	memcpy(strb->cstr, s, len); 								\
-	strb->cstr[len] = 0;										\
-	strb->len = len;											\
+	memcpy(strb->cstr, s, n); 									\
+	strb->cstr[n] = 0;											\
+	strb->len = n;												\
 	strb->refcnt = 1;											\
 	(c)->val_strb = strb;										\
-	(c)->cstr_off = off;										\
+	(c)->strb_off = off;										\
 	}
 
 #define DUP_STR(c,d,off) {										\
-	( is_literal(c) ? (c)->val_off = (d)->val_off)				\
+	( is_literal(c) ? (c)->val_off = (d)->val_off);				\
 	: is_strbuf(c) ? ((c)->val_strb = (d)->val_strb;			\
 		(c)->val_strb->refcnt++;								\
 		(c)->strb_off = off;									\
 	: is_static(c) ? (c)->val_str = (d)->val_str + (off);		\
 		(c)->str_len = (d)->str_len - (off);					\
-	: strcpy((c)->val_chr, (d)->val_chr)						\
-	)
-}
+	: strcpy((c)->val_chr, (d)->val_chr);						\
+	)															\
+	}
 
 #define INC_REF(c) 												\
 	if (is_strbuf(c)) {											\
@@ -161,14 +159,14 @@ typedef struct {
 	}
 
 #define _GET_STR(pl,c) 											\
-	( is_literal(c) ? ((pl)->g_pool + (c)->val_off)				\
+	( is_literal(c) ? ((pl)->pool + (c)->val_off)				\
 	: is_strbuf(c) ? ((c)->val_strb->cstr + (c)->strb_off)		\
 	: is_static(c) ? (c)->val_str								\
 	: ((char*)(c)->val_chr)										\
 	)
 
 #define _LEN_STR(pl,c) 											\
-	( is_literal(c) ? strlen((pl)->g_pool + (c)->val_off)		\
+	( is_literal(c) ? strlen((pl)->pool + (c)->val_off)		\
 	: is_strbuf(c) ? ((c)->val_strb->len - (c)->strb_off)		\
 	: is_static(c) ? (c)->str_len								\
 	: strlen((c)->val_chr)										\
@@ -610,7 +608,6 @@ extern idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_false_s;
 extern idx_t g_gt_s, g_eq_s, g_sys_elapsed_s, g_sys_queue_s, g_braces_s;
 extern idx_t g_stream_property_s;
 extern stream g_streams[MAX_STREAMS];
-extern char *g_pool;
 extern unsigned g_cpu_count;
 
 inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
