@@ -145,7 +145,7 @@ typedef struct {
 	)															\
 	}
 
-#define INCR_REF(c) 												\
+#define INCR_REF(c) 											\
 	if (is_strbuf(c)) {											\
 		(c)->val_strb->refcnt++;								\
 	}
@@ -166,7 +166,7 @@ typedef struct {
 	)
 
 #define _LEN_STR(pl,c) 											\
-	( is_literal(c) ? strlen((pl)->pool + (c)->val_off)		\
+	( is_literal(c) ? strlen((pl)->pool + (c)->val_off)			\
 	: is_strbuf(c) ? ((c)->val_strb->len - (c)->strb_off)		\
 	: is_static(c) ? (c)->str_len								\
 	: strlen((c)->val_chr)										\
