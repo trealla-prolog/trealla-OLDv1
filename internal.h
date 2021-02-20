@@ -106,9 +106,8 @@ typedef uint32_t idx_t;
 #define is_list(c) (is_iso_list(c) || is_string(c))
 #define is_integer(c) (is_rational(c) && ((c)->val_den == 1))
 #define is_tmp(c) ((c)->flags & FLAG_TMP)
-#define is_const_blob(c) (is_blob(c) && ((c)->flags & FLAG2_CONST))
-#define is_nonconst_blob(c) (is_blob(c) && !((c)->flags & FLAG2_CONST))
-#define is_dup_cstring(c) (is_blob(c) && ((c)->flags & FLAG2_DUP))
+#define is_static(c) (is_blob(c) && ((c)->flags & FLAG2_CONST))
+#define is_strbuf(c) (is_blob(c) && !((c)->flags & FLAG2_CONST))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
 #define is_quoted(c) ((c)->flags & FLAG2_QUOTED)
 #define is_fresh(c) ((c)->flags & FLAG2_FRESH)
@@ -118,36 +117,71 @@ typedef uint32_t idx_t;
 #define is_tail_recursive(c) ((c)->flags & FLAG_TAIL_REC)
 #define is_key(c) ((c)->flags & FLAG_KEY)
 #define is_op(c) (c->flags && 0xFF00)
+#define is_strbuf(c) is_strbuf(c)
 
-// These 2 assume literal or cstring types...
+typedef struct {
+	size_t len;
+	uint32_t refcnt;
+	char cstr[];
+} strbuf;
 
-#define GET_STR(c) (!is_cstring(c) ? (q->m->pl->pool + (c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
-#define LEN_STR(c) (is_blob(c) ? (c)->len_str : strlen(GET_STR(c)))
+#define SET_STR(c,s,len,off) {									\
+	char *strb = malloc(sizeof(strbuf) + (len) + 1);			\
+	may_ptr_error(strb);										\
+	memcpy(strb->cstr, s, len); 								\
+	strb->cstr[len] = 0;										\
+	strb->len = len;											\
+	strb->refcnt = 1;											\
+	(c)->val_strb = strb;										\
+	(c)->cstr_off = off;										\
+	}
 
-#define PARSER_GET_STR(c) (!is_cstring(c) ? (p->m->pl->pool + (c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
-#define PARSER_LEN_STR(c) (is_blob(c) ? (c)->len_str : strlen(PARSER_GET_STR(c)))
+#define DUP_STR(c,d,off) {										\
+	( is_literal(c) ? (c)->val_off = (d)->val_off)				\
+	: is_strbuf(c) ? ((c)->val_strb = (d)->val_strb;			\
+		(c)->val_strb->refcnt++;								\
+		(c)->strb_off = off;									\
+	: is_static(c) ? (c)->val_str = (d)->val_str + (off);		\
+		(c)->str_len = (d)->str_len - (off);					\
+	: strcpy((c)->val_chr, (d)->val_chr)						\
+	)
+}
 
-#define MODULE_GET_STR(c) (!is_cstring(c) ? (m->pl->pool + (c)->val_off) : is_blob(c) ? (c)->val_str : (c)->val_chr)
-#define MODULE_LEN_STR(c) (is_blob(c) ? (c)->len_str : strlen(MODULE_GET_STR(c)))
+#define INC_REF(c) 												\
+	if (is_strbuf(c)) {											\
+		(c)->val_strb->refcnt++;								\
+	}
 
-#define FORCE_FREE_STR(c) if (is_blob(c)) { free((c)->val_str); (c)->val_str = NULL; }
-#define FREE_STR(c) if (is_nonconst_blob(c)) { free((c)->val_str); (c)->val_str = NULL; }
-#define TAKE_STR(c) { (c)->val_str = NULL; }
+#define DEC_REF(c)												\
+	if (is_strbuf(c)) {											\
+		if (!(--(c)->val_strb->refcnt))	{						\
+			free((c)->val_strb);								\
+			(c)->val_strb = NULL;								\
+		}														\
+	}
 
-#define DUP_STR(c,v) {												\
-	char *str = malloc((v)->len_str + 1);							\
-	may_ptr_error(str);												\
-	memcpy(str, (v)->val_str, (v)->len_str);						\
-	(c)->val_str = str;												\
-	(c)->val_str[(v)->len_str] = '\0'; }
+#define _GET_STR(pl,c) 											\
+	( is_literal(c) ? ((pl)->g_pool + (c)->val_off)				\
+	: is_strbuf(c) ? ((c)->val_strb->cstr + (c)->strb_off)		\
+	: is_static(c) ? (c)->val_str								\
+	: ((char*)(c)->val_chr)										\
+	)
 
-#define SET_STR(c,s,len) {											\
-	char *str = malloc((len) + 1);									\
-	may_ptr_error(str);												\
-	memcpy(str, s, len); 											\
-	(c)->val_str = str;												\
-	(c)->val_str[len] = '\0';										\
-	(c)->len_str = len; }
+#define _LEN_STR(pl,c) 											\
+	( is_literal(c) ? strlen((pl)->g_pool + (c)->val_off)		\
+	: is_strbuf(c) ? ((c)->val_strb->len - (c)->strb_off)		\
+	: is_static(c) ? (c)->str_len								\
+	: strlen((c)->val_chr)										\
+	)
+
+#define GET_STR(c) _GET_STR(q->m->pl, c)
+#define LEN_STR(c) _LEN_STR(q->m->pl, c)
+
+#define PARSER_GET_STR(c) _GET_STR(p->m->pl, c)
+#define PARSER_LEN_STR(c) _LEN_STR(p->m->pl, c)
+
+#define MODULE_GET_STR(c) _GET_STR(m->pl, c)
+#define MODULE_LEN_STR(c) _LEN_STR(m->pl, c)
 
 #define QUERY_GET_POOL(off) (q->m->pl->pool + (off))
 #define MODULE_GET_POOL(off) (m->pl->pool + (off))
@@ -188,9 +222,9 @@ enum {
 	FLAG_TAIL=1<<6,
 	FLAG_BLOB=1<<7,						// used with TYPE_CSTRING
 	FLAG_STRING=1<<8,					// used with TYPE_CSTRING
-	FLAG_TMP=1<<9,						// used with TYPE_CSTRING
-	FLAG_KEY=1<<10,						// used with keys
+	FLAG_KEY=1<<9,						// used with keys
 
+	FLAG_SPARE3=1<<10,
 	FLAG_SPARE2=1<<11,
 	FLAG_SPARE1=1<<12,
 
@@ -201,9 +235,8 @@ enum {
 	FLAG2_FIRST_USE=FLAG_HEX,			// used with TYPE_VARIABLE
 	FLAG2_ANON=FLAG_OCTAL,				// used with TYPE_VARIABLE
 	FLAG2_FRESH=FLAG_BINARY,			// used with TYPE_VARIABLE
-	FLAG2_CONST=FLAG_HEX,				// used with TYPE_CSTRING
-	FLAG2_DUP=FLAG_OCTAL,				// used with TYPE_CSTRING
-	FLAG2_QUOTED=FLAG_BINARY,			// used with TYPE_CSTRING
+	FLAG2_STATIC=FLAG_HEX,				// used with TYPE_CSTRING
+	FLAG2_QUOTED=FLAG_OCTAL,			// used with TYPE_CSTRING
 
 	FLAG_END=1<<13
 };
@@ -274,15 +307,20 @@ struct cell_ {
 		};
 
 		struct {
+			strbuf *val_strb;
+			size_t strb_off;		// will be used for slices
+		};
+
+		struct {
 			char *val_str;
-			size_t len_str;
+			size_t str_len;
 		};
 
 		struct {
 			union {
 				pl_state (*fn)(query*);
 				predicate *match;
-				cell *attrs;
+				cell *attrs;		// used in slots
 				uint16_t priority;	// used in parsing operators
 			};
 
@@ -496,7 +534,7 @@ struct parser_ {
 	term *t;
 	char *token, *save_line, *srcptr;
 	cell v;
-	size_t token_size, n_line, len_str;
+	size_t token_size, n_line, str_len;
 	char_flags flag;
 	unsigned line_nbr, depth, read_term;
 	int quote_char;

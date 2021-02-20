@@ -670,7 +670,7 @@ pl_state set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 	else {
 		e->c = *v;
 
-		if (is_nonconst_blob(v)) {
+		if (is_strbuf(v)) {
 			if (is_tmp(v)) {
 				TAKE_STR(v);
 				e->c.flags &= ~FLAG_TMP;
@@ -712,7 +712,7 @@ pl_state reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 	else {
 		e->c = *v;
 
-		if (is_nonconst_blob(v)) {
+		if (is_strbuf(v)) {
 			if (is_tmp(v)) {
 				TAKE_STR(v);
 				e->c.flags &= ~FLAG_TMP;

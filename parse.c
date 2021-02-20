@@ -250,13 +250,13 @@ cell *list_tail(cell *l, cell *tmp)
 	if (!n)
 		n = 1;
 
-	if ((l->len_str - n) != 0) {
+	if ((l->str_len - n) != 0) {
 		tmp->val_type = TYPE_CSTRING;
 		tmp->flags = FLAG_BLOB | FLAG2_CONST | FLAG_STRING;
 		tmp->nbr_cells = 1;
 		tmp->arity = 2;
 		tmp->val_str = l->val_str + n;
-		tmp->len_str = l->len_str - n;
+		tmp->str_len = l->str_len - n;
 		return tmp;
 	}
 
@@ -603,7 +603,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		for (idx_t i = 0; i < r->t.cidx; i++) {
 			cell *c = r->t.cells + i;
 
-			if (is_const_blob(c))
+			if (is_static(c))
 				c->flags |= FLAG2_DUP;
 		}
 	}
@@ -2740,7 +2740,7 @@ static bool get_token(parser *p, int last_op)
 			} else
 				p->quote_char = -1;
 
-			p->len_str = dst - p->token;
+			p->str_len = dst - p->token;
 			p->srcptr = (char*)src;
 			return true;
 		}
@@ -3250,7 +3250,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 				}
 
 				c->flags |= FLAG_BLOB;
-				SET_STR(c, p->token, p->len_str);
+				SET_STR(c, p->token, p->str_len);
 			}
 		}
 

@@ -61,7 +61,7 @@ static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
 		*dst = *src;
 
-		if (is_nonconst_blob(dst))
+		if (is_strbuf(dst))
 			DUP_STR(dst,src)
 	}
 
@@ -1558,7 +1558,7 @@ static USE_RESULT pl_state fn_iso_atom_length_2(query *q)
 
 	if (is_blob(p1)) {
 		const char *p = GET_STR(p1);
-		len = substrlen_utf8(p, p+p1->len_str);
+		len = substrlen_utf8(p, p+p1->str_len);
 	} else
 		len = strlen_utf8(GET_STR(p1));
 
@@ -2391,7 +2391,7 @@ static USE_RESULT pl_state fn_iso_open_4(query *q)
 		tmp.nbr_cells = 1;
 		tmp.arity = 2;
 		tmp.val_str = addr;
-		tmp.len_str = len;
+		tmp.str_len = len;
 		set_var(q, mmap_var, mmap_ctx, &tmp, q->st.curr_frame);
 	}
 #endif
@@ -4387,7 +4387,7 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 		if (is_cstring(tmp2) /*&& arity*/) {
 			cell *c = tmp2;
 			idx_t off = index_from_pool(q->m->pl, GET_STR(c));
-			//if (is_nonconst_blob(c)) free(c->val_str);
+			//if (is_strbuf(c)) free(c->val_str);
 			c->val_off = off;
 			ensure (c->val_off != ERR_IDX);
 			c->val_type = TYPE_LITERAL;
@@ -5029,7 +5029,7 @@ static USE_RESULT pl_state fn_iso_call_1(query *q)
 	if (is_cstring(p1)) {
 		cell *c = p1;
 		idx_t off = index_from_pool(q->m->pl, GET_STR(c));
-		if (is_nonconst_blob(c)) free(c->val_str);
+		if (is_strbuf(c)) free(c->val_str);
 		c->val_off = off;
 		ensure (c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
@@ -5064,7 +5064,7 @@ static USE_RESULT pl_state fn_iso_call_n(query *q)
 	if (is_cstring(tmp2)) {
 		cell *c = tmp2;
 		idx_t off = index_from_pool(q->m->pl, GET_STR(c));
-		if (is_nonconst_blob(c)) free(c->val_str);
+		if (is_strbuf(c)) free(c->val_str);
 		c->val_off = off;
 		ensure (c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
@@ -8320,7 +8320,7 @@ static USE_RESULT pl_state fn_send_1(query *q)
 	for (idx_t i = 0; i < c->nbr_cells; i++) {
 		cell *c2 = c + i;
 
-		if (is_nonconst_blob(c2))
+		if (is_strbuf(c2))
 			DUP_STR(c2,c+1);
 	}
 
