@@ -285,22 +285,22 @@ struct cell_ {
 		};
 
 		struct {
-			char val_chr[MAX_SMALL_STRING];
-		};
-
-		struct {
 			cell *val_ptr;
 			idx_t cgen;				// choice generation
 		};
 
 		struct {
-			strbuf *val_strb;
-			size_t strb_off;		// will be used for slices
+			char val_chr[MAX_SMALL_STRING];
 		};
 
 		struct {
-			char *val_str;
-			size_t str_len;
+			strbuf *val_strb;
+			size_t strb_off;
+		};
+
+		struct {
+			char *val_str;			// used with FLAG2_STATIC
+			size_t str_len;			// length of area pointed to
 		};
 
 		struct {
@@ -311,7 +311,7 @@ struct cell_ {
 				uint16_t priority;	// used in parsing operators
 			};
 
-			idx_t val_off;
+			idx_t val_off;			// offset into pool
 			idx_t var_nbr;			// used with TYPE_VAR
 		};
 	};
