@@ -5456,8 +5456,10 @@ pl_state throw_error(query *q, cell *c, const char *err_type, const char *expect
 	parser_tokenize(p, false, false);
 
 	if (p->nbr_vars) {
-		if (!create_vars(q, p->nbr_vars))
+		if (!create_vars(q, p->nbr_vars)) {
+			destroy_parser(p);
 			return throw_error(q, c, "resource_error", "too_many_vars");
+		}
 	}
 
 	cell *tmp = deep_copy_to_tmp(q, p->t->cells, q->st.curr_frame, false, false);
@@ -5468,7 +5470,7 @@ pl_state throw_error(query *q, cell *c, const char *err_type, const char *expect
 	}
 
 	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
-	may_ptr_error(e);
+	may_ptr_error(e, destroy_parser(p));
 	safe_copy_cells(e, tmp, tmp->nbr_cells);
 	destroy_parser(p);
 	pl_state ok = pl_failure;
