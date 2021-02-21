@@ -369,20 +369,24 @@ predicate *find_predicate(module *m, cell *c)
 	return NULL;
 }
 
-static predicate *find_matching_predicate_internal(module *m, cell *c, bool quiet)
+static predicate *find_matching_predicate_internal(module *m, cell *c, __attribute__((unused)) bool quiet)
 {
+#if 0
 	module *save_m = m;
+#endif
 	module *tmp_m = NULL;
 
 	while (m) {
 		predicate *h = find_predicate(m, c);
 
+#if 0
 		if (!quiet && h && (m != save_m) && !h->is_public
 			&& strcmp(MODULE_GET_STR(c), "dynamic")
 			&& strcmp(MODULE_GET_STR(c), "module")) {
 			fprintf(stdout, "Warning: match not a public method %s/%u\n", MODULE_GET_STR(c), c->arity);
 			break;
 		}
+#endif
 
 		if (h)
 			return h;
