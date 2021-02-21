@@ -101,8 +101,8 @@ typedef uint32_t idx_t;
 #define is_cons_list(c) (is_iso_list(c) && is_variable(c+2))
 
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
-#define is_string(c) ((c)->flags & FLAG_STRING)
-#define is_blob(c) ((c)->flags & FLAG_BLOB)
+#define is_string(c) (is_cstring(c) && (c)->flags & FLAG_STRING)
+#define is_blob(c) (is_cstring(c) && (c)->flags & FLAG_BLOB)
 #define is_list(c) (is_iso_list(c) || is_string(c))
 #define is_integer(c) (is_rational(c) && ((c)->val_den == 1))
 #define is_static(c) (is_blob(c) && ((c)->flags & FLAG2_STATIC))
@@ -155,7 +155,7 @@ typedef struct {
 	)
 
 #define _LEN_STR(pl,c) 											\
-	( !is_cstring(c) ? strlen((pl)->pool + (c)->val_off)			\
+	( !is_cstring(c) ? strlen((pl)->pool + (c)->val_off)		\
 	: is_strbuf(c) ? ((c)->val_strb->len - (c)->strb_off)		\
 	: is_static(c) ? (c)->str_len								\
 	: strlen((c)->val_chr)										\
