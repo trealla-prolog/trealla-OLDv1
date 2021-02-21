@@ -1977,6 +1977,7 @@ static bool parser_attach(parser *p, idx_t start_idx)
 
 void parser_reset(parser *p)
 {
+	clear_term(p->t);
 	p->t->cidx = 0;
 	p->start_term = true;
 }
@@ -1989,6 +1990,9 @@ static void parser_dcg_rewrite(parser *p)
 	if (strcmp(PARSER_GET_STR(p->t->cells), "-->") || (p->t->cells->arity != 2))
 		return;
 
+	// Being conservative here (for now) and using
+	// temp parser/query objects...
+
 	query *q = create_query(p->m, false);
 	ensure(q);
 	char *dst = print_term_to_strbuf(q, p->t->cells, 0, -1);
@@ -1996,9 +2000,6 @@ static void parser_dcg_rewrite(parser *p)
 	ensure(src);
 	sprintf(src, "dcg_translate((%s),_TermOut).", dst);
 	free(dst);
-
-	// Being conservative here (for now) and using
-	// temp parser/query objects...
 
 	parser *p2 = create_parser(p->m);
 	ensure(p2);
@@ -2034,33 +2035,28 @@ static void parser_dcg_rewrite(parser *p)
 		break;
 	}
 
-	destroy_query(q);
-
 	if (!src) {
 		destroy_parser(p2);
+		destroy_query(q);
 		p->error = true;
 		return;
 	}
 
-#if 1
-	destroy_parser(p2);
-	p2 = create_parser(p->m);
-	ensure(p2);
-	p2->skip = true;
-#else
 	parser_reset(p2);
-#endif
-
 	p2->srcptr = src;
 	parser_tokenize(p2, false, false);
 	free(src);
 
+	// Take the completed term...
+
 	clear_term(p->t);
 	free(p->t);
 	p->t = p2->t;
-	p->nbr_vars = p2->nbr_vars;
 	p2->t = NULL;
+	p->nbr_vars = p2->nbr_vars;
+
 	destroy_parser(p2);
+	destroy_query(q);
 }
 
 static cell *make_literal(parser *p, idx_t offset)
