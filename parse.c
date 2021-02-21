@@ -2914,7 +2914,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		if (p->error)
 			break;
 
-		//fprintf(stdout, "Debug: token '%s' quoted=%d, val_type=%u, op=%d, lastop=%d\n", p->token, p->quote_char, p->v.val_type, p->is_op, last_op);
+		//fprintf(stdout, "Debug: token '%s' quoted=%d, val_type=%u, op=%d, lastop=%d, string=%d\n", p->token, p->quote_char, p->v.val_type, p->is_op, last_op, p->string);
 
 		if (!p->quote_char
 		    && !strcmp(p->token, ".")
@@ -3151,7 +3151,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 		if (!strcmp(p->token, "!") &&
 			((*p->srcptr == ',') || (*p->srcptr == '.')))
-			p->quote_char = true;
+			p->quote_char = 1;
 
 		if (p->quote_char /*&& !userop*/) {
 			specifier = 0;
@@ -3220,7 +3220,8 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		else if (p->v.val_type == TYPE_FLOAT) {
 			c->val_flt = p->v.val_flt;
 		} else if ((!p->is_quoted || func || p->is_op || p->is_variable ||
-			(get_builtin(p->m->pl, p->token, 0, &found), found)) && !p->string) {
+			(get_builtin(p->m->pl, p->token, 0, &found), found) ||
+			!strcmp(p->token, "[]")) && !p->string) {
 
 			if (func && !strcmp(p->token, "."))
 				c->priority = 0;
