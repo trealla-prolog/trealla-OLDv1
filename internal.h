@@ -602,6 +602,18 @@ inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 	return nbr_cells;
 }
 
+inline static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
+{
+	assert(nbr_cells);
+
+	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
+		*dst = *src;
+		INCR_REF(src);
+	}
+
+	return nbr_cells;
+}
+
 #define LIST_HANDLER(l) cell l##_h_tmp; cell l##_t_tmp
 #define LIST_HEAD(l) list_head(l, &l##_h_tmp)
 #define LIST_TAIL(l) list_tail(l, &l##_t_tmp)

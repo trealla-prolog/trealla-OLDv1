@@ -54,18 +54,6 @@ static void msleep(int ms)
 
 cell *ERR_CYCLE_CELL = &(cell){};
 
-static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
-{
-	assert(nbr_cells);
-
-	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
-		*dst = *src;
-		INCR_REF(src);
-	}
-
-	return nbr_cells;
-}
-
 static bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool tolerant)
 {
 	if (!is_list(p1) && !is_nil(p1))
