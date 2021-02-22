@@ -215,9 +215,6 @@ enum {
 	FLAG_SPARE2=1<<11,
 	FLAG_SPARE1=1<<12,
 
-	// These are redefinitions and should only be used
-	// when the primary type is already checked...
-
 	FLAG2_PROCESSED=FLAG_KEY,			// used by bagof
 	FLAG2_FIRST_USE=FLAG_HEX,			// used with TYPE_VARIABLE
 	FLAG2_ANON=FLAG_OCTAL,				// used with TYPE_VARIABLE
