@@ -4526,13 +4526,6 @@ static cell *clone2_to_tmp(query *q, cell *p1)
 	cell *tmp = alloc_on_tmp(q, p1->nbr_cells);
 	ensure(tmp);
 	copy_cells(tmp, p1, p1->nbr_cells);
-	cell *c = tmp;
-
-	for (idx_t i = 0; i < p1->nbr_cells; i++, c++) {
-		if (is_blob(c))
-			c->flags |= FLAG2_STATIC;
-	}
-
 	return tmp;
 }
 
@@ -4555,15 +4548,7 @@ static cell *clone2_to_heap(query *q, bool prefix, cell *p1, idx_t nbr_cells, id
 		tmp->flags = FLAG_BUILTIN;
 	}
 
-	copy_cells(tmp+(prefix?1:0), p1, nbr_cells);
-	cell *c = tmp + (prefix?1:0);
-	c->nbr_cells = nbr_cells;
-
-	for (idx_t i = 0; i < nbr_cells; i++, c++) {
-		if (is_blob(c))
-			c->flags |= FLAG2_STATIC;
-	}
-
+	safe_copy_cells(tmp+(prefix?1:0), p1, nbr_cells);
 	return tmp;
 }
 
@@ -4592,9 +4577,6 @@ static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx
 
 	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
 		*dst = *src;
-
-		if (is_blob(src))
-			dst->flags |= FLAG2_STATIC;
 
 		if (!is_variable(src))
 			continue;
