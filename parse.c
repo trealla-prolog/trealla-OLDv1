@@ -592,14 +592,6 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
 	r->t.ugen_created = ++m->pl->ugen;
 	r->m = m;
-
-	if (!consulting) {
-		for (idx_t i = 0; i < r->t.cidx; i++) {
-			cell *c = r->t.cells + i;
-			INCR_REF(c);
-		}
-	}
-
 	return r;
 }
 
