@@ -800,7 +800,6 @@ static USE_RESULT pl_state fn_iso_atom_chars_2(query *q)
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
-			cell *tail = LIST_TAIL(p2);
 			head = deref(q, head, p2_ctx);
 
 			if (!is_atom(head) && is_variable(p1))
@@ -817,6 +816,7 @@ static USE_RESULT pl_state fn_iso_atom_chars_2(query *q)
 					return throw_error(q, head, "type_error", "character");
 			}
 
+			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
 		}
@@ -837,7 +837,6 @@ static USE_RESULT pl_state fn_iso_atom_chars_2(query *q)
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
-			cell *tail = LIST_TAIL(p2);
 			head = deref(q, head, p2_ctx);
 
 			const char *src = GET_STR(head);
@@ -855,6 +854,7 @@ static USE_RESULT pl_state fn_iso_atom_chars_2(query *q)
 			dst += nbytes;
 			*dst = '\0';
 
+			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
 		}
@@ -907,7 +907,6 @@ static USE_RESULT pl_state fn_iso_number_chars_2(query *q)
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
-			cell *tail = LIST_TAIL(p2);
 			head = deref(q, head, p2_ctx);
 
 			if (!is_atom(head) && is_variable(p1))
@@ -924,6 +923,7 @@ static USE_RESULT pl_state fn_iso_number_chars_2(query *q)
 					return throw_error(q, head, "type_error", "character");
 			}
 
+			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
 		}
@@ -943,7 +943,6 @@ static USE_RESULT pl_state fn_iso_number_chars_2(query *q)
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
-			cell *tail = LIST_TAIL(p2);
 			head = deref(q, head, p2_ctx);
 
 			if (!is_atom(head))
@@ -952,6 +951,8 @@ static USE_RESULT pl_state fn_iso_number_chars_2(query *q)
 			const char *src = GET_STR(head);
 			int ch = *src;
 			*dst++ = ch;
+
+			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
 		}
@@ -1057,7 +1058,6 @@ static USE_RESULT pl_state fn_iso_atom_codes_2(query *q)
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
-			cell *tail = LIST_TAIL(p2);
 			head = deref(q, head, p2_ctx);
 
 			if (!is_integer(head) && is_variable(p1))
@@ -1066,6 +1066,7 @@ static USE_RESULT pl_state fn_iso_atom_codes_2(query *q)
 			if (!is_integer(head) && !is_variable(head))
 				return throw_error(q, head, "type_error", "integer");
 
+			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
 		}
@@ -1086,7 +1087,6 @@ static USE_RESULT pl_state fn_iso_atom_codes_2(query *q)
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
-			cell *tail = LIST_TAIL(p2);
 			head = deref(q, head, p2_ctx);
 
 			int_t val = head->val_num;
@@ -1107,6 +1107,7 @@ static USE_RESULT pl_state fn_iso_atom_codes_2(query *q)
 			strcpy(dst, ch);
 			dst += strlen(ch);
 
+			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
 
@@ -1156,7 +1157,6 @@ static USE_RESULT pl_state fn_iso_number_codes_2(query *q)
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
-			cell *tail = LIST_TAIL(p2);
 			head = deref(q, head, p2_ctx);
 
 			if (!is_integer(head) && is_variable(p1))
@@ -1165,6 +1165,7 @@ static USE_RESULT pl_state fn_iso_number_codes_2(query *q)
 			if (!is_integer(head) && !is_variable(head))
 				return throw_error(q, head, "type_error", "integer");
 
+			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
 		}
@@ -1184,7 +1185,6 @@ static USE_RESULT pl_state fn_iso_number_codes_2(query *q)
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
-			cell *tail = LIST_TAIL(p2);
 			head = deref(q, head, p2_ctx);
 
 			if (!is_integer(head))
@@ -1197,6 +1197,7 @@ static USE_RESULT pl_state fn_iso_number_codes_2(query *q)
 
 			*dst++ = val;
 
+			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
 		}
@@ -4370,10 +4371,10 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 
 		if (is_cstring(tmp2) /*&& arity*/) {
 			cell *c = tmp2;
-			idx_t off = index_from_pool(q->m->pl, GET_STR(c));
-			//if (is_strbuf(c)) free(c->val_str);
+			idx_t off = index_from_pool(q->m->pl, GET_STR(tmp2));
+			ensure (off != ERR_IDX);
+			DECR_REF(tmp2);
 			c->val_off = off;
-			ensure (c->val_off != ERR_IDX);
 			c->val_type = TYPE_LITERAL;
 			c->flags = 0;
 		}
@@ -4869,11 +4870,7 @@ static USE_RESULT pl_state fn_iso_asserta_1(query *q)
 
 	if (is_cstring(h)) {
 		idx_t off = index_from_pool(q->m->pl, GET_STR(h));
-		if (off == ERR_IDX) {
-			q->error = true;
-			return pl_error;
-		}
-
+		ensure (off != ERR_IDX);
 		DECR_REF(h);
 		h->val_type = TYPE_LITERAL;
 		h->val_off = off;
@@ -4933,11 +4930,7 @@ static USE_RESULT pl_state fn_iso_assertz_1(query *q)
 
 	if (is_cstring(h)) {
 		idx_t off = index_from_pool(q->m->pl, GET_STR(h));
-		if (off == ERR_IDX) {
-			q->error = true;
-			return pl_error;
-		}
-
+		ensure (off != ERR_IDX);
 		DECR_REF(h);
 		h->val_type = TYPE_LITERAL;
 		h->val_off = off;
@@ -4994,10 +4987,10 @@ static USE_RESULT pl_state fn_iso_call_1(query *q)
 
 	if (is_cstring(p1)) {
 		cell *c = p1;
-		idx_t off = index_from_pool(q->m->pl, GET_STR(c));
-		if (is_strbuf(c)) free(c->val_str);
+		idx_t off = index_from_pool(q->m->pl, GET_STR(p1));
+		ensure (off != ERR_IDX);
+		DECR_REF(p1);
 		c->val_off = off;
-		ensure (c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
 		c->flags = 0;
 	}
@@ -5029,10 +5022,10 @@ static USE_RESULT pl_state fn_iso_call_n(query *q)
 
 	if (is_cstring(tmp2)) {
 		cell *c = tmp2;
-		idx_t off = index_from_pool(q->m->pl, GET_STR(c));
-		if (is_strbuf(c)) free(c->val_str);
+		idx_t off = index_from_pool(q->m->pl, GET_STR(tmp2));
+		ensure (off != ERR_IDX);
+		DECR_REF(tmp2);
 		c->val_off = off;
-		ensure (c->val_off != ERR_IDX);
 		c->val_type = TYPE_LITERAL;
 		c->flags = 0;
 	}
@@ -6568,11 +6561,7 @@ static USE_RESULT pl_state do_asserta_2(query *q)
 
 	if (is_cstring(h)) {
 		idx_t off = index_from_pool(q->m->pl, GET_STR(h));
-		if (off == ERR_IDX) {
-			q->error = true;
-			return pl_error;
-		}
-
+		ensure (off != ERR_IDX);
 		DECR_REF(h);
 		h->val_type = TYPE_LITERAL;
 		h->val_off = off;
@@ -6664,11 +6653,7 @@ static USE_RESULT pl_state do_assertz_2(query *q)
 
 	if (is_cstring(h)) {
 		idx_t off = index_from_pool(q->m->pl, GET_STR(h));
-		if (off == ERR_IDX) {
-			q->error = true;
-			return pl_error;
-		}
-
+		ensure (off != ERR_IDX);
 		DECR_REF(h);
 		h->val_type = TYPE_LITERAL;
 		h->val_off = off;
