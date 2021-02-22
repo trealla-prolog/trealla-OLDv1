@@ -4874,7 +4874,7 @@ static USE_RESULT pl_state fn_iso_asserta_1(query *q)
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
+	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
 	do_assign_vars(p, nbr_cells);
 	parser_term_to_body(p);
 	cell *h = get_head(p->t->cells);
@@ -4938,7 +4938,7 @@ static USE_RESULT pl_state fn_iso_assertz_1(query *q)
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
+	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
 	do_assign_vars(p, nbr_cells);
 	parser_term_to_body(p);
 	cell *h = get_head(p->t->cells);
@@ -6573,7 +6573,7 @@ static USE_RESULT pl_state do_asserta_2(query *q)
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
+	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
 	do_assign_vars(p, nbr_cells);
 	parser_term_to_body(p);
 	cell *h = get_head(p->t->cells);
@@ -6669,7 +6669,7 @@ static USE_RESULT pl_state do_assertz_2(query *q)
 		p->t->nbr_cells = nbr_cells;
 	}
 
-	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
+	p->t->cidx = copy_cells(p->t->cells, tmp, nbr_cells);
 	do_assign_vars(p, nbr_cells);
 	parser_term_to_body(p);
 	cell *h = get_head(p->t->cells);
