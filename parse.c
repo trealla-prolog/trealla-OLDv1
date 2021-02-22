@@ -266,6 +266,7 @@ cell *list_tail(cell *l, cell *tmp)
 
 	*tmp = *l;
 	tmp->strb_off += n;
+	INCR_REF(l);
 	return tmp;
 }
 
