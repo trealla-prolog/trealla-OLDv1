@@ -246,10 +246,7 @@ cell *list_tail(cell *l, cell *tmp)
 	size_t len = is_static(l) ? (size_t)l->str_len : (size_t)l->val_strb->len - l->strb_off;
 	size_t n = len_char_utf8(src);
 
-	//if (!n)
-	//	n = 1;
-
-	if ((len - n) == 0) {
+	if (len == n) {
 		tmp->val_type = TYPE_LITERAL;
 		tmp->nbr_cells = 1;
 		tmp->arity = 0;
