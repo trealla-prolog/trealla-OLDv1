@@ -9114,8 +9114,12 @@ static USE_RESULT pl_state do_urlencode_2(query *q)
 	ensure(dstbuf);
 	url_encode(str, len, dstbuf);
 	cell tmp;
-	may_error(make_cstring(&tmp, dstbuf), free(dstbuf));
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+
+	if (is_string(p1))
+		may_error(make_string(&tmp, dstbuf), free(dstbuf));
+	else
+		may_error(make_cstring(&tmp, dstbuf), free(dstbuf));
+
 	free(dstbuf);
 	pl_state ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
@@ -9132,8 +9136,12 @@ static USE_RESULT pl_state do_urldecode_2(query *q)
 	ensure(dstbuf);
 	url_decode(str, dstbuf);
 	cell tmp;
-	may_error(make_cstring(&tmp, dstbuf), free(dstbuf));
-	if (is_string(p2)) tmp.flags |= FLAG_STRING;
+
+	if (is_string(p1))
+		may_error(make_string(&tmp, dstbuf), free(dstbuf));
+	else
+		may_error(make_cstring(&tmp, dstbuf), free(dstbuf));
+
 	free(dstbuf);
 	int ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
@@ -9864,8 +9872,12 @@ static USE_RESULT pl_state fn_getenv_2(query *q)
 		return pl_failure;
 
 	cell tmp;
-	may_error(make_cstring(&tmp, (char*)value));
-	if (is_string(p1)) tmp.flags |= FLAG_STRING;
+
+	if (is_string(p1))
+		may_error(make_string(&tmp, (char*)value));
+	else
+		may_error(make_cstring(&tmp, (char*)value));
+
 	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	return ok;
