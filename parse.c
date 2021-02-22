@@ -537,16 +537,6 @@ static int compkey(const void *param, const void *ptr1, const void *ptr2)
 
 static clause* assert_begin(module *m, term *t, bool consulting)
 {
-	if (is_cstring(t->cells)) {
-		cell *c = t->cells;
-		idx_t off = index_from_pool(m->pl, MODULE_GET_STR(c));
-		if (off == ERR_IDX) return NULL;
-		DECR_REF(c);
-		c->val_type = TYPE_LITERAL;
-		c->val_off = off;
-		c->flags = 0;
-	}
-
 	cell *c = t->cells;
 
 	if (!check_directive(c))
