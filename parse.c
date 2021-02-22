@@ -1965,13 +1965,13 @@ void parser_reset(parser *p)
 	p->start_term = true;
 }
 
-static void parser_dcg_rewrite(parser *p)
+static bool parser_dcg_rewrite(parser *p)
 {
-	if (p->error || !is_literal(p->t->cells))
-		return;
+	if (p->error || !is_literal(p->t->cells) || (p->t->cells->arity != 2))
+		return false;
 
-	if (strcmp(PARSER_GET_STR(p->t->cells), "-->") || (p->t->cells->arity != 2))
-		return;
+	if (strcmp(PARSER_GET_STR(p->t->cells), "-->"))
+		return false;
 
 	// Being conservative here (for now) and using
 	// temp parser/query objects...
@@ -2022,7 +2022,7 @@ static void parser_dcg_rewrite(parser *p)
 		destroy_parser(p2);
 		destroy_query(q);
 		p->error = true;
-		return;
+		return false;
 	}
 
 	parser_reset(p2);
@@ -2040,6 +2040,7 @@ static void parser_dcg_rewrite(parser *p)
 
 	destroy_parser(p2);
 	destroy_query(q);
+	return true;
 }
 
 static cell *make_literal(parser *p, idx_t offset)
@@ -2907,8 +2908,8 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 				parser_term_to_body(p);
 
 				if (p->consulting && !p->skip) {
-					parser_dcg_rewrite(p);
-					directives(p, p->t);
+					if (!parser_dcg_rewrite(p))
+						directives(p, p->t);
 
 					if (p->already_loaded)
 						break;
@@ -3258,7 +3259,7 @@ static bool parser_run(parser *p, const char *src, int dump)
 
 	parser_assign_vars(p, 0, false);
 
-	if (p->command)
+	if (!p->command)
 		parser_dcg_rewrite(p);
 
 	parser_xref(p, p->t, NULL);
