@@ -58,7 +58,7 @@ LOOP:
 			end_ptr--;
 
 		if ((ch == 0) && (*end_ptr == eol)) {
-			if (strcmp(cmd, "halt."))
+			if (strcmp(cmd, "halt.") && strcmp(cmd, "."))
 				add_history(cmd);
 
 			break;
