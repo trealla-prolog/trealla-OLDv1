@@ -3244,6 +3244,11 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 static bool parser_run(parser *p, const char *src, int dump)
 {
+	if (*src == '.') {
+		fprintf(stdout, "Error: syntax error, unexpected end of clause\n");
+		return false;
+	}
+
 	p->srcptr = (char*)src;
 	parser_tokenize(p, false, false);
 

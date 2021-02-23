@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
+#include <ctype.h>
 #include <errno.h>
 
 #ifdef _WIN32
@@ -313,17 +314,22 @@ int main(int ac, char *av[])
 	char *line;
 
 	while ((line = history_readline_eol("?- ", '.')) != NULL) {
-		if (!strcmp(line, "halt.")) {
+		const char *src = line;
+
+		while (isspace(*src))
+			src++;
+
+		if (!strcmp(src, "halt.")) {
 			free(line);
 			break;
 		}
 
-		if (!line[0] || (line[0] == '\n')) {
+		if (!*src || (*src == '\n')) {
 			free(line);
 			continue;
 		}
 
-		pl_eval(pl, line);
+		pl_eval(pl, src);
 		free(line);
 
 		if (get_halt(pl))
