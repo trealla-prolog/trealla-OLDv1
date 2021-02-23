@@ -321,6 +321,8 @@ A simple dictionary
 Definite Clause Grammars
 ========================
 
+Uses Ulrich Neumerkel's standard reference library.
+
 	:- use_module(library(dcgs)).
 
 DCG rules are translated automatically if this module is included.
@@ -328,6 +330,8 @@ DCG rules are translated automatically if this module is included.
 
 Format
 ======
+
+Uses Markus Triska's public domain library.
 
 	:- use_module(library(format)).
 
