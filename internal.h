@@ -604,8 +604,6 @@ inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 
 inline static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 {
-	assert(nbr_cells);
-
 	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
 		*dst = *src;
 		INCR_REF(src);

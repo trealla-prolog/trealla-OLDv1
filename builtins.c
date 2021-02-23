@@ -4985,9 +4985,11 @@ static USE_RESULT pl_state fn_iso_call_1(query *q)
 	if ((tmp3 = check_body_callable(q->m->p, p1)) != NULL)
 		return throw_error(q, p1, "type_error", "callable");
 
-	if (is_cstring(p1)) {
-		cell *c = p1;
-		idx_t off = index_from_pool(q->m->pl, GET_STR(p1));
+	cell *tmp = clone_to_heap(q, true, p1, 1);
+
+	if (is_cstring(tmp+1)) {
+		cell *c = p1+1;
+		idx_t off = index_from_pool(q->m->pl, GET_STR(p1+1));
 		ensure (off != ERR_IDX);
 		DECR_REF(p1);
 		c->val_off = off;
@@ -4995,7 +4997,6 @@ static USE_RESULT pl_state fn_iso_call_1(query *q)
 		c->flags = 0;
 	}
 
-	cell *tmp = clone_to_heap(q, true, p1, 1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
