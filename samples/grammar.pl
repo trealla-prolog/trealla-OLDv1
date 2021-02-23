@@ -1,5 +1,12 @@
 :- use_module(library(dcgs)).
 
+:- use_module(library(lists)).
+:- use_module(library(error)).
+:- use_module(library(charsio)).
+:- use_module(library(between)).
+
+:- use_module(library(apply)).     % Added by AD
+
 % A grammar in DCG
 
 sentence --> np, vp.

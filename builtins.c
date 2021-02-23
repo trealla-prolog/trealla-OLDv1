@@ -365,7 +365,7 @@ USE_RESULT cell *end_list(query *q)
 	idx_t nbr_cells = tmp_heap_used(q);
 	tmp = alloc_on_heap(q, nbr_cells);
 	if (!tmp) return NULL;
-	copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
+	safe_copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
 	tmp->nbr_cells = nbr_cells;
 	fix_list(tmp);
 	return tmp;
@@ -2814,7 +2814,7 @@ static USE_RESULT pl_state do_read_term(query *q, stream *str, cell *p1, idx_t p
 			cell *save = tmp;
 			tmp = alloc_on_heap(q, idx);
 			ensure(tmp);
-			copy_cells(tmp, save, idx);
+			safe_copy_cells(tmp, save, idx);
 			tmp->nbr_cells = idx;
 			set_var(q, vars, vars_ctx, tmp, q->st.curr_frame);
 		} else {
@@ -2871,7 +2871,7 @@ static USE_RESULT pl_state do_read_term(query *q, stream *str, cell *p1, idx_t p
 			cell *save = tmp;
 			tmp = alloc_on_heap(q, idx);
 			ensure(tmp);
-			copy_cells(tmp, save, idx);
+			safe_copy_cells(tmp, save, idx);
 			tmp->nbr_cells = idx;
 			set_var(q, varnames, varnames_ctx, tmp, q->st.curr_frame);
 		} else {
@@ -2934,7 +2934,7 @@ static USE_RESULT pl_state do_read_term(query *q, stream *str, cell *p1, idx_t p
 			cell *save = tmp;
 			tmp = alloc_on_heap(q, idx);
 			ensure(tmp);
-			copy_cells(tmp, save, idx);
+			safe_copy_cells(tmp, save, idx);
 			tmp->nbr_cells = idx;
 			set_var(q, sings, sings_ctx, tmp, q->st.curr_frame);
 		} else {
@@ -2946,7 +2946,7 @@ static USE_RESULT pl_state do_read_term(query *q, stream *str, cell *p1, idx_t p
 
 	tmp = alloc_on_heap(q, p->t->cidx-1);
 	ensure(tmp);
-	copy_cells(tmp, p->t->cells, p->t->cidx-1);
+	safe_copy_cells(tmp, p->t->cells, p->t->cidx-1);
 	p->t->cidx = 0;
 	return unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 }
@@ -4394,7 +4394,7 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 		idx_t nbr_cells = tmp_heap_used(q) - save;
 		tmp = alloc_on_heap(q, nbr_cells);
 		may_ptr_error(tmp);
-		copy_cells(tmp, tmp2, nbr_cells);
+		safe_copy_cells(tmp, tmp2, nbr_cells);
 		tmp->nbr_cells = nbr_cells;
 		tmp->arity = arity;
 		bool found = false;
@@ -4506,7 +4506,7 @@ static USE_RESULT pl_state fn_iso_term_variables_2(query *q)
 
 	cell *tmp2 = alloc_on_heap(q, idx);
 	ensure(tmp2);
-	copy_cells(tmp2, tmp, idx);
+	safe_copy_cells(tmp2, tmp, idx);
 	return unify(q, p2, p2_ctx, tmp2, q->st.curr_frame);
 }
 
@@ -5092,7 +5092,7 @@ static USE_RESULT pl_state fn_iso_ifthen_2(query *q)
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
-	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_call(q, tmp+nbr_cells);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
@@ -5112,7 +5112,7 @@ static USE_RESULT pl_state do_ifthenelse(query *q, cell *p1, cell *p2, cell *p3)
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_local_cut_0, 0, 0);
-	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_call(q, tmp+nbr_cells);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
@@ -5129,7 +5129,7 @@ static USE_RESULT pl_state fn_if_2(query *q)
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_soft_cut_0, 0, 0);
-	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_call(q, tmp+nbr_cells);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
@@ -5149,7 +5149,7 @@ static USE_RESULT pl_state do_ifelse(query *q, cell *p1, cell *p2, cell *p3)
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_cut_s, fn_soft_cut_0, 0, 0);
-	nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_call(q, tmp+nbr_cells);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
@@ -6186,7 +6186,7 @@ static USE_RESULT pl_state fn_iso_findall_3(query *q)
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
-		nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+		nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		init_queuen(q);
 		free(q->tmpq[q->st.qnbr]);
@@ -6261,7 +6261,7 @@ static USE_RESULT pl_state fn_iso_bagof_3(query *q)
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
-		nbr_cells += copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+		nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		init_queuen(q);
 		free(q->tmpq[q->st.qnbr]);
