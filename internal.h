@@ -365,7 +365,7 @@ struct builtins {
 };
 
 struct op_table {
-	const char *name;
+	char *name;
 	unsigned specifier;
 	unsigned priority;
 };
