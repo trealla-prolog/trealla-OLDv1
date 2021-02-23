@@ -4373,7 +4373,7 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 			cell *c = tmp2;
 			idx_t off = index_from_pool(q->m->pl, GET_STR(tmp2));
 			ensure (off != ERR_IDX);
-			DECR_REF(tmp2);
+			//DECR_REF(tmp2);
 			c->val_off = off;
 			c->val_type = TYPE_LITERAL;
 			c->flags = 0;
@@ -5024,7 +5024,7 @@ static USE_RESULT pl_state fn_iso_call_n(query *q)
 		cell *c = tmp2;
 		idx_t off = index_from_pool(q->m->pl, GET_STR(tmp2));
 		ensure (off != ERR_IDX);
-		DECR_REF(tmp2);
+		//DECR_REF(tmp2);
 		c->val_off = off;
 		c->val_type = TYPE_LITERAL;
 		c->flags = 0;

@@ -728,7 +728,7 @@ static void module_purge_dirty_list(module *m)
 	while (m->dirty_list) {
 		clause *r = m->dirty_list;
 		m->dirty_list = r->dirty;
-		clear_term(&r->t);
+		//clear_term(&r->t);
 		free(r);
 	}
 }
