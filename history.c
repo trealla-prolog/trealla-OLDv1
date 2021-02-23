@@ -38,21 +38,21 @@ LOOP:
 	if ((line = readline(prompt)) == NULL)
 		return NULL;
 
-	const char *s = line;
-
 	if (cmd) {
 		size_t n = strlen(cmd) + strlen(line);
 		cmd = realloc(cmd, n+1);
 		ensure(cmd);
 		strcat(cmd, line);
-		free(line);
 	} else {
-		cmd = line;
+		cmd = strdup(line);
 	}
+
+	free(line);
+	const char *s = cmd;
 
 	for (;;) {
 		int ch = get_char_utf8(&s);
-		const char *end_ptr = cmd + strlen(cmd) - 1;
+		const char *end_ptr = cmd + strlen(cmd) - (strlen(cmd) ? 1 : 0);
 
 		while (isspace(*end_ptr) && (end_ptr != cmd))
 			end_ptr--;
@@ -63,6 +63,7 @@ LOOP:
 		}
 
 		if (ch == 0) {
+			cmd = realloc(cmd, strlen(cmd)+1+1);
 			strcat(cmd, "\n");
 			prompt = " |\t";
 			goto LOOP;
