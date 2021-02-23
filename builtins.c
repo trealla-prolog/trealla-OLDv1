@@ -786,7 +786,7 @@ static USE_RESULT pl_state fn_iso_atom_chars_2(query *q)
 	if (is_string(p2)) {
 		cell tmp;
 		may_error(make_cstringn(&tmp, GET_STR(p2), LEN_STR(p2)));
-		int ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		pl_state ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
 		return ok;
 	}
@@ -865,7 +865,7 @@ static USE_RESULT pl_state fn_iso_atom_chars_2(query *q)
 		cell tmp;
 		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf));
 		free(tmpbuf);
-		int ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		pl_state ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
 		return ok;
 	}
@@ -1021,7 +1021,7 @@ static USE_RESULT pl_state fn_iso_number_chars_2(query *q)
 	print_term_to_buf(q, tmpbuf, sizeof(tmpbuf), p1, p1_ctx, 1, 0, 0);
 	cell tmp;
 	may_error(make_string(&tmp, tmpbuf));
-	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	pl_state ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	return ok;
 }
@@ -1119,7 +1119,7 @@ static USE_RESULT pl_state fn_iso_atom_codes_2(query *q)
 		cell tmp;
 		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf));
 		free(tmpbuf);
-		int ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		pl_state ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
 		return ok;
 	}
@@ -1953,7 +1953,7 @@ static USE_RESULT pl_state do_stream_property(query *q)
 	if (!strcmp(GET_STR(p1), "file_name")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->filename));
-		int ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		pl_state ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
 		return ok;
 	}
@@ -1961,7 +1961,7 @@ static USE_RESULT pl_state do_stream_property(query *q)
 	if (!strcmp(GET_STR(p1), "alias")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->name));
-		int ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		pl_state ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
 		return ok;
 	}
@@ -1969,7 +1969,7 @@ static USE_RESULT pl_state do_stream_property(query *q)
 	if (!strcmp(GET_STR(p1), "mode")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->mode));
-		int ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		pl_state ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
 		return ok;
 	}
@@ -1977,7 +1977,7 @@ static USE_RESULT pl_state do_stream_property(query *q)
 	if (!strcmp(GET_STR(p1), "type")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->binary ? "binary" : "text"));
-		int ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		pl_state ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
 		return ok;
 	}
@@ -1985,7 +1985,7 @@ static USE_RESULT pl_state do_stream_property(query *q)
 	if (!strcmp(GET_STR(p1), "reposition")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->socket || (n <= 2) ? "false" : "true"));
-		int ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		pl_state ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
 		return ok;
 	}
@@ -1993,7 +1993,7 @@ static USE_RESULT pl_state do_stream_property(query *q)
 	if (!strcmp(GET_STR(p1), "encoding")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, "utf8"));
-		int ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		pl_state ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
 		return ok;
 	}
@@ -2005,7 +2005,7 @@ static USE_RESULT pl_state do_stream_property(query *q)
 #else
 		may_error(make_cstring(&tmp, "unix"));
 #endif
-		int ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		pl_state ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
 		return ok;
 	}
@@ -2779,12 +2779,10 @@ static USE_RESULT pl_state do_read_term(query *q, stream *str, cell *p1, idx_t p
 			return throw_error(q, p1, "resource_error", "too_many_vars");
 	}
 
-	cell *tmp = p->t->cells;
-	tmp->nbr_cells = p->t->cidx-1;
 	q->m->pl->tab_idx = 0;
 
 	if (p->nbr_vars)
-		collect_vars(q, tmp, q->st.curr_frame, tmp->nbr_cells, 0);
+		collect_vars(q, p->t->cells, q->st.curr_frame, p->t->cidx-1, 0);
 
 	if (vars) {
 		unsigned cnt = q->m->pl->tab_idx;
@@ -2944,11 +2942,12 @@ static USE_RESULT pl_state do_read_term(query *q, stream *str, cell *p1, idx_t p
 		}
 	}
 
-	tmp = alloc_on_heap(q, p->t->cidx-1);
+	cell *tmp = alloc_on_heap(q, p->t->cidx-1);
 	ensure(tmp);
 	safe_copy_cells(tmp, p->t->cells, p->t->cidx-1);
-	p->t->cidx = 0;
-	return unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
+	pl_state ok = unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
+	clear_term(p->t);
+	return ok;
 }
 
 static USE_RESULT pl_state fn_iso_read_1(query *q)
@@ -5887,7 +5886,7 @@ static USE_RESULT pl_state fn_iso_current_prolog_flag_2(query *q)
 
 		cell *l = end_list(q);
 		may_ptr_error(l);
-		int ok = unify(q, p2, p2_ctx, l, q->st.curr_frame);
+		pl_state ok = unify(q, p2, p2_ctx, l, q->st.curr_frame);
 		return ok;
 	} else if (!strcmp(GET_STR(p1), "unknown")) {
 		cell tmp;
@@ -7075,7 +7074,7 @@ static USE_RESULT pl_state fn_split_atom_4(query *q)
 
 	l = end_list(q);
 	may_ptr_error(l);
-	int ok = unify(q, p4, p4_ctx, l, q->st.curr_frame);
+	pl_state ok = unify(q, p4, p4_ctx, l, q->st.curr_frame);
 	return ok;
 }
 
@@ -7123,7 +7122,7 @@ static USE_RESULT pl_state fn_split_4(query *q)
 		else
 			make_literal(&tmp, g_nil_s);
 
-		int ok = unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
+		pl_state ok = unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
 		return ok;
 	}
@@ -7988,7 +7987,7 @@ static USE_RESULT pl_state fn_write_term_to_chars_3(query *q)
 	cell tmp;
 	may_error(make_string(&tmp, dst), free(dst));
 	free(dst);
-	int ok = unify(q, p_chars, p_chars_ctx, &tmp, q->st.curr_frame);
+	pl_state ok = unify(q, p_chars, p_chars_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	return ok;
 }
@@ -8017,7 +8016,7 @@ static USE_RESULT pl_state fn_write_canonical_to_chars_3(query *q)
 	cell tmp;
 	may_error(make_string(&tmp, dst), free(dst));
 	free(dst);
-	int ok = unify(q, p_chars, p_chars_ctx, &tmp, q->st.curr_frame);
+	pl_state ok = unify(q, p_chars, p_chars_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	return ok;
 }
@@ -8487,7 +8486,7 @@ static USE_RESULT pl_state fn_absolute_file_name_3(query *q)
 
 	free(tmpbuf);
 	free(src);
-	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	pl_state ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	return ok;
 }
@@ -8918,7 +8917,7 @@ static USE_RESULT pl_state fn_sha1_2(query *q)
 
 	cell tmp;
 	may_error(make_string(&tmp, tmpbuf));
-	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	pl_state ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	return ok;
 }
@@ -8943,7 +8942,7 @@ static USE_RESULT pl_state fn_sha256_2(query *q)
 
 	cell tmp;
 	may_error(make_string(&tmp, tmpbuf));
-	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	pl_state ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	return ok;
 }
@@ -8968,7 +8967,7 @@ static USE_RESULT pl_state fn_sha512_2(query *q)
 
 	cell tmp;
 	may_error(make_string(&tmp, tmpbuf));
-	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	pl_state ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	return ok;
 }
@@ -8986,7 +8985,7 @@ static int do_b64encode_2(query *q)
 	cell tmp;
 	may_error(make_string(&tmp, dstbuf), free(dstbuf));
 	free(dstbuf);
-	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	pl_state ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	return ok;
 }
@@ -9003,7 +9002,7 @@ static int do_b64decode_2(query *q)
 	cell tmp;
 	may_error(make_string(&tmp, dstbuf), free(dstbuf));
 	free(dstbuf);
-	int ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	pl_state ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	return ok;
 }
@@ -9099,7 +9098,7 @@ static USE_RESULT pl_state do_urldecode_2(query *q)
 		may_error(make_cstring(&tmp, dstbuf), free(dstbuf));
 
 	free(dstbuf);
-	int ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	pl_state ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	return ok;
 }
@@ -9304,7 +9303,7 @@ static USE_RESULT pl_state fn_directory_files_2(query *q)
 	closedir(dirp);
 	free(src);
 	cell *l = end_list(q);
-	int ok = unify(q, p2, p2_ctx, l, q->st.curr_frame);
+	pl_state ok = unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	return ok;
 }
 
@@ -9538,7 +9537,7 @@ static USE_RESULT pl_state fn_working_directory_2(query *q)
 		free(src);
 	}
 
-	int ok = unify(q, p_old, p_old_ctx, &tmp, q->st.curr_frame);
+	pl_state ok = unify(q, p_old, p_old_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	return ok;
 }
@@ -9834,7 +9833,7 @@ static USE_RESULT pl_state fn_getenv_2(query *q)
 	else
 		may_error(make_cstring(&tmp, (char*)value));
 
-	int ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	pl_state ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	return ok;
 }
