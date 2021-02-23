@@ -203,7 +203,7 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 		if (!strcmp(ptr->name, name) && (ptr->specifier == specifier)) {
 			if (!priority) {
 				free(ptr->name);
-				ptr->name = NULL;
+				ptr->name = strdup("");
 			}
 
 			ptr->specifier = priority ? specifier : 0;
