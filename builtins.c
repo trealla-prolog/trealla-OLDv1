@@ -6044,6 +6044,17 @@ static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 
 	cell *l = end_list(q);
 	ensure(l);
+
+	// This function is only ever called on a queue which
+	// already has a safe_copy done, so the end_list above
+	// which also does a safe_copy needs to be undone. Could
+	// add an option to end_list not to do a safe_copy.
+
+	c = l;
+
+	for (idx_t i = 0; i < l->nbr_cells; i++, c++)
+		DECR_REF(c);
+
 	return l;
 }
 
