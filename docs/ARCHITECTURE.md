@@ -189,7 +189,7 @@ String
 A string can be a BLOB of either type. If the *arity* is 2 and the
 *flag* has FLAG_STRING set then it ref-counted. Otherwise it
 is (usually) a memory-mapped file. Either way, it emulates a list of
-UTF-8 charcters. More here?
+UTF-8 charcters. Is this right?
 
 
 Compound
