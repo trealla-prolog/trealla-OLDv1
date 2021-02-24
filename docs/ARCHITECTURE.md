@@ -104,6 +104,8 @@ Where *nbr_cells* is always 1.
 Cstring
 =======
 
+A small string < 16 bytes.
+
         +----------+---------+----------+---------+
     0	| val_type |  arity  |       flags        |    CELL 1
 		+----------+---------+----------+---------+
@@ -151,7 +153,6 @@ Where *val_str* is a char pointer to UTF-8 chars.
 Where *len_str* is the length of the string in bytes.
 
 A static BLOB is length delimited, not NULL-terminated.
-It is currently only used with mmap'd files.
 
 
 Non-static BLOB
@@ -185,26 +186,10 @@ A BLOB may be used for atoms that are not functors and > 15 bytes long.
 String
 ======
 
-A ref-counted string buffer.
-
-        +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |    CELL 1
-		+----------+---------+----------+---------+
-    4	|                 nbr_cells               |
-        +----------+---------+----------+---------+
-    8	|                                         |
-        +               val_strbuf                +
-   12	|                                         |
-        +----------+---------+----------+---------+
-   16	|                                         |
-        +               strbuf_off                +
-   20	|                                         |
-        +----------+---------+----------+---------+
-
-Where *val_type* is TYPE_CSTRING.
-Where *arity* is always 2.
-Where *flags* is FLAG_BLOB | FLAG_STRING.
-Where *nbr_cells* is always 1.
+A string can be a BLOB of either type. If the *arity* is 2 and the
+*flag* has FLAG_STRING set then it ref-counted. Otherwise it
+is (usually) a memory-mapped file. Either way, it emulates a list of
+UTF-8 charcters. More here?
 
 
 Compound
