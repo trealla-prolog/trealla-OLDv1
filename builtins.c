@@ -371,6 +371,23 @@ USE_RESULT cell *end_list(query *q)
 	return tmp;
 }
 
+USE_RESULT cell *end_list_unsafe(query *q)
+{
+	cell *tmp = alloc_on_tmp(q, 1);
+	if (!tmp) return NULL;
+	tmp->val_type = TYPE_LITERAL;
+	tmp->nbr_cells = 1;
+	tmp->val_off = g_nil_s;
+	tmp->arity = tmp->flags = 0;
+	idx_t nbr_cells = tmp_heap_used(q);
+	tmp = alloc_on_heap(q, nbr_cells);
+	if (!tmp) return NULL;
+	copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
+	tmp->nbr_cells = nbr_cells;
+	fix_list(tmp);
+	return tmp;
+}
+
 static USE_RESULT pl_state make_cstringn(cell *d, const char *s, size_t n)
 {
 	if (n < MAX_SMALL_STRING) {
@@ -6042,19 +6059,12 @@ static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 		c += c->nbr_cells;
 	}
 
-	cell *l = end_list(q);
-	ensure(l);
-
 	// This function is only ever called on a queue which
-	// already has a safe_copy done, so the end_list above
-	// which also does a safe_copy needs to be undone. Could
-	// add an option to end_list not to do a safe_copy.
+	// already has a safe_copy done, so the end_list below
+	// can do an unsafe copy.
 
-	c = l;
-
-	for (idx_t i = 0; i < l->nbr_cells; i++, c++)
-		DECR_REF(c);
-
+	cell *l = end_list_unsafe(q);
+	ensure(l);
 	return l;
 }
 
