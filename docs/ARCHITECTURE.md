@@ -126,8 +126,8 @@ Where *val_chr* is up to 15 bytes of UTF-8 chars, NULL-terminated.
 A Cstring may be used for atoms that are not functors and need quoting.
 
 
-BLOB
-====
+Static BLOB
+===========
 
         +----------+---------+----------+---------+
     0	| val_type |  arity  |       flags        |    CELL 1
@@ -145,17 +145,19 @@ BLOB
 
 Where *val_type* is TYPE_CSTRING.
 Where *arity* is always 0.
-Where *flags* is FLAG_BLOB.
+Where *flags* is FLAG_BLOB | FLAG2_STATIC.
 Where *nbr_cells* is always 1.
 Where *val_str* is a char pointer to UTF-8 chars.
 Where *len_str* is the length of the string in bytes.
 
-A BLOB is length delimited, not NULL-terminated (though it may be).
-A BLOB may be used for atoms that are not functors and > 15 bytes long.
+A static BLOB is length delimited, not NULL-terminated.
+It is currently only used with mmap'd files.
 
 
-String
-======
+Non-static BLOB
+===============
+
+A ref-counted string buffer.
 
         +----------+---------+----------+---------+
     0	| val_type |  arity  |       flags        |    CELL 1
@@ -163,20 +165,46 @@ String
     4	|                 nbr_cells               |
         +----------+---------+----------+---------+
     8	|                                         |
-        +                 val_str                 +
+        +               val_strbuf                +
    12	|                                         |
         +----------+---------+----------+---------+
    16	|                                         |
-        +                 len_str                 +
+        +               strbuf_off                +
+   20	|                                         |
+        +----------+---------+----------+---------+
+
+Where *val_type* is TYPE_CSTRING.
+Where *arity* is always 0.
+Where *flags* is FLAG_BLOB.
+Where *nbr_cells* is always 1.
+
+A BLOB is length delimited, and NULL-terminated.
+A BLOB may be used for atoms that are not functors and > 15 bytes long.
+
+
+String
+======
+
+A ref-counted string buffer.
+
+        +----------+---------+----------+---------+
+    0	| val_type |  arity  |       flags        |    CELL 1
+		+----------+---------+----------+---------+
+    4	|                 nbr_cells               |
+        +----------+---------+----------+---------+
+    8	|                                         |
+        +               val_strbuf                +
+   12	|                                         |
+        +----------+---------+----------+---------+
+   16	|                                         |
+        +               strbuf_off                +
    20	|                                         |
         +----------+---------+----------+---------+
 
 Where *val_type* is TYPE_CSTRING.
 Where *arity* is always 2.
-Where *flags* is FLAG_BLOB|FLAG_STRING.
+Where *flags* is FLAG_BLOB | FLAG_STRING.
 Where *nbr_cells* is always 1.
-Where *val_str* is a pointer to UTF-8 chars.
-Where *len_str* is the length of the string in bytes.
 
 
 Compound
