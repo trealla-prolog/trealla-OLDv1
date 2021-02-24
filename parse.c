@@ -921,8 +921,14 @@ void destroy_query(query *q)
 		free(save);
 	}
 
-	for (int i = 0; i < MAX_QUEUES; i++)
+	for (int i = 0; i < MAX_QUEUES; i++) {
+		for (idx_t j = 0; j < q->qp[i]; j++) {
+			cell *c = q->queue[i]+j;
+			DECR_REF(c);
+		}
+
 		free(q->queue[i]);
+	}
 
 	slot *e = q->slots;
 
