@@ -4582,6 +4582,7 @@ static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx
 
 	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
 		*dst = *src;
+		INCR_REF(src);
 
 		if (!is_variable(src))
 			continue;
