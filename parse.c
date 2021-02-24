@@ -3274,7 +3274,6 @@ static bool parser_run(parser *p, const char *src, int dump)
 
 	parser_xref(p, p->t, NULL);
 
-	bool ok = false;
 	query *q = create_query(p->m, false);
 	if (!q) return false;
 	q->p = p;
@@ -3298,7 +3297,7 @@ static bool parser_run(parser *p, const char *src, int dump)
 	if (dump)
 		module_purge_dirty_list(q->m);
 
-	ok = !q->error;
+	bool ok = !q->error;
 	p->m = q->m;
 	destroy_query(q);
 	return ok;
