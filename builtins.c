@@ -371,7 +371,7 @@ USE_RESULT cell *end_list(query *q)
 	return tmp;
 }
 
-USE_RESULT cell *end_list_unsafe(query *q)
+static USE_RESULT cell *end_list_unsafe(query *q)
 {
 	cell *tmp = alloc_on_tmp(q, 1);
 	if (!tmp) return NULL;
