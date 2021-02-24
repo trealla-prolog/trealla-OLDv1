@@ -1704,9 +1704,9 @@ static USE_RESULT pl_state fn_iso_set_stream_position_2(query *q)
 
 static char *chars_list_to_string(query *q, cell *p_chars, idx_t p_chars_ctx, size_t len)
 {
-	char *src = malloc(len+1);
-	ensure(src);
-	char *dst = src;
+	char *tmp = malloc(len+1);
+	ensure(tmp);
+	char *dst = tmp;
 	LIST_HANDLER(p_chars);
 
 	while (is_list(p_chars)) {
@@ -1728,7 +1728,7 @@ static char *chars_list_to_string(query *q, cell *p_chars, idx_t p_chars_ctx, si
 	}
 
 	*dst = '\0';
-	return src;
+	return tmp;
 }
 
 static void compare_and_zero(uint64_t v1, uint64_t *v2, uint64_t *v)

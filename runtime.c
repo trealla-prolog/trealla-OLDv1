@@ -86,6 +86,7 @@ static USE_RESULT pl_state check_trail(query *q)
 			q->trails_size = new_trailssize;
 		}
 	}
+
 	return pl_success;
 }
 
@@ -106,6 +107,7 @@ static USE_RESULT pl_state check_choice(query *q)
 			q->choices_size = new_choicessize;
 		}
 	}
+
 	return pl_success;
 }
 
@@ -126,6 +128,7 @@ static USE_RESULT pl_state check_frame(query *q)
 			q->frames_size = new_framessize;
 		}
 	}
+
 	return pl_success;
 }
 
@@ -145,9 +148,11 @@ static USE_RESULT pl_state check_slot(query *q, unsigned cnt)
 				return pl_error;
 			}
 
+			memset(q->slots+q->slots_size, 0, sizeof(slot)*(new_slotssize-q->slots_size));
 			q->slots_size = new_slotssize;
 		}
 	}
+
 	return pl_success;
 }
 
@@ -239,6 +244,7 @@ void try_me(const query *q, unsigned nbr_vars)
 	slot *e = GET_SLOT(g, 0);
 
 	for (unsigned i = 0; i < nbr_vars; i++, e++) {
+		DECR_REF(&e->c);
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = NULL;
 	}
