@@ -523,6 +523,7 @@ struct parser_ {
 	size_t token_size, n_line, str_len;
 	char_flags flag;
 	unsigned line_nbr, depth, read_term;
+	unsigned nesting_parens, nesting_braces, nesting_brackets;
 	int quote_char;
 	unsigned nbr_vars;
 	int8_t dq_consing;

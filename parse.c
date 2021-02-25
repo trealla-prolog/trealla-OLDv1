@@ -2908,13 +2908,21 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 		//fprintf(stdout, "Debug: token '%s' quoted=%d, val_type=%u, op=%d, lastop=%d, string=%d\n", p->token, p->quote_char, p->v.val_type, p->is_op, last_op, p->string);
 
-		if (!p->quote_char
-		    && !strcmp(p->token, ".")
+		if (!p->quote_char && !strcmp(p->token, ".")
 		    && (*p->srcptr != '(')
 		    && (*p->srcptr != ',')
 		    && (*p->srcptr != ')')
 		    && (*p->srcptr != ']')
 		    && (*p->srcptr != '|')) {
+
+			if (p->nesting_parens || p->nesting_brackets || p->nesting_braces) {
+				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+					printf("Error: syntax error, mismatched parens/brackets/braces, line nbr %u\n", p->line_nbr);
+
+				p->nesting_parens = p->nesting_brackets = p->nesting_braces = 0;
+				p->error = true;
+			}
+
 			if (parser_attach(p, 0)) {
 
 				if (p->t->cells->nbr_cells < (p->t->cidx-1)) {
@@ -2972,6 +2980,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			cell *c = make_literal(p, g_dot_s);
 			c->arity = 2;
 			p->start_term = true;
+			p->nesting_brackets++;
 			parser_tokenize(p, true, true);
 			last_bar = false;
 
@@ -2993,6 +3002,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			ensure(c);
 			c->arity = 1;
 			p->start_term = true;
+			p->nesting_braces++;
 			parser_tokenize(p, false, false);
 			last_bar = false;
 
@@ -3008,6 +3018,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quote_char && !strcmp(p->token, "(")) {
 			p->start_term = true;
+			p->nesting_parens++;
 			unsigned tmp_arity = parser_tokenize(p, is_func, false);
 			last_bar = false;
 
@@ -3132,7 +3143,20 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			break;
 		}
 
-		if (!p->quote_char && (!strcmp(p->token, ")") || !strcmp(p->token, "]") || !strcmp(p->token, "}"))) {
+		if (!p->quote_char && !strcmp(p->token, ")")) {
+			p->nesting_parens--;
+			parser_attach(p, begin_idx);
+			return arity;
+		}
+
+		if (!p->quote_char && !strcmp(p->token, "]")) {
+			p->nesting_brackets--;
+			parser_attach(p, begin_idx);
+			return arity;
+		}
+
+		if (!p->quote_char && !strcmp(p->token, "}")) {
+			p->nesting_braces--;
 			parser_attach(p, begin_idx);
 			return arity;
 		}
@@ -3719,7 +3743,7 @@ module *create_module(prolog *pl, const char *name)
 	make_rule(m, "keycompare(Delta, (K1-_), (K2-_)) :- "	\
 		"(K1 @< K2 -> Delta = '<' ; "						\
 		"(K1 @> K2 -> Delta = '>' ; "						\
-		"Delta = '=').");
+		"Delta = '=')).");
 
 	make_rule(m, "keysort(L, R) :- "						\
 		"instantiated(L, R), "								\
