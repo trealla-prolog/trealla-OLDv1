@@ -3291,6 +3291,9 @@ static bool parser_run(parser *p, const char *src, int dump)
 	p->srcptr = (char*)src;
 	parser_tokenize(p, false, false);
 
+	if (!p->error && !p->end_of_term && !p->run_init)
+		p->error = true;
+
 	if (p->error) {
 		if (p->command)
 			fprintf(stdout, "Error: syntax error\n");
@@ -4003,12 +4006,19 @@ void set_stats(prolog *pl) { pl->stats = true; }
 void set_noindex(prolog *pl) { pl->noindex = true; }
 void set_opt(prolog *pl, int level) { pl->opt = level; }
 
-bool pl_eval(prolog *pl, const char *src)
+bool pl_eval(prolog *pl, const char *s)
 {
 	parser *p = create_parser(pl->curr_m);
 	if (!p) return false;
+	char *src = malloc(strlen(s)+2);
+	strcpy(src, s);
+
+	if (src[strlen(s)-1] != '.')
+		strcat(src, ".");
+
 	p->command = true;
 	bool ok = parser_run(p, src, 1);
+	free(src);
 	pl->curr_m = p->m;
 	destroy_parser(p);
 	return ok;
