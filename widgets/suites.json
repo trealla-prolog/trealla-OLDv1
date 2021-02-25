@@ -12,17 +12,6 @@
       "total" : 36
     }
   }, {
-    "uid" : "e611df5a8f19bb5c43fe82f9ff53872d",
-    "name" : "control/cut_0/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 6,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 15,
-      "unknown" : 0,
-      "total" : 21
-    }
-  }, {
     "uid" : "e8a334ca3e0bebcbd1687a3840012f9f",
     "name" : "predicates/findall_4/tests.lgt::tests",
     "statistic" : {
@@ -54,17 +43,6 @@
       "passed" : 30,
       "unknown" : 0,
       "total" : 34
-    }
-  }, {
-    "uid" : "2fa097f54728c3cdaa06f09f04fafff8",
-    "name" : "predicates/write_term_3/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 3,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 53,
-      "unknown" : 0,
-      "total" : 56
     }
   }, {
     "uid" : "35e0270303027cbfd9c90db5371a1a60",
@@ -109,6 +87,28 @@
       "passed" : 13,
       "unknown" : 0,
       "total" : 16
+    }
+  }, {
+    "uid" : "bb8e106369c9e4f92fe1145b40d7d18a",
+    "name" : "predicates/format_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 2,
+      "broken" : 0,
+      "skipped" : 1,
+      "passed" : 13,
+      "unknown" : 0,
+      "total" : 16
+    }
+  }, {
+    "uid" : "6984bae94e7678c9d6f1b911bb94461e",
+    "name" : "predicates/length_2/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 2,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 11,
+      "unknown" : 0,
+      "total" : 13
     }
   } ]
 }
