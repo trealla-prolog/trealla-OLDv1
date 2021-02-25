@@ -4010,15 +4010,16 @@ bool pl_eval(prolog *pl, const char *s)
 {
 	parser *p = create_parser(pl->curr_m);
 	if (!p) return false;
-	char *src = malloc(strlen(s)+2);
-	strcpy(src, s);
+	char *cmd = malloc(strlen(s)+2);
+	if(!cmd) return false;
+	strcpy(cmd, s);
 
-	if (src[strlen(s)-1] != '.')
-		strcat(src, ".");
+	if (cmd[strlen(s)-1] != '.')
+		strcat(cmd, ".");
 
 	p->command = true;
-	bool ok = parser_run(p, src, 1);
-	free(src);
+	bool ok = parser_run(p, cmd, 1);
+	free(cmd);
 	pl->curr_m = p->m;
 	destroy_parser(p);
 	return ok;
