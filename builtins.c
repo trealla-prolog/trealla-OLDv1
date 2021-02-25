@@ -428,6 +428,33 @@ static USE_RESULT pl_state make_string(cell *d, const char *s)
 	return make_stringn(d, s, strlen(s));
 }
 
+static USE_RESULT pl_state make_slice(query *q, cell *d, cell *orig, size_t off, size_t n)
+{
+	if (n < MAX_SMALL_STRING) {
+		const char *s = GET_STR(orig);
+
+		if (!memchr(s+off, 0, n)) {
+			make_smalln(d, s+off, n);
+			return pl_success;
+		}
+	}
+
+	if (!is_strbuf(orig)) {
+		const char *s = GET_STR(orig);
+
+		if (is_string(orig))
+			return make_stringn(d, s+off, n);
+
+		return make_cstringn(d, s+off, n);
+	}
+
+	*d = *orig;
+	d->strb_off = off;
+	d->strb_len = n;
+	INCR_REF(orig);
+	return pl_success;
+}
+
 static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only, bool copy_attrs)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
@@ -1351,7 +1378,6 @@ static USE_RESULT pl_state fn_iso_sub_atom_5(query *q)
 		return pl_failure;
 	}
 
-	const char *src = GET_STR(p1);
 	const size_t len_p1 = LEN_STR(p1);
 
 	for (size_t i = before; i <= len_p1; i++) {
@@ -1380,7 +1406,7 @@ static USE_RESULT pl_state fn_iso_sub_atom_5(query *q)
 				continue;
 			}
 
-			may_error(make_cstringn(&tmp, src+i, j));
+			may_error(make_slice(q, &tmp, p1, i, j));
 
 			if (is_atom(p5) && !strcmp(GET_STR(p5), GET_STR(&tmp))) {
 				DECR_REF(&tmp);
