@@ -3529,15 +3529,12 @@ bool module_save_file(module *m, const char *filename)
 static void make_rule(module *m, const char *src)
 {
 	m->prebuilt = true;
-	parser *p = create_parser(m);
-	if (p) {
-		p->consulting = true;
-		p->srcptr = (char*)src;
-		parser_tokenize(p, false, false);
-		m->prebuilt = false;
-		destroy_parser(p);
-	} else
-		m->error = true;
+	bool save = m->p->consulting;
+	m->p->consulting = true;
+	m->p->srcptr = (char*)src;
+	parser_tokenize(m->p, false, false);
+	m->prebuilt = false;
+	m->p->consulting = save;
 }
 
 void destroy_module(module *m)
