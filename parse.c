@@ -2916,6 +2916,14 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		    && (*p->srcptr != ']')
 		    && (*p->srcptr != '|')) {
 			if (parser_attach(p, 0)) {
+
+				if (p->t->cells->nbr_cells < (p->t->cidx-1)) {
+					if (DUMP_ERRS || (p->consulting && !p->do_read_term))
+						printf("Error: syntax error, operator expected '%s', line nbr %u\n", p->token, p->line_nbr);
+
+					p->error = true;
+				}
+
 				parser_assign_vars(p, p->read_term, false);
 				parser_term_to_body(p);
 
