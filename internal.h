@@ -132,6 +132,7 @@ typedef struct {
 	strb->refcnt = 1;											\
 	(c)->val_strb = strb;										\
 	(c)->strb_off = off;										\
+	(c)->strb_len = n;											\
 	}
 
 #define INCR_REF(c) 											\
@@ -156,7 +157,7 @@ typedef struct {
 
 #define _LEN_STR(pl,c) 											\
 	( !is_cstring(c) ? strlen((pl)->pool + (c)->val_off)		\
-	: is_strbuf(c) ? ((c)->val_strb->len - (c)->strb_off)		\
+	: is_strbuf(c) ? (c)->strb_len								\
 	: is_static(c) ? (c)->str_len								\
 	: strlen((c)->val_chr)										\
 	)
@@ -292,12 +293,13 @@ struct cell_ {
 
 		struct {
 			strbuf *val_strb;
-			size_t strb_off;
+			uint32_t strb_off;		// slice offset
+			uint32_t strb_len;		// slice length (or zero)
 		};
 
 		struct {
-			char *val_str;			// used with FLAG2_STATIC
-			size_t str_len;			// length of area pointed to
+			char *val_str;			// slice offset
+			size_t str_len;			// slice_length
 		};
 
 		struct {

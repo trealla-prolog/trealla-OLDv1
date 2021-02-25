@@ -149,10 +149,12 @@ Where *val_type* is TYPE_CSTRING.
 Where *arity* is always 0.
 Where *flags* is FLAG_BLOB | FLAG2_STATIC.
 Where *nbr_cells* is always 1.
-Where *val_str* is a char pointer to UTF-8 chars.
-Where *len_str* is the length of the string in bytes.
+Where *val_str* is a pointer to a slice of UTF-8 chars.
+Where *len_str* is the length of the slice in bytes.
 
-A static BLOB is length delimited, not NULL-terminated.
+A static BLOB is length delimited, not NULL-terminated. The
+primary use of a static BLOB is to point to memory that is never
+freed, such as a memory-mapped file.
 
 
 Non-static BLOB
@@ -169,27 +171,30 @@ A ref-counted string buffer.
         +               val_strbuf                +
    12	|                                         |
         +----------+---------+----------+---------+
-   16	|                                         |
-        +               strbuf_off                +
-   20	|                                         |
+   16	|               strbuf_off                |
+        +----------+---------+----------+---------+
+   20	|               strbuf_len                |
         +----------+---------+----------+---------+
 
 Where *val_type* is TYPE_CSTRING.
 Where *arity* is always 0.
 Where *flags* is FLAG_BLOB.
 Where *nbr_cells* is always 1.
+Where *val_strbuf* is a pointer to a strbuf object.
+Where *strbuf_off* is the byte offset into a slice of a strbuf.
+Where *strbuf_len* is the length of the slice.
 
-A BLOB is length delimited, and NULL-terminated.
-A BLOB may be used for atoms that are not functors and > 15 bytes long.
+A *strbuf* contains a reference count for tracking lifetimes, a length
+field and a data payload. The *strbuf_off* field can be used to
+define the tail of a BLOB. Or use a *strbuf_len* to get a slice (not
+yet implemented).
 
 
 String
 ======
 
-A string can be a BLOB of either type. If the *arity* is 2 and the
-*flag* has FLAG_STRING set then it ref-counted. Otherwise it
-is (usually) a memory-mapped file. Either way, it emulates a list of
-UTF-8 charcters. Is this right?
+A string is an optimized form of a chars-list and can be a BLOB of
+either type. The *arity* is 2 and the *flag* has FLAG_STRING set.
 
 
 Compound
