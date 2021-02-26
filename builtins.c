@@ -5778,6 +5778,14 @@ static USE_RESULT pl_state fn_iso_current_op_3(query *q)
 			return pl_failure;
 	}
 
+	prefix = !IS_INFIX(type);
+	type = 0;
+	user_op = false;
+	pri = get_op(q->m, sname, &type, &user_op, !prefix);
+
+	if (!pri || (!IS_INFIX(type) == prefix))
+		drop_choice(q);
+
 	return pl_success;
 }
 
