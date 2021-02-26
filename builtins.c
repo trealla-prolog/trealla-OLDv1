@@ -5736,8 +5736,6 @@ static USE_RESULT pl_state fn_iso_current_op_3(query *q)
 			!strcmp(stype, "fy") ||
 			!strcmp(stype, "xf") ||
 			!strcmp(stype, "yf");
-	} else if (!q->retry) {
-		may_error(make_choice(q));
 	}
 
 	unsigned type = 0;
@@ -5746,6 +5744,9 @@ static USE_RESULT pl_state fn_iso_current_op_3(query *q)
 
 	if (!pri)
 		return pl_failure;
+
+	if (!is_atom(p_spec) && !q->retry)
+		may_error(make_choice(q));
 
 	if (is_variable(p_spec)) {
 		cell tmp = {0};
