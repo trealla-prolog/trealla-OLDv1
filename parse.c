@@ -2835,8 +2835,14 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, int tolerant)
 	idx_t save_ctx = q ? q->latest_ctx : l_ctx;
 	size_t is_chars_list = 0;
 	LIST_HANDLER(l);
+	int depth = 0;
 
 	while (is_iso_list(l) && q->m->flag.double_quote_chars) {
+		if (depth++ >= MAX_DEPTH) {
+			is_chars_list = 0;
+			break;
+		}
+
 		cell *h = LIST_HEAD(l);
 		cell *c = q ? deref(q, h, l_ctx) : h;
 
