@@ -5700,7 +5700,7 @@ static USE_RESULT pl_state fn_iso_current_op_3(query *q)
 	GET_NEXT_ARG(p_spec,atom_or_var);
 	GET_NEXT_ARG(p_name,atom_or_var);
 	const char *sname = GET_STR(p_name);
-	bool prefix = q->retry ? true : false;\
+	bool prefix = q->retry ? true : false;
 
 	if (!is_integer(p_pri) && !is_variable(p_pri))
 		return throw_error(q, p_pri, "domain_error", "operator_priority");
@@ -5725,7 +5725,7 @@ static USE_RESULT pl_state fn_iso_current_op_3(query *q)
 			;
 		else if (!strcmp(spec, "yfx"))
 			;
-			else
+		else
 			return throw_error(q, p_spec, "domain_error", "operator_specifier");
 		}
 
