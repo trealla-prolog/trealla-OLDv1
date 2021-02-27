@@ -236,9 +236,9 @@ enum {
 #define	OP_XFX 6
 #define	OP_XFY 7
 
-#define IS_PREFIX(op) ((op == OP_FX) || (op == OP_FY))
-#define IS_POSTFIX(op) ((op == OP_XF) || (op == OP_YF))
-#define IS_INFIX(op) ((op == OP_XFX) || (op == OP_XFY) || (op == OP_YFX))
+#define IS_PREFIX(op) (((op) == OP_FX) || ((op) == OP_FY))
+#define IS_POSTFIX(op) (((op) == OP_XF) || ((op) == OP_YF))
+#define IS_INFIX(op) (((op) == OP_XFX) || ((op) == OP_XFY) || ((op) == OP_YFX))
 
 #define CELL_PREFIX(c) IS_PREFIX(GET_OP(c))
 #define CELL_POSTFIX(c) IS_POSTFIX(GET_OP(c))
