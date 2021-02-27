@@ -31,7 +31,7 @@ static bool needs_quote(module *m, const char *src, size_t srclen)
 	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!") || !strcmp(src, "¡"))
 		return false;
 
-	if (get_op(m, src, NULL, NULL, false))
+	if (get_op(m, src, NULL, false))
 		return false;
 
 	while (srclen--) {
@@ -702,11 +702,11 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		idx_t lhs_ctx = q->latest_ctx;
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		idx_t rhs_ctx = q->latest_ctx;
-		int my_prec = get_op(q->m, GET_STR(c), NULL, NULL, false);
-		int lhs_prec1 = is_literal(lhs) ? get_op(q->m, GET_STR(lhs), NULL, NULL, false) : 0;
-		int lhs_prec2 = is_literal(lhs) && !lhs->arity ? get_op(q->m, GET_STR(lhs), NULL, NULL, false) : 0;
-		int rhs_prec1 = is_literal(rhs) ? get_op(q->m, GET_STR(rhs), NULL, NULL, false) : 0;
-		int rhs_prec2 = is_literal(rhs) && !rhs->arity ? get_op(q->m, GET_STR(rhs), NULL, NULL, false) : 0;
+		int my_prec = get_op(q->m, GET_STR(c), NULL, false);
+		int lhs_prec1 = is_literal(lhs) ? get_op(q->m, GET_STR(lhs), NULL, false) : 0;
+		int lhs_prec2 = is_literal(lhs) && !lhs->arity ? get_op(q->m, GET_STR(lhs), NULL, false) : 0;
+		int rhs_prec1 = is_literal(rhs) ? get_op(q->m, GET_STR(rhs), NULL, false) : 0;
+		int rhs_prec2 = is_literal(rhs) && !rhs->arity ? get_op(q->m, GET_STR(rhs), NULL, false) : 0;
 		//printf("\n*** c=%s prec=%d\n", GET_STR(c), my_prec);
 		//printf("*** lhs=%s prec=%d\n", GET_STR(lhs), lhs_prec1);
 		//printf("*** rhs=%s prec=%d\n", GET_STR(rhs), rhs_prec1);

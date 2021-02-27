@@ -40,7 +40,7 @@ char **g_av = NULL, *g_argv0 = NULL;
 
 static atomic_t int g_tpl_count = 0;
 
-static struct op_table g_ops[] =
+static const struct op_table g_ops[] =
 {
 	{":-", OP_XFX, 1200},
 	{":-", OP_FX, 1200},
@@ -152,21 +152,20 @@ idx_t index_from_pool(prolog *pl, const char *name)
 	return add_to_pool(pl, name);
 }
 
-unsigned get_op(module *m, const char *name, unsigned *specifier, bool *userop, bool hint_prefix)
+unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
 {
 	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
-		if (hint_prefix && (ptr->specifier != OP_FX) && (ptr->specifier != OP_FY))
+		if (hint_prefix && !IS_PREFIX(ptr->specifier))
 			continue;
 
 		if (!strcmp(ptr->name, name)) {
 			if (specifier) *specifier = ptr->specifier;
-			if (userop) *userop = true;
 			return ptr->priority;
 		}
 	}
 
 	if (hint_prefix)
-		return get_op(m, name, specifier, userop, false);
+		return get_op(m, name, specifier, false);
 
 	return 0;
 }
@@ -174,10 +173,9 @@ unsigned get_op(module *m, const char *name, unsigned *specifier, bool *userop, 
 bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 {
 	unsigned ot = 0, pri = 0;
-	bool userop = false;
 	int hint = IS_PREFIX(specifier);
 
-	if ((pri = get_op(m, name, &ot, &userop, hint)) != 0) {
+	if ((pri = get_op(m, name, &ot, hint)) != 0) {
 		if ((ot == specifier) && priority)
 			return true;
 	}
@@ -1475,12 +1473,12 @@ static void parser_xref_cell(parser *p, term *t, cell *c, predicate *parent)
 	module *m = p->m;
 
 	unsigned specifier;
-	bool userop, hint_prefix = c->arity == 1;
+	bool hint_prefix = c->arity == 1;
 
 	if ((c->arity == 2)
 		&& !GET_OP(c)
 		&& strcmp(functor, "{}")
-		&& get_op(m, functor, &specifier, &userop, hint_prefix)) {
+		&& get_op(m, functor, &specifier, hint_prefix)) {
 		SET_OP(c, specifier);
 	}
 
@@ -2714,11 +2712,8 @@ static bool get_token(parser *p, int last_op)
 				continue;
 			}
 
-			bool userop = false;
-
-			if (get_op(p->m, p->token, NULL, &userop, false)) {
-				//if (userop)
-					p->is_op = true;
+			if (get_op(p->m, p->token, NULL, false)) {
+				p->is_op = true;
 
 				if (!strcmp(p->token, ","))
 					p->quote_char = -1;
@@ -2762,7 +2757,7 @@ static bool get_token(parser *p, int last_op)
 
 		if (isupper(*p->token) || (*p->token == '_'))
 			p->is_variable = true;
-		else if (get_op(p->m, p->token, NULL, NULL, false))
+		else if (get_op(p->m, p->token, NULL, false))
 			p->is_op = true;
 
 		if (isspace(ch)) {
@@ -3042,8 +3037,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			&& strcmp(p->token, ",")
 			) {
 			unsigned specifier = 0;
-			bool userop = false;
-			unsigned priority = get_op(p->m, p->token, &specifier, &userop, last_op);
+			unsigned priority = get_op(p->m, p->token, &specifier, last_op);
 
 			if (!last_op && (priority > 1000)) {
 				if (DUMP_ERRS || (p->consulting && !p->do_read_term))
@@ -3171,14 +3165,13 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 
 		unsigned specifier = 0;
-		bool userop = false;
-		int priority = get_op(p->m, p->token, &specifier, &userop, last_op);
+		int priority = get_op(p->m, p->token, &specifier, last_op);
 
 		if (!strcmp(p->token, "!") &&
 			((*p->srcptr == ',') || (*p->srcptr == '.')))
 			p->quote_char = 1;
 
-		if (p->quote_char /*&& !userop*/) {
+		if (p->quote_char) {
 			specifier = 0;
 			priority = 0;
 		}
@@ -3584,7 +3577,7 @@ void destroy_module(module *m)
 		fclose(m->fp);
 
 	for (struct op_table *ptr = m->ops; ptr->name; ptr++)
-		free((void*)ptr->name);
+		free(ptr->name);
 
 	destroy_parser(m->p);
 	free(m->filename);

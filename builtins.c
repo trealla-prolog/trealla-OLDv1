@@ -5079,16 +5079,14 @@ static USE_RESULT pl_state fn_iso_call_n(query *q)
 	if ((tmp2->fn = get_builtin(q->m->pl, GET_STR(tmp2), arity, &found)), found) {
 		tmp2->flags |= FLAG_BUILTIN;
 		unsigned specifier;
-		bool userop;
 
-		if (get_op(q->m, GET_STR(tmp2), &specifier, &userop, false))
+		if (get_op(q->m, GET_STR(tmp2), &specifier, false))
 			SET_OP(tmp2, specifier);
 	} else if (found) {
 		tmp2->flags |= FLAG_BUILTIN;
 		unsigned specifier;
-		bool userop;
 
-		if (get_op(q->m, GET_STR(tmp2), &specifier, &userop, false))
+		if (get_op(q->m, GET_STR(tmp2), &specifier, false))
 			SET_OP(tmp2, specifier);
 	} else {
 		tmp2->match = find_matching_predicate(q->m, tmp2);
@@ -5739,8 +5737,7 @@ static USE_RESULT pl_state fn_iso_current_op_3(query *q)
 	}
 
 	unsigned type = 0;
-	bool user_op = false;
-	int pri = get_op(q->m, sname, &type, &user_op, prefix);
+	int pri = get_op(q->m, sname, &type, prefix);
 
 	if (!pri)
 		return pl_failure;
@@ -5782,8 +5779,7 @@ static USE_RESULT pl_state fn_iso_current_op_3(query *q)
 
 	prefix = !IS_INFIX(type);
 	type = 0;
-	user_op = false;
-	pri = get_op(q->m, sname, &type, &user_op, !prefix);
+	pri = get_op(q->m, sname, &type, !prefix);
 
 	if ((!pri || (!IS_INFIX(type) == prefix)) && made_choice)
 		drop_choice(q);
@@ -6443,10 +6439,9 @@ static pl_state do_op(query *q, cell *p3)
 	if (!strcmp(GET_STR(p3), ","))
 		return throw_error(q, p3, "permission_error", "modify,operator");
 
-	bool tmp_userop = false;
 	unsigned tmp_optype = 0;
 
-	get_op(q->m, GET_STR(p3), &tmp_optype, &tmp_userop, false);
+	get_op(q->m, GET_STR(p3), &tmp_optype, false);
 
 	if (IS_INFIX(specifier) && IS_POSTFIX(tmp_optype))
 		return throw_error(q, p3, "permission_error", "create,operator");
