@@ -190,7 +190,7 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 			return true;
 	}
 
-	struct op_table *ptr = m->ops;
+	struct op_table *ptr = m->sysops;
 
 	for (; ptr->name; ptr++) {
 		if (strcmp(ptr->name, name))
@@ -212,8 +212,7 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 		return true;
 	}
 
-	struct op_table *save_ptr = ptr;
-	ptr = m->sysops;
+	ptr = m->ops;
 
 	for (; ptr->name; ptr++) {
 		if (strcmp(ptr->name, name))
@@ -241,7 +240,6 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 	if (!m->user_ops)
 		return false;
 
-	ptr = save_ptr;
 	ptr->name = strdup(name);
 	ptr->specifier = specifier;
 	ptr->priority = priority;
