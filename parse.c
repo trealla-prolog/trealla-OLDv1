@@ -164,6 +164,16 @@ unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_pref
 		}
 	}
 
+	for (const struct op_table *ptr = m->sysops; ptr->name; ptr++) {
+		if (hint_prefix && !IS_PREFIX(ptr->specifier))
+			continue;
+
+		if (!strcmp(ptr->name, name)) {
+			if (specifier) *specifier = ptr->specifier;
+			return ptr->priority;
+		}
+	}
+
 	if (hint_prefix)
 		return get_op(m, name, specifier, false);
 
@@ -202,12 +212,36 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 		return true;
 	}
 
+	struct op_table *save_ptr = ptr;
+	ptr = m->sysops;
+
+	for (; ptr->name; ptr++) {
+		if (strcmp(ptr->name, name))
+			continue;
+
+		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
+			continue;
+
+		if (!priority) {
+			free(ptr->name);
+			ptr->name = strdup("");
+			ptr->specifier = 0;
+			ptr->priority = 0;
+			return true;
+		}
+
+		ptr->specifier = specifier;
+		ptr->priority = priority;
+		return true;
+	}
+
 	if (!priority)
 		return true;
 
 	if (!m->user_ops)
 		return false;
 
+	ptr = save_ptr;
 	ptr->name = strdup(name);
 	ptr->specifier = specifier;
 	ptr->priority = priority;
@@ -3599,7 +3633,7 @@ module *create_module(prolog *pl, const char *name)
 	m->flag.character_escapes = true;
 	m->user_ops = MAX_USER_OPS;
 	m->error = false;
-	struct op_table *ptr2 = m->ops;
+	struct op_table *ptr2 = m->sysops;
 
 	for (const struct op_table *ptr = g_ops; ptr->name; ptr++, ptr2++) {
 		ptr2->name = strdup(ptr->name);
