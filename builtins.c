@@ -5700,7 +5700,7 @@ static USE_RESULT pl_state fn_iso_current_op_3(query *q)
 	GET_NEXT_ARG(p_spec,atom_or_var);
 	GET_NEXT_ARG(p_name,atom_or_var);
 	const char *sname = GET_STR(p_name);
-	bool prefix = q->retry ? true : false;
+	bool prefix = q->retry ? true : false, made_choice = false;
 
 	if (!is_integer(p_pri) && !is_variable(p_pri))
 		return throw_error(q, p_pri, "domain_error", "operator_priority");
@@ -5745,8 +5745,10 @@ static USE_RESULT pl_state fn_iso_current_op_3(query *q)
 	if (!pri)
 		return pl_failure;
 
-	if (!is_atom(p_spec) && !q->retry)
+	if (!q->retry) {
 		may_error(make_choice(q));
+		made_choice = true;
+	}
 
 	if (is_variable(p_spec)) {
 		cell tmp = {0};
@@ -5783,7 +5785,7 @@ static USE_RESULT pl_state fn_iso_current_op_3(query *q)
 	user_op = false;
 	pri = get_op(q->m, sname, &type, &user_op, !prefix);
 
-	if (!pri || (!IS_INFIX(type) == prefix))
+	if ((!pri || (!IS_INFIX(type) == prefix)) && made_choice)
 		drop_choice(q);
 
 	return pl_success;
