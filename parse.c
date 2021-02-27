@@ -154,8 +154,6 @@ idx_t index_from_pool(prolog *pl, const char *name)
 
 unsigned get_op(module *m, const char *name, unsigned *specifier, bool *userop, bool hint_prefix)
 {
-	assert(name);
-
 	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
 		if (hint_prefix && (ptr->specifier != OP_FX) && (ptr->specifier != OP_FY))
 			continue;
@@ -163,17 +161,6 @@ unsigned get_op(module *m, const char *name, unsigned *specifier, bool *userop, 
 		if (!strcmp(ptr->name, name)) {
 			if (specifier) *specifier = ptr->specifier;
 			if (userop) *userop = true;
-			return ptr->priority;
-		}
-	}
-
-	for (const struct op_table *ptr = g_ops; ptr->name; ptr++) {
-		if (hint_prefix && (ptr->specifier != OP_FX) && (ptr->specifier != OP_FY))
-			continue;
-
-		if (!strcmp(ptr->name, name)) {
-			if (specifier) *specifier = ptr->specifier;
-			if (userop) *userop = false;
 			return ptr->priority;
 		}
 	}
@@ -186,8 +173,6 @@ unsigned get_op(module *m, const char *name, unsigned *specifier, bool *userop, 
 
 bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 {
-	assert(name);
-
 	unsigned ot = 0, pri = 0;
 	bool userop = false;
 	int hint = IS_PREFIX(specifier);
@@ -203,7 +188,7 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 		if (strcmp(ptr->name, name))
 			continue;
 
-		if (ptr->specifier != specifier)
+		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
 			continue;
 
 		if (!priority) {
@@ -3621,6 +3606,14 @@ module *create_module(prolog *pl, const char *name)
 	m->flag.character_escapes = true;
 	m->user_ops = MAX_USER_OPS;
 	m->error = false;
+	struct op_table *ptr2 = m->ops;
+
+	for (const struct op_table *ptr = g_ops; ptr->name; ptr++, ptr2++) {
+		ptr2->name = strdup(ptr->name);
+		ptr2->specifier = ptr->specifier;
+		ptr2->priority = ptr->priority;
+		m->user_ops--;
+	}
 
 	m->index = sl_create1(compkey, m);
 	ensure(m->index);
