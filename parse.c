@@ -200,17 +200,27 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 	struct op_table *ptr = m->ops;
 
 	for (; ptr->name; ptr++) {
-		if (!strcmp(ptr->name, name) && (ptr->specifier == specifier)) {
-			if (!priority) {
-				free(ptr->name);
-				ptr->name = strdup("");
-			}
+		if (strcmp(ptr->name, name))
+			continue;
 
-			ptr->specifier = priority ? specifier : 0;
-			ptr->priority = priority;
+		if (ptr->specifier != specifier)
+			continue;
+
+		if (!priority) {
+			free(ptr->name);
+			ptr->name = strdup("");
+			ptr->specifier = 0;
+			ptr->priority = 0;
 			return true;
 		}
+
+		ptr->specifier = specifier;
+		ptr->priority = priority;
+		return true;
 	}
+
+	if (!priority)
+		return true;
 
 	if (!m->user_ops)
 		return false;
