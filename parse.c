@@ -210,10 +210,10 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 	if (!m->user_ops)
 		return false;
 
-	m->user_ops--;
 	ptr->name = strdup(name);
 	ptr->specifier = specifier;
 	ptr->priority = priority;
+	m->user_ops--;
 	return true;
 }
 
