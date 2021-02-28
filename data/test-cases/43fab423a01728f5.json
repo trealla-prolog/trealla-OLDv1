@@ -1,0 +1,55 @@
+{
+  "uid" : "43fab423a01728f5",
+  "name" : "lgt_throw_1_1",
+  "historyId" : "control/throw_1/tests.lgt::tests:tests#lgt_throw_1_1",
+  "time" : {
+    "start" : 1614489986000,
+    "stop" : 1614489986000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Wrong error",
+  "statusTrace" : "'$catch'('$lgt_send_to_self_'(tests,test(lgt_throw_1_1,[B],[error(instantiation_error,B)]),c(lgtunit,lgtunit,r(tests,tests,[],[]))),C,'$lgtunit#0.check_error#7'(lgt_throw_1_1,[error(instantiation_error,B)],C,'/home/runner/logtalk/tests/prolog/control/throw_1/tests.lgt',10-13,1614489986.6515009,0x1,c(lgtunit,lgtunit,r(tests,tests,[],[]))))",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "control/throw_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "43fab423a01728f5.json",
+  "parameterValues" : [ ]
+}
