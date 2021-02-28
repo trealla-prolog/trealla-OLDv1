@@ -1,0 +1,49 @@
+{
+  "uid" : "482d979ba71e602f",
+  "name" : "iso_unify_with_occurs_check_2_12",
+  "historyId" : "predicates/unify_with_occurs_check_2/tests.lgt::tests:tests#iso_unify_with_occurs_check_2_12",
+  "time" : {
+    "start" : 1614484093000,
+    "stop" : 1614484093008,
+    "duration" : 8
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/unify_with_occurs_check_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "482d979ba71e602f.json",
+  "parameterValues" : [ ]
+}
