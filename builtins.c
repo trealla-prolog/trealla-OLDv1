@@ -1198,10 +1198,14 @@ static USE_RESULT pl_state fn_iso_number_codes_2(query *q)
 		cell *save_p2 = p2;
 		idx_t save_p2_ctx = p2_ctx;
 		LIST_HANDLER(p2);
+		int cnt = 0;
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
 			head = deref(q, head, p2_ctx);
+
+			if (!cnt && !is_integer(head) && is_variable(p1))
+				return throw_error(q, head, "syntax_error", "integer");
 
 			if (!is_integer(head) && is_variable(p1))
 				return throw_error(q, head, "type_error", "integer");
@@ -1212,6 +1216,7 @@ static USE_RESULT pl_state fn_iso_number_codes_2(query *q)
 			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
+			cnt++;
 		}
 
 		if (!is_nil(p2) && !is_variable(p2))
