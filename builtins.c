@@ -6524,7 +6524,7 @@ static USE_RESULT pl_state fn_iso_op_3(query *q)
 			return pl_success;
 	}
 
-	if (is_atom(p3) && !is_nil(p3))
+	if (is_atom(p3))
 		return do_op(q, p3);
 
 	return pl_success;
