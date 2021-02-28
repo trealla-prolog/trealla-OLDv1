@@ -1415,6 +1415,31 @@ static USE_RESULT pl_state fn_iso_mod_2(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_state fn_iso_rem_2(query *q)
+{
+	CHECK_CALC();
+	GET_FIRST_ARG(p1_tmp,any);
+	GET_NEXT_ARG(p2_tmp,any);
+	cell p1 = calc(q, p1_tmp);
+	cell p2 = calc(q, p2_tmp);
+
+	if (is_integer(&p1) && is_integer(&p2)) {
+		if (p2.val_num == 0)
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
+
+		q->accum.val_num = (long long)(p1.val_num % p2.val_num);
+		q->accum.val_type = TYPE_INTEGER;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else if (!is_integer(&p1)) {
+		return throw_error(q, &p1, "type_error", "integer");
+	} else if (!is_integer(&p2)) {
+		return throw_error(q, &p2, "type_error", "integer");
+	}
+
+	return pl_success;
+}
+
 static USE_RESULT pl_state fn_iso_max_2(query *q)
 {
 	CHECK_CALC();
@@ -2268,7 +2293,7 @@ const struct builtins g_arith_funcs[] =
 	{"//", 2, fn_iso_divint_2, NULL},
 	{"div", 2, fn_iso_div_2, NULL},
 	{"mod", 2, fn_iso_mod_2, NULL},
-	{"rem", 2, fn_iso_mod_2, NULL},
+	{"rem", 2, fn_iso_rem_2, NULL},
 	{"max", 2, fn_iso_max_2, NULL},
 	{"min", 2, fn_iso_min_2, NULL},
 	{"xor", 2, fn_iso_xor_2, NULL},
