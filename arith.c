@@ -1234,6 +1234,10 @@ static USE_RESULT pl_state fn_iso_powi_2(query *q)
 #endif
 
 	if (is_integer(&p1) && is_integer(&p2)) {
+		if ((p1.val_num != 1) && (p2.val_num < 0)) {
+			return throw_error(q, &p1, "type_error", "float");
+		}
+
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		__int128_t tmp = pow(p1.val_num,p2.val_num);
 
