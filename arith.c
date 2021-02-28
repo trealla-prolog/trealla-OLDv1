@@ -1396,6 +1396,13 @@ static USE_RESULT pl_state fn_iso_mod_2(query *q)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_num = (long long)(p1.val_num % p2.val_num);
+
+		if (p2.val_num < 0)
+			q->accum.val_num *= -1;
+
+		if (p1.val_num < 0)
+			q->accum.val_num *= -1;
+
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
