@@ -5767,6 +5767,44 @@ static USE_RESULT pl_state fn_iso_current_op_3(query *q)
 
 		if (!unify(q, p_spec, p_spec_ctx, &tmp, q->st.curr_frame))
 			return pl_failure;
+	} else {
+		unsigned spec = 0;
+		const char *type = GET_STR(p_spec);
+
+		if (!strcmp(type, "fx"))
+			spec = OP_FX;
+		else if (!strcmp(type, "fy"))
+			spec = OP_FY;
+		else if (!strcmp(type, "yf"))
+			spec = OP_YF;
+		else if (!strcmp(type, "xf"))
+			spec = OP_XF;
+		else if (!strcmp(type, "yfx"))
+			spec = OP_YFX;
+		else if (!strcmp(type, "xfy"))
+			spec = OP_XFY;
+		else if (!strcmp(type, "xfx"))
+			spec = OP_XFX;
+
+		unsigned pri = get_op2(q->m, sname, spec);
+
+		if (!pri) {
+			if (made_choice)
+				drop_choice(q);
+
+			return false;
+		}
+
+		cell tmp;
+		make_int(&tmp, pri);
+
+		if (!unify(q, p_pri, p_pri_ctx, &tmp, q->st.curr_frame))
+			return pl_failure;
+
+		if (made_choice)
+			drop_choice(q);
+
+		return true;
 	}
 
 	if (is_variable(p_pri)) {

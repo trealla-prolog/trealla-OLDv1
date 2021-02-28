@@ -180,6 +180,25 @@ unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_pref
 	return 0;
 }
 
+unsigned get_op2(module *m, const char *name, unsigned specifier)
+{
+	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
+		if (!strcmp(ptr->name, name)) {
+			if (specifier == ptr->specifier)
+				return ptr->priority;
+		}
+	}
+
+	for (const struct op_table *ptr = m->sysops; ptr->name; ptr++) {
+		if (!strcmp(ptr->name, name)) {
+			if (specifier == ptr->specifier)
+				return ptr->priority;
+		}
+	}
+
+	return 0;
+}
+
 bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 {
 	unsigned ot = 0, pri = 0;

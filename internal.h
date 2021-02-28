@@ -641,6 +641,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting);
 clause *erase_from_db(module *m, uuid *ref);
 clause *find_in_db(module *m, uuid *ref);
 unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix);
+unsigned get_op2(module *m, const char *name, unsigned specifier);
 bool set_op(module *m, const char *name, unsigned specifier, unsigned priority);
 USE_RESULT pl_state make_choice(query *q);
 USE_RESULT pl_state make_barrier(query *q);
