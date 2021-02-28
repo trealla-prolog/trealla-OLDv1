@@ -426,6 +426,10 @@ static USE_RESULT pl_state fn_iso_exp_1(query *q)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
 		q->accum.val_flt = exp((double)p1.val_num / p1.val_den);
+
+		if (isinf(q->accum.val_flt))
+			return throw_error(q, &p1, "evaluation_error", "float_overflow");
+
 		q->accum.val_type = TYPE_FLOAT;
 	} else if (is_float(&p1)) {
 		q->accum.val_flt = exp(p1.val_flt);
