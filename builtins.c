@@ -10913,9 +10913,6 @@ static USE_RESULT pl_state fn_iso_length_2(query *q)
 		if (p2->val_num >= MAX_VARS)
 			return throw_error(q, p2, "resource_error", "too_many_vars");
 
-		//if (is_anon(p1))
-		//	return pl_success;
-
 		idx_t nbr = p2->val_num;
 
 		if (nbr == 0) {
