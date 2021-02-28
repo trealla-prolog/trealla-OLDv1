@@ -419,7 +419,7 @@ static void commit_me(query *q, term *t)
 	}
 #endif
 
-	if (tco && last_match && !q->m->pl->opt)
+	if (tco && last_match && q->m->pl->opt)
 		reuse_frame(q, t->nbr_vars);
 	else
 		g = make_frame(q, t->nbr_vars);
