@@ -10,10 +10,6 @@
 #define USE_OPENSSL 0
 #endif
 
-#ifndef USE_LIBRESSL
-#define USE_LIBRESSL 0
-#endif
-
 #ifndef USE_INT128
 #define USE_INT128 0
 #endif
