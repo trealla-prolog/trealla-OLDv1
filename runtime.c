@@ -1282,13 +1282,14 @@ static bool check_redo(query *q)
 		}
 
 		if ((ch == 'r') || (ch == ' ') || (ch == ';')) {
-			printf("%c\n", ';');
+			printf("\n; ");
+			fflush(stdout);
 			q->retry = QUERY_RETRY;
 			break;
 		}
 
 		if ((ch == '\n') || (ch == 'a')) {
-			printf("%c\n", '.');
+			printf(".\n");
 			q->abort = true;
 			return true;
 		}
