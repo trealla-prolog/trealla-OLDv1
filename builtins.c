@@ -6478,13 +6478,19 @@ static pl_state do_op(query *q, cell *p3)
 		return throw_error(q, p3, "permission_error", "modify,operator");
 
 	unsigned tmp_optype = 0;
-
 	get_op(q->m, GET_STR(p3), &tmp_optype, false);
 
 	if (IS_INFIX(specifier) && IS_POSTFIX(tmp_optype))
 		return throw_error(q, p3, "permission_error", "create,operator");
 
-	if (IS_POSTFIX(specifier) && IS_INFIX(tmp_optype))
+	unsigned tmp_pri = get_op2(q->m, GET_STR(p3), OP_FX);
+
+	if (IS_POSTFIX(specifier) && (IS_INFIX(tmp_optype) || tmp_pri))
+		return throw_error(q, p3, "permission_error", "create,operator");
+
+	tmp_pri = get_op2(q->m, GET_STR(p3), OP_FY);
+
+	if (IS_POSTFIX(specifier) && (IS_INFIX(tmp_optype) || tmp_pri))
 		return throw_error(q, p3, "permission_error", "create,operator");
 
 	if (!set_op(q->m, GET_STR(p3), specifier, pri))
