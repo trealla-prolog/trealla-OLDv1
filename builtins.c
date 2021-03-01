@@ -6153,6 +6153,8 @@ static USE_RESULT pl_state fn_sys_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell *l = convert_to_list(q, get_queue(q), queue_used(q));
+
+#if 0
 	frame *g = GET_CURR_FRAME();
 	unsigned new_varno = g->nbr_vars;
 	cell *c = l;
@@ -6168,6 +6170,7 @@ static USE_RESULT pl_state fn_sys_list_1(query *q)
 		if (!create_vars(q, new_varno-g->nbr_vars))
 			return throw_error(q, p1, "resource_error", "too_many_vars");
 	}
+#endif
 
 	return unify(q, p1, p1_ctx, l, q->st.curr_frame);
 }

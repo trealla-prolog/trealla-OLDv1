@@ -25,28 +25,6 @@ faultinject_t FAULTINJECT_NAME;
 
 typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 
-#ifdef _WIN32
-uint64_t get_time_in_usec(void)
-{
-	static const uint64_t epoch = 116444736000000000ULL;
-	FILETIME file_time;
-	SYSTEMTIME system_time;
-	ULARGE_INTEGER u;
-	GetSystemTime(&system_time);
-	SystemTimeToFileTime(&system_time, &file_time);
-	u.LowPart = file_time.dwLowDateTime;
-	u.HighPart = file_time.dwHighDateTime;
-	return (u.QuadPart - epoch) / 10 + (1000ULL * system_time.wMilliseconds);
-}
-#else
-uint64_t get_time_in_usec(void)
-{
-	struct timespec now;
-	clock_gettime(CLOCK_REALTIME, &now);
-	return (uint64_t)(now.tv_sec * 1000 * 1000) + (now.tv_nsec / 1000);
-}
-#endif
-
 size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements, size_t max_elements)
 {
 	assert(min_elements <= max_elements);
@@ -1430,6 +1408,28 @@ pl_state run_query(query *q)
 
 	return pl_success;
 }
+
+#ifdef _WIN32
+uint64_t get_time_in_usec(void)
+{
+	static const uint64_t epoch = 116444736000000000ULL;
+	FILETIME file_time;
+	SYSTEMTIME system_time;
+	ULARGE_INTEGER u;
+	GetSystemTime(&system_time);
+	SystemTimeToFileTime(&system_time, &file_time);
+	u.LowPart = file_time.dwLowDateTime;
+	u.HighPart = file_time.dwHighDateTime;
+	return (u.QuadPart - epoch) / 10 + (1000ULL * system_time.wMilliseconds);
+}
+#else
+uint64_t get_time_in_usec(void)
+{
+	struct timespec now;
+	clock_gettime(CLOCK_REALTIME, &now);
+	return (uint64_t)(now.tv_sec * 1000 * 1000) + (now.tv_nsec / 1000);
+}
+#endif
 
 pl_state query_execute(query *q, term *t)
 {
