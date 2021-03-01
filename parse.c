@@ -3337,7 +3337,7 @@ static bool parser_run(parser *p, const char *src, int dump)
 	parser_tokenize(p, false, false);
 
 	if (!p->error && !p->end_of_term && !p->run_init) {
-		fprintf(stdout, "Error: syntax error\n");
+		fprintf(stdout, "Error: syntax error, missing operand or operator\n");
 		p->error = true;
 	}
 
