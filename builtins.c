@@ -11487,31 +11487,6 @@ static const struct builtins g_other_funcs[] =
 	{0}
 };
 
-extern const struct builtins g_arith_funcs[];
-extern const struct builtins g_contrib_funcs[];
-
-void load_builtins(prolog *pl, bool iso_only)
-{
-	for (const struct builtins *ptr = g_iso_funcs; ptr->name; ptr++) {
-		sl_app(pl->funtab, ptr->name, ptr);
-	}
-
-	for (const struct builtins *ptr = g_arith_funcs; ptr->name; ptr++) {
-		sl_app(pl->funtab, ptr->name, ptr);
-	}
-
-	if (iso_only)
-		return;
-
-	for (const struct builtins *ptr = g_other_funcs; ptr->name; ptr++) {
-		sl_app(pl->funtab, ptr->name, ptr);
-	}
-
-	for (const struct builtins *ptr = g_contrib_funcs; ptr->name; ptr++) {
-		sl_app(pl->funtab, ptr->name, ptr);
-	}
-}
-
 void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found)
 {
 	sliter *iter = sl_findkey(pl->funtab, name);
@@ -11527,4 +11502,26 @@ void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found)
 
 	*found = false;
 	return NULL;
+}
+
+extern const struct builtins g_arith_funcs[];
+extern const struct builtins g_contrib_funcs[];
+
+void load_builtins(prolog *pl)
+{
+	for (const struct builtins *ptr = g_iso_funcs; ptr->name; ptr++) {
+		sl_app(pl->funtab, ptr->name, ptr);
+	}
+
+	for (const struct builtins *ptr = g_arith_funcs; ptr->name; ptr++) {
+		sl_app(pl->funtab, ptr->name, ptr);
+	}
+
+	for (const struct builtins *ptr = g_other_funcs; ptr->name; ptr++) {
+		sl_app(pl->funtab, ptr->name, ptr);
+	}
+
+	for (const struct builtins *ptr = g_contrib_funcs; ptr->name; ptr++) {
+		sl_app(pl->funtab, ptr->name, ptr);
+	}
 }

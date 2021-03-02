@@ -4249,7 +4249,7 @@ prolog *pl_create()
 	pl->funtab = sl_create2((void*)my_strcmp, NULL);
 
 	if (pl->funtab)
-		load_builtins(pl, false);
+		load_builtins(pl);
 
 	//printf("Library: %s\n", g_tpl_lib);
 
