@@ -1848,6 +1848,8 @@ static bool attach_ops(parser *p, idx_t start_idx)
 	for (idx_t i = start_idx; i < p->t->cidx;) {
 		cell *c = p->t->cells + i;
 
+		//printf("*** OP0 %s type=%u, specifier=%u, pri=%u\n", PARSER_GET_STR(c), c->val_type, GET_OP(c), c->priority);
+
 		if ((c->nbr_cells > 1) || !is_literal(c) || !c->priority) {
 			i += c->nbr_cells;
 			continue;
@@ -1877,8 +1879,6 @@ static bool attach_ops(parser *p, idx_t start_idx)
 	for (idx_t i = start_idx; i <= end_idx;) {
 		cell *c = p->t->cells + i;
 
-		//printf("*** OP0 %s type=%u, specifier=%u, pri=%u\n", PARSER_GET_STR(c), c->val_type, GET_OP(c), c->priority);
-
 		if ((c->nbr_cells > 1) || !is_literal(c) || !c->priority) {
 			last_idx = i;
 			i += c->nbr_cells;
@@ -1890,6 +1890,8 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			i += c->nbr_cells;
 			continue;
 		}
+
+		//printf("*** OP1 %s type=%u, specifier=%u, pri=%u\n", PARSER_GET_STR(c), c->val_type, GET_OP(c), c->priority);
 
 		c->val_type = TYPE_LITERAL;
 		c->arity = 1;
