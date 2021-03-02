@@ -11533,12 +11533,12 @@ void load_builtins(prolog *pl)
 	}
 }
 
-static char *_push_property(char **bufptr, size_t *lenptr, char *dst, const struct builtins *ptr, const char *type)
+static char *_push_property(char **bufptr, size_t *lenptr, char *dst, const char *name, unsigned arity, const char *type)
 {
 	char *tmpbuf = *bufptr;
 	size_t buflen = *lenptr;
 
-	if (ptr->name[0] == '$')
+	if (name[0] == '$')
 		return dst;
 
 	if ((buflen-(dst-tmpbuf)) < 256) {
@@ -11547,9 +11547,9 @@ static char *_push_property(char **bufptr, size_t *lenptr, char *dst, const stru
 		dst = tmpbuf + offset;
 	}
 
-	if (!isalpha(ptr->name[0]) && (ptr->name[0] != '_')) {
+	if (!isalpha(name[0]) && (name[0] != '_')) {
 		char name[256];
-		const char *src = ptr->name;
+		const char *src = name;
 		char *dst2 = name;
 
 		while (*src) {
@@ -11562,13 +11562,13 @@ static char *_push_property(char **bufptr, size_t *lenptr, char *dst, const stru
 		*dst2 = '\0';
 		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$predicate_property'('%s'", name);
 	} else
-		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$predicate_property'(%s", ptr->name);
+		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$predicate_property'(%s", name);
 
 
-	if (ptr->arity) {
+	if (arity) {
 		dst += snprintf(dst, buflen-(dst-tmpbuf), "(");
 
-		for (unsigned i = 0; i < ptr->arity; i++) {
+		for (unsigned i = 0; i < arity; i++) {
 			if (i > 0)
 				dst += snprintf(dst, buflen-(dst-tmpbuf), ",");
 
@@ -11584,8 +11584,10 @@ static char *_push_property(char **bufptr, size_t *lenptr, char *dst, const stru
 
 static char *push_property(char **bufptr, size_t *lenptr, char *dst, const struct builtins *ptr)
 {
-	dst = _push_property(bufptr, lenptr, dst, ptr, "built_in");
-	dst = _push_property(bufptr, lenptr, dst, ptr, "static");
+	dst = _push_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "built_in");
+	dst = _push_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "static");
+	dst = _push_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "private");
+	dst = _push_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "native_code");
 	return dst;
 }
 
