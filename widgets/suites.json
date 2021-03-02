@@ -1,114 +1,114 @@
 {
   "total" : 153,
   "items" : [ {
-    "uid" : "8d72f33464c61a169f6282af0f2f0181",
-    "name" : "predicates/read_term_3/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 6,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 30,
-      "unknown" : 0,
-      "total" : 36
-    }
-  }, {
-    "uid" : "e8a334ca3e0bebcbd1687a3840012f9f",
-    "name" : "predicates/findall_4/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 6,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 7,
-      "unknown" : 0,
-      "total" : 13
-    }
-  }, {
-    "uid" : "fe889f4ed1e23b13cb890295efdd6049",
-    "name" : "predicates/setof_3/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 4,
-      "broken" : 0,
-      "skipped" : 1,
-      "passed" : 30,
-      "unknown" : 0,
-      "total" : 35
-    }
-  }, {
-    "uid" : "e96278ed9288bacdb418cbcc943c2f26",
-    "name" : "predicates/stream_property_2/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 4,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 30,
-      "unknown" : 0,
-      "total" : 34
-    }
-  }, {
-    "uid" : "bdc881d4b933694f76d7d16bff33e9cf",
-    "name" : "predicates/bagof_3/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 2,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 16,
-      "unknown" : 0,
-      "total" : 18
-    }
-  }, {
-    "uid" : "dd82f0b51a196f10db178e28f30765c1",
-    "name" : "predicates/format_2/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 2,
-      "broken" : 0,
-      "skipped" : 1,
-      "passed" : 13,
-      "unknown" : 0,
-      "total" : 16
-    }
-  }, {
-    "uid" : "bb8e106369c9e4f92fe1145b40d7d18a",
-    "name" : "predicates/format_3/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 2,
-      "broken" : 0,
-      "skipped" : 1,
-      "passed" : 13,
-      "unknown" : 0,
-      "total" : 16
-    }
-  }, {
-    "uid" : "85f20e8d17acbdaa0b478cb78dac7de9",
-    "name" : "predicates/predicate_property_2/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 2,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 10,
-      "unknown" : 0,
-      "total" : 12
-    }
-  }, {
-    "uid" : "ed0cdb351cf5fe82566e390f01a37528",
-    "name" : "control/throw_1/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 2,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 5,
-      "unknown" : 0,
-      "total" : 7
-    }
-  }, {
-    "uid" : "8c7c11628e768e873513ac99dd2929a7",
-    "name" : "predicates/open_4/tests.lgt::tests",
+    "uid" : "8607eb65e049f2e42659e1e192a138f2",
+    "name" : "control/disjunction_2/tests.lgt",
     "statistic" : {
       "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 25,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 26
+      "total" : 1
+    }
+  }, {
+    "uid" : "b4e2e5bfe89571f3e9dd34e6fd2de3ab",
+    "name" : "control/fail_0/tests.lgt",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
+    "uid" : "315a48850d0a753418bf59768e374ecb",
+    "name" : "control/catch_3/tests.lgt",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
+    "uid" : "9c2a877710404a0e8482b3a5ff5544f9",
+    "name" : "control/call_1/tests.lgt",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
+    "uid" : "668ae64c96f07851e57c5b34f489a5be",
+    "name" : "control/cut_0/tests.lgt",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
+    "uid" : "917484c9cabcded6d80e5853b3fa9371",
+    "name" : "control/conjunction_2/tests.lgt",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
+    "uid" : "306da9c337ac7f8ff4a89f048b765453",
+    "name" : "functions/acos_1/tests.lgt",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
+    "uid" : "a2fad80d17ce7d2a9b0b4e4ff04007fe",
+    "name" : "functions/atanh_1/tests.lgt",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
+    "uid" : "8a614fdbc14432666948536e9e3c1fd9",
+    "name" : "functions/acosh_1/tests.lgt",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
+    "uid" : "8774585c3d71c473d6cf3034ae63492d",
+    "name" : "control/false_0/tests.lgt",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
     }
   } ]
 }

@@ -1,0 +1,55 @@
+{
+  "uid" : "f87eff1809dd26e5",
+  "name" : "div_2",
+  "historyId" : "functions/div_2/tests.lgt:tests#div_2",
+  "time" : {
+    "start" : 1614646490000,
+    "stop" : 1614646490000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Crash",
+  "statusTrace" : "Crash",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/div_2/tests.lgt"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "f87eff1809dd26e5.json",
+  "parameterValues" : [ ]
+}

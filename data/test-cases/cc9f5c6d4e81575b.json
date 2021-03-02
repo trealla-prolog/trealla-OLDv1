@@ -1,0 +1,55 @@
+{
+  "uid" : "cc9f5c6d4e81575b",
+  "name" : "ground_1",
+  "historyId" : "predicates/ground_1/tests.lgt:tests#ground_1",
+  "time" : {
+    "start" : 1614646494000,
+    "stop" : 1614646494000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Crash",
+  "statusTrace" : "Crash",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/ground_1/tests.lgt"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "cc9f5c6d4e81575b.json",
+  "parameterValues" : [ ]
+}

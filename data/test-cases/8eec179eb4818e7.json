@@ -1,0 +1,55 @@
+{
+  "uid" : "8eec179eb4818e7",
+  "name" : "compound_1",
+  "historyId" : "predicates/compound_1/tests.lgt:tests#compound_1",
+  "time" : {
+    "start" : 1614646493000,
+    "stop" : 1614646493000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Crash",
+  "statusTrace" : "Crash",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/compound_1/tests.lgt"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "8eec179eb4818e7.json",
+  "parameterValues" : [ ]
+}

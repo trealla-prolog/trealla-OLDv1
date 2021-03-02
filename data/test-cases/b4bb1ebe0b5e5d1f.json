@@ -1,0 +1,55 @@
+{
+  "uid" : "b4bb1ebe0b5e5d1f",
+  "name" : "max_2",
+  "historyId" : "functions/max_2/tests.lgt:tests#max_2",
+  "time" : {
+    "start" : 1614646491000,
+    "stop" : 1614646491000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Crash",
+  "statusTrace" : "Crash",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/max_2/tests.lgt"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "b4bb1ebe0b5e5d1f.json",
+  "parameterValues" : [ ]
+}
