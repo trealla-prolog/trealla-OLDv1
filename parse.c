@@ -3886,44 +3886,44 @@ module *create_module(prolog *pl, const char *name)
 		"'$call'(TMP_G),"									\
 		"'$call'(G,P1,P2,P3,P4,P5,p6,P7)=TMP_G.");
 
-	// taskn...
+	// call_taskn...
 
-	make_rule(m, "task(G) :- "								\
+	make_rule(m, "call_task(G) :- "								\
 		"copy_term('$task'(G),TMP_G),"						\
 		"'$call'(TMP_G),"									\
 		"'$task'(G)=TMP_G.");
 
-	make_rule(m, "task(G,P1) :- "							\
+	make_rule(m, "call_task(G,P1) :- "							\
 		"copy_term('$task'(G,P1),TMP_G),"					\
 		"'$call'(TMP_G),"									\
 		"'$task'(G,P1)=TMP_G.");
 
-	make_rule(m, "task(G,P1,P2) :- "						\
+	make_rule(m, "call_task(G,P1,P2) :- "						\
 		"copy_term('$task'(G,P1,P2),TMP_G),"				\
 		"'$call'(TMP_G),"									\
 		"'$task'(G,P1,P2)=TMP_G.");
 
-	make_rule(m, "task(G,P1,P2,P3) :- "						\
+	make_rule(m, "call_task(G,P1,P2,P3) :- "						\
 		"copy_term('$task'(G,P1,P2,P3),TMP_G),"				\
 		"'$call'(TMP_G),"									\
 		"'$task'(G,P1,P2,P3)=TMP_G.");
 
-	make_rule(m, "task(G,P1,P2,P3,P4) :- "					\
+	make_rule(m, "call_task(G,P1,P2,P3,P4) :- "					\
 		"copy_term('$task'(G,P1,P2,P3,P4),TMP_G),"			\
 		"'$call'(TMP_G),"									\
 		"'$task'(G,P1,P2,P3,P4)=TMP_G.");
 
-	make_rule(m, "task(G,P1,P2,P3,P4,P5) :- "				\
+	make_rule(m, "call_task(G,P1,P2,P3,P4,P5) :- "				\
 		"copy_term('$task'(G,P1,P2,P3,P4,P5),TMP_G),"		\
 		"'$call'(TMP_G),"									\
 		"'$task'(G,P1,P2,p3,P4,P5)=TMP_G.");
 
-	make_rule(m, "task(G,P1,P2,P3,P4,P5,P6) :- "			\
+	make_rule(m, "call_task(G,P1,P2,P3,P4,P5,P6) :- "			\
 		"copy_term('$task'(G,P1,P2,P3,P4,P5,P6),TMP_G),"	\
 		"'$call'(TMP_G),"									\
 		"'$task'(G,P1,P2,P3,P4,P5,P6)=TMP_G.");
 
-	make_rule(m, "task(G,P1,P2,P3,P4,P5,P6,P7) :- "			\
+	make_rule(m, "call_task(G,P1,P2,P3,P4,P5,P6,P7) :- "			\
 		"copy_term('$task'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),"	\
 		"'$call'(TMP_G),"									\
 		"'$task'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G.");

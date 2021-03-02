@@ -402,7 +402,7 @@ yield control, either explicitly or implicitly (when waiting on input
 or a timer)...
 
 	fork/0                  # parent fails, child continues
-	task/[1-n]              # concurrent form of call/1-n
+	call_task/[1-n]         # concurrent form of call/1-n
 	yield/0                 # voluntarily yield control
 	wait/0                  # parent should wait for children to finish
 	await/0                 # parent should wait for a message
@@ -413,14 +413,14 @@ or a timer)...
 Note: *send/1*, *sleep/1* and *delay/1* do implied yields. As does *getline/2*,
 *bread/3*, *bwrite/2* and *accept/2*.
 
-Note: *task/n* acts as if defined as:
+Note: *call_task/n* acts as if defined as:
 
-	task(G) :- fork, call(G).
-	task(G,P1) :- fork, call(G,P1).
-	task(G,P1,P2) :- fork, call(G,P1,P2).
+	call_task(G) :- fork, call(G).
+	call_task(G,P1) :- fork, call(G,P1).
+	call_task(G,P1,P2) :- fork, call(G,P1,P2).
 	...
 
-In practice *task* calls a special version of *fork/0* that limits
+In practice *call_task* calls a special version of *fork/0* that limits
 the number of such concurrent tasks (see the *cpu_count* flag, initially
 and artificially set at 4). Excess tasks will be scheduled as tasks finish.
 
@@ -445,7 +445,7 @@ test54 :-
 
 test55 :-
 	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
-	maplist(task(geturl),L),
+	maplist(call_task(geturl),L),
 	wait,
 	writeln('Finished').
 
