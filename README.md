@@ -513,9 +513,3 @@ the *rdiv/2* operator:
 	yes
 
 
-Benchmarks
-==========
-
-The Peirera (sic) benchmarks may be run:
-
-  tpl -g bench_peirera,halt samples/broken/peirera.pl
