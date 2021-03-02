@@ -3229,8 +3229,8 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			priority = 0;
 		}
 
-		if (priority
-			&& (specifier != OP_XF) && (specifier != OP_YF)
+		if (priority && last_op
+			&& !IS_POSTFIX(specifier)
 			&& ((*p->srcptr == ',') || (*p->srcptr == ')') ||
 			(*p->srcptr == '|') || (*p->srcptr == ']') ||
 			(*p->srcptr == '}') )) {
