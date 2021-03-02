@@ -1243,6 +1243,10 @@ static void directives(parser *p, term *t)
 		return;
 	}
 
+	if (!strcmp(dirname, "meta_predicate") && (c->arity == 1)) {
+		if (!is_structure(p1)) return;
+	}
+
 	if (!strcmp(dirname, "use_module") && (c->arity >= 1)) {
 		if (!is_atom(p1) && !is_structure(p1)) return;
 		const char *name = PARSER_GET_STR(p1);
