@@ -1852,18 +1852,18 @@ static void db_log(query *q, clause *r, enum log_type l)
 	case LOG_ASSERTA:
 		dst = print_term_to_strbuf(q, r->t.cells, q->st.curr_frame, 1);
 		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
-		fprintf(q->m->fp, "a_(%s,'%s').\n", dst, tmpbuf);
+		fprintf(q->m->fp, "'$a_'(%s,'%s').\n", dst, tmpbuf);
 		free(dst);
 		break;
 	case LOG_ASSERTZ:
 		dst = print_term_to_strbuf(q, r->t.cells, q->st.curr_frame, 1);
 		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
-		fprintf(q->m->fp, "z_(%s,'%s').\n", dst, tmpbuf);
+		fprintf(q->m->fp, "'$z_'(%s,'%s').\n", dst, tmpbuf);
 		free(dst);
 		break;
 	case LOG_ERASE:
 		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
-		fprintf(q->m->fp, "e_('%s').\n", tmpbuf);
+		fprintf(q->m->fp, "'$e_'('%s').\n", tmpbuf);
 		break;
 	}
 
@@ -10470,13 +10470,13 @@ void do_db_load(module *m)
 	ensure(m->fp);
 }
 
-static USE_RESULT pl_state fn_db_load_0(query *q)
+static USE_RESULT pl_state fn_sys_db_load_0(query *q)
 {
 	do_db_load(q->m);
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_db_save_0(query *q)
+static USE_RESULT pl_state fn_sys_db_save_0(query *q)
 {
 	if (!q->m->fp)
 		return pl_failure;
@@ -11484,12 +11484,12 @@ static const struct builtins g_other_funcs[] =
 
 	// Used for database log
 
-	{"a_", 2, fn_sys_asserta_2, "+term,+ref"},
-	{"z_", 2, fn_sys_assertz_2, "+term,+ref"},
-	{"e_", 1, fn_erase_1, "+ref"},
+	{"$a_", 2, fn_sys_asserta_2, "+term,+ref"},
+	{"$z_", 2, fn_sys_assertz_2, "+term,+ref"},
+	{"$e_", 1, fn_erase_1, "+ref"},
 
-	{"db_load", 0, fn_db_load_0, NULL},
-	{"db_save", 0, fn_db_save_0, NULL},
+	{"$db_load", 0, fn_sys_db_load_0, NULL},
+	{"$db_save", 0, fn_sys_db_save_0, NULL},
 
 	{0}
 };
