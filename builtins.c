@@ -10149,7 +10149,13 @@ static USE_RESULT pl_state fn_replace_4(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_predicate_property_2(query *q)
+static USE_RESULT pl_state fn_sys_load_properties_0(query *q)
+{
+	load_properties(q->m);
+	return pl_success;
+}
+
+static USE_RESULT pl_state fn_legacy_predicate_property_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -11418,7 +11424,8 @@ static const struct builtins g_other_funcs[] =
 	{"bwrite", 2, fn_bwrite_2, "+stream,-string"},
 	{"hex_chars", 2, fn_hex_chars_2, "?integer,?string"},
 	{"octal_chars", 2, fn_octal_chars_2, "?integer,?string"},
-	{"predicate_property", 2, fn_predicate_property_2, "+callable,?string"},
+	{"legacy_predicate_property", 2, fn_legacy_predicate_property_2, "+callable,?string"},
+	{"$load_properties", 0, fn_sys_load_properties_0, NULL},
 	{"numbervars", 1, fn_numbervars_1, "+term"},
 	{"numbervars", 3, fn_numbervars_3, "+term,+start,?end"},
 	{"numbervars", 4, fn_numbervars_3, "+term,+start,?end,+list"},
@@ -11524,4 +11531,91 @@ void load_builtins(prolog *pl)
 	for (const struct builtins *ptr = g_contrib_funcs; ptr->name; ptr++) {
 		sl_app(pl->funtab, ptr->name, ptr);
 	}
+}
+
+static char *push_property(char **bufptr, size_t *lenptr, char *dst, const struct builtins *ptr, const char *type)
+{
+	char *tmpbuf = *bufptr;
+	size_t buflen = *lenptr;
+
+	if (ptr->name[0] == '$')
+		return dst;
+
+	if ((buflen-(dst-tmpbuf)) < 256) {
+		size_t offset = dst - tmpbuf;
+		*bufptr = tmpbuf = realloc(tmpbuf, *lenptr=(buflen*=2));
+		dst = tmpbuf + offset;
+	}
+
+	if (!isalpha(ptr->name[0]) && (ptr->name[0] != '_')) {
+		char name[256];
+		const char *src = ptr->name;
+		char *dst2 = name;
+
+		while (*src) {
+			if (*src == '\\')
+				*dst2++ = *src;
+
+			*dst2++ = *src++;
+		}
+
+		*dst2 = '\0';
+		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$predicate_property'('%s'", name);
+	} else
+		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$predicate_property'(%s", ptr->name);
+
+
+	if (ptr->arity) {
+		dst += snprintf(dst, buflen-(dst-tmpbuf), "(");
+
+		for (unsigned i = 0; i < ptr->arity; i++) {
+			if (i > 0)
+				dst += snprintf(dst, buflen-(dst-tmpbuf), ",");
+
+			dst += snprintf(dst, buflen-(dst-tmpbuf), "_");
+		}
+
+		dst += snprintf(dst, buflen-(dst-tmpbuf), ")");
+	}
+
+	dst += snprintf(dst, buflen-(dst-tmpbuf), ", %s).\n", type);
+	return dst;
+}
+
+void load_properties(module *m)
+{
+	if (m->loaded_properties)
+		return;
+
+	m->loaded_properties = false;
+	size_t buflen = 1024*8;
+	char *tmpbuf = malloc(buflen);
+	char *dst = tmpbuf;
+	*dst = '\0';
+
+	for (const struct builtins *ptr = g_iso_funcs; ptr->name; ptr++) {
+		sl_app(m->pl->funtab, ptr->name, ptr);
+		dst = push_property(&tmpbuf, &buflen, dst, ptr, "built_in");
+	}
+
+	for (const struct builtins *ptr = g_arith_funcs; ptr->name; ptr++) {
+		sl_app(m->pl->funtab, ptr->name, ptr);
+		dst = push_property(&tmpbuf, &buflen, dst, ptr, "built_in");
+	}
+
+	for (const struct builtins *ptr = g_other_funcs; ptr->name; ptr++) {
+		sl_app(m->pl->funtab, ptr->name, ptr);
+		dst = push_property(&tmpbuf, &buflen, dst, ptr, "built_in");
+	}
+
+	for (const struct builtins *ptr = g_contrib_funcs; ptr->name; ptr++) {
+		sl_app(m->pl->funtab, ptr->name, ptr);
+		dst = push_property(&tmpbuf, &buflen, dst, ptr, "built_in");
+	}
+
+	m->p->srcptr = tmpbuf;
+	m->p->consulting = true;
+	parser_tokenize(m->p, false, false);
+
+	free(tmpbuf);
 }

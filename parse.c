@@ -3671,6 +3671,10 @@ module *create_module(prolog *pl, const char *name)
 	make_rule(m, "format(F) :- format(F, []).");
 	make_rule(m, "unify_with_occurs_check(X, X) :- acyclic_term(X).");
 
+	make_rule(m, "predicate_property(P, A) :- "				\
+		"'$load_properties', "								\
+		"'$predicate_property'(P, A).");
+
 	make_rule(m, "subsumes_term(G,S) :- "					\
 		"\\+ \\+ ( "										\
 		" term_variables(S, V1), "							\
