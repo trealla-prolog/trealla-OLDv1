@@ -11533,7 +11533,7 @@ void load_builtins(prolog *pl)
 	}
 }
 
-static char *push_property(char **bufptr, size_t *lenptr, char *dst, const struct builtins *ptr, const char *type)
+static char *_push_property(char **bufptr, size_t *lenptr, char *dst, const struct builtins *ptr, const char *type)
 {
 	char *tmpbuf = *bufptr;
 	size_t buflen = *lenptr;
@@ -11582,6 +11582,13 @@ static char *push_property(char **bufptr, size_t *lenptr, char *dst, const struc
 	return dst;
 }
 
+static char *push_property(char **bufptr, size_t *lenptr, char *dst, const struct builtins *ptr)
+{
+	dst = _push_property(bufptr, lenptr, dst, ptr, "built_in");
+	dst = _push_property(bufptr, lenptr, dst, ptr, "static");
+	return dst;
+}
+
 void load_properties(module *m)
 {
 	if (m->loaded_properties)
@@ -11595,22 +11602,22 @@ void load_properties(module *m)
 
 	for (const struct builtins *ptr = g_iso_funcs; ptr->name; ptr++) {
 		sl_app(m->pl->funtab, ptr->name, ptr);
-		dst = push_property(&tmpbuf, &buflen, dst, ptr, "built_in");
+		dst = push_property(&tmpbuf, &buflen, dst, ptr);
 	}
 
 	for (const struct builtins *ptr = g_arith_funcs; ptr->name; ptr++) {
 		sl_app(m->pl->funtab, ptr->name, ptr);
-		dst = push_property(&tmpbuf, &buflen, dst, ptr, "built_in");
+		dst = push_property(&tmpbuf, &buflen, dst, ptr);
 	}
 
 	for (const struct builtins *ptr = g_other_funcs; ptr->name; ptr++) {
 		sl_app(m->pl->funtab, ptr->name, ptr);
-		dst = push_property(&tmpbuf, &buflen, dst, ptr, "built_in");
+		dst = push_property(&tmpbuf, &buflen, dst, ptr);
 	}
 
 	for (const struct builtins *ptr = g_contrib_funcs; ptr->name; ptr++) {
 		sl_app(m->pl->funtab, ptr->name, ptr);
-		dst = push_property(&tmpbuf, &buflen, dst, ptr, "built_in");
+		dst = push_property(&tmpbuf, &buflen, dst, ptr);
 	}
 
 	m->p->srcptr = tmpbuf;
