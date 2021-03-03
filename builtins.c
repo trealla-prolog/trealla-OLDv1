@@ -11538,23 +11538,23 @@ char *push_property(char **bufptr, size_t *lenptr, char *dst, const char *name, 
 	char *tmpbuf = *bufptr;
 	size_t buflen = *lenptr;
 
-	if (name[0] == '$')
-		return dst;
-
-	if ((buflen-(dst-tmpbuf)) < 256) {
+	if ((buflen-(dst-tmpbuf)) < 1024) {
 		size_t offset = dst - tmpbuf;
 		*bufptr = tmpbuf = realloc(tmpbuf, *lenptr=(buflen*=2));
 		dst = tmpbuf + offset;
 	}
 
 	if (!isalpha(name[0]) && (name[0] != '_')) {
-		char namebuf[256];
+		char namebuf[512];
 		const char *src = name;
 		char *dst2 = namebuf;
+		size_t len = sizeof(namebuf)-1;
 
-		while (*src) {
-			if (*src == '\\')
+		while (*src && len--) {
+			if (*src == '\\') {
 				*dst2++ = *src;
+				len--;
+			}
 
 			*dst2++ = *src++;
 		}
@@ -11650,21 +11650,37 @@ void load_properties(module *m)
 
 	for (const struct builtins *ptr = g_iso_funcs; ptr->name; ptr++) {
 		sl_app(m->pl->funtab, ptr->name, ptr);
+
+		if (ptr->name[0] == '$')
+			continue;
+
 		dst = push_properties(&tmpbuf, &buflen, dst, ptr);
 	}
 
 	for (const struct builtins *ptr = g_arith_funcs; ptr->name; ptr++) {
 		sl_app(m->pl->funtab, ptr->name, ptr);
+
+		if (ptr->name[0] == '$')
+			continue;
+
 		dst = push_properties(&tmpbuf, &buflen, dst, ptr);
 	}
 
 	for (const struct builtins *ptr = g_other_funcs; ptr->name; ptr++) {
 		sl_app(m->pl->funtab, ptr->name, ptr);
+
+		if (ptr->name[0] == '$')
+			continue;
+
 		dst = push_properties(&tmpbuf, &buflen, dst, ptr);
 	}
 
 	for (const struct builtins *ptr = g_contrib_funcs; ptr->name; ptr++) {
 		sl_app(m->pl->funtab, ptr->name, ptr);
+
+		if (ptr->name[0] == '$')
+			continue;
+
 		dst = push_properties(&tmpbuf, &buflen, dst, ptr);
 	}
 

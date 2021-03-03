@@ -468,12 +468,12 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 
 static void push_properties(module *m, const char *name, unsigned arity, const char *type)
 {
-	size_t buflen = 256;
+	if (name[0] == '$')
+		return;
+
+	size_t buflen = 1024;
 	char *tmpbuf = malloc(buflen);
 	push_property(&tmpbuf, &buflen, tmpbuf, name, arity, type);
-
-	//printf("%s", tmpbuf);
-
 	parser *p = create_parser(m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
