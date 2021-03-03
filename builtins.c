@@ -11647,13 +11647,6 @@ void load_properties(module *m)
 	dst = push_property(&tmpbuf, &buflen, dst, "setof", 3, "control_construct");
 	dst = push_property(&tmpbuf, &buflen, dst, "setof", 3, "meta_predicate(setof(?,0,-))");
 
-	for (int i = 1; i <= 7; i++) {
-		dst = push_property(&tmpbuf, &buflen, dst, "call", i, "built_in");
-		dst = push_property(&tmpbuf, &buflen, dst, "call", i, "static");
-		dst = push_property(&tmpbuf, &buflen, dst, "call", i, "private");
-		dst = push_property(&tmpbuf, &buflen, dst, "call", i, "control_construct");
-	}
-
 	for (int i = 2; i <= 7; i++) {
 		char metabuf[256];
 		char *dst2 = metabuf;
@@ -11665,13 +11658,6 @@ void load_properties(module *m)
 
 		sprintf(dst2, "))");
 		dst = push_property(&tmpbuf, &buflen, dst, "call", i, metabuf);
-	}
-
-	for (int i = 1; i <= 7; i++) {
-		dst = push_property(&tmpbuf, &buflen, dst, "task", i, "built_in");
-		dst = push_property(&tmpbuf, &buflen, dst, "task", i, "static");
-		dst = push_property(&tmpbuf, &buflen, dst, "task", i, "private");
-		dst = push_property(&tmpbuf, &buflen, dst, "task", i, "control_construct");
 	}
 
 	for (int i = 2; i <= 7; i++) {
