@@ -2683,7 +2683,7 @@ static bool get_token(parser *p, int last_op)
 			}
 		}
 
-		dst += sprintf(dst, "%u", ch);
+		dst += snprintf(dst, 8, "%u", ch);
 		*dst = '\0';
 		p->srcptr = (char*)src;
 		p->v.val_num = ch;

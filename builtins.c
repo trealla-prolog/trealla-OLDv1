@@ -4867,11 +4867,11 @@ static void do_assign_vars(parser *p, idx_t nbr_cells)
 		char tmpbuf[20];
 
 		if (vars[c->var_nbr] == 1)
-			sprintf(tmpbuf, "%s", "_");
+			snprintf(tmpbuf, sizeof(tmpbuf), "%s", "_");
 		else if (var_nbr < 26)
-			sprintf(tmpbuf, "%c", ch);
+			snprintf(tmpbuf, sizeof(tmpbuf), "%c", ch);
 		else
-			sprintf(tmpbuf, "%c%d", ch, n);
+			snprintf(tmpbuf, sizeof(tmpbuf), "%c%d", ch, n);
 
 		c->val_off = index_from_pool(p->m->pl, tmpbuf);
 		c->flags = 0;
@@ -8567,9 +8567,10 @@ static USE_RESULT pl_state fn_absolute_file_name_3(query *q)
 		if (!ptr)
 			return throw_error(q, p1, "existence_error", "environment_variable");
 
-		tmpbuf = malloc(strlen(ptr)+1+strlen(s)+1);
+		size_t buflen = strlen(ptr)+1+strlen(s);
+		tmpbuf = malloc(buflen+1);
 		may_ptr_error(tmpbuf);
-		sprintf(tmpbuf, "%s/%s", ptr, s);
+		snprintf(tmpbuf, buflen, "%s/%s", ptr, s);
 		char *tmpbuf2;
 
 		if ((tmpbuf2 = realpath(tmpbuf, NULL)) == NULL) {
@@ -8577,9 +8578,10 @@ static USE_RESULT pl_state fn_absolute_file_name_3(query *q)
 				tmpbuf2 = realpath(".", NULL);
 
 			may_ptr_error(tmpbuf2, free(tmpbuf));
-			char *tmp = malloc(strlen(tmpbuf2)+1+strlen(s)+1);
+			size_t buflen = strlen(tmpbuf2)+1+strlen(s);
+			char *tmp = malloc(buflen+1);
 			may_ptr_error(tmp, free(tmpbuf2));
-			sprintf(tmp, "%s/%s", tmpbuf2, s);
+			snprintf(tmp, buflen, "%s/%s", tmpbuf2, s);
 			free(tmpbuf);
 			tmpbuf = tmp;
 		} else {
@@ -8594,9 +8596,10 @@ static USE_RESULT pl_state fn_absolute_file_name_3(query *q)
 			may_ptr_error(tmpbuf);
 
 			if (*s != '/') {
-				char *tmp = malloc(strlen(tmpbuf)+1+strlen(s)+1);
+				size_t buflen = strlen(tmpbuf)+1+strlen(s);
+				char *tmp = malloc(buflen+1);
 				may_ptr_error(tmp, free(tmpbuf));
-				sprintf(tmp, "%s/%s", tmpbuf, s);
+				snprintf(tmp, buflen, "%s/%s", tmpbuf, s);
 				free(tmpbuf);
 				tmpbuf = tmp;
 			} else {
@@ -8729,8 +8732,8 @@ static USE_RESULT pl_state do_format(query *q, cell *str, idx_t str_ctx, cell* p
 {
 	char *srcbuf = GET_STR(p1);
 	const char *src = srcbuf;
-	size_t bufsiz;
-	char *tmpbuf = malloc(bufsiz=strlen(src)+100);
+	size_t bufsiz = strlen(src)+100;
+	char *tmpbuf = malloc(bufsiz);
 	may_ptr_error(tmpbuf);
 	char *dst = tmpbuf;
 	*dst = '\0';
@@ -9892,7 +9895,7 @@ static USE_RESULT pl_state fn_hex_chars_2(query *q)
 
 	if (is_variable(p1)) {
 		char tmpbuf[256];
-		sprintf(tmpbuf, "%llx", (long long)p2->val_num);
+		snprintf(tmpbuf, sizeof(tmpbuf), "%llx", (long long)p2->val_num);
 		cell tmp;
 		may_error(make_string(&tmp, tmpbuf));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -9923,7 +9926,7 @@ static USE_RESULT pl_state fn_octal_chars_2(query *q)
 
 	if (is_variable(p1)) {
 		char tmpbuf[256];
-		sprintf(tmpbuf, "%llo", (long long)p2->val_num);
+		snprintf(tmpbuf, sizeof(tmpbuf), "%llo", (long long)p2->val_num);
 		cell tmp;
 		may_error(make_string(&tmp, tmpbuf));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -10042,7 +10045,7 @@ static USE_RESULT pl_state fn_atomic_concat_3(query *q)
 			len1 += sprint_int(tmpbuf1+len1, sizeof(tmpbuf1)-len1, p1->val_den, 10);
 			src1 = tmpbuf1;
 		} else {
-			len1 = sprintf(tmpbuf1, "%.17g", p1->val_flt);
+			len1 = snprintf(tmpbuf1, sizeof(tmpbuf1), "%.17g", p1->val_flt);
 			src1 = tmpbuf1;
 		}
 
@@ -10057,7 +10060,7 @@ static USE_RESULT pl_state fn_atomic_concat_3(query *q)
 			len2 += sprint_int(tmpbuf2+len2, sizeof(tmpbuf2)-len2, p2->val_den, 10);
 			src2 = tmpbuf2;
 		} else {
-			len2 = sprintf(tmpbuf2, "%.17g", p2->val_flt);
+			len2 = snprintf(tmpbuf2, sizeof(tmpbuf1), "%.17g", p2->val_flt);
 			src2 = tmpbuf2;
 		}
 
@@ -11671,26 +11674,26 @@ void load_properties(module *m)
 	for (int i = 2; i <= 7; i++) {
 		char metabuf[256];
 		char *dst2 = metabuf;
-		dst2 += sprintf(dst2, "meta_predicate(call(%d", i-1);
+		dst2 += snprintf(dst2, sizeof(metabuf), "meta_predicate(call(%d", i-1);
 
 		for (int j = 1; j < i; j++)
-			dst2 += sprintf(dst2, ",?");
+			dst2 += snprintf(dst2, sizeof(metabuf)-(dst2-metabuf), ",?");
 
 
-		sprintf(dst2, "))");
+		snprintf(dst2, sizeof(metabuf)-(dst2-metabuf), "))");
 		dst = push_property(&tmpbuf, &buflen, dst, "call", i, metabuf);
 	}
 
 	for (int i = 2; i <= 7; i++) {
 		char metabuf[256];
 		char *dst2 = metabuf;
-		dst2 += sprintf(dst2, "meta_predicate(task(%d", i-1);
+		dst2 += snprintf(dst2, sizeof(metabuf), "meta_predicate(task(%d", i-1);
 
 		for (int j = 1; j < i; j++)
-			dst2 += sprintf(dst2, ",?");
+			dst2 += snprintf(dst2, sizeof(metabuf)-(dst2-metabuf), ",?");
 
 
-		sprintf(dst2, "))");
+		snprintf(dst2, sizeof(metabuf)-(dst2-metabuf), "))");
 		dst = push_property(&tmpbuf, &buflen, dst, "task", i, metabuf);
 	}
 
