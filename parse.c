@@ -478,7 +478,7 @@ static void push_properties(module *m, const char *name, unsigned arity, const c
 	p->srcptr = tmpbuf;
 	p->consulting = true;
 	parser_tokenize(p, false, false);
-	free(p);
+	destroy_parser(p);
 	free(tmpbuf);
 }
 
@@ -3692,6 +3692,9 @@ void destroy_module(module *m)
 
 	if (m->fp)
 		fclose(m->fp);
+
+	for (struct op_table *ptr = m->sysops; ptr->name; ptr++)
+		free(ptr->name);
 
 	for (struct op_table *ptr = m->ops; ptr->name; ptr++)
 		free(ptr->name);
