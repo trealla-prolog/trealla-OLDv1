@@ -3724,9 +3724,20 @@ module *create_module(prolog *pl, const char *name)
 	make_rule(m, "format(F) :- format(F, []).");
 	make_rule(m, "unify_with_occurs_check(X, X) :- acyclic_term(X).");
 
+	make_rule(m, "'$member'(El, [H|T]) :- '$member_'(T, El, H).");
+	make_rule(m, "'$member_'(_, El, El).");
+	make_rule(m, "'$member_'([H|T], El, _) :- '$member_'(T, El, H).");
+	make_rule(m, "'$memberchk'(T, L) :- '$member'(T, L), !.");
+
 	make_rule(m, "predicate_property(P, A) :- "				\
 		"mustbe_callable(P), "								\
 		"'$load_properties', "								\
+		"(var(A) -> true ; "								\
+		" ('$memberchk'(A, [built_in,private,static,dynamic,persist,multifile,meta_predicate(_)]) -> "							\
+			"true ; "										\
+			"throw(error(domain_error(predicate_property,A),P)) "		\
+			")"												\
+		"), "												\
 		"'$predicate_property'(P, A).");
 
 	make_rule(m, "subsumes_term(G,S) :- "					\
