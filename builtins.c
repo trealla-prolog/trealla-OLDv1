@@ -11582,7 +11582,7 @@ static char *_push_property(char **bufptr, size_t *lenptr, char *dst, const char
 	return dst;
 }
 
-char *push_property(char **bufptr, size_t *lenptr, char *dst, const struct builtins *ptr)
+static char *push_property(char **bufptr, size_t *lenptr, char *dst, const struct builtins *ptr)
 {
 	dst = _push_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "built_in");
 	dst = _push_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "static");
