@@ -11626,6 +11626,8 @@ void load_properties(module *m)
 	char *dst = tmpbuf;
 	*dst = '\0';
 
+	dst = push_property(&tmpbuf, &buflen, dst, "|", 2, "meta_predicate((:|+))");
+
 	dst = push_property(&tmpbuf, &buflen, dst, ",", 2, "control_construct");
 	dst = push_property(&tmpbuf, &buflen, dst, ",", 2, "meta_predicate((0,0))");
 
@@ -11640,12 +11642,24 @@ void load_properties(module *m)
 
 	dst = push_property(&tmpbuf, &buflen, dst, "findall", 3, "control_construct");
 	dst = push_property(&tmpbuf, &buflen, dst, "findall", 3, "meta_predicate(findall(?,0,-))");
-
 	dst = push_property(&tmpbuf, &buflen, dst, "bagof", 3, "control_construct");
 	dst = push_property(&tmpbuf, &buflen, dst, "bagof", 3, "meta_predicate(bagof(?,0,-))");
-
 	dst = push_property(&tmpbuf, &buflen, dst, "setof", 3, "control_construct");
 	dst = push_property(&tmpbuf, &buflen, dst, "setof", 3, "meta_predicate(setof(?,0,-))");
+
+	dst = push_property(&tmpbuf, &buflen, dst, "asserta", 1, "meta_predicate(asserta(:))");
+	dst = push_property(&tmpbuf, &buflen, dst, "assertz", 1, "meta_predicate(assertz(:))");
+	dst = push_property(&tmpbuf, &buflen, dst, "retract", 1, "meta_predicate(retract(:))");
+	dst = push_property(&tmpbuf, &buflen, dst, "retractall", 1, "meta_predicate(retractall(:))");
+	dst = push_property(&tmpbuf, &buflen, dst, "current_predicate", 1, "meta_predicate(current_predicate(:))");
+	dst = push_property(&tmpbuf, &buflen, dst, "predicate_property", 1, "meta_predicate(predicate_property(:,?))");
+	dst = push_property(&tmpbuf, &buflen, dst, "abolish", 1, "meta_predicate(abolish(:))");
+	dst = push_property(&tmpbuf, &buflen, dst, "clause", 2, "meta_predicate(abolish(:,?))");
+	dst = push_property(&tmpbuf, &buflen, dst, "catch", 3, "meta_predicate(catch(0,?,0))");
+	dst = push_property(&tmpbuf, &buflen, dst, "phrase", 2, "meta_predicate(phrase(2,?))");
+	dst = push_property(&tmpbuf, &buflen, dst, "phrase", 3, "meta_predicate(phrase(2,?,?))");
+	dst = push_property(&tmpbuf, &buflen, dst, "once", 1, "meta_predicate(once(0))");
+	dst = push_property(&tmpbuf, &buflen, dst, "ignore", 1, "meta_predicate(ignore(0))");
 
 	for (int i = 2; i <= 7; i++) {
 		char metabuf[256];
@@ -11671,6 +11685,32 @@ void load_properties(module *m)
 
 		sprintf(dst2, "))");
 		dst = push_property(&tmpbuf, &buflen, dst, "task", i, metabuf);
+	}
+
+	for (int i = 2; i <= 7; i++) {
+		char metabuf[256];
+		char *dst2 = metabuf;
+		dst2 += sprintf(dst2, "meta_predicate(maplist(%d", i-1);
+
+		for (int j = 1; j < i; j++)
+			dst2 += sprintf(dst2, ",?");
+
+
+		sprintf(dst2, "))");
+		dst = push_property(&tmpbuf, &buflen, dst, "maplist", i, metabuf);
+	}
+
+	for (int i = 2; i <= 7; i++) {
+		char metabuf[256];
+		char *dst2 = metabuf;
+		dst2 += sprintf(dst2, "meta_predicate(tasklist(%d", i-1);
+
+		for (int j = 1; j < i; j++)
+			dst2 += sprintf(dst2, ",?");
+
+
+		sprintf(dst2, "))");
+		dst = push_property(&tmpbuf, &buflen, dst, "tasklist", i, metabuf);
 	}
 
 	for (const struct builtins *ptr = g_iso_funcs; ptr->name; ptr++) {
