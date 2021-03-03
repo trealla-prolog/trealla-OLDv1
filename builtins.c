@@ -11533,7 +11533,7 @@ void load_builtins(prolog *pl)
 	}
 }
 
-static char *push_property(char **bufptr, size_t *lenptr, char *dst, const char *name, unsigned arity, const char *type)
+char *push_property(char **bufptr, size_t *lenptr, char *dst, const char *name, unsigned arity, const char *type)
 {
 	char *tmpbuf = *bufptr;
 	size_t buflen = *lenptr;

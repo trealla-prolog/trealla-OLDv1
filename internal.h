@@ -347,6 +347,7 @@ struct predicate_ {
 	bool is_prebuilt:1;
 	bool is_public:1;
 	bool is_dynamic:1;
+	bool is_meta_predicate:1;
 	bool is_persist:1;
 	bool is_multifile:1;
 	bool is_discontiguous:1;
@@ -701,6 +702,7 @@ cell *check_body_callable(parser *p, cell *c);
 void load_builtins(prolog *pl);
 void load_properties(module *m);
 void add_to_dirty_list(query *q, clause *r);
+char *push_property(char **bufptr, size_t *lenptr, char *dst, const char *name, unsigned arity, const char *type);
 
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
 pl_state print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);

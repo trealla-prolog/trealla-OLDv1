@@ -466,6 +466,14 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 	return find_predicate(m, &tmp);
 }
 
+static void push_properties(const char *name, unsigned arity, const char *type)
+{
+	size_t buflen = 1024;
+	char *tmpbuf = malloc(buflen);
+	push_property(&tmpbuf, &buflen, tmpbuf, name, arity, type);
+	free(tmpbuf);
+}
+
 static predicate *create_predicate(module *m, cell *c)
 {
 	assert(is_literal(c));
@@ -620,11 +628,17 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		if (check_directive(t->cells))
 			h->check_directive = true;
 
-		if (!consulting)
+		if (!consulting) {
+			push_properties(MODULE_GET_STR(c), c->arity, "dynamic");
 			h->is_dynamic = true;
+		} else
+			push_properties(MODULE_GET_STR(c), c->arity, "static");
 
-		if (consulting && m->make_public)
+		if (consulting && m->make_public) {
+			push_properties(MODULE_GET_STR(c), c->arity, "public");
 			h->is_public = true;
+		}
+
 	}
 
 	if (m->prebuilt)
@@ -848,9 +862,27 @@ static void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	predicate *h = find_predicate(m, &tmp);
 	if (!h) h = create_predicate(m, &tmp);
 
-	if (h)
+	if (h) {
+		push_properties(name, arity, "dynamic");
 		h->is_dynamic = true;
-	else
+	} else
+		m->error = true;
+}
+
+static void set_meta_predicate_in_db(module *m, const char *name, unsigned arity)
+{
+	cell tmp = (cell){0};
+	tmp.val_type = TYPE_LITERAL;
+	tmp.val_off = index_from_pool(m->pl, name);
+	ensure(tmp.val_off != ERR_IDX);
+	tmp.arity = arity;
+	predicate *h = find_predicate(m, &tmp);
+	if (!h) h = create_predicate(m, &tmp);
+
+	if (h) {
+		//push_properties(name, arity, "meta_predicate");
+		h->is_meta_predicate = true;
+	} else
 		m->error = true;
 }
 
@@ -865,6 +897,7 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 	if (!h) h = create_predicate(m, &tmp);
 
 	if (h) {
+		push_properties(name, arity, "dynamic");
 		h->is_dynamic = true;
 		h->is_persist = true;
 		m->use_persist = true;
@@ -1489,6 +1522,8 @@ static void directives(parser *p, term *t)
 				set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), arity);
 			} else if (!strcmp(dirname, "persist")) {
 				set_persist_in_db(p->m, PARSER_GET_STR(c_name), arity);
+			} else if (!strcmp(dirname, "meta_predicate")) {
+				set_meta_predicate_in_db(p->m, PARSER_GET_STR(c_name), arity);
 			} else if (!strcmp(dirname, "multifile")) {
 				const char *src = PARSER_GET_STR(c_name);
 
