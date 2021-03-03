@@ -641,8 +641,14 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		if (!consulting) {
 			push_properties(m, MODULE_GET_STR(c), c->arity, "dynamic");
 			h->is_dynamic = true;
-		} else
+		} else {
+			if (m->prebuilt) {
+				push_properties(m, MODULE_GET_STR(c), c->arity, "built_in");
+				push_properties(m, MODULE_GET_STR(c), c->arity, "private");
+			}
+
 			push_properties(m, MODULE_GET_STR(c), c->arity, "static");
+		}
 
 		if (consulting && m->make_public) {
 			push_properties(m, MODULE_GET_STR(c), c->arity, "public");
