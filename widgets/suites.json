@@ -100,15 +100,15 @@
       "total" : 26
     }
   }, {
-    "uid" : "85f20e8d17acbdaa0b478cb78dac7de9",
-    "name" : "predicates/predicate_property_2/tests.lgt::tests",
+    "uid" : "21ff05688ac7c7a65af1611086e5abe1",
+    "name" : "control/catch_3/tests.lgt::tests",
     "statistic" : {
       "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 11,
+      "passed" : 10,
       "unknown" : 0,
-      "total" : 12
+      "total" : 11
     }
   } ]
 }
