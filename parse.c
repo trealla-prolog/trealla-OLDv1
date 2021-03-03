@@ -466,11 +466,19 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 	return find_predicate(m, &tmp);
 }
 
-static void push_properties(const char *name, unsigned arity, const char *type)
+static void push_properties(module *m, const char *name, unsigned arity, const char *type)
 {
-	size_t buflen = 1024;
+	size_t buflen = 256;
 	char *tmpbuf = malloc(buflen);
 	push_property(&tmpbuf, &buflen, tmpbuf, name, arity, type);
+
+	//printf("%s", tmpbuf);
+
+	parser *p = create_parser(m);
+	p->srcptr = tmpbuf;
+	p->consulting = true;
+	parser_tokenize(p, false, false);
+	free(p);
 	free(tmpbuf);
 }
 
@@ -505,9 +513,11 @@ static void set_multifile_in_db(module *m, const char *name, idx_t arity)
 	tmp.arity = arity;
 	predicate *h = find_predicate(m, &tmp);
 	if (!h) h = create_predicate(m, &tmp);
-	if (h)
+
+	if (h) {
+		push_properties(m, name, arity, "multifile");
 		h->is_multifile = true;
-	else
+	} else
 		m->error = true;
 }
 
@@ -629,13 +639,13 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 			h->check_directive = true;
 
 		if (!consulting) {
-			push_properties(MODULE_GET_STR(c), c->arity, "dynamic");
+			push_properties(m, MODULE_GET_STR(c), c->arity, "dynamic");
 			h->is_dynamic = true;
 		} else
-			push_properties(MODULE_GET_STR(c), c->arity, "static");
+			push_properties(m, MODULE_GET_STR(c), c->arity, "static");
 
 		if (consulting && m->make_public) {
-			push_properties(MODULE_GET_STR(c), c->arity, "public");
+			push_properties(m, MODULE_GET_STR(c), c->arity, "public");
 			h->is_public = true;
 		}
 
@@ -846,9 +856,10 @@ void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
 	predicate *h = find_predicate(m, &tmp);
 	if (!h) h = create_predicate(m, &tmp);
 
-	if (h)
+	if (h) {
+		push_properties(m, name, arity, "discontiguous");
 		h->is_discontiguous = true;
-	else
+	} else
 		m->error = true;
 }
 
@@ -863,7 +874,7 @@ static void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	if (!h) h = create_predicate(m, &tmp);
 
 	if (h) {
-		push_properties(name, arity, "dynamic");
+		push_properties(m, name, arity, "dynamic");
 		h->is_dynamic = true;
 	} else
 		m->error = true;
@@ -880,7 +891,7 @@ static void set_meta_predicate_in_db(module *m, const char *name, unsigned arity
 	if (!h) h = create_predicate(m, &tmp);
 
 	if (h) {
-		//push_properties(name, arity, "meta_predicate");
+		push_properties(m, name, arity, "meta_predicate");
 		h->is_meta_predicate = true;
 	} else
 		m->error = true;
@@ -897,7 +908,8 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 	if (!h) h = create_predicate(m, &tmp);
 
 	if (h) {
-		push_properties(name, arity, "dynamic");
+		push_properties(m, name, arity, "dynamic");
+		push_properties(m, name, arity, "persist");
 		h->is_dynamic = true;
 		h->is_persist = true;
 		m->use_persist = true;
