@@ -11675,43 +11675,30 @@ void load_properties(module *m)
 
 	for (const struct builtins *ptr = g_iso_funcs; ptr->name; ptr++) {
 		sl_app(m->pl->funtab, ptr->name, ptr);
-
-		if (ptr->name[0] == '$')
-			continue;
-
+		if (ptr->name[0] == '$') continue;
 		dst = push_properties(&tmpbuf, &buflen, dst, ptr);
 	}
 
 	for (const struct builtins *ptr = g_arith_funcs; ptr->name; ptr++) {
 		sl_app(m->pl->funtab, ptr->name, ptr);
-
-		if (ptr->name[0] == '$')
-			continue;
-
+		if (ptr->name[0] == '$') continue;
 		dst = push_properties(&tmpbuf, &buflen, dst, ptr);
 	}
 
 	for (const struct builtins *ptr = g_other_funcs; ptr->name; ptr++) {
 		sl_app(m->pl->funtab, ptr->name, ptr);
-
-		if (ptr->name[0] == '$')
-			continue;
-
+		if (ptr->name[0] == '$') continue;
 		dst = push_properties(&tmpbuf, &buflen, dst, ptr);
 	}
 
 	for (const struct builtins *ptr = g_contrib_funcs; ptr->name; ptr++) {
 		sl_app(m->pl->funtab, ptr->name, ptr);
-
-		if (ptr->name[0] == '$')
-			continue;
-
+		if (ptr->name[0] == '$') continue;
 		dst = push_properties(&tmpbuf, &buflen, dst, ptr);
 	}
 
 	m->p->srcptr = tmpbuf;
 	m->p->consulting = true;
 	parser_tokenize(m->p, false, false);
-
 	free(tmpbuf);
 }
