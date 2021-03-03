@@ -897,7 +897,7 @@ static void set_meta_predicate_in_db(module *m, const char *name, unsigned arity
 	if (!h) h = create_predicate(m, &tmp);
 
 	if (h) {
-		push_properties(m, name, arity, "meta_predicate");
+		//push_properties(m, name, arity, "meta_predicate");
 		h->is_meta_predicate = true;
 	} else
 		m->error = true;
