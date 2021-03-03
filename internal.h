@@ -700,6 +700,7 @@ void parser_term_to_body(parser *p);
 cell *check_body_callable(parser *p, cell *c);
 void load_builtins(prolog *pl);
 void load_properties(module *m);
+char *push_property(char **bufptr, size_t *lenptr, char *dst, const struct builtins *ptr);
 void add_to_dirty_list(query *q, clause *r);
 
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
