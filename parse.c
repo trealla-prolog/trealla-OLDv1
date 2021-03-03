@@ -3725,6 +3725,7 @@ module *create_module(prolog *pl, const char *name)
 	make_rule(m, "unify_with_occurs_check(X, X) :- acyclic_term(X).");
 
 	make_rule(m, "predicate_property(P, A) :- "				\
+		"mustbe_callable(P), "								\
 		"'$load_properties', "								\
 		"'$predicate_property'(P, A).");
 
