@@ -5,6 +5,14 @@ partition([X|L], Y, L1, [X|L2]) :-
 	partition(L, Y, L1, L2).
 partition([], _, [], []).
 
+:- meta_predicate(maplist(1, ?)).
+:- meta_predicate(maplist(2, ?, ?)).
+:- meta_predicate(maplist(3, ?, ?, ?)).
+:- meta_predicate(maplist(4, ?, ?, ?, ?)).
+:- meta_predicate(maplist(5, ?, ?, ?, ?, ?)).
+:- meta_predicate(maplist(6, ?, ?, ?, ?, ?, ?)).
+:- meta_predicate(maplist(7, ?, ?, ?, ?, ?, ?, ?)).
+
 maplist(_, []).
 maplist(Goal, [X1|X1s]) :-
 	call(Goal, X1),
@@ -24,6 +32,14 @@ maplist(_, [], [], [], []).
 maplist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s]) :-
 	call(Goal, X1, X2, X3, X4),
 	maplist(Goal, X1s, X2s, X3s, X4s).
+
+:- meta_predicate(tasklist(1, ?)).
+:- meta_predicate(tasklist(2, ?, ?)).
+:- meta_predicate(tasklist(3, ?, ?, ?)).
+:- meta_predicate(tasklist(4, ?, ?, ?, ?)).
+:- meta_predicate(tasklist(5, ?, ?, ?, ?, ?)).
+:- meta_predicate(tasklist(6, ?, ?, ?, ?, ?, ?)).
+:- meta_predicate(tasklist(7, ?, ?, ?, ?, ?, ?, ?)).
 
 tasklist(_, []), wait.
 tasklist(Goal, [X1|X1s]) :-

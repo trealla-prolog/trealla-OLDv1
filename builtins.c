@@ -11670,7 +11670,7 @@ void load_properties(module *m)
 	dst = push_property(&tmpbuf, &buflen, dst, "once", 1, "meta_predicate(once(0))");
 	dst = push_property(&tmpbuf, &buflen, dst, "ignore", 1, "meta_predicate(ignore(0))");
 
-	for (int i = 1; i <= 7; i++) {
+	for (int i = 2; i <= 7; i++) {
 		char metabuf[256];
 		char *dst2 = metabuf;
 		dst2 += sprintf(dst2, "meta_predicate(call(%d", i-1);
@@ -11683,7 +11683,7 @@ void load_properties(module *m)
 		dst = push_property(&tmpbuf, &buflen, dst, "call", i, metabuf);
 	}
 
-	for (int i = 1; i <= 7; i++) {
+	for (int i = 2; i <= 7; i++) {
 		char metabuf[256];
 		char *dst2 = metabuf;
 		dst2 += sprintf(dst2, "meta_predicate(task(%d", i-1);
@@ -11694,36 +11694,6 @@ void load_properties(module *m)
 
 		sprintf(dst2, "))");
 		dst = push_property(&tmpbuf, &buflen, dst, "task", i, metabuf);
-	}
-
-	// This should go in library/apply.pl as a meta_predicate directive
-
-	for (int i = 3; i <= 7; i++) {
-		char metabuf[256];
-		char *dst2 = metabuf;
-		dst2 += sprintf(dst2, "meta_predicate(maplist(%d", i-1);
-
-		for (int j = 1; j < i; j++)
-			dst2 += sprintf(dst2, ",?");
-
-
-		sprintf(dst2, "))");
-		dst = push_property(&tmpbuf, &buflen, dst, "maplist", i, metabuf);
-	}
-
-	// This should go in library/apply.pl as a meta_predicate directive
-
-	for (int i = 3; i <= 7; i++) {
-		char metabuf[256];
-		char *dst2 = metabuf;
-		dst2 += sprintf(dst2, "meta_predicate(tasklist(%d", i-1);
-
-		for (int j = 1; j < i; j++)
-			dst2 += sprintf(dst2, ",?");
-
-
-		sprintf(dst2, "))");
-		dst = push_property(&tmpbuf, &buflen, dst, "tasklist", i, metabuf);
 	}
 
 	for (const struct builtins *ptr = g_iso_funcs; ptr->name; ptr++) {

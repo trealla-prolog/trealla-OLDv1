@@ -886,8 +886,10 @@ static void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 		m->error = true;
 }
 
-static void set_meta_predicate_in_db(module *m, const char *name, unsigned arity)
+static void set_meta_predicate_in_db(module *m, cell *c)
 {
+	const char *name = MODULE_GET_STR(c);
+	unsigned arity = c->arity;
 	cell tmp = (cell){0};
 	tmp.val_type = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
@@ -897,7 +899,11 @@ static void set_meta_predicate_in_db(module *m, const char *name, unsigned arity
 	if (!h) h = create_predicate(m, &tmp);
 
 	if (h) {
-		//push_properties(m, name, arity, "meta_predicate");
+		query q = (query){0};
+		q.m = m;
+		char *dst = print_term_to_strbuf(&q, c, 0, 0);
+		push_properties(m, name, arity, dst);
+		free(dst);
 		h->is_meta_predicate = true;
 	} else
 		m->error = true;
@@ -1526,7 +1532,7 @@ static void directives(parser *p, term *t)
 		return;
 
 	while (is_literal(p1)) {
-		if ((!strcmp(PARSER_GET_STR(p1), "/") || !strcmp(PARSER_GET_STR(p1), "/")) && (p1->arity == 2)) {
+		if (!strcmp(PARSER_GET_STR(p1), "/") && (p1->arity == 2)) {
 			cell *c_name = p1 + 1;
 			if (!is_atom(c_name)) return;
 			cell *c_arity = p1 + 2;
@@ -1541,7 +1547,7 @@ static void directives(parser *p, term *t)
 			} else if (!strcmp(dirname, "persist")) {
 				set_persist_in_db(p->m, PARSER_GET_STR(c_name), arity);
 			} else if (!strcmp(dirname, "meta_predicate")) {
-				set_meta_predicate_in_db(p->m, PARSER_GET_STR(c_name), arity);
+				set_meta_predicate_in_db(p->m, c_name);
 			} else if (!strcmp(dirname, "multifile")) {
 				const char *src = PARSER_GET_STR(c_name);
 
@@ -1565,6 +1571,9 @@ static void directives(parser *p, term *t)
 				set_discontiguous_in_db(p->m, PARSER_GET_STR(c_name), arity);
 			}
 
+			p1 += p1->nbr_cells;
+		} else if (!strcmp(dirname, "meta_predicate")) {
+			set_meta_predicate_in_db(p->m, p1);
 			p1 += p1->nbr_cells;
 		} else if (!strcmp(PARSER_GET_STR(p1), ",") && (p1->arity == 2))
 			p1 += 1;
