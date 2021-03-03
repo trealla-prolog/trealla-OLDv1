@@ -466,14 +466,14 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 	return find_predicate(m, &tmp);
 }
 
-static void push_properties(module *m, const char *name, unsigned arity, const char *type)
+static void push_property(module *m, const char *name, unsigned arity, const char *type)
 {
 	if (name[0] == '$')
 		return;
 
 	size_t buflen = 1024;
 	char *tmpbuf = malloc(buflen);
-	push_property(&tmpbuf, &buflen, tmpbuf, name, arity, type);
+	format_property(&tmpbuf, &buflen, tmpbuf, name, arity, type);
 	parser *p = create_parser(m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
@@ -515,7 +515,7 @@ static void set_multifile_in_db(module *m, const char *name, idx_t arity)
 	if (!h) h = create_predicate(m, &tmp);
 
 	if (h) {
-		push_properties(m, name, arity, "multifile");
+		push_property(m, name, arity, "multifile");
 		h->is_multifile = true;
 	} else
 		m->error = true;
@@ -639,19 +639,19 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 			h->check_directive = true;
 
 		if (!consulting) {
-			push_properties(m, MODULE_GET_STR(c), c->arity, "dynamic");
+			push_property(m, MODULE_GET_STR(c), c->arity, "dynamic");
 			h->is_dynamic = true;
 		} else {
 			if (m->prebuilt) {
-				push_properties(m, MODULE_GET_STR(c), c->arity, "built_in");
-				push_properties(m, MODULE_GET_STR(c), c->arity, "private");
+				push_property(m, MODULE_GET_STR(c), c->arity, "built_in");
+				push_property(m, MODULE_GET_STR(c), c->arity, "private");
 			}
 
-			push_properties(m, MODULE_GET_STR(c), c->arity, "static");
+			push_property(m, MODULE_GET_STR(c), c->arity, "static");
 		}
 
 		if (consulting && m->make_public) {
-			push_properties(m, MODULE_GET_STR(c), c->arity, "public");
+			push_property(m, MODULE_GET_STR(c), c->arity, "public");
 			h->is_public = true;
 		}
 
@@ -863,7 +863,7 @@ void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
 	if (!h) h = create_predicate(m, &tmp);
 
 	if (h) {
-		push_properties(m, name, arity, "discontiguous");
+		push_property(m, name, arity, "discontiguous");
 		h->is_discontiguous = true;
 	} else
 		m->error = true;
@@ -880,7 +880,7 @@ static void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	if (!h) h = create_predicate(m, &tmp);
 
 	if (h) {
-		push_properties(m, name, arity, "dynamic");
+		push_property(m, name, arity, "dynamic");
 		h->is_dynamic = true;
 	} else
 		m->error = true;
@@ -902,7 +902,7 @@ static void set_meta_predicate_in_db(module *m, cell *c)
 		query q = (query){0};
 		q.m = m;
 		char *dst = print_term_to_strbuf(&q, c, 0, 0);
-		push_properties(m, name, arity, dst);
+		push_property(m, name, arity, dst);
 		free(dst);
 		h->is_meta_predicate = true;
 	} else
@@ -920,8 +920,8 @@ static void set_persist_in_db(module *m, const char *name, unsigned arity)
 	if (!h) h = create_predicate(m, &tmp);
 
 	if (h) {
-		push_properties(m, name, arity, "dynamic");
-		push_properties(m, name, arity, "persist");
+		push_property(m, name, arity, "dynamic");
+		push_property(m, name, arity, "persist");
 		h->is_dynamic = true;
 		h->is_persist = true;
 		m->use_persist = true;
