@@ -11575,7 +11575,7 @@ char *push_property(char **bufptr, size_t *lenptr, char *dst, const char *name, 
 		char *dst2 = namebuf;
 		size_t len = sizeof(namebuf)-1;
 
-		while (*src && len--) {
+		while (*src && len-- > 1) {
 			if (*src == '\\') {
 				*dst2++ = *src;
 				len--;
