@@ -11647,6 +11647,7 @@ void load_properties(module *m)
 	dst = push_property(&tmpbuf, &buflen, dst, "setof", 3, "control_construct");
 	dst = push_property(&tmpbuf, &buflen, dst, "setof", 3, "meta_predicate(setof(?,0,-))");
 
+	dst = push_property(&tmpbuf, &buflen, dst, "setup_call_cleanup", 3, "meta_predicate(setup_call_cleanup(0,0,0))");
 	dst = push_property(&tmpbuf, &buflen, dst, "asserta", 1, "meta_predicate(asserta(:))");
 	dst = push_property(&tmpbuf, &buflen, dst, "assertz", 1, "meta_predicate(assertz(:))");
 	dst = push_property(&tmpbuf, &buflen, dst, "retract", 1, "meta_predicate(retract(:))");
