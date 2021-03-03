@@ -11608,10 +11608,10 @@ void load_properties(module *m)
 	dst = _push_property(&tmpbuf, &buflen, dst, ";", 2, "meta_predicate((0;0))");
 
 	dst = _push_property(&tmpbuf, &buflen, dst, "->", 2, "control_construct");
-	dst = _push_property(&tmpbuf, &buflen, dst, "->", 2, "meta_predicate((0;0))");
+	dst = _push_property(&tmpbuf, &buflen, dst, "->", 2, "meta_predicate((0->0))");
 
 	dst = _push_property(&tmpbuf, &buflen, dst, "*->", 2, "control_construct");
-	dst = _push_property(&tmpbuf, &buflen, dst, "*->", 2, "meta_predicate((0;0))");
+	dst = _push_property(&tmpbuf, &buflen, dst, "*->", 2, "meta_predicate((0*->0))");
 
 	for (int i = 1; i <= 7; i++) {
 		dst = _push_property(&tmpbuf, &buflen, dst, "call", i, "built_in");

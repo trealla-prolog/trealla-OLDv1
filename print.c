@@ -516,6 +516,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		bool special_op = (!strcmp(GET_STR(head), ",")
 			|| !strcmp(GET_STR(head), ";")
 			|| !strcmp(GET_STR(head), "->")
+			|| !strcmp(GET_STR(head), "*->")
 			|| !strcmp(GET_STR(head), "-->"));
 		int parens = is_structure(head) && special_op;
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
@@ -652,7 +653,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 					if (!strcmp(s, ",") || !strcmp(s, ";") ||
 						!strcmp(s, "->") || !strcmp(s, ":-") ||
-						!strcmp(s, "-->"))
+						!strcmp(s, "*->") || !strcmp(s, "-->"))
 						parens = 1;
 				}
 
