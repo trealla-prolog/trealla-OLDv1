@@ -11548,9 +11548,9 @@ static char *_push_property(char **bufptr, size_t *lenptr, char *dst, const char
 	}
 
 	if (!isalpha(name[0]) && (name[0] != '_')) {
-		char name[256];
+		char namebuf[256];
 		const char *src = name;
-		char *dst2 = name;
+		char *dst2 = namebuf;
 
 		while (*src) {
 			if (*src == '\\')
@@ -11560,7 +11560,7 @@ static char *_push_property(char **bufptr, size_t *lenptr, char *dst, const char
 		}
 
 		*dst2 = '\0';
-		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$predicate_property'('%s'", name);
+		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$predicate_property'('%s'", namebuf);
 	} else
 		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$predicate_property'(%s", name);
 
@@ -11587,7 +11587,6 @@ static char *push_property(char **bufptr, size_t *lenptr, char *dst, const struc
 	dst = _push_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "built_in");
 	dst = _push_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "static");
 	dst = _push_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "private");
-	dst = _push_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "native_code");
 	return dst;
 }
 
@@ -11596,11 +11595,33 @@ void load_properties(module *m)
 	if (m->loaded_properties)
 		return;
 
-	m->loaded_properties = false;
+	m->loaded_properties = true;
 	size_t buflen = 1024*8;
 	char *tmpbuf = malloc(buflen);
 	char *dst = tmpbuf;
 	*dst = '\0';
+
+	dst = _push_property(&tmpbuf, &buflen, dst, ",", 2, "built_in");
+	dst = _push_property(&tmpbuf, &buflen, dst, ",", 2, "static");
+	dst = _push_property(&tmpbuf, &buflen, dst, ",", 2, "private");
+	dst = _push_property(&tmpbuf, &buflen, dst, ",", 2, "control_construct");
+	dst = _push_property(&tmpbuf, &buflen, dst, ",", 2, "meta_predicate((0,0))");
+
+	for (int i = 1; i <= 7; i++) {
+		dst = _push_property(&tmpbuf, &buflen, dst, "call", i, "built_in");
+		dst = _push_property(&tmpbuf, &buflen, dst, "call", i, "static");
+		dst = _push_property(&tmpbuf, &buflen, dst, "call", i, "private");
+		dst = _push_property(&tmpbuf, &buflen, dst, "call", i, "control_construct");
+		dst = _push_property(&tmpbuf, &buflen, dst, "call", i, "meta_predicate(call(1,?))");
+	}
+
+	for (int i = 1; i <= 7; i++) {
+		dst = _push_property(&tmpbuf, &buflen, dst, "task", i, "built_in");
+		dst = _push_property(&tmpbuf, &buflen, dst, "task", i, "static");
+		dst = _push_property(&tmpbuf, &buflen, dst, "task", i, "private");
+		dst = _push_property(&tmpbuf, &buflen, dst, "task", i, "control_construct");
+		dst = _push_property(&tmpbuf, &buflen, dst, "task", i, "meta_predicate(task(1,?))");
+	}
 
 	for (const struct builtins *ptr = g_iso_funcs; ptr->name; ptr++) {
 		sl_app(m->pl->funtab, ptr->name, ptr);
