@@ -3733,7 +3733,7 @@ module *create_module(prolog *pl, const char *name)
 		"mustbe_callable(P), "								\
 		"'$load_properties', "								\
 		"(var(A) -> true ; "								\
-		" ('$memberchk'(A, [built_in,control_construct,private,static,dynamic,persist,multifile,meta_predicate(_)]) -> "							\
+		" ('$memberchk'(A, [built_in,control_construct,discontiguous,private,static,dynamic,persist,multifile,meta_predicate(_)]) -> "							\
 			"true ; "										\
 			"throw(error(domain_error(predicate_property,A),P)) "		\
 			")"												\
