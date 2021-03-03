@@ -1,0 +1,55 @@
+{
+  "uid" : "838e2a5fd62aa8f2",
+  "name" : "iso_term_02",
+  "historyId" : "syntax/terms/tests.lgt::tests:tests#iso_term_02",
+  "time" : {
+    "start" : 1614761552000,
+    "stop" : 1614761552000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Error instead of success",
+  "statusTrace" : "error(syntax_error((read_term,[])),read/1)",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "syntax/terms/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "838e2a5fd62aa8f2.json",
+  "parameterValues" : [ ]
+}
