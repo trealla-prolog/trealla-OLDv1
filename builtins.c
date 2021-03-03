@@ -11631,7 +11631,14 @@ void load_properties(module *m)
 
 	for (int i = 2; i <= 7; i++) {
 		char metabuf[256];
-		sprintf(metabuf, "meta_predicate(call(%d,?))", i-1);
+		char *dst2 = metabuf;
+		dst2 += sprintf(dst2, "meta_predicate(call(%d", i-1);
+
+		for (int j = 1; j < i; j++)
+			dst2 += sprintf(dst2, ",?");
+
+
+		sprintf(dst2, "))");
 		dst = push_property(&tmpbuf, &buflen, dst, "call", i, metabuf);
 	}
 
@@ -11644,7 +11651,14 @@ void load_properties(module *m)
 
 	for (int i = 2; i <= 7; i++) {
 		char metabuf[256];
-		sprintf(metabuf, "meta_predicate(call(%d,?))", i-1);
+		char *dst2 = metabuf;
+		dst2 += sprintf(dst2, "meta_predicate(task(%d", i-1);
+
+		for (int j = 1; j < i; j++)
+			dst2 += sprintf(dst2, ",?");
+
+
+		sprintf(dst2, "))");
 		dst = push_property(&tmpbuf, &buflen, dst, "task", i, metabuf);
 	}
 
