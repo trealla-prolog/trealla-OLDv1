@@ -11667,8 +11667,6 @@ void load_properties(module *m)
 	dst = push_property(&tmpbuf, &buflen, dst, "catch", 3, "meta_predicate(catch(0,?,0))");
 	dst = push_property(&tmpbuf, &buflen, dst, "phrase", 2, "meta_predicate(phrase(2,?))");
 	dst = push_property(&tmpbuf, &buflen, dst, "phrase", 3, "meta_predicate(phrase(2,?,?))");
-	dst = push_property(&tmpbuf, &buflen, dst, "once", 1, "meta_predicate(once(0))");
-	dst = push_property(&tmpbuf, &buflen, dst, "ignore", 1, "meta_predicate(ignore(0))");
 
 	for (int i = 2; i <= 7; i++) {
 		char metabuf[256];
