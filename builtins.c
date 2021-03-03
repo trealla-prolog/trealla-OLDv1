@@ -11696,6 +11696,8 @@ void load_properties(module *m)
 		dst = push_property(&tmpbuf, &buflen, dst, "task", i, metabuf);
 	}
 
+	// This should go in library/apply.pl as a meta_predicate directive
+
 	for (int i = 3; i <= 7; i++) {
 		char metabuf[256];
 		char *dst2 = metabuf;
@@ -11708,6 +11710,8 @@ void load_properties(module *m)
 		sprintf(dst2, "))");
 		dst = push_property(&tmpbuf, &buflen, dst, "maplist", i, metabuf);
 	}
+
+	// This should go in library/apply.pl as a meta_predicate directive
 
 	for (int i = 3; i <= 7; i++) {
 		char metabuf[256];
