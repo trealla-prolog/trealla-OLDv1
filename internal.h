@@ -720,15 +720,16 @@ typedef struct {
 }
  PRBUF;
 
-#define PRBUF_INIT(pr) { 											\
-	(pr)->buf = malloc((pr)->size=256);								\
-}
+#define PRBUF_INIT(pr) PRBUF pr_##buf;								\
+	pr_##buf.buf = malloc(pr_##buf.size=256);
 
-#define PRBUF_CLEAR(pr) free((pr)->buf)
-#define PRBUF_BUF(pr) (pr)->buf
-#define PRBUF_SIZE(pr) (pr)->size
+#define PRBUF_BUF(pr) pr_##buf.buf
+#define PRBUF_SIZE(pr) pr_##buf.size
 
 #define PRBUF_CHK(pr,len) 											\
+	if (!pr_##buf.buf) pr_##buf.buf = malloc(pr_##buf.size=256);	\
 	if (len >= PRBUF_SIZE(pr)) {									\
-		(pr)->buf = realloc((pr)->buf, (pr)->size *= 2);			\
+		pr_##buf.buf = realloc(pr_##buf.buf, pr_##buf.size *= 2);	\
 	}
+
+#define PRBUF_DONE(pr) free(pr_##buf.buf); pr_##buf.buf = NULL;

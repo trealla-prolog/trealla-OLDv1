@@ -1333,12 +1333,11 @@ static void directives(parser *p, term *t)
 					continue;
 
 				char *src = strndup((const char*)lib->start, (lib->end-lib->start));
-				PRBUF pr;
-				PRBUF_INIT(&pr);
-				PRBUF_CHK(&pr, strlen("library/")+strlen(lib->name));
-				snprintf(PRBUF_BUF(&pr), PRBUF_SIZE(&pr), "library/%s", lib->name);
-				m = module_load_text(p->m, src, PRBUF_BUF(&pr));
-				PRBUF_CLEAR(&pr);
+				PRBUF_INIT(pr);
+				PRBUF_CHK(pr, strlen("library/")+strlen(lib->name));
+				snprintf(PRBUF_BUF(pr), PRBUF_SIZE(pr), "library/%s", lib->name);
+				m = module_load_text(p->m, src, PRBUF_BUF(pr));
+				PRBUF_DONE(pr);
 				free(src);
 
 				if (m != p->m)
@@ -4386,12 +4385,11 @@ prolog *pl_create()
 				memcpy(src, lib->start, len);
 				src[len] = '\0';
 				assert(pl->m);
-				PRBUF pr;
-				PRBUF_INIT(&pr);
-				PRBUF_CHK(&pr, strlen("library/")+strlen(lib->name));
-				snprintf(PRBUF_BUF(&pr), PRBUF_SIZE(&pr), "library/%s", lib->name);
-				module_load_text(pl->m, src, PRBUF_BUF(&pr));
-				PRBUF_CLEAR(&pr);
+				PRBUF_INIT(pr);
+				PRBUF_CHK(pr, strlen("library/")+strlen(lib->name));
+				snprintf(PRBUF_BUF(pr), PRBUF_SIZE(pr), "library/%s", lib->name);
+				module_load_text(pl->m, src, PRBUF_BUF(pr));
+				PRBUF_DONE(pr);
 				free(src);
 			}
 		}
