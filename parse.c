@@ -987,7 +987,7 @@ parser *create_parser(module *m)
 	p->t = calloc(sizeof(term)+(sizeof(cell)*nbr_cells), 1);
 	p->t->nbr_cells = nbr_cells;
 	p->start_term = true;
-	p->line_nbr = 1;
+	p->line_nbr = 0;
 	p->m = m;
 	p->error = false;
 	p->flag = m->flag;
@@ -1785,7 +1785,7 @@ void parser_assign_vars(parser *p, unsigned start, bool rebase)
 			(p->vartab.var_name[i][strlen(p->vartab.var_name[i])-1] != '_') &&
 			(*p->vartab.var_name[i] != '_')) {
 			if (!p->m->pl->quiet)
-				fprintf(stdout, "Warning: singleton: %s, line %d, file '%s'\n", p->vartab.var_name[i], (int)p->line_nbr, p->m->filename);
+				fprintf(stdout, "Warning: singleton: %s, line %u, file '%s'\n", p->vartab.var_name[i], (int)p->line_nbr, p->m->filename);
 		}
 	}
 
@@ -2278,7 +2278,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 	if ((*s == '.') && isdigit(s[1])) {
 		if (DUMP_ERRS || !p->do_read_term)
-			fprintf(stdout, "Error: syntax error parsing number, line %d, file '%s'\n", p->line_nbr, p->m->filename);
+			fprintf(stdout, "Error: syntax error parsing number, line %u, file '%s'\n", p->line_nbr, p->m->filename);
 
 		p->error = true;
 		return -1;
@@ -2320,7 +2320,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			if ((v > INT64_MAX) || (v < INT64_MIN)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, integer overflow, line %d, file '%s'\n", p->line_nbr, p->m->filename);
+					fprintf(stdout, "Error: syntax error, integer overflow, line %u, file '%s'\n", p->line_nbr, p->m->filename);
 
 				p->error = true;
 				return -1;
@@ -2332,7 +2332,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 		if (isdigit(*s) || isalpha(*s)) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing binary number, line %d, file '%s\n", p->line_nbr, p->m->filename);
+				fprintf(stdout, "Error: syntax error, parsing binary number, line %u, file '%s\n", p->line_nbr, p->m->filename);
 
 			p->error = true;
 			return -1;
@@ -2356,7 +2356,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			if ((v > INT64_MAX) || (v < INT64_MIN)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, integer overflow, line %d, file '%s'\n", p->line_nbr, p->m->filename);
+					fprintf(stdout, "Error: syntax error, integer overflow, line %u, file '%s'\n", p->line_nbr, p->m->filename);
 
 				p->error = true;
 				return -1;
@@ -2368,7 +2368,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 		if (isdigit(*s) || isalpha(*s)) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing octal number, line %d, file '%s'\n", p->line_nbr, p->m->filename);
+				fprintf(stdout, "Error: syntax error, parsing octal number, line %u, file '%s'\n", p->line_nbr, p->m->filename);
 
 			p->error = true;
 			return -1;
@@ -2396,7 +2396,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			if ((v > INT64_MAX) || (v < INT64_MIN)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, integer overflow, line %d, file '%s'\n", p->line_nbr, p->m->filename);
+					fprintf(stdout, "Error: syntax error, integer overflow, line %u, file '%s'\n", p->line_nbr, p->m->filename);
 
 				p->error = true;
 				return -1;
@@ -2408,7 +2408,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 		if (isalpha(*s)) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing hex number, line %d, file '%s'\n", p->line_nbr, p->m->filename);
+				fprintf(stdout, "Error: syntax error, parsing hex number, line %u, file '%s'\n", p->line_nbr, p->m->filename);
 
 			p->error = true;
 			return -1;
@@ -2431,7 +2431,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		if ((v > INT64_MAX) || (v < INT64_MIN)) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, integer overflow, line %d, file '%s'\n", p->line_nbr, p->m->filename);
+				fprintf(stdout, "Error: syntax error, integer overflow, line %u, file '%s'\n", p->line_nbr, p->m->filename);
 
 			p->error = true;
 			return -1;
@@ -2451,7 +2451,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 	if (isalpha(*s)) {
 		if (DUMP_ERRS || !p->do_read_term)
-			fprintf(stdout, "Error: syntax error, parsing number, line %d, file '%s'\n", p->line_nbr, p->m->filename);
+			fprintf(stdout, "Error: syntax error, parsing number, line %u, file '%s'\n", p->line_nbr, p->m->filename);
 
 		p->error = true;
 		return -1;
@@ -2482,7 +2482,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 		if ((*s == '(') || (isalpha(*s))) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing number, line %d, file '%s'\n", p->line_nbr, p->m->filename);
+				fprintf(stdout, "Error: syntax error, parsing number, line %u, file '%s'\n", p->line_nbr, p->m->filename);
 
 			p->error = true;
 			return -1;
@@ -2737,7 +2737,7 @@ static bool get_token(parser *p, int last_op)
 		if ((strchr(dst, '.') || strchr(dst, 'e') || strchr(dst, 'E')) && !strchr(dst, '\'')) {
 			if (!valid_float(p->token)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, float, line %d, file '%s'\n", p->line_nbr, p->m->filename);
+					fprintf(stdout, "Error: syntax error, float, line %u, file '%s'\n", p->line_nbr, p->m->filename);
 
 				p->error = true;
 				return false;
