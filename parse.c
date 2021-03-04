@@ -2917,7 +2917,6 @@ static bool get_token(parser *p, int last_op)
 	}
 
 	static const char *s_delims = "!(){}[]|_,`'\"\t\r\n ";
-	p->is_op = true;
 
 	while (*src) {
 		ch = get_char_utf8(&src);
@@ -2943,6 +2942,7 @@ static bool get_token(parser *p, int last_op)
 			break;
 	}
 
+	p->is_op = get_op(p->m, p->token, NULL, false);
 	p->srcptr = (char*)src;
 	return true;
 }
