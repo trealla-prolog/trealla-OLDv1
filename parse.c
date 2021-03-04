@@ -1333,7 +1333,11 @@ static void directives(parser *p, term *t)
 					continue;
 
 				char *src = strndup((const char*)lib->start, (lib->end-lib->start));
-				m = module_load_text(p->m, src);
+				PRBUF pr;
+				PRBUF_INIT(&pr);
+				PRBUF_CHK(&pr, strlen("library/")+strlen(lib->name));
+				snprintf(PRBUF_BUF(&pr), PRBUF_SIZE(&pr), "library/%s", lib->name);
+				m = module_load_text(p->m, src, PRBUF_BUF(&pr));
 				free(src);
 
 				if (m != p->m)
@@ -3464,11 +3468,13 @@ static bool parser_run(parser *p, const char *src, int dump)
 	return ok;
 }
 
-module *module_load_text(module *m, const char *src)
+module *module_load_text(module *m, const char *src, const char *filename)
 {
 	parser *p = create_parser(m);
 	if (!p) return NULL;
 
+	free(p->m->filename);
+	p->m->filename = strdup(filename);
 	p->consulting = true;
 	p->srcptr = (char*)src;
 	parser_tokenize(p, false, false);
@@ -3505,13 +3511,14 @@ module *module_load_text(module *m, const char *src)
 
 bool module_load_fp(module *m, FILE *fp, const char *filename)
 {
-	bool ok = false;
 	parser *p = create_parser(m);
 	if (!p) return false;
+
 	free(p->m->filename);
 	p->m->filename = strdup(filename);
 	p->consulting = true;
 	p->fp = fp;
+	bool ok = false;
 
 	do {
 		if (getline(&p->save_line, &p->n_line, p->fp) == -1)
@@ -4378,7 +4385,11 @@ prolog *pl_create()
 				memcpy(src, lib->start, len);
 				src[len] = '\0';
 				assert(pl->m);
-				module_load_text(pl->m, src);
+				PRBUF pr;
+				PRBUF_INIT(&pr);
+				PRBUF_CHK(&pr, strlen("library/")+strlen(lib->name));
+				snprintf(PRBUF_BUF(&pr), PRBUF_SIZE(&pr), "library/%s", lib->name);
+				module_load_text(pl->m, src, PRBUF_BUF(&pr));
 				free(src);
 			}
 		}

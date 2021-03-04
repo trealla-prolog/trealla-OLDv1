@@ -692,7 +692,7 @@ USE_RESULT cell *end_list(query *q);
 size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, int tolerant);
 void consultall(parser *p, cell *l);
 void fix_list(cell *c);
-module *module_load_text(module *m, const char *src);
+module *module_load_text(module *m, const char *src, const char *filename);
 void make_indirect(cell *tmp, cell *c);
 void stash_me(query *q, term *t, bool last_match);
 unsigned fake_numbervars(query *q, cell *c, idx_t c_ctx, unsigned start);
@@ -714,3 +714,21 @@ pl_state print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
 char *print_canonical_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
 pl_state print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
 
+typedef struct {
+	char *buf;
+	size_t size;
+}
+ PRBUF;
+
+#define PRBUF_INIT(pr) { 											\
+	(pr)->buf = malloc((pr)->size=256);								\
+}
+
+#define PRBUF_CLEAR(pr) free((pr)->buf)
+#define PRBUF_BUF(pr) (pr)->buf
+#define PRBUF_SIZE(pr) (pr)->size
+
+#define PRBUF_CHK(pr,len) 											\
+	if (len >= PRBUF_SIZE(pr)) {									\
+		(pr)->buf = realloc((pr)->buf, (pr)->size *= 2);			\
+	}

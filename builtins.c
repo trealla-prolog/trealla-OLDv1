@@ -11070,7 +11070,11 @@ static USE_RESULT pl_state fn_use_module_1(query *q)
 				continue;
 
 			char *src = strndup((const char*)lib->start, (lib->end-lib->start));
-			m = module_load_text(q->m, src);
+			PRBUF pr;
+			PRBUF_INIT(&pr);
+			PRBUF_CHK(&pr, strlen("library/")+strlen(lib->name));
+			snprintf(PRBUF_BUF(&pr), PRBUF_SIZE(&pr), "library/%s", lib->name);
+			m = module_load_text(q->m, src, PRBUF_BUF(&pr));
 			free(src);
 
 			if (m != q->m)
