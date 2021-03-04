@@ -8707,7 +8707,7 @@ static int format_integer(char *dst, int_t v, int grouping, int sep, int decimal
 	while (src >= tmpbuf1) {
 		*dst2++ = *src--;
 
-		if (grouping && !decimals && !(i++%grouping) && *src)
+		if (grouping && !decimals && !(i++ % grouping) && *src)
 			*dst2++ = sep;
 
 		if (decimals && (j++ == decimals)) {
