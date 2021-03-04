@@ -484,8 +484,6 @@ static void push_property(module *m, const char *name, unsigned arity, const cha
 
 static predicate *create_predicate(module *m, cell *c)
 {
-	assert(is_literal(c));
-
 	FAULTINJECT(errno = ENOMEM; return NULL);
 	predicate *h = calloc(1, sizeof(predicate));
 	ensure(h);
@@ -987,7 +985,7 @@ parser *create_parser(module *m)
 	p->t = calloc(sizeof(term)+(sizeof(cell)*nbr_cells), 1);
 	p->t->nbr_cells = nbr_cells;
 	p->start_term = true;
-	p->line_nbr = 0;
+	p->line_nbr = 1;
 	p->m = m;
 	p->error = false;
 	p->flag = m->flag;
@@ -1202,6 +1200,7 @@ static void directives(parser *p, term *t)
 		const char *name = PARSER_GET_STR(p1);
 		char *tmpbuf = relative_to(p->m->filename, name);
 		deconsult(p->m->pl, tmpbuf);
+		unsigned save_line_nbr = p->line_nbr;
 
 		if (!module_load_file(p->m, tmpbuf)) {
 			if (DUMP_ERRS || !p->do_read_term)
@@ -1212,6 +1211,7 @@ static void directives(parser *p, term *t)
 			return;
 		}
 
+		p->line_nbr = save_line_nbr;
 		free(tmpbuf);
 		return;
 	}
@@ -1785,7 +1785,7 @@ void parser_assign_vars(parser *p, unsigned start, bool rebase)
 			(p->vartab.var_name[i][strlen(p->vartab.var_name[i])-1] != '_') &&
 			(*p->vartab.var_name[i] != '_')) {
 			if (!p->m->pl->quiet)
-				fprintf(stdout, "Warning: singleton: %s, line %u, file '%s'\n", p->vartab.var_name[i], (int)p->line_nbr, p->m->filename);
+				fprintf(stdout, "Warning: singleton: %s, near line %u, file '%s'\n", p->vartab.var_name[i], p->line_nbr, p->m->filename);
 		}
 	}
 
@@ -2110,6 +2110,7 @@ static bool parser_dcg_rewrite(parser *p)
 
 	parser *p2 = create_parser(p->m);
 	ensure(p2);
+	p2->line_nbr = p->line_nbr;
 	p2->skip = true;
 	p2->srcptr = src;
 	parser_tokenize(p2, false, false);
@@ -2556,79 +2557,86 @@ static bool valid_float(const char *src)
 static const char *eat_space(parser *p)
 {
 	const char *src = p->srcptr;
-
-LOOP:
-
-	while (isspace(*src)) {
-		if (*src == '\n')
-			p->line_nbr++;
-
-		src++;
-	}
-
-	while ((*src == '%') && !p->fp) {
-		while (*src && (*src != '\n'))
-			src++;
-
-		if (*src == '\n')
-			p->line_nbr++;
-
-		src++;
-
-		while (isspace(*src)) {
-			if (*src == '\n')
-				p->line_nbr++;
-
-			src++;
-		}
-
-		goto LOOP;
-	}
-
-	while ((!*src || (*src == '%')) && p->fp) {
-		if (getline(&p->save_line, &p->n_line, p->fp) == -1)
-			return NULL;
-
-		p->srcptr = p->save_line;
-		src = p->srcptr;
-
-		while (isspace(*src)) {
-			if (*src == '\n')
-				p->line_nbr++;
-
-			src++;
-		}
-
-		goto LOOP;
-	}
+	bool done;
 
 	do {
-		if (!p->comment && (src[0] == '/') && (src[1] == '*')) {
-			p->comment = true;
-			src += 2;
+		done = true;
+
+		while (isspace(*src)) {
+			if (*src == '\n')
+				p->line_nbr++;
+
+			src++;
+		}
+
+		while ((*src == '%') && !p->fp) {
+			while (*src && (*src != '\n'))
+				src++;
+
+			if (*src == '\n')
+				p->line_nbr++;
+
+			src++;
+
+			while (isspace(*src)) {
+				if (*src == '\n')
+					p->line_nbr++;
+
+				src++;
+			}
+
+			done = false;
 			continue;
 		}
 
-		if (p->comment && (src[0] == '*') && (src[1] == '/')) {
-			p->comment = false;
-			src += 2;
-			goto LOOP;
-		}
-
-		if (*src == '\n')
-			p->line_nbr++;
-
-		if (p->comment)
-			src++;
-
-		if (!*src && p->comment && p->fp) {
+		while ((!*src || (*src == '%')) && p->fp) {
 			if (getline(&p->save_line, &p->n_line, p->fp) == -1)
 				return NULL;
 
-			src = p->srcptr = p->save_line;
+			p->srcptr = p->save_line;
+			src = p->srcptr;
+
+			while (isspace(*src)) {
+				if (*src == '\n')
+					p->line_nbr++;
+
+				src++;
+			}
+
+			done = false;
+			continue;
 		}
+
+		do {
+			if (!p->comment && (src[0] == '/') && (src[1] == '*')) {
+				p->comment = true;
+				src += 2;
+				continue;
+			}
+
+			if (p->comment && (src[0] == '*') && (src[1] == '/')) {
+				p->comment = false;
+				src += 2;
+				done = false;
+				continue;
+			}
+
+			if (*src == '\n')
+				p->line_nbr++;
+
+			if (p->comment)
+				src++;
+
+			if (!*src && p->comment && p->fp) {
+				if (getline(&p->save_line, &p->n_line, p->fp) == -1)
+					return NULL;
+
+				src = p->srcptr = p->save_line;
+			}
+		}
+		 while (*src && p->comment);
 	}
-	 while (*src && p->comment);
+	 while (!done);
 
 	while (isspace(*src)) {
 		if (*src == '\n')
@@ -2796,7 +2804,7 @@ static bool get_token(parser *p, int last_op)
 
 					if (!p->error) {
 						if (ch2 == '\n') {
-							p->line_nbr++;
+							//p->line_nbr++;
 							continue;
 						}
 					} else {

@@ -11723,6 +11723,7 @@ void load_properties(module *m)
 
 	m->p->srcptr = tmpbuf;
 	m->p->consulting = true;
+	m->p->line_nbr = 0;
 	parser_tokenize(m->p, false, false);
 	free(tmpbuf);
 }
