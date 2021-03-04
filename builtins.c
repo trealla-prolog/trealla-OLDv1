@@ -8567,8 +8567,8 @@ static USE_RESULT pl_state fn_absolute_file_name_3(query *q)
 		if (!ptr)
 			return throw_error(q, p1, "existence_error", "environment_variable");
 
-		size_t buflen = strlen(ptr)+1+strlen(s);
-		tmpbuf = malloc(buflen+1);
+		size_t buflen = strlen(ptr)+1+strlen(s)+1;
+		tmpbuf = malloc(buflen);
 		may_ptr_error(tmpbuf);
 		snprintf(tmpbuf, buflen, "%s/%s", ptr, s);
 		char *tmpbuf2;
@@ -8578,8 +8578,8 @@ static USE_RESULT pl_state fn_absolute_file_name_3(query *q)
 				tmpbuf2 = realpath(".", NULL);
 
 			may_ptr_error(tmpbuf2, free(tmpbuf));
-			size_t buflen = strlen(tmpbuf2)+1+strlen(s);
-			char *tmp = malloc(buflen+1);
+			size_t buflen = strlen(tmpbuf2)+1+strlen(s)+1;
+			char *tmp = malloc(buflen);
 			may_ptr_error(tmp, free(tmpbuf2));
 			snprintf(tmp, buflen, "%s/%s", tmpbuf2, s);
 			free(tmpbuf);
@@ -8596,8 +8596,8 @@ static USE_RESULT pl_state fn_absolute_file_name_3(query *q)
 			may_ptr_error(tmpbuf);
 
 			if (*s != '/') {
-				size_t buflen = strlen(tmpbuf)+1+strlen(s);
-				char *tmp = malloc(buflen+1);
+				size_t buflen = strlen(tmpbuf)+1+strlen(s)+1;
+				char *tmp = malloc(buflen);
 				may_ptr_error(tmp, free(tmpbuf));
 				snprintf(tmp, buflen, "%s/%s", tmpbuf, s);
 				free(tmpbuf);
