@@ -11075,6 +11075,7 @@ static USE_RESULT pl_state fn_use_module_1(query *q)
 			PRBUF_CHK(&pr, strlen("library/")+strlen(lib->name));
 			snprintf(PRBUF_BUF(&pr), PRBUF_SIZE(&pr), "library/%s", lib->name);
 			m = module_load_text(q->m, src, PRBUF_BUF(&pr));
+			PRBUF_CLEAR(&pr);
 			free(src);
 
 			if (m != q->m)
