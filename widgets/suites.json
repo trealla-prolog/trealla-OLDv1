@@ -45,50 +45,6 @@
       "total" : 34
     }
   }, {
-    "uid" : "339a45d656de0d132e4b8dc11693d308",
-    "name" : "predicates/get_code_2/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 3,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 19,
-      "unknown" : 0,
-      "total" : 22
-    }
-  }, {
-    "uid" : "edb47ef3610bd886cc6d05efc6058434",
-    "name" : "predicates/get_char_2/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 3,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 17,
-      "unknown" : 0,
-      "total" : 20
-    }
-  }, {
-    "uid" : "864256fb5591417f4e68cb8ab213687f",
-    "name" : "predicates/peek_code_2/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 2,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 20,
-      "unknown" : 0,
-      "total" : 22
-    }
-  }, {
-    "uid" : "828969827aaf8848c5a364fff228c0c2",
-    "name" : "predicates/peek_char_2/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 2,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 18,
-      "unknown" : 0,
-      "total" : 20
-    }
-  }, {
     "uid" : "bdc881d4b933694f76d7d16bff33e9cf",
     "name" : "predicates/bagof_3/tests.lgt::tests",
     "statistic" : {
@@ -109,6 +65,50 @@
       "passed" : 13,
       "unknown" : 0,
       "total" : 16
+    }
+  }, {
+    "uid" : "bb8e106369c9e4f92fe1145b40d7d18a",
+    "name" : "predicates/format_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 2,
+      "broken" : 0,
+      "skipped" : 1,
+      "passed" : 13,
+      "unknown" : 0,
+      "total" : 16
+    }
+  }, {
+    "uid" : "ed0cdb351cf5fe82566e390f01a37528",
+    "name" : "control/throw_1/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 2,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 5,
+      "unknown" : 0,
+      "total" : 7
+    }
+  }, {
+    "uid" : "8c7c11628e768e873513ac99dd2929a7",
+    "name" : "predicates/open_4/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 25,
+      "unknown" : 0,
+      "total" : 26
+    }
+  }, {
+    "uid" : "21ff05688ac7c7a65af1611086e5abe1",
+    "name" : "control/catch_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 10,
+      "unknown" : 0,
+      "total" : 11
     }
   } ]
 }
