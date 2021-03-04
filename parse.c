@@ -1333,11 +1333,10 @@ static void directives(parser *p, term *t)
 					continue;
 
 				char *src = strndup((const char*)lib->start, (lib->end-lib->start));
-				PRBUF_INIT(pr);
-				PRBUF_CHK(pr, strlen("library/")+strlen(lib->name));
-				snprintf(PRBUF_BUF(pr), PRBUF_SIZE(pr), "library/%s", lib->name);
-				m = module_load_text(p->m, src, PRBUF_BUF(pr));
-				PRBUF_DONE(pr);
+				STRING_INIT(pr);
+				STRING_CAT2(pr, "library/", lib->name);
+				m = module_load_text(p->m, src, STRING_BUF(pr));
+				STRING_DONE(pr);
 				free(src);
 
 				if (m != p->m)
@@ -4385,11 +4384,10 @@ prolog *pl_create()
 				memcpy(src, lib->start, len);
 				src[len] = '\0';
 				assert(pl->m);
-				PRBUF_INIT(pr);
-				PRBUF_CHK(pr, strlen("library/")+strlen(lib->name));
-				snprintf(PRBUF_BUF(pr), PRBUF_SIZE(pr), "library/%s", lib->name);
-				module_load_text(pl->m, src, PRBUF_BUF(pr));
-				PRBUF_DONE(pr);
+				STRING_INIT(pr);
+				STRING_CAT2(pr, "library/", lib->name);
+				module_load_text(pl->m, src, STRING_BUF(pr));
+				STRING_DONE(pr);
 				free(src);
 			}
 		}

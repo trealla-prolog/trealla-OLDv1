@@ -715,21 +715,35 @@ char *print_canonical_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
 pl_state print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
 
 typedef struct {
-	char *buf;
+	char *buf, *dst;
 	size_t size;
 }
- PRBUF;
+ STRING;
 
-#define PRBUF_INIT(pr) PRBUF pr_##buf;								\
-	pr_##buf.buf = malloc(pr_##buf.size=256);
+#define STRING_INIT(pr) STRING pr_##buf;								\
+	pr_##buf.buf = malloc(pr_##buf.size=256);							\
+	pr_##buf.dst = pr_##buf.buf;
 
-#define PRBUF_BUF(pr) pr_##buf.buf
-#define PRBUF_SIZE(pr) pr_##buf.size
+#define STRING_BUF(pr) pr_##buf.buf
+#define STRING_SIZE(pr) (pr_##buf.dst - pr_##buf.buf)
+#define STRING_REM(pr) (pr_##buf.size - (pr_##buf.dst - pr_##buf.buf))
 
-#define PRBUF_CHK(pr,len) 											\
-	if (!pr_##buf.buf) pr_##buf.buf = malloc(pr_##buf.size=256);	\
-	if (len >= PRBUF_SIZE(pr)) {									\
-		pr_##buf.buf = realloc(pr_##buf.buf, pr_##buf.size *= 2);	\
+#define STRING_CHK(pr,len) 												\
+	if (!pr_##buf.buf) pr_##buf.buf = malloc(pr_##buf.size=256);		\
+	if (len >= STRING_REM(pr)) {										\
+		size_t offset = pr_##buf.dst - pr_##buf.buf;					\
+		pr_##buf.buf = realloc(pr_##buf.buf, pr_##buf.size *= 2);		\
+		pr_##buf.dst = pr_##buf.buf + offset;							\
 	}
 
-#define PRBUF_DONE(pr) free(pr_##buf.buf); pr_##buf.buf = NULL;
+#define STRING_CAT(pr,s) {												\
+	size_t len = strlen(s);												\
+	STRING_CHK(pr, len);												\
+	strcpy(pr_##buf.dst, s);											\
+	pr_##buf.dst += len;												\
+	}
+
+#define STRING_CAT2(pr,s1,s2)											\
+	STRING_CAT(pr,s1); STRING_CAT(pr,s2);
+
+#define STRING_DONE(pr) free(pr_##buf.buf); pr_##buf.buf = NULL;
