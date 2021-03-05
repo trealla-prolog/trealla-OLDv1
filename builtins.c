@@ -402,7 +402,7 @@ static USE_RESULT pl_state make_cstringn(cell *d, const char *s, size_t n)
 	d->flags = FLAG_BLOB;
 	d->nbr_cells = 1;
 	d->arity = 0;
-	SET_STR(d,s,n,0);
+	SET_STR(d, s, n, 0);
 	return pl_success;
 }
 
@@ -419,7 +419,7 @@ static USE_RESULT pl_state make_stringn(cell *d, const char *s, size_t n)
 	d->flags |= FLAG_STRING;
 	d->nbr_cells = 1;
 	d->arity = 2;
-	SET_STR(d,s,n,0);
+	SET_STR(d, s, n, 0);
 	return pl_success;
 }
 
