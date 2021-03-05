@@ -1,3 +1,4 @@
+:- use_module(library(format)).
 :- use_module(library(http)).
 
 test1 :-
