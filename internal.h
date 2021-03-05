@@ -721,6 +721,7 @@ typedef struct {
 
 #define STRING_INIT(pr) STRING pr_##buf;								\
 	pr_##buf.buf = malloc(pr_##buf.size=256);							\
+	ensure(pr_##buf.buf);												\
 	pr_##buf.dst = pr_##buf.buf;
 
 #define STRING_BUF(pr) pr_##buf.buf
@@ -730,11 +731,13 @@ typedef struct {
 #define STRING_CHK(pr,len) {											\
 	if (!pr_##buf.buf) {												\
 		pr_##buf.buf = malloc(pr_##buf.size=256);						\
+		ensure(pr_##buf.buf);											\
 		pr_##buf.dst = pr_##buf.buf;									\
 	}																	\
 	if (len >= STRING_REM(pr)) {										\
 		size_t offset = pr_##buf.dst - pr_##buf.buf;					\
 		pr_##buf.buf = realloc(pr_##buf.buf, pr_##buf.size *= 2);		\
+		ensure(pr_##buf.buf);											\
 		pr_##buf.dst = pr_##buf.buf + offset;							\
 	}																	\
 }
