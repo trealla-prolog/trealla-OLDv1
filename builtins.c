@@ -8684,9 +8684,7 @@ static USE_RESULT pl_state fn_consult_1(query *q)
 	while (is_list(p1)) {
 		cell *h = LIST_HEAD(p1);
 		cell *c = deref(q, h, p1_ctx);
-
 		may_error(do_consult(q, c, q->latest_ctx));
-
 		p1 = LIST_TAIL(p1);
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
