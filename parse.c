@@ -3467,7 +3467,7 @@ static bool parser_run(parser *p, const char *src, int dump)
 	return ok;
 }
 
-module *module_load_text(module *m, const char *src, const char *filename)
+module *module_load_text(module *m, const char *src, __attribute__((unused)) const char *filename)
 {
 	parser *p = create_parser(m);
 	if (!p) return NULL;
