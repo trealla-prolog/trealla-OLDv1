@@ -8664,12 +8664,12 @@ static USE_RESULT pl_state do_consult(query *q, cell *p1, idx_t p1_ctx)
 		return throw_error(q, p1, "type_error", "filespec");
 
 	module *tmp_m = create_module(q->m->pl, GET_STR(mod));
-	const char *src = GET_STR(file);
-	deconsult(q->m->pl, src);
+	const char *filename = GET_STR(file);
+	deconsult(q->m->pl, filename);
 	tmp_m->make_public = 1;
-	char *tmpbuf = relative_to(q->m->filename, src);
+	char *tmpbuf = relative_to(q->m->filename, filename);
 
-	if (!module_load_file(tmp_m, src)) {
+	if (!module_load_file(tmp_m, filename)) {
 		destroy_module(tmp_m);
 		free(tmpbuf);
 		return throw_error(q, p1, "existence_error", "filespec");
@@ -11080,10 +11080,10 @@ static USE_RESULT pl_state fn_use_module_1(query *q)
 				continue;
 
 			char *src = strndup((const char*)lib->start, (lib->end-lib->start));
-			STRING_INIT(pr);
-			STRING_CAT2(pr, "library/", lib->name);
-			m = module_load_text(q->m, src, STRING_BUF(pr));
-			STRING_DONE(pr);
+			STRING_INIT(s1);
+			STRING_CAT2(s1, "library/", lib->name);
+			m = module_load_text(q->m, src, STRING_BUF(s1));
+			STRING_DONE(s1);
 			free(src);
 
 			if (m != q->m)

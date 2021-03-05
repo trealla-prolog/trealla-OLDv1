@@ -1182,40 +1182,40 @@ static void directives(parser *p, term *t)
 		if (!is_atom(p1)) return;
 		const char *name = PARSER_GET_STR(p1);
 		unsigned save_line_nbr = p->line_nbr;
-		char *tmpbuf = relative_to(p->m->filename, name);
+		char *filename = relative_to(p->m->filename, name);
 
-		if (!module_load_file(p->m, tmpbuf)) {
+		if (!module_load_file(p->m, filename)) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: not found: %s\n", tmpbuf);
+				fprintf(stdout, "Error: not found: %s\n", filename);
 
-			free(tmpbuf);
+			free(filename);
 			p->error = true;
 			return;
 		}
 
 		p->line_nbr = save_line_nbr;
-		free(tmpbuf);
+		free(filename);
 		return;
 	}
 
 	if (!strcmp(dirname, "ensure_loaded") && (c->arity == 1)) {
 		if (!is_atom(p1)) return;
 		const char *name = PARSER_GET_STR(p1);
-		char *tmpbuf = relative_to(p->m->filename, name);
-		deconsult(p->m->pl, tmpbuf);
+		char *filename = relative_to(p->m->filename, name);
+		deconsult(p->m->pl, filename);
 		unsigned save_line_nbr = p->line_nbr;
 
-		if (!module_load_file(p->m, tmpbuf)) {
+		if (!module_load_file(p->m, filename)) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: not found: %s\n", tmpbuf);
+				fprintf(stdout, "Error: not found: %s\n", filename);
 
-			free(tmpbuf);
+			free(filename);
 			p->error = true;
 			return;
 		}
 
 		p->line_nbr = save_line_nbr;
-		free(tmpbuf);
+		free(filename);
 		return;
 	}
 
@@ -1336,10 +1336,10 @@ static void directives(parser *p, term *t)
 					continue;
 
 				char *src = strndup((const char*)lib->start, (lib->end-lib->start));
-				STRING_INIT(pr);
-				STRING_CAT2(pr, "library/", lib->name);
-				m = module_load_text(p->m, src, STRING_BUF(pr));
-				STRING_DONE(pr);
+				STRING_INIT(s1);
+				STRING_CAT2(s1, "library/", lib->name);
+				m = module_load_text(p->m, src, STRING_BUF(s1));
+				STRING_DONE(s1);
 				free(src);
 
 				if (m != p->m)
@@ -1357,26 +1357,23 @@ static void directives(parser *p, term *t)
 			name = dstbuf;
 		}
 
-		char *tmpbuf = relative_to(p->m->filename, name);
-		char *save = strdup(p->m->filename);
+		char *filename = relative_to(p->m->filename, name);
+		char *save_filename = p->m->filename;
 
-		if (!module_load_file(p->m, tmpbuf)) {
+		if (!module_load_file(p->m, filename)) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: using module file: %s\n", tmpbuf);
+				fprintf(stdout, "Error: using module file: %s\n", filename);
 
-			if (p->m->filename != save) {
-				free(p->m->filename);
-				p->m->filename = save;
-			}
-
+			free(p->m->filename);
+			p->m->filename = save_filename;
 			p->error = true;
-			free(tmpbuf);
+			free(filename);
 			return;
 		}
 
 		free(p->m->filename);
-		p->m->filename = save;
-		free(tmpbuf);
+		p->m->filename = save_filename;
+		free(filename);
 	}
 
 	if (!strcmp(dirname, "set_prolog_flag") && (c->arity == 2)) {
@@ -3514,9 +3511,9 @@ module *module_load_text(module *m, const char *src, const char *filename)
 	}
 
 	m = p->m;
+	free(p->m->filename);
+	p->m->filename = save_filename;
 	destroy_parser(p);
-	free(m->filename);
-	m->filename = save_filename;
 	return m;
 }
 
@@ -3632,8 +3629,8 @@ bool module_load_file(module *m, const char *filename)
 	m->filename = strdup(realbuf);
 	bool ok = module_load_fp(m, fp);
 	fclose(fp);
-	free(realbuf);
 	free(m->filename);
+	free(realbuf);
 	m->filename = save_filename;
 	return ok;
 }
@@ -4219,11 +4216,13 @@ bool pl_consult(prolog *pl, const char *filename)
 
 bool pl_preconsult(prolog *pl, const char *filename)
 {
+	char *save_filename = pl->m->filename;
+
 	if (!pl_consult(pl, filename))
 		return false;
 
 	free(pl->m->filename);
-	pl->m->filename = strdup("./");
+	pl->m->filename = save_filename;
 	return true;
 }
 
@@ -4414,10 +4413,10 @@ prolog *pl_create()
 				memcpy(src, lib->start, len);
 				src[len] = '\0';
 				assert(pl->m);
-				STRING_INIT(pr);
-				STRING_CAT2(pr, "library/", lib->name);
-				module_load_text(pl->m, src, STRING_BUF(pr));
-				STRING_DONE(pr);
+				STRING_INIT(s1);
+				STRING_CAT2(s1, "library/", lib->name);
+				module_load_text(pl->m, src, STRING_BUF(s1));
+				STRING_DONE(s1);
 				free(src);
 			}
 		}
