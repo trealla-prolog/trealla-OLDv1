@@ -742,7 +742,7 @@ typedef struct {
 #define STRING_CAT(pr,s) {												\
 	size_t len = strlen(s);												\
 	STRING_CHK(pr, len);												\
-	strcpy(pr_##buf.dst, s);											\
+	memcpy(pr_##buf.dst, s, len+1);										\
 	pr_##buf.dst += len;												\
 }
 
