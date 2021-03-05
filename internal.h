@@ -729,7 +729,10 @@ typedef struct {
 #define STRING_REM(pr) (pr_##buf.size - (pr_##buf.dst - pr_##buf.buf))
 
 #define STRING_CHK(pr,len) {											\
-	if (!pr_##buf.buf) pr_##buf.buf = malloc(pr_##buf.size=256);		\
+	if (!pr_##buf.buf) {												\
+		pr_##buf.buf = malloc(pr_##buf.size=256);						\
+		pr_##buf.dst = pr_##buf.buf;									\
+	}																	\
 	if (len >= STRING_REM(pr)) {										\
 		size_t offset = pr_##buf.dst - pr_##buf.buf;					\
 		pr_##buf.buf = realloc(pr_##buf.buf, pr_##buf.size *= 2);		\
