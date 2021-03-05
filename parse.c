@@ -2093,6 +2093,7 @@ void parser_reset(parser *p)
 	clear_term(p->t);
 	p->t->cidx = 0;
 	p->start_term = true;
+	p->line_nbr = 0;
 }
 
 static bool parser_dcg_rewrite(parser *p)
@@ -3421,6 +3422,7 @@ static bool parser_run(parser *p, const char *src, int dump)
 	}
 
 	p->srcptr = (char*)src;
+	p->line_nbr = 0;
 	parser_tokenize(p, false, false);
 
 	if (!p->error && !p->end_of_term && !p->run_init) {
@@ -3679,6 +3681,7 @@ static void make_rule(module *m, const char *src)
 	bool save = m->p->consulting;
 	m->p->consulting = true;
 	m->p->srcptr = (char*)src;
+	m->p->line_nbr = 0;
 	parser_tokenize(m->p, false, false);
 	m->prebuilt = false;
 	m->p->consulting = save;

@@ -2809,6 +2809,7 @@ static USE_RESULT pl_state do_read_term(query *q, stream *str, cell *p1, idx_t p
 	p->do_read_term = true;
 	char *save_filename = p->m->filename;
 	p->m->filename = p->srcptr;
+	p->line_nbr = 0;
 	parser_tokenize(p, false, false);
 	p->m->filename = save_filename;
 	p->do_read_term = false;
@@ -11733,12 +11734,13 @@ void load_properties(module *m)
 		dst = push_property(&tmpbuf, &buflen, dst, ptr);
 	}
 
-	m->p->srcptr = tmpbuf;
-	m->p->consulting = true;
-	m->p->line_nbr = 0;
+	parser *p = create_parser(m);
+	p->srcptr = tmpbuf;
+	p->consulting = true;
 	char *save_filename = m->filename;
-	m->filename = m->p->srcptr;
-	parser_tokenize(m->p, false, false);
+	m->filename = p->srcptr;
+	parser_tokenize(p, false, false);
 	m->filename = save_filename;
+	destroy_parser(p);
 	free(tmpbuf);
 }
