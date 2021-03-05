@@ -2742,10 +2742,10 @@ static bool get_token(parser *p, int last_op)
 
 	if ((*src != '-') && parse_number(p, &src, neg)) {
 		if ((size_t)(src-tmpptr) >= p->token_size) {
-			size_t len = dst - p->token;
+			size_t offset = dst - p->token;
 			p->token = realloc(p->token, p->token_size*=2);
 			ensure(p->token);
-			dst = p->token+len;
+			dst = p->token+offset;
 		}
 
 		strncpy(dst, tmpptr, src-tmpptr);
@@ -2828,10 +2828,10 @@ static bool get_token(parser *p, int last_op)
 				size_t len = (dst-p->token) + put_len_utf8(ch) + 1;
 
 				if (len >= p->token_size) {
-					size_t len = dst - p->token;
+					size_t offset = dst - p->token;
 					p->token = realloc(p->token, p->token_size*=2);
 					ensure(p->token);
-					dst = p->token+len;
+					dst = p->token+offset;
 				}
 
 				dst += put_char_utf8(dst, ch);
@@ -2880,10 +2880,10 @@ static bool get_token(parser *p, int last_op)
 			size_t len = (dst-p->token) + put_len_utf8(ch) + 1;
 
 			if (len >= p->token_size) {
-				size_t len = dst - p->token;
+				size_t offset = dst - p->token;
 				p->token = realloc(p->token, p->token_size*=2);
 				ensure(p->token);
-				dst = p->token+len;
+				dst = p->token+offset;
 			}
 
 			dst += put_char_utf8(dst, ch);
@@ -2933,10 +2933,10 @@ static bool get_token(parser *p, int last_op)
 		size_t len = (dst-p->token) + put_len_utf8(ch) + 1;
 
 		if (len >= p->token_size) {
-			size_t len = dst - p->token;
+			size_t offset = dst - p->token;
 			p->token = realloc(p->token, p->token_size*=2);
 			ensure(p->token);
-			dst = p->token+len;
+			dst = p->token+offset;
 		}
 
 		dst += put_char_utf8(dst, ch);
