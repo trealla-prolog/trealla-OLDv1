@@ -3629,6 +3629,7 @@ bool module_load_file(module *m, const char *filename)
 		return 0;
 	}
 
+	free(m->filename);
 	m->filename = strdup(realbuf);
 	bool ok = module_load_fp(m, fp);
 	fclose(fp);
