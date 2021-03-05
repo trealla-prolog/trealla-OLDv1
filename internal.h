@@ -517,7 +517,7 @@ struct parser_ {
 	term *t;
 	char *token, *save_line, *srcptr;
 	cell v;
-	size_t token_size, n_line, str_len;
+	size_t token_size, n_line, toklen;
 	char_flags flag;
 	unsigned line_nbr, depth, read_term;
 	unsigned nesting_parens, nesting_braces, nesting_brackets;

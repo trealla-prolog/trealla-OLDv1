@@ -2859,7 +2859,7 @@ static bool get_token(parser *p, int last_op)
 			} else
 				p->quote_char = -1;
 
-			p->str_len = dst - p->token;
+			p->toklen = dst - p->token;
 			p->srcptr = (char*)src;
 			return true;
 		}
@@ -3393,10 +3393,9 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			ensure(c->val_off != ERR_IDX);
 		} else {
 			c->val_type = TYPE_CSTRING;
-			size_t len = strlen(p->token);
 
-			if ((len < MAX_SMALL_STRING) && !p->string)
-				memcpy(c->val_chr, p->token, len+1);
+			if ((p->toklen < MAX_SMALL_STRING) && !p->string)
+				memcpy(c->val_chr, p->token, p->toklen+1);
 			else {
 				if (p->string) {
 					c->flags |= FLAG_STRING;
@@ -3404,7 +3403,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 				}
 
 				c->flags |= FLAG_BLOB;
-				SET_STR(c, p->token, p->str_len, 0);
+				SET_STR(c, p->token, p->toklen, 0);
 			}
 		}
 
