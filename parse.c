@@ -134,7 +134,7 @@ static idx_t add_to_pool(prolog *pl, const char *name)
 		pl->pool_size = nbytes;
 	}
 
-	strcpy(pl->pool + offset, name);
+	memcpy(pl->pool + offset, name, len+1);
 	pl->pool_offset += len + 1;
 	const char *key = strdup(name);
 	sl_set(pl->symtab, key, (void*)(unsigned long)offset);
@@ -1739,7 +1739,7 @@ static idx_t get_varno(parser *p, const char *src)
 		return 0;
 	}
 
-	strcpy(p->vartab.var_pool+offset, src);
+	memcpy(p->vartab.var_pool+offset, src, len+1);
 	return i;
 }
 
@@ -3393,9 +3393,10 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			ensure(c->val_off != ERR_IDX);
 		} else {
 			c->val_type = TYPE_CSTRING;
+			size_t len = strlen(p->token);
 
-			if ((strlen(p->token) < MAX_SMALL_STRING) && !p->string)
-				strcpy(c->val_chr, p->token);
+			if ((len < MAX_SMALL_STRING) && !p->string)
+				memcpy(c->val_chr, p->token, len+1);
 			else {
 				if (p->string) {
 					c->flags |= FLAG_STRING;
@@ -3590,8 +3591,9 @@ bool module_load_file(module *m, const char *filename)
 		}
 	}
 
-	char *tmpbuf = malloc(strlen(filename) + 20);
-	strcpy(tmpbuf, filename);
+	size_t len = strlen(filename);
+	char *tmpbuf = malloc(len + 20);
+	memcpy(tmpbuf, filename, len+1);
 
 	if (tmpbuf[0] == '~') {
 		const char *ptr = getenv("HOME");
@@ -4184,9 +4186,10 @@ bool pl_eval(prolog *pl, const char *s)
 {
 	parser *p = create_parser(pl->curr_m);
 	if (!p) return false;
-	char *cmd = malloc(strlen(s)+2);
+	size_t len = strlen(s);
+	char *cmd = malloc(len+2);
 	if(!cmd) return false;
-	strcpy(cmd, s);
+	memcpy(cmd, s, len+1);
 
 	if (cmd[strlen(s)-1] != '.')
 		strcat(cmd, ".");
