@@ -8634,14 +8634,14 @@ static USE_RESULT pl_state do_consult(query *q, cell *p1, idx_t p1_ctx)
 		const char *src = GET_STR(p1);
 		deconsult(q->m->pl, src);
 
-		char *tmpbuf = relative_to(q->m->filename, src);
+		char *filename = relative_to(q->m->filename, src);
 
-		if (!module_load_file(q->m, tmpbuf)) {
-			free(tmpbuf);
+		if (!module_load_file(q->m, filename)) {
+			free(filename);
 			return throw_error(q, p1, "existence_error", "filespec");
 		}
 
-		free(tmpbuf);
+		free(filename);
 		return pl_success;
 	}
 
@@ -8655,18 +8655,18 @@ static USE_RESULT pl_state do_consult(query *q, cell *p1, idx_t p1_ctx)
 		return throw_error(q, p1, "type_error", "filespec");
 
 	module *tmp_m = create_module(q->m->pl, GET_STR(mod));
-	const char *filename = GET_STR(file);
+	char *filename = GET_STR(file);
 	deconsult(q->m->pl, filename);
 	tmp_m->make_public = 1;
-	char *tmpbuf = relative_to(q->m->filename, filename);
+	filename = relative_to(q->m->filename, filename);
 
 	if (!module_load_file(tmp_m, filename)) {
 		destroy_module(tmp_m);
-		free(tmpbuf);
+		free(filename);
 		return throw_error(q, p1, "existence_error", "filespec");
 	}
 
-	free(tmpbuf);
+	free(filename);
 	return pl_success;
 }
 
@@ -8676,7 +8676,6 @@ static USE_RESULT pl_state fn_consult_1(query *q)
 
 	if (!is_iso_list(p1)) {
 		may_error(do_consult(q, p1, p1_ctx));
-
 		return pl_success;
 	}
 
@@ -11090,22 +11089,15 @@ static USE_RESULT pl_state fn_use_module_1(query *q)
 		name = dstbuf;
 	}
 
-	char *save = strdup(q->m->filename);
-	char *tmpbuf = relative_to(q->m->filename, name);
+	char *filename = relative_to(q->m->filename, name);
 
-	if (!module_load_file(q->m, tmpbuf)) {
-		fprintf(stdout, "Error: using module file: %s\n", tmpbuf);
-		free(tmpbuf);
-
-		if (q->m->filename != save)
-			free(q->m->filename);
-
-		q->m->filename = save;
+	if (!module_load_file(q->m, filename)) {
+		fprintf(stdout, "Error: using module file: %s\n", filename);
+		free(filename);
 		return pl_failure;
 	}
 
-	free(tmpbuf);
-	q->m->filename = save;
+	free(filename);
 	return pl_success;
 }
 

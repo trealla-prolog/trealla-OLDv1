@@ -210,7 +210,7 @@ int main(int ac, char *av[])
 	signal(SIGPIPE, SIG_IGN);
 	const char *goal = NULL;
 
-	pl_preconsult(pl, "~/.tplrc");
+	pl_consult(pl, "~/.tplrc");
 
 	for (i = 1; i < ac; i++) {
 		if (!strcmp(av[i], "--"))

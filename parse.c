@@ -1355,21 +1355,16 @@ static void directives(parser *p, term *t)
 		}
 
 		char *filename = relative_to(p->m->filename, name);
-		char *save_filename = p->m->filename;
 
 		if (!module_load_file(p->m, filename)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: using module file: %s\n", filename);
 
-			free(p->m->filename);
-			p->m->filename = save_filename;
 			p->error = true;
 			free(filename);
 			return;
 		}
 
-		free(p->m->filename);
-		p->m->filename = save_filename;
 		free(filename);
 	}
 
@@ -3471,7 +3466,7 @@ module *module_load_text(module *m, const char *src, const char *filename)
 	parser *p = create_parser(m);
 	if (!p) return NULL;
 
-	char *save_filename = m->filename;
+	char *save_filename = p->m->filename;
 	p->m->filename = strdup(filename);
 	p->consulting = true;
 	p->srcptr = (char*)src;
@@ -3621,8 +3616,8 @@ bool module_load_file(module *m, const char *filename)
 	m->filename = strdup(realbuf);
 	bool ok = module_load_fp(m, fp);
 	fclose(fp);
-	free(m->filename);
 	free(realbuf);
+	free(m->filename);
 	m->filename = save_filename;
 	return ok;
 }
@@ -4204,18 +4199,6 @@ bool pl_consult_fp(prolog *pl, FILE *fp, const char *filename)
 bool pl_consult(prolog *pl, const char *filename)
 {
 	return module_load_file(pl->m, filename);
-}
-
-bool pl_preconsult(prolog *pl, const char *filename)
-{
-	char *save_filename = pl->m->filename;
-
-	if (!pl_consult(pl, filename))
-		return false;
-
-	free(pl->m->filename);
-	pl->m->filename = save_filename;
-	return true;
 }
 
 static void g_destroy(prolog *pl)
