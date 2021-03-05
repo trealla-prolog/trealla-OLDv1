@@ -1956,10 +1956,7 @@ static void add_stream_properties(query *q, int n)
 	parser *p = create_parser(q->m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
-	char *save_filename = q->m->filename;
-	q->m->filename = p->srcptr;
 	parser_tokenize(p, false, false);
-	q->m->filename = save_filename;
 	destroy_parser(p);
 }
 
@@ -2807,11 +2804,8 @@ static USE_RESULT pl_state do_read_term(query *q, stream *str, cell *p1, idx_t p
 	frame *g = GET_CURR_FRAME();
 	p->read_term = g->nbr_vars;
 	p->do_read_term = true;
-	char *save_filename = p->m->filename;
-	p->m->filename = p->srcptr;
 	p->line_nbr = 0;
 	parser_tokenize(p, false, false);
-	p->m->filename = save_filename;
 	p->do_read_term = false;
 	p->read_term = 0;
 
@@ -5474,10 +5468,7 @@ pl_state throw_error(query *q, cell *c, const char *err_type, const char *expect
 	p->srcptr = dst2;
 	frame *g = GET_CURR_FRAME();
 	p->read_term = g->nbr_vars;
-	char *save_filename = p->m->filename;
-	p->m->filename = p->srcptr;
 	parser_tokenize(p, false, false);
-	p->m->filename = save_filename;
 
 	if (p->nbr_vars) {
 		if (!create_vars(q, p->nbr_vars)) {
@@ -11737,10 +11728,7 @@ void load_properties(module *m)
 	parser *p = create_parser(m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
-	char *save_filename = m->filename;
-	m->filename = p->srcptr;
 	parser_tokenize(p, false, false);
-	m->filename = save_filename;
 	destroy_parser(p);
 	free(tmpbuf);
 }
