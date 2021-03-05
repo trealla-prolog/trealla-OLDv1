@@ -1129,10 +1129,11 @@ void consultall(parser *p, cell *l)
 char *relative_to(const char *basefile, const char *relfile)
 {
 	char *tmpbuf = malloc(strlen(basefile) + strlen(relfile) + 256);
+	char *ptr = tmpbuf;
 
 	if (!strncmp(relfile, "../", 3)) {
 		strcpy(tmpbuf, basefile);
-		char *ptr = tmpbuf + strlen(tmpbuf) - 1;
+		ptr = tmpbuf + strlen(tmpbuf) - 1;
 
 		while ((ptr != tmpbuf) && (*ptr != '/'))
 			ptr--;
@@ -1141,10 +1142,9 @@ char *relative_to(const char *basefile, const char *relfile)
 			*ptr++ = '/';
 
 		*ptr = '\0';
-		strcat(ptr, relfile);
-	} else
-		strcpy(tmpbuf, relfile);
+	}
 
+	strcpy(ptr, relfile);
 	return tmpbuf;
 }
 
