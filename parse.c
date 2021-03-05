@@ -272,13 +272,13 @@ cell *list_head(cell *l, cell *tmp)
 		return l + 1;
 
 	const char *src = is_static(l) ? l->val_str : (char*)l->val_strb->cstr + l->strb_off;
-	size_t n = len_char_utf8(src);
+	size_t len = len_char_utf8(src);
 	tmp->val_type = TYPE_CSTRING;
 	tmp->nbr_cells = 1;
 	tmp->flags = 0;
 	tmp->arity = 0;
-	memcpy(tmp->val_chr, src, n);
-	tmp->val_chr[n] = '\0';
+	memcpy(tmp->val_chr, src, len);
+	tmp->val_chr[len] = '\0';
 	return tmp;
 }
 
@@ -292,10 +292,10 @@ cell *list_tail(cell *l, cell *tmp)
 	}
 
 	const char *src = is_static(l) ? l->val_str : (char*)l->val_strb->cstr;
-	size_t len = is_static(l) ? (size_t)l->str_len : (size_t)l->val_strb->len - l->strb_off;
-	size_t n = len_char_utf8(src);
+	size_t str_len = is_static(l) ? (size_t)l->str_len : (size_t)l->val_strb->len - l->strb_off;
+	size_t len = len_char_utf8(src);
 
-	if (len == n) {
+	if (str_len == len) {
 		tmp->val_type = TYPE_LITERAL;
 		tmp->nbr_cells = 1;
 		tmp->arity = 0;
@@ -308,14 +308,14 @@ cell *list_tail(cell *l, cell *tmp)
 		tmp->flags = FLAG_BLOB | FLAG2_STATIC | FLAG_STRING;
 		tmp->nbr_cells = 1;
 		tmp->arity = 2;
-		tmp->val_str = l->val_str + n;
-		tmp->str_len = l->str_len - n;
+		tmp->val_str = l->val_str + len;
+		tmp->str_len = l->str_len - len;
 		return tmp;
 	}
 
 	*tmp = *l;
-	tmp->strb_off = l->strb_off + n;
-	tmp->strb_len = l->val_strb->len - n;
+	tmp->strb_off = l->strb_off + len;
+	tmp->strb_len = l->strb_len - len;
 	return tmp;
 }
 
