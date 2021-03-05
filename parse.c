@@ -398,7 +398,6 @@ predicate *find_predicate(module *m, cell *c)
 	tmp.val_type = TYPE_LITERAL;
 	tmp.flags = FLAG_KEY;
 	tmp.nbr_cells = 1;
-	tmp.arity = 0;
 
 	if (is_cstring(c))
 		tmp.val_off = index_from_pool(m->pl, MODULE_GET_STR(c));
@@ -498,7 +497,6 @@ static predicate *create_predicate(module *m, cell *c)
 	h->key.val_type = TYPE_LITERAL;
 	h->key.flags = FLAG_KEY;
 	h->key.nbr_cells = 1;
-	h->key.arity = 0;
 
 	if (is_cstring(c))
 		h->key.val_off = index_from_pool(m->pl, MODULE_GET_STR(c));
@@ -625,7 +623,6 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		c->val_type = TYPE_LITERAL;
 		c->val_off = off;
 		c->flags = 0;
-		c->arity = 0;
 	}
 
 	predicate *h = find_predicate(m, c);
@@ -3090,7 +3087,6 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 						h->val_type = TYPE_LITERAL;
 						h->val_off = off;
 						h->flags = 0;
-						h->arity = 0;
 					}
 
 					if (!p->error && !assertz_to_db(p->m, p->t, 1)) {

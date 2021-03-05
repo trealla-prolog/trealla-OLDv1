@@ -4431,7 +4431,6 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 			c->val_off = off;
 			c->val_type = TYPE_LITERAL;
 			c->flags = 0;
-			c->arity = 0;
 		}
 
 		if (!is_literal(tmp2) && arity)
@@ -4931,7 +4930,6 @@ static USE_RESULT pl_state fn_iso_asserta_1(query *q)
 		h->val_type = TYPE_LITERAL;
 		h->val_off = off;
 		h->flags = 0;
-		h->arity = 0;
 	}
 
 	if (!is_literal(h))
@@ -4992,7 +4990,6 @@ static USE_RESULT pl_state fn_iso_assertz_1(query *q)
 		h->val_type = TYPE_LITERAL;
 		h->val_off = off;
 		h->flags = 0;
-		h->arity = 0;
 	}
 
 	if (!is_literal(h))
@@ -5057,7 +5054,6 @@ static USE_RESULT pl_state fn_iso_call_1(query *q)
 		c->val_off = off;
 		c->val_type = TYPE_LITERAL;
 		c->flags = 0;
-		c->arity = 0;
 	}
 
 	idx_t nbr_cells = 1 + p1->nbr_cells;
@@ -5092,7 +5088,6 @@ static USE_RESULT pl_state fn_iso_call_n(query *q)
 		c->val_off = off;
 		c->val_type = TYPE_LITERAL;
 		c->flags = 0;
-		c->arity = 0;
 	}
 
 	bool found = false;
@@ -6691,7 +6686,6 @@ static USE_RESULT pl_state do_asserta_2(query *q)
 		h->val_type = TYPE_LITERAL;
 		h->val_off = off;
 		h->flags = 0;
-		h->arity = 0;
 	}
 
 	if (!is_literal(h))
@@ -6784,7 +6778,6 @@ static USE_RESULT pl_state do_assertz_2(query *q)
 		h->val_type = TYPE_LITERAL;
 		h->val_off = off;
 		h->flags = 0;
-		h->arity = 0;
 	}
 
 	if (!is_literal(h))
