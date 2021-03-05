@@ -3472,8 +3472,8 @@ module *module_load_text(module *m, const char *src, const char *filename)
 	parser *p = create_parser(m);
 	if (!p) return NULL;
 
-	free(p->m->filename);
-	p->m->filename = strdup(filename);
+	//free(p->m->filename);
+	//p->m->filename = strdup(filename);
 	p->consulting = true;
 	p->srcptr = (char*)src;
 	parser_tokenize(p, false, false);
