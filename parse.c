@@ -477,8 +477,11 @@ static void push_property(module *m, const char *name, unsigned arity, const cha
 	parser *p = create_parser(m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
+	char *save_filename = m->filename;
+	m->filename = p->srcptr;
 	parser_tokenize(p, false, false);
 	destroy_parser(p);
+	m->filename = save_filename;
 	free(tmpbuf);
 }
 
@@ -2116,7 +2119,10 @@ static bool parser_dcg_rewrite(parser *p)
 	p2->line_nbr = p->line_nbr;
 	p2->skip = true;
 	p2->srcptr = src;
+	char *save_filename = p->m->filename;
+	p->m->filename = p2->srcptr;
 	parser_tokenize(p2, false, false);
+	p->m->filename = save_filename;
 	parser_xref(p2, p2->t, NULL);
 	query_execute(q, p2->t);
 	free(src);
@@ -2155,7 +2161,9 @@ static bool parser_dcg_rewrite(parser *p)
 
 	parser_reset(p2);
 	p2->srcptr = src;
+	p->m->filename = p2->srcptr;
 	parser_tokenize(p2, false, false);
+	p->m->filename = save_filename;
 	free(src);
 
 	// Take the completed term...
