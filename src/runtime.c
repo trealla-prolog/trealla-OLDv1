@@ -447,7 +447,7 @@ pl_state make_choice(query *q)
 	frame *g = GET_CURR_FRAME();
 	idx_t curr_choice = q->cp++;
 	choice *ch = GET_CHOICE(curr_choice);
-	*ch = (choice){0};
+	memset(ch, 0, sizeof(choice));
 	ch->ugen = g->ugen;
 	ch->orig_cgen = ch->cgen = g->cgen;
 	ch->st = q->st;
