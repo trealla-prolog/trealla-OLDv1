@@ -6322,10 +6322,11 @@ static USE_RESULT pl_state fn_iso_findall_3(query *q)
 	init_queuen(q);
 	may_error(make_choice(q));
 	nbr_cells = q->tmpq_size[q->st.qnbr];
+	frame *g = GET_FRAME(q->st.curr_frame);
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
-		try_me(q, MAX_ARITY);
+		try_me(q, g->nbr_vars);
 
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
@@ -6400,6 +6401,7 @@ static USE_RESULT pl_state fn_iso_bagof_3(query *q)
 	pin_vars(q, mask);
 	idx_t nbr_cells = q->tmpq_size[q->st.qnbr];
 	bool unmatched = false;
+	frame *g = GET_FRAME(q->st.curr_frame);
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 	     nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
@@ -6407,7 +6409,7 @@ static USE_RESULT pl_state fn_iso_bagof_3(query *q)
 		if (c->flags & FLAG2_PROCESSED)
 			continue;
 
-		try_me(q, MAX_ARITY);
+		try_me(q, g->nbr_vars);
 
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			c->flags |= FLAG2_PROCESSED;
