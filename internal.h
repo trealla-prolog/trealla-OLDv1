@@ -726,6 +726,7 @@ typedef struct {
 
 #define STRING_BUF(pr) pr_##buf.buf
 #define STRING_SIZE(pr) (pr_##buf.dst - pr_##buf.buf)
+#define STRING_LEN(pr) (pr_##buf.dst - pr_##buf.buf)
 #define STRING_REM(pr) (pr_##buf.size - (pr_##buf.dst - pr_##buf.buf))
 
 #define STRING_CHK(pr,len) {											\
