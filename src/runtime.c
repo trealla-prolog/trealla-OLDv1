@@ -523,7 +523,7 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 
 					ch->did_cleanup = true;
 					cell *c = ch->st.curr_cell;
-					c = deref(q, c,ch->st.curr_frame);
+					c = deref(q, c, ch->st.curr_frame);
 					cell *p1 = deref(q, c+1, ch->st.curr_frame);
 					cell *tmp = deep_copy_to_heap(q, p1, ch->st.curr_frame, true, false);
 					do_cleanup(q, tmp);
