@@ -7429,7 +7429,7 @@ static USE_RESULT pl_state fn_server_3(query *q)
 	char *keyfile = "privkey.pem", *certfile = "fullchain.pem";
 	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, level = 0;
 	unsigned port = 80;
-	strcpy(hostname, "localhost");
+	snprintf(hostname, sizeof(hostname), "localhost");
 	path[0] = '\0';
 	LIST_HANDLER(p3);
 
@@ -9256,15 +9256,12 @@ static USE_RESULT pl_state fn_string_lower_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	size_t len = LEN_STR(p1);
 	char *tmps = malloc(len+1);
-	ensure(tmps);
+	may_ptr_error(tmps);
 	memcpy(tmps, GET_STR(p1), len);
 	tmps[len] = '\0';
-	char *s = tmps;
 
-	while (*s) {
+	for (char *s = tmps; *s; s++)
 		*s = tolower(*s);
-		s++;
-	}
 
 	cell tmp;
 	may_error(make_stringn(&tmp, tmps, len), free(tmps));
@@ -9280,15 +9277,12 @@ static USE_RESULT pl_state fn_string_upper_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	size_t len = LEN_STR(p1);
 	char *tmps = malloc(len+1);
-	ensure(tmps);
+	may_ptr_error(tmps);
 	memcpy(tmps, GET_STR(p1), len);
 	tmps[len] = '\0';
-	char *s = tmps;
 
-	while (*s) {
+	for (char *s = tmps; *s; s++)
 		*s = toupper(*s);
-		s++;
-	}
 
 	cell tmp;
 	may_error(make_stringn(&tmp, tmps, len), free(tmps));
@@ -10119,7 +10113,7 @@ static USE_RESULT pl_state fn_replace_4(query *q)
 	GET_NEXT_ARG(p4,variable);
 
 	int srclen = LEN_STR(p1);
-	int dstlen = srclen * 2;
+	int dstlen = srclen * LEN_STR(p3);
 	const char *src = GET_STR(p1);
 	const char *s1 = GET_STR(p2);
 	const char *s2 = GET_STR(p3);
