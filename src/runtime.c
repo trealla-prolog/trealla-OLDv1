@@ -640,9 +640,9 @@ unsigned create_vars(query *q, unsigned cnt)
 	return var_nbr;
 }
 
-pl_state set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
+pl_state set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 {
-	frame *g = GET_FRAME(c_ctx);
+	const frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
 	cell *frozen = NULL;
 
@@ -671,9 +671,9 @@ pl_state set_var(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 	return pl_success;
 }
 
-pl_state reset_value(query *q, cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
+pl_state reset_value(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 {
-	frame *g = GET_FRAME(c_ctx);
+	const frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
 
 	while (is_variable(&e->c)) {
