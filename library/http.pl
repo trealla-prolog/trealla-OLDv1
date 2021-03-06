@@ -9,7 +9,7 @@
 read_response(S, Code) :-
 	getline(S, Line),
 	split(Line, ' ' ,_Ver, Rest),
-	split(Rest, ' ', Code2, _Rest2),
+	split(Rest, ' ', Code2, _),
 	number_chars(Code, Code2).
 
 read_header(S, Pair) :-
