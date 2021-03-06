@@ -640,7 +640,7 @@ unsigned create_vars(query *q, unsigned cnt)
 	return var_nbr;
 }
 
-pl_state set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
+void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 {
 	const frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
@@ -662,16 +662,19 @@ pl_state set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		call_attrs(q, frozen);
 
 	if (!q->cp)
-		return pl_success;
+		return;
 
-	may_error (check_trail(q));
+	if (check_trail(q) != pl_success) {
+		q->error = pl_error;
+		return;
+	}
+
 	trail *tr = q->trails + q->st.tp++;
 	tr->var_nbr = c->var_nbr;
 	tr->ctx = c_ctx;
-	return pl_success;
 }
 
-pl_state reset_value(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
+void reset_value(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 {
 	const frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
@@ -691,8 +694,6 @@ pl_state reset_value(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		e->c = *v;
 		INCR_REF(v);
 	}
-
-	return pl_success;
 }
 
 bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
