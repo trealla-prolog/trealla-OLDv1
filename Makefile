@@ -28,14 +28,14 @@ CFLAGS += -flto=$(LTO)
 LDFLAGS += -flto=$(LTO)
 endif
 
-OBJECTS = tpl.o history.o \
-	arith.o builtins.o contrib.o library.o \
-	parse.o print.o runtime.o \
-	skiplist.o base64.o network.o utf8.o
+OBJECTS = tpl.o src/history.o \
+	src/arith.o src/builtins.o src/contrib.o \
+	src/library.o src/parse.o src/print.o src/runtime.o \
+	src/skiplist.o src/base64.o src/network.o src/utf8.o
 
 ifndef NOLDLIBS
-OBJECTS += lists.o dict.o apply.o http.o atts.o \
-	error.o dcgs.o format.o charsio.o
+OBJECTS += src/lists.o src/dict.o src/apply.o src/http.o src/atts.o \
+	src/error.o src/dcgs.o src/format.o src/charsio.o
 CFLAGS += -DUSE_LDLIBS=1
 endif
 
@@ -54,28 +54,30 @@ test:
 	./tests/run.sh
 
 clean:
-	rm -f tpl *.o gmon.* vgcore.* *.core core core.* faultinject.*
+	rm -f tpl src/*.o *.o gmon.* vgcore.* *.core core core.* faultinject.*
 
 # from [gcc|clang] -MM *.c
 
-arith.o: arith.c trealla.h internal.h cdebug.h builtins.h
-base64.o: base64.c base64.h
-builtins.o: builtins.c trealla.h internal.h skiplist.h utf8.h cdebug.h \
-  network.h base64.h builtins.h
-contrib.o: contrib.c trealla.h internal.h cdebug.h builtins.h
-history.o: history.c history.h utf8.h cdebug.h
-library.o: library.c library.h
-network.o: network.c internal.h skiplist.h utf8.h trealla.h cdebug.h \
-  network.h
-parse.o: parse.c internal.h skiplist.h utf8.h trealla.h cdebug.h \
-  history.h library.h builtins.h
-print.o: print.c internal.h skiplist.h utf8.h trealla.h cdebug.h \
-  builtins.h network.h
-runtime.o: runtime.c internal.h skiplist.h utf8.h trealla.h cdebug.h \
-  history.h builtins.h
-skiplist.o: skiplist.c skiplist.h cdebug.h
-tpl.o: tpl.c history.h trealla.h cdebug.h
-utf8.o: utf8.c utf8.h
+src/arith.o: src/arith.c src/trealla.h src/internal.h src/skiplist.h \
+ src/cdebug.h src/builtins.h
+src/base64.o: src/base64.c src/base64.h
+src/builtins.o: src/builtins.c src/trealla.h src/internal.h src/skiplist.h \
+ src/cdebug.h src/network.h src/base64.h src/library.h src/utf8.h \
+ src/builtins.h
+src/contrib.o: src/contrib.c src/trealla.h src/internal.h src/skiplist.h \
+ src/cdebug.h src/builtins.h
+src/history.o: src/history.c src/history.h src/utf8.h src/cdebug.h
+src/library.o: src/library.c src/library.h
+src/network.o: src/network.c src/internal.h src/skiplist.h src/trealla.h \
+ src/cdebug.h src/network.h
+src/parse.o: src/parse.c src/internal.h src/skiplist.h src/trealla.h \
+ src/cdebug.h src/history.h src/library.h src/builtins.h src/utf8.h
+src/print.o: src/print.c src/internal.h src/skiplist.h src/trealla.h \
+ src/cdebug.h src/builtins.h src/network.h src/utf8.h
+src/runtime.o: src/runtime.c src/internal.h src/skiplist.h src/trealla.h \
+ src/cdebug.h src/history.h src/builtins.h
+src/skiplist.o: src/skiplist.c src/skiplist.h src/cdebug.h
+src/utf8.o: src/utf8.c src/utf8.h
 
 # Library modules
 
@@ -90,29 +92,29 @@ ifeq ($(UNAME_S),FreeBSD)
 	OSFLAG = -m elf_x86_64
 endif
 
-dict.o: library/dict.pl
-	$(LD) $(OSFLAG) -r -b binary -o dict.o library/dict.pl
+src/dict.o: library/dict.pl
+	$(LD) $(OSFLAG) -r -b binary -o src/dict.o library/dict.pl
 
-dcgs.o: library/dcgs.pl
-	$(LD) $(OSFLAG) -r -b binary -o dcgs.o library/dcgs.pl
+src/dcgs.o: library/dcgs.pl
+	$(LD) $(OSFLAG) -r -b binary -o src/dcgs.o library/dcgs.pl
 
-format.o: library/format.pl
-	$(LD) $(OSFLAG) -r -b binary -o format.o library/format.pl
+src/format.o: library/format.pl
+	$(LD) $(OSFLAG) -r -b binary -o src/format.o library/format.pl
 
-charsio.o: library/charsio.pl
-	$(LD) $(OSFLAG) -r -b binary -o charsio.o library/charsio.pl
+src/charsio.o: library/charsio.pl
+	$(LD) $(OSFLAG) -r -b binary -o src/charsio.o library/charsio.pl
 
-lists.o: library/lists.pl
-	$(LD) $(OSFLAG) -r -b binary -o lists.o library/lists.pl
+src/lists.o: library/lists.pl
+	$(LD) $(OSFLAG) -r -b binary -o src/lists.o library/lists.pl
 
-apply.o: library/apply.pl
-	$(LD) $(OSFLAG) -r -b binary -o apply.o library/apply.pl
+src/apply.o: library/apply.pl
+	$(LD) $(OSFLAG) -r -b binary -o src/apply.o library/apply.pl
 
-http.o: library/http.pl
-	$(LD) $(OSFLAG) -r -b binary -o http.o library/http.pl
+src/http.o: library/http.pl
+	$(LD) $(OSFLAG) -r -b binary -o src/http.o library/http.pl
 
-atts.o: library/atts.pl
-	$(LD) $(OSFLAG) -r -b binary -o atts.o library/atts.pl
+src/atts.o: library/atts.pl
+	$(LD) $(OSFLAG) -r -b binary -o src/atts.o library/atts.pl
 
-error.o: library/error.pl
-	$(LD) $(OSFLAG) -r -b binary -o error.o library/error.pl
+src/error.o: library/error.pl
+	$(LD) $(OSFLAG) -r -b binary -o src/error.o library/error.pl
