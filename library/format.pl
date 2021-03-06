@@ -327,7 +327,7 @@ numeric_argument(Ds, Num, Rest, Args0, Args) :-
         ).
 
 numeric_argument_([D|Ds], Ns0, Ns, Rest) :-
-        (   memberchk(D, "0123456789") ->
+        (   member(D, "0123456789") ->
             number_chars(N, [D]),
             numeric_argument_(Ds, [N|Ns0], Ns, Rest)
         ;   Ns = Ns0,
