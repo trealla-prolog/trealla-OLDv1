@@ -10129,11 +10129,11 @@ static USE_RESULT pl_state fn_replace_4(query *q)
 				size_t save_len = dst - dstbuf;
 				dstlen = ((save_len)*2) + s2len;
 				dstbuf = (char*)realloc(dstbuf, dstlen + 1);
-				ensure(dstbuf);
+				may_ptr_error(dstbuf);
 				dst = dstbuf + save_len;
 			}
 
-			strcpy(dst, s2);
+			memcpy(dst, s2, s2len);
 			dst += s2len;
 			dstlen -= s2len;
 			src += s1len;
@@ -10143,7 +10143,7 @@ static USE_RESULT pl_state fn_replace_4(query *q)
 				size_t max_len = dst - dstbuf;
 				dstlen = max_len *= 2;
 				dstbuf = (char*)realloc(dstbuf, dstlen + 1);
-				ensure(dstbuf);
+				may_ptr_error(dstbuf);
 				dst = dstbuf + max_len;
 			}
 
