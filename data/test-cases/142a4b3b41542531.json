@@ -1,0 +1,55 @@
+{
+  "uid" : "142a4b3b41542531",
+  "name" : "sics_setof_3_29",
+  "historyId" : "predicates/setof_3/tests.lgt::tests:tests#sics_setof_3_29",
+  "time" : {
+    "start" : 1615094141000,
+    "stop" : 1615094141000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Wrong error",
+  "statusTrace" : "error(type_error(list,[('$lgt_set_compiler_flag'(report,warnings),'$lgt_set_compiler_flag'(suspicious_calls,silent),'$lgt_logtalk_load'(lgtunit(loader),'/home/runner/logtalk/tests/prolog/predicates/setof_3/',c(user,user,r(user,user,[],[]))),'$lgt_logtalk_load'(tests,[hook(lgtunit)],'/home/runner/logtalk/tests/prolog/predicates/setof_3/',c(user,user,r(user,user,[],[]))),tests::run)|1]))",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/setof_3/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "142a4b3b41542531.json",
+  "parameterValues" : [ ]
+}
