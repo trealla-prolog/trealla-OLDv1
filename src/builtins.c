@@ -6326,7 +6326,7 @@ static USE_RESULT pl_state fn_iso_findall_3(query *q)
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
-		try_me(q, g->nbr_vars);
+		try_me(q, g->nbr_vars*2);
 
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
@@ -6409,7 +6409,7 @@ static USE_RESULT pl_state fn_iso_bagof_3(query *q)
 		if (c->flags & FLAG2_PROCESSED)
 			continue;
 
-		try_me(q, g->nbr_vars);
+		try_me(q, g->nbr_vars*2);
 
 		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
 			c->flags |= FLAG2_PROCESSED;
