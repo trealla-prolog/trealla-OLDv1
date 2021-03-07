@@ -20,12 +20,12 @@
 #define DBL_DECIMAL_DIG DBL_DIG
 #endif
 
-static bool needs_quote(module *m, const char *src, size_t srclen)
+bool needs_quote(module *m, const char *src, size_t srclen)
 {
 	if (!strcmp(src, ",") || !strcmp(src, ".") || !strcmp(src, "|"))
 		return true;
 
-	if (!*src || isupper(*src) || isdigit(*src) || (*src == '_'))
+	if (!*src || isupper(*src) || isdigit(*src) || (*src == '_') || (*src == '$'))
 		return true;
 
 	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!") || !strcmp(src, "¡"))
