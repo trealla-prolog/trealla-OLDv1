@@ -5419,7 +5419,7 @@ pl_state throw_error(query *q, cell *c, const char *err_type, const char *expect
 	char functor[1024];
 
 	if (needs_quote(q->m, GET_STR(q->st.curr_cell), LEN_STR(q->st.curr_cell)))
-		snprintf(functor, sizeof(functor), "'%s'", GET_STR(q->st.curr_cell));
+		formatted(functor, sizeof(functor), GET_STR(q->st.curr_cell), LEN_STR(q->st.curr_cell), false);
 	else
 		snprintf(functor, sizeof(functor), "%s", GET_STR(q->st.curr_cell));
 
@@ -5452,18 +5452,18 @@ pl_state throw_error(query *q, cell *c, const char *err_type, const char *expect
 	} else if (!strcmp(err_type, "permission_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, functor, q->st.curr_cell->arity);
 
-	} else if (IS_OP(c)) {
+	} else if (IS_OP(q->st.curr_cell)) {
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 
 	} else {
 		if (!strcmp(GET_STR(q->st.curr_cell), "$call"))
-			snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, "call", q->st.curr_cell->arity);
+			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "call", q->st.curr_cell->arity);
 		else if (!strcmp(GET_STR(q->st.curr_cell), "$catch"))
-			snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, "catch", q->st.curr_cell->arity);
+			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "catch", q->st.curr_cell->arity);
 		else if (!strcmp(GET_STR(q->st.curr_cell), "$bagof"))
-			snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, "bagof", q->st.curr_cell->arity);
+			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, "bagof", q->st.curr_cell->arity);
 		else
-			snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, functor, q->st.curr_cell->arity);
+			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, functor, q->st.curr_cell->arity);
 	}
 
 	//printf("*** %s\n", dst2);

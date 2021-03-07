@@ -3309,11 +3309,14 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			priority = 0;
 		}
 
-		if (priority && last_op
+		if (priority && (last_op || last_bar)
 			&& !IS_POSTFIX(specifier)
-			&& ((*p->srcptr == ',') || (*p->srcptr == ')') ||
-			(*p->srcptr == '|') || (*p->srcptr == ']') ||
-			(*p->srcptr == '}') )) {
+			&& ((*p->srcptr == ',')
+				|| (*p->srcptr == ')')
+				|| (*p->srcptr == '|')
+				|| (*p->srcptr == ']')
+				|| (*p->srcptr == '}')
+			)) {
 			specifier = 0;
 			priority = 0;
 		}

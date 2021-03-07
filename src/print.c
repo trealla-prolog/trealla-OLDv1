@@ -96,7 +96,7 @@ size_t sprint_int(char *dst, size_t size, int_t n, int base)
 	return dst - save_dst;
 }
 
-static size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen, bool dq)
+size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen, bool dq)
 {
 	extern const char *g_escapes;
 	extern const char *g_anti_escapes;
