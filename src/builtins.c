@@ -5418,9 +5418,11 @@ pl_state throw_error(query *q, cell *c, const char *err_type, const char *expect
 	expected = tmpbuf;
 	char functor[1024];
 
-	if (needs_quote(q->m, GET_STR(q->st.curr_cell), LEN_STR(q->st.curr_cell)))
-		formatted(functor, sizeof(functor), GET_STR(q->st.curr_cell), LEN_STR(q->st.curr_cell), false);
-	else
+	if (needs_quote(q->m, GET_STR(q->st.curr_cell), LEN_STR(q->st.curr_cell))) {
+		char tmpbuf[1024-3];
+		formatted(tmpbuf, sizeof(tmpbuf), GET_STR(q->st.curr_cell), LEN_STR(q->st.curr_cell), false);
+		snprintf(functor, sizeof(functor), "'%s'", tmpbuf);
+	} else
 		snprintf(functor, sizeof(functor), "%s", GET_STR(q->st.curr_cell));
 
 	if (is_variable(c)) {
