@@ -10,7 +10,10 @@ member_(_, El, El).
 member_([H|T], El, _) :-
     member_(T, El, H).
 
-memberchk(T, L) :- member(T, L), !.
+memberchk(Element, [Element| _]) :-
+	!.
+memberchk(Element, [_| List]) :-
+	memberchk(Element, List).
 
 select(X, [X|T], T).
 select(X, [H|T], [H|Rest]) :- select(X, T, Rest).
