@@ -4,11 +4,9 @@
 	merge/3, last/2, flatten/2
 	]).
 
-member(El, [H|T]) :-
-    member_(T, El, H).
-member_(_, El, El).
-member_([H|T], El, _) :-
-    member_(T, El, H).
+member(Element, [Element| _]).
+member(Element, [_| List]) :-
+	member(Element, List).
 
 memberchk(Element, [Element| _]) :-
 	!.
