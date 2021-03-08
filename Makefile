@@ -28,8 +28,8 @@ CFLAGS += -flto=$(LTO)
 LDFLAGS += -flto=$(LTO)
 endif
 
-OBJECTS = tpl.o src/history.o \
-	src/arith.o src/builtins.o src/contrib.o \
+OBJECTS = tpl.o src/history.o src/arith.o \
+	src/builtins.o src/contrib.o src/heap.c \
 	src/library.o src/parse.o src/print.o src/runtime.o \
 	src/skiplist.o src/base64.o src/network.o src/utf8.o
 
@@ -65,6 +65,8 @@ src/builtins.o: src/builtins.c src/trealla.h src/internal.h src/skiplist.h \
  src/cdebug.h src/network.h src/base64.h src/library.h src/utf8.h \
  src/builtins.h
 src/contrib.o: src/contrib.c src/trealla.h src/internal.h src/skiplist.h \
+ src/cdebug.h src/builtins.h
+src/heap.o: src/heap.c src/trealla.h src/internal.h \
  src/cdebug.h src/builtins.h
 src/history.o: src/history.c src/history.h src/utf8.h src/cdebug.h
 src/library.o: src/library.c src/library.h
