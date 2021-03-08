@@ -6133,7 +6133,7 @@ static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 {
 	if ((!nbr_cells || !c->nbr_cells)) {
 		cell *c = alloc_on_tmp(q, 1);
-		ensure(c);
+		may_ptr_error(c);
 		make_literal(c, g_nil_s);
 		return c;
 	}
