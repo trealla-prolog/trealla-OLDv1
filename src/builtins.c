@@ -9268,8 +9268,9 @@ static USE_RESULT pl_state fn_string_lower_2(query *q)
 	may_ptr_error(tmps);
 	memcpy(tmps, GET_STR(p1), len);
 	tmps[len] = '\0';
+	size_t n = len;
 
-	for (char *s = tmps; *s; s++)
+	for (char *s = tmps; n--; s++)
 		*s = tolower(*s);
 
 	cell tmp;
@@ -9289,8 +9290,9 @@ static USE_RESULT pl_state fn_string_upper_2(query *q)
 	may_ptr_error(tmps);
 	memcpy(tmps, GET_STR(p1), len);
 	tmps[len] = '\0';
+	size_t n = len;
 
-	for (char *s = tmps; *s; s++)
+	for (char *s = tmps; n--; s++)
 		*s = toupper(*s);
 
 	cell tmp;
