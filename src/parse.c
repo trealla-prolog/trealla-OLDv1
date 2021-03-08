@@ -1010,9 +1010,6 @@ parser *create_parser(module *m)
 
 void destroy_query(query *q)
 {
-	free(q->trails);
-	free(q->choices);
-
 	while (q->st.qnbr > 0) {
 		free(q->tmpq[q->st.qnbr]);
 		q->tmpq[q->st.qnbr] = NULL;
@@ -1045,6 +1042,8 @@ void destroy_query(query *q)
 	for (idx_t i = 0; i < q->st.sp; i++, e++)
 		DECR_REF(&e->c);
 
+	free(q->trails);
+	free(q->choices);
 	free(q->slots);
 	free(q->frames);
 	free(q->tmp_heap);

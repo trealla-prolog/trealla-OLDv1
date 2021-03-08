@@ -4707,7 +4707,7 @@ static USE_RESULT pl_state fn_iso_clause_2(query *q)
 	while (match_clause(q, p1, p1_ctx, DO_CLAUSE)) {
 		term *t = &q->st.curr_clause2->t;
 		cell *body = get_body(t->cells);
-		int ok;
+		pl_state ok;
 
 		if (body)
 			ok = unify(q, p2, p2_ctx, body, q->st.fp);
@@ -6612,7 +6612,7 @@ static USE_RESULT pl_state fn_clause_3(query *q)
 		}
 
 		cell *body = get_body(t->cells);
-		int ok;
+		pl_state ok;
 
 		if (body)
 			ok = unify(q, p2, p2_ctx, body, q->st.fp);
@@ -8000,7 +8000,7 @@ static USE_RESULT pl_state fn_read_term_from_chars_2(query *q)
 
 	cell tmp;
 	make_literal(&tmp, g_nil_s);
-	int ok = do_read_term(q, str, p_term, p_term_ctx, &tmp, q->st.curr_frame, src);
+	pl_state ok = do_read_term(q, str, p_term, p_term_ctx, &tmp, q->st.curr_frame, src);
 	free(src);
 	return ok;
 }
@@ -8039,7 +8039,7 @@ static USE_RESULT pl_state fn_read_term_from_chars_3(query *q)
 	if (src[strlen(src)-1] != '.')
 		strcat(src, ".");
 
-	int ok = do_read_term(q, str, p_term, p_term_ctx, p_opts, p_opts_ctx, src);
+	pl_state ok = do_read_term(q, str, p_term, p_term_ctx, p_opts, p_opts_ctx, src);
 	free(src);
 	return ok;
 }
@@ -8078,7 +8078,7 @@ static USE_RESULT pl_state fn_read_term_from_atom_3(query *q)
 	if (src[strlen(src)-1] != '.')
 		strcat(src, ".");
 
-	int ok = do_read_term(q, str, p_term, p_term_ctx, p_opts, p_opts_ctx, src);
+	pl_state ok = do_read_term(q, str, p_term, p_term_ctx, p_opts, p_opts_ctx, src);
 	free(src);
 	return ok;
 }
@@ -9694,7 +9694,7 @@ static USE_RESULT pl_state fn_chdir_1(query *q)
 	} else
 		filename = GET_STR(p1);
 
-	int ok = !chdir(filename);
+	pl_state ok = !chdir(filename);
 	free(src);
 	return ok;
 }
