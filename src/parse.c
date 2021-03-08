@@ -4354,7 +4354,8 @@ prolog *pl_create()
 			*src = '\0';
 			g_tpl_lib = realloc(g_tpl_lib, strlen(g_tpl_lib)+40);
 			strcat(g_tpl_lib, "/library");
-		}
+		} else
+			g_tpl_lib = strdup("../library");
 	}
 
 	pl->funtab = sl_create2((void*)my_strcmp, NULL);
