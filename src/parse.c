@@ -323,7 +323,7 @@ cell *list_tail(cell *l, cell *tmp)
 		return tmp;
 	}
 
-	*tmp = *l;
+	copy_cells(tmp, l, 1);
 	tmp->strb_off = l->strb_off + len;
 	tmp->strb_len = l->strb_len - len;
 	return tmp;

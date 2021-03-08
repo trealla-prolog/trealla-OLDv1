@@ -599,7 +599,7 @@ extern unsigned g_cpu_count;
 
 inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 {
-	memcpy(dst, src, sizeof(cell)*(nbr_cells));
+	memcpy(dst, src, sizeof(cell)*nbr_cells);
 	return nbr_cells;
 }
 

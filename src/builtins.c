@@ -469,7 +469,7 @@ static USE_RESULT cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsi
 
 	cell *tmp = alloc_on_tmp(q, 1);
 	if (!tmp) return NULL;
-	*tmp = *p1;
+	copy_cells(tmp, p1, 1);
 
 	if (!is_structure(p1)) {
 		if (!is_variable(p1))
@@ -572,7 +572,7 @@ static USE_RESULT cell *deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx, uns
 	p1_ctx = q->latest_ctx;
 	cell *tmp = alloc_on_tmp(q, 1);
 	if (!tmp) return NULL;
-	*tmp = *p1;
+	copy_cells(tmp, p1, 1);
 
 	if (!is_structure(p1))
 		return tmp;
