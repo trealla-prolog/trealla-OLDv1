@@ -606,11 +606,18 @@ inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 inline static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 {
 	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
-		*dst = *src;
 		INCR_REF(src);
+		*dst = *src;
 	}
 
 	return nbr_cells;
+}
+
+inline static void chk_cells(cell *src, idx_t nbr_cells)
+{
+	for (idx_t i = 0; i < nbr_cells; i++, src++) {
+		DECR_REF(src);
+	}
 }
 
 #define LIST_HANDLER(l) cell l##_h_tmp; cell l##_t_tmp
