@@ -333,7 +333,7 @@ static cell *alloc_on_queuen(query *q, int qnbr, const cell *c)
 
 // Defer check until end_list()
 
-void allocate_list_on_heap(query *q, const cell *c)
+void allocate_list(query *q, const cell *c)
 {
 	if (!init_tmp_heap(q)) return;
 	append_list(q, c);
@@ -925,7 +925,7 @@ static USE_RESULT pl_state fn_iso_atom_chars_2(query *q)
 
 		if (first) {
 			first = false;
-			allocate_list_on_heap(q, &tmp2);
+			allocate_list(q, &tmp2);
 		} else
 			append_list(q, &tmp2);
 	}
@@ -1172,7 +1172,7 @@ static USE_RESULT pl_state fn_iso_atom_codes_2(query *q)
 	const char *src = tmpbuf;
 	cell tmp;
 	make_int(&tmp, get_char_utf8(&src));
-	allocate_list_on_heap(q, &tmp);
+	allocate_list(q, &tmp);
 
 	while (*src) {
 		make_int(&tmp, get_char_utf8(&src));
@@ -1316,7 +1316,7 @@ static USE_RESULT pl_state fn_iso_number_codes_2(query *q)
 	const char *src = tmpbuf;
 	cell tmp;
 	make_int(&tmp, *src);
-	allocate_list_on_heap(q, &tmp);
+	allocate_list(q, &tmp);
 
 	while (*++src) {
 		make_int(&tmp, *src);
@@ -4371,7 +4371,7 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 		tmp2.nbr_cells = 1;
 		tmp2.arity = 0;
 		CLR_OP(&tmp2);
-		allocate_list_on_heap(q, &tmp2);
+		allocate_list(q, &tmp2);
 		p1 = tmp;
 		unsigned arity = p1->arity;
 		p1++;
@@ -4463,7 +4463,7 @@ static USE_RESULT pl_state fn_iso_univ_2(query *q)
 	tmp.nbr_cells = 1;
 	tmp.arity = 0;
 	CLR_OP(&tmp);
-	allocate_list_on_heap(q, &tmp);
+	allocate_list(q, &tmp);
 	unsigned arity = p1->arity;
 	p1++;
 
@@ -5983,7 +5983,7 @@ static USE_RESULT pl_state fn_iso_current_prolog_flag_2(query *q)
 		int i = g_avc;
 		cell tmp;
 		may_error(make_cstring(&tmp, g_av[i++]));
-		allocate_list_on_heap(q, &tmp);
+		allocate_list(q, &tmp);
 
 		while (i < g_ac) {
 			may_error(make_cstring(&tmp, g_av[i++]));
@@ -6138,7 +6138,7 @@ static cell *convert_to_list(query *q, cell *c, idx_t nbr_cells)
 		return c;
 	}
 
-	allocate_list_on_heap(q, c);
+	allocate_list(q, c);
 	nbr_cells -= c->nbr_cells;
 	c += c->nbr_cells;
 
@@ -6973,7 +6973,7 @@ static USE_RESULT pl_state fn_statistics_2(query *q)
 		double elapsed = now - q->time_started;
 		cell tmp;
 		make_int(&tmp, elapsed/1000);
-		allocate_list_on_heap(q, &tmp);
+		allocate_list(q, &tmp);
 		append_list(q, &tmp);
 		make_literal(&tmp, g_nil_s);
 		cell *l = end_list(q);
@@ -7171,7 +7171,7 @@ static USE_RESULT pl_state fn_split_atom_4(query *q)
 		may_error(make_cstringn(&tmp, start, ptr-start));
 
 		if (nbr++ == 1)
-			allocate_list_on_heap(q, &tmp);
+			allocate_list(q, &tmp);
 		else
 			append_list(q, &tmp);
 
@@ -7187,7 +7187,7 @@ static USE_RESULT pl_state fn_split_atom_4(query *q)
 		may_error(make_cstring(&tmp, start));
 
 		if (!in_list)
-			allocate_list_on_heap(q, &tmp);
+			allocate_list(q, &tmp);
 		else
 			append_list(q, &tmp);
 	}
@@ -7384,7 +7384,7 @@ static USE_RESULT pl_state fn_getfile_2(query *q)
 		may_error(make_stringn(&tmp, line, len));
 
 		if (nbr++ == 1)
-			allocate_list_on_heap(q, &tmp);
+			allocate_list(q, &tmp);
 		else
 			append_list(q, &tmp);
 
@@ -9428,7 +9428,7 @@ static USE_RESULT pl_state fn_directory_files_2(query *q)
 	else
 		may_error(make_cstring(&tmp, dire->d_name));
 
-	allocate_list_on_heap(q, &tmp);
+	allocate_list(q, &tmp);
 
 	for (dire = readdir(dirp); dire; dire = readdir(dirp)) {
 		if (is_string(p1))
@@ -10852,7 +10852,7 @@ static USE_RESULT pl_state do_length(query *q)
 	tmp.val_off = g_anon_s;
 	tmp.var_nbr = var_nbr++;
 	tmp.arity = 0;
-	allocate_list_on_heap(q, &tmp);
+	allocate_list(q, &tmp);
 
 	for (unsigned i = 1; i < nbr; i++) {
 		tmp.var_nbr = var_nbr++;
@@ -10972,7 +10972,7 @@ static USE_RESULT pl_state fn_iso_length_2(query *q)
 		tmp.flags = FLAG2_FRESH | FLAG2_ANON;
 		tmp.val_off = g_anon_s;
 		tmp.var_nbr = var_nbr++;
-		allocate_list_on_heap(q, &tmp);
+		allocate_list(q, &tmp);
 
 		for (idx_t i = 1; i < nbr; i++) {
 			tmp.var_nbr = var_nbr++;

@@ -363,7 +363,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 			h->flags &= ~FLAG_STRING;
 
 			if (!cnt++)
-				allocate_list_on_heap(q, h);
+				allocate_list(q, h);
 			else
 				append_list(q, h);
 		}
