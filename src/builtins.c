@@ -11095,7 +11095,7 @@ static USE_RESULT pl_state fn_use_module_1(query *q)
 	char *filename = relative_to(q->m->filename, name);
 
 	if (!module_load_file(q->m, filename)) {
-		fprintf(stdout, "Error: using module file: %s\n", filename);
+		fprintf(stdout, "Error: module file not found: %s\n", filename);
 		free(filename);
 		return pl_failure;
 	}
