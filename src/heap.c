@@ -1,18 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
 #include <ctype.h>
 #include <errno.h>
-#include <sys/time.h>
-#include <sys/stat.h>
 
 #include "trealla.h"
 #include "internal.h"
-#include "network.h"
-#include "base64.h"
-#include "library.h"
-#include "utf8.h"
 #include "builtins.h"
 
 // The tmp heap is used for temporary allocations (a scratch-pad)
