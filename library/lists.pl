@@ -1,5 +1,5 @@
 :- module(lists, [
-	member/2, memberchk/2, select/3, selectchk/3, subtract/3, union/3,
+	member/2, select/3, selectchk/3, subtract/3, union/3,
 	intersection/3, reverse/2, append/3, nth/3, nth1/3, nth0/3,
 	merge/3, last/2, flatten/2
 	]).
@@ -7,11 +7,6 @@
 member(Element, [Element| _]).
 member(Element, [_| List]) :-
 	member(Element, List).
-
-memberchk(Element, [Element| _]) :-
-	!.
-memberchk(Element, [_| List]) :-
-	memberchk(Element, List).
 
 select(X, [X|T], T).
 select(X, [H|T], [H|Rest]) :- select(X, T, Rest).

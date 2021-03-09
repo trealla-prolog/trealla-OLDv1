@@ -182,6 +182,7 @@ GNU-Prolog & SWI-Prolog
 Others
 ======
 
+	memberchk/2
 	read_term_from_chars/2		# read_term_from_chars(+chars,-term)
 	read_term_from_chars/3		# read_term_from_chars(+chars,+opts,-term)
 	write_term_to_chars/3		# write_term_to_chars(+term,+opts,-chars)
