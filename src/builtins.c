@@ -5160,7 +5160,8 @@ pl_state throw_error(query *q, cell *c, const char *err_type, const char *expect
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "evaluable")) {
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),(%s)/%u).", err_type, expected, is_callable(c)?GET_STR(c):dst, c->arity, functor, q->st.curr_cell->arity);
 
-	} else if (!strcmp(err_type, "permission_error") && is_structure(c) && strcmp(GET_STR(c), "/")) {
+	} else if (!strcmp(err_type, "permission_error")
+		&& is_structure(c) && strcmp(GET_STR(c), "/") && is_variable(c+1)) {
 		char tmpbuf[1024];
 		snprintf(tmpbuf, sizeof(tmpbuf), "(%s)/%u\n", GET_STR(c), (unsigned)c->arity);
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, tmpbuf, functor, q->st.curr_cell->arity);
