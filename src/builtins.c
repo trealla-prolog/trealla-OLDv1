@@ -9891,6 +9891,8 @@ static USE_RESULT pl_state fn_replace_4(query *q)
 	return pl_success;
 }
 
+static void load_properties(module *m);
+
 static USE_RESULT pl_state fn_sys_load_properties_0(query *q)
 {
 	load_properties(q->m);
@@ -11330,7 +11332,7 @@ static char *push_property(char **bufptr, size_t *lenptr, char *dst, const struc
 	return dst;
 }
 
-void load_properties(module *m)
+static void load_properties(module *m)
 {
 	if (m->loaded_properties)
 		return;

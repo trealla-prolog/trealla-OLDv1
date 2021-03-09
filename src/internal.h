@@ -738,7 +738,6 @@ char *relative_to(const char *basefile, const char *relfile);
 void parser_term_to_body(parser *p);
 cell *check_body_callable(parser *p, cell *c);
 void load_builtins(prolog *pl);
-void load_properties(module *m);
 void add_to_dirty_list(query *q, clause *r);
 char *format_property(char **bufptr, size_t *lenptr, char *dst, const char *name, unsigned arity, const char *type);
 bool needs_quote(module *m, const char *src, size_t srclen);
