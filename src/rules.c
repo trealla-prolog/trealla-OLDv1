@@ -1,10 +1,8 @@
 	make_rule(m, "format(F) :- format(F, []).");
 	make_rule(m, "unify_with_occurs_check(X, X) :- acyclic_term(X).");
 
-	make_rule(m, "'$member'(El, [H|T]) :- '$member_'(T, El, H).");
-	make_rule(m, "'$member_'(_, El, El).");
-	make_rule(m, "'$member_'([H|T], El, _) :- '$member_'(T, El, H).");
-	make_rule(m, "'$memberchk'(T, L) :- '$member'(T, L), !.");
+	make_rule(m, "'$memberchk'(Element, [Element|_]) :- !.");
+	make_rule(m, "'$memberchk'(Element, [_|List]) :- '$memberchk'(Element, List).");
 
 	make_rule(m, "predicate_property(P, A) :- "				\
 		"mustbe_callable(P), "								\
