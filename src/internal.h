@@ -703,6 +703,7 @@ cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx);
 
 cell *alloc_on_heap(query *q, idx_t nbr_cells);
 cell *alloc_on_tmp(query *q, idx_t nbr_cells);
+cell *alloc_on_queuen(query *q, int qnbr, const cell *c);
 
 cell *init_tmp_heap(query* q);
 inline static idx_t tmp_heap_used(const query *q) { return q->tmphp; }
@@ -725,7 +726,8 @@ void call_attrs(query *q, cell *attrs);
 void allocate_list(query *q, const cell *c);
 void append_list(query *q, const cell *c);
 USE_RESULT cell *end_list(query *q);
-size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, int tolerant);
+bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool partial_list);
+size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool tolerant);
 void consultall(parser *p, cell *l);
 void fix_list(cell *c);
 module *module_load_text(module *m, const char *src, const char *filename);

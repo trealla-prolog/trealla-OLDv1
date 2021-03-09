@@ -264,3 +264,22 @@ cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 	return tmp;
 }
 
+cell *alloc_on_queuen(query *q, int qnbr, const cell *c)
+{
+	FAULTINJECT(errno = ENOMEM; return NULL);
+	if (!q->queue[qnbr]) {
+		q->queue[qnbr] = calloc(q->q_size[qnbr], sizeof(cell));
+		ensure(q->queue[qnbr]);
+	}
+
+	while ((q->qp[qnbr]+c->nbr_cells) >= q->q_size[qnbr]) {
+		q->q_size[qnbr] += q->q_size[qnbr] / 2;
+		q->queue[qnbr] = realloc(q->queue[qnbr], sizeof(cell)*q->q_size[qnbr]);
+		ensure(q->queue[qnbr]);
+	}
+
+	cell *dst = q->queue[qnbr] + q->qp[qnbr];
+	q->qp[qnbr] += safe_copy_cells(dst, c, c->nbr_cells);
+	return dst;
+}
+
