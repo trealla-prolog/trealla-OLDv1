@@ -52,7 +52,7 @@ static void msleep(int ms)
 
 cell *ERR_CYCLE_CELL = &(cell){};
 
-static bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool tolerant)
+static bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool partial_list)
 {
 	if (!is_list(p1) && !is_nil(p1))
 		return false;
@@ -66,7 +66,7 @@ static bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool tolerant)
 		p1_ctx = q->latest_ctx;
 	}
 
-	return is_nil(p1) || (tolerant && is_variable(p1));
+	return is_nil(p1) || (partial_list && is_variable(p1));
 }
 
 #if 0

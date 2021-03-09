@@ -2952,7 +2952,7 @@ static bool get_token(parser *p, int last_op)
 	return true;
 }
 
-size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, int tolerant)
+size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, int allow_integers)
 {
 	idx_t save_ctx = q ? q->latest_ctx : l_ctx;
 	size_t is_chars_list = 0;
@@ -2968,7 +2968,7 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, int tolerant)
 		cell *h = LIST_HEAD(l);
 		cell *c = q ? deref(q, h, l_ctx) : h;
 
-		if (is_integer(c) && !tolerant) {
+		if (is_integer(c) && !allow_integers) {
 			is_chars_list = 0;
 			break;
 		} else if (!is_integer(c) && !is_atom(c)) {

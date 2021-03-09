@@ -8,6 +8,28 @@
 #include "internal.h"
 #include "builtins.h"
 
+size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements, size_t max_elements)
+{
+	assert(min_elements <= max_elements);
+	FAULTINJECT(errno = ENOMEM; return 0);
+	size_t elements = max_elements;
+	void* mem;
+
+	do {
+		mem = realloc(*addr, elem_size * elements);
+		if (mem) break;
+		elements = min_elements + (elements-min_elements)/2;
+		message("memory pressure reduce %lu to %lu", max_elements, elements);
+	}
+	 while (elements > min_elements);
+
+	if (!mem)
+		return 0;
+
+	*addr = mem;
+	return elements;
+}
+
 // The tmp heap is used for temporary allocations (a scratch-pad)
 // for work in progress. As such it can survive a realloc() call.
 

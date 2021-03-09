@@ -25,28 +25,6 @@ faultinject_t FAULTINJECT_NAME;
 
 typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 
-size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements, size_t max_elements)
-{
-	assert(min_elements <= max_elements);
-	FAULTINJECT(errno = ENOMEM; return 0);
-	size_t elements = max_elements;
-	void* mem;
-
-	do {
-		mem = realloc(*addr, elem_size * elements);
-		if (mem) break;
-		elements = min_elements + (elements-min_elements)/2;
-		message("memory pressure reduce %lu to %lu", max_elements, elements);
-	}
-	 while (elements > min_elements);
-
-	if (!mem)
-		return 0;
-
-	*addr = mem;
-	return elements;
-}
-
 static USE_RESULT pl_state check_trail(query *q)
 {
 	if (q->st.tp > q->max_trails) {
