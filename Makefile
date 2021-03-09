@@ -72,7 +72,7 @@ src/history.o: src/history.c src/history.h src/utf8.h src/cdebug.h
 src/library.o: src/library.c src/library.h
 src/network.o: src/network.c src/internal.h src/skiplist.h src/trealla.h \
  src/cdebug.h src/network.h
-src/parse.o: src/parse.c src/internal.h src/skiplist.h src/trealla.h \
+src/parse.o: src/parse.c src/rules.c src/internal.h src/skiplist.h src/trealla.h \
  src/cdebug.h src/history.h src/library.h src/builtins.h src/utf8.h
 src/print.o: src/print.c src/internal.h src/skiplist.h src/trealla.h \
  src/cdebug.h src/builtins.h src/network.h src/utf8.h
