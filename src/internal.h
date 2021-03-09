@@ -260,6 +260,10 @@ typedef struct clause_ clause;
 typedef struct cell_ cell;
 typedef struct parser_ parser;
 
+// Using a fixed-size cell allows having arrays of cells, which is
+// basically what a term is. A compound is a variable length array
+// of cells, the length specified by 'nbr_cells' field in header.
+
 struct cell_ {
 	uint8_t val_type;
 	uint8_t arity;
@@ -269,23 +273,34 @@ struct cell_ {
 	// Tagged union based off 'val_type' ...
 
 	union {
+
+		// A rational (and integer)...
+
 		struct {
 			int_t val_num;
 			int_t val_den;
 		};
 
+		// A double...
+
 		struct {
 			double val_flt;
 		};
+
+		// A call return...
 
 		struct {
 			cell *val_ptr;
 			idx_t cgen;				// choice generation
 		};
 
+		// A small (inline) cstring (includes NULL-delimiter)...
+
 		struct {
 			char val_chr[MAX_SMALL_STRING];
 		};
+
+		// A ref-counted length-defined string...
 
 		struct {
 			strbuf *val_strb;
@@ -293,10 +308,14 @@ struct cell_ {
 			uint32_t strb_len;		// slice length (or zero)
 		};
 
+		// A static length-defined string...
+
 		struct {
-			char *val_str;			// slice offset
+			char *val_str;
 			size_t str_len;			// slice_length
 		};
+
+		// An atom, var or predicate...
 
 		struct {
 			union {
