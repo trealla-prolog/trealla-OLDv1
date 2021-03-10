@@ -7861,7 +7861,7 @@ static USE_RESULT pl_state fn_is_list_1(query *q)
 	return is_valid_list(q, p1, p1_ctx, false);
 }
 
-static USE_RESULT pl_state fn_mustbe_pairlist_1(query *q)
+static USE_RESULT pl_state fn_sys_mustbe_pairlist_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
@@ -7892,17 +7892,17 @@ static USE_RESULT pl_state fn_mustbe_pairlist_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_mustbe_pairlist_or_var_1(query *q)
+static USE_RESULT pl_state fn_sys_mustbe_pairlist_or_var_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
 	if (is_variable(p1))
 		return pl_success;
 
-	return fn_mustbe_pairlist_1(q);
+	return fn_sys_mustbe_pairlist_1(q);
 }
 
-static USE_RESULT pl_state fn_mustbe_list_1(query *q)
+static USE_RESULT pl_state fn_sys_mustbe_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
@@ -7916,7 +7916,7 @@ static USE_RESULT pl_state fn_mustbe_list_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_mustbe_list_or_var_1(query *q)
+static USE_RESULT pl_state fn_sys_mustbe_list_or_var_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
@@ -7929,22 +7929,9 @@ static USE_RESULT pl_state fn_mustbe_list_or_var_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_mustbe_callable_1(query *q)
+static USE_RESULT pl_state fn_sys_mustbe_callable_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-
-	if (!is_callable(p1))
-		return throw_error(q, p1, "type_error", "callable");
-
-	return pl_success;
-}
-
-static USE_RESULT pl_state fn_mustbe_callable_or_var_1(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-
-	if (is_variable(p1))
-		return pl_success;
 
 	if (!is_callable(p1))
 		return throw_error(q, p1, "type_error", "callable");
@@ -10299,7 +10286,7 @@ static USE_RESULT pl_state fn_succ_2(query *q)
 	return p1->val_num == (p2->val_num - 1);
 }
 
-static USE_RESULT pl_state fn_instantiated_1(query *q)
+static USE_RESULT pl_state fn_sys_instantiated_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
@@ -10309,7 +10296,7 @@ static USE_RESULT pl_state fn_instantiated_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_instantiated_2(query *q)
+static USE_RESULT pl_state fn_sys_instantiated_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -11131,12 +11118,11 @@ static const struct builtins g_other_funcs[] =
 	{"split_atom", 4, fn_split_atom_4, "+string,+sep,+pad,-list"},
 	{"split", 4, fn_split_4, "+string,+string,?left,?right"},
 	{"is_list", 1, fn_is_list_1, "+term"},
-	{"mustbe_pairlist", 1, fn_mustbe_pairlist_1, "+pair"},
-	{"mustbe_pairlist_or_var", 1, fn_mustbe_pairlist_or_var_1, "+pair"},
-	{"mustbe_list", 1, fn_mustbe_list_1, "+term"},
-	{"mustbe_list_or_var", 1, fn_mustbe_list_or_var_1, "+term"},
-	{"mustbe_callable", 1, fn_mustbe_callable_1, "+term"},
-	{"mustbe_callable_or_var", 1, fn_mustbe_callable_or_var_1, "+term"},
+	{"$mustbe_pairlist", 1, fn_sys_mustbe_pairlist_1, "+pair"},
+	{"$mustbe_pairlist_or_var", 1, fn_sys_mustbe_pairlist_or_var_1, "?pair"},
+	{"$mustbe_list", 1, fn_sys_mustbe_list_1, "+term"},
+	{"$mustbe_list_or_var", 1, fn_sys_mustbe_list_or_var_1, "?term"},
+	{"$mustbe_callable", 1, fn_sys_mustbe_callable_1, "+term"},
 	{"list", 1, fn_is_list_1, "+term"},
 	{"is_stream", 1, fn_is_stream_1, "+term"},
 	//{"forall", 2, fn_forall_2, "+term,+term"},
@@ -11222,8 +11208,8 @@ static const struct builtins g_other_funcs[] =
 	{"send", 1, fn_send_1, "+term"},
 	{"recv", 1, fn_recv_1, "?term"},
 
-	{"instantiated", 1, fn_instantiated_1, "+term"},
-	{"instantiated", 2, fn_instantiated_2, "+term,+term"},
+	{"$mustbe_instantiated", 1, fn_sys_instantiated_1, "+term"},
+	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+term,+term"},
 
 	// Used for database log
 

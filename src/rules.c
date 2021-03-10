@@ -12,7 +12,7 @@
 		"	memberchk(El, L).");
 
 	make_rule(m, "predicate_property(P, A) :- "				\
-		"mustbe_callable(P), "								\
+		"'$mustbe_callable'(P), "							\
 		"'$load_properties', "								\
 		"(var(A) -> true ; "								\
 		" (memberchk(A, [built_in,control_construct,discontiguous,private,static,dynamic,persist,multifile,meta_predicate(_)]) -> "							\
@@ -70,9 +70,9 @@
 	// sort...
 
 	make_rule(m, "sort(L, R) :- "							\
-		"instantiated(L, R), "								\
-		"mustbe_list(L), "									\
-		"mustbe_list_or_var(R), "							\
+		"'$mustbe_instantiated'(L, R), "						\
+		"'$mustbe_list'(L), "								\
+		"'$mustbe_list_or_var'(R), "						\
 		"length(L,N), "										\
 		"sort(N, L, _, R).");
 
@@ -110,9 +110,9 @@
 	// msort...
 
 	make_rule(m, "msort(L, R) :- "							\
-		"instantiated(L, R), "								\
-		"mustbe_list(L), "									\
-		"mustbe_list_or_var(R), "							\
+		"'$mustbe_instantiated'(L, R), "						\
+		"'$mustbe_list'(L), "								\
+		"'$mustbe_list_or_var'(R), "						\
 		"length(L,N), "										\
 		"msort(N, L, _, R).");
 
@@ -155,9 +155,9 @@
 		"Delta = '=')).");
 
 	make_rule(m, "keysort(L, R) :- "						\
-		"instantiated(L, R), "								\
-		"mustbe_pairlist(L), "								\
-		"mustbe_pairlist_or_var(R), "						\
+		"'$mustbe_instantiated'(L, R), "						\
+		"'$mustbe_pairlist'(L), "							\
+		"'$mustbe_pairlist_or_var'(R), "					\
 		"length(L,N), "										\
 		"keysort(N, L, _, R).");
 
@@ -182,8 +182,8 @@
 		"copy_term('$findall'(T,G,B0),TMP_G),"				\
 		"'$call'(TMP_G),"									\
 		"'$findall'(T,G,B0)=TMP_G,"							\
-		"mustbe_list_or_var(B),"							\
-		"mustbe_list_or_var(Tail),"							\
+		"'$mustbe_list_or_var'(B),"							\
+		"'$mustbe_list_or_var'(Tail),"						\
 		"'$append'(B0, Tail, B), !.");
 
 	make_rule(m, "bagof(T,G,B) :- "							\
