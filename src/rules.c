@@ -182,6 +182,8 @@
 		"copy_term('$findall'(T,G,B0),TMP_G),"				\
 		"'$call'(TMP_G),"									\
 		"'$findall'(T,G,B0)=TMP_G,"							\
+		"mustbe_list_or_var(B),"							\
+		"mustbe_list_or_var(Tail),"							\
 		"'$append'(B0, Tail, B), !.");
 
 	make_rule(m, "bagof(T,G,B) :- "							\
