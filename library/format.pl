@@ -17,6 +17,7 @@
    for the following tokens with special meaning:
 
      ~w    use the next available argument from Arguments here
+     ~c    use the next available here, which must be character code   % AD Mar 10, 2021
      ~q    use the next argument here, formatted as by writeq/1
      ~a    use the next argument here, which must be an atom
      ~s    use the next argument here, which must be a string
@@ -176,6 +177,10 @@ cells([~,k|Fs], [Arg|Args], Tab, Es, VNs) --> !,
         cells(Fs, Args, Tab, [chars(Chars)|Es], VNs).
 cells([~,a|Fs], [Arg|Args], Tab, Es, VNs) --> !,
         { atom_chars(Arg, Chars) },
+        cells(Fs, Args, Tab, [chars(Chars)|Es], VNs).
+cells([~,c|Fs], [Arg|Args], Tab, Es, VNs) --> !,
+        { atom_codes(A, [Arg]) },
+        { atom_chars(A, Chars) },
         cells(Fs, Args, Tab, [chars(Chars)|Es], VNs).
 cells([~|Fs0], Args0, Tab, Es, VNs) -->
         { numeric_argument(Fs0, Num, [d|Fs], Args0, [Arg0|Args]) },
@@ -373,7 +378,7 @@ digits(uppercase, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ").
    Impure I/O, implemented as a small wrapper over format_//2.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-/* Allow atom format string for compatability... AD 18/1/2020 */
+/* Allow atom format string for compatability... AD Jan 18, 2021 */
 
 format(Fs, Args) :-
         current_output(Stream),
