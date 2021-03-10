@@ -173,28 +173,27 @@
 		"keysort(N2, L2, L3, R2), "							\
 		"keymerge(R1, R2, R).");
 
-	// findall...
+	make_rule(m, "findall(T, G, B) :- "						\
+		"copy_term('$findall'(T,G,B),TMP_G),"				\
+		"'$call'(TMP_G),"									\
+		"'$findall'(T,G,B)=TMP_G.");
 
 	make_rule(m, "findall(T, G, B, Tail) :- "				\
-		"findall(T, G, B0), "								\
-		"'$append'(B0, Tail, B).");
-
-	// bagof...
+		"copy_term('$findall'(T,G,B0),TMP_G),"				\
+		"'$call'(TMP_G),"									\
+		"'$findall'(T,G,B0)=TMP_G,"							\
+		"'$append'(B0, Tail, B), !.");
 
 	make_rule(m, "bagof(T,G,B) :- "							\
 		"copy_term('$bagof'(T,G,B),TMP_G),"					\
 		"'$call'(TMP_G),"									\
 		"'$bagof'(T,G,B)=TMP_G.");
 
-	// setof...
-
 	make_rule(m, "setof(T,G,B) :- "							\
 		"copy_term('$bagof'(T,G,B),TMP_G),"					\
 		"'$call'(TMP_G),"									\
 		"'$bagof'(T,G,TMP_B)=TMP_G,"						\
 		"sort(TMP_B,B).");
-
-	// catch...
 
 	make_rule(m, "catch(G,E,C) :- "							\
 		"copy_term('$catch'(G,E,C),TMP_G),"					\

@@ -11047,7 +11047,7 @@ static const struct builtins g_iso_funcs[] =
 	{"current_prolog_flag", 2, fn_iso_current_prolog_flag_2, NULL},
 	{"set_prolog_flag", 2, fn_iso_set_prolog_flag_2, NULL},
 	{"op", 3, fn_iso_op_3, NULL},
-	{"findall", 3, fn_iso_findall_3, NULL},
+	{"$findall", 3, fn_iso_findall_3, NULL},
 	{"$bagof", 3, fn_iso_bagof_3, NULL},
 	{"current_predicate", 1, fn_iso_current_predicate_1, NULL},
 	{"current_op", 3, fn_iso_current_op_3, NULL},
