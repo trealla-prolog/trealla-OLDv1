@@ -118,6 +118,9 @@ format_cell(cell(From,To,Es)) -->
           ) },
         format_elements(Es).
 
+/* Allow code specifier purely for backwards compatability... by AD on Mar 11, 2021 */
+format_cell(Chars) --> [Chars].
+
 format_elements([]) --> [].
 format_elements([E|Es]) -->
         format_element(E),
@@ -177,10 +180,6 @@ cells([~,k|Fs], [Arg|Args], Tab, Es, VNs) --> !,
         cells(Fs, Args, Tab, [chars(Chars)|Es], VNs).
 cells([~,a|Fs], [Arg|Args], Tab, Es, VNs) --> !,
         { atom_chars(Arg, Chars) },
-        cells(Fs, Args, Tab, [chars(Chars)|Es], VNs).
-cells([~,c|Fs], [Arg|Args], Tab, Es, VNs) --> !,
-        { atom_codes(A, [Arg]) },
-        { atom_chars(A, Chars) },
         cells(Fs, Args, Tab, [chars(Chars)|Es], VNs).
 cells([~|Fs0], Args0, Tab, Es, VNs) -->
         { numeric_argument(Fs0, Num, [d|Fs], Args0, [Arg0|Args]) },
@@ -284,6 +283,28 @@ cells([~|Fs0], Args0, Tab0, Es, VNs) -->
         { Tab is Tab0 + Num },
         cell(Tab0, Tab, Es),
         cells(Fs, Args, Tab, [], VNs).
+
+/********************************************************************/
+/* Allow code specifier purely for backwards compatability... by AD on Mar 11, 2021 */
+
+cells([~,c|Fs], [Arg|Args], Tab, Es, VNs) --> !,
+        { atom_codes(A, [Arg]) },
+        { atom_chars(A, Chars) },
+        cell(Tab, Tab, Es),
+        n_chars(1, Chars),
+        cells(Fs, Args, 0, [], VNs).
+cells([~|Fs0], [Arg|Args0], Tab, Es, VNs) -->
+        { numeric_argument(Fs0, Num, [c|Fs], Args0, Args) },
+        !,
+        { atom_codes(A, [Arg]) },
+        { atom_chars(A, Chars) },
+        cell(Tab, Tab, Es),
+        n_chars(Num, Chars),
+        cells(Fs, Args, 0, [], VNs).
+
+/*                                                                  */
+/********************************************************************/
+
 cells([~,C|_], _, _, _, _) -->
         { atom_chars(A, [~,C]),
           domain_error(format_string, A, format_//2) }.
@@ -298,6 +319,12 @@ format_number_chars(N0, Chars) :-
 
 n_newlines(0) --> !.
 n_newlines(N0) --> { N0 > 0, N is N0 - 1 }, [newline], n_newlines(N).
+
+/* Allow code specifier purely for backwards compatability... by AD on Mar 11, 2021 */
+
+n_chars(0, _) --> !.
+n_chars(N0, Chars) --> { N0 > 0, N is N0 - 1 },
+    Chars, n_chars(N, Chars).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ?- phrase(upto_what(Cs, ~), "abc~test", Rest).
