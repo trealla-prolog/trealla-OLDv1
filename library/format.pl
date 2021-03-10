@@ -17,7 +17,6 @@
    for the following tokens with special meaning:
 
      ~w    use the next available argument from Arguments here
-     ~c    use the next available here, which must be character code   % AD Mar 10, 2021
      ~q    use the next argument here, formatted as by writeq/1
      ~a    use the next argument here, which must be an atom
      ~s    use the next argument here, which must be a string
@@ -41,6 +40,8 @@
      ~`Ct  like ~t, use character C instead of spaces to fill the space
      ~n    newline
      ~Nn   N newlines
+     ~c    use the next argument here, which must be character code   % AD Mar 10, 2021
+     ~Nc   use the next argument here, which must be character code   % AD Mar 11, 2021
      ~i    ignore the next argument
      ~~    the literal ~
 
