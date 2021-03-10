@@ -15,23 +15,12 @@
     "uid" : "fe889f4ed1e23b13cb890295efdd6049",
     "name" : "predicates/setof_3/tests.lgt::tests",
     "statistic" : {
-      "failed" : 4,
+      "failed" : 5,
       "broken" : 0,
       "skipped" : 1,
-      "passed" : 30,
+      "passed" : 29,
       "unknown" : 0,
       "total" : 35
-    }
-  }, {
-    "uid" : "e8a334ca3e0bebcbd1687a3840012f9f",
-    "name" : "predicates/findall_4/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 4,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 9,
-      "unknown" : 0,
-      "total" : 13
     }
   }, {
     "uid" : "bdc881d4b933694f76d7d16bff33e9cf",
@@ -109,6 +98,17 @@
       "passed" : 9,
       "unknown" : 0,
       "total" : 10
+    }
+  }, {
+    "uid" : "2fa097f54728c3cdaa06f09f04fafff8",
+    "name" : "predicates/write_term_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 56,
+      "unknown" : 0,
+      "total" : 56
     }
   } ]
 }
