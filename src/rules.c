@@ -1,8 +1,15 @@
 	make_rule(m, "format(F) :- format(F, []).");
 	make_rule(m, "unify_with_occurs_check(X, X) :- acyclic_term(X).");
 
-	make_rule(m, "memberchk(El, [El|_]) :- !.");
-	make_rule(m, "memberchk(El, [_|L]) :- memberchk(El, L).");
+	make_rule(m,
+		"'$append'([], L, L)."								\
+		"'$append'([H|T], L, [H|R]) :- "					\
+		"	'$append'(T, L, R).");
+
+	make_rule(m,
+		"memberchk(El, [El|_]) :- !."						\
+		"memberchk(El, [_|L]) :- "							\
+		"	memberchk(El, L).");
 
 	make_rule(m, "predicate_property(P, A) :- "				\
 		"mustbe_callable(P), "								\
@@ -36,8 +43,9 @@
 		"), "												\
 		"'$chk_is_det'.");
 
-	make_rule(m, "partial_string(S,P) :- append(S,_,P).");
-	make_rule(m, "partial_string(S,P,V) :- append(S,V,P).");
+	make_rule(m,
+		"partial_string(S,P) :- '$append'(S, _, P)."		\
+		"partial_string(S,P,V) :- '$append'(S, V, P).");
 
 	make_rule(m, "forall(Cond,Action) :- \\+ (Cond, \\+ Action).");
 
@@ -46,18 +54,20 @@
 
 	// merge...
 
-	make_rule(m, "merge([], R, R) :- !.");
-	make_rule(m, "merge(R, [], R) :- !.");
-	make_rule(m, "merge([H1|T1], [H2|T2], Result) :- "		\
-		"compare(Delta, H1, H2), !, "						\
-		"merge(Delta, H1, H2, T1, T2, Result).");
+	make_rule(m,
+		"merge([], R, R) :- !."								\
+		"merge(R, [], R) :- !.");
 
-	make_rule(m, "merge(>, H1, H2, T1, T2, [H2|R]) :- "		\
-		"merge([H1|T1], T2, R).");
-	make_rule(m, "merge(=, H1, _, T1, T2, [H1|R]) :- "		\
-		"merge(T1, T2, R).");
-	make_rule(m, "merge(<, H1, H2, T1, T2, [H1|R]) :- "		\
-		"merge(T1, [H2|T2], R).");
+	make_rule(m,
+		"merge([H1|T1], [H2|T2], Result) :- "				\
+		"	compare(Delta, H1, H2), !, "					\
+		"	merge(Delta, H1, H2, T1, T2, Result)."			\
+		"merge(>, H1, H2, T1, T2, [H2|R]) :- "				\
+		"	merge([H1|T1], T2, R)."							\
+		"merge(=, H1, _, T1, T2, [H1|R]) :- "				\
+		"	merge(T1, T2, R)."								\
+		"merge(<, H1, H2, T1, T2, [H1|R]) :- "				\
+		"	merge(T1, [H2|T2], R).");
 
 	// sort...
 
@@ -68,36 +78,40 @@
 		"length(L,N), "										\
 		"sort(N, L, _, R).");
 
-	make_rule(m, "sort(2, [X1, X2|L], L, R) :- !, "			\
-		"compare(Delta, X1, X2), "							\
-		"'$sort2'(Delta, X1, X2, R).");
-	make_rule(m, "sort(1, [X|L], L, [X]) :- !.");
-	make_rule(m, "sort(0, L, L, []) :- !.");
-	make_rule(m, "sort(N, L1, L3, R) :- "					\
-		"N1 is N // 2, "									\
-		"plus(N1, N2, N), "									\
-		"sort(N1, L1, L2, R1), "							\
-		"sort(N2, L2, L3, R2), "							\
-		"merge(R1, R2, R).");
+	make_rule(m,
+		"sort(2, [X1, X2|L], L, R) :- !,"					\
+		"	compare(Delta, X1, X2), "						\
+		"	'$sort2'(Delta, X1, X2, R)."					\
+		"sort(1, [X|L], L, [X]) :- !."						\
+		"sort(0, L, L, []) :- !."							\
+		"sort(N, L1, L3, R) :- "							\
+		"	N1 is N // 2, "									\
+		"	plus(N1, N2, N), "								\
+		"	sort(N1, L1, L2, R1), "							\
+		"	sort(N2, L2, L3, R2), "							\
+		"	merge(R1, R2, R).");
 
-	make_rule(m, "'$sort2'(<, X1, X2, [X1, X2]).");
-	make_rule(m, "'$sort2'(=, X1, _,  [X1]).");
-	make_rule(m, "'$sort2'(>, X1, X2, [X2, X1]).");
+	make_rule(m,
+		"'$sort2'(<, X1, X2, [X1, X2])."					\
+		"'$sort2'(=, X1, _,  [X1])."						\
+		"'$sort2'(>, X1, X2, [X2, X1]).");
 
 	// mmerge...
 
-	make_rule(m, "mmerge([], R, R) :- !.");
-	make_rule(m, "mmerge(R, [], R) :- !.");
-	make_rule(m, "mmerge([H1|T1], [H2|T2], Result) :- "		\
-		"compare(Delta, H1, H2), !, "						\
-		"mmerge(Delta, H1, H2, T1, T2, Result).");
+	make_rule(m,
+		"mmerge([], R, R) :- !."							\
+		"mmerge(R, [], R) :- !."							\
+		"mmerge([H1|T1], [H2|T2], Result) :- "				\
+		"	compare(Delta, H1, H2), !, "					\
+		"	mmerge(Delta, H1, H2, T1, T2, Result).");
 
-	make_rule(m, "mmerge(>, H1, H2, T1, T2, [H2|R]) :- "	\
-		"mmerge([H1|T1], T2, R).");
-	make_rule(m, "mmerge(=, H1, H2, T1, T2, [H1|R]) :- "	\
-		"mmerge(T1, [H2|T2], R).");
-	make_rule(m, "mmerge(<, H1, H2, T1, T2, [H1|R]) :- "	\
-		"mmerge(T1, [H2|T2], R).");
+	make_rule(m,
+		"mmerge(>, H1, H2, T1, T2, [H2|R]) :- "				\
+		"	mmerge([H1|T1], T2, R)."						\
+		"mmerge(=, H1, H2, T1, T2, [H1|R]) :- "				\
+		"	mmerge(T1, [H2|T2], R)."						\
+		"mmerge(<, H1, H2, T1, T2, [H1|R]) :- "				\
+		"	mmerge(T1, [H2|T2], R).");
 
 	// msort...
 
@@ -108,36 +122,40 @@
 		"length(L,N), "										\
 		"msort(N, L, _, R).");
 
-	make_rule(m, "msort(2, [X1, X2|L], L, R) :- !, "		\
-		"compare(Delta, X1, X2), "							\
-		"'$msort2'(Delta, X1, X2, R).");
-	make_rule(m, "msort(1, [X|L], L, [X]) :- !.");
-	make_rule(m, "msort(0, L, L, []) :- !.");
-	make_rule(m, "msort(N, L1, L3, R) :- "					\
-		"N1 is N // 2, "									\
-		"plus(N1, N2, N), "									\
-		"msort(N1, L1, L2, R1), "							\
-		"msort(N2, L2, L3, R2), "							\
-		"mmerge(R1, R2, R).");
+	make_rule(m,
+		"msort(2, [X1, X2|L], L, R) :- !, "					\
+		"	compare(Delta, X1, X2), "						\
+		"'	$msort2'(Delta, X1, X2, R)."					\
+		"msort(1, [X|L], L, [X]) :- !."						\
+		"msort(0, L, L, []) :- !."							\
+		"msort(N, L1, L3, R) :- "							\
+		"	N1 is N // 2, "									\
+		"	plus(N1, N2, N), "								\
+		"	msort(N1, L1, L2, R1), "						\
+		"	msort(N2, L2, L3, R2), "						\
+		"	mmerge(R1, R2, R).");
 
-	make_rule(m, "'$msort2'(<, X1, X2, [X1, X2]).");
-	make_rule(m, "'$msort2'(=, X1, X2, [X1, X2]).");
-	make_rule(m, "'$msort2'(>, X1, X2, [X2, X1]).");
+	make_rule(m,
+		"'$msort2'(<, X1, X2, [X1, X2])."					\
+		"'$msort2'(=, X1, X2, [X1, X2])."					\
+		"'$msort2'(>, X1, X2, [X2, X1]).");
 
 	// keymerge...
 
-	make_rule(m, "keymerge([], R, R) :- !.");
-	make_rule(m, "keymerge(R, [], R) :- !.");
-	make_rule(m, "keymerge([H1|T1], [H2|T2], Result) :- "	\
-		"keycompare(Delta, H1, H2), !, "					\
-		"keymerge(Delta, H1, H2, T1, T2, Result).");
+	make_rule(m,
+		"keymerge([], R, R) :- !."							\
+		"keymerge(R, [], R) :- !."							\
+		"keymerge([H1|T1], [H2|T2], Result) :- "			\
+		"	keycompare(Delta, H1, H2), !, "					\
+		"	keymerge(Delta, H1, H2, T1, T2, Result).");
 
-	make_rule(m, "keymerge(>, H1, H2, T1, T2, [H2|R]) :- "	\
-		"keymerge([H1|T1], T2, R).");
-	make_rule(m, "keymerge(=, H1, H2, T1, T2, [H1|R]) :- "	\
-		"keymerge(T1, [H2|T2], R).");
-	make_rule(m, "keymerge(<, H1, H2, T1, T2, [H1|R]) :- "	\
-		"keymerge(T1, [H2|T2], R).");
+	make_rule(m,
+		"keymerge(>, H1, H2, T1, T2, [H2|R]) :- "			\
+		"	keymerge([H1|T1], T2, R)."						\
+		"keymerge(=, H1, H2, T1, T2, [H1|R]) :- "			\
+		"	keymerge(T1, [H2|T2], R)."						\
+		"keymerge(<, H1, H2, T1, T2, [H1|R]) :- "			\
+		"	keymerge(T1, [H2|T2], R).");
 
 	// keysort...
 
@@ -153,40 +171,33 @@
 		"length(L,N), "										\
 		"keysort(N, L, _, R).");
 
-	make_rule(m, "keysort(2, [X1, X2|L], L, R) :- !, "		\
-		"keycompare(Delta, X1, X2), "						\
-		"'$msort2'(Delta, X1, X2, R).");
-	make_rule(m, "keysort(1, [X|L], L, [X]) :- !.");
-	make_rule(m, "keysort(0, L, L, []) :- !.");
-	make_rule(m, "keysort(N, L1, L3, R) :- "				\
-		"N1 is N // 2, "									\
-		"plus(N1, N2, N), "									\
-		"keysort(N1, L1, L2, R1), "							\
-		"keysort(N2, L2, L3, R2), "							\
-		"keymerge(R1, R2, R).");
-
-	// findall...
+	make_rule(m,
+		"keysort(2, [X1, X2|L], L, R) :- !, "				\
+		"	keycompare(Delta, X1, X2), "					\
+		"	'$msort2'(Delta, X1, X2, R)."					\
+		"keysort(1, [X|L], L, [X]) :- !."					\
+		"keysort(0, L, L, []) :- !."						\
+		"keysort(N, L1, L3, R) :- "							\
+		"	N1 is N // 2, "									\
+		"	plus(N1, N2, N), "								\
+		"	keysort(N1, L1, L2, R1), "						\
+		"	keysort(N2, L2, L3, R2), "						\
+		"	keymerge(R1, R2, R).");
 
 	make_rule(m, "findall(T, G, B, Tail) :- "				\
 		"findall(T, G, B0), "								\
 		"'$append'(B0, Tail, B).");
-
-	// bagof...
 
 	make_rule(m, "bagof(T,G,B) :- "							\
 		"copy_term('$bagof'(T,G,B),TMP_G),"					\
 		"'$call'(TMP_G),"									\
 		"'$bagof'(T,G,B)=TMP_G.");
 
-	// setof...
-
 	make_rule(m, "setof(T,G,B) :- "							\
 		"copy_term('$bagof'(T,G,B),TMP_G),"					\
 		"'$call'(TMP_G),"									\
 		"'$bagof'(T,G,TMP_B)=TMP_G,"						\
 		"sort(TMP_B,B).");
-
-	// catch...
 
 	make_rule(m, "catch(G,E,C) :- "							\
 		"copy_term('$catch'(G,E,C),TMP_G),"					\
@@ -289,10 +300,6 @@
 		" copy_term(P, P2), P2=P,"							\
 		" phrase(P2, Ms, []),"								\
 		" close(Str).");
-
-	make_rule(m, "'$append'([], L, L).");
-	make_rule(m, "'$append'([H|T], L, [H|R]) :- "			\
-		" '$append'(T, L, R).");
 
 	make_rule(m, "phrase(GRBody, S0) :-"					\
 		"phrase(GRBody, S0, []).");
