@@ -25,7 +25,7 @@ faultinject_t FAULTINJECT_NAME;
 
 typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 
-static USE_RESULT pl_state check_trail(query *q)
+static USE_RESULT pl_status check_trail(query *q)
 {
 	if (q->st.tp > q->max_trails) {
 		q->max_trails = q->st.tp;
@@ -46,7 +46,7 @@ static USE_RESULT pl_state check_trail(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state check_choice(query *q)
+static USE_RESULT pl_status check_choice(query *q)
 {
 	if (q->cp > q->max_choices) {
 		q->max_choices = q->cp;
@@ -67,7 +67,7 @@ static USE_RESULT pl_state check_choice(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state check_frame(query *q)
+static USE_RESULT pl_status check_frame(query *q)
 {
 	if (q->st.fp > q->max_frames) {
 		q->max_frames = q->st.fp;
@@ -88,7 +88,7 @@ static USE_RESULT pl_state check_frame(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state check_slot(query *q, unsigned cnt)
+static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 {
 	idx_t nbr = q->st.sp + cnt + MAX_ARITY;
 
@@ -417,7 +417,7 @@ void stash_me(query *q, term *t, bool last_match)
 	q->st.sp += nbr_vars;
 }
 
-pl_state make_choice(query *q)
+pl_status make_choice(query *q)
 {
 	may_error(check_frame(q));
 	may_error(check_choice(q));
@@ -441,7 +441,7 @@ pl_state make_choice(query *q)
 // A barrier is used when making a call/1, it sets a
 // new choice generation so that cuts are contained...
 
-pl_state make_barrier(query *q)
+pl_status make_barrier(query *q)
 {
 	may_error(make_choice(q));
 	frame *g = GET_CURR_FRAME();
@@ -451,7 +451,7 @@ pl_state make_barrier(query *q)
 	return pl_success;
 }
 
-pl_state make_catcher(query *q, enum q_retry retry)
+pl_status make_catcher(query *q, enum q_retry retry)
 {
 	may_error(make_barrier(q));
 	choice *ch = GET_CURR_CHOICE();
@@ -855,7 +855,7 @@ static bool CHECK_UPDATE_VIEW(__attribute__((unused)) query *q, clause *c)
 
 // Match HEAD :- BODY.
 
-USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx)
+USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 {
 	if (!q->retry) {
 		cell *head = get_head(p1);
@@ -945,7 +945,7 @@ USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx)
 // Match HEAD.
 // Match HEAD :- true.
 
-USE_RESULT pl_state match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retract)
+USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retract)
 {
 	if (!q->retry) {
 		cell *c = p1;
@@ -1045,7 +1045,7 @@ static void next_key(query *q)
 		q->st.curr_clause = q->st.curr_clause->next;
 }
 
-static USE_RESULT pl_state match_head(query *q)
+static USE_RESULT pl_status match_head(query *q)
 {
 	if (!q->retry) {
 		cell *c = q->st.curr_cell;
@@ -1277,7 +1277,7 @@ static bool outstanding_choices(query *q)
 	return q->cp;
 }
 
-pl_state run_query(query *q)
+pl_status run_query(query *q)
 {
 	q->yielded = false;
 	bool done = false;
@@ -1406,7 +1406,7 @@ uint64_t get_time_in_usec(void)
 }
 #endif
 
-pl_state query_execute(query *q, term *t)
+pl_status query_execute(query *q, term *t)
 {
 	q->m->pl->did_dump_vars = false;
 	q->st.curr_cell = t->cells;
@@ -1421,7 +1421,7 @@ pl_state query_execute(query *q, term *t)
 	g->nbr_vars = t->nbr_vars;
 	g->nbr_slots = t->nbr_vars;
 	g->ugen = ++q->m->pl->ugen;
-	pl_state ret = run_query(q);
+	pl_status ret = run_query(q);
 	sl_done(q->st.iter);
 	return ret;
 }

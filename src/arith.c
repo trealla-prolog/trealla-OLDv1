@@ -69,7 +69,7 @@ void do_reduce(cell *n)
 
 #define reduce(c) if ((c)->val_den != 1) do_reduce(c)
 
-static USE_RESULT pl_state fn_iso_is_2(query *q)
+static USE_RESULT pl_status fn_iso_is_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -107,7 +107,7 @@ static USE_RESULT pl_state fn_iso_is_2(query *q)
 	return pl_failure;
 }
 
-static USE_RESULT pl_state fn_iso_float_1(query *q)
+static USE_RESULT pl_status fn_iso_float_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 
@@ -145,7 +145,7 @@ static USE_RESULT pl_state fn_iso_float_1(query *q)
 	return is_float(p1_tmp);
 }
 
-static USE_RESULT pl_state fn_iso_integer_1(query *q)
+static USE_RESULT pl_status fn_iso_integer_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 
@@ -172,7 +172,7 @@ static USE_RESULT pl_state fn_iso_integer_1(query *q)
 	return is_integer(p1_tmp);
 }
 
-static USE_RESULT pl_state fn_iso_abs_1(query *q)
+static USE_RESULT pl_status fn_iso_abs_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -189,7 +189,7 @@ static USE_RESULT pl_state fn_iso_abs_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_sign_1(query *q)
+static USE_RESULT pl_status fn_iso_sign_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -206,7 +206,7 @@ static USE_RESULT pl_state fn_iso_sign_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_positive_1(query *q)
+static USE_RESULT pl_status fn_iso_positive_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -215,7 +215,7 @@ static USE_RESULT pl_state fn_iso_positive_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_negative_1(query *q)
+static USE_RESULT pl_status fn_iso_negative_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -234,7 +234,7 @@ static USE_RESULT pl_state fn_iso_negative_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_epsilon_0(query *q)
+static USE_RESULT pl_status fn_iso_epsilon_0(query *q)
 {
 	CHECK_CALC();
 	q->accum.val_flt = DBL_EPSILON;
@@ -242,7 +242,7 @@ static USE_RESULT pl_state fn_iso_epsilon_0(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_pi_0(query *q)
+static USE_RESULT pl_status fn_iso_pi_0(query *q)
 {
 	CHECK_CALC();
 	q->accum.val_flt = M_PI;
@@ -250,7 +250,7 @@ static USE_RESULT pl_state fn_iso_pi_0(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_e_0(query *q)
+static USE_RESULT pl_status fn_iso_e_0(query *q)
 {
 	CHECK_CALC();
 	q->accum.val_flt = M_E;
@@ -258,7 +258,7 @@ static USE_RESULT pl_state fn_iso_e_0(query *q)
 	return pl_success;
 }
 
-USE_RESULT pl_state fn_iso_add_2(query *q)
+USE_RESULT pl_status fn_iso_add_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -310,7 +310,7 @@ USE_RESULT pl_state fn_iso_add_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_sub_2(query *q)
+static USE_RESULT pl_status fn_iso_sub_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -362,7 +362,7 @@ static USE_RESULT pl_state fn_iso_sub_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_mul_2(query *q)
+static USE_RESULT pl_status fn_iso_mul_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -415,7 +415,7 @@ static USE_RESULT pl_state fn_iso_mul_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_exp_1(query *q)
+static USE_RESULT pl_status fn_iso_exp_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -443,7 +443,7 @@ static USE_RESULT pl_state fn_iso_exp_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_sqrt_1(query *q)
+static USE_RESULT pl_status fn_iso_sqrt_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -473,7 +473,7 @@ static USE_RESULT pl_state fn_iso_sqrt_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_log_1(query *q)
+static USE_RESULT pl_status fn_iso_log_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -503,7 +503,7 @@ static USE_RESULT pl_state fn_iso_log_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_truncate_1(query *q)
+static USE_RESULT pl_status fn_iso_truncate_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -541,7 +541,7 @@ static USE_RESULT pl_state fn_iso_truncate_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_round_1(query *q)
+static USE_RESULT pl_status fn_iso_round_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -586,7 +586,7 @@ static USE_RESULT pl_state fn_iso_round_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_ceiling_1(query *q)
+static USE_RESULT pl_status fn_iso_ceiling_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -624,7 +624,7 @@ static USE_RESULT pl_state fn_iso_ceiling_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_float_integer_part_1(query *q)
+static USE_RESULT pl_status fn_iso_float_integer_part_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -644,7 +644,7 @@ static USE_RESULT pl_state fn_iso_float_integer_part_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_float_fractional_part_1(query *q)
+static USE_RESULT pl_status fn_iso_float_fractional_part_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -664,7 +664,7 @@ static USE_RESULT pl_state fn_iso_float_fractional_part_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_floor_1(query *q)
+static USE_RESULT pl_status fn_iso_floor_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -702,7 +702,7 @@ static USE_RESULT pl_state fn_iso_floor_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_sin_1(query *q)
+static USE_RESULT pl_status fn_iso_sin_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -732,7 +732,7 @@ static USE_RESULT pl_state fn_iso_sin_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_cos_1(query *q)
+static USE_RESULT pl_status fn_iso_cos_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -762,7 +762,7 @@ static USE_RESULT pl_state fn_iso_cos_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_tan_1(query *q)
+static USE_RESULT pl_status fn_iso_tan_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -792,7 +792,7 @@ static USE_RESULT pl_state fn_iso_tan_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_asin_1(query *q)
+static USE_RESULT pl_status fn_iso_asin_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -822,7 +822,7 @@ static USE_RESULT pl_state fn_iso_asin_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_acos_1(query *q)
+static USE_RESULT pl_status fn_iso_acos_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -852,7 +852,7 @@ static USE_RESULT pl_state fn_iso_acos_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_atan_1(query *q)
+static USE_RESULT pl_status fn_iso_atan_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -882,7 +882,7 @@ static USE_RESULT pl_state fn_iso_atan_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_atan2_2(query *q)
+static USE_RESULT pl_status fn_iso_atan2_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -941,7 +941,7 @@ static USE_RESULT pl_state fn_iso_atan2_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_sinh_1(query *q)
+static USE_RESULT pl_status fn_sinh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -971,7 +971,7 @@ static USE_RESULT pl_state fn_sinh_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_cosh_1(query *q)
+static USE_RESULT pl_status fn_cosh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1001,7 +1001,7 @@ static USE_RESULT pl_state fn_cosh_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_tanh_1(query *q)
+static USE_RESULT pl_status fn_tanh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1031,7 +1031,7 @@ static USE_RESULT pl_state fn_tanh_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_asinh_1(query *q)
+static USE_RESULT pl_status fn_asinh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1061,7 +1061,7 @@ static USE_RESULT pl_state fn_asinh_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_acosh_1(query *q)
+static USE_RESULT pl_status fn_acosh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1091,7 +1091,7 @@ static USE_RESULT pl_state fn_acosh_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_atanh_1(query *q)
+static USE_RESULT pl_status fn_atanh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1121,7 +1121,7 @@ static USE_RESULT pl_state fn_atanh_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_copysign_2(query *q)
+static USE_RESULT pl_status fn_iso_copysign_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1158,7 +1158,7 @@ static USE_RESULT pl_state fn_iso_copysign_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_pow_2(query *q)
+static USE_RESULT pl_status fn_iso_pow_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1218,7 +1218,7 @@ static USE_RESULT pl_state fn_iso_pow_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_powi_2(query *q)
+static USE_RESULT pl_status fn_iso_powi_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1291,7 +1291,7 @@ static USE_RESULT pl_state fn_iso_powi_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_divide_2(query *q)
+static USE_RESULT pl_status fn_iso_divide_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1341,7 +1341,7 @@ static USE_RESULT pl_state fn_iso_divide_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_divint_2(query *q)
+static USE_RESULT pl_status fn_iso_divint_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1366,7 +1366,7 @@ static USE_RESULT pl_state fn_iso_divint_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_div_2(query *q)
+static USE_RESULT pl_status fn_iso_div_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1391,7 +1391,7 @@ static USE_RESULT pl_state fn_iso_div_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_mod_2(query *q)
+static USE_RESULT pl_status fn_iso_mod_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1423,7 +1423,7 @@ static USE_RESULT pl_state fn_iso_mod_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_rem_2(query *q)
+static USE_RESULT pl_status fn_iso_rem_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1448,7 +1448,7 @@ static USE_RESULT pl_state fn_iso_rem_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_max_2(query *q)
+static USE_RESULT pl_status fn_iso_max_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1497,7 +1497,7 @@ static USE_RESULT pl_state fn_iso_max_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_min_2(query *q)
+static USE_RESULT pl_status fn_iso_min_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1546,7 +1546,7 @@ static USE_RESULT pl_state fn_iso_min_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_xor_2(query *q)
+static USE_RESULT pl_status fn_iso_xor_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1568,7 +1568,7 @@ static USE_RESULT pl_state fn_iso_xor_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_and_2(query *q)
+static USE_RESULT pl_status fn_iso_and_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1590,7 +1590,7 @@ static USE_RESULT pl_state fn_iso_and_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_or_2(query *q)
+static USE_RESULT pl_status fn_iso_or_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1612,7 +1612,7 @@ static USE_RESULT pl_state fn_iso_or_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_shl_2(query *q)
+static USE_RESULT pl_status fn_iso_shl_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1634,7 +1634,7 @@ static USE_RESULT pl_state fn_iso_shl_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_shr_2(query *q)
+static USE_RESULT pl_status fn_iso_shr_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1656,7 +1656,7 @@ static USE_RESULT pl_state fn_iso_shr_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_iso_neg_1(query *q)
+static USE_RESULT pl_status fn_iso_neg_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1811,7 +1811,7 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 	return 0;
 }
 
-static USE_RESULT pl_state fn_iso_seq_2(query *q)
+static USE_RESULT pl_status fn_iso_seq_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -1819,7 +1819,7 @@ static USE_RESULT pl_state fn_iso_seq_2(query *q)
 	return res == 0 || res == ERR_CYCLE_CMP;
 }
 
-static USE_RESULT pl_state fn_iso_sne_2(query *q)
+static USE_RESULT pl_status fn_iso_sne_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -1827,7 +1827,7 @@ static USE_RESULT pl_state fn_iso_sne_2(query *q)
 	return res != 0 && res != ERR_CYCLE_CMP;
 }
 
-static USE_RESULT pl_state fn_iso_slt_2(query *q)
+static USE_RESULT pl_status fn_iso_slt_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -1835,7 +1835,7 @@ static USE_RESULT pl_state fn_iso_slt_2(query *q)
 	return res != ERR_CYCLE_CMP && res < 0;
 }
 
-static USE_RESULT pl_state fn_iso_sle_2(query *q)
+static USE_RESULT pl_status fn_iso_sle_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -1843,7 +1843,7 @@ static USE_RESULT pl_state fn_iso_sle_2(query *q)
 	return res != ERR_CYCLE_CMP && res <= 0;
 }
 
-static USE_RESULT pl_state fn_iso_sgt_2(query *q)
+static USE_RESULT pl_status fn_iso_sgt_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -1851,7 +1851,7 @@ static USE_RESULT pl_state fn_iso_sgt_2(query *q)
 	return res != ERR_CYCLE_CMP && res > 0;
 }
 
-static USE_RESULT pl_state fn_iso_sge_2(query *q)
+static USE_RESULT pl_status fn_iso_sge_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -1859,7 +1859,7 @@ static USE_RESULT pl_state fn_iso_sge_2(query *q)
 	return res != ERR_CYCLE_CMP && res >= 0;
 }
 
-static USE_RESULT pl_state fn_iso_neq_2(query *q)
+static USE_RESULT pl_status fn_iso_neq_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -1882,7 +1882,7 @@ static USE_RESULT pl_state fn_iso_neq_2(query *q)
 	return throw_error(q, &p1, "type_error", "evaluable");
 }
 
-static USE_RESULT pl_state fn_iso_nne_2(query *q)
+static USE_RESULT pl_status fn_iso_nne_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -1905,7 +1905,7 @@ static USE_RESULT pl_state fn_iso_nne_2(query *q)
 	return throw_error(q, &p1, "type_error", "evaluable");
 }
 
-static USE_RESULT pl_state fn_iso_nge_2(query *q)
+static USE_RESULT pl_status fn_iso_nge_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -1928,7 +1928,7 @@ static USE_RESULT pl_state fn_iso_nge_2(query *q)
 	return throw_error(q, &p1, "type_error", "evaluable");
 }
 
-static USE_RESULT pl_state fn_iso_ngt_2(query *q)
+static USE_RESULT pl_status fn_iso_ngt_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -1951,7 +1951,7 @@ static USE_RESULT pl_state fn_iso_ngt_2(query *q)
 	return throw_error(q, &p1, "type_error", "evaluable");
 }
 
-static USE_RESULT pl_state fn_iso_nle_2(query *q)
+static USE_RESULT pl_status fn_iso_nle_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -1974,7 +1974,7 @@ static USE_RESULT pl_state fn_iso_nle_2(query *q)
 	return throw_error(q, &p1, "type_error", "evaluable");
 }
 
-static USE_RESULT pl_state fn_iso_nlt_2(query *q)
+static USE_RESULT pl_status fn_iso_nlt_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -1997,7 +1997,7 @@ static USE_RESULT pl_state fn_iso_nlt_2(query *q)
 	return throw_error(q, &p1, "type_error", "evaluable");
 }
 
-static USE_RESULT pl_state fn_log_2(query *q)
+static USE_RESULT pl_status fn_log_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -2060,7 +2060,7 @@ static USE_RESULT pl_state fn_log_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_log10_1(query *q)
+static USE_RESULT pl_status fn_log10_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -2102,14 +2102,14 @@ static double rnd(void)
 	return((double)g_seed / (double)random_M);
 }
 
-static USE_RESULT pl_state fn_set_seed_1(query *q)
+static USE_RESULT pl_status fn_set_seed_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	g_seed = p1->val_num;
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_get_seed_1(query *q)
+static USE_RESULT pl_status fn_get_seed_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
@@ -2118,7 +2118,7 @@ static USE_RESULT pl_state fn_get_seed_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_random_1(query *q)
+static USE_RESULT pl_status fn_random_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -2140,7 +2140,7 @@ static USE_RESULT pl_state fn_random_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_rand_0(query *q)
+static USE_RESULT pl_status fn_rand_0(query *q)
 {
 	q->accum.val_type = TYPE_INTEGER;
 	q->accum.val_num = (int_t)rnd() * RAND_MAX;
@@ -2148,7 +2148,7 @@ static USE_RESULT pl_state fn_rand_0(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_rand_1(query *q)
+static USE_RESULT pl_status fn_rand_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
@@ -2157,7 +2157,7 @@ static USE_RESULT pl_state fn_rand_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_state fn_rdiv_2(query *q)
+static USE_RESULT pl_status fn_rdiv_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -2222,7 +2222,7 @@ static void do_real_to_fraction(double v, double accuracy, int_t *num, int_t *de
 	return;
 }
 
-static USE_RESULT pl_state fn_rational_1(query *q)
+static USE_RESULT pl_status fn_rational_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 
@@ -2249,7 +2249,7 @@ static USE_RESULT pl_state fn_rational_1(query *q)
 	return is_rational(p1_tmp);
 }
 
-static USE_RESULT pl_state fn_gcd_2(query *q)
+static USE_RESULT pl_status fn_gcd_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);

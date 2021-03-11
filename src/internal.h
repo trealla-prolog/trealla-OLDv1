@@ -77,7 +77,7 @@ typedef enum {
 	pl_error   =  0,
 	pl_failure =  0,
 	pl_success =  1,
-} pl_state;
+} pl_status;
 
 // Sentinel Value
 #define ERR_IDX (~(idx_t)0)
@@ -344,7 +344,7 @@ struct cell_ {
 
 		struct {
 			union {
-				pl_state (*fn)(query*);
+				pl_status (*fn)(query*);
 				predicate *match;
 				cell *attrs;		// used in slots
 				uint16_t priority;	// used in parsing operators
@@ -403,7 +403,7 @@ struct predicate_ {
 struct builtins {
 	const char *name;
 	unsigned arity;
-	pl_state (*fn)(query*);
+	pl_status (*fn)(query*);
 	const char *help;
 };
 
@@ -692,12 +692,12 @@ clause *find_in_db(module *m, uuid *ref);
 unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix);
 unsigned get_op2(module *m, const char *name, unsigned specifier);
 bool set_op(module *m, const char *name, unsigned specifier, unsigned priority);
-USE_RESULT pl_state make_choice(query *q);
-USE_RESULT pl_state make_barrier(query *q);
-USE_RESULT pl_state make_catcher(query *q, enum q_retry type);
+USE_RESULT pl_status make_choice(query *q);
+USE_RESULT pl_status make_barrier(query *q);
+USE_RESULT pl_status make_catcher(query *q, enum q_retry type);
 void cut_me(query *q, bool local_cut, bool soft_cut);
 void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found);
-pl_state query_execute(query *q, term *t);
+pl_status query_execute(query *q, term *t);
 bool check_rule(const cell *c);
 cell *get_head(cell *c);
 cell *get_body(cell *c);
@@ -706,7 +706,7 @@ predicate *find_predicate(module *m, cell *c);
 predicate *find_matching_predicate(module *m, cell *c);
 predicate *find_matching_predicate_quiet(module *m, cell *c);
 predicate *find_functor(module *m, const char *name, unsigned arity);
-USE_RESULT pl_state fn_call_0(query *q, cell *p1);
+USE_RESULT pl_status fn_call_0(query *q, cell *p1);
 void undo_me(query *q);
 parser *create_parser(module *m);
 void destroy_parser(parser *p);
@@ -719,7 +719,7 @@ void parser_assign_vars(parser *p, unsigned start, bool rebase);
 query *create_query(module *m, bool sub_query);
 query *create_task(query *q, cell *curr_cell);
 void destroy_query(query *q);
-USE_RESULT pl_state run_query(query *q);
+USE_RESULT pl_status run_query(query *q);
 
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx);
 cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix);
@@ -736,14 +736,14 @@ inline static idx_t tmp_heap_used(const query *q) { return q->tmphp; }
 inline static cell *get_tmp_heap(const query *q, idx_t i) { return q->tmp_heap + i; }
 
 void make_end(cell *tmp);
-USE_RESULT pl_state match_rule(query *q, cell *p1, idx_t p1_ctx);
-USE_RESULT pl_state match_clause(query *q, cell *p1, idx_t p1_ctx, int retract);
+USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx);
+USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, int retract);
 idx_t index_from_pool(prolog *pl, const char *name);
 void do_reduce(cell *n);
 unsigned create_vars(query *q, unsigned nbr);
 unsigned count_bits(const uint8_t *mask, unsigned bit);
 void try_me(const query *q, unsigned vars);
-USE_RESULT pl_state throw_error(query *q, cell *c, const char *err_type, const char *expected);
+USE_RESULT pl_status throw_error(query *q, cell *c, const char *err_type, const char *expected);
 uint64_t get_time_in_usec(void);
 void clear_term(term *t);
 void do_db_load(module *m);
@@ -770,14 +770,14 @@ bool needs_quote(module *m, const char *src, size_t srclen);
 size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen, bool dq);
 
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
-pl_state print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
-pl_state print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
+pl_status print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
+pl_status print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
 char *print_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
 
 ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, unsigned depth);
-pl_state print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
+pl_status print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
 char *print_canonical_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
-pl_state print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
+pl_status print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
 
 typedef struct {
 	char *buf, *dst;
