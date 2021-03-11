@@ -1399,14 +1399,14 @@ static void directives(parser *p, term *t)
 				return;
 			}
 		} else if (!strcmp(PARSER_GET_STR(p1), "character_escapes")) {
-			if (!strcmp(PARSER_GET_STR(p2), "true"))
+			if (!strcmp(PARSER_GET_STR(p2), "true") || !strcmp(PARSER_GET_STR(p2), "on"))
 				p->m->flag.character_escapes = true;
-			else if (!strcmp(PARSER_GET_STR(p2), "false"))
+			else if (!strcmp(PARSER_GET_STR(p2), "false") || !strcmp(PARSER_GET_STR(p2), "off"))
 				p->m->flag.character_escapes = false;
 		} else if (!strcmp(PARSER_GET_STR(p1), "prefer_rationals")) {
-			if (!strcmp(PARSER_GET_STR(p2), "true"))
+			if (!strcmp(PARSER_GET_STR(p2), "true") || !strcmp(PARSER_GET_STR(p2), "on"))
 				p->m->flag.prefer_rationals = true;
-			else if (!strcmp(PARSER_GET_STR(p2), "false"))
+			else if (!strcmp(PARSER_GET_STR(p2), "false") || !strcmp(PARSER_GET_STR(p2), "off"))
 				p->m->flag.prefer_rationals = false;
 		} else if (!strcmp(PARSER_GET_STR(p1), "rational_syntax")) {
 			if (!strcmp(PARSER_GET_STR(p2), "natural"))
