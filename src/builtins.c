@@ -10718,6 +10718,15 @@ static USE_RESULT pl_state fn_memberchk_2(query *q)
 		return pl_success;
 	}
 
+	if (is_atom(p1)) {
+		const char *src = GET_STR(p1);
+		size_t len = LEN_STR(p1);
+		size_t lench = len_char_utf8(src);
+
+		if (is_string(p2) && (lench == len))
+			return memmem(GET_STR(p2), LEN_STR(p2), src, lench) ? pl_success : pl_failure;
+	}
+
 	DISCARD_RESULT make_choice(q);
 	frame *g = GET_FRAME(q->st.curr_frame);
 
@@ -10726,8 +10735,10 @@ static USE_RESULT pl_state fn_memberchk_2(query *q)
 		h = deref(q, h, p2_ctx);
 		try_me(q, g->nbr_vars);
 
-		if (unify(q, p1, p1_ctx, h, q->latest_ctx))
+		if (unify(q, p1, p1_ctx, h, q->latest_ctx)) {
+			drop_choice(q);
 			return pl_success;
+		}
 
 		undo_me(q);
 		p2 = LIST_TAIL(p2);
