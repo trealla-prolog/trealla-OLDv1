@@ -1,12 +1,11 @@
 :- module(lists, [
 	member/2, select/3, selectchk/3, subtract/3, union/3,
 	intersection/3, reverse/2, append/3, nth/3, nth1/3, nth0/3,
-	merge/3, last/2, flatten/2
+	last/2, flatten/2
 	]).
 
-member(Element, [Element| _]).
-member(Element, [_| List]) :-
-	member(Element, List).
+member(X, [X|_]).
+member(X, [_|T]) :- member(X, T).
 
 select(X, [X|T], T).
 select(X, [H|T], [H|Rest]) :- select(X, T, Rest).
@@ -43,11 +42,9 @@ nth0(0, [H|_], H).
 nth0(N, [_|T], H) :- nth0(M, T, H), N is M + 1.
 
 last_([], Last, Last).
-last_([X|Xs], _, Last) :-
-    last_(Xs, X, Last).
+last_([X|Xs], _, Last) :- last_(Xs, X, Last).
 
-last([X|Xs], Last) :-
-    last_(Xs, X, Last).
+last([X|Xs], Last) :- last_(Xs, X, Last).
 
 flatten(List, FlatList) :-
     flatten_(List, [], FlatList0),
