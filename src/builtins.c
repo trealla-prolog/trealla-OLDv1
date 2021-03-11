@@ -10748,6 +10748,8 @@ static USE_RESULT pl_state fn_memberchk_2(query *q)
 			p2 = deref(q, p2, p2_ctx);
 			p2_ctx = q->latest_ctx;
 		}
+
+		return pl_failure;
 	}
 
 	may_error(make_choice(q));
