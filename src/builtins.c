@@ -10705,6 +10705,40 @@ static USE_RESULT pl_state fn_iso_length_2(query *q)
 	return throw_error(q, p1, "type_error", "arg_invalid");
 }
 
+static USE_RESULT pl_state fn_memberchk_2(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,list);
+	LIST_HANDLER(p2);
+
+	if (is_variable(p1)) {
+		cell *h = LIST_HEAD(p2);
+		h = deref(q, h, p2_ctx);
+		set_var(q, p1, p1_ctx, h, q->latest_ctx);
+		return pl_success;
+	}
+
+	DISCARD_RESULT make_choice(q);
+	frame *g = GET_FRAME(q->st.curr_frame);
+
+	while (is_list(p2)) {
+		cell *h = LIST_HEAD(p2);
+		h = deref(q, h, p2_ctx);
+		try_me(q, g->nbr_vars);
+
+		if (unify(q, p1, p1_ctx, h, q->latest_ctx))
+			return pl_success;
+
+		undo_me(q);
+		p2 = LIST_TAIL(p2);
+		p2 = deref(q, p2, p2_ctx);
+		p2_ctx = q->latest_ctx;
+	}
+
+	drop_choice(q);
+	return pl_failure;
+}
+
 static USE_RESULT pl_state fn_sys_put_chars_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
@@ -11090,6 +11124,7 @@ static const struct builtins g_other_funcs[] =
 
 	// Miscellaneous...
 
+	{"memberchk", 2, fn_memberchk_2, "?term,+list"},
 	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars"},
 	{"ignore", 1, fn_ignore_1, "+callable"},
 
@@ -11327,6 +11362,7 @@ static char *push_property(char **bufptr, size_t *lenptr, char *dst, const struc
 	dst = format_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "built_in");
 	dst = format_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "static");
 	dst = format_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "private");
+	dst = format_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "native_code");
 	return dst;
 }
 

@@ -5,10 +5,6 @@ make_rule(m,
 	"'$append'([], L, L)."										\
 	"'$append'([H|T], L, [H|R]) :- '$append'(T, L, R).");
 
-make_rule(m,
-	"memberchk(X, [X|_]) :- !."									\
-	"memberchk(X, [_|T]) :- memberchk(X, T).");
-
 make_rule(m, "predicate_property(P, A) :- "						\
 	"'$mustbe_callable'(P), "									\
 	"'$load_properties', "										\
