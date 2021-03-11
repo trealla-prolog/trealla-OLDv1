@@ -10718,12 +10718,12 @@ static USE_RESULT pl_state fn_memberchk_2(query *q)
 		return pl_success;
 	}
 
-	if (is_atom(p1)) {
+	if (is_atom(p1) && is_string(p2)) {
 		const char *src = GET_STR(p1);
 		size_t len = LEN_STR(p1);
 		size_t lench = len_char_utf8(src);
 
-		if (is_string(p2) && (lench == len))
+		if (lench == len)
 			return memmem(GET_STR(p2), LEN_STR(p2), src, lench) ? pl_success : pl_failure;
 	}
 
