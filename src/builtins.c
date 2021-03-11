@@ -414,8 +414,13 @@ static USE_RESULT pl_state fn_iso_nonvar_1(query *q)
 	return !is_variable(p1);
 }
 
-static bool has_vars(query *q, cell *c, idx_t c_ctx)
+static bool has_vars(query *q, cell *c, idx_t c_ctx, unsigned depth)
 {
+	if (depth >= 64000) {
+		q->cycle_error = true;
+		return false;
+	}
+
 	if (is_variable(c))
 		return true;
 
@@ -428,8 +433,11 @@ static bool has_vars(query *q, cell *c, idx_t c_ctx)
 	while (arity--) {
 		cell *c2 = deref(q, c, c_ctx);
 
-		if (has_vars(q, c2, q->latest_ctx))
+		if (has_vars(q, c2, q->latest_ctx, depth+1))
 			return true;
+
+		if (q->cycle_error)
+			return false;
 
 		c += c->nbr_cells;
 	}
@@ -440,7 +448,7 @@ static bool has_vars(query *q, cell *c, idx_t c_ctx)
 static USE_RESULT pl_state fn_iso_ground_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return !has_vars(q, p1, p1_ctx);
+	return !has_vars(q, p1, p1_ctx, 0);
 }
 
 USE_RESULT pl_state fn_iso_cut_0(query *q)
@@ -4379,12 +4387,15 @@ static USE_RESULT pl_state fn_iso_copy_term_2(query *q)
 	if (is_atomic(p1) && is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
-	if (!has_vars(q, p1, p1_ctx) && !is_variable(p2))
+	if (!is_variable(p2) && !has_vars(q, p1, p1_ctx, 0))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
+
+	if (q->cycle_error)
+		return throw_error(q, p1, "resource_error", "too_many_vars");
 
 	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, true);
 
-	if (!tmp || tmp == ERR_CYCLE_CELL)
+	if (!tmp || (tmp == ERR_CYCLE_CELL))
 		return throw_error(q, p1, "resource_error", "too_many_vars");
 
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
@@ -4401,8 +4412,11 @@ static USE_RESULT pl_state fn_copy_term_nat_2(query *q)
 	if (is_atomic(p1) && is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
-	if (!has_vars(q, p1, p1_ctx) && !is_variable(p2))
+	if (!is_variable(p2) && !has_vars(q, p1, p1_ctx, 0))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
+
+	if (q->cycle_error)
+		return throw_error(q, p1, "resource_error", "too_many_vars");
 
 	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, false);
 

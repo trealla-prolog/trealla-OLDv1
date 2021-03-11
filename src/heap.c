@@ -167,7 +167,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth,
 	while (arity--) {
 		cell *c = deref(q, p1, p1_ctx);
 		cell *rec = deep_copy2_to_tmp(q, c, q->latest_ctx, depth+1, nonlocals_only, copy_attrs);
-		if (!rec || rec == ERR_CYCLE_CELL) return rec;
+		if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 		p1 += p1->nbr_cells;
 	}
 
@@ -234,7 +234,7 @@ static cell *deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth
 	while (arity--) {
 		cell *c = deref(q, p1, p1_ctx);
 		cell *rec = deep_clone2_to_tmp(q, c, q->latest_ctx, depth+1);
-		if (!rec || rec == ERR_CYCLE_CELL) return rec;
+		if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 		p1 += p1->nbr_cells;
 	}
 
@@ -250,14 +250,14 @@ cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 
 	q->cycle_error = false;
 	cell *rec = deep_clone2_to_tmp(q, p1, p1_ctx, 0);
-	if (!rec || rec == ERR_CYCLE_CELL) return rec;
+	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 	return q->tmp_heap;
 }
 
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 {
 	p1 = deep_clone_to_tmp(q, p1, p1_ctx);
-	if (!p1 || p1 == ERR_CYCLE_CELL) return p1;
+	if (!p1 || (p1 == ERR_CYCLE_CELL)) return p1;
 	cell *tmp = alloc_on_heap(q, p1->nbr_cells);
 	if (!tmp) return NULL;
 	safe_copy_cells(tmp, p1, p1->nbr_cells);
