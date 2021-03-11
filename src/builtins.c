@@ -2053,7 +2053,7 @@ static USE_RESULT pl_state fn_iso_open_4(query *q)
 			cell *name = c + 1;
 			name = deref(q, name, q->latest_ctx);
 
-			if (!is_atom(name))
+			if (!is_atom(name) && strcmp(GET_STR(c), "mmap"))
 				return throw_error(q, c, "domain_error", "stream_option");
 
 			if (get_named_stream(GET_STR(name)) >= 0)	// ???????
