@@ -32,7 +32,7 @@ stream g_streams[MAX_STREAMS] = {{0}};
 idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
 idx_t g_sys_elapsed_s, g_sys_queue_s, g_braces_s;
-idx_t g_stream_property_s;
+idx_t g_stream_property_s, g_unify_s;
 unsigned g_cpu_count = 4;
 char *g_tpl_lib = NULL;
 int g_ac = 0, g_avc = 1;
@@ -3917,6 +3917,7 @@ static bool g_init(prolog *pl)
 			CHECK_SENTINEL(g_empty_s = index_from_pool(pl, ""), ERR_IDX);
 			CHECK_SENTINEL(g_anon_s = index_from_pool(pl, "_"), ERR_IDX);
 			CHECK_SENTINEL(g_dot_s = index_from_pool(pl, "."), ERR_IDX);
+			CHECK_SENTINEL(g_unify_s = index_from_pool(pl, "="), ERR_IDX);
 			CHECK_SENTINEL(g_cut_s = index_from_pool(pl, "!"), ERR_IDX);
 			CHECK_SENTINEL(g_nil_s = index_from_pool(pl, "[]"), ERR_IDX);
 			CHECK_SENTINEL(g_braces_s = index_from_pool(pl, "{}"), ERR_IDX);

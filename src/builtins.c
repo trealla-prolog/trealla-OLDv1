@@ -2617,7 +2617,7 @@ static USE_RESULT pl_state do_read_term(query *q, stream *str, cell *p1, idx_t p
 				tmp[idx].arity = 2;
 				tmp[idx++].nbr_cells = ((cnt-done)*4)+1;
 				cell v;
-				make_literal(&v, index_from_pool(q->m->pl, "="));
+				make_literal(&v, g_unify_s);
 				v.flags |= FLAG_BUILTIN;
 				v.fn = fn_iso_unify_2;
 				v.arity = 2;
@@ -2680,7 +2680,7 @@ static USE_RESULT pl_state do_read_term(query *q, stream *str, cell *p1, idx_t p
 				tmp[idx].arity = 2;
 				tmp[idx++].nbr_cells = ((cnt-done)*4)+1;
 				cell v;
-				make_literal(&v, index_from_pool(q->m->pl, "="));
+				make_literal(&v, g_unify_s);
 				v.flags |= FLAG_BUILTIN;
 				v.fn = fn_iso_unify_2;
 				v.arity = 2;
