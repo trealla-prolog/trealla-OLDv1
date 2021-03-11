@@ -10752,6 +10752,25 @@ static USE_RESULT pl_state fn_memberchk_2(query *q)
 		return pl_failure;
 	}
 
+	if (is_rational(p1)) {
+		while (is_list(p2)) {
+			cell *h = LIST_HEAD(p2);
+			h = deref(q, h, p2_ctx);
+
+			if (is_rational(h)) {
+				if ((p1->val_num == h->val_num)
+					&& (p1->val_den == h->val_den))
+					return pl_success;
+			}
+
+			p2 = LIST_TAIL(p2);
+			p2 = deref(q, p2, p2_ctx);
+			p2_ctx = q->latest_ctx;
+		}
+
+		return pl_failure;
+	}
+
 	may_error(make_choice(q));
 	frame *g = GET_FRAME(q->st.curr_frame);
 
