@@ -31,8 +31,9 @@ static const unsigned INITIAL_NBR_TRAILS = 1000;
 stream g_streams[MAX_STREAMS] = {{0}};
 idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
-idx_t g_sys_elapsed_s, g_sys_queue_s, g_braces_s;
-idx_t g_stream_property_s, g_unify_s;
+idx_t g_sys_elapsed_s, g_sys_queue_s, g_braces_s, g_call_s, g_braces_s;
+idx_t g_stream_property_s, g_unify_s, g_on_s, g_off_s, g_sys_var_s;
+idx_t g_plus_s, g_minus_s;
 unsigned g_cpu_count = 4;
 char *g_tpl_lib = NULL;
 int g_ac = 0, g_avc = 1;
@@ -1827,7 +1828,7 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 	p1->val_type = TYPE_LITERAL;
 	p1->flags = 0;//FLAG_BUILTIN;
 	p1->fn = NULL;
-	p1->val_off = index_from_pool(p->m->pl, "call");
+	p1->val_off = g_call_s;
 	p1->nbr_cells = 2;
 	p1->arity = 1;
 
@@ -3143,7 +3144,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quote_char && !strcmp(p->token, "{")) {
 			save_idx = p->t->cidx;
-			cell *c = make_literal(p, index_from_pool(p->m->pl, "{}"));
+			cell *c = make_literal(p, g_braces_s);
 			ensure(c);
 			c->arity = 1;
 			p->start_term = true;
@@ -3913,11 +3914,18 @@ static bool g_init(prolog *pl)
 		if (!error) {
 			CHECK_SENTINEL(g_false_s = index_from_pool(pl, "false"), ERR_IDX);
 			CHECK_SENTINEL(g_true_s = index_from_pool(pl, "true"), ERR_IDX);
+			CHECK_SENTINEL(g_plus_s = index_from_pool(pl, "+"), ERR_IDX);
+			CHECK_SENTINEL(g_minus_s = index_from_pool(pl, "-"), ERR_IDX);
 			CHECK_SENTINEL(g_pair_s = index_from_pool(pl, ":"), ERR_IDX);
 			CHECK_SENTINEL(g_empty_s = index_from_pool(pl, ""), ERR_IDX);
 			CHECK_SENTINEL(g_anon_s = index_from_pool(pl, "_"), ERR_IDX);
 			CHECK_SENTINEL(g_dot_s = index_from_pool(pl, "."), ERR_IDX);
+			CHECK_SENTINEL(g_call_s = index_from_pool(pl, "call"), ERR_IDX);
+			CHECK_SENTINEL(g_braces_s = index_from_pool(pl, "braces"), ERR_IDX);
 			CHECK_SENTINEL(g_unify_s = index_from_pool(pl, "="), ERR_IDX);
+			CHECK_SENTINEL(g_on_s = index_from_pool(pl, "on"), ERR_IDX);
+			CHECK_SENTINEL(g_off_s = index_from_pool(pl, "off"), ERR_IDX);
+			CHECK_SENTINEL(g_sys_var_s = index_from_pool(pl, "$VAR"), ERR_IDX);
 			CHECK_SENTINEL(g_cut_s = index_from_pool(pl, "!"), ERR_IDX);
 			CHECK_SENTINEL(g_nil_s = index_from_pool(pl, "[]"), ERR_IDX);
 			CHECK_SENTINEL(g_braces_s = index_from_pool(pl, "{}"), ERR_IDX);

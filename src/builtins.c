@@ -5598,18 +5598,18 @@ static USE_RESULT pl_state fn_iso_current_prolog_flag_2(query *q)
 		cell tmp;
 
 		if (q->m->flag.char_conversion)
-			make_literal(&tmp, index_from_pool(q->m->pl, "on"));
+			make_literal(&tmp, g_on_s);
 		else
-			make_literal(&tmp, index_from_pool(q->m->pl, "off"));
+			make_literal(&tmp, g_off_s);
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "debug")) {
 		cell tmp;
 
 		if (q->m->flag.debug)
-			make_literal(&tmp, index_from_pool(q->m->pl, "on"));
+			make_literal(&tmp, g_on_s);
 		else
-			make_literal(&tmp, index_from_pool(q->m->pl, "off"));
+			make_literal(&tmp, g_off_s);
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "character_escapes")) {
@@ -5763,7 +5763,7 @@ static USE_RESULT pl_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.double_quote_chars = true;
 		} else {
 			cell *tmp = alloc_on_heap(q, 3);
-			make_structure(tmp, index_from_pool(q->m->pl, "+"), fn_iso_add_2, 2, 2);
+			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
@@ -5777,7 +5777,7 @@ static USE_RESULT pl_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.character_escapes = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
-			make_structure(tmp, index_from_pool(q->m->pl, "+"), fn_iso_add_2, 2, 2);
+			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
@@ -5789,7 +5789,7 @@ static USE_RESULT pl_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.char_conversion = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
-			make_structure(tmp, index_from_pool(q->m->pl, "+"), fn_iso_add_2, 2, 2);
+			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
@@ -5801,7 +5801,7 @@ static USE_RESULT pl_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.rational_syntax_natural = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
-			make_structure(tmp, index_from_pool(q->m->pl, "+"), fn_iso_add_2, 2, 2);
+			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
@@ -5813,7 +5813,7 @@ static USE_RESULT pl_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.prefer_rationals = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
-			make_structure(tmp, index_from_pool(q->m->pl, "+"), fn_iso_add_2, 2, 2);
+			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
@@ -5825,7 +5825,7 @@ static USE_RESULT pl_state fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.debug = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
-			make_structure(tmp, index_from_pool(q->m->pl, "+"), fn_iso_add_2, 2, 2);
+			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
@@ -7895,7 +7895,7 @@ static USE_RESULT pl_state fn_sys_mustbe_pairlist_1(query *q)
 		if (is_variable(h))
 			return throw_error(q, h, "instantiation_error", "not_sufficiently_instantiated");
 
-		if (!is_literal(h) || (h->arity != 2) || (h->val_off != index_from_pool(q->m->pl, "-")))
+		if (!is_literal(h) || (h->arity != 2) || (h->val_off != g_minus_s))
 			return throw_error(q, h, "type_error", "pair");
 
 		p1 = LIST_TAIL(p1);
@@ -10035,7 +10035,7 @@ static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, int *end)
 
 	if (is_variable(p1)) {
 		cell *tmp = alloc_on_heap(q, 2);
-		make_structure(tmp+0, index_from_pool(q->m->pl, "$VAR"), NULL, 1, 1);
+		make_structure(tmp+0, g_sys_var_s, NULL, 1, 1);
 		make_int(tmp+1, *end); *end = *end + 1;
 		tmp->flags |= FLAG2_QUOTED;
 		set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
@@ -10054,7 +10054,7 @@ static unsigned real_numbervars(query *q, cell *p1, idx_t p1_ctx, int *end)
 
 		if (is_variable(c)) {
 			cell *tmp = alloc_on_heap(q, 2);
-			make_structure(tmp+0, index_from_pool(q->m->pl, "$VAR"), NULL, 1, 1);
+			make_structure(tmp+0, g_sys_var_s, NULL, 1, 1);
 			make_int(tmp+1, *end); *end = *end + 1;
 			tmp->flags |= FLAG2_QUOTED;
 			set_var(q, c, q->latest_ctx, tmp, q->st.curr_frame);
