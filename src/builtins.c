@@ -5757,9 +5757,9 @@ static USE_RESULT pl_state fn_iso_set_prolog_flag_2(query *q)
 
 		q->m->p->flag = q->m->flag;
 	} else if (!strcmp(GET_STR(p1), "character_escapes")) {
-		if (!strcmp(GET_STR(p2), "true"))
+		if (!strcmp(GET_STR(p2), "true") || !strcmp(GET_STR(p2), "on"))
 			q->m->flag.character_escapes = true;
-		else if (!strcmp(GET_STR(p2), "false"))
+		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
 			q->m->flag.character_escapes = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
@@ -5793,9 +5793,9 @@ static USE_RESULT pl_state fn_iso_set_prolog_flag_2(query *q)
 			return throw_error(q, tmp, "domain_error", "flag_value");
 		}
 	} else if (!strcmp(GET_STR(p1), "prefer_rationals")) {
-		if (!strcmp(GET_STR(p2), "true"))
+		if (!strcmp(GET_STR(p2), "true") || !strcmp(GET_STR(p2), "on"))
 			q->m->flag.prefer_rationals = true;
-		else if (!strcmp(GET_STR(p2), "flase"))
+		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
 			q->m->flag.prefer_rationals = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
