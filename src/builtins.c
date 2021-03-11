@@ -10727,7 +10727,7 @@ static USE_RESULT pl_state fn_memberchk_2(query *q)
 			return memmem(GET_STR(p2), LEN_STR(p2), src, lench) ? pl_success : pl_failure;
 	}
 
-	DISCARD_RESULT make_choice(q);
+	may_error(make_choice(q));
 	frame *g = GET_FRAME(q->st.curr_frame);
 
 	while (is_list(p2)) {
