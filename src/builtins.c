@@ -10926,10 +10926,7 @@ static USE_RESULT pl_state fn_iso_compare_3(query *q)
 
 static const struct builtins g_iso_funcs[] =
 {
-	{":-", 2, NULL, NULL},
-	//{":-", 1, NULL, NULL},
 	{",", 2, NULL, NULL},
-	//{"call", 1, NULL, NULL},
 
 	{"!", 0, fn_iso_cut_0, NULL},
 	{":", 2, fn_iso_invoke_2, NULL},
@@ -11356,7 +11353,6 @@ static void load_properties(module *m)
 	dst = format_property(&tmpbuf, &buflen, dst, "!", 0, "control_construct");
 	dst = format_property(&tmpbuf, &buflen, dst, "true", 0, "control_construct");
 	dst = format_property(&tmpbuf, &buflen, dst, "fail", 0, "control_construct");
-
 	dst = format_property(&tmpbuf, &buflen, dst, "|", 2, "meta_predicate((:|+))");
 	dst = format_property(&tmpbuf, &buflen, dst, "time", 1, "meta_predicate(time(0))");
 	dst = format_property(&tmpbuf, &buflen, dst, "setup_call_cleanup", 3, "meta_predicate(setup_call_cleanup(0,0,0))");

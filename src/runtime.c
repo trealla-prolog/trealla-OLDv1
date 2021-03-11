@@ -1216,8 +1216,6 @@ static bool check_interrupt(query *q)
 
 static bool check_redo(query *q)
 {
-	int ch = 0;
-
 	if (q->do_dump_vars && q->cp) {
 		dump_vars(q, true);
 
@@ -1229,8 +1227,8 @@ static bool check_redo(query *q)
 
 	for (;;) {
 		printf(" ");
-		ch = history_getch();
-		//printf("%c\n", ch);
+		fflush(stdout);
+		int ch = history_getch();
 
 		if ((ch == 'h') || (ch == '?')) {
 			printf("Action (a)bort, (e)xit, (r)edo:\n");
@@ -1306,23 +1304,10 @@ pl_state run_query(query *q)
 		q->did_throw = false;
 		Trace(q, q->st.curr_cell, CALL);
 
-		if (!(q->st.curr_cell->flags&FLAG_BUILTIN)) {
-			if (is_iso_list(q->st.curr_cell)) {
-				consultall(q->m->p, q->st.curr_cell);
-				follow_me(q);
-			} else {
-				if (!is_callable(q->st.curr_cell))
-					DISCARD_RESULT throw_error(q, q->st.curr_cell, "type_error", "callable");
-				else if (match_head(q) != pl_success) {
-					q->retry = QUERY_RETRY;
-					q->tot_retries++;
-					continue;
-				}
-			}
-		} else {
-			if (!q->st.curr_cell->fn) {
+		if (q->st.curr_cell->flags&FLAG_BUILTIN) {
+			if (!q->st.curr_cell->fn) {					// NO-OP
 				q->tot_goals--;
-				q->st.curr_cell++;					// NO-OP
+				q->st.curr_cell++;
 				continue;
 			}
 
@@ -1342,6 +1327,17 @@ pl_state run_query(query *q)
 				break;
 
 			follow_me(q);
+		} else if (is_iso_list(q->st.curr_cell)) {
+			consultall(q->m->p, q->st.curr_cell);
+			follow_me(q);
+		} else {
+			if (!is_callable(q->st.curr_cell))
+				DISCARD_RESULT throw_error(q, q->st.curr_cell, "type_error", "callable");
+			else if (match_head(q) != pl_success) {
+				q->retry = QUERY_RETRY;
+				q->tot_retries++;
+				continue;
+			}
 		}
 
 		q->resume = false;
@@ -1360,10 +1356,10 @@ pl_state run_query(query *q)
 				}
 
 				if (outstanding_choices(q) && q->p && !q->run_init) {
-					if (check_redo(q))
-						return pl_success;
-					else
+					if (!check_redo(q))
 						break;
+
+					return pl_success;
 				}
 
 				done = q->status = true;
