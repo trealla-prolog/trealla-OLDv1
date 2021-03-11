@@ -6,8 +6,8 @@ make_rule(m,
 	"'$append'([H|T], L, [H|R]) :- '$append'(T, L, R).");
 
 make_rule(m,
-	"memberchk(El, [El|_]) :- !."								\
-	"memberchk(El, [_|L]) :- memberchk(El, L).");
+	"memberchk(X, [X|_]) :- !."									\
+	"memberchk(X, [_|T]) :- memberchk(X, T).");
 
 make_rule(m, "predicate_property(P, A) :- "						\
 	"'$mustbe_callable'(P), "									\
