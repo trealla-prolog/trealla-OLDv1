@@ -10727,6 +10727,29 @@ static USE_RESULT pl_state fn_memberchk_2(query *q)
 			return memmem(GET_STR(p2), LEN_STR(p2), src, lench) ? pl_success : pl_failure;
 	}
 
+	if (is_atom(p1)) {
+		const char *src = GET_STR(p1);
+		size_t len = LEN_STR(p1);
+
+		while (is_list(p2)) {
+			cell *h = LIST_HEAD(p2);
+			h = deref(q, h, p2_ctx);
+
+			if (is_atom(h)) {
+				size_t lenh = LEN_STR(h);
+
+				if (lenh == len) {
+					if (!memcmp(src, GET_STR(h), len))
+						return pl_success;
+				}
+			}
+
+			p2 = LIST_TAIL(p2);
+			p2 = deref(q, p2, p2_ctx);
+			p2_ctx = q->latest_ctx;
+		}
+	}
+
 	may_error(make_choice(q));
 	frame *g = GET_FRAME(q->st.curr_frame);
 
