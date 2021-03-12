@@ -817,31 +817,10 @@ typedef struct {
 	*pr_##buf.dst = '\0';												\
 }
 
-#define STRING_CAT(pr,s) {												\
-	size_t len = strlen(s);												\
-	STRING_CHK(pr, len);												\
-	memcpy(pr_##buf.dst, s, len+1);										\
-	pr_##buf.dst += len;												\
-	*pr_##buf.dst = '\0';												\
-}
-
 #define STRING_CAT2n(pr,s1,len1,s2,len2)								\
 	STRING_CATn(pr,s1,len1); 											\
 	STRING_CATn(pr,s2,len2);
 
-#define STRING_CAT2(pr,s1,s2)											\
-	STRING_CAT(pr,s1); 													\
-	STRING_CAT(pr,s2);
-
-#define STRING_CAT3(pr,s1,s2,s3)										\
-	STRING_CAT(pr,s1);													\
-	STRING_CAT(pr,s2);													\
-	STRING_CAT(pr,s3);
-
-#define STRING_CAT4(pr,s1,s2,s3,s4)										\
-	STRING_CAT(pr,s1);													\
-	STRING_CAT(pr,s2);													\
-	STRING_CAT(pr,s3);													\
-	STRING_CAT(pr,s4);
-
+#define STRING_CAT(pr,s) STRING_CATn(pr,s,strlen(s))
+#define STRING_CAT2(pr,s1,s2) STRING_CAT2n(pr,s1,strlen(s1),s2,strlen(s2))
 #define STRING_DONE(pr) free(pr_##buf.buf); pr_##buf.buf = NULL;
