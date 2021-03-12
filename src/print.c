@@ -715,10 +715,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	int lhs_prec2 = is_literal(lhs) && !lhs->arity ? get_op(q->m, GET_STR(lhs), NULL, false) : 0;
 	int rhs_prec1 = is_literal(rhs) ? get_op(q->m, GET_STR(rhs), NULL, false) : 0;
 	int rhs_prec2 = is_literal(rhs) && !rhs->arity ? get_op(q->m, GET_STR(rhs), NULL, false) : 0;
-	//printf("\n*** c=%s prec=%d\n", GET_STR(c), my_prec);
-	//printf("*** lhs=%s prec=%d\n", GET_STR(lhs), lhs_prec1);
-	//printf("*** rhs=%s prec=%d\n", GET_STR(rhs), rhs_prec1);
-	int parens = 0;//depth && strcmp(src, ",") && strcmp(src, "is") && strcmp(src, "->");
+	int parens = 0;
 	int lhs_parens = lhs_prec1 > my_prec;
 	lhs_parens |= lhs_prec2;
 	if (parens || lhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
