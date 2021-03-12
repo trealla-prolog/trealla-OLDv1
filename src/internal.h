@@ -779,6 +779,8 @@ pl_status print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 char *print_canonical_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
 pl_status print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
 
+// A string builder...
+
 typedef struct {
 	char *buf, *dst;
 	size_t size;
@@ -822,6 +824,10 @@ typedef struct {
 	pr_##buf.dst += len;												\
 	*pr_##buf.dst = '\0';												\
 }
+
+#define STRING_CAT2n(pr,s1,len1,s2,len2)								\
+	STRING_CATn(pr,s1,len1); 											\
+	STRING_CATn(pr,s2,len2);
 
 #define STRING_CAT2(pr,s1,s2)											\
 	STRING_CAT(pr,s1); 													\

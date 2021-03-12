@@ -599,10 +599,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
-		size_t bufsiz;
-		char *tmpbuf = malloc(bufsiz=256), *dst = tmpbuf;
-		ensure(tmpbuf);
-		*dst = '\0';
+		STRING_INIT(tmpbuf);
 		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
@@ -610,19 +607,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 			head = deref(q, head, p2_ctx);
 
 			const char *src = GET_STR(head);
-			int nbytes = len_char_utf8(src);
-			size_t nlen = dst - tmpbuf;
-
-			while ((nlen+10) > bufsiz) {
-				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				ensure(tmpbuf);
-				tmpbuf[nlen] = '\0';
-			}
-
-			dst = tmpbuf+nlen;
-			strncpy(dst, src, nbytes);
-			dst += nbytes;
-			*dst = '\0';
+			STRING_CATn(tmpbuf, src, len_char_utf8(src));
 
 			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
@@ -633,8 +618,8 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 			return throw_error(q, p2, "type_error", "list");
 
 		cell tmp;
-		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf));
-		free(tmpbuf);
+		may_error(make_cstring(&tmp, STRING_BUF(tmpbuf)), STRING_DONE(tmpbuf));
+		STRING_DONE(tmpbuf);
 		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
 		return ok;
@@ -849,10 +834,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
-		size_t bufsiz;
-		char *tmpbuf = malloc(bufsiz=256), *dst = tmpbuf;
-		ensure(tmpbuf);
-		*dst = '\0';
+		STRING_INIT(tmpbuf);
 		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
@@ -866,17 +848,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 
 			char ch[10];
 			put_char_utf8(ch, val);
-			size_t nlen = dst - tmpbuf;
-
-			while ((nlen+strlen(ch)) >= bufsiz) {
-				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				ensure(tmpbuf);
-			}
-
-			dst = tmpbuf+nlen;
-			strcpy(dst, ch);
-			dst += strlen(ch);
-
+			STRING_CAT(tmpbuf, ch);
 			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
@@ -887,8 +859,8 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 			return throw_error(q, p2, "type_error", "list");
 
 		cell tmp;
-		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf));
-		free(tmpbuf);
+		may_error(make_cstring(&tmp, STRING_BUF(tmpbuf)), STRING_DONE(tmpbuf));
+		STRING_DONE(tmpbuf);
 		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
 		return ok;
@@ -1254,17 +1226,13 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 			len2 = strlen(tmpbuf2);
 		}
 
-		size_t nbytes = len1 + len2;
-		char *dst = malloc(nbytes + 1);
-		ensure(dst);
-		memcpy(dst, src1, len1);
-		memcpy(dst+len1, src2, len2);
-		dst[nbytes] = '\0';
+		STRING_INIT(tmpbuf);
+		STRING_CAT2n(tmpbuf, src1, len1, src2, len2);
 		cell tmp;
-		may_error(make_cstringn(&tmp, dst, nbytes), free(dst));
+		may_error(make_cstringn(&tmp, STRING_BUF(tmpbuf), STRING_LEN(tmpbuf)), STRING_DONE(tmpbuf));
+		STRING_DONE(tmpbuf);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
-		free(dst);
 		return pl_success;
 	}
 
@@ -5208,6 +5176,8 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 	if (p->nbr_vars) {
 		if (!create_vars(q, p->nbr_vars)) {
 			destroy_parser(p);
+			free(dst2);
+			free(dst);
 			return throw_error(q, c, "resource_error", "too_many_vars");
 		}
 	}
@@ -5216,6 +5186,8 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 	may_ptr_error(tmp);
 	if (tmp == ERR_CYCLE_CELL) {
 		destroy_parser(p);
+		free(dst2);
+		free(dst);
 		return throw_error(q, c, "resource_error", "cyclic_term");
 	}
 
@@ -9782,17 +9754,13 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 			src2 = tmpbuf2;
 		}
 
-		size_t nbytes = len1 + len2;
-		char *dst = malloc(nbytes + 1);
-		ensure(dst);
-		memcpy(dst, src1, len1);
-		memcpy(dst+len1, src2, len2);
-		dst[nbytes] = '\0';
+		STRING_INITn(tmpbuf, len1+len2);
+		STRING_CAT2n(tmpbuf, src1, len1, src2, len2);
 		cell tmp;
-		may_error(make_cstringn(&tmp, dst, nbytes), free(dst));
+		may_error(make_cstringn(&tmp, STRING_BUF(tmpbuf), STRING_LEN(tmpbuf)), STRING_DONE(tmpbuf));
+		STRING_DONE(tmpbuf);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
-		free(dst);
 		return pl_success;
 	}
 
@@ -9800,12 +9768,13 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 		if (strcmp(GET_STR(p3)+(LEN_STR(p3)-LEN_STR(p2)), GET_STR(p2)))
 			return pl_failure;
 
-		char *dst = strndup(GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
+		STRING_INIT(tmpbuf);
+		STRING_CATn(tmpbuf, GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
 		cell tmp;
-		may_error(make_string(&tmp, dst), free(dst));
+		may_error(make_stringn(&tmp, STRING_BUF(tmpbuf), STRING_LEN(tmpbuf)), STRING_DONE(tmpbuf));
+		STRING_DONE(tmpbuf);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
-		free(dst);
 		return pl_success;
 	}
 
@@ -9838,56 +9807,35 @@ static USE_RESULT pl_status fn_replace_4(query *q)
 	GET_NEXT_ARG(p3,atom);
 	GET_NEXT_ARG(p4,variable);
 
-	int srclen = LEN_STR(p1);
-	int dstlen = srclen * LEN_STR(p3);
+	size_t srclen = LEN_STR(p1);
+	size_t dstlen = srclen * LEN_STR(p3);
 	const char *src = GET_STR(p1);
 	const char *s1 = GET_STR(p2);
 	const char *s2 = GET_STR(p3);
-	int s1len = LEN_STR(p2);
-	int s2len = LEN_STR(p3);
-	char *dstbuf = (char*)malloc(dstlen + 1);
-	ensure(dstbuf);
-	char *dst = dstbuf;
+	size_t s1len = LEN_STR(p2);
+	size_t s2len = LEN_STR(p3);
+	STRING_INITn(tmpbuf, dstlen);
 
 	while (srclen > 0) {
 		if (!strncmp(src, s1, s1len)) {
-			if (dstlen < s2len) {
-				size_t save_len = dst - dstbuf;
-				dstlen = ((save_len)*2) + s2len;
-				dstbuf = (char*)realloc(dstbuf, dstlen + 1);
-				may_ptr_error(dstbuf);
-				dst = dstbuf + save_len;
-			}
-
-			memcpy(dst, s2, s2len);
-			dst += s2len;
-			dstlen -= s2len;
+			STRING_CATn(tmpbuf, s2, s2len);
 			src += s1len;
 			srclen -= s1len;
 		} else {
-			if (dstlen < 1) {
-				size_t max_len = dst - dstbuf;
-				dstlen = max_len *= 2;
-				dstbuf = (char*)realloc(dstbuf, dstlen + 1);
-				may_ptr_error(dstbuf);
-				dst = dstbuf + max_len;
-			}
-
-			*dst++ = *src++;
-			dstlen--;
+			STRING_CATn(tmpbuf, src, 1);
+			src++;
 			srclen--;
 		}
 	}
 
-	*dst = '\0';
 	cell tmp;
 
-	if (strlen(dstbuf))
-		may_error(make_string(&tmp, dstbuf), free(dstbuf));
+	if (STRING_LEN(tmpbuf))
+		may_error(make_stringn(&tmp, STRING_BUF(tmpbuf), STRING_LEN(tmpbuf)), STRING_DONE(tmpbuf));
 	else
 		make_literal(&tmp, g_nil_s);
 
-	free(dstbuf);
+	STRING_DONE(tmpbuf);
 	set_var(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	return pl_success;
