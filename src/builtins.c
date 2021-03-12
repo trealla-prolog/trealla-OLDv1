@@ -5995,11 +5995,11 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 	if (!q->retry) {
 		q->st.qnbr++;
 		assert(q->st.qnbr < MAX_QUEUES);
-		cell *tmp = clone_to_heap(q, true, p2, 2+p2->nbr_cells+1);
+		cell *tmp = clone_to_heap(q, true, p2, 2+p1->nbr_cells+1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
+		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
-		nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+		nbr_cells += safe_copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		init_queuen(q);
 		free(q->tmpq[q->st.qnbr]);
@@ -6035,7 +6035,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
 		try_me(q, g->nbr_vars*2);
 
-		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
+		if (unify(q, p1, p1_ctx, c, q->st.fp)) {
 			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
 			may_ptr_error(tmp);
 			alloc_on_queuen(q, q->st.qnbr, tmp);
