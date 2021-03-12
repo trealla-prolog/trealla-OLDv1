@@ -6111,7 +6111,7 @@ static USE_RESULT pl_status fn_iso_bagof_3(query *q)
 	frame *g = GET_FRAME(q->st.curr_frame);
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
-	     nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
+		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
 
 		if (c->flags & FLAG2_PROCESSED)
 			continue;
