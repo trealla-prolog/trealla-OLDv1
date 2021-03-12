@@ -669,6 +669,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		return dst - save_dst;
 	}
 
+	// Postfix...
+
 	if (IS_XF(c) || IS_YF(c)) {
 		cell *lhs = c + 1;
 		lhs = running ? deref(q, lhs, c_ctx) : lhs;
@@ -679,6 +681,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		dst += snprintf(dst, dstlen, "%s", src);
 		return dst - save_dst;
 	}
+
+	// Prefix...
 
 	if (IS_FX(c) || IS_FY(c)) {
 		cell *rhs = c + 1;
@@ -697,6 +701,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
 		return dst - save_dst;
 	}
+
+	// Infix...
 
 	cell *lhs = c + 1;
 	cell *rhs = lhs + lhs->nbr_cells;
