@@ -786,27 +786,33 @@ typedef struct {
  STRING;
 
 #define STRING_INIT(pr) STRING pr_##buf;								\
-	pr_##buf.buf = malloc(pr_##buf.size=256);							\
-	ensure(pr_##buf.buf);												\
+	pr_##buf.size = 0;													\
+	pr_##buf.buf = NULL;												\
+	pr_##buf.dst = pr_##buf.buf;
+
+#define STRING_INITn(pr,len) STRING pr_##buf;							\
+	pr_##buf.size = len;												\
+	pr_##buf.buf = malloc(len+1);										\
 	pr_##buf.dst = pr_##buf.buf;
 
 #define STRING_BUF(pr) pr_##buf.buf
-#define STRING_SIZE(pr) (pr_##buf.dst - pr_##buf.buf)
 #define STRING_LEN(pr) (pr_##buf.dst - pr_##buf.buf)
-#define STRING_REM(pr) (pr_##buf.size - STRING_LEN(pr))
 
 #define STRING_CHK(pr,len) {											\
-	if (!pr_##buf.buf) {												\
-		pr_##buf.buf = malloc(pr_##buf.size=256);						\
-		ensure(pr_##buf.buf);											\
-		pr_##buf.dst = pr_##buf.buf;									\
-	}																	\
-	if (len >= STRING_REM(pr)) {										\
+	size_t rem = pr_##buf.size - STRING_LEN(pr);						\
+	if (len >= rem) {													\
 		size_t offset = STRING_LEN(pr);									\
-		pr_##buf.buf = realloc(pr_##buf.buf, pr_##buf.size *= 2);		\
+		pr_##buf.buf = realloc(pr_##buf.buf, (pr_##buf.size += (len-rem)) + 1); \
 		ensure(pr_##buf.buf);											\
 		pr_##buf.dst = pr_##buf.buf + offset;							\
 	}																	\
+}
+
+#define STRING_CATn(pr,s,len) {											\
+	STRING_CHK(pr, len);												\
+	memcpy(pr_##buf.dst, s, len+1);										\
+	pr_##buf.dst += len;												\
+	*pr_##buf.dst = '\0';												\
 }
 
 #define STRING_CAT(pr,s) {												\
@@ -814,6 +820,7 @@ typedef struct {
 	STRING_CHK(pr, len);												\
 	memcpy(pr_##buf.dst, s, len+1);										\
 	pr_##buf.dst += len;												\
+	*pr_##buf.dst = '\0';												\
 }
 
 #define STRING_CAT2(pr,s1,s2)											\
