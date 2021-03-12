@@ -18,10 +18,6 @@
 #define USE_INT32 0
 #endif
 
-#ifndef USE_GMP
-#define USE_GMP 0
-#endif
-
 #ifndef USE_LDLIBS
 #define USE_LDLIBS 0
 #endif

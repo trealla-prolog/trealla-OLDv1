@@ -311,7 +311,6 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 			var_nbr--;
 		}
 
-#if 1
 		if (!dstlen) {
 			if (!(s_mask1[var_nbr]))
 				s_mask1[var_nbr] = 1;
@@ -331,9 +330,6 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 			dst += snprintf(dst, dstlen, "%c", ch);
 		else
 			dst += snprintf(dst, dstlen, "%c%u", ch, n);
-#else
-		dst += snprintf(dst, dstlen, "_V%d", var_nbr);
-#endif
 
 		return dst - save_dst;
 	}
@@ -438,13 +434,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 		return dst - save_dst;
 	}
-
-#if USE_GMP
-	if (is_bignum(c)) {
-		dst += gmp_snprintf(dst, dstlen, "%Zd", &c->val_mpz);
-		return dst - save_dst;
-	}
-#endif
 
 	if (is_float(c) && (c->val_flt == M_PI)) {
 		dst += snprintf(dst, dstlen, "3.141592653589793");
