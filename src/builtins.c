@@ -8630,9 +8630,9 @@ static USE_RESULT pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* 
 				q->quoted = -1;
 
 			if (canonical)
-				len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, 1, 0);
+				len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, 1, false, 0);
 			else
-				len = print_term_to_buf(q, NULL, 0, c, c_ctx, 1, 0, 0);
+				len = print_term_to_buf(q, NULL, 0, c, c_ctx, 1, false, 0);
 
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
@@ -8643,9 +8643,9 @@ static USE_RESULT pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* 
 			}
 
 			if (canonical)
-				len = print_canonical_to_buf(q, dst, nbytes, c, c_ctx, 1, 0);
+				len = print_canonical_to_buf(q, dst, nbytes, c, c_ctx, 1, false, 0);
 			else
-				len = print_term_to_buf(q, dst, nbytes, c, c_ctx, 1, 0, 0);
+				len = print_term_to_buf(q, dst, nbytes, c, c_ctx, 1, false, 0);
 
 			q->quoted = saveq;
 		}

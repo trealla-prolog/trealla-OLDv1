@@ -238,7 +238,7 @@ static unsigned count_non_anons(const uint8_t *mask, unsigned bit)
 	return bits;
 }
 
-ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, unsigned depth)
+ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, bool cons, unsigned depth)
 {
 	if (!depth && !dst && !dstlen) {
 		fake_numbervars(q, c, c_ctx, 0);
@@ -387,7 +387,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 
 	for (c++; arity--; c += c->nbr_cells) {
 		cell *tmp = running ? deref(q, c, c_ctx) : c;
-		ssize_t res = print_canonical_to_buf(q, dst, dstlen, tmp, q->latest_ctx, running, depth+1);
+		ssize_t res = print_canonical_to_buf(q, dst, dstlen, tmp, q->latest_ctx, running, cons, depth+1);
 		if (res < 0) return -1;
 		dst += res;
 
@@ -399,6 +399,168 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 	return dst - save_dst;
 }
 
+#if 0
+ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, bool cons, unsigned depth)
+{
+	if (!depth && !dst && !dstlen) {
+		fake_numbervars(q, c, c_ctx, 0);
+		memset(s_mask1, 0, MAX_ARITY);
+		memset(s_mask2, 0, MAX_ARITY);
+		q->nv_start = -1;
+	}
+
+	char *save_dst = dst;
+
+	if (depth > MAX_DEPTH)
+		return -1;
+
+	if (is_rational(c)) {
+		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY))) {
+			dst += snprintf(dst, dstlen, "%s0x", c->val_num<0?"-":"");
+			dst += sprint_int(dst, dstlen, c->val_num, 16);
+		} else if ((c->flags & FLAG_OCTAL) && !running) {
+			dst += snprintf(dst, dstlen, "%s0o", c->val_num<0?"-":"");
+			dst += sprint_int(dst, dstlen, c->val_num, 8);
+		} else if (c->val_den != 1) {
+			if (q->flag.rational_syntax_natural) {
+				dst += sprint_int(dst, dstlen, c->val_num, 10);
+				dst += snprintf(dst, dstlen, "%s", "/");
+				dst += sprint_int(dst, dstlen, c->val_den, 10);
+			} else {
+				dst += sprint_int(dst, dstlen, c->val_num, 10);
+				dst += snprintf(dst, dstlen, "%s", " rdiv ");
+				dst += sprint_int(dst, dstlen, c->val_den, 10);
+			}
+		} else
+			dst += sprint_int(dst, dstlen, c->val_num, 10);
+
+		return dst - save_dst;
+	}
+
+	if (is_float(c) && (c->val_flt == M_PI)) {
+		dst += snprintf(dst, dstlen, "3.141592653589793");
+		return dst - save_dst;
+	}
+
+	if (is_float(c) && (c->val_flt == M_E)) {
+		dst += snprintf(dst, dstlen, "2.718281828459045");
+		return dst - save_dst;
+	}
+
+	if (is_float(c)) {
+		char tmpbuf[256];
+		sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, c->val_flt);
+		const char *ptr = strchr(tmpbuf, '.');
+
+		if (ptr && (strlen(ptr+1) > 1))
+			sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, c->val_flt);
+
+		reformat_float(tmpbuf);
+		dst += snprintf(dst, dstlen, "%s", tmpbuf);
+		return dst - save_dst;
+	}
+
+	idx_t var_nbr = 0;
+
+	if (is_variable(c)
+		&& (running>0) && (q->nv_start == -1)
+		&& ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != ERR_IDX)) {
+
+		for (unsigned i = 0; i < MAX_ARITY; i++) {
+			if (q->nv_mask[i])
+				break;
+
+			var_nbr--;
+		}
+
+		if (!dstlen) {
+			if (!(s_mask1[var_nbr]))
+				s_mask1[var_nbr] = 1;
+			else
+				s_mask2[var_nbr] = 1;
+		}
+
+		unsigned nbr = count_non_anons(s_mask2, var_nbr);
+
+		char ch = 'A';
+		ch += nbr % 26;
+		unsigned n = (unsigned)nbr / 26;
+
+		if (dstlen && !(s_mask2[var_nbr]))
+			dst += snprintf(dst, dstlen, "%s", "_");
+		else if (nbr < 26)
+			dst += snprintf(dst, dstlen, "%c", ch);
+		else
+			dst += snprintf(dst, dstlen, "%c%u", ch, n);
+
+		return dst - save_dst;
+	}
+
+	if (is_variable(c) && (running>0)) {
+		frame *g = GET_FRAME(c_ctx);
+		slot *e = GET_SLOT(g, c->var_nbr);
+		idx_t slot_nbr = e - q->slots;
+		dst += snprintf(dst, dstlen, "_%u", (unsigned)slot_nbr);
+		return dst - save_dst;
+	}
+
+	if (is_string(c)) {
+		int cnt = 0;
+		cell *l = c;
+
+		LIST_HANDLER(l);
+
+		while (is_list(l)) {
+			if ((cnt > 256) && (running < 0)) {
+				dst += snprintf(dst, dstlen, "|...");
+				return dst - save_dst;
+			}
+
+			cell *h = LIST_HEAD(l);
+			l = LIST_TAIL(l);
+			h->flags &= ~FLAG_STRING;
+
+			if (!cnt++)
+				allocate_list(q, h);
+			else
+				append_list(q, h);
+		}
+
+		c = end_list(q);
+	}
+
+	const char *src = GET_STR(c);
+	int dq = 0, quote = !is_variable(c) && needs_quote(q->m, src, LEN_STR(c));
+	if (is_string(c)) dq = quote = 1;
+	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
+
+	if (quote || q->quoted)
+		dst += formatted(dst, dstlen, src, LEN_STR(c), dq);
+	else
+		dst += plain(dst, dstlen, src, LEN_STR(c), dq);
+
+	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
+
+	if (!is_structure(c))
+		return dst - save_dst;
+
+	idx_t arity = c->arity;
+	dst += snprintf(dst, dstlen, "(");
+
+	for (c++; arity--; c += c->nbr_cells) {
+		cell *tmp = running ? deref(q, c, c_ctx) : c;
+		ssize_t res = print_term_to_buf(q, dst, dstlen, tmp, q->latest_ctx, running, cons, depth+1);
+		if (res < 0) return -1;
+		dst += res;
+
+		if (arity)
+			dst += snprintf(dst, dstlen, ",");
+	}
+
+	dst += snprintf(dst, dstlen, ")");
+	return dst - save_dst;
+}
+#else
 static char *varformat(unsigned nbr)
 {
 	static char tmpbuf[80];
@@ -408,7 +570,7 @@ static char *varformat(unsigned nbr)
 	return tmpbuf;
 }
 
-ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth)
+ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, bool cons, unsigned depth)
 {
 	char *save_dst = dst;
 
@@ -732,21 +894,22 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 	return dst - save_dst;
 }
+#endif
 
 char *print_canonical_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 {
 	bool cycle_error = false;
-	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 0);
+	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 
 	if (len < 0) {
 		running = 0;
-		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 1);
+		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
 		cycle_error = true;
 	}
 
 	char *buf = malloc(len+10);
 	ensure(buf);
-	len = print_canonical_to_buf(q, buf, len+1, c, c_ctx, running, 0);
+	len = print_canonical_to_buf(q, buf, len+1, c, c_ctx, running, false, 0);
 	q->cycle_error = cycle_error;
 	return buf;
 }
@@ -754,17 +917,17 @@ char *print_canonical_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 pl_status print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running)
 {
 	bool cycle_error = false;
-	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 0);
+	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 
 	if (len < 0) {
 		running = 0;
-		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 1);
+		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
 		cycle_error = true;
 	}
 
 	char *dst = malloc(len*2+1); //cehteh: why *2?
 	may_ptr_error(dst);
-	len = print_canonical_to_buf(q, dst, len+1, c, c_ctx, running, 0);
+	len = print_canonical_to_buf(q, dst, len+1, c, c_ctx, running, false, 0);
 	const char *src = dst;
 
 	if (q->nv_start == -1) {
@@ -794,17 +957,17 @@ pl_status print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx,
 pl_status print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 {
 	bool cycle_error = false;
-	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 0);
+	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 
 	if (len < 0) {
 		running = 0;
-		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, 1);
+		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
 		cycle_error = true;
 	}
 
 	char *dst = malloc(len*2+1); //cehteh: why *2?
 	may_ptr_error(dst);
-	len = print_canonical_to_buf(q, dst, len+1, c, c_ctx, running, 0);
+	len = print_canonical_to_buf(q, dst, len+1, c, c_ctx, running, false, 0);
 	const char *src = dst;
 
 	if (q->nv_start == -1) {
@@ -834,17 +997,17 @@ pl_status print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 char *print_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 {
 	bool cycle_error = false;
-	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 0);
+	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 
 	if (len < 0) {
 		running = 0;
-		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 1);
+		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
 		cycle_error = true;
 	}
 
 	char *buf = malloc(len+10);
 	ensure(buf);
-	len = print_term_to_buf(q, buf, len+1, c, c_ctx, running, 0, 0);
+	len = print_term_to_buf(q, buf, len+1, c, c_ctx, running, false, 0);
 	q->numbervars = false;
 	q->cycle_error = cycle_error;
 	return buf;
@@ -853,17 +1016,17 @@ char *print_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 pl_status print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running)
 {
 	bool cycle_error = false;
-	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 0);
+	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 
 	if (len < 0) {
 		running = 0;
-		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 1);
+		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
 		cycle_error = true;
 	}
 
 	char *dst = malloc(len+10);
 	may_ptr_error(dst);
-	len = print_term_to_buf(q, dst, len+1, c, c_ctx, running, 0, 0);
+	len = print_term_to_buf(q, dst, len+1, c, c_ctx, running, false, 0);
 	const char *src = dst;
 
 	while (len) {
@@ -889,17 +1052,17 @@ pl_status print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 pl_status print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 {
 	bool cycle_error = false;
-	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 0);
+	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 
 	if (len < 0) {
 		running = 0;
-		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, 0, 1);
+		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
 		cycle_error = true;
 	}
 
 	char *dst = malloc(len+10);
 	may_ptr_error(dst);
-	len = print_term_to_buf(q, dst, len+1, c, c_ctx, running, 0, 0);
+	len = print_term_to_buf(q, dst, len+1, c, c_ctx, running, false, 0);
 	const char *src = dst;
 
 	while (len) {

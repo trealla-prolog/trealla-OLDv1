@@ -765,12 +765,12 @@ char *format_property(char **bufptr, size_t *lenptr, char *dst, const char *name
 bool needs_quote(module *m, const char *src, size_t srclen);
 size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen, bool dq);
 
-ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, int cons, unsigned depth);
+ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, bool cons, unsigned depth);
 pl_status print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
 pl_status print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
 char *print_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
 
-ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, unsigned depth);
+ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, bool unused, unsigned depth);
 pl_status print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
 char *print_canonical_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
 pl_status print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
