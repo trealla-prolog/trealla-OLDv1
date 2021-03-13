@@ -561,11 +561,11 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		return dst - save_dst;
 	}
 
-	unsigned optype = GET_OP(c);
+	int optype = GET_OP(c);
 
 	if (q->ignore_ops || !optype || !c->arity) {
 		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quote(q->m, src, LEN_STR(c));
-		int dq = 0, braces = 0;
+		int dq = 0, braces = 0, parens = 0;
 		if (is_string(c)) dq = quote = 1;
 		if (q->quoted < 0) quote = 0;
 		if ((c->arity == 1) && is_literal(c) && !strcmp(src, "{}")) braces = 1;
@@ -600,6 +600,9 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
+		if (parens)
+			dst += snprintf(dst, dstlen, "%s", "(");
+
 		if (running && is_variable(c)
 			&& ((c_ctx != q->st.curr_frame) || is_fresh(c) || (running > 0))) {
 			frame *g = GET_FRAME(c_ctx);
@@ -625,6 +628,9 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
+		if (parens)
+			dst += snprintf(dst, dstlen, "%s", ")");
+
 		if (is_structure(c) && !is_string(c)) {
 			idx_t arity = c->arity;
 			dst += snprintf(dst, dstlen, "%s", braces?"{":"(");
@@ -632,7 +638,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			for (c++; arity--; c += c->nbr_cells) {
 				cell *tmp = running ? deref(q, c, c_ctx) : c;
 				idx_t tmp_ctx = q->latest_ctx;
-				bool parens = false;
+				int parens = 0;
 
 				if (!braces && is_literal(tmp)) {
 					const char *s = GET_STR(tmp);
@@ -640,7 +646,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 					if (!strcmp(s, ",") || !strcmp(s, ";") ||
 						!strcmp(s, "->") || !strcmp(s, ":-") ||
 						!strcmp(s, "*->") || !strcmp(s, "-->"))
-						parens = true;
+						parens = 1;
 				}
 
 				if (parens)

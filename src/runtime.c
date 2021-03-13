@@ -1175,7 +1175,7 @@ static void dump_vars(query *q, bool partial)
 		fprintf(stdout, "%s = ", p->vartab.var_name[i]);
 		int save = q->quoted;
 		q->quoted = 1;
-		bool parens = 0;
+		bool parens = false;
 
 		// If priority >= '=' then put in parens...
 
@@ -1184,6 +1184,9 @@ static void dump_vars(query *q, bool partial)
 			unsigned pri = get_op(q->m, GET_STR(c), &spec, false);
 			if (pri >= 700) parens = true;
 		}
+
+		if (get_op(q->m, GET_STR(c), NULL, false) && !GET_OP(c))
+			parens = true;
 
 		if (parens) putc('(', stdout);
 		print_term(q, stdout, c, q->latest_ctx, -2);
