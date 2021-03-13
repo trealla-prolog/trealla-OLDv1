@@ -1166,13 +1166,6 @@ static USE_RESULT pl_status fn_iso_pow_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-#if 0
-	if (is_rational(&p1)) {
-		if (p1.val_num == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-	}
-#endif
-
 	if (is_rational(&p1) && is_rational(&p2)) {
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
