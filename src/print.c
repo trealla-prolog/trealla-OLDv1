@@ -710,16 +710,16 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	idx_t lhs_ctx = q->latest_ctx;
 	rhs = running ? deref(q, rhs, c_ctx) : rhs;
 	idx_t rhs_ctx = q->latest_ctx;
-	int my_prec = get_op(q->m, GET_STR(c), NULL, false);
-	int lhs_prec1 = is_literal(lhs) ? get_op(q->m, GET_STR(lhs), NULL, false) : 0;
-	int lhs_prec2 = is_literal(lhs) && !lhs->arity ? get_op(q->m, GET_STR(lhs), NULL, false) : 0;
-	int rhs_prec1 = is_literal(rhs) ? get_op(q->m, GET_STR(rhs), NULL, false) : 0;
-	int rhs_prec2 = is_literal(rhs) && !rhs->arity ? get_op(q->m, GET_STR(rhs), NULL, false) : 0;
-	int parens = 0;
+	int my_pri = get_op(q->m, GET_STR(c), NULL, false);
+	int lhs_pri1 = is_literal(lhs) ? get_op(q->m, GET_STR(lhs), NULL, false) : 0;
+	int lhs_pri2 = is_literal(lhs) && !lhs->arity ? get_op(q->m, GET_STR(lhs), NULL, false) : 0;
+	int rhs_pri1 = is_literal(rhs) ? get_op(q->m, GET_STR(rhs), NULL, false) : 0;
+	int rhs_pri2 = is_literal(rhs) && !rhs->arity ? get_op(q->m, GET_STR(rhs), NULL, false) : 0;
 
-	int lhs_parens = lhs_prec1 > my_prec;
-	lhs_parens += lhs_prec2 > 0;
-	if (parens || lhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
+	int lhs_parens = lhs_pri1 >= my_pri;
+	if ((lhs_pri1 == my_pri) && IS_YFX(c)) lhs_parens = 0;
+	lhs_parens += lhs_pri2 > 0;
+	if (lhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
 	ssize_t res = print_term_to_buf(q, dst, dstlen, lhs, lhs_ctx, running, 0, depth+1);
 	if (res < 0) return -1;
 	dst += res;
@@ -730,21 +730,22 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		|| !strcmp(src, "=~=") || !strcmp(src, "=..")
 		|| !strcmp(src, "=>")|| !strcmp(src, "?=")
 		|| !*src;
-	if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
+	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
 	dst += snprintf(dst, dstlen, "%s", src);
 	if (!*src) space = 0;
 	space += is_rational(rhs) && (rhs->val_num < 0);
-	if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
+	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
-	int rhs_parens = rhs_prec1 > my_prec;
-	rhs_parens += rhs_prec1 && lhs_prec1 && (rhs_prec1 != lhs_prec1);
-	rhs_parens += rhs_prec2 > 0;
+	int rhs_parens = rhs_pri1 >= my_pri;
+	if ((rhs_pri1 == my_pri) && IS_XFY(c)) rhs_parens = 0;
+	//rhs_parens += rhs_pri1 && lhs_pri1 && (rhs_pri1 != lhs_pri1);
+	rhs_parens += rhs_pri2 > 0;
 	if (rhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
 	res = print_term_to_buf(q, dst, dstlen, rhs, rhs_ctx, running, 0, depth+1);
 	if (res < 0) return -1;
 	dst += res;
-	if (parens || rhs_parens) dst += snprintf(dst, dstlen, "%s", ")");
+	if (rhs_parens) dst += snprintf(dst, dstlen, "%s", ")");
 
 	return dst - save_dst;
 }
