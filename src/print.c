@@ -561,11 +561,17 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		return dst - save_dst;
 	}
 
-	int optype = GET_OP(c);
+#if 0
+	unsigned optype = 0;
+	get_op(q->m, GET_STR(c), &optype, false);
+	unsigned optype = 0;
+#else
+	unsigned optype = GET_OP(c);
+#endif
 
 	if (q->ignore_ops || !optype || !c->arity) {
 		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quote(q->m, src, LEN_STR(c));
-		int dq = 0, braces = 0, parens = 0;
+		int dq = 0, braces = 0;
 		if (is_string(c)) dq = quote = 1;
 		if (q->quoted < 0) quote = 0;
 		if ((c->arity == 1) && is_literal(c) && !strcmp(src, "{}")) braces = 1;
@@ -600,9 +606,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
-		if (parens)
-			dst += snprintf(dst, dstlen, "%s", "(");
-
 		if (running && is_variable(c)
 			&& ((c_ctx != q->st.curr_frame) || is_fresh(c) || (running > 0))) {
 			frame *g = GET_FRAME(c_ctx);
@@ -628,9 +631,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
-		if (parens)
-			dst += snprintf(dst, dstlen, "%s", ")");
-
 		if (is_structure(c) && !is_string(c)) {
 			idx_t arity = c->arity;
 			dst += snprintf(dst, dstlen, "%s", braces?"{":"(");
@@ -638,7 +638,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			for (c++; arity--; c += c->nbr_cells) {
 				cell *tmp = running ? deref(q, c, c_ctx) : c;
 				idx_t tmp_ctx = q->latest_ctx;
-				int parens = 0;
+				bool parens = false;
 
 				if (!braces && is_literal(tmp)) {
 					const char *s = GET_STR(tmp);
@@ -646,7 +646,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 					if (!strcmp(s, ",") || !strcmp(s, ";") ||
 						!strcmp(s, "->") || !strcmp(s, ":-") ||
 						!strcmp(s, "*->") || !strcmp(s, "-->"))
-						parens = 1;
+						parens = true;
 				}
 
 				if (parens)
@@ -666,6 +666,20 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			dst += snprintf(dst, dstlen, "%s", braces?"}":")");
 		}
 
+		return dst - save_dst;
+	}
+
+	// Naked...
+
+	if (!c->arity) {
+		bool save = q->ignore_ops;
+		q->ignore_ops = true;
+		dst += snprintf(dst, dstlen, "(");
+		ssize_t res = print_term_to_buf(q, dst, dstlen, c, c_ctx, running, 0, depth+1);
+		q->ignore_ops = save;
+		if (res < 0) return -1;
+		dst += res;
+		dst += snprintf(dst, dstlen, ")");
 		return dst - save_dst;
 	}
 
