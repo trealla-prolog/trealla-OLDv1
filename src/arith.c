@@ -1239,6 +1239,11 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 		}
 
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
+		double res = pow(p1.val_num,p2.val_num);
+
+		if (res > INT64_MAX)
+			return throw_error(q, &p1, "evaluation_error", "int_overflow");
+
 		__int128_t tmp = pow(p1.val_num,p2.val_num);
 
 		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
@@ -1251,7 +1256,12 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
-				q->accum.val_num = (int_t)pow(p1.val_num,p2.val_num);
+				double res = pow(p1.val_num,p2.val_num);
+
+				if (res > INT64_MAX)
+					return throw_error(q, &p1, "evaluation_error", "int_overflow");
+
+				q->accum.val_num = (int_t)res;
 				q->accum.val_type = TYPE_INTEGER;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			}

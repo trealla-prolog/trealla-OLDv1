@@ -290,7 +290,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 
 	if (is_float(c)) {
 		char tmpbuf[256];
-		sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, c->val_flt);
+		sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG-1, c->val_flt);
 		const char *ptr = strchr(tmpbuf, '.');
 
 		if (ptr && (strlen(ptr+1) > 1))
