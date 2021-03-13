@@ -716,13 +716,15 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	int rhs_prec1 = is_literal(rhs) ? get_op(q->m, GET_STR(rhs), NULL, false) : 0;
 	int rhs_prec2 = is_literal(rhs) && !rhs->arity ? get_op(q->m, GET_STR(rhs), NULL, false) : 0;
 	int parens = 0;
+
 	int lhs_parens = lhs_prec1 > my_prec;
-	lhs_parens |= lhs_prec2;
+	lhs_parens += lhs_prec2 > 0;
 	if (parens || lhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
 	ssize_t res = print_term_to_buf(q, dst, dstlen, lhs, lhs_ctx, running, 0, depth+1);
 	if (res < 0) return -1;
 	dst += res;
 	if (lhs_parens) dst += snprintf(dst, dstlen, "%s", ")");
+
 	int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-")
 		|| !strcmp(src, "-->") || !strcmp(src, "->") || !strcmp(src, "*->")
 		|| !strcmp(src, "=~=") || !strcmp(src, "=..")
@@ -736,13 +738,14 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
 
 	int rhs_parens = rhs_prec1 > my_prec;
-	rhs_parens |= rhs_prec1 && lhs_prec1 && (rhs_prec1 != lhs_prec1);
-	rhs_parens |= rhs_prec2;
+	rhs_parens += rhs_prec1 && lhs_prec1 && (rhs_prec1 != lhs_prec1);
+	rhs_parens += rhs_prec2 > 0;
 	if (rhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
 	res = print_term_to_buf(q, dst, dstlen, rhs, rhs_ctx, running, 0, depth+1);
 	if (res < 0) return -1;
 	dst += res;
 	if (parens || rhs_parens) dst += snprintf(dst, dstlen, "%s", ")");
+
 	return dst - save_dst;
 }
 
