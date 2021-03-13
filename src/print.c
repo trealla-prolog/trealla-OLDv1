@@ -710,11 +710,12 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	idx_t lhs_ctx = q->latest_ctx;
 	rhs = running ? deref(q, rhs, c_ctx) : rhs;
 	idx_t rhs_ctx = q->latest_ctx;
-	int my_priority = get_op(q->m, GET_STR(c), NULL, false);
-	int lhs_pri_1 = is_literal(lhs) ? get_op(q->m, GET_STR(lhs), NULL, false) : 0;
-	int lhs_pri_2 = is_literal(lhs) && !lhs->arity ? get_op(q->m, GET_STR(lhs), NULL, false) : 0;
-	int rhs_pri_1 = is_literal(rhs) ? get_op(q->m, GET_STR(rhs), NULL, false) : 0;
-	int rhs_pri_2 = is_literal(rhs) && !rhs->arity ? get_op(q->m, GET_STR(rhs), NULL, false) : 0;
+
+	unsigned lhs_pri_1 = is_literal(lhs) ? get_op(q->m, GET_STR(lhs), NULL, false) : 0;
+	unsigned lhs_pri_2 = is_literal(lhs) && !lhs->arity ? get_op(q->m, GET_STR(lhs), NULL, false) : 0;
+	unsigned rhs_pri_1 = is_literal(rhs) ? get_op(q->m, GET_STR(rhs), NULL, false) : 0;
+	unsigned rhs_pri_2 = is_literal(rhs) && !rhs->arity ? get_op(q->m, GET_STR(rhs), NULL, false) : 0;
+	unsigned my_priority = get_op(q->m, GET_STR(c), NULL, false);
 
 	int lhs_parens = lhs_pri_1 >= my_priority;
 	if ((lhs_pri_1 == my_priority) && IS_YFX(c)) lhs_parens = 0;
