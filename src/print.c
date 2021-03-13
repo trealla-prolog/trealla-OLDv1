@@ -561,13 +561,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		return dst - save_dst;
 	}
 
-#if 0
-	unsigned optype = 0;
-	get_op(q->m, GET_STR(c), &optype, false);
-	unsigned optype = 0;
-#else
 	unsigned optype = GET_OP(c);
-#endif
 
 	if (q->ignore_ops || !optype || !c->arity) {
 		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quote(q->m, src, LEN_STR(c));
@@ -666,20 +660,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			dst += snprintf(dst, dstlen, "%s", braces?"}":")");
 		}
 
-		return dst - save_dst;
-	}
-
-	// Naked...
-
-	if (!c->arity) {
-		bool save = q->ignore_ops;
-		q->ignore_ops = true;
-		dst += snprintf(dst, dstlen, "(");
-		ssize_t res = print_term_to_buf(q, dst, dstlen, c, c_ctx, running, 0, depth+1);
-		q->ignore_ops = save;
-		if (res < 0) return -1;
-		dst += res;
-		dst += snprintf(dst, dstlen, ")");
 		return dst - save_dst;
 	}
 
