@@ -741,7 +741,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 	int rhs_parens = rhs_pri_1 >= my_priority;
 	if ((rhs_pri_1 == my_priority) && IS_XFY(c)) rhs_parens = 0;
-	//rhs_parens += rhs_pri_1 && lhs_pri_1 && (rhs_pri_1 != lhs_pri_1);
 	rhs_parens += rhs_pri_2 > 0;
 	if (rhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
 	res = print_term_to_buf(q, dst, dstlen, rhs, rhs_ctx, running, 0, depth+1);
