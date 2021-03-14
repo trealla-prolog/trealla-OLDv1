@@ -156,6 +156,9 @@ idx_t index_from_pool(prolog *pl, const char *name)
 unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
 {
 	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
+		if (!ptr->specifier)
+			continue;
+
 		if (hint_prefix && !IS_PREFIX(ptr->specifier))
 			continue;
 
@@ -166,6 +169,9 @@ unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_pref
 	}
 
 	for (const struct op_table *ptr = m->def_ops; ptr->name; ptr++) {
+		if (!ptr->specifier)
+			continue;
+
 		if (hint_prefix && !IS_PREFIX(ptr->specifier))
 			continue;
 
@@ -184,6 +190,9 @@ unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_pref
 unsigned get_op2(module *m, const char *name, unsigned specifier)
 {
 	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
+		if (!ptr->specifier)
+			continue;
+
 		if (!strcmp(ptr->name, name)) {
 			if (specifier == ptr->specifier)
 				return ptr->priority;
@@ -191,6 +200,9 @@ unsigned get_op2(module *m, const char *name, unsigned specifier)
 	}
 
 	for (const struct op_table *ptr = m->def_ops; ptr->name; ptr++) {
+		if (!ptr->specifier)
+			continue;
+
 		if (!strcmp(ptr->name, name)) {
 			if (specifier == ptr->specifier)
 				return ptr->priority;
@@ -216,6 +228,9 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 		if (strcmp(ptr->name, name))
 			continue;
 
+		if (!ptr->specifier)
+			continue;
+
 		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
 			continue;
 
@@ -238,6 +253,9 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 
 	for (; ptr->name; ptr++) {
 		if (strcmp(ptr->name, name))
+			continue;
+
+		if (!ptr->specifier)
 			continue;
 
 		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))

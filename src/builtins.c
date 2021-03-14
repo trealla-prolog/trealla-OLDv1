@@ -11375,6 +11375,9 @@ static void load_ops(query *q)
 	for (const struct op_table *ptr = q->m->ops; ptr->name; ptr++) {
 		char specifier[256], name[256];
 
+		if (!ptr->specifier)
+			continue;
+
 		if (ptr->specifier == OP_FX)
 			strcpy(specifier, "fx");
 		else if (ptr->specifier == OP_FY)
@@ -11407,6 +11410,9 @@ static void load_ops(query *q)
 
 	for (const struct op_table *ptr = q->m->def_ops; ptr->name; ptr++) {
 		char specifier[256], name[256];
+
+		if (!ptr->specifier)
+			continue;
 
 		if (ptr->specifier == OP_FX)
 			strcpy(specifier, "fx");
