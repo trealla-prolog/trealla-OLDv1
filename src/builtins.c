@@ -6393,9 +6393,6 @@ static USE_RESULT pl_status fn_sys_assertz_2(query *q)
 
 static void save_db(FILE *fp, query *q, int logging)
 {
-	int save = q->quoted;
-	q->quoted = 1;
-
 	for (predicate *h = q->m->head; h; h = h->next) {
 		if (h->is_prebuilt)
 			continue;
@@ -6421,8 +6418,6 @@ static void save_db(FILE *fp, query *q, int logging)
 			fprintf(fp, ".\n");
 		}
 	}
-
-	q->quoted = save;
 }
 
 static USE_RESULT pl_status fn_listing_0(query *q)
