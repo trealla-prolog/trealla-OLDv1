@@ -102,8 +102,10 @@ size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen, bool 
 	extern const char *g_anti_escapes;
 	size_t len = 0;
 
-	while (srclen--) {
-		int ch = *src++;
+	while (srclen) {
+		size_t lench = len_char_utf8(src);
+		int ch = get_char_utf8(&src);
+		srclen -= lench;
 		const char *ptr = ch != ' ' ? strchr(g_escapes, ch) : NULL;
 
 		if (ch && ptr) {
@@ -149,10 +151,12 @@ size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen, bool 
 
 			len += 2;
 		} else {
-			if (dstlen)
-				*dst++ = ch;
+			if (dstlen) {
+				put_char_utf8(dst, ch);
+				dst += lench;
+			}
 
-			len++;
+			len += lench;
 		}
 	}
 
