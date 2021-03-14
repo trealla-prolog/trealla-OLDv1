@@ -16,11 +16,23 @@ make_rule(m, "predicate_property(P, A) :- "						\
 	"), "														\
 	"'$predicate_property'(P, A).");
 
-make_rule(m, "current_op(A, B, C) :- "							\
-	"(nonvar(C), "												\
-	"	(atom(C) -> true ; "									\
-	"		throw(error(type_error(atom,C),current_op/3)))),"	\
-	"'$load_ops', "												\
+make_rule(m, "current_op(A, B, C) :- "								\
+	"(var(C) -> true ; "											\
+	"	(atom(C) -> true ; "										\
+	"		throw(error(type_error(atom,C),current_op/3)))),"		\
+	"(var(B) -> true ; "											\
+	"	(atom(B) -> true ; "										\
+	"		throw(error(domain_error(operator_specifier,B),current_op/3)))),"	\
+	"(var(B) -> true ; "											\
+	"	(memberchk(B, [fx,fy,yf,xf,yfx,xfy,xfx]) -> true ; "	\
+	"		throw(error(domain_error(operator_specifier,B),current_op/3)))),"	\
+	"(var(A) -> true ; "											\
+	"	(integer(A) -> true ; "										\
+	"		throw(error(domain_error(operator_priority,A),current_op/3)))),"	\
+	"(var(A) -> true ; "											\
+	"	(A =< 1200 -> true ; "										\
+	"		throw(error(domain_error(operator_priority,A),current_op/3)))),"	\
+	"'$load_ops', "													\
 	"'$current_op'(A, B, C).");
 
 make_rule(m, "subsumes_term(G,S) :- "							\
