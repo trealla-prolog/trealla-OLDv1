@@ -9860,13 +9860,8 @@ static USE_RESULT pl_status fn_sys_load_properties_0(query *q)
 
 static void load_ops(query *q);
 
-static USE_RESULT pl_status fn_sys_load_ops_1(query *q)
+static USE_RESULT pl_status fn_sys_load_ops_0(query *q)
 {
-	GET_FIRST_ARG(p1,variable);
-	cell tmp;
-	may_error(make_cstring(&tmp, q->m->name));
-	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	DECR_REF(&tmp);
 	load_ops(q);
 	return pl_success;
 }
@@ -11226,7 +11221,7 @@ static const struct builtins g_other_funcs[] =
 	{"octal_chars", 2, fn_octal_chars_2, "?integer,?string"},
 	{"legacy_predicate_property", 2, fn_legacy_predicate_property_2, "+callable,?string"},
 	{"$load_properties", 0, fn_sys_load_properties_0, NULL},
-	{"$load_ops", 1, fn_sys_load_ops_1, NULL},
+	{"$load_ops", 0, fn_sys_load_ops_0, NULL},
 	{"numbervars", 1, fn_numbervars_1, "+term"},
 	{"numbervars", 3, fn_numbervars_3, "+term,+start,?end"},
 	{"numbervars", 4, fn_numbervars_3, "+term,+start,?end,+list"},
@@ -11509,7 +11504,7 @@ static void load_ops(query *q)
 
 	cell tmp;
 	make_literal(&tmp, index_from_pool(q->m->pl, "$current_op"));
-	tmp.arity = 4;
+	tmp.arity = 3;
 
 	if (do_abolish(q, &tmp, &tmp, false) != pl_success)
 		return;
@@ -11540,8 +11535,8 @@ static void load_ops(query *q)
 
 		formatted(name, sizeof(name), ptr->name, strlen(ptr->name), false);
 
-		unsigned len = snprintf(NULL, 0, "'$current_op'('%s', %u, %s, '%s').\n",
-			q->m->name, ptr->priority, specifier, name);
+		unsigned len = snprintf(NULL, 0, "'$current_op'(%u, %s, '%s').\n",
+			ptr->priority, specifier, name);
 
 		while ((buflen-(dst-tmpbuf)) <= len) {
 			size_t offset = dst - tmpbuf;
@@ -11549,8 +11544,8 @@ static void load_ops(query *q)
 			dst = tmpbuf + offset;
 		}
 
-		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$current_op'('%s', %u, %s, '%s').\n",
-			q->m->name, ptr->priority, specifier, name);
+		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$current_op'(%u, %s, '%s').\n",
+			ptr->priority, specifier, name);
 	}
 
 	//printf("%s", tmpbuf);
