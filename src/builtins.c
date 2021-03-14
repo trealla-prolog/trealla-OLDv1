@@ -11548,7 +11548,7 @@ static void load_ops(query *q)
 			ptr->priority, specifier, name);
 	}
 
-	for (const struct op_table *ptr = q->m->sysops; ptr->name; ptr++) {
+	for (const struct op_table *ptr = q->m->def_ops; ptr->name; ptr++) {
 		char specifier[256], name[256];
 
 		if (ptr->specifier == OP_FX)

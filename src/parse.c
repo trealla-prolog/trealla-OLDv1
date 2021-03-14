@@ -165,7 +165,7 @@ unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_pref
 		}
 	}
 
-	for (const struct op_table *ptr = m->sysops; ptr->name; ptr++) {
+	for (const struct op_table *ptr = m->def_ops; ptr->name; ptr++) {
 		if (hint_prefix && !IS_PREFIX(ptr->specifier))
 			continue;
 
@@ -190,7 +190,7 @@ unsigned get_op2(module *m, const char *name, unsigned specifier)
 		}
 	}
 
-	for (const struct op_table *ptr = m->sysops; ptr->name; ptr++) {
+	for (const struct op_table *ptr = m->def_ops; ptr->name; ptr++) {
 		if (!strcmp(ptr->name, name)) {
 			if (specifier == ptr->specifier)
 				return ptr->priority;
@@ -210,7 +210,7 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 			return true;
 	}
 
-	struct op_table *ptr = m->sysops;
+	struct op_table *ptr = m->def_ops;
 
 	for (; ptr->name; ptr++) {
 		if (strcmp(ptr->name, name))
@@ -261,14 +261,14 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 	if (!priority)
 		return true;
 
-	if (!m->user_ops)
+	if (!m->spare_ops)
 		return false;
 
 	ptr->name = strdup(name);
 	ptr->specifier = specifier;
 	ptr->priority = priority;
 	m->loaded_ops = false;
-	m->user_ops--;
+	m->spare_ops--;
 	return true;
 }
 
@@ -3750,7 +3750,7 @@ void destroy_module(module *m)
 	if (m->fp)
 		fclose(m->fp);
 
-	for (struct op_table *ptr = m->sysops; ptr->name; ptr++)
+	for (struct op_table *ptr = m->def_ops; ptr->name; ptr++)
 		free(ptr->name);
 
 	for (struct op_table *ptr = m->ops; ptr->name; ptr++)
@@ -3774,15 +3774,14 @@ module *create_module(prolog *pl, const char *name)
 	m->flag.unknown = UNK_ERROR;
 	m->flag.double_quote_chars = true;
 	m->flag.character_escapes = true;
-	m->user_ops = MAX_USER_OPS;
+	m->spare_ops = MAX_OPS;
 	m->error = false;
-	struct op_table *ptr2 = m->sysops;
+	struct op_table *ptr2 = m->def_ops;
 
 	for (const struct op_table *ptr = g_ops; ptr->name; ptr++, ptr2++) {
 		ptr2->name = strdup(ptr->name);
 		ptr2->specifier = ptr->specifier;
 		ptr2->priority = ptr->priority;
-		m->user_ops--;
 	}
 
 	m->index = sl_create1(compkey, m);
