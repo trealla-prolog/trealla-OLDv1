@@ -17,6 +17,9 @@ make_rule(m, "predicate_property(P, A) :- "						\
 	"'$predicate_property'(P, A).");
 
 make_rule(m, "current_op(A, B, C) :- "							\
+	"(nonvar(C), "												\
+	"	(atom(C) -> true ; "									\
+	"		throw(error(type_error(atom,C),current_op/3)))),"	\
 	"'$load_ops', "												\
 	"'$current_op'(A, B, C).");
 
