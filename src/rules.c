@@ -373,9 +373,9 @@ make_rule(m, 																							\
 	"current_op(A,B,C) :- var(A), var(B), atom(C), !, '$load_ops', '$current_op'(A, B, C)."				\
 	"current_op(A,B,C) :- var(A), var(B), !, throw(error(type_error(atom,C),current_op/3))."			\
 	"current_op(A,B,C) :- var(A), var(B), !, '$load_ops', '$current_op'(A, B, C)."						\
-	"current_op(A,B,C) :- var(A), atom(B), !, '$load_ops', '$current_op'(A, B, C)."						\
+	"current_op(A,B,C) :- var(A), atom(B), memberchk(B,[xf, yf, fx, fy, xfx, xfy, yfx]), !, '$load_ops', '$current_op'(A, B, C)."						\
 	"current_op(A,B,_) :- var(A), !, throw(error(domain_error(operator_specifier,B),current_op/3))."	\
 	"current_op(A,B,C) :- var(A), !, '$load_ops', '$current_op'(A, B, C)."								\
-	"current_op(A,B,C) :- integer(A), !, '$load_ops', '$current_op'(A, B, C)."							\
+	"current_op(A,B,C) :- integer(A), A >=0, A =< 1200, !, '$load_ops', '$current_op'(A, B, C)."							\
 	"current_op(A,_,_) :- throw(error(domain_error(operator_priority,A),current_op/3)).");
 
