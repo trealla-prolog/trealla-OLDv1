@@ -165,16 +165,6 @@ unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_pref
 		}
 	}
 
-	for (const struct op_table *ptr = m->sysops; ptr->name; ptr++) {
-		if (hint_prefix && !IS_PREFIX(ptr->specifier))
-			continue;
-
-		if (!strcmp(ptr->name, name)) {
-			if (specifier) *specifier = ptr->specifier;
-			return ptr->priority;
-		}
-	}
-
 	if (hint_prefix)
 		return get_op(m, name, specifier, false);
 
@@ -184,13 +174,6 @@ unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_pref
 unsigned get_op2(module *m, const char *name, unsigned specifier)
 {
 	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
-		if (!strcmp(ptr->name, name)) {
-			if (specifier == ptr->specifier)
-				return ptr->priority;
-		}
-	}
-
-	for (const struct op_table *ptr = m->sysops; ptr->name; ptr++) {
 		if (!strcmp(ptr->name, name)) {
 			if (specifier == ptr->specifier)
 				return ptr->priority;
@@ -210,7 +193,7 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 			return true;
 	}
 
-	struct op_table *ptr = m->sysops;
+	struct op_table *ptr = m->ops;
 
 	for (; ptr->name; ptr++) {
 		if (strcmp(ptr->name, name))
@@ -220,6 +203,7 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 			continue;
 
 		if (!priority) {
+			m->loaded_ops = false;
 			free(ptr->name);
 			ptr->name = strdup("");
 			ptr->specifier = 0;
@@ -227,28 +211,7 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 			return true;
 		}
 
-		ptr->specifier = specifier;
-		ptr->priority = priority;
-		return true;
-	}
-
-	ptr = m->ops;
-
-	for (; ptr->name; ptr++) {
-		if (strcmp(ptr->name, name))
-			continue;
-
-		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
-			continue;
-
-		if (!priority) {
-			free(ptr->name);
-			ptr->name = strdup("");
-			ptr->specifier = 0;
-			ptr->priority = 0;
-			return true;
-		}
-
+		m->loaded_ops = false;
 		ptr->specifier = specifier;
 		ptr->priority = priority;
 		return true;
@@ -257,13 +220,14 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 	if (!priority)
 		return true;
 
-	if (!m->user_ops)
+	if (!m->nbr_ops)
 		return false;
 
 	ptr->name = strdup(name);
 	ptr->specifier = specifier;
 	ptr->priority = priority;
-	m->user_ops--;
+	m->nbr_ops--;
+	m->loaded_ops = false;
 	return true;
 }
 
@@ -3745,9 +3709,6 @@ void destroy_module(module *m)
 	if (m->fp)
 		fclose(m->fp);
 
-	for (struct op_table *ptr = m->sysops; ptr->name; ptr++)
-		free(ptr->name);
-
 	for (struct op_table *ptr = m->ops; ptr->name; ptr++)
 		free(ptr->name);
 
@@ -3769,15 +3730,15 @@ module *create_module(prolog *pl, const char *name)
 	m->flag.unknown = UNK_ERROR;
 	m->flag.double_quote_chars = true;
 	m->flag.character_escapes = true;
-	m->user_ops = MAX_USER_OPS;
+	m->nbr_ops = MAX_OPS;
 	m->error = false;
-	struct op_table *ptr2 = m->sysops;
+	struct op_table *ptr2 = m->ops;
 
 	for (const struct op_table *ptr = g_ops; ptr->name; ptr++, ptr2++) {
 		ptr2->name = strdup(ptr->name);
 		ptr2->specifier = ptr->specifier;
 		ptr2->priority = ptr->priority;
-		m->user_ops--;
+		m->nbr_ops--;
 	}
 
 	m->index = sl_create1(compkey, m);

@@ -4432,9 +4432,8 @@ static USE_RESULT pl_status fn_iso_retract_1(query *q)
 	return do_retract(q, p1, p1_ctx, DO_RETRACT);
 }
 
-static USE_RESULT pl_status fn_iso_retractall_1(query *q)
+static USE_RESULT pl_status do_retractall(query *q, cell *p1, idx_t p1_ctx)
 {
-	GET_FIRST_ARG(p1,callable);
 	predicate *h = find_matching_predicate(q->m, get_head(p1));
 
 	if (!h) {
@@ -4458,7 +4457,13 @@ static USE_RESULT pl_status fn_iso_retractall_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status do_abolish(query *q, cell *c_orig, cell *c)
+static USE_RESULT pl_status fn_iso_retractall_1(query *q)
+{
+	GET_FIRST_ARG(p1,callable);
+	return do_retractall(q, p1, p1_ctx);
+}
+
+static USE_RESULT pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 {
 	predicate *h = find_matching_predicate(q->m, c);
 	if (!h) return pl_success;
@@ -4473,7 +4478,9 @@ static USE_RESULT pl_status do_abolish(query *q, cell *c_orig, cell *c)
 		add_to_dirty_list(q, r);
 	}
 
-	h->is_abolished = true;
+	if (hard)
+		h->is_abolished = true;
+
 	sl_destroy(h->index);
 	h->index = NULL;
 	h->cnt = 0;
@@ -4519,7 +4526,7 @@ static USE_RESULT pl_status fn_iso_abolish_1(query *q)
 	tmp = *p1_name;
 	tmp.arity = p1_arity->val_num;
 	CLR_OP(&tmp);
-	return do_abolish(q, p1, &tmp);
+	return do_abolish(q, p1, &tmp, true);
 }
 
 static unsigned count_non_anons(uint8_t *mask, unsigned bit)
@@ -9851,11 +9858,16 @@ static USE_RESULT pl_status fn_sys_load_properties_0(query *q)
 	return pl_success;
 }
 
-static void load_ops(module *m);
+static void load_ops(query *q);
 
-static USE_RESULT pl_status fn_sys_load_ops_0(query *q)
+static USE_RESULT pl_status fn_sys_load_ops_1(query *q)
 {
-	load_ops(q->m);
+	GET_FIRST_ARG(p1,variable);
+	cell tmp;
+	may_error(make_cstring(&tmp, q->m->name));
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	DECR_REF(&tmp);
+	load_ops(q);
 	return pl_success;
 }
 
@@ -10211,7 +10223,7 @@ static USE_RESULT pl_status fn_abolish_2(query *q)
 	cell tmp = *p1;
 	tmp.arity = p2->val_num;
 	CLR_OP(&tmp);
-	return do_abolish(q, &tmp, &tmp);
+	return do_abolish(q, &tmp, &tmp, true);
 }
 
 static USE_RESULT pl_status fn_sys_lt_2(query *q)
@@ -11214,7 +11226,7 @@ static const struct builtins g_other_funcs[] =
 	{"octal_chars", 2, fn_octal_chars_2, "?integer,?string"},
 	{"legacy_predicate_property", 2, fn_legacy_predicate_property_2, "+callable,?string"},
 	{"$load_properties", 0, fn_sys_load_properties_0, NULL},
-	{"$load_ops", 0, fn_sys_load_ops_0, NULL},
+	{"$load_ops", 1, fn_sys_load_ops_1, NULL},
 	{"numbervars", 1, fn_numbervars_1, "+term"},
 	{"numbervars", 3, fn_numbervars_3, "+term,+start,?end"},
 	{"numbervars", 4, fn_numbervars_3, "+term,+start,?end,+list"},
@@ -11490,18 +11502,25 @@ static void load_properties(module *m)
 	free(tmpbuf);
 }
 
-static void load_ops(module *m)
+static void load_ops(query *q)
 {
-	if (m->loaded_ops)
+	if (q->m->loaded_ops)
 		return;
 
-	m->loaded_ops = true;
+	cell tmp;
+	make_literal(&tmp, index_from_pool(q->m->pl, "$current_op"));
+	tmp.arity = 4;
+
+	if (do_abolish(q, &tmp, &tmp, false) != pl_success)
+		return;
+
+	q->m->loaded_ops = true;
 	size_t buflen = 1024*8;
 	char *tmpbuf = malloc(buflen);
 	char *dst = tmpbuf;
 	*dst = '\0';
 
-	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
+	for (const struct op_table *ptr = q->m->ops; ptr->name; ptr++) {
 		char specifier[256], name[256];
 
 		if (ptr->specifier == OP_FX)
@@ -11521,8 +11540,8 @@ static void load_ops(module *m)
 
 		formatted(name, sizeof(name), ptr->name, strlen(ptr->name), false);
 
-		unsigned len = snprintf(NULL, 0, "'$current_op'(%u, %s, '%s').\n",
-			ptr->priority, specifier, name);
+		unsigned len = snprintf(NULL, 0, "'$current_op'('%s', %u, %s, '%s').\n",
+			q->m->name, ptr->priority, specifier, name);
 
 		while ((buflen-(dst-tmpbuf)) <= len) {
 			size_t offset = dst - tmpbuf;
@@ -11530,46 +11549,13 @@ static void load_ops(module *m)
 			dst = tmpbuf + offset;
 		}
 
-		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$current_op'(%u, %s, '%s').\n",
-			ptr->priority, specifier, name);
-	}
-
-	for (const struct op_table *ptr = m->sysops; ptr->name; ptr++) {
-		char specifier[256], name[256];
-
-		if (ptr->specifier == OP_FX)
-			strcpy(specifier, "fx");
-		else if (ptr->specifier == OP_FY)
-			strcpy(specifier, "fy");
-		else if (ptr->specifier == OP_YF)
-			strcpy(specifier, "yf");
-		else if (ptr->specifier == OP_XF)
-			strcpy(specifier, "xf");
-		else if (ptr->specifier == OP_YFX)
-			strcpy(specifier, "yfx");
-		else if (ptr->specifier == OP_XFY)
-			strcpy(specifier, "xfy");
-		else if (ptr->specifier == OP_XFX)
-			strcpy(specifier, "xfx");
-
-		formatted(name, sizeof(name), ptr->name, strlen(ptr->name), false);
-
-		unsigned len = snprintf(NULL, 0, "'$current_op'(%u, %s, '%s').\n",
-			ptr->priority, specifier, name);
-
-		while ((buflen-(dst-tmpbuf)) <= len) {
-			size_t offset = dst - tmpbuf;
-			tmpbuf = realloc(tmpbuf, buflen*=2);
-			dst = tmpbuf + offset;
-		}
-
-		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$current_op'(%u, %s, '%s').\n",
-			ptr->priority, specifier, name);
+		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$current_op'('%s', %u, %s, '%s').\n",
+			q->m->name, ptr->priority, specifier, name);
 	}
 
 	//printf("%s", tmpbuf);
 
-	parser *p = create_parser(m);
+	parser *p = create_parser(q->m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
 	parser_tokenize(p, false, false);

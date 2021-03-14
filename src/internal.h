@@ -83,7 +83,7 @@ typedef enum {
 #define MAX_SMALL_STRING (MAX(sizeof(int_t),sizeof(void*))*2)
 #define MAX_VAR_POOL_SIZE 1000
 #define MAX_ARITY UCHAR_MAX
-#define MAX_USER_OPS 250
+#define MAX_OPS 250
 #define MAX_QUEUES 16
 #define MAX_STREAMS 1024
 #define MAX_DEPTH 9000
@@ -592,10 +592,9 @@ struct module_ {
 	FILE *fp;
 	skiplist *index;
 	clause *dirty_list;
-	struct op_table sysops[MAX_USER_OPS+1];
-	struct op_table ops[MAX_USER_OPS+1];
+	struct op_table ops[MAX_OPS+1];
 	char_flags flag;
-	unsigned user_ops;
+	unsigned nbr_ops;
 	bool prebuilt:1;
 	bool use_persist:1;
 	bool make_public:1;
