@@ -279,14 +279,26 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 	if (!priority)
 		return true;
 
-	if (!m->spare_ops)
-		return false;
+	ptr = m->ops;
+
+	for (; ptr->name; ptr++) {
+		if (!ptr->specifier)
+			break;
+	}
+
+	if (!ptr->name) {
+		if (!m->spare_ops)
+			return false;
+
+		m->spare_ops--;
+	} else {
+		free(ptr->name);
+	}
 
 	ptr->name = strdup(name);
 	ptr->specifier = specifier;
 	ptr->priority = priority;
 	m->loaded_ops = false;
-	m->spare_ops--;
 	return true;
 }
 
