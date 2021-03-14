@@ -1173,8 +1173,6 @@ static void dump_vars(query *q, bool partial)
 			fprintf(stdout, ",\n");
 
 		fprintf(stdout, "%s = ", p->vartab.var_name[i]);
-		int save = q->quoted;
-		q->quoted = 1;
 		bool parens = false;
 
 		// If priority >= '=' then put in parens...
@@ -1191,7 +1189,6 @@ static void dump_vars(query *q, bool partial)
 		if (parens) putc('(', stdout);
 		print_term(q, stdout, c, q->latest_ctx, -2);
 		if (parens) putc(')', stdout);
-		q->quoted = save;
 		any++;
 	}
 

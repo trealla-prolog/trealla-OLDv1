@@ -5407,6 +5407,7 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 	return pl_success;
 }
 
+#if 0
 // FIXME: this needs to backtrack
 
 static USE_RESULT pl_status fn_iso_current_op_3(query *q)
@@ -5541,6 +5542,7 @@ static USE_RESULT pl_status fn_iso_current_op_3(query *q)
 
 	return pl_success;
 }
+#endif
 
 static USE_RESULT pl_status fn_iso_acyclic_term_1(query *q)
 {
@@ -9849,6 +9851,14 @@ static USE_RESULT pl_status fn_sys_load_properties_0(query *q)
 	return pl_success;
 }
 
+static void load_ops(module *m);
+
+static USE_RESULT pl_status fn_sys_load_ops_0(query *q)
+{
+	load_ops(q->m);
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_legacy_predicate_property_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
@@ -11085,7 +11095,7 @@ static const struct builtins g_iso_funcs[] =
 	{"$findall", 3, fn_iso_findall_3, NULL},
 	{"$bagof", 3, fn_iso_bagof_3, NULL},
 	{"current_predicate", 1, fn_iso_current_predicate_1, NULL},
-	{"current_op", 3, fn_iso_current_op_3, NULL},
+	//{"current_op", 3, fn_iso_current_op_3, NULL},
 	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL},
 	{"compare", 3, fn_iso_compare_3, NULL},
 
@@ -11204,6 +11214,7 @@ static const struct builtins g_other_funcs[] =
 	{"octal_chars", 2, fn_octal_chars_2, "?integer,?string"},
 	{"legacy_predicate_property", 2, fn_legacy_predicate_property_2, "+callable,?string"},
 	{"$load_properties", 0, fn_sys_load_properties_0, NULL},
+	{"$load_ops", 0, fn_sys_load_ops_0, NULL},
 	{"numbervars", 1, fn_numbervars_1, "+term"},
 	{"numbervars", 3, fn_numbervars_3, "+term,+start,?end"},
 	{"numbervars", 4, fn_numbervars_3, "+term,+start,?end,+list"},
@@ -11470,6 +11481,93 @@ static void load_properties(module *m)
 		if (ptr->name[0] == '$') continue;
 		dst = push_property(&tmpbuf, &buflen, dst, ptr);
 	}
+
+	parser *p = create_parser(m);
+	p->srcptr = tmpbuf;
+	p->consulting = true;
+	parser_tokenize(p, false, false);
+	destroy_parser(p);
+	free(tmpbuf);
+}
+
+static void load_ops(module *m)
+{
+	if (m->loaded_ops)
+		return;
+
+	m->loaded_ops = true;
+	size_t buflen = 1024*8;
+	char *tmpbuf = malloc(buflen);
+	char *dst = tmpbuf;
+	*dst = '\0';
+
+	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
+		char specifier[256], name[256];
+
+		if (ptr->specifier == OP_FX)
+			strcpy(specifier, "fx");
+		else if (ptr->specifier == OP_FY)
+			strcpy(specifier, "fy");
+		else if (ptr->specifier == OP_YF)
+			strcpy(specifier, "yf");
+		else if (ptr->specifier == OP_XF)
+			strcpy(specifier, "xf");
+		else if (ptr->specifier == OP_YFX)
+			strcpy(specifier, "yfx");
+		else if (ptr->specifier == OP_XFY)
+			strcpy(specifier, "xfy");
+		else if (ptr->specifier == OP_XFX)
+			strcpy(specifier, "xfx");
+
+		formatted(name, sizeof(name), ptr->name, strlen(ptr->name), false);
+
+		unsigned len = snprintf(NULL, 0, "'$current_op'(%u, %s, '%s').\n",
+			ptr->priority, specifier, name);
+
+		while ((buflen-(dst-tmpbuf)) <= len) {
+			size_t offset = dst - tmpbuf;
+			tmpbuf = realloc(tmpbuf, buflen*=2);
+			dst = tmpbuf + offset;
+		}
+
+		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$current_op'(%u, %s, '%s').\n",
+			ptr->priority, specifier, name);
+	}
+
+	for (const struct op_table *ptr = m->sysops; ptr->name; ptr++) {
+		char specifier[256], name[256];
+
+		if (ptr->specifier == OP_FX)
+			strcpy(specifier, "fx");
+		else if (ptr->specifier == OP_FY)
+			strcpy(specifier, "fy");
+		else if (ptr->specifier == OP_YF)
+			strcpy(specifier, "yf");
+		else if (ptr->specifier == OP_XF)
+			strcpy(specifier, "xf");
+		else if (ptr->specifier == OP_YFX)
+			strcpy(specifier, "yfx");
+		else if (ptr->specifier == OP_XFY)
+			strcpy(specifier, "xfy");
+		else if (ptr->specifier == OP_XFX)
+			strcpy(specifier, "xfx");
+
+		formatted(name, sizeof(name), ptr->name, strlen(ptr->name), false);
+
+		unsigned len = snprintf(NULL, 0, "'$current_op'(%u, %s, '%s').\n",
+			ptr->priority, specifier, name);
+
+		while ((buflen-(dst-tmpbuf)) <= len) {
+			size_t offset = dst - tmpbuf;
+			tmpbuf = realloc(tmpbuf, buflen*=2);
+			dst = tmpbuf + offset;
+		}
+
+		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$current_op'(%u, %s, '%s').\n",
+			ptr->priority, specifier, name);
+	}
+
+	//printf("%s", tmpbuf);
 
 	parser *p = create_parser(m);
 	p->srcptr = tmpbuf;
