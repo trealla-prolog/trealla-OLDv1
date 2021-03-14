@@ -2491,7 +2491,9 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 		return 1;
 	}
 
-	if (isalpha(*s)) {
+	int lench = len_char_utf8(s);
+
+	if ((lench > 1) || isalpha(*s)) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, parsing number, line %u, file '%s'\n", p->line_nbr, get_filename(p->m->filename));
 
@@ -2521,8 +2523,9 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 		*srcptr = tmpptr;
 		s = *srcptr;
+		int lench = len_char_utf8(s);
 
-		if ((*s == '(') || (isalpha(*s))) {
+		if ((*s == '(') || (lench > 1) || isalpha(*s)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, parsing number, line %u, file '%s'\n", p->line_nbr, get_filename(p->m->filename));
 
