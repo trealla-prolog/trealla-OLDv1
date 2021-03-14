@@ -11548,6 +11548,39 @@ static void load_ops(query *q)
 			ptr->priority, specifier, name);
 	}
 
+	for (const struct op_table *ptr = q->m->sysops; ptr->name; ptr++) {
+		char specifier[256], name[256];
+
+		if (ptr->specifier == OP_FX)
+			strcpy(specifier, "fx");
+		else if (ptr->specifier == OP_FY)
+			strcpy(specifier, "fy");
+		else if (ptr->specifier == OP_YF)
+			strcpy(specifier, "yf");
+		else if (ptr->specifier == OP_XF)
+			strcpy(specifier, "xf");
+		else if (ptr->specifier == OP_YFX)
+			strcpy(specifier, "yfx");
+		else if (ptr->specifier == OP_XFY)
+			strcpy(specifier, "xfy");
+		else if (ptr->specifier == OP_XFX)
+			strcpy(specifier, "xfx");
+
+		formatted(name, sizeof(name), ptr->name, strlen(ptr->name), false);
+
+		unsigned len = snprintf(NULL, 0, "'$current_op'(%u, %s, '%s').\n",
+			ptr->priority, specifier, name);
+
+		while ((buflen-(dst-tmpbuf)) <= len) {
+			size_t offset = dst - tmpbuf;
+			tmpbuf = realloc(tmpbuf, buflen*=2);
+			dst = tmpbuf + offset;
+		}
+
+		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$current_op'(%u, %s, '%s').\n",
+			ptr->priority, specifier, name);
+	}
+
 	//printf("%s", tmpbuf);
 
 	parser *p = create_parser(q->m);
