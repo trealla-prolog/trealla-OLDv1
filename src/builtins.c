@@ -5120,7 +5120,7 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 	expected = tmpbuf;
 	char functor[1024];
 
-	if (needs_quote(q->m, GET_STR(q->st.curr_cell), LEN_STR(q->st.curr_cell))) {
+	if (needs_quoting(q->m, GET_STR(q->st.curr_cell), LEN_STR(q->st.curr_cell))) {
 		char tmpbuf[1024-3];
 		formatted(tmpbuf, sizeof(tmpbuf), GET_STR(q->st.curr_cell), LEN_STR(q->st.curr_cell), false);
 		snprintf(functor, sizeof(functor), "'%s'", tmpbuf);

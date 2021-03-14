@@ -20,7 +20,7 @@
 #define DBL_DECIMAL_DIG DBL_DIG
 #endif
 
-bool needs_quote(module *m, const char *src, size_t srclen)
+bool needs_quoting(module *m, const char *src, size_t srclen)
 {
 	if (!strcmp(src, ",") || !strcmp(src, ".") || !strcmp(src, "|"))
 		return true;
@@ -37,11 +37,101 @@ bool needs_quote(module *m, const char *src, size_t srclen)
 	while (srclen--) {
 		int ch = get_char_utf8(&src);
 
-		if (!isalnum(ch) && (ch != '_'))
+		if ((iscntrl(ch) || isspace(ch) || ispunct(ch)) && (ch != '_'))
 			return true;
 	}
 
 	return false;
+}
+
+size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen, bool dq)
+{
+	extern const char *g_escapes;
+	extern const char *g_anti_escapes;
+	size_t len = 0;
+	int chars = 0, bytes = 0;
+
+	while (srclen) {
+		int lench = len_char_utf8(src);
+		int ch = get_char_utf8(&src);
+		srclen -= lench;
+		bytes += lench;
+		chars++;
+		const char *ptr = (bytes == 1) && (ch != ' ') ? strchr(g_escapes, ch) : NULL;
+
+		if (ch && ptr) {
+			if (dstlen) {
+				*dst++ = '\\';
+				*dst++ = g_anti_escapes[ptr-g_escapes];
+			}
+
+			len += 2;
+		} else if (!dq && (ch == '\'')) {
+			if (dstlen) {
+				*dst++ = '\'';
+				*dst++ = ch;
+			}
+
+			len += 2;
+		} else if (ch == (dq?'"':'\'')) {
+			if (dstlen) {
+				*dst++ = '\\';
+				*dst++ = ch;
+			}
+
+			len += 2;
+		} else if (ch < ' ') {
+			if (dstlen) {
+				*dst++ = '\\';
+				*dst++ = 'x';
+			}
+
+			size_t n = snprintf(dst, dstlen, "%u", ch);
+			len += n;
+			if (dstlen) dst += n;
+
+			if (dstlen)
+				*dst++ = '\\';
+
+			len += 3;
+		} else if (ch == '\\') {
+			if (dstlen) {
+				*dst++ = '\\';
+				*dst++ = ch;
+			}
+
+			len += 2;
+		} else {
+			if (dstlen)
+				dst += put_char_utf8(dst, ch);
+
+			len += lench;
+		}
+	}
+
+	if (dstlen)
+		*dst = '\0';
+
+	return len;
+}
+
+static size_t plain(char *dst, size_t dstlen, const char *src, size_t srclen, __attribute__((unused)) bool dq)
+{
+	size_t len = 0;
+
+	while (srclen--) {
+		int ch = *src++;
+
+		if (dstlen)
+			*dst++ = ch;
+
+		len++;
+	}
+
+	if (dstlen)
+		*dst = '\0';
+
+	return len;
 }
 
 static size_t sprint_int_(char *dst, size_t size, int_t n, int base)
@@ -94,95 +184,6 @@ size_t sprint_int(char *dst, size_t size, int_t n, int base)
 	dst += sprint_int_(dst, size, n, base);
 	if (size) *dst = '\0';
 	return dst - save_dst;
-}
-
-size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen, bool dq)
-{
-	extern const char *g_escapes;
-	extern const char *g_anti_escapes;
-	size_t len = 0;
-
-	while (srclen) {
-		size_t lench = len_char_utf8(src);
-		int ch = get_char_utf8(&src);
-		srclen -= lench;
-		const char *ptr = ch != ' ' ? strchr(g_escapes, ch) : NULL;
-
-		if (ch && ptr) {
-			if (dstlen) {
-				*dst++ = '\\';
-				*dst++ = g_anti_escapes[ptr-g_escapes];
-			}
-
-			len += 2;
-		} else if (!dq && (ch == '\'')) {
-			if (dstlen) {
-				*dst++ = '\'';
-				*dst++ = ch;
-			}
-
-			len += 2;
-		} else if (ch == (dq?'"':'\'')) {
-			if (dstlen) {
-				*dst++ = '\\';
-				*dst++ = ch;
-			}
-
-			len += 2;
-		} else if (ch < ' ') {
-			if (dstlen) {
-				*dst++ = '\\';
-				*dst++ = 'x';
-			}
-
-			size_t n = snprintf(dst, dstlen, "%u", ch);
-			len += n;
-			if (dstlen) dst += n;
-
-			if (dstlen)
-				*dst++ = '\\';
-
-			len += 3;
-		} else if (ch == '\\') {
-			if (dstlen) {
-				*dst++ = '\\';
-				*dst++ = ch;
-			}
-
-			len += 2;
-		} else {
-			if (dstlen) {
-				put_char_utf8(dst, ch);
-				dst += lench;
-			}
-
-			len += lench;
-		}
-	}
-
-	if (dstlen)
-		*dst = '\0';
-
-	return len;
-}
-
-static size_t plain(char *dst, size_t dstlen, const char *src, size_t srclen, __attribute__((unused)) bool dq)
-{
-	size_t len = 0;
-
-	while (srclen--) {
-		int ch = *src++;
-
-		if (dstlen)
-			*dst++ = ch;
-
-		len++;
-	}
-
-	if (dstlen)
-		*dst = '\0';
-
-	return len;
 }
 
 static void reformat_float(char *tmpbuf)
@@ -375,7 +376,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 	}
 
 	const char *src = GET_STR(c);
-	int dq = 0, quote = !is_variable(c) && needs_quote(q->m, src, LEN_STR(c));
+	int dq = 0, quote = !is_variable(c) && needs_quoting(q->m, src, LEN_STR(c));
 	if (is_string(c)) dq = quote = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 
@@ -568,7 +569,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	int optype = GET_OP(c);
 
 	if (q->ignore_ops || !optype || !c->arity) {
-		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quote(q->m, src, LEN_STR(c));
+		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quoting(q->m, src, LEN_STR(c));
 		int dq = 0, braces = 0;
 		if (is_string(c)) dq = quote = 1;
 		if (q->quoted < 0) quote = 0;
