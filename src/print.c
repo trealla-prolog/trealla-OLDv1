@@ -20,7 +20,7 @@
 #define DBL_DECIMAL_DIG DBL_DIG
 #endif
 
-bool needs_quoting(module *m, const char *src, size_t srclen)
+bool needs_quoting(module *m, const char *src, int srclen)
 {
 	if (!*src)
 		return true;
@@ -41,14 +41,17 @@ bool needs_quoting(module *m, const char *src, size_t srclen)
 	if (get_op(m, src, NULL, false))
 		return false;
 
-	while (srclen) {
+	while (srclen > 0) {
 		int lench = len_char_utf8(src);
+
+		if (!lench)
+			break;
+
+		int ch = get_char_utf8(&src);
 		srclen -= lench;
 
 		if (lench == 1) {
-			int ch = get_char_utf8(&src);
-
-			if ((iscntrl(ch) || isspace(ch) || ispunct(ch)) && (ch != '_'))
+			if (!isalnum(ch) && (ch != '_'))
 				return true;
 		}
 	}
@@ -56,15 +59,19 @@ bool needs_quoting(module *m, const char *src, size_t srclen)
 	return false;
 }
 
-size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen, bool dq)
+size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq)
 {
 	extern const char *g_escapes;
 	extern const char *g_anti_escapes;
 	size_t len = 0;
 	int chars = 0, bytes = 0;
 
-	while (srclen) {
+	while (srclen > 0) {
 		int lench = len_char_utf8(src);
+
+		if (!lench)
+			break;
+
 		int ch = get_char_utf8(&src);
 		srclen -= lench;
 		bytes += lench;
@@ -127,11 +134,11 @@ size_t formatted(char *dst, size_t dstlen, const char *src, size_t srclen, bool 
 	return len;
 }
 
-static size_t plain(char *dst, size_t dstlen, const char *src, size_t srclen, __attribute__((unused)) bool dq)
+static size_t plain(char *dst, size_t dstlen, const char *src, int srclen)
 {
 	size_t len = 0;
 
-	while (srclen--) {
+	while (srclen-- > 0) {
 		int ch = *src++;
 
 		if (dstlen)
@@ -395,7 +402,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 	if (quote || q->quoted)
 		dst += formatted(dst, dstlen, src, LEN_STR(c), dq);
 	else
-		dst += plain(dst, dstlen, src, LEN_STR(c), dq);
+		dst += plain(dst, dstlen, src, LEN_STR(c));
 
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 
@@ -638,7 +645,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			if ((running < 0) && is_blob(c) && (len_str == 256))
 				dst += snprintf(dst, dstlen, "%s", "|...");
 		} else
-			dst += plain(dst, dstlen, src, LEN_STR(c), false);
+			dst += plain(dst, dstlen, src, LEN_STR(c));
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
