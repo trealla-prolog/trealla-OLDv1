@@ -368,21 +368,24 @@ make_rule(m, "absolute_file_name(R,A) :- absolute_file_name(R,A,[]).");
 make_rule(m, "client(U,H,P,S) :- client(U,H,P,S,[]).");
 make_rule(m, "server(H,S) :- server(H,S,[]).");
 
-make_rule(m, "current_op(A, B, C) :- "								\
-	"(var(C) -> true ; "											\
-	"	(atom(C) -> true ; "										\
-	"		throw(error(type_error(atom,C),current_op/3)))),"		\
-	"(var(B) -> true ; "											\
-	"	(atom(B) -> true ; "										\
+make_rule(m, "current_op(A, B, C) :- "											\
+	"(var(C) -> true ; "														\
+	"	(atom(C) -> true ; "													\
+	"		throw(error(type_error(atom,C),current_op/3)))),"					\
+	"(var(B) -> true ; "														\
+	"	(atom(B) -> true ; "													\
 	"		throw(error(domain_error(operator_specifier,B),current_op/3)))),"	\
-	"(var(B) -> true ; "											\
-	"	(memberchk(B, [fx,fy,yf,xf,yfx,xfy,xfx]) -> true ; "	\
+	"(var(B) -> true ; "														\
+	"	(memberchk(B, [fx,fy,yf,xf,yfx,xfy,xfx]) -> true ; "					\
 	"		throw(error(domain_error(operator_specifier,B),current_op/3)))),"	\
-	"(var(A) -> true ; "											\
-	"	(integer(A) -> true ; "										\
+	"(var(A) -> true ; "														\
+	"	(integer(A) -> true ; "													\
 	"		throw(error(domain_error(operator_priority,A),current_op/3)))),"	\
-	"(var(A) -> true ; "											\
-	"	(A =< 1200 -> true ; "										\
+	"(var(A) -> true ; "														\
+	"	(A >= 0 -> true ; "														\
 	"		throw(error(domain_error(operator_priority,A),current_op/3)))),"	\
-	"'$load_ops', "													\
+	"(var(A) -> true ; "														\
+	"	(A =< 1200 -> true ; "													\
+	"		throw(error(domain_error(operator_priority,A),current_op/3)))),"	\
+	"'$load_ops', "																\
 	"'$current_op'(A, B, C).");
