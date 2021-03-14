@@ -22,23 +22,35 @@
 
 bool needs_quoting(module *m, const char *src, size_t srclen)
 {
-	if (!strcmp(src, ",") || !strcmp(src, ".") || !strcmp(src, "|"))
+	if (!*src)
 		return true;
 
-	if (!*src || isupper(*src) || isdigit(*src) || (*src == '_') || (*src == '$'))
+	if (!strcmp(src, ",") || !strcmp(src, ".") || !strcmp(src, "|"))
 		return true;
 
 	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!") || !strcmp(src, "¡"))
 		return false;
 
+	int lench = len_char_utf8(src);
+
+	if (lench == 1) {
+		if (isupper(*src) || isdigit(*src) || (*src == '_') || (*src == '$'))
+			return true;
+	}
+
 	if (get_op(m, src, NULL, false))
 		return false;
 
-	while (srclen--) {
-		int ch = get_char_utf8(&src);
+	while (srclen) {
+		int lench = len_char_utf8(src);
+		srclen -= lench;
 
-		if ((iscntrl(ch) || isspace(ch) || ispunct(ch)) && (ch != '_'))
-			return true;
+		if (lench == 1) {
+			int ch = get_char_utf8(&src);
+
+			if ((iscntrl(ch) || isspace(ch) || ispunct(ch)) && (ch != '_'))
+				return true;
+		}
 	}
 
 	return false;
