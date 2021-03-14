@@ -368,21 +368,24 @@ make_rule(m, "absolute_file_name(R,A) :- absolute_file_name(R,A,[]).");
 make_rule(m, "client(U,H,P,S) :- client(U,H,P,S,[]).");
 make_rule(m, "server(H,S) :- server(H,S,[]).");
 
-make_rule(m, 																							\
-	"current_op(A,B,C) :- var(A), var(B), var(C), !, '$load_ops', '$current_op'(A, B, C)."				\
-	"current_op(_,_,C) :- nonvar(C), \\+ atom(C), !, throw(error(type_error(atom,C),current_op/3))."	\
-	"current_op(_,B,_) :- nonvar(B), \\+ atom(B), "														\
-	"	!, throw(error(domain_error(operator_specifier,B),current_op/3))."								\
-	"current_op(_,B,_) :- nonvar(B), "																	\
-	"	\\+ memberchk(B,[xf, yf, fx, fy, xfx, xfy, yfx]), " 											\
-	"	!, throw(error(domain_error(operator_specifier,B),current_op/3))."								\
-	"current_op(A,_,_) :- nonvar(A), "																	\
-	"	\\+ integer(A),	"																				\
-	"	!, throw(error(domain_error(operator_priority,A),current_op/3))."								\
-	"current_op(A,_,_) :- nonvar(A), "																	\
-	"	\\+ (A >= 0), "																					\
-	"	!, throw(error(domain_error(operator_priority,A),current_op/3))."								\
-	"current_op(A,_,_) :- nonvar(A), "																	\
-	"	\\+ (A =< 1200), "																				\
-	"	!, throw(error(domain_error(operator_priority,A),current_op/3))."								\
-	"current_op(A,B,C) :- !, '$load_ops', '$current_op'(A, B, C).");
+make_rule(m, 																	\
+	"current_op(A,B,C) :- var(A), var(B), var(C), "								\
+	"	!, '$load_ops', '$current_op'(A, B, C)."								\
+	"current_op(_,_,C) :- nonvar(C), \\+ atom(C), "								\
+	"	!, throw(error(type_error(atom,C),current_op/3))."						\
+	"current_op(_,B,_) :- nonvar(B), \\+ atom(B), "								\
+	"	!, throw(error(domain_error(operator_specifier,B),current_op/3))."		\
+	"current_op(_,B,_) :- nonvar(B), "											\
+	"	\\+ memberchk(B,[xf, yf, fx, fy, xfx, xfy, yfx]), " 					\
+	"	!, throw(error(domain_error(operator_specifier,B),current_op/3))."		\
+	"current_op(A,_,_) :- nonvar(A), "											\
+	"	\\+ integer(A),	"														\
+	"	!, throw(error(domain_error(operator_priority,A),current_op/3))."		\
+	"current_op(A,_,_) :- nonvar(A), "											\
+	"	\\+ (A >= 0), "															\
+	"	!, throw(error(domain_error(operator_priority,A),current_op/3))."		\
+	"current_op(A,_,_) :- nonvar(A), "											\
+	"	\\+ (A =< 1200), "														\
+	"	!, throw(error(domain_error(operator_priority,A),current_op/3))."		\
+	"current_op(A,B,C) :- "														\
+	"	!, '$load_ops', '$current_op'(A, B, C).");
