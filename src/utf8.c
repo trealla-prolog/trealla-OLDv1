@@ -66,6 +66,12 @@ const char *strrchr_utf8(const char *s, int ch)
 	return save_src;
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// TODO: need a definition of what consitutes alpha
+// for UTF-8 > 7bits. For now accept everything.
+//
+
 int isalpha_utf8(int _ch)
 {
 	unsigned int ch = (unsigned int)_ch;
@@ -77,6 +83,9 @@ int isalnum_utf8(int _ch)
 	unsigned int ch = (unsigned int)_ch;
 	return isdigit(_ch) || isalpha(_ch) || (ch > 0x7F);
 }
+
+//
+//////////////////////////////////////////////////////////////////////
 
 int is_char_utf8(const char *src)
 {
