@@ -5950,7 +5950,9 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 
 	uint64_t xs_vars = 0;
 	p2 = skip_existentials(q, p2, &xs_vars);
-	cell *tvars = do_term_variables(q, p2, p2_ctx);
+	cell *tvars_tmp = do_term_variables(q, p2, p2_ctx);
+	cell *tvars = malloc(sizeof(cell)*tvars_tmp->nbr_cells);
+	copy_cells(tvars, tvars_tmp, tvars_tmp->nbr_cells);
 
 	// First time thru generate all solutions
 
@@ -5968,11 +5970,14 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 		q->tmpq[q->st.qnbr] = NULL;
 		may_error(make_barrier(q));
 		q->st.curr_cell = tmp;
+		free(tvars);
 		return pl_success;
 	}
 
-	if (!queuen_used(q) && !q->tmpq[q->st.qnbr])
+	if (!queuen_used(q) && !q->tmpq[q->st.qnbr]) {
+		free(tvars);
 		return pl_failure;
+	}
 
 	// First retry takes a copy
 
@@ -6022,6 +6027,7 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 		free(q->tmpq[q->st.qnbr]);
 		q->tmpq[q->st.qnbr] = NULL;
 		drop_choice(q);
+		free(tvars);
 		return pl_failure;
 	}
 
@@ -6041,6 +6047,7 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 		q->st.qnbr--;
 	}
 
+	free(tvars);
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
