@@ -76,7 +76,7 @@ size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq)
 		srclen -= lench;
 		bytes += lench;
 		chars++;
-		const char *ptr = (bytes == 1) && (ch != ' ') ? strchr(g_escapes, ch) : NULL;
+		const char *ptr = (lench == 1) && (ch != ' ') ? strchr(g_escapes, ch) : NULL;
 
 		if (ch && ptr) {
 			if (dstlen) {
