@@ -4229,10 +4229,7 @@ static cell *do_term_variables(query *q, cell *p1, idx_t p1_ctx)
 		}
 	}
 
-	cell *tmp2 = alloc_on_heap(q, idx);
-	ensure(tmp2);
-	safe_copy_cells(tmp2, tmp, idx);
-	return tmp2;
+	return tmp;		// returns on tmp_heap
 }
 
 static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
@@ -4254,7 +4251,10 @@ static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
 	if (!tmp)
 		return throw_error(q, p1, "resource_error", "too_many_vars");
 
-	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
+	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
+	may_ptr_error(tmp2);
+	safe_copy_cells(tmp2, tmp, tmp->nbr_cells);
+	return unify(q, p2, p2_ctx, tmp2, q->st.curr_frame);
 }
 
 static cell *clone2_to_tmp(query *q, cell *p1)
@@ -5950,17 +5950,18 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 
 	uint64_t xs_vars = 0;
 	p2 = skip_existentials(q, p2, &xs_vars);
+	cell *tvars = do_term_variables(q, p2, p2_ctx);
 
 	// First time thru generate all solutions
 
 	if (!q->retry) {
 		q->st.qnbr++;
 		assert(q->st.qnbr < MAX_QUEUES);
-		cell *tmp = clone_to_heap(q, true, p2, 2+p2->nbr_cells+1);
+		cell *tmp = clone_to_heap(q, true, p2, 2+tvars->nbr_cells+1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
+		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+tvars->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
-		nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+		nbr_cells += safe_copy_cells(tmp+nbr_cells, tvars, tvars->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 		init_queuen(q);
 		free(q->tmpq[q->st.qnbr]);
@@ -6003,7 +6004,7 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 
 		try_me(q, g->nbr_vars*2);
 
-		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
+		if (unify(q, tvars, p2_ctx, c, q->st.fp)) {
 			c->flags |= FLAG2_PROCESSED;
 			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, true, false);
 			may_ptr_error(tmp);
