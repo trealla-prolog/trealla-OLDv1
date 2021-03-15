@@ -4229,10 +4229,7 @@ static cell *do_term_variables(query *q, cell *p1, idx_t p1_ctx)
 		}
 	}
 
-	cell *tmp2 = alloc_on_heap(q, idx);
-	ensure(tmp2);
-	safe_copy_cells(tmp2, tmp, idx);
-	return tmp2;
+	return tmp;		// returns on tmp_heap
 }
 
 static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
@@ -4254,7 +4251,10 @@ static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
 	if (!tmp)
 		return throw_error(q, p1, "resource_error", "too_many_vars");
 
-	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
+	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
+	may_ptr_error(tmp2);
+	safe_copy_cells(tmp2, tmp, tmp->nbr_cells);
+	return unify(q, p2, p2_ctx, tmp2, q->st.curr_frame);
 }
 
 static cell *clone2_to_tmp(query *q, cell *p1)
