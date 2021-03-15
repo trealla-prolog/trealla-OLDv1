@@ -2949,6 +2949,13 @@ static bool get_token(parser *p, int last_op)
 		return (dst - p->token) != 0;
 	}
 
+	if ((src[0] == '=') && (src[1] == '.') && (src[2] == '.')) {
+		dst += sprintf(dst, "=..");
+		p->srcptr = (char*)src+3;
+		return (dst - p->token) != 0;
+	}
+
+
 	if (src[0] == '!') {
 		*dst++ = *src++;
 		*dst = '\0';
@@ -2956,7 +2963,7 @@ static bool get_token(parser *p, int last_op)
 		return (dst - p->token) != 0;
 	}
 
-	static const char *s_delims = "!(){}[]|_,`'\"\t\r\n ";
+	static const char *s_delims = ".!(){}[]|_,`'\"\t\r\n ";
 
 	while (*src) {
 		ch = get_char_utf8(&src);
@@ -2975,6 +2982,7 @@ static bool get_token(parser *p, int last_op)
 
 		if (strchr(s_delims, ch))
 			break;
+
 
 		ch = peek_char_utf8(src);
 
