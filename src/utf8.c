@@ -73,16 +73,14 @@ const char *strrchr_utf8(const char *s, int ch)
 // for UTF-8 > 7bits. For now accept everything.
 //
 
-int isalpha_utf8(int _ch)
+int isalpha_utf8(int ch)
 {
-	//unsigned int ch = (unsigned int)_ch;
-	return iswalpha(_ch); //isalpha(_ch) || (ch > 0x7F);
+	return iswalpha(ch);
 }
 
-int isalnum_utf8(int _ch)
+int isalnum_utf8(int ch)
 {
-	//unsigned int ch = (unsigned int)_ch;
-	return isdigit(_ch) || iswalpha(_ch); //isalpha(_ch) || (ch > 0x7F);
+	return iswalnum(ch);
 }
 
 //
