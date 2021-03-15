@@ -4496,7 +4496,7 @@ static USE_RESULT pl_status fn_iso_abolish_1(query *q)
 
 	const char *src = GET_STR(p1);
 
-	if (strcmp(src, "/"))
+	if (strcmp(src, "/") && strcmp(src, "//"))
 		return throw_error(q, p1, "type_error", "predicate_indicator");
 
 	cell *p1_name = p1 + 1;
@@ -4507,6 +4507,9 @@ static USE_RESULT pl_status fn_iso_abolish_1(query *q)
 
 	cell *p1_arity = p1 + 2;
 	p1_arity = deref(q, p1_arity, p1_ctx);
+
+	if (!strcmp(src, "//"))
+		p1_arity += 2;
 
 	if (!is_integer(p1_arity))
 		return throw_error(q, p1_arity, "type_error", "integer");
@@ -6462,19 +6465,18 @@ static USE_RESULT pl_status fn_listing_1(query *q)
 	unsigned arity = -1;
 
 	if (p1->arity) {
+		if (strcmp(GET_STR(p1), "/") && strcmp(GET_STR(p1), "//"))
+			return throw_error(q, p1, "type_error", "predicate_indicator");
+
 		cell *p2 = p1 + 1;
 
-		if (!is_atom(p2)) {
-			q->error = 1;
+		if (!is_atom(p2))
 			return throw_error(q, p2, "type_error", "atom");
-		}
 
 		cell *p3 = p2 + p2->nbr_cells;
 
-		if (!is_integer(p3)) {
-			q->error = 1;
+		if (!is_integer(p3))
 			return throw_error(q, p3, "type_error", "integer");
-		}
 
 		name = index_from_pool(q->m->pl, GET_STR(p2));
 		arity = p3->val_num;
