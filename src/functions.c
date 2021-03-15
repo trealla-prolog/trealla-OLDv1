@@ -29,7 +29,8 @@ void do_calc_(query *q, cell *c, idx_t c_ctx)
 	q->st.curr_frame = c_ctx;
 	q->calc = true;
 
-	c->fn(q);
+	if (c->fn)
+		c->fn(q);
 
 	q->calc = save_calc;
 
