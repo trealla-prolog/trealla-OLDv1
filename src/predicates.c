@@ -4166,20 +4166,8 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 	return unify(q, p2, p2_ctx, l, p1_ctx);
 }
 
-static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
+static cell *do_term_variables(query *q, cell *p1, idx_t p1_ctx)
 {
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,list_or_nil_or_var);
-
-	if (is_list(p2) && !is_valid_list(q, p2, p2_ctx, true))
-		return throw_error(q, p2, "type_error", "list");
-
-	if (!is_variable(p1) && (is_atom(p1) || is_number(p1))) {
-		cell tmp;
-		make_literal(&tmp, g_nil_s);
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	}
-
 	frame *g = GET_CURR_FRAME();
 	q->m->pl->varno = g->nbr_vars;
 	q->m->pl->tab_idx = 0;
@@ -4223,7 +4211,7 @@ static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
 
 		if (new_vars) {
 			if (!create_vars(q, new_vars))
-				return throw_error(q, p1, "resource_error", "too_many_vars");
+				return NULL;
 		}
 
 		for (unsigned i = 0; i < cnt; i++) {
@@ -4244,7 +4232,29 @@ static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
 	cell *tmp2 = alloc_on_heap(q, idx);
 	ensure(tmp2);
 	safe_copy_cells(tmp2, tmp, idx);
-	return unify(q, p2, p2_ctx, tmp2, q->st.curr_frame);
+	return tmp2;
+}
+
+static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
+
+	if (is_list(p2) && !is_valid_list(q, p2, p2_ctx, true))
+		return throw_error(q, p2, "type_error", "list");
+
+	if (!is_variable(p1) && (is_atom(p1) || is_number(p1))) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
+
+	cell *tmp = do_term_variables(q, p1, p1_ctx);
+
+	if (!tmp)
+		return throw_error(q, p1, "resource_error", "too_many_vars");
+
+	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
 static cell *clone2_to_tmp(query *q, cell *p1)
