@@ -4735,7 +4735,7 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_iso_call_1(query *q)
+static USE_RESULT pl_status fn_sys_call_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp3;
@@ -4762,7 +4762,7 @@ static USE_RESULT pl_status fn_iso_call_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_iso_call_n(query *q)
+static USE_RESULT pl_status fn_sys_call_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	clone_to_tmp(q, p1);
@@ -5858,7 +5858,7 @@ static void unpin_vars(query *q)
 	ch->pins = 0;
 }
 
-static USE_RESULT pl_status fn_iso_findall_3(query *q)
+static USE_RESULT pl_status fn_sys_findall_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
@@ -5929,7 +5929,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_iso_bagof_3(query *q)
+static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
@@ -10870,14 +10870,14 @@ static const struct builtins g_predicates_iso[] =
 	{"once", 1, fn_iso_once_1, NULL},
 	{"throw", 1, fn_iso_throw_1, NULL},
 	{"$catch", 3, fn_iso_catch_3, NULL},
-	{"$call", 1, fn_iso_call_1, NULL},
-	{"$call", 2, fn_iso_call_n, NULL},
-	{"$call", 3, fn_iso_call_n, NULL},
-	{"$call", 4, fn_iso_call_n, NULL},
-	{"$call", 5, fn_iso_call_n, NULL},
-	{"$call", 6, fn_iso_call_n, NULL},
-	{"$call", 7, fn_iso_call_n, NULL},
-	{"$call", 8, fn_iso_call_n, NULL},
+	{"$call", 1, fn_sys_call_1, NULL},
+	{"$call", 2, fn_sys_call_n, NULL},
+	{"$call", 3, fn_sys_call_n, NULL},
+	{"$call", 4, fn_sys_call_n, NULL},
+	{"$call", 5, fn_sys_call_n, NULL},
+	{"$call", 6, fn_sys_call_n, NULL},
+	{"$call", 7, fn_sys_call_n, NULL},
+	{"$call", 8, fn_sys_call_n, NULL},
 	{"repeat", 0, fn_iso_repeat_0, NULL},
 	{"true", 0, fn_iso_true_0, NULL},
 	{"fail", 0, fn_iso_fail_0, NULL},
@@ -10964,8 +10964,8 @@ static const struct builtins g_predicates_iso[] =
 	{"current_prolog_flag", 2, fn_iso_current_prolog_flag_2, NULL},
 	{"set_prolog_flag", 2, fn_iso_set_prolog_flag_2, NULL},
 	{"op", 3, fn_iso_op_3, NULL},
-	{"$findall", 3, fn_iso_findall_3, NULL},
-	{"$bagof", 3, fn_iso_bagof_3, NULL},
+	{"$findall", 3, fn_sys_findall_3, NULL},
+	{"$bagof", 3, fn_sys_bagof_3, NULL},
 	{"current_predicate", 1, fn_iso_current_predicate_1, NULL},
 	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL},
 	{"compare", 3, fn_iso_compare_3, NULL},
