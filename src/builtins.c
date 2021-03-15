@@ -6400,6 +6400,11 @@ static void save_db(FILE *fp, query *q, int logging)
 		if (logging && !h->is_persist)
 			continue;
 
+		const char *src = GET_STR(&h->key);
+
+		if (src[0] == '$')
+			continue;
+
 		for (clause *r = h->head; r; r = r->next) {
 			if (r->t.ugen_erased)
 				continue;
