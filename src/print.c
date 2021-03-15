@@ -50,10 +50,8 @@ bool needs_quoting(module *m, const char *src, int srclen)
 		int ch = get_char_utf8(&src);
 		srclen -= lench;
 
-		if (lench == 1) {
-			if (!isalnum(ch) && (ch != '_'))
-				return true;
-		}
+		if (!isalnum_utf8(ch) && (ch != '_'))
+			return true;
 	}
 
 	return false;

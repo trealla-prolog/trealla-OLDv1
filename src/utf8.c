@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <wctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -74,14 +75,14 @@ const char *strrchr_utf8(const char *s, int ch)
 
 int isalpha_utf8(int _ch)
 {
-	unsigned int ch = (unsigned int)_ch;
-	return isalpha(_ch) || (ch > 0x7F);
+	//unsigned int ch = (unsigned int)_ch;
+	return iswalpha(_ch); //isalpha(_ch) || (ch > 0x7F);
 }
 
 int isalnum_utf8(int _ch)
 {
-	unsigned int ch = (unsigned int)_ch;
-	return isdigit(_ch) || isalpha(_ch) || (ch > 0x7F);
+	//unsigned int ch = (unsigned int)_ch;
+	return isdigit(_ch) || iswalpha(_ch); //isalpha(_ch) || (ch > 0x7F);
 }
 
 //
