@@ -5106,7 +5106,7 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 	int save_quoted = q->quoted;
 	q->quoted = 1;
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, 1, 0, 0);
-	ensure(len >= 0); //cehteh: FIXME: cyclic term
+	if (len <= 0) { q->error = true; return pl_failure; }
 	char *dst = malloc(len+1);
 	ensure(dst);
 	len = print_term_to_buf(q, dst, len+1, c, c_ctx, 1, 0, 0);
