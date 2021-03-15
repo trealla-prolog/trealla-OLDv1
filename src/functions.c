@@ -2274,7 +2274,7 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 	return pl_success;
 }
 
-const struct builtins g_arith_funcs[] =
+const struct builtins g_functions[] =
 {
 	{"=:=", 2, fn_iso_neq_2, NULL},
 	{"=\\=", 2, fn_iso_nne_2, NULL},

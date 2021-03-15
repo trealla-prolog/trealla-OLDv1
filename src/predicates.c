@@ -10857,7 +10857,7 @@ static USE_RESULT pl_status fn_iso_compare_3(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static const struct builtins g_iso_funcs[] =
+static const struct builtins g_predicates_iso[] =
 {
 	{",", 2, NULL, NULL},
 
@@ -10990,7 +10990,7 @@ static const struct builtins g_iso_funcs[] =
 	{0}
 };
 
-static const struct builtins g_other_funcs[] =
+static const struct builtins g_predicates_other[] =
 {
 	{"*->", 2, fn_if_2, NULL},
 	{"if", 3, fn_if_3, NULL},
@@ -11171,20 +11171,20 @@ void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found)
 	return NULL;
 }
 
-extern const struct builtins g_arith_funcs[];
+extern const struct builtins g_functions[];
 extern const struct builtins g_contrib_funcs[];
 
 void load_builtins(prolog *pl)
 {
-	for (const struct builtins *ptr = g_iso_funcs; ptr->name; ptr++) {
+	for (const struct builtins *ptr = g_predicates_iso; ptr->name; ptr++) {
 		sl_app(pl->funtab, ptr->name, ptr);
 	}
 
-	for (const struct builtins *ptr = g_arith_funcs; ptr->name; ptr++) {
+	for (const struct builtins *ptr = g_functions; ptr->name; ptr++) {
 		sl_app(pl->funtab, ptr->name, ptr);
 	}
 
-	for (const struct builtins *ptr = g_other_funcs; ptr->name; ptr++) {
+	for (const struct builtins *ptr = g_predicates_other; ptr->name; ptr++) {
 		sl_app(pl->funtab, ptr->name, ptr);
 	}
 
@@ -11329,19 +11329,19 @@ static void load_properties(module *m)
 		dst = format_property(&tmpbuf, &buflen, dst, "task", i, metabuf);
 	}
 
-	for (const struct builtins *ptr = g_iso_funcs; ptr->name; ptr++) {
+	for (const struct builtins *ptr = g_predicates_iso; ptr->name; ptr++) {
 		sl_app(m->pl->funtab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		dst = push_property(&tmpbuf, &buflen, dst, ptr);
 	}
 
-	for (const struct builtins *ptr = g_arith_funcs; ptr->name; ptr++) {
+	for (const struct builtins *ptr = g_functions; ptr->name; ptr++) {
 		sl_app(m->pl->funtab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		dst = push_property(&tmpbuf, &buflen, dst, ptr);
 	}
 
-	for (const struct builtins *ptr = g_other_funcs; ptr->name; ptr++) {
+	for (const struct builtins *ptr = g_predicates_other; ptr->name; ptr++) {
 		sl_app(m->pl->funtab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		dst = push_property(&tmpbuf, &buflen, dst, ptr);
