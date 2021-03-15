@@ -28,8 +28,8 @@ CFLAGS += -flto=$(LTO)
 LDFLAGS += -flto=$(LTO)
 endif
 
-OBJECTS = tpl.o src/history.o src/arith.o \
-	src/builtins.o src/contrib.o src/heap.c \
+OBJECTS = tpl.o src/history.o src/functions.o \
+	src/predicates.o src/contrib.o src/heap.c \
 	src/library.o src/parse.o src/print.o src/runtime.o \
 	src/skiplist.o src/base64.o src/network.o src/utf8.o
 
@@ -58,10 +58,10 @@ clean:
 
 # from [gcc|clang] -MM *.c
 
-src/arith.o: src/arith.c src/trealla.h src/internal.h src/skiplist.h \
+src/functions.o: src/functions.c src/trealla.h src/internal.h src/skiplist.h \
  src/cdebug.h src/builtins.h
 src/base64.o: src/base64.c src/base64.h
-src/builtins.o: src/builtins.c src/trealla.h src/internal.h src/skiplist.h \
+src/predicates.o: src/predicates.c src/trealla.h src/internal.h src/skiplist.h \
  src/cdebug.h src/network.h src/base64.h src/library.h src/utf8.h \
  src/builtins.h
 src/contrib.o: src/contrib.c src/trealla.h src/internal.h src/skiplist.h \
