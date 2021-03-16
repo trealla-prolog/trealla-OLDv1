@@ -2448,7 +2448,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 			s++;
 		}
 
-		if (isalpha(peek_char_utf8(s))) {
+		if (isalpha_utf8(peek_char_utf8(s))) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, parsing hex number, line %u, file '%s'\n", p->line_nbr, get_filename(p->m->filename));
 
