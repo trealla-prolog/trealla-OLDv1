@@ -5813,17 +5813,18 @@ static int collect_local_vars(cell *p1, idx_t nbr_cells, cell **slots)
 	return cnt;
 }
 
-static uint64_t get_vars(cell *p, __attribute__((unused)) idx_t p_ctx)
+static uint64_t get_vars(cell *p)
 {
 	cell *slots[MAX_ARITY] = {0};
 	int cnt = collect_local_vars(p, p->nbr_cells, slots);
 	uint64_t mask = 0;
 
-	if (cnt) {
-		for (unsigned i = 0; i < MAX_ARITY; i++) {
-			if (slots[i])
-				mask |= 1ULL << i;
-		}
+	if (!cnt)
+		return 0;
+
+	for (unsigned i = 0; i < MAX_ARITY; i++) {
+		if (slots[i])
+			mask |= 1ULL << i;
 	}
 
 	return mask;
@@ -5994,18 +5995,20 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 
 	init_queuen(q);
 	may_error(make_choice(q));
-	uint64_t p1_vars = get_vars(p1, p1_ctx);
-	uint64_t p2_vars = get_vars(p2, p2_ctx);
+	uint64_t p1_vars = get_vars(p1);
+	uint64_t p2_vars = get_vars(p2);
 	uint64_t mask = p1_vars ^ p2_vars ^ xs_vars;
 	pin_vars(q, mask);
 	idx_t nbr_cells = q->tmpq_size[q->st.qnbr];
 	bool unmatched = false;
 	frame *g = GET_FRAME(q->st.curr_frame);
 
+	printf("*** pins=%0lX\n", mask);
+
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
 
-#if 0
+#if 1
 		fprintf(stdout, "*** ");
 		print_term(q, stdout, c, p2_ctx, 1);
 		fprintf(stdout, "\n");
