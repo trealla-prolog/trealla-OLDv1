@@ -181,7 +181,7 @@ make_rule(m, "findall(T, G, B, Tail) :- "						\
 	"'$append'(B0, Tail, B), !.");
 
 make_rule(m, "bagof(T,G,B) :- "									\
-	"copy_term('$bagof'(T,G,_),TMP_G),"							\
+	"copy_term('$bagof'(T,G,B),TMP_G),"							\
 	"'$call'(TMP_G),"											\
 	"'$bagof'(T,G,B)=TMP_G.");
 
