@@ -1370,6 +1370,7 @@ static void directives(parser *p, term *t)
 			if (!strcmp(name, "between") ||
 				!strcmp(name, "terms") ||
 				!strcmp(name, "types") ||
+				!strcmp(name, "iso_ext") ||
 				!strcmp(name, "files"))
 				return;
 
