@@ -4201,9 +4201,10 @@ static cell *do_term_variables(query *q, cell *p1, idx_t p1_ctx)
 
 		make_literal(tmp+idx++, g_nil_s);
 		tmp[0].arity = 2;
-		tmp[0].nbr_cells = idx;
 	} else
 		make_literal(tmp+idx++, g_nil_s);
+
+	tmp[0].nbr_cells = idx;
 
 	if (cnt) {
 		unsigned new_vars = q->m->pl->varno - g->nbr_vars;
@@ -5939,6 +5940,42 @@ static USE_RESULT pl_status fn_sys_findall_3(query *q)
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
+static cell *shallow_term_variables(query *q, cell *p1, idx_t p1_ctx)
+{
+	frame *g = GET_CURR_FRAME();
+	q->m->pl->varno = g->nbr_vars;
+	q->m->pl->tab_idx = 0;
+	collect_vars(q, p1, p1_ctx, p1->nbr_cells, 0);
+	const unsigned cnt = q->m->pl->tab_idx;
+	init_tmp_heap(q);
+	cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
+	ensure(tmp);
+	unsigned idx = 0;
+
+	if (cnt) {
+		unsigned done = 0;
+
+		for (unsigned i = 0; i < cnt; i++) {
+			make_literal(tmp+idx, g_dot_s);
+			tmp[idx].arity = 2;
+			tmp[idx].nbr_cells = ((cnt-done)*2)+1;
+			idx++;
+			cell v;
+			make_variable(&v, q->m->pl->tab3[i]);
+			v.var_nbr = q->m->pl->tab2[i];
+			tmp[idx++] = v;
+			done++;
+		}
+
+		make_literal(tmp+idx++, g_nil_s);
+		tmp[0].arity = 2;
+	} else
+		make_literal(tmp+idx++, g_nil_s);
+
+	tmp[0].nbr_cells = idx;
+	return tmp;		// returns on tmp_heap
+}
+
 static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -5950,7 +5987,7 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 
 	uint64_t xs_vars = 0;
 	p2 = skip_existentials(q, p2, &xs_vars);
-	cell *tvars_tmp = do_term_variables(q, p2, p2_ctx);
+	cell *tvars_tmp = shallow_term_variables(q, p2, p2_ctx);
 	cell *tvars = malloc(sizeof(cell)*tvars_tmp->nbr_cells);
 	copy_cells(tvars, tvars_tmp, tvars_tmp->nbr_cells);
 
@@ -6033,10 +6070,10 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 
 	// Return matching solutions
 
-	cell *tmp = deep_copy_to_heap(q, p2, p2_ctx, true, false);
+	cell *tmp = deep_copy_to_heap(q, tvars, p2_ctx, true, false);
 	may_ptr_error(tmp);
 	unpin_vars(q);
-	unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
+	unify(q, tvars, p2_ctx, tmp, q->st.curr_frame);
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 
 	if (!unmatched) {
