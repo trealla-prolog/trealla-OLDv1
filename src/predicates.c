@@ -5961,28 +5961,35 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 
 	uint64_t xs_vars = 0;
 	p2 = skip_existentials(q, p2, &xs_vars);
+	cell *tvars_tmp = do_term_variables(q, p2, p2_ctx);
+	cell *tvars = malloc(sizeof(cell)*tvars_tmp->nbr_cells);
+	copy_cells(tvars, tvars_tmp, tvars_tmp->nbr_cells);
 
 	// First time thru generate all solutions
 
 	if (!q->retry) {
 		q->st.qnbr++;
 		assert(q->st.qnbr < MAX_QUEUES);
-		cell *tmp = clone_to_heap(q, true, p2, 2+p2->nbr_cells+1);
+		cell *tmp = clone_to_heap(q, true, p2, 2+tvars->nbr_cells+1);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p2->nbr_cells);
+		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+tvars->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
-		nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+		nbr_cells += copy_cells(tmp+nbr_cells, tvars, tvars->nbr_cells);
 		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
+
 		init_queuen(q);
 		free(q->tmpq[q->st.qnbr]);
 		q->tmpq[q->st.qnbr] = NULL;
 		may_error(make_barrier(q));
 		q->st.curr_cell = tmp;
+		free(tvars);
 		return pl_success;
 	}
 
-	if (!queuen_used(q) && !q->tmpq[q->st.qnbr])
+	if (!queuen_used(q) && !q->tmpq[q->st.qnbr]) {
+		free(tvars);
 		return pl_failure;
+	}
 
 	// First retry takes a copy
 
@@ -6009,12 +6016,18 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
 
+#if 0
+		fprintf(stdout, "*** ");
+		print_term(q, stdout, c, p2_ctx, 1);
+		fprintf(stdout, "\n");
+#endif
+
 		if (c->flags & FLAG2_PROCESSED)
 			continue;
 
 		try_me(q, g->nbr_vars*2);
 
-		if (unify(q, p2, p2_ctx, c, q->st.fp)) {
+		if (unify(q, tvars, p2_ctx, c, q->st.fp)) {
 			c->flags |= FLAG2_PROCESSED;
 			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, true, false);
 			may_ptr_error(tmp);
@@ -6032,15 +6045,16 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 		free(q->tmpq[q->st.qnbr]);
 		q->tmpq[q->st.qnbr] = NULL;
 		drop_choice(q);
+		free(tvars);
 		return pl_failure;
 	}
 
 	// Return matching solutions
 
-	cell *tmp = deep_copy_to_heap(q, p2, p2_ctx, true, false);
+	cell *tmp = deep_copy_to_heap(q, tvars, p2_ctx, true, false);
 	may_ptr_error(tmp);
 	unpin_vars(q);
-	unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
+	unify(q, tvars, p2_ctx, tmp, q->st.curr_frame);
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 
 	if (!unmatched) {
@@ -6051,6 +6065,7 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 		q->st.qnbr--;
 	}
 
+	free(tvars);
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
