@@ -15,10 +15,10 @@
     "uid" : "fe889f4ed1e23b13cb890295efdd6049",
     "name" : "predicates/setof_3/tests.lgt::tests",
     "statistic" : {
-      "failed" : 4,
+      "failed" : 3,
       "broken" : 0,
       "skipped" : 1,
-      "passed" : 30,
+      "passed" : 31,
       "unknown" : 0,
       "total" : 35
     }
