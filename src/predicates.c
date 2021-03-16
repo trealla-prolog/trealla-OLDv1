@@ -5834,6 +5834,16 @@ static cell *skip_existentials(query *q, cell *p2, uint64_t *xs)
 {
 	while (is_structure(p2) && !strcmp(GET_STR(p2), "^")) {
 		cell *c = ++p2;
+
+		if (!is_variable(c)) {
+			for (idx_t i = 0; i < c->nbr_cells; i++) {
+				if (is_variable(c+i)) {
+					assert((c+i)->var_nbr < 64);
+					*xs |= 1ULL << (c+i)->var_nbr;
+				}
+			}
+		}
+
 		assert(c->var_nbr < 64);
 
 		if (is_variable(c))
@@ -6003,12 +6013,10 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 	bool unmatched = false;
 	frame *g = GET_FRAME(q->st.curr_frame);
 
-	printf("*** pins=%0lX\n", mask);
-
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
 
-#if 1
+#if 0
 		fprintf(stdout, "*** ");
 		print_term(q, stdout, c, p2_ctx, 1);
 		fprintf(stdout, "\n");
