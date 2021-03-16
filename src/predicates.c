@@ -11215,7 +11215,9 @@ char *format_property(char **bufptr, size_t *lenptr, char *dst, const char *name
 		dst = tmpbuf + offset;
 	}
 
-	if (!isalpha_utf8(name[0]) && (name[0] != '_')) {
+	int ch = peek_char_utf8(name);
+
+	if (!isalpha_utf8(ch) && (name[0] != '_')) {
 		char namebuf[512];
 		const char *src = name;
 		char *dst2 = namebuf;
