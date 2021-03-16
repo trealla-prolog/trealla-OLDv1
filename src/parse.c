@@ -2995,7 +2995,7 @@ static bool get_token(parser *p, int last_op)
 	return true;
 }
 
-bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool partial_list)
+bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials)
 {
 	if (!is_list(p1) && !is_nil(p1))
 		return false;
@@ -3009,7 +3009,7 @@ bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool partial_list)
 		p1_ctx = q->latest_ctx;
 	}
 
-	return is_nil(p1) || (partial_list && is_variable(p1));
+	return is_nil(p1) || (allow_partials && is_variable(p1));
 }
 
 size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_integers)
