@@ -1,0 +1,49 @@
+{
+  "uid" : "b92554632c0fd7b0",
+  "name" : "iso_bitwise_right_shift_1_04",
+  "historyId" : "functions/bitwise_right_shift_2/tests.lgt::tests:tests#iso_bitwise_right_shift_1_04",
+  "time" : {
+    "start" : 1615874734000,
+    "stop" : 1615874734000,
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/bitwise_right_shift_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "b92554632c0fd7b0.json",
+  "parameterValues" : [ ]
+}
