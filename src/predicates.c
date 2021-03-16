@@ -4201,9 +4201,10 @@ static cell *do_term_variables(query *q, cell *p1, idx_t p1_ctx)
 
 		make_literal(tmp+idx++, g_nil_s);
 		tmp[0].arity = 2;
-		tmp[0].nbr_cells = idx;
 	} else
 		make_literal(tmp+idx++, g_nil_s);
+
+	tmp[0].nbr_cells = idx;
 
 	if (cnt) {
 		unsigned new_vars = q->m->pl->varno - g->nbr_vars;
