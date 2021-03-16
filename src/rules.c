@@ -181,12 +181,12 @@ make_rule(m, "findall(T, G, B, Tail) :- "						\
 	"'$append'(B0, Tail, B), !.");
 
 make_rule(m, "bagof(T,G,B) :- "									\
-	"copy_term('$bagof'(T,G,B),TMP_G),"							\
+	"copy_term('$bagof'(T,G,_),TMP_G),"							\
 	"'$call'(TMP_G),"											\
 	"'$bagof'(T,G,B)=TMP_G.");
 
 make_rule(m, "setof(T,G,B) :- "									\
-	"copy_term('$bagof'(T,G,B),TMP_G),"							\
+	"copy_term('$bagof'(T,G,_),TMP_G),"							\
 	"'$call'(TMP_G),"											\
 	"'$bagof'(T,G,TMP_B)=TMP_G,"								\
 	"sort(TMP_B,B).");
