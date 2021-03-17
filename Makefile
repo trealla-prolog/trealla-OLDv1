@@ -38,6 +38,8 @@ OBJECTS +=  library/builtin.o \
 	library/http.o  library/atts.o library/error.o  library/dcgs.o  \
 	library/format.o  library/charsio.o
 
+library/%.c: library/%.pl
+	xxd -i $^ $@
 all: tpl
 
 tpl: $(OBJECTS)
@@ -79,35 +81,3 @@ src/runtime.o: src/runtime.c src/internal.h src/skiplist.h src/trealla.h \
  src/cdebug.h src/history.h src/builtins.h
 src/skiplist.o: src/skiplist.c src/skiplist.h src/cdebug.h
 src/utf8.o: src/utf8.c src/utf8.h
-
-# Library modules
-
-library/builtin.c: library/builtin.pl
-	xxd -i library/builtin.pl library/builtin.c
-
-library/dict.c: library/dict.pl
-	xxd -i library/dict.pl library/dict.c
-
-library/dcgs.c: library/dcgs.pl
-	xxd -i library/dcgs.pl library/dcgs.c
-
-library/format.c: library/format.pl
-	xxd -i library/format.pl library/format.c
-
-library/charsio.c: library/charsio.pl
-	xxd -i library/charsio.pl library/charsio.c
-
-library/lists.c: library/lists.pl
-	xxd -i library/lists.pl library/lists.c
-
-library/apply.c: library/apply.pl
-	xxd -i library/apply.pl library/apply.c
-
-library/http.c: library/http.pl
-	xxd -i library/http.pl library/http.c
-
-library/atts.c: library/atts.pl
-	xxd -i library/atts.pl library/atts.c
-
-library/error.c: library/error.pl
-	xxd -i library/error.pl library/error.c
