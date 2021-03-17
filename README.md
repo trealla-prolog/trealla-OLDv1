@@ -99,7 +99,8 @@ What's missing, problems?
 =========================
 
 	environment limit is 32K vars per frame
-	implement attributed variables
+	implement attributed variables to support constraints
+	unbounded (Bignums)... GMP or other?
 
 
 Acknowledgements
