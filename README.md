@@ -29,9 +29,9 @@ Written in plain-old C.
 	git clone https://github.com/infradig/trealla.git
 	cd trealla
 
-On Debian+ systems you may need to install GNU readline:
+On Debian+ systems you may need to install GNU readline & xxd
 
-	sudo apt install libreadline-dev
+	sudo apt install libreadline-dev xxd
 
 Then...
 
