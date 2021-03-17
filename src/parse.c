@@ -3736,6 +3736,7 @@ bool module_save_file(module *m, const char *filename)
 	return true;
 }
 
+#if 0
 static void make_rule(module *m, const char *src)
 {
 	m->prebuilt = true;
@@ -3747,6 +3748,7 @@ static void make_rule(module *m, const char *src)
 	m->prebuilt = false;
 	m->p->consulting = save;
 }
+#endif
 
 void destroy_module(module *m)
 {
@@ -3828,8 +3830,6 @@ module *create_module(prolog *pl, const char *name)
 	ensure(m->index);
 	m->p = create_parser(m);
 	ensure(m->p);
-
-#include "rules.c"
 
 	parser *p = create_parser(m);
 	if (p) {
@@ -4086,7 +4086,9 @@ prolog *pl_create()
 		pl->m->prebuilt = true;
 
 		for (library *lib = g_libs; lib->name; lib++) {
-			if (!strcmp(lib->name, "apply") ||
+			if (
+				!strcmp(lib->name, "builtin") ||
+				!strcmp(lib->name, "apply") ||
 				//!strcmp(lib->name, "dcgs") ||
 				//!strcmp(lib->name, "charsio") ||
 				//!strcmp(lib->name, "format") ||
