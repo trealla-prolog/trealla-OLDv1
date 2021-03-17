@@ -85,45 +85,26 @@ src/utf8.o: src/utf8.c src/utf8.h
 library/dict.c: library/dict.pl
 	xxd -i library/dict.pl library/dict.c
 
-library/dict.o: library/dict.c
-
 library/dcgs.c: library/dcgs.pl
 	xxd -i library/dcgs.pl library/dcgs.c
-
-library/dcgs.o: library/dcgs.c
 
 library/format.c: library/format.pl
 	xxd -i library/format.pl library/format.c
 
-library/format.o: library/format.c
-
 library/charsio.c: library/charsio.pl
 	xxd -i library/charsio.pl library/charsio.c
-
-library/charsio.o: library/charsio.c
 
 library/lists.c: library/lists.pl
 	xxd -i library/lists.pl library/lists.c
 
-library/lists.o: library/lists.c
-
 library/apply.c: library/apply.pl
 	xxd -i library/apply.pl library/apply.c
-
-library/apply.o: library/apply.c
 
 library/http.c: library/http.pl
 	xxd -i library/http.pl library/http.c
 
-library/http.o: library/http.c
-
 library/atts.c: library/atts.pl
 	xxd -i library/atts.pl library/atts.c
 
-library/atts.o: library/atts.c
-
 library/error.c: library/error.pl
 	xxd -i library/error.pl library/error.c
-
-library/error.o: library/error.c
-
