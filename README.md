@@ -50,19 +50,12 @@ Then...
 
 	make test
 
-You can build without linked-in library modules:
-
-	make NOLDLIBS=1
-
-and this is currently necessary with OSX. The only side-effect is to
-make startup a little slower as they are pre-loaded from disk.
-
 A 'make debug' build compiles in 0.2s with *tcc* and about 3s with
 *clang* and *gcc*. Should build on any Unix-like system with a C99
 compiler (could do C89 with a few cosmetic tweaks). Has been tested on
 Manjaro, Ubuntu, Debian, FreeBSD and Raspbian (32 & 64-bit) systems.
 
-On *BSD* systems use gmake and do
+On *BSD* systems use *gmake* to build and do
 
 	pkg install editors/vim
 
