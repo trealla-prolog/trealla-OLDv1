@@ -40,6 +40,7 @@ OBJECTS +=  library/builtin.o \
 
 library/%.c: library/%.pl
 	xxd -i $^ $@
+
 all: tpl
 
 tpl: $(OBJECTS)
