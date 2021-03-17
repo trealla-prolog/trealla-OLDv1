@@ -18,10 +18,6 @@
 #define USE_INT32 0
 #endif
 
-#ifndef USE_LDLIBS
-#define USE_LDLIBS 0
-#endif
-
 #ifndef USE_THREADS
 #define USE_THREADS 0
 #endif

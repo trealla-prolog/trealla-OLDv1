@@ -62,7 +62,11 @@ A 'make debug' build compiles in 0.2s with *tcc* and about 3s with
 compiler (could do C89 with a few cosmetic tweaks). Has been tested on
 Manjaro, Ubuntu, Debian, FreeBSD and Raspbian (32 & 64-bit) systems.
 
-On *BSD* systems use gmake.
+On *BSD* systems use gmake and do
+
+	pkg install editirs/vim
+
+to get the *xxd* utility.
 
 
 Usage

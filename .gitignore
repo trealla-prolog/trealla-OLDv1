@@ -1,4 +1,4 @@
-samples/test1.pro
+library/*.c
 core
 tpl
 *.db

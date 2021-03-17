@@ -1378,7 +1378,9 @@ static void directives(parser *p, term *t)
 				if (strcmp(lib->name, name))
 					continue;
 
-				char *src = strndup((const char*)lib->start, (lib->end-lib->start));
+				char *src = malloc(*lib->len+1);
+				memcpy(src, lib->start, *lib->len);
+				src[*lib->len] = '\0';
 				STRING_INIT(s1);
 				STRING_CAT2(s1, "library/", lib->name);
 				m = module_load_text(p->m, src, STRING_BUF(s1));
@@ -4083,7 +4085,6 @@ prolog *pl_create()
 
 		pl->m->prebuilt = true;
 
-#if USE_LDLIBS
 		for (library *lib = g_libs; lib->name; lib++) {
 			if (!strcmp(lib->name, "apply") ||
 				//!strcmp(lib->name, "dcgs") ||
@@ -4092,11 +4093,10 @@ prolog *pl_create()
 				//!strcmp(lib->name, "http") ||
 				//!strcmp(lib->name, "atts") ||
 				!strcmp(lib->name, "lists")) {
-				size_t len = lib->end-lib->start;
-				char *src = malloc(len+1);
-				ensure(src); //cehteh: checkthis
-				memcpy(src, lib->start, len);
-				src[len] = '\0';
+				char *src = malloc(*lib->len+1);
+				ensure(src);
+				memcpy(src, lib->start, *lib->len);
+				src[*lib->len] = '\0';
 				assert(pl->m);
 				STRING_INIT(s1);
 				STRING_CAT2(s1, "library/", lib->name);
@@ -4105,15 +4105,6 @@ prolog *pl_create()
 				free(src);
 			}
 		}
-#else
-		module_load_file(pl->m, "library/apply.pl");
-		//module_load_file(pl->m, "library/dcgs.pl");
-		//module_load_file(pl->m, "library/charsio.pl");
-		//module_load_file(pl->m, "library/format.pl");
-		//module_load_file(pl->m, "library/http.pl");
-		//module_load_file(pl->m, "library/atts.pl");
-		module_load_file(pl->m, "library/lists.pl");
-#endif
 
 		pl->m->prebuilt = false;
 	}

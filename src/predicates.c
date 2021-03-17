@@ -10744,7 +10744,10 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			if (strcmp(lib->name, name))
 				continue;
 
-			char *src = strndup((const char*)lib->start, (lib->end-lib->start));
+			char *src = malloc(*lib->len+1);
+			ensure(src);
+			memcpy(src, lib->start, *lib->len);
+			src[*lib->len] = '\0';
 			STRING_INIT(s1);
 			STRING_CAT2(s1, "library/", lib->name);
 			m = module_load_text(q->m, src, STRING_BUF(s1));

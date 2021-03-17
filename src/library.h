@@ -4,8 +4,8 @@
 
 typedef struct {
     const char *name;
-    const uint8_t *start;
-    const uint8_t *end;
+    const unsigned char *start;
+    const unsigned int *len;
 } library;
 
 extern library g_libs[];

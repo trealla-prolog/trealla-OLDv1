@@ -33,11 +33,9 @@ OBJECTS = tpl.o src/history.o src/functions.o \
 	src/library.o src/parse.o src/print.o src/runtime.o \
 	src/skiplist.o src/base64.o src/network.o src/utf8.o
 
-ifndef NOLDLIBS
-OBJECTS += src/lists.o src/dict.o src/apply.o src/http.o src/atts.o \
-	src/error.o src/dcgs.o src/format.o src/charsio.o
-CFLAGS += -DUSE_LDLIBS=1
-endif
+OBJECTS +=  library/lists.o  library/dict.o  library/apply.o \
+	library/http.o  library/atts.o library/error.o  library/dcgs.o  \
+	library/format.o  library/charsio.o
 
 all: tpl
 
@@ -54,7 +52,7 @@ test:
 	./tests/run.sh
 
 clean:
-	rm -f tpl src/*.o *.o gmon.* vgcore.* *.core core core.* faultinject.*
+	rm -f tpl src/*.o library/*.o library/*.c *.o gmon.* vgcore.* *.core core core.* faultinject.*
 
 # from [gcc|clang] -MM *.c
 
@@ -83,40 +81,49 @@ src/utf8.o: src/utf8.c src/utf8.h
 
 # Library modules
 
-# Needed for using gmake with non-GNU linkers...
 
-UNAME_S := $(shell uname -s)
+library/dict.c: library/dict.pl
+	xxd -i library/dict.pl library/dict.c
 
-ifeq ($(UNAME_S),Darwin)
-	OSFLAG = -m elf_x86_64
-endif
-ifeq ($(UNAME_S),FreeBSD)
-	OSFLAG = -m elf_x86_64
-endif
+library/dict.o: library/dict.c
 
-src/dict.o: library/dict.pl
-	$(LD) $(OSFLAG) -r -b binary -o src/dict.o library/dict.pl
+library/dcgs.c: library/dcgs.pl
+	xxd -i library/dcgs.pl library/dcgs.c
 
-src/dcgs.o: library/dcgs.pl
-	$(LD) $(OSFLAG) -r -b binary -o src/dcgs.o library/dcgs.pl
+library/dcgs.o: library/dcgs.c
 
-src/format.o: library/format.pl
-	$(LD) $(OSFLAG) -r -b binary -o src/format.o library/format.pl
+library/format.c: library/format.pl
+	xxd -i library/format.pl library/format.c
 
-src/charsio.o: library/charsio.pl
-	$(LD) $(OSFLAG) -r -b binary -o src/charsio.o library/charsio.pl
+library/format.o: library/format.c
 
-src/lists.o: library/lists.pl
-	$(LD) $(OSFLAG) -r -b binary -o src/lists.o library/lists.pl
+library/charsio.c: library/charsio.pl
+	xxd -i library/charsio.pl library/charsio.c
 
-src/apply.o: library/apply.pl
-	$(LD) $(OSFLAG) -r -b binary -o src/apply.o library/apply.pl
+library/charsio.o: library/charsio.c
 
-src/http.o: library/http.pl
-	$(LD) $(OSFLAG) -r -b binary -o src/http.o library/http.pl
+library/lists.c: library/lists.pl
+	xxd -i library/lists.pl library/lists.c
 
-src/atts.o: library/atts.pl
-	$(LD) $(OSFLAG) -r -b binary -o src/atts.o library/atts.pl
+library/lists.o: library/lists.c
 
-src/error.o: library/error.pl
-	$(LD) $(OSFLAG) -r -b binary -o src/error.o library/error.pl
+library/apply.c: library/apply.pl
+	xxd -i library/apply.pl library/apply.c
+
+library/apply.o: library/apply.c
+
+library/http.c: library/http.pl
+	xxd -i library/http.pl library/http.c
+
+library/http.o: library/http.c
+
+library/atts.c: library/atts.pl
+	xxd -i library/atts.pl library/atts.c
+
+library/atts.o: library/atts.c
+
+library/error.c: library/error.pl
+	xxd -i library/error.pl library/error.c
+
+library/error.o: library/error.c
+
