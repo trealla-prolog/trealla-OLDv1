@@ -81,7 +81,6 @@ src/utf8.o: src/utf8.c src/utf8.h
 
 # Library modules
 
-
 library/dict.c: library/dict.pl
 	xxd -i library/dict.pl library/dict.c
 
