@@ -64,7 +64,7 @@ Manjaro, Ubuntu, Debian, FreeBSD and Raspbian (32 & 64-bit) systems.
 
 On *BSD* systems use gmake and do
 
-	pkg install editirs/vim
+	pkg install editors/vim
 
 to get the *xxd* utility.
 
