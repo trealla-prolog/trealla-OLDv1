@@ -3383,7 +3383,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			priority = 0;
 		}
 
-		if (priority && IS_POSTFIX(specifier) && args) {
+		if (priority && IS_POSTFIX(specifier) && args && last_op) {
 			specifier = 0;
 			priority = 0;
 		}
