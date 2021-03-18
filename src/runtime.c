@@ -543,6 +543,9 @@ static void follow_me(query *q)
 		if (q->st.curr_cell->cgen != ERR_IDX)
 			g->cgen = q->st.curr_cell->cgen;
 
+		if (q->st.curr_cell->mod_nbr != q->m->id)
+			q->m = find_module_id(q->m->pl, q->st.curr_cell->mod_nbr);
+
 		q->st.curr_cell = q->st.curr_cell->val_ptr;
 	}
 }

@@ -383,6 +383,16 @@ module *find_module(prolog *pl, const char *name)
 	return NULL;
 }
 
+module *find_module_id(prolog *pl, idx_t id)
+{
+	for (module *m = pl->modules; m; m = m->next) {
+		if (m->id == id)
+			return m;
+	}
+
+	return pl->m;
+}
+
 static bool check_directive(const cell *c)
 {
 	if (is_structure(c) && (c->val_off == g_clause_s) && (c->arity == 1))
@@ -2903,8 +2913,8 @@ static bool get_token(parser *p, int last_op)
 	ensure(!p->error, "fallen through from above");
 
 	if (isalpha_utf8(ch) || (ch == '_')) {
-		while (isalnum_utf8(ch) || (ch == '_') ||
-			((ch == ':') && find_module(p->m->pl, p->token))) {
+		while (isalnum_utf8(ch) || (ch == '_')
+			/*|| ((ch == ':') && find_module(p->m->pl, p->token))*/) {
 
 			if ((src[0] == ':') && (src[1] == ':'))	// HACK
 				break;
@@ -3823,6 +3833,7 @@ module *create_module(prolog *pl, const char *name)
 	m->flag.character_escapes = true;
 	m->spare_ops = MAX_OPS;
 	m->error = false;
+	m->id = index_from_pool(pl, name);
 	struct op_table *ptr2 = m->def_ops;
 
 	for (const struct op_table *ptr = g_ops; ptr->name; ptr++, ptr2++) {

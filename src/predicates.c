@@ -147,6 +147,7 @@ static void make_call(query *q, cell *tmp)
 	frame *g = GET_CURR_FRAME();
 	tmp->val_ptr = c + c->nbr_cells;
 	tmp->cgen = g->cgen;
+	tmp->mod_nbr = q->m->id;
 }
 
 static void make_literal(cell *tmp, idx_t offset)
@@ -4836,16 +4837,23 @@ static USE_RESULT pl_status fn_iso_invoke_2(query *q)
 	GET_NEXT_ARG(p2,callable);
 
 	module *m = find_module(q->m->pl, GET_STR(p1));
-	if (!m) return throw_error(q, q->st.curr_cell, "existence_error", "procedure");
-	predicate *h = find_predicate(m, p2);
-	if (!h) return throw_error(q, q->st.curr_cell, "existence_error", "procedure");
+
+	if (!m) {
+		//return throw_error(q, q->st.curr_cell, "existence_error", "module");
+
+		m = create_module(q->m->pl, GET_STR(p1));
+	} else {
+		//predicate *h = find_predicate(m, p2);
+		//if (!h) return throw_error(q, q->st.curr_cell, "existence_error", "procedure");
+	}
 
 	cell *tmp = clone_to_heap(q, true, p2, 1);
 	idx_t nbr_cells = 1;
-	tmp[nbr_cells].match = h;
+	//tmp[nbr_cells].match = h;
 	nbr_cells += p2->nbr_cells;
 	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
+	q->m = m;
 	return pl_success;
 }
 
@@ -5107,10 +5115,15 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 	q->quoted = 1;
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, 1, 0, 0);
 	if (len <= 0) { q->error = true; return pl_failure; }
-	char *dst = malloc(len+1);
+	char *dst = malloc(len+1+1024);
 	ensure(dst);
-	len = print_term_to_buf(q, dst, len+1, c, c_ctx, 1, 0, 0);
+	int off = 0;
 
+	if (q->m != q->m->pl->m) {
+		off += sprintf(dst, "%s:", q->m->name);
+	}
+
+	len = print_term_to_buf(q, dst+off, len+1, c, c_ctx, 1, 0, 0);
 	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q->st.curr_cell) + 1024;
 	char *dst2 = malloc(len2+1);
 	ensure(dst2);
@@ -10792,8 +10805,14 @@ static USE_RESULT pl_status fn_module_1(query *q)
 	const char *name = GET_STR(p1);
 	module *m = find_module(q->m->pl, name);
 
-	if (!m)
+	if (!m) {
 		return throw_error(q, p1, "domain_error", "module");
+
+		if (q->p->command)
+			fprintf(stdout, "Warning: created module '%s'\n", GET_STR(p1));
+
+		m = create_module(q->m->pl, GET_STR(p1));
+	}
 
 	q->m = m;
 	return pl_success;

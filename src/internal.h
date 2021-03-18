@@ -309,6 +309,7 @@ struct cell_ {
 		struct {
 			cell *val_ptr;
 			idx_t cgen;				// choice generation
+			idx_t mod_nbr;
 		};
 
 		// A small (inline) cstring (includes NULL-delimiter)...
@@ -590,6 +591,7 @@ struct module_ {
 	clause *dirty_list;
 	struct op_table def_ops[MAX_OPS+1];
 	struct op_table ops[MAX_OPS+1];
+	idx_t id;
 	char_flags flag;
 	unsigned spare_ops, loaded_ops;
 	bool prebuilt:1;
@@ -676,6 +678,7 @@ bool deconsult(prolog *pl, const char *filename);
 module *create_module(prolog *pl, const char *name);
 void destroy_module(module *m);
 module *find_module(prolog *pl, const char *name);
+module *find_module_id(prolog *pl, idx_t id);
 module *find_next_module(prolog *pl, module *m);
 clause *asserta_to_db(module *m, term *t, bool consulting);
 clause *assertz_to_db(module *m, term *t, bool consulting);
