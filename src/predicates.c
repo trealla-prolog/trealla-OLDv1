@@ -452,19 +452,19 @@ static USE_RESULT pl_status fn_iso_ground_1(query *q)
 	return !has_vars(q, p1, p1_ctx, 0);
 }
 
-USE_RESULT pl_status fn_iso_cut_0(query *q)
+static USE_RESULT pl_status fn_iso_cut_0(query *q)
 {
 	cut_me(q, false, false);
 	return pl_success;
 }
 
-USE_RESULT pl_status fn_local_cut_0(query *q)
+static USE_RESULT pl_status fn_local_cut_0(query *q)
 {
 	cut_me(q, true, false);
 	return pl_success;
 }
 
-USE_RESULT pl_status fn_soft_cut_0(query *q)
+static USE_RESULT pl_status fn_soft_cut_0(query *q)
 {
 	cut_me(q, true, true);
 	return pl_success;
@@ -4755,17 +4755,6 @@ static USE_RESULT pl_status fn_sys_call_1(query *q)
 		return throw_error(q, p1, "type_error", "callable");
 
 	cell *tmp = clone_to_heap(q, true, p1, 1);
-
-	if (is_cstring(tmp+1)) {
-		cell *c = p1+1;
-		idx_t off = index_from_pool(q->m->pl, GET_STR(p1+1));
-		ensure (off != ERR_IDX);
-		DECR_REF(p1);
-		c->val_off = off;
-		c->val_type = TYPE_LITERAL;
-		c->flags = 0;
-	}
-
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
