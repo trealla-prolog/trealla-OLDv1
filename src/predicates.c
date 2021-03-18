@@ -4857,7 +4857,7 @@ static USE_RESULT pl_status fn_iso_invoke_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_iso_ifthen_2(query *q)
+static USE_RESULT pl_status fn_iso_if_then_2(query *q)
 {
 	if (q->retry)
 		return pl_failure;
@@ -4874,7 +4874,7 @@ static USE_RESULT pl_status fn_iso_ifthen_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status do_ifthenelse(query *q, cell *p1, cell *p2, cell *p3)
+static USE_RESULT pl_status do_if_then_else(query *q, cell *p1, cell *p2, cell *p3)
 {
 	if (q->retry) {
 		cell *tmp = clone_to_heap(q, true, p3, 1);
@@ -4911,7 +4911,7 @@ static USE_RESULT pl_status fn_if_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status do_ifelse(query *q, cell *p1, cell *p2, cell *p3)
+static USE_RESULT pl_status do_if_else(query *q, cell *p1, cell *p2, cell *p3)
 {
 	if (q->retry) {
 		cell *tmp = clone_to_heap(q, true, p3, 1);
@@ -4936,23 +4936,23 @@ static USE_RESULT pl_status fn_if_3(query *q)
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,callable);
-	return do_ifelse(q, p1, p2, p3);
+	return do_if_else(q, p1, p2, p3);
 }
 
 static USE_RESULT pl_status fn_iso_disjunction_2(query *q)
 {
-	if ((q->st.curr_cell+1)->fn == fn_iso_ifthen_2) {
+	if ((q->st.curr_cell+1)->fn == fn_iso_if_then_2) {
 		cell *p1 = q->st.curr_cell + 2;
 		cell *p2 = p1 + p1->nbr_cells;
 		cell *p3 = p2 + p2->nbr_cells;
-		return do_ifthenelse(q, p1, p2, p3);
+		return do_if_then_else(q, p1, p2, p3);
 	}
 
 	if ((q->st.curr_cell+1)->fn == fn_if_2) {
 		cell *p1 = q->st.curr_cell + 2;
 		cell *p2 = p1 + p1->nbr_cells;
 		cell *p3 = p2 + p2->nbr_cells;
-		return do_ifelse(q, p1, p2, p3);
+		return do_if_else(q, p1, p2, p3);
 	}
 
 	GET_FIRST_ARG(p1,callable);
@@ -10922,7 +10922,7 @@ static const struct builtins g_predicates_iso[] =
 	{"!", 0, fn_iso_cut_0, NULL},
 	{":", 2, fn_iso_invoke_2, NULL},
 	{"=..", 2, fn_iso_univ_2, NULL},
-	{"->", 2, fn_iso_ifthen_2, NULL},
+	{"->", 2, fn_iso_if_then_2, NULL},
 	{";", 2, fn_iso_disjunction_2, NULL},
 	{"\\+", 1, fn_iso_negation_1, NULL},
 	{"once", 1, fn_iso_once_1, NULL},
