@@ -2976,7 +2976,7 @@ static bool get_token(parser *p, int last_op)
 		return (dst - p->token) != 0;
 	}
 
-	static const char *s_delims = ".!(){}[]|_,`'\"\t\r\n ";
+	static const char *s_delims = "!(){}[]|_,`'\"\t\r\n ";
 
 	while (*src) {
 		ch = get_char_utf8(&src);
@@ -2996,6 +2996,8 @@ static bool get_token(parser *p, int last_op)
 		if (strchr(s_delims, ch))
 			break;
 
+		if ((ch == '.') && isspace(*src))
+			break;
 
 		ch = peek_char_utf8(src);
 
