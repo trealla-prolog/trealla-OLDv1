@@ -2047,7 +2047,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 			if (off > end_idx) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: missing operand to '%s', line nbr %d\n", PARSER_GET_STR(c), p->line_nbr);
+					fprintf(stdout, "Error: missing operand to '%s', line nbr %d, '%s'\n", PARSER_GET_STR(c), p->line_nbr, p->save_line);
 
 				p->error = true;
 				return false;
@@ -2088,7 +2088,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 		if (off > end_idx) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: missing operand to '%s', line nbr %d\n", PARSER_GET_STR(c), p->line_nbr);
+				fprintf(stdout, "Error: missing operand to '%s', line nbr %d, '%s'\n", PARSER_GET_STR(c), p->line_nbr, p->save_line);
 
 			p->error = true;
 			return false;
@@ -2333,7 +2333,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 	if ((*s == '.') && isdigit(s[1])) {
 		if (DUMP_ERRS || !p->do_read_term)
-			fprintf(stdout, "Error: syntax error parsing number, line %u, file '%s'\n", p->line_nbr, get_filename(p->m->filename));
+			fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 		p->error = true;
 		return -1;
@@ -2375,7 +2375,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			if ((v > INT64_MAX) || (v < INT64_MIN)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, integer overflow, line %u, file '%s'\n", p->line_nbr, get_filename(p->m->filename));
+					fprintf(stdout, "Error: syntax error, integer overflow, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 				p->error = true;
 				return -1;
@@ -2387,7 +2387,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 		if (isdigit(*s) || isalpha_utf8(peek_char_utf8(s))) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing binary number, line %u, file '%s\n", p->line_nbr, get_filename(p->m->filename));
+				fprintf(stdout, "Error: syntax error, parsing binary number, line %u, '%s\n", p->line_nbr, p->save_line);
 
 			p->error = true;
 			return -1;
@@ -2411,7 +2411,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			if ((v > INT64_MAX) || (v < INT64_MIN)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, integer overflow, line %u, file '%s'\n", p->line_nbr, get_filename(p->m->filename));
+					fprintf(stdout, "Error: syntax error, integer overflow, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 				p->error = true;
 				return -1;
@@ -2423,7 +2423,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 		if (isdigit(*s) || isalpha_utf8(peek_char_utf8(s))) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing octal number, line %u, file '%s'\n", p->line_nbr, get_filename(p->m->filename));
+				fprintf(stdout, "Error: syntax error, parsing octal number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 			p->error = true;
 			return -1;
@@ -2451,7 +2451,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			if ((v > INT64_MAX) || (v < INT64_MIN)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, integer overflow, line %u, file '%s'\n", p->line_nbr, get_filename(p->m->filename));
+					fprintf(stdout, "Error: syntax error, integer overflow, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 				p->error = true;
 				return -1;
@@ -2463,7 +2463,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 		if (isdigit(*s) || isalpha_utf8(peek_char_utf8(s))) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing hex number, line %u, file '%s'\n", p->line_nbr, get_filename(p->m->filename));
+				fprintf(stdout, "Error: syntax error, parsing hex number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 			p->error = true;
 			return -1;
@@ -2486,7 +2486,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		if ((v > INT64_MAX) || (v < INT64_MIN)) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, integer overflow, line %u, file '%s'\n", p->line_nbr, get_filename(p->m->filename));
+				fprintf(stdout, "Error: syntax error, integer overflow, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 			p->error = true;
 			return -1;
@@ -2506,7 +2506,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 	if (isalpha_utf8(peek_char_utf8(s))) {
 		if (DUMP_ERRS || !p->do_read_term)
-			fprintf(stdout, "Error: syntax error, parsing number, line %u, file '%s'\n", p->line_nbr, get_filename(p->m->filename));
+			fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 		p->error = true;
 		return -1;
@@ -2536,7 +2536,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 		s = *srcptr;
 		if ((*s == '(') || isalpha_utf8(peek_char_utf8(s))) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing number, line %u, file '%s'\n", p->line_nbr, get_filename(p->m->filename));
+				fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 			p->error = true;
 			return -1;
@@ -2737,7 +2737,7 @@ static bool get_token(parser *p, int last_op)
 
 			if (p->error) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, illegal character escape <<%s>>, line %d\n", p->srcptr, p->line_nbr);
+					fprintf(stdout, "Error: syntax error, illegal character escape <<%s>>, line %d '%s'\n", p->srcptr, p->line_nbr, p->save_line);
 
 				p->error = true;
 				return false;
@@ -2798,7 +2798,7 @@ static bool get_token(parser *p, int last_op)
 		if ((strchr(dst, '.') || strchr(dst, 'e') || strchr(dst, 'E')) && !strchr(dst, '\'')) {
 			if (!valid_float(p->token)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, float, line %u, file '%s'\n", p->line_nbr, get_filename(p->m->filename));
+					fprintf(stdout, "Error: syntax error, float, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 				p->error = true;
 				return false;
@@ -2862,7 +2862,7 @@ static bool get_token(parser *p, int last_op)
 						}
 					} else {
 						if (DUMP_ERRS || !p->do_read_term)
-							fprintf(stdout, "Error: syntax error, illegal character escape <<%s>>, line %d\n", p->srcptr, p->line_nbr);
+							fprintf(stdout, "Error: syntax error, illegal character escape <<%s>>, line %d, '%s'\n", p->srcptr, p->line_nbr, p->save_line);
 
 						p->error = true;
 						return false;
@@ -2946,7 +2946,7 @@ static bool get_token(parser *p, int last_op)
 
 			if (!p->is_op && (*src == '(')) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, %s\n", p->line_nbr, p->token, p->srcptr);
+					fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line);
 
 				p->error = true;
 			}
@@ -3120,17 +3120,16 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 			if (p->nesting_parens || p->nesting_brackets || p->nesting_braces) {
 				if (DUMP_ERRS || !p->do_read_term)
-					printf("Error: syntax error, mismatched parens/brackets/braces, line nbr %u\n", p->line_nbr);
+					printf("Error: syntax error, mismatched parens/brackets/braces, line nbr %u '%s'\n", p->line_nbr, p->save_line);
 
 				p->error = true;
 				p->nesting_parens = p->nesting_brackets = p->nesting_braces = 0;
 			}
 
 			if (parser_attach(p, 0)) {
-
 				if (p->t->cells->nbr_cells < (p->t->cidx-1)) {
 					if (DUMP_ERRS || !p->do_read_term)
-						printf("Error: syntax error, operator expected '%s', line nbr %u\n", p->token, p->line_nbr);
+						printf("Error: syntax error, operator expected '%s', line nbr %u, '%s'\n", p->token, p->line_nbr, p->save_line);
 
 					p->error = true;
 				}
@@ -3248,7 +3247,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 			if (!last_op && (priority > 1000)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: suggest parens around operator '%s', line %d: %s\n", p->token, p->line_nbr, p->srcptr);
+					fprintf(stdout, "Error: suggest parens around operator '%s', line %d %s\n", p->token, p->line_nbr, p->srcptr);
 
 				p->error = true;
 				break;
@@ -3258,7 +3257,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		if (!p->quote_char && !strcmp(p->token, ",") && consing) {
 			if (*p->srcptr == ',') {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error missing element\n");
+					fprintf(stdout, "Error: syntax error missing element '%s'\n", p->save_line);
 
 				p->error = true;
 				break;
@@ -3266,7 +3265,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 			if (was_consing) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error parsing list1\n");
+					fprintf(stdout, "Error: syntax error parsing list '%s'\n", p->save_line);
 
 				p->error = true;
 				break;
@@ -3285,7 +3284,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 			if (*p->srcptr == ',') {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error missing arg\n");
+					fprintf(stdout, "Error: syntax error missing arg '%s'\n", p->save_line);
 
 				p->error = true;
 				break;
@@ -3295,7 +3294,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 			if (arity > MAX_ARITY) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: max arity reached, line %d: %s\n", p->line_nbr, p->srcptr);
+					fprintf(stdout, "Error: max arity reached, line %d '%s'\n", p->line_nbr, p->save_line);
 
 				p->error = true;
 				break;
@@ -3307,7 +3306,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 		if (!p->is_quoted && consing && p->start_term && !strcmp(p->token, "|")) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error parsing list2\n");
+				fprintf(stdout, "Error: syntax error parsing list '%s'\n", p->save_line);
 
 			p->error = true;
 			break;
@@ -3315,7 +3314,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 		if (!p->is_quoted && was_consing && consing && !strcmp(p->token, "|")) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error parsing list3\n");
+				fprintf(stdout, "Error: syntax error parsing list '%s'\n", p->save_line);
 
 			p->error = true;
 			break;
@@ -3330,7 +3329,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 		if (!p->is_quoted && was_consing && last_bar && !strcmp(p->token, "]")) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error parsing list4\n");
+				fprintf(stdout, "Error: syntax error parsing list '%s'\n", p->save_line);
 
 			p->error = true;
 			break;
@@ -3339,7 +3338,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		if (!p->quote_char && p->start_term &&
 			(!strcmp(p->token, ",") || !strcmp(p->token, "]") || !strcmp(p->token, ")") || !strcmp(p->token, "}"))) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, start of term expected, line %d: %s\n", p->line_nbr, p->srcptr);
+				fprintf(stdout, "Error: syntax error, start of term expected, line %d '%s'\n", p->line_nbr, p->save_line);
 
 			p->error = true;
 			break;
@@ -3365,7 +3364,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 		if (p->is_variable && (*p->srcptr == '(')) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, line %d: %s\n", p->line_nbr, p->srcptr);
+				fprintf(stdout, "Error: syntax error, line %d '%s'\n", p->line_nbr, p->save_line);
 
 			p->error = true;
 			break;
@@ -3430,7 +3429,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 #if 0
 		if (p->is_op && !priority) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, %s\n", p->line_nbr, p->token, p->srcptr);
+				fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s '%s'\n", p->line_nbr, p->token, p->save_line);
 
 			p->error = true;
 			break;
