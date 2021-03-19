@@ -216,6 +216,7 @@ Others
 	load_files/2
 	split_atom/4
 	plus/3
+	module/1
 
 	call_nth/2
 	offset/2

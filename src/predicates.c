@@ -10788,7 +10788,15 @@ static USE_RESULT pl_status fn_use_module_2(query *q)
 
 static USE_RESULT pl_status fn_module_1(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_var);
+
+	if (is_variable(p1)) {
+		cell tmp;
+		make_literal(&tmp, index_from_pool(q->m->pl, q->m->name));
+		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		return pl_success;
+	}
+
 	const char *name = GET_STR(p1);
 	module *m = find_module(q->m->pl, name);
 
