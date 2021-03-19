@@ -1,1 +1,2 @@
-Error: syntax error, parsing number, line 4, file 'test020.pl'
+Error: syntax error, parsing number, line 4, '	_X = 3s,
+'

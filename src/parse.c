@@ -2022,7 +2022,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 			if (IS_FX(rhs) && (rhs->priority == c->priority)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
+					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
 
 				p->error = true;
 				return false;
@@ -2033,7 +2033,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			if ((((idx_t)(rhs - p->t->cells)) < end_idx)
 				&& IS_XF(rhs) && (rhs->priority == c->priority)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
+					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
 
 				p->error = true;
 				return false;
@@ -2047,7 +2047,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 			if (off > end_idx) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: missing operand to '%s', line nbr %d, '%s'\n", PARSER_GET_STR(c), p->line_nbr, p->save_line);
+					fprintf(stdout, "Error: missing operand to '%s', line %u, '%s'\n", PARSER_GET_STR(c), p->line_nbr, p->save_line);
 
 				p->error = true;
 				return false;
@@ -2063,7 +2063,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 		if (IS_XF(rhs) && (rhs->priority == c->priority)) {
 			if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
+					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
 
 			p->error = true;
 			return false;
@@ -2088,7 +2088,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 		if (off > end_idx) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: missing operand to '%s', line nbr %d, '%s'\n", PARSER_GET_STR(c), p->line_nbr, p->save_line);
+				fprintf(stdout, "Error: missing operand to '%s', line %u, '%s'\n", PARSER_GET_STR(c), p->line_nbr, p->save_line);
 
 			p->error = true;
 			return false;
@@ -2114,7 +2114,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 				&& (IS_XFX(next))
 				&& (next->priority == c->priority)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: operator clash, line nbr %d\n", p->line_nbr);
+					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
 
 				p->error = true;
 				return false;
@@ -3120,7 +3120,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 			if (p->nesting_parens || p->nesting_brackets || p->nesting_braces) {
 				if (DUMP_ERRS || !p->do_read_term)
-					printf("Error: syntax error, mismatched parens/brackets/braces, line nbr %u '%s'\n", p->line_nbr, p->save_line);
+					printf("Error: syntax error, mismatched parens/brackets/braces, line %u '%s'\n", p->line_nbr, p->save_line);
 
 				p->error = true;
 				p->nesting_parens = p->nesting_brackets = p->nesting_braces = 0;
@@ -3129,7 +3129,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			if (parser_attach(p, 0)) {
 				if (p->t->cells->nbr_cells < (p->t->cidx-1)) {
 					if (DUMP_ERRS || !p->do_read_term)
-						printf("Error: syntax error, operator expected '%s', line nbr %u, '%s'\n", p->token, p->line_nbr, p->save_line);
+						printf("Error: syntax error, operator expected '%s', line %u, '%s'\n", p->token, p->line_nbr, p->save_line);
 
 					p->error = true;
 				}
@@ -3161,7 +3161,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 					if (!p->error && !assertz_to_db(p->m, p->t, 1)) {
 						if (DUMP_ERRS || !p->do_read_term)
-							printf("Error: '%s', line nbr %u\n", p->token, p->line_nbr);
+							printf("Error: '%s', line %u\n", p->token, p->line_nbr);
 
 						p->error = true;
 					}
