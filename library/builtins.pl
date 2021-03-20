@@ -427,7 +427,7 @@ nb_setval(K,V) :-
 
 nb_getval(K,V) :-
 	'$mustbe_atom'(K),
-	'$global_key'(K, V).
+	catch('$global_key'(K, V), _, throw(error(existence_error(variable,K),nb_setval/2))).
 
 nb_delete(K) :-
 	'$mustbe_atom'(K),
@@ -461,7 +461,7 @@ b_setval0(K,_) :-
 
 b_getval(K,V) :-
 	'$mustbe_atom'(K),
-	'$global_key'(K, V).
+	catch('$global_key'(K, V), _, throw(error(existence_error(variable,K),b_setval/2))).
 
 b_delete(K) :-
 	'$mustbe_atom'(K),
