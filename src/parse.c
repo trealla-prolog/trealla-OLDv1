@@ -2888,12 +2888,8 @@ static bool get_token(parser *p, int last_op)
 
 	// Atoms...
 
-	ensure(!p->error, "fallen through from above");
-
 	if (isalpha_utf8(ch) || (ch == '_')) {
-		while (isalnum_utf8(ch) || (ch == '_')
-			/*|| ((ch == ':') && find_module(p->m->pl, p->token))*/) {
-
+		while (isalnum_utf8(ch) || (ch == '_')) {
 			if ((src[0] == ':') && (src[1] == ':'))	// HACK
 				break;
 
@@ -2958,7 +2954,6 @@ static bool get_token(parser *p, int last_op)
 
 	while (*src) {
 		ch = get_char_utf8(&src);
-
 		size_t len = (dst-p->token) + put_len_utf8(ch) + 1;
 
 		if (len >= p->token_size) {
