@@ -410,11 +410,11 @@ set_random(seed(Seed)) :- set_seed(Seed).
 set_random(seed(random)) :- time(Seed), set_seed(Seed).
 maybe :- random(F), F < 0.5.
 
-nb_set_val(K, V) :-
+nb_set_val(K,V) :-
 	atom(K), nonvar(V),
 	retract('$record_key'(K,_)),
 	fail.
-nb_set_val(K, V) :-
+nb_set_val(K,V) :-
 	atom(K), nonvar(V),
 	assertz('$record_key'(K,V)).
 
