@@ -1,21 +1,6 @@
 '$append'([], L, L).
 '$append'([H|T], L, [H|R]) :- '$append'(T, L, R).
 
-set_random(seed(Seed)) :- set_seed(Seed).
-set_random(seed(random)) :- time(Seed), set_seed(Seed).
-maybe :- random(F), F < 0.5.
-
-nb_set_val(K, V) :-
-	atom(K), nonvar(V),
-	retract('$record_key'(K,_)),
-	fail.
-nb_set_val(K, V) :-
-	atom(K), nonvar(V),
-	assertz('$record_key'(K,V)).
-
-nb_get_val(K,V) :- atom(K), '$record_key'(K,V).
-
-format(F) :- format(F, []).
 unify_with_occurs_check(X, X) :- acyclic_term(X).
 
 predicate_property(P, A) :-
@@ -419,9 +404,23 @@ term_to_atom(T,S) :- write_term_to_chars(S,T,[]).
 write_term_to_atom(S,T,Opts) :- write_term_to_chars(S,Opts,T).
 read_term_from_atom(S,T,Opts) :- read_term_from_chars(S,Opts,T).
 absolute_file_name(R,A) :- absolute_file_name(R,A,[]).
-
 client(U,H,P,S) :- client(U,H,P,S,[]).
 server(H,S) :- server(H,S,[]).
+set_random(seed(Seed)) :- set_seed(Seed).
+set_random(seed(random)) :- time(Seed), set_seed(Seed).
+maybe :- random(F), F < 0.5.
+
+nb_set_val(K, V) :-
+	atom(K), nonvar(V),
+	retract('$record_key'(K,_)),
+	fail.
+nb_set_val(K, V) :-
+	atom(K), nonvar(V),
+	assertz('$record_key'(K,V)).
+
+nb_get_val(K,V) :- atom(K), '$record_key'(K,V).
+
+format(F) :- format(F, []).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
