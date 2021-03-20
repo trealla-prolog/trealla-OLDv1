@@ -25,6 +25,9 @@ subsumes_term(G,S) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
+call_cleanup(G,C) :-
+	setup_call_cleanup(true, G, C).
+
 setup_call_cleanup(S,G,C) :-
 	copy_term('$setup_call_cleanup'(S,G,C),TMP_G),
 	'$call'(TMP_G),
@@ -400,6 +403,7 @@ recorda(K,V,R) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V),R).
 recordz(K,V,R) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V),R).
 recorded(K,V,R) :- nonvar(K), clause('$record_key'(K,V),_,R).
 
+format(F) :- format(F, []).
 term_to_atom(T,S) :- write_term_to_chars(S,T,[]).
 write_term_to_atom(S,T,Opts) :- write_term_to_chars(S,Opts,T).
 read_term_from_atom(S,T,Opts) :- read_term_from_chars(S,Opts,T).
@@ -410,47 +414,63 @@ set_random(seed(Seed)) :- set_seed(Seed).
 set_random(seed(random)) :- time(Seed), set_seed(Seed).
 maybe :- random(F), F < 0.5.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Global variables
+
 nb_setval(K,_) :-
 	'$mustbe_atom'(K),
-	retract('$nb_setval_key'(K, _)),
+	retract('$global_key'(K, _)),
 	fail.
 nb_setval(K,V) :-
 	'$mustbe_atom'(K),
-	assertz('$nb_setval_key'(K, V)).
+	assertz('$global_key'(K, V)).
 
 nb_getval(K,V) :-
 	'$mustbe_atom'(K),
-	'$nb_setval_key'(K, V).
+	'$global_key'(K, V).
 
 nb_delete(K) :-
 	'$mustbe_atom'(K),
-	retract('$nb_setval_key'(K, _)),
+	retract('$global_key'(K, _)),
 	!.
 nb_delete(_).
 
 b_setval(K,_) :-
 	'$mustbe_atom'(K),
-	retract('$b_setval_key'(K, _)),
+	retract('$global_key'(K, _)),
 	fail.
 b_setval(K,V) :-
 	'$mustbe_atom'(K),
-	assertz('$b_setval_key'(K, V)).
+	assertz('$global_key'(K, V)).
 b_setval(K,_) :-
-	retract('$b_setval_key'(K, _)),
-	assertz('$b_setval_key'(K, [])),
+	retract('$global_key'(K, _)),
+	assertz('$global_key'(K, [])),
+	fail.
+
+b_setval0(K,_) :-
+	'$mustbe_atom'(K),
+	retract('$global_key'(K, _)),
+	fail.
+b_setval0(K,V) :-
+	'$mustbe_atom'(K),
+	assertz('$global_key'(K, V)).
+b_setval0(K,_) :-
+	retract('$global_key'(K, _)),
+	assertz('$global_key'(K, 0)),
 	fail.
 
 b_getval(K,V) :-
 	'$mustbe_atom'(K),
-	'$b_setval_key'(K, V).
+	'$global_key'(K, V).
 
 b_delete(K) :-
 	'$mustbe_atom'(K),
-	retract('$b_setval_key'(K, _)),
+	retract('$global_key'(K, _)),
 	!.
 b_delete(_).
 
-format(F) :- format(F, []).
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
