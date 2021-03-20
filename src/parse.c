@@ -62,6 +62,7 @@ static const struct op_table g_ops[] =
 	//{"module", OP_FX, 1150},
 	//{"use_module", OP_FX, 1150},
 	//{"ensure_loaded", OP_FX, 1150},
+	{"attribute", OP_FX, 1150},
 	{"meta_predicate", OP_FX, 1150},
 
 	{"\\+", OP_FY, 900},

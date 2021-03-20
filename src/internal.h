@@ -587,7 +587,7 @@ struct module_ {
 	predicate *head, *tail;
 	parser *p;
 	FILE *fp;
-	skiplist *index;
+	skiplist *index, *nbs;
 	clause *dirty_list;
 	struct op_table def_ops[MAX_OPS+1];
 	struct op_table ops[MAX_OPS+1];

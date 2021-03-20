@@ -5,6 +5,15 @@ set_random(seed(Seed)) :- set_seed(Seed).
 set_random(seed(random)) :- time(Seed), set_seed(Seed).
 maybe :- random(F), F < 0.5.
 
+nb_set_val(K, V) :-
+	atom(K), nonvar(V),
+	retract('$record_key'(K,_)), !, assertz('$record_key'(K,V)).
+nb_set_val(K, V) :-
+	atom(K), nonvar(V),
+	assertz('$record_key'(K,V)).
+
+nb_get_val(K,V) :- atom(K), '$record_key'(K,V).
+
 format(F) :- format(F, []).
 unify_with_occurs_check(X, X) :- acyclic_term(X).
 
