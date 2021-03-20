@@ -3,6 +3,7 @@
 
 set_random(seed(Seed)) :- set_seed(Seed).
 set_random(seed(random)) :- time(Seed), set_seed(Seed).
+maybe :- random(F), F < 0.5.
 
 format(F) :- format(F, []).
 unify_with_occurs_check(X, X) :- acyclic_term(X).

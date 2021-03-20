@@ -2124,16 +2124,17 @@ static USE_RESULT pl_status fn_get_seed_1(query *q)
 
 static USE_RESULT pl_status fn_random_1(query *q)
 {
-	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	cell p1 = calc(q, p1_tmp);
 
-	if (is_variable(&p1)) {
+	if (is_variable(p1_tmp)) {
 		cell tmp;
 		make_float(&tmp, rnd());
-		set_var(q, &p1, p1_tmp_ctx, &tmp, q->st.curr_frame);
+		set_var(q, p1_tmp, p1_tmp_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
+
+	CHECK_CALC();
+	cell p1 = calc(q, p1_tmp);
 
 	if (p1.val_num < 1)
 		return throw_error(q, &p1, "domain_error", "positive_integer");
