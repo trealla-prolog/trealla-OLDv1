@@ -4081,7 +4081,7 @@ prolog *pl_create()
 
 		for (library *lib = g_libs; lib->name; lib++) {
 			if (
-				!strcmp(lib->name, "builtin") ||
+				!strcmp(lib->name, "builtins") ||
 				!strcmp(lib->name, "apply") ||
 				//!strcmp(lib->name, "dcgs") ||
 				//!strcmp(lib->name, "assoc") ||
