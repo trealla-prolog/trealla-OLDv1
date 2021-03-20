@@ -218,6 +218,11 @@ Others
 	plus/3
 	module/1
 
+	nb_setval(K,V)
+	nb_getval(K,V)
+	b_setval(K,V)
+	b_getval(K,V)
+
 	call_nth/2
 	offset/2
 	limit/2
