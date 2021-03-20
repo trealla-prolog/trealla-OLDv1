@@ -62,6 +62,7 @@ static const struct op_table g_ops[] =
 	//{"module", OP_FX, 1150},
 	//{"use_module", OP_FX, 1150},
 	//{"ensure_loaded", OP_FX, 1150},
+	{"meta_predicate", OP_FX, 1150},
 
 	{"\\+", OP_FY, 900},
 	{"is", OP_XFX, 700},
@@ -2630,32 +2631,16 @@ static const char *eat_space(parser *p)
 				p->line_nbr++;
 
 			src++;
-
-			while (isspace(*src)) {
-				if (*src == '\n')
-					p->line_nbr++;
-
-				src++;
-			}
-
 			done = false;
 			continue;
 		}
 
-		while ((!*src || (*src == '%')) && p->fp) {
+		if ((!*src || (*src == '%')) && p->fp) {
 			if (getline(&p->save_line, &p->n_line, p->fp) == -1)
 				return NULL;
 
 			p->srcptr = p->save_line;
 			src = p->srcptr;
-
-			while (isspace(*src)) {
-				if (*src == '\n')
-					p->line_nbr++;
-
-				src++;
-			}
-
 			done = false;
 			continue;
 		}
@@ -2690,13 +2675,6 @@ static const char *eat_space(parser *p)
 		 while (*src && p->comment);
 	}
 	 while (!done);
-
-	while (isspace(*src)) {
-		if (*src == '\n')
-			p->line_nbr++;
-
-		src++;
-	}
 
 	return src;
 }
