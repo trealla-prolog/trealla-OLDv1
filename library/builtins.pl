@@ -412,13 +412,29 @@ maybe :- random(F), F < 0.5.
 
 nb_setval(K,V) :-
 	atom(K), nonvar(V),
-	retract('$nb_setval_key'(K,_)),
+	retract('$nb_setval_key'(K, _)),
 	fail.
 nb_setval(K,V) :-
 	atom(K), nonvar(V),
-	assertz('$nb_setval_key'(K,V)).
+	assertz('$nb_setval_key'(K, V)).
 
-nb_getval(K,V) :- atom(K), '$nb_setval_key'(K,V).
+nb_getval(K,V) :- atom(K),
+	'$nb_setval_key'(K, V).
+
+b_setval(K,V) :-
+	atom(K), nonvar(V),
+	retract('$b_setval_key'(K, _)),
+	fail.
+b_setval(K,V) :-
+	atom(K), nonvar(V),
+	assertz('$b_setval_key'(K, V)).
+b_setval(K,V) :-
+	retract('$b_setval_key'(K, _)),
+	assertz('$b_setval_key'(K, [])),
+	fail.
+
+b_getval(K,V) :- atom(K),
+	'$b_setval_key'(K, V).
 
 format(F) :- format(F, []).
 
