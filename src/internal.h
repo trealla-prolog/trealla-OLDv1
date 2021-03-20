@@ -792,7 +792,7 @@ typedef struct {
 	pr_##buf.buf = malloc(len+1);										\
 	pr_##buf.dst = pr_##buf.buf;
 
-#define STRING_BUF(pr) pr_##buf.buf
+#define STRING_CSTR(pr) pr_##buf.buf
 #define STRING_LEN(pr) (pr_##buf.dst - pr_##buf.buf)
 
 #define STRING_CHK(pr,len) {											\

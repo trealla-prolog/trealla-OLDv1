@@ -1394,7 +1394,7 @@ static void directives(parser *p, term *t)
 				src[*lib->len] = '\0';
 				STRING_INIT(s1);
 				STRING_CAT2(s1, "library/", lib->name);
-				m = module_load_text(p->m, src, STRING_BUF(s1));
+				m = module_load_text(p->m, src, STRING_CSTR(s1));
 				STRING_DONE(s1);
 				free(src);
 
@@ -1416,10 +1416,10 @@ static void directives(parser *p, term *t)
 		char *filename = relative_to(p->m->filename, name);
 
 		if (!module_load_file(p->m, filename)) {
-			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: using module file: %s\n", filename);
+			//if (DUMP_ERRS || !p->do_read_term)
+			//	fprintf(stdout, "Error: using module file: %s\n", filename);
 
-			p->error = true;
+			//p->error = true;
 			free(filename);
 			return;
 		}
@@ -4097,7 +4097,7 @@ prolog *pl_create()
 				assert(pl->m);
 				STRING_INIT(s1);
 				STRING_CAT2(s1, "library/", lib->name);
-				module_load_text(pl->m, src, STRING_BUF(s1));
+				module_load_text(pl->m, src, STRING_CSTR(s1));
 				STRING_DONE(s1);
 				free(src);
 			}

@@ -619,7 +619,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 			return throw_error(q, p2, "type_error", "list");
 
 		cell tmp;
-		may_error(make_cstring(&tmp, STRING_BUF(tmpbuf)), STRING_DONE(tmpbuf));
+		may_error(make_cstring(&tmp, STRING_CSTR(tmpbuf)), STRING_DONE(tmpbuf));
 		STRING_DONE(tmpbuf);
 		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
@@ -860,7 +860,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 			return throw_error(q, p2, "type_error", "list");
 
 		cell tmp;
-		may_error(make_cstring(&tmp, STRING_BUF(tmpbuf)), STRING_DONE(tmpbuf));
+		may_error(make_cstring(&tmp, STRING_CSTR(tmpbuf)), STRING_DONE(tmpbuf));
 		STRING_DONE(tmpbuf);
 		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
@@ -1230,7 +1230,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 		STRING_INIT(tmpbuf);
 		STRING_CAT2n(tmpbuf, src1, len1, src2, len2);
 		cell tmp;
-		may_error(make_cstringn(&tmp, STRING_BUF(tmpbuf), STRING_LEN(tmpbuf)), STRING_DONE(tmpbuf));
+		may_error(make_cstringn(&tmp, STRING_CSTR(tmpbuf), STRING_LEN(tmpbuf)), STRING_DONE(tmpbuf));
 		STRING_DONE(tmpbuf);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
@@ -9667,7 +9667,7 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 		STRING_INITn(tmpbuf, len1+len2);
 		STRING_CAT2n(tmpbuf, src1, len1, src2, len2);
 		cell tmp;
-		may_error(make_cstringn(&tmp, STRING_BUF(tmpbuf), STRING_LEN(tmpbuf)), STRING_DONE(tmpbuf));
+		may_error(make_cstringn(&tmp, STRING_CSTR(tmpbuf), STRING_LEN(tmpbuf)), STRING_DONE(tmpbuf));
 		STRING_DONE(tmpbuf);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
@@ -9681,7 +9681,7 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 		STRING_INIT(tmpbuf);
 		STRING_CATn(tmpbuf, GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
 		cell tmp;
-		may_error(make_stringn(&tmp, STRING_BUF(tmpbuf), STRING_LEN(tmpbuf)), STRING_DONE(tmpbuf));
+		may_error(make_stringn(&tmp, STRING_CSTR(tmpbuf), STRING_LEN(tmpbuf)), STRING_DONE(tmpbuf));
 		STRING_DONE(tmpbuf);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
@@ -9741,7 +9741,7 @@ static USE_RESULT pl_status fn_replace_4(query *q)
 	cell tmp;
 
 	if (STRING_LEN(tmpbuf))
-		may_error(make_stringn(&tmp, STRING_BUF(tmpbuf), STRING_LEN(tmpbuf)), STRING_DONE(tmpbuf));
+		may_error(make_stringn(&tmp, STRING_CSTR(tmpbuf), STRING_LEN(tmpbuf)), STRING_DONE(tmpbuf));
 	else
 		make_literal(&tmp, g_nil_s);
 
@@ -10750,7 +10750,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			src[*lib->len] = '\0';
 			STRING_INIT(s1);
 			STRING_CAT2(s1, "library/", lib->name);
-			m = module_load_text(q->m, src, STRING_BUF(s1));
+			m = module_load_text(q->m, src, STRING_CSTR(s1));
 			STRING_DONE(s1);
 			free(src);
 
