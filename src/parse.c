@@ -3383,15 +3383,18 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (priority && (last_op || last_bar)
-			&& !IS_POSTFIX(specifier)
-			&& ((*p->srcptr == ',')
-				|| (*p->srcptr == ')')
-				|| (*p->srcptr == '|')
-				|| (*p->srcptr == ']')
-				|| (*p->srcptr == '}')
-			)) {
-			specifier = 0;
-			priority = 0;
+			&& !IS_POSTFIX(specifier)) {
+			int nextch = *eat_space(p);
+
+			if ((nextch == ',')
+				|| (nextch == ')')
+				|| (nextch == '|')
+				|| (nextch == ']')
+				|| (nextch == '}')
+			) {
+				specifier = 0;
+				priority = 0;
+			}
 		}
 
 		if (priority && IS_POSTFIX(specifier) && args && last_op) {
