@@ -2347,7 +2347,6 @@ const struct builtins g_functions[] =
 	{"random", 1, fn_random_1, "?integer"},
 	{"rand", 1, fn_rand_1, "?integer"},
 	{"rand", 0, fn_rand_0, NULL},
-	{"set_random", 1, fn_set_seed_1, "+integer"},
 	{"srandom", 1, fn_set_seed_1, "+integer"},
 	{"set_seed", 1, fn_set_seed_1, "+integer"},
 	{"get_seed", 1, fn_get_seed_1, "-integer"},
