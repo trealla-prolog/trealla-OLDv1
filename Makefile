@@ -38,7 +38,7 @@ OBJECTS = tpl.o src/history.o src/functions.o \
 
 OBJECTS +=  library/builtin.o library/lists.o library/dict.o \
 	library/apply.o library/http.o library/atts.o library/error.o \
-	library/dcgs.o library/format.o library/charsio.o
+	library/dcgs.o library/format.o library/charsio.o library/assoc.o
 
 library/%.c: library/%.pl
 	xxd -i $^ $@

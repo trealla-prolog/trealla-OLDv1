@@ -4084,6 +4084,7 @@ prolog *pl_create()
 				!strcmp(lib->name, "builtin") ||
 				!strcmp(lib->name, "apply") ||
 				//!strcmp(lib->name, "dcgs") ||
+				//!strcmp(lib->name, "assoc") ||
 				//!strcmp(lib->name, "charsio") ||
 				//!strcmp(lib->name, "format") ||
 				//!strcmp(lib->name, "http") ||

@@ -20,12 +20,15 @@ extern unsigned char library_format_pl[];
 extern unsigned int library_format_pl_len;
 extern unsigned char library_charsio_pl[];
 extern unsigned int library_charsio_pl_len;
+extern unsigned char library_assoc_pl[];
+extern unsigned int library_assoc_pl_len;
 
 library g_libs[] = {
      {"builtin", library_builtin_pl, &library_builtin_pl_len},
      {"lists", library_lists_pl, &library_lists_pl_len},
      {"dict", library_dict_pl, &library_dict_pl_len},
      {"apply", library_apply_pl, &library_apply_pl_len},
+     {"assoc", library_assoc_pl, &library_assoc_pl_len},
      {"http", library_http_pl, &library_http_pl_len},
      {"atts", library_atts_pl, &library_atts_pl_len},
      {"error", library_error_pl, &library_error_pl_len},
