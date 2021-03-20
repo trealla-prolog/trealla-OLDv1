@@ -435,6 +435,9 @@ nb_delete(K) :-
 	!.
 nb_delete(_).
 
+% The following is not really correct. Need to setup a hook
+% so as to reverse the assignment to handle a cut...
+
 b_setval(K,_) :-
 	'$mustbe_atom'(K),
 	retract('$global_key'(K, _)),
