@@ -428,7 +428,7 @@ b_setval(K,V) :-
 b_setval(K,V) :-
 	atom(K), nonvar(V),
 	assertz('$b_setval_key'(K, V)).
-b_setval(K,V) :-
+b_setval(K,_) :-
 	retract('$b_setval_key'(K, _)),
 	assertz('$b_setval_key'(K, [])),
 	fail.
