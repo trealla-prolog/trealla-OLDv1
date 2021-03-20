@@ -422,6 +422,12 @@ nb_getval(K,V) :-
 	'$mustbe_atom'(K),
 	'$nb_setval_key'(K, V).
 
+nb_delete(K) :-
+	'$mustbe_atom'(K),
+	retract('$nb_setval_key'(K, _)),
+	!.
+nb_delete(_).
+
 b_setval(K,_) :-
 	'$mustbe_atom'(K),
 	retract('$b_setval_key'(K, _)),
@@ -437,6 +443,12 @@ b_setval(K,_) :-
 b_getval(K,V) :-
 	'$mustbe_atom'(K),
 	'$b_setval_key'(K, V).
+
+b_delete(K) :-
+	'$mustbe_atom'(K),
+	retract('$b_setval_key'(K, _)),
+	!.
+b_delete(_).
 
 format(F) :- format(F, []).
 

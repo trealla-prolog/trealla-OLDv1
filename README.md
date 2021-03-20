@@ -220,8 +220,11 @@ Others
 
 	nb_setval(K,V)
 	nb_getval(K,V)
+	nb_delete(K)
+
 	b_setval(K,V)
 	b_getval(K,V)
+	b_delete(K)
 
 	call_nth/2
 	offset/2
