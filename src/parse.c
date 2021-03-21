@@ -551,7 +551,9 @@ static predicate *create_predicate(module *m, cell *c)
 	h->key.val_type = TYPE_LITERAL;
 	h->key.flags = FLAG_KEY;
 	h->key.nbr_cells = 1;
-	h->key.val_off = c->val_off;
+
+	if (is_cstring(c))
+		h->key.val_off = index_from_pool(m->pl, MODULE_GET_STR(c));
 
 	sl_app(m->index, &h->key, h);
 	return h;
@@ -666,6 +668,15 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	if (!c) {
 		fprintf(stdout, "Error: not a fact or clause\n");
 		return NULL;
+	}
+
+	if (is_cstring(c)) {
+		idx_t off = index_from_pool(m->pl, MODULE_GET_STR(c));
+		if (off == ERR_IDX) return NULL;
+		DECR_REF(c);
+		c->val_type = TYPE_LITERAL;
+		c->val_off = off;
+		c->flags = 0;
 	}
 
 	predicate *h = find_predicate(m, c);
@@ -3216,7 +3227,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			}
 		}
 
-		if (!p->quote_char && !strcmp(p->token, ",") && consing) {
+		if (!p->quote_char && consing && !strcmp(p->token, ",")) {
 			if (*p->srcptr == ',') {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error missing element '%s'\n", p->save_line);
