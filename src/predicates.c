@@ -4141,7 +4141,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 			if ((tmp->fn = get_builtin(q->m->pl, GET_STR(tmp), tmp->arity, &found)), found)
 				tmp->flags |= FLAG_BUILTIN;
 			else {
-				tmp->match = find_matching_predicate_quiet(q->m, tmp);
+				tmp->match = find_matching_predicate(q->m, tmp);
 				tmp->flags &= ~FLAG_BUILTIN;
 			}
 		}
