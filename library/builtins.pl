@@ -415,7 +415,7 @@ set_random(seed(random)) :- time(Seed), set_seed(Seed).
 maybe :- random(F), F < 0.5.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Global variables
+% Global variables. This a quick hack using assert/retract...
 
 nb_setval(K,_) :-
 	'$mustbe_atom'(K),
