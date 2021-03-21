@@ -1179,6 +1179,68 @@ char *relative_to(const char *basefile, const char *relfile)
 	return tmpbuf;
 }
 
+static void do_op(parser *p, cell *c)
+{
+	cell *p1 = c + 1, *p2 = c + 2, *p3 = c + 3;
+
+	if (!is_integer(p1) || !is_literal(p2) || (!is_atom(p3) && !is_list(p3))) {
+		if (DUMP_ERRS || !p->do_read_term)
+			fprintf(stdout, "Error: unknown op\n");
+
+		p->error = true;
+		return;
+	}
+
+	unsigned specifier;
+	const char *spec = PARSER_GET_STR(p2);
+
+	if (!strcmp(spec, "fx"))
+		specifier = OP_FX;
+	else if (!strcmp(spec, "fy"))
+		specifier = OP_FY;
+	else if (!strcmp(spec, "xf"))
+		specifier = OP_XF;
+	else if (!strcmp(spec, "yf"))
+		specifier = OP_YF;
+	else if (!strcmp(spec, "xfx"))
+		specifier = OP_XFX;
+	else if (!strcmp(spec, "xfy"))
+		specifier = OP_XFY;
+	else if (!strcmp(spec, "yfx"))
+		specifier = OP_YFX;
+	else {
+		if (DUMP_ERRS || !p->do_read_term)
+			fprintf(stdout, "Error: unknown op spec val_type\n");
+		return;
+	}
+
+	LIST_HANDLER(p3);
+
+	while (is_list(p3)) {
+		cell *h = LIST_HEAD(p3);
+
+		if (is_atom(h)) {
+			if (!set_op(p->m, PARSER_GET_STR(h), specifier, p1->val_num)) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: could not set op\n");
+
+				continue;
+			}
+		}
+
+		p3 = LIST_TAIL(p3);
+	}
+
+	if (is_atom(p3) && !is_nil(p3)) {
+		if (!set_op(p->m, PARSER_GET_STR(p3), specifier, p1->val_num)) {
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Error: could not set op\n");
+
+			return;
+		}
+	}
+}
+
 static void directives(parser *p, term *t)
 {
 	p->skip = false;
@@ -1301,31 +1363,33 @@ static void directives(parser *p, term *t)
 			cell *head = LIST_HEAD(p2);
 
 			if (is_structure(head)) {
-				if (strcmp(PARSER_GET_STR(head), "/") && strcmp(PARSER_GET_STR(head), "//"))
-					return;
+				if (!strcmp(PARSER_GET_STR(head), "/")
+					|| !strcmp(PARSER_GET_STR(head), "//")) {
+					cell *f = head+1, *a = f+1;
+					if (!is_literal(f)) return;
+					if (!is_integer(a)) return;
+					cell tmp = *f;
+					tmp.arity = a->val_num;
 
-				cell *f = head+1, *a = f+1;
-				if (!is_literal(f)) return;
-				if (!is_integer(a)) return;
-				cell tmp = *f;
-				tmp.arity = a->val_num;
+					if (!strcmp(PARSER_GET_STR(head), "//"))
+						tmp.arity += 2;
 
-				if (!strcmp(PARSER_GET_STR(head), "//"))
-					tmp.arity += 2;
+					predicate *h = find_predicate(p->m, &tmp);
+					if (!h) h = create_predicate(p->m, &tmp);
+					if (!h) {
+						destroy_module(p->m);
+						p->m = NULL;
+						if (DUMP_ERRS || !p->do_read_term)
+							fprintf(stdout, "Error: predicate creation failed\n");
 
-				predicate *h = find_predicate(p->m, &tmp);
-				if (!h) h = create_predicate(p->m, &tmp);
-				if (!h) {
-					destroy_module(p->m);
-					p->m = NULL;
-					if (DUMP_ERRS || !p->do_read_term)
-						fprintf(stdout, "Error: predicate creation failed\n");
+						p->error = true;
+						return;
+					}
 
-					p->error = true;
-					return;
+					h->is_public = true;
+				} else if (!strcmp(PARSER_GET_STR(head), "op") && (head->arity == 3)) {
+					do_op(p, head);
 				}
-
-				h->is_public = true;
 			}
 
 			p2 = LIST_TAIL(p2);
@@ -1450,65 +1514,7 @@ static void directives(parser *p, term *t)
 	}
 
 	if (!strcmp(dirname, "op") && (c->arity == 3)) {
-		cell *p2 = c + 2, *p3 = c + 3;
-
-		if (!is_integer(p1) || !is_literal(p2) || (!is_atom(p3) && !is_list(p3))) {
-			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: unknown op\n");
-
-			p->error = true;
-			return;
-		}
-
-		unsigned specifier;
-		const char *spec = PARSER_GET_STR(p2);
-
-		if (!strcmp(spec, "fx"))
-			specifier = OP_FX;
-		else if (!strcmp(spec, "fy"))
-			specifier = OP_FY;
-		else if (!strcmp(spec, "xf"))
-			specifier = OP_XF;
-		else if (!strcmp(spec, "yf"))
-			specifier = OP_YF;
-		else if (!strcmp(spec, "xfx"))
-			specifier = OP_XFX;
-		else if (!strcmp(spec, "xfy"))
-			specifier = OP_XFY;
-		else if (!strcmp(spec, "yfx"))
-			specifier = OP_YFX;
-		else {
-			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: unknown op spec val_type\n");
-			return;
-		}
-
-		LIST_HANDLER(p3);
-
-		while (is_list(p3)) {
-			cell *h = LIST_HEAD(p3);
-
-			if (is_atom(h)) {
-				if (!set_op(p->m, PARSER_GET_STR(h), specifier, p1->val_num)) {
-					if (DUMP_ERRS || !p->do_read_term)
-						fprintf(stdout, "Error: could not set op\n");
-
-					continue;
-				}
-			}
-
-			p3 = LIST_TAIL(p3);
-		}
-
-		if (is_atom(p3) && !is_nil(p3)) {
-			if (!set_op(p->m, PARSER_GET_STR(p3), specifier, p1->val_num)) {
-				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: could not set op\n");
-
-				return;
-			}
-		}
-
+		do_op(p, c);
 		return;
 	}
 
