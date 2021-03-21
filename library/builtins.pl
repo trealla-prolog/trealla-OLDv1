@@ -436,7 +436,7 @@ nb_delete(K) :-
 nb_delete(_).
 
 nb_current(K, V) :-
-	clause('$global_key'(K, _), _).
+	clause('$global_key'(K, V), _).
 
 % The following is not really correct. Need to setup a hook
 % so as to reverse the assignment to handle a cut...
