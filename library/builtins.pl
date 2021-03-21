@@ -419,19 +419,19 @@ maybe :- random(F), F < 0.5.
 
 nb_setval(K,_) :-
 	'$mustbe_atom'(K),
-	retract('$global_key'(K, _)),
+	retract('$global_nb_key'(K, _)),
 	fail.
 nb_setval(K,V) :-
 	'$mustbe_atom'(K),
-	assertz('$global_key'(K, V)).
+	assertz('$global_nb_key'(K, V)).
 
 nb_getval(K,V) :-
 	'$mustbe_atom'(K),
-	catch('$global_key'(K, V), _, throw(error(existence_error(variable,K),nb_setval/2))).
+	catch('$global_nb_key'(K, V), _, throw(error(existence_error(variable, K), nb_setval/2))).
 
 nb_delete(K) :-
 	'$mustbe_atom'(K),
-	retract('$global_key'(K, _)),
+	retract('$global_nb_key'(K, _)),
 	!.
 nb_delete(_).
 
@@ -440,34 +440,34 @@ nb_delete(_).
 
 b_setval(K,_) :-
 	'$mustbe_atom'(K),
-	\+ clause('$global_key'(K, _), _), asserta('$global_key'(K, [])),
+	\+ clause('$global_b_key'(K, _), _), asserta('$global_b_key'(K, [])),
 	fail.
 b_setval(K,V) :-
 	'$mustbe_atom'(K),
-	asserta('$global_key'(K, V)).
+	asserta('$global_b_key'(K, V)).
 b_setval(K,_) :-
-	retract('$global_key'(K, _)),
+	retract('$global_b_key'(K, _)),
 	!.
 
 b_setval0(K,_) :-
 	'$mustbe_atom'(K),
-	\+ clause('$global_key'(K, _), _), asserta('$global_key'(K, 0)),
+	\+ clause('$global_b_key'(K, _), _), asserta('$global_b_key'(K, 0)),
 	fail.
 b_setval0(K,V) :-
 	'$mustbe_atom'(K),
-	asserta('$global_key'(K, V)).
+	asserta('$global_b_key'(K, V)).
 b_setval0(K,_) :-
-	retract('$global_key'(K, _)),
+	retract('$global_b_key'(K, _)),
 	!.
 
 b_getval(K,V) :-
 	'$mustbe_atom'(K),
-	catch('$global_key'(K, V), _, throw(error(existence_error(variable,K),b_setval/2))),
+	catch('$global_b_key'(K, V), _, throw(error(existence_error(variable, K), b_setval/2))),
 	!.
 
 b_delete(K) :-
 	'$mustbe_atom'(K),
-	retractall('$global_key'(K, _)),
+	retractall('$global_b_key'(K, _)),
 	!.
 b_delete(_).
 
