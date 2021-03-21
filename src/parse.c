@@ -473,7 +473,7 @@ predicate *find_predicate(module *m, cell *c)
 	return NULL;
 }
 
-static predicate *find_matching_predicate_internal(module *m, cell *c)
+predicate *find_matching_predicate(module *m, cell *c)
 {
 	module *tmp_m = NULL;
 
@@ -490,11 +490,6 @@ static predicate *find_matching_predicate_internal(module *m, cell *c)
 	}
 
 	return NULL;
-}
-
-predicate *find_matching_predicate(module *m, cell *c)
-{
-	return find_matching_predicate_internal(m, c);
 }
 
 predicate *find_functor(module *m, const char *name, unsigned arity)
