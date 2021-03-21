@@ -415,62 +415,63 @@ set_random(seed(random)) :- time(Seed), set_seed(Seed).
 maybe :- random(F), F < 0.5.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Global variables. This a quick hack using assert/retract...
+% Global variables. using the namespace 'user' to make sure they
+% are truly global and not just in the current module. This a quick
+% hack using assert/retract...
 
 nb_setval(K,_) :-
 	'$mustbe_atom'(K),
-	retract('$global_key'(K, _)),
+	user:retract('nb_key'(K, _)),
 	fail.
 nb_setval(K,V) :-
 	'$mustbe_atom'(K),
-	assertz('$global_key'(K, V)).
+	user:assertz('nb_key'(K, V)).
 
 nb_getval(K,V) :-
 	'$mustbe_atom'(K),
-	catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), nb_setval/2))).
+	user:catch('nb_key'(K, V), _, throw(error(existence_error(variable, K), nb_setval/2))).
 
 nb_delete(K) :-
 	'$mustbe_atom'(K),
-	retract('$global_key'(K, _)),
+	user:retract('nb_key'(K, _)),
 	!.
 nb_delete(_).
 
 nb_current(K, V) :-
-	clause('$global_key'(K, V), _).
+	user:clause('nb_key'(K, V), _).
 
-% The following is not really correct. Need to setup a hook
-% so as to reverse the assignment to handle a cut...
+% The following is not really correct.
 
 b_setval(K,_) :-
 	'$mustbe_atom'(K),
-	\+ clause('$global_key'(K, _), _), asserta('$global_key'(K, [])),
+	\+ user:clause('nb_key'(K, _), _), asserta('nb_key'(K, [])),
 	fail.
 b_setval(K,V) :-
 	'$mustbe_atom'(K),
-	asserta('$global_key'(K, V)).
+	user:asserta('nb_key'(K, V)).
 b_setval(K,_) :-
-	retract('$global_key'(K, _)),
+	user:retract('nb_key'(K, _)),
 	!.
 
 b_setval0(K,_) :-
 	'$mustbe_atom'(K),
-	\+ clause('$global_key'(K, _), _), asserta('$global_key'(K, 0)),
+	\+ user:clause('nb_key'(K, _), _), asserta('nb_key'(K, 0)),
 	fail.
 b_setval0(K,V) :-
 	'$mustbe_atom'(K),
-	asserta('$global_key'(K, V)).
+	asserta('nb_key'(K, V)).
 b_setval0(K,_) :-
-	retract('$global_key'(K, _)),
+	user:retract('nb_key'(K, _)),
 	!.
 
 b_getval(K,V) :-
 	'$mustbe_atom'(K),
-	catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), b_setval/2))),
+	user:catch('nb_key'(K, V), _, throw(error(existence_error(variable, K), b_setval/2))),
 	!.
 
 b_delete(K) :-
 	'$mustbe_atom'(K),
-	retractall('$global_key'(K, _)),
+	user:retractall('nb_key'(K, _)),
 	!.
 b_delete(_).
 
