@@ -221,6 +221,7 @@ Others
 	nb_setval(K,V)
 	nb_getval(K,V)
 	nb_delete(K)
+	nb_current(K,V)
 
 	b_setval(K,V)
 	b_getval(K,V)
