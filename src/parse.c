@@ -473,6 +473,15 @@ predicate *find_predicate(module *m, cell *c)
 	return NULL;
 }
 
+predicate *find_functor(module *m, const char *name, unsigned arity)
+{
+	cell tmp = (cell){0};
+	tmp.val_type = TYPE_LITERAL;
+	tmp.val_off = index_from_pool(m->pl, name);
+	tmp.arity = arity;
+	return find_predicate(m, &tmp);
+}
+
 predicate *search_predicate(module *m, cell *c)
 {
 	module *tmp_m = NULL;
@@ -490,15 +499,6 @@ predicate *search_predicate(module *m, cell *c)
 	}
 
 	return NULL;
-}
-
-predicate *find_functor(module *m, const char *name, unsigned arity)
-{
-	cell tmp = (cell){0};
-	tmp.val_type = TYPE_LITERAL;
-	tmp.val_off = index_from_pool(m->pl, name);
-	tmp.arity = arity;
-	return find_predicate(m, &tmp);
 }
 
 static void push_property(module *m, const char *name, unsigned arity, const char *type)
