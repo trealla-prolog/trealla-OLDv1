@@ -473,7 +473,7 @@ predicate *find_predicate(module *m, cell *c)
 	return NULL;
 }
 
-predicate *find_matching_predicate(module *m, cell *c)
+predicate *search_predicate(module *m, cell *c)
 {
 	module *tmp_m = NULL;
 

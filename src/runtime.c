@@ -878,7 +878,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 			c->flags = 0;
 		}
 
-		predicate *h = find_matching_predicate(q->m, head);
+		predicate *h = search_predicate(q->m, head);
 
 		if (!h) {
 			bool found = false;
@@ -967,7 +967,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retra
 			c->flags = 0;
 		}
 
-		predicate *h = find_matching_predicate(q->m, p1);
+		predicate *h = search_predicate(q->m, p1);
 
 		if (!h) {
 			bool found = false;
@@ -1076,7 +1076,7 @@ static USE_RESULT pl_status match_head(query *q)
 		}
 
 		if (!h) {
-			h = find_matching_predicate(q->m, c);
+			h = search_predicate(q->m, c);
 
 			if (!h) {
 				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(c), "initialization")))

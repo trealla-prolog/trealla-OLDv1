@@ -1661,7 +1661,7 @@ static void del_stream_properties(query *q, int n)
 	tmp->arity = 2;
 	q->retry = QUERY_OK;
 
-	predicate *h = find_matching_predicate(q->m, tmp);
+	predicate *h = search_predicate(q->m, tmp);
 
 	if (!h) {
 		DISCARD_RESULT throw_error(q, tmp, "existence_error", "procedure");
@@ -1827,7 +1827,7 @@ static void clear_streams_properties(query *q)
 	tmp.nbr_cells = 1;
 	tmp.arity = 2;
 
-	predicate *h = find_matching_predicate(q->m, &tmp);
+	predicate *h = search_predicate(q->m, &tmp);
 
 	if (h) {
 		for (clause *r = h->head; r;) {
@@ -4141,7 +4141,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 			if ((tmp->fn = get_builtin(q->m->pl, GET_STR(tmp), tmp->arity, &found)), found)
 				tmp->flags |= FLAG_BUILTIN;
 			else {
-				tmp->match = find_matching_predicate(q->m, tmp);
+				tmp->match = search_predicate(q->m, tmp);
 				tmp->flags &= ~FLAG_BUILTIN;
 			}
 		}
@@ -4445,7 +4445,7 @@ static USE_RESULT pl_status fn_iso_retract_1(query *q)
 
 static USE_RESULT pl_status do_retractall(query *q, cell *p1, idx_t p1_ctx)
 {
-	predicate *h = find_matching_predicate(q->m, get_head(p1));
+	predicate *h = search_predicate(q->m, get_head(p1));
 
 	if (!h) {
 		cell *head = get_head(p1);
@@ -4476,7 +4476,7 @@ static USE_RESULT pl_status fn_iso_retractall_1(query *q)
 
 static USE_RESULT pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 {
-	predicate *h = find_matching_predicate(q->m, c);
+	predicate *h = search_predicate(q->m, c);
 	if (!h) return pl_success;
 
 	if (!h->is_dynamic)
@@ -4808,7 +4808,7 @@ static USE_RESULT pl_status fn_sys_call_n(query *q)
 		if (get_op(q->m, GET_STR(tmp2), &specifier, false))
 			SET_OP(tmp2, specifier);
 	} else {
-		tmp2->match = find_matching_predicate(q->m, tmp2);
+		tmp2->match = search_predicate(q->m, tmp2);
 		tmp2->flags &= ~FLAG_BUILTIN;
 	}
 
@@ -8010,7 +8010,7 @@ static USE_RESULT pl_status fn_task_n(query *q)
 	if ((tmp2->fn = get_builtin(q->m->pl, GET_STR(tmp2), arity, &found)), found)
 		tmp2->flags |= FLAG_BUILTIN;
 	else {
-		tmp2->match = find_matching_predicate(q->m, tmp2);
+		tmp2->match = search_predicate(q->m, tmp2);
 		tmp2->flags &= ~FLAG_BUILTIN;
 	}
 

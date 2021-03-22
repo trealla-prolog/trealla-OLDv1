@@ -698,7 +698,7 @@ cell *get_head(cell *c);
 cell *get_body(cell *c);
 cell *get_logical_body(cell *c);
 predicate *find_predicate(module *m, cell *c);
-predicate *find_matching_predicate(module *m, cell *c);
+predicate *search_predicate(module *m, cell *c);
 predicate *find_functor(module *m, const char *name, unsigned arity);
 USE_RESULT pl_status fn_call_0(query *q, cell *p1);
 void undo_me(query *q);
