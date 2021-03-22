@@ -697,10 +697,8 @@ static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2
 		cell *c2 = deref(q, p2, p2_ctx);
 		idx_t c2_ctx = q->latest_ctx;
 
-#if 1
 		if ((c1 == orig_p1) && (c2 == orig_p2))
 			return unify_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1);
-#endif
 
 		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
 			return false;
