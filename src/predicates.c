@@ -4870,9 +4870,10 @@ static USE_RESULT pl_status fn_iso_if_then_2(query *q)
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
 	cell tmp1;
-	make_structure(&tmp1, g_once_s, fn_iso_once_1, 1, p1->nbr_cells);
+	make_structure(&tmp1, g_once_s, fn_iso_once_1, 1, 0);
 	cell *tmp = clone_to_heap(q, true, &tmp1, p1->nbr_cells+p2->nbr_cells+1);
-	idx_t nbr_cells = 1+1;
+	idx_t nbr_cells = 1;
+	tmp[nbr_cells++].nbr_cells += p1->nbr_cells;	// update the once structure
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_call(q, tmp+nbr_cells);
