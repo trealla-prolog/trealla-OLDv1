@@ -4067,7 +4067,7 @@ prolog *pl_create()
 			if (
 				!strcmp(lib->name, "builtins") ||
 				!strcmp(lib->name, "apply") ||
-				!strcmp(lib->name, "atts") ||
+				//!strcmp(lib->name, "atts") ||
 				//!strcmp(lib->name, "dcgs") ||
 				//!strcmp(lib->name, "assoc") ||
 				//!strcmp(lib->name, "charsio") ||
