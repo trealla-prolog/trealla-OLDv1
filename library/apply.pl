@@ -13,37 +13,37 @@ partition([], _, [], []).
 :- meta_predicate(maplist(6, ?, ?, ?, ?, ?, ?)).
 :- meta_predicate(maplist(7, ?, ?, ?, ?, ?, ?, ?)).
 
-maplist(_, []) :- !.
+maplist(_, []).
 maplist(Goal, [X1|X1s]) :-
 	call(Goal, X1),
 	maplist(Goal, X1s).
 
-maplist(_, [], []) :- !.
+maplist(_, [], []).
 maplist(Goal, [X1|X1s], [X2|X2s]) :-
 	call(Goal, X1, X2),
 	maplist(Goal, X1s, X2s).
 
-maplist(_, [], [], []) :- !.
+maplist(_, [], [], []).
 maplist(Goal, [X1|X1s], [X2|X2s], [X3|X3s]) :-
 	call(Goal, X1, X2, X3),
 	maplist(Goal, X1s, X2s, X3s).
 
-maplist(_, [], [], [], []) :- !.
+maplist(_, [], [], [], []).
 maplist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s]) :-
 	call(Goal, X1, X2, X3, X4),
 	maplist(Goal, X1s, X2s, X3s, X4s).
 
-maplist(_, [], [], [], [], []) :- !.
+maplist(_, [], [], [], [], []).
 maplist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s]) :-
 	call(Goal, X1, X2, X3, X4, X5),
 	maplist(Goal, X1s, X2s, X3s, X4s, X5s).
 
-maplist(_, [], [], [], [], [], []) :- !.
+maplist(_, [], [], [], [], [], []).
 maplist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s], [X6|X6s]) :-
 	call(Goal, X1, X2, X3, X4, X5, X6),
 	maplist(Goal, X1s, X2s, X3s, X4s, X5s, X6s).
 
-maplist(_, [], [], [], [], [], [], []) :- !.
+maplist(_, [], [], [], [], [], [], []).
 maplist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s], [X6|X6s], [X7|X7s]) :-
 	call(Goal, X1, X2, X3, X4, X5, X6, X7),
 	maplist(Goal, X1s, X2s, X3s, X4s, X5s, X6s, X7s).
@@ -56,37 +56,37 @@ maplist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s], [X6|X6s], [X7|X7
 :- meta_predicate(tasklist(6, ?, ?, ?, ?, ?, ?)).
 :- meta_predicate(tasklist(7, ?, ?, ?, ?, ?, ?, ?)).
 
-tasklist(_, []) :- !, wait.
+tasklist(_, []) :- wait.
 tasklist(Goal, [X1|X1s]) :-
 	task(Goal, X1),
 	tasklist(Goal, X1s).
 
-tasklist(_, [], []) :- !, wait.
+tasklist(_, [], []) :- wait.
 tasklist(Goal, [X1|X1s], [X2|X2s]) :-
 	task(Goal, X1, X2),
 	tasklist(Goal, X1s, X2s).
 
-tasklist(_, [], [], []) :- !, wait.
+tasklist(_, [], [], []) :- wait.
 tasklist(Goal, [X1|X1s], [X2|X2s], [X3|X3s]) :-
 	task(Goal, X1, X2, X3),
 	tasklist(Goal, X1s, X2s, X3s).
 
-tasklist(_, [], [], [], []) :- !, wait.
+tasklist(_, [], [], [], []) :- wait.
 tasklist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s]) :-
 	task(Goal, X1, X2, X3, X4),
 	tasklist(Goal, X1s, X2s, X3s, X4s).
 
-tasklist(_, [], [], [], [], []) :- !, wait.
+tasklist(_, [], [], [], [], []) :- wait.
 tasklist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s]) :-
 	task(Goal, X1, X2, X3, X4, X5),
 	tasklist(Goal, X1s, X2s, X3s, X4s, X5s).
 
-tasklist(_, [], [], [], [], [], []) :- !, wait.
+tasklist(_, [], [], [], [], [], []) :- wait.
 tasklist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s], [X6|X6s]) :-
 	task(Goal, X1, X2, X3, X4, X5, X6),
 	tasklist(Goal, X1s, X2s, X3s, X4s, X5s, X6s).
 
-tasklist(_, [], [], [], [], [], [], []) :- !, wait.
+tasklist(_, [], [], [], [], [], [], []) :- wait.
 tasklist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s], [X6|X6s], [X7|X7s]) :-
 	task(Goal, X1, X2, X3, X4, X5, X6, X7),
 	tasklist(Goal, X1s, X2s, X3s, X4s, X5s, X6s, X7s).

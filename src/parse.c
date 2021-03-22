@@ -1389,6 +1389,7 @@ static void directives(parser *p, term *t)
 					h->is_public = true;
 				} else if (!strcmp(PARSER_GET_STR(head), "op") && (head->arity == 3)) {
 					do_op(p, head);
+					// TO-DO: make public...
 				}
 			}
 

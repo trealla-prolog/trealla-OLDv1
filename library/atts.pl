@@ -1,5 +1,5 @@
 :- module(atts,
-	[op(1199, fx, attribute)]).
+	[op(1150, fx, attribute)]).
 
 :- use_module(library(dict)).
 
