@@ -4605,8 +4605,10 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 
 	bool found = false;
 
-	if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found)
-		return throw_error(q, head, "permission_error", "modify,static_procedure");
+	if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found) {
+		if (!GET_OP(head))
+			return throw_error(q, head, "permission_error", "modify,static_procedure");
+	}
 
 	cell *tmp2, *body = get_body(p1);
 
@@ -4665,8 +4667,10 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 
 	bool found = false;
 
-	if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found)
-		return throw_error(q, head, "permission_error", "modify,static_procedure");
+	if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found) {
+		if (!GET_OP(head))
+			return throw_error(q, head, "permission_error", "modify,static_procedure");
+	}
 
 	cell *tmp2, *body = get_body(p1);
 
@@ -6257,8 +6261,10 @@ static USE_RESULT pl_status do_asserta_2(query *q)
 
 	bool found = false;
 
-	if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found)
-		return throw_error(q, head, "permission_error", "modify,static_procedure");
+	if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found) {
+		if (!GET_OP(head))
+			return throw_error(q, head, "permission_error", "modify,static_procedure");
+	}
 
 	cell *body = get_body(p1);
 
@@ -6348,8 +6354,10 @@ static USE_RESULT pl_status do_assertz_2(query *q)
 
 	bool found = false;
 
-	if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found)
-		return throw_error(q, head, "permission_error", "modify,static_procedure");
+	if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found) {
+		if (!GET_OP(head))
+			return throw_error(q, head, "permission_error", "modify,static_procedure");
+	}
 
 	cell *body = get_body(p1);
 
