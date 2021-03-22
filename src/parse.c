@@ -482,6 +482,8 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 	return find_predicate(m, &tmp);
 }
 
+// FIXME: this should only search the current modules, not all of them.
+
 predicate *search_predicate(module *m, cell *c)
 {
 	module *tmp_m = NULL;
@@ -499,6 +501,27 @@ predicate *search_predicate(module *m, cell *c)
 	}
 
 	return NULL;
+}
+
+// FIXME: this should only search the current modules, not all of them.
+
+unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
+{
+	module *tmp_m = NULL;
+
+	while (m) {
+		unsigned priority = get_op(m, name, specifier, hint_prefix);
+
+		if (priority)
+			return priority;
+
+		if (!tmp_m)
+			m = tmp_m = m->pl->modules;
+		else
+			m = m->next;
+	}
+
+	return 0;
 }
 
 static void push_property(module *m, const char *name, unsigned arity, const char *type)
