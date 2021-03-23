@@ -5465,6 +5465,17 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_literal(&tmp, g_off_s);
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	} else if (!strcmp(GET_STR(p1), "occurs_check")) {
+		cell tmp;
+
+		if (q->m->flag.occurs_check == 1)
+			make_literal(&tmp, g_true_s);
+		else if (q->m->flag.occurs_check == 0)
+			make_literal(&tmp, g_false_s);
+		else
+			make_literal(&tmp, index_from_pool(q->m->pl, "error"));
+
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "debug")) {
 		cell tmp;
 
@@ -5649,6 +5660,20 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			q->m->flag.char_conversion = true;
 		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
 			q->m->flag.char_conversion = false;
+		else {
+			cell *tmp = alloc_on_heap(q, 3);
+			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
+			tmp[1] = *p1; tmp[1].nbr_cells = 1;
+			tmp[2] = *p2; tmp[2].nbr_cells = 1;
+			return throw_error(q, tmp, "domain_error", "flag_value");
+		}
+	} else if (!strcmp(GET_STR(p1), "occurs_check")) {
+		if (!strcmp(GET_STR(p2), "true") || !strcmp(GET_STR(p2), "on"))
+			q->m->flag.occurs_check = 1;
+		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
+			q->m->flag.occurs_check = 0;
+		else if (!strcmp(GET_STR(p2), "error"))
+			q->m->flag.occurs_check = -1;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);

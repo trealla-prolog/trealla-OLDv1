@@ -481,7 +481,8 @@ struct arena_ {
 enum q_retry { QUERY_OK=0, QUERY_RETRY=1, QUERY_EXCEPTION=2 };
 enum unknowns { UNK_FAIL=0, UNK_ERROR=1, UNK_WARNING=2, UNK_CHANGEABLE=3 };
 
-typedef struct char_flags_ {
+typedef struct prolog_flags_ {
+	short occurs_check;
 	enum unknowns unknown;
 	bool double_quote_codes:1;
 	bool double_quote_chars:1;
@@ -491,7 +492,7 @@ typedef struct char_flags_ {
 	bool rational_syntax_natural:1;
 	bool prefer_rationals:1;
 	bool debug:1;
-} char_flags;
+} prolog_flags;
 
 struct query_ {
 	query *prev, *next, *parent;
@@ -517,7 +518,7 @@ struct query_ {
 	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;
 	idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
 	uint8_t nv_mask[MAX_ARITY];
-	char_flags flag;
+	prolog_flags flag;
 	enum q_retry retry;
 	int8_t halt_code;
 	int8_t quoted;
@@ -555,7 +556,7 @@ struct parser_ {
 	char *token, *save_line, *srcptr;
 	cell v;
 	size_t token_size, n_line, toklen;
-	char_flags flag;
+	prolog_flags flag;
 	unsigned line_nbr, depth, read_term;
 	unsigned nesting_parens, nesting_braces, nesting_brackets;
 	int quote_char;
@@ -592,7 +593,7 @@ struct module_ {
 	struct op_table def_ops[MAX_OPS+1];
 	struct op_table ops[MAX_OPS+1];
 	idx_t id;
-	char_flags flag;
+	prolog_flags flag;
 	unsigned spare_ops, loaded_ops;
 	bool prebuilt:1;
 	bool use_persist:1;
