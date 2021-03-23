@@ -1315,7 +1315,7 @@ static int get_named_stream(const char *name)
 	return -1;
 }
 
-static int get_stream(__attribute__((unused)) query *q, cell *p1)
+static int get_stream(query *q, cell *p1)
 {
 	if (is_atom(p1)) {
 		int n = get_named_stream(GET_STR(p1));
@@ -1346,7 +1346,7 @@ static int get_stream(__attribute__((unused)) query *q, cell *p1)
 	return p1->val_num;
 }
 
-static bool closed_stream(__attribute__((unused)) query *q, cell *p1)
+static bool is_closed_stream(cell *p1)
 {
 	if (!(p1->flags&FLAG_STREAM))
 		return false;
@@ -1851,7 +1851,7 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 	GET_NEXT_ARG(p1,any);
 
 	if (!is_stream_or_var(pstr)) {
-		if (closed_stream(q, pstr))
+		if (is_closed_stream(pstr))
 			return throw_error(q, pstr, "existence_error", "stream");
 		else
 			return throw_error(q, pstr, "domain_error", "stream");
@@ -2192,7 +2192,7 @@ static USE_RESULT pl_status fn_iso_close_2(query *q)
 	return fn_iso_close_1(q);
 }
 
-static USE_RESULT pl_status fn_iso_at_end_of_stream_0(__attribute__((unused)) query *q)
+static USE_RESULT pl_status fn_iso_at_end_of_stream_0(query *q)
 {
 	int n = q->m->pl->current_input;
 	stream *str = &g_streams[n];
@@ -2248,7 +2248,7 @@ static USE_RESULT pl_status fn_iso_at_end_of_stream_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_iso_flush_output_0(__attribute__((unused)) query *q)
+static USE_RESULT pl_status fn_iso_flush_output_0(query *q)
 {
 	int n = q->m->pl->current_output;
 	stream *str = &g_streams[n];
@@ -2269,7 +2269,7 @@ static USE_RESULT pl_status fn_iso_flush_output_1(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT pl_status fn_iso_nl_0(__attribute__((unused)) query *q)
+static USE_RESULT pl_status fn_iso_nl_0(query *q)
 {
 	int n = q->m->pl->current_output;
 	stream *str = &g_streams[n];
