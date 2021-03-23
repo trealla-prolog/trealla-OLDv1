@@ -3536,6 +3536,7 @@ static bool parser_run(parser *p, const char *src, int dump)
 	q->do_dump_vars = dump;
 	q->run_init = p->run_init;
 	query_execute(q, p->t);
+
 	p->m->pl->halt = q->halt;
 	p->m->pl->halt_code = q->halt_code;
 	p->m->pl->status = q->status;
@@ -3901,17 +3902,17 @@ bool pl_eval(prolog *pl, const char *s)
 {
 	parser *p = create_parser(pl->curr_m);
 	if (!p) return false;
-	size_t len = strlen(s);
-	char *cmd = malloc(len+2);
-	if(!cmd) return false;
-	memcpy(cmd, s, len+1);
+	STRING_INIT(pr);
 
-	if (cmd[strlen(s)-1] != '.')
-		strcat(cmd, ".");
+	if (s[strlen(s)-1] != '.') {
+		STRING_CAT2(pr, s, ".");
+	} else {
+		STRING_CAT(pr, s);
+	}
 
 	p->command = true;
-	bool ok = parser_run(p, cmd, 1);
-	free(cmd);
+	bool ok = parser_run(p, STRING_CSTR(pr), 1);
+	STRING_DONE(pr);
 	pl->curr_m = p->m;
 	destroy_parser(p);
 	return ok;
