@@ -1662,11 +1662,7 @@ static void parser_xref_cell(parser *p, term *t, cell *c, predicate *parent)
 	}
 
 	bool found = false;
-
-	if ((c->fn = get_builtin(p->m->pl, functor, c->arity, &found)) != NULL) {
-		c->flags |= FLAG_BUILTIN;
-		return;
-	}
+	c->fn = get_builtin(p->m->pl, functor, c->arity, &found);
 
 	if (found) {
 		c->flags |= FLAG_BUILTIN;
@@ -2919,7 +2915,7 @@ static bool get_token(parser *p, int last_op)
 
 		if (isupper(*p->token) || (*p->token == '_'))
 			p->is_variable = true;
-		else if (get_op(p->m, p->token, NULL, false))
+		else if (search_op(p->m, p->token, NULL, false))
 			p->is_op = true;
 
 		if (isspace(ch)) {
@@ -2986,7 +2982,7 @@ static bool get_token(parser *p, int last_op)
 			break;
 	}
 
-	p->is_op = get_op(p->m, p->token, NULL, false);
+	p->is_op = search_op(p->m, p->token, NULL, false);
 	p->srcptr = (char*)src;
 	return true;
 }
@@ -3224,7 +3220,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			&& strcmp(p->token, ",")
 			) {
 			unsigned specifier = 0;
-			unsigned priority = get_op(p->m, p->token, &specifier, last_op);
+			unsigned priority = search_op(p->m, p->token, &specifier, last_op);
 
 			if (!last_op && (priority > 1000)) {
 				if (DUMP_ERRS || !p->do_read_term)
@@ -3352,7 +3348,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 
 		unsigned specifier = 0;
-		int priority = get_op(p->m, p->token, &specifier, last_op);
+		int priority = search_op(p->m, p->token, &specifier, last_op);
 
 		if (!strcmp(p->token, "!") &&
 			((*p->srcptr == ',') || (*p->srcptr == '.')))
@@ -3409,16 +3405,6 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			p->is_op = false;
 			save_idx = p->t->cidx;
 		}
-
-#if 0
-		if (p->is_op && !priority) {
-			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s '%s'\n", p->line_nbr, p->token, p->save_line);
-
-			p->error = true;
-			break;
-		}
-#endif
 
 		p->start_term = false;
 		cell *c = make_cell(p);
