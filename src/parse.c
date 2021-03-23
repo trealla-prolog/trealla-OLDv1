@@ -1028,6 +1028,7 @@ static cell *make_cell(parser *p)
 
 void destroy_parser(parser *p)
 {
+	free(p->save_line);
 	free(p->token);
 	clear_term(p->t);
 	free(p->t);
@@ -3605,7 +3606,6 @@ bool module_load_fp(module *m, FILE *fp)
 {
 	parser *p = create_parser(m);
 	if (!p) return false;
-
 	p->consulting = true;
 	p->fp = fp;
 	bool ok = false;
@@ -3619,8 +3619,6 @@ bool module_load_fp(module *m, FILE *fp)
 		ok = !p->error;
 	}
 	 while (ok && !p->already_loaded);
-
-	free(p->save_line);
 
 	if (!p->error && !p->already_loaded && !p->end_of_term && p->t->cidx) {
 		if (DUMP_ERRS || !p->do_read_term)

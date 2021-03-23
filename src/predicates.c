@@ -10095,7 +10095,6 @@ static void restore_db(module *m, FILE *fp)
 
 	m->loading = 0;
 	destroy_query(q);
-	free(p->save_line);
 	destroy_parser(p);
 }
 
