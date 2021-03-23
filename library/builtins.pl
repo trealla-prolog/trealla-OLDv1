@@ -321,59 +321,59 @@ task(G,P1,P2,P3,P4,P5,P6,P7) :-
 %
 
 phrase_from_file(P, Filename) :-
-	 open(Filename, read, Str, [mmap(Ms)]),
-	 copy_term(P, P2), P2=P,
-	 phrase(P2, Ms, []),
-	 close(Str).
+	open(Filename, read, Str, [mmap(Ms)]),
+	copy_term(P, P2), P2=P,
+	phrase(P2, Ms, []),
+	close(Str).
 
 phrase_from_file(P, Filename, Opts) :-
-	 open(Filename, read, Str, [mmap(Ms)|Opts]),
-	 copy_term(P, P2), P2=P,
-	 phrase(P2, Ms, []),
-	 close(Str).
+	open(Filename, read, Str, [mmap(Ms)|Opts]),
+	copy_term(P, P2), P2=P,
+	phrase(P2, Ms, []),
+	close(Str).
 
 phrase(GRBody, S0) :-
 	phrase(GRBody, S0, []).
 
 phrase(GRBody, S0, S) :-
-	 ( var(GRBody) ->
-	 throw(error(instantiation_error, phrase/3))
-	 ; dcg_constr(GRBody) -> phrase_(GRBody, S0, S)
-	 ; functor(GRBody, _, _) -> call(GRBody, S0, S)
-	 ; throw(error(type_error(callable, GRBody), phrase/3))
-	 ).
+	( var(GRBody) ->
+		throw(error(instantiation_error, phrase/3))
+	; dcg_constr(GRBody) -> phrase_(GRBody, S0, S)
+	; functor(GRBody, _, _) -> call(GRBody, S0, S)
+	; throw(error(type_error(callable, GRBody), phrase/3))
+	).
 
 phrase_([], S, S).
 	phrase_(!, S, S).
-	phrase_((A, B), S0, S) :-
-	  phrase(A, S0, S1), phrase(B, S1, S).
-	phrase_((A -> B ; C), S0, S) :-
-	 !,
-	 (phrase(A, S0, S1) ->
-	  phrase(B, S1, S) ; phrase(C, S0, S)
-	 ).
-	phrase_((A ; B), S0, S) :-
-	 (phrase(A, S0, S) ; phrase(B, S0, S)).
-	phrase_((A | B), S0, S) :-
-	 (phrase(A, S0, S) ; phrase(B, S0, S)).
-	phrase_({G}, S0, S) :-
-	 (call(G), S0 = S).
-	phrase_(call(G), S0, S) :-
-	 call(G, S0, S).
-	phrase_((A -> B), S0, S) :-
-	 phrase((A -> B ; fail), S0, S).
-	phrase_(phrase(NonTerminal), S0, S) :-
-	 phrase(NonTerminal, S0, S).
-	phrase_([T|Ts], S0, S) :-
-	 '$append'([T|Ts], S, S0).
+phrase_((A, B), S0, S) :-
+	phrase(A, S0, S1), phrase(B, S1, S).
+phrase_((A -> B ; C), S0, S) :-
+	!,
+	(phrase(A, S0, S1) ->
+		phrase(B, S1, S) ; phrase(C, S0, S)
+	).
+phrase_((A ; B), S0, S) :-
+	(phrase(A, S0, S) ; phrase(B, S0, S)).
+phrase_((A | B), S0, S) :-
+	(phrase(A, S0, S) ; phrase(B, S0, S)).
+phrase_({G}, S0, S) :-
+	(call(G), S0 = S).
+phrase_(call(G), S0, S) :-
+	call(G, S0, S).
+phrase_((A -> B), S0, S) :-
+	phrase((A -> B ; fail), S0, S).
+phrase_(phrase(NonTerminal), S0, S) :-
+	phrase(NonTerminal, S0, S).
+phrase_([T|Ts], S0, S) :-
+	'$append'([T|Ts], S, S0).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Canonical version... this is a start
 
 phrase_to_stream(P, Stream) :-
-	 phrase(P, Chars, []),
-	 maplist(write(Stream), Chars).
+	phrase(P, Chars, []),
+	maplist(write(Stream), Chars).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Edinburgh...
