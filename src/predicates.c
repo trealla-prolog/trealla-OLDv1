@@ -4799,13 +4799,13 @@ static USE_RESULT pl_status fn_sys_call_n(query *q)
 		tmp2->flags |= FLAG_BUILTIN;
 		unsigned specifier;
 
-		if (get_op(q->m, GET_STR(tmp2), &specifier, false))
+		if (search_op(q->m, GET_STR(tmp2), &specifier, false))
 			SET_OP(tmp2, specifier);
 	} else if (found) {
 		tmp2->flags |= FLAG_BUILTIN;
 		unsigned specifier;
 
-		if (get_op(q->m, GET_STR(tmp2), &specifier, false))
+		if (search_op(q->m, GET_STR(tmp2), &specifier, false))
 			SET_OP(tmp2, specifier);
 	} else {
 		tmp2->match = search_predicate(q->m, tmp2);
