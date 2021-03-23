@@ -10365,15 +10365,9 @@ static USE_RESULT pl_status fn_frozen_2(query *q)
 static USE_RESULT pl_status fn_del_attrs_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	GET_NEXT_ARG(p2,list_or_nil);
-	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
-	may_ptr_error(tmp);
-	if (tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, "resource_error", "cyclic_term");
-
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->var_nbr);
-	e->c.attrs = tmp;
+	e->c.attrs = NULL;
 	return pl_success;
 }
 
@@ -11214,9 +11208,9 @@ static const struct builtins g_predicates_other[] =
 
 	{"freeze", 2, fn_freeze_2, "+variable,+callable"},
 	{"frozen", 2, fn_frozen_2, "+variable,+callable"},
+	{"put_attrs", 2, fn_put_attrs_2, "+variable,+list"},
+	{"get_attrs", 2, fn_get_attrs_2, "+variable,-variable"},
 	{"del_attrs", 1, fn_del_attrs_1, "+variable"},
-	{"put_attrs", 2, fn_put_attrs_2, "+variable,+callable"},
-	{"get_attrs", 2, fn_get_attrs_2, "+variable,+callable"},
 
 #if USE_OPENSSL
 	{"sha1", 2, fn_sha1_2, "+string,?string"},
