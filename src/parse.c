@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -1264,6 +1265,38 @@ static void do_op(parser *p, cell *c)
 	}
 }
 
+static bool	is_loaded(module *m, const char *filename)
+{
+	struct loaded_file *ptr = m->loaded_files;
+
+	while (ptr) {
+		if (!strcmp(ptr->filename, filename))
+			return true;
+
+		ptr = ptr->next;
+	}
+
+	return false;
+}
+
+static void	set_loaded(module *m, const char *filename)
+{
+	struct loaded_file *ptr = m->loaded_files;
+
+	while (ptr) {
+		if (!strcmp(ptr->filename, filename))
+			return;
+
+		ptr = ptr->next;
+	}
+
+	ptr = malloc(sizeof(*ptr));
+	ptr->next = m->loaded_files;
+	strncpy(ptr->filename, filename, PATH_MAX);
+	ptr->filename[PATH_MAX-1] = '\0';
+	m->loaded_files = ptr;
+}
+
 static void directives(parser *p, term *t)
 {
 	p->skip = false;
@@ -1318,7 +1351,10 @@ static void directives(parser *p, term *t)
 		if (!is_atom(p1)) return;
 		const char *name = PARSER_GET_STR(p1);
 		char *filename = relative_to(p->m->filename, name);
-		deconsult(p->m->pl, filename);
+
+		if (is_loaded(p->m, filename))
+			return;
+
 		unsigned save_line_nbr = p->line_nbr;
 
 		if (!module_load_file(p->m, filename)) {
@@ -3664,6 +3700,7 @@ bool module_load_file(module *m, const char *filename)
 	}
 
 	free(tmpbuf);
+	set_loaded(m, realbuf);
 	FILE *fp = fopen(realbuf, "r");
 
 	if (!fp) {
@@ -3739,6 +3776,14 @@ static void make_rule(module *m, const char *src)
 void destroy_module(module *m)
 {
 	module_purge_dirty_list(m);
+
+	struct loaded_file *ptr = m->loaded_files;
+
+	while (ptr) {
+		struct loaded_file *save = ptr;
+		ptr = ptr->next;
+		free(save);
+	}
 
 	while (m->tasks) {
 		query *task = m->tasks->next;

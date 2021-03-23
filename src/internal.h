@@ -580,6 +580,11 @@ struct parser_ {
 	bool command:1;
 };
 
+struct loaded_file {
+	struct loaded_file *next;
+	char filename[PATH_MAX];
+};
+
 struct module_ {
 	module *next;
 	prolog *pl;
@@ -590,6 +595,7 @@ struct module_ {
 	FILE *fp;
 	skiplist *index, *nbs;
 	clause *dirty_list;
+	struct loaded_file *loaded_files;
 	struct op_table def_ops[MAX_OPS+1];
 	struct op_table ops[MAX_OPS+1];
 	idx_t id;
