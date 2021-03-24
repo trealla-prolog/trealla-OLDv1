@@ -4,7 +4,7 @@
 :- use_module(library(dict)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Attributes are scoped with att(Attribute) allowing multiple
+% Attributes are scoped with atts(Attribute) allowing multiple
 % sets of non-conflicting attributes to be used concurrently on
 % a variable.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -29,39 +29,39 @@ del_attr(V, Name) :-
 put_atts(V, +(A)) :- !,
 	'$get_attrs'(V, D),
 	functor(A, F, _),
-	dict:set(D, att(F), A, D2),
+	dict:set(D, atts(F), A, D2),
 	'$put_attrs'(V, D2).
 
 put_atts(V, -(A)) :- !,
 	'$get_attrs'(V, D),
 	functor(A, F, _),
-	dict:del(D, att(F), D2),
+	dict:del(D, atts(F), D2),
 	'$put_attrs'(V, D2).
 
 put_atts(V, A) :- !,
 	'$get_attrs'(V, D),
 	functor(A, F, _),
-	dict:set(D, att(F), A, D2),
+	dict:set(D, atts(F), A, D2),
 	'$put_attrs'(V, D2).
 
 get_atts(V, L) :- var(L), !,
 	'$get_attrs'(V, D),
-	dict:lst1(D, att(_), L).
+	dict:match(D, atts(_), L).
 
 get_atts(V, +(A)) :- !,
 	'$get_attrs'(V, D),
 	functor(A, F, _),
-	dict:get(D, att(F), A).
+	dict:get(D, atts(F), A).
 
 get_atts(V, -(A)) :- !,
 	'$get_attrs'(V, D),
 	functor(A, F, _),
-	\+ dict:get(D, att(F), _).
+	\+ dict:get(D, atts(F), _).
 
 get_atts(V, A) :- !,
 	'$get_attrs'(V, D),
 	functor(A, F, _),
-	dict:get(D, att(F), A).
+	dict:get(D, atts(F), A).
 
 attributed(V) :-
 	'$get_attrs'(V, D),

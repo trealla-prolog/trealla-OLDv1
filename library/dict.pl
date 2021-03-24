@@ -1,4 +1,4 @@
-:- module(dict, [get/4, get/3, set/4, del/3, lst/2]).
+:- module(dict, [get/4, get/3, set/4, del/3, lst/2, match/3]).
 
 get([], _, D, D) :- !.
 get([N:V|_], N, V, _) :- !.
@@ -28,13 +28,13 @@ lst0([_:V|T], L1, L) :-
 lst(D, L) :-
 	lst0(D, [], L).
 
-lst1([], _, L, L) :- !.
-lst1([H:V|T], Template, L1, L) :-
+match([], _, L, L) :- !.
+match([H:V|T], Template, L1, L) :-
 	copy_term(Template, Template2),
 	( H = Template ->
-		lst1(T, Template2, [V|L1], L) ;
-		lst1(T, Template2, L1, L)
+		match(T, Template2, [V|L1], L) ;
+		match(T, Template2, L1, L)
 	).
 
-lst1(D, Template, L) :-
-	lst1(D, Template, [], L).
+match(D, Template, L) :-
+	match(D, Template, [], L).
