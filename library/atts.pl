@@ -5,20 +5,20 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-get_attr(V, Module, Value) :-
+get_attr(V, Name, Value) :-
 	var(V),
-	Access =.. [Module,Value],
-	get_atts(V, +Access).
+	Attr =.. [Name,Value],
+	get_atts(V, +Attr).
 
-put_attr(V, Module, Value) :-
+put_attr(V, Name, Value) :-
 	var(V),
-	Access =.. [Module,Value],
-	put_atts(V, +Access).
+	Attr =.. [Name,Value],
+	put_atts(V, +Attr).
 
-del_attr(V, Module) :-
+del_attr(V, Name) :-
 	var(V),
-	Access =.. [Module,_],
-	put_atts(V, -Access).
+	Attr =.. [Name,_],
+	put_atts(V, -Attr).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
