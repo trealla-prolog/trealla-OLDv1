@@ -4,6 +4,10 @@
 :- use_module(library(dict)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Attributes are scoped with att(Attribute) allowing multiple
+% sets of non-conflicting attributes to be used concurrently on
+% a variable.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 get_attr(V, Name, Value) :-
 	var(V),
