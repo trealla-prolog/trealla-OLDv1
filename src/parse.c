@@ -4156,4 +4156,3 @@ prolog *pl_create()
 
 	return pl;
 }
-

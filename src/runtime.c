@@ -1491,4 +1491,3 @@ pl_status query_execute(query *q, term *t)
 	sl_done(q->st.iter);
 	return ret;
 }
-
