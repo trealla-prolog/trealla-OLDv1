@@ -10361,7 +10361,7 @@ static USE_RESULT pl_status fn_frozen_2(query *q)
 	return unify(q, p2, p2_ctx, e->c.attrs, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_del_attrs_1(query *q)
+static USE_RESULT pl_status fn_sys_del_attrs_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	frame *g = GET_FRAME(p1_ctx);
@@ -10370,7 +10370,7 @@ static USE_RESULT pl_status fn_del_attrs_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_put_attrs_2(query *q)
+static USE_RESULT pl_status fn_sys_put_attrs_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,list_or_nil);
@@ -10385,7 +10385,7 @@ static USE_RESULT pl_status fn_put_attrs_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_get_attrs_2(query *q)
+static USE_RESULT pl_status fn_sys_get_attrs_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,variable);
@@ -11207,9 +11207,9 @@ static const struct builtins g_predicates_other[] =
 
 	{"freeze", 2, fn_freeze_2, "+variable,+callable"},
 	{"frozen", 2, fn_frozen_2, "+variable,+callable"},
-	{"put_attrs", 2, fn_put_attrs_2, "+variable,+list"},
-	{"get_attrs", 2, fn_get_attrs_2, "+variable,-variable"},
-	{"del_attrs", 1, fn_del_attrs_1, "+variable"},
+	{"$put_attrs", 2, fn_sys_put_attrs_2, "+variable,+list"},
+	{"$get_attrs", 2, fn_sys_get_attrs_2, "+variable,-variable"},
+	{"$del_attrs", 1, fn_sys_del_attrs_1, "+variable"},
 
 #if USE_OPENSSL
 	{"sha1", 2, fn_sha1_2, "+string,?string"},

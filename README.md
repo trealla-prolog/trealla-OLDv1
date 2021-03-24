@@ -173,10 +173,6 @@ GNU-Prolog & SWI-Prolog
 	freeze/2
 	frozen/2
 
-	put_attrs/2
-	get_attrs/2
-	del_attrs/1
-
 
 Others
 ======
