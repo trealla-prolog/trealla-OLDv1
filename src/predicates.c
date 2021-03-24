@@ -415,7 +415,7 @@ static USE_RESULT pl_status fn_iso_nonvar_1(query *q)
 	return !is_variable(p1);
 }
 
-static bool has_vars(query *q, cell *c, idx_t c_ctx, unsigned depth)
+bool has_vars(query *q, cell *c, idx_t c_ctx, unsigned depth)
 {
 	if (depth >= 64000) {
 		q->cycle_error = true;

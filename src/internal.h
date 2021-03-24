@@ -770,6 +770,7 @@ void add_to_dirty_list(query *q, clause *r);
 char *format_property(char **bufptr, size_t *lenptr, char *dst, const char *name, unsigned arity, const char *type);
 bool needs_quoting(module *m, const char *src, int srclen);
 size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq);
+bool has_vars(query *q, cell *c, idx_t c_ctx, unsigned depth);
 
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, bool cons, unsigned depth);
 pl_status print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
