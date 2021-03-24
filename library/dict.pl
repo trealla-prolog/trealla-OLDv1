@@ -21,9 +21,9 @@ del([N:_|T], N, T) :- !.
 del([H|T], N, [H|D]) :-
 	del(T, N, D).
 
-lst0([], D, D) :- !.
-lst0([_:V|T], D1, D) :-
-	lst0(T, [V|D1], D).
+lst0([], L, L) :- !.
+lst0([_:V|T], L1, L) :-
+	lst0(T, [V|L1], L).
 
-lst(D, D) :-
-	lst0(D, [], D``).
+lst(D, L) :-
+	lst0(D, [], L).
