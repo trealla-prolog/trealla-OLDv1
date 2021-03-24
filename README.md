@@ -301,26 +301,6 @@ Note: consult/1 and load_files/2 support lists of files as args. Also
 support loading into modules eg. *consult(MOD:FILE-SPEC)*.
 
 
-Attributed variables		##NOT WORKING YET##
-====================
-
-	:- use_module(library(atts)).
-
-	get_attr(V, Module, Value)
-	put_attr(V, Module, Value)
-	del_attr(V, Module)
-
-	put_atts(V, +(A))
-	put_atts(V, -(A))
-	put_atts(V, A)
-	get_atts(V, L)
-	get_atts(V, +(A))
-	get_atts(V, -(A))
-	get_atts(V, A)
-
-	attributed(V)
-
-
 Definite Clause Grammars
 ========================
 
