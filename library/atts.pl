@@ -40,7 +40,7 @@ put_atts(V, A) :- !,
 	dict:set(D, F, A, D2),
 	put_attrs(V, D2).
 
-lst_atts(V, L) :- var(L), !,
+get_atts(V, L) :- var(L), !,
 	get_attrs(V, D),
 	dict:lst(D, L).
 
