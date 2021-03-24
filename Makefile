@@ -36,8 +36,8 @@ OBJECTS = tpl.o src/history.o src/functions.o \
 	src/library.o src/parse.o src/print.o src/runtime.o \
 	src/skiplist.o src/base64.o src/network.o src/utf8.o
 
-OBJECTS +=  library/builtins.o library/lists.o library/dict.o \
-	library/apply.o library/http.o library/atts.o library/error.o \
+OBJECTS +=  library/builtins.o library/lists.o library/apply.o \
+	library/http.o library/atts.o library/error.o \
 	library/dcgs.o library/format.o library/charsio.o \
 	library/ordsets.o library/assoc.o
 

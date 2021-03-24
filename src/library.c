@@ -4,8 +4,6 @@ extern unsigned char library_builtins_pl[];
 extern unsigned int library_builtins_pl_len;
 extern unsigned char library_lists_pl[];
 extern unsigned int library_lists_pl_len;
-extern unsigned char library_dict_pl[];
-extern unsigned int library_dict_pl_len;
 extern unsigned char library_apply_pl[];
 extern unsigned int library_apply_pl_len;
 extern unsigned char library_http_pl[];
@@ -28,7 +26,6 @@ extern unsigned int library_ordsets_pl_len;
 library g_libs[] = {
      {"builtins", library_builtins_pl, &library_builtins_pl_len},
      {"lists", library_lists_pl, &library_lists_pl_len},
-     {"dict", library_dict_pl, &library_dict_pl_len},
      {"apply", library_apply_pl, &library_apply_pl_len},
      {"assoc", library_assoc_pl, &library_assoc_pl_len},
      {"ordsets", library_ordsets_pl, &library_ordsets_pl_len},
