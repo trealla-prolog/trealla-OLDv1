@@ -2511,7 +2511,7 @@ static USE_RESULT pl_status do_read_term(query *q, stream *str, cell *p1, idx_t 
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	parser_xref(p, p->t, NULL);
+	term_xref(p, p->t, NULL);
 
 	if (p->nbr_vars) {
 		if (!create_vars(q, p->nbr_vars))
@@ -4555,9 +4555,9 @@ static unsigned count_non_anons(uint8_t *mask, unsigned bit)
 	return bits;
 }
 
-static void do_assign_vars(parser *p, idx_t nbr_cells)
+static void do_term_assign_vars(parser *p, idx_t nbr_cells)
 {
-	assign_vars(p, 0, true);
+	term_assign_vars(p, 0, true);
 	uint8_t vars[MAX_ARITY] = {0};
 
 	for (idx_t i = 0; i < nbr_cells; i++) {
@@ -4631,8 +4631,8 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	}
 
 	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
-	do_assign_vars(p, nbr_cells);
-	parser_term_to_body(p);
+	do_term_assign_vars(p, nbr_cells);
+	term_to_body(p);
 	cell *h = get_head(p->t->cells);
 
 	if (is_cstring(h)) {
@@ -4693,8 +4693,8 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	}
 
 	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
-	do_assign_vars(p, nbr_cells);
-	parser_term_to_body(p);
+	do_term_assign_vars(p, nbr_cells);
+	term_to_body(p);
 	cell *h = get_head(p->t->cells);
 
 	if (is_cstring(h)) {
@@ -6318,8 +6318,8 @@ static USE_RESULT pl_status do_asserta_2(query *q)
 	}
 
 	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
-	do_assign_vars(p, nbr_cells);
-	parser_term_to_body(p);
+	do_term_assign_vars(p, nbr_cells);
+	term_to_body(p);
 	cell *h = get_head(p->t->cells);
 
 	if (is_cstring(h)) {
@@ -6412,8 +6412,8 @@ static USE_RESULT pl_status do_assertz_2(query *q)
 	}
 
 	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
-	do_assign_vars(p, nbr_cells);
-	parser_term_to_body(p);
+	do_term_assign_vars(p, nbr_cells);
+	term_to_body(p);
 	cell *h = get_head(p->t->cells);
 
 	if (is_cstring(h)) {
@@ -10088,7 +10088,7 @@ static void restore_db(module *m, FILE *fp)
 
 		p->srcptr = p->save_line;
 		parser_tokenize(p, false, false);
-		parser_xref(p, p->t, NULL);
+		term_xref(p, p->t, NULL);
 		query_execute(q, p->t);
 		clear_term(p->t);
 	}

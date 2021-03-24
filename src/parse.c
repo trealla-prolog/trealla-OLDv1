@@ -1683,7 +1683,7 @@ static void directives(parser *p, term *t)
 	return;
 }
 
-static void parser_xref_cell(parser *p, term *t, cell *c, predicate *parent)
+static void xref_cell(parser *p, term *t, cell *c, predicate *parent)
 {
 	const char *functor = PARSER_GET_STR(c);
 	module *m = p->m;
@@ -1755,7 +1755,7 @@ static void parser_xref_cell(parser *p, term *t, cell *c, predicate *parent)
 	}
 }
 
-void parser_xref(parser *p, term *t, predicate *parent)
+void term_xref(parser *p, term *t, predicate *parent)
 {
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
@@ -1763,18 +1763,16 @@ void parser_xref(parser *p, term *t, predicate *parent)
 		if (!is_literal(c))
 			continue;
 
-		parser_xref_cell(p, t, c, parent);
+		xref_cell(p, t, c, parent);
 	}
 }
 
-static void parser_xref_db(parser *p)
+static void xref_db(parser *p)
 {
 	for (predicate *h = p->m->head; h; h = h->next) {
 		for (clause *r = h->head; r; r = r->next)
-			parser_xref(p, &r->t, h);
+			term_xref(p, &r->t, h);
 	}
-
-	p->end_of_term = false;
 }
 
 static void check_first_cut(parser *p)
@@ -1832,7 +1830,7 @@ static idx_t get_varno(parser *p, const char *src)
 	return i;
 }
 
-void assign_vars(parser *p, unsigned start, bool rebase)
+void term_assign_vars(parser *p, unsigned start, bool rebase)
 {
 	if (!p || p->error)
 		return;
@@ -1995,7 +1993,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 	return p->t->cells + c_idx;
 }
 
-void parser_term_to_body(parser *p)
+void term_to_body(parser *p)
 {
 	term_to_body_conversion(p, p->t->cells);
 	p->t->cells->nbr_cells = p->t->cidx - 1;
@@ -2185,7 +2183,7 @@ void parser_reset(parser *p)
 	p->line_nbr = 0;
 }
 
-static bool parser_dcg_rewrite(parser *p)
+static bool term_dcg_rewrite(parser *p)
 {
 	if (p->error || !is_literal(p->t->cells) || (p->t->cells->arity != 2))
 		return false;
@@ -2210,7 +2208,7 @@ static bool parser_dcg_rewrite(parser *p)
 	p2->skip = true;
 	p2->srcptr = src;
 	parser_tokenize(p2, false, false);
-	parser_xref(p2, p2->t, NULL);
+	term_xref(p2, p2->t, NULL);
 	query_execute(q, p2->t);
 	free(src);
 	frame *g = GET_FRAME(0);
@@ -3151,11 +3149,11 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 					p->error = true;
 				}
 
-				assign_vars(p, p->read_term, false);
-				parser_term_to_body(p);
+				term_assign_vars(p, p->read_term, false);
+				term_to_body(p);
 
 				if (p->consulting && !p->skip) {
-					if (!parser_dcg_rewrite(p))
+					if (!term_dcg_rewrite(p))
 						directives(p, p->t);
 
 					if (p->already_loaded)
@@ -3526,12 +3524,12 @@ static bool parser_run(parser *p, const char *src, int dump)
 	if (!lexer_analyze(p, 0))
 		return false;
 
-	assign_vars(p, 0, false);
+	term_assign_vars(p, 0, false);
 
 	if (!p->command)
-		parser_dcg_rewrite(p);
+		term_dcg_rewrite(p);
 
-	parser_xref(p, p->t, NULL);
+	term_xref(p, p->t, NULL);
 
 	query *q = create_query(p->m, false);
 	if (!q) return false;
@@ -3582,7 +3580,7 @@ module *module_load_text(module *m, const char *src, const char *filename)
 	}
 
 	if (!p->error) {
-		parser_xref_db(p);
+		xref_db(p);
 		int save = p->m->pl->quiet;
 		p->m->pl->quiet = true;
 		p->m->pl->halt = false;
@@ -3632,7 +3630,7 @@ bool module_load_fp(module *m, FILE *fp)
 	}
 
 	if (!p->error && !p->already_loaded) {
-		parser_xref_db(p);
+		xref_db(p);
 		int save = p->m->pl->quiet;
 		p->m->pl->quiet = true;
 		p->directive = true;
@@ -3868,7 +3866,7 @@ module *create_module(prolog *pl, const char *name)
 	parser *p = create_parser(m);
 	if (p) {
 		p->consulting = true;
-		parser_xref_db(p);
+		xref_db(p);
 		destroy_parser(p);
 	}
 
