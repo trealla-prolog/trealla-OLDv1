@@ -22,6 +22,8 @@ extern unsigned char library_assoc_pl[];
 extern unsigned int library_assoc_pl_len;
 extern unsigned char library_ordsets_pl[];
 extern unsigned int library_ordsets_pl_len;
+extern unsigned char library_dict_pl[];
+extern unsigned int library_dict_pl_len;
 
 library g_libs[] = {
      {"builtins", library_builtins_pl, &library_builtins_pl_len},
@@ -29,6 +31,7 @@ library g_libs[] = {
      {"apply", library_apply_pl, &library_apply_pl_len},
      {"assoc", library_assoc_pl, &library_assoc_pl_len},
      {"ordsets", library_ordsets_pl, &library_ordsets_pl_len},
+     {"dict", library_dict_pl, &library_dict_pl_len},
      {"http", library_http_pl, &library_http_pl_len},
      {"atts", library_atts_pl, &library_atts_pl_len},
      {"error", library_error_pl, &library_error_pl_len},
