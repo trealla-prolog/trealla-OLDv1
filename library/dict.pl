@@ -11,18 +11,19 @@ get([N:V|_], N, V) :- !.
 get([_|T], N, V) :-
 	get(T, N, V).
 
-set(L, N, V, L2) :-
-	del(L, N, L3),
-	L2=[N:V|L3].
+set([], N, V, [N:V]) :- !.
+set(D, N, V, D2) :-
+	del(D, N, D3),
+	D2=[N:V|D3].
 
 del([], _, []) :- !.
 del([N:_|T], N, T) :- !.
-del([H|T], N, [H|L]) :-
-	del(T, N, L).
+del([H|T], N, [H|D]) :-
+	del(T, N, D).
 
-lst0([], L, L) :- !.
-lst0([_:V|T], L1, L) :-
-	lst0(T, [V|L1], L).
+lst0([], D, D) :- !.
+lst0([_:V|T], D1, D) :-
+	lst0(T, [V|D1], D).
 
-lst(D, L) :-
-	lst0(D, [], L).
+lst(D, D) :-
+	lst0(D, [], D``).
