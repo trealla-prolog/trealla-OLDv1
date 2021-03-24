@@ -27,3 +27,14 @@ lst0([_:V|T], L1, L) :-
 
 lst(D, L) :-
 	lst0(D, [], L).
+
+lst1([], _, L, L) :- !.
+lst1([H:V|T], Template, L1, L) :-
+	copy_term(Template, Template2),
+	( H = Template ->
+		lst1(T, Template2, [V|L1], L) ;
+		lst1(T, Template2, L1, L)
+	).
+
+lst1(D, Template, L) :-
+	lst1(D, Template, [], L).

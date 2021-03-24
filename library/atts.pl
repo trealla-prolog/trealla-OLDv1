@@ -25,39 +25,39 @@ del_attr(V, Name) :-
 put_atts(V, +(A)) :- !,
 	'$get_attrs'(V, D),
 	functor(A, F, _),
-	dict:set(D, F, A, D2),
+	dict:set(D, att(F), A, D2),
 	'$put_attrs'(V, D2).
 
 put_atts(V, -(A)) :- !,
 	'$get_attrs'(V, D),
 	functor(A, F, _),
-	dict:del(D, F, D2),
+	dict:del(D, att(F), D2),
 	'$put_attrs'(V, D2).
 
 put_atts(V, A) :- !,
 	'$get_attrs'(V, D),
 	functor(A, F, _),
-	dict:set(D, F, A, D2),
+	dict:set(D, att(F), A, D2),
 	'$put_attrs'(V, D2).
 
 get_atts(V, L) :- var(L), !,
 	'$get_attrs'(V, D),
-	dict:lst(D, L).
+	dict:lst1(D, att(_), L).
 
 get_atts(V, +(A)) :- !,
 	'$get_attrs'(V, D),
 	functor(A, F, _),
-	dict:get(D, F, A).
+	dict:get(D, att(F), A).
 
 get_atts(V, -(A)) :- !,
 	'$get_attrs'(V, D),
 	functor(A, F, _),
-	\+ dict:get(D, F, _).
+	\+ dict:get(D, att(F), _).
 
 get_atts(V, A) :- !,
 	'$get_attrs'(V, D),
 	functor(A, F, _),
-	dict:get(D, F, A).
+	dict:get(D, att(F), A).
 
 attributed(V) :-
 	'$get_attrs'(V, D),
