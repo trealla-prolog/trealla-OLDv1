@@ -4557,7 +4557,7 @@ static unsigned count_non_anons(uint8_t *mask, unsigned bit)
 
 static void do_assign_vars(parser *p, idx_t nbr_cells)
 {
-	parser_assign_vars(p, 0, true);
+	assign_vars(p, 0, true);
 	uint8_t vars[MAX_ARITY] = {0};
 
 	for (idx_t i = 0; i < nbr_cells; i++) {
@@ -7940,7 +7940,7 @@ static USE_RESULT pl_status fn_wait_0(query *q)
 				continue;
 			}
 
-			DISCARD_RESULT run_query(task);
+			DISCARD_RESULT query_start(task);
 
 			task = task->next;
 			did_something = 1;
@@ -7984,7 +7984,7 @@ static USE_RESULT pl_status fn_await_0(query *q)
 				continue;
 			}
 
-			DISCARD_RESULT run_query(task);
+			DISCARD_RESULT query_start(task);
 
 			if (!task->tmo_msecs && task->yielded) {
 				did_something = 1;

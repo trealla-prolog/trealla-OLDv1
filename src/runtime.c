@@ -1343,7 +1343,7 @@ static bool outstanding_choices(query *q)
 	return q->cp;
 }
 
-pl_status run_query(query *q)
+pl_status query_start(query *q)
 {
 	q->yielded = false;
 	bool done = false;
@@ -1487,7 +1487,7 @@ pl_status query_execute(query *q, term *t)
 	g->nbr_vars = t->nbr_vars;
 	g->nbr_slots = t->nbr_vars;
 	g->ugen = ++q->m->pl->ugen;
-	pl_status ret = run_query(q);
+	pl_status ret = query_start(q);
 	sl_done(q->st.iter);
 	return ret;
 }

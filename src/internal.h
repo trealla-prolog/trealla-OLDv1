@@ -717,11 +717,11 @@ void parser_xref(parser *p, term *t, predicate *parent);
 void parser_reset(parser *p);
 idx_t drop_choice(query *q);
 bool retry_choice(query *q);
-void parser_assign_vars(parser *p, unsigned start, bool rebase);
+void assign_vars(parser *p, unsigned start, bool rebase);
 query *create_query(module *m, bool sub_query);
 query *create_task(query *q, cell *curr_cell);
 void destroy_query(query *q);
-USE_RESULT pl_status run_query(query *q);
+USE_RESULT pl_status query_start(query *q);
 
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx);
 cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix);

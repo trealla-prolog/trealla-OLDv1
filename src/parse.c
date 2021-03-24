@@ -1832,7 +1832,7 @@ static idx_t get_varno(parser *p, const char *src)
 	return i;
 }
 
-void parser_assign_vars(parser *p, unsigned start, bool rebase)
+void assign_vars(parser *p, unsigned start, bool rebase)
 {
 	if (!p || p->error)
 		return;
@@ -2169,7 +2169,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 	return true;
 }
 
-static bool parser_attach(parser *p, idx_t start_idx)
+static bool lexer_analyze(parser *p, idx_t start_idx)
 {
 	while (attach_ops(p, start_idx))
 		;
@@ -3111,6 +3111,9 @@ void fix_list(cell *c)
 	}
 }
 
+// Build a compact bytecode representation of the input as an
+// array of cells.
+
 unsigned parser_tokenize(parser *p, bool args, bool consing)
 {
 	idx_t begin_idx = p->t->cidx, arg_idx = p->t->cidx, save_idx = 0;
@@ -3140,7 +3143,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 				p->nesting_parens = p->nesting_brackets = p->nesting_braces = 0;
 			}
 
-			if (parser_attach(p, 0)) {
+			if (lexer_analyze(p, 0)) {
 				if (p->t->cells->nbr_cells < (p->t->cidx-1)) {
 					if (DUMP_ERRS || !p->do_read_term)
 						printf("Error: syntax error, operator expected '%s', line %u, '%s'\n", p->token, p->line_nbr, p->save_line);
@@ -3148,7 +3151,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 					p->error = true;
 				}
 
-				parser_assign_vars(p, p->read_term, false);
+				assign_vars(p, p->read_term, false);
 				parser_term_to_body(p);
 
 				if (p->consulting && !p->skip) {
@@ -3293,7 +3296,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && args && !strcmp(p->token, ",")) {
-			parser_attach(p, arg_idx);
+			lexer_analyze(p, arg_idx);
 			arg_idx = p->t->cidx;
 
 			if (*p->srcptr == ',') {
@@ -3360,19 +3363,19 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quote_char && !strcmp(p->token, ")")) {
 			p->nesting_parens--;
-			parser_attach(p, begin_idx);
+			lexer_analyze(p, begin_idx);
 			return arity;
 		}
 
 		if (!p->quote_char && !strcmp(p->token, "]")) {
 			p->nesting_brackets--;
-			parser_attach(p, begin_idx);
+			lexer_analyze(p, begin_idx);
 			return arity;
 		}
 
 		if (!p->quote_char && !strcmp(p->token, "}")) {
 			p->nesting_braces--;
-			parser_attach(p, begin_idx);
+			lexer_analyze(p, begin_idx);
 			return arity;
 		}
 
@@ -3520,10 +3523,10 @@ static bool parser_run(parser *p, const char *src, int dump)
 		return true;
 	}
 
-	if (!parser_attach(p, 0))
+	if (!lexer_analyze(p, 0))
 		return false;
 
-	parser_assign_vars(p, 0, false);
+	assign_vars(p, 0, false);
 
 	if (!p->command)
 		parser_dcg_rewrite(p);
