@@ -424,7 +424,6 @@ server(H,S) :- server(H,S,[]).
 set_random(seed(Seed)) :- set_seed(Seed).
 set_random(seed(random)) :- time(Seed), set_seed(Seed).
 maybe :- random(F), F < 0.5.
-
 prolog_load_context(module, Module) :- module(Module).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
