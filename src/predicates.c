@@ -4837,14 +4837,8 @@ static USE_RESULT pl_status fn_iso_invoke_2(query *q)
 	cell *tmp = clone_to_heap(q, true, p2, 1);
 	idx_t nbr_cells = 1;
 
-	predicate *h = find_predicate(m, p2);
-
-	if (!h) {
-		bool found = false;
-		tmp[nbr_cells].fn = get_builtin(m->pl, GET_STR(p2), p2->arity, &found);
-		if (found) tmp[nbr_cells].flags |= FLAG_BUILTIN;
-	} else
-		tmp[nbr_cells].match = h;
+	if (!is_builtin(p2))
+		tmp[nbr_cells].match = find_predicate(m, p2);
 
 	nbr_cells += p2->nbr_cells;
 	make_call(q, tmp+nbr_cells);
