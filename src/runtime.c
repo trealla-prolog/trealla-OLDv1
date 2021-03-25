@@ -258,6 +258,7 @@ bool retry_choice(query *q)
 	trim_heap(q, ch);
 	sl_done(q->st.iter);
 	q->st = ch->st;
+	q->save_m = NULL;		// maybe move q->save_m to q->st.save_m
 
 	frame *g = GET_CURR_FRAME();
 	g->ugen = ch->ugen;

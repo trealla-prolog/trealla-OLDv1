@@ -4844,7 +4844,7 @@ static USE_RESULT pl_status fn_iso_invoke_2(query *q)
 	nbr_cells += p2->nbr_cells;
 	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
-	q->save_m = m;
+	q->st.m = q->save_m = m;
 	return pl_success;
 }
 
