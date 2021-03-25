@@ -626,10 +626,11 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 {
 	const frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
-	cell *frozen = NULL;
+	bool try_thaw = false;
+	cell save_c = e->c;
 
-	if (is_empty(&e->c) && e->c.attrs && !is_list_or_nil(e->c.attrs))
-		frozen = e->c.attrs;
+	if (is_empty(&e->c) && e->c.attrs)
+		try_thaw = true;
 
 	e->ctx = v_ctx;
 
@@ -640,8 +641,8 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		INCR_REF(v);
 	}
 
-	if (frozen)
-		call_attrs(q, frozen);
+	if (try_thaw)
+		sys_thaw(q, &save_c);
 
 	if (!q->cp)
 		return;
