@@ -570,20 +570,20 @@ del_attr(V, Module) :-
 
 put_att(V, +(A)) :- !,
 	'$get_attrs'(V, D),
-	functor(A, F, _),
-	dict:set(D, att(F), A, D2),
+	A =.. [Module,Attr|_],
+	dict:set(D, att(Module-Attr), A, D2),
 	'$put_attrs'(V, D2).
 
 put_att(V, -(A)) :- !,
 	'$get_attrs'(V, D),
-	functor(A, F, _),
-	dict:del(D, att(F), D2),
+	A =.. [Module,Attr|_],
+	dict:del(D, att(Module-Attr), D2),
 	'$put_attrs'(V, D2).
 
 put_att(V, A) :- !,
 	'$get_attrs'(V, D),
-	functor(A, F, _),
-	dict:set(D, att(F), A, D2),
+	A =.. [Module,Attr|_],
+	dict:set(D, att(Module-Attr), A, D2),
 	'$put_attrs'(V, D2).
 
 get_att(V, L) :- var(L), !,
@@ -592,18 +592,18 @@ get_att(V, L) :- var(L), !,
 
 get_att(V, +(A)) :- !,
 	'$get_attrs'(V, D),
-	functor(A, F, _),
-	dict:get(D, att(F), A).
+	A =.. [Module,Attr|_],
+	dict:get(D, att(Module-Attr), A).
 
 get_att(V, -(A)) :- !,
 	'$get_attrs'(V, D),
-	functor(A, F, _),
-	\+ dict:get(D, att(F), _).
+	A =.. [Module,Attr|_],
+	\+ dict:get(D, att(Module-Attr), _).
 
 get_att(V, A) :- !,
 	'$get_attrs'(V, D),
-	functor(A, F, _),
-	dict:get(D, att(F), A).
+	A =.. [Module,Attr|_],
+	dict:get(D, att(Module-Attr), A).
 
 attributed(V) :-
 	'$get_attrs'(V, D),
