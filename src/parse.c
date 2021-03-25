@@ -830,7 +830,7 @@ static bool retract_from_db(module *m, clause *r)
 
 void add_to_dirty_list(query *q, clause *r)
 {
-	if (!retract_from_db(q->m, r))
+	if (!retract_from_db(q->st.m, r))
 		return;
 
 	r->dirty = q->dirty_list;
@@ -855,8 +855,8 @@ static void query_purge_dirty_list(query *q)
 		if (r->owner->tail == r)
 			r->owner->tail = r->prev;
 
-		r->dirty = q->m->dirty_list;
-		q->m->dirty_list = r;
+		r->dirty = q->st.m->dirty_list;
+		q->st.m->dirty_list = r;
 	}
 }
 
@@ -957,7 +957,7 @@ static void set_meta_predicate_in_db(module *m, cell *c)
 
 	if (h) {
 		query q = (query){0};
-		q.m = m;
+		q.st.m = m;
 		char *dst = print_term_to_strbuf(&q, c, 0, 0);
 		push_property(m, name, arity, dst);
 		free(dst);
@@ -1107,7 +1107,7 @@ query *create_query(module *m, bool is_task)
 	query *q = calloc(1, sizeof(query));
 	ensure(q);
 	q->qid = g_query_id++;
-	q->m = m;
+	q->st.m = m;
 	q->trace = m->pl->trace;
 	q->flag = m->flag;
 
@@ -1142,7 +1142,7 @@ query *create_query(module *m, bool is_task)
 
 query *create_task(query *q, cell *curr_cell)
 {
-	query *subq = create_query(q->m, true);
+	query *subq = create_query(q->st.m, true);
 	if (!subq) return NULL;
 	subq->parent = q;
 	subq->st.fp = 1;
@@ -1508,7 +1508,7 @@ static void directives(parser *p, term *t)
 			}
 
 			query q = (query){0};
-			q.m = p->m;
+			q.st.m = p->m;
 			snprintf(dstbuf, sizeof(dstbuf), "%s/", g_tpl_lib);
 			char *dst = dstbuf + strlen(dstbuf);
 			idx_t ctx = 0;
@@ -3031,7 +3031,7 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_integers)
 	LIST_HANDLER(l);
 	int depth = 0;
 
-	while (is_iso_list(l) && q->m->flag.double_quote_chars) {
+	while (is_iso_list(l) && q->st.m->flag.double_quote_chars) {
 		if (depth++ >= MAX_DEPTH) {
 			is_chars_list = 0;
 			break;
@@ -3527,7 +3527,7 @@ static bool parser_run(parser *p, const char *src, int dump)
 	p->m->pl->halt_code = q->halt_code;
 	p->m->pl->status = q->status;
 
-	if (!p->m->pl->quiet && !p->directive && dump && q->m->pl->stats) {
+	if (!p->m->pl->quiet && !p->directive && dump && q->st.m->pl->stats) {
 		fprintf(stdout,
 			"Goals %llu, Matches %llu, Max frames %u, Max choices %u, Max trails: %u, Backtracks %llu, TCOs:%llu\n",
 			(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
@@ -3538,10 +3538,10 @@ static bool parser_run(parser *p, const char *src, int dump)
 	query_purge_dirty_list(q);
 
 	if (dump)
-		module_purge_dirty_list(q->m);
+		module_purge_dirty_list(q->st.m);
 
 	bool ok = !q->error;
-	p->m = q->m;
+	p->m = q->st.m;
 	destroy_query(q);
 	return ok;
 }
@@ -3710,7 +3710,7 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 	(void) dq;
 	idx_t ctx = 0;
 	query q = (query){0};
-	q.m = m;
+	q.st.m = m;
 
 	for (predicate *h = m->head; h; h = h->next) {
 		if (h->is_prebuilt)

@@ -133,9 +133,9 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth,
 		slot *e = GET_SLOT(g, p1->var_nbr);
 		idx_t slot_nbr = e - q->slots;
 
-		for (size_t i = 0; i < q->m->pl->tab_idx; i++) {
-			if (q->m->pl->tab1[i] == slot_nbr) {
-				tmp->var_nbr = q->m->pl->tab2[i];
+		for (size_t i = 0; i < q->st.m->pl->tab_idx; i++) {
+			if (q->st.m->pl->tab1[i] == slot_nbr) {
+				tmp->var_nbr = q->st.m->pl->tab2[i];
 				tmp->flags = FLAG2_FRESH;
 
 				if (is_anon(p1))
@@ -147,7 +147,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth,
 			}
 		}
 
-		tmp->var_nbr = q->m->pl->varno;
+		tmp->var_nbr = q->st.m->pl->varno;
 		tmp->flags = FLAG2_FRESH;
 		tmp->val_off = g_nil_s;
 		tmp->attrs = e->c.attrs;
@@ -155,9 +155,9 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth,
 		if (is_anon(p1))
 			tmp->flags |= FLAG2_ANON;
 
-		q->m->pl->tab1[q->m->pl->tab_idx] = slot_nbr;
-		q->m->pl->tab2[q->m->pl->tab_idx] = q->m->pl->varno++;
-		q->m->pl->tab_idx++;
+		q->st.m->pl->tab1[q->st.m->pl->tab_idx] = slot_nbr;
+		q->st.m->pl->tab2[q->st.m->pl->tab_idx] = q->st.m->pl->varno++;
+		q->st.m->pl->tab_idx++;
 		return tmp;
 	}
 
@@ -183,12 +183,12 @@ cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, bo
 		return NULL;
 
 	frame *g = GET_CURR_FRAME();
-	q->m->pl->varno = g->nbr_vars;
-	q->m->pl->tab_idx = 0;
+	q->st.m->pl->varno = g->nbr_vars;
+	q->st.m->pl->tab_idx = 0;
 	q->cycle_error = false;
 	cell* rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, nonlocals_only, copy_attrs);
 	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
-	int cnt = q->m->pl->varno - g->nbr_vars;
+	int cnt = q->st.m->pl->varno - g->nbr_vars;
 
 	if (cnt) {
 		if (!create_vars(q, cnt)) {

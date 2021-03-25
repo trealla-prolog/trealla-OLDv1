@@ -147,7 +147,7 @@ static void make_call(query *q, cell *tmp)
 	frame *g = GET_CURR_FRAME();
 	tmp->val_ptr = c + c->nbr_cells;
 	tmp->cgen = g->cgen;
-	tmp->mod_nbr = q->m->id;
+	tmp->mod_nbr = q->st.m->id;
 }
 
 static void make_literal(cell *tmp, idx_t offset)
@@ -1366,7 +1366,7 @@ static USE_RESULT pl_status fn_iso_current_input_1(query *q)
 
 	if (is_variable(pstr)) {
 		cell tmp;
-		make_int(&tmp, q->m->pl->current_input);
+		make_int(&tmp, q->st.m->pl->current_input);
 		tmp.flags |= FLAG_STREAM | FLAG_HEX;
 		set_var(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
@@ -1376,7 +1376,7 @@ static USE_RESULT pl_status fn_iso_current_input_1(query *q)
 		return throw_error(q, pstr, "domain_error", "stream");
 
 	int n = get_stream(q, pstr);
-	return n == q->m->pl->current_input ? pl_success : pl_failure;
+	return n == q->st.m->pl->current_input ? pl_success : pl_failure;
 }
 
 static USE_RESULT pl_status fn_iso_current_output_1(query *q)
@@ -1385,7 +1385,7 @@ static USE_RESULT pl_status fn_iso_current_output_1(query *q)
 
 	if (is_variable(pstr)) {
 		cell tmp;
-		make_int(&tmp, q->m->pl->current_output);
+		make_int(&tmp, q->st.m->pl->current_output);
 		tmp.flags |= FLAG_STREAM | FLAG_HEX;
 		set_var(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
@@ -1395,7 +1395,7 @@ static USE_RESULT pl_status fn_iso_current_output_1(query *q)
 		return throw_error(q, pstr, "domain_error", "stream");
 
 	int n = get_stream(q, pstr);
-	return n == q->m->pl->current_output ? pl_success : pl_failure;
+	return n == q->st.m->pl->current_output ? pl_success : pl_failure;
 }
 
 static USE_RESULT pl_status fn_iso_set_input_1(query *q)
@@ -1407,7 +1407,7 @@ static USE_RESULT pl_status fn_iso_set_input_1(query *q)
 	if (strcmp(str->mode, "read") && strcmp(str->mode, "update"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
 
-	q->m->pl->current_input = n;
+	q->st.m->pl->current_input = n;
 	return pl_success;
 }
 
@@ -1420,7 +1420,7 @@ static USE_RESULT pl_status fn_iso_set_output_1(query *q)
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, "permission_error", "output,stream");
 
-	q->m->pl->current_output = n;
+	q->st.m->pl->current_output = n;
 	return pl_success;
 }
 
@@ -1542,18 +1542,18 @@ static void db_log(query *q, clause *r, enum log_type l)
 	case LOG_ASSERTA:
 		dst = print_term_to_strbuf(q, r->t.cells, q->st.curr_frame, 1);
 		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
-		fprintf(q->m->fp, "'$a_'(%s,'%s').\n", dst, tmpbuf);
+		fprintf(q->st.m->fp, "'$a_'(%s,'%s').\n", dst, tmpbuf);
 		free(dst);
 		break;
 	case LOG_ASSERTZ:
 		dst = print_term_to_strbuf(q, r->t.cells, q->st.curr_frame, 1);
 		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
-		fprintf(q->m->fp, "'$z_'(%s,'%s').\n", dst, tmpbuf);
+		fprintf(q->st.m->fp, "'$z_'(%s,'%s').\n", dst, tmpbuf);
 		free(dst);
 		break;
 	case LOG_ERASE:
 		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
-		fprintf(q->m->fp, "'$e_'('%s').\n", tmpbuf);
+		fprintf(q->st.m->fp, "'$e_'('%s').\n", tmpbuf);
 		break;
 	}
 
@@ -1585,7 +1585,7 @@ static USE_RESULT pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, int is_
 	stash_me(q, &r->t, last_match);
 	add_to_dirty_list(q, r);
 
-	if (!q->m->loading && r->t.persist)
+	if (!q->st.m->loading && r->t.persist)
 		db_log(q, r, LOG_ERASE);
 
 	return pl_success;
@@ -1643,7 +1643,7 @@ static void add_stream_properties(query *q, int n)
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, newline(posix)).\n", n);
 #endif
 
-	parser *p = create_parser(q->m);
+	parser *p = create_parser(q->st.m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
 	parser_tokenize(p, false, false);
@@ -1661,7 +1661,7 @@ static void del_stream_properties(query *q, int n)
 	tmp->arity = 2;
 	q->retry = QUERY_OK;
 
-	predicate *h = search_predicate(q->m, tmp);
+	predicate *h = search_predicate(q->st.m, tmp);
 
 	if (!h) {
 		DISCARD_RESULT throw_error(q, tmp, "existence_error", "procedure");
@@ -1758,13 +1758,13 @@ static USE_RESULT pl_status do_stream_property(query *q)
 		cell tmp;
 
 		if (str->eof_action == eof_action_eof_code)
-			make_literal(&tmp, index_from_pool(q->m->pl, "eof_code"));
+			make_literal(&tmp, index_from_pool(q->st.m->pl, "eof_code"));
 		else if (str->eof_action == eof_action_error)
-			make_literal(&tmp, index_from_pool(q->m->pl, "error"));
+			make_literal(&tmp, index_from_pool(q->st.m->pl, "error"));
 		else if (str->eof_action == eof_action_reset)
-			make_literal(&tmp, index_from_pool(q->m->pl, "reset"));
+			make_literal(&tmp, index_from_pool(q->st.m->pl, "reset"));
 		else
-			make_literal(&tmp, index_from_pool(q->m->pl, "none"));
+			make_literal(&tmp, index_from_pool(q->st.m->pl, "none"));
 
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
@@ -1796,11 +1796,11 @@ static USE_RESULT pl_status do_stream_property(query *q)
 		cell tmp;
 
 		if (str->at_end_of_file)
-			make_literal(&tmp, index_from_pool(q->m->pl, "past"));
+			make_literal(&tmp, index_from_pool(q->st.m->pl, "past"));
 		else if (at_end_of_file)
-			make_literal(&tmp, index_from_pool(q->m->pl, "at"));
+			make_literal(&tmp, index_from_pool(q->st.m->pl, "at"));
 		else
-			make_literal(&tmp, index_from_pool(q->m->pl, "not"));
+			make_literal(&tmp, index_from_pool(q->st.m->pl, "not"));
 
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
@@ -1827,7 +1827,7 @@ static void clear_streams_properties(query *q)
 	tmp.nbr_cells = 1;
 	tmp.arity = 2;
 
-	predicate *h = search_predicate(q->m, &tmp);
+	predicate *h = search_predicate(q->st.m, &tmp);
 
 	if (h) {
 		for (clause *r = h->head; r;) {
@@ -2138,14 +2138,14 @@ static USE_RESULT pl_status fn_iso_close_1(query *q)
 		|| (str->fp == stderr))
 		return pl_success;
 
-	if (q->m->pl->current_input == n)
-		q->m->pl->current_input = 0;
+	if (q->st.m->pl->current_input == n)
+		q->st.m->pl->current_input = 0;
 
-	if (q->m->pl->current_output == n)
-		q->m->pl->current_output = 1;
+	if (q->st.m->pl->current_output == n)
+		q->st.m->pl->current_output = 1;
 
-	if (q->m->pl->current_error == n)
-		q->m->pl->current_error = 2;
+	if (q->st.m->pl->current_error == n)
+		q->st.m->pl->current_error = 2;
 
 	if (str->p)
 		destroy_parser(str->p);
@@ -2194,7 +2194,7 @@ static USE_RESULT pl_status fn_iso_close_2(query *q)
 
 static USE_RESULT pl_status fn_iso_at_end_of_stream_0(query *q)
 {
-	int n = q->m->pl->current_input;
+	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (str->p) {
@@ -2250,7 +2250,7 @@ static USE_RESULT pl_status fn_iso_at_end_of_stream_1(query *q)
 
 static USE_RESULT pl_status fn_iso_flush_output_0(query *q)
 {
-	int n = q->m->pl->current_output;
+	int n = q->st.m->pl->current_output;
 	stream *str = &g_streams[n];
 	fflush(str->fp);
 	return !ferror(str->fp);
@@ -2271,7 +2271,7 @@ static USE_RESULT pl_status fn_iso_flush_output_1(query *q)
 
 static USE_RESULT pl_status fn_iso_nl_0(query *q)
 {
-	int n = q->m->pl->current_output;
+	int n = q->st.m->pl->current_output;
 	stream *str = &g_streams[n];
 	fputc('\n', str->fp);
 	fflush(str->fp);
@@ -2304,21 +2304,21 @@ static bool collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, int 
 		if (is_structure(c)) {
 			collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1, depth+1);
 		} else if (is_variable(c)) {
-			for (unsigned idx = 0; idx < q->m->pl->tab_idx; idx++) {
-				if ((q->m->pl->tab1[idx] == q->latest_ctx) && (q->m->pl->tab2[idx] == c->var_nbr)) {
-					q->m->pl->tab4[idx]++;
+			for (unsigned idx = 0; idx < q->st.m->pl->tab_idx; idx++) {
+				if ((q->st.m->pl->tab1[idx] == q->latest_ctx) && (q->st.m->pl->tab2[idx] == c->var_nbr)) {
+					q->st.m->pl->tab4[idx]++;
 					found = 1;
 					break;
 				}
 			}
 
 			if (!found) {
-				q->m->pl->tab1[q->m->pl->tab_idx] = q->latest_ctx;
-				q->m->pl->tab2[q->m->pl->tab_idx] = c->var_nbr;
-				q->m->pl->tab3[q->m->pl->tab_idx] = c->val_off;
-				q->m->pl->tab4[q->m->pl->tab_idx] = 1;
-				q->m->pl->tab5[q->m->pl->tab_idx] = is_anon(c) ? 1 : 0;
-				q->m->pl->tab_idx++;
+				q->st.m->pl->tab1[q->st.m->pl->tab_idx] = q->latest_ctx;
+				q->st.m->pl->tab2[q->st.m->pl->tab_idx] = c->var_nbr;
+				q->st.m->pl->tab3[q->st.m->pl->tab_idx] = c->val_off;
+				q->st.m->pl->tab4[q->st.m->pl->tab_idx] = 1;
+				q->st.m->pl->tab5[q->st.m->pl->tab_idx] = is_anon(c) ? 1 : 0;
+				q->st.m->pl->tab_idx++;
 			}
 		}
 
@@ -2392,7 +2392,7 @@ static bool parse_read_params(query *q, parser *p, cell *c, cell **vars, idx_t *
 static USE_RESULT pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, char *src)
 {
 	if (!str->p)
-		str->p = create_parser(q->m);
+		str->p = create_parser(q->st.m);
 
 	parser *p = str->p;
 	p->fp = str->fp;
@@ -2518,13 +2518,13 @@ static USE_RESULT pl_status do_read_term(query *q, stream *str, cell *p1, idx_t 
 			return throw_error(q, p1, "resource_error", "too_many_vars");
 	}
 
-	q->m->pl->tab_idx = 0;
+	q->st.m->pl->tab_idx = 0;
 
 	if (p->nbr_vars)
 		collect_vars(q, p->t->cells, q->st.curr_frame, p->t->cidx-1, 0);
 
 	if (vars) {
-		unsigned cnt = q->m->pl->tab_idx;
+		unsigned cnt = q->st.m->pl->tab_idx;
 		may_ptr_error(init_tmp_heap(q));
 		cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
 		may_ptr_error(tmp);
@@ -2533,13 +2533,13 @@ static USE_RESULT pl_status do_read_term(query *q, stream *str, cell *p1, idx_t 
 		if (cnt) {
 			unsigned done = 0;
 
-			for (unsigned i = 0; i < q->m->pl->tab_idx; i++) {
+			for (unsigned i = 0; i < q->st.m->pl->tab_idx; i++) {
 				make_literal(tmp+idx, g_dot_s);
 				tmp[idx].arity = 2;
 				tmp[idx++].nbr_cells = ((cnt-done)*2)+1;
 				cell v;
-				make_variable(&v, q->m->pl->tab3[i]);
-				v.var_nbr = q->m->pl->tab2[i];
+				make_variable(&v, q->st.m->pl->tab3[i]);
+				v.var_nbr = q->st.m->pl->tab2[i];
 				tmp[idx++] = v;
 				done++;
 			}
@@ -2568,8 +2568,8 @@ static USE_RESULT pl_status do_read_term(query *q, stream *str, cell *p1, idx_t 
 		may_ptr_error(tmp);
 		unsigned idx = 0;
 
-		for (unsigned i = 0; i < q->m->pl->tab_idx; i++) {
-			if (q->m->pl->tab5[i])
+		for (unsigned i = 0; i < q->st.m->pl->tab_idx; i++) {
+			if (q->st.m->pl->tab5[i])
 				continue;
 
 			cnt++;
@@ -2578,8 +2578,8 @@ static USE_RESULT pl_status do_read_term(query *q, stream *str, cell *p1, idx_t 
 		if (cnt) {
 			unsigned done = 0;
 
-			for (unsigned i = 0; i < q->m->pl->tab_idx; i++) {
-				if (q->m->pl->tab5[i])
+			for (unsigned i = 0; i < q->st.m->pl->tab_idx; i++) {
+				if (q->st.m->pl->tab5[i])
 					continue;
 
 				make_literal(tmp+idx, g_dot_s);
@@ -2593,10 +2593,10 @@ static USE_RESULT pl_status do_read_term(query *q, stream *str, cell *p1, idx_t 
 				v.nbr_cells = 3;
 				SET_OP(&v,OP_XFX);
 				tmp[idx++] = v;
-				make_literal(&v, q->m->pl->tab3[i]);
+				make_literal(&v, q->st.m->pl->tab3[i]);
 				tmp[idx++] = v;
-				make_variable(&v, q->m->pl->tab3[i]);
-				v.var_nbr = q->m->pl->tab2[i];
+				make_variable(&v, q->st.m->pl->tab3[i]);
+				v.var_nbr = q->st.m->pl->tab2[i];
 				tmp[idx++] = v;
 				done++;
 			}
@@ -2625,11 +2625,11 @@ static USE_RESULT pl_status do_read_term(query *q, stream *str, cell *p1, idx_t 
 		ensure(tmp);
 		unsigned idx = 0;
 
-		for (unsigned i = 0; i < q->m->pl->tab_idx; i++) {
-			if (q->m->pl->tab4[i] != 1)
+		for (unsigned i = 0; i < q->st.m->pl->tab_idx; i++) {
+			if (q->st.m->pl->tab4[i] != 1)
 				continue;
 
-			if (varnames && (q->m->pl->tab5[i]))
+			if (varnames && (q->st.m->pl->tab5[i]))
 				continue;
 
 			cnt++;
@@ -2638,11 +2638,11 @@ static USE_RESULT pl_status do_read_term(query *q, stream *str, cell *p1, idx_t 
 		if (cnt) {
 			unsigned done = 0;
 
-			for (unsigned i = 0; i < q->m->pl->tab_idx; i++) {
-				if (q->m->pl->tab4[i] != 1)
+			for (unsigned i = 0; i < q->st.m->pl->tab_idx; i++) {
+				if (q->st.m->pl->tab4[i] != 1)
 					continue;
 
-				if (varnames && (q->m->pl->tab5[i]))
+				if (varnames && (q->st.m->pl->tab5[i]))
 					continue;
 
 				make_literal(tmp+idx, g_dot_s);
@@ -2656,10 +2656,10 @@ static USE_RESULT pl_status do_read_term(query *q, stream *str, cell *p1, idx_t 
 				v.nbr_cells = 3;
 				SET_OP(&v,OP_XFX);
 				tmp[idx++] = v;
-				make_literal(&v, q->m->pl->tab3[i]);
+				make_literal(&v, q->st.m->pl->tab3[i]);
 				tmp[idx++] = v;
-				make_variable(&v, q->m->pl->tab3[i]);
-				v.var_nbr = q->m->pl->tab2[i];
+				make_variable(&v, q->st.m->pl->tab3[i]);
+				v.var_nbr = q->st.m->pl->tab2[i];
 				tmp[idx++] = v;
 				done++;
 			}
@@ -2692,7 +2692,7 @@ static USE_RESULT pl_status do_read_term(query *q, stream *str, cell *p1, idx_t 
 static USE_RESULT pl_status fn_iso_read_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = q->m->pl->current_input;
+	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -2733,7 +2733,7 @@ static USE_RESULT pl_status fn_iso_read_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
-	int n = q->m->pl->current_input;
+	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -2770,7 +2770,7 @@ static USE_RESULT pl_status fn_iso_read_term_3(query *q)
 static USE_RESULT pl_status fn_iso_write_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = q->m->pl->current_output;
+	int n = q->st.m->pl->current_output;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -2808,7 +2808,7 @@ static USE_RESULT pl_status fn_iso_write_2(query *q)
 static USE_RESULT pl_status fn_iso_writeq_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = q->m->pl->current_output;
+	int n = q->st.m->pl->current_output;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -2854,7 +2854,7 @@ static USE_RESULT pl_status fn_iso_writeq_2(query *q)
 static USE_RESULT pl_status fn_iso_write_canonical_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = q->m->pl->current_output;
+	int n = q->st.m->pl->current_output;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -3008,7 +3008,7 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
-	int n = q->m->pl->current_output;
+	int n = q->st.m->pl->current_output;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -3018,7 +3018,7 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
-	q->flag = q->m->flag;
+	q->flag = q->st.m->flag;
 	cell *p2_orig = p2, *vnames;
 	idx_t vnames_ctx;
 	LIST_HANDLER(p2);
@@ -3082,7 +3082,7 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
-	q->flag = q->m->flag;
+	q->flag = q->st.m->flag;
 	cell *p2_orig = p2, *vnames;
 	idx_t vnames_ctx;
 	LIST_HANDLER(p2);
@@ -3126,7 +3126,7 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 static USE_RESULT pl_status fn_iso_put_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	int n = q->m->pl->current_output;
+	int n = q->st.m->pl->current_output;
 	stream *str = &g_streams[n];
 	size_t len = len_char_utf8(GET_STR(p1));
 
@@ -3180,7 +3180,7 @@ static USE_RESULT pl_status fn_iso_put_char_2(query *q)
 static USE_RESULT pl_status fn_iso_put_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	int n = q->m->pl->current_output;
+	int n = q->st.m->pl->current_output;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -3230,7 +3230,7 @@ static USE_RESULT pl_status fn_iso_put_code_2(query *q)
 static USE_RESULT pl_status fn_iso_put_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,byte);
-	int n = q->m->pl->current_output;
+	int n = q->st.m->pl->current_output;
 	stream *str = &g_streams[n];
 
 	if (!str->binary) {
@@ -3276,7 +3276,7 @@ static USE_RESULT pl_status fn_iso_put_byte_2(query *q)
 static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_character_or_var);
-	int n = q->m->pl->current_input;
+	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -3410,7 +3410,7 @@ static USE_RESULT pl_status fn_iso_get_char_2(query *q)
 static USE_RESULT pl_status fn_iso_get_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
-	int n = q->m->pl->current_input;
+	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (is_integer(p1) && (p1->val_num < -1))
@@ -3546,7 +3546,7 @@ static USE_RESULT pl_status fn_iso_get_code_2(query *q)
 static USE_RESULT pl_status fn_iso_get_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_byte_or_var);
-	int n = q->m->pl->current_input;
+	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (!str->binary) {
@@ -3670,7 +3670,7 @@ static USE_RESULT pl_status fn_iso_get_byte_2(query *q)
 static USE_RESULT pl_status fn_iso_peek_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_character_or_var);
-	int n = q->m->pl->current_input;
+	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (str->binary) {
@@ -3777,7 +3777,7 @@ static USE_RESULT pl_status fn_iso_peek_char_2(query *q)
 static USE_RESULT pl_status fn_iso_peek_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
-	int n = q->m->pl->current_input;
+	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (is_integer(p1) && (p1->val_num < -1))
@@ -3885,7 +3885,7 @@ static USE_RESULT pl_status fn_iso_peek_code_2(query *q)
 static USE_RESULT pl_status fn_iso_peek_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_byte_or_var);
-	int n = q->m->pl->current_input;
+	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (!str->binary) {
@@ -4109,7 +4109,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 
 		if (is_cstring(tmp2) /*&& arity*/) {
 			cell *c = tmp2;
-			idx_t off = index_from_pool(q->m->pl, GET_STR(tmp2));
+			idx_t off = index_from_pool(q->st.m->pl, GET_STR(tmp2));
 			ensure (off != ERR_IDX);
 			//DECR_REF(tmp2);
 			c->val_off = off;
@@ -4138,10 +4138,10 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		bool found = false;
 
 		if (is_callable(tmp)) {
-			if ((tmp->fn = get_builtin(q->m->pl, GET_STR(tmp), tmp->arity, &found)), found)
+			if ((tmp->fn = get_builtin(q->st.m->pl, GET_STR(tmp), tmp->arity, &found)), found)
 				tmp->flags |= FLAG_BUILTIN;
 			else {
-				tmp->match = search_predicate(q->m, tmp);
+				tmp->match = search_predicate(q->st.m, tmp);
 				tmp->flags &= ~FLAG_BUILTIN;
 			}
 		}
@@ -4170,10 +4170,10 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 static cell *do_term_variables(query *q, cell *p1, idx_t p1_ctx)
 {
 	frame *g = GET_CURR_FRAME();
-	q->m->pl->varno = g->nbr_vars;
-	q->m->pl->tab_idx = 0;
+	q->st.m->pl->varno = g->nbr_vars;
+	q->st.m->pl->tab_idx = 0;
 	collect_vars(q, p1, p1_ctx, p1->nbr_cells, 0);
-	const unsigned cnt = q->m->pl->tab_idx;
+	const unsigned cnt = q->st.m->pl->tab_idx;
 	init_tmp_heap(q);
 	cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
 	ensure(tmp);
@@ -4188,13 +4188,13 @@ static cell *do_term_variables(query *q, cell *p1, idx_t p1_ctx)
 			tmp[idx].nbr_cells = ((cnt-done)*2)+1;
 			idx++;
 			cell v;
-			make_variable(&v, q->m->pl->tab3[i]);
+			make_variable(&v, q->st.m->pl->tab3[i]);
 
-			if (q->m->pl->tab1[i] != q->st.curr_frame) {
+			if (q->st.m->pl->tab1[i] != q->st.curr_frame) {
 				v.flags |= FLAG2_FRESH;
-				v.var_nbr = q->m->pl->varno++;
+				v.var_nbr = q->st.m->pl->varno++;
 			} else
-				v.var_nbr = q->m->pl->tab2[i];
+				v.var_nbr = q->st.m->pl->tab2[i];
 
 			tmp[idx++] = v;
 			done++;
@@ -4207,8 +4207,8 @@ static cell *do_term_variables(query *q, cell *p1, idx_t p1_ctx)
 		make_literal(tmp, g_nil_s);
 
 	if (cnt) {
-		unsigned new_vars = q->m->pl->varno - g->nbr_vars;
-		q->m->pl->varno = g->nbr_vars;
+		unsigned new_vars = q->st.m->pl->varno - g->nbr_vars;
+		q->st.m->pl->varno = g->nbr_vars;
 
 		if (new_vars) {
 			if (!create_vars(q, new_vars))
@@ -4216,17 +4216,17 @@ static cell *do_term_variables(query *q, cell *p1, idx_t p1_ctx)
 		}
 
 		for (unsigned i = 0; i < cnt; i++) {
-			if (q->m->pl->tab1[i] == q->st.curr_frame)
+			if (q->st.m->pl->tab1[i] == q->st.curr_frame)
 				continue;
 
 			cell v, tmp2;
 			make_variable(&v, g_anon_s);
 			v.flags |= FLAG2_FRESH;
-			v.var_nbr = q->m->pl->varno++;
+			v.var_nbr = q->st.m->pl->varno++;
 			make_variable(&tmp2, g_anon_s);
 			tmp2.flags |= FLAG2_FRESH;
-			tmp2.var_nbr = q->m->pl->tab2[i];
-			set_var(q, &v, q->st.curr_frame, &tmp2, q->m->pl->tab1[i]);
+			tmp2.var_nbr = q->st.m->pl->tab2[i];
+			set_var(q, &v, q->st.curr_frame, &tmp2, q->st.m->pl->tab1[i]);
 		}
 	}
 
@@ -4309,8 +4309,8 @@ static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx
 
 	cell *src = p1, *dst = tmp+(prefix?1:0);
 	frame *g = GET_CURR_FRAME();
-	q->m->pl->varno = g->nbr_vars;
-	q->m->pl->tab_idx = 0;
+	q->st.m->pl->varno = g->nbr_vars;
+	q->st.m->pl->tab_idx = 0;
 
 	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
 		*dst = *src;
@@ -4323,25 +4323,25 @@ static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx
 		idx_t slot_nbr = e - q->slots;
 		int found = 0;
 
-		for (size_t i = 0; i < q->m->pl->tab_idx; i++) {
-			if (q->m->pl->tab1[i] == slot_nbr) {
-				dst->var_nbr = q->m->pl->tab2[i];
+		for (size_t i = 0; i < q->st.m->pl->tab_idx; i++) {
+			if (q->st.m->pl->tab1[i] == slot_nbr) {
+				dst->var_nbr = q->st.m->pl->tab2[i];
 				break;
 			}
 		}
 
 		if (!found) {
-			dst->var_nbr = q->m->pl->varno;
-			q->m->pl->tab1[q->m->pl->tab_idx] = slot_nbr;
-			q->m->pl->tab2[q->m->pl->tab_idx] = q->m->pl->varno++;
-			q->m->pl->tab_idx++;
+			dst->var_nbr = q->st.m->pl->varno;
+			q->st.m->pl->tab1[q->st.m->pl->tab_idx] = slot_nbr;
+			q->st.m->pl->tab2[q->st.m->pl->tab_idx] = q->st.m->pl->varno++;
+			q->st.m->pl->tab_idx++;
 		}
 
 		dst->flags = FLAG2_FRESH;
 	}
 
-	if (q->m->pl->varno != g->nbr_vars) {
-		if (!create_vars(q, q->m->pl->varno-g->nbr_vars)) {
+	if (q->st.m->pl->varno != g->nbr_vars) {
+		if (!create_vars(q, q->st.m->pl->varno-g->nbr_vars)) {
 			DISCARD_RESULT throw_error(q, p1, "resource_error", "too_many_vars");
 			return NULL;
 		}
@@ -4445,13 +4445,13 @@ static USE_RESULT pl_status fn_iso_retract_1(query *q)
 
 static USE_RESULT pl_status do_retractall(query *q, cell *p1, idx_t p1_ctx)
 {
-	predicate *h = search_predicate(q->m, get_head(p1));
+	predicate *h = search_predicate(q->st.m, get_head(p1));
 
 	if (!h) {
 		cell *head = get_head(p1);
 		bool found = false;
 
-		if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found)
+		if (get_builtin(q->st.m->pl, GET_STR(head), head->arity, &found), found)
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 		return pl_success;
@@ -4476,14 +4476,14 @@ static USE_RESULT pl_status fn_iso_retractall_1(query *q)
 
 static USE_RESULT pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 {
-	predicate *h = search_predicate(q->m, c);
+	predicate *h = search_predicate(q->st.m, c);
 	if (!h) return pl_success;
 
 	if (!h->is_dynamic)
 		return throw_error(q, c_orig, "permission_error", "modify,static_procedure");
 
 	for (clause *r = h->head; r; r = r->next) {
-		if (!q->m->loading && r->t.persist && !r->t.ugen_erased)
+		if (!q->st.m->loading && r->t.persist && !r->t.ugen_erased)
 			db_log(q, r, LOG_ERASE);
 
 		add_to_dirty_list(q, r);
@@ -4533,7 +4533,7 @@ static USE_RESULT pl_status fn_iso_abolish_1(query *q)
 
 	bool found = false;
 
-	if (get_builtin(q->m->pl, GET_STR(p1_name), p1_arity->val_num, &found), found)
+	if (get_builtin(q->st.m->pl, GET_STR(p1_name), p1_arity->val_num, &found), found)
 		return throw_error(q, p1, "permission_error", "modify,static_procedure");
 
 	cell tmp;
@@ -4605,14 +4605,14 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 
 	bool found = false;
 
-	if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found) {
+	if (get_builtin(q->st.m->pl, GET_STR(head), head->arity, &found), found) {
 		if (!GET_OP(head))
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 	}
 
 	cell *tmp2, *body = get_body(p1);
 
-	if (body && ((tmp2 = check_body_callable(q->m->p, body)) != NULL))
+	if (body && ((tmp2 = check_body_callable(q->st.m->p, body)) != NULL))
 		return throw_error(q, tmp2, "type_error", "callable");
 
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
@@ -4622,7 +4622,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	idx_t nbr_cells = tmp->nbr_cells;
-	parser *p = q->m->p;
+	parser *p = q->st.m->p;
 
 	if (nbr_cells > p->t->nbr_cells) {
 		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
@@ -4636,7 +4636,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	cell *h = get_head(p->t->cells);
 
 	if (is_cstring(h)) {
-		idx_t off = index_from_pool(q->m->pl, GET_STR(h));
+		idx_t off = index_from_pool(q->st.m->pl, GET_STR(h));
 		ensure (off != ERR_IDX);
 		DECR_REF(h);
 		h->val_type = TYPE_LITERAL;
@@ -4647,11 +4647,11 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
 
-	clause *r = asserta_to_db(q->m, p->t, 0);
+	clause *r = asserta_to_db(q->st.m, p->t, 0);
 	may_ptr_error(r);
-	uuid_gen(q->m->pl, &r->u);
+	uuid_gen(q->st.m->pl, &r->u);
 
-	if (!q->m->loading && r->t.persist)
+	if (!q->st.m->loading && r->t.persist)
 		db_log(q, r, LOG_ASSERTA);
 
 	return pl_success;
@@ -4667,14 +4667,14 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 
 	bool found = false;
 
-	if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found) {
+	if (get_builtin(q->st.m->pl, GET_STR(head), head->arity, &found), found) {
 		if (!GET_OP(head))
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 	}
 
 	cell *tmp2, *body = get_body(p1);
 
-	if (body && ((tmp2 = check_body_callable(q->m->p, body)) != NULL))
+	if (body && ((tmp2 = check_body_callable(q->st.m->p, body)) != NULL))
 		return throw_error(q, tmp2, "type_error", "callable");
 
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
@@ -4684,7 +4684,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	idx_t nbr_cells = tmp->nbr_cells;
-	parser *p = q->m->p;
+	parser *p = q->st.m->p;
 
 	if (nbr_cells > p->t->nbr_cells) {
 		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
@@ -4698,7 +4698,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	cell *h = get_head(p->t->cells);
 
 	if (is_cstring(h)) {
-		idx_t off = index_from_pool(q->m->pl, GET_STR(h));
+		idx_t off = index_from_pool(q->st.m->pl, GET_STR(h));
 		ensure (off != ERR_IDX);
 		DECR_REF(h);
 		h->val_type = TYPE_LITERAL;
@@ -4709,11 +4709,11 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
 
-	clause *r = assertz_to_db(q->m, p->t, 0);
+	clause *r = assertz_to_db(q->st.m, p->t, 0);
 	may_ptr_error(r);
-	uuid_gen(q->m->pl, &r->u);
+	uuid_gen(q->st.m->pl, &r->u);
 
-	if (!q->m->loading && r->t.persist)
+	if (!q->st.m->loading && r->t.persist)
 		db_log(q, r, LOG_ASSERTZ);
 
 	return pl_success;
@@ -4732,7 +4732,7 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 
 	cell *tmp2;
 
-	if ((tmp2 = check_body_callable(q->m->p, p1)) != NULL)
+	if ((tmp2 = check_body_callable(q->st.m->p, p1)) != NULL)
 		return throw_error(q, p1, "type_error", "callable");
 
 	cell *tmp;
@@ -4755,7 +4755,7 @@ static USE_RESULT pl_status fn_sys_call_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp3;
 
-	if ((tmp3 = check_body_callable(q->m->p, p1)) != NULL)
+	if ((tmp3 = check_body_callable(q->st.m->p, p1)) != NULL)
 		return throw_error(q, p1, "type_error", "callable");
 
 	cell *tmp = clone_to_heap(q, true, p1, 1);
@@ -4785,7 +4785,7 @@ static USE_RESULT pl_status fn_sys_call_n(query *q)
 
 	if (is_cstring(tmp2)) {
 		cell *c = tmp2;
-		idx_t off = index_from_pool(q->m->pl, GET_STR(tmp2));
+		idx_t off = index_from_pool(q->st.m->pl, GET_STR(tmp2));
 		ensure (off != ERR_IDX);
 		//DECR_REF(tmp2);
 		c->val_off = off;
@@ -4795,20 +4795,20 @@ static USE_RESULT pl_status fn_sys_call_n(query *q)
 
 	bool found = false;
 
-	if ((tmp2->fn = get_builtin(q->m->pl, GET_STR(tmp2), arity, &found)), found) {
+	if ((tmp2->fn = get_builtin(q->st.m->pl, GET_STR(tmp2), arity, &found)), found) {
 		tmp2->flags |= FLAG_BUILTIN;
 		unsigned specifier;
 
-		if (search_op(q->m, GET_STR(tmp2), &specifier, false))
+		if (search_op(q->st.m, GET_STR(tmp2), &specifier, false))
 			SET_OP(tmp2, specifier);
 	} else if (found) {
 		tmp2->flags |= FLAG_BUILTIN;
 		unsigned specifier;
 
-		if (search_op(q->m, GET_STR(tmp2), &specifier, false))
+		if (search_op(q->st.m, GET_STR(tmp2), &specifier, false))
 			SET_OP(tmp2, specifier);
 	} else {
-		tmp2->match = search_predicate(q->m, tmp2);
+		tmp2->match = search_predicate(q->st.m, tmp2);
 		tmp2->flags &= ~FLAG_BUILTIN;
 	}
 
@@ -4816,7 +4816,7 @@ static USE_RESULT pl_status fn_sys_call_n(query *q)
 	make_call(q, tmp+1+tmp2->nbr_cells);
 	cell *tmp3;
 
-	if ((tmp3 = check_body_callable(q->m->p, tmp2)) != NULL)
+	if ((tmp3 = check_body_callable(q->st.m->p, tmp2)) != NULL)
 		return throw_error(q, tmp2, "type_error", "callable");
 
 	q->st.curr_cell = tmp;
@@ -4829,11 +4829,11 @@ static USE_RESULT pl_status fn_iso_invoke_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,callable);
 
-	module *m = find_module(q->m->pl, GET_STR(p1));
+	module *m = find_module(q->st.m->pl, GET_STR(p1));
 
 	if (!m) {
 		//return throw_error(q, q->st.curr_cell, "existence_error", "module");
-		m = create_module(q->m->pl, GET_STR(p1));
+		m = create_module(q->st.m->pl, GET_STR(p1));
 	} else {
 		//if (!h) return throw_error(q, q->st.curr_cell, "existence_error", "procedure");
 	}
@@ -4844,7 +4844,7 @@ static USE_RESULT pl_status fn_iso_invoke_2(query *q)
 	nbr_cells += p2->nbr_cells;
 	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
-	q->m = m;
+	q->st.m = m;
 	return pl_success;
 }
 
@@ -5073,7 +5073,7 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 	print_term(q, stdout, e, q->st.curr_frame, 1);
 	fprintf(stdout, "\n");
 	q->quoted = 1;
-	q->m->pl->did_dump_vars = true;
+	q->st.m->pl->did_dump_vars = true;
 	free(q->exception);
 	q->exception = NULL;
 	q->error = true;
@@ -5109,8 +5109,8 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 	ensure(dst);
 	int off = 0;
 
-	if (q->m != q->m->pl->m) {
-		off += sprintf(dst, "%s:", q->m->name);
+	if (q->st.m != q->st.m->pl->m) {
+		off += sprintf(dst, "%s:", q->st.m->name);
 	}
 
 	len = print_term_to_buf(q, dst+off, len+1, c, c_ctx, 1, 0, 0);
@@ -5136,7 +5136,7 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 	expected = tmpbuf;
 	char functor[1024];
 
-	if (needs_quoting(q->m, GET_STR(q->st.curr_cell), LEN_STR(q->st.curr_cell))) {
+	if (needs_quoting(q->st.m, GET_STR(q->st.curr_cell), LEN_STR(q->st.curr_cell))) {
 		char tmpbuf[1024-3];
 		formatted(tmpbuf, sizeof(tmpbuf), GET_STR(q->st.curr_cell), LEN_STR(q->st.curr_cell), false);
 		snprintf(functor, sizeof(functor), "'%s'", tmpbuf);
@@ -5189,7 +5189,7 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 
 	//printf("*** %s\n", dst2);
 
-	parser *p = create_parser(q->m);
+	parser *p = create_parser(q->st.m);
 	may_ptr_error(p);
 	p->srcptr = dst2;
 	frame *g = GET_CURR_FRAME();
@@ -5273,7 +5273,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 			tmp[0].nbr_cells = 1 + arity;
 
 			if (is_cstring(p2))
-				tmp[0].val_off = index_from_pool(q->m->pl, GET_STR(p2));
+				tmp[0].val_off = index_from_pool(q->st.m->pl, GET_STR(p2));
 			else
 				tmp[0].val_off = p2->val_off;
 
@@ -5336,18 +5336,18 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 
 	const char *functor = GET_STR(pf);
 	unsigned arity = pa->val_num + add_two;
-	module *m = q->m;
+	module *m = q->st.m;
 
 	if (strchr(functor, ':')) {
 		char tmpbuf1[256], tmpbuf2[256];
 		tmpbuf1[0] = tmpbuf2[0] = '\0';
 		sscanf(functor, "%255[^:]:%255s", tmpbuf1, tmpbuf2);
 		tmpbuf1[sizeof(tmpbuf1)-1] = tmpbuf2[sizeof(tmpbuf2)-1] = '\0';
-		m = find_module(q->m->pl, tmpbuf1);
+		m = find_module(q->st.m->pl, tmpbuf1);
 	}
 
 	if (!m)
-		m = q->m;
+		m = q->st.m;
 
 	module *tmp_m = NULL;
 
@@ -5356,14 +5356,14 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 			return pl_success;
 
 		if (!tmp_m)
-			m = tmp_m = q->m->pl->modules;
+			m = tmp_m = q->st.m->pl->modules;
 		else
 			m = m->next;
 	}
 
 	bool found = false;
 
-	if (get_builtin(q->m->pl, functor, arity, &found), found)
+	if (get_builtin(q->st.m->pl, functor, arity, &found), found)
 		return pl_success;
 
 	return pl_failure;
@@ -5372,7 +5372,7 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 static bool search_functor(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
 	if (!q->retry)
-		q->st.iter2 = sl_first(q->m->index);
+		q->st.iter2 = sl_first(q->st.m->index);
 
 	DISCARD_RESULT make_choice(q);
 	predicate *h = NULL;
@@ -5446,18 +5446,18 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 	if (!strcmp(GET_STR(p1), "double_quotes")) {
 		cell tmp;
 
-		if (q->m->flag.double_quote_atom)
-			make_literal(&tmp, index_from_pool(q->m->pl, "atom"));
-		else if (q->m->flag.double_quote_codes)
-			make_literal(&tmp, index_from_pool(q->m->pl, "codes"));
-		else if (q->m->flag.double_quote_chars)
-			make_literal(&tmp, index_from_pool(q->m->pl, "chars"));
+		if (q->st.m->flag.double_quote_atom)
+			make_literal(&tmp, index_from_pool(q->st.m->pl, "atom"));
+		else if (q->st.m->flag.double_quote_codes)
+			make_literal(&tmp, index_from_pool(q->st.m->pl, "codes"));
+		else if (q->st.m->flag.double_quote_chars)
+			make_literal(&tmp, index_from_pool(q->st.m->pl, "chars"));
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "char_conversion")) {
 		cell tmp;
 
-		if (q->m->flag.char_conversion)
+		if (q->st.m->flag.char_conversion)
 			make_literal(&tmp, g_on_s);
 		else
 			make_literal(&tmp, g_off_s);
@@ -5466,18 +5466,18 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 	} else if (!strcmp(GET_STR(p1), "occurs_check")) {
 		cell tmp;
 
-		if (q->m->flag.occurs_check == 1)
+		if (q->st.m->flag.occurs_check == 1)
 			make_literal(&tmp, g_true_s);
-		else if (q->m->flag.occurs_check == 0)
+		else if (q->st.m->flag.occurs_check == 0)
 			make_literal(&tmp, g_false_s);
 		else
-			make_literal(&tmp, index_from_pool(q->m->pl, "error"));
+			make_literal(&tmp, index_from_pool(q->st.m->pl, "error"));
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "debug")) {
 		cell tmp;
 
-		if (q->m->flag.debug)
+		if (q->st.m->flag.debug)
 			make_literal(&tmp, g_on_s);
 		else
 			make_literal(&tmp, g_off_s);
@@ -5486,7 +5486,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 	} else if (!strcmp(GET_STR(p1), "character_escapes")) {
 		cell tmp;
 
-		if (q->m->flag.character_escapes)
+		if (q->st.m->flag.character_escapes)
 			make_literal(&tmp, g_true_s);
 		else
 			make_literal(&tmp, g_false_s);
@@ -5495,7 +5495,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 	} else if (!strcmp(GET_STR(p1), "prefer_rationals")) {
 		cell tmp;
 
-		if (q->m->flag.prefer_rationals)
+		if (q->st.m->flag.prefer_rationals)
 			make_literal(&tmp, g_true_s);
 		else
 			make_literal(&tmp, g_false_s);
@@ -5504,19 +5504,19 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 	} else if (!strcmp(GET_STR(p1), "rational_syntax")) {
 		cell tmp;
 
-		if (q->m->flag.rational_syntax_natural)
-			make_literal(&tmp, index_from_pool(q->m->pl, "natural"));
+		if (q->st.m->flag.rational_syntax_natural)
+			make_literal(&tmp, index_from_pool(q->st.m->pl, "natural"));
 		else
-			make_literal(&tmp, index_from_pool(q->m->pl, "compatibility"));
+			make_literal(&tmp, index_from_pool(q->st.m->pl, "compatibility"));
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "dialect")) {
 		cell tmp;
-		make_literal(&tmp, index_from_pool(q->m->pl, "trealla"));
+		make_literal(&tmp, index_from_pool(q->st.m->pl, "trealla"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "integer_rounding_function")) {
 		cell tmp;
-		make_literal(&tmp, index_from_pool(q->m->pl, "toward_zero"));
+		make_literal(&tmp, index_from_pool(q->st.m->pl, "toward_zero"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "bounded")) {
 		cell tmp;
@@ -5560,7 +5560,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 		sscanf(VERSION, "v%u.%u.%u", &v1, &v2, &v3);
 		cell *tmp = alloc_on_heap(q, 5);
 		ensure(tmp);
-		make_literal(&tmp[0], index_from_pool(q->m->pl, "trealla"));
+		make_literal(&tmp[0], index_from_pool(q->st.m->pl, "trealla"));
 		make_int(&tmp[1], v1);
 		make_int(&tmp[2], v2);
 		make_int(&tmp[3], v3);
@@ -5570,7 +5570,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 		return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "version_git")) {
 		cell tmp;
-		make_literal(&tmp, index_from_pool(q->m->pl, VERSION));
+		make_literal(&tmp, index_from_pool(q->st.m->pl, VERSION));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "argv")) {
 		if (g_avc == g_ac) {
@@ -5596,10 +5596,10 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 	} else if (!strcmp(GET_STR(p1), "unknown")) {
 		cell tmp;
 		make_literal(&tmp,
-			q->m->flag.unknown == UNK_ERROR ? index_from_pool(q->m->pl, "error") :
-			q->m->flag.unknown == UNK_WARNING ? index_from_pool(q->m->pl, "warning") :
-			q->m->flag.unknown == UNK_CHANGEABLE ? index_from_pool(q->m->pl, "changeable") :
-			index_from_pool(q->m->pl, "fail"));
+			q->st.m->flag.unknown == UNK_ERROR ? index_from_pool(q->st.m->pl, "error") :
+			q->st.m->flag.unknown == UNK_WARNING ? index_from_pool(q->st.m->pl, "warning") :
+			q->st.m->flag.unknown == UNK_CHANGEABLE ? index_from_pool(q->st.m->pl, "changeable") :
+			index_from_pool(q->st.m->pl, "fail"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -5624,14 +5624,14 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 
 	if (!strcmp(GET_STR(p1), "double_quotes")) {
 		if (!strcmp(GET_STR(p2), "atom")) {
-			q->m->flag.double_quote_chars = q->m->flag.double_quote_codes = false;
-			q->m->flag.double_quote_atom = true;
+			q->st.m->flag.double_quote_chars = q->st.m->flag.double_quote_codes = false;
+			q->st.m->flag.double_quote_atom = true;
 		} else if (!strcmp(GET_STR(p2), "codes")) {
-			q->m->flag.double_quote_chars = q->m->flag.double_quote_atom = false;
-			q->m->flag.double_quote_codes = true;
+			q->st.m->flag.double_quote_chars = q->st.m->flag.double_quote_atom = false;
+			q->st.m->flag.double_quote_codes = true;
 		} else if (!strcmp(GET_STR(p2), "chars")) {
-			q->m->flag.double_quote_atom = q->m->flag.double_quote_codes = false;
-			q->m->flag.double_quote_chars = true;
+			q->st.m->flag.double_quote_atom = q->st.m->flag.double_quote_codes = false;
+			q->st.m->flag.double_quote_chars = true;
 		} else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
@@ -5640,12 +5640,12 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			return throw_error(q, tmp, "domain_error", "flag_value");
 		}
 
-		q->m->p->flag = q->m->flag;
+		q->st.m->p->flag = q->st.m->flag;
 	} else if (!strcmp(GET_STR(p1), "character_escapes")) {
 		if (!strcmp(GET_STR(p2), "true") || !strcmp(GET_STR(p2), "on"))
-			q->m->flag.character_escapes = true;
+			q->st.m->flag.character_escapes = true;
 		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
-			q->m->flag.character_escapes = false;
+			q->st.m->flag.character_escapes = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
@@ -5655,9 +5655,9 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		}
 	} else if (!strcmp(GET_STR(p1), "char_conversion")) {
 		if (!strcmp(GET_STR(p2), "true") || !strcmp(GET_STR(p2), "on"))
-			q->m->flag.char_conversion = true;
+			q->st.m->flag.char_conversion = true;
 		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
-			q->m->flag.char_conversion = false;
+			q->st.m->flag.char_conversion = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
@@ -5667,11 +5667,11 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		}
 	} else if (!strcmp(GET_STR(p1), "occurs_check")) {
 		if (!strcmp(GET_STR(p2), "true") || !strcmp(GET_STR(p2), "on"))
-			q->m->flag.occurs_check = 1;
+			q->st.m->flag.occurs_check = 1;
 		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
-			q->m->flag.occurs_check = 0;
+			q->st.m->flag.occurs_check = 0;
 		else if (!strcmp(GET_STR(p2), "error"))
-			q->m->flag.occurs_check = -1;
+			q->st.m->flag.occurs_check = -1;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
@@ -5681,9 +5681,9 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		}
 	} else if (!strcmp(GET_STR(p1), "rational_syntax")) {
 		if (!strcmp(GET_STR(p2), "natural"))
-			q->m->flag.rational_syntax_natural = true;
+			q->st.m->flag.rational_syntax_natural = true;
 		else if (!strcmp(GET_STR(p2), "compatibility"))
-			q->m->flag.rational_syntax_natural = false;
+			q->st.m->flag.rational_syntax_natural = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
@@ -5693,9 +5693,9 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		}
 	} else if (!strcmp(GET_STR(p1), "prefer_rationals")) {
 		if (!strcmp(GET_STR(p2), "true") || !strcmp(GET_STR(p2), "on"))
-			q->m->flag.prefer_rationals = true;
+			q->st.m->flag.prefer_rationals = true;
 		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
-			q->m->flag.prefer_rationals = false;
+			q->st.m->flag.prefer_rationals = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
@@ -5705,9 +5705,9 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		}
 	} else if (!strcmp(GET_STR(p1), "debug")) {
 		if (!strcmp(GET_STR(p2), "true") || !strcmp(GET_STR(p2), "on"))
-			q->m->flag.debug = true;
+			q->st.m->flag.debug = true;
 		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
-			q->m->flag.debug = false;
+			q->st.m->flag.debug = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
@@ -5717,13 +5717,13 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		}
 	} else if (!strcmp(GET_STR(p1), "unknown")) {
 		if (!strcmp(GET_STR(p2), "fail")) {
-			q->m->flag.unknown = UNK_FAIL;
+			q->st.m->flag.unknown = UNK_FAIL;
 		} else if (!strcmp(GET_STR(p2), "error")) {
-			q->m->flag.unknown = UNK_ERROR;
+			q->st.m->flag.unknown = UNK_ERROR;
 		} else if (!strcmp(GET_STR(p2), "warning")) {
-			q->m->flag.unknown = UNK_WARNING;
+			q->st.m->flag.unknown = UNK_WARNING;
 		} else if (!strcmp(GET_STR(p2), "changeable")) {
-			q->m->flag.unknown = UNK_CHANGEABLE;
+			q->st.m->flag.unknown = UNK_CHANGEABLE;
 		}
 	} else if (!strcmp(GET_STR(p1),"bounded")
 		|| !strcmp(GET_STR(p1),"max_arity")
@@ -5738,7 +5738,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 	else
 		return throw_error(q, p1, "domain_error", "prolog_flag");
 
-	q->flag = q->m->flag;
+	q->flag = q->st.m->flag;
 	return pl_success;
 }
 
@@ -6139,22 +6139,22 @@ static pl_status do_op(query *q, cell *p3)
 		return throw_error(q, p3, "permission_error", "modify,operator");
 
 	unsigned tmp_optype = 0;
-	get_op(q->m, GET_STR(p3), &tmp_optype, false);
+	get_op(q->st.m, GET_STR(p3), &tmp_optype, false);
 
 	if (IS_INFIX(specifier) && IS_POSTFIX(tmp_optype))
 		return throw_error(q, p3, "permission_error", "create,operator");
 
-	unsigned tmp_pri = get_op2(q->m, GET_STR(p3), OP_FX);
+	unsigned tmp_pri = get_op2(q->st.m, GET_STR(p3), OP_FX);
 
 	if (IS_POSTFIX(specifier) && (IS_INFIX(tmp_optype) || tmp_pri))
 		return throw_error(q, p3, "permission_error", "create,operator");
 
-	tmp_pri = get_op2(q->m, GET_STR(p3), OP_FY);
+	tmp_pri = get_op2(q->st.m, GET_STR(p3), OP_FY);
 
 	if (IS_POSTFIX(specifier) && (IS_INFIX(tmp_optype) || tmp_pri))
 		return throw_error(q, p3, "permission_error", "create,operator");
 
-	if (!set_op(q->m, GET_STR(p3), specifier, pri))
+	if (!set_op(q->st.m, GET_STR(p3), specifier, pri))
 		return throw_error(q, p3, "resource_error", "too_many_ops");
 
 	return pl_success;
@@ -6202,10 +6202,10 @@ static USE_RESULT pl_status fn_erase_1(query *q)
 	GET_FIRST_ARG(p1,atom);
 	uuid u;
 	uuid_from_buf(GET_STR(p1), &u);
-	clause *r = erase_from_db(q->m, &u);
+	clause *r = erase_from_db(q->st.m, &u);
 	may_ptr_error(r);
 
-	if (!q->m->loading && r->t.persist)
+	if (!q->st.m->loading && r->t.persist)
 		db_log(q, r, LOG_ERASE);
 
 	return pl_success;
@@ -6217,7 +6217,7 @@ static USE_RESULT pl_status fn_instance_2(query *q)
 	GET_NEXT_ARG(p2,any);
 	uuid u;
 	uuid_from_buf(GET_STR(p1), &u);
-	clause *r = find_in_db(q->m, &u);
+	clause *r = find_in_db(q->st.m, &u);
 	may_ptr_error(r);
 	return unify(q, p2, p2_ctx, r->t.cells, q->st.curr_frame);
 }
@@ -6234,7 +6234,7 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 		if (!is_variable(p3)) {
 			uuid u;
 			uuid_from_buf(GET_STR(p3), &u);
-			clause *r = find_in_db(q->m, &u);
+			clause *r = find_in_db(q->st.m, &u);
 			may_ptr_error(r);
 			t = &r->t;
 		} else {
@@ -6285,7 +6285,7 @@ static USE_RESULT pl_status do_asserta_2(query *q)
 
 	bool found = false;
 
-	if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found) {
+	if (get_builtin(q->st.m->pl, GET_STR(head), head->arity, &found), found) {
 		if (!GET_OP(head))
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 	}
@@ -6297,7 +6297,7 @@ static USE_RESULT pl_status do_asserta_2(query *q)
 
 	cell *tmp2;
 
-	if (body && ((tmp2 = check_body_callable(q->m->p, body)) != NULL))
+	if (body && ((tmp2 = check_body_callable(q->st.m->p, body)) != NULL))
 		return throw_error(q, tmp2, "type_error", "callable");
 
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -6307,7 +6307,7 @@ static USE_RESULT pl_status do_asserta_2(query *q)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	idx_t nbr_cells = tmp->nbr_cells;
-	parser *p = q->m->p;
+	parser *p = q->st.m->p;
 
 	if (nbr_cells > p->t->nbr_cells) {
 		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
@@ -6321,7 +6321,7 @@ static USE_RESULT pl_status do_asserta_2(query *q)
 	cell *h = get_head(p->t->cells);
 
 	if (is_cstring(h)) {
-		idx_t off = index_from_pool(q->m->pl, GET_STR(h));
+		idx_t off = index_from_pool(q->st.m->pl, GET_STR(h));
 		ensure (off != ERR_IDX);
 		DECR_REF(h);
 		h->val_type = TYPE_LITERAL;
@@ -6332,7 +6332,7 @@ static USE_RESULT pl_status do_asserta_2(query *q)
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
 
-	clause *r = asserta_to_db(q->m, p->t, 0);
+	clause *r = asserta_to_db(q->st.m, p->t, 0);
 	may_ptr_error(r);
 
 	if (!is_variable(p2)) {
@@ -6348,7 +6348,7 @@ static USE_RESULT pl_status do_asserta_2(query *q)
 		DECR_REF(&tmp2);
 	}
 
-	if (!q->m->loading && r->t.persist)
+	if (!q->st.m->loading && r->t.persist)
 		db_log(q, r, LOG_ASSERTA);
 
 	return pl_success;
@@ -6378,7 +6378,7 @@ static USE_RESULT pl_status do_assertz_2(query *q)
 
 	bool found = false;
 
-	if (get_builtin(q->m->pl, GET_STR(head), head->arity, &found), found) {
+	if (get_builtin(q->st.m->pl, GET_STR(head), head->arity, &found), found) {
 		if (!GET_OP(head))
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 	}
@@ -6390,7 +6390,7 @@ static USE_RESULT pl_status do_assertz_2(query *q)
 
 	cell *tmp2;
 
-	if (body && ((tmp2 = check_body_callable(q->m->p, body)) != NULL))
+	if (body && ((tmp2 = check_body_callable(q->st.m->p, body)) != NULL))
 		return throw_error(q, tmp2, "type_error", "callable");
 
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -6401,7 +6401,7 @@ static USE_RESULT pl_status do_assertz_2(query *q)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	idx_t nbr_cells = tmp->nbr_cells;
-	parser *p = q->m->p;
+	parser *p = q->st.m->p;
 
 	if (nbr_cells > p->t->nbr_cells) {
 		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
@@ -6415,7 +6415,7 @@ static USE_RESULT pl_status do_assertz_2(query *q)
 	cell *h = get_head(p->t->cells);
 
 	if (is_cstring(h)) {
-		idx_t off = index_from_pool(q->m->pl, GET_STR(h));
+		idx_t off = index_from_pool(q->st.m->pl, GET_STR(h));
 		ensure (off != ERR_IDX);
 		DECR_REF(h);
 		h->val_type = TYPE_LITERAL;
@@ -6426,7 +6426,7 @@ static USE_RESULT pl_status do_assertz_2(query *q)
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
 
-	clause *r = assertz_to_db(q->m, p->t, 0);
+	clause *r = assertz_to_db(q->st.m, p->t, 0);
 	may_ptr_error(r);
 
 	if (!is_variable(p2)) {
@@ -6442,7 +6442,7 @@ static USE_RESULT pl_status do_assertz_2(query *q)
 		DECR_REF(&tmp2);
 	}
 
-	if (!q->m->loading && r->t.persist)
+	if (!q->st.m->loading && r->t.persist)
 		db_log(q, r, LOG_ASSERTZ);
 
 	return pl_success;
@@ -6464,7 +6464,7 @@ static USE_RESULT pl_status fn_sys_assertz_2(query *q)
 
 static void save_db(FILE *fp, query *q, int logging)
 {
-	for (predicate *h = q->m->head; h; h = h->next) {
+	for (predicate *h = q->st.m->head; h; h = h->next) {
 		if (h->is_prebuilt)
 			continue;
 
@@ -6504,7 +6504,7 @@ static USE_RESULT pl_status fn_listing_0(query *q)
 
 static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 {
-	module *m = q->st.curr_clause ? q->st.curr_clause->m : q->m;
+	module *m = q->st.curr_clause ? q->st.curr_clause->m : q->st.m;
 
 	for (predicate *h = m->head; h; h = h->next) {
 		if (h->is_prebuilt)
@@ -6546,7 +6546,7 @@ static USE_RESULT pl_status fn_listing_1(query *q)
 		if (!is_integer(p3))
 			return throw_error(q, p3, "type_error", "integer");
 
-		name = index_from_pool(q->m->pl, GET_STR(p2));
+		name = index_from_pool(q->st.m->pl, GET_STR(p2));
 		arity = p3->val_num;
 
 		if (!strcmp(GET_STR(p1), "//"))
@@ -6711,7 +6711,7 @@ static USE_RESULT pl_status fn_get_time_1(query *q)
 static USE_RESULT pl_status fn_writeln_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = q->m->pl->current_output;
+	int n = q->st.m->pl->current_output;
 	stream *str = &g_streams[n];
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	fputc('\n', str->fp);
@@ -7396,7 +7396,7 @@ static USE_RESULT pl_status fn_client_5(query *q)
 static USE_RESULT pl_status fn_getline_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	int n = q->m->pl->current_input;
+	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 	char *line = NULL;
 	size_t len = 0;
@@ -7612,7 +7612,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_2(query *q)
 {
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_term,any);
-	int n = q->m->pl->current_input;
+	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 	char *src;
 	size_t len;
@@ -7652,7 +7652,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_opts,any);
 	GET_NEXT_ARG(p_term,any);
-	int n = q->m->pl->current_input;
+	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	char *src;
@@ -7691,7 +7691,7 @@ static USE_RESULT pl_status fn_read_term_from_atom_3(query *q)
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_term,any);
 	GET_NEXT_ARG(p_opts,any);
-	int n = q->m->pl->current_input;
+	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	char *src;
@@ -7730,7 +7730,7 @@ static USE_RESULT pl_status fn_write_term_to_chars_3(query *q)
 	GET_FIRST_ARG(p_term,any);
 	GET_NEXT_ARG(p2,list_or_nil);
 	GET_NEXT_ARG(p_chars,any);
-	q->flag = q->m->flag;
+	q->flag = q->st.m->flag;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2)) {
@@ -7759,7 +7759,7 @@ static USE_RESULT pl_status fn_write_canonical_to_chars_3(query *q)
 	GET_FIRST_ARG(p_term,any);
 	GET_NEXT_ARG(p2,list_or_nil);
 	GET_NEXT_ARG(p_chars,any);
-	q->flag = q->m->flag;
+	q->flag = q->st.m->flag;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2)) {
@@ -7909,9 +7909,9 @@ static query *pop_task(module *m, query *task)
 
 static USE_RESULT pl_status fn_wait_0(query *q)
 {
-	while (!g_tpl_interrupt && q->m->tasks) {
+	while (!g_tpl_interrupt && q->st.m->tasks) {
 		uint_t now = get_time_in_usec() / 1000;
-		query *task = q->m->tasks;
+		query *task = q->st.m->tasks;
 		unsigned did_something = 0, spawn_cnt = 0;
 
 		while (!g_tpl_interrupt && task) {
@@ -7933,7 +7933,7 @@ static USE_RESULT pl_status fn_wait_0(query *q)
 
 			if (!task->yielded || !task->st.curr_cell) {
 				query *save = task;
-				task = pop_task(q->m, task);
+				task = pop_task(q->st.m, task);
 				destroy_query(save);
 				continue;
 			}
@@ -7953,9 +7953,9 @@ static USE_RESULT pl_status fn_wait_0(query *q)
 
 static USE_RESULT pl_status fn_await_0(query *q)
 {
-	while (!g_tpl_interrupt && q->m->tasks) {
+	while (!g_tpl_interrupt && q->st.m->tasks) {
 		uint_t now = get_time_in_usec() / 1000;
-		query *task = q->m->tasks;
+		query *task = q->st.m->tasks;
 		unsigned did_something = 0, spawn_cnt = 0;
 
 		while (!g_tpl_interrupt && task) {
@@ -7977,7 +7977,7 @@ static USE_RESULT pl_status fn_await_0(query *q)
 
 			if (!task->yielded || !q->st.curr_cell) {
 				query *save = task;
-				task = pop_task(q->m, task);
+				task = pop_task(q->st.m, task);
 				destroy_query(save);
 				continue;
 			}
@@ -7996,7 +7996,7 @@ static USE_RESULT pl_status fn_await_0(query *q)
 			break;
 	}
 
-	if (!q->m->tasks)
+	if (!q->st.m->tasks)
 		return pl_failure;
 
 	may_error(make_choice(q));
@@ -8030,17 +8030,17 @@ static USE_RESULT pl_status fn_task_n(query *q)
 	tmp2->arity = arity;
 	bool found = false;
 
-	if ((tmp2->fn = get_builtin(q->m->pl, GET_STR(tmp2), arity, &found)), found)
+	if ((tmp2->fn = get_builtin(q->st.m->pl, GET_STR(tmp2), arity, &found)), found)
 		tmp2->flags |= FLAG_BUILTIN;
 	else {
-		tmp2->match = search_predicate(q->m, tmp2);
+		tmp2->match = search_predicate(q->st.m, tmp2);
 		tmp2->flags &= ~FLAG_BUILTIN;
 	}
 
 	cell *tmp = clone_to_heap(q, false, tmp2, 0);
 	query *task = create_task(q, tmp);
 	task->yielded = task->spawned = true;
-	push_task(q->m, task);
+	push_task(q->st.m, task);
 	return pl_success;
 }
 
@@ -8049,7 +8049,7 @@ static USE_RESULT pl_status fn_fork_0(query *q)
 	cell *curr_cell = q->st.curr_cell + q->st.curr_cell->nbr_cells;
 	query *task = create_task(q, curr_cell);
 	task->yielded = true;
-	push_task(q->m, task);
+	push_task(q->st.m, task);
 	return pl_failure;
 }
 
@@ -8153,7 +8153,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	GET_NEXT_ARG(p_opts,list_or_nil);
 	int expand = 0;
 	char *src = NULL, *filename;
-	char *here = strdup(q->m->filename);
+	char *here = strdup(q->st.m->filename);
 	char *ptr = here + strlen(here) - 1;
 
 	while (*ptr && (*ptr != '/')) {
@@ -8280,11 +8280,11 @@ static USE_RESULT pl_status do_consult(query *q, cell *p1, idx_t p1_ctx)
 {
 	if (is_atom(p1)) {
 		const char *src = GET_STR(p1);
-		deconsult(q->m->pl, src);
+		deconsult(q->st.m->pl, src);
 
-		char *filename = relative_to(q->m->filename, src);
+		char *filename = relative_to(q->st.m->filename, src);
 
-		if (!module_load_file(q->m, filename)) {
+		if (!module_load_file(q->st.m, filename)) {
 			free(filename);
 			return throw_error(q, p1, "existence_error", "filespec");
 		}
@@ -8302,11 +8302,11 @@ static USE_RESULT pl_status do_consult(query *q, cell *p1, idx_t p1_ctx)
 	if (!is_atom(mod) || !is_atom(file))
 		return throw_error(q, p1, "type_error", "filespec");
 
-	module *tmp_m = create_module(q->m->pl, GET_STR(mod));
+	module *tmp_m = create_module(q->st.m->pl, GET_STR(mod));
 	char *filename = GET_STR(file);
-	deconsult(q->m->pl, filename);
+	deconsult(q->st.m->pl, filename);
 	tmp_m->make_public = 1;
-	filename = relative_to(q->m->filename, filename);
+	filename = relative_to(q->st.m->filename, filename);
 
 	if (!module_load_file(tmp_m, filename)) {
 		destroy_module(tmp_m);
@@ -8610,7 +8610,7 @@ static USE_RESULT pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* 
 	size_t len = dst - tmpbuf;
 
 	if (str == NULL) {
-		int n = q->m->pl->current_output;
+		int n = q->st.m->pl->current_output;
 		stream *str = &g_streams[n];
 		net_write(tmpbuf, len, str);
 	} else if (is_structure(str) && ((strcmp(GET_STR(str),"atom") && strcmp(GET_STR(str),"chars") && strcmp(GET_STR(str),"string")) || (str->arity > 1) || !is_variable(str+1))) {
@@ -9341,7 +9341,7 @@ static USE_RESULT pl_status fn_chdir_1(query *q)
 static USE_RESULT pl_status fn_edin_skip_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	int n = q->m->pl->current_input;
+	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
@@ -9405,7 +9405,7 @@ static USE_RESULT pl_status fn_edin_tab_1(query *q)
 	if (!is_integer(&p1))
 		return throw_error(q, &p1, "type_error", "integer");
 
-	int n = q->m->pl->current_output;
+	int n = q->st.m->pl->current_output;
 	stream *str = &g_streams[n];
 
 	for (int i = 0; i < p1.val_num; i++)
@@ -9434,7 +9434,7 @@ static USE_RESULT pl_status fn_edin_tab_2(query *q)
 
 static USE_RESULT pl_status fn_edin_seen_0(query *q)
 {
-	int n = q->m->pl->current_input;
+	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 
 	if (n <= 2)
@@ -9449,13 +9449,13 @@ static USE_RESULT pl_status fn_edin_seen_0(query *q)
 	free(str->mode);
 	free(str->name);
 	memset(str, 0, sizeof(stream));
-	q->m->pl->current_input = 0;
+	q->st.m->pl->current_input = 0;
 	return pl_success;
 }
 
 static USE_RESULT pl_status fn_edin_told_0(query *q)
 {
-	int n = q->m->pl->current_output;
+	int n = q->st.m->pl->current_output;
 	stream *str = &g_streams[n];
 
 	if (n <= 2)
@@ -9470,14 +9470,14 @@ static USE_RESULT pl_status fn_edin_told_0(query *q)
 	free(str->mode);
 	free(str->name);
 	memset(str, 0, sizeof(stream));
-	q->m->pl->current_output = 0;
+	q->st.m->pl->current_output = 0;
 	return pl_success;
 }
 
 static USE_RESULT pl_status fn_edin_seeing_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	char *name = q->m->pl->current_input==0?"user":g_streams[q->m->pl->current_input].name;
+	char *name = q->st.m->pl->current_input==0?"user":g_streams[q->st.m->pl->current_input].name;
 	cell tmp;
 	may_error(make_cstring(&tmp, name));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -9488,7 +9488,7 @@ static USE_RESULT pl_status fn_edin_seeing_1(query *q)
 static USE_RESULT pl_status fn_edin_telling_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	char *name =q->m->pl->current_output==1?"user":g_streams[q->m->pl->current_output].name;
+	char *name =q->st.m->pl->current_output==1?"user":g_streams[q->st.m->pl->current_output].name;
 	cell tmp;
 	may_error(make_cstring(&tmp, name));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -9643,7 +9643,7 @@ static USE_RESULT pl_status fn_uuid_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	uuid u;
-	uuid_gen(q->m->pl, &u);
+	uuid_gen(q->st.m->pl, &u);
 	char tmpbuf[128];
 	uuid_to_buf(&u, tmpbuf, sizeof(tmpbuf));
 	cell tmp;
@@ -9797,7 +9797,7 @@ static void load_properties(module *m);
 
 static USE_RESULT pl_status fn_sys_load_properties_0(query *q)
 {
-	load_properties(q->m);
+	load_properties(q->st.m);
 	return pl_success;
 }
 
@@ -9817,8 +9817,8 @@ static USE_RESULT pl_status fn_legacy_predicate_property_2(query *q)
 	cell tmp;
 	bool found = false;
 
-	if (get_builtin(q->m->pl, f, p1->arity, &found), found) {
-		make_literal(&tmp, index_from_pool(q->m->pl, "built_in"));
+	if (get_builtin(q->st.m->pl, f, p1->arity, &found), found) {
+		make_literal(&tmp, index_from_pool(q->st.m->pl, "built_in"));
 
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
@@ -9826,58 +9826,58 @@ static USE_RESULT pl_status fn_legacy_predicate_property_2(query *q)
 			return throw_error(q, p2, "domain_error", "predicate_property");
 	}
 
-	predicate *h = find_functor(q->m, f, p1->arity);
+	predicate *h = find_functor(q->st.m, f, p1->arity);
 
 	if (h && !h->is_dynamic && !is_variable(p2)) {
-		make_literal(&tmp, index_from_pool(q->m->pl, "built_in"));
+		make_literal(&tmp, index_from_pool(q->st.m->pl, "built_in"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
 	if (h && h->is_multifile) {
-		make_literal(&tmp, index_from_pool(q->m->pl, "multifile"));
+		make_literal(&tmp, index_from_pool(q->st.m->pl, "multifile"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
 	if (h && h->is_dynamic) {
-		make_literal(&tmp, index_from_pool(q->m->pl, "dynamic"));
+		make_literal(&tmp, index_from_pool(q->st.m->pl, "dynamic"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
 	if (h && !h->is_dynamic) {
-		make_literal(&tmp, index_from_pool(q->m->pl, "static"));
+		make_literal(&tmp, index_from_pool(q->st.m->pl, "static"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
 	if (h && h->is_persist) {
-		make_literal(&tmp, index_from_pool(q->m->pl, "persist"));
+		make_literal(&tmp, index_from_pool(q->st.m->pl, "persist"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
 	if (h && h->is_public) {
-		make_literal(&tmp, index_from_pool(q->m->pl, "public"));
+		make_literal(&tmp, index_from_pool(q->st.m->pl, "public"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
 	if (h && h->is_public) {
-		make_literal(&tmp, index_from_pool(q->m->pl, "exported"));
+		make_literal(&tmp, index_from_pool(q->st.m->pl, "exported"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
 	if (h) {
-		make_literal(&tmp, index_from_pool(q->m->pl, "static"));
+		make_literal(&tmp, index_from_pool(q->st.m->pl, "static"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
 	if (h) {
-		make_literal(&tmp, index_from_pool(q->m->pl, "visible"));
+		make_literal(&tmp, index_from_pool(q->st.m->pl, "visible"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
@@ -10125,31 +10125,31 @@ void do_db_load(module *m)
 
 static USE_RESULT pl_status fn_sys_db_load_0(query *q)
 {
-	do_db_load(q->m);
+	do_db_load(q->st.m);
 	return pl_success;
 }
 
 static USE_RESULT pl_status fn_sys_db_save_0(query *q)
 {
-	if (!q->m->fp)
+	if (!q->st.m->fp)
 		return pl_failure;
 
-	if (strlen(q->m->name) >= 1024*4-4)
+	if (strlen(q->st.m->name) >= 1024*4-4)
 		return pl_error;
 
-	fclose(q->m->fp);
+	fclose(q->st.m->fp);
 	char filename[1024*4];
-	snprintf(filename, sizeof(filename), "%s.db", q->m->name);
+	snprintf(filename, sizeof(filename), "%s.db", q->st.m->name);
 	char filename2[1024*4];
-	snprintf(filename2, sizeof(filename2), "%s.TMP", q->m->name);
+	snprintf(filename2, sizeof(filename2), "%s.TMP", q->st.m->name);
 	FILE *fp = fopen(filename2, "wb");
 	may_ptr_error(fp);
-	save_db(q->m->fp, q, 1);
+	save_db(q->st.m->fp, q, 1);
 	fclose(fp);
 	remove(filename);
 	rename(filename2, filename);
-	q->m->fp = fopen(filename, "ab");
-	may_ptr_error(q->m->fp);
+	q->st.m->fp = fopen(filename, "ab");
+	may_ptr_error(q->st.m->fp);
 	return pl_success;
 }
 
@@ -10726,13 +10726,13 @@ static USE_RESULT pl_status fn_current_module_1(query *q)
 	if (!q->retry) {
 		if (is_atom(p1)) {
 			const char *name = GET_STR(p1);
-			return find_module(q->m->pl, name) ? pl_success : pl_failure;
+			return find_module(q->st.m->pl, name) ? pl_success : pl_failure;
 		}
 
 		may_error(make_choice(q));
-		module *m = q->save_m = find_next_module(q->m->pl, NULL);
+		module *m = q->save_m = find_next_module(q->st.m->pl, NULL);
 		cell tmp;
-		make_literal(&tmp, index_from_pool(q->m->pl, m->name));
+		make_literal(&tmp, index_from_pool(q->st.m->pl, m->name));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
@@ -10744,7 +10744,7 @@ static USE_RESULT pl_status fn_current_module_1(query *q)
 
 	may_error(make_choice(q));
 	cell tmp;
-	make_literal(&tmp, index_from_pool(q->m->pl, m->name));
+	make_literal(&tmp, index_from_pool(q->st.m->pl, m->name));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
@@ -10762,7 +10762,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 		name = GET_STR(p1);
 		module *m;
 
-		if ((m = find_module(q->m->pl, name)) != NULL) {
+		if ((m = find_module(q->st.m->pl, name)) != NULL) {
 			if (!m->fp)
 				do_db_load(m);
 
@@ -10785,11 +10785,11 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			src[*lib->len] = '\0';
 			STRING_INIT(s1);
 			STRING_CAT2(s1, "library/", lib->name);
-			m = module_load_text(q->m, src, STRING_CSTR(s1));
+			m = module_load_text(q->st.m, src, STRING_CSTR(s1));
 			STRING_DONE(s1);
 			free(src);
 
-			if (m != q->m)
+			if (m != q->st.m)
 				do_db_load(m);
 
 			return pl_success;
@@ -10802,9 +10802,9 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 		name = dstbuf;
 	}
 
-	char *filename = relative_to(q->m->filename, name);
+	char *filename = relative_to(q->st.m->filename, name);
 
-	if (!module_load_file(q->m, filename)) {
+	if (!module_load_file(q->st.m, filename)) {
 		fprintf(stdout, "Error: module file not found: %s\n", filename);
 		free(filename);
 		return pl_failure;
@@ -10827,26 +10827,26 @@ static USE_RESULT pl_status fn_module_1(query *q)
 
 	if (is_variable(p1)) {
 		cell tmp;
-		make_literal(&tmp, index_from_pool(q->m->pl, q->m->name));
+		make_literal(&tmp, index_from_pool(q->st.m->pl, q->st.m->name));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
 
 	const char *name = GET_STR(p1);
-	module *m = find_module(q->m->pl, name);
+	module *m = find_module(q->st.m->pl, name);
 
 	if (!m) {
 #if 0
 		if (q->p->command)
 			fprintf(stdout, "Warning: created module '%s'\n", GET_STR(p1));
 
-		m = create_module(q->m->pl, GET_STR(p1));
+		m = create_module(q->st.m->pl, GET_STR(p1));
 #else
 		return throw_error(q, p1, "domain_error", "module");
 #endif
 	}
 
-	q->m = m;
+	q->st.m = m;
 	return pl_success;
 }
 
@@ -11456,23 +11456,23 @@ static void load_properties(module *m)
 
 static void load_ops(query *q)
 {
-	if (q->m->loaded_ops)
+	if (q->st.m->loaded_ops)
 		return;
 
 	cell tmp;
-	make_literal(&tmp, index_from_pool(q->m->pl, "$current_op"));
+	make_literal(&tmp, index_from_pool(q->st.m->pl, "$current_op"));
 	tmp.arity = 3;
 
 	if (do_abolish(q, &tmp, &tmp, false) != pl_success)
 		return;
 
-	q->m->loaded_ops = true;
+	q->st.m->loaded_ops = true;
 	size_t buflen = 1024*8;
 	char *tmpbuf = malloc(buflen);
 	char *dst = tmpbuf;
 	*dst = '\0';
 
-	for (const struct op_table *ptr = q->m->ops; ptr->name; ptr++) {
+	for (const struct op_table *ptr = q->st.m->ops; ptr->name; ptr++) {
 		char specifier[256], name[256];
 
 		if (!ptr->specifier)
@@ -11508,7 +11508,7 @@ static void load_ops(query *q)
 			ptr->priority, specifier, name);
 	}
 
-	for (const struct op_table *ptr = q->m->def_ops; ptr->name; ptr++) {
+	for (const struct op_table *ptr = q->st.m->def_ops; ptr->name; ptr++) {
 		char specifier[256], name[256];
 
 		if (!ptr->specifier)
@@ -11546,7 +11546,7 @@ static void load_ops(query *q)
 
 	//printf("%s", tmpbuf);
 
-	parser *p = create_parser(q->m);
+	parser *p = create_parser(q->st.m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
 	parser_tokenize(p, false, false);

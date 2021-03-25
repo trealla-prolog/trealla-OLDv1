@@ -393,7 +393,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 	}
 
 	const char *src = GET_STR(c);
-	int dq = 0, quote = !is_variable(c) && needs_quoting(q->m, src, LEN_STR(c));
+	int dq = 0, quote = !is_variable(c) && needs_quoting(q->st.m, src, LEN_STR(c));
 	if (is_string(c)) dq = quote = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 
@@ -586,7 +586,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	int optype = GET_OP(c);
 
 	if (q->ignore_ops || !optype || !c->arity) {
-		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quoting(q->m, src, LEN_STR(c));
+		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quoting(q->st.m, src, LEN_STR(c));
 		int dq = 0, braces = 0;
 		if (is_string(c)) dq = quote = 1;
 		if (q->quoted < 0) quote = 0;
@@ -727,11 +727,11 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	rhs = running ? deref(q, rhs, c_ctx) : rhs;
 	idx_t rhs_ctx = q->latest_ctx;
 
-	unsigned lhs_pri_1 = is_literal(lhs) ? get_op(q->m, GET_STR(lhs), NULL, false) : 0;
-	unsigned lhs_pri_2 = is_literal(lhs) && !lhs->arity ? get_op(q->m, GET_STR(lhs), NULL, false) : 0;
-	unsigned rhs_pri_1 = is_literal(rhs) ? get_op(q->m, GET_STR(rhs), NULL, false) : 0;
-	unsigned rhs_pri_2 = is_literal(rhs) && !rhs->arity ? get_op(q->m, GET_STR(rhs), NULL, false) : 0;
-	unsigned my_priority = get_op(q->m, GET_STR(c), NULL, false);
+	unsigned lhs_pri_1 = is_literal(lhs) ? get_op(q->st.m, GET_STR(lhs), NULL, false) : 0;
+	unsigned lhs_pri_2 = is_literal(lhs) && !lhs->arity ? get_op(q->st.m, GET_STR(lhs), NULL, false) : 0;
+	unsigned rhs_pri_1 = is_literal(rhs) ? get_op(q->st.m, GET_STR(rhs), NULL, false) : 0;
+	unsigned rhs_pri_2 = is_literal(rhs) && !rhs->arity ? get_op(q->st.m, GET_STR(rhs), NULL, false) : 0;
+	unsigned my_priority = get_op(q->st.m, GET_STR(c), NULL, false);
 
 	int lhs_parens = lhs_pri_1 >= my_priority;
 	if ((lhs_pri_1 == my_priority) && IS_YFX(c)) lhs_parens = 0;

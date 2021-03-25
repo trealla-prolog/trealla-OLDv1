@@ -175,8 +175,8 @@ typedef struct {
 	: strlen((c)->val_chr)										\
 	)
 
-#define GET_STR(c) _GET_STR(q->m->pl, c)
-#define LEN_STR(c) _LEN_STR(q->m->pl, c)
+#define GET_STR(c) _GET_STR(q->st.m->pl, c)
+#define LEN_STR(c) _LEN_STR(q->st.m->pl, c)
 
 #define PARSER_GET_STR(c) _GET_STR(p->m->pl, c)
 #define PARSER_LEN_STR(c) _LEN_STR(p->m->pl, c)
@@ -184,7 +184,7 @@ typedef struct {
 #define MODULE_GET_STR(c) _GET_STR(m->pl, c)
 #define MODULE_LEN_STR(c) _LEN_STR(m->pl, c)
 
-#define QUERY_GET_POOL(off) (q->m->pl->pool + (off))
+#define QUERY_GET_POOL(off) (q->st.m->pl->pool + (off))
 #define MODULE_GET_POOL(off) (m->pl->pool + (off))
 #define PARSER_GET_POOL(off) (p->m->pl->pool + (off))
 
@@ -449,12 +449,13 @@ typedef struct {
 	cell *curr_cell;
 	clause *curr_clause, *curr_clause2;
 	sliter *iter, *iter2;
+	module *m;
 	idx_t curr_frame, fp, hp, tp, sp, cgen;
 	uint8_t anbr, qnbr;
-} state;
+} prolog_state;
 
 typedef struct {
-	state st;
+	prolog_state st;
 	uint64_t pins, ugen;
 	idx_t v1, v2, cgen, orig_cgen, overflow;
 	uint16_t nbr_vars, nbr_slots;
@@ -496,7 +497,7 @@ typedef struct prolog_flags_ {
 
 struct query_ {
 	query *prev, *next, *parent;
-	module *m, *save_m;
+	module *save_m;
 	parser *p;
 	frame *frames;
 	slot *slots;
@@ -507,7 +508,7 @@ struct query_ {
 	arena *arenas;
 	clause *dirty_list;
 	cell accum;
-	state st;
+	prolog_state st;
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
 	uint64_t step, qid, time_started;
 	unsigned max_depth, tmo_msecs;
