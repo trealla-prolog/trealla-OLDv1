@@ -519,7 +519,7 @@ current_op(A,B,C) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Note: Trealla doesn't support goal_expansion (yet) so fake it
-% based on calling... M:put_atts(V, AccessSpec)
+% based on calling... M:put_atts(V, AccessSpec) and active Module
 
 put_atts(V, AccessSpec) :-
 	module(Module),
