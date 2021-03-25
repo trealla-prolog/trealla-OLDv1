@@ -1,3 +1,6 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+
 '$append'([], L, L).
 '$append'([H|T], L, [H|R]) :- '$append'(T, L, R).
 
@@ -22,6 +25,9 @@ subsumes_term(G,S) :-
 	 V2 == V1
 	).
 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
@@ -41,16 +47,13 @@ setup_call_cleanup(S,G,C) :-
 	),
 	'$chk_is_det'.
 
+catch(G,E,C) :-
+	copy_term('$catch'(G,E,C),TMP_G),
+	'$call'(TMP_G),
+	'$catch'(G,E,C)=TMP_G.
+
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-partial_string(S,P) :- '$append'(S,_,P).
-partial_string(S,P,V) :- '$append'(S,V,P).
-
-forall(Cond,Action) :- \+ (Cond, \+ Action).
-
-chars_base64(Plain,Base64,_) :- base64(Plain,Base64).
-chars_urlenc(Plain,Url,_) :- urlenc(Plain,Url).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -197,6 +200,9 @@ keysort(N, L1, L3, R) :-
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+
 findall(T, G, B) :-
 	copy_term('$findall'(T,G,B),TMP_G),
 	'$call'(TMP_G),
@@ -221,10 +227,8 @@ setof(T,G,B) :-
 	'$bagof'(T,G,TMP_B)=TMP_G,
 	sort(TMP_B,B).
 
-catch(G,E,C) :-
-	copy_term('$catch'(G,E,C),TMP_G),
-	'$call'(TMP_G),
-	'$catch'(G,E,C)=TMP_G.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -395,6 +399,13 @@ append(F) :- open(F,append,S), set_output(S).
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+partial_string(S,P) :- '$append'(S,_,P).
+partial_string(S,P,V) :- '$append'(S,V,P).
+
+forall(Cond,Action) :- \+ (Cond, \+ Action).
+chars_base64(Plain,Base64,_) :- base64(Plain,Base64).
+chars_urlenc(Plain,Url,_) :- urlenc(Plain,Url).
+
 current_key(K) :- var(K), clause('$record_key'(K,_),_).
 recorda(K,V) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V)).
 recordz(K,V) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V)).
@@ -504,3 +515,74 @@ current_op(A,B,C) :-
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+
+:- use_module(library(dict)).
+
+get_attr(V, Module, Value) :-
+	var(V),
+	Attr =.. [Module,Value],
+	get_att(V, +Attr).
+
+put_attr(V, Module, Value) :-
+	var(V),
+	Attr =.. [Module,Value],
+	put_att(V, +Attr).
+
+del_attr(V, Module) :-
+	var(V),
+	Attr =.. [Module,_],
+	put_att(V, -Attr).
+
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+
+put_att(V, +(A)) :- !,
+	'$get_attrs'(V, D),
+	functor(A, F, _),
+	dict:set(D, att(F), A, D2),
+	'$put_attrs'(V, D2).
+
+put_att(V, -(A)) :- !,
+	'$get_attrs'(V, D),
+	functor(A, F, _),
+	dict:del(D, att(F), D2),
+	'$put_attrs'(V, D2).
+
+put_att(V, A) :- !,
+	'$get_attrs'(V, D),
+	functor(A, F, _),
+	dict:set(D, att(F), A, D2),
+	'$put_attrs'(V, D2).
+
+get_att(V, L) :- var(L), !,
+	'$get_attrs'(V, D),
+	dict:match(D, att(_), L).
+
+get_att(V, +(A)) :- !,
+	'$get_attrs'(V, D),
+	functor(A, F, _),
+	dict:get(D, att(F), A).
+
+get_att(V, -(A)) :- !,
+	'$get_attrs'(V, D),
+	functor(A, F, _),
+	\+ dict:get(D, att(F), _).
+
+get_att(V, A) :- !,
+	'$get_attrs'(V, D),
+	functor(A, F, _),
+	dict:get(D, att(F), A).
+
+attributed(V) :-
+	'$get_attrs'(V, D),
+	D \= [].
+
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
