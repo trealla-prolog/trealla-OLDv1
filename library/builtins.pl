@@ -527,7 +527,13 @@ put_atts(V, AccessSpec) :-
 
 get_atts(V, AccessSpec) :-
 	module(Module),
-	get_attr(V, Module, AccessSpec).
+	(var(AccessSpec) ->
+		(
+			get_att(V, List),
+			findall(F, (Template =.. [Module,F], member(Template, List)), AccessSpec)
+		) ;
+		get_attr(V, Module, AccessSpec)
+	).
 
 del_atts(V) :-
 	module(Module),
