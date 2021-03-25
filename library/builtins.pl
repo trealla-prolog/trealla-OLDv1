@@ -517,10 +517,6 @@ current_op(A,B,C) :-
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-whoami :-
-	module(Module),
-	writeln(['***', Module]).
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Note: Trealla doesn't support goal_expansion (yet) so fake it...
 

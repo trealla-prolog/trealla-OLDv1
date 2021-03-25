@@ -4844,7 +4844,7 @@ static USE_RESULT pl_status fn_iso_invoke_2(query *q)
 	nbr_cells += p2->nbr_cells;
 	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
-	q->st.m = m;
+	q->save_m = m;
 	return pl_success;
 }
 
@@ -10827,7 +10827,8 @@ static USE_RESULT pl_status fn_module_1(query *q)
 
 	if (is_variable(p1)) {
 		cell tmp;
-		make_literal(&tmp, index_from_pool(q->st.m->pl, q->st.m->name));
+		make_literal(&tmp, index_from_pool(q->st.m->pl, (q->save_m?q->save_m:q->st.m)->name));
+		q->save_m = NULL;
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
