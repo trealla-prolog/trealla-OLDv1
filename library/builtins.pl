@@ -587,7 +587,7 @@ get_att(V, -(A)) :- !,
 	functor(A, F, _),
 	\+ dict:get(D, att(F), _).
 
-get_att(sV, A) :- !,
+get_att(V, A) :- !,
 	'$get_attrs'(V, D),
 	functor(A, F, _),
 	dict:get(D, att(F), A).
