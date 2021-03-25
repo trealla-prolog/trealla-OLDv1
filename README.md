@@ -173,6 +173,10 @@ GNU-Prolog & SWI-Prolog
 	freeze/2
 	frozen/2
 
+	put_atts/2				# call by module M:put_atts(...)
+	get_atts/2				#    ditto
+	del_atts/1				#    ditto
+
 
 Others
 ======

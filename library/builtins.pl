@@ -517,30 +517,36 @@ current_op(A,B,C) :-
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-get_atts(V, AccessSpec) :-
-	module(Module),
-	get_attr(V, Module, AccessSpec).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Note: Trealla doesn't support goal_expansion (yet) so fake it...
 
 put_atts(V, AccessSpec) :-
 	module(Module),
 	put_attr(V, Module, AccessSpec).
 
+get_atts(V, AccessSpec) :-
+	module(Module),
+	get_attr(V, Module, AccessSpec).
+
 del_atts(V) :-
 	module(Module),
 	del_attr(V, Module).
 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-
-get_attr(V, Module, Value) :-
-	var(V),
-	Attr =.. [Module,Value],
-	get_att(V, +Attr).
 
 put_attr(V, Module, Value) :-
 	var(V),
 	Attr =.. [Module,Value],
 	put_att(V, +Attr).
+
+get_attr(V, Module, Value) :-
+	var(V),
+	Attr =.. [Module,Value],
+	get_att(V, +Attr).
 
 del_attr(V, Module) :-
 	var(V),
