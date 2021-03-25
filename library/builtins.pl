@@ -425,6 +425,8 @@ set_random(seed(Seed)) :- set_seed(Seed).
 set_random(seed(random)) :- time(Seed), set_seed(Seed).
 maybe :- random(F), F < 0.5.
 
+prolog_load_context(module, Module) :- module(Module).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Global variables. using the namespace 'user' to make sure they
 % are truly global and not just in the current module. This a quick
