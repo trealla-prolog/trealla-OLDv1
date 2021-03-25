@@ -1706,21 +1706,6 @@ static void xref_cell(parser *p, term *t, cell *c, predicate *parent)
 		return;
 	}
 
-	if ((functor[0] != ':') && strchr(functor+1, ':')) {
-		char tmpbuf1[256], tmpbuf2[256];
-		tmpbuf1[0] = tmpbuf2[0] = '\0';
-		sscanf(functor, "%255[^:]:%255s", tmpbuf1, tmpbuf2);
-		tmpbuf1[sizeof(tmpbuf1)-1] = tmpbuf2[sizeof(tmpbuf2)-1] = '\0';
-		m = find_module(p->m->pl, tmpbuf1);
-
-		if (m) {
-			c->val_off = index_from_pool(p->m->pl, tmpbuf2);
-			ensure(c->val_off != ERR_IDX);
-		}
-		else
-			m = p->m;
-	}
-
 	module *tmp_m = NULL;
 
 	while (m) {
