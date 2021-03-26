@@ -38,7 +38,7 @@ bool needs_quoting(module *m, const char *src, int srclen)
 			return true;
 	}
 
-	if (get_op(m, src, NULL, false))
+	if (search_op(m, src, NULL, false))
 		return false;
 
 	while (srclen > 0) {
@@ -710,7 +710,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		int parens = is_structure(rhs) && !strcmp(GET_STR(rhs), ",");
 		dst += snprintf(dst, dstlen, "%s", src);
 		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
-		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
+		if (parens) dst += snprintf(dst, dstlen, "%s", " (");
 		ssize_t res = print_term_to_buf(q, dst, dstlen, rhs, rhs_ctx, running, 0, depth+1);
 		if (res < 0) return -1;
 		dst += res;
@@ -727,11 +727,11 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	rhs = running ? deref(q, rhs, c_ctx) : rhs;
 	idx_t rhs_ctx = q->latest_ctx;
 
-	unsigned lhs_pri_1 = is_literal(lhs) ? get_op(q->st.m, GET_STR(lhs), NULL, false) : 0;
-	unsigned lhs_pri_2 = is_literal(lhs) && !lhs->arity ? get_op(q->st.m, GET_STR(lhs), NULL, false) : 0;
-	unsigned rhs_pri_1 = is_literal(rhs) ? get_op(q->st.m, GET_STR(rhs), NULL, false) : 0;
-	unsigned rhs_pri_2 = is_literal(rhs) && !rhs->arity ? get_op(q->st.m, GET_STR(rhs), NULL, false) : 0;
-	unsigned my_priority = get_op(q->st.m, GET_STR(c), NULL, false);
+	unsigned lhs_pri_1 = is_literal(lhs) ? search_op(q->st.m, GET_STR(lhs), NULL, false) : 0;
+	unsigned lhs_pri_2 = is_literal(lhs) && !lhs->arity ? search_op(q->st.m, GET_STR(lhs), NULL, false) : 0;
+	unsigned rhs_pri_1 = is_literal(rhs) ? search_op(q->st.m, GET_STR(rhs), NULL, false) : 0;
+	unsigned rhs_pri_2 = is_literal(rhs) && !rhs->arity ? search_op(q->st.m, GET_STR(rhs), NULL, false) : 0;
+	unsigned my_priority = search_op(q->st.m, GET_STR(c), NULL, false);
 
 	int lhs_parens = lhs_pri_1 >= my_priority;
 	if ((lhs_pri_1 == my_priority) && IS_YFX(c)) lhs_parens = 0;
