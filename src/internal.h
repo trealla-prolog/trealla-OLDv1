@@ -751,7 +751,7 @@ uint64_t get_time_in_usec(void);
 void clear_term(term *t);
 void do_db_load(module *m);
 size_t sprint_int(char *dst, size_t size, int_t n, int base);
-void sys_thaw(query *q, const cell *c);
+void call_attrs(query *q, cell *attrs);
 void allocate_list(query *q, const cell *c);
 void append_list(query *q, const cell *c);
 USE_RESULT cell *end_list(query *q);

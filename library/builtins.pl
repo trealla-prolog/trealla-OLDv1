@@ -542,20 +542,6 @@ del_atts(V) :-
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-freeze(V, Term) :-
-	( nonvar(V) ->
-		call(Term) ;
-		put_attr(V, freeze, goal(Term))).
-
-frozen(V, Term) :-
-	(get_attr(V, freeze, goal(Term)) ->
-		true ;
-		Term = true).
-
-'$thaw'(V) :-
-	frozen(V, Term),
-	call(Term).
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 

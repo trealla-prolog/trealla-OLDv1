@@ -10314,28 +10314,14 @@ static USE_RESULT pl_status fn_offset_2(query *q)
 	return pl_success;
 }
 
-void sys_thaw(query *q, const cell *c)
+void call_attrs(query *q, cell *attrs)
 {
-	cell *tmp = alloc_on_heap(q, 1+2+1);
-	// Needed for follow() to work
-	*tmp = (cell){0};
-	tmp->val_type = TYPE_EMPTY;
-	tmp->nbr_cells = 1;
-	tmp->flags = FLAG_BUILTIN;
-	idx_t nbr_cells = 1;
-	tmp[nbr_cells+0].val_type = TYPE_LITERAL;
-	tmp[nbr_cells+0].nbr_cells = 2;
-	tmp[nbr_cells+0].arity = 1;
-	tmp[nbr_cells+0].flags = 0;
-	tmp[nbr_cells+0].val_off = index_from_pool(q->st.m->pl, "$thaw");
-	tmp[nbr_cells+0].match = find_functor(q->st.m, "$thaw", 1);
-	tmp[nbr_cells+1] = *c;
-	nbr_cells += 2;
+	cell *tmp = clone_to_heap(q, true, attrs, 1);
+	idx_t nbr_cells = 1 + attrs->nbr_cells;
 	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 }
 
-#if 0
 static USE_RESULT pl_status fn_freeze_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -10371,7 +10357,6 @@ static USE_RESULT pl_status fn_frozen_2(query *q)
 
 	return unify(q, p2, p2_ctx, e->c.attrs, q->st.curr_frame);
 }
-#endif
 
 static USE_RESULT pl_status fn_sys_del_attrs_1(query *q)
 {
@@ -11218,11 +11203,8 @@ static const struct builtins g_predicates_other[] =
 	{"plus", 3, fn_plus_3, "?integer,?integer,?integer"},
 	{"succ", 2, fn_succ_2, "?integer,?integer"},
 
-#if 0
 	{"freeze", 2, fn_freeze_2, "+variable,+callable"},
 	{"frozen", 2, fn_frozen_2, "+variable,+callable"},
-#endif
-
 	{"$put_attrs", 2, fn_sys_put_attrs_2, "+variable,+list"},
 	{"$get_attrs", 2, fn_sys_get_attrs_2, "+variable,-variable"},
 	{"$del_attrs", 1, fn_sys_del_attrs_1, "+variable"},
