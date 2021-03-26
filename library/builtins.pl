@@ -519,7 +519,7 @@ current_op(A,B,C) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Note: Trealla doesn't support goal_expansion (yet) so fake it
-% based on calling... M:put_atts(V, AccessSpec) and active Module
+% based on calling M:put_atts(V, AccessSpec) and active Module
 
 put_atts(V, AccessSpec) :-
 	module(Module),
@@ -570,19 +570,19 @@ del_attr(V, Module) :-
 
 put_att(V, +(A)) :- !,
 	'$get_attrs'(V, D),
-	A =.. [Module,Attr|_],
+	A =.. [Module,Attr],
 	dict:set(D, Module-Attr, A, D2),
 	'$put_attrs'(V, D2).
 
 put_att(V, -(A)) :- !,
 	'$get_attrs'(V, D),
-	A =.. [Module,Attr|_],
+	A =.. [Module,Attr],
 	dict:del(D, Module-Attr, D2),
 	'$put_attrs'(V, D2).
 
 put_att(V, A) :- !,
 	'$get_attrs'(V, D),
-	A =.. [Module,Attr|_],
+	A =.. [Module,Attr],
 	dict:set(D, Module-Attr, A, D2),
 	'$put_attrs'(V, D2).
 
@@ -592,17 +592,17 @@ get_att(V, L) :- var(L), !,
 
 get_att(V, +(A)) :- !,
 	'$get_attrs'(V, D),
-	A =.. [Module,Attr|_],
+	A =.. [Module,Attr],
 	dict:get(D, Module-Attr, A).
 
 get_att(V, -(A)) :- !,
 	'$get_attrs'(V, D),
-	A =.. [Module,Attr|_],
+	A =.. [Module,Attr],
 	\+ dict:get(D, Module-Attr, _).
 
 get_att(V, A) :- !,
 	'$get_attrs'(V, D),
-	A =.. [Module,Attr|_],
+	A =.. [Module,Attr],
 	dict:get(D, Module-Attr, A).
 
 attributed(V) :-
