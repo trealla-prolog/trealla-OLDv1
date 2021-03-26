@@ -10836,14 +10836,10 @@ static USE_RESULT pl_status fn_module_1(query *q)
 	module *m = find_module(q->st.m->pl, name);
 
 	if (!m) {
-#if 0
 		if (q->p->command)
-			fprintf(stdout, "Warning: created module '%s'\n", GET_STR(p1));
+			fprintf(stdout, "Info: created module '%s'\n", GET_STR(p1));
 
 		m = create_module(q->st.m->pl, GET_STR(p1));
-#else
-		return throw_error(q, p1, "domain_error", "module");
-#endif
 	}
 
 	q->st.m = m;
