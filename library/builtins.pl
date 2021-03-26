@@ -571,39 +571,39 @@ del_attr(V, Module) :-
 put_att(V, +(A)) :- !,
 	'$get_attrs'(V, D),
 	A =.. [Module,Attr|_],
-	dict:set(D, att(Module-Attr), A, D2),
+	dict:set(D, Module-Attr, A, D2),
 	'$put_attrs'(V, D2).
 
 put_att(V, -(A)) :- !,
 	'$get_attrs'(V, D),
 	A =.. [Module,Attr|_],
-	dict:del(D, att(Module-Attr), D2),
+	dict:del(D, Module-Attr, D2),
 	'$put_attrs'(V, D2).
 
 put_att(V, A) :- !,
 	'$get_attrs'(V, D),
 	A =.. [Module,Attr|_],
-	dict:set(D, att(Module-Attr), A, D2),
+	dict:set(D, Module-Attr, A, D2),
 	'$put_attrs'(V, D2).
 
 get_att(V, L) :- var(L), !,
 	'$get_attrs'(V, D),
-	dict:match(D, att(_), L).
+	dict:match(D, _, L).
 
 get_att(V, +(A)) :- !,
 	'$get_attrs'(V, D),
 	A =.. [Module,Attr|_],
-	dict:get(D, att(Module-Attr), A).
+	dict:get(D, Module-Attr, A).
 
 get_att(V, -(A)) :- !,
 	'$get_attrs'(V, D),
 	A =.. [Module,Attr|_],
-	\+ dict:get(D, att(Module-Attr), _).
+	\+ dict:get(D, Module-Attr, _).
 
 get_att(V, A) :- !,
 	'$get_attrs'(V, D),
 	A =.. [Module,Attr|_],
-	dict:get(D, att(Module-Attr), A).
+	dict:get(D, Module-Attr, A).
 
 attributed(V) :-
 	'$get_attrs'(V, D),
