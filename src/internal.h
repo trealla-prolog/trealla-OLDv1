@@ -407,7 +407,7 @@ struct op_table {
 };
 
 typedef struct {
-	idx_t ctx;
+	idx_t ctx, attrsx;
 	uint16_t var_nbr;
 } trail;
 
