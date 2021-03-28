@@ -1339,52 +1339,6 @@ static bool outstanding_choices(query *q)
 	return q->cp;
 }
 
-pl_status do_post_unification_checks(query *q)
-{
-	extern pl_status fn_sys_undo_trail_0(query *);
-	extern pl_status fn_sys_redo_trail_0(query *);
-	q->undo_tp = q->save_tp;
-
-	cell *tmp = alloc_on_heap(q, 1+2+1);
-	may_error(tmp);
-	// Needed for follow() to work
-	*tmp = (cell){0};
-	tmp->val_type = TYPE_EMPTY;
-	tmp->nbr_cells = 1;
-	tmp->flags = FLAG_BUILTIN;
-	idx_t nbr_cells = 1;
-
-	// 1) undo trail / saving bindings
-	tmp[nbr_cells].val_type = TYPE_LITERAL;
-	tmp[nbr_cells].nbr_cells = 1;
-	tmp[nbr_cells].arity = 0;
-	tmp[nbr_cells].flags = FLAG_BUILTIN;
-	tmp[nbr_cells].val_off = index_from_pool(q->st.m->pl, "$undo_trail");
-	tmp[nbr_cells].fn = fn_sys_undo_trail_0;
-	nbr_cells += 1;
-
-	// 2) TODO: get attribute list
-
-	// 3) TODO: for all modules...
-	//    call verify_attributes
-	//    collect the goals
-
-	// 4) restore trail bindings (removing attrs)
-	tmp[nbr_cells].val_type = TYPE_LITERAL;
-	tmp[nbr_cells].nbr_cells = 1;
-	tmp[nbr_cells].arity = 0;
-	tmp[nbr_cells].flags = FLAG_BUILTIN;
-	tmp[nbr_cells].val_off = index_from_pool(q->st.m->pl, "$redo_trail");
-	tmp[nbr_cells].fn = fn_sys_redo_trail_0;
-	nbr_cells += 1;
-
-	// 5) TODO: call goals
-
-	make_call(q, tmp+nbr_cells);
-	q->st.curr_cell = tmp;
-	return pl_success;
-}
-
 pl_status query_start(query *q)
 {
 	q->yielded = false;
