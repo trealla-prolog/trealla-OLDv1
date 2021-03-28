@@ -10314,50 +10314,6 @@ static USE_RESULT pl_status fn_offset_2(query *q)
 	return pl_success;
 }
 
-void call_attrs(query *q, cell *attrs)
-{
-	cell *tmp = clone_to_heap(q, true, attrs, 1);
-	idx_t nbr_cells = 1 + attrs->nbr_cells;
-	make_call(q, tmp+nbr_cells);
-	q->st.curr_cell = tmp;
-}
-
-static USE_RESULT pl_status fn_freeze_2(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,callable);
-
-	if (is_variable(p1)) {
-		cell *tmp = clone_to_heap(q, false, p2, 0);
-		frame *g = GET_FRAME(p1_ctx);
-		slot *e = GET_SLOT(g, p1->var_nbr);
-		e->c.attrs = tmp;
-		return pl_success;
-	}
-
-	cell *tmp = clone_to_heap(q, true, p2, 1);
-	idx_t nbr_cells = 1 + p2->nbr_cells;
-	make_call(q, tmp+nbr_cells);
-	q->st.curr_cell = tmp;
-	return pl_success;
-}
-
-static USE_RESULT pl_status fn_frozen_2(query *q)
-{
-	GET_FIRST_ARG(p1,variable);
-	GET_NEXT_ARG(p2,any);
-	frame *g = GET_FRAME(p1_ctx);
-	slot *e = GET_SLOT(g, p1->var_nbr);
-
-	if (!e->c.attrs) {
-		cell tmp;
-		make_literal(&tmp, g_true_s);
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	}
-
-	return unify(q, p2, p2_ctx, e->c.attrs, q->st.curr_frame);
-}
-
 static USE_RESULT pl_status fn_sys_del_attrs_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
@@ -11199,8 +11155,6 @@ static const struct builtins g_predicates_other[] =
 	{"plus", 3, fn_plus_3, "?integer,?integer,?integer"},
 	{"succ", 2, fn_succ_2, "?integer,?integer"},
 
-	{"freeze", 2, fn_freeze_2, "+variable,+callable"},
-	{"frozen", 2, fn_frozen_2, "+variable,+callable"},
 	{"$put_attrs", 2, fn_sys_put_attrs_2, "+variable,+list"},
 	{"$get_attrs", 2, fn_sys_get_attrs_2, "+variable,-variable"},
 	{"$del_attrs", 1, fn_sys_del_attrs_1, "+variable"},

@@ -407,7 +407,8 @@ struct op_table {
 };
 
 typedef struct {
-	idx_t ctx, attrsx;
+	cell *attrs;
+	idx_t ctx;
 	uint16_t var_nbr;
 } trail;
 
@@ -515,7 +516,7 @@ struct query_ {
 	int nv_start;
 	idx_t cp, tmphp, latest_ctx, popp, variable_names_ctx, save_cp;
 	idx_t frames_size, slots_size, trails_size, choices_size;
-	idx_t max_choices, max_frames, max_slots, max_trails;
+	idx_t max_choices, max_frames, max_slots, max_trails, save_tp;
 	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;
 	idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
 	uint8_t nv_mask[MAX_ARITY];
@@ -523,6 +524,7 @@ struct query_ {
 	enum q_retry retry;
 	int8_t halt_code;
 	int8_t quoted;
+	bool has_attrs:1;
 	bool do_dump_vars:1;
 	bool status:1;
 	bool resume:1;

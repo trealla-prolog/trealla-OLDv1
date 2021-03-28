@@ -181,7 +181,7 @@ static void unwind_trail(query *q, const choice *ch)
 		slot *e = GET_SLOT(g, tr->var_nbr);
 		DECR_REF(&e->c);
 		e->c.val_type = TYPE_EMPTY;
-		e->c.attrs = NULL;
+		e->c.attrs = tr->attrs;
 	}
 }
 
@@ -622,15 +622,32 @@ unsigned create_vars(query *q, unsigned cnt)
 	return var_nbr;
 }
 
+void sys_thaw(query *q, const cell *c)
+{
+	cell *tmp = alloc_on_heap(q, 1+2+1);
+	// Needed for follow() to work
+	*tmp = (cell){0};
+	tmp->val_type = TYPE_EMPTY;
+	tmp->nbr_cells = 1;
+	tmp->flags = FLAG_BUILTIN;
+	idx_t nbr_cells = 1;
+	tmp[nbr_cells+0].val_type = TYPE_LITERAL;
+	tmp[nbr_cells+0].nbr_cells = 2;
+	tmp[nbr_cells+0].arity = 1;
+	tmp[nbr_cells+0].flags = 0;
+	tmp[nbr_cells+0].val_off = index_from_pool(q->st.m->pl, "$thaw");
+	tmp[nbr_cells+0].match = find_functor(q->st.m, "$thaw", 1);
+	tmp[nbr_cells+1] = *c;
+	nbr_cells += 2;
+	//make_call(q, tmp+nbr_cells);
+	q->st.curr_cell = tmp;
+}
+
 void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 {
 	const frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
-	cell *frozen = NULL;
-
-	if (is_empty(&e->c) && e->c.attrs && is_callable(e->c.attrs))
-		frozen = e->c.attrs;
-
+	cell *attrs = e->c.attrs;
 	e->ctx = v_ctx;
 
 	if (is_structure(v))
@@ -640,10 +657,7 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		INCR_REF(v);
 	}
 
-	if (frozen)
-		call_attrs(q, frozen);
-
-	if (!q->cp)
+	if (!q->cp && !attrs)
 		return;
 
 	if (check_trail(q) != pl_success) {
@@ -651,7 +665,11 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		return;
 	}
 
+	if (attrs)
+		q->has_attrs = true;
+
 	trail *tr = q->trails + q->st.tp++;
+	tr->attrs = attrs;
 	tr->var_nbr = c->var_nbr;
 	tr->ctx = c_ctx;
 }
@@ -1137,8 +1155,6 @@ static USE_RESULT pl_status match_head(query *q)
 		q->no_tco = false;
 
 		if (unify_structure(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp, 0)) {
-			Trace(q, q->st.curr_cell, EXIT);
-
 			if (q->error)
 				return pl_error;
 
@@ -1369,7 +1385,10 @@ pl_status query_start(query *q)
 
 		q->tot_goals++;
 		q->did_throw = false;
+		q->save_tp = q->st.tp;
+		q->has_attrs = false;
 		Trace(q, q->st.curr_cell, CALL);
+		cell *save_cell = q->st.curr_cell;
 
 		if (q->st.curr_cell->flags&FLAG_BUILTIN) {
 			if (!q->st.curr_cell->fn) {					// NO-OP
@@ -1388,8 +1407,6 @@ pl_status query_start(query *q)
 				continue;
 			}
 
-			Trace(q, q->st.curr_cell, EXIT);
-
 			if (q->error)
 				break;
 
@@ -1405,8 +1422,13 @@ pl_status query_start(query *q)
 				q->tot_retries++;
 				continue;
 			}
+
 		}
 
+		// if (q->has_attrs)
+		// 		process
+
+		Trace(q, save_cell, EXIT);
 		q->resume = false;
 		q->retry = QUERY_OK;
 

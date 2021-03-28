@@ -4109,6 +4109,7 @@ prolog *pl_create()
 			if (
 				!strcmp(lib->name, "builtins") ||
 				!strcmp(lib->name, "apply") ||
+				//!strcmp(lib->name, "freeze") ||
 				//!strcmp(lib->name, "atts") ||
 				//!strcmp(lib->name, "dcgs") ||
 				//!strcmp(lib->name, "assoc") ||
@@ -4116,7 +4117,6 @@ prolog *pl_create()
 				//!strcmp(lib->name, "charsio") ||
 				//!strcmp(lib->name, "format") ||
 				//!strcmp(lib->name, "http") ||
-				//!strcmp(lib->name, "atts") ||
 				!strcmp(lib->name, "lists")) {
 				char *src = malloc(*lib->len+1);
 				ensure(src);
