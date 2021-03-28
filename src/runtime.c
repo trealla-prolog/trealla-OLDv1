@@ -1354,7 +1354,7 @@ pl_status do_post_unification_checks(query *q)
 	tmp->flags = FLAG_BUILTIN;
 	idx_t nbr_cells = 1;
 
-	// undo trail (save bindings)
+	// 1) undo trail / saving bindings
 	tmp[nbr_cells].val_type = TYPE_LITERAL;
 	tmp[nbr_cells].nbr_cells = 1;
 	tmp[nbr_cells].arity = 0;
@@ -1363,13 +1363,13 @@ pl_status do_post_unification_checks(query *q)
 	tmp[nbr_cells].fn = fn_sys_undo_trail_0;
 	nbr_cells += 1;
 
-	// TODO: get attribute list
+	// 2) TODO: get attribute list
 
-	// TODO: for all modules...
+	// 3) TODO: for all modules...
 	//    call verify_attributes
 	//    collect the goals
 
-	// restore trail bindings (removing attrs)
+	// 4) restore trail bindings (removing attrs)
 	tmp[nbr_cells].val_type = TYPE_LITERAL;
 	tmp[nbr_cells].nbr_cells = 1;
 	tmp[nbr_cells].arity = 0;
@@ -1378,7 +1378,7 @@ pl_status do_post_unification_checks(query *q)
 	tmp[nbr_cells].fn = fn_sys_redo_trail_0;
 	nbr_cells += 1;
 
-	// TODO: call goals
+	// 5) TODO: call goals
 
 	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
