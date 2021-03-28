@@ -10879,10 +10879,7 @@ static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
 
 pl_status fn_sys_undo_trail_0(query *q)
 {
-	if (!q->save_tp)
-		return pl_failure;
-
-	for (idx_t i = q->save_tp; i < q->st.hp; i++) {
+	for (idx_t i = q->save_tp; i < q->st.tp; i++) {
 		const trail *tr = q->trails + q->save_tp + i;
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
