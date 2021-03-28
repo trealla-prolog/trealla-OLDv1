@@ -10879,11 +10879,13 @@ static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
 
 pl_status fn_sys_undo_trail_0(query *q)
 {
+	q->save_c = malloc(sizeof(cell)*(q->st.tp-q->undo_tp));
+
 	for (idx_t i = q->undo_tp; i < q->st.tp; i++) {
 		const trail *tr = q->trails + q->undo_tp + i;
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
-		e->save_c = e->c;
+		q->save_c[i] = e->c;
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = tr->attrs;
 	}
@@ -10897,9 +10899,10 @@ pl_status fn_sys_redo_trail_0(query * q)
 		const trail *tr = q->trails + q->undo_tp + i;
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
-		e->c = e->save_c;
+		e->c = q->save_c[i];
 	}
 
+	free(q->save_c);
 	return pl_success;
 }
 
