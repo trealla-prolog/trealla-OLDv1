@@ -1341,6 +1341,9 @@ static bool outstanding_choices(query *q)
 
 void do_post_unification_checks(query *q)
 {
+	extern pl_status fn_sys_undo_trail_0(query *);
+	extern pl_status fn_sys_redo_trail_0(query *);
+
 	cell *tmp = alloc_on_heap(q, 1+1+1);
 	// Needed for follow() to work
 	*tmp = (cell){0};
@@ -1350,20 +1353,28 @@ void do_post_unification_checks(query *q)
 	idx_t nbr_cells = 1;
 
 	// undo trail (save bindings)
-
 	tmp[nbr_cells].val_type = TYPE_LITERAL;
 	tmp[nbr_cells].nbr_cells = 1;
 	tmp[nbr_cells].arity = 0;
-	tmp[nbr_cells].flags = 0;
+	tmp[nbr_cells].flags = FLAG_BUILTIN;
 	tmp[nbr_cells].val_off = index_from_pool(q->st.m->pl, "$undo_trail");
-	tmp[nbr_cells].match = find_functor(q->st.m, "$undo_trail", 1);
+	tmp[nbr_cells].fn = fn_sys_undo_trail_0;
 	nbr_cells += 1;
 
 	// get attribute list
 	// for all modules...
 	//    call verify_attributes
 	//    collect the goals
+
 	// restore trail bindings (removing attrs)
+	tmp[nbr_cells].val_type = TYPE_LITERAL;
+	tmp[nbr_cells].nbr_cells = 1;
+	tmp[nbr_cells].arity = 0;
+	tmp[nbr_cells].flags = FLAG_BUILTIN;
+	tmp[nbr_cells].val_off = index_from_pool(q->st.m->pl, "$redo_trail");
+	tmp[nbr_cells].fn = fn_sys_redo_trail_0;
+	nbr_cells += 1;
+
 	// call goals
 
 	make_call(q, tmp+nbr_cells);

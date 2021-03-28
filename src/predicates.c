@@ -10877,6 +10877,31 @@ static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
 	return pl_success;
 }
 
+pl_status fn_sys_undo_trail_0(query *q)
+{
+	if (!q->save_tp)
+		return pl_failure;
+
+	for (idx_t i = q->save_tp; i < q->st.hp; i++) {
+		const trail *tr = q->trails + q->save_tp + i;
+		const frame *g = GET_FRAME(tr->ctx);
+		slot *e = GET_SLOT(g, tr->var_nbr);
+		e->save_c = e->c;
+		e->c.val_type = TYPE_EMPTY;
+		e->c.attrs = tr->attrs;
+	}
+
+	return pl_success;
+}
+
+pl_status fn_sys_redo_trail_0(query * q)
+{
+	if (!q->save_tp)
+		return pl_failure;
+
+	return pl_failure;
+}
+
 static USE_RESULT pl_status fn_iso_compare_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
@@ -11050,9 +11075,12 @@ static const struct builtins g_predicates_other[] =
 
 	// Miscellaneous...
 
-	{"memberchk", 2, fn_memberchk_2, "?term,+list"},
-	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars"},
 	{"ignore", 1, fn_ignore_1, "+callable"},
+	{"memberchk", 2, fn_memberchk_2, "?term,+list"},
+
+	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars"},
+	{"$undo_trail", 0, fn_sys_undo_trail_0, NULL},
+	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL},
 
 #if 1
 	{"legacy_format", 2, fn_format_2, "+string,+list"},
