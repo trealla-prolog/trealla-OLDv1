@@ -1425,8 +1425,13 @@ pl_status query_start(query *q)
 
 		}
 
-		// if (q->has_attrs)
-		// 		process
+		if (q->has_attrs) {
+			// Undo bindings from trail
+			// call verify_attributes on all (relevant? where?) modules
+			// if any failed fail hard
+			// rebind  (how)
+			// call any goals (eg from freeze)
+		}
 
 		Trace(q, save_cell, EXIT);
 		q->resume = false;
