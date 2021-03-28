@@ -622,27 +622,6 @@ unsigned create_vars(query *q, unsigned cnt)
 	return var_nbr;
 }
 
-void sys_thaw(query *q, const cell *c)
-{
-	cell *tmp = alloc_on_heap(q, 1+2+1);
-	// Needed for follow() to work
-	*tmp = (cell){0};
-	tmp->val_type = TYPE_EMPTY;
-	tmp->nbr_cells = 1;
-	tmp->flags = FLAG_BUILTIN;
-	idx_t nbr_cells = 1;
-	tmp[nbr_cells+0].val_type = TYPE_LITERAL;
-	tmp[nbr_cells+0].nbr_cells = 2;
-	tmp[nbr_cells+0].arity = 1;
-	tmp[nbr_cells+0].flags = 0;
-	tmp[nbr_cells+0].val_off = index_from_pool(q->st.m->pl, "$thaw");
-	tmp[nbr_cells+0].match = find_functor(q->st.m, "$thaw", 1);
-	tmp[nbr_cells+1] = *c;
-	nbr_cells += 2;
-	//make_call(q, tmp+nbr_cells);
-	q->st.curr_cell = tmp;
-}
-
 void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 {
 	const frame *g = GET_FRAME(c_ctx);
@@ -1358,6 +1337,37 @@ static bool outstanding_choices(query *q)
 	}
 
 	return q->cp;
+}
+
+void do_post_unification_checks(query *q)
+{
+	cell *tmp = alloc_on_heap(q, 1+1+1);
+	// Needed for follow() to work
+	*tmp = (cell){0};
+	tmp->val_type = TYPE_EMPTY;
+	tmp->nbr_cells = 1;
+	tmp->flags = FLAG_BUILTIN;
+	idx_t nbr_cells = 1;
+
+	// undo trail (save bindings)
+
+	tmp[nbr_cells].val_type = TYPE_LITERAL;
+	tmp[nbr_cells].nbr_cells = 1;
+	tmp[nbr_cells].arity = 0;
+	tmp[nbr_cells].flags = 0;
+	tmp[nbr_cells].val_off = index_from_pool(q->st.m->pl, "$undo_trail");
+	tmp[nbr_cells].match = find_functor(q->st.m, "$undo_trail", 1);
+	nbr_cells += 1;
+
+	// get attribute list
+	// for all modules...
+	//    call verify_attributes
+	//    collect the goals
+	// restore trail bindings (removing attrs)
+	// call goals
+
+	make_call(q, tmp+nbr_cells);
+	q->st.curr_cell = tmp;
 }
 
 pl_status query_start(query *q)

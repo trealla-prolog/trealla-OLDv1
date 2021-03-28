@@ -140,7 +140,7 @@ void make_end(cell *tmp)
 	tmp->cgen = ERR_IDX;
 }
 
-static void make_call(query *q, cell *tmp)
+void make_call(query *q, cell *tmp)
 {
 	make_end(tmp);
 	cell *c = q->st.curr_cell;
