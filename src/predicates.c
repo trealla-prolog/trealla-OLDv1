@@ -10893,10 +10893,14 @@ pl_status fn_sys_undo_trail_0(query *q)
 
 pl_status fn_sys_redo_trail_0(query * q)
 {
-	if (!q->save_tp)
-		return pl_failure;
+	for (idx_t i = q->undo_tp; i < q->st.tp; i++) {
+		const trail *tr = q->trails + q->undo_tp + i;
+		const frame *g = GET_FRAME(tr->ctx);
+		slot *e = GET_SLOT(g, tr->var_nbr);
+		e->c = e->save_c;
+	}
 
-	return pl_failure;
+	return pl_success;
 }
 
 static USE_RESULT pl_status fn_iso_compare_3(query *q)

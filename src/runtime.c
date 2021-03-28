@@ -1339,13 +1339,14 @@ static bool outstanding_choices(query *q)
 	return q->cp;
 }
 
-void do_post_unification_checks(query *q)
+pl_status do_post_unification_checks(query *q)
 {
 	extern pl_status fn_sys_undo_trail_0(query *);
 	extern pl_status fn_sys_redo_trail_0(query *);
 	q->undo_tp = q->save_tp;
 
-	cell *tmp = alloc_on_heap(q, 1+1+1);
+	cell *tmp = alloc_on_heap(q, 1+2+1);
+	may_error(tmp);
 	// Needed for follow() to work
 	*tmp = (cell){0};
 	tmp->val_type = TYPE_EMPTY;
@@ -1362,8 +1363,9 @@ void do_post_unification_checks(query *q)
 	tmp[nbr_cells].fn = fn_sys_undo_trail_0;
 	nbr_cells += 1;
 
-	// get attribute list
-	// for all modules...
+	// TODO: get attribute list
+
+	// TODO: for all modules...
 	//    call verify_attributes
 	//    collect the goals
 
@@ -1376,10 +1378,11 @@ void do_post_unification_checks(query *q)
 	tmp[nbr_cells].fn = fn_sys_redo_trail_0;
 	nbr_cells += 1;
 
-	// call goals
+	// TODO: call goals
 
 	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
+	return pl_success;
 }
 
 pl_status query_start(query *q)
@@ -1448,7 +1451,7 @@ pl_status query_start(query *q)
 		}
 
 		if (q->has_attrs)
-			do_post_unification_checks(q);
+			may_error(do_post_unification_checks(q));
 
 		Trace(q, save_cell, EXIT);
 		q->resume = false;
