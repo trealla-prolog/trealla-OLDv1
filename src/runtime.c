@@ -1343,6 +1343,7 @@ void do_post_unification_checks(query *q)
 {
 	extern pl_status fn_sys_undo_trail_0(query *);
 	extern pl_status fn_sys_redo_trail_0(query *);
+	q->undo_tp = q->save_tp;
 
 	cell *tmp = alloc_on_heap(q, 1+1+1);
 	// Needed for follow() to work
@@ -1446,13 +1447,8 @@ pl_status query_start(query *q)
 
 		}
 
-		if (q->has_attrs) {
-			// Undo bindings from trail
-			// call verify_attributes on all (relevant? where?) modules
-			// if any failed fail hard
-			// rebind  (how)
-			// call any goals (eg from freeze)
-		}
+		if (q->has_attrs)
+			do_post_unification_checks(q);
 
 		Trace(q, save_cell, EXIT);
 		q->resume = false;
