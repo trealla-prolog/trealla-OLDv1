@@ -414,7 +414,7 @@ typedef struct {
 
 typedef struct {
 	cell c;
-	cell save_c;		// TODO: need a better way
+	cell save_c;		// FIXME: a waste
 	idx_t ctx;
 } slot;
 
