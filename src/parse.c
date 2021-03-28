@@ -123,7 +123,6 @@ static idx_t is_in_pool(__attribute__((unused)) prolog *pl, const char *name)
 
 static idx_t add_to_pool(prolog *pl, const char *name)
 {
-	if (!name) return ERR_IDX;
 	idx_t offset = pl->pool_offset;
 	size_t len = strlen(name);
 
@@ -146,7 +145,6 @@ static idx_t add_to_pool(prolog *pl, const char *name)
 
 idx_t index_from_pool(prolog *pl, const char *name)
 {
-	if (!name) return ERR_IDX;
 	idx_t offset = is_in_pool(pl, name);
 
 	if (offset != ERR_IDX)
