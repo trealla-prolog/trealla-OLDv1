@@ -10899,12 +10899,16 @@ pl_status fn_sys_undo_trail_1(query *q)
 
 	for (unsigned i = 0; i < g->nbr_vars; i++) {
 		slot *e = GET_SLOT(g, 0);
+		cell tmp[3];
+		make_structure(tmp, g_minus_s, NULL, 2, 2);
+		tmp[1] = e->c;
+		tmp[2] = q->save_c[i];
 
 		if (first) {
-			allocate_list(q, &e->c);
+			allocate_list(q, tmp);
 			first = false;
 		} else
-			append_list(q, &e->c);
+			append_list(q, tmp);
 	}
 
 	cell *tmp = end_list(q);

@@ -620,18 +620,17 @@ attributed(V) :-
 % then call M:verify_attributes once per M.
 
 '$process_var'(_, [], Goals, Goals) :- !.
-'$process_var'(Var, [Att|Atts], SoFar, Goals) :-
+'$process_var'(Var, Value, [Att|Atts], SoFar, Goals) :-
 	functor(Att,M,_),
-	Value = [], % TODO: get Value for Var?
 	M:verify_attributes(Var, Value, NewGoals),
 	'$append'(SoFar, NewGoals, MoreGoals),
 	'$process_var'(Var, Atts, MoreGoals, Goals),
 	true.
 
 '$process_vars'([], Goals, Goals) :- !.
-'$process_vars'([Var|Vars], SoFar, Goals) :-
+'$process_vars'([Var-Value|Vars], SoFar, Goals) :-
 	get_att(Var, Atts),
-	'$process_var'(Var, Atts, SoFar, MoreGoals),
+	'$process_var'(Var, Value, Atts, SoFar, MoreGoals),
 	'$process_vars'(Vars, MoreGoals, Goals),
 	true.
 
