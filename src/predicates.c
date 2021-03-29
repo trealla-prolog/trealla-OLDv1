@@ -10884,6 +10884,7 @@ pl_status fn_sys_undo_trail_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	q->save_c = malloc(sizeof(cell)*(q->st.tp - q->undo_tp));
+	may_ptr_error(q->save_c);
 
 	for (idx_t i = q->undo_tp; i < q->st.tp; i++) {
 		const trail *tr = q->trails + q->undo_tp + i;
@@ -10895,10 +10896,11 @@ pl_status fn_sys_undo_trail_1(query *q)
 	}
 
 	frame *g = GET_CURR_FRAME();
+	frame *g_prev = GET_FRAME(g->prev_frame);
 	bool first = true;
 
-	for (unsigned i = 0; i < g->nbr_vars; i++) {
-		slot *e = GET_SLOT(g, 0);
+	for (unsigned i = 0; i < g_prev->nbr_vars; i++) {
+		slot *e = GET_SLOT(g_prev, 0);
 		cell tmp[3];
 		make_structure(tmp, g_minus_s, NULL, 2, 2);
 		SET_OP(&tmp[0], OP_YFX);
@@ -10913,7 +10915,8 @@ pl_status fn_sys_undo_trail_1(query *q)
 	}
 
 	cell *tmp = end_list(q);
-	set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
+	may_ptr_error(tmp);
+	set_var(q, p1, p1_ctx, tmp, g->prev_frame);
 	return pl_success;
 }
 
@@ -10934,7 +10937,7 @@ pl_status do_post_unification_checks(query *q)
 {
 	q->undo_tp = q->save_tp;
 	cell *tmp = alloc_on_heap(q, 3);
-	may_error(tmp);
+	may_ptr_error(tmp);
 	// Needed for follow() to work
 	*tmp = (cell){0};
 	tmp[0].val_type = TYPE_EMPTY;
