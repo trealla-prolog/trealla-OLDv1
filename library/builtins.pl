@@ -612,3 +612,23 @@ attributed(V) :-
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+
+'$post_unify_hook'(V, New, Goals) :-
+	'$undo_trail',
+
+/*
+	// 2) TODO: get attribute list for all vars
+
+	// 3) TODO: for all vars and for all modules...
+	//    call verify_attributes
+	//    collect the goals
+*/
+
+	'$redo_trail',
+	true.
+
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
