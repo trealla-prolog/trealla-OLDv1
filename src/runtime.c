@@ -1389,6 +1389,9 @@ pl_status query_start(query *q)
 			if (q->error)
 				break;
 
+			if (q->has_attrs)
+				may_error(do_post_unification_checks(q));
+
 			follow_me(q);
 		} else if (is_iso_list(q->st.curr_cell)) {
 			consultall(q->st.m->p, q->st.curr_cell);
@@ -1402,10 +1405,10 @@ pl_status query_start(query *q)
 				continue;
 			}
 
-		}
 
-		if (q->has_attrs)
-			may_error(do_post_unification_checks(q));
+			if (q->has_attrs)
+				may_error(do_post_unification_checks(q));
+		}
 
 		Trace(q, save_cell, EXIT);
 		q->resume = false;

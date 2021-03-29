@@ -142,7 +142,6 @@ void make_end(cell *tmp)
 
 static void make_call(query *q, cell *tmp)
 {
-	assert(q->st.curr_cell);
 	make_end(tmp);
 	cell *c = q->st.curr_cell;
 	frame *g = GET_CURR_FRAME();
