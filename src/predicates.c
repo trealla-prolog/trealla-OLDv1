@@ -142,6 +142,7 @@ void make_end(cell *tmp)
 
 static void make_call(query *q, cell *tmp)
 {
+	assert(q->st.curr_cell);
 	make_end(tmp);
 	cell *c = q->st.curr_cell;
 	frame *g = GET_CURR_FRAME();
@@ -10945,7 +10946,7 @@ pl_status do_post_unification_checks(query *q)
 	tmp[1].arity = 0;
 	tmp[1].flags = 0;
 	tmp[1].val_off = index_from_pool(q->st.m->pl, "$post_unify_hook");
-	tmp[1].match = find_predicate(q->st.m->pl->user_m, &tmp[1]);
+	tmp[1].match = find_predicate(q->st.m->pl->user_m, tmp+1);
 
 	make_call(q, tmp+2);
 	q->st.curr_cell = tmp;
