@@ -5108,7 +5108,7 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 	ensure(dst);
 	int off = 0;
 
-	if (q->st.m != q->st.m->pl->m) {
+	if (q->st.m != q->st.m->pl->user_m) {
 		off += sprintf(dst, "%s:", q->st.m->name);
 	}
 
@@ -10925,7 +10925,7 @@ pl_status do_post_unification_checks(query *q)
 	tmp[1].arity = 0;
 	tmp[1].flags = 0;
 	tmp[1].val_off = index_from_pool(q->st.m->pl, "$post_unify_hook");
-	tmp[1].match = find_predicate(q->st.m->pl->m, &tmp[1]);
+	tmp[1].match = find_predicate(q->st.m->pl->user_m, &tmp[1]);
 
 	make_call(q, tmp+2);
 	q->st.curr_cell = tmp;

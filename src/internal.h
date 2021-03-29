@@ -620,7 +620,7 @@ struct prolog_ {
 	idx_t tab4[64000];
 	uint8_t tab5[64000];
 	module *modules;
-	module *m, *curr_m;
+	module *user_m, *curr_m;
 	uint64_t s_last, s_cnt, seed;
 	skiplist *symtab, *funtab;
 	char *pool;

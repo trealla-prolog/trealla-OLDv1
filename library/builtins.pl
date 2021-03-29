@@ -616,7 +616,7 @@ attributed(V) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-'$post_unify_hook'(V, New, Goals) :-
+'$post_unify_hook' :-
 	'$undo_trail',
 
 /*
