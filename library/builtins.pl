@@ -638,7 +638,7 @@ attributed(V) :-
 	'$undo_trail'(Vars),
 	'$process_vars'(Vars, [], Goals),
 	'$redo_trail',
-	maplist(call, Goals),
+	maplist(call, Goals),	% can we even do this here? maybe return it
 	true.
 
 %
