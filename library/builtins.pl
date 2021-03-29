@@ -615,6 +615,10 @@ attributed(V) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
+% This is not efficient if M appears more than once in a
+% Vars attribute list. Better to get the list of Ms first
+% then call M:verify_attributes once per M.
+
 '$process_var'(_, [], Goals, Goals) :- !.
 '$process_var'(Var, [Att|Atts], SoFar, Goals) :-
 	functor(Att,M,_),
