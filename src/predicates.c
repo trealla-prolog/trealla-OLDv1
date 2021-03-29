@@ -5952,7 +5952,7 @@ static USE_RESULT pl_status fn_sys_findall_3(query *q)
 	init_queuen(q);
 	may_error(make_choice(q));
 	nbr_cells = q->tmpq_size[q->st.qnbr];
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
@@ -6038,7 +6038,7 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 	pin_vars(q, mask);
 	idx_t nbr_cells = q->tmpq_size[q->st.qnbr];
 	bool unmatched = false;
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
@@ -10628,7 +10628,7 @@ static USE_RESULT pl_status fn_memberchk_2(query *q)
 	}
 
 	may_error(make_choice(q));
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
@@ -10883,7 +10883,7 @@ static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
 pl_status fn_sys_undo_trail_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	q->save_c = malloc(sizeof(cell)*(q->st.tp-q->undo_tp));
+	q->save_c = malloc(sizeof(cell)*(q->st.tp - q->undo_tp));
 
 	for (idx_t i = q->undo_tp; i < q->st.tp; i++) {
 		const trail *tr = q->trails + q->undo_tp + i;
@@ -10894,13 +10894,14 @@ pl_status fn_sys_undo_trail_1(query *q)
 		e->c.attrs = tr->attrs;
 	}
 
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 	bool first = true;
 
 	for (unsigned i = 0; i < g->nbr_vars; i++) {
 		slot *e = GET_SLOT(g, 0);
 		cell tmp[3];
 		make_structure(tmp, g_minus_s, NULL, 2, 2);
+		SET_OP(&tmp[0], OP_YFX);
 		tmp[1] = e->c;
 		tmp[2] = q->save_c[i];
 
