@@ -612,22 +612,30 @@ attributed(V) :-
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
+'$process_var'(_, [], Goals, Goals) :- !.
+'$process_var'(Var, [Att|Atts], SoFar, Goals) :-
+	functor(Att,M,_),
+	Value = [], %get Value for Var?
+	M:verify_attributes(Var, Value, NewGoals),
+	'$append'(SoFar, NewGoals, MoreGoals),
+	'$process_var'(Var, Atts, MoreGoals, Goals),
+	true.
+
+'$process_vars'([], Goals, Goals) :- !.
+'$process_vars'([Var|Vars], SoFar, Goals) :-
+	get_att(Var, Atts),
+	'$process_var'(Var, Atts, SoFar, MoreGoals),
+	'$process_vars'(Vars, MoreGoals, Goals),
+	true.
+
 '$post_unify_hook' :-
 	'$undo_trail'(Vars),
-
-/*
-	// 2) TODO: get attribute list for all vars
-
-	// 3) TODO: for all vars and for all modules...
-	//    call verify_attributes
-	//    collect the goals
-*/
-
+	'$process_vars'(Vars, [], Goals),
 	'$redo_trail',
+	maplist(call, Goals),
 	true.
 
 %
