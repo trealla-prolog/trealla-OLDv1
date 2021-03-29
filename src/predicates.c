@@ -10880,8 +10880,9 @@ static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
 	return pl_success;
 }
 
-pl_status fn_sys_undo_trail_0(query *q)
+pl_status fn_sys_undo_trail_1(query *q)
 {
+	GET_FIRST_ARG(p1,variable);
 	q->save_c = malloc(sizeof(cell)*(q->st.tp-q->undo_tp));
 
 	for (idx_t i = q->undo_tp; i < q->st.tp; i++) {
@@ -10893,6 +10894,21 @@ pl_status fn_sys_undo_trail_0(query *q)
 		e->c.attrs = tr->attrs;
 	}
 
+	frame *g = GET_FRAME(q->st.curr_frame);
+	bool first = true;
+
+	for (unsigned i = 0; i < g->nbr_vars; i++) {
+		slot *e = GET_SLOT(g, 0);
+
+		if (first) {
+			allocate_list(q, &e->c);
+			first = false;
+		} else
+			append_list(q, &e->c);
+	}
+
+	cell *tmp = end_list(q);
+	set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	return pl_success;
 }
 
@@ -11109,7 +11125,7 @@ static const struct builtins g_predicates_other[] =
 	{"memberchk", 2, fn_memberchk_2, "?term,+list"},
 
 	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars"},
-	{"$undo_trail", 0, fn_sys_undo_trail_0, NULL},
+	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL},
 	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL},
 
 #if 1

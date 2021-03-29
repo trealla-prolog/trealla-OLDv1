@@ -617,7 +617,7 @@ attributed(V) :-
 %
 
 '$post_unify_hook' :-
-	'$undo_trail',
+	'$undo_trail'(Vars),
 
 /*
 	// 2) TODO: get attribute list for all vars
