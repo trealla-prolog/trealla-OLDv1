@@ -10883,28 +10883,43 @@ static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
 pl_status fn_sys_undo_trail_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
+	frame *g = GET_CURR_FRAME();
+	frame *g_prev = GET_FRAME(g->prev_frame);
+	cell *tmp_save_c = malloc(sizeof(cell)*g_prev->nbr_vars);
+
+	// Save our vars values
+
+	for (unsigned i = 0; i < g_prev->nbr_vars; i++) {
+		printf("*** save ctx=%u, var=%u\n", g->prev_frame, i);
+		slot *e = GET_SLOT(g_prev, i);
+		tmp_save_c[i] = e->c;
+	}
+
 	q->save_c = malloc(sizeof(cell)*(q->st.tp - q->undo_tp));
 	may_ptr_error(q->save_c);
 
-	for (idx_t i = q->undo_tp; i < q->st.tp; i++) {
+	// Unbind our vars
+
+	for (idx_t i = q->undo_tp; i < q->redo_tp; i++) {
 		const trail *tr = q->trails + q->undo_tp + i;
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
-		q->save_c[i] = e->c;
+		printf("*** unbind ctx=%u, var=%u\n", tr->ctx, tr->var_nbr);
+		q->save_c[i] = tmp_save_c[i];
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = tr->attrs;
 	}
 
-	frame *g = GET_CURR_FRAME();
-	frame *g_prev = GET_FRAME(g->prev_frame);
 	bool first = true;
 
+	// Make list of Var-Val
+
 	for (unsigned i = 0; i < g_prev->nbr_vars; i++) {
-		slot *e = GET_SLOT(g_prev, 0);
 		cell tmp[3];
 		make_structure(tmp, g_minus_s, NULL, 2, 2);
 		SET_OP(&tmp[0], OP_YFX);
-		tmp[1] = e->c;
+		make_variable(&tmp[1], g_anon_s);
+		tmp[1].var_nbr = i;
 		tmp[2] = q->save_c[i];
 
 		if (first) {
@@ -10917,18 +10932,20 @@ pl_status fn_sys_undo_trail_1(query *q)
 	cell *tmp = end_list(q);
 	may_ptr_error(tmp);
 	set_var(q, p1, p1_ctx, tmp, g->prev_frame);
+	free(tmp_save_c);
 	return pl_success;
 }
 
 pl_status fn_sys_redo_trail_0(query * q)
 {
-	for (idx_t i = q->undo_tp; i < q->st.tp; i++) {
+	for (idx_t i = q->undo_tp; i < q->redo_tp; i++) {
 		const trail *tr = q->trails + q->undo_tp + i;
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
 		e->c = q->save_c[i];
 	}
 
+	q->undo_tp = q->redo_tp = 0;
 	free(q->save_c);
 	return pl_success;
 }
@@ -10936,6 +10953,7 @@ pl_status fn_sys_redo_trail_0(query * q)
 pl_status do_post_unification_checks(query *q)
 {
 	q->undo_tp = q->save_tp;
+	q->redo_tp = q->st.tp;
 	cell *tmp = alloc_on_heap(q, 3);
 	may_ptr_error(tmp);
 	// Needed for follow() to work

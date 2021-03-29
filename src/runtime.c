@@ -286,14 +286,20 @@ static frame *make_frame(query *q, unsigned nbr_vars)
 
 static void trim_trail(query *q)
 {
-	if (!q->cp) {
+	if (!q->cp && !q->redo_tp) {
 		q->st.tp = 0;
 		return;
 	}
 
-	const choice *ch = GET_CURR_CHOICE();
+	idx_t tp;
 
-	while (q->st.tp > ch->st.tp) {
+	if (q->cp) {
+		const choice *ch = GET_CURR_CHOICE();
+		tp = ch->st.tp;
+	} else
+		tp = 0;
+
+	while (q->st.tp > tp) {
 		const trail *tr = q->trails + q->st.tp - 1;
 
 		if (tr->ctx != q->st.curr_frame)
