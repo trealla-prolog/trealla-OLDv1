@@ -10729,14 +10729,17 @@ static USE_RESULT pl_status fn_current_module_1(query *q)
 		}
 
 		may_error(make_choice(q));
-		module *m = q->save_m = find_next_module(q->st.m->pl, NULL);
+		module *m = q->current_m = q->st.m->pl->modules;
 		cell tmp;
 		make_literal(&tmp, index_from_pool(q->st.m->pl, m->name));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
 
-	module *m = q->save_m = q->save_m->next;
+	if (!q->current_m)
+		return pl_failure;
+
+	module *m = q->current_m = q->current_m->next;
 
 	if (!m)
 		return pl_failure;

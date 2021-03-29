@@ -497,7 +497,7 @@ typedef struct prolog_flags_ {
 
 struct query_ {
 	query *prev, *next, *parent;
-	module *save_m;
+	module *save_m, *current_m;
 	parser *p;
 	frame *frames;
 	slot *slots;
