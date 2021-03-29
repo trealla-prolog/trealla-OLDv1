@@ -622,7 +622,7 @@ attributed(V) :-
 '$process_var'(_, [], Goals, Goals) :- !.
 '$process_var'(Var, [Att|Atts], SoFar, Goals) :-
 	functor(Att,M,_),
-	Value = [], %get Value for Var?
+	Value = [], % TODO: get Value for Var?
 	M:verify_attributes(Var, Value, NewGoals),
 	'$append'(SoFar, NewGoals, MoreGoals),
 	'$process_var'(Var, Atts, MoreGoals, Goals),
