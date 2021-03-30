@@ -526,6 +526,7 @@ struct query_ {
 	int8_t halt_code;
 	int8_t quoted;
 	bool has_attrs:1;
+	bool in_hook:1;
 	bool do_dump_vars:1;
 	bool status:1;
 	bool resume:1;
@@ -775,7 +776,7 @@ char *format_property(char **bufptr, size_t *lenptr, char *dst, const char *name
 bool needs_quoting(module *m, const char *src, int srclen);
 size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq);
 bool has_vars(query *q, cell *c, idx_t c_ctx, unsigned depth);
-pl_status do_post_unification_checks(query *q);
+pl_status do_post_unification_hook(query *q);
 
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, bool cons, unsigned depth);
 pl_status print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);

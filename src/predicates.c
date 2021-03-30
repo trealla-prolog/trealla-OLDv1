@@ -10314,7 +10314,7 @@ static USE_RESULT pl_status fn_offset_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_del_attrs_1(query *q)
+static USE_RESULT pl_status fn_sys_delete_attributes_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	frame *g = GET_FRAME(p1_ctx);
@@ -10323,7 +10323,7 @@ static USE_RESULT pl_status fn_sys_del_attrs_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_put_attrs_2(query *q)
+static USE_RESULT pl_status fn_sys_store_attributes_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,list_or_nil);
@@ -10338,7 +10338,7 @@ static USE_RESULT pl_status fn_sys_put_attrs_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_get_attrs_2(query *q)
+static USE_RESULT pl_status fn_sys_retrieve_attributes_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,variable);
@@ -10883,6 +10883,7 @@ static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
 pl_status fn_sys_undo_trail_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
+	q->in_hook = true;
 	frame *g = GET_CURR_FRAME();
 	frame *g_prev = GET_FRAME(g->prev_frame);
 	cell *tmp_save_c = malloc(sizeof(cell)*g_prev->nbr_vars);
@@ -10908,7 +10909,6 @@ pl_status fn_sys_undo_trail_1(query *q)
 		q->save_e[j] = *e;
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = tr->attrs;
-		e->ctx = 0;
 	}
 
 	bool first = true;
@@ -10949,10 +10949,11 @@ pl_status fn_sys_redo_trail_0(query * q)
 
 	q->undo_lo_tp = q->undo_hi_tp = 0;
 	free(q->save_e);
+	q->in_hook = false;
 	return pl_success;
 }
 
-pl_status do_post_unification_checks(query *q)
+pl_status do_post_unification_hook(query *q)
 {
 	q->undo_lo_tp = q->save_tp;
 	q->undo_hi_tp = q->st.tp;
@@ -11257,9 +11258,9 @@ static const struct builtins g_predicates_other[] =
 	{"plus", 3, fn_plus_3, "?integer,?integer,?integer"},
 	{"succ", 2, fn_succ_2, "?integer,?integer"},
 
-	{"$put_attrs", 2, fn_sys_put_attrs_2, "+variable,+list"},
-	{"$get_attrs", 2, fn_sys_get_attrs_2, "+variable,-variable"},
-	{"$del_attrs", 1, fn_sys_del_attrs_1, "+variable"},
+	{"$store_attributes", 2, fn_sys_store_attributes_2, "+variable,+list"},
+	{"$retrieve_attributes", 2, fn_sys_retrieve_attributes_2, "+variable,-variable"},
+	{"$delete_attributes", 1, fn_sys_delete_attributes_1, "+variable"},
 
 #if USE_OPENSSL
 	{"sha1", 2, fn_sha1_2, "+string,?string"},

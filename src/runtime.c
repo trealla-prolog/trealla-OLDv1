@@ -657,9 +657,9 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		q->has_attrs = true;
 
 	trail *tr = q->trails + q->st.tp++;
-	tr->attrs = attrs;
-	tr->var_nbr = c->var_nbr;
 	tr->ctx = c_ctx;
+	tr->var_nbr = c->var_nbr;
+	tr->attrs = attrs;
 }
 
 void reset_value(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
@@ -1398,8 +1398,8 @@ pl_status query_start(query *q)
 			if (q->error)
 				break;
 
-			if (q->has_attrs)
-				may_error(do_post_unification_checks(q));
+			if (q->has_attrs && !q->in_hook)
+				may_error(do_post_unification_hook(q));
 
 			follow_me(q);
 		} else if (is_iso_list(q->st.curr_cell)) {
@@ -1416,7 +1416,7 @@ pl_status query_start(query *q)
 
 
 			if (q->has_attrs)
-				may_error(do_post_unification_checks(q));
+				may_error(do_post_unification_hook(q));
 		}
 
 		Trace(q, save_cell, EXIT);
