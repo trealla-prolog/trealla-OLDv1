@@ -10885,19 +10885,10 @@ pl_status fn_sys_undo_trail_1(query *q)
 	GET_FIRST_ARG(p1,variable);
 	q->in_hook = true;
 	frame *g = GET_CURR_FRAME();
-	frame *g_prev = GET_FRAME(g->prev_frame);
-	cell *tmp_save_c = malloc(sizeof(cell)*g_prev->nbr_vars);
-
-	// Save our vars values
-
-	for (unsigned i = 0; i < g_prev->nbr_vars; i++) {
-		//printf("*** save ctx=%u, var=%u\n", g->prev_frame, i);
-		slot *e = GET_SLOT(g_prev, i);
-		tmp_save_c[i] = e->c;
-	}
 
 	q->save_e = malloc(sizeof(slot)*(q->undo_hi_tp - q->undo_lo_tp));
 	may_ptr_error(q->save_e);
+	bool first = true;
 
 	// Unbind our vars
 
@@ -10905,35 +10896,29 @@ pl_status fn_sys_undo_trail_1(query *q)
 		const trail *tr = q->trails + i;
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
-		//printf("*** unbind [%u:%u:%u] ctx=%u, var=%u\n", j, i, q->undo_hi_tp, tr->ctx, tr->var_nbr);
+		//printf("*** unbind [%u:%u] ctx=%u, var=%u\n", j, i, tr->ctx, tr->var_nbr);
 		q->save_e[j] = *e;
-		e->c.val_type = TYPE_EMPTY;
-		e->c.attrs = tr->attrs;
-	}
 
-	bool first = true;
-
-	// Make list of Var-Val
-
-	for (unsigned i = 0; i < g_prev->nbr_vars; i++) {
 		cell tmp[3];
 		make_structure(tmp, g_minus_s, NULL, 2, 2);
 		SET_OP(&tmp[0], OP_YFX);
 		make_variable(&tmp[1], g_anon_s);
-		tmp[1].var_nbr = i;
-		tmp[2] = tmp_save_c[i];
+		tmp[1].var_nbr = tr->var_nbr;
+		tmp[2] = e->c;
 
 		if (first) {
 			allocate_list(q, tmp);
 			first = false;
 		} else
 			append_list(q, tmp);
+
+		e->c.val_type = TYPE_EMPTY;
+		e->c.attrs = tr->attrs;
 	}
 
 	cell *tmp = end_list(q);
 	may_ptr_error(tmp);
 	set_var(q, p1, p1_ctx, tmp, g->prev_frame);
-	free(tmp_save_c);
 	return pl_success;
 }
 
