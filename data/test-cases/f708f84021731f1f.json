@@ -1,0 +1,49 @@
+{
+  "uid" : "f708f84021731f1f",
+  "name" : "sign_1_integer_01",
+  "historyId" : "::(functions/sign_1/tests.lgt,tests):tests#sign_1_integer_01",
+  "time" : {
+    "start" : 1617089881000,
+    "stop" : 1617089881000,
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "::(functions/sign_1/tests.lgt,tests)"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "f708f84021731f1f.json",
+  "parameterValues" : [ ]
+}

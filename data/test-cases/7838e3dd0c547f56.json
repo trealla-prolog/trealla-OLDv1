@@ -1,0 +1,49 @@
+{
+  "uid" : "7838e3dd0c547f56",
+  "name" : "sics_stream_property_2_04",
+  "historyId" : "::(predicates/stream_property_2/tests.lgt,tests):tests#sics_stream_property_2_04",
+  "time" : {
+    "start" : 1617090237000,
+    "stop" : 1617090237002,
+    "duration" : 2
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "::(predicates/stream_property_2/tests.lgt,tests)"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "7838e3dd0c547f56.json",
+  "parameterValues" : [ ]
+}

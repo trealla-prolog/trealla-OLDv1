@@ -1,0 +1,49 @@
+{
+  "uid" : "85e43f3c32e4d63e",
+  "name" : "iso_catch_3_06",
+  "historyId" : "::(control/catch_3/tests.lgt,tests):tests#iso_catch_3_06",
+  "time" : {
+    "start" : 1617089679000,
+    "stop" : 1617089679000,
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "::(control/catch_3/tests.lgt,tests)"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "85e43f3c32e4d63e.json",
+  "parameterValues" : [ ]
+}
