@@ -10890,7 +10890,7 @@ pl_status fn_sys_undo_trail_1(query *q)
 	// Save our vars values
 
 	for (unsigned i = 0; i < g_prev->nbr_vars; i++) {
-		printf("*** save ctx=%u, var=%u\n", g->prev_frame, i);
+		//printf("*** save ctx=%u, var=%u\n", g->prev_frame, i);
 		slot *e = GET_SLOT(g_prev, i);
 		tmp_save_c[i] = e->c;
 	}
@@ -10904,7 +10904,7 @@ pl_status fn_sys_undo_trail_1(query *q)
 		const trail *tr = q->trails + q->undo_tp + i;
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
-		printf("*** unbind ctx=%u, var=%u\n", tr->ctx, tr->var_nbr);
+		//printf("*** unbind ctx=%u, var=%u\n", tr->ctx, tr->var_nbr);
 		q->save_c[i] = tmp_save_c[i];
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = tr->attrs;
