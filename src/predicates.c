@@ -10895,17 +10895,17 @@ pl_status fn_sys_undo_trail_1(query *q)
 		tmp_save_c[i] = e->c;
 	}
 
-	q->save_c = malloc(sizeof(cell)*(q->st.tp - q->undo_tp));
+	q->save_c = malloc(sizeof(cell)*(q->undo_hi_tp - q->undo_lo_tp));
 	may_ptr_error(q->save_c);
 
 	// Unbind our vars
 
-	for (idx_t i = q->undo_tp; i < q->redo_tp; i++) {
-		const trail *tr = q->trails + q->undo_tp + i;
+	for (idx_t i = q->undo_lo_tp, j = 0; i < q->undo_hi_tp; i++, j++) {
+		const trail *tr = q->trails + i;
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
-		//printf("*** unbind ctx=%u, var=%u\n", tr->ctx, tr->var_nbr);
-		q->save_c[i] = e->c;
+		//printf("*** unbind [%u:%u:%u] ctx=%u, var=%u\n", j, i, q->undo_hi_tp, tr->ctx, tr->var_nbr);
+		q->save_c[j] = e->c;
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = tr->attrs;
 	}
@@ -10938,22 +10938,23 @@ pl_status fn_sys_undo_trail_1(query *q)
 
 pl_status fn_sys_redo_trail_0(query * q)
 {
-	for (idx_t i = q->undo_tp; i < q->redo_tp; i++) {
-		const trail *tr = q->trails + q->undo_tp + i;
+	for (idx_t i = q->undo_lo_tp, j = 0; i < q->undo_hi_tp; i++, j++) {
+		const trail *tr = q->trails + i;
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
-		e->c = q->save_c[i];
+		//printf("*** rebind [%u:%u:%u] ctx=%u, var=%u\n", j, i, q->undo_hi_tp, tr->ctx, tr->var_nbr);
+		e->c = q->save_c[j];
 	}
 
-	q->undo_tp = q->redo_tp = 0;
+	q->undo_lo_tp = q->undo_hi_tp = 0;
 	free(q->save_c);
 	return pl_success;
 }
 
 pl_status do_post_unification_checks(query *q)
 {
-	q->undo_tp = q->save_tp;
-	q->redo_tp = q->st.tp;
+	q->undo_lo_tp = q->save_tp;
+	q->undo_hi_tp = q->st.tp;
 	cell *tmp = alloc_on_heap(q, 3);
 	may_ptr_error(tmp);
 	// Needed for follow() to work

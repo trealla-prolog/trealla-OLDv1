@@ -286,7 +286,10 @@ static frame *make_frame(query *q, unsigned nbr_vars)
 
 static void trim_trail(query *q)
 {
-	if (!q->cp && !q->redo_tp) {
+	if (q->undo_hi_tp)
+		return;
+
+	if (!q->cp) {
 		q->st.tp = 0;
 		return;
 	}
@@ -535,7 +538,7 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 #endif
 	}
 
-	if (!q->cp)
+	if (!q->cp && !q->undo_hi_tp)
 		q->st.tp = 0;
 }
 
