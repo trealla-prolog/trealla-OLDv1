@@ -10348,11 +10348,11 @@ static USE_RESULT pl_status fn_sys_get_attrs_2(query *q)
 	if (!e->c.attrs) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		set_var(q, p2, p2_ctx, &tmp, p1_ctx);
 		return pl_success;
 	}
 
-	set_var(q, p2, p2_ctx, e->c.attrs, q->st.curr_frame);
+	set_var(q, p2, p2_ctx, e->c.attrs, p1_ctx);
 	return pl_success;
 }
 

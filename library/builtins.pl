@@ -621,16 +621,11 @@ attributed(V) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-% This is not efficient if M appears more than once in a
-% Vars attribute list. Better to get the list of Ms first
-% then call M:verify_attributes once per M.
-
-'$process_var'(_, _, [], Goals, Goals) :- !.
-'$process_var'(Var, Val, [Att|Atts], SoFar, Goals) :-
-	functor(Att, M, _),
-	M:verify_attributes(Var, Val, NewGoals),
-	'$append'(SoFar, NewGoals, MoreGoals),
-	'$process_var'(Var, Val, Atts, MoreGoals, Goals),
+'$post_unify_hook' :-
+	'$undo_trail'(Vars),
+	'$process_vars'(Vars, [], Goals),
+	'$redo_trail',
+	maplist(call, Goals),
 	true.
 
 '$process_vars'([], Goals, Goals) :- !.
@@ -640,11 +635,12 @@ attributed(V) :-
 	'$process_vars'(Vars, MoreGoals, Goals),
 	true.
 
-'$post_unify_hook' :-
-	'$undo_trail'(Vars),
-	'$process_vars'(Vars, [], Goals),
-	'$redo_trail',
-	maplist(call, Goals),	% can we even do this here? maybe return it
+'$process_var'(_, _, [], Goals, Goals) :- !.
+'$process_var'(Var, Val, [Att|Atts], SoFar, Goals) :-
+	functor(Att, M, _),
+	M:verify_attributes(Var, Val, NewGoals),
+	'$append'(SoFar, NewGoals, MoreGoals),
+	'$process_var'(Var, Val, Atts, MoreGoals, Goals),
 	true.
 
 %

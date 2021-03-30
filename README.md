@@ -174,8 +174,8 @@ GNU-Prolog & SWI-Prolog
 	get_atts/2				#    ditto
 	del_atts/1				#    ditto
 
-	freeze/2				# in library *freeze*
-	frozen/2				# in library *freeze*
+	freeze/2				# use_module(library(freeze))
+	frozen/2				# use_module(library(freeze))
 
 
 Others
