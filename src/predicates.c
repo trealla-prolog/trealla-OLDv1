@@ -10905,7 +10905,7 @@ pl_status fn_sys_undo_trail_1(query *q)
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
 		//printf("*** unbind ctx=%u, var=%u\n", tr->ctx, tr->var_nbr);
-		q->save_c[i] = tmp_save_c[i];
+		q->save_c[i] = e->c;
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = tr->attrs;
 	}
@@ -10920,7 +10920,7 @@ pl_status fn_sys_undo_trail_1(query *q)
 		SET_OP(&tmp[0], OP_YFX);
 		make_variable(&tmp[1], g_anon_s);
 		tmp[1].var_nbr = i;
-		tmp[2] = q->save_c[i];
+		tmp[2] = tmp_save_c[i];
 
 		if (first) {
 			allocate_list(q, tmp);
