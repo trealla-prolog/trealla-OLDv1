@@ -10895,8 +10895,8 @@ pl_status fn_sys_undo_trail_1(query *q)
 		tmp_save_c[i] = e->c;
 	}
 
-	q->save_c = malloc(sizeof(cell)*(q->undo_hi_tp - q->undo_lo_tp));
-	may_ptr_error(q->save_c);
+	q->save_e = malloc(sizeof(slot)*(q->undo_hi_tp - q->undo_lo_tp));
+	may_ptr_error(q->save_e);
 
 	// Unbind our vars
 
@@ -10905,9 +10905,10 @@ pl_status fn_sys_undo_trail_1(query *q)
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
 		//printf("*** unbind [%u:%u:%u] ctx=%u, var=%u\n", j, i, q->undo_hi_tp, tr->ctx, tr->var_nbr);
-		q->save_c[j] = e->c;
+		q->save_e[j] = *e;
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = tr->attrs;
+		e->ctx = 0;
 	}
 
 	bool first = true;
@@ -10943,11 +10944,11 @@ pl_status fn_sys_redo_trail_0(query * q)
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
 		//printf("*** rebind [%u:%u:%u] ctx=%u, var=%u\n", j, i, q->undo_hi_tp, tr->ctx, tr->var_nbr);
-		e->c = q->save_c[j];
+		*e = q->save_e[j];
 	}
 
 	q->undo_lo_tp = q->undo_hi_tp = 0;
-	free(q->save_c);
+	free(q->save_e);
 	return pl_success;
 }
 

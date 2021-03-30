@@ -508,7 +508,7 @@ struct query_ {
 	cell *queue[MAX_QUEUES], *tmpq[MAX_QUEUES];
 	arena *arenas;
 	clause *dirty_list;
-	cell *save_c;
+	slot *save_e;
 	cell accum;
 	prolog_state st;
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
