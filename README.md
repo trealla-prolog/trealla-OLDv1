@@ -13,8 +13,8 @@ A compact, efficient Prolog interpreter with
 	Full-term just-in-time indexing
 	DCG via library(dcgs)
 	format_//2 via library(format)
-	Attributed variables with SICStus interface (still testing)
-	Logtalk compatible (still testing)
+	Attributed variables with SICStus interface (testing / in-progress)
+	Logtalk compatible (testing / in-progress)
 	REPL with history
 	MIT licensed
 
