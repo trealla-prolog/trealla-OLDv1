@@ -170,12 +170,12 @@ GNU-Prolog & SWI-Prolog
 	random/1                # random(-float) float [0.0,<1.0]
 	random/1                # random(+integer) function returning integer [0,<integer]
 
-	freeze/2
-	frozen/2
-
 	put_atts/2				# call by module M:put_atts(...)
 	get_atts/2				#    ditto
 	del_atts/1				#    ditto
+
+	freeze/2				# use_module(library(freeze))
+	frozen/2				# use_module(library(freeze))
 
 
 Others

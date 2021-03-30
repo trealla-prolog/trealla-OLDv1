@@ -91,7 +91,7 @@ typedef enum {
 #define GET_CURR_CHOICE() GET_CHOICE(q->cp-1)
 
 #define GET_FRAME(i) (q->frames+(i))
-#define GET_CURR_FRAME(i) GET_FRAME(q->st.curr_frame)
+#define GET_CURR_FRAME() GET_FRAME(q->st.curr_frame)
 
 #define GET_SLOT(g,i) ((i) < g->nbr_slots ? (q->slots+g->ctx+(i)) : (q->slots+g->overflow+((i)-g->nbr_slots)))
 
@@ -407,6 +407,7 @@ struct op_table {
 };
 
 typedef struct {
+	cell *attrs;
 	idx_t ctx;
 	uint16_t var_nbr;
 } trail;
@@ -507,6 +508,7 @@ struct query_ {
 	cell *queue[MAX_QUEUES], *tmpq[MAX_QUEUES];
 	arena *arenas;
 	clause *dirty_list;
+	cell *save_c;
 	cell accum;
 	prolog_state st;
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
@@ -515,14 +517,15 @@ struct query_ {
 	int nv_start;
 	idx_t cp, tmphp, latest_ctx, popp, variable_names_ctx, save_cp;
 	idx_t frames_size, slots_size, trails_size, choices_size;
-	idx_t max_choices, max_frames, max_slots, max_trails;
-	idx_t h_size, tmph_size, tot_heaps, tot_heapsize;
+	idx_t max_choices, max_frames, max_slots, max_trails, save_tp;
+	idx_t h_size, tmph_size, tot_heaps, tot_heapsize, undo_lo_tp, undo_hi_tp;
 	idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
 	uint8_t nv_mask[MAX_ARITY];
 	prolog_flags flag;
 	enum q_retry retry;
 	int8_t halt_code;
 	int8_t quoted;
+	bool has_attrs:1;
 	bool do_dump_vars:1;
 	bool status:1;
 	bool resume:1;
@@ -617,7 +620,7 @@ struct prolog_ {
 	idx_t tab4[64000];
 	uint8_t tab5[64000];
 	module *modules;
-	module *m, *curr_m;
+	module *user_m, *curr_m;
 	uint64_t s_last, s_cnt, seed;
 	skiplist *symtab, *funtab;
 	char *pool;
@@ -772,6 +775,7 @@ char *format_property(char **bufptr, size_t *lenptr, char *dst, const char *name
 bool needs_quoting(module *m, const char *src, int srclen);
 size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq);
 bool has_vars(query *q, cell *c, idx_t c_ctx, unsigned depth);
+pl_status do_post_unification_checks(query *q);
 
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, bool cons, unsigned depth);
 pl_status print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);

@@ -5108,7 +5108,7 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 	ensure(dst);
 	int off = 0;
 
-	if (q->st.m != q->st.m->pl->m) {
+	if (q->st.m != q->st.m->pl->user_m) {
 		off += sprintf(dst, "%s:", q->st.m->name);
 	}
 
@@ -5952,7 +5952,7 @@ static USE_RESULT pl_status fn_sys_findall_3(query *q)
 	init_queuen(q);
 	may_error(make_choice(q));
 	nbr_cells = q->tmpq_size[q->st.qnbr];
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
@@ -6038,7 +6038,7 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 	pin_vars(q, mask);
 	idx_t nbr_cells = q->tmpq_size[q->st.qnbr];
 	bool unmatched = false;
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
@@ -10314,50 +10314,6 @@ static USE_RESULT pl_status fn_offset_2(query *q)
 	return pl_success;
 }
 
-void call_attrs(query *q, cell *attrs)
-{
-	cell *tmp = clone_to_heap(q, true, attrs, 1);
-	idx_t nbr_cells = 1 + attrs->nbr_cells;
-	make_call(q, tmp+nbr_cells);
-	q->st.curr_cell = tmp;
-}
-
-static USE_RESULT pl_status fn_freeze_2(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,callable);
-
-	if (is_variable(p1)) {
-		cell *tmp = clone_to_heap(q, false, p2, 0);
-		frame *g = GET_FRAME(p1_ctx);
-		slot *e = GET_SLOT(g, p1->var_nbr);
-		e->c.attrs = tmp;
-		return pl_success;
-	}
-
-	cell *tmp = clone_to_heap(q, true, p2, 1);
-	idx_t nbr_cells = 1 + p2->nbr_cells;
-	make_call(q, tmp+nbr_cells);
-	q->st.curr_cell = tmp;
-	return pl_success;
-}
-
-static USE_RESULT pl_status fn_frozen_2(query *q)
-{
-	GET_FIRST_ARG(p1,variable);
-	GET_NEXT_ARG(p2,any);
-	frame *g = GET_FRAME(p1_ctx);
-	slot *e = GET_SLOT(g, p1->var_nbr);
-
-	if (!e->c.attrs) {
-		cell tmp;
-		make_literal(&tmp, g_true_s);
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	}
-
-	return unify(q, p2, p2_ctx, e->c.attrs, q->st.curr_frame);
-}
-
 static USE_RESULT pl_status fn_sys_del_attrs_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
@@ -10392,11 +10348,11 @@ static USE_RESULT pl_status fn_sys_get_attrs_2(query *q)
 	if (!e->c.attrs) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		set_var(q, p2, p2_ctx, &tmp, p1_ctx);
 		return pl_success;
 	}
 
-	set_var(q, p2, p2_ctx, e->c.attrs, q->st.curr_frame);
+	set_var(q, p2, p2_ctx, e->c.attrs, p1_ctx);
 	return pl_success;
 }
 
@@ -10672,7 +10628,7 @@ static USE_RESULT pl_status fn_memberchk_2(query *q)
 	}
 
 	may_error(make_choice(q));
-	frame *g = GET_FRAME(q->st.curr_frame);
+	frame *g = GET_CURR_FRAME();
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
@@ -10924,6 +10880,101 @@ static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
 	return pl_success;
 }
 
+pl_status fn_sys_undo_trail_1(query *q)
+{
+	GET_FIRST_ARG(p1,variable);
+	frame *g = GET_CURR_FRAME();
+	frame *g_prev = GET_FRAME(g->prev_frame);
+	cell *tmp_save_c = malloc(sizeof(cell)*g_prev->nbr_vars);
+
+	// Save our vars values
+
+	for (unsigned i = 0; i < g_prev->nbr_vars; i++) {
+		//printf("*** save ctx=%u, var=%u\n", g->prev_frame, i);
+		slot *e = GET_SLOT(g_prev, i);
+		tmp_save_c[i] = e->c;
+	}
+
+	q->save_c = malloc(sizeof(cell)*(q->undo_hi_tp - q->undo_lo_tp));
+	may_ptr_error(q->save_c);
+
+	// Unbind our vars
+
+	for (idx_t i = q->undo_lo_tp, j = 0; i < q->undo_hi_tp; i++, j++) {
+		const trail *tr = q->trails + i;
+		const frame *g = GET_FRAME(tr->ctx);
+		slot *e = GET_SLOT(g, tr->var_nbr);
+		//printf("*** unbind [%u:%u:%u] ctx=%u, var=%u\n", j, i, q->undo_hi_tp, tr->ctx, tr->var_nbr);
+		q->save_c[j] = e->c;
+		e->c.val_type = TYPE_EMPTY;
+		e->c.attrs = tr->attrs;
+	}
+
+	bool first = true;
+
+	// Make list of Var-Val
+
+	for (unsigned i = 0; i < g_prev->nbr_vars; i++) {
+		cell tmp[3];
+		make_structure(tmp, g_minus_s, NULL, 2, 2);
+		SET_OP(&tmp[0], OP_YFX);
+		make_variable(&tmp[1], g_anon_s);
+		tmp[1].var_nbr = i;
+		tmp[2] = tmp_save_c[i];
+
+		if (first) {
+			allocate_list(q, tmp);
+			first = false;
+		} else
+			append_list(q, tmp);
+	}
+
+	cell *tmp = end_list(q);
+	may_ptr_error(tmp);
+	set_var(q, p1, p1_ctx, tmp, g->prev_frame);
+	free(tmp_save_c);
+	return pl_success;
+}
+
+pl_status fn_sys_redo_trail_0(query * q)
+{
+	for (idx_t i = q->undo_lo_tp, j = 0; i < q->undo_hi_tp; i++, j++) {
+		const trail *tr = q->trails + i;
+		const frame *g = GET_FRAME(tr->ctx);
+		slot *e = GET_SLOT(g, tr->var_nbr);
+		//printf("*** rebind [%u:%u:%u] ctx=%u, var=%u\n", j, i, q->undo_hi_tp, tr->ctx, tr->var_nbr);
+		e->c = q->save_c[j];
+	}
+
+	q->undo_lo_tp = q->undo_hi_tp = 0;
+	free(q->save_c);
+	return pl_success;
+}
+
+pl_status do_post_unification_checks(query *q)
+{
+	q->undo_lo_tp = q->save_tp;
+	q->undo_hi_tp = q->st.tp;
+	cell *tmp = alloc_on_heap(q, 3);
+	may_ptr_error(tmp);
+	// Needed for follow() to work
+	*tmp = (cell){0};
+	tmp[0].val_type = TYPE_EMPTY;
+	tmp[0].nbr_cells = 1;
+	tmp[0].flags = FLAG_BUILTIN;
+
+	tmp[1].val_type = TYPE_LITERAL;
+	tmp[1].nbr_cells = 1;
+	tmp[1].arity = 0;
+	tmp[1].flags = 0;
+	tmp[1].val_off = index_from_pool(q->st.m->pl, "$post_unify_hook");
+	tmp[1].match = find_predicate(q->st.m->pl->user_m, tmp+1);
+
+	make_call(q, tmp+2);
+	q->st.curr_cell = tmp;
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_iso_compare_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
@@ -11097,9 +11148,12 @@ static const struct builtins g_predicates_other[] =
 
 	// Miscellaneous...
 
-	{"memberchk", 2, fn_memberchk_2, "?term,+list"},
-	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars"},
 	{"ignore", 1, fn_ignore_1, "+callable"},
+	{"memberchk", 2, fn_memberchk_2, "?term,+list"},
+
+	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars"},
+	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL},
+	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL},
 
 #if 1
 	{"legacy_format", 2, fn_format_2, "+string,+list"},
@@ -11202,8 +11256,6 @@ static const struct builtins g_predicates_other[] =
 	{"plus", 3, fn_plus_3, "?integer,?integer,?integer"},
 	{"succ", 2, fn_succ_2, "?integer,?integer"},
 
-	{"freeze", 2, fn_freeze_2, "+variable,+callable"},
-	{"frozen", 2, fn_frozen_2, "+variable,+callable"},
 	{"$put_attrs", 2, fn_sys_put_attrs_2, "+variable,+list"},
 	{"$get_attrs", 2, fn_sys_get_attrs_2, "+variable,-variable"},
 	{"$del_attrs", 1, fn_sys_del_attrs_1, "+variable"},

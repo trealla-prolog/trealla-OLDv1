@@ -181,7 +181,7 @@ static void unwind_trail(query *q, const choice *ch)
 		slot *e = GET_SLOT(g, tr->var_nbr);
 		DECR_REF(&e->c);
 		e->c.val_type = TYPE_EMPTY;
-		e->c.attrs = NULL;
+		e->c.attrs = tr->attrs;
 	}
 }
 
@@ -286,14 +286,23 @@ static frame *make_frame(query *q, unsigned nbr_vars)
 
 static void trim_trail(query *q)
 {
+	if (q->undo_hi_tp)
+		return;
+
 	if (!q->cp) {
 		q->st.tp = 0;
 		return;
 	}
 
-	const choice *ch = GET_CURR_CHOICE();
+	idx_t tp;
 
-	while (q->st.tp > ch->st.tp) {
+	if (q->cp) {
+		const choice *ch = GET_CURR_CHOICE();
+		tp = ch->st.tp;
+	} else
+		tp = 0;
+
+	while (q->st.tp > tp) {
 		const trail *tr = q->trails + q->st.tp - 1;
 
 		if (tr->ctx != q->st.curr_frame)
@@ -529,7 +538,7 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 #endif
 	}
 
-	if (!q->cp)
+	if (!q->cp && !q->undo_hi_tp)
 		q->st.tp = 0;
 }
 
@@ -626,11 +635,7 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 {
 	const frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
-	cell *frozen = NULL;
-
-	if (is_empty(&e->c) && e->c.attrs && is_callable(e->c.attrs))
-		frozen = e->c.attrs;
-
+	cell *attrs = e->c.attrs;
 	e->ctx = v_ctx;
 
 	if (is_structure(v))
@@ -640,10 +645,7 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		INCR_REF(v);
 	}
 
-	if (frozen)
-		call_attrs(q, frozen);
-
-	if (!q->cp)
+	if (!q->cp && !attrs)
 		return;
 
 	if (check_trail(q) != pl_success) {
@@ -651,7 +653,11 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		return;
 	}
 
+	if (attrs)
+		q->has_attrs = true;
+
 	trail *tr = q->trails + q->st.tp++;
+	tr->attrs = attrs;
 	tr->var_nbr = c->var_nbr;
 	tr->ctx = c_ctx;
 }
@@ -1137,8 +1143,6 @@ static USE_RESULT pl_status match_head(query *q)
 		q->no_tco = false;
 
 		if (unify_structure(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp, 0)) {
-			Trace(q, q->st.curr_cell, EXIT);
-
 			if (q->error)
 				return pl_error;
 
@@ -1369,7 +1373,10 @@ pl_status query_start(query *q)
 
 		q->tot_goals++;
 		q->did_throw = false;
+		q->save_tp = q->st.tp;
+		q->has_attrs = false;
 		Trace(q, q->st.curr_cell, CALL);
+		cell *save_cell = q->st.curr_cell;
 
 		if (q->st.curr_cell->flags&FLAG_BUILTIN) {
 			if (!q->st.curr_cell->fn) {					// NO-OP
@@ -1388,10 +1395,11 @@ pl_status query_start(query *q)
 				continue;
 			}
 
-			Trace(q, q->st.curr_cell, EXIT);
-
 			if (q->error)
 				break;
+
+			if (q->has_attrs)
+				may_error(do_post_unification_checks(q));
 
 			follow_me(q);
 		} else if (is_iso_list(q->st.curr_cell)) {
@@ -1405,8 +1413,13 @@ pl_status query_start(query *q)
 				q->tot_retries++;
 				continue;
 			}
+
+
+			if (q->has_attrs)
+				may_error(do_post_unification_checks(q));
 		}
 
+		Trace(q, save_cell, EXIT);
 		q->resume = false;
 		q->retry = QUERY_OK;
 

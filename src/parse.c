@@ -123,7 +123,6 @@ static idx_t is_in_pool(__attribute__((unused)) prolog *pl, const char *name)
 
 static idx_t add_to_pool(prolog *pl, const char *name)
 {
-	if (!name) return ERR_IDX;
 	idx_t offset = pl->pool_offset;
 	size_t len = strlen(name);
 
@@ -146,7 +145,6 @@ static idx_t add_to_pool(prolog *pl, const char *name)
 
 idx_t index_from_pool(prolog *pl, const char *name)
 {
-	if (!name) return ERR_IDX;
 	idx_t offset = is_in_pool(pl, name);
 
 	if (offset != ERR_IDX)
@@ -392,7 +390,7 @@ module *find_module_id(prolog *pl, idx_t id)
 			return m;
 	}
 
-	return pl->m;
+	return pl->user_m;
 }
 
 static bool check_directive(const cell *c)
@@ -3906,17 +3904,17 @@ bool pl_eval(prolog *pl, const char *s)
 
 bool pl_consult_fp(prolog *pl, FILE *fp, const char *filename)
 {
-	char *save_filename = pl->m->filename;
-	pl->m->filename = strdup(filename);
-	int ok = module_load_fp(pl->m, fp);
-	free(pl->m->filename);
-	pl->m->filename = save_filename;
+	char *save_filename = pl->user_m->filename;
+	pl->user_m->filename = strdup(filename);
+	int ok = module_load_fp(pl->user_m, fp);
+	free(pl->user_m->filename);
+	pl->user_m->filename = save_filename;
 	return ok;
 }
 
 bool pl_consult(prolog *pl, const char *filename)
 {
-	return module_load_file(pl->m, filename);
+	return module_load_file(pl->user_m, filename);
 }
 
 static void g_destroy(prolog *pl)
@@ -4032,7 +4030,7 @@ void pl_destroy(prolog *pl)
 {
 	if (!pl) return;
 
-	destroy_module(pl->m);
+	destroy_module(pl->user_m);
 
 	if (!--g_tpl_count)
 		g_destroy(pl);
@@ -4080,9 +4078,9 @@ prolog *pl_create()
 
 	//printf("Library: %s\n", g_tpl_lib);
 
-	pl->m = create_module(pl, "user");
-	if (pl->m) {
-		pl->curr_m = pl->m;
+	pl->user_m = create_module(pl, "user");
+	if (pl->user_m) {
+		pl->curr_m = pl->user_m;
 		pl->s_last = 0;
 		pl->s_cnt = 0;
 		pl->seed = 0;
@@ -4090,25 +4088,26 @@ prolog *pl_create()
 		pl->current_output = 1;		// STDOUT
 		pl->current_error = 2;		// STDERR
 
-		set_multifile_in_db(pl->m, "term_expansion", 2);
-		set_multifile_in_db(pl->m, "goal_expansion", 2);
-		set_noindex_in_db(pl->m, "$stream_property", 2);
-		set_noindex_in_db(pl->m, "$current_op", 3);
+		set_multifile_in_db(pl->user_m, "term_expansion", 2);
+		set_multifile_in_db(pl->user_m, "goal_expansion", 2);
+		set_noindex_in_db(pl->user_m, "$stream_property", 2);
+		set_noindex_in_db(pl->user_m, "$current_op", 3);
 
-		set_dynamic_in_db(pl->m, "$current_op", 3);
-		set_dynamic_in_db(pl->m, "$predicate_property", 2);
-		set_dynamic_in_db(pl->m, "$stream_property", 2);
-		set_dynamic_in_db(pl->m, "term_expansion", 2);
-		set_dynamic_in_db(pl->m, "goal_expansion", 2);
-		set_dynamic_in_db(pl->m, "initialization", 1);
-		set_dynamic_in_db(pl->m, ":-", 1);
+		set_dynamic_in_db(pl->user_m, "$current_op", 3);
+		set_dynamic_in_db(pl->user_m, "$predicate_property", 2);
+		set_dynamic_in_db(pl->user_m, "$stream_property", 2);
+		set_dynamic_in_db(pl->user_m, "term_expansion", 2);
+		set_dynamic_in_db(pl->user_m, "goal_expansion", 2);
+		set_dynamic_in_db(pl->user_m, "initialization", 1);
+		set_dynamic_in_db(pl->user_m, ":-", 1);
 
-		pl->m->prebuilt = true;
+		pl->user_m->prebuilt = true;
 
 		for (library *lib = g_libs; lib->name; lib++) {
 			if (
 				!strcmp(lib->name, "builtins") ||
 				!strcmp(lib->name, "apply") ||
+				//!strcmp(lib->name, "freeze") ||
 				//!strcmp(lib->name, "atts") ||
 				//!strcmp(lib->name, "dcgs") ||
 				//!strcmp(lib->name, "assoc") ||
@@ -4116,25 +4115,24 @@ prolog *pl_create()
 				//!strcmp(lib->name, "charsio") ||
 				//!strcmp(lib->name, "format") ||
 				//!strcmp(lib->name, "http") ||
-				//!strcmp(lib->name, "atts") ||
 				!strcmp(lib->name, "lists")) {
 				char *src = malloc(*lib->len+1);
 				ensure(src);
 				memcpy(src, lib->start, *lib->len);
 				src[*lib->len] = '\0';
-				assert(pl->m);
+				assert(pl->user_m);
 				STRING_INIT(s1);
 				STRING_CAT2(s1, "library/", lib->name);
-				module_load_text(pl->m, src, STRING_CSTR(s1));
+				module_load_text(pl->user_m, src, STRING_CSTR(s1));
 				STRING_DONE(s1);
 				free(src);
 			}
 		}
 
-		pl->m->prebuilt = false;
+		pl->user_m->prebuilt = false;
 	}
 
-	if (!pl->m || pl->m->error || !pl->m->filename) {
+	if (!pl->user_m || pl->user_m->error || !pl->user_m->filename) {
 		pl_destroy(pl);
 		pl = NULL;
 	}
