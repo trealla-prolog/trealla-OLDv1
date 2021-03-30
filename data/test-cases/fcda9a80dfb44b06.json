@@ -1,0 +1,49 @@
+{
+  "uid" : "fcda9a80dfb44b06",
+  "name" : "sics_bitwise_complement_1_05",
+  "historyId" : "::(functions/bitwise_complement_1/tests.lgt,tests):tests#sics_bitwise_complement_1_05",
+  "time" : {
+    "start" : 1617080327000,
+    "stop" : 1617080327000,
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "::(functions/bitwise_complement_1/tests.lgt,tests)"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "fcda9a80dfb44b06.json",
+  "parameterValues" : [ ]
+}

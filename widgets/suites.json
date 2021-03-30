@@ -1,8 +1,8 @@
 {
   "total" : 153,
   "items" : [ {
-    "uid" : "8d72f33464c61a169f6282af0f2f0181",
-    "name" : "predicates/read_term_3/tests.lgt::tests",
+    "uid" : "27727a077e6b9f5de53e31af25a4b0ab",
+    "name" : "::(predicates/read_term_3/tests.lgt,tests)",
     "statistic" : {
       "failed" : 6,
       "broken" : 0,
@@ -12,8 +12,8 @@
       "total" : 36
     }
   }, {
-    "uid" : "ed0cdb351cf5fe82566e390f01a37528",
-    "name" : "control/throw_1/tests.lgt::tests",
+    "uid" : "7b590b281332995a6bd0202f9b9b48b6",
+    "name" : "::(control/throw_1/tests.lgt,tests)",
     "statistic" : {
       "failed" : 2,
       "broken" : 0,
@@ -23,8 +23,8 @@
       "total" : 7
     }
   }, {
-    "uid" : "fe889f4ed1e23b13cb890295efdd6049",
-    "name" : "predicates/setof_3/tests.lgt::tests",
+    "uid" : "4216a9cb17076ff456d3b2bac7870b78",
+    "name" : "::(predicates/setof_3/tests.lgt,tests)",
     "statistic" : {
       "failed" : 1,
       "broken" : 0,
@@ -34,8 +34,8 @@
       "total" : 35
     }
   }, {
-    "uid" : "bdc881d4b933694f76d7d16bff33e9cf",
-    "name" : "predicates/bagof_3/tests.lgt::tests",
+    "uid" : "245195a3f75dc7cbb0d26383f8d2298b",
+    "name" : "::(predicates/bagof_3/tests.lgt,tests)",
     "statistic" : {
       "failed" : 1,
       "broken" : 0,
@@ -45,8 +45,8 @@
       "total" : 18
     }
   }, {
-    "uid" : "21ff05688ac7c7a65af1611086e5abe1",
-    "name" : "control/catch_3/tests.lgt::tests",
+    "uid" : "b8ef159b67a985fdf756a96f0da9bfdf",
+    "name" : "::(control/catch_3/tests.lgt,tests)",
     "statistic" : {
       "failed" : 1,
       "broken" : 0,
@@ -56,8 +56,8 @@
       "total" : 11
     }
   }, {
-    "uid" : "2dae564ffa6f8fff4ee6bf8dbbb0e559",
-    "name" : "predicates/set_stream_position_2/tests.lgt::tests",
+    "uid" : "bc5de3d44eff2352fb7a81c922e2013b",
+    "name" : "::(predicates/set_stream_position_2/tests.lgt,tests)",
     "statistic" : {
       "failed" : 1,
       "broken" : 0,
@@ -67,8 +67,8 @@
       "total" : 10
     }
   }, {
-    "uid" : "2fa097f54728c3cdaa06f09f04fafff8",
-    "name" : "predicates/write_term_3/tests.lgt::tests",
+    "uid" : "cac759b6fe03805863bf2a7990a2ee48",
+    "name" : "::(predicates/write_term_3/tests.lgt,tests)",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
@@ -78,8 +78,8 @@
       "total" : 56
     }
   }, {
-    "uid" : "e323763b3f5107ef1a6b74d4676f7951",
-    "name" : "syntax/operators/tests.lgt::tests",
+    "uid" : "84b34b0ecb2989a19191b1b31f9cf204",
+    "name" : "::(syntax/operators/tests.lgt,tests)",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
@@ -89,8 +89,8 @@
       "total" : 56
     }
   }, {
-    "uid" : "a5e7e6a80bb657bcaa763c06b523455c",
-    "name" : "predicates/current_op_3/tests.lgt::tests",
+    "uid" : "42a89cd14307b357762209706649ff81",
+    "name" : "::(predicates/current_op_3/tests.lgt,tests)",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
@@ -100,8 +100,8 @@
       "total" : 48
     }
   }, {
-    "uid" : "99435521304eae5c110018f363e3c213",
-    "name" : "predicates/is_2/tests.lgt::tests",
+    "uid" : "78dc3e7360477ac5515e7466e5e13de2",
+    "name" : "::(predicates/is_2/tests.lgt,tests)",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
