@@ -521,23 +521,24 @@ current_op(A,B,C) :-
 % Note: Trealla doesn't support goal_expansion (yet) so fake it
 % based on calling M:put_atts(V, AccessSpec) and active Module
 
-put_atts(V, AccessSpec) :-
+put_atts(Var, AccessSpec) :-
 	module(Module),
-	put_attr(V, Module, AccessSpec).
+	put_attr(Var, Module, AccessSpec).
 
-get_atts(V, AccessSpec) :-
+get_atts(Var, AccessSpec) :-
 	module(Module),
 	(var(AccessSpec) ->
 		(
-			get_att(V, List),
+			get_att(Var, List),
 			findall(F, (Template =.. [Module,F], member(Template, List)), AccessSpec)
-		) ;
-		get_attr(V, Module, AccessSpec)
+		)
+	;
+		get_attr(Var, Module, AccessSpec)
 	).
 
-del_atts(V) :-
+del_atts(Var) :-
 	module(Module),
-	del_attr(V, Module).
+	del_attr(Var, Module).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -545,20 +546,20 @@ del_atts(V) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-put_attr(V, Module, Value) :-
-	var(V),
+put_attr(Var, Module, Value) :-
+	var(Var),
 	Attr =.. [Module,Value],
-	put_att(V, +Attr).
+	put_att(Var, +Attr).
 
-get_attr(V, Module, Value) :-
-	var(V),
+get_attr(Var, Module, Value) :-
+	var(Var),
 	Attr =.. [Module,Value],
-	get_att(V, +Attr).
+	get_att(Var, +Attr).
 
-del_attr(V, Module) :-
-	var(V),
+del_attr(Var, Module) :-
+	var(Var),
 	Attr =.. [Module,_],
-	put_att(V, -Attr).
+	put_att(Var, -Attr).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -568,51 +569,51 @@ del_attr(V, Module) :-
 
 :- use_module(library(dict)).
 
-put_att(V, +(A)) :- !,
-	'$retrieve_attributes'(V, D),
-	A =.. [Module,Attr],
-	functor(Attr,Functor,Arity),
-	dict:set(D, Module-(Functor/Arity), A, D2),
-	'$store_attributes'(V, D2).
+put_att(Var, +Attr) :- !,
+	'$retrieve_attributes'(Var, D),
+	Attr =.. [Module,Value],
+	functor(Value,Functor,Arity),
+	dict:set(D, Module-(Functor/Arity), Attr, D2),
+	'$store_attributes'(Var, D2).
 
-put_att(V, -(A)) :- !,
-	'$retrieve_attributes'(V, D),
-	A =.. [Module,Attr],
-	functor(Attr,Functor,Arity),
+put_att(Var, -Attr) :- !,
+	'$retrieve_attributes'(Var, D),
+	Attr =.. [Module,Value],
+	functor(Value,Functor,Arity),
 	dict:del(D, Module-(Functor/Arity), D2),
-	'$store_attributes'(V, D2).
+	'$store_attributes'(Var, D2).
 
-put_att(V, A) :- !,
-	'$retrieve_attributes'(V, D),
-	A =.. [Module,Attr],
-	functor(Attr,Functor,Arity),
-	dict:set(D, Module-(Functor/Arity), A, D2),
-	'$store_attributes'(V, D2).
+put_att(Var, Attr) :- !,
+	'$retrieve_attributes'(Var, D),
+	Attr =.. [Module,Value],
+	functor(Value,Functor,Arity),
+	dict:set(D, Module-(Functor/Arity), Attr, D2),
+	'$store_attributes'(Var, D2).
 
-get_att(V, L) :- var(L), !,
-	'$retrieve_attributes'(V, D),
+get_att(Var, L) :- var(L), !,
+	'$retrieve_attributes'(Var, D),
 	dict:match(D, _, L).
 
-get_att(V, +(A)) :- !,
-	'$retrieve_attributes'(V, D),
-	A =.. [Module,Attr],
-	functor(Attr,Functor,Arity),
-	dict:get(D, Module-(Functor/Arity), A).
+get_att(Var, +(Attr)) :- !,
+	'$retrieve_attributes'(Var, D),
+	Attr =.. [Module,Value],
+	functor(Value,Functor,Arity),
+	dict:get(D, Module-(Functor/Arity), Attr).
 
-get_att(V, -(A)) :- !,
-	'$retrieve_attributes'(V, D),
-	A =.. [Module,Attr],
-	functor(Attr,Functor,Arity),
+get_att(Var, -Attr) :- !,
+	'$retrieve_attributes'(Var, D),
+	Attr =.. [Module,Value],
+	functor(Value,Functor,Arity),
 	\+ dict:get(D, Module-(Functor/Arity), _).
 
-get_att(V, A) :- !,
-	'$retrieve_attributes'(V, D),
-	A =.. [Module,Attr],
-	functor(Attr,Functor,Arity),
-	dict:get(D, Module-(Functor/Arity), A).
+get_att(Var, Attr) :- !,
+	'$retrieve_attributes'(Var, D),
+	Attr =.. [Module,Value],
+	functor(Value,Functor,Arity),
+	dict:get(D, Module-(Functor/Arity), Attr).
 
-attributed(V) :-
-	'$retrieve_attributes'(V, D),
+attributed(Var) :-
+	'$retrieve_attributes'(Var, D),
 	D \= [].
 
 %
