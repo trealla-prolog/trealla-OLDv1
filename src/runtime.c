@@ -1158,7 +1158,6 @@ static USE_RESULT pl_status match_head(query *q)
 	return pl_failure;
 }
 
-#if 0
 static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, cell *tmp)
 {
 	parser *p = q->p;
@@ -1198,7 +1197,6 @@ static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, cell 
 
 	return c;
 }
-#endif
 
 static void dump_vars(query *q, bool partial)
 {
@@ -1230,10 +1228,10 @@ static void dump_vars(query *q, bool partial)
 		fprintf(stdout, "%s = ", p->vartab.var_name[i]);
 		bool parens = false;
 
-#if 0
 		cell tmp;
-		c = check_duplicate_result(q, i, c, &tmp);
-#endif
+
+		if (1)
+			c = check_duplicate_result(q, i, c, &tmp);
 
 		// If priority >= '=' then put in parens...
 
