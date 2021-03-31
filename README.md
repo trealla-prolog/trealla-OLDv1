@@ -14,7 +14,7 @@ A compact, efficient Prolog interpreter with
 	DCG via library(dcgs)
 	format_//2 via library(format)
 	Attributed variables with SICStus interface (in-progress)
-	Logtalk compatible (testing / in-progress)
+	Logtalk compatible (in-progress)
 	REPL with history
 	MIT licensed
 
