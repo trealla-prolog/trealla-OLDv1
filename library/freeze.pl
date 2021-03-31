@@ -5,31 +5,26 @@
 :- meta_predicate freeze(?, 0).
 :- attribute frozen/1.
 
-freeze(V, Term) :-
-	( nonvar(V) ->
+freeze(Var, Term) :-
+	( nonvar(Var) ->
 		call(Term)
 	;
-		put_attr(V, freeze, frozen(Term))
+		put_atts(Var, frozen(Term))
 	).
 
-frozen(V, Term) :-
-	( get_attr(V, freeze, frozen(Term)) ->
+frozen(Var, Term) :-
+	( get_atts(Var, frozen(Term)) ->
 		true
 	;
 		Term = true
 	).
 
-verify_attributes(V, _, Goals) :-
-	get_attr(V, freeze, frozen(Term)), !,
+verify_attributes(Var, _, Goals) :-
+	get_atts(Var, frozen(Term)), !,
 	( var(Term) ->
 		Goals = []
 	;
 		Goals = [Term]
 	).
 verify_attributes(_, _, []).
-
-attribute_goals(Var) -->
-    { get_atts(Var, frozen(Goals)),
-      put_atts(Var, -frozen(_)) },
-    [freeze(Var, Goals)].
 
