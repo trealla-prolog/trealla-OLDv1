@@ -96,14 +96,6 @@ The default path to the library is relative to the executable location.
 The file "~/.tplrc" is consulted on startup.
 
 
-What's missing, problems?
-=========================
-
-	environment limit is 32K vars per frame
-	implement attributed variables to support constraints
-	unbounded (Bignums)... GMP or other?
-
-
 Acknowledgements
 ================
 
