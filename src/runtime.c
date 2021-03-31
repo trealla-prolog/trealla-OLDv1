@@ -1084,6 +1084,7 @@ static USE_RESULT pl_status match_head(query *q)
 
 		if (!h) {
 			h = search_predicate(q->st.m, c);
+			q->save_m = q->st.m;
 
 			if (!h) {
 				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(c), "initialization")))
