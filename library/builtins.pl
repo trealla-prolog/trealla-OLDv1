@@ -528,8 +528,7 @@ put_atts(Var, Value) :-
 get_atts(Var, Value) :-
 	module(Module),
 	(var(Value) ->
-		(
-			get_att(Var, List),
+		( get_att(Var, List),
 			findall(F, (Template =.. [Module,F], member(Template, List)), Value)
 		)
 	;
