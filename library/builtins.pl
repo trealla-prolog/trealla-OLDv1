@@ -521,19 +521,19 @@ current_op(A,B,C) :-
 % Note: Trealla doesn't support goal_expansion (yet) so fake it
 % based on calling M:put_atts(V, AccessSpec) and active Module
 
-put_atts(Var, AccessSpec) :-
+put_atts(Var, Value) :-
 	module(Module),
-	put_attr(Var, Module, AccessSpec).
+	put_attr(Var, Module, Value).
 
-get_atts(Var, AccessSpec) :-
+get_atts(Var, Value) :-
 	module(Module),
-	(var(AccessSpec) ->
+	(var(Value) ->
 		(
 			get_att(Var, List),
-			findall(F, (Template =.. [Module,F], member(Template, List)), AccessSpec)
+			findall(F, (Template =.. [Module,F], member(Template, List)), Value)
 		)
 	;
-		get_attr(Var, Module, AccessSpec)
+		get_attr(Var, Module, Value)
 	).
 
 del_atts(Var) :-
