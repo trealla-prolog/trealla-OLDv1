@@ -1235,7 +1235,7 @@ static void dump_vars(query *q, bool partial)
 
 		cell tmp;
 
-		if (0)
+		if (1)
 			c = check_duplicate_result(q, i, c, &tmp);
 
 		// If priority >= '=' then put in parens...
