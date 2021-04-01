@@ -6503,7 +6503,7 @@ static USE_RESULT pl_status fn_listing_0(query *q)
 
 static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 {
-	module *m = q->st.curr_clause ? q->st.curr_clause->m : q->st.m;
+	module *m = q->st.curr_clause ? q->st.curr_clause->owner->m : q->st.m;
 
 	for (predicate *h = m->head; h; h = h->next) {
 		if (h->is_prebuilt)

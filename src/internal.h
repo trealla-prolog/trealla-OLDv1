@@ -370,7 +370,6 @@ typedef struct {
 struct clause_ {
 	predicate *owner;
 	clause *prev, *next, *dirty;
-	module *m;
 	uuid u;
 	term t;
 };
@@ -378,6 +377,7 @@ struct clause_ {
 struct predicate_ {
 	predicate *next;
 	clause *head, *tail;
+	module *m;
 	skiplist *index, *index_save;
 	cell key;
 	unsigned cnt;

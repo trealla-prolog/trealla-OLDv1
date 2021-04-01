@@ -490,8 +490,10 @@ predicate *search_predicate(module *m, cell *c)
 	while (m) {
 		predicate *h = find_predicate(m, c);
 
-		if (h)
+		if (h) {
+			h->m = m;
 			return h;
+		}
 
 		if (!tmp_m)
 			m = tmp_m = m->pl->modules;
@@ -547,6 +549,7 @@ static predicate *create_predicate(module *m, cell *c)
 	h->next = m->head;
 	m->head = h;
 
+	h->m = m;
 	h->key = *c;
 	h->key.val_type = TYPE_LITERAL;
 	h->key.flags = FLAG_KEY;
@@ -726,7 +729,6 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	memcpy(&r->t, t, sizeof(term));
 	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
 	r->t.ugen_created = ++m->pl->ugen;
-	r->m = m;
 	return r;
 }
 

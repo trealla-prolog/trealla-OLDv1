@@ -366,7 +366,7 @@ static void commit_me(query *q, term *t)
 {
 	frame *g = GET_CURR_FRAME();
 	g->m = q->st.m;
-	q->st.m = q->st.curr_clause->m;
+	q->st.m = q->st.curr_clause->owner->m;
 	q->st.iter = NULL;
 	bool last_match = !q->st.curr_clause->next || t->first_cut;
 	bool recursive = is_tail_recursive(q->st.curr_cell);
