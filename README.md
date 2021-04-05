@@ -163,9 +163,13 @@ GNU-Prolog & SWI-Prolog
 	random/1                # random(-float) float [0.0,<1.0]
 	random/1                # random(+integer) function returning integer [0,<integer]
 
-	put_atts/2				# call by module M:put_atts(...)
-	get_atts/2				#    ditto
-	del_atts/1				#    ditto
+	M:put_atts/2
+	M:get_atts/2
+	M:del_atts/1
+
+	put_attr/3
+	get_attr/3
+	del_attr/2
 
 	freeze/2				# use_module(library(freeze))
 	frozen/2				# use_module(library(freeze))

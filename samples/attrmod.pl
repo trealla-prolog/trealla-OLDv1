@@ -1,4 +1,4 @@
-:- module(attrmod, [domain/2]).
+:- module(attrmod, [domain/2, test/0]).
 
 :- use_module(library(dif)).		% get from scryer
 :- use_module(library(dcgs)).
@@ -31,3 +31,5 @@ attribute_goals(Var) -->
 domain(X, List) :-
 	list_to_ord_set(List, Dom),
 	put_atts(X, domain(Dom)).
+
+test :- attrmod:domain(X, [a,b,c]), attrmod:domain(Y, [c,d,e]), X=Y, write(X), nl.
