@@ -155,6 +155,8 @@ GNU-Prolog & SWI-Prolog
 
 	maplist/[2-8]			# autoloaded from library(apply)
 	foldl/[4-7]				# autoloaded from library(apply)
+	include/3				# autoloaded from library(apply)
+	exclude/3				# autoloaded from library(apply)
 
 	read_term_from_atom/3	# use read_term_from_chars/3 instead
 	write_term_to_atom/3	# use write_term_to_chars/3 instead

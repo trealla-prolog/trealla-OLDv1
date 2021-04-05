@@ -122,3 +122,25 @@ foldl_([], [], [], [], _, V, V).
 foldl_([H1|T1], [H2|T2], [H3|T3], [H4|T4], Goal, V0, V) :-
 	call(Goal, H1, H2, H3, H4, V0, V1),
 	foldl_(T1, T2, T3, T4, Goal, V1, V).
+
+include(Goal, List, Included) :-
+	include_(List, Goal, Included).
+
+	include_([], _, []).
+	include_([X1|Xs1], P, Included) :-
+		(   call(P, X1)
+		->  Included = [X1|Included1]
+		;   Included = Included1
+		),
+		include_(Xs1, P, Included1).
+
+exclude(Goal, List, Included) :-
+	exclude_(List, Goal, Included).
+
+exclude_([], _, []).
+exclude_([X1|Xs1], P, Included) :-
+	(   call(P, X1)
+	->  Included = Included1
+	;   Included = [X1|Included1]
+	),
+	exclude_(Xs1, P, Included1).

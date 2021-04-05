@@ -1163,7 +1163,7 @@ static USE_RESULT pl_status match_head(query *q)
 	return pl_failure;
 }
 
-static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, cell *tmp)
+static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t orig_c_ctx, cell *tmp)
 {
 	parser *p = q->p;
 	frame *g = GET_FRAME(0);
@@ -1178,29 +1178,27 @@ static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, cell 
 		if (is_empty(&e->c))
 			continue;
 
-		q->latest_ctx = e->ctx;
-
 		if (is_indirect(&e->c)) {
 			c = e->c.val_ptr;
 			q->latest_ctx = e->ctx;
 		} else
 			c = deref(q, &e->c, e->ctx);
 
-		try_me(q, p->nbr_vars);
-
-		if (unify(q, c, 0, orig_c, q->st.curr_frame)) {
+		if (unify(q, c, q->latest_ctx, orig_c, 0)) {
 			tmp->val_type = TYPE_VARIABLE;
 			tmp->nbr_cells = 1;
 			tmp->val_off = index_from_pool(q->st.m->pl, p->vartab.var_name[i]);
 			tmp->arity = 0;
 			tmp->flags = 0;
+			tmp->var_nbr = 0;
 			return tmp;
 		}
 
-		undo_me(q);
+		q->latest_ctx = orig_c_ctx;
 	}
 
-	return c;
+	q->latest_ctx = orig_c_ctx;
+	return orig_c;
 }
 
 static void dump_vars(query *q, bool partial)
@@ -1210,12 +1208,14 @@ static void dump_vars(query *q, bool partial)
 	int any = 0;
 
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
+		if (!strcmp(p->vartab.var_name[i], "_"))
+			continue;
+
 		slot *e = GET_SLOT(g, i);
 
 		if (is_empty(&e->c))
 			continue;
 
-		q->latest_ctx = e->ctx;
 		cell *c;
 
 		if (is_indirect(&e->c)) {
@@ -1223,9 +1223,6 @@ static void dump_vars(query *q, bool partial)
 			q->latest_ctx = e->ctx;
 		} else
 			c = deref(q, &e->c, e->ctx);
-
-		if (!strcmp(p->vartab.var_name[i], "_"))
-			continue;
 
 		if (any)
 			fprintf(stdout, ",\n");
@@ -1236,7 +1233,7 @@ static void dump_vars(query *q, bool partial)
 		cell tmp;
 
 		if (1)
-			c = check_duplicate_result(q, i, c, &tmp);
+			c = check_duplicate_result(q, i, c, q->latest_ctx, &tmp);
 
 		// If priority >= '=' then put in parens...
 
