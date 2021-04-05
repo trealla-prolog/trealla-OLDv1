@@ -26,6 +26,8 @@ extern unsigned char library_dict_pl[];
 extern unsigned int library_dict_pl_len;
 extern unsigned char library_freeze_pl[];
 extern unsigned int library_freeze_pl_len;
+extern unsigned char library_dif_pl[];
+extern unsigned int library_dif_pl_len;
 
 library g_libs[] = {
      {"builtins", library_builtins_pl, &library_builtins_pl_len},
@@ -41,5 +43,6 @@ library g_libs[] = {
      {"format", library_format_pl, &library_format_pl_len},
      {"charsio", library_charsio_pl, &library_charsio_pl_len},
      {"freeze", library_freeze_pl, &library_freeze_pl_len},
+     {"dif", library_dif_pl, &library_dif_pl_len},
      {0}
 };
