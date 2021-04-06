@@ -17,7 +17,7 @@ predicate_property(P, A) :-
 	),
 	'$predicate_property'(P, A).
 
-subsumes_term(G,S) :-
+subsumes_term(G, S) :-
 	\+ \+ (
 	 term_variables(S, V1),
 	 G = S,
@@ -31,26 +31,25 @@ subsumes_term(G,S) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-call_cleanup(G,C) :-
+call_cleanup(G, C) :-
 	setup_call_cleanup(true, G, C).
 
-setup_call_cleanup(S,G,C) :-
-	copy_term('$setup_call_cleanup'(S,G,C),TMP_G),
+setup_call_cleanup(S, G, C) :-
+	copy_term('$setup_call_cleanup'(S, G, C),TMP_G),
 	'$call'(TMP_G),
-	'$setup_call_cleanup'(S,G,C)=TMP_G.
+	'$setup_call_cleanup'(S, G, C) = TMP_G.
 
-'$setup_call_cleanup'(S,G,C) :-
-	'$call'((S,!)),
-	'$register_cleanup'((C,!)),
-	catch(G,Err,
-	 (catch((\+ \+ C),_,true),throw(Err))
-	),
+'$setup_call_cleanup'(S, G, C) :-
+	'$call'((S, !)),
+	'$register_cleanup'((C, !)),
+	catch(G, Err,
+		(catch((\+ \+ C), _, true), throw(Err))),
 	'$chk_is_det'.
 
-catch(G,E,C) :-
-	copy_term('$catch'(G,E,C),TMP_G),
+catch(G, E, C) :-
+	copy_term('$catch'(G, E, C), TMP_G),
 	'$call'(TMP_G),
-	'$catch'(G,E,C)=TMP_G.
+	'$catch'(G, E, C) = TMP_G.
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

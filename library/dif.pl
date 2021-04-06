@@ -5,5 +5,5 @@
 dif(X, Y) :-
    X \== Y,
    ( X \= Y -> true
-   ; throw(error(instantiation_error,iso_dif/2))
+   ; throw(error(instantiation_error,dif/2))
    ).
