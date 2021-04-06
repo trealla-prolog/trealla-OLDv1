@@ -1163,7 +1163,7 @@ static USE_RESULT pl_status match_head(query *q)
 	return pl_failure;
 }
 
-static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t orig_c_ctx, cell *tmp)
+static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t orig_ctx, cell *tmp)
 {
 	parser *p = q->p;
 	frame *g = GET_FRAME(0);
@@ -1178,13 +1178,18 @@ static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t
 		if (is_empty(&e->c))
 			continue;
 
+		q->latest_ctx = 0;
+
 		if (is_indirect(&e->c)) {
 			c = e->c.val_ptr;
 			q->latest_ctx = e->ctx;
 		} else
 			c = deref(q, &e->c, e->ctx);
 
-		if (unify(q, c, q->latest_ctx, orig_c, 0)) {
+		if (!is_variable(orig_c) && is_variable(c))
+			continue;
+
+		if (unify(q, c, q->latest_ctx, orig_c, orig_ctx)) {
 			tmp->val_type = TYPE_VARIABLE;
 			tmp->nbr_cells = 1;
 			tmp->val_off = index_from_pool(q->st.m->pl, p->vartab.var_name[i]);
@@ -1193,11 +1198,9 @@ static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t
 			tmp->var_nbr = 0;
 			return tmp;
 		}
-
-		q->latest_ctx = orig_c_ctx;
 	}
 
-	q->latest_ctx = orig_c_ctx;
+	q->latest_ctx = orig_ctx;
 	return orig_c;
 }
 
@@ -1229,11 +1232,8 @@ static void dump_vars(query *q, bool partial)
 
 		fprintf(stdout, "%s = ", p->vartab.var_name[i]);
 		bool parens = false;
-
 		cell tmp;
-
-		if (0)
-			c = check_duplicate_result(q, i, c, q->latest_ctx, &tmp);
+		c = check_duplicate_result(q, i, c, q->latest_ctx, &tmp);
 
 		// If priority >= '=' then put in parens...
 
