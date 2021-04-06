@@ -1246,9 +1246,9 @@ static void dump_vars(query *q, bool partial)
 		if (is_atom(c) && get_op(q->st.m, GET_STR(c), NULL, false) && !GET_OP(c))
 			parens = true;
 
-		if (parens) putc('(', stdout);
+		if (parens) fputc('(', stdout);
 		print_term(q, stdout, c, q->latest_ctx, -2);
-		if (parens) putc(')', stdout);
+		if (parens) fputc(')', stdout);
 		any++;
 	}
 
