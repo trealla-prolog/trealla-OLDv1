@@ -1142,7 +1142,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 
 // NOTE: this just handles the mode(-,-,+) case...
 
-static USE_RESULT pl_status do_atom_concat_3(query *q)
+static pl_status do_atom_concat_3(query *q)
 {
 	if (!q->retry) {
 		GET_FIRST_ARG(p1,variable);
@@ -1560,7 +1560,7 @@ static void db_log(query *q, clause *r, enum log_type l)
 	q->quoted = save;
 }
 
-static USE_RESULT pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, int is_retract)
+static pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, int is_retract)
 {
 	cell *head = get_head(p1);
 
@@ -1679,7 +1679,7 @@ static void del_stream_properties(query *q, int n)
 	q->retry = QUERY_OK;
 }
 
-static USE_RESULT pl_status do_stream_property(query *q)
+static pl_status do_stream_property(query *q)
 {
 	GET_FIRST_ARG(pstr,any);
 	GET_NEXT_ARG(p1,any);
@@ -2389,7 +2389,7 @@ static bool parse_read_params(query *q, parser *p, cell *c, cell **vars, idx_t *
 	return true;
 }
 
-static USE_RESULT pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, char *src)
+static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, char *src)
 {
 	if (!str->p)
 		str->p = create_parser(q->st.m);
@@ -4448,7 +4448,7 @@ static USE_RESULT pl_status fn_iso_retract_1(query *q)
 	return do_retract(q, p1, p1_ctx, DO_RETRACT);
 }
 
-static USE_RESULT pl_status do_retractall(query *q, cell *p1, idx_t p1_ctx)
+static pl_status do_retractall(query *q, cell *p1, idx_t p1_ctx)
 {
 	predicate *h = search_predicate(q->st.m, get_head(p1));
 
@@ -4479,7 +4479,7 @@ static USE_RESULT pl_status fn_iso_retractall_1(query *q)
 	return do_retractall(q, p1, p1_ctx);
 }
 
-static USE_RESULT pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
+static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 {
 	predicate *h = search_predicate(q->st.m, c);
 	if (!h) return pl_success;
@@ -4883,7 +4883,7 @@ static USE_RESULT pl_status fn_iso_if_then_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status do_if_then_else(query *q, cell *p1, cell *p2, cell *p3)
+static pl_status do_if_then_else(query *q, cell *p1, cell *p2, cell *p3)
 {
 	if (q->retry) {
 		cell *tmp = clone_to_heap(q, true, p3, 1);
@@ -4920,7 +4920,7 @@ static USE_RESULT pl_status fn_if_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status do_if_else(query *q, cell *p1, cell *p2, cell *p3)
+static pl_status do_if_else(query *q, cell *p1, cell *p2, cell *p3)
 {
 	if (q->retry) {
 		cell *tmp = clone_to_heap(q, true, p3, 1);
@@ -6279,7 +6279,7 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 	return pl_failure;
 }
 
-static USE_RESULT pl_status do_asserta_2(query *q)
+static pl_status do_asserta_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	cell *head = get_head(p1);
@@ -6372,7 +6372,7 @@ static USE_RESULT pl_status fn_sys_asserta_2(query *q)
 	return do_asserta_2(q);
 }
 
-static USE_RESULT pl_status do_assertz_2(query *q)
+static pl_status do_assertz_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	cell *head = get_head(p1);
@@ -8280,7 +8280,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	return ok;
 }
 
-static USE_RESULT pl_status do_consult(query *q, cell *p1, idx_t p1_ctx)
+static pl_status do_consult(query *q, cell *p1, idx_t p1_ctx)
 {
 	if (is_atom(p1)) {
 		const char *src = GET_STR(p1);
@@ -8378,7 +8378,7 @@ static int format_integer(char *dst, int_t v, int grouping, int sep, int decimal
 	return dst2 - dst;
 }
 
-static USE_RESULT pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx_t p2_ctx)
+static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx_t p2_ctx)
 {
 	char *srcbuf = GET_STR(p1);
 	const char *src = srcbuf;
@@ -8845,7 +8845,7 @@ char *url_decode(const char *src, char *dstbuf)
 	return dstbuf;
 }
 
-static USE_RESULT pl_status do_urlencode_2(query *q)
+static pl_status do_urlencode_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,variable);
@@ -8867,7 +8867,7 @@ static USE_RESULT pl_status do_urlencode_2(query *q)
 	return ok;
 }
 
-static USE_RESULT pl_status do_urldecode_2(query *q)
+static pl_status do_urldecode_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,atom);
@@ -10396,7 +10396,7 @@ static USE_RESULT pl_status fn_call_nth_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status do_length(query *q)
+static pl_status do_length(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer);
