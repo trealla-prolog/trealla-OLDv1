@@ -1792,7 +1792,7 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		return 0;
 	}
 
-	int val = strcmp(GET_STR(p1), GET_STR(p2));
+	int val = cstring_cmp(GET_STR(p1), LEN_STR(p1), GET_STR(p2), LEN_STR(p2));
 	if (val) return val>0?1:-1;
 
 	int arity = p1->arity;
