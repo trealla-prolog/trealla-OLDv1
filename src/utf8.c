@@ -71,24 +71,10 @@ const char *strrchr_utf8(const char *s, int ch)
 	return save_src;
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-// TODO: need a definition of what consitutes alpha
-// for UTF-8 > 7bits. For now accept everything.
-//
-
-int isalpha_utf8(int ch)
-{
-	return iswalpha(ch);
-}
-
-int isalnum_utf8(int ch)
-{
-	return iswalnum(ch);
-}
-
-//
-//////////////////////////////////////////////////////////////////////
+int isalpha_utf8(int ch) { return iswalpha(ch); }
+int isalnum_utf8(int ch) { return iswalnum(ch); }
+int toupper_utf8(int ch) { return towupper(ch); }
+int tolower_utf8(int ch) { return towlower(ch); }
 
 int is_char_utf8(const char *src)
 {

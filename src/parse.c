@@ -2399,7 +2399,9 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 			s++;
 		}
 
-		if (isdigit(*s) || isalpha_utf8(peek_char_utf8(s))) {
+		int ch = peek_char_utf8(s);
+
+		if (isdigit(ch) || isalpha_utf8(ch)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, parsing binary number, line %u, '%s\n", p->line_nbr, p->save_line);
 
@@ -2435,7 +2437,9 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 			s++;
 		}
 
-		if (isdigit(*s) || isalpha_utf8(peek_char_utf8(s))) {
+		int ch = peek_char_utf8(s);
+
+		if (isdigit(ch) || isalpha_utf8(ch)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, parsing octal number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
@@ -2475,7 +2479,9 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 			s++;
 		}
 
-		if (isdigit(*s) || isalpha_utf8(peek_char_utf8(s))) {
+		int ch = peek_char_utf8(s);
+
+		if (isdigit(ch) || isalpha_utf8(ch)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, parsing hex number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
@@ -2518,7 +2524,9 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 		return 1;
 	}
 
-	if (isalpha_utf8(peek_char_utf8(s))) {
+	int ch = peek_char_utf8(s);
+
+	if (isalpha_utf8(ch)) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
@@ -2547,8 +2555,9 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 			tmpptr--;
 
 		*srcptr = tmpptr;
-		s = *srcptr;
-		if ((*s == '(') || isalpha_utf8(peek_char_utf8(s))) {
+		int ch = peek_char_utf8(*srcptr);
+
+		if ((ch == '(') || isalpha_utf8(ch)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
@@ -2897,9 +2906,9 @@ static bool get_token(parser *p, int last_op)
 		}
 	}
 
-	int ch = peek_char_utf8(src);
-
 	// Atoms...
+
+	int ch = peek_char_utf8(src);
 
 	if (isalpha_utf8(ch) || (ch == '_')) {
 		while (isalnum_utf8(ch) || (ch == '_')) {
@@ -2908,7 +2917,7 @@ static bool get_token(parser *p, int last_op)
 
 			ch = get_char_utf8(&src);
 
-			size_t len = (dst-p->token) + put_len_utf8(ch) + 1;
+			size_t len = (dst - p->token) + put_len_utf8(ch) + 1;
 
 			if (len >= p->token_size) {
 				size_t offset = dst - p->token;

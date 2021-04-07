@@ -8906,16 +8906,20 @@ static USE_RESULT pl_status fn_string_lower_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
-	size_t len = LEN_STR(p1);
-	char *tmps = malloc(len+1);
+	const char *src = GET_STR(p1);
+	size_t len = substrlen_utf8(src, src+LEN_STR(p1));
+	char *tmps = malloc((len*4)+1);
 	may_ptr_error(tmps);
-	memcpy(tmps, GET_STR(p1), len);
-	tmps[len] = '\0';
+	char *dst = tmps;
 	size_t n = len;
 
-	for (char *s = tmps; n--; s++)
-		*s = tolower(*s);
+	while (n--) {
+		int ch = get_char_utf8(&src);
+		ch = tolower_utf8(ch);
+		dst += put_char_bare_utf8(dst, ch);
+	}
 
+	*dst = '\0';
 	cell tmp;
 	may_error(make_stringn(&tmp, tmps, len), free(tmps));
 	free(tmps);
@@ -8928,16 +8932,20 @@ static USE_RESULT pl_status fn_string_upper_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
-	size_t len = LEN_STR(p1);
-	char *tmps = malloc(len+1);
+	const char *src = GET_STR(p1);
+	size_t len = substrlen_utf8(src, src+LEN_STR(p1));
+	char *tmps = malloc((len*4)+1);
 	may_ptr_error(tmps);
-	memcpy(tmps, GET_STR(p1), len);
-	tmps[len] = '\0';
+	char *dst = tmps;
 	size_t n = len;
 
-	for (char *s = tmps; n--; s++)
-		*s = toupper(*s);
+	while (n--) {
+		int ch = get_char_utf8(&src);
+		ch = toupper_utf8(ch);
+		dst += put_char_bare_utf8(dst, ch);
+	}
 
+	*dst = '\0';
 	cell tmp;
 	may_error(make_stringn(&tmp, tmps, len), free(tmps));
 	free(tmps);
@@ -8945,6 +8953,7 @@ static USE_RESULT pl_status fn_string_upper_2(query *q)
 	DECR_REF(&tmp);
 	return ok;
 }
+
 
 static USE_RESULT pl_status fn_access_file_2(query *q)
 {
