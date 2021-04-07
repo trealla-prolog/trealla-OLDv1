@@ -1,1 +1,1 @@
-uncaught exception: error(existence_error(procedure,foo:bar),bar/0)
+exception: error(existence_error(procedure,foo:bar),bar/0)
