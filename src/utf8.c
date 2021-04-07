@@ -1,3 +1,7 @@
+// This code follows the "be liberal in what you accept, be strict
+// in what you emit" rule. It decodes deprecated  6-byte UTF-8
+// but will not encode them.
+
 #include <ctype.h>
 #include <wctype.h>
 #include <stdio.h>
@@ -105,10 +109,15 @@ int put_len_utf8(int _ch)
 		len = 3;
 	else if (ch <= 0x01FFFFF)
 		len = 4;
+#if 1
+	else
+		len = 0;
+#else
 	else if (ch <= 0x03FFFFFF)
 		len = 5;
 	else if (ch <= 0x7FFFFFFF)
 		len = 6;
+#endif
 
 	return len;
 }
@@ -146,7 +155,8 @@ int put_char_bare_utf8(char *_dst, int _ch)
 		*dst = 0b10000000;
 		*dst++ |= ch & 0b00111111;
 		len = 4;
-	}
+	} else
+		len = 0;
 
 	return len;
 }
