@@ -22,6 +22,17 @@ Trealla is not WAM-based. It uses tree-walking, structure-sharing and
 deep-binding.
 
 
+A note on UTF-8
+===============
+
+Trealla uses UTF-8 internally and this works well with modern operating
+systems that are already, or moving to, native UTF-8. It aligns well
+with standard C as functions like strcmp/memcmp that require no special
+handling to respect codepoint order. This also works seemlesly with the
+implementation of double-quoted *strings* (ie. chars-list), DCGs, and
+mmap'd files.
+
+
 Building
 ========
 
