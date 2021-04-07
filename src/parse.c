@@ -34,7 +34,7 @@ idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
 idx_t g_sys_elapsed_s, g_sys_queue_s, g_braces_s, g_call_s, g_braces_s;
 idx_t g_stream_property_s, g_unify_s, g_on_s, g_off_s, g_sys_var_s;
-idx_t g_plus_s, g_minus_s, g_once_s;
+idx_t g_plus_s, g_minus_s, g_once_s, g_post_unify_hook_s;
 unsigned g_cpu_count = 4;
 char *g_tpl_lib = NULL;
 int g_ac = 0, g_avc = 1;
@@ -3975,20 +3975,16 @@ static bool g_init(prolog *pl)
 			CHECK_SENTINEL(g_unify_s = index_from_pool(pl, "="), ERR_IDX);
 			CHECK_SENTINEL(g_on_s = index_from_pool(pl, "on"), ERR_IDX);
 			CHECK_SENTINEL(g_off_s = index_from_pool(pl, "off"), ERR_IDX);
-			CHECK_SENTINEL(g_sys_var_s = index_from_pool(pl, "$VAR"), ERR_IDX);
 			CHECK_SENTINEL(g_cut_s = index_from_pool(pl, "!"), ERR_IDX);
 			CHECK_SENTINEL(g_nil_s = index_from_pool(pl, "[]"), ERR_IDX);
 			CHECK_SENTINEL(g_braces_s = index_from_pool(pl, "{}"), ERR_IDX);
 			CHECK_SENTINEL(g_fail_s = index_from_pool(pl, "fail"), ERR_IDX);
 			CHECK_SENTINEL(g_clause_s = index_from_pool(pl, ":-"), ERR_IDX);
-			CHECK_SENTINEL(g_sys_elapsed_s = index_from_pool(pl, "$elapsed"), ERR_IDX);
-			CHECK_SENTINEL(g_sys_queue_s = index_from_pool(pl, "$queue"), ERR_IDX);
 			CHECK_SENTINEL(g_eof_s = index_from_pool(pl, "end_of_file"), ERR_IDX);
 			CHECK_SENTINEL(g_lt_s = index_from_pool(pl, "<"), ERR_IDX);
 			CHECK_SENTINEL(g_gt_s = index_from_pool(pl, ">"), ERR_IDX);
 			CHECK_SENTINEL(g_eq_s = index_from_pool(pl, "="), ERR_IDX);
 			CHECK_SENTINEL(g_once_s = index_from_pool(pl, "once"), ERR_IDX);
-			CHECK_SENTINEL(g_stream_property_s = index_from_pool(pl, "$stream_property"), ERR_IDX);
 
 			g_streams[0].fp = stdin;
 			CHECK_SENTINEL(g_streams[0].filename = strdup("stdin"), NULL);
@@ -4007,6 +4003,12 @@ static bool g_init(prolog *pl)
 			CHECK_SENTINEL(g_streams[2].name = strdup("user_error"), NULL);
 			CHECK_SENTINEL(g_streams[2].mode = strdup("append"), NULL);
 			g_streams[2].eof_action = eof_action_reset;
+
+			CHECK_SENTINEL(g_sys_elapsed_s = index_from_pool(pl, "$elapsed"), ERR_IDX);
+			CHECK_SENTINEL(g_sys_queue_s = index_from_pool(pl, "$queue"), ERR_IDX);
+			CHECK_SENTINEL(g_sys_var_s = index_from_pool(pl, "$VAR"), ERR_IDX);
+			CHECK_SENTINEL(g_stream_property_s = index_from_pool(pl, "$stream_property"), ERR_IDX);
+			CHECK_SENTINEL(g_post_unify_hook_s = index_from_pool(pl, "$post_unify_hook"), ERR_IDX);
 		}
 
 		if (error) {

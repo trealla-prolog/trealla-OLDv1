@@ -10959,7 +10959,7 @@ pl_status do_post_unification_hook(query *q)
 	tmp[1].nbr_cells = 1;
 	tmp[1].arity = 0;
 	tmp[1].flags = 0;
-	tmp[1].val_off = index_from_pool(q->st.m->pl, "$post_unify_hook");
+	tmp[1].val_off = g_post_unify_hook_s;
 	tmp[1].match = find_predicate(q->st.m->pl->user_m, tmp+1);
 
 	make_call(q, tmp+2);
