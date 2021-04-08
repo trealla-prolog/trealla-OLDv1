@@ -322,7 +322,7 @@ struct cell_ {
 
 		struct {
 			strbuf *val_strb;
-			uint32_t strb_off;		// slice offset
+			uint32_t strb_off;		// slice offset (or zero)
 			uint32_t strb_len;		// slice length (or zero)
 		};
 
