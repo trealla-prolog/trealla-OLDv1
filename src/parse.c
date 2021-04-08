@@ -2841,9 +2841,8 @@ static bool get_token(parser *p, int last_op)
 					ch = *src++;
 				} else if (ch == p->quote_char) {
 					if ((ch == '"') && !*p->token && p->string) {
-						dst += put_char_utf8(dst, ch='[');
-						dst += put_char_utf8(dst, ch=']');
-						*dst = '\0';
+						dst += put_char_bare_utf8(dst, ch='[');
+						dst += put_char_bare_utf8(dst, ch=']');
 						p->string = false;
 					}
 
@@ -2869,18 +2868,19 @@ static bool get_token(parser *p, int last_op)
 					}
 				}
 
-				size_t len = (dst-p->token) + put_len_utf8(ch) + 1;
+				size_t len = (dst - p->token) + put_len_utf8(ch) + 1;
 
 				if (len >= p->token_size) {
 					size_t offset = dst - p->token;
 					p->token = realloc(p->token, p->token_size*=2);
 					ensure(p->token);
-					dst = p->token+offset;
+					dst = p->token + offset;
 				}
 
-				dst += put_char_utf8(dst, ch);
-				*dst = '\0';
+				dst += put_char_bare_utf8(dst, ch);
 			}
+
+			*dst = '\0';
 
 			if (p->quote_char && p->fp) {
 				if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
@@ -2902,6 +2902,7 @@ static bool get_token(parser *p, int last_op)
 
 			p->toklen = dst - p->token;
 			p->srcptr = (char*)src;
+			//printf("*** '%s'\n", p->token);
 			return true;
 		}
 	}
@@ -2926,17 +2927,20 @@ static bool get_token(parser *p, int last_op)
 				dst = p->token+offset;
 			}
 
-			dst += put_char_utf8(dst, ch);
-			*dst = '\0';
+			dst += put_char_bare_utf8(dst, ch);
 			ch = peek_char_utf8(src);
 		}
 
-		if (isupper(*p->token) || (*p->token == '_'))
+		*dst = '\0';
+
+		int ch_start = peek_char_utf8(p->token);
+
+		if (isupper(ch_start) || (ch_start == '_'))
 			p->is_variable = true;
 		else if (search_op(p->m, p->token, NULL, false))
 			p->is_op = true;
 
-		if (isspace(ch)) {
+		if (isspace_utf8(ch)) {
 			p->srcptr = (char*)src;
 			src = eat_space(p);
 

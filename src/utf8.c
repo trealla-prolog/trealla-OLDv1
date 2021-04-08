@@ -71,6 +71,7 @@ const char *strrchr_utf8(const char *s, int ch)
 	return save_src;
 }
 
+int isspace_utf8(int ch) { return iswspace(ch); }
 int isalpha_utf8(int ch) { return iswalpha(ch); }
 int isalnum_utf8(int ch) { return iswalnum(ch); }
 int toupper_utf8(int ch) { return towupper(ch); }
