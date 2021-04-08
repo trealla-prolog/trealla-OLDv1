@@ -30,7 +30,8 @@ systems that are already, or moving to, native UTF-8. It aligns well
 with standard C as functions like strcmp/memcmp that require no special
 handling to respect codepoint order. This also works seemlesly with the
 implementation of double-quoted *strings* (ie. chars-list), DCGs, and
-mmap'd files.
+mmap'd files. Any code-point specific requirements, like
+*get_char/get_code/atom_length* are handled on the fly.
 
 
 Building
