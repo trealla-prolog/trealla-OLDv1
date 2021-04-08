@@ -279,15 +279,14 @@ typedef struct parser_ parser;
 
 // Using a fixed-size cell allows having arrays of cells, which is
 // basically what a term is. A compound is a variable length array
-// of cells, the length specified by 'nbr_cells' field in header.
+// of cells, the length specified by 'nbr_cells' field in the 1st cell.
+// A cell is a tagged union based off 'val_type' ...
 
 struct cell_ {
 	uint8_t val_type;
 	uint8_t arity;
 	uint16_t flags;
 	idx_t nbr_cells;
-
-	// Tagged union based off 'val_type' ...
 
 	union {
 
