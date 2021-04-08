@@ -2901,7 +2901,6 @@ static bool get_token(parser *p, int last_op)
 
 			p->toklen = dst - p->token;
 			p->srcptr = (char*)src;
-			//printf("*** '%s' : %u : %s\n", p->token, (unsigned)p->toklen, tmpptr);
 			return true;
 		}
 	}
