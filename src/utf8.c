@@ -133,7 +133,7 @@ int put_char_bare_utf8(char *_dst, int _ch)
 		*dst++ |= ch & 0b00111111;
 		len = 3;
 	} else if (ch <= 0x010FFFF) {
-		*dst = 0b11100000;
+		*dst = 0b11110000;
 		*dst++ |= (ch >> 18) & 0b00000111;
 		*dst = 0b10000000;
 		*dst++ |= (ch >> 12) & 0b00111111;
