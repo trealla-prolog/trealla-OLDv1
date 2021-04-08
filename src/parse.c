@@ -2834,8 +2834,7 @@ static bool get_token(parser *p, int last_op)
 			p->string = true;
 
 		for (;;) {
-			while (*src) {
-				int ch = get_char_utf8(&src);
+			for (int ch; (ch = get_char_utf8(&src));) {
 
 				if ((ch == p->quote_char) && (*src == ch)) {
 					ch = *src++;
@@ -2902,7 +2901,7 @@ static bool get_token(parser *p, int last_op)
 
 			p->toklen = dst - p->token;
 			p->srcptr = (char*)src;
-			//printf("*** '%s'\n", p->token);
+			//printf("*** '%s' : %u : %s\n", p->token, (unsigned)p->toklen, tmpptr);
 			return true;
 		}
 	}

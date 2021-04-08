@@ -132,7 +132,7 @@ int put_char_bare_utf8(char *_dst, int _ch)
 		*dst = 0b10000000;
 		*dst++ |= ch & 0b00111111;
 		len = 3;
-	} else if (ch <= 0x01FFFFF) {
+	} else if (ch <= 0x010FFFF) {
 		*dst = 0b11100000;
 		*dst++ |= (ch >> 18) & 0b00000111;
 		*dst = 0b10000000;
@@ -174,7 +174,7 @@ int get_char_utf8(const char **_src)
 	int expect = 1;
 	unsigned int n = 0;
 
-	while (*src && expect--) {
+	while (expect--) {
 		unsigned char ch = *src++;
 
 		if ((ch & 0b11111100) == 0b11111100) {

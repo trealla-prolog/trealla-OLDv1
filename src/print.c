@@ -120,7 +120,7 @@ size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq)
 			len += 2;
 		} else {
 			if (dstlen)
-				dst += put_char_utf8(dst, ch);
+				dst += put_char_bare_utf8(dst, ch);
 
 			len += lench;
 		}
@@ -134,21 +134,12 @@ size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq)
 
 static size_t plain(char *dst, size_t dstlen, const char *src, int srclen)
 {
-	size_t len = 0;
-
-	while (srclen-- > 0) {
-		int ch = *src++;
-
-		if (dstlen)
-			*dst++ = ch;
-
-		len++;
+	if (dstlen) {
+		memcpy(dst, src, srclen);
+		dst[srclen] = '\0';
 	}
 
-	if (dstlen)
-		*dst = '\0';
-
-	return len;
+	return srclen;
 }
 
 static size_t sprint_int_(char *dst, size_t size, int_t n, int base)
