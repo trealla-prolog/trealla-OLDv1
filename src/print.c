@@ -733,7 +733,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	dst += res;
 	if (lhs_parens) dst += snprintf(dst, dstlen, "%s", ")");
 
-	int space = isalpha_utf8(peek_char_utf8(src)) || isspace(*src)
+	int space = isalpha_utf8(peek_char_utf8(src)) || isspace_utf8(*src)
 		|| !strcmp(src, ":-") || !strcmp(src, "-->")
 		|| !strcmp(src, "->") || !strcmp(src, "*->")
 		|| !strcmp(src, "=~=") || !strcmp(src, "=..")

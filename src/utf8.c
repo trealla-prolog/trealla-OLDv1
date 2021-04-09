@@ -4,6 +4,7 @@
 
 #include <ctype.h>
 #include <wctype.h>
+#include <wchar.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -12,20 +13,6 @@
 #endif
 
 #include "utf8.h"
-
-size_t strlen_utf8(const char *s)
-{
-	size_t cnt = 0;
-
-	while (*s) {
-		unsigned char ch = *(const unsigned char *)s++;
-
-		if ((ch < 0x80) || (ch > 0xBF))
-			cnt++;
-	}
-
-	return cnt;
-}
 
 size_t substrlen_utf8(const char *s, const char *end)
 {
@@ -76,6 +63,8 @@ int isalpha_utf8(int ch) { return iswalpha(ch); }
 int isalnum_utf8(int ch) { return iswalnum(ch); }
 int toupper_utf8(int ch) { return towupper(ch); }
 int tolower_utf8(int ch) { return towlower(ch); }
+
+size_t strlen_utf8(const char *s) { return wcslen((const void*)s); }
 
 int is_char_utf8(const char *src)
 {

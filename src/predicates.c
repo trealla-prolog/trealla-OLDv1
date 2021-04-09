@@ -721,7 +721,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		const char *src = tmpbuf;
 		char *end = NULL;
 
-		while (isspace(*src))
+		while (isspace_utf8(*src))
 			src++;
 
 		if ((src[0] == '0') && (src[1] == '\'')) {
@@ -958,7 +958,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 		const char *src = tmpbuf;
 		char *end = NULL;
 
-		while (isspace(*src))
+		while (isspace_utf8(*src))
 			src++;
 
 		if ((src[0] == '0') && (src[1] == '\'')) {
@@ -6880,7 +6880,7 @@ static USE_RESULT pl_status fn_split_4(query *q)
 		DECR_REF(&tmp);
 		ptr = ptr+1;
 
-		while (isspace(*ptr))
+		while (isspace_utf8(*ptr))
 			ptr++;
 
 		if (*ptr)
@@ -7638,7 +7638,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_2(query *q)
 
 	const char *end_ptr = src + strlen(src) - 1;
 
-	while (isspace(*end_ptr) && (end_ptr != src))
+	while (isspace_utf8(*end_ptr) && (end_ptr != src))
 		end_ptr--;
 
 	if (src[strlen(src)-1] != '.')
@@ -7679,7 +7679,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 
 	const char *end_ptr = src + strlen(src) - 1;
 
-	while (isspace(*end_ptr) && (end_ptr != src))
+	while (isspace_utf8(*end_ptr) && (end_ptr != src))
 		end_ptr--;
 
 	if (src[strlen(src)-1] != '.')
@@ -7718,7 +7718,7 @@ static USE_RESULT pl_status fn_read_term_from_atom_3(query *q)
 
 	const char *end_ptr = src + strlen(src) - 1;
 
-	while (isspace(*end_ptr) && (end_ptr != src))
+	while (isspace_utf8(*end_ptr) && (end_ptr != src))
 		end_ptr--;
 
 	if (src[strlen(src)-1] != '.')
@@ -10053,11 +10053,11 @@ static USE_RESULT pl_status fn_char_type_2(query *q)
 	else if (!strcmp(GET_STR(p2), "xdigit"))
 		return isxdigit(ch);
 	else if (!strcmp(GET_STR(p2), "whitespace"))
-		return isblank(ch) || isspace(ch);
+		return isblank(ch) || isspace_utf8(ch);
 	else if (!strcmp(GET_STR(p2), "white"))
 		return isblank(ch);
 	else if (!strcmp(GET_STR(p2), "space"))
-		return isspace(ch);
+		return isspace_utf8(ch);
 	else if (!strcmp(GET_STR(p2), "lower"))
 		return islower(ch);
 	else if (!strcmp(GET_STR(p2), "upper"))
