@@ -2933,7 +2933,7 @@ static bool get_token(parser *p, int last_op)
 
 		int ch_start = peek_char_utf8(p->token);
 
-		if (isupper(ch_start) || (ch_start == '_'))
+		if (isupper_utf8(ch_start) || (ch_start == '_'))
 			p->is_variable = true;
 		else if (search_op(p->m, p->token, NULL, false))
 			p->is_op = true;

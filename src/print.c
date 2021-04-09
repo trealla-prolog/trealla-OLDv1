@@ -34,7 +34,9 @@ bool needs_quoting(module *m, const char *src, int srclen)
 	int lench = len_char_utf8(src);
 
 	if (lench == 1) {
-		if (isupper(*src) || isdigit(*src) || (*src == '_') || (*src == '$'))
+		int ch = peek_char_utf8(src);
+
+		if (isupper_utf8(ch) || isdigit(ch) || (ch == '_') || (ch == '$'))
 			return true;
 	}
 

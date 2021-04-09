@@ -13,6 +13,14 @@
 
 #include "utf8.h"
 
+int isspace_utf8(int ch) { return iswspace(ch); }
+int isalpha_utf8(int ch) { return iswalpha(ch); }
+int isalnum_utf8(int ch) { return iswalnum(ch); }
+int isupper_utf8(int ch) { return iswupper(ch); }
+int islower_utf8(int ch) { return iswlower(ch); }
+int toupper_utf8(int ch) { return towupper(ch); }
+int tolower_utf8(int ch) { return towlower(ch); }
+
 size_t strlen_utf8(const char *s)
 {
 	size_t cnt = 0;
@@ -70,12 +78,6 @@ const char *strrchr_utf8(const char *s, int ch)
 
 	return save_src;
 }
-
-int isspace_utf8(int ch) { return iswspace(ch); }
-int isalpha_utf8(int ch) { return iswalpha(ch); }
-int isalnum_utf8(int ch) { return iswalnum(ch); }
-int toupper_utf8(int ch) { return towupper(ch); }
-int tolower_utf8(int ch) { return towlower(ch); }
 
 int is_char_utf8(const char *src)
 {

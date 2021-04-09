@@ -11,6 +11,8 @@ extern int fgetc_utf8(FILE *fp);
 extern int isalpha_utf8(int ch);
 extern int isalnum_utf8(int ch);
 extern int isspace_utf8(int ch);
+extern int isupper_utf8(int ch);
+extern int islower_utf8(int ch);
 extern const char *strchr_utf8(const char *s, int ch);
 extern const char *strrchr_utf8(const char *s, int ch);
 extern int toupper_utf8(int ch);
