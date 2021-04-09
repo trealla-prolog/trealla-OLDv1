@@ -39,6 +39,7 @@
 #endif
 
 #define MAX_VARS 32768
+#define MAX_BYTES_PER_CODEPOINT 6 // Unicode says 4, but max possible is 6
 
 #ifndef _WIN32
 static void msleep(int ms)
@@ -8908,7 +8909,7 @@ static USE_RESULT pl_status fn_string_lower_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *src = GET_STR(p1);
 	size_t len = substrlen_utf8(src, src+LEN_STR(p1));
-	char *tmps = malloc((len*4)+1);
+	char *tmps = malloc((len*MAX_BYTES_PER_CODEPOINT)+1);
 	may_ptr_error(tmps);
 	char *dst = tmps;
 	size_t n = len;
@@ -8934,7 +8935,7 @@ static USE_RESULT pl_status fn_string_upper_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *src = GET_STR(p1);
 	size_t len = substrlen_utf8(src, src+LEN_STR(p1));
-	char *tmps = malloc((len*4)+1);
+	char *tmps = malloc((len*MAX_BYTES_PER_CODEPOINT)+1);
 	may_ptr_error(tmps);
 	char *dst = tmps;
 	size_t n = len;
