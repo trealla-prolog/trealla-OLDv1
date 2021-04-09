@@ -8921,7 +8921,7 @@ static USE_RESULT pl_status fn_string_lower_2(query *q)
 
 	*dst = '\0';
 	cell tmp;
-	may_error(make_stringn(&tmp, tmps, len), free(tmps));
+	may_error(make_stringn(&tmp, tmps, LEN_STR(p1)), free(tmps));
 	free(tmps);
 	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
@@ -8947,7 +8947,7 @@ static USE_RESULT pl_status fn_string_upper_2(query *q)
 
 	*dst = '\0';
 	cell tmp;
-	may_error(make_stringn(&tmp, tmps, len), free(tmps));
+	may_error(make_stringn(&tmp, tmps, LEN_STR(p1)), free(tmps));
 	free(tmps);
 	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
