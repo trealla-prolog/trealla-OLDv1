@@ -34,7 +34,7 @@ idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
 idx_t g_sys_elapsed_s, g_sys_queue_s, g_braces_s, g_call_s, g_braces_s;
 idx_t g_stream_property_s, g_unify_s, g_on_s, g_off_s, g_sys_var_s;
-idx_t g_plus_s, g_minus_s, g_once_s, g_post_unify_hook_s, g_sys_recordkey_s;
+idx_t g_plus_s, g_minus_s, g_once_s, g_post_unify_hook_s, g_sys_record_key_s;
 unsigned g_cpu_count = 4;
 char *g_tpl_lib = NULL;
 int g_ac = 0, g_avc = 1;
@@ -1733,7 +1733,7 @@ void term_xref(parser *p, term *t, predicate *parent)
 {
 	cell *c = t->cells;
 
-	if (c->val_off == g_sys_recordkey_s)
+	if (c->val_off == g_sys_record_key_s)
 		return;
 
 	for (idx_t i = 0; i < t->cidx; i++) {
@@ -4025,7 +4025,7 @@ static bool g_init(prolog *pl)
 			CHECK_SENTINEL(g_sys_var_s = index_from_pool(pl, "$VAR"), ERR_IDX);
 			CHECK_SENTINEL(g_stream_property_s = index_from_pool(pl, "$stream_property"), ERR_IDX);
 			CHECK_SENTINEL(g_post_unify_hook_s = index_from_pool(pl, "$post_unify_hook"), ERR_IDX);
-			CHECK_SENTINEL(g_sys_recordkey_s = index_from_pool(pl, "$recordkey"), ERR_IDX);
+			CHECK_SENTINEL(g_sys_record_key_s = index_from_pool(pl, "$record_key"), ERR_IDX);
 		}
 
 		if (error) {
@@ -4103,6 +4103,7 @@ prolog *pl_create()
 		set_noindex_in_db(pl->user_m, "$stream_property", 2);
 		set_noindex_in_db(pl->user_m, "$current_op", 3);
 
+		set_dynamic_in_db(pl->user_m, "$record_key", 2);
 		set_dynamic_in_db(pl->user_m, "$current_op", 3);
 		set_dynamic_in_db(pl->user_m, "$predicate_property", 2);
 		set_dynamic_in_db(pl->user_m, "$stream_property", 2);
