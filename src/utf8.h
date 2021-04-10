@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <wctype.h>
-#include <wchar.h>
 
 /*
  * This allows supplying a getter function...
