@@ -30,8 +30,26 @@ systems that are already, or moving to, native UTF-8. It aligns well
 with standard C as functions like strcmp/memcmp that require no special
 handling to respect codepoint order. This also works seemlesly with the
 implementation of double-quoted *strings* (ie. chars-list), DCGs, and
-mmap'd files. Any code-point specific requirements, like
-*get_char/get_code/atom_length* are handled on the fly.
+mmap'd files. Any code-point specific requirements, like *get_char*,
+*get_code* & *atom_length* are handled on the fly.
+
+Trealla goes one step beyond the standard and accepts as a variable
+name any atom beginning with Unicode uppercase...
+
+	$ tpl
+	Trealla Prolog (c) Infradig 2020, v1.8.15
+	?- [user].
+	是.            % be: means, approximately, "True".
+	不是 :- \+ 是.  % not be: means, approximately, "False".
+	<CTRL-D>
+	true.
+	?- 是.
+	true.
+	?- 不是.
+	false.
+	?- Δ is 123456-123455.
+	Δ = 1.
+	?-
 
 
 Building
