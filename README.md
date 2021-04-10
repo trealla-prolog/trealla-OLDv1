@@ -49,6 +49,8 @@ characters...
 Trealla goes one step beyond the standard and accepts as a variable
 name any atom beginning with Unicode uppercase...
 
+	?- atom_upper(δ,C).
+	C = Δ.
 	?- Δ is 123456-123455.
 	Δ = 1.
 	?-
