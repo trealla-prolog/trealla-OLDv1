@@ -28,9 +28,6 @@ static inline int tolower_utf8(int ch) { return towlower(ch); }
 static inline int getc_utf8(FILE *fp) { return xgetc_utf8(fgetc, fp); }
 static inline int fgetc_utf8(FILE *fp) { return xgetc_utf8(fgetc, fp); }
 
-// Defining these to avoid wchar_t(*) contamination. IMHO the wchar_t
-// type should be deprecated from the C/C++ standards.
-
 extern size_t strlen_utf8(const char *s);						// returns #chars
 extern size_t substrlen_utf8(const char *s, const char *end);	// returns #chars
 extern const char *strchr_utf8(const char *s, int ch);
