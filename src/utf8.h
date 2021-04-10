@@ -17,8 +17,9 @@ static inline int islower_utf8(int ch) { return iswlower(ch); }
 static inline int toupper_utf8(int ch) { return towupper(ch); }
 static inline int tolower_utf8(int ch) { return towlower(ch); }
 
+static inline int fgetc_utf8(FILE *fp) { return fgetwc(fp); }
+
 extern int readc_utf8(int fd, int *ch);
-extern int fgetc_utf8(FILE *fp);
 extern const char *strchr_utf8(const char *s, int ch);
 extern const char *strrchr_utf8(const char *s, int ch);
 

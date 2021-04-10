@@ -281,7 +281,3 @@ int xgetc_utf8(int(*fn)(), void *p1)
 	return (int)n;
 }
 
-int fgetc_utf8(FILE *fp)
-{
-	return xgetc_utf8(fgetc, fp);
-}
