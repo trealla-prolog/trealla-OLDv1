@@ -722,7 +722,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		const char *src = tmpbuf;
 		char *end = NULL;
 
-		while (isspace_utf8(*src))
+		while (iswspace(*src))
 			src++;
 
 		if ((src[0] == '0') && (src[1] == '\'')) {
@@ -959,7 +959,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 		const char *src = tmpbuf;
 		char *end = NULL;
 
-		while (isspace_utf8(*src))
+		while (iswspace(*src))
 			src++;
 
 		if ((src[0] == '0') && (src[1] == '\'')) {
@@ -6881,7 +6881,7 @@ static USE_RESULT pl_status fn_split_4(query *q)
 		DECR_REF(&tmp);
 		ptr = ptr+1;
 
-		while (isspace_utf8(*ptr))
+		while (iswspace(*ptr))
 			ptr++;
 
 		if (*ptr)
@@ -7639,7 +7639,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_2(query *q)
 
 	const char *end_ptr = src + strlen(src) - 1;
 
-	while (isspace_utf8(*end_ptr) && (end_ptr != src))
+	while (iswspace(*end_ptr) && (end_ptr != src))
 		end_ptr--;
 
 	if (src[strlen(src)-1] != '.')
@@ -7680,7 +7680,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 
 	const char *end_ptr = src + strlen(src) - 1;
 
-	while (isspace_utf8(*end_ptr) && (end_ptr != src))
+	while (iswspace(*end_ptr) && (end_ptr != src))
 		end_ptr--;
 
 	if (src[strlen(src)-1] != '.')
@@ -7719,7 +7719,7 @@ static USE_RESULT pl_status fn_read_term_from_atom_3(query *q)
 
 	const char *end_ptr = src + strlen(src) - 1;
 
-	while (isspace_utf8(*end_ptr) && (end_ptr != src))
+	while (iswspace(*end_ptr) && (end_ptr != src))
 		end_ptr--;
 
 	if (src[strlen(src)-1] != '.')
@@ -8916,7 +8916,7 @@ static USE_RESULT pl_status fn_string_lower_2(query *q)
 
 	while (n--) {
 		int ch = get_char_utf8(&src);
-		ch = tolower_utf8(ch);
+		ch = towlower(ch);
 		dst += put_char_bare_utf8(dst, ch);
 	}
 
@@ -8942,7 +8942,7 @@ static USE_RESULT pl_status fn_string_upper_2(query *q)
 
 	while (n--) {
 		int ch = get_char_utf8(&src);
-		ch = toupper_utf8(ch);
+		ch = towupper(ch);
 		dst += put_char_bare_utf8(dst, ch);
 	}
 
@@ -10054,11 +10054,11 @@ static USE_RESULT pl_status fn_char_type_2(query *q)
 	else if (!strcmp(GET_STR(p2), "xdigit"))
 		return isxdigit(ch);
 	else if (!strcmp(GET_STR(p2), "whitespace"))
-		return isblank(ch) || isspace_utf8(ch);
+		return isblank(ch) || iswspace(ch);
 	else if (!strcmp(GET_STR(p2), "white"))
 		return isblank(ch);
 	else if (!strcmp(GET_STR(p2), "space"))
-		return isspace_utf8(ch);
+		return iswspace(ch);
 	else if (!strcmp(GET_STR(p2), "lower"))
 		return islower(ch);
 	else if (!strcmp(GET_STR(p2), "upper"))
@@ -11350,7 +11350,7 @@ char *format_property(char **bufptr, size_t *lenptr, char *dst, const char *name
 
 	int ch = peek_char_utf8(name);
 
-	if (!isalpha_utf8(ch) && (name[0] != '_')) {
+	if (!iswalpha(ch) && (name[0] != '_')) {
 		char namebuf[512];
 		const char *src = name;
 		char *dst2 = namebuf;

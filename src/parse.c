@@ -2406,7 +2406,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 		int ch = peek_char_utf8(s);
 
-		if (isdigit(ch) || isalpha_utf8(ch)) {
+		if (isdigit(ch) || iswalpha(ch)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, parsing binary number, line %u, '%s\n", p->line_nbr, p->save_line);
 
@@ -2444,7 +2444,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 		int ch = peek_char_utf8(s);
 
-		if (isdigit(ch) || isalpha_utf8(ch)) {
+		if (isdigit(ch) || iswalpha(ch)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, parsing octal number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
@@ -2486,7 +2486,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 		int ch = peek_char_utf8(s);
 
-		if (isdigit(ch) || isalpha_utf8(ch)) {
+		if (isdigit(ch) || iswalpha(ch)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, parsing hex number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
@@ -2531,7 +2531,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 	int ch = peek_char_utf8(s);
 
-	if (isalpha_utf8(ch)) {
+	if (iswalpha(ch)) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
@@ -2556,13 +2556,13 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 	if (!try_rational) {
 		strtod(tmpptr, &tmpptr);
 
-		if ((tmpptr[-1] == '.')  || isspace_utf8(tmpptr[-1]))
+		if ((tmpptr[-1] == '.')  || iswspace(tmpptr[-1]))
 			tmpptr--;
 
 		*srcptr = tmpptr;
 		int ch = peek_char_utf8(*srcptr);
 
-		if ((ch == '(') || isalpha_utf8(ch)) {
+		if ((ch == '(') || iswalpha(ch)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
@@ -2601,7 +2601,7 @@ static int is_matching_pair(char **dst, char **src, int lh, int rh)
 	if (*s != lh)
 		return 0;
 
-	while (s++, isspace_utf8(*s))
+	while (s++, iswspace(*s))
 		;
 
 	if (*s != rh)
@@ -2643,7 +2643,7 @@ static const char *eat_space(parser *p)
 	do {
 		done = true;
 
-		while (isspace_utf8(*src)) {
+		while (iswspace(*src)) {
 			if (*src == '\n')
 				p->line_nbr++;
 
@@ -2771,7 +2771,7 @@ static bool get_token(parser *p, int last_op)
 	if ((*src == '-') && last_op) {
 		const char *save_src = src++;
 
-		while (isspace_utf8(*src)) {
+		while (iswspace(*src)) {
 			if (*src == '\n')
 				p->line_nbr++;
 
@@ -2914,8 +2914,8 @@ static bool get_token(parser *p, int last_op)
 
 	int ch = peek_char_utf8(src);
 
-	if (isalpha_utf8(ch) || (ch == '_')) {
-		while (isalnum_utf8(ch) || (ch == '_')) {
+	if (iswalpha(ch) || (ch == '_')) {
+		while (iswalnum(ch) || (ch == '_')) {
 			if ((src[0] == ':') && (src[1] == ':'))	// HACK
 				break;
 
@@ -2938,12 +2938,12 @@ static bool get_token(parser *p, int last_op)
 
 		int ch_start = peek_char_utf8(p->token);
 
-		if (isupper_utf8(ch_start) || (ch_start == '_'))
+		if (iswupper(ch_start) || (ch_start == '_'))
 			p->is_variable = true;
 		else if (search_op(p->m, p->token, NULL, false))
 			p->is_op = true;
 
-		if (isspace_utf8(ch)) {
+		if (iswspace(ch)) {
 			p->srcptr = (char*)src;
 			src = eat_space(p);
 
@@ -2998,12 +2998,12 @@ static bool get_token(parser *p, int last_op)
 		if (strchr(s_delims, ch))
 			break;
 
-		if ((ch == '.') && isspace_utf8(*src))
+		if ((ch == '.') && iswspace(*src))
 			break;
 
 		ch = peek_char_utf8(src);
 
-		if (strchr(s_delims, ch) || isalnum_utf8(ch) || (ch == '_'))
+		if (strchr(s_delims, ch) || iswalnum(ch) || (ch == '_'))
 			break;
 	}
 

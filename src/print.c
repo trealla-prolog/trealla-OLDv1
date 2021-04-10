@@ -36,7 +36,7 @@ bool needs_quoting(module *m, const char *src, int srclen)
 	if (lench == 1) {
 		int ch = peek_char_utf8(src);
 
-		if (isupper_utf8(ch) || isdigit(ch) || (ch == '_') || (ch == '$'))
+		if (iswupper(ch) || isdigit(ch) || (ch == '_') || (ch == '$'))
 			return true;
 	}
 
@@ -52,7 +52,7 @@ bool needs_quoting(module *m, const char *src, int srclen)
 		int ch = get_char_utf8(&src);
 		srclen -= lench;
 
-		if (!isalnum_utf8(ch) && (ch != '_'))
+		if (!iswalnum(ch) && (ch != '_'))
 			return true;
 	}
 
@@ -697,7 +697,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		cell *rhs = c + 1;
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		idx_t rhs_ctx = q->latest_ctx;
-		int space = isalpha_utf8(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "\\+");
+		int space = iswalpha(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "\\+");
 		space += !strcmp(src, "-") && is_rational(rhs) && (rhs->val_num < 0);
 		//if (!strcmp(src, "-") && !is_rational(rhs)) dst += snprintf(dst, dstlen, "%s", " ");
 		int parens = is_structure(rhs) && !strcmp(GET_STR(rhs), ",");
@@ -735,7 +735,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	dst += res;
 	if (lhs_parens) dst += snprintf(dst, dstlen, "%s", ")");
 
-	int space = isalpha_utf8(peek_char_utf8(src)) || isspace_utf8(*src)
+	int space = iswalpha(peek_char_utf8(src)) || iswspace(*src)
 		|| !strcmp(src, ":-") || !strcmp(src, "-->")
 		|| !strcmp(src, "->") || !strcmp(src, "*->")
 		|| !strcmp(src, "=~=") || !strcmp(src, "=..")

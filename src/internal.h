@@ -2,6 +2,9 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <ctype.h>
+#include <wctype.h>
+#include <wchar.h>
 #include <limits.h>
 #include <assert.h>
 #include <sys/param.h>
