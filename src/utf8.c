@@ -212,6 +212,8 @@ int readc_utf8(int fd, int *res)
 	return 1;
 }
 
+// Note: 'fn' is a byte-getter function (eg. fgetc)
+
 int xgetc_utf8(int(*fn)(), void *p1)
 {
 	unsigned int n = 0;
