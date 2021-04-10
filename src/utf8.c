@@ -41,37 +41,7 @@ size_t substrlen_utf8(const char *s, const char *end)
 	return cnt;
 }
 
-const char *strchr_utf8(const char *s, int ch)
-{
-	const char *src = s;
-
-	while (*src && (peek_char_utf8(src) != ch))
-		get_char_utf8(&src);
-
-	if (!*src || (peek_char_utf8(src) != ch))
-		return NULL;
-
-	return src;
-}
-
-const char *strrchr_utf8(const char *s, int ch)
-{
-	const char *src = s, *save_src = NULL;
-
-	while (*src) {
-		while (*src && peek_char_utf8(src) != ch)
-			get_char_utf8(&src);
-
-		if (!*src || (peek_char_utf8(src) != ch))
-			return save_src;
-
-		save_src = src;
-	}
-
-	return save_src;
-}
-
-int is_char_utf8(const char *src)
+bool is_char_utf8(const char *src)
 {
 	unsigned int ch = *(const unsigned char *)src;
 	return (ch >= 0x80) && (ch <= 0xBF);
