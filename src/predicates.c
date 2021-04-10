@@ -1285,7 +1285,7 @@ static USE_RESULT pl_status fn_iso_atom_length_2(query *q)
 		return throw_error(q, p2, "domain_error", "not_less_than_zero");
 
 	const char *p = GET_STR(p1);
-	size_t len = substrlen_utf8(p, p + LEN_STR(p1));
+	size_t len = substrlen_utf8(p, LEN_STR(p1));
 	cell tmp;
 	make_int(&tmp, len);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -8908,7 +8908,7 @@ static USE_RESULT pl_status fn_string_lower_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *src = GET_STR(p1);
-	size_t len = substrlen_utf8(src, src+LEN_STR(p1));
+	size_t len = substrlen_utf8(src, LEN_STR(p1));
 	char *tmps = malloc((len*MAX_BYTES_PER_CODEPOINT)+1);
 	may_ptr_error(tmps);
 	char *dst = tmps;
@@ -8934,7 +8934,7 @@ static USE_RESULT pl_status fn_string_upper_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *src = GET_STR(p1);
-	size_t len = substrlen_utf8(src, src+LEN_STR(p1));
+	size_t len = substrlen_utf8(src, LEN_STR(p1));
 	char *tmps = malloc((len*MAX_BYTES_PER_CODEPOINT)+1);
 	may_ptr_error(tmps);
 	char *dst = tmps;

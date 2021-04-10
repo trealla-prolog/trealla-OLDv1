@@ -27,8 +27,9 @@ size_t strlen_utf8(const char *s)
 	return cnt;
 }
 
-size_t substrlen_utf8(const char *s, const char *end)
+size_t substrlen_utf8(const char *s, size_t n)
 {
+	const char *end = s + n;
 	size_t cnt = 0;
 
 	while (*s && (s <= end)) {
