@@ -1,22 +1,26 @@
 #pragma once
 
 #include <stdio.h>
+#include <ctype.h>
+#include <wctype.h>
+#include <wchar.h>
 
 /*
  *  These relate to similar stdc functions...
  */
 
+static inline int isspace_utf8(int ch) { return iswspace(ch); }
+static inline int isalpha_utf8(int ch) { return iswalpha(ch); }
+static inline int isalnum_utf8(int ch) { return iswalnum(ch); }
+static inline int isupper_utf8(int ch) { return iswupper(ch); }
+static inline int islower_utf8(int ch) { return iswlower(ch); }
+static inline int toupper_utf8(int ch) { return towupper(ch); }
+static inline int tolower_utf8(int ch) { return towlower(ch); }
+
 extern int readc_utf8(int fd, int *ch);
 extern int fgetc_utf8(FILE *fp);
-extern int isalpha_utf8(int ch);
-extern int isalnum_utf8(int ch);
-extern int isspace_utf8(int ch);
-extern int isupper_utf8(int ch);
-extern int islower_utf8(int ch);
 extern const char *strchr_utf8(const char *s, int ch);
 extern const char *strrchr_utf8(const char *s, int ch);
-extern int toupper_utf8(int ch);
-extern int tolower_utf8(int ch);
 
 extern size_t strlen_utf8(const char *s);						// returns #chars
 extern size_t substrlen_utf8(const char *s, const char *end);	// returns #chars
