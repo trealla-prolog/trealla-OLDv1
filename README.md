@@ -369,8 +369,6 @@ With *bread/3* the 'len' arg can be an integer > 0 meaning return that
 many bytes, = 0 meaning return what is there (if non-blocking) or a variable
 meaning return all bytes until end end of file,
 
-Network SSL reading does not support get_code/get_char/peek_code/peek_char.
-
 
 Persistence					##EXPERIMENTAL##
 ===========
