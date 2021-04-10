@@ -8903,6 +8903,59 @@ static USE_RESULT pl_status fn_urlenc_2(query *q)
 	return throw_error(q, p1, "instantiation_error", "atom");
 }
 
+static USE_RESULT pl_status fn_atom_lower_2(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,atom_or_var);
+	const char *src = GET_STR(p1);
+	size_t len = substrlen_utf8(src, LEN_STR(p1));
+	char *tmps = malloc((len*MAX_BYTES_PER_CODEPOINT)+1);
+	may_ptr_error(tmps);
+	char *dst = tmps;
+	size_t n = len;
+
+	while (n--) {
+		int ch = get_char_utf8(&src);
+		ch = towlower(ch);
+		dst += put_char_bare_utf8(dst, ch);
+	}
+
+	*dst = '\0';
+	cell tmp;
+	may_error(make_stringn(&tmp, tmps, LEN_STR(p1)), free(tmps));
+	free(tmps);
+	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	DECR_REF(&tmp);
+	return ok;
+}
+
+static USE_RESULT pl_status fn_atom_upper_2(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,atom_or_var);
+	const char *src = GET_STR(p1);
+	size_t len = substrlen_utf8(src, LEN_STR(p1));
+	char *tmps = malloc((len*MAX_BYTES_PER_CODEPOINT)+1);
+	may_ptr_error(tmps);
+	char *dst = tmps;
+	size_t n = len;
+
+	while (n--) {
+		int ch = get_char_utf8(&src);
+		ch = towupper(ch);
+		dst += put_char_bare_utf8(dst, ch);
+	}
+
+	*dst = '\0';
+	cell tmp;
+	may_error(make_stringn(&tmp, tmps, LEN_STR(p1)), free(tmps));
+	free(tmps);
+	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	DECR_REF(&tmp);
+	return ok;
+}
+
+
 static USE_RESULT pl_status fn_string_lower_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -11223,6 +11276,8 @@ static const struct builtins g_predicates_other[] =
 	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "+term,+list,?chars"},
 	{"base64", 2, fn_base64_2, "?string,?string"},
 	{"urlenc", 2, fn_urlenc_2, "?string,?string"},
+	{"atom_lower", 2, fn_atom_lower_2, "?atom,?atom"},
+	{"atom_upper", 2, fn_atom_upper_2, "?atom,?atom"},
 	{"string_lower", 2, fn_string_lower_2, "?string,?string"},
 	{"string_upper", 2, fn_string_upper_2, "?string,?string"},
 	{"bread", 3, fn_bread_3, "+stream,+integer,-string"},
