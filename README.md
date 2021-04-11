@@ -26,8 +26,8 @@ A note on UTF-8
 ===============
 
 Trealla uses UTF-8 internally and this works well with modern operating
-systems that are already [1](http://utf8everywhere.org/), or moving to
-[2](https://en.wikipedia.org/wiki/Unicode_in_Microsoft_Windows#UTF-8),
+systems that are already [[1](http://utf8everywhere.org/)], or moving to
+[[2](https://en.wikipedia.org/wiki/Unicode_in_Microsoft_Windows#UTF-8)],
 native UTF-8.
 
 It aligns well with standard C as functions like strcmp/memcmp that
