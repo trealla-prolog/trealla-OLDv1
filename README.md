@@ -26,12 +26,16 @@ A note on UTF-8
 ===============
 
 Trealla uses UTF-8 internally and this works well with modern operating
-systems that are already [1], or moving to [2], native UTF-8. It aligns well
-with standard C as functions like strcmp/memcmp that require no special
-handling to respect codepoint order. This also works seemlesly with the
-implementation of double-quoted *strings* (ie. chars-list), DCGs, and
-mmap'd files. Any code-point specific requirements, like *get_char*,
-*get_code*, *sub_atom* & *atom_length* are handled on the fly.
+systems that are already [1](http://utf8everywhere.org/), or moving to
+[2](https://en.wikipedia.org/wiki/Unicode_in_Microsoft_Windows#UTF-8),
+native UTF-8.
+
+It aligns well with standard C as functions like strcmp/memcmp that
+require no special handling to respect codepoint order. This also works
+seemlesly with the implementation of double-quoted *strings* (ie.
+chars-list), DCGs, and mmap'd files. Any code-point specific
+requirements, like *get_char*, *get_code*, *sub_atom* & *atom_length*
+are handled on the fly.
 
 Unicode atoms do not need to be quoted unless they contain breaking
 characters...
@@ -54,9 +58,6 @@ name any atom beginning with Unicode uppercase...
 	?- Δ is 123456-123455.
 	Δ = 1.
 	?-
-
-[1] http://utf8everywhere.org/
-[2] https://en.wikipedia.org/wiki/Unicode_in_Microsoft_Windows#UTF-8
 
 
 Building
