@@ -26,7 +26,7 @@ A note on UTF-8
 ===============
 
 Trealla uses UTF-8 internally and this works well with modern operating
-systems that are already, or moving to, native UTF-8. It aligns well
+systems that are already [1], or moving to [2], native UTF-8. It aligns well
 with standard C as functions like strcmp/memcmp that require no special
 handling to respect codepoint order. This also works seemlesly with the
 implementation of double-quoted *strings* (ie. chars-list), DCGs, and
@@ -54,6 +54,9 @@ name any atom beginning with Unicode uppercase...
 	?- Δ is 123456-123455.
 	Δ = 1.
 	?-
+
+[1] http://utf8everywhere.org/
+[2] https://en.wikipedia.org/wiki/Unicode_in_Microsoft_Windows#UTF-8
 
 
 Building
