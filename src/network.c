@@ -261,10 +261,9 @@ size_t net_write(const void *ptr, size_t nbytes, stream *str)
 int net_getc(stream *str)
 {
 #if USE_OPENSSL
-	size_t len = 1;
-	char ptr[2];
-
 	if (str->ssl) {
+		size_t len = 1;
+		char ptr[2];
 		char *dst = ptr;
 
 		while (len && str->srclen) {

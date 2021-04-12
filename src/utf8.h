@@ -24,8 +24,6 @@ extern size_t substrlen_utf8(const char *s, size_t n);			// returns #chars
 extern const char *strchr_utf8(const char *s, int ch);
 extern const char *strrchr_utf8(const char *s, int ch);
 
-extern int readc_utf8(int fd, int *ch);
-
 /*
  *  These just get/put a memory buffer...
  */
