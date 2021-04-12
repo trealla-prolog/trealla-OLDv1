@@ -34,8 +34,11 @@ It aligns well with standard C as functions like strcmp/memcmp that
 require no special handling to respect codepoint order. This also works
 seemlesly with the implementation of double-quoted *strings* (ie.
 chars-list), DCGs, and mmap'd files. Any code-point specific
-requirements, like *get_char*, *get_code*, *sub_atom* & *atom_length*
-are handled on the fly.
+requirements, like *get_char*, *get_code*, *sub_atom*, *atom_length* &
+*_upper/*_lower are handled on the fly.
+
+Note Trealla does not produce, expect or handle BOM characters (BOM is
+not an official part of Unicode).
 
 Unicode atoms do not need to be quoted unless they contain breaking
 characters...
