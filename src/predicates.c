@@ -1949,8 +1949,12 @@ static USE_RESULT pl_status fn_iso_open_3(query *q)
 
 	free(src);
 
-	if (!str->fp)
-		return throw_error(q, p1, "existence_error", "source_sink");
+	if (!str->fp) {
+		if (errno == EACCES)
+			return throw_error(q, p1, "permission_error", "open, source_sink");
+		else
+			return throw_error(q, p1, "existence_error", "source_sink");
+	}
 
 	cell *tmp = alloc_on_heap(q, 1);
 	ensure(tmp);
@@ -2093,8 +2097,12 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 	free(src);
 
-	if (!str->fp)
-		return throw_error(q, p1, "existence_error", "source_sink");
+	if (!str->fp) {
+		if (errno == EACCES)
+			return throw_error(q, p1, "permission_error", "open, source_sink");
+		else
+			return throw_error(q, p1, "existence_error", "source_sink");
+	}
 
 #if USE_MMAP
 	int prot = 0;
