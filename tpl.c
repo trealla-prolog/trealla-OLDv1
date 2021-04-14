@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <ctype.h>
 #include <errno.h>
+#include <locale.h>
 
 #ifdef _WIN32
 #include <io.h>
@@ -142,6 +143,7 @@ static int daemonize(int argc, char *argv[])
 
 int main(int ac, char *av[])
 {
+	setlocale(LC_ALL, ".UTF8");
 	const char *homedir;
 	g_argv0 = av[0];
 
