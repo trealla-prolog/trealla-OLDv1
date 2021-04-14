@@ -239,3 +239,17 @@ int xgetc_utf8(int(*fn)(), void *p1)
 	return (int)n;
 }
 
+int index_utf8(const char *src, short i)
+{
+	short idx = 0;
+
+	while (*src) {
+		int ch = get_char_utf8(&src);
+		
+		if (idx++ == i)
+			return ch;
+	}
+
+	return 0;
+}
+

@@ -35,3 +35,9 @@ extern int put_char_bare_utf8(char *dst, int ch);				// returns #bytes
 extern int put_len_utf8(int ch);								// returns #bytes
 extern bool is_char_utf8(const char *src);
 extern size_t len_char_utf8(const char *src);					// returns #bytes
+
+/*
+ *  Get indexed char
+ */
+
+extern int index_utf8(const char *src, short i);
