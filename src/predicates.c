@@ -1160,10 +1160,10 @@ static pl_status do_atom_concat_3(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,atom);
-	const char *src = GET_STR(p3);
+	const char *src = GET_STR(p2);
 	size_t len = LEN_STR(p1) + len_char_utf8(src);
 	char *dst1 = strndup(src, len);
-	char *dst2 = strdup(src+len);
+	char *dst2 = strdup(src + len);
 	int done = 0;
 
 	if (!*dst2)
