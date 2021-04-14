@@ -41,3 +41,4 @@ extern size_t len_char_utf8(const char *src);					// returns #bytes
  */
 
 extern int index_utf8(const char *src, size_t i);
+extern size_t offset_of_index_utf8(const char *buffer, size_t i);

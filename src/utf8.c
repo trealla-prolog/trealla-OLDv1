@@ -239,8 +239,9 @@ int xgetc_utf8(int(*fn)(), void *p1)
 	return (int)n;
 }
 
-int index_utf8(const char *src, size_t i)
+int index_utf8(const char *buffer, size_t i)
 {
+	const char *src = buffer;
 	size_t idx = 0;
 
 	while (*src) {
@@ -253,3 +254,17 @@ int index_utf8(const char *src, size_t i)
 	return 0;
 }
 
+size_t offset_of_index_utf8(const char *buffer, size_t i)
+{
+	const char *src = buffer;
+	size_t idx = 0;
+	
+	while (*src) {
+		get_char_utf8(&src);
+		
+		if (idx++ == i)
+			return src - buffer;
+	}
+
+	return 0;
+}
