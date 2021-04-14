@@ -150,9 +150,8 @@ int put_char_utf8(char *dst, int ch)
     return len;
 }
 
-int peek_char_utf8(const char *_src)
+int peek_char_utf8(const char *src)
 {
-	const char *src = _src;
 	return get_char_utf8(&src);
 }
 
