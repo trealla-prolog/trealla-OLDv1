@@ -254,17 +254,17 @@ int index_utf8(const char *buffer, size_t i)
 	return 0;
 }
 
-size_t offset_of_index_utf8(const char *buffer, size_t i)
+size_t offset_utf8(const char *buffer, size_t i)
 {
 	const char *src = buffer;
 	size_t idx = 0;
 	
 	while (*src) {
-		get_char_utf8(&src);
-		
 		if (idx++ == i)
-			return src - buffer;
+			break;
+
+		get_char_utf8(&src);		
 	}
 
-	return 0;
+	return src - buffer;
 }

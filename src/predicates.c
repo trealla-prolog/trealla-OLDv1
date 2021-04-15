@@ -1028,6 +1028,8 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
+#define LEN_STR_UTF8(c) strlen_utf8(GET_STR(c))
+
 static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -1066,24 +1068,24 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 			len = p3->val_num;
 			before++;
 
-			if ((before+len) > LEN_STR(p1)) {
+			if ((before+len) > LEN_STR_UTF8(p1)) {
 				drop_choice(q);
 				return pl_failure;
 			}
 		}
 	}
 
-	if (len > (LEN_STR(p1)-before)) {
+	if (len > (LEN_STR_UTF8(p1)-before)) {
 		before++;
 		len = 0;
 	}
 
-	if (before > LEN_STR(p1)) {
+	if (before > LEN_STR_UTF8(p1)) {
 		drop_choice(q);
 		return pl_failure;
 	}
 
-	const size_t len_p1 = LEN_STR(p1);
+	const size_t len_p1 = LEN_STR_UTF8(p1);
 
 	for (size_t i = before; i <= len_p1; i++) {
 		for (size_t j = len; j <= (len_p1-i); j++) {
@@ -1111,7 +1113,10 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 				continue;
 			}
 
-			may_error(make_slice(q, &tmp, p1, i, j));
+			size_t ipos = offset_utf8(GET_STR(p1), i);
+			size_t jpos = offset_utf8(GET_STR(p1), i+j);
+			
+			may_error(make_slice(q, &tmp, p1, ipos, jpos-ipos));
 
 			if (is_atom(p5) && !strcmp(GET_STR(p5), GET_STR(&tmp))) {
 				DECR_REF(&tmp);
