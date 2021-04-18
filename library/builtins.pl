@@ -451,6 +451,13 @@ nb_delete(_).
 nb_current(K, V) :-
 	user:clause('$global_key'(K, V), _).
 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Global variables. using the namespace 'user' to make sure they
+% are truly global and not just in the current module. This a quick
+% hack using assert/retract...
 % The following is not really correct.
 
 b_setval(K,_) :-
