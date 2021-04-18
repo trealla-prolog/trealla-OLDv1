@@ -41,4 +41,4 @@ extern size_t len_char_utf8(const char *src);					// returns #bytes
  */
 
 extern int character_at_pos(const char *src, size_t i);
-extern size_t offset_at_pos(const char *buffer, size_t i);
+extern size_t offset_at_pos(const char *src, size_t i);
