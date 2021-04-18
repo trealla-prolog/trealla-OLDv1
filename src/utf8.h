@@ -6,6 +6,8 @@
 #include <ctype.h>
 #include <wctype.h>
 
+#define BOM_UTF8 0xFEFF
+
 /*
  * This allows supplying a getter function...
  */

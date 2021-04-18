@@ -37,8 +37,7 @@ chars-list), DCGs, and mmap'd files. Any code-point specific
 requirements, like *get_char*, *get_code*, *sub_atom*, *atom_length*,
 *atom_codes*, *atom_chars* & *_upper/*_lower are handled on the fly.
 
-Note Trealla does not produce, expect or handle BOM characters (the
-BOM is not an official part of Unicode).
+On an open/[3,4] a BOM will be skipped if encountered.
 
 Unicode atoms do not need to be quoted unless they contain breaking
 characters...
