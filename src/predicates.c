@@ -1113,8 +1113,8 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 				continue;
 			}
 
-			size_t ipos = offset_utf8(GET_STR(p1), i);
-			size_t jpos = offset_utf8(GET_STR(p1), i+j);
+			size_t ipos = offset_at_pos(GET_STR(p1), i);
+			size_t jpos = offset_at_pos(GET_STR(p1), i+j);
 			
 			may_error(make_slice(q, &tmp, p1, ipos, jpos-ipos));
 

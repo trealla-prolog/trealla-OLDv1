@@ -239,7 +239,7 @@ int xgetc_utf8(int(*fn)(), void *p1)
 	return (int)n;
 }
 
-int index_utf8(const char *buffer, size_t i)
+int character_at_pos(const char *buffer, size_t i)
 {
 	const char *src = buffer;
 	size_t idx = 0;
@@ -254,7 +254,7 @@ int index_utf8(const char *buffer, size_t i)
 	return 0;
 }
 
-size_t offset_utf8(const char *buffer, size_t i)
+size_t offset_at_pos(const char *buffer, size_t i)
 {
 	const char *src = buffer;
 	size_t idx = 0;
