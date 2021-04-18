@@ -577,7 +577,13 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	}
 
 	int optype = GET_OP(c);
-
+	unsigned specifier;
+	
+	if (!optype && search_op(q->st.m, GET_STR(c), &specifier, true)) {
+		SET_OP(c, specifier);
+		optype = specifier;
+	}
+	
 	if (q->ignore_ops || !optype || !c->arity) {
 		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quoting(q->st.m, src, LEN_STR(c));
 		int dq = 0, braces = 0;
@@ -698,7 +704,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		idx_t rhs_ctx = q->latest_ctx;
 		int space = iswalpha(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "\\+");
-		space += !strcmp(src, "-") && is_rational(rhs) && (rhs->val_num < 0);
+		space += (!strcmp(src, "-") || !strcmp(src, "+")) && is_rational(rhs) && (rhs->val_num < 0);
 		//if (!strcmp(src, "-") && !is_rational(rhs)) dst += snprintf(dst, dstlen, "%s", " ");
 		int parens = is_structure(rhs) && !strcmp(GET_STR(rhs), ",");
 		dst += snprintf(dst, dstlen, "%s", src);
