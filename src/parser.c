@@ -337,7 +337,7 @@ cell *list_tail(cell *l, cell *tmp)
 		return h + h->nbr_cells;
 	}
 
-	const char *src = is_static(l) ? l->val_str : (char*)l->val_strb->cstr;
+	const char *src = is_static(l) ? l->val_str : (char*)l->val_strb->cstr + l->strb_off;
 	size_t str_len = is_static(l) ? (size_t)l->str_len : (size_t)l->val_strb->len - l->strb_off;
 	size_t len = len_char_utf8(src);
 
