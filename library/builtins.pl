@@ -638,7 +638,7 @@ atomic_list_concat(L, Sep, Atom) :-
 	->  atom_list(Atom, Sep, L)
 	;   instantiation_error(atomic_list_concat_(L, Sep, Atom)).
 
-list_atom([Word], _Sep, Word).
+list_atom([Word],  _Sep, Word).
 list_atom([Word|L], Sep, Atom) :-
 	list_atom(L, Sep, Right),
 	atom_concat(Sep, Right, Right1),
@@ -646,10 +646,10 @@ list_atom([Word|L], Sep, Atom) :-
 	!.
 
 atom_list(Atom, Sep, [Word|L]) :-
-	sub_atom(Atom, X,N,_, Sep),
-	sub_atom(Atom, 0,X,_, Word),
-	Z is X+N,
-	sub_atom(Atom, Z,_,0, Rest),
+	sub_atom(Atom, X, N, _, Sep),
+	sub_atom(Atom, 0, X, _, Word),
+	Z is X + N,
+	sub_atom(Atom, Z, _, 0, Rest),
 	!, atom_list(Rest, Sep, L).
 atom_list(Atom, _Sep, [Atom]).
 
