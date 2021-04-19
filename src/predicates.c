@@ -2051,12 +2051,11 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 	off_t offset = 0;
 	
-	if (!strcmp(mode, "read") && 0) {
+	if (!strcmp(mode, "read") && !ferror(str->fp)) {
 		int ch = net_getc(str);
 		
 		if ((unsigned)ch != BOM_UTF8) {
-			str->did_getc = true;
-			str->ungetch = ch;
+			fseek(str->fp, 0, SEEK_SET);
 		} else
 			offset = 1;
 	}
