@@ -37,7 +37,8 @@ chars-list), DCGs, and mmap'd files. Any code-point specific
 requirements, like *get_char*, *get_code*, *sub_atom*, *atom_length*,
 *atom_codes*, *atom_chars* & *_upper/*_lower are handled on the fly.
 
-On an open/[3,4] a BOM will be skipped if encountered.
+No special handling of a BOM is done as parsing should treat it
+as a non-breaking space.
 
 Unicode atoms do not need to be quoted unless they contain breaking
 characters...

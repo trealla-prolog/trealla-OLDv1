@@ -2049,17 +2049,6 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			return throw_error(q, p1, "existence_error", "source_sink");
 	}
 
-	off_t offset = 0;
-	
-	if (!strcmp(mode, "read") && !ferror(str->fp)) {
-		int ch = net_getc(str);
-		
-		if ((unsigned)ch != BOM_UTF8) {
-			fseek(str->fp, 0, SEEK_SET);
-		} else
-			offset = 1;
-	}
-	
 #if USE_MMAP
 	int prot = 0;
 
@@ -2073,7 +2062,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 		stat(filename, &st);
 		size_t len = st.st_size;
 		int fd = fileno(str->fp);
-		void *addr = mmap(0, len, prot, MAP_PRIVATE, fd, offset);
+		void *addr = mmap(0, len, prot, MAP_PRIVATE, fd, 0);
 		cell tmp = {0};
 		tmp.val_type = TYPE_CSTRING;
 		tmp.flags = FLAG_BLOB | FLAG_STRING | FLAG2_STATIC;
