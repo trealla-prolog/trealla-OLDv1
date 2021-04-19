@@ -221,6 +221,7 @@ GNU-Prolog & SWI-Prolog
 Others
 ======
 
+    atomic_list_concat/[2,3]    # atomic_list_concat(L,Sep,Atom) (bidirectional)
 	memberchk/2
 	read_term_from_chars/2		# read_term_from_chars(+chars,-term)
 	read_term_from_chars/3		# read_term_from_chars(+chars,+opts,-term)
