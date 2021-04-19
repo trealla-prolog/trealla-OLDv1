@@ -2051,7 +2051,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 	off_t offset = 0;
 	
-	if (!strcmp(mode, "read")) {
+	if (!strcmp(mode, "read") && 0) {
 		int ch = net_getc(str);
 		
 		if ((unsigned)ch != BOM_UTF8) {
