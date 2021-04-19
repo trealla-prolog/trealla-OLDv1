@@ -1909,66 +1909,6 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_iso_open_3(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,atom);
-	GET_NEXT_ARG(p3,variable);
-	const char *filename;
-	const char *mode = GET_STR(p2);
-	int n = new_stream();
-	char *src = NULL;
-
-	if (n < 0)
-		return throw_error(q, p1, "resource_error", "too_many_streams");
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, "type_error", "atom");
-
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-		filename = src;
-	} else if (is_atom(p1))
-		filename = GET_STR(p1);
-	else
-		return throw_error(q, p1, "domain_error", "source_sink");
-
-	stream *str = &g_streams[n];
-	str->filename = strdup(filename);
-	str->name = strdup(filename);
-	str->mode = strdup(mode);
-	str->eof_action = eof_action_eof_code;
-
-	if (!strcmp(mode, "read"))
-		str->fp = fopen(filename, "r");
-	else if (!strcmp(mode, "write"))
-		str->fp = fopen(filename, "w");
-	else if (!strcmp(mode, "append"))
-		str->fp = fopen(filename, "a");
-	else if (!strcmp(mode, "update"))
-		str->fp = fopen(filename, "r+");
-	else
-		return throw_error(q, p2, "domain_error", "io_mode");
-
-	free(src);
-
-	if (!str->fp) {
-		if (errno == EACCES)
-			return throw_error(q, p1, "permission_error", "open, source_sink");
-		else
-			return throw_error(q, p1, "existence_error", "source_sink");
-	}
-
-	cell *tmp = alloc_on_heap(q, 1);
-	ensure(tmp);
-	make_int(tmp, n);
-	tmp->flags |= FLAG_STREAM | FLAG_HEX;
-	set_var(q, p3, p3_ctx, tmp, q->st.curr_frame);
-	return pl_success;
-}
-
 static USE_RESULT pl_status fn_iso_open_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
@@ -2114,9 +2054,10 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	if (!strcmp(mode, "read")) {
 		int ch = net_getc(str);
 		
-		if ((unsigned)ch != BOM_UTF8)
+		if ((unsigned)ch != BOM_UTF8) {
+			str->did_getc = true;
 			str->ungetch = ch;
-		else
+		} else
 			offset = 1;
 	}
 	
@@ -11128,7 +11069,6 @@ static const struct builtins g_predicates_iso[] =
 	{"sub_atom", 5, fn_iso_sub_atom_5, NULL},
 	{"current_rule", 1, fn_iso_current_rule_1, NULL},
 
-	{"open", 3, fn_iso_open_3, NULL},
 	{"open", 4, fn_iso_open_4, NULL},
 	{"close", 1, fn_iso_close_1, NULL},
 	{"close", 2, fn_iso_close_2, NULL},
