@@ -5459,7 +5459,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "encoding")) {
 		cell tmp;
-		make_literal(&tmp, index_from_pool(q->st.m->pl, "utf8"));
+		make_literal(&tmp, index_from_pool(q->st.m->pl, "UTF-8"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "debug")) {
 		cell tmp;
