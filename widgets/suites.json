@@ -1,6 +1,72 @@
 {
-  "total" : 1,
+  "total" : 154,
   "items" : [ {
+    "uid" : "8d72f33464c61a169f6282af0f2f0181",
+    "name" : "predicates/read_term_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 6,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 30,
+      "unknown" : 0,
+      "total" : 36
+    }
+  }, {
+    "uid" : "ed0cdb351cf5fe82566e390f01a37528",
+    "name" : "control/throw_1/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 2,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 5,
+      "unknown" : 0,
+      "total" : 7
+    }
+  }, {
+    "uid" : "fe889f4ed1e23b13cb890295efdd6049",
+    "name" : "predicates/setof_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 1,
+      "passed" : 33,
+      "unknown" : 0,
+      "total" : 35
+    }
+  }, {
+    "uid" : "bdc881d4b933694f76d7d16bff33e9cf",
+    "name" : "predicates/bagof_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 17,
+      "unknown" : 0,
+      "total" : 18
+    }
+  }, {
+    "uid" : "21ff05688ac7c7a65af1611086e5abe1",
+    "name" : "control/catch_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 10,
+      "unknown" : 0,
+      "total" : 11
+    }
+  }, {
+    "uid" : "2dae564ffa6f8fff4ee6bf8dbbb0e559",
+    "name" : "predicates/set_stream_position_2/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 9,
+      "unknown" : 0,
+      "total" : 10
+    }
+  }, {
     "uid" : "d43fc533ca1ad427757b2d322e01b8e7",
     "name" : "unicode/tests.lgt::tests",
     "statistic" : {
@@ -10,6 +76,39 @@
       "passed" : 85,
       "unknown" : 0,
       "total" : 85
+    }
+  }, {
+    "uid" : "2fa097f54728c3cdaa06f09f04fafff8",
+    "name" : "predicates/write_term_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 56,
+      "unknown" : 0,
+      "total" : 56
+    }
+  }, {
+    "uid" : "e323763b3f5107ef1a6b74d4676f7951",
+    "name" : "syntax/operators/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 56,
+      "unknown" : 0,
+      "total" : 56
+    }
+  }, {
+    "uid" : "a5e7e6a80bb657bcaa763c06b523455c",
+    "name" : "predicates/current_op_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 48,
+      "unknown" : 0,
+      "total" : 48
     }
   } ]
 }
