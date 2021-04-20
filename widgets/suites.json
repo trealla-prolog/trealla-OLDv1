@@ -4,10 +4,10 @@
     "uid" : "d43fc533ca1ad427757b2d322e01b8e7",
     "name" : "unicode/tests.lgt::tests",
     "statistic" : {
-      "failed" : 3,
+      "failed" : 0,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 82,
+      "passed" : 85,
       "unknown" : 0,
       "total" : 85
     }

@@ -3,507 +3,39 @@
   "children" : [ {
     "name" : "tests",
     "children" : [ {
-      "name" : "sics_unicode_atom_length_2_09",
-      "uid" : "63ddd2d5bc13fbdf",
+      "name" : "lgt_unicode_read_term_3_02",
+      "uid" : "cf150d3e029c8e86",
       "parentUid" : "bf49149a3821e34f7608bb6885d52868",
       "status" : "passed",
       "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_sub_atom_5_31",
-      "uid" : "cbba7fce2763b75d",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_sub_atom_5_03",
-      "uid" : "d1e544628fe821ce",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_length_2_07",
-      "uid" : "feb9d540655d9ae6",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_codes_2_01b",
-      "uid" : "a98728af87e283bb",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_sub_atom_5_07",
-      "uid" : "7ceaccfd15b78814",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_length_2_10",
-      "uid" : "8dc8466e30a48717",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_chars_2_14",
-      "uid" : "b01750c651666db4",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_sub_atom_5_01",
-      "uid" : "c9ec28950aaeb0a8",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_current_prolog_flag_2_01",
-      "uid" : "c1697b319c95ffdb",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "failed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_get_char_2_01a",
-      "uid" : "c1e61dd18ca5273e",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103004,
-        "duration" : 4
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_read_term_3_01",
-      "uid" : "1038e30bf5a3ca7d",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103004,
-        "duration" : 4
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_sub_atom_5_06",
-      "uid" : "736634aef8a0c489",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_char_code_2_05",
-      "uid" : "d7b44031efa9c6b3",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_chars_2_05b",
-      "uid" : "1173c00f45780899",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_put_code_2_01",
-      "uid" : "25e6bc4d19fba6c5",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103006,
-        "duration" : 6
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_codes_2_04a",
-      "uid" : "c8f87ba878ed647a",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_codes_2_03b",
-      "uid" : "3ed056b5211eb40",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_char_code_2_01",
-      "uid" : "91e6845769e2edda",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_chars_2_03b",
-      "uid" : "a036bf8c09f475df",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_char_code_2_03",
-      "uid" : "dc5317c0cdaa6d96",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_char_code_2_08",
-      "uid" : "d25dce7273060456",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_concat_3_14",
-      "uid" : "95f9fcc5ca973a82",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_write_term_3_02",
-      "uid" : "e7d308893ee45c94",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103008,
-        "duration" : 8
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_length_2_01",
-      "uid" : "25a55cfa08895671",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_char_code_2_06",
-      "uid" : "95472edaa7d4a613",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_codes_2_07b",
-      "uid" : "470b609fb8058f50",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_write_term_3_01",
-      "uid" : "2fd51e03c144b3ef",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103009,
-        "duration" : 9
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_concat_3_13",
-      "uid" : "acc4c5460d77bc04",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_concat_3_11",
-      "uid" : "7d389fc7e73a1c0a",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_chars_2_05a",
-      "uid" : "e94964652f6faae5",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_put_code_2_02",
-      "uid" : "e2ab1719b91ad9e3",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103005,
+        "start" : 1618898322000,
+        "stop" : 1618898322005,
         "duration" : 5
       },
       "flaky" : false,
       "newFailed" : false,
       "parameters" : [ ]
     }, {
-      "name" : "lgt_unicode_char_code_2_04",
-      "uid" : "e565d3f3f35473d7",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_chars_2_07a",
-      "uid" : "632d8e866648ef6f",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_sub_atom_5_05",
-      "uid" : "b2897e64328a73c",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
       "name" : "sics_unicode_atom_codes_2_05a",
-      "uid" : "7c991c3ba9bfc6f0",
+      "uid" : "d0ab71aa4e2bf72",
       "parentUid" : "bf49149a3821e34f7608bb6885d52868",
       "status" : "passed",
       "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
         "duration" : 0
       },
       "flaky" : false,
       "newFailed" : false,
       "parameters" : [ ]
     }, {
-      "name" : "lgt_unicode_put_char_2_02",
-      "uid" : "b1623c2bda64c188",
+      "name" : "lgt_unicode_atom_chars_2_06a",
+      "uid" : "cf4e69cd719fec68",
       "parentUid" : "bf49149a3821e34f7608bb6885d52868",
       "status" : "passed",
       "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103006,
-        "duration" : 6
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_codes_2_01a",
-      "uid" : "c3d492b7bec5e347",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_chars_2_02a",
-      "uid" : "42392a60ff680c8b",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
         "duration" : 0
       },
       "flaky" : false,
@@ -511,181 +43,12 @@
       "parameters" : [ ]
     }, {
       "name" : "sics_unicode_atom_codes_2_04b",
-      "uid" : "88d36177aacd1e82",
+      "uid" : "fe0c323fe2ac536",
       "parentUid" : "bf49149a3821e34f7608bb6885d52868",
       "status" : "passed",
       "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_codes_2_13",
-      "uid" : "97a90a69ad28ac53",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_chars_2_01a",
-      "uid" : "89e57d1adfd7ebc5",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_stream_property_2_01",
-      "uid" : "99f7732c2d17cbf6",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "failed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_chars_2_06b",
-      "uid" : "3bed0ff15ca2cc15",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_codes_2_06b",
-      "uid" : "73c1207a209533da",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_get_char_2_02a",
-      "uid" : "26a1126e7ca30e4c",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103004,
-        "duration" : 4
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_chars_2_06a",
-      "uid" : "748af3bd095e939e",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_sub_atom_5_04",
-      "uid" : "3dc5437ee1f6bcad",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_length_2_05",
-      "uid" : "3975b5ec6276c02e",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_chars_2_07b",
-      "uid" : "9dc1831331053e6e",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_codes_2_07a",
-      "uid" : "63f6defbddcfd402",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_sub_atom_5_35",
-      "uid" : "5a502f8e14265f00",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_length_2_04",
-      "uid" : "265f2bd8e194701a",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
         "duration" : 0
       },
       "flaky" : false,
@@ -693,25 +56,90 @@
       "parameters" : [ ]
     }, {
       "name" : "lgt_unicode_sub_atom_5_02",
-      "uid" : "c1e93940c5930270",
+      "uid" : "2867e225ca095678",
       "parentUid" : "bf49149a3821e34f7608bb6885d52868",
       "status" : "passed",
       "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
         "duration" : 0
       },
       "flaky" : false,
       "newFailed" : false,
       "parameters" : [ ]
     }, {
-      "name" : "lgt_unicode_char_code_2_09",
-      "uid" : "e126e383aa9ca428",
+      "name" : "sics_unicode_sub_atom_5_33",
+      "uid" : "8f8fafafe6dfd0b1",
       "parentUid" : "bf49149a3821e34f7608bb6885d52868",
       "status" : "passed",
       "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_length_2_06",
+      "uid" : "37d198c5a24d0910",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_get_char_2_02a",
+      "uid" : "1017ba01967dd503",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322004,
+        "duration" : 4
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_chars_2_07b",
+      "uid" : "70d5a42d988a6ccb",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_codes_2_04a",
+      "uid" : "136b71e36c21a219",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_length_2_05",
+      "uid" : "2197564a9dbaf3a1",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
         "duration" : 0
       },
       "flaky" : false,
@@ -719,324 +147,12 @@
       "parameters" : [ ]
     }, {
       "name" : "lgt_unicode_atom_chars_2_02b",
-      "uid" : "61f7c9f6386f45f9",
+      "uid" : "c74432a3402f2e6b",
       "parentUid" : "bf49149a3821e34f7608bb6885d52868",
       "status" : "passed",
       "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_get_char_2_01b",
-      "uid" : "fdc18fdacb0f9347",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103006,
-        "duration" : 6
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_length_2_06",
-      "uid" : "6e0f25644cf61d33",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_codes_2_05b",
-      "uid" : "ead2a574ca2ca2fb",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_sub_atom_5_34",
-      "uid" : "4a9b74e1c71dc578",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_char_code_2_02",
-      "uid" : "da03869d1bea86c6",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_stream_property_2_02",
-      "uid" : "98cbb4e0305c24fa",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "failed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_get_code_2_01b",
-      "uid" : "f0493def73b82928",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103006,
-        "duration" : 6
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_codes_2_03a",
-      "uid" : "3c37ea57bdd58631",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_get_char_2_02b",
-      "uid" : "ed14d91c8ad3db52",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103006,
-        "duration" : 6
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_read_term_3_02",
-      "uid" : "69e2a35977f6c454",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103004,
-        "duration" : 4
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_codes_2_06a",
-      "uid" : "a302741b15936211",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_get_code_2_02b",
-      "uid" : "f95ca5d55871fee7",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103006,
-        "duration" : 6
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_length_2_02",
-      "uid" : "25b849ba67abaf9d",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_put_char_2_01",
-      "uid" : "122f88f7dfd3f16a",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103006,
-        "duration" : 6
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_sub_atom_5_33",
-      "uid" : "e9b2dbf7287d8e9d",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_get_code_2_02a",
-      "uid" : "2166f26d2608ad5d",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103004,
-        "duration" : 4
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_chars_2_15",
-      "uid" : "9d58ebf6ac643a65",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_codes_2_02a",
-      "uid" : "f7afaa9698a926e",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_codes_2_02b",
-      "uid" : "a63ad8a8d188b731",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_sub_atom_5_32",
-      "uid" : "f3a1a00d5a8fe78a",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_codes_2_12",
-      "uid" : "b405b27c7f876c89",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "sics_unicode_atom_concat_3_12",
-      "uid" : "95b96c8b13fbd2f9",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_chars_2_04b",
-      "uid" : "bdc8a6afd5761bb3",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
-        "duration" : 0
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_chars_2_03a",
-      "uid" : "b42d32d4e9831bc0",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
         "duration" : 0
       },
       "flaky" : false,
@@ -1044,51 +160,38 @@
       "parameters" : [ ]
     }, {
       "name" : "lgt_unicode_char_code_2_07",
-      "uid" : "2c3bf368fbb25d58",
+      "uid" : "4e4d861b8d38c74c",
       "parentUid" : "bf49149a3821e34f7608bb6885d52868",
       "status" : "passed",
       "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
         "duration" : 0
       },
       "flaky" : false,
       "newFailed" : false,
       "parameters" : [ ]
     }, {
-      "name" : "lgt_unicode_get_code_2_01a",
-      "uid" : "f9d49a8c5f744800",
+      "name" : "sics_unicode_atom_codes_2_07a",
+      "uid" : "9efb70b6eee27dd3",
       "parentUid" : "bf49149a3821e34f7608bb6885d52868",
       "status" : "passed",
       "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103004,
-        "duration" : 4
-      },
-      "flaky" : false,
-      "newFailed" : false,
-      "parameters" : [ ]
-    }, {
-      "name" : "lgt_unicode_atom_length_2_03",
-      "uid" : "bfd1fac2be476473",
-      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
-      "status" : "passed",
-      "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
         "duration" : 0
       },
       "flaky" : false,
       "newFailed" : false,
       "parameters" : [ ]
     }, {
-      "name" : "lgt_unicode_atom_chars_2_04a",
-      "uid" : "444c91e446d3b1a2",
+      "name" : "lgt_unicode_stream_property_2_01",
+      "uid" : "9c0bdcda3f109261",
       "parentUid" : "bf49149a3821e34f7608bb6885d52868",
       "status" : "passed",
       "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
         "duration" : 0
       },
       "flaky" : false,
@@ -1096,12 +199,909 @@
       "parameters" : [ ]
     }, {
       "name" : "lgt_unicode_atom_chars_2_01b",
-      "uid" : "c11f21cc683058ce",
+      "uid" : "3e061fd579eec1dc",
       "parentUid" : "bf49149a3821e34f7608bb6885d52868",
       "status" : "passed",
       "time" : {
-        "start" : 1618875103000,
-        "stop" : 1618875103000,
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_concat_3_14",
+      "uid" : "316bf4f9a594c45e",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_sub_atom_5_32",
+      "uid" : "5060c17260e68a11",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_concat_3_13",
+      "uid" : "ef4132b952b32a99",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_char_code_2_06",
+      "uid" : "cdfe9c666d5b765a",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_sub_atom_5_05",
+      "uid" : "f61e64111140c9e3",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_chars_2_01a",
+      "uid" : "c2d534e4afd72ba0",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_read_term_3_01",
+      "uid" : "7fd4c089d13b35a9",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322005,
+        "duration" : 5
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_length_2_10",
+      "uid" : "45ce2abe1f4faea",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_stream_property_2_02",
+      "uid" : "a65fabe6de2a2b94",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_length_2_01",
+      "uid" : "476cffc5b827e695",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_chars_2_14",
+      "uid" : "134f386e752de3e5",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_chars_2_03b",
+      "uid" : "b846df35348b4d77",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_chars_2_05b",
+      "uid" : "975d32bd9cb10bb8",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_get_char_2_01b",
+      "uid" : "ab9d03e8667307dc",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322007,
+        "duration" : 7
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_put_code_2_02",
+      "uid" : "136994c96b12f19d",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322007,
+        "duration" : 7
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_char_code_2_01",
+      "uid" : "2b411b2864657cfb",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_concat_3_12",
+      "uid" : "191583b1150f59e4",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_get_code_2_02a",
+      "uid" : "fabae820f4254421",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322004,
+        "duration" : 4
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_codes_2_02a",
+      "uid" : "b9e565881f5f1a71",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_sub_atom_5_04",
+      "uid" : "23467eba91bde224",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_get_code_2_01b",
+      "uid" : "a0e16386d330533c",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322006,
+        "duration" : 6
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_codes_2_01a",
+      "uid" : "eea8552530f976c9",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_get_char_2_02b",
+      "uid" : "79a3c48e3b717b21",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322007,
+        "duration" : 7
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_char_code_2_08",
+      "uid" : "539a0846f2c71ecf",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_codes_2_07b",
+      "uid" : "ddf8e71810fd2974",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_codes_2_03a",
+      "uid" : "42f83fdc7a7b960b",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_get_code_2_02b",
+      "uid" : "b9e7384cbdbcc601",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322007,
+        "duration" : 7
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_codes_2_13",
+      "uid" : "a8ca162bd93e744b",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_char_code_2_04",
+      "uid" : "604af0e1bc8770db",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_current_prolog_flag_2_01",
+      "uid" : "e274d67a0ec478a6",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_sub_atom_5_31",
+      "uid" : "760eb1ba0613cbd3",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_codes_2_03b",
+      "uid" : "5d5145d629f9aa93",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_codes_2_01b",
+      "uid" : "4958029daa414326",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_char_code_2_02",
+      "uid" : "f252f02b0f9c3b23",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_chars_2_05a",
+      "uid" : "1b9ad03353104bee",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_codes_2_12",
+      "uid" : "30ba800d85951a68",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_sub_atom_5_03",
+      "uid" : "37d944de38b06a5f",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_length_2_03",
+      "uid" : "8bb58f9809eddfb0",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_sub_atom_5_34",
+      "uid" : "36415deac3278763",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_chars_2_04a",
+      "uid" : "59a44e4f0b39bc58",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_chars_2_15",
+      "uid" : "cd5a8923933b8b06",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_write_term_3_02",
+      "uid" : "e806ffa4eb3b497e",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322018,
+        "duration" : 18
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_sub_atom_5_01",
+      "uid" : "c30315cb449fd253",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_write_term_3_01",
+      "uid" : "eb22d1a608e878f6",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322009,
+        "duration" : 9
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_sub_atom_5_06",
+      "uid" : "534a37221ed48f70",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_codes_2_02b",
+      "uid" : "ab1bf1e70ebee241",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_sub_atom_5_35",
+      "uid" : "a86e4d7d5df32547",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_length_2_04",
+      "uid" : "dc4604e2d80b1905",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_codes_2_06a",
+      "uid" : "272d02b184800cab",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_sub_atom_5_07",
+      "uid" : "b29273d90076f757",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_chars_2_07a",
+      "uid" : "6768756a16ecfd",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_put_char_2_02",
+      "uid" : "ed73efe6d6a24c83",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322006,
+        "duration" : 6
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_char_code_2_03",
+      "uid" : "115af58f95dd4f7a",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_length_2_07",
+      "uid" : "31b90e1631fd80df",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_codes_2_06b",
+      "uid" : "ebe087552d7855d9",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_chars_2_06b",
+      "uid" : "1d9e8bd7646d3342",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_char_code_2_05",
+      "uid" : "e18f896b01fcbca7",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_chars_2_03a",
+      "uid" : "7e72c1c2ac53a4ed",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_chars_2_04b",
+      "uid" : "e03f91d6984dc423",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_char_code_2_09",
+      "uid" : "ecd4e7430c9602c5",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_put_code_2_01",
+      "uid" : "305d3fe2b97d297c",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322006,
+        "duration" : 6
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_chars_2_02a",
+      "uid" : "11e5a200eb535cbc",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_put_char_2_01",
+      "uid" : "32a1a064bfb9282e",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322006,
+        "duration" : 6
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_get_code_2_01a",
+      "uid" : "b9f6e27ce606057b",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322005,
+        "duration" : 5
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_concat_3_11",
+      "uid" : "6ef58752fa0157ab",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_length_2_09",
+      "uid" : "99858b02f885fbf3",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_get_char_2_01a",
+      "uid" : "9d87e366463492d1",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322004,
+        "duration" : 4
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "lgt_unicode_atom_length_2_02",
+      "uid" : "d8e19ac897010894",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
+        "duration" : 0
+      },
+      "flaky" : false,
+      "newFailed" : false,
+      "parameters" : [ ]
+    }, {
+      "name" : "sics_unicode_atom_codes_2_05b",
+      "uid" : "cc282ad65b1d9a34",
+      "parentUid" : "bf49149a3821e34f7608bb6885d52868",
+      "status" : "passed",
+      "time" : {
+        "start" : 1618898322000,
+        "stop" : 1618898322000,
         "duration" : 0
       },
       "flaky" : false,

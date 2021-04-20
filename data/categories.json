@@ -1,56 +1,5 @@
 {
   "uid" : "4b4757e66a1912dae1a509f688f20b0f",
-  "children" : [ {
-    "name" : "Product defects",
-    "children" : [ {
-      "name" : "Error instead of success",
-      "children" : [ {
-        "name" : "lgt_unicode_current_prolog_flag_2_01",
-        "uid" : "c1697b319c95ffdb",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1618875103000,
-          "stop" : 1618875103000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "lgt_unicode_stream_property_2_01",
-        "uid" : "99f7732c2d17cbf6",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1618875103000,
-          "stop" : 1618875103000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      } ],
-      "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
-    }, {
-      "name" : "Failure instead of success",
-      "children" : [ {
-        "name" : "lgt_unicode_stream_property_2_02",
-        "uid" : "98cbb4e0305c24fa",
-        "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
-        "status" : "failed",
-        "time" : {
-          "start" : 1618875103000,
-          "stop" : 1618875103000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      } ],
-      "uid" : "7a65c89daad8cf82ce910dbf95cc8113"
-    } ],
-    "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
-  } ],
+  "children" : [ ],
   "name" : "categories"
 }
