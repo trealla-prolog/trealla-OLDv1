@@ -1631,7 +1631,7 @@ static void add_stream_properties(query *q, int n)
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, alias('%s')).\n", n, str->name);
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, file_name('%s')).\n", n, str->filename);
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, mode(%s)).\n", n, str->mode);
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, encoding(%s)).\n", n, "utf8");
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, encoding(%s)).\n", n, "UTF-8");
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, type(%s)).\n", n, str->binary ? "binary" : "text");
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, line_count(%i)).\n", n, str->p ? str->p->line_nbr : 1);
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, position(%llu)).\n", n, (unsigned long long)(pos != -1 ? pos : 0));
@@ -1737,7 +1737,7 @@ static pl_status do_stream_property(query *q)
 
 	if (!strcmp(GET_STR(p1), "encoding")) {
 		cell tmp;
-		may_error(make_cstring(&tmp, "utf8"));
+		may_error(make_cstring(&tmp, "UTF-8"));
 		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
 		return ok;
@@ -5447,6 +5447,10 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 		else
 			make_literal(&tmp, index_from_pool(q->st.m->pl, "error"));
 
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	} else if (!strcmp(GET_STR(p1), "encoding")) {
+		cell tmp;
+		make_literal(&tmp, index_from_pool(q->st.m->pl, "utf8"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!strcmp(GET_STR(p1), "debug")) {
 		cell tmp;
