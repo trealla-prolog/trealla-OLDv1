@@ -1631,6 +1631,7 @@ static void add_stream_properties(query *q, int n)
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, alias('%s')).\n", n, str->name);
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, file_name('%s')).\n", n, str->filename);
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, mode(%s)).\n", n, str->mode);
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, bom(%s)).\n", n, str->bom?"true":"false");
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, encoding(%s)).\n", n, "UTF-8");
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, type(%s)).\n", n, str->binary ? "binary" : "text");
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, line_count(%i)).\n", n, str->p ? str->p->line_nbr : 1);
@@ -1714,6 +1715,14 @@ static pl_status do_stream_property(query *q)
 	if (!strcmp(GET_STR(p1), "mode")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->mode));
+		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		DECR_REF(&tmp);
+		return ok;
+	}
+
+	if (!strcmp(GET_STR(p1), "bom")) {
+		cell tmp;
+		may_error(make_cstring(&tmp, str->bom?"true":"false"));
 		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
 		return ok;
