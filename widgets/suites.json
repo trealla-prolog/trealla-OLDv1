@@ -73,9 +73,9 @@
       "failed" : 0,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 85,
+      "passed" : 95,
       "unknown" : 0,
-      "total" : 85
+      "total" : 95
     }
   }, {
     "uid" : "2fa097f54728c3cdaa06f09f04fafff8",
