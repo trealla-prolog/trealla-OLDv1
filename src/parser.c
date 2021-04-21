@@ -2800,13 +2800,15 @@ static bool get_token(parser *p, int last_op)
 		strncpy(dst, tmpptr, src-tmpptr);
 		dst[src-tmpptr] = '\0';
 
-		if ((strchr(dst, '.') || strchr(dst, 'e') || strchr(dst, 'E')) && !strchr(dst, '\'')) {
-			if (!valid_float(p->token)) {
-				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, float, line %u, '%s'\n", p->line_nbr, p->save_line);
+		if ((dst[0] != '0') && (dst[1] != 'x')) {
+			if ((strchr(dst, '.') || strchr(dst, 'e') || strchr(dst, 'E')) && !strchr(dst, '\'')) {
+				if (!valid_float(p->token)) {
+					if (DUMP_ERRS || !p->do_read_term)
+						fprintf(stdout, "Error: syntax error, float, line %u, '%s'\n", p->line_nbr, p->save_line);
 
-				p->error = true;
-				return false;
+					p->error = true;
+					return false;
+				}
 			}
 		}
 
