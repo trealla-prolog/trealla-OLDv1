@@ -1927,6 +1927,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	const char *mode = GET_STR(p2);
 	int n = new_stream();
 	char *src = NULL;
+	bool use_bom = false;
 
 	if (n < 0)
 		return throw_error(q, p1, "resource_error", "too_many_streams");
@@ -2003,6 +2004,9 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 					binary = 1;
 				} else if (is_atom(name) && !strcmp(GET_STR(name), "text"))
 					binary = 0;
+			} else if (!strcmp(GET_STR(c), "bom")) {
+				if (is_atom(name) && !strcmp(GET_STR(name), "true"))
+					use_bom = true;
 			} else if (!strcmp(GET_STR(c), "eof_action")) {
 				if (is_atom(name) && !strcmp(GET_STR(name), "error")) {
 					str->eof_action = eof_action_error;
@@ -2060,7 +2064,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 	size_t offset = 0;
 
-	if (!strcmp(mode, "read") && 1) {
+	if (!strcmp(mode, "read")) {
 		int ch = xgetc_utf8(net_getc, str);
 
 		if (feof(str->fp))
@@ -2071,8 +2075,14 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			offset = 1;
 		} else
 			fseek(str->fp, 0, SEEK_SET);
+	} else if (!strcmp(mode, "write") && use_bom) {
+		int ch = 0xFEFF;
+		char tmpbuf[10];
+		put_char_utf8(tmpbuf, ch);
+		net_write(tmpbuf, strlen(tmpbuf), str);		
+		str->bom = true;
 	}
-	
+
 #if USE_MMAP
 	int prot = 0;
 
