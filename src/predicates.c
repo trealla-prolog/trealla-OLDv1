@@ -2072,7 +2072,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 		
 		if ((unsigned)ch == 0xFEFF) {
 			str->bom = true;
-			offset = 1;
+			offset = 3;
 		} else
 			fseek(str->fp, 0, SEEK_SET);
 	} else if (!strcmp(mode, "write") && use_bom) {
