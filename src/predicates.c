@@ -2064,7 +2064,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 	size_t offset = 0;
 
-	if (!strcmp(mode, "read")) {
+	if (!strcmp(mode, "read") && !binary) {
 		int ch = xgetc_utf8(net_getc, str);
 
 		if (feof(str->fp))
@@ -2075,7 +2075,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			offset = 1;
 		} else
 			fseek(str->fp, 0, SEEK_SET);
-	} else if (!strcmp(mode, "write") && use_bom) {
+	} else if (!strcmp(mode, "write") && use_bom && !binary) {
 		int ch = 0xFEFF;
 		char tmpbuf[10];
 		put_char_utf8(tmpbuf, ch);
