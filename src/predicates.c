@@ -1441,6 +1441,9 @@ static USE_RESULT pl_status fn_iso_set_stream_position_2(query *q)
 	if (!is_integer(p1))
 		return throw_error(q, p1, "domain_error", "stream_position");
 
+	if (!str->repo)
+		return throw_error(q, p1, "permission_error", "reposition,stream");
+
 	if (fseeko(str->fp, p1->val_num, SEEK_SET))
 		return throw_error(q, p1, "domain_error", "position");
 
@@ -2007,6 +2010,13 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			} else if (!strcmp(GET_STR(c), "bom")) {
 				if (is_atom(name) && !strcmp(GET_STR(name), "true"))
 					use_bom = true;
+				else if (is_atom(name) && !strcmp(GET_STR(name), "false"))
+					use_bom = false;
+			} else if (!strcmp(GET_STR(c), "reposition")) {
+				if (is_atom(name) && !strcmp(GET_STR(name), "true"))
+					str->repo = true;
+				else if (is_atom(name) && !strcmp(GET_STR(name), "false"))
+					str->repo = false;
 			} else if (!strcmp(GET_STR(c), "eof_action")) {
 				if (is_atom(name) && !strcmp(GET_STR(name), "error")) {
 					str->eof_action = eof_action_error;

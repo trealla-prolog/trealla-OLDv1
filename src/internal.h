@@ -438,6 +438,7 @@ typedef struct {
 	uint8_t level, eof_action;
 	bool at_end_of_file:1;
 	bool bom:1;
+	bool repo:1;
 	bool binary:1;
 	bool did_getc:1;
 	bool socket:1;
