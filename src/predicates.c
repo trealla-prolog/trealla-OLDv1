@@ -2075,7 +2075,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			offset = 1;
 		} else
 			fseek(str->fp, 0, SEEK_SET);
-	} else if (!strcmp(mode, "write") && use_bom && !binary) {
+	} else if (!strcmp(mode, "write") && use_bom) {
 		int ch = 0xFEFF;
 		char tmpbuf[10];
 		put_char_utf8(tmpbuf, ch);
