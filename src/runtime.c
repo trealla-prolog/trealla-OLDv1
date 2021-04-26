@@ -853,14 +853,6 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 
 static bool CHECK_UPDATE_VIEW(__attribute__((unused)) query *q, clause *c)
 {
-#if 0
-	printf("*** pl->ugen=%llu, g->ugen=%llu, cl->ugen_created=%llu, cl->ugen_erased=%llu\n",
-		(long long unsigned)q->st.m->pl->ugen,
-		(long long unsigned)g->ugen,
-		(long long unsigned)c->t.ugen_created,
-		(long long unsigned)c->t.ugen_erased);
-#endif
-
 	frame *g = GET_FRAME(q->st.curr_frame);
 
 	if (c->t.ugen_created > g->ugen)

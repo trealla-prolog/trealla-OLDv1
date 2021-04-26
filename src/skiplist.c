@@ -16,7 +16,6 @@ struct keyval_ {
 };
 
 #define BUCKET_SIZE 32
-#define MAX_ITERS 16
 
 struct slnode_ {
 	keyval_t bkt[BUCKET_SIZE];
