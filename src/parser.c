@@ -291,6 +291,7 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 			return false;
 
 		m->spare_ops--;
+		m->user_ops = true;
 	} else {
 		free(ptr->name);
 	}
@@ -485,20 +486,24 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 
 predicate *search_predicate(module *m, cell *c)
 {
-	module *tmp_m = NULL;
+	module *orig_m = m;
+	predicate *h = find_predicate(m, c);
 
-	while (m) {
-		predicate *h = find_predicate(m, c);
+	if (h) {
+		h->m = m;
+		return h;
+	}
+
+	for (m = m->pl->modules; m; m = m->next) {
+		if (m == orig_m)
+			continue;
+			
+		h = find_predicate(m, c);
 
 		if (h) {
 			h->m = m;
 			return h;
 		}
-
-		if (!tmp_m)
-			m = tmp_m = m->pl->modules;
-		else
-			m = m->next;
 	}
 
 	return NULL;
@@ -508,18 +513,20 @@ predicate *search_predicate(module *m, cell *c)
 
 unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
 {
-	module *tmp_m = NULL;
+	module *orig_m = m;
+	unsigned priority = get_op(m, name, specifier, hint_prefix);
 
-	while (m) {
-		unsigned priority = get_op(m, name, specifier, hint_prefix);
+	if (priority)
+		return priority;
+
+	for (m = m->pl->modules; m; m = m->next) {
+		if ((m == orig_m) || !m->user_ops)
+			continue;
+			
+		priority = get_op(m, name, specifier, hint_prefix);
 
 		if (priority)
 			return priority;
-
-		if (!tmp_m)
-			m = tmp_m = m->pl->modules;
-		else
-			m = m->next;
 	}
 
 	return 0;

@@ -608,6 +608,7 @@ struct module_ {
 	idx_t id;
 	prolog_flags flag;
 	unsigned spare_ops, loaded_ops;
+	bool user_ops:1;
 	bool prebuilt:1;
 	bool use_persist:1;
 	bool make_public:1;
