@@ -603,67 +603,23 @@ static bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, id
 
 static int compkey(const void *param, const void *ptr1, const void *ptr2)
 {
-	assert(ptr1 && ptr2);
-
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
 	const module *m = (const module*)param;
 
-	if (is_integer(p1) && is_integer(p2)) {
-		if (p1->val_num < p2->val_num)
-			return -1;
-		else if (p1->val_num > p2->val_num)
-			return 1;
-	} else if (is_float(p1) && is_float(p2)) {
-		if (p1->val_flt < p2->val_flt)
-			return -1;
-		else if (p1->val_flt > p2->val_flt)
-			return 1;
-	} else if (is_key(p1) && is_key(p2)) {
-		if (p1->arity == p2->arity) {
-			if (p1->val_off == p2->val_off)
-				return 0;
-		}
-
-		int ok = strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
-		if (ok) return ok;
-
-		if (p1->arity < p2->arity)
-			return -1;
-
-		if (p1->arity > p2->arity)
-			return 1;
-
-		return 0;
-	} else if (is_atom(p1) && is_atom(p2) && (p1->arity == p2->arity)) {
-		return strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
-	} else if (is_structure(p1) && is_structure(p2)) {
-		if (p1->arity < p2->arity)
-			return -1;
-
-		if (p1->arity > p2->arity)
-			return 1;
-
-		if (p1->val_off != p2->val_off) {
-			int i = strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
-
-			if (i != 0)
-				return i;
-		}
-
-		int arity = p1->arity;
-		p1++; p2++;
-
-		while (arity--) {
-			int i = compkey(m, p1, p2);
-
-			if (i != 0)
-				return i;
-
-			p1 += p1->nbr_cells;
-			p2 += p2->nbr_cells;
-		}
+	if (p1->arity == p2->arity) {
+		if (p1->val_off == p2->val_off)
+			return 0;
 	}
+
+	int ok = strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
+	if (ok) return ok;
+
+	if (p1->arity < p2->arity)
+		return -1;
+
+	if (p1->arity > p2->arity)
+		return 1;
 
 	return 0;
 }
