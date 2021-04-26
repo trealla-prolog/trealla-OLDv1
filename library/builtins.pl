@@ -1,9 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-'$append'([], L, L).
-'$append'([H|T], L, [H|R]) :- '$append'(T, L, R).
-
 unify_with_occurs_check(X, X) :- acyclic_term(X).
 
 predicate_property(P, A) :-
@@ -213,7 +210,7 @@ findall(T, G, B, Tail) :-
 	'$findall'(T,G,B0)=TMP_G,
 	'$mustbe_list_or_var'(B),
 	'$mustbe_list_or_var'(Tail),
-	'$append'(B0, Tail, B), !.
+	append(B0, Tail, B), !.
 
 bagof(T,G,B) :-
 	copy_term('$bagof'(T,G,B),TMP_G),
@@ -368,7 +365,7 @@ phrase_((A -> B), S0, S) :-
 phrase_(phrase(NonTerminal), S0, S) :-
 	phrase(NonTerminal, S0, S).
 phrase_([T|Ts], S0, S) :-
-	'$append'([T|Ts], S, S0).
+	append([T|Ts], S, S0).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -398,8 +395,8 @@ append(F) :- open(F,append,S), set_output(S).
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-partial_string(S,P) :- '$append'(S,_,P).
-partial_string(S,P,V) :- '$append'(S,V,P).
+partial_string(S,P) :- append(S,_,P).
+partial_string(S,P,V) :- append(S,V,P).
 
 forall(Cond,Action) :- \+ (Cond, \+ Action).
 chars_base64(Plain,Base64,_) :- base64(Plain,Base64).
