@@ -1,5 +1,7 @@
 :- module(atts,
 	[op(1150, fx, attribute)]).
+:- use_module(library(apply)).
+:- use_module(library(lists)).
 
 '$post_unify_hook' :-
 	'$undo_trail'(Vars),
@@ -17,6 +19,6 @@
 '$process_var'(Var, Val, [Att|Atts], SoFar, Goals) :-
 	functor(Att, M, _),
 	M:verify_attributes(Var, Val, NewGoals),
-	'$append'(SoFar, NewGoals, MoreGoals),
+	append(SoFar, NewGoals, MoreGoals),
 	'$process_var'(Var, Val, Atts, MoreGoals, Goals).
 

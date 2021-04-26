@@ -84,7 +84,6 @@
 :- use_module(library(error)).
 :- use_module(library(charsio)).
 :- use_module(library(between)).
-
 :- use_module(library(apply)).     % Added by AD
 
 format_(Fs, Args) -->
