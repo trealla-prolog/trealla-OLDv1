@@ -612,14 +612,14 @@ static int compkey(const void *param, const void *ptr1, const void *ptr2)
 			return 0;
 	}
 
-	int ok = strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
-	if (ok) return ok;
-
 	if (p1->arity < p2->arity)
 		return -1;
 
 	if (p1->arity > p2->arity)
 		return 1;
+
+	int ok = strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
+	if (ok) return ok;
 
 	return 0;
 }
