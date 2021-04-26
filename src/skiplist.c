@@ -2,10 +2,8 @@
 #include <stdio.h>
 #include <time.h>
 #include <math.h>
-#include <assert.h>
 
 #include "skiplist.h"
-#include "cdebug.h"
 
 
 typedef struct keyval_ keyval_t;
@@ -46,17 +44,14 @@ struct skiplist_ {
 #define MAX_LEVELS 32
 #define MAX_LEVEL (MAX_LEVELS - 1)
 
-inline static slnode_t*
-new_node_of_level(unsigned x)
+inline static slnode_t *new_node_of_level(unsigned x)
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	return malloc(sizeof(slnode_t) + ((x+1) * sizeof(slnode_t*)));
 }
 
 
 skiplist *sl_create2(int (*compkey)(const void *p, const void*, const void*), void(*delkey)(void*))
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	skiplist *l = (skiplist*)calloc(1, sizeof(struct skiplist_));
 	if (!l) return NULL;
 
@@ -492,11 +487,10 @@ sliter *sl_first(skiplist *l)
 	sliter *iter;
 
 	if (!l->iters) {
-		iter = calloc(1, sizeof(sliter));
-		ensure(iter);
+		iter = malloc(sizeof(sliter));
+		if (!iter) return NULL;
 	} else {
 		iter = l->iters;
-		iter->dead = false;
 		l->iters = iter->next;
 	}
 
@@ -504,6 +498,7 @@ sliter *sl_first(skiplist *l)
 	iter->l = l;
 	iter->p = l->header->forward[0];
 	iter->idx = 0;
+	iter->dead = false;
 	return iter;
 }
 
@@ -511,8 +506,6 @@ bool sl_next(sliter *iter, void **val)
 {
 	if (!iter || !iter->p)
 		return false;
-
-	assert(!iter->dead);
 
 	for (;;) {
 		if (iter->idx < iter->p->nbr) {
@@ -555,11 +548,10 @@ sliter *sl_findkey(skiplist *l, const void *key)
 	sliter *iter;
 
 	if (!l->iters) {
-		iter = calloc(1, sizeof(sliter));
-		ensure(iter);
+		iter = malloc(sizeof(sliter));
+		if (!iter) return NULL;
 	} else {
 		iter = l->iters;
-		iter->dead = false;
 		l->iters = iter->next;
 	}
 
@@ -567,6 +559,7 @@ sliter *sl_findkey(skiplist *l, const void *key)
 	iter->l = l;
 	iter->p = q;
 	iter->idx = imid;
+	iter->dead = false;
 	return iter;
 }
 
@@ -574,8 +567,6 @@ bool sl_nextkey(sliter *iter, void **val)
 {
 	if (!iter || !iter->p)
 		return false;
-
-	assert(!iter->dead);
 
 	for (;;) {
 		if (iter->idx < iter->p->nbr) {
@@ -604,9 +595,6 @@ void sl_done(sliter *iter)
 	if (!iter)
 		return;
 
-	assert(!iter->dead);
-
-	iter->dead = true;
 	iter->next = iter->l->iters;
 	iter->l->iters = iter;
 }
