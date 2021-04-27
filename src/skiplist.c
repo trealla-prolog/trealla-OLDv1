@@ -33,7 +33,7 @@ struct sliter_ {
 struct skiplist_ {
 	slnode_t *header;
 	int (*compkey)(const void*, const void*, const void *p);
-	void (*delkey)(void*);
+	void (*delkey)(void*, void*);
 	const void *p;
 	sliter *iters;
 	size_t count;
@@ -50,7 +50,7 @@ inline static slnode_t *new_node_of_level(unsigned x)
 }
 
 
-skiplist *sl_create2(int (*compkey)(const void*, const void*, const void *p), void(*delkey)(void*))
+skiplist *sl_create(int (*compkey)(const void*, const void*, const void *p), void(*delkey)(void*, void*), const void *p)
 {
 	skiplist *l = (skiplist*)calloc(1, sizeof(struct skiplist_));
 	if (!l) return NULL;
@@ -77,22 +77,8 @@ skiplist *sl_create2(int (*compkey)(const void*, const void*, const void *p), vo
 	l->header->bkt[0].key = NULL;
 	l->compkey = compkey;
 	l->delkey = delkey;
+	l->p = p;
 	return l;
-}
-
-skiplist *sl_create1(int (*compkey)(const void*, const void*, const void *p), const void *p)
-{
-	skiplist *sl = sl_create2(compkey, NULL);
-
-	if (sl)
-		sl->p = p;
-
-	return sl;
-}
-
-skiplist *sl_create(int (*compkey)(const void*, const void*, const void *p))
-{
-	return sl_create2(compkey, NULL);
 }
 
 void sl_destroy(skiplist *l)
@@ -111,7 +97,7 @@ void sl_destroy(skiplist *l)
 
 		if (l->delkey) {
 			for (int j = 0; j < p->nbr; j++)
-				l->delkey(p->bkt[j].key);
+				l->delkey(p->bkt[j].key, p->bkt[j].val);
 		}
 
 		free(p);

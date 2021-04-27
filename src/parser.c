@@ -687,7 +687,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 static void reindex_predicate(module *m, predicate *h)
 {
-	h->index = sl_create1(compkey, m);
+	h->index = sl_create(compkey, NULL, m);
 	ensure(h->index);
 
 	for (clause *r = h->head; r; r = r->next) {
@@ -3803,7 +3803,7 @@ module *create_module(prolog *pl, const char *name)
 		ptr2->priority = ptr->priority;
 	}
 
-	m->index = sl_create1(compkey, m);
+	m->index = sl_create(compkey, NULL, m);
 	ensure(m->index);
 	m->p = create_parser(m);
 	ensure(m->p);
@@ -3925,7 +3925,7 @@ static bool g_init(prolog *pl)
 	if (pl->pool) {
 		bool error = false;
 
-		CHECK_SENTINEL(pl->symtab = sl_create2((void*)strcmp, free), NULL);
+		CHECK_SENTINEL(pl->symtab = sl_create((void*)strcmp, (void*)free, NULL), NULL);
 
 		if (!error) {
 			CHECK_SENTINEL(g_false_s = index_from_pool(pl, "false"), ERR_IDX);
@@ -4031,7 +4031,7 @@ prolog *pl_create()
 			g_tpl_lib = strdup("../library");
 	}
 
-	pl->funtab = sl_create2((void*)strcmp, NULL);
+	pl->funtab = sl_create((void*)strcmp, NULL, NULL);
 
 	if (pl->funtab)
 		load_builtins(pl);
