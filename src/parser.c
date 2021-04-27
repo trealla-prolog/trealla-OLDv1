@@ -607,21 +607,16 @@ static int compkey(const void *param, const void *ptr1, const void *ptr2)
 	const cell *p2 = (const cell*)ptr2;
 	const module *m = (const module*)param;
 
-	if (p1->arity == p2->arity) {
-		if (p1->val_off == p2->val_off)
-			return 0;
-	}
-
 	if (p1->arity < p2->arity)
 		return -1;
 
 	if (p1->arity > p2->arity)
 		return 1;
 
-	int ok = strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
-	if (ok) return ok;
+	if (p1->val_off == p2->val_off)
+		return 0;
 
-	return 0;
+	return strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
 }
 
 static clause* assert_begin(module *m, term *t, bool consulting)
