@@ -19,10 +19,6 @@
 
 int g_tpl_interrupt = 0;
 
-#ifdef FAULTINJECT_ENABLED
-faultinject_t FAULTINJECT_NAME;
-#endif
-
 typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 
 static USE_RESULT pl_status check_trail(query *q)
@@ -31,8 +27,6 @@ static USE_RESULT pl_status check_trail(query *q)
 		q->max_trails = q->st.tp;
 
 		if (q->st.tp >= q->trails_size) {
-			FAULTINJECT(errno = ENOMEM; q->error = true; return pl_error);
-
 			idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size*3/2);
 			if (!new_trailssize) {
 				q->error = true;
@@ -52,8 +46,6 @@ static USE_RESULT pl_status check_choice(query *q)
 		q->max_choices = q->cp;
 
 		if (q->cp >= q->choices_size) {
-			FAULTINJECT(errno = ENOMEM; q->error = true; return pl_error);
-
 			idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size*3/2);
 			if (!new_choicessize) {
 				q->error = true;
@@ -73,8 +65,6 @@ static USE_RESULT pl_status check_frame(query *q)
 		q->max_frames = q->st.fp;
 
 		if (q->st.fp >= q->frames_size) {
-			FAULTINJECT(errno = ENOMEM; q->error = true; return pl_error);
-
 			idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size*3/2);
 			if (!new_framessize) {
 				q->error = true;
@@ -96,8 +86,6 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 		q->max_slots = q->st.sp;
 
 		if (nbr >= q->slots_size) {
-			FAULTINJECT(errno = ENOMEM; q->error = true; return pl_error);
-
 			idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, q->slots_size*3/2>nbr?q->slots_size*3/2:nbr);
 			if (!new_slotssize) {
 				q->error = true;

@@ -127,7 +127,6 @@ static idx_t add_to_pool(prolog *pl, const char *name)
 	size_t len = strlen(name);
 
 	while ((offset+len+1+1) >= pl->pool_size) {
-		FAULTINJECT(errno = ENOMEM; return ERR_IDX);
 		size_t nbytes = pl->pool_size * 2;
 		char *tmp = realloc(pl->pool, nbytes);
 		if (!tmp) return ERR_IDX;
@@ -545,7 +544,6 @@ static void push_property(module *m, const char *name, unsigned arity, const cha
 
 static predicate *create_predicate(module *m, cell *c)
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	predicate *h = calloc(1, sizeof(predicate));
 	ensure(h);
 	h->next = m->head;
@@ -990,7 +988,6 @@ void destroy_parser(parser *p)
 
 parser *create_parser(module *m)
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	parser *p = calloc(1, sizeof(parser));
 	ensure(p);
 	p->token = calloc(p->token_size=INITIAL_TOKEN_SIZE+1, 1);
@@ -3782,7 +3779,6 @@ void destroy_module(module *m)
 
 module *create_module(prolog *pl, const char *name)
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	module *m = calloc(1, sizeof(module));
 	ensure(m);
 
@@ -3920,7 +3916,6 @@ static void g_destroy(prolog *pl)
 
 static bool g_init(prolog *pl)
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	pl->pool = calloc(pl->pool_size=INITIAL_POOL_SIZE, 1);
 	if (pl->pool) {
 		bool error = false;
@@ -4000,7 +3995,6 @@ void pl_destroy(prolog *pl)
 
 prolog *pl_create()
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	prolog *pl = calloc(1, sizeof(prolog));
 
 	if (!g_tpl_count++ && !g_init(pl)) {

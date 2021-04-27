@@ -279,7 +279,6 @@ static USE_RESULT pl_status make_cstringn(cell *d, const char *s, size_t n)
 		}
 	}
 
-	FAULTINJECT(errno = ENOMEM; return pl_error);
 	d->val_type = TYPE_CSTRING;
 	d->flags = FLAG_BLOB;
 	d->nbr_cells = 1;
@@ -295,7 +294,6 @@ static USE_RESULT pl_status make_cstring(cell *d, const char *s)
 
 static USE_RESULT pl_status make_stringn(cell *d, const char *s, size_t n)
 {
-	FAULTINJECT(errno = ENOMEM; return pl_error);
 	d->val_type = TYPE_CSTRING;
 	d->flags = FLAG_BLOB;
 	d->flags |= FLAG_STRING;
