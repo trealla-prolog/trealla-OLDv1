@@ -596,7 +596,7 @@ static bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, id
 	return h->is_multifile ? true : false;
 }
 
-static int compkey(const void *param, const void *ptr1, const void *ptr2)
+static int compkey(const void *ptr1, const void *ptr2, const void *param)
 {
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
@@ -3918,11 +3918,6 @@ static void g_destroy(prolog *pl)
 	pl->pool = NULL;
 }
 
-static int my_strcmp(__attribute__((unused)) const void *p, const void *k1, const void *k2)
-{
-	return strcmp(k1, k2);
-}
-
 static bool g_init(prolog *pl)
 {
 	FAULTINJECT(errno = ENOMEM; return NULL);
@@ -3930,7 +3925,7 @@ static bool g_init(prolog *pl)
 	if (pl->pool) {
 		bool error = false;
 
-		CHECK_SENTINEL(pl->symtab = sl_create2((void*)my_strcmp, free), NULL);
+		CHECK_SENTINEL(pl->symtab = sl_create2((void*)strcmp, free), NULL);
 
 		if (!error) {
 			CHECK_SENTINEL(g_false_s = index_from_pool(pl, "false"), ERR_IDX);
@@ -4036,7 +4031,7 @@ prolog *pl_create()
 			g_tpl_lib = strdup("../library");
 	}
 
-	pl->funtab = sl_create2((void*)my_strcmp, NULL);
+	pl->funtab = sl_create2((void*)strcmp, NULL);
 
 	if (pl->funtab)
 		load_builtins(pl);
