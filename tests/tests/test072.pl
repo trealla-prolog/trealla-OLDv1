@@ -1,4 +1,5 @@
 :- initialization(main(10)).
+:- use_module(library(apply)).
 
 main(Size) :-
     setof(Total, M^Freq^Perm^square(Size, M, Total, Freq, Perm), Totals),

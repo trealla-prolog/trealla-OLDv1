@@ -11581,7 +11581,7 @@ static void load_ops(query *q)
 	char *dst = tmpbuf;
 	*dst = '\0';
 
-	for (const struct op_table *ptr = q->st.m->ops; ptr->name; ptr++) {
+	for (const op_table *ptr = q->st.m->ops; ptr->name; ptr++) {
 		char specifier[256], name[256];
 
 		if (!ptr->specifier)
@@ -11617,7 +11617,7 @@ static void load_ops(query *q)
 			ptr->priority, specifier, name);
 	}
 
-	for (const struct op_table *ptr = q->st.m->def_ops; ptr->name; ptr++) {
+	for (const op_table *ptr = q->st.m->def_ops; ptr->name; ptr++) {
 		char specifier[256], name[256];
 
 		if (!ptr->specifier)

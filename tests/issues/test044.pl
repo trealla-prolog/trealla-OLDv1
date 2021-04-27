@@ -1,4 +1,5 @@
-:-initialization(main).
+:- initialization(main).
+:- use_module(library(apply)).
 
 main :-
 	length(_, E), N is 2^E,

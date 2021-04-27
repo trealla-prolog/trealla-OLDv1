@@ -400,11 +400,11 @@ struct builtins {
 	const char *help;
 };
 
-struct op_table {
+typedef struct {
 	char *name;
 	unsigned specifier;
 	unsigned priority;
-};
+} op_table;
 
 typedef struct {
 	cell *attrs;
@@ -603,8 +603,8 @@ struct module_ {
 	skiplist *index, *nbs;
 	clause *dirty_list;
 	struct loaded_file *loaded_files;
-	struct op_table def_ops[MAX_OPS+1];
-	struct op_table ops[MAX_OPS+1];
+	op_table def_ops[MAX_OPS+1];
+	op_table ops[MAX_OPS+1];
 	idx_t id;
 	prolog_flags flag;
 	unsigned spare_ops, loaded_ops;

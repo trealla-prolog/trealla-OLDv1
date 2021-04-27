@@ -42,7 +42,7 @@ char **g_av = NULL, *g_argv0 = NULL;
 
 static atomic_t int g_tpl_count = 0;
 
-static const struct op_table g_ops[] =
+static const op_table g_ops[] =
 {
 	{":-", OP_XFX, 1200},
 	{":-", OP_FX, 1200},
@@ -155,7 +155,7 @@ idx_t index_from_pool(prolog *pl, const char *name)
 
 unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
 {
-	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
+	for (const op_table *ptr = m->ops; ptr->name; ptr++) {
 		if (!ptr->specifier)
 			continue;
 
@@ -168,7 +168,7 @@ unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_pref
 		}
 	}
 
-	for (const struct op_table *ptr = m->def_ops; ptr->name; ptr++) {
+	for (const op_table *ptr = m->def_ops; ptr->name; ptr++) {
 		if (!ptr->specifier)
 			continue;
 
@@ -189,24 +189,26 @@ unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_pref
 
 unsigned find_op(module *m, const char *name, unsigned specifier)
 {
-	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
+	for (const op_table *ptr = m->ops; ptr->name; ptr++) {
 		if (!ptr->specifier)
 			continue;
 
-		if (!strcmp(ptr->name, name)) {
-			if (specifier == ptr->specifier)
-				return ptr->priority;
-		}
+		if (specifier != ptr->specifier)
+			continue;
+			
+		if (!strcmp(ptr->name, name))
+			return ptr->priority;
 	}
 
-	for (const struct op_table *ptr = m->def_ops; ptr->name; ptr++) {
+	for (const op_table *ptr = m->def_ops; ptr->name; ptr++) {
 		if (!ptr->specifier)
 			continue;
 
-		if (!strcmp(ptr->name, name)) {
-			if (specifier == ptr->specifier)
-				return ptr->priority;
-		}
+		if (specifier != ptr->specifier)
+			continue;
+			
+		if (!strcmp(ptr->name, name))
+			return ptr->priority;
 	}
 
 	return 0;
@@ -222,21 +224,19 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 			return true;
 	}
 
-	struct op_table *ptr = m->def_ops;
+	op_table *ptr = m->def_ops;
 
 	for (; ptr->name; ptr++) {
-		if (strcmp(ptr->name, name))
-			continue;
-
 		if (!ptr->specifier)
 			continue;
 
 		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
 			continue;
 
+		if (strcmp(ptr->name, name))
+			continue;
+
 		if (!priority) {
-			free(ptr->name);
-			ptr->name = strdup("");
 			ptr->specifier = 0;
 			ptr->priority = 0;
 			m->loaded_ops = false;
@@ -252,18 +252,16 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 	ptr = m->ops;
 
 	for (; ptr->name; ptr++) {
-		if (strcmp(ptr->name, name))
-			continue;
-
 		if (!ptr->specifier)
 			continue;
 
 		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
 			continue;
 
+		if (strcmp(ptr->name, name))
+			continue;
+
 		if (!priority) {
-			free(ptr->name);
-			ptr->name = strdup("");
 			ptr->specifier = 0;
 			ptr->priority = 0;
 			m->loaded_ops = false;
@@ -279,21 +277,18 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 	if (!priority)
 		return true;
 
-	ptr = m->ops;
+	for (ptr = m->ops; ptr->specifier; ptr++)
+		;
 
-	for (; ptr->name; ptr++) {
-		if (!ptr->specifier)
-			break;
-	}
+	m->user_ops = true;
 
-	if (!ptr->name) {
+	if (ptr->name)
+		free(ptr->name);
+	else {
 		if (!m->spare_ops)
 			return false;
 
 		m->spare_ops--;
-		m->user_ops = true;
-	} else {
-		free(ptr->name);
 	}
 
 	ptr->name = strdup(name);
@@ -3773,10 +3768,10 @@ void destroy_module(module *m)
 	if (m->fp)
 		fclose(m->fp);
 
-	for (struct op_table *ptr = m->def_ops; ptr->name; ptr++)
+	for (op_table *ptr = m->def_ops; ptr->name; ptr++)
 		free(ptr->name);
 
-	for (struct op_table *ptr = m->ops; ptr->name; ptr++)
+	for (op_table *ptr = m->ops; ptr->name; ptr++)
 		free(ptr->name);
 
 	destroy_parser(m->p);
@@ -3800,9 +3795,9 @@ module *create_module(prolog *pl, const char *name)
 	m->spare_ops = MAX_OPS;
 	m->error = false;
 	m->id = index_from_pool(pl, name);
-	struct op_table *ptr2 = m->def_ops;
+	op_table *ptr2 = m->def_ops;
 
-	for (const struct op_table *ptr = g_ops; ptr->name; ptr++, ptr2++) {
+	for (const op_table *ptr = g_ops; ptr->name; ptr++, ptr2++) {
 		ptr2->name = strdup(ptr->name);
 		ptr2->specifier = ptr->specifier;
 		ptr2->priority = ptr->priority;
@@ -4076,17 +4071,18 @@ prolog *pl_create()
 
 		for (library *lib = g_libs; lib->name; lib++) {
 			if (
-				!strcmp(lib->name, "builtins") ||
-				!strcmp(lib->name, "apply") ||
-				//!strcmp(lib->name, "freeze") ||
-				//!strcmp(lib->name, "atts") ||
-				//!strcmp(lib->name, "dcgs") ||
-				//!strcmp(lib->name, "assoc") ||
-				//!strcmp(lib->name, "ordsets") ||
-				//!strcmp(lib->name, "charsio") ||
-				//!strcmp(lib->name, "format") ||
-				//!strcmp(lib->name, "http") ||
-				!strcmp(lib->name, "lists")) {
+				!strcmp(lib->name, "builtins") 
+				//|| !strcmp(lib->name, "apply") 
+				//|| !strcmp(lib->name, "freeze") 
+				//|| !strcmp(lib->name, "atts") 
+				//|| !strcmp(lib->name, "dcgs") 
+				//|| !strcmp(lib->name, "assoc") 
+				//|| !strcmp(lib->name, "ordsets") 
+				//|| !strcmp(lib->name, "charsio") 
+				//|| !strcmp(lib->name, "format") 
+				//||!strcmp(lib->name, "http") 
+				||!strcmp(lib->name, "lists")
+				) {
 				char *src = malloc(*lib->len+1);
 				ensure(src);
 				memcpy(src, lib->start, *lib->len);
