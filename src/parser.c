@@ -4081,7 +4081,7 @@ prolog *pl_create()
 				//|| !strcmp(lib->name, "charsio") 
 				//|| !strcmp(lib->name, "format") 
 				//||!strcmp(lib->name, "http") 
-				||!strcmp(lib->name, "lists")
+				|| !strcmp(lib->name, "lists")
 				) {
 				char *src = malloc(*lib->len+1);
 				ensure(src);
