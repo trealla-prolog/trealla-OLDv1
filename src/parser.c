@@ -4070,19 +4070,7 @@ prolog *pl_create()
 		pl->user_m->prebuilt = true;
 
 		for (library *lib = g_libs; lib->name; lib++) {
-			if (
-				!strcmp(lib->name, "builtins") 
-				//|| !strcmp(lib->name, "apply") 
-				//|| !strcmp(lib->name, "freeze") 
-				//|| !strcmp(lib->name, "atts") 
-				//|| !strcmp(lib->name, "dcgs") 
-				//|| !strcmp(lib->name, "assoc") 
-				//|| !strcmp(lib->name, "ordsets") 
-				//|| !strcmp(lib->name, "charsio") 
-				//|| !strcmp(lib->name, "format") 
-				//||!strcmp(lib->name, "http") 
-				//|| !strcmp(lib->name, "lists")
-				) {
+			if (!strcmp(lib->name, "builtins")) {
 				char *src = malloc(*lib->len+1);
 				ensure(src);
 				memcpy(src, lib->start, *lib->len);
@@ -4093,6 +4081,7 @@ prolog *pl_create()
 				module_load_text(pl->user_m, src, STRING_CSTR(s1));
 				STRING_DONE(s1);
 				free(src);
+				break;
 			}
 		}
 
