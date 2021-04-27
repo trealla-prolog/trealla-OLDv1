@@ -1376,9 +1376,6 @@ pl_status query_start(query *q)
 				continue;
 			}
 
-			if (q->error)
-				break;
-
 			if (q->has_attrs && !q->in_hook)
 				may_error(do_post_unification_hook(q));
 
@@ -1394,7 +1391,6 @@ pl_status query_start(query *q)
 				q->tot_retries++;
 				continue;
 			}
-
 
 			if (q->has_attrs)
 				may_error(do_post_unification_hook(q));
