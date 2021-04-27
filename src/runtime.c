@@ -1231,7 +1231,7 @@ static void dump_vars(query *q, bool partial)
 
 		if (is_structure(c)) {
 			unsigned spec = GET_OP(c);
-			unsigned pri = get_op(q->st.m, GET_STR(c), &spec, false);
+			unsigned pri = find_op(q->st.m, GET_STR(c), spec);
 			if (pri >= 700) parens = true;
 		}
 

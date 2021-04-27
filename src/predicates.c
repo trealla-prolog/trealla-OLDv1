@@ -6151,12 +6151,12 @@ static pl_status do_op(query *q, cell *p3)
 	if (IS_INFIX(specifier) && IS_POSTFIX(tmp_optype))
 		return throw_error(q, p3, "permission_error", "create,operator");
 
-	unsigned tmp_pri = get_op2(q->st.m, GET_STR(p3), OP_FX);
+	unsigned tmp_pri = find_op(q->st.m, GET_STR(p3), OP_FX);
 
 	if (IS_POSTFIX(specifier) && (IS_INFIX(tmp_optype) || tmp_pri))
 		return throw_error(q, p3, "permission_error", "create,operator");
 
-	tmp_pri = get_op2(q->st.m, GET_STR(p3), OP_FY);
+	tmp_pri = find_op(q->st.m, GET_STR(p3), OP_FY);
 
 	if (IS_POSTFIX(specifier) && (IS_INFIX(tmp_optype) || tmp_pri))
 		return throw_error(q, p3, "permission_error", "create,operator");

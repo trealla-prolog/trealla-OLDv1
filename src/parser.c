@@ -187,7 +187,7 @@ unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_pref
 	return 0;
 }
 
-unsigned get_op2(module *m, const char *name, unsigned specifier)
+unsigned find_op(module *m, const char *name, unsigned specifier)
 {
 	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
 		if (!ptr->specifier)
