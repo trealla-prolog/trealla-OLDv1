@@ -1,5 +1,4 @@
-:-initialization(main).
-
+:- initialization(main).
 :- use_module(library(dcgs)).
 
 sentence --> np, vp.

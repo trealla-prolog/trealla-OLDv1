@@ -1,6 +1,6 @@
 :- module(dcgs, [ dcg_translate/2, dcg_constr/1 ]).
-
 :- use_module(library(apply)).
+:- use_module(library(lists)).
 
 dcg_translate(TermIn, Term) :-
 	nonvar(TermIn),

@@ -1,4 +1,5 @@
 :- initialization(main).
+:- use_module(library(lists)).
 
 main :-
 	prepare(List),

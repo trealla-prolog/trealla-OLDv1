@@ -1,4 +1,5 @@
 :- initialization(main).
+:- use_module(library(lists)).
 
 main :-
 	JsonData = '[{"foo": 1, "bar": 2}, {"bar": 3, "foo": 4}]',

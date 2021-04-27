@@ -1,9 +1,10 @@
 %  Program 23.1  A program for solving equations from "The Art of Prolog"
 
+:- initialization(main).
+:- use_module(library(lists)).
+
 :- op(40,xfx,\).
 :- op(50,xfx,^).
-
-:- initialization(main).
 
 main :-
     solve_equation(2^(2*x)-5*2^(x+1)+16 = 0,x,_=Z),

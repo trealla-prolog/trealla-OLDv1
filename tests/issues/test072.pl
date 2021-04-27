@@ -1,4 +1,5 @@
 :- initialization(main).
+:- use_module(library(lists)).
 
 main :-
     solve(8, Queens),
