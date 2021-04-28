@@ -8323,7 +8323,7 @@ static pl_status do_consult(query *q, cell *p1, idx_t p1_ctx)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_consult_1(query *q)
+static USE_RESULT pl_status fn_load_files_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
 
@@ -11171,7 +11171,7 @@ static const struct builtins g_predicates_iso[] =
 	{"use_module", 1, fn_use_module_1, NULL},
 	{"use_module", 2, fn_use_module_2, NULL},
 	{"module", 1, fn_module_1, NULL},
-	{"consult", 1, fn_consult_1, NULL},
+	{"load_files", 2, fn_load_files_2, NULL},
 	{"listing", 0, fn_listing_0, NULL},
 	{"listing", 1, fn_listing_1, NULL},
 	{"time", 1, fn_time_1, NULL},
@@ -11303,7 +11303,6 @@ static const struct builtins g_predicates_other[] =
 	{"getenv", 2, fn_getenv_2, NULL},
 	{"setenv", 2, fn_setenv_2, NULL},
 	{"unsetenv", 1, fn_unsetenv_1, NULL},
-	{"load_files", 2, fn_consult_1, "+files"},
 	{"statistics", 2, fn_statistics_2, "+string,-variable"},
 	{"duplicate_term", 2, fn_iso_copy_term_2, "+string,-variable"},
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer"},
