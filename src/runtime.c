@@ -677,8 +677,6 @@ void reset_value(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 	}
 }
 
-bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
-
 static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
 {
 	if (p1->arity != p2->arity)
@@ -839,7 +837,7 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 	return g_disp[p1->val_type].fn(q, p1, p2);
 }
 
-static bool CHECK_UPDATE_VIEW(__attribute__((unused)) query *q, clause *c)
+static bool check_update_view(query *q, clause *c)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 
@@ -902,7 +900,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
 
-		if (!CHECK_UPDATE_VIEW(q, q->st.curr_clause2))
+		if (!check_update_view(q, q->st.curr_clause2))
 			continue;
 
 		term *t = &q->st.curr_clause2->t;
@@ -997,7 +995,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retra
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
 
-		if (!CHECK_UPDATE_VIEW(q, q->st.curr_clause2))
+		if (!check_update_view(q, q->st.curr_clause2))
 			continue;
 
 		term *t = &q->st.curr_clause2->t;
@@ -1119,7 +1117,7 @@ static USE_RESULT pl_status match_head(query *q)
 
 	for (; q->st.curr_clause; next_key(q)) {
 
-		if (!CHECK_UPDATE_VIEW(q, q->st.curr_clause))
+		if (!check_update_view(q, q->st.curr_clause))
 			continue;
 
 		term *t = &q->st.curr_clause->t;
