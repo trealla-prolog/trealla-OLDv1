@@ -499,7 +499,7 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 
 					ch->did_cleanup = true;
 					cell *c = ch->st.curr_cell;
-					c = deref(q, c, ch->st.curr_frame);
+					//c = deref(q, c, ch->st.curr_frame);
 					cell *p1 = deref(q, c+1, ch->st.curr_frame);
 					cell *tmp = deep_copy_to_heap(q, p1, ch->st.curr_frame, true, false);
 					do_cleanup(q, tmp);
@@ -687,7 +687,7 @@ static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2
 	if (p1->val_off != p2->val_off)
 		return false;
 
-	cell *orig_p1 = p1, *orig_p2 = p2;
+	//cell *orig_p1 = p1, *orig_p2 = p2;
 	unsigned arity = p1->arity;
 	p1++; p2++;
 
@@ -697,8 +697,8 @@ static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2
 		cell *c2 = deref(q, p2, p2_ctx);
 		idx_t c2_ctx = q->latest_ctx;
 
-		if ((c1 == orig_p1) && (c2 == orig_p2))
-			return unify_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1);
+		//if ((c1 == orig_p1) && (c2 == orig_p2))
+		//	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 
 		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
 			return false;
@@ -717,10 +717,10 @@ static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx,
 
 	while (is_list(p1) && is_list(p2)) {
 		cell *h1 = LIST_HEAD(p1);
+		cell *h2 = LIST_HEAD(p2);
+
 		cell *c1 = deref(q, h1, p1_ctx);
 		idx_t c1_ctx = q->latest_ctx;
-
-		cell *h2 = LIST_HEAD(p2);
 		cell *c2 = deref(q, h2, p2_ctx);
 		idx_t c2_ctx = q->latest_ctx;
 
@@ -728,10 +728,10 @@ static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx,
 			return false;
 
 		p1 = LIST_TAIL(p1);
+		p2 = LIST_TAIL(p2);
+
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
-
-		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
