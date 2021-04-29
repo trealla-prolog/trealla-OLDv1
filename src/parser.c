@@ -42,7 +42,7 @@ char **g_av = NULL, *g_argv0 = NULL;
 
 static atomic_t int g_tpl_count = 0;
 
-static const struct op_table g_ops[] =
+static const op_table g_ops[] =
 {
 	{":-", OP_XFX, 1200},
 	{":-", OP_FX, 1200},
@@ -127,7 +127,6 @@ static idx_t add_to_pool(prolog *pl, const char *name)
 	size_t len = strlen(name);
 
 	while ((offset+len+1+1) >= pl->pool_size) {
-		FAULTINJECT(errno = ENOMEM; return ERR_IDX);
 		size_t nbytes = pl->pool_size * 2;
 		char *tmp = realloc(pl->pool, nbytes);
 		if (!tmp) return ERR_IDX;
@@ -155,7 +154,7 @@ idx_t index_from_pool(prolog *pl, const char *name)
 
 unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
 {
-	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
+	for (const op_table *ptr = m->ops; ptr->name; ptr++) {
 		if (!ptr->specifier)
 			continue;
 
@@ -168,7 +167,7 @@ unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_pref
 		}
 	}
 
-	for (const struct op_table *ptr = m->def_ops; ptr->name; ptr++) {
+	for (const op_table *ptr = m->def_ops; ptr->name; ptr++) {
 		if (!ptr->specifier)
 			continue;
 
@@ -187,26 +186,28 @@ unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_pref
 	return 0;
 }
 
-unsigned get_op2(module *m, const char *name, unsigned specifier)
+unsigned find_op(module *m, const char *name, unsigned specifier)
 {
-	for (const struct op_table *ptr = m->ops; ptr->name; ptr++) {
+	for (const op_table *ptr = m->ops; ptr->name; ptr++) {
 		if (!ptr->specifier)
 			continue;
 
-		if (!strcmp(ptr->name, name)) {
-			if (specifier == ptr->specifier)
-				return ptr->priority;
-		}
+		if (specifier != ptr->specifier)
+			continue;
+			
+		if (!strcmp(ptr->name, name))
+			return ptr->priority;
 	}
 
-	for (const struct op_table *ptr = m->def_ops; ptr->name; ptr++) {
+	for (const op_table *ptr = m->def_ops; ptr->name; ptr++) {
 		if (!ptr->specifier)
 			continue;
 
-		if (!strcmp(ptr->name, name)) {
-			if (specifier == ptr->specifier)
-				return ptr->priority;
-		}
+		if (specifier != ptr->specifier)
+			continue;
+			
+		if (!strcmp(ptr->name, name))
+			return ptr->priority;
 	}
 
 	return 0;
@@ -222,21 +223,19 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 			return true;
 	}
 
-	struct op_table *ptr = m->def_ops;
+	op_table *ptr = m->def_ops;
 
 	for (; ptr->name; ptr++) {
-		if (strcmp(ptr->name, name))
-			continue;
-
 		if (!ptr->specifier)
 			continue;
 
 		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
 			continue;
 
+		if (strcmp(ptr->name, name))
+			continue;
+
 		if (!priority) {
-			free(ptr->name);
-			ptr->name = strdup("");
 			ptr->specifier = 0;
 			ptr->priority = 0;
 			m->loaded_ops = false;
@@ -252,18 +251,16 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 	ptr = m->ops;
 
 	for (; ptr->name; ptr++) {
-		if (strcmp(ptr->name, name))
-			continue;
-
 		if (!ptr->specifier)
 			continue;
 
 		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
 			continue;
 
+		if (strcmp(ptr->name, name))
+			continue;
+
 		if (!priority) {
-			free(ptr->name);
-			ptr->name = strdup("");
 			ptr->specifier = 0;
 			ptr->priority = 0;
 			m->loaded_ops = false;
@@ -279,21 +276,18 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 	if (!priority)
 		return true;
 
-	ptr = m->ops;
+	for (ptr = m->ops; ptr->specifier; ptr++)
+		;
 
-	for (; ptr->name; ptr++) {
-		if (!ptr->specifier)
-			break;
-	}
+	m->user_ops = true;
 
-	if (!ptr->name) {
+	if (ptr->name)
+		free(ptr->name);
+	else {
 		if (!m->spare_ops)
 			return false;
 
 		m->spare_ops--;
-		m->user_ops = true;
-	} else {
-		free(ptr->name);
 	}
 
 	ptr->name = strdup(name);
@@ -550,7 +544,6 @@ static void push_property(module *m, const char *name, unsigned arity, const cha
 
 static predicate *create_predicate(module *m, cell *c)
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	predicate *h = calloc(1, sizeof(predicate));
 	ensure(h);
 	h->next = m->head;
@@ -601,16 +594,11 @@ static bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, id
 	return h->is_multifile ? true : false;
 }
 
-static int compkey(const void *param, const void *ptr1, const void *ptr2)
+static int compkey(const void *ptr1, const void *ptr2, const void *param)
 {
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
 	const module *m = (const module*)param;
-
-	if (p1->arity == p2->arity) {
-		if (p1->val_off == p2->val_off)
-			return 0;
-	}
 
 	if (p1->arity < p2->arity)
 		return -1;
@@ -618,10 +606,10 @@ static int compkey(const void *param, const void *ptr1, const void *ptr2)
 	if (p1->arity > p2->arity)
 		return 1;
 
-	int ok = strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
-	if (ok) return ok;
+	if (p1->val_off == p2->val_off)
+		return 0;
 
-	return 0;
+	return strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
 }
 
 static clause* assert_begin(module *m, term *t, bool consulting)
@@ -697,7 +685,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 static void reindex_predicate(module *m, predicate *h)
 {
-	h->index = sl_create1(compkey, m);
+	h->index = sl_create(compkey, NULL, m);
 	ensure(h->index);
 
 	for (clause *r = h->head; r; r = r->next) {
@@ -1000,7 +988,6 @@ void destroy_parser(parser *p)
 
 parser *create_parser(module *m)
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	parser *p = calloc(1, sizeof(parser));
 	ensure(p);
 	p->token = calloc(p->token_size=INITIAL_TOKEN_SIZE+1, 1);
@@ -3778,10 +3765,10 @@ void destroy_module(module *m)
 	if (m->fp)
 		fclose(m->fp);
 
-	for (struct op_table *ptr = m->def_ops; ptr->name; ptr++)
+	for (op_table *ptr = m->def_ops; ptr->name; ptr++)
 		free(ptr->name);
 
-	for (struct op_table *ptr = m->ops; ptr->name; ptr++)
+	for (op_table *ptr = m->ops; ptr->name; ptr++)
 		free(ptr->name);
 
 	destroy_parser(m->p);
@@ -3792,7 +3779,6 @@ void destroy_module(module *m)
 
 module *create_module(prolog *pl, const char *name)
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	module *m = calloc(1, sizeof(module));
 	ensure(m);
 
@@ -3805,15 +3791,15 @@ module *create_module(prolog *pl, const char *name)
 	m->spare_ops = MAX_OPS;
 	m->error = false;
 	m->id = index_from_pool(pl, name);
-	struct op_table *ptr2 = m->def_ops;
+	op_table *ptr2 = m->def_ops;
 
-	for (const struct op_table *ptr = g_ops; ptr->name; ptr++, ptr2++) {
+	for (const op_table *ptr = g_ops; ptr->name; ptr++, ptr2++) {
 		ptr2->name = strdup(ptr->name);
 		ptr2->specifier = ptr->specifier;
 		ptr2->priority = ptr->priority;
 	}
 
-	m->index = sl_create1(compkey, m);
+	m->index = sl_create(compkey, NULL, m);
 	ensure(m->index);
 	m->p = create_parser(m);
 	ensure(m->p);
@@ -3928,19 +3914,13 @@ static void g_destroy(prolog *pl)
 	pl->pool = NULL;
 }
 
-static int my_strcmp(__attribute__((unused)) const void *p, const void *k1, const void *k2)
-{
-	return strcmp(k1, k2);
-}
-
 static bool g_init(prolog *pl)
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	pl->pool = calloc(pl->pool_size=INITIAL_POOL_SIZE, 1);
 	if (pl->pool) {
 		bool error = false;
 
-		CHECK_SENTINEL(pl->symtab = sl_create2((void*)my_strcmp, free), NULL);
+		CHECK_SENTINEL(pl->symtab = sl_create((void*)strcmp, (void*)free, NULL), NULL);
 
 		if (!error) {
 			CHECK_SENTINEL(g_false_s = index_from_pool(pl, "false"), ERR_IDX);
@@ -4015,7 +3995,6 @@ void pl_destroy(prolog *pl)
 
 prolog *pl_create()
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	prolog *pl = calloc(1, sizeof(prolog));
 
 	if (!g_tpl_count++ && !g_init(pl)) {
@@ -4046,7 +4025,7 @@ prolog *pl_create()
 			g_tpl_lib = strdup("../library");
 	}
 
-	pl->funtab = sl_create2((void*)my_strcmp, NULL);
+	pl->funtab = sl_create((void*)strcmp, NULL, NULL);
 
 	if (pl->funtab)
 		load_builtins(pl);
@@ -4080,18 +4059,7 @@ prolog *pl_create()
 		pl->user_m->prebuilt = true;
 
 		for (library *lib = g_libs; lib->name; lib++) {
-			if (
-				!strcmp(lib->name, "builtins") ||
-				!strcmp(lib->name, "apply") ||
-				//!strcmp(lib->name, "freeze") ||
-				//!strcmp(lib->name, "atts") ||
-				//!strcmp(lib->name, "dcgs") ||
-				//!strcmp(lib->name, "assoc") ||
-				//!strcmp(lib->name, "ordsets") ||
-				//!strcmp(lib->name, "charsio") ||
-				//!strcmp(lib->name, "format") ||
-				//!strcmp(lib->name, "http") ||
-				!strcmp(lib->name, "lists")) {
+			if (!strcmp(lib->name, "builtins")) {
 				char *src = malloc(*lib->len+1);
 				ensure(src);
 				memcpy(src, lib->start, *lib->len);
@@ -4102,6 +4070,7 @@ prolog *pl_create()
 				module_load_text(pl->user_m, src, STRING_CSTR(s1));
 				STRING_DONE(s1);
 				free(src);
+				break;
 			}
 		}
 

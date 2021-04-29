@@ -20,10 +20,6 @@
 
 int g_tpl_interrupt = 0;
 
-#ifdef FAULTINJECT_ENABLED
-faultinject_t FAULTINJECT_NAME;
-#endif
-
 typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 
 static USE_RESULT pl_status check_trail(query *q)
@@ -32,8 +28,6 @@ static USE_RESULT pl_status check_trail(query *q)
 		q->max_trails = q->st.tp;
 
 		if (q->st.tp >= q->trails_size) {
-			FAULTINJECT(errno = ENOMEM; q->error = true; return pl_error);
-
 			idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size*3/2);
 			if (!new_trailssize) {
 				q->error = true;
@@ -53,8 +47,6 @@ static USE_RESULT pl_status check_choice(query *q)
 		q->max_choices = q->cp;
 
 		if (q->cp >= q->choices_size) {
-			FAULTINJECT(errno = ENOMEM; q->error = true; return pl_error);
-
 			idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size*3/2);
 			if (!new_choicessize) {
 				q->error = true;
@@ -74,8 +66,6 @@ static USE_RESULT pl_status check_frame(query *q)
 		q->max_frames = q->st.fp;
 
 		if (q->st.fp >= q->frames_size) {
-			FAULTINJECT(errno = ENOMEM; q->error = true; return pl_error);
-
 			idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size*3/2);
 			if (!new_framessize) {
 				q->error = true;
@@ -97,8 +87,6 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 		q->max_slots = q->st.sp;
 
 		if (nbr >= q->slots_size) {
-			FAULTINJECT(errno = ENOMEM; q->error = true; return pl_error);
-
 			idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, q->slots_size*3/2>nbr?q->slots_size*3/2:nbr);
 			if (!new_slotssize) {
 				q->error = true;
@@ -512,7 +500,7 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 
 					ch->did_cleanup = true;
 					cell *c = ch->st.curr_cell;
-					c = deref(q, c, ch->st.curr_frame);
+					//c = deref(q, c, ch->st.curr_frame);
 					cell *p1 = deref(q, c+1, ch->st.curr_frame);
 					cell *tmp = deep_copy_to_heap(q, p1, ch->st.curr_frame, true, false);
 					do_cleanup(q, tmp);
@@ -690,8 +678,6 @@ void reset_value(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 	}
 }
 
-bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
-
 static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
 {
 	if (p1->arity != p2->arity)
@@ -700,7 +686,7 @@ static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2
 	if (p1->val_off != p2->val_off)
 		return false;
 
-	cell *orig_p1 = p1, *orig_p2 = p2;
+	//cell *orig_p1 = p1, *orig_p2 = p2;
 	unsigned arity = p1->arity;
 	p1++; p2++;
 
@@ -710,8 +696,8 @@ static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2
 		cell *c2 = deref(q, p2, p2_ctx);
 		idx_t c2_ctx = q->latest_ctx;
 
-		if ((c1 == orig_p1) && (c2 == orig_p2))
-			return unify_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1);
+		//if ((c1 == orig_p1) && (c2 == orig_p2))
+		//	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 
 		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
 			return false;
@@ -730,10 +716,10 @@ static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx,
 
 	while (is_list(p1) && is_list(p2)) {
 		cell *h1 = LIST_HEAD(p1);
+		cell *h2 = LIST_HEAD(p2);
+
 		cell *c1 = deref(q, h1, p1_ctx);
 		idx_t c1_ctx = q->latest_ctx;
-
-		cell *h2 = LIST_HEAD(p2);
 		cell *c2 = deref(q, h2, p2_ctx);
 		idx_t c2_ctx = q->latest_ctx;
 
@@ -741,10 +727,10 @@ static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx,
 			return false;
 
 		p1 = LIST_TAIL(p1);
+		p2 = LIST_TAIL(p2);
+
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
-
-		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
@@ -852,7 +838,7 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 	return g_disp[p1->val_type].fn(q, p1, p2);
 }
 
-static bool CHECK_UPDATE_VIEW(__attribute__((unused)) query *q, clause *c)
+static bool check_update_view(query *q, clause *c)
 {
 	frame *g = GET_FRAME(q->st.curr_frame);
 
@@ -915,7 +901,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
 
-		if (!CHECK_UPDATE_VIEW(q, q->st.curr_clause2))
+		if (!check_update_view(q, q->st.curr_clause2))
 			continue;
 
 		term *t = &q->st.curr_clause2->t;
@@ -1010,7 +996,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retra
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
 
-		if (!CHECK_UPDATE_VIEW(q, q->st.curr_clause2))
+		if (!check_update_view(q, q->st.curr_clause2))
 			continue;
 
 		term *t = &q->st.curr_clause2->t;
@@ -1132,7 +1118,7 @@ static USE_RESULT pl_status match_head(query *q)
 
 	for (; q->st.curr_clause; next_key(q)) {
 
-		if (!CHECK_UPDATE_VIEW(q, q->st.curr_clause))
+		if (!check_update_view(q, q->st.curr_clause))
 			continue;
 
 		term *t = &q->st.curr_clause->t;
@@ -1232,7 +1218,7 @@ static void dump_vars(query *q, bool partial)
 
 		if (is_structure(c)) {
 			unsigned spec = GET_OP(c);
-			unsigned pri = get_op(q->st.m, GET_STR(c), &spec, false);
+			unsigned pri = find_op(q->st.m, GET_STR(c), spec);
 			if (pri >= 700) parens = true;
 		}
 
@@ -1389,9 +1375,6 @@ pl_status query_start(query *q)
 				continue;
 			}
 
-			if (q->error)
-				break;
-
 			if (q->has_attrs && !q->in_hook)
 				may_error(do_post_unification_hook(q));
 
@@ -1407,7 +1390,6 @@ pl_status query_start(query *q)
 				q->tot_retries++;
 				continue;
 			}
-
 
 			if (q->has_attrs)
 				may_error(do_post_unification_hook(q));

@@ -50,10 +50,10 @@ tpl: $(OBJECTS)
 	$(CC) -o tpl $(OBJECTS) $(OPT) $(LDFLAGS)
 
 profile:
-	$(MAKE) 'OPT=$(OPT) -O0 -pg -DDEBUG -DFAULTINJECT_NAME=g_faultinject'
+	$(MAKE) 'OPT=$(OPT) -O0 -pg -DDEBUG'
 
 debug:
-	$(MAKE) 'OPT=$(OPT) -O0 -g -DDEBUG -DFAULTINJECT_NAME=g_faultinject'
+	$(MAKE) 'OPT=$(OPT) -O0 -g -DDEBUG'
 
 test:
 	./tests/run.sh

@@ -255,7 +255,7 @@ Others
 	char_type/2
 	code_type/2
 	uuid/1					# generates non-standard UUID
-	load_files/2
+	load_files/[1,2]
 	split_atom/4
 	plus/3
 	module/1

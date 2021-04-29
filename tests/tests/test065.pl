@@ -1,4 +1,6 @@
+:- initialization(main).
 :- use_module(library(lists)).
+:- use_module(library(apply)).
 
 %% Each sq is repr by sq(SqNum,Var,RowDig,ColDig,RegReg)
 %% were XXXDig is a "bitmask" used(D1,...D9) and Dk is 1 iff digit k used in
@@ -144,5 +146,3 @@ print_sol([]).
 print_row([X1,X2,X3,X4,X5,X6,X7,X8,X9|Rest],Rest) :-
 	maplist(write,[X1,' ',X2,' ',X3,'  ',X4,' ',X5,' ',X6,'  ',X7,' ',X8,' ',X9]),
 	nl.
-
-:- initialization(main).

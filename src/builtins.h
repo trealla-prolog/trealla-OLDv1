@@ -59,12 +59,12 @@ inline static cell *deref_var(query *q, cell *c, idx_t c_ctx)
 	}
 
 	if (is_empty(&e->c))
-		return (q->latest_ctx=c_ctx, c);
+		return q->latest_ctx = c_ctx, c;
 
-	if (!is_indirect(&e->c))
-		return &e->c;
+	if (is_indirect(&e->c))
+		return q->latest_ctx = e->ctx, e->c.val_ptr;
 
-	return (q->latest_ctx=e->ctx, e->c.val_ptr);
+	return q->latest_ctx = e->ctx, &e->c;
 }
 
 #define deref(q,c,c_ctx) !is_variable(c) ? (q->latest_ctx = c_ctx, c) : deref_var(q,c,c_ctx)
@@ -124,7 +124,7 @@ inline static cell *get_raw_arg(query *q, int n)
 	return c;
 }
 
-bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
+extern bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
 
 #define unify(q,p1,p1_ctx,p2,p2_ctx) \
 	unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0)

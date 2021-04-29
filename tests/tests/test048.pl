@@ -1,4 +1,5 @@
 :- initialization(main).
+:- use_module(library(lists)).
 
 foo([bar(a), bar(b), bar(c), bar(d)]).
 

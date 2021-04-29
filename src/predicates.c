@@ -279,7 +279,6 @@ static USE_RESULT pl_status make_cstringn(cell *d, const char *s, size_t n)
 		}
 	}
 
-	FAULTINJECT(errno = ENOMEM; return pl_error);
 	d->val_type = TYPE_CSTRING;
 	d->flags = FLAG_BLOB;
 	d->nbr_cells = 1;
@@ -295,7 +294,6 @@ static USE_RESULT pl_status make_cstring(cell *d, const char *s)
 
 static USE_RESULT pl_status make_stringn(cell *d, const char *s, size_t n)
 {
-	FAULTINJECT(errno = ENOMEM; return pl_error);
 	d->val_type = TYPE_CSTRING;
 	d->flags = FLAG_BLOB;
 	d->flags |= FLAG_STRING;
@@ -1966,7 +1964,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	str->name = strdup(filename);
 	str->mode = strdup(mode);
 	str->eof_action = eof_action_eof_code;
-	int binary = 0;
+	bool binary = false, bom_specified = false;
 
 #if USE_MMAP
 	cell *mmap_var = NULL;
@@ -2004,10 +2002,12 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			} else if (!strcmp(GET_STR(c), "type")) {
 				if (is_atom(name) && !strcmp(GET_STR(name), "binary")) {
 					str->binary = true;
-					binary = 1;
+					binary = true;
 				} else if (is_atom(name) && !strcmp(GET_STR(name), "text"))
-					binary = 0;
+					binary = false;
 			} else if (!strcmp(GET_STR(c), "bom")) {
+				bom_specified = true;
+				
 				if (is_atom(name) && !strcmp(GET_STR(name), "true"))
 					use_bom = true;
 				else if (is_atom(name) && !strcmp(GET_STR(name), "false"))
@@ -2074,7 +2074,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 	size_t offset = 0;
 
-	if (!strcmp(mode, "read") && !binary) {
+	if (!strcmp(mode, "read") && !binary && (!bom_specified || use_bom)) {
 		int ch = xgetc_utf8(net_getc, str);
 
 		if (feof(str->fp))
@@ -2085,7 +2085,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			offset = 3;
 		} else
 			fseek(str->fp, 0, SEEK_SET);
-	} else if (!strcmp(mode, "write") && use_bom) {
+	} else if (!strcmp(mode, "write") && !binary && use_bom) {
 		int ch = 0xFEFF;
 		char tmpbuf[10];
 		put_char_utf8(tmpbuf, ch);
@@ -6151,12 +6151,12 @@ static pl_status do_op(query *q, cell *p3)
 	if (IS_INFIX(specifier) && IS_POSTFIX(tmp_optype))
 		return throw_error(q, p3, "permission_error", "create,operator");
 
-	unsigned tmp_pri = get_op2(q->st.m, GET_STR(p3), OP_FX);
+	unsigned tmp_pri = find_op(q->st.m, GET_STR(p3), OP_FX);
 
 	if (IS_POSTFIX(specifier) && (IS_INFIX(tmp_optype) || tmp_pri))
 		return throw_error(q, p3, "permission_error", "create,operator");
 
-	tmp_pri = get_op2(q->st.m, GET_STR(p3), OP_FY);
+	tmp_pri = find_op(q->st.m, GET_STR(p3), OP_FY);
 
 	if (IS_POSTFIX(specifier) && (IS_INFIX(tmp_optype) || tmp_pri))
 		return throw_error(q, p3, "permission_error", "create,operator");
@@ -8325,7 +8325,7 @@ static pl_status do_consult(query *q, cell *p1, idx_t p1_ctx)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_consult_1(query *q)
+static USE_RESULT pl_status fn_load_files_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
 
@@ -11173,7 +11173,7 @@ static const struct builtins g_predicates_iso[] =
 	{"use_module", 1, fn_use_module_1, NULL},
 	{"use_module", 2, fn_use_module_2, NULL},
 	{"module", 1, fn_module_1, NULL},
-	{"consult", 1, fn_consult_1, NULL},
+	{"load_files", 2, fn_load_files_2, NULL},
 	{"listing", 0, fn_listing_0, NULL},
 	{"listing", 1, fn_listing_1, NULL},
 	{"time", 1, fn_time_1, NULL},
@@ -11305,7 +11305,6 @@ static const struct builtins g_predicates_other[] =
 	{"getenv", 2, fn_getenv_2, NULL},
 	{"setenv", 2, fn_setenv_2, NULL},
 	{"unsetenv", 1, fn_unsetenv_1, NULL},
-	{"load_files", 2, fn_consult_1, "+files"},
 	{"statistics", 2, fn_statistics_2, "+string,-variable"},
 	{"duplicate_term", 2, fn_iso_copy_term_2, "+string,-variable"},
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer"},
@@ -11581,7 +11580,7 @@ static void load_ops(query *q)
 	char *dst = tmpbuf;
 	*dst = '\0';
 
-	for (const struct op_table *ptr = q->st.m->ops; ptr->name; ptr++) {
+	for (const op_table *ptr = q->st.m->ops; ptr->name; ptr++) {
 		char specifier[256], name[256];
 
 		if (!ptr->specifier)
@@ -11617,7 +11616,7 @@ static void load_ops(query *q)
 			ptr->priority, specifier, name);
 	}
 
-	for (const struct op_table *ptr = q->st.m->def_ops; ptr->name; ptr++) {
+	for (const op_table *ptr = q->st.m->def_ops; ptr->name; ptr++) {
 		char specifier[256], name[256];
 
 		if (!ptr->specifier)

@@ -193,7 +193,7 @@ typedef struct {
 // when the sentinel otherwise does some (optional) error handling action
 // default action is 'error=true' to indicate an error happened
 #define CHECK_SENTINEL(expr, err_sentinel, ...) CHECK_SENTINEL_((expr), err_sentinel, ## __VA_ARGS__, error=true)
-#define CHECK_SENTINEL_(expr, err_sentinel, on_error, ...) do { if((expr) == err_sentinel){message(#expr " = " #err_sentinel); on_error;}} while (0)
+#define CHECK_SENTINEL_(expr, err_sentinel, on_error, ...) do { if((expr) == err_sentinel){on_error;}} while (0)
 
 #define may_error(expr, ...) CHECK_SENTINEL(expr, pl_error, __VA_ARGS__; return pl_error)
 #define may_idx_error(expr, ...) CHECK_SENTINEL(expr, ERR_IDX, __VA_ARGS__; return pl_error)
@@ -400,11 +400,11 @@ struct builtins {
 	const char *help;
 };
 
-struct op_table {
+typedef struct {
 	char *name;
 	unsigned specifier;
 	unsigned priority;
-};
+} op_table;
 
 typedef struct {
 	cell *attrs;
@@ -603,8 +603,8 @@ struct module_ {
 	skiplist *index, *nbs;
 	clause *dirty_list;
 	struct loaded_file *loaded_files;
-	struct op_table def_ops[MAX_OPS+1];
-	struct op_table ops[MAX_OPS+1];
+	op_table def_ops[MAX_OPS+1];
+	op_table ops[MAX_OPS+1];
 	idx_t id;
 	prolog_flags flag;
 	unsigned spare_ops, loaded_ops;
@@ -700,7 +700,7 @@ clause *assertz_to_db(module *m, term *t, bool consulting);
 clause *erase_from_db(module *m, uuid *ref);
 clause *find_in_db(module *m, uuid *ref);
 unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix);
-unsigned get_op2(module *m, const char *name, unsigned specifier);
+unsigned find_op(module *m, const char *name, unsigned specifier);
 bool set_op(module *m, const char *name, unsigned specifier, unsigned priority);
 USE_RESULT pl_status make_choice(query *q);
 USE_RESULT pl_status make_barrier(query *q);

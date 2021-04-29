@@ -11,7 +11,6 @@
 size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements, size_t max_elements)
 {
 	assert(min_elements <= max_elements);
-	FAULTINJECT(errno = ENOMEM; return 0);
 	size_t elements = max_elements;
 	void* mem;
 
@@ -19,7 +18,7 @@ size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements, size_t max
 		mem = realloc(*addr, elem_size * elements);
 		if (mem) break;
 		elements = min_elements + (elements-min_elements)/2;
-		message("memory pressure reduce %lu to %lu", max_elements, elements);
+		//message("memory pressure reduce %lu to %lu", max_elements, elements);
 	}
 	 while (elements > min_elements);
 
@@ -36,7 +35,6 @@ size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements, size_t max
 cell *init_tmp_heap(query* q)
 {
 	if (!q->tmp_heap) {
-		FAULTINJECT(errno = ENOMEM; return NULL);
 		q->tmp_heap = malloc(q->tmph_size * sizeof(cell));
 		if (!q->tmp_heap) return NULL;
 		*q->tmp_heap = (cell){0};
@@ -68,7 +66,6 @@ cell *alloc_on_tmp(query *q, idx_t nbr_cells)
 
 cell *alloc_on_heap(query *q, idx_t nbr_cells)
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	if (!q->arenas) {
 		if (q->h_size < nbr_cells)
 			q->h_size = nbr_cells;
@@ -108,7 +105,6 @@ cell *alloc_on_heap(query *q, idx_t nbr_cells)
 
 static cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only, bool copy_attrs)
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	if (depth >= 64000) {
 		q->cycle_error = true;
 		return ERR_CYCLE_CELL;
@@ -178,7 +174,6 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth,
 
 cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	if (!init_tmp_heap(q))
 		return NULL;
 
@@ -212,7 +207,6 @@ cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, b
 
 static cell *deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth)
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	if (depth >= 64000) {
 		q->cycle_error = true;
 		return ERR_CYCLE_CELL;
@@ -266,7 +260,6 @@ cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 
 cell *alloc_on_queuen(query *q, int qnbr, const cell *c)
 {
-	FAULTINJECT(errno = ENOMEM; return NULL);
 	if (!q->queue[qnbr]) {
 		q->queue[qnbr] = calloc(q->q_size[qnbr], sizeof(cell));
 		ensure(q->queue[qnbr]);
