@@ -2072,7 +2072,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 	size_t offset = 0;
 
-	if (!strcmp(mode, "read") && !binary) {
+	if (!strcmp(mode, "read") && !binary && use_bom) {
 		int ch = xgetc_utf8(net_getc, str);
 
 		if (feof(str->fp))
