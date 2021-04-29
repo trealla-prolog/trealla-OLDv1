@@ -1964,7 +1964,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	str->name = strdup(filename);
 	str->mode = strdup(mode);
 	str->eof_action = eof_action_eof_code;
-	bool binary = false;
+	bool binary = false, bom_specified = false;
 
 #if USE_MMAP
 	cell *mmap_var = NULL;
@@ -2006,6 +2006,8 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 				} else if (is_atom(name) && !strcmp(GET_STR(name), "text"))
 					binary = false;
 			} else if (!strcmp(GET_STR(c), "bom")) {
+				bom_specified = true;
+				
 				if (is_atom(name) && !strcmp(GET_STR(name), "true"))
 					use_bom = true;
 				else if (is_atom(name) && !strcmp(GET_STR(name), "false"))
@@ -2072,7 +2074,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 	size_t offset = 0;
 
-	if (!strcmp(mode, "read") && !binary && use_bom) {
+	if (!strcmp(mode, "read") && !binary && (!bom_specified || use_bom)) {
 		int ch = xgetc_utf8(net_getc, str);
 
 		if (feof(str->fp))
