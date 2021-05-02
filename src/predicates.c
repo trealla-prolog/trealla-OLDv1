@@ -1056,16 +1056,13 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 		if (!is_variable(p3)) {
 			len = p3->val_num;
 			set_pinned(q, 3);
+		}
 
 		if (!is_variable(p4))
 			after = p4->val_num;
 
 		if (is_variable(p2) && is_integer(p3) && is_integer(p4))
 			before = len_p1 - after - len;		
-
-		if (is_variable(p3) && is_integer(p2) && is_integer(p4))
-			len = len_p1 - before - after;		
-		}
 	} else {
 		idx_t v1, v2;
 		get_params(q, &v1, &v2);
@@ -1100,8 +1097,6 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 			cell tmp;
 			make_int(&tmp, i);
 
-			//printf("*** before=%d, len=%d\n", (int)i, (int)j);
-			
 			if (!unify(q, p2, p2_ctx, &tmp, q->st.curr_frame)) {
 				retry_choice(q);
 				continue;
@@ -1142,12 +1137,12 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 				retry_choice(q);
 				continue;
 			}
-		
+
 			DECR_REF(&tmp);
 			return pl_success;
 		}
 
-		len--;
+		len = 0;
 	}
 
 	drop_choice(q);
