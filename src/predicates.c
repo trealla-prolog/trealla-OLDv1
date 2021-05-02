@@ -51,6 +51,38 @@ static void msleep(int ms)
 }
 #endif
 
+#if 0
+static int slicecmp_(const char *s1, size_t len1, const char *s2, size_t len2)
+{
+	while (len1 && len2) {
+		if ((unsigned char)*s1 < (unsigned char)*s2)
+			return -1;
+			
+		if ((unsigned char)*s1 > (unsigned char)*s2)
+			return 1;
+			
+		len1--;
+		len2--;
+	}
+
+	if (len1)
+		return 1;
+		
+	if (len2)
+		return -1;
+		
+	return 0;
+}
+#else
+static int slicecmp_(const char *s1, __attribute__((unused))size_t len1, const char *s2, __attribute__((unused))size_t len2)
+{
+	return strcmp(s1, s2);
+}
+#endif
+
+#define slicecmp(s1,l1,s2,l2) slicecmp_(s1,l1,s2,l2)
+#define slicecmp2(s1,l1,s2) slicecmp_(s1,l1,s2,strlen(s2))
+
 cell *ERR_CYCLE_CELL = &(cell){};
 
 #if 0
@@ -296,6 +328,7 @@ static USE_RESULT pl_status make_string(cell *d, const char *s)
 	return make_stringn(d, s, strlen(s));
 }
 
+#if 0
 static USE_RESULT pl_status make_slice(query *q, cell *d, cell *orig, size_t off, size_t n)
 {
 	if (n < MAX_SMALL_STRING) {
@@ -322,6 +355,7 @@ static USE_RESULT pl_status make_slice(query *q, cell *d, cell *orig, size_t off
 	INCR_REF(orig);
 	return pl_success;
 }
+#endif
 
 static USE_RESULT pl_status fn_iso_unify_2(query *q)
 {
@@ -1095,17 +1129,21 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 				continue;
 			}
 
-			size_t ipos = offset_at_pos(GET_STR(p1), i);
-			size_t jpos = offset_at_pos(GET_STR(p1), i+j);
-			
-			may_error(make_slice(q, &tmp, p1, ipos, jpos-ipos));
+			size_t ipos = offset_at_pos(GET_STR(p1), LEN_STR(p1), i);
+			size_t jpos = offset_at_pos(GET_STR(p1), LEN_STR(p1), i+j);
 
-			if (is_atom(p5) && !strcmp(GET_STR(p5), GET_STR(&tmp))) {
+#if 0		
+			may_error(make_slice(q, &tmp, p1, ipos, jpos-ipos));
+#else
+			may_error(make_cstringn(&tmp, GET_STR(p1)+ipos, jpos-ipos));
+#endif
+
+			if (is_atom(p5) && !slicecmp(GET_STR(p5), LEN_STR(p5), GET_STR(&tmp), LEN_STR(&tmp))) {
 				DECR_REF(&tmp);
 				return pl_success;
 			}
 
-			if (is_atom(p5) && strcmp(GET_STR(p5), GET_STR(&tmp))) {
+			if (is_atom(p5) && slicecmp(GET_STR(p5), LEN_STR(p5), GET_STR(&tmp), LEN_STR(&tmp))) {
 				DECR_REF(&tmp);
 				retry_choice(q);
 				continue;
@@ -1240,7 +1278,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 	}
 
 	if (is_variable(p2)) {
-		if (strncmp(GET_STR(p3), GET_STR(p1), LEN_STR(p1)))
+		if (slicecmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1)))  // Was strncmp??
 			return pl_failure;
 
 		char *dst = strdup(GET_STR(p3)+LEN_STR(p1));
@@ -1252,10 +1290,10 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 		return pl_success;
 	}
 
-	if (strncmp(GET_STR(p3), GET_STR(p1), LEN_STR(p1)))
+	if (slicecmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1)))		// Was strncmp??
 		return pl_failure;
 
-	if (strcmp(GET_STR(p3)+LEN_STR(p1), GET_STR(p2)))
+	if (slicecmp(GET_STR(p3)+LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1), GET_STR(p2), LEN_STR(p2)))
 		return pl_failure;
 
 	return pl_success;
@@ -1681,7 +1719,7 @@ static pl_status do_stream_property(query *q)
 	cell *c = p1 + 1;
 	c = deref(q, c, p1_ctx);
 
-	if (!strcmp(GET_STR(p1), "file_name")) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "file_name")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->filename));
 		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
@@ -1689,7 +1727,7 @@ static pl_status do_stream_property(query *q)
 		return ok;
 	}
 
-	if (!strcmp(GET_STR(p1), "alias")) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "alias")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->name));
 		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
@@ -1697,7 +1735,7 @@ static pl_status do_stream_property(query *q)
 		return ok;
 	}
 
-	if (!strcmp(GET_STR(p1), "mode")) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "mode")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->mode));
 		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
@@ -1705,7 +1743,7 @@ static pl_status do_stream_property(query *q)
 		return ok;
 	}
 
-	if (!strcmp(GET_STR(p1), "bom")) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "bom")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->bom?"true":"false"));
 		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
@@ -1713,7 +1751,7 @@ static pl_status do_stream_property(query *q)
 		return ok;
 	}
 
-	if (!strcmp(GET_STR(p1), "type")) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "type")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->binary ? "binary" : "text"));
 		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
@@ -1721,7 +1759,7 @@ static pl_status do_stream_property(query *q)
 		return ok;
 	}
 
-	if (!strcmp(GET_STR(p1), "reposition")) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "reposition")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->socket || (n <= 2) ? "false" : "true"));
 		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
@@ -1729,7 +1767,7 @@ static pl_status do_stream_property(query *q)
 		return ok;
 	}
 
-	if (!strcmp(GET_STR(p1), "encoding")) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "encoding")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, "UTF-8"));
 		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
@@ -1737,7 +1775,7 @@ static pl_status do_stream_property(query *q)
 		return ok;
 	}
 
-	if (!strcmp(GET_STR(p1), "newline")) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "newline")) {
 		cell tmp;
 #ifdef _WIN32
 		may_error(make_cstring(&tmp, "dos"));
@@ -1749,13 +1787,13 @@ static pl_status do_stream_property(query *q)
 		return ok;
 	}
 
-	if (!strcmp(GET_STR(p1), "input"))
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "input"))
 		return !strcmp(str->mode, "read");
 
-	if (!strcmp(GET_STR(p1), "output"))
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "output"))
 		return strcmp(str->mode, "read");
 
-	if (!strcmp(GET_STR(p1), "eof_action") && is_stream(pstr)) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "eof_action") && is_stream(pstr)) {
 		cell tmp;
 
 		if (str->eof_action == eof_action_eof_code)
@@ -1770,7 +1808,7 @@ static pl_status do_stream_property(query *q)
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (!strcmp(GET_STR(p1), "end_of_stream") && is_stream(pstr)) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "end_of_stream") && is_stream(pstr)) {
 		bool at_end_of_file = false;
 
 		if (!str->at_end_of_file && (n > 2)) {
@@ -1806,13 +1844,13 @@ static pl_status do_stream_property(query *q)
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (!strcmp(GET_STR(p1), "position") && !is_variable(pstr)) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "position") && !is_variable(pstr)) {
 		cell tmp;
 		make_int(&tmp, ftello(str->fp));
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (!strcmp(GET_STR(p1), "line_count") && !is_variable(pstr)) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "line_count") && !is_variable(pstr)) {
 		cell tmp;
 		make_int(&tmp, str->p?str->p->line_nbr:1);
 		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
@@ -1920,7 +1958,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	const char *filename;
 	stream *oldstr = NULL;
 
-	if (is_structure(p1) && (p1->arity == 1) && !strcmp(GET_STR(p1), "stream")) {
+	if (is_structure(p1) && (p1->arity == 1) && !slicecmp2(GET_STR(p1), LEN_STR(p1), "stream")) {
 		int oldn = get_stream(q, p1+1);
 
 		if (oldn < 0)
@@ -1968,45 +2006,45 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			cell *name = c + 1;
 			name = deref(q, name, q->latest_ctx);
 
-			if (!is_atom(name) && strcmp(GET_STR(c), "mmap"))
+			if (!is_atom(name) && slicecmp2(GET_STR(c), LEN_STR(c), "mmap"))
 				return throw_error(q, c, "domain_error", "stream_option");
 
 			if (get_named_stream(GET_STR(name)) >= 0)	// ???????
 				return throw_error(q, c, "permission_error", "open,source_sink");
 
-			if (!strcmp(GET_STR(c), "mmap")) {
+			if (!slicecmp2(GET_STR(c), LEN_STR(c), "mmap")) {
 #if USE_MMAP
 				mmap_var = name;
 				mmap_var = deref(q, mmap_var, q->latest_ctx);
 				mmap_ctx = q->latest_ctx;
 #endif
-			} else if (!strcmp(GET_STR(c), "alias")) {
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "alias")) {
 				free(str->name);
 				str->name = strdup(GET_STR(name));
-			} else if (!strcmp(GET_STR(c), "type")) {
-				if (is_atom(name) && !strcmp(GET_STR(name), "binary")) {
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "type")) {
+				if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "binary")) {
 					str->binary = true;
 					binary = true;
-				} else if (is_atom(name) && !strcmp(GET_STR(name), "text"))
+				} else if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "text"))
 					binary = false;
-			} else if (!strcmp(GET_STR(c), "bom")) {
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "bom")) {
 				bom_specified = true;
 				
-				if (is_atom(name) && !strcmp(GET_STR(name), "true"))
+				if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "true"))
 					use_bom = true;
-				else if (is_atom(name) && !strcmp(GET_STR(name), "false"))
+				else if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "false"))
 					use_bom = false;
-			} else if (!strcmp(GET_STR(c), "reposition")) {
-				if (is_atom(name) && !strcmp(GET_STR(name), "true"))
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "reposition")) {
+				if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "true"))
 					str->repo = true;
-				else if (is_atom(name) && !strcmp(GET_STR(name), "false"))
+				else if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "false"))
 					str->repo = false;
-			} else if (!strcmp(GET_STR(c), "eof_action")) {
-				if (is_atom(name) && !strcmp(GET_STR(name), "error")) {
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "eof_action")) {
+				if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "error")) {
 					str->eof_action = eof_action_error;
-				} else if (is_atom(name) && !strcmp(GET_STR(name), "eof_code")) {
+				} else if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "eof_code")) {
 					str->eof_action = eof_action_eof_code;
-				} else if (is_atom(name) && !strcmp(GET_STR(name), "reset")) {
+				} else if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "reset")) {
 					str->eof_action = eof_action_reset;
 				}
 			}
@@ -2321,23 +2359,23 @@ static bool parse_read_params(query *q, parser *p, cell *c, cell **vars, idx_t *
 
 	cell *c1 = deref(q, c+1, q->latest_ctx);
 
-	if (!strcmp(GET_STR(c), "character_escapes")) {
+	if (!slicecmp2(GET_STR(c), LEN_STR(c), "character_escapes")) {
 		if (is_literal(c1))
-			p->flag.character_escapes = !strcmp(GET_STR(c1), "true");
-	} else if (!strcmp(GET_STR(c), "double_quotes")) {
+			p->flag.character_escapes = !slicecmp2(GET_STR(c1), LEN_STR(c1), "true");
+	} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "double_quotes")) {
 		if (is_literal(c1)) {
-			if (!strcmp(GET_STR(c1), "atom")) {
+			if (!slicecmp2(GET_STR(c1), LEN_STR(c1), "atom")) {
 				p->flag.double_quote_codes = p->flag.double_quote_chars = false;
 				p->flag.double_quote_atom = true;
-			} else if (!strcmp(GET_STR(c1), "chars")) {
+			} else if (!slicecmp2(GET_STR(c1), LEN_STR(c1), "chars")) {
 				p->flag.double_quote_atom = p->flag.double_quote_codes = false;
 				p->flag.double_quote_chars = true;
-			} else if (!strcmp(GET_STR(c1), "codes")) {
+			} else if (!slicecmp2(GET_STR(c1), LEN_STR(c1), "codes")) {
 				p->flag.double_quote_atom = p->flag.double_quote_chars = false;
 				p->flag.double_quote_codes = true;
 			}
 		}
-	} else if (!strcmp(GET_STR(c), "variables")) {
+	} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "variables")) {
 		if (is_variable(c1)) {
 			cell *v = c1;
 			if (vars) *vars = v;
@@ -2346,7 +2384,7 @@ static bool parse_read_params(query *q, parser *p, cell *c, cell **vars, idx_t *
 			DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
 			return false;
 		}
-	} else if (!strcmp(GET_STR(c), "variable_names")) {
+	} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "variable_names")) {
 		if (is_variable(c1)) {
 			cell *v = c1;
 			if (varnames) *varnames = v;
@@ -2355,7 +2393,7 @@ static bool parse_read_params(query *q, parser *p, cell *c, cell **vars, idx_t *
 			DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
 			return false;
 		}
-	} else if (!strcmp(GET_STR(c), "singletons")) {
+	} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "singletons")) {
 		if (is_variable(c1)) {
 			cell *v = c1;
 			if (sings) *sings = v;
@@ -2892,45 +2930,45 @@ static bool parse_write_params(query *q, cell *c, cell **vnames, idx_t *vnames_c
 		return false;
 	}
 
-	if (!strcmp(GET_STR(c), "max_depth")) {
+	if (!slicecmp2(GET_STR(c), LEN_STR(c), "max_depth")) {
 		if (is_integer(c1))
 			q->max_depth = c[1].val_num;
-	} else if (!strcmp(GET_STR(c), "fullstop")) {
-		if (!is_literal(c1) || (strcmp(GET_STR(c1), "true") && strcmp(GET_STR(c1), "false"))) {
+	} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "fullstop")) {
+		if (!is_literal(c1) || (slicecmp2(GET_STR(c1), LEN_STR(c1), "true") && slicecmp2(GET_STR(c1), LEN_STR(c1), "false"))) {
 			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 			return false;
 		}
 
-		q->fullstop = !strcmp(GET_STR(c1), "true");
-	} else if (!strcmp(GET_STR(c), "nl")) {
-		if (!is_literal(c1) || (strcmp(GET_STR(c1), "true") && strcmp(GET_STR(c1), "false"))) {
+		q->fullstop = !slicecmp2(GET_STR(c1), LEN_STR(c1), "true");
+	} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "nl")) {
+		if (!is_literal(c1) || (slicecmp2(GET_STR(c1), LEN_STR(c1), "true") && slicecmp2(GET_STR(c1), LEN_STR(c1), "false"))) {
 			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 			return false;
 		}
 
-		q->nl = !strcmp(GET_STR(c1), "true");
-	} else if (!strcmp(GET_STR(c), "quoted")) {
-		if (!is_literal(c1) || (strcmp(GET_STR(c1), "true") && strcmp(GET_STR(c1), "false"))) {
+		q->nl = !slicecmp2(GET_STR(c1), LEN_STR(c1), "true");
+	} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "quoted")) {
+		if (!is_literal(c1) || (slicecmp2(GET_STR(c1), LEN_STR(c1), "true") && slicecmp2(GET_STR(c1), LEN_STR(c1), "false"))) {
 			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 			return false;
 		}
 
-		q->quoted = !strcmp(GET_STR(c1), "true");
-	} else if (!strcmp(GET_STR(c), "ignore_ops")) {
-		if (!is_literal(c1) || (strcmp(GET_STR(c1), "true") && strcmp(GET_STR(c1), "false"))) {
+		q->quoted = !slicecmp2(GET_STR(c1), LEN_STR(c1), "true");
+	} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "ignore_ops")) {
+		if (!is_literal(c1) || (slicecmp2(GET_STR(c1), LEN_STR(c1), "true") && slicecmp2(GET_STR(c1), LEN_STR(c1), "false"))) {
 			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 			return false;
 		}
 
-		q->ignore_ops = !strcmp(GET_STR(c1), "true");
-	} else if (!strcmp(GET_STR(c), "numbervars")) {
-		if (!is_literal(c1) || (strcmp(GET_STR(c1), "true") && strcmp(GET_STR(c1), "false"))) {
+		q->ignore_ops = !slicecmp2(GET_STR(c1), LEN_STR(c1), "true");
+	} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "numbervars")) {
+		if (!is_literal(c1) || (slicecmp2(GET_STR(c1), LEN_STR(c1), "true") && slicecmp2(GET_STR(c1), LEN_STR(c1), "false"))) {
 			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 			return false;
 		}
 
-		q->numbervars = !strcmp(GET_STR(c1), "true");
-	} else if (!strcmp(GET_STR(c), "variable_names")) {
+		q->numbervars = !slicecmp2(GET_STR(c1), LEN_STR(c1), "true");
+	} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "variable_names")) {
 		if (!is_list_or_nil(c1)) {
 			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 			return false;
@@ -5153,7 +5191,7 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),(%s)/%u).", err_type, expected, is_callable(c)?GET_STR(c):dst, c->arity, functor, q->st.curr_cell->arity);
 
 	} else if (!strcmp(err_type, "permission_error")
-		&& is_structure(c) && strcmp(GET_STR(c), "/") && is_variable(c+1)) {
+		&& is_structure(c) && slicecmp2(GET_STR(c), LEN_STR(c), "/") && is_variable(c+1)) {
 		char tmpbuf[1024];
 		snprintf(tmpbuf, sizeof(tmpbuf), "(%s)/%u\n", GET_STR(c), (unsigned)c->arity);
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, tmpbuf, functor, q->st.curr_cell->arity);
@@ -5305,9 +5343,9 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 	GET_FIRST_ARG(p1,structure);
 	int add_two = 0;
 
-	if (!strcmp(GET_STR(p1), "/"))
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "/"))
 		;
-	else if (!strcmp(GET_STR(p1), "//"))
+	else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "//"))
 		add_two = 2;
 	else
 		return throw_error(q, p1, "type_error", "predicate_indicator");
@@ -5394,7 +5432,7 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 	if (p_pi->arity != 2)
 		return throw_error(q, p_pi, "type_error", "predicate_indicator");
 
-	if (strcmp(GET_STR(p_pi), "/"))
+	if (slicecmp2(GET_STR(p_pi), LEN_STR(p_pi), "/"))
 		return throw_error(q, p_pi, "type_error", "predicate_indicator");
 
 	p1 = p_pi + 1;
@@ -5430,7 +5468,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,any);
 
-	if (!strcmp(GET_STR(p1), "double_quotes")) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "double_quotes")) {
 		cell tmp;
 
 		if (q->st.m->flag.double_quote_atom)
@@ -5441,7 +5479,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_literal(&tmp, index_from_pool(q->st.m->pl, "chars"));
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "char_conversion")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "char_conversion")) {
 		cell tmp;
 
 		if (q->st.m->flag.char_conversion)
@@ -5450,7 +5488,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_literal(&tmp, g_off_s);
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "occurs_check")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "occurs_check")) {
 		cell tmp;
 
 		if (q->st.m->flag.occurs_check == 1)
@@ -5461,11 +5499,11 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_literal(&tmp, index_from_pool(q->st.m->pl, "error"));
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "encoding")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "encoding")) {
 		cell tmp;
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "UTF-8"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "debug")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "debug")) {
 		cell tmp;
 
 		if (q->st.m->flag.debug)
@@ -5474,7 +5512,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_literal(&tmp, g_off_s);
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "character_escapes")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "character_escapes")) {
 		cell tmp;
 
 		if (q->st.m->flag.character_escapes)
@@ -5483,7 +5521,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_literal(&tmp, g_false_s);
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "prefer_rationals")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "prefer_rationals")) {
 		cell tmp;
 
 		if (q->st.m->flag.prefer_rationals)
@@ -5492,7 +5530,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_literal(&tmp, g_false_s);
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "rational_syntax")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "rational_syntax")) {
 		cell tmp;
 
 		if (q->st.m->flag.rational_syntax_natural)
@@ -5501,52 +5539,52 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_literal(&tmp, index_from_pool(q->st.m->pl, "compatibility"));
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "dialect")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "dialect")) {
 		cell tmp;
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "trealla"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "integer_rounding_function")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "integer_rounding_function")) {
 		cell tmp;
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "toward_zero"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "bounded")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "bounded")) {
 		cell tmp;
 		make_literal(&tmp, g_true_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "max_arity")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "max_arity")) {
 		cell tmp;
 		make_int(&tmp, MAX_ARITY);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 #if USE_INT32
-	} else if (!strcmp(GET_STR(p1), "max_integer")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "max_integer")) {
 		cell tmp;
 		make_int(&tmp, INT32_MAX);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "min_integer")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "min_integer")) {
 		cell tmp;
 		make_int(&tmp, INT32_MIN);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 #else
-	} else if (!strcmp(GET_STR(p1), "max_integer")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "max_integer")) {
 		cell tmp;
 		make_int(&tmp, INT64_MAX);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "min_integer")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "min_integer")) {
 		cell tmp;
 		make_int(&tmp, INT64_MIN);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 #endif
-	} else if (!strcmp(GET_STR(p1), "cpu_count")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "cpu_count")) {
 		cell tmp;
 		make_int(&tmp, g_cpu_count);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "version")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "version")) {
 		unsigned v1 = 0;
 		sscanf(VERSION, "v%u", &v1);
 		cell tmp;
 		make_int(&tmp, v1);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "version_data")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "version_data")) {
 		unsigned v1 = 0, v2 = 0, v3 = 0;
 		sscanf(VERSION, "v%u.%u.%u", &v1, &v2, &v3);
 		cell *tmp = alloc_on_heap(q, 5);
@@ -5559,11 +5597,11 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 		tmp[0].arity = 4;
 		tmp[0].nbr_cells = 5;
 		return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "version_git")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "version_git")) {
 		cell tmp;
 		make_literal(&tmp, index_from_pool(q->st.m->pl, VERSION));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!strcmp(GET_STR(p1), "argv")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "argv")) {
 		if (g_avc == g_ac) {
 			cell tmp;
 			make_literal(&tmp, g_nil_s);
@@ -5584,7 +5622,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 		may_ptr_error(l);
 		pl_status ok = unify(q, p2, p2_ctx, l, q->st.curr_frame);
 		return ok;
-	} else if (!strcmp(GET_STR(p1), "unknown")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "unknown")) {
 		cell tmp;
 		make_literal(&tmp,
 			q->st.m->flag.unknown == UNK_ERROR ? index_from_pool(q->st.m->pl, "error") :
@@ -5605,7 +5643,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 	if (!is_atom(p1))
 		return throw_error(q, p1, "type_error", "atom");
 
-	if (!strcmp(GET_STR(p1), "cpu_count") && is_integer(p2)) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "cpu_count") && is_integer(p2)) {
 		g_cpu_count = p2->val_num;
 		return pl_success;
 	}
@@ -5613,14 +5651,14 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 	if (!is_atom(p2) && !is_integer(p2))
 		return throw_error(q, p2, "type_error", "atom");
 
-	if (!strcmp(GET_STR(p1), "double_quotes")) {
-		if (!strcmp(GET_STR(p2), "atom")) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "double_quotes")) {
+		if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "atom")) {
 			q->st.m->flag.double_quote_chars = q->st.m->flag.double_quote_codes = false;
 			q->st.m->flag.double_quote_atom = true;
-		} else if (!strcmp(GET_STR(p2), "codes")) {
+		} else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "codes")) {
 			q->st.m->flag.double_quote_chars = q->st.m->flag.double_quote_atom = false;
 			q->st.m->flag.double_quote_codes = true;
-		} else if (!strcmp(GET_STR(p2), "chars")) {
+		} else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "chars")) {
 			q->st.m->flag.double_quote_atom = q->st.m->flag.double_quote_codes = false;
 			q->st.m->flag.double_quote_chars = true;
 		} else {
@@ -5632,10 +5670,10 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		}
 
 		q->st.m->p->flag = q->st.m->flag;
-	} else if (!strcmp(GET_STR(p1), "character_escapes")) {
-		if (!strcmp(GET_STR(p2), "true") || !strcmp(GET_STR(p2), "on"))
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "character_escapes")) {
+		if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "true") || !slicecmp2(GET_STR(p2), LEN_STR(p2), "on"))
 			q->st.m->flag.character_escapes = true;
-		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
+		else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "false") || !slicecmp2(GET_STR(p2), LEN_STR(p2), "off"))
 			q->st.m->flag.character_escapes = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
@@ -5644,10 +5682,10 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
 		}
-	} else if (!strcmp(GET_STR(p1), "char_conversion")) {
-		if (!strcmp(GET_STR(p2), "true") || !strcmp(GET_STR(p2), "on"))
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "char_conversion")) {
+		if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "true") || !slicecmp2(GET_STR(p2), LEN_STR(p2), "on"))
 			q->st.m->flag.char_conversion = true;
-		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
+		else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "false") || !slicecmp2(GET_STR(p2), LEN_STR(p2), "off"))
 			q->st.m->flag.char_conversion = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
@@ -5656,12 +5694,12 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
 		}
-	} else if (!strcmp(GET_STR(p1), "occurs_check")) {
-		if (!strcmp(GET_STR(p2), "true") || !strcmp(GET_STR(p2), "on"))
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "occurs_check")) {
+		if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "true") || !slicecmp2(GET_STR(p2), LEN_STR(p2), "on"))
 			q->st.m->flag.occurs_check = 1;
-		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
+		else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "false") || !slicecmp2(GET_STR(p2), LEN_STR(p2), "off"))
 			q->st.m->flag.occurs_check = 0;
-		else if (!strcmp(GET_STR(p2), "error"))
+		else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "error"))
 			q->st.m->flag.occurs_check = -1;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
@@ -5670,10 +5708,10 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
 		}
-	} else if (!strcmp(GET_STR(p1), "rational_syntax")) {
-		if (!strcmp(GET_STR(p2), "natural"))
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "rational_syntax")) {
+		if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "natural"))
 			q->st.m->flag.rational_syntax_natural = true;
-		else if (!strcmp(GET_STR(p2), "compatibility"))
+		else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "compatibility"))
 			q->st.m->flag.rational_syntax_natural = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
@@ -5682,10 +5720,10 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
 		}
-	} else if (!strcmp(GET_STR(p1), "prefer_rationals")) {
-		if (!strcmp(GET_STR(p2), "true") || !strcmp(GET_STR(p2), "on"))
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "prefer_rationals")) {
+		if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "true") || !slicecmp2(GET_STR(p2), LEN_STR(p2), "on"))
 			q->st.m->flag.prefer_rationals = true;
-		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
+		else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "false") || !slicecmp2(GET_STR(p2), LEN_STR(p2), "off"))
 			q->st.m->flag.prefer_rationals = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
@@ -5694,10 +5732,10 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
 		}
-	} else if (!strcmp(GET_STR(p1), "debug")) {
-		if (!strcmp(GET_STR(p2), "true") || !strcmp(GET_STR(p2), "on"))
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "debug")) {
+		if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "true") || !slicecmp2(GET_STR(p2), LEN_STR(p2), "on"))
 			q->st.m->flag.debug = true;
-		else if (!strcmp(GET_STR(p2), "false") || !strcmp(GET_STR(p2), "off"))
+		else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "false") || !slicecmp2(GET_STR(p2), LEN_STR(p2), "off"))
 			q->st.m->flag.debug = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
@@ -5706,24 +5744,24 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
 		}
-	} else if (!strcmp(GET_STR(p1), "unknown")) {
-		if (!strcmp(GET_STR(p2), "fail")) {
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "unknown")) {
+		if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "fail")) {
 			q->st.m->flag.unknown = UNK_FAIL;
-		} else if (!strcmp(GET_STR(p2), "error")) {
+		} else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "error")) {
 			q->st.m->flag.unknown = UNK_ERROR;
-		} else if (!strcmp(GET_STR(p2), "warning")) {
+		} else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "warning")) {
 			q->st.m->flag.unknown = UNK_WARNING;
-		} else if (!strcmp(GET_STR(p2), "changeable")) {
+		} else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "changeable")) {
 			q->st.m->flag.unknown = UNK_CHANGEABLE;
 		}
-	} else if (!strcmp(GET_STR(p1),"bounded")
-		|| !strcmp(GET_STR(p1),"max_arity")
-		|| !strcmp(GET_STR(p1),"max_integer")
-		|| !strcmp(GET_STR(p1),"min_integer")
-		|| !strcmp(GET_STR(p1),"version")
-		|| !strcmp(GET_STR(p1),"version_data")
-		|| !strcmp(GET_STR(p1),"version_git")
-		|| !strcmp(GET_STR(p1),"dialect")
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "bounded")
+		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "max_arity")
+		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "max_integer")
+		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "min_integer")
+		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "version")
+		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "version_data")
+		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "version_git")
+		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "dialect")
 		)
 		return throw_error(q, p1, "permission_error", "modify,flag");
 	else
@@ -5851,7 +5889,7 @@ static uint64_t get_vars(cell *p)
 
 static cell *skip_existentials(query *q, cell *p2, uint64_t *xs)
 {
-	while (is_structure(p2) && !strcmp(GET_STR(p2), "^")) {
+	while (is_structure(p2) && !slicecmp2(GET_STR(p2), LEN_STR(p2), "^")) {
 		cell *c = ++p2;
 
 		if (!is_variable(c)) {
@@ -6117,16 +6155,16 @@ static pl_status do_op(query *q, cell *p3)
 	else
 		return throw_error(q, p2, "domain_error", "operator_specifier");
 
-	if (pri && !strcmp(GET_STR(p3), "|") && (!IS_INFIX(specifier) || (pri < 1001)))
+	if (pri && !slicecmp2(GET_STR(p3), LEN_STR(p3), "|") && (!IS_INFIX(specifier) || (pri < 1001)))
 		return throw_error(q, p3, "permission_error", "create,operator");
 
-	if (!strcmp(GET_STR(p3), "[]"))
+	if (!slicecmp2(GET_STR(p3), LEN_STR(p3), "[]"))
 		return throw_error(q, p3, "permission_error", "create,operator");
 
-	if (!strcmp(GET_STR(p3), "{}"))
+	if (!slicecmp2(GET_STR(p3), LEN_STR(p3), "{}"))
 		return throw_error(q, p3, "permission_error", "create,operator");
 
-	if (!strcmp(GET_STR(p3), ","))
+	if (!slicecmp2(GET_STR(p3), LEN_STR(p3), ","))
 		return throw_error(q, p3, "permission_error", "modify,operator");
 
 	unsigned tmp_optype = 0;
@@ -6524,7 +6562,7 @@ static USE_RESULT pl_status fn_listing_1(query *q)
 	unsigned arity = -1;
 
 	if (p1->arity) {
-		if (strcmp(GET_STR(p1), "/") && strcmp(GET_STR(p1), "//"))
+		if (slicecmp2(GET_STR(p1), LEN_STR(p1), "/") && slicecmp2(GET_STR(p1), LEN_STR(p1), "//"))
 			return throw_error(q, p1, "type_error", "predicate_indicator");
 
 		cell *p2 = p1 + 1;
@@ -6540,7 +6578,7 @@ static USE_RESULT pl_status fn_listing_1(query *q)
 		name = index_from_pool(q->st.m->pl, GET_STR(p2));
 		arity = p3->val_num;
 
-		if (!strcmp(GET_STR(p1), "//"))
+		if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "//"))
 			arity += 2;
 	}
 
@@ -6585,7 +6623,7 @@ static USE_RESULT pl_status fn_statistics_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,list_or_var);
 
-	if (!strcmp(GET_STR(p1), "cputime") && is_variable(p2)) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "cputime") && is_variable(p2)) {
 		uint64_t now = get_time_in_usec();
 		double elapsed = now - q->time_started;
 		cell tmp;
@@ -6594,14 +6632,14 @@ static USE_RESULT pl_status fn_statistics_2(query *q)
 		return pl_success;
 	}
 
-	if (!strcmp(GET_STR(p1), "gctime") && is_variable(p2)) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "gctime") && is_variable(p2)) {
 		cell tmp;
 		make_float(&tmp, 0);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
 
-	if (!strcmp(GET_STR(p1), "runtime")) {
+	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "runtime")) {
 		uint64_t now = get_time_in_usec();
 		double elapsed = now - q->time_started;
 		cell tmp;
@@ -7080,51 +7118,51 @@ static USE_RESULT pl_status fn_server_3(query *q)
 		cell *c = deref(q, h, p3_ctx);
 
 		if (is_structure(c) && (c->arity == 1)) {
-			if (!strcmp(GET_STR(c), "udp")) {
+			if (!slicecmp2(GET_STR(c), LEN_STR(c), "udp")) {
 				c = c + 1;
 
 				if (is_atom(c))
-					udp = !strcmp(GET_STR(c), "true") ? 1 : 0;
-			} else if (!strcmp(GET_STR(c), "nodelay")) {
+					udp = !slicecmp2(GET_STR(c), LEN_STR(c), "true") ? 1 : 0;
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "nodelay")) {
 				c = c + 1;
 
 				if (is_atom(c))
-					nodelay = !strcmp(GET_STR(c), "true") ? 1 : 0;
-			} else if (!strcmp(GET_STR(c), "ssl")) {
+					nodelay = !slicecmp2(GET_STR(c), LEN_STR(c), "true") ? 1 : 0;
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "ssl")) {
 				c = c + 1;
 
 				if (is_atom(c))
-					ssl = !strcmp(GET_STR(c), "true") ? 1 : 0;
-			} else if (!strcmp(GET_STR(c), "keyfile")) {
+					ssl = !slicecmp2(GET_STR(c), LEN_STR(c), "true") ? 1 : 0;
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "keyfile")) {
 				c = c + 1;
 
 				if (is_atom(c))
 					keyfile = GET_STR(c);
-			} else if (!strcmp(GET_STR(c), "certfile")) {
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "certfile")) {
 				c = c + 1;
 
 				if (is_atom(c))
 					certfile = GET_STR(c);
-			} else if (!strcmp(GET_STR(c), "hostname")) {
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "hostname")) {
 				c = c + 1;
 
 				if (is_atom(c)) {
 					strncpy(hostname, GET_STR(c), sizeof(hostname));
 					hostname[sizeof(hostname)-1] = '\0';
 				}
-			} else if (!strcmp(GET_STR(c), "scheme")) {
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "scheme")) {
 				c = c + 1;
 
 				if (is_atom(c)) {
-					ssl = !strcmp(GET_STR(c), "https") ? 1 : 0;
+					ssl = !slicecmp2(GET_STR(c), LEN_STR(c), "https") ? 1 : 0;
 					port = 443;
 				}
-			} else if (!strcmp(GET_STR(c), "port")) {
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "port")) {
 				c = c + 1;
 
 				if (is_integer(c))
 					port = c->val_num;
-			} else if (!strcmp(GET_STR(c), "level")) {
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "level")) {
 				c = c + 1;
 
 				if (is_integer(c))
@@ -7258,39 +7296,39 @@ static USE_RESULT pl_status fn_client_5(query *q)
 		cell *c = deref(q, h, p5_ctx);
 
 		if (is_structure(c) && (c->arity == 1)) {
-			if (!strcmp(GET_STR(c), "udp")) {
+			if (!slicecmp2(GET_STR(c), LEN_STR(c), "udp")) {
 				c = c + 1;
 
 				if (is_atom(c))
-					udp = !strcmp(GET_STR(c), "true") ? 1 : 0;
-			} else if (!strcmp(GET_STR(c), "nodelay")) {
+					udp = !slicecmp2(GET_STR(c), LEN_STR(c), "true") ? 1 : 0;
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "nodelay")) {
 				c = c + 1;
 
 				if (is_atom(c))
-					nodelay = !strcmp(GET_STR(c), "true") ? 1 : 0;
-			} else if (!strcmp(GET_STR(c), "ssl")) {
+					nodelay = !slicecmp2(GET_STR(c), LEN_STR(c), "true") ? 1 : 0;
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "ssl")) {
 				c = c + 1;
 
 				if (is_atom(c))
-					ssl = !strcmp(GET_STR(c), "true") ? 1 : 0;
-			} else if (!strcmp(GET_STR(c), "certfile")) {
+					ssl = !slicecmp2(GET_STR(c), LEN_STR(c), "true") ? 1 : 0;
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "certfile")) {
 				c = c + 1;
 
 				if (is_atom(c))
 					certfile = GET_STR(c);
-			} else if (!strcmp(GET_STR(c), "scheme")) {
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "scheme")) {
 				c = c + 1;
 
 				if (is_atom(c)) {
-					ssl = !strcmp(GET_STR(c), "https") ? 1 : 0;
+					ssl = !slicecmp2(GET_STR(c), LEN_STR(c), "https") ? 1 : 0;
 					port = 443;
 				}
-			} else if (!strcmp(GET_STR(c), "port")) {
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "port")) {
 				c = c + 1;
 
 				if (is_integer(c))
 					port = (int)c->val_num;
-			} else if (!strcmp(GET_STR(c), "level")) {
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "level")) {
 				c = c + 1;
 
 				if (is_integer(c))
@@ -7312,11 +7350,11 @@ static USE_RESULT pl_status fn_client_5(query *q)
 		cell *c = deref(q, h, p5_ctx);
 
 		if (is_structure(c) && (c->arity == 1)) {
-			if (!strcmp(GET_STR(c), "host")) {
+			if (!slicecmp2(GET_STR(c), LEN_STR(c), "host")) {
 				c = c + 1;
 
 				//if (is_atom(c))
-				//	;//udp = !strcmp(GET_STR(c), "true") ? 1 : 0;
+				//	;//udp = !slicecmp2(GET_STR(c), LEN_STR(c), "true") ? 1 : 0;
 			}
 		}
 
@@ -8284,7 +8322,7 @@ static pl_status do_consult(query *q, cell *p1, idx_t p1_ctx)
 		return pl_success;
 	}
 
-	if (strcmp(GET_STR(p1), ":"))
+	if (slicecmp2(GET_STR(p1), LEN_STR(p1), ":"))
 		return throw_error(q, p1, "type_error", "filespec");
 
 	cell *mod = deref(q, p1+1, p1_ctx);
@@ -8604,10 +8642,10 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 		int n = q->st.m->pl->current_output;
 		stream *str = &g_streams[n];
 		net_write(tmpbuf, len, str);
-	} else if (is_structure(str) && ((strcmp(GET_STR(str),"atom") && strcmp(GET_STR(str),"chars") && strcmp(GET_STR(str),"string")) || (str->arity > 1) || !is_variable(str+1))) {
+	} else if (is_structure(str) && ((slicecmp2(GET_STR(str), LEN_STR(str), "atom") && slicecmp2(GET_STR(str), LEN_STR(str), "chars") && slicecmp2(GET_STR(str), LEN_STR(str), "string")) || (str->arity > 1) || !is_variable(str+1))) {
 		free(tmpbuf);
 		return throw_error(q, c, "type_error", "structure");
-	} else if (is_structure(str) && !strcmp(GET_STR(str),"atom")) {
+	} else if (is_structure(str) && !slicecmp2(GET_STR(str), LEN_STR(str), "atom")) {
 		cell *c = deref(q, str+1, str_ctx);
 		cell tmp;
 		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf));
@@ -9770,7 +9808,7 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 	}
 
 	if (is_variable(p1)) {
-		if (strcmp(GET_STR(p3)+(LEN_STR(p3)-LEN_STR(p2)), GET_STR(p2)))
+		if (slicecmp(GET_STR(p3)+(LEN_STR(p3)-LEN_STR(p2)), LEN_STR(p3)-LEN_STR(p2), GET_STR(p2), LEN_STR(p2)))
 			return pl_failure;
 
 		STRING_INIT(tmpbuf);
@@ -9784,7 +9822,7 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 	}
 
 	if (is_variable(p2)) {
-		if (strncmp(GET_STR(p3), GET_STR(p1), LEN_STR(p1)))
+		if (slicecmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1)))
 			return pl_failure;
 
 		char *dst = strdup(GET_STR(p3)+LEN_STR(p1));
@@ -9796,10 +9834,10 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 		return pl_success;
 	}
 
-	if (strncmp(GET_STR(p3), GET_STR(p1), LEN_STR(p1)))
+	if (slicecmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1)))
 		return pl_failure;
 
-	if (strcmp(GET_STR(p3)+LEN_STR(p1), GET_STR(p2)))
+	if (slicecmp(GET_STR(p3)+LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1), GET_STR(p2), LEN_STR(p2)))
 		return pl_failure;
 
 	return pl_success;
@@ -10086,39 +10124,39 @@ static USE_RESULT pl_status fn_char_type_2(query *q)
 	} else
 		ch = p1->val_num;
 
-	if (!strcmp(GET_STR(p2), "alpha"))
+	if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "alpha"))
 		return isalpha(ch);
-	else if (!strcmp(GET_STR(p2), "digit"))
+	else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "digit"))
 		return isdigit(ch);
-	else if (!strcmp(GET_STR(p2), "xdigit"))
+	else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "xdigit"))
 		return isxdigit(ch);
-	else if (!strcmp(GET_STR(p2), "whitespace"))
+	else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "whitespace"))
 		return isblank(ch) || iswspace(ch);
-	else if (!strcmp(GET_STR(p2), "white"))
+	else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "white"))
 		return isblank(ch);
-	else if (!strcmp(GET_STR(p2), "space"))
+	else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "space"))
 		return iswspace(ch);
-	else if (!strcmp(GET_STR(p2), "lower"))
+	else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "lower"))
 		return islower(ch);
-	else if (!strcmp(GET_STR(p2), "upper"))
+	else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "upper"))
 		return isupper(ch);
-	else if (!strcmp(GET_STR(p2), "punct"))
+	else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "punct"))
 		return ispunct(ch);
-	else if (!strcmp(GET_STR(p2), "cntrl"))
+	else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "cntrl"))
 		return iscntrl(ch);
-	else if (!strcmp(GET_STR(p2), "graph"))
+	else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "graph"))
 		return isgraph(ch);
-	else if (!strcmp(GET_STR(p2), "ascii"))
+	else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "ascii"))
 		return ch < 128;
-	else if (!strcmp(GET_STR(p2), "newline"))
+	else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "newline"))
 		return ch == 10;
-	else if (!strcmp(GET_STR(p2), "end_of_line"))
+	else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "end_of_line"))
 		return (ch >= 10) && (ch <= 13);
-	else if (!strcmp(GET_STR(p2), "end_of_file"))
+	else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "end_of_file"))
 		return ch == -1;
-	else if (!strcmp(GET_STR(p2), "quote"))
+	else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "quote"))
 		return (ch == '\'') || (ch == '"') || (ch == '`');
-	else if (!strcmp(GET_STR(p2), "period"))
+	else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "period"))
 		return (ch == '.') || (ch == '!') || (ch == '?');
 
 	return pl_failure;
@@ -11023,9 +11061,9 @@ static USE_RESULT pl_status fn_iso_compare_3(query *q)
 	GET_NEXT_ARG(p3,any);
 
 	if (is_atom(p1)) {
-		if (strcmp(GET_STR(p1), "<")
-			&& strcmp(GET_STR(p1), ">")
-			&& strcmp(GET_STR(p1), "="))
+		if (slicecmp2(GET_STR(p1), LEN_STR(p1), "<")
+			&& slicecmp2(GET_STR(p1), LEN_STR(p1), ">")
+			&& slicecmp2(GET_STR(p1), LEN_STR(p1), "="))
 			return throw_error(q, p1, "domain_error", "order");
 	}
 
