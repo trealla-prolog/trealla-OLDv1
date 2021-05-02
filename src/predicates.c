@@ -51,7 +51,7 @@ static void msleep(int ms)
 }
 #endif
 
-static int slicencmp(const char *s1, size_t len1, const char *s2, size_t len2, size_t len3)
+static int STRNCMP(const char *s1, size_t len1, const char *s2, size_t len2, size_t len3)
 {
 	while (len1 && len2 && len3) {
 		if ((unsigned char)*s1 < (unsigned char)*s2)
@@ -347,6 +347,7 @@ static USE_RESULT pl_status make_string(cell *d, const char *s)
 	return make_stringn(d, s, strlen(s));
 }
 
+#if 0
 static USE_RESULT pl_status make_slice(query *q, cell *d, cell *orig, size_t off, size_t n)
 {
 	if (n < MAX_SMALL_STRING) {
@@ -368,11 +369,23 @@ static USE_RESULT pl_status make_slice(query *q, cell *d, cell *orig, size_t off
 	}
 
 	*d = *orig;
-	d->strb_off = off;
+	d->strb_off += off;
 	d->strb_len = n;
 	INCR_REF(orig);
 	return pl_success;
 }
+#else
+static USE_RESULT pl_status make_slice(query *q, cell *d, cell *orig, size_t off, size_t n)
+{
+	printf("*** off=%u, len=%u\n", (unsigned)off, (unsigned)n);
+	const char *s = GET_STR(orig);
+
+	if (is_string(orig))
+		return make_stringn(d, s+off, n);
+
+	return make_cstringn(d, s+off, n);
+}
+#endif
 
 static USE_RESULT pl_status fn_iso_unify_2(query *q)
 {
@@ -1291,7 +1304,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 	}
 
 	if (is_variable(p2)) {
-		if (slicencmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1), LEN_STR(p1)))  
+		if (STRNCMP(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1), LEN_STR(p1)))  
 			return pl_failure;
 
 		char *dst = strdup(GET_STR(p3)+LEN_STR(p1));
@@ -1303,7 +1316,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 		return pl_success;
 	}
 
-	if (slicencmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1), LEN_STR(p1)))	
+	if (STRNCMP(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1), LEN_STR(p1)))	
 		return pl_failure;
 
 	if (STRCMP(GET_STR(p3)+LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1), GET_STR(p2), LEN_STR(p2)))
