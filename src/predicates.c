@@ -1278,8 +1278,13 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 	}
 
 	if (is_variable(p2)) {
-		if (slicecmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1)))  // Was strncmp??
+#if 0
+		if (slicecmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1)))  
 			return pl_failure;
+#else
+		if (strncmp(GET_STR(p3), GET_STR(p1), LEN_STR(p1))) 
+			return pl_failure;
+#endif
 
 		char *dst = strdup(GET_STR(p3)+LEN_STR(p1));
 		cell tmp;
@@ -1290,8 +1295,13 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 		return pl_success;
 	}
 
-	if (slicecmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1)))		// Was strncmp??
+#if 0
+	if (slicecmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1)))	
 		return pl_failure;
+#else
+	if (strncmp(GET_STR(p3), GET_STR(p1), LEN_STR(p1)))	
+		return pl_failure;
+#endif
 
 	if (slicecmp(GET_STR(p3)+LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1), GET_STR(p2), LEN_STR(p2)))
 		return pl_failure;
