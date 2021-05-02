@@ -69,18 +69,6 @@ static pl_status do_yield_0(query *q, int msecs)
 	return pl_failure;
 }
 
-static void set_pinned(query *q, int i)
-{
-	choice *ch = GET_CURR_CHOICE();
-	ch->pins |= 1ULL << i;
-}
-
-static int is_pinned(query *q, int i)
-{
-	choice *ch = GET_CURR_CHOICE();
-	return ch->pins & (1ULL << i) ? 1 : 0;
-}
-
 static void set_params(query *q, idx_t p1, idx_t p2)
 {
 	choice *ch = GET_CURR_CHOICE();
@@ -1053,10 +1041,8 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 		if (!is_variable(p2))
 			before = p2->val_num;
 
-		if (!is_variable(p3)) {
+		if (!is_variable(p3))
 			len = p3->val_num;
-			set_pinned(q, 3);
-		}
 
 		if (!is_variable(p4))
 			after = p4->val_num;
@@ -1071,16 +1057,6 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 		get_params(q, &v1, &v2);
 		before = v1;
 		len = v2;
-
-		if (is_pinned(q, 3)) {
-			len = p3->val_num;
-			before++;
-
-			if ((before+len) > LEN_STR_UTF8(p1)) {
-				drop_choice(q);
-				return pl_failure;
-			}
-		}
 	}
 
 	if (len > (LEN_STR_UTF8(p1)-before)) {
