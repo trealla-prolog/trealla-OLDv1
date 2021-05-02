@@ -1058,7 +1058,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 	GET_NEXT_ARG(p4,integer_or_var);		// after
 	GET_NEXT_ARG(p5,atom_or_var);
 	const size_t len_p1 = LEN_STR_UTF8(p1);
-	size_t before = 0, len = 0, after = 0;
+	size_t before = 0, len = 0;
 
 	if (is_integer(p2) && (p2->val_num < 0))
 		return throw_error(q, p2, "domain_error", "not_less_than_zero");
@@ -1070,6 +1070,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 		return throw_error(q, p4, "domain_error", "not_less_than_zero");
 
 	if (!q->retry) {
+		size_t after = 0;
 		may_error(make_choice(q));
 
 		if (!is_variable(p2))
