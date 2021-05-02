@@ -1063,6 +1063,9 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 
 		if (is_variable(p2) && is_integer(p3) && is_integer(p4))
 			before = len_p1 - after - len;		
+
+		if (is_variable(p3) && is_integer(p2) && is_integer(p4))
+			len = len_p1 - before - after;		
 	} else {
 		idx_t v1, v2;
 		get_params(q, &v1, &v2);
