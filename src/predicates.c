@@ -1031,11 +1031,12 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,integer_or_var);
-	GET_NEXT_ARG(p3,integer_or_var);
-	GET_NEXT_ARG(p4,integer_or_var);
+	GET_NEXT_ARG(p2,integer_or_var);		// before
+	GET_NEXT_ARG(p3,integer_or_var);		// len	
+	GET_NEXT_ARG(p4,integer_or_var);		// after
 	GET_NEXT_ARG(p5,atom_or_var);
-	size_t before = 0, len = 0;
+	const size_t len_p1 = LEN_STR_UTF8(p1);
+	size_t before = 0, len = 0, after = 0;
 
 	if (is_integer(p2) && (p2->val_num < 0))
 		return throw_error(q, p2, "domain_error", "not_less_than_zero");
@@ -1055,6 +1056,12 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 		if (!is_variable(p3)) {
 			len = p3->val_num;
 			set_pinned(q, 3);
+
+		if (!is_variable(p4))
+			after = p4->val_num;
+
+		if (is_variable(p2) && is_integer(p3) && is_integer(p4))
+			before = len_p1 - after - len;		
 		}
 	} else {
 		idx_t v1, v2;
@@ -1082,8 +1089,6 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 		drop_choice(q);
 		return pl_failure;
 	}
-
-	const size_t len_p1 = LEN_STR_UTF8(p1);
 
 	for (size_t i = before; i <= len_p1; i++) {
 		for (size_t j = len; j <= (len_p1-i); j++) {
