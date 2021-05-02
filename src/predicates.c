@@ -527,7 +527,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (is_variable(p2) && !strcmp(GET_STR(p1), "")) {
+	if (is_variable(p2) && !LEN_STR(p1)) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -786,7 +786,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (is_variable(p2) && !strcmp(GET_STR(p1), "")) {
+	if (is_variable(p2) && !LEN_STR(p1)) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -6838,7 +6838,7 @@ static USE_RESULT pl_status fn_split_4(query *q)
 	GET_NEXT_ARG(p3,any);
 	GET_NEXT_ARG(p4,any);
 
-	if (is_nil(p1) || !strcmp(GET_STR(p1), "")) {
+	if (is_nil(p1) || !LEN_STR(p1)) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
 
