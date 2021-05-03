@@ -56,48 +56,55 @@ static int slicencmp(const char *s1, size_t len1, const char *s2, size_t len2, s
 	while (len1 && len2 && n) {
 		if ((unsigned char)*s1 < (unsigned char)*s2)
 			return -1;
-
+			
 		if ((unsigned char)*s1 > (unsigned char)*s2)
 			return 1;
-
+			
 		len1--;
 		len2--;
 		n--;
 	}
 
 	if (!n)
-		return 0;	// matched up to here so success!
-
+		return 0;
+		
 	if (len1)
 		return 1;
-
+		
 	if (len2)
 		return -1;
-
+		
 	return 0;
 }
 
+#if 0
 static int slicecmp_(const char *s1, size_t len1, const char *s2, size_t len2)
 {
 	while (len1 && len2) {
 		if ((unsigned char)*s1 < (unsigned char)*s2)
 			return -1;
-
+			
 		if ((unsigned char)*s1 > (unsigned char)*s2)
 			return 1;
-
+			
 		len1--;
 		len2--;
 	}
 
 	if (len1)
 		return 1;
-
+		
 	if (len2)
 		return -1;
-
+		
 	return 0;
 }
+#else
+static int slicecmp_(const char *s1, __attribute__((unused))size_t len1, const char *s2, __attribute__((unused))size_t len2)
+{
+	return strcmp(s1, s2);
+}
+#endif
 
 #define slicecmp(s1,l1,s2,l2) slicecmp_(s1,l1,s2,l2)
 #define slicecmp2(s1,l1,s2) slicecmp_(s1,l1,s2,strlen(s2))
@@ -347,32 +354,34 @@ static USE_RESULT pl_status make_string(cell *d, const char *s)
 	return make_stringn(d, s, strlen(s));
 }
 
+#if 0
 static USE_RESULT pl_status make_slice(query *q, cell *d, cell *orig, size_t off, size_t n)
 {
-#if 0
-	if (is_strbuf(orig)) {
-		*d = *orig;
-		d->strb_off += off;
-		d->strb_len = n;
-		INCR_REF(orig);
-		return pl_success;
+	if (n < MAX_SMALL_STRING) {
+		const char *s = GET_STR(orig);
+
+		if (!memchr(s+off, 0, n)) {
+			make_smalln(d, s+off, n);
+			return pl_success;
+		}
 	}
 
-	if (is_static(orig)) {
-		*d = *orig;
-		d->val_str += off;
-		d->str_len = n;
-		return pl_success;
+	if (!is_strbuf(orig)) {
+		const char *s = GET_STR(orig);
+
+		if (is_string(orig))
+			return make_stringn(d, s+off, n);
+
+		return make_cstringn(d, s+off, n);
 	}
-#endif
 
-	const char *s = GET_STR(orig);
-
-	if (is_string(orig))
-		return make_stringn(d, s+off, n);
-
-	return make_cstringn(d, s+off, n);
+	*d = *orig;
+	d->strb_off = off;
+	d->strb_len = n;
+	INCR_REF(orig);
+	return pl_success;
 }
+#endif
 
 static USE_RESULT pl_status fn_iso_unify_2(query *q)
 {
@@ -1071,7 +1080,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,integer_or_var);		// before
-	GET_NEXT_ARG(p3,integer_or_var);		// len
+	GET_NEXT_ARG(p3,integer_or_var);		// len	
 	GET_NEXT_ARG(p4,integer_or_var);		// after
 	GET_NEXT_ARG(p5,atom_or_var);
 	const size_t len_p1 = LEN_STR_UTF8(p1);
@@ -1099,10 +1108,10 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 			after = p4->val_num;
 
 		if (is_variable(p2) && is_integer(p3) && is_integer(p4))
-			before = len_p1 - after - len;
+			before = len_p1 - after - len;		
 
 		if (is_variable(p3) && is_integer(p2) && is_integer(p4))
-			len = len_p1 - before - after;
+			len = len_p1 - before - after;		
 	} else {
 		idx_t v1, v2;
 		get_params(q, &v1, &v2);
@@ -1146,10 +1155,14 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 				continue;
 			}
 
-			size_t ipos = offset_at_pos(GET_STR(p1), len_p1, i);
-			size_t jpos = offset_at_pos(GET_STR(p1), len_p1, i+j);
+			size_t ipos = offset_at_pos(GET_STR(p1), LEN_STR(p1), i);
+			size_t jpos = offset_at_pos(GET_STR(p1), LEN_STR(p1), i+j);
 
+#if 0		
 			may_error(make_slice(q, &tmp, p1, ipos, jpos-ipos));
+#else
+			may_error(make_cstringn(&tmp, GET_STR(p1)+ipos, jpos-ipos));
+#endif
 
 			if (is_atom(p5) && !slicecmp(GET_STR(p5), LEN_STR(p5), GET_STR(&tmp), LEN_STR(&tmp))) {
 				DECR_REF(&tmp);
@@ -1291,7 +1304,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 	}
 
 	if (is_variable(p2)) {
-		if (slicencmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1), LEN_STR(p1)))
+		if (slicencmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1), LEN_STR(p1)))  
 			return pl_failure;
 
 		char *dst = strdup(GET_STR(p3)+LEN_STR(p1));
@@ -1303,7 +1316,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 		return pl_success;
 	}
 
-	if (slicencmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1), LEN_STR(p1)))
+	if (slicencmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1), LEN_STR(p1)))	
 		return pl_failure;
 
 	if (slicecmp(GET_STR(p3)+LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1), GET_STR(p2), LEN_STR(p2)))
@@ -2042,7 +2055,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 					binary = false;
 			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "bom")) {
 				bom_specified = true;
-
+				
 				if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "true"))
 					use_bom = true;
 				else if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "false"))
@@ -2114,7 +2127,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 		if (feof(str->fp))
 			clearerr(str->fp);
-
+		
 		if ((unsigned)ch == 0xFEFF) {
 			str->bom = true;
 			offset = 3;
@@ -2124,7 +2137,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 		int ch = 0xFEFF;
 		char tmpbuf[10];
 		put_char_utf8(tmpbuf, ch);
-		net_write(tmpbuf, strlen(tmpbuf), str);
+		net_write(tmpbuf, strlen(tmpbuf), str);		
 		str->bom = true;
 	}
 
