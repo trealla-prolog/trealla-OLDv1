@@ -42,5 +42,5 @@ extern size_t len_char_utf8(const char *src);					// returns #bytes
  *  Get indexed char
  */
 
-extern int character_at_pos(const char *src, size_t srclen, size_t i);
-extern size_t offset_at_pos(const char *src, size_t srclen, size_t i);
+extern int character_at_pos(const char *src, size_t i);
+extern size_t offset_at_pos(const char *src, size_t i);
