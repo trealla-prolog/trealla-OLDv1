@@ -1068,8 +1068,8 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 				continue;
 			}
 
-			size_t ipos = offset_at_pos(GET_STR(p1), i);
-			size_t jpos = offset_at_pos(GET_STR(p1), i+j);
+			size_t ipos = offset_at_pos(GET_STR(p1), len_p1, i);
+			size_t jpos = offset_at_pos(GET_STR(p1), len_p1, i+j);
 			may_error(make_cstringn(&tmp, GET_STR(p1)+ipos, jpos-ipos));
 
 			if (is_atom(p5) && !strcmp(GET_STR(p5), GET_STR(&tmp))) {

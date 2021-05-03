@@ -239,12 +239,12 @@ int xgetc_utf8(int(*fn)(), void *p1)
 	return (int)n;
 }
 
-int character_at_pos(const char *buffer, size_t i)
+int character_at_pos(const char *buffer, size_t buflen, size_t i)
 {
 	const char *src = buffer;
 	size_t idx = 0;
 
-	while (*src) {
+	while (src < (buffer+buflen)) {
 		int ch = get_char_utf8(&src);
 		
 		if (idx++ == i)
@@ -254,12 +254,12 @@ int character_at_pos(const char *buffer, size_t i)
 	return 0;
 }
 
-size_t offset_at_pos(const char *buffer, size_t i)
+size_t offset_at_pos(const char *buffer, size_t buflen, size_t i)
 {
 	const char *src = buffer;
 	size_t idx = 0;
 	
-	while (*src) {
+	while (src < (buffer+buflen)) {
 		if (idx++ == i)
 			break;
 
