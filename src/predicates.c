@@ -375,6 +375,11 @@ static USE_RESULT pl_status make_slice(query *q, cell *d, cell *orig, size_t off
 		return make_cstringn(d, s+off, n);
 	}
 
+	*d = *orig;
+	d->strb_off = off;
+	d->strb_len = n;
+	INCR_REF(orig);
+	return pl_success;
 #else
 	const char *s = GET_STR(orig);
 
@@ -1157,8 +1162,8 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 				continue;
 			}
 
-			size_t ipos = offset_at_pos(GET_STR(p1), len_p1, i);
-			size_t jpos = offset_at_pos(GET_STR(p1), len_p1, i+j);
+			size_t ipos = offset_at_pos(GET_STR(p1), LEN_STR(p1), i);
+			size_t jpos = offset_at_pos(GET_STR(p1), LEN_STR(p1), i+j);
 
 			may_error(make_slice(q, &tmp, p1, ipos, jpos-ipos));
 
