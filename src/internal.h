@@ -27,11 +27,11 @@
 typedef __int128_t int_t;
 typedef __uint128_t uint_t;
 #elif USE_INT32
-typedef __int32_t int_t;
-typedef __uint32_t uint_t;
+typedef int32_t int_t;
+typedef uint32_t uint_t;
 #else
-typedef __int64_t int_t;
-typedef __uint64_t uint_t;
+typedef int64_t int_t;
+typedef uint64_t uint_t;
 #endif
 
 #if (__STDC_VERSION__ >= 201112L) && USE_THREADS
