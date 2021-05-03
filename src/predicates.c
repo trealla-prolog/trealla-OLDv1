@@ -357,29 +357,27 @@ static USE_RESULT pl_status make_string(cell *d, const char *s)
 static USE_RESULT pl_status make_slice(query *q, cell *d, cell *orig, size_t off, size_t n)
 {
 #if 0
-	if (n < MAX_SMALL_STRING) {
-		const char *s = GET_STR(orig);
-
-		if (!memchr(s+off, 0, n)) {
-			make_smalln(d, s+off, n);
-			return pl_success;
-		}
+	if (is_static(orig)) {
+		*d = *orig;
+		d->val_str += off;
+		d->str_len = n;
+		return pl_success;
 	}
-
-	if (!is_strbuf(orig)) {
-		const char *s = GET_STR(orig);
-
-		if (is_string(orig))
-			return make_stringn(d, s+off, n);
-
-		return make_cstringn(d, s+off, n);
+	
+	if (is_strbuf(orig)) {
+		*d = *orig;
+		d->strb_off += off;
+		d->strb_len = n;
+		INCR_REF(orig);
+		return pl_success;
 	}
+	
+	const char *s = GET_STR(orig);
 
-	*d = *orig;
-	d->strb_off = off;
-	d->strb_len = n;
-	INCR_REF(orig);
-	return pl_success;
+	if (is_string(orig))
+		return make_stringn(d, s+off, n);
+
+	return make_cstringn(d, s+off, n);
 #else
 	const char *s = GET_STR(orig);
 
