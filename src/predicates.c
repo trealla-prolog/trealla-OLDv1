@@ -354,34 +354,28 @@ static USE_RESULT pl_status make_string(cell *d, const char *s)
 	return make_stringn(d, s, strlen(s));
 }
 
-#if 0
 static USE_RESULT pl_status make_slice(query *q, cell *d, cell *orig, size_t off, size_t n)
 {
-	if (n < MAX_SMALL_STRING) {
-		const char *s = GET_STR(orig);
-
-		if (!memchr(s+off, 0, n)) {
-			make_smalln(d, s+off, n);
-			return pl_success;
-		}
+	if (is_static(orig)) {
+		*d = *orig;
+		d->val_str += off;
+		d->str_len = n;
 	}
 
-	if (!is_strbuf(orig)) {
-		const char *s = GET_STR(orig);
-
-		if (is_string(orig))
-			return make_stringn(d, s+off, n);
-
-		return make_cstringn(d, s+off, n);
+	if (is_strbuf(orig)) {
+		*d = *orig;
+		d->strb_off += off;
+		d->strb_len = n;
+		INCR_REF(orig);
 	}
+				
+	const char *s = GET_STR(orig);
 
-	*d = *orig;
-	d->strb_off = off;
-	d->strb_len = n;
-	INCR_REF(orig);
-	return pl_success;
+	if (is_string(orig))
+		return make_stringn(d, s+off, n);
+
+	return make_cstringn(d, s+off, n);
 }
-#endif
 
 static USE_RESULT pl_status fn_iso_unify_2(query *q)
 {
@@ -1155,14 +1149,10 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 				continue;
 			}
 
-			size_t ipos = offset_at_pos(GET_STR(p1), LEN_STR(p1), i);
-			size_t jpos = offset_at_pos(GET_STR(p1), LEN_STR(p1), i+j);
+			size_t ipos = offset_at_pos(GET_STR(p1), len_p1, i);
+			size_t jpos = offset_at_pos(GET_STR(p1), len_p1, i+j);
 
-#if 0		
 			may_error(make_slice(q, &tmp, p1, ipos, jpos-ipos));
-#else
-			may_error(make_cstringn(&tmp, GET_STR(p1)+ipos, jpos-ipos));
-#endif
 
 			if (is_atom(p5) && !slicecmp(GET_STR(p5), LEN_STR(p5), GET_STR(&tmp), LEN_STR(&tmp))) {
 				DECR_REF(&tmp);
