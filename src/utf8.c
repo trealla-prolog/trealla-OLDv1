@@ -32,7 +32,7 @@ size_t substrlen_utf8(const char *s, size_t n)
 	const char *end = s + n;
 	size_t cnt = 0;
 
-	while (*s && (s <= end)) {
+	while (s < end) {
 		unsigned char ch = *(const unsigned char *)s++;
 
 		if ((ch < 0x80) || (ch > 0xBF))
