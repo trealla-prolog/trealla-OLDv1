@@ -3366,7 +3366,6 @@ static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 	str->did_getc = true;
 
 	if (FEOF(str)) {
-		str->ungetch = 0;
 		str->did_getc = false;
 		str->at_end_of_file = str->eof_action != eof_action_reset;
 
@@ -3437,7 +3436,6 @@ static USE_RESULT pl_status fn_iso_get_char_2(query *q)
 	str->did_getc = true;
 
 	if (FEOF(str)) {
-		str->ungetch = 0;
 		str->did_getc = false;
 		str->at_end_of_file = str->eof_action != eof_action_reset;
 
@@ -3507,7 +3505,6 @@ static USE_RESULT pl_status fn_iso_get_code_1(query *q)
 	str->did_getc = true;
 
 	if (FEOF(str)) {
-		str->ungetch = 0;
 		str->did_getc = false;
 		str->at_end_of_file = str->eof_action != eof_action_reset;
 
@@ -3579,7 +3576,6 @@ static USE_RESULT pl_status fn_iso_get_code_2(query *q)
 	str->did_getc = true;
 
 	if (FEOF(str)) {
-		str->ungetch = 0;
 		str->did_getc = false;
 		str->at_end_of_file = str->eof_action != eof_action_reset;
 
@@ -3644,7 +3640,6 @@ static USE_RESULT pl_status fn_iso_get_byte_1(query *q)
 	str->did_getc = true;
 
 	if (FEOF(str)) {
-		str->ungetch = 0;
 		str->did_getc = false;
 		str->at_end_of_file = str->eof_action != eof_action_reset;
 
@@ -3710,7 +3705,6 @@ static USE_RESULT pl_status fn_iso_get_byte_2(query *q)
 	str->did_getc = true;
 
 	if (FEOF(str)) {
-		str->ungetch = 0;
 		str->did_getc = false;
 		str->at_end_of_file = str->eof_action != eof_action_reset;
 
