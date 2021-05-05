@@ -1,17 +1,6 @@
 {
-  "total" : 154,
+  "total" : 155,
   "items" : [ {
-    "uid" : "8d72f33464c61a169f6282af0f2f0181",
-    "name" : "predicates/read_term_3/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 6,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 30,
-      "unknown" : 0,
-      "total" : 36
-    }
-  }, {
     "uid" : "ed0cdb351cf5fe82566e390f01a37528",
     "name" : "control/throw_1/tests.lgt::tests",
     "statistic" : {
@@ -21,6 +10,17 @@
       "passed" : 5,
       "unknown" : 0,
       "total" : 7
+    }
+  }, {
+    "uid" : "8d72f33464c61a169f6282af0f2f0181",
+    "name" : "predicates/read_term_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 35,
+      "unknown" : 0,
+      "total" : 36
     }
   }, {
     "uid" : "fe889f4ed1e23b13cb890295efdd6049",
@@ -56,26 +56,15 @@
       "total" : 11
     }
   }, {
-    "uid" : "2dae564ffa6f8fff4ee6bf8dbbb0e559",
-    "name" : "predicates/set_stream_position_2/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 1,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 9,
-      "unknown" : 0,
-      "total" : 10
-    }
-  }, {
-    "uid" : "d43fc533ca1ad427757b2d322e01b8e7",
-    "name" : "unicode/tests.lgt::tests",
+    "uid" : "09812cef55155aac413b0e337d25177f",
+    "name" : "unicode/builtins/tests.lgt::tests",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 99,
+      "passed" : 128,
       "unknown" : 0,
-      "total" : 99
+      "total" : 128
     }
   }, {
     "uid" : "2fa097f54728c3cdaa06f09f04fafff8",
@@ -109,6 +98,17 @@
       "passed" : 48,
       "unknown" : 0,
       "total" : 48
+    }
+  }, {
+    "uid" : "99435521304eae5c110018f363e3c213",
+    "name" : "predicates/is_2/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 45,
+      "unknown" : 0,
+      "total" : 45
     }
   } ]
 }
