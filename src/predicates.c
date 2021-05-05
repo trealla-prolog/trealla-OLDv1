@@ -5141,7 +5141,7 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 
 static USE_RESULT pl_status fn_iso_throw_1(query *q)
 {
-	GET_FIRST_ARG(p1,any);
+	GET_FIRST_ARG(p1,nonvar);
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
 	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
