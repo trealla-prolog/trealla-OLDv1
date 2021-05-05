@@ -2257,9 +2257,6 @@ static USE_RESULT pl_status fn_iso_at_end_of_stream_0(query *q)
 		str->ungetch = ch;
 	}
 
-	if (str->ungetch)
-		return pl_failure;
-	
 	if (!feof(str->fp) && !ferror(str->fp))
 		return pl_failure;
 
@@ -2289,9 +2286,6 @@ static USE_RESULT pl_status fn_iso_at_end_of_stream_1(query *q)
 		int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 		str->ungetch = ch;
 	}
-
-	if (str->ungetch)
-		return pl_failure;
 
 	if (!feof(str->fp) && !ferror(str->fp))
 		return pl_failure;
