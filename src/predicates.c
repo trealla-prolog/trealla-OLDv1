@@ -2245,7 +2245,7 @@ static USE_RESULT pl_status fn_iso_at_end_of_stream_0(query *q)
 	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 
-	if (str->p) {
+	if (!str->ungetch && str->p) {
 		if (str->p->srcptr && *str->p->srcptr) {
 			int ch = get_char_utf8((const char**)&str->p->srcptr);
 			str->ungetch = ch;
@@ -2257,6 +2257,9 @@ static USE_RESULT pl_status fn_iso_at_end_of_stream_0(query *q)
 		str->ungetch = ch;
 	}
 
+	if (str->ungetch)
+		return pl_failure;
+	
 	if (!feof(str->fp) && !ferror(str->fp))
 		return pl_failure;
 
@@ -2275,7 +2278,7 @@ static USE_RESULT pl_status fn_iso_at_end_of_stream_1(query *q)
 	if (strcmp(str->mode, "read") && strcmp(str->mode, "update"))
 		return throw_error(q, pstr, "permission_error", "input,stream");
 
-	if (str->p) {
+	if (!str->ungetch && str->p) {
 		if (str->p->srcptr && *str->p->srcptr) {
 			int ch = get_char_utf8((const char**)&str->p->srcptr);
 			str->ungetch = ch;
@@ -2286,6 +2289,9 @@ static USE_RESULT pl_status fn_iso_at_end_of_stream_1(query *q)
 		int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
 		str->ungetch = ch;
 	}
+
+	if (str->ungetch)
+		return pl_failure;
 
 	if (!feof(str->fp) && !ferror(str->fp))
 		return pl_failure;
@@ -3343,7 +3349,7 @@ static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
-	if (str->p) {
+	if (!str->ungetch && str->p) {
 		if (str->p->srcptr && *str->p->srcptr) {
 			int ch = get_char_utf8((const char**)&str->p->srcptr);
 			str->ungetch = ch;
@@ -3414,7 +3420,7 @@ static USE_RESULT pl_status fn_iso_get_char_2(query *q)
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
-	if (str->p) {
+	if (!str->ungetch && str->p) {
 		if (str->p->srcptr && *str->p->srcptr) {
 			int ch = get_char_utf8((const char**)&str->p->srcptr);
 			str->ungetch = ch;
@@ -3484,7 +3490,7 @@ static USE_RESULT pl_status fn_iso_get_code_1(query *q)
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
-	if (str->p) {
+	if (!str->ungetch && str->p) {
 		if (str->p->srcptr && *str->p->srcptr) {
 			int ch = get_char_utf8((const char**)&str->p->srcptr);
 			str->ungetch = ch;
@@ -3556,7 +3562,7 @@ static USE_RESULT pl_status fn_iso_get_code_2(query *q)
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
-	if (str->p) {
+	if (!str->ungetch && str->p) {
 		if (str->p->srcptr && *str->p->srcptr) {
 			int ch = get_char_utf8((const char**)&str->p->srcptr);
 			str->ungetch = ch;
@@ -3621,7 +3627,7 @@ static USE_RESULT pl_status fn_iso_get_byte_1(query *q)
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
-	if (str->p) {
+	if (!str->ungetch && str->p) {
 		if (str->p->srcptr && *str->p->srcptr) {
 			int ch = *str->p->srcptr++;
 			str->ungetch = ch;
@@ -3687,7 +3693,7 @@ static USE_RESULT pl_status fn_iso_get_byte_2(query *q)
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
-	if (str->p) {
+	if (!str->ungetch && str->p) {
 		if (str->p->srcptr && *str->p->srcptr) {
 			int ch = *str->p->srcptr;
 			str->ungetch = ch;
@@ -3748,7 +3754,7 @@ static USE_RESULT pl_status fn_iso_peek_char_1(query *q)
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
-	if (str->p) {
+	if (!str->ungetch && str->p) {
 		if (str->p->srcptr && *str->p->srcptr) {
 			int ch = peek_char_utf8((const char*)str->p->srcptr);
 			str->ungetch = ch;
@@ -3804,7 +3810,7 @@ static USE_RESULT pl_status fn_iso_peek_char_2(query *q)
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
-	if (str->p) {
+	if (!str->ungetch && str->p) {
 		if (str->p->srcptr && *str->p->srcptr) {
 			int ch = peek_char_utf8((const char*)str->p->srcptr);
 			str->ungetch = ch;
@@ -3858,7 +3864,7 @@ static USE_RESULT pl_status fn_iso_peek_code_1(query *q)
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
-	if (str->p) {
+	if (!str->ungetch && str->p) {
 		if (str->p->srcptr && *str->p->srcptr) {
 			int ch = peek_char_utf8((const char*)str->p->srcptr);
 			str->ungetch = ch;
@@ -3914,7 +3920,7 @@ static USE_RESULT pl_status fn_iso_peek_code_2(query *q)
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
-	if (str->p) {
+	if (!str->ungetch && str->p) {
 		if (str->p->srcptr && *str->p->srcptr) {
 			int ch = peek_char_utf8((const char*)str->p->srcptr);
 			str->ungetch = ch;
@@ -3963,7 +3969,7 @@ static USE_RESULT pl_status fn_iso_peek_byte_1(query *q)
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
-	if (str->p) {
+	if (!str->ungetch && str->p) {
 		if (str->p->srcptr && *str->p->srcptr) {
 			int ch = peek_char_utf8((const char*)str->p->srcptr);
 			str->ungetch = ch;
@@ -4015,7 +4021,7 @@ static USE_RESULT pl_status fn_iso_peek_byte_2(query *q)
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
-	if (str->p) {
+	if (!str->ungetch && str->p) {
 		if (str->p->srcptr && *str->p->srcptr) {
 			int ch = peek_char_utf8((const char*)str->p->srcptr);
 			str->ungetch = ch;
