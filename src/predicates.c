@@ -3321,6 +3321,8 @@ static USE_RESULT pl_status fn_iso_put_byte_2(query *q)
 	return !ferror(str->fp);
 }
 
+#define FEOF(str) feof(str->fp) && !str->ungetch
+
 static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_character_or_var);
@@ -3362,9 +3364,9 @@ static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 	}
 
 	str->did_getc = true;
-	str->ungetch = 0;
 
-	if (feof(str->fp)) {
+	if (FEOF(str)) {
+		str->ungetch = 0;
 		str->did_getc = false;
 		str->at_end_of_file = str->eof_action != eof_action_reset;
 
@@ -3375,6 +3377,8 @@ static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
+
+	str->ungetch = 0;
 
 	if (ch == '\n')
 		str->did_getc = false;
@@ -3431,9 +3435,9 @@ static USE_RESULT pl_status fn_iso_get_char_2(query *q)
 	}
 
 	str->did_getc = true;
-	str->ungetch = 0;
 
-	if (feof(str->fp)) {
+	if (FEOF(str)) {
+		str->ungetch = 0;
 		str->did_getc = false;
 		str->at_end_of_file = str->eof_action != eof_action_reset;
 
@@ -3444,6 +3448,8 @@ static USE_RESULT pl_status fn_iso_get_char_2(query *q)
 		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
+
+	str->ungetch = 0;
 
 	if (ch == '\n')
 		str->did_getc = false;
@@ -3499,9 +3505,9 @@ static USE_RESULT pl_status fn_iso_get_code_1(query *q)
 	}
 
 	str->did_getc = true;
-	str->ungetch = 0;
 
-	if (feof(str->fp)) {
+	if (FEOF(str)) {
+		str->ungetch = 0;
 		str->did_getc = false;
 		str->at_end_of_file = str->eof_action != eof_action_reset;
 
@@ -3512,6 +3518,8 @@ static USE_RESULT pl_status fn_iso_get_code_1(query *q)
 		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
+
+	str->ungetch = 0;
 
 	if ((ch == '\n') || (ch == EOF))
 		str->did_getc = false;
@@ -3569,9 +3577,9 @@ static USE_RESULT pl_status fn_iso_get_code_2(query *q)
 	}
 
 	str->did_getc = true;
-	str->ungetch = 0;
 
-	if (feof(str->fp)) {
+	if (FEOF(str)) {
+		str->ungetch = 0;
 		str->did_getc = false;
 		str->at_end_of_file = str->eof_action != eof_action_reset;
 
@@ -3582,6 +3590,8 @@ static USE_RESULT pl_status fn_iso_get_code_2(query *q)
 		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
+
+	str->ungetch = 0;
 
 	if (ch == '\n')
 		str->did_getc = false;
@@ -3632,9 +3642,9 @@ static USE_RESULT pl_status fn_iso_get_byte_1(query *q)
 	}
 
 	str->did_getc = true;
-	str->ungetch = 0;
 
-	if (feof(str->fp)) {
+	if (FEOF(str)) {
+		str->ungetch = 0;
 		str->did_getc = false;
 		str->at_end_of_file = str->eof_action != eof_action_reset;
 
@@ -3645,6 +3655,8 @@ static USE_RESULT pl_status fn_iso_get_byte_1(query *q)
 		make_int(&tmp, -1);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
+
+	str->ungetch = 0;
 
 	cell tmp;
 	make_int(&tmp, ch);
@@ -3696,9 +3708,9 @@ static USE_RESULT pl_status fn_iso_get_byte_2(query *q)
 	}
 
 	str->did_getc = true;
-	str->ungetch = 0;
 
-	if (feof(str->fp)) {
+	if (FEOF(str)) {
+		str->ungetch = 0;
 		str->did_getc = false;
 		str->at_end_of_file = str->eof_action != eof_action_reset;
 
@@ -3710,6 +3722,7 @@ static USE_RESULT pl_status fn_iso_get_byte_2(query *q)
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
+	str->ungetch = 0;
 	cell tmp;
 	make_int(&tmp, ch);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -3751,7 +3764,7 @@ static USE_RESULT pl_status fn_iso_peek_char_1(query *q)
 	}
 
 
-	if (feof(str->fp)) {
+	if (FEOF(str)) {
 		str->did_getc = false;
 		clearerr(str->fp);
 		cell tmp;
@@ -3806,7 +3819,7 @@ static USE_RESULT pl_status fn_iso_peek_char_2(query *q)
 		return pl_failure;
 	}
 
-	if (feof(str->fp)) {
+	if (FEOF(str)) {
 		str->did_getc = false;
 		clearerr(str->fp);
 		cell tmp;
@@ -3860,7 +3873,7 @@ static USE_RESULT pl_status fn_iso_peek_code_1(query *q)
 		return pl_failure;
 	}
 
-	if (feof(str->fp)) {
+	if (FEOF(str)) {
 		str->did_getc = false;
 		clearerr(str->fp);
 		cell tmp;
@@ -3916,7 +3929,7 @@ static USE_RESULT pl_status fn_iso_peek_code_2(query *q)
 		return pl_failure;
 	}
 
-	if (feof(str->fp)) {
+	if (FEOF(str)) {
 		str->did_getc = false;
 		clearerr(str->fp);
 		cell tmp;
@@ -3965,7 +3978,7 @@ static USE_RESULT pl_status fn_iso_peek_byte_1(query *q)
 		return pl_failure;
 	}
 
-	if (feof(str->fp)) {
+	if (FEOF(str)) {
 		clearerr(str->fp);
 		cell tmp;
 		make_int(&tmp, -1);
@@ -4017,7 +4030,7 @@ static USE_RESULT pl_status fn_iso_peek_byte_2(query *q)
 		return pl_failure;
 	}
 
-	if (feof(str->fp)) {
+	if (FEOF(str)) {
 		clearerr(str->fp);
 		cell tmp;
 		make_int(&tmp, -1);
