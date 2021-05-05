@@ -1,77 +1,18 @@
 {
   "uid" : "4b4757e66a1912dae1a509f688f20b0f",
+  "name" : "categories",
   "children" : [ {
     "name" : "Product defects",
     "children" : [ {
-      "name" : "Error instead of success",
-      "children" : [ {
-        "name" : "iso_catch_3_08",
-        "uid" : "a122813319e62cc3",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1620191537000,
-          "stop" : 1620191537000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "iso_bagof_3_10",
-        "uid" : "6d64af5939331bda",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1620191705000,
-          "stop" : 1620191705000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "sics_read_term_3_24",
-        "uid" : "70750ad3ec403558",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1620191835000,
-          "stop" : 1620191835001,
-          "duration" : 1
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      } ],
-      "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
-    }, {
-      "name" : "Wrong error",
-      "children" : [ {
-        "name" : "lgt_throw_1_1",
-        "uid" : "4cb62a931669b963",
-        "parentUid" : "253761ad1716c4cf6303f692bd63b68e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1620191562000,
-          "stop" : 1620191562000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      } ],
-      "uid" : "253761ad1716c4cf6303f692bd63b68e"
-    }, {
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "eclipse_throw_1_7",
-        "uid" : "c1814e09e7ea656b",
+        "uid" : "e69805668e36c860",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1620191562000,
-          "stop" : 1620191562000,
+          "start" : 1620196970000,
+          "stop" : 1620196970000,
           "duration" : 0
         },
         "flaky" : false,
@@ -79,12 +20,12 @@
         "parameters" : [ ]
       }, {
         "name" : "iso_setof_3_12",
-        "uid" : "658f1a1c32adb24d",
+        "uid" : "d304402cfabdd558",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1620191855000,
-          "stop" : 1620191855000,
+          "start" : 1620197223000,
+          "stop" : 1620197223000,
           "duration" : 0
         },
         "flaky" : false,
@@ -92,8 +33,37 @@
         "parameters" : [ ]
       } ],
       "uid" : "7a65c89daad8cf82ce910dbf95cc8113"
+    }, {
+      "name" : "Error instead of success",
+      "children" : [ {
+        "name" : "iso_bagof_3_10",
+        "uid" : "673abcc2208c7a69",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "start" : 1620197094000,
+          "stop" : 1620197094000,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "sics_read_term_3_24",
+        "uid" : "471f6da150cdcae9",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "start" : 1620197207000,
+          "stop" : 1620197207001,
+          "duration" : 1
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      } ],
+      "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
     } ],
     "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
-  } ],
-  "name" : "categories"
+  } ]
 }
