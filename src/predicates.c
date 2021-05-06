@@ -10937,7 +10937,7 @@ static USE_RESULT pl_status fn_sys_clone_term_2(query *q)
 	GET_NEXT_ARG(p2,any);
 
 	if (is_variable(p1) && is_variable(p2))
-		return pl_success;
+		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
 	if (is_atomic(p1) && is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
