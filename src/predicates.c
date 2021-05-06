@@ -10931,6 +10931,34 @@ static USE_RESULT pl_status fn_module_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_sys_clone_term_2(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,any);
+
+	if (is_variable(p1) && is_variable(p2))
+		return pl_success;
+
+	if (is_atomic(p1) && is_variable(p2))
+		return unify(q, p1, p1_ctx, p2, p2_ctx);
+
+	if (!is_variable(p2) && !has_vars(q, p1, p1_ctx, 0))
+		return unify(q, p1, p1_ctx, p2, p2_ctx);
+
+	if (q->cycle_error)
+		return throw_error(q, p1, "resource_error", "too_many_vars");
+
+	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, true);
+
+	if (!tmp || (tmp == ERR_CYCLE_CELL))
+		return throw_error(q, p1, "resource_error", "too_many_vars");
+
+	if (!unify(q, p2, p2_ctx, tmp, q->st.curr_frame))
+		return pl_failure;
+
+	return unify(q, p1, p1_ctx, p2, p2_ctx);
+}
+
 static USE_RESULT pl_status fn_sys_register_term_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
@@ -11235,6 +11263,7 @@ static const struct builtins g_predicates_iso[] =
 	{"time", 1, fn_time_1, NULL},
 	{"trace", 0, fn_trace_0, NULL},
 
+	{"$clone_term", 2, fn_sys_clone_term_2, NULL},
 	{"$register_cleanup", 1, fn_sys_register_cleanup_1, NULL},
 	{"$register_term", 1, fn_sys_register_term_1, NULL},
 	{"$chk_is_det", 0, fn_sys_chk_is_det_0, NULL},
@@ -11362,7 +11391,7 @@ static const struct builtins g_predicates_other[] =
 	{"setenv", 2, fn_setenv_2, NULL},
 	{"unsetenv", 1, fn_unsetenv_1, NULL},
 	{"statistics", 2, fn_statistics_2, "+string,-variable"},
-	{"duplicate_term", 2, fn_iso_copy_term_2, "+string,-variable"},
+	{"duplicate_term", 2, fn_iso_copy_term_2, "+term,-variable"},
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer"},
 	{"limit", 2, fn_limit_2, "+integer,+callable"},
 	{"offset", 2, fn_offset_2, "+integer,+callable"},
