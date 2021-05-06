@@ -10956,7 +10956,7 @@ static USE_RESULT pl_status fn_sys_clone_term_2(query *q)
 	if (!unify(q, p2, p2_ctx, tmp, q->st.curr_frame))
 		return pl_failure;
 
-	return unify(q, p1, p1_ctx, p2, p2_ctx);
+	return unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 }
 
 static USE_RESULT pl_status fn_sys_register_term_1(query *q)

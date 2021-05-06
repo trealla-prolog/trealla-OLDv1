@@ -219,43 +219,35 @@ setof(T,G,B) :-
 %
 
 call(G) :-
-	copy_term('$call'(G),TMP_G),
-	'$call'(G)=TMP_G,
+	'$clone_term'('$call'(G),TMP_G),
 	'$call'(TMP_G).
 
 call(G,P1) :-
-	copy_term('$call'(G,P1),TMP_G),
-	'$call'(G,P1)=TMP_G,
+	'$clone_term'('$call'(G,P1),TMP_G),
 	'$call'(TMP_G).
 
 call(G,P1,P2) :-
-	copy_term('$call'(G,P1,P2),TMP_G),
-	'$call'(G,P1,P2)=TMP_G,
+	'$clone_term'('$call'(G,P1,P2),TMP_G),
 	'$call'(TMP_G).
 
 call(G,P1,P2,P3) :-
-	copy_term('$call'(G,P1,P2,P3),TMP_G),
-	'$call'(G,P1,P2,P3)=TMP_G,
+	'$clone_term'('$call'(G,P1,P2,P3),TMP_G),
 	'$call'(TMP_G).
 
 call(G,P1,P2,P3,P4) :-
-	copy_term('$call'(G,P1,P2,P3,P4),TMP_G),
-	'$call'(G,P1,P2,P3,P4)=TMP_G,
+	'$clone_term'('$call'(G,P1,P2,P3,P4),TMP_G),
 	'$call'(TMP_G).
 
 call(G,P1,P2,P3,P4,P5) :-
-	copy_term('$call'(G,P1,P2,P3,P4,P5),TMP_G),
-	'$call'(G,P1,P2,P3,P4,P5)=TMP_G,
+	'$clone_term'('$call'(G,P1,P2,P3,P4,P5),TMP_G),
 	'$call'(TMP_G).
 
 call(G,P1,P2,P3,P4,P5,P6) :-
-	copy_term('$call'(G,P1,P2,P3,P4,P5,P6),TMP_G),
-	'$call'(G,P1,P2,P3,P4,P5,P6)=TMP_G,
+	'$clone_term'('$call'(G,P1,P2,P3,P4,P5,P6),TMP_G),
 	'$call'(TMP_G).
 
 call(G,P1,P2,P3,P4,P5,P6,P7) :-
-	copy_term('$call'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),
-	'$call'(G,P1,P2,P3,P4,P5,p6,P7)=TMP_G,
+	'$clone_term'('$call'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),
 	'$call'(TMP_G).
 
 %
@@ -265,43 +257,35 @@ call(G,P1,P2,P3,P4,P5,P6,P7) :-
 %
 
 task(G) :-
-	copy_term('$task'(G),TMP_G),
-	'$task'(G)=TMP_G,
+	'$clone_term'('$task'(G),TMP_G),
 	'$call'(TMP_G).
 
 task(G,P1) :-
-	copy_term('$task'(G,P1),TMP_G),
-	'$task'(G,P1)=TMP_G,
+	'$clone_term'('$task'(G,P1),TMP_G),
 	'$call'(TMP_G).
 
 task(G,P1,P2) :-
-	copy_term('$task'(G,P1,P2),TMP_G),
-	'$task'(G,P1,P2)=TMP_G,
+	'$clone_term'('$task'(G,P1,P2),TMP_G),
 	'$call'(TMP_G).
 
 task(G,P1,P2,P3) :-
-	copy_term('$task'(G,P1,P2,P3),TMP_G),
-	'$task'(G,P1,P2,P3)=TMP_G,
+	'$clone_term'('$task'(G,P1,P2,P3),TMP_G),
 	'$call'(TMP_G).
 
 task(G,P1,P2,P3,P4) :-
-	copy_term('$task'(G,P1,P2,P3,P4),TMP_G),
-	'$task'(G,P1,P2,P3,P4)=TMP_G,
+	'$clone_term'('$task'(G,P1,P2,P3,P4),TMP_G),
 	'$call'(TMP_G).
 
 task(G,P1,P2,P3,P4,P5) :-
-	copy_term('$task'(G,P1,P2,P3,P4,P5),TMP_G),
-	'$task'(G,P1,P2,p3,P4,P5)=TMP_G,
+	'$clone_term'('$task'(G,P1,P2,P3,P4,P5),TMP_G),
 	'$call'(TMP_G).
 
 task(G,P1,P2,P3,P4,P5,P6) :-
-	copy_term('$task'(G,P1,P2,P3,P4,P5,P6),TMP_G),
-	'$task'(G,P1,P2,P3,P4,P5,P6)=TMP_G,
+	'$clone_term'('$task'(G,P1,P2,P3,P4,P5,P6),TMP_G),
 	'$call'(TMP_G).
 
 task(G,P1,P2,P3,P4,P5,P6,P7) :-
-	copy_term('$task'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),
-	'$task'(G,P1,P2,P3,P4,P5,P6,P7)=TMP_G,
+	'$clone_term'('$task'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),
 	'$call'(TMP_G).
 
 %
