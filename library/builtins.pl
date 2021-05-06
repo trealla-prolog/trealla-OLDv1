@@ -22,21 +22,10 @@ subsumes_term(G, S) :-
 	 V2 == V1
 	).
 
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-
 call_cleanup(G, C) :-
 	setup_call_cleanup(true, G, C).
 
 setup_call_cleanup(S, G, C) :-
-	copy_term('$setup_call_cleanup'(S, G, C),TMP_G),
-	'$call'(TMP_G),
-	'$setup_call_cleanup'(S, G, C) = TMP_G.
-
-'$setup_call_cleanup'(S, G, C) :-
 	'$call'((S, !)),
 	'$register_cleanup'((C, !)),
 	catch(G, Err,
@@ -625,7 +614,7 @@ attributed(Var) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+% This is bidirectional!
 
 atomic_list_concat(L, Atom) :-
 	atomic_list_concat(L, '', Atom).
@@ -649,7 +638,8 @@ atom_list(Atom, Sep, [Word|L]) :-
 	sub_atom(Atom, 0, X, _, Word),
 	Z is X + N,
 	sub_atom(Atom, Z, _, 0, Rest),
-	!, atom_list(Rest, Sep, L).
+	!,
+	atom_list(Rest, Sep, L).
 atom_list(Atom, _Sep, [Atom]).
 
 %
