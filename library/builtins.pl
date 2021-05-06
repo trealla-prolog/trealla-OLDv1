@@ -219,7 +219,7 @@ setof(T,G,B) :-
 %
 
 call(G) :-
-	'$clone_term'('$call'(G),TMP_G),
+	'$clone_term'(G,TMP_G),
 	'$call'(TMP_G).
 
 call(G,P1) :-
@@ -257,7 +257,7 @@ call(G,P1,P2,P3,P4,P5,P6,P7) :-
 %
 
 task(G) :-
-	'$clone_term'('$task'(G),TMP_G),
+	'$clone_term'(G,TMP_G),
 	'$call'(TMP_G).
 
 task(G,P1) :-
