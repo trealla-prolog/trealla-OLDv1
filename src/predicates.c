@@ -522,22 +522,39 @@ static USE_RESULT pl_status fn_soft_cut_0(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_block_exception_1(query *q)
+static USE_RESULT pl_status fn_block_exception_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
+	GET_NEXT_ARG(p2,integer);
 	int_t cp = p1->val_num;
+	int_t cgen = p2->val_num;
 
-	if ((cp < 0) || (cp >= q->cp))
+	if ((cp < 0) || (cgen < 0))
 		return pl_failure;
 
-#if 0
+	// No longer extant...
+	
+	if (cp >= q->cp) 
+		return pl_success;
+
+	// Has the exception happened and been
+	// overwritten? Check it is still valid...
+	
+	choice *ch = GET_CHOICE(cp);
+
+	if (cgen != ch->cgen) 
+		return pl_success;
+
+#if 1
+	// If no outstanding choice points for the target
+	// goal then drop the exception handler...
+	
 	if (cp == (q->cp-1)) {
 		q->cp--;
 		return pl_success;
 	}
 #endif
 	
-	choice *ch = GET_CHOICE(cp);
 	ch->blocked = true;
 	return pl_success;
 }
@@ -5133,10 +5150,13 @@ static USE_RESULT pl_status fn_iso_catch_3(query *q)
 	// First time through? Try the primary goal...
 
 	may_error(make_catcher(q, QUERY_RETRY));
-	cell *tmp = clone_to_heap(q, true, p1, 3);
+	const choice *ch = GET_CURR_CHOICE();
+	
+	cell *tmp = clone_to_heap(q, true, p1, 4);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, index_from_pool(q->st.m->pl, "$block_exception"), fn_block_exception_1, 1, 1);
+	make_structure(tmp+nbr_cells++, index_from_pool(q->st.m->pl, "$block_exception"), fn_block_exception_2, 2, 2);
 	make_int(tmp+nbr_cells++, q->cp-1);
+	make_int(tmp+nbr_cells++, ch->cgen);
 	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 	q->save_cp = q->cp;
