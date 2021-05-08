@@ -522,10 +522,15 @@ static USE_RESULT pl_status fn_soft_cut_0(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_local_block_0(query *q)
+static USE_RESULT pl_status fn_block_exception_1(query *q)
 {
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = GET_CHOICE(curr_choice);
+	GET_FIRST_ARG(p1,integer);
+	idx_t cgen = p1->val_num;
+	choice *ch = GET_CURR_CHOICE();
+
+	while (ch->cgen != cgen)
+		ch--;
+		
 	ch->blocked = true;
 	return pl_success;
 }
@@ -5120,11 +5125,13 @@ static USE_RESULT pl_status fn_iso_catch_3(query *q)
 
 	// First time through? Try the primary goal...
 
+	may_error(make_catcher(q, QUERY_RETRY));
 	cell *tmp = clone_to_heap(q, true, p1, 3);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, index_from_pool(q->st.m->pl, "$block"), fn_local_block_0, 0, 0);
+	make_structure(tmp+nbr_cells++, index_from_pool(q->st.m->pl, "$block_exception"), fn_block_exception_1, 1, 1);
+	choice *ch = GET_CURR_CHOICE();
+	make_int(tmp+nbr_cells++, ch->cgen);
 	make_call(q, tmp+nbr_cells);
-	may_error(make_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;
 	q->save_cp = q->cp;
 	return pl_success;
