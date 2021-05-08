@@ -33,8 +33,9 @@ setup_call_cleanup(S, G, C) :-
 	'$chk_is_det'.
 
 catch(G, E, C) :-
-	'$clone_term'('$catch'(G, E, C), TMP_G),
-	'$call'(TMP_G).
+	copy_term('$catch'(G, E, C), TMP_G),
+	'$call'(TMP_G),
+	'$catch'(G, E, C)=TMP_G.
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
