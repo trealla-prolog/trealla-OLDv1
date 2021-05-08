@@ -555,7 +555,7 @@ static USE_RESULT pl_status fn_block_exception_2(query *q)
 	}
 #endif
 	
-	ch->blocked = true;
+	//ch->blocked = true;
 	return pl_success;
 }
 
