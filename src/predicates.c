@@ -530,10 +530,12 @@ static USE_RESULT pl_status fn_block_exception_1(query *q)
 	if ((cp < 0) || (cp >= q->cp))
 		return pl_failure;
 
+#if 0
 	if (cp == (q->cp-1)) {
 		q->cp--;
 		return pl_success;
 	}
+#endif
 	
 	choice *ch = GET_CHOICE(cp);
 	ch->blocked = true;
