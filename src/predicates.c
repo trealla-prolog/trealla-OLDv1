@@ -11465,21 +11465,17 @@ void load_builtins(prolog *pl)
 {
 	const struct builtins *ptr;
 	
-	for (ptr = g_predicates_iso; ptr->name; ptr++) {
+	for (ptr = g_predicates_iso; ptr->name; ptr++)
 		sl_app(pl->funtab, ptr->name, ptr);
-	}
 
-	for (ptr = g_functions; ptr->name; ptr++) {
+	for (ptr = g_functions; ptr->name; ptr++)
 		sl_app(pl->funtab, ptr->name, ptr);
-	}
 
-	for (ptr = g_predicates_other; ptr->name; ptr++) {
+	for (ptr = g_predicates_other; ptr->name; ptr++)
 		sl_app(pl->funtab, ptr->name, ptr);
-	}
 
-	for (ptr = g_contrib_funcs; ptr->name; ptr++) {
+	for (ptr = g_contrib_funcs; ptr->name; ptr++)
 		sl_app(pl->funtab, ptr->name, ptr);
-	}
 }
 
 char *format_property(char **bufptr, size_t *lenptr, char *dst, const char *name, unsigned arity, const char *type)
