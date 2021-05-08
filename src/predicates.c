@@ -545,7 +545,7 @@ static USE_RESULT pl_status fn_block_exception_2(query *q)
 	if (cgen != ch->cgen) 
 		return pl_success;
 
-#if 1
+#if 0
 	// If no outstanding choice points for the target
 	// goal then drop the exception handler...
 	
@@ -5183,7 +5183,7 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 		return true;
 	}
 
-	fprintf(stdout, "exception: ");
+	fprintf(stdout, "uncaught exception: ");
 	q->quoted = 1;
 	print_term(q, stdout, e, q->st.curr_frame, 1);
 	fprintf(stdout, "\n");
