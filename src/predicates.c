@@ -2057,6 +2057,8 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 					binary = true;
 				} else if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "text"))
 					binary = false;
+				else
+					return throw_error(q, c, "domain_error", "stream_option");
 			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "bom")) {
 				bom_specified = true;
 				
@@ -2064,11 +2066,15 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 					use_bom = true;
 				else if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "false"))
 					use_bom = false;
+				else
+					return throw_error(q, c, "domain_error", "stream_option");
 			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "reposition")) {
 				if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "true"))
 					str->repo = true;
 				else if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "false"))
 					str->repo = false;
+				else
+					return throw_error(q, c, "domain_error", "stream_option");
 			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "eof_action")) {
 				if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "error")) {
 					str->eof_action = eof_action_error;
@@ -2077,6 +2083,8 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 				} else if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "reset")) {
 					str->eof_action = eof_action_reset;
 				}
+				else
+					return throw_error(q, c, "domain_error", "stream_option");
 			}
 		} else
 			return throw_error(q, c, "domain_error", "stream_option");
@@ -2131,6 +2139,8 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 		if (feof(str->fp))
 			clearerr(str->fp);
+
+		// Needs some work here to validate BOM
 		
 		if ((unsigned)ch == 0xFEFF) {
 			str->bom = true;
