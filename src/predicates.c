@@ -10709,7 +10709,7 @@ static USE_RESULT pl_status fn_memberchk_2(query *q)
 		size_t lench = len_char_utf8(src);
 
 		if (lench == len)
-			return memmem(GET_STR(p2), LEN_STR(p2), src, lench) ? pl_success : pl_failure;
+			return memmem(GET_STR(p2), LEN_STR(p2), src, len) ? pl_success : pl_failure;
 	}
 
 	if (is_atom(p1)) {
@@ -10787,7 +10787,7 @@ static USE_RESULT pl_status fn_sys_put_chars_2(query *q)
 	GET_NEXT_ARG(p1,any);
 	size_t len;
 
-	if (is_cstring(p1)) {
+	if (is_atom(p1)) {
 		const char *src = GET_STR(p1);
 		size_t len = LEN_STR(p1);
 		net_write(src, len, str);
@@ -11463,19 +11463,21 @@ extern const struct builtins g_contrib_funcs[];
 
 void load_builtins(prolog *pl)
 {
-	for (const struct builtins *ptr = g_predicates_iso; ptr->name; ptr++) {
+	const struct builtins *ptr;
+	
+	for (ptr = g_predicates_iso; ptr->name; ptr++) {
 		sl_app(pl->funtab, ptr->name, ptr);
 	}
 
-	for (const struct builtins *ptr = g_functions; ptr->name; ptr++) {
+	for (ptr = g_functions; ptr->name; ptr++) {
 		sl_app(pl->funtab, ptr->name, ptr);
 	}
 
-	for (const struct builtins *ptr = g_predicates_other; ptr->name; ptr++) {
+	for (ptr = g_predicates_other; ptr->name; ptr++) {
 		sl_app(pl->funtab, ptr->name, ptr);
 	}
 
-	for (const struct builtins *ptr = g_contrib_funcs; ptr->name; ptr++) {
+	for (ptr = g_contrib_funcs; ptr->name; ptr++) {
 		sl_app(pl->funtab, ptr->name, ptr);
 	}
 }
