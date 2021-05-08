@@ -525,12 +525,12 @@ static USE_RESULT pl_status fn_soft_cut_0(query *q)
 static USE_RESULT pl_status fn_block_exception_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	idx_t cgen = p1->val_num;
-	choice *ch = GET_CURR_CHOICE();
+	int_t cp = p1->val_num;
 
-	while (ch->cgen != cgen)
-		ch--;
+	if ((cp < 0) || (cp >= q->cp))
+		return pl_failure;
 		
+	choice *ch = GET_CHOICE(cp);
 	ch->blocked = true;
 	return pl_success;
 }
@@ -5129,8 +5129,7 @@ static USE_RESULT pl_status fn_iso_catch_3(query *q)
 	cell *tmp = clone_to_heap(q, true, p1, 3);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, index_from_pool(q->st.m->pl, "$block_exception"), fn_block_exception_1, 1, 1);
-	choice *ch = GET_CURR_CHOICE();
-	make_int(tmp+nbr_cells++, ch->cgen);
+	make_int(tmp+nbr_cells++, q->cp-1);
 	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 	q->save_cp = q->cp;
