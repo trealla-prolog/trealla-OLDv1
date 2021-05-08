@@ -5141,7 +5141,7 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 	q->exception = e;
 
 	while (retry_choice(q)) {
-		choice *ch = GET_CHOICE(q->cp);
+		const choice *ch = GET_CHOICE(q->cp);
 
 		if (!ch->catchme_retry)
 			continue;

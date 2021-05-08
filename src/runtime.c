@@ -233,15 +233,14 @@ bool retry_choice(query *q)
 	if (!q->cp)
 		return false;
 
-	idx_t curr_choice = q->cp - 1;
-	choice *ch = GET_CHOICE(curr_choice);
+	choice *ch = GET_CURR_CHOICE();
 
 	if (ch->blocked) {
 		drop_choice(q);
 		return retry_choice(q);
 	}
 
-	curr_choice = drop_choice(q);
+	idx_t curr_choice = drop_choice(q);
 	ch = GET_CHOICE(curr_choice);
 	unwind_trail(q, ch);
 
