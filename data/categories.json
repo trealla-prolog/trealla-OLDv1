@@ -6,12 +6,25 @@
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "eclipse_throw_1_7",
-        "uid" : "3efa83d2a1c07504",
+        "uid" : "96665fea51d3b9fb",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1620454085000,
-          "stop" : 1620454085000,
+          "start" : 1620460194000,
+          "stop" : 1620460194000,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "iso_clause_2_09",
+        "uid" : "c36354a70f00c442",
+        "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
+        "status" : "failed",
+        "time" : {
+          "start" : 1620460323000,
+          "stop" : 1620460323000,
           "duration" : 0
         },
         "flaky" : false,
@@ -19,25 +32,12 @@
         "parameters" : [ ]
       }, {
         "name" : "iso_setof_3_12",
-        "uid" : "c9f72c078c3e339",
+        "uid" : "e581126e6fa0c42a",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1620454311000,
-          "stop" : 1620454311000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "swi_setup_call_cleanup_3_06",
-        "uid" : "d881853a73923689",
-        "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
-        "status" : "failed",
-        "time" : {
-          "start" : 1620454313000,
-          "stop" : 1620454313000,
+          "start" : 1620460440000,
+          "stop" : 1620460440000,
           "duration" : 0
         },
         "flaky" : false,
@@ -49,12 +49,12 @@
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "iso_bagof_3_10",
-        "uid" : "d23c55f8c16887d7",
+        "uid" : "990ddd9c8d474d3d",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1620454196000,
-          "stop" : 1620454196000,
+          "start" : 1620460313000,
+          "stop" : 1620460313000,
           "duration" : 0
         },
         "flaky" : false,
@@ -62,12 +62,12 @@
         "parameters" : [ ]
       }, {
         "name" : "lgt_format_2_empty_control_sequence",
-        "uid" : "fba3c9552fae443f",
+        "uid" : "9562f235f446f558",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1620454235000,
-          "stop" : 1620454235001,
+          "start" : 1620460355000,
+          "stop" : 1620460355001,
           "duration" : 1
         },
         "flaky" : false,
@@ -75,25 +75,12 @@
         "parameters" : [ ]
       }, {
         "name" : "lgt_format_3_empty_control_sequence",
-        "uid" : "5e47040c39ce83e1",
+        "uid" : "88f330d7f42a2e4",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1620454237000,
-          "stop" : 1620454237001,
-          "duration" : 1
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "sics_read_term_3_22",
-        "uid" : "ecd8b535daf53420",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1620454296000,
-          "stop" : 1620454296001,
+          "start" : 1620460357000,
+          "stop" : 1620460357001,
           "duration" : 1
         },
         "flaky" : false,
@@ -101,12 +88,12 @@
         "parameters" : [ ]
       }, {
         "name" : "sics_read_term_3_24",
-        "uid" : "ecd041ade517c32a",
+        "uid" : "66d3fc38599b1956",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1620454296000,
-          "stop" : 1620454296001,
+          "start" : 1620460424000,
+          "stop" : 1620460424001,
           "duration" : 1
         },
         "flaky" : false,
