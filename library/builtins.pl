@@ -206,10 +206,10 @@ bagof(T,G,B) :-
 	'$bagof'(T,G,B)=TMP_G.
 
 setof(T,G,B) :-
-	copy_term('$bagof'(T,G,_),TMP_G),
+	copy_term('$bagof'(T,G,B0),TMP_G),
 	'$call'(TMP_G),
-	'$bagof'(T,G,TMP_B)=TMP_G,
-	sort(TMP_B,B).
+	'$bagof'(T,G,B0)=TMP_G,
+	sort(B0,B).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
