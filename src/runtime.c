@@ -233,15 +233,8 @@ bool retry_choice(query *q)
 	if (!q->cp)
 		return false;
 
-	choice *ch = GET_CURR_CHOICE();
-
-	if (ch->blocked) {
-		drop_choice(q);
-		return retry_choice(q);
-	}
-
 	idx_t curr_choice = drop_choice(q);
-	ch = GET_CHOICE(curr_choice);
+	const choice *ch = GET_CHOICE(curr_choice);
 	unwind_trail(q, ch);
 
 	// TO-DO: Watch for stack, make non-recursive...
@@ -250,7 +243,6 @@ bool retry_choice(query *q)
 		return retry_choice(q);
 
 	trim_heap(q, ch);
-	ch->blocked = false;
 	sl_done(q->st.iter);
 	q->st = ch->st;
 	q->save_m = NULL;		// maybe move q->save_m to q->st.save_m

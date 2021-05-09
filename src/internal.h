@@ -464,7 +464,6 @@ typedef struct {
 	uint16_t nbr_vars, nbr_slots;
 	bool catchme_retry:1;
 	bool catchme_exception:1;
-	bool blocked:1;
 	bool barrier:1;
 	bool soft_cut:1;
 	bool did_cleanup:1;
