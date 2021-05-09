@@ -35,7 +35,7 @@ setup_call_cleanup(S, G, C) :-
 catch(G, E, C) :-
 	copy_term('$catch'(G, E, C), TMP_G),
 	'$call'(TMP_G),
-	'$catch'(G, E, C)=TMP_G.
+	'$catch'(G, E, C) = TMP_G.
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -207,10 +207,10 @@ bagof(T,G,B) :-
 	'$bagof'(T,G,B)=TMP_G.
 
 setof(T,G,B) :-
-	copy_term('$bagof'(T,G,B0),TMP_G),
+	copy_term('$bagof'(T,G,_),TMP_G),
 	'$call'(TMP_G),
-	'$bagof'(T,G,B0)=TMP_G,
-	sort(B0,B).
+	'$bagof'(T,G,TMP_B)=TMP_G,
+	sort(TMP_B,B).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
