@@ -6408,6 +6408,7 @@ static pl_status do_asserta_2(query *q)
 		uuid_from_buf(GET_STR(p2), &u);
 		r->u = u;
 	} else {
+		uuid_gen(q->st.m->pl, &r->u);
 		char tmpbuf[128];
 		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
 		cell tmp2;
@@ -6502,6 +6503,7 @@ static pl_status do_assertz_2(query *q)
 		uuid_from_buf(GET_STR(p2), &u);
 		r->u = u;
 	} else {
+		uuid_gen(q->st.m->pl, &r->u);
 		char tmpbuf[128];
 		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
 		cell tmp2;
