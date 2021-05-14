@@ -1461,7 +1461,7 @@ static USE_RESULT pl_status fn_iso_max_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_rational(&p1) && is_rational(&p2)) {
-		cell s1, s2;
+		cell s1 = {0}, s2 = {0};
 		s1.val_num = p1.val_num * p2.val_den;
 		s1.val_den = p1.val_den * p2.val_den;
 		s2.val_num = p2.val_num * p1.val_den;
@@ -1510,7 +1510,7 @@ static USE_RESULT pl_status fn_iso_min_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_rational(&p1) && is_rational(&p2)) {
-		cell s1, s2;
+		cell s1 = {0}, s2 = {0};
 		s1.val_num = p1.val_num * p2.val_den;
 		s1.val_den = p1.val_den * p2.val_den;
 		s2.val_num = p2.val_num * p1.val_den;
