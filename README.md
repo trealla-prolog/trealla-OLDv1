@@ -235,6 +235,8 @@ Others
 	partial_string/3			# partial_string(+string,-string,-var)
 	if/3, (*->)/2				# softcut
 	setup_call_cleanup/3		# setup_call_cleanup(:Setup,:Goal,:Cleanup)
+	call_cleanup/2				# call_cleanup(:Goal,:Cleanup)
+	variant/2					# variant(+term1,+term2)
 	copy_term_nat/2				# doesn't copy attrs
 	findall/4
 	atomic_concat/3
