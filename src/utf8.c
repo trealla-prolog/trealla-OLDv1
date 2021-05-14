@@ -74,7 +74,7 @@ const char *strrchr_utf8(const char *s, int ch)
 
 bool is_char_utf8(const char *src)
 {
-	unsigned int ch = *(const unsigned char *)src;
+	unsigned char ch = *(const unsigned char *)src;
 	return (ch >= 0x80) && (ch <= 0xBF);
 }
 
