@@ -3652,6 +3652,13 @@ bool module_load_file(module *m, const char *filename)
 		return 0;
 	}
 
+	// Check for a BOM
+	
+	int ch = getc_utf8(fp);
+	
+	if ((unsigned)ch != 0xFEFF)
+		fseek(fp, 0, SEEK_SET);
+
 	free(m->filename);
 	m->filename = strdup(realbuf);
 	bool ok = module_load_fp(m, fp);
