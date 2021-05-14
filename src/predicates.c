@@ -530,7 +530,7 @@ static USE_RESULT pl_status fn_iso_callable_1(query *q)
 
 static USE_RESULT pl_status fn_iso_char_code_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_var);
+	GET_FIRST_ARG(p1,character_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_variable(p1) && is_variable(p2))
@@ -4661,7 +4661,14 @@ static void do_term_assign_vars(parser *p, idx_t nbr_cells)
 static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	cell *head = get_head(p1);
+
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
+	may_ptr_error(tmp);
+
+	if (tmp == ERR_CYCLE_CELL)
+		return throw_error(q, p1, "resource_error", "cyclic_term");
+
+	cell *head = get_head(tmp);
 
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
@@ -4673,16 +4680,10 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 	}
 
-	cell *tmp2, *body = get_body(p1);
+	cell *tmp2, *body = get_body(tmp);
 
 	if (body && ((tmp2 = check_body_callable(q->st.m->p, body)) != NULL))
 		return throw_error(q, tmp2, "type_error", "callable");
-
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
-	may_ptr_error(tmp);
-
-	if (tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->st.m->p;
@@ -4723,7 +4724,14 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	cell *head = get_head(p1);
+
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
+	may_ptr_error(tmp);
+
+	if (tmp == ERR_CYCLE_CELL)
+		return throw_error(q, p1, "resource_error", "cyclic_term");
+
+	cell *head = get_head(tmp);
 
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
@@ -4735,16 +4743,10 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 	}
 
-	cell *tmp2, *body = get_body(p1);
+	cell *tmp2, *body = get_body(tmp);
 
 	if (body && ((tmp2 = check_body_callable(q->st.m->p, body)) != NULL))
 		return throw_error(q, tmp2, "type_error", "callable");
-
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
-	may_ptr_error(tmp);
-
-	if (tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->st.m->p;
