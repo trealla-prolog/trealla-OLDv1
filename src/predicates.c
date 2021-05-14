@@ -5092,9 +5092,10 @@ static USE_RESULT pl_status fn_iso_catch_3(query *q)
 	if (q->retry == QUERY_EXCEPTION) {
 		GET_NEXT_ARG(p3,callable);
 		q->retry = QUERY_OK;
-		cell *tmp = clone_to_heap(q, true, p3, 1);
-		make_call(q, tmp+1+p3->nbr_cells);
 		may_error(make_catcher(q, QUERY_EXCEPTION));
+		cell *tmp = clone_to_heap(q, true, p3, 1);
+		may_ptr_error(tmp);
+		make_call(q, tmp+1+p3->nbr_cells);
 		q->st.curr_cell = tmp;
 		return pl_success;
 	}
@@ -5104,9 +5105,10 @@ static USE_RESULT pl_status fn_iso_catch_3(query *q)
 
 	// First time through? Try the primary goal...
 
-	cell *tmp = clone_to_heap(q, true, p1, 1);
-	make_call(q, tmp+1+p1->nbr_cells);
 	may_error(make_catcher(q, QUERY_RETRY));
+	cell *tmp = clone_to_heap(q, true, p1, 1);
+	may_ptr_error(tmp);
+	make_call(q, tmp+1+p1->nbr_cells);
 	q->st.curr_cell = tmp;
 	q->save_cp = q->cp;
 	return pl_success;
@@ -5124,7 +5126,7 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 
 		q->retry = QUERY_EXCEPTION;
 
-		if (!fn_iso_catch_3(q))
+		if (fn_iso_catch_3(q) != pl_success)
 			continue;
 
 		free(q->exception);
@@ -5148,9 +5150,7 @@ static USE_RESULT pl_status fn_iso_throw_1(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
-	if (tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, "resource_error", "cyclic_term");
-
+	may_ptr_error(tmp);
 	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
 	may_ptr_error(e);
 	safe_copy_cells(e, tmp, tmp->nbr_cells);
