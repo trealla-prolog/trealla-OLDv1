@@ -6303,8 +6303,14 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 			uuid u;
 			uuid_from_buf(GET_STR(p3), &u);
 			clause *r = find_in_db(q->st.m, &u);
-			may_ptr_error(r);
+
+			if (!r || (!u.u1 && !u.u2))
+				break;
+				
+			q->st.curr_clause2 = r;
 			t = &r->t;
+			cell *head = get_head(t->cells);
+			unify(q, p1, p1_ctx, head, q->st.fp);
 		} else {
 			if (!match_clause(q, p1, p1_ctx, DO_CLAUSE))
 				break;
@@ -6330,11 +6336,17 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 		}
 
 		if (ok) {
-			bool last_match = !q->st.curr_clause2->next;
-			stash_me(q, t, last_match);
+			if (is_variable(p3)) {
+				bool last_match = !q->st.curr_clause2->next;
+				stash_me(q, t, last_match);
+			}
+			
 			return pl_success;
 		}
 
+		if (!is_variable(p3))
+			break;
+			
 		undo_me(q);
 		drop_choice(q);
 		q->retry = QUERY_RETRY;
