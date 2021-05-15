@@ -7,6 +7,7 @@
 #include "trealla.h"
 #include "internal.h"
 #include "builtins.h"
+#include "heap.h"
 
 size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements, size_t max_elements)
 {

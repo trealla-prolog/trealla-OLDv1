@@ -31,8 +31,9 @@
 #include "network.h"
 #include "base64.h"
 #include "library.h"
-#include "utf8.h"
 #include "builtins.h"
+#include "heap.h"
+#include "utf8.h"
 
 #if USE_OPENSSL
 #include "openssl/sha.h"
