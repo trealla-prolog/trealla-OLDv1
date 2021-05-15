@@ -529,8 +529,8 @@ unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_p
 
 static void push_property(module *m, const char *name, unsigned arity, const char *type)
 {
-	if (name[0] == '$')
-		return;
+	//if (name[0] == '$')
+	//	return;
 
 	size_t buflen = 1024;
 	char *tmpbuf = malloc(buflen);
