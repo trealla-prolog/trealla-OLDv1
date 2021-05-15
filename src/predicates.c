@@ -9867,7 +9867,7 @@ static USE_RESULT pl_status fn_sys_load_ops_0(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_legacy_predicate_property_2(query *q)
+static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -11303,7 +11303,7 @@ static const struct builtins g_predicates_other[] =
 	{"bwrite", 2, fn_bwrite_2, "+stream,-string"},
 	{"hex_chars", 2, fn_hex_chars_2, "?integer,?string"},
 	{"octal_chars", 2, fn_octal_chars_2, "?integer,?string"},
-	{"legacy_predicate_property", 2, fn_legacy_predicate_property_2, "+callable,?string"},
+	{"$legacy_predicate_property", 2, fn_sys_legacy_predicate_property_2, "+callable,?string"},
 	{"$load_properties", 0, fn_sys_load_properties_0, NULL},
 	{"$load_ops", 0, fn_sys_load_ops_0, NULL},
 	{"numbervars", 1, fn_numbervars_1, "+term"},

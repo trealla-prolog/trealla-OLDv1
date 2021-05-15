@@ -4,6 +4,10 @@
 unify_with_occurs_check(X, X) :- acyclic_term(X).
 
 predicate_property(P, A) :-
+	nonvar(P), atom(A), !,
+	'$legacy_predicate_property'(P, A).
+	
+predicate_property(P, A) :-
 	'$mustbe_callable'(P),
 	'$load_properties',
 	(var(A) -> true ;
