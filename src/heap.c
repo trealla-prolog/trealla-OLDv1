@@ -316,14 +316,11 @@ static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t 
 	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
 		*dst = *src;
 		INCR_REF(src);
-		cell *c = src;
 		
-		if (!is_variable(c))
+		if (!is_variable(src))
 			continue;
 
-		c = deref_var(q, c, p1_ctx);
-		
-		slot *e = GET_SLOT(g, c->var_nbr);
+		slot *e = GET_SLOT(g, src->var_nbr);
 		idx_t slot_nbr = e - q->slots;
 		int found = 0;
 
