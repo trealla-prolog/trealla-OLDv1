@@ -89,7 +89,7 @@ int put_len_utf8(int _ch)
 		len = 2;
 	else if (ch <= 0xFFFF)
 		len = 3;
-	else if (ch <= 0x010FFFFF)
+	else if (ch <= 0x010FFFF)
 		len = 4;
 	else
 		len = 0;
