@@ -22,6 +22,15 @@ subsumes_term(G, S) :-
 	 V2 == V1
 	).
 
+variant(Term1, Term2) :-
+	% avoid trouble in any shared variables
+	copy_term(Term1, Term1Copy),
+	copy_term(Term2, Term2Copy),
+	% ground and compare the term copies
+	numbervars(Term1Copy, 0, N),
+	numbervars(Term2Copy, 0, N),
+	Term1Copy == Term2Copy.
+
 call_cleanup(G, C) :-
 	setup_call_cleanup(true, G, C).
 
@@ -39,15 +48,6 @@ catch(G, E, C) :-
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-variant(Term1, Term2) :-
-	% avoid trouble in any shared variables
-	copy_term(Term1, Term1Copy),
-	copy_term(Term2, Term2Copy),
-	% ground and compare the term copies
-	numbervars(Term1Copy, 0, N),
-	numbervars(Term2Copy, 0, N),
-	Term1Copy == Term2Copy.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
