@@ -259,6 +259,103 @@ cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
 	return tmp;
 }
 
+cell *clone2_to_tmp(query *q, cell *p1)
+{
+	cell *tmp = alloc_on_tmp(q, p1->nbr_cells);
+	ensure(tmp);
+	copy_cells(tmp, p1, p1->nbr_cells);
+	return tmp;
+}
+
+cell *clone_to_tmp(query *q, cell *p1)
+{
+	if (!init_tmp_heap(q)) return NULL;
+	return clone2_to_tmp(q, p1);
+}
+
+static cell *clone2_to_heap(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
+{
+	cell *tmp = alloc_on_heap(q, (prefix?1:0)+nbr_cells+suffix);
+	ensure(tmp);
+
+	if (prefix) {
+		// Needed for follow() to work
+		*tmp = (cell){0};
+		tmp->val_type = TYPE_EMPTY;
+		tmp->nbr_cells = 1;
+		tmp->flags = FLAG_BUILTIN;
+	}
+
+	safe_copy_cells(tmp+(prefix?1:0), p1, nbr_cells);
+	return tmp;
+}
+
+cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix)
+{
+	return clone2_to_heap(q, prefix, p1, p1->nbr_cells, suffix);
+}
+
+static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
+{
+	cell *tmp = alloc_on_heap(q, (prefix?1:0)+nbr_cells+suffix);
+	ensure(tmp);
+
+	if (prefix) {
+		// Needed for follow() to work
+		*tmp = (cell){0};
+		tmp->val_type = TYPE_EMPTY;
+		tmp->nbr_cells = 1;
+		tmp->flags = FLAG_BUILTIN;
+	}
+
+	cell *src = p1, *dst = tmp+(prefix?1:0);
+	frame *g = GET_CURR_FRAME();
+	q->st.m->pl->varno = g->nbr_vars;
+	q->st.m->pl->tab_idx = 0;
+
+	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
+		*dst = *src;
+		INCR_REF(src);
+
+		if (!is_variable(src))
+			continue;
+
+		slot *e = GET_SLOT(g, src->var_nbr);
+		idx_t slot_nbr = e - q->slots;
+		int found = 0;
+
+		for (size_t i = 0; i < q->st.m->pl->tab_idx; i++) {
+			if (q->st.m->pl->tab1[i] == slot_nbr) {
+				dst->var_nbr = q->st.m->pl->tab2[i];
+				break;
+			}
+		}
+
+		if (!found) {
+			dst->var_nbr = q->st.m->pl->varno;
+			q->st.m->pl->tab1[q->st.m->pl->tab_idx] = slot_nbr;
+			q->st.m->pl->tab2[q->st.m->pl->tab_idx] = q->st.m->pl->varno++;
+			q->st.m->pl->tab_idx++;
+		}
+
+		dst->flags = FLAG2_FRESH;
+	}
+
+	if (q->st.m->pl->varno != g->nbr_vars) {
+		if (!create_vars(q, q->st.m->pl->varno-g->nbr_vars)) {
+			DISCARD_RESULT throw_error(q, p1, "resource_error", "too_many_vars");
+			return NULL;
+		}
+	}
+
+	return tmp;
+}
+
+cell *copy_to_heap(query *q, bool prefix, cell *p1, idx_t suffix)
+{
+	return copy_to_heap2(q, prefix, p1, p1->nbr_cells, suffix);
+}
+
 cell *alloc_on_queuen(query *q, int qnbr, const cell *c)
 {
 	if (!q->queue[qnbr]) {
