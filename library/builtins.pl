@@ -5,10 +5,10 @@ unify_with_occurs_check(X, X) :- acyclic_term(X).
 
 predicate_property(P, A) :-
 	nonvar(P), atom(A), !,
+	'$mustbe_callable'(P),
 	'$legacy_predicate_property'(P, A).
 	
 predicate_property(P, A) :-
-	'$mustbe_callable'(P),
 	'$load_properties',
 	(var(A) -> true ;
 	 (memberchk(A, [built_in,control_construct,discontiguous,private,static,dynamic,persist,multifile,meta_predicate(_)]) ->
@@ -16,6 +16,7 @@ predicate_property(P, A) :-
 		throw(error(domain_error(predicate_property,A),P))
 		)
 	),
+	(var(P) -> true ; '$mustbe_callable'(P)),
 	'$predicate_property'(P, A).
 
 subsumes_term(G, S) :-
