@@ -2,6 +2,7 @@
 
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx);
 cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, bool copy_attrs);
+
 cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, bool copy_attrs);
 cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx);
 
