@@ -3638,7 +3638,7 @@ bool module_load_file(module *m, const char *filename)
 			free(tmpbuf);
 			free(m->filename);
 			m->filename = save_filename;
-			return 0;
+			return false;
 		}
 	}
 
@@ -3650,7 +3650,7 @@ bool module_load_file(module *m, const char *filename)
 		free(realbuf);
 		free(m->filename);
 		m->filename = save_filename;
-		return 0;
+		return false;
 	}
 
 	// Check for a BOM

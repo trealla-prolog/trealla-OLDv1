@@ -6933,6 +6933,15 @@ static USE_RESULT pl_status fn_loadfile_2(query *q)
 	if (!fp)
 		return throw_error(q, p1, "existence_error", "cannot_open_file");
 
+	// Check for a BOM
+	
+	int ch = getc_utf8(fp), offset = 0;
+	
+	if ((unsigned)ch != 0xFEFF)
+		fseek(fp, 0, SEEK_SET);
+	else
+		offset = 3;
+		
 	struct stat st = {0};
 
 #ifdef _POSIX_C_SOURCE
@@ -6946,10 +6955,11 @@ static USE_RESULT pl_status fn_loadfile_2(query *q)
 	}
 #endif
 
-	char *s = malloc(st.st_size+1);
+	size_t len = st.st_size - offset;
+	char *s = malloc(len+1);
 	may_ptr_error(s, fclose(fp));
 
-	if (fread(s, 1, st.st_size, fp) != (size_t)st.st_size) {
+	if (fread(s, 1, len, fp) != (size_t)len) {
 		free(s);
 		fclose(fp);
 		return throw_error(q, p1, "domain_error", "cannot_read");
@@ -6958,7 +6968,7 @@ static USE_RESULT pl_status fn_loadfile_2(query *q)
 	s[st.st_size] = '\0';
 	fclose(fp);
 	cell tmp;
-	may_error(make_stringn(&tmp, s, st.st_size), free(s));
+	may_error(make_stringn(&tmp, s, len), free(s));
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	free(s);
@@ -6991,6 +7001,13 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 		free(filename);
 		return throw_error(q, p1, "existence_error", "cannot_open_file");
 	}
+
+	// Check for a BOM
+	
+	int ch = getc_utf8(fp);
+	
+	if ((unsigned)ch != 0xFEFF)
+		fseek(fp, 0, SEEK_SET);
 
 	char *line = NULL;
 	size_t len = 0;
