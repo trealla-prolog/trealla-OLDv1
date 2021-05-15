@@ -295,7 +295,7 @@ cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix)
 	return clone2_to_heap(q, prefix, p1, p1->nbr_cells, suffix);
 }
 
-static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
+static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t nbr_cells, idx_t suffix)
 {
 	cell *tmp = alloc_on_heap(q, (prefix?1:0)+nbr_cells+suffix);
 	ensure(tmp);
@@ -351,9 +351,9 @@ static cell *copy_to_heap2(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx
 	return tmp;
 }
 
-cell *copy_to_heap(query *q, bool prefix, cell *p1, idx_t suffix)
+cell *copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t suffix)
 {
-	return copy_to_heap2(q, prefix, p1, p1->nbr_cells, suffix);
+	return copy_to_heap2(q, prefix, p1, p1_ctx, p1->nbr_cells, suffix);
 }
 
 cell *alloc_on_queuen(query *q, int qnbr, const cell *c)

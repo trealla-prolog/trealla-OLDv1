@@ -9,7 +9,7 @@ cell *clone2_to_tmp(query *q, cell *p1);
 cell *clone_to_tmp(query *q, cell *p1);
 
 cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix);
-cell *copy_to_heap(query *q, bool prefix, cell *p1, idx_t suffix);
+cell *copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t suffix);
 
 cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx);
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx);

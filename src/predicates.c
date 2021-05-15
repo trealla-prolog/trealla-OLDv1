@@ -4707,7 +4707,7 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 	cell *tmp;
 
 	if (p1_ctx != q->st.curr_frame) {
-		tmp = copy_to_heap(q, false, p1, 1);
+		tmp = copy_to_heap(q, false, p1, p1_ctx, 1);
 		unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	} else
 		tmp = clone_to_heap(q, false, p1, 1);
