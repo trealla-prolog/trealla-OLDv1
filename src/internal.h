@@ -626,7 +626,7 @@ struct prolog_ {
 	module *modules;
 	module *user_m, *curr_m;
 	uint64_t s_last, s_cnt, seed;
-	skiplist *symtab, *funtab;
+	skiplist *symtab, *funtab, *keyval;
 	char *pool;
 	uint64_t ugen;
 	idx_t pool_offset, pool_size, tab_idx;

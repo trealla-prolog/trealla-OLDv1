@@ -3922,10 +3922,9 @@ static void g_destroy(prolog *pl)
 	free(g_tpl_lib);
 	sl_destroy(pl->funtab);
 	sl_destroy(pl->symtab);
-	pl->symtab = NULL;
+	sl_destroy(pl->keyval);
 	free(pl->pool);
 	pl->pool_offset = 0;
-	pl->pool = NULL;
 }
 
 static bool g_init(prolog *pl)
@@ -3935,6 +3934,7 @@ static bool g_init(prolog *pl)
 		bool error = false;
 
 		CHECK_SENTINEL(pl->symtab = sl_create((void*)strcmp, (void*)free, NULL), NULL);
+		CHECK_SENTINEL(pl->keyval = sl_create((void*)strcmp, (void*)free, NULL), NULL);
 
 		if (!error) {
 			CHECK_SENTINEL(g_false_s = index_from_pool(pl, "false"), ERR_IDX);

@@ -355,7 +355,7 @@ bool sl_get(const skiplist *l, const void *key, const void **val)
 	if (imid < 0)
 		return false;
 
-	*val = q->bkt[imid].val;
+	if (val) *val = q->bkt[imid].val;
 	return true;
 }
 

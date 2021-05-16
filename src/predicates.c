@@ -10733,6 +10733,102 @@ static USE_RESULT pl_status fn_sys_put_chars_2(query *q)
 	return !ferror(str->fp);
 }
 
+static USE_RESULT pl_status fn_kv_set_3(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,atom);
+	GET_NEXT_ARG(p3,list_or_nil);
+	bool do_create = false;
+	LIST_HANDLER(p3);
+	
+	while (is_list(p3)) {
+		cell *h = LIST_HEAD(p3);
+		h = deref(q, h, p3_ctx);
+
+		if (is_variable(h))
+			return throw_error(q, p3, "instantiation_error", "read_option");
+
+		if (is_structure(h) && (h->arity == 1)) {
+			cell *n = h + 0;
+			if (!strcmp(GET_STR(n), "create")) {
+				cell *v = n + 1;
+				v = deref(q, v, q->latest_ctx);
+
+				if (is_variable(v))
+					return throw_error(q, p3, "instantiation_error", "read_option");
+
+				if (is_atom(v) && !strcmp(GET_STR(v), "true")) 
+					do_create = true;
+			}
+		}
+		
+		p3 = LIST_TAIL(p3);
+		p3 = deref(q, p3, p3_ctx);
+		p3_ctx = q->latest_ctx;
+	}
+
+	const char *key = strdup(GET_STR(p1));
+
+	if (do_create) {
+		if (sl_get(q->st.m->pl->keyval, key, NULL))
+			return pl_failure;
+	}
+	
+	const char *val = strdup(GET_STR(p1));
+	sl_set(q->st.m->pl->keyval, key, val);
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_kv_get_3(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,atom_or_var);
+	GET_NEXT_ARG(p3,list_or_nil);
+	bool do_delete = false;
+	LIST_HANDLER(p3);
+	
+	while (is_list(p3)) {
+		cell *h = LIST_HEAD(p3);
+		h = deref(q, h, p3_ctx);
+
+		if (is_variable(h))
+			return throw_error(q, p3, "instantiation_error", "read_option");
+
+		if (is_structure(h) && (h->arity == 1)) {
+			cell *n = h + 0;
+			if (!strcmp(GET_STR(n), "delete")) {
+				cell *v = n + 1;
+				v = deref(q, v, q->latest_ctx);
+
+				if (is_variable(v))
+					return throw_error(q, p3, "instantiation_error", "read_option");
+
+				if (is_atom(v) && !strcmp(GET_STR(v), "true"))
+					do_delete = true;
+			}
+		}
+		
+		p3 = LIST_TAIL(p3);
+		p3 = deref(q, p3, p3_ctx);
+		p3_ctx = q->latest_ctx;
+	}
+
+	const char *key = strdup(GET_STR(p1));
+	const char *val = NULL;
+
+	if (!sl_get(q->st.m->pl->keyval, key, (void*)&val))
+		return pl_failure;
+
+	if (do_delete)
+		sl_del(q->st.m->pl->keyval, key);
+
+	cell tmp;
+	may_error(make_cstring(&tmp, val));
+	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	DECR_REF(&tmp);
+	return ok;
+}
+
 static USE_RESULT pl_status fn_current_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
@@ -11331,6 +11427,9 @@ static const struct builtins g_predicates_other[] =
 	{"plus", 3, fn_plus_3, "?integer,?integer,?integer"},
 	{"succ", 2, fn_succ_2, "?integer,?integer"},
 
+	{"kv_set", 3, fn_kv_set_3, "+atom,+value,+list"},
+	{"kv_get", 3, fn_kv_get_3, "+atom,-value,+list"},
+		
 	{"$store_attributes", 2, fn_sys_store_attributes_2, "+variable,+list"},
 	{"$retrieve_attributes", 2, fn_sys_retrieve_attributes_2, "+variable,-variable"},
 	{"$delete_attributes", 1, fn_sys_delete_attributes_1, "+variable"},
