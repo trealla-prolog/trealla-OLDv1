@@ -789,8 +789,25 @@ void add_to_dirty_list(query *q, clause *r)
 	q->dirty_list = r;
 }
 
+static void module_purge_dirty_list(module *m)
+{
+	int cnt = 0;
+	
+	while (m->dirty_list) {
+		clause *r = m->dirty_list;
+		m->dirty_list = r->dirty;
+		//clear_term(&r->t);
+		free(r);
+		cnt++;
+	}
+
+	//if (cnt) printf("Info: module '%s' purged %d retracted items\n", m->name, cnt); 
+}
+
 static void query_purge_dirty_list(query *q)
 {
+	int cnt = 0;
+	
 	while (q->dirty_list) {
 		clause *r = q->dirty_list;
 		q->dirty_list = r->dirty;
@@ -807,19 +824,18 @@ static void query_purge_dirty_list(query *q)
 		if (r->owner->tail == r)
 			r->owner->tail = r->prev;
 
+#if 1
+		free(r);
+#else
 		r->dirty = q->st.m->dirty_list;
 		q->st.m->dirty_list = r;
-	}
-}
+#endif
 
-static void module_purge_dirty_list(module *m)
-{
-	while (m->dirty_list) {
-		clause *r = m->dirty_list;
-		m->dirty_list = r->dirty;
-		//clear_term(&r->t);
-		free(r);
+		cnt++;
 	}
+
+	//if (cnt) printf("Info: query purged %d retracted items\n", cnt);
+	
 }
 
 clause *find_in_db(module *m, uuid *ref)
@@ -3606,7 +3622,7 @@ bool module_load_file(module *m, const char *filename)
 			stream *str = &g_streams[i];
 
 			if (!strcmp(str->name, "user_input")) {
-				int ok = module_load_fp(m, str->fp, "./");
+				int ok = module_load_fp(m, str->fp, filename);
 				clearerr(str->fp);
 				return ok;
 			}
@@ -3785,7 +3801,7 @@ module *create_module(prolog *pl, const char *name)
 	ensure(m);
 
 	m->pl = pl;
-	m->filename = strdup("./");
+	m->filename = strdup(name);
 	m->name = strdup(name);
 	m->flag.unknown = UNK_ERROR;
 	m->flag.double_quote_chars = true;
