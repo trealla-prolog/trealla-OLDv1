@@ -3927,7 +3927,7 @@ static void g_destroy(prolog *pl)
 	pl->pool_offset = 0;
 }
 
-static void keyfree(const void *key, const void *val)
+static void keyvalfree(const void *key, const void *val)
 {
 	free((void*)key);
 	free((void*)val);
@@ -3940,7 +3940,7 @@ static bool g_init(prolog *pl)
 		bool error = false;
 
 		CHECK_SENTINEL(pl->symtab = sl_create((void*)strcmp, (void*)free, NULL), NULL);
-		CHECK_SENTINEL(pl->keyval = sl_create((void*)strcmp, (void*)keyfree, NULL), NULL);
+		CHECK_SENTINEL(pl->keyval = sl_create((void*)strcmp, (void*)keyvalfree, NULL), NULL);
 
 		if (!error) {
 			CHECK_SENTINEL(g_false_s = index_from_pool(pl, "false"), ERR_IDX);

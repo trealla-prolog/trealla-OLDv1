@@ -10735,8 +10735,8 @@ static USE_RESULT pl_status fn_sys_put_chars_2(query *q)
 
 static USE_RESULT pl_status fn_kv_set_3(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,atom);
+	GET_FIRST_ARG(p1,atomic);
+	GET_NEXT_ARG(p2,atomic);
 	GET_NEXT_ARG(p3,list_or_nil);
 	bool do_create = false;
 	LIST_HANDLER(p3);
@@ -10767,22 +10767,37 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 		p3_ctx = q->latest_ctx;
 	}
 
-	const char *key = strdup(GET_STR(p1));
+	const char *key;
+
+	if (is_integer(p1)) {
+		char tmpbuf[128];
+		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)p1->val_num);
+		key = strdup(tmpbuf);
+	} else
+		key = strdup(GET_STR(p1));
 
 	if (do_create) {
 		if (sl_get(q->st.m->pl->keyval, key, NULL))
 			return pl_failure;
 	}
 	
-	const char *val = strdup(GET_STR(p1));
+	const char *val;
+
+	if (is_integer(p2)) {
+		char tmpbuf[128];
+		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)p2->val_num);
+		val = strdup(tmpbuf);
+	} else
+		val = strdup(GET_STR(p2));
+
 	sl_set(q->st.m->pl->keyval, key, val);
 	return pl_success;
 }
 
 static USE_RESULT pl_status fn_kv_get_3(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,atom_or_var);
+	GET_FIRST_ARG(p1,atomic);
+	GET_NEXT_ARG(p2,atomic_or_var);
 	GET_NEXT_ARG(p3,list_or_nil);
 	bool do_delete = false;
 	LIST_HANDLER(p3);
@@ -10813,17 +10828,42 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 		p3_ctx = q->latest_ctx;
 	}
 
-	const char *key = strdup(GET_STR(p1));
+	const char *key;
+
+	if (is_integer(p1)) {
+		char tmpbuf[128];
+		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)p1->val_num);
+		key = strdup(tmpbuf);
+	} else
+		key = strdup(GET_STR(p1));
+
 	const char *val = NULL;
 
 	if (!sl_get(q->st.m->pl->keyval, key, (void*)&val))
 		return pl_failure;
 
+	cell tmp;
+	const char *src = val;
+	int all_digs = 1;
+
+	while (*src) {
+		if (!isdigit(*src)) {
+			all_digs = 0;
+			break;
+		}
+		
+		src++;
+	}
+	
+	if (all_digs) {
+		int_t v = strtoll(val, NULL, 10);
+		make_int(&tmp, v);
+	} else
+		may_error(make_cstring(&tmp, val));
+
 	if (do_delete)
 		sl_del(q->st.m->pl->keyval, key);
 
-	cell tmp;
-	may_error(make_cstring(&tmp, val));
 	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	return ok;
@@ -11427,8 +11467,8 @@ static const struct builtins g_predicates_other[] =
 	{"plus", 3, fn_plus_3, "?integer,?integer,?integer"},
 	{"succ", 2, fn_succ_2, "?integer,?integer"},
 
-	{"kv_set", 3, fn_kv_set_3, "+atom,+value,+list"},
-	{"kv_get", 3, fn_kv_get_3, "+atom,-value,+list"},
+	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list"},
+	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list"},
 		
 	{"$store_attributes", 2, fn_sys_store_attributes_2, "+variable,+list"},
 	{"$retrieve_attributes", 2, fn_sys_retrieve_attributes_2, "+variable,-variable"},

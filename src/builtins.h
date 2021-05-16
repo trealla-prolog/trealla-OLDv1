@@ -22,6 +22,7 @@
 #define is_list_or_var(c) (is_list(c) || is_variable(c))
 #define is_structure_or_var(c) (is_structure(c) || is_variable(c))
 #define is_character_or_var(c) (is_atom(c) || is_variable(c))
+#define is_atomic_or_var(c) (is_atomic(c) || is_variable(c))
 #define is_atom_or_var(c) (is_atom(c) || is_variable(c))
 #define is_atom_or_int(c) (is_atom(c) || is_integer(c))
 #define is_atom_or_structure(c) (is_atom(c) || is_structure(c))
