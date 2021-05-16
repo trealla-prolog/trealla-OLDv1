@@ -686,7 +686,6 @@ enum {DO_CLAUSE, DO_RETRACT, DO_STREAM_RETRACT, DO_RETRACTALL};
 USE_RESULT size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max_elements);
 void set_var(query *q, const cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 void reset_value(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
-bool module_load_fp(module *m, FILE *fp);
 bool module_load_file(module *m, const char *filename);
 bool module_save_file(module *m, const char *filename);
 bool deconsult(prolog *pl, const char *filename);

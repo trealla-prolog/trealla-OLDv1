@@ -3547,10 +3547,13 @@ module *module_load_text(module *m, const char *src, const char *filename)
 	return m;
 }
 
-bool module_load_fp(module *m, FILE *fp)
+static bool module_load_fp(module *m, FILE *fp, const char *filename)
 {
 	parser *p = create_parser(m);
 	if (!p) return false;
+	char *save_filename = m->filename;
+	m->filename = strdup(filename);
+
 	p->consulting = true;
 	p->fp = fp;
 	bool ok = false;
@@ -3591,24 +3594,20 @@ bool module_load_fp(module *m, FILE *fp)
 
 	ok = !p->error;
 	destroy_parser(p);
+	free(m->filename);
+	m->filename = save_filename;
 	return ok;
 }
 
 bool module_load_file(module *m, const char *filename)
 {
-	char *save_filename = m->filename;
-	m->filename = strdup(filename);
-
 	if (!strcmp(filename, "user")) {
 		for (int i = 0; i < MAX_STREAMS; i++) {
 			stream *str = &g_streams[i];
 
 			if (!strcmp(str->name, "user_input")) {
-				m->filename = strdup("./");
-				int ok = module_load_fp(m, str->fp);
+				int ok = module_load_fp(m, str->fp, "./");
 				clearerr(str->fp);
-				free(m->filename);
-				m->filename = save_filename;
 				return ok;
 			}
 		}
@@ -3636,8 +3635,6 @@ bool module_load_file(module *m, const char *filename)
 
 		if (!(realbuf = realpath(tmpbuf, NULL))) {
 			free(tmpbuf);
-			free(m->filename);
-			m->filename = save_filename;
 			return false;
 		}
 	}
@@ -3648,8 +3645,6 @@ bool module_load_file(module *m, const char *filename)
 
 	if (!fp) {
 		free(realbuf);
-		free(m->filename);
-		m->filename = save_filename;
 		return false;
 	}
 
@@ -3661,13 +3656,11 @@ bool module_load_file(module *m, const char *filename)
 		fseek(fp, 0, SEEK_SET);
 
 	clearerr(fp);
-	free(m->filename);
-	m->filename = strdup(realbuf);
-	bool ok = module_load_fp(m, fp);
+	char *tmp_filename = strdup(realbuf);
+	bool ok = module_load_fp(m, fp, tmp_filename);
 	fclose(fp);
 	free(realbuf);
-	free(m->filename);
-	m->filename = save_filename;
+	free(tmp_filename);
 	return ok;
 }
 
@@ -3871,11 +3864,7 @@ bool pl_eval(prolog *pl, const char *s)
 
 bool pl_consult_fp(prolog *pl, FILE *fp, const char *filename)
 {
-	char *save_filename = pl->user_m->filename;
-	pl->user_m->filename = strdup(filename);
-	int ok = module_load_fp(pl->user_m, fp);
-	free(pl->user_m->filename);
-	pl->user_m->filename = save_filename;
+	int ok = module_load_fp(pl->user_m, fp, filename);
 	return ok;
 }
 
