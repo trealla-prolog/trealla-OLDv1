@@ -824,7 +824,7 @@ static void query_purge_dirty_list(query *q)
 		if (r->owner->tail == r)
 			r->owner->tail = r->prev;
 
-#if 1
+#if 0
 		free(r);
 #else
 		r->dirty = q->st.m->dirty_list;
