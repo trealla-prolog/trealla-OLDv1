@@ -1,5 +1,7 @@
 #pragma once
 
+USE_RESULT size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max_elements);
+
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx);
 cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, bool copy_attrs);
 
