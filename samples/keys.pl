@@ -4,6 +4,8 @@
 %			main2	(recordz/recorded/erase)
 %			main3	(kv_set/kv_get/kv_del) 			0.22s
 
+:- dynamic(key/2).
+
 main1 :-
 	writeln('Set'),
 	between(1,100000,I),
@@ -13,13 +15,13 @@ main1 :-
 main1 :-
 	writeln('Get'),
 	between(1,100000,I),
-		once(key(I,I)),
+		key(I,I),
 		fail.
 
 main1 :-
 	writeln('Del'),
 	between(1,100000,I),
-		once(retract(key(I,I))),
+		retract(key(I,I)),
 		fail.
 
 main1 :-
