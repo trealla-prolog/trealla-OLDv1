@@ -16,7 +16,7 @@ predicate_property(P, A) :-
 		throw(error(domain_error(predicate_property,A),P))
 		)
 	),
-	(var(P) -> true ; '$mustbe_callable'(P)),
+	'$mustbe_callable'(P),
 	'$predicate_property'(P, A).
 
 subsumes_term(G, S) :-
