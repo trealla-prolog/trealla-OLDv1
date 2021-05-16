@@ -1691,7 +1691,7 @@ static void add_stream_properties(query *q, int n)
 
 	if (!str->binary) {
 		dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, bom(%s)).\n", n, str->bom ? "true" : "false");
-		dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, encoding(%s)).\n", n, "UTF-8");
+		dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, encoding('%s')).\n", n, "UTF-8");
 	}
 
 	if (!strcmp(str->mode, "read"))
