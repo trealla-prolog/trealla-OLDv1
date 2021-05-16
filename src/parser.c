@@ -3660,6 +3660,7 @@ bool module_load_file(module *m, const char *filename)
 	if ((unsigned)ch != 0xFEFF)
 		fseek(fp, 0, SEEK_SET);
 
+	clearerr(fp);
 	free(m->filename);
 	m->filename = strdup(realbuf);
 	bool ok = module_load_fp(m, fp);
