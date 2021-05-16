@@ -1618,7 +1618,7 @@ static void db_log(query *q, clause *r, enum log_type l)
 	q->quoted = save;
 }
 
-static pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, int is_retract)
+static pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, enum clause_type is_retract)
 {
 	cell *head = get_head(p1);
 

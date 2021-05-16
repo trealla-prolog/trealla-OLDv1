@@ -681,7 +681,7 @@ inline static void chk_cells(cell *src, idx_t nbr_cells)
 cell *list_head(cell *l, cell *tmp);
 cell *list_tail(cell *l, cell *tmp);
 
-enum {DO_CLAUSE, DO_RETRACT, DO_STREAM_RETRACT, DO_RETRACTALL};
+enum clause_type {DO_CLAUSE, DO_RETRACT, DO_STREAM_RETRACT, DO_RETRACTALL};
 
 USE_RESULT size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max_elements);
 void set_var(query *q, const cell *c, idx_t ctx, cell *v, idx_t v_ctx);
@@ -732,7 +732,7 @@ USE_RESULT pl_status query_start(query *q);
 
 void make_end(cell *tmp);
 USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx);
-USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, int retract);
+USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_type retract);
 idx_t index_from_pool(prolog *pl, const char *name);
 void do_reduce(cell *n);
 unsigned create_vars(query *q, unsigned nbr);

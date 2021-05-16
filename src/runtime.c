@@ -919,6 +919,8 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 		q->tot_matches++;
 
 		if (unify_structure(q, p1, p1_ctx, c, q->st.fp, 0)) {
+			int ok;
+			
 			if (needs_true) {
 				p1_body = deref(q, p1_body, p1_ctx);
 				idx_t p1_body_ctx = q->latest_ctx;
@@ -926,10 +928,11 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 				tmp.val_type = TYPE_LITERAL;
 				tmp.nbr_cells = 1;
 				tmp.val_off = g_true_s;
-				return unify(q, p1_body, p1_body_ctx, &tmp, q->st.curr_frame);
-			}
+				ok = unify(q, p1_body, p1_body_ctx, &tmp, q->st.curr_frame);
+			} else
+				ok = pl_success;
 
-			return pl_success;
+			return ok;
 		}
 
 		undo_me(q);
@@ -942,7 +945,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 // Match HEAD.
 // Match HEAD :- true.
 
-USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retract)
+USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_type is_retract)
 {
 	if (!q->retry) {
 		cell *c = p1;
@@ -994,7 +997,6 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, int is_retra
 	may_error(make_choice(q));
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
-
 		if (!check_update_view(q, q->st.curr_clause2))
 			continue;
 
