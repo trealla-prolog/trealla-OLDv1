@@ -1628,8 +1628,7 @@ static void db_log(query *q, clause *r, enum log_type l)
 
 static pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, enum clause_type is_retract)
 {
-	cell *head = get_head(p1);
-	head = deref(q, head, p1_ctx);
+	cell *head = deref(q, get_head(p1), p1_ctx);
 
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "not_sufficiently_instantiated");
@@ -4421,10 +4420,10 @@ static USE_RESULT pl_status fn_iso_retract_1(query *q)
 
 static pl_status do_retractall(query *q, cell *p1, idx_t p1_ctx)
 {
-	predicate *h = search_predicate(q->st.m, get_head(p1));
+	cell *head = deref(q, get_head(p1), p1_ctx);
+	predicate *h = search_predicate(q->st.m, head);
 
 	if (!h) {
-		cell *head = deref(q, get_head(p1), p1_ctx);
 		bool found = false;
 
 		if (get_builtin(q->st.m->pl, GET_STR(head), head->arity, &found), found)
@@ -6271,7 +6270,7 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 static pl_status do_asserta_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	cell *head = get_head(p1);
+	cell *head = deref(q, get_head(p1), p1_ctx);
 
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
@@ -6283,7 +6282,7 @@ static pl_status do_asserta_2(query *q)
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 	}
 
-	cell *body = get_body(p1);
+	cell *body = deref(q, get_body(p1), p1_ctx);
 
 	if (body && !is_callable(body))
 		return throw_error(q, body, "type_error", "callable");
@@ -6365,7 +6364,7 @@ static USE_RESULT pl_status fn_sys_asserta_2(query *q)
 static pl_status do_assertz_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	cell *head = get_head(p1);
+	cell *head = deref(q, get_head(p1), p1_ctx);
 
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
@@ -6377,7 +6376,7 @@ static pl_status do_assertz_2(query *q)
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 	}
 
-	cell *body = get_body(p1);
+	cell *body = deref(q, get_body(p1), p1_ctx);
 
 	if (body && !is_callable(body))
 		return throw_error(q, body, "type_error", "callable");
