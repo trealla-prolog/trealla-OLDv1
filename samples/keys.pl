@@ -2,77 +2,81 @@
 %
 %		main1	(assertz/match)		1.93s	(SWI 1.29s)
 %		main2	(recordz/recorded)	2.14s	(SWI 0.72s)
-%		main3	(kv_set/kv_get)		0.14s
+%		main3	(kv_set/kv_get)		1.25s
+%
+% Testing with 16GB RAM:
+%
+%  SWI and Trealla could do 10M keys for main1/main2
+%  SWI and Trealla failed to do 100M keys for main1
+%  SWI could do 100M keys for main2
+%  Trealla could do 100M keys for main3
 
 main1 :-
-	writeln('Set'),
-	between(1,1000000,I),
+	write('Set'), nl,
+	between(1,100000000,I),
 		assertz(key(I,I)),
 		fail.
 
 main1 :-
-	writeln('Get'),
-	between(1,1000000,I),
+	write('Get'), nl,
+	between(1,100000000,I),
 		key(I,I),
 		fail.
 
 /*
 main1 :-
-	writeln('Del'),
-	between(1,1000000,I),
+	write('Del'), nl,
+	between(1,100000000,I),
 		retract(key(I,I)),
 		fail.
 */
 
 main1 :-
-	writeln('Done'),
-	halt.
+	write('Done'), nl.
 
 main2 :-
-	writeln('Set'),
-	between(1,1000000,I),
+	write('Set'), nl,
+	between(1,100000000,I),
 		recordz(I,I),
 		fail.
 
 main2 :-
-	writeln('Get'),
-	between(1,1000000,I),
+	write('Get'), nl,
+	between(1,100000000,I),
 		recorded(I,I),
 		fail.
 
 /*
 main2 :-
-	writeln('Del'),
-	between(1,1000000,I),
+	write('Del'), nl,
+	between(1,100000000,I),
 		recorded(I,I,R),
 		erase(R),
 		fail.
 */
 
 main2 :-
-	writeln('Done'),
-	halt.
+	write('Done'), nl.
 
 main3 :-
-	writeln('Set'),
-	between(1,1000000,I),
+	write('Set'), nl,
+	between(1,100000000,I),
 		kv_set(I,I,[]),
 		fail.
 
 main3 :-
-	writeln('Get'),
-	between(1,1000000,I),
+	write('Get'), nl,
+	between(1,100000000,I),
 		kv_get(I,I,[]),
 		fail.
 
 /*
 main3 :-
-	writeln('Del'),
-	between(1,1000000,I),
+	write('Del'), nl,
+	between(1,100000000,I),
 		kv_get(I,I,[delete(true)]),
 		fail.
 */
 
 main3 :-
-	writeln('Done'),
-	halt.
+	write('Done'), nl.
