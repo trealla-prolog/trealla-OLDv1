@@ -3,21 +3,21 @@
 % Results 1M keys:
 %									 TPL	 SWI	 LVM	GPROLOG
 %		main1	(database)			1.93s	1.29s	5.33s	 0.64
-%		main2	(recorded)			2.14s	0.72s	-
-%		main3/4	(key-val)			1.25s	-		1.88s
+%		main2	(recorded)			2.14s	0.72s	-		 -
+%		main3/4	(key-val)			1.25s	-		1.88s	 -
 %
 % Results 10M keys:
 %									 TPL	 SWI	 LVM	GPROLOG
 %		main1	(database)			21s		15s		61s		 6.2
-%		main2	(recorded)			23s		7.3s	-
-%		main3/4	(key-val)			13s		-		20s		
+%		main2	(recorded)			23s		7.3s	-		 -
+%		main3/4	(key-val)			13s		-		20s		 -
 %
 % Results 100M keys:
 %
 %									 TPL	 SWI	 LVM	GPROLOG
 %		main1	(database)			fail	fail 	fail	 fail
-%		main2	(recorded)			fail	1m12s	-
-%		main3/4	(key-val)			2m19s	-		fail
+%		main2	(recorded)			fail	1m12s	-		 -
+%		main3/4	(key-val)			2m19s	-		fail	 -
 %
 % Note: Trealla key-val uses only atomic keys & values
 
