@@ -1,15 +1,24 @@
+% Testing with 16GB RAM, in-order insertion
+%
 % Results 1M keys:
+%										 TPL	 SWI	 LVM
+%		main1	(assertz/match)			1.93s	1.29s	5.33s
+%		main2	(recordz/recorded)		2.14s	0.72s	-
+%		main3/4	(key/value)				1.25s	-		1.88s
 %
-%		main1	(assertz/match)		1.93s	(SWI 1.29s, LVM 5.33s)
-%		main2	(recordz/recorded)	2.14s	(SWI 0.72s)
-%		main3	(kv_set/kv_get)		1.25s
+% Results 10M keys:
+%										 TPL	 SWI	 LVM
+%		main1	(assertz/match)			21s		15s		61s
+%		main2	(recordz/recorded)		23s		7.3s	-
+%		main3/4	(key/value)				13s		-		20s		
 %
-% Testing with 16GB RAM:
+% Results 100M keys:
 %
-%  SWI and Trealla could do 10M keys for main1/main2
-%  SWI and Trealla failed to do 100M keys for main1
-%  SWI could do 100M keys for main2
-%  Trealla could do 100M keys for main3
+%										 TPL	 SWI	 LVM
+%		main1	(assertz/match)			fail	fail 	fail
+%		main2	(recordz/recorded)		failed	1m12s	-
+%		main3/4	(key/value)				2m19s	-		fail
+%
 
 main1 :-
 	write('Set'), nl,
@@ -79,4 +88,27 @@ main3 :-
 */
 
 main3 :-
+	write('Done'), nl.
+
+main4 :-
+	write('Set'), nl,
+	between(1,1000000,I),
+		create_key_value(I,I),
+		fail.
+
+main4 :-
+	write('Get'), nl,
+	between(1,1000000,I),
+		read_key_value(I,I),
+		fail.
+
+/*
+main4 :-
+	write('Del'), nl,
+	between(1,1000000,I),
+		delete_key_value(I,I]),
+		fail.
+*/
+
+main4 :-
 	write('Done'), nl.
