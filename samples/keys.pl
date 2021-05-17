@@ -13,20 +13,20 @@
 
 main1 :-
 	write('Set'), nl,
-	between(1,100000000,I),
+	between(1,1000000,I),
 		assertz(key(I,I)),
 		fail.
 
 main1 :-
 	write('Get'), nl,
-	between(1,100000000,I),
+	between(1,1000000,I),
 		key(I,I),
 		fail.
 
 /*
 main1 :-
 	write('Del'), nl,
-	between(1,100000000,I),
+	between(1,1000000,I),
 		retract(key(I,I)),
 		fail.
 */
@@ -36,20 +36,20 @@ main1 :-
 
 main2 :-
 	write('Set'), nl,
-	between(1,100000000,I),
+	between(1,1000000,I),
 		recordz(I,I),
 		fail.
 
 main2 :-
 	write('Get'), nl,
-	between(1,100000000,I),
+	between(1,1000000,I),
 		recorded(I,I),
 		fail.
 
 /*
 main2 :-
 	write('Del'), nl,
-	between(1,100000000,I),
+	between(1,1000000,I),
 		recorded(I,I,R),
 		erase(R),
 		fail.
@@ -60,20 +60,20 @@ main2 :-
 
 main3 :-
 	write('Set'), nl,
-	between(1,100000000,I),
+	between(1,1000000,I),
 		kv_set(I,I,[]),
 		fail.
 
 main3 :-
 	write('Get'), nl,
-	between(1,100000000,I),
+	between(1,1000000,I),
 		kv_get(I,I,[]),
 		fail.
 
 /*
 main3 :-
 	write('Del'), nl,
-	between(1,100000000,I),
+	between(1,1000000,I),
 		kv_get(I,I,[delete(true)]),
 		fail.
 */
