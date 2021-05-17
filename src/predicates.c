@@ -1620,7 +1620,7 @@ static void db_log(query *q, clause *r, enum log_type l)
 
 static pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, enum clause_type is_retract)
 {
-	cell *head = get_head(p1);
+	cell *head = deref(q, get_head(p1), p1_ctx);
 
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "not_sufficiently_instantiated");
@@ -4415,7 +4415,7 @@ static pl_status do_retractall(query *q, cell *p1, idx_t p1_ctx)
 	predicate *h = search_predicate(q->st.m, get_head(p1));
 
 	if (!h) {
-		cell *head = get_head(p1);
+		cell *head = deref(q, get_head(p1), p1_ctx);
 		bool found = false;
 
 		if (get_builtin(q->st.m->pl, GET_STR(head), head->arity, &found), found)
