@@ -1101,7 +1101,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 	if (is_integer(p4) && (p4->val_num < 0))
 		return throw_error(q, p4, "domain_error", "not_less_than_zero");
 
-	int fixed = is_integer(p2) + is_integer(p3) + is_integer(p4);
+	int fixed = (is_integer(p2) + is_integer(p3) + is_integer(p4)) >= 2;
 		
 	if (!q->retry) {
 		may_error(make_choice(q));
@@ -1187,7 +1187,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 
 			DECR_REF(&tmp);
 
-			if (fixed >= 2) {
+			if (fixed) {
 				drop_choice(q);
 				drop_choice(q);
 			}
@@ -1628,7 +1628,8 @@ static void db_log(query *q, clause *r, enum log_type l)
 
 static pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, enum clause_type is_retract)
 {
-	cell *head = deref(q, get_head(p1), p1_ctx);
+	cell *head = get_head(p1);
+	head = deref(q, head, p1_ctx);
 
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "not_sufficiently_instantiated");

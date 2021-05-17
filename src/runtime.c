@@ -855,7 +855,7 @@ static bool check_update_view(query *q, clause *c)
 USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 {
 	if (!q->retry) {
-		cell *head = get_head(p1);
+		cell *head = deref(q, get_head(p1), p1_ctx);
 		cell *c = head;
 
 		if (!is_literal(c)) {
@@ -910,7 +910,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 		cell *c_body = get_logical_body(c);
 
 		if (p1_body && is_variable(p1_body) && !c_body) {
-			p1 = get_head(p1);
+			p1 = deref(q, get_head(p1), p1_ctx);
 			c = get_head(c);
 			needs_true = true;
 		}
