@@ -1101,10 +1101,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 	if (is_integer(p4) && (p4->val_num < 0))
 		return throw_error(q, p4, "domain_error", "not_less_than_zero");
 
-	bool fixed = false;
-	
-	if (is_integer(p2) && is_integer(p3))
-		fixed = true;
+	int fixed = is_integer(p2) + is_integer(p3) + is_integer(p4);
 		
 	if (!q->retry) {
 		may_error(make_choice(q));
@@ -1190,7 +1187,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 
 			DECR_REF(&tmp);
 
-			if (fixed) {
+			if (fixed >= 2) {
 				drop_choice(q);
 				drop_choice(q);
 			}
