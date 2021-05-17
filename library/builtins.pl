@@ -390,7 +390,7 @@ forall(Cond,Action) :- \+ (Cond, \+ Action).
 chars_base64(Plain,Base64,_) :- base64(Plain,Base64).
 chars_urlenc(Plain,Url,_) :- urlenc(Plain,Url).
 
-current_key(K) :- var(K), clause('$record_key'(K,_),_).
+current_key(K) :- var(K), '$record_key'(K,_).
 recorda(K,V) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V)).
 recordz(K,V) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V)).
 recorded(K,V) :- nonvar(K), '$record_key'(K,V).
