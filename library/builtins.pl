@@ -393,7 +393,7 @@ chars_urlenc(Plain,Url,_) :- urlenc(Plain,Url).
 current_key(K) :- var(K), clause('$record_key'(K,_),_).
 recorda(K,V) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V)).
 recordz(K,V) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V)).
-recorded(K,V) :- nonvar(K), clause('$record_key'(K,V),_).
+recorded(K,V) :- nonvar(K), '$record_key'(K,V).
 recorda(K,V,R) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V),R).
 recordz(K,V,R) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V),R).
 recorded(K,V,R) :- nonvar(K), clause('$record_key'(K,V),_,R).
