@@ -1,6 +1,6 @@
 % Results 1M keys:
 %
-%		main1	(assertz/match)		1.93s	(SWI 1.29s)
+%		main1	(assertz/match)		1.93s	(SWI 1.29s, LVM 5.33s)
 %		main2	(recordz/recorded)	2.14s	(SWI 0.72s)
 %		main3	(kv_set/kv_get)		1.25s
 %
