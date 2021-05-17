@@ -133,6 +133,7 @@ extern bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_
 
 extern void make_int(cell *tmp, int_t v);
 extern void make_float(cell *tmp, double v);
+extern int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
 
 #define calc_(q,c) !(c->flags&FLAG_BUILTIN) ? *c : (do_calc_(q,c,c##_ctx), q->accum)
 

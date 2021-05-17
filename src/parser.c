@@ -613,6 +613,74 @@ static int compkey(const void *ptr1, const void *ptr2, const void *param)
 	return strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
 }
 
+static int compkey2(const void *ptr1, const void *ptr2, const void *param)
+{
+	const cell *p1 = (const cell*)ptr1;
+	const cell *p2 = (const cell*)ptr2;
+	const module *m = (const module*)param;
+
+	if (is_integer(p1)) {
+		if (is_integer(p2)) {
+			if (p1->val_num < p2->val_num)
+				return -1;
+			else if (p1->val_num > p2->val_num)
+				return 1;
+			else
+				return 0;
+		} else if (is_variable(p2))
+			return 0;
+	} else if (is_float(p1)) {
+		if (is_float(p2)) {
+			if (p1->val_flt < p2->val_flt)
+				return -1;
+			else if (p1->val_flt > p2->val_flt)
+				return 1;
+			else
+				return 0;
+		} else if (is_variable(p2))
+			return 0;
+	} else if (is_atom(p1)) {
+		if (is_atom(p2))
+			return strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
+		else if (is_variable(p2))
+			return 0;
+	} else if (is_structure(p1)) {
+		if (is_structure(p2)) {
+			if (p1->arity < p2->arity)
+				return -1;
+
+			if (p1->arity > p2->arity)
+				return 1;
+
+			int i = strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
+
+			if (i != 0)
+				return i;
+
+			int arity = p1->arity;
+			p1++; p2++;
+
+			while (arity--) {
+				int i = compkey2(p1, p2, param);
+
+				if (i != 0)
+					return i;
+
+				p1 += p1->nbr_cells;
+				p2 += p2->nbr_cells;
+			}
+
+			return 0;
+		} else if (is_variable(p2))
+			return 0;
+	} else if (is_variable(p1))
+		return 0;
+	else
+		return 0;
+
+	return 0;
+}
+
 static clause* assert_begin(module *m, term *t, bool consulting)
 {
 	cell *c = t->cells;
@@ -686,7 +754,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 static void reindex_predicate(module *m, predicate *h)
 {
-	h->index = sl_create(compkey, NULL, m);
+	h->index = sl_create(compkey2, NULL, m);
 	ensure(h->index);
 
 	for (clause *r = h->head; r; r = r->next) {

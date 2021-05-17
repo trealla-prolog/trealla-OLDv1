@@ -683,7 +683,6 @@ cell *list_tail(cell *l, cell *tmp);
 
 enum clause_type {DO_CLAUSE, DO_RETRACT, DO_STREAM_RETRACT, DO_RETRACTALL};
 
-extern int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
 void set_var(query *q, const cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 void reset_value(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
 bool module_load_file(module *m, const char *filename);
