@@ -1678,20 +1678,6 @@ static USE_RESULT pl_status fn_iso_neg_1(query *q)
 	return pl_success;
 }
 
-static int cstring_cmp(const char *s1, size_t len1, const char *s2, size_t len2)
-{
-	size_t len = len1 < len2 ? len1 : len2;
-	int val = memcmp(s1, s2, len);
-	if (val) return val>0?1:-1;
-
-	if (len1 < len2)
-		return -1;
-	else if (len1 > len2)
-		return 1;
-
-	return 0;
-}
-
 int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
 {
 	if (depth == MAX_DEPTH) {
@@ -1740,7 +1726,7 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 
 	if (is_iso_atom(p1)) {
 		if (is_iso_atom(p2))
-			return cstring_cmp(GET_STR(p1), LEN_STR(p1), GET_STR(p2), LEN_STR(p2));
+			return slicecmp(GET_STR(p1), LEN_STR(p1), GET_STR(p2), LEN_STR(p2));
 
 		if (is_variable(p2) || is_number(p2))
 			return 1;
@@ -1792,7 +1778,7 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		return 0;
 	}
 
-	int val = cstring_cmp(GET_STR(p1), LEN_STR(p1), GET_STR(p2), LEN_STR(p2));
+	int val = slicecmp(GET_STR(p1), LEN_STR(p1), GET_STR(p2), LEN_STR(p2));
 	if (val) return val>0?1:-1;
 
 	int arity = p1->arity;

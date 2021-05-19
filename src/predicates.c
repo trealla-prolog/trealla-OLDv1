@@ -89,34 +89,19 @@ static int slicencmp(const char *s1, size_t len1, const char *s2, size_t len2, s
 	return 0;
 }
 
-#if 0
-static int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2)
+int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2)
 {
-	while (len1 && len2) {
-		if ((unsigned char)*s1 < (unsigned char)*s2)
-			return -1;
-			
-		if ((unsigned char)*s1 > (unsigned char)*s2)
-			return 1;
-			
-		len1--;
-		len2--;
-	}
+	size_t len = len1 < len2 ? len1 : len2;
+	int val = memcmp(s1, s2, len);
+	if (val) return val>0?1:-1;
 
-	if (len1)
-		return 1;
-		
-	if (len2)
+	if (len1 < len2)
 		return -1;
-		
+	else if (len1 > len2)
+		return 1;
+
 	return 0;
 }
-#else
-static int slicecmp(const char *s1, __attribute__((unused))size_t len1, const char *s2, __attribute__((unused))size_t len2)
-{
-	return strcmp(s1, s2);
-}
-#endif
 
 #define slicecmp2(s1,l1,s2) slicecmp(s1,l1,s2,strlen(s2))
 
