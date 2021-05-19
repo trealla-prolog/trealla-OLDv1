@@ -747,7 +747,7 @@ extern void allocate_list(query *q, const cell *c);
 extern void append_list(query *q, const cell *c);
 extern USE_RESULT cell *end_list(query *q);
 extern bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool partial_list);
-extern size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool tolerant);
+extern size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes);
 extern void consultall(parser *p, cell *l);
 extern void fix_list(cell *c);
 extern module *module_load_text(module *m, const char *src, const char *filename);

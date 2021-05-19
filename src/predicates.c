@@ -10769,7 +10769,7 @@ static USE_RESULT pl_status fn_sys_put_chars_2(query *q)
 		const char *src = GET_STR(p1);
 		size_t len = LEN_STR(p1);
 		net_write(src, len, str);
-	} else if ((len = scan_is_chars_list(q, p1, p1_ctx, false)) > 0) {
+	} else if ((len = scan_is_chars_list(q, p1, p1_ctx, true)) > 0) {
 		char *src = chars_list_to_string(q, p1, p1_ctx, len);
 		net_write(src, len, str);
 		free(src);
