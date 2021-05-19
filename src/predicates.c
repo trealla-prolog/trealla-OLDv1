@@ -9340,11 +9340,16 @@ static USE_RESULT pl_status fn_make_directory_1(query *q)
 
 	if (!stat(filename, &st)) {
 		free(src);
-		return pl_error;
+		return throw_error(q, p1, "existence_error", "already_exists");
 	}
 
 	free(src);
-	return !mkdir(filename, 0777);
+
+	if (mkdir(filename, 0777))
+		return throw_error(q, p1, "existence_error", "creation_error");
+
+	free(src);
+	return pl_success;
 }
 
 static USE_RESULT pl_status fn_make_directory_path_1(query *q)
@@ -9369,17 +9374,24 @@ static USE_RESULT pl_status fn_make_directory_path_1(query *q)
 			*ptr = '\0';
 
 			if (stat(filename, &st)) {
-				if (mkdir(filename, 0777))
-					return pl_failure;
+				if (mkdir(filename, 0777)) {
+					free(filename);
+					return throw_error(q, p1, "existence_error", "creation_error");
+				}
 			}
 
 			*ptr = PATH_SEP_CHAR;
 		}
 	}
 	
-	if (stat(filename, &st)) {
-		if (mkdir(filename, 0777))
-			return pl_failure;
+	if (!stat(filename, &st)) {
+		free(filename);
+		return throw_error(q, p1, "existence_error", "already_exists");
+	}
+
+	if (mkdir(filename, 0777)) {
+		free(filename);
+		return throw_error(q, p1, "existence_error", "creation_error");
 	}
 
 	free(filename);
