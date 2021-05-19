@@ -90,7 +90,7 @@ static int slicencmp(const char *s1, size_t len1, const char *s2, size_t len2, s
 }
 
 #if 0
-static int slicecmp_(const char *s1, size_t len1, const char *s2, size_t len2)
+static int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2)
 {
 	while (len1 && len2) {
 		if ((unsigned char)*s1 < (unsigned char)*s2)
@@ -112,14 +112,13 @@ static int slicecmp_(const char *s1, size_t len1, const char *s2, size_t len2)
 	return 0;
 }
 #else
-static int slicecmp_(const char *s1, __attribute__((unused))size_t len1, const char *s2, __attribute__((unused))size_t len2)
+static int slicecmp(const char *s1, __attribute__((unused))size_t len1, const char *s2, __attribute__((unused))size_t len2)
 {
 	return strcmp(s1, s2);
 }
 #endif
 
-#define slicecmp(s1,l1,s2,l2) slicecmp_(s1,l1,s2,l2)
-#define slicecmp2(s1,l1,s2) slicecmp_(s1,l1,s2,strlen(s2))
+#define slicecmp2(s1,l1,s2) slicecmp(s1,l1,s2,strlen(s2))
 
 cell *ERR_CYCLE_CELL = &(cell){};
 
