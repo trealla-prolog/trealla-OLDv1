@@ -1237,7 +1237,7 @@ static pl_status do_atom_concat_3(query *q)
 	char *dst2 = strdup(src2 + len);
 	int done = 0;
 
-	if (!*dst2)
+	if (!*(src2+len))
 		done = 1;
 
 	GET_RAW_ARG(1,p1_raw);
