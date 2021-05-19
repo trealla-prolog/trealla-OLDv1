@@ -2462,6 +2462,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 	parser_reset(p);
 	p->one_shot = true;
 	p->error = false;
+	p->flag = q->st.m->flag;
 	cell *vars = NULL, *varnames = NULL, *sings = NULL;
 	idx_t vars_ctx = 0, varnames_ctx = 0, sings_ctx = 0;
 	LIST_HANDLER(p2);

@@ -14,7 +14,7 @@
 
 #define CHECK_CALC()							\
 	if (!q->calc) {								\
-		if (q->flag.unknown == 0)				\
+		if (q->st.m->flag.unknown == 0)				\
 			return false;						\
 		else									\
 			return throw_error(q, q->st.curr_cell, "existence_error", "procedure");	\
