@@ -1328,12 +1328,10 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 		if (slicencmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1), LEN_STR(p1)))  
 			return pl_failure;
 
-		char *dst = strdup(GET_STR(p3)+LEN_STR(p1));
 		cell tmp;
-		may_error (make_cstring(&tmp, dst), free(dst));
+		may_error(make_cstringn(&tmp, GET_STR(p3)+LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1)));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		DECR_REF(&tmp);
-		free(dst);
 		return pl_success;
 	}
 
