@@ -57,7 +57,7 @@ static void msleep(int ms)
 static char *slicedup(const char *s, size_t n)
 {
 	char *ptr = malloc(n+1);
-	may_ptr_error(ptr);
+	if (!ptr) return NULL;
 	memcpy(ptr, s, n);
 	ptr[n+1] = '\0';
 	return ptr;
