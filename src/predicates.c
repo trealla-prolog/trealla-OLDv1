@@ -9386,7 +9386,7 @@ static USE_RESULT pl_status fn_make_directory_path_1(query *q)
 	
 	if (!stat(filename, &st)) {
 		free(filename);
-		return throw_error(q, p1, "existence_error", "already_exists");
+		return pl_success;
 	}
 
 	if (mkdir(filename, 0777)) {
