@@ -4,23 +4,23 @@
 
 typedef struct prolog_ prolog;
 
-prolog *pl_create();
-void pl_destroy(prolog*);
+extern prolog *pl_create();
+extern void pl_destroy(prolog*);
 
-bool pl_eval(prolog*, const char *expr);
-bool pl_consult(prolog*, const char *filename);
-bool pl_consult_fp(prolog*, FILE *fp, const char *filename);
+extern bool pl_eval(prolog*, const char *expr);
+extern bool pl_consult(prolog*, const char *filename);
+extern bool pl_consult_fp(prolog*, FILE *fp, const char *filename);
 
-int get_halt_code(prolog*);
-bool get_halt(prolog*);
-bool get_status(prolog*);
-bool get_dump_vars(prolog*);
+extern int get_halt_code(prolog*);
+extern bool get_halt(prolog*);
+extern bool get_status(prolog*);
+extern bool get_dump_vars(prolog*);
 
-void set_trace(prolog*);
-void set_quiet(prolog*);
-void set_stats(prolog*);
-void set_noindex(prolog*);
-void set_opt(prolog*, int onoff);
+extern void set_trace(prolog*);
+extern void set_quiet(prolog*);
+extern void set_stats(prolog*);
+extern void set_noindex(prolog*);
+extern void set_opt(prolog*, int onoff);
 
 extern int g_tpl_interrupt, g_ac, g_avc;
 extern char **g_av, *g_argv0;
