@@ -4709,7 +4709,7 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 	} else
 		tmp = clone_to_heap(q, false, p1, 1);
 
-	idx_t nbr_cells = 0 + p1->nbr_cells;
+	idx_t nbr_cells = 0 + tmp->nbr_cells;
 	make_call(q, tmp+nbr_cells);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
@@ -4719,9 +4719,8 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 static USE_RESULT pl_status fn_sys_call_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	cell *tmp3;
 
-	if ((tmp3 = check_body_callable(q->st.m->p, p1)) != NULL)
+	if (check_body_callable(q->st.m->p, p1) != NULL)
 		return throw_error(q, p1, "type_error", "callable");
 
 	cell *tmp = clone_to_heap(q, true, p1, 1);
@@ -11052,18 +11051,6 @@ static USE_RESULT pl_status fn_sys_clone_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-
-	if (is_variable(p1) && is_variable(p2))
-		return unify(q, p1, p1_ctx, p2, p2_ctx);
-
-	if (is_atomic(p1) && is_variable(p2))
-		return unify(q, p1, p1_ctx, p2, p2_ctx);
-
-	if (!is_variable(p2) && !has_vars(q, p1, p1_ctx, 0))
-		return unify(q, p1, p1_ctx, p2, p2_ctx);
-
-	if (q->cycle_error)
-		return throw_error(q, p1, "resource_error", "too_many_vars");
 
 	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, true);
 
