@@ -9862,7 +9862,7 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 		if (slicecmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1)))
 			return pl_failure;
 
-		char *dst = strdup(GET_STR(p3)+LEN_STR(p1));
+		char *dst = slicedup(GET_STR(p3)+LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1));
 		cell tmp;
 		may_error(make_string(&tmp, dst), free(dst));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
