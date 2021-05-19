@@ -1310,7 +1310,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 		if (memcmp(GET_STR(p3)+(LEN_STR(p3)-LEN_STR(p2)), GET_STR(p2), LEN_STR(p2)))
 			return pl_failure;
 
-		char *dst = strndup(GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
+		char *dst = slicedup(GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
 		cell tmp;
 		may_error(make_cstring(&tmp, dst), free(dst));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
