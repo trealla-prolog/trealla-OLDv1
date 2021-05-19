@@ -13,6 +13,7 @@
 #define snprintf _snprintf
 #define msleep Sleep
 #define PATH_SEP "\\"
+#define PATH_SEP_CHAR '\\'
 #define USE_MMAP 0
 #else
 #ifndef USE_MMAP
@@ -23,6 +24,7 @@
 #include <sys/mman.h>
 #endif
 #define PATH_SEP "/"
+#define PATH_SEP_CHAR '/'
 #include <dirent.h>
 #endif
 
@@ -9345,6 +9347,45 @@ static USE_RESULT pl_status fn_make_directory_1(query *q)
 	return !mkdir(filename, 0777);
 }
 
+static USE_RESULT pl_status fn_make_directory_path_1(query *q)
+{
+	GET_FIRST_ARG(p1,atom_or_list);
+	char *filename;
+
+	if (is_iso_list(p1)) {
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
+
+		if (!len)
+			return throw_error(q, p1, "type_error", "atom");
+
+		filename = chars_list_to_string(q, p1, p1_ctx, len);
+	} else
+		filename = strdup(GET_STR(p1));
+
+	struct stat st = {0};			
+
+	for (char *ptr = filename+1; *ptr; ptr++) {
+		if (*ptr == PATH_SEP_CHAR) {
+			*ptr = '\0';
+
+			if (stat(filename, &st)) {
+				if (mkdir(filename, 0777))
+					return pl_failure;
+			}
+
+			*ptr = PATH_SEP_CHAR;
+		}
+	}
+	
+	if (stat(filename, &st)) {
+		if (mkdir(filename, 0777))
+			return pl_failure;
+	}
+
+	free(filename);
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_working_directory_2(query *q)
 {
 	GET_FIRST_ARG(p_old,variable);
@@ -11428,6 +11469,7 @@ static const struct builtins g_predicates_other[] =
 	{"size_file", 2, fn_size_file_2, "+string,-integer"},
 	{"exists_directory", 1, fn_exists_directory_1, "+string"},
 	{"make_directory", 1, fn_make_directory_1, "+string"},
+	{"make_directory_path", 1, fn_make_directory_path_1, "+string"},
 	{"working_directory", 2, fn_working_directory_2, "-string,+string"},
 	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL},
 	{"chdir", 1, fn_chdir_1, "+string"},

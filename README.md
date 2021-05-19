@@ -287,6 +287,7 @@ Others
 	size_file/2
 	exists_directory/1
 	make_directory/1
+	make_directory_path/1
 	working_directory/2
 	chdir/1
 	absolute_file_name/[2,3] # expand(Bool) & relative_to(file) options
