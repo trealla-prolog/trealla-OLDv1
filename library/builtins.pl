@@ -232,10 +232,6 @@ setof(T,G,B) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-call(G) :-
-	'$clone_term'(G,TMP_G),
-	'$call'(TMP_G).
-
 call(G,P1) :-
 	'$clone_term'('$call'(G,P1),TMP_G),
 	'$call'(TMP_G).

@@ -206,6 +206,27 @@ cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, b
 	return tmp2;
 }
 
+cell *do_deep_copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t suffix, bool nonlocals_only, bool copy_attrs, idx_t *nbr_cells)
+{
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, nonlocals_only, copy_attrs);
+	if (!tmp || (tmp == ERR_CYCLE_CELL)) return tmp;
+	cell *tmp2 = alloc_on_heap(q, (prefix?1:0)+tmp->nbr_cells+suffix);
+	if (!tmp2) return NULL;
+	*nbr_cells = prefix?1:0;
+	
+	if (prefix) {
+		// Needed for follow() to work
+		*tmp2 = (cell){0};
+		tmp2->val_type = TYPE_EMPTY;
+		tmp2->nbr_cells = 1;
+		tmp2->flags = FLAG_BUILTIN;
+	}
+
+	safe_copy_cells(tmp2+(prefix?1:0), tmp, tmp->nbr_cells);
+	*nbr_cells += tmp->nbr_cells;
+	return tmp2;
+}
+
 static cell *deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth)
 {
 	if (depth >= 64000) {

@@ -5,6 +5,8 @@ USE_RESULT size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements,
 cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx);
 cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, bool copy_attrs);
 
+cell *do_deep_copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t suffix, bool nonlocals_only, bool copy_attrs, idx_t *nbr_cells);
+
 cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, bool copy_attrs);
 cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx);
 
