@@ -54,6 +54,15 @@ static void msleep(int ms)
 }
 #endif
 
+static char *slicedup(const char *s, size_t n)
+{
+	char *ptr = malloc(n+1);
+	may_ptr_error(ptr);
+	memcpy(ptr, s, n);
+	ptr[n+1] = '\0';
+	return ptr;
+}
+
 static int slicencmp(const char *s1, size_t len1, const char *s2, size_t len2, size_t n)
 {
 	while (len1 && len2 && n) {
@@ -2061,7 +2070,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 #endif
 			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "alias")) {
 				free(str->name);
-				str->name = strdup(GET_STR(name));
+				str->name = slicedup(GET_STR(name), LEN_STR(name));
 			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "type")) {
 				if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "binary")) {
 					str->binary = true;
@@ -7169,7 +7178,7 @@ static USE_RESULT pl_status fn_server_3(query *q)
 	}
 
 	stream *str = &g_streams[n];
-	str->filename = strdup(GET_STR(p1));
+	str->filename = slicedup(GET_STR(p1), LEN_STR(p1));
 	str->name = strdup(hostname);
 	str->mode = strdup("update");
 	str->nodelay = nodelay;
@@ -7353,7 +7362,7 @@ static USE_RESULT pl_status fn_client_5(query *q)
 	}
 
 	stream *str = &g_streams[n];
-	str->filename = strdup(GET_STR(p1));
+	str->filename = slicedup(GET_STR(p1), LEN_STR(p1));
 	str->name = strdup(hostname);
 	str->mode = strdup("update");
 	str->socket = true;
@@ -9340,13 +9349,13 @@ static USE_RESULT pl_status fn_make_directory_1(query *q)
 
 	if (!stat(filename, &st)) {
 		free(src);
-		return throw_error(q, p1, "existence_error", "already_exists");
+		return throw_error(q, p1, "existence_error", "file");
 	}
 
 	free(src);
 
 	if (mkdir(filename, 0777))
-		return throw_error(q, p1, "existence_error", "creation_error");
+		return throw_error(q, p1, "permission_error", "file");
 
 	free(src);
 	return pl_success;
@@ -9365,7 +9374,7 @@ static USE_RESULT pl_status fn_make_directory_path_1(query *q)
 
 		filename = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = strdup(GET_STR(p1));
+		filename = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	struct stat st = {0};			
 
@@ -9376,7 +9385,7 @@ static USE_RESULT pl_status fn_make_directory_path_1(query *q)
 			if (stat(filename, &st)) {
 				if (mkdir(filename, 0777)) {
 					free(filename);
-					return throw_error(q, p1, "existence_error", "creation_error");
+					return throw_error(q, p1, "permission_error", "directory");
 				}
 			}
 
@@ -9391,7 +9400,7 @@ static USE_RESULT pl_status fn_make_directory_path_1(query *q)
 
 	if (mkdir(filename, 0777)) {
 		free(filename);
-		return throw_error(q, p1, "existence_error", "creation_error");
+		return throw_error(q, p1, "permission_error", "directory");
 	}
 
 	free(filename);
@@ -10835,7 +10844,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)p1->val_num);
 		key = strdup(tmpbuf);
 	} else
-		key = strdup(GET_STR(p1));
+		key = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	if (do_create) {
 		if (sl_get(q->st.m->pl->keyval, key, NULL))
@@ -10849,7 +10858,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)p2->val_num);
 		val = strdup(tmpbuf);
 	} else
-		val = strdup(GET_STR(p2));
+		val = slicedup(GET_STR(p2), LEN_STR(p2));
 
 	sl_set(q->st.m->pl->keyval, key, val);
 	return pl_success;
@@ -10896,7 +10905,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)p1->val_num);
 		key = strdup(tmpbuf);
 	} else
-		key = strdup(GET_STR(p1));
+		key = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	const char *val = NULL;
 
