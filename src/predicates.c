@@ -89,6 +89,7 @@ static int slicencmp(const char *s1, size_t len1, const char *s2, size_t len2, s
 	return 0;
 }
 
+#if 0
 static int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2)
 {
 	while (len1 && len2) {
@@ -110,13 +111,14 @@ static int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2)
 		
 	return 0;
 }
-
-#if 0
-#define slicecmp2(s1,l1,s2) slicecmp(s1,l1,s2,strlen(s2))
 #else
-#define slicecmp2(s1,l1,s2) strcmp(s1, s2)
+static int slicecmp(const char *s1, __attribute__((unused))size_t len1, const char *s2, __attribute__((unused))size_t len2)
+{
+	return strcmp(s1, s2);
+}
 #endif
 
+#define slicecmp2(s1,l1,s2) slicecmp(s1,l1,s2,strlen(s2))
 
 cell *ERR_CYCLE_CELL = &(cell){};
 
