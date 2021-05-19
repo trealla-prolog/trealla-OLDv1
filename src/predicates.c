@@ -59,7 +59,7 @@ static char *slicedup(const char *s, size_t n)
 	char *ptr = malloc(n+1);
 	if (!ptr) return NULL;
 	memcpy(ptr, s, n);
-	ptr[n+1] = '\0';
+	ptr[n] = '\0';
 	return ptr;
 }
 
