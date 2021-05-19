@@ -678,8 +678,8 @@ inline static void chk_cells(cell *src, idx_t nbr_cells)
 #define LIST_HEAD(l) list_head(l, &l##_h_tmp)
 #define LIST_TAIL(l) list_tail(l, &l##_t_tmp)
 
-cell *list_head(cell *l, cell *tmp);
-cell *list_tail(cell *l, cell *tmp);
+extern cell *list_head(cell *l, cell *tmp);
+extern cell *list_tail(cell *l, cell *tmp);
 
 enum clause_type {DO_CLAUSE, DO_RETRACT, DO_STREAM_RETRACT, DO_RETRACTALL};
 
