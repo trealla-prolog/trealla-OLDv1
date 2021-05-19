@@ -1234,7 +1234,6 @@ static pl_status do_atom_concat_3(query *q)
 	GET_NEXT_ARG(p3,atom);
 	const char *src2 = GET_STR(p2);
 	size_t len = len_char_utf8(src2);
-	char *dst2 = strdup(src2 + len);
 	int done = 0;
 
 	if (!*(src2+len))
@@ -1246,10 +1245,9 @@ static pl_status do_atom_concat_3(query *q)
 	may_error(make_cstringn(&tmp, GET_STR(p3), LEN_STR(p1)+len));
 	reset_value(q, p1_raw, p1_raw_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
-	may_error(make_cstring(&tmp, dst2), free(dst2));
+	may_error(make_cstringn(&tmp, GET_STR(p2)+len, LEN_STR(p2)-len));
 	reset_value(q, p2_raw, p2_raw_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
-	free(dst2);
 
 	if (!done)
 		may_error(make_choice(q));
