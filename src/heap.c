@@ -273,8 +273,9 @@ cell *clone_to_tmp(query *q, cell *p1)
 	return clone2_to_tmp(q, p1);
 }
 
-static cell *clone2_to_heap(query *q, bool prefix, cell *p1, idx_t nbr_cells, idx_t suffix)
+cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix)
 {
+	idx_t nbr_cells = p1->nbr_cells;
 	cell *tmp = alloc_on_heap(q, (prefix?1:0)+nbr_cells+suffix);
 	ensure(tmp);
 
@@ -288,11 +289,6 @@ static cell *clone2_to_heap(query *q, bool prefix, cell *p1, idx_t nbr_cells, id
 
 	safe_copy_cells(tmp+(prefix?1:0), p1, nbr_cells);
 	return tmp;
-}
-
-cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix)
-{
-	return clone2_to_heap(q, prefix, p1, p1->nbr_cells, suffix);
 }
 
 cell *copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t suffix)
