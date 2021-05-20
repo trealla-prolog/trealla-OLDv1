@@ -335,6 +335,7 @@ Others
 	shell/1
 	shell/2
 	wall_time/1
+	date_time/6
 	date_time/7
 
 	open(stream(Str),...)   # with open/4 reopen a stream
