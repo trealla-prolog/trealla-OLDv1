@@ -6571,6 +6571,11 @@ static USE_RESULT pl_status fn_time_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_statistics_0(__attribute__((unused)) query *q)
+{
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_statistics_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -8117,6 +8122,33 @@ static USE_RESULT pl_status fn_date_time_7(query *q)
 	set_var(q, p6, p6_ctx, &tmp, q->st.curr_frame);
 	make_int(&tmp, 0);
 	set_var(q, p7, p7_ctx, &tmp, q->st.curr_frame);
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_date_time_6(query *q)
+{
+	GET_FIRST_ARG(p1,variable);
+	GET_NEXT_ARG(p2,variable);
+	GET_NEXT_ARG(p3,variable);
+	GET_NEXT_ARG(p4,variable);
+	GET_NEXT_ARG(p5,variable);
+	GET_NEXT_ARG(p6,variable);
+	struct tm tm;
+	time_t now = time(NULL);
+	localtime_r(&now, &tm);
+	cell tmp;
+	make_int(&tmp, tm.tm_year+1900);
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	make_int(&tmp, tm.tm_mon+1);
+	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	make_int(&tmp, tm.tm_mday);
+	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+	make_int(&tmp, tm.tm_hour);
+	set_var(q, p4, p4_ctx, &tmp, q->st.curr_frame);
+	make_int(&tmp, tm.tm_min);
+	set_var(q, p5, p5_ctx, &tmp, q->st.curr_frame);
+	make_int(&tmp, tm.tm_sec);
+	set_var(q, p6, p6_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
 
@@ -11423,6 +11455,7 @@ static const struct builtins g_predicates_other[] =
 	{"shell", 1, fn_shell_1, "+atom"},
 	{"shell", 2, fn_shell_2, "+atom,??"},
 	{"wall_time", 1, fn_wall_time_1, "-integer"},
+	{"date_time", 6, fn_date_time_6, "-yyyy,-m,-d,-h,--m,-s"},
 	{"date_time", 7, fn_date_time_7, "-yyyy,-m,-d,-h,--m,-s,-ms"},
 	{"between", 3, fn_between_3, "+integer,+integer,-integer"},
 	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list"},
@@ -11495,6 +11528,7 @@ static const struct builtins g_predicates_other[] =
 	{"getenv", 2, fn_getenv_2, NULL},
 	{"setenv", 2, fn_setenv_2, NULL},
 	{"unsetenv", 1, fn_unsetenv_1, NULL},
+	{"statistics", 0, fn_statistics_0, NULL},
 	{"statistics", 2, fn_statistics_2, "+string,-variable"},
 	{"duplicate_term", 2, fn_iso_copy_term_2, "+term,-variable"},
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer"},
