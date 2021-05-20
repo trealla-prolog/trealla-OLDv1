@@ -11070,17 +11070,16 @@ static USE_RESULT pl_status fn_module_1(query *q)
 static USE_RESULT pl_status fn_sys_clone_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
+	GET_NEXT_ARG(p2,variable);
 
 	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, true);
 
 	if (!tmp || (tmp == ERR_CYCLE_CELL))
 		return throw_error(q, p1, "resource_error", "too_many_vars");
 
-	if (!unify(q, p2, p2_ctx, tmp, q->st.curr_frame))
-		return pl_failure;
-
-	return unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
+	unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
+	set_var(q, p2, p2_ctx, tmp, q->st.curr_frame);
+	return pl_success;
 }
 
 static USE_RESULT pl_status fn_sys_register_term_1(query *q)
