@@ -4716,21 +4716,6 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_call_1(query *q)
-{
-	GET_FIRST_ARG(p1,callable);
-
-	if (check_body_callable(q->st.m->p, p1) != NULL)
-		return throw_error(q, p1, "type_error", "callable");
-
-	cell *tmp = clone_to_heap(q, true, p1, 1);
-	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_call(q, tmp+nbr_cells);
-	q->st.curr_cell = tmp;
-	q->save_cp = q->cp;
-	return pl_success;
-}
-
 static USE_RESULT pl_status fn_sys_call_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
@@ -11287,7 +11272,7 @@ static const struct builtins g_predicates_iso[] =
 	{"throw", 1, fn_iso_throw_1, NULL},
 	{"$catch", 3, fn_iso_catch_3, NULL},
 
-	{"$call", 1, fn_sys_call_1, NULL},
+	{"$call", 1, fn_sys_call_n, NULL},
 	{"$call", 2, fn_sys_call_n, NULL},
 	{"$call", 3, fn_sys_call_n, NULL},
 	{"$call", 4, fn_sys_call_n, NULL},

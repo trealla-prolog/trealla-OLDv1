@@ -223,8 +223,7 @@ cell *do_deep_copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t 
 	} else
 		*nbr_cells = 0;
 
-	safe_copy_cells(tmp2+(prefix?1:0), tmp, tmp->nbr_cells);
-	*nbr_cells += tmp->nbr_cells;
+	*nbr_cells += safe_copy_cells(tmp2+(prefix?1:0), tmp, tmp->nbr_cells);
 	return tmp2;
 }
 
