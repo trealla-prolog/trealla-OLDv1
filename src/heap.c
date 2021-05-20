@@ -104,7 +104,7 @@ cell *alloc_on_heap(query *q, idx_t nbr_cells)
 	return c;
 }
 
-static cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only, bool copy_attrs)
+cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only, bool copy_attrs)
 {
 	if (depth >= 64000) {
 		q->cycle_error = true;
