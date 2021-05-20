@@ -232,7 +232,7 @@ int main(int ac, char *av[])
 		} else if (!strcmp(av[i], "--library")) {
 			do_goal = 0;
 			do_lib = 1;
-		} else if (!strcmp(av[i], "-l") || !strcmp(av[i], "--consult-file")) {
+		} else if (!strcmp(av[i], "-f") || !strcmp(av[i], "-l") || !strcmp(av[i], "--consult-file")) {
 			do_lib = do_goal = 0;
 		} else if (!strcmp(av[i], "-g") || !strcmp(av[i], "--query-goal")) {
 			do_lib = 0;
