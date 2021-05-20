@@ -1363,7 +1363,7 @@ static void directives(parser *p, term *t)
 
 	cell *p1 = c + 1;
 
-	if (!strcmp(dirname, "include") && (p1->arity == 1)) {
+	if (!strcmp(dirname, "include")) {
 		if (!is_atom(p1)) return;
 		const char *name = PARSER_GET_STR(p1);
 		unsigned save_line_nbr = p->line_nbr;
