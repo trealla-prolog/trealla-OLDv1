@@ -47,7 +47,7 @@ setup_call_cleanup(S, G, C) :-
 	'$chk_is_det'.
 
 catch(G, E, C) :-
-	'$clone_term'('$catch'(G,E,C)).
+	'$call'('$catch'(G,E,C)).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -202,12 +202,12 @@ keysort(N, L1, L3, R) :-
 
 findall(T, G, B) :-
 	copy_term('$findall'(T,G,B),TMP_G),
-	'$call'(TMP_G),
+	'$rawcall'(TMP_G),
 	'$findall'(T,G,B)=TMP_G.
 
 findall(T, G, B, Tail) :-
 	copy_term('$findall'(T,G,B0),TMP_G),
-	'$call'(TMP_G),
+	'$rawcall'(TMP_G),
 	'$findall'(T,G,B0)=TMP_G,
 	'$mustbe_list_or_var'(B),
 	'$mustbe_list_or_var'(Tail),
@@ -215,12 +215,12 @@ findall(T, G, B, Tail) :-
 
 bagof(T,G,B) :-
 	copy_term('$bagof'(T,G,B),TMP_G),
-	'$call'(TMP_G),
+	'$rawcall'(TMP_G),
 	'$bagof'(T,G,B)=TMP_G.
 
 setof(T,G,B) :-
 	copy_term('$bagof'(T,G,_),TMP_G),
-	'$call'(TMP_G),
+	'$rawcall'(TMP_G),
 	'$bagof'(T,G,TMP_B)=TMP_G,
 	sort(TMP_B,B).
 
@@ -231,28 +231,28 @@ setof(T,G,B) :-
 %
 
 call(G) :-
-	'$clone_term'(G).
+	'$call'(G).
 
 call(G,P1) :-
-	'$clone_term'('$call'(G,P1)).
+	'$call'('$rawcall'(G,P1)).
 
 call(G,P1,P2) :-
-	'$clone_term'('$call'(G,P1,P2)).
+	'$call'('$rawcall'(G,P1,P2)).
 
 call(G,P1,P2,P3) :-
-	'$clone_term'('$call'(G,P1,P2,P3)).
+	'$call'('$rawcall'(G,P1,P2,P3)).
 
 call(G,P1,P2,P3,P4) :-
-	'$clone_term'('$call'(G,P1,P2,P3,P4)).
+	'$call'('$rawcall'(G,P1,P2,P3,P4)).
 
 call(G,P1,P2,P3,P4,P5) :-
-	'$clone_term'('$call'(G,P1,P2,P3,P4,P5)).
+	'$call'('$rawcall'(G,P1,P2,P3,P4,P5)).
 
 call(G,P1,P2,P3,P4,P5,P6) :-
-	'$clone_term'('$call'(G,P1,P2,P3,P4,P5,P6)).
+	'$call'('$rawcall'(G,P1,P2,P3,P4,P5,P6)).
 
 call(G,P1,P2,P3,P4,P5,P6,P7) :-
-	'$clone_term'('$call'(G,P1,P2,P3,P4,P5,P6,P7)).
+	'$call'('$rawcall'(G,P1,P2,P3,P4,P5,P6,P7)).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -261,28 +261,28 @@ call(G,P1,P2,P3,P4,P5,P6,P7) :-
 %
 
 task(G) :-
-	'$clone_term'('$task'(G)).
+	'$call'('$task'(G)).
 
 task(G,P1) :-
-	'$clone_term'('$task'(G,P1)).
+	'$call'('$task'(G,P1)).
 
 task(G,P1,P2) :-
-	'$clone_term'('$task'(G,P1,P2)).
+	'$call'('$task'(G,P1,P2)).
 
 task(G,P1,P2,P3) :-
-	'$clone_term'('$task'(G,P1,P2,P3)).
+	'$call'('$task'(G,P1,P2,P3)).
 
 task(G,P1,P2,P3,P4) :-
-	'$clone_term'('$task'(G,P1,P2,P3,P4)).
+	'$call'('$task'(G,P1,P2,P3,P4)).
 
 task(G,P1,P2,P3,P4,P5) :-
-	'$clone_term'('$task'(G,P1,P2,P3,P4,P5)).
+	'$call'('$task'(G,P1,P2,P3,P4,P5)).
 
 task(G,P1,P2,P3,P4,P5,P6) :-
-	'$clone_term'('$task'(G,P1,P2,P3,P4,P5,P6)).
+	'$call'('$task'(G,P1,P2,P3,P4,P5,P6)).
 
 task(G,P1,P2,P3,P4,P5,P6,P7) :-
-	'$clone_term'('$task'(G,P1,P2,P3,P4,P5,P6,P7)).
+	'$call'('$task'(G,P1,P2,P3,P4,P5,P6,P7)).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

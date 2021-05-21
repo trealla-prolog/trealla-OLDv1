@@ -4716,7 +4716,7 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_clone_term_1(query *q)
+static USE_RESULT pl_status fn_call_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
@@ -4738,7 +4738,7 @@ static USE_RESULT pl_status fn_sys_clone_term_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_call_1(query *q)
+static USE_RESULT pl_status fn_sys_rawcall1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
@@ -4753,7 +4753,7 @@ static USE_RESULT pl_status fn_sys_call_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_call_n(query *q)
+static USE_RESULT pl_status fn_sys_rawcalln(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	clone_to_tmp(q, p1);
@@ -5163,7 +5163,9 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 
 	} else {
-		if (!strcmp(GET_STR(q->st.curr_cell), "$call"))
+		if (!strcmp(GET_STR(q->st.curr_cell), "$rawcall"))
+			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "call", q->st.curr_cell->arity);
+		else if (!strcmp(GET_STR(q->st.curr_cell), "$call"))
 			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "call", q->st.curr_cell->arity);
 		else if (!strcmp(GET_STR(q->st.curr_cell), "$catch"))
 			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "catch", q->st.curr_cell->arity);
@@ -11294,14 +11296,14 @@ static const struct builtins g_predicates_iso[] =
 	{"throw", 1, fn_iso_throw_1, NULL},
 	{"$catch", 3, fn_iso_catch_3, NULL},
 
-	{"$call", 1, fn_sys_call_1, NULL},
-	{"$call", 2, fn_sys_call_n, NULL},
-	{"$call", 3, fn_sys_call_n, NULL},
-	{"$call", 4, fn_sys_call_n, NULL},
-	{"$call", 5, fn_sys_call_n, NULL},
-	{"$call", 6, fn_sys_call_n, NULL},
-	{"$call", 7, fn_sys_call_n, NULL},
-	{"$call", 8, fn_sys_call_n, NULL},
+	{"$rawcall", 1, fn_sys_rawcall1, NULL},
+	{"$rawcall", 2, fn_sys_rawcalln, NULL},
+	{"$rawcall", 3, fn_sys_rawcalln, NULL},
+	{"$rawcall", 4, fn_sys_rawcalln, NULL},
+	{"$rawcall", 5, fn_sys_rawcalln, NULL},
+	{"$rawcall", 6, fn_sys_rawcalln, NULL},
+	{"$rawcall", 7, fn_sys_rawcalln, NULL},
+	{"$rawcall", 8, fn_sys_rawcalln, NULL},
 	{"repeat", 0, fn_iso_repeat_0, NULL},
 	{"true", 0, fn_iso_true_0, NULL},
 	{"fail", 0, fn_iso_fail_0, NULL},
@@ -11406,7 +11408,7 @@ static const struct builtins g_predicates_iso[] =
 	{"time", 1, fn_time_1, NULL},
 	{"trace", 0, fn_trace_0, NULL},
 
-	{"$clone_term", 1, fn_sys_clone_term_1, NULL},
+	{"$call", 1, fn_call_1, NULL},
 	{"$register_cleanup", 1, fn_sys_register_cleanup_1, NULL},
 	{"$register_term", 1, fn_sys_register_term_1, NULL},
 	{"$chk_is_det", 0, fn_sys_chk_is_det_0, NULL},
