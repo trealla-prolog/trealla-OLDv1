@@ -206,23 +206,19 @@ findall(T, G, B) :-
 	'$findall'(T,G,B)=TMP_G.
 
 findall(T, G, B, Tail) :-
-	copy_term('$findall'(T,G,B0),TMP_G),
-	'$rawcall'(TMP_G),
-	'$findall'(T,G,B0)=TMP_G,
+	findall(T, G, B0),
 	'$mustbe_list_or_var'(B),
 	'$mustbe_list_or_var'(Tail),
 	append(B0, Tail, B), !.
 
-bagof(T,G,B) :-
+bagof(T, G, B) :-
 	copy_term('$bagof'(T,G,B),TMP_G),
 	'$rawcall'(TMP_G),
 	'$bagof'(T,G,B)=TMP_G.
 
-setof(T,G,B) :-
-	copy_term('$bagof'(T,G,_),TMP_G),
-	'$rawcall'(TMP_G),
-	'$bagof'(T,G,TMP_B)=TMP_G,
-	sort(TMP_B,B).
+setof(T, G, B) :-
+	bagof(T, G, B0),
+	sort(B0,B).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
