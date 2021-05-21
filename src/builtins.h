@@ -77,8 +77,19 @@ inline static cell *deref_var(query *q, cell *c, idx_t c_ctx)
 	q->accum.val_den = 1; \
 	if (!is_##val_type(p)) { return throw_error(q, p, "type_error", #val_type); }
 
+#define GET_FIRST_ARG0(p,val_type,p0) \
+	__attribute__((unused)) cell *p = get_first_arg0(q,p0); \
+	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx; \
+	q->accum.val_den = 1; \
+	if (!is_##val_type(p)) { return throw_error(q, p, "type_error", #val_type); }
+
 #define GET_FIRST_RAW_ARG(p,val_type) \
 	__attribute__((unused)) cell *p = get_first_raw_arg(q); \
+	__attribute__((unused)) idx_t p##_ctx = q->st.curr_frame; \
+	if (!is_##val_type(p)) { return throw_error(q, p, "type_error", #val_type); }
+
+#define GET_FIRST_RAW_ARG0(p,val_type,p0) \
+	__attribute__((unused)) cell *p = get_first_raw_arg0(q,p0); \
 	__attribute__((unused)) idx_t p##_ctx = q->st.curr_frame; \
 	if (!is_##val_type(p)) { return throw_error(q, p, "type_error", #val_type); }
 
@@ -98,9 +109,21 @@ inline static cell *get_first_arg(query *q)
 	return deref(q, q->last_arg, q->st.curr_frame);
 }
 
+inline static cell *get_first_arg0(query *q, cell *p0)
+{
+	q->last_arg = p0 + 1;
+	return deref(q, q->last_arg, q->st.curr_frame);
+}
+
 inline static cell *get_first_raw_arg(query *q)
 {
 	q->last_arg = q->st.curr_cell + 1;
+	return q->last_arg;
+}
+
+inline static cell *get_first_raw_arg0(query *q, cell *p0)
+{
+	q->last_arg = p0 + 1;
 	return q->last_arg;
 }
 

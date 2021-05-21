@@ -4746,30 +4746,18 @@ static USE_RESULT pl_status fn_sys_call_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_rawcall_1(query *q)
+static USE_RESULT pl_status fn_sys_call_n(query *q)
 {
-	GET_FIRST_ARG(p1,callable);
+	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, true);
+	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 
-	if (check_body_callable(q->st.m->p, p1) != NULL)
-		return throw_error(q, p1, "type_error", "callable");
-
-	cell *tmp = clone_to_heap(q, true, p1, 1);
-	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_call(q, tmp+nbr_cells);
-	q->st.curr_cell = tmp;
-	q->save_cp = q->cp;
-	return pl_success;
-}
-
-static USE_RESULT pl_status fn_sys_rawcall_n(query *q)
-{
-	GET_FIRST_ARG(p1,callable);
+	GET_FIRST_RAW_ARG0(p1,callable,p0);
 	clone_to_tmp(q, p1);
 	unsigned arity = p1->arity;
 	unsigned args = 1;
 
 	while (args++ < q->st.curr_cell->arity) {
-		cell *p2 = get_next_raw_arg(q);
+		GET_NEXT_RAW_ARG(p2,any);
 		clone2_to_tmp(q, p2);
 		arity++;
 	}
@@ -4813,6 +4801,21 @@ static USE_RESULT pl_status fn_sys_rawcall_n(query *q)
 	if (check_body_callable(q->st.m->p, tmp2) != NULL)
 		return throw_error(q, tmp2, "type_error", "callable");
 
+	q->st.curr_cell = tmp;
+	q->save_cp = q->cp;
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_sys_rawcall_1(query *q)
+{
+	GET_FIRST_ARG(p1,callable);
+
+	if (check_body_callable(q->st.m->p, p1) != NULL)
+		return throw_error(q, p1, "type_error", "callable");
+
+	cell *tmp = clone_to_heap(q, true, p1, 1);
+	idx_t nbr_cells = 1 + p1->nbr_cells;
+	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 	q->save_cp = q->cp;
 	return pl_success;
@@ -11302,16 +11305,17 @@ static const struct builtins g_predicates_iso[] =
 	{"once", 1, fn_iso_once_1, NULL},
 	{"throw", 1, fn_iso_throw_1, NULL},
 	{"$catch", 3, fn_iso_catch_3, NULL},
+
 	{"$call", 1, fn_sys_call_1, NULL},
+	{"$call", 2, fn_sys_call_n, NULL},
+	{"$call", 3, fn_sys_call_n, NULL},
+	{"$call", 4, fn_sys_call_n, NULL},
+	{"$call", 5, fn_sys_call_n, NULL},
+	{"$call", 6, fn_sys_call_n, NULL},
+	{"$call", 7, fn_sys_call_n, NULL},
+	{"$call", 8, fn_sys_call_n, NULL},
 
 	{"$rawcall", 1, fn_sys_rawcall_1, NULL},
-	{"$rawcall", 2, fn_sys_rawcall_n, NULL},
-	{"$rawcall", 3, fn_sys_rawcall_n, NULL},
-	{"$rawcall", 4, fn_sys_rawcall_n, NULL},
-	{"$rawcall", 5, fn_sys_rawcall_n, NULL},
-	{"$rawcall", 6, fn_sys_rawcall_n, NULL},
-	{"$rawcall", 7, fn_sys_rawcall_n, NULL},
-	{"$rawcall", 8, fn_sys_rawcall_n, NULL},
 
 	{"repeat", 0, fn_iso_repeat_0, NULL},
 	{"true", 0, fn_iso_true_0, NULL},

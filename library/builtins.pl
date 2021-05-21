@@ -234,25 +234,25 @@ call(G) :-
 	'$call'(G).
 
 call(G,P1) :-
-	'$call'('$rawcall'(G,P1)).
+	'$call'(G,P1).
 
 call(G,P1,P2) :-
-	'$call'('$rawcall'(G,P1,P2)).
+	'$call'(G,P1,P2).
 
 call(G,P1,P2,P3) :-
-	'$call'('$rawcall'(G,P1,P2,P3)).
+	'$call'(G,P1,P2,P3).
 
 call(G,P1,P2,P3,P4) :-
-	'$call'('$rawcall'(G,P1,P2,P3,P4)).
+	'$call'(G,P1,P2,P3,P4).
 
 call(G,P1,P2,P3,P4,P5) :-
-	'$call'('$rawcall'(G,P1,P2,P3,P4,P5)).
+	'$call'(G,P1,P2,P3,P4,P5).
 
 call(G,P1,P2,P3,P4,P5,P6) :-
-	'$call'('$rawcall'(G,P1,P2,P3,P4,P5,P6)).
+	'$call'(G,P1,P2,P3,P4,P5,P6).
 
 call(G,P1,P2,P3,P4,P5,P6,P7) :-
-	'$call'('$rawcall'(G,P1,P2,P3,P4,P5,P6,P7)).
+	'$call'(G,P1,P2,P3,P4,P5,P6,P7).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
