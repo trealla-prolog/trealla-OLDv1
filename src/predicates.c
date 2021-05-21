@@ -4763,7 +4763,7 @@ static USE_RESULT pl_status fn_sys_rawcall_1(query *q)
 
 static USE_RESULT pl_status fn_sys_rawcall_n(query *q)
 {
-	GET_FIRST_ARG(p1,callable);
+	cell *p1 = get_first_raw_arg(q);
 	clone_to_tmp(q, p1);
 	unsigned arity = p1->arity;
 	unsigned args = 1;
