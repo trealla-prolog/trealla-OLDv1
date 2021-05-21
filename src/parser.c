@@ -1363,7 +1363,7 @@ static void directives(parser *p, term *t)
 
 	cell *p1 = c + 1;
 
-	if (!strcmp(dirname, "include")) {
+	if (!strcmp(dirname, "include") && (c->arity == 1)) {
 		if (!is_atom(p1)) return;
 		const char *name = PARSER_GET_STR(p1);
 		unsigned save_line_nbr = p->line_nbr;
@@ -1635,6 +1635,10 @@ static void directives(parser *p, term *t)
 				set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), arity);
 			} else if (!strcmp(dirname, "persist")) {
 				set_persist_in_db(p->m, PARSER_GET_STR(c_name), arity);
+			} else if (!strcmp(dirname, "discontiguous")) {
+				set_discontiguous_in_db(p->m, PARSER_GET_STR(c_name), arity);
+			} else if (!strcmp(dirname, "noindex")) {
+				set_noindex_in_db(p->m, PARSER_GET_STR(c_name), arity);
 			} else if (!strcmp(dirname, "multifile")) {
 				const char *src = PARSER_GET_STR(c_name);
 
@@ -1654,8 +1658,6 @@ static void directives(parser *p, term *t)
 						return;
 					}
 				}
-			} else if (!strcmp(dirname, "discontiguous")) {
-				set_discontiguous_in_db(p->m, PARSER_GET_STR(c_name), arity);
 			}
 		}
 

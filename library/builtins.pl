@@ -7,7 +7,7 @@ predicate_property(P, A) :-
 	nonvar(P), atom(A), !,
 	'$mustbe_callable'(P),
 	'$legacy_predicate_property'(P, A).
-	
+
 predicate_property(P, A) :-
 	'$load_properties',
 	(var(A) -> true ;
@@ -233,36 +233,28 @@ setof(T,G,B) :-
 %
 
 call(G) :-
-	'$clone_term'(G,TMP_G),
-	'$call'(TMP_G).
+	'$clone_term'(G).
 
 call(G,P1) :-
-	'$clone_term'('$call'(G,P1),TMP_G),
-	'$call'(TMP_G).
+	'$clone_term'('$call'(G,P1)).
 
 call(G,P1,P2) :-
-	'$clone_term'('$call'(G,P1,P2),TMP_G),
-	'$call'(TMP_G).
+	'$clone_term'('$call'(G,P1,P2)).
 
 call(G,P1,P2,P3) :-
-	'$clone_term'('$call'(G,P1,P2,P3),TMP_G),
-	'$call'(TMP_G).
+	'$clone_term'('$call'(G,P1,P2,P3)).
 
 call(G,P1,P2,P3,P4) :-
-	'$clone_term'('$call'(G,P1,P2,P3,P4),TMP_G),
-	'$call'(TMP_G).
+	'$clone_term'('$call'(G,P1,P2,P3,P4)).
 
 call(G,P1,P2,P3,P4,P5) :-
-	'$clone_term'('$call'(G,P1,P2,P3,P4,P5),TMP_G),
-	'$call'(TMP_G).
+	'$clone_term'('$call'(G,P1,P2,P3,P4,P5)).
 
 call(G,P1,P2,P3,P4,P5,P6) :-
-	'$clone_term'('$call'(G,P1,P2,P3,P4,P5,P6),TMP_G),
-	'$call'(TMP_G).
+	'$clone_term'('$call'(G,P1,P2,P3,P4,P5,P6)).
 
 call(G,P1,P2,P3,P4,P5,P6,P7) :-
-	'$clone_term'('$call'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),
-	'$call'(TMP_G).
+	'$clone_term'('$call'(G,P1,P2,P3,P4,P5,P6,P7)).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -271,36 +263,28 @@ call(G,P1,P2,P3,P4,P5,P6,P7) :-
 %
 
 task(G) :-
-	'$clone_term'(G,TMP_G),
-	'$call'(TMP_G).
+	'$clone_term'('$task'(G)).
 
 task(G,P1) :-
-	'$clone_term'('$task'(G,P1),TMP_G),
-	'$call'(TMP_G).
+	'$clone_term'('$task'(G,P1)).
 
 task(G,P1,P2) :-
-	'$clone_term'('$task'(G,P1,P2),TMP_G),
-	'$call'(TMP_G).
+	'$clone_term'('$task'(G,P1,P2)).
 
 task(G,P1,P2,P3) :-
-	'$clone_term'('$task'(G,P1,P2,P3),TMP_G),
-	'$call'(TMP_G).
+	'$clone_term'('$task'(G,P1,P2,P3)).
 
 task(G,P1,P2,P3,P4) :-
-	'$clone_term'('$task'(G,P1,P2,P3,P4),TMP_G),
-	'$call'(TMP_G).
+	'$clone_term'('$task'(G,P1,P2,P3,P4)).
 
 task(G,P1,P2,P3,P4,P5) :-
-	'$clone_term'('$task'(G,P1,P2,P3,P4,P5),TMP_G),
-	'$call'(TMP_G).
+	'$clone_term'('$task'(G,P1,P2,P3,P4,P5)).
 
 task(G,P1,P2,P3,P4,P5,P6) :-
-	'$clone_term'('$task'(G,P1,P2,P3,P4,P5,P6),TMP_G),
-	'$call'(TMP_G).
+	'$clone_term'('$task'(G,P1,P2,P3,P4,P5,P6)).
 
 task(G,P1,P2,P3,P4,P5,P6,P7) :-
-	'$clone_term'('$task'(G,P1,P2,P3,P4,P5,P6,P7),TMP_G),
-	'$call'(TMP_G).
+	'$clone_term'('$task'(G,P1,P2,P3,P4,P5,P6,P7)).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -617,7 +601,7 @@ attributed(Var) :-
 
 atomic_list_concat(L, Atom) :-
 	atomic_list_concat(L, '', Atom).
-	
+
 atomic_list_concat(L, Sep, Atom) :-
 	( atom(Sep), ground(L), is_list(L) )
 	->  list_atom(L, Sep, Atom)
