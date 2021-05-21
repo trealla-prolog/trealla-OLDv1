@@ -845,7 +845,7 @@ bool retract_from_db(module *m, clause *r)
 
 	predicate *h = r->owner;
 
-	if (--h->cnt < JUST_IN_TIME_COUNT) {
+	if (!--h->cnt) {
 		sl_destroy(h->index);
 		sl_destroy(h->index_save);
 		h->index = h->index_save = NULL;
