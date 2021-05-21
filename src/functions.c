@@ -1357,6 +1357,13 @@ static USE_RESULT pl_status fn_iso_divint_2(query *q)
 		if (p2.val_num == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
+#if USE_INT32
+		if (p1.val_num == INT32_MIN)
+#else
+		if (p1.val_num == INT64_MIN)
+#endif
+			return throw_error(q, &p1, "evaluation_error", "int_overflow");
+
 		q->accum.val_num = p1.val_num / p2.val_num;
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
