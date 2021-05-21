@@ -1,7 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-unify_with_occurs_check(X, X) :- acyclic_term(X).
+unify_with_occurs_check(X, X) :-
+	acyclic_term(X).
 
 predicate_property(P, A) :-
 	nonvar(P), atom(A), !,
