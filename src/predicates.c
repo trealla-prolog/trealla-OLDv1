@@ -4725,7 +4725,7 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_call_1(query *q)
+static USE_RESULT pl_status fn_sys_call_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
@@ -4747,7 +4747,7 @@ static USE_RESULT pl_status fn_call_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_rawcall1(query *q)
+static USE_RESULT pl_status fn_sys_rawcall_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
@@ -4762,7 +4762,7 @@ static USE_RESULT pl_status fn_sys_rawcall1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_rawcalln(query *q)
+static USE_RESULT pl_status fn_sys_rawcall_n(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	clone_to_tmp(q, p1);
@@ -11304,15 +11304,17 @@ static const struct builtins g_predicates_iso[] =
 	{"once", 1, fn_iso_once_1, NULL},
 	{"throw", 1, fn_iso_throw_1, NULL},
 	{"$catch", 3, fn_iso_catch_3, NULL},
+	{"$call", 1, fn_sys_call_1, NULL},
 
-	{"$rawcall", 1, fn_sys_rawcall1, NULL},
-	{"$rawcall", 2, fn_sys_rawcalln, NULL},
-	{"$rawcall", 3, fn_sys_rawcalln, NULL},
-	{"$rawcall", 4, fn_sys_rawcalln, NULL},
-	{"$rawcall", 5, fn_sys_rawcalln, NULL},
-	{"$rawcall", 6, fn_sys_rawcalln, NULL},
-	{"$rawcall", 7, fn_sys_rawcalln, NULL},
-	{"$rawcall", 8, fn_sys_rawcalln, NULL},
+	{"$rawcall", 1, fn_sys_rawcall_1, NULL},
+	{"$rawcall", 2, fn_sys_rawcall_n, NULL},
+	{"$rawcall", 3, fn_sys_rawcall_n, NULL},
+	{"$rawcall", 4, fn_sys_rawcall_n, NULL},
+	{"$rawcall", 5, fn_sys_rawcall_n, NULL},
+	{"$rawcall", 6, fn_sys_rawcall_n, NULL},
+	{"$rawcall", 7, fn_sys_rawcall_n, NULL},
+	{"$rawcall", 8, fn_sys_rawcall_n, NULL},
+
 	{"repeat", 0, fn_iso_repeat_0, NULL},
 	{"true", 0, fn_iso_true_0, NULL},
 	{"fail", 0, fn_iso_fail_0, NULL},
@@ -11417,7 +11419,6 @@ static const struct builtins g_predicates_iso[] =
 	{"time", 1, fn_time_1, NULL},
 	{"trace", 0, fn_trace_0, NULL},
 
-	{"$call", 1, fn_call_1, NULL},
 	{"$register_cleanup", 1, fn_sys_register_cleanup_1, NULL},
 	{"$register_term", 1, fn_sys_register_term_1, NULL},
 	{"$chk_is_det", 0, fn_sys_chk_is_det_0, NULL},
