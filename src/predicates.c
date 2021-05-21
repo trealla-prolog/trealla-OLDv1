@@ -1614,6 +1614,15 @@ static void db_log(query *q, clause *r, enum log_type l)
 	q->quoted = save;
 }
 
+static void add_to_dirty_list(query *q, clause *r)
+{
+	if (!retract_from_db(q->st.m, r))
+		return;
+
+	r->dirty = q->dirty_list;
+	q->dirty_list = r;
+}
+
 static pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, enum clause_type is_retract)
 {
 	cell *head = deref(q, get_head(p1), p1_ctx);

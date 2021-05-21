@@ -27,7 +27,7 @@ static const unsigned INITIAL_NBR_SLOTS = 1000;
 static const unsigned INITIAL_NBR_CHOICES = 1000;
 static const unsigned INITIAL_NBR_TRAILS = 1000;
 
-#define JUST_IN_TIME_COUNT 50
+#define JUST_IN_TIME_COUNT 25
 #define DUMP_ERRS 0
 
 stream g_streams[MAX_STREAMS] = {{0}};
@@ -195,7 +195,7 @@ unsigned find_op(module *m, const char *name, unsigned specifier)
 
 		if (specifier != ptr->specifier)
 			continue;
-			
+
 		if (!strcmp(ptr->name, name))
 			return ptr->priority;
 	}
@@ -206,7 +206,7 @@ unsigned find_op(module *m, const char *name, unsigned specifier)
 
 		if (specifier != ptr->specifier)
 			continue;
-			
+
 		if (!strcmp(ptr->name, name))
 			return ptr->priority;
 	}
@@ -492,7 +492,7 @@ predicate *search_predicate(module *m, cell *c)
 	for (m = m->pl->modules; m; m = m->next) {
 		if (m == orig_m)
 			continue;
-			
+
 		h = find_predicate(m, c);
 
 		if (h) {
@@ -517,7 +517,7 @@ unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_p
 	for (m = m->pl->modules; m; m = m->next) {
 		if ((m == orig_m) || !m->user_ops)
 			continue;
-			
+
 		priority = get_op(m, name, specifier, hint_prefix);
 
 		if (priority)
@@ -838,44 +838,42 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 	return r;
 }
 
-static bool retract_from_db(module *m, clause *r)
+bool retract_from_db(module *m, clause *r)
 {
 	if (r->t.ugen_erased)
 		return false;
 
-	r->owner->cnt--;
+	predicate *h = r->owner;
+
+	if (--h->cnt < JUST_IN_TIME_COUNT) {
+		sl_destroy(h->index);
+		sl_destroy(h->index_save);
+		h->index = h->index_save = NULL;
+	}
+
 	r->t.ugen_erased = ++m->pl->ugen;
 	return true;
-}
-
-void add_to_dirty_list(query *q, clause *r)
-{
-	if (!retract_from_db(q->st.m, r))
-		return;
-
-	r->dirty = q->dirty_list;
-	q->dirty_list = r;
 }
 
 static void module_purge_dirty_list(module *m)
 {
 	int cnt = 0;
-	
+
 	while (m->dirty_list) {
 		clause *r = m->dirty_list;
 		m->dirty_list = r->dirty;
-		//clear_term(&r->t);
+		clear_term(&r->t);
 		free(r);
 		cnt++;
 	}
 
-	//if (cnt) printf("Info: module '%s' purged %d retracted items\n", m->name, cnt); 
+	//if (cnt) printf("Info: module '%s' purged %d retracted items\n", m->name, cnt);
 }
 
 static void query_purge_dirty_list(query *q)
 {
 	int cnt = 0;
-	
+
 	while (q->dirty_list) {
 		clause *r = q->dirty_list;
 		q->dirty_list = r->dirty;
@@ -893,17 +891,18 @@ static void query_purge_dirty_list(query *q)
 			r->owner->tail = r->prev;
 
 #if 0
+		clear_term(&r->t);
 		free(r);
 #else
-		r->dirty = q->st.m->dirty_list;
-		q->st.m->dirty_list = r;
+		r->dirty = r->owner->m->dirty_list;
+		r->owner->m->dirty_list = r;
 #endif
 
 		cnt++;
 	}
 
 	//if (cnt) printf("Info: query purged %d retracted items\n", cnt);
-	
+
 }
 
 clause *find_in_db(module *m, uuid *ref)
@@ -3735,9 +3734,9 @@ bool module_load_file(module *m, const char *filename)
 	}
 
 	// Check for a BOM
-	
+
 	int ch = getc_utf8(fp);
-	
+
 	if ((unsigned)ch != 0xFEFF)
 		fseek(fp, 0, SEEK_SET);
 
