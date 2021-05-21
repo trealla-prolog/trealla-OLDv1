@@ -154,7 +154,7 @@ msort(N, L1, L3, R) :-
 keymerge([], R, R) :- !.
 keymerge(R, [], R) :- !.
 keymerge([H1|T1], [H2|T2], Result) :-
-	keycompare(Delta, H1, H2), !,
+	keycompare_(Delta, H1, H2), !,
 	keymerge(Delta, H1, H2, T1, T2, Result).
 
 keymerge(>, H1, H2, T1, T2, [H2|R]) :-
@@ -170,7 +170,7 @@ keymerge(<, H1, H2, T1, T2, [H1|R]) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-keycompare(Delta, (K1-_), (K2-_)) :-
+keycompare_(Delta, (K1-_), (K2-_)) :-
 	(K1 @< K2 -> Delta = '<' ;
 	(K1 @> K2 -> Delta = '>' ;
 	Delta = '=')).
@@ -183,7 +183,7 @@ keysort(L, R) :-
 	keysort(N, L, _, R).
 
 keysort(2, [X1, X2|L], L, R) :- !,
-	keycompare(Delta, X1, X2),
+	keycompare_(Delta, X1, X2),
 	'$msort2'(Delta, X1, X2, R).
 keysort(1, [X|L], L, [X]) :- !.
 keysort(0, L, L, []) :- !.
