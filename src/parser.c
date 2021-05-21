@@ -890,7 +890,7 @@ static void query_purge_dirty_list(query *q)
 		if (r->owner->tail == r)
 			r->owner->tail = r->prev;
 
-#if 0
+#if 1
 		clear_term(&r->t);
 		free(r);
 #else
