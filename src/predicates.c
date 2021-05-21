@@ -4728,7 +4728,6 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 static USE_RESULT pl_status fn_sys_call_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-
 	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, true);
 
 	if (!tmp || (tmp == ERR_CYCLE_CELL))
@@ -4810,9 +4809,8 @@ static USE_RESULT pl_status fn_sys_rawcall_n(query *q)
 
 	cell *tmp = clone_to_heap(q, true, tmp2, 1);
 	make_call(q, tmp+1+tmp2->nbr_cells);
-	cell *tmp3;
 
-	if ((tmp3 = check_body_callable(q->st.m->p, tmp2)) != NULL)
+	if (check_body_callable(q->st.m->p, tmp2) != NULL)
 		return throw_error(q, tmp2, "type_error", "callable");
 
 	q->st.curr_cell = tmp;
