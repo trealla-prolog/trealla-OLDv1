@@ -1,7 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-unify_with_occurs_check(X, X) :- acyclic_term(X).
+unify_with_occurs_check(X, X) :-
+	acyclic_term(X).
 
 predicate_property(P, A) :-
 	nonvar(P), atom(A), !,
@@ -226,59 +227,23 @@ setof(T, G, B) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-call(G) :-
-	'$call'(G).
+call(G) :- '$call'(G).
+call(G, P1) :- '$call'(G, P1).
+call(G, P1, P2) :- '$call'(G, P1, P2).
+call(G, P1, P2, P3) :- '$call'(G, P1, P2, P3).
+call(G, P1, P2, P3, P4) :- '$call'(G, P1, P2, P3, P4).
+call(G, P1, P2, P3, P4, P5) :- '$call'(G, P1, P2, P3, P4, P5).
+call(G, P1, P2, P3, P4, P5, P6) :- '$call'(G, P1, P2, P3, P4, P5, P6).
+call(G, P1, P2, P3, P4, P5, P6, P7) :- '$call'(G, P1, P2, P3, P4, P5, P6, P7).
 
-call(G,P1) :-
-	'$call'(G,P1).
-
-call(G,P1,P2) :-
-	'$call'(G,P1,P2).
-
-call(G,P1,P2,P3) :-
-	'$call'(G,P1,P2,P3).
-
-call(G,P1,P2,P3,P4) :-
-	'$call'(G,P1,P2,P3,P4).
-
-call(G,P1,P2,P3,P4,P5) :-
-	'$call'(G,P1,P2,P3,P4,P5).
-
-call(G,P1,P2,P3,P4,P5,P6) :-
-	'$call'(G,P1,P2,P3,P4,P5,P6).
-
-call(G,P1,P2,P3,P4,P5,P6,P7) :-
-	'$call'(G,P1,P2,P3,P4,P5,P6,P7).
-
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-
-task(G) :-
-	'$call'('$task'(G)).
-
-task(G,P1) :-
-	'$call'('$task'(G,P1)).
-
-task(G,P1,P2) :-
-	'$call'('$task'(G,P1,P2)).
-
-task(G,P1,P2,P3) :-
-	'$call'('$task'(G,P1,P2,P3)).
-
-task(G,P1,P2,P3,P4) :-
-	'$call'('$task'(G,P1,P2,P3,P4)).
-
-task(G,P1,P2,P3,P4,P5) :-
-	'$call'('$task'(G,P1,P2,P3,P4,P5)).
-
-task(G,P1,P2,P3,P4,P5,P6) :-
-	'$call'('$task'(G,P1,P2,P3,P4,P5,P6)).
-
-task(G,P1,P2,P3,P4,P5,P6,P7) :-
-	'$call'('$task'(G,P1,P2,P3,P4,P5,P6,P7)).
+task(G) :- '$call'('$task'(G)).
+task(G, P1) :- '$call'('$task'(G, P1)).
+task(G, P1, P2) :- '$call'('$task'(G, P1, P2)).
+task(G, P1, P2, P3) :- '$call'('$task'(G, P1, P2, P3)).
+task(G, P1, P2, P3, P4) :- '$call'('$task'(G, P1, P2, P3, P4)).
+task(G, P1, P2, P3, P4, P5) :- '$call'('$task'(G, P1, P2, P3, P4, P5)).
+task(G, P1, P2, P3, P4, P5, P6) :- '$call'('$task'(G, P1, P2, P3, P4, P5, P6)).
+task(G, P1, P2, P3, P4, P5, P6, P7) :- '$call'('$task'(G, P1, P2, P3, P4, P5, P6, P7)).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
