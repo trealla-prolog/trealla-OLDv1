@@ -14,7 +14,7 @@ predicate_property(P, A) :-
 	(var(A) -> true ;
 	 (memberchk(A, [built_in,control_construct,discontiguous,private,static,dynamic,persist,multifile,meta_predicate(_)]) ->
 		true ;
-		throw(error(domain_error(predicate_property,A),P))
+		throw(error(domain_error(predicate_property, A), P))
 		)
 	),
 	'$mustbe_callable'(P),
@@ -202,7 +202,7 @@ keysort(N, L1, L3, R) :-
 %
 
 findall(T, G, B) :-
-	copy_term('$findall'(T,G,B),G0),
+	copy_term('$findall'(T,G,B), G0),
 	'$rawcall'(G0),
 	'$findall'(T,G,B)=G0.
 
@@ -213,13 +213,13 @@ findall(T, G, B, Tail) :-
 	append(B0, Tail, B), !.
 
 bagof(T, G, B) :-
-	copy_term('$bagof'(T,G,B),G0),
+	copy_term('$bagof'(T,G,B), G0),
 	'$rawcall'(G0),
 	'$bagof'(T,G,B)=G0.
 
 setof(T, G, B) :-
 	bagof(T, G, B0),
-	sort(B0,B).
+	sort(B0, B).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -311,43 +311,43 @@ phrase_to_stream(P, Stream) :-
 
 tab(0) :- !.
 tab(N) :- put_code(32), M is N-1, tab(M).
-tab(_,0) :- !.
-tab(S,N) :- put_code(S,32), M is N-1, tab(S,M).
+tab(_, 0) :- !.
+tab(S, N) :- put_code(S, 32), M is N-1, tab(S, M).
 get0(C) :- get_code(C).
-get0(S,C) :- get_code(S,C).
+get0(S, C) :- get_code(S, C).
 display(T) :- write_canonical(T).
-display(S,T) :- write_canonical(S,T).
+display(S, T) :- write_canonical(S, T).
 put(C) :- put_code(C).
-put(S,C) :- put_code(S,C).
-see(F) :- open(F,read,S), set_input(S).
-tell(F) :- open(F,write,S), set_output(S).
-append(F) :- open(F,append,S), set_output(S).
+put(S,C) :- put_code(S, C).
+see(F) :- open(F, read, S), set_input(S).
+tell(F) :- open(F, write, S), set_output(S).
+append(F) :- open(F, append, S), set_output(S).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-partial_string(S,P) :- append(S,_,P).
-partial_string(S,P,V) :- append(S,V,P).
+partial_string(S, P) :- append(S, _, P).
+partial_string(S, P, V) :- append(S, V, P).
 
-forall(Cond,Action) :- \+ (Cond, \+ Action).
-chars_base64(Plain,Base64,_) :- base64(Plain,Base64).
-chars_urlenc(Plain,Url,_) :- urlenc(Plain,Url).
+forall(Cond, Action) :- \+ (Cond, \+ Action).
+chars_base64(Plain, Base64,_) :- base64(Plain, Base64).
+chars_urlenc(Plain, Url, _) :- urlenc(Plain, Url).
 
 current_key(K) :- var(K), '$record_key'(K,_).
-recorda(K,V) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V)).
-recordz(K,V) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V)).
-recorded(K,V) :- nonvar(K), '$record_key'(K,V).
-recorda(K,V,R) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V),R).
-recordz(K,V,R) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V),R).
-recorded(K,V,R) :- nonvar(K), clause('$record_key'(K,V),_,R).
+recorda(K, V) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V)).
+recordz(K, V) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V)).
+recorded(K, V) :- nonvar(K), '$record_key'(K,V).
+recorda(K, V, R) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V), R).
+recordz(K, V, R) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V), R).
+recorded(K, V, R) :- nonvar(K), clause('$record_key'(K,V), _, R).
 
 format(F) :- format(F, []).
-term_to_atom(T,S) :- write_term_to_chars(S,T,[]).
-write_term_to_atom(S,T,Opts) :- write_term_to_chars(S,Opts,T).
-read_term_from_atom(S,T,Opts) :- read_term_from_chars(S,Opts,T).
-absolute_file_name(R,A) :- absolute_file_name(R,A,[]).
-client(U,H,P,S) :- client(U,H,P,S,[]).
-server(H,S) :- server(H,S,[]).
+term_to_atom(T, S) :- write_term_to_chars(S, T, []).
+write_term_to_atom(S, T, Opts) :- write_term_to_chars(S, Opts, T).
+read_term_from_atom(S, T, Opts) :- read_term_from_chars(S, Opts, T).
+absolute_file_name(R, A) :- absolute_file_name(R, A, []).
+client(U, H, P, S) :- client(U,H,P,S,[]).
+server(H, S) :- server(H,S,[]).
 set_random(seed(Seed)) :- set_seed(Seed).
 set_random(seed(random)) :- time(Seed), set_seed(Seed).
 maybe :- random(F), F < 0.5.
@@ -361,15 +361,15 @@ consult(Files) :- load_files(Files,[]).
 % are truly global and not just in the current module. This a quick
 % hack using assert/retract...
 
-nb_setval(K,_) :-
+nb_setval(K, _) :-
 	'$mustbe_atom'(K),
 	user:retract('$global_key'(K, _)),
 	fail.
-nb_setval(K,V) :-
+nb_setval(K, V) :-
 	'$mustbe_atom'(K),
 	user:assertz('$global_key'(K, V)).
 
-nb_getval(K,V) :-
+nb_getval(K, V) :-
 	'$mustbe_atom'(K),
 	user:catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), nb_setval/2))).
 
@@ -391,29 +391,29 @@ nb_current(K, V) :-
 % hack using assert/retract...
 % The following is not really correct.
 
-b_setval(K,_) :-
+b_setval(K, _) :-
 	'$mustbe_atom'(K),
 	\+ user:clause('$global_key'(K, _), _), asserta('$global_key'(K, [])),
 	fail.
-b_setval(K,V) :-
+b_setval(K, V) :-
 	'$mustbe_atom'(K),
 	user:asserta('$global_key'(K, V)).
-b_setval(K,_) :-
+b_setval(K, _) :-
 	user:retract('$global_key'(K, _)),
 	!.
 
-b_setval0(K,_) :-
+b_setval0(K, _) :-
 	'$mustbe_atom'(K),
 	\+ user:clause('$global_key'(K, _), _), asserta('$global_key'(K, 0)),
 	fail.
-b_setval0(K,V) :-
+b_setval0(K, V) :-
 	'$mustbe_atom'(K),
 	asserta('$global_key'(K, V)).
-b_setval0(K,_) :-
+b_setval0(K, _) :-
 	user:retract('$global_key'(K, _)),
 	!.
 
-b_getval(K,V) :-
+b_getval(K, V) :-
 	'$mustbe_atom'(K),
 	user:catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), b_setval/2))),
 	!.
@@ -430,25 +430,25 @@ b_delete(_).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-current_op(A,B,C) :- var(A), var(B), var(C),
+current_op(A, B, C) :- var(A), var(B), var(C),
 	!, '$load_ops', '$current_op'(A, B, C).
-current_op(_,_,C) :- nonvar(C), \+ atom(C),
-	!, throw(error(type_error(atom,C),current_op/3)).
-current_op(_,B,_) :- nonvar(B), \+ atom(B),
-	!, throw(error(domain_error(operator_specifier,B),current_op/3)).
-current_op(_,B,_) :- nonvar(B),
+current_op(_, _, C) :- nonvar(C), \+ atom(C),
+	!, throw(error(type_error(atom,C), current_op/3)).
+current_op(_, B, _) :- nonvar(B), \+ atom(B),
+	!, throw(error(domain_error(operator_specifier, B), current_op/3)).
+current_op(_, B, _) :- nonvar(B),
 	\+ memberchk(B,[xf, yf, fx, fy, xfx, xfy, yfx]),
-	!, throw(error(domain_error(operator_specifier,B),current_op/3)).
-current_op(A,_,_) :- nonvar(A),
+	!, throw(error(domain_error(operator_specifier, B), current_op/3)).
+current_op(A, _, _) :- nonvar(A),
 	\+ integer(A),
-	!, throw(error(domain_error(operator_priority,A),current_op/3)).
-current_op(A,_,_) :- nonvar(A),
+	!, throw(error(domain_error(operator_priority, A), current_op/3)).
+current_op(A, _, _) :- nonvar(A),
 	\+ (A >= 0),
-	!, throw(error(domain_error(operator_priority,A),current_op/3)).
-current_op(A,_,_) :- nonvar(A),
+	!, throw(error(domain_error(operator_priority, A), current_op/3)).
+current_op(A, _, _) :- nonvar(A),
 	\+ (A =< 1200),
-	!, throw(error(domain_error(operator_priority,A),current_op/3)).
-current_op(A,B,C) :-
+	!, throw(error(domain_error(operator_priority, A), current_op/3)).
+current_op(A, B, C) :-
 	!, '$load_ops', '$current_op'(A, B, C).
 
 %
