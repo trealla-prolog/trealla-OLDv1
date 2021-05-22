@@ -3298,7 +3298,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && consing && !strcmp(p->token, ",")) {
-			if (*p->srcptr == ',') {
+			if ((*p->srcptr == ',') && !p->flag.double_quote_codes) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error missing element '%s'\n", p->save_line);
 

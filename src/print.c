@@ -476,7 +476,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		return dst - save_dst;
 	}
 
-	int is_chars_list = scan_is_chars_list(q, c, c_ctx, 0);
+	int is_chars_list = scan_is_chars_list(q, c, c_ctx, false);
 
 	if (is_chars_list) {
 		cell *l = c;
@@ -578,14 +578,14 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 	int optype = GET_OP(c);
 	unsigned specifier;
-	
+
 	if (!optype && search_op(q->st.m, GET_STR(c), &specifier, true) && (c->arity == 1)) {
 		if (IS_PREFIX(specifier)) {
 			SET_OP(c, specifier);
 			optype = specifier;
 		}
 	}
-	
+
 	if (q->ignore_ops || !optype || !c->arity) {
 		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quoting(q->st.m, src, LEN_STR(c));
 		int dq = 0, braces = 0;
