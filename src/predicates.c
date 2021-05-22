@@ -11571,7 +11571,6 @@ static const struct builtins g_predicates_other[] =
 	{"sha512", 2, fn_sha512_2, "+string,?string"},
 #endif
 
-	{"fork", 0, fn_fork_0, NULL},
 	{"$task", 1, fn_task_n, "+callable"},
 	{"$task", 2, fn_task_n, "+callable,+term,..."},
 	{"$task", 3, fn_task_n, "+callable,+term,..."},
@@ -11583,6 +11582,7 @@ static const struct builtins g_predicates_other[] =
 	{"wait", 0, fn_wait_0, NULL},
 	{"await", 0, fn_await_0, NULL},
 	{"yield", 0, fn_yield_0, NULL},
+	{"fork", 0, fn_fork_0, NULL},
 	{"send", 1, fn_send_1, "+term"},
 	{"recv", 1, fn_recv_1, "?term"},
 
