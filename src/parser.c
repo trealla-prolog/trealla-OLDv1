@@ -2755,7 +2755,9 @@ static bool get_token(parser *p, int last_op)
 	p->quote_char = 0;
 	p->string = p->is_quoted = p->is_variable = p->is_op = false;
 
-	if (p->dq_consing && (*src == '"')) {
+	if (p->dq_consing && (*src == '"') && (src[1] == '"')) {
+		src++;
+	} else if (p->dq_consing && (*src == '"')) {
 		*dst++ = ']';
 		*dst = '\0';
 		p->srcptr = (char*)++src;
@@ -2861,7 +2863,7 @@ static bool get_token(parser *p, int last_op)
 		if ((p->quote_char == '"') && p->flag.double_quote_codes) {
 			*dst++ = '[';
 
-			if (*src == p->quote_char) {
+			if ((*src == '"') && (src[1] != '"')) {
 				*dst++ = ']';
 				*dst = '\0';
 				p->srcptr = (char*)++src;
