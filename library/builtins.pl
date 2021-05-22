@@ -41,7 +41,7 @@ call_cleanup(G, C) :-
 	setup_call_cleanup(true, G, C).
 
 setup_call_cleanup(S, G, C) :-
-	'$call'((S, !)),
+	call((S, !)),
 	'$register_cleanup'((C, !)),
 	catch(G, Err, (catch((\+ \+ C), _, true), throw(Err))),
 	'$chk_is_det'.
