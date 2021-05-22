@@ -2124,7 +2124,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	free(src);
 
 	if (!str->fp) {
-		if (errno == EACCES)
+		if ((errno == EACCES) || (strcmp(mode, "read") && (errno == EROFS)))
 			return throw_error(q, p1, "permission_error", "open, source_sink");
 		else
 			return throw_error(q, p1, "existence_error", "source_sink");
