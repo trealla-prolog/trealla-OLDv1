@@ -202,20 +202,20 @@ keysort(N, L1, L3, R) :-
 %
 
 findall(T, G, B) :-
-	copy_term('$findall'(T,G,B),TMP_G),
-	'$rawcall'(TMP_G),
-	'$findall'(T,G,B)=TMP_G.
+	copy_term('$findall'(T,G,B),G0),
+	'$rawcall'(G0),
+	'$findall'(T,G,B)=G0.
 
 findall(T, G, B, Tail) :-
-	findall(T, G, B0),
 	'$mustbe_list_or_var'(B),
 	'$mustbe_list_or_var'(Tail),
+	findall(T, G, B0),
 	append(B0, Tail, B), !.
 
 bagof(T, G, B) :-
-	copy_term('$bagof'(T,G,B),TMP_G),
-	'$rawcall'(TMP_G),
-	'$bagof'(T,G,B)=TMP_G.
+	copy_term('$bagof'(T,G,B),G0),
+	'$rawcall'(G0),
+	'$bagof'(T,G,B)=G0.
 
 setof(T, G, B) :-
 	bagof(T, G, B0),
