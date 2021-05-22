@@ -6,12 +6,12 @@
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "eclipse_throw_1_7",
-        "uid" : "300ee7d8d9a31f2f",
+        "uid" : "492ca0c3f47b7e0b",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1620971749000,
-          "stop" : 1620971749000,
+          "start" : 1621725016000,
+          "stop" : 1621725016000,
           "duration" : 0
         },
         "flaky" : false,
@@ -19,12 +19,12 @@
         "parameters" : [ ]
       }, {
         "name" : "iso_setof_3_12",
-        "uid" : "636af260cde4dd09",
+        "uid" : "cbce00de62590849",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1620972012000,
-          "stop" : 1620972012000,
+          "start" : 1621725325000,
+          "stop" : 1621725325000,
           "duration" : 0
         },
         "flaky" : false,
@@ -36,12 +36,12 @@
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "iso_bagof_3_10",
-        "uid" : "9f43d5b8d58d591f",
+        "uid" : "d1a78e109f92d79e",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1620971883000,
-          "stop" : 1620971883000,
+          "start" : 1621725171000,
+          "stop" : 1621725171000,
           "duration" : 0
         },
         "flaky" : false,
@@ -49,13 +49,13 @@
         "parameters" : [ ]
       }, {
         "name" : "sics_read_term_3_24",
-        "uid" : "157c20a1abf9dcf2",
+        "uid" : "2b0fe997095368a2",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1620971996000,
-          "stop" : 1620971996002,
-          "duration" : 2
+          "start" : 1621725305000,
+          "stop" : 1621725305001,
+          "duration" : 1
         },
         "flaky" : false,
         "newFailed" : false,
