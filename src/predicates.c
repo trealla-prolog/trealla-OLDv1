@@ -5888,19 +5888,16 @@ static void unpin_vars(query *q)
 	ch->pins = 0;
 }
 
-static USE_RESULT pl_status fn_iso_findall_3(query *q)
+static USE_RESULT pl_status fn_sys_findall_3(query *q)
 {
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,callable);
+	GET_NEXT_ARG(p3,list_or_nil_or_var);
+
+	if (is_list(p3) && !is_valid_list(q, p3, p3_ctx, true))
+		return throw_error(q, p3, "type_error", "list");
+
 	if (!q->retry) {
-		cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, true);
-		unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
-
-		GET_FIRST_RAW_ARG0(p1,any,p0);
-		GET_NEXT_ARG(p2,callable);
-		GET_NEXT_ARG(p3,list_or_nil_or_var);
-
-		if (is_list(p3) && !is_valid_list(q, p3, p3_ctx, true))
-			return throw_error(q, p3, "type_error", "list");
-
 		q->st.qnbr++;
 		assert(q->st.qnbr < MAX_QUEUES);
 		cell *tmp = clone_to_heap(q, true, p2, 2+p1->nbr_cells+1);
@@ -5916,10 +5913,6 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 		q->st.curr_cell = tmp;
 		return pl_success;
 	}
-
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,callable);
-	GET_NEXT_ARG(p3,list_or_nil_or_var);
 
 	if (!queuen_used(q)) {
 		q->st.qnbr--;
@@ -11391,7 +11384,7 @@ static const struct builtins g_predicates_iso[] =
 	{"current_prolog_flag", 2, fn_iso_current_prolog_flag_2, NULL},
 	{"set_prolog_flag", 2, fn_iso_set_prolog_flag_2, NULL},
 	{"op", 3, fn_iso_op_3, NULL},
-	{"findall", 3, fn_iso_findall_3, NULL},
+	{"$findall", 3, fn_sys_findall_3, NULL},
 	{"$bagof", 3, fn_sys_bagof_3, NULL},
 	{"current_predicate", 1, fn_iso_current_predicate_1, NULL},
 	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL},

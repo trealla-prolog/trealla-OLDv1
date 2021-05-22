@@ -201,6 +201,11 @@ keysort(N, L1, L3, R) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
+findall(T, G, B) :-
+	copy_term('$findall'(T,G,B),G0),
+	'$rawcall'(G0),
+	'$findall'(T,G,B)=G0.
+
 findall(T, G, B, Tail) :-
 	'$mustbe_list_or_var'(B),
 	'$mustbe_list_or_var'(Tail),
