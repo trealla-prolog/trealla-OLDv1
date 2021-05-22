@@ -49,6 +49,44 @@ setup_call_cleanup(S, G, C) :-
 catch(G, E, C) :-
 	'$call'('$catch'(G,E,C)).
 
+findall(T, G, B) :-
+	copy_term('$findall'(T,G,B), G0),
+	'$rawcall'(G0),
+	'$findall'(T,G,B)=G0.
+
+findall(T, G, B, Tail) :-
+	'$mustbe_list_or_var'(B),
+	'$mustbe_list_or_var'(Tail),
+	findall(T, G, B0),
+	append(B0, Tail, B), !.
+
+bagof(T, G, B) :-
+	copy_term('$bagof'(T,G,B), G0),
+	'$rawcall'(G0),
+	'$bagof'(T,G,B)=G0.
+
+setof(T, G, B) :-
+	bagof(T, G, B0),
+	sort(B0, B).
+
+call(G) :- '$call'(G).
+call(G, P1) :- '$call'(G, P1).
+call(G, P1, P2) :- '$call'(G, P1, P2).
+call(G, P1, P2, P3) :- '$call'(G, P1, P2, P3).
+call(G, P1, P2, P3, P4) :- '$call'(G, P1, P2, P3, P4).
+call(G, P1, P2, P3, P4, P5) :- '$call'(G, P1, P2, P3, P4, P5).
+call(G, P1, P2, P3, P4, P5, P6) :- '$call'(G, P1, P2, P3, P4, P5, P6).
+call(G, P1, P2, P3, P4, P5, P6, P7) :- '$call'(G, P1, P2, P3, P4, P5, P6, P7).
+
+task(G) :- '$task'(G).
+task(G, P1) :- '$task'(G, P1).
+task(G, P1, P2) :- '$task'(G, P1, P2).
+task(G, P1, P2, P3) :- '$task'(G, P1, P2, P3).
+task(G, P1, P2, P3, P4) :- '$task'(G, P1, P2, P3, P4).
+task(G, P1, P2, P3, P4, P5) :- '$task'(G, P1, P2, P3, P4, P5).
+task(G, P1, P2, P3, P4, P5, P6) :- '$task'(G, P1, P2, P3, P4, P5, P6).
+task(G, P1, P2, P3, P4, P5, P6, P7) :- '$task'(G, P1, P2, P3, P4, P5, P6, P7).
+
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -193,56 +231,6 @@ keysort(N, L1, L3, R) :-
 	keysort(N1, L1, L2, R1),
 	keysort(N2, L2, L3, R2),
 	keymerge(R1, R2, R).
-
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-
-findall(T, G, B) :-
-	copy_term('$findall'(T,G,B), G0),
-	'$rawcall'(G0),
-	'$findall'(T,G,B)=G0.
-
-findall(T, G, B, Tail) :-
-	'$mustbe_list_or_var'(B),
-	'$mustbe_list_or_var'(Tail),
-	findall(T, G, B0),
-	append(B0, Tail, B), !.
-
-bagof(T, G, B) :-
-	copy_term('$bagof'(T,G,B), G0),
-	'$rawcall'(G0),
-	'$bagof'(T,G,B)=G0.
-
-setof(T, G, B) :-
-	bagof(T, G, B0),
-	sort(B0, B).
-
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-
-call(G) :- '$call'(G).
-call(G, P1) :- '$call'(G, P1).
-call(G, P1, P2) :- '$call'(G, P1, P2).
-call(G, P1, P2, P3) :- '$call'(G, P1, P2, P3).
-call(G, P1, P2, P3, P4) :- '$call'(G, P1, P2, P3, P4).
-call(G, P1, P2, P3, P4, P5) :- '$call'(G, P1, P2, P3, P4, P5).
-call(G, P1, P2, P3, P4, P5, P6) :- '$call'(G, P1, P2, P3, P4, P5, P6).
-call(G, P1, P2, P3, P4, P5, P6, P7) :- '$call'(G, P1, P2, P3, P4, P5, P6, P7).
-
-task(G) :- '$task'(G).
-task(G, P1) :- '$task'(G, P1).
-task(G, P1, P2) :- '$task'(G, P1, P2).
-task(G, P1, P2, P3) :- '$task'(G, P1, P2, P3).
-task(G, P1, P2, P3, P4) :- '$task'(G, P1, P2, P3, P4).
-task(G, P1, P2, P3, P4, P5) :- '$task'(G, P1, P2, P3, P4, P5).
-task(G, P1, P2, P3, P4, P5, P6) :- '$task'(G, P1, P2, P3, P4, P5, P6).
-task(G, P1, P2, P3, P4, P5, P6, P7) :- '$task'(G, P1, P2, P3, P4, P5, P6, P7).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
