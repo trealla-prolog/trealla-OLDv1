@@ -59,10 +59,10 @@ static int slicencmp(const char *s1, size_t len1, const char *s2, size_t len2, s
 	while (len1 && len2 && n) {
 		if ((unsigned char)*s1 < (unsigned char)*s2)
 			return -1;
-			
+
 		if ((unsigned char)*s1 > (unsigned char)*s2)
 			return 1;
-			
+
 		len1--;
 		len2--;
 		n--;
@@ -70,13 +70,13 @@ static int slicencmp(const char *s1, size_t len1, const char *s2, size_t len2, s
 
 	if (!n)
 		return 0;
-		
+
 	if (len1)
 		return 1;
-		
+
 	if (len2)
 		return -1;
-		
+
 	return 0;
 }
 
@@ -86,20 +86,20 @@ static int slicecmp_(const char *s1, size_t len1, const char *s2, size_t len2)
 	while (len1 && len2) {
 		if ((unsigned char)*s1 < (unsigned char)*s2)
 			return -1;
-			
+
 		if ((unsigned char)*s1 > (unsigned char)*s2)
 			return 1;
-			
+
 		len1--;
 		len2--;
 	}
 
 	if (len1)
 		return 1;
-		
+
 	if (len2)
 		return -1;
-		
+
 	return 0;
 }
 #else
@@ -366,7 +366,7 @@ static USE_RESULT pl_status make_slice(query *q, cell *d, cell *orig, size_t off
 		d->str_len = n;
 		return pl_success;
 	}
-	
+
 	if (is_strbuf(orig)) {
 		*d = *orig;
 		d->strb_off += off;
@@ -374,7 +374,7 @@ static USE_RESULT pl_status make_slice(query *q, cell *d, cell *orig, size_t off
 		INCR_REF(orig);
 		return pl_success;
 	}
-	
+
 	const char *s = GET_STR(orig);
 
 	if (is_string(orig))
@@ -1088,7 +1088,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,integer_or_var);		// before
-	GET_NEXT_ARG(p3,integer_or_var);		// len	
+	GET_NEXT_ARG(p3,integer_or_var);		// len
 	GET_NEXT_ARG(p4,integer_or_var);		// after
 	GET_NEXT_ARG(p5,atom_or_var);
 	const size_t len_p1 = LEN_STR_UTF8(p1);
@@ -1104,7 +1104,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 		return throw_error(q, p4, "domain_error", "not_less_than_zero");
 
 	int fixed = (is_integer(p2) + is_integer(p3) + is_integer(p4)) >= 2;
-		
+
 	if (!q->retry) {
 		may_error(make_choice(q));
 
@@ -1118,10 +1118,10 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 			after = p4->val_num;
 
 		if (is_variable(p2) && is_integer(p3) && is_integer(p4))
-			before = len_p1 - after - len;		
+			before = len_p1 - after - len;
 
 		if (is_variable(p3) && is_integer(p2) && is_integer(p4))
-			len = len_p1 - before - after;		
+			len = len_p1 - before - after;
 	} else {
 		idx_t v1, v2;
 		get_params(q, &v1, &v2);
@@ -1193,7 +1193,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 				drop_choice(q);
 				drop_choice(q);
 			}
-			
+
 			return pl_success;
 		}
 
@@ -1316,7 +1316,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 	}
 
 	if (is_variable(p2)) {
-		if (slicencmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1), LEN_STR(p1)))  
+		if (slicencmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1), LEN_STR(p1)))
 			return pl_failure;
 
 		char *dst = strdup(GET_STR(p3)+LEN_STR(p1));
@@ -1328,7 +1328,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 		return pl_success;
 	}
 
-	if (slicencmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1), LEN_STR(p1)))	
+	if (slicencmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1), LEN_STR(p1)))
 		return pl_failure;
 
 	if (slicecmp(GET_STR(p3)+LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1), GET_STR(p2), LEN_STR(p2)))
@@ -2070,7 +2070,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 					binary = false;
 			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "bom")) {
 				bom_specified = true;
-				
+
 				if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "true"))
 					use_bom = true;
 				else if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "false"))
@@ -2129,7 +2129,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	free(src);
 
 	if (!str->fp) {
-		if (errno == EACCES)
+		if ((errno == EACCES) || (strcmp(mode, "read") && (errno == EROFS)))
 			return throw_error(q, p1, "permission_error", "open, source_sink");
 		else
 			return throw_error(q, p1, "existence_error", "source_sink");
@@ -2142,7 +2142,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 		if (feof(str->fp))
 			clearerr(str->fp);
-		
+
 		if ((unsigned)ch == 0xFEFF) {
 			str->bom = true;
 			offset = 3;
@@ -2152,7 +2152,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 		int ch = 0xFEFF;
 		char tmpbuf[10];
 		put_char_utf8(tmpbuf, ch);
-		net_write(tmpbuf, strlen(tmpbuf), str);		
+		net_write(tmpbuf, strlen(tmpbuf), str);
 		str->bom = true;
 	}
 
@@ -6220,7 +6220,7 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 
 			if (!r || (!u.u1 && !u.u2))
 				break;
-				
+
 			q->st.curr_clause2 = r;
 			t = &r->t;
 			cell *head = get_head(t->cells);
@@ -6254,13 +6254,13 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 				bool last_match = !q->st.curr_clause2->next;
 				stash_me(q, t, last_match);
 			}
-			
+
 			return pl_success;
 		}
 
 		if (!is_variable(p3))
 			break;
-			
+
 		undo_me(q);
 		drop_choice(q);
 		q->retry = QUERY_RETRY;
@@ -6944,14 +6944,14 @@ static USE_RESULT pl_status fn_loadfile_2(query *q)
 		return throw_error(q, p1, "existence_error", "cannot_open_file");
 
 	// Check for a BOM
-	
+
 	int ch = getc_utf8(fp), offset = 0;
-	
+
 	if ((unsigned)ch != 0xFEFF)
 		fseek(fp, 0, SEEK_SET);
 	else
 		offset = 3;
-		
+
 	struct stat st = {0};
 
 	if (fstat(fileno(fp), &st)) {
@@ -7006,9 +7006,9 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 	}
 
 	// Check for a BOM
-	
+
 	int ch = getc_utf8(fp);
-	
+
 	if ((unsigned)ch != 0xFEFF)
 		fseek(fp, 0, SEEK_SET);
 
@@ -9367,7 +9367,7 @@ static USE_RESULT pl_status fn_make_directory_path_1(query *q)
 	} else
 		filename = strdup(GET_STR(p1));
 
-	struct stat st = {0};			
+	struct stat st = {0};
 
 	for (char *ptr = filename+1; *ptr; ptr++) {
 		if (*ptr == PATH_SEP_CHAR) {
@@ -9383,7 +9383,7 @@ static USE_RESULT pl_status fn_make_directory_path_1(query *q)
 			*ptr = PATH_SEP_CHAR;
 		}
 	}
-	
+
 	if (!stat(filename, &st)) {
 		free(filename);
 		return pl_success;
@@ -10801,7 +10801,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 	GET_NEXT_ARG(p3,list_or_nil);
 	bool do_create = false;
 	LIST_HANDLER(p3);
-	
+
 	while (is_list(p3)) {
 		cell *h = LIST_HEAD(p3);
 		h = deref(q, h, p3_ctx);
@@ -10818,11 +10818,11 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 				if (is_variable(v))
 					return throw_error(q, p3, "instantiation_error", "read_option");
 
-				if (is_atom(v) && !strcmp(GET_STR(v), "true")) 
+				if (is_atom(v) && !strcmp(GET_STR(v), "true"))
 					do_create = true;
 			}
 		}
-		
+
 		p3 = LIST_TAIL(p3);
 		p3 = deref(q, p3, p3_ctx);
 		p3_ctx = q->latest_ctx;
@@ -10841,7 +10841,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 		if (sl_get(q->st.m->pl->keyval, key, NULL))
 			return pl_failure;
 	}
-	
+
 	const char *val;
 
 	if (is_integer(p2)) {
@@ -10862,7 +10862,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 	GET_NEXT_ARG(p3,list_or_nil);
 	bool do_delete = false;
 	LIST_HANDLER(p3);
-	
+
 	while (is_list(p3)) {
 		cell *h = LIST_HEAD(p3);
 		h = deref(q, h, p3_ctx);
@@ -10883,7 +10883,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 					do_delete = true;
 			}
 		}
-		
+
 		p3 = LIST_TAIL(p3);
 		p3 = deref(q, p3, p3_ctx);
 		p3_ctx = q->latest_ctx;
@@ -10912,10 +10912,10 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 			all_digs = 0;
 			break;
 		}
-		
+
 		src++;
 	}
-	
+
 	if (all_digs) {
 		int_t v = strtoll(val, NULL, 10);
 		make_int(&tmp, v);
@@ -11531,7 +11531,7 @@ static const struct builtins g_predicates_other[] =
 
 	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list"},
 	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list"},
-		
+
 	{"$store_attributes", 2, fn_sys_store_attributes_2, "+variable,+list"},
 	{"$retrieve_attributes", 2, fn_sys_retrieve_attributes_2, "+variable,-variable"},
 	{"$delete_attributes", 1, fn_sys_delete_attributes_1, "+variable"},
