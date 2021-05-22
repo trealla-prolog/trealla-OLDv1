@@ -11579,6 +11579,7 @@ static const struct builtins g_predicates_other[] =
 	{"$task", 6, fn_task_n, "+callable,+term,..."},
 	{"$task", 7, fn_task_n, "+callable,+term,..."},
 	{"$task", 8, fn_task_n, "+callable,+term,..."},
+
 	{"wait", 0, fn_wait_0, NULL},
 	{"await", 0, fn_await_0, NULL},
 	{"yield", 0, fn_yield_0, NULL},
