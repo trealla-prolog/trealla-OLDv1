@@ -4725,27 +4725,6 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_call_1(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, true);
-
-	if (!tmp || (tmp == ERR_CYCLE_CELL))
-		return throw_error(q, p1, "resource_error", "too_many_vars");
-
-	unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
-
-	if (check_body_callable(q->st.m->p, tmp) != NULL)
-		return throw_error(q, tmp, "type_error", "callable");
-
-	cell *tmp2 = clone_to_heap(q, true, tmp, 1);
-	idx_t nbr_cells = 1 + tmp->nbr_cells;
-	make_call(q, tmp2+nbr_cells);
-	q->st.curr_cell = tmp2;
-	q->save_cp = q->cp;
-	return pl_success;
-}
-
 static USE_RESULT pl_status fn_sys_call_n(query *q)
 {
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, true);
@@ -8045,13 +8024,16 @@ static USE_RESULT pl_status fn_yield_0(query *q)
 
 static USE_RESULT pl_status fn_task_n(query *q)
 {
-	GET_FIRST_ARG(p1,callable);
+	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, true);
+	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
+
+	GET_FIRST_RAW_ARG0(p1,callable,p0);
 	clone_to_tmp(q, p1);
 	unsigned arity = p1->arity;
 	unsigned args = 1;
 
 	while (args++ < q->st.curr_cell->arity) {
-		cell *p2 = get_next_raw_arg(q);
+		GET_NEXT_RAW_ARG(p2,any);
 		clone2_to_tmp(q, p2);
 		arity++;
 	}
@@ -11306,7 +11288,7 @@ static const struct builtins g_predicates_iso[] =
 	{"throw", 1, fn_iso_throw_1, NULL},
 	{"$catch", 3, fn_iso_catch_3, NULL},
 
-	{"$call", 1, fn_sys_call_1, NULL},
+	{"$call", 1, fn_sys_call_n, NULL},
 	{"$call", 2, fn_sys_call_n, NULL},
 	{"$call", 3, fn_sys_call_n, NULL},
 	{"$call", 4, fn_sys_call_n, NULL},
