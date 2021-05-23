@@ -6283,7 +6283,10 @@ static pl_status do_asserta_2(query *q)
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 	}
 
-	cell *body = deref(q, get_body(p1), p1_ctx);
+	cell *body = get_body(p1);
+
+	if (body)
+		body = deref(q, body, p1_ctx);
 
 	if (body && !is_callable(body))
 		return throw_error(q, body, "type_error", "callable");
