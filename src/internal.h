@@ -536,6 +536,7 @@ struct query_ {
 	bool error:1;
 	bool did_throw:1;
 	bool trace:1;
+	bool creep:1;
 	bool calc:1;
 	bool yielded:1;
 	bool is_task:1;

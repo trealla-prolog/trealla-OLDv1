@@ -155,6 +155,9 @@ static void trace_call(query *q, cell *c, box_t box)
 	fprintf(stderr, "\n");
 	fflush(stderr);
 	q->max_depth = save_depth;
+
+	if (q->creep)
+		sleep(1);
 }
 
 static void unwind_trail(query *q, const choice *ch)
@@ -920,7 +923,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 
 		if (unify_structure(q, p1, p1_ctx, c, q->st.fp, 0)) {
 			int ok;
-			
+
 			if (needs_true) {
 				p1_body = deref(q, p1_body, p1_ctx);
 				idx_t p1_body_ctx = q->latest_ctx;
@@ -1245,10 +1248,21 @@ static bool check_interrupt(query *q)
 	g_tpl_interrupt = 0;
 
 	for (;;) {
-		printf("\nAction (a)bort, (c)ontinue, (e)xit: ");
+		printf("\nAction (a)bort, (c)ontinue, (t)race, c(r)eep, (e)xit: ");
 		fflush(stdout);
 		int ch = history_getch();
 		printf("%c\n", ch);
+
+		if (ch == 't') {
+			q->trace = true;
+			return false;
+		}
+
+		if (ch == 'r') {
+			q->trace = true;
+			q->creep = true;
+			return false;
+		}
 
 		if (ch == 'c')
 			return false;
