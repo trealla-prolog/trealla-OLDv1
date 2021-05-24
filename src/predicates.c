@@ -8234,7 +8234,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 				}
 			} else if (!strcmp(GET_STR(h), "relative_to")) {
 				if (is_atom(h+1))
-					cwd = GET_STR(h+1);
+					cwd = slicedup(GET_STR(h+1), LEN_STR(h+1));
 			}
 		}
 
@@ -8247,7 +8247,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	const char *s = filename;
 
 	if (expand && (*s == '$')) {
-		char envbuf[1024];
+		char envbuf[PATH_MAX];
 		char *dst = envbuf;
 		s++;
 
