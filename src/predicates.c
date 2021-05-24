@@ -8269,16 +8269,6 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 		char *tmpbuf2;
 
 		if ((tmpbuf2 = realpath(tmpbuf, NULL)) == NULL) {
-			if ((tmpbuf2 = realpath(cwd, NULL)) == NULL)
-				tmpbuf2 = realpath(".", NULL);
-
-			may_ptr_error(tmpbuf2, free(tmpbuf));
-			size_t buflen = strlen(tmpbuf2)+1+strlen(s)+1;
-			char *tmp = malloc(buflen);
-			may_ptr_error(tmp, free(tmpbuf2));
-			snprintf(tmp, buflen, "%s/%s", tmpbuf2, s);
-			free(tmpbuf);
-			tmpbuf = tmp;
 		} else {
 			free(tmpbuf);
 			tmpbuf = tmpbuf2;
