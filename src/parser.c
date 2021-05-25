@@ -116,7 +116,7 @@ static idx_t is_in_pool(__attribute__((unused)) prolog *pl, const char *name)
 {
 	const void *val;
 
-	if (sl_get(pl->symtab, name, &val))
+	if (m_get(pl->symtab, name, &val))
 		return (idx_t)(unsigned long)val;
 
 	return ERR_IDX;
@@ -139,7 +139,7 @@ static idx_t add_to_pool(prolog *pl, const char *name)
 	memcpy(pl->pool + offset, name, len+1);
 	pl->pool_offset += len + 1;
 	const char *key = strdup(name);
-	sl_set(pl->symtab, key, (void*)(unsigned long)offset);
+	m_set(pl->symtab, key, (void*)(unsigned long)offset);
 	return offset;
 }
 
@@ -454,14 +454,14 @@ predicate *find_predicate(module *m, cell *c)
 	if (is_cstring(c))
 		tmp.val_off = index_from_pool(m->pl, MODULE_GET_STR(c));
 
-	sliter *iter = sl_findkey(m->index, &tmp);
+	miter *iter = m_findkey(m->index, &tmp);
 	predicate *h = NULL;
 
-	while (sl_nextkey(iter, (void*)&h)) {
+	while (m_nextkey(iter, (void*)&h)) {
 		if (h->is_abolished)
 			continue;
 
-		sl_done(iter);
+		m_done(iter);
 		return h;
 	}
 
@@ -559,7 +559,7 @@ static predicate *create_predicate(module *m, cell *c)
 	if (is_cstring(c))
 		h->key.val_off = index_from_pool(m->pl, MODULE_GET_STR(c));
 
-	sl_app(m->index, &h->key, h);
+	m_app(m->index, &h->key, h);
 	return h;
 }
 
@@ -754,14 +754,14 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 
 static void reindex_predicate(module *m, predicate *h)
 {
-	h->index = sl_create(compkey2, NULL, m);
+	h->index = m_create(compkey2, NULL, m);
 	ensure(h->index);
 
 	for (clause *r = h->head; r; r = r->next) {
 		cell *c = get_head(r->t.cells);
 
 		if (!r->t.ugen_erased)
-			sl_app(h->index, c, r);
+			m_app(h->index, c, r);
 	}
 }
 
@@ -789,9 +789,9 @@ static void assert_commit(module *m, term *t, clause *r, predicate *h, bool appe
 
 		if (h->index) {
 			if (!append)
-				sl_set(h->index, c, r);
+				m_set(h->index, c, r);
 			else
-				sl_app(h->index, c, r);
+				m_app(h->index, c, r);
 		}
 	}
 
@@ -846,8 +846,8 @@ bool retract_from_db(module *m, clause *r)
 	predicate *h = r->owner;
 
 	if (!--h->cnt) {
-		sl_destroy(h->index);
-		sl_destroy(h->index_save);
+		m_destroy(h->index);
+		m_destroy(h->index_save);
 		h->index = h->index_save = NULL;
 	}
 
@@ -3822,7 +3822,7 @@ void destroy_module(module *m)
 		m->tasks = task;
 	}
 
-	sl_destroy(m->index);
+	m_destroy(m->index);
 
 	for (predicate *h = m->head; h;) {
 		predicate *save = h->next;
@@ -3834,8 +3834,8 @@ void destroy_module(module *m)
 			r = save;
 		}
 
-		sl_destroy(h->index);
-		sl_destroy(h->index_save);
+		m_destroy(h->index);
+		m_destroy(h->index_save);
 		free(h);
 		h = save;
 	}
@@ -3888,7 +3888,7 @@ module *create_module(prolog *pl, const char *name)
 		ptr2->priority = ptr->priority;
 	}
 
-	m->index = sl_create(compkey, NULL, m);
+	m->index = m_create(compkey, NULL, m);
 	ensure(m->index);
 	m->p = create_parser(m);
 	ensure(m->p);
@@ -3991,9 +3991,9 @@ static void g_destroy(prolog *pl)
 		destroy_module(pl->modules);
 
 	free(g_tpl_lib);
-	sl_destroy(pl->funtab);
-	sl_destroy(pl->symtab);
-	sl_destroy(pl->keyval);
+	m_destroy(pl->funtab);
+	m_destroy(pl->symtab);
+	m_destroy(pl->keyval);
 	free(pl->pool);
 	pl->pool_offset = 0;
 }
@@ -4010,8 +4010,8 @@ static bool g_init(prolog *pl)
 	if (pl->pool) {
 		bool error = false;
 
-		CHECK_SENTINEL(pl->symtab = sl_create((void*)strcmp, (void*)free, NULL), NULL);
-		CHECK_SENTINEL(pl->keyval = sl_create((void*)strcmp, (void*)keyvalfree, NULL), NULL);
+		CHECK_SENTINEL(pl->symtab = m_create((void*)strcmp, (void*)free, NULL), NULL);
+		CHECK_SENTINEL(pl->keyval = m_create((void*)strcmp, (void*)keyvalfree, NULL), NULL);
 
 		if (!error) {
 			CHECK_SENTINEL(g_false_s = index_from_pool(pl, "false"), ERR_IDX);
@@ -4116,7 +4116,7 @@ prolog *pl_create()
 			g_tpl_lib = strdup("../library");
 	}
 
-	pl->funtab = sl_create((void*)strcmp, NULL, NULL);
+	pl->funtab = m_create((void*)strcmp, NULL, NULL);
 
 	if (pl->funtab)
 		load_builtins(pl);

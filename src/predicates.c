@@ -4482,7 +4482,7 @@ static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 	if (hard)
 		h->is_abolished = true;
 
-	sl_destroy(h->index);
+	m_destroy(h->index);
 	h->index = NULL;
 	h->cnt = 0;
 	return pl_success;
@@ -5391,12 +5391,12 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 static bool search_functor(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
 	if (!q->retry)
-		q->st.iter2 = sl_first(q->st.m->index);
+		q->st.iter2 = m_first(q->st.m->index);
 
 	DISCARD_RESULT make_choice(q);
 	predicate *h = NULL;
 
-	while (sl_next(q->st.iter2, (void*)&h)) {
+	while (m_next(q->st.iter2, (void*)&h)) {
 		if (h->is_abolished)
 			continue;
 
@@ -10922,7 +10922,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 	may_ptr_error(key);
 
 	if (do_create) {
-		if (sl_get(q->st.m->pl->keyval, key, NULL))
+		if (m_get(q->st.m->pl->keyval, key, NULL))
 			return pl_failure;
 	}
 
@@ -10936,7 +10936,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 		val = slicedup(GET_STR(p2), LEN_STR(p2));
 
 	may_ptr_error(val);
-	sl_set(q->st.m->pl->keyval, key, val);
+	m_set(q->st.m->pl->keyval, key, val);
 	return pl_success;
 }
 
@@ -10986,7 +10986,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 	may_ptr_error(key);
 	const char *val = NULL;
 
-	if (!sl_get(q->st.m->pl->keyval, key, (void*)&val))
+	if (!m_get(q->st.m->pl->keyval, key, (void*)&val))
 		return pl_failure;
 
 	cell tmp;
@@ -11009,7 +11009,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 		may_error(make_cstring(&tmp, val));
 
 	if (do_delete)
-		sl_del(q->st.m->pl->keyval, key);
+		m_del(q->st.m->pl->keyval, key);
 
 	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
@@ -11638,12 +11638,12 @@ static const struct builtins g_predicates_other[] =
 
 void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found)
 {
-	sliter *iter = sl_findkey(pl->funtab, name);
+	miter *iter = m_findkey(pl->funtab, name);
 	const struct builtins *ptr;
 
-	while (sl_nextkey(iter, (void**)&ptr)) {
+	while (m_nextkey(iter, (void**)&ptr)) {
 		if (ptr->arity == arity) {
-			sl_done(iter);
+			m_done(iter);
 			*found = true;
 			return ptr->fn;
 		}
@@ -11659,19 +11659,19 @@ extern const struct builtins g_contrib_funcs[];
 void load_builtins(prolog *pl)
 {
 	for (const struct builtins *ptr = g_predicates_iso; ptr->name; ptr++) {
-		sl_app(pl->funtab, ptr->name, ptr);
+		m_app(pl->funtab, ptr->name, ptr);
 	}
 
 	for (const struct builtins *ptr = g_functions; ptr->name; ptr++) {
-		sl_app(pl->funtab, ptr->name, ptr);
+		m_app(pl->funtab, ptr->name, ptr);
 	}
 
 	for (const struct builtins *ptr = g_predicates_other; ptr->name; ptr++) {
-		sl_app(pl->funtab, ptr->name, ptr);
+		m_app(pl->funtab, ptr->name, ptr);
 	}
 
 	for (const struct builtins *ptr = g_contrib_funcs; ptr->name; ptr++) {
-		sl_app(pl->funtab, ptr->name, ptr);
+		m_app(pl->funtab, ptr->name, ptr);
 	}
 }
 
@@ -11815,25 +11815,25 @@ static void load_properties(module *m)
 	}
 
 	for (const struct builtins *ptr = g_predicates_iso; ptr->name; ptr++) {
-		sl_app(m->pl->funtab, ptr->name, ptr);
+		m_app(m->pl->funtab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		dst = push_property(&tmpbuf, &buflen, dst, ptr);
 	}
 
 	for (const struct builtins *ptr = g_functions; ptr->name; ptr++) {
-		sl_app(m->pl->funtab, ptr->name, ptr);
+		m_app(m->pl->funtab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		dst = push_property(&tmpbuf, &buflen, dst, ptr);
 	}
 
 	for (const struct builtins *ptr = g_predicates_other; ptr->name; ptr++) {
-		sl_app(m->pl->funtab, ptr->name, ptr);
+		m_app(m->pl->funtab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		dst = push_property(&tmpbuf, &buflen, dst, ptr);
 	}
 
 	for (const struct builtins *ptr = g_contrib_funcs; ptr->name; ptr++) {
-		sl_app(m->pl->funtab, ptr->name, ptr);
+		m_app(m->pl->funtab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		dst = push_property(&tmpbuf, &buflen, dst, ptr);
 	}

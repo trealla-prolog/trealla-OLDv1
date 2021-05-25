@@ -247,7 +247,7 @@ bool retry_choice(query *q)
 		return retry_choice(q);
 
 	trim_heap(q, ch);
-	sl_done(q->st.iter);
+	m_done(q->st.iter);
 	q->st = ch->st;
 	q->save_m = NULL;		// maybe move q->save_m to q->st.save_m
 
@@ -382,7 +382,7 @@ static void commit_me(query *q, term *t)
 		g = make_frame(q, t->nbr_vars);
 
 	if (last_match || t->cut_only) {
-		sl_done(ch->st.iter);
+		m_done(ch->st.iter);
 		drop_choice(q);
 		trim_trail(q);
 	} else {
@@ -488,7 +488,7 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 		if (ch->cgen < g->cgen)
 			break;
 
-		sl_done(ch->st.iter);
+		m_done(ch->st.iter);
 		q->cp--;
 
 		if (ch->chk_is_det) {
@@ -1039,7 +1039,7 @@ static const char *dump_key(void *p, const void *p1)
 static void next_key(query *q)
 {
 	if (q->st.iter) {
-		if (!sl_nextkey(q->st.iter, (void**)&q->st.curr_clause)) {
+		if (!m_nextkey(q->st.iter, (void**)&q->st.curr_clause)) {
 			q->st.curr_clause = NULL;
 			q->st.iter = NULL;
 		}
@@ -1101,7 +1101,7 @@ static USE_RESULT pl_status match_head(query *q)
 			}
 
 			if (!all_vars) {
-				q->st.iter = sl_findkey(h->index, key);
+				q->st.iter = m_findkey(h->index, key);
 				next_key(q);
 			} else {
 				q->st.curr_clause = h->head;
@@ -1495,6 +1495,6 @@ pl_status query_execute(query *q, term *t)
 	g->nbr_slots = t->nbr_vars;
 	g->ugen = ++q->st.m->pl->ugen;
 	pl_status ret = query_start(q);
-	sl_done(q->st.iter);
+	m_done(q->st.iter);
 	return ret;
 }

@@ -43,7 +43,7 @@ typedef uint64_t uint_t;
 
 typedef uint32_t idx_t;
 
-#include "skiplist.h"
+#include "map.h"
 #include "trealla.h"
 #include "cdebug.h"
 
@@ -378,7 +378,7 @@ struct predicate_ {
 	predicate *next;
 	clause *head, *tail;
 	module *m;
-	skiplist *index, *index_save;
+	map *index, *index_save;
 	cell key;
 	unsigned cnt;
 	bool is_prebuilt:1;
@@ -451,7 +451,7 @@ typedef struct {
 typedef struct {
 	cell *curr_cell;
 	clause *curr_clause, *curr_clause2;
-	sliter *iter, *iter2;
+	miter *iter, *iter2;
 	module *m;
 	idx_t curr_frame, fp, hp, tp, sp, cgen;
 	uint8_t anbr, qnbr;
@@ -601,7 +601,7 @@ struct module_ {
 	predicate *head, *tail;
 	parser *p;
 	FILE *fp;
-	skiplist *index, *nbs;
+	map *index, *nbs;
 	clause *dirty_list;
 	struct loaded_file *loaded_files;
 	op_table def_ops[MAX_OPS+1];
@@ -627,7 +627,7 @@ struct prolog_ {
 	module *modules;
 	module *user_m, *curr_m;
 	uint64_t s_last, s_cnt, seed;
-	skiplist *symtab, *funtab, *keyval;
+	map *symtab, *funtab, *keyval;
 	char *pool;
 	uint64_t ugen;
 	idx_t pool_offset, pool_size, tab_idx;
