@@ -54,6 +54,20 @@ static void msleep(int ms)
 }
 #endif
 
+static size_t slicecpy(char *dst, size_t dstlen, const char *src, size_t len)
+{
+	char *save = dst;
+
+	while ((dstlen-1) && len) {
+		*dst++ = *src++;
+		dstlen--;
+		len--;
+	}
+
+	*dst = '\0';
+	return dst - save;
+}
+
 static char *slicedup(const char *s, size_t n)
 {
 	char *ptr = malloc(n+1);
@@ -7163,10 +7177,8 @@ static USE_RESULT pl_status fn_server_3(query *q)
 			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "hostname")) {
 				c = c + 1;
 
-				if (is_atom(c)) {
-					strncpy(hostname, GET_STR(c), sizeof(hostname));
-					hostname[sizeof(hostname)-1] = '\0';
-				}
+				if (is_atom(c))
+					slicecpy(hostname, sizeof(hostname), GET_STR(c), LEN_STR(c));
 			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "scheme")) {
 				c = c + 1;
 
@@ -11854,7 +11866,7 @@ static void load_ops(query *q)
 	*dst = '\0';
 
 	for (const op_table *ptr = q->st.m->ops; ptr->name; ptr++) {
-		char specifier[256], name[256];
+		char specifier[20], name[256];
 
 		if (!ptr->specifier)
 			continue;
@@ -11890,7 +11902,7 @@ static void load_ops(query *q)
 	}
 
 	for (const op_table *ptr = q->st.m->def_ops; ptr->name; ptr++) {
-		char specifier[256], name[256];
+		char specifier[20], name[256];
 
 		if (!ptr->specifier)
 			continue;
