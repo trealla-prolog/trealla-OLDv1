@@ -4752,6 +4752,10 @@ static USE_RESULT pl_status fn_sys_call_1(query *q)
 static USE_RESULT pl_status fn_sys_call_n(query *q)
 {
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, true);
+
+	if (!p0 || (p0 == ERR_CYCLE_CELL))
+		return throw_error(q, q->st.curr_cell, "resource_error", "too_many_vars");
+
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
