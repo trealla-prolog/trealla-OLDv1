@@ -2019,8 +2019,11 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 	stream *str = &g_streams[n];
 	str->filename = strdup(filename);
+	may_ptr_error(str->filename);
 	str->name = strdup(filename);
+	may_ptr_error(str->name);
 	str->mode = strdup(mode);
+	may_ptr_error(str->mode);
 	str->eof_action = eof_action_eof_code;
 	bool binary = false, bom_specified = false;
 
@@ -2177,7 +2180,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 #endif
 
 	cell *tmp = alloc_on_heap(q, 1);
-	ensure(tmp);
+	may_ptr_error(tmp);
 	make_int(tmp, n);
 	tmp->flags |= FLAG_STREAM | FLAG_HEX;
 	set_var(q, p3, p3_ctx, tmp, q->st.curr_frame);
@@ -2608,7 +2611,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 
 			cell *save = tmp;
 			tmp = alloc_on_heap(q, idx);
-			ensure(tmp);
+			may_ptr_error(tmp);
 			safe_copy_cells(tmp, save, idx);
 			tmp->nbr_cells = idx;
 			set_var(q, vars, vars_ctx, tmp, q->st.curr_frame);
@@ -2665,7 +2668,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 
 			cell *save = tmp;
 			tmp = alloc_on_heap(q, idx);
-			ensure(tmp);
+			may_ptr_error(tmp);
 			safe_copy_cells(tmp, save, idx);
 			tmp->nbr_cells = idx;
 			set_var(q, varnames, varnames_ctx, tmp, q->st.curr_frame);
@@ -2680,7 +2683,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 		unsigned cnt = 0;
 		may_ptr_error(init_tmp_heap(q));
 		cell *tmp = alloc_on_tmp(q, (cnt*4)+1);
-		ensure(tmp);
+		may_ptr_error(tmp);
 		unsigned idx = 0;
 
 		for (unsigned i = 0; i < q->st.m->pl->tab_idx; i++) {
@@ -2728,7 +2731,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 
 			cell *save = tmp;
 			tmp = alloc_on_heap(q, idx);
-			ensure(tmp);
+			may_ptr_error(tmp);
 			safe_copy_cells(tmp, save, idx);
 			tmp->nbr_cells = idx;
 			set_var(q, sings, sings_ctx, tmp, q->st.curr_frame);
@@ -2740,7 +2743,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 	}
 
 	cell *tmp = alloc_on_heap(q, p->t->cidx-1);
-	ensure(tmp);
+	may_ptr_error(tmp);
 	safe_copy_cells(tmp, p->t->cells, p->t->cidx-1);
 	pl_status ok = unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	clear_term(p->t);
@@ -4175,7 +4178,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		if (is_cstring(tmp2) /*&& arity*/) {
 			cell *c = tmp2;
 			idx_t off = index_from_pool(q->st.m->pl, GET_STR(tmp2));
-			ensure (off != ERR_IDX);
+			may_idx_error(off);
 			//DECR_REF(tmp2);
 			c->val_off = off;
 			c->val_type = TYPE_LITERAL;
@@ -4600,7 +4603,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 
 	if (nbr_cells > p->t->nbr_cells) {
 		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
-		ensure(p->t);
+		may_ptr_error(p->t);
 		p->t->nbr_cells = nbr_cells;
 	}
 
@@ -4611,7 +4614,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 
 	if (is_cstring(h)) {
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(h));
-		ensure (off != ERR_IDX);
+		may_idx_error(off);
 		DECR_REF(h);
 		h->val_type = TYPE_LITERAL;
 		h->val_off = off;
@@ -4663,7 +4666,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 
 	if (nbr_cells > p->t->nbr_cells) {
 		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
-		ensure(p->t);
+		may_ptr_error(p->t);
 		p->t->nbr_cells = nbr_cells;
 	}
 
@@ -4674,7 +4677,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 
 	if (is_cstring(h)) {
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(h));
-		ensure (off != ERR_IDX);
+		may_idx_error(off);
 		DECR_REF(h);
 		h->val_type = TYPE_LITERAL;
 		h->val_off = off;
@@ -4725,6 +4728,27 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_sys_call_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, true);
+
+	if (!tmp || (tmp == ERR_CYCLE_CELL))
+		return throw_error(q, p1, "resource_error", "too_many_vars");
+
+	unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
+
+	if (check_body_callable(q->st.m->p, tmp) != NULL)
+		return throw_error(q, tmp, "type_error", "callable");
+
+	cell *tmp2 = clone_to_heap(q, true, tmp, 1);
+	idx_t nbr_cells = 1 + tmp->nbr_cells;
+	make_call(q, tmp2+nbr_cells);
+	q->st.curr_cell = tmp2;
+	q->save_cp = q->cp;
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_sys_call_n(query *q)
 {
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, true);
@@ -4748,7 +4772,7 @@ static USE_RESULT pl_status fn_sys_call_n(query *q)
 	if (is_cstring(tmp2)) {
 		cell *c = tmp2;
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(tmp2));
-		ensure (off != ERR_IDX);
+		may_idx_error(off);
 		//DECR_REF(tmp2);
 		c->val_off = off;
 		c->val_type = TYPE_LITERAL;
@@ -5081,7 +5105,7 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, 1, 0, 0);
 	if (len <= 0) { q->error = true; return pl_failure; }
 	char *dst = malloc(len+1+1024);
-	ensure(dst);
+	may_ptr_error(dst);
 	int off = 0;
 
 	if (q->st.m != q->st.m->pl->user_m) {
@@ -5091,7 +5115,7 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 	len = print_term_to_buf(q, dst+off, len+1, c, c_ctx, 1, 0, 0);
 	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q->st.curr_cell) + 1024;
 	char *dst2 = malloc(len2+1);
-	ensure(dst2);
+	may_ptr_error(dst2);
 	q->quoted = save_quoted;
 
 	if (!strncmp(expected, "iso_", 4))
@@ -5243,7 +5267,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 			set_var(q, p1, p1_ctx, p2, p2_ctx);
 		} else {
 			cell *tmp = alloc_on_heap(q, 1+arity);
-			ensure(tmp);
+			may_ptr_error(tmp);
 			*tmp = (cell){0};
 			tmp[0].val_type = TYPE_LITERAL;
 			tmp[0].arity = arity;
@@ -5540,7 +5564,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 		unsigned v1 = 0, v2 = 0, v3 = 0;
 		sscanf(VERSION, "v%u.%u.%u", &v1, &v2, &v3);
 		cell *tmp = alloc_on_heap(q, 5);
-		ensure(tmp);
+		may_ptr_error(tmp);
 		make_literal(&tmp[0], index_from_pool(q->st.m->pl, "trealla"));
 		make_int(&tmp[1], v1);
 		make_int(&tmp[2], v2);
@@ -5925,7 +5949,7 @@ static USE_RESULT pl_status fn_sys_findall_3(query *q)
 
 	idx_t nbr_cells = queuen_used(q);
 	q->tmpq[q->st.qnbr] = malloc(sizeof(cell)*nbr_cells);
-	ensure(q->tmpq[q->st.qnbr]);
+	may_ptr_error(q->tmpq[q->st.qnbr]);
 	copy_cells(q->tmpq[q->st.qnbr], get_queuen(q), nbr_cells);
 	q->tmpq_size[q->st.qnbr] = nbr_cells;
 
@@ -5971,7 +5995,9 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 	uint64_t xs_vars = 0;
 	p2 = skip_existentials(q, p2, &xs_vars);
 	cell *tvars_tmp = do_term_variables(q, p2, p2_ctx);
+	may_ptr_error(tvars_tmp);
 	cell *tvars = malloc(sizeof(cell)*tvars_tmp->nbr_cells);
+	may_ptr_error(tvars);
 	copy_cells(tvars, tvars_tmp, tvars_tmp->nbr_cells);
 
 	// First time thru generate all solutions
@@ -6005,7 +6031,7 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 	if (!q->tmpq[q->st.qnbr]) {
 		idx_t nbr_cells = queuen_used(q);
 		q->tmpq[q->st.qnbr] = malloc(sizeof(cell)*nbr_cells);
-		ensure(q->tmpq[q->st.qnbr]);
+		may_ptr_error(q->tmpq[q->st.qnbr]);
 		copy_cells(q->tmpq[q->st.qnbr], get_queuen(q), nbr_cells);
 		q->tmpq_size[q->st.qnbr] = nbr_cells;
 	}
@@ -6307,7 +6333,7 @@ static pl_status do_asserta_2(query *q)
 
 	if (nbr_cells > p->t->nbr_cells) {
 		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
-		ensure(p->t);
+		may_ptr_error(p->t);
 		p->t->nbr_cells = nbr_cells;
 	}
 
@@ -6318,7 +6344,7 @@ static pl_status do_asserta_2(query *q)
 
 	if (is_cstring(h)) {
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(h));
-		ensure (off != ERR_IDX);
+		may_idx_error(off);
 		DECR_REF(h);
 		h->val_type = TYPE_LITERAL;
 		h->val_off = off;
@@ -6405,7 +6431,7 @@ static pl_status do_assertz_2(query *q)
 
 	if (nbr_cells > p->t->nbr_cells) {
 		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
-		ensure(p->t);
+		may_ptr_error(p->t);
 		p->t->nbr_cells = nbr_cells;
 	}
 
@@ -6416,7 +6442,7 @@ static pl_status do_assertz_2(query *q)
 
 	if (is_cstring(h)) {
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(h));
-		ensure (off != ERR_IDX);
+		may_idx_error(off);
 		DECR_REF(h);
 		h->val_type = TYPE_LITERAL;
 		h->val_off = off;
@@ -6922,7 +6948,7 @@ static USE_RESULT pl_status fn_savefile_2(query *q)
 		filename = GET_STR(p1);
 
 	FILE *fp = fopen(filename, "wb");
-	ensure(fp);
+	may_ptr_error(fp);
 	fwrite(GET_STR(p2), 1, LEN_STR(p2), fp);
 	fclose(fp);
 	free(src);
@@ -7180,8 +7206,11 @@ static USE_RESULT pl_status fn_server_3(query *q)
 
 	stream *str = &g_streams[n];
 	str->filename = slicedup(GET_STR(p1), LEN_STR(p1));
+	may_ptr_error(str->filename);
 	str->name = strdup(hostname);
+	may_ptr_error(str->name);
 	str->mode = strdup("update");
+	may_ptr_error(str->mode);
 	str->nodelay = nodelay;
 	str->nonblock = nonblock;
 	str->udp = udp;
@@ -7197,7 +7226,7 @@ static USE_RESULT pl_status fn_server_3(query *q)
 
 	net_set_nonblocking(str);
 	cell *tmp = alloc_on_heap(q, 1);
-	ensure(tmp);
+	may_ptr_error(tmp);
 	make_int(tmp, n);
 	tmp->flags |= FLAG_STREAM | FLAG_HEX;
 	set_var(q, p2, p2_ctx, tmp, q->st.curr_frame);
@@ -7232,8 +7261,11 @@ static USE_RESULT pl_status fn_accept_2(query *q)
 
 	stream *str2 = &g_streams[n];
 	str2->filename = strdup(str->filename);
+	may_ptr_error(str2->filename);
 	str2->name = strdup(str->name);
+	may_ptr_error(str2->name);
 	str2->mode = strdup("update");
+	may_ptr_error(str2->mode);
 	str->socket = true;
 	str2->nodelay = str->nodelay;
 	str2->nonblock = str->nonblock;
@@ -7364,8 +7396,11 @@ static USE_RESULT pl_status fn_client_5(query *q)
 
 	stream *str = &g_streams[n];
 	str->filename = slicedup(GET_STR(p1), LEN_STR(p1));
+	may_ptr_error(str->filename);
 	str->name = strdup(hostname);
+	may_ptr_error(str->name);
 	str->mode = strdup("update");
+	may_ptr_error(str->mode);
 	str->socket = true;
 	str->nodelay = nodelay;
 	str->nonblock = nonblock;
@@ -7402,7 +7437,7 @@ static USE_RESULT pl_status fn_client_5(query *q)
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	DECR_REF(&tmp);
 	cell *tmp2 = alloc_on_heap(q, 1);
-	ensure(tmp2);
+	may_ptr_error(tmp2);
 	make_int(tmp2, n);
 	tmp2->flags |= FLAG_STREAM | FLAG_HEX;
 	set_var(q, p4, p4_ctx, tmp2, q->st.curr_frame);
@@ -7504,7 +7539,7 @@ static USE_RESULT pl_status fn_bread_3(query *q)
 	if (is_integer(p1) && (p1->val_num > 0)) {
 		if (!str->data) {
 			str->data = malloc(p1->val_num+1);
-			ensure(str->data);
+			may_ptr_error(str->data);
 			str->data_len = 0;
 		}
 
@@ -7542,14 +7577,14 @@ static USE_RESULT pl_status fn_bread_3(query *q)
 	if (is_integer(p1)) {
 		if (!str->data) {
 			str->data = malloc((str->alloc_nbytes=1024*1)+1);
-			ensure(str->data);
+			may_ptr_error(str->data);
 			str->data_len = 0;
 		}
 
 		size_t nbytes = net_read(str->data, str->alloc_nbytes, str);
 		str->data[nbytes] = '\0';
 		str->data = realloc(str->data, nbytes+1);
-		ensure(str->data);
+		may_ptr_error(str->data);
 		cell tmp;
 		may_error(make_stringn(&tmp, str->data, nbytes), free(str->data));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -7561,7 +7596,7 @@ static USE_RESULT pl_status fn_bread_3(query *q)
 
 	if (!str->data) {
 		str->data = malloc((str->alloc_nbytes=1024*1)+1);
-		ensure(str->data);
+		may_ptr_error(str->data);
 		str->data_len = 0;
 	}
 
@@ -7576,7 +7611,7 @@ static USE_RESULT pl_status fn_bread_3(query *q)
 
 		if (str->alloc_nbytes == str->data_len) {
 			str->data = realloc(str->data, (str->alloc_nbytes*=2)+1);
-			ensure(str->data);
+			may_ptr_error(str->data);
 		}
 	}
 
@@ -7636,7 +7671,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_2(query *q)
 	if (is_cstring(p_chars)) {
 		len = LEN_STR(p_chars);
 		src = malloc(len+1);
-		ensure(src);
+		may_ptr_error(src);
 		memcpy(src, GET_STR(p_chars), len);
 		src[len] = '\0';
 	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx, false)) > 0) {
@@ -7677,7 +7712,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 	if (is_cstring(p_chars)) {
 		len = LEN_STR(p_chars);
 		src = malloc(len+1+1);	// final +1 is for look-ahead
-		ensure(src);
+		may_ptr_error(src);
 		memcpy(src, GET_STR(p_chars), len);
 		src[len] = '\0';
 	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx, false)) > 0) {
@@ -7716,7 +7751,7 @@ static USE_RESULT pl_status fn_read_term_from_atom_3(query *q)
 	if (is_cstring(p_chars)) {
 		len = LEN_STR(p_chars);
 		src = malloc(len+1+1);	// final +1 is for look-ahead
-		ensure(src);
+		may_ptr_error(src);
 		memcpy(src, GET_STR(p_chars), len);
 		src[len] = '\0';
 	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx, false)) > 0) {
@@ -8200,6 +8235,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	int expand = 0;
 	char *src = NULL, *filename;
 	char *here = strdup(q->st.m->filename);
+	may_ptr_error(here);
 	char *ptr = here + strlen(here) - 1;
 
 	while (*ptr && (*ptr != '/')) {
@@ -8514,7 +8550,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				ensure(tmpbuf); //TODO: use alloc_grow
+				may_ptr_error(tmpbuf); //TODO: use alloc_grow
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -8531,7 +8567,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				ensure(tmpbuf); //TODO: use alloc_grow
+				may_ptr_error(tmpbuf); //TODO: use alloc_grow
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -8551,7 +8587,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				ensure(tmpbuf); //TODO: use alloc_grow
+				may_ptr_error(tmpbuf); //TODO: use alloc_grow
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -8568,7 +8604,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				ensure(tmpbuf);
+				may_ptr_error(tmpbuf);
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -8585,7 +8621,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				ensure(tmpbuf);
+				may_ptr_error(tmpbuf);
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -8602,7 +8638,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				ensure(tmpbuf);
+				may_ptr_error(tmpbuf);
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -8625,7 +8661,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				ensure(tmpbuf);
+				may_ptr_error(tmpbuf);
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -8884,7 +8920,7 @@ static pl_status do_urlencode_2(query *q)
 	const char *str = GET_STR(p1);
 	size_t len = LEN_STR(p1);
 	char *dstbuf = malloc((len*3)+1);
-	ensure(dstbuf);
+	may_ptr_error(dstbuf);
 	url_encode(str, len, dstbuf);
 	cell tmp;
 
@@ -8906,7 +8942,7 @@ static pl_status do_urldecode_2(query *q)
 	const char *str = GET_STR(p2);
 	size_t len = LEN_STR(p2);
 	char *dstbuf = malloc(len+1);
-	ensure(dstbuf);
+	may_ptr_error(dstbuf);
 	url_decode(str, dstbuf);
 	cell tmp;
 
@@ -10867,6 +10903,8 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 	} else
 		key = slicedup(GET_STR(p1), LEN_STR(p1));
 
+	may_ptr_error(key);
+
 	if (do_create) {
 		if (sl_get(q->st.m->pl->keyval, key, NULL))
 			return pl_failure;
@@ -10881,6 +10919,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 	} else
 		val = slicedup(GET_STR(p2), LEN_STR(p2));
 
+	may_ptr_error(val);
 	sl_set(q->st.m->pl->keyval, key, val);
 	return pl_success;
 }
@@ -10928,6 +10967,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 	} else
 		key = slicedup(GET_STR(p1), LEN_STR(p1));
 
+	may_ptr_error(key);
 	const char *val = NULL;
 
 	if (!sl_get(q->st.m->pl->keyval, key, (void*)&val))
@@ -11024,7 +11064,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 				continue;
 
 			char *src = malloc(*lib->len+1);
-			ensure(src);
+			may_ptr_error(src);
 			memcpy(src, lib->start, *lib->len);
 			src[*lib->len] = '\0';
 			STRING_INIT(s1);
@@ -11284,7 +11324,7 @@ static const struct builtins g_predicates_iso[] =
 	{"throw", 1, fn_iso_throw_1, NULL},
 	{"$catch", 3, fn_iso_catch_3, NULL},
 
-	{"$call", 1, fn_sys_call_n, NULL},
+	{"$call", 1, fn_sys_call_1, NULL},
 	{"$call", 2, fn_sys_call_n, NULL},
 	{"$call", 3, fn_sys_call_n, NULL},
 	{"$call", 4, fn_sys_call_n, NULL},
@@ -11687,6 +11727,7 @@ static void load_properties(module *m)
 	m->loaded_properties = true;
 	size_t buflen = 1024*8;
 	char *tmpbuf = malloc(buflen);
+	ensure(tmpbuf);
 	char *dst = tmpbuf;
 	*dst = '\0';
 
@@ -11804,6 +11845,7 @@ static void load_ops(query *q)
 	q->st.m->loaded_ops = true;
 	size_t buflen = 1024*8;
 	char *tmpbuf = malloc(buflen);
+	ensure(tmpbuf);
 	char *dst = tmpbuf;
 	*dst = '\0';
 
