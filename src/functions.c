@@ -10,6 +10,7 @@
 
 #include "trealla.h"
 #include "internal.h"
+#include "query.h"
 #include "builtins.h"
 
 #define CHECK_CALC()							\

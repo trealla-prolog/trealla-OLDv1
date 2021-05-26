@@ -6,6 +6,7 @@
 
 #include "trealla.h"
 #include "internal.h"
+#include "query.h"
 #include "builtins.h"
 #include "heap.h"
 
@@ -212,7 +213,7 @@ cell *do_deep_copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t 
 	if (!tmp || (tmp == ERR_CYCLE_CELL)) return tmp;
 	cell *tmp2 = alloc_on_heap(q, (prefix?1:0)+tmp->nbr_cells+suffix);
 	if (!tmp2) return NULL;
-	
+
 	if (prefix) {
 		*nbr_cells = 1;
 		// Needed for follow() to work
@@ -334,7 +335,7 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t suffix)
 	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
 		*dst = *src;
 		INCR_REF(src);
-		
+
 		if (!is_variable(src))
 			continue;
 

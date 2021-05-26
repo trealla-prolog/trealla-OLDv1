@@ -12,6 +12,7 @@
 #include "library.h"
 #include "trealla.h"
 #include "parser.h"
+#include "query.h"
 #include "builtins.h"
 #include "heap.h"
 #include "utf8.h"

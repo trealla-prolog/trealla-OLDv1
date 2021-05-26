@@ -67,24 +67,24 @@ src/base64.o: src/base64.c src/base64.h
 src/contrib.o: src/contrib.c src/trealla.h src/internal.h src/map.h \
   src/skiplist.h src/cdebug.h src/builtins.h
 src/functions.o: src/functions.c src/trealla.h src/internal.h src/map.h \
-  src/skiplist.h src/cdebug.h src/builtins.h
+  src/skiplist.h src/cdebug.h src/query.h src/builtins.h
 src/heap.o: src/heap.c src/trealla.h src/internal.h src/map.h src/skiplist.h \
-  src/cdebug.h src/builtins.h src/heap.h
+  src/cdebug.h src/query.h src/builtins.h src/heap.h
 src/history.o: src/history.c src/history.h src/utf8.h src/cdebug.h
 src/library.o: src/library.c src/library.h
 src/network.o: src/network.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/network.h
 src/parser.o: src/parser.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/history.h src/library.h src/parser.h \
-  src/builtins.h src/heap.h src/utf8.h
+  src/query.h src/builtins.h src/heap.h src/utf8.h
 src/predicates.o: src/predicates.c src/trealla.h src/internal.h src/map.h \
   src/skiplist.h src/cdebug.h src/network.h src/base64.h src/library.h \
-  src/parser.h src/builtins.h src/heap.h src/utf8.h
+  src/parser.h src/query.h src/builtins.h src/heap.h src/utf8.h
 src/print.o: src/print.c src/internal.h src/map.h src/skiplist.h \
-  src/trealla.h src/cdebug.h src/parser.h src/builtins.h src/network.h \
-  src/utf8.h
+  src/trealla.h src/cdebug.h src/parser.h src/query.h src/builtins.h \
+  src/network.h src/utf8.h
 src/query.o: src/query.c src/internal.h src/map.h src/skiplist.h \
-  src/trealla.h src/cdebug.h src/history.h src/parser.h src/builtins.h \
-  src/heap.h
+  src/trealla.h src/cdebug.h src/history.h src/parser.h src/query.h \
+  src/builtins.h src/heap.h
 src/skiplist.o: src/skiplist.c src/skiplist.h
 src/utf8.o: src/utf8.c src/utf8.h
