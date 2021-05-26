@@ -33,7 +33,7 @@ endif
 
 OBJECTS = tpl.o src/history.o src/functions.o \
 	src/predicates.o src/contrib.o src/heap.c \
-	src/library.o src/parser.o src/print.o src/runtime.o \
+	src/library.o src/parser.o src/print.o src/query.o \
 	src/skiplist.o src/base64.o src/network.o src/utf8.o
 
 OBJECTS +=  library/builtins.o library/lists.o library/apply.o \
@@ -83,7 +83,7 @@ src/predicates.o: src/predicates.c src/trealla.h src/internal.h src/map.h \
 src/print.o: src/print.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/parser.h src/builtins.h src/network.h \
   src/utf8.h
-src/runtime.o: src/runtime.c src/internal.h src/map.h src/skiplist.h \
+src/query.o: src/query.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/history.h src/parser.h src/builtins.h \
   src/heap.h
 src/skiplist.o: src/skiplist.c src/skiplist.h
