@@ -12,6 +12,7 @@
 #endif
 
 #include "internal.h"
+#include "parser.h"
 #include "builtins.h"
 #include "network.h"
 #include "utf8.h"
