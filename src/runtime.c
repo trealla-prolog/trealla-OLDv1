@@ -13,6 +13,7 @@
 
 #include "internal.h"
 #include "history.h"
+#include "parser.h"
 #include "builtins.h"
 #include "heap.h"
 #include "cdebug.h"

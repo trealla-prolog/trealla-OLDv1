@@ -75,11 +75,11 @@ src/library.o: src/library.c src/library.h
 src/network.o: src/network.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/network.h
 src/parser.o: src/parser.c src/internal.h src/map.h src/skiplist.h \
-  src/trealla.h src/cdebug.h src/history.h src/library.h src/builtins.h \
-  src/heap.h src/utf8.h
+  src/trealla.h src/cdebug.h src/history.h src/library.h src/parser.h \
+  src/builtins.h src/heap.h src/utf8.h
 src/predicates.o: src/predicates.c src/trealla.h src/internal.h src/map.h \
   src/skiplist.h src/cdebug.h src/network.h src/base64.h src/library.h \
-  src/builtins.h src/heap.h src/utf8.h
+  src/parser.h src/builtins.h src/heap.h src/utf8.h
 src/print.o: src/print.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/builtins.h src/network.h src/utf8.h
 src/runtime.o: src/runtime.c src/internal.h src/map.h src/skiplist.h \

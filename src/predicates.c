@@ -33,6 +33,7 @@
 #include "network.h"
 #include "base64.h"
 #include "library.h"
+#include "parser.h"
 #include "builtins.h"
 #include "heap.h"
 #include "utf8.h"
