@@ -1,6 +1,9 @@
 #pragma once
 
 extern query *create_query(module *m, bool sub_query);
+extern query *create_task(query *q, cell *curr_cell);
+extern void destroy_query(query *q);
+
 extern void set_var(query *q, const cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 extern void reset_value(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
 extern USE_RESULT pl_status make_choice(query *q);
@@ -13,8 +16,6 @@ extern void undo_me(query *q);
 extern idx_t drop_choice(query *q);
 extern bool retry_choice(query *q);
 extern void term_assign_vars(parser *p, unsigned start, bool rebase);
-extern query *create_task(query *q, cell *curr_cell);
-extern void destroy_query(query *q);
 extern 	USE_RESULT pl_status query_start(query *q);
 extern USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx);
 extern USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_type retract);
