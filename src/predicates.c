@@ -7140,7 +7140,7 @@ static USE_RESULT pl_status fn_server_3(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,variable);
 	GET_NEXT_ARG(p3,list_or_nil);
-	char hostname[1024], path[4096];
+	char hostname[1024], path[1024*4];
 	char *keyfile = "privkey.pem", *certfile = "fullchain.pem";
 	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, level = 0;
 	unsigned port = 80;
@@ -7323,7 +7323,7 @@ static USE_RESULT pl_status fn_client_5(query *q)
 	GET_NEXT_ARG(p3,variable);
 	GET_NEXT_ARG(p4,variable);
 	GET_NEXT_ARG(p5,list_or_nil);
-	char hostname[1024], path[4096];
+	char hostname[1024], path[1024*4];
 	char *certfile = NULL;
 	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, level = 0;
 	hostname[0] = path[0] = '\0';
@@ -7596,7 +7596,7 @@ static USE_RESULT pl_status fn_bread_3(query *q)
 
 	if (is_integer(p1)) {
 		if (!str->data) {
-			str->data = malloc((str->alloc_nbytes=1024*1)+1);
+			str->data = malloc((str->alloc_nbytes=1024)+1);
 			may_ptr_error(str->data);
 			str->data_len = 0;
 		}
@@ -7615,7 +7615,7 @@ static USE_RESULT pl_status fn_bread_3(query *q)
 	}
 
 	if (!str->data) {
-		str->data = malloc((str->alloc_nbytes=1024*1)+1);
+		str->data = malloc((str->alloc_nbytes=1024)+1);
 		may_ptr_error(str->data);
 		str->data_len = 0;
 	}
