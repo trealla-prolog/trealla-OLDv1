@@ -49,16 +49,6 @@ bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, idx_t ari
 	return h->is_multifile ? true : false;
 }
 
-static idx_t is_in_pool(__attribute__((unused)) prolog *pl, const char *name)
-{
-	const void *val;
-
-	if (m_get(pl->symtab, name, &val))
-		return (idx_t)(unsigned long)val;
-
-	return ERR_IDX;
-}
-
 static idx_t add_to_pool(prolog *pl, const char *name)
 {
 	idx_t offset = pl->pool_offset;
@@ -82,10 +72,10 @@ static idx_t add_to_pool(prolog *pl, const char *name)
 
 idx_t index_from_pool(prolog *pl, const char *name)
 {
-	idx_t offset = is_in_pool(pl, name);
+	const void *val;
 
-	if (offset != ERR_IDX)
-		return offset;
+	if (m_get(pl->symtab, name, &val))
+		return (idx_t)(unsigned long)val;
 
 	return add_to_pool(pl, name);
 }
@@ -113,17 +103,17 @@ bool pl_eval(prolog *pl, const char *s)
 {
 	parser *p = create_parser(pl->curr_m);
 	if (!p) return false;
-	STRING_INIT(pr);
+	STRING_INIT(cmd);
 
 	if (s[strlen(s)-1] != '.') {
-		STRING_CAT2(pr, s, ".");
+		STRING_CAT2(cmd, s, ".");
 	} else {
-		STRING_CAT(pr, s);
+		STRING_CAT(cmd, s);
 	}
 
 	p->command = true;
-	bool ok = parser_run(p, STRING_CSTR(pr), 1);
-	STRING_DONE(pr);
+	bool ok = parser_run(p, STRING_CSTR(cmd), 1);
+	STRING_DONE(cmd);
 	pl->curr_m = p->m;
 	destroy_parser(p);
 	return ok;
