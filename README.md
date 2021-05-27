@@ -261,6 +261,7 @@ Others
 	split_atom/4
 	plus/3
 	module/1
+	line_count/2
 
 	nb_setval(K,V)
 	nb_getval(K,V)

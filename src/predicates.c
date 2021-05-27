@@ -10380,6 +10380,17 @@ static USE_RESULT pl_status fn_sys_lt_2(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_line_count_2(query *q)
+{
+	GET_FIRST_ARG(pstr,stream);
+	GET_NEXT_ARG(p2,integer_or_var);
+	int n = get_stream(q, pstr);
+	stream *str = &g_streams[n];
+	cell tmp;
+	make_int(&tmp, str->p->line_nbr);
+	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+}
+
 static USE_RESULT pl_status fn_succ_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
@@ -11595,6 +11606,7 @@ static const struct builtins g_predicates_other[] =
 	{"offset", 2, fn_offset_2, "+integer,+callable"},
 	{"plus", 3, fn_plus_3, "?integer,?integer,?integer"},
 	{"succ", 2, fn_succ_2, "?integer,?integer"},
+	{"line_count", 2, fn_line_count_2, "+stream,?integer"},
 
 	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list"},
 	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list"},
