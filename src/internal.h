@@ -455,8 +455,8 @@ typedef struct {
 	clause *curr_clause, *curr_clause2;
 	miter *iter, *iter2;
 	module *m;
-	idx_t curr_frame, fp, hp, tp, sp, cgen;
-	uint8_t anbr, qnbr;
+	idx_t curr_frame, fp, hp, tp, sp, cgen, anbr;
+	uint8_t qnbr;
 } prolog_state;
 
 typedef struct {
