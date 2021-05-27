@@ -33,9 +33,9 @@ endif
 
 OBJECTS = tpl.o src/history.o src/functions.o \
 	src/predicates.o src/contrib.o src/heap.c \
-	src/library.o src/parser.o src/prolog.o \
-	src/print.o src/query.o src/skiplist.o \
-	src/base64.o src/network.o src/utf8.o
+	src/library.o src/module.o src/parser.o \
+	src/print.o src/prolog.o src/query.o \
+	src/skiplist.o src/base64.o src/network.o src/utf8.o
 
 OBJECTS +=  library/builtins.o library/lists.o library/apply.o \
 	library/http.o library/atts.o library/error.o library/dcgs.o \
@@ -73,6 +73,10 @@ heap.o: src/heap.c src/trealla.h src/internal.h src/map.h src/skiplist.h \
   src/cdebug.h src/query.h src/builtins.h src/heap.h
 history.o: src/history.c src/history.h src/utf8.h src/cdebug.h
 library.o: src/library.c src/library.h
+module.o: src/module.c src/internal.h src/map.h src/skiplist.h \
+  src/trealla.h src/cdebug.h src/history.h src/library.h src/parser.h \
+  src/module.h src/prolog.h src/query.h src/builtins.h src/heap.h \
+  src/utf8.h
 network.o: src/network.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/network.h
 parser.o: src/parser.c src/internal.h src/map.h src/skiplist.h \

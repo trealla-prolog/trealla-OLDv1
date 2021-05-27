@@ -6,6 +6,7 @@ extern module *find_module(prolog *pl, const char *name);
 extern module *find_module_id(prolog *pl, idx_t id);
 extern module *find_next_module(prolog *pl, module *m);
 extern idx_t index_from_pool(prolog *pl, const char *name);
+extern bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, idx_t arity);
 extern void load_builtins(prolog *pl);
 
 extern idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
