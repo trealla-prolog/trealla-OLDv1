@@ -13,6 +13,7 @@
 
 #include "internal.h"
 #include "parser.h"
+#include "module.h"
 #include "query.h"
 #include "builtins.h"
 #include "network.h"

@@ -34,6 +34,8 @@
 #include "base64.h"
 #include "library.h"
 #include "parser.h"
+#include "module.h"
+#include "prolog.h"
 #include "query.h"
 #include "builtins.h"
 #include "heap.h"

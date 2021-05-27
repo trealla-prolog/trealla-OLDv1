@@ -12,6 +12,8 @@
 #include "library.h"
 #include "trealla.h"
 #include "parser.h"
+#include "module.h"
+#include "prolog.h"
 #include "query.h"
 #include "builtins.h"
 #include "heap.h"
@@ -3052,81 +3054,6 @@ static bool get_token(parser *p, int last_op)
 	p->is_op = search_op(p->m, p->token, NULL, false);
 	p->srcptr = (char*)src;
 	return true;
-}
-
-bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials)
-{
-	if (!is_list(p1) && !is_nil(p1))
-		return false;
-
-	LIST_HANDLER(p1);
-
-	while (is_list(p1)) {
-		LIST_HEAD(p1);
-		p1 = LIST_TAIL(p1);
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-	}
-
-	return is_nil(p1) || (allow_partials && is_variable(p1));
-}
-
-size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes)
-{
-	idx_t save_ctx = q ? q->latest_ctx : l_ctx;
-	size_t is_chars_list = 0;
-	LIST_HANDLER(l);
-	int depth = 0;
-
-	while (is_iso_list(l) && q->st.m->flag.double_quote_chars) {
-		if (depth++ >= MAX_DEPTH) {
-			is_chars_list = 0;
-			break;
-		}
-
-		cell *h = LIST_HEAD(l);
-		cell *c = q ? deref(q, h, l_ctx) : h;
-
-		if (is_integer(c) && !allow_codes) {
-			is_chars_list = 0;
-			break;
-		} else if (!is_integer(c) && !is_atom(c)) {
-			is_chars_list = 0;
-			break;
-		}
-
-		if (is_integer(c)) {
-			int ch = c->val_num;
-			char tmp[20];
-			put_char_utf8(tmp, ch);
-			size_t len = len_char_utf8(tmp);
-			is_chars_list += len;
-		} else {
-			const char *src = GET_STR(c);
-			size_t len = len_char_utf8(src);
-
-			if (len != LEN_STR(c)) {
-				is_chars_list = 0;
-				break;
-			}
-
-			is_chars_list += len;
-		}
-
-		l = LIST_TAIL(l);
-		l = q ? deref(q, l, l_ctx) : l;
-		if (q) l_ctx = q->latest_ctx;
-	}
-
-	if (is_variable(l))
-		is_chars_list = 0;
-	else if (is_string(l))
-		;
-	else if (!is_literal(l) || (l->val_off != g_nil_s))
-		is_chars_list = 0;
-
-	if (q) q->latest_ctx = save_ctx;
-	return is_chars_list;
 }
 
 void fix_list(cell *c)
