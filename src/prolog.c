@@ -101,11 +101,22 @@ void set_opt(prolog *pl, int level) { pl->opt = level; }
 
 bool pl_eval(prolog *pl, const char *s)
 {
+	if (!*s)
+		return false;
+
 	parser *p = create_parser(pl->curr_m);
 	if (!p) return false;
 	STRING_INIT(cmd);
+	const char *ptr = s + strlen(s) - 1;
 
-	if (s[strlen(s)-1] != '.') {
+	while (ptr != s) {
+		if ((*ptr == '.') || !isspace(*ptr))
+			break;
+
+		ptr--;
+	}
+
+	if (*ptr != '.') {
 		STRING_CAT2(cmd, s, ".");
 	} else {
 		STRING_CAT(cmd, s);
