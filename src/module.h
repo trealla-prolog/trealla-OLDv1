@@ -20,4 +20,10 @@ extern unsigned search_op(module *m, const char *name, unsigned *specifier, bool
 extern module *module_load_text(module *m, const char *src, const char *filename);
 extern bool needs_quoting(module *m, const char *src, int srclen);
 extern void do_db_load(module *m);
-
+extern void set_noindex_in_db(module *m, const char *name, unsigned arity);
+extern void set_discontiguous_in_db(module *m, const char *name, unsigned arity);
+extern void set_dynamic_in_db(module *m, const char *name, unsigned arity);
+extern void set_meta_predicate_in_db(module *m, cell *c);
+extern void set_persist_in_db(module *m, const char *name, unsigned arity);
+extern void set_multifile_in_db(module *m, const char *name, idx_t arity);
+extern bool module_load_fp(module *m, FILE *fp, const char *filename);
