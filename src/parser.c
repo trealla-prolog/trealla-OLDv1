@@ -987,13 +987,7 @@ static void directives(parser *p, term *t)
 			if (!strcmp(PARSER_GET_STR(p1), "//"))
 				arity += 2;
 
-			if (!strcmp(dirname, "dynamic")) {
-				set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), arity);
-			} else if (!strcmp(dirname, "persist")) {
-				set_persist_in_db(p->m, PARSER_GET_STR(c_name), arity);
-			} else if (!strcmp(dirname, "meta_predicate")) {
-				set_meta_predicate_in_db(p->m, c_name);
-			} else if (!strcmp(dirname, "multifile")) {
+			if (!strcmp(dirname, "multifile")) {
 				const char *src = PARSER_GET_STR(c_name);
 
 				if (!strchr(src, ':')) {
@@ -1012,9 +1006,14 @@ static void directives(parser *p, term *t)
 						return;
 					}
 				}
-			} else if (!strcmp(dirname, "discontiguous")) {
+			} else if (!strcmp(dirname, "discontiguous"))
 				set_discontiguous_in_db(p->m, PARSER_GET_STR(c_name), arity);
-			}
+			else if (!strcmp(dirname, "dynamic"))
+				set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), arity);
+			else if (!strcmp(dirname, "persist"))
+				set_persist_in_db(p->m, PARSER_GET_STR(c_name), arity);
+			else if (!strcmp(dirname, "meta_predicate"))
+				set_meta_predicate_in_db(p->m, c_name);
 
 			p1 += p1->nbr_cells;
 		} else if (!strcmp(dirname, "meta_predicate")) {
