@@ -1,5 +1,8 @@
 #pragma once
 
+extern prolog *pl_create();
+extern void pl_destroy(prolog*);
+
 extern void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found);
 extern bool deconsult(prolog *pl, const char *filename);
 extern module *find_module(prolog *pl, const char *name);
