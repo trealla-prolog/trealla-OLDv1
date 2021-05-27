@@ -21,15 +21,6 @@
 
 static const unsigned INITIAL_TOKEN_SIZE = 100;		// bytes
 
-static const unsigned INITIAL_NBR_CELLS = 100;		// cells
-static const unsigned INITIAL_NBR_HEAP = 8000;		// cells
-static const unsigned INITIAL_NBR_QUEUE = 1000;		// cells
-
-static const unsigned INITIAL_NBR_GOALS = 1000;
-static const unsigned INITIAL_NBR_SLOTS = 1000;
-static const unsigned INITIAL_NBR_CHOICES = 1000;
-static const unsigned INITIAL_NBR_TRAILS = 1000;
-
 unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
 {
 	for (const op_table *ptr = m->ops; ptr->name; ptr++) {
@@ -418,119 +409,6 @@ parser *create_parser(module *m)
 	}
 
 	return p;
-}
-
-void destroy_query(query *q)
-{
-	while (q->st.qnbr > 0) {
-		free(q->tmpq[q->st.qnbr]);
-		q->tmpq[q->st.qnbr] = NULL;
-		q->st.qnbr--;
-	}
-
-	for (arena *a = q->arenas; a;) {
-		for (idx_t i = 0; i < a->hp; i++) {
-			cell *c = a->heap + i;
-			DECR_REF(c);
-		}
-
-		arena *save = a;
-		a = a->next;
-		free(save->heap);
-		free(save);
-	}
-
-	for (int i = 0; i < MAX_QUEUES; i++) {
-		for (idx_t j = 0; j < q->qp[i]; j++) {
-			cell *c = q->queue[i]+j;
-			DECR_REF(c);
-		}
-
-		free(q->queue[i]);
-	}
-
-	slot *e = q->slots;
-
-	for (idx_t i = 0; i < q->st.sp; i++, e++)
-		DECR_REF(&e->c);
-
-	free(q->trails);
-	free(q->choices);
-	free(q->slots);
-	free(q->frames);
-	free(q->tmp_heap);
-	free(q);
-}
-
-query *create_query(module *m, bool is_task)
-{
-	static atomic_t uint64_t g_query_id = 0;
-
-	query *q = calloc(1, sizeof(query));
-	ensure(q);
-	q->qid = g_query_id++;
-	q->st.m = m;
-	q->trace = m->pl->trace;
-	q->flag = m->flag;
-
-	// Allocate these now...
-
-	q->frames_size = is_task ? INITIAL_NBR_GOALS/10 : INITIAL_NBR_GOALS;
-	q->slots_size = is_task ? INITIAL_NBR_SLOTS/10 : INITIAL_NBR_SLOTS;
-	q->choices_size = is_task ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
-	q->trails_size = is_task ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
-
-	bool error = false;
-	CHECK_SENTINEL(q->frames = calloc(q->frames_size, sizeof(frame)), NULL);
-	CHECK_SENTINEL(q->slots = calloc(q->slots_size, sizeof(slot)), NULL);
-	CHECK_SENTINEL(q->choices = calloc(q->choices_size, sizeof(choice)), NULL);
-	CHECK_SENTINEL(q->trails = calloc(q->trails_size, sizeof(trail)), NULL);
-
-	// Allocate these later as needed...
-
-	q->h_size = is_task ? INITIAL_NBR_HEAP/10 : INITIAL_NBR_HEAP;
-	q->tmph_size = is_task ? INITIAL_NBR_CELLS/10 : INITIAL_NBR_CELLS;
-
-	for (int i = 0; i < MAX_QUEUES; i++)
-		q->q_size[i] = is_task ? INITIAL_NBR_QUEUE/10 : INITIAL_NBR_QUEUE;
-
-	if (error) {
-		destroy_query (q);
-		q = NULL;
-	}
-
-	return q;
-}
-
-query *create_task(query *q, cell *curr_cell)
-{
-	query *subq = create_query(q->st.m, true);
-	if (!subq) return NULL;
-	subq->parent = q;
-	subq->st.fp = 1;
-	subq->is_task = true;
-
-	cell *tmp = clone_to_heap(subq, 0, curr_cell, 1); //cehteh: checkme
-	idx_t nbr_cells = tmp->nbr_cells;
-	make_end(tmp+nbr_cells);
-	subq->st.curr_cell = tmp;
-
-	frame *gsrc = GET_FRAME(q->st.curr_frame);
-	frame *gdst = subq->frames;
-	gdst->nbr_vars = gsrc->nbr_vars;
-	slot *e = GET_SLOT(gsrc, 0);
-
-	for (unsigned i = 0; i < gsrc->nbr_vars; i++, e++) {
-		cell *c = deref(q, &e->c, e->ctx);
-		cell tmp = (cell){0};
-		tmp.val_type = TYPE_VARIABLE;
-		tmp.var_nbr = i;
-		tmp.val_off = g_anon_s;
-		set_var(subq, &tmp, 0, c, q->latest_ctx);
-	}
-
-	subq->st.sp = gsrc->nbr_vars;
-	return subq;
 }
 
 void consultall(parser *p, cell *l)

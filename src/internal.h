@@ -47,6 +47,8 @@ typedef uint32_t idx_t;
 #include "trealla.h"
 #include "cdebug.h"
 
+static const unsigned INITIAL_NBR_CELLS = 100;		// cells
+
 typedef enum {
 /*
   sketch: plan for final enums:
