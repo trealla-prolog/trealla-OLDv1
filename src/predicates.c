@@ -2553,16 +2553,8 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 				return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 			}
 
-#if 0
-			if (*p->save_line && (p->save_line[strlen(p->save_line)-1] == '\n'))
-				p->save_line[strlen(p->save_line)-1] = '\0';
-
-			if (*p->save_line && (p->save_line[strlen(p->save_line)-1] == '\r'))
-				p->save_line[strlen(p->save_line)-1] = '\0';
-#endif
-
 			if (!strlen(p->save_line) || (*p->save_line == '\r') || (*p->save_line == '\n')) {
-				p->line_nbr++;
+				//p->line_nbr++;
 				continue;
 			}
 
