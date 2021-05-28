@@ -1382,7 +1382,6 @@ void parser_reset(parser *p)
 	clear_term(p->t);
 	p->t->cidx = 0;
 	p->start_term = true;
-	p->line_nbr = 0;
 }
 
 static bool term_dcg_rewrite(parser *p)

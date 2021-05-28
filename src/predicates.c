@@ -2542,9 +2542,6 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 					set_var(q, sings, sings_ctx, &tmp, q->st.curr_frame);
 				}
 
-				//destroy_parser(p);
-				//str->p = NULL;
-
 				cell tmp;
 				make_literal(&tmp, g_eof_s);
 				return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -2573,7 +2570,6 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 	frame *g = GET_CURR_FRAME();
 	p->read_term = g->nbr_vars;
 	p->do_read_term = true;
-	p->line_nbr = 0;
 	parser_tokenize(p, false, false);
 	p->do_read_term = false;
 	p->read_term = 0;
