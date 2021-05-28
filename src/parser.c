@@ -1885,6 +1885,9 @@ static const char *eat_space(parser *p)
 		}
 
 		if ((!*src || (*src == '%')) && p->fp) {
+			if (*src == '%')
+				p->line_nbr++;
+
 			if (getline(&p->save_line, &p->n_line, p->fp) == -1)
 				return NULL;
 
