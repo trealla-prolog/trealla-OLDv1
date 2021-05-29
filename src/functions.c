@@ -41,6 +41,11 @@ void do_calc_(query *q, cell *c, idx_t c_ctx)
 	}
 }
 
+pl_status call_function(query *q, cell *c, __attribute__((unused)) idx_t c_ctx)
+{
+	return throw_error(q, c, "type_error", "evaluable");
+}
+
 static int_t gcd(int_t num, int_t remainder)
 {
 	if (remainder == 0)

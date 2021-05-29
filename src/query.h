@@ -33,6 +33,12 @@ extern void stash_me(query *q, term *t, bool last_match);
 extern unsigned fake_numbervars(query *q, cell *c, idx_t c_ctx, unsigned start);
 extern bool has_vars(query *q, cell *c, idx_t c_ctx, unsigned depth);
 extern pl_status do_post_unification_hook(query *q);
+extern pl_status throw_error(query *q, cell *c, const char *err_type, const char *expected);
+extern bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
+extern int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
+extern USE_RESULT pl_status fn_iso_add_2(query *q);
+extern void do_calc_(query *q, cell *c, idx_t c_ctx);
+extern pl_status call_function(query *q, cell *c, __attribute__((unused)) idx_t c_ctx);
 
 extern ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, bool cons, unsigned depth);
 extern pl_status print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);

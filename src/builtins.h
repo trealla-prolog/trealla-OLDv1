@@ -149,25 +149,20 @@ inline static cell *get_raw_arg(query *q, int n)
 	return c;
 }
 
-extern bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
-
 #define unify(q,p1,p1_ctx,p2,p2_ctx) \
 	unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0)
 
 extern void make_int(cell *tmp, int_t v);
 extern void make_float(cell *tmp, double v);
-extern int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
 
-#define calc_(q,c) !(c->flags&FLAG_BUILTIN) ? *c : (do_calc_(q,c,c##_ctx), q->accum)
+#define calc_(q,c,c_ctx) 											\
+	!(c->flags&FLAG_BUILTIN) ? *c : 								\
+		(do_calc_(q,c,c_ctx), q->accum)
 
-extern USE_RESULT pl_status fn_iso_add_2(query *q);
-extern void do_calc_(query *q, cell *c, idx_t c_ctx);
-
-#define calc(q,c) calc_(q, c); 										\
+#define calc(q,c) calc_(q, c, c##_ctx); 							\
 	if (q->did_throw)												\
 		return pl_success; 											\
 	else if (is_variable(c))										\
 		return throw_error(q, c, "instantiation_error", "number");	\
 	else if (is_callable(c) && !is_builtin(c))						\
-		return throw_error(q, c, "type_error", "evaluable")
-
+		return call_function(q, c, c##_ctx);
