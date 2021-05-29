@@ -64,38 +64,38 @@ clean:
 
 # from [gcc|clang] -MM *.c
 
-base64.o: src/base64.c src/base64.h
-contrib.o: src/contrib.c src/trealla.h src/internal.h src/map.h \
+src/base64.o: src/base64.c src/base64.h
+src/contrib.o: src/contrib.c src/trealla.h src/internal.h src/map.h \
   src/skiplist.h src/cdebug.h src/builtins.h
-functions.o: src/functions.c src/trealla.h src/internal.h src/map.h \
+src/functions.o: src/functions.c src/trealla.h src/internal.h src/map.h \
   src/skiplist.h src/cdebug.h src/query.h src/builtins.h
-heap.o: src/heap.c src/trealla.h src/internal.h src/map.h src/skiplist.h \
+src/heap.o: src/heap.c src/trealla.h src/internal.h src/map.h src/skiplist.h \
   src/cdebug.h src/query.h src/builtins.h src/heap.h
-history.o: src/history.c src/history.h src/utf8.h src/cdebug.h
-library.o: src/library.c src/library.h
-module.o: src/module.c src/internal.h src/map.h src/skiplist.h \
+src/history.o: src/history.c src/history.h src/utf8.h src/cdebug.h
+src/library.o: src/library.c src/library.h
+src/module.o: src/module.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/history.h src/library.h src/parser.h \
   src/module.h src/prolog.h src/query.h src/builtins.h src/heap.h \
   src/utf8.h
-network.o: src/network.c src/internal.h src/map.h src/skiplist.h \
+src/network.o: src/network.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/network.h
-parser.o: src/parser.c src/internal.h src/map.h src/skiplist.h \
+src/parser.o: src/parser.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/history.h src/library.h src/parser.h \
   src/module.h src/prolog.h src/query.h src/builtins.h src/heap.h \
   src/utf8.h
-predicates.o: src/predicates.c src/trealla.h src/internal.h src/map.h \
+src/predicates.o: src/predicates.c src/trealla.h src/internal.h src/map.h \
   src/skiplist.h src/cdebug.h src/network.h src/base64.h src/library.h \
   src/parser.h src/module.h src/prolog.h src/query.h src/builtins.h \
   src/heap.h src/utf8.h
-print.o: src/print.c src/internal.h src/map.h src/skiplist.h \
+src/print.o: src/print.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/parser.h src/module.h src/query.h \
   src/builtins.h src/network.h src/utf8.h
-prolog.o: src/prolog.c src/internal.h src/map.h src/skiplist.h \
+src/prolog.o: src/prolog.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/history.h src/library.h src/parser.h \
   src/module.h src/prolog.h src/query.h src/builtins.h src/heap.h \
   src/utf8.h
-query.o: src/query.c src/internal.h src/map.h src/skiplist.h \
+src/query.o: src/query.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/history.h src/parser.h src/module.h \
   src/prolog.h src/query.h src/builtins.h src/heap.h src/utf8.h
-skiplist.o: src/skiplist.c src/skiplist.h
-utf8.o: src/utf8.c src/utf8.h
+src/skiplist.o: src/skiplist.c src/skiplist.h
+src/utf8.o: src/utf8.c src/utf8.h

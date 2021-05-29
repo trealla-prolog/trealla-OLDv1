@@ -163,11 +163,11 @@ extern int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, uns
 extern USE_RESULT pl_status fn_iso_add_2(query *q);
 extern void do_calc_(query *q, cell *c, idx_t c_ctx);
 
-#define calc(q,c) calc_(q, c); 				\
-	if (q->did_throw)						\
-		return pl_success; 					\
-	else if (is_variable(c))				\
-		return throw_error(q, c, "instantiation_error", "number"); \
-	else if (is_callable(c) && !is_builtin(c))				\
+#define calc(q,c) calc_(q, c); 										\
+	if (q->did_throw)												\
+		return pl_success; 											\
+	else if (is_variable(c))										\
+		return throw_error(q, c, "instantiation_error", "number");	\
+	else if (is_callable(c) && !is_builtin(c))						\
 		return throw_error(q, c, "type_error", "evaluable")
 
