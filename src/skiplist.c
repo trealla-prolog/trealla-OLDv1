@@ -41,7 +41,7 @@ struct skiplist_ {
 	unsigned seed;
 };
 
-#define MAX_LEVELS 32
+#define MAX_LEVELS 16
 #define MAX_LEVEL (MAX_LEVELS - 1)
 
 inline static slnode_t *new_node_of_level(unsigned x)
