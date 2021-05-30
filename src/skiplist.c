@@ -549,6 +549,31 @@ sliter *sl_findkey(skiplist *l, const void *key)
 	return iter;
 }
 
+bool sl_is_nextkey(sliter *iter)
+{
+	if (!iter || !iter->p)
+		return false;
+
+	for (;;) {
+		if (iter->idx < iter->p->nbr) {
+			if (iter->l->compkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p) != 0) {
+				sl_done(iter);
+				return false;
+			}
+
+			return true;
+		}
+
+		iter->p = iter->p->forward[0];
+		iter->idx = 0;
+
+		if (!iter->p)
+			break;
+	}
+
+	return false;
+}
+
 bool sl_nextkey(sliter *iter, void **val)
 {
 	if (!iter || !iter->p)
