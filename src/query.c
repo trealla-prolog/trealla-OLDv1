@@ -448,6 +448,14 @@ static void trim_trail(query *q)
 static void reuse_frame(query *q, unsigned nbr_vars)
 {
 	frame *g = GET_CURR_FRAME();
+	slot *e = GET_SLOT(g, 0);
+
+	for (unsigned i = 0; i < g->nbr_vars; i++, e++) {
+		DECR_REF(&e->c);
+		e->c.val_type = TYPE_EMPTY;
+		e->c.attrs = NULL;
+	}
+
 	g->nbr_slots = nbr_vars;
 	g->nbr_vars = nbr_vars;
 	g->overflow = 0;
@@ -455,13 +463,6 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	const frame *new_g = GET_FRAME(q->st.fp);
 	const choice *ch = GET_CURR_CHOICE();
 	q->st.sp = ch->st.sp;
-
-	for (unsigned i = 0; i < nbr_vars; i++) {
-		slot *e = GET_SLOT(g, i);
-		DECR_REF(&e->c);
-		e->c.val_type = TYPE_EMPTY;
-		e->c.attrs = NULL;
-	}
 
 	const slot *from = GET_SLOT(new_g, 0);
 	slot *to = GET_SLOT(g, 0);
