@@ -304,42 +304,6 @@ cell *get_logical_body(cell *c)
 	return body;
 }
 
-
-static void query_purge_dirty_list(query *q)
-{
-	int cnt = 0;
-
-	while (q->dirty_list) {
-		clause *r = q->dirty_list;
-		q->dirty_list = r->dirty;
-
-		if (r->prev)
-			r->prev->next = r->next;
-
-		if (r->next)
-			r->next->prev = r->prev;
-
-		if (r->owner->head == r)
-			r->owner->head = r->next;
-
-		if (r->owner->tail == r)
-			r->owner->tail = r->prev;
-
-#if 1
-		clear_term(&r->t);
-		free(r);
-#else
-		r->dirty = r->owner->m->dirty_list;
-		r->owner->m->dirty_list = r;
-#endif
-
-		cnt++;
-	}
-
-	//if (cnt) printf("Info: query purged %d retracted items\n", cnt);
-
-}
-
 void clear_term(term *t)
 {
 	if (!t)
@@ -2693,11 +2657,6 @@ bool parser_run(parser *p, const char *src, int dump)
 			q->max_frames, q->max_choices, q->max_trails,
 			(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
 	}
-
-	query_purge_dirty_list(q);
-
-	if (dump)
-		module_purge_dirty_list(q->st.m);
 
 	bool ok = !q->error;
 	p->m = q->st.m;

@@ -604,7 +604,6 @@ struct module_ {
 	parser *p;
 	FILE *fp;
 	map *index, *nbs;
-	clause *dirty_list;
 	struct loaded_file *loaded_files;
 	op_table def_ops[MAX_OPS+1];
 	op_table ops[MAX_OPS+1];

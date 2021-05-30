@@ -610,20 +610,6 @@ bool retract_from_db(module *m, clause *r)
 	return true;
 }
 
-void module_purge_dirty_list(module *m)
-{
-	int cnt = 0;
-
-	while (m->dirty_list) {
-		clause *r = m->dirty_list;
-		m->dirty_list = r->dirty;
-		clear_term(&r->t);
-		free(r);
-		cnt++;
-	}
-
-	//if (cnt) printf("Info: module '%s' purged %d retracted items\n", m->name, cnt);
-}
 static void	set_loaded(module *m, const char *filename)
 {
 	struct loaded_file *ptr = m->loaded_files;
@@ -857,8 +843,6 @@ static void make_rule(module *m, const char *src)
 
 void destroy_module(module *m)
 {
-	module_purge_dirty_list(m);
-
 	struct loaded_file *ptr = m->loaded_files;
 
 	while (ptr) {
