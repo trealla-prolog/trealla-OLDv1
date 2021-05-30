@@ -39,6 +39,7 @@ extern int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, uns
 extern USE_RESULT pl_status fn_iso_add_2(query *q);
 extern void do_calc_(query *q, cell *c, idx_t c_ctx);
 extern pl_status call_function(query *q, cell *c, __attribute__((unused)) idx_t c_ctx);
+extern void add_to_dirty_list(query *q, clause *r);
 
 extern ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, bool cons, unsigned depth);
 extern pl_status print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);

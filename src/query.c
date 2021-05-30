@@ -195,6 +195,15 @@ static bool is_next_key(query *q)
 	return false;
 }
 
+void add_to_dirty_list(query *q, clause *r)
+{
+	if (!retract_from_db(q->st.m, r))
+		return;
+
+	r->dirty = q->dirty_list;
+	q->dirty_list = r;
+}
+
 bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials)
 {
 	if (!is_list(p1) && !is_nil(p1))
@@ -1594,6 +1603,8 @@ pl_status query_execute(query *q, term *t)
 
 void destroy_query(query *q)
 {
+	module_purge_dirty_list(q->st.m);
+
 	while (q->st.qnbr > 0) {
 		free(q->tmpq[q->st.qnbr]);
 		q->tmpq[q->st.qnbr] = NULL;
