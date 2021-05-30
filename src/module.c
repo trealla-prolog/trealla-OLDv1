@@ -521,12 +521,13 @@ static void reindex_predicate(module *m, predicate *h)
 static void assert_commit(module *m, term *t, clause *r, predicate *h, bool append)
 {
 	cell *c = get_head(r->t.cells);
-	cell *p1 = c + 1;
 
 	if (h->is_persist)
 		r->t.persist = true;
 
 	if (h->key.arity) {
+		cell *p1 = c + 1;
+
 		if (!h->index && is_structure(p1))
 			h->is_noindex = true;
 
@@ -536,7 +537,7 @@ static void assert_commit(module *m, term *t, clause *r, predicate *h, bool appe
 			h->index = NULL;
 		}
 
-		if (!h->index && (h->cnt > 50)
+		if (!h->index && (h->cnt > 25)
 			&& !m->pl->noindex && !h->is_noindex)
 			reindex_predicate(m, h);
 
