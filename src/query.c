@@ -173,6 +173,17 @@ static void trace_call(query *q, cell *c, box_t box)
 		sleep(1);
 }
 
+static void next_key(query *q)
+{
+	if (q->st.iter) {
+		if (!m_nextkey(q->st.iter, (void**)&q->st.curr_clause)) {
+			q->st.curr_clause = NULL;
+			q->st.iter = NULL;
+		}
+	} else
+		q->st.curr_clause = q->st.curr_clause->next;
+}
+
 bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials)
 {
 	if (!is_list(p1) && !is_nil(p1))
@@ -1117,17 +1128,6 @@ static const char *dump_key(void *p, const void *p1)
 	return tmpbuf;
 }
 #endif
-
-static void next_key(query *q)
-{
-	if (q->st.iter) {
-		if (!m_nextkey(q->st.iter, (void**)&q->st.curr_clause)) {
-			q->st.curr_clause = NULL;
-			q->st.iter = NULL;
-		}
-	} else if (q->st.curr_clause)
-		q->st.curr_clause = q->st.curr_clause->next;
-}
 
 static USE_RESULT pl_status match_head(query *q)
 {
