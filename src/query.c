@@ -447,6 +447,7 @@ static void trim_trail(query *q)
 
 static void reuse_frame(query *q, unsigned nbr_vars)
 {
+	const frame *newg = GET_FRAME(q->st.fp);
 	frame *g = GET_CURR_FRAME();
 	slot *e = GET_SLOT(g, 0);
 
@@ -456,15 +457,15 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 		e->c.attrs = NULL;
 	}
 
+	g->cgen = newg->cgen;
 	g->nbr_slots = nbr_vars;
 	g->nbr_vars = nbr_vars;
 	g->overflow = 0;
 
-	const frame *new_g = GET_FRAME(q->st.fp);
 	const choice *ch = GET_CURR_CHOICE();
 	q->st.sp = ch->st.sp;
 
-	const slot *from = GET_SLOT(new_g, 0);
+	const slot *from = GET_SLOT(newg, 0);
 	slot *to = GET_SLOT(g, 0);
 	memmove(to, from, sizeof(slot)*nbr_vars);
 	q->st.sp = g->ctx + nbr_vars;
@@ -498,6 +499,7 @@ static void commit_me(query *q, term *t)
 	bool last_match = t->first_cut || !is_next_key(q);
 	bool recursive = last_match && is_tail_recursive(q->st.curr_cell);
 	bool tco = !q->no_tco && recursive && !any_choices(q, g, true);
+	bool slots_ok = check_slots(q, g, t);
 	choice *ch = GET_CURR_CHOICE();
 
 #if 0
@@ -505,14 +507,7 @@ static void commit_me(query *q, term *t)
 		tco, q->no_tco, last_match, recursive, any_choices(q, g, true), check_slots(q, g, t));
 #endif
 
-#if 0
-	if (tco && !last_match) {
-		printf("*** here1\n");
-		ch->tail_rec = true;
-	}
-#endif
-
-	if (tco && check_slots(q, g, t) && q->st.m->pl->opt)
+	if (tco && slots_ok && q->st.m->pl->opt)
 		reuse_frame(q, t->nbr_vars);
 	else
 		g = make_frame(q, t->nbr_vars);
