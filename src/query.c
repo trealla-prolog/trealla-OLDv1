@@ -173,6 +173,35 @@ static void trace_call(query *q, cell *c, box_t box)
 		sleep(1);
 }
 
+static void purge_dirty_list(query *q)
+{
+	int cnt = 0;
+
+	while (q->dirty_list) {
+		clause *r = q->dirty_list;
+		q->dirty_list = r->dirty;
+
+		if (r->prev)
+			r->prev->next = r->next;
+
+		if (r->next)
+			r->next->prev = r->prev;
+
+		if (r->owner->head == r)
+			r->owner->head = r->next;
+
+		if (r->owner->tail == r)
+			r->owner->tail = r->prev;
+
+		clear_term(&r->t);
+		free(r);
+		cnt++;
+	}
+
+	if (cnt) printf("Info: query purged %d retracted items\n", cnt);
+
+}
+
 static void next_key(query *q)
 {
 	if (q->st.iter) {
@@ -1599,35 +1628,6 @@ pl_status query_execute(query *q, term *t)
 	pl_status ret = query_start(q);
 	m_done(q->st.iter);
 	return ret;
-}
-
-static void purge_dirty_list(query *q)
-{
-	int cnt = 0;
-
-	while (q->dirty_list) {
-		clause *r = q->dirty_list;
-		q->dirty_list = r->dirty;
-
-		if (r->prev)
-			r->prev->next = r->next;
-
-		if (r->next)
-			r->next->prev = r->prev;
-
-		if (r->owner->head == r)
-			r->owner->head = r->next;
-
-		if (r->owner->tail == r)
-			r->owner->tail = r->prev;
-
-		clear_term(&r->t);
-		free(r);
-		cnt++;
-	}
-
-	if (cnt) printf("Info: query purged %d retracted items\n", cnt);
-
 }
 
 void destroy_query(query *q)
