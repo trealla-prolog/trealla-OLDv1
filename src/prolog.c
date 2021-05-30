@@ -316,6 +316,7 @@ prolog *pl_create()
 
 		set_multifile_in_db(pl->user_m, "term_expansion", 2);
 		set_multifile_in_db(pl->user_m, "goal_expansion", 2);
+
 		set_noindex_in_db(pl->user_m, "$stream_property", 2);
 		set_noindex_in_db(pl->user_m, "$current_op", 3);
 
