@@ -19,8 +19,6 @@
 #include "heap.h"
 #include "utf8.h"
 
-#define JUST_IN_TIME_COUNT 50
-
 static const op_table g_ops[] =
 {
 	{":-", OP_XFX, 1200},
@@ -538,7 +536,7 @@ static void assert_commit(module *m, term *t, clause *r, predicate *h, bool appe
 			h->index = NULL;
 		}
 
-		if (!h->index && (h->cnt > JUST_IN_TIME_COUNT)
+		if (!h->index && (h->cnt > 50)
 			&& !m->pl->noindex && !h->is_noindex)
 			reindex_predicate(m, h);
 
@@ -604,6 +602,7 @@ bool retract_from_db(module *m, clause *r)
 		m_destroy(h->index);
 		m_destroy(h->index_save);
 		h->index = h->index_save = NULL;
+		h->head = h->tail = NULL;
 	}
 
 	r->t.ugen_erased = ++m->pl->ugen;

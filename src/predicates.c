@@ -4474,6 +4474,7 @@ static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 
 	m_destroy(h->index);
 	h->index = NULL;
+	h->head = h->tail = NULL;
 	h->cnt = 0;
 	return pl_success;
 }
