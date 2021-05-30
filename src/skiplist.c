@@ -119,10 +119,11 @@ static int binary_search(const skiplist *l, const keyval_t n[], const void *key,
 {
 	while (imax >= imin) {
 		int imid = (imax + imin) / 2;
+		int ok = l->compkey(n[imid].key, key, l->p);
 
-		if (l->compkey(n[imid].key, key, l->p) == 0)
+		if (ok == 0)
 			return imid;
-		else if (l->compkey(n[imid].key, key, l->p) < 0)
+		else if (ok < 0)
 			imin = imid + 1;
 		else
 			imax = imid - 1;
@@ -139,14 +140,17 @@ static int binary_search1(const skiplist *l, const keyval_t n[], const void *key
 
 	while (imax >= imin) {
 		imid = (imax + imin) / 2;
+		int ok = l->compkey(n[imid].key, key, l->p);
 
-		if (l->compkey(n[imid].key, key, l->p) < 0)
+		if (ok < 0)
 			imin = imid + 1;
 		else
 			imax = imid - 1;
 	}
 
-	if (l->compkey(n[imid].key, key, l->p) < 0)
+	int ok = l->compkey(n[imid].key, key, l->p);
+
+	if (ok < 0)
 		imid++;
 
 	return imid;
@@ -160,14 +164,17 @@ static int binary_search2(const skiplist *l, const keyval_t n[], const void *key
 
 	while (imax >= imin) {
 		imid = (imax + imin) / 2;
+		int ok = l->compkey(n[imid].key, key, l->p);
 
-		if (l->compkey(n[imid].key, key, l->p) <= 0)
+		if (ok <= 0)
 			imin = imid + 1;
 		else
 			imax = imid - 1;
 	}
 
-	if (l->compkey(n[imid].key, key, l->p) <= 0)
+	int ok = l->compkey(n[imid].key, key, l->p);
+
+	if (ok <= 0)
 		imid++;
 
 	return imid;
