@@ -490,10 +490,10 @@ sliter *sl_first(skiplist *l)
 
 bool sl_next(sliter *iter, void **val)
 {
-	if (!iter || !iter->p)
+	if (!iter)
 		return false;
 
-	for (;;) {
+	while (iter->p) {
 		if (iter->idx < iter->p->nbr) {
 			*val = iter->p->bkt[iter->idx++].val;
 			return true;
@@ -501,9 +501,6 @@ bool sl_next(sliter *iter, void **val)
 
 		iter->p = iter->p->forward[0];
 		iter->idx = 0;
-
-		if (!iter->p)
-			break;
 	}
 
 	sl_done(iter);
@@ -551,10 +548,10 @@ sliter *sl_findkey(skiplist *l, const void *key)
 
 bool sl_is_nextkey(sliter *iter)
 {
-	if (!iter || !iter->p)
+	if (!iter)
 		return false;
 
-	for (;;) {
+	while (iter->p) {
 		if (iter->idx < iter->p->nbr) {
 			if (iter->l->compkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p) != 0) {
 				sl_done(iter);
@@ -566,9 +563,6 @@ bool sl_is_nextkey(sliter *iter)
 
 		iter->p = iter->p->forward[0];
 		iter->idx = 0;
-
-		if (!iter->p)
-			break;
 	}
 
 	return false;
@@ -576,10 +570,10 @@ bool sl_is_nextkey(sliter *iter)
 
 bool sl_nextkey(sliter *iter, void **val)
 {
-	if (!iter || !iter->p)
+	if (!iter)
 		return false;
 
-	for (;;) {
+	while (iter->p) {
 		if (iter->idx < iter->p->nbr) {
 			if (iter->l->compkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p) != 0) {
 				sl_done(iter);
@@ -592,9 +586,6 @@ bool sl_nextkey(sliter *iter, void **val)
 
 		iter->p = iter->p->forward[0];
 		iter->idx = 0;
-
-		if (!iter->p)
-			break;
 	}
 
 	sl_done(iter);
