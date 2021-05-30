@@ -173,7 +173,7 @@ static void trace_call(query *q, cell *c, box_t box)
 		sleep(1);
 }
 
-static void purge_dirty_list(query *q)
+void purge_dirty_list(query *q)
 {
 	int cnt = 0;
 
@@ -198,7 +198,7 @@ static void purge_dirty_list(query *q)
 		cnt++;
 	}
 
-	if (cnt) printf("Info: query purged %d retracted items\n", cnt);
+	//if (cnt) printf("Info: query purged %d retracted items\n", cnt);
 
 }
 

@@ -1915,11 +1915,12 @@ static void clear_streams_properties(query *q)
 
 	if (h) {
 		for (clause *r = h->head; r;) {
-			clause *save = r->next;
-			add_to_dirty_list(q, r);
-			r = save;
+			clause *save = r;
+			r = r->next;
+			add_to_dirty_list(q, save);
 		}
 
+		h->head = h->tail = NULL;
 		h->cnt = 0;
 	}
 }
