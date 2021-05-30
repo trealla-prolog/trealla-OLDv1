@@ -49,7 +49,6 @@ typedef uint32_t idx_t;
 
 static const unsigned INITIAL_NBR_CELLS = 100;		// cells
 
-typedef enum {
 /*
   sketch: plan for final enums:
   - leave the compiler the freedom to put this in a signed char
@@ -58,6 +57,8 @@ typedef enum {
     - all 'special' returns are <0
     - all errors (may need to add more in future) are <= pl_error
 */
+
+typedef enum {
 //PLANNED:	pl_last__  = -100;  //unused for now, just for starting the enumeration
 //PLANNED:	pl_...,             //insert more error codes here on demand
 //PLANNED:	pl_cycle,           //cyclic term
@@ -190,17 +191,6 @@ typedef struct {
 #define QUERY_GET_POOL(off) (q->st.m->pl->pool + (off))
 #define MODULE_GET_POOL(off) (m->pl->pool + (off))
 #define PARSER_GET_POOL(off) (p->m->pl->pool + (off))
-
-// Wrap an assignment that's expected to return anything but the given sentinel value.
-// when the sentinel otherwise does some (optional) error handling action
-// default action is 'error=true' to indicate an error happened
-#define CHECK_SENTINEL(expr, err_sentinel, ...) CHECK_SENTINEL_((expr), err_sentinel, ## __VA_ARGS__, error=true)
-#define CHECK_SENTINEL_(expr, err_sentinel, on_error, ...) do { if((expr) == err_sentinel){on_error;}} while (0)
-
-#define may_error(expr, ...) CHECK_SENTINEL(expr, pl_error, __VA_ARGS__; return pl_error)
-#define may_idx_error(expr, ...) CHECK_SENTINEL(expr, ERR_IDX, __VA_ARGS__; return pl_error)
-#define may_ptr_error(expr, ...) CHECK_SENTINEL(expr, NULL, __VA_ARGS__; return pl_error)
-#define may_cycle_error(expr, ...) CHECK_SENTINEL(expr, ERR_CYCLE_CELL, __VA_ARGS__; return pl_cycle)
 
 // If changing the order of these: see runtime.c dispatch table
 
