@@ -184,7 +184,7 @@ static void next_key(query *q)
 		q->st.curr_clause = q->st.curr_clause->next;
 }
 
-bool is_next_key(query *q)
+static bool is_next_key(query *q)
 {
 	if (q->st.iter) {
 		if (m_is_nextkey(q->st.iter))
@@ -463,7 +463,7 @@ static void commit_me(query *q, term *t)
 	g->m = q->st.m;
 	q->st.m = q->st.curr_clause->owner->m;
 	q->st.iter = NULL;
-	bool last_match = !q->st.curr_clause->next || t->first_cut;
+	bool last_match = t->first_cut || !is_next_key(q);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool tco = !q->no_tco && recursive && !any_choices(q, g, true) && check_slots(q, g, t);
 	choice *ch = GET_CURR_CHOICE();
