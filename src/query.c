@@ -456,24 +456,17 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	const choice *ch = GET_CURR_CHOICE();
 	q->st.sp = ch->st.sp;
 
-	// See if we can reclaim the slots as well... what about trails?
-
-	if (!q->no_tco && q->st.m->pl->opt) {
-		for (unsigned i = 0; i < nbr_vars; i++) {
-			slot *e = GET_SLOT(g, i);
-			DECR_REF(&e->c);
-			e->c.val_type = TYPE_EMPTY;
-			e->c.attrs = NULL;
-		}
-
-		const slot *from = GET_SLOT(new_g, 0);
-		slot *to = GET_SLOT(g, 0);
-		memmove(to, from, sizeof(slot)*nbr_vars);
-		q->st.sp = g->ctx + nbr_vars;
-	} else {
-		g->ctx = new_g->ctx;
+	for (unsigned i = 0; i < nbr_vars; i++) {
+		slot *e = GET_SLOT(g, i);
+		DECR_REF(&e->c);
+		e->c.val_type = TYPE_EMPTY;
+		e->c.attrs = NULL;
 	}
 
+	const slot *from = GET_SLOT(new_g, 0);
+	slot *to = GET_SLOT(g, 0);
+	memmove(to, from, sizeof(slot)*nbr_vars);
+	q->st.sp = g->ctx + nbr_vars;
 	q->tot_tcos++;
 }
 
@@ -502,8 +495,8 @@ static void commit_me(query *q, term *t)
 	q->st.m = q->st.curr_clause->owner->m;
 	q->st.iter = NULL;
 	bool last_match = t->first_cut || !is_next_key(q);
-	bool recursive = is_tail_recursive(q->st.curr_cell);
-	bool tco = !q->no_tco && recursive && !any_choices(q, g, true) && check_slots(q, g, t);
+	bool recursive = last_match && is_tail_recursive(q->st.curr_cell);
+	bool tco = !q->no_tco && recursive && !any_choices(q, g, true);
 	choice *ch = GET_CURR_CHOICE();
 
 #if 0
@@ -518,7 +511,7 @@ static void commit_me(query *q, term *t)
 	}
 #endif
 
-	if (tco && last_match && q->st.m->pl->opt)
+	if (tco && check_slots(q, g, t) && q->st.m->pl->opt)
 		reuse_frame(q, t->nbr_vars);
 	else
 		g = make_frame(q, t->nbr_vars);
