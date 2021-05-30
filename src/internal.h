@@ -382,7 +382,7 @@ struct predicate_ {
 	module *m;
 	map *index, *index_save;
 	cell key;
-	unsigned cnt;
+	uint64_t cnt;
 	bool is_prebuilt:1;
 	bool is_public:1;
 	bool is_dynamic:1;
