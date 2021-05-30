@@ -184,6 +184,17 @@ static void next_key(query *q)
 		q->st.curr_clause = q->st.curr_clause->next;
 }
 
+bool is_next_key(query *q)
+{
+	if (q->st.iter) {
+		if (m_is_nextkey(q->st.iter))
+			return true;
+	} else if (q->st.curr_clause->next)
+		return true;
+
+	return false;
+}
+
 bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials)
 {
 	if (!is_list(p1) && !is_nil(p1))
