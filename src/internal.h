@@ -713,8 +713,10 @@ typedef struct {
 #define STRING_LEN(pr) (pr_##buf.dst - pr_##buf.buf)
 
 #define STRING_TRIM(pr,ch) {											\
-	if (pr_##buf.dst[-1] == ch) 										\
-		 *--pr_##buf.dst = '\0';										\
+	if (STRING_LEN(pr)) {												\
+		if (pr_##buf.dst[-1] == ch) 									\
+			 *--pr_##buf.dst = '\0';									\
+		}																\
 	}
 
 #define STRING_CHK(pr,len) {											\
