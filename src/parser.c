@@ -2605,16 +2605,28 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 	return !p->error;
 }
 
-bool parser_run(parser *p, const char *src, int dump)
+bool parser_run(parser *p, const char *pSrc, bool dump, bool is_init)
 {
-	if (*src == '.') {
+	if (*pSrc == '.') {
 		fprintf(stdout, "Error: syntax error, unexpected end of clause\n");
 		return false;
 	}
 
-	p->srcptr = (char*)src;
-	p->line_nbr = 0;
-	parser_tokenize(p, false, false);
+	if (!is_init) {
+		STRING_INIT(src);
+		STRING_CAT2(src, "call((", pSrc);
+		STRING_TRIM(src, '.');
+		STRING_CAT(src, ")).");
+
+		p->srcptr = STRING_CSTR(src);
+		p->line_nbr = 0;
+		parser_tokenize(p, false, false);
+		STRING_DONE(src);
+	} else {
+		p->srcptr = (char*)pSrc;
+		p->line_nbr = 0;
+		parser_tokenize(p, false, false);
+	}
 
 	if (!p->error && !p->end_of_term && !p->run_init) {
 		fprintf(stdout, "Error: syntax error, missing operand or operator\n");

@@ -712,6 +712,11 @@ typedef struct {
 #define STRING_CSTR(pr) pr_##buf.buf
 #define STRING_LEN(pr) (pr_##buf.dst - pr_##buf.buf)
 
+#define STRING_TRIM(pr,ch) {											\
+	if (pr_##buf.dst[-1] == ch) 										\
+		 *--pr_##buf.dst = '\0';										\
+	}
+
 #define STRING_CHK(pr,len) {											\
 	size_t rem = pr_##buf.size - STRING_LEN(pr);						\
 	if (len >= rem) {													\

@@ -11,7 +11,7 @@ extern void parser_reset(parser *p);
 extern void consultall(parser *p, cell *l);
 extern void term_to_body(parser *p);
 extern cell *check_body_callable(parser *p, cell *c);
-extern bool parser_run(parser *p, const char *src, int dump);
+extern bool parser_run(parser *p, const char *src, bool dump, bool is_init);
 extern void xref_db(parser *p);
 
 extern char *format_property(char **bufptr, size_t *lenptr, char *dst, const char *name, unsigned arity, const char *type);

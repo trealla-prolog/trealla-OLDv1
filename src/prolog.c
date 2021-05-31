@@ -123,7 +123,7 @@ bool pl_eval(prolog *pl, const char *s)
 	}
 
 	p->command = true;
-	bool ok = parser_run(p, STRING_CSTR(cmd), 1);
+	bool ok = parser_run(p, STRING_CSTR(cmd), true, false);
 	STRING_DONE(cmd);
 	pl->curr_m = p->m;
 	destroy_parser(p);
