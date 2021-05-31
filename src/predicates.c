@@ -8219,8 +8219,11 @@ static USE_RESULT pl_status fn_date_time_6(query *q)
 static USE_RESULT pl_status fn_shell_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	DISCARD_RESULT system(GET_STR(p1));
-	return pl_success;
+	int status = system(GET_STR(p1));
+	if (status == 0)
+		return pl_success;
+	else
+		return pl_failure;
 }
 
 static USE_RESULT pl_status fn_shell_2(query *q)
