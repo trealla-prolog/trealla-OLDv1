@@ -291,7 +291,7 @@ struct cell_ {
 			idx_t mod_nbr;
 		};
 
-		// A small (inline) cstring (includes NULL-delimiter)...
+		// A small (inline) cstring (includes NULL)...
 
 		struct {
 			char val_chr[MAX_SMALL_STRING];
