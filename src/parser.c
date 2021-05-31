@@ -311,7 +311,7 @@ void clear_term(term *t)
 
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
-		DECR_REF(c);
+		unshare_cell(c);
 		c->val_type = TYPE_EMPTY;
 	}
 
@@ -2276,7 +2276,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 							break;
 						}
 
-						DECR_REF(h);
+						unshare_cell(h);
 						h->val_type = TYPE_LITERAL;
 						h->val_off = off;
 						h->flags = 0;

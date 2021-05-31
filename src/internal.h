@@ -152,19 +152,6 @@ typedef struct {
 	(c)->strb_len = n;											\
 	}
 
-#define INCR_REF(c) 											\
-	if (is_strbuf(c)) {											\
-		(c)->val_strb->refcnt++;								\
-	}
-
-#define DECR_REF(c)												\
-	if (is_strbuf(c)) {											\
-		if (!(--(c)->val_strb->refcnt))	{						\
-			free((c)->val_strb);								\
-			(c)->val_strb = NULL;								\
-		}														\
-	}
-
 #define _GET_STR(pl,c) 											\
 	( !is_cstring(c) ? ((pl)->pool + (c)->val_off)				\
 	: is_strbuf(c) ? ((c)->val_strb->cstr + (c)->strb_off)		\
@@ -643,6 +630,23 @@ extern idx_t g_call_s, g_braces_s, g_plus_s, g_minus_s, g_post_unify_hook_s;
 extern stream g_streams[MAX_STREAMS];
 extern unsigned g_cpu_count;
 
+inline static void share_cell(const cell *c)
+{
+	if (is_strbuf(c)) {
+		(c)->val_strb->refcnt++;
+	}
+}
+
+inline static void unshare_cell(cell *c)
+{
+	if (is_strbuf(c)) {
+		if (!(--(c)->val_strb->refcnt))	{
+			free((c)->val_strb);
+			(c)->val_strb = NULL;
+		}
+	}
+}
+
 inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 {
 	memcpy(dst, src, sizeof(cell)*nbr_cells);
@@ -652,7 +656,7 @@ inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 inline static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 {
 	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
-		INCR_REF(src);
+		share_cell(src);
 		*dst = *src;
 	}
 
@@ -662,7 +666,7 @@ inline static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 inline static void chk_cells(cell *src, idx_t nbr_cells)
 {
 	for (idx_t i = 0; i < nbr_cells; i++, src++) {
-		DECR_REF(src);
+		unshare_cell(src);
 	}
 }
 

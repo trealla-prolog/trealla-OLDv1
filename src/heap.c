@@ -334,7 +334,7 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t suffix)
 
 	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
 		*dst = *src;
-		INCR_REF(src);
+		share_cell(src);
 
 		if (!is_variable(src))
 			continue;

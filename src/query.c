@@ -314,7 +314,7 @@ static void unwind_trail(query *q, const choice *ch)
 
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
-		DECR_REF(&e->c);
+		unshare_cell(&e->c);
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = tr->attrs;
 	}
@@ -335,7 +335,7 @@ void try_me(const query *q, unsigned nbr_vars)
 	slot *e = GET_SLOT(g, 0);
 
 	for (unsigned i = 0; i < nbr_vars; i++, e++) {
-		DECR_REF(&e->c);
+		unshare_cell(&e->c);
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = NULL;
 	}
@@ -349,7 +349,7 @@ static void trim_heap(query *q, const choice *ch)
 
 		for (idx_t i = 0; i < a->hp; i++) {
 			cell *c = a->heap + i;
-			DECR_REF(c);
+			unshare_cell(c);
 			c->val_type = TYPE_EMPTY;
 		}
 
@@ -363,7 +363,7 @@ static void trim_heap(query *q, const choice *ch)
 
 	for (idx_t i = ch->st.hp; a && (i < a->hp); i++) {
 		cell *c = a->heap + i;
-		DECR_REF(c);
+		unshare_cell(c);
 		c->val_type = TYPE_EMPTY;
 	}
 }
@@ -452,7 +452,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	slot *e = GET_SLOT(g, 0);
 
 	for (unsigned i = 0; i < g->nbr_vars; i++, e++) {
-		DECR_REF(&e->c);
+		unshare_cell(&e->c);
 		e->c.val_type = TYPE_EMPTY;
 		e->c.attrs = NULL;
 	}
@@ -769,7 +769,7 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		make_indirect(&e->c, v);
 	else {
 		e->c = *v;
-		INCR_REF(v);
+		share_cell(v);
 	}
 
 	if (!q->cp && !attrs)
@@ -807,7 +807,7 @@ void reset_value(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		make_indirect(&e->c, v);
 	else {
 		e->c = *v;
-		INCR_REF(v);
+		share_cell(v);
 	}
 }
 
@@ -996,7 +996,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 			// For now convert it to a literal
 			idx_t off = index_from_pool(q->st.m->pl, GET_STR(c));
 			may_idx_error(off);
-			DECR_REF(c);
+			unshare_cell(c);
 			c->val_type = TYPE_LITERAL;
 			c->val_off = off;
 			c->flags = 0;
@@ -1088,7 +1088,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 			// For now convert it to a literal
 			idx_t off = index_from_pool(q->st.m->pl, GET_STR(c));
 			may_idx_error(off);
-			DECR_REF(c);
+			unshare_cell(c);
 			c->val_type = TYPE_LITERAL;
 			c->val_off = off;
 			c->flags = 0;
@@ -1183,7 +1183,7 @@ static USE_RESULT pl_status match_head(query *q)
 				return pl_error;
 			}
 
-			DECR_REF(c);
+			unshare_cell(c);
 			c->val_type = TYPE_LITERAL;
 			c->val_off = off;
 			c->flags = 0;
@@ -1632,7 +1632,7 @@ void destroy_query(query *q)
 	for (arena *a = q->arenas; a;) {
 		for (idx_t i = 0; i < a->hp; i++) {
 			cell *c = a->heap + i;
-			DECR_REF(c);
+			unshare_cell(c);
 		}
 
 		arena *save = a;
@@ -1644,7 +1644,7 @@ void destroy_query(query *q)
 	for (int i = 0; i < MAX_QUEUES; i++) {
 		for (idx_t j = 0; j < q->qp[i]; j++) {
 			cell *c = q->queue[i]+j;
-			DECR_REF(c);
+			unshare_cell(c);
 		}
 
 		free(q->queue[i]);
@@ -1653,7 +1653,7 @@ void destroy_query(query *q)
 	slot *e = q->slots;
 
 	for (idx_t i = 0; i < q->st.sp; i++, e++)
-		DECR_REF(&e->c);
+		unshare_cell(&e->c);
 
 	free(q->trails);
 	free(q->choices);

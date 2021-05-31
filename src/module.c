@@ -449,7 +449,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 	if (is_cstring(c)) {
 		idx_t off = index_from_pool(m->pl, MODULE_GET_STR(c));
 		if (off == ERR_IDX) return NULL;
-		DECR_REF(c);
+		unshare_cell(c);
 		c->val_type = TYPE_LITERAL;
 		c->val_off = off;
 		c->flags = 0;
