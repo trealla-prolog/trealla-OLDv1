@@ -199,7 +199,6 @@ void purge_dirty_list(query *q)
 	}
 
 	//if (cnt) printf("Info: query purged %d retracted items\n", cnt);
-
 }
 
 static void next_key(query *q)
