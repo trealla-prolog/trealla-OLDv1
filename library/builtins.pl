@@ -328,6 +328,7 @@ recorda(K, V, R) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V), R).
 recordz(K, V, R) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V), R).
 recorded(K, V, R) :- nonvar(K), clause('$record_key'(K,V), _, R).
 
+print(T) :- writeln(T).
 format(F) :- format(F, []).
 term_to_atom(T, S) :- write_term_to_chars(S, T, []).
 write_term_to_atom(S, T, Opts) :- write_term_to_chars(S, Opts, T).
