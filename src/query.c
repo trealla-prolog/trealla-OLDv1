@@ -496,7 +496,7 @@ static void commit_me(query *q, term *t)
 	q->st.m = q->st.curr_clause->owner->m;
 	q->st.iter = NULL;
 	bool last_match = t->first_cut || !is_next_key(q);
-	bool recursive = last_match && is_tail_recursive(q->st.curr_cell);
+	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool tco = !q->no_tco && recursive && !any_choices(q, g, true);
 	bool slots_ok = check_slots(q, g, t);
 	choice *ch = GET_CURR_CHOICE();
@@ -511,7 +511,7 @@ static void commit_me(query *q, term *t)
 	else
 		g = make_frame(q, t->nbr_vars);
 
-	if (last_match || t->cut_only) {
+	if (last_match) {
 		m_done(ch->st.iter);
 		drop_choice(q);
 		trim_trail(q);
