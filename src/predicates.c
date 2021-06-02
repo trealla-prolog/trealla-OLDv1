@@ -11488,6 +11488,7 @@ static const struct builtins g_predicates_other[] =
 	{"string", 1, fn_atom_1, "+term"},
 	{"atomic_concat", 3, fn_atomic_concat_3, NULL},
 	{"replace", 4, fn_replace_4, "+orig,+from,+to,-new"},
+	{"print", 1, fn_writeln_1, "+term"},
 	{"writeln", 1, fn_writeln_1, "+term"},
 	{"sleep", 1, fn_sleep_1, "+integer"},
 	{"delay", 1, fn_delay_1, "+integer"},
