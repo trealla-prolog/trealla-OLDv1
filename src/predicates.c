@@ -6766,20 +6766,20 @@ static USE_RESULT pl_status fn_between_3(query *q)
 	GET_NEXT_ARG(p2,integer);
 	GET_NEXT_ARG(p3,integer_or_var);
 
-	if (!q->retry && !is_variable(p3)) {
-		if (p3->val_num > p2->val_num)
-			return pl_failure;
-
-		if (p3->val_num < p1->val_num)
-			return pl_failure;
-
-		return pl_success;
-	}
-
-	if (p1->val_num > p2->val_num)
-		return pl_failure;
-
 	if (!q->retry) {
+		if (p1->val_num > p2->val_num)
+			return pl_failure;
+
+		if (!is_variable(p3)) {
+			if (p3->val_num > p2->val_num)
+				return pl_failure;
+
+			if (p3->val_num < p1->val_num)
+				return pl_failure;
+
+			return pl_success;
+		}
+
 		set_var(q, p3, p3_ctx, p1, q->st.curr_frame);
 
 		if (p1->val_num != p2->val_num)
@@ -6788,12 +6788,7 @@ static USE_RESULT pl_status fn_between_3(query *q)
 		return pl_success;
 	}
 
-	int_t val = p3->val_num;
-
-	if (val == p2->val_num)
-		return pl_failure;
-
-	val++;
+	int_t val = p3->val_num + 1;
 	GET_RAW_ARG(3,p3_raw);
 	cell tmp;
 	make_int(&tmp, val);

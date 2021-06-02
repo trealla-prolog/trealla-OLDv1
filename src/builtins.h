@@ -139,7 +139,7 @@ inline static cell *get_next_raw_arg(query *q)
 	return q->last_arg;
 }
 
-inline static cell *get_raw_arg(query *q, int n)
+inline static cell *get_raw_arg(const query *q, int n)
 {
 	cell *c = q->st.curr_cell + 1;
 
