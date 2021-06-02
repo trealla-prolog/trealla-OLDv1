@@ -6499,7 +6499,7 @@ static USE_RESULT pl_status fn_sys_assertz_2(query *q)
 
 static void save_db(FILE *fp, query *q, int logging)
 {
-	for (predicate *h = q->st.m->head; h; h = h->next) {
+	for (predicate *h = q->st.m->head; h && !g_tpl_interrupt; h = h->next) {
 		if (h->is_prebuilt)
 			continue;
 
@@ -6511,7 +6511,7 @@ static void save_db(FILE *fp, query *q, int logging)
 		if (src[0] == '$')
 			continue;
 
-		for (clause *r = h->head; r; r = r->next) {
+		for (clause *r = h->head; r && !g_tpl_interrupt; r = r->next) {
 			if (r->t.ugen_erased)
 				continue;
 
@@ -6541,7 +6541,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 {
 	module *m = q->st.curr_clause ? q->st.curr_clause->owner->m : q->st.m;
 
-	for (predicate *h = m->head; h; h = h->next) {
+	for (predicate *h = m->head; h && !g_tpl_interrupt; h = h->next) {
 		if (h->is_prebuilt)
 			continue;
 
@@ -6551,7 +6551,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 		if ((arity != h->key.arity) && (arity != -1U))
 			continue;
 
-		for (clause *r = h->head; r; r = r->next) {
+		for (clause *r = h->head; r && !g_tpl_interrupt; r = r->next) {
 			if (r->t.ugen_erased)
 				continue;
 
