@@ -2217,9 +2217,6 @@ void fix_list(cell *c)
 	}
 }
 
-// Build a compact bytecode representation of the input as an
-// array of cells.
-
 unsigned tokenize(parser *p, bool args, bool consing)
 {
 	idx_t begin_idx = p->t->cidx, arg_idx = p->t->cidx, save_idx = 0;
