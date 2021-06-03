@@ -1243,10 +1243,10 @@ static pl_status do_atom_concat_3(query *q)
 	GET_RAW_ARG(2,p2_raw);
 	cell tmp;
 	may_error(make_cstringn(&tmp, GET_STR(p3), LEN_STR(p1)+len));
-	reset_value(q, p1_raw, p1_raw_ctx, &tmp, q->st.curr_frame);
+	reset_var(q, p1_raw, p1_raw_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	may_error(make_cstringn(&tmp, GET_STR(p2)+len, LEN_STR(p2)-len));
-	reset_value(q, p2_raw, p2_raw_ctx, &tmp, q->st.curr_frame);
+	reset_var(q, p2_raw, p2_raw_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 
 	if (!done)
@@ -4073,7 +4073,7 @@ static USE_RESULT pl_status fn_iso_arg_3(query *q)
 
 			cell tmp;
 			make_int(&tmp, arg_nbr);
-			reset_value(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+			reset_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 			may_error(make_choice(q));
 		}
 
@@ -6790,7 +6790,7 @@ static USE_RESULT pl_status fn_between_3(query *q)
 	GET_RAW_ARG(3,p3_raw);
 	cell tmp;
 	make_int(&tmp, val);
-	reset_value(q, p3_raw, p3_raw_ctx, &tmp, q->st.curr_frame);
+	reset_var(q, p3_raw, p3_raw_ctx, &tmp, q->st.curr_frame);
 
 	if (val != p2->val_num)
 		may_error(make_choice(q));
@@ -10588,7 +10588,7 @@ static pl_status do_length(query *q)
 	GET_RAW_ARG(2, p2_orig);
 	cell tmp;
 	make_int(&tmp, ++nbr);
-	reset_value(q, p2_orig, p2_orig_ctx, &tmp, q->st.curr_frame);
+	reset_var(q, p2_orig, p2_orig_ctx, &tmp, q->st.curr_frame);
 	may_error(make_choice(q));
 
 	if (is_variable(p1) && is_anon(p1))

@@ -14,7 +14,11 @@ extern cell *check_body_callable(parser *p, cell *c);
 extern bool run(parser *p, const char *src, bool dump, bool is_init);
 extern void xref_db(parser *p);
 
-extern char *format_property(char **bufptr, size_t *lenptr, char *dst, const char *name, unsigned arity, const char *type);
 extern void clear_term(term *t);
-extern size_t sprint_int(char *dst, size_t size, int_t n, int base);
+extern void do_reduce(cell *n);
+extern void make_end(cell *tmp);
 extern void fix_list(cell *c);
+extern bool check_rule(const cell *c);
+extern cell *get_head(cell *c);
+extern cell *get_body(cell *c);
+extern cell *get_logical_body(cell *c);

@@ -683,17 +683,13 @@ extern cell *list_tail(cell *l, cell *tmp);
 
 enum clause_type {DO_CLAUSE, DO_RETRACT, DO_STREAM_RETRACT, DO_RETRACTALL};
 
-extern bool check_rule(const cell *c);
-extern cell *get_head(cell *c);
-extern cell *get_body(cell *c);
-extern cell *get_logical_body(cell *c);
 extern size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq);
 extern int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2);
 extern unsigned count_bits(const uint8_t *mask, unsigned bit);
 extern uint64_t get_time_in_usec(void);
-extern void do_reduce(cell *n);
-extern void make_end(cell *tmp);
 extern char *relative_to(const char *basefile, const char *relfile);
+extern size_t sprint_int(char *dst, size_t size, int_t n, int base);
+extern char *format_property(char **bufptr, size_t *lenptr, char *dst, const char *name, unsigned arity, const char *type);
 
 // A string builder...
 

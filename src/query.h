@@ -10,7 +10,7 @@ extern USE_RESULT pl_status make_catcher(query *q, enum q_retry type);
 extern void cut_me(query *q, bool local_cut, bool soft_cut);
 
 extern void set_var(query *q, const cell *c, idx_t ctx, cell *v, idx_t v_ctx);
-extern void reset_value(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
+extern void reset_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
 extern pl_status execute(query *q, term *t);
 extern USE_RESULT pl_status fn_call_0(query *q, cell *p1);
 extern void undo_me(query *q);
@@ -30,7 +30,7 @@ extern bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_
 extern void allocate_list(query *q, const cell *c);
 extern void append_list(query *q, const cell *c);
 extern USE_RESULT cell *end_list(query *q);
-extern bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool partial_list);
+extern bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials);
 extern size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes);
 
 extern void make_indirect(cell *tmp, cell *c);

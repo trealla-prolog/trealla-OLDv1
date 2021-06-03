@@ -788,7 +788,7 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 	tr->attrs = attrs;
 }
 
-void reset_value(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
+void reset_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 {
 	const frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
