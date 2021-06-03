@@ -1444,7 +1444,7 @@ static bool check_redo(query *q)
 	return false;
 }
 
-static bool outstanding_choices(query *q)
+static bool any_outstanding_choices(query *q)
 {
 	if (!q->cp)
 		return false;
@@ -1459,7 +1459,7 @@ static bool outstanding_choices(query *q)
 		q->cp--;
 	}
 
-	return q->cp;
+	return q->cp > 0;
 }
 
 pl_status start(query *q)
@@ -1547,7 +1547,7 @@ pl_status start(query *q)
 					q->cp--;
 				}
 
-				if (outstanding_choices(q) && q->p && !q->run_init) {
+				if (any_outstanding_choices(q) && q->p && !q->run_init) {
 					if (!check_redo(q))
 						break;
 
