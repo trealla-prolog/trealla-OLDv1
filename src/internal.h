@@ -119,11 +119,12 @@ typedef enum {
 
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
 #define is_string(c) (is_cstring(c) && (c)->flags & FLAG_STRING)
+#define is_managed(c) ((c)->flags & FLAG_MANAGED)
 #define is_blob(c) (is_cstring(c) && (c)->flags & FLAG_BLOB)
 #define is_list(c) (is_iso_list(c) || is_string(c))
 #define is_integer(c) (is_rational(c) && ((c)->val_den == 1))
-#define is_static(c) (is_blob(c) && ((c)->flags & FLAG2_STATIC))
-#define is_strbuf(c) (is_blob(c) && !((c)->flags & FLAG2_STATIC))
+#define is_static(c) (is_blob(c) && ((c)->flags & FLAG_STATIC))
+#define is_strbuf(c) (is_blob(c) && !((c)->flags & FLAG_STATIC))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
 #define is_quoted(c) ((c)->flags & FLAG2_QUOTED)
 #define is_fresh(c) ((c)->flags & FLAG2_FRESH)
@@ -150,6 +151,7 @@ typedef struct {
 	(c)->val_strb = strb;										\
 	(c)->strb_off = off;										\
 	(c)->strb_len = n;											\
+	(c)->flags |= FLAG_MANAGED | FLAG_BLOB;						\
 	}
 
 #define _GET_STR(pl,c) 											\
@@ -204,16 +206,15 @@ enum {
 	FLAG_BLOB=1<<7,						// used with TYPE_CSTRING
 	FLAG_STRING=1<<8,					// used with TYPE_CSTRING
 	FLAG_KEY=1<<9,						// used with keys
+	FLAG_STATIC=1<<10,
+	FLAG_MANAGED=1<<11,					// any ref-counted object
 
-	FLAG_SPARE3=1<<10,
-	FLAG_SPARE2=1<<11,
 	FLAG_SPARE1=1<<12,
 
 	FLAG2_PROCESSED=FLAG_KEY,			// used by bagof
 	FLAG2_FIRST_USE=FLAG_HEX,			// used with TYPE_VARIABLE
 	FLAG2_ANON=FLAG_OCTAL,				// used with TYPE_VARIABLE
 	FLAG2_FRESH=FLAG_BINARY,			// used with TYPE_VARIABLE
-	FLAG2_STATIC=FLAG_HEX,				// used with TYPE_CSTRING
 	FLAG2_QUOTED=FLAG_OCTAL,			// used with TYPE_CSTRING
 
 	FLAG_END=1<<13
@@ -632,17 +633,20 @@ extern unsigned g_cpu_count;
 
 inline static void share_cell(const cell *c)
 {
-	if (is_strbuf(c)) {
-		(c)->val_strb->refcnt++;
+	if (is_managed(c)) {
+		if (is_strbuf(c))
+			(c)->val_strb->refcnt++;
 	}
 }
 
 inline static void unshare_cell(cell *c)
 {
-	if (is_strbuf(c)) {
-		if (!(--(c)->val_strb->refcnt))	{
-			free((c)->val_strb);
-			(c)->val_strb = NULL;
+	if (is_managed(c)) {
+		if (is_strbuf(c)) {
+			if (!(--(c)->val_strb->refcnt))	{
+				free((c)->val_strb);
+				(c)->val_strb = NULL;
+			}
 		}
 	}
 }

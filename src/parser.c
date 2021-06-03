@@ -215,7 +215,7 @@ cell *list_tail(cell *l, cell *tmp)
 	}
 
 	if (is_static(l)) {
-		tmp->flags = FLAG_BLOB | FLAG2_STATIC | FLAG_STRING;
+		tmp->flags = FLAG_BLOB | FLAG_STATIC | FLAG_STRING;
 		tmp->nbr_cells = 1;
 		tmp->arity = 2;
 		tmp->val_str = l->val_str + len;
@@ -381,7 +381,7 @@ void consultall(parser *p, cell *l)
 
 	while (is_list(l)) {
 		cell *h = LIST_HEAD(l);
-		module_load_file(p->m, PARSER_GET_STR(h));
+		load_file(p->m, PARSER_GET_STR(h));
 		l = LIST_TAIL(l);
 	}
 }
@@ -520,7 +520,7 @@ static void directives(parser *p, term *t)
 		unsigned save_line_nbr = p->line_nbr;
 		char *filename = relative_to(p->m->filename, name);
 
-		if (!module_load_file(p->m, filename)) {
+		if (!load_file(p->m, filename)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: not found: %s\n", filename);
 
@@ -544,7 +544,7 @@ static void directives(parser *p, term *t)
 
 		unsigned save_line_nbr = p->line_nbr;
 
-		if (!module_load_file(p->m, filename)) {
+		if (!load_file(p->m, filename)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: not found: %s\n", filename);
 
@@ -683,7 +683,7 @@ static void directives(parser *p, term *t)
 				src[*lib->len] = '\0';
 				STRING_INIT(s1);
 				STRING_CAT2(s1, "library/", lib->name);
-				m = module_load_text(p->m, src, STRING_CSTR(s1));
+				m = load_text(p->m, src, STRING_CSTR(s1));
 				STRING_DONE(s1);
 				free(src);
 
@@ -704,7 +704,7 @@ static void directives(parser *p, term *t)
 
 		char *filename = relative_to(p->m->filename, name);
 
-		if (!module_load_file(p->m, filename)) {
+		if (!load_file(p->m, filename)) {
 			//if (DUMP_ERRS || !p->do_read_term)
 			//	fprintf(stdout, "Error: using module file: %s\n", filename);
 
@@ -1341,7 +1341,7 @@ static bool lexer_analyze(parser *p, idx_t start_idx)
 	return !p->error;
 }
 
-void parser_reset(parser *p)
+void reset(parser *p)
 {
 	clear_term(p->t);
 	p->t->cidx = 0;
@@ -1372,9 +1372,9 @@ static bool term_dcg_rewrite(parser *p)
 	p2->line_nbr = p->line_nbr;
 	p2->skip = true;
 	p2->srcptr = src;
-	parser_tokenize(p2, false, false);
+	tokenize(p2, false, false);
 	term_xref(p2, p2->t, NULL);
-	query_execute(q, p2->t);
+	execute(q, p2->t);
 	free(src);
 	frame *g = GET_FRAME(0);
 	src = NULL;
@@ -1409,9 +1409,9 @@ static bool term_dcg_rewrite(parser *p)
 		return false;
 	}
 
-	parser_reset(p2);
+	reset(p2);
 	p2->srcptr = src;
-	parser_tokenize(p2, false, false);
+	tokenize(p2, false, false);
 	free(src);
 
 	// Take the completed term...
@@ -2220,7 +2220,7 @@ void fix_list(cell *c)
 // Build a compact bytecode representation of the input as an
 // array of cells.
 
-unsigned parser_tokenize(parser *p, bool args, bool consing)
+unsigned tokenize(parser *p, bool args, bool consing)
 {
 	idx_t begin_idx = p->t->cidx, arg_idx = p->t->cidx, save_idx = 0;
 	bool last_op = true, is_func = false, was_consing = false;
@@ -2306,7 +2306,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			c->arity = 2;
 			p->start_term = true;
 			p->nesting_brackets++;
-			parser_tokenize(p, true, true);
+			tokenize(p, true, true);
 			last_bar = false;
 
 			if (p->error)
@@ -2328,7 +2328,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 			c->arity = 1;
 			p->start_term = true;
 			p->nesting_braces++;
-			parser_tokenize(p, false, false);
+			tokenize(p, false, false);
 			last_bar = false;
 
 			if (p->error)
@@ -2344,7 +2344,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 		if (!p->quote_char && !strcmp(p->token, "(")) {
 			p->start_term = true;
 			p->nesting_parens++;
-			unsigned tmp_arity = parser_tokenize(p, is_func, false);
+			unsigned tmp_arity = tokenize(p, is_func, false);
 			last_bar = false;
 
 			if (p->error)
@@ -2593,7 +2593,6 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 					c->arity = 2;
 				}
 
-				c->flags |= FLAG_BLOB;
 				SET_STR(c, p->token, p->toklen, 0);
 			}
 		}
@@ -2605,7 +2604,7 @@ unsigned parser_tokenize(parser *p, bool args, bool consing)
 	return !p->error;
 }
 
-bool parser_run(parser *p, const char *pSrc, bool dump, bool is_init)
+bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 {
 	if (*pSrc == '.') {
 		fprintf(stdout, "Error: syntax error, unexpected end of clause\n");
@@ -2620,12 +2619,12 @@ bool parser_run(parser *p, const char *pSrc, bool dump, bool is_init)
 
 		p->srcptr = STRING_CSTR(src);
 		p->line_nbr = 0;
-		parser_tokenize(p, false, false);
+		tokenize(p, false, false);
 		STRING_DONE(src);
 	} else {
 		p->srcptr = (char*)pSrc;
 		p->line_nbr = 0;
-		parser_tokenize(p, false, false);
+		tokenize(p, false, false);
 	}
 
 	if (!p->error && !p->end_of_term && !p->run_init) {
@@ -2656,7 +2655,7 @@ bool parser_run(parser *p, const char *pSrc, bool dump, bool is_init)
 	q->p = p;
 	q->do_dump_vars = dump;
 	q->run_init = p->run_init;
-	query_execute(q, p->t);
+	execute(q, p->t);
 
 	p->m->pl->halt = q->halt;
 	p->m->pl->halt_code = q->halt_code;

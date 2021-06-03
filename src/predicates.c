@@ -339,7 +339,7 @@ static USE_RESULT pl_status make_cstringn(cell *d, const char *s, size_t n)
 	}
 
 	d->val_type = TYPE_CSTRING;
-	d->flags = FLAG_BLOB;
+	d->flags = 0;
 	d->nbr_cells = 1;
 	d->arity = 0;
 	SET_STR(d, s, n, 0);
@@ -354,8 +354,7 @@ static USE_RESULT pl_status make_cstring(cell *d, const char *s)
 static USE_RESULT pl_status make_stringn(cell *d, const char *s, size_t n)
 {
 	d->val_type = TYPE_CSTRING;
-	d->flags = FLAG_BLOB;
-	d->flags |= FLAG_STRING;
+	d->flags = FLAG_STRING;
 	d->nbr_cells = 1;
 	d->arity = 2;
 	SET_STR(d, s, n, 0);
@@ -1721,7 +1720,7 @@ static void add_stream_properties(query *q, int n)
 	parser *p = create_parser(q->st.m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
-	parser_tokenize(p, false, false);
+	tokenize(p, false, false);
 	destroy_parser(p);
 }
 
@@ -2179,7 +2178,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 		void *addr = mmap(0, len, prot, MAP_PRIVATE, fd, offset);
 		cell tmp = {0};
 		tmp.val_type = TYPE_CSTRING;
-		tmp.flags = FLAG_BLOB | FLAG_STRING | FLAG2_STATIC;
+		tmp.flags = FLAG_BLOB | FLAG_STRING | FLAG_STATIC;
 		tmp.nbr_cells = 1;
 		tmp.arity = 2;
 		tmp.val_str = addr;
@@ -2465,7 +2464,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 
 	parser *p = str->p;
 	p->fp = str->fp;
-	parser_reset(p);
+	reset(p);
 	p->one_shot = true;
 	p->error = false;
 	p->flag = q->st.m->flag;
@@ -2559,7 +2558,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 	frame *g = GET_CURR_FRAME();
 	p->read_term = g->nbr_vars;
 	p->do_read_term = true;
-	parser_tokenize(p, false, false);
+	tokenize(p, false, false);
 	p->do_read_term = false;
 	p->read_term = 0;
 
@@ -5203,7 +5202,7 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 	p->srcptr = dst2;
 	frame *g = GET_CURR_FRAME();
 	p->read_term = g->nbr_vars;
-	parser_tokenize(p, false, false);
+	tokenize(p, false, false);
 
 	if (p->nbr_vars) {
 		if (!create_vars(q, p->nbr_vars)) {
@@ -7990,7 +7989,7 @@ static USE_RESULT pl_status fn_wait_0(query *q)
 				continue;
 			}
 
-			DISCARD_RESULT query_start(task);
+			DISCARD_RESULT start(task);
 
 			task = task->next;
 			did_something = 1;
@@ -8034,7 +8033,7 @@ static USE_RESULT pl_status fn_await_0(query *q)
 				continue;
 			}
 
-			DISCARD_RESULT query_start(task);
+			DISCARD_RESULT start(task);
 
 			if (!task->tmo_msecs && task->yielded) {
 				did_something = 1;
@@ -8093,7 +8092,7 @@ static USE_RESULT pl_status fn_task_n(query *q)
 	}
 
 	cell *tmp = clone_to_heap(q, false, tmp2, 0);
-	query *task = create_task(q, tmp);
+	query *task = create_sub_query(q, tmp);
 	task->yielded = task->spawned = true;
 	push_task(q->st.m, task);
 	return pl_success;
@@ -8102,7 +8101,7 @@ static USE_RESULT pl_status fn_task_n(query *q)
 static USE_RESULT pl_status fn_fork_0(query *q)
 {
 	cell *curr_cell = q->st.curr_cell + q->st.curr_cell->nbr_cells;
-	query *task = create_task(q, curr_cell);
+	query *task = create_sub_query(q, curr_cell);
 	task->yielded = true;
 	push_task(q->st.m, task);
 	return pl_failure;
@@ -8360,7 +8359,7 @@ static pl_status do_consult(query *q, cell *p1, idx_t p1_ctx)
 
 		char *filename = relative_to(q->st.m->filename, src);
 
-		if (!module_load_file(q->st.m, filename)) {
+		if (!load_file(q->st.m, filename)) {
 			free(filename);
 			return throw_error(q, p1, "existence_error", "filespec");
 		}
@@ -8384,7 +8383,7 @@ static pl_status do_consult(query *q, cell *p1, idx_t p1_ctx)
 	tmp_m->make_public = 1;
 	filename = relative_to(q->st.m->filename, filename);
 
-	if (!module_load_file(tmp_m, filename)) {
+	if (!load_file(tmp_m, filename)) {
 		destroy_module(tmp_m);
 		free(filename);
 		return throw_error(q, p1, "existence_error", "filespec");
@@ -10274,9 +10273,9 @@ static void restore_db(module *m, FILE *fp)
 			break;
 
 		p->srcptr = p->save_line;
-		parser_tokenize(p, false, false);
+		tokenize(p, false, false);
 		term_xref(p, p->t, NULL);
-		query_execute(q, p->t);
+		execute(q, p->t);
 		clear_term(p->t);
 	}
 
@@ -11073,7 +11072,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			src[*lib->len] = '\0';
 			STRING_INIT(s1);
 			STRING_CAT2(s1, "library/", lib->name);
-			m = module_load_text(q->st.m, src, STRING_CSTR(s1));
+			m = load_text(q->st.m, src, STRING_CSTR(s1));
 			STRING_DONE(s1);
 			free(src);
 
@@ -11092,7 +11091,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 
 	char *filename = relative_to(q->st.m->filename, name);
 
-	if (!module_load_file(q->st.m, filename)) {
+	if (!load_file(q->st.m, filename)) {
 		fprintf(stdout, "Error: module file not found: %s\n", filename);
 		free(filename);
 		return pl_failure;
@@ -11830,7 +11829,7 @@ static void load_properties(module *m)
 	parser *p = create_parser(m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
-	parser_tokenize(p, false, false);
+	tokenize(p, false, false);
 	destroy_parser(p);
 	free(tmpbuf);
 }
@@ -11931,7 +11930,7 @@ static void load_ops(query *q)
 	parser *p = create_parser(q->st.m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
-	parser_tokenize(p, false, false);
+	tokenize(p, false, false);
 	destroy_parser(p);
 	free(tmpbuf);
 }

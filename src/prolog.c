@@ -19,7 +19,7 @@
 #include "heap.h"
 #include "utf8.h"
 
-static const unsigned INITIAL_POOL_SIZE = 64000;	// bytes
+static const size_t INITIAL_POOL_SIZE = 64000;	// bytes
 
 stream g_streams[MAX_STREAMS] = {{0}};
 idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
@@ -123,7 +123,7 @@ bool pl_eval(prolog *pl, const char *s)
 	}
 
 	p->command = true;
-	bool ok = parser_run(p, STRING_CSTR(cmd), true, false);
+	bool ok = run(p, STRING_CSTR(cmd), true, false);
 	STRING_DONE(cmd);
 	pl->curr_m = p->m;
 	destroy_parser(p);
@@ -132,13 +132,13 @@ bool pl_eval(prolog *pl, const char *s)
 
 bool pl_consult_fp(prolog *pl, FILE *fp, const char *filename)
 {
-	int ok = module_load_fp(pl->user_m, fp, filename);
+	int ok = load_fp(pl->user_m, fp, filename);
 	return ok;
 }
 
 bool pl_consult(prolog *pl, const char *filename)
 {
-	return module_load_file(pl->user_m, filename);
+	return load_file(pl->user_m, filename);
 }
 
 static void g_destroy(prolog *pl)
@@ -341,7 +341,7 @@ prolog *pl_create()
 				assert(pl->user_m);
 				STRING_INIT(s1);
 				STRING_CAT2(s1, "library/", lib->name);
-				module_load_text(pl->user_m, src, STRING_CSTR(s1));
+				load_text(pl->user_m, src, STRING_CSTR(s1));
 				STRING_DONE(s1);
 				free(src);
 				break;

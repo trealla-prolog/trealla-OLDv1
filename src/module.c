@@ -220,7 +220,7 @@ static void push_property(module *m, const char *name, unsigned arity, const cha
 	parser *p = create_parser(m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
-	parser_tokenize(p, false, false);
+	tokenize(p, false, false);
 	destroy_parser(p);
 	free(tmpbuf);
 }
@@ -628,7 +628,7 @@ static void	set_loaded(module *m, const char *filename)
 	m->loaded_files = ptr;
 }
 
-module *module_load_text(module *m, const char *src, const char *filename)
+module *load_text(module *m, const char *src, const char *filename)
 {
 	parser *p = create_parser(m);
 	if (!p) return NULL;
@@ -637,7 +637,7 @@ module *module_load_text(module *m, const char *src, const char *filename)
 	p->m->filename = strdup(filename);
 	p->consulting = true;
 	p->srcptr = (char*)src;
-	parser_tokenize(p, false, false);
+	tokenize(p, false, false);
 
 	if (!p->error && !p->already_loaded && !p->end_of_term && p->t->cidx) {
 		if (DUMP_ERRS || !p->do_read_term)
@@ -656,7 +656,7 @@ module *module_load_text(module *m, const char *src, const char *filename)
 		if (p->run_init == true) {
 			p->command = true;
 
-			if (parser_run(p, "(:- initialization(G)), retract((:- initialization(_))), G", false, true))
+			if (run(p, "(:- initialization(G)), retract((:- initialization(_))), G", false, true))
 				p->m->pl->halt = true;
 		}
 
@@ -671,7 +671,7 @@ module *module_load_text(module *m, const char *src, const char *filename)
 	return m;
 }
 
-bool module_load_fp(module *m, FILE *fp, const char *filename)
+bool load_fp(module *m, FILE *fp, const char *filename)
 {
 	parser *p = create_parser(m);
 	if (!p) return false;
@@ -687,7 +687,7 @@ bool module_load_fp(module *m, FILE *fp, const char *filename)
 			break;
 
 		p->srcptr = p->save_line;
-		parser_tokenize(p, false, false);
+		tokenize(p, false, false);
 		ok = !p->error;
 	}
 	 while (ok && !p->already_loaded);
@@ -708,7 +708,7 @@ bool module_load_fp(module *m, FILE *fp, const char *filename)
 		if (p->run_init == true) {
 			p->command = true;
 
-			if (parser_run(p, "(:- initialization(G)), retract((:- initialization(_))), G", false, true))
+			if (run(p, "(:- initialization(G)), retract((:- initialization(_))), G", false, true))
 				p->m->pl->halt = true;
 		}
 
@@ -723,14 +723,14 @@ bool module_load_fp(module *m, FILE *fp, const char *filename)
 	return ok;
 }
 
-bool module_load_file(module *m, const char *filename)
+bool load_file(module *m, const char *filename)
 {
 	if (!strcmp(filename, "user")) {
 		for (int i = 0; i < MAX_STREAMS; i++) {
 			stream *str = &g_streams[i];
 
 			if (!strcmp(str->name, "user_input")) {
-				int ok = module_load_fp(m, str->fp, filename);
+				int ok = load_fp(m, str->fp, filename);
 				clearerr(str->fp);
 				return ok;
 			}
@@ -781,7 +781,7 @@ bool module_load_file(module *m, const char *filename)
 
 	clearerr(fp);
 	char *tmp_filename = strdup(realbuf);
-	bool ok = module_load_fp(m, fp, tmp_filename);
+	bool ok = load_fp(m, fp, tmp_filename);
 	fclose(fp);
 	free(realbuf);
 	free(tmp_filename);
@@ -813,7 +813,7 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 	}
 }
 
-bool module_save_file(module *m, const char *filename)
+bool save_file(module *m, const char *filename)
 {
 	FILE *fp = fopen(filename, "w");
 
@@ -835,7 +835,7 @@ static void make_rule(module *m, const char *src)
 	m->p->consulting = true;
 	m->p->srcptr = (char*)src;
 	m->p->line_nbr = 0;
-	parser_tokenize(m->p, false, false);
+	tokenize(m->p, false, false);
 	m->prebuilt = false;
 	m->p->consulting = save;
 }

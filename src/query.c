@@ -173,7 +173,7 @@ static void trace_call(query *q, cell *c, box_t box)
 		sleep(1);
 }
 
-void purge_dirty_list(query *q)
+static void purge_dirty_list(query *q)
 {
 	int cnt = 0;
 
@@ -1462,7 +1462,7 @@ static bool outstanding_choices(query *q)
 	return q->cp;
 }
 
-pl_status query_start(query *q)
+pl_status start(query *q)
 {
 	q->yielded = false;
 	bool done = false;
@@ -1598,7 +1598,7 @@ uint64_t get_time_in_usec(void)
 }
 #endif
 
-pl_status query_execute(query *q, term *t)
+pl_status execute(query *q, term *t)
 {
 	q->st.m->pl->did_dump_vars = false;
 	q->st.curr_cell = t->cells;
@@ -1613,7 +1613,7 @@ pl_status query_execute(query *q, term *t)
 	g->nbr_vars = t->nbr_vars;
 	g->nbr_slots = t->nbr_vars;
 	g->ugen = ++q->st.m->pl->ugen;
-	pl_status ret = query_start(q);
+	pl_status ret = start(q);
 	m_done(q->st.iter);
 	return ret;
 }
@@ -1702,7 +1702,7 @@ query *create_query(module *m, bool is_task)
 	return q;
 }
 
-query *create_task(query *q, cell *curr_cell)
+query *create_sub_query(query *q, cell *curr_cell)
 {
 	query *subq = create_query(q->st.m, true);
 	if (!subq) return NULL;
