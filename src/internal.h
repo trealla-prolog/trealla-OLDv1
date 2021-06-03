@@ -703,41 +703,41 @@ typedef struct {
 }
  STRING;
 
-#define STRING_INIT(pr) STRING pr_##buf;								\
-	pr_##buf.size = 0;													\
-	pr_##buf.buf = NULL;												\
-	pr_##buf.dst = pr_##buf.buf;
+#define STRING_INIT(pr) STRING pr##_buf;								\
+	pr##_buf.size = 0;													\
+	pr##_buf.buf = NULL;												\
+	pr##_buf.dst = pr##_buf.buf;
 
-#define STRING_INITn(pr,len) STRING pr_##buf; 							\
-	pr_##buf.size = len;												\
-	pr_##buf.buf = malloc(len+1);										\
-	pr_##buf.dst = pr_##buf.buf;
+#define STRING_INITn(pr,len) STRING pr##_buf; 							\
+	pr##_buf.size = len;												\
+	pr##_buf.buf = malloc(len+1);										\
+	pr##_buf.dst = pr##_buf.buf;
 
-#define STRING_CSTR(pr) pr_##buf.buf
-#define STRING_LEN(pr) (pr_##buf.dst - pr_##buf.buf)
+#define STRING_CSTR(pr) pr##_buf.buf
+#define STRING_LEN(pr) (pr##_buf.dst - pr##_buf.buf)
 
 #define STRING_TRIM(pr,ch) {											\
 	if (STRING_LEN(pr)) {												\
-		if (pr_##buf.dst[-1] == ch) 									\
-			 *--pr_##buf.dst = '\0';									\
+		if (pr##_buf.dst[-1] == ch) 									\
+			 *--pr##_buf.dst = '\0';									\
 		}																\
 	}
 
 #define STRING_CHK(pr,len) {											\
-	size_t rem = pr_##buf.size - STRING_LEN(pr);						\
+	size_t rem = pr##_buf.size - STRING_LEN(pr);						\
 	if (len >= rem) {													\
 		size_t offset = STRING_LEN(pr);									\
-		pr_##buf.buf = realloc(pr_##buf.buf, (pr_##buf.size += (len-rem)) + 1); \
-		ensure(pr_##buf.buf);											\
-		pr_##buf.dst = pr_##buf.buf + offset;							\
+		pr##_buf.buf = realloc(pr##_buf.buf, (pr##_buf.size += (len-rem)) + 1); \
+		ensure(pr##_buf.buf);											\
+		pr##_buf.dst = pr##_buf.buf + offset;							\
 	}																	\
 }
 
 #define STRING_CATn(pr,s,len) {											\
 	STRING_CHK(pr, len);												\
-	memcpy(pr_##buf.dst, s, len+1);										\
-	pr_##buf.dst += len;												\
-	*pr_##buf.dst = '\0';												\
+	memcpy(pr##_buf.dst, s, len+1);										\
+	pr##_buf.dst += len;												\
+	*pr##_buf.dst = '\0';												\
 }
 
 #define STRING_CAT2n(pr,s1,len1,s2,len2) {								\
@@ -747,4 +747,4 @@ typedef struct {
 
 #define STRING_CAT(pr,s) STRING_CATn(pr,s,strlen(s))
 #define STRING_CAT2(pr,s1,s2) STRING_CAT2n(pr,s1,strlen(s1),s2,strlen(s2))
-#define STRING_DONE(pr) { free(pr_##buf.buf); pr_##buf.buf = NULL; }
+#define STRING_DONE(pr) { free(pr##_buf.buf); pr##_buf.buf = NULL; }

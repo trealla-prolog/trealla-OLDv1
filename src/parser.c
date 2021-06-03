@@ -678,14 +678,13 @@ static void directives(parser *p, term *t)
 				if (strcmp(lib->name, name))
 					continue;
 
-				char *src = malloc(*lib->len+1);
-				memcpy(src, lib->start, *lib->len);
-				src[*lib->len] = '\0';
+				STRING_INIT(src);
+				STRING_CATn(src, lib->start, *lib->len);
 				STRING_INIT(s1);
 				STRING_CAT2(s1, "library/", lib->name);
-				m = load_text(p->m, src, STRING_CSTR(s1));
+				m = load_text(p->m, STRING_CSTR(src), STRING_CSTR(s1));
+				STRING_DONE(src);
 				STRING_DONE(s1);
-				free(src);
 
 				if (m != p->m)
 					do_db_load(m);
