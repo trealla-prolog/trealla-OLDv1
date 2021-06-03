@@ -725,6 +725,15 @@ typedef struct {
 		}																\
 	}
 
+#define STRING_trim_all(pr,ch) {										\
+	while (STRING_strlen(pr)) {											\
+		if (pr##_buf.dst[-1] != ch) 									\
+			break;														\
+																		\
+		 *--pr##_buf.dst = '\0';										\
+		}																\
+	}
+
 #define STRING_check(pr,len) {											\
 	size_t rem = pr##_buf.size - STRING_strlen(pr);						\
 	if (len >= rem) {													\
