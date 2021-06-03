@@ -716,7 +716,6 @@ typedef struct {
 	*pr##_buf.dst = '\0';
 
 #define STRING_strlen(pr) (pr##_buf.dst - pr##_buf.buf)
-#define STRING_cstr(pr) pr##_buf.buf ? pr##_buf.buf : ""
 
 #define STRING_trim(pr,ch) {											\
 	if (STRING_strlen(pr)) {											\
@@ -758,4 +757,5 @@ typedef struct {
 
 #define STRING_strcat(pr,s) STRING_strcatn(pr,s,strlen(s))
 #define STRING_strcat2(pr,s1,s2) STRING_strcat2n(pr,s1,strlen(s1),s2,strlen(s2))
+#define STRING_cstr(pr) pr##_buf.buf ? pr##_buf.buf : ""
 #define STRING_free(pr) { free(pr##_buf.buf); pr##_buf.buf = NULL; }
