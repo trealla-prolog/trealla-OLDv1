@@ -715,8 +715,8 @@ typedef struct {
 	pr##_buf.dst = pr##_buf.buf;										\
 	*pr##_buf.dst = '\0';
 
-#define STRING_cstr(pr) pr##_buf.buf
 #define STRING_strlen(pr) (pr##_buf.dst - pr##_buf.buf)
+#define STRING_cstr(pr) pr##_buf.buf ? pr##_buf.buf : ""
 
 #define STRING_trim(pr,ch) {											\
 	if (STRING_strlen(pr)) {											\
