@@ -664,7 +664,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
-		STRING_INIT(tmpbuf);
+		STRING_alloc(tmpbuf);
 		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
@@ -672,7 +672,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 			head = deref(q, head, p2_ctx);
 
 			const char *src = GET_STR(head);
-			STRING_CATn(tmpbuf, src, len_char_utf8(src));
+			STRING_strcatn(tmpbuf, src, len_char_utf8(src));
 
 			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
@@ -683,8 +683,8 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 			return throw_error(q, p2, "type_error", "list");
 
 		cell tmp;
-		may_error(make_cstring(&tmp, STRING_CSTR(tmpbuf)), STRING_DONE(tmpbuf));
-		STRING_DONE(tmpbuf);
+		may_error(make_cstring(&tmp, STRING_cstr(tmpbuf)), STRING_free(tmpbuf));
+		STRING_free(tmpbuf);
 		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
@@ -899,7 +899,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
-		STRING_INIT(tmpbuf);
+		STRING_alloc(tmpbuf);
 		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
@@ -913,7 +913,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 
 			char ch[10];
 			put_char_utf8(ch, val);
-			STRING_CAT(tmpbuf, ch);
+			STRING_strcat(tmpbuf, ch);
 			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
@@ -924,8 +924,8 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 			return throw_error(q, p2, "type_error", "list");
 
 		cell tmp;
-		may_error(make_cstring(&tmp, STRING_CSTR(tmpbuf)), STRING_DONE(tmpbuf));
-		STRING_DONE(tmpbuf);
+		may_error(make_cstring(&tmp, STRING_cstr(tmpbuf)), STRING_free(tmpbuf));
+		STRING_free(tmpbuf);
 		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
@@ -1296,11 +1296,11 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 			len2 = strlen(tmpbuf2);
 		}
 
-		STRING_INIT(tmpbuf);
-		STRING_CAT2n(tmpbuf, src1, len1, src2, len2);
+		STRING_alloc(tmpbuf);
+		STRING_strcat2n(tmpbuf, src1, len1, src2, len2);
 		cell tmp;
-		may_error(make_cstringn(&tmp, STRING_CSTR(tmpbuf), STRING_LEN(tmpbuf)), STRING_DONE(tmpbuf));
-		STRING_DONE(tmpbuf);
+		may_error(make_cstringn(&tmp, STRING_cstr(tmpbuf), STRING_strlen(tmpbuf)), STRING_free(tmpbuf));
+		STRING_free(tmpbuf);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
@@ -9894,11 +9894,11 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 			src2 = tmpbuf2;
 		}
 
-		STRING_INITn(tmpbuf, len1+len2);
-		STRING_CAT2n(tmpbuf, src1, len1, src2, len2);
+		STRING_allocn(tmpbuf, len1+len2);
+		STRING_strcat2n(tmpbuf, src1, len1, src2, len2);
 		cell tmp;
-		may_error(make_cstringn(&tmp, STRING_CSTR(tmpbuf), STRING_LEN(tmpbuf)), STRING_DONE(tmpbuf));
-		STRING_DONE(tmpbuf);
+		may_error(make_cstringn(&tmp, STRING_cstr(tmpbuf), STRING_strlen(tmpbuf)), STRING_free(tmpbuf));
+		STRING_free(tmpbuf);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
@@ -9908,11 +9908,11 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 		if (slicecmp(GET_STR(p3)+(LEN_STR(p3)-LEN_STR(p2)), LEN_STR(p3)-LEN_STR(p2), GET_STR(p2), LEN_STR(p2)))
 			return pl_failure;
 
-		STRING_INIT(tmpbuf);
-		STRING_CATn(tmpbuf, GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
+		STRING_alloc(tmpbuf);
+		STRING_strcatn(tmpbuf, GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
 		cell tmp;
-		may_error(make_stringn(&tmp, STRING_CSTR(tmpbuf), STRING_LEN(tmpbuf)), STRING_DONE(tmpbuf));
-		STRING_DONE(tmpbuf);
+		may_error(make_stringn(&tmp, STRING_cstr(tmpbuf), STRING_strlen(tmpbuf)), STRING_free(tmpbuf));
+		STRING_free(tmpbuf);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
@@ -9954,15 +9954,15 @@ static USE_RESULT pl_status fn_replace_4(query *q)
 	const char *s2 = GET_STR(p3);
 	size_t s1len = LEN_STR(p2);
 	size_t s2len = LEN_STR(p3);
-	STRING_INITn(tmpbuf, dstlen);
+	STRING_allocn(tmpbuf, dstlen);
 
 	while (srclen > 0) {
 		if (!strncmp(src, s1, s1len)) {
-			STRING_CATn(tmpbuf, s2, s2len);
+			STRING_strcatn(tmpbuf, s2, s2len);
 			src += s1len;
 			srclen -= s1len;
 		} else {
-			STRING_CATn(tmpbuf, src, 1);
+			STRING_strcatn(tmpbuf, src, 1);
 			src++;
 			srclen--;
 		}
@@ -9970,12 +9970,12 @@ static USE_RESULT pl_status fn_replace_4(query *q)
 
 	cell tmp;
 
-	if (STRING_LEN(tmpbuf))
-		may_error(make_stringn(&tmp, STRING_CSTR(tmpbuf), STRING_LEN(tmpbuf)), STRING_DONE(tmpbuf));
+	if (STRING_strlen(tmpbuf))
+		may_error(make_stringn(&tmp, STRING_cstr(tmpbuf), STRING_strlen(tmpbuf)), STRING_free(tmpbuf));
 	else
 		make_literal(&tmp, g_nil_s);
 
-	STRING_DONE(tmpbuf);
+	STRING_free(tmpbuf);
 	set_var(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return pl_success;
@@ -11070,10 +11070,10 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			may_ptr_error(src);
 			memcpy(src, lib->start, *lib->len);
 			src[*lib->len] = '\0';
-			STRING_INIT(s1);
-			STRING_CAT2(s1, "library/", lib->name);
-			m = load_text(q->st.m, src, STRING_CSTR(s1));
-			STRING_DONE(s1);
+			STRING_alloc(s1);
+			STRING_strcat2(s1, "library/", lib->name);
+			m = load_text(q->st.m, src, STRING_cstr(s1));
+			STRING_free(s1);
 			free(src);
 
 			if (m != q->st.m)

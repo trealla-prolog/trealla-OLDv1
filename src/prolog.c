@@ -106,7 +106,7 @@ bool pl_eval(prolog *pl, const char *s)
 
 	parser *p = create_parser(pl->curr_m);
 	if (!p) return false;
-	STRING_INIT(cmd);
+	STRING_alloc(cmd);
 	const char *ptr = s + strlen(s) - 1;
 
 	while (ptr != s) {
@@ -117,14 +117,14 @@ bool pl_eval(prolog *pl, const char *s)
 	}
 
 	if (*ptr != '.') {
-		STRING_CAT2(cmd, s, ".");
+		STRING_strcat2(cmd, s, ".");
 	} else {
-		STRING_CAT(cmd, s);
+		STRING_strcat(cmd, s);
 	}
 
 	p->command = true;
-	bool ok = run(p, STRING_CSTR(cmd), true, false);
-	STRING_DONE(cmd);
+	bool ok = run(p, STRING_cstr(cmd), true, false);
+	STRING_free(cmd);
 	pl->curr_m = p->m;
 	destroy_parser(p);
 	return ok;
@@ -339,10 +339,10 @@ prolog *pl_create()
 				memcpy(src, lib->start, *lib->len);
 				src[*lib->len] = '\0';
 				assert(pl->user_m);
-				STRING_INIT(s1);
-				STRING_CAT2(s1, "library/", lib->name);
-				load_text(pl->user_m, src, STRING_CSTR(s1));
-				STRING_DONE(s1);
+				STRING_alloc(s1);
+				STRING_strcat2(s1, "library/", lib->name);
+				load_text(pl->user_m, src, STRING_cstr(s1));
+				STRING_free(s1);
 				free(src);
 				break;
 			}

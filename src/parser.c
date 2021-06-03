@@ -678,13 +678,13 @@ static void directives(parser *p, term *t)
 				if (strcmp(lib->name, name))
 					continue;
 
-				STRING_INIT(src);
-				STRING_CATn(src, lib->start, *lib->len);
-				STRING_INIT(s1);
-				STRING_CAT2(s1, "library/", lib->name);
-				m = load_text(p->m, STRING_CSTR(src), STRING_CSTR(s1));
-				STRING_DONE(src);
-				STRING_DONE(s1);
+				STRING_alloc(src);
+				STRING_strcatn(src, lib->start, *lib->len);
+				STRING_alloc(s1);
+				STRING_strcat2(s1, "library/", lib->name);
+				m = load_text(p->m, STRING_cstr(src), STRING_cstr(s1));
+				STRING_free(src);
+				STRING_free(s1);
 
 				if (m != p->m)
 					do_db_load(m);
@@ -2608,15 +2608,15 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 	}
 
 	if (!is_init) {
-		STRING_INIT(src);
-		STRING_CAT2(src, "call((", pSrc);
-		STRING_TRIM(src, '.');
-		STRING_CAT(src, ")).");
+		STRING_alloc(src);
+		STRING_strcat2(src, "call((", pSrc);
+		STRING_trim(src, '.');
+		STRING_strcat(src, ")).");
 
-		p->srcptr = STRING_CSTR(src);
+		p->srcptr = STRING_cstr(src);
 		p->line_nbr = 0;
 		tokenize(p, false, false);
-		STRING_DONE(src);
+		STRING_free(src);
 	} else {
 		p->srcptr = (char*)pSrc;
 		p->line_nbr = 0;
