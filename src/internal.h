@@ -136,8 +136,8 @@ typedef enum {
 #define is_op(c) (c->flags && 0xFF00)
 
 typedef struct {
+	int64_t refcnt;
 	size_t len;
-	uint32_t refcnt;
 	char cstr[];
 } strbuf;
 
@@ -643,7 +643,7 @@ inline static void unshare_cell(cell *c)
 {
 	if (is_managed(c)) {
 		if (is_strbuf(c)) {
-			if (!(--(c)->val_strb->refcnt))	{
+			if (--(c)->val_strb->refcnt == 0)	{
 				free((c)->val_strb);
 				(c)->val_strb = NULL;
 			}
