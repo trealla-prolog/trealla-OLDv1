@@ -1580,7 +1580,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 			v += *s - '0';
 
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-			if ((v > INT64_MAX) || (v < INT64_MIN)) {
+			if (v > INT64_MAX) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, integer overflow, line %u, '%s'\n", p->line_nbr, p->save_line);
 
@@ -1618,7 +1618,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 			v += *s - '0';
 
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-			if ((v > INT64_MAX) || (v < INT64_MIN)) {
+			if (v > INT64_MAX) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, integer overflow, line %u, '%s'\n", p->line_nbr, p->save_line);
 
@@ -1660,7 +1660,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 				v += *s - '0';
 
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-			if ((v > INT64_MAX) || (v < INT64_MIN)) {
+			if (v > INT64_MAX) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, integer overflow, line %u, '%s'\n", p->line_nbr, p->save_line);
 
@@ -1697,7 +1697,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 		v += *s - '0';
 
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		if ((v > INT64_MAX) || (v < INT64_MIN)) {
+			if (v > INT64_MAX) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, integer overflow, line %u, '%s'\n", p->line_nbr, p->save_line);
 
