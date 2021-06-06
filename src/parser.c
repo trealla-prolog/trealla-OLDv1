@@ -1553,6 +1553,9 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 		if (*s == '\\') {
 			s++;
 			v = get_escape(&s, &p->error);
+		} else if ((*s == '\'') && (s[1] == '\'')) {
+			s += 2;
+			v = '\'';
 		} else
 			v = get_char_utf8(&s);
 
@@ -2083,7 +2086,7 @@ static bool get_token(parser *p, int last_op)
 					p->srcptr = NULL;
 
 					if (DUMP_ERRS || !p->do_read_term)
-						fprintf(stdout, "Error: syntax error, unterminated quoted atom <<%s>>, line %d, '%s'\n", p->srcptr, p->line_nbr, p->save_line);
+						fprintf(stdout, "Error: syntax error, unterminated quoted atom, line %d, '%s'\n", p->line_nbr, p->save_line);
 
 					p->error = true;
 					return false;
