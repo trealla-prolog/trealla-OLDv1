@@ -1481,8 +1481,8 @@ static int get_hex(const char **srcptr, int n)
 	return v;
 }
 
-const char *g_escapes = "\e\a\f\b\t\v\r\n\x20\x7F";
-const char *g_anti_escapes = "eafbtvrnsd";
+const char *g_escapes = "\e\a\f\b\t\v\r\n\x20\x7F\'";
+const char *g_anti_escapes = "eafbtvrnsd'";
 
 static int get_escape(const char **_src, bool *error)
 {
@@ -2080,8 +2080,13 @@ static bool get_token(parser *p, int last_op)
 
 			if (p->quote_char && p->fp) {
 				if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
-					p->srcptr = (char*)src;
-					return true;
+					p->srcptr = NULL;
+
+					if (DUMP_ERRS || !p->do_read_term)
+						fprintf(stdout, "Error: syntax error, unterminated quoted atom <<%s>>, line %d, '%s'\n", p->srcptr, p->line_nbr, p->save_line);
+
+					p->error = true;
+					return false;
 				}
 
 				src = p->srcptr = p->save_line;
@@ -2581,9 +2586,10 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		} else {
 			c->val_type = TYPE_CSTRING;
 
-			if ((p->toklen < MAX_SMALL_STRING) && !p->string)
-				memcpy(c->val_chr, p->token, p->toklen+1);
-			else {
+			if ((p->toklen < MAX_SMALL_STRING) && !p->string) {
+				memcpy(c->val_chr, p->token, p->toklen);
+				c->val_chr[p->toklen] = '\0';
+			} else {
 				if (p->string) {
 					c->flags |= FLAG_STRING;
 					c->arity = 2;

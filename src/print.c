@@ -81,6 +81,9 @@ size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq)
 		chars++;
 		const char *ptr = (lench == 1) && (ch != ' ') ? strchr(g_escapes, ch) : NULL;
 
+		if ((ch == '\'') && dq)
+			ptr = 0;
+
 		if (ch && ptr) {
 			if (dstlen) {
 				*dst++ = '\\';

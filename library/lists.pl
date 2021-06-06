@@ -4,8 +4,12 @@
 	last/2, flatten/2
 	]).
 
-member(X, [X|_]).
-member(X, [_|T]) :- member(X, T).
+member(El, [H|T]) :-
+    member_(T, El, H).
+
+member_(_, El, El).
+member_([H|T], El, _) :-
+    member_(T, El, H).
 
 select(X, [X|T], T).
 select(X, [H|T], [H|Rest]) :- select(X, T, Rest).
