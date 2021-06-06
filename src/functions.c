@@ -277,13 +277,13 @@ USE_RESULT pl_status fn_iso_add_2(query *q)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		__int128_t tmp = (__int128_t)p1.val_num + p2.val_num;
 
-		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
+		if ((tmp > MY_INT64_MAX) || (tmp < MY_INT64_MIN)) {
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = (int64_t)p1.val_num + p2.val_num;
 
-			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			if ((tmp > MY_INT32_MAX) || (tmp < MY_INT32_MIN)) {
 				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
@@ -329,13 +329,13 @@ static USE_RESULT pl_status fn_iso_sub_2(query *q)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		__int128_t tmp = (__int128_t)p1.val_num - p2.val_num;
 
-		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
+		if ((tmp > MY_INT64_MAX) || (tmp < MY_INT64_MIN)) {
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = (int64_t)p1.val_num - p2.val_num;
 
-			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			if ((tmp > MY_INT32_MAX) || (tmp < MY_INT32_MIN)) {
 				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
@@ -381,13 +381,13 @@ static USE_RESULT pl_status fn_iso_mul_2(query *q)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		__int128_t tmp = (__int128_t)p1.val_num * p2.val_num;
 
-		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
+		if ((tmp > MY_INT64_MAX) || (tmp < MY_INT64_MIN)) {
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = (int64_t)p1.val_num * p2.val_num;
 
-			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			if ((tmp > MY_INT32_MAX) || (tmp < MY_INT32_MIN)) {
 				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
@@ -520,13 +520,13 @@ static USE_RESULT pl_status fn_iso_truncate_1(query *q)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		__int128_t tmp = p1.val_flt;
 
-		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
+		if ((tmp > MY_INT64_MAX) || (tmp < MY_INT64_MIN)) {
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = p1.val_flt;
 
-			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			if ((tmp > MY_INT32_MAX) || (tmp < MY_INT32_MIN)) {
 				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
@@ -558,7 +558,7 @@ static USE_RESULT pl_status fn_iso_round_1(query *q)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		__int128_t tmp = rint(p1.val_flt);
 
-		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
+		if ((tmp > MY_INT64_MAX) || (tmp < MY_INT64_MIN)) {
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 			double f = fabs(p1.val_flt);
@@ -571,7 +571,7 @@ static USE_RESULT pl_status fn_iso_round_1(query *q)
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = nearbyintf(p1.val_flt);
 
-			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			if ((tmp > MY_INT32_MAX) || (tmp < MY_INT32_MIN)) {
 				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
@@ -603,13 +603,13 @@ static USE_RESULT pl_status fn_iso_ceiling_1(query *q)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		__int128_t tmp = ceil(p1.val_flt);
 
-		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
+		if ((tmp > MY_INT64_MAX) || (tmp < MY_INT64_MIN)) {
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = ceil(p1.val_flt);
 
-			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			if ((tmp > MY_INT32_MAX) || (tmp < MY_INT32_MIN)) {
 				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
@@ -681,13 +681,13 @@ static USE_RESULT pl_status fn_iso_floor_1(query *q)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		__int128_t tmp = floor(p1.val_flt);
 
-		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
+		if ((tmp > MY_INT64_MAX) || (tmp < MY_INT64_MIN)) {
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = floor(p1.val_flt);
 
-			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			if ((tmp > MY_INT32_MAX) || (tmp < MY_INT32_MIN)) {
 				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
@@ -1241,24 +1241,24 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 		double res = pow(p1.val_num,p2.val_num);
 
-		if (res > (double)INT64_MAX)
+		if (res > (double)MY_INT64_MAX)
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 
 		__int128_t tmp = pow(p1.val_num,p2.val_num);
 
-		if ((tmp > INT64_MAX) || (tmp < INT64_MIN)) {
+		if ((tmp > MY_INT64_MAX) || (tmp < MY_INT64_MIN)) {
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
 			int64_t tmp = pow(p1.val_num,p2.val_num);
 
-			if ((tmp > INT32_MAX) || (tmp < INT32_MIN)) {
+			if ((tmp > MY_INT32_MAX) || (tmp < MY_INT32_MIN)) {
 				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
 				double res = pow(p1.val_num,p2.val_num);
 
-				if (res > (double)INT64_MAX)
+				if (res > (double)MY_INT64_MAX)
 					return throw_error(q, &p1, "evaluation_error", "int_overflow");
 
 				q->accum.val_num = (int_t)res;
@@ -1364,9 +1364,9 @@ static USE_RESULT pl_status fn_iso_divint_2(query *q)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 #if USE_INT32
-		if (p1.val_num == INT32_MIN)
+		if (p1.val_num == MY_INT32_MIN)
 #else
-		if (p1.val_num == INT64_MIN)
+		if (p1.val_num == MY_INT64_MIN)
 #endif
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 

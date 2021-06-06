@@ -34,6 +34,12 @@ typedef int64_t int_t;
 typedef uint64_t uint_t;
 #endif
 
+#define MY_INT64_MIN (INT64_MIN+1)
+#define MY_INT64_MAX (INT64_MAX)
+
+#define MY_INT32_MIN (INT32_MIN+1)
+#define MY_INT32_MAX (INT32_MAX)
+
 #if (__STDC_VERSION__ >= 201112L) && USE_THREADS
 #include <stdatomic.h>
 #define atomic_t _Atomic
