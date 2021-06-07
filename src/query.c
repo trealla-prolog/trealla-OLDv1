@@ -1362,39 +1362,42 @@ static void dump_vars(query *q, bool partial)
 	q->st.m->pl->did_dump_vars = any;
 }
 
-static bool check_interrupt(query *q)
+static int check_interrupt(query *q)
 {
 	g_tpl_interrupt = 0;
 
 	for (;;) {
-		printf("\nAction (a)bort, (c)ontinue, (t)race, c(r)eep, (e)xit: ");
+		printf("\nAction (a)bort, (f)ail, (c)ontinue, (t)race, c(r)eep, (e)xit: ");
 		fflush(stdout);
 		int ch = history_getch();
 		printf("%c\n", ch);
 
 		if (ch == 't') {
-			q->trace = true;
-			return false;
+			q->trace = !q->trace;
+			return 0;
 		}
 
 		if (ch == 'r') {
 			q->trace = true;
 			q->creep = true;
-			return false;
+			return 0;
 		}
 
 		if (ch == 'c')
-			return false;
+			return 0;
+
+		if (ch == 'f')
+			return -1;
 
 		if (ch == 'a') {
 			q->abort = true;
-			return true;
+			return 1;
 		}
 
 		if (ch == 'e') {
 			signal(SIGINT, NULL);
 			q->halt = true;
-			return true;
+			return 1;
 		}
 	}
 }
@@ -1469,10 +1472,16 @@ pl_status start(query *q)
 
 	while (!done && !q->error) {
 		if (g_tpl_interrupt) {
-			if (check_interrupt(q))
-				return pl_success;
-			else
-				continue;
+			int ok = check_interrupt(q);
+
+			switch (ok) {
+				case 1:
+					return pl_success;
+				case -1:
+					q->retry = true;
+				default:
+					continue;
+			}
 		}
 
 		if (q->retry) {
