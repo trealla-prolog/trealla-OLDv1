@@ -165,7 +165,7 @@ static void make_variable(cell *tmp, idx_t off)
 
 void make_int(cell *tmp, int_t v)
 {
-	tmp->val_type = TYPE_INTEGER;
+	tmp->val_type = TYPE_RATIONAL;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
 	tmp->val_num = v;
@@ -6731,7 +6731,7 @@ static USE_RESULT pl_status fn_busy_1(query *q)
 static USE_RESULT pl_status fn_now_0(query *q)
 {
 	int_t secs = get_time_in_usec() / 1000 / 1000;
-	q->accum.val_type = TYPE_INTEGER;
+	q->accum.val_type = TYPE_RATIONAL;
 	q->accum.val_num = secs;
 	return pl_success;
 }

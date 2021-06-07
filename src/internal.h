@@ -111,7 +111,7 @@ typedef enum {
 #define is_variable(c) ((c)->val_type == TYPE_VARIABLE)
 #define is_literal(c) ((c)->val_type == TYPE_LITERAL)
 #define is_cstring(c) ((c)->val_type == TYPE_CSTRING)
-#define is_rational(c) ((c)->val_type == TYPE_INTEGER)
+#define is_rational(c) ((c)->val_type == TYPE_RATIONAL)
 #define is_bignum(c) ((c)->val_type == TYPE_BIGNUM)
 #define is_float(c) ((c)->val_type == TYPE_FLOAT)
 #define is_indirect(c) ((c)->val_type == TYPE_INDIRECT)
@@ -194,7 +194,7 @@ enum {
 	TYPE_VARIABLE=1,
 	TYPE_LITERAL=2,
 	TYPE_CSTRING=3,
-	TYPE_INTEGER=4,
+	TYPE_RATIONAL=4,
 	TYPE_BIGNUM=5,
 	TYPE_FLOAT=6,
 	TYPE_INDIRECT=7,
@@ -203,10 +203,10 @@ enum {
 
 enum {
 	FLAG_BUILTIN=1<<0,
-	FLAG_HEX=1<<1,						// used with TYPE_INTEGER
-	FLAG_OCTAL=1<<2,					// used with TYPE_INTEGER
-	FLAG_BINARY=1<<3,					// used with TYPE_INTEGER
-	FLAG_STREAM=1<<4,					// used with TYPE_INTEGER
+	FLAG_HEX=1<<1,						// used with TYPE_RATIONAL
+	FLAG_OCTAL=1<<2,					// used with TYPE_RATIONAL
+	FLAG_BINARY=1<<3,					// used with TYPE_RATIONAL
+	FLAG_STREAM=1<<4,					// used with TYPE_RATIONAL
 	FLAG_TAIL_REC=1<<5,
 	FLAG_TAIL=1<<6,
 	FLAG_BLOB=1<<7,						// used with TYPE_CSTRING

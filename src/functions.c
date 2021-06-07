@@ -162,14 +162,14 @@ static USE_RESULT pl_status fn_iso_integer_1(query *q)
 		if (is_float(&p1)) {
 			q->accum.val_num = (int_t)p1.val_flt;
 			q->accum.val_den = 1;
-			q->accum.val_type = TYPE_INTEGER;
+			q->accum.val_type = TYPE_RATIONAL;
 			return pl_success;
 		}
 
 		if (is_rational(&p1)) {
 			q->accum.val_num = p1.val_num;
 			q->accum.val_den = p1.val_den;
-			q->accum.val_type = TYPE_INTEGER;
+			q->accum.val_type = TYPE_RATIONAL;
 			return pl_success;
 		}
 
@@ -288,7 +288,7 @@ USE_RESULT pl_status fn_iso_add_2(query *q)
 			} else {
 #endif
 				q->accum.val_num = p1.val_num + p2.val_num;
-				q->accum.val_type = TYPE_INTEGER;
+				q->accum.val_type = TYPE_RATIONAL;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
@@ -298,7 +298,7 @@ USE_RESULT pl_status fn_iso_add_2(query *q)
 		q->accum.val_num = p1.val_num * p2.val_den;
 		q->accum.val_num += p2.val_num * p1.val_den;
 		q->accum.val_den = p1.val_den * p2.val_den;
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_integer(&p1) && is_float(&p2)) {
 		q->accum.val_flt = (double)p1.val_num + p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
@@ -340,7 +340,7 @@ static USE_RESULT pl_status fn_iso_sub_2(query *q)
 			} else {
 #endif
 				q->accum.val_num = p1.val_num - p2.val_num;
-				q->accum.val_type = TYPE_INTEGER;
+				q->accum.val_type = TYPE_RATIONAL;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
@@ -350,7 +350,7 @@ static USE_RESULT pl_status fn_iso_sub_2(query *q)
 		q->accum.val_num = p1.val_num * p2.val_den;
 		q->accum.val_num -= p2.val_num * p1.val_den;
 		q->accum.val_den = p1.val_den * p2.val_den;
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_integer(&p1) && is_float(&p2)) {
 		q->accum.val_flt = (double)p1.val_num - p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
@@ -392,7 +392,7 @@ static USE_RESULT pl_status fn_iso_mul_2(query *q)
 			} else {
 #endif
 				q->accum.val_num = p1.val_num * p2.val_num;
-				q->accum.val_type = TYPE_INTEGER;
+				q->accum.val_type = TYPE_RATIONAL;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
@@ -403,7 +403,7 @@ static USE_RESULT pl_status fn_iso_mul_2(query *q)
 		q->accum.val_num *= p2.val_num * p1.val_den;
 		q->accum.val_den = p1.val_den * p2.val_den;
 		q->accum.val_den *= p1.val_den * p2.val_den;
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_integer(&p1) && is_float(&p2)) {
 		q->accum.val_flt = (double)p1.val_num * p2.val_flt;
 		q->accum.val_type = TYPE_FLOAT;
@@ -531,7 +531,7 @@ static USE_RESULT pl_status fn_iso_truncate_1(query *q)
 			} else {
 #endif
 				q->accum.val_num = (int_t)p1.val_flt;
-				q->accum.val_type = TYPE_INTEGER;
+				q->accum.val_type = TYPE_RATIONAL;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
@@ -576,7 +576,7 @@ static USE_RESULT pl_status fn_iso_round_1(query *q)
 			} else {
 #endif
 				q->accum.val_num = nearbyintf(p1.val_flt);
-				q->accum.val_type = TYPE_INTEGER;
+				q->accum.val_type = TYPE_RATIONAL;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
@@ -614,7 +614,7 @@ static USE_RESULT pl_status fn_iso_ceiling_1(query *q)
 			} else {
 #endif
 				q->accum.val_num = (int_t)ceil(p1.val_flt);
-				q->accum.val_type = TYPE_INTEGER;
+				q->accum.val_type = TYPE_RATIONAL;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
@@ -692,7 +692,7 @@ static USE_RESULT pl_status fn_iso_floor_1(query *q)
 			} else {
 #endif
 				q->accum.val_num = (int_t)floor(p1.val_flt);
-				q->accum.val_type = TYPE_INTEGER;
+				q->accum.val_type = TYPE_RATIONAL;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
@@ -1142,14 +1142,14 @@ static USE_RESULT pl_status fn_iso_copysign_2(query *q)
 		if (p2.val_num < 0)
 			q->accum.val_num = -llabs((long long)p1.val_num);
 
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_rational(&p1) && is_float(&p2)) {
 		q->accum = p1;
 
 		if (p2.val_flt < 0.0)
 			q->accum.val_num = -llabs((long long)p1.val_num);
 
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_float(&p1) && is_float(&p2)) {
 		q->accum.val_flt = copysign(p1.val_flt, p2.val_flt);
 		q->accum.val_type = TYPE_FLOAT;
@@ -1262,7 +1262,7 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 					return throw_error(q, &p1, "evaluation_error", "int_overflow");
 
 				q->accum.val_num = (int_t)res;
-				q->accum.val_type = TYPE_INTEGER;
+				q->accum.val_type = TYPE_RATIONAL;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			}
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
@@ -1320,7 +1320,7 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 		p2.val_num *= p1.val_den;
 		q->accum.val_num = p1.val_num;
 		q->accum.val_den = p2.val_num;
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_integer(&p1) && is_float(&p2)) {
 		if (p2.val_flt == 0.0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
@@ -1371,7 +1371,7 @@ static USE_RESULT pl_status fn_iso_divint_2(query *q)
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 
 		q->accum.val_num = p1.val_num / p2.val_num;
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1396,7 +1396,7 @@ static USE_RESULT pl_status fn_iso_div_2(query *q)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_num = floor((double)p1.val_num / p2.val_num);
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1428,7 +1428,7 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 		if (p1.val_num < 0)
 			q->accum.val_num *= -1;
 
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1453,7 +1453,7 @@ static USE_RESULT pl_status fn_iso_rem_2(query *q)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_num = (long long)(p1.val_num % p2.val_num);
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1481,7 +1481,7 @@ static USE_RESULT pl_status fn_iso_max_2(query *q)
 		s2.val_den = p2.val_den * p1.val_den;
 		if (s1.val_num >= s2.val_num) q->accum = s1;
 		else q->accum = s2;
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_rational(&p1) && is_float(&p2)) {
 		double f1 = (double)p1.val_num;
 		if (p1.val_den) f1 /= p1.val_den;
@@ -1530,7 +1530,7 @@ static USE_RESULT pl_status fn_iso_min_2(query *q)
 		s2.val_den = p2.val_den * p1.val_den;
 		if (s1.val_num <= s2.val_num) q->accum = s1;
 		else q->accum = s2;
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_rational(&p1) && is_float(&p2)) {
 		double f1 = (double)p1.val_num;
 		if (p1.val_den) f1 /= p1.val_den;
@@ -1573,7 +1573,7 @@ static USE_RESULT pl_status fn_iso_xor_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = p1.val_num ^ p2.val_num;
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1595,7 +1595,7 @@ static USE_RESULT pl_status fn_iso_and_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = p1.val_num & p2.val_num;
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1617,7 +1617,7 @@ static USE_RESULT pl_status fn_iso_or_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = p1.val_num | p2.val_num;
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1639,7 +1639,7 @@ static USE_RESULT pl_status fn_iso_shl_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = p1.val_num << p2.val_num;
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1661,7 +1661,7 @@ static USE_RESULT pl_status fn_iso_shr_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = p1.val_num >> p2.val_num;
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1681,7 +1681,7 @@ static USE_RESULT pl_status fn_iso_neg_1(query *q)
 
 	if (is_integer(&p1)) {
 		q->accum.val_num = ~p1.val_num;
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
@@ -2138,7 +2138,7 @@ static USE_RESULT pl_status fn_random_1(query *q)
 	if (p1.val_num < 1)
 		return throw_error(q, &p1, "domain_error", "positive_integer");
 
-	q->accum.val_type = TYPE_INTEGER;
+	q->accum.val_type = TYPE_RATIONAL;
 	q->accum.val_num = llabs((long long)((int_t)(rnd() * RAND_MAX) % p1.val_num));
 	q->accum.val_den = 1;
 	return pl_success;
@@ -2146,7 +2146,7 @@ static USE_RESULT pl_status fn_random_1(query *q)
 
 static USE_RESULT pl_status fn_rand_0(query *q)
 {
-	q->accum.val_type = TYPE_INTEGER;
+	q->accum.val_type = TYPE_RATIONAL;
 	q->accum.val_num = (int_t)rnd() * RAND_MAX;
 	q->accum.val_den = 1;
 	return pl_success;
@@ -2174,7 +2174,7 @@ static USE_RESULT pl_status fn_rdiv_2(query *q)
 		p2.val_num *= p1.val_den;
 		q->accum.val_num = p1.val_num;
 		q->accum.val_den = p2.val_num;
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else
 		return throw_error(q, &p1, "type_error", "integer");
 
@@ -2237,13 +2237,13 @@ static USE_RESULT pl_status fn_rational_1(query *q)
 			reduce(&p1);
 			q->accum.val_num = p1.val_num;
 			q->accum.val_den = p1.val_den;
-			q->accum.val_type = TYPE_INTEGER;
+			q->accum.val_type = TYPE_RATIONAL;
 			return pl_success;
 		}
 
 		if (is_float(&p1)) {
 			do_real_to_fraction(p1.val_flt, 0.00001, &q->accum.val_num, &q->accum.val_den);
-			q->accum.val_type = TYPE_INTEGER;
+			q->accum.val_type = TYPE_RATIONAL;
 			return pl_success;
 		}
 
@@ -2263,7 +2263,7 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_num = gcd(p1.val_num, p2.val_num);
-		q->accum.val_type = TYPE_INTEGER;
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {

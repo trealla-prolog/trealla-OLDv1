@@ -1559,7 +1559,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 		} else
 			v = get_char_utf8(&s);
 
-		p->v.val_type = TYPE_INTEGER;
+		p->v.val_type = TYPE_RATIONAL;
 		p->v.val_num = v;
 		if (neg) p->v.val_num = -p->v.val_num;
 		*srcptr = s;
@@ -1602,7 +1602,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 			return -1;
 		}
 
-		p->v.val_type = TYPE_INTEGER;
+		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_BINARY;
 		p->v.val_num = (int_t)v;
 		if (neg) p->v.val_num = -p->v.val_num;
@@ -1640,7 +1640,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 			return -1;
 		}
 
-		p->v.val_type = TYPE_INTEGER;
+		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_OCTAL;
 		p->v.val_num = (int_t)v;
 		if (neg) p->v.val_num = -p->v.val_num;
@@ -1682,7 +1682,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 			return -1;
 		}
 
-		p->v.val_type = TYPE_INTEGER;
+		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_HEX;
 		p->v.val_num = (int_t)v;
 		if (neg) p->v.val_num = -p->v.val_num;
@@ -1727,7 +1727,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 		return -1;
 	}
 
-	p->v.val_type = TYPE_INTEGER;
+	p->v.val_type = TYPE_RATIONAL;
 	p->v.val_num = (int_t)v;
 		if (neg) p->v.val_num = -p->v.val_num;
 	int try_rational = 0;
@@ -1946,7 +1946,7 @@ static bool get_token(parser *p, int last_op)
 		*dst = '\0';
 		p->srcptr = (char*)src;
 		p->v.val_num = ch;
-		p->v.val_type = TYPE_INTEGER;
+		p->v.val_type = TYPE_RATIONAL;
 		p->dq_consing = -1;
 		return true;
 	}
@@ -2564,7 +2564,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		c->priority = priority;
 		bool found = false;
 
-		if (p->v.val_type == TYPE_INTEGER) {
+		if (p->v.val_type == TYPE_RATIONAL) {
 			c->val_num = p->v.val_num;
 			c->val_den = p->v.val_den;
 			c->flags = p->v.flags;
