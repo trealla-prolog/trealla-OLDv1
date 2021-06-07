@@ -3,28 +3,32 @@
   "children" : [ {
     "name" : "Product defects",
     "children" : [ {
-      "name" : "Failure instead of success",
+      "name" : "Error instead of success",
       "children" : [ {
-        "name" : "eclipse_throw_1_7",
-        "uid" : "492ca0c3f47b7e0b",
-        "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
+        "name" : "iso_bagof_3_10",
+        "uid" : "58b51b4aeaa6f17e",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1621725016000,
-          "stop" : 1621725016000,
+          "start" : 1623031536000,
+          "stop" : 1623031536000,
           "duration" : 0
         },
         "flaky" : false,
         "newFailed" : false,
         "parameters" : [ ]
-      }, {
+      } ],
+      "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
+    }, {
+      "name" : "Failure instead of success",
+      "children" : [ {
         "name" : "iso_setof_3_12",
-        "uid" : "cbce00de62590849",
+        "uid" : "bf883c86795bb8f5",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1621725325000,
-          "stop" : 1621725325000,
+          "start" : 1623031680000,
+          "stop" : 1623031680000,
           "duration" : 0
         },
         "flaky" : false,
@@ -32,36 +36,6 @@
         "parameters" : [ ]
       } ],
       "uid" : "7a65c89daad8cf82ce910dbf95cc8113"
-    }, {
-      "name" : "Error instead of success",
-      "children" : [ {
-        "name" : "iso_bagof_3_10",
-        "uid" : "d1a78e109f92d79e",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1621725171000,
-          "stop" : 1621725171000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "sics_read_term_3_24",
-        "uid" : "2b0fe997095368a2",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1621725305000,
-          "stop" : 1621725305001,
-          "duration" : 1
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      } ],
-      "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
     } ],
     "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
   } ],
