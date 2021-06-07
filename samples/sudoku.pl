@@ -1,3 +1,5 @@
+:- use_module(library(lists)).
+
 % sudoku solver, illustrating prolog programming/backtracking, not optimized for performance
 
 
