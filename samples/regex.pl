@@ -44,6 +44,7 @@ Constructing the DCG parser requires apply the left recursion removal techniques
 */
 
 :- set_prolog_flag(double_quotes, codes).
+:- use_module(library(dcgs)).
 
 re(Z) --> basicRE(W), reTail(W, Z).
 reTail(W, Z) --> "|", basicRE(X), reTail(union(W,X), Z).
