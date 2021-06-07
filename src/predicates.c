@@ -5066,13 +5066,22 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 		if (!ch->catchme_retry)
 			continue;
 
+		cell *tmp = copy_to_heap(q, false, e, q->st.curr_frame, 0);
+		may_ptr_error(tmp);
+		cell *e2 = malloc(sizeof(cell) * tmp->nbr_cells);
+		may_ptr_error(e2);
+		safe_copy_cells(e2, tmp, tmp->nbr_cells);
+		q->exception = e2;
 		q->retry = QUERY_EXCEPTION;
 
-		if (fn_iso_catch_3(q) != pl_success)
+		if (fn_iso_catch_3(q) != pl_success) {
+			free(e2);
 			continue;
+		}
 
 		free(q->exception);
 		q->exception = NULL;
+		free(e);
 		return true;
 	}
 
