@@ -5919,7 +5919,7 @@ static void unpin_vars(query *q)
 	ch->pins = 0;
 }
 
-static USE_RESULT pl_status fn_sys_findall_3(query *q)
+static USE_RESULT pl_status fn_iso_findall_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
@@ -5990,7 +5990,7 @@ static USE_RESULT pl_status fn_sys_findall_3(query *q)
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_sys_bagof_3(query *q)
+static USE_RESULT pl_status fn_iso_bagof_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,callable);
@@ -11423,8 +11423,8 @@ static const struct builtins g_predicates_iso[] =
 	{"current_prolog_flag", 2, fn_iso_current_prolog_flag_2, NULL},
 	{"set_prolog_flag", 2, fn_iso_set_prolog_flag_2, NULL},
 	{"op", 3, fn_iso_op_3, NULL},
-	{"$findall", 3, fn_sys_findall_3, NULL},
-	{"$bagof", 3, fn_sys_bagof_3, NULL},
+	{"$findall", 3, fn_iso_findall_3, NULL},
+	{"$bagof", 3, fn_iso_bagof_3, NULL},
 	{"current_predicate", 1, fn_iso_current_predicate_1, NULL},
 	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL},
 	{"compare", 3, fn_iso_compare_3, NULL},
