@@ -6102,7 +6102,7 @@ static USE_RESULT pl_status fn_iso_bagof_3(query *q)
 
 	// Return matching solutions
 
-	cell *tmp = deep_copy_to_heap(q, tvars, p2_ctx, true, false);
+	cell *tmp = deep_clone_to_heap(q, tvars, p2_ctx);
 	may_ptr_error(tmp);
 	unpin_vars(q);
 	unify(q, tvars, p2_ctx, tmp, q->st.curr_frame);
