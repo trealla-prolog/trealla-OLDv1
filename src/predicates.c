@@ -11856,11 +11856,7 @@ static void load_ops(query *q)
 		return;
 
 	q->st.m->loaded_ops = true;
-	size_t buflen = 1024*8;
-	char *tmpbuf = malloc(buflen);
-	ensure(tmpbuf);
-	char *dst = tmpbuf;
-	*dst = '\0';
+	STRING_allocn(pr, 1024*8);
 
 	for (const op_table *ptr = q->st.m->ops; ptr->name; ptr++) {
 		char specifier[20], name[256];
@@ -11884,18 +11880,11 @@ static void load_ops(query *q)
 			strcpy(specifier, "xfx");
 
 		formatted(name, sizeof(name), ptr->name, strlen(ptr->name), false);
+		char tmpbuf[1024];
 
-		unsigned len = snprintf(NULL, 0, "'$current_op'(%u, %s, '%s').\n",
+		snprintf(tmpbuf, sizeof(tmpbuf), "'$current_op'(%u, %s, '%s').\n",
 			ptr->priority, specifier, name);
-
-		while ((buflen-(dst-tmpbuf)) <= len) {
-			size_t offset = dst - tmpbuf;
-			tmpbuf = realloc(tmpbuf, buflen*=2);
-			dst = tmpbuf + offset;
-		}
-
-		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$current_op'(%u, %s, '%s').\n",
-			ptr->priority, specifier, name);
+		STRING_strcat(pr, tmpbuf);
 	}
 
 	for (const op_table *ptr = q->st.m->def_ops; ptr->name; ptr++) {
@@ -11920,26 +11909,17 @@ static void load_ops(query *q)
 			strcpy(specifier, "xfx");
 
 		formatted(name, sizeof(name), ptr->name, strlen(ptr->name), false);
-
-		unsigned len = snprintf(NULL, 0, "'$current_op'(%u, %s, '%s').\n",
-			ptr->priority, specifier, name);
-
-		while ((buflen-(dst-tmpbuf)) <= len) {
-			size_t offset = dst - tmpbuf;
-			tmpbuf = realloc(tmpbuf, buflen*=2);
-			dst = tmpbuf + offset;
-		}
-
-		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$current_op'(%u, %s, '%s').\n",
-			ptr->priority, specifier, name);
+		char tmpbuf[1024];
+		snprintf(tmpbuf, sizeof(tmpbuf), "'$current_op'(%u, %s, '%s').\n", ptr->priority, specifier, name);
+		STRING_strcat(pr, tmpbuf);
 	}
 
 	//printf("%s", tmpbuf);
 
 	parser *p = create_parser(q->st.m);
-	p->srcptr = tmpbuf;
+	p->srcptr = STRING_cstr(pr);
 	p->consulting = true;
 	tokenize(p, false, false);
 	destroy_parser(p);
-	free(tmpbuf);
+	STRING_free(pr);
 }
