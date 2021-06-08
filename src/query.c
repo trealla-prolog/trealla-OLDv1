@@ -945,6 +945,7 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 			set_var(q, p1, p1_ctx, p2, p2_ctx);
 		else if (p2->var_nbr != p1->var_nbr)
 			set_var(q, p2, p2_ctx, p1, p1_ctx);
+
 		return true;
 	}
 
