@@ -8,7 +8,6 @@ predicate_property(P, A) :-
 	nonvar(P), atom(A), !,
 	'$mustbe_callable'(P),
 	'$legacy_predicate_property'(P, A).
-
 predicate_property(P, A) :-
 	'$load_properties',
 	(var(A) -> true ;

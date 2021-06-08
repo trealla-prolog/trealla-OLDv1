@@ -214,15 +214,13 @@ static void push_property(module *m, const char *name, unsigned arity, const cha
 	//if (name[0] == '$')
 	//	return;
 
-	size_t buflen = 1024;
-	char *tmpbuf = malloc(buflen);
-	format_property(&tmpbuf, &buflen, tmpbuf, name, arity, type);
+	char tmpbuf[1024];
+	format_property(tmpbuf, sizeof(tmpbuf), name, arity, type);
 	parser *p = create_parser(m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
 	tokenize(p, false, false);
 	destroy_parser(p);
-	free(tmpbuf);
 }
 
 clause *erase_from_db(module *m, uuid *ref)

@@ -695,7 +695,7 @@ extern unsigned count_bits(const uint8_t *mask, unsigned bit);
 extern uint64_t get_time_in_usec(void);
 extern char *relative_to(const char *basefile, const char *relfile);
 extern size_t sprint_int(char *dst, size_t size, int_t n, int base);
-extern char *format_property(char **bufptr, size_t *lenptr, char *dst, const char *name, unsigned arity, const char *type);
+extern void format_property(char *tmpbuf, size_t buflen, const char *name, unsigned arity, const char *type);
 
 // A string builder...
 

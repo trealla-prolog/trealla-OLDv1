@@ -11672,18 +11672,10 @@ void load_builtins(prolog *pl)
 	}
 }
 
-char *format_property(char **bufptr, size_t *lenptr, char *dst, const char *name, unsigned arity, const char *type)
+void format_property(char *tmpbuf, size_t buflen, const char *name, unsigned arity, const char *type)
 {
-	char *tmpbuf = *bufptr;
-	size_t buflen = *lenptr;
-
-	if ((buflen-(dst-tmpbuf)) < 1024) {
-		size_t offset = dst - tmpbuf;
-		*bufptr = tmpbuf = realloc(tmpbuf, *lenptr=(buflen*=2));
-		dst = tmpbuf + offset;
-	}
-
 	int ch = peek_char_utf8(name);
+	char *dst = tmpbuf;
 
 	if (!iswalpha(ch) && (name[0] != '_')) {
 		char namebuf[512];
@@ -11720,16 +11712,6 @@ char *format_property(char **bufptr, size_t *lenptr, char *dst, const char *name
 	}
 
 	dst += snprintf(dst, buflen-(dst-tmpbuf), ", %s).\n", type);
-	return dst;
-}
-
-static char *push_property(char **bufptr, size_t *lenptr, char *dst, const struct builtins *ptr)
-{
-	dst = format_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "built_in");
-	dst = format_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "static");
-	dst = format_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "private");
-	dst = format_property(bufptr, lenptr, dst, ptr->name, ptr->arity, "native_code");
-	return dst;
 }
 
 static void load_properties(module *m)
@@ -11738,52 +11720,49 @@ static void load_properties(module *m)
 		return;
 
 	m->loaded_properties = true;
-	size_t buflen = 1024*8;
-	char *tmpbuf = malloc(buflen);
-	ensure(tmpbuf);
-	char *dst = tmpbuf;
-	*dst = '\0';
+	STRING_allocn(pr, 1024*64);
+	char tmpbuf[1024];
 
-	dst = format_property(&tmpbuf, &buflen, dst, ",", 2, "control_construct");
-	dst = format_property(&tmpbuf, &buflen, dst, ",", 2, "meta_predicate((0,0))");
+	format_property(tmpbuf, sizeof(tmpbuf), ",", 2, "control_construct"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), ",", 2, "meta_predicate((0,0))"); STRING_strcat(pr, tmpbuf);
 
-	dst = format_property(&tmpbuf, &buflen, dst, ";", 2, "control_construct");
-	dst = format_property(&tmpbuf, &buflen, dst, ";", 2, "meta_predicate((0;0))");
+	format_property(tmpbuf, sizeof(tmpbuf), ";", 2, "control_construct"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), ";", 2, "meta_predicate((0;0))"); STRING_strcat(pr, tmpbuf);
 
-	dst = format_property(&tmpbuf, &buflen, dst, "->", 2, "control_construct");
-	dst = format_property(&tmpbuf, &buflen, dst, "->", 2, "meta_predicate((0->0))");
+	format_property(tmpbuf, sizeof(tmpbuf), "->", 2, "control_construct"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "->", 2, "meta_predicate((0->0))"); STRING_strcat(pr, tmpbuf);
 
-	dst = format_property(&tmpbuf, &buflen, dst, "*->", 2, "control_construct");
-	dst = format_property(&tmpbuf, &buflen, dst, "*->", 2, "meta_predicate((0*->0))");
+	format_property(tmpbuf, sizeof(tmpbuf), "*->", 2, "control_construct"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "*->", 2, "meta_predicate((0*->0))"); STRING_strcat(pr, tmpbuf);
 
-	dst = format_property(&tmpbuf, &buflen, dst, "findall", 3, "control_construct");
-	dst = format_property(&tmpbuf, &buflen, dst, "findall", 3, "meta_predicate(findall(?,0,-))");
+	format_property(tmpbuf, sizeof(tmpbuf), "findall", 3, "control_construct"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "findall", 3, "meta_predicate(findall(?,0,-))"); STRING_strcat(pr, tmpbuf);
 
-	dst = format_property(&tmpbuf, &buflen, dst, "bagof", 3, "control_construct");
-	dst = format_property(&tmpbuf, &buflen, dst, "bagof", 3, "meta_predicate(bagof(?,0,-))");
+	format_property(tmpbuf, sizeof(tmpbuf), "bagof", 3, "control_construct"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "bagof", 3, "meta_predicate(bagof(?,0,-))"); STRING_strcat(pr, tmpbuf);
 
-	dst = format_property(&tmpbuf, &buflen, dst, "setof", 3, "control_construct");
-	dst = format_property(&tmpbuf, &buflen, dst, "setof", 3, "meta_predicate(setof(?,0,-))");
+	format_property(tmpbuf, sizeof(tmpbuf), "setof", 3, "control_construct"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "setof", 3, "meta_predicate(setof(?,0,-))"); STRING_strcat(pr, tmpbuf);
 
-	dst = format_property(&tmpbuf, &buflen, dst, "throw", 1, "control_construct");
-	dst = format_property(&tmpbuf, &buflen, dst, "call", 1, "control_construct");
-	dst = format_property(&tmpbuf, &buflen, dst, "!", 0, "control_construct");
-	dst = format_property(&tmpbuf, &buflen, dst, "true", 0, "control_construct");
-	dst = format_property(&tmpbuf, &buflen, dst, "fail", 0, "control_construct");
-	dst = format_property(&tmpbuf, &buflen, dst, "|", 2, "meta_predicate((:|+))");
-	dst = format_property(&tmpbuf, &buflen, dst, "time", 1, "meta_predicate(time(0))");
-	dst = format_property(&tmpbuf, &buflen, dst, "setup_call_cleanup", 3, "meta_predicate(setup_call_cleanup(0,0,0))");
-	dst = format_property(&tmpbuf, &buflen, dst, "asserta", 1, "meta_predicate(asserta(:))");
-	dst = format_property(&tmpbuf, &buflen, dst, "assertz", 1, "meta_predicate(assertz(:))");
-	dst = format_property(&tmpbuf, &buflen, dst, "retract", 1, "meta_predicate(retract(:))");
-	dst = format_property(&tmpbuf, &buflen, dst, "retractall", 1, "meta_predicate(retractall(:))");
-	dst = format_property(&tmpbuf, &buflen, dst, "current_predicate", 1, "meta_predicate(current_predicate(:))");
-	dst = format_property(&tmpbuf, &buflen, dst, "predicate_property", 1, "meta_predicate(predicate_property(:,?))");
-	dst = format_property(&tmpbuf, &buflen, dst, "abolish", 1, "meta_predicate(abolish(:))");
-	dst = format_property(&tmpbuf, &buflen, dst, "clause", 2, "meta_predicate(abolish(:,?))");
-	dst = format_property(&tmpbuf, &buflen, dst, "catch", 3, "meta_predicate(catch(0,?,0))");
-	dst = format_property(&tmpbuf, &buflen, dst, "phrase", 2, "meta_predicate(phrase(2,?))");
-	dst = format_property(&tmpbuf, &buflen, dst, "phrase", 3, "meta_predicate(phrase(2,?,?))");
+	format_property(tmpbuf, sizeof(tmpbuf), "throw", 1, "control_construct"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "call", 1, "control_construct"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "!", 0, "control_construct"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "true", 0, "control_construct"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "fail", 0, "control_construct"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "|", 2, "meta_predicate((:|+))"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "time", 1, "meta_predicate(time(0))"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "setup_call_cleanup", 3, "meta_predicate(setup_call_cleanup(0,0,0))"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "asserta", 1, "meta_predicate(asserta(:))"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "assertz", 1, "meta_predicate(assertz(:))"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "retract", 1, "meta_predicate(retract(:))"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "retractall", 1, "meta_predicate(retractall(:))"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "current_predicate", 1, "meta_predicate(current_predicate(:))"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "predicate_property", 1, "meta_predicate(predicate_property(:,?))"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "abolish", 1, "meta_predicate(abolish(:))"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "clause", 2, "meta_predicate(abolish(:,?))"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "catch", 3, "meta_predicate(catch(0,?,0))"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "phrase", 2, "meta_predicate(phrase(2,?))"); STRING_strcat(pr, tmpbuf);
+	format_property(tmpbuf, sizeof(tmpbuf), "phrase", 3, "meta_predicate(phrase(2,?,?))"); STRING_strcat(pr, tmpbuf);
 
 	for (int i = 2; i <= 7; i++) {
 		char metabuf[256];
@@ -11795,7 +11774,7 @@ static void load_properties(module *m)
 
 
 		snprintf(dst2, sizeof(metabuf)-(dst2-metabuf), "))");
-		dst = format_property(&tmpbuf, &buflen, dst, "call", i, metabuf);
+		format_property(tmpbuf, sizeof(tmpbuf), "call", i, metabuf); STRING_strcat(pr, tmpbuf);
 	}
 
 	for (int i = 2; i <= 7; i++) {
@@ -11808,39 +11787,51 @@ static void load_properties(module *m)
 
 
 		snprintf(dst2, sizeof(metabuf)-(dst2-metabuf), "))");
-		dst = format_property(&tmpbuf, &buflen, dst, "task", i, metabuf);
+		format_property(tmpbuf, sizeof(tmpbuf), "task", i, metabuf); STRING_strcat(pr, tmpbuf);
 	}
 
 	for (const struct builtins *ptr = g_predicates_iso; ptr->name; ptr++) {
 		m_app(m->pl->funtab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
-		dst = push_property(&tmpbuf, &buflen, dst, ptr);
-	}
+		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); STRING_strcat(pr, tmpbuf);
+		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "static"); STRING_strcat(pr, tmpbuf);
+		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "private"); STRING_strcat(pr, tmpbuf);
+		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "native_code"); STRING_strcat(pr, tmpbuf);
+ 	}
 
 	for (const struct builtins *ptr = g_functions; ptr->name; ptr++) {
 		m_app(m->pl->funtab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
-		dst = push_property(&tmpbuf, &buflen, dst, ptr);
+		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); STRING_strcat(pr, tmpbuf);
+		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "static"); STRING_strcat(pr, tmpbuf);
+		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "private"); STRING_strcat(pr, tmpbuf);
+		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "native_code"); STRING_strcat(pr, tmpbuf);
 	}
 
 	for (const struct builtins *ptr = g_predicates_other; ptr->name; ptr++) {
 		m_app(m->pl->funtab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
-		dst = push_property(&tmpbuf, &buflen, dst, ptr);
+		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); STRING_strcat(pr, tmpbuf);
+		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "static"); STRING_strcat(pr, tmpbuf);
+		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "private"); STRING_strcat(pr, tmpbuf);
+		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "native_code"); STRING_strcat(pr, tmpbuf);
 	}
 
 	for (const struct builtins *ptr = g_contrib_funcs; ptr->name; ptr++) {
 		m_app(m->pl->funtab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
-		dst = push_property(&tmpbuf, &buflen, dst, ptr);
+		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); STRING_strcat(pr, tmpbuf);
+		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "static"); STRING_strcat(pr, tmpbuf);
+		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "private"); STRING_strcat(pr, tmpbuf);
+		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "native_code"); STRING_strcat(pr, tmpbuf);
 	}
 
 	parser *p = create_parser(m);
-	p->srcptr = tmpbuf;
+	p->srcptr = STRING_cstr(pr);
 	p->consulting = true;
 	tokenize(p, false, false);
 	destroy_parser(p);
-	free(tmpbuf);
+	STRING_free(pr);
 }
 
 static void load_ops(query *q)
