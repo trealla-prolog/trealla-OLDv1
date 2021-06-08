@@ -6078,11 +6078,14 @@ static USE_RESULT pl_status fn_iso_bagof_3(query *q)
 
 		try_me(q, g->nbr_vars*2);
 
+		// FIXME: if no variables copied & any>0 skip
+		// FIXME: if no variables copied & any=0 break after queueing it
+
 		if (unify(q, tvars, p2_ctx, c, q->st.fp)) {
-			c->flags |= FLAG2_PROCESSED;
 			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, true, false);
 			may_ptr_error(tmp);
 			alloc_on_queuen(q, q->st.qnbr, tmp);
+			c->flags |= FLAG2_PROCESSED;
 		} else
 			unmatched = true;
 
