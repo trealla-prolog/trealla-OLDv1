@@ -37,9 +37,6 @@ chars-list), DCGs, and mmap'd files. Any code-point specific
 requirements, like *get_char*, *get_code*, *sub_atom*, *atom_length*,
 *atom_codes*, *atom_chars* & *_upper/*_lower are handled on the fly.
 
-No special handling of a BOM is done as parsing should treat it
-as a non-breaking space.
-
 Unicode atoms do not need to be quoted unless they contain breaking
 characters...
 
@@ -53,8 +50,7 @@ characters...
 	?- 不是.
 	false.
 
-Trealla goes one step beyond the standard and accepts as a variable
-name any atom beginning with Unicode uppercase...
+Trealla accepts as a variable any atom beginning with Unicode uppercase...
 
 	?- atom_upper(δ,C).
 	C = Δ.

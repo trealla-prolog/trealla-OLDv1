@@ -558,8 +558,8 @@ atomic_list_concat(L, Sep, Atom) :-
 list_atom([Word],  _Sep, Word).
 list_atom([Word|L], Sep, Atom) :-
 	list_atom(L, Sep, Right),
-	atom_concat(Sep, Right, Right1),
-	atom_concat(Word, Right1, Atom),
+	atomic_concat(Sep, Right, Right1),
+	atomic_concat(Word, Right1, Atom),
 	!.
 
 atom_list(Atom, Sep, [Word|L]) :-
