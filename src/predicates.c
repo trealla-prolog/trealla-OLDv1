@@ -10982,11 +10982,11 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 	}
 
 	char *key;
+	char tmpbuf[128];
 
 	if (is_integer(p1)) {
-		char tmpbuf[128];
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)p1->val_num);
-		key = strdup(tmpbuf);
+		key = tmpbuf;
 	} else if (is_atom(p1))
 		key = slicedup(GET_STR(p1), LEN_STR(p1));
 	else
@@ -10996,7 +10996,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 	char *val = NULL;
 
 	if (!m_get(q->st.m->pl->keyval, key, (void*)&val)) {
-		free(key);
+		if (key != tmpbuf) free(key);
 		return pl_failure;
 	}
 
@@ -11022,7 +11022,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 	if (do_delete)
 		m_del(q->st.m->pl->keyval, key);
 
-	free(key);
+	if (key != tmpbuf) free(key);
 	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
