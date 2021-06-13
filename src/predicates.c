@@ -10909,7 +10909,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 		p3_ctx = q->latest_ctx;
 	}
 
-	const char *key;
+	char *key;
 
 	if (is_integer(p1)) {
 		char tmpbuf[128];
@@ -10923,11 +10923,13 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 	may_ptr_error(key);
 
 	if (do_create) {
-		if (m_get(q->st.m->pl->keyval, key, NULL))
+		if (m_get(q->st.m->pl->keyval, key, NULL)) {
+			free(key);
 			return pl_failure;
+		}
 	}
 
-	const char *val;
+	char *val;
 
 	if (is_integer(p2)) {
 		char tmpbuf[128];
@@ -10935,8 +10937,10 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 		val = strdup(tmpbuf);
 	} else if (is_atom(p2))
 		val = slicedup(GET_STR(p2), LEN_STR(p2));
-	else
+	else {
+		free(key);
 		return throw_error(q, p2, "type_error", "integer");
+	}
 
 	may_ptr_error(val);
 	m_set(q->st.m->pl->keyval, key, val);
