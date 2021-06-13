@@ -10977,7 +10977,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 		p3_ctx = q->latest_ctx;
 	}
 
-	const char *key;
+	char *key;
 
 	if (is_integer(p1)) {
 		char tmpbuf[128];
@@ -10991,8 +10991,10 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 	may_ptr_error(key);
 	const char *val = NULL;
 
-	if (!m_get(q->st.m->pl->keyval, key, (void*)&val))
+	if (!m_get(q->st.m->pl->keyval, key, (void*)&val)) {
+		free(key);
 		return pl_failure;
+	}
 
 	cell tmp;
 	const char *src = val;
@@ -11016,6 +11018,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 	if (do_delete)
 		m_del(q->st.m->pl->keyval, key);
 
+	free(key);
 	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
