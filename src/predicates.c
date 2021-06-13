@@ -10993,7 +10993,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 		return throw_error(q, p2, "type_error", "integer");
 
 	may_ptr_error(key);
-	const char *val = NULL;
+	char *val = NULL;
 
 	if (!m_get(q->st.m->pl->keyval, key, (void*)&val)) {
 		free(key);
