@@ -10915,8 +10915,10 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 		char tmpbuf[128];
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)p1->val_num);
 		key = strdup(tmpbuf);
-	} else
+	} else if (is_atom(p1))
 		key = slicedup(GET_STR(p1), LEN_STR(p1));
+	else
+		return throw_error(q, p1, "type_error", "integer");
 
 	may_ptr_error(key);
 
@@ -10931,8 +10933,10 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 		char tmpbuf[128];
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)p2->val_num);
 		val = strdup(tmpbuf);
-	} else
+	} else if (is_atom(p2))
 		val = slicedup(GET_STR(p2), LEN_STR(p2));
+	else
+		return throw_error(q, p2, "type_error", "integer");
 
 	may_ptr_error(val);
 	m_set(q->st.m->pl->keyval, key, val);
@@ -10979,8 +10983,10 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 		char tmpbuf[128];
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)p1->val_num);
 		key = strdup(tmpbuf);
-	} else
+	} else if (is_atom(p1))
 		key = slicedup(GET_STR(p1), LEN_STR(p1));
+	else
+		return throw_error(q, p2, "type_error", "integer");
 
 	may_ptr_error(key);
 	const char *val = NULL;
