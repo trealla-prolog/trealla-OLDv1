@@ -134,19 +134,19 @@ static int compkey2(const void *ptr1, const void *ptr2, const void *param)
 
 	if (is_integer(p1)) {
 		if (is_integer(p2)) {
-			if (get_numerator(p1) < get_numerator(p2))
+			if (get_integer(p1) < get_integer(p2))
 				return -1;
-			else if (get_numerator(p1) > get_numerator(p2))
+			else if (get_integer(p1) > get_integer(p2))
 				return 1;
 			else
 				return 0;
 		} else if (is_variable(p2))
 			return 0;
-	} else if (is_float(p1)) {
-		if (is_float(p2)) {
-			if (p1->val_flt < p2->val_flt)
+	} else if (is_real(p1)) {
+		if (is_real(p2)) {
+			if (get_real(p1) < get_real(p2))
 				return -1;
-			else if (p1->val_flt > p2->val_flt)
+			else if (get_real(p1) > get_real(p2))
 				return 1;
 			else
 				return 0;

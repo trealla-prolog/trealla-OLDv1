@@ -102,14 +102,14 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 		return (p1->val_num == p2.val_num) && (p1->val_den == p2.val_den);
 	}
 
-	if (is_float(p1) && is_float(&p2))
-		return p1->val_flt == p2.val_flt;
+	if (is_real(p1) && is_real(&p2))
+		return p1->val_real == p2.val_real;
 
 	if (is_atom(p1) && is_number(&p2) && !strcmp(GET_STR(p1), "nan"))
-		return is_float(&p2)? isnan(p2.val_flt) : 0;
+		return is_real(&p2)? isnan(p2.val_real) : 0;
 
 	if (is_atom(p1) && is_number(&p2) && !strcmp(GET_STR(p1), "inf"))
-		return is_float(&p2) ? isinf(p2.val_flt) : 0;
+		return is_real(&p2) ? isinf(p2.val_real) : 0;
 
 	return pl_failure;
 }
@@ -121,15 +121,15 @@ static USE_RESULT pl_status fn_iso_float_1(query *q)
 	if (q->calc) {
 		cell p1 = calc(q, p1_tmp);
 
-		if (is_float(&p1)) {
-			q->accum.val_flt = p1.val_flt;
-			q->accum.val_type = TYPE_FLOAT;
+		if (is_real(&p1)) {
+			q->accum.val_real = p1.val_real;
+			q->accum.val_type = TYPE_REAL;
 			return pl_success;
 		}
 
 		if (is_integer(&p1)) {
-			q->accum.val_flt = (double)p1.val_num;
-			q->accum.val_type = TYPE_FLOAT;
+			q->accum.val_real = (double)p1.val_num;
+			q->accum.val_type = TYPE_REAL;
 			return pl_success;
 		}
 
@@ -138,18 +138,18 @@ static USE_RESULT pl_status fn_iso_float_1(query *q)
 				if (p1.val_den == 0)
 					return throw_error(q, &p1, "evaluation_error", "undefined");
 
-				q->accum.val_flt = (double)p1.val_num / p1.val_den;
+				q->accum.val_real = (double)p1.val_num / p1.val_den;
 			} else
-				q->accum.val_flt = 0.0;
+				q->accum.val_real = 0.0;
 
-			q->accum.val_type = TYPE_FLOAT;
+			q->accum.val_type = TYPE_REAL;
 			return pl_success;
 		}
 
 		return throw_error(q, &p1, "type_error", "integer_or_float");
 	}
 
-	return is_float(p1_tmp);
+	return is_real(p1_tmp);
 }
 
 static USE_RESULT pl_status fn_iso_integer_1(query *q)
@@ -159,8 +159,8 @@ static USE_RESULT pl_status fn_iso_integer_1(query *q)
 	if (q->calc) {
 		cell p1 = calc(q, p1_tmp);
 
-		if (is_float(&p1)) {
-			q->accum.val_num = (int_t)p1.val_flt;
+		if (is_real(&p1)) {
+			q->accum.val_num = (int_t)p1.val_real;
 			q->accum.val_den = 1;
 			q->accum.val_type = TYPE_RATIONAL;
 			return pl_success;
@@ -188,8 +188,8 @@ static USE_RESULT pl_status fn_iso_abs_1(query *q)
 
 	if (is_integer(&p1))
 		q->accum.val_num = llabs((long long)p1.val_num);
-	else if (is_float(&p1))
-		q->accum.val_flt = fabs(p1.val_flt);
+	else if (is_real(&p1))
+		q->accum.val_real = fabs(p1.val_real);
 	else
 		return throw_error(q, &p1, "type_error", "number");
 
@@ -205,8 +205,8 @@ static USE_RESULT pl_status fn_iso_sign_1(query *q)
 
 	if (is_integer(&p1))
 		q->accum.val_num = p1.val_num < 0 ? -1 : p1.val_num > 0  ? 1 : 0;
-	else if (is_float(&p1))
-		q->accum.val_flt = p1.val_flt < 0 ? -1 : p1.val_flt > 0  ? 1 : 0;
+	else if (is_real(&p1))
+		q->accum.val_real = p1.val_real < 0 ? -1 : p1.val_real > 0  ? 1 : 0;
 	else
 		return throw_error(q, &p1, "type_error", "number");
 
@@ -231,8 +231,8 @@ static USE_RESULT pl_status fn_iso_negative_1(query *q)
 
 	if (is_rational(&p1))
 		q->accum.val_num = -p1.val_num;
-	else if (is_float(&p1))
-		q->accum.val_flt = -p1.val_flt;
+	else if (is_real(&p1))
+		q->accum.val_real = -p1.val_real;
 	else if (is_variable(&p1))
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	else
@@ -244,24 +244,24 @@ static USE_RESULT pl_status fn_iso_negative_1(query *q)
 static USE_RESULT pl_status fn_iso_epsilon_0(query *q)
 {
 	CHECK_CALC();
-	q->accum.val_flt = DBL_EPSILON;
-	q->accum.val_type = TYPE_FLOAT;
+	q->accum.val_real = DBL_EPSILON;
+	q->accum.val_type = TYPE_REAL;
 	return pl_success;
 }
 
 static USE_RESULT pl_status fn_iso_pi_0(query *q)
 {
 	CHECK_CALC();
-	q->accum.val_flt = M_PI;
-	q->accum.val_type = TYPE_FLOAT;
+	q->accum.val_real = M_PI;
+	q->accum.val_type = TYPE_REAL;
 	return pl_success;
 }
 
 static USE_RESULT pl_status fn_iso_e_0(query *q)
 {
 	CHECK_CALC();
-	q->accum.val_flt = M_E;
-	q->accum.val_type = TYPE_FLOAT;
+	q->accum.val_real = M_E;
+	q->accum.val_type = TYPE_REAL;
 	return pl_success;
 }
 
@@ -299,15 +299,15 @@ USE_RESULT pl_status fn_iso_add_2(query *q)
 		q->accum.val_num += p2.val_num * p1.val_den;
 		q->accum.val_den = p1.val_den * p2.val_den;
 		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_integer(&p1) && is_float(&p2)) {
-		q->accum.val_flt = (double)p1.val_num + p2.val_flt;
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_float(&p2)) {
-		q->accum.val_flt = p1.val_flt + p2.val_flt;
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_integer(&p2)) {
-		q->accum.val_flt = p1.val_flt + p2.val_num;
-		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_integer(&p1) && is_real(&p2)) {
+		q->accum.val_real = (double)p1.val_num + p2.val_real;
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_real(&p2)) {
+		q->accum.val_real = p1.val_real + p2.val_real;
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_integer(&p2)) {
+		q->accum.val_real = p1.val_real + p2.val_num;
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
@@ -351,15 +351,15 @@ static USE_RESULT pl_status fn_iso_sub_2(query *q)
 		q->accum.val_num -= p2.val_num * p1.val_den;
 		q->accum.val_den = p1.val_den * p2.val_den;
 		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_integer(&p1) && is_float(&p2)) {
-		q->accum.val_flt = (double)p1.val_num - p2.val_flt;
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_float(&p2)) {
-		q->accum.val_flt = p1.val_flt - p2.val_flt;
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_integer(&p2)) {
-		q->accum.val_flt = p1.val_flt - p2.val_num;
-		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_integer(&p1) && is_real(&p2)) {
+		q->accum.val_real = (double)p1.val_num - p2.val_real;
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_real(&p2)) {
+		q->accum.val_real = p1.val_real - p2.val_real;
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_integer(&p2)) {
+		q->accum.val_real = p1.val_real - p2.val_num;
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
@@ -404,15 +404,15 @@ static USE_RESULT pl_status fn_iso_mul_2(query *q)
 		q->accum.val_den = p1.val_den * p2.val_den;
 		q->accum.val_den *= p1.val_den * p2.val_den;
 		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_integer(&p1) && is_float(&p2)) {
-		q->accum.val_flt = (double)p1.val_num * p2.val_flt;
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_float(&p2)) {
-		q->accum.val_flt = p1.val_flt * p2.val_flt;
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_integer(&p2)) {
-		q->accum.val_flt = p1.val_flt * p2.val_num;
-		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_integer(&p1) && is_real(&p2)) {
+		q->accum.val_real = (double)p1.val_num * p2.val_real;
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_real(&p2)) {
+		q->accum.val_real = p1.val_real * p2.val_real;
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_integer(&p2)) {
+		q->accum.val_real = p1.val_real * p2.val_num;
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
@@ -432,15 +432,15 @@ static USE_RESULT pl_status fn_iso_exp_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = exp((double)p1.val_num / p1.val_den);
+		q->accum.val_real = exp((double)p1.val_num / p1.val_den);
 
-		if (isinf(q->accum.val_flt))
+		if (isinf(q->accum.val_real))
 			return throw_error(q, &p1, "evaluation_error", "float_overflow");
 
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1)) {
-		q->accum.val_flt = exp(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1)) {
+		q->accum.val_real = exp(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
@@ -463,14 +463,14 @@ static USE_RESULT pl_status fn_iso_sqrt_1(query *q)
 		if (p1.val_num < 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = sqrt((double)p1.val_num / p1.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1)) {
-		if (p1.val_flt == -1)
+		q->accum.val_real = sqrt((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1)) {
+		if (p1.val_real == -1)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = sqrt(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = sqrt(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
@@ -493,14 +493,14 @@ static USE_RESULT pl_status fn_iso_log_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = log((double)p1.val_num / p1.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1)) {
-		if (p1.val_flt <= 0.0)
+		q->accum.val_real = log((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1)) {
+		if (p1.val_real <= 0.0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = log(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = log(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
@@ -516,21 +516,21 @@ static USE_RESULT pl_status fn_iso_truncate_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (is_float(&p1)) {
+	if (is_real(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = p1.val_flt;
+		__int128_t tmp = p1.val_real;
 
 		if ((tmp > MY_INT64_MAX) || (tmp < MY_INT64_MIN)) {
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-			int64_t tmp = p1.val_flt;
+			int64_t tmp = p1.val_real;
 
 			if ((tmp > MY_INT32_MAX) || (tmp < MY_INT32_MIN)) {
 				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
-				q->accum.val_num = (int_t)p1.val_flt;
+				q->accum.val_num = (int_t)p1.val_real;
 				q->accum.val_type = TYPE_RATIONAL;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			}
@@ -554,14 +554,14 @@ static USE_RESULT pl_status fn_iso_round_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (is_float(&p1)) {
+	if (is_real(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = rint(p1.val_flt);
+		__int128_t tmp = rint(p1.val_real);
 
 		if ((tmp > MY_INT64_MAX) || (tmp < MY_INT64_MIN)) {
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
-			double f = fabs(p1.val_flt);
+			double f = fabs(p1.val_real);
 
 			if ((f - floor(f)) > 0.5)
 				fesetround(FE_TONEAREST);
@@ -569,13 +569,13 @@ static USE_RESULT pl_status fn_iso_round_1(query *q)
 				fesetround(FE_UPWARD);
 
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-			int64_t tmp = nearbyintf(p1.val_flt);
+			int64_t tmp = nearbyintf(p1.val_real);
 
 			if ((tmp > MY_INT32_MAX) || (tmp < MY_INT32_MIN)) {
 				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
-				q->accum.val_num = nearbyintf(p1.val_flt);
+				q->accum.val_num = nearbyintf(p1.val_real);
 				q->accum.val_type = TYPE_RATIONAL;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			}
@@ -599,21 +599,21 @@ static USE_RESULT pl_status fn_iso_ceiling_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (is_float(&p1)) {
+	if (is_real(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = ceil(p1.val_flt);
+		__int128_t tmp = ceil(p1.val_real);
 
 		if ((tmp > MY_INT64_MAX) || (tmp < MY_INT64_MIN)) {
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-			int64_t tmp = ceil(p1.val_flt);
+			int64_t tmp = ceil(p1.val_real);
 
 			if ((tmp > MY_INT32_MAX) || (tmp < MY_INT32_MIN)) {
 				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
-				q->accum.val_num = (int_t)ceil(p1.val_flt);
+				q->accum.val_num = (int_t)ceil(p1.val_real);
 				q->accum.val_type = TYPE_RATIONAL;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			}
@@ -637,9 +637,9 @@ static USE_RESULT pl_status fn_iso_float_integer_part_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (is_float(&p1)) {
-		q->accum.val_flt = (int_t)p1.val_flt;
-		q->accum.val_type = TYPE_FLOAT;
+	if (is_real(&p1)) {
+		q->accum.val_real = (int_t)p1.val_real;
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (is_rational(&p1)) {
@@ -657,9 +657,9 @@ static USE_RESULT pl_status fn_iso_float_fractional_part_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (is_float(&p1)) {
-		q->accum.val_flt = p1.val_flt - (int_t)p1.val_flt;
-		q->accum.val_type = TYPE_FLOAT;
+	if (is_real(&p1)) {
+		q->accum.val_real = p1.val_real - (int_t)p1.val_real;
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (is_rational(&p1)) {
@@ -677,21 +677,21 @@ static USE_RESULT pl_status fn_iso_floor_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (is_float(&p1)) {
+	if (is_real(&p1)) {
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-		__int128_t tmp = floor(p1.val_flt);
+		__int128_t tmp = floor(p1.val_real);
 
 		if ((tmp > MY_INT64_MAX) || (tmp < MY_INT64_MIN)) {
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 		} else {
 #elif defined(__SIZEOF_INT64__) && USE_INT32 && CHECK_OVERFLOW
-			int64_t tmp = floor(p1.val_flt);
+			int64_t tmp = floor(p1.val_real);
 
 			if ((tmp > MY_INT32_MAX) || (tmp < MY_INT32_MIN)) {
 				return throw_error(q, &p1, "evaluation_error", "int_overflow");
 			} else {
 #endif
-				q->accum.val_num = (int_t)floor(p1.val_flt);
+				q->accum.val_num = (int_t)floor(p1.val_real);
 				q->accum.val_type = TYPE_RATIONAL;
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
 			}
@@ -719,21 +719,21 @@ static USE_RESULT pl_status fn_iso_sin_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = sin((double)p1.val_num / p1.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1)) {
-		q->accum.val_flt = sin(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = sin((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1)) {
+		q->accum.val_real = sin(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+	if (is_real(&q->accum) && isinf(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
-	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+	if (is_real(&q->accum) && isnan(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
@@ -749,21 +749,21 @@ static USE_RESULT pl_status fn_iso_cos_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = cos((double)p1.val_num / p1.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1)) {
-		q->accum.val_flt = cos(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = cos((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1)) {
+		q->accum.val_real = cos(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+	if (is_real(&q->accum) && isinf(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
-	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+	if (is_real(&q->accum) && isnan(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
@@ -779,21 +779,21 @@ static USE_RESULT pl_status fn_iso_tan_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = tan((double)p1.val_num / p1.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1)) {
-		q->accum.val_flt = tan(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = tan((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1)) {
+		q->accum.val_real = tan(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+	if (is_real(&q->accum) && isinf(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
-	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+	if (is_real(&q->accum) && isnan(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
@@ -809,21 +809,21 @@ static USE_RESULT pl_status fn_iso_asin_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = asin((double)p1.val_num / p1.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1)) {
-		q->accum.val_flt = asin(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = asin((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1)) {
+		q->accum.val_real = asin(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+	if (is_real(&q->accum) && isinf(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
-	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+	if (is_real(&q->accum) && isnan(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
@@ -839,21 +839,21 @@ static USE_RESULT pl_status fn_iso_acos_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = acos((double)p1.val_num / p1.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1)) {
-		q->accum.val_flt = acos(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = acos((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1)) {
+		q->accum.val_real = acos(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+	if (is_real(&q->accum) && isinf(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
-	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+	if (is_real(&q->accum) && isnan(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
@@ -869,21 +869,21 @@ static USE_RESULT pl_status fn_iso_atan_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = atan((double)p1.val_num / p1.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1)) {
-		q->accum.val_flt = atan(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = atan((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1)) {
+		q->accum.val_real = atan(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+	if (is_real(&q->accum) && isinf(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
-	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+	if (is_real(&q->accum) && isnan(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
@@ -907,42 +907,42 @@ static USE_RESULT pl_status fn_iso_atan2_2(query *q)
 		if (p2.val_den == 0)
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 
-		q->accum.val_flt = atan2((double)p1.val_num / p1.val_den, (double)p2.val_num / p2.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_rational(&p1) && is_float(&p2)) {
-		if ((p1.val_num == 0) && (p2.val_flt == 0.0))
+		q->accum.val_real = atan2((double)p1.val_num / p1.val_den, (double)p2.val_num / p2.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_rational(&p1) && is_real(&p2)) {
+		if ((p1.val_num == 0) && (p2.val_real == 0.0))
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = atan2((double)p1.val_num / p1.val_den, p2.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_float(&p2)) {
-		if ((p1.val_flt == 0.0) && (p2.val_num == 0))
+		q->accum.val_real = atan2((double)p1.val_num / p1.val_den, p2.val_real);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_real(&p2)) {
+		if ((p1.val_real == 0.0) && (p2.val_num == 0))
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = atan2(p1.val_flt, p2.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_rational(&p2)) {
-		if ((p1.val_flt == 0.0) && (p2.val_num == 0))
+		q->accum.val_real = atan2(p1.val_real, p2.val_real);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_rational(&p2)) {
+		if ((p1.val_real == 0.0) && (p2.val_num == 0))
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
 		if (p2.val_den == 0)
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 
-		q->accum.val_flt = atan2(p1.val_flt, (double)p2.val_num / p2.val_den);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = atan2(p1.val_real, (double)p2.val_num / p2.val_den);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+	if (is_real(&q->accum) && isinf(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
-	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+	if (is_real(&q->accum) && isnan(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
@@ -958,21 +958,21 @@ static USE_RESULT pl_status fn_sinh_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = sinh((double)p1.val_num / p1.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1)) {
-		q->accum.val_flt = sinh(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = sinh((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1)) {
+		q->accum.val_real = sinh(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+	if (is_real(&q->accum) && isinf(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "float_overflow");
 
-	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+	if (is_real(&q->accum) && isnan(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
@@ -988,21 +988,21 @@ static USE_RESULT pl_status fn_cosh_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = cosh((double)p1.val_num / p1.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1)) {
-		q->accum.val_flt = cosh(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = cosh((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1)) {
+		q->accum.val_real = cosh(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+	if (is_real(&q->accum) && isinf(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "float_overflow");
 
-	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+	if (is_real(&q->accum) && isnan(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
@@ -1018,21 +1018,21 @@ static USE_RESULT pl_status fn_tanh_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = tanh((double)p1.val_num / p1.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1)) {
-		q->accum.val_flt = tanh(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = tanh((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1)) {
+		q->accum.val_real = tanh(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+	if (is_real(&q->accum) && isinf(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "float_overflow");
 
-	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+	if (is_real(&q->accum) && isnan(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
@@ -1048,21 +1048,21 @@ static USE_RESULT pl_status fn_asinh_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = asinh((double)p1.val_num / p1.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1)) {
-		q->accum.val_flt = asinh(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = asinh((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1)) {
+		q->accum.val_real = asinh(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+	if (is_real(&q->accum) && isinf(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
-	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+	if (is_real(&q->accum) && isnan(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
@@ -1078,21 +1078,21 @@ static USE_RESULT pl_status fn_acosh_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = acosh((double)p1.val_num / p1.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1)) {
-		q->accum.val_flt = acosh(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = acosh((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1)) {
+		q->accum.val_real = acosh(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+	if (is_real(&q->accum) && isinf(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
-	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+	if (is_real(&q->accum) && isnan(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
@@ -1108,21 +1108,21 @@ static USE_RESULT pl_status fn_atanh_1(query *q)
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = atanh((double)p1.val_num / p1.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1)) {
-		q->accum.val_flt = atanh(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = atanh((double)p1.val_num / p1.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1)) {
+		q->accum.val_real = atanh(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	if (is_float(&q->accum) && isinf(q->accum.val_flt))
+	if (is_real(&q->accum) && isinf(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
-	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+	if (is_real(&q->accum) && isnan(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
@@ -1143,19 +1143,19 @@ static USE_RESULT pl_status fn_iso_copysign_2(query *q)
 			q->accum.val_num = -llabs((long long)p1.val_num);
 
 		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_rational(&p1) && is_float(&p2)) {
+	} else if (is_rational(&p1) && is_real(&p2)) {
 		q->accum = p1;
 
-		if (p2.val_flt < 0.0)
+		if (p2.val_real < 0.0)
 			q->accum.val_num = -llabs((long long)p1.val_num);
 
 		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_float(&p1) && is_float(&p2)) {
-		q->accum.val_flt = copysign(p1.val_flt, p2.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_rational(&p2)) {
-		q->accum.val_flt = copysign(p1.val_flt, p2.val_num);
-		q->accum.val_type = TYPE_FLOAT;
+	} else if (is_real(&p1) && is_real(&p2)) {
+		q->accum.val_real = copysign(p1.val_real, p2.val_real);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_rational(&p2)) {
+		q->accum.val_real = copysign(p1.val_real, p2.val_num);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
@@ -1183,36 +1183,36 @@ static USE_RESULT pl_status fn_iso_pow_2(query *q)
 		if ((p1.val_num == 0) && (p2.val_num < 0))
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 
-		q->accum.val_flt = pow((double)p1.val_num / p1.val_den, (double)p2.val_num / p2.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_rational(&p1) && is_float(&p2)) {
+		q->accum.val_real = pow((double)p1.val_num / p1.val_den, (double)p2.val_num / p2.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_rational(&p1) && is_real(&p2)) {
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		if ((p1.val_num == 0) && (p2.val_flt < 0.0))
+		if ((p1.val_num == 0) && (p2.val_real < 0.0))
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 
-		q->accum.val_flt = pow((double)p1.val_num / p1.val_den, p2.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_float(&p2)) {
-		if ((p1.val_flt == 0.0) && (p2.val_flt < 0.0))
+		q->accum.val_real = pow((double)p1.val_num / p1.val_den, p2.val_real);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_real(&p2)) {
+		if ((p1.val_real == 0.0) && (p2.val_real < 0.0))
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 
-		q->accum.val_flt = pow(p1.val_flt, p2.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_integer(&p2)) {
-		if ((p1.val_flt == 0.0) && (p2.val_num < 0))
+		q->accum.val_real = pow(p1.val_real, p2.val_real);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_integer(&p2)) {
+		if ((p1.val_real == 0.0) && (p2.val_num < 0))
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 
-		q->accum.val_flt = pow(p1.val_flt, p2.val_num);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = pow(p1.val_real, p2.val_num);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+	if (is_real(&q->accum) && isnan(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
@@ -1275,27 +1275,27 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 		if (p2.val_den == 0)
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 
-		q->accum.val_flt = pow((double)p1.val_num / p1.val_den, (double)p2.val_num / p2.val_den);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_rational(&p1) && is_float(&p2)) {
+		q->accum.val_real = pow((double)p1.val_num / p1.val_den, (double)p2.val_num / p2.val_den);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_rational(&p1) && is_real(&p2)) {
 		if (p1.val_den == 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_flt = pow((double)p1.val_num / p1.val_den, p2.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_float(&p2)) {
-		q->accum.val_flt = pow(p1.val_flt, p2.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_integer(&p2)) {
-		q->accum.val_flt = pow(p1.val_flt, p2.val_num);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = pow((double)p1.val_num / p1.val_den, p2.val_real);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_real(&p2)) {
+		q->accum.val_real = pow(p1.val_real, p2.val_real);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_integer(&p2)) {
+		q->accum.val_real = pow(p1.val_real, p2.val_num);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+	if (is_real(&q->accum) && isnan(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
@@ -1313,39 +1313,39 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 		if (p2.val_num == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
-		q->accum.val_flt = (double)p1.val_num / p2.val_num;
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = (double)p1.val_num / p2.val_num;
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_rational(&p1) && is_rational(&p2)) {
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		q->accum.val_num = p1.val_num;
 		q->accum.val_den = p2.val_num;
 		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_integer(&p1) && is_float(&p2)) {
-		if (p2.val_flt == 0.0)
+	} else if (is_integer(&p1) && is_real(&p2)) {
+		if (p2.val_real == 0.0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
-		q->accum.val_flt = (double)p1.val_num / p2.val_flt;
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_float(&p2)) {
-		if (p2.val_flt == 0.0)
+		q->accum.val_real = (double)p1.val_num / p2.val_real;
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_real(&p2)) {
+		if (p2.val_real == 0.0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
-		q->accum.val_flt = p1.val_flt / p2.val_flt;
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_integer(&p2)) {
+		q->accum.val_real = p1.val_real / p2.val_real;
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_integer(&p2)) {
 		if (p2.val_num == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
-		q->accum.val_flt = p1.val_flt / p2.val_num;
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = p1.val_real / p2.val_num;
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	if (is_float(&q->accum) && isnan(q->accum.val_flt))
+	if (is_real(&q->accum) && isnan(q->accum.val_real))
 		return throw_error(q, &p1, "evaluation_error", "undefined");
 
 	return pl_success;
@@ -1482,24 +1482,24 @@ static USE_RESULT pl_status fn_iso_max_2(query *q)
 		if (s1.val_num >= s2.val_num) q->accum = s1;
 		else q->accum = s2;
 		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_rational(&p1) && is_float(&p2)) {
+	} else if (is_rational(&p1) && is_real(&p2)) {
 		double f1 = (double)p1.val_num;
 		if (p1.val_den) f1 /= p1.val_den;
 
-		if (f1 > p2.val_flt)
+		if (f1 > p2.val_real)
 			q->accum = p1;
 		else
 			q->accum = p2;
-	} else if (is_rational(&p2) && is_float(&p1)) {
+	} else if (is_rational(&p2) && is_real(&p1)) {
 		double f2 = (double)p2.val_num;
 		if (p2.val_den) f2 /= p2.val_den;
 
-		if (f2 > p1.val_flt)
+		if (f2 > p1.val_real)
 			q->accum = p2;
 		else
 			q->accum = p1;
-	} else if (is_float(&p1) && is_float(&p2)) {
-		if (p1.val_flt > p2.val_flt)
+	} else if (is_real(&p1) && is_real(&p2)) {
+		if (p1.val_real > p2.val_real)
 			q->accum = p1;
 		else
 			q->accum = p2;
@@ -1531,24 +1531,24 @@ static USE_RESULT pl_status fn_iso_min_2(query *q)
 		if (s1.val_num <= s2.val_num) q->accum = s1;
 		else q->accum = s2;
 		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_rational(&p1) && is_float(&p2)) {
+	} else if (is_rational(&p1) && is_real(&p2)) {
 		double f1 = (double)p1.val_num;
 		if (p1.val_den) f1 /= p1.val_den;
 
-		if (f1 < p2.val_flt)
+		if (f1 < p2.val_real)
 			q->accum = p1;
 		else
 			q->accum = p2;
-	} else if (is_rational(&p2) && is_float(&p1)) {
+	} else if (is_rational(&p2) && is_real(&p1)) {
 		double f2 = (double)p2.val_num;
 		if (p1.val_den) f2 /= p1.val_den;
 
-		if (f2 < p1.val_flt)
+		if (f2 < p1.val_real)
 			q->accum = p2;
 		else
 			q->accum = p1;
-	} else if (is_float(&p1) && is_float(&p2)) {
-		if (p1.val_flt < p2.val_flt)
+	} else if (is_real(&p1) && is_real(&p2)) {
+		if (p1.val_real < p2.val_real)
 			q->accum = p1;
 		else
 			q->accum = p2;
@@ -1718,7 +1718,7 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 			return tmp1.val_num < tmp2.val_num ? -1 : tmp1.val_num > tmp2.val_num ? 1 : 0;
 		}
 
-		if (is_float(p2))
+		if (is_real(p2))
 			return 1;
 
 		if (is_variable(p2))
@@ -1727,9 +1727,9 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		return -1;
 	}
 
-	if (is_float(p1)) {
-		if (is_float(p2))
-			return p1->val_flt < p2->val_flt ? -1 : p1->val_flt > p2->val_flt ? 1 : 0;
+	if (is_real(p1)) {
+		if (is_real(p2))
+			return p1->val_real < p2->val_real ? -1 : p1->val_real > p2->val_real ? 1 : 0;
 
 		if (is_variable(p2))
 			return 1;
@@ -1875,12 +1875,12 @@ static USE_RESULT pl_status fn_iso_neq_2(query *q)
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num == p2.val_num;
-	} else if (is_integer(&p1) && is_float(&p2))
-		return p1.val_num == p2.val_flt;
-	else if (is_float(&p1) && is_float(&p2))
-		return p1.val_flt == p2.val_flt;
-	else if (is_float(&p1) && is_integer(&p2))
-		return p1.val_flt == p2.val_num;
+	} else if (is_integer(&p1) && is_real(&p2))
+		return p1.val_num == p2.val_real;
+	else if (is_real(&p1) && is_real(&p2))
+		return p1.val_real == p2.val_real;
+	else if (is_real(&p1) && is_integer(&p2))
+		return p1.val_real == p2.val_num;
 
 	return throw_error(q, &p1, "type_error", "evaluable");
 }
@@ -1898,12 +1898,12 @@ static USE_RESULT pl_status fn_iso_nne_2(query *q)
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num != p2.val_num;
-	} else if (is_integer(&p1) && is_float(&p2))
-		return p1.val_num != p2.val_flt;
-	else if (is_float(&p1) && is_float(&p2))
-		return p1.val_flt != p2.val_flt;
-	else if (is_float(&p1) && is_integer(&p2))
-		return p1.val_flt != p2.val_num;
+	} else if (is_integer(&p1) && is_real(&p2))
+		return p1.val_num != p2.val_real;
+	else if (is_real(&p1) && is_real(&p2))
+		return p1.val_real != p2.val_real;
+	else if (is_real(&p1) && is_integer(&p2))
+		return p1.val_real != p2.val_num;
 
 	return throw_error(q, &p1, "type_error", "evaluable");
 }
@@ -1921,12 +1921,12 @@ static USE_RESULT pl_status fn_iso_nge_2(query *q)
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num >= p2.val_num;
-	} else if (is_integer(&p1) && is_float(&p2))
-		return p1.val_num >= p2.val_flt;
-	else if (is_float(&p1) && is_float(&p2))
-		return p1.val_flt >= p2.val_flt;
-	else if (is_float(&p1) && is_integer(&p2))
-		return p1.val_flt >= p2.val_num;
+	} else if (is_integer(&p1) && is_real(&p2))
+		return p1.val_num >= p2.val_real;
+	else if (is_real(&p1) && is_real(&p2))
+		return p1.val_real >= p2.val_real;
+	else if (is_real(&p1) && is_integer(&p2))
+		return p1.val_real >= p2.val_num;
 
 	return throw_error(q, &p1, "type_error", "evaluable");
 }
@@ -1944,12 +1944,12 @@ static USE_RESULT pl_status fn_iso_ngt_2(query *q)
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num > p2.val_num;
-	} else if (is_integer(&p1) && is_float(&p2))
-		return p1.val_num > p2.val_flt;
-	else if (is_float(&p1) && is_float(&p2))
-		return p1.val_flt > p2.val_flt;
-	else if (is_float(&p1) && is_integer(&p2))
-		return p1.val_flt > p2.val_num;
+	} else if (is_integer(&p1) && is_real(&p2))
+		return p1.val_num > p2.val_real;
+	else if (is_real(&p1) && is_real(&p2))
+		return p1.val_real > p2.val_real;
+	else if (is_real(&p1) && is_integer(&p2))
+		return p1.val_real > p2.val_num;
 
 	return throw_error(q, &p1, "type_error", "evaluable");
 }
@@ -1967,12 +1967,12 @@ static USE_RESULT pl_status fn_iso_nle_2(query *q)
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num <= p2.val_num;
-	} else if (is_integer(&p1) && is_float(&p2))
-		return p1.val_num <= p2.val_flt;
-	else if (is_float(&p1) && is_float(&p2))
-		return p1.val_flt <= p2.val_flt;
-	else if (is_float(&p1) && is_integer(&p2))
-		return p1.val_flt <= p2.val_num;
+	} else if (is_integer(&p1) && is_real(&p2))
+		return p1.val_num <= p2.val_real;
+	else if (is_real(&p1) && is_real(&p2))
+		return p1.val_real <= p2.val_real;
+	else if (is_real(&p1) && is_integer(&p2))
+		return p1.val_real <= p2.val_num;
 
 	return throw_error(q, &p1, "type_error", "evaluable");
 }
@@ -1990,12 +1990,12 @@ static USE_RESULT pl_status fn_iso_nlt_2(query *q)
 		p1.val_num *= p2.val_den;
 		p2.val_num *= p1.val_den;
 		return p1.val_num < p2.val_num;
-	} else if (is_integer(&p1) && is_float(&p2))
-		return p1.val_num < p2.val_flt;
-	else if (is_float(&p1) && is_float(&p2))
-		return p1.val_flt < p2.val_flt;
-	else if (is_float(&p1) && is_integer(&p2))
-		return p1.val_flt < p2.val_num;
+	} else if (is_integer(&p1) && is_real(&p2))
+		return p1.val_num < p2.val_real;
+	else if (is_real(&p1) && is_real(&p2))
+		return p1.val_real < p2.val_real;
+	else if (is_real(&p1) && is_integer(&p2))
+		return p1.val_real < p2.val_num;
 
 	return throw_error(q, &p1, "type_error", "evaluable");
 }
@@ -2012,9 +2012,9 @@ static USE_RESULT pl_status fn_log_2(query *q)
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (is_variable(&p2)) {
 		return throw_error(q, &p2, "instantiation_error", "not_sufficiently_instantiated");
-	} else if (! is_integer(&p1) && ! is_float(&p1)) {
+	} else if (! is_integer(&p1) && ! is_real(&p1)) {
 		return throw_error(q, &p1, "type_error", "evaluable");
-	} else if (! is_integer(&p2) && ! is_float(&p2)){
+	} else if (! is_integer(&p2) && ! is_real(&p2)){
 		return throw_error(q, &p2, "type_error", "evaluable");
 	}
 
@@ -2024,10 +2024,10 @@ static USE_RESULT pl_status fn_log_2(query *q)
 		} else if (p1.val_num < 0) {
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 		}
-	} else if (is_float(&p1)) {
-		if (p1.val_flt == 0.0) {
+	} else if (is_real(&p1)) {
+		if (p1.val_real == 0.0) {
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
-		} else if (p1.val_flt < 0.0) {
+		} else if (p1.val_real < 0.0) {
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 		}
 	}
@@ -2038,26 +2038,26 @@ static USE_RESULT pl_status fn_log_2(query *q)
 		} else if (p2.val_num < 0) {
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 		}
-	} else if (is_float(&p2)) {
-		if (p2.val_flt == 0.0) {
+	} else if (is_real(&p2)) {
+		if (p2.val_real == 0.0) {
 			return throw_error(q, &p2, "evaluation_error", "zero_divisor");
-		} else if (p2.val_flt < 0.0) {
+		} else if (p2.val_real < 0.0) {
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 		}
 	}
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_flt = log(p2.val_num) / log(p1.val_num);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_integer(&p1) && is_float(&p2)) {
-		q->accum.val_flt = log(p2.val_flt) / log(p1.val_num);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_integer(&p2)) {
-		q->accum.val_flt = log(p2.val_num) / log(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
-	} else if (is_float(&p1) && is_float(&p2)) {
-		q->accum.val_flt = log(p2.val_flt) / log(p1.val_flt);
-		q->accum.val_type = TYPE_FLOAT;
+		q->accum.val_real = log(p2.val_num) / log(p1.val_num);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_integer(&p1) && is_real(&p2)) {
+		q->accum.val_real = log(p2.val_real) / log(p1.val_num);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_integer(&p2)) {
+		q->accum.val_real = log(p2.val_num) / log(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_real(&p2)) {
+		q->accum.val_real = log(p2.val_real) / log(p1.val_real);
+		q->accum.val_type = TYPE_REAL;
 	}
 
 	return pl_success;
@@ -2077,17 +2077,17 @@ static USE_RESULT pl_status fn_log10_1(query *q)
 		} else if (p1.val_num < 0) {
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 		} else {
-			q->accum.val_flt = log10(p1.val_num);
-			q->accum.val_type = TYPE_FLOAT;
+			q->accum.val_real = log10(p1.val_num);
+			q->accum.val_type = TYPE_REAL;
 		}
-	} else if (is_float(&p1)) {
-		if (p1.val_flt == 0.0) {
+	} else if (is_real(&p1)) {
+		if (p1.val_real == 0.0) {
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
-		} else if (p1.val_flt < 0.0) {
+		} else if (p1.val_real < 0.0) {
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 		} else {
-			q->accum.val_flt = log10(p1.val_flt);
-			q->accum.val_type = TYPE_FLOAT;
+			q->accum.val_real = log10(p1.val_real);
+			q->accum.val_type = TYPE_REAL;
 		}
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
@@ -2127,7 +2127,7 @@ static USE_RESULT pl_status fn_random_1(query *q)
 
 	if (is_variable(p1_tmp)) {
 		cell tmp;
-		make_float(&tmp, rnd());
+		make_real(&tmp, rnd());
 		set_var(q, p1_tmp, p1_tmp_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
@@ -2241,8 +2241,8 @@ static USE_RESULT pl_status fn_rational_1(query *q)
 			return pl_success;
 		}
 
-		if (is_float(&p1)) {
-			do_real_to_fraction(p1.val_flt, 0.00001, &q->accum.val_num, &q->accum.val_den);
+		if (is_real(&p1)) {
+			do_real_to_fraction(p1.val_real, 0.00001, &q->accum.val_num, &q->accum.val_den);
 			q->accum.val_type = TYPE_RATIONAL;
 			return pl_success;
 		}

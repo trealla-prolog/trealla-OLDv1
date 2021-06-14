@@ -299,23 +299,23 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 		return dst - save_dst;
 	}
 
-	if (is_float(c) && (c->val_flt == M_PI)) {
+	if (is_real(c) && (get_real(c) == M_PI)) {
 		dst += snprintf(dst, dstlen, "3.141592653589793");
 		return dst - save_dst;
 	}
 
-	if (is_float(c) && (c->val_flt == M_E)) {
+	if (is_real(c) && (get_real(c) == M_E)) {
 		dst += snprintf(dst, dstlen, "2.718281828459045");
 		return dst - save_dst;
 	}
 
-	if (is_float(c)) {
+	if (is_real(c)) {
 		char tmpbuf[256];
-		sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG-1, c->val_flt);
+		sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG-1, get_real(c));
 		const char *ptr = strchr(tmpbuf, '.');
 
 		if (ptr && (strlen(ptr+1) > 1))
-			sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, c->val_flt);
+			sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, get_real(c));
 
 		reformat_float(tmpbuf);
 		dst += snprintf(dst, dstlen, "%s", tmpbuf);
@@ -459,23 +459,23 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		return dst - save_dst;
 	}
 
-	if (is_float(c) && (c->val_flt == M_PI)) {
+	if (is_real(c) && (get_real(c) == M_PI)) {
 		dst += snprintf(dst, dstlen, "3.141592653589793");
 		return dst - save_dst;
 	}
 
-	if (is_float(c) && (c->val_flt == M_E)) {
+	if (is_real(c) && (get_real(c) == M_E)) {
 		dst += snprintf(dst, dstlen, "2.718281828459045");
 		return dst - save_dst;
 	}
 
-	if (is_float(c)) {
+	if (is_real(c)) {
 		char tmpbuf[256];
-		sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG-1, c->val_flt);
+		sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG-1, get_real(c));
 		const char *ptr = strchr(tmpbuf, '.');
 
 		if (ptr && (strlen(ptr+1) > 1))
-			sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, c->val_flt);
+			sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, get_real(c));
 
 		reformat_float(tmpbuf);
 		dst += snprintf(dst, dstlen, "%s", tmpbuf);

@@ -268,7 +268,7 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes)
 		}
 
 		if (is_integer(c)) {
-			int ch = get_numerator(c);
+			int ch = get_integer(c);
 			char tmp[20];
 			put_char_utf8(tmp, ch);
 			size_t len = len_char_utf8(tmp);
@@ -880,8 +880,8 @@ static bool unify_int(__attribute__((unused)) query *q, cell *p1, cell *p2)
 
 static bool unify_float(__attribute__((unused)) query *q, cell *p1, cell *p2)
 {
-	if (is_float(p2))
-		return p1->val_flt == p2->val_flt;
+	if (is_real(p2))
+		return get_real(p1) == get_real(p2);
 
 	return false;
 }
@@ -921,7 +921,7 @@ static const struct dispatch g_disp[] =
 	{TYPE_CSTRING, unify_cstring},
 	{TYPE_RATIONAL, unify_int},
 	{TYPE_BIGNUM, NULL},
-	{TYPE_FLOAT, unify_float},
+	{TYPE_REAL, unify_float},
 	{0}
 };
 

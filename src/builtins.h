@@ -15,7 +15,7 @@
 #define is_callable_or_var(c) (is_literal(c) || is_cstring(c) || is_variable(c))
 #define is_structure(c) (is_literal(c) && (c)->arity)
 #define is_compound(c) (is_structure(c) || is_string(c))
-#define is_number(c) (is_rational(c) || is_float(c))
+#define is_number(c) (is_rational(c) || is_real(c))
 #define is_atomic(c) (is_atom(c) || is_number(c))
 #define is_list_or_nil(c) (is_list(c) || is_nil(c))
 #define is_list_or_nil_or_var(c) (is_list_or_nil(c) || is_variable(c))
@@ -38,9 +38,9 @@
 #define is_atom_or_list_or_var(c) (is_atom(c) || is_iso_list(c) || is_variable(c))
 #define is_in_character(c) is_atom(c)
 #define is_in_character_or_var(c) (is_in_character(c) || is_variable(c))
-#define is_in_byte(c) (is_integer(c) && (c->val_num >= -1) && (c->val_num < 256))
+#define is_in_byte(c) (is_integer(c) && (get_integer(c) >= -1) && (get_integer(c) < 256))
 #define is_in_byte_or_var(c) (is_in_byte(c) || is_variable(c))
-#define is_byte(c) (is_integer(c) && (c->val_num >= 0) && (c->val_num < 256))
+#define is_byte(c) (is_integer(c) && (get_integer(c) >= 0) && (get_integer(c) < 256))
 #define is_any(c) 1
 
 #define is_iso_list_or_nil(c) (is_iso_list(c) || is_nil(c))
@@ -153,7 +153,7 @@ inline static cell *get_raw_arg(const query *q, int n)
 	unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0)
 
 extern void make_int(cell *tmp, int_t v);
-extern void make_float(cell *tmp, double v);
+extern void make_real(cell *tmp, double v);
 
 #define calc_(q,c,c_ctx) 											\
 	!(c->flags&FLAG_BUILTIN) ? *c : 								\

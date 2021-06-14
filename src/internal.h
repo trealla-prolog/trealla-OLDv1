@@ -113,7 +113,7 @@ typedef enum {
 #define is_cstring(c) ((c)->val_type == TYPE_CSTRING)
 #define is_rational(c) ((c)->val_type == TYPE_RATIONAL)
 #define is_bignum(c) ((c)->val_type == TYPE_BIGNUM)
-#define is_float(c) ((c)->val_type == TYPE_FLOAT)
+#define is_real(c) ((c)->val_type == TYPE_REAL)
 #define is_indirect(c) ((c)->val_type == TYPE_INDIRECT)
 #define is_end(c) ((c)->val_type == TYPE_END)
 
@@ -123,9 +123,13 @@ typedef enum {
 #define is_iso_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
 #define is_cons_list(c) (is_iso_list(c) && is_variable(c+2))
 
+#define get_real(c) (c)->val_real
+#define set_real(c,v) (c)->val_real = v
+#define get_integer(c) (c)->val_num
+#define set_integer(c,v) { (c)->val_num = v; (c)->val_den = 1; }
 #define get_numerator(c) (c)->val_num
-#define get_denominator(c) (c)->val_den
 #define set_numerator(c,v) (c)->val_num = v
+#define get_denominator(c) (c)->val_den
 #define set_denominator(c,v) (c)->val_den = v
 
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
@@ -201,7 +205,7 @@ enum {
 	TYPE_CSTRING=3,
 	TYPE_RATIONAL=4,
 	TYPE_BIGNUM=5,
-	TYPE_FLOAT=6,
+	TYPE_REAL=6,
 	TYPE_INDIRECT=7,
 	TYPE_END=8
 };
@@ -292,7 +296,7 @@ struct cell_ {
 		// A double...
 
 		struct {
-			double val_flt;
+			double val_real;
 		};
 
 		// A call return...

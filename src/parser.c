@@ -449,7 +449,7 @@ static void do_op(parser *p, cell *c)
 		cell *h = LIST_HEAD(p3);
 
 		if (is_atom(h)) {
-			if (!set_op(p->m, PARSER_GET_STR(h), specifier, get_numerator(p1))) {
+			if (!set_op(p->m, PARSER_GET_STR(h), specifier, get_integer(p1))) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: could not set op\n");
 
@@ -461,7 +461,7 @@ static void do_op(parser *p, cell *c)
 	}
 
 	if (is_atom(p3) && !is_nil(p3)) {
-		if (!set_op(p->m, PARSER_GET_STR(p3), specifier, get_numerator(p1))) {
+		if (!set_op(p->m, PARSER_GET_STR(p3), specifier, get_integer(p1))) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: could not set op\n");
 
@@ -615,7 +615,7 @@ static void directives(parser *p, term *t)
 					if (!is_literal(f)) return;
 					if (!is_integer(a)) return;
 					cell tmp = *f;
-					tmp.arity = get_numerator(a);
+					tmp.arity = get_integer(a);
 
 					if (!strcmp(PARSER_GET_STR(head), "//"))
 						tmp.arity += 2;
@@ -774,7 +774,7 @@ static void directives(parser *p, term *t)
 			if (!is_atom(c_name)) continue;
 			cell *c_arity = h + 2;
 			if (!is_integer(c_arity)) continue;
-			unsigned arity = get_numerator(c_arity);
+			unsigned arity = get_integer(c_arity);
 
 			if (!strcmp(PARSER_GET_STR(h), "//"))
 				arity += 2;
@@ -823,7 +823,7 @@ static void directives(parser *p, term *t)
 			if (!is_atom(c_name)) return;
 			cell *c_arity = p1 + 2;
 			if (!is_integer(c_arity)) return;
-			unsigned arity = get_numerator(c_arity);
+			unsigned arity = get_integer(c_arity);
 
 			if (!strcmp(PARSER_GET_STR(p1), "//"))
 				arity += 2;
@@ -1561,7 +1561,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 		p->v.val_type = TYPE_RATIONAL;
 		set_numerator(&p->v, v);
-		if (neg) set_numerator(&p->v, -get_numerator(&p->v));
+		if (neg) set_numerator(&p->v, -get_integer(&p->v));
 		*srcptr = s;
 		return 1;
 	}
@@ -1605,7 +1605,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_BINARY;
 		set_numerator(&p->v, v);
-		if (neg) set_numerator(&p->v, -get_numerator(&p->v));
+		if (neg) set_numerator(&p->v, -get_integer(&p->v));
 		*srcptr = s;
 		return 1;
 	}
@@ -1643,7 +1643,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_OCTAL;
 		set_numerator(&p->v, v);
-		if (neg) set_numerator(&p->v, -get_numerator(&p->v));
+		if (neg) set_numerator(&p->v, -get_integer(&p->v));
 		*srcptr = s;
 		return 1;
 	}
@@ -1685,7 +1685,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_HEX;
 		set_numerator(&p->v, v);
-		if (neg) set_numerator(&p->v, -get_numerator(&p->v));
+		if (neg) set_numerator(&p->v, -get_integer(&p->v));
 		*srcptr = s;
 		return 1;
 	}
@@ -1710,9 +1710,9 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 	}
 
 	if ((*s == '.') && isdigit(s[1])) {
-		p->v.val_type = TYPE_FLOAT;
-		p->v.val_flt = strtod(s=tmpptr, &tmpptr);
-		if (neg) p->v.val_flt = -p->v.val_flt;
+		p->v.val_type = TYPE_REAL;
+		p->v.val_real = strtod(s=tmpptr, &tmpptr);
+		if (neg) p->v.val_real = -p->v.val_real;
 		*srcptr = tmpptr;
 		return 1;
 	}
@@ -1729,7 +1729,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 	p->v.val_type = TYPE_RATIONAL;
 	set_numerator(&p->v, v);
-	if (neg) set_numerator(&p->v, -get_numerator(&p->v));
+	if (neg) set_numerator(&p->v, -get_integer(&p->v));
 	int try_rational = 0;
 
 #if 0
@@ -1772,7 +1772,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 	set_denominator(&p->v, (int_t)v);
 	do_reduce(&p->v);
-	if (neg) set_numerator(&p->v, -get_numerator(&p->v));
+	if (neg) set_numerator(&p->v, -get_integer(&p->v));
 	*srcptr = s;
 	return 1;
 }
@@ -2564,8 +2564,8 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			set_denominator(c, get_denominator(&p->v));
 			c->flags = p->v.flags;
 		}
-		else if (p->v.val_type == TYPE_FLOAT) {
-			c->val_flt = p->v.val_flt;
+		else if (p->v.val_type == TYPE_REAL) {
+			c->val_real = p->v.val_real;
 		} else if ((!p->is_quoted || func || p->is_op || p->is_variable ||
 			(get_builtin(p->m->pl, p->token, 0, &found), found) ||
 			!strcmp(p->token, "[]")) && !p->string) {
