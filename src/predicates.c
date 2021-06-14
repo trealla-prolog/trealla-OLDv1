@@ -9608,7 +9608,7 @@ static USE_RESULT pl_status fn_edin_tab_1(query *q)
 	int n = q->st.m->pl->current_output;
 	stream *str = &g_streams[n];
 
-	for (int i = 0; i < p1.val_num; i++)
+	for (int i = 0; i < get_numerator(&p1); i++)
 		fputc(' ', str->fp);
 
 	return !ferror(str->fp);
@@ -9626,7 +9626,7 @@ static USE_RESULT pl_status fn_edin_tab_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 
-	for (int i = 0; i < p1.val_num; i++)
+	for (int i = 0; i < get_numerator(&p1); i++)
 		fputc(' ', str->fp);
 
 	return !ferror(str->fp);
@@ -10815,7 +10815,7 @@ static USE_RESULT pl_status fn_memberchk_2(query *q)
 			h = deref(q, h, p2_ctx);
 
 			if (is_rational(h)) {
-				if ((get_numerator(p1) == h->val_num)
+				if ((get_numerator(p1) == get_numerator(h))
 					&& (get_denominator(p1) == get_denominator(h)))
 					return pl_success;
 			}
