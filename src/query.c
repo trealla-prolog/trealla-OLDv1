@@ -268,7 +268,7 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes)
 		}
 
 		if (is_integer(c)) {
-			int ch = c->val_num;
+			int ch = get_numerator(c);
 			char tmp[20];
 			put_char_utf8(tmp, ch);
 			size_t len = len_char_utf8(tmp);
@@ -873,7 +873,7 @@ static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx,
 static bool unify_int(__attribute__((unused)) query *q, cell *p1, cell *p2)
 {
 	if (is_rational(p2))
-		return (p1->val_num == p2->val_num) && (p1->val_den == p2->val_den);
+		return (get_numerator(p1) == get_numerator(p2)) && (get_denominator(p1) == get_denominator(p2));
 
 	return false;
 }
