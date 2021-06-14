@@ -123,9 +123,6 @@ typedef enum {
 #define is_iso_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
 #define is_cons_list(c) (is_iso_list(c) && is_variable(c+2))
 
-#define get_numerator(c) (c)->val_num
-#define get_denominator(c) (c)->val_den
-
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
 #define is_string(c) (is_cstring(c) && (c)->flags & FLAG_STRING)
 #define is_managed(c) ((c)->flags & FLAG_MANAGED)
@@ -143,6 +140,12 @@ typedef enum {
 #define is_tail_recursive(c) ((c)->flags & FLAG_TAIL_REC)
 #define is_key(c) ((c)->flags & FLAG_KEY)
 #define is_op(c) (c->flags && 0xFF00)
+
+#define set_rational(c1,c2) (c1)->val_num = (c2)->val_num; (c1)->val_den = (c2)->val_den
+#define get_numerator(c) (c)->val_num
+#define get_denominator(c) (c)->val_den
+#define set_numerator(c,v) (c)->val_num = (v)
+#define set_denominator(c,v) (c)->val_den = (v)
 
 typedef struct {
 	int64_t refcnt;
@@ -198,10 +201,9 @@ enum {
 	TYPE_LITERAL=2,
 	TYPE_CSTRING=3,
 	TYPE_RATIONAL=4,
-	TYPE_BIGNUM=5,
-	TYPE_FLOAT=6,
-	TYPE_INDIRECT=7,
-	TYPE_END=8
+	TYPE_FLOAT=5,
+	TYPE_INDIRECT=6,
+	TYPE_END=7
 };
 
 enum {

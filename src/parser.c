@@ -449,7 +449,7 @@ static void do_op(parser *p, cell *c)
 		cell *h = LIST_HEAD(p3);
 
 		if (is_atom(h)) {
-			if (!set_op(p->m, PARSER_GET_STR(h), specifier, p1->val_num)) {
+			if (!set_op(p->m, PARSER_GET_STR(h), specifier, get_numerator(p1))) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: could not set op\n");
 
@@ -461,7 +461,7 @@ static void do_op(parser *p, cell *c)
 	}
 
 	if (is_atom(p3) && !is_nil(p3)) {
-		if (!set_op(p->m, PARSER_GET_STR(p3), specifier, p1->val_num)) {
+		if (!set_op(p->m, PARSER_GET_STR(p3), specifier, get_numerator(p1))) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: could not set op\n");
 
@@ -615,7 +615,7 @@ static void directives(parser *p, term *t)
 					if (!is_literal(f)) return;
 					if (!is_integer(a)) return;
 					cell tmp = *f;
-					tmp.arity = a->val_num;
+					tmp.arity = get_numerator(a);
 
 					if (!strcmp(PARSER_GET_STR(head), "//"))
 						tmp.arity += 2;
@@ -774,7 +774,7 @@ static void directives(parser *p, term *t)
 			if (!is_atom(c_name)) continue;
 			cell *c_arity = h + 2;
 			if (!is_integer(c_arity)) continue;
-			unsigned arity = c_arity->val_num;
+			unsigned arity = get_numerator(c_arity);
 
 			if (!strcmp(PARSER_GET_STR(h), "//"))
 				arity += 2;
@@ -823,7 +823,7 @@ static void directives(parser *p, term *t)
 			if (!is_atom(c_name)) return;
 			cell *c_arity = p1 + 2;
 			if (!is_integer(c_arity)) return;
-			unsigned arity = c_arity->val_num;
+			unsigned arity = get_numerator(c_arity);
 
 			if (!strcmp(PARSER_GET_STR(p1), "//"))
 				arity += 2;
@@ -1530,8 +1530,8 @@ static int get_escape(const char **_src, bool *error)
 
 static int parse_number(parser *p, const char **srcptr, bool neg)
 {
-	p->v.val_num = 0;
-	p->v.val_den = 1;
+	set_numerator(&p->v, 0);
+	set_denominator(&p->v, 1);
 	p->v.flags = 0;
 	const char *s = *srcptr;
 
@@ -1560,8 +1560,8 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 			v = get_char_utf8(&s);
 
 		p->v.val_type = TYPE_RATIONAL;
-		p->v.val_num = v;
-		if (neg) p->v.val_num = -p->v.val_num;
+		set_numerator(&p->v, v);
+		if (neg) set_numerator(&p->v, -get_numerator(&p->v));
 		*srcptr = s;
 		return 1;
 	}
@@ -1604,8 +1604,8 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_BINARY;
-		p->v.val_num = (int_t)v;
-		if (neg) p->v.val_num = -p->v.val_num;
+		set_numerator(&p->v, (int_t)v);
+		if (neg) set_numerator(&p->v, -get_numerator(&p->v));
 		*srcptr = s;
 		return 1;
 	}
@@ -1642,8 +1642,8 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_OCTAL;
-		p->v.val_num = (int_t)v;
-		if (neg) p->v.val_num = -p->v.val_num;
+		set_numerator(&p->v,(int_t)v);
+		if (neg) set_numerator(&p->v, -get_numerator(&p->v));
 		*srcptr = s;
 		return 1;
 	}
@@ -1684,8 +1684,8 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_HEX;
-		p->v.val_num = (int_t)v;
-		if (neg) p->v.val_num = -p->v.val_num;
+		set_numerator(&p->v, (int_t)v);
+		if (neg) set_numerator(&p->v, -get_numerator(&p->v));
 		*srcptr = s;
 		return 1;
 	}
@@ -1728,8 +1728,8 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 	}
 
 	p->v.val_type = TYPE_RATIONAL;
-	p->v.val_num = (int_t)v;
-		if (neg) p->v.val_num = -p->v.val_num;
+	set_numerator(&p->v, (int_t)v);
+	if (neg) set_numerator(&p->v,-get_numerator(&p->v));
 	int try_rational = 0;
 
 #if 0
@@ -1771,13 +1771,10 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 	}
 
 	p->v.val_den = (int_t)v;
-	cell tmp;
-	tmp.val_num = p->v.val_num;
-	tmp.val_den = p->v.val_den;
+	cell tmp = p->v;
 	do_reduce(&tmp);
-	p->v.val_num = tmp.val_num;
-	p->v.val_den = tmp.val_den;
-	if (neg) p->v.val_num = -p->v.val_num;
+	p->v = tmp;
+	if (neg) set_numerator(&p->v, -get_numerator(&p->v));
 	*srcptr = s;
 	return 1;
 }
@@ -1945,7 +1942,7 @@ static bool get_token(parser *p, int last_op)
 		dst += snprintf(dst, 8, "%u", ch);
 		*dst = '\0';
 		p->srcptr = (char*)src;
-		p->v.val_num = ch;
+		set_numerator(&p->v, ch);
 		p->v.val_type = TYPE_RATIONAL;
 		p->dq_consing = -1;
 		return true;
@@ -2565,8 +2562,8 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		bool found = false;
 
 		if (p->v.val_type == TYPE_RATIONAL) {
-			c->val_num = p->v.val_num;
-			c->val_den = p->v.val_den;
+			set_numerator(c, get_numerator(&p->v));
+			set_denominator(c, get_denominator(&p->v));
 			c->flags = p->v.flags;
 		}
 		else if (p->v.val_type == TYPE_FLOAT) {
