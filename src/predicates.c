@@ -10367,9 +10367,12 @@ static USE_RESULT pl_status fn_sys_lt_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
+	int_t num = get_numerator(p1);
 
-	if (p1->val_num++ < get_numerator(p2))
+	if (num < get_numerator(p2)) {
+		set_numerator(p1, num+1);
 		return pl_success;
+	}
 
 	drop_choice(q);
 	return pl_success;
@@ -10494,9 +10497,12 @@ static USE_RESULT pl_status fn_sys_gt_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
+	int_t num = get_numerator(p1);
 
-	if (p1->val_num++ <= get_numerator(p2))
+	if (num <= get_numerator(p2)) {
+		set_numerator(p1, num+1);
 		return pl_failure;
+	}
 
 	return pl_success;
 }
@@ -10561,9 +10567,12 @@ static USE_RESULT pl_status fn_sys_ne_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
+	int_t num = get_numerator(p1);
 
-	if (p1->val_num++ != get_numerator(p2))
+	if (num != get_numerator(p2)) {
+		set_numerator(p1, num+1);
 		return pl_failure;
+	}
 
 	drop_choice(q);
 	return pl_success;
