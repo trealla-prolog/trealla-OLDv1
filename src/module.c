@@ -134,9 +134,9 @@ static int compkey2(const void *ptr1, const void *ptr2, const void *param)
 
 	if (is_integer(p1)) {
 		if (is_integer(p2)) {
-			if (p1->val_num < p2->val_num)
+			if (get_numerator(p1) < get_numerator(p2))
 				return -1;
-			else if (p1->val_num > p2->val_num)
+			else if (get_numerator(p1) > get_numerator(p2))
 				return 1;
 			else
 				return 0;
