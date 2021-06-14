@@ -123,12 +123,15 @@ typedef enum {
 #define is_iso_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
 #define is_cons_list(c) (is_iso_list(c) && is_variable(c+2))
 
+#define get_numerator(c) (c)->val_num
+#define get_denominator(c) (c)->val_den
+
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
 #define is_string(c) (is_cstring(c) && (c)->flags & FLAG_STRING)
 #define is_managed(c) ((c)->flags & FLAG_MANAGED)
 #define is_blob(c) (is_cstring(c) && (c)->flags & FLAG_BLOB)
 #define is_list(c) (is_iso_list(c) || is_string(c))
-#define is_integer(c) (is_rational(c) && ((c)->val_den == 1))
+#define is_integer(c) (is_rational(c) && (get_denominator(c) == 1))
 #define is_static(c) (is_blob(c) && ((c)->flags & FLAG_STATIC))
 #define is_strbuf(c) (is_blob(c) && !((c)->flags & FLAG_STATIC))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
