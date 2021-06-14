@@ -906,7 +906,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 			cell *head = LIST_HEAD(p2);
 			head = deref(q, head, p2_ctx);
 
-			int_t val = head->val_num;
+			int_t val = get_numerator(head);
 
 			if (val < 0)
 				return throw_error(q, head, "representation_error", "character_code");
@@ -1002,7 +1002,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 			if (!is_integer(head))
 				return throw_error(q, head, "type_error", "integer");
 
-			int val = head->val_num;
+			int val = get_numerator(head);
 
 			if (val < 0)
 				return throw_error(q, head, "representation_error", "character_code");
@@ -1106,10 +1106,10 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 	if (is_integer(p2) && (get_numerator(p2) < 0))
 		return throw_error(q, p2, "domain_error", "not_less_than_zero");
 
-	if (is_integer(p3) && (p3->val_num < 0))
+	if (is_integer(p3) && (get_numerator(p3) < 0))
 		return throw_error(q, p3, "domain_error", "not_less_than_zero");
 
-	if (is_integer(p4) && (p4->val_num < 0))
+	if (is_integer(p4) && (get_numerator(p4) < 0))
 		return throw_error(q, p4, "domain_error", "not_less_than_zero");
 
 	int fixed = (is_integer(p2) + is_integer(p3) + is_integer(p4)) >= 2;
@@ -1121,10 +1121,10 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 			before = get_numerator(p2);
 
 		if (!is_variable(p3))
-			len = p3->val_num;
+			len = get_numerator(p3);
 
 		if (!is_variable(p4))
-			after = p4->val_num;
+			after = get_numerator(p4);
 
 		if (is_variable(p2) && is_integer(p3) && is_integer(p4))
 			before = len_p1 - after - len;
@@ -1522,7 +1522,7 @@ static char *chars_list_to_string(query *q, cell *p_chars, idx_t p_chars_ctx, si
 		h = deref(q, h, p_chars_ctx);
 
 		if (is_integer(h)) {
-			int ch = h->val_num;
+			int ch = get_numerator(h);
 			dst += put_char_utf8(dst, ch);
 		} else {
 			const char *p = GET_STR(h);
@@ -2974,7 +2974,7 @@ static bool parse_write_params(query *q, cell *c, cell **vnames, idx_t *vnames_c
 
 	if (!slicecmp2(GET_STR(c), LEN_STR(c), "max_depth")) {
 		if (is_integer(c1))
-			q->max_depth = c[1].val_num;
+			q->max_depth = get_numerator(&c[1]);
 	} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "fullstop")) {
 		if (!is_literal(c1) || (slicecmp2(GET_STR(c1), LEN_STR(c1), "true") && slicecmp2(GET_STR(c1), LEN_STR(c1), "false"))) {
 			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
@@ -4504,20 +4504,20 @@ static USE_RESULT pl_status fn_iso_abolish_1(query *q)
 	if (!is_integer(p1_arity))
 		return throw_error(q, p1_arity, "type_error", "integer");
 
-	if (p1_arity->val_num < 0)
+	if (get_numerator(p1_arity) < 0)
 		return throw_error(q, p1_arity, "domain_error", "not_less_than_zero");
 
-	if (p1_arity->val_num > MAX_ARITY)
+	if (get_numerator(p1_arity) > MAX_ARITY)
 		return throw_error(q, p1_arity, "representation_error", "max_arity");
 
 	bool found = false;
 
-	if (get_builtin(q->st.m->pl, GET_STR(p1_name), p1_arity->val_num, &found), found)
+	if (get_builtin(q->st.m->pl, GET_STR(p1_name), get_numerator(p1_arity), &found), found)
 		return throw_error(q, p1, "permission_error", "modify,static_procedure");
 
 	cell tmp;
 	tmp = *p1_name;
-	tmp.arity = p1_arity->val_num;
+	tmp.arity = get_numerator(p1_arity);
 	CLR_OP(&tmp);
 	return do_abolish(q, p1, &tmp, true);
 }
@@ -5258,16 +5258,16 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 		if (!is_integer(p3))
 			return throw_error(q, p3, "type_error", "integer");
 
-		if (p3->val_num < 0)
+		if (get_numerator(p3) < 0)
 			return throw_error(q, p3, "domain_error", "not_less_than_zero");
 
-		if (p3->val_num > (MAX_ARITY/2))
+		if (get_numerator(p3) > (MAX_ARITY/2))
 			return throw_error(q, p3, "representation_error", "max_arity");
 
-		if (!is_atom(p2) && (p3->val_num > 0))
+		if (!is_atom(p2) && (get_numerator(p3) > 0))
 			return throw_error(q, p2, "type_error", "atom");
 
-		unsigned arity = p3->val_num;
+		unsigned arity = get_numerator(p3);
 		unsigned var_nbr = 0;
 
 		if (arity) {
@@ -6593,7 +6593,7 @@ static USE_RESULT pl_status fn_listing_1(query *q)
 			return throw_error(q, p3, "type_error", "integer");
 
 		name = index_from_pool(q->st.m->pl, GET_STR(p2));
-		arity = p3->val_num;
+		arity = get_numerator(p3);
 
 		if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "//"))
 			arity += 2;
@@ -6781,10 +6781,10 @@ static USE_RESULT pl_status fn_between_3(query *q)
 			return pl_failure;
 
 		if (!is_variable(p3)) {
-			if (p3->val_num > get_numerator(p2))
+			if (get_numerator(p3) > get_numerator(p2))
 				return pl_failure;
 
-			if (p3->val_num < get_numerator(p1))
+			if (get_numerator(p3) < get_numerator(p1))
 				return pl_failure;
 
 			return pl_success;
@@ -6798,7 +6798,7 @@ static USE_RESULT pl_status fn_between_3(query *q)
 		return pl_success;
 	}
 
-	int_t val = p3->val_num + 1;
+	int_t val = get_numerator(p3) + 1;
 	GET_RAW_ARG(3,p3_raw);
 	cell tmp;
 	make_int(&tmp, val);
@@ -10442,7 +10442,7 @@ static USE_RESULT pl_status fn_plus_3(query *q)
 			return throw_error(q, p3, "type_error", "integer");
 
 		cell tmp;
-		make_int(&tmp, p3->val_num - get_numerator(p2));
+		make_int(&tmp, get_numerator(p3) - get_numerator(p2));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
@@ -10455,7 +10455,7 @@ static USE_RESULT pl_status fn_plus_3(query *q)
 			return throw_error(q, p3, "type_error", "integer");
 
 		cell tmp;
-		make_int(&tmp, p3->val_num - get_numerator(p1));
+		make_int(&tmp, get_numerator(p3) - get_numerator(p1));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
@@ -10473,7 +10473,7 @@ static USE_RESULT pl_status fn_plus_3(query *q)
 		return pl_success;
 	}
 
-	return p3->val_num == get_numerator(p1) + get_numerator(p2);
+	return get_numerator(p3) == get_numerator(p1) + get_numerator(p2);
 }
 
 static USE_RESULT pl_status fn_limit_2(query *q)
