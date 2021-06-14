@@ -283,15 +283,15 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 		} else if ((c->flags & FLAG_OCTAL) && !running) {
 			dst += snprintf(dst, dstlen, "%s0o", get_numerator(c)<0?"-":"");
 			dst += sprint_int(dst, dstlen, get_numerator(c), 8);
-		} else if (c->val_den != 1) {
+		} else if (get_denominator(c) != 1) {
 			if (q->flag.rational_syntax_natural) {
 				dst += sprint_int(dst, dstlen, get_numerator(c), 10);
 				dst += snprintf(dst, dstlen, "%s", "/");
-				dst += sprint_int(dst, dstlen, c->val_den, 10);
+				dst += sprint_int(dst, dstlen, get_denominator(c), 10);
 			} else {
 				dst += sprint_int(dst, dstlen, get_numerator(c), 10);
 				dst += snprintf(dst, dstlen, "%s", " rdiv ");
-				dst += sprint_int(dst, dstlen, c->val_den, 10);
+				dst += sprint_int(dst, dstlen, get_denominator(c), 10);
 			}
 		} else
 			dst += sprint_int(dst, dstlen, get_numerator(c), 10);
@@ -443,15 +443,15 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY))) {
 			dst += snprintf(dst, dstlen, "%s0x", get_numerator(c)<0?"-":"");
 			dst += sprint_int(dst, dstlen, get_numerator(c), 16);
-		} else if (c->val_den != 1) {
+		} else if (get_denominator(c) != 1) {
 			if (q->flag.rational_syntax_natural) {
 				dst += sprint_int(dst, dstlen, get_numerator(c), 10);
 				dst += snprintf(dst, dstlen, "/");
-				dst += sprint_int(dst, dstlen, c->val_den, 10);
+				dst += sprint_int(dst, dstlen, get_denominator(c), 10);
 			} else {
 				dst += sprint_int(dst, dstlen, get_numerator(c), 10);
 				dst += snprintf(dst, dstlen, " rdiv ");
-				dst += sprint_int(dst, dstlen, c->val_den, 10);
+				dst += sprint_int(dst, dstlen, get_denominator(c), 10);
 			}
 		} else
 			dst += sprint_int(dst, dstlen, get_numerator(c), 10);
