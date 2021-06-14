@@ -5352,7 +5352,7 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 		return throw_error(q, p1, "type_error", "integer");
 
 	const char *functor = GET_STR(pf);
-	unsigned arity = pa->val_num + add_two;
+	unsigned arity = get_numerator(pa) + add_two;
 	module *m = q->st.m;
 
 	if (strchr(functor, ':')) {
@@ -6735,7 +6735,7 @@ static USE_RESULT pl_status fn_now_0(query *q)
 {
 	int_t secs = get_time_in_usec() / 1000 / 1000;
 	q->accum.val_type = TYPE_RATIONAL;
-	q->accum.val_num = secs;
+	set_numerator(&q->accum, secs);
 	return pl_success;
 }
 
@@ -7186,12 +7186,12 @@ static USE_RESULT pl_status fn_server_3(query *q)
 				c = c + 1;
 
 				if (is_integer(c))
-					port = c->val_num;
+					port = get_numerator(c);
 			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "level")) {
 				c = c + 1;
 
 				if (is_integer(c))
-					level = (int)c->val_num;
+					level = (int)get_numerator(c);
 			}
 		}
 
@@ -7358,12 +7358,12 @@ static USE_RESULT pl_status fn_client_5(query *q)
 				c = c + 1;
 
 				if (is_integer(c))
-					port = (int)c->val_num;
+					port = (int)get_numerator(c);
 			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "level")) {
 				c = c + 1;
 
 				if (is_integer(c))
-					level = (int)c->val_num;
+					level = (int)get_numerator(c);
 			}
 		}
 
@@ -8570,7 +8570,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 				nbytes = bufsiz - save;
 			}
 
-			len = put_char_utf8(dst, (int)c->val_num);
+			len = put_char_utf8(dst, (int)get_numerator(c));
 		} else if ((ch == 'e') || (ch == 'E')) {
 			if (!is_float(c)) {
 				free(tmpbuf);
@@ -8624,7 +8624,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 				nbytes = bufsiz - save;
 			}
 
-			len = format_integer(dst, c->val_num, noargval?3:argval, '_', 0);
+			len = format_integer(dst, get_numerator(c), noargval?3:argval, '_', 0);
 		} else if (ch == 'd') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
@@ -8641,7 +8641,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 				nbytes = bufsiz - save;
 			}
 
-			len = format_integer(dst, c->val_num, 0, ',', noargval?2:argval);
+			len = format_integer(dst, get_numerator(c), 0, ',', noargval?2:argval);
 		} else if (ch == 'D') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
@@ -8658,7 +8658,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 				nbytes = bufsiz - save;
 			}
 
-			len = format_integer(dst, c->val_num, 3, ',', noargval?2:argval);
+			len = format_integer(dst, get_numerator(c), 3, ',', noargval?2:argval);
 		} else {
 			int saveq = q->quoted;
 
