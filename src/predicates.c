@@ -127,7 +127,7 @@ cell *ERR_CYCLE_CELL = &(cell){};
 #if 0
 static double rat_to_float(cell *n)
 {
-	return (double)n->val_num / n->val_den;
+	return (double)get_numerator() / get_denominator(n);
 }
 #endif
 
@@ -168,8 +168,8 @@ void make_int(cell *tmp, int_t v)
 	tmp->val_type = TYPE_RATIONAL;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
-	tmp->val_num = v;
-	tmp->val_den = 1;
+	set_numerator(tmp, v);
+	set_denominator(tmp, 1);
 }
 
 void make_float(cell *tmp, double v)
@@ -9884,7 +9884,7 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 			src1 = tmpbuf1;
 		} else if (is_rational(p1)) {
 			len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), p1->val_num, 10);
-			len1 += sprint_int(tmpbuf1+len1, sizeof(tmpbuf1)-len1, p1->val_den, 10);
+			len1 += sprint_int(tmpbuf1+len1, sizeof(tmpbuf1)-len1, get_denominator(p1), 10);
 			src1 = tmpbuf1;
 		} else {
 			len1 = snprintf(tmpbuf1, sizeof(tmpbuf1), "%.17g", p1->val_flt);
@@ -9899,7 +9899,7 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 			src2 = tmpbuf2;
 		} else if (is_rational(p2)) {
 			len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), p2->val_num, 10);
-			len2 += sprint_int(tmpbuf2+len2, sizeof(tmpbuf2)-len2, p2->val_den, 10);
+			len2 += sprint_int(tmpbuf2+len2, sizeof(tmpbuf2)-len2, get_denominator(p2), 10);
 			src2 = tmpbuf2;
 		} else {
 			len2 = snprintf(tmpbuf2, sizeof(tmpbuf1), "%.17g", p2->val_flt);
@@ -10816,7 +10816,7 @@ static USE_RESULT pl_status fn_memberchk_2(query *q)
 
 			if (is_rational(h)) {
 				if ((p1->val_num == h->val_num)
-					&& (p1->val_den == h->val_den))
+					&& (get_denominator(p1) == get_denominator(h)))
 					return pl_success;
 			}
 
