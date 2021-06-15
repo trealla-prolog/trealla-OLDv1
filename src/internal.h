@@ -130,6 +130,8 @@ typedef enum {
 #define get_numerator(c) (c)->val_int
 #define get_denominator(c) (c)->val_den
 
+#define is_negative(c) (is_rational(c) && (get_numerator(c) < 0))
+#define is_positive(c) (is_rational(c) && (get_numerator(c) > 0))
 #define is_bigint(c) (is_rational(c) && is_managed(c))
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
 #define is_string(c) (is_cstring(c) && (c)->flags & FLAG_STRING)

@@ -747,7 +747,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 	dst += snprintf(dst, dstlen, "%s", src);
 	if (!*src) space = 0;
-	space += is_rational(rhs) && (get_numerator(rhs) < 0);
+	space += is_rational(rhs) && is_negative(rhs);
 	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
 	int rhs_parens = rhs_pri_1 >= my_priority;

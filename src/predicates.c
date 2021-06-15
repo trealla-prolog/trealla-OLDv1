@@ -554,7 +554,7 @@ static USE_RESULT pl_status fn_iso_char_code_2(query *q)
 	}
 
 	if (is_integer(p2)) {
-		if (get_integer(p2) < 0)
+		if (is_negative(p2))
 			return throw_error(q, p2, "representation_error", "character_code");
 	}
 
@@ -1095,13 +1095,13 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 	const size_t len_p1 = LEN_STR_UTF8(p1);
 	size_t before = 0, len = 0, after = 0;
 
-	if (is_integer(p2) && (get_integer(p2) < 0))
+	if (is_integer(p2) && is_negative(p2))
 		return throw_error(q, p2, "domain_error", "not_less_than_zero");
 
-	if (is_integer(p3) && (get_integer(p3) < 0))
+	if (is_integer(p3) && is_negative(p3))
 		return throw_error(q, p3, "domain_error", "not_less_than_zero");
 
-	if (is_integer(p4) && (get_integer(p4) < 0))
+	if (is_integer(p4) && is_negative(p4))
 		return throw_error(q, p4, "domain_error", "not_less_than_zero");
 
 	int fixed = (is_integer(p2) + is_integer(p3) + is_integer(p4)) >= 2;
@@ -1339,7 +1339,7 @@ static USE_RESULT pl_status fn_iso_atom_length_2(query *q)
 	if (!is_iso_atom(p1))
 		return throw_error(q, p1, "type_error", "atom");
 
-	if (is_integer(p2) && (get_integer(p2) < 0))
+	if (is_integer(p2) && is_negative(p2))
 		return throw_error(q, p2, "domain_error", "not_less_than_zero");
 
 	const char *p = GET_STR(p1);
@@ -1392,7 +1392,7 @@ static int get_stream(query *q, cell *p1)
 		return -1;
 	}
 
-	if ((get_integer(p1) < 0) || (get_integer(p1) >= MAX_STREAMS)) {
+	if (is_negative(p1) || (get_integer(p1) >= MAX_STREAMS)) {
 		//DISCARD_RESULT throw_error(q, p1, "type_error", "stream");
 		return -1;
 	}
@@ -1410,7 +1410,7 @@ static bool is_closed_stream(cell *p1)
 	if (!(p1->flags&FLAG_STREAM))
 		return false;
 
-	if ((get_integer(p1) < 0) || (get_integer(p1) >= MAX_STREAMS))
+	if (is_negative(p1) || (get_integer(p1) >= MAX_STREAMS))
 		return false;
 
 	if (g_streams[get_integer(p1)].fp)
@@ -4496,7 +4496,7 @@ static USE_RESULT pl_status fn_iso_abolish_1(query *q)
 	if (!is_integer(p1_arity))
 		return throw_error(q, p1_arity, "type_error", "integer");
 
-	if (get_integer(p1_arity) < 0)
+	if (is_negative(p1_arity))
 		return throw_error(q, p1_arity, "domain_error", "not_less_than_zero");
 
 	if (get_integer(p1_arity) > MAX_ARITY)
@@ -5250,13 +5250,13 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 		if (!is_integer(p3))
 			return throw_error(q, p3, "type_error", "integer");
 
-		if (get_integer(p3) < 0)
+		if (is_negative(p3))
 			return throw_error(q, p3, "domain_error", "not_less_than_zero");
 
 		if (get_integer(p3) > (MAX_ARITY/2))
 			return throw_error(q, p3, "representation_error", "max_arity");
 
-		if (!is_atom(p2) && (get_integer(p3) > 0))
+		if (!is_atom(p2) && is_positive(p3))
 			return throw_error(q, p2, "type_error", "atom");
 
 		unsigned arity = get_integer(p3);
@@ -5430,7 +5430,7 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 	p2 = deref(q, p2, p_pi_ctx);
 	p2_ctx = q->latest_ctx;
 
-	if ((!is_integer(p2) || (get_integer(p2) < 0)) && !is_variable(p2))
+	if ((!is_integer(p2) || is_negative(p2)) && !is_variable(p2))
 		return throw_error(q, p_pi, "type_error", "predicate_indicator");
 
 	if (!search_functor(q, p1, p1_ctx, p2, p2_ctx))
@@ -6144,7 +6144,7 @@ static USE_RESULT pl_status fn_iso_op_3(query *q)
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,list_or_atom);
 
-	if (is_integer(p1) && ((get_integer(p1) < 0) || (get_integer(p1) > 1200)))
+	if (is_integer(p1) && (is_negative(p1) || (get_integer(p1) > 1200)))
 		return throw_error(q, p1, "domain_error", "operator_priority");
 
 	LIST_HANDLER(p3);
@@ -7500,7 +7500,7 @@ static USE_RESULT pl_status fn_bread_3(query *q)
 	stream *str = &g_streams[n];
 	size_t len;
 
-	if (is_integer(p1) && (get_integer(p1) > 0)) {
+	if (is_integer(p1) && is_positive(p1)) {
 		if (!str->data) {
 			str->data = malloc(get_integer(p1)+1);
 			may_ptr_error(str->data);
@@ -10330,10 +10330,10 @@ static USE_RESULT pl_status fn_succ_2(query *q)
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 
-	if (is_integer(p1) && (get_integer(p1) < 0))
+	if (is_integer(p1) && is_negative(p1))
 		return throw_error(q, p1, "domain_error", "not_less_than_zero");
 
-	if (is_integer(p2) && (get_integer(p2) < 0))
+	if (is_integer(p2) && is_negative(p2))
 		return throw_error(q, p2, "domain_error", "not_less_than_zero");
 
 	if (is_variable(p2)) {
@@ -10642,7 +10642,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	}
 
 	if (is_integer(p2) && !is_variable(p1)) {
-		if (get_integer(p2) < 0)
+		if (is_negative(p2))
 			return throw_error(q, p2, "domain_error", "not_less_than_zero");
 
 		if (get_integer(p2) == 0) {
@@ -10672,7 +10672,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	}
 
 	if (is_variable(p1) && is_integer(p2)) {
-		if (get_integer(p2) < 0)
+		if (is_negative(p2))
 			return throw_error(q, p2, "domain_error", "not_less_than_zero");
 
 		if (get_integer(p2) >= MAX_VARS)
