@@ -5516,31 +5516,16 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "bounded")) {
 		cell tmp;
-		make_literal(&tmp, g_true_s);
+		make_literal(&tmp, g_false_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "max_arity")) {
 		cell tmp;
 		make_int(&tmp, MAX_ARITY);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-#if USE_INT32
 	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "max_integer")) {
-		cell tmp;
-		make_int(&tmp, MY_INT32_MAX);
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		return false;
 	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "min_integer")) {
-		cell tmp;
-		make_int(&tmp, MY_INT32_MIN);
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-#else
-	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "max_integer")) {
-		cell tmp;
-		make_int(&tmp, MY_INT64_MAX);
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "min_integer")) {
-		cell tmp;
-		make_int(&tmp, MY_INT64_MIN);
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-#endif
+		return false;
 	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "cpu_count")) {
 		cell tmp;
 		make_int(&tmp, g_cpu_count);

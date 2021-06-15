@@ -11,21 +11,12 @@
 #define USE_OPENSSL 0
 #endif
 
-#ifndef USE_INT128
-#define USE_INT128 0
-#endif
-
 #ifndef USE_THREADS
 #define USE_THREADS 0
 #endif
 
-#if USE_INT128
-typedef __int128_t int_t;
-typedef __uint128_t uint_t;
-#else
 typedef int64_t int_t;
 typedef uint64_t uint_t;
-#endif
 
 #define MY_INT64_MIN (INT64_MIN+1)
 #define MY_INT64_MAX (INT64_MAX)
@@ -86,7 +77,6 @@ typedef enum {
 #define MAX_DEPTH 9000
 
 #define STREAM_BUFLEN 1024
-#define CHECK_OVERFLOW 1
 
 #define GET_CHOICE(i) (q->choices+(i))
 #define GET_CURR_CHOICE() GET_CHOICE(q->cp-1)
@@ -296,7 +286,7 @@ struct cell_ {
 			int_t val_den;
 		};
 
-		// A managed (big) rational...
+		// A managed bigint-rational...
 
 		struct {
 			mp_rat val_rat;

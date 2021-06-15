@@ -1555,37 +1555,32 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		return true;
 	}
 
-#if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-	__int128_t v = 0;
-#else
-	int_t v = 0;
-#endif
+	mpz_t v2;
+	mp_int_init(&v2);
+	mp_small val;
+	char *tmpptr = (char*)s;
 
 	if ((*s == '0') && (s[1] == 'b')) {
 		s += 2;
 
-		while (isbdigit(*s)) {
-			v <<= 1;
-			v += *s - '0';
+		mp_int_read_cstring(&v2, 2, s, (char**)&s);
 
-#if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-			if (v > INT64_MAX) {
-				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, integer overflow, line %u, '%s'\n", p->line_nbr, p->save_line);
-
-				p->error = true;
-				return false;
-			}
-#endif
-
-			s++;
+		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
+			// TODO: use bigints
+			set_integer(&p->v, strtoll(tmpptr, NULL, 2));
+			if (neg) p->v.val_int = -p->v.val_int;
+			mp_int_clear(&v2);
+		} else {
+			set_integer(&p->v, val);
+			if (neg) p->v.val_int = -p->v.val_int;
+			mp_int_clear(&v2);
 		}
 
 		int ch = peek_char_utf8(s);
 
 		if (isdigit(ch) || iswalpha(ch)) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing binary number, line %u, '%s\n", p->line_nbr, p->save_line);
+				fprintf(stdout, "Error: syntax error, parsing binary, line %u, '%s\n", p->line_nbr, p->save_line);
 
 			p->error = true;
 			return false;
@@ -1593,8 +1588,6 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_BINARY;
-		set_integer(&p->v, v);
-		if (neg) set_integer(&p->v, -get_integer(&p->v));
 		*srcptr = s;
 		return true;
 	}
@@ -1602,28 +1595,24 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	if ((*s == '0') && (s[1] == 'o')) {
 		s += 2;
 
-		while (isodigit(*s)) {
-			v <<= 3;
-			v += *s - '0';
+		mp_int_read_cstring(&v2, 8, s, (char**)&s);
 
-#if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-			if (v > INT64_MAX) {
-				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, integer overflow, line %u, '%s'\n", p->line_nbr, p->save_line);
-
-				p->error = true;
-				return false;
-			}
-#endif
-
-			s++;
+		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
+			// TODO: use bigints
+			set_integer(&p->v, strtoll(tmpptr, NULL, 8));
+			if (neg) p->v.val_int = -p->v.val_int;
+			mp_int_clear(&v2);
+		} else {
+			set_integer(&p->v, val);
+			if (neg) p->v.val_int = -p->v.val_int;
+			mp_int_clear(&v2);
 		}
 
 		int ch = peek_char_utf8(s);
 
 		if (isdigit(ch) || iswalpha(ch)) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing octal number, line %u, '%s'\n", p->line_nbr, p->save_line);
+				fprintf(stdout, "Error: syntax error, parsing octal, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 			p->error = true;
 			return false;
@@ -1631,8 +1620,6 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_OCTAL;
-		set_integer(&p->v, v);
-		if (neg) set_integer(&p->v, -get_integer(&p->v));
 		*srcptr = s;
 		return true;
 	}
@@ -1640,32 +1627,24 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	if ((*s == '0') && (s[1] == 'x')) {
 		s += 2;
 
-		while (isxdigit(*s)) {
-			v <<= 4;
+		mp_int_read_cstring(&v2, 16, s, (char**)&s);
 
-			if ((toupper(*s) >= 'A') && (toupper(*s) <= 'F'))
-				v += 10 + (toupper(*s) - 'A');
-			else
-				v += *s - '0';
-
-#if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-			if (v > INT64_MAX) {
-				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, integer overflow, line %u, '%s'\n", p->line_nbr, p->save_line);
-
-				p->error = true;
-				return false;
-			}
-#endif
-
-			s++;
+		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
+			// TODO: use bigints
+			set_integer(&p->v, strtoll(tmpptr, NULL, 16));
+			if (neg) p->v.val_int = -p->v.val_int;
+			mp_int_clear(&v2);
+		} else {
+			set_integer(&p->v, val);
+			if (neg) p->v.val_int = -p->v.val_int;
+			mp_int_clear(&v2);
 		}
 
 		int ch = peek_char_utf8(s);
 
 		if (isdigit(ch) || iswalpha(ch)) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing hex number, line %u, '%s'\n", p->line_nbr, p->save_line);
+				fprintf(stdout, "Error: syntax error, parsing hexadecimal, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 			p->error = true;
 			return false;
@@ -1673,38 +1652,30 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_HEX;
-		set_integer(&p->v, v);
-		if (neg) set_integer(&p->v, -get_integer(&p->v));
 		*srcptr = s;
 		return true;
 	}
 
-	char *tmpptr = (char*)s;
+	mp_int_read_cstring(&v2, 10, s, (char**)&s);
 
-	while (isdigit(*s)) {
-		v *= 10;
-		v += *s - '0';
-
-#if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
-			if (v > INT64_MAX) {
-			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, integer overflow, line %u, '%s'\n", p->line_nbr, p->save_line);
-
-			p->error = true;
-			return false;
-		}
-#endif
-
-		s++;
-	}
-
-	if ((*s == '.') && isdigit(s[1])) {
+	if (s && (*s == '.') && isdigit(s[1])) {
 		p->v.val_type = TYPE_REAL;
-		double v = strtod(s=tmpptr, &tmpptr);
+		double v = strtod(tmpptr, &tmpptr);
 		set_real(&p->v, v);
-		if (neg) set_real(&p->v, -get_real(&p->v));
+		if (neg) p->v.val_real = -p->v.val_real;
 		*srcptr = tmpptr;
 		return true;
+	}
+
+	if (mp_int_to_int(&v2, &val) == MP_RANGE) {
+		// TODO: use bigints
+		set_integer(&p->v, strtoll(tmpptr, NULL, 10));
+		if (neg) p->v.val_int = -p->v.val_int;
+		mp_int_clear(&v2);
+	} else {
+		set_integer(&p->v, val);
+		if (neg) p->v.val_int = -p->v.val_int;
+		mp_int_clear(&v2);
 	}
 
 	int ch = peek_char_utf8(s);
@@ -1718,14 +1689,11 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	}
 
 	p->v.val_type = TYPE_RATIONAL;
-	set_integer(&p->v, v);
-	if (neg) set_integer(&p->v, -get_integer(&p->v));
-	strtod(tmpptr, &tmpptr);
 
-	if ((tmpptr[-1] == '.')  || iswspace(tmpptr[-1]))
-		tmpptr--;
+	if ((s[-1] == '.') || iswspace(s[-1]))
+		s--;
 
-	*srcptr = tmpptr;
+	*srcptr = s;
 	ch = peek_char_utf8(*srcptr);
 
 	if ((ch == '(') || iswalpha(ch)) {
