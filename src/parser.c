@@ -1528,7 +1528,7 @@ static int get_escape(const char **_src, bool *error)
 #define isbdigit(ch) (((ch) >= '0') && ((ch) <= '1'))
 #define isodigit(ch) (((ch) >= '0') && ((ch) <= '7'))
 
-static int parse_number(parser *p, const char **srcptr, bool neg)
+static bool parse_number(parser *p, const char **srcptr, bool neg)
 {
 	set_numerator(&p->v, 0);
 	set_denominator(&p->v, 1);
@@ -1540,11 +1540,11 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 			fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 		p->error = true;
-		return -1;
+		return false;
 	}
 
 	if (!isdigit(*s))
-		return 0;
+		return false;
 
 	if ((*s == '0') && (s[1] == '\'')) {
 		s += 2;
@@ -1560,10 +1560,10 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 			v = get_char_utf8(&s);
 
 		p->v.val_type = TYPE_RATIONAL;
-		set_numerator(&p->v, v);
-		if (neg) set_numerator(&p->v, -get_integer(&p->v));
+		set_integer(&p->v, v);
+		if (neg) set_numerator(&p->v, -get_numerator(&p->v));
 		*srcptr = s;
-		return 1;
+		return true;
 	}
 
 #if defined(__SIZEOF_INT128__) && !USE_INT128 && CHECK_OVERFLOW
@@ -1585,7 +1585,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 					fprintf(stdout, "Error: syntax error, integer overflow, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 				p->error = true;
-				return -1;
+				return false;
 			}
 #endif
 
@@ -1599,15 +1599,15 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 				fprintf(stdout, "Error: syntax error, parsing binary number, line %u, '%s\n", p->line_nbr, p->save_line);
 
 			p->error = true;
-			return -1;
+			return false;
 		}
 
 		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_BINARY;
-		set_numerator(&p->v, v);
-		if (neg) set_numerator(&p->v, -get_integer(&p->v));
+		set_integer(&p->v, v);
+		if (neg) set_numerator(&p->v, -get_numerator(&p->v));
 		*srcptr = s;
-		return 1;
+		return true;
 	}
 
 	if ((*s == '0') && (s[1] == 'o')) {
@@ -1623,7 +1623,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 					fprintf(stdout, "Error: syntax error, integer overflow, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 				p->error = true;
-				return -1;
+				return false;
 			}
 #endif
 
@@ -1637,15 +1637,15 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 				fprintf(stdout, "Error: syntax error, parsing octal number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 			p->error = true;
-			return -1;
+			return false;
 		}
 
 		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_OCTAL;
-		set_numerator(&p->v, v);
-		if (neg) set_numerator(&p->v, -get_integer(&p->v));
+		set_integer(&p->v, v);
+		if (neg) set_numerator(&p->v, -get_numerator(&p->v));
 		*srcptr = s;
-		return 1;
+		return true;
 	}
 
 	if ((*s == '0') && (s[1] == 'x')) {
@@ -1665,7 +1665,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 					fprintf(stdout, "Error: syntax error, integer overflow, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 				p->error = true;
-				return -1;
+				return false;
 			}
 #endif
 
@@ -1679,15 +1679,15 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 				fprintf(stdout, "Error: syntax error, parsing hex number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 			p->error = true;
-			return -1;
+			return false;
 		}
 
 		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_HEX;
-		set_numerator(&p->v, v);
-		if (neg) set_numerator(&p->v, -get_integer(&p->v));
+		set_integer(&p->v, v);
+		if (neg) set_numerator(&p->v, -get_numerator(&p->v));
 		*srcptr = s;
-		return 1;
+		return true;
 	}
 
 	char *tmpptr = (char*)s;
@@ -1702,7 +1702,7 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 				fprintf(stdout, "Error: syntax error, integer overflow, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 			p->error = true;
-			return -1;
+			return false;
 		}
 #endif
 
@@ -1711,10 +1711,11 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 	if ((*s == '.') && isdigit(s[1])) {
 		p->v.val_type = TYPE_REAL;
-		p->v.val_real = strtod(s=tmpptr, &tmpptr);
-		if (neg) p->v.val_real = -p->v.val_real;
+		double v = strtod(s=tmpptr, &tmpptr);
+		set_real(&p->v, v);
+		if (neg) set_real(&p->v, -get_real(&p->v));
 		*srcptr = tmpptr;
-		return 1;
+		return true;
 	}
 
 	int ch = peek_char_utf8(s);
@@ -1724,12 +1725,12 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 			fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 		p->error = true;
-		return -1;
+		return false;
 	}
 
 	p->v.val_type = TYPE_RATIONAL;
-	set_numerator(&p->v, v);
-	if (neg) set_numerator(&p->v, -get_integer(&p->v));
+	set_integer(&p->v, v);
+	if (neg) set_numerator(&p->v, -get_numerator(&p->v));
 	int try_rational = 0;
 
 #if 0
@@ -1755,10 +1756,10 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 				fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
 			p->error = true;
-			return -1;
+			return false;
 		}
 
-		return 1;
+		return true;
 	}
 
 	s++;
@@ -1772,23 +1773,23 @@ static int parse_number(parser *p, const char **srcptr, bool neg)
 
 	set_denominator(&p->v, (int_t)v);
 	do_reduce(&p->v);
-	if (neg) set_numerator(&p->v, -get_integer(&p->v));
+	if (neg) set_numerator(&p->v, -get_numerator(&p->v));
 	*srcptr = s;
-	return 1;
+	return true;
 }
 
-static int is_matching_pair(char **dst, char **src, int lh, int rh)
+static bool is_matching_pair(char **dst, char **src, int lh, int rh)
 {
 	char *s = *src, *d = *dst;
 
 	if (*s != lh)
-		return 0;
+		return false;
 
 	while (s++, iswspace(*s))
 		;
 
 	if (*s != rh)
-		return 0;
+		return false;
 
 	s++;
 	*d++ = lh;
@@ -1796,7 +1797,7 @@ static int is_matching_pair(char **dst, char **src, int lh, int rh)
 	*d = '\0';
 	*dst = d;
 	*src = s;
-	return 1;
+	return true;
 }
 
 static bool valid_float(const char *src)
@@ -1940,7 +1941,7 @@ static bool get_token(parser *p, int last_op)
 		dst += snprintf(dst, 8, "%u", ch);
 		*dst = '\0';
 		p->srcptr = (char*)src;
-		set_numerator(&p->v, ch);
+		set_integer(&p->v, ch);
 		p->v.val_type = TYPE_RATIONAL;
 		p->dq_consing = -1;
 		return true;
@@ -2565,7 +2566,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			c->flags = p->v.flags;
 		}
 		else if (p->v.val_type == TYPE_REAL) {
-			c->val_real = p->v.val_real;
+			set_real(c, get_real(&p->v));
 		} else if ((!p->is_quoted || func || p->is_op || p->is_variable ||
 			(get_builtin(p->m->pl, p->token, 0, &found), found) ||
 			!strcmp(p->token, "[]")) && !p->string) {

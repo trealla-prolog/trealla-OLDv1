@@ -186,7 +186,7 @@ static USE_RESULT pl_status fn_iso_abs_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 	q->accum.val_type = p1.val_type;
 
-	if (is_integer(&p1))
+	if (is_rational(&p1))
 		q->accum.val_num = llabs((long long)p1.val_num);
 	else if (is_real(&p1))
 		q->accum.val_real = fabs(p1.val_real);
@@ -203,7 +203,7 @@ static USE_RESULT pl_status fn_iso_sign_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 	q->accum.val_type = p1.val_type;
 
-	if (is_integer(&p1))
+	if (is_rational(&p1))
 		q->accum.val_num = p1.val_num < 0 ? -1 : p1.val_num > 0  ? 1 : 0;
 	else if (is_real(&p1))
 		q->accum.val_real = p1.val_real < 0 ? -1 : p1.val_real > 0  ? 1 : 0;
