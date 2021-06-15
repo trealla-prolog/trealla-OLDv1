@@ -290,6 +290,12 @@ struct cell_ {
 			int_t val_den;
 		};
 
+		// A managed (big) rational...
+
+		struct {
+			mp_rat val_rat;
+		};
+
 		// A double...
 
 		struct {
@@ -310,7 +316,7 @@ struct cell_ {
 			char val_chr[MAX_SMALL_STRING];
 		};
 
-		// A ref-counted length-defined string...
+		// A managed length-defined string...
 
 		struct {
 			strbuf *val_strb;
