@@ -588,7 +588,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		if ((c->arity == 1) && is_literal(c) && !strcmp(src, "{}")) braces = 1;
 
 		if (running && is_literal(c) && !strcmp(src, "$VAR") && q->numbervars && is_integer(c+1)) {
-			unsigned var_nbr = get_numerator(c+1) - q->nv_start;
+			unsigned var_nbr = get_integer(c+1) - q->nv_start;
 			dst += snprintf(dst, dstlen, "%s", varformat(var_nbr));
 			return dst - save_dst;
 		}

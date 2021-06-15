@@ -9834,10 +9834,6 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 		} else if (is_integer(p1)) {
 			len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), get_integer(p1), 10);
 			src1 = tmpbuf1;
-		} else if (is_rational(p1)) {
-			len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), get_numerator(p1), 10);
-			len1 += sprint_int(tmpbuf1+len1, sizeof(tmpbuf1)-len1, get_denominator(p1), 10);
-			src1 = tmpbuf1;
 		} else {
 			len1 = snprintf(tmpbuf1, sizeof(tmpbuf1), "%.17g", get_real(p1));
 			src1 = tmpbuf1;
@@ -9848,10 +9844,6 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 			src2 = GET_STR(p2);
 		} else if (is_integer(p2)) {
 			len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), get_integer(p2), 10);
-			src2 = tmpbuf2;
-		} else if (is_rational(p2)) {
-			len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), get_numerator(p2), 10);
-			len2 += sprint_int(tmpbuf2+len2, sizeof(tmpbuf2)-len2, get_denominator(p2), 10);
 			src2 = tmpbuf2;
 		} else {
 			len2 = snprintf(tmpbuf2, sizeof(tmpbuf1), "%.17g", get_real(p2));
@@ -10778,6 +10770,24 @@ static USE_RESULT pl_status fn_memberchk_2(query *q)
 			if (is_rational(h)) {
 				if ((get_numerator(p1) == get_numerator(h))
 					&& (get_denominator(p1) == get_denominator(h)))
+					return pl_success;
+			}
+
+			p2 = LIST_TAIL(p2);
+			p2 = deref(q, p2, p2_ctx);
+			p2_ctx = q->latest_ctx;
+		}
+
+		return pl_failure;
+	}
+
+	if (is_real(p1)) {
+		while (is_list(p2)) {
+			cell *h = LIST_HEAD(p2);
+			h = deref(q, h, p2_ctx);
+
+			if (is_real(h)) {
+				if (get_real(p1) == get_real(h))
 					return pl_success;
 			}
 
