@@ -124,13 +124,6 @@ int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2)
 
 cell *ERR_CYCLE_CELL = &(cell){};
 
-#if 0
-static double rat_to_float(cell *n)
-{
-	return (double)get_numerator() / get_denominator(n);
-}
-#endif
-
 static pl_status do_yield_0(query *q, int msecs)
 {
 	q->yielded = true;

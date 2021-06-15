@@ -125,9 +125,9 @@ typedef enum {
 
 #define get_real(c) (c)->val_real
 #define set_real(c,v) (c)->val_real = v
-#define get_integer(c) (c)->val_num
-#define set_integer(c,v) { (c)->val_num = v; (c)->val_den = 1; }
-#define get_numerator(c) (c)->val_num
+#define get_integer(c) (c)->val_int
+#define set_integer(c,v) { (c)->val_int = v; (c)->val_den = 1; }
+#define get_numerator(c) (c)->val_int
 #define get_denominator(c) (c)->val_den
 
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
@@ -286,7 +286,7 @@ struct cell_ {
 		// A rational (and integer)...
 
 		struct {
-			int_t val_num;
+			int_t val_int;
 			int_t val_den;
 		};
 
