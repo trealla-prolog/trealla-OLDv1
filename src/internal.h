@@ -52,6 +52,7 @@ typedef uint32_t idx_t;
 #include "map.h"
 #include "trealla.h"
 #include "cdebug.h"
+#include "imath/imrat.h"
 
 static const unsigned INITIAL_NBR_CELLS = 100;		// cells
 
@@ -112,7 +113,6 @@ typedef enum {
 #define is_literal(c) ((c)->val_type == TYPE_LITERAL)
 #define is_cstring(c) ((c)->val_type == TYPE_CSTRING)
 #define is_rational(c) ((c)->val_type == TYPE_RATIONAL)
-#define is_bignum(c) ((c)->val_type == TYPE_BIGNUM)
 #define is_real(c) ((c)->val_type == TYPE_REAL)
 #define is_indirect(c) ((c)->val_type == TYPE_INDIRECT)
 #define is_end(c) ((c)->val_type == TYPE_END)
@@ -204,10 +204,9 @@ enum {
 	TYPE_LITERAL=2,
 	TYPE_CSTRING=3,
 	TYPE_RATIONAL=4,
-	TYPE_BIGNUM=5,
-	TYPE_REAL=6,
-	TYPE_INDIRECT=7,
-	TYPE_END=8
+	TYPE_REAL=5,
+	TYPE_INDIRECT=6,
+	TYPE_END=7
 };
 
 enum {

@@ -870,7 +870,7 @@ static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx,
 	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 }
 
-static bool unify_int(__attribute__((unused)) query *q, cell *p1, cell *p2)
+static bool unify_rational(__attribute__((unused)) query *q, cell *p1, cell *p2)
 {
 	if (is_rational(p2))
 		return (get_numerator(p1) == get_numerator(p2)) && (get_denominator(p1) == get_denominator(p2));
@@ -878,7 +878,7 @@ static bool unify_int(__attribute__((unused)) query *q, cell *p1, cell *p2)
 	return false;
 }
 
-static bool unify_float(__attribute__((unused)) query *q, cell *p1, cell *p2)
+static bool unify_real(__attribute__((unused)) query *q, cell *p1, cell *p2)
 {
 	if (is_real(p2))
 		return get_real(p1) == get_real(p2);
@@ -919,9 +919,8 @@ static const struct dispatch g_disp[] =
 	{TYPE_VARIABLE, NULL},
 	{TYPE_LITERAL, unify_literal},
 	{TYPE_CSTRING, unify_cstring},
-	{TYPE_RATIONAL, unify_int},
-	{TYPE_BIGNUM, NULL},
-	{TYPE_REAL, unify_float},
+	{TYPE_RATIONAL, unify_rational},
+	{TYPE_REAL, unify_real},
 	{0}
 };
 
