@@ -658,6 +658,8 @@ inline static void share_cell(const cell *c)
 	if (is_managed(c)) {
 		if (is_strbuf(c))
 			(c)->val_strb->refcnt++;
+		else if (is_bigint(c))
+			(c)->val_big->refcnt++;
 	}
 }
 
@@ -668,6 +670,12 @@ inline static void unshare_cell(cell *c)
 			if (--(c)->val_strb->refcnt == 0)	{
 				free((c)->val_strb);
 				(c)->val_strb = NULL;
+			}
+		} else if (is_bigint(c)) {
+			if (--(c)->val_big->refcnt == 0)	{
+				mp_rat_clear(&(c)->val_big->rat);
+				free((c)->val_big);
+				(c)->val_big = NULL;
 			}
 		}
 	}
