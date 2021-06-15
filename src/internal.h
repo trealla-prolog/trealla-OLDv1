@@ -15,10 +15,6 @@
 #define USE_INT128 0
 #endif
 
-#ifndef USE_INT32
-#define USE_INT32 0
-#endif
-
 #ifndef USE_THREADS
 #define USE_THREADS 0
 #endif
@@ -26,9 +22,6 @@
 #if USE_INT128
 typedef __int128_t int_t;
 typedef __uint128_t uint_t;
-#elif USE_INT32
-typedef int32_t int_t;
-typedef uint32_t uint_t;
 #else
 typedef int64_t int_t;
 typedef uint64_t uint_t;
@@ -36,9 +29,6 @@ typedef uint64_t uint_t;
 
 #define MY_INT64_MIN (INT64_MIN+1)
 #define MY_INT64_MAX (INT64_MAX)
-
-#define MY_INT32_MIN (INT32_MIN+1)
-#define MY_INT32_MAX (INT32_MAX)
 
 #if (__STDC_VERSION__ >= 201112L) && USE_THREADS
 #include <stdatomic.h>

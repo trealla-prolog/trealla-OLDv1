@@ -12,8 +12,6 @@ endif
 
 ifdef INT128
 CFLAGS += -DUSE_INT128=1
-else ifdef INT32
-CFLAGS += -DUSE_INT32=1
 endif
 
 ifdef THREADS
