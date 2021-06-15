@@ -5505,24 +5505,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_literal(&tmp, g_false_s);
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "prefer_rationals")) {
-		cell tmp;
 
-		if (q->st.m->flag.prefer_rationals)
-			make_literal(&tmp, g_true_s);
-		else
-			make_literal(&tmp, g_false_s);
-
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "rational_syntax")) {
-		cell tmp;
-
-		if (q->st.m->flag.rational_syntax_natural)
-			make_literal(&tmp, index_from_pool(q->st.m->pl, "natural"));
-		else
-			make_literal(&tmp, index_from_pool(q->st.m->pl, "compatibility"));
-
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "dialect")) {
 		cell tmp;
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "trealla"));
@@ -5692,30 +5675,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
 		}
-	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "rational_syntax")) {
-		if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "natural"))
-			q->st.m->flag.rational_syntax_natural = true;
-		else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "compatibility"))
-			q->st.m->flag.rational_syntax_natural = false;
-		else {
-			cell *tmp = alloc_on_heap(q, 3);
-			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
-			tmp[1] = *p1; tmp[1].nbr_cells = 1;
-			tmp[2] = *p2; tmp[2].nbr_cells = 1;
-			return throw_error(q, tmp, "domain_error", "flag_value");
-		}
-	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "prefer_rationals")) {
-		if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "true") || !slicecmp2(GET_STR(p2), LEN_STR(p2), "on"))
-			q->st.m->flag.prefer_rationals = true;
-		else if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "false") || !slicecmp2(GET_STR(p2), LEN_STR(p2), "off"))
-			q->st.m->flag.prefer_rationals = false;
-		else {
-			cell *tmp = alloc_on_heap(q, 3);
-			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
-			tmp[1] = *p1; tmp[1].nbr_cells = 1;
-			tmp[2] = *p2; tmp[2].nbr_cells = 1;
-			return throw_error(q, tmp, "domain_error", "flag_value");
-		}
+
 	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "debug")) {
 		if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "true") || !slicecmp2(GET_STR(p2), LEN_STR(p2), "on"))
 			q->st.m->flag.debug = true;

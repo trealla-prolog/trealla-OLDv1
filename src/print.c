@@ -278,23 +278,17 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 
 	if (is_rational(c)) {
 		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY))) {
-			dst += snprintf(dst, dstlen, "%s0x", get_numerator(c)<0?"-":"");
-			dst += sprint_int(dst, dstlen, get_numerator(c), 16);
+			dst += snprintf(dst, dstlen, "%s0x", get_integer(c)<0?"-":"");
+			dst += sprint_int(dst, dstlen, get_integer(c), 16);
 		} else if ((c->flags & FLAG_OCTAL) && !running) {
-			dst += snprintf(dst, dstlen, "%s0o", get_numerator(c)<0?"-":"");
-			dst += sprint_int(dst, dstlen, get_numerator(c), 8);
-		} else if (get_denominator(c) != 1) {
-			if (q->flag.rational_syntax_natural) {
-				dst += sprint_int(dst, dstlen, get_numerator(c), 10);
-				dst += snprintf(dst, dstlen, "%s", "/");
-				dst += sprint_int(dst, dstlen, get_denominator(c), 10);
-			} else {
-				dst += sprint_int(dst, dstlen, get_numerator(c), 10);
-				dst += snprintf(dst, dstlen, "%s", " rdiv ");
-				dst += sprint_int(dst, dstlen, get_denominator(c), 10);
-			}
-		} else
+			dst += snprintf(dst, dstlen, "%s0o", get_integer(c)<0?"-":"");
+			dst += sprint_int(dst, dstlen, get_integer(c), 8);
+		} else if (!is_integer(c)) {
 			dst += sprint_int(dst, dstlen, get_numerator(c), 10);
+			dst += snprintf(dst, dstlen, "%s", " rdiv ");
+			dst += sprint_int(dst, dstlen, get_denominator(c), 10);
+		} else
+			dst += sprint_int(dst, dstlen, get_integer(c), 10);
 
 		return dst - save_dst;
 	}
@@ -441,18 +435,12 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 	if (is_rational(c)) {
 		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY))) {
-			dst += snprintf(dst, dstlen, "%s0x", get_numerator(c)<0?"-":"");
-			dst += sprint_int(dst, dstlen, get_numerator(c), 16);
-		} else if (get_denominator(c) != 1) {
-			if (q->flag.rational_syntax_natural) {
-				dst += sprint_int(dst, dstlen, get_numerator(c), 10);
-				dst += snprintf(dst, dstlen, "/");
-				dst += sprint_int(dst, dstlen, get_denominator(c), 10);
-			} else {
-				dst += sprint_int(dst, dstlen, get_numerator(c), 10);
-				dst += snprintf(dst, dstlen, " rdiv ");
-				dst += sprint_int(dst, dstlen, get_denominator(c), 10);
-			}
+			dst += snprintf(dst, dstlen, "%s0x", get_integer(c)<0?"-":"");
+			dst += sprint_int(dst, dstlen, get_integer(c), 16);
+		} else if (!is_integer(c)) {
+			dst += sprint_int(dst, dstlen, get_numerator(c), 10);
+			dst += snprintf(dst, dstlen, " rdiv ");
+			dst += sprint_int(dst, dstlen, get_denominator(c), 10);
 		} else
 			dst += sprint_int(dst, dstlen, get_numerator(c), 10);
 
@@ -712,7 +700,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		idx_t rhs_ctx = q->latest_ctx;
 		int space = iswalpha(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "\\+");
-		space += (!strcmp(src, "-") || !strcmp(src, "+")) && is_rational(rhs) && (get_numerator(rhs) < 0);
+		space += (!strcmp(src, "-") || !strcmp(src, "+")) && is_rational(rhs) && (get_integer(rhs) < 0);
 		//if (!strcmp(src, "-") && !is_rational(rhs)) dst += snprintf(dst, dstlen, "%s", " ");
 		int parens = is_structure(rhs) && !strcmp(GET_STR(rhs), ",");
 		dst += snprintf(dst, dstlen, "%s", src);

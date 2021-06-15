@@ -741,16 +741,6 @@ static void directives(parser *p, term *t)
 				p->m->flag.character_escapes = true;
 			else if (!strcmp(PARSER_GET_STR(p2), "false") || !strcmp(PARSER_GET_STR(p2), "off"))
 				p->m->flag.character_escapes = false;
-		} else if (!strcmp(PARSER_GET_STR(p1), "prefer_rationals")) {
-			if (!strcmp(PARSER_GET_STR(p2), "true") || !strcmp(PARSER_GET_STR(p2), "on"))
-				p->m->flag.prefer_rationals = true;
-			else if (!strcmp(PARSER_GET_STR(p2), "false") || !strcmp(PARSER_GET_STR(p2), "off"))
-				p->m->flag.prefer_rationals = false;
-		} else if (!strcmp(PARSER_GET_STR(p1), "rational_syntax")) {
-			if (!strcmp(PARSER_GET_STR(p2), "natural"))
-				p->m->flag.rational_syntax_natural = true;
-			else if (!strcmp(PARSER_GET_STR(p2), "compatibility"))
-				p->m->flag.rational_syntax_natural = false;
 		} else {
 			fprintf(stdout, "Warning: unknown flag: %s\n", PARSER_GET_STR(p1));
 		}
