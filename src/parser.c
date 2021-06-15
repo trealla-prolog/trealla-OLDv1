@@ -1669,11 +1669,12 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 	if (mp_int_to_int(&v2, &val) == MP_RANGE) {
 		p->v.val_big = malloc(sizeof(bigint));
+		p->v.val_big->refcnt = 1;
 		mp_rat_init(&p->v.val_big->rat);
 		mp_int_clear(&p->v.val_big->rat.num);
 		p->v.val_big->rat.num = v2;
 		if (neg) p->v.val_big->rat.num.sign = MP_NEG;
-		p->v.flags |= FLAG_BIGINT;
+		p->v.flags |= FLAG_MANAGED;
 	} else {
 		set_integer(&p->v, val);
 		if (neg) p->v.val_int = -p->v.val_int;

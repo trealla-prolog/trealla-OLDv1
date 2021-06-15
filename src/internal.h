@@ -125,7 +125,7 @@ typedef enum {
 #define is_le(c,n) (get_integer(c) <= (n))
 #define is_lt(c,n) (get_integer(c) < (n))
 
-#define is_bigint(c) ((c)->flags & FLAG_BIGINT)
+#define is_bigint(c) (is_rational(c) && (c)->flags & FLAG_MANAGED)
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
 #define is_string(c) (is_cstring(c) && (c)->flags & FLAG_STRING)
 #define is_managed(c) ((c)->flags & FLAG_MANAGED)
@@ -226,8 +226,9 @@ enum {
 	FLAG_STRING=1<<8,					// used with TYPE_CSTRING
 	FLAG_KEY=1<<9,						// used with keys
 	FLAG_STATIC=1<<10,
-	FLAG_BIGINT=1<<11,					// used with TYPE_RATIONAL
-	FLAG_MANAGED=1<<12,					// any ref-counted object
+	FLAG_MANAGED=1<<11,					// any ref-counted object
+
+	FLAG_SPARE1=1<<12,
 
 	FLAG2_PROCESSED=FLAG_KEY,			// used by bagof
 	FLAG2_FIRST_USE=FLAG_HEX,			// used with TYPE_VARIABLE
