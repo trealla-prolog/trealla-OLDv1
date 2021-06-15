@@ -6734,7 +6734,7 @@ static USE_RESULT pl_status fn_now_0(query *q)
 {
 	int_t secs = get_time_in_usec() / 1000 / 1000;
 	q->accum.val_type = TYPE_RATIONAL;
-	set_numerator(&q->accum, secs);
+	set_integer(&q->accum, secs);
 	return pl_success;
 }
 
@@ -10369,7 +10369,7 @@ static USE_RESULT pl_status fn_sys_lt_2(query *q)
 	int_t num = get_integer(p1);
 
 	if (num < get_integer(p2)) {
-		set_numerator(p1, num+1);
+		set_integer(p1, num+1);
 		return pl_success;
 	}
 
@@ -10499,7 +10499,7 @@ static USE_RESULT pl_status fn_sys_gt_2(query *q)
 	int_t num = get_integer(p1);
 
 	if (num <= get_integer(p2)) {
-		set_numerator(p1, num+1);
+		set_integer(p1, num+1);
 		return pl_failure;
 	}
 
@@ -10569,7 +10569,7 @@ static USE_RESULT pl_status fn_sys_ne_2(query *q)
 	int_t num = get_integer(p1);
 
 	if (num != get_integer(p2)) {
-		set_numerator(p1, num+1);
+		set_integer(p1, num+1);
 		return pl_failure;
 	}
 

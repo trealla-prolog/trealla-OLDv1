@@ -1530,8 +1530,7 @@ static int get_escape(const char **_src, bool *error)
 
 static bool parse_number(parser *p, const char **srcptr, bool neg)
 {
-	set_numerator(&p->v, 0);
-	set_denominator(&p->v, 1);
+	set_integer(&p->v, 0);
 	p->v.flags = 0;
 	const char *s = *srcptr;
 
@@ -1561,7 +1560,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 		p->v.val_type = TYPE_RATIONAL;
 		set_integer(&p->v, v);
-		if (neg) set_numerator(&p->v, -get_numerator(&p->v));
+		if (neg) set_integer(&p->v, -get_integer(&p->v));
 		*srcptr = s;
 		return true;
 	}
@@ -1605,7 +1604,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_BINARY;
 		set_integer(&p->v, v);
-		if (neg) set_numerator(&p->v, -get_numerator(&p->v));
+		if (neg) set_integer(&p->v, -get_integer(&p->v));
 		*srcptr = s;
 		return true;
 	}
@@ -1643,7 +1642,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_OCTAL;
 		set_integer(&p->v, v);
-		if (neg) set_numerator(&p->v, -get_numerator(&p->v));
+		if (neg) set_integer(&p->v, -get_integer(&p->v));
 		*srcptr = s;
 		return true;
 	}
@@ -1685,7 +1684,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		p->v.val_type = TYPE_RATIONAL;
 		p->v.flags |= FLAG_HEX;
 		set_integer(&p->v, v);
-		if (neg) set_numerator(&p->v, -get_numerator(&p->v));
+		if (neg) set_integer(&p->v, -get_integer(&p->v));
 		*srcptr = s;
 		return true;
 	}
@@ -1730,51 +1729,23 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 	p->v.val_type = TYPE_RATIONAL;
 	set_integer(&p->v, v);
-	if (neg) set_numerator(&p->v, -get_numerator(&p->v));
-	int try_rational = 0;
+	if (neg) set_integer(&p->v, -get_integer(&p->v));
+	strtod(tmpptr, &tmpptr);
 
-#if 0
-	module *m = p->m;
+	if ((tmpptr[-1] == '.')  || iswspace(tmpptr[-1]))
+		tmpptr--;
 
-	if ((*s == 'r') || (*s == 'R'))
-		try_rational = 1;
-	else if ((*s == '/') && p->flag.rational_syntax_natural)
-		try_rational = 1;
-#endif
+	*srcptr = tmpptr;
+	ch = peek_char_utf8(*srcptr);
 
-	if (!try_rational) {
-		strtod(tmpptr, &tmpptr);
+	if ((ch == '(') || iswalpha(ch)) {
+		if (DUMP_ERRS || !p->do_read_term)
+			fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
-		if ((tmpptr[-1] == '.')  || iswspace(tmpptr[-1]))
-			tmpptr--;
-
-		*srcptr = tmpptr;
-		int ch = peek_char_utf8(*srcptr);
-
-		if ((ch == '(') || iswalpha(ch)) {
-			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
-
-			p->error = true;
-			return false;
-		}
-
-		return true;
+		p->error = true;
+		return false;
 	}
 
-	s++;
-	v = 0;
-
-	while ((*s >= '0') && (*s <= '9')) {
-		v *= 10;
-		v += *s - '0';
-		s++;
-	}
-
-	set_denominator(&p->v, (int_t)v);
-	do_reduce(&p->v);
-	if (neg) set_numerator(&p->v, -get_numerator(&p->v));
-	*srcptr = s;
 	return true;
 }
 
@@ -2561,8 +2532,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		bool found = false;
 
 		if (p->v.val_type == TYPE_RATIONAL) {
-			set_numerator(c, get_numerator(&p->v));
-			set_denominator(c, get_denominator(&p->v));
+			set_integer(c, get_integer(&p->v));
 			c->flags = p->v.flags;
 		}
 		else if (p->v.val_type == TYPE_REAL) {

@@ -128,9 +128,7 @@ typedef enum {
 #define get_integer(c) (c)->val_num
 #define set_integer(c,v) { (c)->val_num = v; (c)->val_den = 1; }
 #define get_numerator(c) (c)->val_num
-#define set_numerator(c,v) (c)->val_num = v
 #define get_denominator(c) (c)->val_den
-#define set_denominator(c,v) (c)->val_den = v
 
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
 #define is_string(c) (is_cstring(c) && (c)->flags & FLAG_STRING)
