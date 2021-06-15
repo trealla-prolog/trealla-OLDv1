@@ -276,6 +276,69 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 	if (depth > MAX_DEPTH)
 		return -1;
 
+	if (is_bigint(c) && is_integer(c)) {
+		int radix = 10;
+
+		if (c->flags & FLAG_BINARY)
+			radix = 2;
+		else if (c->flags & FLAG_HEX)
+			radix = 16;
+		else if ((c->flags & FLAG_OCTAL) && !running)
+			radix = 8;
+
+		if (c->flags & FLAG_BINARY)
+			dst += snprintf(dst, dstlen, "%s0b", is_negative(c)?"-":"");
+		else if (c->flags & FLAG_HEX)
+			dst += snprintf(dst, dstlen, "%s0x", is_negative(c)?"-":"");
+		else if ((c->flags & FLAG_OCTAL) && !running)
+			dst += snprintf(dst, dstlen, "%s0o", is_negative(c)?"-":"");
+
+		if (!dst)
+			dst += mp_int_string_len(&c->val_rat->num, radix);
+		else
+			dst += mp_int_to_string(&c->val_rat->num, radix, dst, dstlen);
+
+		return dst - save_dst;
+	}
+
+	if (is_bigint(c)) {
+		int radix = 10;
+
+		if (c->flags & FLAG_BINARY)
+			radix = 2;
+		else if (c->flags & FLAG_HEX)
+			radix = 16;
+		else if ((c->flags & FLAG_OCTAL) && !running)
+			radix = 8;
+
+		if (c->flags & FLAG_BINARY)
+			dst += snprintf(dst, dstlen, "%s0b", is_negative(c)?"-":"");
+		else if (c->flags & FLAG_HEX)
+			dst += snprintf(dst, dstlen, "%s0x", is_negative(c)?"-":"");
+		else if ((c->flags & FLAG_OCTAL) && !running)
+			dst += snprintf(dst, dstlen, "%s0o", is_negative(c)?"-":"");
+
+		if (!dst) {
+			dst += mp_int_string_len(&c->val_rat->num, radix);
+			dst += snprintf(dst, dstlen, "%s", " rdiv ");
+
+			if (c->flags & FLAG_BINARY)
+				dst += snprintf(dst, dstlen, "0b");
+			else if (c->flags & FLAG_HEX)
+				dst += snprintf(dst, dstlen, "0x");
+			else if ((c->flags & FLAG_OCTAL) && !running)
+				dst += snprintf(dst, dstlen, "0o");
+
+			dst += mp_int_string_len(&c->val_rat->den, radix);
+		} else {
+			dst += mp_int_to_string(&c->val_rat->num, 10, dst, dstlen);
+			dst += snprintf(dst, dstlen, "%s", " rdiv ");
+			dst += mp_int_to_string(&c->val_rat->den, 10, dst, dstlen);
+		}
+
+		return dst - save_dst;
+	}
+
 	if (is_rational(c)) {
 		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY))) {
 			dst += snprintf(dst, dstlen, "%s0x", get_integer(c)<0?"-":"");
