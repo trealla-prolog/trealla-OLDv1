@@ -294,10 +294,10 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 			dst += snprintf(dst, dstlen, "%s0o", is_negative(c)?"-":"");
 
 		if (!dstlen)
-			dst += mp_int_string_len(&c->val_rat->num, radix);
+			dst += mp_int_string_len(&c->val_big->rat.num, radix);
 		else {
-			size_t len = mp_int_string_len(&c->val_rat->num, radix);
-			mp_int_to_string(&c->val_rat->num, radix, dst, dstlen);
+			size_t len = mp_int_string_len(&c->val_big->rat.num, radix);
+			mp_int_to_string(&c->val_big->rat.num, radix, dst, dstlen);
 			dst += len;
 		}
 
@@ -322,7 +322,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 			dst += snprintf(dst, dstlen, "%s0o", is_negative(c)?"-":"");
 
 		if (!dstlen) {
-			dst += mp_int_string_len(&c->val_rat->num, radix);
+			dst += mp_int_string_len(&c->val_big->rat.num, radix);
 			dst += snprintf(dst, dstlen, "%s", " rdiv ");
 
 			if (c->flags & FLAG_BINARY)
@@ -332,14 +332,14 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 			else if ((c->flags & FLAG_OCTAL) && !running)
 				dst += snprintf(dst, dstlen, "0o");
 
-			dst += mp_int_string_len(&c->val_rat->den, radix);
+			dst += mp_int_string_len(&c->val_big->rat.den, radix);
 		} else {
-			size_t len = mp_int_string_len(&c->val_rat->num, radix);
-			mp_int_to_string(&c->val_rat->num, 10, dst, dstlen);
+			size_t len = mp_int_string_len(&c->val_big->rat.num, radix);
+			mp_int_to_string(&c->val_big->rat.num, 10, dst, dstlen);
 			dst += len;
 			dst += snprintf(dst, dstlen, "%s", " rdiv ");
-			len = mp_int_string_len(&c->val_rat->den, radix);
-			mp_int_to_string(&c->val_rat->den, 10, dst, dstlen);
+			len = mp_int_string_len(&c->val_big->rat.den, radix);
+			mp_int_to_string(&c->val_big->rat.den, 10, dst, dstlen);
 			dst += len;
 		}
 
@@ -521,10 +521,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			dst += snprintf(dst, dstlen, "%s0o", is_negative(c)?"-":"");
 
 		if (!dstlen)
-			dst += mp_int_string_len(&c->val_rat->num, radix);
+			dst += mp_int_string_len(&c->val_big->rat.num, radix);
 		else {
-			size_t len = mp_int_string_len(&c->val_rat->num, radix);
-			mp_int_to_string(&c->val_rat->num, radix, dst, dstlen);
+			size_t len = mp_int_string_len(&c->val_big->rat.num, radix);
+			mp_int_to_string(&c->val_big->rat.num, radix, dst, dstlen);
 			dst += len;
 		}
 
@@ -549,7 +549,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			dst += snprintf(dst, dstlen, "%s0o", is_negative(c)?"-":"");
 
 		if (!dstlen) {
-			dst += mp_int_string_len(&c->val_rat->num, radix);
+			dst += mp_int_string_len(&c->val_big->rat.num, radix);
 			dst += snprintf(dst, dstlen, "%s", " rdiv ");
 
 			if (c->flags & FLAG_BINARY)
@@ -559,14 +559,14 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			else if ((c->flags & FLAG_OCTAL) && !running)
 				dst += snprintf(dst, dstlen, "0o");
 
-			dst += mp_int_string_len(&c->val_rat->den, radix);
+			dst += mp_int_string_len(&c->val_big->rat.den, radix);
 		} else {
-			size_t len = mp_int_string_len(&c->val_rat->num, radix);
-			mp_int_to_string(&c->val_rat->num, 10, dst, dstlen);
+			size_t len = mp_int_string_len(&c->val_big->rat.num, radix);
+			mp_int_to_string(&c->val_big->rat.num, 10, dst, dstlen);
 			dst += len;
 			dst += snprintf(dst, dstlen, "%s", " rdiv ");
-			len = mp_int_string_len(&c->val_rat->den, radix);
-			mp_int_to_string(&c->val_rat->den, 10, dst, dstlen);
+			len = mp_int_string_len(&c->val_big->rat.den, radix);
+			mp_int_to_string(&c->val_big->rat.den, 10, dst, dstlen);
 			dst += len;
 		}
 

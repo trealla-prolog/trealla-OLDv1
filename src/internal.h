@@ -146,7 +146,7 @@ typedef enum {
 #define is_integer(c) 											\
 	(is_rational(c) ? 											\
 		is_bigint(c) ? 											\
-			mp_rat_is_integer((c)->val_rat) 					\
+			mp_rat_is_integer(&(c)->val_big->rat)				\
 		: get_denominator(c) == 1		 						\
 	: false)
 
@@ -155,6 +155,11 @@ typedef struct {
 	size_t len;
 	char cstr[];
 } strbuf;
+
+typedef struct {
+	int64_t refcnt;
+	mpq_t rat;
+} bigint;
 
 #define SET_STR(c,s,n,off) {									\
 	strbuf *strb = malloc(sizeof(strbuf) + (n) + 1);			\
@@ -294,7 +299,7 @@ struct cell_ {
 		// A managed bigint-rational...
 
 		struct {
-			mp_rat val_rat;
+			bigint *val_big;
 		};
 
 		// A double...
