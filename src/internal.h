@@ -124,21 +124,21 @@ typedef enum {
 #define is_cons_list(c) (is_iso_list(c) && is_variable(c+2))
 
 #define get_real(c) (c)->val_real
-#define set_real(c,v) (c)->val_real = v
+#define set_real(c,v) (c)->val_real = (v)
 #define get_integer(c) (c)->val_int
-#define set_integer(c,v) { (c)->val_int = v; (c)->val_den = 1; }
+#define set_integer(c,v) { (c)->val_int = (v); (c)->val_den = 1; }
 #define get_numerator(c) (c)->val_int
 #define get_denominator(c) (c)->val_den
 
 #define is_negative(c) (is_rational(c) && (get_numerator(c) < 0))
 #define is_positive(c) (is_rational(c) && (get_numerator(c) > 0))
 
-#define is_gt(c,n) (is_rational(c) && (get_numerator(c) > n))
-#define is_ge(c,n) (is_rational(c) && (get_numerator(c) >= n))
-#define is_eq(c,n) (is_rational(c) && (get_numerator(c) == n))
-#define is_ne(c,n) (is_rational(c) && (get_numerator(c) != n))
-#define is_le(c,n) (is_rational(c) && (get_numerator(c) <= n))
-#define is_lt(c,n) (is_rational(c) && (get_numerator(c) < n))
+#define is_gt(c,n) (is_rational(c) && (get_numerator(c) > (n)))
+#define is_ge(c,n) (is_rational(c) && (get_numerator(c) >= (n)))
+#define is_eq(c,n) (is_rational(c) && (get_numerator(c) == (n)))
+#define is_ne(c,n) (is_rational(c) && (get_numerator(c) != (n)))
+#define is_le(c,n) (is_rational(c) && (get_numerator(c) <= (n)))
+#define is_lt(c,n) (is_rational(c) && (get_numerator(c) < (n)))
 
 #define is_bigint(c) (is_rational(c) && is_managed(c))
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))

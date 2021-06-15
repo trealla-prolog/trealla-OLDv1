@@ -1392,7 +1392,7 @@ static int get_stream(query *q, cell *p1)
 		return -1;
 	}
 
-	if (is_negative(p1) || (get_integer(p1) >= MAX_STREAMS)) {
+	if (is_negative(p1) || is_ge(p1,MAX_STREAMS)) {
 		//DISCARD_RESULT throw_error(q, p1, "type_error", "stream");
 		return -1;
 	}
@@ -1410,7 +1410,7 @@ static bool is_closed_stream(cell *p1)
 	if (!(p1->flags&FLAG_STREAM))
 		return false;
 
-	if (is_negative(p1) || (get_integer(p1) >= MAX_STREAMS))
+	if (is_negative(p1) || is_ge(p1,MAX_STREAMS))
 		return false;
 
 	if (g_streams[get_integer(p1)].fp)
@@ -3245,7 +3245,7 @@ static USE_RESULT pl_status fn_iso_put_code_1(query *q)
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
-	if (is_integer(p1) && (get_integer(p1) <= -1))
+	if (is_integer(p1) && is_le(p1,-1))
 		return throw_error(q, p1, "representation_error", "character_code");
 
 	int ch = (int)get_integer(p1);
@@ -3272,7 +3272,7 @@ static USE_RESULT pl_status fn_iso_put_code_2(query *q)
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
-	if (is_integer(p1) && (get_integer(p1) <= -1))
+	if (is_integer(p1) && is_le(p1,-1))
 		return throw_error(q, p1, "representation_error", "character_code");
 
 	int ch = (int)get_integer(p1);
@@ -3295,7 +3295,7 @@ static USE_RESULT pl_status fn_iso_put_byte_1(query *q)
 		return throw_error(q, &tmp, "permission_error", "output,text_stream");
 	}
 
-	if (is_integer(p1) && (get_integer(p1) <= -1))
+	if (is_integer(p1) && is_le(p1,-1))
 		return throw_error(q, p1, "representation_error", "character_code");
 
 	int ch = (int)get_integer(p1);
@@ -3318,7 +3318,7 @@ static USE_RESULT pl_status fn_iso_put_byte_2(query *q)
 	if (!str->binary)
 		return throw_error(q, pstr, "permission_error", "output,text_stream");
 
-	if (is_integer(p1) && (get_integer(p1) <= -1))
+	if (is_integer(p1) && is_le(p1,-1))
 		return throw_error(q, p1, "representation_error", "character_code");
 
 	int ch = (int)get_integer(p1);
@@ -5253,7 +5253,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 		if (is_negative(p3))
 			return throw_error(q, p3, "domain_error", "not_less_than_zero");
 
-		if (get_integer(p3) > (MAX_ARITY/2))
+		if (is_gt(p3,MAX_ARITY/2))
 			return throw_error(q, p3, "representation_error", "max_arity");
 
 		if (!is_atom(p2) && is_positive(p3))
@@ -6144,7 +6144,7 @@ static USE_RESULT pl_status fn_iso_op_3(query *q)
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,list_or_atom);
 
-	if (is_integer(p1) && (is_negative(p1) || (get_integer(p1) > 1200)))
+	if (is_integer(p1) && (is_negative(p1) || is_gt(p1,1200)))
 		return throw_error(q, p1, "domain_error", "operator_priority");
 
 	LIST_HANDLER(p3);
@@ -10675,7 +10675,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		if (is_negative(p2))
 			return throw_error(q, p2, "domain_error", "not_less_than_zero");
 
-		if (get_integer(p2) >= MAX_VARS)
+		if (is_ge(p2,MAX_VARS))
 			return throw_error(q, p2, "resource_error", "too_many_vars");
 
 		idx_t nbr = get_integer(p2);
