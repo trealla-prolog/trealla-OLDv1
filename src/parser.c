@@ -1668,10 +1668,12 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	}
 
 	if (mp_int_to_int(&v2, &val) == MP_RANGE) {
-		// TODO: use bigints
-		set_integer(&p->v, strtoll(tmpptr, NULL, 10));
-		if (neg) p->v.val_int = -p->v.val_int;
-		mp_int_clear(&v2);
+		p->v.val_rat = malloc(sizeof(mpq_t));
+		mp_rat_init(p->v.val_rat);
+		mp_int_clear(&p->v.val_rat->num);
+		p->v.val_rat->num = v2;
+		if (neg) p->v.val_rat->num.sign = MP_NEG;
+		p->v.flags |= FLAG_BIGINT;
 	} else {
 		set_integer(&p->v, val);
 		if (neg) p->v.val_int = -p->v.val_int;

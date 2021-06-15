@@ -125,13 +125,12 @@ typedef enum {
 #define is_le(c,n) (get_integer(c) <= (n))
 #define is_lt(c,n) (get_integer(c) < (n))
 
-#define is_bigint(c) (is_rational(c) && is_managed(c))
+#define is_bigint(c) ((c)->flags & FLAG_BIGINT)
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
 #define is_string(c) (is_cstring(c) && (c)->flags & FLAG_STRING)
 #define is_managed(c) ((c)->flags & FLAG_MANAGED)
 #define is_blob(c) (is_cstring(c) && (c)->flags & FLAG_BLOB)
 #define is_list(c) (is_iso_list(c) || is_string(c))
-#define is_integer(c) (is_rational(c) && (get_denominator(c) == 1))
 #define is_static(c) (is_blob(c) && ((c)->flags & FLAG_STATIC))
 #define is_strbuf(c) (is_blob(c) && !((c)->flags & FLAG_STATIC))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
@@ -143,6 +142,13 @@ typedef enum {
 #define is_tail_recursive(c) ((c)->flags & FLAG_TAIL_REC)
 #define is_key(c) ((c)->flags & FLAG_KEY)
 #define is_op(c) (c->flags & 0xE000)
+
+#define is_integer(c) 											\
+	(is_rational(c) ? 											\
+		is_bigint(c) ? 											\
+			mp_rat_is_integer((c)->val_rat) 					\
+		: get_denominator(c) == 1		 						\
+	: false)
 
 typedef struct {
 	int64_t refcnt;
@@ -215,9 +221,8 @@ enum {
 	FLAG_STRING=1<<8,					// used with TYPE_CSTRING
 	FLAG_KEY=1<<9,						// used with keys
 	FLAG_STATIC=1<<10,
-	FLAG_MANAGED=1<<11,					// any ref-counted object
-
-	FLAG_SPARE1=1<<12,
+	FLAG_BIGINT=1<<11,					// used with TYPE_RATIONAL
+	FLAG_MANAGED=1<<12,					// any ref-counted object
 
 	FLAG2_PROCESSED=FLAG_KEY,			// used by bagof
 	FLAG2_FIRST_USE=FLAG_HEX,			// used with TYPE_VARIABLE
