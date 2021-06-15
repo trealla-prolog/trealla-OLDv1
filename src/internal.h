@@ -133,12 +133,14 @@ typedef enum {
 #define is_negative(c) (is_rational(c) && (get_numerator(c) < 0))
 #define is_positive(c) (is_rational(c) && (get_numerator(c) > 0))
 
-#define is_gt(c,n) (is_rational(c) && (get_numerator(c) > (n)))
-#define is_ge(c,n) (is_rational(c) && (get_numerator(c) >= (n)))
-#define is_eq(c,n) (is_rational(c) && (get_numerator(c) == (n)))
-#define is_ne(c,n) (is_rational(c) && (get_numerator(c) != (n)))
-#define is_le(c,n) (is_rational(c) && (get_numerator(c) <= (n)))
-#define is_lt(c,n) (is_rational(c) && (get_numerator(c) < (n)))
+#define is_gt(c,n) (is_rational(c) && (get_integer(c) > (n)))
+#define is_ge(c,n) (is_rational(c) && (get_integer(c) >= (n)))
+#define is_eq(c,n) (is_rational(c) && (get_integer(c) == (n)))
+#define is_ne(c,n) (is_rational(c) && (get_integer(c) != (n)))
+#define is_le(c,n) (is_rational(c) && (get_integer(c) <= (n)))
+#define is_lt(c,n) (is_rational(c) && (get_integer(c) < (n)))
+
+#define cmp_gt(c1,c2) (is_rational(c1) && is_rational(c2) && (get_integer(c1) > get_integer(c2)))
 
 #define is_bigint(c) (is_rational(c) && is_managed(c))
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
