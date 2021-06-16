@@ -4,8 +4,7 @@ Trealla Prolog
 A compact, efficient Prolog interpreter with
 [ISO compliant](https://infradig.github.io/trealla/) aspirations.
 
-	Integers are 64-bit (optionally 32 or 128-bit)
-	Integer overflow detection
+	Integers are 64-bit, with promotion to unbounded
 	Rationals are a native type
 	Reals are double
 	Atoms are UTF-8 of unlimited length
