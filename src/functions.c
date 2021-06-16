@@ -1069,7 +1069,7 @@ static USE_RESULT pl_status fn_iso_pow_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_integer(&p1) && is_small_integer(&p2)) {
+	if (is_bigint(&p1) && is_small_integer(&p2)) {
 		if ((mp_int_compare_zero(&p1.val_big->rat.num) == 0) && (p2.val_int < 0))
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
