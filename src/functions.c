@@ -178,6 +178,19 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 		return pl_success;
 	}
 
+	if (is_bigint(p1) && is_bigint(&p2))
+		return !mp_rat_compare(&p1->val_big->rat, &p2.val_big->rat);
+
+	if (is_bigint(p1) && is_rational(&p2)) {
+		mp_rat_set_value(&q->accum_rat, get_integer(&p2), 1);
+		return !mp_rat_compare(&p1->val_big->rat, &q->accum_rat);
+	}
+
+	if (is_bigint(&p2) && is_rational(p1)) {
+		mp_rat_set_value(&q->accum_rat, get_integer(p1), 1);
+		return !mp_rat_compare(&p2.val_big->rat, &q->accum_rat);
+	}
+
 	if (is_integer(p1) && is_integer(&p2))
 		return (p1->val_int == p2.val_int);
 
@@ -246,6 +259,12 @@ static USE_RESULT pl_status fn_iso_integer_1(query *q)
 			q->accum.val_int = (int_t)p1.val_real;
 			q->accum.val_den = 1;
 			q->accum.val_type = TYPE_RATIONAL;
+			return pl_success;
+		}
+
+		if (is_bigint(&p1)) {
+			mp_rat_init_copy(&q->accum_rat, &p1.val_big->rat);
+			SET_ACCUM();
 			return pl_success;
 		}
 
@@ -432,13 +451,10 @@ static USE_RESULT pl_status fn_iso_sqrt_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
 		if (p1.val_int < 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_real = sqrt((double)p1.val_int / p1.val_den);
+		q->accum.val_real = sqrt((double)get_integer(&p1));
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1)) {
 		if (p1.val_real == -1)
