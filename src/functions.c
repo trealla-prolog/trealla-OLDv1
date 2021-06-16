@@ -194,9 +194,8 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 	if (is_integer(p1) && is_integer(&p2))
 		return (p1->val_int == p2.val_int);
 
-	if (is_rational(p1) && is_rational(&p2)) {
-		return (p1->val_int == p2.val_int) && (p1->val_den == p2.val_den);
-	}
+	if (is_rational(p1) && is_rational(&p2))
+		return (p1->val_int == p2.val_int);
 
 	if (is_real(p1) && is_real(&p2))
 		return p1->val_real == p2.val_real;
