@@ -879,7 +879,7 @@ static bool unify_rational(__attribute__((unused)) query *q, cell *p1, cell *p2)
 		return !mp_rat_compare_value(&p1->val_big->rat, p2->val_int, 1);
 
 	if (is_bigint(p2) && is_integer(p1))
-		return !mp_rat_compare_value(&p1->val_big->rat, p2->val_int, 1);
+		return !mp_rat_compare_value(&p2->val_big->rat, p1->val_int, 1);
 
 	if (is_rational(p2))
 		return (get_integer(p1) == get_integer(p2));
