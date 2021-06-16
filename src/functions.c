@@ -273,6 +273,14 @@ static USE_RESULT pl_status fn_iso_e_0(query *q)
 		mp_rat_init(&q->accum.val_big->rat);					\
 		mp_rat_copy(&q->accum_rat, &q->accum.val_big->rat);
 
+// Simple one for now...
+
+#define OVERFLOW(op,v1,v2)										\
+	(v1) > INT32_MAX ||											\
+	(v1) < INT32_MIN ||											\
+	(v2) > INT32_MAX ||											\
+	(v2) < INT32_MIN
+
 USE_RESULT pl_status fn_iso_add_2(query *q)
 {
 	CHECK_CALC();
@@ -316,6 +324,23 @@ USE_RESULT pl_status fn_iso_add_2(query *q)
 			q->accum.val_type = TYPE_REAL;
 			q->accum.flags = 0;
 		}
+	} else if (is_integer(&p1) && is_integer(&p2)) {
+		if (OVERFLOW(+, p1.val_int, p2.val_int)) {
+			mp_rat_set_value(&q->accum_rat, q->accum.val_int, 1);
+			SET_ACCUM();
+		} else {
+			q->accum.val_int = p1.val_int + p2.val_int;
+			q->accum.val_type = TYPE_RATIONAL;
+		}
+	} else if (is_integer(&p1) && is_real(&p2)) {
+		q->accum.val_real = (double)p1.val_int + p2.val_real;
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_real(&p2)) {
+		q->accum.val_real = p1.val_real + p2.val_real;
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_real(&p1) && is_integer(&p2)) {
+		q->accum.val_real = p1.val_real + p2.val_int;
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
