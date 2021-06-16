@@ -1251,7 +1251,29 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 	if (!is_integer(&p2))
 		return throw_error(q, &p2, "type_error", "integer");
 
-	DO_OP2int(%, div, p1, p2);
+	if (is_bigint(&p1) || is_bigint(&p2))
+		return throw_error(q, &p2, "type_error", "integer");
+
+	if (is_integer(&p1) && is_integer(&p2)) {
+		if (p2.val_int == 0)
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
+
+		q->accum.val_int = (double)(p1.val_int % p2.val_int);
+		q->accum.val_type = TYPE_RATIONAL;
+
+		if (p2.val_int < 0)
+			q->accum.val_int *= -1;
+
+		if (p1.val_int < 0)
+			q->accum.val_int *= -1;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else if (!is_integer(&p1)) {
+		return throw_error(q, &p1, "type_error", "integer");
+	} else if (!is_integer(&p2)) {
+		return throw_error(q, &p2, "type_error", "integer");
+	}
+
 	return pl_success;
 }
 
