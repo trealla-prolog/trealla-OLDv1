@@ -128,6 +128,28 @@
 		return throw_error(q, &p1, "type_error", "evaluable"); \
 	}
 
+#if 0
+static mp_result mp_rat_rem(mp_rat a, mp_rat b, mp_rat c)
+{
+	mp_rat_div(a, b, c);
+	mpq_t d;
+	mp_rat_init(&d);
+	mp_rat_mul(c, b, &d);
+	mp_rat_sub(c, &d, c);
+	return MP_OK;
+}
+#endif
+
+static double mp_int_to_float(cell *p1)
+{
+	size_t len = mp_int_string_len(&p1->val_big->rat.num, 10);
+	char *buf = malloc(len+1);
+	mp_int_to_string(&p1->val_big->rat.num, 10, buf, len);
+	double d = atof(buf);
+	free(buf);
+	return d;
+}
+
 #define CHECK_CALC()							\
 	if (!q->calc) {								\
 		if (q->st.m->flag.unknown == 0)				\
@@ -207,16 +229,6 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 		return is_real(&p2) ? isinf(p2.val_real) : 0;
 
 	return pl_failure;
-}
-
-static double mp_int_to_float(cell *p1)
-{
-	size_t len = mp_int_string_len(&p1->val_big->rat.num, 10);
-	char *buf = malloc(len+1);
-	mp_int_to_string(&p1->val_big->rat.num, 10, buf, len);
-	double d = atof(buf);
-	free(buf);
-	return d;
 }
 
 static USE_RESULT pl_status fn_iso_float_1(query *q)
@@ -374,18 +386,6 @@ static USE_RESULT pl_status fn_iso_e_0(query *q)
 	q->accum.val_type = TYPE_REAL;
 	return pl_success;
 }
-
-#if 0
-static mp_result mp_rat_rem(mp_rat a, mp_rat b, mp_rat c)
-{
-	mp_rat_div(a, b, c);
-	mpq_t d;
-	mp_rat_init(&d);
-	mp_rat_mul(c, b, &d);
-	mp_rat_sub(c, &d, c);
-	return MP_OK;
-}
-#endif
 
 USE_RESULT pl_status fn_iso_add_2(query *q)
 {
