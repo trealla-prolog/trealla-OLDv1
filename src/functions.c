@@ -142,7 +142,7 @@ static mp_result mp_rat_rem(mp_rat a, mp_rat b, mp_rat c)
 
 static double mp_int_to_float(mpz_t *v)
 {
-	size_t len = mp_int_string_len(v, 10);
+	size_t len = mp_int_string_len(v, 10) - 1;
 	char *buf = malloc(len+1);
 	mp_int_to_string(v, 10, buf, len);
 	double d = atof(buf);
@@ -2231,8 +2231,8 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 			SET_ACCUM();
 		} else if (is_bigint(&p2) && is_integer(&p1)) {
 			mpz_t tmp1;
-			mp_int_set_value(&tmp1, p1.val_int);
-			mp_int_gcd(&tmp1, &p1.val_big->rat.num, &q->accum_rat.num);
+			mp_int_init_value(&tmp1, p1.val_int);
+			mp_int_gcd(&tmp1, &p2.val_big->rat.num, &q->accum_rat.num);
 			mp_int_clear(&tmp1);
 			mp_int_set_value(&q->accum_rat.den, 1);
 			SET_ACCUM();
