@@ -301,7 +301,10 @@ static USE_RESULT pl_status fn_iso_abs_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 	q->accum.val_type = p1.val_type;
 
-	if (is_rational(&p1))
+	if (is_bigint(&p1)) {
+		mp_rat_abs(&p1.val_big->rat, &q->accum_rat);
+		SET_ACCUM();
+	} else if (is_rational(&p1))
 		q->accum.val_int = llabs((long long)p1.val_int);
 	else if (is_real(&p1))
 		q->accum.val_real = fabs(p1.val_real);
