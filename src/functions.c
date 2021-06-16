@@ -358,30 +358,7 @@ static USE_RESULT pl_status fn_iso_sub_2(query *q)
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
-
-	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_int = p1.val_int - p2.val_int;
-		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_rational(&p1) && is_rational(&p2)) {
-		q->accum.val_int = p1.val_int * p2.val_den;
-		q->accum.val_int -= p2.val_int * p1.val_den;
-		q->accum.val_den = p1.val_den * p2.val_den;
-		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_integer(&p1) && is_real(&p2)) {
-		q->accum.val_real = (double)p1.val_int - p2.val_real;
-		q->accum.val_type = TYPE_REAL;
-	} else if (is_real(&p1) && is_real(&p2)) {
-		q->accum.val_real = p1.val_real - p2.val_real;
-		q->accum.val_type = TYPE_REAL;
-	} else if (is_real(&p1) && is_integer(&p2)) {
-		q->accum.val_real = p1.val_real - p2.val_int;
-		q->accum.val_type = TYPE_REAL;
-	} else if (is_variable(&p1) || is_variable(&p2)) {
-		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
-	} else {
-		return throw_error(q, &p1, "type_error", "evaluable");
-	}
-
+	DO_OP2(-, sub, p1, p2);
 	return pl_success;
 }
 
@@ -392,31 +369,7 @@ static USE_RESULT pl_status fn_iso_mul_2(query *q)
 	GET_NEXT_ARG(p2_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
-
-	if ((is_integer(&p1)) && is_integer(&p2)) {
-		q->accum.val_int = p1.val_int * p2.val_int;
-		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_rational(&p1) && is_rational(&p2)) {
-		q->accum.val_int = p1.val_int * p2.val_den;
-		q->accum.val_int *= p2.val_int * p1.val_den;
-		q->accum.val_den = p1.val_den * p2.val_den;
-		q->accum.val_den *= p1.val_den * p2.val_den;
-		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_integer(&p1) && is_real(&p2)) {
-		q->accum.val_real = (double)p1.val_int * p2.val_real;
-		q->accum.val_type = TYPE_REAL;
-	} else if (is_real(&p1) && is_real(&p2)) {
-		q->accum.val_real = p1.val_real * p2.val_real;
-		q->accum.val_type = TYPE_REAL;
-	} else if (is_real(&p1) && is_integer(&p2)) {
-		q->accum.val_real = p1.val_real * p2.val_int;
-		q->accum.val_type = TYPE_REAL;
-	} else if (is_variable(&p1) || is_variable(&p2)) {
-		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
-	} else {
-		return throw_error(q, &p1, "type_error", "evaluable");
-	}
-
+	DO_OP2(*, mul, p1, p2);
 	return pl_success;
 }
 
