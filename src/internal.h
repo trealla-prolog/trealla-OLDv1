@@ -515,6 +515,7 @@ struct query_ {
 	clause *dirty_list;
 	slot *save_e;
 	cell accum;
+	mpq_t accum_rat;
 	prolog_state st;
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
 	uint64_t step, qid, time_started;

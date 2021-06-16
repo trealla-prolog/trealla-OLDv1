@@ -1681,6 +1681,7 @@ query *create_query(module *m, bool is_task)
 	q->st.m = m;
 	q->trace = m->pl->trace;
 	q->flag = m->flag;
+	mp_rat_init(&q->accum_rat);
 
 	// Allocate these now...
 
