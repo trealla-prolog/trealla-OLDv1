@@ -2225,9 +2225,9 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 			mp_int_gcd(&tmp1, &tmp2, &tmp3);
 			mp_int_clear(&tmp1);
 			mp_int_clear(&tmp2);
-			mp_rat_clear(&q->accum_rat);
+			mp_int_clear(&q->accum_rat.num);
 			q->accum_rat.num = tmp3;
-			mp_int_init(&q->accum_rat.den);
+			mp_int_set_value(&q->accum_rat.den, 1);
 			SET_ACCUM();
 		} else if (is_bigint(&p1) && is_integer(&p2)) {
 			mpz_t tmp1, tmp2, tmp3;
@@ -2238,9 +2238,9 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 			mp_int_gcd(&tmp1, &tmp2, &tmp3);
 			mp_int_clear(&tmp1);
 			mp_int_clear(&tmp2);
-			mp_rat_clear(&q->accum_rat);
+			mp_int_clear(&q->accum_rat.num);
 			q->accum_rat.num = tmp3;
-			mp_int_init(&q->accum_rat.den);
+			mp_int_set_value(&q->accum_rat.den, 1);
 			SET_ACCUM();
 		} else if (is_bigint(&p2) && is_integer(&p1)) {
 			mpz_t tmp1, tmp2, tmp3;
@@ -2251,9 +2251,9 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 			mp_int_gcd(&tmp1, &tmp2, &tmp3);
 			mp_int_clear(&tmp1);
 			mp_int_clear(&tmp2);
-			mp_rat_clear(&q->accum_rat);
+			mp_int_clear(&q->accum_rat.num);
 			q->accum_rat.num = tmp3;
-			mp_int_init(&q->accum_rat.den);
+			mp_int_set_value(&q->accum_rat.den, 1);
 			SET_ACCUM();
 		} else {
 			q->accum.val_int = gcd(p1.val_int, p2.val_int);
