@@ -452,7 +452,7 @@ static USE_RESULT pl_status fn_iso_sqrt_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_bigint(&p1)) {
-		if (mp_rat_compare_zero(&p1.val_big->rat) < 0)
+		if (mp_int_compare_zero(&p1.val_big->rat.num) < 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
 		if (!mp_rat_is_integer(&p1.val_big->rat))
@@ -491,7 +491,14 @@ static USE_RESULT pl_status fn_iso_log_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (is_rational(&p1)) {
+	if (is_bigint(&p1) && is_integer(&p1)) {
+		if (mp_int_compare_zero(&p1.val_big->rat.num) <= 0)
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
+		q->accum.val_real = log(mp_int_to_float(&p1.val_big->rat.num));
+		q->accum.val_type = TYPE_REAL;
+		return pl_success;
+	} else if (is_integer(&p1)) {
 		if (p1.val_int <= 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
