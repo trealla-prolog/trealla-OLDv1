@@ -2222,14 +2222,14 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 			mp_int_clear(&q->accum_rat.num);
 			mp_int_set_value(&q->accum_rat.den, 1);
 			SET_ACCUM();
-		} else if (is_bigint(&p1) && is_integer(&p2)) {
+		} else if (is_bigint(&p1)) {
 			mpz_t tmp2;
 			mp_int_init_value(&tmp2, p2.val_int);
 			mp_int_gcd(&p1.val_big->rat.num, &tmp2, &q->accum_rat.num);
 			mp_int_clear(&tmp2);
 			mp_int_set_value(&q->accum_rat.den, 1);
 			SET_ACCUM();
-		} else if (is_bigint(&p2) && is_integer(&p1)) {
+		} else if (is_bigint(&p2)) {
 			mpz_t tmp1;
 			mp_int_init_value(&tmp1, p1.val_int);
 			mp_int_gcd(&tmp1, &p2.val_big->rat.num, &q->accum_rat.num);
