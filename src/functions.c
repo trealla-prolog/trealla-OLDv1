@@ -2111,8 +2111,10 @@ static USE_RESULT pl_status fn_rational_1(query *q)
 		}
 
 		if (is_real(&p1)) {
-			do_real_to_fraction(p1.val_real, 0.00001, &q->accum.val_int, &q->accum.val_den);
-			q->accum.val_type = TYPE_RATIONAL;
+			int_t num, den;
+			do_real_to_fraction(p1.val_real, 0.00001, &num, &den);
+			mp_rat_set_value(&q->accum_rat, num, den);
+			SET_ACCUM();
 			return pl_success;
 		}
 
