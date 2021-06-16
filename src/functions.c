@@ -209,6 +209,16 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 	return pl_failure;
 }
 
+static double mp_int_to_float(cell *p1)
+{
+	size_t len = mp_int_string_len(&p1->val_big->rat.num, 10);
+	char *buf = malloc(len+1);
+	mp_int_to_string(&p1->val_big->rat.num, 10, buf, len);
+	double d = atof(buf);
+	free(buf);
+	return d;
+}
+
 static USE_RESULT pl_status fn_iso_float_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
@@ -223,12 +233,8 @@ static USE_RESULT pl_status fn_iso_float_1(query *q)
 		}
 
 		if (is_bigint(&p1) && is_integer(&p1)) {
-			size_t len = mp_int_string_len(&p1.val_big->rat.num, 10);
-			char *buf = malloc(len+1);
-			mp_int_to_string(&p1.val_big->rat.num, 10, buf, len);
-			q->accum.val_real = atof(buf);
+			q->accum.val_real = mp_int_to_float(&p1);
 			q->accum.val_type = TYPE_REAL;
-			free(buf);
 			return pl_success;
 		}
 
