@@ -1319,7 +1319,7 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 	if (!is_integer(&p2))
 		return throw_error(q, &p2, "type_error", "integer");
 
-	DO_OP2int(/, div, p1, p2);
+	DO_OP2int(%, div, p1, p2);
 	return pl_success;
 }
 
