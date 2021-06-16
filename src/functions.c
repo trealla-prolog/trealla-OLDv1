@@ -417,10 +417,7 @@ static USE_RESULT pl_status fn_iso_exp_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		q->accum.val_real = exp((double)p1.val_int / p1.val_den);
+		q->accum.val_real = exp((double)p1.val_int);
 
 		if (isinf(q->accum.val_real))
 			return throw_error(q, &p1, "evaluation_error", "float_overflow");
@@ -491,10 +488,7 @@ static USE_RESULT pl_status fn_iso_log_1(query *q)
 		if (p1.val_int <= 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		q->accum.val_real = log((double)p1.val_int / p1.val_den);
+		q->accum.val_real = log((double)p1.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1)) {
 		if (p1.val_real <= 0.0)
@@ -645,10 +639,7 @@ static USE_RESULT pl_status fn_iso_sin_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		q->accum.val_real = sin((double)p1.val_int / p1.val_den);
+		q->accum.val_real = sin((double)p1.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1)) {
 		q->accum.val_real = sin(p1.val_real);
@@ -675,10 +666,7 @@ static USE_RESULT pl_status fn_iso_cos_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		q->accum.val_real = cos((double)p1.val_int / p1.val_den);
+		q->accum.val_real = cos((double)p1.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1)) {
 		q->accum.val_real = cos(p1.val_real);
@@ -705,10 +693,7 @@ static USE_RESULT pl_status fn_iso_tan_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		q->accum.val_real = tan((double)p1.val_int / p1.val_den);
+		q->accum.val_real = tan((double)p1.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1)) {
 		q->accum.val_real = tan(p1.val_real);
@@ -735,10 +720,7 @@ static USE_RESULT pl_status fn_iso_asin_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		q->accum.val_real = asin((double)p1.val_int / p1.val_den);
+		q->accum.val_real = asin((double)p1.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1)) {
 		q->accum.val_real = asin(p1.val_real);
@@ -765,10 +747,7 @@ static USE_RESULT pl_status fn_iso_acos_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		q->accum.val_real = acos((double)p1.val_int / p1.val_den);
+		q->accum.val_real = acos((double)p1.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1)) {
 		q->accum.val_real = acos(p1.val_real);
@@ -795,10 +774,7 @@ static USE_RESULT pl_status fn_iso_atan_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		q->accum.val_real = atan((double)p1.val_int / p1.val_den);
+		q->accum.val_real = atan((double)p1.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1)) {
 		q->accum.val_real = atan(p1.val_real);
@@ -830,22 +806,13 @@ static USE_RESULT pl_status fn_iso_atan2_2(query *q)
 		if ((p1.val_int == 0) && (p2.val_int == 0))
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		if (p2.val_den == 0)
-			return throw_error(q, &p2, "evaluation_error", "undefined");
-
-		q->accum.val_real = atan2((double)p1.val_int / p1.val_den, (double)p2.val_int / p2.val_den);
+		q->accum.val_real = atan2((double)p1.val_int, (double)p2.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_rational(&p1) && is_real(&p2)) {
 		if ((p1.val_int == 0) && (p2.val_real == 0.0))
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		q->accum.val_real = atan2((double)p1.val_int / p1.val_den, p2.val_real);
+		q->accum.val_real = atan2((double)p1.val_int, p2.val_real);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1) && is_real(&p2)) {
 		if ((p1.val_real == 0.0) && (p2.val_int == 0))
@@ -857,10 +824,7 @@ static USE_RESULT pl_status fn_iso_atan2_2(query *q)
 		if ((p1.val_real == 0.0) && (p2.val_int == 0))
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		if (p2.val_den == 0)
-			return throw_error(q, &p2, "evaluation_error", "undefined");
-
-		q->accum.val_real = atan2(p1.val_real, (double)p2.val_int / p2.val_den);
+		q->accum.val_real = atan2(p1.val_real, (double)p2.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
@@ -884,10 +848,7 @@ static USE_RESULT pl_status fn_sinh_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		q->accum.val_real = sinh((double)p1.val_int / p1.val_den);
+		q->accum.val_real = sinh((double)p1.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1)) {
 		q->accum.val_real = sinh(p1.val_real);
@@ -914,10 +875,7 @@ static USE_RESULT pl_status fn_cosh_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		q->accum.val_real = cosh((double)p1.val_int / p1.val_den);
+		q->accum.val_real = cosh((double)p1.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1)) {
 		q->accum.val_real = cosh(p1.val_real);
@@ -944,10 +902,7 @@ static USE_RESULT pl_status fn_tanh_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		q->accum.val_real = tanh((double)p1.val_int / p1.val_den);
+		q->accum.val_real = tanh((double)p1.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1)) {
 		q->accum.val_real = tanh(p1.val_real);
@@ -974,10 +929,7 @@ static USE_RESULT pl_status fn_asinh_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		q->accum.val_real = asinh((double)p1.val_int / p1.val_den);
+		q->accum.val_real = asinh((double)p1.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1)) {
 		q->accum.val_real = asinh(p1.val_real);
@@ -1004,10 +956,7 @@ static USE_RESULT pl_status fn_acosh_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		q->accum.val_real = acosh((double)p1.val_int / p1.val_den);
+		q->accum.val_real = acosh((double)p1.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1)) {
 		q->accum.val_real = acosh(p1.val_real);
@@ -1034,10 +983,7 @@ static USE_RESULT pl_status fn_atanh_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 
 	if (is_rational(&p1)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		q->accum.val_real = atanh((double)p1.val_int / p1.val_den);
+		q->accum.val_real = atanh((double)p1.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1)) {
 		q->accum.val_real = atanh(p1.val_real);
@@ -1103,25 +1049,16 @@ static USE_RESULT pl_status fn_iso_pow_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_rational(&p1) && is_rational(&p2)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		if (p2.val_den == 0)
-			return throw_error(q, &p2, "evaluation_error", "undefined");
-
 		if ((p1.val_int == 0) && (p2.val_int < 0))
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 
-		q->accum.val_real = pow((double)p1.val_int / p1.val_den, (double)p2.val_int / p2.val_den);
+		q->accum.val_real = pow((double)p1.val_int, (double)p2.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_rational(&p1) && is_real(&p2)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
 		if ((p1.val_int == 0) && (p2.val_real < 0.0))
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 
-		q->accum.val_real = pow((double)p1.val_int / p1.val_den, p2.val_real);
+		q->accum.val_real = pow((double)p1.val_int, p2.val_real);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1) && is_real(&p2)) {
 		if ((p1.val_real == 0.0) && (p2.val_real < 0.0))
@@ -1175,19 +1112,10 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 		q->accum.val_int = (int_t)res;
 		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_rational(&p1) && is_rational(&p2)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		if (p2.val_den == 0)
-			return throw_error(q, &p2, "evaluation_error", "undefined");
-
-		q->accum.val_real = pow((double)p1.val_int / p1.val_den, (double)p2.val_int / p2.val_den);
+		q->accum.val_real = pow((double)p1.val_int, (double)p2.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_rational(&p1) && is_real(&p2)) {
-		if (p1.val_den == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
-		q->accum.val_real = pow((double)p1.val_int / p1.val_den, p2.val_real);
+		q->accum.val_real = pow((double)p1.val_int, p2.val_real);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1) && is_real(&p2)) {
 		q->accum.val_real = pow(p1.val_real, p2.val_real);
