@@ -13,6 +13,121 @@
 #include "query.h"
 #include "builtins.h"
 
+#define SET_ACCUM() 											\
+		q->accum.val_type = TYPE_RATIONAL;						\
+		q->accum.flags = FLAG_MANAGED;							\
+		q->accum.val_big = malloc(sizeof(bigint));				\
+		q->accum.val_big->refcnt = 0;							\
+		mp_rat_init(&q->accum.val_big->rat);					\
+		mp_rat_copy(&q->accum_rat, &q->accum.val_big->rat);
+
+// Simple one for now...
+
+#define OVERFLOW(op,v1,v2)										\
+	(v1) > INT32_MAX ||											\
+	(v1) < INT32_MIN ||											\
+	(v2) > INT32_MAX ||											\
+	(v2) < INT32_MIN
+
+#define DO_OP2(op,op2,p1,p2) \
+	if (is_bigint(&p1)) { \
+		if (is_bigint(&p2)) { \
+			mp_rat_##op2(&p1.val_big->rat, &p2.val_big->rat, &q->accum_rat); \
+			SET_ACCUM(); \
+		} else if (is_rational(&p2)) { \
+			mpq_t tmp; \
+			mp_rat_init(&tmp); \
+			mp_rat_set_value(&tmp, get_integer(&p2), 1); \
+			mp_rat_##op2(&p1.val_big->rat, &tmp, &q->accum_rat); \
+			mp_rat_clear(&tmp); \
+			SET_ACCUM(); \
+		} else if (is_real(&p2)) { \
+			mp_small n, d; \
+			mp_rat_to_ints(&p1.val_big->rat, &n, &d); \
+			q->accum.val_real = (double)n / d; \
+			q->accum.val_real = q->accum.val_real op p1.val_real; \
+			q->accum.val_type = TYPE_REAL; \
+			q->accum.flags = 0; \
+		} \
+	} else if (is_bigint(&p2)) { \
+		if (is_rational(&p1)) { \
+			mpq_t tmp; \
+			mp_rat_init(&tmp); \
+			mp_rat_set_value(&tmp, get_integer(&p1), 1); \
+			mp_rat_##op2(&p2.val_big->rat, &tmp, &q->accum_rat); \
+			mp_rat_clear(&tmp); \
+			SET_ACCUM(); \
+		} else if (is_real(&p1)) { \
+			mp_small n, d; \
+			mp_rat_to_ints(&p2.val_big->rat, &n, &d); \
+			q->accum.val_real = (double)n / d; \
+			q->accum.val_real = q->accum.val_real op p2.val_real; \
+			q->accum.val_type = TYPE_REAL; \
+			q->accum.flags = 0; \
+		} \
+	} else if (is_rational(&p1) && is_rational(&p2)) { \
+		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
+			mp_rat_set_value(&q->accum_rat, q->accum.val_int, 1); \
+			SET_ACCUM(); \
+		} else { \
+			q->accum.val_int = p1.val_int op p2.val_int; \
+			q->accum.val_type = TYPE_RATIONAL; \
+		} \
+	} else if (is_rational(&p1) && is_real(&p2)) { \
+		q->accum.val_real = (double)p1.val_int op p2.val_real; \
+		q->accum.val_type = TYPE_REAL; \
+	} else if (is_real(&p1) && is_real(&p2)) { \
+		q->accum.val_real = p1.val_real op p2.val_real; \
+		q->accum.val_type = TYPE_REAL; \
+	} else if (is_real(&p1) && is_rational(&p2)) { \
+		q->accum.val_real = p1.val_real op p2.val_int; \
+		q->accum.val_type = TYPE_REAL; \
+	} else if (is_variable(&p1) || is_variable(&p2)) { \
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated"); \
+	} else { \
+		return throw_error(q, &p1, "type_error", "evaluable"); \
+	}
+
+#define DO_OP2int(op,op2,p1,p2) \
+	if (is_bigint(&p1)) { \
+		if (is_bigint(&p2)) { \
+			mp_rat_##op2(&p1.val_big->rat, &p2.val_big->rat, &q->accum_rat); \
+			SET_ACCUM(); \
+		} else if (is_rational(&p2)) { \
+			mpq_t tmp; \
+			mp_rat_init(&tmp); \
+			mp_rat_set_value(&tmp, get_integer(&p2), 1); \
+			mp_rat_##op2(&p1.val_big->rat, &tmp, &q->accum_rat); \
+			mp_rat_clear(&tmp); \
+			SET_ACCUM(); \
+		} else { \
+			return throw_error(q, &p1, "type_error", "evaluable"); \
+		} \
+	} else if (is_bigint(&p2)) { \
+		if (is_rational(&p1)) { \
+			mpq_t tmp; \
+			mp_rat_init(&tmp); \
+			mp_rat_set_value(&tmp, get_integer(&p1), 1); \
+			mp_rat_##op2(&p2.val_big->rat, &tmp, &q->accum_rat); \
+			mp_rat_clear(&tmp); \
+			SET_ACCUM(); \
+		} else { \
+			return throw_error(q, &p1, "type_error", "evaluable"); \
+		} \
+	} else if (is_rational(&p1) && is_rational(&p2)) { \
+		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
+			mp_rat_set_value(&q->accum_rat, q->accum.val_int, 1); \
+			SET_ACCUM(); \
+		} else { \
+			q->accum.val_int = p1.val_int op p2.val_int; \
+			q->accum.val_type = TYPE_RATIONAL; \
+		} \
+	} else if (is_variable(&p1) || is_variable(&p2)) { \
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated"); \
+	} else { \
+		return throw_error(q, &p1, "type_error", "evaluable"); \
+	}
+
 #define CHECK_CALC()							\
 	if (!q->calc) {								\
 		if (q->st.m->flag.unknown == 0)				\
@@ -229,9 +344,10 @@ static USE_RESULT pl_status fn_iso_negative_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 	q->accum.val_type = p1.val_type;
 
-	if (is_bigint(&p1))
-		q->accum.val_int = -p1.val_int;
-	else if (is_rational(&p1))
+	if (is_bigint(&p1)) {
+		mp_rat_neg(&p1.val_big->rat, &q->accum_rat);
+		SET_ACCUM();
+	} else if (is_rational(&p1))
 		q->accum.val_int = -p1.val_int;
 	else if (is_real(&p1))
 		q->accum.val_real = -p1.val_real;
@@ -266,121 +382,6 @@ static USE_RESULT pl_status fn_iso_e_0(query *q)
 	q->accum.val_type = TYPE_REAL;
 	return pl_success;
 }
-
-#define SET_ACCUM() 											\
-		q->accum.val_type = TYPE_RATIONAL;						\
-		q->accum.flags = FLAG_MANAGED;							\
-		q->accum.val_big = malloc(sizeof(bigint));				\
-		q->accum.val_big->refcnt = 0;							\
-		mp_rat_init(&q->accum.val_big->rat);					\
-		mp_rat_copy(&q->accum_rat, &q->accum.val_big->rat);
-
-// Simple one for now...
-
-#define OVERFLOW(op,v1,v2)										\
-	(v1) > INT32_MAX ||											\
-	(v1) < INT32_MIN ||											\
-	(v2) > INT32_MAX ||											\
-	(v2) < INT32_MIN
-
-#define DO_OP2(op,op2,p1,p2) \
-	if (is_bigint(&p1)) { \
-		if (is_bigint(&p2)) { \
-			mp_rat_##op2(&p1.val_big->rat, &p2.val_big->rat, &q->accum_rat); \
-			SET_ACCUM(); \
-		} else if (is_rational(&p2)) { \
-			mpq_t tmp; \
-			mp_rat_init(&tmp); \
-			mp_rat_set_value(&tmp, get_integer(&p2), 1); \
-			mp_rat_##op2(&p1.val_big->rat, &tmp, &q->accum_rat); \
-			mp_rat_clear(&tmp); \
-			SET_ACCUM(); \
-		} else if (is_real(&p2)) { \
-			mp_small n, d; \
-			mp_rat_to_ints(&p1.val_big->rat, &n, &d); \
-			q->accum.val_real = (double)n / d; \
-			q->accum.val_real = q->accum.val_real op p1.val_real; \
-			q->accum.val_type = TYPE_REAL; \
-			q->accum.flags = 0; \
-		} \
-	} else if (is_bigint(&p2)) { \
-		if (is_rational(&p1)) { \
-			mpq_t tmp; \
-			mp_rat_init(&tmp); \
-			mp_rat_set_value(&tmp, get_integer(&p1), 1); \
-			mp_rat_##op2(&p2.val_big->rat, &tmp, &q->accum_rat); \
-			mp_rat_clear(&tmp); \
-			SET_ACCUM(); \
-		} else if (is_real(&p1)) { \
-			mp_small n, d; \
-			mp_rat_to_ints(&p2.val_big->rat, &n, &d); \
-			q->accum.val_real = (double)n / d; \
-			q->accum.val_real = q->accum.val_real op p2.val_real; \
-			q->accum.val_type = TYPE_REAL; \
-			q->accum.flags = 0; \
-		} \
-	} else if (is_rational(&p1) && is_rational(&p2)) { \
-		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
-			mp_rat_set_value(&q->accum_rat, q->accum.val_int, 1); \
-			SET_ACCUM(); \
-		} else { \
-			q->accum.val_int = p1.val_int op p2.val_int; \
-			q->accum.val_type = TYPE_RATIONAL; \
-		} \
-	} else if (is_rational(&p1) && is_real(&p2)) { \
-		q->accum.val_real = (double)p1.val_int op p2.val_real; \
-		q->accum.val_type = TYPE_REAL; \
-	} else if (is_real(&p1) && is_real(&p2)) { \
-		q->accum.val_real = p1.val_real op p2.val_real; \
-		q->accum.val_type = TYPE_REAL; \
-	} else if (is_real(&p1) && is_rational(&p2)) { \
-		q->accum.val_real = p1.val_real op p2.val_int; \
-		q->accum.val_type = TYPE_REAL; \
-	} else if (is_variable(&p1) || is_variable(&p2)) { \
-		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated"); \
-	} else { \
-		return throw_error(q, &p1, "type_error", "evaluable"); \
-	}
-
-#define DO_OP2int(op,op2,p1,p2) \
-	if (is_bigint(&p1)) { \
-		if (is_bigint(&p2)) { \
-			mp_rat_##op2(&p1.val_big->rat, &p2.val_big->rat, &q->accum_rat); \
-			SET_ACCUM(); \
-		} else if (is_rational(&p2)) { \
-			mpq_t tmp; \
-			mp_rat_init(&tmp); \
-			mp_rat_set_value(&tmp, get_integer(&p2), 1); \
-			mp_rat_##op2(&p1.val_big->rat, &tmp, &q->accum_rat); \
-			mp_rat_clear(&tmp); \
-			SET_ACCUM(); \
-		} else { \
-			return throw_error(q, &p1, "type_error", "evaluable"); \
-		} \
-	} else if (is_bigint(&p2)) { \
-		if (is_rational(&p1)) { \
-			mpq_t tmp; \
-			mp_rat_init(&tmp); \
-			mp_rat_set_value(&tmp, get_integer(&p1), 1); \
-			mp_rat_##op2(&p2.val_big->rat, &tmp, &q->accum_rat); \
-			mp_rat_clear(&tmp); \
-			SET_ACCUM(); \
-		} else { \
-			return throw_error(q, &p1, "type_error", "evaluable"); \
-		} \
-	} else if (is_rational(&p1) && is_rational(&p2)) { \
-		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
-			mp_rat_set_value(&q->accum_rat, q->accum.val_int, 1); \
-			SET_ACCUM(); \
-		} else { \
-			q->accum.val_int = p1.val_int op p2.val_int; \
-			q->accum.val_type = TYPE_RATIONAL; \
-		} \
-	} else if (is_variable(&p1) || is_variable(&p2)) { \
-		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated"); \
-	} else { \
-		return throw_error(q, &p1, "type_error", "evaluable"); \
-	}
 
 static mp_result mp_rat_rem(mp_rat a, mp_rat b, mp_rat c)
 {
