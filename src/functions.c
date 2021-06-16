@@ -142,8 +142,8 @@ static mp_result mp_rat_rem(mp_rat a, mp_rat b, mp_rat c)
 
 static double mp_int_to_float(mpz_t *v)
 {
-	size_t len = mp_int_string_len(v, 10) - 1;
-	char *buf = malloc(len+1);
+	size_t len = mp_int_string_len(v, 10);
+	char *buf = malloc(len);
 	mp_int_to_string(v, 10, buf, len);
 	double d = atof(buf);
 	free(buf);
