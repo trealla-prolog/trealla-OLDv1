@@ -1663,6 +1663,7 @@ void destroy_query(query *q)
 	for (idx_t i = 0; i < q->st.sp; i++, e++)
 		unshare_cell(&e->c);
 
+	mp_rat_clear(&q->accum_rat);
 	free(q->trails);
 	free(q->choices);
 	free(q->slots);
