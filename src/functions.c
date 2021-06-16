@@ -281,25 +281,6 @@ USE_RESULT pl_status fn_iso_add_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-#if 0
-	if (is_integer(&p1) && is_integer(&p2)) {
-		q->accum.val_int = p1.val_int + p2.val_int;
-		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_rational(&p1) && is_rational(&p2)) {
-		q->accum.val_int = p1.val_int * p2.val_den;
-		q->accum.val_int += p2.val_int * p1.val_den;
-		q->accum.val_den = p1.val_den * p2.val_den;
-		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_integer(&p1) && is_real(&p2)) {
-		q->accum.val_real = (double)p1.val_int + p2.val_real;
-		q->accum.val_type = TYPE_REAL;
-	} else if (is_real(&p1) && is_real(&p2)) {
-		q->accum.val_real = p1.val_real + p2.val_real;
-		q->accum.val_type = TYPE_REAL;
-	} else if (is_real(&p1) && is_integer(&p2)) {
-		q->accum.val_real = p1.val_real + p2.val_int;
-		q->accum.val_type = TYPE_REAL;
-#else
 	if (is_bigint(&p1)) {
 		if (is_bigint(&p2)) {
 			mp_rat_add(&p1.val_big->rat, &p2.val_big->rat, &q->accum_rat);
@@ -320,7 +301,21 @@ USE_RESULT pl_status fn_iso_add_2(query *q)
 			q->accum.flags = 0;
 		}
 	} else if (is_bigint(&p2)) {
-#endif
+		if (is_rational(&p1)) {
+			mpq_t tmp;
+			mp_rat_init(&tmp);
+			mp_rat_set_value(&tmp, get_integer(&p1), 1);
+			mp_rat_add(&p2.val_big->rat, &tmp, &q->accum_rat);
+			mp_rat_clear(&tmp);
+			SET_ACCUM();
+		} else if (is_real(&p1)) {
+			mp_small n, d;
+			mp_rat_to_ints(&p2.val_big->rat, &n, &d);
+			q->accum.val_real = (double)n / d;
+			q->accum.val_real += p2.val_real;
+			q->accum.val_type = TYPE_REAL;
+			q->accum.flags = 0;
+		}
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
