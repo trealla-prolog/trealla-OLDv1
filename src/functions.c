@@ -222,15 +222,17 @@ static USE_RESULT pl_status fn_iso_float_1(query *q)
 			return pl_success;
 		}
 
-		if (is_bigint(&p1)) {
-			int_t num = 1, den = 1;
-			mp_rat_to_ints(&p1.val_big->rat, &num, &den);
-			q->accum.val_real = (double)num / den;
+		if (is_bigint(&p1) && is_integer(&p1)) {
+			size_t len = mp_int_string_len(&p1.val_big->rat.num, 10);
+			char *buf = malloc(len+1);
+			mp_int_to_string(&p1.val_big->rat.num, 10, buf, len);
+			q->accum.val_real = atof(buf);
 			q->accum.val_type = TYPE_REAL;
+			free(buf);
 			return pl_success;
 		}
 
-		if (is_rational(&p1)) {
+		if (is_integer(&p1)) {
 			q->accum.val_real = (double)p1.val_int;
 			q->accum.val_type = TYPE_REAL;
 			return pl_success;
@@ -367,6 +369,7 @@ static USE_RESULT pl_status fn_iso_e_0(query *q)
 	return pl_success;
 }
 
+#if 0
 static mp_result mp_rat_rem(mp_rat a, mp_rat b, mp_rat c)
 {
 	mp_rat_div(a, b, c);
@@ -376,6 +379,7 @@ static mp_result mp_rat_rem(mp_rat a, mp_rat b, mp_rat c)
 	mp_rat_sub(c, &d, c);
 	return MP_OK;
 }
+#endif
 
 USE_RESULT pl_status fn_iso_add_2(query *q)
 {
