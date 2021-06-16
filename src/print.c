@@ -334,11 +334,11 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 
 			dst += mp_int_string_len(&c->val_big->rat.den, radix);
 		} else {
-			size_t len = mp_int_string_len(&c->val_big->rat.num, radix);
+			size_t len = mp_int_string_len(&c->val_big->rat.num, radix) - 1;
 			mp_int_to_string(&c->val_big->rat.num, 10, dst, dstlen);
 			dst += len;
 			dst += snprintf(dst, dstlen, "%s", " rdiv ");
-			len = mp_int_string_len(&c->val_big->rat.den, radix);
+			len = mp_int_string_len(&c->val_big->rat.den, radix) - 1;
 			mp_int_to_string(&c->val_big->rat.den, 10, dst, dstlen);
 			dst += len;
 		}
@@ -557,11 +557,11 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 			dst += mp_int_string_len(&c->val_big->rat.den, radix);
 		} else {
-			size_t len = mp_int_string_len(&c->val_big->rat.num, radix);
+			size_t len = mp_int_string_len(&c->val_big->rat.num, radix) - 1;
 			mp_int_to_string(&c->val_big->rat.num, 10, dst, dstlen);
 			dst += len;
 			dst += snprintf(dst, dstlen, "%s", " rdiv ");
-			len = mp_int_string_len(&c->val_big->rat.den, radix);
+			len = mp_int_string_len(&c->val_big->rat.den, radix) - 1;
 			mp_int_to_string(&c->val_big->rat.den, 10, dst, dstlen);
 			dst += len;
 		}
