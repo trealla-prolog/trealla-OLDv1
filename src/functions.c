@@ -161,36 +161,6 @@ pl_status call_function(query *q, cell *c, __attribute__((unused)) idx_t c_ctx)
 	return throw_error(q, c, "type_error", "evaluable");
 }
 
-static int_t gcd(int_t num, int_t remainder)
-{
-	if (remainder == 0)
-		return num;
-
-	return gcd(remainder, num % remainder);
-}
-
-void do_reduce(cell *n)
-{
-	int_t r = 0;
-
-	if (n->val_den > n->val_int)
-		r = gcd(n->val_den, n->val_int);
-	else if (n->val_den < n->val_int)
-		r = gcd(n->val_int, n->val_den);
-	else
-		r = gcd(n->val_int, n->val_den);
-
-	n->val_int /= r;
-	n->val_den /= r;
-
-	if (n->val_den < 0) {
-		n->val_int = -n->val_int;
-		n->val_den = -n->val_den;
-	}
-}
-
-#define reduce(c) if ((c)->val_den != 1) do_reduce(c)
-
 static USE_RESULT pl_status fn_iso_is_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -199,7 +169,6 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 	p2.nbr_cells = 1;
 
 	if (is_variable(p1) && is_rational(&p2)) {
-		reduce(&p2);
 		set_var(q, p1, p1_ctx, &p2, q->st.curr_frame);
 		return pl_success;
 	}
@@ -213,7 +182,6 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 		return (p1->val_int == p2.val_int);
 
 	if (is_rational(p1) && is_rational(&p2)) {
-		reduce(p1); reduce(&p2);
 		return (p1->val_int == p2.val_int) && (p1->val_den == p2.val_den);
 	}
 
@@ -2136,7 +2104,6 @@ static USE_RESULT pl_status fn_rational_1(query *q)
 		cell p1 = calc(q, p1_tmp);
 
 		if (is_rational(&p1)) {
-			reduce(&p1);
 			q->accum.val_int = p1.val_int;
 			q->accum.val_den = p1.val_den;
 			q->accum.val_type = TYPE_RATIONAL;
@@ -2153,6 +2120,14 @@ static USE_RESULT pl_status fn_rational_1(query *q)
 	}
 
 	return is_rational(p1_tmp);
+}
+
+static int_t gcd(int_t num, int_t remainder)
+{
+	if (remainder == 0)
+		return num;
+
+	return gcd(remainder, num % remainder);
 }
 
 static USE_RESULT pl_status fn_gcd_2(query *q)
