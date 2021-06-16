@@ -140,11 +140,11 @@ static mp_result mp_rat_rem(mp_rat a, mp_rat b, mp_rat c)
 }
 #endif
 
-static double mp_int_to_float(cell *p1)
+static double mp_int_to_float(mpz_t *v)
 {
-	size_t len = mp_int_string_len(&p1->val_big->rat.num, 10);
+	size_t len = mp_int_string_len(v, 10);
 	char *buf = malloc(len+1);
-	mp_int_to_string(&p1->val_big->rat.num, 10, buf, len);
+	mp_int_to_string(v, 10, buf, len);
 	double d = atof(buf);
 	free(buf);
 	return d;
@@ -245,7 +245,7 @@ static USE_RESULT pl_status fn_iso_float_1(query *q)
 		}
 
 		if (is_bigint(&p1) && is_integer(&p1)) {
-			q->accum.val_real = mp_int_to_float(&p1);
+			q->accum.val_real = mp_int_to_float(&p1.val_big->rat.num);
 			q->accum.val_type = TYPE_REAL;
 			return pl_success;
 		}
@@ -461,12 +461,9 @@ static USE_RESULT pl_status fn_iso_sqrt_1(query *q)
 		mpz_t tmp;
 		mp_int_init(&tmp);
 		mp_int_sqrt(&p1.val_big->rat.num, &tmp);
-		size_t len = mp_int_string_len(&tmp, 10);
-		char *buf = malloc(len+1);
-		mp_int_to_string(&tmp, 10, buf, len);
-		q->accum.val_real = atof(buf);
+		q->accum.val_real = mp_int_to_float(&tmp);
 		q->accum.val_type = TYPE_REAL;
-		free(buf);
+		mp_int_clear(&tmp);
 	} else if (is_rational(&p1)) {
 		if (p1.val_int < 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
