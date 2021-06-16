@@ -1217,6 +1217,9 @@ static USE_RESULT pl_status fn_iso_div_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
+	if (is_bigint(&p1) || is_bigint(&p2))
+		return throw_error(q, &p2, "type_error", "integer");
+
 	if (is_integer(&p1) && is_integer(&p2)) {
 		if (p2.val_int == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
@@ -1279,7 +1282,34 @@ static USE_RESULT pl_status fn_iso_max_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (is_rational(&p1) && is_rational(&p2)) {
+	if (is_bigint(&p1)) {
+		if (is_bigint(&p2)) {
+			if (mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) >= 0)
+				mp_rat_copy(&p1.val_big->rat, &q->accum_rat);
+			else
+				mp_rat_copy(&p2.val_big->rat, &q->accum_rat);
+		} else if (is_integer(&p2)) {
+			if (mp_rat_compare_value(&p1.val_big->rat, p2.val_int, 1) >= 0)
+				mp_rat_copy(&p1.val_big->rat, &q->accum_rat);
+			else {
+				mp_rat_set_value(&q->accum_rat, p2.val_int, 1);
+			}
+		} else
+			return throw_error(q, &p2, "type_error", "integer");
+
+		SET_ACCUM();
+	} else if (is_bigint(&p2)) {
+		if (is_integer(&p1)) {
+			if (mp_rat_compare_value(&p2.val_big->rat, p1.val_int, 1) >= 0)
+				mp_rat_copy(&p2.val_big->rat, &q->accum_rat);
+			else {
+				mp_rat_set_value(&q->accum_rat, p1.val_int, 1);
+			}
+		} else
+			return throw_error(q, &p2, "type_error", "integer");
+
+		SET_ACCUM();
+ 	} else if (is_rational(&p1) && is_rational(&p2)) {
 		cell s1 = {0}, s2 = {0};
 		s1.val_int = p1.val_int * p2.val_den;
 		s1.val_den = p1.val_den * p2.val_den;
@@ -1328,7 +1358,34 @@ static USE_RESULT pl_status fn_iso_min_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (is_rational(&p1) && is_rational(&p2)) {
+	if (is_bigint(&p1)) {
+		if (is_bigint(&p2)) {
+			if (mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) <= 0)
+				mp_rat_copy(&p1.val_big->rat, &q->accum_rat);
+			else
+				mp_rat_copy(&p2.val_big->rat, &q->accum_rat);
+		} else if (is_integer(&p2)) {
+			if (mp_rat_compare_value(&p1.val_big->rat, p2.val_int, 1) <= 0)
+				mp_rat_copy(&p1.val_big->rat, &q->accum_rat);
+			else {
+				mp_rat_set_value(&q->accum_rat, p2.val_int, 1);
+			}
+		} else
+			return throw_error(q, &p2, "type_error", "integer");
+
+		SET_ACCUM();
+	} else if (is_bigint(&p2)) {
+		if (is_integer(&p1)) {
+			if (mp_rat_compare_value(&p2.val_big->rat, p1.val_int, 1) <= 0)
+				mp_rat_copy(&p2.val_big->rat, &q->accum_rat);
+			else {
+				mp_rat_set_value(&q->accum_rat, p1.val_int, 1);
+			}
+		} else
+			return throw_error(q, &p2, "type_error", "integer");
+
+		SET_ACCUM();
+	} else if (is_rational(&p1) && is_rational(&p2)) {
 		cell s1 = {0}, s2 = {0};
 		s1.val_int = p1.val_int * p2.val_den;
 		s1.val_den = p1.val_den * p2.val_den;
