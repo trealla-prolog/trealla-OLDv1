@@ -353,10 +353,6 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 		} else if ((c->flags & FLAG_OCTAL) && !running) {
 			dst += snprintf(dst, dstlen, "%s0o", get_integer(c)<0?"-":"");
 			dst += sprint_int(dst, dstlen, get_integer(c), 8);
-		} else if (!is_integer(c)) {
-			dst += sprint_int(dst, dstlen, get_numerator(c), 10);
-			dst += snprintf(dst, dstlen, "%s", " rdiv ");
-			dst += sprint_int(dst, dstlen, get_denominator(c), 10);
 		} else
 			dst += sprint_int(dst, dstlen, get_integer(c), 10);
 
@@ -577,10 +573,9 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY))) {
 			dst += snprintf(dst, dstlen, "%s0x", get_integer(c)<0?"-":"");
 			dst += sprint_int(dst, dstlen, get_integer(c), 16);
-		} else if (!is_integer(c)) {
-			dst += sprint_int(dst, dstlen, get_numerator(c), 10);
-			dst += snprintf(dst, dstlen, " rdiv ");
-			dst += sprint_int(dst, dstlen, get_denominator(c), 10);
+		} else if ((c->flags & FLAG_OCTAL) && !running) {
+			dst += snprintf(dst, dstlen, "%s0o", get_integer(c)<0?"-":"");
+			dst += sprint_int(dst, dstlen, get_integer(c), 8);
 		} else
 			dst += sprint_int(dst, dstlen, get_numerator(c), 10);
 

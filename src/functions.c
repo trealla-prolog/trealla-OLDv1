@@ -1219,11 +1219,7 @@ static USE_RESULT pl_status fn_iso_divint_2(query *q)
 		if (p2.val_int == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
-#if USE_INT32
-		if (p1.val_int == MY_INT32_MIN)
-#else
 		if (p1.val_int == MY_INT64_MIN)
-#endif
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 
 		q->accum.val_int = p1.val_int / p2.val_int;
