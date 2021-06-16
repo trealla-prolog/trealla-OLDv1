@@ -2218,7 +2218,7 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		if (is_bigint(&p1) && is_bigint(&p2)) {
-			mp_int_gcd(&p1.val_big->rat.num, &p2.val_big->rat.den, &q->accum_rat.num);
+			mp_int_gcd(&p1.val_big->rat.num, &p2.val_big->rat.num, &q->accum_rat.num);
 			mp_int_set_value(&q->accum_rat.den, 1);
 			SET_ACCUM();
 		} else if (is_bigint(&p1)) {
