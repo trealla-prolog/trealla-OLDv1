@@ -322,7 +322,7 @@ static USE_RESULT pl_status fn_iso_e_0(query *q)
 			mp_rat_set_value(&q->accum_rat, q->accum.val_int, 1); \
 			SET_ACCUM(); \
 		} else { \
-			q->accum.val_int = p1.val_int + p2.val_int; \
+			q->accum.val_int = p1.val_int op p2.val_int; \
 			q->accum.val_type = TYPE_RATIONAL; \
 		} \
 	} else if (is_integer(&p1) && is_real(&p2)) { \
