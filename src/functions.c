@@ -222,21 +222,16 @@ static USE_RESULT pl_status fn_iso_float_1(query *q)
 			return pl_success;
 		}
 
-		if (is_integer(&p1)) {
-			q->accum.val_real = (double)p1.val_int;
+		if (is_bigint(&p1)) {
+			int_t num, den;
+			mp_rat_to_ints(&p1.val_big->rat, &num, &den);
+			q->accum.val_real = (double)num / den;
 			q->accum.val_type = TYPE_REAL;
 			return pl_success;
 		}
 
 		if (is_rational(&p1)) {
-			if (p1.val_int != 0) {
-				if (p1.val_den == 0)
-					return throw_error(q, &p1, "evaluation_error", "undefined");
-
-				q->accum.val_real = (double)p1.val_int / p1.val_den;
-			} else
-				q->accum.val_real = 0.0;
-
+			q->accum.val_real = (double)p1.val_int;
 			q->accum.val_type = TYPE_REAL;
 			return pl_success;
 		}
