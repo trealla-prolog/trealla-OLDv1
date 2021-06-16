@@ -2052,14 +2052,33 @@ static USE_RESULT pl_status fn_rdiv_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (is_rational(&p1) && is_rational(&p2)) {
-		p1.val_int *= p2.val_den;
-		p2.val_int *= p1.val_den;
-		q->accum.val_int = p1.val_int;
-		q->accum.val_den = p2.val_int;
-		q->accum.val_type = TYPE_RATIONAL;
-	} else
+	if (is_integer(&p1) && is_integer(&p2)) {
+		if (get_integer(&p2) == 0)
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
+
+		if (is_bigint(&p1) && is_bigint(&p2))
+			mp_rat_div(&p1.val_big->rat, &p2.val_big->rat, &q->accum_rat);
+		else if (is_bigint(&p1)) {
+			mpz_t tmp;
+			mp_int_set_value(&tmp, get_integer(&p2));
+			mp_rat_div_int(&p1.val_big->rat, &tmp, &q->accum_rat);
+			mp_int_clear(&tmp);
+		} else if (is_bigint(&p2)) {
+			mpq_t tmp;
+			mp_rat_set_value(&tmp, get_integer(&p1), 1);
+			mp_rat_div(&tmp, &p2.val_big->rat, &q->accum_rat);
+			mp_rat_clear(&tmp);
+		} else
+			mp_rat_set_value(&q->accum_rat, get_integer(&p1), get_integer(&p2));
+
+		SET_ACCUM();
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else if (!is_integer(&p1)) {
 		return throw_error(q, &p1, "type_error", "integer");
+	} else if (!is_integer(&p2)) {
+		return throw_error(q, &p2, "type_error", "integer");
+	}
 
 	return pl_success;
 }
