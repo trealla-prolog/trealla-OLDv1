@@ -2232,7 +2232,7 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 		} else if (is_bigint(&p2)) {
 			mpz_t tmp1;
 			mp_int_init_value(&tmp1, p1.val_int);
-			mp_int_gcd(&tmp1, &p2.val_big->rat.num, &q->accum_rat.num);
+			mp_int_gcd(&p2.val_big->rat.num, &tmp1, &q->accum_rat.num);
 			mp_int_clear(&tmp1);
 			mp_int_set_value(&q->accum_rat.den, 1);
 			SET_ACCUM();
