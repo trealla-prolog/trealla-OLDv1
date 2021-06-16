@@ -150,6 +150,8 @@ typedef enum {
 		: get_denominator(c) == 1		 						\
 	: false)
 
+#define is_small_integer(c) (!is_bigint(c) && is_integer(c))
+
 typedef struct {
 	int64_t refcnt;
 	size_t len;

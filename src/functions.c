@@ -426,7 +426,14 @@ static USE_RESULT pl_status fn_iso_exp_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (is_rational(&p1)) {
+	if (is_bigint(&p1) && is_integer(&p1)) {
+		if (mp_int_compare_zero(&p1.val_big->rat.num) <= 0)
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
+		q->accum.val_real = exp(mp_int_to_float(&p1.val_big->rat.num));
+		q->accum.val_type = TYPE_REAL;
+		return pl_success;
+	} else if (is_rational(&p1)) {
 		q->accum.val_real = exp((double)p1.val_int);
 
 		if (isinf(q->accum.val_real))
@@ -1062,7 +1069,16 @@ static USE_RESULT pl_status fn_iso_pow_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (is_rational(&p1) && is_rational(&p2)) {
+	if (is_bigint(&p1) && is_integer(&p1) && is_small_integer(&p2)) {
+		if ((mp_int_compare_zero(&p1.val_big->rat.num) == 0) && (p2.val_int < 0))
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
+		q->accum.val_real = pow(mp_int_to_float(&p1.val_big->rat.num), (double)p2.val_int);
+		q->accum.val_type = TYPE_REAL;
+		return pl_success;
+	}
+
+	if (is_small_integer(&p1) && is_small_integer(&p2)) {
 		if ((p1.val_int == 0) && (p2.val_int < 0))
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 
