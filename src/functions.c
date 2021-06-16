@@ -1252,7 +1252,7 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 		if (p2.val_int == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
-		q->accum.val_int = (double)(p1.val_int % p2.val_int);
+		q->accum.val_int = p1.val_int % p2.val_int;
 		q->accum.val_type = TYPE_RATIONAL;
 
 		if (p2.val_int < 0)
@@ -1597,6 +1597,15 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 
 		return -1;
 	}
+
+	if (is_bigint(p1) && is_bigint(p2))
+		return mp_rat_compare(&p1->val_big->rat, &p2->val_big->rat);
+
+	if (is_bigint(p1) && is_integer(p2))
+		return mp_rat_compare_value(&p1->val_big->rat, p2->val_int, 1);
+
+	if (is_bigint(p2) && is_integer(p1))
+		return mp_rat_compare_value(&p2->val_big->rat, p1->val_int, 1);
 
 	if (is_rational(p1)) {
 		if (is_rational(p2)) {

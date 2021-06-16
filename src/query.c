@@ -872,8 +872,17 @@ static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx,
 
 static bool unify_rational(__attribute__((unused)) query *q, cell *p1, cell *p2)
 {
+	if (is_bigint(p1) && is_bigint(p2))
+		return !mp_rat_compare(&p1->val_big->rat, &p2->val_big->rat);
+
+	if (is_bigint(p1) && is_integer(p2))
+		return !mp_rat_compare_value(&p1->val_big->rat, p2->val_int, 1);
+
+	if (is_bigint(p2) && is_integer(p1))
+		return !mp_rat_compare_value(&p1->val_big->rat, p2->val_int, 1);
+
 	if (is_rational(p2))
-		return (get_numerator(p1) == get_numerator(p2)) && (get_denominator(p1) == get_denominator(p2));
+		return (get_integer(p1) == get_integer(p2));
 
 	return false;
 }
