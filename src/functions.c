@@ -340,6 +340,56 @@ static USE_RESULT pl_status fn_iso_e_0(query *q)
 		return throw_error(q, &p1, "type_error", "evaluable"); \
 	}
 
+#define DO_OP2int(op,op2,p1,p2) \
+	if (is_bigint(&p1)) { \
+		if (is_bigint(&p2)) { \
+			mp_rat_##op2(&p1.val_big->rat, &p2.val_big->rat, &q->accum_rat); \
+			SET_ACCUM(); \
+		} else if (is_rational(&p2)) { \
+			mpq_t tmp; \
+			mp_rat_init(&tmp); \
+			mp_rat_set_value(&tmp, get_integer(&p2), 1); \
+			mp_rat_##op2(&p1.val_big->rat, &tmp, &q->accum_rat); \
+			mp_rat_clear(&tmp); \
+			SET_ACCUM(); \
+		} else { \
+			return throw_error(q, &p1, "type_error", "evaluable"); \
+		} \
+	} else if (is_bigint(&p2)) { \
+		if (is_rational(&p1)) { \
+			mpq_t tmp; \
+			mp_rat_init(&tmp); \
+			mp_rat_set_value(&tmp, get_integer(&p1), 1); \
+			mp_rat_##op2(&p2.val_big->rat, &tmp, &q->accum_rat); \
+			mp_rat_clear(&tmp); \
+			SET_ACCUM(); \
+		} else { \
+			return throw_error(q, &p1, "type_error", "evaluable"); \
+		} \
+	} else if (is_integer(&p1) && is_integer(&p2)) { \
+		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
+			mp_rat_set_value(&q->accum_rat, q->accum.val_int, 1); \
+			SET_ACCUM(); \
+		} else { \
+			q->accum.val_int = p1.val_int op p2.val_int; \
+			q->accum.val_type = TYPE_RATIONAL; \
+		} \
+	} else if (is_variable(&p1) || is_variable(&p2)) { \
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated"); \
+	} else { \
+		return throw_error(q, &p1, "type_error", "evaluable"); \
+	}
+
+static mp_result mp_rat_rem(mp_rat a, mp_rat b, mp_rat c)
+{
+	mp_rat_div(a, b, c);
+	mpq_t d;
+	mp_rat_init(&d);
+	mp_rat_mul(c, b, &d);
+	mp_rat_sub(c, &d, c);
+	return MP_OK;
+}
+
 USE_RESULT pl_status fn_iso_add_2(query *q)
 {
 	CHECK_CALC();
@@ -1216,11 +1266,18 @@ static USE_RESULT pl_status fn_iso_divint_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		if (p2.val_int == 0)
+		if (get_integer(&p2) == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
+
+		DO_OP2(/, div, p1, p2);
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else if (!is_integer(&p1)) {
+		return throw_error(q, &p1, "type_error", "integer");
+	} else if (!is_integer(&p2)) {
+		return throw_error(q, &p2, "type_error", "integer");
 	}
 
-	DO_OP2(/, div, p1, p2);
 	return pl_success;
 }
 
@@ -1233,11 +1290,10 @@ static USE_RESULT pl_status fn_iso_div_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		if (p2.val_int == 0)
+		if (get_integer(&p2) == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
-		q->accum.val_int = floor((double)p1.val_int / p2.val_int);
-		q->accum.val_type = TYPE_RATIONAL;
+		DO_OP2(/, div, p1, p2);
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1257,27 +1313,13 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (is_integer(&p1) && is_integer(&p2)) {
-		if (p2.val_int == 0)
-			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
-
-		q->accum.val_int = (long long)(p1.val_int % p2.val_int);
-
-		if (p2.val_int < 0)
-			q->accum.val_int *= -1;
-
-		if (p1.val_int < 0)
-			q->accum.val_int *= -1;
-
-		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_variable(&p1) || is_variable(&p2)) {
-		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
-	} else if (!is_integer(&p1)) {
+	if (!is_integer(&p1))
 		return throw_error(q, &p1, "type_error", "integer");
-	} else if (!is_integer(&p2)) {
-		return throw_error(q, &p2, "type_error", "integer");
-	}
 
+	if (!is_integer(&p2))
+		return throw_error(q, &p2, "type_error", "integer");
+
+	DO_OP2int(/, div, p1, p2);
 	return pl_success;
 }
 
@@ -1289,20 +1331,14 @@ static USE_RESULT pl_status fn_iso_rem_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (is_integer(&p1) && is_integer(&p2)) {
-		if (p2.val_int == 0)
-			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
-
-		q->accum.val_int = (long long)(p1.val_int % p2.val_int);
-		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_variable(&p1) || is_variable(&p2)) {
-		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
-	} else if (!is_integer(&p1)) {
+	if (!is_integer(&p1))
 		return throw_error(q, &p1, "type_error", "integer");
-	} else if (!is_integer(&p2)) {
-		return throw_error(q, &p2, "type_error", "integer");
-	}
 
+	if (!is_integer(&p2))
+		return throw_error(q, &p2, "type_error", "integer");
+
+
+	DO_OP2int(%, rem, p1, p2);
 	return pl_success;
 }
 
