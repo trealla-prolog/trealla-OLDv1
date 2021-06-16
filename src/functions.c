@@ -1568,10 +1568,10 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 
 	if (is_rational(p1)) {
 		if (is_rational(p2)) {
-			cell tmp1 = *p1, tmp2 = *p2;
-			tmp1.val_int *= tmp2.val_den;
-			tmp2.val_int *= tmp1.val_den;
-			return tmp1.val_int < tmp2.val_int ? -1 : tmp1.val_int > tmp2.val_int ? 1 : 0;
+			cell tmp_p1 = *p1, tmp_p2 = *p2;
+			tmp_p1.val_int *= tmp_p2.val_den;
+			tmp_p2.val_int *= tmp_p1.val_den;
+			return tmp_p1.val_int < tmp_p2.val_int ? -1 : tmp_p1.val_int > tmp_p2.val_int ? 1 : 0;
 		}
 
 		if (is_real(p2))
@@ -1619,12 +1619,12 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		while (is_list(p1) && is_list(p2)) {
 			cell *h1 = LIST_HEAD(p1);
 			h1 = deref(q, h1, p1_ctx);
-			idx_t tmp1_ctx = q->latest_ctx;
+			idx_t tmp_p1_ctx = q->latest_ctx;
 			cell *h2 = LIST_HEAD(p2);
 			h2 = deref(q, h2, p2_ctx);
-			idx_t tmp2_ctx = q->latest_ctx;
+			idx_t tmp_p2_ctx = q->latest_ctx;
 
-			int val = compare(q, h1, tmp1_ctx, h2, tmp2_ctx, depth+1);
+			int val = compare(q, h1, tmp_p1_ctx, h2, tmp_p2_ctx, depth+1);
 			if (val) return val;
 
 			p1 = LIST_TAIL(p1);
@@ -1656,11 +1656,11 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 
 	while (arity--) {
 		cell *h1 = deref(q, p1, p1_ctx);
-		idx_t tmp1_ctx = q->latest_ctx;
+		idx_t tmp_p1_ctx = q->latest_ctx;
 		cell *h2 = deref(q, p2, p2_ctx);
-		idx_t tmp2_ctx = q->latest_ctx;
+		idx_t tmp_p2_ctx = q->latest_ctx;
 
-		int val = compare(q, h1, tmp1_ctx, h2, tmp2_ctx, depth+1);
+		int val = compare(q, h1, tmp_p1_ctx, h2, tmp_p2_ctx, depth+1);
 		if (val) return val;
 
 		p1 += p1->nbr_cells;
