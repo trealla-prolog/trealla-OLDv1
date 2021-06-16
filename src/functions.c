@@ -229,7 +229,9 @@ static USE_RESULT pl_status fn_iso_negative_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 	q->accum.val_type = p1.val_type;
 
-	if (is_rational(&p1))
+	if (is_bigint(&p1))
+		q->accum.val_int = -p1.val_int;
+	else if (is_rational(&p1))
 		q->accum.val_int = -p1.val_int;
 	else if (is_real(&p1))
 		q->accum.val_real = -p1.val_real;
@@ -317,7 +319,7 @@ static USE_RESULT pl_status fn_iso_e_0(query *q)
 			q->accum.val_type = TYPE_REAL; \
 			q->accum.flags = 0; \
 		} \
-	} else if (is_integer(&p1) && is_integer(&p2)) { \
+	} else if (is_rational(&p1) && is_rational(&p2)) { \
 		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
 			mp_rat_set_value(&q->accum_rat, q->accum.val_int, 1); \
 			SET_ACCUM(); \
@@ -325,13 +327,13 @@ static USE_RESULT pl_status fn_iso_e_0(query *q)
 			q->accum.val_int = p1.val_int op p2.val_int; \
 			q->accum.val_type = TYPE_RATIONAL; \
 		} \
-	} else if (is_integer(&p1) && is_real(&p2)) { \
+	} else if (is_rational(&p1) && is_real(&p2)) { \
 		q->accum.val_real = (double)p1.val_int op p2.val_real; \
 		q->accum.val_type = TYPE_REAL; \
 	} else if (is_real(&p1) && is_real(&p2)) { \
 		q->accum.val_real = p1.val_real op p2.val_real; \
 		q->accum.val_type = TYPE_REAL; \
-	} else if (is_real(&p1) && is_integer(&p2)) { \
+	} else if (is_real(&p1) && is_rational(&p2)) { \
 		q->accum.val_real = p1.val_real op p2.val_int; \
 		q->accum.val_type = TYPE_REAL; \
 	} else if (is_variable(&p1) || is_variable(&p2)) { \
@@ -366,7 +368,7 @@ static USE_RESULT pl_status fn_iso_e_0(query *q)
 		} else { \
 			return throw_error(q, &p1, "type_error", "evaluable"); \
 		} \
-	} else if (is_integer(&p1) && is_integer(&p2)) { \
+	} else if (is_rational(&p1) && is_rational(&p2)) { \
 		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
 			mp_rat_set_value(&q->accum_rat, q->accum.val_int, 1); \
 			SET_ACCUM(); \
