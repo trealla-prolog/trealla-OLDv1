@@ -1218,10 +1218,11 @@ static USE_RESULT pl_status fn_iso_div_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		if (get_integer(&p2) == 0)
+		if (p2.val_int == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
-		DO_OP2(/, div, p1, p2);
+		q->accum.val_int = floor((double)get_integer(&p1) / get_integer(&p2));
+		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
