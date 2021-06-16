@@ -1664,6 +1664,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		set_real(&p->v, v);
 		if (neg) p->v.val_real = -p->v.val_real;
 		*srcptr = tmpptr;
+		mp_int_clear(&v2);
 		return true;
 	}
 
