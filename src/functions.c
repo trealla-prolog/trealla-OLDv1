@@ -1218,20 +1218,9 @@ static USE_RESULT pl_status fn_iso_divint_2(query *q)
 	if (is_integer(&p1) && is_integer(&p2)) {
 		if (p2.val_int == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
-
-		if (p1.val_int == MY_INT64_MIN)
-			return throw_error(q, &p1, "evaluation_error", "int_overflow");
-
-		q->accum.val_int = p1.val_int / p2.val_int;
-		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_variable(&p1) || is_variable(&p2)) {
-		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
-	} else if (!is_integer(&p1)) {
-		return throw_error(q, &p1, "type_error", "integer");
-	} else if (!is_integer(&p2)) {
-		return throw_error(q, &p2, "type_error", "integer");
 	}
 
+	DO_OP2(/, div, p1, p2);
 	return pl_success;
 }
 
