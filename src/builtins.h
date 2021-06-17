@@ -74,13 +74,11 @@ inline static cell *deref_var(query *q, cell *c, idx_t c_ctx)
 #define GET_FIRST_ARG(p,val_type) \
 	__attribute__((unused)) cell *p = get_first_arg(q); \
 	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx; \
-	q->accum.val_den = 1; \
 	if (!is_##val_type(p)) { return throw_error(q, p, "type_error", #val_type); }
 
 #define GET_FIRST_ARG0(p,val_type,p0) \
 	__attribute__((unused)) cell *p = get_first_arg0(q,p0); \
 	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx; \
-	q->accum.val_den = 1; \
 	if (!is_##val_type(p)) { return throw_error(q, p, "type_error", #val_type); }
 
 #define GET_FIRST_RAW_ARG(p,val_type) \
