@@ -53,7 +53,7 @@
 			mpq_t tmp; \
 			mp_rat_init(&tmp); \
 			mp_rat_set_value(&tmp, get_integer(&p1), 1); \
-			mp_rat_##op2(&p2.val_big->rat, &tmp, &q->accum_rat); \
+			mp_rat_##op2(&tmp, &p2.val_big->rat, &q->accum_rat); \
 			mp_rat_clear(&tmp); \
 			SET_ACCUM(); \
 		} else if (is_real(&p1)) { \
