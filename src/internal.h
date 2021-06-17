@@ -125,6 +125,7 @@ typedef enum {
 #define is_le(c,n) (get_integer(c) <= (n))
 #define is_lt(c,n) (get_integer(c) < (n))
 
+#define is_smallint(c) (is_rational(c) && !((c)->flags & FLAG_MANAGED))
 #define is_bigint(c) (is_rational(c) && (c)->flags & FLAG_MANAGED)
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
 #define is_string(c) (is_cstring(c) && (c)->flags & FLAG_STRING)
@@ -147,10 +148,8 @@ typedef enum {
 	(is_rational(c) ? 											\
 		is_bigint(c) ? 											\
 			mp_rat_is_integer(&(c)->val_big->rat)				\
-		: get_denominator(c) == 1		 						\
+		: true													\
 	: false)
-
-#define is_smallint(c) (!is_bigint(c) && is_integer(c))
 
 typedef struct {
 	int64_t refcnt;

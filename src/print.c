@@ -346,7 +346,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 		return dst - save_dst;
 	}
 
-	if (is_rational(c)) {
+	if (is_smallint(c)) {
 		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY))) {
 			dst += snprintf(dst, dstlen, "%s0x", get_integer(c)<0?"-":"");
 			dst += sprint_int(dst, dstlen, get_integer(c), 16);
@@ -569,7 +569,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		return dst - save_dst;
 	}
 
-	if (is_rational(c)) {
+	if (is_smallint(c)) {
 		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY))) {
 			dst += snprintf(dst, dstlen, "%s0x", get_integer(c)<0?"-":"");
 			dst += sprint_int(dst, dstlen, get_integer(c), 16);
@@ -835,8 +835,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		idx_t rhs_ctx = q->latest_ctx;
 		int space = iswalpha(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "\\+");
-		space += (!strcmp(src, "-") || !strcmp(src, "+")) && is_rational(rhs) && (get_integer(rhs) < 0);
-		//if (!strcmp(src, "-") && !is_rational(rhs)) dst += snprintf(dst, dstlen, "%s", " ");
+		space += (!strcmp(src, "-") || !strcmp(src, "+")) && is_smallint(rhs) && (get_integer(rhs) < 0);
+		//if (!strcmp(src, "-") && !is_smallint(rhs)) dst += snprintf(dst, dstlen, "%s", " ");
 		int parens = is_structure(rhs) && !strcmp(GET_STR(rhs), ",");
 		dst += snprintf(dst, dstlen, "%s", src);
 		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
@@ -882,7 +882,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 	dst += snprintf(dst, dstlen, "%s", src);
 	if (!*src) space = 0;
-	space += is_rational(rhs) && is_negative(rhs);
+	space += is_smallint(rhs) && is_negative(rhs);
 	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
 	int rhs_parens = rhs_pri_1 >= my_priority;

@@ -34,7 +34,7 @@
 		if (is_bigint(&p2)) { \
 			mp_rat_##op2(&p1.val_big->rat, &p2.val_big->rat, &q->accum_rat); \
 			SET_ACCUM(); \
-		} else if (is_rational(&p2)) { \
+		} else if (is_smallint(&p2)) { \
 			mpq_t tmp; \
 			mp_rat_init(&tmp); \
 			mp_rat_set_value(&tmp, get_integer(&p2), 1); \
@@ -49,7 +49,7 @@
 			q->accum.flags = 0; \
 		} \
 	} else if (is_bigint(&p2)) { \
-		if (is_rational(&p1)) { \
+		if (is_smallint(&p1)) { \
 			mpq_t tmp; \
 			mp_rat_init(&tmp); \
 			mp_rat_set_value(&tmp, get_integer(&p1), 1); \
@@ -63,7 +63,7 @@
 			q->accum.val_type = TYPE_REAL; \
 			q->accum.flags = 0; \
 		} \
-	} else if (is_rational(&p1) && is_rational(&p2)) { \
+	} else if (is_smallint(&p1) && is_smallint(&p2)) { \
 		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
 			mp_rat_set_value(&q->accum_rat, q->accum.val_int, 1); \
 			SET_ACCUM(); \
@@ -71,13 +71,13 @@
 			q->accum.val_int = p1.val_int op p2.val_int; \
 			q->accum.val_type = TYPE_RATIONAL; \
 		} \
-	} else if (is_rational(&p1) && is_real(&p2)) { \
+	} else if (is_smallint(&p1) && is_real(&p2)) { \
 		q->accum.val_real = (double)p1.val_int op p2.val_real; \
 		q->accum.val_type = TYPE_REAL; \
 	} else if (is_real(&p1) && is_real(&p2)) { \
 		q->accum.val_real = p1.val_real op p2.val_real; \
 		q->accum.val_type = TYPE_REAL; \
-	} else if (is_real(&p1) && is_rational(&p2)) { \
+	} else if (is_real(&p1) && is_smallint(&p2)) { \
 		q->accum.val_real = p1.val_real op p2.val_int; \
 		q->accum.val_type = TYPE_REAL; \
 	} else if (is_variable(&p1) || is_variable(&p2)) { \
@@ -91,7 +91,7 @@
 		if (is_bigint(&p2)) { \
 			mp_rat_##op2(&p1.val_big->rat, &p2.val_big->rat, &q->accum_rat); \
 			SET_ACCUM(); \
-		} else if (is_rational(&p2)) { \
+		} else if (is_smallint(&p2)) { \
 			mpq_t tmp; \
 			mp_rat_init(&tmp); \
 			mp_rat_set_value(&tmp, get_integer(&p2), 1); \
@@ -102,7 +102,7 @@
 			return throw_error(q, &p1, "type_error", "evaluable"); \
 		} \
 	} else if (is_bigint(&p2)) { \
-		if (is_rational(&p1)) { \
+		if (is_smallint(&p1)) { \
 			mpq_t tmp; \
 			mp_rat_init(&tmp); \
 			mp_rat_set_value(&tmp, get_integer(&p1), 1); \
@@ -112,7 +112,7 @@
 		} else { \
 			return throw_error(q, &p1, "type_error", "evaluable"); \
 		} \
-	} else if (is_rational(&p1) && is_rational(&p2)) { \
+	} else if (is_smallint(&p1) && is_smallint(&p2)) { \
 		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
 			mp_rat_set_value(&q->accum_rat, q->accum.val_int, 1); \
 			SET_ACCUM(); \
@@ -188,7 +188,7 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 	p2.nbr_cells = 1;
 
-	if (is_variable(p1) && is_rational(&p2)) {
+	if (is_variable(p1) && is_smallint(&p2)) {
 		set_var(q, p1, p1_ctx, &p2, q->st.curr_frame);
 		return pl_success;
 	}
@@ -201,12 +201,12 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 	if (is_bigint(p1) && is_bigint(&p2))
 		return !mp_rat_compare(&p1->val_big->rat, &p2.val_big->rat);
 
-	if (is_bigint(p1) && is_rational(&p2)) {
+	if (is_bigint(p1) && is_smallint(&p2)) {
 		mp_rat_set_value(&q->accum_rat, get_integer(&p2), 1);
 		return !mp_rat_compare(&p1->val_big->rat, &q->accum_rat);
 	}
 
-	if (is_bigint(&p2) && is_rational(p1)) {
+	if (is_bigint(&p2) && is_smallint(p1)) {
 		mp_rat_set_value(&q->accum_rat, get_integer(p1), 1);
 		return !mp_rat_compare(&p2.val_big->rat, &q->accum_rat);
 	}
@@ -214,7 +214,7 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 	if (is_integer(p1) && is_integer(&p2))
 		return (p1->val_int == p2.val_int);
 
-	if (is_rational(p1) && is_rational(&p2))
+	if (is_smallint(p1) && is_smallint(&p2))
 		return (p1->val_int == p2.val_int);
 
 	if (is_real(p1) && is_real(&p2))
@@ -280,7 +280,7 @@ static USE_RESULT pl_status fn_iso_integer_1(query *q)
 			return pl_success;
 		}
 
-		if (is_rational(&p1)) {
+		if (is_smallint(&p1)) {
 			q->accum.val_int = p1.val_int;
 			q->accum.val_den = p1.val_den;
 			q->accum.val_type = TYPE_RATIONAL;
@@ -303,7 +303,7 @@ static USE_RESULT pl_status fn_iso_abs_1(query *q)
 	if (is_bigint(&p1)) {
 		mp_rat_abs(&p1.val_big->rat, &q->accum_rat);
 		SET_ACCUM();
-	} else if (is_rational(&p1))
+	} else if (is_smallint(&p1))
 		q->accum.val_int = llabs((long long)p1.val_int);
 	else if (is_real(&p1))
 		q->accum.val_real = fabs(p1.val_real);
@@ -320,7 +320,7 @@ static USE_RESULT pl_status fn_iso_sign_1(query *q)
 	cell p1 = calc(q, p1_tmp);
 	q->accum.val_type = p1.val_type;
 
-	if (is_rational(&p1))
+	if (is_smallint(&p1))
 		q->accum.val_int = p1.val_int < 0 ? -1 : p1.val_int > 0  ? 1 : 0;
 	else if (is_real(&p1))
 		q->accum.val_real = p1.val_real < 0 ? -1 : p1.val_real > 0  ? 1 : 0;
@@ -349,7 +349,7 @@ static USE_RESULT pl_status fn_iso_negative_1(query *q)
 	if (is_bigint(&p1)) {
 		mp_rat_neg(&p1.val_big->rat, &q->accum_rat);
 		SET_ACCUM();
-	} else if (is_rational(&p1))
+	} else if (is_smallint(&p1))
 		q->accum.val_int = -p1.val_int;
 	else if (is_real(&p1))
 		q->accum.val_real = -p1.val_real;
@@ -535,7 +535,7 @@ static USE_RESULT pl_status fn_iso_truncate_1(query *q)
 		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
-	} else if (is_rational(&p1)) {
+	} else if (is_smallint(&p1)) {
 		return throw_error(q, &p1, "type_error", "float");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
@@ -562,7 +562,7 @@ static USE_RESULT pl_status fn_iso_round_1(query *q)
 		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
-	} else if (is_rational(&p1)) {
+	} else if (is_smallint(&p1)) {
 		return throw_error(q, &p1, "type_error", "float");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
@@ -582,7 +582,7 @@ static USE_RESULT pl_status fn_iso_ceiling_1(query *q)
 		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
-	} else if (is_rational(&p1)) {
+	} else if (is_smallint(&p1)) {
 		return throw_error(q, &p1, "type_error", "float");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
@@ -602,7 +602,7 @@ static USE_RESULT pl_status fn_iso_float_integer_part_1(query *q)
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
-	} else if (is_rational(&p1)) {
+	} else if (is_smallint(&p1)) {
 		return throw_error(q, &p1, "type_error", "float");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
@@ -622,7 +622,7 @@ static USE_RESULT pl_status fn_iso_float_fractional_part_1(query *q)
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
-	} else if (is_rational(&p1)) {
+	} else if (is_smallint(&p1)) {
 		return throw_error(q, &p1, "type_error", "float");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
@@ -642,7 +642,7 @@ static USE_RESULT pl_status fn_iso_floor_1(query *q)
 		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
-	} else if (is_rational(&p1)) {
+	} else if (is_smallint(&p1)) {
 		return throw_error(q, &p1, "type_error", "float");
 	} else {
 		return throw_error(q, &p1, "type_error", "evaluable");
@@ -1030,14 +1030,14 @@ static USE_RESULT pl_status fn_iso_copysign_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (is_rational(&p1) && is_rational(&p2)) {
+	if (is_smallint(&p1) && is_smallint(&p2)) {
 		q->accum = p1;
 
 		if (p2.val_int < 0)
 			q->accum.val_int = -llabs((long long)p1.val_int);
 
 		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_rational(&p1) && is_real(&p2)) {
+	} else if (is_smallint(&p1) && is_real(&p2)) {
 		q->accum = p1;
 
 		if (p2.val_real < 0.0)
@@ -1047,7 +1047,7 @@ static USE_RESULT pl_status fn_iso_copysign_2(query *q)
 	} else if (is_real(&p1) && is_real(&p2)) {
 		q->accum.val_real = copysign(p1.val_real, p2.val_real);
 		q->accum.val_type = TYPE_REAL;
-	} else if (is_real(&p1) && is_rational(&p2)) {
+	} else if (is_real(&p1) && is_smallint(&p2)) {
 		q->accum.val_real = copysign(p1.val_real, p2.val_int);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
@@ -1082,7 +1082,7 @@ static USE_RESULT pl_status fn_iso_pow_2(query *q)
 
 		q->accum.val_real = pow((double)p1.val_int, (double)p2.val_int);
 		q->accum.val_type = TYPE_REAL;
-	} else if (is_rational(&p1) && is_real(&p2)) {
+	} else if (is_smallint(&p1) && is_real(&p2)) {
 		if ((p1.val_int == 0) && (p2.val_real < 0.0))
 			return throw_error(q, &p2, "evaluation_error", "undefined");
 
@@ -1166,7 +1166,7 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 		mp_int_to_int(&q->accum_rat.num, &n);
 		q->accum.val_int = n;
 		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_rational(&p1) && is_real(&p2)) {
+	} else if (is_smallint(&p1) && is_real(&p2)) {
 		q->accum.val_real = pow(p1.val_int, p2.val_real);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1) && is_real(&p2)) {
@@ -1213,7 +1213,7 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 
 		q->accum.val_real = (double)p1.val_int / p2.val_int;
 		q->accum.val_type = TYPE_REAL;
-	} else if (is_rational(&p1) && is_rational(&p2)) {
+	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		p1.val_int *= p2.val_den;
 		p2.val_int *= p1.val_den;
 		q->accum.val_int = p1.val_int;
@@ -1482,7 +1482,7 @@ static USE_RESULT pl_status fn_iso_max_2(query *q)
 			return throw_error(q, &p2, "type_error", "integer");
 
 		SET_ACCUM();
- 	} else if (is_rational(&p1) && is_rational(&p2)) {
+ 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		cell s1 = {0}, s2 = {0};
 		s1.val_int = p1.val_int * p2.val_den;
 		s1.val_den = p1.val_den * p2.val_den;
@@ -1491,7 +1491,7 @@ static USE_RESULT pl_status fn_iso_max_2(query *q)
 		if (s1.val_int >= s2.val_int) q->accum = s1;
 		else q->accum = s2;
 		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_rational(&p1) && is_real(&p2)) {
+	} else if (is_smallint(&p1) && is_real(&p2)) {
 		double f1 = (double)p1.val_int;
 		if (p1.val_den) f1 /= p1.val_den;
 
@@ -1499,7 +1499,7 @@ static USE_RESULT pl_status fn_iso_max_2(query *q)
 			q->accum = p1;
 		else
 			q->accum = p2;
-	} else if (is_rational(&p2) && is_real(&p1)) {
+	} else if (is_smallint(&p2) && is_real(&p1)) {
 		double f2 = (double)p2.val_int;
 		if (p2.val_den) f2 /= p2.val_den;
 
@@ -1514,9 +1514,9 @@ static USE_RESULT pl_status fn_iso_max_2(query *q)
 			q->accum = p2;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
-	} else if (!is_rational(&p1)) {
+	} else if (!is_smallint(&p1)) {
 		return throw_error(q, &p1, "type_error", "integer");
-	} else if (!is_rational(&p2)) {
+	} else if (!is_smallint(&p2)) {
 		return throw_error(q, &p2, "type_error", "integer");
 	}
 
@@ -1558,7 +1558,7 @@ static USE_RESULT pl_status fn_iso_min_2(query *q)
 			return throw_error(q, &p2, "type_error", "integer");
 
 		SET_ACCUM();
-	} else if (is_rational(&p1) && is_rational(&p2)) {
+	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		cell s1 = {0}, s2 = {0};
 		s1.val_int = p1.val_int * p2.val_den;
 		s1.val_den = p1.val_den * p2.val_den;
@@ -1567,7 +1567,7 @@ static USE_RESULT pl_status fn_iso_min_2(query *q)
 		if (s1.val_int <= s2.val_int) q->accum = s1;
 		else q->accum = s2;
 		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_rational(&p1) && is_real(&p2)) {
+	} else if (is_smallint(&p1) && is_real(&p2)) {
 		double f1 = (double)p1.val_int;
 		if (p1.val_den) f1 /= p1.val_den;
 
@@ -1575,7 +1575,7 @@ static USE_RESULT pl_status fn_iso_min_2(query *q)
 			q->accum = p1;
 		else
 			q->accum = p2;
-	} else if (is_rational(&p2) && is_real(&p1)) {
+	} else if (is_smallint(&p2) && is_real(&p1)) {
 		double f2 = (double)p2.val_int;
 		if (p1.val_den) f2 /= p1.val_den;
 
@@ -1590,9 +1590,9 @@ static USE_RESULT pl_status fn_iso_min_2(query *q)
 			q->accum = p2;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
-	} else if (!is_rational(&p1)) {
+	} else if (!is_smallint(&p1)) {
 		return throw_error(q, &p1, "type_error", "integer");
-	} else if (!is_rational(&p2)) {
+	} else if (!is_smallint(&p2)) {
 		return throw_error(q, &p2, "type_error", "integer");
 	}
 
@@ -1755,8 +1755,8 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 	if (is_bigint(p2) && is_integer(p1))
 		return -mp_rat_compare_value(&p2->val_big->rat, p1->val_int, 1);
 
-	if (is_rational(p1)) {
-		if (is_rational(p2)) {
+	if (is_smallint(p1)) {
+		if (is_smallint(p2)) {
 			cell tmp_p1 = *p1, tmp_p2 = *p2;
 			tmp_p1.val_int *= tmp_p2.val_den;
 			tmp_p2.val_int *= tmp_p1.val_den;
@@ -1916,7 +1916,7 @@ static USE_RESULT pl_status fn_iso_neq_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_int == p2.val_int;
-	else if (is_rational(&p1) && is_rational(&p2)) {
+	else if (is_smallint(&p1) && is_smallint(&p2)) {
 		p1.val_int *= p2.val_den;
 		p2.val_int *= p1.val_den;
 		return p1.val_int == p2.val_int;
@@ -1939,7 +1939,7 @@ static USE_RESULT pl_status fn_iso_nne_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_int != p2.val_int;
-	else if (is_rational(&p1) && is_rational(&p2)) {
+	else if (is_smallint(&p1) && is_smallint(&p2)) {
 		p1.val_int *= p2.val_den;
 		p2.val_int *= p1.val_den;
 		return p1.val_int != p2.val_int;
@@ -1962,7 +1962,7 @@ static USE_RESULT pl_status fn_iso_nge_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_int >= p2.val_int;
-	else if (is_rational(&p1) && is_rational(&p2)) {
+	else if (is_smallint(&p1) && is_smallint(&p2)) {
 		p1.val_int *= p2.val_den;
 		p2.val_int *= p1.val_den;
 		return p1.val_int >= p2.val_int;
@@ -1985,7 +1985,7 @@ static USE_RESULT pl_status fn_iso_ngt_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_int > p2.val_int;
-	else if (is_rational(&p1) && is_rational(&p2)) {
+	else if (is_smallint(&p1) && is_smallint(&p2)) {
 		p1.val_int *= p2.val_den;
 		p2.val_int *= p1.val_den;
 		return p1.val_int > p2.val_int;
@@ -2008,7 +2008,7 @@ static USE_RESULT pl_status fn_iso_nle_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_int <= p2.val_int;
-	else if (is_rational(&p1) && is_rational(&p2)) {
+	else if (is_smallint(&p1) && is_smallint(&p2)) {
 		p1.val_int *= p2.val_den;
 		p2.val_int *= p1.val_den;
 		return p1.val_int <= p2.val_int;
@@ -2031,7 +2031,7 @@ static USE_RESULT pl_status fn_iso_nlt_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_int < p2.val_int;
-	else if (is_rational(&p1) && is_rational(&p2)) {
+	else if (is_smallint(&p1) && is_smallint(&p2)) {
 		p1.val_int *= p2.val_den;
 		p2.val_int *= p1.val_den;
 		return p1.val_int < p2.val_int;
@@ -2297,7 +2297,7 @@ static USE_RESULT pl_status fn_rational_1(query *q)
 	if (q->calc) {
 		cell p1 = calc(q, p1_tmp);
 
-		if (is_rational(&p1)) {
+		if (is_smallint(&p1)) {
 			q->accum.val_int = p1.val_int;
 			q->accum.val_den = p1.val_den;
 			q->accum.val_type = TYPE_RATIONAL;
@@ -2315,7 +2315,7 @@ static USE_RESULT pl_status fn_rational_1(query *q)
 		return throw_error(q, &p1, "type_error", "evaluable");
 	}
 
-	return is_rational(p1_tmp);
+	return is_smallint(p1_tmp);
 }
 
 static int_t gcd(int_t num, int_t remainder)
