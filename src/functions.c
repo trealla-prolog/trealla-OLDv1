@@ -1275,10 +1275,25 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (is_bigint(&p1) || is_bigint(&p2))
+	if (!is_integer(&p1) || !is_integer(&p2))
 		return throw_error(q, &p2, "type_error", "integer");
 
-	if (is_integer(&p1) && is_integer(&p2)) {
+	if (is_bigint(&p1) && is_bigint(&p2)) {
+		mp_int_mod(&p1.val_big->rat.num, &p2.val_big->rat.num, &q->accum_rat.num);
+		SET_ACCUM();
+	} else if (is_bigint(&p1)) {
+		mpz_t tmp;
+		mp_int_init_value(&tmp, p2.val_int);
+		mp_int_mod(&p1.val_big->rat.num, &tmp, &q->accum_rat.num);
+		mp_int_clear(&tmp);
+		SET_ACCUM();
+	} else if (is_bigint(&p2)) {
+		mpz_t tmp;
+		mp_int_init_value(&tmp, p1.val_int);
+		mp_int_mod(&tmp, &p2.val_big->rat.num, &q->accum_rat.num);
+		mp_int_clear(&tmp);
+		SET_ACCUM();
+	} else if (is_integer(&p1) && is_integer(&p2)) {
 		if (p2.val_int == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
