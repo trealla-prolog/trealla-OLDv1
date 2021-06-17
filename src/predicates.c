@@ -10747,12 +10747,12 @@ static USE_RESULT pl_status fn_memberchk_2(query *q)
 		return pl_failure;
 	}
 
-	if (is_rational(p1)) {
+	if (is_smallint(p1)) {
 		while (is_list(p2)) {
 			cell *h = LIST_HEAD(p2);
 			h = deref(q, h, p2_ctx);
 
-			if (is_rational(h)) {
+			if (is_smallint(h)) {
 				if ((get_numerator(p1) == get_numerator(h))
 					&& (get_denominator(p1) == get_denominator(h)))
 					return pl_success;
