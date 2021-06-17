@@ -107,7 +107,7 @@ typedef enum {
 #define set_real(c,v) (c)->val_real = (v)
 
 #define get_integer(c) (c)->val_int
-#define set_integer(c,v) { (c)->val_int = (v); (c)->val_den = 1; }
+#define set_integer(c,v) { (c)->val_int = (v); (c)->val_spare = 0; }
 
 #define is_integer(c) 											\
 	(is_rational(c) ? 											\
@@ -289,7 +289,7 @@ struct cell_ {
 
 		struct {
 			int_t val_int;
-			int_t val_den;			// redundant
+			int_t val_spare;
 		};
 
 		// A managed bigint...
