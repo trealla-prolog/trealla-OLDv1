@@ -106,12 +106,15 @@ typedef enum {
 #define get_real(c) (c)->val_real
 #define set_real(c,v) (c)->val_real = (v)
 
-////////////////////////////////////////////////////////////////////
-//
 #define get_integer(c) (c)->val_int
 #define set_integer(c,v) { (c)->val_int = (v); (c)->val_den = 1; }
-//
-////////////////////////////////////////////////////////////////////
+
+#define is_integer(c) 											\
+	(is_rational(c) ? 											\
+		is_bigint(c) ? 											\
+			mp_rat_is_integer(&(c)->val_big->rat)				\
+		: true													\
+	: false)
 
 #define is_negative(c) (get_integer(c) < 0)
 #define is_positive(c) (get_integer(c) > 0)
@@ -141,13 +144,6 @@ typedef enum {
 #define is_tail_recursive(c) ((c)->flags & FLAG_TAIL_REC)
 #define is_key(c) ((c)->flags & FLAG_KEY)
 #define is_op(c) (c->flags & 0xE000)
-
-#define is_integer(c) 											\
-	(is_rational(c) ? 											\
-		is_bigint(c) ? 											\
-			mp_rat_is_integer(&(c)->val_big->rat)				\
-		: true													\
-	: false)
 
 typedef struct {
 	int64_t refcnt;
