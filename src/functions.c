@@ -269,7 +269,6 @@ static USE_RESULT pl_status fn_iso_integer_1(query *q)
 
 		if (is_real(&p1)) {
 			q->accum.val_int = (int_t)p1.val_real;
-			q->accum.val_den = 1;
 			q->accum.val_type = TYPE_RATIONAL;
 			return pl_success;
 		}
@@ -1742,10 +1741,7 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 
 	if (is_smallint(p1)) {
 		if (is_smallint(p2)) {
-			cell tmp_p1 = *p1, tmp_p2 = *p2;
-			tmp_p1.val_int *= tmp_p2.val_den;
-			tmp_p2.val_int *= tmp_p1.val_den;
-			return tmp_p1.val_int < tmp_p2.val_int ? -1 : tmp_p1.val_int > tmp_p2.val_int ? 1 : 0;
+			return p1->val_int < p2->val_int ? -1 : p1->val_int > p2->val_int ? 1 : 0;
 		}
 
 		if (is_real(p2))
@@ -1902,8 +1898,6 @@ static USE_RESULT pl_status fn_iso_neq_2(query *q)
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_int == p2.val_int;
 	else if (is_smallint(&p1) && is_smallint(&p2)) {
-		p1.val_int *= p2.val_den;
-		p2.val_int *= p1.val_den;
 		return p1.val_int == p2.val_int;
 	} else if (is_integer(&p1) && is_real(&p2))
 		return p1.val_int == p2.val_real;
@@ -1925,8 +1919,6 @@ static USE_RESULT pl_status fn_iso_nne_2(query *q)
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_int != p2.val_int;
 	else if (is_smallint(&p1) && is_smallint(&p2)) {
-		p1.val_int *= p2.val_den;
-		p2.val_int *= p1.val_den;
 		return p1.val_int != p2.val_int;
 	} else if (is_integer(&p1) && is_real(&p2))
 		return p1.val_int != p2.val_real;
@@ -1948,8 +1940,6 @@ static USE_RESULT pl_status fn_iso_nge_2(query *q)
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_int >= p2.val_int;
 	else if (is_smallint(&p1) && is_smallint(&p2)) {
-		p1.val_int *= p2.val_den;
-		p2.val_int *= p1.val_den;
 		return p1.val_int >= p2.val_int;
 	} else if (is_integer(&p1) && is_real(&p2))
 		return p1.val_int >= p2.val_real;
@@ -1971,8 +1961,6 @@ static USE_RESULT pl_status fn_iso_ngt_2(query *q)
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_int > p2.val_int;
 	else if (is_smallint(&p1) && is_smallint(&p2)) {
-		p1.val_int *= p2.val_den;
-		p2.val_int *= p1.val_den;
 		return p1.val_int > p2.val_int;
 	} else if (is_integer(&p1) && is_real(&p2))
 		return p1.val_int > p2.val_real;
@@ -1994,8 +1982,6 @@ static USE_RESULT pl_status fn_iso_nle_2(query *q)
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_int <= p2.val_int;
 	else if (is_smallint(&p1) && is_smallint(&p2)) {
-		p1.val_int *= p2.val_den;
-		p2.val_int *= p1.val_den;
 		return p1.val_int <= p2.val_int;
 	} else if (is_integer(&p1) && is_real(&p2))
 		return p1.val_int <= p2.val_real;
@@ -2017,8 +2003,6 @@ static USE_RESULT pl_status fn_iso_nlt_2(query *q)
 	if (is_integer(&p1) && is_integer(&p2))
 		return p1.val_int < p2.val_int;
 	else if (is_smallint(&p1) && is_smallint(&p2)) {
-		p1.val_int *= p2.val_den;
-		p2.val_int *= p1.val_den;
 		return p1.val_int < p2.val_int;
 	} else if (is_integer(&p1) && is_real(&p2))
 		return p1.val_int < p2.val_real;
@@ -2170,7 +2154,6 @@ static USE_RESULT pl_status fn_random_1(query *q)
 
 	q->accum.val_type = TYPE_RATIONAL;
 	q->accum.val_int = llabs((long long)((int_t)(rnd() * RAND_MAX) % p1.val_int));
-	q->accum.val_den = 1;
 	return pl_success;
 }
 
@@ -2178,7 +2161,6 @@ static USE_RESULT pl_status fn_rand_0(query *q)
 {
 	q->accum.val_type = TYPE_RATIONAL;
 	q->accum.val_int = (int_t)rnd() * RAND_MAX;
-	q->accum.val_den = 1;
 	return pl_success;
 }
 
@@ -2284,7 +2266,6 @@ static USE_RESULT pl_status fn_rational_1(query *q)
 
 		if (is_smallint(&p1)) {
 			q->accum.val_int = p1.val_int;
-			q->accum.val_den = p1.val_den;
 			q->accum.val_type = TYPE_RATIONAL;
 			return pl_success;
 		}
