@@ -1173,7 +1173,19 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (is_integer(&p1) && is_integer(&p2)) {
+	if (is_bigint(&p1) && is_bigint(&p2) && is_integer(&p1) && is_integer(&p2)) {
+		q->accum.val_real = mp_int_to_float(&p1.val_big->rat.num);
+		q->accum.val_real /= mp_int_to_float(&p2.val_big->rat.num);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_bigint(&p1) && is_integer(&p1) && is_integer(&p2)) {
+		q->accum.val_real = mp_int_to_float(&p1.val_big->rat.num);
+		q->accum.val_real /= p2.val_int;
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_bigint(&p2) && is_integer(&p2) && is_integer(&p1)) {
+		q->accum.val_real = p1.val_int;
+		q->accum.val_real /= mp_int_to_float(&p2.val_big->rat.num);
+		q->accum.val_type = TYPE_REAL;
+	} else if (is_integer(&p1) && is_integer(&p2)) {
 		if (p2.val_int == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
