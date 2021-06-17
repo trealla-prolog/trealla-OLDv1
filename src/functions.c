@@ -42,10 +42,9 @@
 			mp_rat_clear(&tmp); \
 			SET_ACCUM(); \
 		} else if (is_real(&p2)) { \
-			mp_small n, d; \
-			mp_rat_to_ints(&p1.val_big->rat, &n, &d); \
-			q->accum.val_real = (double)n / d; \
-			q->accum.val_real = q->accum.val_real op p1.val_real; \
+			double d = mp_int_to_float(&p1.val_big->rat.num); \
+			d /= mp_int_to_float(&p1.val_big->rat.den); \
+			q->accum.val_real = d op p2.val_real; \
 			q->accum.val_type = TYPE_REAL; \
 			q->accum.flags = 0; \
 		} \
@@ -58,10 +57,9 @@
 			mp_rat_clear(&tmp); \
 			SET_ACCUM(); \
 		} else if (is_real(&p1)) { \
-			mp_small n, d; \
-			mp_rat_to_ints(&p2.val_big->rat, &n, &d); \
-			q->accum.val_real = (double)n / d; \
-			q->accum.val_real = q->accum.val_real op p2.val_real; \
+			double d = mp_int_to_float(&p2.val_big->rat.num); \
+			d /= mp_int_to_float(&p2.val_big->rat.den); \
+			q->accum.val_real = p1.val_real op d; \
 			q->accum.val_type = TYPE_REAL; \
 			q->accum.flags = 0; \
 		} \
