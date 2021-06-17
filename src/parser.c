@@ -412,7 +412,7 @@ static void do_op(parser *p, cell *c)
 {
 	cell *p1 = c + 1, *p2 = c + 2, *p3 = c + 3;
 
-	if (!is_integer(p1) || !is_literal(p2) || (!is_atom(p3) && !is_list(p3))) {
+	if (!is_smallint(p1) || !is_literal(p2) || (!is_atom(p3) && !is_list(p3))) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: unknown op\n");
 
@@ -613,7 +613,7 @@ static void directives(parser *p, term *t)
 					|| !strcmp(PARSER_GET_STR(head), "//")) {
 					cell *f = head+1, *a = f+1;
 					if (!is_literal(f)) return;
-					if (!is_integer(a)) return;
+					if (!is_smallint(a)) return;
 					cell tmp = *f;
 					tmp.arity = get_integer(a);
 
@@ -763,7 +763,7 @@ static void directives(parser *p, term *t)
 			cell *c_name = h + 1;
 			if (!is_atom(c_name)) continue;
 			cell *c_arity = h + 2;
-			if (!is_integer(c_arity)) continue;
+			if (!is_smallint(c_arity)) continue;
 			unsigned arity = get_integer(c_arity);
 
 			if (!strcmp(PARSER_GET_STR(h), "//"))
@@ -812,7 +812,7 @@ static void directives(parser *p, term *t)
 			cell *c_name = p1 + 1;
 			if (!is_atom(c_name)) return;
 			cell *c_arity = p1 + 2;
-			if (!is_integer(c_arity)) return;
+			if (!is_smallint(c_arity)) return;
 			unsigned arity = get_integer(c_arity);
 
 			if (!strcmp(PARSER_GET_STR(p1), "//"))

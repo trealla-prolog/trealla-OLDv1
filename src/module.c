@@ -132,8 +132,17 @@ static int compkey2(const void *ptr1, const void *ptr2, const void *param)
 	const cell *p2 = (const cell*)ptr2;
 	const module *m = (const module*)param;
 
-	if (is_integer(p1)) {
-		if (is_integer(p2)) {
+	if (is_bigint(p1)) {
+		if (is_bigint(p2)) {
+			return mp_rat_compare(&p1->val_big->rat, &p2->val_big->rat);
+		} else if (is_smallint(p2)) {
+			return mp_rat_compare_value(&p1->val_big->rat, p2->val_int, 1);
+		} else if (is_variable(p2))
+			return 0;
+	} else if (is_smallint(p1)) {
+		if (is_bigint(p2)) {
+			return -mp_rat_compare_value(&p2->val_big->rat, p1->val_int, 1);
+		} if (is_smallint(p2)) {
 			if (get_integer(p1) < get_integer(p2))
 				return -1;
 			else if (get_integer(p1) > get_integer(p2))
