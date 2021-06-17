@@ -1120,30 +1120,19 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-#if 0
-	if (is_integer(&p1)) {
-		if (p1.val_int == 0)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-	}
-#endif
-
 	if (is_integer(&p1) && is_integer(&p2)) {
-		if ((p1.val_int != 1) && (p2.val_int < 0)) {
+		if ((p1.val_int != 1) && (p2.val_int < 0))
 			return throw_error(q, &p1, "type_error", "float");
-		}
 
-		double res = pow(p1.val_int,p2.val_int);
+		double d = pow(p1.val_int, p2.val_int);
 
-		if (res > (double)MY_INT64_MAX)
+		if (d > MY_INT64_MAX)
 			return throw_error(q, &p1, "evaluation_error", "int_overflow");
 
-		q->accum.val_int = (int_t)res;
+		q->accum.val_int = d;
 		q->accum.val_type = TYPE_RATIONAL;
-	} else if (is_rational(&p1) && is_rational(&p2)) {
-		q->accum.val_real = pow((double)p1.val_int, (double)p2.val_int);
-		q->accum.val_type = TYPE_REAL;
 	} else if (is_rational(&p1) && is_real(&p2)) {
-		q->accum.val_real = pow((double)p1.val_int, p2.val_real);
+		q->accum.val_real = pow(p1.val_int, p2.val_real);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1) && is_real(&p2)) {
 		q->accum.val_real = pow(p1.val_real, p2.val_real);
