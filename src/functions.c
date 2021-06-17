@@ -1247,12 +1247,6 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (!is_integer(&p1))
-		return throw_error(q, &p1, "type_error", "integer");
-
-	if (!is_integer(&p2))
-		return throw_error(q, &p2, "type_error", "integer");
-
 	if (is_bigint(&p1) && is_bigint(&p2)) {
 		mp_int_mod(&p1.val_big->rat.num, &p2.val_big->rat.num, &q->accum_rat.num);
 		SET_ACCUM();
@@ -1300,10 +1294,7 @@ static USE_RESULT pl_status fn_iso_div_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (!is_integer(&p1))
-		return throw_error(q, &p1, "type_error", "integer");
-
-	if (!is_integer(&p2))
+	if (is_bigint(&p1) || is_bigint(&p2))
 		return throw_error(q, &p2, "type_error", "integer");
 
 	if (is_integer(&p1) && is_integer(&p2)) {
