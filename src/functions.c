@@ -1156,7 +1156,7 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 		mp_int_clear(&tmp1);
 		mp_int_clear(&tmp2);
 
-		if (mp_int_compare_value(&q->accum_rat.num, LONG_MAX) > 0) {
+		if (mp_int_compare_value(&q->accum_rat.num, INT64_MAX) > 0) {
 			mp_int_set_value(&q->accum_rat.den, 1);
 			SET_ACCUM();
 			return pl_success;
