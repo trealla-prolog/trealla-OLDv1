@@ -1635,7 +1635,7 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		return mp_rat_compare_value(&p1->val_big->rat, p2->val_int, 1);
 
 	if (is_bigint(p2) && is_integer(p1))
-		return mp_rat_compare_value(&p2->val_big->rat, p1->val_int, 1);
+		return -mp_rat_compare_value(&p2->val_big->rat, p1->val_int, 1);
 
 	if (is_rational(p1)) {
 		if (is_rational(p2)) {
