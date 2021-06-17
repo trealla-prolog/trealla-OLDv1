@@ -577,7 +577,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			dst += snprintf(dst, dstlen, "%s0o", get_integer(c)<0?"-":"");
 			dst += sprint_int(dst, dstlen, get_integer(c), 8);
 		} else
-			dst += sprint_int(dst, dstlen, get_numerator(c), 10);
+			dst += sprint_int(dst, dstlen, get_integer(c), 10);
 
 		return dst - save_dst;
 	}

@@ -10753,7 +10753,7 @@ static USE_RESULT pl_status fn_memberchk_2(query *q)
 			h = deref(q, h, p2_ctx);
 
 			if (is_smallint(h)) {
-				if ((get_numerator(p1) == get_numerator(h))
+				if ((get_integer(p1) == get_integer(h))
 					&& (get_denominator(p1) == get_denominator(h)))
 					return pl_success;
 			}
