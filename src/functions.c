@@ -433,8 +433,8 @@ static USE_RESULT pl_status fn_iso_exp_1(query *q)
 		q->accum.val_real = exp(mp_int_to_float(&p1.val_big->rat.num));
 		q->accum.val_type = TYPE_REAL;
 		return pl_success;
-	} else if (is_rational(&p1)) {
-		q->accum.val_real = exp((double)p1.val_int);
+	} else if (is_integer(&p1)) {
+		q->accum.val_real = exp((double)get_integer(&p1));
 
 		if (isinf(q->accum.val_real))
 			return throw_error(q, &p1, "evaluation_error", "float_overflow");
@@ -458,7 +458,7 @@ static USE_RESULT pl_status fn_iso_sqrt_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = calc(q, p1_tmp);
 
-	if (is_bigint(&p1)) {
+	if (is_bigint(&p1) && is_integer(&p1)) {
 		if (mp_int_compare_zero(&p1.val_big->rat.num) < 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
@@ -471,7 +471,7 @@ static USE_RESULT pl_status fn_iso_sqrt_1(query *q)
 		q->accum.val_real = mp_int_to_float(&tmp);
 		q->accum.val_type = TYPE_REAL;
 		mp_int_clear(&tmp);
-	} else if (is_rational(&p1)) {
+	} else if (is_integer(&p1)) {
 		if (p1.val_int < 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
