@@ -282,7 +282,6 @@ static USE_RESULT pl_status fn_iso_integer_1(query *q)
 
 		if (is_smallint(&p1)) {
 			q->accum.val_int = p1.val_int;
-			q->accum.val_den = p1.val_den;
 			q->accum.val_type = TYPE_RATIONAL;
 			return pl_success;
 		}
@@ -1213,12 +1212,6 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 
 		q->accum.val_real = (double)p1.val_int / p2.val_int;
 		q->accum.val_type = TYPE_REAL;
-	} else if (is_smallint(&p1) && is_smallint(&p2)) {
-		p1.val_int *= p2.val_den;
-		p2.val_int *= p1.val_den;
-		q->accum.val_int = p1.val_int;
-		q->accum.val_den = p2.val_int;
-		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_integer(&p1) && is_real(&p2)) {
 		if (p2.val_real == 0.0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
@@ -1483,17 +1476,14 @@ static USE_RESULT pl_status fn_iso_max_2(query *q)
 
 		SET_ACCUM();
  	} else if (is_smallint(&p1) && is_smallint(&p2)) {
-		cell s1 = {0}, s2 = {0};
-		s1.val_int = p1.val_int * p2.val_den;
-		s1.val_den = p1.val_den * p2.val_den;
-		s2.val_int = p2.val_int * p1.val_den;
-		s2.val_den = p2.val_den * p1.val_den;
-		if (s1.val_int >= s2.val_int) q->accum = s1;
-		else q->accum = s2;
+		if (p1.val_int >= p2.val_int)
+			q->accum = p1;
+		else
+			q->accum = p2;
+
 		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_smallint(&p1) && is_real(&p2)) {
 		double f1 = (double)p1.val_int;
-		if (p1.val_den) f1 /= p1.val_den;
 
 		if (f1 > p2.val_real)
 			q->accum = p1;
@@ -1501,7 +1491,6 @@ static USE_RESULT pl_status fn_iso_max_2(query *q)
 			q->accum = p2;
 	} else if (is_smallint(&p2) && is_real(&p1)) {
 		double f2 = (double)p2.val_int;
-		if (p2.val_den) f2 /= p2.val_den;
 
 		if (f2 > p1.val_real)
 			q->accum = p2;
@@ -1559,17 +1548,14 @@ static USE_RESULT pl_status fn_iso_min_2(query *q)
 
 		SET_ACCUM();
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
-		cell s1 = {0}, s2 = {0};
-		s1.val_int = p1.val_int * p2.val_den;
-		s1.val_den = p1.val_den * p2.val_den;
-		s2.val_int = p2.val_int * p1.val_den;
-		s2.val_den = p2.val_den * p1.val_den;
-		if (s1.val_int <= s2.val_int) q->accum = s1;
-		else q->accum = s2;
+		if (p1.val_int <= p2.val_int)
+			q->accum = p1;
+		else
+			q->accum = p2;
+
 		q->accum.val_type = TYPE_RATIONAL;
 	} else if (is_smallint(&p1) && is_real(&p2)) {
 		double f1 = (double)p1.val_int;
-		if (p1.val_den) f1 /= p1.val_den;
 
 		if (f1 < p2.val_real)
 			q->accum = p1;
@@ -1577,7 +1563,6 @@ static USE_RESULT pl_status fn_iso_min_2(query *q)
 			q->accum = p2;
 	} else if (is_smallint(&p2) && is_real(&p1)) {
 		double f2 = (double)p2.val_int;
-		if (p1.val_den) f2 /= p1.val_den;
 
 		if (f2 < p1.val_real)
 			q->accum = p2;
