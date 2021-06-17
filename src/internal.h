@@ -110,7 +110,6 @@ typedef enum {
 //
 #define get_integer(c) (c)->val_int
 #define set_integer(c,v) { (c)->val_int = (v); (c)->val_den = 1; }
-#define get_denominator(c) (c)->val_den
 //
 ////////////////////////////////////////////////////////////////////
 
