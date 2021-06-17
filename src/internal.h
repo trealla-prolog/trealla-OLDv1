@@ -285,14 +285,14 @@ struct cell_ {
 
 	union {
 
-		// A rational (and integer)...
+		// A smallint...
 
 		struct {
 			int_t val_int;
-			int_t val_den;
+			int_t val_den;			// redundant
 		};
 
-		// A managed bigint-rational...
+		// A managed bigint...
 
 		struct {
 			bigint *val_big;
