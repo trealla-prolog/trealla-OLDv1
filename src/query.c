@@ -259,15 +259,15 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes)
 		cell *h = LIST_HEAD(l);
 		cell *c = q ? deref(q, h, l_ctx) : h;
 
-		if (is_integer(c) && !allow_codes) {
+		if (is_smallint(c) && !allow_codes) {
 			is_chars_list = 0;
 			break;
-		} else if (!is_integer(c) && !is_atom(c)) {
+		} else if (!is_smallint(c) && !is_atom(c)) {
 			is_chars_list = 0;
 			break;
 		}
 
-		if (is_integer(c)) {
+		if (is_smallint(c)) {
 			int ch = get_integer(c);
 			char tmp[20];
 			put_char_utf8(tmp, ch);
@@ -875,13 +875,13 @@ static bool unify_rational(__attribute__((unused)) query *q, cell *p1, cell *p2)
 	if (is_bigint(p1) && is_bigint(p2))
 		return !mp_rat_compare(&p1->val_big->rat, &p2->val_big->rat);
 
-	if (is_bigint(p1) && is_integer(p2))
+	if (is_bigint(p1) && is_smallint(p2))
 		return !mp_rat_compare_value(&p1->val_big->rat, p2->val_int, 1);
 
-	if (is_bigint(p2) && is_integer(p1))
+	if (is_bigint(p2) && is_smallint(p1))
 		return !mp_rat_compare_value(&p2->val_big->rat, p1->val_int, 1);
 
-	if (is_rational(p2))
+	if (is_smallint(p2))
 		return (get_integer(p1) == get_integer(p2));
 
 	return false;
