@@ -22,13 +22,16 @@
 }
 
 #define CLR_ACCUM(p1) {												\
-	if (is_bigint(p1)) 												\
+	if (is_bigint(p1) && !((p1)->val_big->refcnt)) {				\
+	    printf("*** clear\n");										\
 		mp_rat_clear(&(p1)->val_big->rat);							\
-																	\
+	}																\
 	(p1)->val_type = TYPE_RATIONAL;									\
 	(p1)->val_int = 0;												\
 	(p1)->flags = 0;												\
 }
+
+#define CLR_ACCUM2(p1,p2) { CLR_ACCUM(p1); CLR_ACCUM(p2); }
 
 // Simple one for now...
 
@@ -399,8 +402,7 @@ USE_RESULT pl_status fn_iso_add_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 	DO_OP2(+, add, p1, p2);
-	CLR_ACCUM(&p1);
-	CLR_ACCUM(&p2);
+	CLR_ACCUM2(&p1,&p2);
 	return pl_success;
 }
 
