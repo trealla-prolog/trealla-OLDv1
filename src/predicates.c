@@ -3221,9 +3221,6 @@ static USE_RESULT pl_status fn_iso_put_char_2(query *q)
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
-	if (!is_smallint(p1))
-		return throw_error(q, p1, "type_error", "integer");
-
 	if (len != LEN_STR(p1))
 		return throw_error(q, p1, "type_error", "character");
 
