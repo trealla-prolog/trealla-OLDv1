@@ -21,7 +21,7 @@
 	mp_rat_init_copy(&q->accum.val_big->rat, &q->accum_rat);	\
 }
 
-void clr_accum(cell *p)
+static void clr_accum(cell *p)
 {
 	if (is_bigint(p) && !p->val_big->refcnt) {
 		mp_rat_clear(&p->val_big->rat);

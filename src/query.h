@@ -26,7 +26,6 @@ extern USE_RESULT pl_status throw_error(query *q, cell *c, const char *err_type,
 extern void call_attrs(query *q, cell *attrs);
 extern void stash_me(query *q, term *t, bool last_match);
 extern bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
-extern void clr_accum(cell *p);
 
 extern void allocate_list(query *q, const cell *c);
 extern void append_list(query *q, const cell *c);
