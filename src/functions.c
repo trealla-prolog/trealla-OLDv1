@@ -21,14 +21,14 @@
 		mp_rat_init_copy(&q->accum.val_big->rat, &q->accum_rat);	\
 }
 
-static void clr_accum(cell *p1)
+static void clr_accum(cell *p)
 {
-	if (is_bigint(p1) && !p1->val_big->refcnt)
-		mp_rat_clear(&p1->val_big->rat);
+	if (is_bigint(p) && !p->val_big->refcnt)
+		mp_rat_clear(&p->val_big->rat);
 
-	p1->val_type = TYPE_RATIONAL;
-	p1->val_int = 0;
-	p1->flags = 0;
+	p->val_type = TYPE_RATIONAL;
+	p->val_int = 0;
+	p->flags = 0;
 }
 
 #define CLEAR __attribute__((cleanup (clr_accum)))
