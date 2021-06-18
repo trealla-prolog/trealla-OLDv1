@@ -23,9 +23,8 @@
 
 static void clr_accum(cell *p)
 {
-	if (is_bigint(p) && !p->val_big->refcnt) {
+	if (is_bigint(p) && !p->val_big->refcnt)
 		mp_rat_clear(&p->val_big->rat);
-	}
 
 	p->val_type = TYPE_RATIONAL;
 	p->val_int = 0;
