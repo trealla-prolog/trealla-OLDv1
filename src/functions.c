@@ -1345,12 +1345,12 @@ static USE_RESULT pl_status fn_iso_div_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2) && is_integer(&p1) && is_integer(&p2)) {
-		mpz_t tmp, tmp1;
+		mpz_t tmp, tmp2;
 		mp_int_init(&tmp);
-		mp_int_init(&tmp1);
-		mp_int_mod(&p1.val_big->rat.num, &p2.val_big->rat.num, &tmp1);
-		mp_int_sub(&p1.val_big->rat.num, &tmp1, &tmp);
-		mp_int_clear(&tmp1);
+		mp_int_init(&tmp2);
+		mp_int_mod(&p1.val_big->rat.num, &p2.val_big->rat.num, &tmp2);
+		mp_int_sub(&p1.val_big->rat.num, &tmp2, &tmp);
+		mp_int_clear(&tmp2);
 		mp_int_div(&tmp, &p2.val_big->rat.num, &q->accum_rat.num, NULL);
 		mp_int_set_value(&q->accum_rat.den, 1);
 		mp_int_clear(&tmp);
