@@ -2212,7 +2212,7 @@ static USE_RESULT pl_status fn_rdiv_2(query *q)
 		return throw_error(q, &p2, "type_error", "integer");
 	}
 
-	if (0 && is_bigint(&q->accum) && mp_rat_is_integer(&q->accum.val_big->rat)) {
+	if (is_bigint(&q->accum) && mp_rat_is_integer(&q->accum.val_big->rat)) {
 		if ((mp_int_compare_value(&q->accum.val_big->rat.num, INT64_MAX) < 0) &&
 			(mp_int_compare_value(&q->accum.val_big->rat.num, INT64_MIN) > 0)) {
 			mp_small n, d;
