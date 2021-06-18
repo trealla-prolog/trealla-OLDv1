@@ -62,7 +62,7 @@ static void clr_accum(cell *p)
 		if (is_smallint(&p1)) { \
 			mpz_t tmp; \
 			mp_int_init_value(&tmp, p1.val_int); \
-			mp_int_##op2##_value(&tmp, p2.val_int, &q->accum_int); \
+			mp_int_##op2(&tmp, &p2.val_big->rat, &q->accum_int); \
 			mp_int_clear(&tmp); \
 			SET_ACCUM(); \
 		} else if (is_real(&p1)) { \
@@ -100,7 +100,7 @@ static void clr_accum(cell *p)
 			mp_int_##op2(&p1.val_big->rat, &p2.val_big->rat, &q->accum_int); \
 			SET_ACCUM(); \
 		} else if (is_smallint(&p2)) { \
-			mp_int_##op2(&p1.val_big->rat, p2.val_int, &q->accum_int); \
+			mp_int_##op2##_value(&p1.val_big->rat, p2.val_int, &q->accum_int); \
 			SET_ACCUM(); \
 		} else { \
 			return throw_error(q, &p1, "type_error", "evaluable"); \
