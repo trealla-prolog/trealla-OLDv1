@@ -1114,7 +1114,9 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 				return throw_error(q, &p1, "type_error", "float");
 		}
 
-		mp_int_expt_full(&p1.val_big->rat, &p2.val_big->rat, &q->accum_int);
+		if (mp_int_expt_full(&p1.val_big->rat, &p2.val_big->rat, &q->accum_int) == MP_RANGE)
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
 		SET_ACCUM();
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
 		if (mp_int_compare_value(&p1.val_big->rat, 1) != 0) {
@@ -1130,7 +1132,10 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p1.val_int);
-		mp_int_expt_full(&tmp, &p2.val_big->rat, &q->accum_int);
+
+		if (mp_int_expt_full(&tmp, &p2.val_big->rat, &q->accum_int) == MP_RANGE)
+			return throw_error(q, &p1, "evaluation_error", "undefined");
+
 		mp_int_clear(&tmp);
 		SET_ACCUM();
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
