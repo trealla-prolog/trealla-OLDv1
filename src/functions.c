@@ -49,11 +49,10 @@ static void clr_accum(cell *p)
 			mp_rat_##op2(&p1.val_big->rat, &p2.val_big->rat, &q->accum_rat); \
 			SET_ACCUM(); \
 		} else if (is_smallint(&p2)) { \
-			mpq_t tmp; \
-			mp_rat_init(&tmp); \
-			mp_rat_set_value(&tmp, get_smallint(&p2), 1); \
-			mp_rat_##op2(&p1.val_big->rat, &tmp, &q->accum_rat); \
-			mp_rat_clear(&tmp); \
+			mpz_t tmp; \
+			mp_int_init_value(&tmp, p2.val_int); \
+			mp_rat_##op2##_int(&p1.val_big->rat, &tmp, &q->accum_rat); \
+			mp_int_clear(&tmp); \
 			SET_ACCUM(); \
 		} else if (is_real(&p2)) { \
 			double d = mp_int_to_double(&p1.val_big->rat.num); \
@@ -106,10 +105,9 @@ static void clr_accum(cell *p)
 			mp_rat_##op2(&p1.val_big->rat, &p2.val_big->rat, &q->accum_rat); \
 			SET_ACCUM(); \
 		} else if (is_smallint(&p2)) { \
-			mpq_t tmp; \
-			mp_rat_init(&tmp); \
-			mp_rat_set_value(&tmp, get_smallint(&p2), 1); \
-			mp_rat_##op2(&p1.val_big->rat, &tmp, &q->accum_rat); \
+			mpz_t tmp; \
+			mp_int_init_value(&tmp, p2.val_int); \
+			mp_rat_##op2##_int(&p1.val_big->rat, &tmp, &q->accum_rat); \
 			mp_rat_clear(&tmp); \
 			SET_ACCUM(); \
 		} else { \
