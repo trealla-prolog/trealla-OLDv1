@@ -76,6 +76,7 @@ inline static cell *deref_var(query *q, cell *c, idx_t c_ctx)
 	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx; \
 	q->accum.val_type = TYPE_RATIONAL; \
 	q->accum.val_int = 0; \
+	q->accum.flags = 0; \
 	if (!is_##vt(p)) { return throw_error(q, p, "type_error", #vt); }
 
 #define GET_FIRST_ARG0(p,vt,p0) \
@@ -83,6 +84,7 @@ inline static cell *deref_var(query *q, cell *c, idx_t c_ctx)
 	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx; \
 	q->accum.val_type = TYPE_RATIONAL; \
 	q->accum.val_int = 0; \
+	q->accum.flags = 0; \
 	if (!is_##vt(p)) { return throw_error(q, p, "type_error", #vt); }
 
 #define GET_FIRST_RAW_ARG(p,vt) \
