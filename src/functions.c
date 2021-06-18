@@ -2220,6 +2220,7 @@ static USE_RESULT pl_status fn_rdiv_2(query *q)
 			mp_rat_zero(&q->accum.val_big->rat);
 			q->accum.val_type = TYPE_RATIONAL;
 			q->accum.val_int = n;
+			q->accum.flags = 0;
 		}
 	}
 
