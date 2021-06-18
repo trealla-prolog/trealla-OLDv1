@@ -33,7 +33,7 @@ typedef uint32_t idx_t;
 #include "map.h"
 #include "trealla.h"
 #include "cdebug.h"
-#include "imath/imrat.h"
+#include "imath/imath.h"
 
 static const unsigned INITIAL_NBR_CELLS = 100;		// cells
 
@@ -92,7 +92,7 @@ typedef enum {
 #define is_variable(c) ((c)->val_type == TYPE_VARIABLE)
 #define is_literal(c) ((c)->val_type == TYPE_LITERAL)
 #define is_cstring(c) ((c)->val_type == TYPE_CSTRING)
-#define is_rational(c) ((c)->val_type == TYPE_RATIONAL)
+#define is_integer(c) ((c)->val_type == TYPE_INTEGER)
 #define is_real(c) ((c)->val_type == TYPE_REAL)
 #define is_indirect(c) ((c)->val_type == TYPE_INDIRECT)
 #define is_end(c) ((c)->val_type == TYPE_END)
@@ -109,13 +109,6 @@ typedef enum {
 #define get_smallint(c) (c)->val_int
 #define set_smallint(c,v) { (c)->val_int = (v); (c)->val_spare1 = 0; }
 
-#define is_integer(c) 											\
-	(is_rational(c) ? 											\
-		is_bigint(c) ? 											\
-			mp_rat_is_integer(&(c)->val_big->rat)				\
-		: true													\
-	: false)
-
 #define is_negative(c) (get_smallint(c) < 0)
 #define is_positive(c) (get_smallint(c) > 0)
 
@@ -126,8 +119,8 @@ typedef enum {
 #define is_le(c,n) (get_smallint(c) <= (n))
 #define is_lt(c,n) (get_smallint(c) < (n))
 
-#define is_smallint(c) (is_rational(c) && !((c)->flags & FLAG_MANAGED))
-#define is_bigint(c) (is_rational(c) && (c)->flags & FLAG_MANAGED)
+#define is_smallint(c) (is_integer(c) && !((c)->flags & FLAG_MANAGED))
+#define is_bigint(c) (is_integer(c) && (c)->flags & FLAG_MANAGED)
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
 #define is_string(c) (is_cstring(c) && (c)->flags & FLAG_STRING)
 #define is_managed(c) ((c)->flags & FLAG_MANAGED)
@@ -153,7 +146,7 @@ typedef struct {
 
 typedef struct {
 	int64_t refcnt;
-	mpq_t rat;
+	mpz_t rat;
 } bigint;
 
 #define SET_STR(c,s,n,off) {									\
@@ -203,7 +196,7 @@ enum {
 	TYPE_VARIABLE=1,
 	TYPE_LITERAL=2,
 	TYPE_CSTRING=3,
-	TYPE_RATIONAL=4,
+	TYPE_INTEGER=4,
 	TYPE_REAL=5,
 	TYPE_INDIRECT=6,
 	TYPE_END=7
@@ -211,10 +204,10 @@ enum {
 
 enum {
 	FLAG_BUILTIN=1<<0,
-	FLAG_HEX=1<<1,						// used with TYPE_RATIONAL
-	FLAG_OCTAL=1<<2,					// used with TYPE_RATIONAL
-	FLAG_BINARY=1<<3,					// used with TYPE_RATIONAL
-	FLAG_STREAM=1<<4,					// used with TYPE_RATIONAL
+	FLAG_HEX=1<<1,						// used with TYPE_INTEGER
+	FLAG_OCTAL=1<<2,					// used with TYPE_INTEGER
+	FLAG_BINARY=1<<3,					// used with TYPE_INTEGER
+	FLAG_STREAM=1<<4,					// used with TYPE_INTEGER
 	FLAG_TAIL_REC=1<<5,
 	FLAG_TAIL=1<<6,
 	FLAG_BLOB=1<<7,						// used with TYPE_CSTRING
@@ -512,7 +505,7 @@ struct query_ {
 	clause *dirty_list;
 	slot *save_e;
 	cell accum;
-	mpq_t accum_rat;
+	mpz_t accum_int;
 	prolog_state st;
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
 	uint64_t step, qid, time_started;
@@ -672,7 +665,7 @@ inline static void unshare_cell(cell *c)
 			}
 		} else if (is_bigint(c)) {
 			if (--(c)->val_big->refcnt == 0)	{
-				mp_rat_clear(&(c)->val_big->rat);
+				mp_int_clear(&(c)->val_big->rat);
 				free((c)->val_big);
 				(c)->val_big = NULL;
 			}

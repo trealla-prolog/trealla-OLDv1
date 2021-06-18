@@ -158,7 +158,7 @@ static void make_variable(cell *tmp, idx_t off)
 
 void make_int(cell *tmp, int_t v)
 {
-	tmp->val_type = TYPE_RATIONAL;
+	tmp->val_type = TYPE_INTEGER;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
 	set_smallint(tmp, v);
@@ -6671,7 +6671,7 @@ static USE_RESULT pl_status fn_busy_1(query *q)
 static USE_RESULT pl_status fn_now_0(query *q)
 {
 	int_t secs = get_time_in_usec() / 1000 / 1000;
-	q->accum.val_type = TYPE_RATIONAL;
+	q->accum.val_type = TYPE_INTEGER;
 	set_smallint(&q->accum, secs);
 	return pl_success;
 }
@@ -6719,7 +6719,7 @@ static USE_RESULT pl_status fn_between_3(query *q)
 	if (!is_smallint(p2))
 		return throw_error(q, p2, "type_error", "integer");
 
-	if (is_rational(p3) && !is_smallint(p3))
+	if (is_integer(p3) && !is_smallint(p3))
 		return throw_error(q, p3, "type_error", "integer");
 
 	if (!q->retry) {

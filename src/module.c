@@ -134,14 +134,14 @@ static int compkey2(const void *ptr1, const void *ptr2, const void *param)
 
 	if (is_bigint(p1)) {
 		if (is_bigint(p2)) {
-			return mp_rat_compare(&p1->val_big->rat, &p2->val_big->rat);
+			return mp_int_compare(&p1->val_big->rat, &p2->val_big->rat);
 		} else if (is_smallint(p2)) {
-			return mp_rat_compare_value(&p1->val_big->rat, p2->val_int, 1);
+			return mp_int_compare_value(&p1->val_big->rat, p2->val_int);
 		} else if (is_variable(p2))
 			return 0;
 	} else if (is_smallint(p1)) {
 		if (is_bigint(p2)) {
-			return -mp_rat_compare_value(&p2->val_big->rat, p1->val_int, 1);
+			return -mp_int_compare_value(&p2->val_big->rat, p1->val_int);
 		} if (is_smallint(p2)) {
 			if (get_smallint(p1) < get_smallint(p2))
 				return -1;

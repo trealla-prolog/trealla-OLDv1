@@ -10,10 +10,6 @@ CFLAGS += -DUSE_OPENSSL=1
 LDFLAGS += -lssl -lcrypto
 endif
 
-ifdef INT128
-CFLAGS += -DUSE_INT128=1
-endif
-
 ifdef THREADS
 CFLAGS += -DUSE_THREADS=1 -pthread
 LDFLAGS += -pthread
@@ -35,7 +31,7 @@ OBJECTS +=  library/builtins.o library/lists.o library/apply.o \
 	library/format.o library/charsio.o library/freeze.o \
 	library/ordsets.o library/assoc.o library/dict.o library/dif.o
 
-OBJECTS += src/imath/imath.o src/imath/imrat.o
+OBJECTS += src/imath/imath.o
 
 library/%.c: library/%.pl
 	xxd -i $^ $@
@@ -61,44 +57,43 @@ clean:
 
 src/base64.o: src/base64.c src/base64.h
 src/contrib.o: src/contrib.c src/trealla.h src/internal.h src/map.h \
-  src/skiplist.h src/cdebug.h src/imath/imrat.h src/imath/imath.h \
+  src/skiplist.h src/cdebug.h src/imath/imath.h \
   src/builtins.h
 src/functions.o: src/functions.c src/trealla.h src/internal.h src/map.h \
-  src/skiplist.h src/cdebug.h src/imath/imrat.h src/imath/imath.h \
+  src/skiplist.h src/cdebug.h src/imath/imath.h \
   src/query.h src/builtins.h
 src/heap.o: src/heap.c src/trealla.h src/internal.h src/map.h src/skiplist.h \
-  src/cdebug.h src/imath/imrat.h src/imath/imath.h src/query.h \
+  src/cdebug.h src/imath/imath.h src/query.h \
   src/builtins.h src/heap.h
 src/history.o: src/history.c src/history.h src/utf8.h src/cdebug.h
 src/library.o: src/library.c src/library.h
 src/module.o: src/module.c src/internal.h src/map.h src/skiplist.h \
-  src/trealla.h src/cdebug.h src/imath/imrat.h src/imath/imath.h \
+  src/trealla.h src/cdebug.h src/imath/imath.h \
   src/history.h src/library.h src/parser.h src/module.h src/prolog.h \
   src/query.h src/builtins.h src/heap.h src/utf8.h
 src/network.o: src/network.c src/internal.h src/map.h src/skiplist.h \
-  src/trealla.h src/cdebug.h src/imath/imrat.h src/imath/imath.h \
+  src/trealla.h src/cdebug.h src/imath/imath.h \
   src/network.h
 src/parser.o: src/parser.c src/internal.h src/map.h src/skiplist.h \
-  src/trealla.h src/cdebug.h src/imath/imrat.h src/imath/imath.h \
+  src/trealla.h src/cdebug.h src/imath/imath.h \
   src/history.h src/library.h src/parser.h src/module.h src/prolog.h \
   src/query.h src/builtins.h src/heap.h src/utf8.h
 src/predicates.o: src/predicates.c src/trealla.h src/internal.h src/map.h \
-  src/skiplist.h src/cdebug.h src/imath/imrat.h src/imath/imath.h \
+  src/skiplist.h src/cdebug.h src/imath/imath.h \
   src/network.h src/base64.h src/library.h src/parser.h src/module.h \
   src/prolog.h src/query.h src/builtins.h src/heap.h src/utf8.h
 src/print.o: src/print.c src/internal.h src/map.h src/skiplist.h \
-  src/trealla.h src/cdebug.h src/imath/imrat.h src/imath/imath.h \
+  src/trealla.h src/cdebug.h src/imath/imath.h \
   src/parser.h src/module.h src/query.h src/builtins.h src/network.h \
   src/utf8.h
 src/prolog.o: src/prolog.c src/internal.h src/map.h src/skiplist.h \
-  src/trealla.h src/cdebug.h src/imath/imrat.h src/imath/imath.h \
+  src/trealla.h src/cdebug.h src/imath/imath.h \
   src/history.h src/library.h src/parser.h src/module.h src/prolog.h \
   src/query.h src/builtins.h src/heap.h src/utf8.h
 src/query.o: src/query.c src/internal.h src/map.h src/skiplist.h \
-  src/trealla.h src/cdebug.h src/imath/imrat.h src/imath/imath.h \
+  src/trealla.h src/cdebug.h src/imath/imath.h \
   src/history.h src/parser.h src/module.h src/prolog.h src/query.h \
   src/builtins.h src/heap.h src/utf8.h
 src/skiplist.o: src/skiplist.c src/skiplist.h
 src/utf8.o: src/utf8.c src/utf8.h
 src/imath/imath.o: src/imath/imath.c src/imath/imath.h
-src/imath/imrat.o: src/imath/imrat.c src/imath/imrat.h src/imath/imath.h

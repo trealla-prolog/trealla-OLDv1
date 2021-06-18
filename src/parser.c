@@ -1548,7 +1548,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		} else
 			v = get_char_utf8(&s);
 
-		p->v.val_type = TYPE_RATIONAL;
+		p->v.val_type = TYPE_INTEGER;
 		set_smallint(&p->v, v);
 		if (neg) set_smallint(&p->v, -get_smallint(&p->v));
 		*srcptr = s;
@@ -1568,10 +1568,8 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
 			p->v.val_big = malloc(sizeof(bigint));
 			p->v.val_big->refcnt = 1;
-			mp_rat_init(&p->v.val_big->rat);
-			mp_int_clear(&p->v.val_big->rat.num);
-			p->v.val_big->rat.num = v2;
-			if (neg) p->v.val_big->rat.num.sign = MP_NEG;
+			mp_int_init_copy(&p->v.val_big->rat, &v2);
+			if (neg) p->v.val_big->rat.sign = MP_NEG;
 			p->v.flags |= FLAG_MANAGED;
 		} else {
 			set_smallint(&p->v, val);
@@ -1589,7 +1587,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			return false;
 		}
 
-		p->v.val_type = TYPE_RATIONAL;
+		p->v.val_type = TYPE_INTEGER;
 		p->v.flags |= FLAG_BINARY;
 		*srcptr = s;
 		return true;
@@ -1603,10 +1601,8 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
 			p->v.val_big = malloc(sizeof(bigint));
 			p->v.val_big->refcnt = 1;
-			mp_rat_init(&p->v.val_big->rat);
-			mp_int_clear(&p->v.val_big->rat.num);
-			p->v.val_big->rat.num = v2;
-			if (neg) p->v.val_big->rat.num.sign = MP_NEG;
+			mp_int_init_copy(&p->v.val_big->rat, &v2);
+			if (neg) p->v.val_big->rat.sign = MP_NEG;
 			p->v.flags |= FLAG_MANAGED;
 		} else {
 			set_smallint(&p->v, val);
@@ -1624,7 +1620,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			return false;
 		}
 
-		p->v.val_type = TYPE_RATIONAL;
+		p->v.val_type = TYPE_INTEGER;
 		p->v.flags |= FLAG_OCTAL;
 		*srcptr = s;
 		return true;
@@ -1638,10 +1634,8 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
 			p->v.val_big = malloc(sizeof(bigint));
 			p->v.val_big->refcnt = 1;
-			mp_rat_init(&p->v.val_big->rat);
-			mp_int_clear(&p->v.val_big->rat.num);
-			p->v.val_big->rat.num = v2;
-			if (neg) p->v.val_big->rat.num.sign = MP_NEG;
+			mp_int_init_copy(&p->v.val_big->rat, &v2);
+			if (neg) p->v.val_big->rat.sign = MP_NEG;
 			p->v.flags |= FLAG_MANAGED;
 		} else {
 			set_smallint(&p->v, val);
@@ -1659,7 +1653,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			return false;
 		}
 
-		p->v.val_type = TYPE_RATIONAL;
+		p->v.val_type = TYPE_INTEGER;
 		p->v.flags |= FLAG_HEX;
 		*srcptr = s;
 		return true;
@@ -1680,10 +1674,8 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	if (mp_int_to_int(&v2, &val) == MP_RANGE) {
 		p->v.val_big = malloc(sizeof(bigint));
 		p->v.val_big->refcnt = 1;
-		mp_rat_init(&p->v.val_big->rat);
-		mp_int_clear(&p->v.val_big->rat.num);
-		p->v.val_big->rat.num = v2;
-		if (neg) p->v.val_big->rat.num.sign = MP_NEG;
+		mp_int_init_copy(&p->v.val_big->rat, &v2);
+		if (neg) p->v.val_big->rat.sign = MP_NEG;
 		p->v.flags |= FLAG_MANAGED;
 	} else {
 		set_smallint(&p->v, val);
@@ -1701,7 +1693,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		return false;
 	}
 
-	p->v.val_type = TYPE_RATIONAL;
+	p->v.val_type = TYPE_INTEGER;
 
 	if ((s[-1] == '.') || iswspace(s[-1]))
 		s--;
@@ -1884,7 +1876,7 @@ static bool get_token(parser *p, int last_op)
 		*dst = '\0';
 		p->srcptr = (char*)src;
 		set_smallint(&p->v, ch);
-		p->v.val_type = TYPE_RATIONAL;
+		p->v.val_type = TYPE_INTEGER;
 		p->dq_consing = -1;
 		return true;
 	}
@@ -2502,7 +2494,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		c->priority = priority;
 		bool found = false;
 
-		if (p->v.val_type == TYPE_RATIONAL) {
+		if (p->v.val_type == TYPE_INTEGER) {
 			set_smallint(c, get_smallint(&p->v));
 			c->flags = p->v.flags;
 		}
