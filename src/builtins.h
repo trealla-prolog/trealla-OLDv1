@@ -158,6 +158,7 @@ extern void make_real(cell *tmp, double v);
 		(do_calc_(q,c,c_ctx), q->accum)
 
 #define calc(q,c) calc_(q, c, c##_ctx); 							\
+	q->accum.flags = 0;												\
 	if (q->did_throw)												\
 		return pl_success; 											\
 	else if (is_variable(c))										\
