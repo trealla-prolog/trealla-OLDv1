@@ -2186,6 +2186,8 @@ static USE_RESULT pl_status fn_rdiv_2(query *q)
 	else if (is_smallint(&p2) && (get_smallint(&p2) == 0))
 		return throw_error(q, &p2, "evaluation_error", "zero_divisor");
 
+	// TODO: when INT64_MIN < value < INT64_MAX convert back to int
+
 	if (is_bigint(&p1) && is_bigint(&p2)) {
 		mp_rat_div(&p1.val_big->rat, &p2.val_big->rat, &q->accum_rat);
 		SET_ACCUM();
