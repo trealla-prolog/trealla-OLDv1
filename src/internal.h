@@ -68,7 +68,7 @@ typedef enum {
 #define IDX_MAX (ERR_IDX-1)
 #define ERR_CYCLE_CMP -2
 
-#define MAX_SMALL_STRING (MAX(sizeof(int_t),sizeof(void*))*2)
+#define MAX_SMALL_STRING (sizeof(void*)*2)
 #define MAX_VAR_POOL_SIZE 1000
 #define MAX_ARITY UCHAR_MAX
 #define MAX_OPS 250
@@ -107,7 +107,7 @@ typedef enum {
 #define set_real(c,v) (c)->val_real = (v)
 
 #define get_integer(c) (c)->val_int
-#define set_integer(c,v) { (c)->val_int = (v); (c)->val_spare = 0; }
+#define set_integer(c,v) { (c)->val_int = (v); (c)->val_spare1 = 0; }
 
 #define is_integer(c) 											\
 	(is_rational(c) ? 											\
@@ -289,19 +289,21 @@ struct cell_ {
 
 		struct {
 			int_t val_int;
-			int_t val_spare;
+			void *val_spare1;
 		};
 
 		// A managed bigint...
 
 		struct {
 			bigint *val_big;
+			void *val_spare2;
 		};
 
 		// A double...
 
 		struct {
 			double val_real;
+			void *val_spare3;
 		};
 
 		// A call return...
