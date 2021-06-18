@@ -23,7 +23,6 @@
 
 #define CLR_ACCUM(p1) {												\
 	if (is_bigint(p1) && !((p1)->val_big->refcnt)) {				\
-	    printf("*** clear\n");										\
 		mp_rat_clear(&(p1)->val_big->rat);							\
 	}																\
 	(p1)->val_type = TYPE_RATIONAL;									\
@@ -249,7 +248,15 @@ static USE_RESULT pl_status fn_iso_float_1(query *q)
 			return pl_success;
 		}
 
-		if (is_bigint(&p1) && is_integer(&p1)) {
+		if (is_bigint(&p1) && !is_integer(&p1)) {
+			q->accum.val_real = mp_int_to_double(&p1.val_big->rat.num);
+			q->accum.val_real /= mp_int_to_double(&p1.val_big->rat.den);
+			q->accum.val_type = TYPE_REAL;
+			CLR_ACCUM(&p1);
+			return pl_success;
+		}
+
+		if (is_bigint(&p1)) {
 			q->accum.val_real = mp_int_to_double(&p1.val_big->rat.num);
 			q->accum.val_type = TYPE_REAL;
 			CLR_ACCUM(&p1);
