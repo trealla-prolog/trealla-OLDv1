@@ -18,8 +18,7 @@
 		q->accum.flags = FLAG_MANAGED;							\
 		q->accum.val_big = malloc(sizeof(bigint));				\
 		q->accum.val_big->refcnt = 0;							\
-		mp_rat_init(&q->accum.val_big->rat);					\
-		mp_rat_copy(&q->accum_rat, &q->accum.val_big->rat);
+		mp_rat_init_copy(&q->accum.val_big->rat, &q->accum_rat);
 
 // Simple one for now...
 
@@ -1245,7 +1244,10 @@ static USE_RESULT pl_status fn_iso_divint_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		if (get_smallint(&p2) == 0)
+		if (is_bigint(&p2) && mp_rat_compare_zero(&p2.val_big->rat) == 0)
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
+
+		if (is_smallint(&p2) && get_smallint(&p2) == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		DO_OP2(/, div, p1, p2);
@@ -1268,7 +1270,7 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2)) {
+	if (is_bigint(&p1) && is_bigint(&p2) && is_integer(&p1) && is_integer(&p2)) {
 		mp_int_mod(&p1.val_big->rat.num, &p2.val_big->rat.num, &q->accum_rat.num);
 
 		if (mp_int_compare_zero(&p2.val_big->rat.num))
@@ -1278,7 +1280,7 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 			mp_int_neg(&q->accum_rat.num, &q->accum_rat.num);
 
 		SET_ACCUM();
-	} else if (is_bigint(&p1) && is_integer(&p2)) {
+	} else if (is_bigint(&p1) && is_integer(&p1) && is_integer(&p2)) {
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p2.val_int);
 		mp_int_mod(&p1.val_big->rat.num, &tmp, &q->accum_rat.num);
@@ -1291,7 +1293,7 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 			q->accum.val_int *= -1;
 
 		SET_ACCUM();
-	} else if (is_bigint(&p2) && is_integer(&p1)) {
+	} else if (is_bigint(&p2) && is_integer(&p2) && is_integer(&p1)) {
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p1.val_int);
 		mp_int_mod(&tmp, &p2.val_big->rat.num, &q->accum_rat.num);
@@ -1342,7 +1344,7 @@ static USE_RESULT pl_status fn_iso_div_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2)) {
+	if (is_bigint(&p1) && is_bigint(&p2) && is_integer(&p1) && is_integer(&p2)) {
 		mp_int_mod(&p1.val_big->rat.num, &p2.val_big->rat.num, &q->accum_rat.num);
 		mp_int_sub(&p1.val_big->rat.num, &q->accum_rat.num, &q->accum_rat.num);
 		mpz_t tmp;
@@ -1352,7 +1354,7 @@ static USE_RESULT pl_status fn_iso_div_2(query *q)
 		mp_int_div(&q->accum_rat.num, &p2.val_big->rat.num, &q->accum_rat.num, &tmp2);
 		mp_int_clear(&tmp2);
 		SET_ACCUM();
-	} else if (is_bigint(&p1) && is_integer(&p2)) {
+	} else if (is_bigint(&p1) && is_integer(&p1) && is_integer(&p2)) {
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p2.val_int);
 		mp_int_mod(&p1.val_big->rat.num, &tmp, &q->accum_rat.num);
@@ -1363,7 +1365,7 @@ static USE_RESULT pl_status fn_iso_div_2(query *q)
 		mp_int_clear(&tmp2);
 		mp_int_clear(&tmp);
 		SET_ACCUM();
-	} else if (is_bigint(&p2) && is_integer(&p1)) {
+	} else if (is_bigint(&p2) && is_integer(&p2) && is_integer(&p1)) {
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p1.val_int);
 		mp_int_mod(&tmp, &p2.val_big->rat.num, &q->accum_rat.num);
@@ -1402,7 +1404,7 @@ static USE_RESULT pl_status fn_iso_rem_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2)) {
+	if (is_bigint(&p1) && is_bigint(&p2) && is_integer(&p1) && is_integer(&p2)) {
 		mp_int_mod(&p1.val_big->rat.num, &p2.val_big->rat.num, &q->accum_rat.num);
 		SET_ACCUM();
 	} else if (is_bigint(&p1) && is_integer(&p2)) {
