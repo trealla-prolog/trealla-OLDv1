@@ -208,15 +208,11 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 	if (is_bigint(p1) && is_bigint(&p2))
 		return !mp_rat_compare(&p1->val_big->rat, &p2.val_big->rat);
 
-	if (is_bigint(p1) && is_smallint(&p2)) {
-		mp_rat_set_value(&q->accum_rat, get_smallint(&p2), 1);
-		return !mp_rat_compare(&p1->val_big->rat, &q->accum_rat);
-	}
+	if (is_bigint(p1) && is_smallint(&p2))
+		return !mp_rat_compare_value(&p1->val_big->rat, p2.val_int, 1);
 
-	if (is_bigint(&p2) && is_smallint(p1)) {
-		mp_rat_set_value(&q->accum_rat, get_smallint(p1), 1);
-		return !mp_rat_compare(&p2.val_big->rat, &q->accum_rat);
-	}
+	if (is_bigint(&p2) && is_smallint(p1))
+		return !mp_rat_compare_value(&p2.val_big->rat, p1->val_int, 1);
 
 	if (is_integer(p1) && is_integer(&p2))
 		return (p1->val_int == p2.val_int);
