@@ -1905,18 +1905,15 @@ static USE_RESULT pl_status fn_iso_neq_2(query *q)
 	CLEAR cell p1 = calc(q, p1_tmp);
 	CLEAR cell p2 = calc(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2)) {
-		int ok = mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) == 0;
-		return ok;
-	} else if (is_bigint(&p1) && is_smallint(&p2)) {
-		int ok = mp_rat_compare_value(&p1.val_big->rat, p2.val_int, 1) == 0;
-		return ok;
-	} else if (is_bigint(&p2) && is_smallint(&p1)) {
-		int ok = mp_rat_compare_value(&p2.val_big->rat, p1.val_int, 1) == 0;
-		return ok;
-	} else if (is_smallint(&p1) && is_smallint(&p2)) {
+	if (is_bigint(&p1) && is_bigint(&p2))
+		return mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) == 0;
+	else if (is_bigint(&p1) && is_smallint(&p2))
+		return mp_rat_compare_value(&p1.val_big->rat, p2.val_int, 1) == 0;
+	else if (is_bigint(&p2) && is_smallint(&p1))
+		return mp_rat_compare_value(&p2.val_big->rat, p1.val_int, 1) == 0;
+	else if (is_smallint(&p1) && is_smallint(&p2))
 		return p1.val_int == p2.val_int;
-	} else if (is_smallint(&p1) && is_real(&p2))
+	else if (is_smallint(&p1) && is_real(&p2))
 		return p1.val_int == p2.val_real;
 	else if (is_real(&p1) && is_real(&p2))
 		return p1.val_real == p2.val_real;
@@ -1933,18 +1930,15 @@ static USE_RESULT pl_status fn_iso_nne_2(query *q)
 	CLEAR cell p1 = calc(q, p1_tmp);
 	CLEAR cell p2 = calc(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2)) {
-		int ok = mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) != 0;
-		return ok;
-	} else if (is_bigint(&p1) && is_smallint(&p2)) {
-		int ok = mp_rat_compare_value(&p1.val_big->rat, p2.val_int, 1) != 0;
-		return ok;
-	} else if (is_bigint(&p2) && is_smallint(&p1)) {
-		int ok = mp_rat_compare_value(&p2.val_big->rat, p1.val_int, 1) != 0;
-		return ok;
-	} else if (is_smallint(&p1) && is_smallint(&p2)) {
+	if (is_bigint(&p1) && is_bigint(&p2))
+		return mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) != 0;
+	else if (is_bigint(&p1) && is_smallint(&p2))
+		return mp_rat_compare_value(&p1.val_big->rat, p2.val_int, 1) != 0;
+	else if (is_bigint(&p2) && is_smallint(&p1))
+		return mp_rat_compare_value(&p2.val_big->rat, p1.val_int, 1) != 0;
+	else if (is_smallint(&p1) && is_smallint(&p2))
 		return p1.val_int != p2.val_int;
-	} else if (is_smallint(&p1) && is_real(&p2))
+	else if (is_smallint(&p1) && is_real(&p2))
 		return p1.val_int != p2.val_real;
 	else if (is_real(&p1) && is_real(&p2))
 		return p1.val_real != p2.val_real;
@@ -1961,18 +1955,15 @@ static USE_RESULT pl_status fn_iso_nge_2(query *q)
 	CLEAR cell p1 = calc(q, p1_tmp);
 	CLEAR cell p2 = calc(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2)) {
-		int ok = mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) >= 0;
-		return ok;
-	} else if (is_bigint(&p1) && is_smallint(&p2)) {
-		int ok = mp_rat_compare_value(&p1.val_big->rat, p2.val_int, 1) >= 0;
-		return ok;
-	} else if (is_bigint(&p2) && is_smallint(&p1)) {
-		int ok = mp_rat_compare_value(&p2.val_big->rat, p1.val_int, 1) < 0;
-		return ok;
-	} else if (is_smallint(&p1) && is_smallint(&p2)) {
+	if (is_bigint(&p1) && is_bigint(&p2))
+		return mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) >= 0;
+	else if (is_bigint(&p1) && is_smallint(&p2))
+		return mp_rat_compare_value(&p1.val_big->rat, p2.val_int, 1) >= 0;
+	else if (is_bigint(&p2) && is_smallint(&p1))
+		return mp_rat_compare_value(&p2.val_big->rat, p1.val_int, 1) < 0;
+	else if (is_smallint(&p1) && is_smallint(&p2))
 		return p1.val_int >= p2.val_int;
-	} else if (is_smallint(&p1) && is_real(&p2))
+	else if (is_smallint(&p1) && is_real(&p2))
 		return p1.val_int >= p2.val_real;
 	else if (is_real(&p1) && is_real(&p2))
 		return p1.val_real >= p2.val_real;
@@ -1989,18 +1980,15 @@ static USE_RESULT pl_status fn_iso_ngt_2(query *q)
 	CLEAR cell p1 = calc(q, p1_tmp);
 	CLEAR cell p2 = calc(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2)) {
-		int ok = mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) > 0;
-		return ok;
-	} else if (is_bigint(&p1) && is_smallint(&p2)) {
-		int ok = mp_rat_compare_value(&p1.val_big->rat, p2.val_int, 1) > 0;
-		return ok;
-	} else if (is_bigint(&p2) && is_smallint(&p1)) {
-		int ok = mp_rat_compare_value(&p2.val_big->rat, p1.val_int, 1) <= 0;
-		return ok;
-	} else if (is_smallint(&p1) && is_smallint(&p2)) {
+	if (is_bigint(&p1) && is_bigint(&p2))
+		return mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) > 0;
+	else if (is_bigint(&p1) && is_smallint(&p2))
+		return mp_rat_compare_value(&p1.val_big->rat, p2.val_int, 1) > 0;
+	else if (is_bigint(&p2) && is_smallint(&p1))
+		return mp_rat_compare_value(&p2.val_big->rat, p1.val_int, 1) <= 0;
+	else if (is_smallint(&p1) && is_smallint(&p2))
 		return p1.val_int > p2.val_int;
-	} else if (is_smallint(&p1) && is_real(&p2))
+	else if (is_smallint(&p1) && is_real(&p2))
 		return p1.val_int > p2.val_real;
 	else if (is_real(&p1) && is_real(&p2))
 		return p1.val_real > p2.val_real;
@@ -2017,18 +2005,15 @@ static USE_RESULT pl_status fn_iso_nle_2(query *q)
 	CLEAR cell p1 = calc(q, p1_tmp);
 	CLEAR cell p2 = calc(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2)) {
-		int ok = mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) <= 0;
-		return ok;
-	} else if (is_bigint(&p1) && is_smallint(&p2)) {
-		int ok = mp_rat_compare_value(&p1.val_big->rat, p2.val_int, 1) <= 0;
-		return ok;
-	} else if (is_bigint(&p2) && is_smallint(&p1)) {
-		int ok = mp_rat_compare_value(&p2.val_big->rat, p1.val_int, 1) > 0;
-		return ok;
-	} else if (is_smallint(&p1) && is_smallint(&p2)) {
+	if (is_bigint(&p1) && is_bigint(&p2))
+		return mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) <= 0;
+	else if (is_bigint(&p1) && is_smallint(&p2))
+		return mp_rat_compare_value(&p1.val_big->rat, p2.val_int, 1) <= 0;
+	else if (is_bigint(&p2) && is_smallint(&p1))
+		return mp_rat_compare_value(&p2.val_big->rat, p1.val_int, 1) > 0;
+	else if (is_smallint(&p1) && is_smallint(&p2))
 		return p1.val_int <= p2.val_int;
-	} else if (is_smallint(&p1) && is_real(&p2))
+	else if (is_smallint(&p1) && is_real(&p2))
 		return p1.val_int <= p2.val_real;
 	else if (is_real(&p1) && is_real(&p2))
 		return p1.val_real <= p2.val_real;
@@ -2045,18 +2030,15 @@ static USE_RESULT pl_status fn_iso_nlt_2(query *q)
 	CLEAR cell p1 = calc(q, p1_tmp);
 	CLEAR cell p2 = calc(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2)) {
-		int ok = mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) < 0;
-		return ok;
-	} else if (is_bigint(&p1) && is_smallint(&p2)) {
-		int ok = mp_rat_compare_value(&p1.val_big->rat, p2.val_int, 1) < 0;
-		return ok;
-	} else if (is_bigint(&p2) && is_smallint(&p1)) {
-		int ok = mp_rat_compare_value(&p2.val_big->rat, p1.val_int, 1) >= 0;
-		return ok;
-	} else if (is_smallint(&p1) && is_smallint(&p2)) {
+	if (is_bigint(&p1) && is_bigint(&p2))
+		return mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) < 0;
+	else if (is_bigint(&p1) && is_smallint(&p2))
+		return mp_rat_compare_value(&p1.val_big->rat, p2.val_int, 1) < 0;
+	else if (is_bigint(&p2) && is_smallint(&p1))
+		return mp_rat_compare_value(&p2.val_big->rat, p1.val_int, 1) >= 0;
+	else if (is_smallint(&p1) && is_smallint(&p2))
 		return p1.val_int < p2.val_int;
-	} else if (is_smallint(&p1) && is_real(&p2))
+	else if (is_smallint(&p1) && is_real(&p2))
 		return p1.val_int < p2.val_real;
 	else if (is_real(&p1) && is_real(&p2))
 		return p1.val_real < p2.val_real;
