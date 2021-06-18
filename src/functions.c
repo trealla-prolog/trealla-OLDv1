@@ -13,19 +13,29 @@
 #include "query.h"
 #include "builtins.h"
 
-#define SET_ACCUM() 											\
-		q->accum.val_type = TYPE_RATIONAL;						\
-		q->accum.flags = FLAG_MANAGED;							\
-		q->accum.val_big = malloc(sizeof(bigint));				\
-		q->accum.val_big->refcnt = 0;							\
-		mp_rat_init_copy(&q->accum.val_big->rat, &q->accum_rat);
+#define SET_ACCUM() {												\
+		q->accum.val_type = TYPE_RATIONAL;							\
+		q->accum.flags = FLAG_MANAGED;								\
+		q->accum.val_big = malloc(sizeof(bigint));					\
+		q->accum.val_big->refcnt = 0;								\
+		mp_rat_init_copy(&q->accum.val_big->rat, &q->accum_rat);	\
+}
+
+#define CLR_ACCUM(p1) {												\
+	if (is_bigint(p1)) {											\
+		mp_rat_clear(&(p1)->val_big->rat);							\
+	}																\
+	(p1)->val_type = TYPE_RATIONAL;									\
+	(p1)->val_int = 0;												\
+	(p1)->flags = 0;												\
+}
 
 // Simple one for now...
 
-#define OVERFLOW(op,v1,v2)										\
-	(v1) > INT32_MAX ||											\
-	(v1) < INT32_MIN ||											\
-	(v2) > INT32_MAX ||											\
+#define OVERFLOW(op,v1,v2)											\
+	(v1) > INT32_MAX ||												\
+	(v1) < INT32_MIN ||												\
+	(v2) > INT32_MAX ||												\
 	(v2) < INT32_MIN
 
 #define DO_OP2(op,op2,p1,p2) \
@@ -233,21 +243,25 @@ static USE_RESULT pl_status fn_iso_float_1(query *q)
 		if (is_real(&p1)) {
 			q->accum.val_real = p1.val_real;
 			q->accum.val_type = TYPE_REAL;
+			CLR_ACCUM(&p1);
 			return pl_success;
 		}
 
 		if (is_bigint(&p1) && is_integer(&p1)) {
 			q->accum.val_real = mp_int_to_double(&p1.val_big->rat.num);
 			q->accum.val_type = TYPE_REAL;
+			CLR_ACCUM(&p1);
 			return pl_success;
 		}
 
 		if (is_integer(&p1)) {
 			q->accum.val_real = (double)p1.val_int;
 			q->accum.val_type = TYPE_REAL;
+			CLR_ACCUM(&p1);
 			return pl_success;
 		}
 
+		CLR_ACCUM(&p1);
 		return throw_error(q, &p1, "type_error", "integer_or_float");
 	}
 
@@ -1357,8 +1371,8 @@ static USE_RESULT pl_status fn_iso_div_2(query *q)
 		mp_int_sub(&p1.val_big->rat.num, &q->accum_rat.num, &q->accum_rat.num);
 		mp_int_div(&q->accum_rat.num, &tmp, &q->accum_rat.num, NULL);
 		mp_int_set_value(&q->accum_rat.den, 1);
-		mp_int_clear(&tmp);
 		SET_ACCUM();
+		mp_int_clear(&tmp);
 	} else if (is_bigint(&p2) && is_integer(&p2) && is_integer(&p1)) {
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p1.val_int);
