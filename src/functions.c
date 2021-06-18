@@ -21,10 +21,12 @@
 		mp_rat_init_copy(&q->accum.val_big->rat, &q->accum_rat);	\
 }
 
-static void clr_accum(cell *p)
+void clr_accum(cell *p)
 {
-	if (is_bigint(p) && !p->val_big->refcnt)
+	if (is_bigint(p) && !p->val_big->refcnt) {
+		printf("*** here\n");
 		mp_rat_clear(&p->val_big->rat);
+	}
 
 	p->val_type = TYPE_RATIONAL;
 	p->val_int = 0;
@@ -161,8 +163,10 @@ static double mp_int_to_double(mpz_t *v)
 }
 
 #define CHECK_CALC()							\
+	clr_accum(&q->accum);						\
+												\
 	if (!q->calc) {								\
-		if (q->st.m->flag.unknown == 0)				\
+		if (q->st.m->flag.unknown == 0)			\
 			return false;						\
 		else									\
 			return throw_error(q, q->st.curr_cell, "existence_error", "procedure");	\
@@ -344,8 +348,7 @@ static USE_RESULT pl_status fn_iso_positive_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	cell p1 = calc(q, p1_tmp);
-	q->accum = p1;
+	q->accum = calc(q, p1_tmp);
 	return pl_success;
 }
 
