@@ -2191,13 +2191,14 @@ static USE_RESULT pl_status fn_rdiv_2(query *q)
 		SET_ACCUM();
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
 		mpz_t tmp;
-		mp_int_set_value(&tmp, get_smallint(&p2));
+		mp_int_init_value(&tmp, p2.val_int);
 		mp_rat_div_int(&p1.val_big->rat, &tmp, &q->accum_rat);
 		mp_int_clear(&tmp);
 		SET_ACCUM();
 	} else if (is_bigint(&p2) && is_smallint(&p1)) {
 		mpq_t tmp;
-		mp_rat_set_value(&tmp, get_smallint(&p1), 1);
+		mp_rat_init(&tmp);
+		mp_rat_set_value(&tmp, p1.val_int, 1);
 		mp_rat_div(&tmp, &p2.val_big->rat, &q->accum_rat);
 		mp_rat_clear(&tmp);
 		SET_ACCUM();
