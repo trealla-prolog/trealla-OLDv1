@@ -326,7 +326,8 @@ static USE_RESULT pl_status fn_iso_positive_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	q->accum = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	q->accum = p1;
 	return pl_success;
 }
 

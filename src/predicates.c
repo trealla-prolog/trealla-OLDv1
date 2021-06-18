@@ -570,7 +570,7 @@ static USE_RESULT pl_status fn_iso_char_code_2(query *q)
 	size_t len = len_char_utf8(src);
 
 	if (len != LEN_STR(p1))
-		return throw_error(q, p1, "type_error", "character");
+		return throw_error(q, p1, "type_error", "integer");
 
 	int ch = peek_char_utf8(src);
 	return ch == get_smallint(p2);
@@ -3197,7 +3197,7 @@ static USE_RESULT pl_status fn_iso_put_char_1(query *q)
 
 	const char *src = GET_STR(p1);
 	int ch = get_char_utf8(&src);
-	char tmpbuf[20];
+	char tmpbuf[80];
 	put_char_utf8(tmpbuf, ch);
 	net_write(tmpbuf, strlen(tmpbuf), str);
 	return !ferror(str->fp);
@@ -3221,12 +3221,15 @@ static USE_RESULT pl_status fn_iso_put_char_2(query *q)
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
+	if (!is_smallint(p1))
+		return throw_error(q, p1, "type_error", "integer");
+
 	if (len != LEN_STR(p1))
 		return throw_error(q, p1, "type_error", "character");
 
 	const char *src = GET_STR(p1);
 	int ch = get_char_utf8(&src);
-	char tmpbuf[20];
+	char tmpbuf[80];
 	put_char_utf8(tmpbuf, ch);
 	net_write(tmpbuf, strlen(tmpbuf), str);
 	return !ferror(str->fp);
@@ -3245,11 +3248,14 @@ static USE_RESULT pl_status fn_iso_put_code_1(query *q)
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
+	if (!is_smallint(p1))
+		return throw_error(q, p1, "type_error", "integer");
+
 	if (is_smallint(p1) && is_le(p1,-1))
 		return throw_error(q, p1, "representation_error", "character_code");
 
 	int ch = (int)get_smallint(p1);
-	char tmpbuf[20];
+	char tmpbuf[80];
 	put_char_utf8(tmpbuf, ch);
 	net_write(tmpbuf, strlen(tmpbuf), str);
 	return !ferror(str->fp);
@@ -3272,11 +3278,14 @@ static USE_RESULT pl_status fn_iso_put_code_2(query *q)
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
+	if (!is_smallint(p1))
+		return throw_error(q, p1, "type_error", "integer");
+
 	if (is_smallint(p1) && is_le(p1,-1))
 		return throw_error(q, p1, "representation_error", "character_code");
 
 	int ch = (int)get_smallint(p1);
-	char tmpbuf[20];
+	char tmpbuf[80];
 	put_char_utf8(tmpbuf, ch);
 	net_write(tmpbuf, strlen(tmpbuf), str);
 	return !ferror(str->fp);
@@ -3295,11 +3304,14 @@ static USE_RESULT pl_status fn_iso_put_byte_1(query *q)
 		return throw_error(q, &tmp, "permission_error", "output,text_stream");
 	}
 
+	if (!is_smallint(p1))
+		return throw_error(q, p1, "type_error", "integer");
+
 	if (is_smallint(p1) && is_le(p1,-1))
 		return throw_error(q, p1, "representation_error", "character_code");
 
 	int ch = (int)get_smallint(p1);
-	char tmpbuf[20];
+	char tmpbuf[80];
 	snprintf(tmpbuf, sizeof(tmpbuf), "%c", ch);
 	net_write(tmpbuf, 1, str);
 	return !ferror(str->fp);
@@ -3318,11 +3330,14 @@ static USE_RESULT pl_status fn_iso_put_byte_2(query *q)
 	if (!str->binary)
 		return throw_error(q, pstr, "permission_error", "output,text_stream");
 
+	if (!is_smallint(p1))
+		return throw_error(q, p1, "type_error", "integer");
+
 	if (is_smallint(p1) && is_le(p1,-1))
 		return throw_error(q, p1, "representation_error", "character_code");
 
 	int ch = (int)get_smallint(p1);
-	char tmpbuf[20];
+	char tmpbuf[80];
 	snprintf(tmpbuf, sizeof(tmpbuf), "%c", ch);
 	net_write(tmpbuf, 1, str);
 	return !ferror(str->fp);
@@ -3389,7 +3404,7 @@ static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 	if (ch == '\n')
 		str->did_getc = false;
 
-	char tmpbuf[20];
+	char tmpbuf[80];
 	put_char_utf8(tmpbuf, ch);
 	cell tmp;
 	make_small(&tmp, tmpbuf);
@@ -3459,7 +3474,7 @@ static USE_RESULT pl_status fn_iso_get_char_2(query *q)
 	if (ch == '\n')
 		str->did_getc = false;
 
-	char tmpbuf[20];
+	char tmpbuf[80];
 	put_char_utf8(tmpbuf, ch);
 	cell tmp;
 	make_small(&tmp, tmpbuf);
@@ -3774,7 +3789,7 @@ static USE_RESULT pl_status fn_iso_peek_char_1(query *q)
 	}
 
 	str->ungetch = ch;
-	char tmpbuf[20];
+	char tmpbuf[80];
 	put_char_utf8(tmpbuf, ch);
 	cell tmp;
 	make_small(&tmp, tmpbuf);
@@ -3829,7 +3844,7 @@ static USE_RESULT pl_status fn_iso_peek_char_2(query *q)
 	}
 
 	str->ungetch = ch;
-	char tmpbuf[20];
+	char tmpbuf[80];
 	put_char_utf8(tmpbuf, ch);
 	cell tmp;
 	make_small(&tmp, tmpbuf);
@@ -4552,7 +4567,7 @@ static void do_term_assign_vars(parser *p, idx_t nbr_cells)
 		char ch = 'A';
 		ch += var_nbr % 26;
 		unsigned n = var_nbr / 26;
-		char tmpbuf[20];
+		char tmpbuf[80];
 
 		if (vars[c->var_nbr] == 1)
 			snprintf(tmpbuf, sizeof(tmpbuf), "%s", "_");
@@ -9769,11 +9784,12 @@ static USE_RESULT pl_status fn_setenv_2(query *q)
 
 	if (is_atom(p2)) {
 		setenv(GET_STR(p1), GET_STR(p2), 1);
-	} else {
+	} else if (is_smallint(p2)) {
 		char tmpbuf[256];
 		sprint_int(tmpbuf, sizeof(tmpbuf), get_smallint(p2), 10);
 		setenv(GET_STR(p1), tmpbuf, 1);
-	}
+	} else
+		return pl_failure;
 
 	return pl_success;
 }
@@ -9828,6 +9844,8 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 		} else if (is_smallint(p1)) {
 			len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), get_smallint(p1), 10);
 			src1 = tmpbuf1;
+		} else if (is_bigint(p1)) {
+			return pl_failure;
 		} else {
 			len1 = snprintf(tmpbuf1, sizeof(tmpbuf1), "%.17g", get_real(p1));
 			src1 = tmpbuf1;
@@ -9839,6 +9857,8 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 		} else if (is_smallint(p2)) {
 			len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), get_smallint(p2), 10);
 			src2 = tmpbuf2;
+		} else if (is_bigint(p1)) {
+			return pl_failure;
 		} else {
 			len2 = snprintf(tmpbuf2, sizeof(tmpbuf1), "%.17g", get_real(p2));
 			src2 = tmpbuf2;
@@ -11830,7 +11850,7 @@ static void load_ops(query *q)
 	STRING_allocn(pr, 1024*8);
 
 	for (const op_table *ptr = q->st.m->ops; ptr->name; ptr++) {
-		char specifier[20], name[256];
+		char specifier[80], name[256];
 
 		if (!ptr->specifier)
 			continue;
@@ -11859,7 +11879,7 @@ static void load_ops(query *q)
 	}
 
 	for (const op_table *ptr = q->st.m->def_ops; ptr->name; ptr++) {
-		char specifier[20], name[256];
+		char specifier[80], name[256];
 
 		if (!ptr->specifier)
 			continue;
