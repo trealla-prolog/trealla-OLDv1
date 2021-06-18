@@ -13,18 +13,17 @@
 #include "query.h"
 #include "builtins.h"
 
-#define SET_ACCUM() {												\
-		q->accum.val_type = TYPE_RATIONAL;							\
-		q->accum.flags = FLAG_MANAGED;								\
-		q->accum.val_big = malloc(sizeof(bigint));					\
-		q->accum.val_big->refcnt = 0;								\
-		mp_rat_init_copy(&q->accum.val_big->rat, &q->accum_rat);	\
+#define SET_ACCUM() {											\
+	q->accum.val_type = TYPE_RATIONAL;							\
+	q->accum.flags = FLAG_MANAGED;								\
+	q->accum.val_big = malloc(sizeof(bigint));					\
+	q->accum.val_big->refcnt = 0;								\
+	mp_rat_init_copy(&q->accum.val_big->rat, &q->accum_rat);	\
 }
 
 void clr_accum(cell *p)
 {
 	if (is_bigint(p) && !p->val_big->refcnt) {
-		printf("*** here\n");
 		mp_rat_clear(&p->val_big->rat);
 	}
 
@@ -37,10 +36,10 @@ void clr_accum(cell *p)
 
 // Simple one for now...
 
-#define OVERFLOW(op,v1,v2)											\
-	(v1) > INT32_MAX ||												\
-	(v1) < INT32_MIN ||												\
-	(v2) > INT32_MAX ||												\
+#define OVERFLOW(op,v1,v2)										\
+	(v1) > INT32_MAX ||											\
+	(v1) < INT32_MIN ||											\
+	(v2) > INT32_MAX ||											\
 	(v2) < INT32_MIN
 
 #define DO_OP2(op,op2,p1,p2) \
@@ -206,6 +205,7 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 
 	if (is_variable(p1) && is_number(&p2)) {
 		set_var(q, p1, p1_ctx, &p2, q->st.curr_frame);
+		clr_accum(&q->accum);
 		return pl_success;
 	}
 
