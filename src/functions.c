@@ -188,11 +188,6 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 	p2.nbr_cells = 1;
 
-	if (is_variable(p1) && is_smallint(&p2)) {
-		set_var(q, p1, p1_ctx, &p2, q->st.curr_frame);
-		return pl_success;
-	}
-
 	if (is_variable(p1) && is_number(&p2)) {
 		set_var(q, p1, p1_ctx, &p2, q->st.curr_frame);
 		return pl_success;
@@ -2186,8 +2181,6 @@ static USE_RESULT pl_status fn_rdiv_2(query *q)
 	else if (is_smallint(&p2) && (get_smallint(&p2) == 0))
 		return throw_error(q, &p2, "evaluation_error", "zero_divisor");
 
-	// TODO: when INT64_MIN < value < INT64_MAX convert back to int
-
 	if (is_bigint(&p1) && is_bigint(&p2)) {
 		mp_rat_div(&p1.val_big->rat, &p2.val_big->rat, &q->accum_rat);
 		SET_ACCUM();
@@ -2217,6 +2210,17 @@ static USE_RESULT pl_status fn_rdiv_2(query *q)
 		return throw_error(q, &p1, "type_error", "integer");
 	} else if (!is_integer(&p2)) {
 		return throw_error(q, &p2, "type_error", "integer");
+	}
+
+	if (0 && is_bigint(&q->accum) && mp_rat_is_integer(&q->accum.val_big->rat)) {
+		if ((mp_int_compare_value(&q->accum.val_big->rat.num, INT64_MAX) < 0) &&
+			(mp_int_compare_value(&q->accum.val_big->rat.num, INT64_MIN) > 0)) {
+			mp_small n, d;
+			mp_rat_to_ints(&q->accum.val_big->rat, &n, &d);
+			mp_rat_zero(&q->accum.val_big->rat);
+			q->accum.val_type = TYPE_RATIONAL;
+			q->accum.val_int = n;
+		}
 	}
 
 	return pl_success;
