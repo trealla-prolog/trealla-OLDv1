@@ -2258,6 +2258,9 @@ static USE_RESULT pl_status fn_random_1(query *q)
 	CHECK_CALC();
 	cell p1 = calc(q, p1_tmp);
 
+	if (!is_smallint(&p1))
+		return throw_error(q, &p1, "type_error", "evaluable");
+
 	if (p1.val_int < 1)
 		return throw_error(q, &p1, "domain_error", "positive_integer");
 
@@ -2298,12 +2301,14 @@ static USE_RESULT pl_status fn_rdiv_2(query *q)
 	if (is_bigint(&p1) && is_bigint(&p2)) {
 		mp_rat_div(&p1.val_big->rat, &p2.val_big->rat, &q->accum_rat);
 		SET_ACCUM();
+		CLR_ACCUM2(&p1,&p2);
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p2.val_int);
 		mp_rat_div_int(&p1.val_big->rat, &tmp, &q->accum_rat);
 		mp_int_clear(&tmp);
 		SET_ACCUM();
+		CLR_ACCUM2(&p1,&p2);
 	} else if (is_bigint(&p2) && is_smallint(&p1)) {
 		mpq_t tmp;
 		mp_rat_init(&tmp);
@@ -2311,6 +2316,7 @@ static USE_RESULT pl_status fn_rdiv_2(query *q)
 		mp_rat_div(&tmp, &p2.val_big->rat, &q->accum_rat);
 		mp_rat_clear(&tmp);
 		SET_ACCUM();
+		CLR_ACCUM2(&p1,&p2);
 	} else if (is_smallint(&p1)) {
 		if (get_smallint(&p2) == 1)
 			q->accum = p1;
@@ -2434,6 +2440,7 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 			mp_int_gcd(&p1.val_big->rat.num, &p2.val_big->rat.num, &q->accum_rat.num);
 			mp_int_set_value(&q->accum_rat.den, 1);
 			SET_ACCUM();
+			CLR_ACCUM2(&p1,&p2);
 		} else if (is_bigint(&p1)) {
 			mpz_t tmp;
 			mp_int_init_value(&tmp, p2.val_int);
@@ -2441,6 +2448,7 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 			mp_int_clear(&tmp);
 			mp_int_set_value(&q->accum_rat.den, 1);
 			SET_ACCUM();
+			CLR_ACCUM2(&p1,&p2);
 		} else if (is_bigint(&p2)) {
 			mpz_t tmp;
 			mp_int_init_value(&tmp, p1.val_int);
@@ -2448,6 +2456,7 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 			mp_int_clear(&tmp);
 			mp_int_set_value(&q->accum_rat.den, 1);
 			SET_ACCUM();
+			CLR_ACCUM2(&p1,&p2);
 		} else {
 			q->accum.val_int = gcd(p1.val_int, p2.val_int);
 			q->accum.val_type = TYPE_RATIONAL;
