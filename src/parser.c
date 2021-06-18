@@ -449,7 +449,7 @@ static void do_op(parser *p, cell *c)
 		cell *h = LIST_HEAD(p3);
 
 		if (is_atom(h)) {
-			if (!set_op(p->m, PARSER_GET_STR(h), specifier, get_integer(p1))) {
+			if (!set_op(p->m, PARSER_GET_STR(h), specifier, get_smallint(p1))) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: could not set op\n");
 
@@ -461,7 +461,7 @@ static void do_op(parser *p, cell *c)
 	}
 
 	if (is_atom(p3) && !is_nil(p3)) {
-		if (!set_op(p->m, PARSER_GET_STR(p3), specifier, get_integer(p1))) {
+		if (!set_op(p->m, PARSER_GET_STR(p3), specifier, get_smallint(p1))) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: could not set op\n");
 
@@ -615,7 +615,7 @@ static void directives(parser *p, term *t)
 					if (!is_literal(f)) return;
 					if (!is_smallint(a)) return;
 					cell tmp = *f;
-					tmp.arity = get_integer(a);
+					tmp.arity = get_smallint(a);
 
 					if (!strcmp(PARSER_GET_STR(head), "//"))
 						tmp.arity += 2;
@@ -764,7 +764,7 @@ static void directives(parser *p, term *t)
 			if (!is_atom(c_name)) continue;
 			cell *c_arity = h + 2;
 			if (!is_smallint(c_arity)) continue;
-			unsigned arity = get_integer(c_arity);
+			unsigned arity = get_smallint(c_arity);
 
 			if (!strcmp(PARSER_GET_STR(h), "//"))
 				arity += 2;
@@ -813,7 +813,7 @@ static void directives(parser *p, term *t)
 			if (!is_atom(c_name)) return;
 			cell *c_arity = p1 + 2;
 			if (!is_smallint(c_arity)) return;
-			unsigned arity = get_integer(c_arity);
+			unsigned arity = get_smallint(c_arity);
 
 			if (!strcmp(PARSER_GET_STR(p1), "//"))
 				arity += 2;
@@ -1520,7 +1520,7 @@ static int get_escape(const char **_src, bool *error)
 
 static bool parse_number(parser *p, const char **srcptr, bool neg)
 {
-	set_integer(&p->v, 0);
+	set_smallint(&p->v, 0);
 	p->v.flags = 0;
 	const char *s = *srcptr;
 
@@ -1549,8 +1549,8 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			v = get_char_utf8(&s);
 
 		p->v.val_type = TYPE_RATIONAL;
-		set_integer(&p->v, v);
-		if (neg) set_integer(&p->v, -get_integer(&p->v));
+		set_smallint(&p->v, v);
+		if (neg) set_smallint(&p->v, -get_smallint(&p->v));
 		*srcptr = s;
 		return true;
 	}
@@ -1574,7 +1574,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			if (neg) p->v.val_big->rat.num.sign = MP_NEG;
 			p->v.flags |= FLAG_MANAGED;
 		} else {
-			set_integer(&p->v, val);
+			set_smallint(&p->v, val);
 			if (neg) p->v.val_int = -p->v.val_int;
 			mp_int_clear(&v2);
 		}
@@ -1609,7 +1609,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			if (neg) p->v.val_big->rat.num.sign = MP_NEG;
 			p->v.flags |= FLAG_MANAGED;
 		} else {
-			set_integer(&p->v, val);
+			set_smallint(&p->v, val);
 			if (neg) p->v.val_int = -p->v.val_int;
 			mp_int_clear(&v2);
 		}
@@ -1644,7 +1644,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			if (neg) p->v.val_big->rat.num.sign = MP_NEG;
 			p->v.flags |= FLAG_MANAGED;
 		} else {
-			set_integer(&p->v, val);
+			set_smallint(&p->v, val);
 			if (neg) p->v.val_int = -p->v.val_int;
 			mp_int_clear(&v2);
 		}
@@ -1686,7 +1686,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		if (neg) p->v.val_big->rat.num.sign = MP_NEG;
 		p->v.flags |= FLAG_MANAGED;
 	} else {
-		set_integer(&p->v, val);
+		set_smallint(&p->v, val);
 		if (neg) p->v.val_int = -p->v.val_int;
 		mp_int_clear(&v2);
 	}
@@ -1883,7 +1883,7 @@ static bool get_token(parser *p, int last_op)
 		dst += snprintf(dst, 8, "%u", ch);
 		*dst = '\0';
 		p->srcptr = (char*)src;
-		set_integer(&p->v, ch);
+		set_smallint(&p->v, ch);
 		p->v.val_type = TYPE_RATIONAL;
 		p->dq_consing = -1;
 		return true;
@@ -2503,7 +2503,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		bool found = false;
 
 		if (p->v.val_type == TYPE_RATIONAL) {
-			set_integer(c, get_integer(&p->v));
+			set_smallint(c, get_smallint(&p->v));
 			c->flags = p->v.flags;
 		}
 		else if (p->v.val_type == TYPE_REAL) {

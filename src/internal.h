@@ -106,8 +106,8 @@ typedef enum {
 #define get_real(c) (c)->val_real
 #define set_real(c,v) (c)->val_real = (v)
 
-#define get_integer(c) (c)->val_int
-#define set_integer(c,v) { (c)->val_int = (v); (c)->val_spare1 = 0; }
+#define get_smallint(c) (c)->val_int
+#define set_smallint(c,v) { (c)->val_int = (v); (c)->val_spare1 = 0; }
 
 #define is_integer(c) 											\
 	(is_rational(c) ? 											\
@@ -116,15 +116,15 @@ typedef enum {
 		: true													\
 	: false)
 
-#define is_negative(c) (get_integer(c) < 0)
-#define is_positive(c) (get_integer(c) > 0)
+#define is_negative(c) (get_smallint(c) < 0)
+#define is_positive(c) (get_smallint(c) > 0)
 
-#define is_gt(c,n) (get_integer(c) > (n))
-#define is_ge(c,n) (get_integer(c) >= (n))
-#define is_eq(c,n) (get_integer(c) == (n))
-#define is_ne(c,n) (get_integer(c) != (n))
-#define is_le(c,n) (get_integer(c) <= (n))
-#define is_lt(c,n) (get_integer(c) < (n))
+#define is_gt(c,n) (get_smallint(c) > (n))
+#define is_ge(c,n) (get_smallint(c) >= (n))
+#define is_eq(c,n) (get_smallint(c) == (n))
+#define is_ne(c,n) (get_smallint(c) != (n))
+#define is_le(c,n) (get_smallint(c) <= (n))
+#define is_lt(c,n) (get_smallint(c) < (n))
 
 #define is_smallint(c) (is_rational(c) && !((c)->flags & FLAG_MANAGED))
 #define is_bigint(c) (is_rational(c) && (c)->flags & FLAG_MANAGED)

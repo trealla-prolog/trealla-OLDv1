@@ -38,9 +38,9 @@
 #define is_atom_or_list_or_var(c) (is_atom(c) || is_iso_list(c) || is_variable(c))
 #define is_in_character(c) is_atom(c)
 #define is_in_character_or_var(c) (is_in_character(c) || is_variable(c))
-#define is_in_byte(c) (is_integer(c) && (get_integer(c) >= -1) && (get_integer(c) < 256))
+#define is_in_byte(c) (is_integer(c) && (get_smallint(c) >= -1) && (get_smallint(c) < 256))
 #define is_in_byte_or_var(c) (is_in_byte(c) || is_variable(c))
-#define is_byte(c) (is_integer(c) && (get_integer(c) >= 0) && (get_integer(c) < 256))
+#define is_byte(c) (is_integer(c) && (get_smallint(c) >= 0) && (get_smallint(c) < 256))
 #define is_any(c) 1
 
 #define is_iso_list_or_nil(c) (is_iso_list(c) || is_nil(c))

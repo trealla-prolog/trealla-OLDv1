@@ -37,7 +37,7 @@
 		} else if (is_smallint(&p2)) { \
 			mpq_t tmp; \
 			mp_rat_init(&tmp); \
-			mp_rat_set_value(&tmp, get_integer(&p2), 1); \
+			mp_rat_set_value(&tmp, get_smallint(&p2), 1); \
 			mp_rat_##op2(&p1.val_big->rat, &tmp, &q->accum_rat); \
 			mp_rat_clear(&tmp); \
 			SET_ACCUM(); \
@@ -52,7 +52,7 @@
 		if (is_smallint(&p1)) { \
 			mpq_t tmp; \
 			mp_rat_init(&tmp); \
-			mp_rat_set_value(&tmp, get_integer(&p1), 1); \
+			mp_rat_set_value(&tmp, get_smallint(&p1), 1); \
 			mp_rat_##op2(&tmp, &p2.val_big->rat, &q->accum_rat); \
 			mp_rat_clear(&tmp); \
 			SET_ACCUM(); \
@@ -94,7 +94,7 @@
 		} else if (is_smallint(&p2)) { \
 			mpq_t tmp; \
 			mp_rat_init(&tmp); \
-			mp_rat_set_value(&tmp, get_integer(&p2), 1); \
+			mp_rat_set_value(&tmp, get_smallint(&p2), 1); \
 			mp_rat_##op2(&p1.val_big->rat, &tmp, &q->accum_rat); \
 			mp_rat_clear(&tmp); \
 			SET_ACCUM(); \
@@ -105,7 +105,7 @@
 		if (is_smallint(&p1)) { \
 			mpq_t tmp; \
 			mp_rat_init(&tmp); \
-			mp_rat_set_value(&tmp, get_integer(&p1), 1); \
+			mp_rat_set_value(&tmp, get_smallint(&p1), 1); \
 			mp_rat_##op2(&p2.val_big->rat, &tmp, &q->accum_rat); \
 			mp_rat_clear(&tmp); \
 			SET_ACCUM(); \
@@ -202,12 +202,12 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 		return !mp_rat_compare(&p1->val_big->rat, &p2.val_big->rat);
 
 	if (is_bigint(p1) && is_smallint(&p2)) {
-		mp_rat_set_value(&q->accum_rat, get_integer(&p2), 1);
+		mp_rat_set_value(&q->accum_rat, get_smallint(&p2), 1);
 		return !mp_rat_compare(&p1->val_big->rat, &q->accum_rat);
 	}
 
 	if (is_bigint(&p2) && is_smallint(p1)) {
-		mp_rat_set_value(&q->accum_rat, get_integer(p1), 1);
+		mp_rat_set_value(&q->accum_rat, get_smallint(p1), 1);
 		return !mp_rat_compare(&p2.val_big->rat, &q->accum_rat);
 	}
 
@@ -430,7 +430,7 @@ static USE_RESULT pl_status fn_iso_exp_1(query *q)
 		q->accum.val_type = TYPE_REAL;
 		return pl_success;
 	} else if (is_integer(&p1)) {
-		q->accum.val_real = exp((double)get_integer(&p1));
+		q->accum.val_real = exp((double)get_smallint(&p1));
 
 		if (isinf(q->accum.val_real))
 			return throw_error(q, &p1, "evaluation_error", "float_overflow");
@@ -471,7 +471,7 @@ static USE_RESULT pl_status fn_iso_sqrt_1(query *q)
 		if (p1.val_int < 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_real = sqrt((double)get_integer(&p1));
+		q->accum.val_real = sqrt((double)get_smallint(&p1));
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1)) {
 		if (p1.val_real == -1)
@@ -1250,7 +1250,7 @@ static USE_RESULT pl_status fn_iso_divint_2(query *q)
 	cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		if (get_integer(&p2) == 0)
+		if (get_smallint(&p2) == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		DO_OP2(/, div, p1, p2);
@@ -2181,26 +2181,33 @@ static USE_RESULT pl_status fn_rdiv_2(query *q)
 	cell p1 = calc(q, p1_tmp);
 	cell p2 = calc(q, p2_tmp);
 
-	if (is_integer(&p1) && is_integer(&p2)) {
-		if (get_integer(&p2) == 0)
-			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
+	if (is_bigint(&p2) && (mp_rat_compare_zero(&p2.val_big->rat) == 0))
+		return throw_error(q, &p2, "evaluation_error", "zero_divisor");
+	else if (is_smallint(&p2) && (get_smallint(&p2) == 0))
+		return throw_error(q, &p2, "evaluation_error", "zero_divisor");
 
-		if (is_bigint(&p1) && is_bigint(&p2))
-			mp_rat_div(&p1.val_big->rat, &p2.val_big->rat, &q->accum_rat);
-		else if (is_bigint(&p1)) {
-			mpz_t tmp;
-			mp_int_set_value(&tmp, get_integer(&p2));
-			mp_rat_div_int(&p1.val_big->rat, &tmp, &q->accum_rat);
-			mp_int_clear(&tmp);
-		} else if (is_bigint(&p2)) {
-			mpq_t tmp;
-			mp_rat_set_value(&tmp, get_integer(&p1), 1);
-			mp_rat_div(&tmp, &p2.val_big->rat, &q->accum_rat);
-			mp_rat_clear(&tmp);
-		} else
-			mp_rat_set_value(&q->accum_rat, get_integer(&p1), get_integer(&p2));
-
+	if (is_bigint(&p1) && is_bigint(&p2)) {
+		mp_rat_div(&p1.val_big->rat, &p2.val_big->rat, &q->accum_rat);
 		SET_ACCUM();
+	} else if (is_bigint(&p1) && is_smallint(&p2)) {
+		mpz_t tmp;
+		mp_int_set_value(&tmp, get_smallint(&p2));
+		mp_rat_div_int(&p1.val_big->rat, &tmp, &q->accum_rat);
+		mp_int_clear(&tmp);
+		SET_ACCUM();
+	} else if (is_bigint(&p2) && is_smallint(&p1)) {
+		mpq_t tmp;
+		mp_rat_set_value(&tmp, get_smallint(&p1), 1);
+		mp_rat_div(&tmp, &p2.val_big->rat, &q->accum_rat);
+		mp_rat_clear(&tmp);
+		SET_ACCUM();
+	} else if (is_smallint(&p1)) {
+		if (get_smallint(&p2) == 1)
+			q->accum = p1;
+		else {
+			mp_rat_set_value(&q->accum_rat, get_smallint(&p1), get_smallint(&p2));
+			SET_ACCUM();
+		}
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {

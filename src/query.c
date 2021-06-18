@@ -268,7 +268,7 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes)
 		}
 
 		if (is_smallint(c)) {
-			int ch = get_integer(c);
+			int ch = get_smallint(c);
 			char tmp[20];
 			put_char_utf8(tmp, ch);
 			size_t len = len_char_utf8(tmp);
@@ -882,7 +882,7 @@ static bool unify_rational(__attribute__((unused)) query *q, cell *p1, cell *p2)
 		return !mp_rat_compare_value(&p2->val_big->rat, p1->val_int, 1);
 
 	if (is_smallint(p2))
-		return (get_integer(p1) == get_integer(p2));
+		return (get_smallint(p1) == get_smallint(p2));
 
 	return false;
 }

@@ -348,13 +348,13 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 
 	if (is_smallint(c)) {
 		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY))) {
-			dst += snprintf(dst, dstlen, "%s0x", get_integer(c)<0?"-":"");
-			dst += sprint_int(dst, dstlen, get_integer(c), 16);
+			dst += snprintf(dst, dstlen, "%s0x", get_smallint(c)<0?"-":"");
+			dst += sprint_int(dst, dstlen, get_smallint(c), 16);
 		} else if ((c->flags & FLAG_OCTAL) && !running) {
-			dst += snprintf(dst, dstlen, "%s0o", get_integer(c)<0?"-":"");
-			dst += sprint_int(dst, dstlen, get_integer(c), 8);
+			dst += snprintf(dst, dstlen, "%s0o", get_smallint(c)<0?"-":"");
+			dst += sprint_int(dst, dstlen, get_smallint(c), 8);
 		} else
-			dst += sprint_int(dst, dstlen, get_integer(c), 10);
+			dst += sprint_int(dst, dstlen, get_smallint(c), 10);
 
 		return dst - save_dst;
 	}
@@ -571,13 +571,13 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 	if (is_smallint(c)) {
 		if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY))) {
-			dst += snprintf(dst, dstlen, "%s0x", get_integer(c)<0?"-":"");
-			dst += sprint_int(dst, dstlen, get_integer(c), 16);
+			dst += snprintf(dst, dstlen, "%s0x", get_smallint(c)<0?"-":"");
+			dst += sprint_int(dst, dstlen, get_smallint(c), 16);
 		} else if ((c->flags & FLAG_OCTAL) && !running) {
-			dst += snprintf(dst, dstlen, "%s0o", get_integer(c)<0?"-":"");
-			dst += sprint_int(dst, dstlen, get_integer(c), 8);
+			dst += snprintf(dst, dstlen, "%s0o", get_smallint(c)<0?"-":"");
+			dst += sprint_int(dst, dstlen, get_smallint(c), 8);
 		} else
-			dst += sprint_int(dst, dstlen, get_integer(c), 10);
+			dst += sprint_int(dst, dstlen, get_smallint(c), 10);
 
 		return dst - save_dst;
 	}
@@ -723,7 +723,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		if ((c->arity == 1) && is_literal(c) && !strcmp(src, "{}")) braces = 1;
 
 		if (running && is_literal(c) && !strcmp(src, "$VAR") && q->numbervars && is_integer(c+1)) {
-			unsigned var_nbr = get_integer(c+1) - q->nv_start;
+			unsigned var_nbr = get_smallint(c+1) - q->nv_start;
 			dst += snprintf(dst, dstlen, "%s", varformat(var_nbr));
 			return dst - save_dst;
 		}
@@ -835,7 +835,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		idx_t rhs_ctx = q->latest_ctx;
 		int space = iswalpha(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "\\+");
-		space += (!strcmp(src, "-") || !strcmp(src, "+")) && is_smallint(rhs) && (get_integer(rhs) < 0);
+		space += (!strcmp(src, "-") || !strcmp(src, "+")) && is_smallint(rhs) && (get_smallint(rhs) < 0);
 		//if (!strcmp(src, "-") && !is_smallint(rhs)) dst += snprintf(dst, dstlen, "%s", " ");
 		int parens = is_structure(rhs) && !strcmp(GET_STR(rhs), ",");
 		dst += snprintf(dst, dstlen, "%s", src);
