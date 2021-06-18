@@ -31,7 +31,7 @@ static void clr_accum(cell *p1)
 	p1->flags = 0;
 }
 
-#define CLEANUP __attribute__((cleanup (clr_accum)))
+#define CLEAR __attribute__((cleanup (clr_accum)))
 
 // Simple one for now...
 
@@ -241,7 +241,7 @@ static USE_RESULT pl_status fn_iso_float_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 
 	if (q->calc) {
-		CLEANUP cell p1 = calc(q, p1_tmp);
+		CLEAR cell p1 = calc(q, p1_tmp);
 
 		if (is_real(&p1)) {
 			q->accum.val_real = p1.val_real;
@@ -279,7 +279,7 @@ static USE_RESULT pl_status fn_iso_integer_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 
 	if (q->calc) {
-		CLEANUP cell p1 = calc(q, p1_tmp);
+		CLEAR cell p1 = calc(q, p1_tmp);
 
 		if (is_real(&p1)) {
 			q->accum.val_int = (int_t)p1.val_real;
@@ -309,7 +309,7 @@ static USE_RESULT pl_status fn_iso_abs_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 	q->accum.val_type = p1.val_type;
 
 	if (is_bigint(&p1)) {
@@ -329,7 +329,7 @@ static USE_RESULT pl_status fn_iso_sign_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 	q->accum.val_type = p1.val_type;
 
 	if (is_bigint(&p1)) {
@@ -357,7 +357,7 @@ static USE_RESULT pl_status fn_iso_negative_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 	q->accum.val_type = p1.val_type;
 
 	if (is_bigint(&p1)) {
@@ -404,8 +404,8 @@ USE_RESULT pl_status fn_iso_add_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 	DO_OP2(+, add, p1, p2);
 	return pl_success;
 }
@@ -415,8 +415,8 @@ static USE_RESULT pl_status fn_iso_sub_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 	DO_OP2(-, sub, p1, p2);
 	return pl_success;
 }
@@ -426,8 +426,8 @@ static USE_RESULT pl_status fn_iso_mul_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 	DO_OP2(*, mul, p1, p2);
 	return pl_success;
 }
@@ -436,7 +436,7 @@ static USE_RESULT pl_status fn_iso_exp_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_bigint(&p1) && is_integer(&p1)) {
 		if (mp_int_compare_zero(&p1.val_big->rat.num) <= 0)
@@ -467,7 +467,7 @@ static USE_RESULT pl_status fn_iso_sqrt_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_bigint(&p1) && is_integer(&p1)) {
 		if (mp_int_compare_zero(&p1.val_big->rat.num) < 0)
@@ -507,7 +507,7 @@ static USE_RESULT pl_status fn_iso_log_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_bigint(&p1) && is_integer(&p1)) {
 		if (mp_int_compare_zero(&p1.val_big->rat.num) <= 0)
@@ -541,7 +541,7 @@ static USE_RESULT pl_status fn_iso_truncate_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_real(&p1)) {
 		q->accum.val_int = (int_t)p1.val_real;
@@ -561,7 +561,7 @@ static USE_RESULT pl_status fn_iso_round_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_real(&p1)) {
 		double f = fabs(p1.val_real);
@@ -588,7 +588,7 @@ static USE_RESULT pl_status fn_iso_ceiling_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_real(&p1)) {
 		q->accum.val_int = (int_t)ceil(p1.val_real);
@@ -608,7 +608,7 @@ static USE_RESULT pl_status fn_iso_float_integer_part_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_real(&p1)) {
 		q->accum.val_real = (int_t)p1.val_real;
@@ -628,7 +628,7 @@ static USE_RESULT pl_status fn_iso_float_fractional_part_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_real(&p1)) {
 		q->accum.val_real = p1.val_real - (int_t)p1.val_real;
@@ -648,7 +648,7 @@ static USE_RESULT pl_status fn_iso_floor_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_real(&p1)) {
 		q->accum.val_int = (int_t)floor(p1.val_real);
@@ -668,7 +668,7 @@ static USE_RESULT pl_status fn_iso_sin_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_smallint(&p1)) {
 		q->accum.val_real = sin((double)p1.val_int);
@@ -695,7 +695,7 @@ static USE_RESULT pl_status fn_iso_cos_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_smallint(&p1)) {
 		q->accum.val_real = cos((double)p1.val_int);
@@ -722,7 +722,7 @@ static USE_RESULT pl_status fn_iso_tan_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_smallint(&p1)) {
 		q->accum.val_real = tan((double)p1.val_int);
@@ -749,7 +749,7 @@ static USE_RESULT pl_status fn_iso_asin_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_smallint(&p1)) {
 		q->accum.val_real = asin((double)p1.val_int);
@@ -776,7 +776,7 @@ static USE_RESULT pl_status fn_iso_acos_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_smallint(&p1)) {
 		q->accum.val_real = acos((double)p1.val_int);
@@ -803,7 +803,7 @@ static USE_RESULT pl_status fn_iso_atan_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_smallint(&p1)) {
 		q->accum.val_real = atan((double)p1.val_int);
@@ -831,8 +831,8 @@ static USE_RESULT pl_status fn_iso_atan2_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_smallint(&p1) && is_smallint(&p2)) {
 		if ((p1.val_int == 0) && (p2.val_int == 0))
@@ -877,7 +877,7 @@ static USE_RESULT pl_status fn_sinh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_smallint(&p1)) {
 		q->accum.val_real = sinh((double)p1.val_int);
@@ -904,7 +904,7 @@ static USE_RESULT pl_status fn_cosh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_smallint(&p1)) {
 		q->accum.val_real = cosh((double)p1.val_int);
@@ -931,7 +931,7 @@ static USE_RESULT pl_status fn_tanh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_smallint(&p1)) {
 		q->accum.val_real = tanh((double)p1.val_int);
@@ -958,7 +958,7 @@ static USE_RESULT pl_status fn_asinh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_smallint(&p1)) {
 		q->accum.val_real = asinh((double)p1.val_int);
@@ -985,7 +985,7 @@ static USE_RESULT pl_status fn_acosh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_smallint(&p1)) {
 		q->accum.val_real = acosh((double)p1.val_int);
@@ -1012,7 +1012,7 @@ static USE_RESULT pl_status fn_atanh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_smallint(&p1)) {
 		q->accum.val_real = atanh((double)p1.val_int);
@@ -1040,8 +1040,8 @@ static USE_RESULT pl_status fn_iso_copysign_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_smallint(&p1) && is_smallint(&p2)) {
 		q->accum = p1;
@@ -1077,8 +1077,8 @@ static USE_RESULT pl_status fn_iso_pow_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_integer(&p1) && is_smallint(&p2)) {
 		if ((mp_int_compare_zero(&p1.val_big->rat.num) == 0) && (p2.val_int < 0))
@@ -1130,8 +1130,8 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2) && is_integer(&p1) && is_integer(&p2)) {
 		if (mp_int_compare_value(&p1.val_big->rat.num, 1) != 0) {
@@ -1205,8 +1205,8 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2) && is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_real = mp_int_to_double(&p1.val_big->rat.num);
@@ -1261,8 +1261,8 @@ static USE_RESULT pl_status fn_iso_divint_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		if (is_bigint(&p2) && mp_rat_compare_zero(&p2.val_big->rat) == 0)
@@ -1288,8 +1288,8 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2) && is_integer(&p1) && is_integer(&p2)) {
 		mp_int_mod(&p1.val_big->rat.num, &p2.val_big->rat.num, &q->accum_rat.num);
@@ -1362,8 +1362,8 @@ static USE_RESULT pl_status fn_iso_div_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2) && is_integer(&p1) && is_integer(&p2)) {
 		mp_int_mod(&p1.val_big->rat.num, &p2.val_big->rat.num, &q->accum_rat.num);
@@ -1414,8 +1414,8 @@ static USE_RESULT pl_status fn_iso_rem_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2) && is_integer(&p1) && is_integer(&p2)) {
 		mp_int_mod(&p1.val_big->rat.num, &p2.val_big->rat.num, &q->accum_rat.num);
@@ -1454,8 +1454,8 @@ static USE_RESULT pl_status fn_iso_max_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1)) {
 		if (is_bigint(&p2)) {
@@ -1526,8 +1526,8 @@ static USE_RESULT pl_status fn_iso_min_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1)) {
 		if (is_bigint(&p2)) {
@@ -1598,8 +1598,8 @@ static USE_RESULT pl_status fn_iso_xor_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_int = p1.val_int ^ p2.val_int;
@@ -1620,8 +1620,8 @@ static USE_RESULT pl_status fn_iso_and_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_int = p1.val_int & p2.val_int;
@@ -1642,8 +1642,8 @@ static USE_RESULT pl_status fn_iso_or_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_int = p1.val_int | p2.val_int;
@@ -1664,8 +1664,8 @@ static USE_RESULT pl_status fn_iso_shl_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_int = p1.val_int << p2.val_int;
@@ -1686,8 +1686,8 @@ static USE_RESULT pl_status fn_iso_shr_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		q->accum.val_int = p1.val_int >> p2.val_int;
@@ -1707,7 +1707,7 @@ static USE_RESULT pl_status fn_iso_neg_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_integer(&p1)) {
 		q->accum.val_int = ~p1.val_int;
@@ -1902,8 +1902,8 @@ static USE_RESULT pl_status fn_iso_neq_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2)) {
 		int ok = mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) == 0;
@@ -1930,8 +1930,8 @@ static USE_RESULT pl_status fn_iso_nne_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2)) {
 		int ok = mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) != 0;
@@ -1958,8 +1958,8 @@ static USE_RESULT pl_status fn_iso_nge_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2)) {
 		int ok = mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) >= 0;
@@ -1986,8 +1986,8 @@ static USE_RESULT pl_status fn_iso_ngt_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2)) {
 		int ok = mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) > 0;
@@ -2014,8 +2014,8 @@ static USE_RESULT pl_status fn_iso_nle_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2)) {
 		int ok = mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) <= 0;
@@ -2042,8 +2042,8 @@ static USE_RESULT pl_status fn_iso_nlt_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2)) {
 		int ok = mp_rat_compare(&p1.val_big->rat, &p2.val_big->rat) < 0;
@@ -2071,8 +2071,8 @@ static USE_RESULT pl_status fn_log_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
@@ -2133,7 +2133,7 @@ static USE_RESULT pl_status fn_log10_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
@@ -2199,7 +2199,7 @@ static USE_RESULT pl_status fn_random_1(query *q)
 	}
 
 	CHECK_CALC();
-	CLEANUP cell p1 = calc(q, p1_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (!is_smallint(&p1))
 		return throw_error(q, &p1, "type_error", "evaluable");
@@ -2233,8 +2233,8 @@ static USE_RESULT pl_status fn_rdiv_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p2) && (mp_rat_compare_zero(&p2.val_big->rat) == 0))
 		return throw_error(q, &p2, "evaluation_error", "zero_divisor");
@@ -2337,7 +2337,7 @@ static USE_RESULT pl_status fn_rational_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 
 	if (q->calc) {
-		CLEANUP cell p1 = calc(q, p1_tmp);
+		CLEAR cell p1 = calc(q, p1_tmp);
 
 		if (is_smallint(&p1)) {
 			q->accum.val_int = p1.val_int;
@@ -2372,8 +2372,8 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = calc(q, p1_tmp);
-	CLEANUP cell p2 = calc(q, p2_tmp);
+	CLEAR cell p1 = calc(q, p1_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		if (is_bigint(&p1) && is_bigint(&p2)) {
