@@ -4596,6 +4596,9 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
 
+	if (!is_literal(head) && !is_cstring(head))
+		return throw_error(q, head, "type_error", "callable");
+
 	bool found = false;
 
 	if (get_builtin(q->st.m->pl, GET_STR(head), head->arity, &found), found) {
@@ -4658,6 +4661,9 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 
 	if (is_variable(head))
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
+
+	if (!is_literal(head) && !is_cstring(head))
+		return throw_error(q, head, "type_error", "callable");
 
 	bool found = false;
 
