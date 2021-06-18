@@ -6713,6 +6713,15 @@ static USE_RESULT pl_status fn_between_3(query *q)
 	GET_NEXT_ARG(p2,integer);
 	GET_NEXT_ARG(p3,integer_or_var);
 
+	if (!is_smallint(p1))
+		return throw_error(q, p1, "type_error", "integer");
+
+	if (!is_smallint(p2))
+		return throw_error(q, p2, "type_error", "integer");
+
+	if (is_rational(p3) && !is_smallint(p3))
+		return throw_error(q, p3, "type_error", "integer");
+
 	if (!q->retry) {
 		if (get_smallint(p1) > get_smallint(p2))
 			return pl_failure;

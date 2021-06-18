@@ -153,6 +153,7 @@ static size_t plain(char *dst, size_t dstlen, const char *src, int srclen)
 static size_t sprint_int_(char *dst, size_t size, int_t n, int base)
 {
 	const char *save_dst = dst;
+
 	if ((n / base) > 0)
 		dst += sprint_int_(dst, size, n / base, base);
 
@@ -164,7 +165,11 @@ static size_t sprint_int_(char *dst, size_t size, int_t n, int base)
 	} else
 		n2 += '0';
 
-	if (size) *dst++ = n2; else dst++;
+	if (size)
+		*dst++ = n2;
+	else
+		dst++;
+
 	return dst - save_dst;
 }
 
@@ -173,7 +178,10 @@ size_t sprint_int(char *dst, size_t size, int_t n, int base)
 	const char *save_dst = dst;
 
 	if ((n < 0) && (base == 10)) {
-		if (size) *dst++ = '-'; else dst++;
+		if (size)
+			*dst++ = '-';
+		else
+			dst++;
 
 		// NOTE: according to the man pages...
 		//
@@ -181,24 +189,26 @@ size_t sprint_int(char *dst, size_t size, int_t n, int base)
 		// 		the most negative integer is not defined."
 		//
 
-#if USE_INT32
-		if (n == INT32_MIN)
-#else
 		if (n == INT64_MIN)
-#endif
 			n = imaxabs(n+1) - 1;
 		else
 			n = imaxabs(n);
 	}
 
 	if (n == 0) {
-		if (size) *dst++ = '0'; else dst++;
-		if (size) *dst = '\0';
+		if (size)
+			*dst++ = '0';
+		else
+			dst++;
+
 		return dst - save_dst;
 	}
 
 	dst += sprint_int_(dst, size, n, base);
-	if (size) *dst = '\0';
+
+	if (size)
+		*dst = '\0';
+
 	return dst - save_dst;
 }
 
