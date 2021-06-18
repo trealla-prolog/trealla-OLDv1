@@ -324,6 +324,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 		} else
 			dst += sprint_int(dst, dstlen, get_smallint(c), 10);
 
+		if (dstlen) *dst = 0;
 		return dst - save_dst;
 	}
 
@@ -505,6 +506,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		} else
 			dst += sprint_int(dst, dstlen, get_smallint(c), 10);
 
+		if (dstlen) *dst = 0;
 		return dst - save_dst;
 	}
 

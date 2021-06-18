@@ -829,7 +829,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	char tmpbuf[256];
+	char tmpbuf[1024];
 	print_term_to_buf(q, tmpbuf, sizeof(tmpbuf), p1, p1_ctx, 1, 0, 0);
 	cell tmp;
 	may_error(make_string(&tmp, tmpbuf));
