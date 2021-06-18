@@ -23,7 +23,7 @@
 
 static void clr_accum(cell *p1)
 {
-	if (is_bigint(p1) && !(p1->val_big->refcnt))
+	if (is_bigint(p1) && !p1->val_big->refcnt)
 		mp_rat_clear(&p1->val_big->rat);
 
 	p1->val_type = TYPE_RATIONAL;
@@ -197,7 +197,7 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2_tmp,any);
-	cell p2 = calc(q, p2_tmp);
+	CLEAR cell p2 = calc(q, p2_tmp);
 	p2.nbr_cells = 1;
 
 	if (is_variable(p1) && is_number(&p2)) {
