@@ -37,11 +37,11 @@ static void clr_accum(cell *p)
 
 // Simple one for now...
 
-#define OVERFLOW(op,v1,v2)										\
-	(v1) > INT32_MAX ||											\
-	(v1) < INT32_MIN ||											\
-	(v2) > INT32_MAX ||											\
-	(v2) < INT32_MIN
+#define OVERFLOW(op,v1,v2)											\
+	(v1) >= INT32_MAX ||											\
+	(v1) <= INT32_MIN ||											\
+	(v2) >= INT32_MAX ||											\
+	(v2) <= INT32_MIN
 
 #define DO_OP2(op,op2,p1,p2) \
 	if (is_bigint(&p1)) { \
@@ -79,7 +79,7 @@ static void clr_accum(cell *p)
 		} \
 	} else if (is_smallint(&p1) && is_smallint(&p2)) { \
 		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
-			mp_rat_set_value(&q->accum_rat, q->accum.val_int, 1); \
+			mp_rat_set_value(&q->accum_rat, p1.val_int op p2.val_int, 1); \
 			SET_ACCUM(); \
 		} else { \
 			q->accum.val_int = p1.val_int op p2.val_int; \
@@ -128,7 +128,7 @@ static void clr_accum(cell *p)
 		} \
 	} else if (is_smallint(&p1) && is_smallint(&p2)) { \
 		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
-			mp_rat_set_value(&q->accum_rat, q->accum.val_int, 1); \
+			mp_rat_set_value(&q->accum_rat, p1.val_int op p2.val_int, 1); \
 			SET_ACCUM(); \
 		} else { \
 			q->accum.val_int = p1.val_int op p2.val_int; \
