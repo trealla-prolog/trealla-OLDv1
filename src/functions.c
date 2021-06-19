@@ -1298,31 +1298,10 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 
 		SET_ACCUM();
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
-		mpz_t tmp;
-		mp_int_init_value(&tmp, p2.val_int);
-		mp_int_mod(&p1.val_big->ival, &tmp, &q->tmp_ival);
-		mp_int_clear(&tmp);
-
-		if (mp_int_compare_zero(&p2.val_big->ival))
-			mp_int_neg(&q->tmp_ival, &q->tmp_ival);
-
-		if (p1.val_int < 0)
-			q->accum.val_int *= -1;
-
-		SET_ACCUM();
-	} else if (is_bigint(&p2) && is_smallint(&p1)) {
-		mpz_t tmp;
-		mp_int_init_value(&tmp, p1.val_int);
-		mp_int_mod(&tmp, &p2.val_big->ival, &q->tmp_ival);
-		mp_int_clear(&tmp);
-
-		if (mp_int_compare_zero(&p1.val_big->ival))
-			mp_int_neg(&q->tmp_ival, &q->tmp_ival);
-
-		if (p2.val_int < 0)
-			q->accum.val_int *= -1;
-
-		SET_ACCUM();
+		mp_small n;
+		mp_int_mod_value(&p1.val_big->ival, p2.val_int, &n);
+		q->accum.val_int = n;
+		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_smallint(&p1) && is_bigint(&p2)) {
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p1.val_int);
