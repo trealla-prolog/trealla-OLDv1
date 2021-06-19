@@ -1652,7 +1652,15 @@ static USE_RESULT pl_status fn_iso_shl_2(query *q)
 	CLEAR cell p1 = calc(q, p1_tmp);
 	CLEAR cell p2 = calc(q, p2_tmp);
 
-	if (is_smallint(&p1) && is_smallint(&p2)) {
+	if (is_bigint(&p1) && is_smallint(&p2)) {
+		int n = p2.val_int;
+		mp_int_copy(&p1.val_big->ival, &q->tmp_ival);
+
+		while (n-- > 0)
+			mp_int_mul_value(&q->tmp_ival, 2, &q->tmp_ival);
+
+		SET_ACCUM();
+	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		q->accum.val_int = p1.val_int << p2.val_int;
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
@@ -1674,7 +1682,15 @@ static USE_RESULT pl_status fn_iso_shr_2(query *q)
 	CLEAR cell p1 = calc(q, p1_tmp);
 	CLEAR cell p2 = calc(q, p2_tmp);
 
-	if (is_smallint(&p1) && is_smallint(&p2)) {
+	if (is_bigint(&p1) && is_smallint(&p2)) {
+		int n = p2.val_int;
+		mp_int_copy(&p1.val_big->ival, &q->tmp_ival);
+
+		while (n-- > 0)
+			mp_int_div_value(&q->tmp_ival, 2, &q->tmp_ival, NULL);
+
+		SET_ACCUM();
+	} if (is_smallint(&p1) && is_smallint(&p2)) {
 		q->accum.val_int = p1.val_int >> p2.val_int;
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
