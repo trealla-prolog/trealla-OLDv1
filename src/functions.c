@@ -61,7 +61,6 @@ static void clr_accum(cell *p)
 			SET_ACCUM(); \
 		} else if (is_real(&p2)) { \
 			double d = mp_int_to_double(&p1.val_big->ival); \
-			d /= mp_int_to_double(&p1.val_big->ival); \
 			q->accum.val_real = d op p2.val_real; \
 			q->accum.val_type = TYPE_REAL; \
 			q->accum.flags = 0; \
