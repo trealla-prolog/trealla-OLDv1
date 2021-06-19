@@ -140,9 +140,9 @@ static void clr_accum(cell *p)
 
 static double mp_int_to_double(mpz_t *v)
 {
-	size_t len = mp_int_string_len(v, 10);
+	size_t len = mp_int_string_len(v, 10) - 1;
 	char *buf = malloc(len+1);
-	mp_int_to_string(v, 10, buf, len);
+	mp_int_to_string(v, 10, buf, len+1);
 	double d = atof(buf);
 	free(buf);
 	return d;
@@ -245,6 +245,10 @@ static USE_RESULT pl_status fn_iso_float_1(query *q)
 
 		if (is_bigint(&p1)) {
 			q->accum.val_real = mp_int_to_double(&p1.val_big->ival);
+
+			if (isinf(q->accum.val_real))
+				return throw_error(q, &p1, "evaluation_error", "float_overflow");
+
 			q->accum.val_type = TYPE_REAL;
 			return pl_success;
 		}
@@ -430,6 +434,10 @@ static USE_RESULT pl_status fn_iso_exp_1(query *q)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
 		q->accum.val_real = exp(mp_int_to_double(&p1.val_big->ival));
+
+		if (isinf(q->accum.val_real))
+			return throw_error(q, &p1, "evaluation_error", "float_overflow");
+
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_smallint(&p1)) {
 		q->accum.val_real = exp((double)p1.val_int);
@@ -464,6 +472,10 @@ static USE_RESULT pl_status fn_iso_sqrt_1(query *q)
 		mp_int_init(&tmp);
 		mp_int_sqrt(&p1.val_big->ival, &tmp);
 		q->accum.val_real = mp_int_to_double(&tmp);
+
+		if (isinf(q->accum.val_real))
+			return throw_error(q, &p1, "evaluation_error", "float_overflow");
+
 		q->accum.val_type = TYPE_REAL;
 		mp_int_clear(&tmp);
 	} else if (is_smallint(&p1)) {
@@ -498,6 +510,10 @@ static USE_RESULT pl_status fn_iso_log_1(query *q)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
 		q->accum.val_real = log(mp_int_to_double(&p1.val_big->ival));
+
+		if (isinf(q->accum.val_real))
+			return throw_error(q, &p1, "evaluation_error", "float_overflow");
+
 		q->accum.val_type = TYPE_REAL;
 		return pl_success;
 	} else if (is_smallint(&p1)) {

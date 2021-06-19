@@ -712,6 +712,8 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 
 	// Verify the list
 
+	int_t cnt = 0;
+
 	if (!is_variable(p2)) {
 		cell *save_p2 = p2;
 		idx_t save_p2_ctx = p2_ctx;
@@ -738,6 +740,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
+			cnt++;
 		}
 
 		if (!is_nil(p2) && !is_variable(p2))
@@ -829,10 +832,11 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	char tmpbuf[1024];
+	char *tmpbuf = malloc(cnt+1);
 	print_term_to_buf(q, tmpbuf, sizeof(tmpbuf), p1, p1_ctx, 1, 0, 0);
 	cell tmp;
 	may_error(make_string(&tmp, tmpbuf));
+	free(tmpbuf);
 	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
