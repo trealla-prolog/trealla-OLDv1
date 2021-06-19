@@ -73,7 +73,8 @@ static void clr_accum(cell *p)
 		} \
 	} else if (is_smallint(&p1) && is_smallint(&p2)) { \
 		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
-			mp_int_set_value(&q->accum_int, p1.val_int op p2.val_int); \
+			mp_int_set_value(&q->accum_int, p1.val_int); \
+			mp_int_##op2##_value(&q->accum_int, p2.val_int, &q->accum_int); \
 			SET_ACCUM(); \
 		} else { \
 			q->accum.val_int = p1.val_int op p2.val_int; \
@@ -117,7 +118,8 @@ static void clr_accum(cell *p)
 		} \
 	} else if (is_smallint(&p1) && is_smallint(&p2)) { \
 		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
-			mp_int_set_value(&q->accum_int, p1.val_int op p2.val_int); \
+			mp_int_set_value(&q->accum_int, p1.val_int); \
+			mp_int_##op2##_value(&q->accum_int, p2.val_int, &q->accum_int); \
 			SET_ACCUM(); \
 		} else { \
 			q->accum.val_int = p1.val_int op p2.val_int; \
