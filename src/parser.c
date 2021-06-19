@@ -1568,8 +1568,8 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
 			p->v.val_big = malloc(sizeof(bigint));
 			p->v.val_big->refcnt = 1;
-			mp_int_init_copy(&p->v.val_big->rat, &v2);
-			if (neg) p->v.val_big->rat.sign = MP_NEG;
+			mp_int_init_copy(&p->v.val_big->ival, &v2);
+			if (neg) p->v.val_big->ival.sign = MP_NEG;
 			p->v.flags |= FLAG_MANAGED;
 		} else {
 			set_smallint(&p->v, val);
@@ -1601,8 +1601,8 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
 			p->v.val_big = malloc(sizeof(bigint));
 			p->v.val_big->refcnt = 1;
-			mp_int_init_copy(&p->v.val_big->rat, &v2);
-			if (neg) p->v.val_big->rat.sign = MP_NEG;
+			mp_int_init_copy(&p->v.val_big->ival, &v2);
+			if (neg) p->v.val_big->ival.sign = MP_NEG;
 			p->v.flags |= FLAG_MANAGED;
 		} else {
 			set_smallint(&p->v, val);
@@ -1634,8 +1634,8 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
 			p->v.val_big = malloc(sizeof(bigint));
 			p->v.val_big->refcnt = 1;
-			mp_int_init_copy(&p->v.val_big->rat, &v2);
-			if (neg) p->v.val_big->rat.sign = MP_NEG;
+			mp_int_init_copy(&p->v.val_big->ival, &v2);
+			if (neg) p->v.val_big->ival.sign = MP_NEG;
 			p->v.flags |= FLAG_MANAGED;
 		} else {
 			set_smallint(&p->v, val);
@@ -1674,8 +1674,8 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	if (mp_int_to_int(&v2, &val) == MP_RANGE) {
 		p->v.val_big = malloc(sizeof(bigint));
 		p->v.val_big->refcnt = 1;
-		mp_int_init_copy(&p->v.val_big->rat, &v2);
-		if (neg) p->v.val_big->rat.sign = MP_NEG;
+		mp_int_init_copy(&p->v.val_big->ival, &v2);
+		if (neg) p->v.val_big->ival.sign = MP_NEG;
 		p->v.flags |= FLAG_MANAGED;
 	} else {
 		set_smallint(&p->v, val);

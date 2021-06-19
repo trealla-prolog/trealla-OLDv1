@@ -869,13 +869,13 @@ static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx,
 static bool unify_integer(__attribute__((unused)) query *q, cell *p1, cell *p2)
 {
 	if (is_bigint(p1) && is_bigint(p2))
-		return !mp_int_compare(&p1->val_big->rat, &p2->val_big->rat);
+		return !mp_int_compare(&p1->val_big->ival, &p2->val_big->ival);
 
 	if (is_bigint(p1) && is_smallint(p2))
-		return !mp_int_compare_value(&p1->val_big->rat, p2->val_int);
+		return !mp_int_compare_value(&p1->val_big->ival, p2->val_int);
 
 	if (is_bigint(p2) && is_smallint(p1))
-		return !mp_int_compare_value(&p2->val_big->rat, p1->val_int);
+		return !mp_int_compare_value(&p2->val_big->ival, p1->val_int);
 
 	if (is_smallint(p2))
 		return (get_smallint(p1) == get_smallint(p2));
@@ -1668,7 +1668,7 @@ void destroy_query(query *q)
 	for (idx_t i = 0; i < q->st.sp; i++, e++)
 		unshare_cell(&e->c);
 
-	mp_int_clear(&q->accum_int);
+	mp_int_clear(&q->tmp_ival);
 	free(q->trails);
 	free(q->choices);
 	free(q->slots);
@@ -1687,7 +1687,7 @@ query *create_query(module *m, bool is_task)
 	q->st.m = m;
 	q->trace = m->pl->trace;
 	q->flag = m->flag;
-	mp_int_init(&q->accum_int);
+	mp_int_init(&q->tmp_ival);
 
 	// Allocate these now...
 

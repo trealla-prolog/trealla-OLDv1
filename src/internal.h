@@ -145,7 +145,7 @@ typedef struct {
 
 typedef struct {
 	int64_t refcnt;
-	mpz_t rat;
+	mpz_t ival;
 } bigint;
 
 #define SET_STR(c,s,n,off) {									\
@@ -504,7 +504,7 @@ struct query_ {
 	clause *dirty_list;
 	slot *save_e;
 	cell accum;
-	mpz_t accum_int;
+	mpz_t tmp_ival;
 	prolog_state st;
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
 	uint64_t step, qid, time_started;
@@ -664,7 +664,7 @@ inline static void unshare_cell(cell *c)
 			}
 		} else if (is_bigint(c)) {
 			if (--(c)->val_big->refcnt == 0)	{
-				mp_int_clear(&(c)->val_big->rat);
+				mp_int_clear(&(c)->val_big->ival);
 				free((c)->val_big);
 				(c)->val_big = NULL;
 			}

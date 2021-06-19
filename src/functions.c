@@ -18,13 +18,13 @@
 	q->accum.flags = FLAG_MANAGED;								\
 	q->accum.val_big = malloc(sizeof(bigint));					\
 	q->accum.val_big->refcnt = 0;								\
-	mp_int_init_copy(&q->accum.val_big->rat, &q->accum_int);	\
+	mp_int_init_copy(&q->accum.val_big->ival, &q->tmp_ival);	\
 }
 
 static void clr_accum(cell *p)
 {
 	if (is_bigint(p) && !p->val_big->refcnt) {
-		mp_int_clear(&p->val_big->rat);
+		mp_int_clear(&p->val_big->ival);
 		free(p->val_big);
 	}
 
@@ -46,14 +46,14 @@ static void clr_accum(cell *p)
 #define DO_OP2(op,op2,p1,p2) \
 	if (is_bigint(&p1)) { \
 		if (is_bigint(&p2)) { \
-			mp_int_##op2(&p1.val_big->rat, &p2.val_big->rat, &q->accum_int); \
+			mp_int_##op2(&p1.val_big->ival, &p2.val_big->ival, &q->tmp_ival); \
 			SET_ACCUM(); \
 		} else if (is_smallint(&p2)) { \
-			mp_int_##op2##_value(&p1.val_big->rat, p2.val_int, &q->accum_int); \
+			mp_int_##op2##_value(&p1.val_big->ival, p2.val_int, &q->tmp_ival); \
 			SET_ACCUM(); \
 		} else if (is_real(&p2)) { \
-			double d = mp_int_to_double(&p1.val_big->rat); \
-			d /= mp_int_to_double(&p1.val_big->rat); \
+			double d = mp_int_to_double(&p1.val_big->ival); \
+			d /= mp_int_to_double(&p1.val_big->ival); \
 			q->accum.val_real = d op p2.val_real; \
 			q->accum.val_type = TYPE_REAL; \
 			q->accum.flags = 0; \
@@ -62,19 +62,19 @@ static void clr_accum(cell *p)
 		if (is_smallint(&p1)) { \
 			mpz_t tmp; \
 			mp_int_init_value(&tmp, p1.val_int); \
-			mp_int_##op2(&tmp, &p2.val_big->rat, &q->accum_int); \
+			mp_int_##op2(&tmp, &p2.val_big->ival, &q->tmp_ival); \
 			mp_int_clear(&tmp); \
 			SET_ACCUM(); \
 		} else if (is_real(&p1)) { \
-			double d = mp_int_to_double(&p2.val_big->rat); \
+			double d = mp_int_to_double(&p2.val_big->ival); \
 			q->accum.val_real = p1.val_real op d; \
 			q->accum.val_type = TYPE_REAL; \
 			q->accum.flags = 0; \
 		} \
 	} else if (is_smallint(&p1) && is_smallint(&p2)) { \
 		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
-			mp_int_set_value(&q->accum_int, p1.val_int); \
-			mp_int_##op2##_value(&q->accum_int, p2.val_int, &q->accum_int); \
+			mp_int_set_value(&q->tmp_ival, p1.val_int); \
+			mp_int_##op2##_value(&q->tmp_ival, p2.val_int, &q->tmp_ival); \
 			SET_ACCUM(); \
 		} else { \
 			q->accum.val_int = p1.val_int op p2.val_int; \
@@ -98,10 +98,10 @@ static void clr_accum(cell *p)
 #define DO_OP2int(op,op2,p1,p2) \
 	if (is_bigint(&p1)) { \
 		if (is_bigint(&p2)) { \
-			mp_int_##op2(&p1.val_big->rat, &p2.val_big->rat, &q->accum_int); \
+			mp_int_##op2(&p1.val_big->ival, &p2.val_big->ival, &q->tmp_ival); \
 			SET_ACCUM(); \
 		} else if (is_smallint(&p2)) { \
-			mp_int_##op2##_value(&p1.val_big->rat, p2.val_int, &q->accum_int); \
+			mp_int_##op2##_value(&p1.val_big->ival, p2.val_int, &q->tmp_ival); \
 			SET_ACCUM(); \
 		} else { \
 			return throw_error(q, &p1, "type_error", "evaluable"); \
@@ -110,7 +110,7 @@ static void clr_accum(cell *p)
 		if (is_smallint(&p1)) { \
 			mpz_t tmp; \
 			mp_int_init_value(&tmp, p1.val_int); \
-			mp_int_##op2(&tmp, &p2.val_big->rat, &q->accum_int); \
+			mp_int_##op2(&tmp, &p2.val_big->ival, &q->tmp_ival); \
 			mp_int_clear(&tmp); \
 			SET_ACCUM(); \
 		} else { \
@@ -118,8 +118,8 @@ static void clr_accum(cell *p)
 		} \
 	} else if (is_smallint(&p1) && is_smallint(&p2)) { \
 		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
-			mp_int_set_value(&q->accum_int, p1.val_int); \
-			mp_int_##op2##_value(&q->accum_int, p2.val_int, &q->accum_int); \
+			mp_int_set_value(&q->tmp_ival, p1.val_int); \
+			mp_int_##op2##_value(&q->tmp_ival, p2.val_int, &q->tmp_ival); \
 			SET_ACCUM(); \
 		} else { \
 			q->accum.val_int = p1.val_int op p2.val_int; \
@@ -200,13 +200,13 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 	}
 
 	if (is_bigint(p1) && is_bigint(&p2))
-		return !mp_int_compare(&p1->val_big->rat, &p2.val_big->rat);
+		return !mp_int_compare(&p1->val_big->ival, &p2.val_big->ival);
 
 	if (is_bigint(p1) && is_smallint(&p2))
-		return !mp_int_compare_value(&p1->val_big->rat, p2.val_int);
+		return !mp_int_compare_value(&p1->val_big->ival, p2.val_int);
 
 	if (is_bigint(&p2) && is_smallint(p1))
-		return !mp_int_compare_value(&p2.val_big->rat, p1->val_int);
+		return !mp_int_compare_value(&p2.val_big->ival, p1->val_int);
 
 	if (is_smallint(p1) && is_smallint(&p2))
 		return (p1->val_int == p2.val_int);
@@ -237,7 +237,7 @@ static USE_RESULT pl_status fn_iso_float_1(query *q)
 		}
 
 		if (is_bigint(&p1)) {
-			q->accum.val_real = mp_int_to_double(&p1.val_big->rat);
+			q->accum.val_real = mp_int_to_double(&p1.val_big->ival);
 			q->accum.val_type = TYPE_REAL;
 			return pl_success;
 		}
@@ -268,7 +268,7 @@ static USE_RESULT pl_status fn_iso_integer_1(query *q)
 		}
 
 		if (is_bigint(&p1)) {
-			mp_int_init_copy(&q->accum_int, &p1.val_big->rat);
+			mp_int_init_copy(&q->tmp_ival, &p1.val_big->ival);
 			SET_ACCUM();
 			return pl_success;
 		}
@@ -293,7 +293,7 @@ static USE_RESULT pl_status fn_iso_abs_1(query *q)
 	q->accum.val_type = p1.val_type;
 
 	if (is_bigint(&p1)) {
-		mp_int_abs(&p1.val_big->rat, &q->accum_int);
+		mp_int_abs(&p1.val_big->ival, &q->tmp_ival);
 		SET_ACCUM();
 	} else if (is_smallint(&p1))
 		q->accum.val_int = llabs((long long)p1.val_int);
@@ -313,7 +313,7 @@ static USE_RESULT pl_status fn_iso_sign_1(query *q)
 	q->accum.val_type = p1.val_type;
 
 	if (is_bigint(&p1)) {
-		q->accum.val_int = mp_int_compare_zero(&p1.val_big->rat);
+		q->accum.val_int = mp_int_compare_zero(&p1.val_big->ival);
 	} else if (is_smallint(&p1))
 		q->accum.val_int = p1.val_int < 0 ? -1 : p1.val_int > 0  ? 1 : 0;
 	else if (is_real(&p1))
@@ -341,7 +341,7 @@ static USE_RESULT pl_status fn_iso_negative_1(query *q)
 	q->accum.val_type = p1.val_type;
 
 	if (is_bigint(&p1)) {
-		mp_int_neg(&p1.val_big->rat, &q->accum_int);
+		mp_int_neg(&p1.val_big->ival, &q->tmp_ival);
 		SET_ACCUM();
 	} else if (is_smallint(&p1))
 		q->accum.val_int = -p1.val_int;
@@ -419,10 +419,10 @@ static USE_RESULT pl_status fn_iso_exp_1(query *q)
 	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_bigint(&p1)) {
-		if (mp_int_compare_zero(&p1.val_big->rat) <= 0)
+		if (mp_int_compare_zero(&p1.val_big->ival) <= 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_real = exp(mp_int_to_double(&p1.val_big->rat));
+		q->accum.val_real = exp(mp_int_to_double(&p1.val_big->ival));
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_smallint(&p1)) {
 		q->accum.val_real = exp((double)p1.val_int);
@@ -450,12 +450,12 @@ static USE_RESULT pl_status fn_iso_sqrt_1(query *q)
 	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_bigint(&p1)) {
-		if (mp_int_compare_zero(&p1.val_big->rat) < 0)
+		if (mp_int_compare_zero(&p1.val_big->ival) < 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
 		mpz_t tmp;
 		mp_int_init(&tmp);
-		mp_int_sqrt(&p1.val_big->rat, &tmp);
+		mp_int_sqrt(&p1.val_big->ival, &tmp);
 		q->accum.val_real = mp_int_to_double(&tmp);
 		q->accum.val_type = TYPE_REAL;
 		mp_int_clear(&tmp);
@@ -487,10 +487,10 @@ static USE_RESULT pl_status fn_iso_log_1(query *q)
 	CLEAR cell p1 = calc(q, p1_tmp);
 
 	if (is_bigint(&p1)) {
-		if (mp_int_compare_zero(&p1.val_big->rat) <= 0)
+		if (mp_int_compare_zero(&p1.val_big->ival) <= 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_real = log(mp_int_to_double(&p1.val_big->rat));
+		q->accum.val_real = log(mp_int_to_double(&p1.val_big->ival));
 		q->accum.val_type = TYPE_REAL;
 		return pl_success;
 	} else if (is_smallint(&p1)) {
@@ -1058,10 +1058,10 @@ static USE_RESULT pl_status fn_iso_pow_2(query *q)
 	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_smallint(&p2)) {
-		if ((mp_int_compare_zero(&p1.val_big->rat) == 0) && (p2.val_int < 0))
+		if ((mp_int_compare_zero(&p1.val_big->ival) == 0) && (p2.val_int < 0))
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_real = pow(mp_int_to_double(&p1.val_big->rat), (double)p2.val_int);
+		q->accum.val_real = pow(mp_int_to_double(&p1.val_big->ival), (double)p2.val_int);
 		q->accum.val_type = TYPE_REAL;
 		return pl_success;
 	}
@@ -1111,22 +1111,22 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2)) {
-		if (mp_int_compare_value(&p1.val_big->rat, 1) != 0) {
-			if (mp_int_compare_value(&p2.val_big->rat, 0) < 0)
+		if (mp_int_compare_value(&p1.val_big->ival, 1) != 0) {
+			if (mp_int_compare_value(&p2.val_big->ival, 0) < 0)
 				return throw_error(q, &p1, "type_error", "float");
 		}
 
-		if (mp_int_expt_full(&p1.val_big->rat, &p2.val_big->rat, &q->accum_int) == MP_RANGE)
+		if (mp_int_expt_full(&p1.val_big->ival, &p2.val_big->ival, &q->tmp_ival) == MP_RANGE)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
 		SET_ACCUM();
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
-		if (mp_int_compare_value(&p1.val_big->rat, 1) != 0) {
+		if (mp_int_compare_value(&p1.val_big->ival, 1) != 0) {
 			if (p2.val_int < 0)
 				return throw_error(q, &p1, "type_error", "float");
 		}
 
-		mp_int_expt(&p1.val_big->rat, p2.val_int, &q->accum_int);
+		mp_int_expt(&p1.val_big->ival, p2.val_int, &q->tmp_ival);
 		SET_ACCUM();
 	} else if (is_bigint(&p2) && is_smallint(&p1)) {
 		if ((p1.val_int != 1) && (p2.val_int < 0))
@@ -1135,7 +1135,7 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p1.val_int);
 
-		if (mp_int_expt_full(&tmp, &p2.val_big->rat, &q->accum_int) == MP_RANGE)
+		if (mp_int_expt_full(&tmp, &p2.val_big->ival, &q->tmp_ival) == MP_RANGE)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
 		mp_int_clear(&tmp);
@@ -1144,19 +1144,19 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 		if ((p1.val_int != 1) && (p2.val_int < 0))
 			return throw_error(q, &p1, "type_error", "float");
 
-		if (mp_int_expt_value(p1.val_int, p2.val_int, &q->accum_int) == MP_RANGE) {
+		if (mp_int_expt_value(p1.val_int, p2.val_int, &q->tmp_ival) == MP_RANGE) {
 			q->accum.val_int = pow(p1.val_int, p2.val_int);
 			q->accum.val_type = TYPE_INTEGER;
 			return pl_success;
 		}
 
-		if (mp_int_compare_value(&q->accum_int, INT32_MAX) > 0) {
+		if (mp_int_compare_value(&q->tmp_ival, INT32_MAX) > 0) {
 			SET_ACCUM();
 			return pl_success;
 		}
 
 		mp_small n;
-		mp_int_to_int(&q->accum_int, &n);
+		mp_int_to_int(&q->tmp_ival, &n);
 		q->accum.val_int = n;
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_smallint(&p1) && is_real(&p2)) {
@@ -1189,16 +1189,16 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2)) {
-		q->accum.val_real = mp_int_to_double(&p1.val_big->rat);
-		q->accum.val_real /= mp_int_to_double(&p2.val_big->rat);
+		q->accum.val_real = mp_int_to_double(&p1.val_big->ival);
+		q->accum.val_real /= mp_int_to_double(&p2.val_big->ival);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
-		q->accum.val_real = mp_int_to_double(&p1.val_big->rat);
+		q->accum.val_real = mp_int_to_double(&p1.val_big->ival);
 		q->accum.val_real /= p2.val_int;
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_bigint(&p2) && is_smallint(&p1)) {
 		q->accum.val_real = p1.val_int;
-		q->accum.val_real /= mp_int_to_double(&p2.val_big->rat);
+		q->accum.val_real /= mp_int_to_double(&p2.val_big->ival);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		if (p2.val_int == 0)
@@ -1245,7 +1245,7 @@ static USE_RESULT pl_status fn_iso_divint_2(query *q)
 	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_integer(&p1) && is_integer(&p2)) {
-		if (is_bigint(&p2) && mp_int_compare_zero(&p2.val_big->rat) == 0)
+		if (is_bigint(&p2) && mp_int_compare_zero(&p2.val_big->ival) == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		if (is_smallint(&p2) && get_smallint(&p2) == 0)
@@ -1272,23 +1272,23 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2)) {
-		mp_int_mod(&p1.val_big->rat, &p2.val_big->rat, &q->accum_int);
+		mp_int_mod(&p1.val_big->ival, &p2.val_big->ival, &q->tmp_ival);
 
-		if (mp_int_compare_zero(&p2.val_big->rat))
-			mp_int_neg(&q->accum_int, &q->accum_int);
+		if (mp_int_compare_zero(&p2.val_big->ival))
+			mp_int_neg(&q->tmp_ival, &q->tmp_ival);
 
-		if (mp_int_compare_zero(&p1.val_big->rat))
-			mp_int_neg(&q->accum_int, &q->accum_int);
+		if (mp_int_compare_zero(&p1.val_big->ival))
+			mp_int_neg(&q->tmp_ival, &q->tmp_ival);
 
 		SET_ACCUM();
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p2.val_int);
-		mp_int_mod(&p1.val_big->rat, &tmp, &q->accum_int);
+		mp_int_mod(&p1.val_big->ival, &tmp, &q->tmp_ival);
 		mp_int_clear(&tmp);
 
-		if (mp_int_compare_zero(&p2.val_big->rat))
-			mp_int_neg(&q->accum_int, &q->accum_int);
+		if (mp_int_compare_zero(&p2.val_big->ival))
+			mp_int_neg(&q->tmp_ival, &q->tmp_ival);
 
 		if (p1.val_int < 0)
 			q->accum.val_int *= -1;
@@ -1297,11 +1297,11 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 	} else if (is_bigint(&p2) && is_smallint(&p1)) {
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p1.val_int);
-		mp_int_mod(&tmp, &p2.val_big->rat, &q->accum_int);
+		mp_int_mod(&tmp, &p2.val_big->ival, &q->tmp_ival);
 		mp_int_clear(&tmp);
 
-		if (mp_int_compare_zero(&p1.val_big->rat))
-			mp_int_neg(&q->accum_int, &q->accum_int);
+		if (mp_int_compare_zero(&p1.val_big->ival))
+			mp_int_neg(&q->tmp_ival, &q->tmp_ival);
 
 		if (p2.val_int < 0)
 			q->accum.val_int *= -1;
@@ -1310,7 +1310,7 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 	} else if (is_smallint(&p1) && is_bigint(&p2)) {
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p1.val_int);
-		mp_int_mod(&tmp, &p2.val_big->rat, &q->accum_int);
+		mp_int_mod(&tmp, &p2.val_big->ival, &q->tmp_ival);
 		mp_int_clear(&tmp);
 		SET_ACCUM();
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
@@ -1346,24 +1346,24 @@ static USE_RESULT pl_status fn_iso_div_2(query *q)
 	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2)) {
-		mp_int_mod(&p1.val_big->rat, &p2.val_big->rat, &q->accum_int);
-		mp_int_sub(&p1.val_big->rat, &q->accum_int, &q->accum_int);
-		mp_int_div(&q->accum_int, &p2.val_big->rat, &q->accum_int, NULL);
+		mp_int_mod(&p1.val_big->ival, &p2.val_big->ival, &q->tmp_ival);
+		mp_int_sub(&p1.val_big->ival, &q->tmp_ival, &q->tmp_ival);
+		mp_int_div(&q->tmp_ival, &p2.val_big->ival, &q->tmp_ival, NULL);
 		SET_ACCUM();
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p2.val_int);
-		mp_int_mod(&p1.val_big->rat, &tmp, &q->accum_int);
-		mp_int_sub(&p1.val_big->rat, &q->accum_int, &q->accum_int);
-		mp_int_div(&q->accum_int, &tmp, &q->accum_int, NULL);
+		mp_int_mod(&p1.val_big->ival, &tmp, &q->tmp_ival);
+		mp_int_sub(&p1.val_big->ival, &q->tmp_ival, &q->tmp_ival);
+		mp_int_div(&q->tmp_ival, &tmp, &q->tmp_ival, NULL);
 		SET_ACCUM();
 		mp_int_clear(&tmp);
 	} else if (is_bigint(&p2) && is_smallint(&p1)) {
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p1.val_int);
-		mp_int_mod(&tmp, &p2.val_big->rat, &q->accum_int);
-		mp_int_sub(&tmp, &q->accum_int, &q->accum_int);
-		mp_int_div(&q->accum_int, &p2.val_big->rat, &q->accum_int, NULL);
+		mp_int_mod(&tmp, &p2.val_big->ival, &q->tmp_ival);
+		mp_int_sub(&tmp, &q->tmp_ival, &q->tmp_ival);
+		mp_int_div(&q->tmp_ival, &p2.val_big->ival, &q->tmp_ival, NULL);
 		mp_int_clear(&tmp);
 		SET_ACCUM();
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
@@ -1395,18 +1395,18 @@ static USE_RESULT pl_status fn_iso_rem_2(query *q)
 	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2)) {
-		mp_int_mod(&p1.val_big->rat, &p2.val_big->rat, &q->accum_int);
+		mp_int_mod(&p1.val_big->ival, &p2.val_big->ival, &q->tmp_ival);
 		SET_ACCUM();
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p2.val_int);
-		mp_int_mod(&p1.val_big->rat, &tmp, &q->accum_int);
+		mp_int_mod(&p1.val_big->ival, &tmp, &q->tmp_ival);
 		mp_int_clear(&tmp);
 		SET_ACCUM();
 	} else if (is_smallint(&p1) && is_bigint(&p2)) {
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p1.val_int);
-		mp_int_mod(&tmp, &p2.val_big->rat, &q->accum_int);
+		mp_int_mod(&tmp, &p2.val_big->ival, &q->tmp_ival);
 		mp_int_clear(&tmp);
 		SET_ACCUM();
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
@@ -1436,15 +1436,15 @@ static USE_RESULT pl_status fn_iso_max_2(query *q)
 
 	if (is_bigint(&p1)) {
 		if (is_bigint(&p2)) {
-			if (mp_int_compare(&p1.val_big->rat, &p2.val_big->rat) >= 0)
-				mp_int_copy(&p1.val_big->rat, &q->accum_int);
+			if (mp_int_compare(&p1.val_big->ival, &p2.val_big->ival) >= 0)
+				mp_int_copy(&p1.val_big->ival, &q->tmp_ival);
 			else
-				mp_int_copy(&p2.val_big->rat, &q->accum_int);
+				mp_int_copy(&p2.val_big->ival, &q->tmp_ival);
 		} else if (is_smallint(&p2)) {
-			if (mp_int_compare_value(&p1.val_big->rat, p2.val_int) >= 0)
-				mp_int_copy(&p1.val_big->rat, &q->accum_int);
+			if (mp_int_compare_value(&p1.val_big->ival, p2.val_int) >= 0)
+				mp_int_copy(&p1.val_big->ival, &q->tmp_ival);
 			else {
-				mp_int_set_value(&q->accum_int, p2.val_int);
+				mp_int_set_value(&q->tmp_ival, p2.val_int);
 			}
 		} else
 			return throw_error(q, &p2, "type_error", "integer");
@@ -1452,10 +1452,10 @@ static USE_RESULT pl_status fn_iso_max_2(query *q)
 		SET_ACCUM();
 	} else if (is_bigint(&p2)) {
 		if (is_smallint(&p1)) {
-			if (mp_int_compare_value(&p2.val_big->rat, p1.val_int) >= 0)
-				mp_int_copy(&p2.val_big->rat, &q->accum_int);
+			if (mp_int_compare_value(&p2.val_big->ival, p1.val_int) >= 0)
+				mp_int_copy(&p2.val_big->ival, &q->tmp_ival);
 			else {
-				mp_int_set_value(&q->accum_int, p1.val_int);
+				mp_int_set_value(&q->tmp_ival, p1.val_int);
 			}
 		} else
 			return throw_error(q, &p2, "type_error", "integer");
@@ -1508,15 +1508,15 @@ static USE_RESULT pl_status fn_iso_min_2(query *q)
 
 	if (is_bigint(&p1)) {
 		if (is_bigint(&p2)) {
-			if (mp_int_compare(&p1.val_big->rat, &p2.val_big->rat) <= 0)
-				mp_int_copy(&p1.val_big->rat, &q->accum_int);
+			if (mp_int_compare(&p1.val_big->ival, &p2.val_big->ival) <= 0)
+				mp_int_copy(&p1.val_big->ival, &q->tmp_ival);
 			else
-				mp_int_copy(&p2.val_big->rat, &q->accum_int);
+				mp_int_copy(&p2.val_big->ival, &q->tmp_ival);
 		} else if (is_smallint(&p2)) {
-			if (mp_int_compare_value(&p1.val_big->rat, p2.val_int) <= 0)
-				mp_int_copy(&p1.val_big->rat, &q->accum_int);
+			if (mp_int_compare_value(&p1.val_big->ival, p2.val_int) <= 0)
+				mp_int_copy(&p1.val_big->ival, &q->tmp_ival);
 			else {
-				mp_int_set_value(&q->accum_int, p2.val_int);
+				mp_int_set_value(&q->tmp_ival, p2.val_int);
 			}
 		} else
 			return throw_error(q, &p2, "type_error", "integer");
@@ -1524,10 +1524,10 @@ static USE_RESULT pl_status fn_iso_min_2(query *q)
 		SET_ACCUM();
 	} else if (is_bigint(&p2)) {
 		if (is_smallint(&p1)) {
-			if (mp_int_compare_value(&p2.val_big->rat, p1.val_int) <= 0)
-				mp_int_copy(&p2.val_big->rat, &q->accum_int);
+			if (mp_int_compare_value(&p2.val_big->ival, p1.val_int) <= 0)
+				mp_int_copy(&p2.val_big->ival, &q->tmp_ival);
 			else {
-				mp_int_set_value(&q->accum_int, p1.val_int);
+				mp_int_set_value(&q->tmp_ival, p1.val_int);
 			}
 		} else
 			return throw_error(q, &p2, "type_error", "integer");
@@ -1718,13 +1718,13 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 	}
 
 	if (is_bigint(p1) && is_bigint(p2))
-		return mp_int_compare(&p1->val_big->rat, &p2->val_big->rat);
+		return mp_int_compare(&p1->val_big->ival, &p2->val_big->ival);
 
 	if (is_bigint(p1) && is_smallint(p2))
-		return mp_int_compare_value(&p1->val_big->rat, p2->val_int);
+		return mp_int_compare_value(&p1->val_big->ival, p2->val_int);
 
 	if (is_bigint(p2) && is_smallint(p1))
-		return -mp_int_compare_value(&p2->val_big->rat, p1->val_int);
+		return -mp_int_compare_value(&p2->val_big->ival, p1->val_int);
 
 	if (is_smallint(p1)) {
 		if (is_smallint(p2)) {
@@ -1883,11 +1883,11 @@ static USE_RESULT pl_status fn_iso_neq_2(query *q)
 	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2))
-		return mp_int_compare(&p1.val_big->rat, &p2.val_big->rat) == 0;
+		return mp_int_compare(&p1.val_big->ival, &p2.val_big->ival) == 0;
 	else if (is_bigint(&p1) && is_smallint(&p2))
-		return mp_int_compare_value(&p1.val_big->rat, p2.val_int) == 0;
+		return mp_int_compare_value(&p1.val_big->ival, p2.val_int) == 0;
 	else if (is_bigint(&p2) && is_smallint(&p1))
-		return mp_int_compare_value(&p2.val_big->rat, p1.val_int) == 0;
+		return mp_int_compare_value(&p2.val_big->ival, p1.val_int) == 0;
 	else if (is_smallint(&p1) && is_smallint(&p2))
 		return p1.val_int == p2.val_int;
 	else if (is_smallint(&p1) && is_real(&p2))
@@ -1908,11 +1908,11 @@ static USE_RESULT pl_status fn_iso_nne_2(query *q)
 	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2))
-		return mp_int_compare(&p1.val_big->rat, &p2.val_big->rat) != 0;
+		return mp_int_compare(&p1.val_big->ival, &p2.val_big->ival) != 0;
 	else if (is_bigint(&p1) && is_smallint(&p2))
-		return mp_int_compare_value(&p1.val_big->rat, p2.val_int) != 0;
+		return mp_int_compare_value(&p1.val_big->ival, p2.val_int) != 0;
 	else if (is_bigint(&p2) && is_smallint(&p1))
-		return mp_int_compare_value(&p2.val_big->rat, p1.val_int) != 0;
+		return mp_int_compare_value(&p2.val_big->ival, p1.val_int) != 0;
 	else if (is_smallint(&p1) && is_smallint(&p2))
 		return p1.val_int != p2.val_int;
 	else if (is_smallint(&p1) && is_real(&p2))
@@ -1933,11 +1933,11 @@ static USE_RESULT pl_status fn_iso_nge_2(query *q)
 	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2))
-		return mp_int_compare(&p1.val_big->rat, &p2.val_big->rat) >= 0;
+		return mp_int_compare(&p1.val_big->ival, &p2.val_big->ival) >= 0;
 	else if (is_bigint(&p1) && is_smallint(&p2))
-		return mp_int_compare_value(&p1.val_big->rat, p2.val_int) >= 0;
+		return mp_int_compare_value(&p1.val_big->ival, p2.val_int) >= 0;
 	else if (is_bigint(&p2) && is_smallint(&p1))
-		return mp_int_compare_value(&p2.val_big->rat, p1.val_int) < 0;
+		return mp_int_compare_value(&p2.val_big->ival, p1.val_int) < 0;
 	else if (is_smallint(&p1) && is_smallint(&p2))
 		return p1.val_int >= p2.val_int;
 	else if (is_smallint(&p1) && is_real(&p2))
@@ -1958,11 +1958,11 @@ static USE_RESULT pl_status fn_iso_ngt_2(query *q)
 	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2))
-		return mp_int_compare(&p1.val_big->rat, &p2.val_big->rat) > 0;
+		return mp_int_compare(&p1.val_big->ival, &p2.val_big->ival) > 0;
 	else if (is_bigint(&p1) && is_smallint(&p2))
-		return mp_int_compare_value(&p1.val_big->rat, p2.val_int) > 0;
+		return mp_int_compare_value(&p1.val_big->ival, p2.val_int) > 0;
 	else if (is_bigint(&p2) && is_smallint(&p1))
-		return mp_int_compare_value(&p2.val_big->rat, p1.val_int) <= 0;
+		return mp_int_compare_value(&p2.val_big->ival, p1.val_int) <= 0;
 	else if (is_smallint(&p1) && is_smallint(&p2))
 		return p1.val_int > p2.val_int;
 	else if (is_smallint(&p1) && is_real(&p2))
@@ -1983,11 +1983,11 @@ static USE_RESULT pl_status fn_iso_nle_2(query *q)
 	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2))
-		return mp_int_compare(&p1.val_big->rat, &p2.val_big->rat) <= 0;
+		return mp_int_compare(&p1.val_big->ival, &p2.val_big->ival) <= 0;
 	else if (is_bigint(&p1) && is_smallint(&p2))
-		return mp_int_compare_value(&p1.val_big->rat, p2.val_int) <= 0;
+		return mp_int_compare_value(&p1.val_big->ival, p2.val_int) <= 0;
 	else if (is_bigint(&p2) && is_smallint(&p1))
-		return mp_int_compare_value(&p2.val_big->rat, p1.val_int) > 0;
+		return mp_int_compare_value(&p2.val_big->ival, p1.val_int) > 0;
 	else if (is_smallint(&p1) && is_smallint(&p2))
 		return p1.val_int <= p2.val_int;
 	else if (is_smallint(&p1) && is_real(&p2))
@@ -2008,11 +2008,11 @@ static USE_RESULT pl_status fn_iso_nlt_2(query *q)
 	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2))
-		return mp_int_compare(&p1.val_big->rat, &p2.val_big->rat) < 0;
+		return mp_int_compare(&p1.val_big->ival, &p2.val_big->ival) < 0;
 	else if (is_bigint(&p1) && is_smallint(&p2))
-		return mp_int_compare_value(&p1.val_big->rat, p2.val_int) < 0;
+		return mp_int_compare_value(&p1.val_big->ival, p2.val_int) < 0;
 	else if (is_bigint(&p2) && is_smallint(&p1))
-		return mp_int_compare_value(&p2.val_big->rat, p1.val_int) >= 0;
+		return mp_int_compare_value(&p2.val_big->ival, p1.val_int) >= 0;
 	else if (is_smallint(&p1) && is_smallint(&p2))
 		return p1.val_int < p2.val_int;
 	else if (is_smallint(&p1) && is_real(&p2))
@@ -2206,18 +2206,18 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 
 	if (is_integer(&p1) && is_integer(&p2)) {
 		if (is_bigint(&p1) && is_bigint(&p2)) {
-			mp_int_gcd(&p1.val_big->rat, &p2.val_big->rat, &q->accum_int);
+			mp_int_gcd(&p1.val_big->ival, &p2.val_big->ival, &q->tmp_ival);
 			SET_ACCUM();
 		} else if (is_bigint(&p1)) {
 			mpz_t tmp;
 			mp_int_init_value(&tmp, p2.val_int);
-			mp_int_gcd(&p1.val_big->rat, &tmp, &q->accum_int);
+			mp_int_gcd(&p1.val_big->ival, &tmp, &q->tmp_ival);
 			mp_int_clear(&tmp);
 			SET_ACCUM();
 		} else if (is_bigint(&p2)) {
 			mpz_t tmp;
 			mp_int_init_value(&tmp, p1.val_int);
-			mp_int_gcd(&p2.val_big->rat, &tmp, &q->accum_int);
+			mp_int_gcd(&p2.val_big->ival, &tmp, &q->tmp_ival);
 			mp_int_clear(&tmp);
 			SET_ACCUM();
 		} else {
