@@ -35,13 +35,21 @@ static void clr_accum(cell *p)
 
 #define CLEAR __attribute__((cleanup (clr_accum)))
 
-// Simple one for now...
+#if defined(__SIZEOF_INT128__)
 
-#define OVERFLOW(op,v1,v2)											\
-	(v1) >= INT32_MAX ||											\
-	(v1) <= INT32_MIN ||											\
-	(v2) >= INT32_MAX ||											\
-	(v2) <= INT32_MIN
+#define ON_OVERFLOW(op,v1,v2)										\
+	__int128_t tmp = (__int128_t)v2 op v2;						\
+	if ((tmp > INT64_MAX) || (tmp < INT64_MIN))
+
+#else
+
+#define ON_OVERFLOW(op,v1,v2)										\
+	if ((v1) >= INT32_MAX ||									\
+		(v1) <= INT32_MIN ||									\
+		(v2) >= INT32_MAX ||									\
+		(v2) <= INT32_MIN)
+
+#endif
 
 #define DO_OP2(op,op2,p1,p2) \
 	if (is_bigint(&p1)) { \
@@ -72,7 +80,7 @@ static void clr_accum(cell *p)
 			q->accum.flags = 0; \
 		} \
 	} else if (is_smallint(&p1) && is_smallint(&p2)) { \
-		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
+		ON_OVERFLOW(op, p1.val_int, p2.val_int) { \
 			mp_int_set_value(&q->tmp_ival, p1.val_int); \
 			mp_int_##op2##_value(&q->tmp_ival, p2.val_int, &q->tmp_ival); \
 			SET_ACCUM(); \
@@ -117,7 +125,7 @@ static void clr_accum(cell *p)
 			return throw_error(q, &p1, "type_error", "evaluable"); \
 		} \
 	} else if (is_smallint(&p1) && is_smallint(&p2)) { \
-		if (OVERFLOW(op, p1.val_int, p2.val_int)) { \
+		ON_OVERFLOW(op, p1.val_int, p2.val_int) { \
 			mp_int_set_value(&q->tmp_ival, p1.val_int); \
 			mp_int_##op2##_value(&q->tmp_ival, p2.val_int, &q->tmp_ival); \
 			SET_ACCUM(); \
