@@ -307,10 +307,11 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 			dst += mp_int_string_len(&c->val_big->ival, radix) - 1;
 		else {
 			size_t len = mp_int_string_len(&c->val_big->ival, radix) -1;
-			mp_int_to_string(&c->val_big->ival, radix, dst, dstlen);
-			dst += len;
+			mp_int_to_string(&c->val_big->ival, radix, dst, len+1);
+			dst += strlen(dst);
 		}
 
+		if (dstlen) *dst = 0;
 		return dst - save_dst;
 	}
 
@@ -489,10 +490,11 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			dst += mp_int_string_len(&c->val_big->ival, radix) - 1;
 		else {
 			size_t len = mp_int_string_len(&c->val_big->ival, radix) - 1;
-			mp_int_to_string(&c->val_big->ival, radix, dst, dstlen);
-			dst += len;
+			mp_int_to_string(&c->val_big->ival, radix, dst, len+1);
+			dst += strlen(dst);
 		}
 
+		if (dstlen) *dst = 0;
 		return dst - save_dst;
 	}
 
