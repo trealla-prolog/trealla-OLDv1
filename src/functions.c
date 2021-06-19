@@ -1214,6 +1214,9 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 		q->accum.val_real = p1.val_int;
 		q->accum.val_real /= mp_int_to_double(&p2.val_big->ival);
 		q->accum.val_type = TYPE_REAL;
+	} else if (is_bigint(&p2) && is_real(&p1)) {
+		q->accum.val_real = p1.val_real / mp_int_to_double(&p2.val_big->ival);
+		q->accum.val_type = TYPE_REAL;
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		if (p2.val_int == 0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
