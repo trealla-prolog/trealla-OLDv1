@@ -515,7 +515,6 @@ static USE_RESULT pl_status fn_iso_log_1(query *q)
 			return throw_error(q, &p1, "evaluation_error", "float_overflow");
 
 		q->accum.val_type = TYPE_REAL;
-		return pl_success;
 	} else if (is_smallint(&p1)) {
 		if (p1.val_int <= 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
