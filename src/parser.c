@@ -1837,6 +1837,7 @@ static bool get_token(parser *p, int last_op)
 	*dst = '\0';
 	bool neg = false;
 	p->v.val_type = TYPE_LITERAL;
+	p->v.flags = 0;
 	p->quote_char = 0;
 	p->string = p->is_quoted = p->is_variable = p->is_op = false;
 
@@ -2494,11 +2495,12 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		c->priority = priority;
 		bool found = false;
 
-		if (p->v.val_type == TYPE_INTEGER) {
-			set_smallint(c, get_smallint(&p->v));
+		if (is_bigint(&p->v)) {
+			c->val_big = p->v.val_big;
 			c->flags = p->v.flags;
-		}
-		else if (p->v.val_type == TYPE_REAL) {
+		} else if (is_smallint(&p->v)) {
+			set_smallint(c, get_smallint(&p->v));
+		} else if (p->v.val_type == TYPE_REAL) {
 			set_real(c, get_real(&p->v));
 		} else if ((!p->is_quoted || func || p->is_op || p->is_variable ||
 			(get_builtin(p->m->pl, p->token, 0, &found), found) ||
