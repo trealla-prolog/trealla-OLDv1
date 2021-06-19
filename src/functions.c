@@ -1124,7 +1124,7 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 				return throw_error(q, &p1, "type_error", "float");
 		}
 
-		mp_int_expt(&p1.val_big->rat, p1.val_int, &q->accum_int);
+		mp_int_expt(&p1.val_big->rat, p2.val_int, &q->accum_int);
 		SET_ACCUM();
 	} else if (is_bigint(&p2) && is_smallint(&p1)) {
 		if ((p1.val_int != 1) && (p2.val_int < 0))
