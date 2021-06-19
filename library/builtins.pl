@@ -589,12 +589,13 @@ plus(_,_,_) :-
 
 succ(X,S) :- nonvar(X), Y=1, nonvar(Y),
 	'$mustbe_integer'(X), '$mustbe_integer'(Y), !,
+	(X >= 0 -> true ; throw(error(domain_error(not_less_than_zero, X), succ/2))),
 	S is X + Y.
-succ(X,S) :- nonvar(X), Y=1, var(Y), nonvar(S),
-	'$mustbe_integer'(X), '$mustbe_integer'(S), !,
-	Y is S - X.
 succ(X,S) :- var(X), Y=1, nonvar(Y), nonvar(S),
 	'$mustbe_integer'(S), '$mustbe_integer'(Y), !,
+	(S >= 0 -> true ; throw(error(domain_error(not_less_than_zero, S), succ/2))),
+	!,
+	S > 0,
 	X is S - Y.
 succ(_,_) :-
 	throw(error(instantiation_error, succ/2)).
