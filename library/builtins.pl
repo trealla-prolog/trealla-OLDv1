@@ -574,3 +574,15 @@ atom_list(Atom, _, [Atom]).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+plus(X,Y,S) :- nonvar(X), nonvar(Y),
+	'$mustbe_integer'(X), '$mustbe_integer'(Y), !,
+	S is X + Y.
+plus(X,Y,S) :- nonvar(X), var(Y), nonvar(S),
+	'$mustbe_integer'(X), '$mustbe_integer'(S), !,
+  Y is S - X.
+plus(X,Y,S) :- var(X), nonvar(Y), nonvar(S),
+	'$mustbe_integer'(S), '$mustbe_integer'(Y), !,
+  X is S - Y.
+plus(_,_,_) :-
+	throw(error(instantiation_error, plus/3)).

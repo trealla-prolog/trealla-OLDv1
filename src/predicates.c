@@ -7908,6 +7908,16 @@ static USE_RESULT pl_status fn_sys_mustbe_atom_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_sys_mustbe_integer_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+
+	if (!is_integer(p1))
+		return throw_error(q, p1, "type_error", "integer");
+
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_is_stream_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -11454,6 +11464,7 @@ static const struct builtins g_predicates_other[] =
 	{"$mustbe_list_or_var", 1, fn_sys_mustbe_list_or_var_1, "?list"},
 	{"$mustbe_callable", 1, fn_sys_mustbe_callable_1, ":term"},
 	{"$mustbe_atom", 1, fn_sys_mustbe_atom_1, "+atom"},
+	{"$mustbe_integer", 1, fn_sys_mustbe_integer_1, "+integer"},
 	{"list", 1, fn_is_list_1, "+term"},
 	{"is_stream", 1, fn_is_stream_1, "+term"},
 	//{"forall", 2, fn_forall_2, "+term,+term"},
