@@ -2491,13 +2491,13 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		cell *c = make_cell(p);
 		c->nbr_cells = 1;
 		c->val_type = p->v.val_type;
+		c->flags = p->v.flags;
 		SET_OP(c,specifier);
 		c->priority = priority;
 		bool found = false;
 
 		if (is_bigint(&p->v)) {
 			c->val_big = p->v.val_big;
-			c->flags = p->v.flags;
 		} else if (is_smallint(&p->v)) {
 			set_smallint(c, get_smallint(&p->v));
 		} else if (p->v.val_type == TYPE_REAL) {
