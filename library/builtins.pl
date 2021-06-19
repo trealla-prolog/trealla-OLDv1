@@ -580,9 +580,21 @@ plus(X,Y,S) :- nonvar(X), nonvar(Y),
 	S is X + Y.
 plus(X,Y,S) :- nonvar(X), var(Y), nonvar(S),
 	'$mustbe_integer'(X), '$mustbe_integer'(S), !,
-  Y is S - X.
+	Y is S - X.
 plus(X,Y,S) :- var(X), nonvar(Y), nonvar(S),
 	'$mustbe_integer'(S), '$mustbe_integer'(Y), !,
-  X is S - Y.
+	X is S - Y.
 plus(_,_,_) :-
 	throw(error(instantiation_error, plus/3)).
+
+succ(X,S) :- nonvar(X), Y=1, nonvar(Y),
+	'$mustbe_integer'(X), '$mustbe_integer'(Y), !,
+	S is X + Y.
+succ(X,S) :- nonvar(X), Y=1, var(Y), nonvar(S),
+	'$mustbe_integer'(X), '$mustbe_integer'(S), !,
+	Y is S - X.
+succ(X,S) :- var(X), Y=1, nonvar(Y), nonvar(S),
+	'$mustbe_integer'(S), '$mustbe_integer'(Y), !,
+	X is S - Y.
+succ(_,_) :-
+	throw(error(instantiation_error, succ/2)).
