@@ -1158,7 +1158,7 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 			return pl_success;
 		}
 
-		if (mp_int_compare_value(&q->tmp_ival, INT32_MAX) > 0) {
+		if (mp_int_compare_value(&q->tmp_ival, INT64_MAX) > 0) {
 			SET_ACCUM();
 			return pl_success;
 		}
