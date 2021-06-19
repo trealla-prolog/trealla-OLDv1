@@ -818,7 +818,6 @@ static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2
 	if (p1->val_off != p2->val_off)
 		return false;
 
-	//cell *orig_p1 = p1, *orig_p2 = p2;
 	unsigned arity = p1->arity;
 	p1++; p2++;
 
@@ -827,9 +826,6 @@ static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2
 		idx_t c1_ctx = q->latest_ctx;
 		cell *c2 = deref(q, p2, p2_ctx);
 		idx_t c2_ctx = q->latest_ctx;
-
-		//if ((c1 == orig_p1) && (c2 == orig_p2))
-		//	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 
 		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
 			return false;
