@@ -29,7 +29,8 @@ OBJECTS = tpl.o src/history.o src/functions.o \
 OBJECTS +=  library/builtins.o library/lists.o library/apply.o \
 	library/http.o library/atts.o library/error.o library/dcgs.o \
 	library/format.o library/charsio.o library/freeze.o \
-	library/ordsets.o library/assoc.o library/dict.o library/dif.o
+	library/ordsets.o library/assoc.o library/dict.o library/dif.o \
+	library/ugraphs.o
 
 OBJECTS += src/imath/imath.o
 
