@@ -1680,9 +1680,9 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	} else {
 		set_smallint(&p->v, val);
 		if (neg) p->v.val_int = -p->v.val_int;
-		mp_int_clear(&v2);
 	}
 
+	mp_int_clear(&v2);
 	int ch = peek_char_utf8(s);
 
 	if (iswalpha(ch)) {
@@ -1916,7 +1916,7 @@ static bool get_token(parser *p, int last_op)
 	if ((*src != '-') && parse_number(p, &src, neg)) {
 		if ((size_t)(src-tmpptr) >= p->token_size) {
 			size_t offset = dst - p->token;
-			p->token = realloc(p->token, p->token_size*=2);
+			p->token = realloc(p->token, p->token_size = (src-tmpptr)+1);
 			ensure(p->token);
 			dst = p->token+offset;
 		}
