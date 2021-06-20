@@ -6,12 +6,129 @@
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "iso_bagof_3_10",
-        "uid" : "58b51b4aeaa6f17e",
+        "uid" : "8cd4d5bc3754372b",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1623031536000,
-          "stop" : 1623031536000,
+          "start" : 1624163359000,
+          "stop" : 1624163359000,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "lgt_unbounded_and_03",
+        "uid" : "538a428c0a03b97b",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "start" : 1624163566000,
+          "stop" : 1624163566000,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "lgt_unbounded_xor_01",
+        "uid" : "7a21c89ec227e035",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "start" : 1624163566000,
+          "stop" : 1624163566000,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "lgt_unbounded_and_02",
+        "uid" : "4865ce19d05fdb0a",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "start" : 1624163566000,
+          "stop" : 1624163566000,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "lgt_unbounded_xor_02",
+        "uid" : "ef634309665ec4e7",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "start" : 1624163566000,
+          "stop" : 1624163566000,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "lgt_unbounded_and_01",
+        "uid" : "5ef5e901570fd404",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "start" : 1624163566000,
+          "stop" : 1624163566000,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "lgt_unbounded_or_03",
+        "uid" : "823204c3e606b770",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "start" : 1624163566000,
+          "stop" : 1624163566000,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "lgt_unbounded_or_02",
+        "uid" : "72ef8c0498c439b1",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "start" : 1624163566000,
+          "stop" : 1624163566000,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "lgt_unbounded_xor_03",
+        "uid" : "d0f4dbaf7c6124a2",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "start" : 1624163566000,
+          "stop" : 1624163566000,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "lgt_unbounded_or_01",
+        "uid" : "d8549a32730c39ee",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "start" : 1624163566000,
+          "stop" : 1624163566000,
           "duration" : 0
         },
         "flaky" : false,
@@ -23,12 +140,12 @@
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "iso_setof_3_12",
-        "uid" : "bf883c86795bb8f5",
+        "uid" : "eafdfff41da8dd87",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1623031680000,
-          "stop" : 1623031680000,
+          "start" : 1624163510000,
+          "stop" : 1624163510000,
           "duration" : 0
         },
         "flaky" : false,

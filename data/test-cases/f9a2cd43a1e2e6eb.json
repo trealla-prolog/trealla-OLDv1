@@ -1,0 +1,49 @@
+{
+  "uid" : "f9a2cd43a1e2e6eb",
+  "name" : "sics_bitwise_or_2_07",
+  "historyId" : "functions/bitwise_or_2/tests.lgt::tests:tests#sics_bitwise_or_2_07",
+  "time" : {
+    "start" : 1624163229000,
+    "stop" : 1624163229000,
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/bitwise_or_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "f9a2cd43a1e2e6eb.json",
+  "parameterValues" : [ ]
+}
