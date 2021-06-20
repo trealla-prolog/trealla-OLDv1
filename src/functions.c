@@ -168,6 +168,7 @@ static double MP_INT_TO_DOUBLE(mpz_t *v)
 
 static mp_result mp_int_set_double(mp_int a, double b)
 {
+	mp_result err;
 	uint64_t frac;
 	int exp;
 	union {
@@ -186,14 +187,11 @@ static mp_result mp_int_set_double(mp_int a, double b)
 	exp -= 1023 + 52;
 	mp_int_set_uvalue(a, frac);
 
-	if (exp < 0)
-		mp_int_div_pow2(a, -exp, a, NULL);
-	else
-		mp_int_mul_pow2(a, exp, a);
+	err = exp < 0 ? mp_int_div_pow2(a, -exp, a, NULL) : mp_int_mul_pow2(a, exp, a);
+	if (err != MP_OK) return err;
 
-	if (((cast.bits >> 63) != 0uLL) && !mp_int_compare_zero(a)) {
+	if (((cast.bits >> 63) != 0uLL) && !mp_int_compare_zero(a))
 		a->sign = MP_NEG;
-	}
 
 	return MP_OK;
 }
