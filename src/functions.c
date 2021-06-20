@@ -141,7 +141,6 @@ static void clr_accum(cell *p)
 static mp_result mp_int_to_double(mp_int z, double *out) {
   assert(z != NULL);
 
-  /* Make sure the value is representable as a small integer */
   mp_sign sz = MP_SIGN(z);
   mp_usmall uz = MP_USED(z);
   mp_digit *dz = MP_DIGITS(z) + uz - 1;
@@ -1183,9 +1182,12 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 			return pl_success;
 		}
 
-		mp_small n;
-		mp_int_to_int(&q->tmp_ival, &n);
-		q->accum.val_int = n;
+		if (mp_int_compare_value(&q->tmp_ival, INT64_MIN) < 0) {
+			SET_ACCUM();
+			return pl_success;
+		}
+
+		q->accum.val_int = pow(p1.val_int, p2.val_int);
 		q->accum.val_type = TYPE_INTEGER;
 	} else if (is_smallint(&p1) && is_real(&p2)) {
 		q->accum.val_real = pow(p1.val_int, p2.val_real);
