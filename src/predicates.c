@@ -978,11 +978,12 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 
 	// Verify the list
 
+	int cnt = 0;
+
 	if (!is_variable(p2)) {
 		cell *save_p2 = p2;
 		idx_t save_p2_ctx = p2_ctx;
 		LIST_HANDLER(p2);
-		int cnt = 0;
 
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
@@ -1011,7 +1012,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
-		char tmpbuf[256];
+		char *tmpbuf = malloc(cnt+1);
 		char *dst = tmpbuf;
 		*dst = '\0';
 		LIST_HANDLER(p2);
@@ -1077,21 +1078,37 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 				return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
 			}
 		} else {
-			int_t val = strtoll(src, &end, 10);
+			mpz_t tmpz;
+			mp_int_init(&tmpz);
 
-			if (*end) {
+			if (mp_int_read_string(&tmpz, 10, tmpbuf) == MP_TRUNC) {
 				double f = strtod(src, &end);
 
 				if (*end) {
 					make_smalln(&tmp, end, 1);
+					free(tmpbuf);
 					return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
 				}
 
 				make_real(&tmp, f);
-			} else
-				make_int(&tmp, val);
+			} else {
+				mp_small val;
+
+				if (mp_int_to_int(&tmpz, &val) == MP_RANGE) {
+					tmp.val_type = TYPE_INTEGER;							\
+					tmp.flags = FLAG_MANAGED;								\
+					tmp.val_big = malloc(sizeof(bigint));					\
+					tmp.val_big->refcnt = 0;								\
+					mp_int_init_copy(&tmp.val_big->ival, &tmpz);			\
+				} else {
+					make_int(&tmp, val);
+				}
+			}
+
+			mp_int_clear(&tmpz);
 		}
 
+		free(tmpbuf);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
