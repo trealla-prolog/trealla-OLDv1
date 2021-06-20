@@ -98,6 +98,9 @@ On *BSD* systems use *gmake* to build and do
 
 to get the *xxd* utility.
 
+For unbounded arithmetic uses the https://github.com/creachadair/imath
+library, which is partially included in the source.
+
 
 Usage
 =====
