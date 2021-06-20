@@ -830,6 +830,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 				if (*end) {
 					make_smalln(&tmp, end, 1);
 					free(tmpbuf);
+					mp_int_clear(&tmpz);
 					return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
 				}
 
@@ -838,11 +839,12 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 				mp_small val;
 
 				if (mp_int_to_int(&tmpz, &val) == MP_RANGE) {
-					tmp.val_type = TYPE_INTEGER;							\
-					tmp.flags = FLAG_MANAGED;								\
-					tmp.val_big = malloc(sizeof(bigint));					\
-					tmp.val_big->refcnt = 0;								\
-					mp_int_init_copy(&tmp.val_big->ival, &tmpz);			\
+					tmp.nbr_cells = 1;
+					tmp.val_type = TYPE_INTEGER;
+					tmp.flags = FLAG_MANAGED;
+					tmp.val_big = malloc(sizeof(bigint));
+					tmp.val_big->refcnt = 0;
+					mp_int_init_copy(&tmp.val_big->ival, &tmpz);
 				} else {
 					make_int(&tmp, val);
 				}
@@ -1087,6 +1089,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 				if (*end) {
 					make_smalln(&tmp, end, 1);
 					free(tmpbuf);
+					mp_int_clear(&tmpz);
 					return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
 				}
 
@@ -1095,11 +1098,12 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 				mp_small val;
 
 				if (mp_int_to_int(&tmpz, &val) == MP_RANGE) {
-					tmp.val_type = TYPE_INTEGER;							\
-					tmp.flags = FLAG_MANAGED;								\
-					tmp.val_big = malloc(sizeof(bigint));					\
-					tmp.val_big->refcnt = 0;								\
-					mp_int_init_copy(&tmp.val_big->ival, &tmpz);			\
+					tmp.nbr_cells = 1;
+					tmp.val_type = TYPE_INTEGER;
+					tmp.flags = FLAG_MANAGED;
+					tmp.val_big = malloc(sizeof(bigint));
+					tmp.val_big->refcnt = 0;
+					mp_int_init_copy(&tmp.val_big->ival, &tmpz);
 				} else {
 					make_int(&tmp, val);
 				}
