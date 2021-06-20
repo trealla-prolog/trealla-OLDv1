@@ -454,18 +454,18 @@ static USE_RESULT pl_status fn_iso_exp_1(query *q)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
 		q->accum.val_real = exp(MP_INT_TO_DOUBLE(&p1.val_big->ival));
+		q->accum.val_type = TYPE_REAL;
 
 		if (isinf(q->accum.val_real))
-			return throw_error(q, &p1, "evaluation_error", "float_overflow");
+			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
 
-		q->accum.val_type = TYPE_REAL;
 	} else if (is_smallint(&p1)) {
 		q->accum.val_real = exp((double)p1.val_int);
+		q->accum.val_type = TYPE_REAL;
 
 		if (isinf(q->accum.val_real))
-			return throw_error(q, &p1, "evaluation_error", "float_overflow");
+			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
 
-		q->accum.val_type = TYPE_REAL;
 	} else if (is_real(&p1)) {
 		q->accum.val_real = exp(p1.val_real);
 		q->accum.val_type = TYPE_REAL;
@@ -488,16 +488,11 @@ static USE_RESULT pl_status fn_iso_sqrt_1(query *q)
 		if (mp_int_compare_zero(&p1.val_big->ival) < 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		mpz_t tmp;
-		mp_int_init(&tmp);
-		mp_int_sqrt(&p1.val_big->ival, &tmp);
-		q->accum.val_real = MP_INT_TO_DOUBLE(&tmp);
+		q->accum.val_real = sqrt(MP_INT_TO_DOUBLE(&p1.val_big->ival));
+		q->accum.val_type = TYPE_REAL;
 
 		if (isinf(q->accum.val_real))
-			return throw_error(q, &p1, "evaluation_error", "float_overflow");
-
-		q->accum.val_type = TYPE_REAL;
-		mp_int_clear(&tmp);
+			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
 	} else if (is_smallint(&p1)) {
 		if (p1.val_int < 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
@@ -530,11 +525,11 @@ static USE_RESULT pl_status fn_iso_log_1(query *q)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
 		q->accum.val_real = log(MP_INT_TO_DOUBLE(&p1.val_big->ival));
+		q->accum.val_type = TYPE_REAL;
 
 		if (isinf(q->accum.val_real))
-			return throw_error(q, &p1, "evaluation_error", "float_overflow");
+			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
 
-		q->accum.val_type = TYPE_REAL;
 	} else if (is_smallint(&p1)) {
 		if (p1.val_int <= 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
@@ -911,10 +906,10 @@ static USE_RESULT pl_status fn_sinh_1(query *q)
 	}
 
 	if (is_real(&q->accum) && isinf(q->accum.val_real))
-		return throw_error(q, &p1, "evaluation_error", "float_overflow");
+		return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
 
 	if (is_real(&q->accum) && isnan(q->accum.val_real))
-		return throw_error(q, &p1, "evaluation_error", "undefined");
+		return throw_error(q, &q->accum, "evaluation_error", "undefined");
 
 	return pl_success;
 }
@@ -938,10 +933,10 @@ static USE_RESULT pl_status fn_cosh_1(query *q)
 	}
 
 	if (is_real(&q->accum) && isinf(q->accum.val_real))
-		return throw_error(q, &p1, "evaluation_error", "float_overflow");
+		return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
 
 	if (is_real(&q->accum) && isnan(q->accum.val_real))
-		return throw_error(q, &p1, "evaluation_error", "undefined");
+		return throw_error(q, &q->accum, "evaluation_error", "undefined");
 
 	return pl_success;
 }
@@ -965,10 +960,10 @@ static USE_RESULT pl_status fn_tanh_1(query *q)
 	}
 
 	if (is_real(&q->accum) && isinf(q->accum.val_real))
-		return throw_error(q, &p1, "evaluation_error", "float_overflow");
+		return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
 
 	if (is_real(&q->accum) && isnan(q->accum.val_real))
-		return throw_error(q, &p1, "evaluation_error", "undefined");
+		return throw_error(q, &q->accum, "evaluation_error", "undefined");
 
 	return pl_success;
 }
