@@ -751,7 +751,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
-		char tmpbuf[256];
+		char *tmpbuf = malloc(cnt+1);
 		char *dst = tmpbuf;
 		*dst = '\0';
 		LIST_HANDLER(p2);
@@ -760,8 +760,10 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 			cell *head = LIST_HEAD(p2);
 			head = deref(q, head, p2_ctx);
 
-			if (!is_atom(head))
+			if (!is_atom(head)) {
+				free(tmpbuf);
 				return throw_error(q, head, "type_error", "atom");
+			}
 
 			const char *src = GET_STR(head);
 			int ch = *src;
@@ -772,8 +774,10 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 			p2_ctx = q->latest_ctx;
 		}
 
-		if (!is_nil(p2))
+		if (!is_nil(p2)) {
+			free(tmpbuf);
 			return throw_error(q, p2, "type_error", "list");
+		}
 
 		*dst = '\0';
 		cell tmp;
@@ -793,6 +797,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 
 			if (*end) {
 				make_smalln(&tmp, end, 1);
+				free(tmpbuf);
 				return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
 			}
 		} else if ((src[0] == '0') && (src[1] == 'o')) {
@@ -802,6 +807,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 
 			if (*end) {
 				make_smalln(&tmp, end, 1);
+				free(tmpbuf);
 				return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
 			}
 		} else if ((src[0] == '0') && (src[1] == 'b')) {
@@ -811,32 +817,51 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 
 			if (*end) {
 				make_smalln(&tmp, end, 1);
+				free(tmpbuf);
 				return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
 			}
 		} else {
-			int_t val = strtoll(src, &end, 10);
+			mpz_t tmpz;
+			mp_int_init(&tmpz);
 
-			if (*end) {
+			if (mp_int_read_string(&tmpz, 10, tmpbuf) == MP_TRUNC) {
 				double f = strtod(src, &end);
 
 				if (*end) {
 					make_smalln(&tmp, end, 1);
+					free(tmpbuf);
 					return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
 				}
 
 				make_real(&tmp, f);
-			} else
-				make_int(&tmp, val);
+			} else {
+				mp_small val;
+
+				if (mp_int_to_int(&tmpz, &val) == MP_RANGE) {
+					tmp.val_type = TYPE_INTEGER;							\
+					tmp.flags = FLAG_MANAGED;								\
+					tmp.val_big = malloc(sizeof(bigint));					\
+					tmp.val_big->refcnt = 0;								\
+					mp_int_init_copy(&tmp.val_big->ival, &tmpz);			\
+				} else {
+					make_int(&tmp, val);
+				}
+			}
+
+			mp_int_clear(&tmpz);
 		}
 
+		free(tmpbuf);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	char *tmpbuf = malloc(cnt+1);
-	print_term_to_buf(q, tmpbuf, sizeof(tmpbuf), p1, p1_ctx, 1, 0, 0);
+	ssize_t len = print_term_to_buf(q, NULL, 0, p1, p1_ctx, 1, 0, 0);
+	char *dst = malloc(len+10);
+	may_ptr_error(dst);
+	print_term_to_buf(q, dst, len, p1, p1_ctx, 1, 0, 0);
 	cell tmp;
-	may_error(make_string(&tmp, tmpbuf));
-	free(tmpbuf);
+	may_error(make_string(&tmp, dst));
+	free(dst);
 	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
@@ -1070,9 +1095,11 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	char tmpbuf[256];
-	print_term_to_buf(q, tmpbuf, sizeof(tmpbuf), p1, p1_ctx, 1, 0, 0);
-	const char *src = tmpbuf;
+	ssize_t len = print_term_to_buf(q, NULL, 0, p1, p1_ctx, 1, 0, 0);
+	char *dst = malloc(len+10);
+	may_ptr_error(dst);
+	print_term_to_buf(q, dst, len, p1, p1_ctx, 1, 0, 0);
+	const char *src = dst;
 	cell tmp;
 	make_int(&tmp, *src);
 	allocate_list(q, &tmp);
@@ -1084,6 +1111,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 
 	cell *l = end_list(q);
 	may_ptr_error(l);
+	free(dst);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
