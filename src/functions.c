@@ -1703,10 +1703,7 @@ static USE_RESULT pl_status fn_iso_shl_2(query *q)
 	if (is_bigint(&p1) && is_smallint(&p2)) {
 		int n = p2.val_int;
 		mp_int_copy(&p1.val_big->ival, &q->tmp_ival);
-
-		while (n-- > 0)
-			mp_int_mul_value(&q->tmp_ival, 2, &q->tmp_ival);
-
+		mp_int_mul_pow2(&q->tmp_ival, n, &q->tmp_ival);
 		SET_ACCUM();
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		q->accum.val_int = p1.val_int << p2.val_int;
@@ -1733,10 +1730,7 @@ static USE_RESULT pl_status fn_iso_shr_2(query *q)
 	if (is_bigint(&p1) && is_smallint(&p2)) {
 		int n = p2.val_int;
 		mp_int_copy(&p1.val_big->ival, &q->tmp_ival);
-
-		while (n-- > 0)
-			mp_int_div_value(&q->tmp_ival, 2, &q->tmp_ival, NULL);
-
+		mp_int_div_pow2(&q->tmp_ival, n, &q->tmp_ival, NULL);
 		SET_ACCUM();
 	} if (is_smallint(&p1) && is_smallint(&p2)) {
 		q->accum.val_int = p1.val_int >> p2.val_int;
