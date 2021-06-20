@@ -51,7 +51,7 @@ test:
 	./tests/run.sh
 
 clean:
-	rm -f tpl src/*.o src/imath.o library/*.o library/*.c *.o gmon.* vgcore.* *.core core core.* faultinject.*
+	rm -f tpl src/*.o src/imath/*.o library/*.o library/*.c *.o gmon.* vgcore.* *.core core core.* faultinject.*
 
 # from [gcc|clang] -MM src/*.c src/imath/*.c
 
