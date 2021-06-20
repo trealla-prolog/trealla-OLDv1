@@ -5,13 +5,11 @@ A compact, efficient Prolog interpreter with
 [ISO compliant](https://infradig.github.io/trealla/) aspirations.
 
 	Integers are unbounded
-	Rationals are a native type
-	Reals are double
 	Atoms are UTF-8 of unlimited length
 	The default double-quoted representation is *chars* list
-	Full-term just-in-time indexing
-	DCG via library(dcgs)
-	format_//2 via library(format)
+	Full-term indexing
+	DCGs
+	format_//2
 	Attributed variables with SICStus interface (in-progress)
 	Logtalk compatible (in-progress)
 	REPL with history
