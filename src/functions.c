@@ -60,7 +60,7 @@ static void clr_accum(cell *p)
 			mp_int_##op2##_value(&p1.val_big->ival, p2.val_int, &q->tmp_ival); \
 			SET_ACCUM(); \
 		} else if (is_real(&p2)) { \
-			double d = mp_int_to_double(&p1.val_big->ival); \
+			double d = MP_INT_TO_DOUBLE(&p1.val_big->ival); \
 			q->accum.val_real = d op p2.val_real; \
 			q->accum.val_type = TYPE_REAL; \
 			q->accum.flags = 0; \
@@ -73,7 +73,7 @@ static void clr_accum(cell *p)
 			mp_int_clear(&tmp); \
 			SET_ACCUM(); \
 		} else if (is_real(&p1)) { \
-			double d = mp_int_to_double(&p2.val_big->ival); \
+			double d = MP_INT_TO_DOUBLE(&p2.val_big->ival); \
 			q->accum.val_real = p1.val_real op d; \
 			q->accum.val_type = TYPE_REAL; \
 			q->accum.flags = 0; \
@@ -138,13 +138,32 @@ static void clr_accum(cell *p)
 		return throw_error(q, &p1, "type_error", "evaluable"); \
 	}
 
-static double mp_int_to_double(mpz_t *v)
+static mp_result mp_int_to_double(mp_int z, double *out) {
+  assert(z != NULL);
+
+  /* Make sure the value is representable as a small integer */
+  mp_sign sz = MP_SIGN(z);
+  mp_usmall uz = MP_USED(z);
+  mp_digit *dz = MP_DIGITS(z) + uz - 1;
+  double uv = 0.0;
+  while (uz > 0) {
+	int n = MP_DIGIT_BIT / 2;
+    while (n-- > 0) uv *= 2;
+	n = MP_DIGIT_BIT / 2;
+    while (n-- > 0) uv *= 2;
+    uv += *dz--;
+    --uz;
+  }
+
+  if (out) *out = ((sz == MP_NEG) ? -uv : uv);
+
+  return MP_OK;
+}
+
+static double MP_INT_TO_DOUBLE(mpz_t *v)
 {
-	size_t len = mp_int_string_len(v, 10) - 1;
-	char *buf = malloc(len+1);
-	mp_int_to_string(v, 10, buf, len+1);
-	double d = strtod(buf, NULL);
-	free(buf);
+	double d;
+	mp_int_to_double(v, &d);
 	return d;
 }
 
@@ -244,10 +263,11 @@ static USE_RESULT pl_status fn_iso_float_1(query *q)
 		}
 
 		if (is_bigint(&p1)) {
-			q->accum.val_real = mp_int_to_double(&p1.val_big->ival);
+			q->accum.val_real = MP_INT_TO_DOUBLE(&p1.val_big->ival);
 
-			if (isinf(q->accum.val_real))
-				return throw_error(q, &p1, "evaluation_error", "float_overflow");
+			if (isinf(q->accum.val_real)) {
+				return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
+			}
 
 			q->accum.val_type = TYPE_REAL;
 			return pl_success;
@@ -433,7 +453,7 @@ static USE_RESULT pl_status fn_iso_exp_1(query *q)
 		if (mp_int_compare_zero(&p1.val_big->ival) <= 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_real = exp(mp_int_to_double(&p1.val_big->ival));
+		q->accum.val_real = exp(MP_INT_TO_DOUBLE(&p1.val_big->ival));
 
 		if (isinf(q->accum.val_real))
 			return throw_error(q, &p1, "evaluation_error", "float_overflow");
@@ -471,7 +491,7 @@ static USE_RESULT pl_status fn_iso_sqrt_1(query *q)
 		mpz_t tmp;
 		mp_int_init(&tmp);
 		mp_int_sqrt(&p1.val_big->ival, &tmp);
-		q->accum.val_real = mp_int_to_double(&tmp);
+		q->accum.val_real = MP_INT_TO_DOUBLE(&tmp);
 
 		if (isinf(q->accum.val_real))
 			return throw_error(q, &p1, "evaluation_error", "float_overflow");
@@ -509,7 +529,7 @@ static USE_RESULT pl_status fn_iso_log_1(query *q)
 		if (mp_int_compare_zero(&p1.val_big->ival) <= 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_real = log(mp_int_to_double(&p1.val_big->ival));
+		q->accum.val_real = log(MP_INT_TO_DOUBLE(&p1.val_big->ival));
 
 		if (isinf(q->accum.val_real))
 			return throw_error(q, &p1, "evaluation_error", "float_overflow");
@@ -1083,7 +1103,7 @@ static USE_RESULT pl_status fn_iso_pow_2(query *q)
 		if ((mp_int_compare_zero(&p1.val_big->ival) == 0) && (p2.val_int < 0))
 			return throw_error(q, &p1, "evaluation_error", "undefined");
 
-		q->accum.val_real = pow(mp_int_to_double(&p1.val_big->ival), (double)p2.val_int);
+		q->accum.val_real = pow(MP_INT_TO_DOUBLE(&p1.val_big->ival), (double)p2.val_int);
 		q->accum.val_type = TYPE_REAL;
 		return pl_success;
 	}
@@ -1138,9 +1158,7 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 				return throw_error(q, &p1, "type_error", "float");
 		}
 
-		if (mp_int_expt_full(&p1.val_big->ival, &p2.val_big->ival, &q->tmp_ival) == MP_RANGE)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
+		mp_int_expt_full(&p1.val_big->ival, &p2.val_big->ival, &q->tmp_ival);
 		SET_ACCUM();
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
 		if (mp_int_compare_value(&p1.val_big->ival, 1) != 0) {
@@ -1156,21 +1174,14 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p1.val_int);
-
-		if (mp_int_expt_full(&tmp, &p2.val_big->ival, &q->tmp_ival) == MP_RANGE)
-			return throw_error(q, &p1, "evaluation_error", "undefined");
-
+		mp_int_expt_full(&tmp, &p2.val_big->ival, &q->tmp_ival);
 		mp_int_clear(&tmp);
 		SET_ACCUM();
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		if ((p1.val_int != 1) && (p2.val_int < 0))
 			return throw_error(q, &p1, "type_error", "float");
 
-		if (mp_int_expt_value(p1.val_int, p2.val_int, &q->tmp_ival) == MP_RANGE) {
-			q->accum.val_int = pow(p1.val_int, p2.val_int);
-			q->accum.val_type = TYPE_INTEGER;
-			return pl_success;
-		}
+		mp_int_expt_value(p1.val_int, p2.val_int, &q->tmp_ival);
 
 		if (mp_int_compare_value(&q->tmp_ival, INT64_MAX) > 0) {
 			SET_ACCUM();
@@ -1211,25 +1222,25 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 	CLEAR cell p2 = calc(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2)) {
-		q->accum.val_real = mp_int_to_double(&p1.val_big->ival);
-		q->accum.val_real /= mp_int_to_double(&p2.val_big->ival);
+		q->accum.val_real = MP_INT_TO_DOUBLE(&p1.val_big->ival);
+		q->accum.val_real /= MP_INT_TO_DOUBLE(&p2.val_big->ival);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
-		q->accum.val_real = mp_int_to_double(&p1.val_big->ival);
+		q->accum.val_real = MP_INT_TO_DOUBLE(&p1.val_big->ival);
 		q->accum.val_real /= p2.val_int;
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_bigint(&p1) && is_real(&p2)) {
 		if (p2.val_real == 0.0)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
-		q->accum.val_real = mp_int_to_double(&p1.val_big->ival) / p2.val_real;
+		q->accum.val_real = MP_INT_TO_DOUBLE(&p1.val_big->ival) / p2.val_real;
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_bigint(&p2) && is_smallint(&p1)) {
 		q->accum.val_real = p1.val_int;
-		q->accum.val_real /= mp_int_to_double(&p2.val_big->ival);
+		q->accum.val_real /= MP_INT_TO_DOUBLE(&p2.val_big->ival);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_bigint(&p2) && is_real(&p1)) {
-		q->accum.val_real = p1.val_real / mp_int_to_double(&p2.val_big->ival);
+		q->accum.val_real = p1.val_real / MP_INT_TO_DOUBLE(&p2.val_big->ival);
 		q->accum.val_type = TYPE_REAL;
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		if (p2.val_int == 0)
