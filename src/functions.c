@@ -187,9 +187,9 @@ static mp_result mp_int_set_double(mp_int a, double b)
 	mp_int_set_uvalue(a, frac);
 
 	if (exp < 0)
-		while (exp++ != 0) mp_int_div_value(a, 2, a, NULL);
+		mp_int_div_pow2(a, -exp, a, NULL);
 	else
-		while (exp-- != 0) mp_int_mul_value(a, 2, a);
+		mp_int_mul_pow2(a, exp, a);
 
 	if (((cast.bits >> 63) != 0uLL) && !mp_int_compare_zero(a)) {
 		a->sign = MP_NEG;
