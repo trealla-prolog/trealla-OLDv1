@@ -166,6 +166,38 @@ static double MP_INT_TO_DOUBLE(mpz_t *v)
 	return d;
 }
 
+static mp_result mp_int_set_double(mp_int a, double b)
+{
+	uint64_t frac;
+	int exp;
+	union {
+	  double   dbl;
+	  uint64_t bits;
+	} cast;
+	cast.dbl = b;
+
+	exp = (int)((unsigned)(cast.bits >> 52) & 0x7FFu);
+	frac = (cast.bits & ((1uLL << 52) - 1uLL)) | (1uLL << 52);
+
+	if (exp == 0x7FF) { /* +-inf, NaN */
+	  return MP_RANGE;
+	}
+
+	exp -= 1023 + 52;
+	mp_int_set_uvalue(a, frac);
+
+	if (exp < 0)
+		while (exp++ != 0) mp_int_div_value(a, 2, a, NULL);
+	else
+		while (exp-- != 0) mp_int_mul_value(a, 2, a);
+
+	if (((cast.bits >> 63) != 0uLL) && !mp_int_compare_zero(a)) {
+		a->sign = MP_NEG;
+	}
+
+	return MP_OK;
+}
+
 static mp_result mp_int_divx(mp_int a, mp_int b, mp_int q)
 {
 	return mp_int_div(a, b, q, NULL);
@@ -291,9 +323,15 @@ static USE_RESULT pl_status fn_iso_integer_1(query *q)
 	if (q->calc) {
 		CLEAR cell p1 = calc(q, p1_tmp);
 
-		if (is_real(&p1)) {
+		if (0 && is_real(&p1) && (p1.val_real < INT64_MAX) && (p1.val_real > INT64_MIN)) {
 			q->accum.val_int = (int_t)p1.val_real;
 			q->accum.val_type = TYPE_INTEGER;
+			return pl_success;
+		}
+
+		if (is_real(&p1)) {
+			mp_int_set_double(&q->tmp_ival, p1.val_real);
+			SET_ACCUM();
 			return pl_success;
 		}
 
