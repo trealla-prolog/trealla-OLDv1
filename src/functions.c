@@ -595,8 +595,8 @@ static USE_RESULT pl_status fn_popcount_1(query *q)
 		if (p1.val_int < 0)
 			return throw_error(q, &p1, "domain_error", "not_less_than_zero");
 
-		uint_t x = p1.val_int;
-        unsigned long long y;
+		uint64_t x = p1.val_int;
+        uint64_t y;
         y = x * 0x0002000400080010ULL;
         y = y & 0x1111111111111111ULL;
         y = y * 0x1111111111111111ULL;
