@@ -580,6 +580,36 @@ static USE_RESULT pl_status fn_iso_log_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_popcount_1(query *q)
+{
+	CHECK_CALC();
+	GET_FIRST_ARG(p1_tmp,any);
+	CLEAR cell p1 = calc(q, p1_tmp);
+
+	if (!is_integer(&p1))
+		return throw_error(q, &p1, "type_error", "integer");
+
+	if (is_bigint(&p1)) {
+		return throw_error(q, &p1, "type_error", "integer");
+	} else {
+		if (p1.val_int < 0)
+			return throw_error(q, &p1, "domain_error", "not_less_than_zero");
+
+        // Brian Kernighan's algorithm O(log n)
+		uint_t x = p1.val_int;
+
+        unsigned long long y;
+        y = x * 0x0002000400080010ULL;
+        y = y & 0x1111111111111111ULL;
+        y = y * 0x1111111111111111ULL;
+        y = y >> 60;
+		q->accum.val_int = y;
+	}
+
+	q->accum.val_type = TYPE_INTEGER;
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_iso_truncate_1(query *q)
 {
 	CHECK_CALC();
@@ -2352,6 +2382,7 @@ const struct builtins g_functions[] =
 	{"acosh", 1, fn_acosh_1, NULL},
 	{"atanh", 1, fn_atanh_1, NULL},
 
+	{"popcount", 1, fn_popcount_1, NULL},
 	{"atan2", 2, fn_iso_atan2_2, NULL},
 	{"copysign", 2, fn_iso_copysign_2, NULL},
 	{"truncate", 1, fn_iso_truncate_1, NULL},
