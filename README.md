@@ -301,7 +301,7 @@ Others
 	string_lower/2
 	atom_upper/2
 	atom_lower/2
-	popcount/1              # function returning number of 1 bits (smallint only)
+	popcount/1              # function returning number of 1 bits
 	log10/1                 # function returning log10 of arg
 	now/0                   # function returning C-time in secs as integer
 	now/1                   # now (-integer) C-time in secs as integer
