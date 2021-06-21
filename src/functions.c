@@ -614,12 +614,12 @@ static USE_RESULT pl_status fn_popcount_1(query *q)
 		return throw_error(q, &p1, "type_error", "integer");
 
 	if (is_bigint(&p1)) {
-		mp_usmall n;
+		mp_usmall count;
 
-		if (mp_int_popcount(&p1.val_big->ival, &n) != MP_OK)
+		if (mp_int_popcount(&p1.val_big->ival, &count) != MP_OK)
 			return throw_error(q, &p1, "domain_error", "not_less_than_zero");
 
-		q->accum.val_int = n;
+		q->accum.val_int = count;
 	} else {
 		if (p1.val_int < 0)
 			return throw_error(q, &p1, "domain_error", "not_less_than_zero");
