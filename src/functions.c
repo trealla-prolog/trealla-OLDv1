@@ -139,22 +139,23 @@ static void clr_accum(cell *p)
 	}
 
 static mp_result mp_int_to_double(mp_int z, double *out) {
-  assert(z != NULL);
+	assert(z != NULL);
 
-  mp_sign sz = MP_SIGN(z);
-  mp_usmall uz = MP_USED(z);
-  mp_digit *dz = MP_DIGITS(z) + uz - 1;
-  double uv = 0.0;
-  while (uz > 0) {
-	int n = MP_DIGIT_BIT / 2;
-    while (n-- > 0) uv *= 2;
-	n = MP_DIGIT_BIT / 2;
-    while (n-- > 0) uv *= 2;
-    uv += *dz--;
-    --uz;
-  }
+	mp_sign sz = MP_SIGN(z);
+	mp_usmall uz = MP_USED(z);
+	mp_digit *dz = MP_DIGITS(z) + uz - 1;
+	double uv = 0.0;
 
-  if (out) *out = ((sz == MP_NEG) ? -uv : uv);
+	while (uz > 0) {
+		int n = MP_DIGIT_BIT / 2;
+		while (n-- > 0) uv *= 2;
+		n = MP_DIGIT_BIT / 2;
+		while (n-- > 0) uv *= 2;
+		uv += *dz--;
+		--uz;
+	}
+
+	if (out) *out = ((sz == MP_NEG) ? -uv : uv);
 
   return MP_OK;
 }
@@ -215,6 +216,29 @@ static mp_result mp_int_divx_value(mp_int a, mp_small b, mp_int q)
 		else									\
 			return throw_error(q, q->st.curr_cell, "existence_error", "procedure");	\
 	}
+
+static mp_result mp_int_popcount(mp_int z, mp_usmall *out) {
+	assert(z != NULL);
+
+	if (mp_int_compare_zero(z) < 0)
+		return MP_UNDEF;
+
+	mp_usmall uz = MP_USED(z);
+	mp_digit *dz = MP_DIGITS(z) + uz - 1;
+	mp_usmall count = 0;
+	while (uz > 0) {
+		mp_usmall n = *dz--;
+		while (n > 0) {
+			n = n & (n - 1);
+			count++;
+		}
+		--uz;
+	}
+
+	if (out) *out = count;
+
+  return MP_OK;
+}
 
 void do_calc_(query *q, cell *c, idx_t c_ctx)
 {
@@ -590,7 +614,12 @@ static USE_RESULT pl_status fn_popcount_1(query *q)
 		return throw_error(q, &p1, "type_error", "integer");
 
 	if (is_bigint(&p1)) {
-		return throw_error(q, &p1, "type_error", "integer");
+		mp_usmall n;
+
+		if (mp_int_popcount(&p1.val_big->ival, &n) != MP_OK)
+			return throw_error(q, &p1, "domain_error", "not_less_than_zero");
+
+		q->accum.val_int = n;
 	} else {
 		if (p1.val_int < 0)
 			return throw_error(q, &p1, "domain_error", "not_less_than_zero");
