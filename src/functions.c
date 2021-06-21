@@ -190,7 +190,7 @@ static mp_result mp_int_set_double(mp_int a, double b)
 	err = exp < 0 ? mp_int_div_pow2(a, -exp, a, NULL) : mp_int_mul_pow2(a, exp, a);
 	if (err != MP_OK) return err;
 
-	if (((cast.bits >> 63) != 0uLL) && !mp_int_compare_zero(a))
+	if (((cast.bits >> 63) != 0uLL) && mp_int_compare_zero(a))
 		a->sign = MP_NEG;
 
 	return MP_OK;
@@ -321,7 +321,7 @@ static USE_RESULT pl_status fn_iso_integer_1(query *q)
 	if (q->calc) {
 		CLEAR cell p1 = calc(q, p1_tmp);
 
-		if (0 && is_real(&p1) && (p1.val_real < INT64_MAX) && (p1.val_real > INT64_MIN)) {
+		if (is_real(&p1) && (p1.val_real < INT64_MAX) && (p1.val_real > INT64_MIN)) {
 			q->accum.val_int = (int_t)p1.val_real;
 			q->accum.val_type = TYPE_INTEGER;
 			return pl_success;
@@ -333,15 +333,9 @@ static USE_RESULT pl_status fn_iso_integer_1(query *q)
 			return pl_success;
 		}
 
-		if (is_bigint(&p1)) {
-			mp_int_init_copy(&q->tmp_ival, &p1.val_big->ival);
-			SET_ACCUM();
-			return pl_success;
-		}
-
-		if (is_smallint(&p1)) {
-			q->accum.val_int = p1.val_int;
-			q->accum.val_type = TYPE_INTEGER;
+		if (is_integer(&p1)) {
+			share_cell(&p1);
+			q->accum = p1;
 			return pl_success;
 		}
 
