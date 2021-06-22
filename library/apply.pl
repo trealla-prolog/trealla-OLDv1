@@ -1,3 +1,5 @@
+:- pragma(apply, [once(true)]).
+
 partition([X|L], Y, [X|L1], L2) :-
 	X @< Y, !,
 	partition(L, Y, L1, L2).

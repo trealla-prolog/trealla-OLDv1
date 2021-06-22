@@ -558,6 +558,61 @@ static void directives(parser *p, term *t)
 		return;
 	}
 
+	if (!strcmp(dirname, "pragma") && (c->arity == 2)) {
+		cell *p2 = c + 2;
+		const char *name = "";
+		char tmpbuf[1024];
+
+		if (is_variable(p1)) {
+			snprintf(tmpbuf, sizeof(tmpbuf), "%s", p->m->filename);
+			char *ptr = tmpbuf + strlen(tmpbuf) - 1;
+
+			while (*ptr && (*ptr != '.') && (ptr != tmpbuf))
+				ptr--;
+
+			if (*ptr == '.')
+				*ptr = '\0';
+
+			name = tmpbuf;
+		} else if (!is_atom(p1)) {
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Error: pragma name not an atom\n");
+
+			p->error = true;
+			return;
+		} else
+			name = PARSER_GET_STR(p1);
+
+		module *tmp_m;
+
+		if ((tmp_m = find_module(p->m->pl, name)) != NULL) {
+			//if (DUMP_ERRS || !p->do_read_term)
+			//	fprintf(stdout, "Error: module already loaded: %s\n", name);
+			//
+			p->already_loaded = true;
+			p->m = tmp_m;
+			return;
+		}
+
+		tmp_m = create_module(p->m->pl, name);
+		if (!tmp_m) {
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Error: module creation failed: %s\n", name);
+
+			p->error = true;
+			return;
+		}
+
+		LIST_HANDLER(p2);
+
+		while (is_iso_list(p2)) {
+			LIST_HEAD(p2);
+			p2 = LIST_TAIL(p2);
+		}
+
+		return;
+	}
+
 	if (!strcmp(dirname, "module") && (c->arity == 2)) {
 		cell *p2 = c + 2;
 		const char *name = "";
