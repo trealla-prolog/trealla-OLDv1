@@ -11,6 +11,7 @@ A compact, efficient Prolog interpreter with
 	DCGs
 	format_//2
 	Attributed variables with SICStus interface (in-progress)
+	User-defined functions
 	Logtalk compatible (in-progress)
 	REPL with history
 	MIT licensed
@@ -361,6 +362,29 @@ Uses Markus Triska's public domain library.
 
 	format_//2
 	format[2,3]
+
+
+User-define functions
+=====================
+
+Give classic Prolog...
+
+	fac(N,F) :-
+		factorial(N,1,F).
+
+	factorial(0,F,F) :- !.
+	factorial(N,Tot,F) :-
+		NewTot is Tot * N,
+		N1 is N - 1,
+		factorial(N1,NewTot,F).
+
+define a functions...
+
+	fac(N) :- fac(N,F), return(F).
+
+then call...
+
+	tpl -g "F is fac(20), writeln([fac(20),F]), halt" -f samples/facfunc.pl
 
 
 HTTP 1.1

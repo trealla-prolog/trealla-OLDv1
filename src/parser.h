@@ -16,7 +16,6 @@ extern void xref_db(parser *p);
 
 extern void clear_term(term *t);
 extern void do_reduce(cell *n);
-extern void make_end(cell *tmp);
 extern void fix_list(cell *c);
 extern bool check_rule(const cell *c);
 extern cell *get_head(cell *c);

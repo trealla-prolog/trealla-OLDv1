@@ -12,6 +12,7 @@
 #include "internal.h"
 #include "query.h"
 #include "builtins.h"
+#include "heap.h"
 
 #define SET_ACCUM() {											\
 	q->accum.val_type = TYPE_INTEGER;							\
@@ -262,7 +263,34 @@ void call_builtin(query *q, cell *c, idx_t c_ctx)
 
 pl_status call_function(query *q, cell *c, __attribute__((unused)) idx_t c_ctx)
 {
-	return throw_error(q, c, "type_error", "evaluable");
+	if (q->retry)
+		return pl_failure;
+
+	cell *save = q->st.curr_cell;
+	idx_t save_ctx = q->st.curr_frame;
+	cell *tmp = clone_to_heap(q, true, c, 1);
+	idx_t nbr_cells = 1 + c->nbr_cells;
+	make_call(q, tmp+nbr_cells);
+	may_error(make_barrier(q));
+	q->st.curr_cell = tmp;
+	pl_status ok = start(q);
+	q->error = false;
+
+	if (!q->did_throw) {
+		q->st.curr_cell = save;
+		q->st.curr_frame = save_ctx;
+	}
+
+	return ok;
+}
+
+static USE_RESULT pl_status fn_return_1(query *q)
+{
+	GET_FIRST_ARG(p1_tmp,any);
+	CLEANUP cell p1 = eval(q, p1_tmp);
+	q->accum = p1;
+	q->error = true;
+	return pl_success;
 }
 
 static USE_RESULT pl_status fn_iso_is_2(query *q)
@@ -2432,6 +2460,7 @@ const struct builtins g_functions[] =
 	{"gcd", 2, fn_gcd_2, "?integer,?integer"},
 	{"integer", 1, fn_iso_integer_1, NULL},
 	{"is", 2, fn_iso_is_2, NULL},
+	{"return", 1, fn_return_1, NULL},
 
 	{0}
 };

@@ -152,6 +152,7 @@ inline static cell *get_raw_arg(const query *q, int n)
 
 extern void make_int(cell *tmp, int_t v);
 extern void make_real(cell *tmp, double v);
+extern void make_call(query *q, cell *tmp);
 
 #define eval(q,c)														\
 	is_builtin(c) ? (call_builtin(q,c,c##_ctx), q->accum) :				\
