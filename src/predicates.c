@@ -172,7 +172,7 @@ void make_real(cell *tmp, double v)
 	set_real(tmp, v);
 }
 
-static void make_structure(cell *tmp, idx_t offset, void *fn, unsigned arity, idx_t extra_cells)
+void make_structure(cell *tmp, idx_t offset, void *fn, unsigned arity, idx_t extra_cells)
 {
 	tmp->val_type = TYPE_LITERAL;
 	tmp->nbr_cells = 1 + extra_cells;
@@ -514,7 +514,7 @@ static USE_RESULT pl_status fn_iso_cut_0(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_local_cut_0(query *q)
+USE_RESULT pl_status fn_local_cut_0(query *q)
 {
 	cut_me(q, true, false);
 	return pl_success;

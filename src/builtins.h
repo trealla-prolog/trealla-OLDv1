@@ -154,6 +154,10 @@ extern void make_int(cell *tmp, int_t v);
 extern void make_real(cell *tmp, double v);
 extern void make_call(query *q, cell *tmp);
 extern void make_end(cell *tmp);
+extern void make_structure(cell *tmp, idx_t offset, void *fn, unsigned arity, idx_t extra_cells);
+
+extern USE_RESULT pl_status fn_iso_add_2(query *q);
+extern USE_RESULT pl_status fn_local_cut_0(query *q);
 
 #define eval(q,c)														\
 	is_builtin(c) ? (call_builtin(q,c,c##_ctx), q->accum) :				\

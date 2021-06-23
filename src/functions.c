@@ -289,6 +289,7 @@ static USE_RESULT pl_status fn_return_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	q->accum = p1;
+	cut_me(q, false, false);
 	q->error = true;
 	return pl_success;
 }
