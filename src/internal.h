@@ -19,6 +19,7 @@ typedef int64_t int_t;
 typedef uint64_t uint_t;
 
 #define INT_T_MAX INT64_MAX
+#define INT_T_MIN INT64_MIN
 
 #if (__STDC_VERSION__ >= 201112L) && USE_THREADS
 #include <stdatomic.h>

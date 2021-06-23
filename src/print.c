@@ -189,7 +189,7 @@ size_t sprint_int(char *dst, size_t size, int_t n, int base)
 		// 		the most negative integer is not defined."
 		//
 
-		if (n == INT64_MIN)
+		if (n == INT_T_MIN)
 			n = imaxabs(n+1) - 1;
 		else
 			n = imaxabs(n);

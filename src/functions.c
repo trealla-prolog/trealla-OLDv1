@@ -377,7 +377,7 @@ static USE_RESULT pl_status fn_iso_integer_1(query *q)
 	if (q->eval) {
 		CLEANUP cell p1 = eval(q, p1_tmp);
 
-		if (is_real(&p1) && (p1.val_real < INT64_MAX) && (p1.val_real > INT64_MIN)) {
+		if (is_real(&p1) && (p1.val_real < INT_T_MAX) && (p1.val_real > INT_T_MIN)) {
 			q->accum.val_int = (int_t)p1.val_real;
 			q->accum.tag = TAG_INTEGER;
 			return pl_success;
@@ -1298,12 +1298,12 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 
 		mp_int_expt_value(p1.val_int, p2.val_int, &q->tmp_ival);
 
-		if (mp_int_compare_value(&q->tmp_ival, INT64_MAX) > 0) {
+		if (mp_int_compare_value(&q->tmp_ival, INT_T_MAX) > 0) {
 			SET_ACCUM();
 			return pl_success;
 		}
 
-		if (mp_int_compare_value(&q->tmp_ival, INT64_MIN) < 0) {
+		if (mp_int_compare_value(&q->tmp_ival, INT_T_MIN) < 0) {
 			SET_ACCUM();
 			return pl_success;
 		}
