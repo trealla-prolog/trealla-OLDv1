@@ -266,6 +266,9 @@ pl_status call_function(query *q, cell *c, __attribute__((unused)) idx_t c_ctx)
 	if (q->retry)
 		return pl_failure;
 
+	if (!c->fn)
+		return throw_error(q, c, "type_error", "evaluable");
+
 	cell *save = q->st.curr_cell;
 	idx_t save_ctx = q->st.curr_frame;
 	cell *tmp = clone_to_heap(q, true, c, 1);
