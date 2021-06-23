@@ -330,6 +330,8 @@ void set_meta_predicate_in_db(module *m, cell *c)
 		h->is_meta_predicate = true;
 	} else
 		m->error = true;
+
+	push_property(m, MODULE_GET_STR(c), c->arity, "static");
 }
 
 void set_persist_in_db(module *m, const char *name, unsigned arity)
