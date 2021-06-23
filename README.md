@@ -366,10 +366,10 @@ Uses Markus Triska's public domain library.
 	format[2,3]
 
 
-User-define functions
-=====================
+User-defined functions
+======================
 
-Give classic Prolog...
+Given classic Prolog...
 
 	fac(N,F) :-
 		factorial(N,1,F).
