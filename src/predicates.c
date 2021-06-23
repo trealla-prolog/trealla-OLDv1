@@ -9627,7 +9627,7 @@ static USE_RESULT pl_status fn_edin_skip_2(query *q)
 static USE_RESULT pl_status fn_edin_tab_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
-	cell p1 = calc(q, p1_tmp);
+	cell p1 = eval(q, p1_tmp);
 
 	if (!is_smallint(&p1))
 		return throw_error(q, &p1, "type_error", "integer");
@@ -9645,7 +9645,7 @@ static USE_RESULT pl_status fn_edin_tab_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	GET_FIRST_ARG(p1_tmp,any);
-	cell p1 = calc(q, p1_tmp);
+	cell p1 = eval(q, p1_tmp);
 
 	if (!is_smallint(&p1))
 		return throw_error(q, &p1, "type_error", "integer");

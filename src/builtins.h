@@ -153,7 +153,7 @@ inline static cell *get_raw_arg(const query *q, int n)
 extern void make_int(cell *tmp, int_t v);
 extern void make_real(cell *tmp, double v);
 
-#define calc(q,c)														\
+#define eval(q,c)														\
 	!(c->flags&FLAG_BUILTIN) ? *c : (do_calc(q,c,c##_ctx), q->accum);	\
 	q->accum.flags = 0;													\
 	if (q->did_throw)													\
