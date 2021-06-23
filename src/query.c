@@ -314,7 +314,7 @@ static void unwind_trail(query *q, const choice *ch)
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
 		unshare_cell(&e->c);
-		e->c.tag = TYPE_EMPTY;
+		e->c.tag = TAG_EMPTY;
 		e->c.attrs = tr->attrs;
 	}
 }
@@ -335,7 +335,7 @@ void try_me(const query *q, unsigned nbr_vars)
 
 	for (unsigned i = 0; i < nbr_vars; i++, e++) {
 		unshare_cell(&e->c);
-		e->c.tag = TYPE_EMPTY;
+		e->c.tag = TAG_EMPTY;
 		e->c.attrs = NULL;
 	}
 }
@@ -349,7 +349,7 @@ static void trim_heap(query *q, const choice *ch)
 		for (idx_t i = 0; i < a->hp; i++) {
 			cell *c = a->heap + i;
 			unshare_cell(c);
-			c->tag = TYPE_EMPTY;
+			c->tag = TAG_EMPTY;
 		}
 
 		arena *save = a;
@@ -363,7 +363,7 @@ static void trim_heap(query *q, const choice *ch)
 	for (idx_t i = ch->st.hp; a && (i < a->hp); i++) {
 		cell *c = a->heap + i;
 		unshare_cell(c);
-		c->tag = TYPE_EMPTY;
+		c->tag = TAG_EMPTY;
 	}
 }
 
@@ -452,7 +452,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 
 	for (unsigned i = 0; i < g->nbr_vars; i++, e++) {
 		unshare_cell(&e->c);
-		e->c.tag = TYPE_EMPTY;
+		e->c.tag = TAG_EMPTY;
 		e->c.attrs = NULL;
 	}
 
@@ -708,7 +708,7 @@ static bool resume_frame(query *q)
 
 void make_indirect(cell *tmp, cell *c)
 {
-	tmp->tag = TYPE_INDIRECT;
+	tmp->tag = TAG_INDIRECT;
 	tmp->nbr_cells = 1;
 	tmp->arity = 0;
 	tmp->flags = 0;
@@ -744,7 +744,7 @@ unsigned create_vars(query *q, unsigned cnt)
 
 	for (unsigned i = 0; i < cnt; i++) {
 		slot *e = GET_SLOT(g, g->nbr_vars+i);
-		e->c.tag = TYPE_EMPTY;
+		e->c.tag = TAG_EMPTY;
 		e->c.attrs = NULL;
 	}
 
@@ -920,12 +920,12 @@ struct dispatch {
 
 static const struct dispatch g_disp[] =
 {
-	{TYPE_EMPTY, NULL},
-	{TYPE_VARIABLE, NULL},
-	{TYPE_LITERAL, unify_literal},
-	{TYPE_CSTRING, unify_cstring},
-	{TYPE_INTEGER, unify_integer},
-	{TYPE_REAL, unify_real},
+	{TAG_EMPTY, NULL},
+	{TAG_VARIABLE, NULL},
+	{TAG_LITERAL, unify_literal},
+	{TAG_CSTRING, unify_cstring},
+	{TAG_INTEGER, unify_integer},
+	{TAG_REAL, unify_real},
 	{0}
 };
 
@@ -1001,7 +1001,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 			idx_t off = index_from_pool(q->st.m->pl, GET_STR(c));
 			may_idx_error(off);
 			unshare_cell(c);
-			c->tag = TYPE_LITERAL;
+			c->tag = TAG_LITERAL;
 			c->val_off = off;
 			c->flags = 0;
 		}
@@ -1063,7 +1063,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 				p1_body = deref(q, p1_body, p1_ctx);
 				idx_t p1_body_ctx = q->latest_ctx;
 				cell tmp = (cell){0};
-				tmp.tag = TYPE_LITERAL;
+				tmp.tag = TAG_LITERAL;
 				tmp.nbr_cells = 1;
 				tmp.val_off = g_true_s;
 				ok = unify(q, p1_body, p1_body_ctx, &tmp, q->st.curr_frame);
@@ -1093,7 +1093,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 			idx_t off = index_from_pool(q->st.m->pl, GET_STR(c));
 			may_idx_error(off);
 			unshare_cell(c);
-			c->tag = TYPE_LITERAL;
+			c->tag = TAG_LITERAL;
 			c->val_off = off;
 			c->flags = 0;
 		}
@@ -1188,7 +1188,7 @@ static USE_RESULT pl_status match_head(query *q)
 			}
 
 			unshare_cell(c);
-			c->tag = TYPE_LITERAL;
+			c->tag = TAG_LITERAL;
 			c->val_off = off;
 			c->flags = 0;
 			h = NULL;
@@ -1297,7 +1297,7 @@ static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t
 			continue;
 
 		if (unify(q, c, q->latest_ctx, orig_c, orig_ctx)) {
-			tmp->tag = TYPE_VARIABLE;
+			tmp->tag = TAG_VARIABLE;
 			tmp->nbr_cells = 1;
 			tmp->val_off = index_from_pool(q->st.m->pl, p->vartab.var_name[i]);
 			tmp->arity = 0;
@@ -1739,7 +1739,7 @@ query *create_sub_query(query *q, cell *curr_cell)
 	for (unsigned i = 0; i < gsrc->nbr_vars; i++, e++) {
 		cell *c = deref(q, &e->c, e->ctx);
 		cell tmp = (cell){0};
-		tmp.tag = TYPE_VARIABLE;
+		tmp.tag = TAG_VARIABLE;
 		tmp.var_nbr = i;
 		tmp.val_off = g_anon_s;
 		set_var(subq, &tmp, 0, c, q->latest_ctx);

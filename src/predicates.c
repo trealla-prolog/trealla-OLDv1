@@ -149,7 +149,7 @@ static void get_params(query *q, idx_t *p1, idx_t *p2)
 
 static void make_variable(cell *tmp, idx_t off)
 {
-	tmp->tag = TYPE_VARIABLE;
+	tmp->tag = TAG_VARIABLE;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
 	tmp->val_off = off;
@@ -158,7 +158,7 @@ static void make_variable(cell *tmp, idx_t off)
 
 void make_int(cell *tmp, int_t v)
 {
-	tmp->tag = TYPE_INTEGER;
+	tmp->tag = TAG_INTEGER;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
 	set_smallint(tmp, v);
@@ -166,7 +166,7 @@ void make_int(cell *tmp, int_t v)
 
 void make_real(cell *tmp, double v)
 {
-	tmp->tag = TYPE_REAL;
+	tmp->tag = TAG_REAL;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
 	set_real(tmp, v);
@@ -174,7 +174,7 @@ void make_real(cell *tmp, double v)
 
 void make_structure(cell *tmp, idx_t offset, void *fn, unsigned arity, idx_t extra_cells)
 {
-	tmp->tag = TYPE_LITERAL;
+	tmp->tag = TAG_LITERAL;
 	tmp->nbr_cells = 1 + extra_cells;
 	tmp->flags = FLAG_BUILTIN;
 	tmp->arity = arity;
@@ -184,7 +184,7 @@ void make_structure(cell *tmp, idx_t offset, void *fn, unsigned arity, idx_t ext
 
 void make_end(cell *tmp)
 {
-	tmp->tag = TYPE_END;
+	tmp->tag = TAG_END;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
 	tmp->match = NULL;
@@ -204,7 +204,7 @@ void make_call(query *q, cell *tmp)
 
 static void make_literal(cell *tmp, idx_t offset)
 {
-	tmp->tag = TYPE_LITERAL;
+	tmp->tag = TAG_LITERAL;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
 	tmp->val_off = offset;
@@ -213,7 +213,7 @@ static void make_literal(cell *tmp, idx_t offset)
 static void make_smalln(cell *tmp, const char *s, size_t n)
 {
 	assert(n < MAX_SMALL_STRING);
-	tmp->tag = TYPE_CSTRING;
+	tmp->tag = TAG_CSTRING;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
 	memcpy(tmp->val_chr, s, n);
@@ -276,7 +276,7 @@ void append_list(query *q, const cell *c)
 {
 	cell *tmp = alloc_on_tmp(q, 1+c->nbr_cells);
 	if (!tmp) return;
-	tmp->tag = TYPE_LITERAL;
+	tmp->tag = TAG_LITERAL;
 	tmp->nbr_cells = 1 + c->nbr_cells;
 	tmp->val_off = g_dot_s;
 	tmp->arity = 2;
@@ -289,7 +289,7 @@ USE_RESULT cell *end_list(query *q)
 {
 	cell *tmp = alloc_on_tmp(q, 1);
 	if (!tmp) return NULL;
-	tmp->tag = TYPE_LITERAL;
+	tmp->tag = TAG_LITERAL;
 	tmp->nbr_cells = 1;
 	tmp->val_off = g_nil_s;
 	tmp->arity = tmp->flags = 0;
@@ -307,7 +307,7 @@ static USE_RESULT cell *end_list_unsafe(query *q)
 {
 	cell *tmp = alloc_on_tmp(q, 1);
 	if (!tmp) return NULL;
-	tmp->tag = TYPE_LITERAL;
+	tmp->tag = TAG_LITERAL;
 	tmp->nbr_cells = 1;
 	tmp->val_off = g_nil_s;
 	tmp->arity = tmp->flags = 0;
@@ -330,7 +330,7 @@ static USE_RESULT pl_status make_cstringn(cell *d, const char *s, size_t n)
 		}
 	}
 
-	d->tag = TYPE_CSTRING;
+	d->tag = TAG_CSTRING;
 	d->flags = 0;
 	d->nbr_cells = 1;
 	d->arity = 0;
@@ -345,7 +345,7 @@ static USE_RESULT pl_status make_cstring(cell *d, const char *s)
 
 static USE_RESULT pl_status make_stringn(cell *d, const char *s, size_t n)
 {
-	d->tag = TYPE_CSTRING;
+	d->tag = TAG_CSTRING;
 	d->flags = FLAG_STRING;
 	d->nbr_cells = 1;
 	d->arity = 2;
@@ -840,7 +840,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 
 				if (mp_int_to_int(&tmpz, &val) == MP_RANGE) {
 					tmp.nbr_cells = 1;
-					tmp.tag = TYPE_INTEGER;
+					tmp.tag = TAG_INTEGER;
 					tmp.flags = FLAG_MANAGED;
 					tmp.val_big = malloc(sizeof(bigint));
 					tmp.val_big->refcnt = 0;
@@ -1099,7 +1099,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 
 				if (mp_int_to_int(&tmpz, &val) == MP_RANGE) {
 					tmp.nbr_cells = 1;
-					tmp.tag = TYPE_INTEGER;
+					tmp.tag = TAG_INTEGER;
 					tmp.flags = FLAG_MANAGED;
 					tmp.val_big = malloc(sizeof(bigint));
 					tmp.val_big->refcnt = 0;
@@ -2222,7 +2222,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 		size_t len = st.st_size;
 		void *addr = mmap(0, len, prot, MAP_PRIVATE, fd, offset);
 		cell tmp = {0};
-		tmp.tag = TYPE_CSTRING;
+		tmp.tag = TAG_CSTRING;
 		tmp.flags = FLAG_BLOB | FLAG_STRING | FLAG_STATIC;
 		tmp.nbr_cells = 1;
 		tmp.arity = 2;
@@ -4240,7 +4240,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 			may_idx_error(off);
 			//unshare_cell(tmp2);
 			c->val_off = off;
-			c->tag = TYPE_LITERAL;
+			c->tag = TAG_LITERAL;
 			c->flags = 0;
 		}
 
@@ -4679,7 +4679,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(h));
 		may_idx_error(off);
 		unshare_cell(h);
-		h->tag = TYPE_LITERAL;
+		h->tag = TAG_LITERAL;
 		h->val_off = off;
 		h->flags = 0;
 	}
@@ -4745,7 +4745,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(h));
 		may_idx_error(off);
 		unshare_cell(h);
-		h->tag = TYPE_LITERAL;
+		h->tag = TAG_LITERAL;
 		h->val_off = off;
 		h->flags = 0;
 	}
@@ -4845,7 +4845,7 @@ static USE_RESULT pl_status fn_sys_call_n(query *q)
 		may_idx_error(off);
 		//unshare_cell(tmp2);
 		c->val_off = off;
-		c->tag = TYPE_LITERAL;
+		c->tag = TAG_LITERAL;
 		c->flags = 0;
 	}
 
@@ -5348,7 +5348,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 			cell *tmp = alloc_on_heap(q, 1+arity);
 			may_ptr_error(tmp);
 			*tmp = (cell){0};
-			tmp[0].tag = TYPE_LITERAL;
+			tmp[0].tag = TAG_LITERAL;
 			tmp[0].arity = arity;
 			tmp[0].nbr_cells = 1 + arity;
 
@@ -5358,7 +5358,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 				tmp[0].val_off = p2->val_off;
 
 			for (unsigned i = 1; i <= arity; i++) {
-				tmp[i].tag = TYPE_VARIABLE;
+				tmp[i].tag = TAG_VARIABLE;
 				tmp[i].nbr_cells = 1;
 				tmp[i].var_nbr = var_nbr++;
 				tmp[i].val_off = g_anon_s;
@@ -5377,7 +5377,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 	CLR_OP(&tmp);
 
 	if (is_string(p1)) {
-		tmp.tag = TYPE_LITERAL;
+		tmp.tag = TAG_LITERAL;
 		tmp.val_off = g_dot_s;
 		tmp.flags = 0;
 	}
@@ -5929,7 +5929,7 @@ static void unpin_vars(query *q)
 			continue;
 
 		slot *e = GET_SLOT(g, i);
-		e->c.tag = TYPE_EMPTY;
+		e->c.tag = TAG_EMPTY;
 		e->c.attrs = NULL;
 	}
 
@@ -6373,7 +6373,7 @@ static pl_status do_asserta_2(query *q)
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(h));
 		may_idx_error(off);
 		unshare_cell(h);
-		h->tag = TYPE_LITERAL;
+		h->tag = TAG_LITERAL;
 		h->val_off = off;
 		h->flags = 0;
 	}
@@ -6471,7 +6471,7 @@ static pl_status do_assertz_2(query *q)
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(h));
 		may_idx_error(off);
 		unshare_cell(h);
-		h->tag = TYPE_LITERAL;
+		h->tag = TAG_LITERAL;
 		h->val_off = off;
 		h->flags = 0;
 	}
@@ -6742,7 +6742,7 @@ static USE_RESULT pl_status fn_busy_1(query *q)
 static USE_RESULT pl_status fn_now_0(query *q)
 {
 	int_t secs = get_time_in_usec() / 1000 / 1000;
-	q->accum.tag = TYPE_INTEGER;
+	q->accum.tag = TAG_INTEGER;
 	set_smallint(&q->accum, secs);
 	return pl_success;
 }
@@ -10573,7 +10573,7 @@ static pl_status do_length(query *q)
 		}
 	}
 
-	tmp.tag = TYPE_VARIABLE;
+	tmp.tag = TAG_VARIABLE;
 	tmp.nbr_cells = 1;
 	tmp.flags = FLAG2_FRESH | FLAG2_ANON;
 	tmp.val_off = g_anon_s;
@@ -10693,7 +10693,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 			return throw_error(q, p2, "resource_error", "too_many_vars");
 
 		cell tmp;
-		tmp.tag = TYPE_VARIABLE;
+		tmp.tag = TAG_VARIABLE;
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;
 		tmp.flags = FLAG2_FRESH | FLAG2_ANON;
@@ -11237,7 +11237,7 @@ pl_status fn_sys_undo_trail_1(query *q)
 		} else
 			append_list(q, tmp);
 
-		e->c.tag = TYPE_EMPTY;
+		e->c.tag = TAG_EMPTY;
 		e->c.attrs = tr->attrs;
 	}
 
@@ -11271,11 +11271,11 @@ pl_status do_post_unification_hook(query *q)
 	may_ptr_error(tmp);
 	// Needed for follow() to work
 	*tmp = (cell){0};
-	tmp[0].tag = TYPE_EMPTY;
+	tmp[0].tag = TAG_EMPTY;
 	tmp[0].nbr_cells = 1;
 	tmp[0].flags = FLAG_BUILTIN;
 
-	tmp[1].tag = TYPE_LITERAL;
+	tmp[1].tag = TAG_LITERAL;
 	tmp[1].nbr_cells = 1;
 	tmp[1].arity = 0;
 	tmp[1].flags = 0;

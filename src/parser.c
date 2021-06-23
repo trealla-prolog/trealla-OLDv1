@@ -183,7 +183,7 @@ cell *list_head(cell *l, cell *tmp)
 
 	const char *src = is_static(l) ? l->val_str : (char*)l->val_strb->cstr + l->strb_off;
 	size_t len = len_char_utf8(src);
-	tmp->tag = TYPE_CSTRING;
+	tmp->tag = TAG_CSTRING;
 	tmp->nbr_cells = 1;
 	tmp->flags = 0;
 	tmp->arity = 0;
@@ -206,7 +206,7 @@ cell *list_tail(cell *l, cell *tmp)
 	size_t len = len_char_utf8(src);
 
 	if (str_len == len) {
-		tmp->tag = TYPE_LITERAL;
+		tmp->tag = TAG_LITERAL;
 		tmp->nbr_cells = 1;
 		tmp->arity = 0;
 		tmp->flags = 0;
@@ -312,7 +312,7 @@ void clear_term(term *t)
 	for (idx_t i = 0; i < t->cidx; i++) {
 		cell *c = t->cells + i;
 		unshare_cell(c);
-		c->tag = TYPE_EMPTY;
+		c->tag = TAG_EMPTY;
 	}
 
 	t->cidx = 0;
@@ -1104,7 +1104,7 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 
 	cell *c = make_cell(p);
 	ensure(c);
-	c->tag = TYPE_END;
+	c->tag = TAG_END;
 	c->nbr_cells = 1;
 	check_first_cut(p);
 	p->t->is_fact = !get_logical_body(p->t->cells);
@@ -1123,7 +1123,7 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 		*dst-- = *last--;
 
 	p1 = p->t->cells + p1_idx;
-	p1->tag = TYPE_LITERAL;
+	p1->tag = TAG_LITERAL;
 	p1->flags = 0;//FLAG_BUILTIN;
 	p1->fn = NULL;
 	p1->val_off = g_call_s;
@@ -1262,7 +1262,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 		//printf("*** OP1 %s type=%u, specifier=%u, pri=%u\n", PARSER_GET_STR(c), c->tag, GET_OP(c), c->priority);
 
-		c->tag = TYPE_LITERAL;
+		c->tag = TAG_LITERAL;
 		c->arity = 1;
 
 		// Prefix...
@@ -1474,7 +1474,7 @@ static bool term_dcg_rewrite(parser *p)
 static cell *make_literal(parser *p, idx_t offset)
 {
 	cell *c = make_cell(p);
-	c->tag = TYPE_LITERAL;
+	c->tag = TAG_LITERAL;
 	c->nbr_cells = 1;
 	c->val_off = offset;
 	return c;
@@ -1603,7 +1603,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		} else
 			v = get_char_utf8(&s);
 
-		p->v.tag = TYPE_INTEGER;
+		p->v.tag = TAG_INTEGER;
 		set_smallint(&p->v, v);
 		if (neg) set_smallint(&p->v, -get_smallint(&p->v));
 		*srcptr = s;
@@ -1642,7 +1642,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			return false;
 		}
 
-		p->v.tag = TYPE_INTEGER;
+		p->v.tag = TAG_INTEGER;
 		p->v.flags |= FLAG_BINARY;
 		*srcptr = s;
 		return true;
@@ -1675,7 +1675,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			return false;
 		}
 
-		p->v.tag = TYPE_INTEGER;
+		p->v.tag = TAG_INTEGER;
 		p->v.flags |= FLAG_OCTAL;
 		*srcptr = s;
 		return true;
@@ -1708,7 +1708,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			return false;
 		}
 
-		p->v.tag = TYPE_INTEGER;
+		p->v.tag = TAG_INTEGER;
 		p->v.flags |= FLAG_HEX;
 		*srcptr = s;
 		return true;
@@ -1717,7 +1717,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	mp_int_read_cstring(&v2, 10, s, (char**)&s);
 
 	if (s && (*s == '.') && isdigit(s[1])) {
-		p->v.tag = TYPE_REAL;
+		p->v.tag = TAG_REAL;
 		double v = strtod(tmpptr, &tmpptr);
 		set_real(&p->v, v);
 		if (neg) p->v.val_real = -p->v.val_real;
@@ -1748,7 +1748,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		return false;
 	}
 
-	p->v.tag = TYPE_INTEGER;
+	p->v.tag = TAG_INTEGER;
 
 	if ((s[-1] == '.') || iswspace(s[-1]))
 		s--;
@@ -1891,7 +1891,7 @@ static bool get_token(parser *p, int last_op)
 	char *dst = p->token;
 	*dst = '\0';
 	bool neg = false;
-	p->v.tag = TYPE_LITERAL;
+	p->v.tag = TAG_LITERAL;
 	p->v.flags = 0;
 	p->quote_char = 0;
 	p->string = p->is_quoted = p->is_variable = p->is_op = false;
@@ -1932,7 +1932,7 @@ static bool get_token(parser *p, int last_op)
 		*dst = '\0';
 		p->srcptr = (char*)src;
 		set_smallint(&p->v, ch);
-		p->v.tag = TYPE_INTEGER;
+		p->v.tag = TAG_INTEGER;
 		p->dq_consing = -1;
 		return true;
 	}
@@ -2267,7 +2267,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 						}
 
 						unshare_cell(h);
-						h->tag = TYPE_LITERAL;
+						h->tag = TAG_LITERAL;
 						h->val_off = off;
 						h->flags = 0;
 					}
@@ -2527,14 +2527,14 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		// Operators in canonical form..
 
 		if (last_op && priority && (*p->srcptr == '(')) {
-			p->v.tag = TYPE_LITERAL;
+			p->v.tag = TAG_LITERAL;
 			specifier = 0;
 			priority = 0;
 			p->quote_char = 0;
 		}
 
 		last_op = strcmp(p->token, ")") && priority;
-		int func = (p->v.tag == TYPE_LITERAL) && !specifier && (*p->srcptr == '(');
+		int func = (p->v.tag == TAG_LITERAL) && !specifier && (*p->srcptr == '(');
 
 		if (func) {
 			is_func = true;
@@ -2555,7 +2555,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			c->val_big = p->v.val_big;
 		} else if (is_smallint(&p->v)) {
 			set_smallint(c, get_smallint(&p->v));
-		} else if (p->v.tag == TYPE_REAL) {
+		} else if (p->v.tag == TAG_REAL) {
 			set_real(c, get_real(&p->v));
 		} else if ((!p->is_quoted || func || p->is_op || p->is_variable ||
 			(get_builtin(p->m->pl, p->token, 0, &found), found) ||
@@ -2565,7 +2565,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				c->priority = 0;
 
 			if (p->is_variable)
-				c->tag = TYPE_VARIABLE;
+				c->tag = TAG_VARIABLE;
 
 			if (p->is_quoted)
 				c->flags |= FLAG2_QUOTED;
@@ -2573,7 +2573,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			c->val_off = index_from_pool(p->m->pl, p->token);
 			ensure(c->val_off != ERR_IDX);
 		} else {
-			c->tag = TYPE_CSTRING;
+			c->tag = TAG_CSTRING;
 
 			if ((p->toklen < MAX_SMALL_STRING) && !p->string) {
 				memcpy(c->val_chr, p->token, p->toklen);
