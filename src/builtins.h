@@ -154,11 +154,10 @@ extern void make_int(cell *tmp, int_t v);
 extern void make_real(cell *tmp, double v);
 
 #define eval(q,c)														\
-	!(c->flags&FLAG_BUILTIN) ? *c : (do_calc(q,c,c##_ctx), q->accum);	\
+	is_builtin(c) ? (call_builtin(q,c,c##_ctx), q->accum) :				\
+	is_callable(c) ? (call_function(q, c, c##_ctx), q->accum) : *c;		\
 	q->accum.flags = 0;													\
 	if (q->did_throw)													\
 		return pl_success; 												\
 	else if (is_variable(c))											\
-		return throw_error(q, c, "instantiation_error", "number");		\
-	else if (is_callable(c) && !is_builtin(c))							\
-		return call_function(q, c, c##_ctx);
+		return throw_error(q, c, "instantiation_error", "number");
