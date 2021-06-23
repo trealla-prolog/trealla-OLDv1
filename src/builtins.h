@@ -160,5 +160,5 @@ extern void make_real(cell *tmp, double v);
 		return pl_success; 												\
 	else if (is_variable(c))											\
 		return throw_error(q, c, "instantiation_error", "number");		\
-	else if (is_callable(c))											\
+	else if (is_callable(c) && !is_builtin(c))							\
 		return call_function(q, c, c##_ctx);
