@@ -369,7 +369,7 @@ Uses Markus Triska's public domain library.
 User-defined functions
 ======================
 
-Given classic Prolog...
+Given the classic Prolog...
 
 	fac(N,F) :-
 		factorial(N,1,F).
@@ -380,7 +380,7 @@ Given classic Prolog...
 		N1 is N - 1,
 		factorial(N1,NewTot,F).
 
-define a functions...
+define a function...
 
 	fac(N) :- fac(N,F), return(F).
 
