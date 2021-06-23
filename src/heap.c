@@ -218,7 +218,7 @@ cell *do_deep_copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t 
 		*nbr_cells = 1;
 		// Needed for follow() to work
 		*tmp2 = (cell){0};
-		tmp2->val_type = TYPE_EMPTY;
+		tmp2->tag = TYPE_EMPTY;
 		tmp2->nbr_cells = 1;
 		tmp2->flags = FLAG_BUILTIN;
 	} else
@@ -304,7 +304,7 @@ cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix)
 	if (prefix) {
 		// Needed for follow() to work
 		*tmp = (cell){0};
-		tmp->val_type = TYPE_EMPTY;
+		tmp->tag = TYPE_EMPTY;
 		tmp->nbr_cells = 1;
 		tmp->flags = FLAG_BUILTIN;
 	}
@@ -322,7 +322,7 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t suffix)
 	if (prefix) {
 		// Needed for follow() to work
 		*tmp = (cell){0};
-		tmp->val_type = TYPE_EMPTY;
+		tmp->tag = TYPE_EMPTY;
 		tmp->nbr_cells = 1;
 		tmp->flags = FLAG_BUILTIN;
 	}

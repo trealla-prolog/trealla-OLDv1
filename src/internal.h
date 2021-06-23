@@ -87,14 +87,14 @@ typedef enum {
 
 // Primary type...
 
-#define is_empty(c) ((c)->val_type == TYPE_EMPTY)
-#define is_variable(c) ((c)->val_type == TYPE_VARIABLE)
-#define is_literal(c) ((c)->val_type == TYPE_LITERAL)
-#define is_cstring(c) ((c)->val_type == TYPE_CSTRING)
-#define is_integer(c) ((c)->val_type == TYPE_INTEGER)
-#define is_real(c) ((c)->val_type == TYPE_REAL)
-#define is_indirect(c) ((c)->val_type == TYPE_INDIRECT)
-#define is_end(c) ((c)->val_type == TYPE_END)
+#define is_empty(c) ((c)->tag == TYPE_EMPTY)
+#define is_variable(c) ((c)->tag == TYPE_VARIABLE)
+#define is_literal(c) ((c)->tag == TYPE_LITERAL)
+#define is_cstring(c) ((c)->tag == TYPE_CSTRING)
+#define is_integer(c) ((c)->tag == TYPE_INTEGER)
+#define is_real(c) ((c)->tag == TYPE_REAL)
+#define is_indirect(c) ((c)->tag == TYPE_INDIRECT)
+#define is_end(c) ((c)->tag == TYPE_END)
 
 // Derived type...
 
@@ -267,10 +267,10 @@ typedef struct parser_ parser;
 // Using a fixed-size cell allows having arrays of cells, which is
 // basically what a term is. A compound is a variable length array
 // of cells, the length specified by 'nbr_cells' field in the 1st cell.
-// A cell is a tagged union based off 'val_type' ...
+// A cell is a tagged union based off 'tag' ...
 
 struct cell_ {
-	uint8_t val_type;
+	uint8_t tag;
 	uint8_t arity;
 	uint16_t flags;
 	idx_t nbr_cells;

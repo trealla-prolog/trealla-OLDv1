@@ -97,7 +97,7 @@ predicate *create_predicate(module *m, cell *c)
 
 	h->m = m;
 	h->key = *c;
-	h->key.val_type = TYPE_LITERAL;
+	h->key.tag = TYPE_LITERAL;
 	h->key.flags = FLAG_KEY;
 	h->key.nbr_cells = 1;
 
@@ -243,7 +243,7 @@ clause *erase_from_db(module *m, uuid *ref)
 void set_noindex_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp = (cell){0};
-	tmp.val_type = TYPE_LITERAL;
+	tmp.tag = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
@@ -259,7 +259,7 @@ void set_noindex_in_db(module *m, const char *name, unsigned arity)
 void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp = (cell){0};
-	tmp.val_type = TYPE_LITERAL;
+	tmp.tag = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
@@ -276,7 +276,7 @@ void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
 void set_multifile_in_db(module *m, const char *name, idx_t arity)
 {
 	cell tmp = (cell){0};
-	tmp.val_type = TYPE_LITERAL;
+	tmp.tag = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
@@ -293,7 +293,7 @@ void set_multifile_in_db(module *m, const char *name, idx_t arity)
 void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp = (cell){0};
-	tmp.val_type = TYPE_LITERAL;
+	tmp.tag = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
@@ -312,7 +312,7 @@ void set_meta_predicate_in_db(module *m, cell *c)
 	const char *name = MODULE_GET_STR(c);
 	unsigned arity = c->arity;
 	cell tmp = (cell){0};
-	tmp.val_type = TYPE_LITERAL;
+	tmp.tag = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
@@ -337,7 +337,7 @@ void set_meta_predicate_in_db(module *m, cell *c)
 void set_persist_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp = (cell){0};
-	tmp.val_type = TYPE_LITERAL;
+	tmp.tag = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off == ERR_IDX);
 	tmp.arity = arity;
@@ -365,7 +365,7 @@ static bool check_directive(const cell *c)
 predicate *find_predicate(module *m, cell *c)
 {
 	cell tmp = *c;
-	tmp.val_type = TYPE_LITERAL;
+	tmp.tag = TYPE_LITERAL;
 	tmp.flags = FLAG_KEY;
 	tmp.nbr_cells = 1;
 
@@ -389,7 +389,7 @@ predicate *find_predicate(module *m, cell *c)
 predicate *find_functor(module *m, const char *name, unsigned arity)
 {
 	cell tmp = (cell){0};
-	tmp.val_type = TYPE_LITERAL;
+	tmp.tag = TYPE_LITERAL;
 	tmp.val_off = index_from_pool(m->pl, name);
 	tmp.arity = arity;
 	return find_predicate(m, &tmp);
@@ -461,7 +461,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		idx_t off = index_from_pool(m->pl, MODULE_GET_STR(c));
 		if (off == ERR_IDX) return NULL;
 		unshare_cell(c);
-		c->val_type = TYPE_LITERAL;
+		c->tag = TYPE_LITERAL;
 		c->val_off = off;
 		c->flags = 0;
 	}
