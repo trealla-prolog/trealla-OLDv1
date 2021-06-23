@@ -217,8 +217,10 @@ GNU-Prolog & SWI-Prolog
 Others
 ======
 
-    atomic_list_concat/[2,3]    # atomic_list_concat(L,Sep,Atom) (bidirectional)
 	memberchk/2
+	atomic_concat/3
+    atomic_list_concat/2		# atomic_list_concat(L,Atom) (bidirectional)
+    atomic_list_concat/3		# atomic_list_concat(L,Sep,Atom) (bidirectional)
 	read_term_from_chars/2		# read_term_from_chars(+chars,-term)
 	read_term_from_chars/3		# read_term_from_chars(+chars,+opts,-term)
 	write_term_to_chars/3		# write_term_to_chars(+term,+opts,-chars)
@@ -235,7 +237,6 @@ Others
 	variant/2					# variant(+term1,+term2)
 	copy_term_nat/2				# doesn't copy attrs
 	findall/4
-	atomic_concat/3
 	var_number/2
 	ignore/1
 	is_list/1
@@ -301,6 +302,7 @@ Others
 	string_lower/2
 	atom_upper/2
 	atom_lower/2
+
 	popcount/1              # function returning number of 1 bits
 	log10/1                 # function returning log10 of arg
 	now/0                   # function returning C-time in secs as integer
@@ -313,6 +315,13 @@ Others
 	rand/0                  # function returning integer [0,RAND_MAX]
 	rand/1                  # integer(-integer) integer [0,RAND_MAX]
 	delay/1                 # delay(+integer) sleep for ms
+	split/4                 # split(+string,+sep,?left,?right)
+	pid/1
+	shell/1
+	shell/2
+	wall_time/1
+	date_time/6
+	date_time/7
 	loadfile/2              # loadfile(+filename,-string)
 	savefile/2              # savefile(+filename,+string)
 	getfile/2               # getfile(+filename,-strings)
@@ -321,22 +330,13 @@ Others
 	bread/3                 # bread(+stream,?len,-string)
 	bwrite/2                # bwrite(+stream,+string)
 	replace/4               # replace(+string,+old,+new,-string)
-	split/4                 # split(+string,+sep,?left,?right)
 	sha1/2                  # sha1(+plaintext,?hash)        NEEDS OPENSSL
 	sha256/2                # sha256(+plaintext,?hash)      NEEDS OPENSSL
 	sha512/2                # sha512(+plaintext,?hash)      NEEDS OPENSSL
-
-	pid/1
-	shell/1
-	shell/2
-	wall_time/1
-	date_time/6
-	date_time/7
+	persist/1               # directive 'persist funct/arity'
 
 	open(stream(Str),...)   # with open/4 reopen a stream
 	open(F,M,S,[mmap(Ls)])  # with open/4 mmap() the file to Ls
-
-	persist/1               # directive 'persist funct/arity'
 
 Note: consult/1 and load_files/2 support lists of files as args. Also
 support loading into modules eg. *consult(MOD:FILE-SPEC)*.
