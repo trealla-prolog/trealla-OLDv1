@@ -369,7 +369,9 @@ Uses Markus Triska's public domain library.
 User-defined functions
 ======================
 
-Given the classic Prolog...
+User-defined functions can be arbitrarily complex, but cannot be
+back-tracked into. The make use of the *return/1* predicate to
+return a unique value. Given the classic Prolog...
 
 	fac(N,F) :-
 		factorial(N,1,F).
