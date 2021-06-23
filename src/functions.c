@@ -240,7 +240,7 @@ static mp_result mp_int_popcount(mp_int z, mp_usmall *out) {
   return MP_OK;
 }
 
-void do_calc_(query *q, cell *c, idx_t c_ctx)
+void do_calc(query *q, cell *c, idx_t c_ctx)
 {
 	cell *save = q->st.curr_cell;
 	idx_t save_ctx = q->st.curr_frame;
