@@ -386,7 +386,11 @@ define a function...
 
 then call...
 
-	tpl -g "F is fac(20), writeln([fac(20),F]), halt" -f samples/facfunc.pl
+```prolog
+	$ tpl samples/facfunc.pl
+	?- F is fac(20).
+	F = 2432902008176640000.
+```
 
 
 HTTP 1.1
