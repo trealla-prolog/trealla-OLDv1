@@ -150,8 +150,7 @@ inline static cell *get_raw_arg(const query *q, int n)
 	return c;
 }
 
-#define unify(q,p1,p1_ctx,p2,p2_ctx) \
-	unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0)
+#define unify(q,p1,p1_ctx,p2,p2_ctx) unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0)
 
 extern void make_int(cell *tmp, int_t v);
 extern void make_real(cell *tmp, double v);

@@ -5687,6 +5687,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		} else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
+			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
@@ -5701,6 +5702,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
+			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
@@ -5713,6 +5715,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
+			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
@@ -5727,6 +5730,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
+			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
@@ -5740,6 +5744,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
+			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
