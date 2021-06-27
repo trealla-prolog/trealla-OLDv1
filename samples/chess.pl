@@ -280,16 +280,16 @@ check_castling(Board, e-Rank, c-Rank, Color, king, OutBoard) :- % Queen side
 check_castling(Board, _, _, _, _, Board).
 
 parse_square(Square, File-Rank) :-
-        name(Square, [F,R]),
-        name(File, [F]),
+        atom_codes(Square, [F,R]),
+        atom_codes(File, [F]),
         myname(Rank, [R]),
         on_board(File-Rank).
 
 parse_move(Move, From_File-From_Rank, To_File-To_Rank) :-
-        name(Move, [FF,FR,TF,TR]),
-        name(From_File, [FF]),
+        atom_codes(Move, [FF,FR,TF,TR]),
+        atom_codes(From_File, [FF]),
         myname(From_Rank, [FR]),
-        name(To_File, [TF]),
+        atom_codes(To_File, [TF]),
         myname(To_Rank, [TR]),
         on_board(From_File-From_Rank),
         on_board(To_File-To_Rank).
@@ -367,7 +367,7 @@ print_squares(Board, File, Rank) :-
 print_a_square(Board, File, Rank) :-
     member(piece(File-Rank, Color, Type), Board),
     (Color = white -> write(' ') ; write('*')),
-    name(Type, [T|_]),
+    atom_codes(Type, [T|_]),
     put(T).
 print_a_square(Board, File, Rank) :-
     write('  ').
