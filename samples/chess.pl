@@ -368,7 +368,7 @@ print_a_square(Board, File, Rank) :-
     member(piece(File-Rank, Color, Type), Board),
     (Color = white -> write(' ') ; write('*')),
     atom_codes(Type, [T|_]),
-    put(T).
+    put_code(T).
 print_a_square(Board, File, Rank) :-
     write('  ').
 
