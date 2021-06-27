@@ -1621,14 +1621,14 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		mp_int_read_cstring(&v2, 2, s, (char**)&s);
 
 		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
-			p->v.val_big = malloc(sizeof(bigint));
-			p->v.val_big->refcnt = 1;
-			mp_int_init_copy(&p->v.val_big->ival, &v2);
-			if (neg) p->v.val_big->ival.sign = MP_NEG;
+			p->v.val_bigint = malloc(sizeof(bigint));
+			p->v.val_bigint->refcnt = 1;
+			mp_int_init_copy(&p->v.val_bigint->ival, &v2);
+			if (neg) p->v.val_bigint->ival.sign = MP_NEG;
 			p->v.flags |= FLAG_MANAGED;
 		} else {
 			set_smallint(&p->v, val);
-			if (neg) p->v.val_int = -p->v.val_int;
+			if (neg) p->v.val_integer = -p->v.val_integer;
 			mp_int_clear(&v2);
 		}
 
@@ -1654,14 +1654,14 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		mp_int_read_cstring(&v2, 8, s, (char**)&s);
 
 		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
-			p->v.val_big = malloc(sizeof(bigint));
-			p->v.val_big->refcnt = 1;
-			mp_int_init_copy(&p->v.val_big->ival, &v2);
-			if (neg) p->v.val_big->ival.sign = MP_NEG;
+			p->v.val_bigint = malloc(sizeof(bigint));
+			p->v.val_bigint->refcnt = 1;
+			mp_int_init_copy(&p->v.val_bigint->ival, &v2);
+			if (neg) p->v.val_bigint->ival.sign = MP_NEG;
 			p->v.flags |= FLAG_MANAGED;
 		} else {
 			set_smallint(&p->v, val);
-			if (neg) p->v.val_int = -p->v.val_int;
+			if (neg) p->v.val_integer = -p->v.val_integer;
 			mp_int_clear(&v2);
 		}
 
@@ -1687,14 +1687,14 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		mp_int_read_cstring(&v2, 16, s, (char**)&s);
 
 		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
-			p->v.val_big = malloc(sizeof(bigint));
-			p->v.val_big->refcnt = 1;
-			mp_int_init_copy(&p->v.val_big->ival, &v2);
-			if (neg) p->v.val_big->ival.sign = MP_NEG;
+			p->v.val_bigint = malloc(sizeof(bigint));
+			p->v.val_bigint->refcnt = 1;
+			mp_int_init_copy(&p->v.val_bigint->ival, &v2);
+			if (neg) p->v.val_bigint->ival.sign = MP_NEG;
 			p->v.flags |= FLAG_MANAGED;
 		} else {
 			set_smallint(&p->v, val);
-			if (neg) p->v.val_int = -p->v.val_int;
+			if (neg) p->v.val_integer = -p->v.val_integer;
 			mp_int_clear(&v2);
 		}
 
@@ -1727,14 +1727,14 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	}
 
 	if (mp_int_to_int(&v2, &val) == MP_RANGE) {
-		p->v.val_big = malloc(sizeof(bigint));
-		p->v.val_big->refcnt = 1;
-		mp_int_init_copy(&p->v.val_big->ival, &v2);
-		if (neg) p->v.val_big->ival.sign = MP_NEG;
+		p->v.val_bigint = malloc(sizeof(bigint));
+		p->v.val_bigint->refcnt = 1;
+		mp_int_init_copy(&p->v.val_bigint->ival, &v2);
+		if (neg) p->v.val_bigint->ival.sign = MP_NEG;
 		p->v.flags |= FLAG_MANAGED;
 	} else {
 		set_smallint(&p->v, val);
-		if (neg) p->v.val_int = -p->v.val_int;
+		if (neg) p->v.val_integer = -p->v.val_integer;
 	}
 
 	mp_int_clear(&v2);
@@ -2552,7 +2552,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		bool found = false;
 
 		if (is_bigint(&p->v)) {
-			c->val_big = p->v.val_big;
+			c->val_bigint = p->v.val_bigint;
 		} else if (is_smallint(&p->v)) {
 			set_smallint(c, get_smallint(&p->v));
 		} else if (p->v.tag == TAG_REAL) {

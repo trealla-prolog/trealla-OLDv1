@@ -304,10 +304,10 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 			dst += snprintf(dst, dstlen, "%s0o", is_negative(c)?"-":"");
 
 		if (!dstlen)
-			dst += mp_int_string_len(&c->val_big->ival, radix) - 1;
+			dst += mp_int_string_len(&c->val_bigint->ival, radix) - 1;
 		else {
-			size_t len = mp_int_string_len(&c->val_big->ival, radix) -1;
-			mp_int_to_string(&c->val_big->ival, radix, dst, len+1);
+			size_t len = mp_int_string_len(&c->val_bigint->ival, radix) -1;
+			mp_int_to_string(&c->val_bigint->ival, radix, dst, len+1);
 			dst += strlen(dst);
 		}
 
@@ -487,10 +487,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			dst += snprintf(dst, dstlen, "%s0o", is_negative(c)?"-":"");
 
 		if (!dstlen)
-			dst += mp_int_string_len(&c->val_big->ival, radix) - 1;
+			dst += mp_int_string_len(&c->val_bigint->ival, radix) - 1;
 		else {
-			size_t len = mp_int_string_len(&c->val_big->ival, radix) - 1;
-			mp_int_to_string(&c->val_big->ival, radix, dst, len+1);
+			size_t len = mp_int_string_len(&c->val_bigint->ival, radix) - 1;
+			mp_int_to_string(&c->val_bigint->ival, radix, dst, len+1);
 			dst += strlen(dst);
 		}
 

@@ -842,9 +842,9 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 					tmp.nbr_cells = 1;
 					tmp.tag = TAG_INTEGER;
 					tmp.flags = FLAG_MANAGED;
-					tmp.val_big = malloc(sizeof(bigint));
-					tmp.val_big->refcnt = 0;
-					mp_int_init_copy(&tmp.val_big->ival, &tmpz);
+					tmp.val_bigint = malloc(sizeof(bigint));
+					tmp.val_bigint->refcnt = 0;
+					mp_int_init_copy(&tmp.val_bigint->ival, &tmpz);
 				} else {
 					make_int(&tmp, val);
 				}
@@ -1101,9 +1101,9 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 					tmp.nbr_cells = 1;
 					tmp.tag = TAG_INTEGER;
 					tmp.flags = FLAG_MANAGED;
-					tmp.val_big = malloc(sizeof(bigint));
-					tmp.val_big->refcnt = 0;
-					mp_int_init_copy(&tmp.val_big->ival, &tmpz);
+					tmp.val_bigint = malloc(sizeof(bigint));
+					tmp.val_bigint->refcnt = 0;
+					mp_int_init_copy(&tmp.val_bigint->ival, &tmpz);
 				} else {
 					make_int(&tmp, val);
 				}

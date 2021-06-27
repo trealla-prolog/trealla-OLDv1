@@ -106,8 +106,8 @@ typedef enum {
 #define get_real(c) (c)->val_real
 #define set_real(c,v) (c)->val_real = (v)
 
-#define get_smallint(c) (c)->val_int
-#define set_smallint(c,v) { (c)->val_int = (v); (c)->val_spare1 = 0; }
+#define get_smallint(c) (c)->val_integer
+#define set_smallint(c,v) { (c)->val_integer = (v); (c)->val_spare1 = 0; }
 
 #define is_negative(c) (get_smallint(c) < 0)
 #define is_positive(c) (get_smallint(c) > 0)
@@ -281,18 +281,18 @@ struct cell_ {
 		// A smallint...
 
 		struct {
-			int_t val_int;
+			int_t val_integer;
 			void *val_spare1;
 		};
 
 		// A managed bigint...
 
 		struct {
-			bigint *val_big;
+			bigint *val_bigint;
 			void *val_spare2;
 		};
 
-		// A double...
+		// A real...
 
 		struct {
 			double val_real;
@@ -651,7 +651,7 @@ inline static void share_cell(const cell *c)
 		if (is_strbuf(c))
 			(c)->val_strb->refcnt++;
 		else if (is_bigint(c))
-			(c)->val_big->refcnt++;
+			(c)->val_bigint->refcnt++;
 	}
 }
 
@@ -664,10 +664,10 @@ inline static void unshare_cell(cell *c)
 				(c)->val_strb = NULL;
 			}
 		} else if (is_bigint(c)) {
-			if (--(c)->val_big->refcnt == 0)	{
-				mp_int_clear(&(c)->val_big->ival);
-				free((c)->val_big);
-				(c)->val_big = NULL;
+			if (--(c)->val_bigint->refcnt == 0)	{
+				mp_int_clear(&(c)->val_bigint->ival);
+				free((c)->val_bigint);
+				(c)->val_bigint = NULL;
 			}
 		}
 	}

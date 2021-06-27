@@ -869,13 +869,13 @@ static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx,
 static bool unify_integer(__attribute__((unused)) query *q, cell *p1, cell *p2)
 {
 	if (is_bigint(p1) && is_bigint(p2))
-		return !mp_int_compare(&p1->val_big->ival, &p2->val_big->ival);
+		return !mp_int_compare(&p1->val_bigint->ival, &p2->val_bigint->ival);
 
 	if (is_bigint(p1) && is_smallint(p2))
-		return !mp_int_compare_value(&p1->val_big->ival, p2->val_int);
+		return !mp_int_compare_value(&p1->val_bigint->ival, p2->val_integer);
 
 	if (is_bigint(p2) && is_smallint(p1))
-		return !mp_int_compare_value(&p2->val_big->ival, p1->val_int);
+		return !mp_int_compare_value(&p2->val_bigint->ival, p1->val_integer);
 
 	if (is_smallint(p2))
 		return (get_smallint(p1) == get_smallint(p2));
