@@ -602,11 +602,16 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (is_variable(p2)) {
+	if (is_variable(p2) && (is_literal(p1) || !is_blob(p1))) {
 		cell tmp;
 		may_error(make_stringn(&tmp, GET_STR(p1), LEN_STR(p1)));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
+		return pl_success;
+	}
+
+	if (is_variable(p2) && is_blob(p1)) {
+		set_var(q, p2, p2_ctx, p1, q->st.curr_frame);
 		return pl_success;
 	}
 
@@ -653,6 +658,12 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 
 		p2 = save_p2;
 		p2_ctx = save_p2_ctx;
+	}
+
+	if (is_string(p2) && is_variable(p1)) {
+		set_var(q, p1, p1_ctx, p2, q->st.curr_frame);
+		p1->flags &= ~FLAG_STRING;
+		return pl_success;
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
