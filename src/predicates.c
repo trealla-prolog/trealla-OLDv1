@@ -612,7 +612,8 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 
 	if (is_variable(p2) && is_blob(p1)) {
 		cell tmp = *p1;
-		tmp.flags |= FLAG_STRING;
+		tmp.flags = FLAG_STRING;
+		tmp.arity = 2;
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
@@ -665,6 +666,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 	if (is_string(p2) && is_variable(p1)) {
 		cell tmp = *p2;
 		tmp.flags &= ~FLAG_STRING;
+		tmp.arity = 0;
 		set_var(q, p1, p1_ctx, p2, q->st.curr_frame);
 		return pl_success;
 	}
