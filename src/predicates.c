@@ -3097,10 +3097,12 @@ static bool parse_write_params(query *q, cell *c, cell **vnames, idx_t *vnames_c
 					DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 					return false;
 				}
+#if 0
 				if (!is_variable(h+2)) {
 					DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 					return false;
 				}
+#endif
 			}
 
 			c1 = LIST_TAIL(c1);
