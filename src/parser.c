@@ -2543,6 +2543,11 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 #endif
 
+		if (priority && (specifier == OP_YFX) && last_op) {
+			specifier = 0;
+			priority = 0;
+		}
+
 		// Operators in canonical form..
 
 		if (last_op && priority && (*p->srcptr == '(')) {
@@ -2553,7 +2558,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		last_op = strcmp(p->token, ")") && priority;
-		int func = (p->v.tag == TAG_LITERAL) && !specifier && (*p->srcptr == '(');
+		int func = is_literal(&p->v) && !specifier && (*p->srcptr == '(');
 
 		if (func) {
 			is_func = true;
