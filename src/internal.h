@@ -739,8 +739,8 @@ typedef struct {
 	if (STRING_strlen(pr)) {											\
 		if (pr##_buf.dst[-1] == ch) 									\
 			 *--pr##_buf.dst = '\0';									\
-		}																\
-	}
+	}																	\
+}
 
 #define STRING_trim_all(pr,ch) {										\
 	while (STRING_strlen(pr)) {											\
@@ -748,8 +748,8 @@ typedef struct {
 			break;														\
 																		\
 		 *--pr##_buf.dst = '\0';										\
-		}																\
-	}
+	}																	\
+}
 
 #define STRING_check(pr,len) {											\
 	size_t rem = pr##_buf.size - STRING_strlen(pr);						\
