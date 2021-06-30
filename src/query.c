@@ -1208,8 +1208,9 @@ static USE_RESULT pl_status match_head(query *q)
 					q->error = true;
 
 				return pl_error;
-			} else
-				c->match = h;
+			}
+
+			c->match = h;
 		}
 
 		if (h->index) {
