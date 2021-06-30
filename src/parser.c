@@ -786,10 +786,10 @@ static void directives(parser *p, term *t)
 				p->m->flag.double_quote_atom = p->m->flag.double_quote_codes = false;
 				p->m->flag.double_quote_chars = true;
 			} else {
-				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: unknown value\n");
+				//if (DUMP_ERRS || !p->do_read_term)
+				//	fprintf(stdout, "Error: unknown value\n");
 
-				p->error = true;
+				//p->error = true;
 				return;
 			}
 		} else if (!strcmp(PARSER_GET_STR(p1), "character_escapes")) {
