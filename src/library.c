@@ -32,7 +32,7 @@ extern unsigned char library_ugraphs_pl[];
 extern unsigned int library_ugraphs_pl_len;
 //extern unsigned char library_clpfd_pl[];
 //extern unsigned int library_clpfd_pl_len;
-//extern unsigned char library_clp_pl[];
+//extern unsigned char library_clpz_pl[];
 //extern unsigned int library_clpz_pl_len;
 
 library g_libs[] = {
