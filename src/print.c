@@ -358,7 +358,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 		&& (running>0) && (q->nv_start == -1)
 		&& ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != ERR_IDX)) {
 
-		for (unsigned i = 0; i < MAX_ARITY; i++) {
+		for (unsigned i = 0; i < MAX_ARITY && var_nbr; i++) {
 			if (q->nv_mask[i])
 				break;
 
