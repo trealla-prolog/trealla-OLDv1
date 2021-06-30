@@ -1178,6 +1178,7 @@ static USE_RESULT pl_status match_head(query *q)
 		predicate *h;
 
 		if (is_literal(c)) {
+			//printf("*** %p\n", c->match);
 			h = c->match;
 		} else {
 			// For now convert it to a literal
