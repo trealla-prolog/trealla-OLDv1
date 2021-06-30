@@ -2233,7 +2233,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 {
 	idx_t begin_idx = p->t->cidx, arg_idx = p->t->cidx, save_idx = 0;
 	bool last_op = true, is_func = false, was_consing = false;
-	bool last_bar = false;
+	bool last_bar = false, last_quoted = false;
 	unsigned arity = 1;
 	p->depth++;
 
@@ -2543,7 +2543,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 #endif
 
-		if (priority && (specifier == OP_YFX) && last_op) {
+		if (priority && (specifier == OP_YFX) && last_op && !last_quoted) {
 			specifier = 0;
 			priority = 0;
 		}
@@ -2557,6 +2557,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			p->quote_char = 0;
 		}
 
+		last_quoted = p->is_quoted;
 		last_op = strcmp(p->token, ")") && priority;
 		int func = is_literal(&p->v) && !specifier && (*p->srcptr == '(');
 
