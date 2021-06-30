@@ -30,7 +30,7 @@ OBJECTS +=  library/builtins.o library/lists.o library/apply.o \
 	library/http.o library/atts.o library/error.o library/dcgs.o \
 	library/format.o library/charsio.o library/freeze.o \
 	library/ordsets.o library/assoc.o library/dict.o library/dif.o \
-	library/ugraphs.o library/clpfd.o library/clpz.o
+	library/ugraphs.o library/clpz.o
 
 OBJECTS += src/imath/imath.o
 
