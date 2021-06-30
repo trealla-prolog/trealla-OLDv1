@@ -797,7 +797,6 @@ static void directives(parser *p, term *t)
 				p->m->flag.character_escapes = true;
 			else if (!strcmp(PARSER_GET_STR(p2), "false") || !strcmp(PARSER_GET_STR(p2), "off"))
 				p->m->flag.character_escapes = false;
-		} else if (!strcmp(PARSER_GET_STR(p1), "generate_debug_info")) {
 		} else {
 			fprintf(stdout, "Warning: unknown flag: %s\n", PARSER_GET_STR(p1));
 		}
