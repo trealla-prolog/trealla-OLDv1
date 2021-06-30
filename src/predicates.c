@@ -11077,6 +11077,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 		}
 
 		if (!strcmp(name, "between")
+		    || !strcmp(name, "samsort")
 		    || !strcmp(name, "terms")
 		    || !strcmp(name, "types")
 			|| !strcmp(name, "iso_ext")

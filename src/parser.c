@@ -722,11 +722,12 @@ static void directives(parser *p, term *t)
 				return;
 			}
 
-			if (!strcmp(name, "between") ||
-				!strcmp(name, "terms") ||
-				!strcmp(name, "types") ||
-				!strcmp(name, "iso_ext") ||
-				!strcmp(name, "files"))
+			if (!strcmp(name, "between")
+				|| !strcmp(name, "samsort")
+				|| !strcmp(name, "terms")
+				|| !strcmp(name, "types")
+				|| !strcmp(name, "iso_ext")
+				|| !strcmp(name, "files"))
 				return;
 
 			for (library *lib = g_libs; lib->name; lib++) {
