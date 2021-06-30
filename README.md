@@ -352,6 +352,8 @@ Definite Clause Grammars
 Uses Ulrich Neumerkel's standard reference library. DCG rules are
 translated automatically as this library is auto-included.
 
+	:- use_module(library(dcgs)).
+
 
 Format
 ======
