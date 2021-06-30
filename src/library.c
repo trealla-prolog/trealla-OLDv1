@@ -30,28 +30,28 @@ extern unsigned char library_dif_pl[];
 extern unsigned int library_dif_pl_len;
 extern unsigned char library_ugraphs_pl[];
 extern unsigned int library_ugraphs_pl_len;
-//extern unsigned char library_clpfd_pl[];
-//extern unsigned int library_clpfd_pl_len;
-//extern unsigned char library_clpz_pl[];
-//extern unsigned int library_clpz_pl_len;
+extern unsigned char library_clpfd_pl[];
+extern unsigned int library_clpfd_pl_len;
+extern unsigned char library_clpz_pl[];
+extern unsigned int library_clpz_pl_len;
 
 library g_libs[] = {
-     {"builtins", library_builtins_pl, &library_builtins_pl_len},
-     {"lists", library_lists_pl, &library_lists_pl_len},
-     {"apply", library_apply_pl, &library_apply_pl_len},
-     {"assoc", library_assoc_pl, &library_assoc_pl_len},
-     {"ordsets", library_ordsets_pl, &library_ordsets_pl_len},
-     {"dict", library_dict_pl, &library_dict_pl_len},
-     {"http", library_http_pl, &library_http_pl_len},
-     {"atts", library_atts_pl, &library_atts_pl_len},
-     {"error", library_error_pl, &library_error_pl_len},
-     {"dcgs", library_dcgs_pl, &library_dcgs_pl_len},
-     {"format", library_format_pl, &library_format_pl_len},
-     {"charsio", library_charsio_pl, &library_charsio_pl_len},
-     {"freeze", library_freeze_pl, &library_freeze_pl_len},
-     {"dif", library_dif_pl, &library_dif_pl_len},
-     {"ugraphs", library_ugraphs_pl, &library_ugraphs_pl_len},
-     //{"clpfd", library_clpfd_pl, &library_clpfd_pl_len},
-     //{"clpz", library_clpz_pl, &library_clpz_pl_len},
-     {0}
+	 {"builtins", library_builtins_pl, &library_builtins_pl_len},
+	 {"lists", library_lists_pl, &library_lists_pl_len},
+	 {"apply", library_apply_pl, &library_apply_pl_len},
+	 {"assoc", library_assoc_pl, &library_assoc_pl_len},
+	 {"ordsets", library_ordsets_pl, &library_ordsets_pl_len},
+	 {"dict", library_dict_pl, &library_dict_pl_len},
+	 {"http", library_http_pl, &library_http_pl_len},
+	 {"atts", library_atts_pl, &library_atts_pl_len},
+	 {"error", library_error_pl, &library_error_pl_len},
+	 {"dcgs", library_dcgs_pl, &library_dcgs_pl_len},
+	 {"format", library_format_pl, &library_format_pl_len},
+	 {"charsio", library_charsio_pl, &library_charsio_pl_len},
+	 {"freeze", library_freeze_pl, &library_freeze_pl_len},
+	 {"dif", library_dif_pl, &library_dif_pl_len},
+	 {"ugraphs", library_ugraphs_pl, &library_ugraphs_pl_len},
+	 {"clpfd", library_clpfd_pl, &library_clpfd_pl_len},
+	 {"clpz", library_clpz_pl, &library_clpz_pl_len},
+	 {0}
 };
