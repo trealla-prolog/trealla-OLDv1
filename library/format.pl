@@ -79,7 +79,6 @@
                    xlisting/1
                   ]).
 
-:- use_module(library(dcgs)).
 :- use_module(library(lists)).
 :- use_module(library(error)).
 :- use_module(library(charsio)).

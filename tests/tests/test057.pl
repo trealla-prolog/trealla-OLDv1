@@ -1,7 +1,5 @@
 :-initialization(main).
 
-:- use_module(library(dcgs)).
-
 % A blocks grammar in DCG
 
 s --> vp.

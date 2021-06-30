@@ -181,6 +181,7 @@ GNU-Prolog & SWI-Prolog
 
 	between/3
 	forall/2
+	samsort/2				# same as msort/2
 	msort/2
 	merge/3
 	format/[1-3]			# needs library(format)
@@ -348,11 +349,8 @@ support loading into modules eg. *consult(MOD:FILE-SPEC)*.
 Definite Clause Grammars
 ========================
 
-Uses Ulrich Neumerkel's standard reference library.
-
-	:- use_module(library(dcgs)).
-
-DCG rules are translated automatically if this module is included.
+Uses Ulrich Neumerkel's standard reference library. DCG rules are
+translated automatically as this library is auto-included.
 
 
 Format
@@ -363,7 +361,7 @@ Uses Markus Triska's public domain library.
 	:- use_module(library(format)).
 
 	format_//2
-	format[2,3]
+	format/[2,3]
 
 
 User-defined functions

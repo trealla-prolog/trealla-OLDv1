@@ -1,7 +1,6 @@
 :- module(attrmod, [domain/2, test/0]).
 
 :- use_module(library(dif)).		% get from scryer
-:- use_module(library(dcgs)).
 :- use_module(library(ordsets)).
 :- use_module(library(atts)).
 

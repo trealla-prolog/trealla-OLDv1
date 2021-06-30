@@ -161,6 +161,8 @@ mmerge(<, H1, H2, T1, T2, [H1|R]) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
+samsort(L, R) :- msort(L, R).
+
 msort(L, R) :-
 	'$mustbe_instantiated'(L, R),
 	'$mustbe_list'(L),

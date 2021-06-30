@@ -1,5 +1,4 @@
 :- use_module(library(lists)).
-:- use_module(library(dcgs)).
 
 % PVR 20/07/92: Added entry declaration for move/5 (it is used in a bagof).
 

@@ -1,5 +1,4 @@
 :- initialization(main).
-:- use_module(library(dcgs)).
 
 sentence --> np, vp.
 np --> det, noun.

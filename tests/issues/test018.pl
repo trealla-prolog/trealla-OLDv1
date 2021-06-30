@@ -1,5 +1,4 @@
 :-initialization(main).
-:- use_module(library(dcgs)).
 
 main :-
 	phrase([], Ls), write(Ls), nl,

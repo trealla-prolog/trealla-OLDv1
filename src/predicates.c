@@ -5785,9 +5785,11 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "version_data")
 		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "version_git")
 		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "dialect")
-		)
+		) {
 		return throw_error(q, p1, "permission_error", "modify,flag");
-	else
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "generate_debug_info")) {
+		;
+	} else
 		return throw_error(q, p1, "domain_error", "prolog_flag");
 
 	q->flag = q->st.m->flag;

@@ -796,6 +796,7 @@ static void directives(parser *p, term *t)
 				p->m->flag.character_escapes = true;
 			else if (!strcmp(PARSER_GET_STR(p2), "false") || !strcmp(PARSER_GET_STR(p2), "off"))
 				p->m->flag.character_escapes = false;
+		} else if (!strcmp(PARSER_GET_STR(p1), "generate_debug_info")) {
 		} else {
 			fprintf(stdout, "Warning: unknown flag: %s\n", PARSER_GET_STR(p1));
 		}
@@ -1399,6 +1400,23 @@ static bool term_dcg_rewrite(parser *p)
 
 	if (strcmp(PARSER_GET_STR(p->t->cells), "-->"))
 		return false;
+
+	if (!find_module(p->m->pl, "dcgs")) {
+		for (library *lib = g_libs; lib->name; lib++) {
+			if (strcmp(lib->name, "dcgs"))
+				continue;
+
+			char *src = malloc(*lib->len+1);
+			may_ptr_error(src);
+			memcpy(src, lib->start, *lib->len);
+			src[*lib->len] = '\0';
+			STRING_alloc(s1);
+			STRING_strcat2(s1, "library/", lib->name);
+			load_text(p->m, src, STRING_cstr(s1));
+			STRING_free(s1);
+			free(src);
+		}
+	}
 
 	// Being conservative here (for now) and using
 	// temp parser/query objects...
