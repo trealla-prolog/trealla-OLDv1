@@ -175,10 +175,6 @@ will gain greatly (*phrase_from_file/[2-3]* uses this).
 Both strings and atoms make use of low-overhead ref-counted byte slices
 where appropriate.
 
-
-GNU-Prolog & SWI-Prolog
-=======================
-
 	between/3
 	forall/2
 	samsort/2				# same as msort/2
@@ -215,12 +211,10 @@ GNU-Prolog & SWI-Prolog
 	freeze/2				# use_module(library(freeze))
 	frozen/2				# use_module(library(freeze))
 
-
-Others
-======
-
-	memberchk/2
-	atomic_concat/3
+	expand_term/2				# expand_term(+term,-term)
+	memberchk/2					# memberchk(+term,+list).
+	nonmember/2					# \+ memberchk(+term,+list)
+	atomic_concat/3				# atomic_concat(+atom,+list,-list)
     atomic_list_concat/2		# atomic_list_concat(L,Atom) (bidirectional)
     atomic_list_concat/3		# atomic_list_concat(L,Sep,Atom) (bidirectional)
 	read_term_from_chars/2		# read_term_from_chars(+chars,-term)

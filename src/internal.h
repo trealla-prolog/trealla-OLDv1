@@ -370,7 +370,7 @@ struct clause_ {
 };
 
 struct predicate_ {
-	predicate *next;
+	predicate *prev, *next;
 	clause *head, *tail;
 	module *m;
 	map *index, *index_save;

@@ -3,6 +3,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
+expand_term((H --> B), Out) :-
+	dcg_translate((H --> B), Out).
+
 unify_with_occurs_check(X, X) :-
 	acyclic_term(X).
 
