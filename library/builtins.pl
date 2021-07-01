@@ -1,7 +1,7 @@
 :- pragma(builtins, [once(true)]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+% These are SICStus compatible...
 
 must_be(Term, callable, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (callable(Term) -> true ; throw(error(type_error(callable, Term), must_be/4))), !.
 must_be(Term, atom, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (atom(Term) -> true ; throw(error(type_error(atom, Term), must_be/4))), !.
@@ -14,6 +14,12 @@ must_be(Term, nonvar, _Goal, _Arg) :- !, (nonvar(Term) -> true ; throw(error(uni
 must_be(Term, ground, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (ground(Term) -> true ; throw(error(type_error(Term, ground), must_be/4))), !.
 must_be(Term, compound, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (compound(Term) -> true ; throw(error(type_error(compound, Term), must_be/4))), !.
 must_be(Term, list, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (list(Term) -> true ; throw(error(type_error(list, Term), must_be/4))), !.
+
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 
 expand_term((H --> B), Out) :-
 	dcg_translate((H --> B), Out).
@@ -367,19 +373,19 @@ consult(Files) :- load_files(Files,[]).
 % hack using assert/retract...
 
 nb_setval(K, _) :-
-	'$mustbe_atom'(K),
+	must_be(K, atom, _, _),
 	user:retract('$global_key'(K, _)),
 	fail.
 nb_setval(K, V) :-
-	'$mustbe_atom'(K),
+	must_be(K, atom, _, _),
 	user:assertz('$global_key'(K, V)).
 
 nb_getval(K, V) :-
-	'$mustbe_atom'(K),
+	must_be(K, atom, _, _),
 	user:catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), nb_setval/2))).
 
 nb_delete(K) :-
-	'$mustbe_atom'(K),
+	must_be(K, atom, _, _),
 	user:retract('$global_key'(K, _)),
 	!.
 nb_delete(_).
@@ -397,22 +403,22 @@ nb_current(K, V) :-
 % The following is not really correct.
 
 b_setval(K, _) :-
-	'$mustbe_atom'(K),
+	must_be(K, atom, _, _),
 	\+ user:clause('$global_key'(K, _), _), asserta('$global_key'(K, [])),
 	fail.
 b_setval(K, V) :-
-	'$mustbe_atom'(K),
+	must_be(K, atom, _, _),
 	user:asserta('$global_key'(K, V)).
 b_setval(K, _) :-
 	user:retract('$global_key'(K, _)),
 	!.
 
 b_setval0(K, _) :-
-	'$mustbe_atom'(K),
+	must_be(K, atom, _, _),
 	\+ user:clause('$global_key'(K, _), _), asserta('$global_key'(K, 0)),
 	fail.
 b_setval0(K, V) :-
-	'$mustbe_atom'(K),
+	must_be(K, atom, _, _),
 	asserta('$global_key'(K, V)).
 b_setval0(K, _) :-
 	user:retract('$global_key'(K, _)),
@@ -595,23 +601,23 @@ atom_list(Atom, _, [Atom]).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 plus(X,Y,S) :- nonvar(X), nonvar(Y),
-	'$mustbe_integer'(X), '$mustbe_integer'(Y), !,
+	must_be(X, integer, _, _), must_be(Y, integer, _, _), !,
 	S is X + Y.
 plus(X,Y,S) :- nonvar(X), var(Y), nonvar(S),
-	'$mustbe_integer'(X), '$mustbe_integer'(S), !,
+	must_be(X, integer, _, _), must_be(S, integer, _, _), !,
 	Y is S - X.
 plus(X,Y,S) :- var(X), nonvar(Y), nonvar(S),
-	'$mustbe_integer'(S), '$mustbe_integer'(Y), !,
+	must_be(S, integer, _, _), must_be(Y, integer, _, _), !,
 	X is S - Y.
 plus(_,_,_) :-
 	throw(error(instantiation_error, plus/3)).
 
 succ(X,S) :- nonvar(X), Y=1, nonvar(Y),
-	'$mustbe_integer'(X), '$mustbe_integer'(Y), !,
+	must_be(X, integer, _, _), must_be(Y, integer, _, _), !,
 	(X >= 0 -> true ; throw(error(domain_error(not_less_than_zero, X), succ/2))),
 	S is X + Y.
 succ(X,S) :- var(X), Y=1, nonvar(Y), nonvar(S),
-	'$mustbe_integer'(S), '$mustbe_integer'(Y), !,
+	must_be(S, integer, _, _), must_be(Y, integer, _, _), !,
 	(S >= 0 -> true ; throw(error(domain_error(not_less_than_zero, S), succ/2))),
 	!,
 	S > 0,

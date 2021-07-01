@@ -1,11 +1,11 @@
-/*  CLP(Z): Constraint Logic Programming over Integers.
+/*  CLP(ℤ): Constraint Logic Programming over Integers.
 
     Author:        Markus Triska
     E-mail:        triska@metalevel.at
     WWW:           https://www.metalevel.at
-    Copyright (C): 2016-2020 Markus Triska
+    Copyright (C): 2016-2021 Markus Triska
 
-    This library provides CLP(Z):
+    This library provides CLP(ℤ):
 
               Constraint Logic Programming over Integers
               ==========================================
@@ -16,45 +16,48 @@
     -) Fully relational, MONOTONIC execution mode.
     -) Always TERMINATING labeling.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+    Permission is hereby granted, free of charge, to any person
+    obtaining a copy of this software and associated documentation
+    files (the "Software"), to deal in the Software without
+    restriction, including without limitation the rights to use, copy,
+    modify, merge, publish, distribute, sublicense, and/or sell copies
+    of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in
-       the documentation and/or other materials provided with the
-       distribution.
+    The above copyright notice and this permission notice shall be
+    included in all copies or substantial portions of the Software.
 
-    3. If you distribute any modified version of this library, then
-       the following conditions must all hold:
-
-       (a) There must be some version of SICStus Prolog that compiles
-           the modified version without errors and without warnings.
-       (b) All Prolog goals that succeed with the original version
-           of this library must also succeed with the modified version.
-       (c) All Prolog goals that fail with the original version of this
-           library must also fail with the modified version.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 
 */
 
 
 :- module(clpz, [
+                 op(760, yfx, #<==>),
+                 op(750, xfy, #==>),
+                 op(750, yfx, #<==),
+                 op(740, yfx, #\/),
+                 op(730, yfx, #\),
+                 op(720, yfx, #/\),
+                 op(710,  fy, #\),
+                 op(700, xfx, #>),
+                 op(700, xfx, #<),
+                 op(700, xfx, #>=),
+                 op(700, xfx, #=<),
+                 op(700, xfx, #=),
+                 op(700, xfx, #\=),
+                 op(700, xfx, in),
+                 op(700, xfx, ins),
+                 op(450, xfx, ..), % should bind more tightly than \/
+                 op(150, fx, #),
                  (#>)/2,
                  (#<)/2,
                  (#>=)/2,
@@ -90,27 +93,38 @@
                  element/3,
                  automaton/3,
                  automaton/8,
-                 transpose/2,
                  zcompare/3,
                  chain/2,
                  fd_var/1,
                  fd_inf/2,
                  fd_sup/2,
                  fd_size/2,
-                 fd_dom/2
+                 fd_dom/2,
+
+                 % for use in predicates from library(reif)
+                 (#=)/3,
+                 (#<)/3
+
+                 % called from goal_expansion
+                 % clpz_equal/2,
+                 % clpz_geq/2
                 ]).
 
-:- public                               % called from goal_expansion
-        clpz_equal/2,
-        clpz_geq/2.
 
 :- use_module(library(assoc)).
+:- use_module(library(pairs)).
 :- use_module(library(between)).
 :- use_module(library(lists)).
 :- use_module(library(atts)).
-:- use_module(library(samsort)).
+:- use_module(library(iso_ext)).
+:- use_module(library(dcgs)).
 :- use_module(library(terms)).
-:- use_module(library(types)).
+:- use_module(library(error), [domain_error/3, type_error/3]).
+:- use_module(library(si)).
+:- use_module(library(freeze)).
+:- use_module(library(arithmetic)).
+
+% :- use_module(library(types)).
 
 :- attribute
         clpz/1,
@@ -134,35 +148,37 @@
         enabled/1.
 
 :- dynamic(monotonic/0).
+:- dynamic(clpz_equal_/2).
+:- dynamic(clpz_geq_/2).
+:- dynamic(clpz_neq/2).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   Compatibility predicates.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-list_itype(L, Where) :-
-   prolog:'$list_info'(L,_,R),
-   (   nonvar(R)
-   ->  R == []
-   ;   instantiation_error(L, Where)
-   ).
+cyclic_term(T) :-
+        \+ acyclic_term(T).
 
 must_be(What, Term) :- must_be(What, unknown(Term)-1, Term).
 
+must_be(ground, _, Term) :- !,
+        (   ground(Term) -> true
+        ;   instantiation_error(Term)
+        ).
 must_be(acyclic, Where, Term) :- !,
         (   acyclic_term(Term) ->
             true
         ;   domain_error(acyclic_term, Term, Where)
         ).
 must_be(list, Where, Term) :- !,
-        (   list_itype(Term, Where) -> true
+        (   list_si(Term) -> true
         ;   type_error(list, Term, Where)
         ).
 must_be(list(What), Where, Term) :- !,
         must_be(list, Where, Term),
         maplist(must_be(What, Where), Term).
-must_be(Type, Goal-Arg, Term) :-
-        must_be(Term, Type, Goal, Arg).
-
+must_be(Type, _, Term) :-
+        error:must_be(Type, Term).
 
 
 instantiation_error(Term) :- instantiation_error(Term, unknown(Term)-1).
@@ -174,79 +190,57 @@ instantiation_error(_, Goal-Arg) :-
 domain_error(Expectation, Term) :-
         domain_error(Expectation, Term, unknown(Term)-1).
 
-domain_error(Expectation, Term, Goal-Arg) :-
-        throw(error(domain_error(Expectation, Term), domain_error(Goal, Arg, Expectation, Term))).
-
-
 type_error(Expectation, Term) :-
         type_error(Expectation, Term, unknown(Term)-1).
-
-type_error(Expectation, Term, Goal-Arg) :-
-        throw(error(type_error(Expectation, Term), type_error(Goal, Arg, Expectation, Term))).
-
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   foldl/4
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
-foldl(Goal_3, Ls, A0, A) :-
-        foldl_(Ls, Goal_3, A0, A).
-
-foldl_([], _, A, A).
-foldl_([L|Ls], G_3, A0, A) :-
-        call(G_3, L, A0, A1),
-        foldl_(Ls, G_3, A1, A).
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   foldl/5
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
-foldl(Goal_4, Xs, Ys, A0, A) :-
-        foldl_(Xs, Ys, Goal_4, A0, A).
-
-foldl_([], [], _, A, A).
-foldl_([X|Xs], [Y|Ys], G_4, A0, A) :-
-        call(G_4, X, Y, A0, A1),
-        foldl_(Xs, Ys, G_4, A1, A).
 
 
 partition(Pred, Ls0, As, Bs) :-
         include(Pred, Ls0, As),
         exclude(Pred, Ls0, Bs).
 
-sum_list(Ls, S) :- sumlist(Ls, S).
+
+partition(Pred, Ls0, Ls, Es, Gs) :-
+        partition_(Ls0, Pred, Ls, Es, Gs).
+
+partition_([], _, [], [], []).
+partition_([X|Xs], Pred, Ls0, Es0, Gs0) :-
+        call(Pred, X, Cmp),
+        (   Cmp = (<) -> Ls0 = [X|Rest], partition_(Xs, Pred, Rest, Es0, Gs0)
+        ;   Cmp = (=) -> Es0 = [X|Rest], partition_(Xs, Pred, Ls0, Rest, Gs0)
+        ;   Cmp = (>) -> Gs0 = [X|Rest], partition_(Xs, Pred, Ls0, Es0, Rest)
+        ).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  Pairs.
+   include/3 and exclude/3
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-pairs_keys_values([], [], []).
-pairs_keys_values([A-B|ABs], [A|As], [B|Bs]) :-
-        pairs_keys_values(ABs, As, Bs).
+include(Goal, Ls0, Ls) :-
+        include_(Ls0, Goal, Ls).
 
-pairs_keys(Ps, Ks) :- pairs_keys_values(Ps, Ks, _).
-
-pairs_values(Ps, Vs) :- pairs_keys_values(Ps, _, Vs).
-
-map_list_to_pairs(Pred, Ls, Ps) :-
-        map_list_to_pairs2(Ls, Pred, Ps).
-
-map_list_to_pairs2([], _, []).
-map_list_to_pairs2([H|T0], Pred, [K-H|T]) :-
-        call(Pred, H, K),
-        map_list_to_pairs2(T0, Pred, T).
-
-:- discontiguous clpz:goal_expansion/5.
+include_([], _, []).
+include_([L|Ls0], Goal, Ls) :-
+        (   call(Goal, L) ->
+            Ls = [L|Rest]
+        ;   Ls = Rest
+        ),
+        include_(Ls0, Goal, Rest).
 
 
-goal_expansion(get_attr(Var, Module, Value), _, clpz, (var(Var),get_atts(Var, [+Access])), []) :-
-        Access =.. [Module,Value].
 
-goal_expansion(put_attr(Var, Module, Value), _, clpz, put_atts(Var, [+Access]), []) :-
-        Access =.. [Module,Value].
+exclude(Goal, Ls0, Ls) :-
+        exclude_(Ls0, Goal, Ls).
 
-goal_expansion(del_attr(Var, Module), _, clpz, (var(Var) -> put_atts(Var, [-Access]);true), []) :-
-        Access =.. [Module,_].
+exclude_([], _, []).
+exclude_([L|Ls0], Goal, Ls) :-
+        (   call(Goal, L) ->
+            Ls = Rest
+        ;   Ls = [L|Rest]
+        ),
+        exclude_(Ls0, Goal, Rest).
+
+
+%:- discontiguous clpz:goal_expansion/5.
+
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   Public operators.
@@ -285,15 +279,15 @@ goal_expansion(del_attr(Var, Module), _, clpz, (var(Var) -> put_atts(Var, [-Acce
 
 ## Introduction			{#clpz-intro}
 
-This library provides CLP(Z): Constraint Logic Programming over
+This library provides CLP(ℤ): Constraint Logic Programming over
 Integers.
 
-CLP(Z) is an instance of the general CLP(.) scheme, extending logic
-programming with reasoning over specialised domains. CLP(Z) lets us
+CLP(ℤ) is an instance of the general CLP(.) scheme, extending logic
+programming with reasoning over specialised domains. CLP(ℤ) lets us
 reason about **integers** in a way that honors the relational nature
 of Prolog.
 
-There are two major use cases of CLP(Z) constraints:
+There are two major use cases of CLP(ℤ) constraints:
 
     1. [**declarative integer arithmetic**](<#clpz-integer-arith>)
     2. solving **combinatorial problems** such as planning, scheduling
@@ -311,7 +305,7 @@ The predicates of this library can be classified as:
 In most cases, [_arithmetic constraints_](<#clpz-arith-constraints>)
 are the only predicates you will ever need from this library. When
 reasoning over integers, simply replace low-level arithmetic
-predicates like `(is)/2` and `(>)/2` by the corresponding CLP(Z)
+predicates like `(is)/2` and `(>)/2` by the corresponding CLP(ℤ)
 constraints like #=/2 and #>/2 to honor and preserve declarative
 properties of your programs. For satisfactory performance, arithmetic
 constraints are implicitly rewritten at compilation time so that
@@ -319,7 +313,7 @@ low-level fallback predicates are automatically used whenever
 possible.
 
 Almost all Prolog programs also reason about integers. Therefore, it
-is highly advisable that you make CLP(Z) constraints available in all
+is highly advisable that you make CLP(ℤ) constraints available in all
 your programs. One way to do this is to put the following directive in
 your =|~/.swiplrc|= initialisation file:
 
@@ -327,7 +321,7 @@ your =|~/.swiplrc|= initialisation file:
 :- use_module(library(clpz)).
 ==
 
-All example programs that appear in the CLP(Z) documentation assume
+All example programs that appear in the CLP(ℤ) documentation assume
 that you have done this.
 
 Important concepts and principles of this library are illustrated by
@@ -335,7 +329,7 @@ means of usage examples that are available in a public git repository:
 [**github.com/triska/clpz**](https://github.com/triska/clpz)
 
 If you are used to the complicated operational considerations that
-low-level arithmetic primitives necessitate, then moving to CLP(Z)
+low-level arithmetic primitives necessitate, then moving to CLP(ℤ)
 constraints may, due to their power and convenience, at first feel to
 you excessive and almost like cheating. It _isn't_. Constraints are an
 integral part of all popular Prolog systems, and they are designed
@@ -343,7 +337,7 @@ to help you eliminate and avoid the use of low-level and less general
 primitives by providing declarative alternatives that are meant to be
 used instead.
 
-When teaching Prolog, CLP(Z) constraints should be introduced
+When teaching Prolog, CLP(ℤ) constraints should be introduced
 _before_ explaining low-level arithmetic predicates and their
 procedural idiosyncrasies. This is because constraints are easy to
 explain, understand and use due to their purely relational nature. In
@@ -351,13 +345,13 @@ contrast, the modedness and directionality of low-level arithmetic
 primitives are impure limitations that are better deferred to more
 advanced lectures.
 
-More information about CLP(Z) constraints and their implementation is
+More information about CLP(ℤ) constraints and their implementation is
 contained in: [**metalevel.at/drt.pdf**](https://www.metalevel.at/drt.pdf)
 
-The best way to discuss applying, improving and extending CLP(Z)
+The best way to discuss applying, improving and extending CLP(ℤ)
 constraints is to use the dedicated `clpz` tag on
 [stackoverflow.com](http://stackoverflow.com). Several of the world's
-foremost CLP(Z) experts regularly participate in these discussions
+foremost CLP(ℤ) experts regularly participate in these discussions
 and will help you for free on this platform.
 
 ## Arithmetic constraints		{#clpz-arith-constraints}
@@ -412,7 +406,7 @@ etc. are meant to be used _instead_ of the primitives `(is)/2`,
 `(=:=)/2`, `(>)/2` etc. over integers. Almost all Prolog programs also
 reason about integers. Therefore, it is recommended that you put the
 following directive in your =|~/.swiplrc|= initialisation file to make
-CLP(Z) constraints available in all your programs:
+CLP(ℤ) constraints available in all your programs:
 
 ==
 :- use_module(library(clpz)).
@@ -420,7 +414,7 @@ CLP(Z) constraints available in all your programs:
 
 Throughout the following, it is assumed that you have done this.
 
-The most basic use of CLP(Z) constraints is _evaluation_ of
+The most basic use of CLP(ℤ) constraints is _evaluation_ of
 arithmetic expressions involving integers. For example:
 
 ==
@@ -439,7 +433,7 @@ partially instantiated. For example:
 Y = 1.
 ==
 
-This relational nature makes CLP(Z) constraints easy to explain and
+This relational nature makes CLP(ℤ) constraints easy to explain and
 use, and well suited for beginners and experienced Prolog programmers
 alike. In contrast, when using low-level integer arithmetic, we get:
 
@@ -455,7 +449,7 @@ Due to the necessary operational considerations, the use of these
 low-level arithmetic predicates is considerably harder to understand
 and should therefore be deferred to more advanced lectures.
 
-For supported expressions, CLP(Z) constraints are drop-in
+For supported expressions, CLP(ℤ) constraints are drop-in
 replacements of these low-level arithmetic predicates, often yielding
 more general programs. See [`n_factorial/2`](<#clpz-factorial>) for an
 example.
@@ -479,13 +473,13 @@ positive_integer(N) :-
         ).
 ==
 
-This illustrates why the performance of CLP(Z) constraints is almost
+This illustrates why the performance of CLP(ℤ) constraints is almost
 always completely satisfactory when they are used in modes that can be
 handled by low-level arithmetic. To disable the automatic rewriting,
 set the Prolog flag `clpz_goal_expansion` to `false`.
 
 If you are used to the complicated operational considerations that
-low-level arithmetic primitives necessitate, then moving to CLP(Z)
+low-level arithmetic primitives necessitate, then moving to CLP(ℤ)
 constraints may, due to their power and convenience, at first feel to
 you excessive and almost like cheating. It _isn't_. Constraints are an
 integral part of all popular Prolog systems, and they are designed
@@ -511,9 +505,9 @@ n_factorial(N, F) :-
         F #= N * F1.
 ==
 
-This program uses CLP(Z) constraints _instead_ of low-level
+This program uses CLP(ℤ) constraints _instead_ of low-level
 arithmetic throughout, and everything that _would have worked_ with
-low-level arithmetic _also_ works with CLP(Z) constraints, retaining
+low-level arithmetic _also_ works with CLP(ℤ) constraints, retaining
 roughly the same performance. For example:
 
 ==
@@ -523,7 +517,7 @@ false.
 ==
 
 Now the point: Due to the increased flexibility and generality of
-CLP(Z) constraints, we are free to _reorder_ the goals as follows:
+CLP(ℤ) constraints, we are free to _reorder_ the goals as follows:
 
 ==
 n_factorial(0, 1).
@@ -552,18 +546,18 @@ the (implied) constraint `F #\= 0` before the recursive call.
 Otherwise, the query `n_factorial(N, 0)` is the only non-terminating
 case of this kind.
 
-The value of CLP(Z) constraints does _not_ lie in completely freeing
+The value of CLP(ℤ) constraints does _not_ lie in completely freeing
 us from _all_ procedural phenomena. For example, the two programs do
 not even have the same _termination properties_ in all cases.
-Instead, the primary benefit of CLP(Z) constraints is that they allow
+Instead, the primary benefit of CLP(ℤ) constraints is that they allow
 you to try different execution orders and apply [**declarative
 debugging**](https://www.metalevel.at/prolog/debugging.html)
 techniques _at all_!  Reordering goals (and clauses) can significantly
 impact the performance of Prolog programs, and you are free to try
 different variants if you use declarative approaches. Moreover, since
-all CLP(Z) constraints _always terminate_, placing them earlier can
+all CLP(ℤ) constraints _always terminate_, placing them earlier can
 at most _improve_, never worsen, the termination properties of your
-programs. An additional benefit of CLP(Z) constraints is that they
+programs. An additional benefit of CLP(ℤ) constraints is that they
 eliminate the complexity of introducing `(is)/2` and `(=:=)/2` to
 beginners, since _both_ predicates are subsumed by #=/2 when reasoning
 over integers.
@@ -571,7 +565,7 @@ over integers.
 ## Combinatorial constraints  {#clpz-combinatorial}
 
 In addition to subsuming and replacing low-level arithmetic
-predicates, CLP(Z) constraints are often used to solve combinatorial
+predicates, CLP(ℤ) constraints are often used to solve combinatorial
 problems such as planning, scheduling and allocation tasks. Among the
 most frequently used *combinatorial constraints* are all_distinct/1,
 global_cardinality/2 and cumulative/2. This library also provides
@@ -580,12 +574,12 @@ useful in more specialized applications.
 
 ## Domains                             {#clpz-domains}
 
-Each CLP(Z) variable has an associated set of admissible integers,
+Each CLP(ℤ) variable has an associated set of admissible integers,
 which we call the variable's *domain*. Initially, the domain of each
-CLP(Z) variable is the set of _all_ integers. CLP(Z) constraints
+CLP(ℤ) variable is the set of _all_ integers. CLP(ℤ) constraints
 like #=/2, #>/2 and #\=/2 can at most reduce, and never extend, the
 domains of their arguments. The constraints in/2 and ins/2 let us
-explicitly state domains of CLP(Z) variables. The process of
+explicitly state domains of CLP(ℤ) variables. The process of
 determining and adjusting domains of variables is called constraint
 *propagation*, and it is performed automatically by this library. When
 the domain of a variable contains only one element, then the variable
@@ -597,7 +591,7 @@ and by enumeration predicates like labeling/2.
 ## Example: Sudoku {#clpz-sudoku}
 
 As another example, consider _Sudoku_: It is a popular puzzle
-over integers that can be easily solved with CLP(Z) constraints.
+over integers that can be easily solved with CLP(ℤ) constraints.
 
 ==
 sudoku(Rows) :-
@@ -701,7 +695,7 @@ own labeling strategies.
 
 ## Core relations and search    {#clpz-search}
 
-Using CLP(Z) constraints to solve combinatorial tasks typically
+Using CLP(ℤ) constraints to solve combinatorial tasks typically
 consists of two phases:
 
     1. First, all relevant constraints are stated.
@@ -717,7 +711,7 @@ search, and more easily try different search strategies.
 
 As an example of a constraint satisfaction problem, consider the
 cryptoarithmetic puzzle SEND + MORE = MONEY, where different letters
-denote distinct integers between 0 and 9. It can be modeled in CLP(Z)
+denote distinct integers between 0 and 9. It can be modeled in CLP(ℤ)
 as follows:
 
 ==
@@ -780,13 +774,13 @@ so-called _eight queens puzzle_. The task is to place 8 queens on an
 8x8 chessboard such that none of the queens is under attack. This
 means that no two queens share the same row, column or diagonal.
 
-To express this puzzle via CLP(Z) constraints, we must first pick a
-suitable representation. Since CLP(Z) constraints reason over
+To express this puzzle via CLP(ℤ) constraints, we must first pick a
+suitable representation. Since CLP(ℤ) constraints reason over
 _integers_, we must find a way to map the positions of queens to
 integers. Several such mappings are conceivable, and it is not
 immediately obvious which we should use. On top of that, different
 constraints can be used to express the desired relations. For such
-reasons, _modeling_ combinatorial problems via CLP(Z) constraints
+reasons, _modeling_ combinatorial problems via CLP(ℤ) constraints
 often necessitates some creativity and has been described as more of
 an art than a science.
 
@@ -851,7 +845,7 @@ separated the core relation from the actual search.
 
 ## Optimisation    {#clpz-optimisation}
 
-We can use labeling/2 to minimize or maximize the value of a CLP(Z)
+We can use labeling/2 to minimize or maximize the value of a CLP(ℤ)
 expression, and generate solutions in increasing or decreasing order
 of the value. See the labeling options `min(Expr)` and `max(Expr)`,
 respectively.
@@ -868,9 +862,9 @@ solutions that are _also_ optimal, so that we can choose among optimal
 solutions by other criteria. For the sake of
 [**purity**](https://www.metalevel.at/prolog/purity.html) and
 completeness, we recommend to avoid `once/1` and other constructs that
-lead to impurities in CLP(Z) programs.
+lead to impurities in CLP(ℤ) programs.
 
-Related to optimisation with CLP(Z) constraints are `library(simplex)`
+Related to optimisation with CLP(ℤ) constraints are `library(simplex)`
 and CLP(Q) which reason about _linear_ constraints over rational
 numbers.
 
@@ -894,9 +888,9 @@ The constraints of this table are reifiable as well.
 When reasoning over Boolean variables, also consider using CLP(B)
 constraints as provided by `library(clpb)`.
 
-## Enabling monotonic CLP(Z)		{#clpz-monotonicity}
+## Enabling monotonic CLP(ℤ)		{#clpz-monotonicity}
 
-In the default execution mode, CLP(Z) constraints still exhibit some
+In the default execution mode, CLP(ℤ) constraints still exhibit some
 non-relational properties. For example, _adding_ constraints can yield
 new solutions:
 
@@ -911,7 +905,7 @@ X = 1+1.
 This behaviour is highly problematic from a logical point of view, and
 it may render declarative debugging techniques inapplicable.
 
-Assert `clpz:monotonic` to make CLP(Z) **monotonic**: This means
+Assert `clpz:monotonic` to make CLP(ℤ) **monotonic**: This means
 that _adding_ new constraints _cannot_ yield new solutions. When this
 flag is `true`, we must wrap variables that occur in arithmetic
 expressions with the functor `(?)/1` or `(#)/1`. For example:
@@ -1013,9 +1007,8 @@ duophrase(NT, As, Bs) :-
 duophrase(NT, As0, As, Bs0, Bs) :-
         call(NT, As0, As, Bs0, Bs).
 
-:- multifile user:term_expansion/6.
-user:term_expansion(Term0, _Layout1, Ids, Term, [], [duodcg|Ids]) :-
-        nonmember(duodcg, Ids),
+%:- multifile user:term_expansion/6.
+term_expansion(Term0, Term) :-
         nonvar(Term0),
         Term0 = (Head0 ++> Body0),
         Term = (Head :- Body),
@@ -1046,6 +1039,28 @@ duodcg_head(Head0, Head, As0, As, Bs0, Bs) :-
         append(Args0, [As0,As,Bs0,Bs], Args),
         Head =.. [F|Args].
 
+
+goal_expansion(get_attr(Var, Module, Value), (var(Var),get_atts(Var, Access))) :-
+        Access =.. [Module,Value].
+
+goal_expansion(put_attr(Var, Module, Value), put_atts(Var, Access)) :-
+        Access =.. [Module,Value].
+
+goal_expansion(del_attr(Var, Module), (var(Var) -> put_atts(Var, -Access);true)) :-
+        Access =.. [Module,_].
+
+
+goal_expansion(A cis B, Expansion) :-
+        phrase(cis_goals(B, A), Goals),
+        list_goal(Goals, Expansion).
+goal_expansion(A cis_lt B, B cis_gt A).
+goal_expansion(A cis_leq B, B cis_geq A).
+goal_expansion(A cis_geq B, cis_leq_numeric(B, N)) :- nonvar(A), A = n(N).
+goal_expansion(A cis_geq B, cis_geq_numeric(A, N)) :- nonvar(B), B = n(N).
+goal_expansion(A cis_gt B, cis_lt_numeric(B, N))   :- nonvar(A), A = n(N).
+goal_expansion(A cis_gt B, cis_gt_numeric(A, N))   :- nonvar(B), B = n(N).
+
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    A bound is either:
 
@@ -1064,20 +1079,6 @@ defaulty_to_bound(D, P) :- ( integer(D) -> P = n(D) ; P = D ).
    Compactified is/2 and predicates for several arithmetic expressions
    with infinities, tailored for the modes needed by this solver.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
-goal_expansion(A cis B, _, clpz, Expansion, []) :-
-        phrase(cis_goals(B, A), Goals),
-        list_goal(Goals, Expansion).
-goal_expansion(A cis_lt B, _, clpz, B cis_gt A, []).
-goal_expansion(A cis_leq B, _, clpz, B cis_geq A, []).
-goal_expansion(A cis_geq B, _, clpz, cis_leq_numeric(B, N), []) :-
-        nonvar(A), A = n(N).
-goal_expansion(A cis_geq B, _, clpz, cis_geq_numeric(A, N), []) :-
-        nonvar(B), B = n(N).
-goal_expansion(A cis_gt B, _, clpz, cis_lt_numeric(B, N), []) :-
-        nonvar(A), A = n(N).
-goal_expansion(A cis_gt B, _, clpz, cis_gt_numeric(A, N), []) :-
-        nonvar(B), B = n(N).
 
 % cis_gt only works for terms of depth 0 on both sides
 cis_gt(sup, B0) :- B0 \== sup.
@@ -1868,7 +1869,7 @@ labeling(Options, Vars) :-
 finite_domain(Goal, Arg, Var) :-
         (   fd_get(Var, Dom, _) ->
             (   domain_infimum(Dom, n(_)), domain_supremum(Dom, n(_)) -> true
-            ;   illarg(var, Goal, Arg)
+            ;   instantiation_error(Dom)
             )
         ;   integer(Var) -> true
         ;   must_be(integer, Goal-Arg, Var)
@@ -1879,7 +1880,7 @@ finite_domain(Var) :-
 
 
 label([O|Os], Options, Selection, Order, Choice, Optim, Consistency, Vars) :-
-        (   var(O)-> illarg(var, labeling(Options, Vars), 1)
+        (   var(O)-> instantiation_error(O)
         ;   override(selection, Selection, O, Options, S1) ->
             label(Os, Options, S1, Order, Choice, Optim, Consistency, Vars)
         ;   override(order, Order, O, Options, O1) ->
@@ -2285,7 +2286,7 @@ scalar_product(Cs, Vs, Op, Value) :-
         maplist(fd_variable, Vs),
         (   Op = (#=), single_value(Value, Right), ground(Vs) ->
             foldl(coeff_int_linsum, Cs, Vs, 0, Right)
-        ;   must_be(callable, Op),
+        ;   must_be(ground, Op),
             (   memberchk(Op, [#=,#\=,#<,#>,#=<,#>=]) -> true
             ;   domain_error(scalar_product_relation, Op)
             ),
@@ -2507,7 +2508,7 @@ remove_lower([C*X|CXs], Min) :-
 
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   Parsing a CLP(Z) expression has two important side-effects: First,
+   Parsing a CLP(ℤ) expression has two important side-effects: First,
    it constrains the variables occurring in the expression to
    integers. Second, it constrains some of them even more: For
    example, in X/Y and X mod Y, Y is constrained to be #\= 0.
@@ -2567,12 +2568,12 @@ parse_clpz(E, R,
              m(\A)             => [p(pfunction(\, A, R))],
              m(msb(A))         => [p(pfunction(msb, A, R))],
              m(lsb(A))         => [p(pfunction(lsb, A, R))],
-             m(popcount(A))    => [p(pfunction(popcount, A, R))],
+             m(popcount(A))    => [p(ppopcount(A, R))],
              m(A<<B)           => [p(pfunction(<<, A, B, R))],
              m(A>>B)           => [p(pfunction(>>, A, B, R))],
              m(A/\B)           => [p(pfunction(/\, A, B, R))],
              m(A\/B)           => [p(pfunction(\/, A, B, R))],
-             m(xor(A,B))       => [p(pfunction(xor, A, B, R))],
+             m(xor(A, B))      => [p(pxor(A, B, R))],
              g(true)           => [g(domain_error(clpz_expression, E))]
             ]).
 
@@ -2665,10 +2666,10 @@ variables_same_queue(Vs0) :-
         maplist(=(Q), Qs).
 
 clear_queue(queue(Goals,Fast,Slow,Aux)) :-
-        put_atts(Goals, [-queue(_,_)]),
-        put_atts(Fast, [-queue(_,_)]),
-        put_atts(Slow, [-queue(_,_)]),
-        put_atts(Aux, [-enabled(_)]).
+        put_atts(Goals, -queue(_,_)),
+        put_atts(Fast, -queue(_,_)),
+        put_atts(Slow, -queue(_,_)),
+        put_atts(Aux, -enabled(_)).
 
 collect_goal(Qs) --> collect_arg(Qs, 1).
 collect_fast(Qs) --> collect_arg(Qs, 2).
@@ -2945,7 +2946,7 @@ expr_conds(A0 mod B0, A mod B)   -->
 expr_conds(A0^B0, A^B)           -->
         expr_conds(A0, A), expr_conds(B0, B),
         [(B >= 0 ; A =:= -1)].
-% Bitwise operations, added to make CLP(Z) usable in more cases
+% Bitwise operations, added to make CLP(ℤ) usable in more cases
 expr_conds(\ A0, \ A) --> expr_conds(A0, A).
 expr_conds(A0<<B0, A<<B) --> expr_conds(A0, A), expr_conds(B0, B).
 expr_conds(A0>>B0, A>>B) --> expr_conds(A0, A), expr_conds(B0, B).
@@ -2954,7 +2955,15 @@ expr_conds(A0\/B0, A\/B) --> expr_conds(A0, A), expr_conds(B0, B).
 expr_conds(xor(A0,B0), xor(A,B)) --> expr_conds(A0, A), expr_conds(B0, B).
 expr_conds(lsb(A0), lsb(A)) --> expr_conds(A0, A).
 expr_conds(msb(A0), msb(A)) --> expr_conds(A0, A).
-expr_conds(popcount(A0), popcount(A)) --> expr_conds(A0, A).
+expr_conds(popcount(A0), Count) -->
+        expr_conds(A0, A),
+        [I is A, arithmetic:popcount(I, Count)].
+
+no_popcount_t(Gs, T) :-
+        (   member(arithmetic:popcount(_, _), Gs) ->
+            T = false
+        ;   T = true
+        ).
 
 clpz_expandable(_ in _).
 clpz_expandable(_ #= _).
@@ -2963,29 +2972,48 @@ clpz_expandable(_ #=< _).
 clpz_expandable(_ #> _).
 clpz_expandable(_ #< _).
 clpz_expandable(_ #\= _).
+clpz_expandable(_ #<==> _).
 
 clpz_expansion(Var in Dom, In) :-
         (   ground(Dom), Dom = L..U, integer(L), integer(U) ->
             expansion_simpler(
                 (   integer(Var) ->
-                    between(L, U, Var)
+                    between:between(L, U, Var)
                 ;   clpz:clpz_in(Var, Dom)
                 ), In)
         ;   In = clpz:clpz_in(Var, Dom)
         ).
+clpz_expansion(A #<==> B, Reif) :-
+        nonvar(A),
+        A =.. [F0,X0,Y0],
+        clpz_builtin(F0, F),
+        phrase(expr_conds(X0, X), Cs0, Cs),
+        phrase(expr_conds(Y0, Y), Cs),
+        list_goal(Cs0, Cond),
+        Expr =.. [F,X,Y],
+        expansion_simpler(( Cond, ( var(B) ; integer(B), clpz:between(0, 1, B) ) ->
+                            (   Expr ->
+                                B = 1
+                            ;   B = 0
+                            )
+                          ; clpz:reify(A, RA),
+                            clpz:reify(B, RA)
+                          ), Reif).
 clpz_expansion(X0 #= Y0, Equal) :-
         phrase(expr_conds(X0, X), CsX),
         phrase(expr_conds(Y0, Y), CsY),
         list_goal(CsX, CondX),
         list_goal(CsY, CondY),
+        no_popcount_t(CsY, YT),
+        no_popcount_t(CsX, XT),
         expansion_simpler(
                 (   CondX ->
-                    (   var(Y) -> Y is X
+                    (   YT, var(Y) -> Y is X
                     ;   CondY -> X =:= Y
                     ;   T is X, clpz:clpz_equal(T, Y0)
                     )
                 ;   CondY ->
-                    (   var(X) -> X is Y
+                    (   XT, var(X) -> X is Y
                     ;   T is Y, clpz:clpz_equal(X0, T)
                     )
                 ;   clpz:clpz_equal(X0, Y0)
@@ -3021,6 +3049,13 @@ clpz_expansion(X0 #\= Y0, Neq) :-
               ), Neq).
 
 
+clpz_builtin(#=, =:=).
+clpz_builtin(#\=, =\=).
+clpz_builtin(#>, >).
+clpz_builtin(#<, <).
+clpz_builtin(#>=, >=).
+clpz_builtin(#=<, =<).
+
 expansion_simpler((True->Then0;_), Then) :-
         is_true(True), !,
         expansion_simpler(Then0, Then).
@@ -3030,22 +3065,24 @@ expansion_simpler((False->_;Else0), Else) :-
 expansion_simpler((If->Then0;Else0), (If->Then;Else)) :- !,
         expansion_simpler(Then0, Then),
         expansion_simpler(Else0, Else).
-expansion_simpler((A0,B0), (A,B)) :-
+expansion_simpler((A0,B0), (A,B)) :- !,
         expansion_simpler(A0, A),
         expansion_simpler(B0, B).
 expansion_simpler(Var is Expr0, Goal) :-
         ground(Expr0), !,
         phrase(expr_conds(Expr0, Expr), Gs),
-        (   maplist(call, Gs) -> Var is Expr, Goal = true
+        (   maplist(call, Gs) -> Value is Expr, Goal = (Var = Value)
         ;   Goal = false
         ).
 expansion_simpler(Var =:= Expr0, Goal) :-
         ground(Expr0), !,
         phrase(expr_conds(Expr0, Expr), Gs),
-        (   maplist(call, Gs) -> Goal = (Var =:= Expr)
+        (   maplist(call, Gs) -> Value is Expr, Goal = (Var =:= Value)
         ;   Goal = false
         ).
-expansion_simpler(between(L,U,V), Goal) :- maplist(integer, [L,U,V]), !,
+expansion_simpler(between:between(L,U,V), Goal) :-
+        maplist(integer, [L,U,V]),
+        !,
         (   between(L,U,V) -> Goal = true
         ;   Goal = false
         ).
@@ -3053,16 +3090,16 @@ expansion_simpler(Goal, Goal).
 
 is_true(true).
 is_true(integer(I))  :- integer(I).
-:- if(current_predicate(var_property/2)).
-is_true(var(X))      :- var(X), var_property(X, fresh(true)).
-is_false(integer(X)) :- var(X), var_property(X, fresh(true)).
+% :- if(current_predicate(var_property/2)).
+% is_true(var(X))      :- var(X), var_property(X, fresh(true)).
+% is_false(integer(X)) :- var(X), var_property(X, fresh(true)).
+% :- endif.
 is_false((A,B))      :- is_false(A) ; is_false(B).
-:- endif.
 is_false(var(X)) :- nonvar(X).
 
 :- dynamic(goal_expansion/1).
 
-goal_expansion(Goal0, _Layout1, _Module, Goal, []) :-
+user:goal_expansion(Goal0, Goal) :-
         \+ goal_expansion(false),
         clpz_expandable(Goal0),
         clpz_expansion(Goal0, Goal).
@@ -3093,6 +3130,13 @@ must_be_fd_integer(X) :-
         (   var(X) -> constrain_to_integer(X)
         ;   must_be(integer, X)
         ).
+
+samsort(Ls0, Ls) :-
+        maplist(as_key, Ls0, LKs0),
+        keysort(LKs0, LKs),
+        maplist(as_key, Ls, LKs).
+
+as_key(E, E-t).
 
 left_right_linsum_const(Left, Right, Cs, Vs, Const) :-
         phrase(linsum(Left, 0, CL), Lefts0, Rights),
@@ -3490,7 +3534,7 @@ parse_reified(E, R, D,
                m(A>>B)       => [function(D,>>,A,B,R)],
                m(A/\B)       => [function(D,/\,A,B,R)],
                m(A\/B)       => [function(D,\/,A,B,R)],
-               m(xor(A, B))  => [function(D,xor,A,B,R)],
+               m(xor(A, B))  => [skeleton(A,B,D,R,pxor)],
                g(true)       => [g(domain_error(clpz_expression, E))]]
              ).
 
@@ -3881,9 +3925,9 @@ put_terminating(X, Dom, Ps) -->
         ).
 
 new_queue(queue(Goals,Fast,Slow,_Aux)) :-
-        put_atts(Goals, [+queue([],_)]),
-        put_atts(Fast, [+queue([],_)]),
-        put_atts(Slow, [+queue([],_)]).
+        put_atts(Goals, +queue([],_)),
+        put_atts(Fast, +queue([],_)),
+        put_atts(Slow, +queue([],_)).
 
 queue_goal(Goal) --> insert_queue(Goal, 1).
 queue_fast(Prop) --> insert_queue(Prop, 2).
@@ -3892,13 +3936,13 @@ queue_slow(Prop) --> insert_queue(Prop, 3).
 insert_queue(Element, Which) -->
         state(Queue),
         { arg(Which, Queue, Arg),
-          get_atts(Arg, [+queue(Head0,Tail0)]),
+          get_atts(Arg, queue(Head0,Tail0)),
           (   Head0 == [] ->
               Head = [Element|Tail]
           ;   Head = Head0,
               Tail0 = [Element|Tail]
           ),
-          put_atts(Arg, [+queue(Head,Tail)]) }.
+          put_atts(Arg, +queue(Head,Tail)) }.
 
 
 domain_spread(Dom, Spread) :-
@@ -4124,9 +4168,9 @@ do_queue -->
 
 print_queue -->
         state(queue(Goal,Fast,Slow,_)),
-        { get_atts(Goal, [+queue(GHs,_)]),
-          get_atts(Fast, [+queue(FHs,_)]),
-          get_atts(Slow, [+queue(SHs,_)]),
+        { get_atts(Goal, +queue(GHs,_)),
+          get_atts(Fast, +queue(FHs,_)),
+          get_atts(Slow, +queue(SHs,_)),
           format("Current queue:~n   goal: ~q~n   fast: ~q~n   slow: ~q~n~n", [GHs,FHs,SHs]) }.
 
 
@@ -4141,13 +4185,13 @@ queue_get_arg(Which, Element) -->
 
 queue_get_arg_(Queue, Which, Element) :-
         arg(Which, Queue, Arg),
-        get_atts(Arg, [+queue([Element|Elements],Tail)]),
+        get_atts(Arg, +queue([Element|Elements],Tail)),
         (   var(Elements) ->
-            put_atts(Arg, [+queue([],_)])
-        ;   put_atts(Arg, [+queue(Elements,Tail)])
+            put_atts(Arg, +queue([],_))
+        ;   put_atts(Arg, +queue(Elements,Tail))
         ).
 
-queue_enabled --> state(queue(_,_,_,Aux)), { \+ get_atts(Aux, [+enabled(false)]) }.
+queue_enabled --> state(queue(_,_,_,Aux)), { \+ get_atts(Aux, +enabled(false)) }.
 
 
 portray_propagator(propagator(P,_), F) :- functor(P, F, _).
@@ -4274,17 +4318,19 @@ tuples_in(Tuples, Relation) :-
         must_be(list(list), Tuples),
         maplist(maplist(fd_variable), Tuples),
         must_be(list(list(integer)), Relation),
-        maplist(relation_tuple(Relation), Tuples),
-        do_queue.
+        maplist(relation_tuple(Relation), Tuples).
 
 relation_tuple(Relation, Tuple) :-
         relation_unifiable(Relation, Tuple, Us, _, _),
         (   ground(Tuple) -> memberchk(Tuple, Relation)
-        ;   tuple_domain(Tuple, Us),
+        ;   new_queue(Q),
+            phrase((tuple_domain(Tuple, Us),do_queue), [Q], _),
             (   Tuple = [_,_|_] -> tuple_freeze(Tuple, Us)
             ;   true
             )
         ).
+
+list_first_rest([L|Ls], L, Ls).
 
 tuple_domain([], _) --> [].
 tuple_domain([T|Ts], Relation0) -->
@@ -4631,7 +4677,7 @@ run_propagator(scalar_product_leq(Cs0,Vs0,P0), MState) -->
 
 run_propagator(scalar_product_eq(Cs0,Vs0,P0), MState) -->
         { coeffs_variables_const(Cs0, Vs0, Cs, Vs, 0, I),
-        P is P0 - I,
+          P is P0 - I,
           (   Vs = [] -> kill(MState), P =:= 0
           ;   Vs = [V], Cs = [C] -> kill(MState), P mod C =:= 0, V is P // C
           ;   Cs == [1,1] -> kill(MState), Vs = [A,B], A + B #= P
@@ -4912,96 +4958,233 @@ run_propagator(ptzdiv(X,Y,Z), MState) -->
 %% % Z = X mod Y
 
 run_propagator(pmod(X,Y,Z), MState) -->
-        (   nonvar(X) ->
-            (   nonvar(Y) -> kill(MState), Y =\= 0, Z is X mod Y
+        (   Y == 0 -> { false }
+        ;   Y == Z -> { false }
+        % ;   nonvar(Y), Z == X -> true
+        ;   X == Y -> kill(MState), queue_goal(Z = 0)
+        ;   true
+        ),
+        (   nonvar(X), nonvar(Y) ->
+            kill(MState),
+            Z is X mod Y
+        ;   nonvar(Y), nonvar(Z) ->
+            (   Y > 0 -> Z >= 0, Z < Y
+            ;   Y < 0 -> Z =< 0, Z > Y
+            ),
+            (   { fd_get(X, _, n(XL), _, _) } ->
+                (   (XL - Z) mod Y =\= 0 ->
+                    XMin is Z + Y * ((XL - Z) div Y + 1)
+                ;   XMin is XL
+                ),
+                { fd_get(X, XD0, XPs),
+                  domain_remove_smaller_than(XD0, XMin, XD2) },
+                  fd_put(X, XD2, XPs)
+                % queue_goal(X #>= XMin)
+            ;   true
+            ),
+            (   { fd_get(X, _, _, n(XU), _) } ->
+                XMax is Z + Y * ((XU - Z) div Y),
+                { fd_get(X, XD1, XPs),
+                  domain_remove_greater_than(XD1, XMax, XD3) },
+                  fd_put(X, XD3, XPs)
+                % queue_goal(X #=< XMax)
             ;   true
             )
-        ;   nonvar(Y) ->
-            Y =\= 0,
-            (   abs(Y) =:= 1 -> kill(MState), Z = 0
-            ;   var(Z) ->
-                YP is abs(Y) - 1,
-                (   Y > 0, { fd_get(X, _, n(XL), n(XU), _) } ->
-                    (   XL >= 0, XU < Y ->
-                        kill(MState), Z = X, ZL = XL, ZU = XU
-                    ;   ZL = 0, ZU = YP
-                    )
-                ;   Y > 0 -> ZL = 0, ZU = YP
-                ;   YN is -YP, ZL = YN, ZU = 0
-                ),
-                (   { fd_get(Z, ZD, ZPs) } ->
-                    { domains_intersection(ZD, from_to(n(ZL), n(ZU)), ZD1),
-                      domain_infimum(ZD1, n(ZMin)),
-                      domain_supremum(ZD1, n(ZMax)) },
-                    fd_put(Z, ZD1, ZPs)
-                ;   ZMin = Z, ZMax = Z
-                ),
-                (   { fd_get(X, XD, XPs), domain_infimum(XD, n(XMin)) } ->
-                    Z1 is XMin mod Y,
-                    (   { between(ZMin, ZMax, Z1) } -> true
-                    ;   Y > 0 ->
-                        Next is ((XMin - ZMin + Y - 1) div Y)*Y + ZMin,
-                        { domain_remove_smaller_than(XD, Next, XD1) },
-                        fd_put(X, XD1, XPs)
-                    ;   neq_num(X, XMin)
-                    )
-                ;   true
-                ),
-                (   { fd_get(X, XD2, XPs2), domain_supremum(XD2, n(XMax)) } ->
-                    Z2 is XMax mod Y,
-                    (   { between(ZMin, ZMax, Z2) } -> true
-                    ;   Y > 0 ->
-                        Prev is ((XMax - ZMin) div Y)*Y + ZMax,
-                        { domain_remove_greater_than(XD2, Prev, XD3) },
-                        fd_put(X, XD3, XPs2)
-                    ;   neq_num(X, XMax)
-                    )
-                ;   true
+            % kill(MState),
+            % queue_goal(X #= Z + Y * _) % Add a variable to be efficient.
+        ;   nonvar(Z), nonvar(X) ->
+            (   Z > 0 ->
+                (   X < 0 -> true
+                ;   X >= Z
                 )
-            ;   { fd_get(X, XD, XPs) },
-                % if possible, propagate at the boundaries
-                (   { domain_infimum(XD, n(Min)) } ->
-                    (   Min mod Y =:= Z -> true
-                    ;   Y > 0 ->
-                        Next is ((Min - Z + Y - 1) div Y)*Y + Z,
-                        { domain_remove_smaller_than(XD, Next, XD1) },
-                        fd_put(X, XD1, XPs)
-                    ;   neq_num(X, Min)
-                    )
-                ;   true
-                ),
-                (   { fd_get(X, XD2, XPs2) } ->
-                    (   { domain_supremum(XD2, n(Max)) } ->
-                        (   Max mod Y =:= Z -> true
-                        ;   Y > 0 ->
-                            Prev is ((Max - Z) div Y)*Y + Z,
-                            { domain_remove_greater_than(XD2, Prev, XD3) },
-                            fd_put(X, XD3, XPs2)
-                        ;   neq_num(X, Max)
-                        )
-                    ;   true
-                    )
+            ;   Z < 0 ->
+                (   X > 0 -> true
+                ;   X =< Z
+                )
+            ;   Z =:= 0 % Multiple solutions so do nothing special.
+            ),
+            (   { fd_get(Y, _, _, n(YU), _),
+                  YU < X, X =< 0 } -> kill(MState), Z =:= X
+            ;   { fd_get(Y, _, n(YL), _, _),
+                  YL > X, X >= 0 } -> kill(MState), Z =:= X
+            ;   (   Z > 0 ->
+                    { fd_get(Y, YD, YPs),
+                      YMin is Z + 1,
+                      domain_remove_smaller_than(YD, YMin, YD1) },
+                      fd_put(Y, YD1, YPs)
+                    % queue_goal(Y #> Z)
+                ;   Z < 0 ->
+                    { fd_get(Y, YD, YPs),
+                      YMax is Z - 1,
+                      domain_remove_greater_than(YD, YMax, YD1) },
+                      fd_put(Y, YD1, YPs)
+                    % queue_goal(Y #< Z)
                 ;   true
                 )
             )
-        ;   X == Y -> kill(MState), Z = 0
-        ;   { fd_get(X, XD, XPs),
-              fd_get(Y, YD, _),
-              fd_get(Z, ZD, ZPs) },
-            (   { domain_infimum(XD, n(XMin)), XMin >= 0,
-                  domain_infimum(YD, n(YMin)), YMin > 0 } ->
-                { domain_remove_smaller_than(ZD, 0, ZD1) }
-            ;   ZD1 = ZD
-            ),
-            (   { domain_supremum(YD, n(YMax)), YMax > 0 } ->
-                { Max is YMax - 1, Min is -Max,
-                  domain_remove_smaller_than(ZD1, Min, ZD2),
-                  domain_remove_greater_than(ZD2, Max, ZD3) }
-            ;   ZD3 = ZD1
-            ),
-            fd_put(Z, ZD3, ZPs)
-            % TODO: propagate more
+        ;   run_propagator(pmodz(X,Y,Z), MState),
+            run_propagator(pmody(X,Y,Z), MState),
+            true
         ).
+
+run_propagator(pmodz(X,Y,Z), MState) -->
+        (   nonvar(Z) -> true % Nothing to do.
+        ;   nonvar(X) ->
+            (   X =:= 0 -> kill(MState), queue_goal(Z = X)
+            ;   (   X > 0 ->
+                    (   { fd_get(Y, _, n(YL), _, _), YL > X } ->
+                        kill(MState),
+                        queue_goal(Z = X)
+                    ;   { fd_get(Z, ZD0, ZPs),
+                          domain_remove_greater_than(ZD0, X, ZD2) },
+                          fd_put(Z, ZD2, ZPs)
+                        % queue_goal(Z #=< X)
+                    )
+                ;   X < 0 ->
+                    (   { fd_get(Y, _, _, n(YU), _), YU < X } ->
+                        kill(MState),
+                        queue_goal(Z = X)
+                    ;   { fd_get(Z, ZD0, ZPs),
+                          domain_remove_smaller_than(ZD0, X, ZD2) },
+                          fd_put(Z, ZD2, ZPs)
+                        % queue_goal(Z #>= X)
+                    )
+                ),
+                (   { fd_get(Y, _, n(YL), n(YU), _), YL > 0 } ->
+                    ZMax is YU - 1,
+                    { fd_get(Z, ZD1, ZPs),
+                      domain_remove_smaller_than(ZD1, 0, ZD3),
+                      domain_remove_greater_than(ZD3, ZMax, ZD5) },
+                      fd_put(Z, ZD5, ZPs)
+                    % queue_goal(Z in 0..ZMax)
+                ;   { fd_get(Y, _, n(YL), n(YU), _), YU < 0 } ->
+                    ZMin is YL + 1,
+                    { fd_get(Z, ZD1, ZPs),
+                      domain_remove_greater_than(ZD1, 0, ZD3),
+                      domain_remove_smaller_than(ZD3, ZMin, ZD5) },
+                      fd_put(Z, ZD5, ZPs)
+                    % queue_goal(Z in ZMin..0)
+                ;   true
+                )
+            )
+        ;   nonvar(Y) ->
+            (   abs(Y) =:= 1 -> kill(MState), queue_goal(Z = 0)
+            ;   Y < 0 ->
+                (   { fd_get(X, _, n(XL), n(XU), _), XU =< 0, Y < XL } ->
+                    kill(MState),
+                    queue_goal(Z = X)
+                ;   ZMin is Y + 1,
+                    { fd_get(Z, ZD1, ZPs),
+                      domain_remove_greater_than(ZD1, 0, ZD3),
+                      domain_remove_smaller_than(ZD3, ZMin, ZD5) },
+                      fd_put(Z, ZD5, ZPs)
+                    % queue_goal(Z in ZMin..0)
+                )
+            ;   Y > 0 ->
+                (   { fd_get(X, _, n(XL), n(XU), _), XL >= 0, Y > XU } ->
+                    kill(MState),
+                    queue_goal(Z = X)
+                ;   ZMax is Y - 1,
+                    { fd_get(Z, ZD1, ZPs),
+                      domain_remove_smaller_than(ZD1, 0, ZD3),
+                      domain_remove_greater_than(ZD3, ZMax, ZD5) },
+                      fd_put(Z, ZD5, ZPs)
+                    % queue_goal(Z in 0..ZMax)
+                )
+            )
+        ;   (   { fd_get(X, _, n(XL), n(XU), _), XL >= 0,
+                  fd_get(Y, _, n(YL), _, _), XU < YL } ->
+                kill(MState),
+                queue_goal(Z = X)
+            ;   { fd_get(X, _, n(XL), n(XU), _), XU =< 0,
+                  fd_get(Y, _, _, n(YU), _), XL > YU } ->
+                kill(MState),
+                queue_goal(Z = X)
+            ;   (   { fd_get(X, _, n(XL), n(XU), _), XL >= 0 } ->
+                    { fd_get(Z, ZD0, ZPs),
+                      domain_remove_greater_than(ZD0, XU, ZD2) },
+                      fd_put(Z, ZD2, ZPs)
+                    % queue_goal(Z #=< XU)
+                ;   { fd_get(X, _, n(XL), n(XU), _), XU =< 0 } ->
+                    { fd_get(Z, ZD0, ZPs),
+                      domain_remove_smaller_than(ZD0, XL, ZD2) },
+                      fd_put(Z, ZD2, ZPs)
+                    % queue_goal(Z #>= XL)
+                ;   true
+                ),
+                (   { fd_get(Y, _, n(YL), n(YU), _), YL > 0 } ->
+                    ZMax is YU - 1,
+                    { fd_get(Z, ZD1, ZPs),
+                      domain_remove_smaller_than(ZD1, 0, ZD3),
+                      domain_remove_greater_than(ZD3, ZMax, ZD5) },
+                      fd_put(Z, ZD5, ZPs)
+                    % queue_goal(Z in 0..ZMax)
+                ;   { fd_get(Y, _, n(YL), n(YU), _), YU < 0 } ->
+                    ZMin is YL + 1,
+                    { fd_get(Z, ZD1, ZPs),
+                      domain_remove_greater_than(ZD1, 0, ZD3),
+                      domain_remove_smaller_than(ZD3, ZMin, ZD5) },
+                      fd_put(Z, ZD5, ZPs)
+                    % queue_goal(Z in ZMin..0)
+                ;   { fd_get(Y, _, n(YL), n(YU), _) } ->
+                    ZMin is YL + 1,
+                    ZMax is YU - 1,
+                    { fd_get(Z, ZD1, ZPs),
+                      domain_remove_greater_than(ZD1, ZMax, ZD3),
+                      domain_remove_smaller_than(ZD3, ZMin, ZD5) },
+                      fd_put(Z, ZD5, ZPs)
+                    % queue_goal(Z in ZMin..ZMax)
+                %/* This doesn't work very well.
+                ;   { fd_get(Y, _, _, n(YU), _), YU > 0 } ->
+                    { fd_get(Z, ZD1, ZPs),
+                      ZMax is YU - 1,
+                      domain_remove_greater_than(ZD1, ZMax, ZD3) },
+                      fd_put(Z, ZD3, ZPs)
+                    % queue_goal(Z #< YU)
+                ;   { fd_get(Y, _, n(YL), _, _), YL < 0 } ->
+                    { fd_get(Z, ZD1, ZPs),
+                      ZMin is YL + 1,
+                      domain_remove_smaller_than(ZD1, ZMin, ZD3) },
+                      fd_put(Z, ZD3, ZPs)
+                    % queue_goal(Z #> YL)
+                % * /
+                ;   true
+                )
+            )
+        ).
+
+run_propagator(pmody(X,Y,Z), MState) -->
+        (   nonvar(Y) -> true % Nothing to do.
+        % ;   nonvar(X) -> true
+        ;   nonvar(Z) ->
+            (   Z > 0 -> % queue_goal(Y #> Z)
+                { fd_get(Y, YD, YPs),
+                  YMin is Z + 1,
+                  domain_remove_smaller_than(YD, YMin, YD1) },
+                  fd_put(Y, YD1, YPs)
+            ;   Z < 0 -> % queue_goal(Y #< Z)
+                { fd_get(Y, YD, YPs),
+                  YMax is Z - 1,
+                  domain_remove_greater_than(YD, YMax, YD1) },
+                  fd_put(Y, YD1, YPs)
+            ;   Z =:= 0 -> kill(MState), queue_goal(X / Y #= _)
+            )
+        ;   (   { fd_get(Z, _, n(ZL), _, _), ZL > 0 } ->
+                { fd_get(Y, YD, YPs),
+                  YMin is ZL + 1,
+                  domain_remove_smaller_than(YD, YMin, YD1) },
+                  fd_put(Y, YD1, YPs)
+                % queue_goal(Y #> ZL)
+            ;   { fd_get(Z, _, _, n(ZU), _), ZU < 0 } ->
+                { fd_get(Y, YD, YPs),
+                  YMax is ZU - 1,
+                  domain_remove_greater_than(YD, YMax, YD1) },
+                  fd_put(Y, YD1, YPs)
+                % queue_goal(Y #< ZU)
+            ;   true
+            )
+        ).
+
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% % Z = X rem Y
@@ -5298,6 +5481,51 @@ run_propagator(pexp(X,Y,Z), MState) -->
             { n(NZL) cis XL^YL,
               domain_remove_smaller_than(ZD, NZL, ZD1) },
             fd_put(Z, ZD1, ZPs)
+        ;   true
+        ).
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% % Y = popcount(X)
+
+run_propagator(ppopcount(X,Y), MState) -->
+        (   nonvar(X) ->
+            kill(MState),
+            queue_goal(popcount(X, Y))
+        ;   true
+        ).
+
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% % Z = X xor Y
+
+run_propagator(pxor(X,Y,Z), MState) -->
+        (   nonvar(X), nonvar(Y) ->
+            kill(MState),
+            Z is xor(X, Y)
+        ;   nonvar(Y), nonvar(Z) ->
+            kill(MState),
+            X is xor(Y, Z)
+        ;   nonvar(Z), nonvar(X) ->
+            kill(MState),
+            Y is xor(Z, X)
+        ;   X == Y ->
+            kill(MState),
+            queue_goal(Z = 0)
+        ;   Y == Z ->
+            kill(MState),
+            queue_goal(X = 0)
+        ;   Z == X ->
+            kill(MState),
+            queue_goal(Y = 0)
+        ;   X == 0 ->
+            kill(MState),
+            queue_goal(Y = Z)
+        ;   Y == 0 ->
+            kill(MState),
+            queue_goal(Z = X)
+        ;   Z == 0 ->
+            kill(MState),
+            queue_goal(X = Y)
         ;   true
         ).
 
@@ -5735,10 +5963,12 @@ difference_arcs([V|Vs], FL0) -->
 
 writeln(T) :- write(T), nl.
 
+:- meta_predicate must_succeed(0).
+
 must_succeed(G) :-
-    (G -> true
-     ;write(failed-G), halt
-    ).
+        (   G -> true
+        ;   throw(failed-G)
+        ).
 
 enumerate([], _) --> [].
 enumerate([N|Ns], V) -->
@@ -5872,28 +6102,33 @@ del_vars_attr(Vars, Attr) :- maplist(del_attr(Attr), Vars).
 % del_attr_(visited, Var)  :- del_attr(Var, visited).
 
 del_all_attrs(Var) :-
-        (    var(Var) ->
-             put_atts(Var, [
-                            -clpz(_),
-                            -clpz_aux(_),
-                            -clpz_relation(_),
-                            -edges(_),
-                            -flow(_),
-                            -parent(_),
-                            -free(_),
-                            -g0_edges(_),
-                            -used(_),
-                            -lowlink(_),
-                            -value(_),
-                            -visited(_),
-                            -index(_),
-                            -in_stack(_),
-                            -clpz_gcc_vs(_),
-                            -clpz_gcc_num(_),
-                            -clpz_gcc_occurred(_)])
+        (   var(Var) ->
+            Atts = [clpz,
+                    clpz_aux,
+                    clpz_relation,
+                    edges,
+                    flow,
+                    parent,
+                    free,
+                    g0_edges,
+                    used,
+                    lowlink,
+                    value,
+                    visited,
+                    index,
+                    in_stack,
+                    clpz_gcc_vs,
+                    clpz_gcc_num,
+                    clpz_gcc_occurred],
+            maplist(remove_attr(Var), Atts)
         ;   true
         ).
 
+remove_attr(Var, Attr) :-
+        functor(Term, Attr, 1),
+        put_atts(Var, -Term).
+
+:- meta_predicate with_local_attributes(?, 0, ?).
 
 with_local_attributes(Vars, Goal, Result) :-
         catch((Goal,
@@ -6046,16 +6281,6 @@ state(S), [S] --> [S].
 state(S0, S), [S] --> [S0].
 
 v_in_stack(V) --> { get_attr(V, in_stack, true) }.
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   scc_num/3: SCC + number of components
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
-scc_num(Vs, Succ, N) :-
-        phrase(scc(Vs), [s(0,[],Succ)], _),
-        maplist(node_lowlink, Vs, Ls0),
-        sort(Ls0, Ls),
-        length(Ls, N).
 
 node_lowlink(V, L) :- get_attr(V, lowlink, L).
 
@@ -6753,7 +6978,10 @@ propagate_circuit(Vs) :-
         with_local_attributes([],
             (same_length(Vs, Ts),
              circuit_graph(Vs, Ts, Ts),
-             scc_num(Ts, circuit_successors, 1)), _).
+             scc(Ts, circuit_successors),
+             maplist(single_component, Ts)), _).
+
+single_component(V) :- get_attr(V, lowlink, 0).
 
 circuit_graph([], _, _).
 circuit_graph([V|Vs], Ts0, [T|Ts]) :-
@@ -6831,8 +7059,10 @@ cumulative(Tasks, Options) :-
             maplist(fd_inf, Starts, MinStarts),
             maplist(arg(3), Tasks, Ends),
             maplist(fd_sup, Ends, MaxEnds),
-            min_member(Start, MinStarts),
-            max_member(End, MaxEnds),
+            MinStarts = [Min|Mins],
+            foldl(min_, Mins, Min, Start),
+            MaxEnds = [Max|Maxs],
+            foldl(max_, Maxs, Max, End),
             resource_limit(Start, End, Tasks, Bss, L)
         ).
 
@@ -6903,6 +7133,10 @@ contribution_at(T, Task, Offset-Bs, Contribution) :-
             nth0(Index, Bs, B),
             ?(Contribution) #= B*C
         ).
+
+nth1(I, Es, E) :-
+        I0 is I-1,
+        nth0(I0, Es, E).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -7242,7 +7476,7 @@ chain(Relation, X, Prev, X) :- call(Relation, ?(Prev), ?(X)).
 
 %% fd_var(+Var)
 %
-%  True iff Var is a CLP(Z) variable.
+%  True iff Var is a CLP(ℤ) variable.
 
 fd_var(X) :- get_attr(X, clpz, _).
 
@@ -7354,7 +7588,8 @@ goals_entail(Goals, E) :-
 
 verify_attributes(Var, Other, Gs) :-
         % portray_clause(Var = Other),
-        (   get_attr(Var, clpz, clpz_attr(_,_,_,Dom,Ps,Q)) ->
+        (   get_atts(Var, clpz(CLPZ)) ->
+            CLPZ = clpz_attr(_,_,_,Dom,Ps,Q),
             (   nonvar(Other) ->
                 (   integer(Other) -> true
                 ;   type_error(integer, Other)
@@ -7362,14 +7597,17 @@ verify_attributes(Var, Other, Gs) :-
                 domain_contains(Dom, Other),
                 phrase(trigger_props(Ps), [Q], [_]),
                 Gs = [phrase(do_queue, [Q], _)]
-            ;   fd_get(Other, OD, OPs),
-                domains_intersection(OD, Dom, Dom1),
-                append_propagators(Ps, OPs, Ps1),
-                new_queue(Q0),
-                variables_same_queue([Var,Other]),
-                phrase((fd_put(Other,Dom1,Ps1),
-                        trigger_props(Ps1)), [Q0], _),
-                Gs = [phrase(do_queue, [Q0], _)]
+            ;   (   get_atts(Other, clpz(clpz_attr(_,_,_,OD,OPs,_))) ->
+                    domains_intersection(OD, Dom, Dom1),
+                    append_propagators(Ps, OPs, Ps1),
+                    new_queue(Q0),
+                    variables_same_queue([Var,Other]),
+                    phrase((fd_put(Other,Dom1,Ps1),
+                            trigger_props(Ps1)), [Q0], _),
+                    Gs = [phrase(do_queue, [Q0], _)]
+                ;   put_atts(Other, clpz(CLPZ)),
+                    Gs = []
+                )
             )
         ;   Gs = []
         ).
@@ -7404,6 +7642,10 @@ intervals_to_drep([A0-B0|Rest], Drep0, Drep) :-
         intervals_to_drep(Rest, Drep0 \/ D1, Drep).
 
 attribute_goals(X) -->
+        { get_atts(X, queue(_,_)) },
+        !,
+        { put_atts(X, -queue(_,_)) }.
+attribute_goals(X) -->
         % { get_attr(X, clpz, Attr), format("A: ~w\n", [Attr]) },
         { get_attr(X, clpz, clpz_attr(_,_,_,Dom,fd_props(Gs,Bs,Os),_)),
           append(Gs, Bs, Ps0),
@@ -7412,21 +7654,8 @@ attribute_goals(X) -->
         (   { default_domain(Dom), \+ all_dead_(Ps) } -> []
         ;   [clpz:(X in Drep)]
         ),
-        attributes_goals(Ps).
-
-clpz_aux:attribute_goals(_) --> [].
-
-clpz_gcc_vs:attribute_goals(_) --> [].
-
-clpz_gcc_num:attribute_goals(_) --> [].
-
-clpz_gcc_occurred:attribute_goals(_) --> [].
-
-clpz_relation:attribute_goals(_) --> [].
-
-attribute_goal(Var, Goal) :-
-        phrase(attribute_goals(Var), Goals),
-        list_goal(Goals, Goal).
+        attributes_goals(Ps),
+        { del_attr(X, clpz) }.
 
 attributes_goals([]) --> [].
 attributes_goals([propagator(P, State)|As]) -->
@@ -7472,6 +7701,8 @@ attribute_goal_(pmod(X,M,K))           --> [?(X) mod ?(M) #= ?(K)].
 attribute_goal_(prem(X,Y,Z))           --> [?(X) rem ?(Y) #= ?(Z)].
 attribute_goal_(pmax(X,Y,Z))           --> [?(Z) #= max(?(X),?(Y))].
 attribute_goal_(pmin(X,Y,Z))           --> [?(Z) #= min(?(X),?(Y))].
+attribute_goal_(pxor(X,Y,Z))           --> [?(Z) #= xor(?(X), ?(Y))].
+attribute_goal_(ppopcount(X,Y))        --> [?(Y) #= popcount(?(X))].
 attribute_goal_(scalar_product_neq(Cs,Vs,C)) -->
         [Left #\= Right],
         { scalar_product_left_right([-1|Cs], [C|Vs], Left, Right) }.
@@ -7490,7 +7721,9 @@ attribute_goal_(pelement(N,Is,V)) --> [element(N, Is, V)].
 attribute_goal_(pgcc(Vs, Pairs, _))   --> [global_cardinality(Vs, Pairs)].
 attribute_goal_(pgcc_single(_,_))     --> [].
 attribute_goal_(pgcc_check_single(_)) --> [].
-attribute_goal_(pgcc_check(_))        --> [].
+attribute_goal_(pgcc_check(Pairs))    -->
+        { pairs_values(Pairs, Nums),
+          maplist(gcc_done, Nums) }.
 attribute_goal_(pcircuit(Vs))       --> [circuit(Vs)].
 attribute_goal_(pserialized(_,_,_,_,O)) --> original_goal(O).
 attribute_goal_(rel_tuple(R, Tuple)) -->
@@ -7581,15 +7814,28 @@ plusterm_(CV, T0, T0+T) :- coeff_var_term(CV, T).
 coeff_var_term(C-V, T) :- ( C =:= 1 -> T = ?(V) ; T = C * ?(V) ).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   Reified predicates for use with predicates from library(reif).
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+#=(X, Y, T) :-
+        X #= Y #<==> B,
+        zo_t(B, T).
+
+#<(X, Y, T) :-
+        X #< Y #<==> B,
+        zo_t(B, T).
+
+zo_t(0, false).
+zo_t(1, true).
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Generated predicates
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-generated_clauses(Cs) :-
-        make_parse_clpz(Cs1),
-        make_parse_reified(Cs2),
-        make_matches(Cs3),
-        append([Cs1,Cs2,Cs3], Cs).
+term_expansion(make_parse_clpz, Clauses)    :- make_parse_clpz(Clauses).
+term_expansion(make_parse_reified, Clauses) :- make_parse_reified(Clauses).
+term_expansion(make_matches, Clauses)       :- make_matches(Clauses).
 
-:- initialization((generated_clauses(Cs),
-                   maplist(assertz, Cs))).
-
+make_parse_clpz.
+make_parse_reified.
+make_matches.
