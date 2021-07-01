@@ -768,8 +768,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		space += (!strcmp(src, "-") || !strcmp(src, "+")) && is_smallint(rhs) && (get_smallint(rhs) < 0);
 		//if (!strcmp(src, "-") && !is_smallint(rhs)) dst += snprintf(dst, dstlen, "%s", " ");
 		int parens = is_structure(rhs) && !strcmp(GET_STR(rhs), ",");
-		parens += *src == '?' || *src == '#';
-		if (*src == '?' || *src == '#') dst += snprintf(dst, dstlen, "%s", " ");
 		dst += snprintf(dst, dstlen, "%s", src);
 		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
@@ -813,6 +811,11 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
 	dst += snprintf(dst, dstlen, "%s", src);
+
+	if (!strcmp(src, "=") &&
+		((*GET_STR(rhs) == '-') || (*GET_STR(rhs) == '?') || (*GET_STR(rhs) == '#')))
+		space = 1;
+
 	if (!*src) space = 0;
 	space += is_smallint(rhs) && is_negative(rhs);
 	if (space) dst += snprintf(dst, dstlen, "%s", " ");
