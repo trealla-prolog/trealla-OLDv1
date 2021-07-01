@@ -1429,6 +1429,8 @@ static bool term_dcg_rewrite(parser *p)
 	sprintf(src, "dcg_translate((%s),_TermOut).", dst);
 	free(dst);
 
+	//printf("*** %s\n", src);
+
 	parser *p2 = create_parser(p->m);
 	ensure(p2);
 	p2->line_nbr = p->line_nbr;
@@ -1436,6 +1438,9 @@ static bool term_dcg_rewrite(parser *p)
 	p2->srcptr = src;
 	tokenize(p2, false, false);
 	term_xref(p2, p2->t, NULL);
+
+	//printf("### "); print_term(q, stdout, p2->t->cells, q->st.curr_frame, 1); printf("\n");
+
 	execute(q, p2->t);
 	free(src);
 	frame *g = GET_FRAME(0);
