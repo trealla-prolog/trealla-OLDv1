@@ -404,7 +404,8 @@ nb_current(K, V) :-
 
 b_setval(K, _) :-
 	must_be(K, atom, _, _),
-	\+ user:clause('$global_key'(K, _), _), asserta('$global_key'(K, [])),
+	\+ user:clause('$global_key'(K, _), _),
+	asserta('$global_key'(K, [])),
 	fail.
 b_setval(K, V) :-
 	must_be(K, atom, _, _),
@@ -434,6 +435,30 @@ b_delete(K) :-
 	user:retractall('$global_key'(K, _)),
 	!.
 b_delete(_).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Compatibility... Scryer?
+
+bb_b_put(K, _) :-
+	must_be(K, atom, _, _),
+	\+ user:clause('$global_key'(K, _), _),
+	asserta('$global_key'(K, [])),
+	fail.
+bb_b_put(K, V) :-
+	must_be(K, atom, _, _),
+	user:asserta('$global_key'(K, V)).
+bb_b_put(K, _) :-
+	user:retract('$global_key'(K, _)),
+	!.
+
+bb_put(K, V) :-
+	must_be(K, atom, _, _),
+	user:asserta('$global_key'(K, V)).
+
+bb_get(K, V) :-
+	must_be(K, atom, _, _),
+	user:catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), b_setval/2))),
+	!.
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
