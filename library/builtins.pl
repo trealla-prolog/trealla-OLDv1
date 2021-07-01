@@ -3,6 +3,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
+nonmember(E, L) :-
+	\+ memberchk(E, L).
+
 expand_term((H --> B), Out) :-
 	dcg_translate((H --> B), Out).
 

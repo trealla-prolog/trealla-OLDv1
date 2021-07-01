@@ -219,7 +219,8 @@ GNU-Prolog & SWI-Prolog
 Others
 ======
 
-	memberchk/2
+	memberchk/2					# memberchk(E,L).
+	nonmember/2					# \+ memberchk(E,L)
 	atomic_concat/3
     atomic_list_concat/2		# atomic_list_concat(L,Atom) (bidirectional)
     atomic_list_concat/3		# atomic_list_concat(L,Sep,Atom) (bidirectional)
