@@ -38,7 +38,7 @@ static const op_table g_ops[] =
 	{"op", OP_FX, 1150},
 	{"dynamic", OP_FX, 1150},
 	{"persist", OP_FX, 1150},
-	{"initialization", OP_FX, 1150},
+	//{"initialization", OP_FX, 1150},
 	{"set_prolog_flag", OP_FX, 1150},
 	{"module", OP_FX, 1150},
 	{"use_module", OP_FX, 1150},
@@ -963,5 +963,9 @@ module *create_module(prolog *pl, const char *name)
 
 	m->next = pl->modules;
 	pl->modules = m;
+	set_dynamic_in_db(m, "term_expansion", 2);
+	set_dynamic_in_db(m, "goal_expansion", 2);
+	set_dynamic_in_db(m, "initialization", 1);
+	set_dynamic_in_db(m, ":-", 1);
 	return m;
 }

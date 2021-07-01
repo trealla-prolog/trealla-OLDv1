@@ -5209,7 +5209,7 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 		off += sprintf(dst, "%s:", q->st.m->name);
 	}
 
-	len = print_term_to_buf(q, dst+off, len+1, c, c_ctx, 1, 0, 0);
+	len = print_term_to_buf(q, dst+off, len+1, c, c_ctx, 1, 0, 0) + off;
 	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q->st.curr_cell) + 1024;
 	char *dst2 = malloc(len2+1);
 	may_ptr_error(dst2);
@@ -5266,6 +5266,7 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 		char tmpbuf[1024];
 		snprintf(tmpbuf, sizeof(tmpbuf), "(%s)/%u\n", GET_STR(c), (unsigned)c->arity);
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, tmpbuf, functor, q->st.curr_cell->arity);
+
 	} else if (!strcmp(err_type, "permission_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, functor, q->st.curr_cell->arity);
 
