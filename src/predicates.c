@@ -10743,7 +10743,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 static USE_RESULT pl_status fn_memberchk_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,list);
+	GET_NEXT_ARG(p2,list_or_nil);
 	LIST_HANDLER(p2);
 
 	if (is_variable(p1)) {
@@ -10844,6 +10844,11 @@ static USE_RESULT pl_status fn_memberchk_2(query *q)
 
 	drop_choice(q);
 	return pl_failure;
+}
+
+static USE_RESULT pl_status fn_nonmember_2(query *q)
+{
+	return fn_memberchk_2(q) == pl_success ? pl_failure : pl_success;
 }
 
 static USE_RESULT pl_status fn_sys_put_chars_2(query *q)
@@ -11491,6 +11496,7 @@ static const struct builtins g_predicates_other[] =
 
 	{"ignore", 1, fn_ignore_1, "+callable"},
 	{"memberchk", 2, fn_memberchk_2, "?term,+list"},
+	{"nonmember", 2, fn_nonmember_2, "?term,+list"},
 
 	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars"},
 	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL},
