@@ -7941,7 +7941,7 @@ static USE_RESULT pl_status fn_sys_mustbe_list_1(query *q)
 
 	if (is_valid_list(q, p1, p1_ctx, true)
 		&& !is_valid_list(q, p1, p1_ctx, false))
-		return throw_error(q, p1, "instantiation_error", "tail_is_a_variable");
+		return throw_error(q, p1, "instantiation_error", "partial_list");
 
 	if (!is_valid_list(q, p1, p1_ctx, false))
 		return throw_error(q, p1, "type_error", "list");
