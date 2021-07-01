@@ -3,6 +3,19 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
+% FIXME
+must_be(Term, callable, _Goal, _Arg) :- !, callable(Term).
+must_be(Term, atom, _Goal, _Arg) :- !, atom(Term).
+must_be(Term, atomic, _Goal, _Arg) :- !, atomic(Term).
+must_be(Term, integer, _Goal, _Arg) :- !, integer(Term).
+must_be(Term, real, _Goal, _Arg) :- !, real(Term).
+must_be(Term, number, _Goal, _Arg) :- !, number(Term).
+must_be(Term, var, _Goal, _Arg) :- !, var(Term).
+must_be(Term, nonvar, _Goal, _Arg) :- !, nonvar(Term).
+must_be(Term, ground, _Goal, _Arg) :- !, ground(Term).
+must_be(Term, compound, _Goal, _Arg) :- !, compound(Term).
+must_be(Term, list, _Goal, _Arg) :- !, list(Term).
+
 expand_term((H --> B), Out) :-
 	dcg_translate((H --> B), Out).
 
