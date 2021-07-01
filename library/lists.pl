@@ -1,6 +1,6 @@
 :- module(lists, [
 	member/2, select/3, selectchk/3, subtract/3, union/3,
-	intersection/3, reverse/2, append/3, nth/3, nth1/3, nth0/3,
+	intersection/3, reverse/2, append/2, append/3, nth/3, nth1/3, nth0/3,
 	last/2, flatten/2
 	]).
 
@@ -35,6 +35,15 @@ revzap_([H|L], L2, L3) :- revzap_(L, [H|L2], L3).
 
 append([], L, L).
 append([H|T], L, [H|R]) :- append(T, L, R).
+
+append(ListOfLists, List) :-
+	must_be(list, ListOfLists),
+	append_(ListOfLists, List).
+
+append_([], []).
+append_([L|Ls], As) :-
+	append(L, Ws, As),
+	append_(Ls, Ws).
 
 nth(1, [H|_], H).
 nth(N, [_|T], H) :- nth(M, T, H), N is M + 1.
