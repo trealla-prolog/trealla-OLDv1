@@ -3,7 +3,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-% FIXME
+% FIXME to throw
 must_be(Term, callable, _Goal, _Arg) :- !, callable(Term).
 must_be(Term, atom, _Goal, _Arg) :- !, atom(Term).
 must_be(Term, atomic, _Goal, _Arg) :- !, atomic(Term).
