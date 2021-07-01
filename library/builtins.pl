@@ -425,12 +425,12 @@ b_setval0(K, _) :-
 	!.
 
 b_getval(K, V) :-
-	'$mustbe_atom'(K),
+	must_be(K, atom, _, _),
 	user:catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), b_setval/2))),
 	!.
 
 b_delete(K) :-
-	'$mustbe_atom'(K),
+	must_be(K, atom, _, _),
 	user:retractall('$global_key'(K, _)),
 	!.
 b_delete(_).
