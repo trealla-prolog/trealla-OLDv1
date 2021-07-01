@@ -7935,20 +7935,6 @@ static USE_RESULT pl_status fn_sys_mustbe_pairlist_or_var_1(query *q)
 	return fn_sys_mustbe_pairlist_1(q);
 }
 
-static USE_RESULT pl_status fn_sys_mustbe_list_1(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-
-	if (is_valid_list(q, p1, p1_ctx, true)
-		&& !is_valid_list(q, p1, p1_ctx, false))
-		return throw_error(q, p1, "instantiation_error", "tail_is_a_variable");
-
-	if (!is_valid_list(q, p1, p1_ctx, false))
-		return throw_error(q, p1, "type_error", "list");
-
-	return pl_success;
-}
-
 static USE_RESULT pl_status fn_sys_mustbe_list_or_var_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -7958,16 +7944,6 @@ static USE_RESULT pl_status fn_sys_mustbe_list_or_var_1(query *q)
 
 	if (!is_valid_list(q, p1, p1_ctx, true))
 		return throw_error(q, p1, "type_error", "list");
-
-	return pl_success;
-}
-
-static USE_RESULT pl_status fn_sys_mustbe_callable_1(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-
-	if (!is_callable(p1))
-		return throw_error(q, p1, "type_error", "callable");
 
 	return pl_success;
 }
@@ -11542,9 +11518,7 @@ static const struct builtins g_predicates_other[] =
 	{"is_list", 1, fn_is_list_1, "+term"},
 	{"$mustbe_pairlist", 1, fn_sys_mustbe_pairlist_1, "+pair"},
 	{"$mustbe_pairlist_or_var", 1, fn_sys_mustbe_pairlist_or_var_1, "?pair"},
-	{"$mustbe_list", 1, fn_sys_mustbe_list_1, "+list"},
 	{"$mustbe_list_or_var", 1, fn_sys_mustbe_list_or_var_1, "?list"},
-	{"$mustbe_callable", 1, fn_sys_mustbe_callable_1, ":term"},
 	{"$mustbe_atom", 1, fn_sys_mustbe_atom_1, "+atom"},
 	{"$mustbe_integer", 1, fn_sys_mustbe_integer_1, "+integer"},
 	{"list", 1, fn_is_list_1, "+term"},

@@ -23,7 +23,7 @@ unify_with_occurs_check(X, X) :-
 
 predicate_property(P, A) :-
 	nonvar(P), atom(A), !,
-	'$mustbe_callable'(P),
+	must_be(P, callable, _, _),
 	'$legacy_predicate_property'(P, A).
 predicate_property(P, A) :-
 	'$load_properties',
@@ -33,7 +33,7 @@ predicate_property(P, A) :-
 		throw(error(domain_error(predicate_property, A), P))
 		)
 	),
-	'$mustbe_callable'(P),
+	must_be(P, callable, _, _),
 	'$predicate_property'(P, A).
 
 subsumes_term(G, S) :-
@@ -130,7 +130,7 @@ merge(<, H1, H2, T1, T2, [H1|R]) :-
 
 sort(L, R) :-
 	'$mustbe_instantiated'(L, R),
-	'$mustbe_list'(L),
+	must_be(L, list, _, _),
 	'$mustbe_list_or_var'(R),
 	length(L,N),
 	sort(N, L, _, R).
@@ -180,7 +180,7 @@ samsort(L, R) :- msort(L, R).
 
 msort(L, R) :-
 	'$mustbe_instantiated'(L, R),
-	'$mustbe_list'(L),
+	must_be(L, list, _, _),
 	'$mustbe_list_or_var'(R),
 	length(L,N),
 	msort(N, L, _, R).

@@ -37,7 +37,7 @@ append([], L, L).
 append([H|T], L, [H|R]) :- append(T, L, R).
 
 append(ListOfLists, List) :-
-	'$mustbe_list'(ListOfLists),
+	must_be(ListOfLists, list, _, _),
 	append_(ListOfLists, List).
 
 append_([], []).
