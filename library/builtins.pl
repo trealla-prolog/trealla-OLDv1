@@ -3,7 +3,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-% FIXME to throw
 must_be(Term, callable, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (callable(Term) -> true ; throw(error(type_error(Term, callable), must_be/4))), !.
 must_be(Term, atom, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (atom(Term) -> true ; throw(error(type_error(Term, atom), must_be/4))), !.
 must_be(Term, atomic, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (atomic(Term) -> true ; throw(error(type_error(Term, atomic), must_be/4))), !.
