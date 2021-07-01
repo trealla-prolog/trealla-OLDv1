@@ -1411,11 +1411,9 @@ del_clpb(Var) :-
    them [] on backtracking, which is quite unfortunate in itself.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-/*
 b_setval(K, T) :- bb_b_put(K, T).
 nb_setval(K, T) :- bb_put(K, T).
 b_getval(K, T) :- bb_get(K, T).
-*/
 
 prepare_global_variables(BDD) :-
         clpb_next_id('$clpb_next_var', V0),
