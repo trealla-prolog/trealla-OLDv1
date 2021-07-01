@@ -4,17 +4,17 @@
 %
 
 % FIXME to throw
-must_be(Term, callable, _Goal, _Arg) :- !, callable(Term).
-must_be(Term, atom, _Goal, _Arg) :- !, atom(Term).
-must_be(Term, atomic, _Goal, _Arg) :- !, atomic(Term).
-must_be(Term, integer, _Goal, _Arg) :- !, integer(Term).
-must_be(Term, real, _Goal, _Arg) :- !, real(Term).
-must_be(Term, number, _Goal, _Arg) :- !, number(Term).
-must_be(Term, var, _Goal, _Arg) :- !, var(Term).
-must_be(Term, nonvar, _Goal, _Arg) :- !, nonvar(Term).
-must_be(Term, ground, _Goal, _Arg) :- !, ground(Term).
-must_be(Term, compound, _Goal, _Arg) :- !, compound(Term).
-must_be(Term, list, _Goal, _Arg) :- !, list(Term).
+must_be(Term, callable, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), callable(Term) -> true ; throw(error(type_error(Term, callable), must_be/4)).
+must_be(Term, atom, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), atom(Term) -> true ; throw(error(type_error(Term, atom), must_be/4)).
+must_be(Term, atomic, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), atomic(Term) -> true ; throw(error(type_error(Term, atomic), must_be/4)).
+must_be(Term, integer, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), integer(Term) -> true ; throw(error(type_error(Term, integer), must_be/4)).
+must_be(Term, float, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), float(Term) -> true ; throw(error(type_error(Term, real), must_be/4)).
+must_be(Term, number, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), number(Term) -> true ; throw(error(type_error(Term, number), must_be/4)).
+must_be(Term, var, _Goal, _Arg) :- !, var(Term) -> true ; throw(error(instantiation_error(Term), must_be/4)).
+must_be(Term, nonvar, _Goal, _Arg) :- !, nonvar(Term) -> true ; throw(error(uninstantiation_error(Term), must_be/4)).
+must_be(Term, ground, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), ground(Term) -> true ; throw(error(type_error(Term, ground), must_be/4)).
+must_be(Term, compound, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), compound(Term) -> true ; throw(error(type_error(Term, compound), must_be/4)).
+must_be(Term, list, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), list(Term) -> true ; throw(error(type_error(Term, list), must_be/4)).
 
 expand_term((H --> B), Out) :-
 	dcg_translate((H --> B), Out).

@@ -188,14 +188,14 @@ where appropriate.
 	name/2
 	tab/[1,2]
 
-	maplist/[2-8]			# autoloaded from library(apply)
-	foldl/[4-7]				# autoloaded from library(apply)
-	include/3				# autoloaded from library(apply)
-	exclude/3				# autoloaded from library(apply)
+	maplist/[2-8]				# autoloaded from library(apply)
+	foldl/[4-7]					# autoloaded from library(apply)
+	include/3					# autoloaded from library(apply)
+	exclude/3					# autoloaded from library(apply)
 
-	read_term_from_atom/3	# use read_term_from_chars/3 instead
-	write_term_to_atom/3	# use write_term_to_chars/3 instead
-	term_to_atom/2			# use write_term_to_chars/3 instead
+	read_term_from_atom/3		# use read_term_from_chars/3 instead
+	write_term_to_atom/3		# use write_term_to_chars/3 instead
+	term_to_atom/2				# use write_term_to_chars/3 instead
 
 	random/1                # random(-float) float [0.0,<1.0]
 	random/1                # random(+integer) function returning integer [0,<integer]
@@ -208,9 +208,10 @@ where appropriate.
 	get_attr/3
 	del_attr/2
 
-	freeze/2				# use_module(library(freeze))
-	frozen/2				# use_module(library(freeze))
+	freeze/2					# use_module(library(freeze))
+	frozen/2					# use_module(library(freeze))
 
+	must_be/4					# must_be(+term,+type,+term,+arg)
 	expand_term/2				# expand_term(+term,-term)
 	memberchk/2					# memberchk(+term,+list).
 	nonmember/2					# \+ memberchk(+term,+list)
