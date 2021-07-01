@@ -219,9 +219,10 @@ GNU-Prolog & SWI-Prolog
 Others
 ======
 
-	memberchk/2					# memberchk(E,L).
-	nonmember/2					# \+ memberchk(E,L)
-	atomic_concat/3
+	expand_term/2				# expand_term(+term,-term)
+	memberchk/2					# memberchk(+term,+list).
+	nonmember/2					# \+ memberchk(+term,+list)
+	atomic_concat/3				# atomic_concat(+atom,+list,-list)
     atomic_list_concat/2		# atomic_list_concat(L,Atom) (bidirectional)
     atomic_list_concat/3		# atomic_list_concat(L,Sep,Atom) (bidirectional)
 	read_term_from_chars/2		# read_term_from_chars(+chars,-term)
