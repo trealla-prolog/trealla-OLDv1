@@ -815,7 +815,7 @@ static void directives(parser *p, term *t)
 	while (is_list(p1)) {
 		cell *h = LIST_HEAD(p1);
 
-			if (is_literal(h) && (!strcmp(PARSER_GET_STR(h), "/") || !strcmp(PARSER_GET_STR(h), "//")) && (h->arity == 2)) {
+		if (is_literal(h) && (!strcmp(PARSER_GET_STR(h), "/") || !strcmp(PARSER_GET_STR(h), "//")) && (h->arity == 2)) {
 			cell *c_name = h + 1;
 			if (!is_atom(c_name)) continue;
 			cell *c_arity = h + 2;
@@ -863,48 +863,45 @@ static void directives(parser *p, term *t)
 	if (is_nil(p1))
 		return;
 
+	//printf("*** %s\n", dirname);
+
 	while (is_literal(p1)) {
-		if (!strcmp(PARSER_GET_STR(p1), "/") && (p1->arity == 2)) {
-			cell *c_name = p1 + 1;
+		module *m = p->m;
+		cell *c_id = p1;
+
+		if (!strcmp(PARSER_GET_STR(p1), ":") && (p1->arity == 2)) {
+			cell *c_mod = p1 + 1;
+			if (!is_atom(c_mod)) return;
+			m = find_module(p->m->pl, PARSER_GET_STR(c_mod));
+			c_id = p1 + 2;
+		}
+
+		if (!strcmp(PARSER_GET_STR(c_id), "/") && (p1->arity == 2)) {
+			cell *c_name = c_id + 1;
 			if (!is_atom(c_name)) return;
-			cell *c_arity = p1 + 2;
+			cell *c_arity = c_id + 2;
 			if (!is_smallint(c_arity)) return;
 			unsigned arity = get_smallint(c_arity);
 
-			if (!strcmp(PARSER_GET_STR(p1), "//"))
+			//printf("*** *** *** %s : %s / %u\n", m->name, PARSER_GET_STR(c_name), arity);
+
+			if (!strcmp(PARSER_GET_STR(c_id), "//"))
 				arity += 2;
 
-			if (!strcmp(dirname, "multifile")) {
-				const char *src = PARSER_GET_STR(c_name);
-
-				if (!strchr(src, ':')) {
-					set_multifile_in_db(p->m, src, arity);
-				} else {
-					char mod[256], name[256];
-					mod[0] = name[0] = '\0';
-					sscanf(src, "%255[^:]:%255s", mod, name);
-					mod[sizeof(mod)-1] = name[sizeof(name)-1] = '\0';
-
-					if (!is_multifile_in_db(p->m->pl, mod, name, arity)) {
-						if (DUMP_ERRS || !p->do_read_term)
-							fprintf(stdout, "Error: not multile %s:%s/%u\n", mod, name, arity);
-
-						p->error = true;
-						return;
-					}
-				}
-			} else if (!strcmp(dirname, "discontiguous"))
-				set_discontiguous_in_db(p->m, PARSER_GET_STR(c_name), arity);
+			if (!strcmp(dirname, "multifile"))
+				set_multifile_in_db(m, PARSER_GET_STR(c_name), arity);
+			else if (!strcmp(dirname, "discontiguous"))
+				set_discontiguous_in_db(m, PARSER_GET_STR(c_name), arity);
 			else if (!strcmp(dirname, "dynamic"))
-				set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), arity);
+				set_dynamic_in_db(m, PARSER_GET_STR(c_name), arity);
 			else if (!strcmp(dirname, "persist"))
-				set_persist_in_db(p->m, PARSER_GET_STR(c_name), arity);
+				set_persist_in_db(m, PARSER_GET_STR(c_name), arity);
 			else if (!strcmp(dirname, "meta_predicate"))
-				set_meta_predicate_in_db(p->m, c_name);
+				set_meta_predicate_in_db(m, c_name);
 
 			p1 += p1->nbr_cells;
 		} else if (!strcmp(dirname, "meta_predicate")) {
-			set_meta_predicate_in_db(p->m, p1);
+			set_meta_predicate_in_db(m, p1);
 			p1 += p1->nbr_cells;
 		} else if (!strcmp(PARSER_GET_STR(p1), ",") && (p1->arity == 2))
 			p1 += 1;

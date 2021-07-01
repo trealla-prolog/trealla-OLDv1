@@ -963,7 +963,6 @@ module *create_module(prolog *pl, const char *name)
 
 	m->next = pl->modules;
 	pl->modules = m;
-	set_dynamic_in_db(m, "term_expansion", 2);
 	set_dynamic_in_db(m, "goal_expansion", 2);
 	set_dynamic_in_db(m, "initialization", 1);
 	set_dynamic_in_db(m, ":-", 1);
