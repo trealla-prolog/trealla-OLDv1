@@ -95,8 +95,15 @@ predicate *create_predicate(module *m, cell *c)
 {
 	predicate *h = calloc(1, sizeof(predicate));
 	ensure(h);
-	h->next = m->head;
-	m->head = h;
+	h->prev = m->tail;
+
+	if (m->tail)
+		m->tail->next = h;
+
+	m->tail = h;
+
+	if (!m->head)
+		m->head = h;
 
 	h->m = m;
 	h->key = *c;

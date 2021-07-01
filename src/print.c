@@ -807,12 +807,12 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		|| !strcmp(src, "->") || !strcmp(src, "*->")
 		|| !strcmp(src, "=~=") || !strcmp(src, "=..")
 		|| !strcmp(src, "=>")|| !strcmp(src, "?=")
-		|| !*src;
+		|| (*src == '#') || !*src;
 	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
 	dst += snprintf(dst, dstlen, "%s", src);
 
-	if (!strcmp(src, "=") &&
+	if ((strchr(src, '=') || strchr(src, '+') || strchr(src, '#')) &&
 		((*GET_STR(rhs) == '-') || (*GET_STR(rhs) == '?') || (*GET_STR(rhs) == '#')))
 		space = 1;
 
