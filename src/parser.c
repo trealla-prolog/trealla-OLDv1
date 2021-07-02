@@ -1390,7 +1390,7 @@ void reset(parser *p)
 	p->start_term = true;
 }
 
-static bool term_dcg_rewrite(parser *p)
+static bool dcg_expansion(parser *p)
 {
 	if (!find_module(p->m->pl, "dcgs")) {
 		for (library *lib = g_libs; lib->name; lib++) {
@@ -1491,7 +1491,7 @@ static bool term_expansion(parser *p)
 		return false;
 
 	if (!strcmp(PARSER_GET_STR(p->t->cells), "-->"))
-		return term_dcg_rewrite(p);
+		return dcg_expansion(p);
 
 	return false;
 }
