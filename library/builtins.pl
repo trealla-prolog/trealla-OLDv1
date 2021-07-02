@@ -454,9 +454,13 @@ bb_b_put(K, _) :-
 	user:retract('$global_key'(K, _)),
 	!.
 
+bb_put(K, _) :-
+	must_be(K, atom, _, _),
+	user:retract('$global_key'(K, _)),
+	fail.
 bb_put(K, V) :-
 	must_be(K, atom, _, _),
-	user:asserta('$global_key'(K, V)).
+	user:assertz('$global_key'(K, V)).
 
 bb_get(K, V) :-
 	must_be(K, atom, _, _),
