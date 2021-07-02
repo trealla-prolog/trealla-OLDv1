@@ -1430,7 +1430,7 @@ static bool dcg_expansion(parser *p)
 	tokenize(p2, false, false);
 	term_xref(p2, p2->t, NULL);
 
-	//printf("### "); print_term(q, stdout, p2->t->cells, q->st.curr_frame, 1); printf("\n");
+	//printf("### "); print_term(q, stdout, p2->t->cells, 0, -1); printf("\n");
 
 	execute(q, p2->t);
 	free(src);
@@ -1493,7 +1493,85 @@ static bool term_expansion(parser *p)
 	if (!strcmp(PARSER_GET_STR(p->t->cells), "-->"))
 		return dcg_expansion(p);
 
-	return false;
+	predicate *h = find_functor(p->m, "term_expansion", 2);
+
+	if (!h || !h->cnt)
+		return false;
+
+	// Being conservative here (for now) and using
+	// temp parser/query objects...
+
+	query *q = create_query(p->m, false);
+	ensure(q);
+	char *dst = print_term_to_strbuf(q, p->t->cells, 0, -1);
+	char *src = malloc(strlen(dst)+256);
+	ensure(src);
+	sprintf(src, "term_expansion((%s),_TermOut).", dst);
+	free(dst);
+
+	//printf("*** %s\n", src);
+
+	parser *p2 = create_parser(p->m);
+	ensure(p2);
+	p2->line_nbr = p->line_nbr;
+	p2->skip = true;
+	p2->srcptr = src;
+	tokenize(p2, false, false);
+	term_xref(p2, p2->t, NULL);
+
+	//printf("### "); print_term(q, stdout, p2->t->cells, 0, -1); printf("\n");
+
+	execute(q, p2->t);
+	free(src);
+	frame *g = GET_FRAME(0);
+	src = NULL;
+
+	for (unsigned i = 0; i < p2->t->nbr_vars; i++) {
+		slot *e = GET_SLOT(g, i);
+
+		if (is_empty(&e->c))
+			continue;
+
+		q->latest_ctx = e->ctx;
+		cell *c;
+
+		if (is_indirect(&e->c)) {
+			c = e->c.val_ptr;
+			q->latest_ctx = e->ctx;
+		} else
+			c = deref(q, &e->c, e->ctx);
+
+		if (strcmp(p2->vartab.var_name[i], "_TermOut"))
+			continue;
+
+		src = print_term_to_strbuf(q, c, q->latest_ctx, -1);
+		strcat(src, ".");
+		break;
+	}
+
+	if (!src) {
+		destroy_parser(p2);
+		destroy_query(q);
+		p->error = true;
+		return false;
+	}
+
+	reset(p2);
+	p2->srcptr = src;
+	tokenize(p2, false, false);
+	free(src);
+
+	// Take the completed term...
+
+	clear_term(p->t);
+	free(p->t);
+	p->t = p2->t;
+	p2->t = NULL;
+	p->nbr_vars = p2->nbr_vars;
+
+	destroy_parser(p2);
+	destroy_query(q);
+	return true;
 }
 
 static cell *make_literal(parser *p, idx_t offset)
