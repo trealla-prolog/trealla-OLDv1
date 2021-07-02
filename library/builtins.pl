@@ -437,7 +437,7 @@ b_delete(K) :-
 b_delete(_).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Compatibility... Scryer?
+% Compatibility with Scryer? Needed for CLPB.
 
 bb_b_put(K, _) :-
 	must_be(K, atom, _, _),
