@@ -441,7 +441,7 @@ b_delete(K) :-
 b_delete(_).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Compatibility with Scryer? Needed for CLPB.
+% Compatibility with Scryer? SICStus? Needed for CLPB.
 
 bb_b_put(K, _) :-
 	must_be(K, atom, _, _),
@@ -459,7 +459,7 @@ bb_b_del(K) :-
 	must_be(K, atom, _, _),
 	user:retract('$global_key'(K, _)),
 	!.
-b_del(_).
+bb_b_del(_).
 
 bb_put(K, _) :-
 	must_be(K, atom, _, _),
@@ -478,7 +478,7 @@ bb_del(K) :-
 	must_be(K, atom, _, _),
 	user:retractall('$global_key'(K, _)),
 	!.
-b_del(_).
+bb_del(_).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
