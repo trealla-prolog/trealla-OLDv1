@@ -21,8 +21,11 @@ must_be(Term, list, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (list(Term)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-expand_term((H --> B), Out) :-
-	dcg_translate((H --> B), Out).
+expand_term((H --> B), Out) :- !,
+	dcg_translate((H --> B), Out), !.
+expand_term(In, Out) :-
+	term_expansion(In, Out). !,
+expand_term(T, T).
 
 unify_with_occurs_check(X, X) :-
 	acyclic_term(X).
