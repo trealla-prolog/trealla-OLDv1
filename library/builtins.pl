@@ -455,6 +455,12 @@ bb_b_put(K, _) :-
 	user:retract('$global_key'(K, _)),
 	!, fail.
 
+bb_b_del(K) :-
+	must_be(K, atom, _, _),
+	user:retract('$global_key'(K, _)),
+	!.
+b_del(_).
+
 bb_put(K, _) :-
 	must_be(K, atom, _, _),
 	user:retract('$global_key'(K, _)),
@@ -467,6 +473,12 @@ bb_get(K, V) :-
 	must_be(K, atom, _, _),
 	user:catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), b_setval/2))),
 	!.
+
+bb_del(K) :-
+	must_be(K, atom, _, _),
+	user:retractall('$global_key'(K, _)),
+	!.
+b_del(_).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
