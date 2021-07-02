@@ -1392,12 +1392,6 @@ void reset(parser *p)
 
 static bool term_dcg_rewrite(parser *p)
 {
-	if (p->error || !is_literal(p->t->cells) || (p->t->cells->arity != 2))
-		return false;
-
-	if (strcmp(PARSER_GET_STR(p->t->cells), "-->"))
-		return false;
-
 	if (!find_module(p->m->pl, "dcgs")) {
 		for (library *lib = g_libs; lib->name; lib++) {
 			if (strcmp(lib->name, "dcgs"))
@@ -1489,6 +1483,17 @@ static bool term_dcg_rewrite(parser *p)
 	destroy_parser(p2);
 	destroy_query(q);
 	return true;
+}
+
+static bool term_expansion(parser *p)
+{
+	if (p->error || !is_literal(p->t->cells) || (p->t->cells->arity != 2))
+		return false;
+
+	if (!strcmp(PARSER_GET_STR(p->t->cells), "-->"))
+		return term_dcg_rewrite(p);
+
+	return false;
 }
 
 static cell *make_literal(parser *p, idx_t offset)
@@ -2271,7 +2276,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				term_to_body(p);
 
 				if (p->consulting && !p->skip) {
-					if (!term_dcg_rewrite(p))
+					if (!term_expansion(p))
 						directives(p, p->t);
 
 					if (p->already_loaded)
@@ -2663,7 +2668,7 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 	term_assign_vars(p, 0, false);
 
 	if (!p->command)
-		term_dcg_rewrite(p);
+		term_expansion(p);
 
 	term_xref(p, p->t, NULL);
 
