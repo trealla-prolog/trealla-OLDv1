@@ -713,6 +713,8 @@ bool load_fp(module *m, FILE *fp, const char *filename)
 	}
 	 while (ok && !p->already_loaded);
 
+	virtual_term(p, "end_of_file");
+
 	if (!p->error && !p->already_loaded && !p->end_of_term && p->t->cidx) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, incomplete statement\n");

@@ -1570,6 +1570,19 @@ static bool term_expansion(parser *p)
 	return true;
 }
 
+bool virtual_term(parser *p, const char *src)
+{
+	parser *p2 = create_parser(p->m);
+	ensure(p2);
+	p2->line_nbr = p->line_nbr;
+	p2->skip = true;
+	p2->srcptr = (char*)src;
+	tokenize(p2, false, false);
+	term_expansion(p2);
+	destroy_parser(p2);
+	return true;
+}
+
 static cell *make_literal(parser *p, idx_t offset)
 {
 	cell *c = make_cell(p);
