@@ -702,11 +702,11 @@ bool load_fp(module *m, FILE *fp, const char *filename)
 	p->fp = fp;
 	bool ok = false;
 
-	virtual_term(p, "begin_of_file.");
+	//virtual_term(p, "begin_of_file.");
 
 	do {
 		if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
-			virtual_term(p, "end_of_file.");
+			//virtual_term(p, "end_of_file.");
 			break;
 		}
 

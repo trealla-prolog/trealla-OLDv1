@@ -1485,7 +1485,7 @@ static bool dcg_expansion(parser *p)
 
 static bool term_expansion(parser *p)
 {
-	if (p->error || !is_literal(p->t->cells) || (p->t->cells->arity != 2))
+	if (p->error || !is_literal(p->t->cells))
 		return false;
 
 	if (!strcmp(PARSER_GET_STR(p->t->cells), "-->"))
@@ -1507,7 +1507,7 @@ static bool term_expansion(parser *p)
 	sprintf(src, "term_expansion((%s),_TermOut).", dst);
 	free(dst);
 
-	//printf("*** %s\n", src);
+	printf("*** %s\n", src);
 
 	parser *p2 = create_parser(p->m);
 	ensure(p2);
@@ -1517,9 +1517,15 @@ static bool term_expansion(parser *p)
 	tokenize(p2, false, false);
 	term_xref(p2, p2->t, NULL);
 
-	//printf("### "); print_term(q, stdout, p2->t->cells, 0, -1); printf("\n");
+	printf("### "); print_term(q, stdout, p2->t->cells, 0, -1); printf("\n");
 
-	execute(q, p2->t);
+	if (execute(q, p2->t) != pl_success) {
+		free(src);
+		destroy_parser(p2);
+		destroy_query(q);
+		return false;
+	}
+
 	free(src);
 	frame *g = GET_FRAME(0);
 	src = NULL;
@@ -1574,9 +1580,7 @@ bool virtual_term(parser *p, const char *src)
 {
 	parser *p2 = create_parser(p->m);
 	ensure(p2);
-	p2->line_nbr = 1;
 	p2->skip = true;
-	p2->consulting = true;
 	p2->srcptr = (char*)src;
 	tokenize(p2, false, false);
 	term_expansion(p2);
