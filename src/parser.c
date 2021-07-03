@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdlib.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -958,7 +959,7 @@ static void xref_cell(parser *p, term *t, cell *c, predicate *parent)
 	}
 }
 
-void term_xref(parser *p, term *t, predicate *parent)
+void xref_term(parser *p, term *t, predicate *parent)
 {
 	cell *c = t->cells;
 
@@ -979,7 +980,7 @@ void xref_db(parser *p)
 {
 	for (predicate *h = p->m->head; h; h = h->next) {
 		for (clause *r = h->head; r; r = r->next)
-			term_xref(p, &r->t, h);
+			xref_term(p, &r->t, h);
 	}
 }
 
@@ -1428,7 +1429,7 @@ static bool dcg_expansion(parser *p)
 	p2->skip = true;
 	p2->srcptr = src;
 	tokenize(p2, false, false);
-	term_xref(p2, p2->t, NULL);
+	xref_term(p2, p2->t, NULL);
 
 	//printf("### "); print_term(q, stdout, p2->t->cells, 0, -1); printf("\n");
 
@@ -1507,7 +1508,7 @@ static bool term_expansion(parser *p)
 	sprintf(src, "term_expansion((%s),_TermOut).", dst);
 	free(dst);
 
-	printf("*** %s\n", src);
+	//printf("*** %s\n", src);
 
 	parser *p2 = create_parser(p->m);
 	ensure(p2);
@@ -1515,11 +1516,13 @@ static bool term_expansion(parser *p)
 	p2->skip = true;
 	p2->srcptr = src;
 	tokenize(p2, false, false);
-	term_xref(p2, p2->t, NULL);
+	xref_term(p2, p2->t, NULL);
 
-	printf("### "); print_term(q, stdout, p2->t->cells, 0, -1); printf("\n");
+	//printf("### "); print_term(q, stdout, p2->t->cells, 0, -1); printf("\n");
 
-	if (execute(q, p2->t) != pl_success) {
+	execute(q, p2->t);
+
+	if (q->retry != QUERY_OK) {
 		free(src);
 		destroy_parser(p2);
 		destroy_query(q);
@@ -2368,6 +2371,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				term_to_body(p);
 
 				if (p->consulting && !p->skip) {
+					xref_term(p, p->t, NULL);
 					term_expansion(p);
 					directives(p, p->t);
 
@@ -2762,7 +2766,7 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 	if (!p->command)
 		term_expansion(p);
 
-	term_xref(p, p->t, NULL);
+	xref_term(p, p->t, NULL);
 
 	query *q = create_query(p->m, false);
 	if (!q) return false;

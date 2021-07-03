@@ -6,7 +6,7 @@ extern parser *create_parser(module *m);
 extern void destroy_parser(parser *p);
 
 extern unsigned tokenize(parser *p, bool args, bool consing);
-extern void term_xref(parser *p, term *t, predicate *parent);
+extern void xref_term(parser *p, term *t, predicate *parent);
 extern void reset(parser *p);
 extern void consultall(parser *p, cell *l);
 extern void term_to_body(parser *p);

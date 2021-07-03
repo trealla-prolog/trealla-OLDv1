@@ -2635,7 +2635,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	term_xref(p, p->t, NULL);
+	xref_term(p, p->t, NULL);
 
 	if (p->nbr_vars) {
 		if (!create_vars(q, p->nbr_vars))
@@ -10305,7 +10305,7 @@ static void restore_db(module *m, FILE *fp)
 
 		p->srcptr = p->save_line;
 		tokenize(p, false, false);
-		term_xref(p, p->t, NULL);
+		xref_term(p, p->t, NULL);
 		execute(q, p->t);
 		clear_term(p->t);
 	}
