@@ -1472,11 +1472,9 @@ static bool dcg_expansion(parser *p)
 	tokenize(p2, false, false);
 	free(src);
 
-	// Take the completed term...
-
 	clear_term(p->t);
 	free(p->t);
-	p->t = p2->t;
+	p->t = p2->t;			// Take the completed term
 	p2->t = NULL;
 	p->nbr_vars = p2->nbr_vars;
 
@@ -1561,11 +1559,9 @@ static bool term_expansion(parser *p)
 	tokenize(p2, false, false);
 	free(src);
 
-	// Take the completed term...
-
 	clear_term(p->t);
 	free(p->t);
-	p->t = p2->t;
+	p->t = p2->t;				// Take the completed term
 	p2->t = NULL;
 	p->nbr_vars = p2->nbr_vars;
 
