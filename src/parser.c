@@ -1572,7 +1572,6 @@ static bool term_expansion(parser *p)
 
 bool virtual_term(parser *p, const char *src)
 {
-	printf("*** %s\n", src);
 	parser *p2 = create_parser(p->m);
 	ensure(p2);
 	p2->line_nbr = 1;
