@@ -696,6 +696,7 @@ bool load_fp(module *m, FILE *fp, const char *filename)
 {
 	parser *p = create_parser(m);
 	if (!p) return false;
+	virtual_term(p, "begin_of_file");
 	char *save_filename = m->filename;
 	m->filename = strdup(filename);
 
