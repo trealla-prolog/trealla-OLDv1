@@ -238,6 +238,7 @@ static void push_property(module *m, const char *name, unsigned arity, const cha
 	parser *p = create_parser(m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
+	p->internal = true;
 	tokenize(p, false, false);
 	destroy_parser(p);
 }

@@ -1486,7 +1486,7 @@ static bool dcg_expansion(parser *p)
 
 static bool term_expansion(parser *p)
 {
-	if (p->error || !is_literal(p->t->cells))
+	if (p->error || p->internal || !is_literal(p->t->cells))
 		return false;
 
 	if (!strcmp(PARSER_GET_STR(p->t->cells), "-->"))

@@ -571,6 +571,7 @@ struct parser_ {
 	bool run_init:1;
 	bool directive:1;
 	bool consulting:1;
+	bool internal:1;
 	bool one_shot:1;
 	bool start_term:1;
 	bool end_of_term:1;
