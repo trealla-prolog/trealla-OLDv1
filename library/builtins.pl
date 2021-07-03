@@ -385,7 +385,7 @@ nb_setval(K, V) :-
 
 nb_getval(K, V) :-
 	must_be(K, atom, _, _),
-	user:catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), nb_setval/2))),
+	user:catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), nb_getval/2))),
 	!.
 
 nb_delete(K) :-
@@ -409,7 +409,7 @@ nb_current(K, V) :-
 b_setval(K, _) :-
 	must_be(K, atom, _, _),
 	\+ user:clause('$global_key'(K, _), _),
-	asserta('$global_key'(K, [])),
+	user:asserta('$global_key'(K, [])),
 	fail.
 b_setval(K, V) :-
 	must_be(K, atom, _, _),
@@ -424,14 +424,14 @@ b_setval0(K, _) :-
 	fail.
 b_setval0(K, V) :-
 	must_be(K, atom, _, _),
-	asserta('$global_key'(K, V)).
+	user:asserta('$global_key'(K, V)).
 b_setval0(K, _) :-
 	user:retract('$global_key'(K, _)),
 	!, fail.
 
 b_getval(K, V) :-
 	must_be(K, atom, _, _),
-	user:catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), b_setval/2))),
+	user:catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), b_getval/2))),
 	!.
 
 b_delete(K) :-
@@ -446,7 +446,7 @@ b_delete(_).
 bb_b_put(K, _) :-
 	must_be(K, atom, _, _),
 	\+ user:clause('$global_key'(K, _), _),
-	asserta('$global_key'(K, [])),
+	user:asserta('$global_key'(K, [])),
 	fail.
 bb_b_put(K, V) :-
 	must_be(K, atom, _, _),
@@ -471,7 +471,7 @@ bb_put(K, V) :-
 
 bb_get(K, V) :-
 	must_be(K, atom, _, _),
-	user:catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), b_setval/2))),
+	user:catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), bb_get/2))),
 	!.
 
 bb_del(K) :-
