@@ -2354,8 +2354,8 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				term_to_body(p);
 
 				if (p->consulting && !p->skip) {
-					if (!term_expansion(p))
-						directives(p, p->t);
+					term_expansion(p);
+					directives(p, p->t);
 
 					if (p->already_loaded)
 						break;
