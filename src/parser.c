@@ -1401,10 +1401,10 @@ static bool dcg_expansion(parser *p)
 			may_ptr_error(src);
 			memcpy(src, lib->start, *lib->len);
 			src[*lib->len] = '\0';
-			STRING_alloc(s1);
-			STRING_strcat2(s1, "library/", lib->name);
-			load_text(p->m, src, STRING_cstr(s1));
-			STRING_free(s1);
+			STRING_alloc(s);
+			STRING_strcat2(s, "library/", lib->name);
+			load_text(p->m, src, STRING_cstr(s));
+			STRING_free(s);
 			free(src);
 		}
 	}
