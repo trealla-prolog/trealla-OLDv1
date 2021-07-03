@@ -696,25 +696,25 @@ bool load_fp(module *m, FILE *fp, const char *filename)
 {
 	parser *p = create_parser(m);
 	if (!p) return false;
-	virtual_term(p, "begin_of_file");
 	char *save_filename = m->filename;
 	m->filename = strdup(filename);
-
 	p->consulting = true;
 	p->fp = fp;
 	bool ok = false;
 
+	virtual_term(p, "begin_of_file.");
+
 	do {
-		if (getline(&p->save_line, &p->n_line, p->fp) == -1)
+		if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
+			virtual_term(p, "end_of_file.");
 			break;
+		}
 
 		p->srcptr = p->save_line;
 		tokenize(p, false, false);
 		ok = !p->error;
 	}
 	 while (ok && !p->already_loaded);
-
-	virtual_term(p, "end_of_file");
 
 	if (!p->error && !p->already_loaded && !p->end_of_term && p->t->cidx) {
 		if (DUMP_ERRS || !p->do_read_term)
