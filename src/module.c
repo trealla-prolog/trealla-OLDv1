@@ -456,9 +456,9 @@ unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_p
 	return 0;
 }
 
-static clause* assert_begin(module *m, term *t, bool consulting)
+static clause* assert_begin(module *m, term *t, cell *p1, bool consulting)
 {
-	cell *c = t->cells;
+	cell *c = p1;
 
 	if (!check_directive(c))
 		c = get_head(t->cells);
@@ -488,7 +488,7 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		h = create_predicate(m, c);
 		ensure(h);
 
-		if (check_directive(t->cells))
+		if (check_directive(p1))
 			h->check_directive = true;
 
 		if (!consulting) {
@@ -520,11 +520,12 @@ static clause* assert_begin(module *m, term *t, bool consulting)
 		return NULL;
 	}
 
-	r->owner = h;
+	copy_cells(r->t.cells, p1, nbr_cells);
 	r->t.nbr_vars = t->nbr_vars;
-	r->t.nbr_cells = copy_cells(r->t.cells, t->cells, nbr_cells);
+	r->t.nbr_cells = nbr_cells;
 	r->t.cidx = r->t.nbr_cells;
 	r->t.ugen_created = ++m->pl->ugen;
+	r->owner = h;
 	return r;
 }
 
@@ -575,7 +576,7 @@ static void assert_commit(module *m, clause *r, predicate *h, bool append)
 
 clause *asserta_to_db(module *m, term *t, bool consulting)
 {
-	clause *r = assert_begin(m, t, consulting);
+	clause *r = assert_begin(m, t, t->cells, consulting);
 	if (!r) return NULL;
 	predicate *h = r->owner;
 
@@ -596,7 +597,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 
 clause *assertz_to_db(module *m, term *t, bool consulting)
 {
-	clause *r = assert_begin(m, t, consulting);
+	clause *r = assert_begin(m, t, t->cells, consulting);
 	if (!r) return NULL;
 	predicate *h = r->owner;
 
