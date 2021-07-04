@@ -2411,6 +2411,8 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 						p->error = true;
 					}
+
+					p->t->cidx = 0;
 				}
 			}
 

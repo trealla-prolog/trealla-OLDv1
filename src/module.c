@@ -592,7 +592,6 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 		h->tail = r;
 
 	assert_commit(m, r, h, false);
-	t->cidx = 0;
 	return r;
 }
 
@@ -613,7 +612,6 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 		h->head = r;
 
 	assert_commit(m, r, h, true);
-	t->cidx = 0;
 	return r;
 }
 

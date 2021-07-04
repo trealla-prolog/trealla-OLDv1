@@ -4707,6 +4707,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 
 	clause *r = asserta_to_db(q->st.m, p->t, 0);
 	may_ptr_error(r);
+	p->t->cidx = 0;
 	uuid_gen(q->st.m->pl, &r->u);
 
 	if (!q->st.m->loading && r->t.persist)
@@ -4773,6 +4774,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 
 	clause *r = assertz_to_db(q->st.m, p->t, 0);
 	may_ptr_error(r);
+	p->t->cidx = 0;
 	uuid_gen(q->st.m->pl, &r->u);
 
 	if (!q->st.m->loading && r->t.persist)
@@ -6408,6 +6410,7 @@ static pl_status do_asserta_2(query *q)
 
 	clause *r = asserta_to_db(q->st.m, p->t, 0);
 	may_ptr_error(r);
+	p->t->cidx = 0;
 
 	if (!is_variable(p2)) {
 		uuid u;
@@ -6506,6 +6509,7 @@ static pl_status do_assertz_2(query *q)
 
 	clause *r = assertz_to_db(q->st.m, p->t, 0);
 	may_ptr_error(r);
+	p->t->cidx = 0;
 
 	if (!is_variable(p2)) {
 		uuid u;
