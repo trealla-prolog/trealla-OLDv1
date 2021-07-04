@@ -456,12 +456,12 @@ unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_p
 	return 0;
 }
 
-static clause* assert_begin(module *m, term *t, cell *p1, bool consulting)
+static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 {
 	cell *c = p1;
 
 	if (!check_directive(c))
-		c = get_head(t->cells);
+		c = get_head(p1);
 
 	if (!c) {
 		fprintf(stdout, "Error: not a fact or clause\n");
@@ -513,17 +513,18 @@ static clause* assert_begin(module *m, term *t, cell *p1, bool consulting)
 	if (m->prebuilt)
 		h->is_prebuilt = true;
 
-	int nbr_cells = t->cidx;
-	clause *r = calloc(sizeof(clause)+(sizeof(cell)*nbr_cells), 1);
+	clause *r = calloc(sizeof(clause)+(sizeof(cell)*(p1->nbr_cells+1)), 1);
 	if (!r) {
 		h->is_abolished = true;
 		return NULL;
 	}
 
-	copy_cells(r->t.cells, p1, nbr_cells);
-	r->t.nbr_vars = t->nbr_vars;
-	r->t.nbr_cells = nbr_cells;
-	r->t.cidx = r->t.nbr_cells;
+	copy_cells(r->t.cells, p1, p1->nbr_cells);
+	r->t.cells[p1->nbr_cells] = (cell){0};
+	r->t.cells[p1->nbr_cells].tag = TAG_END;
+	r->t.nbr_vars = nbr_vars;
+	r->t.nbr_cells = p1->nbr_cells;
+	r->t.cidx = p1->nbr_cells+1;
 	r->t.ugen_created = ++m->pl->ugen;
 	r->owner = h;
 	return r;
@@ -576,7 +577,7 @@ static void assert_commit(module *m, clause *r, predicate *h, bool append)
 
 clause *asserta_to_db(module *m, term *t, bool consulting)
 {
-	clause *r = assert_begin(m, t, t->cells, consulting);
+	clause *r = assert_begin(m, t->nbr_vars, t->cells, consulting);
 	if (!r) return NULL;
 	predicate *h = r->owner;
 
@@ -597,7 +598,7 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 
 clause *assertz_to_db(module *m, term *t, bool consulting)
 {
-	clause *r = assert_begin(m, t, t->cells, consulting);
+	clause *r = assert_begin(m, t->nbr_vars, t->cells, consulting);
 	if (!r) return NULL;
 	predicate *h = r->owner;
 
