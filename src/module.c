@@ -575,9 +575,9 @@ static void assert_commit(module *m, clause *r, predicate *h, bool append)
 	}
 }
 
-clause *asserta_to_db(module *m, term *t, bool consulting)
+clause *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 {
-	clause *r = assert_begin(m, t->nbr_vars, t->cells, consulting);
+	clause *r = assert_begin(m, nbr_vars, p1, consulting);
 	if (!r) return NULL;
 	predicate *h = r->owner;
 
@@ -595,9 +595,9 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 	return r;
 }
 
-clause *assertz_to_db(module *m, term *t, bool consulting)
+clause *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 {
-	clause *r = assert_begin(m, t->nbr_vars, t->cells, consulting);
+	clause *r = assert_begin(m, nbr_vars, p1, consulting);
 	if (!r) return NULL;
 	predicate *h = r->owner;
 

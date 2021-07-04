@@ -20,8 +20,8 @@ extern unsigned search_op(module *m, const char *name, unsigned *specifier, bool
 extern bool needs_quoting(module *m, const char *src, int srclen);
 extern void do_db_load(module *m);
 
-extern clause *asserta_to_db(module *m, term *t, bool consulting);
-extern clause *assertz_to_db(module *m, term *t, bool consulting);
+extern clause *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting);
+extern clause *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting);
 extern bool retract_from_db(module *m, clause *r);
 extern clause *erase_from_db(module *m, uuid *ref);
 

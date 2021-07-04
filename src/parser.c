@@ -2405,7 +2405,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 						h->flags = 0;
 					}
 
-					if (!p->error && !assertz_to_db(p->m, p->t, 1)) {
+					if (!p->error && !assertz_to_db(p->m, p->t->nbr_vars, p->t->cells, 1)) {
 						if (DUMP_ERRS || !p->do_read_term)
 							printf("Error: '%s', line %u\n", p->token, p->line_nbr);
 
