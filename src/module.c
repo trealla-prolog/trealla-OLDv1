@@ -540,7 +540,7 @@ static void reindex_predicate(module *m, predicate *h)
 	}
 }
 
-static void assert_commit(module *m, term *t, clause *r, predicate *h, bool append)
+static void assert_commit(module *m, clause *r, predicate *h, bool append)
 {
 	cell *c = get_head(r->t.cells);
 
@@ -570,8 +570,6 @@ static void assert_commit(module *m, term *t, clause *r, predicate *h, bool appe
 				m_app(h->index, c, r);
 		}
 	}
-
-	t->cidx = 0;
 }
 
 clause *asserta_to_db(module *m, term *t, bool consulting)
@@ -590,7 +588,8 @@ clause *asserta_to_db(module *m, term *t, bool consulting)
 	if (!h->tail)
 		h->tail = r;
 
-	assert_commit(m, t, r, h, false);
+	assert_commit(m, r, h, false);
+	t->cidx = 0;
 	return r;
 }
 
@@ -610,7 +609,8 @@ clause *assertz_to_db(module *m, term *t, bool consulting)
 	if (!h->head)
 		h->head = r;
 
-	assert_commit(m, t, r, h, true);
+	assert_commit(m, r, h, true);
+	t->cidx = 0;
 	return r;
 }
 
