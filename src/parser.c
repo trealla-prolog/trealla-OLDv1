@@ -1495,7 +1495,7 @@ static bool term_expansion(parser *p)
 	predicate *h = find_functor(p->m, "term_expansion", 2);
 
 	if (!h || !h->cnt)
-		return false;
+		return true;
 
 	// Being conservative here (for now) and using
 	// temp parser/query objects...
@@ -2372,7 +2372,15 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				if (p->consulting && !p->skip) {
 					xref_term(p, p->t, NULL);
 					term_expansion(p);
+					cell *p1 = p->t->cells;
 
+					if (!p1->arity &&
+						(!strcmp(PARSER_GET_STR(p1), "begin_of_file") ||
+							!strcmp(PARSER_GET_STR(p1), "end_of_file")))
+						p->skip = true;
+				}
+
+				if (p->consulting && !p->skip) {
 					// Term expansion can return a list...
 
 					cell *p1 = p->t->cells;
