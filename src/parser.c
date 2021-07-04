@@ -2373,7 +2373,19 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				if (p->consulting && !p->skip) {
 					xref_term(p, p->t, NULL);
 					term_expansion(p);
-					directives(p, p->t->cells);
+
+					// Term expansion can return a list...
+
+					cell *p1 = p->t->cells;
+					LIST_HANDLER(p1);
+
+					while (is_list(p1)) {
+						cell *h = LIST_HEAD(p1);
+						directives(p, h);
+						p1 = LIST_TAIL(p1);
+					}
+
+					directives(p, p1);
 
 					if (p->already_loaded)
 						break;
