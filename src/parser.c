@@ -485,23 +485,23 @@ static bool	is_loaded(module *m, const char *filename)
 	return false;
 }
 
-static void directives(parser *p, term *t)
+static void directives(parser *p, cell *d)
 {
 	p->skip = false;
 
-	if (!is_literal(t->cells))
+	if (!is_literal(d))
 		return;
 
-	if (is_list(t->cells) && p->command) {
-		consultall(p, t->cells);
+	if (is_list(d) && p->command) {
+		consultall(p, d);
 		p->skip = true;
 		return;
 	}
 
-	if (strcmp(PARSER_GET_STR(t->cells), ":-") || (t->cells->arity != 1))
+	if (strcmp(PARSER_GET_STR(d), ":-") || (d->arity != 1))
 		return;
 
-	cell *c = t->cells + 1;
+	cell *c = d + 1;
 
 	if (!is_literal(c))
 		return;
@@ -2373,7 +2373,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				if (p->consulting && !p->skip) {
 					xref_term(p, p->t, NULL);
 					term_expansion(p);
-					directives(p, p->t);
+					directives(p, p->t->cells);
 
 					if (p->already_loaded)
 						break;
