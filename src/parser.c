@@ -2329,6 +2329,36 @@ void fix_list(cell *c)
 	}
 }
 
+static bool process_term(parser *p, cell *p1)
+{
+	directives(p, p1);
+
+	cell *h = get_head(p1);
+
+	if (is_cstring(h)) {
+		idx_t off = index_from_pool(p->m->pl, PARSER_GET_STR(h));
+		if (off == ERR_IDX) {
+			p->error = true;
+			return false;
+		}
+
+		unshare_cell(h);
+		h->tag = TAG_LITERAL;
+		h->val_off = off;
+		h->flags = 0;
+	}
+
+	if (!p->error && !assertz_to_db(p->m, p->t->nbr_vars, p1, 1)) {
+		if (DUMP_ERRS || !p->do_read_term)
+			printf("Error: '%s', line %u\n", p->token, p->line_nbr);
+
+		p->error = true;
+		return false;
+	}
+
+	return true;
+}
+
 unsigned tokenize(parser *p, bool args, bool consing)
 {
 	idx_t begin_idx = p->t->cidx, arg_idx = p->t->cidx, save_idx = 0;
@@ -2388,36 +2418,21 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 					while (is_list(p1)) {
 						cell *h = LIST_HEAD(p1);
-						directives(p, h);
+
+						if (!process_term(p, h))
+							return false;
+
+						if (p->already_loaded)
+							return false;
+
 						p1 = LIST_TAIL(p1);
 					}
 
-					directives(p, p1);
+					if (!is_nil(p1) && !process_term(p, p1))
+						return false;
 
 					if (p->already_loaded)
-						break;
-
-					cell *h = get_head(p->t->cells);
-
-					if (is_cstring(h)) {
-						idx_t off = index_from_pool(p->m->pl, PARSER_GET_STR(h));
-						if (off == ERR_IDX) {
-							p->error = true;
-							break;
-						}
-
-						unshare_cell(h);
-						h->tag = TAG_LITERAL;
-						h->val_off = off;
-						h->flags = 0;
-					}
-
-					if (!p->error && !assertz_to_db(p->m, p->t->nbr_vars, p->t->cells, 1)) {
-						if (DUMP_ERRS || !p->do_read_term)
-							printf("Error: '%s', line %u\n", p->token, p->line_nbr);
-
-						p->error = true;
-					}
+						return false;
 
 					p->t->cidx = 0;
 				}
