@@ -1583,10 +1583,9 @@ bool virtual_term(parser *p, const char *src)
 {
 	parser *p2 = create_parser(p->m);
 	ensure(p2);
-	p2->skip = true;
+	p2->consulting = true;
 	p2->srcptr = (char*)src;
 	tokenize(p2, false, false);
-	term_expansion(p2);
 	destroy_parser(p2);
 	return true;
 }
