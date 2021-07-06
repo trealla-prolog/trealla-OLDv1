@@ -11433,6 +11433,14 @@ static const struct builtins g_predicates_iso[] =
 	{"=", 2, fn_iso_unify_2, NULL},
 	{"\\=", 2, fn_iso_notunify_2, NULL},
 
+	{0}
+};
+
+static const struct builtins g_predicates_other[] =
+{
+	{"*->", 2, fn_if_2, NULL},
+	{"if", 3, fn_if_3, NULL},
+
 	{"current_module", 1, fn_current_module_1, NULL},
 	{"use_module", 1, fn_use_module_1, NULL},
 	{"use_module", 2, fn_use_module_2, NULL},
@@ -11446,14 +11454,6 @@ static const struct builtins g_predicates_iso[] =
 	{"$register_cleanup", 1, fn_sys_register_cleanup_1, NULL},
 	{"$register_term", 1, fn_sys_register_term_1, NULL},
 	{"$chk_is_det", 0, fn_sys_chk_is_det_0, NULL},
-
-	{0}
-};
-
-static const struct builtins g_predicates_other[] =
-{
-	{"*->", 2, fn_if_2, NULL},
-	{"if", 3, fn_if_3, NULL},
 
 	// Edinburgh...
 
