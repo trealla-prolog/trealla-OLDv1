@@ -1152,8 +1152,6 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
-#define LEN_STR_UTF8(c) strlen_utf8(GET_STR(c))
-
 static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
