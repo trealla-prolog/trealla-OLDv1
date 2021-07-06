@@ -128,7 +128,7 @@ static bool any_choices(query *q, frame *g, bool in_commit)
 	return ch->cgen >= g->cgen ? true : false;
 }
 
-static void trace_call(query *q, cell *c, box_t box)
+static void trace_call(query *q, cell *c, idx_t c_ctx, box_t box)
 {
 	if (!c || !c->fn || is_empty(c))
 		return;
@@ -164,7 +164,7 @@ static void trace_call(query *q, cell *c, box_t box)
 
 	int save_depth = q->max_depth;
 	q->max_depth = 1000;
-	print_term(q, stderr, c, q->st.curr_frame, -1);
+	print_term(q, stderr, c, c_ctx, -1);
 	fprintf(stderr, "\n");
 	fflush(stderr);
 	q->max_depth = save_depth;
@@ -1492,7 +1492,7 @@ pl_status start(query *q)
 		}
 
 		if (q->retry) {
-			Trace(q, q->st.curr_cell, FAIL);
+			Trace(q, q->st.curr_cell, q->st.curr_frame, FAIL);
 
 			if (!retry_choice(q))
 				break;
@@ -1507,8 +1507,9 @@ pl_status start(query *q)
 		q->did_throw = false;
 		q->save_tp = q->st.tp;
 		q->has_attrs = false;
-		Trace(q, q->st.curr_cell, CALL);
+		Trace(q, q->st.curr_cell, q->st.curr_frame, CALL);
 		cell *save_cell = q->st.curr_cell;
+		idx_t save_ctx = q->st.curr_frame;
 
 		if (q->st.curr_cell->flags&FLAG_BUILTIN) {
 			if (!q->st.curr_cell->fn) {					// NO-OP
@@ -1547,7 +1548,7 @@ pl_status start(query *q)
 				may_error(do_post_unification_hook(q));
 		}
 
-		Trace(q, save_cell, EXIT);
+		Trace(q, save_cell, save_ctx, EXIT);
 		q->resume = false;
 		q->retry = QUERY_OK;
 
