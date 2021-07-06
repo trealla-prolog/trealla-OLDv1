@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <limits.h>
+#include <math.h>
 #include <assert.h>
 #include <sys/param.h>
 
@@ -109,8 +110,14 @@ typedef enum {
 #define get_smallint(c) (c)->val_integer
 #define set_smallint(c,v) { (c)->val_integer = (v); (c)->val_spare1 = 0; }
 
-#define is_negative(c) (get_smallint(c) < 0)
-#define is_positive(c) (get_smallint(c) > 0)
+#define get_integer(c) (c)->val_integer
+
+#define neg_bigint(c) (c)->val_bigint->ival.sign = MP_NEG;
+#define neg_smallint(c) (c)->val_integer = -llabs((c)->val_integer)
+#define neg_real(c) (c)->val_real = -fabs((c)->val_real)
+
+#define is_negative(c) (is_bigint(c) ? (c)->val_bigint->ival.sign == MP_NEG : get_smallint(c) < 0)
+#define is_positive(c) (is_bigint(c) ? (c)->val_bigint->ival.sign != MP_NEG : get_smallint(c) > 0)
 
 #define is_gt(c,n) (get_smallint(c) > (n))
 #define is_ge(c,n) (get_smallint(c) >= (n))
