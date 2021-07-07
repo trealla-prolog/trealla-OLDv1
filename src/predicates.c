@@ -81,31 +81,6 @@ static char *slicedup(const char *s, size_t n)
 	return ptr;
 }
 
-static int slicecmpn(const char *s1, size_t len1, const char *s2, size_t len2)
-{
-	while (len1 && len2) {
-		if ((unsigned char)*s1 < (unsigned char)*s2)
-			return -1;
-
-		if ((unsigned char)*s1 > (unsigned char)*s2)
-			return 1;
-
-		len1--;
-		len2--;
-	}
-
-	if (!len2)
-		return 0;
-
-	if (len1)
-		return 1;
-
-	if (len2)
-		return -1;
-
-	return 0;
-}
-
 int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2)
 {
 	size_t len = len1 < len2 ? len1 : len2;
@@ -1364,9 +1339,6 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 	}
 
 	if (is_variable(p1)) {
-		if (memcmp(GET_STR(p3)+(LEN_STR(p3)-LEN_STR(p2)), GET_STR(p2), LEN_STR(p2)))
-			return pl_failure;
-
 		char *dst = slicedup(GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
 		cell tmp;
 		may_error(make_cstring(&tmp, dst), free(dst));
@@ -1377,9 +1349,6 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 	}
 
 	if (is_variable(p2)) {
-		if (slicecmpn(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1)))
-			return pl_failure;
-
 		cell tmp;
 		may_error(make_cstringn(&tmp, GET_STR(p3)+LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1)));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
