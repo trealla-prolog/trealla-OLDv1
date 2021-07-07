@@ -1387,7 +1387,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 		return pl_success;
 	}
 
-	if (slicecmpn(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1)))
+	if (slicecmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1)))
 		return pl_failure;
 
 	if (slicecmp(GET_STR(p3)+LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1), GET_STR(p2), LEN_STR(p2)))
