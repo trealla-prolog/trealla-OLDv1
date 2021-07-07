@@ -94,7 +94,7 @@ setof(T, G, B) :-
 	bagof(T, G, B0),
 	sort(B0, B).
 
-// This is to contain cuts...
+% This is to contain cuts...
 
 call(G) :- '$call'(G).
 call(G, P1) :- '$call'(G, P1).
