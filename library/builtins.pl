@@ -189,7 +189,6 @@ mmerge(<, H1, H2, T1, T2, [H1|R]) :-
 samsort(L, R) :- msort(L, R).
 
 msort(L, R) :-
-	'$mustbe_instantiated'(L, R),
 	'$mustbe_list'(L),
 	'$mustbe_list_or_var'(R),
 	length(L,N),
@@ -242,7 +241,6 @@ keycompare(Delta, (K1-_), (K2-_)) :-
 	Delta = '=')).
 
 keysort(L, R) :-
-	'$mustbe_instantiated'(L, R),
 	'$mustbe_pairlist'(L),
 	'$mustbe_pairlist_or_var'(R),
 	length(L,N),
