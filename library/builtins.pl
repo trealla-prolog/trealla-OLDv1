@@ -140,7 +140,6 @@ merge(<, H1, H2, T1, T2, [H1|R]) :-
 %
 
 sort(L, R) :-
-	'$mustbe_instantiated'(L, R),
 	'$mustbe_list'(L),
 	'$mustbe_list_or_var'(R),
 	length(L,N),
