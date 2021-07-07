@@ -1339,6 +1339,9 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 	}
 
 	if (is_variable(p1)) {
+		if (LEN_STR(p2) > LEN_STR(p3))
+			return false;
+
 		char *dst = slicedup(GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
 		cell tmp;
 		may_error(make_cstring(&tmp, dst), free(dst));
@@ -1349,6 +1352,9 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 	}
 
 	if (is_variable(p2)) {
+		if (LEN_STR(p1) > LEN_STR(p3))
+			return false;
+
 		cell tmp;
 		may_error(make_cstringn(&tmp, GET_STR(p3)+LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1)));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
