@@ -335,7 +335,6 @@ static USE_RESULT pl_status make_string(cell *d, const char *s)
 
 static USE_RESULT pl_status make_slice(query *q, cell *d, cell *orig, size_t off, size_t n)
 {
-#if 0
 	if (is_static(orig)) {
 		*d = *orig;
 		d->val_str += off;
@@ -357,14 +356,6 @@ static USE_RESULT pl_status make_slice(query *q, cell *d, cell *orig, size_t off
 		return make_stringn(d, s+off, n);
 
 	return make_cstringn(d, s+off, n);
-#else
-	const char *s = GET_STR(orig);
-
-	if (is_string(orig))
-		return make_stringn(d, s+off, n);
-
-	return make_cstringn(d, s+off, n);
-#endif
 }
 
 static USE_RESULT pl_status fn_iso_unify_2(query *q)
@@ -1343,7 +1334,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 			return false;
 
 		cell tmp;
-		may_error(make_cstringn(&tmp, GET_STR(p3), LEN_STR(p3)-LEN_STR(p2)));
+		may_error(make_slice(q, &tmp, p3, 0, LEN_STR(p3)-LEN_STR(p2)));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
@@ -1354,7 +1345,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 			return false;
 
 		cell tmp;
-		may_error(make_cstringn(&tmp, GET_STR(p3)+LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1)));
+		may_error(make_slice(q, &tmp, p3, LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1)));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
@@ -9899,7 +9890,7 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 			return false;
 
 		cell tmp;
-		may_error(make_cstringn(&tmp, GET_STR(p3), LEN_STR(p3)-LEN_STR(p2)));
+		may_error(make_slice(q, &tmp, p3, 0, LEN_STR(p3)-LEN_STR(p2)));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
@@ -9910,7 +9901,7 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 			return false;
 
 		cell tmp;
-		may_error(make_cstringn(&tmp, GET_STR(p3)+LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1)));
+		may_error(make_slice(q, &tmp, p3, LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1)));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
