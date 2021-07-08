@@ -584,7 +584,9 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 
 	if (is_string(p2)) {
 		cell tmp;
-		may_error(make_cstringn(&tmp, GET_STR(p2), LEN_STR(p2)));
+		may_error(make_slice(q, &tmp, p2, 0, LEN_STR(p2)));
+		tmp.flags &= ~FLAG_STRING;
+		tmp.arity = 0;
 		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
