@@ -1265,10 +1265,10 @@ static pl_status do_atom_concat_3(query *q)
 	GET_RAW_ARG(1,p1_raw);
 	GET_RAW_ARG(2,p2_raw);
 	cell tmp;
-	may_error(make_cstringn(&tmp, GET_STR(p3), LEN_STR(p1)+len));
+	may_error(make_slice(q, &tmp, p3, 0, LEN_STR(p1)+len));
 	reset_var(q, p1_raw, p1_raw_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
-	may_error(make_cstringn(&tmp, GET_STR(p2)+len, LEN_STR(p2)-len));
+	may_error(make_slice(q, &tmp, p2, len, LEN_STR(p2)-len));
 	reset_var(q, p2_raw, p2_raw_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 
