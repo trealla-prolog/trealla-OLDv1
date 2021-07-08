@@ -9897,29 +9897,26 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 	}
 
 	if (is_variable(p1)) {
-		if (slicecmp(GET_STR(p3)+(LEN_STR(p3)-LEN_STR(p2)), LEN_STR(p3)-LEN_STR(p2), GET_STR(p2), LEN_STR(p2)))
-			return pl_failure;
+		if (LEN_STR(p2) > LEN_STR(p3))
+			return false;
 
-		STRING_alloc(tmpbuf);
-		STRING_strcatn(tmpbuf, GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
+		char *dst = slicedup(GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
 		cell tmp;
-		may_error(make_stringn(&tmp, STRING_cstr(tmpbuf), STRING_strlen(tmpbuf)), STRING_free(tmpbuf));
-		STRING_free(tmpbuf);
-		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+		may_error(make_cstring(&tmp, dst), free(dst));
+		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
+		free(dst);
 		return pl_success;
 	}
 
 	if (is_variable(p2)) {
-		if (slicecmp(GET_STR(p3), LEN_STR(p3), GET_STR(p1), LEN_STR(p1)))
-			return pl_failure;
+		if (LEN_STR(p1) > LEN_STR(p3))
+			return false;
 
-		char *dst = slicedup(GET_STR(p3)+LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1));
 		cell tmp;
-		may_error(make_string(&tmp, dst), free(dst));
+		may_error(make_cstringn(&tmp, GET_STR(p3)+LEN_STR(p1), LEN_STR(p3)-LEN_STR(p1)));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		free(dst);
 		return pl_success;
 	}
 
