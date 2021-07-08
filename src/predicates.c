@@ -6831,7 +6831,7 @@ static USE_RESULT pl_status fn_split_atom_4(query *q)
 	GET_NEXT_ARG(p3,atom);
 	GET_NEXT_ARG(p4,any);
 	const char *src = GET_STR(p1);
-	int ch = peek_char_utf8(GET_STR(p2));
+	int sep = peek_char_utf8(GET_STR(p2));
 	int pad = peek_char_utf8(GET_STR(p3));
 	const char *start = src, *ptr;
 	cell *l = NULL;
@@ -6843,20 +6843,25 @@ static USE_RESULT pl_status fn_split_atom_4(query *q)
 		return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	}
 
-	while ((ptr = strchr_utf8(start, ch)) != NULL) {
-		while ((peek_char_utf8(start) == pad) && (pad != ch))
+	// FIXME: sep & pad are not a single char...
+
+	while ((ptr = strchr_utf8(start, sep)) != NULL) {
+		while ((peek_char_utf8(start) == pad) && (pad != sep))
 			get_char_utf8(&start);
 
-		cell tmp;
-		may_error(make_cstringn(&tmp, start, ptr-start));
+		if (ptr-start) {
+			cell tmp;
+			may_error(make_slice(q, &tmp, p1, start-src, ptr-start));
 
-		if (nbr++ == 1)
-			allocate_list(q, &tmp);
-		else
-			append_list(q, &tmp);
+			if (nbr++ == 1)
+				allocate_list(q, &tmp);
+			else
+				append_list(q, &tmp);
+
+			in_list = 1;
+		}
 
 		start = ptr + 1;
-		in_list = 1;
 	}
 
 	if (*start) {
@@ -6864,12 +6869,14 @@ static USE_RESULT pl_status fn_split_atom_4(query *q)
 			get_char_utf8(&start);
 
 		cell tmp;
-		may_error(make_cstring(&tmp, start));
+		may_error(make_slice(q, &tmp, p1, start-src, LEN_STR(p1)-(start-src)));
 
-		if (!in_list)
-			allocate_list(q, &tmp);
-		else
-			append_list(q, &tmp);
+		if (LEN_STR(p1)-(start-src)) {
+			if (!in_list)
+				allocate_list(q, &tmp);
+			else
+				append_list(q, &tmp);
+		}
 	}
 
 	l = end_list(q);
@@ -11453,6 +11460,7 @@ static const struct builtins g_predicates_other[] =
 	{"loadfile", 2, fn_loadfile_2, "+string,-string"},
 	{"savefile", 2, fn_savefile_2, "+string,+string"},
 	{"split_atom", 4, fn_split_atom_4, "+string,+sep,+pad,-list"},
+	{"split_string", 4, fn_split_atom_4, "+string,+sep,+pad,-list"},
 	{"split", 4, fn_split_4, "+string,+string,?left,?right"},
 	{"is_list", 1, fn_is_list_1, "+term"},
 	{"list", 1, fn_is_list_1, "+term"},
