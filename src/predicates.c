@@ -9900,12 +9900,10 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 		if (LEN_STR(p2) > LEN_STR(p3))
 			return false;
 
-		char *dst = slicedup(GET_STR(p3), LEN_STR(p3)-LEN_STR(p2));
 		cell tmp;
-		may_error(make_cstring(&tmp, dst), free(dst));
+		may_error(make_cstringn(&tmp, GET_STR(p3), LEN_STR(p3)-LEN_STR(p2)));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		free(dst);
 		return pl_success;
 	}
 
