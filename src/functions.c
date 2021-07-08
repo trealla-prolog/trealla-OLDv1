@@ -15,10 +15,10 @@
 #include "heap.h"
 
 #define SET_ACCUM() {											\
-	q->accum.tag = TAG_INTEGER;							\
+	q->accum.tag = TAG_INTEGER;									\
 	q->accum.flags = FLAG_MANAGED;								\
-	q->accum.val_bigint = malloc(sizeof(bigint));					\
-	q->accum.val_bigint->refcnt = 0;								\
+	q->accum.val_bigint = malloc(sizeof(bigint));				\
+	q->accum.val_bigint->refcnt = 0;							\
 	mp_int_init_copy(&q->accum.val_bigint->ival, &q->tmp_ival);	\
 }
 
@@ -2366,7 +2366,7 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 		} else if (is_bigint(&p2)) {
 			mpz_t tmp;
 			mp_int_init_value(&tmp, p1.val_integer);
-			mp_int_gcd(&p2.val_bigint->ival, &tmp, &q->tmp_ival);
+			mp_int_gcd(&tmp, &p2.val_bigint->ival, &q->tmp_ival);
 			mp_int_clear(&tmp);
 			SET_ACCUM();
 		} else {
