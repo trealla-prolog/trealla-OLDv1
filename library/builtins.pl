@@ -1,4 +1,4 @@
-:- pragma(builtins, [once(true)]).
+:- pragma(builtins, [once]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % These are SICStus compatible...
@@ -24,8 +24,7 @@ must_be(Term, list, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (list(Term)
 expand_term((H --> B), Out) :- !,
 	dcg_translate((H --> B), Out), !.
 expand_term(In, Out) :-
-	term_expansion(In, Out). !,
-expand_term(T, T).
+	term_expansion(In, Out).
 
 unify_with_occurs_check(X, X) :-
 	acyclic_term(X).
@@ -44,6 +43,13 @@ predicate_property(P, A) :-
 	),
 	must_be(P, callable, _, _),
 	'$predicate_property'(P, A).
+
+current_prolog_flag(P, A) :-
+	nonvar(P), !,
+	'$legacy_current_prolog_flag'(P, A).
+current_prolog_flag(P, A) :-
+	'$load_flags',
+	'$current_prolog_flag'(P, A).
 
 subsumes_term(G, S) :-
 	\+ \+ (
@@ -588,19 +594,19 @@ get_att(Var, L) :- var(L), !,
 get_att(Var, +(Attr)) :- !,
 	'$get_attrs'(Var, D),
 	Attr =.. [Module,Value],
-	functor(Value,Functor,Arity),
+	catch(functor(Value,Functor,Arity), _, true),
 	dict:get(D, Module-(Functor/Arity), Attr).
 
 get_att(Var, -Attr) :- !,
 	'$get_attrs'(Var, D),
 	Attr =.. [Module,Value],
-	functor(Value,Functor,Arity),
+	catch(functor(Value,Functor,Arity), _, true),
 	\+ dict:get(D, Module-(Functor/Arity), _).
 
 get_att(Var, Attr) :- !,
 	'$get_attrs'(Var, D),
 	Attr =.. [Module,Value],
-	functor(Value,Functor,Arity),
+	catch(functor(Value,Functor,Arity), _, true),
 	dict:get(D, Module-(Functor/Arity), Attr).
 
 attributed(Var) :-

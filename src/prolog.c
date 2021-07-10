@@ -324,6 +324,7 @@ prolog *pl_create()
 		set_dynamic_in_db(pl->user_m, "$record_key", 2);
 		set_dynamic_in_db(pl->user_m, "$current_op", 3);
 		set_dynamic_in_db(pl->user_m, "$predicate_property", 2);
+		set_dynamic_in_db(pl->user_m, "$current_prolog_flag", 2);
 		set_dynamic_in_db(pl->user_m, "$stream_property", 2);
 		set_dynamic_in_db(pl->user_m, "term_expansion", 2);
 		set_dynamic_in_db(pl->user_m, "goal_expansion", 2);

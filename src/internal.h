@@ -611,12 +611,13 @@ struct module_ {
 	op_table ops[MAX_OPS+1];
 	idx_t id;
 	prolog_flags flag;
-	unsigned spare_ops, loaded_ops;
+	unsigned spare_ops;
 	bool user_ops:1;
 	bool prebuilt:1;
 	bool use_persist:1;
 	bool make_public:1;
 	bool loaded_properties:1;
+	bool loaded_ops:1;
 	bool loading:1;
 	bool error:1;
 };
@@ -756,7 +757,6 @@ typedef struct {
 	while (STRING_strlen(pr)) {											\
 		if (pr##_buf.dst[-1] != ch) 									\
 			break;														\
-																		\
 		 *--pr##_buf.dst = '\0';										\
 	}																	\
 }
@@ -785,5 +785,14 @@ typedef struct {
 
 #define STRING_strcat(pr,s) STRING_strcatn(pr,s,strlen(s))
 #define STRING_strcat2(pr,s1,s2) STRING_strcat2n(pr,s1,strlen(s1),s2,strlen(s2))
+
+#define STRING_sprintf(pr,fmt,...) {									\
+	size_t len = snprintf(NULL, 0, fmt, __VA_ARGS__);					\
+	STRING_check(pr, len);												\
+	sprintf(pr##_buf.dst, fmt, __VA_ARGS__);							\
+	pr##_buf.dst += len;												\
+	*pr##_buf.dst = '\0';												\
+}
+
 #define STRING_cstr(pr) pr##_buf.buf ? pr##_buf.buf : ""
 #define STRING_free(pr) { free(pr##_buf.buf); pr##_buf.buf = NULL; }

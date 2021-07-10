@@ -566,7 +566,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (is_variable(p2) && (is_literal(p1) || !is_blob(p1))) {
+	if (is_variable(p2) && (is_literal(p1) || (LEN_STR(p1) < MAX_SMALL_STRING))) {
 		cell tmp;
 		may_error(make_stringn(&tmp, GET_STR(p1), LEN_STR(p1)));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -574,11 +574,13 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 		return pl_success;
 	}
 
-	if (is_variable(p2) && is_blob(p1)) {
-		cell tmp = *p1;
-		tmp.flags = FLAG_STRING;
+	if (is_variable(p2)) {
+		cell tmp;
+		may_error(make_slice(q, &tmp, p1, 0, LEN_STR(p1)));
+		tmp.flags |= FLAG_STRING;
 		tmp.arity = 2;
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		unshare_cell(&tmp);
 		return pl_success;
 	}
 
@@ -638,7 +640,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
-		STRING_alloc(tmpbuf);
+		STRING_alloc(pr);
 		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
@@ -646,7 +648,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 			head = deref(q, head, p2_ctx);
 
 			const char *src = GET_STR(head);
-			STRING_strcatn(tmpbuf, src, len_char_utf8(src));
+			STRING_strcatn(pr, src, len_char_utf8(src));
 
 			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
@@ -657,8 +659,8 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 			return throw_error(q, p2, "type_error", "list");
 
 		cell tmp;
-		may_error(make_cstring(&tmp, STRING_cstr(tmpbuf)), STRING_free(tmpbuf));
-		STRING_free(tmpbuf);
+		may_error(make_cstring(&tmp, STRING_cstr(pr)), STRING_free(pr));
+		STRING_free(pr);
 		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
@@ -904,7 +906,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
-		STRING_alloc(tmpbuf);
+		STRING_alloc(pr);
 		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
@@ -918,7 +920,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 
 			char ch[10];
 			put_char_utf8(ch, val);
-			STRING_strcat(tmpbuf, ch);
+			STRING_strcat(pr, ch);
 			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
@@ -929,8 +931,8 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 			return throw_error(q, p2, "type_error", "list");
 
 		cell tmp;
-		may_error(make_cstring(&tmp, STRING_cstr(tmpbuf)), STRING_free(tmpbuf));
-		STRING_free(tmpbuf);
+		may_error(make_cstring(&tmp, STRING_cstr(pr)), STRING_free(pr));
+		STRING_free(pr);
 		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
@@ -1321,11 +1323,11 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 			len2 = strlen(tmpbuf2);
 		}
 
-		STRING_alloc(tmpbuf);
-		STRING_strcat2n(tmpbuf, src1, len1, src2, len2);
+		STRING_alloc(pr);
+		STRING_strcat2n(pr, src1, len1, src2, len2);
 		cell tmp;
-		may_error(make_cstringn(&tmp, STRING_cstr(tmpbuf), STRING_strlen(tmpbuf)), STRING_free(tmpbuf));
-		STRING_free(tmpbuf);
+		may_error(make_cstringn(&tmp, STRING_cstr(pr), STRING_strlen(pr)), STRING_free(pr));
+		STRING_free(pr);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
@@ -5735,6 +5737,8 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "version")
 		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "version_data")
 		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "version_git")
+		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "encoding")
+		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "integer_rounding_function")
 		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "dialect")
 		) {
 		return throw_error(q, p1, "permission_error", "modify,flag");
@@ -9884,11 +9888,11 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 			src2 = tmpbuf2;
 		}
 
-		STRING_allocn(tmpbuf, len1+len2);
-		STRING_strcat2n(tmpbuf, src1, len1, src2, len2);
+		STRING_allocn(pr, len1+len2);
+		STRING_strcat2n(pr, src1, len1, src2, len2);
 		cell tmp;
-		may_error(make_cstringn(&tmp, STRING_cstr(tmpbuf), STRING_strlen(tmpbuf)), STRING_free(tmpbuf));
-		STRING_free(tmpbuf);
+		may_error(make_cstringn(&tmp, STRING_cstr(pr), STRING_strlen(pr)), STRING_free(pr));
+		STRING_free(pr);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
@@ -9939,15 +9943,15 @@ static USE_RESULT pl_status fn_replace_4(query *q)
 	const char *s2 = GET_STR(p3);
 	size_t s1len = LEN_STR(p2);
 	size_t s2len = LEN_STR(p3);
-	STRING_allocn(tmpbuf, dstlen);
+	STRING_allocn(pr, dstlen);
 
 	while (srclen > 0) {
 		if (!strncmp(src, s1, s1len)) {
-			STRING_strcatn(tmpbuf, s2, s2len);
+			STRING_strcatn(pr, s2, s2len);
 			src += s1len;
 			srclen -= s1len;
 		} else {
-			STRING_strcatn(tmpbuf, src, 1);
+			STRING_strcatn(pr, src, 1);
 			src++;
 			srclen--;
 		}
@@ -9955,12 +9959,12 @@ static USE_RESULT pl_status fn_replace_4(query *q)
 
 	cell tmp;
 
-	if (STRING_strlen(tmpbuf))
-		may_error(make_stringn(&tmp, STRING_cstr(tmpbuf), STRING_strlen(tmpbuf)), STRING_free(tmpbuf));
+	if (STRING_strlen(pr))
+		may_error(make_stringn(&tmp, STRING_cstr(pr), STRING_strlen(pr)), STRING_free(pr));
 	else
 		make_literal(&tmp, g_nil_s);
 
-	STRING_free(tmpbuf);
+	STRING_free(pr);
 	set_var(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return pl_success;
@@ -9971,6 +9975,14 @@ static void load_properties(module *m);
 static USE_RESULT pl_status fn_sys_load_properties_0(query *q)
 {
 	load_properties(q->st.m);
+	return pl_success;
+}
+
+static void load_flags(query *q);
+
+static USE_RESULT pl_status fn_sys_load_flags_0(query *q)
+{
+	load_flags(q);
 	return pl_success;
 }
 
@@ -11371,7 +11383,7 @@ static const struct builtins g_predicates_iso[] =
 	{"retract", 1, fn_iso_retract_1, NULL},
 	{"retractall", 1, fn_iso_retractall_1, NULL},
 
-	{"current_prolog_flag", 2, fn_iso_current_prolog_flag_2, NULL},
+	{"$legacy_current_prolog_flag", 2, fn_iso_current_prolog_flag_2, NULL},
 	{"set_prolog_flag", 2, fn_iso_set_prolog_flag_2, NULL},
 	{"op", 3, fn_iso_op_3, NULL},
 	{"$findall", 3, fn_iso_findall_3, NULL},
@@ -11500,6 +11512,7 @@ static const struct builtins g_predicates_other[] =
 	{"octal_chars", 2, fn_octal_chars_2, "?integer,?string"},
 	{"$legacy_predicate_property", 2, fn_sys_legacy_predicate_property_2, "+callable,?string"},
 	{"$load_properties", 0, fn_sys_load_properties_0, NULL},
+	{"$load_flags", 0, fn_sys_load_flags_0, NULL},
 	{"$load_ops", 0, fn_sys_load_ops_0, NULL},
 	{"numbervars", 1, fn_numbervars_1, "+term"},
 	{"numbervars", 3, fn_numbervars_3, "+term,+start,?end"},
@@ -11775,6 +11788,39 @@ static void load_properties(module *m)
 	STRING_free(pr);
 }
 
+static void load_flags(query *q)
+{
+	cell tmp;
+	make_literal(&tmp, index_from_pool(q->st.m->pl, "$current_prolog_flag"));
+	tmp.arity = 2;
+
+	if (do_abolish(q, &tmp, &tmp, false) != pl_success)
+		return;
+
+	module *m = q->st.m;
+	STRING_allocn(pr, 1024);
+
+	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "double_quotes", m->flag.double_quote_atom?"atom":m->flag.double_quote_chars?"chars":m->flag.double_quote_codes?"codes":"???");
+	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "char_conversion", m->flag.char_conversion?"on":"off");
+	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "occurs_check", m->flag.occurs_check==1?"on":m->flag.occurs_check==0?"off":"error");
+	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "character_escapes", m->flag.character_escapes?"true":"false");
+	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "debug", m->flag.debug?"on":"off");
+	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "unknown", m->flag.unknown == UNK_ERROR?"error":m->flag.unknown == UNK_WARNING?"warning":m->flag.unknown == UNK_CHANGEABLE?"changeable":"fail");
+	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "encoding", "'UTF-8'");
+	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "dialect", "trealla");
+	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "bounded", "false");
+	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %u).\n", "max_arity", MAX_ARITY);
+	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %u).\n", "cpu_count", g_cpu_count);
+	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "integer_rounding_function", "toward_zero");
+
+	parser *p = create_parser(m);
+	p->srcptr = STRING_cstr(pr);
+	p->consulting = true;
+	tokenize(p, false, false);
+	destroy_parser(p);
+	STRING_free(pr);
+}
+
 static void load_ops(query *q)
 {
 	if (q->st.m->loaded_ops)
@@ -11841,9 +11887,7 @@ static void load_ops(query *q)
 			strcpy(specifier, "xfx");
 
 		formatted(name, sizeof(name), ptr->name, strlen(ptr->name), false);
-		char tmpbuf[1024];
-		snprintf(tmpbuf, sizeof(tmpbuf), "'$current_op'(%u, %s, '%s').\n", ptr->priority, specifier, name);
-		STRING_strcat(pr, tmpbuf);
+		STRING_sprintf(pr, "'$current_op'(%u, %s, '%s').\n", ptr->priority, specifier, name);
 	}
 
 	//printf("%s", tmpbuf);

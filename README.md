@@ -7,11 +7,12 @@ A compact, efficient Prolog interpreter with
 	Integers are unbounded
 	Atoms are UTF-8 of unlimited length
 	The default double-quoted representation is *chars* list
+	Dynamic atoms are automatically garbage collected
 	Full-term indexing
 	DCGs
 	format_//2
-	Attributed variables with SICStus interface (in-progress)
 	User-defined functions
+	Attributed variables with SICStus interface (in-progress)
 	Logtalk compatible (in-progress)
 	REPL with history
 	MIT licensed
