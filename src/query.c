@@ -1178,16 +1178,11 @@ static USE_RESULT pl_status match_head(query *q)
 		predicate *h;
 
 		if (is_literal(c)) {
-			//printf("*** %p\n", c->match);
 			h = c->match;
 		} else {
 			// For now convert it to a literal
 			idx_t off = index_from_pool(q->st.m->pl, GET_STR(c));
-			if (off == ERR_IDX) {
-				q->error = true;
-				return pl_error;
-			}
-
+			may_idx_error(off);
 			unshare_cell(c);
 			c->tag = TAG_LITERAL;
 			c->val_off = off;

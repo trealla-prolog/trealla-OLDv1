@@ -108,17 +108,14 @@ predicate *create_predicate(module *m, cell *c)
 	h->m = m;
 	h->key = *c;
 	h->key.tag = TAG_LITERAL;
-	h->key.flags = FLAG_KEY;
+	h->key.flags = 0;
 	h->key.nbr_cells = 1;
-
-	if (is_cstring(c))
-		h->key.val_off = index_from_pool(m->pl, MODULE_GET_STR(c));
 
 	m_app(m->index, &h->key, h);
 	return h;
 }
 
-static int compkey(const void *ptr1, const void *ptr2, const void *param)
+static int predicate_compkey(const void *ptr1, const void *ptr2, const void *param)
 {
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
@@ -133,10 +130,10 @@ static int compkey(const void *ptr1, const void *ptr2, const void *param)
 	if (p1->val_off == p2->val_off)
 		return 0;
 
-	return strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
+	return strcmp(m->pl->pool+p1->val_off, m->pl->pool+p2->val_off);
 }
 
-static int compkey2(const void *ptr1, const void *ptr2, const void *param)
+static int index_compkey(const void *ptr1, const void *ptr2, const void *param)
 {
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
@@ -193,7 +190,7 @@ static int compkey2(const void *ptr1, const void *ptr2, const void *param)
 			p1++; p2++;
 
 			while (arity--) {
-				int i = compkey2(p1, p2, param);
+				int i = index_compkey(p1, p2, param);
 
 				if (i != 0)
 					return i;
@@ -377,7 +374,7 @@ predicate *find_predicate(module *m, cell *c)
 {
 	cell tmp = *c;
 	tmp.tag = TAG_LITERAL;
-	tmp.flags = FLAG_KEY;
+	tmp.flags = 0;
 	tmp.nbr_cells = 1;
 
 	if (is_cstring(c))
@@ -413,10 +410,8 @@ predicate *search_predicate(module *m, cell *c)
 	module *orig_m = m;
 	predicate *h = find_predicate(m, c);
 
-	if (h) {
-		h->m = m;
+	if (h)
 		return h;
-	}
 
 	for (m = m->pl->modules; m; m = m->next) {
 		if (m == orig_m)
@@ -424,13 +419,156 @@ predicate *search_predicate(module *m, cell *c)
 
 		h = find_predicate(m, c);
 
-		if (h) {
-			h->m = m;
+		if (h)
 			return h;
-		}
 	}
 
 	return NULL;
+}
+
+unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
+{
+	for (const op_table *ptr = m->ops; ptr->name; ptr++) {
+		if (!ptr->specifier)
+			continue;
+
+		if (hint_prefix && !IS_PREFIX(ptr->specifier))
+			continue;
+
+		if (!strcmp(ptr->name, name)) {
+			if (specifier) *specifier = ptr->specifier;
+			return ptr->priority;
+		}
+	}
+
+	for (const op_table *ptr = m->def_ops; ptr->name; ptr++) {
+		if (!ptr->specifier)
+			continue;
+
+		if (hint_prefix && !IS_PREFIX(ptr->specifier))
+			continue;
+
+		if (!strcmp(ptr->name, name)) {
+			if (specifier) *specifier = ptr->specifier;
+			return ptr->priority;
+		}
+	}
+
+	if (hint_prefix)
+		return get_op(m, name, specifier, false);
+
+	return 0;
+}
+
+unsigned find_op(module *m, const char *name, unsigned specifier)
+{
+	for (const op_table *ptr = m->ops; ptr->name; ptr++) {
+		if (!ptr->specifier)
+			continue;
+
+		if (specifier != ptr->specifier)
+			continue;
+
+		if (!strcmp(ptr->name, name))
+			return ptr->priority;
+	}
+
+	for (const op_table *ptr = m->def_ops; ptr->name; ptr++) {
+		if (!ptr->specifier)
+			continue;
+
+		if (specifier != ptr->specifier)
+			continue;
+
+		if (!strcmp(ptr->name, name))
+			return ptr->priority;
+	}
+
+	return 0;
+}
+
+bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
+{
+	unsigned ot = 0, pri = 0;
+	int hint = IS_PREFIX(specifier);
+
+	if ((pri = get_op(m, name, &ot, hint)) != 0) {
+		if ((ot == specifier) && priority)
+			return true;
+	}
+
+	op_table *ptr = m->def_ops;
+
+	for (; ptr->name; ptr++) {
+		if (!ptr->specifier)
+			continue;
+
+		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
+			continue;
+
+		if (strcmp(ptr->name, name))
+			continue;
+
+		if (!priority) {
+			ptr->specifier = 0;
+			ptr->priority = 0;
+			m->loaded_ops = false;
+			return true;
+		}
+
+		ptr->specifier = specifier;
+		ptr->priority = priority;
+		m->loaded_ops = false;
+		return true;
+	}
+
+	ptr = m->ops;
+
+	for (; ptr->name; ptr++) {
+		if (!ptr->specifier)
+			continue;
+
+		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
+			continue;
+
+		if (strcmp(ptr->name, name))
+			continue;
+
+		if (!priority) {
+			ptr->specifier = 0;
+			ptr->priority = 0;
+			m->loaded_ops = false;
+			return true;
+		}
+
+		ptr->specifier = specifier;
+		ptr->priority = priority;
+		m->loaded_ops = false;
+		return true;
+	}
+
+	if (!priority)
+		return true;
+
+	for (ptr = m->ops; ptr->specifier; ptr++)
+		;
+
+	m->user_ops = true;
+
+	if (ptr->name)
+		free(ptr->name);
+	else {
+		if (!m->spare_ops)
+			return false;
+
+		m->spare_ops--;
+	}
+
+	ptr->name = strdup(name);
+	ptr->specifier = specifier;
+	ptr->priority = priority;
+	m->loaded_ops = false;
+	return true;
 }
 
 // FIXME: this should only search the current modules, not all of them.
@@ -532,7 +670,7 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 
 static void reindex_predicate(module *m, predicate *h)
 {
-	h->index = m_create(compkey2, NULL, m);
+	h->index = m_create(index_compkey, NULL, m);
 	ensure(h->index);
 
 	for (clause *r = h->head; r; r = r->next) {
@@ -949,7 +1087,7 @@ module *create_module(prolog *pl, const char *name)
 		ptr2->priority = ptr->priority;
 	}
 
-	m->index = m_create(compkey, NULL, m);
+	m->index = m_create(predicate_compkey, NULL, m);
 	ensure(m->index);
 	m->p = create_parser(m);
 	ensure(m->p);

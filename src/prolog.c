@@ -80,6 +80,34 @@ idx_t index_from_pool(prolog *pl, const char *name)
 	return add_to_pool(pl, name);
 }
 
+module *find_next_module(prolog *pl, module *m)
+{
+	if (!m)
+		return pl->modules;
+
+	return m->next;
+}
+
+module *find_module(prolog *pl, const char *name)
+{
+	for (module *m = pl->modules; m; m = m->next) {
+		if (!strcmp(m->name, name))
+			return m;
+	}
+
+	return NULL;
+}
+
+module *find_module_id(prolog *pl, idx_t id)
+{
+	for (module *m = pl->modules; m; m = m->next) {
+		if (m->id == id)
+			return m;
+	}
+
+	return pl->user_m;
+}
+
 bool deconsult(prolog *pl, const char *filename)
 {
 	module *m = find_module(pl, filename);

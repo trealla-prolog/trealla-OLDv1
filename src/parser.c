@@ -22,151 +22,6 @@
 
 static const unsigned INITIAL_TOKEN_SIZE = 100;		// bytes
 
-unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
-{
-	for (const op_table *ptr = m->ops; ptr->name; ptr++) {
-		if (!ptr->specifier)
-			continue;
-
-		if (hint_prefix && !IS_PREFIX(ptr->specifier))
-			continue;
-
-		if (!strcmp(ptr->name, name)) {
-			if (specifier) *specifier = ptr->specifier;
-			return ptr->priority;
-		}
-	}
-
-	for (const op_table *ptr = m->def_ops; ptr->name; ptr++) {
-		if (!ptr->specifier)
-			continue;
-
-		if (hint_prefix && !IS_PREFIX(ptr->specifier))
-			continue;
-
-		if (!strcmp(ptr->name, name)) {
-			if (specifier) *specifier = ptr->specifier;
-			return ptr->priority;
-		}
-	}
-
-	if (hint_prefix)
-		return get_op(m, name, specifier, false);
-
-	return 0;
-}
-
-unsigned find_op(module *m, const char *name, unsigned specifier)
-{
-	for (const op_table *ptr = m->ops; ptr->name; ptr++) {
-		if (!ptr->specifier)
-			continue;
-
-		if (specifier != ptr->specifier)
-			continue;
-
-		if (!strcmp(ptr->name, name))
-			return ptr->priority;
-	}
-
-	for (const op_table *ptr = m->def_ops; ptr->name; ptr++) {
-		if (!ptr->specifier)
-			continue;
-
-		if (specifier != ptr->specifier)
-			continue;
-
-		if (!strcmp(ptr->name, name))
-			return ptr->priority;
-	}
-
-	return 0;
-}
-
-bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
-{
-	unsigned ot = 0, pri = 0;
-	int hint = IS_PREFIX(specifier);
-
-	if ((pri = get_op(m, name, &ot, hint)) != 0) {
-		if ((ot == specifier) && priority)
-			return true;
-	}
-
-	op_table *ptr = m->def_ops;
-
-	for (; ptr->name; ptr++) {
-		if (!ptr->specifier)
-			continue;
-
-		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
-			continue;
-
-		if (strcmp(ptr->name, name))
-			continue;
-
-		if (!priority) {
-			ptr->specifier = 0;
-			ptr->priority = 0;
-			m->loaded_ops = false;
-			return true;
-		}
-
-		ptr->specifier = specifier;
-		ptr->priority = priority;
-		m->loaded_ops = false;
-		return true;
-	}
-
-	ptr = m->ops;
-
-	for (; ptr->name; ptr++) {
-		if (!ptr->specifier)
-			continue;
-
-		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
-			continue;
-
-		if (strcmp(ptr->name, name))
-			continue;
-
-		if (!priority) {
-			ptr->specifier = 0;
-			ptr->priority = 0;
-			m->loaded_ops = false;
-			return true;
-		}
-
-		ptr->specifier = specifier;
-		ptr->priority = priority;
-		m->loaded_ops = false;
-		return true;
-	}
-
-	if (!priority)
-		return true;
-
-	for (ptr = m->ops; ptr->specifier; ptr++)
-		;
-
-	m->user_ops = true;
-
-	if (ptr->name)
-		free(ptr->name);
-	else {
-		if (!m->spare_ops)
-			return false;
-
-		m->spare_ops--;
-	}
-
-	ptr->name = strdup(name);
-	ptr->specifier = specifier;
-	ptr->priority = priority;
-	m->loaded_ops = false;
-	return true;
-}
-
 static const char *get_filename(const char *path)
 {
 	const char *ptr = strrchr(path, '/');
@@ -228,34 +83,6 @@ cell *list_tail(cell *l, cell *tmp)
 	tmp->strb_off = l->strb_off + len;
 	tmp->strb_len = l->strb_len - len;
 	return tmp;
-}
-
-module *find_next_module(prolog *pl, module *m)
-{
-	if (!m)
-		return pl->modules;
-
-	return m->next;
-}
-
-module *find_module(prolog *pl, const char *name)
-{
-	for (module *m = pl->modules; m; m = m->next) {
-		if (!strcmp(m->name, name))
-			return m;
-	}
-
-	return NULL;
-}
-
-module *find_module_id(prolog *pl, idx_t id)
-{
-	for (module *m = pl->modules; m; m = m->next) {
-		if (m->id == id)
-			return m;
-	}
-
-	return pl->user_m;
 }
 
 bool check_rule(const cell *c)
@@ -935,7 +762,7 @@ static void xref_cell(parser *p, term *t, cell *c, predicate *parent)
 		return;
 	}
 
-	predicate *h = search_predicate(p->m, c);
+	predicate *h = find_predicate(p->m, c);
 
 	if ((c+c->nbr_cells) >= (t->cells+t->cidx-1)) {
 		c->flags |= FLAG_TAIL;
@@ -2509,8 +2336,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
-		if (!p->quote_char && args && !consing && p->is_op
-			&& strcmp(p->token, ",")
+		if (!p->quote_char && args && !consing && p->is_op && last_op && strcmp(p->token, ",")
 			) {
 			unsigned specifier = 0;
 			unsigned priority = search_op(p->m, p->token, &specifier, last_op);
@@ -2641,7 +2467,10 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		unsigned specifier = 0;
-		int priority = search_op(p->m, p->token, &specifier, last_op);
+		int priority = 0;
+
+		if (is_literal(&p->v))
+			priority = search_op(p->m, p->token, &specifier, last_op);
 
 		if (!strcmp(p->token, "!") &&
 			((*p->srcptr == ',') || (*p->srcptr == '.')))

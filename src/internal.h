@@ -142,7 +142,6 @@ typedef enum {
 #define is_builtin(c) ((c)->flags & FLAG_BUILTIN)
 #define is_tail(c) ((c)->flags & FLAG_TAIL)
 #define is_tail_recursive(c) ((c)->flags & FLAG_TAIL_REC)
-#define is_key(c) ((c)->flags & FLAG_KEY)
 #define is_op(c) (c->flags & 0xE000)
 
 typedef struct {
@@ -221,13 +220,13 @@ enum {
 	FLAG_TAIL=1<<6,
 	FLAG_BLOB=1<<7,						// used with TAG_CSTRING
 	FLAG_STRING=1<<8,					// used with TAG_CSTRING
-	FLAG_KEY=1<<9,						// used with keys
-	FLAG_STATIC=1<<10,
-	FLAG_MANAGED=1<<11,					// any ref-counted object
+	FLAG_STATIC=1<<9,
+	FLAG_MANAGED=1<<10,					// any ref-counted object
 
-	FLAG_SPARE1=1<<12,
+	FLAG_SPARE1=1<<11,
+	FLAG_SPARE2=1<<12,
 
-	FLAG2_PROCESSED=FLAG_KEY,			// used by bagof
+	FLAG2_PROCESSED=FLAG_SPARE1,		// used by bagof
 	FLAG2_FIRST_USE=FLAG_HEX,			// used with TAG_VARIABLE
 	FLAG2_ANON=FLAG_OCTAL,				// used with TAG_VARIABLE
 	FLAG2_FRESH=FLAG_BINARY,			// used with TAG_VARIABLE
@@ -658,28 +657,28 @@ extern unsigned g_cpu_count;
 
 inline static void share_cell(const cell *c)
 {
-	if (is_managed(c)) {
-		if (is_strbuf(c))
-			(c)->val_strb->refcnt++;
-		else if (is_bigint(c))
-			(c)->val_bigint->refcnt++;
-	}
+	if (!is_managed(c))
+		return;
+
+	if (is_strbuf(c))
+		(c)->val_strb->refcnt++;
+	else if (is_bigint(c))
+		(c)->val_bigint->refcnt++;
 }
 
 inline static void unshare_cell(cell *c)
 {
-	if (is_managed(c)) {
-		if (is_strbuf(c)) {
-			if (--(c)->val_strb->refcnt == 0)	{
-				free((c)->val_strb);
-				(c)->val_strb = NULL;
-			}
-		} else if (is_bigint(c)) {
-			if (--(c)->val_bigint->refcnt == 0)	{
-				mp_int_clear(&(c)->val_bigint->ival);
-				free((c)->val_bigint);
-				(c)->val_bigint = NULL;
-			}
+	if (!is_managed(c))
+		return;
+
+	if (is_strbuf(c)) {
+		if (--(c)->val_strb->refcnt == 0) {
+			free((c)->val_strb);
+		}
+	} else if (is_bigint(c)) {
+		if (--(c)->val_bigint->refcnt == 0)	{
+			mp_int_clear(&(c)->val_bigint->ival);
+			free((c)->val_bigint);
 		}
 	}
 }
@@ -692,9 +691,9 @@ inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 
 inline static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 {
-	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
+	for (idx_t i = 0; i < nbr_cells; i++) {
 		share_cell(src);
-		*dst = *src;
+		*dst++ = *src++;
 	}
 
 	return nbr_cells;
@@ -702,8 +701,9 @@ inline static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 
 inline static void chk_cells(cell *src, idx_t nbr_cells)
 {
-	for (idx_t i = 0; i < nbr_cells; i++, src++) {
+	for (idx_t i = 0; i < nbr_cells; i++) {
 		unshare_cell(src);
+		src++;
 	}
 }
 

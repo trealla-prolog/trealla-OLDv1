@@ -1760,12 +1760,14 @@ static void del_stream_properties(query *q, int n)
 	tmp->arity = 2;
 	q->retry = QUERY_OK;
 
-	predicate *h = search_predicate(q->st.m, tmp);
+#if 0
+	predicate *h = find_predicate(q->st.m, tmp);
 
 	if (!h) {
 		DISCARD_RESULT throw_error(q, tmp, "existence_error", "procedure");
 		return;
 	}
+#endif
 
 	while (do_retract(q, tmp, q->st.curr_frame, DO_STREAM_RETRACT)) {
 		if (q->did_throw)
@@ -1934,7 +1936,7 @@ static void clear_streams_properties(query *q)
 	tmp.nbr_cells = 1;
 	tmp.arity = 2;
 
-	predicate *h = search_predicate(q->st.m, &tmp);
+	predicate *h = find_predicate(q->st.m, &tmp);
 
 	if (h) {
 		for (clause *r = h->head; r;) {
@@ -4870,7 +4872,7 @@ static USE_RESULT pl_status fn_iso_invoke_2(query *q)
 	cell *tmp = clone_to_heap(q, true, p2, 1);
 	idx_t nbr_cells = 1;
 
-	if (!is_builtin(p2))
+	if (!is_builtin(p2) && !tmp[nbr_cells].match)
 		tmp[nbr_cells].match = find_predicate(m, p2);
 
 	nbr_cells += p2->nbr_cells;
@@ -5380,30 +5382,28 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 
 	const char *functor = GET_STR(pf);
 	unsigned arity = get_integer(pa) + add_two;
-	module *m = q->st.m;
 
 	if (strchr(functor, ':')) {
 		char tmpbuf1[256], tmpbuf2[256];
 		tmpbuf1[0] = tmpbuf2[0] = '\0';
 		sscanf(functor, "%255[^:]:%255s", tmpbuf1, tmpbuf2);
 		tmpbuf1[sizeof(tmpbuf1)-1] = tmpbuf2[sizeof(tmpbuf2)-1] = '\0';
-		m = find_module(q->st.m->pl, tmpbuf1);
-	}
+		module *m = m = find_module(q->st.m->pl, tmpbuf1);
+		if (!m) return pl_failure;
 
-	if (!m)
-		m = q->st.m;
-
-	module *tmp_m = NULL;
-
-	while (m) {
 		if (find_functor(m, functor, arity))
 			return pl_success;
 
-		if (!tmp_m)
-			m = tmp_m = q->st.m->pl->modules;
-		else
-			m = m->next;
+		return pl_failure;
 	}
+
+	cell tmp = (cell){0};
+	tmp.tag = TAG_LITERAL;
+	tmp.val_off = index_from_pool(q->st.m->pl, functor);
+	tmp.arity = arity;
+
+	if (search_predicate(q->st.m, &tmp))
+		return pl_success;
 
 	bool found = false;
 
@@ -5468,10 +5468,15 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 	if ((!is_integer(p2) || is_negative(p2)) && !is_variable(p2))
 		return throw_error(q, p_pi, "type_error", "predicate_indicator");
 
-	if (!search_functor(q, p1, p1_ctx, p2, p2_ctx))
-		return pl_failure;
+	if (is_variable(p1) || is_variable(p2))
+		return search_functor(q, p1, p1_ctx, p2, p2_ctx) ? pl_success : pl_failure;
 
-	return pl_success;
+	cell tmp = (cell){0};
+	tmp.tag = TAG_LITERAL;
+	tmp.val_off = is_literal(p1) ? p1->val_off : index_from_pool(q->st.m->pl, GET_STR(p1));
+	tmp.arity = get_integer(p2);
+
+	return search_predicate(q->st.m, &tmp) != NULL;
 }
 
 static USE_RESULT pl_status fn_iso_acyclic_term_1(query *q)
@@ -10011,7 +10016,7 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 			return throw_error(q, p2, "domain_error", "predicate_property");
 	}
 
-	predicate *h = find_functor(q->st.m, f, p1->arity);
+	predicate *h = find_predicate(q->st.m, p1);
 
 	if (h && !h->is_dynamic && !is_variable(p2)) {
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "built_in"));
