@@ -309,6 +309,7 @@ where appropriate.
 
 	now/1                   # now (-integer) C-time in secs as integer
 	get_time/1              # get_time(-variable) C-time in secs as float
+	cpu_time/1              # cpu_time(-variable) runtime in secs as float
 	set_random/1            # set_random(+option) set random number seed
 	srandom/1               # set_seed(+integer) set random number seed
 	set_seed/1              # set_seed(+integer) set random number seed

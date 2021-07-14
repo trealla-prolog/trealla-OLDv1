@@ -975,10 +975,8 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 	return g_disp[p1->tag].fn(q, p1, p2);
 }
 
-static bool check_update_view(query *q, clause *c)
+static bool check_update_view(const frame *g, const clause *c)
 {
-	frame *g = GET_FRAME(q->st.curr_frame);
-
 	if (c->t.ugen_created > g->ugen)
 		return false;
 
@@ -1035,10 +1033,10 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 	may_error(make_choice(q));
 	cell *p1_body = deref(q, get_logical_body(p1), p1_ctx);
 	cell *orig_p1 = p1;
+	const frame *g = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
-
-		if (!check_update_view(q, q->st.curr_clause2))
+		if (!check_update_view(g, q->st.curr_clause2))
 			continue;
 
 		term *t = &q->st.curr_clause2->t;
@@ -1133,9 +1131,10 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 		return pl_failure;
 
 	may_error(make_choice(q));
+	const frame *g = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
-		if (!check_update_view(q, q->st.curr_clause2))
+		if (!check_update_view(g, q->st.curr_clause2))
 			continue;
 
 		term *t = &q->st.curr_clause2->t;
@@ -1240,10 +1239,10 @@ static USE_RESULT pl_status match_head(query *q)
 		return pl_failure;
 
 	may_error(make_choice(q));
+	const frame *g = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause; next_key(q)) {
-
-		if (!check_update_view(q, q->st.curr_clause))
+		if (!check_update_view(g, q->st.curr_clause))
 			continue;
 
 		term *t = &q->st.curr_clause->t;
@@ -1617,7 +1616,6 @@ pl_status execute(query *q, term *t)
 	q->st.sp = t->nbr_vars;
 	q->st.curr_frame = 0;
 	q->st.fp = 1;
-	q->time_started = get_time_in_usec();
 	q->abort = false;
 	q->cycle_error = false;
 
@@ -1685,6 +1683,7 @@ query *create_query(module *m, bool is_task)
 	q->st.m = m;
 	q->trace = m->pl->trace;
 	q->flag = m->flag;
+	q->time_started = q->query_started = get_time_in_usec();
 	mp_int_init(&q->tmp_ival);
 
 	// Allocate these now...

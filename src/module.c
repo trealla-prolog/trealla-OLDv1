@@ -34,6 +34,7 @@ static const op_table g_ops[] =
 	{"public", OP_FX, 1150},
 	{"discontiguous", OP_FX, 1150},
 	{"multifile", OP_FX, 1150},
+	{"attribute", OP_FX, 1150},
 
 	{"op", OP_FX, 1150},
 	{"dynamic", OP_FX, 1150},
@@ -428,30 +429,33 @@ predicate *search_predicate(module *m, cell *c)
 
 unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
 {
-	for (const op_table *ptr = m->ops; ptr->name; ptr++) {
-		if (!ptr->specifier)
+	miter *iter = m_findkey(m->ops, name);
+	op_table *ptr;
+
+	while (m_nextkey(iter, (void**)&ptr)) {
+		if (!ptr->priority)
 			continue;
 
 		if (hint_prefix && !IS_PREFIX(ptr->specifier))
 			continue;
 
-		if (!strcmp(ptr->name, name)) {
-			if (specifier) *specifier = ptr->specifier;
-			return ptr->priority;
-		}
+		if (specifier) *specifier = ptr->specifier;
+		m_done(iter);
+		return ptr->priority;
 	}
 
-	for (const op_table *ptr = m->def_ops; ptr->name; ptr++) {
-		if (!ptr->specifier)
+	iter = m_findkey(m->defops, name);
+
+	while (m_nextkey(iter, (void**)&ptr)) {
+		if (!ptr->priority)
 			continue;
 
 		if (hint_prefix && !IS_PREFIX(ptr->specifier))
 			continue;
 
-		if (!strcmp(ptr->name, name)) {
-			if (specifier) *specifier = ptr->specifier;
-			return ptr->priority;
-		}
+		if (specifier) *specifier = ptr->specifier;
+		m_done(iter);
+		return ptr->priority;
 	}
 
 	if (hint_prefix)
@@ -462,26 +466,29 @@ unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_pref
 
 unsigned find_op(module *m, const char *name, unsigned specifier)
 {
-	for (const op_table *ptr = m->ops; ptr->name; ptr++) {
-		if (!ptr->specifier)
+	miter *iter = m_findkey(m->ops, name);
+	op_table *ptr;
+
+	while (m_nextkey(iter, (void**)&ptr)) {
+		if (!ptr->priority)
 			continue;
 
-		if (specifier != ptr->specifier)
-			continue;
-
-		if (!strcmp(ptr->name, name))
+		if (ptr->specifier == specifier) {
+			m_done(iter);
 			return ptr->priority;
+		}
 	}
 
-	for (const op_table *ptr = m->def_ops; ptr->name; ptr++) {
-		if (!ptr->specifier)
+	iter = m_findkey(m->defops, name);
+
+	while (m_nextkey(iter, (void**)&ptr)) {
+		if (!ptr->priority)
 			continue;
 
-		if (specifier != ptr->specifier)
-			continue;
-
-		if (!strcmp(ptr->name, name))
+		if (ptr->specifier == specifier) {
+			m_done(iter);
 			return ptr->priority;
+		}
 	}
 
 	return 0;
@@ -489,85 +496,55 @@ unsigned find_op(module *m, const char *name, unsigned specifier)
 
 bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 {
-	unsigned ot = 0, pri = 0;
-	int hint = IS_PREFIX(specifier);
+	miter *iter = m_findkey(m->ops, name);
+	op_table *ptr;
 
-	if ((pri = get_op(m, name, &ot, hint)) != 0) {
-		if ((ot == specifier) && priority)
-			return true;
-	}
-
-	op_table *ptr = m->def_ops;
-
-	for (; ptr->name; ptr++) {
-		if (!ptr->specifier)
-			continue;
-
+	while (m_nextkey(iter, (void**)&ptr)) {
 		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
-			continue;
-
-		if (strcmp(ptr->name, name))
 			continue;
 
 		if (!priority) {
 			ptr->specifier = 0;
 			ptr->priority = 0;
 			m->loaded_ops = false;
+			m_done(iter);
 			return true;
 		}
 
-		ptr->specifier = specifier;
 		ptr->priority = priority;
+		ptr->specifier = specifier;
 		m->loaded_ops = false;
+		m_done(iter);
 		return true;
 	}
 
-	ptr = m->ops;
+	iter = m_findkey(m->defops, name);
 
-	for (; ptr->name; ptr++) {
-		if (!ptr->specifier)
-			continue;
-
+	while (m_nextkey(iter, (void**)&ptr)) {
 		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
-			continue;
-
-		if (strcmp(ptr->name, name))
 			continue;
 
 		if (!priority) {
 			ptr->specifier = 0;
 			ptr->priority = 0;
 			m->loaded_ops = false;
+			m_done(iter);
 			return true;
 		}
 
-		ptr->specifier = specifier;
 		ptr->priority = priority;
+		ptr->specifier = specifier;
 		m->loaded_ops = false;
+		m_done(iter);
 		return true;
 	}
 
-	if (!priority)
-		return true;
-
-	for (ptr = m->ops; ptr->specifier; ptr++)
-		;
-
-	m->user_ops = true;
-
-	if (ptr->name)
-		free(ptr->name);
-	else {
-		if (!m->spare_ops)
-			return false;
-
-		m->spare_ops--;
-	}
-
-	ptr->name = strdup(name);
-	ptr->specifier = specifier;
-	ptr->priority = priority;
+	op_table *tmp = malloc(sizeof(op_table));
+	tmp->name = strdup(name);
+	tmp->priority = priority;
+	tmp->specifier = specifier;
 	m->loaded_ops = false;
+	m_app(m->ops, tmp->name, tmp);
 	return true;
 }
 
@@ -815,6 +792,7 @@ module *load_text(module *m, const char *src, const char *filename)
 		p->directive = true;
 
 		if (p->run_init == true) {
+			p->consulting = false;
 			p->command = true;
 
 			if (run(p, "(:- initialization(G)), retract((:- initialization(_))), G", false, true))
@@ -871,6 +849,7 @@ bool load_fp(module *m, FILE *fp, const char *filename)
 
 		if (p->run_init == true) {
 			p->command = true;
+			p->consulting = false;
 
 			if (run(p, "(:- initialization(G)), retract((:- initialization(_))), G", false, true))
 				p->m->pl->halt = true;
@@ -1022,6 +1001,23 @@ void destroy_module(module *m)
 	}
 
 	m_destroy(m->index);
+	miter *iter = m_first(m->defops);
+	op_table *opptr;
+
+	while (m_next(iter, (void**)&opptr)) {
+		free(opptr->name);
+		free(opptr);
+	}
+
+	m_destroy(m->defops);
+	iter = m_first(m->ops);
+
+	while (m_next(iter, (void**)&opptr)) {
+		free(opptr->name);
+		free(opptr);
+	}
+
+	m_destroy(m->ops);
 
 	for (predicate *h = m->head; h;) {
 		predicate *save = h->next;
@@ -1053,12 +1049,6 @@ void destroy_module(module *m)
 	if (m->fp)
 		fclose(m->fp);
 
-	for (op_table *ptr = m->def_ops; ptr->name; ptr++)
-		free(ptr->name);
-
-	for (op_table *ptr = m->ops; ptr->name; ptr++)
-		free(ptr->name);
-
 	destroy_parser(m->p);
 	free(m->filename);
 	free(m->name);
@@ -1079,14 +1069,16 @@ module *create_module(prolog *pl, const char *name)
 	m->spare_ops = MAX_OPS;
 	m->error = false;
 	m->id = index_from_pool(pl, name);
-	op_table *ptr2 = m->def_ops;
+	m->defops = m_create((void*)strcmp, NULL, NULL);
 
-	for (const op_table *ptr = g_ops; ptr->name; ptr++, ptr2++) {
-		ptr2->name = strdup(ptr->name);
-		ptr2->specifier = ptr->specifier;
-		ptr2->priority = ptr->priority;
+	for (const op_table *ptr = g_ops; ptr->name; ptr++) {
+		op_table *tmp = malloc(sizeof(op_table));
+		memcpy(tmp, ptr, sizeof(op_table));
+		tmp->name = strdup(ptr->name);
+		m_app(m->defops, tmp->name, tmp);
 	}
 
+	m->ops = m_create((void*)strcmp, NULL, NULL);
 	m->index = m_create(predicate_compkey, NULL, m);
 	ensure(m->index);
 	m->p = create_parser(m);

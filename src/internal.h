@@ -72,7 +72,7 @@ typedef enum {
 #define MAX_SMALL_STRING (sizeof(void*)*2)
 #define MAX_VAR_POOL_SIZE 1000
 #define MAX_ARITY UCHAR_MAX
-#define MAX_OPS 250
+#define MAX_OPS 100
 #define MAX_QUEUES 16
 #define MAX_STREAMS 1024
 #define MAX_DEPTH 9000
@@ -516,7 +516,7 @@ struct query_ {
 	mpz_t tmp_ival;
 	prolog_state st;
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
-	uint64_t step, qid, time_started;
+	uint64_t step, qid, time_started, query_started;
 	unsigned max_depth, tmo_msecs;
 	int nv_start;
 	idx_t cp, tmphp, latest_ctx, popp, variable_names_ctx, save_cp;
@@ -604,10 +604,8 @@ struct module_ {
 	predicate *head, *tail;
 	parser *p;
 	FILE *fp;
-	map *index, *nbs;
+	map *index, *nbs, *ops, *defops;
 	struct loaded_file *loaded_files;
-	op_table def_ops[MAX_OPS+1];
-	op_table ops[MAX_OPS+1];
 	idx_t id;
 	prolog_flags flag;
 	unsigned spare_ops;
@@ -732,10 +730,14 @@ typedef struct {
 }
  STRING;
 
+// Don't preallocate, it will be created and expand as needed
+
 #define STRING_alloc(pr) STRING pr##_buf;								\
 	pr##_buf.size = 0;													\
 	pr##_buf.buf = NULL;												\
 	pr##_buf.dst = pr##_buf.buf;
+
+// Preallocate, but it will expand as needed
 
 #define STRING_allocn(pr,len) STRING pr##_buf; 							\
 	pr##_buf.size = len;												\
@@ -743,6 +745,8 @@ typedef struct {
 	ensure(pr##_buf.buf);												\
 	pr##_buf.dst = pr##_buf.buf;										\
 	*pr##_buf.dst = '\0';
+
+// Return length of string in bytes
 
 #define STRING_strlen(pr) (pr##_buf.dst - pr##_buf.buf)
 
@@ -771,6 +775,8 @@ typedef struct {
 	}																	\
 }
 
+// Use where the length is known in advance
+
 #define STRING_strcatn(pr,s,len) {										\
 	STRING_check(pr, len);												\
 	memcpy(pr##_buf.dst, s, len+1);										\
@@ -783,8 +789,12 @@ typedef struct {
 	STRING_strcatn(pr,s2,len2);											\
 }
 
+// Use where length is not known
+
 #define STRING_strcat(pr,s) STRING_strcatn(pr,s,strlen(s))
 #define STRING_strcat2(pr,s1,s2) STRING_strcat2n(pr,s1,strlen(s1),s2,strlen(s2))
+
+// Traditional sprintf into buffer, it will expand as needed
 
 #define STRING_sprintf(pr,fmt,...) {									\
 	size_t len = snprintf(NULL, 0, fmt, __VA_ARGS__);					\
@@ -794,5 +804,10 @@ typedef struct {
 	*pr##_buf.dst = '\0';												\
 }
 
+// Return a traditional C-string
+
 #define STRING_cstr(pr) pr##_buf.buf ? pr##_buf.buf : ""
+
+// Deallocate the buffer
+
 #define STRING_free(pr) { free(pr##_buf.buf); pr##_buf.buf = NULL; }

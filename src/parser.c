@@ -743,14 +743,12 @@ static void directives(parser *p, cell *d)
 static void xref_cell(parser *p, term *t, cell *c, predicate *parent)
 {
 	const char *functor = PARSER_GET_STR(c);
-
 	unsigned specifier;
-	bool hint_prefix = c->arity == 1;
 
 	if ((c->arity == 2)
 		&& !GET_OP(c)
-		&& strcmp(functor, "{}")
-		&& get_op(p->m, functor, &specifier, hint_prefix)) {
+		&& (c->val_off != g_braces_s)
+		&& get_op(p->m, functor, &specifier, false)) {
 		SET_OP(c, specifier);
 	}
 
@@ -762,27 +760,13 @@ static void xref_cell(parser *p, term *t, cell *c, predicate *parent)
 		return;
 	}
 
-	predicate *h = find_predicate(p->m, c);
-
 	if ((c+c->nbr_cells) >= (t->cells+t->cidx-1)) {
 		c->flags |= FLAG_TAIL;
 
-		if (parent && (h == parent)) {
+		if (parent && (parent->key.val_off == c->val_off) && (parent->key.arity == c->arity)) {
 			c->flags |= FLAG_TAIL_REC;
 			t->tail_rec = true;
 		}
-	}
-
-	if (h) {
-		if ((h->m != p->m) && !h->is_public
-			&& strcmp(PARSER_GET_STR(c), "dynamic")
-			&& strcmp(PARSER_GET_STR(c), "module")) {
-			//fprintf(stdout, "Warning: xref not a public method %s/%u\n", PARSER_GET_STR(c), c->arity);
-			//p->error = true;
-			return;
-		}
-
-		c->match = h;
 	}
 }
 

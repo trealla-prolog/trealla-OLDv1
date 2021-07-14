@@ -1287,9 +1287,9 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 	if (q->retry)
 		return do_atom_concat_3(q);
 
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
-	GET_NEXT_ARG(p3,any);
+	GET_FIRST_ARG(p1,atom_or_var);
+	GET_NEXT_ARG(p2,atom_or_var);
+	GET_NEXT_ARG(p3,atom_or_var);
 
 	if (is_variable(p1) && is_variable(p2))
 		return do_atom_concat_3(q);
@@ -1301,30 +1301,8 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 		if (!is_iso_atom(p2))
 			return throw_error(q, p2, "type_error", "atom");
 
-		const char *src1, *src2;
-		size_t len1, len2;
-		char tmpbuf1[256], tmpbuf2[256];
-
-		if (is_atom(p1)) {
-			src1 = GET_STR(p1);
-			len1 = LEN_STR(p1);
-		} else {
-			print_term_to_buf(q, tmpbuf1, sizeof(tmpbuf1), p1, p1_ctx, 1, 0, 0);
-			src1 = tmpbuf1;
-			len1 = strlen(tmpbuf1);
-		}
-
-		if (is_atom(p2)) {
-			src2 = GET_STR(p2);
-			len2 = LEN_STR(p2);
-		} else {
-			print_term_to_buf(q, tmpbuf2, sizeof(tmpbuf2), p2, p2_ctx, 1, 0, 0);
-			src2 = tmpbuf2;
-			len2 = strlen(tmpbuf2);
-		}
-
 		STRING_alloc(pr);
-		STRING_strcat2n(pr, src1, len1, src2, len2);
+		STRING_strcat2n(pr, GET_STR(p1), LEN_STR(p1), GET_STR(p2), LEN_STR(p2));
 		cell tmp;
 		may_error(make_cstringn(&tmp, STRING_cstr(pr), STRING_strlen(pr)), STRING_free(pr));
 		STRING_free(pr);
@@ -2369,7 +2347,7 @@ static USE_RESULT pl_status fn_iso_nl_0(query *q)
 	int n = q->st.m->pl->current_output;
 	stream *str = &g_streams[n];
 	fputc('\n', str->fp);
-	fflush(str->fp);
+	//fflush(str->fp);
 	return !ferror(str->fp);
 }
 
@@ -2383,7 +2361,7 @@ static USE_RESULT pl_status fn_iso_nl_1(query *q)
 		return throw_error(q, pstr, "permission_error", "output,stream");
 
 	fputc('\n', str->fp);
-	fflush(str->fp);
+	//fflush(str->fp);
 	return !ferror(str->fp);
 }
 
@@ -3147,7 +3125,7 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 
 	if (q->nl) {
 		net_write("\n", 1, str);
-		fflush(str->fp);
+		//fflush(str->fp);
 	}
 
 	q->max_depth = q->quoted = q->nl = q->fullstop = false;
@@ -3207,7 +3185,7 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 
 	if (q->nl) {
 		net_write("\n", 1, str);
-		fflush(str->fp);
+		//fflush(str->fp);
 	}
 
 	q->max_depth = q->quoted = q->nl = q->fullstop = false;
@@ -5512,13 +5490,25 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_literal(&tmp, g_off_s);
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "unix")) {
+		cell tmp;
+		make_literal(&tmp, g_true_s);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "dos")) {
+		cell tmp;
+		make_literal(&tmp, g_false_s);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "windows")) {
+		cell tmp;
+		make_literal(&tmp, g_false_s);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "occurs_check")) {
 		cell tmp;
 
 		if (q->st.m->flag.occurs_check == 1)
-			make_literal(&tmp, g_true_s);
+			make_literal(&tmp, g_on_s);
 		else if (q->st.m->flag.occurs_check == 0)
-			make_literal(&tmp, g_false_s);
+			make_literal(&tmp, g_off_s);
 		else
 			make_literal(&tmp, index_from_pool(q->st.m->pl, "error"));
 
@@ -5704,7 +5694,6 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, "domain_error", "flag_value");
 		}
-
 	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "debug")) {
 		if (!slicecmp2(GET_STR(p2), LEN_STR(p2), "true") || !slicecmp2(GET_STR(p2), LEN_STR(p2), "on"))
 			q->st.m->flag.debug = true;
@@ -5743,10 +5732,12 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "version_data")
 		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "version_git")
 		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "encoding")
+		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "unix")
 		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "integer_rounding_function")
 		|| !slicecmp2(GET_STR(p1), LEN_STR(p1), "dialect")
 		) {
 		return throw_error(q, p1, "permission_error", "modify,flag");
+	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "")) {
 	} else {
 		return throw_error(q, p1, "domain_error", "prolog_flag");
 	}
@@ -6631,6 +6622,11 @@ static USE_RESULT pl_status fn_time_1(query *q)
 
 static USE_RESULT pl_status fn_statistics_0(__attribute__((unused)) query *q)
 {
+	fprintf(stdout,
+		"Goals %llu, Matches %llu, Max frames %u, Max choices %u, Max trails: %u, Backtracks %llu, TCOs:%llu\n",
+		(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
+		q->max_frames, q->max_choices, q->max_trails,
+		(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
 	return pl_success;
 }
 
@@ -6641,7 +6637,7 @@ static USE_RESULT pl_status fn_statistics_2(query *q)
 
 	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "cputime") && is_variable(p2)) {
 		uint64_t now = get_time_in_usec();
-		double elapsed = now - q->time_started;
+		double elapsed = now - q->query_started;
 		cell tmp;
 		make_real(&tmp, elapsed/1000/1000);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -6657,7 +6653,7 @@ static USE_RESULT pl_status fn_statistics_2(query *q)
 
 	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "runtime")) {
 		uint64_t now = get_time_in_usec();
-		double elapsed = now - q->time_started;
+		double elapsed = now - q->query_started;
 		cell tmp;
 		make_int(&tmp, elapsed/1000);
 		allocate_list(q, &tmp);
@@ -6753,6 +6749,16 @@ static USE_RESULT pl_status fn_get_time_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_cpu_time_1(query *q)
+{
+	GET_FIRST_ARG(p1,variable);
+	double v = ((double)get_time_in_usec()-q->query_started) / 1000 / 1000;
+	cell tmp;
+	make_real(&tmp, (double)v);
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_writeln_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -6760,7 +6766,7 @@ static USE_RESULT pl_status fn_writeln_1(query *q)
 	stream *str = &g_streams[n];
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	fputc('\n', str->fp);
-	fflush(str->fp);
+	//fflush(str->fp);
 	return !ferror(str->fp);
 }
 
@@ -9686,11 +9692,11 @@ static USE_RESULT pl_status fn_edin_telling_1(query *q)
 	return pl_success;
 }
 
-static idx_t do_jenkins_one_at_a_time_hash(const char *key)
+static idx_t jenkins_one_at_a_time_hash(const char *key, size_t len)
 {
 	idx_t hash = 0;
 
-	while (*key != 0) {
+	while (len-- > 0) {
 		hash += *key++;
 		hash += (hash << 10);
 		hash ^= (hash >> 6);
@@ -9710,10 +9716,20 @@ static USE_RESULT pl_status fn_term_hash_2(query *q)
 	if (is_variable(p1))
 		return pl_success;
 
-	char *dst = print_term_to_strbuf(q, p1, p1_ctx, 1);
 	cell tmp;
-	make_int(&tmp, do_jenkins_one_at_a_time_hash(dst));
-	free(dst);
+
+	if (is_smallint(p1)) {
+		char tmpbuf[80];
+		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long)get_smallint(p1));
+		make_int(&tmp, jenkins_one_at_a_time_hash(tmpbuf, strlen(tmpbuf)));
+	} else if (is_atom(p1)) {
+		make_int(&tmp, jenkins_one_at_a_time_hash(GET_STR(p1), LEN_STR(p1)));
+	} else {
+		char *tmpbuf = print_term_to_strbuf(q, p1, p1_ctx, 1);
+		make_int(&tmp, jenkins_one_at_a_time_hash(tmpbuf, strlen(tmpbuf)));
+		free(tmpbuf);
+	}
+
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -9870,11 +9886,11 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 		if (is_atom(p1)) {
 			len1 = LEN_STR(p1);
 			src1 = GET_STR(p1);
+		} else if (is_bigint(p1)) {
+			return pl_failure;
 		} else if (is_integer(p1)) {
 			len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), get_integer(p1), 10);
 			src1 = tmpbuf1;
-		} else if (is_bigint(p1)) {
-			return pl_failure;
 		} else {
 			len1 = snprintf(tmpbuf1, sizeof(tmpbuf1), "%.17g", get_real(p1));
 			src1 = tmpbuf1;
@@ -9883,11 +9899,11 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 		if (is_atom(p2)) {
 			len2 = LEN_STR(p2);
 			src2 = GET_STR(p2);
+		} else if (is_bigint(p1)) {
+			return pl_failure;
 		} else if (is_integer(p2)) {
 			len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), get_integer(p2), 10);
 			src2 = tmpbuf2;
-		} else if (is_bigint(p1)) {
-			return pl_failure;
 		} else {
 			len2 = snprintf(tmpbuf2, sizeof(tmpbuf1), "%.17g", get_real(p2));
 			src2 = tmpbuf2;
@@ -11463,6 +11479,7 @@ static const struct builtins g_predicates_other[] =
 	{"now", 0, fn_now_0, NULL},
 	{"now", 1, fn_now_1, "now(-integer)"},
 	{"get_time", 1, fn_get_time_1, "-variable"},
+	{"cpu_time", 1, fn_cpu_time_1, "-variable"},
 	{"pid", 1, fn_pid_1, "-integer"},
 	{"shell", 1, fn_shell_1, "+atom"},
 	{"shell", 2, fn_shell_2, "+atom,??"},
@@ -11812,6 +11829,7 @@ static void load_flags(query *q)
 	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "debug", m->flag.debug?"on":"off");
 	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "unknown", m->flag.unknown == UNK_ERROR?"error":m->flag.unknown == UNK_WARNING?"warning":m->flag.unknown == UNK_CHANGEABLE?"changeable":"fail");
 	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "encoding", "'UTF-8'");
+	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "unix", "true");
 	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "dialect", "trealla");
 	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "bounded", "false");
 	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %u).\n", "max_arity", MAX_ARITY);
@@ -11840,8 +11858,10 @@ static void load_ops(query *q)
 
 	q->st.m->loaded_ops = true;
 	STRING_allocn(pr, 1024*8);
+	miter *iter = m_first(q->st.m->ops);
+	op_table *ptr;
 
-	for (const op_table *ptr = q->st.m->ops; ptr->name; ptr++) {
+	while (m_next(iter, (void**)&ptr)) {
 		char specifier[80], name[256];
 
 		if (!ptr->specifier)
@@ -11870,7 +11890,9 @@ static void load_ops(query *q)
 		STRING_strcat(pr, tmpbuf);
 	}
 
-	for (const op_table *ptr = q->st.m->def_ops; ptr->name; ptr++) {
+	iter = m_first(q->st.m->defops);
+
+	while (m_next(iter, (void**)&ptr)) {
 		char specifier[80], name[256];
 
 		if (!ptr->specifier)
@@ -11892,7 +11914,11 @@ static void load_ops(query *q)
 			strcpy(specifier, "xfx");
 
 		formatted(name, sizeof(name), ptr->name, strlen(ptr->name), false);
-		STRING_sprintf(pr, "'$current_op'(%u, %s, '%s').\n", ptr->priority, specifier, name);
+		char tmpbuf[1024];
+
+		snprintf(tmpbuf, sizeof(tmpbuf), "'$current_op'(%u, %s, '%s').\n",
+			ptr->priority, specifier, name);
+		STRING_strcat(pr, tmpbuf);
 	}
 
 	//printf("%s", tmpbuf);
