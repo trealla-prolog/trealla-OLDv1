@@ -1587,27 +1587,19 @@ pl_status start(query *q)
 	return pl_success;
 }
 
-#ifdef _WIN32
-uint64_t get_time_in_usec(void)
+uint64_t cpu_time_in_usec(void)
 {
-	static const uint64_t epoch = 116444736000000000ULL;
-	FILETIME file_time;
-	SYSTEMTIME system_time;
-	ULARGE_INTEGER u;
-	GetSystemTime(&system_time);
-	SystemTimeToFileTime(&system_time, &file_time);
-	u.LowPart = file_time.dwLowDateTime;
-	u.HighPart = file_time.dwHighDateTime;
-	return (u.QuadPart - epoch) / 10 + (1000ULL * system_time.wMilliseconds);
+	struct timespec now;
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &now);
+	return (uint64_t)(now.tv_sec * 1000 * 1000) + (now.tv_nsec / 1000);
 }
-#else
+
 uint64_t get_time_in_usec(void)
 {
 	struct timespec now;
 	clock_gettime(CLOCK_REALTIME, &now);
 	return (uint64_t)(now.tv_sec * 1000 * 1000) + (now.tv_nsec / 1000);
 }
-#endif
 
 pl_status execute(query *q, term *t)
 {
@@ -1683,7 +1675,8 @@ query *create_query(module *m, bool is_task)
 	q->st.m = m;
 	q->trace = m->pl->trace;
 	q->flag = m->flag;
-	q->time_started = q->query_started = get_time_in_usec();
+	q->time_started = q->get_started = get_time_in_usec();
+	q->cpu_last_started = q->cpu_started = cpu_time_in_usec();
 	mp_int_init(&q->tmp_ival);
 
 	// Allocate these now...

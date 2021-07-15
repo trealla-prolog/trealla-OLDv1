@@ -309,7 +309,6 @@ where appropriate.
 
 	now/1                   # now (-integer) C-time in secs as integer
 	get_time/1              # get_time(-variable) C-time in secs as float
-	cpu_time/1              # cpu_time(-variable) runtime in secs as float
 	set_random/1            # set_random(+option) set random number seed
 	srandom/1               # set_seed(+integer) set random number seed
 	set_seed/1              # set_seed(+integer) set random number seed
@@ -328,6 +327,8 @@ where appropriate.
 	getfile/2               # getfile(+filename,-strings)
 	getline/1               # getline(-string)
 	getline/2               # getline(+stream,-string)
+	getlines/1              # getlines(-strings)
+	getlines/2              # getlines(+stream,-strings)
 	bread/3                 # bread(+stream,?len,-string)
 	bwrite/2                # bwrite(+stream,+string)
 	replace/4               # replace(+string,+old,+new,-string)
@@ -341,6 +342,18 @@ where appropriate.
 
 Note: consult/1 and load_files/2 support lists of files as args. Also
 support loading into modules eg. *consult(MOD:FILE-SPEC)*.
+
+	popen/3					# popen(+cmd,+mode,-stream)
+	popen/4					# popen(+cmd,+mode,-stream,+opts)
+
+Note: popen/[3,4] use the Unix popen() system call:
+
+	tpl -g "use_module(library(apply)),popen('ps -a',read,S,[]),getlines(S,Ls),close(S),maplist(print,Ls),halt"
+		PID TTY          TIME CMD
+	   2806 tty2     00:00:00 gnome-session-b
+	  31645 pts/0    00:00:00 tpl
+	  31646 pts/0    00:00:00 sh
+	  31647 pts/0    00:00:00 ps
 
 
 Definite Clause Grammars

@@ -1,8 +1,12 @@
 #pragma once
 
 extern int net_server(const char *hostname, unsigned port, int udp, const char *keyfile, const char *certfile);
-extern int net_accept(stream *str);
 extern int net_connect(const char *hostname, unsigned port, int udp, int nodelay);
+
+extern int net_domain_server(const char *name, int udp);
+extern int net_domain_connect(const char *name, int udp);
+
+extern int net_accept(stream *str);
 extern void net_set_nonblocking(stream *str);
 
 extern void *net_enable_ssl(int fd, const char *hostname, int server, int level, const char *certfile);

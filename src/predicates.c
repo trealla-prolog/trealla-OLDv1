@@ -1990,6 +1990,116 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_popen_4(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,atom);
+	GET_NEXT_ARG(p3,variable);
+	GET_NEXT_ARG(p4,list_or_nil);
+	const char *mode = GET_STR(p2);
+	int n = new_stream();
+	char *src = NULL;
+
+	if (n < 0)
+		return throw_error(q, p1, "resource_error", "too_many_streams");
+
+	const char *filename;
+
+	if (is_atom(p1))
+		filename = GET_STR(p1);
+	else
+		return throw_error(q, p1, "domain_error", "source_sink");
+
+	if (is_iso_list(p1)) {
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
+
+		if (!len)
+			return throw_error(q, p1, "type_error", "atom");
+
+		src = chars_list_to_string(q, p1, p1_ctx, len);
+		filename = src;
+	}
+
+	stream *str = &g_streams[n];
+	str->domain = true;
+	str->filename = strdup(filename);
+	may_ptr_error(str->filename);
+	str->name = strdup(filename);
+	may_ptr_error(str->name);
+	str->mode = strdup(mode);
+	may_ptr_error(str->mode);
+	str->eof_action = eof_action_eof_code;
+	bool binary = false;
+	LIST_HANDLER(p4);
+
+	while (is_list(p4)) {
+		cell *h = LIST_HEAD(p4);
+		cell *c = deref(q, h, p4_ctx);
+
+		if (is_variable(c))
+			return throw_error(q, c, "instantiation_error", "args_not_sufficiently_instantiated");
+
+		if (is_structure(c) && (c->arity == 1)) {
+			cell *name = c + 1;
+			name = deref(q, name, q->latest_ctx);
+
+
+			if (get_named_stream(GET_STR(name)) >= 0)	// ???????
+				return throw_error(q, c, "permission_error", "open,source_sink");
+
+			if (!slicecmp2(GET_STR(c), LEN_STR(c), "alias")) {
+				free(str->name);
+				str->name = slicedup(GET_STR(name), LEN_STR(name));
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "type")) {
+				if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "binary")) {
+					str->binary = true;
+					binary = true;
+				} else if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "text"))
+					binary = false;
+			} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "eof_action")) {
+				if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "error")) {
+					str->eof_action = eof_action_error;
+				} else if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "eof_code")) {
+					str->eof_action = eof_action_eof_code;
+				} else if (is_atom(name) && !slicecmp2(GET_STR(name), LEN_STR(name), "reset")) {
+					str->eof_action = eof_action_reset;
+				}
+			}
+		} else
+			return throw_error(q, c, "domain_error", "stream_option");
+
+		p4 = LIST_TAIL(p4);
+		p4 = deref(q, p4, p4_ctx);
+		p4_ctx = q->latest_ctx;
+
+		if (is_variable(p4))
+			return throw_error(q, p4, "instantiation_error", "args_not_sufficiently_instantiated");
+	}
+
+	if (!strcmp(mode, "read"))
+		str->fp = popen(filename, binary?"rb":"r");
+	else if (!strcmp(mode, "write"))
+		str->fp = popen(filename, binary?"wb":"w");
+	else
+		return throw_error(q, p2, "domain_error", "io_mode");
+
+	free(src);
+
+	if (!str->fp) {
+		if ((errno == EACCES) || (strcmp(mode, "read") && (errno == EROFS)))
+			return throw_error(q, p1, "permission_error", "open, source_sink");
+		else
+			return throw_error(q, p1, "existence_error", "source_sink");
+	}
+
+	cell *tmp = alloc_on_heap(q, 1);
+	may_ptr_error(tmp);
+	make_int(tmp, n);
+	tmp->flags |= FLAG_STREAM | FLAG_HEX;
+	set_var(q, p3, p3_ctx, tmp, q->st.curr_frame);
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_iso_open_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
@@ -2232,6 +2342,7 @@ static USE_RESULT pl_status fn_iso_close_1(query *q)
 	free(str->data);
 	free(str->name);
 	memset(str, 0, sizeof(stream));
+	pstr->tag = TAG_EMPTY;
 	return pl_success;
 }
 
@@ -6636,8 +6747,8 @@ static USE_RESULT pl_status fn_statistics_2(query *q)
 	GET_NEXT_ARG(p2,list_or_var);
 
 	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "cputime") && is_variable(p2)) {
-		uint64_t now = get_time_in_usec();
-		double elapsed = now - q->query_started;
+		uint64_t now = cpu_time_in_usec();
+		double elapsed = now - q->cpu_started;
 		cell tmp;
 		make_real(&tmp, elapsed/1000/1000);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -6652,11 +6763,14 @@ static USE_RESULT pl_status fn_statistics_2(query *q)
 	}
 
 	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "runtime")) {
-		uint64_t now = get_time_in_usec();
-		double elapsed = now - q->query_started;
+		uint64_t now = cpu_time_in_usec();
+		double elapsed = now - q->cpu_started;
 		cell tmp;
 		make_int(&tmp, elapsed/1000);
 		allocate_list(q, &tmp);
+		elapsed = now - q->cpu_last_started;
+		q->cpu_last_started = now;
+		make_int(&tmp, elapsed/1000);
 		append_list(q, &tmp);
 		make_literal(&tmp, g_nil_s);
 		cell *l = end_list(q);
@@ -6742,7 +6856,7 @@ static USE_RESULT pl_status fn_now_1(query *q)
 static USE_RESULT pl_status fn_get_time_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	double v = ((double)get_time_in_usec()) / 1000 / 1000;
+	double v = ((double)get_time_in_usec()-q->get_started) / 1000 / 1000;
 	cell tmp;
 	make_real(&tmp, (double)v);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -6752,7 +6866,7 @@ static USE_RESULT pl_status fn_get_time_1(query *q)
 static USE_RESULT pl_status fn_cpu_time_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	double v = ((double)get_time_in_usec()-q->query_started) / 1000 / 1000;
+	double v = ((double)cpu_time_in_usec()-q->cpu_started) / 1000 / 1000;
 	cell tmp;
 	make_real(&tmp, (double)v);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -6765,6 +6879,28 @@ static USE_RESULT pl_status fn_writeln_1(query *q)
 	int n = q->st.m->pl->current_output;
 	stream *str = &g_streams[n];
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
+	fputc('\n', str->fp);
+	//fflush(str->fp);
+	return !ferror(str->fp);
+}
+
+static USE_RESULT pl_status fn_print_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	int n = q->st.m->pl->current_output;
+	stream *str = &g_streams[n];
+	int was_string = false;
+
+	if (is_string(p1)) {
+		p1->flags &= ~FLAG_STRING;
+		was_string = true;
+	}
+
+	print_term_to_stream(q, str, p1, p1_ctx, 1);
+
+	if (was_string)
+		p1->flags |= FLAG_STRING;
+
 	fputc('\n', str->fp);
 	//fflush(str->fp);
 	return !ferror(str->fp);
@@ -7122,7 +7258,102 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 	return pl_success;
 }
 
-static void parse_host(const char *src, char *hostname, char *path, unsigned *port, int *ssl)
+static USE_RESULT pl_status fn_getlines_1(query *q)
+{
+	GET_NEXT_ARG(p1,variable);
+	int n = q->st.m->pl->current_input;
+	stream *str = &g_streams[n];
+	char *line = NULL;
+	size_t len = 0;
+	int nbr = 1, in_list = 0;
+
+	while (getline(&line, &len, str->fp) != -1) {
+		size_t len = strlen(line);
+		if (line[len-1] == '\n') {
+			line[len-1] = '\0';
+			len--;
+		}
+
+		if (line[len-1] == '\r') {
+			line[len-1] = '\0';
+			len--;
+		}
+
+		cell tmp;
+		may_error(make_stringn(&tmp, line, len));
+
+		if (nbr++ == 1)
+			allocate_list(q, &tmp);
+		else
+			append_list(q, &tmp);
+
+		in_list = 1;
+	}
+
+	free(line);
+
+	if (!in_list) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	} else {
+		cell *l = end_list(q);
+		may_ptr_error(l);
+		set_var(q, p1, p1_ctx, l, q->st.curr_frame);
+	}
+
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_getlines_2(query *q)
+{
+	GET_FIRST_ARG(pstr,stream);
+	GET_NEXT_ARG(p1,variable);
+	int n = get_stream(q, pstr);
+	stream *str = &g_streams[n];
+	char *line = NULL;
+	size_t len = 0;
+	int nbr = 1, in_list = 0;
+
+	while (getline(&line, &len, str->fp) != -1) {
+		size_t len = strlen(line);
+		if (line[len-1] == '\n') {
+			line[len-1] = '\0';
+			len--;
+		}
+
+		if (line[len-1] == '\r') {
+			line[len-1] = '\0';
+			len--;
+		}
+
+		cell tmp;
+		may_error(make_stringn(&tmp, line, len));
+
+		if (nbr++ == 1)
+			allocate_list(q, &tmp);
+		else
+			append_list(q, &tmp);
+
+		in_list = 1;
+	}
+
+	free(line);
+
+	if (!in_list) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	} else {
+		cell *l = end_list(q);
+		may_ptr_error(l);
+		set_var(q, p1, p1_ctx, l, q->st.curr_frame);
+	}
+
+	return pl_success;
+}
+
+static void parse_host(const char *src, char *hostname, char *path, unsigned *port, int *ssl, int *domain)
 {
 	if (!strncmp(src, "https://", 8)) {
 		src += 8;
@@ -7132,6 +7363,9 @@ static void parse_host(const char *src, char *hostname, char *path, unsigned *po
 		src += 7;
 		*ssl = 0;
 		*port = 80;
+	} else if (!strncmp(src, "unix://", 7)) {
+		src += 7;
+		*domain = 1;
 	}
 
 	if (*src == ':')
@@ -7150,7 +7384,7 @@ static USE_RESULT pl_status fn_server_3(query *q)
 	GET_NEXT_ARG(p3,list_or_nil);
 	char hostname[1024], path[1024*4];
 	char *keyfile = "privkey.pem", *certfile = "fullchain.pem";
-	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, level = 0;
+	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, domain = 0, level = 0;
 	unsigned port = 80;
 	snprintf(hostname, sizeof(hostname), "localhost");
 	path[0] = '\0';
@@ -7217,7 +7451,7 @@ static USE_RESULT pl_status fn_server_3(query *q)
 	}
 
 	const char *url = GET_STR(p1);
-	parse_host(url, hostname, path, &port, &ssl);
+	parse_host(url, hostname, path, &port, &ssl, &domain);
 	nonblock = q->is_task;
 
 	int fd = net_server(hostname, port, udp, ssl?keyfile:NULL, ssl?certfile:NULL);
@@ -7333,7 +7567,7 @@ static USE_RESULT pl_status fn_client_5(query *q)
 	GET_NEXT_ARG(p5,list_or_nil);
 	char hostname[1024], path[1024*4];
 	char *certfile = NULL;
-	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, level = 0;
+	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, domain = 0, level = 0;
 	hostname[0] = path[0] = '\0';
 	unsigned port = 80;
 	LIST_HANDLER(p5);
@@ -7389,7 +7623,7 @@ static USE_RESULT pl_status fn_client_5(query *q)
 	}
 
 	const char *url = GET_STR(p1);
-	parse_host(url, hostname, path, &port, &ssl);
+	parse_host(url, hostname, path, &port, &ssl, &domain);
 	nonblock = q->is_task;
 
 	while (is_list(p5)) {
@@ -7486,9 +7720,8 @@ static USE_RESULT pl_status fn_getline_1(query *q)
 	}
 
 	if (net_getline(&line, &len, str) == -1) {
-		perror("getline");
 		free(line);
-		return pl_error; // may_error when pl_error == -1
+		return pl_failure;
 	}
 
 	if (line[strlen(line)-1] == '\n')
@@ -7498,12 +7731,7 @@ static USE_RESULT pl_status fn_getline_1(query *q)
 		line[strlen(line)-1] = '\0';
 
 	cell tmp;
-
-	if (strlen(line))
-		may_error(make_string(&tmp, line), free(line));
-	else
-		make_literal(&tmp, g_nil_s);
-
+	may_error(make_string(&tmp, line), free(line));
 	free(line);
 	pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
@@ -7543,12 +7771,7 @@ static USE_RESULT pl_status fn_getline_2(query *q)
 		line[strlen(line)-1] = '\0';
 
 	cell tmp;
-
-	if (strlen(line))
-		may_error(make_string(&tmp, line), free(line));
-	else
-		make_literal(&tmp, g_nil_s);
-
+	may_error(make_string(&tmp, line), free(line));
 	free(line);
 	pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
@@ -10808,6 +11031,29 @@ static USE_RESULT pl_status fn_nonmember_2(query *q)
 	return fn_memberchk_2(q) == pl_success ? pl_failure : pl_success;
 }
 
+static USE_RESULT pl_status fn_sys_put_chars_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	int n = q->st.m->pl->current_output;
+	stream *str = &g_streams[n];
+	size_t len;
+
+	if (is_cstring(p1)) {
+		const char *src = GET_STR(p1);
+		size_t len = LEN_STR(p1);
+		net_write(src, len, str);
+	} else if ((len = scan_is_chars_list(q, p1, p1_ctx, true)) > 0) {
+		char *src = chars_list_to_string(q, p1, p1_ctx, len);
+		net_write(src, len, str);
+		free(src);
+	} else if (is_nil(p1)) {
+		;
+	} else
+		return throw_error(q, p1, "type_error", "chars");
+
+	return !ferror(str->fp);
+}
+
 static USE_RESULT pl_status fn_sys_put_chars_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
@@ -11455,6 +11701,7 @@ static const struct builtins g_predicates_other[] =
 	{"memberchk", 2, fn_memberchk_2, "?term,+list"},
 	{"nonmember", 2, fn_nonmember_2, "?term,+list"},
 
+	{"$put_chars", 1, fn_sys_put_chars_1, "+chars"},
 	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars"},
 	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL},
 	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL},
@@ -11471,7 +11718,7 @@ static const struct builtins g_predicates_other[] =
 	{"string", 1, fn_atom_1, "+term"},
 	{"atomic_concat", 3, fn_atomic_concat_3, NULL},
 	{"replace", 4, fn_replace_4, "+orig,+from,+to,-new"},
-	{"print", 1, fn_writeln_1, "+term"},
+	{"print", 1, fn_print_1, "+term"},
 	{"writeln", 1, fn_writeln_1, "+term"},
 	{"sleep", 1, fn_sleep_1, "+integer"},
 	{"delay", 1, fn_delay_1, "+integer"},
@@ -11483,6 +11730,7 @@ static const struct builtins g_predicates_other[] =
 	{"pid", 1, fn_pid_1, "-integer"},
 	{"shell", 1, fn_shell_1, "+atom"},
 	{"shell", 2, fn_shell_2, "+atom,??"},
+	{"popen", 4, fn_popen_4, "+atom,+atom,-stream,+list"},
 	{"wall_time", 1, fn_wall_time_1, "-integer"},
 	{"date_time", 6, fn_date_time_6, "-yyyy,-m,-d,-h,--m,-s"},
 	{"date_time", 7, fn_date_time_7, "-yyyy,-m,-d,-h,--m,-s,-ms"},
@@ -11492,6 +11740,8 @@ static const struct builtins g_predicates_other[] =
 	{"accept", 2, fn_accept_2, "+stream,-stream"},
 	{"getline", 1, fn_getline_1, "-string"},
 	{"getline", 2, fn_getline_2, "+stream,-string"},
+	{"getlines", 1, fn_getlines_1, "-list"},
+	{"getlines", 2, fn_getlines_2, "+stream,-list"},
 	{"getfile", 2, fn_getfile_2, "+string,-list"},
 	{"loadfile", 2, fn_loadfile_2, "+string,-string"},
 	{"savefile", 2, fn_savefile_2, "+string,+string"},

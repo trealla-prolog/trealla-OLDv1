@@ -1066,16 +1066,17 @@ module *create_module(prolog *pl, const char *name)
 	m->flag.unknown = UNK_ERROR;
 	m->flag.double_quote_chars = true;
 	m->flag.character_escapes = true;
-	m->spare_ops = MAX_OPS;
 	m->error = false;
 	m->id = index_from_pool(pl, name);
 	m->defops = m_create((void*)strcmp, NULL, NULL);
 
-	for (const op_table *ptr = g_ops; ptr->name; ptr++) {
-		op_table *tmp = malloc(sizeof(op_table));
-		memcpy(tmp, ptr, sizeof(op_table));
-		tmp->name = strdup(ptr->name);
-		m_app(m->defops, tmp->name, tmp);
+	if (strcmp(name, "system")) {
+		for (const op_table *ptr = g_ops; ptr->name; ptr++) {
+			op_table *tmp = malloc(sizeof(op_table));
+			memcpy(tmp, ptr, sizeof(op_table));
+			tmp->name = strdup(ptr->name);
+			m_app(m->defops, tmp->name, tmp);
+		}
 	}
 
 	m->ops = m_create((void*)strcmp, NULL, NULL);

@@ -17,7 +17,7 @@ extern void undo_me(query *q);
 extern idx_t drop_choice(query *q);
 extern bool retry_choice(query *q);
 extern void term_assign_vars(parser *p, unsigned start, bool rebase);
-extern 	USE_RESULT pl_status start(query *q);
+extern USE_RESULT pl_status start(query *q);
 extern USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx);
 extern USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_type retract);
 extern unsigned create_vars(query *q, unsigned nbr);

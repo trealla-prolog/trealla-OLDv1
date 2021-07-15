@@ -23,6 +23,7 @@
 #include <netinet/tcp.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <unistd.h>
 #endif
 
@@ -38,6 +39,52 @@
 static int g_ctx_use_cnt = 0;
 static SSL_CTX *g_ctx = NULL;
 #endif
+
+int net_domain_connect(const char *name, int udp)
+{
+	int fd = socket(AF_UNIX, udp?SOCK_DGRAM:SOCK_STREAM, 0);
+
+	if (fd == -1)
+	   return -1;
+
+	struct sockaddr_un addr;
+	memset(&addr, 0, sizeof(struct sockaddr_un));
+	addr.sun_family = AF_UNIX;
+    strncpy(addr.sun_path, name, sizeof(addr.sun_path) - 1);
+
+	if (connect(fd, (struct sockaddr *) &addr, sizeof(struct sockaddr_un)) == -1) {
+		close(fd);
+		return -1;
+	}
+
+	return fd;
+}
+
+int net_domain_server(const char *name, int udp)
+{
+    struct sockaddr_un server_sockaddr;
+    memset(&server_sockaddr, 0, sizeof(struct sockaddr_un));
+    int fd = socket(AF_UNIX, udp?SOCK_DGRAM:SOCK_STREAM, 0);
+
+    if (fd == -1)
+		return -1;
+
+    server_sockaddr.sun_family = AF_UNIX;
+    strcpy(server_sockaddr.sun_path, name);
+    unlink(name);
+    int rc = bind(fd, (struct sockaddr *) &server_sockaddr, sizeof(server_sockaddr));
+
+    if (rc == -1) {
+		close(fd);
+		return -1;
+	}
+
+	if (udp)
+		return fd;
+
+	listen(fd, -1);
+	return fd;
+}
 
 int net_connect(const char *hostname, unsigned port, int udp, int nodelay)
 {
@@ -376,5 +423,8 @@ void net_close(stream *str)
 	}
 #endif
 
-	fclose(str->fp);
+	if (str->domain)
+		pclose(str->fp);
+	else
+		fclose(str->fp);
 }

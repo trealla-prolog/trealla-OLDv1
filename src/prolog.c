@@ -288,6 +288,7 @@ void pl_destroy(prolog *pl)
 {
 	if (!pl) return;
 
+	destroy_module(pl->system_m);
 	destroy_module(pl->user_m);
 
 	if (!--g_tpl_count)
@@ -335,58 +336,69 @@ prolog *pl_create()
 
 	//printf("Library: %s\n", g_tpl_lib);
 
-	pl->user_m = create_module(pl, "user");
-	if (pl->user_m) {
-		pl->curr_m = pl->user_m;
-		pl->s_last = 0;
-		pl->s_cnt = 0;
-		pl->seed = 0;
-		pl->current_input = 0;		// STDIN
-		pl->current_output = 1;		// STDOUT
-		pl->current_error = 2;		// STDERR
+	pl->system_m = create_module(pl, "system");
 
-		set_multifile_in_db(pl->user_m, "term_expansion", 2);
-		set_multifile_in_db(pl->user_m, "goal_expansion", 2);
-
-		set_noindex_in_db(pl->user_m, "$predicate_property", 2);
-		set_noindex_in_db(pl->user_m, "$stream_property", 2);
-		set_noindex_in_db(pl->user_m, "$current_op", 3);
-
-		set_dynamic_in_db(pl->user_m, "$record_key", 2);
-		set_dynamic_in_db(pl->user_m, "$current_op", 3);
-		set_dynamic_in_db(pl->user_m, "$predicate_property", 2);
-		set_dynamic_in_db(pl->user_m, "$current_prolog_flag", 2);
-		set_dynamic_in_db(pl->user_m, "$stream_property", 2);
-		set_dynamic_in_db(pl->user_m, "term_expansion", 2);
-		set_dynamic_in_db(pl->user_m, "goal_expansion", 2);
-		set_dynamic_in_db(pl->user_m, "initialization", 1);
-		set_dynamic_in_db(pl->user_m, ":-", 1);
-
-		pl->user_m->prebuilt = true;
-
-		for (library *lib = g_libs; lib->name; lib++) {
-			if (!strcmp(lib->name, "builtins")) {
-				char *src = malloc(*lib->len+1);
-				ensure(src);
-				memcpy(src, lib->start, *lib->len);
-				src[*lib->len] = '\0';
-				assert(pl->user_m);
-				STRING_alloc(s1);
-				STRING_strcat2(s1, "library/", lib->name);
-				load_text(pl->user_m, src, STRING_cstr(s1));
-				STRING_free(s1);
-				free(src);
-				break;
-			}
-		}
-
-		pl->user_m->prebuilt = false;
-	}
-
-	if (!pl->user_m || pl->user_m->error || !pl->user_m->filename) {
+	if (!pl->system_m || pl->system_m->error) {
 		pl_destroy(pl);
 		pl = NULL;
+		return pl;
 	}
 
+	pl->user_m = create_module(pl, "user");
+
+	if (!pl->user_m || pl->user_m->error) {
+		pl_destroy(pl);
+		pl = NULL;
+		return pl;
+	}
+
+	pl->curr_m = pl->user_m;
+	pl->s_last = 0;
+	pl->s_cnt = 0;
+	pl->seed = 0;
+
+	pl->current_input = 0;		// STDIN
+	pl->current_output = 1;		// STDOUT
+	pl->current_error = 2;		// STDERR
+
+	set_multifile_in_db(pl->system_m, "term_expansion", 2);
+	set_multifile_in_db(pl->system_m, "goal_expansion", 2);
+	set_dynamic_in_db(pl->system_m, "term_expansion", 2);
+	set_dynamic_in_db(pl->system_m, "goal_expansion", 2);
+
+	set_multifile_in_db(pl->user_m, "term_expansion", 2);
+	set_multifile_in_db(pl->user_m, "goal_expansion", 2);
+	set_noindex_in_db(pl->user_m, "$predicate_property", 2);
+	set_noindex_in_db(pl->user_m, "$stream_property", 2);
+	set_noindex_in_db(pl->user_m, "$current_op", 3);
+	set_dynamic_in_db(pl->user_m, "$record_key", 2);
+	set_dynamic_in_db(pl->user_m, "$current_op", 3);
+	set_dynamic_in_db(pl->user_m, "$predicate_property", 2);
+	set_dynamic_in_db(pl->user_m, "$current_prolog_flag", 2);
+	set_dynamic_in_db(pl->user_m, "$stream_property", 2);
+	set_dynamic_in_db(pl->user_m, "term_expansion", 2);
+	set_dynamic_in_db(pl->user_m, "goal_expansion", 2);
+	set_dynamic_in_db(pl->user_m, "initialization", 1);
+	set_dynamic_in_db(pl->user_m, ":-", 1);
+
+	pl->user_m->prebuilt = true;
+
+	for (library *lib = g_libs; lib->name; lib++) {
+		if (!strcmp(lib->name, "builtins")) {
+			char *src = malloc(*lib->len+1);
+			ensure(src);
+			memcpy(src, lib->start, *lib->len);
+			src[*lib->len] = '\0';
+			assert(pl->user_m);
+			STRING_alloc(s1);
+			STRING_strcat2(s1, "library/", lib->name);
+			load_text(pl->user_m, src, STRING_cstr(s1));
+			STRING_free(s1);
+			free(src);
+			break;
+		}
+	}
+
+	pl->user_m->prebuilt = false;
 	return pl;
 }

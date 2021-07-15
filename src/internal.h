@@ -72,7 +72,6 @@ typedef enum {
 #define MAX_SMALL_STRING (sizeof(void*)*2)
 #define MAX_VAR_POOL_SIZE 1000
 #define MAX_ARITY UCHAR_MAX
-#define MAX_OPS 100
 #define MAX_QUEUES 16
 #define MAX_STREAMS 1024
 #define MAX_DEPTH 9000
@@ -449,6 +448,7 @@ typedef struct {
 	bool nonblock:1;
 	bool udp:1;
 	bool ssl:1;
+	bool domain:1;
 } stream;
 
 typedef struct {
@@ -516,7 +516,7 @@ struct query_ {
 	mpz_t tmp_ival;
 	prolog_state st;
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
-	uint64_t step, qid, time_started, query_started;
+	uint64_t step, qid, time_started, get_started, cpu_started, cpu_last_started;
 	unsigned max_depth, tmo_msecs;
 	int nv_start;
 	idx_t cp, tmphp, latest_ctx, popp, variable_names_ctx, save_cp;
@@ -608,7 +608,6 @@ struct module_ {
 	struct loaded_file *loaded_files;
 	idx_t id;
 	prolog_flags flag;
-	unsigned spare_ops;
 	bool user_ops:1;
 	bool prebuilt:1;
 	bool use_persist:1;
@@ -626,7 +625,7 @@ struct prolog_ {
 	idx_t tab4[64000];
 	uint8_t tab5[64000];
 	module *modules;
-	module *user_m, *curr_m;
+	module *system_m, *user_m, *curr_m;
 	uint64_t s_last, s_cnt, seed;
 	map *symtab, *funtab, *keyval;
 	char *pool;
@@ -718,6 +717,7 @@ extern size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, b
 extern int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2);
 extern unsigned count_bits(const uint8_t *mask, unsigned bit);
 extern uint64_t get_time_in_usec(void);
+extern uint64_t cpu_time_in_usec(void);
 extern char *relative_to(const char *basefile, const char *relfile);
 extern size_t sprint_int(char *dst, size_t size, int_t n, int base);
 extern void format_property(char *tmpbuf, size_t buflen, const char *name, unsigned arity, const char *type);
