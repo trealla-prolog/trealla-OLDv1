@@ -308,7 +308,8 @@ where appropriate.
 	rand/0                  # function returning integer [0,RAND_MAX]
 
 	now/1                   # now (-integer) C-time in secs as integer
-	get_time/1              # get_time(-variable) C-time in secs as float
+	get_time/1              # get_time(-variable) elapsed wall time in secs as float
+	cpu_time/1              # cpu_time(-variable) elapsed CPU time in secs as float
 	set_random/1            # set_random(+option) set random number seed
 	srandom/1               # set_seed(+integer) set random number seed
 	set_seed/1              # set_seed(+integer) set random number seed
@@ -434,8 +435,8 @@ The additional server options can include *keyfile(filespec)* and
 *certfile(filespec)*. If just one concatenated file is supplied, use
 *keyfile(filespec)* only.
 
-The optional schemes 'http://' (the default) and 'https://' can be
-provided in the client URL.
+The optional schemes 'unix://', 'http://' (the default) and 'https://'
+can be provided in the client URL.
 
 With *bread/3* the 'len' arg can be an integer > 0 meaning return that
 many bytes, = 0 meaning return what is there (if non-blocking) or a variable
