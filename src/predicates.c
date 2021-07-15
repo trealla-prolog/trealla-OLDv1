@@ -2342,7 +2342,6 @@ static USE_RESULT pl_status fn_iso_close_1(query *q)
 	free(str->data);
 	free(str->name);
 	memset(str, 0, sizeof(stream));
-	pstr->tag = TAG_EMPTY;
 	return pl_success;
 }
 
