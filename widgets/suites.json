@@ -1,5 +1,5 @@
 {
-  "total" : 163,
+  "total" : 164,
   "items" : [ {
     "uid" : "6323f92028da534ce9e9b896fe8a8e78",
     "name" : "unbounded/tests.lgt::tests",
@@ -7,9 +7,9 @@
       "failed" : 9,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 83,
+      "passed" : 87,
       "unknown" : 0,
-      "total" : 92
+      "total" : 96
     }
   }, {
     "uid" : "fe889f4ed1e23b13cb890295efdd6049",
@@ -51,9 +51,9 @@
       "failed" : 0,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 56,
+      "passed" : 57,
       "unknown" : 0,
-      "total" : 56
+      "total" : 57
     }
   }, {
     "uid" : "e323763b3f5107ef1a6b74d4676f7951",

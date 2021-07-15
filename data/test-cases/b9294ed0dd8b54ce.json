@@ -1,0 +1,49 @@
+{
+  "uid" : "b9294ed0dd8b54ce",
+  "name" : "sics_at_end_of_stream_1_04",
+  "historyId" : "predicates/at_end_of_stream_1/tests.lgt::tests:tests#sics_at_end_of_stream_1_04",
+  "time" : {
+    "start" : 1626340337000,
+    "stop" : 1626340337000,
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/at_end_of_stream_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "b9294ed0dd8b54ce.json",
+  "parameterValues" : [ ]
+}
