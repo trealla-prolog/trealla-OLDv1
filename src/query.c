@@ -665,7 +665,7 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 
 // Continue to next term in body
 
-static void follow_me(query *q)
+static void proceed(query *q)
 {
 	q->st.curr_cell += q->st.curr_cell->nbr_cells;
 	frame *g = GET_CURR_FRAME();
@@ -1525,10 +1525,10 @@ pl_status start(query *q)
 			if (q->has_attrs && !q->in_hook)
 				may_error(do_post_unification_hook(q));
 
-			follow_me(q);
+			proceed(q);
 		} else if (is_iso_list(q->st.curr_cell)) {
 			consultall(q->st.m->p, q->st.curr_cell);
-			follow_me(q);
+			proceed(q);
 		} else {
 			if (!is_callable(q->st.curr_cell)) {
 				DISCARD_RESULT throw_error(q, q->st.curr_cell, "type_error", "callable");
@@ -1570,7 +1570,7 @@ pl_status start(query *q)
 			}
 
 			q->resume = true;
-			follow_me(q);
+			proceed(q);
 		}
 	}
 

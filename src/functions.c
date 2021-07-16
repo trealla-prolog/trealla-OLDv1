@@ -241,6 +241,10 @@ static mp_result mp_int_popcount(mp_int z, mp_usmall *out) {
   return MP_OK;
 }
 
+extern mp_result mp_int_or(mp_int a, mp_int b, mp_int c);
+extern mp_result mp_int_xor(mp_int a, mp_int b, mp_int c);
+extern mp_result mp_int_and(mp_int a, mp_int b, mp_int c);
+
 void call_builtin(query *q, cell *c, idx_t c_ctx)
 {
 	cell *save = q->st.curr_cell;
@@ -1717,30 +1721,23 @@ static USE_RESULT pl_status fn_iso_xor_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
-	if (is_smallint(&p1) && is_smallint(&p2)) {
+	if (is_bigint(&p1) && is_bigint(&p2)) {
+		mp_int_xor(&p1.val_bigint->ival, &p2.val_bigint->ival, &q->tmp_ival);
+		SET_ACCUM();
+	} else if (is_bigint(&p1) && is_smallint(&p2)) {
+		mpz_t tmp;
+		mp_int_init_value(&tmp, p2.val_integer);
+		mp_int_xor(&p1.val_bigint->ival, &tmp, &q->tmp_ival);
+		mp_int_clear(&tmp);
+		SET_ACCUM();
+	} else if (is_bigint(&p2) && is_smallint(&p1)) {
+		mpz_t tmp;
+		mp_int_init_value(&tmp, p1.val_integer);
+		mp_int_xor(&p2.val_bigint->ival, &tmp, &q->tmp_ival);
+		mp_int_clear(&tmp);
+		SET_ACCUM();
+	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		q->accum.val_integer = p1.val_integer ^ p2.val_integer;
-		q->accum.tag = TAG_INTEGER;
-	} else if (is_variable(&p1) || is_variable(&p2)) {
-		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
-	} else if (!is_integer(&p1)) {
-		return throw_error(q, &p1, "type_error", "integer");
-	} else if (!is_integer(&p2)) {
-		return throw_error(q, &p2, "type_error", "integer");
-	}
-
-	return pl_success;
-}
-
-static USE_RESULT pl_status fn_iso_and_2(query *q)
-{
-	CHECK_CALC();
-	GET_FIRST_ARG(p1_tmp,any);
-	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p1 = eval(q, p1_tmp);
-	CLEANUP cell p2 = eval(q, p2_tmp);
-
-	if (is_smallint(&p1) && is_smallint(&p2)) {
-		q->accum.val_integer = p1.val_integer & p2.val_integer;
 		q->accum.tag = TAG_INTEGER;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
@@ -1761,8 +1758,60 @@ static USE_RESULT pl_status fn_iso_or_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
-	if (is_smallint(&p1) && is_smallint(&p2)) {
+	if (is_bigint(&p1) && is_bigint(&p2)) {
+		mp_int_or(&p1.val_bigint->ival, &p2.val_bigint->ival, &q->tmp_ival);
+		SET_ACCUM();
+	} else if (is_bigint(&p1) && is_smallint(&p2)) {
+		mpz_t tmp;
+		mp_int_init_value(&tmp, p2.val_integer);
+		mp_int_or(&p1.val_bigint->ival, &tmp, &q->tmp_ival);
+		mp_int_clear(&tmp);
+		SET_ACCUM();
+	} else if (is_bigint(&p2) && is_smallint(&p1)) {
+		mpz_t tmp;
+		mp_int_init_value(&tmp, p1.val_integer);
+		mp_int_or(&p2.val_bigint->ival, &tmp, &q->tmp_ival);
+		mp_int_clear(&tmp);
+		SET_ACCUM();
+	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		q->accum.val_integer = p1.val_integer | p2.val_integer;
+		q->accum.tag = TAG_INTEGER;
+	} else if (is_variable(&p1) || is_variable(&p2)) {
+		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
+	} else if (!is_integer(&p1)) {
+		return throw_error(q, &p1, "type_error", "integer");
+	} else if (!is_integer(&p2)) {
+		return throw_error(q, &p2, "type_error", "integer");
+	}
+
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_iso_and_2(query *q)
+{
+	CHECK_CALC();
+	GET_FIRST_ARG(p1_tmp,any);
+	GET_NEXT_ARG(p2_tmp,any);
+	CLEANUP cell p1 = eval(q, p1_tmp);
+	CLEANUP cell p2 = eval(q, p2_tmp);
+
+	if (is_bigint(&p1) && is_bigint(&p2)) {
+		mp_int_and(&p1.val_bigint->ival, &p2.val_bigint->ival, &q->tmp_ival);
+		SET_ACCUM();
+	} else if (is_bigint(&p1) && is_smallint(&p2)) {
+		mpz_t tmp;
+		mp_int_init_value(&tmp, p2.val_integer);
+		mp_int_and(&p1.val_bigint->ival, &tmp, &q->tmp_ival);
+		mp_int_clear(&tmp);
+		SET_ACCUM();
+	} else if (is_bigint(&p2) && is_smallint(&p1)) {
+		mpz_t tmp;
+		mp_int_init_value(&tmp, p1.val_integer);
+		mp_int_and(&p2.val_bigint->ival, &tmp, &q->tmp_ival);
+		mp_int_clear(&tmp);
+		SET_ACCUM();
+	} else if (is_smallint(&p1) && is_smallint(&p2)) {
+		q->accum.val_integer = p1.val_integer & p2.val_integer;
 		q->accum.tag = TAG_INTEGER;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");

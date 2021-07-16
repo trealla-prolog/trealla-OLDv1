@@ -38,23 +38,7 @@ typedef uint32_t idx_t;
 
 static const unsigned INITIAL_NBR_CELLS = 100;		// cells
 
-/*
-  sketch: plan for final enums:
-  - leave the compiler the freedom to put this in a signed char
-  - compatible with 'bool' for non special values: pl_success == 1 and pl_failure == 0
-  - make it self enumerating
-    - all 'special' returns are <0
-    - all errors (may need to add more in future) are <= pl_error
-*/
-
 typedef enum {
-//PLANNED:	pl_last__  = -100;  //unused for now, just for starting the enumeration
-//PLANNED:	pl_...,             //insert more error codes here on demand
-//PLANNED:	pl_cycle,           //cyclic term
-//PLANNED:	pl_error,           //generic resource error
-//PLANNED:	pl_halt    = -3,
-//PLANNED:	pl_abort,
-//PLANNED:	pl_yield,
 	pl_halt    =  0,
 	pl_abort   =  0,
 	pl_yield   =  0,
@@ -75,7 +59,6 @@ typedef enum {
 #define MAX_QUEUES 16
 #define MAX_STREAMS 1024
 #define MAX_DEPTH 9000
-
 #define STREAM_BUFLEN 1024
 
 #define GET_CHOICE(i) (q->choices+(i))
@@ -284,69 +267,52 @@ struct cell_ {
 	idx_t nbr_cells;
 
 	union {
-
-		// A smallint...
-
 		struct {
 			int_t val_integer;
 			void *val_spare1;
 		};
-
-		// A managed bigint...
 
 		struct {
 			bigint *val_bigint;
 			void *val_spare2;
 		};
 
-		// A real...
-
 		struct {
 			double val_real;
 			void *val_spare3;
 		};
 
-		// A call return...
-
 		struct {
 			cell *val_ptr;
-			idx_t cgen;				// choice generation
-			idx_t mod_nbr;
+			uint32_t cgen;				// choice generation
+			uint32_t mod_nbr;
 		};
-
-		// A small (inline) cstring (includes NULL)...
 
 		struct {
 			char val_chr[MAX_SMALL_STRING];
 		};
 
-		// A managed length-defined string...
-
 		struct {
 			strbuf *val_strb;
-			uint32_t strb_off;		// slice offset (or zero)
-			uint32_t strb_len;		// slice length (or zero)
+			uint32_t strb_off;			// slice offset
+			uint32_t strb_len;			// slice length
 		};
-
-		// A static length-defined string...
 
 		struct {
 			char *val_str;
-			size_t str_len;			// slice_length
+			uint64_t str_len;			// slice_length
 		};
-
-		// An atom, var or predicate...
 
 		struct {
 			union {
 				pl_status (*fn)(query*);
 				predicate *match;
-				cell *attrs;		// used in slots
-				uint16_t priority;	// used in parsing operators
+				cell *attrs;			// used in slots
+				uint16_t priority;		// used in parsing operators
 			};
 
-			idx_t val_off;			// offset into pool
-			idx_t var_nbr;			// used with TAG_VAR
+			uint32_t val_off;			// offset into pool
+			uint32_t var_nbr;			// used with TAG_VAR
 		};
 	};
 };

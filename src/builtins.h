@@ -41,7 +41,7 @@
 #define is_in_byte(c) (is_integer(c) && (get_smallint(c) >= -1) && (get_smallint(c) < 256))
 #define is_in_byte_or_var(c) (is_in_byte(c) || is_variable(c))
 #define is_byte(c) (is_integer(c) && (get_smallint(c) >= 0) && (get_smallint(c) < 256))
-#define is_any(c) 1
+#define is_any(c) true
 
 #define is_iso_list_or_nil(c) (is_iso_list(c) || is_nil(c))
 #define is_iso_list_or_nil_or_var(c) (is_iso_list_or_nil(c) || is_variable(c))
