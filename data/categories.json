@@ -6,129 +6,12 @@
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "iso_bagof_3_10",
-        "uid" : "b651b9f491e93f15",
+        "uid" : "9e91459826d1f58",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1626340343000,
-          "stop" : 1626340343000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "lgt_unbounded_and_03",
-        "uid" : "12f39f387f440612",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1626340425000,
-          "stop" : 1626340425000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "lgt_unbounded_xor_01",
-        "uid" : "89feeb1e9f611844",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1626340425000,
-          "stop" : 1626340425000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "lgt_unbounded_and_01",
-        "uid" : "62c13ccd49f74f49",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1626340425000,
-          "stop" : 1626340425000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "lgt_unbounded_xor_03",
-        "uid" : "97767c9744a171c3",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1626340425000,
-          "stop" : 1626340425000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "lgt_unbounded_and_02",
-        "uid" : "58fcd21fe06f5fad",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1626340425000,
-          "stop" : 1626340425000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "lgt_unbounded_or_03",
-        "uid" : "88a12c4793cc312d",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1626340425000,
-          "stop" : 1626340425000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "lgt_unbounded_xor_02",
-        "uid" : "644c6a7c6e5cfeb7",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1626340425000,
-          "stop" : 1626340425000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "lgt_unbounded_or_01",
-        "uid" : "f7fb689255d80e8b",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1626340425000,
-          "stop" : 1626340425000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "lgt_unbounded_or_02",
-        "uid" : "158147d753feede6",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1626340425000,
-          "stop" : 1626340425000,
+          "start" : 1626424180000,
+          "stop" : 1626424180000,
           "duration" : 0
         },
         "flaky" : false,
@@ -140,12 +23,12 @@
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "iso_setof_3_12",
-        "uid" : "9e9bcc86ab7d80c1",
+        "uid" : "7a1600bb86f31e57",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1626340403000,
-          "stop" : 1626340403000,
+          "start" : 1626424244000,
+          "stop" : 1626424244000,
           "duration" : 0
         },
         "flaky" : false,
