@@ -241,10 +241,6 @@ static mp_result mp_int_popcount(mp_int z, mp_usmall *out) {
   return MP_OK;
 }
 
-extern mp_result mp_int_or(mp_int a, mp_int b, mp_int c);
-extern mp_result mp_int_xor(mp_int a, mp_int b, mp_int c);
-extern mp_result mp_int_and(mp_int a, mp_int b, mp_int c);
-
 void call_builtin(query *q, cell *c, idx_t c_ctx)
 {
 	cell *save = q->st.curr_cell;
