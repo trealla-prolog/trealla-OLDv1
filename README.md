@@ -2,7 +2,7 @@ Trealla Prolog
 ==============
 
 A compact, efficient Prolog interpreter with
-[[ISO compliant](https://infradig.github.io/trealla/)] aspirations.
+[ISO compliant](https://infradig.github.io/trealla/) aspirations.
 
 	Integers are unbounded
 	Atoms are UTF-8 of unlimited length
@@ -98,7 +98,7 @@ On *BSD* systems use *gmake* to build and do
 
 to get the *xxd* utility.
 
-For unbounded arithmetic uses a modified fork of the [[imath](https://github.com/infradig/imath)]
+For unbounded arithmetic uses a modified fork of the [imath](https://github.com/infradig/imath)
 library, which is partially included in the source.
 
 
