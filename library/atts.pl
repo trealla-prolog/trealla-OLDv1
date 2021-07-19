@@ -11,7 +11,7 @@
 
 '$process_vars'([], Goals, Goals) :- !.
 '$process_vars'([Var-Val|Vars], SoFar, Goals) :-
-	get_att(Var, Atts),
+	'$get_att'(Var, Atts),
 	'$process_var'(Var, Val, Atts, SoFar, MoreGoals),
 	'$process_vars'(Vars, MoreGoals, Goals).
 

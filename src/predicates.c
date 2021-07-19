@@ -10669,7 +10669,7 @@ static USE_RESULT pl_status fn_offset_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_del_attrs_1(query *q)
+static USE_RESULT pl_status fn_sys_del_attributes_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	frame *g = GET_FRAME(p1_ctx);
@@ -10678,7 +10678,7 @@ static USE_RESULT pl_status fn_sys_del_attrs_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_put_attrs_2(query *q)
+static USE_RESULT pl_status fn_sys_set_attributes_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,list_or_nil);
@@ -10693,7 +10693,7 @@ static USE_RESULT pl_status fn_sys_put_attrs_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_get_attrs_2(query *q)
+static USE_RESULT pl_status fn_sys_get_attributes_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,variable);
@@ -11812,9 +11812,9 @@ static const struct builtins g_predicates_other[] =
 	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list"},
 	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list"},
 
-	{"$put_attrs", 2, fn_sys_put_attrs_2, "+variable,+list"},
-	{"$get_attrs", 2, fn_sys_get_attrs_2, "+variable,-variable"},
-	{"$del_attrs", 1, fn_sys_del_attrs_1, "+variable"},
+	{"$set_attributes", 2, fn_sys_set_attributes_2, "+variable,+list"},
+	{"$get_attributes", 2, fn_sys_get_attributes_2, "+variable,-list"},
+	{"$del_attributes", 1, fn_sys_del_attributes_1, "+variable"},
 
 #if USE_OPENSSL
 	{"sha1", 2, fn_sha1_2, "+string,?string"},
