@@ -547,7 +547,7 @@ del_atts(Var) :-
 	'$put_att'(Var, -Attr).
 
 attvar(Var) :-
-	'$get_attributes'(Var, D),
+	'$read_attributes'(Var, D),
 	D \= [].
 
 %
@@ -580,50 +580,50 @@ del_attr(Var, Module) :-
 :- use_module(library(dict)).
 
 '$put_att'(Var, -Attr) :- !,
-	'$get_attributes'(Var, D),
+	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	functor(Value, Functor, Arity),
 	dict:del(D, Module-(Functor/Arity), D2),
-	'$set_attributes'(Var, D2).
+	'$write_attributes'(Var, D2).
 
 '$put_att'(Var, +Attr) :- !,
-	'$get_attributes'(Var, D),
+	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	functor(Value, Functor, Arity),
 	dict:set(D, Module-(Functor/Arity), Attr, D2),
-	'$set_attributes'(Var, D2).
+	'$write_attributes'(Var, D2).
 
 '$put_att'(Var, Attr) :- !,
-	'$get_attributes'(Var, D),
+	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	functor(Value, Functor, Arity),
 	dict:set(D, Module-(Functor/Arity), Attr, D2),
-	'$set_attributes'(Var, D2).
+	'$write_attributes'(Var, D2).
 
 '$get_att'(Var, L) :- var(L), !,
-	'$get_attributes'(Var, D),
+	'$read_attributes'(Var, D),
 	dict:match(D, _, L).
 
 '$get_att'(Var, +(Attr)) :- !,
-	'$get_attributes'(Var, D),
+	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	catch(functor(Value, Functor, Arity), _, true),
 	dict:get(D, Module-(Functor/Arity), Attr).
 
 '$get_att'(Var, -Attr) :- !,
-	'$get_attributes'(Var, D),
+	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	catch(functor(Value, Functor, Arity), _, true),
 	\+ dict:get(D, Module-(Functor/Arity), _).
 
 '$get_att'(Var, Attr) :- !,
-	'$get_attributes'(Var, D),
+	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	catch(functor(Value, Functor, Arity), _, true),
 	dict:get(D, Module-(Functor/Arity), Attr).
 
 attributed(Var) :-
-	'$get_attributes'(Var, D),
+	'$read_attributes'(Var, D),
 	D \= [].
 
 %
