@@ -939,12 +939,15 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 	}
 
 	const char *tmpbuf = GET_STR(p1);
+	size_t len = LEN_STR(p1);
 	const char *src = tmpbuf;
 	cell tmp;
+	len -= len_char_utf8(src);
 	make_int(&tmp, get_char_utf8(&src));
 	allocate_list(q, &tmp);
 
-	while (*src) {
+	while (len) {
+		len -= len_char_utf8(src);
 		make_int(&tmp, get_char_utf8(&src));
 		append_list(q, &tmp);
 	}
@@ -1370,15 +1373,15 @@ static int new_stream()
 	return -1;
 }
 
-static int get_named_stream(const char *name)
+static int get_named_stream(const char *name, size_t len)
 {
 	for (int i = 0; i < MAX_STREAMS; i++) {
 		stream *str = &g_streams[i];
 
-		if (str->name && !strcmp(str->name, name))
+		if (str->name && !strncmp(str->name, name, len))
 			return i;
 
-		if (str->filename && !strcmp(str->filename, name))
+		if (str->filename && !strncmp(str->filename, name, len))
 			return i;
 	}
 
@@ -1388,7 +1391,7 @@ static int get_named_stream(const char *name)
 static int get_stream(query *q, cell *p1)
 {
 	if (is_atom(p1)) {
-		int n = get_named_stream(GET_STR(p1));
+		int n = get_named_stream(GET_STR(p1), LEN_STR(p1));
 
 		if (n < 0) {
 			//DISCARD_RESULT throw_error(q, p1, "type_error", "stream");
@@ -2044,7 +2047,7 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 			name = deref(q, name, q->latest_ctx);
 
 
-			if (get_named_stream(GET_STR(name)) >= 0)	// ???????
+			if (get_named_stream(GET_STR(name), LEN_STR(name)) >= 0)
 				return throw_error(q, c, "permission_error", "open,source_sink");
 
 			if (!slicecmp2(GET_STR(c), LEN_STR(c), "alias")) {
@@ -2171,7 +2174,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			if (!is_atom(name) && slicecmp2(GET_STR(c), LEN_STR(c), "mmap"))
 				return throw_error(q, c, "domain_error", "stream_option");
 
-			if (get_named_stream(GET_STR(name)) >= 0)	// ???????
+			if (get_named_stream(GET_STR(name), LEN_STR(name)) >= 0)
 				return throw_error(q, c, "permission_error", "open,source_sink");
 
 			if (!slicecmp2(GET_STR(c), LEN_STR(c), "mmap")) {
