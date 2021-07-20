@@ -9542,7 +9542,7 @@ static USE_RESULT pl_status fn_time_file_2(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = GET_STR(p1);
+		filename = src = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	struct stat st = {0};
 
@@ -9573,7 +9573,7 @@ static USE_RESULT pl_status fn_size_file_2(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = GET_STR(p1);
+		filename = src = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	struct stat st = {0};
 
@@ -9603,7 +9603,7 @@ static USE_RESULT pl_status fn_exists_directory_1(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = GET_STR(p1);
+		filename = src = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	struct stat st = {0};
 
@@ -9632,10 +9632,9 @@ static USE_RESULT pl_status fn_make_directory_1(query *q)
 		if (!len)
 			return throw_error(q, p1, "type_error", "atom");
 
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-		filename = src;
+		filename = src = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = GET_STR(p1);
+		filename = src = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	struct stat st = {0};
 
@@ -9643,8 +9642,6 @@ static USE_RESULT pl_status fn_make_directory_1(query *q)
 		free(src);
 		return throw_error(q, p1, "existence_error", "file");
 	}
-
-	free(src);
 
 	if (mkdir(filename, 0777))
 		return throw_error(q, p1, "permission_error", "file");
@@ -9722,10 +9719,9 @@ static USE_RESULT pl_status fn_working_directory_2(query *q)
 				return throw_error(q, p_new, "type_error", "atom");
 			}
 
-			src = chars_list_to_string(q, p_new, p_new_ctx, len);
-			filename = src;
+			filename = src = chars_list_to_string(q, p_new, p_new_ctx, len);
 		} else
-			filename = GET_STR(p_new);
+			filename = src = slicedup(GET_STR(p_new), LEN_STR(p_new));
 
 		if (chdir(filename)) {
 			unshare_cell(&tmp);
@@ -9751,7 +9747,7 @@ static USE_RESULT pl_status fn_chdir_1(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = GET_STR(p1);
+		filename = src = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	pl_status ok = !chdir(filename);
 	free(src);
