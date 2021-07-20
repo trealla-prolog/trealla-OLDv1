@@ -307,12 +307,16 @@ struct cell_ {
 			union {
 				pl_status (*fn)(query*);
 				predicate *match;
-				cell *attrs;			// used in slots
 				uint16_t priority;		// used in parsing operators
 			};
 
 			uint32_t val_off;			// offset into pool
 			uint32_t var_nbr;			// used with TAG_VAR
+		};
+
+		struct {
+			cell *attrs;				// used with TAG_EMPTY
+			idx_t attrs_ctx;			// if 'attrs' is set
 		};
 	};
 };
@@ -376,7 +380,7 @@ typedef struct {
 
 typedef struct {
 	cell *attrs;
-	idx_t ctx;
+	idx_t ctx, attrs_ctx;
 	uint16_t var_nbr;
 } trail;
 

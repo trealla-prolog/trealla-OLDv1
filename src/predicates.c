@@ -10682,14 +10682,10 @@ static USE_RESULT pl_status fn_sys_write_attributes_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,list_or_nil);
-	cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
-	may_ptr_error(tmp);
-	if (tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, "resource_error", "cyclic_term");
-
 	frame *g = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(g, p1->var_nbr);
-	e->c.attrs = tmp;
+	e->c.attrs = p2;
+	e->c.attrs_ctx = p2_ctx;
 	return pl_success;
 }
 
@@ -10703,11 +10699,11 @@ static USE_RESULT pl_status fn_sys_read_attributes_2(query *q)
 	if (!e->c.attrs) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
-		set_var(q, p2, p2_ctx, &tmp, p1_ctx);
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
 
-	set_var(q, p2, p2_ctx, e->c.attrs, p1_ctx);
+	set_var(q, p2, p2_ctx, e->c.attrs, e->c.attrs_ctx);
 	return pl_success;
 }
 
@@ -11472,6 +11468,7 @@ pl_status fn_sys_undo_trail_1(query *q)
 
 		e->c.tag = TAG_EMPTY;
 		e->c.attrs = tr->attrs;
+		e->c.attrs_ctx = tr->attrs_ctx;
 	}
 
 	cell *tmp = end_list(q);

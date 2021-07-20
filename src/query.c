@@ -316,6 +316,7 @@ static void unwind_trail(query *q, const choice *ch)
 		unshare_cell(&e->c);
 		e->c.tag = TAG_EMPTY;
 		e->c.attrs = tr->attrs;
+		e->c.attrs_ctx = tr->attrs_ctx;
 	}
 }
 
@@ -758,10 +759,12 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 	slot *e = GET_SLOT(g, c->var_nbr);
 	e->ctx = v_ctx;
 	cell *attrs;
+	idx_t attrs_ctx;
 
-	if (is_empty(&e->c))
+	if (is_empty(&e->c)) {
 		attrs = e->c.attrs;
-	else
+		attrs_ctx = e->c.attrs_ctx;
+	} else
 		attrs = NULL;
 
 	if (is_structure(v))
@@ -786,6 +789,7 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 	tr->ctx = c_ctx;
 	tr->var_nbr = c->var_nbr;
 	tr->attrs = attrs;
+	tr->attrs_ctx = attrs_ctx;
 }
 
 void reset_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
