@@ -544,22 +544,22 @@ del_attr(Var, Module) :-
 put_atts(Var, -Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
-	functor(Value, Functor, Arity),
-	dict:del(D, Module-(Functor/Arity), D2),
+	functor(Value, Functor, _),
+	dict:del(D, Module-Functor, D2),
 	'$write_attributes'(Var, D2).
 
 put_atts(Var, +Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
-	functor(Value, Functor, Arity),
-	dict:set(D, Module-(Functor/Arity), Attr, D2),
+	functor(Value, Functor, _),
+	dict:set(D, Module-Functor, Attr, D2),
 	'$write_attributes'(Var, D2).
 
 put_atts(Var, Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
-	functor(Value, Functor, Arity),
-	dict:set(D, Module-(Functor/Arity), Attr, D2),
+	functor(Value, Functor, _),
+	dict:set(D, Module-Functor, Attr, D2),
 	'$write_attributes'(Var, D2).
 
 get_atts(Var, L) :- var(L), !,
@@ -569,20 +569,20 @@ get_atts(Var, L) :- var(L), !,
 get_atts(Var, -Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
-	catch(functor(Value, Functor, Arity), _, true),
-	\+ dict:get(D, Module-(Functor/Arity), _).
+	catch(functor(Value, Functor, _), _, true),
+	\+ dict:get(D, Module-Functor, _).
 
 get_atts(Var, +Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
-	catch(functor(Value, Functor, Arity), _, true),
-	dict:get(D, Module-(Functor/Arity), Attr).
+	catch(functor(Value, Functor, _), _, true),
+	dict:get(D, Module-Functor, Attr).
 
 get_atts(Var, Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
-	catch(functor(Value, Functor, Arity), _, true),
-	dict:get(D, Module-(Functor/Arity), Attr).
+	catch(functor(Value, Functor, _), _, true),
+	dict:get(D, Module-Functor, Attr).
 
 del_atts(Var) :-
 	var(Var),
