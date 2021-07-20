@@ -1379,10 +1379,12 @@ static int get_named_stream(const char *name, size_t len)
 	for (int i = 0; i < MAX_STREAMS; i++) {
 		stream *str = &g_streams[i];
 
-		if (str->name && !strncmp(str->name, name, len))
+		if (str->name && (strlen(str->name) == len)
+			&& !strncmp(str->name, name, len))
 			return i;
 
-		if (str->filename && !strncmp(str->filename, name, len))
+		if (str->filename && (strlen(str->filename) == len)
+			&& !strncmp(str->filename, name, len))
 			return i;
 	}
 
