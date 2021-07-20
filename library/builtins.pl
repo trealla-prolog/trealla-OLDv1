@@ -367,8 +367,10 @@ read_term_from_atom(S, T, Opts) :- read_term_from_chars(S, Opts, T).
 absolute_file_name(R, A) :- absolute_file_name(R, A, []).
 client(U, H, P, S) :- client(U,H,P,S,[]).
 server(H, S) :- server(H,S,[]).
-set_random(seed(Seed)) :- set_seed(Seed).
 set_random(seed(random)) :- time(Seed), set_seed(Seed).
+set_random(seed(Seed)) :- set_seed(Seed).
+maybe(K, N) :- P is K / N, random(F), F < P.
+maybe(P) :- random(F), F < P.
 maybe :- random(F), F < 0.5.
 prolog_load_context(module, Module) :- module(Module).
 open(F, M, S) :- open(F, M, S, []).
