@@ -176,6 +176,10 @@ will gain greatly (*phrase_from_file/[2-3]* uses this).
 Both strings and atoms make use of low-overhead ref-counted byte slices
 where appropriate.
 
+
+Non-standard predicates
+=======================
+
 	between/3
 	forall/2
 	samsort/2				# same as msort/2
@@ -185,7 +189,6 @@ where appropriate.
 	predicate_property/2
 	numbervars/[1,3-4]
 	e/0
-	sleep/1
 	name/2
 	tab/[1,2]
 
@@ -305,17 +308,20 @@ where appropriate.
 	popcount/1              # function returning number of 1 bits
 	log10/1                 # function returning log10 of arg
 	now/0                   # function returning C-time in secs as integer
-	rand/0                  # function returning integer [0,RAND_MAX]
-
 	now/1                   # now (-integer) C-time in secs as integer
 	get_time/1              # get_time(-variable) elapsed wall time in secs as float
 	cpu_time/1              # cpu_time(-variable) elapsed CPU time in secs as float
-	set_random/1            # set_random(+option) set random number seed
+
+	set_random/1            # set_random(+option) use 'seed(random)' or 'seed(Seed)'
+	maybe/[0-2]                 # probabilistic fail
 	srandom/1               # set_seed(+integer) set random number seed
 	set_seed/1              # set_seed(+integer) set random number seed
 	get_seed/1              # get_seed(-integer) get random number seed
-	rand/1                  # integer(-integer) integer [0,RAND_MAX]
-	delay/1                 # delay(+integer) sleep for ms
+	rand/0                  # function returning integer [0,RAND_MAX]
+	rand/1                  # rand(-integer) integer [0,RAND_MAX]
+
+	sleep/1					# sleep time in secs
+	delay/1                 # sleep time for ms
 	split/4                 # split(+string,+sep,?left,?right)
 	pid/1
 	shell/1
