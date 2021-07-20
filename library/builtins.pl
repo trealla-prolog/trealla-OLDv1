@@ -545,7 +545,7 @@ del_attr(Var, Module) :-
 put_atts(Var, -Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
-	functor(Value, Functor, _),
+	(var(Value) -> Functor = Value ; functor(Value, Functor, _)),
 	dict:del(D, Module-Functor, D2),
 	'$write_attributes'(Var, D2).
 
@@ -587,9 +587,7 @@ get_atts(Var, Attr) :- !,
 
 del_atts(Var) :-
 	var(Var),
-	module(Module),
-	Attr =.. [Module,_],
-	'$write_attribute'(Var, -Attr).
+	'$erase_attribute'(Var).
 
 attvar(Var) :-
 	'$read_attributes'(Var, D),
