@@ -524,18 +524,18 @@ put_atts(Var, Value) :-
 	var(Var),
 	module(Module),
 	Attr =.. [Module,Value],
-	'$put_att'(Var, +Attr).
+	'$write_attribute'(Var, +Attr).
 
 get_atts(Var, Value) :-
 	var(Var),
 	module(Module),
 	(var(Value) ->
-		( '$get_att'(Var, List),
+		( '$read_attribute'(Var, List),
 			findall(F, (Template =.. [Module,F], member(Template, List)), Value)
 		)
 	;
 		( Attr =.. [Module,Value],
-		'$get_att'(Var, +Attr)
+		'$read_attribute'(Var, +Attr)
 		)
 	),
 	true.
@@ -544,7 +544,7 @@ del_atts(Var) :-
 	var(Var),
 	module(Module),
 	Attr =.. [Module,_],
-	'$put_att'(Var, -Attr).
+	'$write_attribute'(Var, -Attr).
 
 attvar(Var) :-
 	'$read_attributes'(Var, D),
@@ -559,17 +559,17 @@ attvar(Var) :-
 put_attr(Var, Module, Value) :-
 	var(Var),
 	Attr =.. [Module,Value],
-	'$put_att'(Var, +Attr).
+	'$write_attribute'(Var, +Attr).
 
 get_attr(Var, Module, Value) :-
 	var(Var),
 	Attr =.. [Module,Value],
-	'$get_att'(Var, +Attr).
+	'$read_attribute'(Var, +Attr).
 
 del_attr(Var, Module) :-
 	var(Var),
 	Attr =.. [Module,_],
-	'$put_att'(Var, -Attr).
+	'$write_attribute'(Var, -Attr).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -579,44 +579,44 @@ del_attr(Var, Module) :-
 
 :- use_module(library(dict)).
 
-'$put_att'(Var, -Attr) :- !,
+'$write_attribute'(Var, -Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	functor(Value, Functor, Arity),
 	dict:del(D, Module-(Functor/Arity), D2),
 	'$write_attributes'(Var, D2).
 
-'$put_att'(Var, +Attr) :- !,
+'$write_attribute'(Var, +Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	functor(Value, Functor, Arity),
 	dict:set(D, Module-(Functor/Arity), Attr, D2),
 	'$write_attributes'(Var, D2).
 
-'$put_att'(Var, Attr) :- !,
+'$write_attribute'(Var, Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	functor(Value, Functor, Arity),
 	dict:set(D, Module-(Functor/Arity), Attr, D2),
 	'$write_attributes'(Var, D2).
 
-'$get_att'(Var, L) :- var(L), !,
+'$read_attribute'(Var, L) :- var(L), !,
 	'$read_attributes'(Var, D),
 	dict:match(D, _, L).
 
-'$get_att'(Var, +(Attr)) :- !,
+'$read_attribute'(Var, +(Attr)) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	catch(functor(Value, Functor, Arity), _, true),
 	dict:get(D, Module-(Functor/Arity), Attr).
 
-'$get_att'(Var, -Attr) :- !,
+'$read_attribute'(Var, -Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	catch(functor(Value, Functor, Arity), _, true),
 	\+ dict:get(D, Module-(Functor/Arity), _).
 
-'$get_att'(Var, Attr) :- !,
+'$read_attribute'(Var, Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	catch(functor(Value, Functor, Arity), _, true),
