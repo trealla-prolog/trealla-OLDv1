@@ -12,8 +12,8 @@ A compact, efficient Prolog interpreter with
 	DCGs
 	format_//2
 	User-defined functions
-	Attributed variables with SICStus interface (in-progress)
-	Logtalk compatible (in-progress)
+	Attributed variables with SICStus interface (work-in-progress)
+	Logtalk compatible (work-in-progress)
 	REPL with history
 	MIT licensed
 
@@ -201,13 +201,13 @@ where appropriate.
 	random/1                # random(-float) float [0.0,<1.0]
 	random/1                # random(+integer) function returning integer [0,<integer]
 
-	M:put_atts/2
-	M:get_atts/2
-	M:del_atts/1
+	put_atts/2					# SICStus-compatible
+	get_atts/2					# SICStus-compatible
+	del_atts/1					# SICStus-compatible
 
-	put_attr/3
-	get_attr/3
-	del_attr/2
+	put_attr/3					# SWI-compatible
+	get_attr/3					# SWI-compatible
+	del_attr/2					# SWI-compatible
 
 	freeze/2					# use_module(library(freeze))
 	frozen/2					# use_module(library(freeze))
