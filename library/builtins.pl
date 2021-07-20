@@ -372,13 +372,6 @@ open(F, M, S) :- open(F, M, S, []).
 load_files(Files) :- load_files(Files,[]).
 consult(Files) :- load_files(Files,[]).
 
-% Should be in library(random)...
-set_random(seed(random)) :- time(Seed), set_seed(Seed).
-set_random(seed(Seed)) :- set_seed(Seed).
-maybe(K, N) :- P is K / N, random(F), F < P.
-maybe(P) :- random(F), F < P.
-maybe :- random(F), F < 0.5.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SWI compatible
 %
