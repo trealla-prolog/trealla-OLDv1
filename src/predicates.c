@@ -1358,8 +1358,7 @@ static USE_RESULT pl_status fn_iso_atom_length_2(query *q)
 	if (is_integer(p2) && is_negative(p2))
 		return throw_error(q, p2, "domain_error", "not_less_than_zero");
 
-	const char *p = GET_STR(p1);
-	size_t len = substrlen_utf8(p, LEN_STR(p1));
+	size_t len = substrlen_utf8(GET_STR(p1), LEN_STR(p1));
 	cell tmp;
 	make_int(&tmp, len);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -8995,9 +8994,8 @@ static USE_RESULT pl_status fn_sha1_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
-	const char *str = GET_STR(p1);
 	unsigned char digest[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*)str, LEN_STR(p1), digest);
+	SHA1((unsigned char*)GET_STR(p1), LEN_STR(p1), digest);
 	char tmpbuf[512];
 	char *dst = tmpbuf;
 	*dst = '\0';
@@ -9020,9 +9018,8 @@ static USE_RESULT pl_status fn_sha256_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
-	const char *str = GET_STR(p1);
 	unsigned char digest[SHA256_DIGEST_LENGTH];
-	SHA256((unsigned char*)str, LEN_STR(p1), digest);
+	SHA256((unsigned char*)GET_STR(p1), LEN_STR(p1), digest);
 	char tmpbuf[512];
 	char *dst = tmpbuf;
 	*dst = '\0';
@@ -9045,9 +9042,8 @@ static USE_RESULT pl_status fn_sha512_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
-	const char *str = GET_STR(p1);
 	unsigned char digest[SHA512_DIGEST_LENGTH];
-	SHA512((unsigned char*)str, LEN_STR(p1), digest);
+	SHA512((unsigned char*)GET_STR(p1), LEN_STR(p1), digest);
 	char tmpbuf[512];
 	char *dst = tmpbuf;
 	*dst = '\0';
@@ -9073,7 +9069,7 @@ static int do_b64encode_2(query *q)
 	GET_NEXT_ARG(p2,variable);
 	const char *str = GET_STR(p1);
 	size_t len = LEN_STR(p1);
-	char *dstbuf = malloc((len*3)+1);
+	char *dstbuf = malloc((len*3)+1);	// BASE64 can increase length x3
 	ensure(dstbuf);
 	b64_encode(str, len, &dstbuf, 0, 0);
 	cell tmp;
@@ -9159,7 +9155,7 @@ static pl_status do_urlencode_2(query *q)
 	GET_NEXT_ARG(p2,variable);
 	const char *str = GET_STR(p1);
 	size_t len = LEN_STR(p1);
-	char *dstbuf = malloc((len*3)+1);
+	char *dstbuf = malloc((len*3)+1);	// URL's can increase length x3
 	may_ptr_error(dstbuf);
 	url_encode(str, len, dstbuf);
 	cell tmp;
@@ -9219,9 +9215,8 @@ static USE_RESULT pl_status fn_atom_lower_2(query *q)
 	char *tmps = malloc((len*MAX_BYTES_PER_CODEPOINT)+1);
 	may_ptr_error(tmps);
 	char *dst = tmps;
-	size_t n = len;
 
-	while (n--) {
+	while (len--) {
 		int ch = get_char_utf8(&src);
 		ch = towlower(ch);
 		dst += put_char_bare_utf8(dst, ch);
@@ -9245,9 +9240,8 @@ static USE_RESULT pl_status fn_atom_upper_2(query *q)
 	char *tmps = malloc((len*MAX_BYTES_PER_CODEPOINT)+1);
 	may_ptr_error(tmps);
 	char *dst = tmps;
-	size_t n = len;
 
-	while (n--) {
+	while (len--) {
 		int ch = get_char_utf8(&src);
 		ch = towupper(ch);
 		dst += put_char_bare_utf8(dst, ch);
@@ -9272,9 +9266,8 @@ static USE_RESULT pl_status fn_string_lower_2(query *q)
 	char *tmps = malloc((len*MAX_BYTES_PER_CODEPOINT)+1);
 	may_ptr_error(tmps);
 	char *dst = tmps;
-	size_t n = len;
 
-	while (n--) {
+	while (len--) {
 		int ch = get_char_utf8(&src);
 		ch = towlower(ch);
 		dst += put_char_bare_utf8(dst, ch);
@@ -9298,9 +9291,8 @@ static USE_RESULT pl_status fn_string_upper_2(query *q)
 	char *tmps = malloc((len*MAX_BYTES_PER_CODEPOINT)+1);
 	may_ptr_error(tmps);
 	char *dst = tmps;
-	size_t n = len;
 
-	while (n--) {
+	while (len--) {
 		int ch = get_char_utf8(&src);
 		ch = towupper(ch);
 		dst += put_char_bare_utf8(dst, ch);
@@ -9503,10 +9495,9 @@ static USE_RESULT pl_status fn_rename_file_2(query *q)
 		if (!len)
 			return throw_error(q, p1, "type_error", "atom");
 
-		src1 = chars_list_to_string(q, p1, p1_ctx, len);
-		filename1 = src1;
+		filename1 = src1 = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename1 = GET_STR(p1);
+		filename1 = src1 = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	if (is_iso_list(p2)) {
 		size_t len = scan_is_chars_list(q, p2, p2_ctx, true);
@@ -9978,8 +9969,9 @@ static USE_RESULT pl_status fn_hex_chars_2(query *q)
 		return pl_success;
 	}
 
-	const char *src = GET_STR(p1);
+	char *src = slicedup(GET_STR(p1), LEN_STR(p1));
 	int_t p1_val = strtoull(src, NULL, 16);
+	free(src);
 
 	if (is_variable(p2)) {
 		cell tmp;
@@ -10009,8 +10001,9 @@ static USE_RESULT pl_status fn_octal_chars_2(query *q)
 		return pl_success;
 	}
 
-	const char *src = GET_STR(p1);
+	char *src = slicedup(GET_STR(p1), LEN_STR(p1));
 	int_t p1_val = strtoull(src, NULL, 8);
+	free(src);
 
 	if (is_variable(p2)) {
 		cell tmp;
@@ -10111,29 +10104,29 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 		char tmpbuf1[256], tmpbuf2[256];
 
 		if (is_atom(p1)) {
-			len1 = LEN_STR(p1);
 			src1 = GET_STR(p1);
+			len1 = LEN_STR(p1);
 		} else if (is_bigint(p1)) {
 			return pl_failure;
 		} else if (is_integer(p1)) {
+			src1 = tmpbuf1;
 			len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), get_integer(p1), 10);
-			src1 = tmpbuf1;
 		} else {
-			len1 = snprintf(tmpbuf1, sizeof(tmpbuf1), "%.17g", get_real(p1));
 			src1 = tmpbuf1;
+			len1 = snprintf(tmpbuf1, sizeof(tmpbuf1), "%.17g", get_real(p1));
 		}
 
 		if (is_atom(p2)) {
-			len2 = LEN_STR(p2);
 			src2 = GET_STR(p2);
+			len2 = LEN_STR(p2);
 		} else if (is_bigint(p1)) {
 			return pl_failure;
 		} else if (is_integer(p2)) {
+			src2 = tmpbuf2;
 			len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), get_integer(p2), 10);
-			src2 = tmpbuf2;
 		} else {
-			len2 = snprintf(tmpbuf2, sizeof(tmpbuf1), "%.17g", get_real(p2));
 			src2 = tmpbuf2;
+			len2 = snprintf(tmpbuf2, sizeof(tmpbuf1), "%.17g", get_real(p2));
 		}
 
 		STRING_allocn(pr, len1+len2);
@@ -10246,11 +10239,11 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,atom_or_var);
-	const char *f = GET_STR(p1);
+	const char *src = GET_STR(p1);
 	cell tmp;
 	bool found = false;
 
-	if (get_builtin(q->st.m->pl, f, p1->arity, &found), found) {
+	if (get_builtin(q->st.m->pl, src, p1->arity, &found), found) {
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "built_in"));
 
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
