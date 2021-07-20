@@ -315,8 +315,8 @@ struct cell_ {
 		};
 
 		struct {
-			cell *attrs;				// used with TAG_EMPTY
-			idx_t attrs_ctx;			// if 'attrs' is set
+			cell *attrs;				// used with TAG_EMPTY in slot
+			idx_t attrs_ctx;			// to set attributes on a var
 		};
 	};
 };
