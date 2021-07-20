@@ -542,7 +542,7 @@ del_attr(Var, Module) :-
 
 :- use_module(library(dict)).
 
-put_atts(Var, []) :- !.
+put_atts(_, []) :- !.
 put_atts(Var, [H|T]) :- !,
 	put_atts(Var, H),
 	put_atts(Var, T).
