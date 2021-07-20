@@ -30,6 +30,9 @@ extern unsigned char library_dif_pl[];
 extern unsigned int library_dif_pl_len;
 extern unsigned char library_ugraphs_pl[];
 extern unsigned int library_ugraphs_pl_len;
+extern unsigned char library_pairs_pl[];
+extern unsigned int library_pairs_pl_len;
+
 //extern unsigned char library_clpb_pl[];
 //extern unsigned int library_clpb_pl_len;
 //extern unsigned char library_clpz_pl[];
@@ -51,7 +54,10 @@ library g_libs[] = {
 	 {"freeze", library_freeze_pl, &library_freeze_pl_len},
 	 {"dif", library_dif_pl, &library_dif_pl_len},
 	 {"ugraphs", library_ugraphs_pl, &library_ugraphs_pl_len},
+	 {"pairs", library_pairs_pl, &library_pairs_pl_len},
+
 	 //{"clpb", library_clpb_pl, &library_clpb_pl_len},
 	 //{"clpz", library_clpz_pl, &library_clpz_pl_len},
+
 	 {0}
 };

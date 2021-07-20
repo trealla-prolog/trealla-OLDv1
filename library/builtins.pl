@@ -376,6 +376,8 @@ load_files(Files) :- load_files(Files,[]).
 consult(Files) :- load_files(Files,[]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SWI compatible
+%
 % Global variables. using the namespace 'user' to make sure they
 % are truly global and not just in the current module. This a quick
 % hack using assert/retract...
@@ -406,6 +408,8 @@ nb_current(K, V) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SWI compatible
+%
 % Global variables. using the namespace 'user' to make sure they
 % are truly global and not just in the current module. This a quick
 % hack using assert/retract...
@@ -446,7 +450,7 @@ b_delete(K) :-
 b_delete(_).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Compatibility with Scryer? SICStus? Needed for CLPB.
+% SICStus compatible
 
 bb_b_put(K, _) :-
 	must_be(K, atom, _, _),
@@ -516,7 +520,7 @@ current_op(A, B, C) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% SWI compatible (emulate SICStus)
+% SWI compatible
 
 put_attr(Var, Module, Value) :-
 	var(Var),
