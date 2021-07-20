@@ -667,13 +667,15 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 	}
 
 	const char *src = GET_STR(p1);
+	size_t len = LEN_STR(p1);
 	bool first = true;
 
-	while (*src) {
-		size_t len = len_char_utf8(src);
+	while (len) {
+		size_t n = len_char_utf8(src);
 		cell tmp2;
-		make_smalln(&tmp2, src, len);
-		src += len;
+		make_smalln(&tmp2, src, n);
+		src += n;
+		len -= n;
 
 		if (first) {
 			first = false;
@@ -8587,17 +8589,19 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 static pl_status do_consult(query *q, cell *p1, idx_t p1_ctx)
 {
 	if (is_atom(p1)) {
-		const char *src = GET_STR(p1);
+		char *src = slicedup(GET_STR(p1), LEN_STR(p1));
 		deconsult(q->st.m->pl, src);
 
 		char *filename = relative_to(q->st.m->filename, src);
 
 		if (!load_file(q->st.m, filename)) {
 			free(filename);
+			free(src);
 			return throw_error(q, p1, "existence_error", "filespec");
 		}
 
 		free(filename);
+		free(src);
 		return pl_success;
 	}
 
