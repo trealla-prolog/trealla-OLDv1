@@ -312,8 +312,6 @@ Non-standard predicates
 	get_time/1              # get_time(-variable) elapsed wall time in secs as float
 	cpu_time/1              # cpu_time(-variable) elapsed CPU time in secs as float
 
-	set_random/1            # set_random(+option) use 'seed(random)' or 'seed(Seed)'
-	maybe/[0-2]             # probabilistic fail
 	srandom/1               # set_seed(+integer) set random number seed
 	set_seed/1              # set_seed(+integer) set random number seed
 	get_seed/1              # get_seed(-integer) get random number seed
