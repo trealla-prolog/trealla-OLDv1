@@ -516,29 +516,73 @@ current_op(A, B, C) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% SICStus compatible
-% Note: Trealla doesn't support goal_expansion (yet) so fake it
-% based on calling M:put_atts(V, AccessSpec) and active Module
+% SWI compatible (emulate SICStus)
 
-put_atts(Var, Value) :-
+put_attr(Var, Module, Value) :-
 	var(Var),
-	module(Module),
 	Attr =.. [Module,Value],
-	'$write_attribute'(Var, +Attr).
+	put_atts(Var, +Attr).
 
-get_atts(Var, Value) :-
+get_attr(Var, Module, Value) :-
 	var(Var),
-	module(Module),
-	(var(Value) ->
-		( '$read_attribute'(Var, List),
-			findall(F, (Template =.. [Module,F], member(Template, List)), Value)
-		)
-	;
-		( Attr =.. [Module,Value],
-		'$read_attribute'(Var, +Attr)
-		)
-	),
-	true.
+	Attr =.. [Module,Value],
+	get_atts(Var, +Attr).
+
+del_attr(Var, Module) :-
+	var(Var),
+	Attr =.. [Module,_],
+	put_atts(Var, -Attr).
+
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SICStus compatible
+
+:- use_module(library(dict)).
+
+put_atts(Var, -Attr) :- !,
+	'$read_attributes'(Var, D),
+	Attr =.. [Module,Value],
+	functor(Value, Functor, Arity),
+	dict:del(D, Module-(Functor/Arity), D2),
+	'$write_attributes'(Var, D2).
+
+put_atts(Var, +Attr) :- !,
+	'$read_attributes'(Var, D),
+	Attr =.. [Module,Value],
+	functor(Value, Functor, Arity),
+	dict:set(D, Module-(Functor/Arity), Attr, D2),
+	'$write_attributes'(Var, D2).
+
+put_atts(Var, Attr) :- !,
+	'$read_attributes'(Var, D),
+	Attr =.. [Module,Value],
+	functor(Value, Functor, Arity),
+	dict:set(D, Module-(Functor/Arity), Attr, D2),
+	'$write_attributes'(Var, D2).
+
+get_atts(Var, L) :- var(L), !,
+	'$read_attributes'(Var, D),
+	dict:match(D, _, L).
+
+get_atts(Var, -Attr) :- !,
+	'$read_attributes'(Var, D),
+	Attr =.. [Module,Value],
+	catch(functor(Value, Functor, Arity), _, true),
+	\+ dict:get(D, Module-(Functor/Arity), _).
+
+get_atts(Var, +Attr) :- !,
+	'$read_attributes'(Var, D),
+	Attr =.. [Module,Value],
+	catch(functor(Value, Functor, Arity), _, true),
+	dict:get(D, Module-(Functor/Arity), Attr).
+
+get_atts(Var, Attr) :- !,
+	'$read_attributes'(Var, D),
+	Attr =.. [Module,Value],
+	catch(functor(Value, Functor, Arity), _, true),
+	dict:get(D, Module-(Functor/Arity), Attr).
 
 del_atts(Var) :-
 	var(Var),
@@ -549,78 +593,6 @@ del_atts(Var) :-
 attvar(Var) :-
 	'$read_attributes'(Var, D),
 	D \= [].
-
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% SWI compatible
-
-put_attr(Var, Module, Value) :-
-	var(Var),
-	Attr =.. [Module,Value],
-	'$write_attribute'(Var, +Attr).
-
-get_attr(Var, Module, Value) :-
-	var(Var),
-	Attr =.. [Module,Value],
-	'$read_attribute'(Var, +Attr).
-
-del_attr(Var, Module) :-
-	var(Var),
-	Attr =.. [Module,_],
-	'$write_attribute'(Var, -Attr).
-
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% For internal use only...
-
-:- use_module(library(dict)).
-
-'$write_attribute'(Var, -Attr) :- !,
-	'$read_attributes'(Var, D),
-	Attr =.. [Module,Value],
-	functor(Value, Functor, Arity),
-	dict:del(D, Module-(Functor/Arity), D2),
-	'$write_attributes'(Var, D2).
-
-'$write_attribute'(Var, +Attr) :- !,
-	'$read_attributes'(Var, D),
-	Attr =.. [Module,Value],
-	functor(Value, Functor, Arity),
-	dict:set(D, Module-(Functor/Arity), Attr, D2),
-	'$write_attributes'(Var, D2).
-
-'$write_attribute'(Var, Attr) :- !,
-	'$read_attributes'(Var, D),
-	Attr =.. [Module,Value],
-	functor(Value, Functor, Arity),
-	dict:set(D, Module-(Functor/Arity), Attr, D2),
-	'$write_attributes'(Var, D2).
-
-'$read_attribute'(Var, L) :- var(L), !,
-	'$read_attributes'(Var, D),
-	dict:match(D, _, L).
-
-'$read_attribute'(Var, +(Attr)) :- !,
-	'$read_attributes'(Var, D),
-	Attr =.. [Module,Value],
-	catch(functor(Value, Functor, Arity), _, true),
-	dict:get(D, Module-(Functor/Arity), Attr).
-
-'$read_attribute'(Var, -Attr) :- !,
-	'$read_attributes'(Var, D),
-	Attr =.. [Module,Value],
-	catch(functor(Value, Functor, Arity), _, true),
-	\+ dict:get(D, Module-(Functor/Arity), _).
-
-'$read_attribute'(Var, Attr) :- !,
-	'$read_attributes'(Var, D),
-	Attr =.. [Module,Value],
-	catch(functor(Value, Functor, Arity), _, true),
-	dict:get(D, Module-(Functor/Arity), Attr).
 
 attributed(Var) :-
 	'$read_attributes'(Var, D),
