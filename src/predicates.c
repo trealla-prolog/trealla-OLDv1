@@ -4342,6 +4342,8 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		tmp->arity = arity;
 		bool found = false;
 
+		assert(strlen(GET_STR(tmp)) == LEN_STR(tmp));
+
 		if (is_callable(tmp)) {
 			if ((tmp->fn = get_builtin(q->st.m->pl, GET_STR(tmp), tmp->arity, &found)), found)
 				tmp->flags |= FLAG_BUILTIN;
@@ -4564,6 +4566,8 @@ static pl_status do_retractall(query *q, cell *p1, idx_t p1_ctx)
 	if (!h) {
 		bool found = false;
 
+		assert(strlen(GET_STR(head)) == LEN_STR(head));
+
 		if (get_builtin(q->st.m->pl, GET_STR(head), head->arity, &found), found)
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 
@@ -4647,6 +4651,8 @@ static USE_RESULT pl_status fn_iso_abolish_1(query *q)
 
 	bool found = false;
 
+	assert(strlen(GET_STR(p1_name)) == LEN_STR(p1_name));
+
 	if (get_builtin(q->st.m->pl, GET_STR(p1_name), get_integer(p1_arity), &found), found)
 		return throw_error(q, p1, "permission_error", "modify,static_procedure");
 
@@ -4729,6 +4735,8 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 
 	bool found = false;
 
+	assert(strlen(GET_STR(head)) == LEN_STR(head));
+
 	if (get_builtin(q->st.m->pl, GET_STR(head), head->arity, &found), found) {
 		if (!GET_OP(head))
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
@@ -4795,6 +4803,8 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 		return throw_error(q, head, "type_error", "callable");
 
 	bool found = false;
+
+	assert(strlen(GET_STR(head)) == LEN_STR(head));
 
 	if (get_builtin(q->st.m->pl, GET_STR(head), head->arity, &found), found) {
 		if (!GET_OP(head))
@@ -4909,6 +4919,8 @@ static USE_RESULT pl_status fn_iso_call_n(query *q)
 	}
 
 	bool found = false;
+
+	assert(strlen(GET_STR(tmp2)) == LEN_STR(tmp2));
 
 	if ((tmp2->fn = get_builtin(q->st.m->pl, GET_STR(tmp2), arity, &found)), found) {
 		tmp2->flags |= FLAG_BUILTIN;
@@ -5474,6 +5486,8 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 	if (!is_integer(pa))
 		return throw_error(q, p1, "type_error", "integer");
 
+	assert(strlen(GET_STR(pf)) == LEN_STR(pf));
+
 	const char *functor = GET_STR(pf);
 	unsigned arity = get_integer(pa) + add_two;
 
@@ -5500,6 +5514,7 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 		return pl_success;
 
 	bool found = false;
+
 
 	if (get_builtin(q->st.m->pl, functor, arity, &found), found)
 		return pl_success;
@@ -6263,6 +6278,8 @@ static pl_status do_op(query *q, cell *p3)
 	if (!slicecmp2(GET_STR(p3), LEN_STR(p3), ","))
 		return throw_error(q, p3, "permission_error", "modify,operator");
 
+	assert(strlen(GET_STR(p3)) == LEN_STR(p3));
+
 	unsigned tmp_optype = 0;
 	get_op(q->st.m, GET_STR(p3), &tmp_optype, false);
 
@@ -6422,6 +6439,8 @@ static pl_status do_asserta_2(query *q)
 
 	bool found = false;
 
+	assert(strlen(GET_STR(head)) == LEN_STR(head));
+
 	if (get_builtin(q->st.m->pl, GET_STR(head), head->arity, &found), found) {
 		if (!GET_OP(head))
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
@@ -6519,6 +6538,8 @@ static pl_status do_assertz_2(query *q)
 		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
 
 	bool found = false;
+
+	assert(strlen(GET_STR(head)) == LEN_STR(head));
 
 	if (get_builtin(q->st.m->pl, GET_STR(head), head->arity, &found), found) {
 		if (!GET_OP(head))
@@ -8319,6 +8340,8 @@ static USE_RESULT pl_status fn_task_n(query *q)
 	tmp2->nbr_cells = tmp_heap_used(q);
 	tmp2->arity = arity;
 	bool found = false;
+
+	assert(strlen(GET_STR(tmp2)) == LEN_STR(tmp2));
 
 	if ((tmp2->fn = get_builtin(q->st.m->pl, GET_STR(tmp2), arity, &found)), found)
 		tmp2->flags |= FLAG_BUILTIN;
@@ -10244,6 +10267,8 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 	const char *src = GET_STR(p1);
 	cell tmp;
 	bool found = false;
+
+	assert(strlen(GET_STR(p1)) == LEN_STR(p1));
 
 	if (get_builtin(q->st.m->pl, src, p1->arity, &found), found) {
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "built_in"));
