@@ -1,0 +1,49 @@
+{
+  "uid" : "8f1a979f3f682723",
+  "name" : "sics_unicode_sub_atom_5_34",
+  "historyId" : "unicode/builtins/tests.lgt::tests:tests#sics_unicode_sub_atom_5_34",
+  "time" : {
+    "start" : 1626788639000,
+    "stop" : 1626788639006,
+    "duration" : 6
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "unicode/builtins/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "8f1a979f3f682723.json",
+  "parameterValues" : [ ]
+}
