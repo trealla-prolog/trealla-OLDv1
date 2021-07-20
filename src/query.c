@@ -758,8 +758,8 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 	const frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
 	e->ctx = v_ctx;
-	cell *attrs;
-	idx_t attrs_ctx;
+	cell *attrs = NULL;
+	idx_t attrs_ctx = 0;
 
 	if (is_empty(&e->c)) {
 		attrs = e->c.attrs;

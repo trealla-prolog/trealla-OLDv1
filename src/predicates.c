@@ -2006,7 +2006,7 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 	const char *filename;
 
 	if (is_atom(p1))
-		filename = GET_STR(p1);
+		filename = src = slicedup(GET_STR(p1), LEN_STR(p1));
 	else
 		return throw_error(q, p1, "domain_error", "source_sink");
 
@@ -2126,7 +2126,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 		stream *oldstr = &g_streams[oldn];
 		filename = oldstr->filename;
 	} else if (is_atom(p1))
-		filename = GET_STR(p1);
+		filename = src = slicedup(GET_STR(p1), LEN_STR(p1));
 	else
 		return throw_error(q, p1, "domain_error", "source_sink");
 
@@ -7110,7 +7110,7 @@ static USE_RESULT pl_status fn_savefile_2(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = GET_STR(p1);
+		filename = src = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	FILE *fp = fopen(filename, "wb");
 	may_ptr_error(fp);
@@ -7136,7 +7136,7 @@ static USE_RESULT pl_status fn_loadfile_2(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = GET_STR(p1);
+		filename = src = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	FILE *fp = fopen(filename, "rb");
 	free(src);
@@ -7196,7 +7196,7 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 		may_ptr_error(src);
 		filename = src;
 	} else
-		filename = GET_STR(p1);
+		filename = src = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	FILE *fp = fopen(filename, "r");
 	free(src);
@@ -8487,7 +8487,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = GET_STR(p1);
+		filename = src = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	LIST_HANDLER(p_opts);
 
@@ -9325,7 +9325,7 @@ static USE_RESULT pl_status fn_access_file_2(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = GET_STR(p1);
+		filename = src = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	const char *mode = GET_STR(p2);
 	int amode = R_OK;
@@ -9359,7 +9359,9 @@ static USE_RESULT pl_status fn_access_file_2(query *q)
 		return pl_success;
 	}
 
-	return !access(filename, amode);
+	int ok = !access(filename, amode);
+	free(src);
+	return ok;
 }
 
 static USE_RESULT pl_status fn_exists_file_1(query *q)
@@ -9377,7 +9379,7 @@ static USE_RESULT pl_status fn_exists_file_1(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = GET_STR(p1);
+		filename = src = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	struct stat st = {0};
 
@@ -9410,7 +9412,7 @@ static USE_RESULT pl_status fn_directory_files_2(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = GET_STR(p1);
+		filename = src = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	struct stat st = {0};
 
@@ -9467,7 +9469,7 @@ static USE_RESULT pl_status fn_delete_file_1(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = GET_STR(p1);
+		filename = src = slicedup(GET_STR(p1), LEN_STR(p1));
 
 	struct stat st = {0};
 
