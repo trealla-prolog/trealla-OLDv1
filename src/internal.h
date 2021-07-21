@@ -343,7 +343,7 @@ struct clause_ {
 	predicate *owner;
 	clause *prev, *next, *dirty;
 	uuid u;
-	rule t;
+	rule r;
 };
 
 struct predicate_ {
@@ -532,7 +532,7 @@ struct parser_ {
 
 	FILE *fp;
 	module *m;
-	rule *t;
+	rule *r;
 	char *token, *save_line, *srcptr;
 	cell v;
 	size_t token_size, n_line, toklen;

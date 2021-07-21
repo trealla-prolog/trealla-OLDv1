@@ -215,7 +215,7 @@ clause *find_in_db(module *m, uuid *ref)
 {
 	for (predicate *h = m->head; h; h = h->next) {
 		for (clause *cl = h->head ; cl; cl = cl->next) {
-			if (cl->t.ugen_erased)
+			if (cl->r.ugen_erased)
 				continue;
 
 			if (!memcmp(&cl->u, ref, sizeof(uuid)))
@@ -245,7 +245,7 @@ clause *erase_from_db(module *m, uuid *ref)
 {
 	clause *cl = find_in_db(m, ref);
 	if (!cl) return 0;
-	cl->t.ugen_erased = ++m->pl->ugen;
+	cl->r.ugen_erased = ++m->pl->ugen;
 	return cl;
 }
 
@@ -636,13 +636,13 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 		return NULL;
 	}
 
-	copy_cells(cl->t.cells, p1, p1->nbr_cells);
-	cl->t.cells[p1->nbr_cells] = (cell){0};
-	cl->t.cells[p1->nbr_cells].tag = TAG_END;
-	cl->t.nbr_vars = nbr_vars;
-	cl->t.nbr_cells = p1->nbr_cells;
-	cl->t.cidx = p1->nbr_cells+1;
-	cl->t.ugen_created = ++m->pl->ugen;
+	copy_cells(cl->r.cells, p1, p1->nbr_cells);
+	cl->r.cells[p1->nbr_cells] = (cell){0};
+	cl->r.cells[p1->nbr_cells].tag = TAG_END;
+	cl->r.nbr_vars = nbr_vars;
+	cl->r.nbr_cells = p1->nbr_cells;
+	cl->r.cidx = p1->nbr_cells+1;
+	cl->r.ugen_created = ++m->pl->ugen;
 	cl->owner = h;
 	return cl;
 }
@@ -653,19 +653,19 @@ static void reindex_predicate(module *m, predicate *h)
 	ensure(h->index);
 
 	for (clause *cl = h->head; cl; cl = cl->next) {
-		cell *c = get_head(cl->t.cells);
+		cell *c = get_head(cl->r.cells);
 
-		if (!cl->t.ugen_erased)
+		if (!cl->r.ugen_erased)
 			m_app(h->index, c, cl);
 	}
 }
 
 static void assert_commit(module *m, clause *cl, predicate *h, bool append)
 {
-	cell *c = get_head(cl->t.cells);
+	cell *c = get_head(cl->r.cells);
 
 	if (h->is_persist)
-		cl->t.persist = true;
+		cl->r.persist = true;
 
 	if (h->key.arity) {
 		cell *p1 = c + 1;
@@ -734,7 +734,7 @@ clause *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 
 bool retract_from_db(module *m, clause *cl)
 {
-	if (cl->t.ugen_erased)
+	if (cl->r.ugen_erased)
 		return false;
 
 	predicate *h = cl->owner;
@@ -746,7 +746,7 @@ bool retract_from_db(module *m, clause *cl)
 		h->head = h->tail = NULL;
 	}
 
-	cl->t.ugen_erased = ++m->pl->ugen;
+	cl->r.ugen_erased = ++m->pl->ugen;
 	return true;
 }
 
@@ -779,7 +779,7 @@ module *load_text(module *m, const char *src, const char *filename)
 	p->srcptr = (char*)src;
 	tokenize(p, false, false);
 
-	if (!p->error && !p->already_loaded && !p->end_of_term && p->t->cidx) {
+	if (!p->error && !p->already_loaded && !p->end_of_term && p->r->cidx) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, incomplete statement\n");
 
@@ -836,7 +836,7 @@ bool load_fp(module *m, FILE *fp, const char *filename)
 	}
 	 while (ok && !p->already_loaded);
 
-	if (!p->error && !p->already_loaded && !p->end_of_term && p->t->cidx) {
+	if (!p->error && !p->already_loaded && !p->end_of_term && p->r->cidx) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, incomplete statement\n");
 
@@ -945,13 +945,13 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 			continue;
 
 		for (clause *cl = h->head; cl; cl = cl->next) {
-			if (cl->t.ugen_erased)
+			if (cl->r.ugen_erased)
 				continue;
 
 			if (canonical)
-				print_canonical(&q, fp, cl->t.cells, ctx, 0);
+				print_canonical(&q, fp, cl->r.cells, ctx, 0);
 			else
-				print_canonical(&q, fp, cl->t.cells, ctx, 0);
+				print_canonical(&q, fp, cl->r.cells, ctx, 0);
 
 			fprintf(fp, "\n");
 		}
@@ -1026,7 +1026,7 @@ void destroy_module(module *m)
 
 		for (clause *cl = h->head; cl;) {
 			clause *save = cl->next;
-			clear_rule(&cl->t);
+			clear_rule(&cl->r);
 			free(cl);
 			cl = save;
 		}

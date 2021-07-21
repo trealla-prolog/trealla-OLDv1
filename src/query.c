@@ -193,7 +193,7 @@ static void purge_dirty_list(query *q)
 		if (cl->owner->tail == cl)
 			cl->owner->tail = cl->prev;
 
-		clear_rule(&cl->t);
+		clear_rule(&cl->r);
 		free(cl);
 		cnt++;
 	}
@@ -472,9 +472,9 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	q->tot_tcos++;
 }
 
-static bool check_slots(const query *q, frame *g, rule *t)
+static bool check_slots(const query *q, frame *g, rule *r)
 {
-	if (g->nbr_vars != t->nbr_vars)
+	if (g->nbr_vars != r->nbr_vars)
 		return false;
 
 	for (unsigned i = 0; i < g->nbr_vars; i++) {
@@ -490,27 +490,27 @@ static bool check_slots(const query *q, frame *g, rule *t)
 	return true;
 }
 
-static void commit_me(query *q, rule *t)
+static void commit_me(query *q, rule *r)
 {
 	frame *g = GET_CURR_FRAME();
 	g->m = q->st.m;
 	q->st.m = q->st.curr_clause->owner->m;
 	q->st.iter = NULL;
-	bool last_match = t->first_cut || !is_next_key(q);
+	bool last_match = r->first_cut || !is_next_key(q);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool tco = !q->no_tco && recursive && !any_choices(q, g, true);
-	bool slots_ok = check_slots(q, g, t);
+	bool slots_ok = check_slots(q, g, r);
 	choice *ch = GET_CURR_CHOICE();
 
 #if 0
 	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, check_slots=%d\n",
-		tco, q->no_tco, last_match, recursive, any_choices(q, g, true), check_slots(q, g, t));
+		tco, q->no_tco, last_match, recursive, any_choices(q, g, true), check_slots(q, g, r));
 #endif
 
 	if (tco && slots_ok && q->st.m->pl->opt)
-		reuse_frame(q, t->nbr_vars);
+		reuse_frame(q, r->nbr_vars);
 	else
-		g = make_frame(q, t->nbr_vars);
+		g = make_frame(q, r->nbr_vars);
 
 	if (last_match) {
 		m_done(ch->st.iter);
@@ -521,11 +521,11 @@ static void commit_me(query *q, rule *t)
 		ch->cgen = g->cgen;
 	}
 
-	q->st.curr_cell = get_body(t->cells);
+	q->st.curr_cell = get_body(r->cells);
 	//memset(q->nv_mask, 0, MAX_ARITY);
 }
 
-void stash_me(query *q, rule *t, bool last_match)
+void stash_me(query *q, rule *r, bool last_match)
 {
 	idx_t cgen = q->st.cgen;
 
@@ -538,7 +538,7 @@ void stash_me(query *q, rule *t, bool last_match)
 		ch->cgen = cgen;
 	}
 
-	unsigned nbr_vars = t->nbr_vars;
+	unsigned nbr_vars = r->nbr_vars;
 	idx_t new_frame = q->st.fp++;
 	frame *g = GET_FRAME(new_frame);
 	g->prev_frame = q->st.curr_frame;
@@ -692,11 +692,11 @@ static bool resume_frame(query *q)
 	frame *g = GET_CURR_FRAME();
 
 #if 0
-	rule *t = &q->st.curr_clause->t;
+	rule *r = &q->st.curr_clause->r;
 
 	if ((q->st.curr_frame == (q->st.fp-1))
-		&& q->st.m->pl->opt && t->tail_rec
-		&& !any_choices(q, g, false) && check_slots(q, g, t))
+		&& q->st.m->pl->opt && r->tail_rec
+		&& !any_choices(q, g, false) && check_slots(q, g, r))
 		q->st.fp--;
 #endif
 
@@ -981,10 +981,10 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 
 static bool check_update_view(const frame *g, const clause *c)
 {
-	if (c->t.ugen_created > g->ugen)
+	if (c->r.ugen_created > g->ugen)
 		return false;
 
-	if (c->t.ugen_erased && (c->t.ugen_erased <= g->ugen))
+	if (c->r.ugen_erased && (c->r.ugen_erased <= g->ugen))
 		return false;
 
 	return true;
@@ -1043,8 +1043,8 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 		if (!check_update_view(g, q->st.curr_clause2))
 			continue;
 
-		rule *t = &q->st.curr_clause2->t;
-		cell *c = t->cells;
+		rule *r = &q->st.curr_clause2->r;
+		cell *c = r->cells;
 		bool needs_true = false;
 		p1 = orig_p1;
 		cell *c_body = get_logical_body(c);
@@ -1055,7 +1055,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 			needs_true = true;
 		}
 
-		try_me(q, t->nbr_vars);
+		try_me(q, r->nbr_vars);
 		q->tot_matches++;
 
 		if (unify_structure(q, p1, p1_ctx, c, q->st.fp, 0)) {
@@ -1141,16 +1141,16 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 		if (!check_update_view(g, q->st.curr_clause2))
 			continue;
 
-		rule *t = &q->st.curr_clause2->t;
-		cell *head = get_head(t->cells);
-		cell *body = get_logical_body(t->cells);
+		rule *r = &q->st.curr_clause2->r;
+		cell *head = get_head(r->cells);
+		cell *body = get_logical_body(r->cells);
 
 		// Retract(HEAD) should ignore rules (and directives)
 
 		if ((is_retract == DO_RETRACT) && body)
 			continue;
 
-		try_me(q, t->nbr_vars);
+		try_me(q, r->nbr_vars);
 		q->tot_matches++;
 
 		if (unify_structure(q, p1, p1_ctx, head, q->st.fp, 0))
@@ -1249,9 +1249,9 @@ static USE_RESULT pl_status match_head(query *q)
 		if (!check_update_view(g, q->st.curr_clause))
 			continue;
 
-		rule *t = &q->st.curr_clause->t;
-		cell *head = get_head(t->cells);
-		try_me(q, t->nbr_vars);
+		rule *r = &q->st.curr_clause->r;
+		cell *head = get_head(r->cells);
+		try_me(q, r->nbr_vars);
 		q->tot_matches++;
 		q->no_tco = false;
 
@@ -1259,7 +1259,7 @@ static USE_RESULT pl_status match_head(query *q)
 			if (q->error)
 				return pl_error;
 
-			commit_me(q, t);
+			commit_me(q, r);
 			return pl_success;
 		}
 
@@ -1375,12 +1375,12 @@ static int check_interrupt(query *q)
 	g_tpl_interrupt = 0;
 
 	for (;;) {
-		printf("\nAction (a)bort, (f)ail, (c)ontinue, (t)race, c(r)eep, (e)xit: ");
+		printf("\nAction (a)bort, (f)ail, (c)ontinue, (r)race, c(r)eep, (e)xit: ");
 		fflush(stdout);
 		int ch = history_getch();
 		printf("%c\n", ch);
 
-		if (ch == 't') {
+		if (ch == 'r') {
 			q->trace = !q->trace;
 			return 0;
 		}
@@ -1608,19 +1608,19 @@ uint64_t get_time_in_usec(void)
 	return (uint64_t)(now.tv_sec * 1000 * 1000) + (now.tv_nsec / 1000);
 }
 
-pl_status execute(query *q, rule *t)
+pl_status execute(query *q, rule *r)
 {
 	q->st.m->pl->did_dump_vars = false;
-	q->st.curr_cell = t->cells;
-	q->st.sp = t->nbr_vars;
+	q->st.curr_cell = r->cells;
+	q->st.sp = r->nbr_vars;
 	q->st.curr_frame = 0;
 	q->st.fp = 1;
 	q->abort = false;
 	q->cycle_error = false;
 
 	frame *g = q->frames + q->st.curr_frame;
-	g->nbr_vars = t->nbr_vars;
-	g->nbr_slots = t->nbr_vars;
+	g->nbr_vars = r->nbr_vars;
+	g->nbr_slots = r->nbr_vars;
 	g->ugen = ++q->st.m->pl->ugen;
 	pl_status ret = start(q);
 	m_done(q->st.iter);

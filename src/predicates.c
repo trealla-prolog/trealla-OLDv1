@@ -1617,13 +1617,13 @@ static void db_log(query *q, clause *cl, enum log_type l)
 
 	switch(l) {
 	case LOG_ASSERTA:
-		dst = print_term_to_strbuf(q, cl->t.cells, q->st.curr_frame, 1);
+		dst = print_term_to_strbuf(q, cl->r.cells, q->st.curr_frame, 1);
 		uuid_to_buf(&cl->u, tmpbuf, sizeof(tmpbuf));
 		fprintf(q->st.m->fp, "'$a_'(%s,'%s').\n", dst, tmpbuf);
 		free(dst);
 		break;
 	case LOG_ASSERTZ:
-		dst = print_term_to_strbuf(q, cl->t.cells, q->st.curr_frame, 1);
+		dst = print_term_to_strbuf(q, cl->r.cells, q->st.curr_frame, 1);
 		uuid_to_buf(&cl->u, tmpbuf, sizeof(tmpbuf));
 		fprintf(q->st.m->fp, "'$z_'(%s,'%s').\n", dst, tmpbuf);
 		free(dst);
@@ -1659,10 +1659,10 @@ static pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, enum clause_type i
 
 	clause *cl = q->st.curr_clause2;
 	bool last_match = !q->st.curr_clause2->next && (is_retract == DO_RETRACT);
-	stash_me(q, &cl->t, last_match);
+	stash_me(q, &cl->r, last_match);
 	add_to_dirty_list(q, cl);
 
-	if (!q->st.m->loading && cl->t.persist)
+	if (!q->st.m->loading && cl->r.persist)
 		db_log(q, cl, LOG_ERASE);
 
 	return pl_success;
@@ -1984,13 +1984,13 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 		return pl_failure;
 	}
 
-	rule *t = &q->st.curr_clause2->t;
+	rule *r = &q->st.curr_clause2->r;
 	GET_FIRST_ARG(pstrx,any);
 
 	if (is_integer(pstrx))
 		pstrx->flags |= FLAG_STREAM | FLAG_HEX;
 
-	stash_me(q, t, false);
+	stash_me(q, r, false);
 	return pl_success;
 }
 
@@ -2687,13 +2687,13 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 		return throw_error(q, &tmp, "syntax_error", "read_term");
 	}
 
-	if (!p->t->cidx) {
+	if (!p->r->cidx) {
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	xref_rule(p, p->t, NULL);
+	xref_rule(p, p->r, NULL);
 
 	if (p->nbr_vars) {
 		if (!create_vars(q, p->nbr_vars))
@@ -2703,7 +2703,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 	q->st.m->pl->tab_idx = 0;
 
 	if (p->nbr_vars)
-		collect_vars(q, p->t->cells, q->st.curr_frame, p->t->cidx-1, 0);
+		collect_vars(q, p->r->cells, q->st.curr_frame, p->r->cidx-1, 0);
 
 	if (vars) {
 		unsigned cnt = q->st.m->pl->tab_idx;
@@ -2863,11 +2863,11 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 		}
 	}
 
-	cell *tmp = alloc_on_heap(q, p->t->cidx-1);
+	cell *tmp = alloc_on_heap(q, p->r->cidx-1);
 	may_ptr_error(tmp);
-	safe_copy_cells(tmp, p->t->cells, p->t->cidx-1);
+	safe_copy_cells(tmp, p->r->cells, p->r->cidx-1);
 	pl_status ok = unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
-	clear_rule(p->t);
+	clear_rule(p->r);
 	return ok;
 }
 
@@ -4525,8 +4525,8 @@ static USE_RESULT pl_status fn_iso_clause_2(query *q)
 	GET_NEXT_ARG(p2,callable_or_var);
 
 	while (match_clause(q, p1, p1_ctx, DO_CLAUSE)) {
-		rule *t = &q->st.curr_clause2->t;
-		cell *body = get_body(t->cells);
+		rule *r = &q->st.curr_clause2->r;
+		cell *body = get_body(r->cells);
 		pl_status ok;
 
 		if (body)
@@ -4539,7 +4539,7 @@ static USE_RESULT pl_status fn_iso_clause_2(query *q)
 
 		if (ok) {
 			bool last_match = !q->st.curr_clause2->next;
-			stash_me(q, t, last_match);
+			stash_me(q, r, last_match);
 			return pl_success;
 		}
 
@@ -4599,7 +4599,7 @@ static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 		return throw_error(q, c_orig, "permission_error", "modify,static_procedure");
 
 	for (clause *cl = h->head; cl; cl = cl->next) {
-		if (!q->st.m->loading && cl->t.persist && !cl->t.ugen_erased)
+		if (!q->st.m->loading && cl->r.persist && !cl->r.ugen_erased)
 			db_log(q, cl, LOG_ERASE);
 
 		add_to_dirty_list(q, cl);
@@ -4680,7 +4680,7 @@ static void do_term_assign_vars(parser *p, idx_t nbr_cells)
 	uint8_t vars[MAX_ARITY] = {0};
 
 	for (idx_t i = 0; i < nbr_cells; i++) {
-		cell *c = p->t->cells+i;
+		cell *c = p->r->cells+i;
 
 		if (!is_variable(c))
 			continue;
@@ -4690,7 +4690,7 @@ static void do_term_assign_vars(parser *p, idx_t nbr_cells)
 	}
 
 	for (idx_t i = 0; i < nbr_cells; i++) {
-		cell *c = p->t->cells+i;
+		cell *c = p->r->cells+i;
 
 		if (!is_variable(c))
 			continue;
@@ -4749,16 +4749,16 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->st.m->p;
 
-	if (nbr_cells > p->t->nbr_cells) {
-		p->t = realloc(p->t, sizeof(rule)+(sizeof(cell)*(nbr_cells+1)));
-		may_ptr_error(p->t);
-		p->t->nbr_cells = nbr_cells;
+	if (nbr_cells > p->r->nbr_cells) {
+		p->r = realloc(p->r, sizeof(rule)+(sizeof(cell)*(nbr_cells+1)));
+		may_ptr_error(p->r);
+		p->r->nbr_cells = nbr_cells;
 	}
 
-	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
+	p->r->cidx = safe_copy_cells(p->r->cells, tmp, nbr_cells);
 	do_term_assign_vars(p, nbr_cells);
 	term_to_body(p);
-	cell *h = get_head(p->t->cells);
+	cell *h = get_head(p->r->cells);
 
 	if (is_cstring(h)) {
 		assert(strlen(GET_STR(h)) == LEN_STR(h));
@@ -4773,12 +4773,12 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
 
-	clause *cl = asserta_to_db(q->st.m, p->t->nbr_vars, p->t->cells, 0);
+	clause *cl = asserta_to_db(q->st.m, p->r->nbr_vars, p->r->cells, 0);
 	may_ptr_error(cl);
-	p->t->cidx = 0;
+	p->r->cidx = 0;
 	uuid_gen(q->st.m->pl, &cl->u);
 
-	if (!q->st.m->loading && cl->t.persist)
+	if (!q->st.m->loading && cl->r.persist)
 		db_log(q, cl, LOG_ASSERTA);
 
 	return pl_success;
@@ -4819,16 +4819,16 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->st.m->p;
 
-	if (nbr_cells > p->t->nbr_cells) {
-		p->t = realloc(p->t, sizeof(rule)+(sizeof(cell)*(nbr_cells+1)));
-		may_ptr_error(p->t);
-		p->t->nbr_cells = nbr_cells;
+	if (nbr_cells > p->r->nbr_cells) {
+		p->r = realloc(p->r, sizeof(rule)+(sizeof(cell)*(nbr_cells+1)));
+		may_ptr_error(p->r);
+		p->r->nbr_cells = nbr_cells;
 	}
 
-	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
+	p->r->cidx = safe_copy_cells(p->r->cells, tmp, nbr_cells);
 	do_term_assign_vars(p, nbr_cells);
 	term_to_body(p);
-	cell *h = get_head(p->t->cells);
+	cell *h = get_head(p->r->cells);
 
 	if (is_cstring(h)) {
 		assert(strlen(GET_STR(h)) == LEN_STR(h));
@@ -4843,12 +4843,12 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
 
-	clause *cl = assertz_to_db(q->st.m, p->t->nbr_vars, p->t->cells, 0);
+	clause *cl = assertz_to_db(q->st.m, p->r->nbr_vars, p->r->cells, 0);
 	may_ptr_error(cl);
-	p->t->cidx = 0;
+	p->r->cidx = 0;
 	uuid_gen(q->st.m->pl, &cl->u);
 
-	if (!q->st.m->loading && cl->t.persist)
+	if (!q->st.m->loading && cl->r.persist)
 		db_log(q, cl, LOG_ASSERTZ);
 
 	return pl_success;
@@ -5361,7 +5361,7 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 		}
 	}
 
-	cell *tmp = deep_copy_to_tmp(q, p->t->cells, q->st.curr_frame, false, false);
+	cell *tmp = deep_copy_to_tmp(q, p->r->cells, q->st.curr_frame, false, false);
 	may_ptr_error(tmp);
 	if (tmp == ERR_CYCLE_CELL) {
 		destroy_parser(p);
@@ -6353,7 +6353,7 @@ static USE_RESULT pl_status fn_erase_1(query *q)
 	clause *cl = erase_from_db(q->st.m, &u);
 	may_ptr_error(cl);
 
-	if (!q->st.m->loading && cl->t.persist)
+	if (!q->st.m->loading && cl->r.persist)
 		db_log(q, cl, LOG_ERASE);
 
 	return pl_success;
@@ -6367,7 +6367,7 @@ static USE_RESULT pl_status fn_instance_2(query *q)
 	uuid_from_buf(GET_STR(p1), &u);
 	clause *cl = find_in_db(q->st.m, &u);
 	may_ptr_error(cl);
-	return unify(q, p2, p2_ctx, cl->t.cells, q->st.curr_frame);
+	return unify(q, p2, p2_ctx, cl->r.cells, q->st.curr_frame);
 }
 
 static USE_RESULT pl_status fn_clause_3(query *q)
@@ -6377,7 +6377,7 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 	GET_NEXT_ARG(p3,atom_or_var);
 
 	for (;;) {
-		rule *t;
+		rule *r;
 
 		if (!is_variable(p3)) {
 			uuid u;
@@ -6388,8 +6388,8 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 				break;
 
 			q->st.curr_clause2 = cl;
-			t = &cl->t;
-			cell *head = get_head(t->cells);
+			r = &cl->r;
+			cell *head = get_head(r->cells);
 			unify(q, p1, p1_ctx, head, q->st.fp);
 		} else {
 			if (!match_clause(q, p1, p1_ctx, DO_CLAUSE))
@@ -6401,10 +6401,10 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 			may_error(make_cstring(&tmp, tmpbuf));
 			set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 			unshare_cell(&tmp);
-			t = &q->st.curr_clause2->t;
+			r = &q->st.curr_clause2->r;
 		}
 
-		cell *body = get_body(t->cells);
+		cell *body = get_body(r->cells);
 		pl_status ok;
 
 		if (body)
@@ -6418,7 +6418,7 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 		if (ok) {
 			if (is_variable(p3)) {
 				bool last_match = !q->st.curr_clause2->next;
-				stash_me(q, t, last_match);
+				stash_me(q, r, last_match);
 			}
 
 			return pl_success;
@@ -6474,16 +6474,16 @@ static pl_status do_asserta_2(query *q)
 	idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->st.m->p;
 
-	if (nbr_cells > p->t->nbr_cells) {
-		p->t = realloc(p->t, sizeof(rule)+(sizeof(cell)*(nbr_cells+1)));
-		may_ptr_error(p->t);
-		p->t->nbr_cells = nbr_cells;
+	if (nbr_cells > p->r->nbr_cells) {
+		p->r = realloc(p->r, sizeof(rule)+(sizeof(cell)*(nbr_cells+1)));
+		may_ptr_error(p->r);
+		p->r->nbr_cells = nbr_cells;
 	}
 
-	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
+	p->r->cidx = safe_copy_cells(p->r->cells, tmp, nbr_cells);
 	do_term_assign_vars(p, nbr_cells);
 	term_to_body(p);
-	cell *h = get_head(p->t->cells);
+	cell *h = get_head(p->r->cells);
 
 	if (is_cstring(h)) {
 		assert(strlen(GET_STR(h)) == LEN_STR(h));
@@ -6498,9 +6498,9 @@ static pl_status do_asserta_2(query *q)
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
 
-	clause *cl = asserta_to_db(q->st.m, p->t->nbr_vars, p->t->cells, 0);
+	clause *cl = asserta_to_db(q->st.m, p->r->nbr_vars, p->r->cells, 0);
 	may_ptr_error(cl);
-	p->t->cidx = 0;
+	p->r->cidx = 0;
 
 	if (!is_variable(p2)) {
 		uuid u;
@@ -6516,7 +6516,7 @@ static pl_status do_asserta_2(query *q)
 		unshare_cell(&tmp2);
 	}
 
-	if (!q->st.m->loading && cl->t.persist)
+	if (!q->st.m->loading && cl->r.persist)
 		db_log(q, cl, LOG_ASSERTA);
 
 	return pl_success;
@@ -6576,16 +6576,16 @@ static pl_status do_assertz_2(query *q)
 	idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->st.m->p;
 
-	if (nbr_cells > p->t->nbr_cells) {
-		p->t = realloc(p->t, sizeof(rule)+(sizeof(cell)*(nbr_cells+1)));
-		may_ptr_error(p->t);
-		p->t->nbr_cells = nbr_cells;
+	if (nbr_cells > p->r->nbr_cells) {
+		p->r = realloc(p->r, sizeof(rule)+(sizeof(cell)*(nbr_cells+1)));
+		may_ptr_error(p->r);
+		p->r->nbr_cells = nbr_cells;
 	}
 
-	p->t->cidx = safe_copy_cells(p->t->cells, tmp, nbr_cells);
+	p->r->cidx = safe_copy_cells(p->r->cells, tmp, nbr_cells);
 	do_term_assign_vars(p, nbr_cells);
 	term_to_body(p);
-	cell *h = get_head(p->t->cells);
+	cell *h = get_head(p->r->cells);
 
 	if (is_cstring(h)) {
 		assert(strlen(GET_STR(h)) == LEN_STR(h));
@@ -6600,9 +6600,9 @@ static pl_status do_assertz_2(query *q)
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
 
-	clause *cl = assertz_to_db(q->st.m, p->t->nbr_vars, p->t->cells, 0);
+	clause *cl = assertz_to_db(q->st.m, p->r->nbr_vars, p->r->cells, 0);
 	may_ptr_error(cl);
-	p->t->cidx = 0;
+	p->r->cidx = 0;
 
 	if (!is_variable(p2)) {
 		uuid u;
@@ -6618,7 +6618,7 @@ static pl_status do_assertz_2(query *q)
 		unshare_cell(&tmp2);
 	}
 
-	if (!q->st.m->loading && cl->t.persist)
+	if (!q->st.m->loading && cl->r.persist)
 		db_log(q, cl, LOG_ASSERTZ);
 
 	return pl_success;
@@ -6653,13 +6653,13 @@ static void save_db(FILE *fp, query *q, int logging)
 			continue;
 
 		for (clause *cl = h->head; cl && !g_tpl_interrupt; cl = cl->next) {
-			if (cl->t.ugen_erased)
+			if (cl->r.ugen_erased)
 				continue;
 
 			if (logging)
 				fprintf(fp, "z_(");
 
-			print_term(q, fp, cl->t.cells, q->st.curr_frame, 0);
+			print_term(q, fp, cl->r.cells, q->st.curr_frame, 0);
 
 			if (logging) {
 				char tmpbuf[256];
@@ -6693,10 +6693,10 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 			continue;
 
 		for (clause *cl = h->head; cl && !g_tpl_interrupt; cl = cl->next) {
-			if (cl->t.ugen_erased)
+			if (cl->r.ugen_erased)
 				continue;
 
-			print_term(q, fp, cl->t.cells, q->st.curr_frame, 0);
+			print_term(q, fp, cl->r.cells, q->st.curr_frame, 0);
 			fprintf(fp, ".\n");
 		}
 	}
@@ -8767,7 +8767,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			continue;
 		}
 
-		if (ch == 't')
+		if (ch == 'r')
 			continue;
 
 		if (ch == '|') {
@@ -10546,9 +10546,9 @@ static void restore_db(module *m, FILE *fp)
 
 		p->srcptr = p->save_line;
 		tokenize(p, false, false);
-		xref_rule(p, p->t, NULL);
-		execute(q, p->t);
-		clear_rule(p->t);
+		xref_rule(p, p->r, NULL);
+		execute(q, p->r);
+		clear_rule(p->r);
 	}
 
 	m->loading = 0;
