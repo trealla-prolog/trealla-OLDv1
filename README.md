@@ -277,14 +277,16 @@ Non-standard predicates
 
 	directory_files/2
 	delete_file/1
-	exists_file/1
+	exists_file/1			# also file_exists/1
 	rename_file/2
 	time_file/2
 	size_file/2
-	exists_directory/1
+
+	exists_directory/1		# also directory_exists/1
 	make_directory/1
 	make_directory_path/1
 	working_directory/2
+
 	chdir/1
 	absolute_file_name/[2,3] # expand(Bool) & relative_to(file) options
 	access_file/2
