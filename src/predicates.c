@@ -2363,8 +2363,8 @@ static USE_RESULT pl_status fn_iso_close_2(query *q)
 		h = deref(q, h, p1_ctx);
 
 		if (!is_structure(h)
-			|| strcmp(GET_STR(h), "force")
-			|| strcmp(GET_STR(h+1), "true"))
+			|| slicecmp2(GET_STR(h), LEN_STR(h), "force")
+			|| slicecmp2(GET_STR(h+1), LEN_STR(h+1), "true"))
 			return throw_error(q, h, "domain_error", "close_option");
 
 		p1 = LIST_TAIL(p1);
@@ -4314,6 +4314,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 
 		if (is_cstring(tmp2) /*&& arity*/) {
 			cell *c = tmp2;
+			assert(strlen(GET_STR(tmp2)) == LEN_STR(tmp2));
 			idx_t off = index_from_pool(q->st.m->pl, GET_STR(tmp2));
 			may_idx_error(off);
 			//unshare_cell(tmp2);
@@ -4762,6 +4763,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	cell *h = get_head(p->t->cells);
 
 	if (is_cstring(h)) {
+		assert(strlen(GET_STR(h)) == LEN_STR(h));
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(h));
 		may_idx_error(off);
 		unshare_cell(h);
@@ -4831,6 +4833,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	cell *h = get_head(p->t->cells);
 
 	if (is_cstring(h)) {
+		assert(strlen(GET_STR(h)) == LEN_STR(h));
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(h));
 		may_idx_error(off);
 		unshare_cell(h);
@@ -4910,6 +4913,7 @@ static USE_RESULT pl_status fn_iso_call_n(query *q)
 
 	if (is_cstring(tmp2)) {
 		cell *c = tmp2;
+		assert(strlen(GET_STR(tmp2)) == LEN_STR(tmp2));
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(tmp2));
 		may_idx_error(off);
 		//unshare_cell(tmp2);
@@ -4969,6 +4973,8 @@ static USE_RESULT pl_status fn_iso_invoke_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,callable);
+
+	assert(strlen(GET_STR(p1)) == LEN_STR(p1));
 
 	module *m = find_module(q->st.m->pl, GET_STR(p1));
 
@@ -5327,13 +5333,13 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, GET_STR(q->st.curr_cell), q->st.curr_cell->arity);
 
 	} else {
-		if (!strcmp(GET_STR(q->st.curr_cell), "$rawcall"))
+		if (!slicecmp2(GET_STR(q->st.curr_cell), LEN_STR(q->st.curr_cell), "$rawcall"))
 			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "call", q->st.curr_cell->arity);
-		else if (!strcmp(GET_STR(q->st.curr_cell), "$call"))
+		else if (!slicecmp2(GET_STR(q->st.curr_cell), LEN_STR(q->st.curr_cell), "$call"))
 			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "call", q->st.curr_cell->arity);
-		else if (!strcmp(GET_STR(q->st.curr_cell), "$catch"))
+		else if (!slicecmp2(GET_STR(q->st.curr_cell), LEN_STR(q->st.curr_cell), "$catch"))
 			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "catch", q->st.curr_cell->arity);
-		else if (!strcmp(GET_STR(q->st.curr_cell), "$bagof"))
+		else if (!slicecmp2(GET_STR(q->st.curr_cell), LEN_STR(q->st.curr_cell), "$bagof"))
 			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, "bagof", q->st.curr_cell->arity);
 		else
 			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, functor, q->st.curr_cell->arity);
@@ -5424,9 +5430,10 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 			tmp[0].arity = arity;
 			tmp[0].nbr_cells = 1 + arity;
 
-			if (is_cstring(p2))
+			if (is_cstring(p2)) {
+				assert(strlen(GET_STR(p2)) == LEN_STR(p2));
 				tmp[0].val_off = index_from_pool(q->st.m->pl, GET_STR(p2));
-			else
+			} else
 				tmp[0].val_off = p2->val_off;
 
 			for (unsigned i = 1; i <= arity; i++) {
@@ -5582,6 +5589,7 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 
 	cell tmp = (cell){0};
 	tmp.tag = TAG_LITERAL;
+	assert(strlen(GET_STR(p1)) == LEN_STR(p1));
 	tmp.val_off = is_literal(p1) ? p1->val_off : index_from_pool(q->st.m->pl, GET_STR(p1));
 	tmp.arity = get_integer(p2);
 
@@ -6480,6 +6488,7 @@ static pl_status do_asserta_2(query *q)
 	cell *h = get_head(p->t->cells);
 
 	if (is_cstring(h)) {
+		assert(strlen(GET_STR(h)) == LEN_STR(h));
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(h));
 		may_idx_error(off);
 		unshare_cell(h);
@@ -6581,6 +6590,7 @@ static pl_status do_assertz_2(query *q)
 	cell *h = get_head(p->t->cells);
 
 	if (is_cstring(h)) {
+		assert(strlen(GET_STR(h)) == LEN_STR(h));
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(h));
 		may_idx_error(off);
 		unshare_cell(h);
@@ -8525,12 +8535,12 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 		h = deref(q, h, p_opts_ctx);
 
 		if (is_structure(h) && (h->arity == 1)) {
-			if (!strcmp(GET_STR(h), "expand")) {
+			if (!slicecmp2(GET_STR(h), LEN_STR(h), "expand")) {
 				if (is_literal(h+1)) {
-					if (!strcmp(GET_STR(h+1), "true"))
+					if (!slicecmp2(GET_STR(h+1), LEN_STR(h+1), "true"))
 						expand = 1;
 				}
-			} else if (!strcmp(GET_STR(h), "relative_to")) {
+			} else if (!slicecmp2(GET_STR(h), LEN_STR(h), "relative_to")) {
 				if (is_atom(h+1))
 					cwd = slicedup(GET_STR(h+1), LEN_STR(h+1));
 			}
@@ -10264,13 +10274,12 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,atom_or_var);
-	const char *src = GET_STR(p1);
 	cell tmp;
 	bool found = false;
 
 	assert(strlen(GET_STR(p1)) == LEN_STR(p1));
 
-	if (get_builtin(q->st.m->pl, src, p1->arity, &found), found) {
+	if (get_builtin(q->st.m->pl, GET_STR(p1), p1->arity, &found), found) {
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "built_in"));
 
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
@@ -11115,14 +11124,14 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 
 		if (is_structure(h) && (h->arity == 1)) {
 			cell *n = h + 0;
-			if (!strcmp(GET_STR(n), "create")) {
+			if (!slicecmp2(GET_STR(n), LEN_STR(n), "create")) {
 				cell *v = n + 1;
 				v = deref(q, v, q->latest_ctx);
 
 				if (is_variable(v))
 					return throw_error(q, p3, "instantiation_error", "read_option");
 
-				if (is_atom(v) && !strcmp(GET_STR(v), "true"))
+				if (is_atom(v) && !slicecmp2(GET_STR(v), LEN_STR(v), "true"))
 					do_create = true;
 			}
 		}
@@ -11187,14 +11196,14 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 
 		if (is_structure(h) && (h->arity == 1)) {
 			cell *n = h + 0;
-			if (!strcmp(GET_STR(n), "delete")) {
+			if (!slicecmp2(GET_STR(n), LEN_STR(n), "delete")) {
 				cell *v = n + 1;
 				v = deref(q, v, q->latest_ctx);
 
 				if (is_variable(v))
 					return throw_error(q, p3, "instantiation_error", "read_option");
 
-				if (is_atom(v) && !strcmp(GET_STR(v), "true"))
+				if (is_atom(v) && !slicecmp2(GET_STR(v), LEN_STR(v), "true"))
 					do_delete = true;
 			}
 		}

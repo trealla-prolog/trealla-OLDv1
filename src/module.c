@@ -373,6 +373,8 @@ static bool check_directive(const cell *c)
 
 predicate *find_predicate(module *m, cell *c)
 {
+	assert(strlen(MODULE_GET_STR(c)) == MODULE_LEN_STR(c));
+
 	cell tmp = *c;
 	tmp.tag = TAG_LITERAL;
 	tmp.flags = 0;

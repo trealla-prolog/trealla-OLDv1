@@ -692,6 +692,8 @@ extern char *relative_to(const char *basefile, const char *relfile);
 extern size_t sprint_int(char *dst, size_t size, int_t n, int base);
 extern void format_property(char *tmpbuf, size_t buflen, const char *name, unsigned arity, const char *type);
 
+#define slicecmp2(s1,l1,s2) slicecmp(s1,l1,s2,strlen(s2))
+
 // A string builder...
 
 typedef struct {
