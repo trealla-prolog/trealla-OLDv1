@@ -193,7 +193,7 @@ static void purge_dirty_list(query *q)
 		if (r->owner->tail == r)
 			r->owner->tail = r->prev;
 
-		clear_term(&r->t);
+		clear_rule(&r->t);
 		free(r);
 		cnt++;
 	}
@@ -472,7 +472,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	q->tot_tcos++;
 }
 
-static bool check_slots(const query *q, frame *g, term *t)
+static bool check_slots(const query *q, frame *g, rule *t)
 {
 	if (g->nbr_vars != t->nbr_vars)
 		return false;
@@ -490,7 +490,7 @@ static bool check_slots(const query *q, frame *g, term *t)
 	return true;
 }
 
-static void commit_me(query *q, term *t)
+static void commit_me(query *q, rule *t)
 {
 	frame *g = GET_CURR_FRAME();
 	g->m = q->st.m;
@@ -525,7 +525,7 @@ static void commit_me(query *q, term *t)
 	//memset(q->nv_mask, 0, MAX_ARITY);
 }
 
-void stash_me(query *q, term *t, bool last_match)
+void stash_me(query *q, rule *t, bool last_match)
 {
 	idx_t cgen = q->st.cgen;
 
@@ -664,7 +664,7 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 		q->st.tp = 0;
 }
 
-// Continue to next term in body
+// Continue to next rule in body
 
 static void proceed(query *q)
 {
@@ -692,7 +692,7 @@ static bool resume_frame(query *q)
 	frame *g = GET_CURR_FRAME();
 
 #if 0
-	term *t = &q->st.curr_clause->t;
+	rule *t = &q->st.curr_clause->t;
 
 	if ((q->st.curr_frame == (q->st.fp-1))
 		&& q->st.m->pl->opt && t->tail_rec
@@ -1043,7 +1043,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 		if (!check_update_view(g, q->st.curr_clause2))
 			continue;
 
-		term *t = &q->st.curr_clause2->t;
+		rule *t = &q->st.curr_clause2->t;
 		cell *c = t->cells;
 		bool needs_true = false;
 		p1 = orig_p1;
@@ -1141,7 +1141,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 		if (!check_update_view(g, q->st.curr_clause2))
 			continue;
 
-		term *t = &q->st.curr_clause2->t;
+		rule *t = &q->st.curr_clause2->t;
 		cell *head = get_head(t->cells);
 		cell *body = get_logical_body(t->cells);
 
@@ -1249,7 +1249,7 @@ static USE_RESULT pl_status match_head(query *q)
 		if (!check_update_view(g, q->st.curr_clause))
 			continue;
 
-		term *t = &q->st.curr_clause->t;
+		rule *t = &q->st.curr_clause->t;
 		cell *head = get_head(t->cells);
 		try_me(q, t->nbr_vars);
 		q->tot_matches++;
@@ -1608,7 +1608,7 @@ uint64_t get_time_in_usec(void)
 	return (uint64_t)(now.tv_sec * 1000 * 1000) + (now.tv_nsec / 1000);
 }
 
-pl_status execute(query *q, term *t)
+pl_status execute(query *q, rule *t)
 {
 	q->st.m->pl->did_dump_vars = false;
 	q->st.curr_cell = t->cells;

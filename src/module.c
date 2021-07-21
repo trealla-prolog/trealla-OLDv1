@@ -365,7 +365,7 @@ void set_persist_in_db(module *m, const char *name, unsigned arity)
 
 static bool check_directive(const cell *c)
 {
-	if (is_structure(c) && (c->val_off == g_clause_s) && (c->arity == 1))
+	if (is_structure(c) && (c->val_off == g_neck_s) && (c->arity == 1))
 		return true;
 
 	return false;
@@ -1026,7 +1026,7 @@ void destroy_module(module *m)
 
 		for (clause *r = h->head; r;) {
 			clause *save = r->next;
-			clear_term(&r->t);
+			clear_rule(&r->t);
 			free(r);
 			r = save;
 		}

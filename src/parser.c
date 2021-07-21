@@ -85,9 +85,9 @@ cell *list_tail(cell *l, cell *tmp)
 	return tmp;
 }
 
-bool check_rule(const cell *c)
+bool check_clause(const cell *c)
 {
-	if (is_structure(c) && (c->val_off == g_clause_s) && (c->arity == 2))
+	if (is_structure(c) && (c->val_off == g_neck_s) && (c->arity == 2))
 		return true;
 
 	return false;
@@ -95,7 +95,7 @@ bool check_rule(const cell *c)
 
 cell *get_head(cell *c)
 {
-	if (check_rule(c))
+	if (check_clause(c))
 		return c + 1;
 
 	return c;
@@ -103,7 +103,7 @@ cell *get_head(cell *c)
 
 cell *get_body(cell *c)
 {
-	if (check_rule(c)) {
+	if (check_clause(c)) {
 		c = c + 1;
 		c += c->nbr_cells;
 
@@ -132,7 +132,7 @@ cell *get_logical_body(cell *c)
 	return body;
 }
 
-void clear_term(term *t)
+void clear_rule(rule *t)
 {
 	if (!t)
 		return;
@@ -151,7 +151,7 @@ static bool make_room(parser *p)
 	if (p->t->cidx == p->t->nbr_cells) {
 		idx_t nbr_cells = p->t->nbr_cells * 2;
 
-		term *t = realloc(p->t, sizeof(term)+(sizeof(cell)*nbr_cells));
+		rule *t = realloc(p->t, sizeof(rule)+(sizeof(cell)*nbr_cells));
 		if (!t) {
 			p->error = true;
 			return false;
@@ -176,7 +176,7 @@ void destroy_parser(parser *p)
 {
 	free(p->save_line);
 	free(p->token);
-	clear_term(p->t);
+	clear_rule(p->t);
 	free(p->t);
 	free(p);
 }
@@ -187,7 +187,7 @@ parser *create_parser(module *m)
 	ensure(p);
 	p->token = calloc(p->token_size=INITIAL_TOKEN_SIZE+1, 1);
 	idx_t nbr_cells = INITIAL_NBR_CELLS;
-	p->t = calloc(sizeof(term)+(sizeof(cell)*nbr_cells), 1);
+	p->t = calloc(sizeof(rule)+(sizeof(cell)*nbr_cells), 1);
 	p->t->nbr_cells = nbr_cells;
 	p->start_term = true;
 	p->line_nbr = 1;
@@ -740,7 +740,7 @@ static void directives(parser *p, cell *d)
 	return;
 }
 
-static void xref_cell(parser *p, term *t, cell *c, predicate *parent)
+static void xref_cell(parser *p, rule *t, cell *c, predicate *parent)
 {
 	const char *functor = PARSER_GET_STR(c);
 	unsigned specifier;
@@ -770,7 +770,7 @@ static void xref_cell(parser *p, term *t, cell *c, predicate *parent)
 	}
 }
 
-void xref_term(parser *p, term *t, predicate *parent)
+void xref_rule(parser *p, rule *t, predicate *parent)
 {
 	cell *c = t->cells;
 
@@ -791,7 +791,7 @@ void xref_db(parser *p)
 {
 	for (predicate *h = p->m->head; h; h = h->next) {
 		for (clause *r = h->head; r; r = r->next)
-			xref_term(p, &r->t, h);
+			xref_rule(p, &r->t, h);
 	}
 }
 
@@ -858,7 +858,7 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 	p->start_term = true;
 	p->nbr_vars = 0;
 	memset(&p->vartab, 0, sizeof(p->vartab));
-	term *t = p->t;
+	rule *t = p->t;
 	t->nbr_vars = 0;
 	t->first_cut = false;
 	t->cut_only = false;
@@ -879,7 +879,7 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 		c->var_nbr += start;
 
 		if (c->var_nbr == MAX_ARITY) {
-			fprintf(stdout, "Error: max vars per term reached\n");
+			fprintf(stdout, "Error: max vars per rule reached\n");
 			p->error = true;
 			return;
 		}
@@ -1197,7 +1197,7 @@ static bool lexer_analyze(parser *p, idx_t start_idx)
 
 void reset(parser *p)
 {
-	clear_term(p->t);
+	clear_rule(p->t);
 	p->t->cidx = 0;
 	p->start_term = true;
 }
@@ -1240,7 +1240,7 @@ static bool dcg_expansion(parser *p)
 	p2->skip = true;
 	p2->srcptr = src;
 	tokenize(p2, false, false);
-	xref_term(p2, p2->t, NULL);
+	xref_rule(p2, p2->t, NULL);
 
 	//printf("### "); print_term(q, stdout, p2->t->cells, 0, -1); printf("\n");
 
@@ -1284,9 +1284,9 @@ static bool dcg_expansion(parser *p)
 	tokenize(p2, false, false);
 	free(src);
 
-	clear_term(p->t);
+	clear_rule(p->t);
 	free(p->t);
-	p->t = p2->t;			// Take the completed term
+	p->t = p2->t;			// Take the completed rule
 	p2->t = NULL;
 	p->nbr_vars = p2->nbr_vars;
 
@@ -1327,7 +1327,7 @@ static bool term_expansion(parser *p)
 	p2->skip = true;
 	p2->srcptr = src;
 	tokenize(p2, false, false);
-	xref_term(p2, p2->t, NULL);
+	xref_rule(p2, p2->t, NULL);
 
 	//printf("### "); print_term(q, stdout, p2->t->cells, 0, -1); printf("\n");
 
@@ -1379,9 +1379,9 @@ static bool term_expansion(parser *p)
 	tokenize(p2, false, false);
 	free(src);
 
-	clear_term(p->t);
+	clear_rule(p->t);
 	free(p->t);
-	p->t = p2->t;				// Take the completed term
+	p->t = p2->t;				// Take the completed rule
 	p2->t = NULL;
 	p->nbr_vars = p2->nbr_vars;
 
@@ -2211,7 +2211,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				term_to_body(p);
 
 				if (p->consulting && !p->skip) {
-					xref_term(p, p->t, NULL);
+					xref_rule(p, p->t, NULL);
 					term_expansion(p);
 					cell *p1 = p->t->cells;
 
@@ -2418,7 +2418,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		if (!p->quote_char && p->start_term &&
 			(!strcmp(p->token, ",") || !strcmp(p->token, "]") || !strcmp(p->token, ")") || !strcmp(p->token, "}"))) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, start of term expected, line %d '%s'\n", p->line_nbr, p->save_line);
+				fprintf(stdout, "Error: syntax error, start of rule expected, line %d '%s'\n", p->line_nbr, p->save_line);
 
 			p->error = true;
 			break;
@@ -2615,7 +2615,7 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 	if (!p->command)
 		term_expansion(p);
 
-	xref_term(p, p->t, NULL);
+	xref_rule(p, p->t, NULL);
 
 	query *q = create_query(p->m, false);
 	if (!q) return false;

@@ -23,7 +23,7 @@ static const size_t INITIAL_POOL_SIZE = 64000;	// bytes
 
 stream g_streams[MAX_STREAMS] = {{0}};
 idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
-idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
+idx_t g_anon_s, g_neck_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
 idx_t g_sys_elapsed_s, g_sys_queue_s, g_braces_s, g_call_s, g_braces_s;
 idx_t g_stream_property_s, g_unify_s, g_on_s, g_off_s, g_sys_var_s;
 idx_t g_plus_s, g_minus_s, g_once_s, g_post_unify_hook_s, g_sys_record_key_s;
@@ -243,7 +243,7 @@ static bool g_init(prolog *pl)
 			CHECK_SENTINEL(g_nil_s = index_from_pool(pl, "[]"), ERR_IDX);
 			CHECK_SENTINEL(g_braces_s = index_from_pool(pl, "{}"), ERR_IDX);
 			CHECK_SENTINEL(g_fail_s = index_from_pool(pl, "fail"), ERR_IDX);
-			CHECK_SENTINEL(g_clause_s = index_from_pool(pl, ":-"), ERR_IDX);
+			CHECK_SENTINEL(g_neck_s = index_from_pool(pl, ":-"), ERR_IDX);
 			CHECK_SENTINEL(g_eof_s = index_from_pool(pl, "end_of_file"), ERR_IDX);
 			CHECK_SENTINEL(g_lt_s = index_from_pool(pl, "<"), ERR_IDX);
 			CHECK_SENTINEL(g_gt_s = index_from_pool(pl, ">"), ERR_IDX);

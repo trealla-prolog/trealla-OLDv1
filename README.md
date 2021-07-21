@@ -8,7 +8,7 @@ A compact, efficient Prolog interpreter with
 	Atoms are UTF-8 of unlimited length
 	The default double-quoted representation is *chars* list
 	Dynamic atoms are automatically garbage collected
-	Full-term indexing
+	Full-rule indexing
 	DCGs
 	format_//2
 	User-defined functions
@@ -121,7 +121,7 @@ where options can be:
 	-w, --watchdog     - create watchdog
 	--stats            - print stats
 	--consult          - consult from STDIN
-	--noindex          - don't use term indexing
+	--noindex          - don't use rule indexing
 	--ns               - non-stop (don't drop to REPL)
 
 For example:
@@ -215,17 +215,17 @@ Non-standard predicates
 	freeze/2					# use_module(library(freeze))
 	frozen/2					# use_module(library(freeze))
 
-	must_be/4					# must_be(+term,+type,+term,+arg)
-	expand_term/2				# expand_term(+term,-term)
-	memberchk/2					# memberchk(+term,+list).
-	nonmember/2					# \+ memberchk(+term,+list)
+	must_be/4					# must_be(+rule,+type,+rule,+arg)
+	expand_term/2				# expand_term(+rule,-rule)
+	memberchk/2					# memberchk(+rule,+list).
+	nonmember/2					# \+ memberchk(+rule,+list)
 	atomic_concat/3				# atomic_concat(+atom,+list,-list)
     atomic_list_concat/2		# atomic_list_concat(L,Atom) (bidirectional)
     atomic_list_concat/3		# atomic_list_concat(L,Sep,Atom) (bidirectional)
-	read_term_from_chars/2		# read_term_from_chars(+chars,-term)
-	read_term_from_chars/3		# read_term_from_chars(+chars,+opts,-term)
-	write_term_to_chars/3		# write_term_to_chars(+term,+opts,-chars)
-	write_canonical_to_chars/3	# write_term_to_chars(+term,+opts,-chars)
+	read_term_from_chars/2		# read_term_from_chars(+chars,-rule)
+	read_term_from_chars/3		# read_term_from_chars(+chars,+opts,-rule)
+	write_term_to_chars/3		# write_term_to_chars(+rule,+opts,-chars)
+	write_canonical_to_chars/3	# write_term_to_chars(+rule,+opts,-chars)
 	chars_base64/3				# currently options are ignored
 	chars_urlenc/3				# currently options are ignored
 	hex_chars/2             	# as number_chars, but in hex
@@ -474,8 +474,8 @@ or a timer)...
 	yield/0                 # voluntarily yield control
 	wait/0                  # parent should wait for children to finish
 	await/0                 # parent should wait for a message
-	send/1                  # apend term to parent queue
-	recv/1                  # pop term from queue
+	send/1                  # apend rule to parent queue
+	recv/1                  # pop rule from queue
 	tasklist/[2-8]          # concurrent form of maplist/1-n
 
 Note: *send/1*, *sleep/1* and *delay/1* do implied yields. As does *getline/2*,

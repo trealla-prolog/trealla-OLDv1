@@ -256,7 +256,7 @@ typedef struct cell_ cell;
 typedef struct parser_ parser;
 
 // Using a fixed-size cell allows having arrays of cells, which is
-// basically what a term is. A compound is a variable length array of
+// basically what a Term is. A compound is a variable length array of
 // cells, the length specified by 'nbr_cells' field in the 1st cell.
 // A cell is a tagged union, the size should should 24 bytes.
 
@@ -337,13 +337,13 @@ typedef struct {
 	bool persist:1;
 	bool tail_rec:1;
 	cell cells[];
-} term;
+} rule;
 
 struct clause_ {
 	predicate *owner;
 	clause *prev, *next, *dirty;
 	uuid u;
-	term t;
+	rule t;
 };
 
 struct predicate_ {
@@ -532,7 +532,7 @@ struct parser_ {
 
 	FILE *fp;
 	module *m;
-	term *t;
+	rule *t;
 	char *token, *save_line, *srcptr;
 	cell v;
 	size_t token_size, n_line, toklen;
@@ -615,7 +615,7 @@ struct prolog_ {
 };
 
 extern idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
-extern idx_t g_anon_s, g_clause_s, g_eof_s, g_lt_s, g_false_s, g_once_s;
+extern idx_t g_anon_s, g_neck_s, g_eof_s, g_lt_s, g_false_s, g_once_s;
 extern idx_t g_gt_s, g_eq_s, g_sys_elapsed_s, g_sys_queue_s, g_braces_s;
 extern idx_t g_stream_property_s, g_unify_s, g_on_s, g_off_s, g_sys_var_s;
 extern idx_t g_call_s, g_braces_s, g_plus_s, g_minus_s, g_post_unify_hook_s;

@@ -1649,7 +1649,7 @@ static pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, enum clause_type i
 
 	pl_status match;
 
-	if (check_rule(p1))
+	if (check_clause(p1))
 		match = match_rule(q, p1, p1_ctx);
 	else
 		match = match_clause(q, p1, p1_ctx, is_retract);
@@ -1984,7 +1984,7 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 		return pl_failure;
 	}
 
-	term *t = &q->st.curr_clause2->t;
+	rule *t = &q->st.curr_clause2->t;
 	GET_FIRST_ARG(pstrx,any);
 
 	if (is_integer(pstrx))
@@ -2693,7 +2693,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	xref_term(p, p->t, NULL);
+	xref_rule(p, p->t, NULL);
 
 	if (p->nbr_vars) {
 		if (!create_vars(q, p->nbr_vars))
@@ -2867,7 +2867,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 	may_ptr_error(tmp);
 	safe_copy_cells(tmp, p->t->cells, p->t->cidx-1);
 	pl_status ok = unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
-	clear_term(p->t);
+	clear_rule(p->t);
 	return ok;
 }
 
@@ -4525,7 +4525,7 @@ static USE_RESULT pl_status fn_iso_clause_2(query *q)
 	GET_NEXT_ARG(p2,callable_or_var);
 
 	while (match_clause(q, p1, p1_ctx, DO_CLAUSE)) {
-		term *t = &q->st.curr_clause2->t;
+		rule *t = &q->st.curr_clause2->t;
 		cell *body = get_body(t->cells);
 		pl_status ok;
 
@@ -4750,7 +4750,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	parser *p = q->st.m->p;
 
 	if (nbr_cells > p->t->nbr_cells) {
-		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
+		p->t = realloc(p->t, sizeof(rule)+(sizeof(cell)*(nbr_cells+1)));
 		may_ptr_error(p->t);
 		p->t->nbr_cells = nbr_cells;
 	}
@@ -4820,7 +4820,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	parser *p = q->st.m->p;
 
 	if (nbr_cells > p->t->nbr_cells) {
-		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
+		p->t = realloc(p->t, sizeof(rule)+(sizeof(cell)*(nbr_cells+1)));
 		may_ptr_error(p->t);
 		p->t->nbr_cells = nbr_cells;
 	}
@@ -6377,7 +6377,7 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 	GET_NEXT_ARG(p3,atom_or_var);
 
 	for (;;) {
-		term *t;
+		rule *t;
 
 		if (!is_variable(p3)) {
 			uuid u;
@@ -6475,7 +6475,7 @@ static pl_status do_asserta_2(query *q)
 	parser *p = q->st.m->p;
 
 	if (nbr_cells > p->t->nbr_cells) {
-		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
+		p->t = realloc(p->t, sizeof(rule)+(sizeof(cell)*(nbr_cells+1)));
 		may_ptr_error(p->t);
 		p->t->nbr_cells = nbr_cells;
 	}
@@ -6577,7 +6577,7 @@ static pl_status do_assertz_2(query *q)
 	parser *p = q->st.m->p;
 
 	if (nbr_cells > p->t->nbr_cells) {
-		p->t = realloc(p->t, sizeof(term)+(sizeof(cell)*(nbr_cells+1)));
+		p->t = realloc(p->t, sizeof(rule)+(sizeof(cell)*(nbr_cells+1)));
 		may_ptr_error(p->t);
 		p->t->nbr_cells = nbr_cells;
 	}
@@ -10546,9 +10546,9 @@ static void restore_db(module *m, FILE *fp)
 
 		p->srcptr = p->save_line;
 		tokenize(p, false, false);
-		xref_term(p, p->t, NULL);
+		xref_rule(p, p->t, NULL);
 		execute(q, p->t);
-		clear_term(p->t);
+		clear_rule(p->t);
 	}
 
 	m->loading = 0;
@@ -11726,8 +11726,8 @@ static const struct builtins g_predicates_other[] =
 	// Miscellaneous...
 
 	{"ignore", 1, fn_ignore_1, "+callable"},
-	{"memberchk", 2, fn_memberchk_2, "?term,+list"},
-	{"nonmember", 2, fn_nonmember_2, "?term,+list"},
+	{"memberchk", 2, fn_memberchk_2, "?rule,+list"},
+	{"nonmember", 2, fn_nonmember_2, "?rule,+list"},
 
 	{"$put_chars", 1, fn_sys_put_chars_1, "+chars"},
 	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars"},
@@ -11743,11 +11743,11 @@ static const struct builtins g_predicates_other[] =
 	{"assert", 1, fn_iso_assertz_1, NULL},
 
 	{"copy_term_nat", 2, fn_copy_term_nat_2, NULL},
-	{"string", 1, fn_atom_1, "+term"},
+	{"string", 1, fn_atom_1, "+rule"},
 	{"atomic_concat", 3, fn_atomic_concat_3, NULL},
 	{"replace", 4, fn_replace_4, "+orig,+from,+to,-new"},
-	{"print", 1, fn_print_1, "+term"},
-	{"writeln", 1, fn_writeln_1, "+term"},
+	{"print", 1, fn_print_1, "+rule"},
+	{"writeln", 1, fn_writeln_1, "+rule"},
 	{"sleep", 1, fn_sleep_1, "+integer"},
 	{"delay", 1, fn_delay_1, "+integer"},
 	{"busy", 1, fn_busy_1, "+integer"},
@@ -11776,11 +11776,11 @@ static const struct builtins g_predicates_other[] =
 	{"split_atom", 4, fn_split_atom_4, "+string,+sep,+pad,-list"},
 	{"split_string", 4, fn_split_atom_4, "+string,+sep,+pad,-list"},
 	{"split", 4, fn_split_4, "+string,+string,?left,?right"},
-	{"is_list", 1, fn_is_list_1, "+term"},
-	{"list", 1, fn_is_list_1, "+term"},
-	{"is_stream", 1, fn_is_stream_1, "+term"},
-	//{"forall", 2, fn_forall_2, "+term,+term"},
-	{"term_hash", 2, fn_term_hash_2, "+term,?integer"},
+	{"is_list", 1, fn_is_list_1, "+rule"},
+	{"list", 1, fn_is_list_1, "+rule"},
+	{"is_stream", 1, fn_is_stream_1, "+rule"},
+	//{"forall", 2, fn_forall_2, "+rule,+rule"},
+	{"term_hash", 2, fn_term_hash_2, "+rule,?integer"},
 	{"rename_file", 2, fn_rename_file_2, "+string,+string"},
 	{"directory_files", 2, fn_directory_files_2, "+pathname,-list"},
 	{"delete_file", 1, fn_delete_file_1, "+string"},
@@ -11795,11 +11795,11 @@ static const struct builtins g_predicates_other[] =
 	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL},
 	{"chdir", 1, fn_chdir_1, "+string"},
 	{"name", 2, fn_iso_atom_codes_2, "?string,?list"},
-	{"read_term_from_chars", 2, fn_read_term_from_chars_2, "+chars,-term"},
-	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,+opts,+term"},
-	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+chars,-term,+opts"},
-	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "+term,+list,?chars"},
-	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "+term,+list,?chars"},
+	{"read_term_from_chars", 2, fn_read_term_from_chars_2, "+chars,-rule"},
+	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,+opts,+rule"},
+	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+chars,-rule,+opts"},
+	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "+rule,+list,?chars"},
+	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "+rule,+list,?chars"},
 	{"base64", 2, fn_base64_2, "?string,?string"},
 	{"urlenc", 2, fn_urlenc_2, "?string,?string"},
 	{"atom_lower", 2, fn_atom_lower_2, "?atom,?atom"},
@@ -11814,26 +11814,26 @@ static const struct builtins g_predicates_other[] =
 	{"$load_properties", 0, fn_sys_load_properties_0, NULL},
 	{"$load_flags", 0, fn_sys_load_flags_0, NULL},
 	{"$load_ops", 0, fn_sys_load_ops_0, NULL},
-	{"numbervars", 1, fn_numbervars_1, "+term"},
-	{"numbervars", 3, fn_numbervars_3, "+term,+start,?end"},
-	{"numbervars", 4, fn_numbervars_3, "+term,+start,?end,+list"},
-	{"var_number", 2, fn_var_number_2, "+term,?integer"},
-	{"char_type", 2, fn_char_type_2, "+char,+term"},
-	{"code_type", 2, fn_char_type_2, "+code,+term"},
+	{"numbervars", 1, fn_numbervars_1, "+rule"},
+	{"numbervars", 3, fn_numbervars_3, "+rule,+start,?end"},
+	{"numbervars", 4, fn_numbervars_3, "+rule,+start,?end,+list"},
+	{"var_number", 2, fn_var_number_2, "+rule,?integer"},
+	{"char_type", 2, fn_char_type_2, "+char,+rule"},
+	{"code_type", 2, fn_char_type_2, "+code,+rule"},
 	{"uuid", 1, fn_uuid_1, "-string"},
-	{"asserta", 2, fn_asserta_2, "+term,-ref"},
-	{"assertz", 2, fn_assertz_2, "+term,-ref"},
-	{"instance", 2, fn_instance_2, "+ref,?term"},
+	{"asserta", 2, fn_asserta_2, "+rule,-ref"},
+	{"assertz", 2, fn_assertz_2, "+rule,-ref"},
+	{"instance", 2, fn_instance_2, "+ref,?rule"},
 	{"erase", 1, fn_erase_1, "+ref"},
 	{"clause", 3, fn_clause_3, "?head,?body,-ref"},
-	{"$queue", 1, fn_sys_queue_1, "+term"},
+	{"$queue", 1, fn_sys_queue_1, "+rule"},
 	{"$list", 1, fn_sys_list_1, "-list"},
 	{"getenv", 2, fn_getenv_2, NULL},
 	{"setenv", 2, fn_setenv_2, NULL},
 	{"unsetenv", 1, fn_unsetenv_1, NULL},
 	{"statistics", 0, fn_statistics_0, NULL},
 	{"statistics", 2, fn_statistics_2, "+string,-variable"},
-	{"duplicate_term", 2, fn_iso_copy_term_2, "+term,-variable"},
+	{"duplicate_term", 2, fn_iso_copy_term_2, "+rule,-variable"},
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer"},
 	{"limit", 2, fn_limit_2, "+integer,+callable"},
 	{"offset", 2, fn_offset_2, "+integer,+callable"},
@@ -11852,23 +11852,23 @@ static const struct builtins g_predicates_other[] =
 #endif
 
 	{"$task", 1, fn_task_n, "+callable"},
-	{"$task", 2, fn_task_n, "+callable,+term,..."},
-	{"$task", 3, fn_task_n, "+callable,+term,..."},
-	{"$task", 4, fn_task_n, "+callable,+term,..."},
-	{"$task", 5, fn_task_n, "+callable,+term,..."},
-	{"$task", 6, fn_task_n, "+callable,+term,..."},
-	{"$task", 7, fn_task_n, "+callable,+term,..."},
-	{"$task", 8, fn_task_n, "+callable,+term,..."},
+	{"$task", 2, fn_task_n, "+callable,+rule,..."},
+	{"$task", 3, fn_task_n, "+callable,+rule,..."},
+	{"$task", 4, fn_task_n, "+callable,+rule,..."},
+	{"$task", 5, fn_task_n, "+callable,+rule,..."},
+	{"$task", 6, fn_task_n, "+callable,+rule,..."},
+	{"$task", 7, fn_task_n, "+callable,+rule,..."},
+	{"$task", 8, fn_task_n, "+callable,+rule,..."},
 
 	{"wait", 0, fn_wait_0, NULL},
 	{"await", 0, fn_await_0, NULL},
 	{"yield", 0, fn_yield_0, NULL},
 	{"fork", 0, fn_fork_0, NULL},
-	{"send", 1, fn_send_1, "+term"},
-	{"recv", 1, fn_recv_1, "?term"},
+	{"send", 1, fn_send_1, "+rule"},
+	{"recv", 1, fn_recv_1, "?rule"},
 
-	{"$mustbe_instantiated", 1, fn_sys_instantiated_1, "+term"},
-	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+term,+term"},
+	{"$mustbe_instantiated", 1, fn_sys_instantiated_1, "+rule"},
+	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+rule,+rule"},
 
 	{"$mustbe_pairlist", 1, fn_sys_mustbe_pairlist_1, "+pair"},
 	{"$mustbe_pairlist_or_var", 1, fn_sys_mustbe_pairlist_or_var_1, "?pair"},
@@ -11877,8 +11877,8 @@ static const struct builtins g_predicates_other[] =
 
 	// Used for database log
 
-	{"$a_", 2, fn_sys_asserta_2, "+term,+ref"},
-	{"$z_", 2, fn_sys_assertz_2, "+term,+ref"},
+	{"$a_", 2, fn_sys_asserta_2, "+rule,+ref"},
+	{"$z_", 2, fn_sys_assertz_2, "+rule,+ref"},
 	{"$e_", 1, fn_erase_1, "+ref"},
 
 	{"$db_load", 0, fn_sys_db_load_0, NULL},

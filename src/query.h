@@ -11,7 +11,7 @@ extern void cut_me(query *q, bool local_cut, bool soft_cut);
 
 extern void set_var(query *q, const cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 extern void reset_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
-extern pl_status execute(query *q, term *t);
+extern pl_status execute(query *q, rule *t);
 extern USE_RESULT pl_status fn_call_0(query *q, cell *p1);
 extern void undo_me(query *q);
 extern idx_t drop_choice(query *q);
@@ -24,7 +24,7 @@ extern unsigned create_vars(query *q, unsigned nbr);
 extern void try_me(const query *q, unsigned vars);
 extern USE_RESULT pl_status throw_error(query *q, cell *c, const char *err_type, const char *expected);
 extern void call_attrs(query *q, cell *attrs);
-extern void stash_me(query *q, term *t, bool last_match);
+extern void stash_me(query *q, rule *t, bool last_match);
 extern bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
 
 extern void allocate_list(query *q, const cell *c);
