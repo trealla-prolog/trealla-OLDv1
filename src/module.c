@@ -94,26 +94,26 @@ static const op_table g_ops[] =
 
 predicate *create_predicate(module *m, cell *c)
 {
-	predicate *h = calloc(1, sizeof(predicate));
-	ensure(h);
-	h->prev = m->tail;
+	predicate *pr = calloc(1, sizeof(predicate));
+	ensure(pr);
+	pr->prev = m->tail;
 
 	if (m->tail)
-		m->tail->next = h;
+		m->tail->next = pr;
 
-	m->tail = h;
+	m->tail = pr;
 
 	if (!m->head)
-		m->head = h;
+		m->head = pr;
 
-	h->m = m;
-	h->key = *c;
-	h->key.tag = TAG_LITERAL;
-	h->key.flags = 0;
-	h->key.nbr_cells = 1;
+	pr->m = m;
+	pr->key = *c;
+	pr->key.tag = TAG_LITERAL;
+	pr->key.flags = 0;
+	pr->key.nbr_cells = 1;
 
-	m_app(m->index, &h->key, h);
-	return h;
+	m_app(m->index, &pr->key, pr);
+	return pr;
 }
 
 static int predicate_compkey(const void *ptr1, const void *ptr2, const void *param)
@@ -213,8 +213,8 @@ static int index_compkey(const void *ptr1, const void *ptr2, const void *param)
 
 clause *find_in_db(module *m, uuid *ref)
 {
-	for (predicate *h = m->head; h; h = h->next) {
-		for (clause *cl = h->head ; cl; cl = cl->next) {
+	for (predicate *pr = m->head; pr; pr = pr->next) {
+		for (clause *cl = pr->head ; cl; cl = cl->next) {
 			if (cl->r.ugen_erased)
 				continue;
 
@@ -256,11 +256,11 @@ void set_noindex_in_db(module *m, const char *name, unsigned arity)
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
-	predicate *h = find_predicate(m, &tmp);
-	if (!h) h = create_predicate(m, &tmp);
+	predicate *pr = find_predicate(m, &tmp);
+	if (!pr) pr = create_predicate(m, &tmp);
 
-	if (h)
-		h->is_noindex = true;
+	if (pr)
+		pr->is_noindex = true;
 	else
 		m->error = true;
 }
@@ -272,12 +272,12 @@ void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
-	predicate *h = find_predicate(m, &tmp);
-	if (!h) h = create_predicate(m, &tmp);
+	predicate *pr = find_predicate(m, &tmp);
+	if (!pr) pr = create_predicate(m, &tmp);
 
-	if (h) {
+	if (pr) {
 		push_property(m, name, arity, "discontiguous");
-		h->is_discontiguous = true;
+		pr->is_discontiguous = true;
 	} else
 		m->error = true;
 }
@@ -289,12 +289,12 @@ void set_multifile_in_db(module *m, const char *name, idx_t arity)
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
-	predicate *h = find_predicate(m, &tmp);
-	if (!h) h = create_predicate(m, &tmp);
+	predicate *pr = find_predicate(m, &tmp);
+	if (!pr) pr = create_predicate(m, &tmp);
 
-	if (h) {
+	if (pr) {
 		push_property(m, name, arity, "multifile");
-		h->is_multifile = true;
+		pr->is_multifile = true;
 	} else
 		m->error = true;
 }
@@ -306,12 +306,12 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
-	predicate *h = find_predicate(m, &tmp);
-	if (!h) h = create_predicate(m, &tmp);
+	predicate *pr = find_predicate(m, &tmp);
+	if (!pr) pr = create_predicate(m, &tmp);
 
-	if (h) {
+	if (pr) {
 		push_property(m, name, arity, "dynamic");
-		h->is_dynamic = true;
+		pr->is_dynamic = true;
 	} else
 		m->error = true;
 }
@@ -325,10 +325,10 @@ void set_meta_predicate_in_db(module *m, cell *c)
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
-	predicate *h = find_predicate(m, &tmp);
-	if (!h) h = create_predicate(m, &tmp);
+	predicate *pr = find_predicate(m, &tmp);
+	if (!pr) pr = create_predicate(m, &tmp);
 
-	if (h) {
+	if (pr) {
 		query q = (query){0};
 		q.st.m = m;
 		char *dst = print_term_to_strbuf(&q, c, 0, 0);
@@ -336,7 +336,7 @@ void set_meta_predicate_in_db(module *m, cell *c)
 		snprintf(tmpbuf, sizeof(tmpbuf), "meta_predicate(%s)", dst);
 		push_property(m, name, arity, tmpbuf);
 		free(dst);
-		h->is_meta_predicate = true;
+		pr->is_meta_predicate = true;
 	} else
 		m->error = true;
 
@@ -350,14 +350,14 @@ void set_persist_in_db(module *m, const char *name, unsigned arity)
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off == ERR_IDX);
 	tmp.arity = arity;
-	predicate *h = find_predicate(m, &tmp);
-	if (!h) h = create_predicate(m, &tmp);
+	predicate *pr = find_predicate(m, &tmp);
+	if (!pr) pr = create_predicate(m, &tmp);
 
-	if (h) {
+	if (pr) {
 		push_property(m, name, arity, "dynamic");
 		push_property(m, name, arity, "persist");
-		h->is_dynamic = true;
-		h->is_persist = true;
+		pr->is_dynamic = true;
+		pr->is_persist = true;
 		m->use_persist = true;
 	} else
 		m->error = true;
@@ -384,14 +384,14 @@ predicate *find_predicate(module *m, cell *c)
 		tmp.val_off = index_from_pool(m->pl, MODULE_GET_STR(c));
 
 	miter *iter = m_findkey(m->index, &tmp);
-	predicate *h = NULL;
+	predicate *pr = NULL;
 
-	while (m_nextkey(iter, (void*)&h)) {
-		if (h->is_abolished)
+	while (m_nextkey(iter, (void*)&pr)) {
+		if (pr->is_abolished)
 			continue;
 
 		m_done(iter);
-		return h;
+		return pr;
 	}
 
 	return NULL;
@@ -411,19 +411,19 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 predicate *search_predicate(module *m, cell *c)
 {
 	module *orig_m = m;
-	predicate *h = find_predicate(m, c);
+	predicate *pr = find_predicate(m, c);
 
-	if (h)
-		return h;
+	if (pr)
+		return pr;
 
 	for (m = m->pl->modules; m; m = m->next) {
 		if (m == orig_m)
 			continue;
 
-		h = find_predicate(m, c);
+		pr = find_predicate(m, c);
 
-		if (h)
-			return h;
+		if (pr)
+			return pr;
 	}
 
 	return NULL;
@@ -594,23 +594,23 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 		c->flags = 0;
 	}
 
-	predicate *h = find_predicate(m, c);
+	predicate *pr = find_predicate(m, c);
 
-	if (h && !consulting && !h->is_dynamic) {
+	if (pr && !consulting && !pr->is_dynamic) {
 		fprintf(stdout, "Error: not dynamic '%s'/%u\n", MODULE_GET_STR(c), c->arity);
 		return NULL;
 	}
 
-	if (!h) {
-		h = create_predicate(m, c);
-		ensure(h);
+	if (!pr) {
+		pr = create_predicate(m, c);
+		ensure(pr);
 
 		if (check_directive(p1))
-			h->check_directive = true;
+			pr->check_directive = true;
 
 		if (!consulting) {
 			push_property(m, MODULE_GET_STR(c), c->arity, "dynamic");
-			h->is_dynamic = true;
+			pr->is_dynamic = true;
 		} else {
 			if (m->prebuilt) {
 				push_property(m, MODULE_GET_STR(c), c->arity, "built_in");
@@ -622,17 +622,17 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 
 		if (consulting && m->make_public) {
 			push_property(m, MODULE_GET_STR(c), c->arity, "public");
-			h->is_public = true;
+			pr->is_public = true;
 		}
 
 	}
 
 	if (m->prebuilt)
-		h->is_prebuilt = true;
+		pr->is_prebuilt = true;
 
 	clause *cl = calloc(sizeof(clause)+(sizeof(cell)*(p1->nbr_cells+1)), 1);
 	if (!cl) {
-		h->is_abolished = true;
+		pr->is_abolished = true;
 		return NULL;
 	}
 
@@ -643,51 +643,51 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 	cl->r.nbr_cells = p1->nbr_cells;
 	cl->r.cidx = p1->nbr_cells+1;
 	cl->r.ugen_created = ++m->pl->ugen;
-	cl->owner = h;
+	cl->owner = pr;
 	return cl;
 }
 
-static void reindex_predicate(module *m, predicate *h)
+static void reindex_predicate(module *m, predicate *pr)
 {
-	h->index = m_create(index_compkey, NULL, m);
-	ensure(h->index);
+	pr->index = m_create(index_compkey, NULL, m);
+	ensure(pr->index);
 
-	for (clause *cl = h->head; cl; cl = cl->next) {
+	for (clause *cl = pr->head; cl; cl = cl->next) {
 		cell *c = get_head(cl->r.cells);
 
 		if (!cl->r.ugen_erased)
-			m_app(h->index, c, cl);
+			m_app(pr->index, c, cl);
 	}
 }
 
-static void assert_commit(module *m, clause *cl, predicate *h, bool append)
+static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 {
 	cell *c = get_head(cl->r.cells);
 
-	if (h->is_persist)
+	if (pr->is_persist)
 		cl->r.persist = true;
 
-	if (h->key.arity) {
+	if (pr->key.arity) {
 		cell *p1 = c + 1;
 
-		if (!h->index && is_structure(p1))
-			h->is_noindex = true;
+		if (!pr->index && is_structure(p1))
+			pr->is_noindex = true;
 
-		if (h->index && is_structure(p1)) {
-			h->is_noindex = true;
-			h->index_save = h->index;
-			h->index = NULL;
+		if (pr->index && is_structure(p1)) {
+			pr->is_noindex = true;
+			pr->index_save = pr->index;
+			pr->index = NULL;
 		}
 
-		if (!h->index && (h->cnt > 50)
-			&& !m->pl->noindex && !h->is_noindex)
-			reindex_predicate(m, h);
+		if (!pr->index && (pr->cnt > 50)
+			&& !m->pl->noindex && !pr->is_noindex)
+			reindex_predicate(m, pr);
 
-		if (h->index) {
+		if (pr->index) {
 			if (!append)
-				m_set(h->index, c, cl);
+				m_set(pr->index, c, cl);
 			else
-				m_app(h->index, c, cl);
+				m_app(pr->index, c, cl);
 		}
 	}
 }
@@ -696,19 +696,19 @@ clause *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 {
 	clause *cl = assert_begin(m, nbr_vars, p1, consulting);
 	if (!cl) return NULL;
-	predicate *h = cl->owner;
+	predicate *pr = cl->owner;
 
-	if (h->head)
-		h->head->prev = cl;
+	if (pr->head)
+		pr->head->prev = cl;
 
-	cl->next = h->head;
-	h->head = cl;
-	h->cnt++;
+	cl->next = pr->head;
+	pr->head = cl;
+	pr->cnt++;
 
-	if (!h->tail)
-		h->tail = cl;
+	if (!pr->tail)
+		pr->tail = cl;
 
-	assert_commit(m, cl, h, false);
+	assert_commit(m, cl, pr, false);
 	return cl;
 }
 
@@ -716,19 +716,19 @@ clause *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 {
 	clause *cl = assert_begin(m, nbr_vars, p1, consulting);
 	if (!cl) return NULL;
-	predicate *h = cl->owner;
+	predicate *pr = cl->owner;
 
-	if (h->tail)
-		h->tail->next = cl;
+	if (pr->tail)
+		pr->tail->next = cl;
 
-	cl->prev = h->tail;
-	h->tail = cl;
-	h->cnt++;
+	cl->prev = pr->tail;
+	pr->tail = cl;
+	pr->cnt++;
 
-	if (!h->head)
-		h->head = cl;
+	if (!pr->head)
+		pr->head = cl;
 
-	assert_commit(m, cl, h, true);
+	assert_commit(m, cl, pr, true);
 	return cl;
 }
 
@@ -737,13 +737,13 @@ bool retract_from_db(module *m, clause *cl)
 	if (cl->r.ugen_erased)
 		return false;
 
-	predicate *h = cl->owner;
+	predicate *pr = cl->owner;
 
-	if (!--h->cnt) {
-		m_destroy(h->index);
-		m_destroy(h->index_save);
-		h->index = h->index_save = NULL;
-		h->head = h->tail = NULL;
+	if (!--pr->cnt) {
+		m_destroy(pr->index);
+		m_destroy(pr->index_save);
+		pr->index = pr->index_save = NULL;
+		pr->head = pr->tail = NULL;
 	}
 
 	cl->r.ugen_erased = ++m->pl->ugen;
@@ -940,11 +940,11 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 	query q = (query){0};
 	q.st.m = m;
 
-	for (predicate *h = m->head; h; h = h->next) {
-		if (h->is_prebuilt)
+	for (predicate *pr = m->head; pr; pr = pr->next) {
+		if (pr->is_prebuilt)
 			continue;
 
-		for (clause *cl = h->head; cl; cl = cl->next) {
+		for (clause *cl = pr->head; cl; cl = cl->next) {
 			if (cl->r.ugen_erased)
 				continue;
 
@@ -1021,20 +1021,20 @@ void destroy_module(module *m)
 
 	m_destroy(m->ops);
 
-	for (predicate *h = m->head; h;) {
-		predicate *save = h->next;
+	for (predicate *pr = m->head; pr;) {
+		predicate *save = pr->next;
 
-		for (clause *cl = h->head; cl;) {
+		for (clause *cl = pr->head; cl;) {
 			clause *save = cl->next;
 			clear_rule(&cl->r);
 			free(cl);
 			cl = save;
 		}
 
-		m_destroy(h->index);
-		m_destroy(h->index_save);
-		free(h);
-		h = save;
+		m_destroy(pr->index);
+		m_destroy(pr->index_save);
+		free(pr);
+		pr = save;
 	}
 
 	if (m->pl->modules == m) {

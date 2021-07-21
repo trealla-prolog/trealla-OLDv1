@@ -1743,9 +1743,9 @@ static void del_stream_properties(query *q, int n)
 	q->retry = QUERY_OK;
 
 #if 0
-	predicate *h = find_predicate(q->st.m, tmp);
+	predicate *pr = find_predicate(q->st.m, tmp);
 
-	if (!h) {
+	if (!pr) {
 		DISCARD_RESULT throw_error(q, tmp, "existence_error", "procedure");
 		return;
 	}
@@ -1918,17 +1918,17 @@ static void clear_streams_properties(query *q)
 	tmp.nbr_cells = 1;
 	tmp.arity = 2;
 
-	predicate *h = find_predicate(q->st.m, &tmp);
+	predicate *pr = find_predicate(q->st.m, &tmp);
 
-	if (h) {
-		for (clause *cl = h->head; cl;) {
+	if (pr) {
+		for (clause *cl = pr->head; cl;) {
 			clause *save = cl;
 			cl = cl->next;
 			add_to_dirty_list(q, save);
 		}
 
-		h->head = h->tail = NULL;
-		h->cnt = 0;
+		pr->head = pr->tail = NULL;
+		pr->cnt = 0;
 	}
 }
 
@@ -4560,9 +4560,9 @@ static USE_RESULT pl_status fn_iso_retract_1(query *q)
 static pl_status do_retractall(query *q, cell *p1, idx_t p1_ctx)
 {
 	cell *head = deref(q, get_head(p1), p1_ctx);
-	predicate *h = search_predicate(q->st.m, head);
+	predicate *pr = search_predicate(q->st.m, head);
 
-	if (!h) {
+	if (!pr) {
 		bool found = false;
 
 		assert(strlen(GET_STR(head)) == LEN_STR(head));
@@ -4592,13 +4592,13 @@ static USE_RESULT pl_status fn_iso_retractall_1(query *q)
 
 static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 {
-	predicate *h = search_predicate(q->st.m, c);
-	if (!h) return pl_success;
+	predicate *pr = search_predicate(q->st.m, c);
+	if (!pr) return pl_success;
 
-	if (!h->is_dynamic)
+	if (!pr->is_dynamic)
 		return throw_error(q, c_orig, "permission_error", "modify,static_procedure");
 
-	for (clause *cl = h->head; cl; cl = cl->next) {
+	for (clause *cl = pr->head; cl; cl = cl->next) {
 		if (!q->st.m->loading && cl->r.persist && !cl->r.ugen_erased)
 			db_log(q, cl, LOG_ERASE);
 
@@ -4606,12 +4606,12 @@ static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 	}
 
 	if (hard)
-		h->is_abolished = true;
+		pr->is_abolished = true;
 
-	m_destroy(h->index);
-	h->index = NULL;
-	h->head = h->tail = NULL;
-	h->cnt = 0;
+	m_destroy(pr->index);
+	pr->index = NULL;
+	pr->head = pr->tail = NULL;
+	pr->cnt = 0;
 	return pl_success;
 }
 
@@ -5533,16 +5533,16 @@ static bool search_functor(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_
 		q->st.iter2 = m_first(q->st.m->index);
 
 	DISCARD_RESULT make_choice(q);
-	predicate *h = NULL;
+	predicate *pr = NULL;
 
-	while (m_next(q->st.iter2, (void*)&h)) {
-		if (h->is_abolished)
+	while (m_next(q->st.iter2, (void*)&pr)) {
+		if (pr->is_abolished)
 			continue;
 
 		try_me(q, 2);
 		cell tmpn, tmpa;
-		make_literal(&tmpn, h->key.val_off);
-		make_int(&tmpa, h->key.arity);
+		make_literal(&tmpn, pr->key.val_off);
+		make_int(&tmpa, pr->key.arity);
 
 		if (unify(q, p1, p1_ctx, &tmpn, q->st.fp)
 			&& unify(q, p2, p2_ctx, &tmpa, q->st.fp)) {
@@ -6640,19 +6640,19 @@ static USE_RESULT pl_status fn_sys_assertz_2(query *q)
 
 static void save_db(FILE *fp, query *q, int logging)
 {
-	for (predicate *h = q->st.m->head; h && !g_tpl_interrupt; h = h->next) {
-		if (h->is_prebuilt)
+	for (predicate *pr = q->st.m->head; pr && !g_tpl_interrupt; pr = pr->next) {
+		if (pr->is_prebuilt)
 			continue;
 
-		if (logging && !h->is_persist)
+		if (logging && !pr->is_persist)
 			continue;
 
-		const char *src = GET_STR(&h->key);
+		const char *src = GET_STR(&pr->key);
 
 		if (src[0] == '$')
 			continue;
 
-		for (clause *cl = h->head; cl && !g_tpl_interrupt; cl = cl->next) {
+		for (clause *cl = pr->head; cl && !g_tpl_interrupt; cl = cl->next) {
 			if (cl->r.ugen_erased)
 				continue;
 
@@ -6682,17 +6682,17 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 {
 	module *m = q->st.curr_clause ? q->st.curr_clause->owner->m : q->st.m;
 
-	for (predicate *h = m->head; h && !g_tpl_interrupt; h = h->next) {
-		if (h->is_prebuilt)
+	for (predicate *pr = m->head; pr && !g_tpl_interrupt; pr = pr->next) {
+		if (pr->is_prebuilt)
 			continue;
 
-		if (name != h->key.val_off)
+		if (name != pr->key.val_off)
 			continue;
 
-		if ((arity != h->key.arity) && (arity != -1U))
+		if ((arity != pr->key.arity) && (arity != -1U))
 			continue;
 
-		for (clause *cl = h->head; cl && !g_tpl_interrupt; cl = cl->next) {
+		for (clause *cl = pr->head; cl && !g_tpl_interrupt; cl = cl->next) {
 			if (cl->r.ugen_erased)
 				continue;
 
@@ -10286,57 +10286,57 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 			return throw_error(q, p2, "domain_error", "predicate_property");
 	}
 
-	predicate *h = find_predicate(q->st.m, p1);
+	predicate *pr = find_predicate(q->st.m, p1);
 
-	if (h && !h->is_dynamic && !is_variable(p2)) {
+	if (pr && !pr->is_dynamic && !is_variable(p2)) {
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "built_in"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
-	if (h && h->is_multifile) {
+	if (pr && pr->is_multifile) {
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "multifile"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
-	if (h && h->is_dynamic) {
+	if (pr && pr->is_dynamic) {
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "dynamic"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
-	if (h && !h->is_dynamic) {
+	if (pr && !pr->is_dynamic) {
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "static"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
-	if (h && h->is_persist) {
+	if (pr && pr->is_persist) {
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "persist"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
-	if (h && h->is_public) {
+	if (pr && pr->is_public) {
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "public"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
-	if (h && h->is_public) {
+	if (pr && pr->is_public) {
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "exported"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
-	if (h) {
+	if (pr) {
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "static"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
 	}
 
-	if (h) {
+	if (pr) {
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "visible"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;

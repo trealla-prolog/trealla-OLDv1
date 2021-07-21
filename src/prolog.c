@@ -45,9 +45,9 @@ bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, idx_t ari
 	tmp.val_off = index_from_pool(m->pl, name);
 	if (tmp.val_off == ERR_IDX) return false;
 	tmp.arity = arity;
-	predicate *h = find_predicate(m, &tmp);
-	if (!h) return false;
-	return h->is_multifile ? true : false;
+	predicate *pr = find_predicate(m, &tmp);
+	if (!pr) return false;
+	return pr->is_multifile ? true : false;
 }
 
 static idx_t add_to_pool(prolog *pl, const char *name)

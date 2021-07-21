@@ -1008,9 +1008,9 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 			c->flags = 0;
 		}
 
-		predicate *h = search_predicate(q->st.m, head);
+		predicate *pr = search_predicate(q->st.m, head);
 
-		if (!h) {
+		if (!pr) {
 			bool found = false;
 
 			if (get_builtin(q->st.m->pl, GET_STR(head), head->arity, &found), found)
@@ -1019,10 +1019,10 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 			q->st.curr_clause2 = NULL;
 			return false;
 		} else {
-			if (!h->is_dynamic)
+			if (!pr->is_dynamic)
 				return throw_error(q, head, "permission_error", "modify,static_procedure");
 
-			q->st.curr_clause2 = h->head;
+			q->st.curr_clause2 = pr->head;
 		}
 
 		frame *g = GET_FRAME(q->st.curr_frame);
@@ -1100,9 +1100,9 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 			c->flags = 0;
 		}
 
-		predicate *h = search_predicate(q->st.m, p1);
+		predicate *pr = search_predicate(q->st.m, p1);
 
-		if (!h) {
+		if (!pr) {
 			bool found = false;
 
 			if (get_builtin(q->st.m->pl, GET_STR(p1), p1->arity, &found), found) {
@@ -1115,14 +1115,14 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 			q->st.curr_clause2 = NULL;
 			return pl_failure;
 		} else {
-			if (!h->is_dynamic) {
+			if (!pr->is_dynamic) {
 				if (is_retract != DO_CLAUSE)
 					return throw_error(q, p1, "permission_error", "modify,static_procedure");
 				else
 					return throw_error(q, p1, "permission_error", "access,private_procedure");
 			}
 
-			q->st.curr_clause2 = h->head;
+			q->st.curr_clause2 = pr->head;
 		}
 
 		frame *g = GET_FRAME(q->st.curr_frame);
@@ -1178,10 +1178,10 @@ static USE_RESULT pl_status match_head(query *q)
 {
 	if (!q->retry) {
 		cell *c = q->st.curr_cell;
-		predicate *h;
+		predicate *pr;
 
 		if (is_literal(c)) {
-			h = c->match;
+			pr = c->match;
 		} else {
 			// For now convert it to a literal
 			idx_t off = index_from_pool(q->st.m->pl, GET_STR(c));
@@ -1190,14 +1190,14 @@ static USE_RESULT pl_status match_head(query *q)
 			c->tag = TAG_LITERAL;
 			c->val_off = off;
 			c->flags = 0;
-			h = NULL;
+			pr = NULL;
 		}
 
-		if (!h) {
-			h = search_predicate(q->st.m, c);
+		if (!pr) {
+			pr = search_predicate(q->st.m, c);
 			q->save_m = q->st.m;
 
-			if (!h) {
+			if (!pr) {
 				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(c), "initialization")))
 					if (q->st.m->flag.unknown == 1)
 						return throw_error(q, c, "existence_error", "procedure");
@@ -1209,10 +1209,10 @@ static USE_RESULT pl_status match_head(query *q)
 				return pl_error;
 			}
 
-			c->match = h;
+			c->match = pr;
 		}
 
-		if (h->index) {
+		if (pr->index) {
 			cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
 			unsigned arity = key->arity;
 			bool all_vars = true;
@@ -1225,13 +1225,13 @@ static USE_RESULT pl_status match_head(query *q)
 			}
 
 			if (!all_vars) {
-				q->st.iter = m_findkey(h->index, key);
+				q->st.iter = m_findkey(pr->index, key);
 				next_key(q);
 			} else {
-				q->st.curr_clause = h->head;
+				q->st.curr_clause = pr->head;
 			}
 		} else {
-			q->st.curr_clause = h->head;
+			q->st.curr_clause = pr->head;
 		}
 
 		frame *g = GET_FRAME(q->st.curr_frame);

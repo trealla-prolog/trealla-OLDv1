@@ -503,9 +503,9 @@ static void directives(parser *p, cell *d)
 					if (!strcmp(PARSER_GET_STR(head), "//"))
 						tmp.arity += 2;
 
-					predicate *h = find_predicate(p->m, &tmp);
-					if (!h) h = create_predicate(p->m, &tmp);
-					if (!h) {
+					predicate *pr = find_predicate(p->m, &tmp);
+					if (!pr) pr = create_predicate(p->m, &tmp);
+					if (!pr) {
 						destroy_module(p->m);
 						p->m = NULL;
 						if (DUMP_ERRS || !p->do_read_term)
@@ -515,7 +515,7 @@ static void directives(parser *p, cell *d)
 						return;
 					}
 
-					h->is_public = true;
+					pr->is_public = true;
 				} else if (!strcmp(PARSER_GET_STR(head), "op") && (head->arity == 3)) {
 					do_op(p, head);
 					// TO-DO: make public...
@@ -789,9 +789,9 @@ void xref_rule(parser *p, rule *r, predicate *parent)
 
 void xref_db(parser *p)
 {
-	for (predicate *h = p->m->head; h; h = h->next) {
-		for (clause *cl = h->head; cl; cl = cl->next)
-			xref_rule(p, &cl->r, h);
+	for (predicate *pr = p->m->head; pr; pr = pr->next) {
+		for (clause *cl = pr->head; cl; cl = cl->next)
+			xref_rule(p, &cl->r, pr);
 	}
 }
 
@@ -1303,9 +1303,9 @@ static bool term_expansion(parser *p)
 	if (!strcmp(PARSER_GET_STR(p->r->cells), "-->"))
 		return dcg_expansion(p);
 
-	predicate *h = find_functor(p->m, "term_expansion", 2);
+	predicate *pr = find_functor(p->m, "term_expansion", 2);
 
-	if (!h || !h->cnt)
+	if (!pr || !pr->cnt)
 		return true;
 
 	// Being conservative here (for now) and using
