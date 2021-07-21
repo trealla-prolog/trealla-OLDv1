@@ -178,23 +178,23 @@ static void purge_dirty_list(query *q)
 	int cnt = 0;
 
 	while (q->dirty_list) {
-		clause *r = q->dirty_list;
-		q->dirty_list = r->dirty;
+		clause *cl = q->dirty_list;
+		q->dirty_list = cl->dirty;
 
-		if (r->prev)
-			r->prev->next = r->next;
+		if (cl->prev)
+			cl->prev->next = cl->next;
 
-		if (r->next)
-			r->next->prev = r->prev;
+		if (cl->next)
+			cl->next->prev = cl->prev;
 
-		if (r->owner->head == r)
-			r->owner->head = r->next;
+		if (cl->owner->head == cl)
+			cl->owner->head = cl->next;
 
-		if (r->owner->tail == r)
-			r->owner->tail = r->prev;
+		if (cl->owner->tail == cl)
+			cl->owner->tail = cl->prev;
 
-		clear_rule(&r->t);
-		free(r);
+		clear_rule(&cl->t);
+		free(cl);
 		cnt++;
 	}
 
@@ -223,13 +223,13 @@ static bool is_next_key(query *q)
 	return false;
 }
 
-void add_to_dirty_list(query *q, clause *r)
+void add_to_dirty_list(query *q, clause *cl)
 {
-	if (!retract_from_db(q->st.m, r))
+	if (!retract_from_db(q->st.m, cl))
 		return;
 
-	r->dirty = q->dirty_list;
-	q->dirty_list = r;
+	cl->dirty = q->dirty_list;
+	q->dirty_list = cl;
 }
 
 bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials)

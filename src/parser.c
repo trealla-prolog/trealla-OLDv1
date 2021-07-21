@@ -790,8 +790,8 @@ void xref_rule(parser *p, rule *t, predicate *parent)
 void xref_db(parser *p)
 {
 	for (predicate *h = p->m->head; h; h = h->next) {
-		for (clause *r = h->head; r; r = r->next)
-			xref_rule(p, &r->t, h);
+		for (clause *cl = h->head; cl; cl = cl->next)
+			xref_rule(p, &cl->t, h);
 	}
 }
 

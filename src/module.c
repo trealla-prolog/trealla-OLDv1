@@ -214,12 +214,12 @@ static int index_compkey(const void *ptr1, const void *ptr2, const void *param)
 clause *find_in_db(module *m, uuid *ref)
 {
 	for (predicate *h = m->head; h; h = h->next) {
-		for (clause *r = h->head ; r; r = r->next) {
-			if (r->t.ugen_erased)
+		for (clause *cl = h->head ; cl; cl = cl->next) {
+			if (cl->t.ugen_erased)
 				continue;
 
-			if (!memcmp(&r->u, ref, sizeof(uuid)))
-				return r;
+			if (!memcmp(&cl->u, ref, sizeof(uuid)))
+				return cl;
 		}
 	}
 
@@ -243,10 +243,10 @@ static void push_property(module *m, const char *name, unsigned arity, const cha
 
 clause *erase_from_db(module *m, uuid *ref)
 {
-	clause *r = find_in_db(m, ref);
-	if (!r) return 0;
-	r->t.ugen_erased = ++m->pl->ugen;
-	return r;
+	clause *cl = find_in_db(m, ref);
+	if (!cl) return 0;
+	cl->t.ugen_erased = ++m->pl->ugen;
+	return cl;
 }
 
 void set_noindex_in_db(module *m, const char *name, unsigned arity)
@@ -630,21 +630,21 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 	if (m->prebuilt)
 		h->is_prebuilt = true;
 
-	clause *r = calloc(sizeof(clause)+(sizeof(cell)*(p1->nbr_cells+1)), 1);
-	if (!r) {
+	clause *cl = calloc(sizeof(clause)+(sizeof(cell)*(p1->nbr_cells+1)), 1);
+	if (!cl) {
 		h->is_abolished = true;
 		return NULL;
 	}
 
-	copy_cells(r->t.cells, p1, p1->nbr_cells);
-	r->t.cells[p1->nbr_cells] = (cell){0};
-	r->t.cells[p1->nbr_cells].tag = TAG_END;
-	r->t.nbr_vars = nbr_vars;
-	r->t.nbr_cells = p1->nbr_cells;
-	r->t.cidx = p1->nbr_cells+1;
-	r->t.ugen_created = ++m->pl->ugen;
-	r->owner = h;
-	return r;
+	copy_cells(cl->t.cells, p1, p1->nbr_cells);
+	cl->t.cells[p1->nbr_cells] = (cell){0};
+	cl->t.cells[p1->nbr_cells].tag = TAG_END;
+	cl->t.nbr_vars = nbr_vars;
+	cl->t.nbr_cells = p1->nbr_cells;
+	cl->t.cidx = p1->nbr_cells+1;
+	cl->t.ugen_created = ++m->pl->ugen;
+	cl->owner = h;
+	return cl;
 }
 
 static void reindex_predicate(module *m, predicate *h)
@@ -652,20 +652,20 @@ static void reindex_predicate(module *m, predicate *h)
 	h->index = m_create(index_compkey, NULL, m);
 	ensure(h->index);
 
-	for (clause *r = h->head; r; r = r->next) {
-		cell *c = get_head(r->t.cells);
+	for (clause *cl = h->head; cl; cl = cl->next) {
+		cell *c = get_head(cl->t.cells);
 
-		if (!r->t.ugen_erased)
-			m_app(h->index, c, r);
+		if (!cl->t.ugen_erased)
+			m_app(h->index, c, cl);
 	}
 }
 
-static void assert_commit(module *m, clause *r, predicate *h, bool append)
+static void assert_commit(module *m, clause *cl, predicate *h, bool append)
 {
-	cell *c = get_head(r->t.cells);
+	cell *c = get_head(cl->t.cells);
 
 	if (h->is_persist)
-		r->t.persist = true;
+		cl->t.persist = true;
 
 	if (h->key.arity) {
 		cell *p1 = c + 1;
@@ -685,59 +685,59 @@ static void assert_commit(module *m, clause *r, predicate *h, bool append)
 
 		if (h->index) {
 			if (!append)
-				m_set(h->index, c, r);
+				m_set(h->index, c, cl);
 			else
-				m_app(h->index, c, r);
+				m_app(h->index, c, cl);
 		}
 	}
 }
 
 clause *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 {
-	clause *r = assert_begin(m, nbr_vars, p1, consulting);
-	if (!r) return NULL;
-	predicate *h = r->owner;
+	clause *cl = assert_begin(m, nbr_vars, p1, consulting);
+	if (!cl) return NULL;
+	predicate *h = cl->owner;
 
 	if (h->head)
-		h->head->prev = r;
+		h->head->prev = cl;
 
-	r->next = h->head;
-	h->head = r;
+	cl->next = h->head;
+	h->head = cl;
 	h->cnt++;
 
 	if (!h->tail)
-		h->tail = r;
+		h->tail = cl;
 
-	assert_commit(m, r, h, false);
-	return r;
+	assert_commit(m, cl, h, false);
+	return cl;
 }
 
 clause *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 {
-	clause *r = assert_begin(m, nbr_vars, p1, consulting);
-	if (!r) return NULL;
-	predicate *h = r->owner;
+	clause *cl = assert_begin(m, nbr_vars, p1, consulting);
+	if (!cl) return NULL;
+	predicate *h = cl->owner;
 
 	if (h->tail)
-		h->tail->next = r;
+		h->tail->next = cl;
 
-	r->prev = h->tail;
-	h->tail = r;
+	cl->prev = h->tail;
+	h->tail = cl;
 	h->cnt++;
 
 	if (!h->head)
-		h->head = r;
+		h->head = cl;
 
-	assert_commit(m, r, h, true);
-	return r;
+	assert_commit(m, cl, h, true);
+	return cl;
 }
 
-bool retract_from_db(module *m, clause *r)
+bool retract_from_db(module *m, clause *cl)
 {
-	if (r->t.ugen_erased)
+	if (cl->t.ugen_erased)
 		return false;
 
-	predicate *h = r->owner;
+	predicate *h = cl->owner;
 
 	if (!--h->cnt) {
 		m_destroy(h->index);
@@ -746,7 +746,7 @@ bool retract_from_db(module *m, clause *r)
 		h->head = h->tail = NULL;
 	}
 
-	r->t.ugen_erased = ++m->pl->ugen;
+	cl->t.ugen_erased = ++m->pl->ugen;
 	return true;
 }
 
@@ -944,14 +944,14 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 		if (h->is_prebuilt)
 			continue;
 
-		for (clause *r = h->head; r; r = r->next) {
-			if (r->t.ugen_erased)
+		for (clause *cl = h->head; cl; cl = cl->next) {
+			if (cl->t.ugen_erased)
 				continue;
 
 			if (canonical)
-				print_canonical(&q, fp, r->t.cells, ctx, 0);
+				print_canonical(&q, fp, cl->t.cells, ctx, 0);
 			else
-				print_canonical(&q, fp, r->t.cells, ctx, 0);
+				print_canonical(&q, fp, cl->t.cells, ctx, 0);
 
 			fprintf(fp, "\n");
 		}
@@ -1024,11 +1024,11 @@ void destroy_module(module *m)
 	for (predicate *h = m->head; h;) {
 		predicate *save = h->next;
 
-		for (clause *r = h->head; r;) {
-			clause *save = r->next;
-			clear_rule(&r->t);
-			free(r);
-			r = save;
+		for (clause *cl = h->head; cl;) {
+			clause *save = cl->next;
+			clear_rule(&cl->t);
+			free(cl);
+			cl = save;
 		}
 
 		m_destroy(h->index);

@@ -1608,7 +1608,7 @@ static int uuid_from_buf(const char *s, uuid *u)
 
 enum log_type { LOG_ASSERTA=1, LOG_ASSERTZ=2, LOG_ERASE=3 };
 
-static void db_log(query *q, clause *r, enum log_type l)
+static void db_log(query *q, clause *cl, enum log_type l)
 {
 	int save = q->quoted;
 	char tmpbuf[256];
@@ -1617,19 +1617,19 @@ static void db_log(query *q, clause *r, enum log_type l)
 
 	switch(l) {
 	case LOG_ASSERTA:
-		dst = print_term_to_strbuf(q, r->t.cells, q->st.curr_frame, 1);
-		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
+		dst = print_term_to_strbuf(q, cl->t.cells, q->st.curr_frame, 1);
+		uuid_to_buf(&cl->u, tmpbuf, sizeof(tmpbuf));
 		fprintf(q->st.m->fp, "'$a_'(%s,'%s').\n", dst, tmpbuf);
 		free(dst);
 		break;
 	case LOG_ASSERTZ:
-		dst = print_term_to_strbuf(q, r->t.cells, q->st.curr_frame, 1);
-		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
+		dst = print_term_to_strbuf(q, cl->t.cells, q->st.curr_frame, 1);
+		uuid_to_buf(&cl->u, tmpbuf, sizeof(tmpbuf));
 		fprintf(q->st.m->fp, "'$z_'(%s,'%s').\n", dst, tmpbuf);
 		free(dst);
 		break;
 	case LOG_ERASE:
-		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
+		uuid_to_buf(&cl->u, tmpbuf, sizeof(tmpbuf));
 		fprintf(q->st.m->fp, "'$e_'('%s').\n", tmpbuf);
 		break;
 	}
@@ -1657,13 +1657,13 @@ static pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, enum clause_type i
 	if (match != pl_success)
 		return match;
 
-	clause *r = q->st.curr_clause2;
+	clause *cl = q->st.curr_clause2;
 	bool last_match = !q->st.curr_clause2->next && (is_retract == DO_RETRACT);
-	stash_me(q, &r->t, last_match);
-	add_to_dirty_list(q, r);
+	stash_me(q, &cl->t, last_match);
+	add_to_dirty_list(q, cl);
 
-	if (!q->st.m->loading && r->t.persist)
-		db_log(q, r, LOG_ERASE);
+	if (!q->st.m->loading && cl->t.persist)
+		db_log(q, cl, LOG_ERASE);
 
 	return pl_success;
 }
@@ -1921,9 +1921,9 @@ static void clear_streams_properties(query *q)
 	predicate *h = find_predicate(q->st.m, &tmp);
 
 	if (h) {
-		for (clause *r = h->head; r;) {
-			clause *save = r;
-			r = r->next;
+		for (clause *cl = h->head; cl;) {
+			clause *save = cl;
+			cl = cl->next;
 			add_to_dirty_list(q, save);
 		}
 
@@ -4598,11 +4598,11 @@ static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 	if (!h->is_dynamic)
 		return throw_error(q, c_orig, "permission_error", "modify,static_procedure");
 
-	for (clause *r = h->head; r; r = r->next) {
-		if (!q->st.m->loading && r->t.persist && !r->t.ugen_erased)
-			db_log(q, r, LOG_ERASE);
+	for (clause *cl = h->head; cl; cl = cl->next) {
+		if (!q->st.m->loading && cl->t.persist && !cl->t.ugen_erased)
+			db_log(q, cl, LOG_ERASE);
 
-		add_to_dirty_list(q, r);
+		add_to_dirty_list(q, cl);
 	}
 
 	if (hard)
@@ -4773,13 +4773,13 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
 
-	clause *r = asserta_to_db(q->st.m, p->t->nbr_vars, p->t->cells, 0);
-	may_ptr_error(r);
+	clause *cl = asserta_to_db(q->st.m, p->t->nbr_vars, p->t->cells, 0);
+	may_ptr_error(cl);
 	p->t->cidx = 0;
-	uuid_gen(q->st.m->pl, &r->u);
+	uuid_gen(q->st.m->pl, &cl->u);
 
-	if (!q->st.m->loading && r->t.persist)
-		db_log(q, r, LOG_ASSERTA);
+	if (!q->st.m->loading && cl->t.persist)
+		db_log(q, cl, LOG_ASSERTA);
 
 	return pl_success;
 }
@@ -4843,13 +4843,13 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
 
-	clause *r = assertz_to_db(q->st.m, p->t->nbr_vars, p->t->cells, 0);
-	may_ptr_error(r);
+	clause *cl = assertz_to_db(q->st.m, p->t->nbr_vars, p->t->cells, 0);
+	may_ptr_error(cl);
 	p->t->cidx = 0;
-	uuid_gen(q->st.m->pl, &r->u);
+	uuid_gen(q->st.m->pl, &cl->u);
 
-	if (!q->st.m->loading && r->t.persist)
-		db_log(q, r, LOG_ASSERTZ);
+	if (!q->st.m->loading && cl->t.persist)
+		db_log(q, cl, LOG_ASSERTZ);
 
 	return pl_success;
 }
@@ -6350,11 +6350,11 @@ static USE_RESULT pl_status fn_erase_1(query *q)
 	GET_FIRST_ARG(p1,atom);
 	uuid u;
 	uuid_from_buf(GET_STR(p1), &u);
-	clause *r = erase_from_db(q->st.m, &u);
-	may_ptr_error(r);
+	clause *cl = erase_from_db(q->st.m, &u);
+	may_ptr_error(cl);
 
-	if (!q->st.m->loading && r->t.persist)
-		db_log(q, r, LOG_ERASE);
+	if (!q->st.m->loading && cl->t.persist)
+		db_log(q, cl, LOG_ERASE);
 
 	return pl_success;
 }
@@ -6365,9 +6365,9 @@ static USE_RESULT pl_status fn_instance_2(query *q)
 	GET_NEXT_ARG(p2,any);
 	uuid u;
 	uuid_from_buf(GET_STR(p1), &u);
-	clause *r = find_in_db(q->st.m, &u);
-	may_ptr_error(r);
-	return unify(q, p2, p2_ctx, r->t.cells, q->st.curr_frame);
+	clause *cl = find_in_db(q->st.m, &u);
+	may_ptr_error(cl);
+	return unify(q, p2, p2_ctx, cl->t.cells, q->st.curr_frame);
 }
 
 static USE_RESULT pl_status fn_clause_3(query *q)
@@ -6382,13 +6382,13 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 		if (!is_variable(p3)) {
 			uuid u;
 			uuid_from_buf(GET_STR(p3), &u);
-			clause *r = find_in_db(q->st.m, &u);
+			clause *cl = find_in_db(q->st.m, &u);
 
-			if (!r || (!u.u1 && !u.u2))
+			if (!cl || (!u.u1 && !u.u2))
 				break;
 
-			q->st.curr_clause2 = r;
-			t = &r->t;
+			q->st.curr_clause2 = cl;
+			t = &cl->t;
 			cell *head = get_head(t->cells);
 			unify(q, p1, p1_ctx, head, q->st.fp);
 		} else {
@@ -6498,26 +6498,26 @@ static pl_status do_asserta_2(query *q)
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
 
-	clause *r = asserta_to_db(q->st.m, p->t->nbr_vars, p->t->cells, 0);
-	may_ptr_error(r);
+	clause *cl = asserta_to_db(q->st.m, p->t->nbr_vars, p->t->cells, 0);
+	may_ptr_error(cl);
 	p->t->cidx = 0;
 
 	if (!is_variable(p2)) {
 		uuid u;
 		uuid_from_buf(GET_STR(p2), &u);
-		r->u = u;
+		cl->u = u;
 	} else {
-		uuid_gen(q->st.m->pl, &r->u);
+		uuid_gen(q->st.m->pl, &cl->u);
 		char tmpbuf[128];
-		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
+		uuid_to_buf(&cl->u, tmpbuf, sizeof(tmpbuf));
 		cell tmp2;
 		may_error(make_cstring(&tmp2, tmpbuf));
 		set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 		unshare_cell(&tmp2);
 	}
 
-	if (!q->st.m->loading && r->t.persist)
-		db_log(q, r, LOG_ASSERTA);
+	if (!q->st.m->loading && cl->t.persist)
+		db_log(q, cl, LOG_ASSERTA);
 
 	return pl_success;
 }
@@ -6600,26 +6600,26 @@ static pl_status do_assertz_2(query *q)
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
 
-	clause *r = assertz_to_db(q->st.m, p->t->nbr_vars, p->t->cells, 0);
-	may_ptr_error(r);
+	clause *cl = assertz_to_db(q->st.m, p->t->nbr_vars, p->t->cells, 0);
+	may_ptr_error(cl);
 	p->t->cidx = 0;
 
 	if (!is_variable(p2)) {
 		uuid u;
 		uuid_from_buf(GET_STR(p2), &u);
-		r->u = u;
+		cl->u = u;
 	} else {
-		uuid_gen(q->st.m->pl, &r->u);
+		uuid_gen(q->st.m->pl, &cl->u);
 		char tmpbuf[128];
-		uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
+		uuid_to_buf(&cl->u, tmpbuf, sizeof(tmpbuf));
 		cell tmp2;
 		may_error(make_cstring(&tmp2, tmpbuf));
 		set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 		unshare_cell(&tmp2);
 	}
 
-	if (!q->st.m->loading && r->t.persist)
-		db_log(q, r, LOG_ASSERTZ);
+	if (!q->st.m->loading && cl->t.persist)
+		db_log(q, cl, LOG_ASSERTZ);
 
 	return pl_success;
 }
@@ -6652,18 +6652,18 @@ static void save_db(FILE *fp, query *q, int logging)
 		if (src[0] == '$')
 			continue;
 
-		for (clause *r = h->head; r && !g_tpl_interrupt; r = r->next) {
-			if (r->t.ugen_erased)
+		for (clause *cl = h->head; cl && !g_tpl_interrupt; cl = cl->next) {
+			if (cl->t.ugen_erased)
 				continue;
 
 			if (logging)
 				fprintf(fp, "z_(");
 
-			print_term(q, fp, r->t.cells, q->st.curr_frame, 0);
+			print_term(q, fp, cl->t.cells, q->st.curr_frame, 0);
 
 			if (logging) {
 				char tmpbuf[256];
-				uuid_to_buf(&r->u, tmpbuf, sizeof(tmpbuf));
+				uuid_to_buf(&cl->u, tmpbuf, sizeof(tmpbuf));
 				fprintf(fp, ",'%s')", tmpbuf);
 			}
 
@@ -6692,11 +6692,11 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 		if ((arity != h->key.arity) && (arity != -1U))
 			continue;
 
-		for (clause *r = h->head; r && !g_tpl_interrupt; r = r->next) {
-			if (r->t.ugen_erased)
+		for (clause *cl = h->head; cl && !g_tpl_interrupt; cl = cl->next) {
+			if (cl->t.ugen_erased)
 				continue;
 
-			print_term(q, fp, r->t.cells, q->st.curr_frame, 0);
+			print_term(q, fp, cl->t.cells, q->st.curr_frame, 0);
 			fprintf(fp, ".\n");
 		}
 	}
