@@ -769,7 +769,7 @@ static void xref_cell(parser *p, rule *r, cell *c, predicate *parent)
 	if ((c->arity == 2)
 		&& !GET_OP(c)
 		&& (c->val_off != g_braces_s)
-		&& get_op(p->m, functor, &specifier, false)) {
+		&& search_op(p->m, functor, &specifier, false)) {
 		SET_OP(c, specifier);
 	}
 
@@ -2040,7 +2040,7 @@ static bool get_token(parser *p, int last_op)
 				continue;
 			}
 
-			if (get_op(p->m, p->token, NULL, false)) {
+			if (search_op(p->m, p->token, NULL, false)) {
 				p->is_op = true;
 
 				if (!strcmp(p->token, ","))

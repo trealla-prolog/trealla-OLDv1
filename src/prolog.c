@@ -161,8 +161,7 @@ bool pl_eval(prolog *pl, const char *s)
 
 bool pl_consult_fp(prolog *pl, FILE *fp, const char *filename)
 {
-	int ok = load_fp(pl->user_m, fp, filename);
-	return ok;
+	return load_fp(pl->user_m, fp, filename) != NULL;
 }
 
 bool pl_consult(prolog *pl, const char *filename)

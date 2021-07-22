@@ -1348,13 +1348,12 @@ static void dump_vars(query *q, bool partial)
 		// If priority >= '=' then put in parens...
 
 		if (is_structure(c)) {
-			unsigned spec = GET_OP(c);
-			unsigned pri = find_op(q->st.m, GET_STR(c), spec);
+			unsigned pri = find_op(q->st.m, GET_STR(c), GET_OP(c));
 			if (pri >= 700) parens = true;
 		}
 
-		if (is_atom(c) && get_op(q->st.m, GET_STR(c), NULL, false) && !GET_OP(c))
-			parens = true;
+		//if (is_atom(c) && search_op(q->st.m, GET_STR(c), NULL, false) && !IS_OP(c))
+		//	parens = true;
 
 		if (parens) fputc('(', stdout);
 		print_term(q, stdout, c, q->latest_ctx, -2);
