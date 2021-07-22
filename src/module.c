@@ -436,7 +436,7 @@ predicate *search_predicate(module *m, cell *c)
 	return NULL;
 }
 
-unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
+static unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
 {
 	miter *iter = m_findkey(m->ops, name);
 	op_table *ptr;

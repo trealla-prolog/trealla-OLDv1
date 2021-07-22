@@ -9,7 +9,6 @@ extern module *load_fp(module *m, FILE *fp, const char *filename);
 extern module *load_text(module *m, const char *src, const char *filename);
 
 extern clause *find_in_db(module *m, uuid *ref);
-extern unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix);
 extern unsigned find_op(module *m, const char *name, unsigned specifier);
 extern bool set_op(module *m, const char *name, unsigned specifier, unsigned priority);
 extern predicate *find_functor(module *m, const char *name, unsigned arity);

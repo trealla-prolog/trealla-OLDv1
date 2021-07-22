@@ -6287,7 +6287,7 @@ static pl_status do_op(query *q, cell *p3)
 	assert(strlen(GET_STR(p3)) == LEN_STR(p3));
 
 	unsigned tmp_optype = 0;
-	get_op(q->st.m, GET_STR(p3), &tmp_optype, false);
+	search_op(q->st.m, GET_STR(p3), &tmp_optype, false);
 
 	if (IS_INFIX(specifier) && IS_POSTFIX(tmp_optype))
 		return throw_error(q, p3, "permission_error", "create,operator");
