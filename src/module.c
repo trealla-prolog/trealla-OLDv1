@@ -569,6 +569,15 @@ unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_p
 	if (priority)
 		return priority;
 
+	for (unsigned i = 0; i < m->idx_used; i++) {
+		module *tmp_m = m->used[i];
+
+		priority = get_op(tmp_m, name, specifier, hint_prefix);
+
+		if (priority)
+			return priority;
+	}
+
 	for (m = m->pl->modules; m; m = m->next) {
 		if ((m == orig_m) || !m->user_ops)
 			continue;
