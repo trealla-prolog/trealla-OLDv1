@@ -1254,7 +1254,7 @@ static bool dcg_expansion(parser *p)
 
 	query *q = create_query(p->m, false);
 	ensure(q);
-	char *dst = print_term_to_strbuf(q, p->r->cells, 0, -1);
+	char *dst = print_canonical_to_strbuf(q, p->r->cells, 0, 0);
 	char *src = malloc(strlen(dst)+256);
 	ensure(src);
 	sprintf(src, "dcg_translate((%s),_TermOut).", dst);
