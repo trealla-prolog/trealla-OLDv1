@@ -419,6 +419,10 @@ static void directives(parser *p, cell *d)
 			//
 			p->already_loaded = true;
 			p->m = tmp_m;
+
+			if (tmp_m != p->m)
+				p->m->used[p->m->idx_used++] = tmp_m;
+
 			return;
 		}
 
@@ -430,6 +434,9 @@ static void directives(parser *p, cell *d)
 			p->error = true;
 			return;
 		}
+
+		if (tmp_m != p->m)
+			p->m->used[p->m->idx_used++] = tmp_m;
 
 		LIST_HANDLER(p2);
 
@@ -1218,7 +1225,7 @@ void reset(parser *p)
 
 static bool dcg_expansion(parser *p)
 {
-	if (!find_module(p->m->pl, "dcgs")) {
+	if (!p->dcgs && !find_module(p->m->pl, "dcgs")) {
 		for (library *lib = g_libs; lib->name; lib++) {
 			if (strcmp(lib->name, "dcgs"))
 				continue;
@@ -1229,9 +1236,16 @@ static bool dcg_expansion(parser *p)
 			src[*lib->len] = '\0';
 			STRING_alloc(s);
 			STRING_strcat2(s, "library/", lib->name);
-			load_text(p->m, src, STRING_cstr(s));
+			module *tmp_m = load_text(p->m, src, STRING_cstr(s));
+
+			if (tmp_m) {
+				p->m->used[p->m->idx_used++] = tmp_m;
+				p->dcgs = tmp_m;
+			}
+
 			STRING_free(s);
 			free(src);
+			break;
 		}
 	}
 

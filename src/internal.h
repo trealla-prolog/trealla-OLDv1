@@ -531,7 +531,7 @@ struct parser_ {
 	} vartab;
 
 	FILE *fp;
-	module *m;
+	module *m, *dcgs;
 	rule *r;
 	char *token, *save_line, *srcptr;
 	cell v;

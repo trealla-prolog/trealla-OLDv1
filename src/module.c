@@ -410,21 +410,46 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 
 predicate *search_predicate(module *m, cell *c)
 {
-	module *orig_m = m;
 	predicate *pr = find_predicate(m, c);
 
 	if (pr)
 		return pr;
 
-	for (m = m->pl->modules; m; m = m->next) {
-		if (m == orig_m)
-			continue;
-
-		pr = find_predicate(m, c);
+	for (unsigned i = 0; i < m->idx_used; i++) {
+		module *tmp_m = m->used[i];
+		pr = find_predicate(tmp_m, c);
 
 		if (pr)
 			return pr;
 	}
+
+#if 0
+	for (module *tmp_m = m->pl->modules; tmp_m; tmp_m = tmp_m->next) {
+		if (m == tmp_m)
+			continue;
+
+		pr = find_predicate(tmp_m, c);
+
+		if (pr) {
+			printf("*** %s\n", tmp_m->name);
+			m->used[m->idx_used++] = tmp_m;
+			return pr;
+		}
+	}
+#else
+	module *tmp_m = find_module(m->pl, "user");
+	if (tmp_m && (tmp_m != m)) { pr = find_predicate(tmp_m, c); if (pr) { m->used[m->idx_used++] = tmp_m; return pr; }}
+	tmp_m = find_module(m->pl, "format");
+	if (tmp_m && (tmp_m != m)) { pr = find_predicate(tmp_m, c); if (pr) { m->used[m->idx_used++] = tmp_m; return pr; }}
+	tmp_m = find_module(m->pl, "error");
+	if (tmp_m && (tmp_m != m)) { pr = find_predicate(tmp_m, c); if (pr) { m->used[m->idx_used++] = tmp_m; return pr; }}
+	tmp_m = find_module(m->pl, "lists");
+	if (tmp_m && (tmp_m != m)) { pr = find_predicate(tmp_m, c); if (pr) { m->used[m->idx_used++] = tmp_m; return pr; }}
+	tmp_m = find_module(m->pl, "apply");
+	if (tmp_m && (tmp_m != m)) { pr = find_predicate(tmp_m, c); if (pr) { m->used[m->idx_used++] = tmp_m; return pr; }}
+	tmp_m = find_module(m->pl, "dcgs");
+	if (tmp_m && (tmp_m != m)) { pr = find_predicate(tmp_m, c); if (pr) { m->used[m->idx_used++] = tmp_m; return pr; }}
+#endif
 
 	return NULL;
 }
@@ -1103,6 +1128,7 @@ module *create_module(prolog *pl, const char *name)
 
 	m->next = pl->modules;
 	pl->modules = m;
+
 	set_dynamic_in_db(m, "goal_expansion", 2);
 	set_dynamic_in_db(m, "initialization", 1);
 	set_dynamic_in_db(m, ":-", 1);
