@@ -36,6 +36,64 @@ int g_tpl_interrupt = 0;
 
 typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 
+// Note: when in commit there is a provisional choice point
+// that we should skip over, hence the '2' ...
+
+static bool any_choices(query *q, frame *g, bool in_commit)
+{
+	if (q->cp < (in_commit ? 2 : 1))
+		return false;
+
+	idx_t curr_choice = q->cp - (in_commit ? 2 : 1);
+	const choice *ch = GET_CHOICE(curr_choice);
+	return ch->cgen >= g->cgen ? true : false;
+}
+
+static void trace_call(query *q, cell *c, idx_t c_ctx, box_t box)
+{
+	if (!c || !c->fn || is_empty(c))
+		return;
+
+#if 0
+	if (is_builtin(c))
+		return;
+#endif
+
+	if (box == CALL)
+		box = q->retry?REDO:q->resume?NEXT:CALL;
+
+	const char *src = GET_STR(c);
+
+	if (!strcmp(src, ",") || !strcmp(src, ";") || !strcmp(src, "->"))
+		return;
+
+	fprintf(stderr, " [%llu] ", (unsigned long long)q->step++);
+	fprintf(stderr, "%s ",
+		box == CALL ? "CALL" :
+		box == EXIT ? "EXIT" :
+		box == REDO ? "REDO" :
+		box == NEXT ? (isatty(2)?"\e[32mNEXT\e[0m" : "NEXT") :
+		box == FAIL ? (isatty(2) ? "\e[31mFAIL\e[0m" : "FAIL") :
+		"????");
+
+#if DEBUG
+	frame *g = GET_CURR_FRAME();
+	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u:tp%u:cp%u:fp%u:sp%u:hp%u} ",
+		q->st.curr_frame, g->nbr_vars, g->nbr_slots, any_choices(q, g, false),
+		q->st.tp, q->cp, q->st.fp, q->st.sp, q->st.hp);
+#endif
+
+	int save_depth = q->max_depth;
+	q->max_depth = 1000;
+	print_term(q, stderr, c, c_ctx, -1);
+	fprintf(stderr, "\n");
+	fflush(stderr);
+	q->max_depth = save_depth;
+
+	if (q->creep)
+		sleep(1);
+}
+
 static USE_RESULT pl_status check_trail(query *q)
 {
 	if (q->st.tp > q->max_trails) {
@@ -113,64 +171,6 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 	}
 
 	return pl_success;
-}
-
-// Note: when in commit there is a provisional choice point
-// that we should skip over, hence the '2' ...
-
-static bool any_choices(query *q, frame *g, bool in_commit)
-{
-	if (q->cp < (in_commit ? 2 : 1))
-		return false;
-
-	idx_t curr_choice = q->cp - (in_commit ? 2 : 1);
-	const choice *ch = GET_CHOICE(curr_choice);
-	return ch->cgen >= g->cgen ? true : false;
-}
-
-static void trace_call(query *q, cell *c, idx_t c_ctx, box_t box)
-{
-	if (!c || !c->fn || is_empty(c))
-		return;
-
-#if 0
-	if (is_builtin(c))
-		return;
-#endif
-
-	if (box == CALL)
-		box = q->retry?REDO:q->resume?NEXT:CALL;
-
-	const char *src = GET_STR(c);
-
-	if (!strcmp(src, ",") || !strcmp(src, ";") || !strcmp(src, "->"))
-		return;
-
-	fprintf(stderr, " [%llu] ", (unsigned long long)q->step++);
-	fprintf(stderr, "%s ",
-		box == CALL ? "CALL" :
-		box == EXIT ? "EXIT" :
-		box == REDO ? "REDO" :
-		box == NEXT ? (isatty(2)?"\e[32mNEXT\e[0m" : "NEXT") :
-		box == FAIL ? (isatty(2) ? "\e[31mFAIL\e[0m" : "FAIL") :
-		"????");
-
-#if DEBUG
-	frame *g = GET_CURR_FRAME();
-	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u:tp%u:cp%u:fp%u:sp%u:hp%u} ",
-		q->st.curr_frame, g->nbr_vars, g->nbr_slots, any_choices(q, g, false),
-		q->st.tp, q->cp, q->st.fp, q->st.sp, q->st.hp);
-#endif
-
-	int save_depth = q->max_depth;
-	q->max_depth = 1000;
-	print_term(q, stderr, c, c_ctx, -1);
-	fprintf(stderr, "\n");
-	fflush(stderr);
-	q->max_depth = save_depth;
-
-	if (q->creep)
-		sleep(1);
 }
 
 static void purge_dirty_list(query *q)
@@ -1352,8 +1352,8 @@ static void dump_vars(query *q, bool partial)
 			if (pri >= 700) parens = true;
 		}
 
-		//if (is_atom(c) && search_op(q->st.m, GET_STR(c), NULL, false) && !IS_OP(c))
-		//	parens = true;
+		if (is_atom(c) && search_op(q->st.m, GET_STR(c), NULL, false) && !IS_OP(c))
+			parens = true;
 
 		if (parens) fputc('(', stdout);
 		print_term(q, stdout, c, q->latest_ctx, -2);
