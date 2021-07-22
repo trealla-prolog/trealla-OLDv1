@@ -77,7 +77,7 @@ cell *alloc_on_heap(query *q, idx_t nbr_cells)
 		a->heap = calloc(q->h_size, sizeof(cell));
 		ensure(a->heap);
 		a->h_size = q->h_size;
-		a->nbr = q->st.anbr++;
+		a->nbr = q->st.arena_nbr++;
 		q->arenas = a;
 	}
 
@@ -94,7 +94,7 @@ cell *alloc_on_heap(query *q, idx_t nbr_cells)
 		a->heap = calloc(q->h_size, sizeof(cell));
 		ensure(a->heap);
 		a->h_size = q->h_size;
-		a->nbr = q->st.anbr++;
+		a->nbr = q->st.arena_nbr++;
 		q->arenas = a;
 		q->st.hp = 0;
 	}

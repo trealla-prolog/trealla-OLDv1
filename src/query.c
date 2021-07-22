@@ -344,7 +344,7 @@ void try_me(const query *q, unsigned nbr_vars)
 static void trim_heap(query *q, const choice *ch)
 {
 	for (arena *a = q->arenas; a;) {
-		if (a->nbr <= ch->st.anbr)
+		if (a->nbr <= ch->st.arena_nbr)
 			break;
 
 		for (idx_t i = 0; i < a->hp; i++) {
