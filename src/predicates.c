@@ -11405,11 +11405,14 @@ static USE_RESULT pl_status fn_module_1(query *q)
 static USE_RESULT pl_status fn_using_0(query *q)
 {
 	module *m = q->st.m;
-	fprintf(stdout, "[%s]\n", m->name);
+	fprintf(stdout, "%s --> [", m->name);
 
-	for (unsigned i = 0; i < m->idx_used; i++)
-		fprintf(stdout, "  %s\n", m->used[i]->name);
+	for (unsigned i = 0; i < m->idx_used; i++) {
+		if (i) fprintf(stdout, "%s", ",");
+		fprintf(stdout, "%s", m->used[i]->name);
+	}
 
+	fprintf(stdout, "].\n");
 	return pl_success;
 }
 
