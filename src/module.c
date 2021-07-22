@@ -486,6 +486,7 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 	tmp->priority = priority;
 	tmp->specifier = specifier;
 	m->loaded_ops = false;
+	m->user_ops = true;
 	m_app(m->ops, tmp->name, tmp);
 	return true;
 }
@@ -598,15 +599,17 @@ unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_p
 			return priority;
 	}
 
-#if 0
+#if 1
 	for (module *tmp_m = m->pl->modules; tmp_m; tmp_m = tmp_m->next) {
 		if ((m == tmp_m) || !tmp_m->user_ops)
 			continue;
 
 		priority = get_op(tmp_m, name, specifier, hint_prefix);
 
-		if (priority)
+		if (priority) {
+			m->used[m->idx_used++] = tmp_m;
 			return priority;
+		}
 	}
 #endif
 
