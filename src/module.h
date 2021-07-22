@@ -10,12 +10,12 @@ extern module *load_text(module *m, const char *src, const char *filename);
 
 extern clause *find_in_db(module *m, uuid *ref);
 extern unsigned find_op(module *m, const char *name, unsigned specifier);
+extern unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_prefix);
 extern bool set_op(module *m, const char *name, unsigned specifier, unsigned priority);
 extern predicate *find_functor(module *m, const char *name, unsigned arity);
 extern predicate *find_predicate(module *m, cell *c);
 extern predicate *search_predicate(module *m, cell *c);
 extern predicate *create_predicate(module *m, cell *c);
-extern unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_prefix);
 extern bool needs_quoting(module *m, const char *src, int srclen);
 extern void do_db_load(module *m);
 

@@ -436,73 +436,6 @@ predicate *search_predicate(module *m, cell *c)
 	return NULL;
 }
 
-static unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
-{
-	miter *iter = m_findkey(m->ops, name);
-	op_table *ptr;
-
-	while (m_nextkey(iter, (void**)&ptr)) {
-		if (!ptr->priority)
-			continue;
-
-		if (hint_prefix && !IS_PREFIX(ptr->specifier))
-			continue;
-
-		if (specifier) *specifier = ptr->specifier;
-		m_done(iter);
-		return ptr->priority;
-	}
-
-	iter = m_findkey(m->defops, name);
-
-	while (m_nextkey(iter, (void**)&ptr)) {
-		if (!ptr->priority)
-			continue;
-
-		if (hint_prefix && !IS_PREFIX(ptr->specifier))
-			continue;
-
-		if (specifier) *specifier = ptr->specifier;
-		m_done(iter);
-		return ptr->priority;
-	}
-
-	if (hint_prefix)
-		return get_op(m, name, specifier, false);
-
-	return 0;
-}
-
-unsigned find_op(module *m, const char *name, unsigned specifier)
-{
-	miter *iter = m_findkey(m->ops, name);
-	op_table *ptr;
-
-	while (m_nextkey(iter, (void**)&ptr)) {
-		if (!ptr->priority)
-			continue;
-
-		if (ptr->specifier == specifier) {
-			m_done(iter);
-			return ptr->priority;
-		}
-	}
-
-	iter = m_findkey(m->defops, name);
-
-	while (m_nextkey(iter, (void**)&ptr)) {
-		if (!ptr->priority)
-			continue;
-
-		if (ptr->specifier == specifier) {
-			m_done(iter);
-			return ptr->priority;
-		}
-	}
-
-	return 0;
-}
-
 bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 {
 	miter *iter = m_findkey(m->ops, name);
@@ -555,6 +488,95 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 	m->loaded_ops = false;
 	m_app(m->ops, tmp->name, tmp);
 	return true;
+}
+
+static unsigned find_op_internal(module *m, const char *name, unsigned specifier)
+{
+	miter *iter = m_findkey(m->ops, name);
+	op_table *ptr;
+
+	while (m_nextkey(iter, (void**)&ptr)) {
+		if (!ptr->priority)
+			continue;
+
+		if (ptr->specifier == specifier) {
+			m_done(iter);
+			return ptr->priority;
+		}
+	}
+
+	iter = m_findkey(m->defops, name);
+
+	while (m_nextkey(iter, (void**)&ptr)) {
+		if (!ptr->priority)
+			continue;
+
+		if (ptr->specifier == specifier) {
+			m_done(iter);
+			return ptr->priority;
+		}
+	}
+
+	return 0;
+}
+
+unsigned find_op(module *m, const char *name, unsigned specifier)
+{
+	unsigned priority = find_op_internal(m, name, specifier);
+
+	if (priority)
+		return priority;
+
+	for (unsigned i = 0; i < m->idx_used; i++) {
+		module *tmp_m = m->used[i];
+
+		if ((m == tmp_m) || !tmp_m->user_ops)
+			continue;
+
+		priority = find_op_internal(tmp_m, name, specifier);
+
+		if (priority)
+			return priority;
+	}
+
+	return 0;
+}
+
+static unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
+{
+	miter *iter = m_findkey(m->ops, name);
+	op_table *ptr;
+
+	while (m_nextkey(iter, (void**)&ptr)) {
+		if (!ptr->priority)
+			continue;
+
+		if (hint_prefix && !IS_PREFIX(ptr->specifier))
+			continue;
+
+		if (specifier) *specifier = ptr->specifier;
+		m_done(iter);
+		return ptr->priority;
+	}
+
+	iter = m_findkey(m->defops, name);
+
+	while (m_nextkey(iter, (void**)&ptr)) {
+		if (!ptr->priority)
+			continue;
+
+		if (hint_prefix && !IS_PREFIX(ptr->specifier))
+			continue;
+
+		if (specifier) *specifier = ptr->specifier;
+		m_done(iter);
+		return ptr->priority;
+	}
+
+	if (hint_prefix)
+		return get_op(m, name, specifier, false);
+
+	return 0;
 }
 
 unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
