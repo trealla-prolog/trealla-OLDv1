@@ -406,8 +406,6 @@ predicate *find_functor(module *m, const char *name, unsigned arity)
 	return find_predicate(m, &tmp);
 }
 
-// FIXME: this should only search the current modules, not all of them.
-
 predicate *search_predicate(module *m, cell *c)
 {
 	predicate *pr = find_predicate(m, c);
@@ -559,11 +557,8 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 	return true;
 }
 
-// FIXME: this should only search the current modules, not all of them.
-
 unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
 {
-	module *orig_m = m;
 	unsigned priority = get_op(m, name, specifier, hint_prefix);
 
 	if (priority)
@@ -572,21 +567,26 @@ unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_p
 	for (unsigned i = 0; i < m->idx_used; i++) {
 		module *tmp_m = m->used[i];
 
+		if ((m == tmp_m) || !tmp_m->user_ops)
+			continue;
+
 		priority = get_op(tmp_m, name, specifier, hint_prefix);
 
 		if (priority)
 			return priority;
 	}
 
-	for (m = m->pl->modules; m; m = m->next) {
-		if ((m == orig_m) || !m->user_ops)
+#if 0
+	for (module *tmp_m = m->pl->modules; tmp_m; tmp_m = tmp_m->next) {
+		if ((m == tmp_m) || !tmp_m->user_ops)
 			continue;
 
-		priority = get_op(m, name, specifier, hint_prefix);
+		priority = get_op(tmp_m, name, specifier, hint_prefix);
 
 		if (priority)
 			return priority;
 	}
+#endif
 
 	return 0;
 }
