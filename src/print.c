@@ -820,7 +820,12 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	dst += snprintf(dst, dstlen, "%s", src);
 
 	if ((strchr(src, '=') || strchr(src, '+') || strchr(src, '#')) &&
-		((*GET_STR(rhs) == '-') || (*GET_STR(rhs) == '~') || (*GET_STR(rhs) == '?') || (*GET_STR(rhs) == '#')))
+		((*GET_STR(rhs) == '-')
+			|| (*GET_STR(rhs) == '*')
+			|| (*GET_STR(rhs) == '+')
+			|| (*GET_STR(rhs) == '~')
+			|| (*GET_STR(rhs) == '?') ||
+			(*GET_STR(rhs) == '#')))
 		space = 1;
 
 	if (!*src) space = 0;
