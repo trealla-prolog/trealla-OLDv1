@@ -566,9 +566,12 @@ struct loaded_file {
 	char filename[PATH_MAX];
 };
 
+#define MAX_MODULES_USED 64
+
 struct module_ {
 	module *next;
 	prolog *pl;
+	module *used[MAX_MODULES_USED];
 	query *tasks;
 	char *name, *filename;
 	predicate *head, *tail;
@@ -576,7 +579,7 @@ struct module_ {
 	FILE *fp;
 	map *index, *nbs, *ops, *defops;
 	struct loaded_file *loaded_files;
-	idx_t id;
+	unsigned id, idx_used;
 	prolog_flags flag;
 	bool user_ops:1;
 	bool prebuilt:1;

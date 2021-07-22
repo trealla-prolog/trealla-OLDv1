@@ -477,8 +477,9 @@ static void directives(parser *p, cell *d)
 			return;
 		}
 
-		p->m = create_module(p->m->pl, name);
-		if (!p->m) {
+		tmp_m = create_module(p->m->pl, name);
+
+		if (!tmp_m) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: module creation failed: %s\n", name);
 
@@ -486,6 +487,7 @@ static void directives(parser *p, cell *d)
 			return;
 		}
 
+		p->m = tmp_m;
 		LIST_HANDLER(p2);
 
 		while (is_iso_list(p2)) {
@@ -528,10 +530,6 @@ static void directives(parser *p, cell *d)
 		return;
 	}
 
-	if (!strcmp(dirname, "meta_predicate") && (c->arity == 1)) {
-		if (!is_structure(p1)) return;
-	}
-
 	if ((!strcmp(dirname, "use_module") || !strcmp(dirname, "autoload")) && (c->arity >= 1)) {
 		if (!is_atom(p1) && !is_structure(p1)) return;
 		const char *name = PARSER_GET_STR(p1);
@@ -546,6 +544,9 @@ static void directives(parser *p, cell *d)
 			if ((m = find_module(p->m->pl, name)) != NULL) {
 				if (!m->fp)
 					do_db_load(m);
+
+				if (m != p->m)
+					p->m->used[p->m->idx_used++] = m;
 
 				return;
 			}
@@ -573,6 +574,9 @@ static void directives(parser *p, cell *d)
 				if (m != p->m)
 					do_db_load(m);
 
+				if (m != p->m)
+					p->m->used[p->m->idx_used++] = m;
+
 				return;
 			}
 
@@ -586,8 +590,9 @@ static void directives(parser *p, cell *d)
 		}
 
 		char *filename = relative_to(p->m->filename, name);
+		module *m;
 
-		if (!load_file(p->m, filename)) {
+		if (!(m = load_file(p->m, filename))) {
 			//if (DUMP_ERRS || !p->do_read_term)
 			//	fprintf(stdout, "Error: using module file: %s\n", filename);
 
@@ -597,6 +602,15 @@ static void directives(parser *p, cell *d)
 		}
 
 		free(filename);
+
+		if (m != p->m)
+			p->m->used[p->m->idx_used++] = m;
+
+		return;
+	}
+
+	if (!strcmp(dirname, "meta_predicate") && (c->arity == 1)) {
+		if (!is_structure(p1)) return;
 	}
 
 	if (!strcmp(dirname, "set_prolog_flag") && (c->arity == 2)) {

@@ -805,17 +805,17 @@ module *load_text(module *m, const char *src, const char *filename)
 		p->m->pl->quiet = save;
 	}
 
-	m = p->m;
+	module *save_m = p->m;
 	free(p->m->filename);
 	p->m->filename = save_filename;
 	destroy_parser(p);
-	return m;
+	return save_m;
 }
 
-bool load_fp(module *m, FILE *fp, const char *filename)
+module *load_fp(module *m, FILE *fp, const char *filename)
 {
 	parser *p = create_parser(m);
-	if (!p) return false;
+	if (!p) return NULL;
 	char *save_filename = m->filename;
 	m->filename = strdup(filename);
 	p->consulting = true;
@@ -843,6 +843,8 @@ bool load_fp(module *m, FILE *fp, const char *filename)
 		p->error = true;
 	}
 
+	module *save_m = p->m;
+
 	if (!p->error && !p->already_loaded) {
 		xref_db(p);
 		int save = p->m->pl->quiet;
@@ -865,19 +867,19 @@ bool load_fp(module *m, FILE *fp, const char *filename)
 	destroy_parser(p);
 	free(m->filename);
 	m->filename = save_filename;
-	return ok;
+	return save_m;
 }
 
-bool load_file(module *m, const char *filename)
+module *load_file(module *m, const char *filename)
 {
 	if (!strcmp(filename, "user")) {
 		for (int i = 0; i < MAX_STREAMS; i++) {
 			stream *str = &g_streams[i];
 
 			if (!strcmp(str->name, "user_input")) {
-				int ok = load_fp(m, str->fp, filename);
+				module *save_m = load_fp(m, str->fp, filename);
 				clearerr(str->fp);
-				return ok;
+				return save_m;
 			}
 		}
 	}
@@ -914,7 +916,7 @@ bool load_file(module *m, const char *filename)
 
 	if (!fp) {
 		free(realbuf);
-		return false;
+		return NULL;
 	}
 
 	// Check for a BOM
@@ -926,11 +928,11 @@ bool load_file(module *m, const char *filename)
 
 	clearerr(fp);
 	char *tmp_filename = strdup(realbuf);
-	bool ok = load_fp(m, fp, tmp_filename);
+	module *save_m = load_fp(m, fp, tmp_filename);
 	fclose(fp);
 	free(realbuf);
 	free(tmp_filename);
-	return ok;
+	return save_m;
 }
 
 static void module_save_fp(module *m, FILE *fp, int canonical, int dq)

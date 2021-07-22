@@ -4,8 +4,8 @@ extern module *create_module(prolog *pl, const char *name);
 extern void destroy_module(module *m);
 
 extern bool save_file(module *m, const char *filename);
-extern bool load_file(module *m, const char *filename);
-extern bool load_fp(module *m, FILE *fp, const char *filename);
+extern module *load_file(module *m, const char *filename);
+extern module *load_fp(module *m, FILE *fp, const char *filename);
 extern module *load_text(module *m, const char *src, const char *filename);
 
 extern clause *find_in_db(module *m, uuid *ref);

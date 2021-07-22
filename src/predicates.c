@@ -11308,6 +11308,9 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			if (!m->fp)
 				do_db_load(m);
 
+			if (m != q->st.m)
+				q->st.m->used[q->st.m->idx_used++] = m;
+
 			return pl_success;
 		}
 
@@ -11336,6 +11339,9 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			if (m != q->st.m)
 				do_db_load(m);
 
+			if (m != q->st.m)
+				q->st.m->used[q->st.m->idx_used++] = m;
+
 			return pl_success;
 		}
 
@@ -11347,14 +11353,19 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 	}
 
 	char *filename = relative_to(q->st.m->filename, name);
+	module *m;
 
-	if (!load_file(q->st.m, filename)) {
+	if (!(m = load_file(q->st.m, filename))) {
 		fprintf(stdout, "Error: module file not found: %s\n", filename);
 		free(filename);
 		return pl_failure;
 	}
 
 	free(filename);
+
+	if (m != q->st.m)
+		q->st.m->used[q->st.m->idx_used++] = m;
+
 	return pl_success;
 }
 
@@ -11388,6 +11399,17 @@ static USE_RESULT pl_status fn_module_1(query *q)
 	}
 
 	q->st.m = m;
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_using_0(query *q)
+{
+	module *m = q->st.m;
+	fprintf(stdout, "[%s]\n", m->name);
+
+	for (unsigned i = 0; i < m->idx_used; i++)
+		fprintf(stdout, "  %s\n", m->used[i]->name);
+
 	return pl_success;
 }
 
@@ -11702,6 +11724,7 @@ static const struct builtins g_predicates_other[] =
 	{"use_module", 1, fn_use_module_1, NULL},
 	{"use_module", 2, fn_use_module_2, NULL},
 	{"module", 1, fn_module_1, NULL},
+	{"using", 0, fn_using_0, NULL},
 	{"load_files", 2, fn_load_files_2, NULL},
 	{"listing", 0, fn_listing_0, NULL},
 	{"listing", 1, fn_listing_1, NULL},
