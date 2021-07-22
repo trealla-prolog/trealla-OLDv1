@@ -423,7 +423,6 @@ predicate *search_predicate(module *m, cell *c)
 			return pr;
 	}
 
-#if 0
 	for (module *tmp_m = m->pl->modules; tmp_m; tmp_m = tmp_m->next) {
 		if (m == tmp_m)
 			continue;
@@ -431,25 +430,10 @@ predicate *search_predicate(module *m, cell *c)
 		pr = find_predicate(tmp_m, c);
 
 		if (pr) {
-			printf("*** %s\n", tmp_m->name);
 			m->used[m->idx_used++] = tmp_m;
 			return pr;
 		}
 	}
-#else
-	module *tmp_m = find_module(m->pl, "user");
-	if (tmp_m && (tmp_m != m)) { pr = find_predicate(tmp_m, c); if (pr) { m->used[m->idx_used++] = tmp_m; return pr; }}
-	tmp_m = find_module(m->pl, "format");
-	if (tmp_m && (tmp_m != m)) { pr = find_predicate(tmp_m, c); if (pr) { m->used[m->idx_used++] = tmp_m; return pr; }}
-	tmp_m = find_module(m->pl, "error");
-	if (tmp_m && (tmp_m != m)) { pr = find_predicate(tmp_m, c); if (pr) { m->used[m->idx_used++] = tmp_m; return pr; }}
-	tmp_m = find_module(m->pl, "lists");
-	if (tmp_m && (tmp_m != m)) { pr = find_predicate(tmp_m, c); if (pr) { m->used[m->idx_used++] = tmp_m; return pr; }}
-	tmp_m = find_module(m->pl, "apply");
-	if (tmp_m && (tmp_m != m)) { pr = find_predicate(tmp_m, c); if (pr) { m->used[m->idx_used++] = tmp_m; return pr; }}
-	tmp_m = find_module(m->pl, "dcgs");
-	if (tmp_m && (tmp_m != m)) { pr = find_predicate(tmp_m, c); if (pr) { m->used[m->idx_used++] = tmp_m; return pr; }}
-#endif
 
 	return NULL;
 }
