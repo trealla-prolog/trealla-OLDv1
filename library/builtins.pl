@@ -35,10 +35,10 @@ predicate_property(P, A) :-
 	'$legacy_predicate_property'(P, A).
 predicate_property(P, A) :-
 	'$load_properties',
-	(var(A) -> true ;
-	 (memberchk(A, [built_in,control_construct,discontiguous,private,static,dynamic,persist,multifile,meta_predicate(_)]) ->
-		true ;
-		throw(error(domain_error(predicate_property, A), P))
+	(	var(A) -> true
+	;	(Controls = [built_in,control_construct,discontiguous,private,static,dynamic,persist,multifile,meta_predicate(_)],
+		memberchk(A, Controls) -> true
+		; throw(error(domain_error(predicate_property, A), P))
 		)
 	),
 	must_be(P, callable, _, _),
@@ -242,9 +242,9 @@ keymerge(<, H1, H2, T1, T2, [H1|R]) :-
 %
 
 keycompare(Delta, (K1-_), (K2-_)) :-
-	(K1 @< K2 -> Delta = '<' ;
-	(K1 @> K2 -> Delta = '>' ;
-	Delta = '=')).
+	(	K1 @< K2 -> Delta = '<'
+	;	(K1 @> K2 -> Delta = '>'
+	;	Delta = '=')).
 
 keysort(L, R) :-
 	'$mustbe_pairlist'(L),
@@ -286,11 +286,10 @@ phrase(GRBody, S0) :-
 	phrase(GRBody, S0, []).
 
 phrase(GRBody, S0, S) :-
-	( var(GRBody) ->
-		throw(error(instantiation_error, phrase/3))
-	; dcg_constr(GRBody) -> phrase_(GRBody, S0, S)
-	; functor(GRBody, _, _) -> call(GRBody, S0, S)
-	; throw(error(type_error(callable, GRBody), phrase/3))
+	(	var(GRBody) -> throw(error(instantiation_error, phrase/3))
+	;	dcg_constr(GRBody) -> phrase_(GRBody, S0, S)
+	;	functor(GRBody, _, _) -> call(GRBody, S0, S)
+	;	throw(error(type_error(callable, GRBody), phrase/3))
 	).
 
 phrase_([], S, S).
@@ -299,8 +298,8 @@ phrase_((A, B), S0, S) :-
 	phrase(A, S0, S1), phrase(B, S1, S).
 phrase_((A -> B ; C), S0, S) :-
 	!,
-	(phrase(A, S0, S1) ->
-		phrase(B, S1, S) ; phrase(C, S0, S)
+	(	phrase(A, S0, S1) -> phrase(B, S1, S)
+	; phrase(C, S0, S)
 	).
 phrase_((A ; B), S0, S) :-
 	(phrase(A, S0, S) ; phrase(B, S0, S)).
@@ -552,10 +551,11 @@ put_atts(Var, [H|T]) :- !,
 put_atts(Var, -Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
-	(var(Value) -> Functor = Value ; functor(Value, Functor, _)),
+	(	var(Value) -> Functor = Value
+	; 	functor(Value, Functor, _)
+	),
 	dict:del(D, Module-Functor, D2),
-	(
-		D2 = [] -> '$erase_attributes'(Var)
+	(	D2 = [] -> '$erase_attributes'(Var)
 		; '$write_attributes'(Var, D2)
 	).
 
@@ -619,11 +619,10 @@ atomic_list_concat(L, Atom) :-
 atomic_list_concat([], _, Atom) :-
 	!, Atom = ''.
 atomic_list_concat(L, Sep, Atom) :-
-	( atom(Sep), ground(L), is_list(L) )
-	->  list_atom(L, Sep, Atom)
-	;   ( atom(Sep), atom(Atom) )
-	->  atom_list(Atom, Sep, L)
-	;   instantiation_error(atomic_list_concat_(L, Sep, Atom)).
+	(	atom(Sep), ground(L), is_list(L) ) ->  list_atom(L, Sep, Atom)
+	;   ( atom(Sep), atom(Atom) ) ->  atom_list(Atom, Sep, L)
+	;   instantiation_error(atomic_list_concat_(L, Sep, Atom)
+	).
 
 list_atom([Word],  _, Word).
 list_atom([Word|L], Sep, Atom) :-
@@ -658,11 +657,15 @@ plus(_,_,_) :-
 
 succ(X,S) :- nonvar(X), Y=1, nonvar(Y),
 	must_be(X, integer, _, _), must_be(Y, integer, _, _), !,
-	(X >= 0 -> true ; throw(error(domain_error(not_less_than_zero, X), succ/2))),
+	(	X >= 0 -> true
+	; 	throw(error(domain_error(not_less_than_zero, X), succ/2))
+	),
 	S is X + Y.
 succ(X,S) :- var(X), Y=1, nonvar(Y), nonvar(S),
 	must_be(S, integer, _, _), must_be(Y, integer, _, _), !,
-	(S >= 0 -> true ; throw(error(domain_error(not_less_than_zero, S), succ/2))),
+	(	S >= 0 -> true
+	; 	throw(error(domain_error(not_less_than_zero, S), succ/2))
+	),
 	!,
 	S > 0,
 	X is S - Y.

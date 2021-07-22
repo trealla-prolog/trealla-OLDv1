@@ -130,8 +130,7 @@ include(Goal, List, Included) :-
 
 	include_([], _, []).
 	include_([X1|Xs1], P, Included) :-
-		(   call(P, X1)
-		->  Included = [X1|Included1]
+		(   call(P, X1) ->  Included = [X1|Included1]
 		;   Included = Included1
 		),
 		include_(Xs1, P, Included1).
@@ -141,8 +140,7 @@ exclude(Goal, List, Included) :-
 
 exclude_([], _, []).
 exclude_([X1|Xs1], P, Included) :-
-	(   call(P, X1)
-	->  Included = Included1
+	(   call(P, X1) ->  Included = Included1
 	;   Included = [X1|Included1]
 	),
 	exclude_(Xs1, P, Included1).
