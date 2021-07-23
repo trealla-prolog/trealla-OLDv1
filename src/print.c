@@ -271,10 +271,10 @@ static unsigned count_non_anons(const uint8_t *mask, unsigned bit)
 
 ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, bool cons, unsigned depth)
 {
-	if (!running)
-		return print_term_to_buf(q, dst, dstlen, c, c_ctx, running, cons, depth);
+	//if (!running)
+	//	return print_term_to_buf(q, dst, dstlen, c, c_ctx, running, cons, depth);
 
-	if (!depth && !dst && !dstlen) {
+	if (!depth && !dst && !dstlen && running) {
 		fake_numbervars(q, c, c_ctx, 0);
 		memset(s_mask1, 0, MAX_ARITY);
 		memset(s_mask2, 0, MAX_ARITY);

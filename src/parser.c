@@ -1295,7 +1295,7 @@ static bool dcg_expansion(parser *p)
 		if (strcmp(p2->vartab.var_name[i], "_TermOut"))
 			continue;
 
-		src = print_canonical_to_strbuf(q, c, q->latest_ctx, -1);
+		src = print_canonical_to_strbuf(q, c, q->latest_ctx, 1);
 		strcat(src, ".");
 		break;
 	}
