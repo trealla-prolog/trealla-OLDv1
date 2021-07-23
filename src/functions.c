@@ -218,29 +218,6 @@ static mp_result mp_int_divx_value(mp_int a, mp_small b, mp_int q)
 			return throw_error(q, q->st.curr_cell, "existence_error", "procedure");	\
 	}
 
-static mp_result mp_int_popcount(mp_int z, mp_usmall *out) {
-	assert(z != NULL);
-
-	if (mp_int_compare_zero(z) < 0)
-		return MP_UNDEF;
-
-	mp_usmall uz = MP_USED(z);
-	mp_digit *dz = MP_DIGITS(z) + uz - 1;
-	mp_usmall count = 0;
-	while (uz > 0) {
-		mp_usmall n = *dz--;
-		while (n > 0) {
-			n = n & (n - 1);
-			count++;
-		}
-		--uz;
-	}
-
-	if (out) *out = count;
-
-  return MP_OK;
-}
-
 void call_builtin(query *q, cell *c, idx_t c_ctx)
 {
 	cell *save = q->st.curr_cell;
