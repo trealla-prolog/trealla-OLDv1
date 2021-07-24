@@ -350,6 +350,7 @@ static void trim_heap(query *q, const choice *ch)
 		for (idx_t i = 0; i < a->max_hp_used; i++) {
 			cell *c = a->heap + i;
 			unshare_cell(c);
+			c->tag = TAG_EMPTY;
 			c->attrs = NULL;
 		}
 
@@ -364,6 +365,7 @@ static void trim_heap(query *q, const choice *ch)
 	for (idx_t i = ch->st.hp; a && (i < a->max_hp_used); i++) {
 		cell *c = a->heap + i;
 		unshare_cell(c);
+		c->tag = TAG_EMPTY;
 		c->attrs = NULL;
 	}
 }
