@@ -1637,7 +1637,7 @@ void destroy_query(query *q)
 	}
 
 	for (arena *a = q->arenas; a;) {
-		for (idx_t i = 0; i < a->hp; i++) {
+		for (idx_t i = 0; i < a->max_hp_used; i++) {
 			cell *c = a->heap + i;
 			unshare_cell(c);
 		}
