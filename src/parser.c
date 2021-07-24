@@ -1268,12 +1268,11 @@ static bool dcg_expansion(parser *p)
 	p2->skip = true;
 	p2->srcptr = src;
 	tokenize(p2, false, false);
-	xref_rule(p2, p2->r, NULL);
+	free(src);
 
 	//printf("### "); print_term(q, stdout, p2->r->cells, 0, -1); printf("\n");
 
 	execute(q, p2->r);
-	free(src);
 	frame *g = GET_FRAME(0);
 	src = NULL;
 
@@ -1284,7 +1283,7 @@ static bool dcg_expansion(parser *p)
 		slot *e = GET_SLOT(g, i);
 
 		if (is_empty(&e->c))
-			continue;
+			break;
 
 		q->latest_ctx = e->ctx;
 		cell *c;
