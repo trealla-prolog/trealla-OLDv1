@@ -1278,6 +1278,9 @@ static bool dcg_expansion(parser *p)
 	src = NULL;
 
 	for (unsigned i = 0; i < p2->r->nbr_vars; i++) {
+		if (strcmp(p2->vartab.var_name[i], "_TermOut"))
+			continue;
+
 		slot *e = GET_SLOT(g, i);
 
 		if (is_empty(&e->c))
@@ -1291,9 +1294,6 @@ static bool dcg_expansion(parser *p)
 			q->latest_ctx = e->ctx;
 		} else
 			c = deref(q, &e->c, e->ctx);
-
-		if (strcmp(p2->vartab.var_name[i], "_TermOut"))
-			continue;
 
 		src = print_canonical_to_strbuf(q, c, q->latest_ctx, 1);
 		strcat(src, ".");
