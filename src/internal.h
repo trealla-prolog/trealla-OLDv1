@@ -451,7 +451,7 @@ typedef struct arena_ arena;
 struct arena_ {
 	arena *next;
 	cell *heap;
-	idx_t hp, h_size;
+	idx_t hp, max_hp_used, h_size;
 	unsigned nbr;
 };
 

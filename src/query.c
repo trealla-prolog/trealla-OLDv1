@@ -347,7 +347,7 @@ static void trim_heap(query *q, const choice *ch)
 		if (a->nbr <= ch->st.arena_nbr)
 			break;
 
-		for (idx_t i = 0; i < a->hp; i++) {
+		for (idx_t i = 0; i < a->max_hp_used; i++) {
 			cell *c = a->heap + i;
 			unshare_cell(c);
 			c->tag = TAG_EMPTY;
@@ -361,7 +361,7 @@ static void trim_heap(query *q, const choice *ch)
 
 	const arena *a = q->arenas;
 
-	for (idx_t i = ch->st.hp; a && (i < a->hp); i++) {
+	for (idx_t i = ch->st.hp; a && (i < a->max_hp_used); i++) {
 		cell *c = a->heap + i;
 		unshare_cell(c);
 		c->tag = TAG_EMPTY;

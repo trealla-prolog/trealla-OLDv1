@@ -74,6 +74,7 @@ cell *alloc_on_heap(query *q, idx_t nbr_cells)
 
 		arena *a = calloc(1, sizeof(arena));
 		ensure(a);
+		a->max_hp_used = 0;
 		a->heap = calloc(q->h_size, sizeof(cell));
 		ensure(a->heap);
 		a->h_size = q->h_size;
@@ -84,6 +85,7 @@ cell *alloc_on_heap(query *q, idx_t nbr_cells)
 	if ((q->st.hp + nbr_cells) >= q->h_size) {
 		arena *a = calloc(1, sizeof(arena));
 		ensure(a);
+		a->max_hp_used = 0;
 		a->next = q->arenas;
 
 		if (q->h_size < nbr_cells) {
@@ -102,6 +104,10 @@ cell *alloc_on_heap(query *q, idx_t nbr_cells)
 	cell *c = q->arenas->heap + q->st.hp;
 	q->st.hp += nbr_cells;
 	q->arenas->hp = q->st.hp;
+
+	if (q->st.hp > q->arenas->max_hp_used)
+		q->arenas->hp = q->st.hp;
+
 	return c;
 }
 
