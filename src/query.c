@@ -153,7 +153,7 @@ static USE_RESULT pl_status check_frame(query *q)
 
 static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 {
-	idx_t nbr = q->st.sp + cnt + MAX_ARITY;
+	idx_t nbr = q->st.sp + cnt;
 
 	if (nbr > q->max_slots) {
 		q->max_slots = q->st.sp;
@@ -564,7 +564,7 @@ pl_status make_choice(query *q)
 	ch->orig_cgen = ch->cgen = g->cgen;
 	ch->st = q->st;
 
-	may_error(check_slot(q, g->nbr_vars));
+	may_error(check_slot(q, MAX_ARITY));
 	ch->nbr_vars = g->nbr_vars;
 	ch->nbr_slots = g->nbr_slots;
 	ch->overflow = g->overflow;
