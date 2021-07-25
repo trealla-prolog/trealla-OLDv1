@@ -755,6 +755,20 @@ unsigned create_vars(query *q, unsigned cnt)
 	return var_nbr;
 }
 
+static void add_trail(query *q, idx_t c_ctx, unsigned c_var_nbr, cell *attrs, idx_t attrs_ctx)
+{
+	if (check_trail(q) != pl_success) {
+		q->error = pl_error;
+		return;
+	}
+
+	trail *tr = q->trails + q->st.tp++;
+	tr->ctx = c_ctx;
+	tr->var_nbr = c_var_nbr;
+	tr->attrs = attrs;
+	tr->attrs_ctx = attrs_ctx;
+}
+
 void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 {
 	const frame *g = GET_FRAME(c_ctx);
@@ -776,22 +790,27 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		share_cell(v);
 	}
 
-	if (!q->cp && !attrs)
-		return;
+	if (attrs) {
+		if (is_variable(v)) {
+			const frame *g = GET_FRAME(v_ctx);
+			slot *e = GET_SLOT(g, v->var_nbr);
 
-	if (check_trail(q) != pl_success) {
-		q->error = pl_error;
-		return;
+			if (!e->c.attrs) {
+				e->c.attrs = attrs;
+				e->c.attrs_ctx = attrs_ctx;
+
+				if (q->cp)
+					add_trail(q, v_ctx, v->var_nbr, NULL, 0);
+			} else
+				q->has_attrs = true;
+		} else
+			q->has_attrs = true;
 	}
 
-	if (attrs)
-		q->has_attrs = true;
+	if (!q->cp)
+		return;
 
-	trail *tr = q->trails + q->st.tp++;
-	tr->ctx = c_ctx;
-	tr->var_nbr = c->var_nbr;
-	tr->attrs = attrs;
-	tr->attrs_ctx = attrs_ctx;
+	add_trail(q, c_ctx, c->var_nbr, attrs, attrs_ctx);
 }
 
 void reset_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
@@ -1546,7 +1565,7 @@ pl_status start(query *q)
 				continue;
 			}
 
-			if (q->has_attrs)
+			if (q->has_attrs && !q->in_hook)
 				may_error(do_post_unification_hook(q));
 		}
 
