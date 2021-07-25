@@ -4,6 +4,8 @@
 	last/2, flatten/2
 	]).
 
+:- use_module(library(apply)).
+
 member(El, [H|T]) :-
     member_(T, El, H).
 
