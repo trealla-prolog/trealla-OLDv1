@@ -257,6 +257,7 @@ Non-standard predicates
 	plus/3
 	module/1
 	line_count/2
+	strip_module/3
 
 	nb_setval(K,V)
 	nb_getval(K,V)
