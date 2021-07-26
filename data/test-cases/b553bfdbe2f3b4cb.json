@@ -1,0 +1,49 @@
+{
+  "uid" : "b553bfdbe2f3b4cb",
+  "name" : "lgt_unbounded_exp_01",
+  "historyId" : "unbounded/tests.lgt::tests:tests#lgt_unbounded_exp_01",
+  "time" : {
+    "start" : 1627259550000,
+    "stop" : 1627259550406,
+    "duration" : 406
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "unbounded/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "b553bfdbe2f3b4cb.json",
+  "parameterValues" : [ ]
+}
