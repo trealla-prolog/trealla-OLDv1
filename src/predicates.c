@@ -4481,9 +4481,6 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
-	if (is_variable(p1) && is_variable(p2))
-		return pl_success;
-
 	if (is_atomic(p1) && is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
@@ -4503,8 +4500,11 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 
 static USE_RESULT pl_status fn_sys_strip_attributes_1(query *q)
 {
-	GET_FIRST_ARG(p1,iso_list);
+	GET_FIRST_ARG(p1,any);
 	LIST_HANDLER(p1);
+
+	if (!is_variable(p1) && !is_iso_list(p1))
+		return pl_success;
 
 	while (is_list(p1)) {
 		cell *c = LIST_HEAD(p1);
