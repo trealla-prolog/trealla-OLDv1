@@ -4917,7 +4917,7 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 
 static USE_RESULT pl_status fn_iso_call_n(query *q)
 {
-	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, true);
+	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
 
 	if (!p0 || (p0 == ERR_CYCLE_CELL))
 		return throw_error(q, q->st.curr_cell, "resource_error", "too_many_vars");
@@ -8360,7 +8360,7 @@ static USE_RESULT pl_status fn_yield_0(query *q)
 
 static USE_RESULT pl_status fn_task_n(query *q)
 {
-	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, true);
+	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 
 	GET_FIRST_RAW_ARG0(p1,callable,p0);

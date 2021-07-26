@@ -236,7 +236,9 @@ Non-standard predicates
 	setup_call_cleanup/3		# setup_call_cleanup(:Setup,:Goal,:Cleanup)
 	call_cleanup/2				# call_cleanup(:Goal,:Cleanup)
 	variant/2					# variant(+term1,+term2)
+	term_attvars/2				# term_attvars(+Term,-Vs)
 	copy_term_nat/2				# doesn't copy attrs
+	copy_term/3					# copy_term(+Term,-Copy,-Gs)
 	findall/4
 	var_number/2
 	ignore/1

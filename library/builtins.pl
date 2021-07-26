@@ -618,23 +618,23 @@ term_attvars(Term, Vs) :-
 	term_variables(Term, Vs0),
 	term_attvars_(Vs0, [], Vs).
 
-copy_goals_(_, [], GsIn, GsIn) :- !.
-copy_goals_(V, [H|T], GsIn, GsOut) :-
+collect_goals_(_, [], GsIn, GsIn) :- !.
+collect_goals_(V, [H|T], GsIn, GsOut) :-
 	H =.. [M,_Value],
-	catch(M:attribute_goals(V, [], Goal), _, Goal = put_atts(V,+H)),
-	copy_goals_(V, T, [Goal|GsIn], GsOut).
+	catch(M:attribute_goals(V, Goal, _), _, Goal = put_atts(V,+H)),
+	collect_goals_(V, T, [Goal|GsIn], GsOut).
 
-copy_goals_([], GsIn, GsIn) :- !.
-copy_goals_([V|T], GsIn, GsOut) :-
+collect_goals_([], GsIn, GsIn) :- !.
+collect_goals_([V|T], GsIn, GsOut) :-
 	get_atts(V, Ls),
-	copy_goals_(V, Ls, GsIn, GsOut2),
-	copy_goals_(T, GsOut2, GsOut).
+	collect_goals_(V, Ls, GsIn, GsOut2),
+	collect_goals_(T, GsOut2, GsOut).
 
 copy_term(Term, Copy, Gs) :-
 	copy_term(Term, Copy),
-	term_attvars(Copy, AttVs),
-	copy_goals_(AttVs, [], Gs),
-	'$strip_attributes'(AttVs).
+	term_attvars(Copy, CopyVs),
+	collect_goals_(CopyVs, [], Gs),
+	'$strip_attributes'(CopyVs).
 
 % Debugging...
 
