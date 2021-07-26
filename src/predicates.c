@@ -170,7 +170,7 @@ void make_call(query *q, cell *tmp)
 	make_end(tmp);
 	cell *c = q->st.curr_cell;
 	frame *g = GET_CURR_FRAME();
-	tmp->val_ptr = c + c->nbr_cells;
+	tmp->val_ptr = c ? c + c->nbr_cells : NULL;
 	tmp->cgen = g->cgen;
 	tmp->mod_nbr = q->st.m->id;
 }
@@ -3115,6 +3115,13 @@ static bool parse_write_params(query *q, cell *c, cell **vnames, idx_t *vnames_c
 		}
 
 		q->quoted = !slicecmp2(GET_STR(c1), LEN_STR(c1), "true");
+	} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "varnames")) {
+		if (!is_literal(c1) || (slicecmp2(GET_STR(c1), LEN_STR(c1), "true") && slicecmp2(GET_STR(c1), LEN_STR(c1), "false"))) {
+			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
+			return false;
+		}
+
+		q->varnames = !slicecmp2(GET_STR(c1), LEN_STR(c1), "true");
 	} else if (!slicecmp2(GET_STR(c), LEN_STR(c), "ignore_ops")) {
 		if (!is_literal(c1) || (slicecmp2(GET_STR(c1), LEN_STR(c1), "true") && slicecmp2(GET_STR(c1), LEN_STR(c1), "false"))) {
 			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
@@ -3242,7 +3249,7 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 		//fflush(str->fp);
 	}
 
-	q->max_depth = q->quoted = q->nl = q->fullstop = false;
+	q->max_depth = q->quoted = q->nl = q->fullstop = q->varnames = false;
 	q->ignore_ops = false;
 	q->variable_names = NULL;
 	return !ferror(str->fp);
@@ -4492,6 +4499,29 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 		return throw_error(q, p1, "resource_error", "too_many_vars");
 
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
+}
+
+static USE_RESULT pl_status fn_sys_strip_attributes_1(query *q)
+{
+	GET_FIRST_ARG(p1,iso_list);
+	LIST_HANDLER(p1);
+
+	while (is_list(p1)) {
+		cell *c = LIST_HEAD(p1);
+		c = deref(q, c, p1_ctx);
+
+		if (is_variable(c)) {
+			frame *g = GET_FRAME(q->latest_ctx);
+			slot *e = GET_SLOT(g, c->var_nbr);
+			e->c.attrs = NULL;
+		}
+
+		p1 = LIST_TAIL(p1);
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+	}
+
+	return pl_success;
 }
 
 static USE_RESULT pl_status fn_copy_term_nat_2(query *q)
@@ -11567,7 +11597,7 @@ pl_status do_post_unification_hook(query *q)
 	tmp[1].arity = 0;
 	tmp[1].flags = 0;
 	tmp[1].val_off = g_post_unify_hook_s;
-	tmp[1].match = find_predicate(q->st.m->pl->user_m, tmp+1);
+	tmp[1].match = search_predicate(q->st.m->pl->user_m, tmp+1);
 
 	make_call(q, tmp+2);
 	q->st.curr_cell = tmp;
@@ -11768,6 +11798,7 @@ static const struct builtins g_predicates_other[] =
 	{"abolish", 2, fn_abolish_2, NULL},
 	{"assert", 1, fn_iso_assertz_1, NULL},
 
+	{"$strip_attributes", 1, fn_sys_strip_attributes_1, "+vars"},
 	{"copy_term_nat", 2, fn_copy_term_nat_2, NULL},
 	{"string", 1, fn_atom_1, "+rule"},
 	{"atomic_concat", 3, fn_atomic_concat_3, NULL},

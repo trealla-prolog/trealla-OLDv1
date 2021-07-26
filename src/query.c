@@ -807,10 +807,8 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 			q->has_attrs = true;
 	}
 
-	if (!q->cp)
-		return;
-
-	add_trail(q, c_ctx, c->var_nbr, attrs, attrs_ctx);
+	if (q->cp)
+		add_trail(q, c_ctx, c->var_nbr, attrs, attrs_ctx);
 }
 
 void reset_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)

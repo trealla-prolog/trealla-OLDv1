@@ -521,6 +521,7 @@ struct query_ {
 	bool cycle_error:1;
 	bool spawned:1;
 	bool run_init:1;
+	bool varnames:1;
 };
 
 struct parser_ {

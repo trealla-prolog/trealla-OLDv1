@@ -608,6 +608,47 @@ attributed(Var) :-
 	'$read_attributes'(Var, D),
 	D \= [].
 
+term_attvars_([], VsIn, VsIn) :- !.
+term_attvars_([H|T], VsIn, VsOut) :-
+	(	attvar(H) -> term_attvars_(T, [H|VsIn], VsOut)
+	;	term_attvars_(T, VsIn, VsOut)
+	).
+
+term_attvars(Term, Vs) :-
+	term_variables(Term, Vs0),
+	term_attvars_(Vs0, [], Vs).
+
+copy_goals_(_, [], GsIn, GsIn) :- !.
+copy_goals_(V, [H|T], GsIn, GsOut) :-
+	H =.. [M,_Value],
+	catch(M:attribute_goals(V, [], Goal), _, Goal = put_atts(V,+H)),
+	copy_goals_(V, T, [Goal|GsIn], GsOut).
+
+copy_goals_([], GsIn, GsIn) :- !.
+copy_goals_([V|T], GsIn, GsOut) :-
+	get_atts(V, Ls),
+	copy_goals_(V, Ls, GsIn, GsOut2),
+	copy_goals_(T, GsOut2, GsOut).
+
+copy_term(Term, Copy, Gs) :-
+	copy_term(Term, Copy),
+	term_attvars(Copy, AttVs),
+	copy_goals_(AttVs, [], Gs),
+	'$strip_attributes'(AttVs).
+
+% Debugging...
+
+portray_atts(V) :-
+	get_atts(V, Ls),
+	portray_atts(V, Ls).
+
+portray_atts(_, []) :- !.
+portray_atts(V, [H|T]) :-
+	H =.. [Module,Value],
+	write_term(user_output, put_attr(V, Module, Value), [varnames(true)]),
+	(T = [] -> write('.') ; write(',')), nl,
+	portray_atts(V,T).
+
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
