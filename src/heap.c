@@ -51,7 +51,7 @@ cell *alloc_on_tmp(query *q, idx_t nbr_cells)
 	idx_t new_size = q->tmphp + nbr_cells;
 
 	if (new_size >= q->tmph_size) {
-		size_t elements = alloc_grow((void**)&q->tmp_heap, sizeof(cell), new_size, new_size*3/2);
+		size_t elements = alloc_grow((void**)&q->tmp_heap, sizeof(cell), new_size, (new_size*3)/2);
 		if (!elements) return NULL;
 		q->tmph_size = elements;
 	}
@@ -87,9 +87,10 @@ cell *alloc_on_heap(query *q, idx_t nbr_cells)
 		ensure(a);
 		a->next = q->arenas;
 
-		q->h_size += nbr_cells;
-		q->h_size *= 3;
-		q->h_size /= 2;
+		if (q->h_size < nbr_cells) {
+			q->h_size = nbr_cells;
+			q->h_size += nbr_cells / 2;
+		}
 
 		a->heap = calloc(q->h_size, sizeof(cell));
 		ensure(a->heap);
