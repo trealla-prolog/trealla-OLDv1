@@ -6670,6 +6670,8 @@ static USE_RESULT pl_status fn_sys_assertz_2(query *q)
 
 static void save_db(FILE *fp, query *q, int logging)
 {
+	q->listing = true;
+
 	for (predicate *pr = q->st.m->head; pr && !g_tpl_interrupt; pr = pr->next) {
 		if (pr->is_prebuilt)
 			continue;
@@ -6700,6 +6702,8 @@ static void save_db(FILE *fp, query *q, int logging)
 			fprintf(fp, ".\n");
 		}
 	}
+
+	q->listing = false;
 }
 
 static USE_RESULT pl_status fn_listing_0(query *q)
