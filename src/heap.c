@@ -110,7 +110,7 @@ cell *alloc_on_heap(query *q, idx_t nbr_cells)
 	return c;
 }
 
-cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only, bool copy_attrs)
+static cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only)
 {
 	if (depth >= 64000) {
 		q->cycle_error = true;
@@ -145,7 +145,7 @@ cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool n
 					tmp->flags |= FLAG2_ANON;
 
 				tmp->val_off = g_nil_s;
-				tmp->attrs = e->c.attrs;
+				tmp->attrs = NULL;
 				return tmp;
 			}
 		}
@@ -154,6 +154,7 @@ cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool n
 		tmp->flags = FLAG2_FRESH;
 		tmp->val_off = g_nil_s;
 		tmp->attrs = e->c.attrs;
+		tmp->attrs_ctx = e->c.attrs_ctx;
 
 		if (is_anon(p1))
 			tmp->flags |= FLAG2_ANON;
@@ -169,7 +170,7 @@ cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool n
 
 	while (arity--) {
 		cell *c = deref(q, p1, p1_ctx);
-		cell *rec = deep_copy2_to_tmp(q, c, q->latest_ctx, depth+1, nonlocals_only, copy_attrs);
+		cell *rec = deep_copy2_to_tmp(q, c, q->latest_ctx, depth+1, nonlocals_only);
 		if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 		p1 += p1->nbr_cells;
 	}
@@ -188,14 +189,28 @@ cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, bo
 	q->st.m->pl->varno = g->nbr_vars;
 	q->st.m->pl->tab_idx = 0;
 	q->cycle_error = false;
-	cell* rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, nonlocals_only, copy_attrs);
+	int nbr_vars = g->nbr_vars;
+	cell* rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, nonlocals_only);
 	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
-	int cnt = q->st.m->pl->varno - g->nbr_vars;
+	int cnt = q->st.m->pl->varno - nbr_vars;
 
 	if (cnt) {
 		if (!create_vars(q, cnt)) {
 			DISCARD_RESULT throw_error(q, p1, "resource_error", "too_many_vars");
 			return NULL;
+		}
+	}
+
+	if (!copy_attrs)
+		return q->tmp_heap;
+
+	cell *c = rec;
+
+	for (idx_t i = 0; i < rec->nbr_cells; i++, c++) {
+		if (is_variable(c) && is_fresh(c) && c->attrs) {
+			slot *e = GET_SLOT(g, c->var_nbr);
+			e->c.attrs = c->attrs;
+			e->c.attrs_ctx = c->attrs_ctx;
 		}
 	}
 

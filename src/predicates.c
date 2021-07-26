@@ -11599,6 +11599,9 @@ pl_status do_post_unification_hook(query *q)
 	tmp[1].val_off = g_post_unify_hook_s;
 	tmp[1].match = search_predicate(q->st.m->pl->user_m, tmp+1);
 
+	if (!tmp[1].match)
+		return pl_success;
+
 	make_call(q, tmp+2);
 	q->st.curr_cell = tmp;
 	return pl_success;
