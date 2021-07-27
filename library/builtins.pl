@@ -638,16 +638,10 @@ copy_term(Term, Copy, Gs) :-
 
 % Debugging...
 
-portray_atts(V) :-
-	get_atts(V, Ls),
-	portray_atts(V, Ls).
-
-portray_atts(_, []) :- !.
-portray_atts(V, [H|T]) :-
-	H =.. [Module,Value],
-	write_term(user_output, put_attr(V, Module, Value), [varnames(true)]),
-	(T = [] -> write('.') ; write(',')), nl,
-	portray_atts(V,T).
+portray_atts(Term) :-
+	copy_term(Term, Copy, Gs),
+	Term = Copy,
+	write_term(user_output, Gs, [varnames(true)]).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

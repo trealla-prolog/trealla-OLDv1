@@ -3210,8 +3210,8 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 	}
 
 	q->flag = q->st.m->flag;
-	cell *p2_orig = p2, *vnames;
-	idx_t vnames_ctx;
+	cell *p2_orig = p2, *vnames = NULL;
+	idx_t vnames_ctx = 0;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2)) {
