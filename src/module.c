@@ -722,10 +722,10 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 			pr->index = NULL;
 		}
 
-		if (!pr->index && (pr->cnt > 25)
+		if (!pr->index
 			&& !m->pl->noindex
 			&& !pr->is_noindex
-			&& !pr->is_dynamic)
+			&& (pr->cnt > 15))
 			reindex_predicate(m, pr);
 
 		if (pr->index) {
