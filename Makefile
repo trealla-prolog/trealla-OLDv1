@@ -3,11 +3,11 @@ GIT_VERSION := "$(shell git describe --abbrev=4 --dirty --always --tags)"
 CFLAGS = -Isrc -I/usr/local/include -DVERSION='$(GIT_VERSION)' -O3 \
 	$(OPT) -Wall -Wextra -D_GNU_SOURCE -Wno-deprecated-declarations
 
-LDFLAGS = -lreadline -L/usr/local/lib -L/usr/local/opt/openssl/lib -lm
+LDFLAGS = -L/usr/local/lib -lreadline -lm
 
 ifndef NOSSL
 CFLAGS += -DUSE_OPENSSL=1
-LDFLAGS += -lssl -lcrypto
+LDFLAGS += -L/usr/local/opt/openssl/lib -lssl -lcrypto
 endif
 
 ifdef THREADS
