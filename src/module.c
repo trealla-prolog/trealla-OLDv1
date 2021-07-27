@@ -725,7 +725,8 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 		if (!pr->index
 			&& !m->pl->noindex
 			&& !pr->is_noindex
-			&& (pr->cnt > 15))
+			&& ((!pr->is_dynamic && (pr->cnt > 15))
+				|| (pr->is_dynamic && (pr->cnt > 50))))
 			reindex_predicate(m, pr);
 
 		if (pr->index) {
