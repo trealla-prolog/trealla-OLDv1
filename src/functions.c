@@ -1754,13 +1754,20 @@ static USE_RESULT pl_status fn_iso_shl_2(query *q)
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_smallint(&p2)) {
-		int n = p2.val_integer;
 		mp_int_copy(&p1.val_bigint->ival, &q->tmp_ival);
-		mp_int_mul_pow2(&q->tmp_ival, n, &q->tmp_ival);
+		mp_int_mul_pow2(&q->tmp_ival, p2.val_integer, &q->tmp_ival);
 		SET_ACCUM();
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		q->accum.val_integer = p1.val_integer << p2.val_integer;
-		q->accum.tag = TAG_INTEGER;
+
+		if (q->accum.val_integer > 0) {
+			q->accum.tag = TAG_INTEGER;
+			return pl_success;
+		}
+
+		mp_int_init_value(&q->tmp_ival, p1.val_integer);
+		mp_int_mul_pow2(&q->tmp_ival, p2.val_integer, &q->tmp_ival);
+		SET_ACCUM();
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {

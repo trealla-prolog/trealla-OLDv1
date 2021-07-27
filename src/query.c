@@ -173,34 +173,6 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 	return pl_success;
 }
 
-static void purge_dirty_list(query *q)
-{
-	int cnt = 0;
-
-	while (q->dirty_list) {
-		clause *cl = q->dirty_list;
-		q->dirty_list = cl->dirty;
-
-		if (cl->prev)
-			cl->prev->next = cl->next;
-
-		if (cl->next)
-			cl->next->prev = cl->prev;
-
-		if (cl->owner->head == cl)
-			cl->owner->head = cl->next;
-
-		if (cl->owner->tail == cl)
-			cl->owner->tail = cl->prev;
-
-		clear_rule(&cl->r);
-		free(cl);
-		cnt++;
-	}
-
-	//if (cnt) printf("Info: query purged %d retracted items\n", cnt);
-}
-
 static void next_key(query *q)
 {
 	if (q->st.iter) {
@@ -230,6 +202,34 @@ void add_to_dirty_list(query *q, clause *cl)
 
 	cl->dirty = q->dirty_list;
 	q->dirty_list = cl;
+}
+
+static void purge_dirty_list(query *q)
+{
+	int cnt = 0;
+
+	while (q->dirty_list) {
+		clause *cl = q->dirty_list;
+		q->dirty_list = cl->dirty;
+
+		if (cl->prev)
+			cl->prev->next = cl->next;
+
+		if (cl->next)
+			cl->next->prev = cl->prev;
+
+		if (cl->owner->head == cl)
+			cl->owner->head = cl->next;
+
+		if (cl->owner->tail == cl)
+			cl->owner->tail = cl->prev;
+
+		clear_rule(&cl->r);
+		free(cl);
+		cnt++;
+	}
+
+	//if (cnt) printf("Info: query purged %d retracted items\n", cnt);
 }
 
 bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials)
