@@ -1760,7 +1760,7 @@ static USE_RESULT pl_status fn_iso_shl_2(query *q)
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		q->accum.val_integer = p1.val_integer << p2.val_integer;
 
-		if (q->accum.val_integer > 0) {
+		if ((q->accum.val_integer > 0) && (p2.val_integer < 64)) {
 			q->accum.tag = TAG_INTEGER;
 			return pl_success;
 		}
