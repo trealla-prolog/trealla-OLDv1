@@ -641,7 +641,9 @@ copy_term(Term, Copy, Gs) :-
 portray_atts(Term) :-
 	copy_term(Term, Copy, Gs),
 	Term = Copy,
-	write_term(user_output, Gs, [varnames(true)]).
+	write_term(user_output, Gs, [varnames(true)]),
+	fail.
+portray_atts(_).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
