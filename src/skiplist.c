@@ -565,6 +565,7 @@ bool sl_is_nextkey(sliter *iter)
 				return false;
 			}
 
+			iter->idx++;
 			return true;
 		}
 
@@ -582,10 +583,15 @@ bool sl_nextkey(sliter *iter, void **val)
 
 	while (iter->p) {
 		if (iter->idx < iter->p->nbr) {
-			if (iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p) != 0) {
-				sl_done(iter);
-				return false;
+			int ok = iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p);
+
+			if (ok < 0) {
+				iter->idx++;
+				continue;
 			}
+
+			if (ok > 0)
+				break;
 
 			*val = iter->p->bkt[iter->idx++].val;
 			return true;
