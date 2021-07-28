@@ -1037,13 +1037,12 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 
 			q->st.curr_clause2 = NULL;
 			return false;
-		} else {
-			if (!pr->is_dynamic)
-				return throw_error(q, head, "permission_error", "modify,static_procedure");
-
-			q->st.curr_clause2 = pr->head;
 		}
 
+		if (!pr->is_dynamic)
+			return throw_error(q, head, "permission_error", "modify,static_procedure");
+
+		q->st.curr_clause2 = pr->head;
 		frame *g = GET_FRAME(q->st.curr_frame);
 		g->ugen = q->st.m->pl->ugen;
 	} else {
@@ -1133,17 +1132,16 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 
 			q->st.curr_clause2 = NULL;
 			return pl_failure;
-		} else {
-			if (!pr->is_dynamic) {
-				if (is_retract != DO_CLAUSE)
-					return throw_error(q, p1, "permission_error", "modify,static_procedure");
-				else
-					return throw_error(q, p1, "permission_error", "access,private_procedure");
-			}
-
-			q->st.curr_clause2 = pr->head;
 		}
 
+		if (!pr->is_dynamic) {
+			if (is_retract != DO_CLAUSE)
+				return throw_error(q, p1, "permission_error", "modify,static_procedure");
+			else
+				return throw_error(q, p1, "permission_error", "access,private_procedure");
+		}
+
+		q->st.curr_clause2 = pr->head;
 		frame *g = GET_FRAME(q->st.curr_frame);
 		g->ugen = q->st.m->pl->ugen;
 	} else {
