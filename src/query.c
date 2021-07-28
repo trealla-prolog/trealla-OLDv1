@@ -1247,6 +1247,13 @@ static USE_RESULT pl_status match_head(query *q)
 			if (!all_vars) {
 				q->st.iter = m_findkey(pr->index, key);
 				next_key(q);
+
+#if 0
+				if (q->st.iter) {
+					m_done(q->st.iter);
+					q->st.iter = NULL;
+				}
+#endif
 			} else {
 				q->st.curr_clause = pr->head;
 			}
