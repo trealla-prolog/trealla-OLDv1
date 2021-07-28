@@ -1229,16 +1229,11 @@ static USE_RESULT pl_status match_head(query *q)
 			}
 
 			if (!all_vars) {
-				miter *iter = m_findkey(pr->index, key);
 				//sl_dump(pr->index, dump_key, q);
-
-				if (!m_nextkey(iter, (void**)&q->st.curr_clause))
+				if (!m_get(pr->index, key, (const void**)&q->st.curr_clause))
 					q->st.curr_clause = NULL;
-				else
-					m_done(iter);
-			} else {
+			} else
 				q->st.curr_clause = pr->head;
-			}
 		} else {
 			q->st.curr_clause = pr->head;
 		}
