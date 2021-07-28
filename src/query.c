@@ -1184,7 +1184,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 }
 
 #if 0
-static const char *dump_key(void *p, const void *p1)
+static const char *dump_key(const void *p1, const void *p)
 {
 	query *q = (query*)p;
 	cell *c = (cell*)p1;
@@ -1246,6 +1246,7 @@ static USE_RESULT pl_status match_head(query *q)
 
 			if (!all_vars) {
 				q->st.iter = m_findkey(pr->index, key);
+				//sl_dump(pr->index, dump_key, q);
 				next_key(q);
 
 #if 0
