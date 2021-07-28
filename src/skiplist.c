@@ -12,7 +12,7 @@ struct keyval_ {
 	void *key, *val;
 };
 
-#define BUCKET_SIZE 16
+#define BUCKET_SIZE 8
 
 struct slnode_ {
 	keyval_t bkt[BUCKET_SIZE];
@@ -36,6 +36,7 @@ struct skiplist_ {
 	const void *p;
 	sliter *iters;
 	size_t count;
+	bool allow_dups;
 	int level;
 	unsigned seed;
 };
@@ -76,6 +77,7 @@ skiplist *sl_create(int (*cmpkey)(const void*, const void*, const void *p), void
 	l->header->bkt[0].key = NULL;
 	l->cmpkey = cmpkey;
 	l->delkey = delkey;
+	l->allow_dups = true;
 	l->p = p;
 	return l;
 }
@@ -112,25 +114,31 @@ void sl_destroy(skiplist *l)
 	free(l);
 }
 
+void sl_allow_dups(skiplist *l, bool mode)
+{
+	l->allow_dups = mode;
+}
+
 size_t sl_count(const skiplist *l) { return l->count; }
 
 static int binary_search(const skiplist *l, const keyval_t n[], const void *key, int imax)
 {
-	int imin = 0;
+	int imin = 0, save = -1;
 
 	while (imax >= imin) {
 		int imid = (imax + imin) / 2;
 		int ok = l->cmpkey(n[imid].key, key, l->p);
 
 		if (ok == 0)
-			return imid;
-		else if (ok < 0)
+			save = imid;
+
+		if (ok < 0)
 			imin = imid + 1;
 		else
 			imax = imid - 1;
 	}
 
-	return -1;
+	return save;
 }
 
 // Modified binary search: return position where it is or ought to be

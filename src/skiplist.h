@@ -12,6 +12,7 @@ extern skiplist *sl_create(
 	const void *p
 	);
 
+extern void sl_allow_dups(skiplist *l, bool mode);
 extern bool sl_set(skiplist *l, const void *k, const void *v);
 extern bool sl_app(skiplist *l, const void *k, const void *v);
 extern bool sl_get(const skiplist *l, const void *k, const void **v);
