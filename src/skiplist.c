@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <time.h>
 #include <math.h>
-#include <assert.h>
 
 #include "skiplist.h"
 
@@ -115,8 +114,10 @@ void sl_destroy(skiplist *l)
 
 size_t sl_count(const skiplist *l) { return l->count; }
 
-static int binary_search(const skiplist *l, const keyval_t n[], const void *key, int imin, int imax)
+static int binary_search(const skiplist *l, const keyval_t n[], const void *key, int imax)
 {
+	int imin = 0;
+
 	while (imax >= imin) {
 		int imid = (imax + imin) / 2;
 		int ok = l->cmpkey(n[imid].key, key, l->p);
@@ -134,9 +135,9 @@ static int binary_search(const skiplist *l, const keyval_t n[], const void *key,
 
 // Modified binary search: return position where it is or ought to be
 
-static int binary_search1(const skiplist *l, const keyval_t n[], const void *key, int imin, int imax)
+static int binary_search1(const skiplist *l, const keyval_t n[], const void *key, int imax)
 {
-	int imid = 0;
+	int imin = 0, imid = 0;
 
 	while (imax >= imin) {
 		imid = (imax + imin) / 2;
@@ -158,9 +159,9 @@ static int binary_search1(const skiplist *l, const keyval_t n[], const void *key
 
 // Modified binary search: return position where it is or ought to be
 
-static int binary_search2(const skiplist *l, const keyval_t n[], const void *key, int imin, int imax)
+static int binary_search2(const skiplist *l, const keyval_t n[], const void *key, int imax)
 {
-	int imid = 0;
+	int imin = 0, imid = 0;
 
 	while (imax >= imin) {
 		imid = (imax + imin) / 2;
@@ -206,7 +207,7 @@ bool sl_set(skiplist *l, const void *key, const void *val)
 	}
 
 	if (p != l->header) {
-		int imid = binary_search2(l, p->bkt, key, 0, p->nbr - 1);
+		int imid = binary_search2(l, p->bkt, key, p->nbr - 1);
 
 		if (p->nbr < BUCKET_SIZE) {
 			int j;
@@ -283,7 +284,7 @@ bool sl_app(skiplist *l, const void *key, const void *val)
 	}
 
 	if (p != l->header) {
-		int imid = binary_search2(l, p->bkt, key, 0, p->nbr - 1);
+		int imid = binary_search2(l, p->bkt, key, p->nbr - 1);
 
 		if (p->nbr < BUCKET_SIZE) {
 			int j;
@@ -357,7 +358,7 @@ bool sl_get(const skiplist *l, const void *key, const void **val)
 	if (!(q = p->forward[0]))
 		return false;
 
-	int imid = binary_search(l, q->bkt, key, 0, q->nbr - 1);
+	int imid = binary_search(l, q->bkt, key, q->nbr - 1);
 
 	if (imid < 0)
 		return false;
@@ -383,7 +384,7 @@ bool sl_del(skiplist *l, const void *key)
 	if (!(q = p->forward[0]))
 		return false;
 
-	int imid = binary_search(l, q->bkt, key, 0, q->nbr - 1);
+	int imid = binary_search(l, q->bkt, key, q->nbr - 1);
 
 	if (imid < 0)
 		return false;
@@ -451,7 +452,7 @@ void sl_find(const skiplist *l, const void *key, int (*f)(const void*, const voi
 	if (!(q = p->forward[0]))
 		return;
 
-	int imid = binary_search2(l, q->bkt, key, 0, q->nbr - 1);
+	int imid = binary_search2(l, q->bkt, key, q->nbr - 1);
 	p = q;
 
 	for (int j = imid; j < p->nbr; j++) {
@@ -523,7 +524,7 @@ sliter *sl_findkey(skiplist *l, const void *key)
 	if (!(q = p->forward[0]))
 		return NULL;
 
-	int imid = binary_search1(l, q->bkt, key, 0, q->nbr - 1);
+	int imid = binary_search1(l, q->bkt, key, q->nbr - 1);
 
 	if (l->cmpkey(q->bkt[imid].key, key, l->p) != 0)
 		return NULL;
