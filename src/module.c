@@ -710,9 +710,10 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	if (pr->is_persist)
 		cl->r.persist = true;
 
+#if 1
 	cell *p1 = c + 1;
 
-	for (int i = 0; (i < pr->key.arity) && !pr->is_noindex; i++) {
+	for (int i = 0; (i < 4) && (i < pr->key.arity) && !pr->is_noindex; i++) {
 		if (!pr->index && is_structure(p1))
 			pr->is_noindex = true;
 
@@ -724,6 +725,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 
 		p1 += p1->nbr_cells;
 	}
+#endif
 
 	if (!pr->index
 		&& !m->pl->noindex
