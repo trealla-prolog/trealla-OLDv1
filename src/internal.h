@@ -482,7 +482,6 @@ struct query_ {
 	arena *arenas;
 	clause *dirty_list;
 	slot *save_e;
-	miter *iter;
 	cell accum;
 	mpz_t tmp_ival;
 	prolog_state st;

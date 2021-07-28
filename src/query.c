@@ -175,16 +175,15 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 
 static void next_key(query *q)
 {
-	if (q->iter) {
-		if (!m_nextkey(q->iter, (void**)&q->st.curr_clause)) {
-			q->st.curr_clause = NULL;
-			q->iter = NULL;
-		} else {
-			m_done(q->iter);
-			q->iter = NULL;
-		}
-	} else
-		q->st.curr_clause = q->st.curr_clause->next;
+	q->st.curr_clause = q->st.curr_clause->next;
+}
+
+static bool is_next_key(query *q)
+{
+	if (q->st.curr_clause->next)
+		return true;
+
+	return false;
 }
 
 void add_to_dirty_list(query *q, clause *cl)
@@ -488,7 +487,7 @@ static void commit_me(query *q, rule *r)
 	frame *g = GET_CURR_FRAME();
 	g->m = q->st.m;
 	q->st.m = q->st.curr_clause->owner->m;
-	bool last_match = r->first_cut || !q->st.curr_clause->next;
+	bool last_match = r->first_cut || !is_next_key(q);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool tco = !q->no_tco && recursive && !any_choices(q, g, true);
 	bool slots_ok = check_slots(q, g, r);
@@ -1230,9 +1229,13 @@ static USE_RESULT pl_status match_head(query *q)
 			}
 
 			if (!all_vars) {
-				q->iter = m_findkey(pr->index, key);
+				miter *iter = m_findkey(pr->index, key);
 				//sl_dump(pr->index, dump_key, q);
-				next_key(q);
+
+				if (!m_nextkey(iter, (void**)&q->st.curr_clause))
+					q->st.curr_clause = NULL;
+				else
+					m_done(iter);
 			} else {
 				q->st.curr_clause = pr->head;
 			}
