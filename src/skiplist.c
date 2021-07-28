@@ -559,7 +559,14 @@ bool sl_is_nextkey(sliter *iter)
 
 	while (iter->p) {
 		if (iter->idx < iter->p->nbr) {
-			if (iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p))
+			int ok = iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p);
+
+			if (ok < 0) {
+				iter->idx++;
+				continue;
+			}
+
+			if (ok > 0)
 				break;
 
 			return true;
@@ -579,7 +586,14 @@ bool sl_nextkey(sliter *iter, void **val)
 
 	while (iter->p) {
 		if (iter->idx < iter->p->nbr) {
-			if (iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p))
+			int ok = iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p);
+
+			if (ok < 0) {
+				iter->idx++;
+				continue;
+			}
+
+			if (ok > 0)
 				break;
 
 			if (val)
