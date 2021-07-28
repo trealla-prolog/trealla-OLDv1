@@ -597,7 +597,9 @@ bool sl_nextkey(sliter *iter, void **val)
 			if (ok > 0)
 				break;
 
-			*val = iter->p->bkt[iter->idx++].val;
+			if (val)
+				*val = iter->p->bkt[iter->idx++].val;
+
 			return true;
 		}
 
