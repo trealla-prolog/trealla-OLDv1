@@ -1167,7 +1167,9 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 	return pl_failure;
 }
 
-#if 0
+#define DUMP_KEYS 0
+
+#if DUMP_KEYS
 static const char *dump_key(const void *p1, const void *p)
 {
 	query *q = (query*)p;
@@ -1229,7 +1231,9 @@ static USE_RESULT pl_status match_head(query *q)
 			}
 
 			if (!all_vars) {
-				//sl_dump(pr->index, dump_key, q);
+#if DUMP_KEYS
+				sl_dump(pr->index, dump_key, q);
+#endif
 				if (!m_get(pr->index, key, (const void**)&q->st.curr_clause))
 					q->st.curr_clause = NULL;
 			} else
