@@ -179,6 +179,9 @@ static void next_key(query *q)
 		if (!m_nextkey(q->st.iter, (void**)&q->st.curr_clause)) {
 			q->st.curr_clause = NULL;
 			q->st.iter = NULL;
+		} else {
+			m_done(q->st.iter);
+			q->st.iter = NULL;
 		}
 	} else
 		q->st.curr_clause = q->st.curr_clause->next;
@@ -1248,13 +1251,6 @@ static USE_RESULT pl_status match_head(query *q)
 				q->st.iter = m_findkey(pr->index, key);
 				//sl_dump(pr->index, dump_key, q);
 				next_key(q);
-
-#if 0
-				if (q->st.iter) {
-					m_done(q->st.iter);
-					q->st.iter = NULL;
-				}
-#endif
 			} else {
 				q->st.curr_clause = pr->head;
 			}
