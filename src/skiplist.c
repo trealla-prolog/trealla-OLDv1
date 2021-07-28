@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <math.h>
+#include <assert.h>
 
 #include "skiplist.h"
 
@@ -451,10 +452,6 @@ void sl_find(const skiplist *l, const void *key, int (*f)(const void*, const voi
 		return;
 
 	int imid = binary_search2(l, q->bkt, key, 0, q->nbr - 1);
-
-	if (imid < 0)
-		return;
-
 	p = q;
 
 	for (int j = imid; j < p->nbr; j++) {
@@ -527,9 +524,6 @@ sliter *sl_findkey(skiplist *l, const void *key)
 		return NULL;
 
 	int imid = binary_search1(l, q->bkt, key, 0, q->nbr - 1);
-
-	if (imid < 0)
-		return NULL;
 
 	if (l->cmpkey(q->bkt[imid].key, key, l->p) != 0)
 		return NULL;
