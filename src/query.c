@@ -187,14 +187,6 @@ static void next_key(query *q)
 		q->st.curr_clause = q->st.curr_clause->next;
 }
 
-static bool is_next_key(query *q)
-{
-	if (q->st.curr_clause->next)
-		return true;
-
-	return false;
-}
-
 void add_to_dirty_list(query *q, clause *cl)
 {
 	if (!retract_from_db(q->st.m, cl))
@@ -496,7 +488,7 @@ static void commit_me(query *q, rule *r)
 	frame *g = GET_CURR_FRAME();
 	g->m = q->st.m;
 	q->st.m = q->st.curr_clause->owner->m;
-	bool last_match = r->first_cut || !is_next_key(q);
+	bool last_match = r->first_cut || !q->st.curr_clause->next;
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool tco = !q->no_tco && recursive && !any_choices(q, g, true);
 	bool slots_ok = check_slots(q, g, r);
