@@ -721,19 +721,19 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 			pr->index_save = pr->index;
 			pr->index = NULL;
 		}
+	}
 
-		if (!pr->index
-			&& !m->pl->noindex
-			&& !pr->is_noindex
-			&& ((!pr->is_dynamic && (pr->cnt > 100))
-				|| (pr->is_dynamic && (pr->cnt > 100)))) {
-			reindex_predicate(m, pr);
-		} else if (pr->index) {
-			if (!append)
-				m_set(pr->index, c, cl);
-			else
-				m_app(pr->index, c, cl);
-		}
+	if (!pr->index
+		&& !m->pl->noindex
+		&& !pr->is_noindex
+		&& ((!pr->is_dynamic && (pr->cnt > 100))
+			|| (pr->is_dynamic && (pr->cnt > 100)))) {
+		reindex_predicate(m, pr);
+	} else if (pr->index) {
+		if (!append)
+			m_set(pr->index, c, cl);
+		else
+			m_app(pr->index, c, cl);
 	}
 }
 
