@@ -391,7 +391,10 @@ bool retry_choice(query *q)
 		return retry_choice(q);
 
 	trim_heap(q, ch);
-	m_done(q->st.iter);
+
+	if (q->st.iter != ch->st.iter)
+		m_done(q->st.iter);
+
 	q->st = ch->st;
 	q->save_m = NULL;		// maybe move q->save_m to q->st.save_m
 

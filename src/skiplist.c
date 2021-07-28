@@ -5,7 +5,6 @@
 
 #include "skiplist.h"
 
-
 typedef struct keyval_ keyval_t;
 typedef struct slnode_ slnode_t;
 
@@ -13,7 +12,7 @@ struct keyval_ {
 	void *key, *val;
 };
 
-#define BUCKET_SIZE 32
+#define BUCKET_SIZE 16
 
 struct slnode_ {
 	keyval_t bkt[BUCKET_SIZE];
@@ -560,9 +559,7 @@ bool sl_is_nextkey(sliter *iter)
 
 	while (iter->p) {
 		if (iter->idx < iter->p->nbr) {
-			int ok = iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p);
-
-			if (ok > 0)
+			if (iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p))
 				break;
 
 			return true;
@@ -582,9 +579,7 @@ bool sl_nextkey(sliter *iter, void **val)
 
 	while (iter->p) {
 		if (iter->idx < iter->p->nbr) {
-			int ok = iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p);
-
-			if (ok > 0)
+			if (iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p))
 				break;
 
 			if (val)
