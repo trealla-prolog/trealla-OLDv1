@@ -424,7 +424,7 @@ typedef struct {
 typedef struct {
 	cell *curr_cell;
 	clause *curr_clause, *curr_clause2;
-	miter *iter, *iter2;
+	miter *iter2;
 	module *m;
 	idx_t curr_frame, fp, hp, tp, sp, cgen, arena_nbr;
 	uint8_t qnbr;
@@ -482,6 +482,7 @@ struct query_ {
 	arena *arenas;
 	clause *dirty_list;
 	slot *save_e;
+	miter *iter;
 	cell accum;
 	mpz_t tmp_ival;
 	prolog_state st;
