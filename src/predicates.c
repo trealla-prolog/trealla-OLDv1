@@ -4638,8 +4638,8 @@ static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 	if (hard)
 		pr->is_abolished = true;
 
-	m_destroy(pr->index);
-	pr->index = NULL;
+	m_destroy(pr->idx1);
+	pr->idx1 = NULL;
 	pr->head = pr->tail = NULL;
 	pr->cnt = 0;
 	return pl_success;

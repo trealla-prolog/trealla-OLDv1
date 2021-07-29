@@ -350,7 +350,7 @@ struct predicate_ {
 	predicate *prev, *next;
 	clause *head, *tail;
 	module *m;
-	map *index, *index_save;
+	map *idx1, *idx1_save;
 	cell key;
 	uint64_t cnt;
 	bool is_prebuilt:1;
@@ -424,7 +424,7 @@ typedef struct {
 typedef struct {
 	cell *curr_cell;
 	clause *curr_clause, *curr_clause2;
-	miter *idx1, *idx2, *f_iter;
+	miter *iter1, *iter2, *f_iter;
 	module *m;
 	idx_t curr_frame, fp, hp, tp, sp, cgen, arena_nbr;
 	uint8_t qnbr;

@@ -693,14 +693,14 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 
 static void reindex_predicate(module *m, predicate *pr)
 {
-	pr->index = m_create(index_compkey, NULL, m);
-	ensure(pr->index);
+	pr->idx1 = m_create(index_compkey, NULL, m);
+	ensure(pr->idx1);
 
 	for (clause *cl = pr->head; cl; cl = cl->next) {
 		cell *c = get_head(cl->r.cells);
 
 		if (!cl->r.ugen_erased)
-			m_app(pr->index, c, cl);
+			m_app(pr->idx1, c, cl);
 	}
 }
 
@@ -715,29 +715,29 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	const int ARG_NBR = pr->key.arity;
 
 	for (int i = 0; (i < ARG_NBR) && (i < pr->key.arity) && !pr->is_noindex; i++) {
-		if (!pr->index && is_structure(p1))
+		if (!pr->idx1 && is_structure(p1))
 			pr->is_noindex = true;
 
-		if (pr->index && is_structure(p1)) {
+		if (pr->idx1 && is_structure(p1)) {
 			pr->is_noindex = true;
-			pr->index_save = pr->index;
-			pr->index = NULL;
+			pr->idx1_save = pr->idx1;
+			pr->idx1 = NULL;
 		}
 
 		p1 += p1->nbr_cells;
 	}
 
-	if (!pr->index
+	if (!pr->idx1
 		&& !m->pl->noindex
 		&& !pr->is_noindex
 		&& ((!pr->is_dynamic && (pr->cnt > 15))
 			|| (pr->is_dynamic && (pr->cnt > 100)))) {
 		reindex_predicate(m, pr);
-	} else if (pr->index) {
+	} else if (pr->idx1) {
 		if (!append)
-			m_set(pr->index, c, cl);
+			m_set(pr->idx1, c, cl);
 		else
-			m_app(pr->index, c, cl);
+			m_app(pr->idx1, c, cl);
 	}
 }
 
@@ -789,9 +789,9 @@ bool retract_from_db(module *m, clause *cl)
 	predicate *pr = cl->owner;
 
 	if (!--pr->cnt) {
-		m_destroy(pr->index);
-		m_destroy(pr->index_save);
-		pr->index = pr->index_save = NULL;
+		m_destroy(pr->idx1);
+		m_destroy(pr->idx1_save);
+		pr->idx1 = pr->idx1_save = NULL;
 		pr->head = pr->tail = NULL;
 	}
 
@@ -1082,8 +1082,8 @@ void destroy_module(module *m)
 			cl = save;
 		}
 
-		m_destroy(pr->index);
-		m_destroy(pr->index_save);
+		m_destroy(pr->idx1);
+		m_destroy(pr->idx1_save);
 		free(pr);
 		pr = save;
 	}
