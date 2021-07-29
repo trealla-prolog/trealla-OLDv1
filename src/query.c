@@ -1232,20 +1232,31 @@ static USE_RESULT pl_status match_head(query *q)
 
 		if (pr->idx1) {
 			cell *key = deep_clone_to_tmp(q, c, q->st.curr_frame);
-			bool use_index = true;
+			cell *p1 = NULL, *p2 = NULL;
 
 			if (key->arity) {
-				cell *p1 = key + 1;
+				p1 = key + 1;
 
-				if (is_variable(p1))
-					use_index = false;
+				if (key->arity > 1) {
+					p2 = p1 + p1->nbr_cells;
+
+					if (is_variable(p2))
+						p2 = NULL;
+				} else {
+					if (is_variable(p1))
+						p1 = NULL;
+				}
 			}
 
-			if (use_index) {
+			if (p1 && is_variable(p1))
+				p1 = NULL;
+
+			if (p1 || p2) {
 #if DUMP_KEYS
 				sl_dump(pr->idx1, dump_key, q);
+				sl_dump(pr->idx2, dump_key, q);
 #endif
-				map *idx = pr->idx1;
+				map *idx = p2 ? pr->idx2 : pr->idx1;
 				q->st.iter = m_findkey(idx, key);
 				next_key(q);
 			} else

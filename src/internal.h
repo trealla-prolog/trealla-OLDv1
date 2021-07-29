@@ -350,7 +350,7 @@ struct predicate_ {
 	predicate *prev, *next;
 	clause *head, *tail;
 	module *m;
-	map *idx1, *idx1_save;
+	map *idx1, *idx2, *idx1_save;
 	cell key;
 	uint64_t cnt;
 	bool is_prebuilt:1;

@@ -697,14 +697,24 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 static void reindex_predicate(module *m, predicate *pr)
 {
 	pr->idx1 = m_create(index_compkey, NULL, m);
-	m_nbr_args(pr->idx1, 1);
 	ensure(pr->idx1);
+	m_nbr_args(pr->idx1, 1);
+
+	if (pr->key.arity > 1) {
+		pr->idx2 = m_create(index_compkey, NULL, m);
+		ensure(pr->idx2);
+		m_nbr_args(pr->idx2, 2);
+	}
 
 	for (clause *cl = pr->head; cl; cl = cl->next) {
 		cell *c = get_head(cl->r.cells);
 
-		if (!cl->r.ugen_erased)
+		if (!cl->r.ugen_erased) {
 			m_app(pr->idx1, c, cl);
+
+			if (pr->idx2)
+				m_app(pr->idx2, c, cl);
+		}
 	}
 }
 
@@ -726,6 +736,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 			pr->is_noindex = true;
 			pr->idx1_save = pr->idx1;
 			pr->idx1 = NULL;
+			pr->idx2 = NULL;
 		}
 
 		p1 += p1->nbr_cells;
@@ -737,11 +748,20 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 		&& ((!pr->is_dynamic && (pr->cnt > 15))
 			|| (pr->is_dynamic && (pr->cnt > 100)))) {
 		reindex_predicate(m, pr);
-	} else if (pr->idx1) {
-		if (!append)
-			m_set(pr->idx1, c, cl);
-		else
-			m_app(pr->idx1, c, cl);
+	} else {
+		if (pr->idx1) {
+			if (!append)
+				m_set(pr->idx1, c, cl);
+			else
+				m_app(pr->idx1, c, cl);
+		}
+
+		if (pr->idx2) {
+			if (!append)
+				m_set(pr->idx2, c, cl);
+			else
+				m_app(pr->idx2, c, cl);
+		}
 	}
 }
 
@@ -794,8 +814,9 @@ bool retract_from_db(module *m, clause *cl)
 
 	if (!--pr->cnt) {
 		m_destroy(pr->idx1);
+		m_destroy(pr->idx2);
 		m_destroy(pr->idx1_save);
-		pr->idx1 = pr->idx1_save = NULL;
+		pr->idx1 = pr->idx2 = pr->idx1_save = NULL;
 		pr->head = pr->tail = NULL;
 	}
 
@@ -1087,6 +1108,7 @@ void destroy_module(module *m)
 		}
 
 		m_destroy(pr->idx1);
+		m_destroy(pr->idx2);
 		m_destroy(pr->idx1_save);
 		free(pr);
 		pr = save;
