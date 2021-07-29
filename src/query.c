@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
 #include <string.h>
@@ -175,21 +176,12 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 
 static void next_key(query *q)
 {
-	if (q->st.iter) {
-		if (!m_nextkey(q->st.iter, (void**)&q->st.curr_clause)) {
-			q->st.curr_clause = NULL;
-			q->st.iter = NULL;
-		}
-	} else
-		q->st.curr_clause = q->st.curr_clause->next;
+	q->st.curr_clause = q->st.curr_clause->next;
 }
 
 static bool is_next_key(query *q)
 {
-	if (q->st.iter) {
-		if (m_is_nextkey(q->st.iter))
-			return true;
-	} else if (q->st.curr_clause->next)
+	if (q->st.curr_clause->next)
 		return true;
 
 	return false;
@@ -391,7 +383,6 @@ bool retry_choice(query *q)
 		return retry_choice(q);
 
 	trim_heap(q, ch);
-	m_done(q->st.iter);
 	q->st = ch->st;
 	q->save_m = NULL;		// maybe move q->save_m to q->st.save_m
 
@@ -497,7 +488,6 @@ static void commit_me(query *q, rule *r)
 	frame *g = GET_CURR_FRAME();
 	g->m = q->st.m;
 	q->st.m = q->st.curr_clause->owner->m;
-	q->st.iter = NULL;
 	bool last_match = r->first_cut || !is_next_key(q);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool tco = !q->no_tco && recursive && !any_choices(q, g, true);
@@ -1230,7 +1220,7 @@ static USE_RESULT pl_status match_head(query *q)
 		}
 
 		if (pr->index) {
-			cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
+			cell *key = deep_clone_to_tmp(q, c, q->st.curr_frame);
 			unsigned arity = key->arity;
 			bool all_vars = true;
 
@@ -1245,9 +1235,8 @@ static USE_RESULT pl_status match_head(query *q)
 #if DUMP_KEYS
 				sl_dump(pr->index, dump_key, q);
 #endif
-
-				q->st.iter = m_findkey(pr->index, key);
-				next_key(q);
+				if (!m_get(pr->index, key, (const void**)&q->st.curr_clause))
+					q->st.curr_clause = NULL;
 			} else
 				q->st.curr_clause = pr->head;
 		} else
@@ -1641,7 +1630,6 @@ pl_status execute(query *q, rule *r)
 	g->nbr_slots = r->nbr_vars;
 	g->ugen = ++q->st.m->pl->ugen;
 	pl_status ret = start(q);
-	m_done(q->st.iter);
 	return ret;
 }
 
