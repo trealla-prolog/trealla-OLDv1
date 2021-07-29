@@ -8,9 +8,7 @@ A compact, efficient Prolog interpreter with
 	Atoms are UTF-8 of unlimited length
 	The default double-quoted representation is *chars* list
 	Dynamic atoms are automatically garbage collected
-	Full-rule indexing
-	DCGs
-	format_//2
+	DCGs & format_//2
 	User-defined functions
 	Attributed variables with SICStus interface (work-in-progress)
 	Logtalk compatible (work-in-progress)
