@@ -139,6 +139,7 @@ static int index_compkey(const void *ptr1, const void *ptr2, const void *param)
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
 	const module *m = (const module*)param;
+	int args = 1;
 
 	if (is_bigint(p1)) {
 		if (is_bigint(p2)) {
@@ -189,6 +190,7 @@ static int index_compkey(const void *ptr1, const void *ptr2, const void *param)
 
 			int arity = p1->arity;
 			p1++; p2++;
+			int cnt = 1;
 
 			while (arity--) {
 				int i = index_compkey(p1, p2, param);
@@ -198,7 +200,9 @@ static int index_compkey(const void *ptr1, const void *ptr2, const void *param)
 
 				p1 += p1->nbr_cells;
 				p2 += p2->nbr_cells;
-				break;						// 1st arg only
+
+				if (cnt++ == args)
+					break;
 			}
 
 			return 0;
