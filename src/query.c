@@ -1245,7 +1245,8 @@ static USE_RESULT pl_status match_head(query *q)
 #if DUMP_KEYS
 				sl_dump(pr->idx1, dump_key, q);
 #endif
-				q->st.iter = m_findkey(pr->idx1, key);
+				map *idx = pr->idx1;
+				q->st.iter = m_findkey(idx, key);
 				next_key(q);
 			} else
 				q->st.curr_clause = pr->head;
