@@ -174,7 +174,7 @@ static int index_compkey(const void *ptr1, const void *ptr2, const void *param)
 			return strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
 		else if (is_variable(p2))
 			return 0;
-	} else if (is_structure(p1)) {
+	} else if (is_structure(p1) && 0) {
 		if (is_structure(p2)) {
 			if (p1->arity < p2->arity)
 				return -1;
@@ -711,19 +711,11 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 		cl->r.persist = true;
 
 	cell *p1 = c + 1;
-	const int ARG_NBR = 2;
 
-	for (int i = 0; (i < ARG_NBR) && (i < pr->key.arity) && !pr->is_noindex; i++) {
-		if (!pr->index && is_structure(p1))
-			pr->is_noindex = true;
-
-		if (pr->index && is_structure(p1)) {
-			pr->is_noindex = true;
-			pr->index_save = pr->index;
-			pr->index = NULL;
-		}
-
-		p1 += p1->nbr_cells;
+	if (pr->index && is_structure(p1)) {
+		pr->is_noindex = true;
+		pr->index_save = pr->index;
+		pr->index = NULL;
 	}
 
 	if (!pr->index
