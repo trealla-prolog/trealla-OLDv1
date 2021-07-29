@@ -15,6 +15,7 @@
 
 #define m_create sl_create
 #define m_allow_dups sl_allow_dups
+#define m_nbr_args sl_nbr_args
 #define m_set sl_set
 #define m_app sl_app
 #define m_get sl_get

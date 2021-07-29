@@ -116,7 +116,7 @@ predicate *create_predicate(module *m, cell *c)
 	return pr;
 }
 
-static int predicate_compkey(const void *ptr1, const void *ptr2, const void *param)
+static int predicate_compkey(const void *ptr1, const void *ptr2, const void *param, __attribute__((unused)) int args)
 {
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
@@ -134,12 +134,11 @@ static int predicate_compkey(const void *ptr1, const void *ptr2, const void *par
 	return strcmp(m->pl->pool+p1->val_off, m->pl->pool+p2->val_off);
 }
 
-static int index_compkey(const void *ptr1, const void *ptr2, const void *param)
+static int index_compkey(const void *ptr1, const void *ptr2, const void *param, int args)
 {
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
 	const module *m = (const module*)param;
-	int args = 1;
 
 	if (is_bigint(p1)) {
 		if (is_bigint(p2)) {
@@ -193,7 +192,7 @@ static int index_compkey(const void *ptr1, const void *ptr2, const void *param)
 			int cnt = 1;
 
 			while (arity--) {
-				int i = index_compkey(p1, p2, param);
+				int i = index_compkey(p1, p2, param, args);
 
 				if (i != 0)
 					return i;
@@ -698,6 +697,7 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 static void reindex_predicate(module *m, predicate *pr)
 {
 	pr->idx1 = m_create(index_compkey, NULL, m);
+	m_nbr_args(pr->idx1, 1);
 	ensure(pr->idx1);
 
 	for (clause *cl = pr->head; cl; cl = cl->next) {
