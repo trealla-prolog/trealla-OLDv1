@@ -424,7 +424,7 @@ typedef struct {
 typedef struct {
 	cell *curr_cell;
 	clause *curr_clause, *curr_clause2;
-	miter *iter1, *iter2, *f_iter;
+	miter *iter, *f_iter;
 	module *m;
 	idx_t curr_frame, fp, hp, tp, sp, cgen, arena_nbr;
 	uint8_t qnbr;
