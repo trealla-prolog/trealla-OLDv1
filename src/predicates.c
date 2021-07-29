@@ -5560,12 +5560,12 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 static bool search_functor(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
 	if (!q->retry)
-		q->st.iter2 = m_first(q->st.m->index);
+		q->st.f_iter = m_first(q->st.m->index);
 
 	DISCARD_RESULT make_choice(q);
 	predicate *pr = NULL;
 
-	while (m_next(q->st.iter2, (void*)&pr)) {
+	while (m_next(q->st.f_iter, (void*)&pr)) {
 		if (pr->is_abolished)
 			continue;
 
