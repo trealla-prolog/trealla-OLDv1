@@ -1221,17 +1221,16 @@ static USE_RESULT pl_status match_head(query *q)
 
 		if (pr->index) {
 			cell *key = deep_clone_to_tmp(q, c, q->st.curr_frame);
-			unsigned arity = key->arity;
-			bool all_vars = true;
+			bool use_index = true;
 
-			for (cell *c = key + 1; arity--; c += c->nbr_cells) {
-				if (!is_variable(c)) {
-					all_vars = false;
-					break;
-				}
+			if (key->arity) {
+				cell *p1 = key + 1;
+
+				if (is_variable(p1))
+					use_index = false;
 			}
 
-			if (!all_vars) {
+			if (use_index) {
 #if DUMP_KEYS
 				sl_dump(pr->index, dump_key, q);
 #endif
