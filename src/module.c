@@ -174,7 +174,7 @@ static int index_compkey(const void *ptr1, const void *ptr2, const void *param)
 			return strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
 		else if (is_variable(p2))
 			return 0;
-	} else if (is_structure(p1) && 0) {
+	} else if (is_structure(p1)) {
 		if (is_structure(p2)) {
 			if (p1->arity < p2->arity)
 				return -1;
@@ -198,6 +198,7 @@ static int index_compkey(const void *ptr1, const void *ptr2, const void *param)
 
 				p1 += p1->nbr_cells;
 				p2 += p2->nbr_cells;
+				break;						// Only want 1st arg
 			}
 
 			return 0;
@@ -712,10 +713,15 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 
 	cell *p1 = c + 1;
 
-	if (pr->index && is_structure(p1)) {
-		pr->is_noindex = true;
-		pr->index_save = pr->index;
-		pr->index = NULL;
+	for (unsigned i = 0; i < c->arity; i++) {
+		if (pr->index && is_structure(p1)) {
+			pr->is_noindex = true;
+			pr->index_save = pr->index;
+			pr->index = NULL;
+			break;
+		}
+
+		p1 += p1->nbr_cells;
 	}
 
 	if (!pr->index
