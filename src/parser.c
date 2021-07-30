@@ -647,7 +647,7 @@ static void directives(parser *p, cell *d)
 			else if (!strcmp(PARSER_GET_STR(p2), "false") || !strcmp(PARSER_GET_STR(p2), "off"))
 				p->m->flag.character_escapes = false;
 		} else {
-			fprintf(stdout, "Warning: unknown flag: %s\n", PARSER_GET_STR(p1));
+			//fprintf(stdout, "Warning: unknown flag: %s\n", PARSER_GET_STR(p1));
 		}
 
 		p->flag = p->m->flag;
@@ -2607,7 +2607,7 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 
 	if (!is_init) {
 		STRING_alloc(src);
-		STRING_strcat2(src, "call((", pSrc);
+		STRING_strcat2(src, "call(true), call((", pSrc);
 		STRING_trim(src, '.');
 		STRING_strcat(src, ")).");
 
