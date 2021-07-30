@@ -49,7 +49,7 @@ profile:
 debug:
 	$(MAKE) 'OPT=$(OPT) -O0 -g -DDEBUG'
 
-test:
+test: tpl
 	./tests/run.sh
 
 clean:

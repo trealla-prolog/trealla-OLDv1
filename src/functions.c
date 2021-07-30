@@ -302,7 +302,7 @@ static USE_RESULT pl_status fn_iso_integer_1(query *q)
 	if (q->eval) {
 		CLEANUP cell p1 = eval(q, p1_tmp);
 
-		if (is_real(&p1) && (p1.val_real < INT_T_MAX) && (p1.val_real > INT_T_MIN)) {
+		if (is_real(&p1) && (p1.val_real < (double)INT_T_MAX) && (p1.val_real > (double)INT_T_MIN)) {
 			q->accum.val_integer = (int_t)p1.val_real;
 			q->accum.tag = TAG_INTEGER;
 			return pl_success;

@@ -2505,6 +2505,7 @@ static bool collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, int 
 				q->st.m->pl->tab3[q->st.m->pl->tab_idx] = c->val_off;
 				q->st.m->pl->tab4[q->st.m->pl->tab_idx] = 1;
 				q->st.m->pl->tab5[q->st.m->pl->tab_idx] = is_anon(c) ? 1 : 0;
+				q->st.m->pl->tab6[q->st.m->pl->tab_idx] = p1;
 				q->st.m->pl->tab_idx++;
 			}
 		}
@@ -5703,7 +5704,6 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_literal(&tmp, g_false_s);
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-
 	} else if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "dialect")) {
 		cell tmp;
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "trealla"));
@@ -10736,6 +10736,127 @@ static USE_RESULT pl_status fn_offset_2(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,any);
+	GET_NEXT_ARG(p3,list_or_nil_or_var);
+
+	q->in_hook = true;
+	may_error(make_choice(q));
+	frame *g = GET_CURR_FRAME();
+	try_me(q, g->nbr_vars);
+
+	if (!unify(q, p1, p1_ctx, p2, p2_ctx)) {
+		q->in_hook = false;
+		undo_me(q);
+		drop_choice(q);
+		return pl_failure;
+	}
+
+	q->in_hook = false;
+	cell *p = p1;
+	idx_t p_ctx = p1_ctx;
+	idx_t nbr_cells = p->nbr_cells;
+	bool first = true;
+
+	for (idx_t i = 0; i < nbr_cells; i++, p++) {
+		if (!is_variable(p))
+			continue;
+
+		cell *c = deref(q, p, p_ctx);
+
+		if (c == p)
+			continue;
+
+		cell *tmp = malloc(sizeof(cell)*(2+c->nbr_cells));
+		make_structure(tmp, g_unify_s, fn_iso_unify_2, 2, 1+c->nbr_cells);
+		SET_OP(tmp, OP_XFX);
+		tmp[1] = *p;
+		copy_cells(tmp+2, c, c->nbr_cells);
+
+		if (first) {
+			first = false;
+			allocate_list(q, tmp);
+		} else
+			append_list(q, tmp);
+
+		free(tmp);
+	}
+
+	p = p2;
+	p_ctx = p2_ctx;
+	nbr_cells = p->nbr_cells;
+
+	for (idx_t i = 0; i < nbr_cells; i++, p++) {
+		if (!is_variable(p))
+			continue;
+
+		// Remove tautologies
+
+		cell *p_tmp = p1;
+		bool skip = false;
+
+		for (idx_t j = 0; j < p1->nbr_cells; j++, p_tmp++) {
+			if (!is_variable(p_tmp))
+				continue;
+
+			if (deref(q, p_tmp, p1_ctx) == deref(q, p, p2_ctx)) {
+				skip = true;
+				break;
+			}
+		}
+
+		if (skip)
+			continue;
+
+		cell *c = deref(q, p, p_ctx);
+
+		if (c == p)
+			continue;
+
+		cell *tmp = malloc(sizeof(cell)*(2+c->nbr_cells));
+		make_structure(tmp, g_unify_s, fn_iso_unify_2, 2, 1+c->nbr_cells);
+		SET_OP(tmp, OP_XFX);
+		tmp[1] = *p;
+		safe_copy_cells(tmp+2, c, c->nbr_cells);
+
+		if (first) {
+			first = false;
+			allocate_list(q, tmp);
+		} else
+			append_list(q, tmp);
+
+		free(tmp);
+	}
+
+	undo_me(q);
+	drop_choice(q);
+
+	if (first) {
+		undo_me(q);
+		drop_choice(q);
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+	}
+
+	cell *l = end_list(q);
+	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
+}
+
+static USE_RESULT pl_status fn_sys_block_verify_hook_0(query *q)
+{
+	q->in_hook = true;
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_sys_unblock_verify_hook_0(query *q)
+{
+	q->in_hook = false;
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_sys_erase_attributes_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
@@ -11902,6 +12023,9 @@ static const struct builtins g_predicates_other[] =
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer"},
 	{"limit", 2, fn_limit_2, "+integer,+callable"},
 	{"offset", 2, fn_offset_2, "+integer,+callable"},
+	{"$block_verify_hook", 0, fn_sys_block_verify_hook_0, NULL},
+	{"$unblock_verify_hook", 0, fn_sys_unblock_verify_hook_0, NULL},
+	{"$unifiable", 3, fn_sys_unifiable_3, NULL},
 
 	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list"},
 	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list"},

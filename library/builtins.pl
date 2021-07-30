@@ -149,7 +149,8 @@ sort(L, R) :-
 	'$mustbe_list'(L),
 	'$mustbe_list_or_var'(R),
 	length(L,N),
-	sort(N, L, _, R).
+	sort(N, L, _, R),
+	!.
 
 sort(2, [X1, X2|L], L, R) :- !,
 	compare(Delta, X1, X2),
@@ -198,7 +199,8 @@ msort(L, R) :-
 	'$mustbe_list'(L),
 	'$mustbe_list_or_var'(R),
 	length(L,N),
-	msort(N, L, _, R).
+	msort(N, L, _, R),
+	!.
 
 msort(2, [X1, X2|L], L, R) :- !,
 	compare(Delta, X1, X2),
@@ -250,7 +252,8 @@ keysort(L, R) :-
 	'$mustbe_pairlist'(L),
 	'$mustbe_pairlist_or_var'(R),
 	length(L,N),
-	keysort(N, L, _, R).
+	keysort(N, L, _, R),
+	!.
 
 keysort(2, [X1, X2|L], L, R) :- !,
 	keycompare(Delta, X1, X2),
@@ -373,6 +376,13 @@ open(F, M, S) :- open(F, M, S, []).
 load_files(Files) :- load_files(Files,[]).
 consult(Files) :- load_files(Files,[]).
 strip_module(T,M,P) :- T=M:P -> true ; P=T, module(M).
+?=(X,Y) :- \+ unifiable(X,Y,[_|_]).
+
+unifiable(T1, T2, Gs) :-
+	copy_term('$unifiable'(T1,T2,Gs), G0),
+	'$rawcall'(G0),
+	'$unifiable'(T1,T2,Gs)=G0.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SWI compatible
