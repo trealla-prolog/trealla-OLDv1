@@ -135,7 +135,7 @@ bool pl_eval(prolog *pl, const char *s)
 
 	parser *p = create_parser(pl->curr_m);
 	if (!p) return false;
-	STRING_alloc(cmd);
+	STRING(cmd);
 	const char *ptr = s + strlen(s) - 1;
 
 	while (ptr != s) {
@@ -389,7 +389,7 @@ prolog *pl_create()
 			memcpy(src, lib->start, *lib->len);
 			src[*lib->len] = '\0';
 			assert(pl->user_m);
-			STRING_alloc(s1);
+			STRING(s1);
 			STRING_strcat2(s1, "library/", lib->name);
 			load_text(pl->user_m, src, STRING_cstr(s1));
 			STRING_free(s1);

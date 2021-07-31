@@ -590,7 +590,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
-		STRING_alloc(pr);
+		STRING(pr);
 		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
@@ -858,7 +858,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
-		STRING_alloc(pr);
+		STRING(pr);
 		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
@@ -1256,7 +1256,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 		if (!is_iso_atom(p2))
 			return throw_error(q, p2, "type_error", "atom");
 
-		STRING_alloc(pr);
+		STRING(pr);
 		STRING_strcat2n(pr, GET_STR(p1), LEN_STR(p1), GET_STR(p2), LEN_STR(p2));
 		cell tmp;
 		may_error(make_cstringn(&tmp, STRING_cstr(pr), STRING_strlen(pr)), STRING_free(pr));
@@ -10140,7 +10140,7 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 			len2 = snprintf(tmpbuf2, sizeof(tmpbuf1), "%.17g", get_real(p2));
 		}
 
-		STRING_allocn(pr, len1+len2);
+		STRING_alloc(pr, len1+len2);
 		STRING_strcat2n(pr, src1, len1, src2, len2);
 		cell tmp;
 		may_error(make_cstringn(&tmp, STRING_cstr(pr), STRING_strlen(pr)), STRING_free(pr));
@@ -10195,7 +10195,7 @@ static USE_RESULT pl_status fn_replace_4(query *q)
 	const char *s2 = GET_STR(p3);
 	size_t s1len = LEN_STR(p2);
 	size_t s2len = LEN_STR(p3);
-	STRING_allocn(pr, dstlen);
+	STRING_alloc(pr, dstlen);
 
 	while (srclen > 0) {
 		if (!strncmp(src, s1, s1len)) {
@@ -11430,7 +11430,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			may_ptr_error(src);
 			memcpy(src, lib->start, *lib->len);
 			src[*lib->len] = '\0';
-			STRING_alloc(s1);
+			STRING(s1);
 			STRING_strcat2(s1, "library/", lib->name);
 			m = load_text(q->st.m, src, STRING_cstr(s1));
 			STRING_free(s1);
@@ -12107,7 +12107,7 @@ static void load_properties(module *m)
 		return;
 
 	m->loaded_properties = true;
-	STRING_allocn(pr, 1024*64);
+	STRING_alloc(pr, 1024*64);
 	char tmpbuf[1024];
 
 	format_property(tmpbuf, sizeof(tmpbuf), ",", 2, "control_construct"); STRING_strcat(pr, tmpbuf);
@@ -12231,7 +12231,7 @@ static void load_flags(query *q)
 		return;
 
 	module *m = q->st.m;
-	STRING_allocn(pr, 1024);
+	STRING_alloc(pr, 1024);
 
 	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "double_quotes", m->flag.double_quote_atom?"atom":m->flag.double_quote_chars?"chars":m->flag.double_quote_codes?"codes":"???");
 	STRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "char_conversion", m->flag.char_conversion?"on":"off");
@@ -12268,7 +12268,7 @@ static void load_ops(query *q)
 		return;
 
 	q->st.m->loaded_ops = true;
-	STRING_allocn(pr, 1024*8);
+	STRING_alloc(pr, 1024*8);
 	miter *iter = m_first(q->st.m->ops);
 	op_table *ptr;
 

@@ -570,9 +570,9 @@ static void directives(parser *p, cell *d)
 				if (strcmp(lib->name, name))
 					continue;
 
-				STRING_alloc(src);
+				STRING(src);
 				STRING_strcatn(src, lib->start, *lib->len);
-				STRING_alloc(s1);
+				STRING(s1);
 				STRING_strcat2(s1, "library/", lib->name);
 				m = load_text(p->m, STRING_cstr(src), STRING_cstr(s1));
 				STRING_free(src);
@@ -1234,7 +1234,7 @@ static bool dcg_expansion(parser *p)
 			may_ptr_error(src);
 			memcpy(src, lib->start, *lib->len);
 			src[*lib->len] = '\0';
-			STRING_alloc(s);
+			STRING(s);
 			STRING_strcat2(s, "library/", lib->name);
 			module *tmp_m = load_text(p->m, src, STRING_cstr(s));
 
@@ -2594,7 +2594,7 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 	}
 
 	if (!is_init) {
-		STRING_alloc(src);
+		STRING(src);
 		STRING_strcat2(src, "call(true), call((", pSrc);
 		STRING_trim(src, '.');
 		STRING_strcat(src, ")).");

@@ -722,18 +722,18 @@ typedef struct {
 	char *buf, *dst;
 	size_t size;
 }
- STRING;
+ astring;
 
 // Don't preallocate, it will be created and expand as needed
 
-#define STRING_alloc(pr) STRING pr##_buf;								\
+#define STRING(pr) astring pr##_buf;								\
 	pr##_buf.size = 0;													\
 	pr##_buf.buf = NULL;												\
 	pr##_buf.dst = pr##_buf.buf;
 
 // Preallocate, but it will expand as needed
 
-#define STRING_allocn(pr,len) STRING pr##_buf; 							\
+#define STRING_alloc(pr,len) astring pr##_buf; 							\
 	pr##_buf.size = len;												\
 	pr##_buf.buf = malloc(len+1);										\
 	ensure(pr##_buf.buf);												\
