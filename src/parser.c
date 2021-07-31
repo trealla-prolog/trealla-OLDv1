@@ -570,13 +570,13 @@ static void directives(parser *p, cell *d)
 				if (strcmp(lib->name, name))
 					continue;
 
-				STRING_alloc(src);
-				STRING_strcatn(src, lib->start, *lib->len);
-				STRING_alloc(s1);
-				STRING_strcat2(s1, "library/", lib->name);
-				m = load_text(p->m, STRING_cstr(src), STRING_cstr(s1));
-				STRING_free(src);
-				STRING_free(s1);
+				ASTRING(src);
+				ASTRING_strcatn(src, lib->start, *lib->len);
+				ASTRING(s1);
+				ASTRING_sprintf(s1, "library/%s", lib->name);
+				m = load_text(p->m, ASTRING_cstr(src), ASTRING_cstr(s1));
+				ASTRING_free(src);
+				ASTRING_free(s1);
 
 				if (m != p->m)
 					do_db_load(m);
@@ -1234,16 +1234,16 @@ static bool dcg_expansion(parser *p)
 			may_ptr_error(src);
 			memcpy(src, lib->start, *lib->len);
 			src[*lib->len] = '\0';
-			STRING_alloc(s);
-			STRING_strcat2(s, "library/", lib->name);
-			module *tmp_m = load_text(p->m, src, STRING_cstr(s));
+			ASTRING(s);
+			ASTRING_sprintf(s, "library/%s", lib->name);
+			module *tmp_m = load_text(p->m, src, ASTRING_cstr(s));
 
 			if (tmp_m) {
 				p->m->used[p->m->idx_used++] = tmp_m;
 				p->dcgs = tmp_m;
 			}
 
-			STRING_free(s);
+			ASTRING_free(s);
 			free(src);
 			break;
 		}
@@ -2594,15 +2594,15 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 	}
 
 	if (!is_init) {
-		STRING_alloc(src);
-		STRING_strcat2(src, "call(true), call((", pSrc);
-		STRING_trim(src, '.');
-		STRING_strcat(src, ")).");
+		ASTRING(src);
+		ASTRING_sprintf(src, "call(true), call((%s", pSrc);
+		ASTRING_trim(src, '.');
+		ASTRING_strcat(src, ")).");
 
-		p->srcptr = STRING_cstr(src);
+		p->srcptr = ASTRING_cstr(src);
 		p->line_nbr = 0;
 		tokenize(p, false, false);
-		STRING_free(src);
+		ASTRING_free(src);
 	} else {
 		p->srcptr = (char*)pSrc;
 		p->line_nbr = 0;

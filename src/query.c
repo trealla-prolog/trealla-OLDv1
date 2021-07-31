@@ -951,7 +951,7 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 
 	if (depth >= MAX_DEPTH) {
 		q->cycle_error = true;
-		return false;
+		return true;
 	}
 
 	if (p1_ctx == q->st.curr_frame)
