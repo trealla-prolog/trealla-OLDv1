@@ -2505,7 +2505,6 @@ static bool collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, int 
 				q->st.m->pl->tab3[q->st.m->pl->tab_idx] = c->val_off;
 				q->st.m->pl->tab4[q->st.m->pl->tab_idx] = 1;
 				q->st.m->pl->tab5[q->st.m->pl->tab_idx] = is_anon(c) ? 1 : 0;
-				q->st.m->pl->tab6[q->st.m->pl->tab_idx] = p1;
 				q->st.m->pl->tab_idx++;
 			}
 		}

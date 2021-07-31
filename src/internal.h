@@ -599,7 +599,6 @@ struct prolog_ {
 	idx_t tab2[64000];
 	idx_t tab4[64000];
 	uint8_t tab5[64000];
-	cell *tab6[64000];
 	module *modules;
 	module *system_m, *user_m, *curr_m;
 	uint64_t s_last, s_cnt, seed;
