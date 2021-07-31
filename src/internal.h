@@ -20,6 +20,8 @@
 #include <io.h>
 #define isatty _isatty
 #define snprintf _snprintf
+#define chdir _chdir
+#define getpid _getpid
 #define PATH_SEP "\\"
 #define PATH_SEP_CHAR '\\'
 #define NEWLINE_MODE "dos"
