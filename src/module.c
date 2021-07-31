@@ -134,7 +134,7 @@ static int predicate_compkey(const void *ptr1, const void *ptr2, const void *par
 	return strcmp(m->pl->pool+p1->val_off, m->pl->pool+p2->val_off);
 }
 
-static int index_compkey(const void *ptr1, const void *ptr2, const void *param, int args)
+static int index_compkey_internal(const void *ptr1, const void *ptr2, const void *param, int args, int depth)
 {
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
@@ -192,7 +192,7 @@ static int index_compkey(const void *ptr1, const void *ptr2, const void *param, 
 			int cnt = 1;
 
 			while (arity--) {
-				int i = index_compkey(p1, p2, param, args);
+				int i = index_compkey_internal(p1, p2, param, args, depth+1);
 
 				if (i != 0)
 					return i;
@@ -200,8 +200,10 @@ static int index_compkey(const void *ptr1, const void *ptr2, const void *param, 
 				p1 += p1->nbr_cells;
 				p2 += p2->nbr_cells;
 
-				if (cnt++ == args)
+				if ((depth == 1) && (cnt == args))
 					break;
+
+				cnt++;
 			}
 
 			return 0;
@@ -213,6 +215,11 @@ static int index_compkey(const void *ptr1, const void *ptr2, const void *param, 
 		return 0;
 
 	return 0;
+}
+
+static int index_compkey(const void *ptr1, const void *ptr2, const void *param, int args)
+{
+	return index_compkey_internal(ptr1, ptr2, param, args, 0);
 }
 
 clause *find_in_db(module *m, uuid *ref)
