@@ -58,7 +58,8 @@ typedef enum {
 #define MAX_ARITY UCHAR_MAX
 #define MAX_QUEUES 16
 #define MAX_STREAMS 1024
-#define MAX_DEPTH 9000
+//#define MAX_DEPTH 9999
+#define MAX_DEPTH 3000			// Clang stack size needs this small
 #define STREAM_BUFLEN 1024
 
 #define GET_CHOICE(i) (q->choices+(i))
