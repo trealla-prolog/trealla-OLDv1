@@ -264,7 +264,7 @@ void set_noindex_in_db(module *m, const char *name, unsigned arity)
 	if (!pr) pr = create_predicate(m, &tmp);
 
 	if (pr)
-		pr->is_noindex = true;
+		pr->is_noindex1 = true;
 	else
 		m->error = true;
 }
@@ -700,7 +700,7 @@ static void reindex_predicate(module *m, predicate *pr)
 	ensure(pr->idx1);
 	m_nbr_args(pr->idx1, 1);
 
-	if (pr->key.arity > 1) {
+	if ((pr->key.arity > 1) && !pr->is_noindex2) {
 		pr->idx2 = m_create(index_compkey, NULL, m);
 		ensure(pr->idx2);
 		m_nbr_args(pr->idx2, 2);
@@ -728,12 +728,17 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	cell *p1 = c + 1;
 	const int ARG_NBR = pr->key.arity;
 
-	for (int i = 0; (i < ARG_NBR) && (i < pr->key.arity) && !pr->is_noindex; i++) {
-		if (!pr->idx1 && is_structure(p1))
-			pr->is_noindex = true;
+	for (int i = 0; (i < ARG_NBR) && (i < pr->key.arity) && !pr->is_noindex1; i++) {
+		bool noindex = (i == 0) && is_structure(p1);
 
-		if (pr->idx1 && is_structure(p1)) {
-			pr->is_noindex = true;
+		if ((i > 0) && is_structure(p1) && (p1->arity > 1))
+			noindex = true;
+
+		if (!pr->idx1 && noindex)
+			pr->is_noindex1 = true;
+
+		if (pr->idx1 && noindex && (i == 0)) {
+			pr->is_noindex1 = true;
 			pr->idx1_save = pr->idx1;
 			pr->idx1 = NULL;
 			pr->idx2 = NULL;
@@ -744,7 +749,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 
 	if (!pr->idx1
 		&& !m->pl->noindex
-		&& !pr->is_noindex
+		&& !pr->is_noindex1
 		&& ((!pr->is_dynamic && (pr->cnt > 15))
 			|| (pr->is_dynamic && (pr->cnt > 100)))) {
 		reindex_predicate(m, pr);
