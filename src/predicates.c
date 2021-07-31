@@ -1670,11 +1670,7 @@ static void add_stream_properties(query *q, int n)
 	else
 		dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, output).\n", n);
 
-#ifdef _WIN32
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, newline(dos)).\n", n);
-#else
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, newline(posix)).\n", n);
-#endif
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, newline(%s)).\n", n, NEWLINE_MODE);
 
 	parser *p = create_parser(q->st.m);
 	p->srcptr = tmpbuf;
@@ -1781,11 +1777,7 @@ static pl_status do_stream_property(query *q)
 
 	if (!slicecmp2(GET_STR(p1), LEN_STR(p1), "newline")) {
 		cell tmp;
-#ifdef _WIN32
-		may_error(make_cstring(&tmp, "dos"));
-#else
-		may_error(make_cstring(&tmp, "posix"));
-#endif
+		may_error(make_cstring(&tmp, NEWLINE_MODE));
 		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;

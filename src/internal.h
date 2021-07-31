@@ -22,10 +22,12 @@
 #define snprintf _snprintf
 #define PATH_SEP "\\"
 #define PATH_SEP_CHAR '\\'
+#define NEWLINE_MODE "dos"
 #else
 #include <unistd.h>
 #define PATH_SEP "/"
 #define PATH_SEP_CHAR '/'
+#define NEWLINE_MODE "posix"
 #endif
 
 typedef int64_t int_t;
