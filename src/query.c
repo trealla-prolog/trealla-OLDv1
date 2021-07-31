@@ -5,13 +5,6 @@
 #include <string.h>
 #include <time.h>
 
-#ifdef _WIN32
-#include <io.h>
-#define isatty _isatty
-#else
-#include <unistd.h>
-#endif
-
 #include "internal.h"
 #include "history.h"
 #include "parser.h"

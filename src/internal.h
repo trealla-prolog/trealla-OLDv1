@@ -16,6 +16,18 @@
 #define USE_THREADS 0
 #endif
 
+#ifdef _WIN32
+#include <io.h>
+#define isatty _isatty
+#define snprintf _snprintf
+#define PATH_SEP "\\"
+#define PATH_SEP_CHAR '\\'
+#else
+#include <unistd.h>
+#define PATH_SEP "/"
+#define PATH_SEP_CHAR '/'
+#endif
+
 typedef int64_t int_t;
 typedef uint64_t uint_t;
 

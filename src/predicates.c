@@ -8,23 +8,14 @@
 #include <sys/stat.h>
 
 #ifdef _WIN32
-#include <io.h>
-#define isatty _isatty
-#define snprintf _snprintf
-#define msleep Sleep
-#define PATH_SEP "\\"
-#define PATH_SEP_CHAR '\\'
 #define USE_MMAP 0
 #else
 #ifndef USE_MMAP
 #define USE_MMAP 1
 #endif
-#include <unistd.h>
 #if USE_MMAP
 #include <sys/mman.h>
 #endif
-#define PATH_SEP "/"
-#define PATH_SEP_CHAR '/'
 #include <dirent.h>
 #endif
 
@@ -48,7 +39,9 @@
 #define MAX_VARS 32768
 #define MAX_BYTES_PER_CODEPOINT 6 // Unicode says 4, but max possible is 6
 
-#ifndef _WIN32
+#ifdef _WIN32
+#define msleep Sleep
+#else
 static void msleep(int ms)
 {
 	struct timespec tv;
@@ -1791,7 +1784,7 @@ static pl_status do_stream_property(query *q)
 #ifdef _WIN32
 		may_error(make_cstring(&tmp, "dos"));
 #else
-		may_error(make_cstring(&tmp, "unix"));
+		may_error(make_cstring(&tmp, "posix"));
 #endif
 		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
