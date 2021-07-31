@@ -10792,7 +10792,7 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 		if (!is_variable(p))
 			continue;
 
-		// Remove tautologies
+		// Ignore duplicates
 
 		cell *p_tmp = p1;
 		bool skip = false;
