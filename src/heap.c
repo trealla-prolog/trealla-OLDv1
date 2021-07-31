@@ -408,3 +408,72 @@ cell *alloc_on_queuen(query *q, int qnbr, const cell *c)
 	return dst;
 }
 
+void fix_list(cell *c)
+{
+	idx_t cnt = c->nbr_cells;
+
+	while (is_iso_list(c)) {
+		c->nbr_cells = cnt;
+		c = c + 1;					// skip .
+		cnt -= 1 + c->nbr_cells;
+		c = c + c->nbr_cells;		// skip head
+	}
+}
+
+// Defer check until end_list()
+
+void allocate_list(query *q, const cell *c)
+{
+	if (!init_tmp_heap(q)) return;
+	append_list(q, c);
+}
+
+// Defer check until end_list()
+
+void append_list(query *q, const cell *c)
+{
+	cell *tmp = alloc_on_tmp(q, 1+c->nbr_cells);
+	if (!tmp) return;
+	tmp->tag = TAG_LITERAL;
+	tmp->nbr_cells = 1 + c->nbr_cells;
+	tmp->val_off = g_dot_s;
+	tmp->arity = 2;
+	tmp->flags = 0;
+	tmp++;
+	copy_cells(tmp, c, c->nbr_cells);
+}
+
+USE_RESULT cell *end_list(query *q)
+{
+	cell *tmp = alloc_on_tmp(q, 1);
+	if (!tmp) return NULL;
+	tmp->tag = TAG_LITERAL;
+	tmp->nbr_cells = 1;
+	tmp->val_off = g_nil_s;
+	tmp->arity = tmp->flags = 0;
+	idx_t nbr_cells = tmp_heap_used(q);
+
+	tmp = alloc_on_heap(q, nbr_cells);
+	if (!tmp) return NULL;
+	safe_copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
+	tmp->nbr_cells = nbr_cells;
+	fix_list(tmp);
+	return tmp;
+}
+
+bool search_tmp_list(query *q, cell *v)
+{
+	cell *tmp = get_tmp_heap(q, 0);
+	idx_t nbr_cells = tmp_heap_used(q);
+
+
+	if (!tmp || !tmp_heap_used(q))
+		return false;
+
+	for (idx_t i = 0; i < nbr_cells; i++, tmp++) {
+		if (tmp->var_nbr == v->var_nbr)
+			return true;
+	}
+
+	return false;
+}

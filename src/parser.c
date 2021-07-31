@@ -2155,18 +2155,6 @@ static bool get_token(parser *p, int last_op)
 	return true;
 }
 
-void fix_list(cell *c)
-{
-	idx_t cnt = c->nbr_cells;
-
-	while (is_iso_list(c)) {
-		c->nbr_cells = cnt;
-		c = c + 1;					// skip .
-		cnt -= 1 + c->nbr_cells;
-		c = c + c->nbr_cells;		// skip head
-	}
-}
-
 static bool process_term(parser *p, cell *p1)
 {
 	directives(p, p1);

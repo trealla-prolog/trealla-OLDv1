@@ -17,6 +17,7 @@
 #include "query.h"
 #include "builtins.h"
 #include "network.h"
+#include "heap.h"
 #include "utf8.h"
 
 #ifndef DBL_DECIMAL_DIG

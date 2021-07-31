@@ -235,47 +235,6 @@ static void init_queuen(query* q)
 static idx_t queuen_used(const query *q) { return q->qp[q->st.qnbr]; }
 static cell *get_queuen(query *q) { return q->queue[q->st.qnbr]; }
 
-// Defer check until end_list()
-
-void allocate_list(query *q, const cell *c)
-{
-	if (!init_tmp_heap(q)) return;
-	append_list(q, c);
-}
-
-// Defer check until end_list()
-
-void append_list(query *q, const cell *c)
-{
-	cell *tmp = alloc_on_tmp(q, 1+c->nbr_cells);
-	if (!tmp) return;
-	tmp->tag = TAG_LITERAL;
-	tmp->nbr_cells = 1 + c->nbr_cells;
-	tmp->val_off = g_dot_s;
-	tmp->arity = 2;
-	tmp->flags = 0;
-	tmp++;
-	copy_cells(tmp, c, c->nbr_cells);
-}
-
-USE_RESULT cell *end_list(query *q)
-{
-	cell *tmp = alloc_on_tmp(q, 1);
-	if (!tmp) return NULL;
-	tmp->tag = TAG_LITERAL;
-	tmp->nbr_cells = 1;
-	tmp->val_off = g_nil_s;
-	tmp->arity = tmp->flags = 0;
-	idx_t nbr_cells = tmp_heap_used(q);
-
-	tmp = alloc_on_heap(q, nbr_cells);
-	if (!tmp) return NULL;
-	safe_copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
-	tmp->nbr_cells = nbr_cells;
-	fix_list(tmp);
-	return tmp;
-}
-
 static USE_RESULT cell *end_list_unsafe(query *q)
 {
 	cell *tmp = alloc_on_tmp(q, 1);
@@ -10763,6 +10722,9 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 		if (!is_variable(p))
 			continue;
 
+		if (!first && search_tmp_list(q, p))
+			continue;
+
 		cell *c = deref(q, p, p_ctx);
 
 		if (c == p)
@@ -10833,8 +10795,6 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 	drop_choice(q);
 
 	if (first) {
-		undo_me(q);
-		drop_choice(q);
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
 		return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
