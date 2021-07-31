@@ -58,7 +58,7 @@ typedef enum {
 #define MAX_ARITY UCHAR_MAX
 #define MAX_QUEUES 16
 #define MAX_STREAMS 1024
-#define MAX_DEPTH 999
+#define MAX_DEPTH 2000
 #define STREAM_BUFLEN 1024
 
 #define GET_CHOICE(i) (q->choices+(i))
