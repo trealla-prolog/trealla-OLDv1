@@ -10746,7 +10746,7 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 	frame *g = GET_CURR_FRAME();
 	try_me(q, g->nbr_vars);
 
-	if (!unify(q, p1, p1_ctx, p2, p2_ctx)) {
+	if (!unify(q, p1, p1_ctx, p2, p2_ctx) && !q->cycle_error) {
 		q->in_hook = false;
 		undo_me(q);
 		drop_choice(q);
