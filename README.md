@@ -237,7 +237,9 @@ Non-standard predicates
 	variant/2					# variant(+term1,+term2)
 	term_attvars/2				# term_attvars(+Term,-Vs)
 	copy_term_nat/2				# doesn't copy attrs
-	copy_term/3					# copy_term(+Term,-Copy,-Gs)
+	copy_term/3					# copy_term(+term1,-term2,-goals)
+	unifiable/3					# unifiable(+term1,+term2,-goals)
+	?=/2						# ?=(+term1,+term2)
 	findall/4
 	var_number/2
 	ignore/1

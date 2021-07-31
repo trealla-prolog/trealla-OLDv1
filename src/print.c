@@ -7,16 +7,13 @@
 #include <float.h>
 #include <inttypes.h>
 
-#ifdef _WIN32
-#define snprintf _snprintf
-#endif
-
 #include "internal.h"
 #include "parser.h"
 #include "module.h"
 #include "query.h"
 #include "builtins.h"
 #include "network.h"
+#include "heap.h"
 #include "utf8.h"
 
 #ifndef DBL_DECIMAL_DIG

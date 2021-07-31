@@ -867,7 +867,7 @@ module *load_text(module *m, const char *src, const char *filename)
 		p->m->pl->halt = false;
 		p->directive = true;
 
-		if (p->run_init == true) {
+		if (p->run_init) {
 			p->consulting = false;
 			p->command = true;
 
@@ -925,7 +925,7 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 		p->m->pl->quiet = true;
 		p->directive = true;
 
-		if (p->run_init == true) {
+		if (p->run_init) {
 			p->command = true;
 			p->consulting = false;
 

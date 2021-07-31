@@ -29,3 +29,9 @@ cell *init_tmp_heap(query* q);
 inline static idx_t tmp_heap_used(const query *q) { return q->tmphp; }
 inline static cell *get_tmp_heap(const query *q, idx_t i) { return q->tmp_heap + i; }
 
+void fix_list(cell *c);
+bool search_tmp_list(query *q, cell *v);
+
+void allocate_list(query *q, const cell *c);
+void append_list(query *q, const cell *c);
+USE_RESULT cell *end_list(query *q);
