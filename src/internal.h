@@ -442,6 +442,7 @@ typedef struct {
 	cell *curr_cell;
 	clause *curr_clause, *curr_clause2;
 	miter *iter, *f_iter;
+	predicate *pr;
 	module *m;
 	idx_t curr_frame, fp, hp, tp, sp, cgen, arena_nbr;
 	uint8_t qnbr;
