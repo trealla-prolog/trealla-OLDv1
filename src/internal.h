@@ -367,7 +367,7 @@ struct predicate_ {
 	predicate *prev, *next;
 	clause *head, *tail;
 	module *m;
-	map *idx1, *idx2, *idx1_save;
+	map *idx1, *idx2, *idx_save;
 	cell key;
 	uint64_t cnt;
 	bool is_prebuilt:1;
@@ -378,8 +378,7 @@ struct predicate_ {
 	bool is_multifile:1;
 	bool is_discontiguous:1;
 	bool is_abolished:1;
-	bool is_noindex1:1;
-	bool is_noindex2:1;
+	bool is_noindex:1;
 	bool check_directive:1;
 };
 
