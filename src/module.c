@@ -733,17 +733,25 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 		cl->r.persist = true;
 
 	cell *p1 = c + 1;
-	const int ARG_NBR = pr->key.arity;
+	const int ARG_NBR = 2;
 
 	for (int i = 0; (i < ARG_NBR) && (i < pr->key.arity) && !pr->is_noindex; i++) {
 		bool noindex = (i == 0) && is_structure(p1);
 
-		if ((i > 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
+		if ((i == 1) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
 			noindex = true;
 
-		if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
-			if (p1->val_off == g_at_s)
+		if ((i == 1) && is_structure(p1) && (p1->arity == 1)) {
+			if (p1->val_off == g_at_s) {
+#if 0
+				query q = (query){0};
+				q.st.m = m;
+				char *dst = print_term_to_strbuf(&q, c, 0, 0);
+				printf("*** %s\n", dst);
+				free(dst);
+#endif
 				noindex = true;
+			}
 		}
 
 		if (!pr->idx1 && noindex)
