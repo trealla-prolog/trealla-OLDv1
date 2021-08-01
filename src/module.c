@@ -169,6 +169,14 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 				return 0;
 		} else if (is_variable(p2))
 			return 0;
+	} else if (is_literal(p1) && !p1->arity) {
+		if (is_literal(p2) && !p2->arity) {
+			if (p1->val_off == p2->val_off)
+				return 0;
+
+			return strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
+		} else if (is_variable(p2))
+			return 0;
 	} else if (is_atom(p1)) {
 		if (is_atom(p2))
 			return strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
@@ -733,15 +741,15 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 		cl->r.persist = true;
 
 	cell *p1 = c + 1;
-	const int ARG_NBR = 2;
+	const int ARG_NBR = pr->key.arity;
 
 	for (int i = 0; (i < ARG_NBR) && (i < pr->key.arity) && !pr->is_noindex; i++) {
 		bool noindex = (i == 0) && is_structure(p1);
 
-		if ((i == 1) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
+		if ((i > 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
 			noindex = true;
 
-		if ((i == 1) && is_structure(p1) && (p1->arity == 1)) {
+		if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
 			if (p1->val_off == g_at_s) {
 #if 0
 				query q = (query){0};
