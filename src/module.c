@@ -205,12 +205,11 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 				if (i != 0)
 					return i;
 
-				p1 += p1->nbr_cells;
-				p2 += p2->nbr_cells;
-
 				if ((depth == 1) && (cnt == args))
 					break;
 
+				p1 += p1->nbr_cells;
+				p2 += p2->nbr_cells;
 				cnt++;
 			}
 
