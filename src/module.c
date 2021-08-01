@@ -754,7 +754,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 				query q = (query){0};
 				q.st.m = m;
 				char *dst = print_term_to_strbuf(&q, c, 0, 0);
-				printf("*** %s\n", dst);
+				printf("*** [%d] %s\n", i, dst);
 				free(dst);
 #endif
 				noindex = true;
