@@ -26,6 +26,8 @@ extern USE_RESULT pl_status throw_error(query *q, cell *c, const char *err_type,
 extern void call_attrs(query *q, cell *attrs);
 extern void stash_me(query *q, rule *t, bool last_match);
 extern bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
+extern void acquire_predicate(__attribute__((unused)) query *q, predicate *pr);
+extern void release_predicate(query *q, predicate *pr);
 
 extern bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials);
 extern size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes);
