@@ -741,6 +741,13 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 		if ((i > 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
 			noindex = true;
 
+		if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
+			const char *src = MODULE_GET_STR(p1);
+
+			if (!strcmp(src, "@"))
+				noindex = true;
+		}
+
 		if (!pr->idx1 && noindex)
 			pr->is_noindex = true;
 
