@@ -742,9 +742,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 			noindex = true;
 
 		if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
-			const char *src = MODULE_GET_STR(p1);
-
-			if (!strcmp(src, "@"))
+			if (p1->val_off == g_at_s)
 				noindex = true;
 		}
 
