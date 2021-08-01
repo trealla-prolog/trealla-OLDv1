@@ -18,7 +18,7 @@ bool virtual_term(parser *p, const char *src);
 extern void clear_rule(rule *t);
 extern void do_reduce(cell *n);
 extern void fix_list(cell *c);
-extern bool check_clause(const cell *c);
+extern bool check_if_rule(const cell *c);
 extern cell *get_head(cell *c);
 extern cell *get_body(cell *c);
 extern cell *get_logical_body(cell *c);

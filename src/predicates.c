@@ -1601,7 +1601,7 @@ static pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, enum clause_type i
 
 	pl_status match;
 
-	if (check_clause(p1))
+	if (check_if_rule(p1))
 		match = match_rule(q, p1, p1_ctx);
 	else
 		match = match_clause(q, p1, p1_ctx, is_retract);
