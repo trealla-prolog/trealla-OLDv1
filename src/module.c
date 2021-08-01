@@ -182,10 +182,10 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 			if (p1->arity > p2->arity)
 				return 1;
 
-			int i = strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
+			bool i = p1->val_off == p2->val_off;
 
-			if (i != 0)
-				return i;
+			if (!i)
+				return strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
 
 			int arity = p1->arity;
 			p1++; p2++;
