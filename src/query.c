@@ -167,26 +167,6 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 	return pl_success;
 }
 
-void acquire_predicate(__attribute__((unused)) query *q, predicate *pr)
-{
-	if (!pr)
-		return;
-
-	//if (!pr->refs) printf("*** acquire %s / %u\n", GET_STR(&pr->key), pr->key.arity);
-	pr->refs++;
-}
-
-void release_predicate(__attribute__((unused)) query *q, predicate *pr)
-{
-	if (!pr)
-		return;
-
-	if (--pr->refs)
-		return;
-
-	//printf("*** release %s / %u\n", GET_STR(&pr->key), pr->key.arity);
-}
-
 static void next_key(query *q)
 {
 	if (q->st.iter) {
