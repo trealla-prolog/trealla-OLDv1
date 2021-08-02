@@ -307,7 +307,7 @@ static void unwind_trail(query *q, const choice *ch)
 
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
-		unshare_cell(&e->c);
+		//unshare_cell(&e->c); // FIXME
 		e->c.tag = TAG_EMPTY;
 		e->c.attrs = tr->attrs;
 		e->c.attrs_ctx = tr->attrs_ctx;
@@ -1680,10 +1680,14 @@ void destroy_query(query *q)
 		free(q->queue[i]);
 	}
 
+#if 0
+	// FIXME
+
 	slot *e = q->slots;
 
 	for (idx_t i = 0; i < q->st.sp; i++, e++)
 		unshare_cell(&e->c);
+#endif
 
 	mp_int_clear(&q->tmp_ival);
 	free(q->trails);
