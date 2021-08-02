@@ -250,10 +250,10 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 	if (is_real(p1) && is_real(&p2))
 		return p1->val_real == p2.val_real;
 
-	if (is_atom(p1) && is_number(&p2) && !strcmp(GET_STR(p1), "nan"))
+	if (is_atom(p1) && is_number(&p2) && !strcmp(GET_STR(q, p1), "nan"))
 		return is_real(&p2)? isnan(p2.val_real) : 0;
 
-	if (is_atom(p1) && is_number(&p2) && !strcmp(GET_STR(p1), "inf"))
+	if (is_atom(p1) && is_number(&p2) && !strcmp(GET_STR(q, p1), "inf"))
 		return is_real(&p2) ? isinf(p2.val_real) : 0;
 
 	return pl_failure;
@@ -1878,7 +1878,7 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 
 	if (is_iso_atom(p1)) {
 		if (is_iso_atom(p2))
-			return slicecmp(GET_STR(p1), LEN_STR(p1), GET_STR(p2), LEN_STR(p2));
+			return slicecmp(GET_STR(q, p1), LEN_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p2));
 
 		if (is_variable(p2) || is_number(p2))
 			return 1;
@@ -1930,7 +1930,7 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		return 0;
 	}
 
-	int val = slicecmp(GET_STR(p1), LEN_STR(p1), GET_STR(p2), LEN_STR(p2));
+	int val = slicecmp(GET_STR(q, p1), LEN_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p2));
 	if (val) return val>0?1:-1;
 
 	int arity = p1->arity;

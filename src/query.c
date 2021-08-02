@@ -56,7 +56,7 @@ static void trace_call(query *q, cell *c, idx_t c_ctx, box_t box)
 	if (box == CALL)
 		box = q->retry?REDO:q->resume?NEXT:CALL;
 
-	const char *src = GET_STR(c);
+	const char *src = GET_STR(q, c);
 
 	if (!strcmp(src, ",") || !strcmp(src, ";") || !strcmp(src, "->"))
 		return;
@@ -268,10 +268,10 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes)
 			size_t len = len_char_utf8(tmp);
 			is_chars_list += len;
 		} else {
-			const char *src = GET_STR(c);
+			const char *src = GET_STR(q, c);
 			size_t len = len_char_utf8(src);
 
-			if (len != LEN_STR(c)) {
+			if (len != LEN_STR(q, c)) {
 				is_chars_list = 0;
 				break;
 			}
@@ -911,19 +911,19 @@ static bool unify_literal(query *q, cell *p1, cell *p2)
 	if (is_literal(p2))
 		return p1->val_off == p2->val_off;
 
-	if (is_cstring(p2) && (LEN_STR(p1) == LEN_STR(p2)))
-		return !memcmp(GET_STR(p2), QUERY_GET_POOL(p1->val_off), LEN_STR(p1));
+	if (is_cstring(p2) && (LEN_STR(q, p1) == LEN_STR(q, p2)))
+		return !memcmp(GET_STR(q, p2), QUERY_GET_POOL(p1->val_off), LEN_STR(q, p1));
 
 	return false;
 }
 
 static bool unify_cstring(query *q, cell *p1, cell *p2)
 {
-	if (is_cstring(p2) && (LEN_STR(p1) == LEN_STR(p2)))
-		return !memcmp(GET_STR(p1), GET_STR(p2), LEN_STR(p1));
+	if (is_cstring(p2) && (LEN_STR(q, p1) == LEN_STR(q, p2)))
+		return !memcmp(GET_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p1));
 
-	if (is_literal(p2) && (LEN_STR(p1) == LEN_STR(p2)))
-		return !memcmp(GET_STR(p1), QUERY_GET_POOL(p2->val_off), LEN_STR(p1));
+	if (is_literal(p2) && (LEN_STR(q, p1) == LEN_STR(q, p2)))
+		return !memcmp(GET_STR(q, p1), QUERY_GET_POOL(p2->val_off), LEN_STR(q, p1));
 
 	return false;
 }
@@ -1011,7 +1011,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 
 		if (!is_literal(c)) {
 			// For now convert it to a literal
-			idx_t off = index_from_pool(q->st.m->pl, GET_STR(c));
+			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
 			may_idx_error(off);
 			unshare_cell(c);
 			c->tag = TAG_LITERAL;
@@ -1024,7 +1024,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 		if (!pr) {
 			bool found = false;
 
-			if (get_builtin(q->st.m->pl, GET_STR(head), head->arity, &found), found)
+			if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found), found)
 				return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 			q->st.curr_clause2 = NULL;
@@ -1102,7 +1102,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 
 		if (!is_literal(c)) {
 			// For now convert it to a literal
-			idx_t off = index_from_pool(q->st.m->pl, GET_STR(c));
+			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
 			may_idx_error(off);
 			unshare_cell(c);
 			c->tag = TAG_LITERAL;
@@ -1115,7 +1115,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 		if (!pr) {
 			bool found = false;
 
-			if (get_builtin(q->st.m->pl, GET_STR(p1), p1->arity, &found), found) {
+			if (get_builtin(q->st.m->pl, GET_STR(q, p1), p1->arity, &found), found) {
 				if (is_retract != DO_CLAUSE)
 					return throw_error(q, p1, "permission_error", "modify,static_procedure");
 				else
@@ -1195,7 +1195,7 @@ static USE_RESULT pl_status match_head(query *q)
 			pr = c->match;
 		} else {
 			// For now convert it to a literal
-			idx_t off = index_from_pool(q->st.m->pl, GET_STR(c));
+			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
 			may_idx_error(off);
 			unshare_cell(c);
 			c->tag = TAG_LITERAL;
@@ -1209,7 +1209,7 @@ static USE_RESULT pl_status match_head(query *q)
 			q->save_m = q->st.m;
 
 			if (!pr) {
-				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(c), "initialization")))
+				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(q, c), "initialization")))
 					if (q->st.m->flag.unknown == 1)
 						return throw_error(q, c, "existence_error", "procedure");
 					else
@@ -1371,11 +1371,11 @@ static void dump_vars(query *q, bool partial)
 		// If priority >= '=' then put in parens...
 
 		if (is_structure(c)) {
-			unsigned pri = find_op(q->st.m, GET_STR(c), GET_OP(c));
+			unsigned pri = find_op(q->st.m, GET_STR(q, c), GET_OP(c));
 			if (pri >= 700) parens = true;
 		}
 
-		if (is_atom(c) && search_op(q->st.m, GET_STR(c), NULL, false) && !IS_OP(c))
+		if (is_atom(c) && search_op(q->st.m, GET_STR(q, c), NULL, false) && !IS_OP(c))
 			parens = true;
 
 		if (parens) fputc('(', stdout);
