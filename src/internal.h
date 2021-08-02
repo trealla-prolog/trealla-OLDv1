@@ -771,11 +771,6 @@ typedef struct {
 	*pr##_buf.dst = '\0';												\
 }
 
-#define ASTRING_strcat2n(pr,s1,len1,s2,len2) {							\
-	ASTRING_strcatn(pr,s1,len1); 										\
-	ASTRING_strcatn(pr,s2,len2);										\
-}
-
 // Use where length is not known
 
 #define ASTRING_strcat(pr,s) ASTRING_strcatn(pr,s,strlen(s))

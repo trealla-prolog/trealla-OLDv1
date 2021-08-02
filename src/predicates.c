@@ -1257,7 +1257,8 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 			return throw_error(q, p2, "type_error", "atom");
 
 		ASTRING(pr);
-		ASTRING_strcat2n(pr, GET_STR(q, p1), LEN_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p2));
+		ASTRING_strcatn(pr, GET_STR(q, p1), LEN_STR(q, p1));
+		ASTRING_strcatn(pr, GET_STR(q, p2), LEN_STR(q, p2));
 		cell tmp;
 		may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
 		ASTRING_free(pr);
@@ -10141,7 +10142,8 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 		}
 
 		ASTRING_alloc(pr, len1+len2);
-		ASTRING_strcat2n(pr, src1, len1, src2, len2);
+		ASTRING_strcatn(pr, src1, len1);
+		ASTRING_strcatn(pr, src2, len2);
 		cell tmp;
 		may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
 		ASTRING_free(pr);
