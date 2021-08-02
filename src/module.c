@@ -348,6 +348,7 @@ void set_meta_predicate_in_db(module *m, cell *c)
 
 	if (pr) {
 		query q = (query){0};
+		q.pl = m->pl;
 		q.st.m = m;
 		char *dst = print_term_to_strbuf(&q, c, 0, 0);
 		char tmpbuf[1024];
@@ -752,6 +753,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 			if (p1->val_off == g_at_s) {
 #if 0
 				query q = (query){0};
+				q.pl = m->pl;
 				q.st.m = m;
 				char *dst = print_term_to_strbuf(&q, c, 0, 0);
 				printf("*** [%d] %s\n", i, dst);
@@ -1045,6 +1047,7 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 	(void) dq;
 	idx_t ctx = 0;
 	query q = (query){0};
+	q.pl = m->pl;
 	q.st.m = m;
 
 	for (predicate *pr = m->head; pr; pr = pr->next) {

@@ -589,6 +589,7 @@ static void directives(parser *p, cell *d)
 			}
 
 			query q = (query){0};
+			q.pl = p->pl;
 			q.st.m = p->m;
 			snprintf(dstbuf, sizeof(dstbuf), "%s/", g_tpl_lib);
 			char *dst = dstbuf + strlen(dstbuf);
