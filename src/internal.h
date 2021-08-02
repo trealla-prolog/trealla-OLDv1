@@ -717,14 +717,10 @@ typedef struct {
 }
  astring;
 
-// Don't preallocate, it will be created and expand as needed
-
 #define ASTRING(pr) astring pr##_buf;									\
 	pr##_buf.size = 0;													\
 	pr##_buf.buf = NULL;												\
 	pr##_buf.dst = pr##_buf.buf;
-
-// Preallocate, but it will expand as needed
 
 #define ASTRING_alloc(pr,len) astring pr##_buf; 						\
 	pr##_buf.size = len;												\
@@ -732,8 +728,6 @@ typedef struct {
 	ensure(pr##_buf.buf);												\
 	pr##_buf.dst = pr##_buf.buf;										\
 	*pr##_buf.dst = '\0';
-
-// Return length of string in bytes
 
 #define ASTRING_strlen(pr) (pr##_buf.dst - pr##_buf.buf)
 
@@ -754,7 +748,7 @@ typedef struct {
 
 #define ASTRING_check(pr,len) {											\
 	size_t rem = pr##_buf.size - ASTRING_strlen(pr);					\
-	if ((len) >= rem) {												\
+	if ((len) >= rem) {													\
 		size_t offset = ASTRING_strlen(pr);								\
 		pr##_buf.buf = realloc(pr##_buf.buf, (pr##_buf.size += ((len)-rem)) + 1); \
 		ensure(pr##_buf.buf);											\
@@ -762,7 +756,7 @@ typedef struct {
 	}																	\
 }
 
-// Use where the length is known in advance
+#define ASTRING_strcat(pr,s) ASTRING_strcatn(pr,s,strlen(s))
 
 #define ASTRING_strcatn(pr,s,len) {										\
 	ASTRING_check(pr, len);												\
@@ -770,12 +764,6 @@ typedef struct {
 	pr##_buf.dst += len;												\
 	*pr##_buf.dst = '\0';												\
 }
-
-// Use where length is not known
-
-#define ASTRING_strcat(pr,s) ASTRING_strcatn(pr,s,strlen(s))
-
-// Traditional sprintf into buffer, it will expand as needed
 
 #define ASTRING_sprintf(pr,fmt,...) {									\
 	size_t len = snprintf(NULL, 0, fmt, __VA_ARGS__);					\
@@ -785,10 +773,5 @@ typedef struct {
 	*pr##_buf.dst = '\0';												\
 }
 
-// Return a traditional C-string
-
 #define ASTRING_cstr(pr) pr##_buf.buf ? pr##_buf.buf : ""
-
-// Deallocate the buffer
-
 #define ASTRING_free(pr) { free(pr##_buf.buf); pr##_buf.buf = NULL; }
