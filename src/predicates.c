@@ -8877,7 +8877,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 				nbytes = bufsiz - save;
 			}
 
-			len = format_integer(dst, get_integer(c), 0, ',', noargval?2:argval);
+			len = format_integer(dst, get_integer(c), 0, ',', 0);
 		} else if (ch == 'D') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
