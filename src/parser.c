@@ -185,6 +185,7 @@ parser *create_parser(module *m)
 {
 	parser *p = calloc(1, sizeof(parser));
 	ensure(p);
+	p->pl = m->pl;
 	p->token = calloc(p->token_size=INITIAL_TOKEN_SIZE+1, 1);
 	idx_t nbr_cells = INITIAL_NBR_CELLS;
 	p->r = calloc(sizeof(rule)+(sizeof(cell)*nbr_cells), 1);

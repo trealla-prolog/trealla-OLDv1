@@ -490,6 +490,7 @@ typedef struct prolog_flags_ {
 struct query_ {
 	query *prev, *next, *parent;
 	module *save_m, *current_m;
+	prolog *pl;
 	parser *p;
 	frame *frames;
 	slot *slots;
@@ -550,6 +551,7 @@ struct parser_ {
 		const char *var_name[MAX_ARITY];
 	} vartab;
 
+	prolog *pl;
 	FILE *fp;
 	module *m, *dcgs;
 	rule *r;

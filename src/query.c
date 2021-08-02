@@ -1701,6 +1701,7 @@ query *create_query(module *m, bool is_task)
 	query *q = calloc(1, sizeof(query));
 	ensure(q);
 	q->qid = g_query_id++;
+	q->pl = m->pl;
 	q->st.m = m;
 	q->trace = m->pl->trace;
 	q->flag = m->flag;
