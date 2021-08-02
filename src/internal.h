@@ -719,16 +719,16 @@ typedef struct {
 
 // Don't preallocate, it will be created and expand as needed
 
-#define ASTRING(pr) astring pr##_buf;								\
+#define ASTRING(pr) astring pr##_buf;									\
 	pr##_buf.size = 0;													\
 	pr##_buf.buf = NULL;												\
 	pr##_buf.dst = pr##_buf.buf;
 
 // Preallocate, but it will expand as needed
 
-#define ASTRING_alloc(pr,len) astring pr##_buf; 							\
+#define ASTRING_alloc(pr,len) astring pr##_buf; 						\
 	pr##_buf.size = len;												\
-	pr##_buf.buf = malloc(len+1);										\
+	pr##_buf.buf = malloc((len)+1);										\
 	ensure(pr##_buf.buf);												\
 	pr##_buf.dst = pr##_buf.buf;										\
 	*pr##_buf.dst = '\0';
@@ -739,24 +739,24 @@ typedef struct {
 
 #define ASTRING_trim(pr,ch) {											\
 	if (ASTRING_strlen(pr)) {											\
-		if (pr##_buf.dst[-1] == ch) 									\
+		if (pr##_buf.dst[-1] == (ch)) 									\
 			 *--pr##_buf.dst = '\0';									\
 	}																	\
 }
 
 #define ASTRING_trim_all(pr,ch) {										\
-	while (ASTRING_strlen(pr)) {											\
-		if (pr##_buf.dst[-1] != ch) 									\
+	while (ASTRING_strlen(pr)) {										\
+		if (pr##_buf.dst[-1] != (ch)) 									\
 			break;														\
 		 *--pr##_buf.dst = '\0';										\
 	}																	\
 }
 
 #define ASTRING_check(pr,len) {											\
-	size_t rem = pr##_buf.size - ASTRING_strlen(pr);						\
-	if (len >= rem) {													\
+	size_t rem = pr##_buf.size - ASTRING_strlen(pr);					\
+	if ((len) >= rem) {												\
 		size_t offset = ASTRING_strlen(pr);								\
-		pr##_buf.buf = realloc(pr##_buf.buf, (pr##_buf.size += (len-rem)) + 1); \
+		pr##_buf.buf = realloc(pr##_buf.buf, (pr##_buf.size += ((len)-rem)) + 1); \
 		ensure(pr##_buf.buf);											\
 		pr##_buf.dst = pr##_buf.buf + offset;							\
 	}																	\
@@ -766,14 +766,14 @@ typedef struct {
 
 #define ASTRING_strcatn(pr,s,len) {										\
 	ASTRING_check(pr, len);												\
-	memcpy(pr##_buf.dst, s, len+1);										\
+	memcpy(pr##_buf.dst, s, (len)+1);									\
 	pr##_buf.dst += len;												\
 	*pr##_buf.dst = '\0';												\
 }
 
 #define ASTRING_strcat2n(pr,s1,len1,s2,len2) {							\
 	ASTRING_strcatn(pr,s1,len1); 										\
-	ASTRING_strcatn(pr,s2,len2);											\
+	ASTRING_strcatn(pr,s2,len2);										\
 }
 
 // Use where length is not known
