@@ -912,7 +912,7 @@ static bool unify_literal(query *q, cell *p1, cell *p2)
 		return p1->val_off == p2->val_off;
 
 	if (is_cstring(p2) && (LEN_STR(q, p1) == LEN_STR(q, p2)))
-		return !memcmp(GET_STR(q, p2), QUERY_GET_POOL(p1->val_off), LEN_STR(q, p1));
+		return !memcmp(GET_STR(q, p2), GET_POOL(q, p1->val_off), LEN_STR(q, p1));
 
 	return false;
 }
@@ -923,7 +923,7 @@ static bool unify_cstring(query *q, cell *p1, cell *p2)
 		return !memcmp(GET_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p1));
 
 	if (is_literal(p2) && (LEN_STR(q, p1) == LEN_STR(q, p2)))
-		return !memcmp(GET_STR(q, p1), QUERY_GET_POOL(p2->val_off), LEN_STR(q, p1));
+		return !memcmp(GET_STR(q, p1), GET_POOL(q, p2->val_off), LEN_STR(q, p1));
 
 	return false;
 }

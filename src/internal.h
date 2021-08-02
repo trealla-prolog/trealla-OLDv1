@@ -182,13 +182,9 @@ typedef struct {
 	)
 
 #define LEN_STR_UTF8(c) strlen_utf8(GET_STR(q, c))
-
-#define GET_STR(x, c) _GET_STR((x)->pl, c)
-#define LEN_STR(x, c) _LEN_STR((x)->pl, c)
-
-#define QUERY_GET_POOL(off) (q->st.m->pl->pool + (off))
-#define MODULE_GET_POOL(off) (m->pl->pool + (off))
-#define PARSER_GET_POOL(off) (p->m->pl->pool + (off))
+#define GET_STR(x,c) _GET_STR((x)->pl, c)
+#define LEN_STR(x,c) _LEN_STR((x)->pl, c)
+#define GET_POOL(x,off) ((x)->pl->pool + (off))
 
 // If changing the order of these: see runtime.c dispatch table
 
