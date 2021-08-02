@@ -174,12 +174,12 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 			if (p1->val_off == p2->val_off)
 				return 0;
 
-			return strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
+			return strcmp(GET_STR(m, p1), GET_STR(m, p2));
 		} else if (is_variable(p2))
 			return 0;
 	} else if (is_atom(p1)) {
 		if (is_atom(p2))
-			return strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
+			return strcmp(GET_STR(m, p1), GET_STR(m, p2));
 		else if (is_variable(p2))
 			return 0;
 	} else if (is_structure(p1)) {
@@ -193,7 +193,7 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 			bool i = p1->val_off == p2->val_off;
 
 			if (!i)
-				return strcmp(MODULE_GET_STR(p1), MODULE_GET_STR(p2));
+				return strcmp(GET_STR(m, p1), GET_STR(m, p2));
 
 			int arity = p1->arity;
 			p1++; p2++;
@@ -336,7 +336,7 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 
 void set_meta_predicate_in_db(module *m, cell *c)
 {
-	const char *name = MODULE_GET_STR(c);
+	const char *name = GET_STR(m, c);
 	unsigned arity = c->arity;
 	cell tmp = (cell){0};
 	tmp.tag = TAG_LITERAL;
@@ -359,7 +359,7 @@ void set_meta_predicate_in_db(module *m, cell *c)
 	} else
 		m->error = true;
 
-	push_property(m, MODULE_GET_STR(c), c->arity, "static");
+	push_property(m, GET_STR(m, c), c->arity, "static");
 }
 
 void set_persist_in_db(module *m, const char *name, unsigned arity)
@@ -392,7 +392,7 @@ static bool check_directive(const cell *c)
 
 predicate *find_predicate(module *m, cell *c)
 {
-	assert(strlen(MODULE_GET_STR(c)) == MODULE_LEN_STR(c));
+	assert(strlen(GET_STR(m, c)) == LEN_STR(m, c));
 
 	cell tmp = *c;
 	tmp.tag = TAG_LITERAL;
@@ -400,7 +400,7 @@ predicate *find_predicate(module *m, cell *c)
 	tmp.nbr_cells = 1;
 
 	if (is_cstring(c))
-		tmp.val_off = index_from_pool(m->pl, MODULE_GET_STR(c));
+		tmp.val_off = index_from_pool(m->pl, GET_STR(m, c));
 
 	miter *iter = m_findkey(m->index, &tmp);
 	predicate *pr = NULL;
@@ -648,7 +648,7 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 	}
 
 	if (is_cstring(c)) {
-		idx_t off = index_from_pool(m->pl, MODULE_GET_STR(c));
+		idx_t off = index_from_pool(m->pl, GET_STR(m, c));
 		if (off == ERR_IDX) return NULL;
 		unshare_cell(c);
 		c->tag = TAG_LITERAL;
@@ -659,7 +659,7 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 	predicate *pr = find_predicate(m, c);
 
 	if (pr && !consulting && !pr->is_dynamic) {
-		fprintf(stdout, "Error: not dynamic '%s'/%u\n", MODULE_GET_STR(c), c->arity);
+		fprintf(stdout, "Error: not dynamic '%s'/%u\n", GET_STR(m, c), c->arity);
 		return NULL;
 	}
 
@@ -671,19 +671,19 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 			pr->check_directive = true;
 
 		if (!consulting) {
-			push_property(m, MODULE_GET_STR(c), c->arity, "dynamic");
+			push_property(m, GET_STR(m, c), c->arity, "dynamic");
 			pr->is_dynamic = true;
 		} else {
 			if (m->prebuilt) {
-				push_property(m, MODULE_GET_STR(c), c->arity, "built_in");
-				push_property(m, MODULE_GET_STR(c), c->arity, "private");
+				push_property(m, GET_STR(m, c), c->arity, "built_in");
+				push_property(m, GET_STR(m, c), c->arity, "private");
 			}
 
-			push_property(m, MODULE_GET_STR(c), c->arity, "static");
+			push_property(m, GET_STR(m, c), c->arity, "static");
 		}
 
 		if (consulting && m->make_public) {
-			push_property(m, MODULE_GET_STR(c), c->arity, "public");
+			push_property(m, GET_STR(m, c), c->arity, "public");
 			pr->is_public = true;
 		}
 

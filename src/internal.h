@@ -183,14 +183,8 @@ typedef struct {
 
 #define LEN_STR_UTF8(c) strlen_utf8(GET_STR(q, c))
 
-#define GET_STR(q, c) _GET_STR(q->pl, c)
-#define LEN_STR(q, c) _LEN_STR(q->pl, c)
-
-#define PARSER_GET_STR(c) _GET_STR(p->m->pl, c)
-#define PARSER_LEN_STR(c) _LEN_STR(p->m->pl, c)
-
-#define MODULE_GET_STR(c) _GET_STR(m->pl, c)
-#define MODULE_LEN_STR(c) _LEN_STR(m->pl, c)
+#define GET_STR(x, c) _GET_STR((x)->pl, c)
+#define LEN_STR(x, c) _LEN_STR((x)->pl, c)
 
 #define QUERY_GET_POOL(off) (q->st.m->pl->pool + (off))
 #define MODULE_GET_POOL(off) (m->pl->pool + (off))

@@ -210,7 +210,7 @@ void consultall(parser *p, cell *l)
 
 	while (is_list(l)) {
 		cell *h = LIST_HEAD(l);
-		load_file(p->m, PARSER_GET_STR(h));
+		load_file(p->m, GET_STR(p, h));
 		l = LIST_TAIL(l);
 	}
 }
@@ -250,7 +250,7 @@ static void do_op(parser *p, cell *c)
 	}
 
 	unsigned specifier;
-	const char *spec = PARSER_GET_STR(p2);
+	const char *spec = GET_STR(p, p2);
 
 	if (!strcmp(spec, "fx"))
 		specifier = OP_FX;
@@ -278,7 +278,7 @@ static void do_op(parser *p, cell *c)
 		cell *h = LIST_HEAD(p3);
 
 		if (is_atom(h)) {
-			if (!set_op(p->m, PARSER_GET_STR(h), specifier, get_integer(p1))) {
+			if (!set_op(p->m, GET_STR(p, h), specifier, get_integer(p1))) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: could not set op\n");
 
@@ -290,7 +290,7 @@ static void do_op(parser *p, cell *c)
 	}
 
 	if (is_atom(p3) && !is_nil(p3)) {
-		if (!set_op(p->m, PARSER_GET_STR(p3), specifier, get_integer(p1))) {
+		if (!set_op(p->m, GET_STR(p, p3), specifier, get_integer(p1))) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: could not set op\n");
 
@@ -326,7 +326,7 @@ static void directives(parser *p, cell *d)
 		return;
 	}
 
-	if (strcmp(PARSER_GET_STR(d), ":-") || (d->arity != 1))
+	if (strcmp(GET_STR(p, d), ":-") || (d->arity != 1))
 		return;
 
 	cell *c = d + 1;
@@ -334,7 +334,7 @@ static void directives(parser *p, cell *d)
 	if (!is_literal(c))
 		return;
 
-	const char *dirname = PARSER_GET_STR(c);
+	const char *dirname = GET_STR(p, c);
 
 	if (!strcmp(dirname, "initialization") && (c->arity <= 2)) {
 		p->run_init = true;
@@ -345,7 +345,7 @@ static void directives(parser *p, cell *d)
 
 	if (!strcmp(dirname, "include") && (c->arity == 1)) {
 		if (!is_atom(p1)) return;
-		const char *name = PARSER_GET_STR(p1);
+		const char *name = GET_STR(p, p1);
 		unsigned save_line_nbr = p->line_nbr;
 		char *filename = relative_to(p->m->filename, name);
 
@@ -365,7 +365,7 @@ static void directives(parser *p, cell *d)
 
 	if (!strcmp(dirname, "ensure_loaded") && (c->arity == 1)) {
 		if (!is_atom(p1)) return;
-		const char *name = PARSER_GET_STR(p1);
+		const char *name = GET_STR(p, p1);
 		char *filename = relative_to(p->m->filename, name);
 
 		if (is_loaded(p->m, filename))
@@ -410,7 +410,7 @@ static void directives(parser *p, cell *d)
 			p->error = true;
 			return;
 		} else
-			name = PARSER_GET_STR(p1);
+			name = GET_STR(p, p1);
 
 		module *tmp_m;
 
@@ -472,7 +472,7 @@ static void directives(parser *p, cell *d)
 			p->error = true;
 			return;
 		} else
-			name = PARSER_GET_STR(p1);
+			name = GET_STR(p, p1);
 
 		module *tmp_m;
 
@@ -502,15 +502,15 @@ static void directives(parser *p, cell *d)
 			cell *head = LIST_HEAD(p2);
 
 			if (is_structure(head)) {
-				if (!strcmp(PARSER_GET_STR(head), "/")
-					|| !strcmp(PARSER_GET_STR(head), "//")) {
+				if (!strcmp(GET_STR(p, head), "/")
+					|| !strcmp(GET_STR(p, head), "//")) {
 					cell *f = head+1, *a = f+1;
 					if (!is_literal(f)) return;
 					if (!is_integer(a)) return;
 					cell tmp = *f;
 					tmp.arity = get_integer(a);
 
-					if (!strcmp(PARSER_GET_STR(head), "//"))
+					if (!strcmp(GET_STR(p, head), "//"))
 						tmp.arity += 2;
 
 					predicate *pr = find_predicate(p->m, &tmp);
@@ -526,7 +526,7 @@ static void directives(parser *p, cell *d)
 					}
 
 					pr->is_public = true;
-				} else if (!strcmp(PARSER_GET_STR(head), "op") && (head->arity == 3)) {
+				} else if (!strcmp(GET_STR(p, head), "op") && (head->arity == 3)) {
 					do_op(p, head);
 					// TO-DO: make public...
 				}
@@ -540,13 +540,13 @@ static void directives(parser *p, cell *d)
 
 	if ((!strcmp(dirname, "use_module") || !strcmp(dirname, "autoload")) && (c->arity >= 1)) {
 		if (!is_atom(p1) && !is_structure(p1)) return;
-		const char *name = PARSER_GET_STR(p1);
+		const char *name = GET_STR(p, p1);
 		char dstbuf[1024*2];
 
 		if (!strcmp(name, "library")) {
 			p1 = p1 + 1;
 			if (!is_literal(p1)) return;
-			name = PARSER_GET_STR(p1);
+			name = GET_STR(p, p1);
 			module *m;
 
 			if ((m = find_module(p->m->pl, name)) != NULL) {
@@ -626,14 +626,14 @@ static void directives(parser *p, cell *d)
 		cell *p2 = c + 2;
 		if (!is_literal(p2)) return;
 
-		if (!strcmp(PARSER_GET_STR(p1), "double_quotes")) {
-			if (!strcmp(PARSER_GET_STR(p2), "atom")) {
+		if (!strcmp(GET_STR(p, p1), "double_quotes")) {
+			if (!strcmp(GET_STR(p, p2), "atom")) {
 				p->m->flag.double_quote_chars = p->m->flag.double_quote_codes = false;
 				p->m->flag.double_quote_atom = true;
-			} else if (!strcmp(PARSER_GET_STR(p2), "codes")) {
+			} else if (!strcmp(GET_STR(p, p2), "codes")) {
 				p->m->flag.double_quote_chars = p->m->flag.double_quote_atom = false;
 				p->m->flag.double_quote_codes = true;
-			} else if (!strcmp(PARSER_GET_STR(p2), "chars")) {
+			} else if (!strcmp(GET_STR(p, p2), "chars")) {
 				p->m->flag.double_quote_atom = p->m->flag.double_quote_codes = false;
 				p->m->flag.double_quote_chars = true;
 			} else {
@@ -643,13 +643,13 @@ static void directives(parser *p, cell *d)
 				p->error = true;
 				return;
 			}
-		} else if (!strcmp(PARSER_GET_STR(p1), "character_escapes")) {
-			if (!strcmp(PARSER_GET_STR(p2), "true") || !strcmp(PARSER_GET_STR(p2), "on"))
+		} else if (!strcmp(GET_STR(p, p1), "character_escapes")) {
+			if (!strcmp(GET_STR(p, p2), "true") || !strcmp(GET_STR(p, p2), "on"))
 				p->m->flag.character_escapes = true;
-			else if (!strcmp(PARSER_GET_STR(p2), "false") || !strcmp(PARSER_GET_STR(p2), "off"))
+			else if (!strcmp(GET_STR(p, p2), "false") || !strcmp(GET_STR(p, p2), "off"))
 				p->m->flag.character_escapes = false;
 		} else {
-			//fprintf(stdout, "Warning: unknown flag: %s\n", PARSER_GET_STR(p1));
+			//fprintf(stdout, "Warning: unknown flag: %s\n", GET_STR(p, p1));
 		}
 
 		p->flag = p->m->flag;
@@ -666,28 +666,28 @@ static void directives(parser *p, cell *d)
 	while (is_list(p1)) {
 		cell *h = LIST_HEAD(p1);
 
-		if (is_literal(h) && (!strcmp(PARSER_GET_STR(h), "/") || !strcmp(PARSER_GET_STR(h), "//")) && (h->arity == 2)) {
+		if (is_literal(h) && (!strcmp(GET_STR(p, h), "/") || !strcmp(GET_STR(p, h), "//")) && (h->arity == 2)) {
 			cell *c_name = h + 1;
 			if (!is_atom(c_name)) continue;
 			cell *c_arity = h + 2;
 			if (!is_integer(c_arity)) continue;
 			unsigned arity = get_integer(c_arity);
 
-			if (!strcmp(PARSER_GET_STR(h), "//"))
+			if (!strcmp(GET_STR(p, h), "//"))
 				arity += 2;
 
-			//printf("*** %s => %s / %u\n", dirname, PARSER_GET_STR(c_name), arity);
+			//printf("*** %s => %s / %u\n", dirname, GET_STR(p, c_name), arity);
 
 			if (!strcmp(dirname, "dynamic")) {
-				set_dynamic_in_db(p->m, PARSER_GET_STR(c_name), arity);
+				set_dynamic_in_db(p->m, GET_STR(p, c_name), arity);
 			} else if (!strcmp(dirname, "persist")) {
-				set_persist_in_db(p->m, PARSER_GET_STR(c_name), arity);
+				set_persist_in_db(p->m, GET_STR(p, c_name), arity);
 			} else if (!strcmp(dirname, "discontiguous")) {
-				set_discontiguous_in_db(p->m, PARSER_GET_STR(c_name), arity);
+				set_discontiguous_in_db(p->m, GET_STR(p, c_name), arity);
 			} else if (!strcmp(dirname, "noindex")) {
-				set_noindex_in_db(p->m, PARSER_GET_STR(c_name), arity);
+				set_noindex_in_db(p->m, GET_STR(p, c_name), arity);
 			} else if (!strcmp(dirname, "multifile")) {
-				const char *src = PARSER_GET_STR(c_name);
+				const char *src = GET_STR(p, c_name);
 
 				if (!strchr(src, ':')) {
 					set_multifile_in_db(p->m, src, arity);
@@ -720,33 +720,33 @@ static void directives(parser *p, cell *d)
 		module *m = p->m;
 		cell *c_id = p1;
 
-		if (!strcmp(PARSER_GET_STR(p1), ":") && (p1->arity == 2)) {
+		if (!strcmp(GET_STR(p, p1), ":") && (p1->arity == 2)) {
 			cell *c_mod = p1 + 1;
 			if (!is_atom(c_mod)) return;
-			m = find_module(p->m->pl, PARSER_GET_STR(c_mod));
+			m = find_module(p->m->pl, GET_STR(p, c_mod));
 			c_id = p1 + 2;
 		}
 
-		if (!strcmp(PARSER_GET_STR(c_id), "/") && (p1->arity == 2)) {
+		if (!strcmp(GET_STR(p, c_id), "/") && (p1->arity == 2)) {
 			cell *c_name = c_id + 1;
 			if (!is_atom(c_name)) return;
 			cell *c_arity = c_id + 2;
 			if (!is_integer(c_arity)) return;
 			unsigned arity = get_integer(c_arity);
 
-			//printf("*** *** *** %s : %s / %u\n", m->name, PARSER_GET_STR(c_name), arity);
+			//printf("*** *** *** %s : %s / %u\n", m->name, GET_STR(p, c_name), arity);
 
-			if (!strcmp(PARSER_GET_STR(c_id), "//"))
+			if (!strcmp(GET_STR(p, c_id), "//"))
 				arity += 2;
 
 			if (!strcmp(dirname, "multifile"))
-				set_multifile_in_db(m, PARSER_GET_STR(c_name), arity);
+				set_multifile_in_db(m, GET_STR(p, c_name), arity);
 			else if (!strcmp(dirname, "discontiguous"))
-				set_discontiguous_in_db(m, PARSER_GET_STR(c_name), arity);
+				set_discontiguous_in_db(m, GET_STR(p, c_name), arity);
 			else if (!strcmp(dirname, "dynamic"))
-				set_dynamic_in_db(m, PARSER_GET_STR(c_name), arity);
+				set_dynamic_in_db(m, GET_STR(p, c_name), arity);
 			else if (!strcmp(dirname, "persist"))
-				set_persist_in_db(m, PARSER_GET_STR(c_name), arity);
+				set_persist_in_db(m, GET_STR(p, c_name), arity);
 			else if (!strcmp(dirname, "meta_predicate"))
 				set_meta_predicate_in_db(m, c_name);
 
@@ -754,7 +754,7 @@ static void directives(parser *p, cell *d)
 		} else if (!strcmp(dirname, "meta_predicate")) {
 			set_meta_predicate_in_db(m, p1);
 			p1 += p1->nbr_cells;
-		} else if (!strcmp(PARSER_GET_STR(p1), ",") && (p1->arity == 2))
+		} else if (!strcmp(GET_STR(p, p1), ",") && (p1->arity == 2))
 			p1 += 1;
 		else
 			break;
@@ -765,7 +765,7 @@ static void directives(parser *p, cell *d)
 
 static void xref_cell(parser *p, rule *r, cell *c, predicate *parent)
 {
-	const char *functor = PARSER_GET_STR(c);
+	const char *functor = GET_STR(p, c);
 	unsigned specifier;
 
 	if ((c->arity == 2)
@@ -830,9 +830,9 @@ static void check_first_cut(parser *p)
 		if (!(c->flags&FLAG_BUILTIN))
 			break;
 
-		if (!strcmp(PARSER_GET_STR(c), ","))
+		if (!strcmp(GET_STR(p, c), ","))
 			;
-		else if (!IS_OP(c) && !strcmp(PARSER_GET_STR(c), "!")) {
+		else if (!IS_OP(c) && !strcmp(GET_STR(p, c), "!")) {
 			p->r->first_cut = true;
 			break;
 		} else {
@@ -897,7 +897,7 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 			snprintf(tmpbuf, sizeof(tmpbuf), "_V%u", c->var_nbr);
 			c->var_nbr = get_varno(p, tmpbuf);
 		} else
-			c->var_nbr = get_varno(p, PARSER_GET_STR(c));
+			c->var_nbr = get_varno(p, GET_STR(p, c));
 
 		c->var_nbr += start;
 
@@ -907,7 +907,7 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 			return;
 		}
 
-		p->vartab.var_name[c->var_nbr] = PARSER_GET_STR(c);
+		p->vartab.var_name[c->var_nbr] = GET_STR(p, c);
 
 		if (p->vartab.var_used[c->var_nbr]++ == 0) {
 			c->flags |= FLAG2_FIRST_USE;
@@ -970,10 +970,10 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 cell *check_body_callable(parser *p, cell *c)
 {
 	if (IS_XFX(c) || IS_XFY(c)) {
-		if (!strcmp(PARSER_GET_STR(c), ",")
-			|| !strcmp(PARSER_GET_STR(c), ";")
-			|| !strcmp(PARSER_GET_STR(c), "->")
-			|| !strcmp(PARSER_GET_STR(c), ":-")) {
+		if (!strcmp(GET_STR(p, c), ",")
+			|| !strcmp(GET_STR(p, c), ";")
+			|| !strcmp(GET_STR(p, c), "->")
+			|| !strcmp(GET_STR(p, c), ":-")) {
 			cell *lhs = c + 1;
 			cell *tmp;
 
@@ -995,10 +995,10 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 	idx_t c_idx = c - p->r->cells;
 
 	if (IS_XFX(c) || IS_XFY(c)) {
-		if (!strcmp(PARSER_GET_STR(c), ",")
-			|| !strcmp(PARSER_GET_STR(c), ";")
-			|| !strcmp(PARSER_GET_STR(c), "->")
-			|| !strcmp(PARSER_GET_STR(c), ":-")) {
+		if (!strcmp(GET_STR(p, c), ",")
+			|| !strcmp(GET_STR(p, c), ";")
+			|| !strcmp(GET_STR(p, c), "->")
+			|| !strcmp(GET_STR(p, c), ":-")) {
 			cell *lhs = c + 1;
 
 			if (is_variable(lhs)) {
@@ -1020,7 +1020,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 	}
 
 	if (IS_FY(c)) {
-			if (!strcmp(PARSER_GET_STR(c), "\\+")) {
+			if (!strcmp(GET_STR(p, c), "\\+")) {
 			cell *rhs = c + 1;
 
 			if (is_variable(rhs)) {
@@ -1050,7 +1050,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 	for (idx_t i = start_idx; i < p->r->cidx;) {
 		cell *c = p->r->cells + i;
 
-		//printf("*** OP0 %s type=%u, specifier=%u, pri=%u\n", PARSER_GET_STR(c), c->tag, GET_OP(c), c->priority);
+		//printf("*** OP0 %s type=%u, specifier=%u, pri=%u\n", GET_STR(p, c), c->tag, GET_OP(c), c->priority);
 
 		if ((c->nbr_cells > 1) || !is_literal(c) || !c->priority) {
 			i += c->nbr_cells;
@@ -1093,7 +1093,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 			continue;
 		}
 
-		//printf("*** OP1 %s type=%u, specifier=%u, pri=%u\n", PARSER_GET_STR(c), c->tag, GET_OP(c), c->priority);
+		//printf("*** OP1 %s type=%u, specifier=%u, pri=%u\n", GET_STR(p, c), c->tag, GET_OP(c), c->priority);
 
 		c->tag = TAG_LITERAL;
 		c->arity = 1;
@@ -1130,7 +1130,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 			if (off > end_idx) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: missing operand to '%s', line %u, '%s'\n", PARSER_GET_STR(c), p->line_nbr, p->save_line);
+					fprintf(stdout, "Error: missing operand to '%s', line %u, '%s'\n", GET_STR(p, c), p->line_nbr, p->save_line);
 
 				p->error = true;
 				return false;
@@ -1171,7 +1171,7 @@ static bool attach_ops(parser *p, idx_t start_idx)
 
 		if (off > end_idx) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: missing operand to '%s', line %u, '%s'\n", PARSER_GET_STR(c), p->line_nbr, p->save_line);
+				fprintf(stdout, "Error: missing operand to '%s', line %u, '%s'\n", GET_STR(p, c), p->line_nbr, p->save_line);
 
 			p->error = true;
 			return false;
@@ -1329,7 +1329,7 @@ static bool term_expansion(parser *p)
 	if (p->error || p->internal || !is_literal(p->r->cells))
 		return false;
 
-	if (!strcmp(PARSER_GET_STR(p->r->cells), "-->"))
+	if (!strcmp(GET_STR(p, p->r->cells), "-->"))
 		return dcg_expansion(p);
 
 	predicate *pr = find_functor(p->m, "term_expansion", 2);
@@ -2164,7 +2164,7 @@ static bool process_term(parser *p, cell *p1)
 	cell *h = get_head(p1);
 
 	if (is_cstring(h)) {
-		idx_t off = index_from_pool(p->m->pl, PARSER_GET_STR(h));
+		idx_t off = index_from_pool(p->m->pl, GET_STR(p, h));
 		if (off == ERR_IDX) {
 			p->error = true;
 			return false;
@@ -2233,8 +2233,8 @@ unsigned tokenize(parser *p, bool args, bool consing)
 					cell *p1 = p->r->cells;
 
 					if (!p1->arity &&
-						(!strcmp(PARSER_GET_STR(p1), "begin_of_file") ||
-							!strcmp(PARSER_GET_STR(p1), "end_of_file")))
+						(!strcmp(GET_STR(p, p1), "begin_of_file") ||
+							!strcmp(GET_STR(p, p1), "end_of_file")))
 						p->skip = true;
 				}
 
