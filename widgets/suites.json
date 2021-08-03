@@ -1,28 +1,6 @@
 {
   "total" : 164,
   "items" : [ {
-    "uid" : "dd82f0b51a196f10db178e28f30765c1",
-    "name" : "predicates/format_2/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 2,
-      "broken" : 0,
-      "skipped" : 1,
-      "passed" : 13,
-      "unknown" : 0,
-      "total" : 16
-    }
-  }, {
-    "uid" : "bb8e106369c9e4f92fe1145b40d7d18a",
-    "name" : "predicates/format_3/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 2,
-      "broken" : 0,
-      "skipped" : 1,
-      "passed" : 13,
-      "unknown" : 0,
-      "total" : 16
-    }
-  }, {
     "uid" : "fe889f4ed1e23b13cb890295efdd6049",
     "name" : "predicates/setof_3/tests.lgt::tests",
     "statistic" : {
@@ -45,6 +23,17 @@
       "total" : 18
     }
   }, {
+    "uid" : "7519eb258ccbefae18275a244af2cf91",
+    "name" : "predicates/write_term_3/tests.lgt",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
     "uid" : "09812cef55155aac413b0e337d25177f",
     "name" : "unicode/builtins/tests.lgt::tests",
     "statistic" : {
@@ -65,17 +54,6 @@
       "passed" : 96,
       "unknown" : 0,
       "total" : 96
-    }
-  }, {
-    "uid" : "2fa097f54728c3cdaa06f09f04fafff8",
-    "name" : "predicates/write_term_3/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 0,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 57,
-      "unknown" : 0,
-      "total" : 57
     }
   }, {
     "uid" : "e323763b3f5107ef1a6b74d4676f7951",
@@ -109,6 +87,28 @@
       "passed" : 37,
       "unknown" : 0,
       "total" : 45
+    }
+  }, {
+    "uid" : "5535d4f02fbd36a57a2fad9630b9582c",
+    "name" : "predicates/term_comparison/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 37,
+      "unknown" : 0,
+      "total" : 37
+    }
+  }, {
+    "uid" : "cca7e0fd2fd1795563678e8da9db0895",
+    "name" : "syntax/numbers/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 37,
+      "unknown" : 0,
+      "total" : 37
     }
   } ]
 }
