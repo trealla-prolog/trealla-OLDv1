@@ -8796,7 +8796,19 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			return throw_error(q, c, "type_error", "integer");
 		}
 
-		if ((ch == 's')) {
+		if ((ch == 's') && is_string(c)) {
+			len = LEN_STR(q, c);
+
+			while (nbytes < len) {
+				size_t save = dst - tmpbuf;
+				tmpbuf = realloc(tmpbuf, bufsiz*=2);
+				may_ptr_error(tmpbuf);
+				dst = tmpbuf + save;
+				nbytes = bufsiz - save;
+			}
+
+			len = sprintf(dst, "%s", GET_STR(q, c));
+		} else if ((ch == 's')) {
 			len = scan_is_chars_list(q, c, c_ctx, true);
 
 			if (!len)
@@ -8807,7 +8819,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				may_ptr_error(tmpbuf); //TODO: use alloc_grow
+				may_ptr_error(tmpbuf);
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -8826,7 +8838,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 				while (nbytes < len) {
 					size_t save = dst - tmpbuf;
 					tmpbuf = realloc(tmpbuf, bufsiz*=2);
-					may_ptr_error(tmpbuf); //TODO: use alloc_grow
+					may_ptr_error(tmpbuf);
 					dst = tmpbuf + save;
 					nbytes = bufsiz - save;
 				}
@@ -8847,7 +8859,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				may_ptr_error(tmpbuf); //TODO: use alloc_grow
+				may_ptr_error(tmpbuf);
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -8867,7 +8879,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				may_ptr_error(tmpbuf); //TODO: use alloc_grow
+				may_ptr_error(tmpbuf);
 				dst = tmpbuf + save;
 				nbytes = bufsiz - save;
 			}
@@ -11894,13 +11906,8 @@ static const struct builtins g_predicates_other[] =
 	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL},
 	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL},
 
-#if 1
 	{"format", 2, fn_format_2, "+string,+list"},
 	{"format", 3, fn_format_3, "+stream,+string,+list"},
-#endif
-
-	{"legacy_format", 2, fn_format_2, "+string,+list"},
-	{"legacy_format", 3, fn_format_3, "+stream,+string,+list"},
 
 	{"abolish", 2, fn_abolish_2, NULL},
 	{"assert", 1, fn_iso_assertz_1, NULL},

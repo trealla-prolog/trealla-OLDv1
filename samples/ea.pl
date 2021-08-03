@@ -2,8 +2,6 @@
 
 :- initialization(main).
 
-:- use_module(library(format)).
-
 main :-
     solve('METHINKS IT IS LIKE A WEASEL'),
     halt.
