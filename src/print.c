@@ -147,18 +147,19 @@ static size_t plain(char *dst, size_t dstlen, const char *src, int srclen)
 	return srclen;
 }
 
-static size_t sprint_int_(char *dst, size_t size, int_t n, int base)
+static size_t sprint_int_(char *dst, size_t size, int_t n, int pbase)
 {
+	int base = abs(pbase);
 	const char *save_dst = dst;
 
 	if ((n / base) > 0)
-		dst += sprint_int_(dst, size, n / base, base);
+		dst += sprint_int_(dst, size, n / base, pbase);
 
 	int n2 = n % base;
 
 	if (n2 > 9) {
 		n2 -= 10;
-		n2 += 'A';
+		n2 += pbase < 0 ? 'A' : 'a';
 	} else
 		n2 += '0';
 
