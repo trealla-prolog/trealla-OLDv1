@@ -1,0 +1,49 @@
+{
+  "uid" : "98cc14d817a5c9bd",
+  "name" : "lgt_unicode_escape_sequence_bmp_01",
+  "historyId" : "unicode/syntax/tests.lgt::tests:tests#lgt_unicode_escape_sequence_bmp_01",
+  "time" : {
+    "start" : 1627983069000,
+    "stop" : 1627983069000,
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "unicode/syntax/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "98cc14d817a5c9bd.json",
+  "parameterValues" : [ ]
+}
