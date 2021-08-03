@@ -495,6 +495,17 @@ bb_get(K, V) :-
 	user:catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), bb_get/2))),
 	!.
 
+bb_delete(K, V) :-
+	must_be(K, atom, _, _),
+	user:retract('$global_key'(K, V)),
+	!.
+
+bb_update(K, O, V) :-
+	must_be(K, atom, _, _),
+	user:retract('$global_key'(K, O)),
+	user:assertz('$global_key'(K, V)),
+	!.
+
 bb_del(K) :-
 	must_be(K, atom, _, _),
 	user:retractall('$global_key'(K, _)),
