@@ -693,6 +693,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 				l = deref(q, l, l_ctx);
 				l_ctx = q->latest_ctx;
 			}
+
+			q->variable_names = NULL;
 		}
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");

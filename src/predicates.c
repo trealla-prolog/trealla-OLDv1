@@ -3219,7 +3219,7 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 	}
 
 	q->flag = q->st.m->flag;
-	cell *p2_orig = p2, *vnames;
+	cell *p2_orig = p2, *vnames = NULL;
 	idx_t vnames_ctx;
 	LIST_HANDLER(p2);
 
@@ -3256,6 +3256,7 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 
 	q->max_depth = q->quoted = q->nl = q->fullstop = false;
 	q->ignore_ops = false;
+	q->variable_names = NULL;
 	return !ferror(str->fp);
 }
 
