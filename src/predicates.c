@@ -8807,7 +8807,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 		if ((ch == 's') && is_string(c)) {
 			len = LEN_STR(q, c);
 
-			while (nbytes < len) {
+			while (nbytes < (len+1)) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
 				may_ptr_error(tmpbuf);
@@ -8824,7 +8824,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 
 			char *src = chars_list_to_string(q, c, p2_ctx, len);
 
-			while (nbytes < len) {
+			while (nbytes < (len+1)) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
 				may_ptr_error(tmpbuf);
@@ -8843,7 +8843,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			while (argval-- > 1) {
 				len = 10;
 
-				while (nbytes < len) {
+				while (nbytes < (len+1)) {
 					size_t save = dst - tmpbuf;
 					tmpbuf = realloc(tmpbuf, bufsiz*=2);
 					may_ptr_error(tmpbuf);
@@ -8864,7 +8864,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 
 			len = 40;
 
-			while (nbytes < len) {
+			while (nbytes < (len+1)) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
 				may_ptr_error(tmpbuf);
@@ -8884,7 +8884,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 
 			len = 40;
 
-			while (nbytes < len) {
+			while (nbytes < (len+1)) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
 				may_ptr_error(tmpbuf);
@@ -8901,7 +8901,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 
 			len = 40;
 
-			while (nbytes < len) {
+			while (nbytes < (len+1)) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
 				may_ptr_error(tmpbuf);
@@ -8918,7 +8918,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 
 			len = 40;
 
-			while (nbytes < len) {
+			while (nbytes < (len+1)) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
 				may_ptr_error(tmpbuf);
@@ -8935,7 +8935,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 
 			len = 40;
 
-			while (nbytes < len) {
+			while (nbytes < (len+1)) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
 				may_ptr_error(tmpbuf);
@@ -8952,7 +8952,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 
 			len = 40;
 
-			while (nbytes < len) {
+			while (nbytes < (len+1)) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
 				may_ptr_error(tmpbuf);
@@ -8969,7 +8969,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 
 			len = 40;
 
-			while (nbytes < len) {
+			while (nbytes < (len+1)) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
 				may_ptr_error(tmpbuf);
@@ -8992,7 +8992,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			else
 				len = print_term_to_buf(q, NULL, 0, c, c_ctx, 1, false, 0);
 
-			while (nbytes < len) {
+			while (nbytes < (len+1)) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
 				may_ptr_error(tmpbuf);
