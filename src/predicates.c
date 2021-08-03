@@ -8815,7 +8815,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 				nbytes = bufsiz - save;
 			}
 
-			len = sprintf(dst, "%s", GET_STR(q, c));
+			slicecpy(dst, len+1, GET_STR(q, c), LEN_STR(q, c));
 		} else if ((ch == 's')) {
 			len = scan_is_chars_list(q, c, c_ctx, true);
 
