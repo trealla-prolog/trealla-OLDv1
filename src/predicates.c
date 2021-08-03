@@ -8666,9 +8666,9 @@ static USE_RESULT pl_status fn_load_files_2(query *q)
 
 static int format_integer(char *dst, int_t v, int grouping, int sep, int decimals, int radix)
 {
-	char tmpbuf1[256], tmpbuf2[256];
+	char tmpbuf1[1024], tmpbuf2[1024];
 	sprint_int(tmpbuf1, sizeof(tmpbuf1), v, radix);
-	const char *src = tmpbuf1 + (strlen(tmpbuf1) - 1);
+	const char *src = tmpbuf1 + strlen(tmpbuf1) - 1;	// start from back
 	char *dst2 = tmpbuf2;
 	int i = 1, j = 1;
 

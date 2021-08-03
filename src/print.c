@@ -199,6 +199,9 @@ size_t sprint_int(char *dst, size_t size, int_t n, int base)
 		else
 			dst++;
 
+		if (size)
+			*dst = '\0';
+
 		return dst - save_dst;
 	}
 
