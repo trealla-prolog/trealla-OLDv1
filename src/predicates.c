@@ -8702,7 +8702,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 	char *srcbuf = GET_STR(q, p1);
 	size_t srclen = LEN_STR(q, p1);
 	const char *src = srcbuf;
-	size_t bufsiz = 256;
+	size_t bufsiz = 1024;
 	char *tmpbuf = malloc(bufsiz);
 	may_ptr_error(tmpbuf);
 	char *dst = tmpbuf;
@@ -8732,8 +8732,10 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			p2 = LIST_TAIL(p2);
 			noargval = 0;
 
-			if (!is_integer(c))
+			if (!is_integer(c)) {
+				free(tmpbuf);
 				return throw_error(q, c, "type_error", "integer");
+			}
 
 			argval = get_smallint(c);
 			int n = len_char_utf8(src);
@@ -8749,6 +8751,14 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 				srclen -= n;
 				continue;
 			}
+		}
+
+		while (nbytes < (unsigned)(1+argval+1)) {
+			size_t save = dst - tmpbuf;
+			tmpbuf = realloc(tmpbuf, bufsiz*=2);
+			may_ptr_error(tmpbuf);
+			dst = tmpbuf + save;
+			nbytes = bufsiz - save;
 		}
 
 		if (ch == 'N') {
@@ -9014,9 +9024,9 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			}
 
 			if (canonical)
-				len = print_canonical_to_buf(q, dst, nbytes, c, c_ctx, 1, false, 0);
+				len = print_canonical_to_buf(q, dst, len+1, c, c_ctx, 1, false, 0);
 			else
-				len = print_term_to_buf(q, dst, nbytes, c, c_ctx, 1, false, 0);
+				len = print_term_to_buf(q, dst, len+1, c, c_ctx, 1, false, 0);
 
 			q->quoted = saveq;
 		}
