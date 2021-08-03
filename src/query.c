@@ -249,7 +249,7 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes)
 	size_t is_chars_list = 0;
 	LIST_HANDLER(l);
 
-	while (is_iso_list(l) && q->st.m->flag.double_quote_chars) {
+	while (is_iso_list(l) && (q->st.m->flag.double_quote_chars || allow_codes)) {
 		cell *h = LIST_HEAD(l);
 		cell *c = q ? deref(q, h, l_ctx) : h;
 
@@ -1680,14 +1680,10 @@ void destroy_query(query *q)
 		free(q->queue[i]);
 	}
 
-#if 0
-	// FIXME
-
 	slot *e = q->slots;
 
 	for (idx_t i = 0; i < q->st.sp; i++, e++)
 		unshare_cell(&e->c);
-#endif
 
 	mp_int_clear(&q->tmp_ival);
 	free(q->trails);
