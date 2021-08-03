@@ -8725,6 +8725,10 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			c = deref(q, head, p2_ctx);
 			p2 = LIST_TAIL(p2);
 			noargval = 0;
+
+			if (!is_integer(c))
+				return throw_error(q, c, "type_error", "integer");
+
 			argval = get_integer(c);
 			ch = get_char_utf8(&src);
 		} else {
