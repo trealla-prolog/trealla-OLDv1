@@ -345,7 +345,7 @@ put(C) :- put_code(C).
 put(S,C) :- put_code(S, C).
 see(F) :- open(F, read, S), set_input(S).
 tell(F) :- open(F, write, S), set_output(S).
-tmp_append_(F) :- open(F, tmp_append_, S), set_output(S).
+append(F) :- open(F, append, S), set_output(S).
 file_exists(F) :- exists_file(F).
 directory_exists(F) :- exists_directory(F).
 
