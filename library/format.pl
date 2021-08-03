@@ -286,7 +286,7 @@ cells([~|Fs0], Args0, Tab0, Es, VNs) -->
         cells(Fs, Args, Tab, [], VNs).
 
 /********************************************************************/
-/* Allow code specifier purely for backwards compatability... by AD on Mar 11, 2021
+/* Allow code specifier purely for backwards compatability... by AD on Mar 11, 2021 */
 
 cells([~,c|Fs], [Arg|Args], Tab, Es, VNs) --> !,
         { atom_codes(A, [Arg]) },
