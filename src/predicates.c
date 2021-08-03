@@ -8698,9 +8698,10 @@ static int format_integer(char *dst, int_t v, int grouping, int sep, int decimal
 
 static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx_t p2_ctx)
 {
-	char *srcbuf = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+	char *srcbuf = GET_STR(q, p1);
+	size_t srclen = LEN_STR(q, p1);
 	const char *src = srcbuf;
-	size_t bufsiz = strlen(src)+100;
+	size_t bufsiz = 256;
 	char *tmpbuf = malloc(bufsiz);
 	may_ptr_error(tmpbuf);
 	char *dst = tmpbuf;
@@ -8709,8 +8710,10 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 	size_t nbytes = bufsiz;
 	LIST_HANDLER(p2);
 
-	while (*src) {
+	while (srclen > 0) {
+		int n = len_char_utf8(src);
 		int ch = get_char_utf8(&src);
+		srclen -= n;
 		int argval = 0, noargval = 1;
 
 		if (ch != '~') {
@@ -8718,7 +8721,9 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			continue;
 		}
 
+		n = len_char_utf8(src);
 		ch = get_char_utf8(&src);
+		srclen -= n;
 
 		if (ch == '*') {
 			cell *head = LIST_HEAD(p2);
@@ -8726,19 +8731,21 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			p2 = LIST_TAIL(p2);
 			noargval = 0;
 
-			if (!is_integer(c)) {
-				free(srcbuf);
+			if (!is_integer(c))
 				return throw_error(q, c, "type_error", "integer");
-			}
 
 			argval = get_smallint(c);
+			int n = len_char_utf8(src);
 			ch = get_char_utf8(&src);
+			srclen -= n;
 		} else {
 			while (isdigit(ch)) {
 				noargval = 0;
 				argval *= 10;
 				argval += ch - '0';
+				int n = len_char_utf8(src);
 				ch = get_char_utf8(&src);
+				srclen -= n;
 				continue;
 			}
 		}
@@ -8803,7 +8810,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 
 		if (((ch == 'd') || (ch == 'D')) && !is_integer(c)) {
 			free(tmpbuf);
-			free(srcbuf);
 			return throw_error(q, c, "type_error", "integer");
 		}
 
@@ -8822,12 +8828,10 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 		} else if ((ch == 's')) {
 			len = scan_is_chars_list(q, c, c_ctx, true);
 
-			if (!len) {
-				free(srcbuf);
+			if (!len)
 				return throw_error(q, p1, "type_error", "list");
-			}
 
-			char *src = chars_list_to_string(q, c, p2_ctx, len);
+			char *tmpsrc = chars_list_to_string(q, c, p2_ctx, len);
 
 			while (nbytes < (len+1)) {
 				size_t save = dst - tmpbuf;
@@ -8837,12 +8841,11 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 				nbytes = bufsiz - save;
 			}
 
-			len = sprintf(dst, "%s", src);
-			free(src);
+			len = sprintf(dst, "%s", tmpsrc);
+			free(tmpsrc);
 		} else if (ch == 'c') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
-				free(srcbuf);
 				return throw_error(q, c, "type_error", "integer");
 			}
 
@@ -8865,7 +8868,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 		} else if ((ch == 'e') || (ch == 'E')) {
 			if (!is_real(c)) {
 				free(tmpbuf);
-				free(srcbuf);
 				return throw_error(q, c, "type_error", "float");
 			}
 
@@ -8886,7 +8888,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 		} else if (ch == 'f') {
 			if (!is_real(c)) {
 				free(tmpbuf);
-				free(srcbuf);
 				return throw_error(q, c, "type_error", "float");
 			}
 
@@ -8904,7 +8905,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 		} else if (ch == 'I') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
-				free(srcbuf);
 				return throw_error(q, c, "type_error", "integer");
 			}
 
@@ -8922,7 +8922,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 		} else if (ch == 'd') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
-				free(srcbuf);
 				return throw_error(q, c, "type_error", "integer");
 			}
 
@@ -8940,7 +8939,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 		} else if (ch == 'D') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
-				free(srcbuf);
 				return throw_error(q, c, "type_error", "integer");
 			}
 
@@ -8958,7 +8956,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 		} else if (ch == 'r') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
-				free(srcbuf);
 				return throw_error(q, c, "type_error", "integer");
 			}
 
@@ -8976,7 +8973,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 		} else if (ch == 'R') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
-				free(srcbuf);
 				return throw_error(q, c, "type_error", "integer");
 			}
 
@@ -9005,6 +9001,9 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			else
 				len = print_term_to_buf(q, NULL, 0, c, c_ctx, 1, false, 0);
 
+			if (q->cycle_error)
+				return throw_error(q, c, "resource_error", "cyclic");
+
 			while (nbytes <= (len+1)) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
@@ -9027,7 +9026,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 
 	*dst = '\0';
 	size_t len = dst - tmpbuf;
-	free(srcbuf);
 
 	if (str == NULL) {
 		int n = q->st.m->pl->current_output;
@@ -9056,10 +9054,10 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 	} else if (is_stream(str)) {
 		int n = get_stream(q, str);
 		stream *str = &g_streams[n];
-		const char *src = tmpbuf;
+		const char *tmpsrc = tmpbuf;
 
 		while (len) {
-			size_t nbytes = net_write(src, len, str);
+			size_t nbytes = net_write(tmpsrc, len, str);
 
 			if (!nbytes) {
 				if (feof(str->fp) || ferror(str->fp)) {
@@ -9071,7 +9069,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 
 			clearerr(str->fp);
 			len -= nbytes;
-			src += nbytes;
+			tmpsrc += nbytes;
 		}
 	} else {
 		free(tmpbuf);
