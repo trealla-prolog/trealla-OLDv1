@@ -8719,12 +8719,23 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 
 		ch = get_char_utf8(&src);
 
-		while (isdigit(ch)) {
+		if (ch == '*') {
+			LIST_HANDLER(p2);
+			cell *head = LIST_HEAD(p2);
+			c = deref(q, head, p2_ctx);
+			idx_t c_ctx = q->latest_ctx;
+			p2 = LIST_TAIL(p2);
 			noargval = 0;
-			argval *= 10;
-			argval += ch - '0';
+			argval = get_integer(c);
 			ch = get_char_utf8(&src);
-			continue;
+		} else {
+			while (isdigit(ch)) {
+				noargval = 0;
+				argval *= 10;
+				argval += ch - '0';
+				ch = get_char_utf8(&src);
+				continue;
+			}
 		}
 
 		if (ch == 'N') {
@@ -8767,7 +8778,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			break;
 
 		LIST_HANDLER(p2);
-
 		cell *head = LIST_HEAD(p2);
 		c = deref(q, head, p2_ctx);
 		idx_t c_ctx = q->latest_ctx;
