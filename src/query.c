@@ -1017,6 +1017,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 			c->tag = TAG_LITERAL;
 			c->val_off = off;
 			c->flags = 0;
+			c->arity = 0;
 		}
 
 		predicate *pr = search_predicate(q->st.m, head);
@@ -1663,6 +1664,7 @@ void destroy_query(query *q)
 		for (idx_t i = 0; i < a->max_hp_used; i++) {
 			cell *c = a->heap + i;
 			unshare_cell(c);
+			c->tag = TAG_EMPTY;
 		}
 
 		arena *save = a;
@@ -1675,6 +1677,7 @@ void destroy_query(query *q)
 		for (idx_t j = 0; j < q->qp[i]; j++) {
 			cell *c = q->queue[i]+j;
 			unshare_cell(c);
+			c->tag = TAG_EMPTY;
 		}
 
 		free(q->queue[i]);

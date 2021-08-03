@@ -2174,6 +2174,7 @@ static bool process_term(parser *p, cell *p1)
 		h->tag = TAG_LITERAL;
 		h->val_off = off;
 		h->flags = 0;
+		h->arity = 0;
 	}
 
 	if (!p->error && !assertz_to_db(p->m, p->r->nbr_vars, p1, 1)) {

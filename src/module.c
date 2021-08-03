@@ -654,6 +654,7 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 		c->tag = TAG_LITERAL;
 		c->val_off = off;
 		c->flags = 0;
+		c->arity = 0;
 	}
 
 	predicate *pr = find_predicate(m, c);
