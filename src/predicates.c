@@ -8992,7 +8992,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			else
 				len = print_term_to_buf(q, NULL, 0, c, c_ctx, 1, false, 0);
 
-			while (nbytes < (len+1)) {
+			while (nbytes < len) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
 				may_ptr_error(tmpbuf);
