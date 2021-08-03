@@ -1,5 +1,5 @@
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   Written March 2020 by Markus Triska (triska@metalevel.at)
+   Written 2020, 2021 by Markus Triska (triska@metalevel.at)
    Part of Scryer Prolog.
 
    This library provides the nonterminal format_//2 to describe
@@ -40,8 +40,6 @@
      ~`Ct  like ~t, use character C instead of spaces to fill the space
      ~n    newline
      ~Nn   N newlines
-     ~c    use the next argument here, which must be character code   % AD Mar 10, 2021
-     ~Nc   use the next argument here, which must be character code   % AD Mar 11, 2021
      ~i    ignore the next argument
      ~~    the literal ~
 
@@ -76,14 +74,14 @@
                    format/3,
                    portray_clause/1,
                    portray_clause/2,
-                   xlisting/1
+                   listing/1
                   ]).
 
+:- use_module(library(dcgs)).
 :- use_module(library(lists)).
 :- use_module(library(error)).
 :- use_module(library(charsio)).
 :- use_module(library(between)).
-:- use_module(library(apply)).     % Added by AD
 
 format_(Fs, Args) -->
         { must_be(list, Fs),
@@ -117,11 +115,6 @@ format_cell(cell(From,To,Es)) -->
           ) },
         format_elements(Es).
 
-/* Allow code specifier purely for backwards compatability... by AD on Mar 11, 2021 */
-/*
-format_cell(Chars) --> [Chars].
-*/
-
 format_elements([]) --> [].
 format_elements([E|Es]) -->
         format_element(E),
@@ -148,7 +141,7 @@ element_gluevar(glue(_,V), N, N) --> [V].
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Our key datastructure is a list of cells and newlines.
-   A cell has the shape from_to(From,To,Elements), where
+   A cell has the shape cell(From,To,Elements), where
    From and To denote the positions of surrounding tab stops.
 
    Elements is a list of elements that occur in a cell,
@@ -160,7 +153,7 @@ element_gluevar(glue(_,V), N, N) --> [V].
    available space is distributed.
 
    newline is used if ~n occurs in a format string.
-   It is is used because a newline character does not
+   It is used because a newline character does not
    consume whitespace in the sense of format strings.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
@@ -175,9 +168,6 @@ cells([~,w|Fs], [Arg|Args], Tab, Es, VNs) --> !,
         cells(Fs, Args, Tab, [chars(Chars)|Es], VNs).
 cells([~,q|Fs], [Arg|Args], Tab, Es, VNs) --> !,
         { write_term_to_chars(Arg, [quoted(true),variable_names(VNs)], Chars) },
-        cells(Fs, Args, Tab, [chars(Chars)|Es], VNs).
-cells([~,k|Fs], [Arg|Args], Tab, Es, VNs) --> !,
-        { write_canonical_to_chars(Arg, [quoted(true),variable_names(VNs)], Chars) },
         cells(Fs, Args, Tab, [chars(Chars)|Es], VNs).
 cells([~,a|Fs], [Arg|Args], Tab, Es, VNs) --> !,
         { atom_chars(Arg, Chars) },
@@ -273,6 +263,11 @@ cells([~,'`',Char,t|Fs], Args, Tab, Es, VNs) --> !,
         cells(Fs, Args, Tab, [glue(Char,_)|Es], VNs).
 cells([~,t|Fs], Args, Tab, Es, VNs) --> !,
         cells(Fs, Args, Tab, [glue(' ',_)|Es], VNs).
+cells([~,'|'|Fs], Args, Tab0, Es, VNs) --> !,
+        { phrase(elements_gluevars(Es, 0, Width), _),
+          Tab is Tab0 + Width },
+        cell(Tab0, Tab, Es),
+        cells(Fs, Args, Tab, [], VNs).
 cells([~|Fs0], Args0, Tab, Es, VNs) -->
         { numeric_argument(Fs0, Num, ['|'|Fs], Args0, Args) },
         !,
@@ -284,28 +279,6 @@ cells([~|Fs0], Args0, Tab0, Es, VNs) -->
         { Tab is Tab0 + Num },
         cell(Tab0, Tab, Es),
         cells(Fs, Args, Tab, [], VNs).
-
-/********************************************************************/
-/* Allow code specifier purely for backwards compatability... by AD on Mar 11, 2021 */
-
-cells([~,c|Fs], [Arg|Args], Tab, Es, VNs) --> !,
-        { atom_codes(A, [Arg]) },
-        { atom_chars(A, Chars) },
-        cell(Tab, Tab, Es),
-        n_chars(1, Chars),
-        cells(Fs, Args, 0, [], VNs).
-cells([~|Fs0], [Arg|Args0], Tab, Es, VNs) -->
-        { numeric_argument(Fs0, Num, [c|Fs], Args0, Args) },
-        !,
-        { atom_codes(A, [Arg]) },
-        { atom_chars(A, Chars) },
-        cell(Tab, Tab, Es),
-        n_chars(Num, Chars),
-        cells(Fs, Args, 0, [], VNs).
-
-/*                                                                  */
-/********************************************************************/
-
 cells([~,C|_], _, _, _, _) -->
         { atom_chars(A, [~,C]),
           domain_error(format_string, A, format_//2) }.
@@ -320,12 +293,6 @@ format_number_chars(N0, Chars) :-
 
 n_newlines(0) --> !.
 n_newlines(N0) --> { N0 > 0, N is N0 - 1 }, [newline], n_newlines(N).
-
-/* Allow code specifier purely for backwards compatability... by AD on Mar 11, 2021 */
-
-n_chars(0, _) --> !.
-n_chars(N0, Chars) --> { N0 > 0, N is N0 - 1 },
-    Chars, n_chars(N, Chars).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ?- phrase(upto_what(Cs, ~), "abc~test", Rest).
@@ -406,15 +373,12 @@ digits(uppercase, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ").
    Impure I/O, implemented as a small wrapper over format_//2.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-/* Allow atom format string for compatability... AD Jan 18, 2021 */
-
 format(Fs, Args) :-
         current_output(Stream),
         format(Stream, Fs, Args).
 
 format(Stream, Fs, Args) :-
-        (atom(Fs) -> atom_chars(Fs, Chars) ; Chars = Fs),
-        phrase(format_(Chars, Args), Cs),
+        phrase(format_(Fs, Args), Cs),
         % we use a specialised internal predicate that uses only a
         % single "write" operation for efficiency. It is equivalent to
         % maplist(put_char(Stream), Cs). It also works for binary streams.
@@ -422,15 +386,15 @@ format(Stream, Fs, Args) :-
         flush_output(Stream).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-?- phrase(cells("hello", [], 0, []), Cs).
+?- phrase(format:cells("hello", [], 0, [], []), Cs).
 
-?- phrase(cells("hello~10|", [], 0, []), Cs).
-?- phrase(cells("~ta~t~10|", [], 0, []), Cs).
+?- phrase(format:cells("hello~10|", [], 0, [], []), Cs).
+?- phrase(format:cells("~ta~t~10|", [], 0, [], []), Cs).
 
 ?- phrase(format_("~`at~50|", []), Ls).
 
-?- phrase(cells("~`at~50|", [], 0, []), Cs),
-   phrase(format_cells(Cs), Ls).
+?- phrase(format:cells("~`at~50|", [], 0, [], []), Cs),
+   phrase(format:format_cells(Cs), Ls).
 ?- phrase(format:cells("~ta~t~tb~tc~21|", [], 0, [], []), Cs).
 Cs = [cell(0,21,[glue(' ',_A),chars("a"),glue(' ',_B),glue(' ',_C),chars("b"),glue(' ',_D),chars("c ...")])]
 ?- phrase(format:cells("~ta~t~4|", [], 0, [], []), Cs).
@@ -461,12 +425,11 @@ Cs = [cell(0,4,[glue(' ',_A),chars("a"),glue(' ',_B)])]
    true.
 
 ?- format("~20f", [0.1]).
-0.10000000000000000000   true % this should use higher accuracy!
-;  false.
+0.10000000000000000000   true.
 
 ?- X is atan(2), format("~7f~n", [X]).
 1.1071487
-   X = 1.1071487177940906
+   X = 1.1071487177940906.
 
 ?- format("~`at~50|~n", []).
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -531,35 +494,50 @@ body_(Var, C, I, VNs) --> { var(Var) }, !,
 body_((A,B), C, I, VNs) --> !,
         body_(A, C, I, VNs), ",\n",
         body_(B, 0, I, VNs).
-body_((A ; Else), C, I, VNs) --> % ( If -> Then ; Else )
-        { nonvar(A), A = (If -> Then) },
+body_(Body, C, I, VNs) -->
+        { body_if_then_else(Body, If, Then, Else) },
         !,
         indent_to(C, I),
         "(  ",
         { C1 is I + 3 },
         body_(If, C1, C1, VNs), " ->\n",
         body_(Then, 0, C1, VNs), "\n",
-        else_branch(Else, C1, I, VNs).
+        else_branch(Else, I, VNs).
 body_((A;B), C, I, VNs) --> !,
         indent_to(C, I),
         "(  ",
         { C1 is I + 3 },
         body_(A, C1, C1, VNs), "\n",
-        else_branch(B, C1, I, VNs).
+        else_branch(B, I, VNs).
 body_(Goal, C, I, VNs) -->
         indent_to(C, I), literal(Goal, VNs).
 
 
-else_branch(Else, C, I, VNs) -->
+% True iff Body has the shape ( If -> Then ; Else ).
+body_if_then_else(Body, If, Then, Else) :-
+        nonvar(Body),
+        Body = (A ; Else),
+        nonvar(A),
+        A = (If -> Then).
+
+else_branch(Else, I, VNs) -->
         indent_to(0, I),
         ";  ",
-        body_(Else, C, C, VNs), "\n",
-        indent_to(0, I),
-        ")".
+        { C is I + 3 },
+        (   { body_if_then_else(Else, If, Then, NextElse) } ->
+            body_(If, C, C, VNs), " ->\n",
+            body_(Then, 0, C, VNs), "\n",
+            else_branch(NextElse, I, VNs)
+        ;   { nonvar(Else), Else = ( A ; B ) } ->
+            body_(A, C, C, VNs), "\n",
+            else_branch(B, I, VNs)
+        ;   body_(Else, C, C, VNs), "\n",
+            indent_to(0, I),
+            ")"
+        ).
 
 indent_to(CurrentColumn, Indent) -->
-        { Delta is Indent - CurrentColumn },
-        format_("~t~*|", [Delta]).
+        format_("~t~*|", [Indent-CurrentColumn]).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ?- portray_clause(a).
@@ -601,7 +579,7 @@ a :-
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-xlisting(PI) :-
+listing(PI) :-
         nonvar(PI),
         (   PI = Name/Arity0 ->
             Arity = Arity0
