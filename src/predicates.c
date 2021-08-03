@@ -8918,7 +8918,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 				nbytes = bufsiz - save;
 			}
 
-			len = format_integer(dst, get_integer(c), 0, ',', 0);
+			len = format_integer(dst, get_integer(c), 0, ',', noargval?0:argval);
 		} else if (ch == 'D') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
@@ -8935,7 +8935,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 				nbytes = bufsiz - save;
 			}
 
-			len = format_integer(dst, get_integer(c), 3, ',', noargval?2:argval);
+			len = format_integer(dst, get_integer(c), 3, ',', noargval?0:argval);
 		} else {
 			int saveq = q->quoted;
 
