@@ -1042,7 +1042,7 @@ void term_to_body(parser *p)
 	p->r->cells->nbr_cells = p->r->cidx - 1;
 }
 
-static bool attach_ops(parser *p, idx_t start_idx)
+static bool reduce(parser *p, idx_t start_idx)
 {
 	idx_t lowest = IDX_MAX, work_idx, end_idx = p->r->cidx - 1;
 	bool do_work = false, bind_le = false;
@@ -1210,9 +1210,9 @@ static bool attach_ops(parser *p, idx_t start_idx)
 	return true;
 }
 
-static bool lexer_analyze(parser *p, idx_t start_idx)
+static bool analyze(parser *p, idx_t start_idx)
 {
-	while (attach_ops(p, start_idx))
+	while (reduce(p, start_idx))
 		;
 
 	return !p->error;
@@ -2217,7 +2217,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				p->nesting_parens = p->nesting_brackets = p->nesting_braces = 0;
 			}
 
-			if (lexer_analyze(p, 0)) {
+			if (analyze(p, 0)) {
 				if (p->r->cells->nbr_cells < (p->r->cidx-1)) {
 					if (DUMP_ERRS || !p->do_read_term)
 						printf("Error: syntax error, operator expected '%s', line %u, '%s'\n", p->token, p->line_nbr, p->save_line);
@@ -2377,7 +2377,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && args && !strcmp(p->token, ",")) {
-			lexer_analyze(p, arg_idx);
+			analyze(p, arg_idx);
 			arg_idx = p->r->cidx;
 
 			if (*p->srcptr == ',') {
@@ -2444,19 +2444,19 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quote_char && !strcmp(p->token, ")")) {
 			p->nesting_parens--;
-			lexer_analyze(p, begin_idx);
+			analyze(p, begin_idx);
 			return arity;
 		}
 
 		if (!p->quote_char && !strcmp(p->token, "]")) {
 			p->nesting_brackets--;
-			lexer_analyze(p, begin_idx);
+			analyze(p, begin_idx);
 			return arity;
 		}
 
 		if (!p->quote_char && !strcmp(p->token, "}")) {
 			p->nesting_braces--;
-			lexer_analyze(p, begin_idx);
+			analyze(p, begin_idx);
 			return arity;
 		}
 
@@ -2625,7 +2625,7 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 		return true;
 	}
 
-	if (!lexer_analyze(p, 0))
+	if (!analyze(p, 0))
 		return false;
 
 	term_assign_vars(p, 0, false);
