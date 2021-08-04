@@ -598,8 +598,9 @@ static unsigned search_op_internal(module *m, const char *name, unsigned *specif
 			continue;
 
 		if (specifier) *specifier = ptr->specifier;
+		unsigned n = ptr->priority;
 		m_done(iter);
-		return ptr->priority;
+		return n;
 	}
 
 	iter = m_findkey(m->defops, name);
@@ -612,8 +613,9 @@ static unsigned search_op_internal(module *m, const char *name, unsigned *specif
 			continue;
 
 		if (specifier) *specifier = ptr->specifier;
+		unsigned n = ptr->priority;
 		m_done(iter);
-		return ptr->priority;
+		return n;
 	}
 
 	if (hint_prefix)
