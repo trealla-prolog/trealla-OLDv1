@@ -583,7 +583,7 @@ unsigned find_op(module *m, const char *name, unsigned specifier)
 	return 0;
 }
 
-static unsigned get_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
+static unsigned search_op_internal(module *m, const char *name, unsigned *specifier, bool hint_prefix)
 {
 	miter *iter;
 	op_table *ptr;
@@ -617,14 +617,14 @@ static unsigned get_op(module *m, const char *name, unsigned *specifier, bool hi
 	}
 
 	if (hint_prefix)
-		return get_op(m, name, specifier, false);
+		return search_op_internal(m, name, specifier, false);
 
 	return 0;
 }
 
 unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_prefix)
 {
-	unsigned priority = get_op(m, name, specifier, hint_prefix);
+	unsigned priority = search_op_internal(m, name, specifier, hint_prefix);
 
 	if (priority)
 		return priority;
@@ -635,7 +635,7 @@ unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_p
 		if ((m == tmp_m) || !tmp_m->user_ops)
 			continue;
 
-		priority = get_op(tmp_m, name, specifier, hint_prefix);
+		priority = search_op_internal(tmp_m, name, specifier, hint_prefix);
 
 		if (priority)
 			return priority;
@@ -646,7 +646,7 @@ unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_p
 		if ((m == tmp_m) || !tmp_m->user_ops)
 			continue;
 
-		priority = get_op(tmp_m, name, specifier, hint_prefix);
+		priority = search_op_internal(tmp_m, name, specifier, hint_prefix);
 
 		if (priority) {
 			//m->used[m->idx_used++] = tmp_m;
