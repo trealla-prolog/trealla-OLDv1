@@ -196,7 +196,6 @@ cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, bo
 
 	if (cnt) {
 		if (!create_vars(q, cnt)) {
-			printf("*** %d\n", cnt);
 			DISCARD_RESULT throw_error(q, p1, "resource_error", "too_many_vars");
 			return NULL;
 		}
