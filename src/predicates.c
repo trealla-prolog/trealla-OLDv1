@@ -828,32 +828,6 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	// Verify the list
-
-	if (!is_variable(p2)) {
-		cell *l = p2;
-		idx_t l_ctx = p2_ctx;
-		LIST_HANDLER(l);
-
-		while (is_list(l)) {
-			cell *head = LIST_HEAD(l);
-			head = deref(q, head, l_ctx);
-
-			if (!is_smallint(head) && is_variable(p1))
-				return throw_error(q, head, "type_error", "integer");
-
-			if (!is_smallint(head) && !is_variable(head))
-				return throw_error(q, head, "type_error", "integer");
-
-			cell *tail = LIST_TAIL(l);
-			l = deref(q, tail, l_ctx);
-			l_ctx = q->latest_ctx;
-		}
-
-		if (!is_nil(l) && !is_variable(l))
-			return throw_error(q, l, "type_error", "list");
-	}
-
 	if (!is_variable(p2) && is_variable(p1)) {
 		cell *l = p2;
 		idx_t l_ctx = p2_ctx;
@@ -864,10 +838,17 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 			cell *head = LIST_HEAD(l);
 			head = deref(q, head, l_ctx);
 
-			int_t val = get_integer(head);
+			if (!is_smallint(head)) {
+				ASTRING_free(pr);
+				return throw_error(q, head, "type_error", "integer");
+			}
 
-			if (val < 0)
+			int_t val = get_smallint(head);
+
+			if (val <= 0) {
+				ASTRING_free(pr);
 				return throw_error(q, head, "representation_error", "character_code");
+			}
 
 			char ch[10];
 			put_char_utf8(ch, val);
@@ -878,8 +859,10 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 
 		}
 
-		if (!is_nil(l))
+		if (!is_nil(l)) {
+			ASTRING_free(pr);
 			return throw_error(q, l, "type_error", "list");
+		}
 
 		cell tmp;
 		may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
