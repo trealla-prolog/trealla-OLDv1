@@ -523,6 +523,7 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 
 #if DUMP_KEYS
 	sl_dump(m->ops, dump_key, m);
+	sl_dump(m->defops, dump_key, m);
 #endif
 
 	return true;
