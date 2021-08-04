@@ -855,10 +855,10 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
-		ASTRING(pr);
 		cell *l = p2;
 		idx_t l_ctx = p2_ctx;
 		LIST_HANDLER(l);
+		ASTRING(pr);
 
 		while (is_list(l)) {
 			cell *head = LIST_HEAD(l);
