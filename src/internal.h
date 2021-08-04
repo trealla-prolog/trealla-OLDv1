@@ -748,7 +748,7 @@ typedef struct {
 
 #define ASTRING_check(pr,len) {											\
 	size_t rem = pr##_buf.size - ASTRING_strlen(pr);					\
-	if ((len) >= rem) {													\
+	if (((len)+1) >= rem) {													\
 		size_t offset = ASTRING_strlen(pr);								\
 		pr##_buf.buf = realloc(pr##_buf.buf, (pr##_buf.size += ((len)-rem)) + 1); \
 		ensure(pr##_buf.buf);											\

@@ -883,7 +883,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 			return throw_error(q, p2, "type_error", "list");
 
 		cell tmp;
-		may_error(make_cstring(&tmp, ASTRING_cstr(pr)), ASTRING_free(pr));
+		may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
 		ASTRING_free(pr);
 		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);

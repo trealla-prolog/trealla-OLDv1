@@ -239,7 +239,7 @@ int character_at_pos(const char *buffer, size_t buflen, size_t i)
 
 	while (src < (buffer+buflen)) {
 		int ch = get_char_utf8(&src);
-		
+
 		if (idx++ == i)
 			return ch;
 	}
@@ -251,12 +251,12 @@ size_t offset_at_pos(const char *buffer, size_t buflen, size_t i)
 {
 	const char *src = buffer;
 	size_t idx = 0;
-	
+
 	while (src < (buffer+buflen)) {
 		if (idx++ == i)
 			break;
 
-		get_char_utf8(&src);		
+		get_char_utf8(&src);
 	}
 
 	return src - buffer;
