@@ -455,6 +455,19 @@ predicate *search_predicate(module *m, cell *c)
 	return NULL;
 }
 
+#define DUMP_KEYS 0
+
+#if DUMP_KEYS
+static const char *dump_key(const void *k, const void *v, const void *p)
+{
+	(void)p; (void)k;
+	const op_table *op = (const op_table*)v;
+	static char tmpbuf[1024];
+	snprintf(tmpbuf, sizeof(tmpbuf), "'%s:%u:%u'", op->name, op->specifier, op->priority);
+	return tmpbuf;
+}
+#endif
+
 bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 {
 	miter *iter = m_findkey(m->ops, name);
@@ -507,6 +520,11 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 	m->loaded_ops = false;
 	m->user_ops = true;
 	m_app(m->ops, tmp->name, tmp);
+
+#if DUMP_KEYS
+	sl_dump(m->ops, dump_key, m);
+#endif
+
 	return true;
 }
 

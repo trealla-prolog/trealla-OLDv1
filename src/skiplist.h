@@ -44,7 +44,7 @@ extern size_t sl_count(const skiplist *l);
 
 extern void sl_dump(
 	const skiplist *l,
-	const char *(*f)(const void* k, const void *p),
+	const char *(*f)(const void* k, const void* v, const void *p),
 	const void *p
 	);
 

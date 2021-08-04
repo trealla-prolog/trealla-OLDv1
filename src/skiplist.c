@@ -610,7 +610,7 @@ void sl_done(sliter *iter)
 	iter->l->iters = iter;
 }
 
-void sl_dump(const skiplist *l, const char *(*f)(const void*, const void*), const void *p1)
+void sl_dump(const skiplist *l, const char *(*f)(const void*, const void*, const void*), const void *p1)
 {
 	if (!l)
 		return;
@@ -624,7 +624,7 @@ void sl_dump(const skiplist *l, const char *(*f)(const void*, const void*), cons
 		printf("%6d: ", p->nbr);
 
 		for (int j = 0; j < p->nbr; j++)
-			printf("%s ", f(p->bkt[j].key, p1));
+			printf("%s ", f(p->bkt[j].key, p->bkt[j].val, p1));
 
 		printf("\n");
 		p = q;
