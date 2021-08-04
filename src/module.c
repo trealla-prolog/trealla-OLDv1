@@ -588,10 +588,31 @@ static unsigned search_op_internal(module *m, const char *name, unsigned *specif
 	miter *iter;
 	op_table *ptr;
 
+	iter = m_findkey(m->defops, name);
+
+	while (m_nextkey(iter, (void**)&ptr)) {
+		if (!ptr->priority)
+			continue;
+
+		if (!IS_INFIX(ptr->specifier))
+			continue;
+
+		if (hint_prefix && !IS_PREFIX(ptr->specifier))
+			continue;
+
+		if (specifier) *specifier = ptr->specifier;
+		unsigned n = ptr->priority;
+		m_done(iter);
+		return n;
+	}
+
 	iter = m_findkey(m->ops, name);
 
 	while (m_nextkey(iter, (void**)&ptr)) {
 		if (!ptr->priority)
+			continue;
+
+		if (!IS_INFIX(ptr->specifier))
 			continue;
 
 		if (hint_prefix && !IS_PREFIX(ptr->specifier))
@@ -607,6 +628,27 @@ static unsigned search_op_internal(module *m, const char *name, unsigned *specif
 
 	while (m_nextkey(iter, (void**)&ptr)) {
 		if (!ptr->priority)
+			continue;
+
+		if (IS_INFIX(ptr->specifier))
+			continue;
+
+		if (hint_prefix && !IS_PREFIX(ptr->specifier))
+			continue;
+
+		if (specifier) *specifier = ptr->specifier;
+		unsigned n = ptr->priority;
+		m_done(iter);
+		return n;
+	}
+
+	iter = m_findkey(m->ops, name);
+
+	while (m_nextkey(iter, (void**)&ptr)) {
+		if (!ptr->priority)
+			continue;
+
+		if (IS_INFIX(ptr->specifier))
 			continue;
 
 		if (hint_prefix && !IS_PREFIX(ptr->specifier))
