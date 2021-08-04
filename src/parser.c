@@ -1342,7 +1342,7 @@ static bool term_expansion(parser *p)
 
 	query *q = create_query(p->m, false);
 	ensure(q);
-	char *dst = print_canonical_to_strbuf(q, p->r->cells, 0, -1);
+	char *dst = print_canonical_to_strbuf(q, p->r->cells, 0, 0);
 	char *src = malloc(strlen(dst)+256);
 	ensure(src);
 	sprintf(src, "term_expansion((%s),_TermOut).", dst);
@@ -1358,7 +1358,7 @@ static bool term_expansion(parser *p)
 	tokenize(p2, false, false);
 	xref_rule(p2, p2->r, NULL);
 
-	//printf("### "); print_term(q, stdout, p2->r->cells, 0, -1); printf("\n");
+	//printf("### "); print_term(q, stdout, p2->r->cells, 0, 0); printf("\n");
 
 	execute(q, p2->r);
 
@@ -1391,7 +1391,7 @@ static bool term_expansion(parser *p)
 		if (strcmp(p2->vartab.var_name[i], "_TermOut"))
 			continue;
 
-		src = print_canonical_to_strbuf(q, c, q->latest_ctx, -1);
+		src = print_canonical_to_strbuf(q, c, q->latest_ctx, 1);
 		strcat(src, ".");
 		break;
 	}
