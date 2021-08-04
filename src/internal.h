@@ -276,7 +276,7 @@ struct cell_ {
 	union {
 		struct {
 			int_t val_int;
-			int_t val_spare1;
+			void *val_spare1;
 		};
 
 		struct {
