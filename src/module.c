@@ -144,12 +144,12 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 		if (is_bigint(p2)) {
 			return mp_int_compare(&p1->val_bigint->ival, &p2->val_bigint->ival);
 		} else if (is_smallint(p2)) {
-			return mp_int_compare_value(&p1->val_bigint->ival, p2->val_integer);
+			return mp_int_compare_value(&p1->val_bigint->ival, p2->val_int);
 		} else if (is_variable(p2))
 			return 0;
 	} else if (is_smallint(p1)) {
 		if (is_bigint(p2)) {
-			return -mp_int_compare_value(&p2->val_bigint->ival, p1->val_integer);
+			return -mp_int_compare_value(&p2->val_bigint->ival, p1->val_int);
 		} if (is_smallint(p2)) {
 			if (get_smallint(p1) < get_smallint(p2))
 				return -1;

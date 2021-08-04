@@ -32,11 +32,11 @@
 #define NEWLINE_MODE "posix"
 #endif
 
-typedef int64_t int_t;
-typedef uint64_t uint_t;
+typedef intmax_t int_t;
+typedef uintmax_t uint_t;
 
-#define INT_T_MAX INT64_MAX
-#define INT_T_MIN INT64_MIN
+#define INT_T_MAX INTMAX_MAX
+#define INT_T_MIN INTMAX_MIN
 
 #if (__STDC_VERSION__ >= 201112L) && USE_THREADS
 #include <stdatomic.h>
@@ -106,13 +106,13 @@ typedef enum {
 #define get_real(c) (c)->val_real
 #define set_real(c,v) (c)->val_real = (v)
 
-#define get_smallint(c) (c)->val_integer
-#define set_smallint(c,v) { (c)->val_integer = (v); (c)->val_spare1 = 0; }
+#define get_smallint(c) (c)->val_int
+#define set_smallint(c,v) { (c)->val_int = (v); (c)->val_spare1 = 0; }
 
-#define get_integer(c) (c)->val_integer
+#define get_integer(c) (c)->val_int
 
 #define neg_bigint(c) (c)->val_bigint->ival.sign = MP_NEG;
-#define neg_smallint(c) (c)->val_integer = -llabs((c)->val_integer)
+#define neg_smallint(c) (c)->val_int = -llabs((c)->val_int)
 #define neg_real(c) (c)->val_real = -fabs((c)->val_real)
 
 #define is_negative(c) (is_bigint(c) ? (c)->val_bigint->ival.sign == MP_NEG : get_smallint(c) < 0)
@@ -275,8 +275,8 @@ struct cell_ {
 
 	union {
 		struct {
-			int_t val_integer;
-			void *val_spare1;
+			int_t val_int;
+			int_t val_spare1;
 		};
 
 		struct {
@@ -748,7 +748,7 @@ typedef struct {
 
 #define ASTRING_check(pr,len) {											\
 	size_t rem = pr##_buf.size - ASTRING_strlen(pr);					\
-	if (((len)+1) >= rem) {													\
+	if (((len)+1) >= rem) {												\
 		size_t offset = ASTRING_strlen(pr);								\
 		pr##_buf.buf = realloc(pr##_buf.buf, (pr##_buf.size += ((len)-rem)) + 1); \
 		ensure(pr##_buf.buf);											\

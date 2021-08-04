@@ -1587,7 +1587,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			p->v.flags |= FLAG_MANAGED;
 		} else {
 			set_smallint(&p->v, val);
-			if (neg) p->v.val_integer = -p->v.val_integer;
+			if (neg) p->v.val_int = -p->v.val_int;
 			mp_int_clear(&v2);
 		}
 
@@ -1620,7 +1620,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			p->v.flags |= FLAG_MANAGED;
 		} else {
 			set_smallint(&p->v, val);
-			if (neg) p->v.val_integer = -p->v.val_integer;
+			if (neg) p->v.val_int = -p->v.val_int;
 			mp_int_clear(&v2);
 		}
 
@@ -1653,7 +1653,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			p->v.flags |= FLAG_MANAGED;
 		} else {
 			set_smallint(&p->v, val);
-			if (neg) p->v.val_integer = -p->v.val_integer;
+			if (neg) p->v.val_int = -p->v.val_int;
 			mp_int_clear(&v2);
 		}
 
@@ -1693,7 +1693,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		p->v.flags |= FLAG_MANAGED;
 	} else {
 		set_smallint(&p->v, val);
-		if (neg) p->v.val_integer = -p->v.val_integer;
+		if (neg) p->v.val_int = -p->v.val_int;
 	}
 
 	mp_int_clear(&v2);

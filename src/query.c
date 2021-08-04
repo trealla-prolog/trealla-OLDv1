@@ -887,10 +887,10 @@ static bool unify_integer(__attribute__((unused)) query *q, cell *p1, cell *p2)
 		return !mp_int_compare(&p1->val_bigint->ival, &p2->val_bigint->ival);
 
 	if (is_bigint(p1) && is_integer(p2))
-		return !mp_int_compare_value(&p1->val_bigint->ival, p2->val_integer);
+		return !mp_int_compare_value(&p1->val_bigint->ival, p2->val_int);
 
 	if (is_bigint(p2) && is_integer(p1))
-		return !mp_int_compare_value(&p2->val_bigint->ival, p1->val_integer);
+		return !mp_int_compare_value(&p2->val_bigint->ival, p1->val_int);
 
 	if (is_integer(p2))
 		return (get_integer(p1) == get_integer(p2));
