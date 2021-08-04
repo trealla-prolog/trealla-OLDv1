@@ -2200,7 +2200,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		if (p->error)
 			break;
 
-		//fprintf(stdout, "Debug: token '%s' quoted=%d, tag=%u, op=%d, lastop=%d, string=%d\n", p->token, p->quote_char, p->v.tag, p->is_op, last_op, p->string);
+		//fprintf(stderr, "Debug: token '%s' quoted=%d, tag=%u, op=%d, lastop=%d, string=%d\n", p->token, p->quote_char, p->v.tag, p->is_op, last_op, p->string);
 
 		if (!p->quote_char && !strcmp(p->token, ".")
 		    && (*p->srcptr != '(')

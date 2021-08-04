@@ -530,8 +530,10 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 
 static unsigned find_op_internal(module *m, const char *name, unsigned specifier)
 {
-	miter *iter = m_findkey(m->ops, name);
+	miter *iter;
 	op_table *ptr;
+
+	iter = m_findkey(m->ops, name);
 
 	while (m_nextkey(iter, (void**)&ptr)) {
 		if (!ptr->priority)
