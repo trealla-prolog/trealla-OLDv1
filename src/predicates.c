@@ -828,44 +828,62 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (!is_variable(p2) && is_variable(p1)) {
-		cell *l = p2;
-		idx_t l_ctx = p2_ctx;
-		LIST_HANDLER(l);
-		ASTRING(pr);
+	// Verify the list
 
-		while (is_list(l)) {
-			cell *head = LIST_HEAD(l);
-			head = deref(q, head, l_ctx);
+	if (!is_variable(p2)) {
+		cell *save_p2 = p2;
+		idx_t save_p2_ctx = p2_ctx;
+		LIST_HANDLER(p2);
 
-			if (!is_smallint(head)) {
-				ASTRING_free(pr);
+		while (is_list(p2)) {
+			cell *head = LIST_HEAD(p2);
+			head = deref(q, head, p2_ctx);
+
+			if (!is_integer(head) && is_variable(p1))
 				return throw_error(q, head, "type_error", "integer");
-			}
 
-			int_t val = get_smallint(head);
+			if (!is_integer(head) && !is_variable(head))
+				return throw_error(q, head, "type_error", "integer");
 
-			if (val <= 0) {
-				ASTRING_free(pr);
+			cell *tail = LIST_TAIL(p2);
+			p2 = deref(q, tail, p2_ctx);
+			p2_ctx = q->latest_ctx;
+		}
+
+		if (!is_nil(p2) && !is_variable(p2))
+			return throw_error(q, p2, "type_error", "list");
+
+		p2 = save_p2;
+		p2_ctx = save_p2_ctx;
+	}
+
+	if (!is_variable(p2) && is_variable(p1)) {
+		ASTRING(pr);
+		LIST_HANDLER(p2);
+
+		while (is_list(p2)) {
+			cell *head = LIST_HEAD(p2);
+			head = deref(q, head, p2_ctx);
+
+			int_t val = get_integer(head);
+
+			if (val < 0)
 				return throw_error(q, head, "representation_error", "character_code");
-			}
 
 			char ch[10];
 			put_char_utf8(ch, val);
 			ASTRING_strcat(pr, ch);
-			cell *tail = LIST_TAIL(l);
-			l = deref(q, tail, l_ctx);
-			l_ctx = q->latest_ctx;
+			cell *tail = LIST_TAIL(p2);
+			p2 = deref(q, tail, p2_ctx);
+			p2_ctx = q->latest_ctx;
 
 		}
 
-		if (!is_nil(l)) {
-			ASTRING_free(pr);
-			return throw_error(q, l, "type_error", "list");
-		}
+		if (!is_nil(p2))
+			return throw_error(q, p2, "type_error", "list");
 
 		cell tmp;
-		may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
+		may_error(make_cstring(&tmp, ASTRING_cstr(pr)), ASTRING_free(pr));
 		ASTRING_free(pr);
 		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
