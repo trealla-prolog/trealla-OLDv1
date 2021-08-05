@@ -8746,6 +8746,9 @@ static cell *get_next_cell(query *q, list_reader_t *fmt)
 	if (fmt->src)
 		return NULL;
 
+	if (!is_list(fmt->p))
+		return NULL;
+
 	fmt->p = fmt->p + 1;
 	cell *head = deref(q, fmt->p, fmt->p_ctx);
 	fmt->p = fmt->p + fmt->p->nbr_cells;
