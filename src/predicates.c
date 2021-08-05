@@ -8741,6 +8741,19 @@ static int get_next_char(query *q, list_reader_t *fmt)
 	return ch;
 }
 
+static cell *get_next_cell(query *q, list_reader_t *fmt)
+{
+	if (fmt->src)
+		return NULL;
+
+	fmt->p = fmt->p + 1;
+	cell *head = deref(q, fmt->p, fmt->p_ctx);
+	fmt->p = fmt->p + fmt->p->nbr_cells;
+	fmt->p = deref(q, fmt->p, fmt->p_ctx);
+	fmt->p_ctx = q->latest_ctx;
+	return head;
+}
+
 static bool is_more_data(query *q, list_reader_t *fmt)
 {
 	(void)q;
@@ -8753,12 +8766,14 @@ static bool is_more_data(query *q, list_reader_t *fmt)
 
 static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
-	list_reader_t fmt;
-	fmt.p = p1;
-	fmt.p_ctx = p1_ctx;
-	fmt.srcbuf = is_atom(p1) ? GET_STR(q, p1) : NULL;
-	fmt.srclen = is_atom(p1) ? LEN_STR(q, p1) : 0;
-	fmt.src = fmt.srcbuf;
+	list_reader_t fmt1 = {0}, fmt2 = {0};
+	fmt1.p = p1;
+	fmt1.p_ctx = p1_ctx;
+	fmt1.srcbuf = is_atom(p1) ? GET_STR(q, p1) : NULL;
+	fmt1.srclen = is_atom(p1) ? LEN_STR(q, p1) : 0;
+	fmt1.src = fmt1.srcbuf;
+	fmt2.p = p2;
+	fmt2.p_ctx = p2_ctx;
 
 	size_t bufsiz = 1024;
 	char *tmpbuf = malloc(bufsiz);
@@ -8767,10 +8782,9 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 	*dst = '\0';
 	cell *c = NULL;
 	size_t nbytes = bufsiz;
-	LIST_HANDLER(p2);
 
-	while (is_more_data(q, &fmt)) {
-		int ch = get_next_char(q, &fmt);
+	while (is_more_data(q, &fmt1)) {
+		int ch = get_next_char(q, &fmt1);
 		int argval = 0, noargval = 1;
 
 		if (ch != '~') {
@@ -8778,27 +8792,25 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			continue;
 		}
 
-		ch = get_next_char(q, &fmt);
+		ch = get_next_char(q, &fmt1);
 
 		if (ch == '*') {
-			cell *head = LIST_HEAD(p2);
-			c = deref(q, head, p2_ctx);
-			p2 = LIST_TAIL(p2);
+			c = get_next_cell(q, &fmt2);
 			noargval = 0;
 
-			if (!is_integer(c)) {
+			if (!c || !is_integer(c)) {
 				free(tmpbuf);
 				return throw_error(q, c, "type_error", "integer");
 			}
 
 			argval = get_smallint(c);
-			ch = get_next_char(q, &fmt);
+			ch = get_next_char(q, &fmt1);
 		} else {
 			while (isdigit(ch)) {
 				noargval = 0;
 				argval *= 10;
 				argval += ch - '0';
-				ch = get_next_char(q, &fmt);
+				ch = get_next_char(q, &fmt1);
 				continue;
 			}
 		}
@@ -8850,10 +8862,10 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		if (!p2 || !is_list(p2))
 			break;
 
-		cell *head = LIST_HEAD(p2);
-		c = deref(q, head, p2_ctx);
-		idx_t c_ctx = q->latest_ctx;
-		p2 = LIST_TAIL(p2);
+		c = get_next_cell(q, &fmt2);
+
+		if (!c)
+			return throw_error(q, c, "domain_error", "missing args");
 
 		if (ch == 'i')
 			continue;
@@ -8887,7 +8899,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 
 			slicecpy(dst, len+1, GET_STR(q, c), LEN_STR(q, c));
 		} else if (ch == 's') {
-			len = scan_is_chars_list(q, c, c_ctx, true);
+			len = scan_is_chars_list(q, c, fmt2.p_ctx, true);
 
 			if (!len)
 				return throw_error(q, p1, "type_error", "list");
@@ -9058,9 +9070,9 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 				q->quoted = -1;
 
 			if (canonical)
-				len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, 1, false, 0);
+				len = print_canonical_to_buf(q, NULL, 0, c, fmt2.p_ctx, 1, false, 0);
 			else
-				len = print_term_to_buf(q, NULL, 0, c, c_ctx, 1, false, 0);
+				len = print_term_to_buf(q, NULL, 0, c, fmt2.p_ctx, 1, false, 0);
 
 			if (q->cycle_error)
 				return throw_error(q, c, "resource_error", "cyclic");
@@ -9074,9 +9086,9 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			}
 
 			if (canonical)
-				len = print_canonical_to_buf(q, dst, len+1, c, c_ctx, 1, false, 0);
+				len = print_canonical_to_buf(q, dst, len+1, c, fmt2.p_ctx, 1, false, 0);
 			else
-				len = print_term_to_buf(q, dst, len+1, c, c_ctx, 1, false, 0);
+				len = print_term_to_buf(q, dst, len+1, c, fmt2.p_ctx, 1, false, 0);
 
 			q->quoted = saveq;
 		}
