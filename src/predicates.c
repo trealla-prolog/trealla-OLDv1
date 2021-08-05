@@ -285,6 +285,11 @@ static USE_RESULT pl_status make_string(cell *d, const char *s)
 
 static USE_RESULT pl_status make_slice(query *q, cell *d, const cell *orig, size_t off, size_t n)
 {
+	if (!n) {
+		make_literal(d, g_empty_s);
+		return pl_success;
+	}
+
 	if (is_static(orig)) {
 		*d = *orig;
 		d->val_str += off;
@@ -1158,6 +1163,8 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 
 			size_t ipos = offset_at_pos(GET_STR(q, p1), LEN_STR(q, p1), i);
 			size_t jpos = offset_at_pos(GET_STR(q, p1), LEN_STR(q, p1), i+j);
+
+			//printf("*** %s,%u off=%u len=%u\n", GET_STR(q, p1), (unsigned)LEN_STR(q, p1), (unsigned)ipos, (unsigned)(jpos-ipos));
 
 			may_error(make_slice(q, &tmp, p1, ipos, jpos-ipos));
 
