@@ -8908,7 +8908,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		}
 
 		if ((ch == 's') && is_string(c)) {
-			len = LEN_STR(q, c);
+			len = MAX(argval, LEN_STR(q, c));
 
 			while (nbytes < (len+1)) {
 				size_t save = dst - tmpbuf;
@@ -8918,7 +8918,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 				nbytes = bufsiz - save;
 			}
 
-			slicecpy(dst, len+1, GET_STR(q, c), LEN_STR(q, c));
+			slicecpy(dst, len+1, GET_STR(q, c), len);
 		} else if (ch == 's') {
 			len = scan_is_chars_list(q, c, fmt2.p_ctx, true);
 
@@ -8927,6 +8927,9 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 
 			char *tmpsrc = chars_list_to_string(q, c, p2_ctx, len);
 
+			if (((int)len > argval && (argval > 0)))
+				len = argval;
+
 			while (nbytes < (len+1)) {
 				size_t save = dst - tmpbuf;
 				tmpbuf = realloc(tmpbuf, bufsiz*=2);
@@ -8935,6 +8938,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 				nbytes = bufsiz - save;
 			}
 
+			tmpsrc[len] = '\0';
 			len = sprintf(dst, "%s", tmpsrc);
 			free(tmpsrc);
 		} else if (ch == 'c') {
