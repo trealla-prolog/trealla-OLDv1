@@ -8982,10 +8982,44 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 				nbytes = bufsiz - save;
 			}
 
-			if (ch == 'e')
-				len = sprintf(dst, "%e", get_real(c));
-			else
-				len = sprintf(dst, "%E", get_real(c));
+			if (argval) {
+				if (ch == 'e')
+					len = sprintf(dst, "%.*e", argval, get_real(c));
+				else
+					len = sprintf(dst, "%.*E", argval, get_real(c));
+			} else {
+				if (ch == 'e')
+					len = sprintf(dst, "%e", get_real(c));
+				else
+					len = sprintf(dst, "%E", get_real(c));
+			}
+		} else if ((ch == 'g') || (ch == 'G')) {
+			if (!is_real(c)) {
+				free(tmpbuf);
+				return throw_error(q, c, "type_error", "float");
+			}
+
+			len = 40;
+
+			while (nbytes < (len+1)) {
+				size_t save = dst - tmpbuf;
+				tmpbuf = realloc(tmpbuf, bufsiz*=2);
+				may_ptr_error(tmpbuf);
+				dst = tmpbuf + save;
+				nbytes = bufsiz - save;
+			}
+
+			if (argval) {
+				if (ch == 'g')
+					len = sprintf(dst, "%.*g", argval, get_real(c));
+				else
+					len = sprintf(dst, "%.*G", argval, get_real(c));
+			} else {
+				if (ch == 'g')
+					len = sprintf(dst, "%g", get_real(c));
+				else
+					len = sprintf(dst, "%G", get_real(c));
+			}
 		} else if (ch == 'f') {
 			if (!is_real(c)) {
 				free(tmpbuf);
@@ -9002,7 +9036,10 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 				nbytes = bufsiz - save;
 			}
 
-			len = sprintf(dst, "%.*f", argval, get_real(c));
+			if (argval)
+				len = sprintf(dst, "%.*f", argval, get_real(c));
+			else
+				len = sprintf(dst, "%f", get_real(c));
 		} else if (ch == 'I') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
