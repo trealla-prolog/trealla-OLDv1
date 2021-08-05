@@ -283,7 +283,7 @@ static USE_RESULT pl_status make_string(cell *d, const char *s)
 	return make_stringn(d, s, strlen(s));
 }
 
-static USE_RESULT pl_status make_slice(query *q, cell *d, cell *orig, size_t off, size_t n)
+static USE_RESULT pl_status make_slice(query *q, cell *d, const cell *orig, size_t off, size_t n)
 {
 	if (is_static(orig)) {
 		*d = *orig;
