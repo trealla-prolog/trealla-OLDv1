@@ -8767,6 +8767,16 @@ static bool is_more_data(query *q, list_reader_t *fmt)
 	return is_list(fmt->p);
 }
 
+#define CHECK_BUF(len) 										\
+	while (nbytes < (unsigned)(1+(len)+1)) {				\
+		size_t save = dst - tmpbuf;							\
+		tmpbuf = realloc(tmpbuf, bufsiz*=2);				\
+		may_ptr_error(tmpbuf);								\
+		dst = tmpbuf + save;								\
+		nbytes = bufsiz - save;								\
+	}
+
+
 static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
 	list_reader_t fmt1 = {0}, fmt2 = {0};
@@ -8823,13 +8833,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			}
 		}
 
-		while (nbytes < (unsigned)(1+argval+1)) {
-			size_t save = dst - tmpbuf;
-			tmpbuf = realloc(tmpbuf, bufsiz*=2);
-			may_ptr_error(tmpbuf);
-			dst = tmpbuf + save;
-			nbytes = bufsiz - save;
-		}
+		CHECK_BUF(argval);
 
 		if (ch == 'n') {
 			while (argval-- > 1)
@@ -8912,15 +8916,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 
 		if ((ch == 's') && is_string(c)) {
 			len = MAX(argval, (int)LEN_STR(q, c));
-
-			while (nbytes < (len+1)) {
-				size_t save = dst - tmpbuf;
-				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				may_ptr_error(tmpbuf);
-				dst = tmpbuf + save;
-				nbytes = bufsiz - save;
-			}
-
+			CHECK_BUF(len);
 			slicecpy(dst, len+1, GET_STR(q, c), len);
 		} else if (ch == 's') {
 			len = scan_is_chars_list(q, c, fmt2.p_ctx, true);
@@ -8933,14 +8929,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			if (((int)len > argval && (argval > 0)))
 				len = argval;
 
-			while (nbytes < (len+1)) {
-				size_t save = dst - tmpbuf;
-				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				may_ptr_error(tmpbuf);
-				dst = tmpbuf + save;
-				nbytes = bufsiz - save;
-			}
-
+			CHECK_BUF(len);
 			tmpsrc[len] = '\0';
 			len = sprintf(dst, "%s", tmpsrc);
 			free(tmpsrc);
@@ -8952,15 +8941,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 
 			while (argval-- > 1) {
 				len = 10;
-
-				while (nbytes < (len+1)) {
-					size_t save = dst - tmpbuf;
-					tmpbuf = realloc(tmpbuf, bufsiz*=2);
-					may_ptr_error(tmpbuf);
-					dst = tmpbuf + save;
-					nbytes = bufsiz - save;
-				}
-
+				CHECK_BUF(len);
 				len = put_char_utf8(dst, (int)get_smallint(c));
 				dst += len;
 			}
@@ -8973,14 +8954,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			}
 
 			len = 40;
-
-			while (nbytes < (len+1)) {
-				size_t save = dst - tmpbuf;
-				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				may_ptr_error(tmpbuf);
-				dst = tmpbuf + save;
-				nbytes = bufsiz - save;
-			}
+			CHECK_BUF(len);
 
 			if (argval) {
 				if (ch == 'e')
@@ -9000,14 +8974,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			}
 
 			len = 40;
-
-			while (nbytes < (len+1)) {
-				size_t save = dst - tmpbuf;
-				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				may_ptr_error(tmpbuf);
-				dst = tmpbuf + save;
-				nbytes = bufsiz - save;
-			}
+			CHECK_BUF(len);
 
 			if (argval) {
 				if (ch == 'g')
@@ -9027,14 +8994,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			}
 
 			len = 40;
-
-			while (nbytes < (len+1)) {
-				size_t save = dst - tmpbuf;
-				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				may_ptr_error(tmpbuf);
-				dst = tmpbuf + save;
-				nbytes = bufsiz - save;
-			}
+			CHECK_BUF(len);
 
 			if (argval)
 				len = sprintf(dst, "%.*f", argval, get_real(c));
@@ -9047,15 +9007,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			}
 
 			len = 40;
-
-			while (nbytes < (len+1)) {
-				size_t save = dst - tmpbuf;
-				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				may_ptr_error(tmpbuf);
-				dst = tmpbuf + save;
-				nbytes = bufsiz - save;
-			}
-
+			CHECK_BUF(len);
 			len = format_integer(dst, get_smallint(c), noargval?3:argval, '_', 0, 10);
 		} else if (ch == 'd') {
 			if (!is_integer(c)) {
@@ -9064,15 +9016,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			}
 
 			len = 40;
-
-			while (nbytes < (len+1)) {
-				size_t save = dst - tmpbuf;
-				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				may_ptr_error(tmpbuf);
-				dst = tmpbuf + save;
-				nbytes = bufsiz - save;
-			}
-
+			CHECK_BUF(len);
 			len = format_integer(dst, get_smallint(c), 0, ',', noargval?0:argval, 10);
 		} else if (ch == 'D') {
 			if (!is_integer(c)) {
@@ -9081,15 +9025,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			}
 
 			len = 40;
-
-			while (nbytes < (len+1)) {
-				size_t save = dst - tmpbuf;
-				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				may_ptr_error(tmpbuf);
-				dst = tmpbuf + save;
-				nbytes = bufsiz - save;
-			}
-
+			CHECK_BUF(len);
 			len = format_integer(dst, get_smallint(c), 3, ',', noargval?0:argval, 10);
 		} else if (ch == 'r') {
 			if (!is_integer(c)) {
@@ -9098,15 +9034,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			}
 
 			len = 40;
-
-			while (nbytes < (len+1)) {
-				size_t save = dst - tmpbuf;
-				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				may_ptr_error(tmpbuf);
-				dst = tmpbuf + save;
-				nbytes = bufsiz - save;
-			}
-
+			CHECK_BUF(len);
 			len = format_integer(dst, get_smallint(c), 0, ',', 0, noargval?0:argval);
 		} else if (ch == 'R') {
 			if (!is_integer(c)) {
@@ -9115,15 +9043,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			}
 
 			len = 40;
-
-			while (nbytes < (len+1)) {
-				size_t save = dst - tmpbuf;
-				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				may_ptr_error(tmpbuf);
-				dst = tmpbuf + save;
-				nbytes = bufsiz - save;
-			}
-
+			CHECK_BUF(len);
 			len = format_integer(dst, get_smallint(c), 0, ',', 0, noargval?0:-argval);
 		} else {
 			int saveq = q->quoted;
@@ -9142,13 +9062,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			if (q->cycle_error)
 				return throw_error(q, c, "resource_error", "cyclic");
 
-			while (nbytes <= (len+1)) {
-				size_t save = dst - tmpbuf;
-				tmpbuf = realloc(tmpbuf, bufsiz*=2);
-				may_ptr_error(tmpbuf);
-				dst = tmpbuf + save;
-				nbytes = bufsiz - save;
-			}
+			CHECK_BUF(len);
 
 			if (canonical)
 				len = print_canonical_to_buf(q, dst, len+1, c, fmt2.p_ctx, 1, false, 0);
