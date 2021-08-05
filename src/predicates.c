@@ -8911,7 +8911,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		}
 
 		if ((ch == 's') && is_string(c)) {
-			len = MAX(argval, LEN_STR(q, c));
+			len = MAX(argval, (int)LEN_STR(q, c));
 
 			while (nbytes < (len+1)) {
 				size_t save = dst - tmpbuf;
