@@ -351,7 +351,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 		const char *ptr = strchr(tmpbuf, '.');
 
 		if (ptr && (strlen(ptr+1) > 1))
-			sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, get_real(c));
+			sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG-1, get_real(c));
 
 		reformat_float(tmpbuf);
 		dst += snprintf(dst, dstlen, "%s", tmpbuf);
@@ -543,7 +543,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		const char *ptr = strchr(tmpbuf, '.');
 
 		if (ptr && (strlen(ptr+1) > 1))
-			sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, get_real(c));
+			sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG-1, get_real(c));
 
 		reformat_float(tmpbuf);
 		dst += snprintf(dst, dstlen, "%s", tmpbuf);
