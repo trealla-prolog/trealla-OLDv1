@@ -536,9 +536,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 
 	if (is_variable(p2)) {
 		cell tmp;
-		may_error(make_slice(q, &tmp, p1, 0, LEN_STR(q, p1)));
-		tmp.flags |= FLAG_STRING;
-		tmp.arity = 2;
+		may_error(make_stringn(&tmp, GET_STR(q, p1), LEN_STR(q, p1)));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
