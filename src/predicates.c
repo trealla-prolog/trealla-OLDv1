@@ -8705,11 +8705,39 @@ static int format_integer(char *dst, int_t v, int grouping, int sep, int decimal
 	return dst2 - dst;
 }
 
-static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p2, idx_t p2_ctx)
+typedef struct {
+	cell *p1;
+	idx_t p1_ctx;
+	char *srcbuf;
+	const char *src;
+	size_t srclen;
+}
+ fmt_t;
+
+static int get_next_char(query *q, fmt_t *fmt)
 {
-	char *srcbuf = GET_STR(q, p1);
-	size_t srclen = LEN_STR(q, p1);
-	const char *src = srcbuf;
+	(void)q;
+	int n = len_char_utf8(fmt->src);
+	int ch = get_char_utf8(&fmt->src);
+	fmt->srclen -= n;
+	return ch;
+}
+
+static bool is_next_char(query *q, fmt_t *fmt)
+{
+	(void)q;
+	return fmt->srclen;
+}
+
+static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
+{
+	fmt_t fmt;
+	fmt.p1 = p1;
+	fmt.p1_ctx = p1_ctx;
+	fmt.srcbuf = GET_STR(q, p1);
+	fmt.srclen = LEN_STR(q, p1);
+	fmt.src = fmt.srcbuf;
+
 	size_t bufsiz = 1024;
 	char *tmpbuf = malloc(bufsiz);
 	may_ptr_error(tmpbuf);
@@ -8719,10 +8747,8 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 	size_t nbytes = bufsiz;
 	LIST_HANDLER(p2);
 
-	while (srclen > 0) {
-		int n = len_char_utf8(src);
-		int ch = get_char_utf8(&src);
-		srclen -= n;
+	while (is_next_char(q, &fmt)) {
+		int ch = get_next_char(q, &fmt);
 		int argval = 0, noargval = 1;
 
 		if (ch != '~') {
@@ -8730,9 +8756,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			continue;
 		}
 
-		n = len_char_utf8(src);
-		ch = get_char_utf8(&src);
-		srclen -= n;
+		ch = get_next_char(q, &fmt);
 
 		if (ch == '*') {
 			cell *head = LIST_HEAD(p2);
@@ -8746,17 +8770,13 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 			}
 
 			argval = get_smallint(c);
-			int n = len_char_utf8(src);
-			ch = get_char_utf8(&src);
-			srclen -= n;
+			ch = get_next_char(q, &fmt);
 		} else {
 			while (isdigit(ch)) {
 				noargval = 0;
 				argval *= 10;
 				argval += ch - '0';
-				int n = len_char_utf8(src);
-				ch = get_char_utf8(&src);
-				srclen -= n;
+				ch = get_next_char(q, &fmt);
 				continue;
 			}
 		}
@@ -9101,17 +9121,17 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell* p1, cell* p
 
 static USE_RESULT pl_status fn_format_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,list_or_nil);
-	return do_format(q, NULL, 0, p1, !is_nil(p2)?p2:NULL, p2_ctx);
+	return do_format(q, NULL, 0, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
 }
 
 static USE_RESULT pl_status fn_format_3(query *q)
 {
 	GET_FIRST_ARG(pstr,stream_or_structure);
-	GET_NEXT_ARG(p1,atom);
+	GET_NEXT_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,list_or_nil);
-	return do_format(q, pstr, pstr_ctx, p1, !is_nil(p2)?p2:NULL, p2_ctx);
+	return do_format(q, pstr, pstr_ctx, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
 }
 
 #if USE_OPENSSL
