@@ -594,11 +594,16 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 		head = running ? deref(q, head, c_ctx) : head;
 		idx_t head_ctx = q->latest_ctx;
-		bool special_op = (!strcmp(GET_STR(q, head), ",")
-			|| !strcmp(GET_STR(q, head), ";")
-			|| !strcmp(GET_STR(q, head), "->")
-			|| !strcmp(GET_STR(q, head), "*->")
-			|| !strcmp(GET_STR(q, head), "-->"));
+		bool special_op = false;
+
+		if (is_literal(head)) {
+			special_op = (!strcmp(GET_STR(q, head), ",")
+				|| !strcmp(GET_STR(q, head), ";")
+				|| !strcmp(GET_STR(q, head), "->")
+				|| !strcmp(GET_STR(q, head), "*->")
+				|| !strcmp(GET_STR(q, head), "-->"));
+		}
+
 		int parens = is_structure(head) && special_op;
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
 		ssize_t res = print_term_to_buf(q, dst, dstlen, head, head_ctx, running, 0, depth+1);

@@ -107,7 +107,7 @@ typedef enum {
 #define set_real(c,v) (c)->val_real = (v)
 
 #define get_smallint(c) (c)->val_int
-#define set_smallint(c,v) { (c)->val_int = (v); (c)->val_spare1 = 0; }
+#define set_smallint(c,v) { (c)->val_int = (v); }
 
 #define get_integer(c) (c)->val_int
 

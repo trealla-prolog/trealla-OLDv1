@@ -1164,8 +1164,6 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 			size_t ipos = offset_at_pos(GET_STR(q, p1), LEN_STR(q, p1), i);
 			size_t jpos = offset_at_pos(GET_STR(q, p1), LEN_STR(q, p1), i+j);
 
-			//printf("*** %s,%u off=%u len=%u\n", GET_STR(q, p1), (unsigned)LEN_STR(q, p1), (unsigned)ipos, (unsigned)(jpos-ipos));
-
 			may_error(make_slice(q, &tmp, p1, ipos, jpos-ipos));
 
 			if (is_atom(p5) && !slicecmp(GET_STR(q, p5), LEN_STR(q, p5), GET_STR(q, &tmp), LEN_STR(q, &tmp))) {
