@@ -8716,17 +8716,39 @@ typedef struct {
 
 static int get_next_char(query *q, fmt_t *fmt)
 {
-	(void)q;
-	int n = len_char_utf8(fmt->src);
-	int ch = get_char_utf8(&fmt->src);
-	fmt->srclen -= n;
+	if (fmt->src) {
+		int n = len_char_utf8(fmt->src);
+		int ch = get_char_utf8(&fmt->src);
+		fmt->srclen -= n;
+		return ch;
+	}
+
+	fmt->p1 = fmt->p1 + 1;
+	cell *head = deref(q, fmt->p1, fmt->p1_ctx);
+	char ch;
+
+	if (is_smallint(head))
+		ch = get_smallint(head);
+	else if (is_atom(head)) {
+		const char *s = GET_STR(q, head);
+		ch = peek_char_utf8(s);
+	} else
+		return -1;
+
+	fmt->p1 = fmt->p1 + fmt->p1->nbr_cells;
+	fmt->p1 = deref(q, fmt->p1, fmt->p1_ctx);
+	fmt->p1_ctx = q->latest_ctx;
 	return ch;
 }
 
 static bool is_next_char(query *q, fmt_t *fmt)
 {
 	(void)q;
-	return fmt->srclen;
+
+	if (fmt->src)
+		return fmt->srclen;
+
+	return is_list(fmt->p1);
 }
 
 static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
@@ -8734,8 +8756,8 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 	fmt_t fmt;
 	fmt.p1 = p1;
 	fmt.p1_ctx = p1_ctx;
-	fmt.srcbuf = GET_STR(q, p1);
-	fmt.srclen = LEN_STR(q, p1);
+	fmt.srcbuf = is_atom(p1) ? GET_STR(q, p1) : NULL;
+	fmt.srclen = is_atom(p1) ? LEN_STR(q, p1) : 0;
 	fmt.src = fmt.srcbuf;
 
 	size_t bufsiz = 1024;
@@ -9121,7 +9143,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 
 static USE_RESULT pl_status fn_format_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,list_or_nil);
 	return do_format(q, NULL, 0, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
 }
@@ -9129,7 +9151,7 @@ static USE_RESULT pl_status fn_format_2(query *q)
 static USE_RESULT pl_status fn_format_3(query *q)
 {
 	GET_FIRST_ARG(pstr,stream_or_structure);
-	GET_NEXT_ARG(p1,atom);
+	GET_NEXT_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,list_or_nil);
 	return do_format(q, pstr, pstr_ctx, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
 }
