@@ -248,6 +248,11 @@ static USE_RESULT cell *end_list_unsafe(query *q)
 
 static USE_RESULT pl_status make_cstringn(cell *d, const char *s, size_t n)
 {
+	if (!n) {
+		make_literal(d, g_empty_s);
+		return pl_success;
+	}
+
 	if (n < MAX_SMALL_STRING) {
 		if (!memchr(s, 0, n)) {
 			make_smalln(d, s, n);
