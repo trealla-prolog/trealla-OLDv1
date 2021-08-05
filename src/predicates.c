@@ -8890,6 +8890,9 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		if (!c)
 			return throw_error(q, c, "domain_error", "missing args");
 
+		if (ch == 'i')
+			continue;
+
 		start_of_line = false;
 		int canonical = 0;
 		size_t len;
