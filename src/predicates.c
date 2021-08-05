@@ -8712,9 +8712,9 @@ typedef struct {
 	const char *src;
 	size_t srclen;
 }
- fmt_t;
+ list_reader_t;
 
-static int get_next_char(query *q, fmt_t *fmt)
+static int get_next_char(query *q, list_reader_t *fmt)
 {
 	if (fmt->src) {
 		int n = len_char_utf8(fmt->src);
@@ -8741,7 +8741,7 @@ static int get_next_char(query *q, fmt_t *fmt)
 	return ch;
 }
 
-static bool is_next_char(query *q, fmt_t *fmt)
+static bool is_next_char(query *q, list_reader_t *fmt)
 {
 	(void)q;
 
@@ -8753,7 +8753,7 @@ static bool is_next_char(query *q, fmt_t *fmt)
 
 static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
-	fmt_t fmt;
+	list_reader_t fmt;
 	fmt.p1 = p1;
 	fmt.p1_ctx = p1_ctx;
 	fmt.srcbuf = is_atom(p1) ? GET_STR(q, p1) : NULL;
