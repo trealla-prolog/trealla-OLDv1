@@ -8706,8 +8706,8 @@ static int format_integer(char *dst, int_t v, int grouping, int sep, int decimal
 }
 
 typedef struct {
-	cell *p1;
-	idx_t p1_ctx;
+	cell *p;
+	idx_t p_ctx;
 	char *srcbuf;
 	const char *src;
 	size_t srclen;
@@ -8723,8 +8723,8 @@ static int get_next_char(query *q, list_reader_t *fmt)
 		return ch;
 	}
 
-	fmt->p1 = fmt->p1 + 1;
-	cell *head = deref(q, fmt->p1, fmt->p1_ctx);
+	fmt->p = fmt->p + 1;
+	cell *head = deref(q, fmt->p, fmt->p_ctx);
 	char ch;
 
 	if (is_smallint(head))
@@ -8735,27 +8735,27 @@ static int get_next_char(query *q, list_reader_t *fmt)
 	} else
 		return -1;
 
-	fmt->p1 = fmt->p1 + fmt->p1->nbr_cells;
-	fmt->p1 = deref(q, fmt->p1, fmt->p1_ctx);
-	fmt->p1_ctx = q->latest_ctx;
+	fmt->p = fmt->p + fmt->p->nbr_cells;
+	fmt->p = deref(q, fmt->p, fmt->p_ctx);
+	fmt->p_ctx = q->latest_ctx;
 	return ch;
 }
 
-static bool is_next_char(query *q, list_reader_t *fmt)
+static bool is_more_data(query *q, list_reader_t *fmt)
 {
 	(void)q;
 
 	if (fmt->src)
 		return fmt->srclen;
 
-	return is_list(fmt->p1);
+	return is_list(fmt->p);
 }
 
 static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
 	list_reader_t fmt;
-	fmt.p1 = p1;
-	fmt.p1_ctx = p1_ctx;
+	fmt.p = p1;
+	fmt.p_ctx = p1_ctx;
 	fmt.srcbuf = is_atom(p1) ? GET_STR(q, p1) : NULL;
 	fmt.srclen = is_atom(p1) ? LEN_STR(q, p1) : 0;
 	fmt.src = fmt.srcbuf;
@@ -8769,7 +8769,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 	size_t nbytes = bufsiz;
 	LIST_HANDLER(p2);
 
-	while (is_next_char(q, &fmt)) {
+	while (is_more_data(q, &fmt)) {
 		int ch = get_next_char(q, &fmt);
 		int argval = 0, noargval = 1;
 
