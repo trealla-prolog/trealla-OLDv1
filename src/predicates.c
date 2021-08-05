@@ -8783,18 +8783,20 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 	char *tmpbuf = malloc(bufsiz);
 	may_ptr_error(tmpbuf);
 	char *dst = tmpbuf;
-	char *save_dst = tmpbuf;
 	*dst = '\0';
 	cell *c = NULL;
 	size_t nbytes = bufsiz;
-	bool skip = false;
+	bool skip = false, start_of_line = true;
+	int tab_at = 1;
 
 	while (is_more_data(q, &fmt1)) {
+		int pos = dst - tmpbuf + 1;
 		int ch = get_next_char(q, &fmt1);
 		int argval = 0, noargval = 1;
 
 		if (ch != '~') {
 			dst += put_char_bare_utf8(dst, ch);
+			start_of_line = false;
 			continue;
 		}
 
@@ -8829,40 +8831,44 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			nbytes = bufsiz - save;
 		}
 
-		if (ch == 'N') {
-			if ((dst != tmpbuf) && (dst[-1] == '\n'))
-				continue;
-
-			*dst++ = '\n';
-			continue;
-		}
-
 		if (ch == 'n') {
 			while (argval-- > 1)
 				*dst++ = '\n';
 
 			*dst++ = '\n';
+			start_of_line = true;
+			continue;
+		}
+
+		if (ch == 'N') {
+			if (!start_of_line)
+				*dst++ = '\n';
+
+			start_of_line = true;
 			continue;
 		}
 
 		if (ch == 't') {
 			save_fmt1 = fmt1;
 			save_fmt2 = fmt2;
-			save_dst = dst;
+			tab_at = pos;
+			skip = false;
 			continue;
 		}
 
 		if (ch == '|') {
 			if (!skip) {
+				for (int i = 0; i < ((argval+1) - tab_at); i++)
+					*dst++ = ' ';
+
 				fmt1 = save_fmt1;
 				fmt2 = save_fmt2;
+				dst = tmpbuf + tab_at - 1;
+				int prefix = (argval+1) - pos;
+				pos = tab_at;
+				dst = tmpbuf + pos - 1;
 
-				char *tmp = save_dst;
-
-				while (tmp != dst)
-					*tmp++ = ' ';
-
-				while ((dst - save_dst) < argval)
+				for (int i = 0; i < prefix; i++, pos++)
 					*dst++ = ' ';
 			}
 
@@ -8872,6 +8878,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 
 		if (ch == '~') {
 			*dst++ = '~';
+			start_of_line = false;
 			continue;
 		}
 
@@ -8883,9 +8890,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		if (!c)
 			return throw_error(q, c, "domain_error", "missing args");
 
-		if (ch == 'i')
-			continue;
-
+		start_of_line = false;
 		int canonical = 0;
 		size_t len;
 
