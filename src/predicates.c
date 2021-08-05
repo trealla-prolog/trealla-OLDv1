@@ -8770,6 +8770,7 @@ static bool is_more_data(query *q, list_reader_t *fmt)
 static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
 	list_reader_t fmt1 = {0}, fmt2 = {0};
+	list_reader_t save_fmt1 = {0}, save_fmt2 = {0};
 	fmt1.p = p1;
 	fmt1.p_ctx = p1_ctx;
 	fmt1.srcbuf = is_atom(p1) ? GET_STR(q, p1) : NULL;
@@ -8782,9 +8783,11 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 	char *tmpbuf = malloc(bufsiz);
 	may_ptr_error(tmpbuf);
 	char *dst = tmpbuf;
+	char *save_dst = tmpbuf;
 	*dst = '\0';
 	cell *c = NULL;
 	size_t nbytes = bufsiz;
+	bool skip = false;
 
 	while (is_more_data(q, &fmt1)) {
 		int ch = get_next_char(q, &fmt1);
@@ -8843,22 +8846,32 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		}
 
 		if (ch == 't') {
-			while (argval-- > 1)
-				*dst++ = '\t';
+			save_fmt1 = fmt1;
+			save_fmt2 = fmt2;
+			save_dst = dst;
+			continue;
+		}
 
-			*dst++ = '\t';
+		if (ch == '|') {
+			if (!skip) {
+				fmt1 = save_fmt1;
+				fmt2 = save_fmt2;
+
+				char *tmp = save_dst;
+
+				while (tmp != dst)
+					*tmp++ = ' ';
+
+				while ((dst - save_dst) < argval)
+					*dst++ = ' ';
+			}
+
+			skip = !skip;
 			continue;
 		}
 
 		if (ch == '~') {
 			*dst++ = '~';
-			continue;
-		}
-
-		if (ch == '|') {
-			while ((dst - tmpbuf) < argval)
-				*dst++ = ' ';
-
 			continue;
 		}
 
