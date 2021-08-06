@@ -8899,11 +8899,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 
         idx_t c_ctx = q->latest_ctx;
 		start_of_line = false;
-		int canonical = 0;
 		size_t len;
-
-		if (ch == 'k')
-			canonical = 1;
 
 		if ((ch == 'a') && !is_atom(c)) {
 			free(tmpbuf);
@@ -9080,7 +9076,15 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		default: {
 			int saveq = q->quoted;
 
-			if (ch == 'q')
+			bool canonical = false, quoted = false;
+
+			if (ch == 'k') {
+				canonical = true;
+			} else if (ch == 'q') {
+				quoted = true;
+			}
+
+			if (quoted)
 				q->quoted = 1;
 
 			if (is_string(c) && !q->quoted)
@@ -9102,6 +9106,8 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 				len = print_term_to_buf(q, dst, len+1, c, fmt2.p_ctx, 1, false, 0);
 
 			q->quoted = saveq;
+			canonical = false;
+			quoted = false;
 			}
 		}
 
