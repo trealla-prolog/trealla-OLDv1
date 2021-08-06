@@ -8902,7 +8902,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 
         idx_t c_ctx = q->latest_ctx;
 		start_of_line = false;
-		size_t len;
+		size_t len = 0;
 
 		if ((ch == 'a') && !is_atom(c)) {
 			free(tmpbuf);
