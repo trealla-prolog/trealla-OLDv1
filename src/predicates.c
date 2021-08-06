@@ -8767,14 +8767,16 @@ static bool is_more_data(query *q, list_reader_t *fmt)
 	return is_list(fmt->p);
 }
 
-#define CHECK_BUF(len) 										\
-	while (nbytes < (unsigned)(1+(len)+1)) {				\
+#define CHECK_BUF(len) {									\
+    int n = (len) > 0 ? len : 1;                            \
+	while (nbytes < (unsigned)(1+n+1)) {    				\
 		size_t save = dst - tmpbuf;							\
 		tmpbuf = realloc(tmpbuf, bufsiz*=2);				\
 		may_ptr_error(tmpbuf);								\
 		dst = tmpbuf + save;								\
 		nbytes = bufsiz - save;								\
-	}
+	}                                                       \
+}
 
 
 static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
