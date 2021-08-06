@@ -8897,6 +8897,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		if (ch == 'i')
 			continue;
 
+        idx_t c_ctx = q->latest_ctx;
 		start_of_line = false;
 		int canonical = 0;
 		size_t len;
@@ -8919,20 +8920,25 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			CHECK_BUF(len);
 			slicecpy(dst, len+1, GET_STR(q, c), len);
 		} else if (ch == 's') {
-			len = scan_is_chars_list(q, c, fmt2.p_ctx, true);
+            list_reader_t fmt3 = {0};
+            fmt3.p = c;
+            fmt3.p_ctx = c_ctx;
+            char *tmpdst = dst;
+            len = 0;
+            int cnt = 0;
 
-			if (!len)
-				return throw_error(q, p1, "type_error", "list");
+            while (is_more_data(q, &fmt3)) {
+                int ch = get_next_char(q, &fmt3);
+                char chars[10];
+                int n = put_char_utf8(chars, ch);
+                CHECK_BUF(n);
+                tmpdst += sprintf(tmpdst, "%s", chars);
+                len += n;
+                cnt++;
 
-			char *tmpsrc = chars_list_to_string(q, c, p2_ctx, len);
-
-			if (((int)len > argval && (argval > 0)))
-				len = argval;
-
-			CHECK_BUF(len);
-			tmpsrc[len] = '\0';
-			len = sprintf(dst, "%s", tmpsrc);
-			free(tmpsrc);
+                if (cnt == argval)
+                    break;
+            }
 		} else if (ch == 'c') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
