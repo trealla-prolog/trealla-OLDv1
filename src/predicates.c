@@ -8915,28 +8915,34 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			return throw_error(q, c, "type_error", "integer");
 		}
 
-		if ((ch == 's') && is_string(c)) {
-			len = MAX(argval, (int)LEN_STR(q, c));
-			CHECK_BUF(len);
-			slicecpy(dst, len+1, GET_STR(q, c), len);
-		} else if (ch == 's') {
-            list_reader_t fmt3 = {0};
-            fmt3.p = c;
-            fmt3.p_ctx = c_ctx;
-            int cnt = 0;
+		switch(ch) {
+		case 's':
+			if (is_string(c)) {
+				len = MAX(argval, (int)LEN_STR(q, c));
+				CHECK_BUF(len);
+				slicecpy(dst, len+1, GET_STR(q, c), len);
+			} else {
+				list_reader_t fmt3 = {0};
+				fmt3.p = c;
+				fmt3.p_ctx = c_ctx;
+				int cnt = 0;
 
-            while (is_more_data(q, &fmt3)) {
-                int ch = get_next_char(q, &fmt3);
-                CHECK_BUF(6+1);
-                dst += put_char_utf8(dst, ch);
-                cnt++;
+				while (is_more_data(q, &fmt3)) {
+					int ch = get_next_char(q, &fmt3);
+					CHECK_BUF(6+1);
+					dst += put_char_utf8(dst, ch);
+					cnt++;
 
-                if (cnt == argval)
-                    break;
-            }
+					if (cnt == argval)
+						break;
+				}
 
-            len = 0;
-		} else if (ch == 'c') {
+				len = 0;
+			}
+
+			break;
+
+		case 'c':
 			if (!is_integer(c)) {
 				free(tmpbuf);
 				return throw_error(q, c, "type_error", "integer");
@@ -8950,7 +8956,10 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			}
 
 			len = put_char_utf8(dst, (int)get_smallint(c));
-		} else if ((ch == 'e') || (ch == 'E')) {
+			break;
+
+		case 'e':
+		case 'E':
 			if (!is_real(c)) {
 				free(tmpbuf);
 				return throw_error(q, c, "type_error", "float");
@@ -8970,7 +8979,11 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 				else
 					len = sprintf(dst, "%E", get_real(c));
 			}
-		} else if ((ch == 'g') || (ch == 'G')) {
+
+			break;
+
+		case 'g':
+		case 'G':
 			if (!is_real(c)) {
 				free(tmpbuf);
 				return throw_error(q, c, "type_error", "float");
@@ -8990,7 +9003,10 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 				else
 					len = sprintf(dst, "%G", get_real(c));
 			}
-		} else if (ch == 'f') {
+
+			break;
+
+		case 'f':
 			if (!is_real(c)) {
 				free(tmpbuf);
 				return throw_error(q, c, "type_error", "float");
@@ -9003,7 +9019,10 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 				len = sprintf(dst, "%.*f", argval, get_real(c));
 			else
 				len = sprintf(dst, "%f", get_real(c));
-		} else if (ch == 'I') {
+
+			break;
+
+		case 'I':
 			if (!is_integer(c)) {
 				free(tmpbuf);
 				return throw_error(q, c, "type_error", "integer");
@@ -9012,7 +9031,9 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			len = 40;
 			CHECK_BUF(len);
 			len = format_integer(dst, get_smallint(c), noargval?3:argval, '_', 0, 10);
-		} else if (ch == 'd') {
+			break;
+
+		case 'd':
 			if (!is_integer(c)) {
 				free(tmpbuf);
 				return throw_error(q, c, "type_error", "integer");
@@ -9021,7 +9042,9 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			len = 40;
 			CHECK_BUF(len);
 			len = format_integer(dst, get_smallint(c), 0, ',', noargval?0:argval, 10);
-		} else if (ch == 'D') {
+			break;
+
+		case 'D':
 			if (!is_integer(c)) {
 				free(tmpbuf);
 				return throw_error(q, c, "type_error", "integer");
@@ -9030,7 +9053,9 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			len = 40;
 			CHECK_BUF(len);
 			len = format_integer(dst, get_smallint(c), 3, ',', noargval?0:argval, 10);
-		} else if (ch == 'r') {
+			break;
+
+		case 'r':
 			if (!is_integer(c)) {
 				free(tmpbuf);
 				return throw_error(q, c, "type_error", "integer");
@@ -9039,7 +9064,9 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			len = 40;
 			CHECK_BUF(len);
 			len = format_integer(dst, get_smallint(c), 0, ',', 0, noargval?0:argval);
-		} else if (ch == 'R') {
+			break;
+
+		case 'R':
 			if (!is_integer(c)) {
 				free(tmpbuf);
 				return throw_error(q, c, "type_error", "integer");
@@ -9048,7 +9075,9 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			len = 40;
 			CHECK_BUF(len);
 			len = format_integer(dst, get_smallint(c), 0, ',', 0, noargval?0:-argval);
-		} else {
+			break;
+
+		default: {
 			int saveq = q->quoted;
 
 			if (ch == 'q')
@@ -9073,6 +9102,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 				len = print_term_to_buf(q, dst, len+1, c, fmt2.p_ctx, 1, false, 0);
 
 			q->quoted = saveq;
+			}
 		}
 
 		dst += len;
