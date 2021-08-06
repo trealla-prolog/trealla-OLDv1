@@ -8720,9 +8720,9 @@ typedef struct {
 static int get_next_char(query *q, list_reader_t *fmt)
 {
 	if (fmt->src) {
-		int n = len_char_utf8(fmt->src);
+		int len = len_char_utf8(fmt->src);
 		int ch = get_char_utf8(&fmt->src);
-		fmt->srclen -= n;
+		fmt->srclen -= len;
 		return ch;
 	}
 
