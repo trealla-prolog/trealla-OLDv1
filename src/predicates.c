@@ -8923,7 +8923,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
             list_reader_t fmt3 = {0};
             fmt3.p = c;
             fmt3.p_ctx = c_ctx;
-            len = 0;
             int cnt = 0;
 
             while (is_more_data(q, &fmt3)) {
@@ -8935,6 +8934,8 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
                 if (cnt == argval)
                     break;
             }
+
+            len = 0;
 		} else if (ch == 'c') {
 			if (!is_integer(c)) {
 				free(tmpbuf);
