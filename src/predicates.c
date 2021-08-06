@@ -8778,7 +8778,6 @@ static bool is_more_data(query *q, list_reader_t *fmt)
 	}                                                       \
 }
 
-
 static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
 	list_reader_t fmt1 = {0}, fmt2 = {0};
