@@ -8938,11 +8938,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			return throw_error(q, c, "type_error", "atom");
 		}
 
-		if (((ch == 'd') || (ch == 'D')) && !is_integer(c)) {
-			free(tmpbuf);
-			return throw_error(q, c, "type_error", "integer");
-		}
-
 		switch(ch) {
 		case 's':
 			if (is_string(c)) {
