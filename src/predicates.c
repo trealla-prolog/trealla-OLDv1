@@ -8767,6 +8767,9 @@ static bool is_more_data(query *q, list_reader_t *fmt)
 	if (fmt->src)
 		return fmt->srclen;
 
+	if (!fmt->p)
+		return false;
+
 	return is_list(fmt->p);
 }
 
@@ -8801,6 +8804,8 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 	size_t nbytes = bufsiz;
 	bool skip = false, start_of_line = true;
 	int tab_at = 1;
+	save_fmt1 = fmt1;
+	save_fmt2 = fmt2;
 
 	while (is_more_data(q, &fmt1)) {
 		int pos = dst - tmpbuf + 1;
@@ -8864,14 +8869,38 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		}
 
 		if (ch == '|') {
+			int at = argval ? argval : pos;
+
 			if (!skip) {
-				for (int i = 0; i < ((argval+1) - tab_at); i++)
+				for (int i = 0; i < (at - tab_at - 1); i++)
 					*dst++ = ' ';
 
 				fmt1 = save_fmt1;
 				fmt2 = save_fmt2;
 				dst = tmpbuf + tab_at - 1;
-				int prefix = (argval+1) - pos;
+				int prefix = at - pos - 1;
+				pos = tab_at;
+				dst = tmpbuf + pos - 1;
+
+				for (int i = 0; i < prefix; i++, pos++)
+					*dst++ = ' ';
+			}
+
+			skip = !skip;
+			continue;
+		}
+
+		if (ch == '+') {
+			int at = argval ? argval : pos;
+
+			if (!skip) {
+				for (int i = 0; i < (at - tab_at - 1); i++)
+					*dst++ = ' ';
+
+				fmt1 = save_fmt1;
+				fmt2 = save_fmt2;
+				dst = tmpbuf + tab_at - 1;
+				int prefix = at - pos - 1;
 				pos = tab_at;
 				dst = tmpbuf + pos - 1;
 
