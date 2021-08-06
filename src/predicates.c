@@ -8705,6 +8705,9 @@ static int format_integer(char *dst, int_t v, int grouping, int sep, int decimal
 	return dst2 - dst;
 }
 
+////////////////////////////////////////////////////////////////////////
+//
+
 typedef struct {
 	cell *p;
 	idx_t p_ctx;
@@ -9170,6 +9173,9 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 	free(tmpbuf);
 	return pl_success;
 }
+
+//
+////////////////////////////////////////////////////////////////////////
 
 static USE_RESULT pl_status fn_format_2(query *q)
 {
