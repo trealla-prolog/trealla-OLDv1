@@ -8800,7 +8800,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 	int tab_at = 1;
 
 	while (is_more_data(q, &fmt1)) {
-		cell *c = NULL;
 		int pos = dst - tmpbuf + 1;
 		int ch = get_next_char(q, &fmt1);
 		int argval = 0, noargval = 1;
@@ -8814,7 +8813,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		ch = get_next_char(q, &fmt1);
 
 		if (ch == '*') {
-			c = get_next_cell(q, &fmt2);
+			cell *c = get_next_cell(q, &fmt2);
 			noargval = 0;
 
 			if (!c || !is_integer(c)) {
@@ -8890,7 +8889,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		if (!p2 || !is_list(p2))
 			break;
 
-		c = get_next_cell(q, &fmt2);
+		cell *c = get_next_cell(q, &fmt2);
 
 		if (!c)
 			return throw_error(q, c, "domain_error", "missing args");
