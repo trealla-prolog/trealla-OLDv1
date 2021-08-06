@@ -8795,12 +8795,12 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 	may_ptr_error(tmpbuf);
 	char *dst = tmpbuf;
 	*dst = '\0';
-	cell *c = NULL;
 	size_t nbytes = bufsiz;
 	bool skip = false, start_of_line = true;
 	int tab_at = 1;
 
 	while (is_more_data(q, &fmt1)) {
+		cell *c = NULL;
 		int pos = dst - tmpbuf + 1;
 		int ch = get_next_char(q, &fmt1);
 		int argval = 0, noargval = 1;
@@ -9089,7 +9089,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		net_write(tmpbuf, len, str);
 	} else if (is_structure(str) && ((slicecmp2(GET_STR(q, str), LEN_STR(q, str), "atom") && slicecmp2(GET_STR(q, str), LEN_STR(q, str), "chars") && slicecmp2(GET_STR(q, str), LEN_STR(q, str), "string")) || (str->arity > 1) || !is_variable(str+1))) {
 		free(tmpbuf);
-		return throw_error(q, c, "type_error", "structure");
+		return throw_error(q, str, "type_error", "structure");
 	} else if (is_structure(str) && !slicecmp2(GET_STR(q, str), LEN_STR(q, str), "atom")) {
 		cell *c = deref(q, str+1, str_ctx);
 		cell tmp;
