@@ -8923,17 +8923,13 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
             list_reader_t fmt3 = {0};
             fmt3.p = c;
             fmt3.p_ctx = c_ctx;
-            char *tmpdst = dst;
             len = 0;
             int cnt = 0;
 
             while (is_more_data(q, &fmt3)) {
                 int ch = get_next_char(q, &fmt3);
-                char chars[10];
-                int n = put_char_utf8(chars, ch);
-                CHECK_BUF(n);
-                tmpdst += sprintf(tmpdst, "%s", chars);
-                len += n;
+                CHECK_BUF(6+1);
+                dst += put_char_utf8(dst, ch);
                 cnt++;
 
                 if (cnt == argval)
