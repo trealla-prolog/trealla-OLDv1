@@ -8711,7 +8711,7 @@ static int format_integer(char *dst, int_t v, int grouping, int sep, int decimal
 typedef struct {
 	cell *p;
 	idx_t p_ctx;
-	char *srcbuf;
+	const char *srcbuf;
 	const char *src;
 	size_t srclen;
 }
