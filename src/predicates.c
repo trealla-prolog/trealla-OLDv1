@@ -8815,7 +8815,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		if (ch != '~') {
             CHECK_BUF(10);
 			dst += put_char_bare_utf8(dst, ch);
-			start_of_line = false;
+			start_of_line = ch != '\n';
 			continue;
 		}
 
