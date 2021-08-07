@@ -8784,8 +8784,6 @@ static bool is_more_data(query *q, list_reader_t *fmt)
 	}                                                       \
 }
 
-#define PRDEBUG(p) if (0) p
-
 static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
 	list_reader_t fmt1 = {0}, fmt2 = {0};
@@ -8815,7 +8813,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
         list_reader_t tmp_fmt1 = fmt1, tmp_fmt2 = fmt2;
 
 		int ch = get_next_char(q, &fmt1);
-        PRDEBUG(printf("*** got: %c\n", ch));
 
 		if (ch != '~') {
             CHECK_BUF(10);
@@ -8825,7 +8822,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		}
 
 		ch = get_next_char(q, &fmt1);
-        PRDEBUG(printf("*** got: %c\n", ch));
 
 		if (ch == '*') {
 			cell *c = get_next_cell(q, &fmt2);
@@ -8838,14 +8834,12 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 
 			argval = get_smallint(c);
 			ch = get_next_char(q, &fmt1);
-            PRDEBUG(printf("*** got: %c\n", ch));
 		} else {
 			while (isdigit(ch)) {
 				noargval = 0;
 				argval *= 10;
 				argval += ch - '0';
 				ch = get_next_char(q, &fmt1);
-                PRDEBUG(printf("*** got: %c\n", ch));
 				continue;
 			}
 		}
@@ -8876,13 +8870,9 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
                 save_fmt2 = tmp_fmt2;
                 tab_at = pos;
                 tabs++;
-                PRDEBUG(printf("*** start tabs tabs=%d, tab_at=%d\n", tabs, tab_at));
             } else if (!redo) {
                 tabs++;
-                PRDEBUG(printf("*** start tabs tabs=%d\n", tabs));
             } else if (redo) {
-                PRDEBUG(printf("*** redo tabs diff=%d, tabs=%d\n", diff, tabs));
-
                 for (int i = 0; i < diff; i++)
                     *dst++ = ' ';
             }
@@ -8910,10 +8900,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
                     dst = tmpbuf + tab_at - 1;
                     diff = ((at - pos) + 1) / tabs;
                 }
-
-                PRDEBUG(printf("*** start stops tabs=%d diff=%d, at=%d, tab_at=%d\n", tabs, diff, at, tab_at));
 			} else {
-                PRDEBUG(printf("*** end stops\n"));
                 tabs = 0;
             }
 
@@ -8941,10 +8928,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
                     dst = tmpbuf + tab_at - 1;
                     diff = ((at - pos) + 1) / tabs;
                 }
-
-                PRDEBUG(printf("*** start stops tabs=%d diff=%d, at=%d, tab_at=%d\n", tabs, diff, at, tab_at));
 			} else {
-                PRDEBUG(printf("*** end stops\n"));
                 tabs = 0;
             }
 
