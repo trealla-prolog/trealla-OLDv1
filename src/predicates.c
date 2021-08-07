@@ -9102,7 +9102,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 
 		default: {
 			int saveq = q->quoted;
-
 			bool canonical = false, quoted = false;
 
 			if (ch == 'k') {
@@ -9133,8 +9132,6 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 				len = print_term_to_buf(q, dst, len+1, c, fmt2.p_ctx, 1, false, 0);
 
 			q->quoted = saveq;
-			canonical = false;
-			quoted = false;
 			}
 		}
 
