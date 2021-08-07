@@ -8815,7 +8815,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		if (ch != '~') {
             CHECK_BUF(10);
 			dst += put_char_bare_utf8(dst, ch);
-			start_of_line = ch != '\n';
+			start_of_line = ch == '\n';
 			continue;
 		}
 
@@ -8854,10 +8854,11 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		}
 
 		if (ch == 'N') {
-			if (!start_of_line)
+			if (!start_of_line) {
+				start_of_line = true;
 				*dst++ = '\n';
+			}
 
-			start_of_line = true;
 			continue;
 		}
 
