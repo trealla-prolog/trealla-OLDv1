@@ -5983,7 +5983,7 @@ static uint64_t get_vars(cell *p)
 	return mask;
 }
 
-static cell *skip_existentials(query *q, cell *p2, uint64_t *xs)
+static cell *redo_existentials(query *q, cell *p2, uint64_t *xs)
 {
 	while (is_structure(p2) && !slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "^")) {
 		cell *c = ++p2;
@@ -6113,7 +6113,7 @@ static USE_RESULT pl_status fn_iso_bagof_3(query *q)
 		return throw_error(q, p3, "type_error", "list");
 
 	uint64_t xs_vars = 0;
-	p2 = skip_existentials(q, p2, &xs_vars);
+	p2 = redo_existentials(q, p2, &xs_vars);
 	cell *tvars_tmp = do_term_variables(q, p2, p2_ctx);
 	may_ptr_error(tvars_tmp);
 	cell *tvars = malloc(sizeof(cell)*tvars_tmp->nbr_cells);
@@ -6182,7 +6182,7 @@ static USE_RESULT pl_status fn_iso_bagof_3(query *q)
 
 		try_me(q, g->nbr_vars*2);
 
-		// FIXME: if no variables copied & any>0 skip
+		// FIXME: if no variables copied & any>0 redo
 		// FIXME: if no variables copied & any=0 break after queueing it
 
 		if (unify(q, tvars, p2_ctx, c, q->st.fp)) {
@@ -8784,6 +8784,8 @@ static bool is_more_data(query *q, list_reader_t *fmt)
 	}                                                       \
 }
 
+#define PRDEBUG(p) if (0) p
+
 static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
 {
 	list_reader_t fmt1 = {0}, fmt2 = {0};
@@ -8802,15 +8804,18 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 	char *dst = tmpbuf;
 	*dst = '\0';
 	size_t nbytes = bufsiz;
-	bool skip = false, start_of_line = true;
-	int tab_at = 1;
+	bool redo = false, start_of_line = true;
+	int tab_at = 1, tabs = 0, diff = 0;
 	save_fmt1 = fmt1;
 	save_fmt2 = fmt2;
 
 	while (is_more_data(q, &fmt1)) {
-		int pos = dst - tmpbuf + 1;
-		int ch = get_next_char(q, &fmt1);
 		int argval = 0, noargval = 1;
+		int pos = dst - tmpbuf + 1;
+        list_reader_t tmp_fmt1 = fmt1, tmp_fmt2 = fmt2;
+
+		int ch = get_next_char(q, &fmt1);
+        PRDEBUG(printf("*** got: %c\n", ch));
 
 		if (ch != '~') {
             CHECK_BUF(10);
@@ -8820,6 +8825,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		}
 
 		ch = get_next_char(q, &fmt1);
+        PRDEBUG(printf("*** got: %c\n", ch));
 
 		if (ch == '*') {
 			cell *c = get_next_cell(q, &fmt2);
@@ -8832,12 +8838,14 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 
 			argval = get_smallint(c);
 			ch = get_next_char(q, &fmt1);
+            PRDEBUG(printf("*** got: %c\n", ch));
 		} else {
 			while (isdigit(ch)) {
 				noargval = 0;
 				argval *= 10;
 				argval += ch - '0';
 				ch = get_next_char(q, &fmt1);
+                PRDEBUG(printf("*** got: %c\n", ch));
 				continue;
 			}
 		}
@@ -8863,54 +8871,84 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		}
 
 		if (ch == 't') {
-			save_fmt1 = fmt1;
-			save_fmt2 = fmt2;
-			tab_at = pos;
-			skip = false;
+            if (!redo && !tabs) {
+                save_fmt1 = tmp_fmt1;
+                save_fmt2 = tmp_fmt2;
+                tab_at = pos;
+                tabs++;
+                PRDEBUG(printf("*** start tabs tabs=%d, tab_at=%d\n", tabs, tab_at));
+            } else if (!redo) {
+                tabs++;
+                PRDEBUG(printf("*** start tabs tabs=%d\n", tabs));
+            } else if (redo) {
+                PRDEBUG(printf("*** redo tabs diff=%d, tabs=%d\n", diff, tabs));
+
+                for (int i = 0; i < diff; i++)
+                    *dst++ = ' ';
+            }
+
 			continue;
 		}
 
 		if (ch == '|') {
 			int at = argval ? argval : pos;
 
-			if (!skip) {
-				for (int i = 0; i < ((at+1) - tab_at); i++)
-					*dst++ = ' ';
+            if (!tabs)
+                continue;
 
-				fmt1 = save_fmt1;
-				fmt2 = save_fmt2;
-				dst = tmpbuf + tab_at - 1;
-				int prefix = (at+1) - pos;
-				pos = tab_at;
-				dst = tmpbuf + pos - 1;
+			if (!redo) {
+                if (!tabs) {
+                    tab_at = pos;
+                    dst = tmpbuf + tab_at - 1;
+                    diff = (at - pos) + 1;
 
-				for (int i = 0; i < prefix; i++, pos++)
-					*dst++ = ' ';
-			}
+                    for (int i = 0; i < diff; i++)
+                        *dst++ = ' ';
+                } else {
+                    fmt1 = save_fmt1;
+                    fmt2 = save_fmt2;
+                    dst = tmpbuf + tab_at - 1;
+                    diff = ((at - pos) + 1) / tabs;
+                }
 
-			skip = !skip;
+                PRDEBUG(printf("*** start stops tabs=%d diff=%d, at=%d, tab_at=%d\n", tabs, diff, at, tab_at));
+			} else {
+                PRDEBUG(printf("*** end stops\n"));
+                tabs = 0;
+            }
+
+			redo = !redo;
 			continue;
 		}
 
 		if (ch == '+') {
 			int at = argval ? argval : pos;
 
-			if (!skip) {
-				for (int i = 0; i < ((at+1) - tab_at); i++)
-					*dst++ = ' ';
+            if (!tabs)
+                continue;
 
-				fmt1 = save_fmt1;
-				fmt2 = save_fmt2;
-				dst = tmpbuf + tab_at - 1;
-				int prefix = (at+1) - pos;
-				pos = tab_at;
-				dst = tmpbuf + pos - 1;
+			if (!redo) {
+                if (!tabs) {
+                    tab_at = pos;
+                    dst = tmpbuf + tab_at - 1;
+                    diff = (at - pos) + 1;
 
-				for (int i = 0; i < prefix; i++, pos++)
-					*dst++ = ' ';
-			}
+                    for (int i = 0; i < diff; i++)
+                        *dst++ = ' ';
+                } else {
+                    fmt1 = save_fmt1;
+                    fmt2 = save_fmt2;
+                    dst = tmpbuf + tab_at - 1;
+                    diff = ((at - pos) + 1) / tabs;
+                }
 
-			skip = !skip;
+                PRDEBUG(printf("*** start stops tabs=%d diff=%d, at=%d, tab_at=%d\n", tabs, diff, at, tab_at));
+			} else {
+                PRDEBUG(printf("*** end stops\n"));
+                tabs = 0;
+            }
+
+			redo = !redo;
 			continue;
 		}
 
@@ -9978,7 +10016,7 @@ static USE_RESULT pl_status fn_chdir_1(query *q)
 	return ok;
 }
 
-static USE_RESULT pl_status fn_edin_skip_1(query *q)
+static USE_RESULT pl_status fn_edin_redo_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	int n = q->st.m->pl->current_input;
@@ -10007,7 +10045,7 @@ static USE_RESULT pl_status fn_edin_skip_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_edin_skip_2(query *q)
+static USE_RESULT pl_status fn_edin_redo_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -10957,19 +10995,19 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 		// Ignore duplicates
 
 		cell *p_tmp = p1;
-		bool skip = false;
+		bool redo = false;
 
 		for (idx_t j = 0; j < p1->nbr_cells; j++, p_tmp++) {
 			if (!is_variable(p_tmp))
 				continue;
 
 			if (deref(q, p_tmp, p1_ctx) == deref(q, p, p2_ctx)) {
-				skip = true;
+				redo = true;
 				break;
 			}
 		}
 
-		if (skip)
+		if (redo)
 			continue;
 
 		cell *c = deref(q, p, p_ctx);
@@ -12063,8 +12101,8 @@ static const struct builtins g_predicates_other[] =
 	{"telling", 1, fn_edin_telling_1, "-name"},
 	{"seen", 0, fn_edin_seen_0, NULL},
 	{"told", 0, fn_edin_told_0, NULL},
-	{"skip", 1, fn_edin_skip_1, "+integer"},
-	{"skip", 2, fn_edin_skip_2, "+stream,+integer"},
+	{"redo", 1, fn_edin_redo_1, "+integer"},
+	{"redo", 2, fn_edin_redo_2, "+stream,+integer"},
 	{"tab", 1, fn_edin_tab_1, "+integer"},
 	{"tab", 2, fn_edin_tab_2, "+stream,+integer"},
 
