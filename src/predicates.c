@@ -8873,13 +8873,13 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			int at = argval ? argval : pos;
 
 			if (!skip) {
-				for (int i = 0; i < (at - tab_at - 1); i++)
+				for (int i = 0; i < ((at+1) - tab_at); i++)
 					*dst++ = ' ';
 
 				fmt1 = save_fmt1;
 				fmt2 = save_fmt2;
 				dst = tmpbuf + tab_at - 1;
-				int prefix = at - pos - 1;
+				int prefix = (at+1) - pos;
 				pos = tab_at;
 				dst = tmpbuf + pos - 1;
 
@@ -8895,13 +8895,13 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			int at = argval ? argval : pos;
 
 			if (!skip) {
-				for (int i = 0; i < (at - tab_at - 1); i++)
+				for (int i = 0; i < ((at+1) - tab_at); i++)
 					*dst++ = ' ';
 
 				fmt1 = save_fmt1;
 				fmt2 = save_fmt2;
 				dst = tmpbuf + tab_at - 1;
-				int prefix = at - pos - 1;
+				int prefix = (at+1) - pos;
 				pos = tab_at;
 				dst = tmpbuf + pos - 1;
 
