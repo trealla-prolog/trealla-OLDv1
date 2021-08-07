@@ -9140,7 +9140,11 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			len = format_integer(dst, get_smallint(c), 0, ',', 0, noargval?0:-argval);
 			break;
 
-		default: {
+		case 'k':
+		case 'q':
+		case 'w':
+		case 'a':
+        {
 			int saveq = q->quoted;
 			bool canonical = false, quoted = false;
 
@@ -9161,8 +9165,10 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 			else
 				len = print_term_to_buf(q, NULL, 0, c, fmt2.p_ctx, 1, false, 0);
 
-			if (q->cycle_error)
+			if (q->cycle_error) {
+				free(tmpbuf);
 				return throw_error(q, c, "resource_error", "cyclic");
+            }
 
 			CHECK_BUF(len);
 
@@ -9172,7 +9178,12 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 				len = print_term_to_buf(q, dst, len+1, c, fmt2.p_ctx, 1, false, 0);
 
 			q->quoted = saveq;
+            break;
         }
+
+        default:
+			free(tmpbuf);
+			return throw_error(q, c, "existence_error", "format_charcter");
 		}
 
 		dst += len;
