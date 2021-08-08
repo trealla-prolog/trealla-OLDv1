@@ -1,7 +1,8 @@
 GIT_VERSION := "$(shell git describe --abbrev=4 --dirty --always --tags)"
 
 CFLAGS = -Isrc -I/usr/local/include -DVERSION='$(GIT_VERSION)' -O3 \
-	$(OPT) -Wall -Wextra -D_GNU_SOURCE -Wno-deprecated-declarations
+	-Wall -Wextra -D_GNU_SOURCE -Wno-deprecated-declarations \
+	-funsigned-char $(OPT)
 
 LDFLAGS = -L/usr/local/lib -lreadline -lm
 
@@ -23,7 +24,7 @@ endif
 OBJECTS = tpl.o src/history.o src/functions.o \
 	src/predicates.o src/contrib.o src/heap.c \
 	src/library.o src/module.o src/parser.o \
-	src/print.o src/prolog.o src/query.o \
+	src/print.o src/prolog.o src/query.o src/format.o \
 	src/skiplist.o src/base64.o src/network.o src/utf8.o
 
 OBJECTS +=  library/builtins.o library/lists.o library/apply.o \
@@ -80,6 +81,10 @@ src/parser.o: src/parser.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/imath/imath.h \
   src/history.h src/library.h src/parser.h src/module.h src/prolog.h \
   src/query.h src/builtins.h src/heap.h src/utf8.h
+src/format.o: src/format.c src/trealla.h src/internal.h src/map.h \
+  src/skiplist.h src/cdebug.h src/imath/imath.h \
+  src/network.h src/base64.h src/library.h src/parser.h src/module.h \
+  src/prolog.h src/query.h src/builtins.h src/heap.h src/utf8.h
 src/predicates.o: src/predicates.c src/trealla.h src/internal.h src/map.h \
   src/skiplist.h src/cdebug.h src/imath/imath.h \
   src/network.h src/base64.h src/library.h src/parser.h src/module.h \

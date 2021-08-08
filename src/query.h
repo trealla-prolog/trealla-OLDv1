@@ -26,6 +26,12 @@ extern USE_RESULT pl_status throw_error(query *q, cell *c, const char *err_type,
 extern void call_attrs(query *q, cell *attrs);
 extern void stash_me(query *q, rule *t, bool last_match);
 extern bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth);
+extern pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx);
+extern size_t slicecpy(char *dst, size_t dstlen, const char *src, size_t len);
+extern USE_RESULT pl_status make_cstringn(cell *d, const char *s, size_t n);
+extern USE_RESULT pl_status make_stringn(cell *d, const char *s, size_t n);
+extern void make_literal(cell *tmp, idx_t offset);
+extern int get_stream(query *q, cell *p1);
 
 extern bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials);
 extern size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes);
@@ -50,3 +56,13 @@ extern pl_status print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int r
 extern char *print_canonical_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
 extern pl_status print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
 
+
+inline static USE_RESULT pl_status make_cstring(cell *d, const char *s)
+{
+	return make_cstringn(d, s, strlen(s));
+}
+
+inline static USE_RESULT pl_status make_string(cell *d, const char *s)
+{
+	return make_stringn(d, s, strlen(s));
+}

@@ -164,7 +164,7 @@ static bool make_room(parser *p)
 	return true;
 }
 
-static cell *make_cell(parser *p)
+static cell *make_a_cell(parser *p)
 {
 	make_room(p);
 	cell *ret = p->r->cells + p->r->cidx++;
@@ -935,7 +935,7 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 			c->flags |= FLAG2_ANON;
 	}
 
-	cell *c = make_cell(p);
+	cell *c = make_a_cell(p);
 	ensure(c);
 	c->tag = TAG_END;
 	c->nbr_cells = 1;
@@ -1430,9 +1430,9 @@ bool virtual_term(parser *p, const char *src)
 	return true;
 }
 
-static cell *make_literal(parser *p, idx_t offset)
+static cell *make_a_literal(parser *p, idx_t offset)
 {
-	cell *c = make_cell(p);
+	cell *c = make_a_cell(p);
 	c->tag = TAG_LITERAL;
 	c->nbr_cells = 1;
 	c->val_off = offset;
@@ -2278,7 +2278,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quote_char && !strcmp(p->token, "[")) {
 			save_idx = p->r->cidx;
-			cell *c = make_literal(p, g_dot_s);
+			cell *c = make_a_literal(p, g_dot_s);
 			c->arity = 2;
 			p->start_term = true;
 			p->nesting_brackets++;
@@ -2288,7 +2288,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			if (p->error)
 				break;
 
-			make_literal(p, g_nil_s);
+			make_a_literal(p, g_nil_s);
 			c = p->r->cells + save_idx;
 			c->nbr_cells = p->r->cidx - save_idx;
 			fix_list(c);
@@ -2299,7 +2299,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quote_char && !strcmp(p->token, "{")) {
 			save_idx = p->r->cidx;
-			cell *c = make_literal(p, g_braces_s);
+			cell *c = make_a_literal(p, g_braces_s);
 			ensure(c);
 			c->arity = 1;
 			p->start_term = true;
@@ -2369,7 +2369,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				break;
 			}
 
-			cell *c = make_literal(p, g_dot_s);
+			cell *c = make_a_literal(p, g_dot_s);
 			c->arity = 2;
 			p->start_term = true;
 			last_op = true;
@@ -2537,7 +2537,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		p->start_term = false;
-		cell *c = make_cell(p);
+		cell *c = make_a_cell(p);
 		c->nbr_cells = 1;
 		c->tag = p->v.tag;
 		c->flags = p->v.flags;
