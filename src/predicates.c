@@ -11196,6 +11196,10 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	GET_FIRST_ARG(p1,list_or_nil_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
 
+	if (!is_variable(p1) && !is_nil(p1)
+		&& !is_string(p1) && !is_valid_list(q, p1, p1_ctx, true))
+		return throw_error(q, p1, "type_error", "list");
+
 	if (is_variable(p1) && is_variable(p2)) {
 		cell tmp;
 		make_int(&tmp, 0);
