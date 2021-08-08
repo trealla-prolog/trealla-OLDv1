@@ -8804,7 +8804,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 	*dst = '\0';
 	size_t nbytes = bufsiz;
 	bool redo = false, start_of_line = true;
-	int tab_at = 1, tabs = 0, diff = 0, last_at = 1;
+	int tab_at = 1, tabs = 0, diff = 0, last_at = 0;
 	save_fmt1 = fmt1;
 	save_fmt2 = fmt2;
 
@@ -8883,6 +8883,9 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 
 		if (ch == '|') {
 			int at = last_at = argval ? argval : pos;
+
+            if (!argval)
+                last_at -= 1;
 
             if (!tabs)
                 continue;
