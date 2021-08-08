@@ -8910,12 +8910,12 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		}
 
 		if (ch == '+') {
-			int at = last_at = argval ? (last_at+argval-1) : pos;
-
             if (!tabs)
                 continue;
 
 			if (!redo) {
+				int at = last_at = argval ? (last_at+argval) : pos;
+
                 if (!tabs) {
                     tab_at = pos;
                     dst = tmpbuf + tab_at - 1;
