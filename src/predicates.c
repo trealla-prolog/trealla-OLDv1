@@ -88,7 +88,8 @@ int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2)
 	return 0;
 }
 
-cell *ERR_CYCLE_CELL = &(cell){};
+static cell err_cell = {0};
+cell *ERR_CYCLE_CELL = &err_cell;
 
 static pl_status do_yield_0(query *q, int msecs)
 {
