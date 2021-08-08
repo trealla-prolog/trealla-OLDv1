@@ -6,12 +6,12 @@
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "iso_bagof_3_10",
-        "uid" : "cd985ba28511d7b6",
+        "uid" : "61c7f0c2b014ce75",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1628393274000,
-          "stop" : 1628393274000,
+          "start" : 1628459878000,
+          "stop" : 1628459878000,
           "duration" : 0
         },
         "flaky" : false,
@@ -19,13 +19,13 @@
         "parameters" : [ ]
       }, {
         "name" : "lgt_write_term_3_25",
-        "uid" : "308ad08a790a2b01",
+        "uid" : "83c00702399cd7a1",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1628393364000,
-          "stop" : 1628393364002,
-          "duration" : 2
+          "start" : 1628459972000,
+          "stop" : 1628459972001,
+          "duration" : 1
         },
         "flaky" : false,
         "newFailed" : false,
@@ -36,12 +36,12 @@
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "iso_setof_3_12",
-        "uid" : "ce39d07ae347a315",
+        "uid" : "bb2f4e105163b24d",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1628393348000,
-          "stop" : 1628393348000,
+          "start" : 1628459955000,
+          "stop" : 1628459955000,
           "duration" : 0
         },
         "flaky" : false,
