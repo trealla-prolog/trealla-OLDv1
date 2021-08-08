@@ -8848,9 +8848,12 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		CHECK_BUF(argval);
 
 		if (ch == 'n') {
-			while (argval-- > 1)
+			while (argval-- > 1) {
+                CHECK_BUF(1);
 				*dst++ = '\n';
+            }
 
+            CHECK_BUF(1);
 			*dst++ = '\n';
 			start_of_line = true;
 			continue;
@@ -8859,6 +8862,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		if (ch == 'N') {
 			if (!start_of_line) {
 				start_of_line = true;
+                CHECK_BUF(1);
 				*dst++ = '\n';
 			}
 
@@ -8874,8 +8878,10 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
             } else if (!redo) {
                 tabs++;
             } else if (redo) {
-                for (int i = 0; i < diff; i++)
+                for (int i = 0; i < diff; i++) {
+                    CHECK_BUF(1);
                     *dst++ = ' ';
+                }
             }
 
 			continue;
@@ -8896,8 +8902,10 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
                     dst = tmpbuf + tab_at - 1;
                     diff = (at - pos) + 1;
 
-                    for (int i = 0; i < diff; i++)
+                    for (int i = 0; i < diff; i++) {
+                        CHECK_BUF(1);
                         *dst++ = ' ';
+                    }
                 } else {
                     fmt1 = save_fmt1;
                     fmt2 = save_fmt2;
@@ -8924,8 +8932,10 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
                     dst = tmpbuf + tab_at - 1;
                     diff = (at - pos) + 1;
 
-                    for (int i = 0; i < diff; i++)
+                    for (int i = 0; i < diff; i++) {
+                        CHECK_BUF(1);
                         *dst++ = ' ';
+                    }
                 } else {
                     fmt1 = save_fmt1;
                     fmt2 = save_fmt2;
@@ -8941,6 +8951,7 @@ static pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p
 		}
 
 		if (ch == '~') {
+            CHECK_BUF(1);
 			*dst++ = '~';
 			start_of_line = false;
 			continue;
