@@ -1353,13 +1353,12 @@ static void dump_vars(query *q, bool partial)
 		if (is_empty(&e->c))
 			continue;
 
-		cell *c;
+		cell *c = deref(q, &e->c, e->ctx);
 
 		if (is_indirect(&e->c)) {
 			c = e->c.val_ptr;
 			q->latest_ctx = e->ctx;
-		} else
-			c = deref(q, &e->c, e->ctx);
+		}
 
 		if (any)
 			fprintf(stdout, ",\n");
