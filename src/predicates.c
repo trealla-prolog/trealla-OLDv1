@@ -10686,6 +10686,12 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 				p1_ctx = q->latest_ctx;
 				cnt++;
 			}
+
+			if (is_variable(l) && is_smallint(p2) && (get_smallint(p2) == cnt)) {
+				cell tmp;
+				make_literal(&tmp, g_nil_s);
+				return unify(q, l, p1_ctx, &tmp, q->st.curr_frame);
+			}
 		}
 
 		return get_integer(p2) == cnt;
