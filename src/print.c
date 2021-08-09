@@ -708,9 +708,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 				cell *h = LIST_HEAD(l);
 				h = deref(q, h, l_ctx);
 				cell *name = h+1;
-				cell *val = h+2;
+				cell *var = h+2;
+				var = deref(q, var, q->latest_ctx);
 
-				if (!strcmp(GET_STR(q, val), GET_STR(q, c))) {
+				if (!strcmp(GET_STR(q, var), GET_STR(q, c))) {
 					dst += snprintf(dst, dstlen, "%s", GET_STR(q, name));
 					return dst - save_dst;
 				}
