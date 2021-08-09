@@ -3,17 +3,17 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % These are SICStus compatible...
 
-must_be(Term, callable, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (callable(Term) -> true ; throw(error(type_error(callable, Term), must_be/4))), !.
-must_be(Term, atom, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (atom(Term) -> true ; throw(error(type_error(atom, Term), must_be/4))), !.
-must_be(Term, atomic, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (atomic(Term) -> true ; throw(error(type_error(atomic, Term), must_be/4))), !.
-must_be(Term, integer, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (integer(Term) -> true ; throw(error(type_error(integer, Term), must_be/4))), !.
-must_be(Term, float, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (float(Term) -> true ; throw(error(type_error(float, Term), must_be/4))), !.
-must_be(Term, number, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (number(Term) -> true ; throw(error(type_error(number, Term), must_be/4))), !.
-must_be(Term, var, _Goal, _Arg) :- !, (var(Term) -> true ; throw(error(instantiation_error(Term), must_be/4))), !.
-must_be(Term, nonvar, _Goal, _Arg) :- !, (nonvar(Term) -> true ; throw(error(uninstantiation_error(Term), must_be/4))), !.
-must_be(Term, ground, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (ground(Term) -> true ; throw(error(type_error(Term, ground), must_be/4))), !.
-must_be(Term, compound, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (compound(Term) -> true ; throw(error(type_error(compound, Term), must_be/4))), !.
-must_be(Term, list, _Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (list(Term) -> true ; throw(error(type_error(list, Term), must_be/4))), !.
+must_be(Term, callable, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (callable(Term) -> true ; throw(error(type_error(callable, Term), Goal))), !.
+must_be(Term, atom, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (atom(Term) -> true ; throw(error(type_error(atom, Term), Goal))), !.
+must_be(Term, atomic, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (atomic(Term) -> true ; throw(error(type_error(atomic, Term), Goal))), !.
+must_be(Term, integer, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (integer(Term) -> true ; throw(error(type_error(integer, Term), Goal))), !.
+must_be(Term, float, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (float(Term) -> true ; throw(error(type_error(float, Term), Goal))), !.
+must_be(Term, number, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (number(Term) -> true ; throw(error(type_error(number, Term), Goal))), !.
+must_be(Term, var, Goal, _Arg) :- !, (var(Term) -> true ; throw(error(instantiation_error(Term), Goal))), !.
+must_be(Term, nonvar, Goal, _Arg) :- !, (nonvar(Term) -> true ; throw(error(uninstantiation_error(Term), Goal))), !.
+must_be(Term, ground, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (ground(Term) -> true ; throw(error(type_error(Term, ground), Goal))), !.
+must_be(Term, compound, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (compound(Term) -> true ; throw(error(type_error(compound, Term), Goal))), !.
+must_be(Term, list, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (list(Term) -> true ; throw(error(type_error(list, Term), Goal))), !.
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -251,13 +251,13 @@ keycompare(Delta, (K1-_), (K2-_)) :-
 	;	(K1 @> K2 -> Delta = '>'
 	;	Delta = '=')).
 
-keysort(L, _) :- var(L),
+keysort(L1, _) :- var(L1),
 	throw(error(instantiation_error, keysort/2)).
-keysort(L, R) :-
-	'$mustbe_pairlist'(L),
-	'$mustbe_pairlist_or_var'(R),
-	length(L,N),
-	keysort(N, L, _, R),
+keysort(L1, L2) :-
+	'$mustbe_pairlist'(L1),
+	'$mustbe_pairlist_or_var'(L2),
+	length(L1,N),
+	keysort(N, L1, _, L2),
 	!.
 
 keysort(2, [X1, X2|L], L, R) :- !,
