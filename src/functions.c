@@ -1193,42 +1193,31 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2)) {
-		if (mp_int_compare_value(&p1.val_bigint->ival, 1) != 0) {
-			if (mp_int_compare_value(&p2.val_bigint->ival, 0) < 0)
-				return throw_error(q, &p1, "type_error", "float");
-		}
-
-		mp_int_expt_full(&p1.val_bigint->ival, &p2.val_bigint->ival, &q->tmp_ival);
-		SET_ACCUM();
+		return throw_error(q, &q->accum, "evaluation_error", "integer_overflow");
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
-		if (mp_int_compare_value(&p1.val_bigint->ival, 1) != 0) {
-			if (p2.val_int < 0)
-				return throw_error(q, &p1, "type_error", "float");
-		}
+		if (p2.val_int < 0)
+			return throw_error(q, &p1, "type_error", "greater_zero");
 
-		mp_int_expt(&p1.val_bigint->ival, p2.val_int, &q->tmp_ival);
+		if (p2.val_int > INT16_MAX)
+			return throw_error(q, &p1, "type_error", "range_error");
+
+		if (mp_int_expt(&p1.val_bigint->ival, p2.val_int, &q->tmp_ival) != MP_OK)
+			return throw_error(q, &q->accum, "evaluation_error", "integer_overflow");
+
 		SET_ACCUM();
 	} else if (is_bigint(&p2) && is_smallint(&p1)) {
-		if ((p1.val_int != 1) && (p2.val_int < 0))
-			return throw_error(q, &p1, "type_error", "float");
-
-		mpz_t tmp;
-		mp_int_init_value(&tmp, p1.val_int);
-		mp_int_expt_full(&tmp, &p2.val_bigint->ival, &q->tmp_ival);
-		mp_int_clear(&tmp);
-		SET_ACCUM();
+		return throw_error(q, &q->accum, "evaluation_error", "integer_overflow");
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		if ((p1.val_int != 1) && (p2.val_int < 0))
 			return throw_error(q, &p1, "type_error", "float");
 
-		mp_int_expt_value(p1.val_int, p2.val_int, &q->tmp_ival);
+		if (p2.val_int > INT16_MAX)
+			return throw_error(q, &p1, "type_error", "range_error");
+
+		if (mp_int_expt_value(p1.val_int, p2.val_int, &q->tmp_ival) != MP_OK)
+			return throw_error(q, &q->accum, "evaluation_error", "integer_overflow");
 
 		if (mp_int_compare_value(&q->tmp_ival, MP_SMALL_MAX) > 0) {
-			SET_ACCUM();
-			return pl_success;
-		}
-
-		if (mp_int_compare_value(&q->tmp_ival, MP_SMALL_MIN) < 0) {
 			SET_ACCUM();
 			return pl_success;
 		}
