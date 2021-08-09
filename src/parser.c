@@ -2599,7 +2599,7 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 	if (!is_init) {
 		ASTRING(src);
 		ASTRING_sprintf(src, "call(true), call((%s", pSrc);
-		ASTRING_trim(src, ' ');
+		ASTRING_trim_ws(src);
 		ASTRING_trim(src, '.');
 		ASTRING_strcat(src, ")).");
 

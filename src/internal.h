@@ -746,6 +746,14 @@ typedef struct {
 	}																	\
 }
 
+#define ASTRING_trim_ws(pr) {											\
+	while (ASTRING_strlen(pr)) {										\
+		if (!isspace(pr##_buf.dst[-1]))									\
+			break;														\
+		 *--pr##_buf.dst = '\0';										\
+	}																	\
+}
+
 #define ASTRING_check(pr,len) {											\
 	size_t rem = pr##_buf.size - ASTRING_strlen(pr);					\
 	if (((len)+1) >= rem) {												\
