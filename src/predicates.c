@@ -3094,7 +3094,10 @@ static bool parse_write_params(query *q, cell *c, cell **vnames, idx_t *vnames_c
 			}
 
 			if (is_literal(h)) {
-				if (!is_atom(h+1)) {
+				if (is_variable(h+1)) {
+					DISCARD_RESULT throw_error(q, c, "instantiation_error", "write_option");
+					return false;
+				} else if (!is_atom(h+1)) {
 					DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
 					return false;
 				}
