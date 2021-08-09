@@ -360,8 +360,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 
 	idx_t var_nbr = 0;
 
-	if (is_variable(c)
-		&& (running!=0) && (q->nv_start == -1)
+	if (is_variable(c) && running && (q->nv_start == -1)
 		&& ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != ERR_IDX)) {
 
 #if 0
@@ -396,7 +395,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 		return dst - save_dst;
 	}
 
-	if (is_variable(c) && (running!=0)) {
+	if (is_variable(c) && running) {
 		frame *g = GET_FRAME(c_ctx);
 		slot *e = GET_SLOT(g, c->var_nbr);
 		idx_t slot_nbr = e - q->slots;
@@ -698,8 +697,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 				l = deref(q, l, l_ctx);
 				l_ctx = q->latest_ctx;
 			}
-
-			q->variable_names = NULL;
 		}
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
