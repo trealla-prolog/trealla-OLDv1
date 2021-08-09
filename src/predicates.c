@@ -10653,6 +10653,12 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 
 			if (is_variable(l) && (l == p2))
 				return false;
+
+			if (is_variable(l)) {
+				cell tmp;
+				make_literal(&tmp, g_nil_s);
+				unify(q, l, p1_ctx, &tmp, q->st.curr_frame);
+			}
 		}
 
 		cell tmp;
