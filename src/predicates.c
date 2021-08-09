@@ -10618,6 +10618,9 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_variable(p1) && is_variable(p2)) {
+		if (p1 == p2)
+			return false;
+
 		cell tmp;
 		make_int(&tmp, 0);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
