@@ -1129,7 +1129,7 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 			if (canonical)
 				print_canonical(&q, fp, cl->r.cells, ctx, 0);
 			else
-				print_canonical(&q, fp, cl->r.cells, ctx, 0);
+				print_term(&q, fp, cl->r.cells, ctx, 0);
 
 			fprintf(fp, "\n");
 		}
