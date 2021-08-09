@@ -248,8 +248,12 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes)
 	idx_t save_ctx = q ? q->latest_ctx : l_ctx;
 	size_t is_chars_list = 0;
 	LIST_HANDLER(l);
+	int cnt = 0;
 
 	while (is_iso_list(l) && (q->st.m->flag.double_quote_chars || allow_codes)) {
+		if (cnt > 1000000)
+			break;
+
 		cell *h = LIST_HEAD(l);
 		cell *c = q ? deref(q, h, l_ctx) : h;
 
@@ -282,6 +286,7 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes)
 		l = LIST_TAIL(l);
 		l = q ? deref(q, l, l_ctx) : l;
 		if (q) l_ctx = q->latest_ctx;
+		cnt++;
 	}
 
 	if (is_variable(l))

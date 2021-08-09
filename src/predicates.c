@@ -10617,6 +10617,9 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 
 	GET_NEXT_ARG(p2,integer_or_var);
 
+	if (is_integer(p2) && !is_smallint(p2))
+		return throw_error(q, p1, "type_error", "integer");
+
 	if (is_variable(p1) && is_variable(p2)) {
 		if (p1 == p2)
 			return false;
@@ -10646,7 +10649,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 			cell *l = p1;
 			LIST_HANDLER(l);
 
-			while (is_list(l)) {
+			while (is_list(l) && (cnt < 1000000)) {
 				LIST_HEAD(l);
 				l = LIST_TAIL(l);
 				l = deref(q, l, p1_ctx);
@@ -10688,7 +10691,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 			cell *l = p1;
 			LIST_HANDLER(l);
 
-			while (is_list(l)) {
+			while (is_list(l) && (cnt < 1000000)) {
 				LIST_HEAD(l);
 				l = LIST_TAIL(l);
 				l = deref(q, l, p1_ctx);

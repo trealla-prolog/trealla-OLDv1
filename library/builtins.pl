@@ -251,6 +251,8 @@ keycompare(Delta, (K1-_), (K2-_)) :-
 	;	(K1 @> K2 -> Delta = '>'
 	;	Delta = '=')).
 
+keysort(L, _) :- var(L),
+	throw(error(instantiation_error, keysort/2)).
 keysort(L, R) :-
 	'$mustbe_pairlist'(L),
 	'$mustbe_pairlist_or_var'(R),
