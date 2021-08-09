@@ -360,6 +360,28 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 
 	idx_t var_nbr = 0;
 
+	if (running && is_variable(c) && q->variable_names) {
+		cell *l = q->variable_names;
+		idx_t l_ctx = q->variable_names_ctx;
+		LIST_HANDLER(l);
+
+		while (is_list(l)) {
+			cell *h = LIST_HEAD(l);
+			h = deref(q, h, l_ctx);
+			cell *name = h+1;
+			cell *val = h+2;
+
+			if (!strcmp(GET_STR(q, val), GET_STR(q, c))) {
+				dst += snprintf(dst, dstlen, "%s", GET_STR(q, name));
+				return dst - save_dst;
+			}
+
+			l = LIST_TAIL(l);
+			l = deref(q, l, l_ctx);
+			l_ctx = q->latest_ctx;
+		}
+	}
+
 	if (is_variable(c) && running && (q->nv_start == -1)
 		&& ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != ERR_IDX)) {
 
