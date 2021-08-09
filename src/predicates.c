@@ -5226,7 +5226,7 @@ static USE_RESULT pl_status fn_iso_throw_1(query *q)
 	return fn_iso_catch_3(q);
 }
 
-pl_status throw_error(query *q, cell *c, const char *err_type, const char *expected)
+static pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expected, cell *goal)
 {
 	q->did_throw = true;
 	idx_t c_ctx = q->latest_ctx;
@@ -5243,7 +5243,7 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 	}
 
 	len = print_term_to_buf(q, dst+off, len+1, c, c_ctx, 1, 0, 0) + off;
-	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q, q->st.curr_cell) + 1024;
+	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q, goal) + 1024;
 	char *dst2 = malloc(len2+1);
 	may_ptr_error(dst2);
 	q->quoted = save_quoted;
@@ -5265,58 +5265,58 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 	expected = tmpbuf;
 	char functor[1024];
 
-	if (needs_quoting(q->st.m, GET_STR(q, q->st.curr_cell), LEN_STR(q, q->st.curr_cell))) {
+	if (needs_quoting(q->st.m, GET_STR(q, goal), LEN_STR(q, goal))) {
 		char tmpbuf[1024-3];
-		formatted(tmpbuf, sizeof(tmpbuf), GET_STR(q, q->st.curr_cell), LEN_STR(q, q->st.curr_cell), false);
+		formatted(tmpbuf, sizeof(tmpbuf), GET_STR(q, goal), LEN_STR(q, goal), false);
 		snprintf(functor, sizeof(functor), "'%s'", tmpbuf);
 	} else
-		snprintf(functor, sizeof(functor), "%s", GET_STR(q, q->st.curr_cell));
+		snprintf(functor, sizeof(functor), "%s", GET_STR(q, goal));
 
 	if (is_variable(c)) {
 		err_type = "instantiation_error";
 		snprintf(dst2, len2+1, "error(%s,%s).", err_type, expected);
 
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "variable")) {
-		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", "uninstantiation_error", dst, functor, q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", "uninstantiation_error", dst, functor, goal->arity);
 
 	} else if (!strcmp(err_type, "instantiation_error")) {
-		snprintf(dst2, len2+1, "error(%s,(%s)/%u).", err_type, functor, q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s,(%s)/%u).", err_type, functor, goal->arity);
 
 	} else if (!strcmp(err_type, "representation_error")) {
-		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, goal->arity);
 
 	} else if (!strcmp(err_type, "evaluation_error")) {
-		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, goal->arity);
 
 	} else if (!strcmp(err_type, "syntax_error")) {
-		snprintf(dst2, len2+1, "error(%s((%s,%s)),(%s)/%u).", err_type, expected, dst, functor, q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s((%s,%s)),(%s)/%u).", err_type, expected, dst, functor, goal->arity);
 
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "evaluable")) {
-		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),(%s)/%u).", err_type, expected, is_callable(c)?GET_STR(q, c):dst, c->arity, functor, q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),(%s)/%u).", err_type, expected, is_callable(c)?GET_STR(q, c):dst, c->arity, functor, goal->arity);
 
 	} else if (!strcmp(err_type, "permission_error")
 		&& is_structure(c) && slicecmp2(GET_STR(q, c), LEN_STR(q, c), "/") && is_variable(c+1)) {
 		char tmpbuf[1024];
 		snprintf(tmpbuf, sizeof(tmpbuf), "(%s)/%u\n", GET_STR(q, c), (unsigned)c->arity);
-		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, tmpbuf, functor, q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, tmpbuf, functor, goal->arity);
 
 	} else if (!strcmp(err_type, "permission_error")) {
-		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, functor, q->st.curr_cell->arity);
+		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, dst, functor, goal->arity);
 
-	} else if (IS_OP(q->st.curr_cell)) {
-		snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, GET_STR(q, q->st.curr_cell), q->st.curr_cell->arity);
+	} else if (IS_OP(goal)) {
+		snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, GET_STR(q, goal), goal->arity);
 
 	} else {
-		if (!slicecmp2(GET_STR(q, q->st.curr_cell), LEN_STR(q, q->st.curr_cell), "$rawcall"))
-			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "call", q->st.curr_cell->arity);
-		else if (!slicecmp2(GET_STR(q, q->st.curr_cell), LEN_STR(q, q->st.curr_cell), "$call"))
-			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "call", q->st.curr_cell->arity);
-		else if (!slicecmp2(GET_STR(q, q->st.curr_cell), LEN_STR(q, q->st.curr_cell), "$catch"))
-			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "catch", q->st.curr_cell->arity);
-		else if (!slicecmp2(GET_STR(q, q->st.curr_cell), LEN_STR(q, q->st.curr_cell), "$bagof"))
-			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, "bagof", q->st.curr_cell->arity);
+		if (!slicecmp2(GET_STR(q, goal), LEN_STR(q, goal), "$rawcall"))
+			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "call", goal->arity);
+		else if (!slicecmp2(GET_STR(q, goal), LEN_STR(q, goal), "$call"))
+			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "call", goal->arity);
+		else if (!slicecmp2(GET_STR(q, goal), LEN_STR(q, goal), "$catch"))
+			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "catch", goal->arity);
+		else if (!slicecmp2(GET_STR(q, goal), LEN_STR(q, goal), "$bagof"))
+			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, "bagof", goal->arity);
 		else
-			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, functor, q->st.curr_cell->arity);
+			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, functor, goal->arity);
 	}
 
 	//printf("*** %s\n", dst2);
@@ -5358,6 +5358,19 @@ pl_status throw_error(query *q, cell *c, const char *err_type, const char *expec
 	free(dst2);
 	free(dst);
 	return ok;
+}
+
+static pl_status throw_error2(query *q, cell *c, const char *err_type, const char *expected, cell *goal)
+{
+	cell tmp;
+	tmp = goal[1];
+	tmp.arity = get_smallint(&goal[2]);
+	return throw_error3(q, c, err_type, expected, &tmp);
+}
+
+pl_status throw_error(query *q, cell *c, const char *err_type, const char *expected)
+{
+	return throw_error3(q, c, err_type, expected, q->st.curr_cell);
 }
 
 static USE_RESULT pl_status fn_iso_functor_3(query *q)
@@ -8107,10 +8120,11 @@ static USE_RESULT pl_status fn_is_list_1(query *q)
 static USE_RESULT pl_status fn_sys_mustbe_pairlist_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,any);
 
 	if (is_valid_list(q, p1, p1_ctx, true)
 		&& !is_valid_list(q, p1, p1_ctx, false))
-		return throw_error(q, p1, "instantiation_error", "tail_is_a_variable");
+		return throw_error2(q, p1, "instantiation_error", "tail_is_a_variable", p2);
 
 	if (!is_valid_list(q, p1, p1_ctx, false))
 		return throw_error(q, p1, "type_error", "list");
