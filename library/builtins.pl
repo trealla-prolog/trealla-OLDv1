@@ -14,6 +14,7 @@ must_be(Term, nonvar, Goal, _Arg) :- !, (nonvar(Term) -> true ; throw(error(unin
 must_be(Term, ground, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (ground(Term) -> true ; throw(error(type_error(Term, ground), Goal))), !.
 must_be(Term, compound, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (compound(Term) -> true ; throw(error(type_error(compound, Term), Goal))), !.
 must_be(Term, list, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (list(Term) -> true ; throw(error(type_error(list, Term), Goal))), !.
+must_be(Term, pair, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (Term = K-_ -> true ; throw(error(type_error(pair, K), Goal))), !.
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
