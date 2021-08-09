@@ -4197,6 +4197,10 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 	if (is_variable(p1) && is_nil(p2))
 		return throw_error(q, p2, "domain_error", "non_empty_list");
 
+	if (!is_variable(p2) && !is_nil(p2)
+		&& !is_valid_list(q, p2, p2_ctx, true))
+		return throw_error(q, p2, "type_error", "list");
+
 	if (is_variable(p2)) {
 		cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, false);
 		may_ptr_error(tmp);
@@ -4393,7 +4397,8 @@ static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 
-	if (is_list(p2) && !is_valid_list(q, p2, p2_ctx, true))
+	if (!is_variable(p2) && !is_nil(p2)
+		&& !is_valid_list(q, p2, p2_ctx, true))
 		return throw_error(q, p2, "type_error", "list");
 
 	if (!is_variable(p1) && (is_atom(p1) || is_number(p1))) {
