@@ -14,7 +14,6 @@ must_be(Term, nonvar, Goal, _Arg) :- !, (nonvar(Term) -> true ; throw(error(unin
 must_be(Term, ground, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (ground(Term) -> true ; throw(error(type_error(Term, ground), Goal))), !.
 must_be(Term, compound, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (compound(Term) -> true ; throw(error(type_error(compound, Term), Goal))), !.
 must_be(Term, list, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (list(Term) -> true ; throw(error(type_error(list, Term), Goal))), !.
-must_be(Term, pair, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (Term = K-_ -> true ; throw(error(type_error(pair, K), Goal))), !.
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -255,8 +254,8 @@ keycompare(Delta, (K1-_), (K2-_)) :-
 keysort(L1, _) :- var(L1),
 	throw(error(instantiation_error, keysort/2)).
 keysort(L1, L2) :-
-	'$mustbe_pairlist'(L1),
-	'$mustbe_pairlist_or_var'(L2),
+	'$mustbe_pairlist'(L1, keysort/2),
+	'$mustbe_pairlist_or_var'(L2, keysort/2),
 	length(L1,N),
 	keysort(N, L1, _, L2),
 	!.

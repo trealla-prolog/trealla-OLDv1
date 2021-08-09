@@ -8104,7 +8104,7 @@ static USE_RESULT pl_status fn_is_list_1(query *q)
 	return is_valid_list(q, p1, p1_ctx, false);
 }
 
-static USE_RESULT pl_status fn_sys_mustbe_pairlist_1(query *q)
+static USE_RESULT pl_status fn_sys_mustbe_pairlist_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
@@ -8135,14 +8135,14 @@ static USE_RESULT pl_status fn_sys_mustbe_pairlist_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_mustbe_pairlist_or_var_1(query *q)
+static USE_RESULT pl_status fn_sys_mustbe_pairlist_or_var_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
 	if (is_variable(p1))
 		return pl_success;
 
-	return fn_sys_mustbe_pairlist_1(q);
+	return fn_sys_mustbe_pairlist_2(q);
 }
 
 static USE_RESULT pl_status fn_sys_mustbe_list_1(query *q)
@@ -11707,8 +11707,8 @@ static const struct builtins g_predicates_other[] =
 	{"$mustbe_instantiated", 1, fn_sys_instantiated_1, "+rule"},
 	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+rule,+rule"},
 
-	{"$mustbe_pairlist", 1, fn_sys_mustbe_pairlist_1, "+pair"},
-	{"$mustbe_pairlist_or_var", 1, fn_sys_mustbe_pairlist_or_var_1, "?pair"},
+	{"$mustbe_pairlist", 2, fn_sys_mustbe_pairlist_2, "+pair,+goal"},
+	{"$mustbe_pairlist_or_var", 2, fn_sys_mustbe_pairlist_or_var_2, "?pair,+goal"},
 	{"$mustbe_list", 1, fn_sys_mustbe_list_1, "?list"},
 	{"$mustbe_list_or_var", 1, fn_sys_mustbe_list_or_var_1, "?list"},
 
