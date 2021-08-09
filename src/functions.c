@@ -1223,17 +1223,19 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 
 		mp_int_expt_value(p1.val_int, p2.val_int, &q->tmp_ival);
 
-		if (mp_int_compare_value(&q->tmp_ival, INT_T_MAX) > 0) {
+		if (mp_int_compare_value(&q->tmp_ival, MP_SMALL_MAX) > 0) {
 			SET_ACCUM();
 			return pl_success;
 		}
 
-		if (mp_int_compare_value(&q->tmp_ival, INT_T_MIN) < 0) {
+		if (mp_int_compare_value(&q->tmp_ival, MP_SMALL_MIN) < 0) {
 			SET_ACCUM();
 			return pl_success;
 		}
 
-		q->accum.val_int = pow(p1.val_int, p2.val_int);
+		mp_small tmp;
+		mp_int_to_int(&q->tmp_ival, &tmp);
+		q->accum.val_int = tmp;
 		q->accum.tag = TAG_INTEGER;
 	} else if (is_smallint(&p1) && is_real(&p2)) {
 		q->accum.val_real = pow(p1.val_int, p2.val_real);
