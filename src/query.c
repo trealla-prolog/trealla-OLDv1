@@ -1637,7 +1637,6 @@ pl_status execute(query *q, rule *r)
 	q->st.m->pl->did_dump_vars = false;
 	q->st.curr_cell = r->cells;
 	q->st.sp = r->nbr_vars;
-	q->st.curr_frame = 0;
 	q->st.fp = 1;
 	q->abort = false;
 	q->cycle_error = false;
