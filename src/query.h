@@ -67,3 +67,23 @@ inline static USE_RESULT pl_status make_string(cell *d, const char *s)
 {
 	return make_stringn(d, s, strlen(s));
 }
+
+typedef struct ref_ ref;
+
+struct ref_ {
+	cell *c;
+	ref *next;
+};
+
+inline static bool in_ref_list(cell *c, ref *rlist)
+{
+	while (rlist) {
+		if (c == rlist->c)
+			return true;
+
+		rlist = rlist->next;
+	}
+
+	return false;
+}
+

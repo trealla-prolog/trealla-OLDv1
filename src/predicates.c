@@ -5583,25 +5583,6 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 	return search_predicate(q->st.m, &tmp) != NULL;
 }
 
-typedef struct ref_ ref;
-
-struct ref_ {
-	cell *c;
-	ref *next;
-};
-
-static bool in_list(cell *c, ref *list)
-{
-	while (list) {
-		if (c == list->c)
-			return true;
-
-		list = list->next;
-	}
-
-	return false;
-}
-
 static bool is_cyclic_term_internal(query *q, cell *p1, idx_t p1_ctx, ref *list)
 {
 	if (!is_structure(p1))
@@ -5614,7 +5595,7 @@ static bool is_cyclic_term_internal(query *q, cell *p1, idx_t p1_ctx, ref *list)
 		//printf("*** chk %p (%s)\n", p1, GET_STR(q, p1));
 
 		if (is_variable(p1)) {
-			if (in_list(p1, list)) {
+			if (in_ref_list(p1, list)) {
 				//printf("*** chk2 %p (%u)\n", p1, p1->var_nbr);
 				return q->cycle_error = true;
 			}
@@ -7073,7 +7054,7 @@ static USE_RESULT pl_status fn_split_atom_4(query *q)
 	int pad = peek_char_utf8(GET_STR(q, p3));
 	const char *start = src, *ptr;
 	cell *l = NULL;
-	int nbr = 1, in_list = 0;
+	int nbr = 1, in_ref_list = 0;
 
 	if (!*start) {
 		cell tmp;
@@ -7096,7 +7077,7 @@ static USE_RESULT pl_status fn_split_atom_4(query *q)
 			else
 				append_list(q, &tmp);
 
-			in_list = 1;
+			in_ref_list = 1;
 		}
 
 		start = ptr + 1;
@@ -7110,7 +7091,7 @@ static USE_RESULT pl_status fn_split_atom_4(query *q)
 		may_error(make_slice(q, &tmp, p1, start-src, LEN_STR(q, p1)-(start-src)));
 
 		if (LEN_STR(q, p1)-(start-src)) {
-			if (!in_list)
+			if (!in_ref_list)
 				allocate_list(q, &tmp);
 			else
 				append_list(q, &tmp);
@@ -7301,7 +7282,7 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 
 	char *line = NULL;
 	size_t len = 0;
-	int nbr = 1, in_list = 0;
+	int nbr = 1, in_ref_list = 0;
 
 	while (getline(&line, &len, fp) != -1) {
 		size_t len = strlen(line);
@@ -7323,14 +7304,14 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 		else
 			append_list(q, &tmp);
 
-		in_list = 1;
+		in_ref_list = 1;
 	}
 
 	free(line);
 	fclose(fp);
 	free(filename);
 
-	if (!in_list) {
+	if (!in_ref_list) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -7350,7 +7331,7 @@ static USE_RESULT pl_status fn_getlines_1(query *q)
 	stream *str = &g_streams[n];
 	char *line = NULL;
 	size_t len = 0;
-	int nbr = 1, in_list = 0;
+	int nbr = 1, in_ref_list = 0;
 
 	while (getline(&line, &len, str->fp) != -1) {
 		size_t len = strlen(line);
@@ -7372,12 +7353,12 @@ static USE_RESULT pl_status fn_getlines_1(query *q)
 		else
 			append_list(q, &tmp);
 
-		in_list = 1;
+		in_ref_list = 1;
 	}
 
 	free(line);
 
-	if (!in_list) {
+	if (!in_ref_list) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -7398,7 +7379,7 @@ static USE_RESULT pl_status fn_getlines_2(query *q)
 	stream *str = &g_streams[n];
 	char *line = NULL;
 	size_t len = 0;
-	int nbr = 1, in_list = 0;
+	int nbr = 1, in_ref_list = 0;
 
 	while (getline(&line, &len, str->fp) != -1) {
 		size_t len = strlen(line);
@@ -7420,12 +7401,12 @@ static USE_RESULT pl_status fn_getlines_2(query *q)
 		else
 			append_list(q, &tmp);
 
-		in_list = 1;
+		in_ref_list = 1;
 	}
 
 	free(line);
 
-	if (!in_list) {
+	if (!in_ref_list) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
