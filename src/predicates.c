@@ -5602,7 +5602,7 @@ static bool in_list(cell *c, ref *list)
 	return false;
 }
 
-static bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx, ref *list)
+static bool is_cyclic_term_internal(query *q, cell *p1, idx_t p1_ctx, ref *list)
 {
 	if (!is_structure(p1))
 		return false;
@@ -5613,7 +5613,7 @@ static bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx, ref *list)
 	for (idx_t i = 0; i < nbr_cells; i++) {
 		if (is_variable(p1)) {
 			if (in_list(p1, list))
-				return true;
+				return q->cycle_error = true;
 
 			ref nlist;
 			nlist.c = p1;
@@ -5622,11 +5622,11 @@ static bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx, ref *list)
 			cell *c = deref(q, p1, p1_ctx);
 			idx_t c_ctx = q->latest_ctx;
 
-			if (is_cyclic_term(q, c, c_ctx, &nlist)) {
+			if (is_cyclic_term_internal(q, c, c_ctx, &nlist)) {
 				return true;
 			}
 		} else {
-			if (is_cyclic_term(q, p1, p1_ctx, list)) {
+			if (is_cyclic_term_internal(q, p1, p1_ctx, list)) {
 				return true;
 			}
 		}
@@ -5638,10 +5638,16 @@ static bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx, ref *list)
 	return false;
 }
 
+bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx)
+{
+	return is_cyclic_term_internal(q, p1, p1_ctx, NULL);
+}
+
 static USE_RESULT pl_status fn_iso_acyclic_term_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return !is_cyclic_term(q, p1, p1_ctx, NULL) ? pl_success : pl_failure;
+	q->cycle_error = false;
+	return !is_cyclic_term(q, p1, p1_ctx) ? pl_success : pl_failure;
 }
 
 static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)

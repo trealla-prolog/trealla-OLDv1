@@ -894,31 +894,26 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 char *print_canonical_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 {
-	bool cycle_error = false;
 	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 
 	if (len < 0) {
 		running = 0;
 		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
-		cycle_error = true;
 	}
 
 	char *buf = malloc(len+10);
 	ensure(buf);
 	len = print_canonical_to_buf(q, buf, len+1, c, c_ctx, running, false, 0);
-	q->cycle_error = cycle_error;
 	return buf;
 }
 
 pl_status print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running)
 {
-	bool cycle_error = false;
 	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 
 	if (len < 0) {
 		running = 0;
 		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
-		cycle_error = true;
 	}
 
 	char *dst = malloc(len*2+1); //cehteh: why *2?
@@ -937,8 +932,7 @@ pl_status print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx,
 		if (feof(str->fp)) {
 			q->error = true;
 			free(dst);
-			q->cycle_error = cycle_error;
-			return pl_error; //cehteh: need a pl_eof error?
+			return pl_error;
 		}
 
 		len -= nbytes;
@@ -946,19 +940,16 @@ pl_status print_canonical_to_stream(query *q, stream *str, cell *c, idx_t c_ctx,
 	}
 
 	free(dst);
-	q->cycle_error = cycle_error;
 	return pl_success;
 }
 
 pl_status print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 {
-	bool cycle_error = false;
 	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 
 	if (len < 0) {
 		running = 0;
 		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
-		cycle_error = true;
 	}
 
 	char *dst = malloc(len*2+1); //cehteh: why *2?
@@ -977,7 +968,6 @@ pl_status print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 		if (feof(fp)) {
 			q->error = true;
 			free(dst);
-			q->cycle_error = cycle_error;
 			return pl_error;
 		}
 
@@ -986,38 +976,32 @@ pl_status print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 	}
 
 	free(dst);
-	q->cycle_error = cycle_error;
 	return pl_success;
 }
 
 char *print_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running)
 {
-	bool cycle_error = false;
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 
 	if (len < 0) {
 		running = 0;
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
-		cycle_error = true;
 	}
 
 	char *buf = malloc(len+10);
 	ensure(buf);
 	len = print_term_to_buf(q, buf, len+1, c, c_ctx, running, false, 0);
 	q->numbervars = false;
-	q->cycle_error = cycle_error;
 	return buf;
 }
 
 pl_status print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running)
 {
-	bool cycle_error = false;
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 
 	if (len < 0) {
 		running = 0;
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
-		cycle_error = true;
 	}
 
 	char *dst = malloc(len+10);
@@ -1031,7 +1015,6 @@ pl_status print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 		if (feof(str->fp)) {
 			q->error = true;
 			free(dst);
-			q->cycle_error = cycle_error;
 			return pl_error;
 		}
 
@@ -1041,19 +1024,16 @@ pl_status print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int 
 
 	free(dst);
 	q->numbervars = false;
-	q->cycle_error = cycle_error;
 	return pl_success;
 }
 
 pl_status print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 {
-	bool cycle_error = false;
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 
 	if (len < 0) {
 		running = 0;
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
-		cycle_error = true;
 	}
 
 	char *dst = malloc(len+10);
@@ -1067,7 +1047,6 @@ pl_status print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 		if (feof(fp)) {
 			q->error = true;
 			free(dst);
-			q->cycle_error = cycle_error;
 			return pl_error;
 		}
 
@@ -1077,6 +1056,5 @@ pl_status print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 
 	free(dst);
 	q->numbervars = false;
-	q->cycle_error = cycle_error;
 	return pl_success;
 }

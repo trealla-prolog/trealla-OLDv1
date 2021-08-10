@@ -32,6 +32,7 @@ extern USE_RESULT pl_status make_cstringn(cell *d, const char *s, size_t n);
 extern USE_RESULT pl_status make_stringn(cell *d, const char *s, size_t n);
 extern void make_literal(cell *tmp, idx_t offset);
 extern int get_stream(query *q, cell *p1);
+extern bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx);
 
 extern bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials);
 extern size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes);
