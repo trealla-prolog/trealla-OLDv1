@@ -251,9 +251,6 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes)
 	int cnt = 0;
 
 	while (is_iso_list(l) && (q->st.m->flag.double_quote_chars || allow_codes)) {
-		if (cnt > 1000000)
-			break;
-
 		cell *h = LIST_HEAD(l);
 		cell *c = q ? deref(q, h, l_ctx) : h;
 

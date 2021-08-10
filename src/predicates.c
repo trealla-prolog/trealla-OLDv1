@@ -5602,10 +5602,10 @@ static bool in_list(cell *c, ref *list)
 	return false;
 }
 
-static bool is_acyclic(query *q, cell *p1, idx_t p1_ctx, ref *list)
+static bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx, ref *list)
 {
 	if (!is_structure(p1))
-		return true;
+		return false;
 
 	idx_t nbr_cells = p1->nbr_cells - 1;
 	p1++;
@@ -5613,7 +5613,7 @@ static bool is_acyclic(query *q, cell *p1, idx_t p1_ctx, ref *list)
 	for (idx_t i = 0; i < nbr_cells; i++) {
 		if (is_variable(p1)) {
 			if (in_list(p1, list)) {
-				return false;
+				return true;
 			}
 
 			ref nlist;
@@ -5623,12 +5623,12 @@ static bool is_acyclic(query *q, cell *p1, idx_t p1_ctx, ref *list)
 			cell *c = deref(q, p1, p1_ctx);
 			idx_t c_ctx = q->latest_ctx;
 
-			if (!is_acyclic(q, c, c_ctx, &nlist)) {
-				return false;
+			if (is_cyclic_term(q, c, c_ctx, &nlist)) {
+				return true;
 			}
 		} else {
-			if (!is_acyclic(q, p1, p1_ctx, list)) {
-				return false;
+			if (is_cyclic_term(q, p1, p1_ctx, list)) {
+				return true;
 			}
 		}
 
@@ -5636,13 +5636,13 @@ static bool is_acyclic(query *q, cell *p1, idx_t p1_ctx, ref *list)
 		p1 += p1->nbr_cells;
 	}
 
-	return true;
+	return false;
 }
 
 static USE_RESULT pl_status fn_iso_acyclic_term_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return is_acyclic(q, p1, p1_ctx, NULL) ? pl_success : pl_failure;
+	return !is_cyclic_term(q, p1, p1_ctx, NULL) ? pl_success : pl_failure;
 }
 
 static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
@@ -10679,6 +10679,13 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 
 	GET_FIRST_ARG(p1,list_or_nil_or_var);
 
+	printf("*** here1\n");
+
+	if (is_cyclic_term(q, p1, p1_ctx, NULL))
+		return throw_error(q, p1, "type_error", "list");
+
+	printf("*** here2\n");
+
 	if (!is_variable(p1) && !is_nil(p1)
 		&& !is_string(p1) && !is_valid_list(q, p1, p1_ctx, true))
 		return throw_error(q, p1, "type_error", "list");
@@ -10717,7 +10724,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 			cell *l = p1;
 			LIST_HANDLER(l);
 
-			while (is_list(l) && (cnt < 1000000)) {
+			while (is_list(l)) {
 				LIST_HEAD(l);
 				l = LIST_TAIL(l);
 				l = deref(q, l, p1_ctx);
@@ -10759,7 +10766,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 			cell *l = p1;
 			LIST_HANDLER(l);
 
-			while (is_list(l) && (cnt < 1000000)) {
+			while (is_list(l)) {
 				LIST_HEAD(l);
 				l = LIST_TAIL(l);
 				l = deref(q, l, p1_ctx);
