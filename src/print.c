@@ -732,9 +732,9 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			return dst - save_dst;
 		}
 
-		if (!running && is_variable(c)) {
-			//dst += snprintf(dst, dstlen, "%s", GET_STR(q, c));
-			dst += snprintf(dst, dstlen, "_%u", c->var_nbr);
+		if (!running && is_variable(c) && q->is_dump_vars) {
+			dst += snprintf(dst, dstlen, "%s", q->p->vartab.var_name[c->var_nbr-1]);
+			//dst += snprintf(dst, dstlen, "_%u", c->var_nbr);
 			return dst - save_dst;
 		}
 

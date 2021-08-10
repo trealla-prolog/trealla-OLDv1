@@ -511,6 +511,7 @@ struct query_ {
 	bool has_attrs:1;
 	bool in_hook:1;
 	bool do_dump_vars:1;
+	bool is_dump_vars:1;
 	bool status:1;
 	bool resume:1;
 	bool no_tco:1;

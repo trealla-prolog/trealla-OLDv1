@@ -1346,6 +1346,8 @@ static void dump_vars(query *q, bool partial)
 	frame *g = GET_FRAME(0);
 	int any = 0;
 
+	q->is_dump_vars = true;
+
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
 		if (!strcmp(p->vartab.var_name[i], "_"))
 			continue;
@@ -1381,10 +1383,13 @@ static void dump_vars(query *q, bool partial)
 			parens = true;
 
 		if (parens) fputc('(', stdout);
+
 		print_term(q, stdout, c, q->latest_ctx, -2);
 		if (parens) fputc(')', stdout);
 		any++;
 	}
+
+	q->is_dump_vars = false;
 
 	if (any && !partial) {
 		fprintf(stdout, ".\n");
