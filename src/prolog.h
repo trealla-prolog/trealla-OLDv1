@@ -18,3 +18,5 @@ extern idx_t g_sys_elapsed_s, g_sys_queue_s, g_braces_s, g_call_s, g_braces_s;
 extern idx_t g_stream_property_s, g_unify_s, g_on_s, g_off_s, g_sys_var_s;
 extern idx_t g_plus_s, g_minus_s, g_once_s, g_post_unify_hook_s, g_sys_record_key_s;
 extern idx_t g_and_s, g_or_s, g_at_s;
+
+extern void sigfn(int s);

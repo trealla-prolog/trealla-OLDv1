@@ -36,10 +36,10 @@
 }
 #endif
 
-static void sigfn(int s)
+void sigfn(int s)
 {
-        (void) s;
-	signal(SIGINT, &sigfn);
+	(void) s;
+	signal(SIGINT, NULL);
 	g_tpl_interrupt = 1;
 }
 

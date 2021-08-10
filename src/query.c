@@ -1401,6 +1401,7 @@ static void dump_vars(query *q, bool partial)
 
 static int check_interrupt(query *q)
 {
+	signal(SIGINT, &sigfn);
 	g_tpl_interrupt = 0;
 
 	for (;;) {
