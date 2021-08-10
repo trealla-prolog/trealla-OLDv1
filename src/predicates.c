@@ -5612,9 +5612,8 @@ static bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx, ref *list)
 
 	for (idx_t i = 0; i < nbr_cells; i++) {
 		if (is_variable(p1)) {
-			if (in_list(p1, list)) {
+			if (in_list(p1, list))
 				return true;
-			}
 
 			ref nlist;
 			nlist.c = p1;
@@ -10678,13 +10677,6 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		return do_length(q);
 
 	GET_FIRST_ARG(p1,list_or_nil_or_var);
-
-	printf("*** here1\n");
-
-	if (is_cyclic_term(q, p1, p1_ctx, NULL))
-		return throw_error(q, p1, "type_error", "list");
-
-	printf("*** here2\n");
 
 	if (!is_variable(p1) && !is_nil(p1)
 		&& !is_string(p1) && !is_valid_list(q, p1, p1_ctx, true))
