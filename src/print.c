@@ -733,7 +733,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		}
 
 		if (!running && is_variable(c)) {
-			//dst += snprintf(dst, dstlen, "s", GET_STR(c));
+			//dst += snprintf(dst, dstlen, "s", GET_STR(q, c));
 			dst += snprintf(dst, dstlen, "_%u", c->var_nbr);
 			return dst - save_dst;
 		}
