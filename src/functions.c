@@ -1211,10 +1211,17 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 		if ((p1.val_int != 1) && (p2.val_int < 0))
 			return throw_error(q, &p1, "type_error", "float");
 
+		if (p2.val_int < 0) {
+			q->accum.val_int = pow(p1.val_int, p2.val_int);
+			q->accum.tag = TAG_INTEGER;
+			return pl_success;
+		}
+
 		if (p2.val_int > (INT32_MAX/2))
 			return throw_error(q, &p1, "evaluation_error", "range_error");
 
-		mp_int_expt_value(p1.val_int, p2.val_int, &q->tmp_ival);
+		if (mp_int_expt_value(p1.val_int, p2.val_int, &q->tmp_ival) != MP_OK)
+			return throw_error(q, &p1, "evaluation_error", "range_error");
 
 		if (mp_int_compare_value(&q->tmp_ival, MP_SMALL_MAX) > 0) {
 			SET_ACCUM();
