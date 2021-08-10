@@ -5583,12 +5583,66 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 	return search_predicate(q->st.m, &tmp) != NULL;
 }
 
+typedef struct ref_ ref;
+
+struct ref_ {
+	cell *c;
+	ref *next;
+};
+
+static bool in_list(cell *c, ref *list)
+{
+	while (list) {
+		if (c == list->c)
+			return true;
+
+		list = list->next;
+	}
+
+	return false;
+}
+
+static bool is_acyclic(query *q, cell *p1, idx_t p1_ctx, ref *list)
+{
+	if (!is_structure(p1))
+		return true;
+
+	idx_t nbr_cells = p1->nbr_cells - 1;
+	p1++;
+
+	for (idx_t i = 0; i < nbr_cells; i++) {
+		if (is_variable(p1)) {
+			if (in_list(p1, list)) {
+				return false;
+			}
+
+			ref nlist;
+			nlist.c = p1;
+			nlist.next = list;
+
+			cell *c = deref(q, p1, p1_ctx);
+			idx_t c_ctx = q->latest_ctx;
+
+			if (!is_acyclic(q, c, c_ctx, &nlist)) {
+				return false;
+			}
+		} else {
+			if (!is_acyclic(q, p1, p1_ctx, list)) {
+				return false;
+			}
+		}
+
+		nbr_cells -= p1->nbr_cells;
+		p1 += p1->nbr_cells;
+	}
+
+	return true;
+}
+
 static USE_RESULT pl_status fn_iso_acyclic_term_1(query *q)
 {
-	GET_FIRST_ARG(p_term,any);
-	ssize_t res = print_term_to_buf(q, NULL, 0, p_term, p_term_ctx, 1, 0, 0);
-	if (res < 0) q->cycle_error = true;
-	return !q->cycle_error;
+	GET_FIRST_ARG(p1,any);
+	return is_acyclic(q, p1, p1_ctx, NULL) ? pl_success : pl_failure;
 }
 
 static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
