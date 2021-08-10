@@ -6,12 +6,12 @@
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "iso_bagof_3_10",
-        "uid" : "aa359cd33e84befa",
+        "uid" : "a06f94ad9b8de087",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1628555533000,
-          "stop" : 1628555533000,
+          "start" : 1628578419000,
+          "stop" : 1628578419000,
           "duration" : 0
         },
         "flaky" : false,
@@ -19,13 +19,13 @@
         "parameters" : [ ]
       }, {
         "name" : "lgt_write_term_3_25",
-        "uid" : "958e1bae67d7ab55",
+        "uid" : "3a2e9a4b0815848a",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1628555630000,
-          "stop" : 1628555630002,
-          "duration" : 2
+          "start" : 1628578515000,
+          "stop" : 1628578515001,
+          "duration" : 1
         },
         "flaky" : false,
         "newFailed" : false,
@@ -36,12 +36,12 @@
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "iso_setof_3_12",
-        "uid" : "773fe8f85728e838",
+        "uid" : "bf9d535dec1f0f7d",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1628555613000,
-          "stop" : 1628555613000,
+          "start" : 1628578498000,
+          "stop" : 1628578498000,
           "duration" : 0
         },
         "flaky" : false,
@@ -49,6 +49,23 @@
         "parameters" : [ ]
       } ],
       "uid" : "7a65c89daad8cf82ce910dbf95cc8113"
+    }, {
+      "name" : "Success instead of failure",
+      "children" : [ {
+        "name" : "lgt_unify_with_occurs_check_2_17",
+        "uid" : "d3a9d463376219a6",
+        "parentUid" : "49a29710414d4733dc4aed8ebe3c827f",
+        "status" : "failed",
+        "time" : {
+          "start" : 1628578511000,
+          "stop" : 1628578511000,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      } ],
+      "uid" : "49a29710414d4733dc4aed8ebe3c827f"
     } ],
     "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
   } ],
