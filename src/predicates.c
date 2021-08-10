@@ -5610,29 +5610,29 @@ static bool is_cyclic_term_internal(query *q, cell *p1, idx_t p1_ctx, ref *list)
 	idx_t nbr_cells = p1->nbr_cells - 1;
 	p1++;
 
-	for (idx_t i = 0; i < nbr_cells; i++) {
+	while (nbr_cells) {
+		//printf("*** chk %p (%s)\n", p1, GET_STR(q, p1));
+
 		if (is_variable(p1)) {
-			if (in_list(p1, list))
+			if (in_list(p1, list)) {
+				//printf("*** chk2 %p (%u)\n", p1, p1->var_nbr);
 				return q->cycle_error = true;
+			}
 
 			ref nlist;
 			nlist.c = p1;
 			nlist.next = list;
+			//printf("*** add %p (%u)\n", p1, p1->var_nbr);
 
 			cell *c = deref(q, p1, p1_ctx);
 			idx_t c_ctx = q->latest_ctx;
 
-			if (is_cyclic_term_internal(q, c, c_ctx, &nlist)) {
+			if (is_cyclic_term_internal(q, c, c_ctx, &nlist))
 				return true;
-			}
-		} else {
-			if (is_cyclic_term_internal(q, p1, p1_ctx, list)) {
-				return true;
-			}
 		}
 
-		nbr_cells -= p1->nbr_cells;
-		p1 += p1->nbr_cells;
+		nbr_cells--;
+		p1++;
 	}
 
 	return false;
@@ -5647,7 +5647,7 @@ static USE_RESULT pl_status fn_iso_acyclic_term_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	q->cycle_error = false;
-	return !is_cyclic_term(q, p1, p1_ctx) ? pl_success : pl_failure;
+	return is_cyclic_term(q, p1, p1_ctx) ? pl_failure : pl_success;
 }
 
 static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
