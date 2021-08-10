@@ -732,9 +732,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			return dst - save_dst;
 		}
 
-		if (!running && is_variable(c) && 0) {
-			printf("*** here: %u / %u / %s\n", c->var_nbr, c->val_off, q->pl->pool+c->val_off);
-			dst += snprintf(dst, dstlen, "%s", q->pl->pool+c->val_off);
+		if (!running && is_variable(c)) {
+			dst += snprintf(dst, dstlen, "_%u", c->var_nbr);
 			return dst - save_dst;
 		}
 
