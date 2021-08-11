@@ -645,6 +645,9 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 
+	if (is_nil(p2))
+		return throw_error(q, p2, "syntax_error", "chars_list_expected");
+
 	// Verify the list
 
 	int_t cnt = 0;
@@ -712,6 +715,10 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 
 			const char *src = GET_STR(q, head);
 			int ch = *src;
+
+			if (!ch)
+				return throw_error(q, head, "type_error", "character");
+
 			*dst++ = ch;
 
 			cell *tail = LIST_TAIL(p2);
@@ -925,6 +932,9 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
+
+	if (is_nil(p2))
+		return throw_error(q, p2, "syntax_error", "codes_list_expected");
 
 	// Verify the list
 
