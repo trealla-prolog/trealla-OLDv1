@@ -648,6 +648,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 	// Verify the list
 
 	int_t cnt = 0;
+	bool any_vars = false;
 
 	if (!is_variable(p2)) {
 		cell *save_p2 = p2;
@@ -657,6 +658,9 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		while (is_list(p2)) {
 			cell *head = LIST_HEAD(p2);
 			head = deref(q, head, p2_ctx);
+
+			if (is_variable(head))
+				any_vars = true;
 
 			if (!is_atom(head) && is_variable(p1))
 				return throw_error(q, head, "type_error", "character");
@@ -681,11 +685,17 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		if (!is_nil(p2) && !is_variable(p2))
 			return throw_error(q, p2, "type_error", "list");
 
+		if (is_variable(p2))
+			any_vars = true;
+
 		p2 = save_p2;
 		p2_ctx = save_p2_ctx;
 	}
 
-	if (!is_variable(p2) && is_variable(p1)) {
+	if (is_variable(p1) && any_vars)
+		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
+
+	if (!is_variable(p2) && !any_vars) {
 		char *tmpbuf = malloc(cnt+1);
 		char *dst = tmpbuf;
 		*dst = '\0';
