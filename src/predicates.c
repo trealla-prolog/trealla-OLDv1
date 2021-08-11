@@ -10694,10 +10694,6 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 
 	if (is_smallint(p2) && !is_variable(p1)) {
 		if (get_integer(p2) == 0) {
-
-			if (!is_valid_list(q, p1, p1_ctx, false))
-				return throw_error(q, p1, "type_error", "list");
-
 			cell tmp;
 			make_literal(&tmp, g_nil_s);
 			return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
