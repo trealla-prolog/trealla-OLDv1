@@ -641,6 +641,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 {
 	GET_FIRST_ARG(p1,number_or_var);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
+	cell *orig_p2 = p2;
 
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
@@ -686,7 +687,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		}
 
 		if (!is_nil(p2) && !is_variable(p2))
-			return throw_error(q, p2, "type_error", "list");
+			return throw_error(q, orig_p2, "type_error", "list");
 
 		if (is_variable(p2))
 			any_vars = true;
@@ -728,7 +729,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 
 		if (!is_nil(p2)) {
 			free(tmpbuf);
-			return throw_error(q, p2, "type_error", "list");
+			return throw_error(q, orig_p2, "type_error", "list");
 		}
 
 		*dst = '\0';
@@ -929,6 +930,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 {
 	GET_FIRST_ARG(p1,number_or_var);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
+	cell *orig_p2 = p2;
 
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
@@ -969,7 +971,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 		}
 
 		if (!is_nil(p2) && !is_variable(p2))
-			return throw_error(q, p2, "type_error", "list");
+			return throw_error(q, orig_p2, "type_error", "list");
 
 		if (is_variable(p2))
 			any_vars = true;
@@ -1007,7 +1009,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 		}
 
 		if (!is_nil(p2))
-			return throw_error(q, p2, "type_error", "list");
+			return throw_error(q, orig_p2, "type_error", "list");
 
 		*dst = '\0';
 		cell tmp;
@@ -5256,14 +5258,22 @@ static USE_RESULT pl_status fn_iso_throw_1(query *q)
 	return fn_iso_catch_3(q);
 }
 
+// TODO: rewrite error throwing not to do printing/parsing
+
 static pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expected, cell *goal)
 {
 	q->did_throw = true;
-	idx_t c_ctx = q->latest_ctx;
+	idx_t c_ctx = q->st.curr_frame;
 	int save_quoted = q->quoted;
 	q->quoted = 1;
-	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, 1, 0, 0);
-	if (len <= 0) { q->error = true; q->quoted = save_quoted; return pl_failure; }
+	ssize_t len = 0;
+	bool is_cyclic = is_cyclic_term(q, c, c_ctx);
+
+	if (is_cyclic)
+		len = print_term_to_buf(q, NULL, 0, c, c_ctx, 0, false, 1);
+	else
+		len = print_term_to_buf(q, NULL, 0, c, c_ctx, 1, false, 0);
+
 	char *dst = malloc(len+1+1024);
 	may_ptr_error(dst);
 	int off = 0;
@@ -5272,7 +5282,11 @@ static pl_status throw_error3(query *q, cell *c, const char *err_type, const cha
 		off += sprintf(dst, "%s:", q->st.m->name);
 	}
 
-	len = print_term_to_buf(q, dst+off, len+1, c, c_ctx, 1, 0, 0) + off;
+	if (is_cyclic)
+		len = print_term_to_buf(q, dst+off, len+1, c, c_ctx, 0, false, 1) + off;
+	else
+		len = print_term_to_buf(q, dst+off, len+1, c, c_ctx, 1, false, 0) + off;
+
 	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q, goal) + 1024;
 	char *dst2 = malloc(len2+1);
 	may_ptr_error(dst2);
