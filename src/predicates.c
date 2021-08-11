@@ -10630,12 +10630,8 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	if (is_negative(p2))
 		return throw_error(q, p2, "domain_error", "not_less_than_zero");
 
-	if (is_cyclic_term(q, p1, p1_ctx))
-		return throw_error(q, p1, "type_error", "list");
-
 	if (!is_variable(p1) && !is_nil(p1) && is_smallint(p2)
-		//&& !is_string(p1) && !is_valid_list_up_to(q, p1, p1_ctx, true, get_smallint(p2)))
-		&& !is_string(p1) && !is_valid_list(q, p1, p1_ctx, true))
+		&& !is_string(p1) && !is_valid_list_up_to(q, p1, p1_ctx, true, get_smallint(p2)))
 		return throw_error(q, p1, "type_error", "list");
 
 	if (!is_variable(p1) && !is_nil(p1) && is_variable(p2)
