@@ -646,7 +646,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 
 	if (is_nil(p2))
-		return throw_error(q, p2, "syntax_error", "chars_list_expected");
+		return throw_error(q, p2, "syntax_error", "incomplete");
 
 	// Verify the list
 
@@ -934,7 +934,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 
 	if (is_nil(p2))
-		return throw_error(q, p2, "syntax_error", "codes_list_expected");
+		return throw_error(q, p2, "syntax_error", "incomplete");
 
 	// Verify the list
 
@@ -5319,7 +5319,7 @@ static pl_status throw_error3(query *q, cell *c, const char *err_type, const cha
 		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, goal->arity);
 
 	} else if (!strcmp(err_type, "syntax_error")) {
-		snprintf(dst2, len2+1, "error(%s((%s,%s)),(%s)/%u).", err_type, expected, dst, functor, goal->arity);
+		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, goal->arity);
 
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "evaluable")) {
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),(%s)/%u).", err_type, expected, is_callable(c)?GET_STR(q, c):dst, c->arity, functor, goal->arity);
