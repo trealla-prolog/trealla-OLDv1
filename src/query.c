@@ -22,7 +22,7 @@ static const unsigned INITIAL_NBR_HEAP = 8000;		// cells
 static const unsigned INITIAL_NBR_QUEUE = 1000;		// cells
 
 static const unsigned INITIAL_NBR_GOALS = 1000;
-static const unsigned INITIAL_NBR_SLOTS = 1000;
+static const unsigned INITIAL_NBR_SLOTS = 32000;
 static const unsigned INITIAL_NBR_CHOICES = 1000;
 static const unsigned INITIAL_NBR_TRAILS = 1000;
 
@@ -153,7 +153,7 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 		q->max_slots = q->st.sp;
 
 		if (nbr >= q->slots_size) {
-			idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, q->slots_size*3/2>nbr?q->slots_size*3/2:nbr);
+			idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, (nbr*3/2));
 			if (!new_slotssize) {
 				q->error = true;
 				return pl_error;
@@ -802,7 +802,8 @@ unsigned create_vars(query *q, unsigned cnt)
 
 	unsigned var_nbr = g->nbr_vars;
 
-	may_error(check_slot(q, cnt));
+	if (check_slot(q, cnt) != pl_success)
+		return 0;
 
 	if ((g->ctx + g->nbr_slots) >= q->st.sp) {
 		g->nbr_slots += cnt;

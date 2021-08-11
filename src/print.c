@@ -600,12 +600,14 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	unsigned print_list = 0, cnt = 0;
 
 	while (is_iso_list(c)) {
-		if (cnt++ > MAX_DEPTH) {
-			return ~(dst - save_dst);
+
+		if (cnt++ > 256) {
+			dst += snprintf(dst, dstlen, "%s", "|...]");
+			return dst - save_dst;
 		}
 
 		if (q->max_depth && (depth >= q->max_depth) && (running < 0)) {
-			dst += snprintf(dst, dstlen, "%s", "|...");
+			dst += snprintf(dst, dstlen, "%s", "|...]");
 			return dst - save_dst;
 		}
 
