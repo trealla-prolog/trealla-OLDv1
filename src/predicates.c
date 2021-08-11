@@ -10664,18 +10664,21 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		return do_length(q);
 
 	GET_FIRST_ARG(p1,list_or_nil_or_var);
-
-	//if (is_cyclic_term(q, p1, p1_ctx))
-	//	return pl_failure;
-
-	if (!is_variable(p1) && !is_nil(p1)
-		&& !is_string(p1) && !is_valid_list(q, p1, p1_ctx, true))
-		return throw_error(q, p1, "type_error", "list");
-
 	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_integer(p2) && !is_smallint(p2))
 		return throw_error(q, p1, "type_error", "integer");
+
+	if (is_negative(p2))
+		return throw_error(q, p2, "domain_error", "not_less_than_zero");
+
+	if (!is_variable(p1) && !is_nil(p1) && is_smallint(p2)
+		&& !is_string(p1) && !is_valid_list_up_to(q, p1, p1_ctx, false, get_smallint(p2)))
+		return throw_error(q, p1, "type_error", "list");
+
+	if (!is_variable(p1) && !is_nil(p1) && is_variable(p2)
+		&& !is_valid_list(q, p1, p1_ctx, true))
+		return throw_error(q, p1, "type_error", "list");
 
 	if (is_variable(p1) && is_variable(p2)) {
 		if (p1 == p2)
@@ -10730,10 +10733,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		return pl_success;
 	}
 
-	if (is_integer(p2) && !is_variable(p1)) {
-		if (is_negative(p2))
-			return throw_error(q, p2, "domain_error", "not_less_than_zero");
-
+	if (is_smallint(p2) && !is_variable(p1)) {
 		if (get_integer(p2) == 0) {
 			cell tmp;
 			make_literal(&tmp, g_nil_s);
@@ -10753,27 +10753,26 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 				l = LIST_TAIL(l);
 				l = deref(q, l, p1_ctx);
 				p1_ctx = q->latest_ctx;
-				cnt++;
+
+				if (++cnt == get_smallint(p2))
+					break;
 			}
 
-			if (is_variable(l) && is_smallint(p2) && (get_smallint(p2) == cnt)) {
-				cell tmp;
-				make_literal(&tmp, g_nil_s);
-				return unify(q, l, p1_ctx, &tmp, q->st.curr_frame);
-			}
+			if (!is_nil(l))
+				return pl_failure;
 		}
 
-		return get_integer(p2) == cnt;
+		return get_smallint(p2) == cnt;
 	}
 
-	if (is_variable(p1) && is_integer(p2)) {
+	if (is_variable(p1) && is_smallint(p2)) {
 		if (is_negative(p2))
 			return throw_error(q, p2, "domain_error", "not_less_than_zero");
 
 		if (is_ge(p2,MAX_VARS))
 			return throw_error(q, p2, "resource_error", "too_many_vars");
 
-		idx_t nbr = get_integer(p2);
+		idx_t nbr = get_smallint(p2);
 
 		if (nbr == 0) {
 			cell tmp;

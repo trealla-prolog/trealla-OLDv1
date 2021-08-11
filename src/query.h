@@ -34,6 +34,7 @@ extern void make_literal(cell *tmp, idx_t offset);
 extern int get_stream(query *q, cell *p1);
 extern bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx);
 
+extern bool is_valid_list_up_to(query *q, cell *p1, idx_t p1_ctx, bool allow_partials, int n);
 extern bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials);
 extern size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes);
 
