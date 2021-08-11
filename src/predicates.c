@@ -5583,47 +5583,6 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 	return search_predicate(q->st.m, &tmp) != NULL;
 }
 
-static bool is_cyclic_term_internal(query *q, cell *p1, idx_t p1_ctx, ref *list)
-{
-	if (!is_structure(p1))
-		return false;
-
-	idx_t nbr_cells = p1->nbr_cells - 1;
-	p1++;
-
-	while (nbr_cells) {
-		//printf("*** chk %p (%s)\n", p1, GET_STR(q, p1));
-
-		if (is_variable(p1)) {
-			if (in_ref_list(p1, list)) {
-				//printf("*** chk2 %p (%u)\n", p1, p1->var_nbr);
-				return q->cycle_error = true;
-			}
-
-			ref nlist;
-			nlist.c = p1;
-			nlist.next = list;
-			//printf("*** add %p (%u)\n", p1, p1->var_nbr);
-
-			cell *c = deref(q, p1, p1_ctx);
-			idx_t c_ctx = q->latest_ctx;
-
-			if (is_cyclic_term_internal(q, c, c_ctx, &nlist))
-				return true;
-		}
-
-		nbr_cells--;
-		p1++;
-	}
-
-	return false;
-}
-
-bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx)
-{
-	return is_cyclic_term_internal(q, p1, p1_ctx, NULL);
-}
-
 static USE_RESULT pl_status fn_iso_acyclic_term_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);

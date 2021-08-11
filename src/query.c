@@ -167,6 +167,42 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 	return pl_success;
 }
 
+static bool is_cyclic_term_internal(query *q, cell *p1, idx_t p1_ctx, ref *list)
+{
+	if (!is_structure(p1))
+		return false;
+
+	idx_t nbr_cells = p1->nbr_cells - 1;
+	p1++;
+
+	while (nbr_cells) {
+		if (is_variable(p1)) {
+			if (in_ref_list(p1, list))
+				return q->cycle_error = true;
+
+			ref nlist;
+			nlist.c = p1;
+			nlist.next = list;
+
+			cell *c = deref(q, p1, p1_ctx);
+			idx_t c_ctx = q->latest_ctx;
+
+			if (is_cyclic_term_internal(q, c, c_ctx, &nlist))
+				return true;
+		}
+
+		nbr_cells--;
+		p1++;
+	}
+
+	return false;
+}
+
+bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx)
+{
+	return is_cyclic_term_internal(q, p1, p1_ctx, NULL);
+}
+
 static void next_key(query *q)
 {
 	if (q->st.iter) {
