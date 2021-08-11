@@ -10632,7 +10632,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		return throw_error(q, p2, "domain_error", "not_less_than_zero");
 
 	if (!is_variable(p1) && !is_nil(p1) && is_smallint(p2)
-		&& !is_string(p1) && !is_valid_list_up_to(q, p1, p1_ctx, false, get_smallint(p2)))
+		&& !is_string(p1) && !is_valid_list_up_to(q, p1, p1_ctx, true, get_smallint(p2)))
 		return throw_error(q, p1, "type_error", "list");
 
 	if (!is_variable(p1) && !is_nil(p1) && is_variable(p2)
@@ -10715,6 +10715,35 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 
 				if (++cnt == get_smallint(p2))
 					break;
+			}
+
+			if (is_variable(l)) {
+				cell *save_l = l;
+				idx_t save_l_ctx = p1_ctx;
+
+				unsigned var_nbr = 0, nbr = 1;
+
+				if (!(var_nbr = create_vars(q, nbr)))
+					return throw_error(q, p2, "resource_error", "too_many_vars");
+
+				cell tmp;
+				tmp.tag = TAG_VARIABLE;
+				tmp.nbr_cells = 1;
+				tmp.flags = FLAG2_FRESH | FLAG2_ANON;
+				tmp.val_off = g_anon_s;
+				tmp.var_nbr = var_nbr++;
+				tmp.arity = 0;
+				allocate_list(q, &tmp);
+
+				for (unsigned i = 1; i < nbr; i++) {
+					tmp.var_nbr = var_nbr++;
+					append_list(q, &tmp);
+				}
+
+				cell *l = end_list(q);
+				may_ptr_error(l);
+				set_var(q, save_l, save_l_ctx, l, q->st.curr_frame);
+				return pl_success;
 			}
 
 			if (!is_nil(l))
