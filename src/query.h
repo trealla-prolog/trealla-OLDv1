@@ -76,7 +76,7 @@ struct ref_ {
 	ref *next;
 };
 
-inline static bool in_ref_list(cell *c, ref *rlist)
+inline static bool is_in_ref_list(cell *c, ref *rlist)
 {
 	while (rlist) {
 		if (c == rlist->c)

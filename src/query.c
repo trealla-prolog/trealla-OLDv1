@@ -177,7 +177,7 @@ static bool is_cyclic_term_internal(query *q, cell *p1, idx_t p1_ctx, ref *list)
 
 	while (nbr_cells) {
 		if (is_variable(p1)) {
-			if (in_ref_list(p1, list))
+			if (is_in_ref_list(p1, list))
 				return q->cycle_error = true;
 
 			ref nlist;
