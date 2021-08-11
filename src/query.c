@@ -167,6 +167,25 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 	return pl_success;
 }
 
+struct ref_ {
+	cell *c;
+	idx_t c_ctx;
+	ref *next;
+};
+
+inline static bool is_in_ref_list(cell *c, idx_t c_ctx, ref *rlist)
+{
+	while (rlist) {
+		if ((c->var_nbr == rlist->c->var_nbr)
+			&& (c_ctx == rlist->c_ctx))
+			return true;
+
+		rlist = rlist->next;
+	}
+
+	return false;
+}
+
 static bool is_cyclic_term_internal(query *q, cell *p1, idx_t p1_ctx, ref *list)
 {
 	if (!is_structure(p1))
@@ -177,11 +196,12 @@ static bool is_cyclic_term_internal(query *q, cell *p1, idx_t p1_ctx, ref *list)
 
 	while (nbr_cells) {
 		if (is_variable(p1)) {
-			if (is_in_ref_list(p1, list))
+			if (is_in_ref_list(p1, p1_ctx, list))
 				return q->cycle_error = true;
 
 			ref nlist;
 			nlist.c = p1;
+			nlist.c_ctx = p1_ctx;
 			nlist.next = list;
 
 			cell *c = deref(q, p1, p1_ctx);

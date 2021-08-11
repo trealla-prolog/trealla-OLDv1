@@ -10634,6 +10634,10 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		&& !is_string(p1) && !is_valid_list_up_to(q, p1, p1_ctx, true, get_smallint(p2)))
 		return throw_error(q, p1, "type_error", "list");
 
+	if (is_structure(p1) && is_variable(p2)
+		&& is_cyclic_term(q, p1, p1_ctx))
+		return throw_error(q, p1, "type_error", "list");
+
 	if (!is_variable(p1) && !is_nil(p1) && is_variable(p2)
 		&& !is_valid_list(q, p1, p1_ctx, true))
 		return throw_error(q, p1, "type_error", "list");
@@ -10743,6 +10747,12 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 				may_ptr_error(l);
 				set_var(q, save_l, save_l_ctx, l, q->st.curr_frame);
 				return pl_success;
+			}
+
+			if (is_variable(l) && (cnt == get_smallint(p2))) {
+				cell tmp;
+				make_literal(&tmp, g_nil_s);
+				return unify(q, l, p1_ctx, &tmp, q->st.curr_frame);
 			}
 
 			if (!is_nil(l))
