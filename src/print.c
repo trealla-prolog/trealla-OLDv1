@@ -600,7 +600,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	unsigned print_list = 0, cnt = 0;
 
 	while (is_iso_list(c)) {
-
 		if (cnt++ > 256) {
 			dst += snprintf(dst, dstlen, "%s", "|...]");
 			return dst - save_dst;

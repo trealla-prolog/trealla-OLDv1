@@ -199,16 +199,18 @@ static bool is_cyclic_term_internal(query *q, cell *p1, idx_t p1_ctx, ref *list)
 			if (is_in_ref_list(p1, p1_ctx, list))
 				return q->cycle_error = true;
 
-			ref nlist;
-			nlist.c = p1;
-			nlist.c_ctx = p1_ctx;
-			nlist.next = list;
+			ref *nlist = malloc(sizeof(ref));
+			nlist->c = p1;
+			nlist->c_ctx = p1_ctx;
+			nlist->next = list;
 
 			cell *c = deref(q, p1, p1_ctx);
 			idx_t c_ctx = q->latest_ctx;
 
-			if (is_cyclic_term_internal(q, c, c_ctx, &nlist))
+			if (is_cyclic_term_internal(q, c, c_ctx, nlist))
 				return true;
+
+			free(nlist);
 		}
 
 		nbr_cells--;
@@ -1466,7 +1468,11 @@ static void dump_vars(query *q, bool partial)
 
 		if (parens) fputc('(', stdout);
 
-		print_term(q, stdout, c, q->latest_ctx, -2);
+		if (is_cyclic_term(q, c, q->latest_ctx))
+			print_term(q, stdout, c, q->latest_ctx, 0);
+		else
+			print_term(q, stdout, c, q->latest_ctx, -2);
+
 		if (parens) fputc(')', stdout);
 		any++;
 	}
