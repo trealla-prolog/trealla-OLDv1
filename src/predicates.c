@@ -10717,7 +10717,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 					break;
 			}
 
-			if (is_variable(l)) {
+			if (is_variable(l) && (cnt != get_smallint(p2))) {
 				cell *save_l = l;
 				idx_t save_l_ctx = p1_ctx;
 
