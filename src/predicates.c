@@ -10721,7 +10721,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 				cell *save_l = l;
 				idx_t save_l_ctx = p1_ctx;
 
-				unsigned var_nbr = 0, nbr = 1;
+				unsigned var_nbr = 0, nbr = get_smallint(p2)-cnt;
 
 				if (!(var_nbr = create_vars(q, nbr)))
 					return throw_error(q, p2, "resource_error", "too_many_vars");
