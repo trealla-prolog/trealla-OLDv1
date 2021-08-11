@@ -235,7 +235,11 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
             } else if (redo) {
                 for (int i = 0; i < diff; i++) {
                     CHECK_BUF(1);
-                    *dst++ = argval?argval:' ';
+
+                    if (argval)
+						dst += put_char_utf8(dst, argval);
+					else
+						*dst++ = ' ';
                 }
             }
 
