@@ -321,6 +321,12 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes)
 			break;
 		}
 
+		// FIXME: proper cycle check
+		if (cnt == 1000000) {
+			is_chars_list = 0;
+			break;
+		}
+
 		if (is_integer(c)) {
 			int ch = get_integer(c);
 			char tmp[20];
