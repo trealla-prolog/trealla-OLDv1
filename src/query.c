@@ -200,6 +200,7 @@ static bool is_cyclic_term_internal(query *q, cell *p1, idx_t p1_ctx, ref *list)
 
 bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx)
 {
+	q->cycle_error = false;
 	return is_cyclic_term_internal(q, p1, p1_ctx, NULL);
 }
 
