@@ -6,12 +6,12 @@
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "iso_bagof_3_10",
-        "uid" : "e9dca51e3af7e377",
+        "uid" : "1331643c41185fc6",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1628585503000,
-          "stop" : 1628585503000,
+          "start" : 1628644645000,
+          "stop" : 1628644645000,
           "duration" : 0
         },
         "flaky" : false,
@@ -19,12 +19,12 @@
         "parameters" : [ ]
       }, {
         "name" : "lgt_write_term_3_25",
-        "uid" : "aa1b4350f5a839c7",
+        "uid" : "457b8c72580633d4",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1628585586000,
-          "stop" : 1628585586001,
+          "start" : 1628644744000,
+          "stop" : 1628644744001,
           "duration" : 1
         },
         "flaky" : false,
@@ -33,15 +33,32 @@
       } ],
       "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
     }, {
+      "name" : "Failure instead of error",
+      "children" : [ {
+        "name" : "commons_length_2_16",
+        "uid" : "d8c6c0b6fc5191d5",
+        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
+        "status" : "failed",
+        "time" : {
+          "start" : 1628644688000,
+          "stop" : 1628644688000,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      } ],
+      "uid" : "f1d33384b55b86e6da2d391daa3c4717"
+    }, {
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "iso_setof_3_12",
-        "uid" : "81c4d8b7c4c84b87",
+        "uid" : "79e4f55bcda0d0d9",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1628585571000,
-          "stop" : 1628585571000,
+          "start" : 1628644727000,
+          "stop" : 1628644727000,
           "duration" : 0
         },
         "flaky" : false,
