@@ -571,7 +571,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		return dst - save_dst;
 	}
 
-	int is_chars_list = scan_is_chars_list(q, c, c_ctx, false);
+	int is_chars_list = !is_cyclic_term(q, c, c_ctx) && scan_is_chars_list(q, c, c_ctx, false);
 
 	if (is_chars_list) {
 		cell *l = c;
