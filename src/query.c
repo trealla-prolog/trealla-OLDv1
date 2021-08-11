@@ -330,7 +330,8 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes)
 	LIST_HANDLER(l);
 	int cnt = 0;
 
-	while (is_iso_list(l) && (q->st.m->flag.double_quote_chars || allow_codes)) {
+	while (is_iso_list(l) && !is_cyclic_term(q, l, l_ctx)
+		&& (q->st.m->flag.double_quote_chars || allow_codes)) {
 		cell *h = LIST_HEAD(l);
 		cell *c = q ? deref(q, h, l_ctx) : h;
 
@@ -338,12 +339,6 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes)
 			is_chars_list = 0;
 			break;
 		} else if (!is_integer(c) && !is_atom(c)) {
-			is_chars_list = 0;
-			break;
-		}
-
-		// FIXME: proper cycle check
-		if (cnt == 1000000) {
 			is_chars_list = 0;
 			break;
 		}
