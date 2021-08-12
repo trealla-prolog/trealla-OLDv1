@@ -718,7 +718,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 			int ch = *src;
 
 			if (!ch)
-				return throw_error(q, head, "syntax_error", "character");
+				return throw_error(q, head, "type_error", "character");
 
 			*dst++ = ch;
 
