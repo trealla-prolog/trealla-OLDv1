@@ -5166,12 +5166,9 @@ static pl_status throw_error3(query *q, cell *c, const char *err_type, const cha
 	int save_quoted = q->quoted;
 	q->quoted = 1;
 	ssize_t len = 0;
-	bool is_cyclic = is_cyclic_term(q, c, c_ctx);
+	bool running = !is_cyclic_term(q, c, c_ctx);
 
-	if (is_cyclic)
-		len = print_term_to_buf(q, NULL, 0, c, c_ctx, 0, false, 1);
-	else
-		len = print_term_to_buf(q, NULL, 0, c, c_ctx, 1, false, 0);
+	len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 
 	char *dst = malloc(len+1+1024);
 	may_ptr_error(dst);
@@ -5181,10 +5178,7 @@ static pl_status throw_error3(query *q, cell *c, const char *err_type, const cha
 		off += sprintf(dst, "%s:", q->st.m->name);
 	}
 
-	if (is_cyclic)
-		len = print_term_to_buf(q, dst+off, len+1, c, c_ctx, 0, false, 1) + off;
-	else
-		len = print_term_to_buf(q, dst+off, len+1, c, c_ctx, 1, false, 0) + off;
+	len = print_term_to_buf(q, dst+off, len+1, c, c_ctx, running, false, 0) + off;
 
 	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q, goal) + 1024;
 	char *dst2 = malloc(len2+1);
