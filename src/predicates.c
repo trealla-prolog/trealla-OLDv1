@@ -321,6 +321,398 @@ static USE_RESULT pl_status fn_iso_notunify_2(query *q)
 	return !fn_iso_unify_2(q);
 }
 
+static bool collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, int depth)
+{
+	if (depth > MAX_DEPTH)
+		return false;
+
+	for (unsigned i = 0; i < nbr_cells;) {
+		cell *c = deref(q, p1, p1_ctx);
+		int found = 0;
+
+		if (is_structure(c)) {
+			collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1, depth+1);
+		} else if (is_variable(c)) {
+			for (unsigned idx = 0; idx < q->st.m->pl->tab_idx; idx++) {
+				if ((q->st.m->pl->tab1[idx] == q->latest_ctx) && (q->st.m->pl->tab2[idx] == c->var_nbr)) {
+					q->st.m->pl->tab4[idx]++;
+					found = 1;
+					break;
+				}
+			}
+
+			if (!found) {
+				q->st.m->pl->tab1[q->st.m->pl->tab_idx] = q->latest_ctx;
+				q->st.m->pl->tab2[q->st.m->pl->tab_idx] = c->var_nbr;
+				q->st.m->pl->tab3[q->st.m->pl->tab_idx] = c->val_off;
+				q->st.m->pl->tab4[q->st.m->pl->tab_idx] = 1;
+				q->st.m->pl->tab5[q->st.m->pl->tab_idx] = is_anon(c) ? 1 : 0;
+				q->st.m->pl->tab_idx++;
+			}
+		}
+
+		i += p1->nbr_cells;
+		p1 += p1->nbr_cells;
+	}
+
+	return true;
+}
+
+static bool parse_read_params(query *q, parser *p, cell *c, cell **vars, idx_t *vars_ctx, cell **varnames, idx_t *varnames_ctx, cell **sings, idx_t *sings_ctx)
+{
+	if (!is_structure(c)) {
+		DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
+		return false;
+	}
+
+	cell *c1 = deref(q, c+1, q->latest_ctx);
+
+	if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "character_escapes")) {
+		if (is_literal(c1))
+			p->flag.character_escapes = !slicecmp2(GET_STR(q, c1), LEN_STR(q, c1), "true");
+	} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "double_quotes")) {
+		if (is_literal(c1)) {
+			if (!slicecmp2(GET_STR(q, c1), LEN_STR(q, c1), "atom")) {
+				p->flag.double_quote_codes = p->flag.double_quote_chars = false;
+				p->flag.double_quote_atom = true;
+			} else if (!slicecmp2(GET_STR(q, c1), LEN_STR(q, c1), "chars")) {
+				p->flag.double_quote_atom = p->flag.double_quote_codes = false;
+				p->flag.double_quote_chars = true;
+			} else if (!slicecmp2(GET_STR(q, c1), LEN_STR(q, c1), "codes")) {
+				p->flag.double_quote_atom = p->flag.double_quote_chars = false;
+				p->flag.double_quote_codes = true;
+			}
+		}
+	} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "variables")) {
+		if (is_variable(c1)) {
+			cell *v = c1;
+			if (vars) *vars = v;
+			if (vars_ctx) *vars_ctx = q->latest_ctx;
+		} else {
+			DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
+			return false;
+		}
+	} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "variable_names")) {
+		if (is_variable(c1)) {
+			cell *v = c1;
+			if (varnames) *varnames = v;
+			if (varnames_ctx) *varnames_ctx = q->latest_ctx;
+		} else {
+			DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
+			return false;
+		}
+	} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "singletons")) {
+		if (is_variable(c1)) {
+			cell *v = c1;
+			if (sings) *sings = v;
+			if (sings_ctx) *sings_ctx = q->latest_ctx;
+		} else {
+			DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
+			return false;
+		}
+	} else {
+		DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
+		return false;
+	}
+
+	return true;
+}
+
+static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, char *src)
+{
+	if (!str->p)
+		str->p = create_parser(q->st.m);
+
+	parser *p = str->p;
+	p->fp = str->fp;
+	reset(p);
+	p->one_shot = true;
+	p->error = false;
+	p->flag = q->st.m->flag;
+	cell *vars = NULL, *varnames = NULL, *sings = NULL;
+	idx_t vars_ctx = 0, varnames_ctx = 0, sings_ctx = 0;
+	LIST_HANDLER(p2);
+
+	while (is_list(p2)) {
+		cell *h = LIST_HEAD(p2);
+		h = deref(q, h, p2_ctx);
+
+		if (is_variable(h))
+			return throw_error(q, p2, "instantiation_error", "read_option");
+
+		if (!parse_read_params(q, p, h, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx))
+			return pl_success;
+
+		p2 = LIST_TAIL(p2);
+		p2 = deref(q, p2, p2_ctx);
+		p2_ctx = q->latest_ctx;
+	}
+
+	if (is_variable(p2))
+		return throw_error(q, p2, "instantiation_error", "read_option");
+
+	if (!is_nil(p2))
+		return throw_error(q, p2, "type_error", "list");
+
+	for (;;) {
+#if 0
+		if (isatty(fileno(str->fp)) && !src) {
+			printf("| ");
+			fflush(str->fp);
+		}
+#endif
+
+		if (!src && (!p->srcptr || !*p->srcptr || (*p->srcptr == '\n'))) {
+			if (p->srcptr && (*p->srcptr == '\n'))
+				p->line_nbr++;
+
+			if (getline(&p->save_line, &p->n_line, str->fp) == -1) {
+				if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+					clearerr(str->fp);
+					do_yield_0(q, 1);
+					return pl_failure;
+				}
+
+				str->at_end_of_file = str->eof_action != eof_action_reset;
+
+				if (str->eof_action == eof_action_reset)
+					clearerr(str->fp);
+
+				if (vars) {
+					cell tmp;
+					make_literal(&tmp, g_nil_s);
+					set_var(q, vars, vars_ctx, &tmp, q->st.curr_frame);
+				}
+
+				if (varnames) {
+					cell tmp;
+					make_literal(&tmp, g_nil_s);
+					set_var(q, varnames, varnames_ctx, &tmp, q->st.curr_frame);
+				}
+
+				if (sings) {
+					cell tmp;
+					make_literal(&tmp, g_nil_s);
+					set_var(q, sings, sings_ctx, &tmp, q->st.curr_frame);
+				}
+
+				//destroy_parser(p);
+				//str->p = NULL;
+
+				cell tmp;
+				make_literal(&tmp, g_eof_s);
+				return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+			}
+
+			if (!strlen(p->save_line) || (*p->save_line == '\r') || (*p->save_line == '\n')) {
+				//p->line_nbr++;
+				continue;
+			}
+
+			p->srcptr = p->save_line;
+		} else if (src)
+			p->srcptr = src;
+
+		break;
+	}
+
+	frame *g = GET_CURR_FRAME();
+	p->read_term = g->nbr_vars;
+	p->do_read_term = true;
+	tokenize(p, false, false);
+	p->do_read_term = false;
+	p->read_term = 0;
+
+	if (p->error) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return throw_error(q, &tmp, "syntax_error", "read_term");
+	}
+
+	if (!p->r->cidx) {
+		cell tmp;
+		make_literal(&tmp, g_eof_s);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	xref_rule(p, p->r, NULL);
+
+	if (p->nbr_vars) {
+		if (!create_vars(q, p->nbr_vars))
+			return throw_error(q, p1, "resource_error", "too_many_vars");
+	}
+
+	q->st.m->pl->tab_idx = 0;
+
+	if (p->nbr_vars)
+		collect_vars(q, p->r->cells, q->st.curr_frame, p->r->cidx-1, 0);
+
+	if (vars) {
+		unsigned cnt = q->st.m->pl->tab_idx;
+		may_ptr_error(init_tmp_heap(q));
+		cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
+		may_ptr_error(tmp);
+		unsigned idx = 0;
+
+		if (cnt) {
+			unsigned done = 0;
+
+			for (unsigned i = 0; i < q->st.m->pl->tab_idx; i++) {
+				make_literal(tmp+idx, g_dot_s);
+				tmp[idx].arity = 2;
+				tmp[idx++].nbr_cells = ((cnt-done)*2)+1;
+				cell v;
+				make_variable(&v, q->st.m->pl->tab3[i]);
+				v.var_nbr = q->st.m->pl->tab2[i];
+				tmp[idx++] = v;
+				done++;
+			}
+
+			make_literal(tmp+idx++, g_nil_s);
+			tmp[0].arity = 2;
+			tmp[0].nbr_cells = idx;
+
+			cell *save = tmp;
+			tmp = alloc_on_heap(q, idx);
+			may_ptr_error(tmp);
+			safe_copy_cells(tmp, save, idx);
+			tmp->nbr_cells = idx;
+			set_var(q, vars, vars_ctx, tmp, q->st.curr_frame);
+		} else {
+			cell tmp;
+			make_literal(&tmp, g_nil_s);
+			set_var(q, vars, vars_ctx, &tmp, q->st.curr_frame);
+		}
+	}
+
+	if (varnames) {
+		unsigned cnt = 0;
+		may_ptr_error(init_tmp_heap(q));
+		cell *tmp = alloc_on_tmp(q, (cnt*4)+1);
+		may_ptr_error(tmp);
+		unsigned idx = 0;
+
+		for (unsigned i = 0; i < q->st.m->pl->tab_idx; i++) {
+			if (q->st.m->pl->tab5[i])
+				continue;
+
+			cnt++;
+		}
+
+		if (cnt) {
+			unsigned done = 0;
+
+			for (unsigned i = 0; i < q->st.m->pl->tab_idx; i++) {
+				if (q->st.m->pl->tab5[i])
+					continue;
+
+				make_literal(tmp+idx, g_dot_s);
+				tmp[idx].arity = 2;
+				tmp[idx++].nbr_cells = ((cnt-done)*4)+1;
+				cell v;
+				make_literal(&v, g_unify_s);
+				v.flags |= FLAG_BUILTIN;
+				v.fn = fn_iso_unify_2;
+				v.arity = 2;
+				v.nbr_cells = 3;
+				SET_OP(&v,OP_XFX);
+				tmp[idx++] = v;
+				make_literal(&v, q->st.m->pl->tab3[i]);
+				tmp[idx++] = v;
+				make_variable(&v, q->st.m->pl->tab3[i]);
+				v.var_nbr = q->st.m->pl->tab2[i];
+				tmp[idx++] = v;
+				done++;
+			}
+
+			make_literal(tmp+idx++, g_nil_s);
+			tmp[0].arity = 2;
+			tmp[0].nbr_cells = idx;
+
+			cell *save = tmp;
+			tmp = alloc_on_heap(q, idx);
+			may_ptr_error(tmp);
+			safe_copy_cells(tmp, save, idx);
+			tmp->nbr_cells = idx;
+			set_var(q, varnames, varnames_ctx, tmp, q->st.curr_frame);
+		} else {
+			cell tmp;
+			make_literal(&tmp, g_nil_s);
+			set_var(q, varnames, varnames_ctx, &tmp, q->st.curr_frame);
+		}
+	}
+
+	if (sings) {
+		unsigned cnt = 0;
+		may_ptr_error(init_tmp_heap(q));
+		cell *tmp = alloc_on_tmp(q, (cnt*4)+1);
+		may_ptr_error(tmp);
+		unsigned idx = 0;
+
+		for (unsigned i = 0; i < q->st.m->pl->tab_idx; i++) {
+			if (q->st.m->pl->tab4[i] != 1)
+				continue;
+
+			if (varnames && (q->st.m->pl->tab5[i]))
+				continue;
+
+			cnt++;
+		}
+
+		if (cnt) {
+			unsigned done = 0;
+
+			for (unsigned i = 0; i < q->st.m->pl->tab_idx; i++) {
+				if (q->st.m->pl->tab4[i] != 1)
+					continue;
+
+				if (varnames && (q->st.m->pl->tab5[i]))
+					continue;
+
+				make_literal(tmp+idx, g_dot_s);
+				tmp[idx].arity = 2;
+				tmp[idx++].nbr_cells = ((cnt-done)*4)+1;
+				cell v;
+				make_literal(&v, g_unify_s);
+				v.flags |= FLAG_BUILTIN;
+				v.fn = fn_iso_unify_2;
+				v.arity = 2;
+				v.nbr_cells = 3;
+				SET_OP(&v,OP_XFX);
+				tmp[idx++] = v;
+				make_literal(&v, q->st.m->pl->tab3[i]);
+				tmp[idx++] = v;
+				make_variable(&v, q->st.m->pl->tab3[i]);
+				v.var_nbr = q->st.m->pl->tab2[i];
+				tmp[idx++] = v;
+				done++;
+			}
+
+			make_literal(tmp+idx++, g_nil_s);
+			tmp[0].arity = 2;
+			tmp[0].nbr_cells = idx;
+
+			cell *save = tmp;
+			tmp = alloc_on_heap(q, idx);
+			may_ptr_error(tmp);
+			safe_copy_cells(tmp, save, idx);
+			tmp->nbr_cells = idx;
+			set_var(q, sings, sings_ctx, tmp, q->st.curr_frame);
+		} else {
+			cell tmp;
+			make_literal(&tmp, g_nil_s);
+			set_var(q, sings, sings_ctx, &tmp, q->st.curr_frame);
+		}
+	}
+
+	cell *tmp = alloc_on_heap(q, p->r->cidx-1);
+	may_ptr_error(tmp);
+	safe_copy_cells(tmp, p->r->cells, p->r->cidx-1);
+	pl_status ok = unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
+	clear_rule(p->r);
+	return ok;
+}
+
 static USE_RESULT pl_status fn_iso_repeat_0(query *q)
 {
 	may_error(make_choice(q));
@@ -700,7 +1092,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 
 	if (!is_variable(p2) && !any_vars) {
-		char *tmpbuf = malloc(cnt+1);
+		char *tmpbuf = malloc(cnt+1+1);
 		char *dst = tmpbuf;
 		*dst = '\0';
 		LIST_HANDLER(p2);
@@ -720,7 +1112,11 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 			if (!ch)
 				return throw_error(q, head, "type_error", "character");
 
-			*dst++ = ch;
+			if (iswspace(ch)) {
+				if (dst != tmpbuf)
+					return throw_error(q, orig_p2, "syntax_error", "character");
+			} else
+				*dst++ = ch;
 
 			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
@@ -732,85 +1128,25 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 			return throw_error(q, orig_p2, "type_error", "list");
 		}
 
+		*dst++ = '.';
 		*dst = '\0';
+
 		cell tmp;
-		const char *src = tmpbuf;
-		char *end = NULL;
-
-		while (iswspace(*src))
-			src++;
-
-		if ((src[0] == '0') && (src[1] == '\'')) {
-			int val = peek_char_utf8(src+2);
-			make_int(&tmp, val);
-		} else if ((src[0] == '0') && (src[1] == 'x')) {
-			char *end;
-			int_t val = strtoll(src+2, &end, 16);
-			make_int(&tmp, val);
-
-			if (*end) {
-				make_smalln(&tmp, end, 1);
-				free(tmpbuf);
-				return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
-			}
-		} else if ((src[0] == '0') && (src[1] == 'o')) {
-			char *end;
-			int_t val = strtoll(src+2, &end, 8);
-			make_int(&tmp, val);
-
-			if (*end) {
-				make_smalln(&tmp, end, 1);
-				free(tmpbuf);
-				return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
-			}
-		} else if ((src[0] == '0') && (src[1] == 'b')) {
-			char *end;
-			int_t val = strtoll(src+2, &end, 2);
-			make_int(&tmp, val);
-
-			if (*end) {
-				make_smalln(&tmp, end, 1);
-				free(tmpbuf);
-				return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
-			}
-		} else {
-			mpz_t tmpz;
-			mp_int_init(&tmpz);
-
-			if (mp_int_read_string(&tmpz, 10, tmpbuf) == MP_TRUNC) {
-				double f = strtod(src, &end);
-
-				if (*end) {
-					make_smalln(&tmp, end, 1);
-					free(tmpbuf);
-					mp_int_clear(&tmpz);
-					return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
-				}
-
-				if ((end != src) && !isdigit(end[-1]))
-					return throw_error(q, p2, "syntax_error", "illegal_number");
-
-				make_real(&tmp, f);
-			} else {
-				mp_small val;
-
-				if (mp_int_to_int(&tmpz, &val) == MP_RANGE) {
-					tmp.nbr_cells = 1;
-					tmp.tag = TAG_INTEGER;
-					tmp.flags = FLAG_MANAGED;
-					tmp.val_bigint = malloc(sizeof(bigint));
-					tmp.val_bigint->refcnt = 0;
-					mp_int_init_copy(&tmp.val_bigint->ival, &tmpz);
-				} else {
-					make_int(&tmp, val);
-				}
-			}
-
-			mp_int_clear(&tmpz);
-		}
-
+		make_literal(&tmp, g_nil_s);
+		int n = q->st.m->pl->current_input;
+		stream *str = &g_streams[n];
+		pl_status ok = do_read_term(q, str, p1, p1_ctx, &tmp, q->st.curr_frame, tmpbuf);
 		free(tmpbuf);
-		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+
+		if ((ok != pl_success) || q->did_throw)
+			return ok;
+
+		p1 = deref(q, p1, p1_ctx);
+
+		if (!is_number(p1))
+			return throw_error(q, orig_p2, "syntax_error", "number");
+
+		return ok;
 	}
 
 	ssize_t len = print_term_to_buf(q, NULL, 0, p1, p1_ctx, 1, 0, 0);
@@ -987,7 +1323,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 
 	if (!is_variable(p2) && !any_vars) {
-		char *tmpbuf = malloc(cnt+1);
+		char *tmpbuf = malloc((cnt*6)+1+1);
 		char *dst = tmpbuf;
 		*dst = '\0';
 		LIST_HANDLER(p2);
@@ -1004,92 +1340,41 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 			if (val < 0)
 				return throw_error(q, head, "representation_error", "character_code");
 
-			*dst++ = val;
+			if (iswspace(val)) {
+				if (dst != tmpbuf)
+					return throw_error(q, orig_p2, "syntax_error", "character");
+			} else
+				dst += put_char_utf8(dst, val);
 
 			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
 		}
 
-		if (!is_nil(p2))
+		if (!is_nil(p2)) {
+			free(tmpbuf);
 			return throw_error(q, orig_p2, "type_error", "list");
-
-		*dst = '\0';
-		cell tmp;
-		const char *src = tmpbuf;
-		char *end = NULL;
-
-		while (iswspace(*src))
-			src++;
-
-		if ((src[0] == '0') && (src[1] == '\'')) {
-			int val = peek_char_utf8(src+2);
-			make_int(&tmp, val);
-		} else if ((src[0] == '0') && (src[1] == 'x')) {
-			char *end;
-			int_t val = strtoll(src+2, &end, 16);
-			make_int(&tmp, val);
-
-			if (*end) {
-				make_smalln(&tmp, end, 1);
-				return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
-			}
-		} else if ((src[0] == '0') && (src[1] == 'o')) {
-			char *end;
-			int_t val = strtoll(src+2, &end, 8);
-			make_int(&tmp, val);
-
-			if (*end) {
-				make_smalln(&tmp, end, 1);
-				return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
-			}
-		} else if ((src[0] == '0') && (src[1] == 'b')) {
-			char *end;
-			int_t val = strtoll(src+2, &end, 2);
-			make_int(&tmp, val);
-
-			if (*end) {
-				make_smalln(&tmp, end, 1);
-				return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
-			}
-		} else {
-			mpz_t tmpz;
-			mp_int_init(&tmpz);
-
-			if (mp_int_read_string(&tmpz, 10, tmpbuf) == MP_TRUNC) {
-				double f = strtod(src, &end);
-
-				if (*end) {
-					make_smalln(&tmp, end, 1);
-					free(tmpbuf);
-					mp_int_clear(&tmpz);
-					return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
-				}
-
-				if ((end != src) && !isdigit(end[-1]))
-					return throw_error(q, p2, "syntax_error", "illegal_number");
-
-				make_real(&tmp, f);
-			} else {
-				mp_small val;
-
-				if (mp_int_to_int(&tmpz, &val) == MP_RANGE) {
-					tmp.nbr_cells = 1;
-					tmp.tag = TAG_INTEGER;
-					tmp.flags = FLAG_MANAGED;
-					tmp.val_bigint = malloc(sizeof(bigint));
-					tmp.val_bigint->refcnt = 0;
-					mp_int_init_copy(&tmp.val_bigint->ival, &tmpz);
-				} else {
-					make_int(&tmp, val);
-				}
-			}
-
-			mp_int_clear(&tmpz);
 		}
 
+		*dst++ = '.';
+		*dst = '\0';
+
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		int n = q->st.m->pl->current_input;
+		stream *str = &g_streams[n];
+		pl_status ok = do_read_term(q, str, p1, p1_ctx, &tmp, q->st.curr_frame, tmpbuf);
 		free(tmpbuf);
-		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+
+		if ((ok != pl_success) || q->did_throw)
+			return ok;
+
+		p1 = deref(q, p1, p1_ctx);
+
+		if (!is_number(p1))
+			return throw_error(q, orig_p2, "syntax_error", "number");
+
+		return ok;
 	}
 
 	ssize_t len = print_term_to_buf(q, NULL, 0, p1, p1_ctx, 1, 0, 0);
@@ -2451,398 +2736,6 @@ static USE_RESULT pl_status fn_iso_nl_1(query *q)
 	fputc('\n', str->fp);
 	//fflush(str->fp);
 	return !ferror(str->fp);
-}
-
-static bool collect_vars(query *q, cell *p1, idx_t p1_ctx, idx_t nbr_cells, int depth)
-{
-	if (depth > MAX_DEPTH)
-		return false;
-
-	for (unsigned i = 0; i < nbr_cells;) {
-		cell *c = deref(q, p1, p1_ctx);
-		int found = 0;
-
-		if (is_structure(c)) {
-			collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1, depth+1);
-		} else if (is_variable(c)) {
-			for (unsigned idx = 0; idx < q->st.m->pl->tab_idx; idx++) {
-				if ((q->st.m->pl->tab1[idx] == q->latest_ctx) && (q->st.m->pl->tab2[idx] == c->var_nbr)) {
-					q->st.m->pl->tab4[idx]++;
-					found = 1;
-					break;
-				}
-			}
-
-			if (!found) {
-				q->st.m->pl->tab1[q->st.m->pl->tab_idx] = q->latest_ctx;
-				q->st.m->pl->tab2[q->st.m->pl->tab_idx] = c->var_nbr;
-				q->st.m->pl->tab3[q->st.m->pl->tab_idx] = c->val_off;
-				q->st.m->pl->tab4[q->st.m->pl->tab_idx] = 1;
-				q->st.m->pl->tab5[q->st.m->pl->tab_idx] = is_anon(c) ? 1 : 0;
-				q->st.m->pl->tab_idx++;
-			}
-		}
-
-		i += p1->nbr_cells;
-		p1 += p1->nbr_cells;
-	}
-
-	return true;
-}
-
-static bool parse_read_params(query *q, parser *p, cell *c, cell **vars, idx_t *vars_ctx, cell **varnames, idx_t *varnames_ctx, cell **sings, idx_t *sings_ctx)
-{
-	if (!is_structure(c)) {
-		DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
-		return false;
-	}
-
-	cell *c1 = deref(q, c+1, q->latest_ctx);
-
-	if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "character_escapes")) {
-		if (is_literal(c1))
-			p->flag.character_escapes = !slicecmp2(GET_STR(q, c1), LEN_STR(q, c1), "true");
-	} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "double_quotes")) {
-		if (is_literal(c1)) {
-			if (!slicecmp2(GET_STR(q, c1), LEN_STR(q, c1), "atom")) {
-				p->flag.double_quote_codes = p->flag.double_quote_chars = false;
-				p->flag.double_quote_atom = true;
-			} else if (!slicecmp2(GET_STR(q, c1), LEN_STR(q, c1), "chars")) {
-				p->flag.double_quote_atom = p->flag.double_quote_codes = false;
-				p->flag.double_quote_chars = true;
-			} else if (!slicecmp2(GET_STR(q, c1), LEN_STR(q, c1), "codes")) {
-				p->flag.double_quote_atom = p->flag.double_quote_chars = false;
-				p->flag.double_quote_codes = true;
-			}
-		}
-	} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "variables")) {
-		if (is_variable(c1)) {
-			cell *v = c1;
-			if (vars) *vars = v;
-			if (vars_ctx) *vars_ctx = q->latest_ctx;
-		} else {
-			DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
-			return false;
-		}
-	} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "variable_names")) {
-		if (is_variable(c1)) {
-			cell *v = c1;
-			if (varnames) *varnames = v;
-			if (varnames_ctx) *varnames_ctx = q->latest_ctx;
-		} else {
-			DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
-			return false;
-		}
-	} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "singletons")) {
-		if (is_variable(c1)) {
-			cell *v = c1;
-			if (sings) *sings = v;
-			if (sings_ctx) *sings_ctx = q->latest_ctx;
-		} else {
-			DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
-			return false;
-		}
-	} else {
-		DISCARD_RESULT throw_error(q, c, "domain_error", "read_option");
-		return false;
-	}
-
-	return true;
-}
-
-static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, char *src)
-{
-	if (!str->p)
-		str->p = create_parser(q->st.m);
-
-	parser *p = str->p;
-	p->fp = str->fp;
-	reset(p);
-	p->one_shot = true;
-	p->error = false;
-	p->flag = q->st.m->flag;
-	cell *vars = NULL, *varnames = NULL, *sings = NULL;
-	idx_t vars_ctx = 0, varnames_ctx = 0, sings_ctx = 0;
-	LIST_HANDLER(p2);
-
-	while (is_list(p2)) {
-		cell *h = LIST_HEAD(p2);
-		h = deref(q, h, p2_ctx);
-
-		if (is_variable(h))
-			return throw_error(q, p2, "instantiation_error", "read_option");
-
-		if (!parse_read_params(q, p, h, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx))
-			return pl_success;
-
-		p2 = LIST_TAIL(p2);
-		p2 = deref(q, p2, p2_ctx);
-		p2_ctx = q->latest_ctx;
-	}
-
-	if (is_variable(p2))
-		return throw_error(q, p2, "instantiation_error", "read_option");
-
-	if (!is_nil(p2))
-		return throw_error(q, p2, "type_error", "list");
-
-	for (;;) {
-#if 0
-		if (isatty(fileno(str->fp)) && !src) {
-			printf("| ");
-			fflush(str->fp);
-		}
-#endif
-
-		if (!src && (!p->srcptr || !*p->srcptr || (*p->srcptr == '\n'))) {
-			if (p->srcptr && (*p->srcptr == '\n'))
-				p->line_nbr++;
-
-			if (getline(&p->save_line, &p->n_line, str->fp) == -1) {
-				if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
-					clearerr(str->fp);
-					do_yield_0(q, 1);
-					return pl_failure;
-				}
-
-				str->at_end_of_file = str->eof_action != eof_action_reset;
-
-				if (str->eof_action == eof_action_reset)
-					clearerr(str->fp);
-
-				if (vars) {
-					cell tmp;
-					make_literal(&tmp, g_nil_s);
-					set_var(q, vars, vars_ctx, &tmp, q->st.curr_frame);
-				}
-
-				if (varnames) {
-					cell tmp;
-					make_literal(&tmp, g_nil_s);
-					set_var(q, varnames, varnames_ctx, &tmp, q->st.curr_frame);
-				}
-
-				if (sings) {
-					cell tmp;
-					make_literal(&tmp, g_nil_s);
-					set_var(q, sings, sings_ctx, &tmp, q->st.curr_frame);
-				}
-
-				//destroy_parser(p);
-				//str->p = NULL;
-
-				cell tmp;
-				make_literal(&tmp, g_eof_s);
-				return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-			}
-
-			if (!strlen(p->save_line) || (*p->save_line == '\r') || (*p->save_line == '\n')) {
-				//p->line_nbr++;
-				continue;
-			}
-
-			p->srcptr = p->save_line;
-		} else if (src)
-			p->srcptr = src;
-
-		break;
-	}
-
-	frame *g = GET_CURR_FRAME();
-	p->read_term = g->nbr_vars;
-	p->do_read_term = true;
-	tokenize(p, false, false);
-	p->do_read_term = false;
-	p->read_term = 0;
-
-	if (p->error) {
-		cell tmp;
-		make_literal(&tmp, g_nil_s);
-		return throw_error(q, &tmp, "syntax_error", "read_term");
-	}
-
-	if (!p->r->cidx) {
-		cell tmp;
-		make_literal(&tmp, g_eof_s);
-		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	}
-
-	xref_rule(p, p->r, NULL);
-
-	if (p->nbr_vars) {
-		if (!create_vars(q, p->nbr_vars))
-			return throw_error(q, p1, "resource_error", "too_many_vars");
-	}
-
-	q->st.m->pl->tab_idx = 0;
-
-	if (p->nbr_vars)
-		collect_vars(q, p->r->cells, q->st.curr_frame, p->r->cidx-1, 0);
-
-	if (vars) {
-		unsigned cnt = q->st.m->pl->tab_idx;
-		may_ptr_error(init_tmp_heap(q));
-		cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
-		may_ptr_error(tmp);
-		unsigned idx = 0;
-
-		if (cnt) {
-			unsigned done = 0;
-
-			for (unsigned i = 0; i < q->st.m->pl->tab_idx; i++) {
-				make_literal(tmp+idx, g_dot_s);
-				tmp[idx].arity = 2;
-				tmp[idx++].nbr_cells = ((cnt-done)*2)+1;
-				cell v;
-				make_variable(&v, q->st.m->pl->tab3[i]);
-				v.var_nbr = q->st.m->pl->tab2[i];
-				tmp[idx++] = v;
-				done++;
-			}
-
-			make_literal(tmp+idx++, g_nil_s);
-			tmp[0].arity = 2;
-			tmp[0].nbr_cells = idx;
-
-			cell *save = tmp;
-			tmp = alloc_on_heap(q, idx);
-			may_ptr_error(tmp);
-			safe_copy_cells(tmp, save, idx);
-			tmp->nbr_cells = idx;
-			set_var(q, vars, vars_ctx, tmp, q->st.curr_frame);
-		} else {
-			cell tmp;
-			make_literal(&tmp, g_nil_s);
-			set_var(q, vars, vars_ctx, &tmp, q->st.curr_frame);
-		}
-	}
-
-	if (varnames) {
-		unsigned cnt = 0;
-		may_ptr_error(init_tmp_heap(q));
-		cell *tmp = alloc_on_tmp(q, (cnt*4)+1);
-		may_ptr_error(tmp);
-		unsigned idx = 0;
-
-		for (unsigned i = 0; i < q->st.m->pl->tab_idx; i++) {
-			if (q->st.m->pl->tab5[i])
-				continue;
-
-			cnt++;
-		}
-
-		if (cnt) {
-			unsigned done = 0;
-
-			for (unsigned i = 0; i < q->st.m->pl->tab_idx; i++) {
-				if (q->st.m->pl->tab5[i])
-					continue;
-
-				make_literal(tmp+idx, g_dot_s);
-				tmp[idx].arity = 2;
-				tmp[idx++].nbr_cells = ((cnt-done)*4)+1;
-				cell v;
-				make_literal(&v, g_unify_s);
-				v.flags |= FLAG_BUILTIN;
-				v.fn = fn_iso_unify_2;
-				v.arity = 2;
-				v.nbr_cells = 3;
-				SET_OP(&v,OP_XFX);
-				tmp[idx++] = v;
-				make_literal(&v, q->st.m->pl->tab3[i]);
-				tmp[idx++] = v;
-				make_variable(&v, q->st.m->pl->tab3[i]);
-				v.var_nbr = q->st.m->pl->tab2[i];
-				tmp[idx++] = v;
-				done++;
-			}
-
-			make_literal(tmp+idx++, g_nil_s);
-			tmp[0].arity = 2;
-			tmp[0].nbr_cells = idx;
-
-			cell *save = tmp;
-			tmp = alloc_on_heap(q, idx);
-			may_ptr_error(tmp);
-			safe_copy_cells(tmp, save, idx);
-			tmp->nbr_cells = idx;
-			set_var(q, varnames, varnames_ctx, tmp, q->st.curr_frame);
-		} else {
-			cell tmp;
-			make_literal(&tmp, g_nil_s);
-			set_var(q, varnames, varnames_ctx, &tmp, q->st.curr_frame);
-		}
-	}
-
-	if (sings) {
-		unsigned cnt = 0;
-		may_ptr_error(init_tmp_heap(q));
-		cell *tmp = alloc_on_tmp(q, (cnt*4)+1);
-		may_ptr_error(tmp);
-		unsigned idx = 0;
-
-		for (unsigned i = 0; i < q->st.m->pl->tab_idx; i++) {
-			if (q->st.m->pl->tab4[i] != 1)
-				continue;
-
-			if (varnames && (q->st.m->pl->tab5[i]))
-				continue;
-
-			cnt++;
-		}
-
-		if (cnt) {
-			unsigned done = 0;
-
-			for (unsigned i = 0; i < q->st.m->pl->tab_idx; i++) {
-				if (q->st.m->pl->tab4[i] != 1)
-					continue;
-
-				if (varnames && (q->st.m->pl->tab5[i]))
-					continue;
-
-				make_literal(tmp+idx, g_dot_s);
-				tmp[idx].arity = 2;
-				tmp[idx++].nbr_cells = ((cnt-done)*4)+1;
-				cell v;
-				make_literal(&v, g_unify_s);
-				v.flags |= FLAG_BUILTIN;
-				v.fn = fn_iso_unify_2;
-				v.arity = 2;
-				v.nbr_cells = 3;
-				SET_OP(&v,OP_XFX);
-				tmp[idx++] = v;
-				make_literal(&v, q->st.m->pl->tab3[i]);
-				tmp[idx++] = v;
-				make_variable(&v, q->st.m->pl->tab3[i]);
-				v.var_nbr = q->st.m->pl->tab2[i];
-				tmp[idx++] = v;
-				done++;
-			}
-
-			make_literal(tmp+idx++, g_nil_s);
-			tmp[0].arity = 2;
-			tmp[0].nbr_cells = idx;
-
-			cell *save = tmp;
-			tmp = alloc_on_heap(q, idx);
-			may_ptr_error(tmp);
-			safe_copy_cells(tmp, save, idx);
-			tmp->nbr_cells = idx;
-			set_var(q, sings, sings_ctx, tmp, q->st.curr_frame);
-		} else {
-			cell tmp;
-			make_literal(&tmp, g_nil_s);
-			set_var(q, sings, sings_ctx, &tmp, q->st.curr_frame);
-		}
-	}
-
-	cell *tmp = alloc_on_heap(q, p->r->cidx-1);
-	may_ptr_error(tmp);
-	safe_copy_cells(tmp, p->r->cells, p->r->cidx-1);
-	pl_status ok = unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
-	clear_rule(p->r);
-	return ok;
 }
 
 static USE_RESULT pl_status fn_iso_read_1(query *q)
