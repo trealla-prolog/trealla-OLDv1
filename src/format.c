@@ -159,7 +159,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 	*dst = '\0';
 	size_t nbytes = bufsiz;
 	bool redo = false, start_of_line = true;
-	int tab_at = 1, tabs = 0, diff = 0, last_at = 0;
+	int tab_at = 1, tabs = 0, diff = 0, last_at = 0, tab_char = ' ';
 	save_fmt1 = fmt1;
 	save_fmt2 = fmt2;
 
@@ -233,13 +233,11 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
             } else if (!redo) {
                 tabs++;
             } else if (redo) {
+				tab_char = argval ? argval : ' ';
+
                 for (int i = 0; i < diff; i++) {
                     CHECK_BUF(1);
-
-                    if (argval)
-						dst += put_char_utf8(dst, argval);
-					else
-						*dst++ = ' ';
+					dst += put_char_utf8(dst, tab_char);
                 }
             }
 
@@ -263,7 +261,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 
                     for (int i = 0; i < diff; i++) {
                         CHECK_BUF(1);
-                        *dst++ = ' ';
+						dst += put_char_utf8(dst, tab_char);
                     }
                 } else {
                     fmt1 = save_fmt1;
@@ -293,7 +291,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 
                     for (int i = 0; i < diff; i++) {
                         CHECK_BUF(1);
-                        *dst++ = ' ';
+						dst += put_char_utf8(dst, tab_char);
                     }
                 } else {
                     fmt1 = save_fmt1;
