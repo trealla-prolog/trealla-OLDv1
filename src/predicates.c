@@ -787,6 +787,9 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 					return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
 				}
 
+				if ((end != src) && !isdigit(end[-1]))
+					return throw_error(q, p2, "syntax_error", "illegal_number");
+
 				make_real(&tmp, f);
 			} else {
 				mp_small val;
@@ -1062,6 +1065,9 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 					mp_int_clear(&tmpz);
 					return throw_error(q, &tmp, "syntax_error", "non_numeric_character");
 				}
+
+				if ((end != src) && !isdigit(end[-1]))
+					return throw_error(q, p2, "syntax_error", "illegal_number");
 
 				make_real(&tmp, f);
 			} else {
