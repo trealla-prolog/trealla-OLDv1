@@ -1542,6 +1542,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
+		p->error_desc = "number";
 		p->error = true;
 		return false;
 	}
@@ -1597,6 +1598,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, parsing binary, line %u, '%s\n", p->line_nbr, p->save_line);
 
+			p->error_desc = "number";
 			p->error = true;
 			return false;
 		}
@@ -1630,6 +1632,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, parsing octal, line %u, '%s'\n", p->line_nbr, p->save_line);
 
+			p->error_desc = "number";
 			p->error = true;
 			return false;
 		}
@@ -1663,6 +1666,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, parsing hexadecimal, line %u, '%s'\n", p->line_nbr, p->save_line);
 
+			p->error_desc = "number";
 			p->error = true;
 			return false;
 		}
@@ -1703,6 +1707,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
+			p->error_desc = "number";
 		p->error = true;
 		return false;
 	}
@@ -1719,6 +1724,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
 
+		p->error_desc = "number";
 		p->error = true;
 		return false;
 	}
@@ -1882,6 +1888,7 @@ static bool get_token(parser *p, int last_op)
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, illegal character escape <<%s>>, line %d '%s'\n", p->srcptr, p->line_nbr, p->save_line);
 
+				p->error_desc = "illegal_escape";
 				p->error = true;
 				return false;
 			}
@@ -1944,6 +1951,7 @@ static bool get_token(parser *p, int last_op)
 					if (DUMP_ERRS || !p->do_read_term)
 						fprintf(stdout, "Error: syntax error, float, line %u, '%s'\n", p->line_nbr, p->save_line);
 
+					p->error_desc = "number";
 					p->error = true;
 					return false;
 				}
@@ -2007,6 +2015,7 @@ static bool get_token(parser *p, int last_op)
 						if (DUMP_ERRS || !p->do_read_term)
 							fprintf(stdout, "Error: syntax error, illegal character escape <<%s>>, line %d, '%s'\n", p->srcptr, p->line_nbr, p->save_line);
 
+						p->error_desc = "illegal_escape";
 						p->error = true;
 						return false;
 					}
@@ -2033,6 +2042,7 @@ static bool get_token(parser *p, int last_op)
 					if (DUMP_ERRS || !p->do_read_term)
 						fprintf(stdout, "Error: syntax error, unterminated quoted atom, line %d, '%s'\n", p->line_nbr, p->save_line);
 
+					p->error_desc = "atom";
 					p->error = true;
 					return false;
 				}
@@ -2096,6 +2106,7 @@ static bool get_token(parser *p, int last_op)
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line);
 
+				p->error_desc = "atom";
 				p->error = true;
 			}
 		}
@@ -2213,6 +2224,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				if (DUMP_ERRS || !p->do_read_term)
 					printf("Error: syntax error, mismatched parens/brackets/braces, line %u '%s'\n", p->line_nbr, p->save_line);
 
+				p->error_desc = "parens";
 				p->error = true;
 				p->nesting_parens = p->nesting_brackets = p->nesting_braces = 0;
 			}
@@ -2222,6 +2234,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 					if (DUMP_ERRS || !p->do_read_term)
 						printf("Error: syntax error, operator expected '%s', line %u, '%s'\n", p->token, p->line_nbr, p->save_line);
 
+					p->error_desc = "operator_expected";
 					p->error = true;
 				}
 
@@ -2357,6 +2370,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error missing element '%s'\n", p->save_line);
 
+				p->error_desc = "list";
 				p->error = true;
 				break;
 			}
@@ -2365,6 +2379,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error parsing list '%s'\n", p->save_line);
 
+				p->error_desc = "list";
 				p->error = true;
 				break;
 			}
@@ -2384,6 +2399,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error missing arg '%s'\n", p->save_line);
 
+				p->error_desc = "args";
 				p->error = true;
 				break;
 			}
@@ -2394,6 +2410,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: max arity reached, line %d '%s'\n", p->line_nbr, p->save_line);
 
+				p->error_desc = "max_arity";
 				p->error = true;
 				break;
 			}
@@ -2406,6 +2423,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error parsing list '%s'\n", p->save_line);
 
+			p->error_desc = "list";
 			p->error = true;
 			break;
 		}
@@ -2414,6 +2432,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error parsing list '%s'\n", p->save_line);
 
+			p->error_desc = "list";
 			p->error = true;
 			break;
 		}
@@ -2429,6 +2448,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error parsing list '%s'\n", p->save_line);
 
+			p->error_desc = "list";
 			p->error = true;
 			break;
 		}
@@ -2438,6 +2458,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, start of rule expected, line %d '%s'\n", p->line_nbr, p->save_line);
 
+			p->error_desc = "start_expected";
 			p->error = true;
 			break;
 		}
@@ -2464,6 +2485,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, line %d '%s'\n", p->line_nbr, p->save_line);
 
+			p->error_desc = "variable_cannot_be_functor";
 			p->error = true;
 			break;
 		}

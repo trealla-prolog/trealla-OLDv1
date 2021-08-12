@@ -546,7 +546,7 @@ struct parser_ {
 	FILE *fp;
 	module *m, *dcgs;
 	rule *r;
-	char *token, *save_line, *srcptr;
+	char *token, *save_line, *srcptr, *error_desc;
 	cell v;
 	size_t token_size, n_line, toklen;
 	prolog_flags flag;

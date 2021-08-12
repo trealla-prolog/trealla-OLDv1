@@ -526,7 +526,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 	if (p->error) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
-		return throw_error(q, &tmp, "syntax_error", "read_term");
+		return throw_error(q, &tmp, "syntax_error", p->error_desc?p->error_desc:"read_term");
 	}
 
 	if (!p->r->cidx) {
