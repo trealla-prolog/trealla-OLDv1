@@ -10553,6 +10553,26 @@ static pl_status do_length(query *q)
 	return pl_success;
 }
 
+static int safe_list_length(query *q, cell *p1, idx_t p1_ctx)
+{
+	LIST_HANDLER(p1);
+	int cnt = 0;
+
+	while (is_list(p1)) {
+		LIST_HEAD(p1);
+		p1 = LIST_TAIL(p1);
+
+		if (is_cyclic_term(q, p1, p1_ctx))
+			break;
+
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+		cnt++;
+	}
+
+	return cnt;
+}
+
 static USE_RESULT pl_status fn_iso_length_2(query *q)
 {
 	if (q->retry)
@@ -10571,9 +10591,11 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		&& !is_string(p1) && !is_valid_list_up_to(q, p1, p1_ctx, true, get_smallint(p2)))
 		return throw_error(q, p1, "type_error", "list");
 
-	if (is_structure(p1) && is_variable(p2)
-		&& is_cyclic_term(q, p1, p1_ctx))
-		return throw_error(q, p1, "type_error", "list");
+	if (is_structure(p1) && is_cyclic_term(q, p1, p1_ctx)) {
+		cell tmp;
+		make_int(&tmp, safe_list_length(q, p1, p1_ctx));
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
 
 	if (!is_variable(p1) && !is_nil(p1) && is_variable(p2)
 		&& !is_valid_list(q, p1, p1_ctx, true))
