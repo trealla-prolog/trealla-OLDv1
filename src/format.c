@@ -559,7 +559,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 	} else if (is_structure(str) && !slicecmp2(GET_STR(q, str), LEN_STR(q, str), "atom")) {
 		cell *c = deref(q, str+1, str_ctx);
 		cell tmp;
-		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf));
+		may_error(make_cstringn(&tmp, tmpbuf, len), free(tmpbuf));
 		set_var(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 	} else if (is_structure(str)) {
@@ -567,7 +567,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 		cell tmp;
 
 		if (strlen(tmpbuf))
-			may_error(make_string(&tmp, tmpbuf), free(tmpbuf));
+			may_error(make_stringn(&tmp, tmpbuf, len), free(tmpbuf));
 		else
 			make_literal(&tmp, g_nil_s);
 
