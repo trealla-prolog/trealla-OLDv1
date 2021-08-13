@@ -1139,14 +1139,18 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		p->do_read_term = true;
 		bool ok = get_token(p, true);
 		p->do_read_term = false;
-		free(tmpbuf);
 
-		if (q->did_throw)
+		if (q->did_throw) {
+			free(tmpbuf);
 			return ok;
+		}
 
-		if (!is_number(&p->v) || *p->srcptr)
+		if (!is_number(&p->v) || *p->srcptr) {
+			free(tmpbuf);
 			return throw_error(q, orig_p2, "syntax_error", p->error?p->error_desc:"number");
+		}
 
+		free(tmpbuf);
 		cell tmp = p->v;
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
