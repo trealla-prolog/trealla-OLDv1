@@ -1140,11 +1140,11 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		bool ok = get_token(p, true);
 		p->do_read_term = false;
 
-		if (!ok || q->did_throw)
+		if (q->did_throw)
 			return ok;
 
 		if (!is_number(&p->v) || *p->srcptr)
-			return throw_error(q, orig_p2, "syntax_error", "number");
+			return throw_error(q, orig_p2, "syntax_error", p->error?p->error_desc:"number");
 
 		cell tmp = p->v;
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -1370,11 +1370,11 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 		bool ok = get_token(p, true);
 		p->do_read_term = false;
 
-		if (!ok || q->did_throw)
+		if (q->did_throw)
 			return ok;
 
 		if (!is_number(&p->v) || *p->srcptr)
-			return throw_error(q, orig_p2, "syntax_error", "number");
+			return throw_error(q, orig_p2, "syntax_error", p->error?p->error_desc:"number");
 
 		cell tmp = p->v;
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);

@@ -1223,6 +1223,7 @@ void reset(parser *p)
 	clear_rule(p->r);
 	p->r->cidx = 0;
 	p->start_term = true;
+	p->comment = false;
 }
 
 static bool dcg_expansion(parser *p)
@@ -1847,6 +1848,33 @@ static const char *eat_space(parser *p)
 	return src;
 }
 
+static bool eat_comment(parser *p)
+{
+	char *src = p->srcptr;
+
+	if (*src != '/')
+		return true;
+
+	src++;
+
+	if (*src != '*')
+		return true;
+
+	src++;
+
+	while (*src) {
+		if ((src[0] == '*') && (src[1] == '/')) {
+			src += 2;
+			p->srcptr = src;
+			return true;
+		}
+
+		src++;
+	}
+
+	return true;
+}
+
 bool get_token(parser *p, int last_op)
 {
 	if (p->error)
@@ -1960,7 +1988,7 @@ bool get_token(parser *p, int last_op)
 		}
 
 		p->srcptr = (char*)src;
-		return true;
+		return eat_comment(p);
 	}
 
 	// Quoted strings...
