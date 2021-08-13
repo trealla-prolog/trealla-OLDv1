@@ -168,16 +168,15 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 }
 
 struct ref_ {
-	cell *c;
-	idx_t c_ctx;
 	ref *next;
+	idx_t var_nbr, ctx;
 };
 
 inline static bool is_in_ref_list(cell *c, idx_t c_ctx, ref *rlist)
 {
 	while (rlist && !g_tpl_interrupt) {
-		if ((c->var_nbr == rlist->c->var_nbr)
-			&& (c_ctx == rlist->c_ctx))
+		if ((c->var_nbr == rlist->var_nbr)
+			&& (c_ctx == rlist->ctx))
 			return true;
 
 		rlist = rlist->next;
@@ -200,9 +199,9 @@ static bool is_cyclic_term_internal(query *q, cell *p1, idx_t p1_ctx, ref *list)
 				return q->cycle_error = true;
 
 			ref *nlist = malloc(sizeof(ref));
-			nlist->c = p1;
-			nlist->c_ctx = p1_ctx;
 			nlist->next = list;
+			nlist->var_nbr = p1->var_nbr;
+			nlist->ctx = p1_ctx;
 
 			cell *c = deref(q, p1, p1_ctx);
 			idx_t c_ctx = q->latest_ctx;
@@ -1470,11 +1469,12 @@ static void dump_vars(query *q, bool partial)
 			parens = true;
 
 		if (parens) fputc('(', stdout);
+		idx_t c_ctx = q->latest_ctx;
 
-		if (is_cyclic_term(q, c, q->latest_ctx))
-			print_term(q, stdout, c, q->latest_ctx, 0);
+		if (is_cyclic_term(q, c, c_ctx))
+			print_term(q, stdout, c, c_ctx, 0);
 		else
-			print_term(q, stdout, c, q->latest_ctx, -2);
+			print_term(q, stdout, c, c_ctx, -2);
 
 		if (parens) fputc(')', stdout);
 		any++;
