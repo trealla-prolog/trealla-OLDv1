@@ -1139,6 +1139,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		p->do_read_term = true;
 		bool ok = get_token(p, true);
 		p->do_read_term = false;
+		free(tmpbuf);
 
 		if (q->did_throw)
 			return ok;
@@ -5128,7 +5129,7 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 			continue;
 		}
 
-		free(q->exception);
+		free(e2);
 		q->exception = NULL;
 		free(e);
 		return true;
@@ -5140,7 +5141,7 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 	fprintf(stdout, "\n");
 	q->quoted = 1;
 	q->st.m->pl->did_dump_vars = true;
-	free(q->exception);
+	free(e);
 	q->exception = NULL;
 	q->error = true;
 	return false;
