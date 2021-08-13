@@ -5124,6 +5124,7 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 
 		if (fn_iso_catch_3(q) != pl_success) {
 			free(e2);
+			q->exception = NULL;
 			continue;
 		}
 
