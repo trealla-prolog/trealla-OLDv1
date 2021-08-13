@@ -1847,7 +1847,7 @@ static const char *eat_space(parser *p)
 	return src;
 }
 
-static bool get_token(parser *p, int last_op)
+bool get_token(parser *p, int last_op)
 {
 	if (p->error)
 		return false;
@@ -1858,6 +1858,7 @@ static bool get_token(parser *p, int last_op)
 	bool neg = false;
 	p->v.tag = TAG_LITERAL;
 	p->v.flags = 0;
+	p->v.nbr_cells = 1;
 	p->quote_char = 0;
 	p->string = p->is_quoted = p->is_variable = p->is_op = false;
 

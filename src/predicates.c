@@ -1128,25 +1128,31 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 			return throw_error(q, orig_p2, "type_error", "list");
 		}
 
-		*dst++ = '.';
 		*dst = '\0';
 
-		cell tmp;
-		make_literal(&tmp, g_nil_s);
 		int n = q->st.m->pl->current_input;
 		stream *str = &g_streams[n];
-		pl_status ok = do_read_term(q, str, p1, p1_ctx, &tmp, q->st.curr_frame, tmpbuf);
-		free(tmpbuf);
 
-		if ((ok != pl_success) || q->did_throw)
+		if (!str->p)
+			str->p = create_parser(q->st.m);
+
+		parser *p = str->p;
+		reset(p);
+		p->error = false;
+		p->flag = q->st.m->flag;
+		p->srcptr = tmpbuf;
+		p->do_read_term = true;
+		bool ok = get_token(p, true);
+		p->do_read_term = false;
+
+		if (!ok || q->did_throw)
 			return ok;
 
-		p1 = deref(q, p1, p1_ctx);
-
-		if (!is_number(p1))
+		if (!is_number(&p->v) || *p->srcptr)
 			return throw_error(q, orig_p2, "syntax_error", "number");
 
-		return ok;
+		cell tmp = p->v;
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
 	ssize_t len = print_term_to_buf(q, NULL, 0, p1, p1_ctx, 1, 0, 0);
@@ -1340,11 +1346,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 			if (val < 0)
 				return throw_error(q, head, "representation_error", "character_code");
 
-			if (iswspace(val)) {
-				if (dst != tmpbuf)
-					return throw_error(q, orig_p2, "syntax_error", "character");
-			} else
-				dst += put_char_utf8(dst, val);
+			dst += put_char_utf8(dst, val);
 
 			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
@@ -1356,25 +1358,31 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 			return throw_error(q, orig_p2, "type_error", "list");
 		}
 
-		*dst++ = '.';
 		*dst = '\0';
 
-		cell tmp;
-		make_literal(&tmp, g_nil_s);
 		int n = q->st.m->pl->current_input;
 		stream *str = &g_streams[n];
-		pl_status ok = do_read_term(q, str, p1, p1_ctx, &tmp, q->st.curr_frame, tmpbuf);
-		free(tmpbuf);
 
-		if ((ok != pl_success) || q->did_throw)
+		if (!str->p)
+			str->p = create_parser(q->st.m);
+
+		parser *p = str->p;
+		reset(p);
+		p->error = false;
+		p->flag = q->st.m->flag;
+		p->srcptr = tmpbuf;
+		p->do_read_term = true;
+		bool ok = get_token(p, true);
+		p->do_read_term = false;
+
+		if (!ok || q->did_throw)
 			return ok;
 
-		p1 = deref(q, p1, p1_ctx);
-
-		if (!is_number(p1))
+		if (!is_number(&p->v) || *p->srcptr)
 			return throw_error(q, orig_p2, "syntax_error", "number");
 
-		return ok;
+		cell tmp = p->v;
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
 	ssize_t len = print_term_to_buf(q, NULL, 0, p1, p1_ctx, 1, 0, 0);
