@@ -1338,13 +1338,17 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 			cell *head = LIST_HEAD(p2);
 			head = deref(q, head, p2_ctx);
 
-			if (!is_integer(head))
+			if (!is_integer(head)) {
+				free(tmpbuf);
 				return throw_error(q, head, "type_error", "integer");
+			}
 
 			int val = get_integer(head);
 
-			if (val < 0)
+			if (val < 0) {
+				free(tmpbuf);
 				return throw_error(q, head, "representation_error", "character_code");
+			}
 
 			dst += put_char_utf8(dst, val);
 
@@ -1375,12 +1379,17 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 		bool ok = get_token(p, true);
 		p->do_read_term = false;
 
-		if (q->did_throw)
+		if (q->did_throw) {
+			free(tmpbuf);
 			return ok;
+		}
 
-		if (!is_number(&p->v) || *p->srcptr)
+		if (!is_number(&p->v) || *p->srcptr) {
+			free(tmpbuf);
 			return throw_error(q, orig_p2, "syntax_error", p->error?p->error_desc:"number");
+		}
 
+		free(tmpbuf);
 		cell tmp = p->v;
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
