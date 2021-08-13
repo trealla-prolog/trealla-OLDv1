@@ -1112,12 +1112,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 			if (!ch)
 				return throw_error(q, head, "type_error", "character");
 
-			if (iswspace(ch)) {
-				if (dst != tmpbuf)
-					return throw_error(q, orig_p2, "syntax_error", "character");
-			} else
-				*dst++ = ch;
-
+			*dst++ = ch;
 			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
