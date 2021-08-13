@@ -1,0 +1,51 @@
+{
+  "uid" : "3f024af24292d27f",
+  "name" : "iso_not_unifiable_2_15",
+  "historyId" : "predicates/not_unifiable_2/tests.lgt::tests:tests#iso_not_unifiable_2_15",
+  "time" : {
+    "start" : 1628819842000,
+    "stop" : 1628819842000,
+    "duration" : 0
+  },
+  "status" : "skipped",
+  "statusMessage" : "Skipped test",
+  "statusTrace" : "",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/not_unifiable_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "3f024af24292d27f.json",
+  "parameterValues" : [ ]
+}

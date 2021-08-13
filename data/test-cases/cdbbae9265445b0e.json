@@ -1,0 +1,51 @@
+{
+  "uid" : "cdbbae9265445b0e",
+  "name" : "lgt_is_2_45",
+  "historyId" : "predicates/is_2/tests.lgt::tests:tests#lgt_is_2_45",
+  "time" : {
+    "start" : 1628819833000,
+    "stop" : 1628819833000,
+    "duration" : 0
+  },
+  "status" : "skipped",
+  "statusMessage" : "Skipped test",
+  "statusTrace" : "",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/is_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "cdbbae9265445b0e.json",
+  "parameterValues" : [ ]
+}
