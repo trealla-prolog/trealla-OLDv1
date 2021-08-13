@@ -208,7 +208,7 @@ void consultall(parser *p, cell *l)
 {
 	LIST_HANDLER(l);
 
-	while (is_list(l)) {
+	while (is_list(l) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(l);
 		load_file(p->m, GET_STR(p, h));
 		l = LIST_TAIL(l);
@@ -274,7 +274,7 @@ static void do_op(parser *p, cell *c)
 
 	LIST_HANDLER(p3);
 
-	while (is_list(p3)) {
+	while (is_list(p3) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(p3);
 
 		if (is_atom(h)) {
@@ -441,7 +441,7 @@ static void directives(parser *p, cell *d)
 
 		LIST_HANDLER(p2);
 
-		while (is_iso_list(p2)) {
+		while (is_iso_list(p2) && !g_tpl_interrupt) {
 			LIST_HEAD(p2);
 			p2 = LIST_TAIL(p2);
 		}
@@ -498,7 +498,7 @@ static void directives(parser *p, cell *d)
 		p->m = tmp_m;
 		LIST_HANDLER(p2);
 
-		while (is_iso_list(p2)) {
+		while (is_iso_list(p2) && !g_tpl_interrupt) {
 			cell *head = LIST_HEAD(p2);
 
 			if (is_structure(head)) {
@@ -663,7 +663,7 @@ static void directives(parser *p, cell *d)
 
 	LIST_HANDLER(p1);
 
-	while (is_list(p1)) {
+	while (is_list(p1) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(p1);
 
 		if (is_literal(h) && (!strcmp(GET_STR(p, h), "/") || !strcmp(GET_STR(p, h), "//")) && (h->arity == 2)) {
@@ -2287,7 +2287,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 					cell *p1 = p->r->cells;
 					LIST_HANDLER(p1);
 
-					while (is_list(p1)) {
+					while (is_list(p1) && !g_tpl_interrupt) {
 						cell *h = LIST_HEAD(p1);
 
 						if (!process_term(p, h))

@@ -175,7 +175,7 @@ struct ref_ {
 
 inline static bool is_in_ref_list(cell *c, idx_t c_ctx, ref *rlist)
 {
-	while (rlist) {
+	while (rlist && !g_tpl_interrupt) {
 		if ((c->var_nbr == rlist->c->var_nbr)
 			&& (c_ctx == rlist->c_ctx))
 			return true;
@@ -294,7 +294,7 @@ bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials)
 
 	LIST_HANDLER(p1);
 
-	while (is_list(p1)) {
+	while (is_list(p1) && !g_tpl_interrupt) {
 		LIST_HEAD(p1);
 		p1 = LIST_TAIL(p1);
 		p1 = deref(q, p1, p1_ctx);
@@ -311,7 +311,7 @@ bool is_valid_list_up_to(query *q, cell *p1, idx_t p1_ctx, bool allow_partials, 
 
 	LIST_HANDLER(p1);
 
-	while (is_list(p1)) {
+	while (is_list(p1) && !g_tpl_interrupt) {
 		LIST_HEAD(p1);
 
 		if (!n)
@@ -335,7 +335,8 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes)
 	int cnt = 0;
 
 	while (is_iso_list(l) && !is_cyclic_term(q, l, l_ctx)
-		&& (q->st.m->flag.double_quote_chars || allow_codes)) {
+		&& (q->st.m->flag.double_quote_chars || allow_codes)
+		&& !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(l);
 		cell *c = q ? deref(q, h, l_ctx) : h;
 
@@ -945,7 +946,7 @@ static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx,
 	LIST_HANDLER(p1);
 	LIST_HANDLER(p2);
 
-	while (is_list(p1) && is_list(p2)) {
+	while (is_list(p1) && is_list(p2) && !g_tpl_interrupt) {
 		cell *h1 = LIST_HEAD(p1);
 		cell *h2 = LIST_HEAD(p2);
 
