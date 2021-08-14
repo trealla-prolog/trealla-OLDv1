@@ -683,7 +683,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	int optype = GET_OP(c);
 	unsigned specifier;
 
-	if (!optype && search_op(q->st.m, GET_STR(q, c), &specifier, true) && (c->arity == 1)) {
+	if (!optype && !is_variable(c)
+		&&search_op(q->st.m, GET_STR(q, c), &specifier, true) && (c->arity == 1)) {
 		if (IS_PREFIX(specifier)) {
 			SET_OP(c, specifier);
 			optype = specifier;
