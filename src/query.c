@@ -1496,12 +1496,12 @@ static int check_interrupt(query *q)
 	g_tpl_interrupt = 0;
 
 	for (;;) {
-		printf("\nAction (a)bort, (f)ail, (c)ontinue, (r)race, c(r)eep, (e)xit: ");
+		printf("\nAction (a)bort, (f)ail, (c)ontinue, (t)race, c(r)eep, (e)xit: ");
 		fflush(stdout);
 		int ch = history_getch();
 		printf("%c\n", ch);
 
-		if (ch == 'r') {
+		if (ch == 't') {
 			q->trace = !q->trace;
 			return 0;
 		}
@@ -1561,7 +1561,7 @@ static bool check_redo(query *q)
 		}
 
 		if ((ch == '\n') || (ch == 'a')) {
-			printf(".\n");
+			printf("\n; ...\n");
 			q->abort = true;
 			return true;
 		}
