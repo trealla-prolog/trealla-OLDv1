@@ -479,7 +479,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 
 			len = 40;
 			CHECK_BUF(len);
-			len = format_integer(dst, get_smallint(c), 0, ',', 0, argval<2||argval>36?10:argval);
+			len = format_integer(dst, get_smallint(c), 0, ',', 0, argval<2||argval>36?8:argval);
 			break;
 
 		case 'R':
@@ -490,7 +490,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 
 			len = 40;
 			CHECK_BUF(len);
-			len = format_integer(dst, get_smallint(c), 0, ',', 0, argval<2||argval>36?10:-argval);
+			len = format_integer(dst, get_smallint(c), 0, ',', 0, argval<2||argval>36?8:-argval);
 			break;
 
 		case 'k':
