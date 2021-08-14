@@ -5249,6 +5249,9 @@ static pl_status throw_error3(query *q, cell *c, const char *err_type, const cha
 	} else if (!strcmp(err_type, "syntax_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, goal->arity);
 
+	} else if (!strcmp(err_type, "resource_error")) {
+		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, goal->arity);
+
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "evaluable")) {
 		snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),(%s)/%u).", err_type, expected, is_callable(c)?GET_STR(q, c):dst, c->arity, functor, goal->arity);
 
