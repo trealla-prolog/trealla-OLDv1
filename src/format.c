@@ -204,12 +204,9 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 		CHECK_BUF(argval);
 
 		if (ch == 'n') {
-			while (argval-- > 1) {
-                CHECK_BUF(1);
+			while (argval-- > 1)
 				*dst++ = '\n';
-            }
 
-            CHECK_BUF(1);
 			*dst++ = '\n';
 			start_of_line = true;
 			continue;
@@ -370,8 +367,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 
 			while (argval-- > 1) {
 				CHECK_BUF(10);
-				len = put_char_utf8(dst, (int)get_smallint(c));
-				dst += len;
+				dst += put_char_utf8(dst, (int)get_smallint(c));
 			}
 
 			CHECK_BUF(10);
@@ -527,7 +523,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 				return throw_error(q, c, "resource_error", "cyclic");
             }
 
-			CHECK_BUF(len);
+			CHECK_BUF(len*2);
 
 			if (canonical)
 				len = print_canonical_to_buf(q, dst, len+1, c, fmt2.p_ctx, 1, false, 0);
