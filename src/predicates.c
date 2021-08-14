@@ -5619,6 +5619,15 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 		cell tmp;
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "UTF-8"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	} else if (!slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "strict_iso")) {
+		cell tmp;
+
+		if (q->st.m->flag.strict_iso)
+			make_literal(&tmp, g_on_s);
+		else
+			make_literal(&tmp, g_off_s);
+
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "debug")) {
 		cell tmp;
 
@@ -5800,6 +5809,19 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			q->st.m->flag.debug = true;
 		else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "false") || !slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "off"))
 			q->st.m->flag.debug = false;
+		else {
+			cell *tmp = alloc_on_heap(q, 3);
+			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
+			SET_OP(tmp, OP_YFX);
+			tmp[1] = *p1; tmp[1].nbr_cells = 1;
+			tmp[2] = *p2; tmp[2].nbr_cells = 1;
+			return throw_error(q, tmp, "domain_error", "flag_value");
+		}
+	} else if (!slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "strict_iso")) {
+		if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "true") || !slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "on"))
+			q->st.m->flag.strict_iso = true;
+		else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "false") || !slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "off"))
+			q->st.m->flag.strict_iso = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
@@ -12017,6 +12039,7 @@ static void load_flags(query *q)
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "char_conversion", m->flag.char_conversion?"on":"off");
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "occurs_check", m->flag.occurs_check==1?"on":m->flag.occurs_check==0?"off":"error");
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "character_escapes", m->flag.character_escapes?"true":"false");
+	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "strict_iso", m->flag.strict_iso?"on":"off");
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "debug", m->flag.debug?"on":"off");
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "unknown", m->flag.unknown == UNK_ERROR?"error":m->flag.unknown == UNK_WARNING?"warning":m->flag.unknown == UNK_CHANGEABLE?"changeable":"fail");
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "encoding", "'UTF-8'");

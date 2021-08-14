@@ -1561,6 +1561,13 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		} else if ((*s == '\'') && (s[1] == '\'')) {
 			s += 2;
 			v = '\'';
+		} else if ((*s == '\'') && p->flag.strict_iso) {
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
+
+			p->error_desc = "number";
+			p->error = true;
+			return false;
 		} else
 			v = get_char_utf8(&s);
 
