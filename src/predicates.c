@@ -5149,10 +5149,16 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 	}
 
 	fprintf(stdout, "uncaught exception: ");
-	q->quoted = 1;
-	print_term(q, stdout, e, q->st.curr_frame, 1);
-	fprintf(stdout, "\n");
-	q->quoted = 1;
+
+	if (is_cyclic_term(q, e, q->st.curr_frame)) {
+		fprintf(stdout, " CYCLIC_TERM\n");
+	} else {
+		q->quoted = 1;
+		print_term(q, stdout, e, q->st.curr_frame, 1);
+		fprintf(stdout, "\n");
+		q->quoted = 1;
+	}
+
 	q->st.m->pl->did_dump_vars = true;
 	free(e);
 	q->exception = NULL;
@@ -5163,14 +5169,24 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 static USE_RESULT pl_status fn_iso_throw_1(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
-	may_ptr_error(tmp);
-	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
-	may_ptr_error(e);
-	safe_copy_cells(e, tmp, tmp->nbr_cells);
 
-	if (!find_exception_handler(q, e))
-		return pl_failure;
+	if (is_cyclic_term(q, p1, p1_ctx)) {
+		cell *e = malloc(sizeof(cell) * p1->nbr_cells);
+		may_ptr_error(e);
+		safe_copy_cells(e, p1, p1->nbr_cells);
+
+		if (!find_exception_handler(q, e))
+			return pl_failure;
+	} else {
+		cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
+		may_ptr_error(tmp);
+		cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
+		may_ptr_error(e);
+		safe_copy_cells(e, tmp, tmp->nbr_cells);
+
+		if (!find_exception_handler(q, e))
+			return pl_failure;
+	}
 
 	return fn_iso_catch_3(q);
 }
