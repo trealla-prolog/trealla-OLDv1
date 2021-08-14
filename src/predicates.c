@@ -5175,7 +5175,8 @@ static USE_RESULT pl_status fn_iso_throw_1(query *q)
 	return fn_iso_catch_3(q);
 }
 
-// TODO: rewrite error throwing not to do printing/parsing
+// TODO: rewrite error throwing not to do printing/parsing. Each
+// type of *_error should have it's own function call...
 
 static pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expected, cell *goal)
 {
