@@ -152,7 +152,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 	fmt2.p = p2;
 	fmt2.p_ctx = p2_ctx;
 
-	size_t bufsiz = 1024;
+	size_t bufsiz = 1024*8;
 	char *tmpbuf = malloc(bufsiz);
 	may_ptr_error(tmpbuf);
 	char *dst = tmpbuf;
@@ -236,7 +236,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 				tab_char = argval ? argval : ' ';
 
                 for (int i = 0; i < diff; i++) {
-                    CHECK_BUF(1);
+                    CHECK_BUF(10);
 					dst += put_char_utf8(dst, tab_char);
                 }
             }
@@ -260,7 +260,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
                     diff = (at - pos) + 1;
 
                     for (int i = 0; i < diff; i++) {
-                        CHECK_BUF(1);
+                        CHECK_BUF(10);
 						dst += put_char_utf8(dst, tab_char);
                     }
                 } else {
@@ -290,7 +290,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
                     diff = (at - pos) + 1;
 
                     for (int i = 0; i < diff; i++) {
-                        CHECK_BUF(1);
+                        CHECK_BUF(10);
 						dst += put_char_utf8(dst, tab_char);
                     }
                 } else {
@@ -348,7 +348,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 
 				while (is_more_data(q, &fmt3)) {
 					int ch = get_next_char(q, &fmt3);
-					CHECK_BUF(6+1);
+					CHECK_BUF(10);
 					dst += put_char_utf8(dst, ch);
 					cnt++;
 
@@ -368,12 +368,12 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 			}
 
 			while (argval-- > 1) {
-				len = 10;
-				CHECK_BUF(len);
+				CHECK_BUF(10);
 				len = put_char_utf8(dst, (int)get_smallint(c));
 				dst += len;
 			}
 
+			CHECK_BUF(10);
 			len = put_char_utf8(dst, (int)get_smallint(c));
 			break;
 
