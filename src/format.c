@@ -472,6 +472,11 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 			break;
 
 		case 'r':
+			if (!noargval && ((argval < 2) || (argval > 36))) {
+				free(tmpbuf);
+				return throw_error(q, p1, "domain_error", "radix_invalid");
+			}
+
 			if (!is_integer(c)) {
 				free(tmpbuf);
 				return throw_error(q, c, "type_error", "integer");
@@ -479,10 +484,15 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 
 			len = 40;
 			CHECK_BUF(len);
-			len = format_integer(dst, get_smallint(c), 0, ',', 0, argval<2||argval>36?8:argval);
+			len = format_integer(dst, get_smallint(c), 0, ',', 0, !argval?8:argval);
 			break;
 
 		case 'R':
+			if (!noargval && ((argval < 2) || (argval > 36))) {
+				free(tmpbuf);
+				return throw_error(q, p1, "domain_error", "radix_invalid");
+			}
+
 			if (!is_integer(c)) {
 				free(tmpbuf);
 				return throw_error(q, c, "type_error", "integer");
@@ -490,7 +500,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 
 			len = 40;
 			CHECK_BUF(len);
-			len = format_integer(dst, get_smallint(c), 0, ',', 0, argval<2||argval>36?8:-argval);
+			len = format_integer(dst, get_smallint(c), 0, ',', 0, !argval?-8:-argval);
 			break;
 
 		case 'k':
