@@ -8150,11 +8150,31 @@ static USE_RESULT pl_status fn_sys_mustbe_pairlist_2(query *q)
 static USE_RESULT pl_status fn_sys_mustbe_pairlist_or_var_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,any);
 
 	if (is_variable(p1))
 		return pl_success;
 
-	return fn_sys_mustbe_pairlist_2(q);
+	if (!is_valid_list(q, p1, p1_ctx, true))
+		return throw_error(q, p1, "type_error", "list");
+
+	LIST_HANDLER(p1);
+
+	while (is_list(p1) && !g_tpl_interrupt) {
+		cell *h = LIST_HEAD(p1);
+		h = deref(q, h, p1_ctx);
+
+		if (!is_variable(h)) {
+			if (!is_literal(h) || (h->arity != 2) || (h->val_off != g_minus_s))
+				return throw_error(q, h, "type_error", "pair");
+		}
+
+		p1 = LIST_TAIL(p1);
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+	}
+
+	return pl_success;
 }
 
 static USE_RESULT pl_status fn_sys_mustbe_list_1(query *q)
