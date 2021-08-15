@@ -6,12 +6,12 @@
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "iso_bagof_3_10",
-        "uid" : "136af44ce3c45475",
+        "uid" : "f4ebdcd5ea840e9c",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1628903335000,
-          "stop" : 1628903335000,
+          "start" : 1629012243000,
+          "stop" : 1629012243000,
           "duration" : 0
         },
         "flaky" : false,
@@ -19,13 +19,26 @@
         "parameters" : [ ]
       }, {
         "name" : "lgt_write_term_3_25",
-        "uid" : "78f1d8d8bcce40f5",
+        "uid" : "ecb3da2b8c28a2e8",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1628903434000,
-          "stop" : 1628903434002,
-          "duration" : 2
+          "start" : 1629012326000,
+          "stop" : 1629012326001,
+          "duration" : 1
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "lgt_number_26",
+        "uid" : "6cf54ad3845c9f01",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "start" : 1629012332000,
+          "stop" : 1629012332000,
+          "duration" : 0
         },
         "flaky" : false,
         "newFailed" : false,
@@ -36,12 +49,12 @@
       "name" : "Failure instead of error",
       "children" : [ {
         "name" : "commons_length_2_16",
-        "uid" : "13ec202c9f88b9d1",
+        "uid" : "e2554910bbf8c9f9",
         "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
         "status" : "failed",
         "time" : {
-          "start" : 1628903378000,
-          "stop" : 1628903378000,
+          "start" : 1629012279000,
+          "stop" : 1629012279000,
           "duration" : 0
         },
         "flaky" : false,
@@ -53,12 +66,12 @@
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "iso_setof_3_12",
-        "uid" : "6552991b0b6d21a9",
+        "uid" : "51975ec72c6225ae",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1628903417000,
-          "stop" : 1628903417000,
+          "start" : 1629012312000,
+          "stop" : 1629012312000,
           "duration" : 0
         },
         "flaky" : false,
