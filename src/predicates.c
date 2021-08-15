@@ -8124,6 +8124,10 @@ static USE_RESULT pl_status fn_write_canonical_to_chars_3(query *q)
 static USE_RESULT pl_status fn_is_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
+
+	if (is_cyclic_term(q, p1, p1_ctx))
+		return false;
+
 	return is_valid_list(q, p1, p1_ctx, false);
 }
 
@@ -8131,6 +8135,9 @@ static USE_RESULT pl_status fn_sys_mustbe_pairlist_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
+
+	if (is_cyclic_term(q, p1, p1_ctx))
+		return throw_error(q, p1, "type_error", "list");
 
 	if (is_valid_list(q, p1, p1_ctx, true)
 		&& !is_valid_list(q, p1, p1_ctx, false))
@@ -8167,6 +8174,9 @@ static USE_RESULT pl_status fn_sys_mustbe_pairlist_or_var_2(query *q)
 	if (is_variable(p1))
 		return pl_success;
 
+	if (is_cyclic_term(q, p1, p1_ctx))
+		return throw_error(q, p1, "type_error", "list");
+
 	if (!is_valid_list(q, p1, p1_ctx, true))
 		return throw_error(q, p1, "type_error", "list");
 
@@ -8193,6 +8203,9 @@ static USE_RESULT pl_status fn_sys_mustbe_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
+	if (is_cyclic_term(q, p1, p1_ctx))
+		return throw_error(q, p1, "type_error", "list");
+
 	if (is_valid_list(q, p1, p1_ctx, true)
 		&& !is_valid_list(q, p1, p1_ctx, false))
 		return throw_error(q, p1, "instantiation_error", "partial_list");
@@ -8209,6 +8222,9 @@ static USE_RESULT pl_status fn_sys_mustbe_list_or_var_1(query *q)
 
 	if (is_variable(p1))
 		return pl_success;
+
+	if (is_cyclic_term(q, p1, p1_ctx))
+		return throw_error(q, p1, "type_error", "list");
 
 	if (!is_valid_list(q, p1, p1_ctx, true))
 		return throw_error(q, p1, "type_error", "list");
