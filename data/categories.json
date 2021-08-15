@@ -1,18 +1,17 @@
 {
   "uid" : "4b4757e66a1912dae1a509f688f20b0f",
-  "name" : "categories",
   "children" : [ {
     "name" : "Product defects",
     "children" : [ {
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "iso_bagof_3_10",
-        "uid" : "58e947f40498a4b",
+        "uid" : "844a3da5e3d85db2",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1629064588000,
-          "stop" : 1629064588000,
+          "start" : 1629068013000,
+          "stop" : 1629068013000,
           "duration" : 0
         },
         "flaky" : false,
@@ -20,26 +19,13 @@
         "parameters" : [ ]
       }, {
         "name" : "lgt_write_term_3_25",
-        "uid" : "9b02947a2b64f914",
+        "uid" : "73e70b5aabf0d036",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1629064688000,
-          "stop" : 1629064688002,
+          "start" : 1629068115000,
+          "stop" : 1629068115002,
           "duration" : 2
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "lgt_number_26",
-        "uid" : "aa4c41e722a17828",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "start" : 1629064695000,
-          "stop" : 1629064695001,
-          "duration" : 1
         },
         "flaky" : false,
         "newFailed" : false,
@@ -50,12 +36,12 @@
       "name" : "Failure instead of error",
       "children" : [ {
         "name" : "commons_length_2_16",
-        "uid" : "6c04f542174e1065",
+        "uid" : "3a1e66b9b9dbe38d",
         "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
         "status" : "failed",
         "time" : {
-          "start" : 1629064632000,
-          "stop" : 1629064632000,
+          "start" : 1629068057000,
+          "stop" : 1629068057000,
           "duration" : 0
         },
         "flaky" : false,
@@ -67,12 +53,12 @@
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "iso_setof_3_12",
-        "uid" : "bd0726f5152ed6fc",
+        "uid" : "9dda44d741bc6557",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1629064671000,
-          "stop" : 1629064671000,
+          "start" : 1629068097000,
+          "stop" : 1629068097000,
           "duration" : 0
         },
         "flaky" : false,
@@ -82,5 +68,6 @@
       "uid" : "7a65c89daad8cf82ce910dbf95cc8113"
     } ],
     "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
-  } ]
+  } ],
+  "name" : "categories"
 }
