@@ -8120,6 +8120,10 @@ static USE_RESULT pl_status fn_sys_mustbe_pairlist_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
+	if (is_valid_list(q, p1, p1_ctx, true)
+		&& !is_valid_list(q, p1, p1_ctx, false))
+		return throw_error2(q, p1, "instantiation_error", "tail_is_a_variable", p2);
+
 	if (!is_valid_list(q, p1, p1_ctx, false))
 		return throw_error(q, p1, "type_error", "list");
 
@@ -8146,33 +8150,11 @@ static USE_RESULT pl_status fn_sys_mustbe_pairlist_2(query *q)
 static USE_RESULT pl_status fn_sys_mustbe_pairlist_or_var_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
 
-	if (is_valid_list(q, p1, p1_ctx, true)
-		&& !is_valid_list(q, p1, p1_ctx, false))
-		return throw_error2(q, p1, "instantiation_error", "tail_is_a_variable", p2);
+	if (is_variable(p1))
+		return pl_success;
 
-	if (!is_valid_list(q, p1, p1_ctx, false))
-		return throw_error(q, p1, "type_error", "list");
-
-	LIST_HANDLER(p1);
-
-	while (is_list(p1) && !g_tpl_interrupt) {
-		cell *h = LIST_HEAD(p1);
-		h = deref(q, h, p1_ctx);
-
-		if (is_variable(h))
-			return throw_error(q, h, "instantiation_error", "not_sufficiently_instantiated");
-
-		if (!is_literal(h) || (h->arity != 2) || (h->val_off != g_minus_s))
-			return throw_error(q, h, "type_error", "pair");
-
-		p1 = LIST_TAIL(p1);
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-	}
-
-	return pl_success;
+	return fn_sys_mustbe_pairlist_2(q);
 }
 
 static USE_RESULT pl_status fn_sys_mustbe_list_1(query *q)
