@@ -1520,6 +1520,14 @@ static int get_escape(const char **_src, bool *error)
 			*error = true;
 			return 0;
 		}
+
+		if ((unsigned)ch > 0x10FFFF) {
+			//if (DUMP_ERRS || !p->do_read_term)
+			//	fprintf(stdout, "Error: syntax error, illegal character code\n");
+			*_src = src;
+			*error = true;
+			return 0;
+		}
 	} else if ((ch != '\\') && (ch != '"') && (ch != '\'') && (ch != '\r') && (ch != '\n')) {
 		*_src = src;
 		*error = true;
