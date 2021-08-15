@@ -1568,7 +1568,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			}
 
 			v = get_escape(&s, &p->error);
-		} else if ((*s == '\'') && p->flag.strict_iso) {
+		} else if ((*s == '\'') && !p->flag.not_strict_iso) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
 

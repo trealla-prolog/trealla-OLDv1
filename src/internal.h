@@ -474,7 +474,7 @@ typedef struct prolog_flags_ {
 	bool double_quote_atom:1;
 	bool character_escapes:1;
 	bool char_conversion:1;
-	bool strict_iso:1;
+	bool not_strict_iso:1;
 	bool debug:1;
 } prolog_flags;
 
