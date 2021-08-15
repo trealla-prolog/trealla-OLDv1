@@ -449,7 +449,6 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 	if (is_string(c)) {
 		int cnt = 0;
 		cell *l = c;
-
 		LIST_HANDLER(l);
 
 		while (is_list(l)) {
@@ -472,15 +471,16 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 	}
 
 	const char *src = GET_STR(q, c);
-	int dq = 0, quote = !is_variable(c) && needs_quoting(q->st.m, src, LEN_STR(q, c));
-	quote += has_spaces(src, LEN_STR(q, c));
+	size_t srclen = LEN_STR(q, c);
+	int dq = 0, quote = !is_variable(c) && needs_quoting(q->st.m, src, srclen);
+	quote += has_spaces(src, srclen);
 	if (is_string(c)) dq = quote = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 
 	if (quote || q->quoted)
-		dst += formatted(dst, dstlen, src, LEN_STR(q, c), dq);
+		dst += formatted(dst, dstlen, src, srclen, dq);
 	else
-		dst += plain(dst, dstlen, src, LEN_STR(q, c));
+		dst += plain(dst, dstlen, src, srclen);
 
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 
@@ -619,6 +619,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	// FIXME make non-recursive
 
 	const char *src = GET_STR(q, c);
+	size_t srclen = LEN_STR(q, c);
 	unsigned print_list = 0, cnt = 0;
 
 	while (is_iso_list(c)) {
@@ -633,7 +634,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		}
 
 		LIST_HANDLER(c);
-
 		cell *head = LIST_HEAD(c);
 
 		if (!cons)
@@ -714,7 +714,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	}
 
 	if (q->ignore_ops || !optype || !c->arity) {
-		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quoting(q->st.m, src, LEN_STR(q, c));
+		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quoting(q->st.m, src, srclen);
 		int dq = 0, braces = 0;
 		if (is_string(c)) dq = quote = 1;
 		if (q->quoted < 0) quote = 0;
@@ -765,7 +765,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			return dst - save_dst;
 		}
 
-		int len_str = LEN_STR(q, c);
+		int len_str = srclen;
 
 		if (braces)
 			;
@@ -773,12 +773,12 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			if ((running < 0) && is_blob(c) && (len_str > 256))
 				len_str = 256;
 
-			dst += formatted(dst, dstlen, src, LEN_STR(q, c), dq);
+			dst += formatted(dst, dstlen, src, srclen, dq);
 
 			if ((running < 0) && is_blob(c) && (len_str == 256))
 				dst += snprintf(dst, dstlen, "%s", "|...");
 		} else
-			dst += plain(dst, dstlen, src, LEN_STR(q, c));
+			dst += plain(dst, dstlen, src, srclen);
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
@@ -831,7 +831,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		dst += res;
 		int quote = q->quoted && has_spaces(src, LEN_STR(q,c));
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
-		dst += snprintf(dst, dstlen, "%s", src);
+		dst += plain(dst, dstlen, src, srclen);
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 		return dst - save_dst;
 	}
@@ -849,7 +849,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		int parens = is_structure(rhs) && !strcmp(GET_STR(q, rhs), ",");
 		int quote = q->quoted && has_spaces(src, LEN_STR(q,c));
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
-		dst += snprintf(dst, dstlen, "%s", src);
+		dst += plain(dst, dstlen, src, srclen);
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
@@ -900,7 +900,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 	int quote = q->quoted && has_spaces(src, LEN_STR(q,c));
 	if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
-	dst += snprintf(dst, dstlen, "%s", src);
+	dst += plain(dst, dstlen, src, srclen);
 	if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 
 	if ((strchr(src, '=') || strchr(src, '+') || strchr(src, '#')) &&
