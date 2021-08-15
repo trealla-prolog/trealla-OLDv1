@@ -605,7 +605,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 		}
 	} else {
 		free(tmpbuf);
-		return throw_error(q, p1, "type_error", "stream");
+		return throw_error(q, str, "domain_error", "stream_or_alias");
 	}
 
 	free(tmpbuf);
