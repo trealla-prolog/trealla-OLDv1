@@ -1038,6 +1038,9 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
 
+	if (is_cyclic_term(q, p2, p2_ctx))
+		return throw_error(q, p2, "type_error", "list");
+
 	if (is_nil(p2))
 		return throw_error(q, p2, "syntax_error", "incomplete");
 
