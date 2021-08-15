@@ -312,13 +312,16 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 			continue;
 		}
 
-		if (!p2 || !is_list(p2))
-			break;
+		if (!p2 || !is_list(p2)) {
+			cell tmp;
+			make_literal(&tmp, g_nil_s);
+			return throw_error(q, &tmp, "domain_error", "missing args");
+		}
 
 		cell *c = get_next_cell(q, &fmt2);
 
 		if (!c)
-			return throw_error(q, c, "domain_error", "missing args");
+			return throw_error(q, p2, "domain_error", "missing args");
 
 		if (ch == 'i')
 			continue;
