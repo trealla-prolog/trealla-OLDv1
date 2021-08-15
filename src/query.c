@@ -1465,7 +1465,7 @@ static void dump_vars(query *q, bool partial)
 			if (pri >= 700) parens = true;
 		}
 
-		if (is_atom(c) && search_op(q->st.m, GET_STR(q, c), NULL, false) && !IS_OP(c))
+		if (is_atom(c) && !is_string(c) && search_op(q->st.m, GET_STR(q, c), NULL, false) && !IS_OP(c))
 			parens = true;
 
 		if (parens) fputc('(', stdout);

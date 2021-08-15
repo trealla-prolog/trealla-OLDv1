@@ -1492,7 +1492,14 @@ const char *g_anti_escapes = "eafbtvrnsd'";
 static int get_escape(const char **_src, bool *error)
 {
 	const char *src = *_src;
-	int ch = *src++;
+	int ch = *src;
+
+	if (!ch || iscntrl(ch)) {
+		*error = true;
+		return 0;
+	}
+
+	ch = *src++;
 	const char *ptr = strchr(g_anti_escapes, ch);
 
 	if (ptr)
@@ -1558,9 +1565,15 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		if (*s == '\\') {
 			s++;
 			v = get_escape(&s, &p->error);
-		} else if ((*s == '\'') && (s[1] == '\'')) {
-			s += 2;
-			v = '\'';
+
+			if (p->error) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
+
+				p->error_desc = "number";
+				p->error = true;
+				return false;
+			}
 		} else if ((*s == '\'') && p->flag.strict_iso) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line);
