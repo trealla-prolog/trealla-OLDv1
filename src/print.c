@@ -59,6 +59,27 @@ bool needs_quoting(module *m, const char *src, int srclen)
 	return false;
 }
 
+static bool has_spaces(const char *src, int srclen)
+{
+	if (!*src)
+		return true;
+
+	while (srclen > 0) {
+		int lench = len_char_utf8(src);
+
+		if (!lench)
+			break;
+
+		int ch = get_char_utf8(&src);
+		srclen -= lench;
+
+		if (isspace(ch))
+			return true;
+	}
+
+	return false;
+}
+
 size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq)
 {
 	extern const char *g_escapes;
@@ -452,6 +473,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 
 	const char *src = GET_STR(q, c);
 	int dq = 0, quote = !is_variable(c) && needs_quoting(q->st.m, src, LEN_STR(q, c));
+	quote += has_spaces(src, LEN_STR(q, c));
 	if (is_string(c)) dq = quote = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 
@@ -807,7 +829,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		ssize_t res = print_term_to_buf(q, dst, dstlen, lhs, lhs_ctx, running, 0, depth+1);
 		if (res < 0) return -1;
 		dst += res;
+		int quote = q->quoted && has_spaces(src, LEN_STR(q,c));
+		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 		dst += snprintf(dst, dstlen, "%s", src);
+		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 		return dst - save_dst;
 	}
 
@@ -822,7 +847,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		space += IS_FX(rhs);
 		//if (!strcmp(src, "-") && !is_smallint(rhs)) dst += snprintf(dst, dstlen, "%s", " ");
 		int parens = is_structure(rhs) && !strcmp(GET_STR(q, rhs), ",");
+		int quote = q->quoted && has_spaces(src, LEN_STR(q,c));
+		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 		dst += snprintf(dst, dstlen, "%s", src);
+		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 		if (space && !parens) dst += snprintf(dst, dstlen, "%s", " ");
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
 		ssize_t res = print_term_to_buf(q, dst, dstlen, rhs, rhs_ctx, running, 0, depth+1);
@@ -870,7 +898,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		|| !*src;
 	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
+	int quote = q->quoted && has_spaces(src, LEN_STR(q,c));
+	if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 	dst += snprintf(dst, dstlen, "%s", src);
+	if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 
 	if ((strchr(src, '=') || strchr(src, '+') || strchr(src, '#')) &&
 		((*GET_STR(q, rhs) == '-')
