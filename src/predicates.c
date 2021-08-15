@@ -10702,7 +10702,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (!is_variable(p1) && !is_nil(p1) && is_variable(p2)
+	if (!is_variable(p1) && !is_nil(p1) && (is_variable(p2) || q->flag.not_strict_iso)
 		&& !is_valid_list(q, p1, p1_ctx, true))
 		return throw_error(q, p1, "type_error", "list");
 
