@@ -1,0 +1,49 @@
+{
+  "uid" : "e906d76c520b3d8a",
+  "name" : "lgt_integer_division_2_05",
+  "historyId" : "functions/integer_division_2/tests.lgt::tests:tests#lgt_integer_division_2_05",
+  "time" : {
+    "start" : 1629069585000,
+    "stop" : 1629069585000,
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/integer_division_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "e906d76c520b3d8a.json",
+  "parameterValues" : [ ]
+}

@@ -1,0 +1,49 @@
+{
+  "uid" : "7b970a1e25c58aa2",
+  "name" : "lgt_write_term_3_36",
+  "historyId" : "predicates/write_term_3/tests.lgt::tests:tests#lgt_write_term_3_36",
+  "time" : {
+    "start" : 1629069720000,
+    "stop" : 1629069720002,
+    "duration" : 2
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/write_term_3/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "7b970a1e25c58aa2.json",
+  "parameterValues" : [ ]
+}

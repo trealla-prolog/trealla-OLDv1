@@ -1,0 +1,49 @@
+{
+  "uid" : "f8ac650e0fa7dd8d",
+  "name" : "lgt_at_end_of_stream_1_12",
+  "historyId" : "predicates/at_end_of_stream_1/tests.lgt::tests:tests#lgt_at_end_of_stream_1_12",
+  "time" : {
+    "start" : 1629069623000,
+    "stop" : 1629069623001,
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/at_end_of_stream_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "f8ac650e0fa7dd8d.json",
+  "parameterValues" : [ ]
+}
