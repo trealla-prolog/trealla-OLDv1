@@ -257,8 +257,7 @@ keysort(L1, L2) :-
 	'$mustbe_pairlist'(L1, keysort/2),
 	'$mustbe_pairlist_or_var'(L2, keysort/2),
 	length(L1,N),
-	keysort(N, L1, _, Ltmp),
-	Ltmp = L2
+	keysort(N, L1, _, L2),
 	!.
 
 keysort(2, [X1, X2|L], L, R) :- !,
