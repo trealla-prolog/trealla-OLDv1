@@ -624,11 +624,13 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 	while (is_iso_list(c)) {
 		if (cnt++ > 256) {
+			dst--;
 			dst += snprintf(dst, dstlen, "%s", "|...]");
 			return dst - save_dst;
 		}
 
 		if (q->max_depth && (depth >= q->max_depth) && (running < 0)) {
+			dst--;
 			dst += snprintf(dst, dstlen, "%s", "|...]");
 			return dst - save_dst;
 		}
@@ -775,8 +777,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 			dst += formatted(dst, dstlen, src, srclen, dq);
 
-			if ((running < 0) && is_blob(c) && (len_str == 256))
+			if ((running < 0) && is_blob(c) && (len_str == 256)) {
+				dst--;
 				dst += snprintf(dst, dstlen, "%s", "|...");
+			}
 		} else
 			dst += plain(dst, dstlen, src, srclen);
 

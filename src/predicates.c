@@ -10686,6 +10686,7 @@ static pl_status do_length(query *q)
 	return pl_success;
 }
 
+#if 0
 static int safe_list_length(query *q, cell *p1, idx_t p1_ctx)
 {
 	LIST_HANDLER(p1);
@@ -10705,6 +10706,7 @@ static int safe_list_length(query *q, cell *p1, idx_t p1_ctx)
 
 	return cnt;
 }
+#endif
 
 static USE_RESULT pl_status fn_iso_length_2(query *q)
 {
@@ -10724,14 +10726,15 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		&& !is_string(p1) && !is_valid_list_up_to(q, p1, p1_ctx, true, get_smallint(p2)))
 		return throw_error(q, p1, "type_error", "list");
 
+#if 0
 	if (is_structure(p1) && is_cyclic_term(q, p1, p1_ctx)) {
 		cell tmp;
 		make_int(&tmp, safe_list_length(q, p1, p1_ctx));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
+#endif
 
-	if (!is_variable(p1) && !is_nil(p1) && (is_variable(p2) || q->flag.not_strict_iso)
-		&& !is_valid_list(q, p1, p1_ctx, true))
+	if (!is_variable(p1) && !is_nil(p1) && (is_cyclic_term(q, p1, p1_ctx) || !is_valid_list(q, p1, p1_ctx, true)))
 		return throw_error(q, p1, "type_error", "list");
 
 	if (is_variable(p1) && is_variable(p2)) {
