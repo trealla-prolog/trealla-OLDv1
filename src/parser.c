@@ -2152,7 +2152,7 @@ bool get_token(parser *p, int last_op)
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line);
 
-				p->error_desc = "atom";
+				p->error_desc = "operator_expected";
 				p->error = true;
 			}
 		}
@@ -2163,6 +2163,8 @@ bool get_token(parser *p, int last_op)
 
 	if (is_matching_pair(&dst, (char**)&src, '[',']') ||
 		is_matching_pair(&dst, (char**)&src, '{','}')) {
+		p->srcptr = (char*)src;
+		src = eat_space(p);
 		p->srcptr = (char*)src;
 		return (dst - p->token) != 0;
 	}
@@ -2596,6 +2598,16 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		last_quoted = p->is_quoted;
 		last_op = strcmp(p->token, ")") && priority;
+
+		if (!strcmp(p->token, "[]") && (*p->srcptr == '(')) {
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Error: syntax error, operator expected '%s'\n", p->save_line);
+
+			p->error_desc = "operator_expected";
+			p->error = true;
+			break;
+		}
+
 		int func = is_literal(&p->v) && !specifier && (*p->srcptr == '(');
 
 		if (func) {
