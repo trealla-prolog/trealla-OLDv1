@@ -1,0 +1,55 @@
+{
+  "uid" : "d4e1a7fcae7ef9a4",
+  "name" : "lgt_format_3_first_argument_wrong_type",
+  "historyId" : "predicates/format_3/tests.lgt::tests:tests#lgt_format_3_first_argument_wrong_type",
+  "time" : {
+    "start" : 1629063065000,
+    "stop" : 1629063065000,
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Wrong error",
+  "statusTrace" : "error(type_error(stream,3.14),format/3)",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/format_3/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "d4e1a7fcae7ef9a4.json",
+  "parameterValues" : [ ]
+}
