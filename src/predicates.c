@@ -2506,8 +2506,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 				} else if (is_atom(name) && !slicecmp2(GET_STR(q, name), LEN_STR(q, name), "reset")) {
 					str->eof_action = eof_action_reset;
 				}
-			} else
-				return throw_error(q, c, "domain_error", "stream_option");
+			}
 		} else
 			return throw_error(q, c, "domain_error", "stream_option");
 
