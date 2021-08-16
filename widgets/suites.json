@@ -34,15 +34,26 @@
       "total" : 18
     }
   }, {
-    "uid" : "09812cef55155aac413b0e337d25177f",
-    "name" : "unicode/builtins/tests.lgt::tests",
+    "uid" : "8842e171f7cab964375d57f45021fa4f",
+    "name" : "unicode/builtins/tests.lgt",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 136,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 136
+      "total" : 1
+    }
+  }, {
+    "uid" : "2f6168d2687f2f7ac36a861586208247",
+    "name" : "unicode/syntax/tests.lgt",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
     }
   }, {
     "uid" : "6323f92028da534ce9e9b896fe8a8e78",
@@ -98,17 +109,6 @@
       "passed" : 48,
       "unknown" : 0,
       "total" : 48
-    }
-  }, {
-    "uid" : "cca7e0fd2fd1795563678e8da9db0895",
-    "name" : "syntax/numbers/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 0,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 39,
-      "unknown" : 0,
-      "total" : 39
     }
   } ]
 }
