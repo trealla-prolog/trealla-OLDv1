@@ -9,7 +9,7 @@ A compact, efficient Prolog interpreter with
 	The default double-quoted representation is *chars* list
 	Dynamic atoms are automatically garbage collected
 	Uses 1st & 2nd arg indexing
-	DCGs & format_//2
+	DCGs
 	User-defined functions
 	Attributed variables with SICStus interface (work-in-progress)
 	Logtalk compatible (work-in-progress)

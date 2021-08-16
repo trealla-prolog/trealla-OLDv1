@@ -2983,7 +2983,7 @@ static bool parse_write_params(query *q, cell *c, cell **vnames, idx_t *vnames_c
 	idx_t c1_ctx = q->latest_ctx;
 
 	if (is_variable(c1)) {
-		DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
+		DISCARD_RESULT throw_error(q, c1, "instantiation_error", "write_option");
 		return false;
 	}
 
