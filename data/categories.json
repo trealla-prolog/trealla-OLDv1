@@ -6,12 +6,12 @@
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "iso_bagof_3_10",
-        "uid" : "38a71b695366f676",
+        "uid" : "9f8be007e9b1a4e2",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1629151446000,
-          "stop" : 1629151446000,
+          "start" : 1629155981000,
+          "stop" : 1629155981000,
           "duration" : 0
         },
         "flaky" : false,
@@ -19,12 +19,12 @@
         "parameters" : [ ]
       }, {
         "name" : "lgt_write_term_3_25",
-        "uid" : "7ddebd9622523aa8",
+        "uid" : "c71c2fad6f32da9d",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1629151546000,
-          "stop" : 1629151546001,
+          "start" : 1629156061000,
+          "stop" : 1629156061001,
           "duration" : 1
         },
         "flaky" : false,
@@ -36,12 +36,12 @@
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "iso_setof_3_12",
-        "uid" : "8d6ea8621cb57ba0",
+        "uid" : "c4e3b409774d191b",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1629151529000,
-          "stop" : 1629151529000,
+          "start" : 1629156047000,
+          "stop" : 1629156047000,
           "duration" : 0
         },
         "flaky" : false,
@@ -49,36 +49,6 @@
         "parameters" : [ ]
       } ],
       "uid" : "7a65c89daad8cf82ce910dbf95cc8113"
-    }, {
-      "name" : "Broken",
-      "children" : [ {
-        "name" : "builtins",
-        "uid" : "58d9a042361ef36c",
-        "parentUid" : "a747cde6acd25d44d5a38ab42c11d73d",
-        "status" : "failed",
-        "time" : {
-          "start" : 1629151560000,
-          "stop" : 1629151560000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      }, {
-        "name" : "syntax",
-        "uid" : "4d0288435772225b",
-        "parentUid" : "a747cde6acd25d44d5a38ab42c11d73d",
-        "status" : "failed",
-        "time" : {
-          "start" : 1629151562000,
-          "stop" : 1629151562000,
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      } ],
-      "uid" : "a747cde6acd25d44d5a38ab42c11d73d"
     } ],
     "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
   } ],
