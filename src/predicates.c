@@ -2460,6 +2460,9 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			cell *name = c + 1;
 			name = deref(q, name, q->latest_ctx);
 
+			if (is_variable(name) && slicecmp2(GET_STR(q, c), LEN_STR(q, c), "mmap"))
+				return throw_error(q, name, "instantiation_error", "stream_option");
+
 			if (!is_atom(name) && slicecmp2(GET_STR(q, c), LEN_STR(q, c), "mmap"))
 				return throw_error(q, c, "domain_error", "stream_option");
 
@@ -2481,6 +2484,8 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 					binary = true;
 				} else if (is_atom(name) && !slicecmp2(GET_STR(q, name), LEN_STR(q, name), "text"))
 					binary = false;
+				else
+					return throw_error(q, c, "domain_error", "stream_option");
 			} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "bom")) {
 				bom_specified = true;
 
@@ -2501,7 +2506,8 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 				} else if (is_atom(name) && !slicecmp2(GET_STR(q, name), LEN_STR(q, name), "reset")) {
 					str->eof_action = eof_action_reset;
 				}
-			}
+			} else
+				return throw_error(q, c, "domain_error", "stream_option");
 		} else
 			return throw_error(q, c, "domain_error", "stream_option");
 
