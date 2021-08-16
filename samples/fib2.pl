@@ -13,4 +13,4 @@ fib(A,B,C,D) :-
     A > 1,
     E is A-1,
     F is B+C,
-    fib(E,C,F,D).
+    fib(E,C,1,D).
