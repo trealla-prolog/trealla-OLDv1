@@ -619,7 +619,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	// FIXME make non-recursive
 
 	const char *src = GET_STR(q, c);
-	size_t srclen = LEN_STR(q, c);
 	unsigned print_list = 0, cnt = 0;
 
 	while (is_iso_list(c)) {
@@ -716,7 +715,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	}
 
 	if (q->ignore_ops || !optype || !c->arity) {
-		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quoting(q->st.m, src, srclen);
+		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quoting(q->st.m, src, LEN_STR(q, c));
 		int dq = 0, braces = 0;
 		if (is_string(c)) dq = quote = 1;
 		if (q->quoted < 0) quote = 0;
@@ -767,7 +766,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			return dst - save_dst;
 		}
 
-		int len_str = srclen;
+		int len_str = LEN_STR(q, c);
 
 		if (braces)
 			;
@@ -775,14 +774,14 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			if ((running < 0) && is_blob(c) && (len_str > 256))
 				len_str = 256;
 
-			dst += formatted(dst, dstlen, src, srclen, dq);
+			dst += formatted(dst, dstlen, src, len_str, dq);
 
 			if ((running < 0) && is_blob(c) && (len_str == 256)) {
 				dst--;
 				dst += snprintf(dst, dstlen, "%s", "|...");
 			}
 		} else
-			dst += plain(dst, dstlen, src, srclen);
+			dst += plain(dst, dstlen, src, len_str);
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
@@ -823,6 +822,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 		return dst - save_dst;
 	}
+
+	size_t srclen = LEN_STR(q, c);
 
 	// Postfix...
 
