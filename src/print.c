@@ -851,7 +851,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		space += (!strcmp(src, "-") || !strcmp(src, "+")) && is_smallint(rhs) && (get_smallint(rhs) < 0);
 		space += IS_FX(rhs);
 		//if (!strcmp(src, "-") && !is_smallint(rhs)) dst += snprintf(dst, dstlen, "%s", " ");
+		unsigned my_priority = search_op(q->st.m, GET_STR(q, c), NULL, true);
+		unsigned rhs_pri = is_literal(rhs) ? search_op(q->st.m, GET_STR(q, rhs), NULL, false) : 0;
 		int parens = is_structure(rhs) && !strcmp(GET_STR(q, rhs), ",");
+		if (rhs_pri >= my_priority) parens = 1;
 		int quote = q->quoted && has_spaces(src, LEN_STR(q,c));
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 		dst += plain(dst, dstlen, src, srclen);
