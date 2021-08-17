@@ -4271,11 +4271,10 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		assert(strlen(GET_STR(q, tmp)) == LEN_STR(q, tmp));
 
 		if (is_callable(tmp)) {
-			if ((tmp->fn = get_builtin(q->st.m->pl, GET_STR(q, tmp), tmp->arity, &found)), found)
-				tmp->flags |= FLAG_BUILTIN;
-			else {
-				tmp->match = search_predicate(q->st.m, tmp);
+			if ((tmp->match = search_predicate(q->st.m, tmp)) != NULL) {
 				tmp->flags &= ~FLAG_BUILTIN;
+			} else if ((tmp->fn = get_builtin(q->st.m->pl, GET_STR(q, tmp), tmp->arity, &found)), found) {
+				tmp->flags |= FLAG_BUILTIN;
 			}
 		}
 
@@ -4876,22 +4875,16 @@ static USE_RESULT pl_status fn_iso_call_n(query *q)
 
 	assert(strlen(GET_STR(q, tmp2)) == LEN_STR(q, tmp2));
 
-	if ((tmp2->fn = get_builtin(q->st.m->pl, GET_STR(q, tmp2), arity, &found)), found) {
-		tmp2->flags |= FLAG_BUILTIN;
-		unsigned specifier;
-
-		if (search_op(q->st.m, GET_STR(q, tmp2), &specifier, false))
-			SET_OP(tmp2, specifier);
-	} else if (found) {
-		tmp2->flags |= FLAG_BUILTIN;
-		unsigned specifier;
-
-		if (search_op(q->st.m, GET_STR(q, tmp2), &specifier, false))
-			SET_OP(tmp2, specifier);
-	} else {
-		tmp2->match = search_predicate(q->st.m, tmp2);
+	if ((tmp2->match = search_predicate(q->st.m, tmp2)) != NULL) {
 		tmp2->flags &= ~FLAG_BUILTIN;
+	} else if ((tmp2->fn = get_builtin(q->st.m->pl, GET_STR(q, tmp2), tmp2->arity, &found)), found) {
+		tmp2->flags |= FLAG_BUILTIN;
 	}
+
+	unsigned specifier;
+
+	if (search_op(q->st.m, GET_STR(q, tmp2), &specifier, false))
+		SET_OP(tmp2, specifier);
 
 	cell *tmp = clone_to_heap(q, true, tmp2, 1);
 	make_call(q, tmp+1+tmp2->nbr_cells);
@@ -5512,7 +5505,6 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 		return pl_success;
 
 	bool found = false;
-
 
 	if (get_builtin(q->st.m->pl, functor, arity, &found), found)
 		return pl_success;
@@ -8404,11 +8396,10 @@ static USE_RESULT pl_status fn_task_n(query *q)
 
 	assert(strlen(GET_STR(q, tmp2)) == LEN_STR(q, tmp2));
 
-	if ((tmp2->fn = get_builtin(q->st.m->pl, GET_STR(q, tmp2), arity, &found)), found)
-		tmp2->flags |= FLAG_BUILTIN;
-	else {
-		tmp2->match = search_predicate(q->st.m, tmp2);
+	if ((tmp2->match = search_predicate(q->st.m, tmp2)) != NULL) {
 		tmp2->flags &= ~FLAG_BUILTIN;
+	} else if ((tmp2->fn = get_builtin(q->st.m->pl, GET_STR(q, tmp2), tmp2->arity, &found)), found) {
+		tmp2->flags |= FLAG_BUILTIN;
 	}
 
 	cell *tmp = clone_to_heap(q, false, tmp2, 0);
