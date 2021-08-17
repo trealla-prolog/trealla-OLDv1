@@ -175,7 +175,7 @@ void call_builtin(query *q, cell *c, idx_t c_ctx)
 	q->st.curr_frame = c_ctx;
 	q->eval = true;
 
-	if (is_function(c) && c->fn)
+	if (c->fn)
 		c->fn(q);
 
 	q->eval = save_calc;
@@ -2269,27 +2269,27 @@ static USE_RESULT pl_status fn_get_seed_1(query *q)
 
 static USE_RESULT pl_status fn_random_1(query *q)
 {
-	GET_FIRST_ARG(p1,real_or_var);
-	cell tmp;
-	make_real(&tmp, rnd());
-	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-}
+	GET_FIRST_ARG(p1_tmp,any);
 
-static USE_RESULT pl_status fn_random_2(query *q)
-{
-	GET_FIRST_ARG(p1,integer_or_var);
-	GET_NEXT_ARG(p2_tmp,any);
-	CLEANUP cell p2 = eval(q, p2_tmp);
+	if (is_variable(p1_tmp)) {
+		cell tmp;
+		make_real(&tmp, rnd());
+		set_var(q, p1_tmp, p1_tmp_ctx, &tmp, q->st.curr_frame);
+		return pl_success;
+	}
 
-	if (!is_smallint(&p2))
-		return throw_error(q, &p2, "type_error", "evaluable");
+	CHECK_CALC();
+	CLEANUP cell p1 = eval(q, p1_tmp);
 
-	if (p2.val_int < 1)
-		return throw_error(q, &p2, "domain_error", "positive_integer");
+	if (!is_smallint(&p1))
+		return throw_error(q, &p1, "type_error", "evaluable");
 
-	cell tmp;
-	make_int(&tmp, llabs((long long)((int_t)(rnd() * RAND_MAX) % p2.val_int)));
-	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	if (p1.val_int < 1)
+		return throw_error(q, &p1, "domain_error", "positive_integer");
+
+	q->accum.tag = TAG_INTEGER;
+	q->accum.val_int = llabs((long long)((int_t)(rnd() * RAND_MAX) % p1.val_int));
+	return pl_success;
 }
 
 static USE_RESULT pl_status fn_rand_0(query *q)
@@ -2376,13 +2376,12 @@ const struct builtins g_functions[] =
 
 	{"is", 2, fn_iso_is_2, NULL, false},
 	{"return", 1, fn_return_1, NULL, false},
+	{"float", 1, fn_iso_float_1, NULL, false},
 	{"integer", 1, fn_iso_integer_1, NULL, false},
 	{"srandom", 1, fn_set_seed_1, "+integer", false},
 	{"set_seed", 1, fn_set_seed_1, "+integer", false},
 	{"get_seed", 1, fn_get_seed_1, "-integer", false},
 	{"rand", 1, fn_rand_1, "?integer", false},
-	{"random", 1, fn_random_1, "-float", false},
-	{"random", 2, fn_random_2, "-integer,+integer", false},
 
 	// Functions...
 
@@ -2440,8 +2439,8 @@ const struct builtins g_functions[] =
 	{"float_fractional_part", 1, fn_iso_float_fractional_part_1, NULL, true},
 	{"log", 2, fn_log_2, "+number,+number", true},
 	{"log10", 1, fn_log10_1, "+integer", true},
+	{"random", 1, fn_random_1, "?integer", true},
 	{"rand", 0, fn_rand_0, NULL, true},
-	{"float", 1, fn_iso_float_1, NULL, true},
 	{"gcd", 2, fn_gcd_2, "?integer,?integer", true},
 
 	{0}
