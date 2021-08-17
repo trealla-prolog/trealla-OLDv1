@@ -4268,8 +4268,6 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		tmp->arity = arity;
 		bool found = false;
 
-		assert(strlen(GET_STR(q, tmp)) == LEN_STR(q, tmp));
-
 		if (is_callable(tmp)) {
 			if ((tmp->match = search_predicate(q->st.m, tmp)) != NULL) {
 				tmp->flags &= ~FLAG_BUILTIN;
@@ -4514,8 +4512,6 @@ static pl_status do_retractall(query *q, cell *p1, idx_t p1_ctx)
 
 	if (!pr) {
 		bool found = false;
-
-		assert(strlen(GET_STR(q, head)) == LEN_STR(q, head));
 
 		if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found), found)
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
@@ -4872,8 +4868,6 @@ static USE_RESULT pl_status fn_iso_call_n(query *q)
 	}
 
 	bool found = false;
-
-	assert(strlen(GET_STR(q, tmp2)) == LEN_STR(q, tmp2));
 
 	if ((tmp2->match = search_predicate(q->st.m, tmp2)) != NULL) {
 		tmp2->flags &= ~FLAG_BUILTIN;
