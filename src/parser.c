@@ -775,6 +775,7 @@ static void xref_cell(parser *p, rule *r, cell *c, predicate *parent)
 		SET_OP(c, specifier);
 	}
 
+#if 1
 	bool found = false;
 	c->fn = get_builtin(p->m->pl, functor, c->arity, &found);
 
@@ -782,6 +783,7 @@ static void xref_cell(parser *p, rule *r, cell *c, predicate *parent)
 		c->flags |= FLAG_BUILTIN;
 		return;
 	}
+#endif
 
 	if ((c+c->nbr_cells) >= (r->cells+r->cidx-1)) {
 		c->flags |= FLAG_TAIL;

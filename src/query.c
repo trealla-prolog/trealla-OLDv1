@@ -1310,6 +1310,7 @@ static USE_RESULT pl_status match_head(query *q)
 			}
 
 			c->match = pr;
+			c->flags &= ~FLAG_BUILTIN;
 		}
 
 		if (pr->idx1) {
