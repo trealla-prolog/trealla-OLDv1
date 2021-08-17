@@ -2,9 +2,9 @@
 
 main :-
 	srandom(1000),
-	X is random(32),
+	random(X, 32),
 	write(X), nl,
 	srandom(1000),
-	Y is random(2^5),
+	random(Y, 2^5),
 	write(Y), nl,
 	halt.

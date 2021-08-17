@@ -139,6 +139,7 @@ typedef enum {
 #define is_fresh(c) ((c)->flags & FLAG2_FRESH)
 #define is_anon(c) ((c)->flags & FLAG2_ANON)
 #define is_builtin(c) ((c)->flags & FLAG_BUILTIN)
+#define is_function(c) ((c)->flags & FLAG_FUNCTION)
 #define is_tail(c) ((c)->flags & FLAG_TAIL)
 #define is_tail_recursive(c) ((c)->flags & FLAG_TAIL_REC)
 #define is_op(c) (c->flags & 0xE000)
@@ -211,9 +212,9 @@ enum {
 	FLAG_STRING=1<<8,					// used with TAG_CSTRING
 	FLAG_STATIC=1<<9,
 	FLAG_MANAGED=1<<10,					// any ref-counted object
+	FLAG_FUNCTION=1<<11,
 
-	FLAG_SPARE1=1<<11,
-	FLAG_SPARE2=1<<12,
+	FLAG_SPARE1=1<<12,
 
 	FLAG2_PROCESSED=FLAG_SPARE1,		// used by bagof
 	FLAG2_FIRST_USE=FLAG_HEX,			// used with TAG_VARIABLE
@@ -377,6 +378,7 @@ struct builtins {
 	unsigned arity;
 	pl_status (*fn)(query*);
 	const char *help;
+	bool function;
 };
 
 typedef struct {

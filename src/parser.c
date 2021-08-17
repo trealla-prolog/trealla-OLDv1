@@ -775,11 +775,15 @@ static void xref_cell(parser *p, rule *r, cell *c, predicate *parent)
 		SET_OP(c, specifier);
 	}
 
-	bool found = false;
-	c->fn = get_builtin(p->m->pl, functor, c->arity, &found);
+	bool found = false, function = false;
+	c->fn = get_builtin(p->m->pl, functor, c->arity, &found, &function);
 
 	if (found) {
-		c->flags |= FLAG_BUILTIN;
+		if (function)
+			c->flags |= FLAG_FUNCTION;
+		else
+			c->flags |= FLAG_BUILTIN;
+
 		return;
 	}
 
@@ -2642,7 +2646,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		} else if (p->v.tag == TAG_REAL) {
 			set_real(c, get_real(&p->v));
 		} else if ((!p->is_quoted || func || p->is_op || p->is_variable ||
-			(get_builtin(p->m->pl, p->token, 0, &found), found) ||
+			(get_builtin(p->m->pl, p->token, 0, &found, NULL), found) ||
 			!strcmp(p->token, "[]")) && !p->string) {
 
 			if (func && !strcmp(p->token, "."))

@@ -200,8 +200,8 @@ Non-standard predicates
 	write_term_to_atom/3		# use write_term_to_chars/3 instead
 	term_to_atom/2				# use write_term_to_chars/3 instead
 
-	random/1                # random(-float) float [0.0,<1.0]
-	random/1                # random(+integer) function returning integer [0,<integer]
+	random/1                    # random(-float) float [0.0,<1.0]
+	random/2                    # random(-integer,+integer) function returning integer [0,<integer]
 
 	put_atts/2					# SICStus-compatible
 	get_atts/2					# SICStus-compatible
@@ -310,7 +310,6 @@ Non-standard predicates
 	atom_upper/2
 	atom_lower/2
 
-	return/1				# function returning number
 	popcount/1              # function returning number of 1 bits
 	log10/1                 # function returning log10 of arg
 	now/0                   # function returning C-time in secs as integer

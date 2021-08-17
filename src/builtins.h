@@ -27,6 +27,7 @@
 #define is_atom_or_int(c) (is_atom(c) || is_integer(c))
 #define is_atom_or_structure(c) (is_atom(c) || is_structure(c))
 #define is_number_or_var(c) (is_number(c) || is_variable(c))
+#define is_real_or_var(c) (is_real(c) || is_variable(c))
 #define is_integer_or_var(c) (is_integer(c) || is_variable(c))
 #define is_integer_or_atom(c) (is_integer(c) || is_atom(c))
 #define is_nonvar(c) !is_variable(c)
@@ -162,7 +163,7 @@ extern USE_RESULT pl_status fn_iso_add_2(query *q);
 extern USE_RESULT pl_status fn_local_cut_0(query *q);
 
 #define eval(q,c)														\
-	is_builtin(c) ? (call_builtin(q,c,c##_ctx), q->accum) :				\
+	is_function(c) || is_builtin(c) ? (call_builtin(q,c,c##_ctx), q->accum) :				\
 	is_callable(c) ? (call_function(q, c, c##_ctx), q->accum) : *c;		\
 	q->accum.flags = 0;													\
 	if (q->did_throw)													\

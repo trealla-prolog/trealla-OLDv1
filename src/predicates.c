@@ -4271,7 +4271,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		if (is_callable(tmp)) {
 			if ((tmp->match = search_predicate(q->st.m, tmp)) != NULL) {
 				tmp->flags &= ~FLAG_BUILTIN;
-			} else if ((tmp->fn = get_builtin(q->st.m->pl, GET_STR(q, tmp), tmp->arity, &found)), found) {
+			} else if ((tmp->fn = get_builtin(q->st.m->pl, GET_STR(q, tmp), tmp->arity, &found, NULL)), found) {
 				tmp->flags |= FLAG_BUILTIN;
 			}
 		}
@@ -4513,7 +4513,7 @@ static pl_status do_retractall(query *q, cell *p1, idx_t p1_ctx)
 	if (!pr) {
 		bool found = false;
 
-		if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found), found)
+		if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found, NULL), found)
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 		return pl_success;
@@ -4599,7 +4599,7 @@ static USE_RESULT pl_status fn_iso_abolish_1(query *q)
 
 	assert(strlen(GET_STR(q, p1_name)) == LEN_STR(q, p1_name));
 
-	if (get_builtin(q->st.m->pl, GET_STR(q, p1_name), get_integer(p1_arity), &found), found)
+	if (get_builtin(q->st.m->pl, GET_STR(q, p1_name), get_integer(p1_arity), &found, NULL), found)
 		return throw_error(q, p1, "permission_error", "modify,static_procedure");
 
 	cell tmp;
@@ -4683,7 +4683,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 
 	assert(strlen(GET_STR(q, head)) == LEN_STR(q, head));
 
-	if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found), found) {
+	if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found, NULL), found) {
 		if (!GET_OP(head))
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 	}
@@ -4753,7 +4753,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 
 	assert(strlen(GET_STR(q, head)) == LEN_STR(q, head));
 
-	if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found), found) {
+	if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found, NULL), found) {
 		if (!GET_OP(head))
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 	}
@@ -4871,7 +4871,7 @@ static USE_RESULT pl_status fn_iso_call_n(query *q)
 
 	if ((tmp2->match = search_predicate(q->st.m, tmp2)) != NULL) {
 		tmp2->flags &= ~FLAG_BUILTIN;
-	} else if ((tmp2->fn = get_builtin(q->st.m->pl, GET_STR(q, tmp2), tmp2->arity, &found)), found) {
+	} else if ((tmp2->fn = get_builtin(q->st.m->pl, GET_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
 		tmp2->flags |= FLAG_BUILTIN;
 	}
 
@@ -5500,7 +5500,7 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 
 	bool found = false;
 
-	if (get_builtin(q->st.m->pl, functor, arity, &found), found)
+	if (get_builtin(q->st.m->pl, functor, arity, &found, NULL), found)
 		return pl_success;
 
 	return pl_failure;
@@ -6445,7 +6445,7 @@ static pl_status do_asserta_2(query *q)
 
 	assert(strlen(GET_STR(q, head)) == LEN_STR(q, head));
 
-	if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found), found) {
+	if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found, NULL), found) {
 		if (!GET_OP(head))
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 	}
@@ -6546,7 +6546,7 @@ static pl_status do_assertz_2(query *q)
 
 	assert(strlen(GET_STR(q, head)) == LEN_STR(q, head));
 
-	if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found), found) {
+	if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found, NULL), found) {
 		if (!GET_OP(head))
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 	}
@@ -8392,7 +8392,7 @@ static USE_RESULT pl_status fn_task_n(query *q)
 
 	if ((tmp2->match = search_predicate(q->st.m, tmp2)) != NULL) {
 		tmp2->flags &= ~FLAG_BUILTIN;
-	} else if ((tmp2->fn = get_builtin(q->st.m->pl, GET_STR(q, tmp2), tmp2->arity, &found)), found) {
+	} else if ((tmp2->fn = get_builtin(q->st.m->pl, GET_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
 		tmp2->flags |= FLAG_BUILTIN;
 	}
 
@@ -9994,7 +9994,7 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 
 	assert(strlen(GET_STR(q, p1)) == LEN_STR(q, p1));
 
-	if (get_builtin(q->st.m->pl, GET_STR(q, p1), p1->arity, &found), found) {
+	if (get_builtin(q->st.m->pl, GET_STR(q, p1), p1->arity, &found, NULL), found) {
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "built_in"));
 
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
@@ -11554,325 +11554,325 @@ static USE_RESULT pl_status fn_iso_compare_3(query *q)
 
 static const struct builtins g_predicates_iso[] =
 {
-	{",", 2, NULL, NULL},
+	{",", 2, NULL, NULL, false},
 
-	{"!", 0, fn_iso_cut_0, NULL},
-	{":", 2, fn_iso_invoke_2, NULL},
-	{"=..", 2, fn_iso_univ_2, NULL},
-	{"->", 2, fn_iso_if_then_2, NULL},
-	{";", 2, fn_iso_disjunction_2, NULL},
-	{"\\+", 1, fn_iso_negation_1, NULL},
-	{"once", 1, fn_iso_once_1, NULL},
-	{"throw", 1, fn_iso_throw_1, NULL},
-	{"$catch", 3, fn_iso_catch_3, NULL},
+	{"!", 0, fn_iso_cut_0, NULL, false},
+	{":", 2, fn_iso_invoke_2, NULL, false},
+	{"=..", 2, fn_iso_univ_2, NULL, false},
+	{"->", 2, fn_iso_if_then_2, NULL, false},
+	{";", 2, fn_iso_disjunction_2, NULL, false},
+	{"\\+", 1, fn_iso_negation_1, NULL, false},
+	{"once", 1, fn_iso_once_1, NULL, false},
+	{"throw", 1, fn_iso_throw_1, NULL, false},
+	{"$catch", 3, fn_iso_catch_3, NULL, false},
 
-	{"$call", 1, fn_iso_call_n, NULL},
-	{"$call", 2, fn_iso_call_n, NULL},
-	{"$call", 3, fn_iso_call_n, NULL},
-	{"$call", 4, fn_iso_call_n, NULL},
-	{"$call", 5, fn_iso_call_n, NULL},
-	{"$call", 6, fn_iso_call_n, NULL},
-	{"$call", 7, fn_iso_call_n, NULL},
-	{"$call", 8, fn_iso_call_n, NULL},
+	{"$call", 1, fn_iso_call_n, NULL, false},
+	{"$call", 2, fn_iso_call_n, NULL, false},
+	{"$call", 3, fn_iso_call_n, NULL, false},
+	{"$call", 4, fn_iso_call_n, NULL, false},
+	{"$call", 5, fn_iso_call_n, NULL, false},
+	{"$call", 6, fn_iso_call_n, NULL, false},
+	{"$call", 7, fn_iso_call_n, NULL, false},
+	{"$call", 8, fn_iso_call_n, NULL, false},
 
-	{"$rawcall", 1, fn_sys_rawcall_1, NULL},
+	{"$rawcall", 1, fn_sys_rawcall_1, NULL, false},
 
-	{"repeat", 0, fn_iso_repeat_0, NULL},
-	{"true", 0, fn_iso_true_0, NULL},
-	{"fail", 0, fn_iso_fail_0, NULL},
-	{"false", 0, fn_iso_fail_0, NULL},
-	{"halt", 0, fn_iso_halt_0, NULL},
-	{"halt", 1, fn_iso_halt_1, NULL},
-	{"atom", 1, fn_iso_atom_1, NULL},
-	{"atomic", 1, fn_iso_atomic_1, NULL},
-	{"number", 1, fn_iso_number_1, NULL},
-	{"compound", 1, fn_iso_compound_1, NULL},
-	{"var", 1, fn_iso_var_1, NULL},
-	{"nonvar", 1, fn_iso_nonvar_1, NULL},
-	{"ground", 1, fn_iso_ground_1, NULL},
-	{"callable", 1, fn_iso_callable_1, NULL},
-	{"char_code", 2, fn_iso_char_code_2, NULL},
-	{"atom_chars", 2, fn_iso_atom_chars_2, NULL},
-	{"atom_codes", 2, fn_iso_atom_codes_2, NULL},
-	{"number_chars", 2, fn_iso_number_chars_2, NULL},
-	{"number_codes", 2, fn_iso_number_codes_2, NULL},
-	{"clause", 2, fn_iso_clause_2, NULL},
-	{"length", 2, fn_iso_length_2, NULL},
-	{"arg", 3, fn_iso_arg_3, NULL},
-	{"functor", 3, fn_iso_functor_3, NULL},
-	{"copy_term", 2, fn_iso_copy_term_2, NULL},
-	{"term_variables", 2, fn_iso_term_variables_2, NULL},
-	{"atom_length", 2, fn_iso_atom_length_2, NULL},
-	{"atom_concat", 3, fn_iso_atom_concat_3, NULL},
-	{"sub_atom", 5, fn_iso_sub_atom_5, NULL},
-	{"current_rule", 1, fn_iso_current_rule_1, NULL},
+	{"repeat", 0, fn_iso_repeat_0, NULL, false},
+	{"true", 0, fn_iso_true_0, NULL, false},
+	{"fail", 0, fn_iso_fail_0, NULL, false},
+	{"false", 0, fn_iso_fail_0, NULL, false},
+	{"halt", 0, fn_iso_halt_0, NULL, false},
+	{"halt", 1, fn_iso_halt_1, NULL, false},
+	{"atom", 1, fn_iso_atom_1, NULL, false},
+	{"atomic", 1, fn_iso_atomic_1, NULL, false},
+	{"number", 1, fn_iso_number_1, NULL, false},
+	{"compound", 1, fn_iso_compound_1, NULL, false},
+	{"var", 1, fn_iso_var_1, NULL, false},
+	{"nonvar", 1, fn_iso_nonvar_1, NULL, false},
+	{"ground", 1, fn_iso_ground_1, NULL, false},
+	{"callable", 1, fn_iso_callable_1, NULL, false},
+	{"char_code", 2, fn_iso_char_code_2, NULL, false},
+	{"atom_chars", 2, fn_iso_atom_chars_2, NULL, false},
+	{"atom_codes", 2, fn_iso_atom_codes_2, NULL, false},
+	{"number_chars", 2, fn_iso_number_chars_2, NULL, false},
+	{"number_codes", 2, fn_iso_number_codes_2, NULL, false},
+	{"clause", 2, fn_iso_clause_2, NULL, false},
+	{"length", 2, fn_iso_length_2, NULL, false},
+	{"arg", 3, fn_iso_arg_3, NULL, false},
+	{"functor", 3, fn_iso_functor_3, NULL, false},
+	{"copy_term", 2, fn_iso_copy_term_2, NULL, false},
+	{"term_variables", 2, fn_iso_term_variables_2, NULL, false},
+	{"atom_length", 2, fn_iso_atom_length_2, NULL, false},
+	{"atom_concat", 3, fn_iso_atom_concat_3, NULL, false},
+	{"sub_atom", 5, fn_iso_sub_atom_5, NULL, false},
+	{"current_rule", 1, fn_iso_current_rule_1, NULL, false},
 
-	{"open", 4, fn_iso_open_4, NULL},
-	{"close", 1, fn_iso_close_1, NULL},
-	{"close", 2, fn_iso_close_2, NULL},
-	{"read_term", 2, fn_iso_read_term_2, NULL},
-	{"read_term", 3, fn_iso_read_term_3, NULL},
-	{"read", 1, fn_iso_read_1, NULL},
-	{"read", 2, fn_iso_read_2, NULL},
-	{"write_canonical", 1, fn_iso_write_canonical_1, NULL},
-	{"write_canonical", 2, fn_iso_write_canonical_2, NULL},
-	{"write_term", 2, fn_iso_write_term_2, NULL},
-	{"write_term", 3, fn_iso_write_term_3, NULL},
-	{"writeq", 1, fn_iso_writeq_1, NULL},
-	{"writeq", 2, fn_iso_writeq_2, NULL},
-	{"write", 1, fn_iso_write_1, NULL},
-	{"write", 2, fn_iso_write_2, NULL},
-	{"nl", 0, fn_iso_nl_0, NULL},
-	{"nl", 1, fn_iso_nl_1, NULL},
-	{"at_end_of_stream", 0, fn_iso_at_end_of_stream_0, NULL},
-	{"at_end_of_stream", 1, fn_iso_at_end_of_stream_1, NULL},
-	{"set_stream_position", 2, fn_iso_set_stream_position_2, NULL},
-	{"flush_output", 0, fn_iso_flush_output_0, NULL},
-	{"flush_output", 1, fn_iso_flush_output_1, NULL},
-	{"put_char", 1, fn_iso_put_char_1, NULL},
-	{"put_char", 2, fn_iso_put_char_2, NULL},
-	{"put_code", 1, fn_iso_put_code_1, NULL},
-	{"put_code", 2, fn_iso_put_code_2, NULL},
-	{"put_byte", 1, fn_iso_put_byte_1, NULL},
-	{"put_byte", 2, fn_iso_put_byte_2, NULL},
-	{"get_char", 1, fn_iso_get_char_1, NULL},
-	{"get_char", 2, fn_iso_get_char_2, NULL},
-	{"get_code", 1, fn_iso_get_code_1, NULL},
-	{"get_code", 2, fn_iso_get_code_2, NULL},
-	{"get_byte", 1, fn_iso_get_byte_1, NULL},
-	{"get_byte", 2, fn_iso_get_byte_2, NULL},
-	{"peek_char", 1, fn_iso_peek_char_1, NULL},
-	{"peek_char", 2, fn_iso_peek_char_2, NULL},
-	{"peek_code", 1, fn_iso_peek_code_1, NULL},
-	{"peek_code", 2, fn_iso_peek_code_2, NULL},
-	{"peek_byte", 1, fn_iso_peek_byte_1, NULL},
-	{"peek_byte", 2, fn_iso_peek_byte_2, NULL},
-	{"current_input", 1, fn_iso_current_input_1, NULL},
-	{"current_output", 1, fn_iso_current_output_1, NULL},
-	{"set_input", 1, fn_iso_set_input_1, NULL},
-	{"set_output", 1, fn_iso_set_output_1, NULL},
-	{"stream_property", 2, fn_iso_stream_property_2, NULL},
+	{"open", 4, fn_iso_open_4, NULL, false},
+	{"close", 1, fn_iso_close_1, NULL, false},
+	{"close", 2, fn_iso_close_2, NULL, false},
+	{"read_term", 2, fn_iso_read_term_2, NULL, false},
+	{"read_term", 3, fn_iso_read_term_3, NULL, false},
+	{"read", 1, fn_iso_read_1, NULL, false},
+	{"read", 2, fn_iso_read_2, NULL, false},
+	{"write_canonical", 1, fn_iso_write_canonical_1, NULL, false},
+	{"write_canonical", 2, fn_iso_write_canonical_2, NULL, false},
+	{"write_term", 2, fn_iso_write_term_2, NULL, false},
+	{"write_term", 3, fn_iso_write_term_3, NULL, false},
+	{"writeq", 1, fn_iso_writeq_1, NULL, false},
+	{"writeq", 2, fn_iso_writeq_2, NULL, false},
+	{"write", 1, fn_iso_write_1, NULL, false},
+	{"write", 2, fn_iso_write_2, NULL, false},
+	{"nl", 0, fn_iso_nl_0, NULL, false},
+	{"nl", 1, fn_iso_nl_1, NULL, false},
+	{"at_end_of_stream", 0, fn_iso_at_end_of_stream_0, NULL, false},
+	{"at_end_of_stream", 1, fn_iso_at_end_of_stream_1, NULL, false},
+	{"set_stream_position", 2, fn_iso_set_stream_position_2, NULL, false},
+	{"flush_output", 0, fn_iso_flush_output_0, NULL, false},
+	{"flush_output", 1, fn_iso_flush_output_1, NULL, false},
+	{"put_char", 1, fn_iso_put_char_1, NULL, false},
+	{"put_char", 2, fn_iso_put_char_2, NULL, false},
+	{"put_code", 1, fn_iso_put_code_1, NULL, false},
+	{"put_code", 2, fn_iso_put_code_2, NULL, false},
+	{"put_byte", 1, fn_iso_put_byte_1, NULL, false},
+	{"put_byte", 2, fn_iso_put_byte_2, NULL, false},
+	{"get_char", 1, fn_iso_get_char_1, NULL, false},
+	{"get_char", 2, fn_iso_get_char_2, NULL, false},
+	{"get_code", 1, fn_iso_get_code_1, NULL, false},
+	{"get_code", 2, fn_iso_get_code_2, NULL, false},
+	{"get_byte", 1, fn_iso_get_byte_1, NULL, false},
+	{"get_byte", 2, fn_iso_get_byte_2, NULL, false},
+	{"peek_char", 1, fn_iso_peek_char_1, NULL, false},
+	{"peek_char", 2, fn_iso_peek_char_2, NULL, false},
+	{"peek_code", 1, fn_iso_peek_code_1, NULL, false},
+	{"peek_code", 2, fn_iso_peek_code_2, NULL, false},
+	{"peek_byte", 1, fn_iso_peek_byte_1, NULL, false},
+	{"peek_byte", 2, fn_iso_peek_byte_2, NULL, false},
+	{"current_input", 1, fn_iso_current_input_1, NULL, false},
+	{"current_output", 1, fn_iso_current_output_1, NULL, false},
+	{"set_input", 1, fn_iso_set_input_1, NULL, false},
+	{"set_output", 1, fn_iso_set_output_1, NULL, false},
+	{"stream_property", 2, fn_iso_stream_property_2, NULL, false},
 
-	{"abolish", 1, fn_iso_abolish_1, NULL},
-	{"asserta", 1, fn_iso_asserta_1, NULL},
-	{"assertz", 1, fn_iso_assertz_1, NULL},
-	{"retract", 1, fn_iso_retract_1, NULL},
-	{"retractall", 1, fn_iso_retractall_1, NULL},
+	{"abolish", 1, fn_iso_abolish_1, NULL, false},
+	{"asserta", 1, fn_iso_asserta_1, NULL, false},
+	{"assertz", 1, fn_iso_assertz_1, NULL, false},
+	{"retract", 1, fn_iso_retract_1, NULL, false},
+	{"retractall", 1, fn_iso_retractall_1, NULL, false},
 
-	{"$legacy_current_prolog_flag", 2, fn_iso_current_prolog_flag_2, NULL},
-	{"set_prolog_flag", 2, fn_iso_set_prolog_flag_2, NULL},
-	{"op", 3, fn_iso_op_3, NULL},
-	{"$findall", 3, fn_iso_findall_3, NULL},
-	{"$bagof", 3, fn_iso_bagof_3, NULL},
-	{"current_predicate", 1, fn_iso_current_predicate_1, NULL},
-	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL},
-	{"compare", 3, fn_iso_compare_3, NULL},
+	{"$legacy_current_prolog_flag", 2, fn_iso_current_prolog_flag_2, NULL, false},
+	{"set_prolog_flag", 2, fn_iso_set_prolog_flag_2, NULL, false},
+	{"op", 3, fn_iso_op_3, NULL, false},
+	{"$findall", 3, fn_iso_findall_3, NULL, false},
+	{"$bagof", 3, fn_iso_bagof_3, NULL, false},
+	{"current_predicate", 1, fn_iso_current_predicate_1, NULL, false},
+	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL, false},
+	{"compare", 3, fn_iso_compare_3, NULL, false},
 
-	{"=", 2, fn_iso_unify_2, NULL},
-	{"\\=", 2, fn_iso_notunify_2, NULL},
+	{"=", 2, fn_iso_unify_2, NULL, false},
+	{"\\=", 2, fn_iso_notunify_2, NULL, false},
 
 	{0}
 };
 
 static const struct builtins g_predicates_other[] =
 {
-	{"*->", 2, fn_if_2, NULL},
-	{"if", 3, fn_if_3, NULL},
+	{"*->", 2, fn_if_2, NULL, false},
+	{"if", 3, fn_if_3, NULL, false},
 
-	{"current_module", 1, fn_current_module_1, NULL},
-	{"use_module", 1, fn_use_module_1, NULL},
-	{"use_module", 2, fn_use_module_2, NULL},
-	{"module", 1, fn_module_1, NULL},
-	{"using", 0, fn_using_0, NULL},
-	{"load_files", 2, fn_load_files_2, NULL},
-	{"listing", 0, fn_listing_0, NULL},
-	{"listing", 1, fn_listing_1, NULL},
-	{"time", 1, fn_time_1, NULL},
-	{"trace", 0, fn_trace_0, NULL},
+	{"current_module", 1, fn_current_module_1, NULL, false},
+	{"use_module", 1, fn_use_module_1, NULL, false},
+	{"use_module", 2, fn_use_module_2, NULL, false},
+	{"module", 1, fn_module_1, NULL, false},
+	{"using", 0, fn_using_0, NULL, false},
+	{"load_files", 2, fn_load_files_2, NULL, false},
+	{"listing", 0, fn_listing_0, NULL, false},
+	{"listing", 1, fn_listing_1, NULL, false},
+	{"time", 1, fn_time_1, NULL, false},
+	{"trace", 0, fn_trace_0, NULL, false},
 
-	{"$register_cleanup", 1, fn_sys_register_cleanup_1, NULL},
-	{"$register_term", 1, fn_sys_register_term_1, NULL},
-	{"$chk_is_det", 0, fn_sys_chk_is_det_0, NULL},
+	{"$register_cleanup", 1, fn_sys_register_cleanup_1, NULL, false},
+	{"$register_term", 1, fn_sys_register_term_1, NULL, false},
+	{"$chk_is_det", 0, fn_sys_chk_is_det_0, NULL, false},
 
 	// Edinburgh...
 
-	{"seeing", 1, fn_edin_seeing_1, "-name"},
-	{"telling", 1, fn_edin_telling_1, "-name"},
-	{"seen", 0, fn_edin_seen_0, NULL},
-	{"told", 0, fn_edin_told_0, NULL},
-	{"redo", 1, fn_edin_redo_1, "+integer"},
-	{"redo", 2, fn_edin_redo_2, "+stream,+integer"},
-	{"tab", 1, fn_edin_tab_1, "+integer"},
-	{"tab", 2, fn_edin_tab_2, "+stream,+integer"},
+	{"seeing", 1, fn_edin_seeing_1, "-name", false},
+	{"telling", 1, fn_edin_telling_1, "-name", false},
+	{"seen", 0, fn_edin_seen_0, NULL, false},
+	{"told", 0, fn_edin_told_0, NULL, false},
+	{"redo", 1, fn_edin_redo_1, "+integer", false},
+	{"redo", 2, fn_edin_redo_2, "+stream,+integer", false},
+	{"tab", 1, fn_edin_tab_1, "+integer", false},
+	{"tab", 2, fn_edin_tab_2, "+stream,+integer", false},
 
 	// Miscellaneous...
 
-	{"ignore", 1, fn_ignore_1, "+callable"},
-	{"memberchk", 2, fn_memberchk_2, "?rule,+list"},
-	{"nonmember", 2, fn_nonmember_2, "?rule,+list"},
+	{"ignore", 1, fn_ignore_1, "+callable", false},
+	{"memberchk", 2, fn_memberchk_2, "?rule,+list", false},
+	{"nonmember", 2, fn_nonmember_2, "?rule,+list", false},
 
-	{"$put_chars", 1, fn_sys_put_chars_1, "+chars"},
-	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars"},
-	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL},
-	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL},
+	{"$put_chars", 1, fn_sys_put_chars_1, "+chars", false},
+	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars", false},
+	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL, false},
+	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL, false},
 
-	{"format", 2, fn_format_2, "+string,+list"},
-	{"format", 3, fn_format_3, "+stream,+string,+list"},
+	{"format", 2, fn_format_2, "+string,+list", false},
+	{"format", 3, fn_format_3, "+stream,+string,+list", false},
 
-	{"abolish", 2, fn_abolish_2, NULL},
-	{"assert", 1, fn_iso_assertz_1, NULL},
+	{"abolish", 2, fn_abolish_2, NULL, false},
+	{"assert", 1, fn_iso_assertz_1, NULL, false},
 
-	{"$strip_attributes", 1, fn_sys_strip_attributes_1, "+vars"},
-	{"copy_term_nat", 2, fn_copy_term_nat_2, NULL},
-	{"string", 1, fn_atom_1, "+rule"},
-	{"atomic_concat", 3, fn_atomic_concat_3, NULL},
-	{"replace", 4, fn_replace_4, "+orig,+from,+to,-new"},
-	{"print", 1, fn_print_1, "+rule"},
-	{"writeln", 1, fn_writeln_1, "+rule"},
-	{"sleep", 1, fn_sleep_1, "+integer"},
-	{"delay", 1, fn_delay_1, "+integer"},
-	{"busy", 1, fn_busy_1, "+integer"},
-	{"now", 0, fn_now_0, NULL},
-	{"now", 1, fn_now_1, "now(-integer)"},
-	{"get_time", 1, fn_get_time_1, "-variable"},
-	{"cpu_time", 1, fn_cpu_time_1, "-variable"},
-	{"pid", 1, fn_pid_1, "-integer"},
-	{"shell", 1, fn_shell_1, "+atom"},
-	{"shell", 2, fn_shell_2, "+atom,??"},
-	{"popen", 4, fn_popen_4, "+atom,+atom,-stream,+list"},
-	{"wall_time", 1, fn_wall_time_1, "-integer"},
-	{"date_time", 6, fn_date_time_6, "-yyyy,-m,-d,-h,--m,-s"},
-	{"date_time", 7, fn_date_time_7, "-yyyy,-m,-d,-h,--m,-s,-ms"},
-	{"between", 3, fn_between_3, "+integer,+integer,-integer"},
-	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list"},
-	{"server", 3, fn_server_3, "+string,-stream,+list"},
-	{"accept", 2, fn_accept_2, "+stream,-stream"},
-	{"getline", 1, fn_getline_1, "-string"},
-	{"getline", 2, fn_getline_2, "+stream,-string"},
-	{"getlines", 1, fn_getlines_1, "-list"},
-	{"getlines", 2, fn_getlines_2, "+stream,-list"},
-	{"getfile", 2, fn_getfile_2, "+string,-list"},
-	{"loadfile", 2, fn_loadfile_2, "+string,-string"},
-	{"savefile", 2, fn_savefile_2, "+string,+string"},
-	{"split_atom", 4, fn_split_atom_4, "+string,+sep,+pad,-list"},
-	{"split_string", 4, fn_split_atom_4, "+string,+sep,+pad,-list"},
-	{"split", 4, fn_split_4, "+string,+string,?left,?right"},
-	{"is_list", 1, fn_is_list_1, "+rule"},
-	{"list", 1, fn_is_list_1, "+rule"},
-	{"is_stream", 1, fn_is_stream_1, "+rule"},
-	//{"forall", 2, fn_forall_2, "+rule,+rule"},
-	{"term_hash", 2, fn_term_hash_2, "+rule,?integer"},
-	{"rename_file", 2, fn_rename_file_2, "+string,+string"},
-	{"directory_files", 2, fn_directory_files_2, "+pathname,-list"},
-	{"delete_file", 1, fn_delete_file_1, "+string"},
-	{"exists_file", 1, fn_exists_file_1, "+string"},
-	{"access_file", 2, fn_access_file_2, "+string,+mode"},
-	{"time_file", 2, fn_time_file_2, "+string,-real"},
-	{"size_file", 2, fn_size_file_2, "+string,-integer"},
-	{"exists_directory", 1, fn_exists_directory_1, "+string"},
-	{"make_directory", 1, fn_make_directory_1, "+string"},
-	{"make_directory_path", 1, fn_make_directory_path_1, "+string"},
-	{"working_directory", 2, fn_working_directory_2, "-string,+string"},
-	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL},
-	{"chdir", 1, fn_chdir_1, "+string"},
-	{"name", 2, fn_iso_atom_codes_2, "?string,?list"},
-	{"read_term_from_chars", 2, fn_read_term_from_chars_2, "+chars,-rule"},
-	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,+opts,+rule"},
-	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+chars,-rule,+opts"},
-	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "+rule,+list,?chars"},
-	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "+rule,+list,?chars"},
-	{"base64", 2, fn_base64_2, "?string,?string"},
-	{"urlenc", 2, fn_urlenc_2, "?string,?string"},
-	{"atom_lower", 2, fn_atom_lower_2, "?atom,?atom"},
-	{"atom_upper", 2, fn_atom_upper_2, "?atom,?atom"},
-	{"string_lower", 2, fn_string_lower_2, "?string,?string"},
-	{"string_upper", 2, fn_string_upper_2, "?string,?string"},
-	{"bread", 3, fn_bread_3, "+stream,+integer,-string"},
-	{"bwrite", 2, fn_bwrite_2, "+stream,-string"},
-	{"hex_chars", 2, fn_hex_chars_2, "?integer,?string"},
-	{"octal_chars", 2, fn_octal_chars_2, "?integer,?string"},
-	{"$legacy_predicate_property", 2, fn_sys_legacy_predicate_property_2, "+callable,?string"},
-	{"$load_properties", 0, fn_sys_load_properties_0, NULL},
-	{"$load_flags", 0, fn_sys_load_flags_0, NULL},
-	{"$load_ops", 0, fn_sys_load_ops_0, NULL},
-	{"numbervars", 1, fn_numbervars_1, "+rule"},
-	{"numbervars", 3, fn_numbervars_3, "+rule,+start,?end"},
-	{"numbervars", 4, fn_numbervars_3, "+rule,+start,?end,+list"},
-	{"var_number", 2, fn_var_number_2, "+rule,?integer"},
-	{"char_type", 2, fn_char_type_2, "+char,+rule"},
-	{"code_type", 2, fn_char_type_2, "+code,+rule"},
-	{"uuid", 1, fn_uuid_1, "-string"},
-	{"asserta", 2, fn_asserta_2, "+rule,-ref"},
-	{"assertz", 2, fn_assertz_2, "+rule,-ref"},
-	{"instance", 2, fn_instance_2, "+ref,?rule"},
-	{"erase", 1, fn_erase_1, "+ref"},
-	{"clause", 3, fn_clause_3, "?head,?body,-ref"},
-	{"$queue", 1, fn_sys_queue_1, "+rule"},
-	{"$list", 1, fn_sys_list_1, "-list"},
-	{"getenv", 2, fn_getenv_2, NULL},
-	{"setenv", 2, fn_setenv_2, NULL},
-	{"unsetenv", 1, fn_unsetenv_1, NULL},
-	{"statistics", 0, fn_statistics_0, NULL},
-	{"statistics", 2, fn_statistics_2, "+string,-variable"},
-	{"duplicate_term", 2, fn_iso_copy_term_2, "+rule,-variable"},
-	{"call_nth", 2, fn_call_nth_2, "+callable,+integer"},
-	{"limit", 2, fn_limit_2, "+integer,+callable"},
-	{"offset", 2, fn_offset_2, "+integer,+callable"},
-	{"$block_verify_hook", 0, fn_sys_block_verify_hook_0, NULL},
-	{"$unblock_verify_hook", 0, fn_sys_unblock_verify_hook_0, NULL},
-	{"$unifiable", 3, fn_sys_unifiable_3, NULL},
-	{"$incr", 1, fn_sys_incr_1, "?var"},
+	{"$strip_attributes", 1, fn_sys_strip_attributes_1, "+vars", false},
+	{"copy_term_nat", 2, fn_copy_term_nat_2, NULL, false},
+	{"string", 1, fn_atom_1, "+rule", false},
+	{"atomic_concat", 3, fn_atomic_concat_3, NULL, false},
+	{"replace", 4, fn_replace_4, "+orig,+from,+to,-new", false},
+	{"print", 1, fn_print_1, "+rule", false},
+	{"writeln", 1, fn_writeln_1, "+rule", false},
+	{"sleep", 1, fn_sleep_1, "+integer", false},
+	{"delay", 1, fn_delay_1, "+integer", false},
+	{"busy", 1, fn_busy_1, "+integer", false},
+	{"now", 0, fn_now_0, NULL, false},
+	{"now", 1, fn_now_1, "now(-integer)", false},
+	{"get_time", 1, fn_get_time_1, "-variable", false},
+	{"cpu_time", 1, fn_cpu_time_1, "-variable", false},
+	{"pid", 1, fn_pid_1, "-integer", false},
+	{"shell", 1, fn_shell_1, "+atom", false},
+	{"shell", 2, fn_shell_2, "+atom,??", false},
+	{"popen", 4, fn_popen_4, "+atom,+atom,-stream,+list", false},
+	{"wall_time", 1, fn_wall_time_1, "-integer", false},
+	{"date_time", 6, fn_date_time_6, "-yyyy,-m,-d,-h,--m,-s", false},
+	{"date_time", 7, fn_date_time_7, "-yyyy,-m,-d,-h,--m,-s,-ms", false},
+	{"between", 3, fn_between_3, "+integer,+integer,-integer", false},
+	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list", false},
+	{"server", 3, fn_server_3, "+string,-stream,+list", false},
+	{"accept", 2, fn_accept_2, "+stream,-stream", false},
+	{"getline", 1, fn_getline_1, "-string", false},
+	{"getline", 2, fn_getline_2, "+stream,-string", false},
+	{"getlines", 1, fn_getlines_1, "-list", false},
+	{"getlines", 2, fn_getlines_2, "+stream,-list", false},
+	{"getfile", 2, fn_getfile_2, "+string,-list", false},
+	{"loadfile", 2, fn_loadfile_2, "+string,-string", false},
+	{"savefile", 2, fn_savefile_2, "+string,+string", false},
+	{"split_atom", 4, fn_split_atom_4, "+string,+sep,+pad,-list", false},
+	{"split_string", 4, fn_split_atom_4, "+string,+sep,+pad,-list", false},
+	{"split", 4, fn_split_4, "+string,+string,?left,?right", false},
+	{"is_list", 1, fn_is_list_1, "+rule", false},
+	{"list", 1, fn_is_list_1, "+rule", false},
+	{"is_stream", 1, fn_is_stream_1, "+rule", false},
+	//{"forall", 2, fn_forall_2, "+rule,+rule", false},
+	{"term_hash", 2, fn_term_hash_2, "+rule,?integer", false},
+	{"rename_file", 2, fn_rename_file_2, "+string,+string", false},
+	{"directory_files", 2, fn_directory_files_2, "+pathname,-list", false},
+	{"delete_file", 1, fn_delete_file_1, "+string", false},
+	{"exists_file", 1, fn_exists_file_1, "+string", false},
+	{"access_file", 2, fn_access_file_2, "+string,+mode", false},
+	{"time_file", 2, fn_time_file_2, "+string,-real", false},
+	{"size_file", 2, fn_size_file_2, "+string,-integer", false},
+	{"exists_directory", 1, fn_exists_directory_1, "+string", false},
+	{"make_directory", 1, fn_make_directory_1, "+string", false},
+	{"make_directory_path", 1, fn_make_directory_path_1, "+string", false},
+	{"working_directory", 2, fn_working_directory_2, "-string,+string", false},
+	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL, false},
+	{"chdir", 1, fn_chdir_1, "+string", false},
+	{"name", 2, fn_iso_atom_codes_2, "?string,?list", false},
+	{"read_term_from_chars", 2, fn_read_term_from_chars_2, "+chars,-rule", false},
+	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,+opts,+rule", false},
+	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+chars,-rule,+opts", false},
+	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "+rule,+list,?chars", false},
+	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "+rule,+list,?chars", false},
+	{"base64", 2, fn_base64_2, "?string,?string", false},
+	{"urlenc", 2, fn_urlenc_2, "?string,?string", false},
+	{"atom_lower", 2, fn_atom_lower_2, "?atom,?atom", false},
+	{"atom_upper", 2, fn_atom_upper_2, "?atom,?atom", false},
+	{"string_lower", 2, fn_string_lower_2, "?string,?string", false},
+	{"string_upper", 2, fn_string_upper_2, "?string,?string", false},
+	{"bread", 3, fn_bread_3, "+stream,+integer,-string", false},
+	{"bwrite", 2, fn_bwrite_2, "+stream,-string", false},
+	{"hex_chars", 2, fn_hex_chars_2, "?integer,?string", false},
+	{"octal_chars", 2, fn_octal_chars_2, "?integer,?string", false},
+	{"$legacy_predicate_property", 2, fn_sys_legacy_predicate_property_2, "+callable,?string", false},
+	{"$load_properties", 0, fn_sys_load_properties_0, NULL, false},
+	{"$load_flags", 0, fn_sys_load_flags_0, NULL, false},
+	{"$load_ops", 0, fn_sys_load_ops_0, NULL, false},
+	{"numbervars", 1, fn_numbervars_1, "+rule", false},
+	{"numbervars", 3, fn_numbervars_3, "+rule,+start,?end", false},
+	{"numbervars", 4, fn_numbervars_3, "+rule,+start,?end,+list", false},
+	{"var_number", 2, fn_var_number_2, "+rule,?integer", false},
+	{"char_type", 2, fn_char_type_2, "+char,+rule", false},
+	{"code_type", 2, fn_char_type_2, "+code,+rule", false},
+	{"uuid", 1, fn_uuid_1, "-string", false},
+	{"asserta", 2, fn_asserta_2, "+rule,-ref", false},
+	{"assertz", 2, fn_assertz_2, "+rule,-ref", false},
+	{"instance", 2, fn_instance_2, "+ref,?rule", false},
+	{"erase", 1, fn_erase_1, "+ref", false},
+	{"clause", 3, fn_clause_3, "?head,?body,-ref", false},
+	{"$queue", 1, fn_sys_queue_1, "+rule", false},
+	{"$list", 1, fn_sys_list_1, "-list", false},
+	{"getenv", 2, fn_getenv_2, NULL, false},
+	{"setenv", 2, fn_setenv_2, NULL, false},
+	{"unsetenv", 1, fn_unsetenv_1, NULL, false},
+	{"statistics", 0, fn_statistics_0, NULL, false},
+	{"statistics", 2, fn_statistics_2, "+string,-variable", false},
+	{"duplicate_term", 2, fn_iso_copy_term_2, "+rule,-variable", false},
+	{"call_nth", 2, fn_call_nth_2, "+callable,+integer", false},
+	{"limit", 2, fn_limit_2, "+integer,+callable", false},
+	{"offset", 2, fn_offset_2, "+integer,+callable", false},
+	{"$block_verify_hook", 0, fn_sys_block_verify_hook_0, NULL, false},
+	{"$unblock_verify_hook", 0, fn_sys_unblock_verify_hook_0, NULL, false},
+	{"$unifiable", 3, fn_sys_unifiable_3, NULL, false},
+	{"$incr", 1, fn_sys_incr_1, "?var", false},
 
-	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list"},
-	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list"},
+	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list", false},
+	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list", false},
 
-	{"$write_attributes", 2, fn_sys_write_attributes_2, "+variable,+list"},
-	{"$read_attributes", 2, fn_sys_read_attributes_2, "+variable,-list"},
-	{"$erase_attributes", 1, fn_sys_erase_attributes_1, "+variable"},
+	{"$write_attributes", 2, fn_sys_write_attributes_2, "+variable,+list", false},
+	{"$read_attributes", 2, fn_sys_read_attributes_2, "+variable,-list", false},
+	{"$erase_attributes", 1, fn_sys_erase_attributes_1, "+variable", false},
 
 #if USE_OPENSSL
-	{"sha1", 2, fn_sha1_2, "+string,?string"},
-	{"sha256", 2, fn_sha256_2, "+string,?string"},
-	{"sha512", 2, fn_sha512_2, "+string,?string"},
+	{"sha1", 2, fn_sha1_2, "+string,?string", false},
+	{"sha256", 2, fn_sha256_2, "+string,?string", false},
+	{"sha512", 2, fn_sha512_2, "+string,?string", false},
 #endif
 
-	{"$task", 1, fn_task_n, "+callable"},
-	{"$task", 2, fn_task_n, "+callable,+rule,..."},
-	{"$task", 3, fn_task_n, "+callable,+rule,..."},
-	{"$task", 4, fn_task_n, "+callable,+rule,..."},
-	{"$task", 5, fn_task_n, "+callable,+rule,..."},
-	{"$task", 6, fn_task_n, "+callable,+rule,..."},
-	{"$task", 7, fn_task_n, "+callable,+rule,..."},
-	{"$task", 8, fn_task_n, "+callable,+rule,..."},
+	{"$task", 1, fn_task_n, "+callable", false},
+	{"$task", 2, fn_task_n, "+callable,+rule,...", false},
+	{"$task", 3, fn_task_n, "+callable,+rule,...", false},
+	{"$task", 4, fn_task_n, "+callable,+rule,...", false},
+	{"$task", 5, fn_task_n, "+callable,+rule,...", false},
+	{"$task", 6, fn_task_n, "+callable,+rule,...", false},
+	{"$task", 7, fn_task_n, "+callable,+rule,...", false},
+	{"$task", 8, fn_task_n, "+callable,+rule,...", false},
 
-	{"wait", 0, fn_wait_0, NULL},
-	{"await", 0, fn_await_0, NULL},
-	{"yield", 0, fn_yield_0, NULL},
-	{"fork", 0, fn_fork_0, NULL},
-	{"send", 1, fn_send_1, "+rule"},
-	{"recv", 1, fn_recv_1, "?rule"},
+	{"wait", 0, fn_wait_0, NULL, false},
+	{"await", 0, fn_await_0, NULL, false},
+	{"yield", 0, fn_yield_0, NULL, false},
+	{"fork", 0, fn_fork_0, NULL, false},
+	{"send", 1, fn_send_1, "+rule", false},
+	{"recv", 1, fn_recv_1, "?rule", false},
 
-	{"$mustbe_instantiated", 1, fn_sys_instantiated_1, "+rule"},
-	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+rule,+rule"},
+	{"$mustbe_instantiated", 1, fn_sys_instantiated_1, "+rule", false},
+	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+rule,+rule", false},
 
-	{"$mustbe_pairlist", 2, fn_sys_mustbe_pairlist_2, "+pair,+goal"},
-	{"$mustbe_pairlist_or_var", 2, fn_sys_mustbe_pairlist_or_var_2, "?pair,+goal"},
-	{"$mustbe_list", 1, fn_sys_mustbe_list_1, "?list"},
-	{"$mustbe_list_or_var", 1, fn_sys_mustbe_list_or_var_1, "?list"},
+	{"$mustbe_pairlist", 2, fn_sys_mustbe_pairlist_2, "+pair,+goal", false},
+	{"$mustbe_pairlist_or_var", 2, fn_sys_mustbe_pairlist_or_var_2, "?pair,+goal", false},
+	{"$mustbe_list", 1, fn_sys_mustbe_list_1, "?list", false},
+	{"$mustbe_list_or_var", 1, fn_sys_mustbe_list_or_var_1, "?list", false},
 
 	// Used for database log
 
-	{"$a_", 2, fn_sys_asserta_2, "+rule,+ref"},
-	{"$z_", 2, fn_sys_assertz_2, "+rule,+ref"},
-	{"$e_", 1, fn_erase_1, "+ref"},
+	{"$a_", 2, fn_sys_asserta_2, "+rule,+ref", false},
+	{"$z_", 2, fn_sys_assertz_2, "+rule,+ref", false},
+	{"$e_", 1, fn_erase_1, "+ref", false},
 
-	{"$db_load", 0, fn_sys_db_load_0, NULL},
-	{"$db_save", 0, fn_sys_db_save_0, NULL},
+	{"$db_load", 0, fn_sys_db_load_0, NULL, false},
+	{"$db_save", 0, fn_sys_db_save_0, NULL, false},
 
 	{0}
 };
 
-void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found)
+void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found, bool *function)
 {
 	miter *iter = m_findkey(pl->funtab, name);
 	const struct builtins *ptr;
@@ -11880,12 +11880,14 @@ void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found)
 	while (m_nextkey(iter, (void**)&ptr)) {
 		if (ptr->arity == arity) {
 			m_done(iter);
-			*found = true;
+			if (found) *found = true;
+			if (function) *function = ptr->function;
 			return ptr->fn;
 		}
 	}
 
-	*found = false;
+	if (found) *found = false;
+	if (function) *function = false;
 	return NULL;
 }
 

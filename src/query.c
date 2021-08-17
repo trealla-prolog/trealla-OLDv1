@@ -1113,7 +1113,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 		if (!pr) {
 			bool found = false;
 
-			if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found), found)
+			if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found, NULL), found)
 				return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 			q->st.curr_clause2 = NULL;
@@ -1204,7 +1204,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 		if (!pr) {
 			bool found = false;
 
-			if (get_builtin(q->st.m->pl, GET_STR(q, p1), p1->arity, &found), found) {
+			if (get_builtin(q->st.m->pl, GET_STR(q, p1), p1->arity, &found, NULL), found) {
 				if (is_retract != DO_CLAUSE)
 					return throw_error(q, p1, "permission_error", "modify,static_procedure");
 				else
@@ -1293,7 +1293,7 @@ static USE_RESULT pl_status match_head(query *q)
 			pr = NULL;
 		}
 
-		if (!pr) {
+		if (!pr || is_function(c)) {
 			pr = search_predicate(q->st.m, c);
 			q->save_m = q->st.m;
 
@@ -1310,7 +1310,6 @@ static USE_RESULT pl_status match_head(query *q)
 			}
 
 			c->match = pr;
-			c->flags &= ~FLAG_BUILTIN;
 		}
 
 		if (pr->idx1) {
@@ -1637,7 +1636,7 @@ pl_status start(query *q)
 		cell *save_cell = q->st.curr_cell;
 		idx_t save_ctx = q->st.curr_frame;
 
-		if (q->st.curr_cell->flags&FLAG_BUILTIN) {
+		if (q->st.curr_cell->flags&FLAG_BUILTIN	) {
 			if (!q->st.curr_cell->fn) {					// NO-OP
 				q->tot_goals--;
 				q->st.curr_cell++;
