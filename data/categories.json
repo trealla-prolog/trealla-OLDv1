@@ -1,17 +1,18 @@
 {
   "uid" : "4b4757e66a1912dae1a509f688f20b0f",
+  "name" : "categories",
   "children" : [ {
     "name" : "Product defects",
     "children" : [ {
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "iso_bagof_3_10",
-        "uid" : "485acddcf25d6657",
+        "uid" : "22e9e723d4e0e173",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1629164655000,
-          "stop" : 1629164655000,
+          "start" : 1629169901000,
+          "stop" : 1629169901000,
           "duration" : 0
         },
         "flaky" : false,
@@ -23,12 +24,12 @@
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "iso_setof_3_12",
-        "uid" : "ae81cd88d5240882",
+        "uid" : "dd842d81b72d2f06",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1629164739000,
-          "stop" : 1629164739000,
+          "start" : 1629169966000,
+          "stop" : 1629169966000,
           "duration" : 0
         },
         "flaky" : false,
@@ -38,6 +39,5 @@
       "uid" : "7a65c89daad8cf82ce910dbf95cc8113"
     } ],
     "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
-  } ],
-  "name" : "categories"
+  } ]
 }
