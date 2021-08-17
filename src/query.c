@@ -1470,6 +1470,7 @@ static void dump_vars(query *q, bool partial)
 
 		if (parens) fputc('(', stdout);
 		idx_t c_ctx = q->latest_ctx;
+		int saveq = q->quoted;
 		q->quoted = 1;
 
 		if (is_cyclic_term(q, c, c_ctx))
@@ -1478,6 +1479,7 @@ static void dump_vars(query *q, bool partial)
 			print_term(q, stdout, c, c_ctx, -2);
 
 		if (parens) fputc(')', stdout);
+		q->quoted = saveq;
 		any++;
 	}
 
