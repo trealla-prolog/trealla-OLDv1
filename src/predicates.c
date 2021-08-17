@@ -1906,7 +1906,6 @@ enum log_type { LOG_ASSERTA=1, LOG_ASSERTZ=2, LOG_ERASE=3 };
 
 static void db_log(query *q, clause *cl, enum log_type l)
 {
-	int saveq = q->quoted;
 	char tmpbuf[256];
 	char *dst;
 	q->quoted = 2;
@@ -1930,7 +1929,7 @@ static void db_log(query *q, clause *cl, enum log_type l)
 		break;
 	}
 
-	q->quoted = saveq;
+	q->quoted = 0;
 }
 
 static pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, enum clause_type is_retract)
@@ -2901,11 +2900,11 @@ static USE_RESULT pl_status fn_iso_writeq_1(query *q)
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
-	int saveq = q->quoted;
 	q->quoted = 1;
 	q->numbervars = true;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
-	q->quoted = saveq;
+	q->numbervars = false;
+	q->quoted = 0;
 	return !ferror(str->fp);
 }
 
@@ -2926,11 +2925,11 @@ static USE_RESULT pl_status fn_iso_writeq_2(query *q)
 		return throw_error(q, &tmp, "permission_error", "output,binary_stream");
 	}
 
-	int saveq = q->quoted;
 	q->quoted = 1;
 	q->numbervars = true;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
-	q->quoted = saveq;
+	q->numbervars = false;
+	q->quoted = 0;
 	return !ferror(str->fp);
 }
 
@@ -3131,12 +3130,14 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 	}
 
 	if (is_variable(p2)) {
-		q->quoted = q->nl = q->fullstop = q->varnames = q->ignore_ops = false;
+		q->quoted = 0;
+		q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
 		return throw_error(q, p2_orig, "instantiation_error", "write_option");
 	}
 
 	if (!is_nil(p2)) {
-		q->quoted = q->nl = q->fullstop = q->varnames = q->ignore_ops = false;
+		q->quoted = 0;
+		q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
 		return throw_error(q, p2_orig, "type_error", "list");
 	}
 
@@ -3157,7 +3158,8 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 		//fflush(str->fp);
 	}
 
-	q->max_depth = q->quoted = q->nl = q->fullstop = q->varnames = q->ignore_ops = false;
+	q->max_depth = q->quoted = 0;
+	q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
 	q->variable_names = NULL;
 	return !ferror(str->fp);
 }
@@ -3198,12 +3200,14 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 	}
 
 	if (is_variable(p2)) {
-		q->quoted = q->nl = q->fullstop = q->varnames = q->ignore_ops = false;
+		q->quoted = 0;
+		q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
 		return throw_error(q, p2_orig, "instantiation_error", "write_option");
 	}
 
 	if (!is_nil(p2)) {
-		q->quoted = q->nl = q->fullstop = q->varnames = q->ignore_ops = false;
+		q->quoted = 0;
+		q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
 		return throw_error(q, p2_orig, "type_error", "list");
 	}
 
@@ -3220,8 +3224,8 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 		//fflush(str->fp);
 	}
 
-	q->max_depth = q->quoted = q->nl = q->fullstop = false;
-	q->ignore_ops = false;
+	q->max_depth = q->quoted = 0;
+	q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
 	q->variable_names = NULL;
 	return !ferror(str->fp);
 }
@@ -5180,7 +5184,7 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 		q->quoted = 1;
 		print_term(q, stdout, e, q->st.curr_frame, 1);
 		fprintf(stdout, "\n");
-		q->quoted = false;
+		q->quoted = 0;
 	}
 
 	q->st.m->pl->did_dump_vars = true;
@@ -5225,7 +5229,6 @@ static pl_status throw_error3(query *q, cell *c, const char *err_type, const cha
 
 	q->did_throw = true;
 	idx_t c_ctx = q->st.curr_frame;
-	int saveq = q->quoted;
 	q->quoted = 1;
 	ssize_t len = 0;
 	bool running = !is_cyclic_term(q, c, c_ctx);
@@ -5244,7 +5247,7 @@ static pl_status throw_error3(query *q, cell *c, const char *err_type, const cha
 	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q, goal) + 1024;
 	char *dst2 = malloc(len2+1);
 	may_ptr_error(dst2);
-	q->quoted = saveq;
+	q->quoted = 0;
 
 	if (!strncmp(expected, "iso_", 4))
 		expected += 4;
@@ -8092,8 +8095,8 @@ static USE_RESULT pl_status fn_write_term_to_chars_3(query *q)
 	}
 
 	char *dst = print_term_to_strbuf(q, p_term, p_term_ctx, 1);
-	q->max_depth = q->quoted = q->nl = q->fullstop = false;
-	q->ignore_ops = false;
+	q->max_depth = q->quoted = 0;
+	q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
 	q->variable_names = NULL;
 	cell tmp;
 	may_error(make_string(&tmp, dst), free(dst));
@@ -8121,8 +8124,8 @@ static USE_RESULT pl_status fn_write_canonical_to_chars_3(query *q)
 	}
 
 	char *dst = print_canonical_to_strbuf(q, p_term, p_term_ctx, 1);
-	q->max_depth = q->quoted = q->nl = q->fullstop = false;
-	q->ignore_ops = false;
+	q->max_depth = q->quoted = 0;
+	q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
 	q->variable_names = NULL;
 	cell tmp;
 	may_error(make_string(&tmp, dst), free(dst));
