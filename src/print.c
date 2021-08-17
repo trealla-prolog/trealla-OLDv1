@@ -1102,3 +1102,10 @@ pl_status print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 	q->numbervars = false;
 	return pl_success;
 }
+
+void clear_write_options(query *q)
+{
+	q->max_depth = q->quoted = 0;
+	q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
+	q->variable_names = NULL;
+}

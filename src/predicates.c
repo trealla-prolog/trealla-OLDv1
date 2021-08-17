@@ -3130,14 +3130,12 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 	}
 
 	if (is_variable(p2)) {
-		q->quoted = 0;
-		q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
+		clear_write_options(q);
 		return throw_error(q, p2_orig, "instantiation_error", "write_option");
 	}
 
 	if (!is_nil(p2)) {
-		q->quoted = 0;
-		q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
+		clear_write_options(q);
 		return throw_error(q, p2_orig, "type_error", "list");
 	}
 
@@ -3158,9 +3156,7 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 		//fflush(str->fp);
 	}
 
-	q->max_depth = q->quoted = 0;
-	q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
-	q->variable_names = NULL;
+	clear_write_options(q);
 	return !ferror(str->fp);
 }
 
@@ -3200,14 +3196,12 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 	}
 
 	if (is_variable(p2)) {
-		q->quoted = 0;
-		q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
+		clear_write_options(q);
 		return throw_error(q, p2_orig, "instantiation_error", "write_option");
 	}
 
 	if (!is_nil(p2)) {
-		q->quoted = 0;
-		q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
+		clear_write_options(q);
 		return throw_error(q, p2_orig, "type_error", "list");
 	}
 
@@ -3224,9 +3218,7 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 		//fflush(str->fp);
 	}
 
-	q->max_depth = q->quoted = 0;
-	q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
-	q->variable_names = NULL;
+	clear_write_options(q);
 	return !ferror(str->fp);
 }
 
@@ -8081,9 +8073,7 @@ static USE_RESULT pl_status fn_write_term_to_chars_3(query *q)
 	}
 
 	char *dst = print_term_to_strbuf(q, p_term, p_term_ctx, 1);
-	q->max_depth = q->quoted = 0;
-	q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
-	q->variable_names = NULL;
+	clear_write_options(q);
 	cell tmp;
 	may_error(make_string(&tmp, dst), free(dst));
 	free(dst);
@@ -8110,9 +8100,7 @@ static USE_RESULT pl_status fn_write_canonical_to_chars_3(query *q)
 	}
 
 	char *dst = print_canonical_to_strbuf(q, p_term, p_term_ctx, 1);
-	q->max_depth = q->quoted = 0;
-	q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
-	q->variable_names = NULL;
+	clear_write_options(q);
 	cell tmp;
 	may_error(make_string(&tmp, dst), free(dst));
 	free(dst);

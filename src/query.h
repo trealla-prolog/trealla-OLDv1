@@ -52,6 +52,7 @@ extern ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, id
 extern pl_status print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
 extern pl_status print_term_to_stream(query *q, stream *str, cell *c, idx_t c_ctx, int running);
 extern char *print_term_to_strbuf(query *q, cell *c, idx_t c_ctx, int running);
+extern void clear_write_options(query *q);
 
 extern ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, bool unused, unsigned depth);
 extern pl_status print_canonical(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);
