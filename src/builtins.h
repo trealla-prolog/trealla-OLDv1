@@ -80,6 +80,11 @@ inline static cell *deref(query *q, cell *c, idx_t c_ctx)
 	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx; \
 	if (!is_##vt(p)) { return throw_error(q, p, "type_error", #vt); }
 
+#define REGET_FIRST_ARG(p,vt) \
+	p = get_first_arg(q); \
+	p##_ctx = q->latest_ctx; \
+	if (!is_##vt(p)) { return throw_error(q, p, "type_error", #vt); }
+
 #define GET_FIRST_ARG0(p,vt,p0) \
 	__attribute__((unused)) cell *p = get_first_arg0(q,p0); \
 	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx; \
@@ -98,6 +103,11 @@ inline static cell *deref(query *q, cell *c, idx_t c_ctx)
 #define GET_NEXT_ARG(p,vt) \
 	__attribute__((unused)) cell *p = get_next_arg(q); \
 	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx; \
+	if (!is_##vt(p)) { return throw_error(q, p, "type_error", #vt); }
+
+#define REGET_NEXT_ARG(p,vt) \
+	p = get_next_arg(q); \
+	p##_ctx = q->latest_ctx; \
 	if (!is_##vt(p)) { return throw_error(q, p, "type_error", #vt); }
 
 #define GET_NEXT_RAW_ARG(p,vt) \
