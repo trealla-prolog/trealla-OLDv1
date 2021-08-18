@@ -390,7 +390,7 @@ typedef struct {
 typedef struct {
 	cell *attrs;
 	idx_t ctx, attrs_ctx;
-	uint16_t var_nbr;
+	uint32_t var_nbr;
 } trail;
 
 typedef struct {
@@ -403,7 +403,8 @@ typedef struct {
 	module *m;
 	uint64_t ugen;
 	idx_t prev_frame, ctx, overflow, cgen;
-	uint16_t nbr_vars, nbr_slots;
+	uint32_t nbr_slots;
+	uint16_t nbr_vars;
 } frame;
 
 enum { eof_action_eof_code, eof_action_error, eof_action_reset };
@@ -444,7 +445,8 @@ typedef struct {
 	prolog_state st;
 	uint64_t pins, ugen;
 	idx_t v1, v2, cgen, orig_cgen, overflow;
-	uint16_t nbr_vars, nbr_slots;
+	uint32_t nbr_slots;
+	uint16_t nbr_vars;
 	bool catchme_retry:1;
 	bool catchme_exception:1;
 	bool barrier:1;
