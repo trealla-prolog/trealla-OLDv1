@@ -10625,6 +10625,26 @@ static USE_RESULT pl_status fn_call_nth_2(query *q)
 	return pl_success;
 }
 
+static unsigned safe_list_length(query *q, cell *p1, idx_t p1_ctx)
+{
+	LIST_HANDLER(p1);
+	unsigned cnt = 0;
+
+	while (is_list(p1) && !g_tpl_interrupt) {
+		LIST_HEAD(p1);
+		p1 = LIST_TAIL(p1);
+
+		if (is_cyclic_term(q, p1, p1_ctx))
+			break;
+
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+		cnt++;
+	}
+
+	return cnt;
+}
+
 static pl_status do_length(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -10644,7 +10664,10 @@ static pl_status do_length(query *q)
 		return throw_error(q, p2, "resource_error", "too_many_vars");
 	}
 
-	unsigned var_nbr = 0;
+	unsigned var_nbr = safe_list_length(q, p1, p1_ctx);
+
+	if (nbr < var_nbr)
+		return pl_failure;
 
 	if (nbr) {
 		if (!(var_nbr = create_vars(q, nbr))) {
@@ -10670,31 +10693,8 @@ static pl_status do_length(query *q)
 
 	cell *l = end_list(q);
 	may_ptr_error(l);
-	set_var(q, p1, p1_ctx, l, q->st.curr_frame);
-	return pl_success;
+	return unify(q, p1, p1_ctx, l, q->st.curr_frame);
 }
-
-#if 0
-static int safe_list_length(query *q, cell *p1, idx_t p1_ctx)
-{
-	LIST_HANDLER(p1);
-	int cnt = 0;
-
-	while (is_list(p1) && !g_tpl_interrupt) {
-		LIST_HEAD(p1);
-		p1 = LIST_TAIL(p1);
-
-		if (is_cyclic_term(q, p1, p1_ctx))
-			break;
-
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-		cnt++;
-	}
-
-	return cnt;
-}
-#endif
 
 static USE_RESULT pl_status fn_iso_length_2(query *q)
 {
@@ -10722,27 +10722,12 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	}
 #endif
 
-	if (!is_variable(p1) && !is_nil(p1) && (is_cyclic_term(q, p1, p1_ctx) || !is_valid_list(q, p1, p1_ctx, true)))
+	if (!is_variable(p1) && !is_nil(p1)
+		&& (is_cyclic_term(q, p1, p1_ctx) || !is_valid_list(q, p1, p1_ctx, true)))
 		return throw_error(q, p1, "type_error", "list");
 
-	if (is_variable(p1) && is_variable(p2)) {
-		if (p1 == p2)
-			return false;
-
-		cell tmp;
-		make_int(&tmp, 0);
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		may_error(make_choice(q));
-
-		if (!is_anon(p1)) {
-			make_literal(&tmp, g_nil_s);
-			set_var(q, p1,p1_ctx, &tmp, q->st.curr_frame);
-		}
-
-		return pl_success;
-	}
-
-	if (!is_variable(p1) && is_variable(p2)) {
+	if (!is_variable(p1) && is_valid_list(q, p1, p1_ctx, false)
+		&& is_variable(p2)) {
 		if (!is_list(p1) && !is_nil(p1))
 			return pl_failure;
 
@@ -10775,6 +10760,28 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		cell tmp;
 		make_int(&tmp, cnt);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		return pl_success;
+	}
+
+	if ((is_variable(p1) || is_valid_list(q, p1, p1_ctx, true))
+		&& (is_variable(p1) || safe_list_length(q, p1, p1_ctx))
+		&& is_variable(p2)) {
+		if (p1 == p2)
+			return false;
+
+		cell tmp;
+		make_int(&tmp, 0);
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		may_error(make_choice(q));
+
+		if (!is_variable(p1))
+			return pl_failure;
+
+		if (!is_anon(p1)) {
+			make_literal(&tmp, g_nil_s);
+			set_var(q, p1,p1_ctx, &tmp, q->st.curr_frame);
+		}
+
 		return pl_success;
 	}
 
