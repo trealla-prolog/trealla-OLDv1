@@ -1,0 +1,49 @@
+{
+  "uid" : "72e531a3f5c5f8b8",
+  "name" : "lgt_format_2_float_exponential_notation_n_places_upper_case",
+  "historyId" : "predicates/format_2/tests.lgt::tests:tests#lgt_format_2_float_exponential_notation_n_places_upper_case",
+  "time" : {
+    "start" : 1629293014000,
+    "stop" : 1629293014003,
+    "duration" : 3
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "steps" : [ ],
+    "attachments" : [ ],
+    "parameters" : [ ],
+    "stepsCount" : 0,
+    "attachmentsCount" : 0,
+    "shouldDisplayMessage" : false,
+    "hasContent" : false
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "junit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/format_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests"
+  }, {
+    "name" : "package",
+    "value" : "tests"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "72e531a3f5c5f8b8.json",
+  "parameterValues" : [ ]
+}
