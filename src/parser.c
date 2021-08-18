@@ -1973,9 +1973,20 @@ bool get_token(parser *p, int last_op)
 
 	// -ve numbers (note there are no explicitly +ve numbers)
 
-	if ((*src == '-') && last_op) {
-		const char *save_src = src++;
+	bool is_neg = false;
+	const char *save_src = src;
 
+	if ((*src == '-') && last_op) {
+		is_neg = true;
+		src += 1;
+	}
+
+	if ((*src == '\'') && (src[1] == '-') && (src[2] == '\'') && last_op) {
+		is_neg = true;
+		src += 3;
+	}
+
+	if (is_neg) {
 		while (iswspace(*src)) {
 			if (*src == '\n')
 				p->line_nbr++;
@@ -1983,10 +1994,13 @@ bool get_token(parser *p, int last_op)
 			src++;
 		}
 
-		if (isdigit(*src)) {
-			if (*save_src == '-')
-				neg = true;
-		} else
+		p->srcptr = (char*)src;
+		eat_comment(p);
+		src = p->srcptr;
+
+		if (isdigit(*src))
+			neg = true;
+		else
 			src = save_src;
 	}
 
