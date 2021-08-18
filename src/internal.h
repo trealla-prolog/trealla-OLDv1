@@ -115,6 +115,7 @@ typedef enum {
 #define neg_smallint(c) (c)->val_int = -llabs((c)->val_int)
 #define neg_real(c) (c)->val_real = -fabs((c)->val_real)
 
+#define is_zero(c) (is_bigint(c) ? mp_int_compare_zero(&(c)->val_bigint->ival) == 0 : get_smallint(c) == 0)
 #define is_negative(c) (is_bigint(c) ? (c)->val_bigint->ival.sign == MP_NEG : get_smallint(c) < 0)
 #define is_positive(c) (is_bigint(c) ? (c)->val_bigint->ival.sign != MP_NEG : get_smallint(c) > 0)
 
