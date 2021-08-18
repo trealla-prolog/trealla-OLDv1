@@ -90,7 +90,7 @@ static void trace_call(query *q, cell *c, idx_t c_ctx, box_t box)
 
 static USE_RESULT pl_status check_trail(query *q)
 {
-	if (q->st.tp > q->max_trails) {
+	if (q->st.tp >= q->max_trails) {
 		q->max_trails = q->st.tp;
 
 		if (q->st.tp >= q->trails_size) {
@@ -109,7 +109,7 @@ static USE_RESULT pl_status check_trail(query *q)
 
 static USE_RESULT pl_status check_choice(query *q)
 {
-	if (q->cp > q->max_choices) {
+	if (q->cp >= q->max_choices) {
 		q->max_choices = q->cp;
 
 		if (q->cp >= q->choices_size) {
@@ -128,7 +128,7 @@ static USE_RESULT pl_status check_choice(query *q)
 
 static USE_RESULT pl_status check_frame(query *q)
 {
-	if (q->st.fp > q->max_frames) {
+	if (q->st.fp >= q->max_frames) {
 		q->max_frames = q->st.fp;
 
 		if (q->st.fp >= q->frames_size) {
@@ -149,8 +149,8 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 {
 	idx_t nbr = q->st.sp + cnt;
 
-	if (nbr > q->max_slots) {
-		q->max_slots = q->st.sp;
+	if (nbr >= q->max_slots) {
+		q->max_slots = nbr;
 
 		if (nbr >= q->slots_size) {
 			idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, (nbr*3/2));
@@ -806,9 +806,7 @@ unsigned create_vars(query *q, unsigned cnt)
 
 	unsigned var_nbr = g->nbr_vars;
 
-	// Allow 16 spares, why not
-
-	if (check_slot(q, cnt+16) != pl_success)
+	if (check_slot(q, cnt) != pl_success)
 		return 0;
 
 	if ((g->ctx + g->nbr_slots) >= q->st.sp) {
@@ -827,8 +825,9 @@ unsigned create_vars(query *q, unsigned cnt)
 		q->st.sp += cnt2 + cnt;
 	}
 
-	for (unsigned i = 0; i < cnt; i++) {
-		slot *e = GET_SLOT(g, g->nbr_vars+i);
+	slot *e = GET_SLOT(g, g->nbr_vars);
+
+	for (unsigned i = 0; i < cnt; i++, e++) {
 		e->c.tag = TAG_EMPTY;
 		e->c.attrs = NULL;
 	}
