@@ -121,9 +121,9 @@ typedef enum {
 	is_integer(c) ? get_smallint(c) < 0 : \
 	is_real(c) ? get_real(c) < 0.0 : false)
 
-#define is_positive(c) (is_bigint(c) ? mp_int_compare_zero(&(c)->val_bigint->ival) >= 0 : \
-	is_integer(c) ? get_smallint(c) >= 0 : \
-	is_real(c) ? get_real(c) >= 0.0 : false)
+#define is_positive(c) (is_bigint(c) ? mp_int_compare_zero(&(c)->val_bigint->ival) > 0 : \
+	is_integer(c) ? get_smallint(c) > 0 : \
+	is_real(c) ? get_real(c) > 0.0 : false)
 
 #define is_gt(c,n) (get_smallint(c) > (n))
 #define is_ge(c,n) (get_smallint(c) >= (n))
