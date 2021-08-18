@@ -5251,10 +5251,10 @@ static pl_status throw_error3(query *q, cell *c, const char *err_type, const cha
 
 	if (is_variable(c)) {
 		err_type = "instantiation_error";
-		snprintf(dst2, len2+1, "error(%s,'%s').", err_type, expected);
+		snprintf(dst2, len2+1, "error(%s,%s).", err_type, expected);
 
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "variable")) {
-		snprintf(dst2, len2+1, "error(%s('%s'),(%s)/%u).", "uninstantiation_error", dst, functor, goal->arity);
+		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", "uninstantiation_error", dst, functor, goal->arity);
 
 	} else if (!strcmp(err_type, "instantiation_error")) {
 		snprintf(dst2, len2+1, "error(%s,(%s)/%u).", err_type, functor, goal->arity);
@@ -5288,11 +5288,11 @@ static pl_status throw_error3(query *q, cell *c, const char *err_type, const cha
 
 	} else {
 		if (!slicecmp2(GET_STR(q, goal), LEN_STR(q, goal), "$rawcall"))
-			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "call", goal->arity);
+			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, "call", goal->arity);
 		else if (!slicecmp2(GET_STR(q, goal), LEN_STR(q, goal), "$call"))
-			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "call", goal->arity);
+			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, "call", goal->arity);
 		else if (!slicecmp2(GET_STR(q, goal), LEN_STR(q, goal), "$catch"))
-			snprintf(dst2, len2+1, "error(%s(%s,(%s)),%s/%u).", err_type, expected, dst, "catch", goal->arity);
+			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, "catch", goal->arity);
 		else if (!slicecmp2(GET_STR(q, goal), LEN_STR(q, goal), "$bagof"))
 			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, "bagof", goal->arity);
 		else
