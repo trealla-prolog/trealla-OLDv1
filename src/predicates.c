@@ -10666,7 +10666,8 @@ static pl_status do_length(query *q)
 
 	cell *l = end_list(q);
 	may_ptr_error(l);
-	set_var(q, p1, p1_ctx, l, q->st.curr_frame);
+	GET_FIRST_ARG(p1_new,any);
+	set_var(q, p1_new, p1_new_ctx, l, q->st.curr_frame);
 	return pl_success;
 }
 
