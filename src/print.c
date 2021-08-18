@@ -847,10 +847,9 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		cell *rhs = c + 1;
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		idx_t rhs_ctx = q->latest_ctx;
-		int space = !is_atom(rhs);//iswalpha(peek_char_utf8(src)) || !strcmp(src, ":-") || !strcmp(src, "\\+");
+		int space = !is_atom(rhs);
 		space += (!strcmp(src, "-") || !strcmp(src, "+")) && is_smallint(rhs) && (get_smallint(rhs) < 0);
 		space += IS_OP(rhs);
-		//if (!strcmp(src, "-") && !is_smallint(rhs)) dst += snprintf(dst, dstlen, "%s", " ");
 		int parens = is_structure(rhs) && !strcmp(GET_STR(q, rhs), ",");
 		unsigned my_priority = search_op(q->st.m, GET_STR(q, c), NULL, true);
 		unsigned rhs_pri = is_literal(rhs) ? search_op(q->st.m, GET_STR(q, rhs), NULL, true) : 0;
