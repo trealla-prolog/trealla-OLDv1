@@ -5381,11 +5381,11 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 		if (arity) {
 			if (!(var_nbr = create_vars(q, arity)))
 				return throw_error(q, p3, "resource_error", "too_many_vars");
-		}
 
-		REGET_FIRST_ARG(p1,any);
-		REGET_NEXT_ARG(p2,any);
-		REGET_NEXT_ARG(p3,any);
+			REGET_FIRST_ARG(p1,any);
+			REGET_NEXT_ARG(p2,any);
+			REGET_NEXT_ARG(p3,any);
+		}
 
 		if (is_number(p2)) {
 			set_var(q, p1, p1_ctx, p2, p2_ctx);
@@ -5918,10 +5918,11 @@ static USE_RESULT pl_status fn_sys_list_1(query *q)
 	if (new_varno != g->nbr_vars) {
 		if (!create_vars(q, new_varno-g->nbr_vars))
 			return throw_error(q, p1, "resource_error", "too_many_vars");
+
+		REGET_FIRST_ARG(p1,variable);
 	}
 #endif
 
-	REGET_FIRST_ARG(p1,variable);
 	return unify(q, p1, p1_ctx, l, q->st.curr_frame);
 }
 
@@ -10650,6 +10651,8 @@ static pl_status do_length(query *q)
 			drop_choice(q);
 			return throw_error(q, p1, "resource_error", "too_many_vars");
 		}
+
+		REGET_FIRST_ARG(p1,any);
 	}
 
 	tmp.tag = TAG_VARIABLE;
@@ -10667,7 +10670,6 @@ static pl_status do_length(query *q)
 
 	cell *l = end_list(q);
 	may_ptr_error(l);
-	REGET_FIRST_ARG(p1,any);
 	set_var(q, p1, p1_ctx, l, q->st.curr_frame);
 	return pl_success;
 }
@@ -10864,6 +10866,8 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		if (!(var_nbr = create_vars(q, nbr)))
 			return throw_error(q, p2, "resource_error", "too_many_vars");
 
+		REGET_FIRST_ARG(p1,list_or_nil_or_var);
+
 		cell tmp;
 		tmp.tag = TAG_VARIABLE;
 		tmp.nbr_cells = 1;
@@ -10880,7 +10884,6 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 
 		cell *l = end_list(q);
 		may_ptr_error(l);
-		REGET_FIRST_ARG(p1,list_or_nil_or_var);
 		set_var(q, p1, p1_ctx, l, q->st.curr_frame);
 		return pl_success;
 	}
