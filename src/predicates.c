@@ -36,8 +36,7 @@
 #include "openssl/sha.h"
 #endif
 
-#define MAX_VARS 32768
-#define MAX_BYTES_PER_CODEPOINT 6 // Unicode says 4, but max possible is 6
+#define MAX_VARS INT16_MAX
 
 #ifdef _WIN32
 #define msleep Sleep

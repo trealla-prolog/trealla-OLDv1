@@ -172,7 +172,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 		int ch = get_next_char(q, &fmt1);
 
 		if (ch != '~') {
-            CHECK_BUF(10);
+            CHECK_BUF(MAX_BYTES_PER_CODEPOINT);
 			dst += put_char_bare_utf8(dst, ch);
 			start_of_line = ch == '\n';
 			continue;
@@ -234,7 +234,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 				tab_char = argval ? argval : ' ';
 
                 for (int i = 0; i < diff; i++) {
-                    CHECK_BUF(10);
+                    CHECK_BUF(MAX_BYTES_PER_CODEPOINT);
 					dst += put_char_utf8(dst, tab_char);
                 }
             }
@@ -258,7 +258,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
                     diff = (at - pos) + 1;
 
                     for (int i = 0; i < diff; i++) {
-                        CHECK_BUF(10);
+                        CHECK_BUF(MAX_BYTES_PER_CODEPOINT);
 						dst += put_char_utf8(dst, tab_char);
                     }
                 } else {
@@ -288,7 +288,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
                     diff = (at - pos) + 1;
 
                     for (int i = 0; i < diff; i++) {
-                        CHECK_BUF(10);
+                        CHECK_BUF(MAX_BYTES_PER_CODEPOINT);
 						dst += put_char_utf8(dst, tab_char);
                     }
                 } else {
@@ -349,7 +349,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 
 				while (is_more_data(q, &fmt3)) {
 					int ch = get_next_char(q, &fmt3);
-					CHECK_BUF(10);
+					CHECK_BUF(MAX_BYTES_PER_CODEPOINT);
 					dst += put_char_utf8(dst, ch);
 					cnt++;
 
@@ -369,11 +369,11 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 			}
 
 			while (argval-- > 1) {
-				CHECK_BUF(10);
+				CHECK_BUF(MAX_BYTES_PER_CODEPOINT);
 				dst += put_char_utf8(dst, (int)get_smallint(c));
 			}
 
-			CHECK_BUF(10);
+			CHECK_BUF(MAX_BYTES_PER_CODEPOINT);
 			len = put_char_utf8(dst, (int)get_smallint(c));
 			break;
 

@@ -22,7 +22,7 @@ static const unsigned INITIAL_NBR_HEAP = 8000;		// cells
 static const unsigned INITIAL_NBR_QUEUE = 1000;		// cells
 
 static const unsigned INITIAL_NBR_GOALS = 1000;
-static const unsigned INITIAL_NBR_SLOTS = 32000;
+static const unsigned INITIAL_NBR_SLOTS = 1000;
 static const unsigned INITIAL_NBR_CHOICES = 1000;
 static const unsigned INITIAL_NBR_TRAILS = 1000;
 
@@ -905,12 +905,41 @@ void reset_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 
 	e->ctx = v_ctx;
 
-	if (v->arity && !is_string(v))
+	cell *attrs = NULL;
+	idx_t attrs_ctx = 0;
+
+	if (is_empty(&e->c)) {
+		attrs = e->c.attrs;
+		attrs_ctx = e->c.attrs_ctx;
+	} else
+		attrs = NULL;
+
+	if (is_structure(v))
 		make_indirect(&e->c, v);
 	else {
 		e->c = *v;
 		share_cell(v);
 	}
+
+	if (attrs) {
+		if (is_variable(v)) {
+			const frame *g = GET_FRAME(v_ctx);
+			slot *e = GET_SLOT(g, v->var_nbr);
+
+			if (!e->c.attrs) {
+				e->c.attrs = attrs;
+				e->c.attrs_ctx = attrs_ctx;
+
+				if (q->cp)
+					add_trail(q, v_ctx, v->var_nbr, NULL, 0);
+			} else
+				q->has_attrs = true;
+		} else
+			q->has_attrs = true;
+	}
+
+	if (q->cp)
+		add_trail(q, c_ctx, c->var_nbr, attrs, attrs_ctx);
 }
 
 static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
