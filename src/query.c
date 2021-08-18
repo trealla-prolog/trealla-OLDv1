@@ -806,7 +806,9 @@ unsigned create_vars(query *q, unsigned cnt)
 
 	unsigned var_nbr = g->nbr_vars;
 
-	if (check_slot(q, cnt) != pl_success)
+	// Allow 16 spares, why not
+
+	if (check_slot(q, cnt+16) != pl_success)
 		return 0;
 
 	if ((g->ctx + g->nbr_slots) >= q->st.sp) {
