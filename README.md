@@ -8,6 +8,7 @@ A compact, efficient Prolog interpreter with
 	Atoms are UTF-8 of unlimited length
 	The default double-quoted representation is *chars* list
 	Dynamic atoms are automatically garbage collected
+	Unlimited arity (system resources constrained)
 	Uses 1st & 2nd arg indexing
 	DCGs
 	User-defined functions
@@ -78,7 +79,7 @@ On Debian+ systems you may need to install OpenSSL:
 
 	sudo apt install libssl-dev
 
-To build without OpenSSL:
+Or, to build without OpenSSL:
 
 	make NOSSL=1
 
@@ -88,8 +89,8 @@ Then...
 
 A 'make debug' build compiles in 0.2s with *tcc* and about 3s with
 *clang* and *gcc*. Should build on any Unix-like system with a C99
-compiler (could do C89 with a few cosmetic tweaks). Has been tested on
-Manjaro, Ubuntu, Debian, FreeBSD and Raspbian (32 & 64-bit) systems.
+compiler. Has been tested on macOS, Linux, FreeBSD and Raspbian (32 &
+64-bit) systems.
 
 On *BSD* systems use *gmake* to build and do
 

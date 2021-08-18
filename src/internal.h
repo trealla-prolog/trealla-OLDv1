@@ -325,6 +325,7 @@ struct cell_ {
 		struct {
 			cell *attrs;				// used with TAG_EMPTY in slot
 			idx_t attrs_ctx;			// to set attributes on a var
+			uint32_t spare5;
 		};
 	};
 };
@@ -338,7 +339,7 @@ typedef struct {
 typedef struct {
 	uint64_t ugen_created, ugen_erased;
 	idx_t nbr_cells, cidx;
-	uint16_t nbr_vars;
+	uint32_t nbr_vars;
 	bool first_cut:1;
 	bool cut_only:1;
 	bool is_fact:1;
@@ -403,8 +404,7 @@ typedef struct {
 	module *m;
 	uint64_t ugen;
 	idx_t prev_frame, ctx, overflow, cgen;
-	uint32_t nbr_slots;
-	uint16_t nbr_vars;
+	uint32_t nbr_slots, nbr_vars;
 } frame;
 
 enum { eof_action_eof_code, eof_action_error, eof_action_reset };
@@ -445,8 +445,7 @@ typedef struct {
 	prolog_state st;
 	uint64_t pins, ugen;
 	idx_t v1, v2, cgen, orig_cgen, overflow;
-	uint32_t nbr_slots;
-	uint16_t nbr_vars;
+	uint32_t nbr_slots, nbr_vars;
 	bool catchme_retry:1;
 	bool catchme_exception:1;
 	bool barrier:1;
