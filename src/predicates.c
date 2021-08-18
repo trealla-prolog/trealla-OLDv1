@@ -738,7 +738,7 @@ static USE_RESULT pl_status fn_iso_halt_0(query *q)
 static USE_RESULT pl_status fn_iso_halt_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	q->halt_code = get_integer(p1);
+	q->halt_code = get_int(p1);
 	q->halt = q->error = true;
 	return pl_halt;
 }
@@ -866,7 +866,7 @@ static USE_RESULT pl_status fn_iso_char_code_2(query *q)
 
 	if (is_variable(p1)) {
 		char tmpbuf[256];
-		put_char_utf8(tmpbuf, get_integer(p2));
+		put_char_utf8(tmpbuf, get_int(p2));
 		cell tmp;
 		make_small(&tmp, tmpbuf);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -879,7 +879,7 @@ static USE_RESULT pl_status fn_iso_char_code_2(query *q)
 		return throw_error(q, p1, "type_error", "integer");
 
 	int ch = peek_char_utf8(src);
-	return ch == get_integer(p2);
+	return ch == get_int(p2);
 }
 
 static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
@@ -1235,7 +1235,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 			cell *head = LIST_HEAD(p2);
 			head = deref(q, head, p2_ctx);
 
-			int_t val = get_integer(head);
+			int_t val = get_int(head);
 
 			if (val < 0)
 				return throw_error(q, head, "representation_error", "character_code");
@@ -1354,7 +1354,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 				return throw_error(q, head, "type_error", "integer");
 			}
 
-			int val = get_integer(head);
+			int val = get_int(head);
 
 			if (val < 0) {
 				free(tmpbuf);
@@ -1450,13 +1450,13 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 		may_error(make_choice(q));
 
 		if (!is_variable(p2))
-			before = get_integer(p2);
+			before = get_int(p2);
 
 		if (!is_variable(p3))
-			len = get_integer(p3);
+			len = get_int(p3);
 
 		if (!is_variable(p4))
-			after = get_integer(p4);
+			after = get_int(p4);
 
 		if (is_variable(p2) && is_integer(p3) && is_integer(p4))
 			before = len_p1 - after - len;
@@ -1709,10 +1709,10 @@ int get_stream(query *q, cell *p1)
 	if (is_negative(p1) || is_ge(p1,MAX_STREAMS))
 		return -1;
 
-	if (!g_streams[get_integer(p1)].fp)
+	if (!g_streams[get_int(p1)].fp)
 		return -1;
 
-	return get_integer(p1);
+	return get_int(p1);
 }
 
 static bool is_closed_stream(cell *p1)
@@ -1723,7 +1723,7 @@ static bool is_closed_stream(cell *p1)
 	if (is_negative(p1) || is_ge(p1,MAX_STREAMS))
 		return false;
 
-	if (g_streams[get_integer(p1)].fp)
+	if (g_streams[get_int(p1)].fp)
 		return false;
 
 	return true;
@@ -1806,7 +1806,7 @@ static USE_RESULT pl_status fn_iso_set_stream_position_2(query *q)
 	if (!str->repo)
 		return throw_error(q, p1, "permission_error", "reposition,stream");
 
-	if (fseeko(str->fp, get_integer(p1), SEEK_SET))
+	if (fseeko(str->fp, get_int(p1), SEEK_SET))
 		return throw_error(q, p1, "domain_error", "position");
 
 	return pl_success;
@@ -1824,7 +1824,7 @@ static char *chars_list_to_string(query *q, cell *p_chars, idx_t p_chars_ctx, si
 		h = deref(q, h, p_chars_ctx);
 
 		if (is_integer(h)) {
-			int ch = get_integer(h);
+			int ch = get_int(h);
 			dst += put_char_utf8(dst, ch);
 		} else {
 			const char *p = GET_STR(q, h);
@@ -2992,7 +2992,7 @@ static bool parse_write_params(query *q, cell *c, cell **vnames, idx_t *vnames_c
 
 	if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "max_depth")) {
 		if (is_integer(c1))
-			q->max_depth = get_integer(&c[1]);
+			q->max_depth = get_int(&c[1]);
 	} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "fullstop")) {
 		if (!is_literal(c1) || (slicecmp2(GET_STR(q, c1), LEN_STR(q, c1), "true") && slicecmp2(GET_STR(q, c1), LEN_STR(q, c1), "false"))) {
 			DISCARD_RESULT throw_error(q, c, "domain_error", "write_option");
@@ -3294,7 +3294,7 @@ static USE_RESULT pl_status fn_iso_put_code_1(query *q)
 	if (is_integer(p1) && is_le(p1,-1))
 		return throw_error(q, p1, "representation_error", "character_code");
 
-	int ch = (int)get_integer(p1);
+	int ch = (int)get_int(p1);
 	char tmpbuf[80];
 	put_char_utf8(tmpbuf, ch);
 	net_write(tmpbuf, strlen(tmpbuf), str);
@@ -3324,7 +3324,7 @@ static USE_RESULT pl_status fn_iso_put_code_2(query *q)
 	if (is_integer(p1) && is_le(p1,-1))
 		return throw_error(q, p1, "representation_error", "character_code");
 
-	int ch = (int)get_integer(p1);
+	int ch = (int)get_int(p1);
 	char tmpbuf[80];
 	put_char_utf8(tmpbuf, ch);
 	net_write(tmpbuf, strlen(tmpbuf), str);
@@ -3350,7 +3350,7 @@ static USE_RESULT pl_status fn_iso_put_byte_1(query *q)
 	if (is_integer(p1) && is_le(p1,-1))
 		return throw_error(q, p1, "representation_error", "character_code");
 
-	int ch = (int)get_integer(p1);
+	int ch = (int)get_int(p1);
 	char tmpbuf[80];
 	snprintf(tmpbuf, sizeof(tmpbuf), "%c", ch);
 	net_write(tmpbuf, 1, str);
@@ -3376,7 +3376,7 @@ static USE_RESULT pl_status fn_iso_put_byte_2(query *q)
 	if (is_integer(p1) && is_le(p1,-1))
 		return throw_error(q, p1, "representation_error", "character_code");
 
-	int ch = (int)get_integer(p1);
+	int ch = (int)get_int(p1);
 	char tmpbuf[80];
 	snprintf(tmpbuf, sizeof(tmpbuf), "%c", ch);
 	net_write(tmpbuf, 1, str);
@@ -3527,7 +3527,7 @@ static USE_RESULT pl_status fn_iso_get_code_1(query *q)
 	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 
-	if (is_integer(p1) && (get_integer(p1) < -1))
+	if (is_integer(p1) && (get_int(p1) < -1))
 		return throw_error(q, p1, "representation_error", "in_character_code");
 
 	if (str->binary) {
@@ -3595,7 +3595,7 @@ static USE_RESULT pl_status fn_iso_get_code_2(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,integer_or_var);
 
-	if (is_integer(p1) && (get_integer(p1) < -1))
+	if (is_integer(p1) && (get_int(p1) < -1))
 		return throw_error(q, p1, "representation_error", "in_character_code");
 
 	if (strcmp(str->mode, "read"))
@@ -3897,7 +3897,7 @@ static USE_RESULT pl_status fn_iso_peek_code_1(query *q)
 	int n = q->st.m->pl->current_input;
 	stream *str = &g_streams[n];
 
-	if (is_integer(p1) && (get_integer(p1) < -1))
+	if (is_integer(p1) && (get_int(p1) < -1))
 		return throw_error(q, p1, "representation_error", "in_character_code");
 
 	if (str->binary) {
@@ -3950,7 +3950,7 @@ static USE_RESULT pl_status fn_iso_peek_code_2(query *q)
 	stream *str = &g_streams[n];
 	GET_NEXT_ARG(p1,integer_or_var);
 
-	if (is_integer(p1) && (get_integer(p1) < -1))
+	if (is_integer(p1) && (get_int(p1) < -1))
 		return throw_error(q, p1, "representation_error", "in_character_code");
 
 	if (strcmp(str->mode, "read"))
@@ -4106,7 +4106,7 @@ static USE_RESULT pl_status fn_iso_arg_3(query *q)
 	GET_NEXT_ARG(p3,any);
 
 	if (is_integer(p1)) {
-		int arg_nbr = get_integer(p1);
+		int arg_nbr = get_int(p1);
 
 		if (q->retry) {
 			if (++arg_nbr > p2->arity)
@@ -4583,19 +4583,19 @@ static USE_RESULT pl_status fn_iso_abolish_1(query *q)
 	if (is_negative(p1_arity))
 		return throw_error(q, p1_arity, "domain_error", "not_less_than_zero");
 
-	if (get_integer(p1_arity) > MAX_ARITY)
+	if (get_int(p1_arity) > MAX_ARITY)
 		return throw_error(q, p1_arity, "representation_error", "max_arity");
 
 	bool found = false;
 
 	assert(strlen(GET_STR(q, p1_name)) == LEN_STR(q, p1_name));
 
-	if (get_builtin(q->st.m->pl, GET_STR(q, p1_name), get_integer(p1_arity), &found, NULL), found)
+	if (get_builtin(q->st.m->pl, GET_STR(q, p1_name), get_int(p1_arity), &found, NULL), found)
 		return throw_error(q, p1, "permission_error", "modify,static_procedure");
 
 	cell tmp;
 	tmp = *p1_name;
-	tmp.arity = get_integer(p1_arity);
+	tmp.arity = get_int(p1_arity);
 	CLR_OP(&tmp);
 	return do_abolish(q, p1, &tmp, true);
 }
@@ -5375,7 +5375,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 		if (!is_atom(p2) && is_positive(p3))
 			return throw_error(q, p2, "type_error", "atom");
 
-		unsigned arity = get_integer(p3);
+		unsigned arity = get_int(p3);
 		unsigned var_nbr = 0;
 
 		if (arity) {
@@ -5463,7 +5463,7 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 	assert(strlen(GET_STR(q, pf)) == LEN_STR(q, pf));
 
 	const char *functor = GET_STR(q, pf);
-	unsigned arity = get_integer(pa) + add_two;
+	unsigned arity = get_int(pa) + add_two;
 
 	if (strchr(functor, ':')) {
 		char tmpbuf1[256], tmpbuf2[256];
@@ -5557,7 +5557,7 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 	tmp.tag = TAG_LITERAL;
 	assert(strlen(GET_STR(q, p1)) == LEN_STR(q, p1));
 	tmp.val_off = is_literal(p1) ? p1->val_off : index_from_pool(q->st.m->pl, GET_STR(q, p1));
-	tmp.arity = get_integer(p2);
+	tmp.arity = get_int(p2);
 
 	return search_predicate(q->st.m, &tmp) != NULL;
 }
@@ -5737,7 +5737,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		return throw_error(q, p1, "type_error", "atom");
 
 	if (!slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "cpu_count") && is_integer(p2)) {
-		g_cpu_count = get_integer(p2);
+		g_cpu_count = get_int(p2);
 		return pl_success;
 	}
 
@@ -5947,7 +5947,7 @@ static USE_RESULT pl_status fn_sys_queuen_2(query *q)
 	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, "resource_error", "cyclic_term");
 
-	alloc_on_queuen(q, get_integer(p1), tmp);
+	alloc_on_queuen(q, get_int(p1), tmp);
 	return pl_success;
 }
 
@@ -6240,7 +6240,7 @@ static pl_status do_op(query *q, cell *p3)
 
 	unsigned specifier;
 	const char *spec = GET_STR(q, p2);
-	unsigned pri = get_integer(p1);
+	unsigned pri = get_int(p1);
 
 	if (!strcmp(spec, "fx"))
 		specifier = OP_FX;
@@ -6714,7 +6714,7 @@ static USE_RESULT pl_status fn_listing_1(query *q)
 			return throw_error(q, p3, "type_error", "integer");
 
 		name = index_from_pool(q->st.m->pl, GET_STR(q, p2));
-		arity = get_integer(p3);
+		arity = get_int(p3);
 
 		if (!slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "//"))
 			arity += 2;
@@ -6814,11 +6814,11 @@ static USE_RESULT pl_status fn_sleep_1(query *q)
 	GET_FIRST_ARG(p1,integer);
 
 	if (q->is_task) {
-		do_yield_0(q, get_integer(p1)*1000);
+		do_yield_0(q, get_int(p1)*1000);
 		return pl_failure;
 	}
 
-	sleep((unsigned)get_integer(p1));
+	sleep((unsigned)get_int(p1));
 	return pl_success;
 }
 
@@ -6830,18 +6830,18 @@ static USE_RESULT pl_status fn_delay_1(query *q)
 	GET_FIRST_ARG(p1,integer);
 
 	if (q->is_task) {
-		do_yield_0(q, get_integer(p1));
+		do_yield_0(q, get_int(p1));
 		return pl_failure;
 	}
 
-	msleep((unsigned)get_integer(p1));
+	msleep((unsigned)get_int(p1));
 	return pl_success;
 }
 
 static USE_RESULT pl_status fn_busy_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	int_t elapse = get_integer(p1);
+	int_t elapse = get_int(p1);
 
 	if (elapse < 0)
 		return pl_success;
@@ -6947,14 +6947,14 @@ static USE_RESULT pl_status fn_between_3(query *q)
 		return throw_error(q, p3, "type_error", "integer");
 
 	if (!q->retry) {
-		if (get_integer(p1) > get_integer(p2))
+		if (get_int(p1) > get_int(p2))
 			return pl_failure;
 
 		if (!is_variable(p3)) {
-			if (get_integer(p3) > get_integer(p2))
+			if (get_int(p3) > get_int(p2))
 				return pl_failure;
 
-			if (get_integer(p3) < get_integer(p1))
+			if (get_int(p3) < get_int(p1))
 				return pl_failure;
 
 			return pl_success;
@@ -6962,19 +6962,19 @@ static USE_RESULT pl_status fn_between_3(query *q)
 
 		set_var(q, p3, p3_ctx, p1, q->st.curr_frame);
 
-		if (get_integer(p1) != get_integer(p2))
+		if (get_int(p1) != get_int(p2))
 			may_error(make_choice(q));
 
 		return pl_success;
 	}
 
-	int_t val = get_integer(p3) + 1;
+	int_t val = get_int(p3) + 1;
 	GET_RAW_ARG(3,p3_raw);
 	cell tmp;
 	make_int(&tmp, val);
 	reset_var(q, p3_raw, p3_raw_ctx, &tmp, q->st.curr_frame);
 
-	if (val != get_integer(p2))
+	if (val != get_int(p2))
 		may_error(make_choice(q));
 
 	return pl_success;
@@ -7461,12 +7461,12 @@ static USE_RESULT pl_status fn_server_3(query *q)
 				c = c + 1;
 
 				if (is_integer(c))
-					port = get_integer(c);
+					port = get_int(c);
 			} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "level")) {
 				c = c + 1;
 
 				if (is_integer(c))
-					level = (int)get_integer(c);
+					level = (int)get_int(c);
 			}
 		}
 
@@ -7633,12 +7633,12 @@ static USE_RESULT pl_status fn_client_5(query *q)
 				c = c + 1;
 
 				if (is_integer(c))
-					port = (int)get_integer(c);
+					port = (int)get_int(c);
 			} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "level")) {
 				c = c + 1;
 
 				if (is_integer(c))
-					level = (int)get_integer(c);
+					level = (int)get_int(c);
 			}
 		}
 
@@ -7814,13 +7814,13 @@ static USE_RESULT pl_status fn_bread_3(query *q)
 
 	if (is_integer(p1) && is_positive(p1)) {
 		if (!str->data) {
-			str->data = malloc(get_integer(p1)+1);
+			str->data = malloc(get_int(p1)+1);
 			may_ptr_error(str->data);
 			str->data_len = 0;
 		}
 
 		for (;;) {
-			len = get_integer(p1) - str->data_len;
+			len = get_int(p1) - str->data_len;
 			size_t nbytes = net_read(str->data+str->data_len, len, str);
 			str->data_len += nbytes;
 			str->data[str->data_len] = '\0';
@@ -9508,7 +9508,7 @@ static USE_RESULT pl_status fn_edin_redo_1(query *q)
 		} else if (ch == '\n')
 			str->did_getc = false;
 
-		if (ch == get_integer(p1))
+		if (ch == get_int(p1))
 			break;
 	}
 
@@ -9538,7 +9538,7 @@ static USE_RESULT pl_status fn_edin_redo_2(query *q)
 		} else if (ch == '\n')
 			str->did_getc = false;
 
-		if (ch == get_integer(p1))
+		if (ch == get_int(p1))
 			break;
 	}
 
@@ -9556,7 +9556,7 @@ static USE_RESULT pl_status fn_edin_tab_1(query *q)
 	int n = q->st.m->pl->current_output;
 	stream *str = &g_streams[n];
 
-	for (int i = 0; i < get_integer(&p1); i++)
+	for (int i = 0; i < get_int(&p1); i++)
 		fputc(' ', str->fp);
 
 	return !ferror(str->fp);
@@ -9574,7 +9574,7 @@ static USE_RESULT pl_status fn_edin_tab_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &g_streams[n];
 
-	for (int i = 0; i < get_integer(&p1); i++)
+	for (int i = 0; i < get_int(&p1); i++)
 		fputc(' ', str->fp);
 
 	return !ferror(str->fp);
@@ -9695,7 +9695,7 @@ static USE_RESULT pl_status fn_hex_chars_2(query *q)
 
 	if (is_variable(p1)) {
 		char tmpbuf[256];
-		snprintf(tmpbuf, sizeof(tmpbuf), "%llx", (long long)get_integer(p2));
+		snprintf(tmpbuf, sizeof(tmpbuf), "%llx", (long long)get_int(p2));
 		cell tmp;
 		may_error(make_string(&tmp, tmpbuf));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -9714,7 +9714,7 @@ static USE_RESULT pl_status fn_hex_chars_2(query *q)
 		return pl_success;
 	}
 
-	return p1_val == get_integer(p2);
+	return p1_val == get_int(p2);
 }
 
 static USE_RESULT pl_status fn_octal_chars_2(query *q)
@@ -9727,7 +9727,7 @@ static USE_RESULT pl_status fn_octal_chars_2(query *q)
 
 	if (is_variable(p1)) {
 		char tmpbuf[256];
-		snprintf(tmpbuf, sizeof(tmpbuf), "%llo", (long long)get_integer(p2));
+		snprintf(tmpbuf, sizeof(tmpbuf), "%llo", (long long)get_int(p2));
 		cell tmp;
 		may_error(make_string(&tmp, tmpbuf));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -9746,7 +9746,7 @@ static USE_RESULT pl_status fn_octal_chars_2(query *q)
 		return pl_success;
 	}
 
-	return p1_val == get_integer(p2);
+	return p1_val == get_int(p2);
 }
 
 static USE_RESULT pl_status fn_atom_1(query *q)
@@ -9785,7 +9785,7 @@ static USE_RESULT pl_status fn_setenv_2(query *q)
 		setenv(GET_STR(q, p1), GET_STR(q, p2), 1);
 	} else if (is_integer(p2)) {
 		char tmpbuf[256];
-		sprint_int(tmpbuf, sizeof(tmpbuf), get_integer(p2), 10);
+		sprint_int(tmpbuf, sizeof(tmpbuf), get_int(p2), 10);
 		setenv(GET_STR(q, p1), tmpbuf, 1);
 	} else
 		return pl_failure;
@@ -9844,7 +9844,7 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 			return pl_failure;
 		} else if (is_integer(p1)) {
 			src1 = tmpbuf1;
-			len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), get_integer(p1), 10);
+			len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), get_int(p1), 10);
 		} else {
 			src1 = tmpbuf1;
 			len1 = snprintf(tmpbuf1, sizeof(tmpbuf1), "%.17g", get_real(p1));
@@ -9857,7 +9857,7 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 			return pl_failure;
 		} else if (is_integer(p2)) {
 			src2 = tmpbuf2;
-			len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), get_integer(p2), 10);
+			len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), get_int(p2), 10);
 		} else {
 			src2 = tmpbuf2;
 			len2 = snprintf(tmpbuf2, sizeof(tmpbuf1), "%.17g", get_real(p2));
@@ -10152,10 +10152,10 @@ static USE_RESULT pl_status fn_numbervars_3(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer);
 	GET_NEXT_ARG(p3,integer_or_var);
-	int end = q->nv_start = get_integer(p2);
+	int end = q->nv_start = get_int(p2);
 	unsigned cnt = real_numbervars(q, p1, p1_ctx, &end);
 	cell tmp;
-	make_int(&tmp, get_integer(p2)+cnt);
+	make_int(&tmp, get_int(p2)+cnt);
 	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -10193,7 +10193,7 @@ static USE_RESULT pl_status fn_char_type_2(query *q)
 
 		ch = peek_char_utf8(GET_STR(q, p1));
 	} else
-		ch = get_integer(p1);
+		ch = get_int(p1);
 
 	if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "alpha"))
 		return isalpha(ch);
@@ -10320,7 +10320,7 @@ static USE_RESULT pl_status fn_abolish_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,integer);
 	cell tmp = *p1;
-	tmp.arity = get_integer(p2);
+	tmp.arity = get_int(p2);
 	CLR_OP(&tmp);
 	return do_abolish(q, &tmp, &tmp, true);
 }
@@ -10329,9 +10329,9 @@ static USE_RESULT pl_status fn_sys_lt_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
-	int_t num = get_integer(p1);
+	int_t num = get_int(p1);
 
-	if (num < get_integer(p2)) {
+	if (num < get_int(p2)) {
 		set_smallint(p1, num+1);
 		return pl_success;
 	}
@@ -10369,7 +10369,7 @@ static USE_RESULT pl_status fn_limit_2(query *q)
 	idx_t nbr_cells = 1 + p2->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_lt_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
-	make_int(tmp+nbr_cells++, get_integer(p1));
+	make_int(tmp+nbr_cells++, get_int(p1));
 	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -10379,9 +10379,9 @@ static USE_RESULT pl_status fn_sys_gt_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
-	int_t num = get_integer(p1);
+	int_t num = get_int(p1);
 
-	if (num <= get_integer(p2)) {
+	if (num <= get_int(p2)) {
 		set_smallint(p1, num+1);
 		return pl_failure;
 	}
@@ -10397,7 +10397,7 @@ static USE_RESULT pl_status fn_offset_2(query *q)
 	idx_t nbr_cells = 1 + p2->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_gt_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
-	make_int(tmp+nbr_cells++, get_integer(p1));
+	make_int(tmp+nbr_cells++, get_int(p1));
 	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -10586,9 +10586,9 @@ static USE_RESULT pl_status fn_sys_ne_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
-	int_t num = get_integer(p1);
+	int_t num = get_int(p1);
 
-	if (num != get_integer(p2)) {
+	if (num != get_int(p2)) {
 		set_smallint(p1, num+1);
 		return pl_failure;
 	}
@@ -10617,7 +10617,7 @@ static USE_RESULT pl_status fn_call_nth_2(query *q)
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_ne_s, fn_sys_ne_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
-	make_int(tmp+nbr_cells++, get_integer(p2));
+	make_int(tmp+nbr_cells++, get_int(p2));
 	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -10627,7 +10627,7 @@ static pl_status do_length(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer);
-	unsigned nbr = get_integer(p2);
+	unsigned nbr = get_int(p2);
 	GET_RAW_ARG(2, p2_orig);
 	cell tmp;
 	make_int(&tmp, ++nbr);
@@ -10775,7 +10775,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	}
 
 	if (is_smallint(p2) && !is_variable(p1)) {
-		if (get_integer(p2) == 0) {
+		if (get_int(p2) == 0) {
 			cell tmp;
 			make_literal(&tmp, g_nil_s);
 			return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -10938,7 +10938,7 @@ static USE_RESULT pl_status fn_memberchk_2(query *q)
 			h = deref(q, h, p2_ctx);
 
 			if (is_integer(h)) {
-				if (get_integer(p1) == get_integer(h))
+				if (get_int(p1) == get_int(h))
 					return pl_success;
 			}
 
@@ -11081,7 +11081,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 
 	if (is_integer(p1)) {
 		char tmpbuf[128];
-		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_integer(p1));
+		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_int(p1));
 		key = strdup(tmpbuf);
 	} else if (is_atom(p1))
 		key = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
@@ -11101,7 +11101,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 
 	if (is_integer(p2)) {
 		char tmpbuf[128];
-		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_integer(p2));
+		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_int(p2));
 		val = strdup(tmpbuf);
 	} else if (is_atom(p2))
 		val = slicedup(GET_STR(q, p2), LEN_STR(q, p2));
@@ -11153,7 +11153,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 	char tmpbuf[128];
 
 	if (is_integer(p1)) {
-		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_integer(p1));
+		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_int(p1));
 		key = tmpbuf;
 	} else if (is_atom(p1))
 		key = slicedup(GET_STR(q, p1), LEN_STR(q, p1));

@@ -278,7 +278,7 @@ static void do_op(parser *p, cell *c)
 		cell *h = LIST_HEAD(p3);
 
 		if (is_atom(h)) {
-			if (!set_op(p->m, GET_STR(p, h), specifier, get_integer(p1))) {
+			if (!set_op(p->m, GET_STR(p, h), specifier, get_int(p1))) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: could not set op\n");
 
@@ -290,7 +290,7 @@ static void do_op(parser *p, cell *c)
 	}
 
 	if (is_atom(p3) && !is_nil(p3)) {
-		if (!set_op(p->m, GET_STR(p, p3), specifier, get_integer(p1))) {
+		if (!set_op(p->m, GET_STR(p, p3), specifier, get_int(p1))) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: could not set op\n");
 
@@ -508,7 +508,7 @@ static void directives(parser *p, cell *d)
 					if (!is_literal(f)) return;
 					if (!is_integer(a)) return;
 					cell tmp = *f;
-					tmp.arity = get_integer(a);
+					tmp.arity = get_int(a);
 
 					if (!strcmp(GET_STR(p, head), "//"))
 						tmp.arity += 2;
@@ -671,7 +671,7 @@ static void directives(parser *p, cell *d)
 			if (!is_atom(c_name)) continue;
 			cell *c_arity = h + 2;
 			if (!is_integer(c_arity)) continue;
-			unsigned arity = get_integer(c_arity);
+			unsigned arity = get_int(c_arity);
 
 			if (!strcmp(GET_STR(p, h), "//"))
 				arity += 2;
@@ -732,7 +732,7 @@ static void directives(parser *p, cell *d)
 			if (!is_atom(c_name)) return;
 			cell *c_arity = c_id + 2;
 			if (!is_integer(c_arity)) return;
-			unsigned arity = get_integer(c_arity);
+			unsigned arity = get_int(c_arity);
 
 			//printf("*** *** *** %s : %s / %u\n", m->name, GET_STR(p, c_name), arity);
 
@@ -1597,7 +1597,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 		p->v.tag = TAG_INTEGER;
 		set_smallint(&p->v, v);
-		if (neg) set_smallint(&p->v, -get_integer(&p->v));
+		if (neg) set_smallint(&p->v, -get_int(&p->v));
 		*srcptr = s;
 		return true;
 	}
@@ -2648,7 +2648,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		if (is_bigint(&p->v)) {
 			c->val_bigint = p->v.val_bigint;
 		} else if (is_smallint(&p->v)) {
-			set_smallint(c, get_integer(&p->v));
+			set_smallint(c, get_int(&p->v));
 		} else if (p->v.tag == TAG_REAL) {
 			set_real(c, get_real(&p->v));
 		} else if ((!p->is_quoted || func || p->is_op || p->is_variable ||

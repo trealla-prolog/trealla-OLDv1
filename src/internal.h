@@ -105,19 +105,25 @@ typedef enum {
 
 #define get_real(c) (c)->val_real
 #define set_real(c,v) (c)->val_real = (v)
-
 #define get_smallint(c) (c)->val_int
 #define set_smallint(c,v) { (c)->val_int = (v); }
-
-#define get_integer(c) (c)->val_int
+#define get_int(c) (c)->val_int
 
 #define neg_bigint(c) (c)->val_bigint->ival.sign = MP_NEG;
 #define neg_smallint(c) (c)->val_int = -llabs((c)->val_int)
 #define neg_real(c) (c)->val_real = -fabs((c)->val_real)
 
-#define is_zero(c) (is_bigint(c) ? mp_int_compare_zero(&(c)->val_bigint->ival) == 0 : get_smallint(c) == 0)
-#define is_negative(c) (is_bigint(c) ? (c)->val_bigint->ival.sign == MP_NEG : get_smallint(c) < 0)
-#define is_positive(c) (is_bigint(c) ? (c)->val_bigint->ival.sign != MP_NEG : get_smallint(c) > 0)
+#define is_zero(c) (is_bigint(c) ? mp_int_compare_zero(&(c)->val_bigint->ival) == 0 : \
+	is_integer(c) ? get_smallint(c) == 0 : \
+	is_real(c) ? get_real(c) == 0.0 : false)
+
+#define is_negative(c) (is_bigint(c) ? mp_int_compare_zero(&(c)->val_bigint->ival) < 0 : \
+	is_integer(c) ? get_smallint(c) < 0 : \
+	is_real(c) ? get_real(c) < 0.0 : false)
+
+#define is_positive(c) (is_bigint(c) ? mp_int_compare_zero(&(c)->val_bigint->ival) >= 0 : \
+	is_integer(c) ? get_smallint(c) >= 0 : \
+	is_real(c) ? get_real(c) >= 0.0 : false)
 
 #define is_gt(c,n) (get_smallint(c) > (n))
 #define is_ge(c,n) (get_smallint(c) >= (n))

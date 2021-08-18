@@ -348,7 +348,7 @@ size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes)
 		}
 
 		if (is_integer(c)) {
-			int ch = get_integer(c);
+			int ch = get_int(c);
 			char tmp[20];
 			put_char_utf8(tmp, ch);
 			size_t len = len_char_utf8(tmp);
@@ -1012,7 +1012,7 @@ static bool unify_integer(__attribute__((unused)) query *q, cell *p1, cell *p2)
 		return !mp_int_compare_value(&p2->val_bigint->ival, p1->val_int);
 
 	if (is_integer(p2))
-		return (get_integer(p1) == get_integer(p2));
+		return (get_int(p1) == get_int(p2));
 
 	return false;
 }
