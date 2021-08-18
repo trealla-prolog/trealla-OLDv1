@@ -1987,16 +1987,8 @@ bool get_token(parser *p, int last_op)
 	}
 
 	if (is_neg) {
-		while (iswspace(*src)) {
-			if (*src == '\n')
-				p->line_nbr++;
-
-			src++;
-		}
-
 		p->srcptr = (char*)src;
-		eat_comment(p);
-		src = p->srcptr;
+		src = eat_space(p);
 
 		if (isdigit(*src))
 			neg = true;
