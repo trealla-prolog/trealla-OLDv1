@@ -5245,18 +5245,16 @@ static pl_status throw_error3(query *q, cell *c, const char *err_type, const cha
 	char functor[1024];
 
 	if (needs_quoting(q->st.m, GET_STR(q, goal), LEN_STR(q, goal))) {
-		char tmpbuf[1024-3];
-		formatted(tmpbuf, sizeof(tmpbuf), GET_STR(q, goal), LEN_STR(q, goal), false);
-		snprintf(functor, sizeof(functor), "'%s'", tmpbuf);
+		snprintf(functor, sizeof(functor), "'%s'", GET_STR(q, goal));
 	} else
 		snprintf(functor, sizeof(functor), "%s", GET_STR(q, goal));
 
 	if (is_variable(c)) {
 		err_type = "instantiation_error";
-		snprintf(dst2, len2+1, "error(%s,%s).", err_type, expected);
+		snprintf(dst2, len2+1, "error(%s,'%s').", err_type, expected);
 
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "variable")) {
-		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", "uninstantiation_error", dst, functor, goal->arity);
+		snprintf(dst2, len2+1, "error(%s('%s'),(%s)/%u).", "uninstantiation_error", dst, functor, goal->arity);
 
 	} else if (!strcmp(err_type, "instantiation_error")) {
 		snprintf(dst2, len2+1, "error(%s,(%s)/%u).", err_type, functor, goal->arity);
