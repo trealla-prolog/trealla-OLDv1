@@ -1152,7 +1152,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 
 		if (!is_number(&p->v) || *p->srcptr) {
 			free(tmpbuf);
-			return throw_error(q, orig_p2, "syntax_error", p->error?p->error_desc:"number");
+			return throw_error(q, orig_p2, "syntax_error", p->error&&p->error_desc?p->error_desc:"number");
 		}
 
 		free(tmpbuf);
