@@ -84,7 +84,7 @@ typedef enum {
 #define GET_FRAME(i) (q->frames+(i))
 #define GET_CURR_FRAME() GET_FRAME(q->st.curr_frame)
 
-#define GET_SLOT(g,i) ((i) < g->nbr_slots ? (q->slots+g->ctx+(i)) : (q->slots+g->overflow+((i)-g->nbr_slots)))
+#define GET_SLOT(g,i) ((i) < g->nbr_slots ? (q->slots+g->base_slot_nbr+(i)) : (q->slots+g->overflow+((i)-g->nbr_slots)))
 
 // Primary type...
 
@@ -410,7 +410,7 @@ typedef struct {
 	cell *prev_cell;
 	module *m;
 	uint64_t ugen;
-	idx_t prev_frame, ctx, overflow, cgen;
+	idx_t prev_frame, base_slot_nbr, overflow, cgen;
 	uint32_t nbr_slots, nbr_vars;
 } frame;
 

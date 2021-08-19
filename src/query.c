@@ -410,9 +410,8 @@ void undo_me(query *q)
 void try_me(const query *q, unsigned nbr_vars)
 {
 	frame *g = GET_FRAME(q->st.fp);
-	g->nbr_slots = nbr_vars;
-	g->nbr_vars = nbr_vars;
-	g->ctx = q->st.sp;
+	g->nbr_slots = g->nbr_vars = nbr_vars;
+	g->base_slot_nbr = q->st.sp;
 	slot *e = GET_SLOT(g, 0);
 
 	for (unsigned i = 0; i < nbr_vars; i++, e++) {
@@ -551,7 +550,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	const slot *from = GET_SLOT(newg, 0);
 	slot *to = GET_SLOT(g, 0);
 	memmove(to, from, sizeof(slot)*nbr_vars);
-	q->st.sp = g->ctx + nbr_vars;
+	q->st.sp = g->base_slot_nbr + nbr_vars;
 	q->tot_tcos++;
 }
 
@@ -809,9 +808,9 @@ unsigned create_vars(query *q, unsigned cnt)
 	if (check_slot(q, cnt) != pl_success)
 		return 0;
 
-	if ((g->ctx + g->nbr_slots) >= q->st.sp) {
+	if ((g->base_slot_nbr + g->nbr_slots) >= q->st.sp) {
 		g->nbr_slots += cnt;
-		q->st.sp = g->ctx + g->nbr_slots;
+		q->st.sp = g->base_slot_nbr + g->nbr_slots;
 	} else if (!g->overflow) {
 		g->overflow = q->st.sp;
 		q->st.sp += cnt;
