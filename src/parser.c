@@ -1493,7 +1493,7 @@ static int get_hex(const char **srcptr, int n)
 const char *g_escapes = "\e\a\f\b\t\v\r\n\x20\x7F\'";
 const char *g_anti_escapes = "eafbtvrnsd'";
 
-static int get_escape(const char **_src, bool *error)
+static int get_escape(const char **_src, bool *error, bool number)
 {
 	const char *src = *_src;
 	int ch = *src++;
@@ -1501,7 +1501,7 @@ static int get_escape(const char **_src, bool *error)
 
 	if (ptr)
 		ch = g_escapes[ptr-g_anti_escapes];
-	else if (isdigit(ch) || (ch == 'x') || (ch == 'u') || (ch == 'U')) {
+	else if ((isdigit(ch) || (ch == 'x') || (ch == 'u') || (ch == 'U')) && !number) {
 		int unicode = 0;
 
 		if (ch == 'U') {
@@ -1532,8 +1532,8 @@ static int get_escape(const char **_src, bool *error)
 			*error = true;
 			return 0;
 		}
-	} else if ((ch != '\\') && (ch != '"') && (ch != '\'') && (ch != '\r') && (ch != '\n')) {
-		*_src = src;
+	} else if (((ch != '\\') && (ch != '"') && (ch != '\'') && (ch != '\r') && (ch != '\n')) || number) {
+		*_src = --src;
 		*error = true;
 		return 0;
 	}
@@ -1579,7 +1579,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 				return false;
 			}
 
-			v = get_escape(&s, &p->error);
+			v = get_escape(&s, &p->error, true);
 		} else if ((*s == '\'') && s[1] == '\'') {
 			s++;
 			v = *s++;
@@ -1942,7 +1942,7 @@ bool get_token(parser *p, int last_op)
 		int ch = get_char_utf8(&src);
 
 		if ((ch == '\\') && p->flag.character_escapes) {
-			ch = get_escape(&src, &p->error);
+			ch = get_escape(&src, &p->error, false);
 
 			if (p->error) {
 				if (DUMP_ERRS || !p->do_read_term)
@@ -2070,7 +2070,7 @@ bool get_token(parser *p, int last_op)
 
 				if ((ch == '\\') && p->flag.character_escapes) {
 					int ch2 = *src;
-					ch = get_escape(&src, &p->error);
+					ch = get_escape(&src, &p->error, false);
 
 					if (!p->error) {
 						if (ch2 == '\n') {
