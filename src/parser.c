@@ -2749,9 +2749,9 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 
 	if (!p->m->pl->quiet && !p->directive && dump && q->st.m->pl->stats) {
 		fprintf(stdout,
-			"Goals %llu, Matches %llu, Max frames %u, Max choices %u, Max trails: %u, Backtracks %llu, TCOs:%llu\n",
+			"Goals %llu. Matches %llu. Max frames %u, choices %u, trails: %u, slots %u. Backtracks %llu. TCOs:%llu\n",
 			(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
-			q->max_frames, q->max_choices, q->max_trails,
+			q->max_frames, q->max_choices, q->max_trails, q->max_slots,
 			(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
 	}
 
