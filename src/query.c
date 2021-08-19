@@ -1703,6 +1703,9 @@ pl_status start(query *q)
 				may_error(do_post_unification_hook(q));
 		}
 
+		if (g_tpl_interrupt)
+			continue;
+
 		Trace(q, save_cell, save_ctx, EXIT);
 		q->resume = false;
 		q->retry = QUERY_OK;
