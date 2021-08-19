@@ -1529,10 +1529,18 @@ static int check_interrupt(query *q)
 	g_tpl_interrupt = 0;
 
 	for (;;) {
-		printf("\nAction (a)bort, (f)ail, (c)ontinue, (t)race, c(r)eep, (e)xit: ");
+		printf("\nAction or (h)elp: ");
+
+		LOOP:
+
 		fflush(stdout);
 		int ch = history_getch();
 		printf("%c\n", ch);
+
+		if (ch == 'h') {
+			printf("Action (a)bort, (f)ail, (c)ontinue, (t)race, c(r)eep, (e)xit: ");
+			goto LOOP;
+		}
 
 		if (ch == 't') {
 			q->trace = !q->trace;
