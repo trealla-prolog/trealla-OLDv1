@@ -547,9 +547,15 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	const choice *ch = GET_CURR_CHOICE();
 	q->st.sp = ch->st.sp;
 
-	const slot *from = GET_SLOT(newg, 0);
+	slot *from = GET_SLOT(newg, 0);
 	slot *to = GET_SLOT(g, 0);
-	memmove(to, from, sizeof(slot)*nbr_vars);
+
+	for (idx_t i = 0; i < nbr_vars; i++) {
+		unshare_cell(&to->c);
+		share_cell(&from->c);
+		*to++ = *from++;
+	}
+
 	q->st.sp = g->base_slot_nbr + nbr_vars;
 	q->tot_tcos++;
 }
@@ -586,7 +592,7 @@ static void commit_me(query *q, rule *r)
 
 #if 0
 	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, check_slots=%d\n",
-		tco, q->no_tco, last_match, recursive, any_choices(q, g, true), check_slots(q, g, r));
+		tco, q->no_tco, last_match, recursive, any_choices(q, g, true), slots_ok);
 #endif
 
 	if (tco && slots_ok && q->st.m->pl->opt)
