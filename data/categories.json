@@ -6,34 +6,30 @@
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "iso_bagof_3_10",
-        "uid" : "a0bd92bb9e518936",
+        "uid" : "52ee0639607dcdc5",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "start" : 1629331108000,
-          "stop" : 1629331108000,
           "duration" : 0
         },
         "flaky" : false,
         "newFailed" : false,
-        "parameters" : [ ]
+        "parameters" : [ "predicates/bagof_3/tests.lgt", "92-95", "https://github.com/LogtalkDotOrg/logtalk3/tree/3e4ea295986fb09d0d4aade1f3b4968e29ef594e/tests/prolog/predicates/bagof_3/tests.lgt#L92" ]
       } ],
       "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
     }, {
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "iso_setof_3_12",
-        "uid" : "1efb711043e372c7",
+        "uid" : "c34221b6094444e8",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
-          "start" : 1629331195000,
-          "stop" : 1629331195000,
           "duration" : 0
         },
         "flaky" : false,
         "newFailed" : false,
-        "parameters" : [ ]
+        "parameters" : [ "predicates/setof_3/tests.lgt", "137-144", "https://github.com/LogtalkDotOrg/logtalk3/tree/3e4ea295986fb09d0d4aade1f3b4968e29ef594e/tests/prolog/predicates/setof_3/tests.lgt#L137" ]
       } ],
       "uid" : "7a65c89daad8cf82ce910dbf95cc8113"
     } ],
