@@ -8128,6 +8128,21 @@ static USE_RESULT pl_status fn_is_list_or_partial_list_1(query *q)
 	return is_valid_list(q, p1, p1_ctx, true);
 }
 
+static USE_RESULT pl_status fn_sys_instantiated_2(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,any);
+
+	if (is_variable(p1)) {
+		char *buf = print_term_to_strbuf(q, p2, p2_ctx, 1);
+		pl_status ok = throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
+		free(buf);
+		return ok;
+	}
+
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_sys_mustbe_pairlist_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -10352,31 +10367,6 @@ static USE_RESULT pl_status fn_sys_lt_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_instantiated_1(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-
-	if (is_variable(p1))
-		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
-
-	return pl_success;
-}
-
-static USE_RESULT pl_status fn_sys_instantiated_2(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
-
-	if (is_variable(p1)) {
-		char *buf = print_term_to_strbuf(q, p2, p2_ctx, 1);
-		pl_status ok = throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
-		free(buf);
-		return ok;
-	}
-
-	return pl_success;
-}
-
 static USE_RESULT pl_status fn_limit_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
@@ -11865,9 +11855,7 @@ static const struct builtins g_predicates_other[] =
 	{"send", 1, fn_send_1, "+rule", false},
 	{"recv", 1, fn_recv_1, "?rule", false},
 
-	{"$mustbe_instantiated", 1, fn_sys_instantiated_1, "+rule", false},
 	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+rule,+rule", false},
-
 	{"$mustbe_pairlist", 2, fn_sys_mustbe_pairlist_2, "+pair,+goal", false},
 	{"$mustbe_pairlist_or_var", 2, fn_sys_mustbe_pairlist_or_var_2, "?pair,+goal", false},
 	{"$mustbe_list", 1, fn_sys_mustbe_list_1, "?list", false},

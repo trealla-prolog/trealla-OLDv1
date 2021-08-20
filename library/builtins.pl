@@ -39,9 +39,8 @@ predicate_property(P, A) :-
 	(	var(A) -> true
 	;	(Controls = [built_in,control_construct,discontiguous,private,static,dynamic,persist,multifile,meta_predicate(_)],
 		memberchk(A, Controls) -> true
-		; throw(error(domain_error(predicate_property, A), P))
-		)
-	),
+	;	throw(error(domain_error(predicate_property, A), P))
+	)),
 	must_be(P, callable, predicate_property/2, _),
 	'$predicate_property'(P, A).
 
@@ -308,7 +307,7 @@ phrase_((A, B), S0, S) :-
 phrase_((A -> B ; C), S0, S) :-
 	!,
 	(	phrase(A, S0, S1) -> phrase(B, S1, S)
-	; phrase(C, S0, S)
+	;	phrase(C, S0, S)
 	).
 phrase_((A ; B), S0, S) :-
 	(phrase(A, S0, S) ; phrase(B, S0, S)).

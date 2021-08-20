@@ -45,18 +45,18 @@ Var
         +----------+---------+----------+---------+
    16	|                 val_off                 |
         +----------+---------+----------+---------+
-   20	|       slot_nbr     |      - UNUSED -    |
+   20	|       var_nbr      |      - UNUSED -    |
         +----------+---------+----------+---------+
 
 Where *val_type* is TYPE_VAR.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
 Where *val_off* is into the symbol table.
-Where *slot_nbr* is the index into the frame
+Where *var_nbr* is the index into the frame
 
 
-Rational
-========
+Integer
+=======
 
         +----------+---------+----------+---------+
     0	| val_type |  arity  |       flags        |    CELL 1
@@ -64,19 +64,41 @@ Rational
     4	|                 nbr_cells               |
         +----------+---------+----------+---------+
     8	|                                         |
-        +                 val_num                 +
+        +                 val_int                 +
    12	|                                         |
         +----------+---------+----------+---------+
    16	|                                         |
-        +                 val_den                 +
+        +                                         +
    20	|                                         |
         +----------+---------+----------+---------+
 
 Where *val_type* is TYPE_RATIONAL.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
+Where *val_int* is a signed 64-bit integer.
 
-A rational with *val_den* of 1 thus becomes an integer.
+
+Bigint
+======
+
+        +----------+---------+----------+---------+
+    0	| val_type |  arity  |       flags        |    CELL 1
+		+----------+---------+----------+---------+
+    4	|                 nbr_cells               |
+        +----------+---------+----------+---------+
+    8	|                                         |
+        +               val_bigint                +
+   12	|                                         |
+        +----------+---------+----------+---------+
+   16	|                                         |
+        +                                         +
+   20	|                                         |
+        +----------+---------+----------+---------+
+
+Where *val_type* is TYPE_RATIONAL.
+Where *arity* is always 0.
+Where *nbr_cells* is always 1.
+Where *val_bigint* is a pointer.
 
 
 Float
@@ -88,7 +110,7 @@ Float
     4	|                 nbr_cells               |
         +----------+---------+----------+---------+
     8	|                                         |
-        +                 val_flt                 +
+        +                val_real                 +
    12	|                                         |
         +----------+---------+----------+---------+
    16	|                                         |
@@ -99,6 +121,7 @@ Float
 Where *val_type* is TYPE_FLOAT.
 Where *arity* is always 0
 Where *nbr_cells* is always 1.
+Where *val_real* is a floating-point *double*.
 
 
 Cstring
@@ -154,7 +177,7 @@ Where *len_str* is the length of the slice in bytes.
 
 A static BLOB is length delimited, not NULL-terminated. The
 primary use of a static BLOB is to point to memory that is never
-freed, such as a memory-mapped file.
+freed, such as in a memory-mapped file.
 
 
 Non-static BLOB
@@ -186,8 +209,7 @@ Where *strbuf_len* is the length of the slice.
 
 A *strbuf* contains a reference count for tracking lifetimes, a length
 field and a data payload. The *strbuf_off* field can be used to
-define the tail of a BLOB. Or use a *strbuf_len* to get a slice (not
-yet implemented).
+define the tail of a BLOB. Or use a *strbuf_len* to get a slice.
 
 
 String
