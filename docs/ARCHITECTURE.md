@@ -22,6 +22,7 @@ Literal
    20	|               - UNUSED -                |
         +----------+---------+----------+---------+
 
+
 Where *val_type* is TYPE_LITERAL.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
@@ -48,6 +49,7 @@ Var
    20	|       var_nbr      |      - UNUSED -    |
         +----------+---------+----------+---------+
 
+
 Where *val_type* is TYPE_VAR.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
@@ -72,6 +74,7 @@ Integer
    20	|                                         |
         +----------+---------+----------+---------+
 
+
 Where *val_type* is TYPE_RATIONAL.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
@@ -95,6 +98,7 @@ Bigint
    20	|                                         |
         +----------+---------+----------+---------+
 
+
 Where *val_type* is TYPE_RATIONAL.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
@@ -117,6 +121,7 @@ Float
         +               - UNUSED -                +
    20	|                                         |
         +----------+---------+----------+---------+
+
 
 Where *val_type* is TYPE_FLOAT.
 Where *arity* is always 0
@@ -143,6 +148,7 @@ A small string < 16 bytes.
    20	|                                         |
         +----------+---------+----------+---------+
 
+
 Where *val_type* is TYPE_CSTRING.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
@@ -167,6 +173,7 @@ Static BLOB
         +                 len_str                 +
    20	|                                         |
         +----------+---------+----------+---------+
+
 
 Where *val_type* is TYPE_CSTRING.
 Where *arity* is always 0.
@@ -198,6 +205,7 @@ A ref-counted string buffer.
         +----------+---------+----------+---------+
    20	|               strbuf_len                |
         +----------+---------+----------+---------+
+
 
 Where *val_type* is TYPE_CSTRING.
 Where *arity* is always 0.
@@ -237,6 +245,7 @@ Compound
         +----------+---------+----------+---------+
     0	| val_type |  arity  |       flags        |    CELL 2
 
+
 Where *val_type* is TYPE_LITERAL.
 Where *arity* is > 0.
 Where *nbr_cells* is > 1 and includes the args.
@@ -261,6 +270,7 @@ List
    20	|               - UNUSED -                |
         +----------+---------+----------+---------+
     0	| val_type |  arity  |       flags        |    CELL 2
+
 
 Where *val_type* is TYPE_LITERAL.
 Where *arity* is always 2.
@@ -310,10 +320,10 @@ this point. On backtracking excess space can be freed.
 
 It also contains the index number of the frame which created it and a
 record of that frames state (nbr of vars etc) at the time the choice
-was created. On backtracking vars (slots space) can be trimmed back
-if possible.
+was created. On backtracking vars (slots space) can be trimmed back,
+if possible, and the frame state restored.
 
-it also contains flags related to managing cuts & call cleanup etc.
+It also contains flags related to managing cuts & call cleanup etc.
 
 
 Trail
