@@ -2298,8 +2298,9 @@ static USE_RESULT pl_status fn_random_1(query *q)
 	if (p1.val_int < 1)
 		return throw_error(q, &p1, "domain_error", "positive_integer");
 
+	int_t r = llabs((long long)((int_t)(rnd() * RAND_MAX) % p1.val_int));
 	q->accum.tag = TAG_INTEGER;
-	q->accum.val_int = llabs((long long)((int_t)(rnd() * RAND_MAX) % p1.val_int));
+	q->accum.val_int = r;
 	return pl_success;
 }
 
