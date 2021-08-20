@@ -1673,8 +1673,6 @@ pl_status start(query *q)
 				continue;
 			}
 
-			q->eval = false;
-
 			if (!q->st.curr_cell->fn(q)) {
 				q->retry = QUERY_RETRY;
 
