@@ -31,14 +31,10 @@ bool needs_quoting(module *m, const char *src, int srclen)
 	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!") || !strcmp(src, "¡"))
 		return false;
 
-	int lench = len_char_utf8(src);
+	int ch = peek_char_utf8(src);
 
-	if (lench == 1) {
-		int ch = peek_char_utf8(src);
-
-		if (iswupper(ch) || isdigit(ch) || (ch == '_') || (ch == '$'))
-			return true;
-	}
+	if (iswupper(ch) || isdigit(ch) || (ch == '_') || (ch == '$'))
+		return true;
 
 	if (search_op(m, src, NULL, false))
 		return false;
