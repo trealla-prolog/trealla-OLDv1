@@ -201,8 +201,15 @@ Non-standard predicates
 	write_term_to_atom/3		# use write_term_to_chars/3 instead
 	term_to_atom/2				# use write_term_to_chars/3 instead
 
-	random/1                # random(-float) float [0.0,<1.0]
-	random/1                # random(+integer) function returning integer [0,<integer]
+	srandom/1					# set_seed(+integer) set random number seed
+	set_seed/1					# set_seed(+integer) set random number seed
+	get_seed/1					# get_seed(-integer) get random number seed
+	rand/1						# rand(-integer) integer [0,RAND_MAX]
+	random/1    	            # random(-float) float [0.0,<1.0]
+
+	random_float/0              # function returning float [0.0,<1.0]
+	random_integer/0            # function returning integer [0,RAND_MAX]
+	rand/0						# function returning integer [0,RAND_MAX]
 
 	put_atts/2					# SICStus-compatible
 	get_atts/2					# SICStus-compatible
@@ -318,12 +325,6 @@ Non-standard predicates
 	now/1                   # now (-integer) C-time in secs as integer
 	get_time/1              # get_time(-variable) elapsed wall time in secs as float
 	cpu_time/1              # cpu_time(-variable) elapsed CPU time in secs as float
-
-	srandom/1               # set_seed(+integer) set random number seed
-	set_seed/1              # set_seed(+integer) set random number seed
-	get_seed/1              # get_seed(-integer) get random number seed
-	rand/0                  # function returning integer [0,RAND_MAX]
-	rand/1                  # rand(-integer) integer [0,RAND_MAX]
 
 	sleep/1					# sleep time in secs
 	delay/1                 # sleep time for ms
