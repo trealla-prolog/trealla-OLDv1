@@ -1335,7 +1335,7 @@ static USE_RESULT pl_status match_head(query *q)
 
 			if (!pr) {
 				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(q, c), "initialization")))
-					if (q->st.m->flag.unknown == 1)
+					if (q->st.m->flag.unknown == UNK_ERROR)
 						return throw_error(q, c, "existence_error", "procedure");
 					else
 						return pl_failure;

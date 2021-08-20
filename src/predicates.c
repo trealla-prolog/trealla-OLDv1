@@ -10441,6 +10441,8 @@ static USE_RESULT pl_status fn_call_nth_2(query *q)
 	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_variable(p2)) {
+		frame *g = GET_CURR_FRAME();
+		g->counter = 1;
 		cell *tmp = clone_to_heap(q, true, p1, 3);
 		idx_t nbr_cells = 1 + p1->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_incr_s, fn_sys_incr_1, 1, 1);

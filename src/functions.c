@@ -160,7 +160,7 @@ static mp_result mp_int_divx_value(mp_int a, mp_small b, mp_int q)
 	clr_accum(&q->accum);						\
 												\
 	if (!q->eval) {								\
-		if (q->st.m->flag.unknown == 0)			\
+		if (q->st.m->flag.unknown == UNK_FAIL)	\
 			return false;						\
 		else									\
 			return throw_error(q, q->st.curr_cell, "existence_error", "procedure");	\
@@ -2275,6 +2275,12 @@ static USE_RESULT pl_status fn_get_seed_1(query *q)
 static USE_RESULT pl_status fn_random_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
+
+	if (q->eval && is_variable(p1_tmp))
+		return throw_error(q, p1_tmp, "instantiation_error", "integer");
+
+	if (!q->eval && !is_variable(p1_tmp))
+		return throw_error(q, p1_tmp, "uninstantiation_error", "variable");
 
 	if (is_variable(p1_tmp)) {
 		cell tmp;
