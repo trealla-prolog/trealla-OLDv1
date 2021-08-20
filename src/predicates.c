@@ -10367,8 +10367,12 @@ static USE_RESULT pl_status fn_sys_instantiated_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
-	if (is_variable(p1) && is_variable(p2))
-		return throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
+	if (is_variable(p1)) {
+		char *buf = print_term_to_strbuf(q, p2, p2_ctx, 1);
+		pl_status ok = throw_error(q, p1, "instantiation_error", "not_sufficiently_instantiated");
+		free(buf);
+		return ok;
+	}
 
 	return pl_success;
 }

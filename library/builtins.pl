@@ -6,15 +6,15 @@
 must_be(Term, var, Goal, _Arg) :- !, (var(Term) -> true ; throw(error(instantiation_error(Term), Goal))), !.
 must_be(Term, nonvar, Goal, _Arg) :- !, (nonvar(Term) -> true ; throw(error(uninstantiation_error(Term), Goal))), !.
 
-must_be(Term, callable, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (callable(Term) -> true ; throw(error(type_error(callable, Term), Goal))), !.
-must_be(Term, atom, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (atom(Term) -> true ; throw(error(type_error(atom, Term), Goal))), !.
-must_be(Term, atomic, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (atomic(Term) -> true ; throw(error(type_error(atomic, Term), Goal))), !.
-must_be(Term, integer, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (integer(Term) -> true ; throw(error(type_error(integer, Term), Goal))), !.
-must_be(Term, float, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (float(Term) -> true ; throw(error(type_error(float, Term), Goal))), !.
-must_be(Term, number, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (number(Term) -> true ; throw(error(type_error(number, Term), Goal))), !.
-must_be(Term, ground, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (ground(Term) -> true ; throw(error(type_error(Term, ground), Goal))), !.
-must_be(Term, compound, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (compound(Term) -> true ; throw(error(type_error(compound, Term), Goal))), !.
-must_be(Term, list, Goal, _Arg) :- !, '$mustbe_instantiated'(Term), (list(Term) -> true ; throw(error(type_error(list, Term), Goal))), !.
+must_be(Term, callable, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (callable(Term) -> true ; throw(error(type_error(callable, Term), Goal))), !.
+must_be(Term, atom, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (atom(Term) -> true ; throw(error(type_error(atom, Term), Goal))), !.
+must_be(Term, atomic, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (atomic(Term) -> true ; throw(error(type_error(atomic, Term), Goal))), !.
+must_be(Term, integer, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (integer(Term) -> true ; throw(error(type_error(integer, Term), Goal))), !.
+must_be(Term, float, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (float(Term) -> true ; throw(error(type_error(float, Term), Goal))), !.
+must_be(Term, number, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (number(Term) -> true ; throw(error(type_error(number, Term), Goal))), !.
+must_be(Term, ground, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (ground(Term) -> true ; throw(error(type_error(Term, ground), Goal))), !.
+must_be(Term, compound, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (compound(Term) -> true ; throw(error(type_error(compound, Term), Goal))), !.
+must_be(Term, list, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (list(Term) -> true ; throw(error(type_error(list, Term), Goal))), !.
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
