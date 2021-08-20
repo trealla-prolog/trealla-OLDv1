@@ -19,7 +19,7 @@ random_text(Len, [H|T]) :-
     random_text(L, T).
 
 random_alpha(Ch) :-                 % generate a single random character
-    P is random(27),
+    P is random_integer mod 27,
     (   P = 0
     ->  Ch is 32
     ;   Ch is P+64
@@ -46,7 +46,7 @@ evolve(Evolution, Probability, Target, Start) :-
 
 mutate(_, [], []).                  % mutate(Probability, Input, Output)
 mutate(Probability, [H|Txt], [H|Mut]) :-
-    R is random(100),
+    R is random_integer mod 100,
     R > Probability,
     !,
     mutate(Probability, Txt, Mut).

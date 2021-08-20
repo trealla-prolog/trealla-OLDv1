@@ -201,8 +201,9 @@ Non-standard predicates
 	write_term_to_atom/3		# use write_term_to_chars/3 instead
 	term_to_atom/2				# use write_term_to_chars/3 instead
 
-	random/1                # random(-float) float [0.0,<1.0]
-	random/1                # random(+integer) function returning integer [0,<integer]
+	random/1    	            # random(-float) float [0.0,<1.0]
+	random_integer/0            # random_integer function returning integer [0,RAND_MAX]
+	random_float/0              # random_float function returning integer [0.0,<1.0]
 
 	put_atts/2					# SICStus-compatible
 	get_atts/2					# SICStus-compatible

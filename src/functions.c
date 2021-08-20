@@ -2269,33 +2269,31 @@ static USE_RESULT pl_status fn_get_seed_1(query *q)
 
 static USE_RESULT pl_status fn_random_1(query *q)
 {
-	GET_FIRST_ARG(p1_tmp,any);
+	GET_FIRST_ARG(p1,variable);
+	cell tmp;
+	make_real(&tmp, rnd());
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	return pl_success;
+}
 
-	if (is_variable(p1_tmp)) {
-		cell tmp;
-		make_real(&tmp, rnd());
-		set_var(q, p1_tmp, p1_tmp_ctx, &tmp, q->st.curr_frame);
-		return pl_success;
-	}
-
-	CHECK_CALC();
-	CLEANUP cell p1 = eval(q, p1_tmp);
-
-	if (!is_smallint(&p1))
-		return throw_error(q, &p1, "type_error", "evaluable");
-
-	if (p1.val_int < 1)
-		return throw_error(q, &p1, "domain_error", "positive_integer");
-
+static USE_RESULT pl_status fn_random_integer_0(query *q)
+{
 	q->accum.tag = TAG_INTEGER;
-	q->accum.val_int = llabs((long long)((int_t)(rnd() * RAND_MAX) % p1.val_int));
+	q->accum.val_int = rnd() * RAND_MAX;
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_random_float_0(query *q)
+{
+	q->accum.tag = TAG_REAL;
+	q->accum.val_real = rnd();
 	return pl_success;
 }
 
 static USE_RESULT pl_status fn_rand_0(query *q)
 {
 	q->accum.tag = TAG_INTEGER;
-	q->accum.val_int = (int_t)rnd() * RAND_MAX;
+	q->accum.val_int = rnd() * RAND_MAX;
 	return pl_success;
 }
 
@@ -2307,7 +2305,6 @@ static USE_RESULT pl_status fn_rand_1(query *q)
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
-
 
 static int_t gcd(int_t num, int_t remainder)
 {
@@ -2382,6 +2379,7 @@ const struct builtins g_functions[] =
 	{"set_seed", 1, fn_set_seed_1, "+integer", false},
 	{"get_seed", 1, fn_get_seed_1, "-integer", false},
 	{"rand", 1, fn_rand_1, "?integer", false},
+	{"random", 1, fn_random_1, "?integer", false},
 
 	// Functions...
 
@@ -2439,7 +2437,8 @@ const struct builtins g_functions[] =
 	{"float_fractional_part", 1, fn_iso_float_fractional_part_1, NULL, true},
 	{"log", 2, fn_log_2, "+number,+number", true},
 	{"log10", 1, fn_log10_1, "+integer", true},
-	{"random", 1, fn_random_1, "?integer", true},
+	{"random_integer", 0, fn_random_integer_0, "?integer", true},
+	{"random_float", 0, fn_random_float_0, NULL, true},
 	{"rand", 0, fn_rand_0, NULL, true},
 	{"gcd", 2, fn_gcd_2, "?integer,?integer", true},
 
