@@ -270,31 +270,50 @@ Where args are the following cells (see *nbr_cells*).
 Where the tail arg is usually a list.
 Where the final tail arg is usually the atom *[]*.
 
+
 Frames
 ======
 
-A frame is an element in an array of frames. A frame is of fixed size
+A frame is an element of the frame stack. Each frame is of fixed size
 and contains an index into the slot table of the base slot for the
-frame. It also contains a count of the number of slots that make up the
-frame. The frame plus it's slots constitute a working context for a
-set of goals. Choices can back-track to a given context.
+frame. It also contains a count of the number of variables that make up
+the frame. The frame plus it's slots constitute a working context for
+a set of goals. Choices can back-track to a given context.
 
 Since only index numbers are used to refer to frames (a *ctx* number)
-the frame table can be easily resized.
+the frame space can be easily resized.
 
 
 Slots
 =====
 
-A slot is an element in an array of slots. It is a cell plus a context
-index (for vars and compounds). Also attribute info.
+A slot is an element in the slot stack. Each slot holds a cell plus
+it's context index (for vars and compounds). Also attribute info.
 
 Slots are cleared on backtracking via the trailed record.
 
 Since only index numbers are used to refer to slots (a *slot* number)
-the slot table can be easily resized. During execution of a builtin
-predicate however, slot pointers may need to be refreshed after
-creating new variables (eg. length/2, copy_term/2 etc).
+the slot space can be easily resized.
+
+During execution of a builtin predicate (a C function) active slot
+pointers (if any) may need to be refreshed after creating new variables
+(eg. in length/2, copy_term/2 etc).
+
+
+Choices
+=======
+
+Similar...
+
+A choice contains the index of the highest heap, slot & trail used at
+this point. On backtracking excess space can be freed.
+
+It also contains the index number of the frame which created it and a
+record of that frames state (nbr of vars etc) at the time the choice
+was created. On backtracking vars (slots space) can be trimmed back
+if possible.
+
+it also contains flags related to managing cuts & call cleanup etc.
 
 
 Trail
@@ -306,8 +325,9 @@ Similar...
 Heap
 ====
 
-A space for dynamically created terms (compounds)...
+A space for dynamically created terms (compounds). Heap space is
+allocated in arenas (aka. pages) as linked list of ever increasing size.
 
-
-
-
+A term allocated on the heap must be fully contained within an arena,
+to this end such terms are first allocated in a temporary space and
+copied into a suitablly size arena.
