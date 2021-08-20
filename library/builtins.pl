@@ -32,7 +32,7 @@ unify_with_occurs_check(X, X) :-
 
 predicate_property(P, A) :-
 	nonvar(P), atom(A), !,
-	must_be(P, callable, _, _),
+	must_be(P, callable, _, predicate_property/2),
 	'$legacy_predicate_property'(P, A).
 predicate_property(P, A) :-
 	'$load_properties',
@@ -42,7 +42,7 @@ predicate_property(P, A) :-
 		; throw(error(domain_error(predicate_property, A), P))
 		)
 	),
-	must_be(P, callable, _, _),
+	must_be(P, callable, _, predicate_property/2),
 	'$predicate_property'(P, A).
 
 current_prolog_flag(P, A) :-
@@ -398,26 +398,26 @@ unifiable(T1, T2, Gs) :-
 % hack using assert/retract...
 
 nb_setval(K, _) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, nb_setval/2),
 	user:retract('$global_key'(K, _)),
 	fail.
 nb_setval(K, V) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, nb_setval/2),
 	user:assertz('$global_key'(K, V)).
 
 nb_getval(K, V) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, nb_getval/2),
 	user:catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), nb_getval/2))),
 	!.
 
 nb_delete(K) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, nb_delete/1),
 	user:retract('$global_key'(K, _)),
 	!.
 nb_delete(_).
 
 nb_current(K, V) :-
-	user:clause('$global_key'(K, V), _).
+	user:clause('$global_key'(K, V), nb_current/2).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -431,35 +431,35 @@ nb_current(K, V) :-
 % The following is not really correct.
 
 b_setval(K, _) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, b_setval/2),
 	\+ user:clause('$global_key'(K, _), _),
 	user:asserta('$global_key'(K, [])),
 	fail.
 b_setval(K, V) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, b_setval/2),
 	user:asserta('$global_key'(K, V)).
 b_setval(K, _) :-
 	user:retract('$global_key'(K, _)),
 	!, fail.
 
 b_setval0(K, _) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, b_setval0/2),
 	\+ user:clause('$global_key'(K, _), _), asserta('$global_key'(K, 0)),
 	fail.
 b_setval0(K, V) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, b_setval0/2),
 	user:asserta('$global_key'(K, V)).
 b_setval0(K, _) :-
 	user:retract('$global_key'(K, _)),
 	!, fail.
 
 b_getval(K, V) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, b_getval/2),
 	user:catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), b_getval/2))),
 	!.
 
 b_delete(K) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, b_delete/1),
 	user:retractall('$global_key'(K, _)),
 	!.
 b_delete(_).
@@ -468,49 +468,49 @@ b_delete(_).
 % SICStus compatible
 
 bb_b_put(K, _) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, bb_b_put/2),
 	\+ user:clause('$global_key'(K, _), _),
 	user:asserta('$global_key'(K, [])),
 	fail.
 bb_b_put(K, V) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, bb_b_put/2),
 	user:asserta('$global_key'(K, V)).
 bb_b_put(K, _) :-
 	user:retract('$global_key'(K, _)),
 	!, fail.
 
 bb_b_del(K) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, bb_b_del/1),
 	user:retract('$global_key'(K, _)),
 	!.
 bb_b_del(_).
 
 bb_put(K, _) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, bb_put/2),
 	user:retract('$global_key'(K, _)),
 	fail.
 bb_put(K, V) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, bb_put/2),
 	user:assertz('$global_key'(K, V)).
 
 bb_get(K, V) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, bb_get/2),
 	user:catch('$global_key'(K, V), _, throw(error(existence_error(variable, K), bb_get/2))),
 	!.
 
 bb_delete(K, V) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, bb_delete/2),
 	user:retract('$global_key'(K, V)),
 	!.
 
 bb_update(K, O, V) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, bb_update/3),
 	user:retract('$global_key'(K, O)),
 	user:assertz('$global_key'(K, V)),
 	!.
 
 bb_del(K) :-
-	must_be(K, atom, _, _),
+	must_be(K, atom, _, bb_del/1),
 	user:retractall('$global_key'(K, _)),
 	!.
 bb_del(_).
@@ -706,25 +706,25 @@ atom_list(Atom, _, [Atom]).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 plus(X,Y,S) :- nonvar(X), nonvar(Y),
-	must_be(X, integer, _, _), must_be(Y, integer, _, _), !,
+	must_be(X, integer, _, plus/3), must_be(Y, integer, _, plus/3), !,
 	S is X + Y.
 plus(X,Y,S) :- nonvar(X), var(Y), nonvar(S),
-	must_be(X, integer, _, _), must_be(S, integer, _, _), !,
+	must_be(X, integer, _, plus/3), must_be(S, integer, _, plus/3), !,
 	Y is S - X.
 plus(X,Y,S) :- var(X), nonvar(Y), nonvar(S),
-	must_be(S, integer, _, _), must_be(Y, integer, _, _), !,
+	must_be(S, integer, _, plus/3), must_be(Y, integer, _, plus/3), !,
 	X is S - Y.
 plus(_,_,_) :-
 	throw(error(instantiation_error, plus/3)).
 
 succ(X,S) :- nonvar(X), Y=1, nonvar(Y),
-	must_be(X, integer, _, _), must_be(Y, integer, _, _), !,
+	must_be(X, integer, _, succ/2), must_be(Y, integer, _, succ/2), !,
 	(	X >= 0 -> true
 	; 	throw(error(domain_error(not_less_than_zero, X), succ/2))
 	),
 	S is X + Y.
 succ(X,S) :- var(X), Y=1, nonvar(Y), nonvar(S),
-	must_be(S, integer, _, _), must_be(Y, integer, _, _), !,
+	must_be(S, integer, _, succ/2), must_be(Y, integer, _, succ/2), !,
 	(	S >= 0 -> true
 	; 	throw(error(domain_error(not_less_than_zero, S), succ/2))
 	),
