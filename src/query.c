@@ -491,6 +491,7 @@ static frame *make_frame(query *q, unsigned nbr_vars)
 	g->prev_frame = q->st.curr_frame;
 	g->prev_cell = q->st.curr_cell;
 	g->cgen = ++q->st.cgen;
+	g->counter = 1;
 	g->overflow = 0;
 
 	q->st.sp += nbr_vars;

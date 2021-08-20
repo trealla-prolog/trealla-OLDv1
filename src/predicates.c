@@ -10411,20 +10411,12 @@ static USE_RESULT pl_status fn_offset_2(query *q)
 
 static USE_RESULT pl_status fn_sys_incr_1(query *q)
 {
-	GET_FIRST_ARG(p1,integer_or_var);
-	GET_RAW_ARG(1,p1_raw);
-
-	if (!is_variable(p1_raw))
-		return pl_failure;
-
-	int n = 0;
-
-	if (is_smallint(p1))
-		n = get_smallint(p1);
-
+	GET_FIRST_ARG(p1, variable);
+	frame *g = GET_CURR_FRAME();
+	int n = g->counter++;
 	cell tmp;
-	make_int(&tmp, n+1);
-	reset_var(q, p1_raw, p1_raw_ctx, &tmp, q->st.curr_frame);
+	make_int(&tmp, n);
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
 

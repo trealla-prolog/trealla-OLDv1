@@ -409,7 +409,7 @@ typedef struct {
 typedef struct {
 	cell *prev_cell;
 	module *m;
-	uint64_t ugen;
+	uint64_t ugen, counter;
 	idx_t prev_frame, base_slot_nbr, overflow, cgen;
 	uint32_t nbr_slots, nbr_vars;
 } frame;
