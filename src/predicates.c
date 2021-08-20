@@ -8118,6 +8118,16 @@ static USE_RESULT pl_status fn_is_list_1(query *q)
 	return is_valid_list(q, p1, p1_ctx, false);
 }
 
+static USE_RESULT pl_status fn_is_list_or_partial_list_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+
+	if (is_cyclic_term(q, p1, p1_ctx))
+		return false;
+
+	return is_valid_list(q, p1, p1_ctx, true);
+}
+
 static USE_RESULT pl_status fn_sys_mustbe_pairlist_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -11755,6 +11765,7 @@ static const struct builtins g_predicates_other[] =
 	{"split_atom", 4, fn_split_atom_4, "+string,+sep,+pad,-list", false},
 	{"split_string", 4, fn_split_atom_4, "+string,+sep,+pad,-list", false},
 	{"split", 4, fn_split_4, "+string,+string,?left,?right", false},
+	{"is_list_or_partial_list", 1, fn_is_list_or_partial_list_1, "+rule", false},
 	{"is_list", 1, fn_is_list_1, "+rule", false},
 	{"list", 1, fn_is_list_1, "+rule", false},
 	{"is_stream", 1, fn_is_stream_1, "+rule", false},
