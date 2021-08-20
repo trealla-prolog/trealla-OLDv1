@@ -10428,6 +10428,48 @@ static USE_RESULT pl_status fn_sys_incr_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_sys_ne_2(query *q)
+{
+	GET_FIRST_ARG(p1,integer);
+	GET_NEXT_ARG(p2,integer);
+	int_t num = get_int(p1);
+
+	if (num != get_int(p2)) {
+		set_smallint(p1, num+1);
+		return pl_failure;
+	}
+
+	drop_choice(q);
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_call_nth_2(query *q)
+{
+	GET_FIRST_ARG(p1,callable);
+	GET_NEXT_ARG(p2,integer_or_var);
+
+	if (is_variable(p2)) {
+		cell *tmp = clone_to_heap(q, true, p1, 3);
+		idx_t nbr_cells = 1 + p1->nbr_cells;
+		make_structure(tmp+nbr_cells++, g_sys_incr_s, fn_sys_incr_1, 1, 1);
+		GET_RAW_ARG(2,p2_raw);
+		tmp[nbr_cells] = *p2_raw;
+		tmp[nbr_cells++].nbr_cells = 1;
+		make_call(q, tmp+nbr_cells);
+		q->st.curr_cell = tmp;
+		return pl_success;
+	}
+
+	cell *tmp = clone_to_heap(q, true, p1, 4);
+	idx_t nbr_cells = 1 + p1->nbr_cells;
+	make_structure(tmp+nbr_cells++, g_sys_ne_s, fn_sys_ne_2, 2, 2);
+	make_int(tmp+nbr_cells++, 1);
+	make_int(tmp+nbr_cells++, get_int(p2));
+	make_call(q, tmp+nbr_cells);
+	q->st.curr_cell = tmp;
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -10585,47 +10627,6 @@ static USE_RESULT pl_status fn_sys_read_attributes_2(query *q)
 	}
 
 	set_var(q, p2, p2_ctx, e->c.attrs, e->c.attrs_ctx);
-	return pl_success;
-}
-
-static USE_RESULT pl_status fn_sys_ne_2(query *q)
-{
-	GET_FIRST_ARG(p1,integer);
-	GET_NEXT_ARG(p2,integer);
-	int_t num = get_int(p1);
-
-	if (num != get_int(p2)) {
-		set_smallint(p1, num+1);
-		return pl_failure;
-	}
-
-	drop_choice(q);
-	return pl_success;
-}
-
-static USE_RESULT pl_status fn_call_nth_2(query *q)
-{
-	GET_FIRST_ARG(p1,callable);
-	GET_NEXT_ARG(p2,integer_or_var);
-
-	if (is_variable(p2)) {
-		cell *tmp = clone_to_heap(q, true, p1, 3);
-		idx_t nbr_cells = 1 + p1->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_incr_s, fn_sys_incr_1, 1, 1);
-		GET_RAW_ARG(2,p2_raw);
-		tmp[nbr_cells++] = *p2_raw;
-		make_call(q, tmp+nbr_cells);
-		q->st.curr_cell = tmp;
-		return pl_success;
-	}
-
-	cell *tmp = clone_to_heap(q, true, p1, 4);
-	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_ne_s, fn_sys_ne_2, 2, 2);
-	make_int(tmp+nbr_cells++, 1);
-	make_int(tmp+nbr_cells++, get_int(p2));
-	make_call(q, tmp+nbr_cells);
-	q->st.curr_cell = tmp;
 	return pl_success;
 }
 
