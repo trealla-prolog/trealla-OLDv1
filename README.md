@@ -386,16 +386,16 @@ Uses Markus Triska's public domain library.
 	:- use_module(library(format)).
 
 	format_//2
-	format/[2,3]
 
 
 User-defined functions
 ======================
 
 User-defined functions can be arbitrarily complex, but cannot be
-back-tracked into. The make use of the *return/1* predicate to
+back-tracked into. They make use of the *return/1* predicate to
 return a unique value. Given the classic Prolog...
 
+```prolog
 	fac(N,F) :-
 		factorial(N,1,F).
 
@@ -404,6 +404,7 @@ return a unique value. Given the classic Prolog...
 		NewTot is Tot * N,
 		N1 is N - 1,
 		factorial(N1,NewTot,F).
+```
 
 define a function...
 
@@ -412,7 +413,6 @@ define a function...
 then call...
 
 ```prolog
-	$ tpl samples/facfunc.pl
 	?- F is fac(20).
 	F = 2432902008176640000.
 ```
@@ -489,14 +489,16 @@ Note: *send/1*, *sleep/1* and *delay/1* do implied yields. As does *getline/2*,
 
 Note: *task/n* acts as if defined as:
 
+```prolog
 	task(G) :- fork, call(G).
 	task(G,P1) :- fork, call(G,P1).
 	task(G,P1,P2) :- fork, call(G,P1,P2).
+```
 	...
 
 In practice *task* calls a special version of *fork/0* that limits
-the number of such concurrent tasks (see the *cpu_count* flag, initially
-and artificially set at 4). Excess tasks will be scheduled as tasks finish.
+the number of such concurrent tasks. Excess tasks will be scheduled as
+tasks finish.
 
 An example:
 

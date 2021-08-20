@@ -160,7 +160,7 @@ static mp_result mp_int_divx_value(mp_int a, mp_small b, mp_int q)
 	clr_accum(&q->accum);						\
 												\
 	if (!q->eval) {								\
-		if (q->st.m->flag.unknown == UNK_FAIL)	\
+		if (q->st.m->flag.unknown == 0)			\
 			return false;						\
 		else									\
 			return throw_error(q, q->st.curr_cell, "existence_error", "procedure");	\
@@ -1828,19 +1828,11 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 
 	if (is_variable(p1)) {
 		if (is_variable(p2)) {
-			if (p1_ctx < p2_ctx)
-				return -1;
-
-			if (p1_ctx > p2_ctx)
-				return 1;
-
-			if (p1->var_nbr < p2->var_nbr)
-				return -1;
-
-			if (p1->var_nbr > p2->var_nbr)
-				return 1;
-
-			return 0;
+			frame *g1 = GET_FRAME(p1_ctx);
+			frame *g2 = GET_FRAME(p2_ctx);
+			idx_t p1_slot = GET_SLOT(g1,p1->var_nbr) - q->slots;
+			idx_t p2_slot = GET_SLOT(g2,p2->var_nbr) - q->slots;
+			return p1_slot < p2_slot ? -1 : p1_slot > p2_slot ? 1 : 0;
 		}
 
 		return -1;
@@ -1888,6 +1880,9 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 
 		return -1;
 	}
+
+	assert(p1->tag && p2->tag);
+	assert((p1->tag != TAG_END) && (p2->tag != TAG_END));
 
 	if (p1->arity < p2->arity)
 		return -1;
@@ -2274,46 +2269,16 @@ static USE_RESULT pl_status fn_get_seed_1(query *q)
 
 static USE_RESULT pl_status fn_random_1(query *q)
 {
-<<<<<<< HEAD
-	GET_FIRST_ARG(p1_tmp,any);
-
-	if (q->eval && is_variable(p1_tmp))
-		return throw_error(q, p1_tmp, "instantiation_error", "integer");
-
-	if (!q->eval && !is_variable(p1_tmp))
-		return throw_error(q, p1_tmp, "uninstantiation_error", "variable");
-
-	if (is_variable(p1_tmp)) {
-		cell tmp;
-		make_real(&tmp, rnd());
-		set_var(q, p1_tmp, p1_tmp_ctx, &tmp, q->st.curr_frame);
-		return pl_success;
-	}
-=======
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_real(&tmp, rnd());
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
->>>>>>> master
 
 static USE_RESULT pl_status fn_random_integer_0(query *q)
 {
 	CHECK_CALC();
-<<<<<<< HEAD
-	CLEANUP cell p1 = eval(q, p1_tmp);
-
-	if (!is_smallint(&p1))
-		return throw_error(q, &p1, "type_error", "evaluable");
-
-	if (p1.val_int < 1)
-		return throw_error(q, &p1, "domain_error", "positive_integer");
-
-	int_t r = llabs((long long)((int_t)(rnd() * RAND_MAX) % p1.val_int));
-	q->accum.tag = TAG_INTEGER;
-	q->accum.val_int = r;
-=======
 	q->accum.tag = TAG_INTEGER;
 	q->accum.val_int = rnd() * ((int64_t)RAND_MAX+1);
 	return pl_success;
@@ -2324,7 +2289,6 @@ static USE_RESULT pl_status fn_random_float_0(query *q)
 	CHECK_CALC();
 	q->accum.tag = TAG_REAL;
 	q->accum.val_real = rnd();
->>>>>>> master
 	return pl_success;
 }
 
