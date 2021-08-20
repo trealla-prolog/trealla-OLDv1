@@ -15,5 +15,4 @@
 14
 15
 16
-17
-uncaught exception: error(resource_error(too_many_vars),length/2)
+uncaught exception: error(resource_error(too_many_vars),'$call'/3)

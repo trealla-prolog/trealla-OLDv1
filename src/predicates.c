@@ -4402,7 +4402,7 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, true);
 
 	if (!tmp || (tmp == ERR_CYCLE_CELL))
-		return throw_error(q, p1, "resource_error", "too_many_vars");
+		return throw_error(q, p1, "resource_error", "cyclic_term");
 
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
