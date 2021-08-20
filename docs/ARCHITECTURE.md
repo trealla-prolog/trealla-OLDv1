@@ -268,5 +268,46 @@ Where *nbr_cells* is > 1 and includes head & tail args.
 Where *val_off* is into the symbol table to '.'.
 Where args are the following cells (see *nbr_cells*).
 Where the tail arg is usually a list.
-Where the final tail arg is usually the atom '[]'.
+Where the final tail arg is usually the atom *[]*.
+
+Frames
+======
+
+A frame is an element in an array of frames. A frame is of fixed size
+and contains an index into the slot table of the base slot for the
+frame. It also contains a count of the number of slots that make up the
+frame. The frame plus it's slots constitute a working context for a
+set of goals. Choices can back-track to a given context.
+
+Since only index numbers are used to refer to frames (a *ctx* number)
+the frame table can be easily resized.
+
+
+Slots
+=====
+
+A slot is an element in an array of slots. It is a cell plus a context
+index (for vars and compounds). Also attribute info.
+
+Slots are cleared on backtracking via the trailed record.
+
+Since only index numbers are used to refer to slots (a *slot* number)
+the slot table can be easily resized. During execution of a builtin
+predicate however, slot pointers may need to be refreshed after
+creating new variables (eg. length/2, copy_term/2 etc).
+
+
+Trail
+=====
+
+Similar...
+
+
+Heap
+====
+
+A space for dynamically created terms (compounds)...
+
+
+
 
