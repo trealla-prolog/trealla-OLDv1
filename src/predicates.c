@@ -6761,9 +6761,9 @@ static USE_RESULT pl_status fn_time_1(query *q)
 static USE_RESULT pl_status fn_statistics_0(__attribute__((unused)) query *q)
 {
 	fprintf(stdout,
-		"Goals %llu, Matches %llu, Max frames %u, Max choices %u, Max trails: %u, Backtracks %llu, TCOs:%llu\n",
+		"Goals %llu, Matches %llu, Max frames %u, choices %u, trails %u, slots %u, heap: %u. Backtracks %llu, TCOs:%llu\n",
 		(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
-		q->max_frames, q->max_choices, q->max_trails,
+		q->max_frames, q->max_choices, q->max_trails, q->max_slots, q->arenas->max_hp_used,
 		(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
 	return pl_success;
 }
