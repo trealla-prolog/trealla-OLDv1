@@ -2278,6 +2278,7 @@ static USE_RESULT pl_status fn_random_1(query *q)
 
 static USE_RESULT pl_status fn_random_integer_0(query *q)
 {
+	CHECK_CALC();
 	q->accum.tag = TAG_INTEGER;
 	q->accum.val_int = rnd() * ((int64_t)RAND_MAX+1);
 	return pl_success;
@@ -2285,6 +2286,7 @@ static USE_RESULT pl_status fn_random_integer_0(query *q)
 
 static USE_RESULT pl_status fn_random_float_0(query *q)
 {
+	CHECK_CALC();
 	q->accum.tag = TAG_REAL;
 	q->accum.val_real = rnd();
 	return pl_success;
@@ -2292,6 +2294,7 @@ static USE_RESULT pl_status fn_random_float_0(query *q)
 
 static USE_RESULT pl_status fn_rand_0(query *q)
 {
+	CHECK_CALC();
 	q->accum.tag = TAG_INTEGER;
 	q->accum.val_int = rnd() * ((int64_t)RAND_MAX+1);
 	return pl_success;
