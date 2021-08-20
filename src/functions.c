@@ -2279,7 +2279,7 @@ static USE_RESULT pl_status fn_random_1(query *q)
 static USE_RESULT pl_status fn_random_integer_0(query *q)
 {
 	q->accum.tag = TAG_INTEGER;
-	q->accum.val_int = rnd() * RAND_MAX;
+	q->accum.val_int = rnd() * ((int64_t)RAND_MAX+1);
 	return pl_success;
 }
 
@@ -2293,7 +2293,7 @@ static USE_RESULT pl_status fn_random_float_0(query *q)
 static USE_RESULT pl_status fn_rand_0(query *q)
 {
 	q->accum.tag = TAG_INTEGER;
-	q->accum.val_int = rnd() * RAND_MAX;
+	q->accum.val_int = rnd() * ((int64_t)RAND_MAX+1);
 	return pl_success;
 }
 
@@ -2301,7 +2301,7 @@ static USE_RESULT pl_status fn_rand_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
-	make_int(&tmp, rnd() * RAND_MAX);
+	make_int(&tmp, rnd() * ((int64_t)RAND_MAX+1));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
