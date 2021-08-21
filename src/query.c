@@ -718,7 +718,6 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 					if (ch->did_cleanup)
 						break;
 
-					//printf("*** cut ch->curr_frame=%u, curr_frame=%u\n", ch->st.curr_frame, q->st.curr_frame);
 					ch->did_cleanup = true;
 					cell *c = ch->st.curr_cell;
 					//c = deref(q, c, ch->st.curr_frame);

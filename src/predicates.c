@@ -11393,7 +11393,6 @@ static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)
 	may_error(make_choice(q));
 	choice *ch = GET_CURR_CHOICE();
 	ch->register_cleanup = true;
-	//printf("*** register ch->curr_frame=%u, curr_frame=%u\n", ch->st.curr_frame, q->st.curr_frame);
 	return pl_success;
 }
 
@@ -11428,11 +11427,6 @@ static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
 			cell *c = ch->st.curr_cell;
 			c = deref(q, c, ch->st.curr_frame);
 			cell *p1 = deref(q, c+1, ch->st.curr_frame);
-
-			//printf("*** chk_det: (");
-			//print_term(q, stdout, p1, ch->st.curr_frame, 1);
-			//printf(")\n");
-
 			may_error(make_barrier(q));
 			do_cleanup(q, p1);
 			return pl_success;
