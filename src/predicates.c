@@ -11391,6 +11391,7 @@ static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)
 	may_error(make_choice(q));
 	choice *ch = GET_CURR_CHOICE();
 	ch->register_cleanup = true;
+	//printf("*** register ch->curr_frame=%u, curr_frame=%u\n", ch->st.curr_frame, q->st.curr_frame);
 	return pl_success;
 }
 

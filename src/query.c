@@ -718,11 +718,14 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 					if (ch->did_cleanup)
 						break;
 
+					//printf("*** cut ch->curr_frame=%u, curr_frame=%u\n", ch->st.curr_frame, q->st.curr_frame);
 					ch->did_cleanup = true;
 					cell *c = ch->st.curr_cell;
 					//c = deref(q, c, ch->st.curr_frame);
 					cell *p1 = deref(q, c+1, ch->st.curr_frame);
-					cell *tmp = deep_copy_to_heap(q, p1, ch->st.curr_frame, true, false);
+					idx_t p1_ctx = q->latest_ctx;
+					cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, false);
+					unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 					do_cleanup(q, tmp);
 					break;
 				}
