@@ -2267,6 +2267,24 @@ static USE_RESULT pl_status fn_get_seed_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_random_between_3(query *q)
+{
+	GET_FIRST_ARG(p1,integer);
+	GET_NEXT_ARG(p2,integer);
+	GET_NEXT_ARG(p3,integer_or_var);
+
+	if (!is_smallint(p1))
+		return throw_error(q, p1, "type_error", "integer");
+
+	if (!is_smallint(p2))
+		return throw_error(q, p2, "type_error", "integer");
+
+	cell tmp;
+	int_t r = rnd() * ((int64_t)RAND_MAX+1);
+	make_int(&tmp, get_smallint(p1) + (r % get_smallint(p2)));
+	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+}
+
 static USE_RESULT pl_status fn_random_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
@@ -2383,6 +2401,7 @@ const struct builtins g_functions[] =
 	{"get_seed", 1, fn_get_seed_1, "-integer", false},
 	{"rand", 1, fn_rand_1, "?integer", false},
 	{"random", 1, fn_random_1, "?integer", false},
+	{"random_between", 3, fn_random_between_3, "?integer,?integer,-integer", false},
 
 	// Functions...
 

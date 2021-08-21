@@ -206,6 +206,7 @@ Non-standard predicates
 	get_seed/1					# get_seed(-integer) get random number seed
 	rand/1						# rand(-integer) integer [0,RAND_MAX]
 	random/1    	            # random(-float) float [0.0,<1.0]
+	random_between/3            # random_between(+int,+int,-int) integer [arg1,<arg2]
 
 	random_float/0              # function returning float [0.0,<1.0]
 	random_integer/0            # function returning integer [0,RAND_MAX]
