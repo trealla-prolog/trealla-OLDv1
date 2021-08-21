@@ -27,7 +27,7 @@ idx_t g_anon_s, g_neck_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
 idx_t g_sys_elapsed_s, g_sys_queue_s, g_braces_s, g_call_s, g_braces_s;
 idx_t g_stream_property_s, g_unify_s, g_on_s, g_off_s, g_sys_var_s;
 idx_t g_plus_s, g_minus_s, g_once_s, g_post_unify_hook_s, g_sys_record_key_s;
-idx_t g_and_s, g_or_s, g_at_s, g_sys_ne_s, g_sys_incr_s;
+idx_t g_and_s, g_or_s, g_at_s, g_sys_ne_s, g_sys_incr_s, g_inner_cut_s;
 unsigned g_cpu_count = 4;
 char *g_tpl_lib = NULL;
 int g_ac = 0, g_avc = 1;
@@ -240,6 +240,7 @@ static bool g_init(prolog *pl)
 			CHECK_SENTINEL(g_on_s = index_from_pool(pl, "on"), ERR_IDX);
 			CHECK_SENTINEL(g_off_s = index_from_pool(pl, "off"), ERR_IDX);
 			CHECK_SENTINEL(g_cut_s = index_from_pool(pl, "!"), ERR_IDX);
+			CHECK_SENTINEL(g_inner_cut_s = index_from_pool(pl, "$inner_cut"), ERR_IDX);
 			CHECK_SENTINEL(g_nil_s = index_from_pool(pl, "[]"), ERR_IDX);
 			CHECK_SENTINEL(g_braces_s = index_from_pool(pl, "{}"), ERR_IDX);
 			CHECK_SENTINEL(g_fail_s = index_from_pool(pl, "fail"), ERR_IDX);
