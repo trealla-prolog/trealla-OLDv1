@@ -73,8 +73,7 @@ call_cleanup(G, C) :-
 
 setup_call_cleanup(S, G, C) :-
 	call((S, !)),
-	copy_term(C,C0),
-	'$register_cleanup'((C0, !)),
+	'$register_cleanup'((C, !)),
 	catch(G, Err, (catch((\+ \+ C), _, true), throw(Err))),
 	'$chk_is_det'.
 
