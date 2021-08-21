@@ -35,7 +35,6 @@ static const op_table g_ops[] =
 	{"discontiguous", OP_FX, 1150},
 	{"multifile", OP_FX, 1150},
 	{"attribute", OP_FX, 1150},
-
 	{"op", OP_FX, 1150},
 	{"dynamic", OP_FX, 1150},
 	{"persist", OP_FX, 1150},
@@ -66,11 +65,9 @@ static const op_table g_ops[] =
 	{":", OP_XFY, 600},
 	{"+", OP_YFX, 500},
 	{"-", OP_YFX, 500},
-	{"?", OP_FX, 500},
-
+	//{"?", OP_FX, 500},
 	{"/\\", OP_YFX, 500},
 	{"\\/", OP_YFX, 500},
-
 	{"*", OP_YFX, 400},
 	{"/", OP_YFX, 400},
 	{"//", OP_YFX, 400},
