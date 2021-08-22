@@ -1501,17 +1501,25 @@ static int get_escape(const char **_src, bool *error, bool number)
 
 	if (ptr)
 		ch = g_escapes[ptr-g_anti_escapes];
-	else if ((isdigit(ch) || (ch == 'x') || (ch == 'u') || (ch == 'U')) && !number) {
+	else if ((isdigit(ch) || (ch == 'x')
+#if 1
+		|| (ch == 'u') || (ch == 'U')
+#endif
+		)
+		&& !number) {
 		int unicode = 0;
 
-		if (ch == 'U') {
+		if (ch == 'x')
+			ch = get_hex(&src, 999);
+#if 1
+		else if (ch == 'U') {
 			ch = get_hex(&src, 8);
 			unicode = 1;
 		} else if (ch == 'u') {
 			ch = get_hex(&src, 4);
 			unicode = 1;
-		} else if (ch == 'x')
-			ch = get_hex(&src, 999);
+		}
+#endif
 		else {
 			src--;
 			ch = get_octal(&src);
