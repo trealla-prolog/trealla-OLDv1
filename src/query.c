@@ -481,6 +481,7 @@ bool retry_choice(query *q)
 	g->nbr_vars = ch->nbr_vars;
 	g->nbr_slots = ch->nbr_slots;
 	g->overflow = ch->overflow;
+	g->counter = ch->counter;
 	return true;
 }
 
@@ -491,7 +492,6 @@ static frame *make_frame(query *q, unsigned nbr_vars)
 	g->prev_frame = q->st.curr_frame;
 	g->prev_cell = q->st.curr_cell;
 	g->cgen = ++q->st.cgen;
-	g->counter = 1;
 	g->overflow = 0;
 
 	q->st.sp += nbr_vars;
@@ -649,6 +649,7 @@ pl_status make_choice(query *q)
 	ch->ugen = g->ugen;
 	ch->orig_cgen = ch->cgen = g->cgen;
 	ch->st = q->st;
+	ch->counter = g->counter;
 
 	may_error(check_slot(q, MAX_ARITY));
 	ch->nbr_vars = g->nbr_vars;
