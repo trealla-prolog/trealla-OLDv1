@@ -2239,7 +2239,7 @@ bool get_token(parser *p, int last_op)
 			break;
 	}
 
-	p->is_op = search_op(p->m, p->token, NULL, false);
+	p->is_op = true;			//search_op(p->m, p->token, NULL, false);
 	p->srcptr = (char*)src;
 	return true;
 }
@@ -2427,8 +2427,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
-		if (!p->quote_char && args && !consing && p->is_op && last_op && strcmp(p->token, ",")
-			) {
+		if (!p->quote_char && args && !consing && p->is_op && last_op && strcmp(p->token, ",")) {
 			unsigned specifier = 0;
 			unsigned priority = search_op(p->m, p->token, &specifier, last_op);
 
@@ -2641,6 +2640,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		if (func) {
 			is_func = true;
 			p->is_op = false;
+			specifier = 0;
 			save_idx = p->r->cidx;
 		}
 
