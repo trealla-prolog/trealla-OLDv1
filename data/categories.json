@@ -6,7 +6,7 @@
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "iso_bagof_3_10",
-        "uid" : "ee59f3f1cd6371ca",
+        "uid" : "f5122daca3bc2655",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
@@ -21,7 +21,7 @@
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "iso_setof_3_12",
-        "uid" : "ca3608ebaad0606b",
+        "uid" : "88b8efe82c54f9b4",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
