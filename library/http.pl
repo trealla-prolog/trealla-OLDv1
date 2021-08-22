@@ -3,6 +3,7 @@
 	http_request/5
 	]).
 
+:- use_module(library(lists)).
 :- use_module(library(dict)).
 
 read_response(S, Code) :-

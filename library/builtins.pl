@@ -80,14 +80,14 @@ setup_call_cleanup(S, G, C) :-
 catch(G, E, C) :-
 	'$call'('$catch'(G, E, C)).
 
-tmp_append_([], L, L).
-tmp_append_([H|T], L, [H|R]) :- tmp_append_(T, L, R).
+'$append'([], L, L).
+'$append'([H|T], L, [H|R]) :- '$append'(T, L, R).
 
 findall(T, G, B, Tail) :-
 	'$mustbe_list_or_var'(B),
 	'$mustbe_list_or_var'(Tail),
 	findall(T, G, B0),
-	tmp_append_(B0, Tail, B), !.
+	'$append'(B0, Tail, B), !.
 
 findall(T, G, B) :-
 	copy_term('$findall'(T,G,B), G0),
@@ -322,7 +322,7 @@ phrase_((A -> B), S0, S) :-
 phrase_(phrase(NonTerminal), S0, S) :-
 	phrase(NonTerminal, S0, S).
 phrase_([T|Ts], S0, S) :-
-	tmp_append_([T|Ts], S, S0).
+	'$append'([T|Ts], S, S0).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -354,8 +354,8 @@ directory_exists(F) :- exists_directory(F).
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-partial_string(S, P) :- tmp_append_(S, _, P).
-partial_string(S, P, V) :- tmp_append_(S, V, P).
+partial_string(S, P) :- '$append'(S, _, P).
+partial_string(S, P, V) :- '$append'(S, V, P).
 
 forall(Cond, Action) :- \+ (Cond, \+ Action).
 chars_base64(Plain, Base64,_) :- base64(Plain, Base64).
