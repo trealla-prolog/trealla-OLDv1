@@ -409,7 +409,7 @@ typedef struct {
 typedef struct {
 	cell *prev_cell;
 	module *m;
-	uint64_t ugen, counter;
+	uint64_t ugen;
 	idx_t prev_frame, base_slot_nbr, overflow, cgen;
 	uint32_t nbr_slots, nbr_vars;
 } frame;
@@ -450,7 +450,7 @@ typedef struct {
 
 typedef struct {
 	prolog_state st;
-	uint64_t pins, ugen, counter;
+	uint64_t pins, ugen;
 	idx_t v1, v2, cgen, orig_cgen, overflow;
 	uint32_t nbr_slots, nbr_vars;
 	bool catchme_retry:1;

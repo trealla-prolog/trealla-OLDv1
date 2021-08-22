@@ -10431,14 +10431,13 @@ static USE_RESULT pl_status fn_sys_ne_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_incr_1(query *q)
+static USE_RESULT pl_status fn_sys_incr_2(query *q)
 {
 	GET_FIRST_ARG(p1, variable);
-	choice *ch = GET_CURR_CHOICE();
-	int n = ++ch->counter;
-	cell tmp;
-	make_int(&tmp, n);
-	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	GET_NEXT_ARG(p2, integer);
+	int64_t n = get_smallint(p2);
+	set_smallint(p2, n+1);
+	set_var(q, p1, p1_ctx, p2, q->st.curr_frame);
 	return pl_success;
 }
 
@@ -10448,12 +10447,13 @@ static USE_RESULT pl_status fn_call_nth_2(query *q)
 	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_variable(p2)) {
-		cell *tmp = clone_to_heap(q, true, p1, 3);
+		cell *tmp = clone_to_heap(q, true, p1, 4);
 		idx_t nbr_cells = 1 + p1->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_incr_s, fn_sys_incr_1, 1, 1);
+		make_structure(tmp+nbr_cells++, g_sys_incr_s, fn_sys_incr_2, 2, 2);
 		GET_RAW_ARG(2,p2_raw);
 		tmp[nbr_cells] = *p2_raw;
 		tmp[nbr_cells++].nbr_cells = 1;
+		make_int(tmp+nbr_cells++, 0);
 		make_call(q, tmp+nbr_cells);
 		q->st.curr_cell = tmp;
 		return pl_success;
@@ -11819,7 +11819,7 @@ static const struct builtins g_predicates_other[] =
 	{"$block_verify_hook", 0, fn_sys_block_verify_hook_0, NULL, false},
 	{"$unblock_verify_hook", 0, fn_sys_unblock_verify_hook_0, NULL, false},
 	{"$unifiable", 3, fn_sys_unifiable_3, NULL, false},
-	{"$incr", 1, fn_sys_incr_1, "?var", false},
+	{"$incr", 2, fn_sys_incr_2, "?var", false},
 
 	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list", false},
 	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list", false},

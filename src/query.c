@@ -481,7 +481,6 @@ bool retry_choice(query *q)
 	g->nbr_vars = ch->nbr_vars;
 	g->nbr_slots = ch->nbr_slots;
 	g->overflow = ch->overflow;
-	g->counter = ch->counter;
 	return true;
 }
 
@@ -649,7 +648,6 @@ pl_status make_choice(query *q)
 	ch->ugen = g->ugen;
 	ch->orig_cgen = ch->cgen = g->cgen;
 	ch->st = q->st;
-	ch->counter = g->counter;
 
 	may_error(check_slot(q, MAX_ARITY));
 	ch->nbr_vars = g->nbr_vars;
@@ -1490,7 +1488,7 @@ static void dump_vars(query *q, bool partial)
 		}
 
 		if (any)
-			fprintf(stdout, ",\n");
+			fprintf(stdout, ", ");
 
 		fprintf(stdout, "%s = ", p->vartab.var_name[i]);
 		bool parens = false;
@@ -1574,6 +1572,9 @@ static int check_interrupt(query *q)
 		}
 
 		if (ch == 'e') {
+			if (!q->run_init)
+				printf("\n");
+
 			signal(SIGINT, NULL);
 			q->halt = true;
 			return 1;
@@ -1617,6 +1618,9 @@ static bool check_redo(query *q)
 		}
 
 		if (ch == 'e') {
+			if (!q->run_init)
+				printf("\n");
+
 			signal(SIGINT, NULL);
 			q->error = q->halt = true;
 			return true;
