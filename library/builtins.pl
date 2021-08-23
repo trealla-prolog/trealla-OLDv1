@@ -256,8 +256,8 @@ _^Goal :- Goal.
 '$explicit_binding'(not(_),    Bound, fail, Bound ).
 '$explicit_binding'(Term^Goal, Bound, Goal, Bound+Vars) :-
 	term_variables(Term, Vars).
-'$explicit_binding'(xsetof(Var,Goal,Set),  Bound, Goal-Set, Bound+Var).
-'$explicit_binding'(xbagof(Var,Goal,Bag),  Bound, Goal-Bag, Bound+Var).
+'$explicit_binding'(setof(Var,Goal,Set),  Bound, Goal-Set, Bound+Var).
+'$explicit_binding'(bagof(Var,Goal,Bag),  Bound, Goal-Bag, Bound+Var).
 
 '$term_is_free_of'(Term, Var) :-
 	var(Term), !,
