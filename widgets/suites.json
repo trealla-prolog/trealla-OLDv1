@@ -1,28 +1,6 @@
 {
   "total" : 163,
   "items" : [ {
-    "uid" : "981e764cf9453c14a5eb0e8df40b068d",
-    "name" : "predicates/asserta_1/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 2,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 10,
-      "unknown" : 0,
-      "total" : 12
-    }
-  }, {
-    "uid" : "51972e6e333c6517c53c0f253146dae9",
-    "name" : "predicates/assertz_1/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 2,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 9,
-      "unknown" : 0,
-      "total" : 11
-    }
-  }, {
     "uid" : "fe889f4ed1e23b13cb890295efdd6049",
     "name" : "predicates/setof_3/tests.lgt::tests",
     "statistic" : {
@@ -109,6 +87,28 @@
       "passed" : 56,
       "unknown" : 0,
       "total" : 56
+    }
+  }, {
+    "uid" : "a5e7e6a80bb657bcaa763c06b523455c",
+    "name" : "predicates/current_op_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 48,
+      "unknown" : 0,
+      "total" : 48
+    }
+  }, {
+    "uid" : "cca7e0fd2fd1795563678e8da9db0895",
+    "name" : "syntax/numbers/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 39,
+      "unknown" : 0,
+      "total" : 39
     }
   } ]
 }
