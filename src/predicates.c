@@ -4672,7 +4672,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	cell *head = get_head(tmp);
 
 	if (is_variable(head))
-		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
+		return throw_error(q, head, "instantiation_error", "args_not_sufficiently_instantiated");
 
 	if (!is_literal(head) && !is_cstring(head))
 		return throw_error(q, head, "type_error", "callable");
@@ -4742,7 +4742,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	cell *head = get_head(tmp);
 
 	if (is_variable(head))
-		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
+		return throw_error(q, head, "instantiation_error", "args_not_sufficiently_instantiated");
 
 	if (!is_literal(head) && !is_cstring(head))
 		return throw_error(q, head, "type_error", "callable");
@@ -6442,7 +6442,7 @@ static pl_status do_asserta_2(query *q)
 	cell *head = deref(q, get_head(p1), p1_ctx);
 
 	if (is_variable(head))
-		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
+		return throw_error(q, head, "instantiation_error", "args_not_sufficiently_instantiated");
 
 	bool found = false;
 
@@ -6543,7 +6543,7 @@ static pl_status do_assertz_2(query *q)
 	cell *head = deref(q, get_head(p1), p1_ctx);
 
 	if (is_variable(head))
-		return throw_error(q, head, "instantiation_error", "args _not_sufficiently_instantiated");
+		return throw_error(q, head, "instantiation_error", "args_not_sufficiently_instantiated");
 
 	bool found = false;
 
