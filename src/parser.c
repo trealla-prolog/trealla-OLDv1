@@ -2245,7 +2245,7 @@ bool get_token(parser *p, int last_op)
 			break;
 	}
 
-	p->is_op = true;			//search_op(p->m, p->token, NULL, false);
+	p->is_op = search_op(p->m, p->token, NULL, false);
 	p->srcptr = (char*)src;
 	return true;
 }
