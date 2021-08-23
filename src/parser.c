@@ -1054,7 +1054,7 @@ static bool reduce(parser *p, idx_t start_idx)
 	for (idx_t i = start_idx; i < p->r->cidx;) {
 		cell *c = p->r->cells + i;
 
-		//printf("*** OP0 %s type=%u, specifier=%u, pri=%u\n", GET_STR(p, c), c->tag, GET_OP(c), c->priority);
+		//printf("*** OP0 %s type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
 
 		if ((c->nbr_cells > 1) || !is_literal(c) || !c->priority) {
 			i += c->nbr_cells;
@@ -1111,6 +1111,7 @@ static bool reduce(parser *p, idx_t start_idx)
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
 
+				p->error_desc = "operator_clash";
 				p->error = true;
 				return false;
 			}
@@ -1122,6 +1123,7 @@ static bool reduce(parser *p, idx_t start_idx)
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
 
+				p->error_desc = "operator_clash";
 				p->error = true;
 				return false;
 			}
@@ -1136,6 +1138,7 @@ static bool reduce(parser *p, idx_t start_idx)
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: missing operand to '%s', line %u, '%s'\n", GET_STR(p, c), p->line_nbr, p->save_line);
 
+				p->error_desc = "operand_missing";
 				p->error = true;
 				return false;
 			}
@@ -1152,6 +1155,7 @@ static bool reduce(parser *p, idx_t start_idx)
 			if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
 
+			p->error_desc = "operator_clash";
 			p->error = true;
 			return false;
 		}
@@ -1177,6 +1181,7 @@ static bool reduce(parser *p, idx_t start_idx)
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: missing operand to '%s', line %u, '%s'\n", GET_STR(p, c), p->line_nbr, p->save_line);
 
+			p->error_desc = "operatand_missing";
 			p->error = true;
 			return false;
 		}
@@ -1203,6 +1208,7 @@ static bool reduce(parser *p, idx_t start_idx)
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
 
+				p->error_desc = "operator_clash";
 				p->error = true;
 				return false;
 			}
@@ -2178,7 +2184,7 @@ bool get_token(parser *p, int last_op)
 
 			if (!p->is_op && (*src == '(')) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line);
+					fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line?p->save_line:"");
 
 				p->error_desc = "operator_expected";
 				p->error = true;
@@ -2308,7 +2314,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			if (analyze(p, 0)) {
 				if (p->r->cells->nbr_cells < (p->r->cidx-1)) {
 					if (DUMP_ERRS || !p->do_read_term)
-						printf("Error: syntax error, operator expected '%s', line %u, '%s'\n", p->token, p->line_nbr, p->save_line);
+						printf("Error: syntax error, operator expected '%s', line %u, '%s'\n", p->token, p->line_nbr, p->save_line?p->save_line:"");
 
 					p->error_desc = "operator_expected";
 					p->error = true;
@@ -2628,7 +2634,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!strcmp(p->token, "[]") && (*p->srcptr == '(')) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, operator expected '%s'\n", p->save_line);
+				fprintf(stdout, "Error: syntax error, operator expected '%s'\n", p->save_line?p->save_line:"");
 
 			p->error_desc = "operator_expected";
 			p->error = true;
@@ -2706,10 +2712,18 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 
 	if (!is_init) {
 		ASTRING(src);
+
+#if 0
 		ASTRING_sprintf(src, "call(true), call((%s", pSrc);
 		ASTRING_trim_ws(src);
 		ASTRING_trim(src, '.');
 		ASTRING_strcat(src, ")).");
+#else
+		ASTRING_sprintf(src, "%s", pSrc);
+		ASTRING_trim_ws(src);
+		ASTRING_trim(src, '.');
+		ASTRING_strcat(src, ".");
+#endif
 
 		p->srcptr = ASTRING_cstr(src);
 		p->line_nbr = 0;
