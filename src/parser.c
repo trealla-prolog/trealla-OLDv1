@@ -1922,7 +1922,7 @@ static bool eat_comment(parser *p)
 
 bool get_token(parser *p, int last_op)
 {
-	if (p->error)
+	if (p->error || !p->srcptr)
 		return false;
 
 	const char *src = p->srcptr;
@@ -2206,6 +2206,7 @@ bool get_token(parser *p, int last_op)
 	if ((src[0] == '=') && (src[1] == '.') && (src[2] == '.')) {
 		dst += sprintf(dst, "=..");
 		p->srcptr = (char*)src+3;
+		p->is_op = true;
 		return (dst - p->token) != 0;
 	}
 
@@ -2290,7 +2291,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 	p->depth++;
 
 	while (get_token(p, last_op)) {
-		if (p->error)
+		if (p->error && !p->do_read_term)
 			break;
 
 		//fprintf(stderr, "Debug: token '%s' quoted=%d, tag=%u, op=%d, lastop=%d, string=%d\n", p->token, p->quote_char, p->v.tag, p->is_op, last_op, p->string);
@@ -2519,6 +2520,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->is_quoted && consing && !strcmp(p->token, "|")) {
+			last_op = true;
 			last_bar = true;
 			was_consing = true;
 			//consing = false;
@@ -2545,18 +2547,21 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && !strcmp(p->token, ")")) {
+			last_op = false;
 			p->nesting_parens--;
 			analyze(p, begin_idx);
 			return arity;
 		}
 
 		if (!p->quote_char && !strcmp(p->token, "]")) {
+			last_op = false;
 			p->nesting_brackets--;
 			analyze(p, begin_idx);
 			return arity;
 		}
 
 		if (!p->quote_char && !strcmp(p->token, "}")) {
+			last_op = false;
 			p->nesting_braces--;
 			analyze(p, begin_idx);
 			return arity;
@@ -2629,9 +2634,6 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			p->quote_char = 0;
 		}
 
-		last_quoted = p->is_quoted;
-		last_op = strcmp(p->token, ")") && priority;
-
 		if (!strcmp(p->token, "[]") && (*p->srcptr == '(')) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, operator expected '%s'\n", p->save_line?p->save_line:"");
@@ -2649,6 +2651,18 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			specifier = 0;
 			save_idx = p->r->cidx;
 		}
+
+		if (!p->is_op && !is_func && !last_op) {
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Error: syntax error, near '%s' operator expected '%s'\n", p->token, p->save_line?p->save_line:"");
+
+			p->error_desc = "operator_expected";
+			p->error = true;
+			break;
+		}
+
+		last_quoted = p->is_quoted;
+		last_op = strcmp(p->token, ")") && priority;
 
 		p->start_term = false;
 		cell *c = make_a_cell(p);
