@@ -386,12 +386,6 @@ static void unwind_trail(query *q, const choice *ch)
 {
 	while (q->st.tp > ch->st.tp) {
 		const trail *tr = q->trails + --q->st.tp;
-
-		if (ch->pins) {
-			if (ch->pins & (1 << tr->var_nbr))
-				continue;
-		}
-
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
 		//unshare_cell(&e->c); // FIXME

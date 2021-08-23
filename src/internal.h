@@ -450,7 +450,7 @@ typedef struct {
 
 typedef struct {
 	prolog_state st;
-	uint64_t pins, ugen;
+	uint64_t ugen;
 	idx_t v1, v2, cgen, orig_cgen, overflow;
 	uint32_t nbr_slots, nbr_vars;
 	bool catchme_retry:1;
