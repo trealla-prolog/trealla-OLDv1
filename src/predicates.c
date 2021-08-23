@@ -519,7 +519,6 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 	p->read_term = g->nbr_vars;
 	p->do_read_term = true;
 	tokenize(p, false, false);
-	p->do_read_term = false;
 	p->read_term = 0;
 
 	if (p->error) {
@@ -530,8 +529,11 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
+		p->do_read_term = false;
 		return throw_error(q, &tmp, "syntax_error", p->error_desc?p->error_desc:"read_term");
 	}
+
+	p->do_read_term = false;
 
 	if (!p->r->cidx) {
 		cell tmp;
