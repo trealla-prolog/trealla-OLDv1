@@ -3,25 +3,10 @@
   "children" : [ {
     "name" : "Product defects",
     "children" : [ {
-      "name" : "Error instead of success",
-      "children" : [ {
-        "name" : "iso_bagof_3_10",
-        "uid" : "fb3a46e5702357b5",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "predicates/bagof_3/tests.lgt", "92-95", "https://github.com/LogtalkDotOrg/logtalk3/tree/97c7898a24f5546824da11a469f553419037e605/tests/prolog/predicates/bagof_3/tests.lgt#L92" ]
-      } ],
-      "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
-    }, {
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "iso_setof_3_12",
-        "uid" : "1f96617ce01d6eef",
+        "uid" : "90049d0251d8198d",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
@@ -32,6 +17,21 @@
         "parameters" : [ "predicates/setof_3/tests.lgt", "137-144", "https://github.com/LogtalkDotOrg/logtalk3/tree/97c7898a24f5546824da11a469f553419037e605/tests/prolog/predicates/setof_3/tests.lgt#L137" ]
       } ],
       "uid" : "7a65c89daad8cf82ce910dbf95cc8113"
+    }, {
+      "name" : "Error instead of success",
+      "children" : [ {
+        "name" : "iso_bagof_3_10",
+        "uid" : "5cb388423c482aed",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "predicates/bagof_3/tests.lgt", "92-95", "https://github.com/LogtalkDotOrg/logtalk3/tree/97c7898a24f5546824da11a469f553419037e605/tests/prolog/predicates/bagof_3/tests.lgt#L92" ]
+      } ],
+      "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
     } ],
     "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
   } ],
