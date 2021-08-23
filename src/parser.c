@@ -1468,18 +1468,18 @@ static int get_octal(const char **srcptr)
 	return v;
 }
 
-static int get_hex(const char **srcptr, int n)
+static int get_hex(const char **srcptr, int n, bool *error)
 {
 	const char *src = *srcptr;
-	int v = 0;
+	int v = 0, orig_n = n;
 
-	while ((n > 0) && (*src == '0')) {
+	while (*src == '0') {
 		src++; n--;
 	}
 
-	while ((n > 0) && (((*src >= '0') && (*src <= '9')) ||
+	while (((*src >= '0') && (*src <= '9')) ||
 		((*src >= 'a') && (*src <= 'f')) ||
-		((*src >= 'A') && (*src <= 'F')))) {
+		((*src >= 'A') && (*src <= 'F'))) {
 		v *= 16;
 		char ch = *src++;
 		n--;
@@ -1490,6 +1490,11 @@ static int get_hex(const char **srcptr, int n)
 			v += 10 + (ch - 'A');
 		else
 			v += ch - '0';
+	}
+
+	if (n && ((orig_n == 4) || (orig_n == 8))) {
+		*error = true;
+		return 0;
 	}
 
 	*srcptr = src;
@@ -1516,13 +1521,13 @@ static int get_escape(const char **_src, bool *error, bool number)
 		int unicode = 0;
 
 		if (ch == 'x')
-			ch = get_hex(&src, 999);
+			ch = get_hex(&src, 999, error);
 #if 1
 		else if (ch == 'U') {
-			ch = get_hex(&src, 8);
+			ch = get_hex(&src, 8, error);
 			unicode = 1;
 		} else if (ch == 'u') {
-			ch = get_hex(&src, 4);
+			ch = get_hex(&src, 4, error);
 			unicode = 1;
 		}
 #endif
