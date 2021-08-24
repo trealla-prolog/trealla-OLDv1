@@ -481,7 +481,7 @@ or a timer)...
 	yield/0                 # voluntarily yield control
 	wait/0                  # parent should wait for children to finish
 	await/0                 # parent should wait for a message
-	send/1                  # apend rule to parent queue
+	send/1                  # append rule to parent queue
 	recv/1                  # pop rule from queue
 	tasklist/[2-8]          # concurrent form of maplist/1-n
 
