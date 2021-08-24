@@ -14,7 +14,8 @@ must_be(Term, float, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (floa
 must_be(Term, number, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (number(Term) -> true ; throw(error(type_error(number, Term), Goal))), !.
 must_be(Term, ground, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (ground(Term) -> true ; throw(error(type_error(Term, ground), Goal))), !.
 must_be(Term, compound, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (compound(Term) -> true ; throw(error(type_error(compound, Term), Goal))), !.
-must_be(Term, list, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (list(Term) -> true ; throw(error(type_error(list, Term), Goal))), !.
+must_be(Term, list, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (is_list(Term) -> true ; throw(error(type_error(list, Term), Goal))), !.
+must_be(Term, list_or_partial_list, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (is_list_or_partial_list(Term) -> true ; throw(error(type_error(list, Term), Goal))), !.
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -94,15 +95,193 @@ findall(T, G, B) :-
 	'$rawcall'(G0),
 	'$findall'(T,G,B)=G0.
 
-bagof(T, G, B) :-
-	copy_term('$bagof'(T,G,B), G0),
-	'$rawcall'(G0),
-	'$bagof'(T,G,B)=G0.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Derived from code by R.A. O'Keefe
 
-setof(T, G, B) :-
-	bagof(T, G, B0),
-	sort(B0, B).
+:- meta_predicate(setof(-,0,?)).
+:- meta_predicate(bagof(-,0,?)).
 
+setof(Template, Generator, Set) :-
+    ( var(Set) -> true ; must_be(Set, list_or_partial_list, setof/3, _) ),
+	'$bagof'(Template, Generator, Bag),
+	sort(Bag, Set).
+
+bagof(Template, Generator, Bag) :-
+    ( var(Bag) -> true ; must_be(Bag, list_or_partial_list, bagof/3, _) ),
+	'$bagof'(Template, Generator, Bag).
+
+'$bagof'(Template, Generator, Bag) :-
+	'$free_variables'(Generator, Template, [], Vars, 1),
+	Vars \== [],
+	!,
+	Key =.. [(.)|Vars],
+	functor(Key, (.), N),
+	findall(Key-Template,Generator,Recorded),
+	'$replace_instance'(Recorded, Key, N, _, OmniumGatherum),
+	keysort(OmniumGatherum, Gamut), !,
+	'$concordant_subset'(Gamut, Key, Answer),
+	Bag = Answer.
+'$bagof'(Template, Generator, Bag) :-
+	findall(Template, Generator, Bag0),
+	Bag0 \== [],
+	Bag = Bag0.
+
+_^Goal :- Goal.
+
+'$replace_instance'([], _, _, _, []) :- !.
+'$replace_instance'([NewKey-Term|Xs], Key, NVars, Vars, [NewKey-Term|NewBag]) :-
+	'$replace_key_variables'(NVars, Key, Vars, NewKey), !,
+	'$replace_instance'(Xs, Key, NVars, Vars, NewBag).
+
+
+%   Original R.A. O'Keefe comment:
+%   There is a bug in the compiled version of arg in Dec-10 Prolog,
+%   hence the rather strange code.  Only two calls on arg are needed
+%   in Dec-10 interpreted Prolog or C-Prolog.
+
+'$replace_key_variables'(0, _, _, _) :- !.
+'$replace_key_variables'(N, OldKey, Vars0, NewKey) :-
+	arg(N, NewKey, Arg),
+	nonvar(Arg), !,
+	'$replace_variables'(Arg, Vars0, Vars1),
+	M is N-1,
+	'$replace_key_variables'(M, OldKey, Vars1, NewKey).
+'$replace_key_variables'(N, OldKey, Vars, NewKey) :-
+	arg(N, OldKey, OldVar),
+	arg(N, NewKey, OldVar),
+	M is N-1,
+	'$replace_key_variables'(M, OldKey, Vars, NewKey).
+
+'$replace_variables'(Term, [Var|Vars], Vars) :-
+	var(Term), !,
+	Term = Var.
+'$replace_variables'(Term, Vars, Vars) :-
+	atomic(Term), !.
+'$replace_variables'(Term, Vars0, Vars) :-
+	functor(Term, _, Arity),
+	'$replace_variables_term'(Arity, Term, Vars0, Vars).
+
+'$replace_variables_term'(0, _, Vars, Vars) :- !.
+'$replace_variables_term'(N, Term, Vars0, Vars) :-
+	arg(N, Term, Arg),
+	'$replace_variables'(Arg, Vars0, Vars1),
+	N1 is N-1,
+	'$replace_variables_term'(N1, Term, Vars1, Vars).
+
+
+/*
+%   '$concordant_subset'([Key-Val list], Key, [Val list]).
+%   takes a list of Key-Val pairs which has been keysorted to bring
+%   all the identical keys together, and enumerates each different
+%   Key and the corresponding lists of values.
+*/
+
+'$concordant_subset'([Key-Val|Rest], Clavis, Answer) :-
+	'$concordant_subset'(Rest, Key, List, More),
+	'$concordant_subset'(More, Key, [Val|List], Clavis, Answer).
+
+/*
+%   '$concordant_subset'(Rest, Key, List, More)
+%   strips off all the Key-Val pairs from the from of Rest,
+%   putting the Val elements into List, and returning the
+%   left-over pairs, if any, as More.
+*/
+
+'$concordant_subset'([Key-Val|Rest], Clavis, List, More) :-
+	subsumes_term(Key, Clavis),
+	subsumes_term(Clavis, Key),
+	!,
+	Key = Clavis,
+	List = [Val|Rest2],
+	'$concordant_subset'(Rest, Clavis, Rest2, More).
+'$concordant_subset'(More, _, [], More).
+
+/*
+%   '$concordant_subset'/5 tries the current subset, and if that
+%   doesn't work if backs up and tries the next subset.  The
+%   first clause is there to save a choice point when this is
+%   the last possible subset.
+*/
+
+'$concordant_subset'([],   Key, Subset, Key, Subset) :- !.
+'$concordant_subset'(_,    Key, Subset, Key, Subset).
+'$concordant_subset'(More, _,   _,   Clavis, Answer) :-
+	'$concordant_subset'(More, Clavis, Answer).
+
+% 0 disables use of '$explicit_binding', 1 enables them
+% setof stuff still uses 1, that's closer to it's usual implementation
+'$free_variables'(A,B,C,D) :- '$free_variables'(A,B,C,D,0).
+
+% ---extracted from: not.pl --------------------%
+
+%   Author : R.A.O'Keefe
+%   Updated: 17 November 1983
+%   Purpose: "suspicious" negation
+
+%   In order to handle variables properly, we have to find all the
+%   universally quantified variables in the Generator.  All variables
+%   as yet unbound are universally quantified, unless
+% a)  they occur in the template
+% b)  they are bound by X^P, setof, or bagof
+%   '$free_variables'(Generator, Template, OldList, NewList,CheckBindings=0,1)
+%   finds this set, using OldList as an accumulator.
+
+'$free_variables'(Term, Bound, VarList, [Term|VarList],_) :-
+	var(Term),
+	'$term_is_free_of'(Bound, Term),
+	'$list_is_free_of'(VarList, Term),
+	!.
+'$free_variables'(Term, _, VarList, VarList,_) :-
+	var(Term),
+	!.
+'$free_variables'(Term, Bound, OldList, NewList, 1) :-
+	'$explicit_binding'(Term, Bound, NewTerm, NewBound),
+	!,
+	'$free_variables'(NewTerm, NewBound, OldList, NewList, 1).
+'$free_variables'(Term, Bound, OldList, NewList, _) :-
+	functor(Term, _, N),
+	'$free_variables'(N, Term, Bound, OldList, NewList, 0).
+
+'$free_variables'(0,    _,     _, VarList, VarList, _) :- !.
+'$free_variables'(N, Term, Bound, OldList, NewList, B) :-
+	arg(N, Term, Argument),
+	'$free_variables'(Argument, Bound, OldList, MidList, B),
+	M is N-1, !,
+	'$free_variables'(M, Term, Bound, MidList, NewList, B).
+
+%   '$explicit_binding' checks for goals known to existentially quantify
+%   one or more variables.  In particular "not" is quite common.
+
+'$explicit_binding'(\+(_),     Bound, fail, Bound ).
+'$explicit_binding'(not(_),    Bound, fail, Bound ).
+'$explicit_binding'(Term^Goal, Bound, Goal, Bound+Vars) :-
+	term_variables(Term, Vars).
+'$explicit_binding'(setof(Var,Goal,Set),  Bound, Goal-Set, Bound+Var).
+'$explicit_binding'(bagof(Var,Goal,Bag),  Bound, Goal-Bag, Bound+Var).
+
+'$term_is_free_of'(Term, Var) :-
+	var(Term), !,
+	Term \== Var.
+'$term_is_free_of'(Term, Var) :-
+	functor(Term, _, N),
+	'$term_is_free_of'(N, Term, Var).
+
+'$term_is_free_of'(0, _, _) :- !.
+'$term_is_free_of'(N, Term, Var) :-
+	arg(N, Term, Argument),
+	'$term_is_free_of'(Argument, Var),
+	M is N-1, !,
+	'$term_is_free_of'(M, Term, Var).
+
+'$list_is_free_of'([], _).
+'$list_is_free_of'([Head|Tail], Var) :-
+	Head \== Var,
+	'$list_is_free_of'(Tail, Var).
+
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This is to contain cuts...
 
 call(G) :- '$call'(G).
