@@ -537,7 +537,11 @@ directory_exists(F) :- exists_directory(F).
 partial_string(S, P) :- '$append'(S, _, P).
 partial_string(S, P, V) :- '$append'(S, V, P).
 
+not(G) :- G, !, fail.
+not(_).
+
 forall(Cond, Action) :- \+ (Cond, \+ Action).
+
 chars_base64(Plain, Base64,_) :- base64(Plain, Base64).
 chars_urlenc(Plain, Url, _) :- urlenc(Plain, Url).
 

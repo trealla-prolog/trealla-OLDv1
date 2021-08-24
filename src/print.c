@@ -28,7 +28,7 @@ bool needs_quoting(module *m, const char *src, int srclen)
 	if (!strcmp(src, ",") || !strcmp(src, ".") || !strcmp(src, "|"))
 		return true;
 
-	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!") || !strcmp(src, "¡"))
+	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!"))
 		return false;
 
 	int ch = peek_char_utf8(src);
@@ -38,6 +38,9 @@ bool needs_quoting(module *m, const char *src, int srclen)
 
 	if (search_op(m, src, NULL, false))
 		return false;
+
+	if (!iswupper(ch) && !iswlower(ch))
+		return true;
 
 	while (srclen > 0) {
 		int lench = len_char_utf8(src);
