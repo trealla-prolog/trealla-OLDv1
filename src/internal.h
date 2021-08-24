@@ -450,7 +450,7 @@ typedef struct {
 
 typedef struct {
 	prolog_state st;
-	uint64_t pins, ugen;
+	uint64_t ugen;
 	idx_t v1, v2, cgen, orig_cgen, overflow;
 	uint32_t nbr_slots, nbr_vars;
 	bool catchme_retry:1;
@@ -475,9 +475,10 @@ struct arena_ {
 
 enum q_retry { QUERY_OK=0, QUERY_RETRY=1, QUERY_EXCEPTION=2 };
 enum unknowns { UNK_FAIL=0, UNK_ERROR=1, UNK_WARNING=2, UNK_CHANGEABLE=3 };
+enum occurs { OCCURS_FALSE=0, OCCURS_TRUE=1, OCCURS_ERROR = 2 };
 
 typedef struct prolog_flags_ {
-	short occurs_check;
+	enum occurs occurs_check;
 	enum unknowns unknown;
 	bool double_quote_codes:1;
 	bool double_quote_chars:1;
