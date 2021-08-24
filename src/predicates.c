@@ -10019,7 +10019,7 @@ static USE_RESULT pl_status fn_char_type_2(query *q)
 	int ch;
 
 	if (is_atom(p1)) {
-		if (LEN_STR(q, p1) != 1)
+		if (strlen_utf8(GET_STR(q, p1)) != 1)
 			return pl_failure;
 
 		ch = peek_char_utf8(GET_STR(q, p1));
@@ -10027,27 +10027,27 @@ static USE_RESULT pl_status fn_char_type_2(query *q)
 		ch = get_int(p1);
 
 	if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "alpha"))
-		return isalpha(ch);
+		return iswalpha(ch);
 	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "digit"))
-		return isdigit(ch);
+		return iswdigit(ch);
 	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "xdigit"))
-		return isxdigit(ch);
+		return iswxdigit(ch);
 	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "whitespace"))
-		return isblank(ch) || iswspace(ch);
+		return iswblank(ch) || iswspace(ch);
 	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "white"))
-		return isblank(ch);
+		return iswblank(ch);
 	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "space"))
 		return iswspace(ch);
 	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "lower"))
-		return islower(ch);
+		return iswlower(ch);
 	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "upper"))
-		return isupper(ch);
+		return iswupper(ch);
 	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "punct"))
-		return ispunct(ch);
+		return iswpunct(ch);
 	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "cntrl"))
-		return iscntrl(ch);
+		return iswcntrl(ch);
 	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "graph"))
-		return isgraph(ch);
+		return iswgraph(ch);
 	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "ascii"))
 		return ch < 128;
 	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "newline"))
