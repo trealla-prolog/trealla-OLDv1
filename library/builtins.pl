@@ -73,6 +73,7 @@ call_cleanup(G, C) :-
 	setup_call_cleanup(true, G, C).
 
 setup_call_cleanup(S, G, C) :-
+	must_be(S, callable, setup_call_cleanup/3, _),
 	call((S, !)),
 	'$register_cleanup'((C -> ! ; true)),
 	catch(G, Err, (catch((\+ \+ C), _, true), throw(Err))),
