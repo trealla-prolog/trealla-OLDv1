@@ -540,6 +540,9 @@ partial_string(S, P, V) :- '$append'(S, V, P).
 not(G) :- G, !, fail.
 not(_).
 
+\+(G) :- G, !, fail.
+\+(_).
+
 forall(Cond, Action) :- \+ (Cond, \+ Action).
 
 chars_base64(Plain, Base64,_) :- base64(Plain, Base64).

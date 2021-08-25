@@ -410,8 +410,8 @@ typedef struct {
 	cell *prev_cell;
 	module *m;
 	uint64_t ugen;
-	idx_t prev_frame, base_slot_nbr, overflow, cgen;
-	uint32_t nbr_slots, nbr_vars;
+	idx_t prev_frame, base_slot_nbr, overflow;
+	uint32_t nbr_slots, nbr_vars, cgen;
 } frame;
 
 enum { eof_action_eof_code, eof_action_error, eof_action_reset };
@@ -444,15 +444,16 @@ typedef struct {
 	miter *iter, *f_iter;
 	predicate *pr;
 	module *m;
-	idx_t curr_frame, fp, hp, tp, sp, cgen, arena_nbr;
+	idx_t curr_frame, fp, hp, tp, sp;
+	uint32_t cgen, arena_nbr;
 	uint8_t qnbr;
 } prolog_state;
 
 typedef struct {
 	prolog_state st;
 	uint64_t ugen;
-	idx_t v1, v2, cgen, orig_cgen, overflow;
-	uint32_t nbr_slots, nbr_vars;
+	idx_t v1, v2, overflow;
+	uint32_t nbr_slots, nbr_vars, cgen, orig_cgen;
 	bool catchme_retry:1;
 	bool catchme_exception:1;
 	bool barrier:1;

@@ -452,8 +452,10 @@ idx_t drop_choice(query *q)
 
 bool retry_choice(query *q)
 {
-	if (!q->cp)
+	if (!q->cp) {
+		q->st.cgen = 0;
 		return false;
+	}
 
 	idx_t curr_choice = drop_choice(q);
 	const choice *ch = GET_CHOICE(curr_choice);
@@ -651,7 +653,7 @@ pl_status make_choice(query *q)
 	return pl_success;
 }
 
-// A barrier is used when making a call/1, it sets a
+// A barrier is used when making a call, it sets a
 // new choice generation so that cuts are contained...
 
 pl_status make_barrier(query *q)

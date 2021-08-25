@@ -5062,6 +5062,7 @@ static USE_RESULT pl_status fn_iso_disjunction_2(query *q)
 	return pl_success;
 }
 
+#if 0
 static USE_RESULT pl_status fn_iso_negation_1(query *q)
 {
 	if (q->retry)
@@ -5077,6 +5078,7 @@ static USE_RESULT pl_status fn_iso_negation_1(query *q)
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
+#endif
 
 static USE_RESULT pl_status fn_ignore_1(query *q)
 {
@@ -11355,7 +11357,7 @@ static const struct builtins g_predicates_iso[] =
 	{"=..", 2, fn_iso_univ_2, NULL, false},
 	{"->", 2, fn_iso_if_then_2, NULL, false},
 	{";", 2, fn_iso_disjunction_2, NULL, false},
-	{"\\+", 1, fn_iso_negation_1, NULL, false},
+	//{"\\+", 1, fn_iso_negation_1, NULL, false},
 	{"once", 1, fn_iso_once_1, NULL, false},
 	{"throw", 1, fn_iso_throw_1, NULL, false},
 	{"$catch", 3, fn_iso_catch_3, NULL, false},
