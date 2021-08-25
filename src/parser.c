@@ -1024,7 +1024,6 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 		}
 	}
 
-#if 0
 	if (IS_FY(c)) {
 			if (!strcmp(GET_STR(p, c), "\\+")) {
 			cell *rhs = c + 1;
@@ -1038,7 +1037,6 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			c->nbr_cells = 1 + rhs->nbr_cells;
 		}
 	}
-#endif
 
 	return p->r->cells + c_idx;
 }
