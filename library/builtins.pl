@@ -534,19 +534,16 @@ directory_exists(F) :- exists_directory(F).
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-partial_string(S, P) :- '$append'(S, _, P).
-partial_string(S, P, V) :- '$append'(S, V, P).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 
 not(G) :- G, !, fail.
 not(_).
 
-\+(G) :- G, !, fail.
-\+(_).
+forall(Cond, Action) :- \+ call((Cond, \+ Action)).
 
-forall(Cond, Action) :- \+ (Cond, \+ Action).
-
-chars_base64(Plain, Base64,_) :- base64(Plain, Base64).
-chars_urlenc(Plain, Url, _) :- urlenc(Plain, Url).
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 current_key(K) :- var(K), '$record_key'(K,_).
 recorda(K, V) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V)).
@@ -557,6 +554,10 @@ recordz(K, V, R) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V), R).
 recorded(K, V, R) :- nonvar(K), clause('$record_key'(K,V), _, R).
 
 format(F) :- format(F, []).
+partial_string(S, P) :- '$append'(S, _, P).
+partial_string(S, P, V) :- '$append'(S, V, P).
+chars_base64(Plain, Base64,_) :- base64(Plain, Base64).
+chars_urlenc(Plain, Url, _) :- urlenc(Plain, Url).
 term_to_atom(T, S) :- write_term_to_chars(S, T, []).
 write_term_to_atom(S, T, Opts) :- write_term_to_chars(S, Opts, T).
 read_term_from_atom(S, T, Opts) :- read_term_from_chars(S, Opts, T).
