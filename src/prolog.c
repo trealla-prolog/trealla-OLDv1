@@ -135,25 +135,8 @@ bool pl_eval(prolog *pl, const char *s)
 
 	parser *p = create_parser(pl->curr_m);
 	if (!p) return false;
-	ASTRING(cmd);
-	const char *ptr = s + strlen(s) - 1;
-
-	while (ptr != s) {
-		if ((*ptr == '.') || !isspace(*ptr))
-			break;
-
-		ptr--;
-	}
-
-	if (*ptr != '.') {
-		ASTRING_sprintf(cmd, "%s.", s);
-	} else {
-		ASTRING_strcat(cmd, s);
-	}
-
 	p->command = true;
-	bool ok = run(p, ASTRING_cstr(cmd), true, false);
-	ASTRING_free(cmd);
+	bool ok = run(p, s, true, false);
 	pl->curr_m = p->m;
 	destroy_parser(p);
 	return ok;
