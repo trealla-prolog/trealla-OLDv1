@@ -39,7 +39,7 @@ bool needs_quoting(module *m, const char *src, int srclen)
 	if (search_op(m, src, NULL, false))
 		return false;
 
-	if (!iswlower(ch) || !isalpha(ch))
+	if (!iswlower(ch) || !iswalpha(ch))
 		return true;
 
 	while (srclen > 0) {
