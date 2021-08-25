@@ -5,41 +5,8 @@
     "children" : [ {
       "name" : "Error instead of success",
       "children" : [ {
-        "name" : "lgt_unicode_non_ground_compound_term_reading",
-        "uid" : "985d28d9997887c2",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 1
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "unicode/syntax/tests.lgt", "87-91", "https://github.com/LogtalkDotOrg/logtalk3/tree/20236c0b986ddedb0f5eaa6f7e97a015b74888b1/tests/prolog/unicode/syntax/tests.lgt#L87" ]
-      }, {
-        "name" : "lgt_unicode_atom_reading_lower_case_start",
-        "uid" : "cb9ab1a20695c056",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 1
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "unicode/syntax/tests.lgt", "53-57", "https://github.com/LogtalkDotOrg/logtalk3/tree/20236c0b986ddedb0f5eaa6f7e97a015b74888b1/tests/prolog/unicode/syntax/tests.lgt#L53" ]
-      }, {
-        "name" : "lgt_unicode_ground_compound_term_writing",
-        "uid" : "52581c7c299969f6",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 2
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "unicode/syntax/tests.lgt", "71-78", "https://github.com/LogtalkDotOrg/logtalk3/tree/20236c0b986ddedb0f5eaa6f7e97a015b74888b1/tests/prolog/unicode/syntax/tests.lgt#L71" ]
-      }, {
         "name" : "lgt_unicode_atom_writing_lower_case_start_quoted",
-        "uid" : "f1ad6c79834c8d14",
+        "uid" : "d537b9be7e4e4ba9",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
@@ -49,8 +16,8 @@
         "newFailed" : false,
         "parameters" : [ "unicode/syntax/tests.lgt", "38-43", "https://github.com/LogtalkDotOrg/logtalk3/tree/20236c0b986ddedb0f5eaa6f7e97a015b74888b1/tests/prolog/unicode/syntax/tests.lgt#L38" ]
       }, {
-        "name" : "lgt_unicode_variable_unifying",
-        "uid" : "98dc5f238c7d7682",
+        "name" : "lgt_unicode_non_ground_compound_term_reading",
+        "uid" : "8d9246611d6db2c8",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
@@ -58,14 +25,47 @@
         },
         "flaky" : false,
         "newFailed" : false,
+        "parameters" : [ "unicode/syntax/tests.lgt", "87-91", "https://github.com/LogtalkDotOrg/logtalk3/tree/20236c0b986ddedb0f5eaa6f7e97a015b74888b1/tests/prolog/unicode/syntax/tests.lgt#L87" ]
+      }, {
+        "name" : "lgt_unicode_variable_unifying",
+        "uid" : "c83cabf0823b72e8",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
         "parameters" : [ "unicode/syntax/tests.lgt", "67-71", "https://github.com/LogtalkDotOrg/logtalk3/tree/20236c0b986ddedb0f5eaa6f7e97a015b74888b1/tests/prolog/unicode/syntax/tests.lgt#L67" ]
+      }, {
+        "name" : "lgt_unicode_ground_compound_term_writing",
+        "uid" : "985cb6e078c87d18",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 1
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "unicode/syntax/tests.lgt", "71-78", "https://github.com/LogtalkDotOrg/logtalk3/tree/20236c0b986ddedb0f5eaa6f7e97a015b74888b1/tests/prolog/unicode/syntax/tests.lgt#L71" ]
+      }, {
+        "name" : "lgt_unicode_atom_reading_lower_case_start",
+        "uid" : "a613e191e95a3e56",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 1
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "unicode/syntax/tests.lgt", "53-57", "https://github.com/LogtalkDotOrg/logtalk3/tree/20236c0b986ddedb0f5eaa6f7e97a015b74888b1/tests/prolog/unicode/syntax/tests.lgt#L53" ]
       } ],
       "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
     }, {
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "lgt_setof_3_34",
-        "uid" : "4cebd1ea7e5d4ac3",
+        "uid" : "d02b7c88d13f3a46",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
