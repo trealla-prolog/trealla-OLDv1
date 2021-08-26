@@ -6,12 +6,8 @@
 
 :- use_module(library(apply)).
 
-member(El, [H|T]) :-
-    member_(T, El, H).
-
-member_(_, El, El).
-member_([H|T], El, _) :-
-    member_(T, El, H).
+member(X, [X|_]).
+member(X, [_|Xs]) :- member(X, Xs).
 
 select(X, [X|T], T).
 select(X, [H|T], [H|Rest]) :- select(X, T, Rest).
