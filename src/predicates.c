@@ -1654,10 +1654,10 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 	if ((len1 + len2) != len3)
 		return pl_failure;
 
-	if (slicecmp(s3, len1, s1, len1))
+	if (memcmp(s3, s1, len1))
 		return pl_failure;
 
-	if (slicecmp(s3+len1, len2, s2, len2))
+	if (memcmp(s3+len1, s2, len2))
 		return pl_failure;
 
 	return pl_success;
