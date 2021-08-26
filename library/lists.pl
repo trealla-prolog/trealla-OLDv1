@@ -4,8 +4,7 @@
 	last/2, flatten/2
 	]).
 
-:- use_module(library(apply)).
-
+member(X, [X|T]) :- T == [] -> !.
 member(X, [X|_]).
 member(X, [_|Xs]) :- member(X, Xs).
 
