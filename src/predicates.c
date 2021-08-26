@@ -1648,10 +1648,16 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 		return pl_success;
 	}
 
-	if (slicecmp(GET_STR(q, p3), LEN_STR(q, p3), GET_STR(q, p1), LEN_STR(q, p1)))
+	size_t len1 = LEN_STR(q, p1), len2 = LEN_STR(q, p2), len3 = LEN_STR(q, p3);
+	const char *s1 = GET_STR(q, p1), *s2 = GET_STR(q, p2), *s3 = GET_STR(q, p3);
+
+	if ((len1 + len2) != len3)
 		return pl_failure;
 
-	if (slicecmp(GET_STR(q, p3)+LEN_STR(q, p1), LEN_STR(q, p3)-LEN_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p2)))
+	if (slicecmp(s3, len1, s1, len1))
+		return pl_failure;
+
+	if (slicecmp(s3+len1, len2, s2, len2))
 		return pl_failure;
 
 	return pl_success;
