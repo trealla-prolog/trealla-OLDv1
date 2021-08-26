@@ -320,10 +320,12 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 	if (depth > MAX_DEPTH)
 		return -1;
 
+#if 0
 	if (q->is_dump_vars && is_stream(c)) {
 		dst += snprintf(dst, dstlen, "'$stream'(%d)", (int)get_smallint(c));
 		return dst - save_dst;
 	}
+#endif
 
 	if (is_bigint(c)) {
 		int radix = 10;
@@ -537,10 +539,12 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 	if (depth > MAX_DEPTH)
 		return -1;
 
+#if 0
 	if (q->is_dump_vars && is_stream(c)) {
 		dst += snprintf(dst, dstlen, "'$stream'(%d)", (int)get_smallint(c));
 		return dst - save_dst;
 	}
+#endif
 
 	if (is_bigint(c)) {
 		int radix = 10;
