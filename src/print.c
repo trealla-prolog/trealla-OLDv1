@@ -33,14 +33,27 @@ bool needs_quoting(module *m, const char *src, int srclen)
 
 	int ch = peek_char_utf8(src);
 
-	if (iswupper(ch) || isdigit(ch) || (ch == '_') || (ch == '$'))
+	if (iswupper(ch) || isdigit(ch) || (ch == '_'))
 		return true;
 
 	if (search_op(m, src, NULL, false))
-		return false;
+		return strchr(src, ' ');
 
-	if (!iswlower(ch) || !iswalpha(ch))
-		return true;
+	if (!iswlower(ch) || !iswalpha(ch)) { // NO %/
+		static const char *s_symbols = "+-*<>=@#^~\\:$";
+		int quote = false;
+
+		while (srclen--) {
+			if (!strchr(s_symbols, *src)) {
+				quote = true;
+				break;
+			}
+
+			src++;
+		}
+
+		return quote;
+	}
 
 	while (srclen > 0) {
 		int lench = len_char_utf8(src);
