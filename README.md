@@ -31,7 +31,7 @@ native UTF-8.
 
 It aligns well with standard C as functions like strcmp/memcmp that
 require no special handling to respect codepoint order. This also works
-seamlesly with the implementation of double-quoted *strings* (ie.
+seamlessly with the implementation of double-quoted *strings* (ie.
 chars-list), DCGs, and mmap'd files. Any code-point specific
 requirements, like *get_char*, *get_code*, *sub_atom*, *atom_length*,
 *atom_codes*, *atom_chars* & *_upper/*_lower are handled on the fly.
@@ -156,7 +156,7 @@ Special thanks to [Christian Thaeter](https://github.com/cehteh) for his
 ongoing work with code cleanup and development ideas.
 
 Special thanks to [Paulo Moura](https://github.com/pmoura) for his patience
-and sleuthing in the quest for Trealla to run his LogTalk project.
+and sleuthing in the quest for Trealla to run his Logtalk project.
 
 
 Strings
@@ -182,73 +182,78 @@ Non-standard predicates
 
 	between/3
 	forall/2
-	samsort/2				# same as msort/2
+	samsort/2                   # same as msort/2
 	msort/2
 	merge/3
-	format/[1-3]			# needs library(format)
+	format/[1-3]
 	predicate_property/2
 	numbervars/[1,3-4]
 	e/0
 	name/2
 	tab/[1,2]
 
-	maplist/[2-8]				# autoloaded from library(apply)
-	foldl/[4-7]					# autoloaded from library(apply)
-	include/3					# autoloaded from library(apply)
-	exclude/3					# autoloaded from library(apply)
+	maplist/[2-8]               # auto-loaded from library(apply)
+	foldl/[4-7]                 # auto-loaded from library(apply)
+	include/3                   # auto-loaded from library(apply)
+	exclude/3                   # auto-loaded from library(apply)
 
-	read_term_from_atom/3		# use read_term_from_chars/3 instead
-	write_term_to_atom/3		# use write_term_to_chars/3 instead
-	term_to_atom/2				# use write_term_to_chars/3 instead
+	read_term_from_atom/3       # use read_term_from_chars/3 instead
+	write_term_to_atom/3        # use write_term_to_chars/3 instead
+	term_to_atom/2              # use write_term_to_chars/3 instead
 
-	srandom/1					# set_seed(+integer) set random number seed
-	set_seed/1					# set_seed(+integer) set random number seed
-	get_seed/1					# get_seed(-integer) get random number seed
-	rand/1						# rand(-integer) integer [0,RAND_MAX]
-	random/1    	            # random(-float) float [0.0,<1.0]
+	srandom/1                   # set_seed(+integer) set random number seed
+	set_seed/1                  # set_seed(+integer) set random number seed
+	get_seed/1                  # get_seed(-integer) get random number seed
+	rand/1                      # rand(-integer) integer [0,RAND_MAX]
+	random/1                    # random(-float) float [0.0,<1.0]
 	random_between/3            # random_between(+int,+int,-int) integer [arg1,<arg2]
 
 	random_float/0              # function returning float [0.0,<1.0]
 	random_integer/0            # function returning integer [0,RAND_MAX]
-	rand/0						# function returning integer [0,RAND_MAX]
+	rand/0                      # function returning integer [0,RAND_MAX]
 
-	put_atts/2					# SICStus-compatible
-	get_atts/2					# SICStus-compatible
-	del_atts/1					# SICStus-compatible
+	bb_get/2                    # SICStus-compatible
+	bb_put/2                    # SICStus-compatible
+	bb_delete/2                 # SICStus-compatible
+	bb_update/3                 # SICStus-compatible
 
-	put_attr/3					# SWI-compatible
-	get_attr/3					# SWI-compatible
-	del_attr/2					# SWI-compatible
+	put_atts/2                  # SICStus-compatible
+	get_atts/2                  # SICStus-compatible
+	del_atts/1                  # SICStus-compatible
 
-	freeze/2					# use_module(library(freeze))
-	frozen/2					# use_module(library(freeze))
+	put_attr/3                  # SWI-compatible
+	get_attr/3                  # SWI-compatible
+	del_attr/2                  # SWI-compatible
 
-	must_be/4					# must_be(+rule,+type,+rule,+arg)
-	expand_term/2				# expand_term(+rule,-rule)
-	memberchk/2					# memberchk(+rule,+list).
-	nonmember/2					# \+ memberchk(+rule,+list)
-	atomic_concat/3				# atomic_concat(+atom,+list,-list)
-    atomic_list_concat/2		# atomic_list_concat(L,Atom) (bidirectional)
-    atomic_list_concat/3		# atomic_list_concat(L,Sep,Atom) (bidirectional)
-	read_term_from_chars/2		# read_term_from_chars(+chars,-rule)
-	read_term_from_chars/3		# read_term_from_chars(+chars,+opts,-rule)
-	write_term_to_chars/3		# write_term_to_chars(+rule,+opts,-chars)
-	write_canonical_to_chars/3	# write_term_to_chars(+rule,+opts,-chars)
-	chars_base64/3				# currently options are ignored
-	chars_urlenc/3				# currently options are ignored
-	hex_chars/2             	# as number_chars, but in hex
-	octal_chars/2           	# as number_chars, but in octal
-	partial_string/2			# partial_string(+string,-string)
-	partial_string/3			# partial_string(+string,-string,-var)
-	if/3, (*->)/2				# softcut
-	setup_call_cleanup/3		# setup_call_cleanup(:Setup,:Goal,:Cleanup)
-	call_cleanup/2				# call_cleanup(:Goal,:Cleanup)
-	variant/2					# variant(+term1,+term2)
-	term_attvars/2				# term_attvars(+Term,-Vs)
-	copy_term_nat/2				# doesn't copy attrs
-	copy_term/3					# copy_term(+term1,-term2,-goals)
-	unifiable/3					# unifiable(+term1,+term2,-goals)
-	?=/2						# ?=(+term1,+term2)
+	freeze/2                    # use_module(library(freeze))
+	frozen/2                    # use_module(library(freeze))
+
+	must_be/4                   # must_be(+rule,+type,+rule,+arg)
+	expand_term/2               # expand_term(+rule,-rule)
+	memberchk/2                 # memberchk(+rule,+list).
+	nonmember/2                 # \+ memberchk(+rule,+list)
+	atomic_concat/3             # atomic_concat(+atom,+list,-list)
+	atomic_list_concat/2	    # atomic_list_concat(L,Atom) (bidirectional)
+	atomic_list_concat/3	    # atomic_list_concat(L,Sep,Atom) (bidirectional)
+	read_term_from_chars/2	    # read_term_from_chars(+chars,-rule)
+	read_term_from_chars/3	    # read_term_from_chars(+chars,+opts,-rule)
+	write_term_to_chars/3	    # write_term_to_chars(+rule,+opts,-chars)
+	write_canonical_to_chars/3  # write_term_to_chars(+rule,+opts,-chars)
+	chars_base64/3              # currently options are ignored
+	chars_urlenc/3              # currently options are ignored
+	hex_chars/2                 # as number_chars, but in hex
+	octal_chars/2               # as number_chars, but in octal
+	partial_string/2            # partial_string(+string,-string)
+	partial_string/3            # partial_string(+string,-string,-var)
+	if/3, (*->)/2               # soft-cut
+	setup_call_cleanup/3        # setup_call_cleanup(:Setup,:Goal,:Cleanup)
+	call_cleanup/2              # call_cleanup(:Goal,:Cleanup)
+	variant/2                   # variant(+term1,+term2)
+	term_attvars/2              # term_attvars(+Term,-Vs)
+	copy_term_nat/2             # doesn't copy attrs
+	copy_term/3                 # copy_term(+term1,-term2,-goals)
+	unifiable/3                 # unifiable(+term1,+term2,-goals)
+	?=/2                        # ?=(+term1,+term2)
 	findall/4
 	var_number/2
 	ignore/1
@@ -264,7 +269,7 @@ Non-standard predicates
 	gcd/2
 	char_type/2
 	code_type/2
-	uuid/1					# generates non-standard UUID
+	uuid/1                      # generates non-standard UUID
 	load_files/[1,2]
 	split_atom/4
 	plus/3
@@ -291,18 +296,18 @@ Non-standard predicates
 
 	directory_files/2
 	delete_file/1
-	exists_file/1			# also file_exists/1
+	exists_file/1               # also file_exists/1
 	rename_file/2
 	time_file/2
 	size_file/2
 
-	exists_directory/1		# also directory_exists/1
+	exists_directory/1          # also directory_exists/1
 	make_directory/1
 	make_directory_path/1
 	working_directory/2
 
 	chdir/1
-	absolute_file_name/[2,3] # expand(Bool) & relative_to(file) options
+	absolute_file_name/[2,3]    # expand(Bool) & relative_to(file) options
 	access_file/2
 
 	current_key/1
@@ -320,54 +325,54 @@ Non-standard predicates
 	atom_upper/2
 	atom_lower/2
 
-	popcount/1              # function returning number of 1 bits
-	log10/1                 # function returning log10 of arg
-	now/0                   # function returning C-time in secs as integer
-	now/1                   # now (-integer) C-time in secs as integer
-	get_time/1              # get_time(-variable) elapsed wall time in secs as float
-	cpu_time/1              # cpu_time(-variable) elapsed CPU time in secs as float
+	popcount/1                  # function returning number of 1 bits
+	log10/1                     # function returning log10 of arg
+	now/0                       # function returning C-time in secs as integer
+	now/1                       # now (-integer) C-time in secs as integer
+	get_time/1                  # get_time(-variable) elapsed wall time in secs as float
+	cpu_time/1                  # cpu_time(-variable) elapsed CPU time in secs as float
 
-	sleep/1					# sleep time in secs
-	delay/1                 # sleep time for ms
-	split/4                 # split(+string,+sep,?left,?right)
+	sleep/1                     # sleep time in secs
+	delay/1                     # sleep time for ms
+	split/4                     # split(+string,+sep,?left,?right)
 	pid/1
 	shell/1
 	shell/2
 	wall_time/1
 	date_time/6
 	date_time/7
-	loadfile/2              # loadfile(+filename,-string)
-	savefile/2              # savefile(+filename,+string)
-	getfile/2               # getfile(+filename,-strings)
-	getline/1               # getline(-string)
-	getline/2               # getline(+stream,-string)
-	getlines/1              # getlines(-strings)
-	getlines/2              # getlines(+stream,-strings)
-	bread/3                 # bread(+stream,?len,-string)
-	bwrite/2                # bwrite(+stream,+string)
-	replace/4               # replace(+string,+old,+new,-string)
-	sha1/2                  # sha1(+plaintext,?hash)        NEEDS OPENSSL
-	sha256/2                # sha256(+plaintext,?hash)      NEEDS OPENSSL
-	sha512/2                # sha512(+plaintext,?hash)      NEEDS OPENSSL
-	persist/1               # directive 'persist funct/arity'
+	loadfile/2                  # loadfile(+filename,-string)
+	savefile/2                  # savefile(+filename,+string)
+	getfile/2                   # getfile(+filename,-strings)
+	getline/1                   # getline(-string)
+	getline/2                   # getline(+stream,-string)
+	getlines/1                  # getlines(-strings)
+	getlines/2                  # getlines(+stream,-strings)
+	bread/3                     # bread(+stream,?len,-string)
+	bwrite/2                    # bwrite(+stream,+string)
+	replace/4                   # replace(+string,+old,+new,-string)
+	sha1/2                      # sha1(+plaintext,?hash)        NEEDS OPENSSL
+	sha256/2                    # sha256(+plaintext,?hash)      NEEDS OPENSSL
+	sha512/2                    # sha512(+plaintext,?hash)      NEEDS OPENSSL
+	persist/1                   # directive 'persist funct/arity'
 
-	open(stream(Str),...)   # with open/4 reopen a stream
-	open(F,M,S,[mmap(Ls)])  # with open/4 mmap() the file to Ls
+	open(stream(Str),...)       # with open/4 reopen a stream
+	open(F,M,S,[mmap(Ls)])      # with open/4 mmap() the file to Ls
 
 Note: consult/1 and load_files/2 support lists of files as args. Also
 support loading into modules eg. *consult(MOD:FILE-SPEC)*.
 
-	popen/3					# popen(+cmd,+mode,-stream)
-	popen/4					# popen(+cmd,+mode,-stream,+opts)
+	popen/3                     # popen(+cmd,+mode,-stream)
+	popen/4                     # popen(+cmd,+mode,-stream,+opts)
 
 Note: popen/[3,4] use the Unix popen() system call:
 
 	tpl -g "use_module(library(apply)),popen('ps -a',read,S,[]),getlines(S,Ls),close(S),maplist(print,Ls),halt"
-		PID TTY          TIME CMD
-	   2806 tty2     00:00:00 gnome-session-b
-	  31645 pts/0    00:00:00 tpl
-	  31646 pts/0    00:00:00 sh
-	  31647 pts/0    00:00:00 ps
+		PID   TTY      TIME     CMD
+		2806  tty2     00:00:00 gnome-session-b
+		31645 pts/0    00:00:00 tpl
+		31646 pts/0    00:00:00 sh
+		31647 pts/0    00:00:00 ps
 
 
 Definite Clause Grammars
@@ -504,7 +509,6 @@ tasks finish.
 An example:
 
 ```prolog
-:-use_module(library(format)).
 :-use_module(library(http)).
 
 geturl(Url) :-
