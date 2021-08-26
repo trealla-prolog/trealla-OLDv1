@@ -5080,23 +5080,6 @@ static USE_RESULT pl_status fn_iso_negation_1(query *q)
 }
 #endif
 
-static USE_RESULT pl_status fn_ignore_1(query *q)
-{
-	if (q->retry) {
-		// reset the g->cgen how?
-		return pl_success;
-	}
-
-	GET_FIRST_ARG(p1,callable);
-	cell *tmp = clone_to_heap(q, true, p1, 2);
-	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
-	make_call(q, tmp+nbr_cells);
-	may_error(make_barrier(q));
-	q->st.curr_cell = tmp;
-	return pl_success;
-}
-
 static USE_RESULT pl_status fn_iso_catch_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -11358,7 +11341,6 @@ static const struct builtins g_predicates_iso[] =
 	{"->", 2, fn_iso_if_then_2, NULL, false},
 	{";", 2, fn_iso_disjunction_2, NULL, false},
 	{"\\+", 1, fn_iso_negation_1, NULL, false},
-	{"once", 1, fn_iso_once_1, NULL, false},
 	{"throw", 1, fn_iso_throw_1, NULL, false},
 	{"$catch", 3, fn_iso_catch_3, NULL, false},
 
@@ -11502,7 +11484,6 @@ static const struct builtins g_predicates_other[] =
 
 	// Miscellaneous...
 
-	{"ignore", 1, fn_ignore_1, "+callable", false},
 	{"memberchk", 2, fn_memberchk_2, "?rule,+list", false},
 	{"nonmember", 2, fn_nonmember_2, "?rule,+list", false},
 

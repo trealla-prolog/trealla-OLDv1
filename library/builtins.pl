@@ -74,8 +74,8 @@ call_cleanup(G, C) :-
 
 setup_call_cleanup(S, G, C) :-
 	must_be(S, callable, setup_call_cleanup/3, _),
-	call((S, !)),
-	'$register_cleanup'((C -> ! ; true)),
+	once(S),
+	'$register_cleanup'(ignore(C)),
 	catch(G, Err, (catch((\+ \+ C), _, true), throw(Err))),
 	'$chk_is_det'.
 
@@ -570,6 +570,8 @@ load_files(Files) :- load_files(Files,[]).
 consult(Files) :- load_files(Files,[]).
 strip_module(T,M,P) :- T=M:P -> true ; P=T, module(M).
 ?=(X,Y) :- \+ unifiable(X,Y,[_|_]).
+ignore(G) :- G -> ! ; true.
+once(G) :- G, !.
 
 unifiable(T1, T2, Gs) :-
 	copy_term('$unifiable'(T1,T2,Gs), G0),
