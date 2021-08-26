@@ -81,19 +81,16 @@ setup_call_cleanup(S, G, C) :-
 catch(G, E, C) :-
 	'$call'('$catch'(G, E, C)).
 
-'$append'([], L, L).
-'$append'([H|T], L, [H|R]) :- '$append'(T, L, R).
+findall(T, G, B) :-
+	copy_term('$findall'(T,G,B), G0),
+	'$rawcall'(G0),
+	'$findall'(T,G,B)=G0.
 
 findall(T, G, B, Tail) :-
 	'$mustbe_list_or_var'(B),
 	'$mustbe_list_or_var'(Tail),
 	findall(T, G, B0),
 	'$append'(B0, Tail, B), !.
-
-findall(T, G, B) :-
-	copy_term('$findall'(T,G,B), G0),
-	'$rawcall'(G0),
-	'$findall'(T,G,B)=G0.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Derived from code by R.A. O'Keefe
@@ -577,6 +574,8 @@ unifiable(T1, T2, Gs) :-
 	'$rawcall'(G0),
 	'$unifiable'(T1,T2,Gs)=G0.
 
+'$append'([], L, L).
+'$append'([H|T], L, [H|R]) :- '$append'(T, L, R).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SWI compatible
