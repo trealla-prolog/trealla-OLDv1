@@ -1683,7 +1683,7 @@ static USE_RESULT pl_status fn_iso_atom_length_2(query *q)
 	if (!is_iso_atom(p1))
 		return throw_error(q, p1, "type_error", "atom");
 
-	if (is_integer(p2) && is_negative(p2))
+	if (is_smallint(p2) && is_negative(p2))
 		return throw_error(q, p2, "domain_error", "not_less_than_zero");
 
 	size_t len = substrlen_utf8(GET_STR(q, p1), LEN_STR(q, p1));
@@ -1730,7 +1730,7 @@ int get_stream(query *q, cell *p1)
 		return n;
 	}
 
-	if (!is_integer(p1) || !(p1->flags&FLAG_STREAM))
+	if (!is_smallint(p1) || !(p1->flags&FLAG_STREAM))
 		return -1;
 
 	if (is_negative(p1) || is_ge(p1,MAX_STREAMS))
@@ -1739,7 +1739,7 @@ int get_stream(query *q, cell *p1)
 	if (!g_streams[get_int(p1)].fp)
 		return -1;
 
-	return get_int(p1);
+	return get_smallint(p1);
 }
 
 static bool is_closed_stream(cell *p1)
@@ -1747,10 +1747,7 @@ static bool is_closed_stream(cell *p1)
 	if (!(p1->flags&FLAG_STREAM))
 		return false;
 
-	if (is_negative(p1) || is_ge(p1,MAX_STREAMS))
-		return false;
-
-	if (g_streams[get_int(p1)].fp)
+	if (g_streams[get_smallint(p1)].fp)
 		return false;
 
 	return true;
@@ -2301,7 +2298,7 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 	rule *r = &q->st.curr_clause2->r;
 	GET_FIRST_ARG(pstrx,any);
 
-	if (is_integer(pstrx))
+	if (is_smallint(pstrx))
 		pstrx->flags |= FLAG_STREAM | FLAG_HEX;
 
 	stash_me(q, r, false);
