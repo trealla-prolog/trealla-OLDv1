@@ -2430,7 +2430,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	if (n < 0)
 		return throw_error(q, p1, "resource_error", "too_many_streams");
 
-	const char *filename;
+	const char *filename = NULL;
 	stream *oldstr = NULL;
 
 	if (is_structure(p1) && (p1->arity == 1) && !slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "stream")) {

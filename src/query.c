@@ -1376,8 +1376,9 @@ static USE_RESULT pl_status match_head(query *q)
 				next_key(q);
 			} else
 				q->st.curr_clause = pr->head;
-		} else
+		} else {
 			q->st.curr_clause = pr->head;
+		}
 
 		frame *g = GET_FRAME(q->st.curr_frame);
 		g->ugen = q->st.m->pl->ugen;

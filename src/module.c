@@ -807,21 +807,25 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	const int ARG_NBR = pr->key.arity;
 
 	for (int i = 0; (i < ARG_NBR) && (i < pr->key.arity) && !pr->is_noindex; i++) {
-		bool noindex = (i == 0) && is_structure(p1);
+		bool noindex = false;
+
+		if ((i == 0) && is_structure(p1)) {
+#if 0
+			query q = (query){0};
+			q.pl = m->pl;
+			q.st.m = m;
+			char *dst = print_term_to_strbuf(&q, c, 0, 0);
+			if (dst) printf("*** [%d] %s\n", i, dst);
+			free(dst);
+#endif
+			noindex = true;
+		}
 
 		if ((i > 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
 			noindex = true;
 
 		if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
 			if (p1->val_off == g_at_s) {
-#if 0
-				query q = (query){0};
-				q.pl = m->pl;
-				q.st.m = m;
-				char *dst = print_term_to_strbuf(&q, c, 0, 0);
-				printf("*** [%d] %s\n", i, dst);
-				free(dst);
-#endif
 				noindex = true;
 			}
 		}
@@ -842,7 +846,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 		&& !m->pl->noindex
 		&& !pr->is_noindex
 		&& ((!pr->is_dynamic && (pr->cnt > 15))
-			|| (pr->is_dynamic && (pr->cnt > 100)))) {
+			|| (pr->is_dynamic && (pr->cnt > 50)))) {
 		reindex_predicate(m, pr);
 	} else {
 		if (pr->idx1) {
