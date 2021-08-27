@@ -1729,10 +1729,7 @@ int get_stream(query *q, cell *p1)
 		return n;
 	}
 
-	if (!is_smallint(p1) || !(p1->flags&FLAG_STREAM))
-		return -1;
-
-	if (is_negative(p1) || is_ge(p1,MAX_STREAMS))
+	if (!(p1->flags&FLAG_STREAM))
 		return -1;
 
 	if (!g_streams[get_int(p1)].fp)
