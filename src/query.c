@@ -951,6 +951,8 @@ static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2
 	if (p1->arity != p2->arity)
 		return false;
 
+	assert(is_literal(p1) && is_literal(p2));
+
 	if (p1->val_off != p2->val_off)
 		return false;
 
