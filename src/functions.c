@@ -1881,9 +1881,6 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		return -1;
 	}
 
-	assert(p1->tag && p2->tag);
-	assert((p1->tag != TAG_END) && (p2->tag != TAG_END));
-
 	if (p1->arity < p2->arity)
 		return -1;
 

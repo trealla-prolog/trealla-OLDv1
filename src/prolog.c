@@ -378,7 +378,6 @@ prolog *pl_create()
 			ensure(src);
 			memcpy(src, lib->start, *lib->len);
 			src[*lib->len] = '\0';
-			assert(pl->user_m);
 			ASTRING(s1);
 			ASTRING_sprintf(s1, "library/%s", lib->name);
 			load_text(pl->user_m, src, ASTRING_cstr(s1));

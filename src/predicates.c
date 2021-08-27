@@ -178,7 +178,6 @@ void make_literal(cell *tmp, idx_t offset)
 
 static void make_smalln(cell *tmp, const char *s, size_t n)
 {
-	assert(n < MAX_SMALL_STRING);
 	tmp->tag = TAG_CSTRING;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
@@ -4255,7 +4254,6 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 
 		if (is_cstring(tmp2) /*&& arity*/) {
 			cell *c = tmp2;
-			assert(strlen(GET_STR(q, tmp2)) == LEN_STR(q, tmp2));
 			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, tmp2));
 			may_idx_error(off);
 			//unshare_cell(tmp2);
@@ -4613,8 +4611,6 @@ static USE_RESULT pl_status fn_iso_abolish_1(query *q)
 
 	bool found = false;
 
-	assert(strlen(GET_STR(q, p1_name)) == LEN_STR(q, p1_name));
-
 	if (get_builtin(q->st.m->pl, GET_STR(q, p1_name), get_int(p1_arity), &found, NULL), found)
 		return throw_error(q, p1, "permission_error", "modify,static_procedure");
 
@@ -4697,8 +4693,6 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 
 	bool found = false;
 
-	assert(strlen(GET_STR(q, head)) == LEN_STR(q, head));
-
 	if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found, NULL), found) {
 		if (!GET_OP(head))
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
@@ -4724,7 +4718,6 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	cell *h = get_head(p->r->cells);
 
 	if (is_cstring(h)) {
-		assert(strlen(GET_STR(q, h)) == LEN_STR(q, h));
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, h));
 		may_idx_error(off);
 		unshare_cell(h);
@@ -4767,8 +4760,6 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 
 	bool found = false;
 
-	assert(strlen(GET_STR(q, head)) == LEN_STR(q, head));
-
 	if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found, NULL), found) {
 		if (!GET_OP(head))
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
@@ -4794,7 +4785,6 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	cell *h = get_head(p->r->cells);
 
 	if (is_cstring(h)) {
-		assert(strlen(GET_STR(q, h)) == LEN_STR(q, h));
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, h));
 		may_idx_error(off);
 		unshare_cell(h);
@@ -4874,7 +4864,6 @@ static USE_RESULT pl_status fn_iso_call_n(query *q)
 
 	if (is_cstring(tmp2)) {
 		cell *c = tmp2;
-		assert(strlen(GET_STR(q, tmp2)) == LEN_STR(q, tmp2));
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, tmp2));
 		may_idx_error(off);
 		//unshare_cell(tmp2);
@@ -4926,9 +4915,6 @@ static USE_RESULT pl_status fn_iso_invoke_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,callable);
-
-	assert(strlen(GET_STR(q, p1)) == LEN_STR(q, p1));
-
 	module *m = find_module(q->st.m->pl, GET_STR(q, p1));
 
 	if (!m)
@@ -5411,7 +5397,6 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 			tmp[0].nbr_cells = 1 + arity;
 
 			if (is_cstring(p2)) {
-				assert(strlen(GET_STR(q, p2)) == LEN_STR(q, p2));
 				tmp[0].val_off = index_from_pool(q->st.m->pl, GET_STR(q, p2));
 			} else
 				tmp[0].val_off = p2->val_off;
@@ -5472,8 +5457,6 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 
 	if (!is_integer(pa))
 		return throw_error(q, p1, "type_error", "integer");
-
-	assert(strlen(GET_STR(q, pf)) == LEN_STR(q, pf));
 
 	const char *functor = GET_STR(q, pf);
 	unsigned arity = get_int(pa) + add_two;
@@ -5568,7 +5551,6 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 
 	cell tmp = (cell){0};
 	tmp.tag = TAG_LITERAL;
-	assert(strlen(GET_STR(q, p1)) == LEN_STR(q, p1));
 	tmp.val_off = is_literal(p1) ? p1->val_off : index_from_pool(q->st.m->pl, GET_STR(q, p1));
 	tmp.arity = get_int(p2);
 
@@ -6078,8 +6060,6 @@ static pl_status do_op(query *q, cell *p3)
 	if (!slicecmp2(GET_STR(q, p3), LEN_STR(q, p3), ","))
 		return throw_error(q, p3, "permission_error", "modify,operator");
 
-	assert(strlen(GET_STR(q, p3)) == LEN_STR(q, p3));
-
 	unsigned tmp_optype = 0;
 	search_op(q->st.m, GET_STR(q, p3), &tmp_optype, false);
 
@@ -6239,8 +6219,6 @@ static pl_status do_asserta_2(query *q)
 
 	bool found = false;
 
-	assert(strlen(GET_STR(q, head)) == LEN_STR(q, head));
-
 	if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found, NULL), found) {
 		if (!GET_OP(head))
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
@@ -6280,7 +6258,6 @@ static pl_status do_asserta_2(query *q)
 	cell *h = get_head(p->r->cells);
 
 	if (is_cstring(h)) {
-		assert(strlen(GET_STR(q, h)) == LEN_STR(q, h));
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, h));
 		may_idx_error(off);
 		unshare_cell(h);
@@ -6340,8 +6317,6 @@ static pl_status do_assertz_2(query *q)
 
 	bool found = false;
 
-	assert(strlen(GET_STR(q, head)) == LEN_STR(q, head));
-
 	if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found, NULL), found) {
 		if (!GET_OP(head))
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
@@ -6382,7 +6357,6 @@ static pl_status do_assertz_2(query *q)
 	cell *h = get_head(p->r->cells);
 
 	if (is_cstring(h)) {
-		assert(strlen(GET_STR(q, h)) == LEN_STR(q, h));
 		idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, h));
 		may_idx_error(off);
 		unshare_cell(h);
@@ -8205,8 +8179,6 @@ static USE_RESULT pl_status fn_task_n(query *q)
 	tmp2->arity = arity;
 	bool found = false;
 
-	assert(strlen(GET_STR(q, tmp2)) == LEN_STR(q, tmp2));
-
 	if ((tmp2->match = search_predicate(q->st.m, tmp2)) != NULL) {
 		tmp2->flags &= ~FLAG_BUILTIN;
 	} else if ((tmp2->fn = get_builtin(q->st.m->pl, GET_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
@@ -9808,8 +9780,6 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	cell tmp;
 	bool found = false;
-
-	assert(strlen(GET_STR(q, p1)) == LEN_STR(q, p1));
 
 	if (get_builtin(q->st.m->pl, GET_STR(q, p1), p1->arity, &found, NULL), found) {
 		make_literal(&tmp, index_from_pool(q->st.m->pl, "built_in"));
