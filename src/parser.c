@@ -1263,32 +1263,22 @@ static bool dcg_expansion(parser *p)
 		}
 	}
 
-	// Being conservative here (for now) and using
-	// temp parser/query objects...
-
 	query *q = create_query(p->m, false);
 	ensure(q);
 	char *dst = print_canonical_to_strbuf(q, p->r->cells, 0, 0);
-	char *src = malloc(strlen(dst)+256);
-	ensure(src);
-	sprintf(src, "dcg_translate((%s),_TermOut).", dst);
+	ASTRING(s);
+	ASTRING_sprintf(s, "dcg_translate((%s),_TermOut).", dst);
 	free(dst);
-
-	//printf("*** %s\n", src);
-
 	parser *p2 = create_parser(p->m);
 	ensure(p2);
 	p2->line_nbr = p->line_nbr;
 	p2->skip = true;
-	p2->srcptr = src;
+	p2->srcptr = ASTRING_cstr(s);
 	tokenize(p2, false, false);
-	free(src);
-
-	//printf("### "); print_term(q, stdout, p2->r->cells, 0, -1); printf("\n");
-
+	ASTRING_free(s);
 	execute(q, p2->r);
 	frame *g = GET_FRAME(0);
-	src = NULL;
+	char *src = NULL;
 
 	for (unsigned i = 0; i < p2->r->nbr_vars; i++) {
 		if (strcmp(p2->vartab.var_name[i], "_TermOut"))
@@ -1349,41 +1339,30 @@ static bool term_expansion(parser *p)
 	if (!pr || !pr->cnt)
 		return true;
 
-	// Being conservative here (for now) and using
-	// temp parser/query objects...
-
 	query *q = create_query(p->m, false);
 	ensure(q);
 	char *dst = print_canonical_to_strbuf(q, p->r->cells, 0, 0);
-	char *src = malloc(strlen(dst)+256);
-	ensure(src);
-	sprintf(src, "term_expansion((%s),_TermOut).", dst);
+	ASTRING(s);
+	ASTRING_sprintf(s, "term_expansion((%s),_TermOut).", dst);
 	free(dst);
-
-	//printf("*** %s\n", src);
-
 	parser *p2 = create_parser(p->m);
 	ensure(p2);
 	p2->line_nbr = p->line_nbr;
 	p2->skip = true;
-	p2->srcptr = src;
+	p2->srcptr = ASTRING_cstr(s);
 	tokenize(p2, false, false);
 	xref_rule(p2, p2->r, NULL);
-
-	//printf("### "); print_term(q, stdout, p2->r->cells, 0, 0); printf("\n");
-
 	execute(q, p2->r);
+	ASTRING_free(s);
 
 	if (q->retry != QUERY_OK) {
-		free(src);
 		destroy_parser(p2);
 		destroy_query(q);
 		return false;
 	}
 
-	free(src);
 	frame *g = GET_FRAME(0);
-	src = NULL;
+	char *src = NULL;
 
 	for (unsigned i = 0; i < p2->r->nbr_vars; i++) {
 		slot *e = GET_SLOT(g, i);
