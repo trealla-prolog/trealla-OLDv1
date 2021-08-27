@@ -10081,7 +10081,7 @@ static void restore_db(module *m, FILE *fp)
 		p->srcptr = p->save_line;
 		tokenize(p, false, false);
 		xref_rule(p, p->r, NULL);
-		execute(q, p->r);
+		execute(q, p->r->cells, p->r->nbr_cells);
 		clear_rule(p->r);
 	}
 

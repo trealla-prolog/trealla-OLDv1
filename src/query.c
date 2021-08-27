@@ -1780,18 +1780,18 @@ uint64_t get_time_in_usec(void)
 	return (uint64_t)(now.tv_sec * 1000 * 1000) + (now.tv_nsec / 1000);
 }
 
-pl_status execute(query *q, rule *r)
+pl_status execute(query *q, cell *cells, unsigned nbr_vars)
 {
 	q->st.m->pl->did_dump_vars = false;
-	q->st.curr_cell = r->cells;
-	q->st.sp = r->nbr_vars;
+	q->st.curr_cell = cells;
+	q->st.sp = nbr_vars;
 	q->st.fp = 1;
 	q->abort = false;
 	q->cycle_error = false;
 
 	frame *g = q->frames + q->st.curr_frame;
-	g->nbr_vars = r->nbr_vars;
-	g->nbr_slots = r->nbr_vars;
+	g->nbr_vars = nbr_vars;
+	g->nbr_slots = nbr_vars;
 	g->ugen = ++q->st.m->pl->ugen;
 	pl_status ret = start(q);
 	m_done(q->st.iter);

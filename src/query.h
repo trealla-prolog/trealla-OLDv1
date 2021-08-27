@@ -11,7 +11,7 @@ extern void cut_me(query *q, bool local_cut, bool soft_cut);
 
 extern void set_var(query *q, const cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 extern void reset_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);
-extern pl_status execute(query *q, rule *t);
+extern pl_status execute(query *q, cell *cells, unsigned nbr_vars);
 extern USE_RESULT pl_status fn_call_0(query *q, cell *p1);
 extern void undo_me(query *q);
 extern idx_t drop_choice(query *q);

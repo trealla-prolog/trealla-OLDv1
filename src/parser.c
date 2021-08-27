@@ -1276,7 +1276,7 @@ static bool dcg_expansion(parser *p)
 	p2->srcptr = ASTRING_cstr(s);
 	tokenize(p2, false, false);
 	ASTRING_free(s);
-	execute(q, p2->r);
+	execute(q, p2->r->cells, p2->r->nbr_vars);
 	frame *g = GET_FRAME(0);
 	char *src = NULL;
 
@@ -1352,7 +1352,7 @@ static bool term_expansion(parser *p)
 	p2->srcptr = ASTRING_cstr(s);
 	tokenize(p2, false, false);
 	xref_rule(p2, p2->r, NULL);
-	execute(q, p2->r);
+	execute(q, p2->r->cells, p2->r->nbr_vars);
 	ASTRING_free(s);
 
 	if (q->retry != QUERY_OK) {
@@ -2771,7 +2771,7 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 	q->p = p;
 	q->do_dump_vars = dump;
 	q->run_init = p->run_init;
-	execute(q, p->r);
+	execute(q, p->r->cells, p->r->nbr_vars);
 
 	p->m->pl->halt = q->halt;
 	p->m->pl->halt_code = q->halt_code;
