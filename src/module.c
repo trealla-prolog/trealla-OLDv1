@@ -390,6 +390,16 @@ static bool check_directive(const cell *c)
 	return false;
 }
 
+void convert_to_literal(module *m, cell *c)
+{
+	idx_t off = index_from_pool(m->pl, GET_STR(m, c));
+	unshare_cell(c);
+	c->tag = TAG_LITERAL;
+	c->val_off = off;
+	c->match = NULL;
+	c->flags = 0;
+}
+
 predicate *find_predicate(module *m, cell *c)
 {
 	cell tmp = *c;

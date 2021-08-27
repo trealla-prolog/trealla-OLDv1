@@ -4254,14 +4254,9 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		arity--;
 		cell *tmp2 = get_tmp_heap(q, save);
 
-		if (is_cstring(tmp2) /*&& arity*/) {
-			cell *c = tmp2;
-			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, tmp2));
-			may_idx_error(off);
-			//unshare_cell(tmp2);
-			c->val_off = off;
-			c->tag = TAG_LITERAL;
-			c->flags = 0;
+		if (is_cstring(tmp2)) {
+			share_cell(tmp2);
+			convert_to_literal(q->st.m, tmp2);
 		}
 
 		if (!is_literal(tmp2) && arity)
@@ -4719,14 +4714,8 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	term_to_body(p);
 	cell *h = get_head(p->r->cells);
 
-	if (is_cstring(h)) {
-		idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, h));
-		may_idx_error(off);
-		unshare_cell(h);
-		h->tag = TAG_LITERAL;
-		h->val_off = off;
-		h->flags = 0;
-	}
+	if (is_cstring(h))
+		convert_to_literal(q->st.m, h);
 
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
@@ -4786,14 +4775,8 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	term_to_body(p);
 	cell *h = get_head(p->r->cells);
 
-	if (is_cstring(h)) {
-		idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, h));
-		may_idx_error(off);
-		unshare_cell(h);
-		h->tag = TAG_LITERAL;
-		h->val_off = off;
-		h->flags = 0;
-	}
+	if (is_cstring(h))
+		convert_to_literal(q->st.m, h);
 
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
@@ -4865,13 +4848,8 @@ static USE_RESULT pl_status fn_iso_call_n(query *q)
 	tmp2->arity = arity;
 
 	if (is_cstring(tmp2)) {
-		cell *c = tmp2;
-		idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, tmp2));
-		may_idx_error(off);
-		//unshare_cell(tmp2);
-		c->val_off = off;
-		c->tag = TAG_LITERAL;
-		c->flags = 0;
+		share_cell(tmp2);
+		convert_to_literal(q->st.m, tmp2);
 	}
 
 	bool found = false;
@@ -6259,14 +6237,8 @@ static pl_status do_asserta_2(query *q)
 	term_to_body(p);
 	cell *h = get_head(p->r->cells);
 
-	if (is_cstring(h)) {
-		idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, h));
-		may_idx_error(off);
-		unshare_cell(h);
-		h->tag = TAG_LITERAL;
-		h->val_off = off;
-		h->flags = 0;
-	}
+	if (is_cstring(h))
+		convert_to_literal(q->st.m, h);
 
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
@@ -6358,14 +6330,8 @@ static pl_status do_assertz_2(query *q)
 	term_to_body(p);
 	cell *h = get_head(p->r->cells);
 
-	if (is_cstring(h)) {
-		idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, h));
-		may_idx_error(off);
-		unshare_cell(h);
-		h->tag = TAG_LITERAL;
-		h->val_off = off;
-		h->flags = 0;
-	}
+	if (is_cstring(h))
+		convert_to_literal(q->st.m, h);
 
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");

@@ -1130,16 +1130,8 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 		cell *head = deref(q, get_head(p1), p1_ctx);
 		cell *c = head;
 
-		if (!is_literal(c)) {
-			// For now convert it to a literal
-			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
-			may_idx_error(off);
-			unshare_cell(c);
-			c->tag = TAG_LITERAL;
-			c->val_off = off;
-			c->flags = 0;
-			c->arity = 0;
-		}
+		if (is_cstring(c))
+			convert_to_literal(q->st.m, c);
 
 		predicate *pr = search_predicate(q->st.m, head);
 
@@ -1222,15 +1214,8 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 	if (!q->retry) {
 		cell *c = p1;
 
-		if (!is_literal(c)) {
-			// For now convert it to a literal
-			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
-			may_idx_error(off);
-			unshare_cell(c);
-			c->tag = TAG_LITERAL;
-			c->val_off = off;
-			c->flags = 0;
-		}
+		if (is_cstring(c))
+			convert_to_literal(q->st.m, c);
 
 		predicate *pr = search_predicate(q->st.m, p1);
 
@@ -1313,18 +1298,10 @@ static USE_RESULT pl_status match_head(query *q)
 		cell *c = q->st.curr_cell;
 		predicate *pr;
 
-		if (is_literal(c)) {
-			pr = c->match;
-		} else {
-			// For now convert it to a literal
-			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
-			may_idx_error(off);
-			unshare_cell(c);
-			c->tag = TAG_LITERAL;
-			c->val_off = off;
-			c->flags = 0;
-			pr = NULL;
-		}
+		if (is_cstring(c))
+			convert_to_literal(q->st.m, c);
+
+		pr = c->match;
 
 		if (!pr || is_function(c)) {
 			pr = search_predicate(q->st.m, c);
