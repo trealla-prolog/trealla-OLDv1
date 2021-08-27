@@ -1239,7 +1239,7 @@ void reset(parser *p)
 
 static bool dcg_expansion(parser *p)
 {
-	if (!p->dcgs && !find_module(p->m->pl, "dcgs")) {
+	if (!p->m->pl->dcgs && !find_module(p->m->pl, "dcgs")) {
 		for (library *lib = g_libs; lib->name; lib++) {
 			if (strcmp(lib->name, "dcgs"))
 				continue;
@@ -1254,7 +1254,7 @@ static bool dcg_expansion(parser *p)
 
 			if (tmp_m) {
 				p->m->used[p->m->idx_used++] = tmp_m;
-				p->dcgs = tmp_m;
+				p->m->pl->dcgs = tmp_m;
 			}
 
 			ASTRING_free(s);

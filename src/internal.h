@@ -556,7 +556,7 @@ struct parser_ {
 
 	prolog *pl;
 	FILE *fp;
-	module *m, *dcgs;
+	module *m;
 	rule *r;
 	char *token, *save_line, *srcptr, *error_desc;
 	cell v;
@@ -623,7 +623,7 @@ struct prolog_ {
 	idx_t tab4[64000];
 	uint8_t tab5[64000];
 	module *modules;
-	module *system_m, *user_m, *curr_m;
+	module *system_m, *user_m, *curr_m, *dcgs;
 	uint64_t s_last, s_cnt, seed;
 	map *symtab, *funtab, *keyval;
 	char *pool;
