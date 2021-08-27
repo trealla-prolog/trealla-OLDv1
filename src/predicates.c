@@ -1565,27 +1565,32 @@ static pl_status do_atom_concat_3(query *q)
 		make_literal(&tmp, g_empty_s);
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		set_var(q, p2, p2_ctx, p3, q->st.curr_frame);
-		may_error(make_choice(q));
+
+		if (LEN_STR(q, p3))
+			may_error(make_choice(q));
+
 		return pl_success;
 	}
 
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,atom);
-	const char *src2 = GET_STR(q, p2);
-	size_t len = len_char_utf8(src2);
-	int done = 0;
+	const char *s2 = GET_STR(q, p2);
+	size_t len = len_char_utf8(s2);
+	size_t len1 = LEN_STR(q, p1);
+	size_t len2 = LEN_STR(q, p2);
+	bool done = false;
 
-	if (!*(src2+len))
-		done = 1;
+	if (!*(s2+len))
+		done = true;
 
 	GET_RAW_ARG(1,p1_raw);
 	GET_RAW_ARG(2,p2_raw);
 	cell tmp;
-	may_error(make_slice(q, &tmp, p3, 0, LEN_STR(q, p1)+len));
+	may_error(make_slice(q, &tmp, p3, 0, len1+len));
 	reset_var(q, p1_raw, p1_raw_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
-	may_error(make_slice(q, &tmp, p2, len, LEN_STR(q, p2)-len));
+	may_error(make_slice(q, &tmp, p2, len, len2-len));
 	reset_var(q, p2_raw, p2_raw_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 
