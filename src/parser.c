@@ -1331,7 +1331,7 @@ static bool term_expansion(parser *p)
 	if (p->error || p->internal || !is_literal(p->r->cells))
 		return false;
 
-	if (!strcmp(GET_STR(p, p->r->cells), "-->"))
+	if (p->r->cells->val_off == g_dcg_s)
 		return dcg_expansion(p);
 
 	predicate *pr = find_functor(p->m, "term_expansion", 2);
