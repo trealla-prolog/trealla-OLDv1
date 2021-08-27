@@ -64,7 +64,7 @@ size_t slicecpy(char *dst, size_t dstlen, const char *src, size_t len)
 	return dst - save;
 }
 
-static char *slicedup(const char *s, size_t n)
+char *slicedup(const char *s, size_t n)
 {
 	char *ptr = malloc(n+1);
 	if (!ptr) return NULL;
@@ -4799,6 +4799,9 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 
 	p1 = deref(q, p1, q->st.curr_frame);
 	idx_t p1_ctx = q->latest_ctx;
+
+	if (is_cstring(p1))
+		convert_to_literal(q->st.m, p1);
 
 	if (!is_callable(p1))
 		return throw_error(q, p1, "type_error", "callable");

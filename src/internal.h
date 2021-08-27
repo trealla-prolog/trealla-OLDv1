@@ -712,6 +712,7 @@ extern cell *list_tail(cell *l, cell *tmp);
 enum clause_type {DO_CLAUSE, DO_RETRACT, DO_STREAM_RETRACT, DO_RETRACTALL};
 
 extern size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq);
+extern char *slicedup(const char *s, size_t n);
 extern int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2);
 extern unsigned count_bits(const uint8_t *mask, unsigned bit);
 extern uint64_t get_time_in_usec(void);

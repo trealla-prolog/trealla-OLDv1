@@ -392,12 +392,20 @@ static bool check_directive(const cell *c)
 
 void convert_to_literal(module *m, cell *c)
 {
-	idx_t off = index_from_pool(m->pl, GET_STR(m, c));
+	char *tmpbuf = NULL, *src;
+
+	if (is_blob(c))
+		src = tmpbuf = slicedup(GET_STR(m, c), LEN_STR(m, c));
+	else
+		src = GET_STR(m, c);
+
+	idx_t off = index_from_pool(m->pl, src);
 	unshare_cell(c);
 	c->tag = TAG_LITERAL;
 	c->val_off = off;
 	c->match = NULL;
 	c->flags = 0;
+	free(tmpbuf);
 }
 
 predicate *find_predicate(module *m, cell *c)
