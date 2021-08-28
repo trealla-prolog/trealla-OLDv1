@@ -9650,31 +9650,49 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 	}
 
 	if (is_variable(p1)) {
-		if (LEN_STR(q, p2) > LEN_STR(q, p3))
+		size_t len2 = LEN_STR(q, p2), len3 = LEN_STR(q, p3);
+		const char *s2 = GET_STR(q, p2), *s3 = GET_STR(q, p3);
+
+		if (len2 > len3)
 			return false;
 
+		if (memcmp(s3+(len3-len2), s2, len2))
+			return pl_failure;
+
 		cell tmp;
-		may_error(make_slice(q, &tmp, p3, 0, LEN_STR(q, p3)-LEN_STR(q, p2)));
+		may_error(make_slice(q, &tmp, p3, 0, len3-len2));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
 	}
 
 	if (is_variable(p2)) {
-		if (LEN_STR(q, p1) > LEN_STR(q, p3))
+		size_t len1 = LEN_STR(q, p1), len3 = LEN_STR(q, p3);
+		const char *s1 = GET_STR(q, p1), *s3 = GET_STR(q, p3);
+
+		if (len1 > len3)
 			return false;
 
+		if (memcmp(s3, s1, len1))
+			return pl_failure;
+
 		cell tmp;
-		may_error(make_slice(q, &tmp, p3, LEN_STR(q, p1), LEN_STR(q, p3)-LEN_STR(q, p1)));
+		may_error(make_slice(q, &tmp, p3, len1, len3-len1));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
 	}
 
-	if (slicecmp(GET_STR(q, p3), LEN_STR(q, p3), GET_STR(q, p1), LEN_STR(q, p1)))
+	size_t len1 = LEN_STR(q, p1), len2 = LEN_STR(q, p2), len3 = LEN_STR(q, p3);
+	const char *s1 = GET_STR(q, p1), *s2 = GET_STR(q, p2), *s3 = GET_STR(q, p3);
+
+	if ((len1 + len2) != len3)
 		return pl_failure;
 
-	if (slicecmp(GET_STR(q, p3)+LEN_STR(q, p1), LEN_STR(q, p3)-LEN_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p2)))
+	if (memcmp(s3, s1, len1))
+		return pl_failure;
+
+	if (memcmp(s3+len1, s2, len2))
 		return pl_failure;
 
 	return pl_success;
