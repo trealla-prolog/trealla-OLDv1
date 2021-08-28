@@ -821,7 +821,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 
 	cell *p1 = c + 1;
 
-	for (int i = 0; (i < pr->key.arity) && !pr->is_noindex; i++) {
+	for (int i = 0; (i < pr->key.arity) && (i < 2) && !pr->is_noindex; i++) {
 		bool noindex = false;
 
 		if ((i == 0) && is_structure(p1) && (p1->arity > 0) && !m->pl->ffai)
