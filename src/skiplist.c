@@ -621,12 +621,12 @@ void sl_dump(const skiplist *l, const char *(*f)(const void*, const void*, const
 
     while (p) {
 		q = p->forward[0];
-		printf("%6d: ", p->nbr);
+		fprintf(stderr, "%6d: ", p->nbr);
 
 		for (int j = 0; j < p->nbr; j++)
-			printf("%s ", f(p->bkt[j].key, p->bkt[j].val, p1));
+			fprintf(stderr, "%s ", f(p->bkt[j].key, p->bkt[j].val, p1));
 
-		printf("\n");
+		fprintf(stderr, "\n");
 		p = q;
     }
 
