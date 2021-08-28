@@ -187,13 +187,13 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 			if (p1->arity > p2->arity)
 				return 1;
 
-			if (p1->val_off == p2->val_off)
-				return 0;
-
-			int ok = strcmp(GET_STR(m, p1), GET_STR(m, p2));
-
-			if (!ok)
-				return ok;
+			if (is_literal(p1) && is_literal(p2)) {
+				if (p1->val_off != p2->val_off)
+					return strcmp(GET_STR(m, p1), GET_STR(m, p2));
+			} else {
+				int ok = strcmp(GET_STR(m, p1), GET_STR(m, p2));
+				if (!ok) return ok;
+			}
 
 			int arity = p1->arity;
 			p1++; p2++;
@@ -830,27 +830,22 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	for (int i = 0; (i < ARG_NBR) && (i < pr->key.arity) && !pr->is_noindex; i++) {
 		bool noindex = false;
 
-#if 1
-		if ((i == 0) && is_structure(p1)) {
-#if 0
-			query q = (query){0};
-			q.pl = m->pl;
-			q.st.m = m;
-			char *dst = print_term_to_strbuf(&q, c, 0, 0);
-			if (dst) printf("*** [%d] %s\n", i, dst);
-			free(dst);
-#endif
+		if ((i == 0) && is_structure(p1))
 			noindex = true;
-		}
-#endif
 
-#if 1
 		if ((i > 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
 			noindex = true;
-#endif
 
 		if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
 			if (p1->val_off == g_at_s) {
+#if 0
+				query q = (query){0};
+				q.pl = m->pl;
+				q.st.m = m;
+				char *dst = print_term_to_strbuf(&q, c, 0, 0);
+				printf("*** [%d] %s\n", i, dst);
+				free(dst);
+#endif
 				noindex = true;
 			}
 		}
@@ -871,7 +866,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 		&& !m->pl->noindex
 		&& !pr->is_noindex
 		&& ((!pr->is_dynamic && (pr->cnt > 15))
-			|| (pr->is_dynamic && (pr->cnt > 50)))) {
+			|| (pr->is_dynamic && (pr->cnt > 100)))) {
 		reindex_predicate(m, pr);
 	} else {
 		if (pr->idx1) {
