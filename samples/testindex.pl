@@ -26,6 +26,34 @@ test1b :-
 	abolish(g/2),
 	write('Done... '), write(1000000), write(' items'), nl, true.
 
+test1c :-
+	write('Load...'), nl,
+	between(1,1000000,I),
+		assertz(g(f(I),I)),
+		fail.
+test1c :-
+	write('Match using compound 1st-arg...'), nl,
+	between(1,1000000,I),
+		g(f(I),_),
+		fail.
+test1c :-
+	abolish(g/2),
+	write('Done... '), write(1000000), write(' items'), nl, true.
+
+test1d :-
+	write('Load...'), nl,
+	between(1,1000000,I),
+		assertz(g(I,f(I))),
+		fail.
+test1d :-
+	write('Match using compound 2nd-arg...'), nl,
+	between(1,1000000,I),
+		g(_,f(I)),
+		fail.
+test1d :-
+	abolish(g/2),
+	write('Done... '), write(1000000), write(' items'), nl, true.
+
 test2a :-
 	write('Load...'), nl,
 	between(1,1000000,I),
