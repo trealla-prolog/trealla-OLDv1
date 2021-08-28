@@ -187,13 +187,8 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 			if (p1->arity > p2->arity)
 				return 1;
 
-			if (is_literal(p1) && is_literal(p2)) {
-				if (p1->val_off != p2->val_off)
-					return strcmp(GET_STR(m, p1), GET_STR(m, p2));
-			} else {
-				int ok = strcmp(GET_STR(m, p1), GET_STR(m, p2));
-				if (ok) return ok;
-			}
+			if (p1->val_off != p2->val_off)
+				return strcmp(GET_STR(m, p1), GET_STR(m, p2));
 
 			int arity = p1->arity;
 			p1++; p2++;
