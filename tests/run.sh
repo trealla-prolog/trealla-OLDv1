@@ -16,10 +16,10 @@ for source in tests/tests/* tests/issues/*
 do
 	case "$source" in
 		*.pl)
-			cmd="$TPL -q --ns "
+			cmd="$TPL --ffai -q --ns "
 			;;
 		*.sh)
-			cmd="env TPL=$TPL sh"
+			cmd="env TPL=$TPL --ffai sh"
 			;;
 		*)
 			continue
