@@ -241,7 +241,7 @@ static void next_key(query *q)
 static bool is_next_key(query *q)
 {
 	if (q->st.iter) {
-		if (m_is_nextkey(q->st.iter))
+		if (m_is_next_key(q->st.iter))
 			return true;
 	} else if (q->st.curr_clause->next)
 		return true;
@@ -1349,7 +1349,7 @@ static USE_RESULT pl_status match_head(query *q)
 				sl_dump(pr->idx2, dump_key, q);
 #endif
 				map *idx = p2 ? pr->idx2 : pr->idx1;
-				q->st.iter = m_findkey(idx, key);
+				q->st.iter = m_find_key(idx, key);
 				next_key(q);
 			} else
 				q->st.curr_clause = pr->head;

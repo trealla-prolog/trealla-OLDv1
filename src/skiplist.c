@@ -517,7 +517,7 @@ bool sl_next(sliter *iter, void **val)
 	return false;
 }
 
-sliter *sl_findkey(skiplist *l, const void *key)
+sliter *sl_find_key(skiplist *l, const void *key)
 {
 	slnode_t *p, *q = 0;
 	p = l->header;
@@ -575,7 +575,7 @@ bool sl_is_nextkey(sliter *iter)
 	return false;
 }
 
-bool sl_nextkey(sliter *iter, void **val)
+bool sl_next_key(sliter *iter, void **val)
 {
 	if (!iter)
 		return false;

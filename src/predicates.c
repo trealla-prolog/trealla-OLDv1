@@ -11571,7 +11571,7 @@ static const struct builtins g_predicates_other[] =
 
 void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found, bool *function)
 {
-	miter *iter = m_findkey(pl->funtab, name);
+	miter *iter = m_find_key(pl->funtab, name);
 	const struct builtins *ptr;
 
 	while (m_nextkey(iter, (void**)&ptr)) {
