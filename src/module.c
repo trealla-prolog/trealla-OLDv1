@@ -819,46 +819,44 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	if (pr->is_persist)
 		cl->r.persist = true;
 
-	if (!m->pl->noindex && !pr->is_noindex && (pr->cnt >= m->pl->indexing_threshold)) {
-		cell *p1 = c + 1;
+	cell *p1 = c + 1;
 
-		for (int i = 0; (i < pr->key.arity) && !pr->is_noindex; i++) {
-			bool noindex = false;
+	for (int i = 0; (i < pr->key.arity) && !pr->is_noindex; i++) {
+		bool noindex = false;
 
-			if ((i == 0) && is_structure(p1) && (p1->arity > 0) && !m->pl->ffai)
+		if ((i == 0) && is_structure(p1) && (p1->arity > 0) && !m->pl->ffai)
+			noindex = true;
+
+		if ((i == 1) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
+			noindex = true;
+
+		if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
+			if (p1->val_off == g_at_s)
 				noindex = true;
-
-			if ((i == 1) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
-				noindex = true;
-
-			if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
-				if (p1->val_off == g_at_s)
-					noindex = true;
-			}
-
-			if (noindex) {
-#if 0
-				query q = (query){0};
-				q.pl = m->pl;
-				q.st.m = m;
-				char *dst = print_term_to_strbuf(&q, c, 0, 0);
-				printf("*** [%d] %s\n", i, dst);
-				free(dst);
-#endif
-			}
-
-
-			if (!pr->idx1 && noindex)
-				pr->is_noindex = true;
-
-			if ((i == 0) && pr->idx1 && noindex) {
-				pr->is_noindex = true;
-				pr->idx_save = pr->idx1;
-				pr->idx1 = NULL;
-			}
-
-			p1 += p1->nbr_cells;
 		}
+
+		if (noindex) {
+#if 0
+			query q = (query){0};
+			q.pl = m->pl;
+			q.st.m = m;
+			char *dst = print_term_to_strbuf(&q, c, 0, 0);
+			printf("*** [%d] %s\n", i, dst);
+			free(dst);
+#endif
+		}
+
+
+		if (!pr->idx1 && noindex)
+			pr->is_noindex = true;
+
+		if ((i == 0) && pr->idx1 && noindex) {
+			pr->is_noindex = true;
+			pr->idx_save = pr->idx1;
+			pr->idx1 = NULL;
+		}
+
+		p1 += p1->nbr_cells;
 	}
 
 	if (!pr->idx1
