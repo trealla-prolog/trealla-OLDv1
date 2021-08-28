@@ -1282,10 +1282,10 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 #define DUMP_KEYS 0
 
 #if DUMP_KEYS
-static const char *dump_key(const void *p1, const void *p)
+static const char *dump_key(const void *p1, __attribute__((unused)) const void *p2, const void *p3)
 {
-	query *q = (query*)p;
-	const cell *c = (cell*)p1;
+	query *q = (query*)p3;
+	cell *c = (cell*)p1;
 	static char tmpbuf[1024];
 	print_term_to_buf(q, tmpbuf, sizeof(tmpbuf), c, q->st.curr_frame, 0, false, 0);
 	return tmpbuf;
