@@ -192,7 +192,7 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 					return strcmp(GET_STR(m, p1), GET_STR(m, p2));
 			} else {
 				int ok = strcmp(GET_STR(m, p1), GET_STR(m, p2));
-				if (!ok) return ok;
+				if (ok) return ok;
 			}
 
 			int arity = p1->arity;
