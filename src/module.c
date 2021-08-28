@@ -176,7 +176,7 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 			return 0;
 	} else if (is_atom(p1)) {
 		if (is_atom(p2))
-			return strcmp(GET_STR(m, p1), GET_STR(m, p2));
+			return slicecmp(GET_STR(m, p1), LEN_STR(m, p1), GET_STR(m, p2), LEN_STR(m, p2));
 		else if (is_variable(p2))
 			return 0;
 	} else if (is_structure(p1)) {
