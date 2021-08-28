@@ -860,7 +860,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	if (!pr->idx1
 		&& !m->pl->noindex
 		&& !pr->is_noindex
-		&& (pr->cnt > 25)) {
+		&& (pr->cnt > m->pl->indexing_threshold)) {
 		reindex_predicate(m, pr);
 	} else {
 		if (pr->idx1) {
