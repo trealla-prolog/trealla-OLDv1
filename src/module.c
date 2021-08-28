@@ -128,7 +128,7 @@ static int predicate_compkey(const void *ptr1, const void *ptr2, const void *par
 	if (p1->val_off == p2->val_off)
 		return 0;
 
-	return strcmp(m->pl->pool+p1->val_off, m->pl->pool+p2->val_off);
+	return strcmp(GET_STR(m, p1), GET_STR(m, p2));
 }
 
 static int index_compkey_internal(const void *ptr1, const void *ptr2, const void *param, int args, int depth)
