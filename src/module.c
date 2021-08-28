@@ -830,7 +830,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 		if ((i == 0) && is_iso_list(p1))
 			noindex = true;
 
-		if ((i > 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
+		if ((i == 1) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
 			noindex = true;
 
 		if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
@@ -846,6 +846,18 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 				noindex = true;
 			}
 		}
+
+		if (noindex) {
+#if 0
+			query q = (query){0};
+			q.pl = m->pl;
+			q.st.m = m;
+			char *dst = print_term_to_strbuf(&q, c, 0, 0);
+			printf("*** [%d] %s\n", i, dst);
+			free(dst);
+#endif
+		}
+
 
 		if (!pr->idx1 && noindex)
 			pr->is_noindex = true;
