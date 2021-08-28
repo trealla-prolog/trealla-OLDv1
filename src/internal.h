@@ -638,6 +638,7 @@ struct prolog_ {
 	bool quiet:1;
 	bool stats:1;
 	bool noindex:1;
+	bool ffai:1;
 	bool iso_only:1;
 	bool trace:1;
 };
