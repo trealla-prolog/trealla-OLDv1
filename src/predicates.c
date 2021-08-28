@@ -5641,6 +5641,10 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 		cell tmp;
 		make_int(&tmp, MAX_ARITY);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	} else if (!slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "indexing_threshold")) {
+		cell tmp;
+		make_int(&tmp, q->st.m->pl->indexing_threshold);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "max_integer")) {
 		return false;
 	} else if (!slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "min_integer")) {
@@ -5714,8 +5718,13 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 	if (!is_atom(p1))
 		return throw_error(q, p1, "type_error", "atom");
 
-	if (!slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "cpu_count") && is_integer(p2)) {
-		g_cpu_count = get_int(p2);
+	if (!slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "cpu_count") && is_smallint(p2)) {
+		g_cpu_count = get_smallint(p2);
+		return pl_success;
+	}
+
+	if (!slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "indexing_threshold") && is_smallint(p2)) {
+		q->st.m->pl->indexing_threshold = get_smallint(p2);
 		return pl_success;
 	}
 
@@ -5839,7 +5848,6 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		|| !slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "dialect")
 		) {
 		return throw_error(q, p1, "permission_error", "modify,flag");
-	} else if (!slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "")) {
 	} else {
 		return throw_error(q, p1, "domain_error", "prolog_flag");
 	}
@@ -11790,6 +11798,7 @@ static void load_flags(query *q)
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %u).\n", "max_arity", MAX_ARITY);
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %u).\n", "cpu_count", g_cpu_count);
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "integer_rounding_function", "toward_zero");
+	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %u).\n", "indexing_threshold", q->st.m->pl->indexing_threshold);
 
 	parser *p = create_parser(m);
 	p->srcptr = ASTRING_cstr(pr);

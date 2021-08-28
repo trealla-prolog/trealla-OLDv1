@@ -200,7 +200,7 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 				if (i != 0)
 					return i;
 
-				if ((depth == 1) && (cnt == args))
+				if ((depth == 0) && (cnt == args))
 					break;
 
 				p1 += p1->nbr_cells;
@@ -860,8 +860,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	if (!pr->idx1
 		&& !m->pl->noindex
 		&& !pr->is_noindex
-		&& ((!pr->is_dynamic && (pr->cnt > 15))
-			|| (pr->is_dynamic && (pr->cnt > 100)))) {
+		&& (pr->cnt > 25)) {
 		reindex_predicate(m, pr);
 	} else {
 		if (pr->idx1) {

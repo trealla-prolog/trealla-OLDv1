@@ -629,7 +629,7 @@ struct prolog_ {
 	char *pool;
 	uint64_t ugen;
 	idx_t pool_offset, pool_size, tab_idx;
-	unsigned varno;
+	unsigned varno, indexing_threshold;
 	uint8_t current_input, current_output, current_error;
 	int8_t halt_code, opt;
 	bool halt:1;
