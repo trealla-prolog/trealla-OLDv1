@@ -820,12 +820,14 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 		cl->r.persist = true;
 
 	cell *p1 = c + 1;
-	const int ARG_NBR = pr->key.arity;
 
-	for (int i = 0; (i < ARG_NBR) && (i < pr->key.arity) && !pr->is_noindex; i++) {
+	for (int i = 0; (i < pr->key.arity) && !pr->is_noindex; i++) {
 		bool noindex = false;
 
 		if ((i == 0) && is_structure(p1) && !m->pl->ffai)
+			noindex = true;
+
+		if ((i == 0) && is_iso_list(p1))
 			noindex = true;
 
 		if ((i > 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
