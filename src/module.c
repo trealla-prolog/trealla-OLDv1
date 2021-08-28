@@ -834,17 +834,8 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 			noindex = true;
 
 		if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
-			if (p1->val_off == g_at_s) {
-#if 0
-				query q = (query){0};
-				q.pl = m->pl;
-				q.st.m = m;
-				char *dst = print_term_to_strbuf(&q, c, 0, 0);
-				printf("*** [%d] %s\n", i, dst);
-				free(dst);
-#endif
+			if (p1->val_off == g_at_s)
 				noindex = true;
-			}
 		}
 
 		if (noindex) {
