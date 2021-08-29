@@ -824,15 +824,17 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	for (int i = 0; (i < pr->key.arity) && (i < 2) && !pr->is_noindex; i++) {
 		bool noindex = false;
 
-		if ((i == 0) && is_structure(p1) && (p1->arity > 0) && !m->pl->ffai)
-			noindex = true;
-
-		if ((i == 1) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
-			noindex = true;
-
-		if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
-			if (p1->val_off == g_at_s)
+		if (is_structure(p1)) {
+			if ((i == 0) && (p1->arity > 0) && !m->pl->ffai)
 				noindex = true;
+
+			if ((i == 1) && (p1->arity > 1) && !is_iso_list(p1))
+				noindex = true;
+
+			if ((i > 0) && (p1->arity == 1)) {
+				if (p1->val_off == g_at_s)
+					noindex = true;
+			}
 		}
 
 		if (noindex) {
