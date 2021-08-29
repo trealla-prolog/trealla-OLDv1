@@ -192,20 +192,28 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 
 			int arity = p1->arity;
 			p1++; p2++;
-			int cnt = 1;
+			int arg = 1;
 
 			while (arity--) {
-				int i = index_compkey_internal(p1, p2, param, args, depth+1);
+				if (!depth) {
+					if (arg == args) {
+						int i = index_compkey_internal(p1, p2, param, args, depth+1);
 
-				if (i != 0)
-					return i;
+						if (i != 0)
+							return i;
 
-				if ((depth == 0) && (cnt == args))
-					break;
+						break;
+					}
+				} else {
+					int i = index_compkey_internal(p1, p2, param, args, depth+1);
+
+					if (i != 0)
+						return i;
+				}
 
 				p1 += p1->nbr_cells;
 				p2 += p2->nbr_cells;
-				cnt++;
+				arg++;
 			}
 
 			return 0;
