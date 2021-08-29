@@ -836,7 +836,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 			if ((i == 0) && (p1->arity > 0) && !m->pl->ffai)
 				noindex = true;
 
-			if ((i == 1) && (p1->arity > 1) && !is_iso_list(p1))
+			if ((i == 1) && (p1->arity > 1) && !is_iso_list(p1) && !m->pl->ffai)
 				noindex = true;
 
 			if ((i > 0) && (p1->arity == 1)) {
@@ -873,6 +873,14 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 		&& !m->pl->noindex
 		&& !pr->is_noindex
 		&& (pr->cnt > m->pl->indexing_threshold)) {
+#if 0
+		query q = (query){0};
+		q.pl = m->pl;
+		q.st.m = m;
+		char *dst = print_term_to_strbuf(&q, c, 0, 0);
+		printf("*** [%d] reindex %s\n", (int)pr->cnt, dst);
+		free(dst);
+#endif
 		reindex_predicate(m, pr);
 	} else {
 		if (pr->idx1) {
