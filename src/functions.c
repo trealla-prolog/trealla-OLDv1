@@ -1922,8 +1922,10 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		return 0;
 	}
 
-	int val = slicecmp(GET_STR(q, p1), LEN_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p2));
-	if (val) return val>0?1:-1;
+	if (p1->val_off != p2->val_off) {
+		int ok = strcmp(GET_STR(q, p1), GET_STR(q, p2));
+		if (ok) return ok;
+	}
 
 	int arity = p1->arity;
 	p1 = p1 + 1;
