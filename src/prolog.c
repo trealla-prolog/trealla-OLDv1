@@ -128,7 +128,6 @@ void set_trace(prolog *pl) { pl->trace = true; }
 void set_quiet(prolog *pl) { pl->quiet = true; }
 void set_stats(prolog *pl) { pl->stats = true; }
 void set_noindex(prolog *pl) { pl->noindex = true; }
-void set_ffai(prolog *pl) { pl->ffai = true; }
 void set_opt(prolog *pl, int level) { pl->opt = level; }
 
 bool pl_eval(prolog *pl, const char *s)
@@ -319,6 +318,7 @@ prolog *pl_create()
 			g_tpl_lib = strdup("../library");
 	}
 
+	pl->indexing_threshold = 150;
 	pl->funtab = m_create((void*)strcmp, NULL, NULL);
 
 	if (pl->funtab)
@@ -342,7 +342,6 @@ prolog *pl_create()
 		return pl;
 	}
 
-	pl->indexing_threshold = 25;
 	pl->curr_m = pl->user_m;
 	pl->s_last = 0;
 	pl->s_cnt = 0;

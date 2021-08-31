@@ -621,7 +621,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 	int is_chars_list = is_string(c);
 
-	if (!is_chars_list && running)
+	if (!is_chars_list)
 		is_chars_list += scan_is_chars_list(q, c, c_ctx, false);
 
 	if (is_chars_list) {

@@ -8,7 +8,6 @@ extern module *load_file(module *m, const char *filename);
 extern module *load_fp(module *m, FILE *fp, const char *filename);
 extern module *load_text(module *m, const char *src, const char *filename);
 
-extern void convert_to_literal(module *m, cell *c);
 extern clause *find_in_db(module *m, uuid *ref);
 extern unsigned find_op(module *m, const char *name, unsigned specifier);
 extern unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_prefix);

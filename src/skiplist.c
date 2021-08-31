@@ -517,7 +517,7 @@ bool sl_next(sliter *iter, void **val)
 	return false;
 }
 
-sliter *sl_find_key(skiplist *l, const void *key)
+sliter *sl_findkey(skiplist *l, const void *key)
 {
 	slnode_t *p, *q = 0;
 	p = l->header;
@@ -575,7 +575,7 @@ bool sl_is_nextkey(sliter *iter)
 	return false;
 }
 
-bool sl_next_key(sliter *iter, void **val)
+bool sl_nextkey(sliter *iter, void **val)
 {
 	if (!iter)
 		return false;
@@ -621,12 +621,12 @@ void sl_dump(const skiplist *l, const char *(*f)(const void*, const void*, const
 
     while (p) {
 		q = p->forward[0];
-		fprintf(stderr, "%6d: ", p->nbr);
+		printf("%6d: ", p->nbr);
 
 		for (int j = 0; j < p->nbr; j++)
-			fprintf(stderr, "%s ", f(p->bkt[j].key, p->bkt[j].val, p1));
+			printf("%s ", f(p->bkt[j].key, p->bkt[j].val, p1));
 
-		fprintf(stderr, "\n");
+		printf("\n");
 		p = q;
     }
 

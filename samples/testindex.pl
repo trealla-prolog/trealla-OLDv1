@@ -4,7 +4,7 @@ test1a :-
 		assertz(g(I,I)),
 		fail.
 test1a :-
-	write('Match using 1st-arg...'), nl,
+	write('Match using atomic 1st-arg...'), nl,
 	between(1,1000000,I),
 		g(I,_),
 		fail.
@@ -18,7 +18,7 @@ test1b :-
 		assertz(g(I,I)),
 		fail.
 test1b :-
-	write('Match using 2nd-arg...'), nl,
+	write('Match using atomic 2nd-arg...'), nl,
 	between(1,1000000,I),
 		g(_,I),
 		fail.

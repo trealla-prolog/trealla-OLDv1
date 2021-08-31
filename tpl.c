@@ -17,7 +17,6 @@
 
 #include "history.h"
 #include "trealla.h"
-#include "cdebug.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -38,8 +37,8 @@
 
 void sigfn(int s)
 {
-	(void) s;
-	signal(SIGINT, NULL);
+        (void) s;
+	signal(SIGINT, &sigfn);
 	g_tpl_interrupt = 1;
 }
 
@@ -143,12 +142,19 @@ static int daemonize(int argc, char *argv[])
 
 int main(int ac, char *av[])
 {
-	setlocale(LC_ALL, "");
+	setlocale(LC_ALL, ".UTF8");
 	const char *homedir;
 	g_argv0 = av[0];
 
 	if ((homedir = getenv("HOME")) == NULL)
 		homedir = ".";
+
+#ifdef FAULTINJECT_ENABLED
+	FAULTINJECT_NAME.counter = strtoul(getenv("FAULTSTART")?getenv("FAULTSTART"):"0", NULL, 0);
+	FAULTINJECT_NAME.abort = getenv("FAULTABORT")?true:false;
+	static bool faultinject_is_off;
+	faultinject_is_off = !FAULTINJECT_NAME.counter;
+#endif
 
 	char histfile[1024];
 	snprintf(histfile, sizeof(histfile), "%s/%s", homedir, ".tpl_history");
@@ -189,8 +195,6 @@ int main(int ac, char *av[])
 			set_stats(pl);
 		else if (!strcmp(av[i], "--noindex"))
 			set_noindex(pl);
-		else if (!strcmp(av[i], "--ffai"))
-			set_ffai(pl);
 		else if (!strcmp(av[i], "--ns"))
 			ns = 1;
 		else if (!strcmp(av[i], "-d") || !strcmp(av[i], "--daemon"))
@@ -253,27 +257,31 @@ int main(int ac, char *av[])
 		}
 	}
 
+
 	if (goal) {
-		const char *src = goal;
-
-		while (isspace(*src))
-			src++;
-
-		if (!pl_eval(pl, src)) {
+		if (!pl_eval(pl, goal)) {
 			int halt_code = get_halt_code(pl);
 			pl_destroy(pl);
+#ifdef FAULTINJECT_ENABLED
+			if (faultinject_is_off)
+				fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_NAME.counter);
+#endif
 			return halt_code;
 		}
 
 		if (get_halt(pl) || ns) {
 			int halt_code = get_halt_code(pl);
 			pl_destroy(pl);
+#ifdef FAULTINJECT_ENABLED
+			if (faultinject_is_off)
+				fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_NAME.counter);
+#endif
 			return halt_code;
 		}
 	}
 
 	if (!quiet)
-		printf("Trealla Prolog (c) Infradig 2020-2021, %s\n", g_version);
+		printf("Trealla Prolog (c) Infradig 2020-2021, %s\n", VERSION);
 
 	if ((version == 2) && !quiet) {
 		fprintf(stdout, "Usage:\n");
@@ -292,7 +300,6 @@ int main(int ac, char *av[])
 		fprintf(stdout, "  --consult\t\t- consult from STDIN\n");
 		fprintf(stdout, "  --stats\t\t- print stats\n");
 		fprintf(stdout, "  --noindex\t\t- don't use term indexing\n");
-		fprintf(stdout, "  --ffai\t\t- force first-arg indexing\n");
 		fprintf(stdout, "  --ns\t\t\t- non-stop (to top-level)\n");
 	}
 
@@ -300,6 +307,10 @@ int main(int ac, char *av[])
 		pl_destroy(pl);
 		return 0;
 	}
+
+#ifdef FAULTINJECT_ENABLED
+	fprintf(stderr, "CDEBUG FAULT INJECTION ENABLED!\n"); //Don't use this build for benchmarking and production
+#endif
 
 	if (isatty(0))
 		history_load(histfile);
@@ -339,6 +350,11 @@ int main(int ac, char *av[])
 
 	int halt_code = get_halt_code(pl);
 	pl_destroy(pl);
+
+#ifdef FAULTINJECT_ENABLED
+	if (faultinject_is_off)
+		fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_NAME.counter);
+#endif
 
 	return halt_code;
 }

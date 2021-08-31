@@ -626,7 +626,7 @@ static void directives(parser *p, cell *d)
 		cell *p2 = c + 2;
 
 		if (!strcmp(GET_STR(p, p1), "indexing_threshold") && is_smallint(p2)) {
-			p->pl->indexing_threshold = get_smallint(p2);
+			p->m->indexing_threshold = get_smallint(p2);
 		}
 
 		if (!is_literal(p2)) return;
@@ -1014,9 +1014,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			if (is_variable(lhs)) {
 				c = insert_here(p, c, lhs);
 				lhs = c + 1;
-			} else if (is_cstring(lhs))
-				convert_to_literal(p->m, lhs);
-			else
+			} else
 				lhs = term_to_body_conversion(p, lhs);
 
 			cell *rhs = lhs + lhs->nbr_cells;
@@ -1024,8 +1022,6 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 
 			if (is_variable(rhs))
 				c = insert_here(p, c, rhs);
-			else if (is_cstring(rhs))
-				convert_to_literal(p->m, rhs);
 			else
 				rhs = term_to_body_conversion(p, rhs);
 
@@ -1040,9 +1036,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			if (is_variable(rhs)) {
 				c = insert_here(p, c, rhs);
 				rhs = c + 1;
-			} else if (is_cstring(rhs))
-				convert_to_literal(p->m, rhs);
-			else
+			} else
 				rhs = term_to_body_conversion(p, rhs);
 
 			c->nbr_cells = 1 + rhs->nbr_cells;
@@ -1492,8 +1486,8 @@ static int get_hex(const char **srcptr, int n, bool *error)
 	return v;
 }
 
-const char *g_escapes = "\e\a\f\b\t\v\r\n\x20\x7F\'\\";
-const char *g_anti_escapes = "eafbtvrnsd'\\";
+const char *g_escapes = "\e\a\f\b\t\v\r\n\x20\x7F\'\\\"`";
+const char *g_anti_escapes = "eafbtvrnsd'\\\"`";
 
 static int get_escape(const char **_src, bool *error, bool number)
 {
