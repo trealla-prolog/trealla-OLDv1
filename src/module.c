@@ -841,8 +841,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	if (!pr->idx1
 		&& !m->pl->noindex
 		&& !pr->is_noindex
-		&& ((!pr->is_dynamic && (pr->cnt > 15))
-			|| (pr->is_dynamic && (pr->cnt > 100)))) {
+		&& (pr->cnt > m->pl->indexing_threshdold))
 		reindex_predicate(m, pr);
 	} else {
 		if (pr->idx1) {

@@ -341,6 +341,7 @@ prolog *pl_create()
 		return pl;
 	}
 
+	pl->indexing_threshold = 150;
 	pl->curr_m = pl->user_m;
 	pl->s_last = 0;
 	pl->s_cnt = 0;
