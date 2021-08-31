@@ -249,6 +249,16 @@ static bool is_next_key(query *q)
 	return false;
 }
 
+static void find_key(query *q, map *idx, cell *key)
+{
+	if (!(q->st.iter = m_find_key(idx, key))) {
+		q->st.curr_clause = NULL;
+		return;
+	}
+
+	next_key(q);
+}
+
 void add_to_dirty_list(query *q, clause *cl)
 {
 	if (!retract_from_db(q->st.m, cl))
@@ -1135,16 +1145,8 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 		cell *head = deref(q, get_head(p1), p1_ctx);
 		cell *c = head;
 
-		if (!is_literal(c)) {
-			// For now convert it to a literal
-			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
-			may_idx_error(off);
-			unshare_cell(c);
-			c->tag = TAG_LITERAL;
-			c->val_off = off;
-			c->flags = 0;
-			c->arity = 0;
-		}
+		if (is_cstring(c))
+			convert_to_literal(q->st.m, c);
 
 		predicate *pr = search_predicate(q->st.m, head);
 
@@ -1227,15 +1229,8 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 	if (!q->retry) {
 		cell *c = p1;
 
-		if (!is_literal(c)) {
-			// For now convert it to a literal
-			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
-			may_idx_error(off);
-			unshare_cell(c);
-			c->tag = TAG_LITERAL;
-			c->val_off = off;
-			c->flags = 0;
-		}
+		if (is_cstring(c))
+			convert_to_literal(q->st.m, c);
 
 		predicate *pr = search_predicate(q->st.m, p1);
 
@@ -1312,88 +1307,71 @@ static const char *dump_key(const void *p1, const void *p)
 }
 #endif
 
+static pl_status start_head(query *q)
+{
+	cell *c = q->st.curr_cell;
+	predicate *pr;
+
+	if (is_cstring(c))
+		convert_to_literal(q->st.m, c);
+
+	pr = c->match;
+
+	if (!pr || is_function(c)) {
+		pr = search_predicate(q->st.m, c);
+		q->save_m = q->st.m;
+
+		if (!pr) {
+			if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(q, c), "initialization")))
+				if (q->st.m->flag.unknown == UNK_ERROR)
+					return throw_error(q, c, "existence_error", "procedure");
+				else
+					return pl_failure;
+			else
+				q->error = true;
+
+			return pl_error;
+		}
+
+		c->match = pr;
+	}
+
+	if (pr->idx1 && c->arity) {
+		cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
+		cell *p1 = key + 1;
+		cell *p2 = c->arity > 1 ? p1 + p1->nbr_cells : NULL;
+		bool use_index1 = !is_variable(p1);
+		bool use_index2 = pr->idx2 && p2 && !is_variable(p2);
+
+		if (use_index1) {
+#if DUMP_KEYS
+			fprintf(stderr, "*** IDX1:\n"); sl_dump(pr->idx1, dump_key, q);
+#endif
+			find_key(q, pr->idx1, key);
+		} else if (use_index2) {
+#if DUMP_KEYS
+			fprintf(stderr, "*** IDX2:\n"); sl_dump(pr->idx2, dump_key, q);
+#endif
+			find_key(q, pr->idx2, key);
+		} else
+			q->st.curr_clause = pr->head;
+	} else {
+		q->st.curr_clause = pr->head;
+	}
+
+	frame *g = GET_FRAME(q->st.curr_frame);
+	g->ugen = q->st.m->pl->ugen;
+	return pl_success;
+}
+
 static USE_RESULT pl_status match_head(query *q)
 {
 	if (!q->retry) {
-		cell *c = q->st.curr_cell;
-		predicate *pr;
-
-		if (is_literal(c)) {
-			pr = c->match;
-		} else {
-			// For now convert it to a literal
-			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
-			may_idx_error(off);
-			unshare_cell(c);
-			c->tag = TAG_LITERAL;
-			c->val_off = off;
-			c->flags = 0;
-			pr = NULL;
-		}
-
-		if (!pr || is_function(c)) {
-			pr = search_predicate(q->st.m, c);
-			q->save_m = q->st.m;
-
-			if (!pr) {
-				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(q, c), "initialization")))
-					if (q->st.m->flag.unknown == UNK_ERROR)
-						return throw_error(q, c, "existence_error", "procedure");
-					else
-						return pl_failure;
-				else
-					q->error = true;
-
-				return pl_error;
-			}
-
-			c->match = pr;
-		}
-
-		if (pr->idx1) {
-			cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
-			cell *p1 = NULL, *p2 = NULL;
-
-			if (key->arity) {
-				p1 = key + 1;
-
-				if (key->arity > 1) {
-					p2 = p1 + p1->nbr_cells;
-
-					if (is_variable(p2))
-						p2 = NULL;
-				} else {
-					if (is_variable(p1))
-						p1 = NULL;
-				}
-			}
-
-			if (p1 && is_variable(p1))
-				p1 = NULL;
-
-			if (p1 && pr->is_noindex1)
-				p1 = NULL;
-
-			if (p2 && pr->is_noindex2)
-				p2 = NULL;
-
-			if (p1 || p2) {
-#if DUMP_KEYS
-				sl_dump(pr->idx1, dump_key, q);
-				sl_dump(pr->idx2, dump_key, q);
-#endif
-				map *idx = p1 ? pr->idx1 : pr->idx2;
-				q->st.iter = m_find_key(idx, key);
-				next_key(q);
-			} else
-				q->st.curr_clause = pr->head;
-		} else
-			q->st.curr_clause = pr->head;
-
-		frame *g = GET_FRAME(q->st.curr_frame);
-		g->ugen = q->st.m->pl->ugen;
-	} else
+		if (start_head(q) != pl_success)
+			return pl_error;
+	} else {
 		next_key(q);
+	}
 
 	if (!q->st.curr_clause)
 		return pl_failure;
