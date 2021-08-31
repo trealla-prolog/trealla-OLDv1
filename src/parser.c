@@ -1495,9 +1495,9 @@ static int get_hex(const char **srcptr, int n, bool *error)
 const char *g_escapes = "\e\a\f\b\t\v\r\n\x20\x7F\'\\\"`";
 const char *g_anti_escapes = "eafbtvrnsd'\\\"`";
 
-static int get_escape(const char **_src, bool *error, bool number)
+static int get_escape(const char **pSrc, bool *error, bool number)
 {
-	const char *src = *_src;
+	const char *src = *pSrc;
 	int ch = *src++;
 	const char *ptr = strchr(g_anti_escapes, ch);
 
@@ -1530,7 +1530,7 @@ static int get_escape(const char **_src, bool *error, bool number)
 		if (!unicode && (*src++ != '\\')) {
 			//if (DUMP_ERRS || !p->do_read_term)
 			//	fprintf(stdout, "Error: syntax error, closing \\ missing\n");
-			*_src = src;
+			*pSrc = src;
 			*error = true;
 			return 0;
 		}
@@ -1538,17 +1538,17 @@ static int get_escape(const char **_src, bool *error, bool number)
 		if ((unsigned)ch > 0x10FFFF) {
 			//if (DUMP_ERRS || !p->do_read_term)
 			//	fprintf(stdout, "Error: syntax error, illegal character code\n");
-			*_src = src;
+			*pSrc = src;
 			*error = true;
 			return 0;
 		}
 	} else if (((ch != '\\') && (ch != '"') && (ch != '\'') && (ch != '\r') && (ch != '\n')) || number) {
-		*_src = --src;
+		*pSrc = --src;
 		*error = true;
 		return 0;
 	}
 
-	*_src = src;
+	*pSrc = src;
 	return ch;
 }
 

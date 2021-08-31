@@ -7,8 +7,8 @@ typedef struct skiplist_ skiplist;
 typedef struct sliter_ sliter;
 
 extern skiplist *sl_create(
-	int (*cmpkey)(const void *k1, const void *k2, const void* p, int args),
-	void (*delkey)(void *k, void *v, const void* p),
+	int (*cmpkey)(const void *k1, const void *k2, const void* param, int args),
+	void (*delkey)(void *k, void *v, const void* param),
 	const void *p
 	);
 
@@ -21,15 +21,15 @@ extern bool sl_del(skiplist *l, const void *k);
 
 extern void sl_iterate(
 	const skiplist *l,
-	int (*callback)(const void *k, const void *v, const void *p),
-	const void *p
+	int (*callback)(const void *k, const void *v, const void *param),
+	const void *param
 	);
 
 extern void sl_find(
 	const skiplist *l,
 	const void *k,
-	int (*f)(const void *k, const void *v, const void *p),
-	const void *p
+	int (*f)(const void *k, const void *v, const void *param),
+	const void *param
 	);
 
 extern sliter *sl_find_key(skiplist *l, const void *k);
@@ -44,8 +44,8 @@ extern size_t sl_count(const skiplist *l);
 
 extern void sl_dump(
 	const skiplist *l,
-	const char *(*f)(const void* k, const void* v, const void *p),
-	const void *p
+	const char *(*f)(const void* k, const void* v, const void *param),
+	const void *param
 	);
 
 extern void sl_destroy(skiplist *l);
