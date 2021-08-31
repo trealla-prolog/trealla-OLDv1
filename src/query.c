@@ -1376,7 +1376,7 @@ static USE_RESULT pl_status match_head(query *q)
 				sl_dump(pr->idx1, dump_key, q);
 				sl_dump(pr->idx2, dump_key, q);
 #endif
-				map *idx = p2 ? pr->idx2 : pr->idx1;
+				map *idx = p1 ? pr->idx1 : pr->idx2;
 				q->st.iter = m_findkey(idx, key);
 				next_key(q);
 			} else
