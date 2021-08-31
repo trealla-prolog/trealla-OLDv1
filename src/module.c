@@ -807,7 +807,10 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	const int ARG_NBR = pr->key.arity;
 
 	for (int i = 0; (i < ARG_NBR) && (i < pr->key.arity) && !pr->is_noindex; i++) {
-		bool noindex = (i == 0) && is_structure(p1);
+		bool noindex = false;
+
+		if ((i == 0) && is_structure(p1) && (p1->arity > 0))
+			noindex = true;
 
 		if ((i > 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
 			noindex = true;
@@ -841,7 +844,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	if (!pr->idx1
 		&& !m->pl->noindex
 		&& !pr->is_noindex
-		&& (pr->cnt > m->pl->indexing_threshdold))
+		&& (pr->cnt > m->pl->indexing_threshold)) {
 		reindex_predicate(m, pr);
 	} else {
 		if (pr->idx1) {

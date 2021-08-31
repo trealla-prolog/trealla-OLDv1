@@ -597,6 +597,11 @@ static void commit_me(query *q, rule *r)
 		g = make_frame(q, r->nbr_vars);
 
 	if (last_match) {
+		if (q->st.iter) {
+			m_done(q->st.iter);
+			q->st.iter = NULL;
+		}
+
 		drop_choice(q);
 		trim_trail(q);
 	} else {
@@ -1346,7 +1351,7 @@ static USE_RESULT pl_status match_head(query *q)
 		}
 
 		if (pr->idx1) {
-			cell *key = deep_clone_to_tmp(q, c, q->st.curr_frame);
+			cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
 			cell *p1 = NULL, *p2 = NULL;
 
 			if (key->arity) {
