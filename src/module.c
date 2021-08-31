@@ -841,9 +841,8 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 		cl->r.persist = true;
 
 	cell *p1 = c + 1;
-	const int ARG_NBR = pr->key.arity;
 
-	for (int i = 0; (i < ARG_NBR) && (i < pr->key.arity) && !pr->is_noindex; i++) {
+	for (int i = 0; (i < pr->key.arity) && (i < 2) && !pr->is_noindex; i++) {
 		if (i == 0) pr->is_noindex1 = !is_ground(p1);
 		if (i == 1) pr->is_noindex2 = !is_ground(p1);
 		bool noindex = false;
