@@ -847,12 +847,14 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 		if (i == 1) pr->is_noindex2 = !is_ground(p1);
 		bool noindex = false;
 
-		if ((i == 0) && is_structure(p1) && (p1->arity > 1))
+		// FIXME: figure out why this is needed...
+
+		if ((i == 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
 			noindex = true;
 
 #if 0
-		if ((i > 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
-			noindex = true;
+		// This was originally for one of Jos's programs,
+		// I assume not still needed...
 
 		if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
 			if (p1->val_off == g_at_s) {
