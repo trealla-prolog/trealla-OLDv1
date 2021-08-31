@@ -318,6 +318,7 @@ prolog *pl_create()
 			g_tpl_lib = strdup("../library");
 	}
 
+	pl->indexing_threshold = 150;
 	pl->funtab = m_create((void*)strcmp, NULL, NULL);
 
 	if (pl->funtab)
@@ -341,7 +342,6 @@ prolog *pl_create()
 		return pl;
 	}
 
-	pl->indexing_threshold = 150;
 	pl->curr_m = pl->user_m;
 	pl->s_last = 0;
 	pl->s_cnt = 0;

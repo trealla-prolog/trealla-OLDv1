@@ -883,7 +883,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	if (!pr->idx1
 		&& !m->pl->noindex
 		&& !pr->is_noindex
-		&& (pr->cnt > m->pl->indexing_threshold)) {
+		&& (pr->cnt > m->indexing_threshold)) {
 		reindex_predicate(m, pr);
 	} else {
 		if (pr->idx1) {
@@ -1285,6 +1285,7 @@ module *create_module(prolog *pl, const char *name)
 	m->flag.character_escapes = true;
 	m->error = false;
 	m->id = index_from_pool(pl, name);
+	m->indexing_threshold = pl->indexing_threshold;
 	m->defops = m_create((void*)strcmp, NULL, NULL);
 
 	if (strcmp(name, "system")) {

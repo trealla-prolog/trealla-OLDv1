@@ -606,7 +606,7 @@ struct module_ {
 	FILE *fp;
 	map *index, *nbs, *ops, *defops;
 	struct loaded_file *loaded_files;
-	unsigned id, idx_used;
+	unsigned id, idx_used, indexing_threshold;
 	prolog_flags flag;
 	bool user_ops:1;
 	bool prebuilt:1;
