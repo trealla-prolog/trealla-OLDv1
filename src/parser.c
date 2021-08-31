@@ -1014,7 +1014,9 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			if (is_variable(lhs)) {
 				c = insert_here(p, c, lhs);
 				lhs = c + 1;
-			} else
+			} else if (is_cstring(lhs))
+				convert_to_literal(p->m, lhs);
+			else
 				lhs = term_to_body_conversion(p, lhs);
 
 			cell *rhs = lhs + lhs->nbr_cells;
@@ -1022,6 +1024,8 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 
 			if (is_variable(rhs))
 				c = insert_here(p, c, rhs);
+			else if (is_cstring(rhs))
+				convert_to_literal(p->m, rhs);
 			else
 				rhs = term_to_body_conversion(p, rhs);
 
@@ -1036,7 +1040,9 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			if (is_variable(rhs)) {
 				c = insert_here(p, c, rhs);
 				rhs = c + 1;
-			} else
+			} else if (is_cstring(rhs))
+				convert_to_literal(p->m, rhs);
+			else
 				rhs = term_to_body_conversion(p, rhs);
 
 			c->nbr_cells = 1 + rhs->nbr_cells;
