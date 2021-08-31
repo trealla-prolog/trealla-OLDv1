@@ -848,7 +848,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 		if (i == 1) pr->is_noindex2 = !is_ground(p1);
 		bool noindex = false;
 
-		if ((i == 0) && is_structure(p1) && (p1->arity > 0))
+		if ((i == 0) && is_structure(p1) && (p1->arity > 1))
 			noindex = true;
 
 		if ((i > 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))

@@ -1371,6 +1371,12 @@ static USE_RESULT pl_status match_head(query *q)
 			if (p1 && is_variable(p1))
 				p1 = NULL;
 
+			if (p1 && pr->is_noindex1)
+				p1 = NULL;
+
+			if (p2 && pr->is_noindex2)
+				p2 = NULL;
+
 			if (p1 || p2) {
 #if DUMP_KEYS
 				sl_dump(pr->idx1, dump_key, q);

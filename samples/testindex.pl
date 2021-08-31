@@ -4,7 +4,7 @@ test1a :-
 		assertz(g(I,I)),
 		fail.
 test1a :-
-	write('Match using 1st-arg...'), nl,
+	write('Match using atomic 1st-arg...'), nl,
 	between(1,1000000,I),
 		g(I,_),
 		fail.
@@ -18,11 +18,39 @@ test1b :-
 		assertz(g(I,I)),
 		fail.
 test1b :-
-	write('Match using 2nd-arg...'), nl,
+	write('Match using atomic 2nd-arg...'), nl,
 	between(1,1000000,I),
 		g(_,I),
 		fail.
 test1b :-
+	abolish(g/2),
+	write('Done... '), write(1000000), write(' items'), nl, true.
+
+test1c :-
+	write('Load...'), nl,
+	between(1,1000000,I),
+		assertz(g(f(I),I)),
+		fail.
+test1c :-
+	write('Match using compound 1st-arg...'), nl,
+	between(1,1000000,I),
+		g(f(I),_),
+		fail.
+test1c :-
+	abolish(g/2),
+	write('Done... '), write(1000000), write(' items'), nl, true.
+
+test1d :-
+	write('Load...'), nl,
+	between(1,1000000,I),
+		assertz(g(I,f(I))),
+		fail.
+test1d :-
+	write('Match using compound 2nd-arg...'), nl,
+	between(1,1000000,I),
+		g(_,f(I)),
+		fail.
+test1d :-
 	abolish(g/2),
 	write('Done... '), write(1000000), write(' items'), nl, true.
 

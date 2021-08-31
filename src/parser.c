@@ -624,6 +624,11 @@ static void directives(parser *p, cell *d)
 
 	if (!strcmp(dirname, "set_prolog_flag") && (c->arity == 2)) {
 		cell *p2 = c + 2;
+
+		if (!strcmp(GET_STR(p, p1), "indexing_threshold") && is_smallint(p2)) {
+			p->pl->indexing_threshold = get_smallint(p2);
+		}
+
 		if (!is_literal(p2)) return;
 
 		if (!strcmp(GET_STR(p, p1), "double_quotes")) {
