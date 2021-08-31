@@ -27,12 +27,12 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#define msleep(ms)                                                                                                             \
-{                                                                                                                              \
-	struct timespec tv;                                                                                                    \
-	tv.tv_sec = (ms) / 1000;                                                                                               \
-	tv.tv_nsec = ((ms) % 1000) * 1000 * 1000;                                                                              \
-	nanosleep(&tv, &tv);                                                                                                   \
+#define msleep(ms)                                                     \
+{                                                                      \
+	struct timespec tv;                                                \
+	tv.tv_sec = (ms) / 1000;                                           \
+	tv.tv_nsec = ((ms) % 1000) * 1000 * 1000;                          \
+	nanosleep(&tv, &tv);                                               \
 }
 #endif
 
