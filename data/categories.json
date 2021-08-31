@@ -6,7 +6,7 @@
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "lgt_setof_3_34",
-        "uid" : "2e7aed011eece2c7",
+        "uid" : "c1b267229534f050",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
@@ -14,7 +14,7 @@
         },
         "flaky" : false,
         "newFailed" : false,
-        "parameters" : [ "predicates/setof_3/tests.lgt", "248-266", "https://github.com/LogtalkDotOrg/logtalk3/tree/1df8296e06b5912ed1378f9be8e2be1a55e23392/tests/prolog/predicates/setof_3/tests.lgt#L248" ]
+        "parameters" : [ "predicates/setof_3/tests.lgt", "248-266", "https://github.com/LogtalkDotOrg/logtalk3/tree/2f11d57ebe3c1160bb0a8a4b113b5e73d642cde7/tests/prolog/predicates/setof_3/tests.lgt#L248" ]
       } ],
       "uid" : "7a65c89daad8cf82ce910dbf95cc8113"
     } ],

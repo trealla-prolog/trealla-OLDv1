@@ -1,5 +1,5 @@
 {
-  "total" : 163,
+  "total" : 164,
   "items" : [ {
     "uid" : "fe889f4ed1e23b13cb890295efdd6049",
     "name" : "predicates/setof_3/tests.lgt::tests",
@@ -95,9 +95,9 @@
       "failed" : 0,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 39,
+      "passed" : 43,
       "unknown" : 0,
-      "total" : 39
+      "total" : 43
     }
   }, {
     "uid" : "99435521304eae5c110018f363e3c213",
