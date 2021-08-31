@@ -230,7 +230,7 @@ bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx)
 static void next_key(query *q)
 {
 	if (q->st.iter) {
-		if (!m_nextkey(q->st.iter, (void**)&q->st.curr_clause)) {
+		if (!m_next_key(q->st.iter, (void**)&q->st.curr_clause)) {
 			q->st.curr_clause = NULL;
 			q->st.iter = NULL;
 		}
@@ -241,7 +241,7 @@ static void next_key(query *q)
 static bool is_next_key(query *q)
 {
 	if (q->st.iter) {
-		if (m_is_nextkey(q->st.iter))
+		if (m_is_next_key(q->st.iter))
 			return true;
 	} else if (q->st.curr_clause->next)
 		return true;
@@ -1383,7 +1383,7 @@ static USE_RESULT pl_status match_head(query *q)
 				sl_dump(pr->idx2, dump_key, q);
 #endif
 				map *idx = p1 ? pr->idx1 : pr->idx2;
-				q->st.iter = m_findkey(idx, key);
+				q->st.iter = m_find_key(idx, key);
 				next_key(q);
 			} else
 				q->st.curr_clause = pr->head;
