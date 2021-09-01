@@ -210,7 +210,7 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 						return i;
 
 					break;
-				} else {
+				} else if (depth) {
 					int i = index_compkey_internal(p1, p2, param, args, depth+1);
 
 					if (i != 0)
