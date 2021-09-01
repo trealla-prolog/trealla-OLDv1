@@ -865,6 +865,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	if (!pr->idx1
 		&& !m->pl->noindex
 		&& !pr->is_noindex
+		&& pr->is_dynamic
 		&& (pr->cnt > m->indexing_threshold)) {
 		reindex_predicate(m, pr);
 	} else {
@@ -1268,7 +1269,7 @@ module *create_module(prolog *pl, const char *name)
 	m->error = false;
 	m->id = index_from_pool(pl, name);
 	m->defops = m_create((void*)strcmp, NULL, NULL);
-	m->indexing_threshold = 100;
+	m->indexing_threshold = 150;
 
 	if (strcmp(name, "system")) {
 		for (const op_table *ptr = g_ops; ptr->name; ptr++) {
