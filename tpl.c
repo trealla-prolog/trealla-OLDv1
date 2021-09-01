@@ -149,6 +149,13 @@ int main(int ac, char *av[])
 	if ((homedir = getenv("HOME")) == NULL)
 		homedir = ".";
 
+#ifdef FAULTINJECT_ENABLED
+	FAULTINJECT_NAME.counter = strtoul(getenv("FAULTSTART")?getenv("FAULTSTART"):"0", NULL, 0);
+	FAULTINJECT_NAME.abort = getenv("FAULTABORT")?true:false;
+	static bool faultinject_is_off;
+	faultinject_is_off = !FAULTINJECT_NAME.counter;
+#endif
+
 	char histfile[1024];
 	snprintf(histfile, sizeof(histfile), "%s/%s", homedir, ".tpl_history");
 
@@ -188,6 +195,8 @@ int main(int ac, char *av[])
 			set_stats(pl);
 		else if (!strcmp(av[i], "--noindex"))
 			set_noindex(pl);
+		else if (!strcmp(av[i], "--ffai"))
+			set_ffai(pl);
 		else if (!strcmp(av[i], "--ns"))
 			ns = 1;
 		else if (!strcmp(av[i], "-d") || !strcmp(av[i], "--daemon"))
@@ -255,12 +264,20 @@ int main(int ac, char *av[])
 		if (!pl_eval(pl, goal)) {
 			int halt_code = get_halt_code(pl);
 			pl_destroy(pl);
+#ifdef FAULTINJECT_ENABLED
+			if (faultinject_is_off)
+				fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_NAME.counter);
+#endif
 			return halt_code;
 		}
 
 		if (get_halt(pl) || ns) {
 			int halt_code = get_halt_code(pl);
 			pl_destroy(pl);
+#ifdef FAULTINJECT_ENABLED
+			if (faultinject_is_off)
+				fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_NAME.counter);
+#endif
 			return halt_code;
 		}
 	}
@@ -292,6 +309,10 @@ int main(int ac, char *av[])
 		pl_destroy(pl);
 		return 0;
 	}
+
+#ifdef FAULTINJECT_ENABLED
+	fprintf(stderr, "CDEBUG FAULT INJECTION ENABLED!\n"); //Don't use this build for benchmarking and production
+#endif
 
 	if (isatty(0))
 		history_load(histfile);
@@ -331,6 +352,11 @@ int main(int ac, char *av[])
 
 	int halt_code = get_halt_code(pl);
 	pl_destroy(pl);
+
+#ifdef FAULTINJECT_ENABLED
+	if (faultinject_is_off)
+		fprintf(stderr, "\nCDEBUG FAULT INJECTION MAX %llu\n", 0LLU-FAULTINJECT_NAME.counter);
+#endif
 
 	return halt_code;
 }

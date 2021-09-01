@@ -128,6 +128,7 @@ void set_trace(prolog *pl) { pl->trace = true; }
 void set_quiet(prolog *pl) { pl->quiet = true; }
 void set_stats(prolog *pl) { pl->stats = true; }
 void set_noindex(prolog *pl) { pl->noindex = true; }
+void set_ffai(prolog *pl) { pl->ffai = true; }
 void set_opt(prolog *pl, int level) { pl->opt = level; }
 
 bool pl_eval(prolog *pl, const char *s)
