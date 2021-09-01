@@ -6,7 +6,7 @@
       "name" : "Failure instead of success",
       "children" : [ {
         "name" : "lgt_setof_3_34",
-        "uid" : "36c5a99ba42f1e17",
+        "uid" : "ef8c033e3c4f64d3",
         "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
