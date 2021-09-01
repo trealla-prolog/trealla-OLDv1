@@ -9622,93 +9622,50 @@ static USE_RESULT pl_status fn_uuid_1(query *q)
 
 static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 {
-	if (q->retry)
-		return do_atom_concat_3(q);
-
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
+	GET_FIRST_ARG(p1,atomic);
+	GET_NEXT_ARG(p2,atomic);
 	GET_NEXT_ARG(p3,any);
 
-	if (is_variable(p1) && is_variable(p2))
-		return do_atom_concat_3(q);
 
-	if (is_variable(p3)) {
-		if (!is_atomic(p1))
-			return throw_error(q, p1, "type_error", "atomic");
+	const char *src1, *src2;
+	size_t len1, len2;
+	char tmpbuf1[256], tmpbuf2[256];
 
-		if (!is_atomic(p2))
-			return throw_error(q, p2, "type_error", "atomic");
-
-		const char *src1, *src2;
-		size_t len1, len2;
-		char tmpbuf1[256], tmpbuf2[256];
-
-		if (is_atom(p1)) {
-			src1 = GET_STR(q, p1);
-			len1 = LEN_STR(q, p1);
-		} else if (is_bigint(p1)) {
-			return pl_failure;
-		} else if (is_integer(p1)) {
-			src1 = tmpbuf1;
-			len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), get_int(p1), 10);
-		} else {
-			src1 = tmpbuf1;
-			len1 = snprintf(tmpbuf1, sizeof(tmpbuf1), "%.17g", get_real(p1));
-		}
-
-		if (is_atom(p2)) {
-			src2 = GET_STR(q, p2);
-			len2 = LEN_STR(q, p2);
-		} else if (is_bigint(p1)) {
-			return pl_failure;
-		} else if (is_integer(p2)) {
-			src2 = tmpbuf2;
-			len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), get_int(p2), 10);
-		} else {
-			src2 = tmpbuf2;
-			len2 = snprintf(tmpbuf2, sizeof(tmpbuf1), "%.17g", get_real(p2));
-		}
-
-		ASTRING_alloc(pr, len1+len2);
-		ASTRING_strcatn(pr, src1, len1);
-		ASTRING_strcatn(pr, src2, len2);
-		cell tmp;
-		may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
-		ASTRING_free(pr);
-		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
-		unshare_cell(&tmp);
-		return pl_success;
-	}
-
-	if (is_variable(p1)) {
-		if (LEN_STR(q, p2) > LEN_STR(q, p3))
-			return false;
-
-		cell tmp;
-		may_error(make_slice(q, &tmp, p3, 0, LEN_STR(q, p3)-LEN_STR(q, p2)));
-		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-		unshare_cell(&tmp);
-		return pl_success;
-	}
-
-	if (is_variable(p2)) {
-		if (LEN_STR(q, p1) > LEN_STR(q, p3))
-			return false;
-
-		cell tmp;
-		may_error(make_slice(q, &tmp, p3, LEN_STR(q, p1), LEN_STR(q, p3)-LEN_STR(q, p1)));
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		unshare_cell(&tmp);
-		return pl_success;
-	}
-
-	if (slicecmp(GET_STR(q, p3), LEN_STR(q, p3), GET_STR(q, p1), LEN_STR(q, p1)))
+	if (is_atom(p1)) {
+		src1 = GET_STR(q, p1);
+		len1 = LEN_STR(q, p1);
+	} else if (is_bigint(p1)) {
 		return pl_failure;
+	} else if (is_integer(p1)) {
+		src1 = tmpbuf1;
+		len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), get_int(p1), 10);
+	} else {
+		src1 = tmpbuf1;
+		len1 = snprintf(tmpbuf1, sizeof(tmpbuf1), "%.17g", get_real(p1));
+	}
 
-	if (slicecmp(GET_STR(q, p3)+LEN_STR(q, p1), LEN_STR(q, p3)-LEN_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p2)))
+	if (is_atom(p2)) {
+		src2 = GET_STR(q, p2);
+		len2 = LEN_STR(q, p2);
+	} else if (is_bigint(p1)) {
 		return pl_failure;
+	} else if (is_integer(p2)) {
+		src2 = tmpbuf2;
+		len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), get_int(p2), 10);
+	} else {
+		src2 = tmpbuf2;
+		len2 = snprintf(tmpbuf2, sizeof(tmpbuf1), "%.17g", get_real(p2));
+	}
 
-	return pl_success;
+	ASTRING_alloc(pr, len1+len2);
+	ASTRING_strcatn(pr, src1, len1);
+	ASTRING_strcatn(pr, src2, len2);
+	cell tmp;
+	may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
+	ASTRING_free(pr);
+	pl_status ok = unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	return ok;
 }
 
 static USE_RESULT pl_status fn_replace_4(query *q)
