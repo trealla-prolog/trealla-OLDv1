@@ -241,7 +241,7 @@ static void next_key(query *q)
 static bool is_next_key(query *q)
 {
 	if (q->st.iter) {
-		if (m_is_nextkey(q->st.iter))
+		if (m_is_next_key(q->st.iter))
 			return true;
 	} else if (q->st.curr_clause->next)
 		return true;

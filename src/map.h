@@ -22,7 +22,7 @@
 #define m_del sl_del
 #define m_find sl_find
 #define m_find_key sl_find_key
-#define m_is_nextkey sl_is_next_key
+#define m_is_next_key sl_is_next_key
 #define m_next_key sl_next_key
 #define m_first sl_first
 #define m_next sl_next
