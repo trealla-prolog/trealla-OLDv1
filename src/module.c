@@ -846,39 +846,41 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	if (pr->is_persist)
 		cl->r.persist = true;
 
-	cell *p1 = c + 1;
+	if (!pr->is_noindex) {
+		cell *p1 = c + 1;
 
-	for (int i = 0; (i < pr->key.arity) && (i < 2) && !pr->is_noindex; i++) {
-		if ((i == 0) && !is_ground(p1)) pr->is_noindex1 = true;
-		if ((i == 1) && !is_ground(p1)) pr->is_noindex2 = true;
-		bool noindex = false;
+		for (int i = 0; (i < pr->key.arity) && (i < 2) && !pr->is_noindex; i++) {
+			if ((i == 0) && !is_ground(p1)) pr->is_noindex1 = true;
+			if ((i == 1) && !is_ground(p1)) pr->is_noindex2 = true;
+			bool noindex = false;
 
-		// FIXME: figure out why this is needed...
+			// FIXME: figure out why this is needed...
 
-		if ((i == 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
-			noindex = true;
+			if ((i == 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
+				noindex = true;
 
 #if 0
-		// This was originally for one of Jos's programs,
-		// I assume not still needed...
+			// This was originally for one of Jos's programs,
+			// I assume not still needed...
 
-		if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
-			if (p1->val_off == g_at_s) {
-				noindex = true;
+			if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
+				if (p1->val_off == g_at_s) {
+					noindex = true;
+				}
 			}
-		}
 #endif
 
-		if (!pr->idx1 && noindex)
-			pr->is_noindex = true;
+			if (!pr->idx1 && noindex)
+				pr->is_noindex = true;
 
-		if ((i == 0) && pr->idx1 && noindex) {
-			pr->is_noindex = true;
-			pr->idx_save = pr->idx1;
-			pr->idx1 = NULL;
+			if ((i == 0) && pr->idx1 && noindex) {
+				pr->is_noindex = true;
+				pr->idx_save = pr->idx1;
+				pr->idx1 = NULL;
+			}
+
+			p1 += p1->nbr_cells;
 		}
-
-		p1 += p1->nbr_cells;
 	}
 
 	// If the index doesn't exist create it when
