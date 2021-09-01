@@ -1340,8 +1340,8 @@ static pl_status start_head(query *q)
 		cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
 		cell *p1 = key + 1;
 		cell *p2 = c->arity > 1 ? p1 + p1->nbr_cells : NULL;
-		bool use_index1 = !is_variable(p1);
-		bool use_index2 = pr->idx2 && p2 && !is_variable(p2);
+		bool use_index1 = !is_variable(p1) && !pr->is_noindex1;
+		bool use_index2 = pr->idx2 && p2 && !is_variable(p2) && !pr->is_noindex2;
 
 		if (use_index1) {
 #if DUMP_KEYS
