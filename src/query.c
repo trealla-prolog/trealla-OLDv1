@@ -1381,11 +1381,11 @@ static USE_RESULT pl_status match_head(query *q)
 				p2 = NULL;
 
 			if (p1 || p2) {
+				map *idx = p1 ? pr->idx1 : pr->idx2;
 #if DUMP_KEYS
-				sl_dump(pr->idx1, dump_key, q);
-				sl_dump(pr->idx2, dump_key, q);
+				if (idx == pr->idx1) printf("*** IDX1: "); sl_dump(pr->idx1, dump_key, q);
+				if (idx == pr->idx2) printf("*** IDX1: "); sl_dump(pr->idx2, dump_key, q);
 #endif
-				map *idx = p2 ? pr->idx2 : pr->idx1;
 				find_key(q, idx, key);
 			} else
 				q->st.curr_clause = pr->head;
