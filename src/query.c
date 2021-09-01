@@ -1325,14 +1325,12 @@ static USE_RESULT pl_status match_head(query *q)
 {
 	if (!q->retry) {
 		cell *c = q->st.curr_cell;
-		predicate *pr;
+		predicate *pr = NULL;
 
-		if (is_literal(c)) {
+		if (is_literal(c))
 			pr = c->match;
-		} else if (is_cstring(c)) {
+		else if (is_cstring(c))
 			convert_to_literal(q->st.m, c);
-			pr = NULL;
-		}
 
 		if (!pr || is_function(c)) {
 			pr = search_predicate(q->st.m, c);
