@@ -819,7 +819,7 @@ static void reindex_predicate(module *m, predicate *pr)
 	}
 }
 
-static bool is_ground(cell* c)
+static bool is_ground(const cell* c)
 {
 	idx_t nbr_cells = c->nbr_cells;
 

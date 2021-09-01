@@ -227,6 +227,14 @@ bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx)
 	return is_cyclic_term_internal(q, p1, p1_ctx, NULL);
 }
 
+static void drop_key(query *q)
+{
+	if (q->st.iter) {
+		m_done(q->st.iter);
+		q->st.iter = NULL;
+	}
+}
+
 static void next_key(query *q)
 {
 	if (q->st.iter) {
@@ -477,7 +485,6 @@ bool retry_choice(query *q)
 		return retry_choice(q);
 
 	trim_heap(q, ch);
-	m_done(q->st.iter);
 	q->st = ch->st;
 	q->save_m = NULL;		// maybe move q->save_m to q->st.save_m
 
@@ -607,11 +614,7 @@ static void commit_me(query *q, rule *r)
 		g = make_frame(q, r->nbr_vars);
 
 	if (last_match) {
-		if (q->st.iter) {
-			m_done(q->st.iter);
-			q->st.iter = NULL;
-		}
-
+		drop_key(q);
 		drop_choice(q);
 		trim_trail(q);
 	} else {
@@ -1400,13 +1403,14 @@ static USE_RESULT pl_status match_head(query *q)
 		undo_me(q);
 	}
 
+	drop_key(q);
 	drop_choice(q);
 	return pl_failure;
 }
 
 static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t orig_ctx, cell *tmp)
 {
-	return orig_c;
+	return orig_c;	// FIXME
 
 	parser *p = q->p;
 	frame *g = GET_FRAME(0);
