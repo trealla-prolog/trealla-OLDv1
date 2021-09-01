@@ -1372,9 +1372,8 @@ static USE_RESULT pl_status match_head(query *q)
 	if (!q->retry) {
 		if (start_head(q) != pl_success)
 			return pl_error;
-	} else {
+	} else
 		next_key(q);
-	}
 
 	if (!q->st.curr_clause)
 		return pl_failure;
