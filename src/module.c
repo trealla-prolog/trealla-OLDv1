@@ -237,7 +237,9 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 			}
 
 			return 0;
-		} else if (is_variable(p2))
+		} else if (!is_variable(p2))
+			return 1;
+		else if (is_variable(p2))
 			return 0;
 	}
 
