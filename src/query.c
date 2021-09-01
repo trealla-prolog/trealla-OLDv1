@@ -597,6 +597,10 @@ static void commit_me(query *q, rule *r)
 		g = make_frame(q, r->nbr_vars);
 
 	if (last_match) {
+		if (q->st.iter)
+			m_done(q->st.iter);
+
+		q->st.iter = NULL;
 		drop_choice(q);
 		trim_trail(q);
 	} else {
@@ -1322,6 +1326,7 @@ static USE_RESULT pl_status match_head(query *q)
 			unshare_cell(c);
 			c->tag = TAG_LITERAL;
 			c->val_off = off;
+			c->match = NULL;
 			c->flags = 0;
 			pr = NULL;
 		}

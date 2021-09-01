@@ -64,7 +64,7 @@ size_t slicecpy(char *dst, size_t dstlen, const char *src, size_t len)
 	return dst - save;
 }
 
-static char *slicedup(const char *s, size_t n)
+char *slicedup(const char *s, size_t n)
 {
 	char *ptr = malloc(n+1);
 	if (!ptr) return NULL;
