@@ -21,9 +21,9 @@
 #define m_get sl_get
 #define m_del sl_del
 #define m_find sl_find
-#define m_findkey sl_findkey
-#define m_is_nextkey sl_is_nextkey
-#define m_nextkey sl_nextkey
+#define m_find_key sl_find_key
+#define m_is_nextkey sl_is_next_key
+#define m_next_key sl_next_key
 #define m_first sl_first
 #define m_next sl_next
 #define m_done sl_done

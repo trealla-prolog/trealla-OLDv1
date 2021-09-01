@@ -32,9 +32,9 @@ extern void sl_find(
 	const void *p
 	);
 
-extern sliter *sl_findkey(skiplist *l, const void *k);
-extern bool sl_is_nextkey(sliter *i);
-extern bool sl_nextkey(sliter *i, void **v);
+extern sliter *sl_find_key(skiplist *l, const void *k);
+extern bool sl_is_next_key(sliter *i);
+extern bool sl_next_key(sliter *i, void **v);
 
 extern sliter *sl_first(skiplist *l);
 extern bool sl_next(sliter *i, void **v);

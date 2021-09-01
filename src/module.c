@@ -397,10 +397,10 @@ predicate *find_predicate(module *m, cell *c)
 	if (is_cstring(c))
 		tmp.val_off = index_from_pool(m->pl, GET_STR(m, c));
 
-	miter *iter = m_findkey(m->index, &tmp);
+	miter *iter = m_find_key(m->index, &tmp);
 	predicate *pr = NULL;
 
-	while (m_nextkey(iter, (void*)&pr)) {
+	while (m_next_key(iter, (void*)&pr)) {
 		if (pr->is_abolished)
 			continue;
 
@@ -465,10 +465,10 @@ static const char *dump_key(const void *k, const void *v, const void *p)
 
 bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 {
-	miter *iter = m_findkey(m->ops, name);
+	miter *iter = m_find_key(m->ops, name);
 	op_table *ptr;
 
-	while (m_nextkey(iter, (void**)&ptr)) {
+	while (m_next_key(iter, (void**)&ptr)) {
 		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
 			continue;
 
@@ -487,9 +487,9 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 		return true;
 	}
 
-	iter = m_findkey(m->defops, name);
+	iter = m_find_key(m->defops, name);
 
-	while (m_nextkey(iter, (void**)&ptr)) {
+	while (m_next_key(iter, (void**)&ptr)) {
 		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
 			continue;
 
@@ -529,9 +529,9 @@ static unsigned find_op_internal(module *m, const char *name, unsigned specifier
 	miter *iter;
 	op_table *ptr;
 
-	iter = m_findkey(m->ops, name);
+	iter = m_find_key(m->ops, name);
 
-	while (m_nextkey(iter, (void**)&ptr)) {
+	while (m_next_key(iter, (void**)&ptr)) {
 		if (!ptr->priority)
 			continue;
 
@@ -541,9 +541,9 @@ static unsigned find_op_internal(module *m, const char *name, unsigned specifier
 		}
 	}
 
-	iter = m_findkey(m->defops, name);
+	iter = m_find_key(m->defops, name);
 
-	while (m_nextkey(iter, (void**)&ptr)) {
+	while (m_next_key(iter, (void**)&ptr)) {
 		if (!ptr->priority)
 			continue;
 
@@ -583,9 +583,9 @@ static unsigned search_op_internal(module *m, const char *name, unsigned *specif
 	miter *iter;
 	op_table *ptr;
 
-	iter = m_findkey(m->defops, name);
+	iter = m_find_key(m->defops, name);
 
-	while (m_nextkey(iter, (void**)&ptr)) {
+	while (m_next_key(iter, (void**)&ptr)) {
 		if (!ptr->priority)
 			continue;
 
@@ -601,9 +601,9 @@ static unsigned search_op_internal(module *m, const char *name, unsigned *specif
 		return n;
 	}
 
-	iter = m_findkey(m->ops, name);
+	iter = m_find_key(m->ops, name);
 
-	while (m_nextkey(iter, (void**)&ptr)) {
+	while (m_next_key(iter, (void**)&ptr)) {
 		if (!ptr->priority)
 			continue;
 
@@ -619,9 +619,9 @@ static unsigned search_op_internal(module *m, const char *name, unsigned *specif
 		return n;
 	}
 
-	iter = m_findkey(m->defops, name);
+	iter = m_find_key(m->defops, name);
 
-	while (m_nextkey(iter, (void**)&ptr)) {
+	while (m_next_key(iter, (void**)&ptr)) {
 		if (!ptr->priority)
 			continue;
 
@@ -637,9 +637,9 @@ static unsigned search_op_internal(module *m, const char *name, unsigned *specif
 		return n;
 	}
 
-	iter = m_findkey(m->ops, name);
+	iter = m_find_key(m->ops, name);
 
-	while (m_nextkey(iter, (void**)&ptr)) {
+	while (m_next_key(iter, (void**)&ptr)) {
 		if (!ptr->priority)
 			continue;
 
