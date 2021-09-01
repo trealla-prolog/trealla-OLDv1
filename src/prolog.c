@@ -318,7 +318,6 @@ prolog *pl_create()
 			g_tpl_lib = strdup("../library");
 	}
 
-	pl->indexing_threshold = 50;
 	pl->funtab = m_create((void*)strcmp, NULL, NULL);
 
 	if (pl->funtab)

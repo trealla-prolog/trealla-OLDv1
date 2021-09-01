@@ -368,8 +368,6 @@ struct predicate_ {
 	map *idx1, *idx2, *idx_save;
 	cell key;
 	uint64_t cnt, refs;
-	bool is_noindex1:1;
-	bool is_noindex2:1;
 	bool is_prebuilt:1;
 	bool is_public:1;
 	bool is_dynamic:1;
@@ -606,7 +604,7 @@ struct module_ {
 	FILE *fp;
 	map *index, *nbs, *ops, *defops;
 	struct loaded_file *loaded_files;
-	unsigned id, idx_used, indexing_threshold;
+	unsigned id, idx_used;
 	prolog_flags flag;
 	bool user_ops:1;
 	bool prebuilt:1;
@@ -631,7 +629,7 @@ struct prolog_ {
 	char *pool;
 	uint64_t ugen;
 	idx_t pool_offset, pool_size, tab_idx;
-	unsigned varno, indexing_threshold;
+	unsigned varno;
 	uint8_t current_input, current_output, current_error;
 	int8_t halt_code, opt;
 	bool halt:1;
@@ -714,7 +712,6 @@ extern cell *list_tail(cell *l, cell *tmp);
 enum clause_type {DO_CLAUSE, DO_RETRACT, DO_STREAM_RETRACT, DO_RETRACTALL};
 
 extern size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq);
-extern char *slicedup(const char *s, size_t n);
 extern int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2);
 extern unsigned count_bits(const uint8_t *mask, unsigned bit);
 extern uint64_t get_time_in_usec(void);

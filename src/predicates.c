@@ -64,7 +64,7 @@ size_t slicecpy(char *dst, size_t dstlen, const char *src, size_t len)
 	return dst - save;
 }
 
-char *slicedup(const char *s, size_t n)
+static char *slicedup(const char *s, size_t n)
 {
 	char *ptr = malloc(n+1);
 	if (!ptr) return NULL;
@@ -4254,9 +4254,14 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		arity--;
 		cell *tmp2 = get_tmp_heap(q, save);
 
-		if (is_cstring(tmp2)) {
-			share_cell(tmp2);
-			convert_to_literal(q->st.m, tmp2);
+		if (is_cstring(tmp2) /*&& arity*/) {
+			cell *c = tmp2;
+			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, tmp2));
+			may_idx_error(off);
+			//unshare_cell(tmp2);
+			c->val_off = off;
+			c->tag = TAG_LITERAL;
+			c->flags = 0;
 		}
 
 		if (!is_literal(tmp2) && arity)
@@ -4714,8 +4719,14 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	term_to_body(p);
 	cell *h = get_head(p->r->cells);
 
-	if (is_cstring(h))
-		convert_to_literal(q->st.m, h);
+	if (is_cstring(h)) {
+		idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, h));
+		may_idx_error(off);
+		unshare_cell(h);
+		h->tag = TAG_LITERAL;
+		h->val_off = off;
+		h->flags = 0;
+	}
 
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
@@ -4775,8 +4786,14 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	term_to_body(p);
 	cell *h = get_head(p->r->cells);
 
-	if (is_cstring(h))
-		convert_to_literal(q->st.m, h);
+	if (is_cstring(h)) {
+		idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, h));
+		may_idx_error(off);
+		unshare_cell(h);
+		h->tag = TAG_LITERAL;
+		h->val_off = off;
+		h->flags = 0;
+	}
 
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
@@ -4848,8 +4865,13 @@ static USE_RESULT pl_status fn_iso_call_n(query *q)
 	tmp2->arity = arity;
 
 	if (is_cstring(tmp2)) {
-		share_cell(tmp2);
-		convert_to_literal(q->st.m, tmp2);
+		cell *c = tmp2;
+		idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, tmp2));
+		may_idx_error(off);
+		//unshare_cell(tmp2);
+		c->val_off = off;
+		c->tag = TAG_LITERAL;
+		c->flags = 0;
 	}
 
 	bool found = false;
@@ -6237,8 +6259,14 @@ static pl_status do_asserta_2(query *q)
 	term_to_body(p);
 	cell *h = get_head(p->r->cells);
 
-	if (is_cstring(h))
-		convert_to_literal(q->st.m, h);
+	if (is_cstring(h)) {
+		idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, h));
+		may_idx_error(off);
+		unshare_cell(h);
+		h->tag = TAG_LITERAL;
+		h->val_off = off;
+		h->flags = 0;
+	}
 
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
@@ -6330,8 +6358,14 @@ static pl_status do_assertz_2(query *q)
 	term_to_body(p);
 	cell *h = get_head(p->r->cells);
 
-	if (is_cstring(h))
-		convert_to_literal(q->st.m, h);
+	if (is_cstring(h)) {
+		idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, h));
+		may_idx_error(off);
+		unshare_cell(h);
+		h->tag = TAG_LITERAL;
+		h->val_off = off;
+		h->flags = 0;
+	}
 
 	if (!is_literal(h))
 		return throw_error(q, h, "type_error", "callable");
@@ -9588,50 +9622,93 @@ static USE_RESULT pl_status fn_uuid_1(query *q)
 
 static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 {
-	GET_FIRST_ARG(p1,atomic);
-	GET_NEXT_ARG(p2,atomic);
+	if (q->retry)
+		return do_atom_concat_3(q);
+
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,any);
 
+	if (is_variable(p1) && is_variable(p2))
+		return do_atom_concat_3(q);
 
-	const char *src1, *src2;
-	size_t len1, len2;
-	char tmpbuf1[256], tmpbuf2[256];
+	if (is_variable(p3)) {
+		if (!is_atomic(p1))
+			return throw_error(q, p1, "type_error", "atomic");
 
-	if (is_atom(p1)) {
-		src1 = GET_STR(q, p1);
-		len1 = LEN_STR(q, p1);
-	} else if (is_bigint(p1)) {
-		return pl_failure;
-	} else if (is_integer(p1)) {
-		src1 = tmpbuf1;
-		len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), get_int(p1), 10);
-	} else {
-		src1 = tmpbuf1;
-		len1 = snprintf(tmpbuf1, sizeof(tmpbuf1), "%.17g", get_real(p1));
+		if (!is_atomic(p2))
+			return throw_error(q, p2, "type_error", "atomic");
+
+		const char *src1, *src2;
+		size_t len1, len2;
+		char tmpbuf1[256], tmpbuf2[256];
+
+		if (is_atom(p1)) {
+			src1 = GET_STR(q, p1);
+			len1 = LEN_STR(q, p1);
+		} else if (is_bigint(p1)) {
+			return pl_failure;
+		} else if (is_integer(p1)) {
+			src1 = tmpbuf1;
+			len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), get_int(p1), 10);
+		} else {
+			src1 = tmpbuf1;
+			len1 = snprintf(tmpbuf1, sizeof(tmpbuf1), "%.17g", get_real(p1));
+		}
+
+		if (is_atom(p2)) {
+			src2 = GET_STR(q, p2);
+			len2 = LEN_STR(q, p2);
+		} else if (is_bigint(p1)) {
+			return pl_failure;
+		} else if (is_integer(p2)) {
+			src2 = tmpbuf2;
+			len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), get_int(p2), 10);
+		} else {
+			src2 = tmpbuf2;
+			len2 = snprintf(tmpbuf2, sizeof(tmpbuf1), "%.17g", get_real(p2));
+		}
+
+		ASTRING_alloc(pr, len1+len2);
+		ASTRING_strcatn(pr, src1, len1);
+		ASTRING_strcatn(pr, src2, len2);
+		cell tmp;
+		may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
+		ASTRING_free(pr);
+		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+		unshare_cell(&tmp);
+		return pl_success;
 	}
 
-	if (is_atom(p2)) {
-		src2 = GET_STR(q, p2);
-		len2 = LEN_STR(q, p2);
-	} else if (is_bigint(p1)) {
-		return pl_failure;
-	} else if (is_integer(p2)) {
-		src2 = tmpbuf2;
-		len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), get_int(p2), 10);
-	} else {
-		src2 = tmpbuf2;
-		len2 = snprintf(tmpbuf2, sizeof(tmpbuf1), "%.17g", get_real(p2));
+	if (is_variable(p1)) {
+		if (LEN_STR(q, p2) > LEN_STR(q, p3))
+			return false;
+
+		cell tmp;
+		may_error(make_slice(q, &tmp, p3, 0, LEN_STR(q, p3)-LEN_STR(q, p2)));
+		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		unshare_cell(&tmp);
+		return pl_success;
 	}
 
-	ASTRING_alloc(pr, len1+len2);
-	ASTRING_strcatn(pr, src1, len1);
-	ASTRING_strcatn(pr, src2, len2);
-	cell tmp;
-	may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
-	ASTRING_free(pr);
-	pl_status ok = unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
-	unshare_cell(&tmp);
-	return ok;
+	if (is_variable(p2)) {
+		if (LEN_STR(q, p1) > LEN_STR(q, p3))
+			return false;
+
+		cell tmp;
+		may_error(make_slice(q, &tmp, p3, LEN_STR(q, p1), LEN_STR(q, p3)-LEN_STR(q, p1)));
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		unshare_cell(&tmp);
+		return pl_success;
+	}
+
+	if (slicecmp(GET_STR(q, p3), LEN_STR(q, p3), GET_STR(q, p1), LEN_STR(q, p1)))
+		return pl_failure;
+
+	if (slicecmp(GET_STR(q, p3)+LEN_STR(q, p1), LEN_STR(q, p3)-LEN_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p2)))
+		return pl_failure;
+
+	return pl_success;
 }
 
 static USE_RESULT pl_status fn_replace_4(query *q)
@@ -11560,10 +11637,10 @@ static const struct builtins g_predicates_other[] =
 
 void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found, bool *function)
 {
-	miter *iter = m_find_key(pl->funtab, name);
+	miter *iter = m_findkey(pl->funtab, name);
 	const struct builtins *ptr;
 
-	while (m_next_key(iter, (void**)&ptr)) {
+	while (m_nextkey(iter, (void**)&ptr)) {
 		if (ptr->arity == arity) {
 			m_done(iter);
 			if (found) *found = true;

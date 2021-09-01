@@ -142,8 +142,8 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 			return mp_int_compare(&p1->val_bigint->ival, &p2->val_bigint->ival);
 		} else if (is_smallint(p2)) {
 			return mp_int_compare_value(&p1->val_bigint->ival, p2->val_int);
-		} else if (!is_variable(p2))
-			return -1;
+		} else if (is_variable(p2))
+			return 0;
 	} else if (is_smallint(p1)) {
 		if (is_bigint(p2)) {
 			return -mp_int_compare_value(&p2->val_bigint->ival, p1->val_int);
@@ -154,8 +154,8 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 				return 1;
 			else
 				return 0;
-		} else if (!is_variable(p2))
-			return -1;
+		} else if (is_variable(p2))
+			return 0;
 	} else if (is_real(p1)) {
 		if (is_real(p2)) {
 			if (get_real(p1) < get_real(p2))
@@ -164,27 +164,21 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 				return 1;
 			else
 				return 0;
-		} else if (is_integer(p2))
-			return 1;
-		else if (!is_variable(p2))
-			return -1;
+		} else if (is_variable(p2))
+			return 0;
 	} else if (is_literal(p1) && !p1->arity) {
 		if (is_literal(p2) && !p2->arity) {
 			if (p1->val_off == p2->val_off)
 				return 0;
 
 			return strcmp(GET_STR(m, p1), GET_STR(m, p2));
-		} else if (is_number(p2))
-			return 1;
-		else if (!is_variable(p2))
-			return -1;
+		} else if (is_variable(p2))
+			return 0;
 	} else if (is_atom(p1)) {
 		if (is_atom(p2))
 			return strcmp(GET_STR(m, p1), GET_STR(m, p2));
-		else if (is_number(p2))
-			return 1;
-		else if (!is_variable(p2))
-			return -1;
+		else if (is_variable(p2))
+			return 0;
 	} else if (is_structure(p1)) {
 		if (is_structure(p2)) {
 			if (p1->arity < p2->arity)
@@ -200,35 +194,29 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 
 			int arity = p1->arity;
 			p1++; p2++;
-			int arg = 1;
+			int cnt = 1;
 
 			while (arity--) {
-				if (!depth && (arg >= args)) {
-					int i = index_compkey_internal(p1, p2, param, args, depth+1);
+				int i = index_compkey_internal(p1, p2, param, args, depth+1);
 
-					if (i != 0)
-						return i;
+				if (i != 0)
+					return i;
 
-					if (arg == 2)
-						break;
-				} else if (depth) {
-					int i = index_compkey_internal(p1, p2, param, args, depth+1);
-
-					if (i != 0)
-						return i;
-				}
+				if ((depth == 1) && (cnt == args))
+					break;
 
 				p1 += p1->nbr_cells;
 				p2 += p2->nbr_cells;
-				arg++;
+				cnt++;
 			}
 
 			return 0;
-		} else if (!is_variable(p2))
-			return 1;
-		else if (is_variable(p2))
+		} else if (is_variable(p2))
 			return 0;
-	}
+	} else if (is_variable(p1))
+		return 0;
+	else
+		return 0;
 
 	return 0;
 }
@@ -399,24 +387,6 @@ static bool check_directive(const cell *c)
 	return false;
 }
 
-void convert_to_literal(module *m, cell *c)
-{
-	char *tmpbuf = NULL, *src;
-
-	if (is_blob(c))
-		src = tmpbuf = slicedup(GET_STR(m, c), LEN_STR(m, c));
-	else
-		src = GET_STR(m, c);
-
-	idx_t off = index_from_pool(m->pl, src);
-	unshare_cell(c);
-	c->tag = TAG_LITERAL;
-	c->val_off = off;
-	c->match = NULL;
-	c->flags = 0;
-	free(tmpbuf);
-}
-
 predicate *find_predicate(module *m, cell *c)
 {
 	cell tmp = *c;
@@ -427,10 +397,10 @@ predicate *find_predicate(module *m, cell *c)
 	if (is_cstring(c))
 		tmp.val_off = index_from_pool(m->pl, GET_STR(m, c));
 
-	miter *iter = m_find_key(m->index, &tmp);
+	miter *iter = m_findkey(m->index, &tmp);
 	predicate *pr = NULL;
 
-	while (m_next_key(iter, (void*)&pr)) {
+	while (m_nextkey(iter, (void*)&pr)) {
 		if (pr->is_abolished)
 			continue;
 
@@ -495,10 +465,10 @@ static const char *dump_key(const void *k, const void *v, const void *p)
 
 bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 {
-	miter *iter = m_find_key(m->ops, name);
+	miter *iter = m_findkey(m->ops, name);
 	op_table *ptr;
 
-	while (m_next_key(iter, (void**)&ptr)) {
+	while (m_nextkey(iter, (void**)&ptr)) {
 		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
 			continue;
 
@@ -517,9 +487,9 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 		return true;
 	}
 
-	iter = m_find_key(m->defops, name);
+	iter = m_findkey(m->defops, name);
 
-	while (m_next_key(iter, (void**)&ptr)) {
+	while (m_nextkey(iter, (void**)&ptr)) {
 		if (IS_INFIX(ptr->specifier) != IS_INFIX(specifier))
 			continue;
 
@@ -559,9 +529,9 @@ static unsigned find_op_internal(module *m, const char *name, unsigned specifier
 	miter *iter;
 	op_table *ptr;
 
-	iter = m_find_key(m->ops, name);
+	iter = m_findkey(m->ops, name);
 
-	while (m_next_key(iter, (void**)&ptr)) {
+	while (m_nextkey(iter, (void**)&ptr)) {
 		if (!ptr->priority)
 			continue;
 
@@ -571,9 +541,9 @@ static unsigned find_op_internal(module *m, const char *name, unsigned specifier
 		}
 	}
 
-	iter = m_find_key(m->defops, name);
+	iter = m_findkey(m->defops, name);
 
-	while (m_next_key(iter, (void**)&ptr)) {
+	while (m_nextkey(iter, (void**)&ptr)) {
 		if (!ptr->priority)
 			continue;
 
@@ -613,9 +583,9 @@ static unsigned search_op_internal(module *m, const char *name, unsigned *specif
 	miter *iter;
 	op_table *ptr;
 
-	iter = m_find_key(m->defops, name);
+	iter = m_findkey(m->defops, name);
 
-	while (m_next_key(iter, (void**)&ptr)) {
+	while (m_nextkey(iter, (void**)&ptr)) {
 		if (!ptr->priority)
 			continue;
 
@@ -631,9 +601,9 @@ static unsigned search_op_internal(module *m, const char *name, unsigned *specif
 		return n;
 	}
 
-	iter = m_find_key(m->ops, name);
+	iter = m_findkey(m->ops, name);
 
-	while (m_next_key(iter, (void**)&ptr)) {
+	while (m_nextkey(iter, (void**)&ptr)) {
 		if (!ptr->priority)
 			continue;
 
@@ -649,9 +619,9 @@ static unsigned search_op_internal(module *m, const char *name, unsigned *specif
 		return n;
 	}
 
-	iter = m_find_key(m->defops, name);
+	iter = m_findkey(m->defops, name);
 
-	while (m_next_key(iter, (void**)&ptr)) {
+	while (m_nextkey(iter, (void**)&ptr)) {
 		if (!ptr->priority)
 			continue;
 
@@ -667,9 +637,9 @@ static unsigned search_op_internal(module *m, const char *name, unsigned *specif
 		return n;
 	}
 
-	iter = m_find_key(m->ops, name);
+	iter = m_findkey(m->ops, name);
 
-	while (m_next_key(iter, (void**)&ptr)) {
+	while (m_nextkey(iter, (void**)&ptr)) {
 		if (!ptr->priority)
 			continue;
 
@@ -826,20 +796,6 @@ static void reindex_predicate(module *m, predicate *pr)
 	}
 }
 
-static bool is_ground(const cell* c)
-{
-	idx_t nbr_cells = c->nbr_cells;
-
-	while (nbr_cells--) {
-		if (is_variable(c))
-			return false;
-
-		c++;
-	}
-
-	return true;
-}
-
 static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 {
 	cell *c = get_head(cl->r.cells);
@@ -847,50 +803,46 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	if (pr->is_persist)
 		cl->r.persist = true;
 
-	if (!pr->is_noindex) {
-		cell *p1 = c + 1;
+	cell *p1 = c + 1;
+	const int ARG_NBR = pr->key.arity;
 
-		for (int i = 0; (i < pr->key.arity) && (i < 2) && !pr->is_noindex; i++) {
-			if ((i == 0) && !is_ground(p1)) pr->is_noindex1 = true;
-			if ((i == 1) && !is_ground(p1)) pr->is_noindex2 = true;
-			bool noindex = false;
+	for (int i = 0; (i < ARG_NBR) && (i < pr->key.arity) && !pr->is_noindex; i++) {
+		bool noindex = (i == 0) && is_structure(p1);
 
-			// FIXME: figure out why this is needed...
+		if ((i > 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
+			noindex = true;
 
-			if ((i == 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1))
-				noindex = true;
-
+		if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
+			if (p1->val_off == g_at_s) {
 #if 0
-			// This was originally for one of Jos's programs,
-			// I assume not still needed...
-
-			if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
-				if (p1->val_off == g_at_s) {
-					noindex = true;
-				}
-			}
+				query q = (query){0};
+				q.pl = m->pl;
+				q.st.m = m;
+				char *dst = print_term_to_strbuf(&q, c, 0, 0);
+				printf("*** [%d] %s\n", i, dst);
+				free(dst);
 #endif
-
-			if (!pr->idx1 && noindex)
-				pr->is_noindex = true;
-
-			if ((i == 0) && pr->idx1 && noindex) {
-				pr->is_noindex = true;
-				pr->idx_save = pr->idx1;
-				pr->idx1 = NULL;
+				noindex = true;
 			}
-
-			p1 += p1->nbr_cells;
 		}
-	}
 
-	// If the index doesn't exist create it when
-	// count exceeds threshold
+		if (!pr->idx1 && noindex)
+			pr->is_noindex = true;
+
+		if ((i == 0) && pr->idx1 && noindex) {
+			pr->is_noindex = true;
+			pr->idx_save = pr->idx1;
+			pr->idx1 = NULL;
+		}
+
+		p1 += p1->nbr_cells;
+	}
 
 	if (!pr->idx1
 		&& !m->pl->noindex
 		&& !pr->is_noindex
-		&& (pr->cnt > m->indexing_threshold)) {
+		&& ((!pr->is_dynamic && (pr->cnt > 15))
+			|| (pr->is_dynamic && (pr->cnt > 100)))) {
 		reindex_predicate(m, pr);
 	} else {
 		if (pr->idx1) {
@@ -1292,7 +1244,6 @@ module *create_module(prolog *pl, const char *name)
 	m->flag.character_escapes = true;
 	m->error = false;
 	m->id = index_from_pool(pl, name);
-	m->indexing_threshold = pl->indexing_threshold;
 	m->defops = m_create((void*)strcmp, NULL, NULL);
 
 	if (strcmp(name, "system")) {
