@@ -1354,7 +1354,7 @@ static USE_RESULT pl_status match_head(query *q)
 		}
 
 		if (pr->idx1) {
-			cell *key = deep_clone_to_tmp(q, c, q->st.curr_frame);
+			cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
 			cell *p1 = NULL, *p2 = NULL;
 
 			if (key->arity) {
