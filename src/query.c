@@ -1319,15 +1319,8 @@ static USE_RESULT pl_status match_head(query *q)
 
 		if (is_literal(c)) {
 			pr = c->match;
-		} else {
-			// For now convert it to a literal
-			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
-			may_idx_error(off);
-			unshare_cell(c);
-			c->tag = TAG_LITERAL;
-			c->val_off = off;
-			c->match = NULL;
-			c->flags = 0;
+		} else if (is_cstring(c)) {
+			convert_to_literal(q->st.m, c);
 			pr = NULL;
 		}
 
