@@ -849,8 +849,8 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	cell *p1 = c + 1;
 
 	for (int i = 0; (i < pr->key.arity) && (i < 2) && !pr->is_noindex; i++) {
-		if (i == 0) pr->is_noindex1 = !is_ground(p1);
-		if (i == 1) pr->is_noindex2 = !is_ground(p1);
+		if ((i == 0) && !is_ground(p1)) pr->is_noindex1 = true;
+		if ((i == 1) && !is_ground(p1)) pr->is_noindex2 = true;
 		bool noindex = false;
 
 		// FIXME: figure out why this is needed...
