@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <math.h>
+#include <assert.h>
 
 #include "skiplist.h"
 
@@ -550,6 +551,8 @@ bool sl_is_next_key(sliter *iter)
 	if (!iter)
 		return false;
 
+	assert(!iter->dead);
+
 	while (iter->p) {
 		if (iter->idx < iter->p->nbr) {
 			if (iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->param, iter->l->args) != 0)
@@ -569,6 +572,8 @@ bool sl_next_key(sliter *iter, void **val)
 {
 	if (!iter)
 		return false;
+
+	assert(!iter->dead);
 
 	while (iter->p) {
 		if (iter->idx < iter->p->nbr) {
@@ -594,6 +599,12 @@ void sl_done(sliter *iter)
 	if (!iter)
 		return;
 
+	assert(!iter->dead);
+
+	if (iter->dead)
+		return;
+
+	iter->dead = true;
 	iter->next = iter->l->iters;
 	iter->l->iters = iter;
 }
