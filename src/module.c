@@ -814,20 +814,6 @@ static void reindex_predicate(module *m, predicate *pr)
 	}
 }
 
-bool is_ground(const cell* c)
-{
-	idx_t nbr_cells = c->nbr_cells;
-
-	while (nbr_cells--) {
-		if (is_variable(c))
-			return false;
-
-		c++;
-	}
-
-	return true;
-}
-
 static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 {
 	cell *c = get_head(cl->r.cells);
@@ -838,8 +824,6 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	cell *p1 = c + 1;
 
 	for (int i = 0; (i < 2) && (i < pr->key.arity) && !pr->is_noindex; i++) {
-		//if ((i == 0) && !is_ground(p1)) pr->is_noindex1 = true;
-		//if ((i == 1) && !is_ground(p1)) pr->is_noindex2 = true;
 		bool noindex = (i == 0) && is_structure(p1) && !m->pl->ffai;
 
 		if ((i > 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1) && !m->pl->ffai)
