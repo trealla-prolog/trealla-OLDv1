@@ -1452,10 +1452,11 @@ static int get_octal(const char **srcptr)
 	return v;
 }
 
-static int get_hex(const char **srcptr, int n, bool *error)
+static int get_hex(const char **srcptr, unsigned n, bool *error)
 {
 	const char *src = *srcptr;
-	int v = 0, orig_n = n;
+	unsigned orig_n = n;
+	int v = 0;
 
 	while (*src == '0') {
 		src++; n--;
@@ -1487,6 +1488,7 @@ static int get_hex(const char **srcptr, int n, bool *error)
 
 const char *g_escapes = "\e\a\f\b\t\v\r\n\x20\x7F\'\\\"`";
 const char *g_anti_escapes = "eafbtvrnsd'\\\"`";
+#define ALLOW_UNICODE_ESCAPE 1
 
 static int get_escape(const char **_src, bool *error, bool number)
 {
@@ -1497,7 +1499,7 @@ static int get_escape(const char **_src, bool *error, bool number)
 	if (ptr)
 		ch = g_escapes[ptr-g_anti_escapes];
 	else if ((isdigit(ch) || (ch == 'x')
-#if 1
+#if ALLOW_UNICODE_ESCAPE
 		|| (ch == 'u') || (ch == 'U')
 #endif
 		)
@@ -1505,8 +1507,8 @@ static int get_escape(const char **_src, bool *error, bool number)
 		int unicode = 0;
 
 		if (ch == 'x')
-			ch = get_hex(&src, 999, error);
-#if 1
+			ch = get_hex(&src, UINT_MAX, error);
+#if ALLOW_UNICODE_ESCAPE
 		else if (ch == 'U') {
 			ch = get_hex(&src, 8, error);
 			unicode = 1;
