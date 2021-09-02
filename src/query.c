@@ -1372,12 +1372,6 @@ static USE_RESULT pl_status match_head(query *q)
 			if (p1 && is_variable(p1))
 				p1 = NULL;
 
-			if (pr->is_noindex1)
-				p1 = NULL;
-
-			if (pr->is_noindex2)
-				p2 = NULL;
-
 			if (p1 || p2) {
 				map *idx = p2 ? pr->idx2 : pr->idx1;
 #if DUMP_KEYS
