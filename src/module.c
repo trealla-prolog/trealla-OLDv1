@@ -142,8 +142,8 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 			return mp_int_compare(&p1->val_bigint->ival, &p2->val_bigint->ival);
 		} else if (is_smallint(p2)) {
 			return mp_int_compare_value(&p1->val_bigint->ival, p2->val_int);
-		} else if (is_variable(p2))
-			return 0;
+		} else if (!is_variable(p2))
+			return -1;
 	} else if (is_smallint(p1)) {
 		if (is_bigint(p2)) {
 			return -mp_int_compare_value(&p2->val_bigint->ival, p1->val_int);
@@ -154,8 +154,8 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 				return 1;
 			else
 				return 0;
-		} else if (is_variable(p2))
-			return 0;
+		} else if (!is_variable(p2))
+			return -1;
 	} else if (is_real(p1)) {
 		if (is_real(p2)) {
 			if (get_real(p1) < get_real(p2))
@@ -164,21 +164,27 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 				return 1;
 			else
 				return 0;
-		} else if (is_variable(p2))
-			return 0;
+		} else if (is_integer(p2))
+			return 1;
+		else if (!is_variable(p2))
+			return -1;
 	} else if (is_literal(p1) && !p1->arity) {
 		if (is_literal(p2) && !p2->arity) {
 			if (p1->val_off == p2->val_off)
 				return 0;
 
 			return strcmp(GET_STR(m, p1), GET_STR(m, p2));
-		} else if (is_variable(p2))
-			return 0;
+		} else if (is_number(p2))
+			return 1;
+		else if (!is_variable(p2))
+			return -1;
 	} else if (is_atom(p1)) {
 		if (is_atom(p2))
 			return strcmp(GET_STR(m, p1), GET_STR(m, p2));
-		else if (is_variable(p2))
-			return 0;
+		else if (is_number(p2))
+			return 1;
+		else if (!is_variable(p2))
+			return -1;
 	} else if (is_structure(p1)) {
 		if (is_structure(p2)) {
 			if (p1->arity < p2->arity)
@@ -211,12 +217,9 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 			}
 
 			return 0;
-		} else if (is_variable(p2))
-			return 0;
-	} else if (is_variable(p1))
-		return 0;
-	else
-		return 0;
+		} else if (!is_variable(p2))
+			return 1;
+	}
 
 	return 0;
 }
