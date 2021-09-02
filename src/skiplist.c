@@ -609,6 +609,7 @@ void sl_done(sliter *iter)
 	if (iter->dead)
 		return;
 
+	iter->dead = true;
 	iter->next = iter->l->iters;
 	iter->l->iters = iter;
 }
