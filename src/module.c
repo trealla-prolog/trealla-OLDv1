@@ -202,7 +202,7 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 				if (i != 0)
 					return i;
 
-				if ((depth == 1) && (cnt == args))
+				if ((depth == 0) && (cnt == args))
 					break;
 
 				p1 += p1->nbr_cells;
@@ -814,7 +814,7 @@ static void reindex_predicate(module *m, predicate *pr)
 	}
 }
 
-static bool is_ground(const cell* c)
+bool is_ground(const cell* c)
 {
 	idx_t nbr_cells = c->nbr_cells;
 
@@ -865,8 +865,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	if (!pr->idx1
 		&& !m->pl->noindex
 		&& !pr->is_noindex
-		&& ((!pr->is_dynamic && (pr->cnt > 15))
-			|| (pr->is_dynamic && (pr->cnt > 100)))) {
+		&& (pr->cnt > m->indexing_threshold)) {
 		reindex_predicate(m, pr);
 	} else {
 		if (pr->idx1) {
@@ -1269,6 +1268,7 @@ module *create_module(prolog *pl, const char *name)
 	m->error = false;
 	m->id = index_from_pool(pl, name);
 	m->defops = m_create((void*)strcmp, NULL, NULL);
+	m->indexing_threshold = 100;
 
 	if (strcmp(name, "system")) {
 		for (const op_table *ptr = g_ops; ptr->name; ptr++) {
