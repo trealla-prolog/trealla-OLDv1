@@ -1379,7 +1379,7 @@ static USE_RESULT pl_status match_head(query *q)
 				p2 = NULL;
 
 			if (p1 || p2) {
-				map *idx = p1 ? pr->idx1 : pr->idx2;
+				map *idx = p2 ? pr->idx2 : pr->idx1;
 #if DUMP_KEYS
 				printf("*** IDX%d: ", idx==pr->idx2?2:1); sl_dump(idx, dump_key, q);
 #endif
