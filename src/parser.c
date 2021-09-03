@@ -1537,7 +1537,8 @@ static int get_escape(const char **_src, bool *error, bool number)
 			*error = true;
 			return 0;
 		}
-	} else if (((ch != '\\') && (ch != '"') && (ch != '\'') && (ch != '\r') && (ch != '\n')) || number) {
+	} else if ((((ch != '\\') && (ch != '"') && (ch != '\'') && (ch != '\r') && (ch != '\n'))
+		|| number) && !isdigit(ch)) {
 		*_src = --src;
 		*error = true;
 		return 0;
@@ -1555,6 +1556,8 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	set_smallint(&p->v, 0);
 	p->v.flags = 0;
 	const char *s = *srcptr;
+
+	LOOP:
 
 	if ((*s == '.') && isdigit(s[1])) {
 		if (DUMP_ERRS || !p->do_read_term)
@@ -1574,6 +1577,25 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 		if (*s == '\\') {
 			s++;
+
+			if ((*s == '+') || (*s == '-')) {
+				if (*s == '-')
+					neg = true;
+
+				s++;
+
+				if (*s != '\'') {
+					if (DUMP_ERRS || !p->do_read_term)
+						fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+
+					p->error_desc = "number";
+					p->error = true;
+					return false;
+				}
+
+				s++;
+				goto LOOP;
+			}
 
 			if (!*s || iscntrl(*s)) {
 				if (DUMP_ERRS || !p->do_read_term)
