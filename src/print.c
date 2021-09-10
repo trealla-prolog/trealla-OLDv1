@@ -259,7 +259,7 @@ static void reformat_float(char *tmpbuf)
 	while (isdigit(*src))
 		*dst++ = *src++;
 
-	if (*src != '.') {
+	if ((*src != '.') && (*src != ',')) {
 		*dst++ = '.';
 		*dst++ = '0';
 	}
