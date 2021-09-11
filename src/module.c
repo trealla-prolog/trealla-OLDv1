@@ -14,7 +14,6 @@
 #include "prolog.h"
 #include "query.h"
 #include "builtins.h"
-#include "heap.h"
 #include "utf8.h"
 
 static const op_table g_ops[] =
