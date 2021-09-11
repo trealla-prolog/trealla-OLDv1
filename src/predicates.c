@@ -19,7 +19,6 @@
 #include <dirent.h>
 #endif
 
-#include "trealla.h"
 #include "internal.h"
 #include "network.h"
 #include "base64.h"

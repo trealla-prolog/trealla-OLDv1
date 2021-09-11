@@ -4,7 +4,6 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include "trealla.h"
 #include "internal.h"
 #include "query.h"
 #include "builtins.h"

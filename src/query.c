@@ -14,7 +14,6 @@
 #include "builtins.h"
 #include "heap.h"
 #include "utf8.h"
-#include "cdebug.h"
 
 #define Trace if (q->trace /*&& !consulting*/) trace_call
 

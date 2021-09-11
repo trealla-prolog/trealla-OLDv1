@@ -9,9 +9,7 @@
 #include <sys/time.h>
 
 #include "internal.h"
-#include "history.h"
 #include "library.h"
-#include "trealla.h"
 #include "parser.h"
 #include "module.h"
 #include "prolog.h"
