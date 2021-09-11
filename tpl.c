@@ -142,7 +142,7 @@ static int daemonize(int argc, char *argv[])
 
 int main(int ac, char *av[])
 {
-	setlocale(LC_ALL, "");
+	setlocale(LC_ALL|~LC_NUMERIC, "");
 	const char *homedir;
 	g_argv0 = av[0];
 
