@@ -8,7 +8,6 @@
 #include <sys/time.h>
 
 #include "internal.h"
-#include "history.h"
 #include "trealla.h"
 #include "parser.h"
 #include "module.h"
