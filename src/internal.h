@@ -451,7 +451,7 @@ typedef struct {
 typedef struct {
 	prolog_state st;
 	uint64_t ugen;
-	idx_t v1, v2, overflow;
+	idx_t v1, v2, overflow, chk_is_det;
 	uint32_t nbr_slots, nbr_vars, cgen, orig_cgen;
 	bool catchme_retry:1;
 	bool catchme_exception:1;
@@ -460,7 +460,6 @@ typedef struct {
 	bool did_cleanup:1;
 	bool register_cleanup:1;
 	bool register_term:1;
-	bool chk_is_det:1;
 	bool tail_rec:1;
 } choice;
 
