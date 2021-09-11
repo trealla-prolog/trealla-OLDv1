@@ -8,16 +8,11 @@
 #include <sys/time.h>
 
 #include "internal.h"
-#include "history.h"
 #include "library.h"
 #include "trealla.h"
 #include "parser.h"
 #include "module.h"
 #include "prolog.h"
-#include "query.h"
-#include "builtins.h"
-#include "heap.h"
-#include "utf8.h"
 
 static const size_t INITIAL_POOL_SIZE = 64000;	// bytes
 
