@@ -92,35 +92,6 @@ findall(T, G, B, Tail) :-
 	findall(T, G, B0),
 	'$append'(B0, Tail, B), !.
 
-xlength(List, Length) :-
-	(	var(Length) ->
-		'$length'(List, List, 0, Length)
-	;	\+ integer(Length) ->
-		throw(error(type_error(integer,Length), length/2))
-	;	Length < 0 ->
-		throw(error(domain_error(not_less_than_zero,Length), length/2))
-	;	'$make_list'(Length, List, List)
-	).
-
-'$make_list'(N, Term, List) :-
-	(	N =:= 0, Term = [] ->
-		true
-	;	M is N-1, Term = [_| Tail] ->
-		'$make_list'(M, Tail, List)
-	;	Term \= [],
-		Term \= [_|_],
-		throw(error(type_error(list,List), length/2))
-	).
-
-'$length'(Term, List, _, _) :-
-	Term \= [],
-	Term \= [_|_],
-	throw(error(type_error(list,List), length/2)).
-'$length'([], _, Length, Length) :- !.
-'$length'([_| Tail], List, Acc, Length) :-
-	Acc2 is Acc + 1,
-	'$length'(Tail, List, Acc2, Length).
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Derived from code by R.A. O'Keefe
 
