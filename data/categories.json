@@ -3,10 +3,25 @@
   "children" : [ {
     "name" : "Product defects",
     "children" : [ {
+      "name" : "Error instead of success",
+      "children" : [ {
+        "name" : "lgt_unbounded_float_division_02",
+        "uid" : "d30ece009b5deb00",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "unbounded/tests.lgt", "107-110", "https://github.com/LogtalkDotOrg/logtalk3/tree/1dbf3cc87284674fcd3d5cfefde52a7c3bc67f9e/tests/prolog/unbounded/tests.lgt#L107" ]
+      } ],
+      "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
+    }, {
       "name" : "Non-deterministic success",
       "children" : [ {
         "name" : "iso_stream_property_2_01",
-        "uid" : "c05ae054ff936260",
+        "uid" : "50d4f6089a1c6878",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
