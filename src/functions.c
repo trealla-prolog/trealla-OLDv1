@@ -1266,6 +1266,9 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 		if (isinf(d))
 			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
 
+		if (iszero(d))
+			return throw_error(q, &q->accum, "evaluation_error", "zero_divisor");
+
 		q->accum.val_real /= d;
 		q->accum.tag = TAG_REAL;
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
@@ -1274,10 +1277,13 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 		if (isinf(q->accum.val_real))
 			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
 
+		if (p2.val_int == 0)
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
+
 		q->accum.val_real /= p2.val_int;
 		q->accum.tag = TAG_REAL;
 	} else if (is_bigint(&p1) && is_real(&p2)) {
-		if (p2.val_real == 0.0)
+		if (iszero(p2.val_real))
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_real = BIGINT_TO_DOUBLE(&p1.val_bigint->ival) / p2.val_real;
@@ -1289,9 +1295,10 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 		if (isinf(d))
 			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
 
-		q->accum.val_real /= d;
+		if (iszero(d))
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
-		if (isinf(q->accum.val_real))
+		q->accum.val_real /= d;
 			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
 
 		q->accum.tag = TAG_REAL;
@@ -1300,6 +1307,9 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 
 		if (isinf(d))
 			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
+
+		if (iszero(d))
+			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_real = p1.val_real / d;
 		q->accum.tag = TAG_REAL;
@@ -1310,13 +1320,13 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 		q->accum.val_real = (double)p1.val_int / p2.val_int;
 		q->accum.tag = TAG_REAL;
 	} else if (is_smallint(&p1) && is_real(&p2)) {
-		if (p2.val_real == 0.0)
+		if (iszero(p2.val_real))
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_real = (double)p1.val_int / p2.val_real;
 		q->accum.tag = TAG_REAL;
 	} else if (is_real(&p1) && is_real(&p2)) {
-		if (p2.val_real == 0.0)
+		if (iszero(p2.val_real))
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_real = p1.val_real / p2.val_real;
