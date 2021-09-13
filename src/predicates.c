@@ -1167,10 +1167,10 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	ssize_t len = print_term_to_buf(q, NULL, 0, p1, p1_ctx, 1, 0, 0);
+	ssize_t len = print_canonical_to_buf(q, NULL, 0, p1, p1_ctx, 1, 0, 0);
 	char *dst = malloc(len+10);
 	may_ptr_error(dst);
-	print_term_to_buf(q, dst, len+1, p1, p1_ctx, 1, 0, 0);
+	print_canonical_to_buf(q, dst, len+1, p1, p1_ctx, 1, 0, 0);
 	cell tmp;
 	may_error(make_string(&tmp, dst));
 	free(dst);

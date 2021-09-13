@@ -390,11 +390,11 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 
 	if (is_real(c)) {
 		char tmpbuf[256];
-		sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG-1, get_real(c));
+		sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, get_real(c));
 		const char *ptr = strchr(tmpbuf, '.');
 
 		if (ptr && (strlen(ptr+1) > 1))
-			sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG-1, get_real(c));
+			sprintf(tmpbuf, "%.*g", DBL_DECIMAL_DIG, get_real(c));
 
 		reformat_float(tmpbuf);
 		dst += snprintf(dst, dstlen, "%s", tmpbuf);
