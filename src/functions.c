@@ -1299,8 +1299,6 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_real /= d;
-			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
-
 		q->accum.tag = TAG_REAL;
 	} else if (is_bigint(&p2) && is_real(&p1)) {
 		double d = BIGINT_TO_DOUBLE(&p2.val_bigint->ival);
