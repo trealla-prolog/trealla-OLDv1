@@ -5930,7 +5930,8 @@ static USE_RESULT pl_status fn_sys_queuen_2(query *q)
 
 static USE_RESULT pl_status fn_iso_findall_3(query *q)
 {
-	GET_FIRST_ARG(p1,any);
+	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, true);
+	GET_FIRST_RAW_ARG0(p1,any,p0);
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,list_or_nil_or_var);
 
@@ -5951,6 +5952,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 		q->tmpq[q->st.qnbr] = NULL;
 		may_error(make_barrier(q));
 		q->st.curr_cell = tmp;
+		unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 		return pl_success;
 	}
 
@@ -5958,7 +5960,9 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 		q->st.qnbr--;
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
-		return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+		pl_status ok = unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+		unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
+		return ok;
 	}
 
 	// Retry takes a copy
@@ -5996,7 +6000,9 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 	q->tmpq[q->st.qnbr] = NULL;
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	q->st.qnbr--;
-	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
+	pl_status ok = unify(q, p3, p3_ctx, l, q->st.curr_frame);
+	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
+	return ok;
 }
 
 static pl_status do_op(query *q, cell *p3)
@@ -11351,7 +11357,7 @@ static const struct builtins g_predicates_iso[] =
 	{"$legacy_current_prolog_flag", 2, fn_iso_current_prolog_flag_2, NULL, false},
 	{"set_prolog_flag", 2, fn_iso_set_prolog_flag_2, NULL, false},
 	{"op", 3, fn_iso_op_3, NULL, false},
-	{"$findall", 3, fn_iso_findall_3, NULL, false},
+	{"findall", 3, fn_iso_findall_3, NULL, false},
 	{"current_predicate", 1, fn_iso_current_predicate_1, NULL, false},
 	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL, false},
 	{"compare", 3, fn_iso_compare_3, NULL, false},
