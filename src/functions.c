@@ -275,9 +275,8 @@ static USE_RESULT pl_status fn_iso_float_1(query *q)
 		if (is_bigint(&p1)) {
 			q->accum.val_real = BIGINT_TO_DOUBLE(&p1.val_bigint->ival);
 
-			if (isinf(q->accum.val_real)) {
+			if (isinf(q->accum.val_real))
 				return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
-			}
 
 			q->accum.tag = TAG_REAL;
 			return pl_success;
@@ -468,14 +467,12 @@ static USE_RESULT pl_status fn_iso_exp_1(query *q)
 
 		if (isinf(q->accum.val_real))
 			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
-
 	} else if (is_smallint(&p1)) {
 		q->accum.val_real = exp((double)p1.val_int);
 		q->accum.tag = TAG_REAL;
 
 		if (isinf(q->accum.val_real))
 			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
-
 	} else if (is_real(&p1)) {
 		q->accum.val_real = exp(p1.val_real);
 		q->accum.tag = TAG_REAL;
@@ -539,7 +536,6 @@ static USE_RESULT pl_status fn_iso_log_1(query *q)
 
 		if (isinf(q->accum.val_real))
 			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
-
 	} else if (is_smallint(&p1)) {
 		if (p1.val_int <= 0)
 			return throw_error(q, &p1, "evaluation_error", "undefined");
@@ -1261,10 +1257,23 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 
 	if (is_bigint(&p1) && is_bigint(&p2)) {
 		q->accum.val_real = BIGINT_TO_DOUBLE(&p1.val_bigint->ival);
-		q->accum.val_real /= BIGINT_TO_DOUBLE(&p2.val_bigint->ival);
+
+		if (isinf(q->accum.val_real))
+			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
+
+		double d = BIGINT_TO_DOUBLE(&p2.val_bigint->ival);
+
+		if (isinf(d))
+			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
+
+		q->accum.val_real /= d;
 		q->accum.tag = TAG_REAL;
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
 		q->accum.val_real = BIGINT_TO_DOUBLE(&p1.val_bigint->ival);
+
+		if (isinf(q->accum.val_real))
+			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
+
 		q->accum.val_real /= p2.val_int;
 		q->accum.tag = TAG_REAL;
 	} else if (is_bigint(&p1) && is_real(&p2)) {
@@ -1275,10 +1284,24 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 		q->accum.tag = TAG_REAL;
 	} else if (is_bigint(&p2) && is_smallint(&p1)) {
 		q->accum.val_real = p1.val_int;
-		q->accum.val_real /= BIGINT_TO_DOUBLE(&p2.val_bigint->ival);
+		double d = BIGINT_TO_DOUBLE(&p2.val_bigint->ival);
+
+		if (isinf(d))
+			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
+
+		q->accum.val_real /= d;
+
+		if (isinf(q->accum.val_real))
+			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
+
 		q->accum.tag = TAG_REAL;
 	} else if (is_bigint(&p2) && is_real(&p1)) {
-		q->accum.val_real = p1.val_real / BIGINT_TO_DOUBLE(&p2.val_bigint->ival);
+		double d = BIGINT_TO_DOUBLE(&p2.val_bigint->ival);
+
+		if (isinf(d))
+			return throw_error(q, &q->accum, "evaluation_error", "float_overflow");
+
+		q->accum.val_real = p1.val_real / d;
 		q->accum.tag = TAG_REAL;
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		if (p2.val_int == 0)
