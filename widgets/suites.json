@@ -1,13 +1,13 @@
 {
   "total" : 164,
   "items" : [ {
-    "uid" : "fe889f4ed1e23b13cb890295efdd6049",
-    "name" : "predicates/setof_3/tests.lgt::tests",
+    "uid" : "e96278ed9288bacdb418cbcc943c2f26",
+    "name" : "predicates/stream_property_2/tests.lgt::tests",
     "statistic" : {
       "failed" : 1,
       "broken" : 0,
-      "skipped" : 1,
-      "passed" : 33,
+      "skipped" : 0,
+      "passed" : 34,
       "unknown" : 0,
       "total" : 35
     }
