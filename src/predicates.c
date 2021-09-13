@@ -5931,7 +5931,7 @@ static USE_RESULT pl_status fn_sys_queuen_2(query *q)
 static USE_RESULT pl_status fn_iso_findall_3(query *q)
 {
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, true);
-	GET_FIRST_RAW_ARG0(p1,any,p0);
+	GET_FIRST_ARG0(p1,any,p0);
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,list_or_nil_or_var);
 
