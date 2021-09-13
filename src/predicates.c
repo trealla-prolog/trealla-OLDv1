@@ -5952,7 +5952,6 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 		q->tmpq[q->st.qnbr] = NULL;
 		may_error(make_barrier(q));
 		q->st.curr_cell = tmp;
-		unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 		return pl_success;
 	}
 
