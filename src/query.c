@@ -397,7 +397,7 @@ static void unwind_trail(query *q, const choice *ch)
 		const trail *tr = q->trails + --q->st.tp;
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
-		//unshare_cell(&e->c); // FIXME
+		unshare_cell(&e->c);
 		e->c.tag = TAG_EMPTY;
 		e->c.attrs = tr->attrs;
 		e->c.attrs_ctx = tr->attrs_ctx;
