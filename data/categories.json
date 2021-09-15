@@ -3,10 +3,25 @@
   "children" : [ {
     "name" : "Product defects",
     "children" : [ {
+      "name" : "Error instead of success",
+      "children" : [ {
+        "name" : "iso_current_op_3_40",
+        "uid" : "2d5e9325bb8287fc",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 1
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "predicates/current_op_3/tests.lgt", "218-230", "https://github.com/LogtalkDotOrg/logtalk3/tree/ea274bccbcb0888e70263e3c89e6169394c31623/tests/prolog/predicates/current_op_3/tests.lgt#L218" ]
+      } ],
+      "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
+    }, {
       "name" : "Non-deterministic success",
       "children" : [ {
         "name" : "iso_stream_property_2_01",
-        "uid" : "d088a03c0e87e965",
+        "uid" : "62b1d3e51c798e01",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
@@ -14,7 +29,7 @@
         },
         "flaky" : false,
         "newFailed" : false,
-        "parameters" : [ "predicates/stream_property_2/tests.lgt", "30-42", "https://github.com/LogtalkDotOrg/logtalk3/tree/552817ec228f741ad38d8c76ab0f27e1c5997bfd/tests/prolog/predicates/stream_property_2/tests.lgt#L30" ]
+        "parameters" : [ "predicates/stream_property_2/tests.lgt", "30-42", "https://github.com/LogtalkDotOrg/logtalk3/tree/ea274bccbcb0888e70263e3c89e6169394c31623/tests/prolog/predicates/stream_property_2/tests.lgt#L30" ]
       } ],
       "uid" : "1e457c6468423f30812a59ec3665696f"
     } ],
