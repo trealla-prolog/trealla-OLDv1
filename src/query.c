@@ -555,8 +555,11 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	slot *from = GET_SLOT(newg, 0);
 	slot *to = GET_SLOT(g, 0);
 
-	for (idx_t i = 0; i < nbr_vars; i++)
+	for (idx_t i = 0; i < nbr_vars; i++) {
+		//unshare_cell(&to->c);
+		share_cell(&from->c);
 		*to++ = *from++;
+	}
 
 	q->st.sp = g->base_slot_nbr + nbr_vars;
 	q->tot_tcos++;
