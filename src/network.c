@@ -319,9 +319,8 @@ int net_getc(stream *str)
 			len--;
 		}
 
-		if (dst != ptr) {
+		if (dst != ptr)
 			return ptr[0];
-		}
 
 		if (SSL_read((SSL*)str->sslptr, ptr, len) == 0)
 			return EOF;
@@ -330,7 +329,7 @@ int net_getc(stream *str)
 	}
 #endif
 
-	return getc(str->fp);
+	return fgetc(str->fp);
 }
 
 size_t net_read(void *ptr, size_t len, stream *str)
@@ -345,9 +344,8 @@ size_t net_read(void *ptr, size_t len, stream *str)
 			len--;
 		}
 
-		if (dst != ptr) {
+		if (dst != ptr)
 			return dst - (char*)ptr;
-		}
 
 		return SSL_read((SSL*)str->sslptr, ptr, len);
 	}
