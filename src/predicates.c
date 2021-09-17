@@ -5065,7 +5065,7 @@ static USE_RESULT pl_status fn_sys_block_handler_0(query *q)
 {
 	choice *ch = GET_CURR_CHOICE();
 
-	while (ch >= q->choices) {
+	do {
 		if (ch->catchme_retry) {
 			ch->block_handler = !ch->block_handler;
 			break;
@@ -5073,6 +5073,7 @@ static USE_RESULT pl_status fn_sys_block_handler_0(query *q)
 
 		ch--;
 	}
+	 while (ch != q->choices);
 
 	if (q->retry)
 		return false;
