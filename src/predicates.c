@@ -5077,7 +5077,9 @@ static USE_RESULT pl_status fn_sys_block_handler_0(query *q)
 	if (q->retry)
 		return false;
 
-	may_error(make_choice(q));
+	if (ch != GET_CURR_CHOICE())
+		may_error(make_choice(q));
+
 	return pl_success;
 }
 
