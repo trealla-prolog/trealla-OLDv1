@@ -5061,6 +5061,26 @@ static USE_RESULT pl_status fn_iso_negation_1(query *q)
 }
 #endif
 
+static USE_RESULT pl_status fn_sys_block_handler_0(query *q)
+{
+	choice *ch = GET_CURR_CHOICE();
+
+	while (ch >= q->choices) {
+		if (ch->catchme_retry) {
+			ch->block_handler = !ch->block_handler;
+			break;
+		}
+
+		ch--;
+	}
+
+	if (q->retry)
+		return false;
+
+	may_error(make_choice(q));
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_iso_catch_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -5091,9 +5111,11 @@ static USE_RESULT pl_status fn_iso_catch_3(query *q)
 	// First time through? Try the primary goal...
 
 	may_error(make_catcher(q, QUERY_RETRY));
-	cell *tmp = clone_to_heap(q, true, p1, 1);
+	idx_t nbr_cells = p1->nbr_cells;
+	cell *tmp = clone_to_heap(q, true, p1, 2);
 	may_ptr_error(tmp);
-	make_call(q, tmp+1+p1->nbr_cells);
+	make_structure(tmp+1+nbr_cells++, index_from_pool(q->pl, "$block_handler"), fn_sys_block_handler_0, 0, 0);
+	make_call(q, tmp+1+nbr_cells);
 	q->st.curr_cell = tmp;
 	q->save_cp = q->cp;
 	return pl_success;
@@ -5106,7 +5128,7 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 	while (retry_choice(q)) {
 		choice *ch = GET_CHOICE(q->cp);
 
-		if (!ch->catchme_retry)
+		if (!ch->catchme_retry || ch->block_handler)
 			continue;
 
 		cell *tmp = copy_to_heap(q, false, e, q->st.curr_frame, 0);
