@@ -340,7 +340,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 			if (is_string(c)) {
 				len = MAX(argval, (int)LEN_STR(q, c));
 				CHECK_BUF(len);
-				slicecpy(dst, len+1, GET_STR(q, c), len);
+				memcpy(dst, GET_STR(q, c), len);
 			} else {
 				list_reader_t fmt3 = {0};
 				fmt3.p = c;
