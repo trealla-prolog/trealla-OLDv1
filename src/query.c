@@ -397,7 +397,7 @@ static void unwind_trail(query *q, const choice *ch)
 		const trail *tr = q->trails + --q->st.tp;
 		const frame *g = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(g, tr->var_nbr);
-		//unshare_cell(&e->c);	// FIXME
+		unshare_cell(&e->c);
 		e->c.tag = TAG_EMPTY;
 		e->c.attrs = tr->attrs;
 		e->c.attrs_ctx = tr->attrs_ctx;
@@ -418,7 +418,7 @@ void try_me(const query *q, unsigned nbr_vars)
 	slot *e = GET_SLOT(g, 0);
 
 	for (unsigned i = 0; i < nbr_vars; i++, e++) {
-		unshare_cell(&e->c);
+		//unshare_cell(&e->c);
 		e->c.tag = TAG_EMPTY;
 		e->c.attrs = NULL;
 	}
@@ -536,18 +536,6 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 {
 	const frame *newg = GET_FRAME(q->st.fp);
 	frame *g = GET_CURR_FRAME();
-	slot *e = GET_SLOT(g, 0);
-
-	for (unsigned i = 0; i < g->nbr_vars; i++, e++) {
-		unshare_cell(&e->c);
-		e->c.tag = TAG_EMPTY;
-		e->c.attrs = NULL;
-	}
-
-	g->cgen = newg->cgen;
-	g->nbr_slots = nbr_vars;
-	g->nbr_vars = nbr_vars;
-	g->overflow = 0;
 
 	const choice *ch = GET_CURR_CHOICE();
 	q->st.sp = ch->st.sp;
@@ -556,10 +544,23 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	slot *to = GET_SLOT(g, 0);
 
 	for (idx_t i = 0; i < nbr_vars; i++) {
-		//unshare_cell(&to->c);
-		share_cell(&from->c);
+		unshare_cell(&to->c);
 		*to++ = *from++;
 	}
+
+	// If the new frame is smaller then the current one.
+	// I don't think this is possible at the moment...
+
+	for (unsigned i = nbr_vars; i < g->nbr_vars; i++, to++) {
+		unshare_cell(&to->c);
+		to->c.tag = TAG_EMPTY;
+		to->c.attrs = NULL;
+	}
+
+	g->cgen = newg->cgen;
+	g->nbr_slots = nbr_vars;
+	g->nbr_vars = nbr_vars;
+	g->overflow = 0;
 
 	q->st.sp = g->base_slot_nbr + nbr_vars;
 	q->tot_tcos++;
@@ -874,8 +875,8 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 	if (is_structure(v))
 		make_indirect(&e->c, v);
 	else {
-		e->c = *v;
 		share_cell(v);
+		e->c = *v;
 	}
 
 	if (attrs) {
@@ -925,8 +926,8 @@ void reset_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 	if (is_structure(v))
 		make_indirect(&e->c, v);
 	else {
-		e->c = *v;
 		share_cell(v);
+		e->c = *v;
 	}
 
 	if (attrs) {
@@ -1806,7 +1807,6 @@ void destroy_query(query *q)
 		for (idx_t i = 0; i < a->max_hp_used; i++) {
 			cell *c = a->heap + i;
 			unshare_cell(c);
-			c->tag = TAG_EMPTY;
 		}
 
 		arena *save = a;
@@ -1819,7 +1819,6 @@ void destroy_query(query *q)
 		for (idx_t j = 0; j < q->qp[i]; j++) {
 			cell *c = q->queue[i]+j;
 			unshare_cell(c);
-			c->tag = TAG_EMPTY;
 		}
 
 		free(q->queue[i]);
@@ -1827,8 +1826,9 @@ void destroy_query(query *q)
 
 	slot *e = q->slots;
 
-	for (idx_t i = 0; i < q->st.sp; i++, e++)
+	for (idx_t i = 0; i < q->st.sp; i++, e++) {
 		unshare_cell(&e->c);
+	}
 
 	mp_int_clear(&q->tmp_ival);
 	free(q->trails);
