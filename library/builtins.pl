@@ -548,7 +548,8 @@ load_files(Files) :- load_files(Files,[]).
 consult(Files) :- load_files(Files,[]).
 strip_module(T,M,P) :- T=M:P -> true ; P=T, module(M).
 ?=(X,Y) :- \+ unifiable(X,Y,[_|_]).
-ignore(G) :- G -> ! ; true.
+ignore(G) :- G, !.
+ignore(_).
 once(G) :- G, !.
 
 unifiable(T1, T2, Gs) :-

@@ -141,9 +141,10 @@ void make_structure(cell *tmp, idx_t offset, void *fn, unsigned arity, idx_t ext
 {
 	tmp->tag = TAG_LITERAL;
 	tmp->nbr_cells = 1 + extra_cells;
-	tmp->flags = FLAG_BUILTIN;
-	tmp->arity = arity;
+	tmp->flags = 0;
+	if (fn) tmp->flags |= FLAG_BUILTIN;
 	tmp->fn = fn;
+	tmp->arity = arity;
 	tmp->val_off = offset;
 }
 
@@ -4912,27 +4913,12 @@ static USE_RESULT pl_status fn_iso_invoke_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_iso_once_1(query *q)
-{
-	if (q->retry)
-		return pl_failure;
-
-	GET_FIRST_ARG(p1,callable);
-	cell *tmp = clone_to_heap(q, true, p1, 2);
-	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
-	make_call(q, tmp+nbr_cells);
-	may_error(make_barrier(q));
-	q->st.curr_cell = tmp;
-	return pl_success;
-}
-
 static USE_RESULT pl_status fn_iso_if_then_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
 	cell tmp1;
-	make_structure(&tmp1, g_once_s, fn_iso_once_1, 1, 0);
+	make_structure(&tmp1, g_once_s, NULL, 1, 0);
 	cell *tmp = clone_to_heap(q, true, &tmp1, p1->nbr_cells+p2->nbr_cells+1);
 	idx_t nbr_cells = 1;
 	tmp[nbr_cells++].nbr_cells += p1->nbr_cells;	// update the once structure
@@ -5124,6 +5110,27 @@ static USE_RESULT pl_status fn_iso_catch_3(query *q)
 	return pl_success;
 }
 
+void do_cleanup(query *q, cell *p1)
+{
+	cell *tmp = clone_to_heap(q, true, p1, 2);
+	idx_t nbr_cells = 1 + p1->nbr_cells;
+	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
+	make_call(q, tmp+nbr_cells);
+	q->st.curr_cell = tmp;
+}
+
+static USE_RESULT pl_status fn_iso_throw_1(query *q);
+
+static void do_cleanup2(query *q, cell *p1, cell *e)
+{
+	cell *tmp = clone_to_heap(q, true, p1, 1+e->nbr_cells+1);
+	idx_t nbr_cells = 1 + p1->nbr_cells;
+	make_structure(tmp+nbr_cells++, g_throw_s, fn_iso_throw_1, 1, e->nbr_cells);
+	nbr_cells += copy_cells(tmp+nbr_cells, e, e->nbr_cells);
+	make_call(q, tmp+nbr_cells);
+	q->st.curr_cell = tmp;
+}
+
 static USE_RESULT bool find_exception_handler(query *q, cell *e)
 {
 	q->exception = e;
@@ -5131,7 +5138,23 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 	while (retry_choice(q)) {
 		choice *ch = GET_CHOICE(q->cp);
 
-		if (!ch->catchme_retry || ch->block_handler)
+		if (ch->block_handler)
+			continue;
+
+		if (ch->register_cleanup && ch->did_cleanup)
+			continue;
+
+		if (ch->register_cleanup && 0) {
+			ch->did_cleanup = true;
+			cell *c = ch->st.curr_cell;
+			c = deref(q, c, ch->st.curr_frame);
+			cell *p1 = deref(q, c+1, ch->st.curr_frame);
+			// have to rethrow after cleanup, how ????
+			do_cleanup2(q, p1, e);
+			return pl_success;
+		}
+
+		if (!ch->catchme_retry)
 			continue;
 
 		cell *tmp = copy_to_heap(q, false, e, q->st.curr_frame, 0);
@@ -5139,6 +5162,7 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 		cell *e2 = malloc(sizeof(cell) * tmp->nbr_cells);
 		may_ptr_error(e2);
 		safe_copy_cells(e2, tmp, tmp->nbr_cells);
+
 		q->exception = e2;
 		q->retry = QUERY_EXCEPTION;
 
@@ -11128,15 +11152,6 @@ static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)
 	return pl_success;
 }
 
-void do_cleanup(query *q, cell *p1)
-{
-	cell *tmp = clone_to_heap(q, true, p1, 2);
-	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
-	make_call(q, tmp+nbr_cells);
-	q->st.curr_cell = tmp;
-}
-
 static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
 {
 	if (q->cp != q->save_cp) {
@@ -11288,6 +11303,7 @@ static const struct builtins g_predicates_iso[] =
 	{"->", 2, fn_iso_if_then_2, NULL, false},
 	{";", 2, fn_iso_disjunction_2, NULL, false},
 	{"\\+", 1, fn_iso_negation_1, NULL, false},
+	{"throw", 1, fn_iso_throw_1, NULL, false},
 	{"throw", 1, fn_iso_throw_1, NULL, false},
 	{"$catch", 3, fn_iso_catch_3, NULL, false},
 

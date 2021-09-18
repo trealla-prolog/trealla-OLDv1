@@ -718,8 +718,6 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 
 		q->cp--;
 
-		extern void do_cleanup(query *q, cell *p1);
-
 		if (ch->register_cleanup) {
 			if (ch->did_cleanup)
 				break;
