@@ -374,7 +374,8 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 			}
 
 			CHECK_BUF(MAX_BYTES_PER_CODEPOINT);
-			len = put_char_utf8(dst, (int)get_smallint(c));
+			dst += put_char_utf8(dst, (int)get_smallint(c));
+			len = 0;
 			break;
 
 		case 'e':
