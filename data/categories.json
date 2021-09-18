@@ -6,7 +6,7 @@
       "name" : "Non-deterministic success",
       "children" : [ {
         "name" : "iso_stream_property_2_01",
-        "uid" : "133f1e10b4b11a73",
+        "uid" : "ba20fa5303850c17",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
@@ -17,21 +17,6 @@
         "parameters" : [ "predicates/stream_property_2/tests.lgt", "30-42", "https://github.com/LogtalkDotOrg/logtalk3/tree/2e12eacdd1e563159b74a873af96cd17da293c55/tests/prolog/predicates/stream_property_2/tests.lgt#L30" ]
       } ],
       "uid" : "1e457c6468423f30812a59ec3665696f"
-    }, {
-      "name" : "Error instead of success",
-      "children" : [ {
-        "name" : "swi_setup_call_cleanup_3_11",
-        "uid" : "9499fc3bb9dcc83d",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "predicates/setup_call_cleanup_3/tests.lgt", "91-94", "https://github.com/LogtalkDotOrg/logtalk3/tree/2e12eacdd1e563159b74a873af96cd17da293c55/tests/prolog/predicates/setup_call_cleanup_3/tests.lgt#L91" ]
-      } ],
-      "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
     } ],
     "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
   } ],
