@@ -5110,6 +5110,45 @@ static USE_RESULT pl_status fn_iso_catch_3(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_iso_catch2_3(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,any);
+
+	if (q->retry && q->exception) {
+		cell *tmp = deep_copy_to_heap(q, q->exception, q->st.curr_frame, false, false);
+		may_ptr_error(tmp);
+		return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
+	}
+
+	// Second time through? Try the recover goal...
+
+	if (q->retry == QUERY_EXCEPTION) {
+		GET_NEXT_ARG(p3,callable);
+		q->retry = QUERY_OK;
+		may_error(make_catcher(q, QUERY_EXCEPTION));
+		cell *tmp = clone_to_heap(q, true, p3, 1);
+		may_ptr_error(tmp);
+		make_call(q, tmp+1+p3->nbr_cells);
+		q->st.curr_cell = tmp;
+		return pl_success;
+	}
+
+	if (q->retry)
+		return pl_failure;
+
+	// First time through? Try the primary goal...
+
+	may_error(make_catcher(q, QUERY_RETRY));
+	idx_t nbr_cells = p1->nbr_cells;
+	cell *tmp = clone_to_heap(q, true, p1, 1);
+	may_ptr_error(tmp);
+	make_call(q, tmp+1+nbr_cells);
+	q->st.curr_cell = tmp;
+	q->save_cp = q->cp;
+	return pl_success;
+}
+
 void do_cleanup(query *q, cell *p1)
 {
 	cell *tmp = clone_to_heap(q, true, p1, 2);
@@ -5120,16 +5159,6 @@ void do_cleanup(query *q, cell *p1)
 }
 
 static USE_RESULT pl_status fn_iso_throw_1(query *q);
-
-static void do_cleanup2(query *q, cell *p1, cell *e)
-{
-	cell *tmp = clone_to_heap(q, true, p1, 1+e->nbr_cells+1);
-	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_throw_s, fn_iso_throw_1, 1, e->nbr_cells);
-	nbr_cells += copy_cells(tmp+nbr_cells, e, e->nbr_cells);
-	make_call(q, tmp+nbr_cells);
-	q->st.curr_cell = tmp;
-}
 
 static USE_RESULT bool find_exception_handler(query *q, cell *e)
 {
@@ -5143,15 +5172,6 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 
 		if (ch->register_cleanup && ch->did_cleanup)
 			continue;
-
-		if (ch->register_cleanup && 0) {
-			ch->did_cleanup = true;
-			cell *c = ch->st.curr_cell;
-			c = deref(q, c, ch->st.curr_frame);
-			cell *p1 = deref(q, c+1, ch->st.curr_frame);
-			do_cleanup2(q, p1, e);
-			return pl_success;
-		}
 
 		if (!ch->catchme_retry)
 			continue;
@@ -11305,6 +11325,7 @@ static const struct builtins g_predicates_iso[] =
 	{"throw", 1, fn_iso_throw_1, NULL, false},
 	{"throw", 1, fn_iso_throw_1, NULL, false},
 	{"$catch", 3, fn_iso_catch_3, NULL, false},
+	{"$catch2", 3, fn_iso_catch2_3, NULL, false},
 
 	{"$call", 1, fn_iso_call_n, NULL, false},
 	{"$call", 2, fn_iso_call_n, NULL, false},

@@ -91,11 +91,14 @@ call_cleanup(G, C) :-
 setup_call_cleanup(S, G, C) :-
 	once(S),
 	'$register_cleanup'(ignore(C)),
-	catch(G, Err, (catch((\+ \+ C), _, true), throw(Err))),
+	catch2(G, Err, (catch2((\+ \+ C), _, true), throw(Err))),
 	'$chk_is_det'.
 
 catch(G, E, C) :-
 	'$call'('$catch'(G, E, C)).
+
+catch2(G, E, C) :-
+	'$call'('$catch2'(G, E, C)).
 
 findall(T, G, B, Tail) :-
 	'$mustbe_list_or_var'(B),
