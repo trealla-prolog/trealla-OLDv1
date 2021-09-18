@@ -11801,7 +11801,7 @@ static void load_properties(module *m)
 	for (const struct builtins *ptr = g_functions; ptr->name; ptr++) {
 		m_app(m->pl->funtab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
-		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); ASTRING_strcat(pr, tmpbuf);
+		//format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); ASTRING_strcat(pr, tmpbuf);
 		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "static"); ASTRING_strcat(pr, tmpbuf);
 		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "private"); ASTRING_strcat(pr, tmpbuf);
 		format_property(tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "native_code"); ASTRING_strcat(pr, tmpbuf);
