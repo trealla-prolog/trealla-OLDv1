@@ -76,7 +76,7 @@ static const op_table g_ops[] =
 	{">>", OP_YFX, 400},
 	{"**", OP_XFX, 200},
 	{"^", OP_XFY, 200},
-	{"\\", OP_FY, 200},
+	//{"\\", OP_FY, 200},
 	{"-", OP_FY, 200},
 	{"+", OP_FY, 200},
 
