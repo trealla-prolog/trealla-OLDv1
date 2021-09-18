@@ -5149,7 +5149,6 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 			cell *c = ch->st.curr_cell;
 			c = deref(q, c, ch->st.curr_frame);
 			cell *p1 = deref(q, c+1, ch->st.curr_frame);
-			// have to rethrow after cleanup, how ????
 			do_cleanup2(q, p1, e);
 			return pl_success;
 		}
