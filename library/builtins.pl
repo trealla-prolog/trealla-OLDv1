@@ -91,7 +91,7 @@ call_cleanup(G, C) :-
 setup_call_cleanup(S, G, C) :-
 	once(S),
 	'$register_cleanup'(ignore(C)),
-	catch2(G, Err, (catch2((\+ \+ C), _, true), throw(Err))),
+	catch2(G, Err, (catch((\+ \+ C), _, true), throw(Err))),
 	'$chk_is_det'.
 
 catch(G, E, C) :-
