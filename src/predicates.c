@@ -5029,7 +5029,6 @@ static USE_RESULT pl_status fn_iso_disjunction_2(query *q)
 	return pl_success;
 }
 
-#if 1
 static USE_RESULT pl_status fn_iso_negation_1(query *q)
 {
 	if (q->retry)
@@ -5045,7 +5044,6 @@ static USE_RESULT pl_status fn_iso_negation_1(query *q)
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
-#endif
 
 static USE_RESULT pl_status fn_sys_block_handler_0(query *q)
 {
