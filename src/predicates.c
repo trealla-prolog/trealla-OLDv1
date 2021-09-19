@@ -5045,13 +5045,13 @@ static USE_RESULT pl_status fn_iso_negation_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_block_handler_0(query *q)
+static USE_RESULT pl_status fn_sys_block_catcher_0(query *q)
 {
 	choice *ch = GET_CURR_CHOICE();
 
 	do {
 		if (ch->catchme_retry) {
-			ch->block_handler = !ch->block_handler;
+			ch->block_catcher = !ch->block_catcher;
 			break;
 		}
 
@@ -5101,7 +5101,7 @@ static USE_RESULT pl_status fn_iso_catch_3(query *q)
 	idx_t nbr_cells = p1->nbr_cells;
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	may_ptr_error(tmp);
-	make_structure(tmp+1+nbr_cells++, index_from_pool(q->pl, "$block_handler"), fn_sys_block_handler_0, 0, 0);
+	make_structure(tmp+1+nbr_cells++, g_sys_block_catcher_s, fn_sys_block_catcher_0, 0, 0);
 	make_call(q, tmp+1+nbr_cells);
 	q->st.curr_cell = tmp;
 	q->save_cp = q->cp;
@@ -5165,7 +5165,7 @@ static USE_RESULT bool find_exception_handler(query *q, cell *e)
 	while (retry_choice(q)) {
 		choice *ch = GET_CHOICE(q->cp);
 
-		if (ch->block_handler)
+		if (ch->block_catcher)
 			continue;
 
 		if (ch->register_cleanup && ch->did_cleanup)
