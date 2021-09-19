@@ -2049,7 +2049,7 @@ static void add_stream_properties(query *q, int n)
 static void del_stream_properties(query *q, int n)
 {
 	cell *tmp = alloc_on_heap(q, 3);
-	make_literal(tmp+0, g_stream_property_s);
+	make_literal(tmp+0, g_sys_stream_property_s);
 	make_int(tmp+1, n);
 	make_variable(tmp+2, g_anon_s);
 	tmp[2].var_nbr = create_vars(q, 1);
@@ -2225,7 +2225,7 @@ static pl_status do_stream_property(query *q)
 static void clear_streams_properties(query *q)
 {
 	cell tmp;
-	make_literal(&tmp, g_stream_property_s);
+	make_literal(&tmp, g_sys_stream_property_s);
 	tmp.nbr_cells = 1;
 	tmp.arity = 2;
 
@@ -2285,7 +2285,7 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 
 	cell *tmp = deep_copy_to_tmp(q, q->st.curr_cell, q->st.curr_frame, false, false);
 	unify(q, tmp, q->st.curr_frame, q->st.curr_cell, q->st.curr_frame);
-	tmp->val_off = g_stream_property_s;
+	tmp->val_off = g_sys_stream_property_s;
 
 	if (!match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE)) {
 		clear_streams_properties(q);
