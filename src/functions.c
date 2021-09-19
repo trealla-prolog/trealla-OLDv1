@@ -39,7 +39,7 @@ static void clr_accum(cell *p)
 #if defined(__SIZEOF_INT128__)
 
 #define ON_OVERFLOW(op,v1,v2)									\
-	__int128_t tmp = (__int128_t)v2 op v2;						\
+	__int128_t tmp = (__int128_t)v1 op v2;						\
 	if ((tmp >= INT64_MAX) || (tmp <= INT64_MIN))
 
 #else
