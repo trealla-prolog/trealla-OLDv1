@@ -1973,7 +1973,7 @@ static pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, enum clause_type i
 	else
 		match = match_clause(q, p1, p1_ctx, is_retract);
 
-	if (match != pl_success)
+	if ((match != pl_success) || q->did_throw)
 		return match;
 
 	clause *cl = q->st.curr_clause2;
