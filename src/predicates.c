@@ -2287,7 +2287,7 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 	unify(q, tmp, q->st.curr_frame, q->st.curr_cell, q->st.curr_frame);
 	tmp->val_off = g_sys_stream_property_s;
 
-	if (!match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE)) {
+	if (match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE) != pl_success) {
 		clear_streams_properties(q);
 
 		if (is_callable(p1) && !strstr(s_properties, GET_STR(q, p1)))
@@ -4483,7 +4483,7 @@ static USE_RESULT pl_status fn_iso_clause_2(query *q)
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable_or_var);
 
-	while (match_clause(q, p1, p1_ctx, DO_CLAUSE)) {
+	while ((match_clause(q, p1, p1_ctx, DO_CLAUSE) == pl_success) && !q->did_throw) {
 		rule *r = &q->st.curr_clause2->r;
 		cell *body = get_body(r->cells);
 		pl_status ok;
@@ -5244,7 +5244,7 @@ static USE_RESULT pl_status fn_iso_throw_1(query *q)
 static pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expected, cell *goal)
 {
 	if (g_tpl_interrupt)
-		return false;
+		return pl_failure;
 
 	q->did_throw = true;
 	idx_t c_ctx = q->st.curr_frame;
@@ -6223,7 +6223,7 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 			cell *head = get_head(r->cells);
 			unify(q, p1, p1_ctx, head, q->st.fp);
 		} else {
-			if (!match_clause(q, p1, p1_ctx, DO_CLAUSE))
+			if (match_clause(q, p1, p1_ctx, DO_CLAUSE) != pl_success)
 				break;
 
 			char tmpbuf[128];
