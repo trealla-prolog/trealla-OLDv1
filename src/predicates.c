@@ -8370,12 +8370,39 @@ static USE_RESULT pl_status fn_shell_2(query *q)
 	return pl_success;
 }
 
+static char *fixup(const char *srcptr)
+{
+	char *tmpbuf = strdup(srcptr);
+	const char *src = srcptr;
+	char *dst = tmpbuf;
+
+	while (*src) {
+		if ((src[0] == '.') && (src[1] == '.') && (src[2] == '/')) {
+			dst -= 2;
+
+			while ((dst != tmpbuf) && (*dst != '/'))
+				dst--;
+
+			src += 2;
+			dst++;
+		} else if ((src[0] == '.') && (src[1] == '/')) {
+			src += 1;
+		} else
+			*dst++ = *src;
+
+		src++;
+	}
+
+	*dst = '\0';
+	return tmpbuf;
+}
+
 static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
 	GET_NEXT_ARG(p_opts,list_or_nil);
-	int expand = 0;
+	bool expand = false;
 	char *src = NULL, *filename;
 	char *here = strdup(q->st.m->filename);
 	may_ptr_error(here);
@@ -8409,7 +8436,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 			if (!slicecmp2(GET_STR(q, h), LEN_STR(q, h), "expand")) {
 				if (is_literal(h+1)) {
 					if (!slicecmp2(GET_STR(q, h+1), LEN_STR(q, h+1), "true"))
-						expand = 1;
+						expand = true;
 				}
 			} else if (!slicecmp2(GET_STR(q, h), LEN_STR(q, h), "relative_to")) {
 				if (is_atom(h+1))
@@ -8467,7 +8494,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 				free(tmpbuf);
 				tmpbuf = tmp;
 			} else {
-				tmpbuf = strdup(s);
+				tmpbuf = fixup(s);
 				may_ptr_error(tmpbuf);
 			}
 		}
