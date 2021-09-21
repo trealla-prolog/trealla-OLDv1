@@ -3,10 +3,99 @@
   "children" : [ {
     "name" : "Product defects",
     "children" : [ {
+      "name" : "Success instead of error",
+      "children" : [ {
+        "name" : "sics_number_chars_2_26",
+        "uid" : "ff7f197c0c08d79a",
+        "parentUid" : "9f5ed15b6392c624c13611779edbd1c0",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "predicates/number_chars_2/tests.lgt", "110-113", "https://github.com/LogtalkDotOrg/logtalk3/tree/51719e2cf1687cee5f9c829a2142f8b0c422e877/tests/prolog/predicates/number_chars_2/tests.lgt#L110" ]
+      }, {
+        "name" : "lgt_number_36",
+        "uid" : "841bd567eac6336d",
+        "parentUid" : "9f5ed15b6392c624c13611779edbd1c0",
+        "status" : "failed",
+        "time" : {
+          "duration" : 1
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "syntax/numbers/tests.lgt", "202-206", "https://github.com/LogtalkDotOrg/logtalk3/tree/51719e2cf1687cee5f9c829a2142f8b0c422e877/tests/prolog/syntax/numbers/tests.lgt#L202" ]
+      }, {
+        "name" : "sics_number_chars_2_25",
+        "uid" : "1af57d6ac5008a57",
+        "parentUid" : "9f5ed15b6392c624c13611779edbd1c0",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "predicates/number_chars_2/tests.lgt", "107-110", "https://github.com/LogtalkDotOrg/logtalk3/tree/51719e2cf1687cee5f9c829a2142f8b0c422e877/tests/prolog/predicates/number_chars_2/tests.lgt#L107" ]
+      }, {
+        "name" : "lgt_number_38",
+        "uid" : "9428141405896740",
+        "parentUid" : "9f5ed15b6392c624c13611779edbd1c0",
+        "status" : "failed",
+        "time" : {
+          "duration" : 1
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "syntax/numbers/tests.lgt", "210-214", "https://github.com/LogtalkDotOrg/logtalk3/tree/51719e2cf1687cee5f9c829a2142f8b0c422e877/tests/prolog/syntax/numbers/tests.lgt#L210" ]
+      } ],
+      "uid" : "9f5ed15b6392c624c13611779edbd1c0"
+    }, {
+      "name" : "Error instead of success",
+      "children" : [ {
+        "name" : "iso_number_chars_2_09",
+        "uid" : "ff09162472e260ec",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "predicates/number_chars_2/tests.lgt", "56-59", "https://github.com/LogtalkDotOrg/logtalk3/tree/51719e2cf1687cee5f9c829a2142f8b0c422e877/tests/prolog/predicates/number_chars_2/tests.lgt#L56" ]
+      }, {
+        "name" : "iso_number_codes_2_07",
+        "uid" : "6debe1d1ccf13095",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "predicates/number_codes_2/tests.lgt", "53-56", "https://github.com/LogtalkDotOrg/logtalk3/tree/51719e2cf1687cee5f9c829a2142f8b0c422e877/tests/prolog/predicates/number_codes_2/tests.lgt#L53" ]
+      } ],
+      "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
+    }, {
+      "name" : "Broken",
+      "children" : [ {
+        "name" : "encodings",
+        "uid" : "29b3d6db6ead1a33",
+        "parentUid" : "a747cde6acd25d44d5a38ab42c11d73d",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      } ],
+      "uid" : "a747cde6acd25d44d5a38ab42c11d73d"
+    }, {
       "name" : "Non-deterministic success",
       "children" : [ {
         "name" : "iso_stream_property_2_01",
-        "uid" : "8d29610f7b14c66",
+        "uid" : "6c45e21b2403675d",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
@@ -14,7 +103,7 @@
         },
         "flaky" : false,
         "newFailed" : false,
-        "parameters" : [ "predicates/stream_property_2/tests.lgt", "30-42", "https://github.com/LogtalkDotOrg/logtalk3/tree/9f194d74c5c314e39263dfda57fdeadec8e29af3/tests/prolog/predicates/stream_property_2/tests.lgt#L30" ]
+        "parameters" : [ "predicates/stream_property_2/tests.lgt", "30-42", "https://github.com/LogtalkDotOrg/logtalk3/tree/51719e2cf1687cee5f9c829a2142f8b0c422e877/tests/prolog/predicates/stream_property_2/tests.lgt#L30" ]
       } ],
       "uid" : "1e457c6468423f30812a59ec3665696f"
     } ],
