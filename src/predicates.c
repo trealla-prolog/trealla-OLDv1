@@ -4483,7 +4483,8 @@ static USE_RESULT pl_status fn_iso_clause_2(query *q)
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable_or_var);
 
-	while ((match_clause(q, p1, p1_ctx, DO_CLAUSE) == pl_success) && !q->did_throw) {
+	while (match_clause(q, p1, p1_ctx, DO_CLAUSE) == pl_success) {
+		if (q->did_throw) return pl_success;
 		rule *r = &q->st.curr_clause2->r;
 		cell *body = get_body(r->cells);
 		pl_status ok;
