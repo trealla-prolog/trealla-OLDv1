@@ -1548,6 +1548,35 @@ static int get_escape(const char **_src, bool *error, bool number)
 #define isbdigit(ch) (((ch) >= '0') && ((ch) <= '1'))
 #define isodigit(ch) (((ch) >= '0') && ((ch) <= '7'))
 
+static void read_integer(mp_int v2, int base, const char *src,  const char **srcptr)
+{
+	size_t bufsiz = 256;
+	char *tmpbuf = malloc(bufsiz);
+	char *dst = tmpbuf;
+
+	 while (*src && isdigit(*src)) {
+		*dst++ = *src++;
+
+		if ((size_t)(dst - tmpbuf) >= (bufsiz-1)) {
+			size_t offset = dst - tmpbuf;
+			tmpbuf = realloc(tmpbuf, bufsiz*=2);
+			dst = tmpbuf + offset;
+		}
+
+		while (isspace(*src) || (*src == '_'))
+			src++;
+	}
+
+	*dst = '\0';
+
+	if (!isdigit(src[-1]))
+		src--;
+
+	mp_int_read_cstring(v2, base, (char*)tmpbuf, NULL);
+	free(tmpbuf);
+	*srcptr = src;
+}
+
 static bool parse_number(parser *p, const char **srcptr, bool neg)
 {
 	set_smallint(&p->v, 0);
@@ -1643,7 +1672,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	if ((*s == '0') && (s[1] == 'b')) {
 		s += 2;
 
-		mp_int_read_cstring(&v2, 2, s, (char**)&s);
+		read_integer(&v2, 2, s, &s);
 
 		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
 			p->v.val_bigint = malloc(sizeof(bigint));
@@ -1677,7 +1706,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	if ((*s == '0') && (s[1] == 'o')) {
 		s += 2;
 
-		mp_int_read_cstring(&v2, 8, s, (char**)&s);
+		read_integer(&v2, 8, s, &s);
 
 		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
 			p->v.val_bigint = malloc(sizeof(bigint));
@@ -1711,7 +1740,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	if ((*s == '0') && (s[1] == 'x')) {
 		s += 2;
 
-		mp_int_read_cstring(&v2, 16, s, (char**)&s);
+		read_integer(&v2, 16, s, &s);
 
 		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
 			p->v.val_bigint = malloc(sizeof(bigint));
@@ -1742,7 +1771,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		return true;
 	}
 
-	mp_int_read_cstring(&v2, 10, s, (char**)&s);
+	read_integer(&v2, 10, s, &s);
 
 	if (s && (*s == '.') && isdigit(s[1])) {
 		p->v.tag = TAG_REAL;

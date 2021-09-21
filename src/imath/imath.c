@@ -1539,13 +1539,6 @@ mp_result mp_int_read_cstring(mp_int z, mp_size radix, const char *str,
     s_dmul(z, (mp_digit)radix);
     s_dadd(z, (mp_digit)ch);
     ++str;
-
-    if (*str == '_')                                        // AD
-		++str;                                              // AD
-    else if (((*str == ' ') || (*str == '\t'))              // AD
-		&& (str[1] != '\0')                                 // AD
-		&& ((ch = s_ch2val(str[1], radix)) >= 0))    		// AD
-		++str;                                              // AD
   }
 
   CLAMP(z);
