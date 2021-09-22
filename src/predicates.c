@@ -1526,12 +1526,6 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 				return pl_success;
 			}
 
-			if (is_atom(p5) && slicecmp(GET_STR(q, p5), LEN_STR(q, p5), GET_STR(q, &tmp), LEN_STR(q, &tmp))) {
-				unshare_cell(&tmp);
-				retry_choice(q);
-				continue;
-			}
-
 			if (!unify(q, p5, p5_ctx, &tmp, q->st.curr_frame)) {
 				unshare_cell(&tmp);
 				retry_choice(q);
