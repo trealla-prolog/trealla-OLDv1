@@ -10543,7 +10543,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		unsigned cnt = 0;
 
 		if (is_string(p1)) {
-			cnt = strlen_utf8(GET_STR(q, p1));
+			cnt = substrlen_utf8(GET_STR(q, p1), LEN_STR(q, p1));
 		} else {
 			cell *l = p1;
 			LIST_HANDLER(l);
@@ -10604,7 +10604,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		int cnt = 0;
 
 		if (is_string(p1)) {
-			cnt = strlen_utf8(GET_STR(q, p1));
+			cnt = substrlen_utf8(GET_STR(q, p1), LEN_STR(q, p1));
 		} else {
 			cell *l = p1;
 			LIST_HANDLER(l);
