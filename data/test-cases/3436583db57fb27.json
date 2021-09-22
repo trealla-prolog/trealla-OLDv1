@@ -1,0 +1,51 @@
+{
+  "uid" : "3436583db57fb27",
+  "name" : "lgt_curly_bracketed_term_08",
+  "fullName" : "lgt_curly_bracketed_term_08::tests",
+  "historyId" : "lgt_curly_bracketed_term_08::tests",
+  "time" : {
+    "duration" : 3
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "syntax/curly_terms/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "syntax/curly_terms/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "syntax/curly_terms/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "syntax/curly_terms/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "63-68"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/51719e2cf1687cee5f9c829a2142f8b0c422e877/tests/prolog/syntax/curly_terms/tests.lgt#L63"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "3436583db57fb27.json",
+  "parameterValues" : [ "syntax/curly_terms/tests.lgt", "63-68", "https://github.com/LogtalkDotOrg/logtalk3/tree/51719e2cf1687cee5f9c829a2142f8b0c422e877/tests/prolog/syntax/curly_terms/tests.lgt#L63" ]
+}
