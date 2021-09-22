@@ -1456,6 +1456,9 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 
 	bool fixed = ((is_integer(p2) ? 1: 0) + (is_integer(p3) ? 1 : 0) + (is_integer(p4) ? 1 : 0)) >= 2;
 
+	if ((!is_variable(p2) || !is_variable(p4)) && !is_variable(p5))
+		fixed = true;
+
 	if (!q->retry) {
 		may_error(make_choice(q));
 
