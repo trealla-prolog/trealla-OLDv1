@@ -1,0 +1,51 @@
+{
+  "uid" : "7bf75d56d829f51",
+  "name" : "lgt_truncate_1_06",
+  "fullName" : "lgt_truncate_1_06::tests",
+  "historyId" : "lgt_truncate_1_06::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/truncate_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "functions/truncate_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "functions/truncate_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "functions/truncate_1/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "55-59"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/725d0ba43a5279cfbad8ade3a2ea52d864c35788/tests/prolog/functions/truncate_1/tests.lgt#L55"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "7bf75d56d829f51.json",
+  "parameterValues" : [ "functions/truncate_1/tests.lgt", "55-59", "https://github.com/LogtalkDotOrg/logtalk3/tree/725d0ba43a5279cfbad8ade3a2ea52d864c35788/tests/prolog/functions/truncate_1/tests.lgt#L55" ]
+}
