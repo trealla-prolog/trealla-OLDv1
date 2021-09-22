@@ -1554,7 +1554,7 @@ static void read_integer(mp_int v2, int base, const char *src,  const char **src
 	char *tmpbuf = malloc(bufsiz);
 	char *dst = tmpbuf;
 
-	 while (*src && isdigit(*src)) {
+	 while (*src) {
 		if ((base == 2) && ((*src < '0') || (*src > '1')))
 			break;
 
@@ -1581,7 +1581,9 @@ static void read_integer(mp_int v2, int base, const char *src,  const char **src
 
 	*dst = '\0';
 
-	if (!isdigit(src[-1]))
+	if ((base != 16) && !isdigit(src[-1]))
+		src--;
+	else if ((base == 16) && !isxdigit(src[-1]))
 		src--;
 
 	mp_int_read_cstring(v2, base, (char*)tmpbuf, NULL);
