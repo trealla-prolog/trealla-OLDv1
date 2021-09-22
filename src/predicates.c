@@ -8494,7 +8494,9 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 				may_ptr_error(tmp, free(tmpbuf));
 				snprintf(tmp, buflen, "%s/%s", tmpbuf, s);
 				free(tmpbuf);
-				tmpbuf = tmp;
+				tmpbuf = fixup(tmp);
+				may_ptr_error(tmpbuf);
+				free(tmp);
 			} else {
 				tmpbuf = fixup(s);
 				may_ptr_error(tmpbuf);
