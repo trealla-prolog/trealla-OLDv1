@@ -6,7 +6,7 @@
       "name" : "Non-deterministic success",
       "children" : [ {
         "name" : "iso_stream_property_2_01",
-        "uid" : "77a574f9d4edf969",
+        "uid" : "4b9afeab7e50e998",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
@@ -17,47 +17,6 @@
         "parameters" : [ "predicates/stream_property_2/tests.lgt", "30-42", "https://github.com/LogtalkDotOrg/logtalk3/tree/51719e2cf1687cee5f9c829a2142f8b0c422e877/tests/prolog/predicates/stream_property_2/tests.lgt#L30" ]
       } ],
       "uid" : "1e457c6468423f30812a59ec3665696f"
-    }, {
-      "name" : "Error instead of success",
-      "children" : [ {
-        "name" : "iso_number_chars_2_09",
-        "uid" : "b9f63bf333bd665d",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "predicates/number_chars_2/tests.lgt", "56-59", "https://github.com/LogtalkDotOrg/logtalk3/tree/51719e2cf1687cee5f9c829a2142f8b0c422e877/tests/prolog/predicates/number_chars_2/tests.lgt#L56" ]
-      }, {
-        "name" : "iso_number_codes_2_07",
-        "uid" : "8aa960dfadc9059",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "predicates/number_codes_2/tests.lgt", "53-56", "https://github.com/LogtalkDotOrg/logtalk3/tree/51719e2cf1687cee5f9c829a2142f8b0c422e877/tests/prolog/predicates/number_codes_2/tests.lgt#L53" ]
-      } ],
-      "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
-    }, {
-      "name" : "Broken",
-      "children" : [ {
-        "name" : "encodings",
-        "uid" : "309ceeaf6f363b73",
-        "parentUid" : "a747cde6acd25d44d5a38ab42c11d73d",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      } ],
-      "uid" : "a747cde6acd25d44d5a38ab42c11d73d"
     } ],
     "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
   } ],
