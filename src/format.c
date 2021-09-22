@@ -108,11 +108,14 @@ static cell *get_next_cell(query *q, list_reader_t *fmt)
 	if (!is_list(fmt->p))
 		return NULL;
 
-	fmt->p = fmt->p + 1;
-	cell *head = deref(q, fmt->p, fmt->p_ctx);
-	fmt->p = fmt->p + fmt->p->nbr_cells;
-	fmt->p = deref(q, fmt->p, fmt->p_ctx);
+	cell *head = fmt->p + 1;
+	cell *tail = head + head->nbr_cells;
+	head = deref(q, head, fmt->p_ctx);
+	idx_t save_ctx = q->latest_ctx;
+	tail = deref(q, tail, fmt->p_ctx);
+	fmt->p = tail;
 	fmt->p_ctx = q->latest_ctx;
+	q->latest_ctx = save_ctx;
 	return head;
 }
 
@@ -528,9 +531,9 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 				q->quoted = -1;
 
 			if (canonical)
-				len = print_canonical_to_buf(q, NULL, 0, c, fmt2.p_ctx, 1, false, 0);
+				len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, 1, false, 0);
 			else
-				len = print_term_to_buf(q, NULL, 0, c, fmt2.p_ctx, 1, false, 0);
+				len = print_term_to_buf(q, NULL, 0, c, c_ctx, 1, false, 0);
 
 			if (q->cycle_error) {
 				free(tmpbuf);
@@ -540,9 +543,9 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 			CHECK_BUF(len*2);
 
 			if (canonical)
-				len = print_canonical_to_buf(q, dst, len+1, c, fmt2.p_ctx, 1, false, 0);
+				len = print_canonical_to_buf(q, dst, len+1, c, c_ctx, 1, false, 0);
 			else
-				len = print_term_to_buf(q, dst, len+1, c, fmt2.p_ctx, 1, false, 0);
+				len = print_term_to_buf(q, dst, len+1, c, c_ctx, 1, false, 0);
 
 			q->quoted = saveq;
             break;
