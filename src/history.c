@@ -67,7 +67,7 @@ LOOP:
 		if (ch == 0) {
 			cmd = realloc(cmd, strlen(cmd)+1+1);
 			strcat(cmd, "\n");
-			prompt = " |\t";
+			prompt = "";
 			goto LOOP;
 		}
 	}

@@ -49,6 +49,8 @@ static void msleep(int ms)
 }
 #endif
 
+#define PROMPT ""
+
 size_t slicecpy(char *dst, size_t dstlen, const char *src, size_t len)
 {
 	char *save = dst;
@@ -455,7 +457,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, idx_t p1_ctx, cel
 	for (;;) {
 #if 0
 		if (isatty(fileno(str->fp)) && !src) {
-			printf("| ");
+			fprintf(str->fp, "%s", PROMPT);
 			fflush(str->fp);
 		}
 #endif
@@ -3439,7 +3441,7 @@ static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 	}
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
-		printf("| ");
+		fprintf(str->fp, "%s", PROMPT);
 		fflush(str->fp);
 	}
 
@@ -3509,7 +3511,7 @@ static USE_RESULT pl_status fn_iso_get_char_2(query *q)
 	}
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
-		printf("| ");
+		fprintf(str->fp, "%s", PROMPT);
 		fflush(str->fp);
 	}
 
@@ -3578,7 +3580,7 @@ static USE_RESULT pl_status fn_iso_get_code_1(query *q)
 	}
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
-		printf("| ");
+		fprintf(str->fp, "%s", PROMPT);
 		fflush(str->fp);
 	}
 
@@ -3649,7 +3651,7 @@ static USE_RESULT pl_status fn_iso_get_code_2(query *q)
 	}
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
-		printf("| ");
+		fprintf(str->fp, "%s", PROMPT);
 		fflush(str->fp);
 	}
 
@@ -3713,7 +3715,7 @@ static USE_RESULT pl_status fn_iso_get_byte_1(query *q)
 	}
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
-		printf("| ");
+		fprintf(str->fp, "%s", PROMPT);
 		fflush(str->fp);
 	}
 
@@ -3778,7 +3780,7 @@ static USE_RESULT pl_status fn_iso_get_byte_2(query *q)
 	}
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
-		printf("| ");
+		fprintf(str->fp, "%s", PROMPT);
 		fflush(str->fp);
 	}
 
@@ -7567,7 +7569,7 @@ static USE_RESULT pl_status fn_getline_1(query *q)
 	size_t len = 0;
 
 	if (isatty(fileno(str->fp))) {
-		printf("| ");
+		fprintf(str->fp, "%s", PROMPT);
 		fflush(str->fp);
 	}
 
@@ -7600,7 +7602,7 @@ static USE_RESULT pl_status fn_getline_2(query *q)
 	size_t len = 0;
 
 	if (isatty(fileno(str->fp))) {
-		printf("| ");
+		fprintf(str->fp, "%s", PROMPT);
 		fflush(str->fp);
 	}
 
@@ -9370,7 +9372,7 @@ static USE_RESULT pl_status fn_edin_redo_1(query *q)
 	stream *str = &g_streams[n];
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
-		printf("| ");
+		fprintf(str->fp, "%s", PROMPT);
 		fflush(str->fp);
 	}
 
@@ -9400,7 +9402,7 @@ static USE_RESULT pl_status fn_edin_redo_2(query *q)
 	GET_NEXT_ARG(p1,integer);
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
-		printf("| ");
+		fprintf(str->fp, "%s", PROMPT);
 		fflush(str->fp);
 	}
 
