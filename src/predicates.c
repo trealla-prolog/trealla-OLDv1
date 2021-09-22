@@ -1454,7 +1454,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 	if (is_integer(p4) && is_negative(p4))
 		return throw_error(q, p4, "domain_error", "not_less_than_zero");
 
-	int fixed = (is_integer(p2) + is_integer(p3) + is_integer(p4)) >= 2;
+	bool fixed = ((is_integer(p2) ? 1: 0) + (is_integer(p3) ? 1 : 0) + (is_integer(p4) ? 1 : 0)) >= 2;
 
 	if (!q->retry) {
 		may_error(make_choice(q));
