@@ -5329,7 +5329,7 @@ static pl_status throw_error3(query *q, cell *c, const char *err_type, const cha
 
 	} else if (!strcmp(err_type, "existence_error") && !strcmp(expected, "procedure")) {
 		char tmpbuf[1024];
-		snprintf(tmpbuf, sizeof(tmpbuf), "(%s)/%u\n", GET_STR(q, c), (unsigned)c->arity);
+		snprintf(tmpbuf, sizeof(tmpbuf), "('%s')/%u\n", GET_STR(q, c), (unsigned)c->arity);
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, tmpbuf, functor, goal->arity);
 
 	} else if (!strcmp(err_type, "permission_error")) {
