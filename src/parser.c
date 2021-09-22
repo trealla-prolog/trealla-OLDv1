@@ -1555,6 +1555,18 @@ static void read_integer(mp_int v2, int base, const char *src,  const char **src
 	char *dst = tmpbuf;
 
 	 while (*src && isdigit(*src)) {
+		if ((base == 2) && ((*src < '0') || (*src > '1')))
+			break;
+
+		if ((base == 8) && ((*src < '0') || (*src > '7')))
+			break;
+
+		if ((base == 10) && ((*src < '0') || (*src > '9')))
+			break;
+
+		if ((base == 16) && !isxdigit(*src))
+			break;
+
 		*dst++ = *src++;
 
 		if ((size_t)(dst - tmpbuf) >= (bufsiz-1)) {
