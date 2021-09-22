@@ -1526,6 +1526,12 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 
 			if (is_atom(p5) && !slicecmp(GET_STR(q, p5), LEN_STR(q, p5), GET_STR(q, &tmp), LEN_STR(q, &tmp))) {
 				unshare_cell(&tmp);
+
+				if (fixed) {
+					drop_choice(q);
+					drop_choice(q);
+				}
+
 				return pl_success;
 			}
 
