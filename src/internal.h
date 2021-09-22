@@ -189,7 +189,7 @@ typedef struct {
 	: strlen((c)->val_chr)										\
 	)
 
-#define LEN_STR_UTF8(c) strlen_utf8(GET_STR(q, c))
+#define LEN_STR_UTF8(c) substrlen_utf8(GET_STR(q, c), LEN_STR(q, c))
 #define GET_STR(x,c) _GET_STR((x)->pl, c)
 #define LEN_STR(x,c) _LEN_STR((x)->pl, c)
 #define GET_POOL(x,off) ((x)->pl->pool + (off))
