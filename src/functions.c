@@ -1890,18 +1890,12 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		if (is_real(p2))
 			return 1;
 
-		if (is_variable(p2))
-			return 1;
-
 		return -1;
 	}
 
 	if (is_real(p1)) {
 		if (is_real(p2))
 			return p1->val_real < p2->val_real ? -1 : p1->val_real > p2->val_real ? 1 : 0;
-
-		if (is_variable(p2))
-			return 1;
 
 		return -1;
 	}
@@ -1910,10 +1904,7 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		return slicecmp(GET_STR(q, p1), LEN_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p2));
 
 	if (is_iso_atom(p1)) {
-		if (is_iso_atom(p2))
-			return slicecmp(GET_STR(q, p1), LEN_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p2));
-
-		if (is_variable(p2) || is_number(p2))
+		if (is_number(p2))
 			return 1;
 
 		return -1;
