@@ -43,7 +43,7 @@ library/%.c: library/%.pl
 
 all: tpl
 
-tpl: $(OBJECTS)
+tpl: $(OBJECTS) Makefile README.md LICENSE
 	rm src/version.o
 	$(CC) $(CFLAGS) -o src/version.o -c src/version.c
 	$(CC) -o tpl $(OBJECTS) $(OPT) $(LDFLAGS)
