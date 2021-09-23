@@ -5269,7 +5269,9 @@ static pl_status throw_error3(query *q, cell *c, const char *err_type, const cha
 
 	len = print_term_to_buf(q, dst+off, len+1, c, c_ctx, running, false, 0) + off;
 
-	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected) + LEN_STR(q, goal) + 1024;
+	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected);
+	if (!is_variable(c)) len2 += LEN_STR(q, goal);
+	len2 += 1024;
 	char *dst2 = malloc(len2+1);
 	may_ptr_error(dst2);
 	q->quoted = 0;
@@ -5291,10 +5293,12 @@ static pl_status throw_error3(query *q, cell *c, const char *err_type, const cha
 	expected = tmpbuf;
 	char functor[1024];
 
-	if (needs_quoting(q->st.m, GET_STR(q, goal), LEN_STR(q, goal))) {
-		snprintf(functor, sizeof(functor), "'%s'", GET_STR(q, goal));
-	} else
-		snprintf(functor, sizeof(functor), "%s", GET_STR(q, goal));
+	if (!is_variable(c)) {
+		if (needs_quoting(q->st.m, GET_STR(q, goal), LEN_STR(q, goal))) {
+			snprintf(functor, sizeof(functor), "'%s'", GET_STR(q, goal));
+		} else
+			snprintf(functor, sizeof(functor), "%s", GET_STR(q, goal));
+	}
 
 	if (is_variable(c)) {
 		err_type = "instantiation_error";
