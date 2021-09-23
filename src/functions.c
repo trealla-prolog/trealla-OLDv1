@@ -1906,8 +1906,11 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		return -1;
 	}
 
-	if (is_atom(p1)) {
-		if (is_atom(p2))
+	if (is_atom(p1) && is_atom(p2))
+		return slicecmp(GET_STR(q, p1), LEN_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p2));
+
+	if (is_iso_atom(p1)) {
+		if (is_iso_atom(p2))
 			return slicecmp(GET_STR(q, p1), LEN_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p2));
 
 		if (is_variable(p2) || is_number(p2))
