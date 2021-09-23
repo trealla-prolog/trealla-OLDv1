@@ -1869,6 +1869,10 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		return -1;
 	}
 
+	if (is_variable(p2)) {
+		return 1;
+	}
+
 	if (is_bigint(p1) && is_bigint(p2))
 		return mp_int_compare(&p1->val_bigint->ival, &p2->val_bigint->ival);
 
@@ -1902,8 +1906,8 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		return -1;
 	}
 
-	if (is_iso_atom(p1)) {
-		if (is_iso_atom(p2))
+	if (is_atom(p1)) {
+		if (is_atom(p2))
 			return slicecmp(GET_STR(q, p1), LEN_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p2));
 
 		if (is_variable(p2) || is_number(p2))
@@ -1925,12 +1929,12 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		while (is_list(p1) && is_list(p2)) {
 			cell *h1 = LIST_HEAD(p1);
 			h1 = deref(q, h1, p1_ctx);
-			idx_t tmp_p1_ctx = q->latest_ctx;
+			idx_t h1_ctx = q->latest_ctx;
 			cell *h2 = LIST_HEAD(p2);
 			h2 = deref(q, h2, p2_ctx);
-			idx_t tmp_p2_ctx = q->latest_ctx;
+			idx_t h2_ctx = q->latest_ctx;
 
-			int val = compare(q, h1, tmp_p1_ctx, h2, tmp_p2_ctx, depth+1);
+			int val = compare(q, h1, h1_ctx, h2, h2_ctx, depth+1);
 			if (val) return val;
 
 			p1 = LIST_TAIL(p1);
@@ -1947,10 +1951,7 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		if (is_list(p2))
 			return -1;
 
-		int val = compare(q, p1, p1_ctx, p2, p2_ctx, depth+1);
-		if (val) return val;
-
-		return 0;
+		return compare(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 	}
 
 	int val = slicecmp(GET_STR(q, p1), LEN_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p2));
