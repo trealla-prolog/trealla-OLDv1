@@ -44,6 +44,8 @@ library/%.c: library/%.pl
 all: tpl
 
 tpl: $(OBJECTS)
+	rm src/version.o
+	$(CC) $(CFLAGS) -o src/version.o -c src/version.c
 	$(CC) -o tpl $(OBJECTS) $(OPT) $(LDFLAGS)
 
 profile:
