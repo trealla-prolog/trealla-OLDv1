@@ -17,7 +17,7 @@
 
 #define Trace if (q->trace /*&& !consulting*/) trace_call
 
-static const unsigned INITIAL_NBR_HEAP = 8000;		// cells
+static const unsigned INITIAL_NBR_HEAP = 16000;		// cells
 static const unsigned INITIAL_NBR_QUEUE = 1000;		// cells
 
 static const unsigned INITIAL_NBR_GOALS = 1000;
