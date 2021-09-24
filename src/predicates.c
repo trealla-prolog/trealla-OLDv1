@@ -4263,8 +4263,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 			return throw_error(q, tmp2, "representation_error", "max_arity");
 
 		idx_t nbr_cells = tmp_heap_used(q) - save;
-		tmp = alloc_on_heap(q, nbr_cells);
-		may_ptr_error(tmp);
+		may_ptr_error(tmp = alloc_on_heap(q, nbr_cells));
 		safe_copy_cells(tmp, tmp2, nbr_cells);
 		tmp->nbr_cells = nbr_cells;
 		tmp->arity = arity;
@@ -10873,9 +10872,9 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 
 	char *key;
 
-	if (is_integer(p1)) {
+	if (is_smallint(p1)) {
 		char tmpbuf[128];
-		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_int(p1));
+		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_smallint(p1));
 		key = strdup(tmpbuf);
 	} else if (is_atom(p1))
 		key = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
@@ -10893,9 +10892,9 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 
 	char *val;
 
-	if (is_integer(p2)) {
+	if (is_smallint(p2)) {
 		char tmpbuf[128];
-		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_int(p2));
+		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_smallint(p2));
 		val = strdup(tmpbuf);
 	} else if (is_atom(p2))
 		val = slicedup(GET_STR(q, p2), LEN_STR(q, p2));
