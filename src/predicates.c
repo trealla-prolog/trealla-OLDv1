@@ -11210,13 +11210,7 @@ static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)
 
 static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
 {
-	if (q->cp != q->save_cp) {
-		choice *ch = GET_CURR_CHOICE();
-		ch->chk_is_det = true;
-		return pl_success;
-	}
-
-	if (q->retry)
+	if (q->cp != q->save_cp)
 		return pl_success;
 
 	choice *ch = GET_CURR_CHOICE();
@@ -11227,10 +11221,13 @@ static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
 				break;
 
 			ch->did_cleanup = true;
+
+			if (ch == GET_CURR_CHOICE())
+				drop_choice(q);
+
 			cell *c = ch->st.curr_cell;
 			c = deref(q, c, ch->st.curr_frame);
 			cell *p1 = deref(q, c+1, ch->st.curr_frame);
-			may_error(make_barrier(q)); // ?????
 			do_cleanup(q, p1);
 			return pl_success;
 		}

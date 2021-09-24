@@ -460,7 +460,6 @@ typedef struct {
 	bool did_cleanup:1;
 	bool register_cleanup:1;
 	bool register_term:1;
-	bool chk_is_det:1;
 	bool block_catcher:1;
 	bool tail_rec:1;
 } choice;
