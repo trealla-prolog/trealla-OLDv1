@@ -4571,9 +4571,7 @@ static USE_RESULT pl_status fn_iso_abolish_1(query *q)
 	if (p1->arity != 2)
 		return throw_error(q, p1, "type_error", "predicate_indicator");
 
-	const char *src = GET_STR(q, p1);
-
-	if (strcmp(src, "/") && strcmp(src, "//"))
+	if (slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "/") && slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "//"))
 		return throw_error(q, p1, "type_error", "predicate_indicator");
 
 	cell *p1_name = p1 + 1;
@@ -4585,7 +4583,7 @@ static USE_RESULT pl_status fn_iso_abolish_1(query *q)
 	cell *p1_arity = p1 + 2;
 	p1_arity = deref(q, p1_arity, p1_ctx);
 
-	if (!strcmp(src, "//"))
+	if (!slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "//"))
 		p1_arity += 2;
 
 	if (!is_integer(p1_arity))
