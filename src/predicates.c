@@ -11203,7 +11203,7 @@ void do_cleanup(query *q, cell *p1)
 {
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0); // ???
 	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 }
