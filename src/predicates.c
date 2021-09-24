@@ -5153,15 +5153,6 @@ static USE_RESULT pl_status fn_iso_catch2_3(query *q)
 	return pl_success;
 }
 
-void do_cleanup(query *q, cell *p1)
-{
-	cell *tmp = clone_to_heap(q, true, p1, 2);
-	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
-	make_call(q, tmp+nbr_cells);
-	q->st.curr_cell = tmp;
-}
-
 static USE_RESULT pl_status fn_iso_throw_1(query *q);
 
 static USE_RESULT bool find_exception_handler(query *q, cell *e)
@@ -11206,6 +11197,15 @@ static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)
 	choice *ch = GET_CURR_CHOICE();
 	ch->register_cleanup = true;
 	return pl_success;
+}
+
+void do_cleanup(query *q, cell *p1)
+{
+	cell *tmp = clone_to_heap(q, true, p1, 2);
+	idx_t nbr_cells = 1 + p1->nbr_cells;
+	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
+	make_call(q, tmp+nbr_cells);
+	q->st.curr_cell = tmp;
 }
 
 static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
