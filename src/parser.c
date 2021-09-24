@@ -207,7 +207,9 @@ void consultall(parser *p, cell *l)
 
 	while (is_list(l) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(l);
-		load_file(p->m, GET_STR(p, h));
+		char *s = slicedup(GET_STR(p, h), LEN_STR(p, h));
+		load_file(p->m, s);
+		free(s);
 		l = LIST_TAIL(l);
 	}
 }
@@ -247,7 +249,7 @@ static void do_op(parser *p, cell *c)
 	}
 
 	unsigned specifier;
-	const char *spec = GET_STR(p, p2);
+	char *spec = slicedup(GET_STR(p, p2), LEN_STR(p, p2));
 
 	if (!strcmp(spec, "fx"))
 		specifier = OP_FX;
@@ -265,34 +267,46 @@ static void do_op(parser *p, cell *c)
 		specifier = OP_YFX;
 	else {
 		if (DUMP_ERRS || !p->do_read_term)
-			fprintf(stdout, "Error: unknown op spec tag\n");
+		fprintf(stdout, "Error: unknown op spec tag\n");
+		free(spec);
 		return;
 	}
 
+	free(spec);
 	LIST_HANDLER(p3);
 
 	while (is_list(p3) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(p3);
 
 		if (is_atom(h)) {
-			if (!set_op(p->m, GET_STR(p, h), specifier, get_int(p1))) {
+			char *name = slicedup(GET_STR(p, h), LEN_STR(p, h));
+
+			if (!set_op(p->m, name, specifier, get_int(p1))) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: could not set op\n");
 
+				free(name);
 				continue;
 			}
+
+			free(name);
 		}
 
 		p3 = LIST_TAIL(p3);
 	}
 
 	if (is_atom(p3) && !is_nil(p3)) {
-		if (!set_op(p->m, GET_STR(p, p3), specifier, get_int(p1))) {
+		char *name = slicedup(GET_STR(p, p3), LEN_STR(p, p3));
+
+		if (!set_op(p->m, name, specifier, get_int(p1))) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: could not set op\n");
 
+			free(name);
 			return;
 		}
+
+		free(name);
 	}
 }
 

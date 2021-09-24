@@ -2467,13 +2467,14 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	while (is_list(p4)) {
 		cell *h = LIST_HEAD(p4);
 		cell *c = deref(q, h, p4_ctx);
+		idx_t c_ctx = q->latest_ctx;
 
 		if (is_variable(c))
 			return throw_error(q, c, "instantiation_error", "args_not_sufficiently_instantiated");
 
 		if (is_structure(c) && (c->arity == 1)) {
 			cell *name = c + 1;
-			name = deref(q, name, q->latest_ctx);
+			name = deref(q, name, c_ctx);
 
 			if (is_variable(name) && slicecmp2(GET_STR(q, c), LEN_STR(q, c), "mmap"))
 				return throw_error(q, name, "instantiation_error", "stream_option");
@@ -2487,7 +2488,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "mmap")) {
 #if USE_MMAP
 				mmap_var = name;
-				mmap_var = deref(q, mmap_var, q->latest_ctx);
+				mmap_var = deref(q, mmap_var, c_ctx);
 				mmap_ctx = q->latest_ctx;
 #endif
 			} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "alias")) {
