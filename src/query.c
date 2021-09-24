@@ -17,10 +17,9 @@
 
 #define Trace if (q->trace /*&& !consulting*/) trace_call
 
-static const unsigned INITIAL_NBR_HEAP = 16000;		// cells
-static const unsigned INITIAL_NBR_QUEUE = 1000;		// cells
-
-static const unsigned INITIAL_NBR_GOALS = 1000;
+static const unsigned INITIAL_NBR_HEAP_CELLS = 16000;
+static const unsigned INITIAL_NBR_QUEUE_CELLS = 1000;
+static const unsigned INITIAL_NBR_GOALS = 2000;
 static const unsigned INITIAL_NBR_SLOTS = 1000;
 static const unsigned INITIAL_NBR_CHOICES = 1000;
 static const unsigned INITIAL_NBR_TRAILS = 1000;
@@ -1867,11 +1866,11 @@ query *create_query(module *m, bool is_task)
 
 	// Allocate these later as needed...
 
-	q->h_size = is_task ? INITIAL_NBR_HEAP/10 : INITIAL_NBR_HEAP;
+	q->h_size = is_task ? INITIAL_NBR_HEAP_CELLS/10 : INITIAL_NBR_HEAP_CELLS;
 	q->tmph_size = is_task ? INITIAL_NBR_CELLS/10 : INITIAL_NBR_CELLS;
 
 	for (int i = 0; i < MAX_QUEUES; i++)
-		q->q_size[i] = is_task ? INITIAL_NBR_QUEUE/10 : INITIAL_NBR_QUEUE;
+		q->q_size[i] = is_task ? INITIAL_NBR_QUEUE_CELLS/10 : INITIAL_NBR_QUEUE_CELLS;
 
 	if (error) {
 		destroy_query (q);
