@@ -76,16 +76,10 @@ char *slicedup(const char *s, size_t n)
 
 int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2)
 {
-	size_t len = len1 < len2 ? len1 : len2;
-	int val = memcmp(s1, s2, len);
-	if (val) return val>0?1:-1;
-
-	if (len1 < len2)
-		return -1;
-	else if (len1 > len2)
-		return 1;
-
-	return 0;
+	size_t min_len = len1 < len2 ? len1 : len2;
+	int val = memcmp(s1, s2, min_len);
+	if (val) return val > 0 ? 1 : -1;
+	return len1 < len2 ? -1 : len1 > len2 ? 1 : 0;
 }
 
 static cell err_cell = {0};
@@ -2317,7 +2311,6 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,variable);
 	GET_NEXT_ARG(p4,list_or_nil);
-	const char *mode = GET_STR(q, p2);
 	int n = new_stream();
 	char *src = NULL;
 
@@ -2343,12 +2336,9 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 
 	stream *str = &g_streams[n];
 	str->domain = true;
-	str->filename = strdup(filename);
-	may_ptr_error(str->filename);
-	str->name = strdup(filename);
-	may_ptr_error(str->name);
-	str->mode = strdup(mode);
-	may_ptr_error(str->mode);
+	may_ptr_error(str->filename = strdup(filename));
+	may_ptr_error(str->name = strdup(filename));
+	may_ptr_error(str->mode = slicedup(GET_STR(q, p2), LEN_STR(q, p2)));
 	str->eof_action = eof_action_eof_code;
 	bool binary = false;
 	LIST_HANDLER(p4);
@@ -2397,9 +2387,9 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 			return throw_error(q, p4, "instantiation_error", "args_not_sufficiently_instantiated");
 	}
 
-	if (!strcmp(mode, "read"))
+	if (!strcmp(str->mode, "read"))
 		str->fp = popen(filename, binary?"rb":"r");
-	else if (!strcmp(mode, "write"))
+	else if (!strcmp(str->mode, "write"))
 		str->fp = popen(filename, binary?"wb":"w");
 	else
 		return throw_error(q, p2, "domain_error", "io_mode");
@@ -2407,7 +2397,7 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 	free(src);
 
 	if (!str->fp) {
-		if ((errno == EACCES) || (strcmp(mode, "read") && (errno == EROFS)))
+		if ((errno == EACCES) || (strcmp(str->mode, "read") && (errno == EROFS)))
 			return throw_error(q, p1, "permission_error", "open, source_sink");
 		else
 			return throw_error(q, p1, "existence_error", "source_sink");
@@ -2427,7 +2417,6 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,variable);
 	GET_NEXT_ARG(p4,list_or_nil);
-	const char *mode = GET_STR(q, p2);
 	int n = new_stream();
 	char *src = NULL;
 	bool use_bom = false;
@@ -2462,12 +2451,9 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	}
 
 	stream *str = &g_streams[n];
-	str->filename = strdup(filename);
-	may_ptr_error(str->filename);
-	str->name = strdup(filename);
-	may_ptr_error(str->name);
-	str->mode = strdup(mode);
-	may_ptr_error(str->mode);
+	may_ptr_error(str->filename = strdup(filename));
+	may_ptr_error(str->name = strdup(filename));
+	may_ptr_error(str->mode = slicedup(GET_STR(q, p2), LEN_STR(q, p2)));
 	str->eof_action = eof_action_eof_code;
 	bool binary = false, bom_specified = false;
 
@@ -2550,24 +2536,24 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	if (oldstr) {
 		int fd = fileno(oldstr->fp);
 
-		if (!strcmp(mode, "read"))
+		if (!strcmp(str->mode, "read"))
 			str->fp = fdopen(fd, binary?"rb":"r");
-		else if (!strcmp(mode, "write"))
+		else if (!strcmp(str->mode, "write"))
 			str->fp = fdopen(fd, binary?"wb":"w");
-		else if (!strcmp(mode, "append"))
+		else if (!strcmp(str->mode, "append"))
 			str->fp = fdopen(fd, binary?"ab":"a");
-		else if (!strcmp(mode, "update"))
+		else if (!strcmp(str->mode, "update"))
 			str->fp = fdopen(fd, binary?"rb+":"r+");
 		else
 			return throw_error(q, p2, "domain_error", "io_mode");
 	} else {
-		if (!strcmp(mode, "read"))
+		if (!strcmp(str->mode, "read"))
 			str->fp = fopen(filename, binary?"rb":"r");
-		else if (!strcmp(mode, "write"))
+		else if (!strcmp(str->mode, "write"))
 			str->fp = fopen(filename, binary?"wb":"w");
-		else if (!strcmp(mode, "append"))
+		else if (!strcmp(str->mode, "append"))
 			str->fp = fopen(filename, binary?"ab":"a");
-		else if (!strcmp(mode, "update"))
+		else if (!strcmp(str->mode, "update"))
 			str->fp = fopen(filename, binary?"rb+":"r+");
 		else
 			return throw_error(q, p2, "domain_error", "io_mode");
@@ -2576,7 +2562,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	free(src);
 
 	if (!str->fp) {
-		if ((errno == EACCES) || (strcmp(mode, "read") && (errno == EROFS)))
+		if ((errno == EACCES) || (strcmp(str->mode, "read") && (errno == EROFS)))
 			return throw_error(q, p1, "permission_error", "open, source_sink");
 		else
 			return throw_error(q, p1, "existence_error", "source_sink");
@@ -2584,7 +2570,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 	size_t offset = 0;
 
-	if (!strcmp(mode, "read") && !binary && (!bom_specified || use_bom)) {
+	if (!strcmp(str->mode, "read") && !binary && (!bom_specified || use_bom)) {
 		int ch = xgetc_utf8(net_getc, str);
 
 		if (feof(str->fp))
@@ -2595,7 +2581,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			offset = 3;
 		} else
 			fseek(str->fp, 0, SEEK_SET);
-	} else if (!strcmp(mode, "write") && !binary && use_bom) {
+	} else if (!strcmp(str->mode, "write") && !binary && use_bom) {
 		int ch = 0xFEFF;
 		char tmpbuf[10];
 		put_char_utf8(tmpbuf, ch);
@@ -2606,7 +2592,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 #if USE_MMAP
 	int prot = 0;
 
-	if (!strcmp(mode, "read"))
+	if (!strcmp(str->mode, "read"))
 		prot = PROT_READ;
 	else
 		prot = PROT_WRITE;
@@ -7319,12 +7305,9 @@ static USE_RESULT pl_status fn_server_3(query *q)
 	}
 
 	stream *str = &g_streams[n];
-	str->filename = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
-	may_ptr_error(str->filename);
-	str->name = strdup(hostname);
-	may_ptr_error(str->name);
-	str->mode = strdup("update");
-	may_ptr_error(str->mode);
+	may_ptr_error(str->filename = slicedup(GET_STR(q, p1), LEN_STR(q, p1)));
+	may_ptr_error(str->name = strdup(hostname));
+	may_ptr_error(str->mode = strdup("update"));
 	str->nodelay = nodelay;
 	str->nonblock = nonblock;
 	str->udp = udp;
@@ -7374,12 +7357,9 @@ static USE_RESULT pl_status fn_accept_2(query *q)
 	}
 
 	stream *str2 = &g_streams[n];
-	str2->filename = strdup(str->filename);
-	may_ptr_error(str2->filename);
-	str2->name = strdup(str->name);
-	may_ptr_error(str2->name);
-	str2->mode = strdup("update");
-	may_ptr_error(str2->mode);
+	may_ptr_error(str2->filename = strdup(str->filename));
+	may_ptr_error(str2->name = strdup(str->name));
+	may_ptr_error(str2->mode = strdup("update"));
 	str->socket = true;
 	str2->nodelay = str->nodelay;
 	str2->nonblock = str->nonblock;
@@ -7509,12 +7489,9 @@ static USE_RESULT pl_status fn_client_5(query *q)
 	}
 
 	stream *str = &g_streams[n];
-	str->filename = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
-	may_ptr_error(str->filename);
-	str->name = strdup(hostname);
-	may_ptr_error(str->name);
-	str->mode = strdup("update");
-	may_ptr_error(str->mode);
+	may_ptr_error(str->filename = slicedup(GET_STR(q, p1), LEN_STR(q, p1)));
+	may_ptr_error(str->name = strdup(hostname));
+	may_ptr_error(str->mode = strdup("update"));
 	str->socket = true;
 	str->nodelay = nodelay;
 	str->nonblock = nonblock;
