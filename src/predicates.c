@@ -8912,18 +8912,17 @@ static USE_RESULT pl_status fn_access_file_2(query *q)
 	} else
 		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
 
-	const char *mode = GET_STR(q, p2);
 	int amode = R_OK;
 
-	if (!strcmp(mode, "read"))
+	if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "read"))
 		amode = R_OK;
-	else if (!strcmp(mode, "write"))
+	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "write"))
 		amode = W_OK;
-	else if (!strcmp(mode, "append"))
+	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "append"))
 		amode = W_OK;
-	else if (!strcmp(mode, "execute"))
+	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "execute"))
 		amode = X_OK;
-	else if (!strcmp(mode, "none")) {
+	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "none")) {
 		free(src);
 		return pl_success;
 	} else {
@@ -8934,12 +8933,12 @@ static USE_RESULT pl_status fn_access_file_2(query *q)
 	struct stat st = {0};
 	int status = stat(filename, &st);
 
-	if (status && (!strcmp(mode, "read") || !strcmp(mode, "exist") || !strcmp(mode, "execute") || !strcmp(mode, "none"))) {
+	if (status && (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "read") || !slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "exist") || !slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "execute") || !slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "none"))) {
 		free(src);
 		return pl_failure;
 	}
 
-	if (status && (!strcmp(mode, "write") || !strcmp(mode, "append"))) {
+	if (status && (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "write") || !slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "append"))) {
 		free(src);
 		return pl_success;
 	}
