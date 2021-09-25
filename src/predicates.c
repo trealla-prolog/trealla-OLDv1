@@ -2467,14 +2467,13 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	while (is_list(p4)) {
 		cell *h = LIST_HEAD(p4);
 		cell *c = deref(q, h, p4_ctx);
-		idx_t c_ctx = q->latest_ctx;
 
 		if (is_variable(c))
 			return throw_error(q, c, "instantiation_error", "args_not_sufficiently_instantiated");
 
 		if (is_structure(c) && (c->arity == 1)) {
 			cell *name = c + 1;
-			name = deref(q, name, c_ctx);
+			name = deref(q, name, q->latest_ctx);
 
 			if (is_variable(name) && slicecmp2(GET_STR(q, c), LEN_STR(q, c), "mmap"))
 				return throw_error(q, name, "instantiation_error", "stream_option");
@@ -2488,7 +2487,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "mmap")) {
 #if USE_MMAP
 				mmap_var = name;
-				mmap_var = deref(q, mmap_var, c_ctx);
+				mmap_var = deref(q, mmap_var, q->latest_ctx);
 				mmap_ctx = q->latest_ctx;
 #endif
 			} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "alias")) {
@@ -6070,21 +6069,22 @@ static pl_status do_op(query *q, cell *p3)
 		return throw_error(q, p3, "type_error", "atom");
 
 	unsigned specifier;
+	const char *spec = GET_STR(q, p2);
 	unsigned pri = get_int(p1);
 
-	if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "fx"))
+	if (!strcmp(spec, "fx"))
 		specifier = OP_FX;
-	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "fy"))
+	else if (!strcmp(spec, "fy"))
 		specifier = OP_FY;
-	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "xf"))
+	else if (!strcmp(spec, "xf"))
 		specifier = OP_XF;
-	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "xfx"))
+	else if (!strcmp(spec, "xfx"))
 		specifier = OP_XFX;
-	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "xfy"))
+	else if (!strcmp(spec, "xfy"))
 		specifier = OP_XFY;
-	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "yf"))
+	else if (!strcmp(spec, "yf"))
 		specifier = OP_YF;
-	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "yfx"))
+	else if (!strcmp(spec, "yfx"))
 		specifier = OP_YFX;
 	else
 		return throw_error(q, p2, "domain_error", "operator_specifier");
@@ -8913,17 +8913,18 @@ static USE_RESULT pl_status fn_access_file_2(query *q)
 	} else
 		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
 
+	const char *mode = GET_STR(q, p2);
 	int amode = R_OK;
 
-	if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "read"))
+	if (!strcmp(mode, "read"))
 		amode = R_OK;
-	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "write"))
+	else if (!strcmp(mode, "write"))
 		amode = W_OK;
-	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "append"))
+	else if (!strcmp(mode, "append"))
 		amode = W_OK;
-	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "execute"))
+	else if (!strcmp(mode, "execute"))
 		amode = X_OK;
-	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "none")) {
+	else if (!strcmp(mode, "none")) {
 		free(src);
 		return pl_success;
 	} else {
@@ -8934,16 +8935,12 @@ static USE_RESULT pl_status fn_access_file_2(query *q)
 	struct stat st = {0};
 	int status = stat(filename, &st);
 
-	if (status && (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "read")
-		|| !slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "exist")
-		|| !slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "execute")
-		|| !slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "none"))) {
+	if (status && (!strcmp(mode, "read") || !strcmp(mode, "exist") || !strcmp(mode, "execute") || !strcmp(mode, "none"))) {
 		free(src);
 		return pl_failure;
 	}
 
-	if (status && (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "write")
-		|| !slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "append"))) {
+	if (status && (!strcmp(mode, "write") || !strcmp(mode, "append"))) {
 		free(src);
 		return pl_success;
 	}
@@ -11027,7 +11024,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	if (!is_atom(p1) && !is_structure(p1)) return pl_error;
-	char *name = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+	const char *name = GET_STR(q, p1);
 	char dstbuf[1024*4];
 
 	if (is_structure(p1) && !strcmp(name, "library")) {
@@ -11043,7 +11040,6 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			if (m != q->st.m)
 				q->st.m->used[q->st.m->idx_used++] = m;
 
-			free(name);
 			return pl_success;
 		}
 
@@ -11053,7 +11049,6 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 		    || !strcmp(name, "types")
 			|| !strcmp(name, "iso_ext")
 		    || !strcmp(name, "files"))
-		    free(name);
 			return pl_success;
 
 		for (library *lib = g_libs; lib->name; lib++) {
@@ -11076,7 +11071,6 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			if (m != q->st.m)
 				q->st.m->used[q->st.m->idx_used++] = m;
 
-			free(name);
 			return pl_success;
 		}
 
@@ -11101,7 +11095,6 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 	if (m != q->st.m)
 		q->st.m->used[q->st.m->idx_used++] = m;
 
-	free(name);
 	return pl_success;
 }
 
