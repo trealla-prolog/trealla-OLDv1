@@ -5036,6 +5036,9 @@ static USE_RESULT pl_status fn_iso_negation_1(query *q)
 
 static USE_RESULT pl_status fn_sys_block_catcher_0(query *q)
 {
+	if (!q->cp)
+		return pl_success;
+
 	choice *ch = GET_CURR_CHOICE();
 
 	do {
