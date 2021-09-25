@@ -6069,22 +6069,21 @@ static pl_status do_op(query *q, cell *p3)
 		return throw_error(q, p3, "type_error", "atom");
 
 	unsigned specifier;
-	const char *spec = GET_STR(q, p2);
 	unsigned pri = get_int(p1);
 
-	if (!strcmp(spec, "fx"))
+	if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "fx"))
 		specifier = OP_FX;
-	else if (!strcmp(spec, "fy"))
+	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "fy"))
 		specifier = OP_FY;
-	else if (!strcmp(spec, "xf"))
+	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "xf"))
 		specifier = OP_XF;
-	else if (!strcmp(spec, "xfx"))
+	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "xfx"))
 		specifier = OP_XFX;
-	else if (!strcmp(spec, "xfy"))
+	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "xfy"))
 		specifier = OP_XFY;
-	else if (!strcmp(spec, "yf"))
+	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "yf"))
 		specifier = OP_YF;
-	else if (!strcmp(spec, "yfx"))
+	else if (!slicecmp2(GET_STR(q, p2), LEN_STR(q, p2), "yfx"))
 		specifier = OP_YFX;
 	else
 		return throw_error(q, p2, "domain_error", "operator_specifier");
