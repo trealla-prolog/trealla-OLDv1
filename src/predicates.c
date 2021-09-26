@@ -5853,7 +5853,7 @@ static void save_name(FILE *fp, query *q, idx_t name, unsigned arity)
 	module *m = q->st.curr_clause ? q->st.curr_clause->owner->m : q->st.m;
 
 	for (predicate *pr = m->head; pr && !g_tpl_interrupt; pr = pr->next) {
-		if (pr->is_prebuilt)
+		if (pr->is_prebuilt && (arity == -1U))
 			continue;
 
 		if (name != pr->key.val_off)
