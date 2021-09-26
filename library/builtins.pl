@@ -522,7 +522,7 @@ not(G) :- G, !, fail.
 not(_).
 
 forall(Cond, Action) :-
-	\+ call((Cond, \+ Action)).
+	\+ call((call(Cond), \+ call(Action))).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
