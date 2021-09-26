@@ -23,7 +23,7 @@ endif
 
 SRCOBJECTS = tpl.o src/history.o src/functions.o \
 	src/predicates.o src/contrib.o src/heap.c \
-	src/library.o src/module.o src/parser.o \
+	src/control.o src/library.o src/module.o src/parser.o \
 	src/print.o src/prolog.o src/query.o src/format.o \
 	src/skiplist.o src/base64.o src/network.o src/utf8.o
 
@@ -65,6 +65,10 @@ clean:
 src/base64.o: src/base64.c src/base64.h
 src/contrib.o: src/contrib.c src/trealla.h src/internal.h src/map.h \
   src/skiplist.h src/cdebug.h src/imath/imath.h src/builtins.h
+src/control.o: src/control.c src/internal.h src/map.h src/skiplist.h \
+  src/trealla.h src/cdebug.h src/imath/imath.h src/network.h \
+  src/base64.h src/library.h src/parser.h src/module.h src/prolog.h \
+  src/query.h src/builtins.h src/heap.h src/utf8.h
 src/format.o: src/format.c src/trealla.h src/internal.h src/map.h \
   src/skiplist.h src/cdebug.h src/imath/imath.h src/network.h \
   src/base64.h src/library.h src/parser.h src/module.h src/prolog.h \
