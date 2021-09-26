@@ -559,7 +559,7 @@ member(X, [X|T]) :- T == [] -> !.
 member(X, [X|_]).
 member(X, [_|Xs]) :- member(X, Xs).
 
-append([], L, L) :- !.
+append([], L, L).
 append([H|T], L, [H|R]) :- append(T, L, R).
 
 unifiable(T1, T2, Gs) :-
