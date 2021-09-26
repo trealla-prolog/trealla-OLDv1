@@ -560,7 +560,8 @@ member(X, [X|_]).
 member(X, [_|Xs]) :- member(X, Xs).
 
 append([], L, L).
-append([H|T], L, [H|R]) :- append(T, L, R).
+append([H|T], L, [H|R]) :-
+	append(T, L, R).
 
 unifiable(T1, T2, Gs) :-
 	copy_term('$unifiable'(T1,T2,Gs), G0),
