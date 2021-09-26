@@ -7,7 +7,7 @@ extern void destroy_query(query *q);
 extern USE_RESULT pl_status make_choice(query *q);
 extern USE_RESULT pl_status make_barrier(query *q);
 extern USE_RESULT pl_status make_catcher(query *q, enum q_retry type);
-extern void cut_me(query *q, bool local_cut, bool soft_cut);
+extern void cut_me(query *q, bool inner_cut, bool soft_cut);
 
 extern void set_var(query *q, const cell *c, idx_t ctx, cell *v, idx_t v_ctx);
 extern void reset_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx);

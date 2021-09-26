@@ -304,8 +304,6 @@ USE_RESULT pl_status fn_iso_cut_0(query *q)
 USE_RESULT pl_status fn_sys_inner_cut_0(query *q)
 {
 	cut_me(q, true, false);
-	frame *g = GET_CURR_FRAME();
-	g->cgen--;
 	return pl_success;
 }
 

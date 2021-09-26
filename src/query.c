@@ -692,7 +692,7 @@ pl_status make_catcher(query *q, enum q_retry retry)
 	return pl_success;
 }
 
-void cut_me(query *q, bool local_cut, bool soft_cut)
+void cut_me(query *q, bool inner_cut, bool soft_cut)
 {
 	frame *g = GET_CURR_FRAME();
 
@@ -709,8 +709,21 @@ void cut_me(query *q, bool local_cut, bool soft_cut)
 			ch--;
 		}
 
-		if (!local_cut && ch->barrier && (ch->cgen == g->cgen))
+		// A normal cut can't break through a barrier, so when the
+		// choice-generations match it's time to stop...
+
+		if (!inner_cut && ch->barrier && (ch->cgen == g->cgen))
 			break;
+
+		// Whereas an inner cut clears the barrier and then stops...
+
+		if (inner_cut && ch->barrier && (ch->cgen == g->cgen)) {
+			g->cgen--;
+			q->cp--;
+			break;
+		}
+
+		// Otherwise just stop...
 
 		if (ch->cgen < g->cgen)
 			break;
