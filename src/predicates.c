@@ -151,7 +151,6 @@ void make_end(cell *tmp)
 	tmp->arity = tmp->flags = 0;
 	tmp->match = NULL;
 	tmp->val_ptr = NULL;
-	tmp->cgen = ERR_IDX;
 }
 
 void make_call(query *q, cell *tmp)
@@ -159,7 +158,7 @@ void make_call(query *q, cell *tmp)
 	make_end(tmp);
 	cell *c = q->st.curr_cell;
 	frame *g = GET_CURR_FRAME();
-	tmp->val_ptr = c ? c + c->nbr_cells : NULL;
+	tmp->val_ptr = c + c->nbr_cells;
 	tmp->cgen = g->cgen;
 	tmp->mod_nbr = q->st.m->id;
 }

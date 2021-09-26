@@ -758,7 +758,7 @@ static void proceed(query *q)
 	frame *g = GET_CURR_FRAME();
 
 	while (q->st.curr_cell && is_end(q->st.curr_cell)) {
-		if (q->st.curr_cell->cgen != 0)
+		if (q->st.curr_cell->val_ptr)
 			g->cgen = q->st.curr_cell->cgen;	// set the cgen back
 
 		if (q->st.curr_cell->mod_nbr != q->st.m->id)
