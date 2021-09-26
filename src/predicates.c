@@ -158,9 +158,9 @@ void make_call(query *q, cell *tmp)
 	make_end(tmp);
 	cell *c = q->st.curr_cell;
 	frame *g = GET_CURR_FRAME();
-	tmp->val_ptr = c + c->nbr_cells;
-	tmp->cgen = g->cgen;
-	tmp->mod_nbr = q->st.m->id;
+	tmp->val_ptr = c + c->nbr_cells;	// save the return instruction
+	tmp->cgen = g->cgen;				// ... choice-generation
+	tmp->mod_nbr = q->st.m->id;			// ... current-module
 }
 
 void make_literal(cell *tmp, idx_t offset)
