@@ -1040,7 +1040,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 	}
 
 	if (IS_FY(c)) {
-			if (!strcmp(GET_STR(p, c), "\\+")) {
+		if (!strcmp(GET_STR(p, c), "\\+")) {
 			cell *rhs = c + 1;
 
 			if (is_variable(rhs)) {
