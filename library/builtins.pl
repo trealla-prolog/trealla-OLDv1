@@ -104,7 +104,7 @@ findall(T, G, B, Tail) :-
 	'$mustbe_list_or_var'(B),
 	'$mustbe_list_or_var'(Tail),
 	findall(T, G, B0),
-	'$append'(B0, Tail, B), !.
+	append(B0, Tail, B), !.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Derived from code by R.A. O'Keefe
@@ -483,7 +483,7 @@ phrase_((A -> B), S0, S) :-
 phrase_(phrase(NonTerminal), S0, S) :-
 	phrase(NonTerminal, S0, S).
 phrase_([T|Ts], S0, S) :-
-	'$append'([T|Ts], S, S0).
+	append([T|Ts], S, S0).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -535,8 +535,8 @@ recordz(K, V, R) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V), R).
 recorded(K, V, R) :- nonvar(K), clause('$record_key'(K,V), _, R).
 
 format(F) :- format(F, []).
-partial_string(S, P) :- '$append'(S, _, P).
-partial_string(S, P, V) :- '$append'(S, V, P).
+partial_string(S, P) :- append(S, _, P).
+partial_string(S, P, V) :- append(S, V, P).
 chars_base64(Plain, Base64,_) :- base64(Plain, Base64).
 chars_urlenc(Plain, Url, _) :- urlenc(Plain, Url).
 term_to_atom(T, S) :- write_term_to_chars(S, T, []).
@@ -555,13 +555,17 @@ ignore(G) :- G, !.
 ignore(_).
 once(G) :- G, !.
 
+member(X, [X|T]) :- T == [] -> !.
+member(X, [X|_]).
+member(X, [_|Xs]) :- member(X, Xs).
+
+append([], L, L) :- !.
+append([H|T], L, [H|R]) :- append(T, L, R).
+
 unifiable(T1, T2, Gs) :-
 	copy_term('$unifiable'(T1,T2,Gs), G0),
 	'$rawcall'(G0),
 	'$unifiable'(T1,T2,Gs)=G0.
-
-'$append'([], L, L).
-'$append'([H|T], L, [H|R]) :- '$append'(T, L, R).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SWI compatible
