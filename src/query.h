@@ -52,8 +52,8 @@ extern USE_RESULT pl_status fn_iso_call_n(query *q);
 extern USE_RESULT pl_status fn_soft_cut_0(query *q);
 extern USE_RESULT pl_status fn_iso_cut_0(query *q);
 extern USE_RESULT pl_status fn_sys_inner_cut_0(query *q);
-extern USE_RESULT pl_status fn_iso_fail_0(__attribute__((unused)) query *q);
-extern USE_RESULT pl_status fn_iso_true_0(__attribute__((unused)) query *q);
+extern USE_RESULT pl_status fn_iso_fail_0(query *q);
+extern USE_RESULT pl_status fn_iso_true_0(query *q);
 
 extern bool is_valid_list_up_to(query *q, cell *p1, idx_t p1_ctx, bool allow_partials, int n);
 extern bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials);
