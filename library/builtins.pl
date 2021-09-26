@@ -524,6 +524,16 @@ not(_).
 %forall(Cond, Action) :-
 %	\+ (Cond, \+ Action).
 
+% BUG: for some reason we currently need the call wrapper around
+% the main negation in forall/3 below. Unfortunately this prevents
+% term-to-body conversion of Cond & Action so we do it manually for
+% now. Of course this is not necessary if we define the negation op
+% as a predicate like not/1 above instead of native in code, which
+% hints at the source of the problem. But note: not/1 is slower than
+% (\+)/1 so I am reluctant to go that way, it would better to find
+% the source of the problem as it probably affects other things
+% like if-then(-else) etc.
+
 forall(Cond, Action) :-
 	\+ call((call(Cond), \+ call(Action))).
 
