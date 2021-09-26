@@ -709,24 +709,19 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 			ch--;
 		}
 
-		// A normal cut can't break through a barrier, so when the
-		// choice-generations match it's time to stop...
+		// A normal cut can't break through a barrier...
 
 		if (!inner_cut && ch->barrier && (ch->cgen == g->cgen))
 			break;
 
-		// Whereas an inner cut clears the barrier and then stops...
+		// Whereas an inner cut clears the barrier.
 
-		if (inner_cut && ch->barrier && (ch->cgen == g->cgen)) {
-			g->cgen--;
-			q->cp--;
+		if (ch->cgen < g->cgen) {
+			if (inner_cut)
+				g->cgen--;
+
 			break;
 		}
-
-		// Otherwise just stop...
-
-		if (ch->cgen < g->cgen)
-			break;
 
 		q->cp--;
 
