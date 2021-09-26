@@ -555,12 +555,10 @@ ignore(G) :- G, !.
 ignore(_).
 once(G) :- G, !.
 
-% TODO: fix indexing look-ahead
-member(X, [X|T]) :- T == [] -> !.
+member(X, [X|T]) :- T == [], !.
 member(X, [X|_]).
 member(X, [_|Xs]) :- member(X, Xs).
 
-% TODO: fix indexing look-ahead
 append(A, L, L) :- A == [], !.
 append([], L, L).
 append([H|T], L, [H|R]) :-
