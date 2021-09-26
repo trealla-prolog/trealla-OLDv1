@@ -758,8 +758,8 @@ static void proceed(query *q)
 	frame *g = GET_CURR_FRAME();
 
 	while (q->st.curr_cell && is_end(q->st.curr_cell)) {
-		if (q->st.curr_cell->cgen != ERR_IDX)
-			g->cgen = q->st.curr_cell->cgen;
+		if (q->st.curr_cell->cgen != 0)
+			g->cgen = q->st.curr_cell->cgen;	// set the cgen back
 
 		if (q->st.curr_cell->mod_nbr != q->st.m->id)
 			q->st.m = find_module_id(q->st.m->pl, q->st.curr_cell->mod_nbr);
