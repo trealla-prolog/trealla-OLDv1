@@ -249,8 +249,6 @@ USE_RESULT pl_status fn_iso_disjunction_2(query *q)
 		cell *p1 = q->st.curr_cell + 2;
 		cell *p2 = p1 + p1->nbr_cells;
 		cell *p3 = p2 + p2->nbr_cells;
-		p2 = deref(q, p2, q->st.curr_frame);
-		p3 = deref(q, p3, q->st.curr_frame);
 		return do_if_then_else(q, p1, p2, p3);
 	}
 
@@ -258,8 +256,6 @@ USE_RESULT pl_status fn_iso_disjunction_2(query *q)
 		cell *p1 = q->st.curr_cell + 2;
 		cell *p2 = p1 + p1->nbr_cells;
 		cell *p3 = p2 + p2->nbr_cells;
-		p2 = deref(q, p2, q->st.curr_frame);
-		p3 = deref(q, p3, q->st.curr_frame);
 		return do_if_else(q, p1, p2, p3);
 	}
 
