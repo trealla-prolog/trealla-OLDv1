@@ -521,6 +521,9 @@ directory_exists(F) :- exists_directory(F).
 not(G) :- G, !, fail.
 not(_).
 
+%forall(Cond, Action) :-
+%	\+ (Cond, \+ Action).
+
 forall(Cond, Action) :-
 	\+ call((call(Cond), \+ call(Action))).
 
