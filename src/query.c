@@ -1541,7 +1541,7 @@ static int check_interrupt(query *q)
 		printf("%c\n", ch);
 
 		if (ch == 'h') {
-			printf("Action (a)bort, (f)ail, (c)ontinue, (t)race, c(r)eep, (e)xit: ");
+			printf("Action (c)[continue], (t)[trace], (r)[creep]: ");
 			goto LOOP;
 		}
 
@@ -1550,7 +1550,7 @@ static int check_interrupt(query *q)
 			return 0;
 		}
 
-		if (ch == 'r') {
+		if ((ch == ';') || (ch == ' ')) {
 			q->trace = true;
 			q->creep = true;
 			return 0;
@@ -1567,7 +1567,7 @@ static int check_interrupt(query *q)
 			return 1;
 		}
 
-		if (ch == 'e') {
+		if (ch == 'x') {
 			if (!q->run_init)
 				printf("\n");
 
@@ -1595,12 +1595,12 @@ static bool check_redo(query *q)
 		int ch = history_getch();
 
 		if ((ch == 'h') || (ch == '?')) {
-			printf("Action (a)bort, (e)xit, (r)edo:\n");
+			printf("Action (a)[abort], (x)[exit], (;)[retry]:\n");
 			fflush(stdout);
 			continue;
 		}
 
-		if ((ch == 'r') || (ch == ' ') || (ch == ';')) {
+		if ((ch == ' ') || (ch == ';')) {
 			printf("\n; ");
 			fflush(stdout);
 			q->retry = QUERY_RETRY;
@@ -1613,7 +1613,7 @@ static bool check_redo(query *q)
 			return true;
 		}
 
-		if (ch == 'e') {
+		if (ch == 'x') {
 			if (!q->run_init)
 				printf("\n");
 
