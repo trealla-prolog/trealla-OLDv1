@@ -30,6 +30,7 @@
 #include "builtins.h"
 #include "heap.h"
 #include "utf8.h"
+#include "history.h"
 
 #if USE_OPENSSL
 #include "openssl/sha.h"
@@ -10154,6 +10155,61 @@ static USE_RESULT pl_status fn_nonmember_2(query *q)
 	return fn_memberchk_2(q) == pl_success ? pl_failure : pl_success;
 }
 
+static USE_RESULT pl_status fn_get_single_char_1(query *q)
+{
+	GET_FIRST_ARG(p1,integer_or_var);
+	int n = q->st.m->pl->current_input;
+	stream *str = &g_streams[n];
+
+	if (is_integer(p1) && (get_int(p1) < -1))
+		return throw_error(q, p1, "representation_error", "in_character_code");
+
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
+		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
+	}
+
+	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
+		cell tmp;
+		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
+		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
+	}
+
+	int ch = history_getch();
+
+	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+		clearerr(str->fp);
+		do_yield_0(q, 1);
+		return pl_failure;
+	}
+
+	str->did_getc = true;
+
+	if (FEOF(str)) {
+		str->did_getc = false;
+		str->at_end_of_file = str->eof_action != eof_action_reset;
+
+		if (str->eof_action == eof_action_reset)
+			clearerr(str->fp);
+
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	str->ungetch = 0;
+
+	if ((ch == '\n') || (ch == EOF))
+		str->did_getc = false;
+
+	cell tmp;
+	make_int(&tmp, ch);
+	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+}
+
 static USE_RESULT pl_status fn_sys_put_chars_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -10842,20 +10898,17 @@ static const struct builtins g_predicates_other[] =
 
 	// Miscellaneous...
 
+	{"get_single_char", 1, fn_get_single_char_1, "-code", false},
 	{"memberchk", 2, fn_memberchk_2, "?rule,+list", false},
 	{"nonmember", 2, fn_nonmember_2, "?rule,+list", false},
-
 	{"$put_chars", 1, fn_sys_put_chars_1, "+chars", false},
 	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars", false},
 	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL, false},
 	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL, false},
-
 	{"format", 2, fn_format_2, "+string,+list", false},
 	{"format", 3, fn_format_3, "+stream,+string,+list", false},
-
 	{"abolish", 2, fn_abolish_2, NULL, false},
 	{"assert", 1, fn_iso_assertz_1, NULL, false},
-
 	{"$strip_attributes", 1, fn_sys_strip_attributes_1, "+vars", false},
 	{"copy_term_nat", 2, fn_copy_term_nat_2, NULL, false},
 	{"string", 1, fn_atom_1, "+rule", false},
