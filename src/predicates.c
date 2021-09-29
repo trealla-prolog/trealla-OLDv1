@@ -10180,6 +10180,9 @@ static USE_RESULT pl_status fn_get_single_char_1(query *q)
 
 	int ch = history_getch();
 
+	if (ch == 4)
+		ch = -1;
+
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
 		do_yield_0(q, 1);
