@@ -1,0 +1,51 @@
+{
+  "uid" : "860f628b8b5661d7",
+  "name" : "iso_catch_3_01",
+  "fullName" : "iso_catch_3_01::tests",
+  "historyId" : "iso_catch_3_01::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "control/catch_3/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "control/catch_3/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "control/catch_3/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "control/catch_3/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "53-58"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/25e550f091f11ead975ad028c35898234d277fb4/tests/prolog/control/catch_3/tests.lgt#L53"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "860f628b8b5661d7.json",
+  "parameterValues" : [ "control/catch_3/tests.lgt", "53-58", "https://github.com/LogtalkDotOrg/logtalk3/tree/25e550f091f11ead975ad028c35898234d277fb4/tests/prolog/control/catch_3/tests.lgt#L53" ]
+}
