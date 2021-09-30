@@ -28,6 +28,18 @@ int history_getch(void)
 	return ch;
 }
 
+int history_getch_fd(int fd)
+{
+	struct termios oldattr, newattr;
+	tcgetattr(fd, &oldattr);
+	newattr = oldattr;
+	newattr.c_lflag &= ~(ICANON | ECHO);
+	tcsetattr(fd, TCSANOW, &newattr);
+	int ch = fgetc_utf8(stdin);
+	tcsetattr(fd, TCSANOW, &oldattr);
+	return ch;
+}
+
 char *history_readline_eol(const char *prompt, char eol)
 {
 	char *cmd = NULL;

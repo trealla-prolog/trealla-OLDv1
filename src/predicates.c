@@ -10178,7 +10178,7 @@ static USE_RESULT pl_status fn_get_unbuffered_code_1(query *q)
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
-	int ch = history_getch();
+	int ch = history_getch_fd(fileno(str->fp));
 
 	if (ch == 4)
 		ch = -1;
@@ -10236,7 +10236,7 @@ static USE_RESULT pl_status fn_get_unbuffered_char_1(query *q)
 		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
 	}
 
-	int ch = history_getch();
+	int ch = history_getch_fd(fileno(str->fp));
 
 	if (ch == 4)
 		ch = -1;
