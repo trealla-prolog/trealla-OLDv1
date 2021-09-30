@@ -197,6 +197,7 @@ Non-standard predicates
 	include/3                   # auto-loaded from library(apply)
 	exclude/3                   # auto-loaded from library(apply)
 
+	get_single_char/1			# read a single character from input
 	read_term_from_atom/3       # use read_term_from_chars/3 instead
 	write_term_to_atom/3        # use write_term_to_chars/3 instead
 	term_to_atom/2              # use write_term_to_chars/3 instead
