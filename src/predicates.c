@@ -10257,7 +10257,7 @@ static USE_RESULT pl_status fn_get_unbuffered_char_1(query *q)
 			clearerr(str->fp);
 
 		cell tmp;
-		make_int(&tmp, -1);
+		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -10268,7 +10268,7 @@ static USE_RESULT pl_status fn_get_unbuffered_char_1(query *q)
 
 	if (ch == -1) {
 		cell tmp;
-		make_int(&tmp, ch);
+		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
