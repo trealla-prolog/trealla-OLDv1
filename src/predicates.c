@@ -10155,7 +10155,7 @@ static USE_RESULT pl_status fn_nonmember_2(query *q)
 	return fn_memberchk_2(q) == pl_success ? pl_failure : pl_success;
 }
 
-static USE_RESULT pl_status fn_get_single_char_1(query *q)
+static USE_RESULT pl_status fn_get_single_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
 	int n = q->st.m->pl->current_input;
@@ -10901,7 +10901,7 @@ static const struct builtins g_predicates_other[] =
 
 	// Miscellaneous...
 
-	{"get_single_char", 1, fn_get_single_char_1, "-code", false},
+	{"get_single_code", 1, fn_get_single_code_1, "-code", false},
 	{"memberchk", 2, fn_memberchk_2, "?rule,+list", false},
 	{"nonmember", 2, fn_nonmember_2, "?rule,+list", false},
 	{"$put_chars", 1, fn_sys_put_chars_1, "+chars", false},
