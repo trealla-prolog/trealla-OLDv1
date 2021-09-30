@@ -10155,7 +10155,7 @@ static USE_RESULT pl_status fn_nonmember_2(query *q)
 	return fn_memberchk_2(q) == pl_success ? pl_failure : pl_success;
 }
 
-static USE_RESULT pl_status fn_get_single_code_1(query *q)
+static USE_RESULT pl_status fn_get_unbuffered_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
 	int n = q->st.m->pl->current_input;
@@ -10210,6 +10210,72 @@ static USE_RESULT pl_status fn_get_single_code_1(query *q)
 
 	cell tmp;
 	make_int(&tmp, ch);
+	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+}
+
+static USE_RESULT pl_status fn_get_unbuffered_char_1(query *q)
+{
+	GET_FIRST_ARG(p1,in_character_or_var);
+	int n = q->st.m->pl->current_input;
+	stream *str = &g_streams[n];
+
+	if (is_integer(p1) && (get_int(p1) < -1))
+		return throw_error(q, p1, "representation_error", "in_character_code");
+
+	if (str->binary) {
+		cell tmp;
+		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
+		return throw_error(q, &tmp, "permission_error", "input,binary_stream");
+	}
+
+	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
+		cell tmp;
+		make_int(&tmp, n);
+		tmp.flags |= FLAG_HEX;
+		return throw_error(q, &tmp, "permission_error", "input,past_end_of_stream");
+	}
+
+	int ch = history_getch();
+
+	if (ch == 4)
+		ch = -1;
+
+	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+		clearerr(str->fp);
+		do_yield_0(q, 1);
+		return pl_failure;
+	}
+
+	str->did_getc = true;
+
+	if (FEOF(str)) {
+		str->did_getc = false;
+		str->at_end_of_file = str->eof_action != eof_action_reset;
+
+		if (str->eof_action == eof_action_reset)
+			clearerr(str->fp);
+
+		cell tmp;
+		make_int(&tmp, -1);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	str->ungetch = 0;
+
+	if ((ch == '\n') || (ch == EOF))
+		str->did_getc = false;
+
+	if (ch == -1) {
+		cell tmp;
+		make_int(&tmp, ch);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	char tmpbuf[80];
+	put_char_utf8(tmpbuf, ch);
+	cell tmp;
+	make_small(&tmp, tmpbuf);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -10901,7 +10967,8 @@ static const struct builtins g_predicates_other[] =
 
 	// Miscellaneous...
 
-	{"get_single_code", 1, fn_get_single_code_1, "-code", false},
+	{"get_unbuffered_code", 1, fn_get_unbuffered_code_1, "?code", false},
+	{"get_unbuffered_char", 1, fn_get_unbuffered_char_1, "?char", false},
 	{"memberchk", 2, fn_memberchk_2, "?rule,+list", false},
 	{"nonmember", 2, fn_nonmember_2, "?rule,+list", false},
 	{"$put_chars", 1, fn_sys_put_chars_1, "+chars", false},
