@@ -4195,7 +4195,6 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		p2_ctx = q->st.curr_frame;
 		unsigned arity = 0;
 		init_tmp_heap(q);
-		idx_t save = tmp_heap_used(q);
 		cell *save_p2 = p2;
 		LIST_HANDLER(p2);
 
@@ -4215,7 +4214,8 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 			return throw_error(q, save_p2, "type_error", "list");
 
 		arity--;
-		cell *tmp2 = get_tmp_heap(q, save);
+		cell *tmp2 = get_tmp_heap(q, 0);
+		idx_t nbr_cells = tmp_heap_used(q);
 
 		if (is_cstring(tmp2)) {
 			share_cell(tmp2);
@@ -4234,7 +4234,6 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		if (arity > MAX_ARITY)
 			return throw_error(q, tmp2, "representation_error", "max_arity");
 
-		idx_t nbr_cells = tmp_heap_used(q) - save;
 		may_ptr_error(tmp = alloc_on_heap(q, nbr_cells));
 		safe_copy_cells(tmp, tmp2, nbr_cells);
 		tmp->nbr_cells = nbr_cells;
