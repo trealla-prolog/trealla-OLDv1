@@ -4194,6 +4194,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		p2 = tmp;
 		p2_ctx = q->st.curr_frame;
 		unsigned arity = 0;
+		init_tmp_heap(q);
 		idx_t save = tmp_heap_used(q);
 		cell *save_p2 = p2;
 		LIST_HANDLER(p2);
