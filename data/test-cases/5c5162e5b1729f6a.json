@@ -1,0 +1,51 @@
+{
+  "uid" : "5c5162e5b1729f6a",
+  "name" : "lgt_xor_2_12",
+  "fullName" : "lgt_xor_2_12::tests",
+  "historyId" : "lgt_xor_2_12::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/xor_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "functions/xor_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "functions/xor_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "functions/xor_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "84-87"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/bc964716d8e2d1eb0d5551c573212fb97b654d06/tests/prolog/functions/xor_2/tests.lgt#L84"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "5c5162e5b1729f6a.json",
+  "parameterValues" : [ "functions/xor_2/tests.lgt", "84-87", "https://github.com/LogtalkDotOrg/logtalk3/tree/bc964716d8e2d1eb0d5551c573212fb97b654d06/tests/prolog/functions/xor_2/tests.lgt#L84" ]
+}

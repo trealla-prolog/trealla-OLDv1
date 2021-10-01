@@ -6,7 +6,7 @@
       "name" : "Non-deterministic success",
       "children" : [ {
         "name" : "iso_stream_property_2_01",
-        "uid" : "ad9f04dd3bd0991b",
+        "uid" : "561af8d603bece0a",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
@@ -14,7 +14,7 @@
         },
         "flaky" : false,
         "newFailed" : false,
-        "parameters" : [ "predicates/stream_property_2/tests.lgt", "30-42", "https://github.com/LogtalkDotOrg/logtalk3/tree/25e550f091f11ead975ad028c35898234d277fb4/tests/prolog/predicates/stream_property_2/tests.lgt#L30" ]
+        "parameters" : [ "predicates/stream_property_2/tests.lgt", "30-42", "https://github.com/LogtalkDotOrg/logtalk3/tree/bc964716d8e2d1eb0d5551c573212fb97b654d06/tests/prolog/predicates/stream_property_2/tests.lgt#L30" ]
       } ],
       "uid" : "1e457c6468423f30812a59ec3665696f"
     } ],
