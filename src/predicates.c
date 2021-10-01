@@ -4185,13 +4185,14 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 	}
 
 	if (is_variable(p1)) {
-		cell *tmp = deep_copy_to_tmp(q, p2, p2_ctx, false, false);
+		cell *tmp = deep_copy_to_heap(q, p2, p2_ctx, false, false);
 		may_ptr_error(tmp);
 		if (tmp == ERR_CYCLE_CELL)
 			return throw_error(q, p1, "resource_error", "cyclic_term");
 
 		unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 		p2 = tmp;
+		p2_ctx = q->st.curr_frame;
 		unsigned arity = 0;
 		idx_t save = tmp_heap_used(q);
 		cell *save_p2 = p2;
