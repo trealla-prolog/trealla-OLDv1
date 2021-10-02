@@ -228,6 +228,9 @@ static USE_RESULT pl_status fn_return_1(query *q)
 
 static USE_RESULT pl_status fn_iso_is_2(query *q)
 {
+	if (q->retry)
+		return pl_failure;
+
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	CLEANUP cell p2 = eval(q, p2_tmp);
