@@ -201,9 +201,8 @@ pl_status call_userfun(query *q, cell *c, __attribute__((unused)) idx_t c_ctx)
 
 	cell *save = q->st.curr_cell;
 	idx_t save_ctx = q->st.curr_frame;
-	cell *tmp = clone_to_heap(q, true, c, 2);
+	cell *tmp = clone_to_heap(q, true, c, 1);
 	idx_t nbr_cells = 1 + c->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
 	make_call(q, tmp+nbr_cells);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
@@ -223,16 +222,14 @@ static USE_RESULT pl_status fn_return_1(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	q->accum = p1;
-	cut_me(q, false, false);
+	cut_me(q, true, false);
+	drop_choice(q);
 	q->error = true;
 	return pl_success;
 }
 
 static USE_RESULT pl_status fn_iso_is_2(query *q)
 {
-	if (q->retry)
-		return pl_failure;
-
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	CLEANUP cell p2 = eval(q, p2_tmp);
