@@ -174,7 +174,7 @@ extern USE_RESULT pl_status fn_local_cut_0(query *q);
 
 #define eval(q,c)														\
 	is_function(c) || is_builtin(c) ? (call_builtin(q,c,c##_ctx), q->accum) :				\
-	is_callable(c) ? (call_function(q, c, c##_ctx), q->accum) : *c;		\
+	is_callable(c) ? (call_userfun(q, c, c##_ctx), q->accum) : *c;		\
 	q->accum.flags = 0;													\
 	if (q->did_throw)													\
 		return pl_success; 												\

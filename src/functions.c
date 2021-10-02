@@ -11,6 +11,7 @@
 #include "trealla.h"
 #include "internal.h"
 #include "query.h"
+#include "module.h"
 #include "builtins.h"
 #include "heap.h"
 
@@ -186,12 +187,15 @@ void call_builtin(query *q, cell *c, idx_t c_ctx)
 	}
 }
 
-pl_status call_function(query *q, cell *c, __attribute__((unused)) idx_t c_ctx)
+pl_status call_userfun(query *q, cell *c, __attribute__((unused)) idx_t c_ctx)
 {
 	if (q->retry)
 		return pl_failure;
 
-	if (!c->fn)
+	if (!c->match)
+		c->match = search_predicate(q->st.m, c);
+
+	if (!c->match)
 		return throw_error(q, c, "type_error", "evaluable");
 
 	cell *save = q->st.curr_cell;
