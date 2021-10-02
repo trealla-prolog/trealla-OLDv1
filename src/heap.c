@@ -433,7 +433,7 @@ void append_list(query *q, const cell *c)
 {
 	cell *tmp = alloc_on_tmp(q, 1+c->nbr_cells);
 	if (!tmp) return;
-	tmp->tag = TAG_LITERAL;
+	tmp->tag = TAG_POOL;
 	tmp->nbr_cells = 1 + c->nbr_cells;
 	tmp->val_off = g_dot_s;
 	tmp->arity = 2;
@@ -446,7 +446,7 @@ USE_RESULT cell *end_list(query *q)
 {
 	cell *tmp = alloc_on_tmp(q, 1);
 	if (!tmp) return NULL;
-	tmp->tag = TAG_LITERAL;
+	tmp->tag = TAG_POOL;
 	tmp->nbr_cells = 1;
 	tmp->val_off = g_nil_s;
 	tmp->arity = tmp->flags = 0;

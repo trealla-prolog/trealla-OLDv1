@@ -803,7 +803,7 @@ static bool resume_frame(query *q)
 
 void make_indirect(cell *tmp, cell *c)
 {
-	tmp->tag = TAG_INDIRECT;
+	tmp->tag = TAG_PTR;
 	tmp->nbr_cells = 1;
 	tmp->arity = 0;
 	tmp->flags = 0;
@@ -1067,10 +1067,10 @@ struct dispatch {
 static const struct dispatch g_disp[] =
 {
 	{TAG_EMPTY, NULL},
-	{TAG_VARIABLE, NULL},
-	{TAG_LITERAL, unify_literal},
-	{TAG_CSTRING, unify_cstring},
-	{TAG_INTEGER, unify_integer},
+	{TAG_VAR, NULL},
+	{TAG_POOL, unify_literal},
+	{TAG_CSTR, unify_cstring},
+	{TAG_INT, unify_integer},
 	{TAG_REAL, unify_real},
 	{0}
 };
@@ -1145,7 +1145,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
 			may_idx_error(off);
 			unshare_cell(c);
-			c->tag = TAG_LITERAL;
+			c->tag = TAG_POOL;
 			c->val_off = off;
 			c->flags = 0;
 			c->arity = 0;
@@ -1207,7 +1207,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 				p1_body = deref(q, p1_body, p1_ctx);
 				idx_t p1_body_ctx = q->latest_ctx;
 				cell tmp = (cell){0};
-				tmp.tag = TAG_LITERAL;
+				tmp.tag = TAG_POOL;
 				tmp.nbr_cells = 1;
 				tmp.val_off = g_true_s;
 				ok = unify(q, p1_body, p1_body_ctx, &tmp, q->st.curr_frame);
@@ -1237,7 +1237,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
 			may_idx_error(off);
 			unshare_cell(c);
-			c->tag = TAG_LITERAL;
+			c->tag = TAG_POOL;
 			c->val_off = off;
 			c->flags = 0;
 		}
@@ -1444,7 +1444,7 @@ static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t
 			continue;
 
 		if (unify(q, c, q->latest_ctx, orig_c, orig_ctx)) {
-			tmp->tag = TAG_VARIABLE;
+			tmp->tag = TAG_VAR;
 			tmp->nbr_cells = 1;
 			tmp->val_off = index_from_pool(q->st.m->pl, p->vartab.var_name[i]);
 			tmp->arity = 0;
@@ -1909,7 +1909,7 @@ query *create_sub_query(query *q, cell *curr_cell)
 	for (unsigned i = 0; i < gsrc->nbr_vars; i++, e++) {
 		cell *c = deref(q, &e->c, e->ctx);
 		cell tmp = (cell){0};
-		tmp.tag = TAG_VARIABLE;
+		tmp.tag = TAG_VAR;
 		tmp.var_nbr = i;
 		tmp.val_off = g_anon_s;
 		set_var(subq, &tmp, 0, c, q->latest_ctx);

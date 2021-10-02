@@ -89,12 +89,12 @@ typedef enum {
 // Primary type...
 
 #define is_empty(c) ((c)->tag == TAG_EMPTY)
-#define is_variable(c) ((c)->tag == TAG_VARIABLE)
-#define is_literal(c) ((c)->tag == TAG_LITERAL)
-#define is_cstring(c) ((c)->tag == TAG_CSTRING)
-#define is_integer(c) ((c)->tag == TAG_INTEGER)
+#define is_variable(c) ((c)->tag == TAG_VAR)
+#define is_literal(c) ((c)->tag == TAG_POOL)
+#define is_cstring(c) ((c)->tag == TAG_CSTR)
+#define is_integer(c) ((c)->tag == TAG_INT)
 #define is_real(c) ((c)->tag == TAG_REAL)
-#define is_indirect(c) ((c)->tag == TAG_INDIRECT)
+#define is_indirect(c) ((c)->tag == TAG_PTR)
 #define is_end(c) ((c)->tag == TAG_END)
 
 // Derived type...
@@ -194,39 +194,39 @@ typedef struct {
 #define LEN_STR(x,c) _LEN_STR((x)->pl, c)
 #define GET_POOL(x,off) ((x)->pl->pool + (off))
 
-// If changing the order of these: see runtime.c dispatch table
+// If changing the order of these: see query.c dispatch table
 
 enum {
 	TAG_EMPTY=0,
-	TAG_VARIABLE=1,
-	TAG_LITERAL=2,
-	TAG_CSTRING=3,
-	TAG_INTEGER=4,
+	TAG_VAR=1,
+	TAG_POOL=2,
+	TAG_CSTR=3,
+	TAG_INT=4,
 	TAG_REAL=5,
-	TAG_INDIRECT=6,
+	TAG_PTR=6,
 	TAG_END=7
 };
 
 enum {
 	FLAG_BUILTIN=1<<0,
-	FLAG_HEX=1<<1,						// used with TAG_INTEGER
-	FLAG_OCTAL=1<<2,					// used with TAG_INTEGER
-	FLAG_BINARY=1<<3,					// used with TAG_INTEGER
-	FLAG_STREAM=1<<4,					// used with TAG_INTEGER
+	FLAG_HEX=1<<1,						// used with TAG_INT
+	FLAG_OCTAL=1<<2,					// used with TAG_INT
+	FLAG_BINARY=1<<3,					// used with TAG_INT
+	FLAG_STREAM=1<<4,					// used with TAG_INT
 	FLAG_TAIL_REC=1<<5,
 	FLAG_TAIL=1<<6,
-	FLAG_BLOB=1<<7,						// used with TAG_CSTRING
-	FLAG_STRING=1<<8,					// used with TAG_CSTRING
+	FLAG_BLOB=1<<7,						// used with TAG_CSTR
+	FLAG_STRING=1<<8,					// used with TAG_CSTR
 	FLAG_STATIC=1<<9,
 	FLAG_MANAGED=1<<10,					// any ref-counted object
 	FLAG_FUNCTION=1<<11,
 
 	FLAG_SPARE1=1<<12,
 
-	FLAG2_FIRST_USE=FLAG_HEX,			// used with TAG_VARIABLE
-	FLAG2_ANON=FLAG_OCTAL,				// used with TAG_VARIABLE
-	FLAG2_FRESH=FLAG_BINARY,			// used with TAG_VARIABLE
-	FLAG2_QUOTED=FLAG_OCTAL,			// used with TAG_CSTRING
+	FLAG2_FIRST_USE=FLAG_HEX,			// used with TAG_VAR
+	FLAG2_ANON=FLAG_OCTAL,				// used with TAG_VAR
+	FLAG2_FRESH=FLAG_BINARY,			// used with TAG_VAR
+	FLAG2_QUOTED=FLAG_OCTAL,			// used with TAG_CSTR
 
 	FLAG_END=1<<13
 };

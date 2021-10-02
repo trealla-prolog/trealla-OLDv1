@@ -38,7 +38,7 @@ bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, idx_t ari
 	if (!m) return false;
 
 	cell tmp = (cell){0};
-	tmp.tag = TAG_LITERAL;
+	tmp.tag = TAG_POOL;
 	tmp.val_off = index_from_pool(m->pl, name);
 	if (tmp.val_off == ERR_IDX) return false;
 	tmp.arity = arity;

@@ -111,7 +111,7 @@ static void get_params(query *q, idx_t *p1, idx_t *p2)
 
 static void make_variable(cell *tmp, idx_t off)
 {
-	tmp->tag = TAG_VARIABLE;
+	tmp->tag = TAG_VAR;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
 	tmp->val_off = off;
@@ -120,7 +120,7 @@ static void make_variable(cell *tmp, idx_t off)
 
 void make_int(cell *tmp, int_t v)
 {
-	tmp->tag = TAG_INTEGER;
+	tmp->tag = TAG_INT;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
 	set_smallint(tmp, v);
@@ -136,7 +136,7 @@ void make_real(cell *tmp, double v)
 
 void make_structure(cell *tmp, idx_t offset, void *fn, unsigned arity, idx_t extra_cells)
 {
-	tmp->tag = TAG_LITERAL;
+	tmp->tag = TAG_POOL;
 	tmp->nbr_cells = 1 + extra_cells;
 	tmp->flags = 0;
 	if (fn) tmp->flags |= FLAG_BUILTIN;
@@ -166,7 +166,7 @@ void make_call(query *q, cell *tmp)
 
 void make_literal(cell *tmp, idx_t offset)
 {
-	tmp->tag = TAG_LITERAL;
+	tmp->tag = TAG_POOL;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
 	tmp->val_off = offset;
@@ -174,7 +174,7 @@ void make_literal(cell *tmp, idx_t offset)
 
 static void make_smalln(cell *tmp, const char *s, size_t n)
 {
-	tmp->tag = TAG_CSTRING;
+	tmp->tag = TAG_CSTR;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
 	memcpy(tmp->val_chr, s, n);
@@ -227,7 +227,7 @@ static USE_RESULT cell *end_list_unsafe(query *q)
 {
 	cell *tmp = alloc_on_tmp(q, 1);
 	if (!tmp) return NULL;
-	tmp->tag = TAG_LITERAL;
+	tmp->tag = TAG_POOL;
 	tmp->nbr_cells = 1;
 	tmp->val_off = g_nil_s;
 	tmp->arity = tmp->flags = 0;
@@ -255,7 +255,7 @@ USE_RESULT pl_status make_cstringn(cell *d, const char *s, size_t n)
 		}
 	}
 
-	d->tag = TAG_CSTRING;
+	d->tag = TAG_CSTR;
 	d->flags = 0;
 	d->nbr_cells = 1;
 	d->arity = 0;
@@ -265,7 +265,7 @@ USE_RESULT pl_status make_cstringn(cell *d, const char *s, size_t n)
 
 USE_RESULT pl_status make_stringn(cell *d, const char *s, size_t n)
 {
-	d->tag = TAG_CSTRING;
+	d->tag = TAG_CSTR;
 	d->flags = FLAG_STRING;
 	d->nbr_cells = 1;
 	d->arity = 2;
@@ -2574,7 +2574,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 		size_t len = st.st_size;
 		void *addr = mmap(0, len, prot, MAP_PRIVATE, fd, offset);
 		cell tmp = {0};
-		tmp.tag = TAG_CSTRING;
+		tmp.tag = TAG_CSTR;
 		tmp.flags = FLAG_BLOB | FLAG_STRING | FLAG_STATIC;
 		tmp.nbr_cells = 1;
 		tmp.arity = 2;
@@ -4792,7 +4792,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 			cell *tmp = alloc_on_heap(q, 1+arity);
 			may_ptr_error(tmp);
 			*tmp = (cell){0};
-			tmp[0].tag = TAG_LITERAL;
+			tmp[0].tag = TAG_POOL;
 			tmp[0].arity = arity;
 			tmp[0].nbr_cells = 1 + arity;
 
@@ -4802,7 +4802,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 				tmp[0].val_off = p2->val_off;
 
 			for (unsigned i = 1; i <= arity; i++) {
-				tmp[i].tag = TAG_VARIABLE;
+				tmp[i].tag = TAG_VAR;
 				tmp[i].nbr_cells = 1;
 				tmp[i].var_nbr = var_nbr++;
 				tmp[i].val_off = g_anon_s;
@@ -4821,7 +4821,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 	CLR_OP(&tmp);
 
 	if (is_string(p1)) {
-		tmp.tag = TAG_LITERAL;
+		tmp.tag = TAG_POOL;
 		tmp.val_off = g_dot_s;
 		tmp.flags = 0;
 	}
@@ -4876,7 +4876,7 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 	}
 
 	cell tmp = (cell){0};
-	tmp.tag = TAG_LITERAL;
+	tmp.tag = TAG_POOL;
 	tmp.val_off = index_from_pool(q->st.m->pl, functor);
 	tmp.arity = arity;
 
@@ -4950,7 +4950,7 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 		return search_functor(q, p1, p1_ctx, p2, p2_ctx) ? pl_success : pl_failure;
 
 	cell tmp = (cell){0};
-	tmp.tag = TAG_LITERAL;
+	tmp.tag = TAG_POOL;
 	tmp.val_off = is_literal(p1) ? p1->val_off : index_from_pool(q->st.m->pl, GET_STR(q, p1));
 	tmp.arity = get_int(p2);
 
@@ -6043,7 +6043,7 @@ static USE_RESULT pl_status fn_busy_1(query *q)
 static USE_RESULT pl_status fn_now_0(query *q)
 {
 	int_t secs = get_time_in_usec() / 1000 / 1000;
-	q->accum.tag = TAG_INTEGER;
+	q->accum.tag = TAG_INT;
 	set_smallint(&q->accum, secs);
 	return pl_success;
 }
@@ -9825,7 +9825,7 @@ static pl_status do_length(query *q)
 		REGET_FIRST_ARG(p1,any);
 	}
 
-	tmp.tag = TAG_VARIABLE;
+	tmp.tag = TAG_VAR;
 	tmp.nbr_cells = 1;
 	tmp.flags = FLAG2_FRESH | FLAG2_ANON;
 	tmp.val_off = g_anon_s;
@@ -9967,7 +9967,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 					return throw_error(q, p2, "resource_error", "too_many_vars");
 
 				cell tmp;
-				tmp.tag = TAG_VARIABLE;
+				tmp.tag = TAG_VAR;
 				tmp.nbr_cells = 1;
 				tmp.flags = FLAG2_FRESH | FLAG2_ANON;
 				tmp.val_off = g_anon_s;
@@ -10023,7 +10023,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		REGET_FIRST_ARG(p1,list_or_nil_or_var);
 
 		cell tmp;
-		tmp.tag = TAG_VARIABLE;
+		tmp.tag = TAG_VAR;
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;
 		tmp.flags = FLAG2_FRESH | FLAG2_ANON;
@@ -10776,7 +10776,7 @@ pl_status do_post_unification_hook(query *q)
 	tmp[0].nbr_cells = 1;
 	tmp[0].flags = FLAG_BUILTIN;
 
-	tmp[1].tag = TAG_LITERAL;
+	tmp[1].tag = TAG_POOL;
 	tmp[1].nbr_cells = 1;
 	tmp[1].arity = 0;
 	tmp[1].flags = 0;

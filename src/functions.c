@@ -17,7 +17,7 @@
 #include "heap.h"
 
 #define SET_ACCUM() {											\
-	q->accum.tag = TAG_INTEGER;									\
+	q->accum.tag = TAG_INT;									\
 	q->accum.flags = FLAG_MANAGED;								\
 	q->accum.val_bigint = malloc(sizeof(bigint));				\
 	q->accum.val_bigint->refcnt = 0;							\
@@ -31,7 +31,7 @@ static void clr_accum(cell *p)
 		free(p->val_bigint);
 	}
 
-	p->tag = TAG_INTEGER;
+	p->tag = TAG_INT;
 	p->val_int = 0;
 	p->flags = 0;
 }
@@ -88,7 +88,7 @@ static void clr_accum(cell *p)
 			SET_ACCUM(); \
 		} else { \
 			q->accum.val_int = p1.val_int op p2.val_int; \
-			q->accum.tag = TAG_INTEGER; \
+			q->accum.tag = TAG_INT; \
 		} \
 	} else if (is_smallint(&p1) && is_real(&p2)) { \
 		q->accum.val_real = (double)p1.val_int op p2.val_real; \
@@ -133,7 +133,7 @@ static void clr_accum(cell *p)
 			SET_ACCUM(); \
 		} else { \
 			q->accum.val_int = p1.val_int op p2.val_int; \
-			q->accum.tag = TAG_INTEGER; \
+			q->accum.tag = TAG_INT; \
 		} \
 	} else if (is_variable(&p1) || is_variable(&p2)) { \
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated"); \
@@ -309,7 +309,7 @@ static USE_RESULT pl_status fn_iso_integer_1(query *q)
 
 		if (is_real(&p1) && (p1.val_real < (double)INT_T_MAX) && (p1.val_real > (double)INT_T_MIN)) {
 			q->accum.val_int = (int_t)p1.val_real;
-			q->accum.tag = TAG_INTEGER;
+			q->accum.tag = TAG_INT;
 			return pl_success;
 		}
 
@@ -594,7 +594,7 @@ static USE_RESULT pl_status fn_popcount_1(query *q)
 		q->accum.val_int = count;
 	}
 
-	q->accum.tag = TAG_INTEGER;
+	q->accum.tag = TAG_INT;
 	return pl_success;
 }
 
@@ -606,7 +606,7 @@ static USE_RESULT pl_status fn_iso_truncate_1(query *q)
 
 	if (is_real(&p1)) {
 		q->accum.val_int = (int_t)p1.val_real;
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (is_smallint(&p1)) {
@@ -633,7 +633,7 @@ static USE_RESULT pl_status fn_iso_round_1(query *q)
 			fesetround(FE_UPWARD);
 
 		q->accum.val_int = llrint(p1.val_real);
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (is_smallint(&p1)) {
@@ -653,7 +653,7 @@ static USE_RESULT pl_status fn_iso_ceiling_1(query *q)
 
 	if (is_real(&p1)) {
 		q->accum.val_int = (int_t)ceil(p1.val_real);
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (is_smallint(&p1)) {
@@ -713,7 +713,7 @@ static USE_RESULT pl_status fn_iso_floor_1(query *q)
 
 	if (is_real(&p1)) {
 		q->accum.val_int = (int_t)floor(p1.val_real);
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (is_smallint(&p1)) {
@@ -1110,14 +1110,14 @@ static USE_RESULT pl_status fn_iso_copysign_2(query *q)
 		if (p2.val_int < 0)
 			q->accum.val_int = -llabs((long long)p1.val_int);
 
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_smallint(&p1) && is_real(&p2)) {
 		q->accum = p1;
 
 		if (p2.val_real < 0.0)
 			q->accum.val_int = -llabs((long long)p1.val_int);
 
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_real(&p1) && is_real(&p2)) {
 		q->accum.val_real = copysign(p1.val_real, p2.val_real);
 		q->accum.tag = TAG_REAL;
@@ -1215,7 +1215,7 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 
 		if (p2.val_int < 0) {
 			q->accum.val_int = pow(p1.val_int, p2.val_int);
-			q->accum.tag = TAG_INTEGER;
+			q->accum.tag = TAG_INT;
 			return pl_success;
 		}
 
@@ -1231,7 +1231,7 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 		}
 
 		q->accum.val_int = pow(p1.val_int, p2.val_int);
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_smallint(&p1) && is_real(&p2)) {
 		q->accum.val_real = pow(p1.val_int, p2.val_real);
 		q->accum.tag = TAG_REAL;
@@ -1402,7 +1402,7 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 		mp_small n;
 		mp_int_mod_value(&p1.val_bigint->ival, p2.val_int, &n);
 		q->accum.val_int = n;
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_smallint(&p1) && is_bigint(&p2)) {
 		mpz_t tmp;
 		mp_int_init_value(&tmp, p1.val_int);
@@ -1421,7 +1421,7 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 		if (p1.val_int < 0)
 			q->accum.val_int *= -1;
 
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1470,7 +1470,7 @@ static USE_RESULT pl_status fn_iso_div_2(query *q)
 			return pl_failure;
 
 		q->accum.val_int = (p1.val_int - q->accum.val_int) / p2.val_int;
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1510,7 +1510,7 @@ static USE_RESULT pl_status fn_iso_rem_2(query *q)
 			return throw_error(q, &p1, "evaluation_error", "zero_divisor");
 
 		q->accum.val_int = p1.val_int % p2.val_int;
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1563,7 +1563,7 @@ static USE_RESULT pl_status fn_iso_max_2(query *q)
 		else
 			q->accum = p2;
 
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_smallint(&p1) && is_real(&p2)) {
 		double f1 = (double)p1.val_int;
 
@@ -1635,7 +1635,7 @@ static USE_RESULT pl_status fn_iso_min_2(query *q)
 		else
 			q->accum = p2;
 
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_smallint(&p1) && is_real(&p2)) {
 		double f1 = (double)p1.val_int;
 
@@ -1691,7 +1691,7 @@ static USE_RESULT pl_status fn_iso_xor_2(query *q)
 		SET_ACCUM();
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		q->accum.val_int = p1.val_int ^ p2.val_int;
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1728,7 +1728,7 @@ static USE_RESULT pl_status fn_iso_or_2(query *q)
 		SET_ACCUM();
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		q->accum.val_int = p1.val_int | p2.val_int;
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1765,7 +1765,7 @@ static USE_RESULT pl_status fn_iso_and_2(query *q)
 		SET_ACCUM();
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		q->accum.val_int = p1.val_int & p2.val_int;
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1793,7 +1793,7 @@ static USE_RESULT pl_status fn_iso_shl_2(query *q)
 		q->accum.val_int = p1.val_int << p2.val_int;
 
 		if ((q->accum.val_int >= 0) && (p2.val_int < 64)) {
-			q->accum.tag = TAG_INTEGER;
+			q->accum.tag = TAG_INT;
 			return pl_success;
 		}
 
@@ -1826,7 +1826,7 @@ static USE_RESULT pl_status fn_iso_shr_2(query *q)
 		SET_ACCUM();
 	} if (is_smallint(&p1) && is_smallint(&p2)) {
 		q->accum.val_int = p1.val_int >> p2.val_int;
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1846,7 +1846,7 @@ static USE_RESULT pl_status fn_iso_neg_1(query *q)
 
 	if (is_smallint(&p1)) {
 		q->accum.val_int = ~p1.val_int;
-		q->accum.tag = TAG_INTEGER;
+		q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
 	} else {
@@ -2326,7 +2326,7 @@ static USE_RESULT pl_status fn_random_1(query *q)
 static USE_RESULT pl_status fn_random_integer_0(query *q)
 {
 	CHECK_CALC();
-	q->accum.tag = TAG_INTEGER;
+	q->accum.tag = TAG_INT;
 	q->accum.val_int = rnd() * ((int64_t)RAND_MAX+1);
 	return pl_success;
 }
@@ -2342,7 +2342,7 @@ static USE_RESULT pl_status fn_random_float_0(query *q)
 static USE_RESULT pl_status fn_rand_0(query *q)
 {
 	CHECK_CALC();
-	q->accum.tag = TAG_INTEGER;
+	q->accum.tag = TAG_INT;
 	q->accum.val_int = rnd() * ((int64_t)RAND_MAX+1);
 	return pl_success;
 }
@@ -2390,7 +2390,7 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 			SET_ACCUM();
 		} else {
 			q->accum.val_int = gcd(p1.val_int, p2.val_int);
-			q->accum.tag = TAG_INTEGER;
+			q->accum.tag = TAG_INT;
 		}
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
