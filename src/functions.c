@@ -12,6 +12,7 @@
 #include "internal.h"
 #include "query.h"
 #include "module.h"
+#include "prolog.h"
 #include "builtins.h"
 #include "heap.h"
 
@@ -200,8 +201,9 @@ pl_status call_userfun(query *q, cell *c, __attribute__((unused)) idx_t c_ctx)
 
 	cell *save = q->st.curr_cell;
 	idx_t save_ctx = q->st.curr_frame;
-	cell *tmp = clone_to_heap(q, true, c, 1);
+	cell *tmp = clone_to_heap(q, true, c, 2);
 	idx_t nbr_cells = 1 + c->nbr_cells;
+	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
 	make_call(q, tmp+nbr_cells);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
