@@ -1477,6 +1477,9 @@ static void dump_vars(query *q, bool partial)
 		if (is_empty(&e->c))
 			continue;
 
+		if (p->vartab.var_name[i][0] == '_')
+			continue;
+
 		cell *c = deref(q, &e->c, e->ctx);
 
 		if (is_indirect(&e->c)) {

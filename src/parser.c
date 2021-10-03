@@ -2803,17 +2803,10 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 	if (!is_init) {
 		ASTRING(src);
 
-#if 1
-		ASTRING_sprintf(src, "call(true), call((%s", pSrc);
+		ASTRING_sprintf(src, "__INIT_G__=(%s", pSrc);
 		ASTRING_trim_ws(src);
 		ASTRING_trim(src, '.');
-		ASTRING_strcat(src, ")).");
-#else
-		ASTRING_sprintf(src, "%s", pSrc);
-		ASTRING_trim_ws(src);
-		ASTRING_trim(src, '.');
-		ASTRING_strcat(src, ".");
-#endif
+		ASTRING_strcat(src, "), __INIT_G__.");
 
 		p->srcptr = ASTRING_cstr(src);
 		p->line_nbr = 0;
