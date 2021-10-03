@@ -368,6 +368,8 @@ struct predicate_ {
 	map *idx1, *idx2, *idx_save;
 	cell key;
 	uint64_t cnt, refs;
+	bool noindex1:1;
+	bool noindex2:1;
 	bool is_prebuilt:1;
 	bool is_public:1;
 	bool is_dynamic:1;
