@@ -7,7 +7,8 @@
 	'$undo_trail'(Vars),
 	'$process_vars'(Vars, [], Goals),
 	'$redo_trail',
-	maplist(call, Goals).
+	maplist(call, Goals),
+	!.
 
 '$process_vars'([], Goals, Goals) :- !.
 '$process_vars'([Var-Val|Vars], SoFar, Goals) :-

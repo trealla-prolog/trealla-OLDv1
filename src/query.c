@@ -1807,7 +1807,6 @@ void destroy_query(query *q)
 
 	while (q->st.qnbr > 0) {
 		free(q->tmpq[q->st.qnbr]);
-		q->tmpq[q->st.qnbr] = NULL;
 		q->st.qnbr--;
 	}
 
