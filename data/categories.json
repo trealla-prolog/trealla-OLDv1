@@ -6,11 +6,11 @@
       "name" : "Non-deterministic success",
       "children" : [ {
         "name" : "iso_stream_property_2_01",
-        "uid" : "a97e70898f1d4803",
+        "uid" : "1a3cf612ba33b42d",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
-          "duration" : 1
+          "duration" : 2
         },
         "flaky" : false,
         "newFailed" : false,
