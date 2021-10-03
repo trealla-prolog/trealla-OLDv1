@@ -194,7 +194,7 @@ typedef struct {
 #define LEN_STR(x,c) _LEN_STR((x)->pl, c)
 #define GET_POOL(x,off) ((x)->pl->pool + (off))
 
-// If changing the order of these: see query.c dispatch table
+// If changing the order of these: see runtime.c dispatch table
 
 enum {
 	TAG_EMPTY=0,
@@ -368,8 +368,6 @@ struct predicate_ {
 	map *idx1, *idx2, *idx_save;
 	cell key;
 	uint64_t cnt, refs;
-	bool noindex1:1;
-	bool noindex2:1;
 	bool is_prebuilt:1;
 	bool is_public:1;
 	bool is_dynamic:1;

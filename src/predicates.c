@@ -10705,16 +10705,7 @@ static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
 	return pl_success;
 }
 
-static pl_status fn_sys_fake_choice_0(query *q)
-{
-	if (q->retry)
-		return pl_failure;
-
-	may_error(make_choice(q));
-	return pl_success;
-}
-
-static pl_status fn_sys_undo_trail_1(query *q)
+pl_status fn_sys_undo_trail_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	q->in_hook = true;
@@ -10757,7 +10748,7 @@ static pl_status fn_sys_undo_trail_1(query *q)
 	return pl_success;
 }
 
-static pl_status fn_sys_redo_trail_0(query * q)
+pl_status fn_sys_redo_trail_0(query * q)
 {
 	for (idx_t i = q->undo_lo_tp, j = 0; i < q->undo_hi_tp; i++, j++) {
 		const trail *tr = q->trails + i;
@@ -10983,10 +10974,13 @@ static const struct builtins g_predicates_other[] =
 	{"nonmember", 2, fn_nonmember_2, "?rule,+list", false},
 	{"$put_chars", 1, fn_sys_put_chars_1, "+chars", false},
 	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars", false},
+	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL, false},
+	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL, false},
 	{"format", 2, fn_format_2, "+string,+list", false},
 	{"format", 3, fn_format_3, "+stream,+string,+list", false},
 	{"abolish", 2, fn_abolish_2, NULL, false},
 	{"assert", 1, fn_iso_assertz_1, NULL, false},
+	{"$strip_attributes", 1, fn_sys_strip_attributes_1, "+vars", false},
 	{"copy_term_nat", 2, fn_copy_term_nat_2, NULL, false},
 	{"string", 1, fn_atom_1, "+rule", false},
 	{"atomic_concat", 3, fn_atomic_concat_3, NULL, false},
@@ -11091,13 +11085,9 @@ static const struct builtins g_predicates_other[] =
 	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list", false},
 	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list", false},
 
-	{"$strip_attributes", 1, fn_sys_strip_attributes_1, "+vars", false},
-	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL, false},
-	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL, false},
 	{"$write_attributes", 2, fn_sys_write_attributes_2, "+variable,+list", false},
 	{"$read_attributes", 2, fn_sys_read_attributes_2, "+variable,-list", false},
 	{"$erase_attributes", 1, fn_sys_erase_attributes_1, "+variable", false},
-	{"$fake_choice", 0, fn_sys_fake_choice_0, NULL, false},
 
 #if USE_OPENSSL
 	{"sha1", 2, fn_sha1_2, "+string,?string", false},

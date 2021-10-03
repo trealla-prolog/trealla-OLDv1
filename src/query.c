@@ -107,7 +107,7 @@ static USE_RESULT pl_status check_trail(query *q)
 
 static USE_RESULT pl_status check_choice(query *q)
 {
-	if (q->cp > q->max_choices) {
+	if (q->cp >= q->max_choices) {
 		q->max_choices = q->cp;
 
 		if (q->cp >= q->choices_size) {
@@ -126,7 +126,7 @@ static USE_RESULT pl_status check_choice(query *q)
 
 static USE_RESULT pl_status check_frame(query *q)
 {
-	if (q->st.fp > q->max_frames) {
+	if (q->st.fp >= q->max_frames) {
 		q->max_frames = q->st.fp;
 
 		if (q->st.fp >= q->frames_size) {
@@ -147,7 +147,7 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 {
 	idx_t nbr = q->st.sp + cnt;
 
-	if (nbr > q->max_slots) {
+	if (nbr >= q->max_slots) {
 		q->max_slots = nbr;
 
 		if (nbr >= q->slots_size) {
@@ -225,17 +225,6 @@ bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx)
 	return is_cyclic_term_internal(q, p1, p1_ctx, NULL);
 }
 
-static bool is_next_key(query *q)
-{
-	if (q->st.iter) {
-		if (m_is_next_key(q->st.iter))
-			return true;
-	} else if (q->st.curr_clause->next)
-		return true;
-
-	return false;
-}
-
 static void next_key(query *q)
 {
 	if (q->st.iter) {
@@ -255,6 +244,17 @@ static void find_key(query *q, map *idx, cell *key)
 	}
 
 	next_key(q);
+}
+
+static bool is_next_key(query *q)
+{
+	if (q->st.iter) {
+		if (m_is_next_key(q->st.iter))
+			return true;
+	} else if (q->st.curr_clause->next)
+		return true;
+
+	return false;
 }
 
 void add_to_dirty_list(query *q, clause *cl)
@@ -455,10 +455,6 @@ static void trim_heap(query *q, const choice *ch)
 idx_t drop_choice(query *q)
 {
 	idx_t curr_choice = --q->cp;
-
-	if (!q->cp)
-		q->st.cgen = 0;
-
 	return curr_choice;
 }
 
@@ -479,6 +475,7 @@ bool retry_choice(query *q)
 		return retry_choice(q);
 
 	trim_heap(q, ch);
+	m_done(q->st.iter);
 	q->st = ch->st;
 	q->save_m = NULL;		// maybe move q->save_m to q->st.save_m
 
@@ -591,6 +588,7 @@ static void commit_me(query *q, rule *r)
 	frame *g = GET_CURR_FRAME();
 	g->m = q->st.m;
 	q->st.m = q->st.curr_clause->owner->m;
+	q->st.iter = NULL;
 	bool last_match = r->first_cut || !is_next_key(q);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool tco = !q->no_tco && recursive && !any_choices(q, g, true);
@@ -611,6 +609,7 @@ static void commit_me(query *q, rule *r)
 		if (q->st.iter)
 			m_done(q->st.iter);
 
+		q->st.iter = NULL;
 		drop_choice(q);
 		trim_trail(q);
 	} else {
@@ -618,7 +617,6 @@ static void commit_me(query *q, rule *r)
 		ch->cgen = g->cgen;
 	}
 
-	q->st.iter = NULL;
 	q->st.curr_cell = get_body(r->cells);
 	//memset(q->nv_mask, 0, MAX_ARITY);
 }
@@ -895,7 +893,7 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 				e->c.attrs = attrs;
 				e->c.attrs_ctx = attrs_ctx;
 
-				if (q->cp || attrs)
+				if (q->cp)
 					add_trail(q, v_ctx, v->var_nbr, NULL, 0);
 			} else
 				q->has_attrs = true;
@@ -903,7 +901,7 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 			q->has_attrs = true;
 	}
 
-	if (q->cp || attrs)
+	if (q->cp)
 		add_trail(q, c_ctx, c->var_nbr, attrs, attrs_ctx);
 }
 
@@ -1309,10 +1307,10 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 #define DUMP_KEYS 0
 
 #if DUMP_KEYS
-static const char *dump_key(const void *k, __attribute__((unused)) const void *v, const void *p)
+static const char *dump_key(const void *p1, const void *p)
 {
 	query *q = (query*)p;
-	cell *c = (cell*)k;
+	const cell *c = (cell*)p1;
 	static char tmpbuf[1024];
 	print_term_to_buf(q, tmpbuf, sizeof(tmpbuf), c, q->st.curr_frame, 0, false, 0);
 	return tmpbuf;
@@ -1349,27 +1347,31 @@ static USE_RESULT pl_status match_head(query *q)
 			c->match = pr;
 		}
 
-		if (pr->idx1 || pr->idx2) {
+		if (pr->idx1) {
 			cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
 			cell *p1 = NULL, *p2 = NULL;
 
 			if (key->arity) {
 				p1 = key + 1;
 
-				if (key->arity > 1)
+				if (key->arity > 1) {
 					p2 = p1 + p1->nbr_cells;
+
+					if (is_variable(p2))
+						p2 = NULL;
+				} else {
+					if (is_variable(p1))
+						p1 = NULL;
+				}
 			}
 
-			if ((p1 && is_variable(p1)) || !pr->idx1)
+			if (p1 && is_variable(p1))
 				p1 = NULL;
-
-			if ((p2 && is_variable(p2)) || !pr->idx2)
-				p2 = NULL;
 
 			if (p1 || p2) {
 				map *idx = p2 ? pr->idx2 : pr->idx1;
 #if DUMP_KEYS
-				printf("*** IDX%d:\n", idx==pr->idx2?2:1); sl_dump(idx, dump_key, q);
+				printf("*** IDX%d: ", idx==pr->idx2?2:1); sl_dump(idx, dump_key, q);
 #endif
 				find_key(q, idx, key);
 			} else
@@ -1384,9 +1386,6 @@ static USE_RESULT pl_status match_head(query *q)
 
 	if (!q->st.curr_clause)
 		return pl_failure;
-
-	// Create a choice-point here, whether we need it or
-	// not. If we commit with a last match it will be dropped:
 
 	may_error(make_choice(q));
 	const frame *g = GET_FRAME(q->st.curr_frame);
@@ -1475,9 +1474,6 @@ static void dump_vars(query *q, bool partial)
 		slot *e = GET_SLOT(g, i);
 
 		if (is_empty(&e->c))
-			continue;
-
-		if (p->vartab.var_name[i][0] == '_')
 			continue;
 
 		cell *c = deref(q, &e->c, e->ctx);
@@ -1789,20 +1785,17 @@ pl_status execute(query *q, cell *cells, unsigned nbr_vars)
 	q->st.m->pl->did_dump_vars = false;
 	q->st.curr_cell = cells;
 	q->st.sp = nbr_vars;
-	q->st.curr_frame = 0;
 	q->st.fp = 1;
 	q->abort = false;
 	q->cycle_error = false;
 
-	frame *g = q->frames;
-	g->prev_frame = 0;
-	g->prev_cell = NULL;
+	frame *g = q->frames + q->st.curr_frame;
 	g->nbr_vars = nbr_vars;
 	g->nbr_slots = nbr_vars;
-	g->ugen = 0;
-	g->cgen = 0;
-	g->overflow = 0;
-	return start(q);
+	g->ugen = ++q->st.m->pl->ugen;
+	pl_status ret = start(q);
+	m_done(q->st.iter);
+	return ret;
 }
 
 void destroy_query(query *q)
@@ -1811,6 +1804,7 @@ void destroy_query(query *q)
 
 	while (q->st.qnbr > 0) {
 		free(q->tmpq[q->st.qnbr]);
+		q->tmpq[q->st.qnbr] = NULL;
 		q->st.qnbr--;
 	}
 
