@@ -107,7 +107,7 @@ static USE_RESULT pl_status check_trail(query *q)
 
 static USE_RESULT pl_status check_choice(query *q)
 {
-	if (q->cp >= q->max_choices) {
+	if (q->cp > q->max_choices) {
 		q->max_choices = q->cp;
 
 		if (q->cp >= q->choices_size) {
@@ -126,7 +126,7 @@ static USE_RESULT pl_status check_choice(query *q)
 
 static USE_RESULT pl_status check_frame(query *q)
 {
-	if (q->st.fp >= q->max_frames) {
+	if (q->st.fp > q->max_frames) {
 		q->max_frames = q->st.fp;
 
 		if (q->st.fp >= q->frames_size) {
@@ -147,7 +147,7 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 {
 	idx_t nbr = q->st.sp + cnt;
 
-	if (nbr >= q->max_slots) {
+	if (nbr > q->max_slots) {
 		q->max_slots = nbr;
 
 		if (nbr >= q->slots_size) {
