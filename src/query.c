@@ -88,7 +88,7 @@ static void trace_call(query *q, cell *c, idx_t c_ctx, box_t box)
 
 static USE_RESULT pl_status check_trail(query *q)
 {
-	if (q->st.tp >= q->max_trails) {
+	if (q->st.tp > q->max_trails) {
 		q->max_trails = q->st.tp;
 
 		if (q->st.tp >= q->trails_size) {
@@ -107,7 +107,7 @@ static USE_RESULT pl_status check_trail(query *q)
 
 static USE_RESULT pl_status check_choice(query *q)
 {
-	if (q->cp >= q->max_choices) {
+	if (q->cp > q->max_choices) {
 		q->max_choices = q->cp;
 
 		if (q->cp >= q->choices_size) {
@@ -126,7 +126,7 @@ static USE_RESULT pl_status check_choice(query *q)
 
 static USE_RESULT pl_status check_frame(query *q)
 {
-	if (q->st.fp >= q->max_frames) {
+	if (q->st.fp > q->max_frames) {
 		q->max_frames = q->st.fp;
 
 		if (q->st.fp >= q->frames_size) {
@@ -147,7 +147,7 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 {
 	idx_t nbr = q->st.sp + cnt;
 
-	if (nbr >= q->max_slots) {
+	if (nbr > q->max_slots) {
 		q->max_slots = nbr;
 
 		if (nbr >= q->slots_size) {
@@ -1474,6 +1474,9 @@ static void dump_vars(query *q, bool partial)
 		slot *e = GET_SLOT(g, i);
 
 		if (is_empty(&e->c))
+			continue;
+
+		if (p->vartab.var_name[i][0] == '_')
 			continue;
 
 		cell *c = deref(q, &e->c, e->ctx);
