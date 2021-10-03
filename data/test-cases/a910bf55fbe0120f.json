@@ -1,0 +1,51 @@
+{
+  "uid" : "a910bf55fbe0120f",
+  "name" : "lgt_multiplication_2_07",
+  "fullName" : "lgt_multiplication_2_07::tests",
+  "historyId" : "lgt_multiplication_2_07::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/multiplication_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "functions/multiplication_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "functions/multiplication_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "functions/multiplication_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "62-67"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/75f005dc4ea9c9dda0dec0811e1bf0a171d711b0/tests/prolog/functions/multiplication_2/tests.lgt#L62"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "a910bf55fbe0120f.json",
+  "parameterValues" : [ "functions/multiplication_2/tests.lgt", "62-67", "https://github.com/LogtalkDotOrg/logtalk3/tree/75f005dc4ea9c9dda0dec0811e1bf0a171d711b0/tests/prolog/functions/multiplication_2/tests.lgt#L62" ]
+}
