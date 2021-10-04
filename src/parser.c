@@ -676,6 +676,18 @@ static void directives(parser *p, cell *d)
 		return;
 	}
 
+	if (!strcmp(dirname, "if") && (c->arity == 1)) {
+		fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
+	}
+
+	if (!strcmp(dirname, "else") && (c->arity == 1)) {
+		fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
+	}
+
+	if (!strcmp(dirname, "endif") && (c->arity == 1)) {
+		fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
+	}
+
 	LIST_HANDLER(p1);
 
 	while (is_list(p1) && !g_tpl_interrupt) {
