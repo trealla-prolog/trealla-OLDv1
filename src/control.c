@@ -69,11 +69,15 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 	make_call(q, tmp+nbr_cells);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
+	q->save_cp = q->cp;
 	return pl_success;
 }
 
 USE_RESULT pl_status fn_iso_call_n(query *q)
 {
+	if (q->retry)
+		return pl_failure;
+
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
 
 	if (!p0 || (p0 == ERR_CYCLE_CELL))
@@ -115,7 +119,9 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 		SET_OP(tmp2, specifier);
 
 	cell *tmp = clone_to_heap(q, true, tmp2, 1);
-	make_call(q, tmp+1+tmp2->nbr_cells);
+	idx_t nbr_cells = 1+tmp2->nbr_cells;
+	make_call(q, tmp+nbr_cells);
+	may_error(make_barrier(q));
 
 	if (check_body_callable(q->st.m->p, tmp2) != NULL)
 		return throw_error(q, tmp2, "type_error", "callable");
@@ -649,8 +655,6 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 
 	} else {
 		if (!slicecmp2(GET_STR(q, goal), LEN_STR(q, goal), "$rawcall"))
-			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, "call", goal->arity);
-		else if (!slicecmp2(GET_STR(q, goal), LEN_STR(q, goal), "$call"))
 			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, "call", goal->arity);
 		else if (!slicecmp2(GET_STR(q, goal), LEN_STR(q, goal), "$catch"))
 			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, "catch", goal->arity);

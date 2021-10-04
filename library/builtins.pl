@@ -97,10 +97,10 @@ setup_call_cleanup(S, G, C) :-
 	'$chk_is_det'.
 
 catch(G, E, C) :-
-	'$call'('$catch'(G, E, C)).
+	call('$catch'(G, E, C)).
 
 catch2(G, E, C) :-
-	'$call'('$catch2'(G, E, C)).
+	call('$catch2'(G, E, C)).
 
 findall(T, G, B, Tail) :-
 	'$mustbe_list_or_var'(B),
@@ -302,15 +302,6 @@ _^Goal :- Goal.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This is to contain cuts...
-
-call(G) :- '$call'(G).
-call(G, P1) :- '$call'(G, P1).
-call(G, P1, P2) :- '$call'(G, P1, P2).
-call(G, P1, P2, P3) :- '$call'(G, P1, P2, P3).
-call(G, P1, P2, P3, P4) :- '$call'(G, P1, P2, P3, P4).
-call(G, P1, P2, P3, P4, P5) :- '$call'(G, P1, P2, P3, P4, P5).
-call(G, P1, P2, P3, P4, P5, P6) :- '$call'(G, P1, P2, P3, P4, P5, P6).
-call(G, P1, P2, P3, P4, P5, P6, P7) :- '$call'(G, P1, P2, P3, P4, P5, P6, P7).
 
 task(G) :- '$task'(G).
 task(G, P1) :- '$task'(G, P1).

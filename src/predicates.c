@@ -10828,14 +10828,14 @@ static const struct builtins g_predicates_iso[] =
 	{"$catch", 3, fn_iso_catch_3, NULL, false},
 	{"$catch2", 3, fn_iso_catch2_3, NULL, false},
 
-	{"$call", 1, fn_iso_call_n, NULL, false},
-	{"$call", 2, fn_iso_call_n, NULL, false},
-	{"$call", 3, fn_iso_call_n, NULL, false},
-	{"$call", 4, fn_iso_call_n, NULL, false},
-	{"$call", 5, fn_iso_call_n, NULL, false},
-	{"$call", 6, fn_iso_call_n, NULL, false},
-	{"$call", 7, fn_iso_call_n, NULL, false},
-	{"$call", 8, fn_iso_call_n, NULL, false},
+	{"call", 1, fn_iso_call_n, NULL, false},
+	{"call", 2, fn_iso_call_n, NULL, false},
+	{"call", 3, fn_iso_call_n, NULL, false},
+	{"call", 4, fn_iso_call_n, NULL, false},
+	{"call", 5, fn_iso_call_n, NULL, false},
+	{"call", 6, fn_iso_call_n, NULL, false},
+	{"call", 7, fn_iso_call_n, NULL, false},
+	{"call", 8, fn_iso_call_n, NULL, false},
 
 	{"$rawcall", 1, fn_sys_rawcall_1, NULL, false},
 
