@@ -11098,14 +11098,14 @@ static const struct builtins g_predicates_other[] =
 	{"sha512", 2, fn_sha512_2, "+string,?string", false},
 #endif
 
-	{"$task", 1, fn_task_n, "+callable", false},
-	{"$task", 2, fn_task_n, "+callable,+rule,...", false},
-	{"$task", 3, fn_task_n, "+callable,+rule,...", false},
-	{"$task", 4, fn_task_n, "+callable,+rule,...", false},
-	{"$task", 5, fn_task_n, "+callable,+rule,...", false},
-	{"$task", 6, fn_task_n, "+callable,+rule,...", false},
-	{"$task", 7, fn_task_n, "+callable,+rule,...", false},
-	{"$task", 8, fn_task_n, "+callable,+rule,...", false},
+	{"task", 1, fn_task_n, "+callable", false},
+	{"task", 2, fn_task_n, "+callable,+rule,...", false},
+	{"task", 3, fn_task_n, "+callable,+rule,...", false},
+	{"task", 4, fn_task_n, "+callable,+rule,...", false},
+	{"task", 5, fn_task_n, "+callable,+rule,...", false},
+	{"task", 6, fn_task_n, "+callable,+rule,...", false},
+	{"task", 7, fn_task_n, "+callable,+rule,...", false},
+	{"task", 8, fn_task_n, "+callable,+rule,...", false},
 
 	{"wait", 0, fn_wait_0, NULL, false},
 	{"await", 0, fn_await_0, NULL, false},
