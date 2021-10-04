@@ -55,7 +55,7 @@ extern USE_RESULT pl_status fn_sys_inner_cut_0(query *q);
 extern USE_RESULT pl_status fn_iso_fail_0(query *q);
 extern USE_RESULT pl_status fn_iso_true_0(query *q);
 extern USE_RESULT pl_status fn_iso_once_1(query *q);
-extern USE_RESULT pl_status fn_sys_ignore_1(query *q);
+extern USE_RESULT pl_status fn_ignore_1(query *q);
 extern USE_RESULT pl_status fn_sys_choice_0(query *q);
 
 extern bool is_valid_list_up_to(query *q, cell *p1, idx_t p1_ctx, bool allow_partials, int n);

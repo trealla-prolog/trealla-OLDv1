@@ -11083,7 +11083,7 @@ static const struct builtins g_predicates_other[] =
 	{"$incr", 2, fn_sys_incr_2, "?var", false},
 	{"$choice", 0, fn_sys_choice_0, NULL, false},
 	{"once", 1, fn_iso_once_1, "+callable", false},
-	{"ignore", 1, fn_sys_ignore_1, "+callable", false},
+	{"ignore", 1, fn_ignore_1, "+callable", false},
 
 	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list", false},
 	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list", false},

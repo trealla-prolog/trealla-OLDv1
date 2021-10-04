@@ -284,13 +284,7 @@ USE_RESULT pl_status fn_iso_negation_1(query *q)
 	if (q->retry)
 		return pl_success;
 
-	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
-
-	if (!p0 || (p0 == ERR_CYCLE_CELL))
-		return throw_error(q, q->st.curr_cell, "resource_error", "too_many_vars");
-
-	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
-	GET_FIRST_RAW_ARG0(p1,callable,p0);
+	GET_FIRST_ARG(p1,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 3);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
@@ -331,7 +325,7 @@ USE_RESULT pl_status fn_iso_once_1(query *q)
 	return pl_success;
 }
 
-USE_RESULT pl_status fn_sys_ignore_1(query *q)
+USE_RESULT pl_status fn_ignore_1(query *q)
 {
 	if (q->retry)
 		return pl_success;
