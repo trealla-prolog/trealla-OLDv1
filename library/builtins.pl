@@ -37,11 +37,14 @@ predicate_property(P, A) :-
 	'$legacy_predicate_property'(P, A).
 predicate_property(P, A) :-
 	'$load_properties',
-	(	var(A) -> true
-	;	(Controls = [built_in,control_construct,discontiguous,private,static,dynamic,persist,multifile,meta_predicate(_)],
-		memberchk(A, Controls) -> true
-	;	throw(error(domain_error(predicate_property, A), P))
-	)),
+	(	var(A)
+	->	true
+	; 	(	(Controls = [built_in,control_construct,discontiguous,private,static,dynamic,persist,multifile,meta_predicate(_)],
+			memberchk(A, Controls))
+		->	true
+		;	throw(error(domain_error(predicate_property, A), P))
+		)
+	),
 	must_be(P, callable, predicate_property/2, _),
 	'$predicate_property'(P, A).
 
@@ -71,16 +74,15 @@ variant(Term1, Term2) :-
 
 deterministic(Goal) :-
 	setup_call_cleanup(true, Goal, Deterministic = true),
-	(	var(Deterministic) ->
-		!,
-		fail
+	(	var(Deterministic)
+	->	(!, fail)
 	;	true
 	).
 
 deterministic(Goal, Deterministic) :-
 	setup_call_cleanup(true, Goal, Deterministic = true),
-	(	var(Deterministic) ->
-		Deterministic = false
+	(	var(Deterministic)
+	->	Deterministic = false
 	;	true
 	),
 	!.
@@ -113,12 +115,18 @@ findall(T, G, B, Tail) :-
 :- meta_predicate(bagof(-,0,?)).
 
 setof(Template, Generator, Set) :-
-    ( var(Set) -> true ; must_be(Set, list_or_partial_list, setof/3, _) ),
+    ( 	var(Set)
+    -> 	true
+    ; 	must_be(Set, list_or_partial_list, setof/3, _)
+    ),
 	'$bagof'(Template, Generator, Bag),
 	sort(Bag, Set).
 
 bagof(Template, Generator, Bag) :-
-    ( var(Bag) -> true ; must_be(Bag, list_or_partial_list, bagof/3, _) ),
+    (	var(Bag)
+		-> true
+		; must_be(Bag, list_or_partial_list, bagof/3, _)
+	),
 	'$bagof'(Template, Generator, Bag).
 
 '$bagof'(Template, Generator, Bag) :-
@@ -455,10 +463,15 @@ phrase(GRBody, S0) :-
 	phrase(GRBody, S0, []).
 
 phrase(GRBody, S0, S) :-
-	(	var(GRBody) -> throw(error(instantiation_error, phrase/3))
-	;	dcg_constr(GRBody) -> phrase_(GRBody, S0, S)
-	;	functor(GRBody, _, _) -> call(GRBody, S0, S)
-	;	throw(error(type_error(callable, GRBody), phrase/3))
+	(	var(GRBody)
+	-> throw(error(instantiation_error, phrase/3))
+	;	(	dcg_constr(GRBody)
+		->	phrase_(GRBody, S0, S)
+		;	(	functor(GRBody, _, _)
+			->	call(GRBody, S0, S)
+			;	throw(error(type_error(callable, GRBody), phrase/3))
+			)
+		)
 	).
 
 phrase_([], S, S).
@@ -467,7 +480,8 @@ phrase_((A, B), S0, S) :-
 	phrase(A, S0, S1), phrase(B, S1, S).
 phrase_((A -> B ; C), S0, S) :-
 	!,
-	(	phrase(A, S0, S1) -> phrase(B, S1, S)
+	(	phrase(A, S0, S1)
+	->	phrase(B, S1, S)
 	;	phrase(C, S0, S)
 	).
 phrase_((A ; B), S0, S) :-
@@ -772,12 +786,14 @@ put_atts(Var, [H|T]) :- !,
 put_atts(Var, -Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
-	(	var(Value) -> Functor = Value
+	(	var(Value)
+	-> Functor = Value
 	; 	functor(Value, Functor, _)
 	),
 	dict:del(D, Module-Functor, D2),
-	(	D2 = [] -> '$erase_attributes'(Var)
-		; '$write_attributes'(Var, D2)
+	(	D2 = []
+	->	'$erase_attributes'(Var)
+	;	'$write_attributes'(Var, D2)
 	).
 
 put_atts(Var, +Attr) :- !,
@@ -830,7 +846,8 @@ attributed(Var) :-
 
 term_attvars_([], VsIn, VsIn) :- !.
 term_attvars_([H|T], VsIn, VsOut) :-
-	(	attvar(H) -> term_attvars_(T, [H|VsIn], VsOut)
+	(	attvar(H)
+	->	term_attvars_(T, [H|VsIn], VsOut)
 	;	term_attvars_(T, VsIn, VsOut)
 	).
 
@@ -874,9 +891,12 @@ atomic_list_concat(L, Atom) :-
 
 atomic_list_concat([], _, []) :- !.
 atomic_list_concat(L, Sep, Atom) :-
-	(	atom(Sep), ground(L), is_list(L) ) ->  list_atom(L, Sep, Atom)
-	;   ( atom(Sep), atom(Atom) ) ->  atom_list(Atom, Sep, L)
-	;   instantiation_error(atomic_list_concat_(L, Sep, Atom)
+	(	(atom(Sep), ground(L), is_list(L))
+	->	list_atom(L, Sep, Atom)
+	;   ( (atom(Sep), atom(Atom))
+		->  atom_list(Atom, Sep, L)
+		;   instantiation_error(atomic_list_concat_(L, Sep, Atom))
+		)
 	).
 
 list_atom([Word],  _, Word).
@@ -912,13 +932,15 @@ plus(_,_,_) :-
 
 succ(X,S) :- nonvar(X), Y=1, nonvar(Y),
 	must_be(X, integer, succ/2, _), must_be(Y, integer, succ/2, _), !,
-	(	X >= 0 -> true
+	(	X >= 0
+	->	true
 	; 	throw(error(domain_error(not_less_than_zero, X), succ/2))
 	),
 	S is X + Y.
 succ(X,S) :- var(X), Y=1, nonvar(Y), nonvar(S),
 	must_be(S, integer, succ/2, _), must_be(Y, integer, succ/2, _), !,
-	(	S >= 0 -> true
+	(	S >= 0
+	->	true
 	; 	throw(error(domain_error(not_less_than_zero, S), succ/2))
 	),
 	!,
