@@ -735,30 +735,6 @@ static USE_RESULT pl_status fn_iso_halt_1(query *q)
 	return pl_halt;
 }
 
-static USE_RESULT pl_status fn_sys_choice_0(query *q)
-{
-	if (q->retry)
-		return pl_failure;
-
-	may_error(make_choice(q));
-	return pl_success;
-}
-
-static USE_RESULT pl_status fn_sys_once_1(query *q)
-{
-	if (q->retry)
-		return pl_failure;
-
-	GET_FIRST_ARG(p1,callable);
-	cell *tmp = clone_to_heap(q, true, p1, 2);
-	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
-	make_call(q, tmp+nbr_cells);
-	may_error(make_barrier(q));
-	q->st.curr_cell = tmp;
-	return pl_success;
-}
-
 static USE_RESULT pl_status fn_iso_number_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -11106,7 +11082,8 @@ static const struct builtins g_predicates_other[] =
 	{"$unifiable", 3, fn_sys_unifiable_3, NULL, false},
 	{"$incr", 2, fn_sys_incr_2, "?var", false},
 	{"$choice", 0, fn_sys_choice_0, NULL, false},
-	{"$once", 1, fn_sys_once_1, "+callable", false},
+	{"once", 1, fn_iso_once_1, "+callable", false},
+	{"ignore", 1, fn_sys_ignore_1, "+callable", false},
 
 	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list", false},
 	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list", false},
