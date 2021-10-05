@@ -680,6 +680,14 @@ pl_status make_barrier(query *q)
 	return pl_success;
 }
 
+pl_status make_call_barrier(query *q)
+{
+	may_error(make_barrier(q));
+	choice *ch = GET_CURR_CHOICE();
+	ch->call_barrier = true;
+	return pl_success;
+}
+
 pl_status make_catcher(query *q, enum q_retry retry)
 {
 	may_error(make_barrier(q));
@@ -760,6 +768,21 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 		q->st.tp = 0;
 }
 
+// If the call is det then the barrier can be dropped...
+
+static void cut_if_det(query *q)
+{
+	frame *g = GET_CURR_FRAME();
+
+	if (!q->cp)		// redundant
+		return;
+
+	choice *ch = GET_CURR_CHOICE();
+
+	if (ch->call_barrier && (ch->cgen == g->cgen))
+		q->cp--;
+}
+
 // Continue to next rule in body
 
 static void proceed(query *q)
@@ -768,8 +791,10 @@ static void proceed(query *q)
 	frame *g = GET_CURR_FRAME();
 
 	while (q->st.curr_cell && is_end(q->st.curr_cell)) {
-		if (q->st.curr_cell->val_ptr)
+		if (q->st.curr_cell->val_ptr) {
+			cut_if_det(q);
 			g->cgen = q->st.curr_cell->cgen;	// set the cgen back
+		}
 
 		if (q->st.curr_cell->mod_nbr != q->st.m->id)
 			q->st.m = find_module_id(q->st.m->pl, q->st.curr_cell->mod_nbr);

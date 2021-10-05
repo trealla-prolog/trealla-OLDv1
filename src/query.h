@@ -6,6 +6,7 @@ extern void destroy_query(query *q);
 
 extern USE_RESULT pl_status make_choice(query *q);
 extern USE_RESULT pl_status make_barrier(query *q);
+extern USE_RESULT pl_status make_call_barrier(query *q);
 extern USE_RESULT pl_status make_catcher(query *q, enum q_retry type);
 extern void cut_me(query *q, bool inner_cut, bool soft_cut);
 
