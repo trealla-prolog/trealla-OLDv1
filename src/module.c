@@ -974,7 +974,7 @@ module *load_text(module *m, const char *src, const char *filename)
 			p->consulting = false;
 			p->command = true;
 
-			if (run(p, "(:- initialization(G)), retract((:- initialization(_))), G", false, true))
+			if (run(p, "(:- initialization(G)), retract((:- initialization(_))), !, G", false, true))
 				p->m->pl->halt = true;
 		}
 
@@ -1032,7 +1032,7 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 			p->command = true;
 			p->consulting = false;
 
-			if (run(p, "(:- initialization(G)), retract((:- initialization(_))), G", false, true))
+			if (run(p, "(:- initialization(G)), retract((:- initialization(_))), !, G", false, true))
 				p->m->pl->halt = true;
 		}
 
