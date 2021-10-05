@@ -591,16 +591,17 @@ static void commit_me(query *q, rule *r)
 	q->st.iter = NULL;
 	bool last_match = r->first_cut || !is_next_key(q);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
-	bool tco = !q->no_tco && recursive && !any_choices(q, g, true);
+	bool choices = any_choices(q, g, true);
 	bool slots_ok = check_slots(q, g, r);
+	bool tco = !q->no_tco && recursive && !choices && slots_ok;
 	choice *ch = GET_CURR_CHOICE();
 
 #if 0
-	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, check_slots=%d\n",
-		tco, q->no_tco, last_match, recursive, any_choices(q, g, true), slots_ok);
+	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, slots_ok=%d\n",
+		tco, q->no_tco, last_match, recursive, choices, slots_ok);
 #endif
 
-	if (tco && slots_ok && q->st.m->pl->opt)
+	if (tco && q->st.m->pl->opt)
 		reuse_frame(q, r->nbr_vars);
 	else
 		g = make_frame(q, r->nbr_vars);
