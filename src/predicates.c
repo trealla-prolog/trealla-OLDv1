@@ -5362,17 +5362,18 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 	if (!q->retry) {
 		q->st.qnbr++;
 		assert(q->st.qnbr < MAX_QUEUES);
-		cell *tmp = clone_to_heap(q, true, p2, 2+p1->nbr_cells+1);
+		cell *tmp = clone_to_heap(q, true, p2, 2+p1->nbr_cells+2);
 		idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
 		nbr_cells += safe_copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
-		make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
+		make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
+		make_call(q, tmp+nbr_cells);
+		may_error(make_barrier(q));
+		q->st.curr_cell = tmp;
 		init_queuen(q);
 		free(q->tmpq[q->st.qnbr]);
 		q->tmpq[q->st.qnbr] = NULL;
-		may_error(make_barrier(q));
-		q->st.curr_cell = tmp;
 		return pl_success;
 	}
 

@@ -204,7 +204,7 @@ pl_status call_userfun(query *q, cell *c, __attribute__((unused)) idx_t c_ctx)
 	cell *tmp = clone_to_heap(q, true, c, 1);
 	idx_t nbr_cells = 1 + c->nbr_cells;
 	make_call(q, tmp+nbr_cells);
-	may_error(make_barrier(q));
+	may_error(make_call_barrier(q));
 	q->st.curr_cell = tmp;
 	pl_status ok = start(q);
 	q->error = false;
