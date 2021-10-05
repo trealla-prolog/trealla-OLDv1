@@ -51,7 +51,7 @@ static USE_RESULT pl_status fn_sys_cut_if_det_0(query *q)
 	choice *ch = GET_CURR_CHOICE();
 
 	if (ch->barrier && !ch->catcher && (ch->cgen == g->cgen))
-		drop_choice(q);
+		q->cp--;
 
 	return pl_success;
 }
@@ -315,15 +315,6 @@ USE_RESULT pl_status fn_iso_negation_1(query *q)
 	make_call(q, tmp+nbr_cells);
 	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
-	return pl_success;
-}
-
-USE_RESULT pl_status fn_sys_choice_0(query *q)
-{
-	if (q->retry)
-		return pl_failure;
-
-	may_error(make_choice(q));
 	return pl_success;
 }
 

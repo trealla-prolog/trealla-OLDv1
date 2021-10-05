@@ -10684,6 +10684,15 @@ static USE_RESULT pl_status fn_sys_get_level_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_sys_choice_0(query *q)
+{
+	if (q->retry)
+		return pl_failure;
+
+	may_error(make_choice(q));
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
 {
 	if (q->cp != q->save_cp)
