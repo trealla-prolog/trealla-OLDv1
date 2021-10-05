@@ -93,7 +93,7 @@ deterministic(Goal) :-
 	!,
 	(	Before == After
 	->	true
-	; fail
+	; 	fail
 	).
 
 deterministic(Goal, Det) :-
@@ -102,8 +102,9 @@ deterministic(Goal, Det) :-
 	'$get_level'(After),
 	(	Before == After
 	->	Det = true
-	; Det = false
-	).
+	; 	Det = false
+	),
+	!.
 deterministic(_, Det) :-
 	Det = false.
 
