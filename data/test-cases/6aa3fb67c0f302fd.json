@@ -1,0 +1,51 @@
+{
+  "uid" : "6aa3fb67c0f302fd",
+  "name" : "iso_disjunction_2_03",
+  "fullName" : "iso_disjunction_2_03::tests",
+  "historyId" : "iso_disjunction_2_03::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "control/disjunction_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "control/disjunction_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "control/disjunction_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "control/disjunction_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "42-47"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/ec561d52572edaaf573f40e7c8261342fe96ffef/tests/prolog/control/disjunction_2/tests.lgt#L42"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "6aa3fb67c0f302fd.json",
+  "parameterValues" : [ "control/disjunction_2/tests.lgt", "42-47", "https://github.com/LogtalkDotOrg/logtalk3/tree/ec561d52572edaaf573f40e7c8261342fe96ffef/tests/prolog/control/disjunction_2/tests.lgt#L42" ]
+}
