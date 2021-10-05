@@ -684,6 +684,7 @@ pl_status make_catcher(query *q, enum q_retry retry)
 {
 	may_error(make_barrier(q));
 	choice *ch = GET_CURR_CHOICE();
+	ch->catcher = true;
 
 	if (retry == QUERY_RETRY)
 		ch->catchme_retry = true;

@@ -10675,6 +10675,15 @@ void do_cleanup(query *q, cell *p1)
 	q->st.curr_cell = tmp;
 }
 
+static USE_RESULT pl_status fn_sys_get_level_1(query *q)
+{
+	GET_FIRST_ARG(p1,variable);
+	cell tmp;
+	make_int(&tmp, q->cp);
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
 {
 	if (q->cp != q->save_cp)
@@ -10954,6 +10963,7 @@ static const struct builtins g_predicates_other[] =
 	{"$register_cleanup", 1, fn_sys_register_cleanup_1, NULL, false},
 	{"$register_term", 1, fn_sys_register_term_1, NULL, false},
 	{"$chk_is_det", 0, fn_sys_chk_is_det_0, NULL, false},
+	{"$get_level", 1, fn_sys_get_level_1, "-var", false},
 
 	// Edinburgh...
 

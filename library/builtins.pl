@@ -73,17 +73,18 @@ variant(Term1, Term2) :-
 	Term1Copy == Term2Copy.
 
 deterministic(Goal) :-
-	setup_call_cleanup(true, Goal, Deterministic = true),
-	(	var(Deterministic)
-	->	(!, fail)
-	;	true
-	).
+	'$get_level'(Before),
+	Goal,
+	'$get_level'(After),
+	Before == After.
 
 deterministic(Goal, Deterministic) :-
-	setup_call_cleanup(true, Goal, Deterministic = true),
-	(	var(Deterministic)
-	->	Deterministic = false
-	;	true
+	'$get_level'(Before),
+	Goal,
+	'$get_level'(After),
+	(	Before == After
+	->	Deterministic = true
+	;	Deterministic = false
 	).
 
 call_cleanup(G, C) :-

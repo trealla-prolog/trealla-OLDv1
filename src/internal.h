@@ -461,6 +461,7 @@ typedef struct {
 	bool register_cleanup:1;
 	bool register_term:1;
 	bool block_catcher:1;
+	bool catcher:1;
 	bool tail_rec:1;
 } choice;
 
