@@ -1664,7 +1664,7 @@ static bool any_outstanding_choices(query *q)
 	choice *ch = GET_CURR_CHOICE();
 
 	for (;;) {
-		if (!ch->register_cleanup)
+		if (!ch->register_cleanup && !ch->call_barrier)
 			break;
 
 		ch--;
