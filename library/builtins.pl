@@ -84,8 +84,7 @@ deterministic(Goal, Deterministic) :-
 	(	var(Deterministic)
 	->	Deterministic = false
 	;	true
-	),
-	!.
+	).
 
 call_cleanup(G, C) :-
 	setup_call_cleanup(true, G, C).

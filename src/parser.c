@@ -2818,7 +2818,7 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 		ASTRING_sprintf(src, "assertz((:- initialization((%s", pSrc);
 		ASTRING_trim_ws(src);
 		ASTRING_trim(src, '.');
-		ASTRING_strcat(src, ")))), (:- initialization(G)), retract((:- initialization(_))), !, G.");
+		ASTRING_strcat(src, ")))), (:- initialization(_G_)), retract((:- initialization(_))), !, _G_.");
 
 		p->srcptr = ASTRING_cstr(src);
 		p->line_nbr = 0;

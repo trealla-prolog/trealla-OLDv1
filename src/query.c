@@ -1463,7 +1463,7 @@ static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t
 static void dump_vars(query *q, bool partial)
 {
 	parser *p = q->p;
-	frame *g = GET_FRAME(0);
+	frame *g = GET_FRAME(1);
 	int any = 0;
 
 	q->is_dump_vars = true;
