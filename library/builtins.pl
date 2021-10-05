@@ -72,13 +72,6 @@ variant(Term1, Term2) :-
 	numbervars(Term2Copy, 0, N),
 	Term1Copy == Term2Copy.
 
-xdeterministic(Goal) :-
-	setup_call_cleanup(true, Goal, Deterministic = true),
-	(	var(Deterministic)
-	->	(!, fail)
-	;	true
-	).
-
 xdeterministic(Goal, Deterministic) :-
 	setup_call_cleanup(true, Goal, Deterministic = true),
 	(	var(Deterministic)
