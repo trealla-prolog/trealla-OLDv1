@@ -593,7 +593,7 @@ static void commit_me(query *q, rule *r)
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool choices = any_choices(q, g, true);
 	bool slots_ok = check_slots(q, g, r);
-	bool tco = !q->no_tco && recursive && !choices && slots_ok;
+	bool tco = last_match && !q->no_tco && recursive && !choices && slots_ok;
 	choice *ch = GET_CURR_CHOICE();
 
 #if 0
