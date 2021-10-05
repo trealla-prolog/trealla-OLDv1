@@ -2815,10 +2815,13 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 	if (!is_init) {
 		ASTRING(src);
 
-		ASTRING_sprintf(src, "assertz((:- initialization((%s", pSrc);
+		// If the top-level was in Prolog it could use
+		// deterministic/2 to query for more solutions etc.
+
+		ASTRING_sprintf(src, "deterministic((%s", pSrc);
 		ASTRING_trim_ws(src);
 		ASTRING_trim(src, '.');
-		ASTRING_strcat(src, ")))), (:- initialization(_G_)), retract((:- initialization(_))), !, _G_.");
+		ASTRING_strcat(src, "), _).");
 
 		p->srcptr = ASTRING_cstr(src);
 		p->line_nbr = 0;

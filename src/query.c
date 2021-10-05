@@ -17,7 +17,7 @@
 
 #define Trace if (q->trace /*&& !consulting*/) trace_call
 
-#define START_CTX 1
+#define START_CTX 0
 
 static const unsigned INITIAL_NBR_HEAP_CELLS = 16000;
 static const unsigned INITIAL_NBR_QUEUE_CELLS = 1000;

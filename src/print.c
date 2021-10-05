@@ -790,7 +790,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 		}
 
 		if (is_variable(c) && !running && q->is_dump_vars) {
-			dst += snprintf(dst, dstlen, "%s", q->p->vartab.var_name[c->var_nbr-4]); // Magic nbr of first query var
+			dst += snprintf(dst, dstlen, "%s", q->p->vartab.var_name[c->var_nbr-4]); // Magic number
 			return dst - save_dst;
 		}
 
