@@ -765,7 +765,7 @@ put_atts(Var, -Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	(	var(Value)
-	-> Functor = Value
+	->	Functor = Value
 	; 	functor(Value, Functor, _)
 	),
 	dict:del(D, Module-Functor, D2),
@@ -871,7 +871,7 @@ atomic_list_concat([], _, []) :- !.
 atomic_list_concat(L, Sep, Atom) :-
 	(	(atom(Sep), ground(L), is_list(L))
 	->	list_atom(L, Sep, Atom)
-	;   ( (atom(Sep), atom(Atom))
+	;   (	(atom(Sep), atom(Atom))
 		->  atom_list(Atom, Sep, L)
 		;   instantiation_error(atomic_list_concat_(L, Sep, Atom))
 		)
