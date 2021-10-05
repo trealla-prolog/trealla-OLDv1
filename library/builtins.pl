@@ -86,8 +86,7 @@ deterministic(Goal, Det) :-
 	(	Before == After
 	->	Det = true
 	; 	Det = false
-	),
-	!.
+	).
 deterministic(_, Det) :-
 	Det = false.
 
