@@ -403,7 +403,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 
 	idx_t var_nbr = 0;
 
-	if (running && is_variable(c) && q->variable_names) {
+	if (is_variable(c) && running && q->variable_names) {
 		cell *l = q->variable_names;
 		idx_t l_ctx = q->variable_names_ctx;
 		LIST_HANDLER(l);
@@ -460,7 +460,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 		return dst - save_dst;
 	}
 
-	if (is_variable(c) && running) {
+	if (is_variable(c)) {
 		frame *g = GET_FRAME(c_ctx);
 		slot *e = GET_SLOT(g, c->var_nbr);
 		idx_t slot_nbr = e - q->slots;
@@ -781,7 +781,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
-		if (running && is_variable(c)
+		if (is_variable(c) && running && !q->cycle_error
 			&& ((c_ctx != q->st.curr_frame) || is_fresh(c) || (running > 0))) {
 			frame *g = GET_FRAME(c_ctx);
 			slot *e = GET_SLOT(g, c->var_nbr);
@@ -789,9 +789,13 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			return dst - save_dst;
 		}
 
-		if (!running && is_variable(c) && q->is_dump_vars) {
-			dst += snprintf(dst, dstlen, "%s", q->p->vartab.var_name[c->var_nbr-1]);
-			//dst += snprintf(dst, dstlen, "_%u", c->var_nbr);
+		if (is_variable(c) && !running && q->is_dump_vars) {
+			dst += snprintf(dst, dstlen, "%s", q->p->vartab.var_name[c->var_nbr-4]); // Magic nbr of first query var
+			return dst - save_dst;
+		}
+
+		if (is_variable(c) && !running) {
+			dst += snprintf(dst, dstlen, "_%u", c->var_nbr);
 			return dst - save_dst;
 		}
 
