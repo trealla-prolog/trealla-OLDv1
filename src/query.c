@@ -1673,7 +1673,7 @@ static bool any_outstanding_choices(query *q)
 		q->cp--;
 	}
 
-	return q->cp > 1; // Top-level leaves 1 choice
+	return q->cp > TOP_LEVEL_CHOICES;
 }
 
 pl_status start(query *q)
