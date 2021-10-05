@@ -2815,9 +2815,6 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 	if (!is_init) {
 		ASTRING(src);
 
-		// If the top-level was in Prolog it could use
-		// deterministic/2 to query for more solutions etc.
-
 		ASTRING_sprintf(src, "deterministic((%s", pSrc);
 		ASTRING_trim_ws(src);
 		ASTRING_trim(src, '.');
