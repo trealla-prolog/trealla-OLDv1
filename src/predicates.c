@@ -10693,9 +10693,11 @@ static USE_RESULT pl_status fn_sys_choice_0(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_chk_is_det_0(query *q)
+static USE_RESULT pl_status fn_sys_chk_is_det_1(query *q)
 {
-	if (q->cp != q->save_cp)
+	GET_FIRST_ARG(p1,integer);
+
+	if (q->cp != get_smallint(p1))
 		return pl_success;
 
 	choice *ch = GET_CURR_CHOICE();
@@ -10971,7 +10973,7 @@ static const struct builtins g_predicates_other[] =
 
 	{"$register_cleanup", 1, fn_sys_register_cleanup_1, NULL, false},
 	{"$register_term", 1, fn_sys_register_term_1, NULL, false},
-	{"$chk_is_det", 0, fn_sys_chk_is_det_0, NULL, false},
+	{"$chk_is_det", 1, fn_sys_chk_is_det_1, "+integer", false},
 	{"$get_level", 1, fn_sys_get_level_1, "-var", false},
 
 	// Edinburgh...

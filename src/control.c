@@ -69,7 +69,6 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 	make_call(q, tmp+nbr_cells);
 	may_error(make_call_barrier(q));
 	q->st.curr_cell = tmp;
-	q->save_cp = q->cp;
 	return pl_success;
 }
 
@@ -127,7 +126,6 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	may_error(make_call_barrier(q));
 
 	q->st.curr_cell = tmp;
-	q->save_cp = q->cp;
 	return pl_success;
 }
 
@@ -142,7 +140,6 @@ USE_RESULT pl_status fn_sys_rawcall_1(query *q)
 	idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_call(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
-	q->save_cp = q->cp;
 	return pl_success;
 }
 
@@ -423,7 +420,6 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 	make_structure(tmp+1+nbr_cells++, g_sys_block_catcher_s, fn_sys_block_catcher_0, 0, 0);
 	make_call(q, tmp+1+nbr_cells);
 	q->st.curr_cell = tmp;
-	q->save_cp = q->cp;
 	return pl_success;
 }
 
@@ -462,7 +458,6 @@ USE_RESULT pl_status fn_iso_catch2_3(query *q)
 	may_ptr_error(tmp);
 	make_call(q, tmp+1+nbr_cells);
 	q->st.curr_cell = tmp;
-	q->save_cp = q->cp;
 	return pl_success;
 }
 
