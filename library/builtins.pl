@@ -86,16 +86,6 @@ xdeterministic(Goal, Deterministic) :-
 	;	true
 	).
 
-deterministic(Goal) :-
-	'$get_level'(Before),
-	Goal,
-	'$get_level'(After),
-	!,
-	(	Before == After
-	->	true
-	; 	fail
-	).
-
 deterministic(Goal, Det) :-
 	'$get_level'(Before),
 	Goal,
