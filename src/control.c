@@ -293,7 +293,7 @@ USE_RESULT pl_status fn_iso_negation_1(query *q)
 	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
 	make_call(q, tmp+nbr_cells);
-	may_error(make_call_barrier(q));
+	may_error(make_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
