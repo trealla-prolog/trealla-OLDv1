@@ -399,10 +399,10 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 	if (q->retry == QUERY_EXCEPTION) {
 		GET_NEXT_ARG(p3,callable);
 		q->retry = QUERY_OK;
-		may_error(make_catcher(q, QUERY_EXCEPTION));
 		cell *tmp = clone_to_heap(q, true, p3, 1);
 		may_ptr_error(tmp);
 		make_call(q, tmp+1+p3->nbr_cells);
+		may_error(make_catcher(q, QUERY_EXCEPTION));
 		q->st.curr_cell = tmp;
 		return pl_success;
 	}
@@ -412,12 +412,12 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 
 	// First time through? Try the primary goal...
 
-	may_error(make_catcher(q, QUERY_RETRY));
 	idx_t nbr_cells = p1->nbr_cells;
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	may_ptr_error(tmp);
 	make_structure(tmp+1+nbr_cells++, g_sys_block_catcher_s, fn_sys_block_catcher_0, 0, 0);
 	make_call(q, tmp+1+nbr_cells);
+	may_error(make_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -438,10 +438,10 @@ USE_RESULT pl_status fn_iso_catch2_3(query *q)
 	if (q->retry == QUERY_EXCEPTION) {
 		GET_NEXT_ARG(p3,callable);
 		q->retry = QUERY_OK;
-		may_error(make_catcher(q, QUERY_EXCEPTION));
 		cell *tmp = clone_to_heap(q, true, p3, 1);
 		may_ptr_error(tmp);
 		make_call(q, tmp+1+p3->nbr_cells);
+		may_error(make_catcher(q, QUERY_EXCEPTION));
 		q->st.curr_cell = tmp;
 		return pl_success;
 	}
@@ -451,11 +451,11 @@ USE_RESULT pl_status fn_iso_catch2_3(query *q)
 
 	// First time through? Try the primary goal...
 
-	may_error(make_catcher(q, QUERY_RETRY));
 	idx_t nbr_cells = p1->nbr_cells;
 	cell *tmp = clone_to_heap(q, true, p1, 1);
 	may_ptr_error(tmp);
 	make_call(q, tmp+1+nbr_cells);
+	may_error(make_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
