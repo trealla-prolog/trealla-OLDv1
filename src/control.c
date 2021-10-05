@@ -124,7 +124,6 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	idx_t nbr_cells = 1+tmp2->nbr_cells;
 	make_call(q, tmp+nbr_cells);
 	may_error(make_call_barrier(q));
-
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
