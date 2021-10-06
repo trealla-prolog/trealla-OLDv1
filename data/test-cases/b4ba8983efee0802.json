@@ -1,0 +1,51 @@
+{
+  "uid" : "b4ba8983efee0802",
+  "name" : "iso_arithmetic_comparison_15",
+  "fullName" : "iso_arithmetic_comparison_15::tests",
+  "historyId" : "iso_arithmetic_comparison_15::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/arithmetic_comparison/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/arithmetic_comparison/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/arithmetic_comparison/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/arithmetic_comparison/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "78-81"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/a13caa734b7e91e5250e17b255971e8d0362c4cb/tests/prolog/predicates/arithmetic_comparison/tests.lgt#L78"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "b4ba8983efee0802.json",
+  "parameterValues" : [ "predicates/arithmetic_comparison/tests.lgt", "78-81", "https://github.com/LogtalkDotOrg/logtalk3/tree/a13caa734b7e91e5250e17b255971e8d0362c4cb/tests/prolog/predicates/arithmetic_comparison/tests.lgt#L78" ]
+}
