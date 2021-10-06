@@ -10709,11 +10709,8 @@ static USE_RESULT pl_status fn_sys_chk_is_det_1(query *q)
 			if (ch->did_cleanup)
 				break;
 
+			drop_choice(q);
 			ch->did_cleanup = true;
-
-			if (ch == GET_CURR_CHOICE())
-				drop_choice(q);
-
 			cell *c = ch->st.curr_cell;
 			c = deref(q, c, ch->st.curr_frame);
 			cell *p1 = deref(q, c+1, ch->st.curr_frame);
@@ -10721,6 +10718,7 @@ static USE_RESULT pl_status fn_sys_chk_is_det_1(query *q)
 			return pl_success;
 		}
 
+		q->cp--;
 		ch--;
 	}
 
