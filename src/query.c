@@ -1538,6 +1538,8 @@ static void dump_vars(query *q, bool partial)
 		int saveq = q->quoted;
 		q->quoted = 1;
 
+		//printf("*** [%u] offset=%u, c->var_nbr=%u\n", (unsigned)i, (unsigned)c_ctx, (unsigned)c->var_nbr);
+
 		if (is_cyclic_term(q, c, c_ctx))
 			print_term(q, stdout, c, c_ctx, 0);
 		else

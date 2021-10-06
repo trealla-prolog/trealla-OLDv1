@@ -460,6 +460,11 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 		return dst - save_dst;
 	}
 
+	if (is_variable(c) && !running && 0) {
+		dst += snprintf(dst, dstlen, "%s", GET_STR(q, c));
+		return dst - save_dst;
+	}
+
 	if (is_variable(c)) {
 		frame *g = GET_FRAME(c_ctx);
 		slot *e = GET_SLOT(g, c->var_nbr);

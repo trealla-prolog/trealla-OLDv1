@@ -2821,10 +2821,10 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 		ASTRING_trim(src, '.');
 		ASTRING_strcat(src, "), _).");
 #else
-		ASTRING_sprintf(src, "assertz((:- initialization((%s", pSrc);
+		ASTRING_sprintf(src, "assertz(:- initialization((%s", pSrc);
 		ASTRING_trim_ws(src);
 		ASTRING_trim(src, '.');
-		ASTRING_strcat(src, ")))), (:- initialization(_G_)), retract((:- initialization(_))), !, _G_.");
+		ASTRING_strcat(src, "))), (:- initialization(_G_)), retract(:- initialization(_)), !, _G_.");
 #endif
 
 		p->srcptr = ASTRING_cstr(src);

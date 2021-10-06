@@ -143,7 +143,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth,
 				if (is_anon(p1))
 					tmp->flags |= FLAG2_ANON;
 
-				tmp->val_off = g_nil_s;
+				tmp->val_off = p1->val_off;
 				tmp->attrs = NULL;
 				return tmp;
 			}
@@ -151,7 +151,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth,
 
 		tmp->var_nbr = q->st.m->pl->varno;
 		tmp->flags = FLAG2_FRESH;
-		tmp->val_off = g_nil_s;
+		tmp->val_off = p1->val_off;
 		tmp->attrs = e->c.attrs;
 		tmp->attrs_ctx = e->c.attrs_ctx;
 
