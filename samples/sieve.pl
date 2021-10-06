@@ -9,7 +9,7 @@ integers(Low,High,[Low|Rest]) :-
     integers(M,High,Rest).
 integers(_,_,[]).
 
-sift([],[]).
+sift([],[]) :- !.
 sift([I|Is],[I|Ps]) :-
     remove(I,Is,New),
     sift(New,Ps).
