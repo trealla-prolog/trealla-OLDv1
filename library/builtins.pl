@@ -72,23 +72,12 @@ variant(Term1, Term2) :-
 	numbervars(Term2Copy, 0, N),
 	Term1Copy == Term2Copy.
 
-xdeterministic(Goal, Deterministic) :-
-	setup_call_cleanup(true, Goal, Deterministic = true),
-	(	var(Deterministic)
-	->	Deterministic = false
+deterministic(Goal, Det) :-
+	call_cleanup(Goal, Det = true),
+	(	var(Det)
+	->	Det = false
 	;	true
 	).
-
-deterministic(Goal, Det) :-
-	'$get_level'(Before),
-	Goal,
-	'$get_level'(After),
-	(	Before == After
-	->	Det = true
-	; 	Det = false
-	).
-deterministic(_, Det) :-
-	Det = false.
 
 call_cleanup(G, C) :-
 	'$register_cleanup'(ignore(C)),
