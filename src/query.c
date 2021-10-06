@@ -17,8 +17,6 @@
 
 #define Trace if (q->trace /*&& !consulting*/) trace_call
 
-#define START_CTX 0
-
 static const unsigned INITIAL_NBR_HEAP_CELLS = 16000;
 static const unsigned INITIAL_NBR_QUEUE_CELLS = 1000;
 static const unsigned INITIAL_NBR_GOALS = 2000;
@@ -416,7 +414,7 @@ void try_me(const query *q, unsigned nbr_vars)
 	frame *g = GET_FRAME(q->st.fp);
 	g->nbr_slots = g->nbr_vars = nbr_vars;
 	g->base_slot_nbr = q->st.sp;
-	slot *e = GET_SLOT(g, 0);
+	slot *e = GET_FIRST_SLOT(g);
 
 	for (unsigned i = 0; i < nbr_vars; i++, e++) {
 		//unshare_cell(&e->c);
@@ -541,8 +539,8 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	const choice *ch = GET_CURR_CHOICE();
 	q->st.sp = ch->st.sp;
 
-	slot *from = GET_SLOT(newg, 0);
-	slot *to = GET_SLOT(g, 0);
+	slot *from = GET_FIRST_SLOT(newg);
+	slot *to = GET_FIRST_SLOT(g);
 
 	for (idx_t i = 0; i < nbr_vars; i++) {
 		unshare_cell(&to->c);
@@ -1449,7 +1447,7 @@ static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t
 	return orig_c;
 
 	parser *p = q->p;
-	frame *g = GET_FRAME(START_CTX);
+	frame *g = GET_FIRST_FRAME();
 	cell *c = orig_c;
 
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
@@ -1461,7 +1459,7 @@ static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t
 		if (is_empty(&e->c))
 			continue;
 
-		q->latest_ctx = START_CTX;
+		q->latest_ctx = 0;
 
 		if (is_indirect(&e->c)) {
 			c = e->c.val_ptr;
@@ -1491,7 +1489,7 @@ static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t
 static void dump_vars(query *q, bool partial)
 {
 	parser *p = q->p;
-	frame *g = GET_FRAME(START_CTX);
+	frame *g = GET_FIRST_FRAME();
 	int any = 0;
 
 	q->is_dump_vars = true;
@@ -1935,7 +1933,7 @@ query *create_sub_query(query *q, cell *curr_cell)
 	frame *gsrc = GET_FRAME(q->st.curr_frame);
 	frame *gdst = subq->frames;
 	gdst->nbr_vars = gsrc->nbr_vars;
-	slot *e = GET_SLOT(gsrc, START_CTX);
+	slot *e = GET_FIRST_SLOT(gsrc);
 
 	for (unsigned i = 0; i < gsrc->nbr_vars; i++, e++) {
 		cell *c = deref(q, &e->c, e->ctx);

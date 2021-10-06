@@ -82,9 +82,11 @@ typedef enum {
 #define GET_CURR_CHOICE() GET_CHOICE(q->cp-1)
 
 #define GET_FRAME(i) (q->frames+(i))
+#define GET_FIRST_FRAME() GET_FRAME(0)
 #define GET_CURR_FRAME() GET_FRAME(q->st.curr_frame)
 
 #define GET_SLOT(g,i) ((i) < g->nbr_slots ? (q->slots+g->base_slot_nbr+(i)) : (q->slots+g->overflow+((i)-g->nbr_slots)))
+#define GET_FIRST_SLOT(g) GET_SLOT(g,0)
 
 // Primary type...
 

@@ -276,7 +276,7 @@ static void reformat_float(char *tmpbuf)
 static int find_binding(query *q, idx_t var_nbr, idx_t var_ctx)
 {
 	const frame *g = GET_FRAME(q->st.curr_frame);
-	const slot *e = GET_SLOT(g, 0);
+	const slot *e = GET_FIRST_SLOT(g);
 
 	for (idx_t i = 0; i < g->nbr_vars; i++, e++) {
 		if (!is_variable(&e->c))

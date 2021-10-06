@@ -1304,7 +1304,7 @@ static bool dcg_expansion(parser *p)
 	tokenize(p2, false, false);
 	ASTRING_free(s);
 	execute(q, p2->r->cells, p2->r->nbr_vars);
-	frame *g = GET_FRAME(0);
+	frame *g = GET_FIRST_FRAME();
 	char *src = NULL;
 
 	for (unsigned i = 0; i < p2->r->nbr_vars; i++) {
@@ -1388,7 +1388,7 @@ static bool term_expansion(parser *p)
 		return false;
 	}
 
-	frame *g = GET_FRAME(0);
+	frame *g = GET_FIRST_FRAME();
 	char *src = NULL;
 
 	for (unsigned i = 0; i < p2->r->nbr_vars; i++) {
