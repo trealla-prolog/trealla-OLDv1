@@ -320,8 +320,10 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 
 	char *save_dst = dst;
 
-	if (depth > MAX_DEPTH)
+	if (depth > MAX_DEPTH) {
+		q->cycle_error = true;
 		return -1;
+	}
 
 #if 0
 	if (q->is_dump_vars && is_stream(c)) {
@@ -460,7 +462,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_
 		return dst - save_dst;
 	}
 
-	if (is_variable(c) && !running && 0) {
+	if (is_variable(c) && !running && !q->cycle_error) {
 		dst += snprintf(dst, dstlen, "%s", GET_STR(q, c));
 		return dst - save_dst;
 	}
@@ -544,8 +546,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 {
 	char *save_dst = dst;
 
-	if (depth > MAX_DEPTH)
+	if (depth > MAX_DEPTH) {
+		q->cycle_error = true;
 		return -1;
+	}
 
 #if 0
 	if (q->is_dump_vars && is_stream(c)) {
@@ -794,7 +798,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			return dst - save_dst;
 		}
 
-		if (is_variable(c) && !running && 0) {
+		if (is_variable(c) && !running && !q->cycle_error) {
 			dst += snprintf(dst, dstlen, "%s", GET_STR(q, c));
 			return dst - save_dst;
 		}
@@ -1120,6 +1124,7 @@ pl_status print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running)
 		running = 0;
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
 	}
+
 
 	char *dst = malloc(len+10);
 	may_ptr_error(dst);
