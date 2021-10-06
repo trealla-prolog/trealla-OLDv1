@@ -789,7 +789,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_c
 			return dst - save_dst;
 		}
 
-		if (is_variable(c) && !running && q->is_dump_vars) {
+		if (is_variable(c) && !running /*&& q->is_dump_vars*/) {
 			dst += snprintf(dst, dstlen, "%s", GET_STR(q, c));
 			return dst - save_dst;
 		}

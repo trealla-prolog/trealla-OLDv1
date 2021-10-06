@@ -17,6 +17,8 @@
 
 #define Trace if (q->trace /*&& !consulting*/) trace_call
 
+#define START_CTX 1
+
 static const unsigned INITIAL_NBR_HEAP_CELLS = 16000;
 static const unsigned INITIAL_NBR_QUEUE_CELLS = 1000;
 static const unsigned INITIAL_NBR_GOALS = 2000;
@@ -1447,7 +1449,7 @@ static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t
 	return orig_c;
 
 	parser *p = q->p;
-	frame *g = GET_FIRST_FRAME();
+	frame *g = GET_FRAME(START_CTX);
 	cell *c = orig_c;
 
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
@@ -1459,7 +1461,7 @@ static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t
 		if (is_empty(&e->c))
 			continue;
 
-		q->latest_ctx = 0;
+		q->latest_ctx = START_CTX;
 
 		if (is_indirect(&e->c)) {
 			c = e->c.val_ptr;
@@ -1489,7 +1491,7 @@ static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t
 static void dump_vars(query *q, bool partial)
 {
 	parser *p = q->p;
-	frame *g = GET_FIRST_FRAME();
+	frame *g = GET_FRAME(START_CTX);
 	int any = 0;
 
 	q->is_dump_vars = true;
