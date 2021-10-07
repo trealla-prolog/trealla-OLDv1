@@ -1456,13 +1456,10 @@ static item *g_items = NULL;
 
 static int check_duplicate_result(query *q, cell *c, int i)
 {
-	if (is_variable(c))
-		return -1;
-
 	item *ptr = g_items;
 
 	while (ptr) {
-		if (unify(q, c, q->st.curr_frame, ptr->c, q->st.curr_frame)) {
+		if (!compare(q, c, q->st.curr_frame, ptr->c, q->st.curr_frame, 0)) {
 			return ptr->nbr;
 		}
 
