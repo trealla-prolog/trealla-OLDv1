@@ -1444,6 +1444,8 @@ static USE_RESULT pl_status match_head(query *q)
 
 static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t orig_ctx, cell *tmp)
 {
+	return orig_c;
+
 	parser *p = q->p;
 	frame *g = GET_FRAME(START_CTX);
 	cell *c = orig_c;
