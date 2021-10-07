@@ -2815,7 +2815,10 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 	if (!is_init) {
 		ASTRING(src);
 
-#if 0
+// Currently QUERY_ASSERT has to be true or else freeze
+// doesn't work... to be investigated.
+
+#if !QUERY_ASSERT
 		ASTRING_sprintf(src, "deterministic((%s", pSrc);
 		ASTRING_trim_ws(src);
 		ASTRING_trim(src, '.');

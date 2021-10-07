@@ -14,6 +14,12 @@
 #include "module.h"
 #include "prolog.h"
 
+#if QUERY_ASSERT
+#define START_CTX 1
+#else
+#define START_CTX 0
+#endif
+
 static const size_t INITIAL_POOL_SIZE = 64000;	// bytes
 
 stream g_streams[MAX_STREAMS] = {{0}};
