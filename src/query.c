@@ -17,6 +17,8 @@
 
 #define Trace if (q->trace /*&& !consulting*/) trace_call
 
+#define START_CTX 1
+
 static const unsigned INITIAL_NBR_HEAP_CELLS = 16000;
 static const unsigned INITIAL_NBR_QUEUE_CELLS = 1000;
 static const unsigned INITIAL_NBR_GOALS = 2000;
@@ -1442,51 +1444,46 @@ static USE_RESULT pl_status match_head(query *q)
 	return pl_failure;
 }
 
-static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t orig_ctx, cell *tmp)
+typedef struct item_ item;
+
+struct item_ {
+	cell *c;
+	int nbr;
+	item *next;
+};
+
+static item *g_items = NULL;
+
+static int check_duplicate_result(query *q, cell *c, int i)
 {
-	return orig_c;
+	if (is_variable(c))
+		return -1;
 
-	parser *p = q->p;
-	frame *g = GET_FRAME(START_CTX);
-	cell *c = orig_c;
+	item *ptr = g_items;
 
-	for (unsigned i = 0; i < p->nbr_vars; i++) {
-		if (i >= orig)
-			break;
-
-		slot *e = GET_SLOT(g, i);
-
-		if (is_empty(&e->c))
-			continue;
-
-		q->latest_ctx = START_CTX;
-		idx_t c_ctx;
-
-		if (is_indirect(&e->c)) {
-			c = e->c.val_ptr;
-			c_ctx = e->ctx;
-		} else {
-			c = deref(q, &e->c, e->ctx);
-			c_ctx = q->latest_ctx;
+	while (ptr) {
+		if (unify(q, c, q->st.curr_frame, ptr->c, q->st.curr_frame)) {
+			return ptr->nbr;
 		}
 
-		if (!is_variable(orig_c) && is_variable(c))
-			continue;
-
-		if (unify(q, c, c_ctx, orig_c, orig_ctx)) {
-			tmp->tag = TAG_VAR;
-			tmp->nbr_cells = 1;
-			tmp->val_off = index_from_pool(q->st.m->pl, p->vartab.var_name[i]);
-			tmp->arity = 0;
-			tmp->flags = 0;
-			tmp->var_nbr = 0;
-			q->latest_ctx = orig_ctx;
-			return tmp;
-		}
+		ptr = ptr->next;
 	}
 
-	q->latest_ctx = orig_ctx;
-	return orig_c;
+	ptr = malloc(sizeof(item));
+	ptr->c = c;
+	ptr->nbr = i;
+	ptr->next = g_items;
+	g_items = ptr;
+	return -1;
+}
+
+static void	clear_results()
+{
+	while (g_items) {
+		item *save = g_items;
+		g_items = g_items->next;
+		free(save);
+	}
 }
 
 static void dump_vars(query *q, bool partial)
@@ -1520,9 +1517,18 @@ static void dump_vars(query *q, bool partial)
 			fprintf(stdout, ", ");
 
 		fprintf(stdout, "%s = ", p->vartab.var_name[i]);
+
+		// See if there is already an output with this value...
+
+		int j = check_duplicate_result(q, c, i);
+
+		if (j >= 0) {
+			fprintf(stdout, "%s", p->vartab.var_name[j]);
+			any++;
+			continue;
+		}
+
 		bool parens = false;
-		cell tmp = {0};
-		c = check_duplicate_result(q, i, c, q->latest_ctx, &tmp);
 
 		// If priority >= '=' then put in parens...
 
@@ -1539,11 +1545,7 @@ static void dump_vars(query *q, bool partial)
 		int saveq = q->quoted;
 		q->quoted = 1;
 
-		//printf("*** [%u] offset=%u, c->var_nbr=%u\n", (unsigned)i, (unsigned)c_ctx, (unsigned)c->var_nbr);
-
 		if (is_cyclic_term(q, c, c_ctx))
-			print_term(q, stdout, c, c_ctx, 0);
-		else if (tmp.tag != TAG_EMPTY)
 			print_term(q, stdout, c, c_ctx, 0);
 		else
 			print_term(q, stdout, c, c_ctx, -2);
@@ -1561,6 +1563,7 @@ static void dump_vars(query *q, bool partial)
 	}
 
 	q->st.m->pl->did_dump_vars = any;
+	clear_results();
 }
 
 static int check_interrupt(query *q)
