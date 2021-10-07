@@ -10804,7 +10804,7 @@ pl_status do_post_unification_hook(query *q)
 	tmp[1].match = search_predicate(q->st.m->pl->user_m, tmp+1);
 
 	if (!tmp[1].match)
-		return pl_success;
+		return throw_error(q, tmp+1, "existence_error", "procedure");
 
 	make_call(q, tmp+2);
 	q->st.curr_cell = tmp;
