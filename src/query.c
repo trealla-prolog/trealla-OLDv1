@@ -1460,17 +1460,20 @@ static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t
 			continue;
 
 		q->latest_ctx = START_CTX;
+		idx_t c_ctx;
 
 		if (is_indirect(&e->c)) {
 			c = e->c.val_ptr;
-			q->latest_ctx = e->ctx;
-		} else
+			c_ctx = e->ctx;
+		} else {
 			c = deref(q, &e->c, e->ctx);
+			c_ctx = q->latest_ctx;
+		}
 
 		if (!is_variable(orig_c) && is_variable(c))
 			continue;
 
-		if (unify(q, c, q->latest_ctx, orig_c, orig_ctx)) {
+		if (unify(q, c, c_ctx, orig_c, orig_ctx)) {
 			tmp->tag = TAG_VAR;
 			tmp->nbr_cells = 1;
 			tmp->val_off = index_from_pool(q->st.m->pl, p->vartab.var_name[i]);
