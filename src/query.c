@@ -1446,8 +1446,6 @@ static USE_RESULT pl_status match_head(query *q)
 
 static cell *check_duplicate_result(query *q, unsigned orig, cell *orig_c, idx_t orig_ctx, cell *tmp)
 {
-	return orig_c;
-
 	parser *p = q->p;
 	frame *g = GET_FRAME(START_CTX);
 	cell *c = orig_c;
@@ -1520,7 +1518,7 @@ static void dump_vars(query *q, bool partial)
 
 		fprintf(stdout, "%s = ", p->vartab.var_name[i]);
 		bool parens = false;
-		cell tmp;
+		cell tmp = {0};
 		c = check_duplicate_result(q, i, c, q->latest_ctx, &tmp);
 
 		// If priority >= '=' then put in parens...
@@ -1541,6 +1539,8 @@ static void dump_vars(query *q, bool partial)
 		//printf("*** [%u] offset=%u, c->var_nbr=%u\n", (unsigned)i, (unsigned)c_ctx, (unsigned)c->var_nbr);
 
 		if (is_cyclic_term(q, c, c_ctx))
+			print_term(q, stdout, c, c_ctx, 0);
+		else if (tmp.tag != TAG_EMPTY)
 			print_term(q, stdout, c, c_ctx, 0);
 		else
 			print_term(q, stdout, c, c_ctx, -2);
