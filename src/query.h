@@ -3,7 +3,7 @@
 #define QUERY_ASSERT 1
 
 #if QUERY_ASSERT
-#define START_CTX 1
+#define START_CTX 0
 #else
 #define START_CTX 0
 #endif
