@@ -2819,22 +2819,15 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 // doesn't work... to be investigated.
 
 #if !QUERY_ASSERT
-#if 0
-		ASTRING_sprintf(src, "copy_term((%s", pSrc);
-		ASTRING_trim_ws(src);
-		ASTRING_trim(src, '.');
-		ASTRING_strcat(src, "), _G_), _G_.");
-#else
 		ASTRING_sprintf(src, "deterministic((%s", pSrc);
 		ASTRING_trim_ws(src);
 		ASTRING_trim(src, '.');
 		ASTRING_strcat(src, "), _).");
-#endif
 #else
 		ASTRING_sprintf(src, "assertz(:- initialization((%s", pSrc);
 		ASTRING_trim_ws(src);
 		ASTRING_trim(src, '.');
-		ASTRING_strcat(src, "))), (:- initialization(_G_)), retract(:- initialization(_)), !, _G_.");
+		ASTRING_strcat(src, "))), (:- initialization(_G_)), retract(:- initialization(_)), !, '$rawcall'(_G_).");
 #endif
 
 		p->srcptr = ASTRING_cstr(src);
