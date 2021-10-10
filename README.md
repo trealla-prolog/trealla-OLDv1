@@ -396,16 +396,6 @@ translated automatically as this library is auto-included.
 	:- use_module(library(dcgs)).
 
 
-Format
-======
-
-Uses Markus Triska's public domain library.
-
-	:- use_module(library(format)).
-
-	format_//2
-
-
 User-defined functions
 ======================
 
