@@ -232,6 +232,9 @@ static void next_key(query *q)
 			q->st.curr_clause = NULL;
 			q->st.iter = NULL;
 		}
+
+		if (!q->pl->ffai)
+			q->st.iter = NULL;
 	} else
 		q->st.curr_clause = q->st.curr_clause->next;
 }
@@ -248,7 +251,7 @@ static void find_key(query *q, map *idx, cell *key)
 
 static bool is_next_key(query *q)
 {
-	if (q->st.iter) {
+	if (q->st.iter && !q->pl->ffai) {
 		if (m_is_next_key(q->st.iter))
 			return true;
 	} else if (q->st.curr_clause->next)
