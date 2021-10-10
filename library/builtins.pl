@@ -731,6 +731,8 @@ del_attr(Var, Module) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SICStus compatible
 
+:- use_module(library(dict)).
+
 put_atts(_, []) :- !.
 put_atts(Var, [H|T]) :- !,
 	put_atts(Var, H),

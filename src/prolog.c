@@ -380,19 +380,19 @@ prolog *pl_create()
 
 	for (library *lib = g_libs; lib->name; lib++) {
 		if (!strcmp(lib->name, "builtins")			// Always need this
-			|| !strcmp(lib->name, "lists")
-			|| !strcmp(lib->name, "apply")
+			|| !strcmp(lib->name, "lists")			// Common
+			|| !strcmp(lib->name, "apply")			// Common
 			) {
-			char *src = malloc(*lib->len+1);
+			size_t len = *lib->len;
+			char *src = malloc(len+1);
 			ensure(src);
-			memcpy(src, lib->start, *lib->len);
-			src[*lib->len] = '\0';
+			memcpy(src, lib->start, len);
+			src[len] = '\0';
 			ASTRING(s1);
 			ASTRING_sprintf(s1, "library/%s", lib->name);
 			load_text(pl->user_m, src, ASTRING_cstr(s1));
 			ASTRING_free(s1);
 			free(src);
-			break;
 		}
 	}
 
