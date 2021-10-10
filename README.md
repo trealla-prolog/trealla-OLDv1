@@ -218,6 +218,15 @@ Non-standard predicates
 	bb_put/2                    # SICStus-compatible
 	bb_delete/2                 # SICStus-compatible
 	bb_update/3                 # SICStus-compatible
+	bb_del/1                    # SICStus-compatible
+
+	bb_b_put/2                  # SICStus-compatible
+	bb_b_del/1                  # SICStus-compatible
+
+	b_getval/2                  # SWI-compatible
+	b_setval/2                  # SWI-compatible
+	b_setval0/2                 # SWI-compatible
+	b_delete/1                  # SWI-compatible
 
 	put_atts/2                  # SICStus-compatible
 	get_atts/2                  # SICStus-compatible
@@ -231,30 +240,31 @@ Non-standard predicates
 	frozen/2                    # use_module(library(freeze))
 
 	must_be/4                   # must_be(+rule,+type,+rule,+arg)
-	expand_term/2               # expand_term(+rule,-rule)
+	expand_term/2               # expand_term(+rule,-Term)
 	memberchk/2                 # memberchk(+rule,+list).
 	nonmember/2                 # \+ memberchk(+rule,+list)
 	atomic_concat/3             # atomic_concat(+atom,+list,-list)
 	atomic_list_concat/2	    # atomic_list_concat(L,Atom) (bidirectional)
 	atomic_list_concat/3	    # atomic_list_concat(L,Sep,Atom) (bidirectional)
-	read_term_from_chars/2	    # read_term_from_chars(+chars,-rule)
-	read_term_from_chars/3	    # read_term_from_chars(+chars,+opts,-rule)
-	write_term_to_chars/3	    # write_term_to_chars(+rule,+opts,-chars)
-	write_canonical_to_chars/3  # write_term_to_chars(+rule,+opts,-chars)
+	read_term_from_chars/2	    # read_term_from_chars(+chars,-Term)
+	read_term_from_chars/3	    # read_term_from_chars(+chars,+opts,-Term)
+	write_term_to_chars/3	    # write_term_to_chars(+rule,+opts,-Cs)
+	write_canonical_to_chars/3  # write_term_to_chars(+rule,+opts,-Cs)
 	chars_base64/3              # currently options are ignored
 	chars_urlenc/3              # currently options are ignored
 	hex_chars/2                 # as number_chars, but in hex
 	octal_chars/2               # as number_chars, but in octal
-	partial_string/2            # partial_string(+string,-string)
-	partial_string/3            # partial_string(+string,-string,-var)
+	partial_string/2            # partial_string(+string,-String)
+	partial_string/3            # partial_string(+string,-String,-Var)
 	if/3, (*->)/2               # soft-cut
-	setup_call_cleanup/3        # setup_call_cleanup(:Setup,:Goal,:Cleanup)
-	call_cleanup/2              # call_cleanup(:Goal,:Cleanup)
+	setup_call_cleanup/3        # setup_call_cleanup(+setup,+goal,+cleanup)
+	call_cleanup/2              # call_cleanup(+goal,+cleanup)
+	deterministic/2             # deterministic(+goal,:boolean)
 	variant/2                   # variant(+term1,+term2)
-	term_attvars/2              # term_attvars(+Term,-Vs)
+	term_attvars/2              # term_attvars(+term,-Vs)
 	copy_term_nat/2             # doesn't copy attrs
-	copy_term/3                 # copy_term(+term1,-term2,-goals)
-	unifiable/3                 # unifiable(+term1,+term2,-goals)
+	copy_term/3                 # copy_term(+term1,-term2,-Goals)
+	unifiable/3                 # unifiable(+term1,+term2,-Goals)
 	?=/2                        # ?=(+term1,+term2)
 	findall/4
 	var_number/2
@@ -331,8 +341,8 @@ Non-standard predicates
 	log10/1                     # function returning log10 of arg
 	now/0                       # function returning C-time in secs as integer
 	now/1                       # now (-integer) C-time in secs as integer
-	get_time/1                  # get_time(-variable) elapsed wall time in secs as float
-	cpu_time/1                  # cpu_time(-variable) elapsed CPU time in secs as float
+	get_time/1                  # get_time(-Var) elapsed wall time in secs as float
+	cpu_time/1                  # cpu_time(-Var) elapsed CPU time in secs as float
 
 	sleep/1                     # sleep time in secs
 	delay/1                     # sleep time for ms
