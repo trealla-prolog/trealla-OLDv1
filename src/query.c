@@ -1377,23 +1377,19 @@ static USE_RESULT pl_status match_head(query *q)
 			c->match = pr;
 		}
 
-		if (pr->idx1 && c->arity) {
+		if ((pr->idx1 || pr->idx2) && c->arity) {
 			cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
 			cell *p1 = key + 1;
 			cell *p2 = key->arity > 1 ? p1 + p1->nbr_cells : NULL;
 			bool use_index1 = pr->idx1 && p1 && !is_variable(p1);
 			bool use_index2 = pr->idx2 && p2 && !is_variable(p2);
+			map *idx = use_index2 ? pr->idx2 : use_index1 ? pr->idx1 : NULL;
 
-			if (use_index1) {
+			if (idx) {
 #if DUMP_KEYS
-				fprintf(stderr, "*** IDX1:\n"); sl_dump(pr->idx1, dump_key, q);
+				fprintf(stderr, "*** IDX:\n"); sl_dump(idx, dump_key, q);
 #endif
-				find_key(q, pr->idx1, key);
-			} else if (use_index2) {
-#if DUMP_KEYS
-				fprintf(stderr, "*** IDX2:\n"); sl_dump(pr->idx2, dump_key, q);
-#endif
-				find_key(q, pr->idx2, key);
+				find_key(q, idx, key);
 			} else
 				q->st.curr_clause = pr->head;
 		} else
