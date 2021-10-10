@@ -1377,33 +1377,23 @@ static USE_RESULT pl_status match_head(query *q)
 			c->match = pr;
 		}
 
-		if (pr->idx1) {
+		if (pr->idx1 && c->arity) {
 			cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
-			cell *p1 = NULL, *p2 = NULL;
+			cell *p1 = key + 1;
+			cell *p2 = key->arity > 1 ? p1 + p1->nbr_cells : NULL;
+			bool use_index1 = pr->idx1 && p1 && !is_variable(p1);
+			bool use_index2 = pr->idx2 && p2 && !is_variable(p2);
 
-			if (key->arity) {
-				p1 = key + 1;
-
-				if (key->arity > 1) {
-					p2 = p1 + p1->nbr_cells;
-
-					if (is_variable(p2))
-						p2 = NULL;
-				} else {
-					if (is_variable(p1))
-						p1 = NULL;
-				}
-			}
-
-			if (p1 && is_variable(p1))
-				p1 = NULL;
-
-			if (p1 || p2) {
-				map *idx = p2 ? pr->idx2 : pr->idx1;
+			if (use_index1) {
 #if DUMP_KEYS
-				printf("*** IDX%d: ", idx==pr->idx2?2:1); sl_dump(idx, dump_key, q);
+				fprintf(stderr, "*** IDX1:\n"); sl_dump(pr->idx1, dump_key, q);
 #endif
-				find_key(q, idx, key);
+				find_key(q, pr->idx1, key);
+			} else if (use_index2) {
+#if DUMP_KEYS
+				fprintf(stderr, "*** IDX2:\n"); sl_dump(pr->idx2, dump_key, q);
+#endif
+				find_key(q, pr->idx2, key);
 			} else
 				q->st.curr_clause = pr->head;
 		} else
