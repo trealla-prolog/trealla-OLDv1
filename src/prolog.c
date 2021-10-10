@@ -389,6 +389,7 @@ prolog *pl_create()
 		if (!strcmp(lib->name, "builtins")			// Always need this
 			|| !strcmp(lib->name, "lists")			// Common
 			|| !strcmp(lib->name, "apply")			// Common
+			|| !strcmp(lib->name, "freeze")			// Common
 			) {
 			size_t len = *lib->len;
 			char *src = malloc(len+1);
