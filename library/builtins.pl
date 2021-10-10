@@ -72,12 +72,23 @@ variant(Term1, Term2) :-
 	numbervars(Term2Copy, 0, N),
 	Term1Copy == Term2Copy.
 
-deterministic(Goal, Det) :-
-	call_cleanup(Goal, Det = true),
-	(	var(Det)
-	->	Det = false
-	;	true
-	).
+% This is so common it needs to be here
+
+member(X, [X|T]) :- T == [], !.
+member(X, [X|_]).
+member(X, [_|Xs]) :- member(X, Xs).
+
+% This is so common it needs to be here
+
+append(A, L, L) :- A == [], !.
+append([], L, L).
+append([H|T], L, [H|R]) :-
+	append(T, L, R).
+
+unifiable(T1, T2, Gs) :-
+	copy_term('$unifiable'(T1,T2,Gs), G0),
+	'$rawcall'(G0),
+	'$unifiable'(T1,T2,Gs)=G0.
 
 call_cleanup(G, C) :-
 	'$register_cleanup'(ignore(C)),
@@ -98,6 +109,13 @@ findall(T, G, B, Tail) :-
 	'$mustbe_list_or_var'(Tail),
 	findall(T, G, B0),
 	append(B0, Tail, B), !.
+
+deterministic(Goal, Det) :-
+	call_cleanup(Goal, Det = true),
+	(	var(Det)
+	->	Det = false
+	;	true
+	).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Derived from code by R.A. O'Keefe
@@ -534,20 +552,6 @@ consult(Files) :- load_files(Files,[]).
 strip_module(T,M,P) :- T=M:P -> true ; P=T, module(M).
 ?=(X,Y) :- \+ unifiable(X,Y,[_|_]).
 
-member(X, [X|T]) :- T == [], !.
-member(X, [X|_]).
-member(X, [_|Xs]) :- member(X, Xs).
-
-append(A, L, L) :- A == [], !.
-append([], L, L).
-append([H|T], L, [H|R]) :-
-	append(T, L, R).
-
-unifiable(T1, T2, Gs) :-
-	copy_term('$unifiable'(T1,T2,Gs), G0),
-	'$rawcall'(G0),
-	'$unifiable'(T1,T2,Gs)=G0.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SWI compatible
 %
@@ -726,8 +730,6 @@ del_attr(Var, Module) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SICStus compatible
-
-:- use_module(library(dict)).
 
 put_atts(_, []) :- !.
 put_atts(Var, [H|T]) :- !,

@@ -2,12 +2,6 @@
 
 #define QUERY_ASSERT 1
 
-#if QUERY_ASSERT
-#define START_CTX 0
-#else
-#define START_CTX 0
-#endif
-
 extern query *create_query(module *m, bool sub_query);
 extern query *create_sub_query(query *q, cell *curr_cell);
 extern void destroy_query(query *q);

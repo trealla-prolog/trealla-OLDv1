@@ -376,8 +376,13 @@ prolog *pl_create()
 
 	pl->user_m->prebuilt = true;
 
+	// Load some common libraries...
+
 	for (library *lib = g_libs; lib->name; lib++) {
-		if (!strcmp(lib->name, "builtins")) {
+		if (!strcmp(lib->name, "builtins")			// Always need this
+			|| !strcmp(lib->name, "lists")
+			|| !strcmp(lib->name, "apply")
+			) {
 			char *src = malloc(*lib->len+1);
 			ensure(src);
 			memcpy(src, lib->start, *lib->len);
