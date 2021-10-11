@@ -247,7 +247,7 @@ static void push_property(module *m, const char *name, unsigned arity, const cha
 	//	return;
 
 	char tmpbuf[1024];
-	format_property(tmpbuf, sizeof(tmpbuf), name, arity, type);
+	format_property(m, tmpbuf, sizeof(tmpbuf), name, arity, type);
 	parser *p = create_parser(m);
 	p->srcptr = tmpbuf;
 	p->consulting = true;
