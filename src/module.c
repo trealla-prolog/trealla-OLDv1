@@ -275,7 +275,7 @@ void set_noindex_in_db(module *m, const char *name, unsigned arity)
 	if (!pr) pr = create_predicate(m, &tmp);
 
 	if (pr)
-		pr->is_noindex = true;
+		pr->is_noindex1 = pr->is_noindex2 = true;
 	else
 		m->error = true;
 }
@@ -790,23 +790,29 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 	return cl;
 }
 
-static void reindex_predicate(module *m, predicate *pr)
+static void index_predicate(module *m, predicate *pr)
 {
-	pr->idx1 = m_create(index_compkey, NULL, m);
-	ensure(pr->idx1);
-	m_nbr_args(pr->idx1, 1);
+	if (!pr->idx1 && !pr->is_noindex1) {
+		pr->idx1 = m_create(index_compkey, NULL, m);
+		ensure(pr->idx1);
+		m_nbr_args(pr->idx1, 1);
+	}
 
-	if (pr->key.arity > 1) {
+	if (!pr->idx2 && !pr->is_noindex2) {
 		pr->idx2 = m_create(index_compkey, NULL, m);
 		ensure(pr->idx2);
 		m_nbr_args(pr->idx2, 2);
 	}
 
+	if (!pr->idx1 && !pr->idx2)
+		return;
+
 	for (clause *cl = pr->head; cl; cl = cl->next) {
 		cell *c = get_head(cl->r.cells);
 
 		if (!cl->r.ugen_erased) {
-			m_app(pr->idx1, c, cl);
+			if (pr->idx1)
+				m_app(pr->idx1, c, cl);
 
 			if (pr->idx2)
 				m_app(pr->idx2, c, cl);
@@ -823,34 +829,38 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 
 	cell *p1 = c + 1;
 
-	for (int i = 0; (i < 2) && (i < pr->key.arity) && !pr->is_noindex; i++) {
-		bool noindex = (i == 0) && is_structure(p1) && !m->pl->ffai;
+	for (int i = 0; (i < 2) && (i < pr->key.arity); i++) {
+		bool noindex = is_variable(p1);
 
-		if ((i > 0) && is_structure(p1) && (p1->arity > 1) && !is_iso_list(p1) && !m->pl->ffai)
+		if (is_structure(p1) && !is_iso_list(p1) && !m->pl->ffai)
 			noindex = true;
 
-		if ((i > 0) && is_structure(p1) && (p1->arity == 1)) {
-			if (p1->val_off == g_at_s)
-				noindex = true;
+		if (i == 0 && noindex) {
+			pr->is_noindex1 = true;
+
+			if (pr->idx1) {
+				m_destroy(pr->idx1);
+				pr->idx1 = NULL;
+			}
 		}
 
-		if (!pr->idx1 && noindex)
-			pr->is_noindex = true;
+		if (i == 1 && noindex) {
+			pr->is_noindex2 = true;
 
-		if ((i == 0) && pr->idx1 && noindex) {
-			pr->is_noindex = true;
-			pr->idx_save = pr->idx1;
-			pr->idx1 = NULL;
+			if (pr->idx2) {
+				m_destroy(pr->idx2);
+				pr->idx2 = NULL;
+			}
 		}
 
 		p1 += p1->nbr_cells;
 	}
 
-	if (!pr->idx1
+	if (((!pr->idx1 && !pr->is_noindex1)
+		|| (!pr->idx2 && !pr->is_noindex2))
 		&& !m->pl->noindex
-		&& !pr->is_noindex
 		&& (pr->cnt > m->indexing_threshold)) {
-		reindex_predicate(m, pr);
+		index_predicate(m, pr);
 	} else {
 		if (pr->idx1) {
 			if (!append)

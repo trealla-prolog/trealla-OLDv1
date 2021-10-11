@@ -378,7 +378,8 @@ struct predicate_ {
 	bool is_multifile:1;
 	bool is_discontiguous:1;
 	bool is_abolished:1;
-	bool is_noindex:1;
+	bool is_noindex1:1;
+	bool is_noindex2:1;
 	bool check_directive:1;
 };
 
