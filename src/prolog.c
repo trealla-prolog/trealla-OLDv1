@@ -380,6 +380,7 @@ prolog *pl_create()
 	set_dynamic_in_db(pl->user_m, "goal_expansion", 2);
 	set_dynamic_in_db(pl->user_m, "initialization", 1);
 	set_dynamic_in_db(pl->user_m, ":-", 1);
+	set_noindex_in_db(pl->user_m, ":-", 1);
 
 	pl->user_m->prebuilt = true;
 
