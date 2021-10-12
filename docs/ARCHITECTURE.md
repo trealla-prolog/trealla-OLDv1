@@ -7,21 +7,21 @@ diagrams illustrate the cell layout on 64-bit systems.
 
 Literal
 =======
-
+```
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |    CELL 1
-		+----------+---------+----------+---------+
-    4	|                 nbr_cells               |
+    0   | val_type |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
-    8	|                                         |
+    4   |                 nbr_cells               |
+        +----------+---------+----------+---------+
+    8   |                                         |
         |               - UNUSED -                |
-   12	|                                         |
+   12   |                                         |
         +----------+---------+----------+---------+
-   16	|                 val_off                 |
+   16   |                 val_off                 |
         +----------+---------+----------+---------+
-   20	|               - UNUSED -                |
+   20   |               - UNUSED -                |
         +----------+---------+----------+---------+
-
+```
 
 Where *val_type* is TYPE_LITERAL.
 Where *arity* is always 0.
@@ -34,21 +34,21 @@ An Atom is always used for functor names.
 
 Var
 ===
-
+```
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |    CELL 1
-		+----------+---------+----------+---------+
-    4	|                 nbr_cells               |
+    0   | val_type |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
-    8	|                                         |
+    4   |                 nbr_cells               |
+        +----------+---------+----------+---------+
+    8   |                                         |
         |               - UNUSED -                |
-   12	|                                         |
+   12   |                                         |
         +----------+---------+----------+---------+
-   16	|                 val_off                 |
+   16   |                 val_off                 |
         +----------+---------+----------+---------+
-   20	|       var_nbr      |      - UNUSED -    |
+   20   |       var_nbr      |      - UNUSED -    |
         +----------+---------+----------+---------+
-
+```
 
 Where *val_type* is TYPE_VAR.
 Where *arity* is always 0.
@@ -59,21 +59,21 @@ Where *var_nbr* is the index into the frame
 
 Integer
 =======
-
+```
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |    CELL 1
-		+----------+---------+----------+---------+
-    4	|                 nbr_cells               |
+    0   | val_type |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
-    8	|                                         |
+    4   |                 nbr_cells               |
+        +----------+---------+----------+---------+
+    8   |                                         |
         +                 val_int                 +
-   12	|                                         |
+   12   |                                         |
         +----------+---------+----------+---------+
-   16	|                                         |
+   16   |                                         |
         +                                         +
-   20	|                                         |
+   20   |                                         |
         +----------+---------+----------+---------+
-
+```
 
 Where *val_type* is TYPE_RATIONAL.
 Where *arity* is always 0.
@@ -83,21 +83,21 @@ Where *val_int* is a signed 64-bit integer.
 
 Bigint
 ======
-
+```
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |    CELL 1
-		+----------+---------+----------+---------+
-    4	|                 nbr_cells               |
+    0   | val_type |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
-    8	|                                         |
+    4   |                 nbr_cells               |
+        +----------+---------+----------+---------+
+    8   |                                         |
         +               val_bigint                +
-   12	|                                         |
+   12   |                                         |
         +----------+---------+----------+---------+
-   16	|                                         |
+   16   |                                         |
         +                                         +
-   20	|                                         |
+   20   |                                         |
         +----------+---------+----------+---------+
-
+```
 
 Where *val_type* is TYPE_RATIONAL.
 Where *arity* is always 0.
@@ -107,21 +107,21 @@ Where *val_bigint* is a pointer.
 
 Float
 =====
-
+```
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |    CELL 1
-		+----------+---------+----------+---------+
-    4	|                 nbr_cells               |
+    0   | val_type |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
-    8	|                                         |
+    4   |                 nbr_cells               |
+        +----------+---------+----------+---------+
+    8   |                                         |
         +                val_real                 +
-   12	|                                         |
+   12   |                                         |
         +----------+---------+----------+---------+
-   16	|                                         |
+   16   |                                         |
         +               - UNUSED -                +
-   20	|                                         |
+   20   |                                         |
         +----------+---------+----------+---------+
-
+```
 
 Where *val_type* is TYPE_FLOAT.
 Where *arity* is always 0
@@ -133,21 +133,21 @@ Cstring
 =======
 
 A small string < 16 bytes.
-
+```
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |    CELL 1
-		+----------+---------+----------+---------+
-    4	|                 nbr_cells               |
+    0   | val_type |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
-    8	|                                         |
+    4   |                 nbr_cells               |
+        +----------+---------+----------+---------+
+    8   |                                         |
         +                                         +
-   12	|                                         |
+   12   |                                         |
         +                 val_chr[16]             +
-   16	|                                         |
+   16   |                                         |
         +                                         +
-   20	|                                         |
+   20   |                                         |
         +----------+---------+----------+---------+
-
+```
 
 Where *val_type* is TYPE_CSTRING.
 Where *arity* is always 0.
@@ -159,21 +159,21 @@ A Cstring may be used for atoms that are not functors and need quoting.
 
 Static BLOB
 ===========
-
+```
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |    CELL 1
-		+----------+---------+----------+---------+
-    4	|                 nbr_cells               |
+    0   | val_type |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
-    8	|                                         |
+    4   |                 nbr_cells               |
+        +----------+---------+----------+---------+
+    8   |                                         |
         +                 val_str                 +
-   12	|                                         |
+   12   |                                         |
         +----------+---------+----------+---------+
-   16	|                                         |
+   16   |                                         |
         +                 len_str                 +
-   20	|                                         |
+   20   |                                         |
         +----------+---------+----------+---------+
-
+```
 
 Where *val_type* is TYPE_CSTRING.
 Where *arity* is always 0.
@@ -191,21 +191,21 @@ Non-static BLOB
 ===============
 
 A ref-counted string buffer.
-
+```
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |    CELL 1
-		+----------+---------+----------+---------+
-    4	|                 nbr_cells               |
+    0   | val_type |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
-    8	|                                         |
+    4   |                 nbr_cells               |
+        +----------+---------+----------+---------+
+    8   |                                         |
         +               val_strbuf                +
-   12	|                                         |
+   12   |                                         |
         +----------+---------+----------+---------+
-   16	|               strbuf_off                |
+   16   |               strbuf_off                |
         +----------+---------+----------+---------+
-   20	|               strbuf_len                |
+   20   |               strbuf_len                |
         +----------+---------+----------+---------+
-
+```
 
 Where *val_type* is TYPE_CSTRING.
 Where *arity* is always 0.
@@ -229,22 +229,22 @@ either type. The *arity* is 2 and the *flag* has FLAG_STRING set.
 
 Compound
 ========
-
+```
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |    CELL 1
-		+----------+---------+----------+---------+
-    4	|                 nbr_cells               |
+    0   | val_type |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
-    8	|                                         |
+    4   |                 nbr_cells               |
+        +----------+---------+----------+---------+
+    8   |                                         |
         +               - UNUSED -                +
-   12	|                                         |
+   12   |                                         |
         +----------+---------+----------+---------+
-   16	|                 val_off                 |
+   16   |                 val_off                 |
         +----------+---------+----------+---------+
-   20	|               - UNUSED -                |
+   20   |               - UNUSED -                |
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |    CELL 2
-
+    0   | val_type |  arity  |       flags        |    CELL 2
+```
 
 Where *val_type* is TYPE_LITERAL.
 Where *arity* is > 0.
@@ -255,22 +255,22 @@ Where args are the following cells (see *nbr_cells*).
 
 List
 ====
-
+```
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |    CELL 1
-		+----------+---------+----------+---------+
-    4	|                 nbr_cells               |
+    0   | val_type |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
-    8	|                                         |
+    4   |                 nbr_cells               |
+        +----------+---------+----------+---------+
+    8   |                                         |
         +               - UNUSED -                +
-   12	|                                         |
+   12   |                                         |
         +----------+---------+----------+---------+
-   16	|                 val_off                 |
+   16   |                 val_off                 |
         +----------+---------+----------+---------+
-   20	|               - UNUSED -                |
+   20   |               - UNUSED -                |
         +----------+---------+----------+---------+
-    0	| val_type |  arity  |       flags        |    CELL 2
-
+    0   | val_type |  arity  |       flags        |    CELL 2
+```
 
 Where *val_type* is TYPE_LITERAL.
 Where *arity* is always 2.
