@@ -243,9 +243,6 @@ clause *find_in_db(module *m, uuid *ref)
 
 static void push_property(module *m, const char *name, unsigned arity, const char *type)
 {
-	//if (name[0] == '$')
-	//	return;
-
 	char tmpbuf[1024];
 	format_property(m, tmpbuf, sizeof(tmpbuf), name, arity, type);
 	parser *p = create_parser(m);
