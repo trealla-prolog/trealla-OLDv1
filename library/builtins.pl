@@ -386,7 +386,8 @@ keysort([Key-X| Xs], List, Ys, YsTail) :-
 	!,
 	'$key_partition'(Xs, Key, List, Left, EQ, EQT, Right),
 	keysort(Left, List,  Ys, [Key-X|EQ]),
-	keysort(Right, List, EQT, YsTail).
+	keysort(Right, List, EQT, YsTail),
+	!.
 keysort([], _, Ys, Ys) :-
 	!.
 keysort([Term| _], _, _, _) :-
