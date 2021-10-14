@@ -1470,7 +1470,7 @@ static void	clear_results()
 static void dump_vars(query *q, bool partial)
 {
 	parser *p = q->p;
-	frame *g = GET_FIRST_FRAME();
+	frame *g = GET_FRAME(1);
 	int any = 0;
 
 	q->is_dump_vars = true;
