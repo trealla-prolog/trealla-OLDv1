@@ -322,7 +322,7 @@ sort([X, Y| Xs], Ys) :- !,
 	sort(X1s, Y1s),
 	sort(X2s, Y2s),
 	'$sort_merge'(Y1s, Y2s, Ys0),
-	Ys = Ys0.
+	Ys = Ys0, !.
 sort([X], [X]) :- !.
 sort(Term, _) :-
 	Term \== [],
