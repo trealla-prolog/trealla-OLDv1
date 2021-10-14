@@ -357,7 +357,7 @@ msort([X, Y| Xs], Ys) :- !,
 	msort(X1s, Y1s),
 	msort(X2s, Y2s),
 	'$msort_merge'(Y1s, Y2s, Ys0),
-	Ys = Ys0.
+	Ys = Ys0, !.
 msort([X], [X]) :- !.
 msort(Term, _) :-
 	Term \== [],
