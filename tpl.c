@@ -187,10 +187,6 @@ int main(int ac, char *av[])
 			set_trace(pl);
 		else if (!strcmp(av[i], "--stats"))
 			set_stats(pl);
-		else if (!strcmp(av[i], "--noindex"))
-			set_noindex(pl);
-		else if (!strcmp(av[i], "--ffai"))
-			set_ffai(pl);
 		else if (!strcmp(av[i], "--ns"))
 			ns = 1;
 		else if (!strcmp(av[i], "-d") || !strcmp(av[i], "--daemon"))
@@ -287,7 +283,6 @@ int main(int ac, char *av[])
 		fprintf(stdout, "  -w, --watchdog\t- create watchdog\n");
 		fprintf(stdout, "  --consult\t\t- consult from STDIN\n");
 		fprintf(stdout, "  --stats\t\t- print stats\n");
-		fprintf(stdout, "  --noindex\t\t- don't use term indexing\n");
 		fprintf(stdout, "  --ns\t\t\t- non-stop (to top-level)\n");
 	}
 

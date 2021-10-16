@@ -711,8 +711,6 @@ static void directives(parser *p, cell *d)
 				set_persist_in_db(p->m, GET_STR(p, c_name), arity);
 			} else if (!strcmp(dirname, "discontiguous")) {
 				set_discontiguous_in_db(p->m, GET_STR(p, c_name), arity);
-			} else if (!strcmp(dirname, "noindex")) {
-				set_noindex_in_db(p->m, GET_STR(p, c_name), arity);
 			} else if (!strcmp(dirname, "multifile")) {
 				const char *src = GET_STR(p, c_name);
 
@@ -2804,6 +2802,8 @@ unsigned tokenize(parser *p, bool args, bool consing)
 	p->depth--;
 	return !p->error;
 }
+
+#define QUERY_ASSERT 1
 
 bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 {

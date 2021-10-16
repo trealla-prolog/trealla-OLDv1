@@ -4524,12 +4524,17 @@ static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 		add_to_dirty_list(q, cl);
 	}
 
-	if (hard)
-		pr->is_abolished = true;
+	m_destroy(pr->idx);
+	pr->idx = NULL;
 
-	m_destroy(pr->idx1);
-	m_destroy(pr->idx2);
-	pr->idx1 = pr->idx2 = NULL;
+	if (hard) {
+		pr->is_abolished = true;
+	} else {
+		pr->idx = m_create(index_cmpkey, NULL, q->st.m);
+		ensure(pr->idx);
+		m_allow_dups(pr->idx, false);
+	}
+
 	pr->head = pr->tail = NULL;
 	pr->cnt = 0;
 	return pl_success;
@@ -5902,6 +5907,54 @@ static USE_RESULT pl_status fn_listing_1(query *q)
 	}
 
 	save_name(stdout, q, name, arity);
+	return pl_success;
+}
+
+const char *dump_key(const void *k, __attribute__((unused)) const void *v, const void *p)
+{
+	query *q = (query*)p;
+	cell *c = (cell*)k;
+	static char tmpbuf[1024];
+	print_term_to_buf(q, tmpbuf, sizeof(tmpbuf), c, q->st.curr_frame, 0, false, 0);
+	return tmpbuf;
+}
+
+static USE_RESULT pl_status fn_sys_dump_keys_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	const char *name = NULL;
+	unsigned arity = -1;
+
+	if (p1->arity) {
+		if (slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "/") && slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "//"))
+			return throw_error(q, p1, "type_error", "predicate_indicator");
+
+		cell *p2 = p1 + 1;
+
+		if (!is_atom(p2))
+			return throw_error(q, p2, "type_error", "atom");
+
+		cell *p3 = p2 + p2->nbr_cells;
+
+		if (!is_integer(p3))
+			return throw_error(q, p3, "type_error", "integer");
+
+		name = GET_STR(q, p2);
+		arity = get_int(p3);
+
+		if (!slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "//"))
+			arity += 2;
+	}
+
+	predicate *pr = find_functor(q->st.m, name, arity);
+
+	if (!pr)
+		return pl_failure;
+
+	if (!pr->idx)
+		return pl_success;
+
+	fprintf(stderr, "\n"); sl_dump(pr->idx, dump_key, q);
 	return pl_success;
 }
 
@@ -11112,6 +11165,8 @@ static const struct builtins g_predicates_other[] =
 	{"$write_attributes", 2, fn_sys_write_attributes_2, "+variable,+list", false},
 	{"$read_attributes", 2, fn_sys_read_attributes_2, "+variable,-list", false},
 	{"$erase_attributes", 1, fn_sys_erase_attributes_1, "+variable", false},
+
+	{"$dump_keys", 1, fn_sys_dump_keys_1, "+pi", false},
 
 #if USE_OPENSSL
 	{"sha1", 2, fn_sha1_2, "+string,?string", false},

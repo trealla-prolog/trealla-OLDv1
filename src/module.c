@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdlib.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -106,11 +107,17 @@ predicate *create_predicate(module *m, cell *c)
 	pr->key.flags = 0;
 	pr->key.nbr_cells = 1;
 
+	if (pr->key.arity) {
+		pr->idx = m_create(index_cmpkey, NULL, m);
+		ensure(pr->idx);
+		m_allow_dups(pr->idx, false);
+	}
+
 	m_app(m->index, &pr->key, pr);
 	return pr;
 }
 
-static int predicate_compkey(const void *ptr1, const void *ptr2, const void *param, __attribute__((unused)) int args)
+static int predicate_cmpkey(const void *ptr1, const void *ptr2, const void *param)
 {
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
@@ -128,7 +135,7 @@ static int predicate_compkey(const void *ptr1, const void *ptr2, const void *par
 	return strcmp(m->pl->pool+p1->val_off, m->pl->pool+p2->val_off);
 }
 
-static int index_compkey_internal(const void *ptr1, const void *ptr2, const void *param, int args, int depth)
+static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, int depth)
 {
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
@@ -190,27 +197,20 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 			if (p1->arity > p2->arity)
 				return 1;
 
-			bool i = p1->val_off == p2->val_off;
-
-			if (!i)
+			if (p1->val_off != p2->val_off)
 				return strcmp(GET_STR(m, p1), GET_STR(m, p2));
 
 			int arity = p1->arity;
 			p1++; p2++;
-			int cnt = 1;
 
 			while (arity--) {
-				int i = index_compkey_internal(p1, p2, param, args, depth+1);
+				int i = index_cmpkey_(p1, p2, param, depth+1);
 
 				if (i != 0)
 					return i;
 
-				if ((depth == 0) && (cnt == args))
-					break;
-
 				p1 += p1->nbr_cells;
 				p2 += p2->nbr_cells;
-				cnt++;
 			}
 
 			return 0;
@@ -221,9 +221,9 @@ static int index_compkey_internal(const void *ptr1, const void *ptr2, const void
 	return 0;
 }
 
-static int index_compkey(const void *ptr1, const void *ptr2, const void *param, int args)
+int index_cmpkey(const void *ptr1, const void *ptr2, const void *param)
 {
-	return index_compkey_internal(ptr1, ptr2, param, args, 0);
+	return index_cmpkey_(ptr1, ptr2, param, 0);
 }
 
 clause *find_in_db(module *m, uuid *ref)
@@ -259,22 +259,6 @@ clause *erase_from_db(module *m, uuid *ref)
 	if (!cl) return 0;
 	cl->r.ugen_erased = ++m->pl->ugen;
 	return cl;
-}
-
-void set_noindex_in_db(module *m, const char *name, unsigned arity)
-{
-	cell tmp = (cell){0};
-	tmp.tag = TAG_POOL;
-	tmp.val_off = index_from_pool(m->pl, name);
-	ensure(tmp.val_off != ERR_IDX);
-	tmp.arity = arity;
-	predicate *pr = find_predicate(m, &tmp);
-	if (!pr) pr = create_predicate(m, &tmp);
-
-	if (pr)
-		pr->is_noindex1 = pr->is_noindex2 = true;
-	else
-		m->error = true;
 }
 
 void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
@@ -787,109 +771,20 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 	return cl;
 }
 
-static void index_predicate(module *m, predicate *pr)
+static void assert_commit(clause *cl, predicate *pr, bool append)
 {
-	if (!pr->idx1 && !pr->is_noindex1) {
-		pr->idx1 = m_create(index_compkey, NULL, m);
-		ensure(pr->idx1);
-		m_nbr_args(pr->idx1, 1);
-	}
-
-	if (!pr->idx2 && !pr->is_noindex2) {
-		pr->idx2 = m_create(index_compkey, NULL, m);
-		ensure(pr->idx2);
-		m_nbr_args(pr->idx2, 2);
-	}
-
-	if (!pr->idx1 && !pr->idx2)
-		return;
-
-	for (clause *cl = pr->head; cl; cl = cl->next) {
-		cell *c = get_head(cl->r.cells);
-
-		if (!cl->r.ugen_erased) {
-			if (pr->idx1)
-				m_app(pr->idx1, c, cl);
-
-			if (pr->idx2)
-				m_app(pr->idx2, c, cl);
-		}
-	}
-}
-
-static bool is_ground(const cell* c)
-{
-	idx_t nbr_cells = c->nbr_cells;
-
-	while (nbr_cells--) {
-		if (is_variable(c))
-			return false;
-
-		c++;
-	}
-
-	return true;
-}
-
-static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
-{
-	cell *c = get_head(cl->r.cells);
-
 	if (pr->is_persist)
 		cl->r.persist = true;
 
-	cell *p1 = c + 1;
+	if (pr->is_noindex || !pr->idx)
+		return;
 
-	for (int i = 0; (i < 2) && (i < pr->key.arity); i++) {
-		bool noindex = !is_ground(p1) && !m->pl->ffai;
+	cell *c = get_head(cl->r.cells);
 
-		//if (is_variable(p1))
-		//	noindex = true;
-
-		if ((i > 0) && is_structure(p1) && !is_iso_list(p1) && !m->pl->ffai)
-			noindex = true;
-
-		if ((i == 0) && noindex) {
-			pr->is_noindex1 = true;
-
-			if (pr->idx1) {
-				m_destroy(pr->idx1);
-				pr->idx1 = NULL;
-			}
-		}
-
-		if ((i == 1) && noindex) {
-			pr->is_noindex2 = true;
-
-			if (pr->idx2) {
-				m_destroy(pr->idx2);
-				pr->idx2 = NULL;
-			}
-		}
-
-		p1 += p1->nbr_cells;
-	}
-
-	if (((!pr->idx1 && !pr->is_noindex1)
-		|| (!pr->idx2 && !pr->is_noindex2))
-		&& !m->pl->noindex
-		&& (pr->cnt > m->indexing_threshold)) {
-		index_predicate(m, pr);
-	} else {
-		if (pr->idx1) {
-			if (!append)
-				m_set(pr->idx1, c, cl);
-			else
-				m_app(pr->idx1, c, cl);
-		}
-
-		if (pr->idx2) {
-			if (!append)
-				m_set(pr->idx2, c, cl);
-			else
-				m_app(pr->idx2, c, cl);
-		}
-	}
+	if (!append)
+		m_set(pr->idx, c, cl);
+	else
+		m_app(pr->idx, c, cl);
 }
 
 clause *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
@@ -908,7 +803,7 @@ clause *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 	if (!pr->tail)
 		pr->tail = cl;
 
-	assert_commit(m, cl, pr, false);
+	assert_commit(cl, pr, false);
 	return cl;
 }
 
@@ -928,7 +823,7 @@ clause *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 	if (!pr->head)
 		pr->head = cl;
 
-	assert_commit(m, cl, pr, true);
+	assert_commit(cl, pr, true);
 	return cl;
 }
 
@@ -937,16 +832,7 @@ bool retract_from_db(module *m, clause *cl)
 	if (cl->r.ugen_erased)
 		return false;
 
-	predicate *pr = cl->owner;
-
-	if (!--pr->cnt) {
-		m_destroy(pr->idx1);
-		m_destroy(pr->idx2);
-		m_destroy(pr->idx_save);
-		pr->idx1 = pr->idx2 = pr->idx_save = NULL;
-		pr->head = pr->tail = NULL;
-	}
-
+	cl->owner->cnt--;
 	cl->r.ugen_erased = ++m->pl->ugen;
 	return true;
 }
@@ -1235,9 +1121,8 @@ void destroy_module(module *m)
 			cl = save;
 		}
 
-		m_destroy(pr->idx1);
-		m_destroy(pr->idx2);
 		m_destroy(pr->idx_save);
+		m_destroy(pr->idx);
 		free(pr);
 		pr = save;
 	}
@@ -1276,7 +1161,8 @@ module *create_module(prolog *pl, const char *name)
 	m->error = false;
 	m->id = index_from_pool(pl, name);
 	m->defops = m_create((void*)strcmp, NULL, NULL);
-	m->indexing_threshold = 100;
+	m_allow_dups(m->defops, false);
+	m->indexing_threshold = 2500;
 
 	if (strcmp(name, "system")) {
 		for (const op_table *ptr = g_ops; ptr->name; ptr++) {
@@ -1288,8 +1174,9 @@ module *create_module(prolog *pl, const char *name)
 	}
 
 	m->ops = m_create((void*)strcmp, NULL, NULL);
-	m->index = m_create(predicate_compkey, NULL, m);
-	ensure(m->index);
+	m_allow_dups(m->ops, false);
+	m->index = m_create(predicate_cmpkey, NULL, m);
+	m_allow_dups(m->index, false);
 	m->p = create_parser(m);
 	ensure(m->p);
 

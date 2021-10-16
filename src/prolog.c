@@ -14,12 +14,6 @@
 #include "module.h"
 #include "prolog.h"
 
-#if QUERY_ASSERT
-#define START_CTX 1
-#else
-#define START_CTX 0
-#endif
-
 static const size_t INITIAL_POOL_SIZE = 64000;	// bytes
 
 stream g_streams[MAX_STREAMS] = {{0}};
@@ -128,8 +122,6 @@ int get_halt_code(prolog *pl) { return pl->halt_code; }
 void set_trace(prolog *pl) { pl->trace = true; }
 void set_quiet(prolog *pl) { pl->quiet = true; }
 void set_stats(prolog *pl) { pl->stats = true; }
-void set_noindex(prolog *pl) { pl->noindex = true; }
-void set_ffai(prolog *pl) { pl->ffai = true; }
 void set_opt(prolog *pl, int level) { pl->opt = level; }
 
 bool pl_eval(prolog *pl, const char *s)
@@ -208,6 +200,8 @@ static bool g_init(prolog *pl)
 
 		CHECK_SENTINEL(pl->symtab = m_create((void*)strcmp, (void*)free, NULL), NULL);
 		CHECK_SENTINEL(pl->keyval = m_create((void*)strcmp, (void*)keyvalfree, NULL), NULL);
+		m_allow_dups(pl->symtab, false);
+		m_allow_dups(pl->keyval, false);
 
 		if (!error) {
 			CHECK_SENTINEL(g_false_s = index_from_pool(pl, "false"), ERR_IDX);
@@ -323,6 +317,7 @@ prolog *pl_create()
 	}
 
 	pl->funtab = m_create((void*)strcmp, NULL, NULL);
+	m_allow_dups(pl->funtab, false);
 
 	if (pl->funtab)
 		load_builtins(pl);
@@ -367,10 +362,6 @@ prolog *pl_create()
 	set_multifile_in_db(pl->user_m, "term_expansion", 2);
 	set_multifile_in_db(pl->user_m, "goal_expansion", 2);
 
-	set_noindex_in_db(pl->user_m, "$predicate_property", 2);
-	set_noindex_in_db(pl->user_m, "$stream_property", 2);
-	set_noindex_in_db(pl->user_m, "$current_op", 3);
-
 	set_dynamic_in_db(pl->user_m, "$record_key", 2);
 	set_dynamic_in_db(pl->user_m, "$current_op", 3);
 	set_dynamic_in_db(pl->user_m, "$predicate_property", 2);
@@ -380,7 +371,6 @@ prolog *pl_create()
 	set_dynamic_in_db(pl->user_m, "goal_expansion", 2);
 	set_dynamic_in_db(pl->user_m, "initialization", 1);
 	set_dynamic_in_db(pl->user_m, ":-", 1);
-	set_noindex_in_db(pl->user_m, ":-", 1);
 
 	pl->user_m->prebuilt = true;
 

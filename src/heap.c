@@ -111,7 +111,7 @@ cell *alloc_on_heap(query *q, idx_t nbr_cells)
 
 static cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only)
 {
-	if (depth >= 64000) {
+	if (depth >= 1000000) {
 		q->cycle_error = true;
 		return ERR_CYCLE_CELL;
 	}
@@ -249,7 +249,7 @@ cell *do_deep_copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t 
 
 static cell *deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth)
 {
-	if (depth >= 64000) {
+	if (depth >= 1000000) {
 		q->cycle_error = true;
 		return ERR_CYCLE_CELL;
 	}

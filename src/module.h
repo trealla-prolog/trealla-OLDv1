@@ -17,6 +17,7 @@ extern predicate *find_functor(module *m, const char *name, unsigned arity);
 extern predicate *find_predicate(module *m, cell *c);
 extern predicate *search_predicate(module *m, cell *c);
 extern predicate *create_predicate(module *m, cell *c);
+extern int index_cmpkey(const void *ptr1, const void *ptr2, const void *param);
 extern bool needs_quoting(module *m, const char *src, int srclen);
 extern void do_db_load(module *m);
 
@@ -25,7 +26,6 @@ extern clause *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consul
 extern bool retract_from_db(module *m, clause *r);
 extern clause *erase_from_db(module *m, uuid *ref);
 
-extern void set_noindex_in_db(module *m, const char *name, unsigned arity);
 extern void set_discontiguous_in_db(module *m, const char *name, unsigned arity);
 extern void set_dynamic_in_db(module *m, const char *name, unsigned arity);
 extern void set_meta_predicate_in_db(module *m, cell *c);

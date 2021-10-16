@@ -367,7 +367,7 @@ struct predicate_ {
 	predicate *prev, *next;
 	clause *head, *tail;
 	module *m;
-	map *idx1, *idx2, *idx_save;
+	map *idx, *idx_save;
 	cell key;
 	uint64_t cnt, refs;
 	bool is_prebuilt:1;
@@ -378,8 +378,7 @@ struct predicate_ {
 	bool is_multifile:1;
 	bool is_discontiguous:1;
 	bool is_abolished:1;
-	bool is_noindex1:1;
-	bool is_noindex2:1;
+	bool is_noindex:1;
 	bool check_directive:1;
 };
 
@@ -443,12 +442,13 @@ typedef struct {
 typedef struct {
 	cell *curr_cell;
 	clause *curr_clause, *curr_clause2;
-	miter *iter, *f_iter;
+	miter *f_iter;
 	predicate *pr;
 	module *m;
 	idx_t curr_frame, fp, hp, tp, sp;
 	uint32_t cgen, arena_nbr;
 	uint8_t qnbr;
+	bool definitive:1;
 } prolog_state;
 
 typedef struct {
@@ -643,7 +643,6 @@ struct prolog_ {
 	bool quiet:1;
 	bool stats:1;
 	bool noindex:1;
-	bool ffai:1;
 	bool iso_only:1;
 	bool trace:1;
 };

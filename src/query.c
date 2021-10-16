@@ -225,36 +225,55 @@ bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx)
 	return is_cyclic_term_internal(q, p1, p1_ctx, NULL);
 }
 
-static void next_key(query *q)
+static bool is_next_key(query *q)
 {
-	if (q->st.iter) {
-		if (!m_next_key(q->st.iter, (void**)&q->st.curr_clause)) {
-			q->st.curr_clause = NULL;
-			q->st.iter = NULL;
-		}
-	} else
-		q->st.curr_clause = q->st.curr_clause->next;
+	if (!q->st.curr_clause->next || q->st.definitive)
+		return false;
+
+	return true;
 }
 
-static void find_key(query *q, map *idx, cell *key)
+static void next_key(query *q)
 {
-	if (!(q->st.iter = m_find_key(idx, key))) {
+	if (!q->st.definitive)
+		q->st.curr_clause = q->st.curr_clause->next;
+	else
 		q->st.curr_clause = NULL;
+}
+
+static void find_key(query *q, predicate *pr, cell *c)
+{
+	q->st.definitive = false;
+
+	if (!pr->idx || (pr->cnt < q->st.m->indexing_threshold)) {
+		q->st.curr_clause = pr->head;
 		return;
 	}
 
-	next_key(q);
-}
+	cell *key = deep_clone_to_tmp(q, c, q->st.curr_frame);
+	q->st.curr_clause = NULL;
+	miter *iter;
 
-static bool is_next_key(query *q)
-{
-	if (q->st.iter) {
-		if (m_is_next_key(q->st.iter))
-			return true;
-	} else if (q->st.curr_clause->next)
-		return true;
+	if (!(iter = m_find_key(pr->idx, key)))
+		return;
 
-	return false;
+	if (!m_next_key(iter, (void*)&q->st.curr_clause))
+		return;
+
+	// If the index search has found just one (definitive) solution
+	// then we can use it with no problems. If more than one then
+	// results must be returned in database order. We could prefetch
+	// all the results and return them sorted, but that would be slow
+	// (because a subsequent cut may make that redundant?). For now
+	// just revert to a regular database search in such cases...
+
+	if (m_next_key(iter, NULL)) {
+		q->st.curr_clause = pr->head;
+		m_done(iter);
+		return;
+	}
+
+	q->st.definitive = true;
 }
 
 void add_to_dirty_list(query *q, clause *cl)
@@ -475,7 +494,6 @@ bool retry_choice(query *q)
 		return retry_choice(q);
 
 	trim_heap(q, ch);
-	m_done(q->st.iter);
 	q->st = ch->st;
 	q->save_m = NULL;		// maybe move q->save_m to q->st.save_m
 
@@ -588,7 +606,6 @@ static void commit_me(query *q, rule *r)
 	frame *g = GET_CURR_FRAME();
 	g->m = q->st.m;
 	q->st.m = q->st.curr_clause->owner->m;
-	q->st.iter = NULL;
 	bool last_match = r->first_cut || !is_next_key(q);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool choices = any_choices(q, g, true);
@@ -607,10 +624,6 @@ static void commit_me(query *q, rule *r)
 		g = make_frame(q, r->nbr_vars);
 
 	if (last_match) {
-		if (q->st.iter)
-			m_done(q->st.iter);
-
-		q->st.iter = NULL;
 		drop_choice(q);
 		trim_trail(q);
 	} else {
@@ -1331,19 +1344,6 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 	return pl_failure;
 }
 
-#define DUMP_KEYS 0
-
-#if DUMP_KEYS
-static const char *dump_key(const void *p1, const void *p)
-{
-	query *q = (query*)p;
-	const cell *c = (cell*)p1;
-	static char tmpbuf[1024];
-	print_term_to_buf(q, tmpbuf, sizeof(tmpbuf), c, q->st.curr_frame, 0, false, 0);
-	return tmpbuf;
-}
-#endif
-
 static USE_RESULT pl_status match_head(query *q)
 {
 	if (!q->retry) {
@@ -1374,24 +1374,7 @@ static USE_RESULT pl_status match_head(query *q)
 			c->match = pr;
 		}
 
-		if ((pr->idx1 || pr->idx2) && c->arity) {
-			cell *key = deep_clone_to_heap(q, c, q->st.curr_frame);
-			cell *p1 = key + 1;
-			cell *p2 = key->arity > 1 ? p1 + p1->nbr_cells : NULL;
-			bool use_index1 = pr->idx1 && p1 && !is_variable(p1);
-			bool use_index2 = pr->idx2 && p2 && !is_variable(p2);
-			map *idx = use_index2 ? pr->idx2 : use_index1 ? pr->idx1 : NULL;
-
-			if (idx) {
-#if DUMP_KEYS
-				fprintf(stderr, "*** IDX:\n"); sl_dump(idx, dump_key, q);
-#endif
-				find_key(q, idx, key);
-			} else
-				q->st.curr_clause = pr->head;
-		} else
-			q->st.curr_clause = pr->head;
-
+		find_key(q, pr, c);
 		frame *g = GET_FRAME(q->st.curr_frame);
 		g->ugen = q->st.m->pl->ugen;
 	} else
@@ -1814,9 +1797,7 @@ pl_status execute(query *q, cell *cells, unsigned nbr_vars)
 	g->nbr_vars = nbr_vars;
 	g->nbr_slots = nbr_vars;
 	g->ugen = ++q->st.m->pl->ugen;
-	pl_status ret = start(q);
-	m_done(q->st.iter);
-	return ret;
+	return start(q);
 }
 
 void destroy_query(query *q)
