@@ -109,18 +109,18 @@ test4 :-
 test5 :-
 	write('Load...'), nl,
 	between(1,10,_),
-		between(1,1000000,J),
+		between(1,100000,J),
 			assertz(f(J)),
 			fail.
 test5 :-
 	write('Match using once 1st-arg...'), nl,
-	between(1,1000000,I),
+	between(1,100000,I),
 		once(f(I)),
 		%write(I), nl,
 		fail.
 test5 :-
 	abolish(f/1),
-	write('Done... '), write(1000000), write(' items'), nl, true.
+	write('Done... '), write(100000), write(' items'), nl, true.
 
 test6 :-
 	assertz(ff(3)),

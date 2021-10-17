@@ -268,8 +268,8 @@ static void find_key(query *q, predicate *pr, cell *c)
 	// just revert to a regular database search in such cases...
 
 	if (m_next_key(iter, NULL)) {
-		q->st.curr_clause = pr->head;
-		m_done(iter);
+		//q->st.curr_clause = pr->head;
+		//m_done(iter);
 		return;
 	}
 
