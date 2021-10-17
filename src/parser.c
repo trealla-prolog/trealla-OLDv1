@@ -2812,9 +2812,9 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 		return false;
 	}
 
-	if (!is_init) {
-		ASTRING(src);
+	ASTRING(src);
 
+	if (!is_init) {
 // Currently QUERY_ASSERT has to be true or else freeze
 // doesn't work... to be investigated.
 
@@ -2830,21 +2830,17 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 		ASTRING_strcat(src, "))), (:- initialization(_G_)), retract(:- initialization(_)), !, '$rawcall'(_G_).");
 #endif
 
-		p->srcptr = ASTRING_cstr(src);
-		p->line_nbr = 0;
-		tokenize(p, false, false);
-		ASTRING_free(src);
 	} else {
-		ASTRING(src);
 		ASTRING_sprintf(src, "%s", pSrc);
 		ASTRING_trim_ws(src);
 		ASTRING_trim(src, '.');
 		ASTRING_strcat(src, ".");
-		p->srcptr = ASTRING_cstr(src);
-		p->line_nbr = 0;
-		tokenize(p, false, false);
-		ASTRING_free(src);
 	}
+
+	p->srcptr = ASTRING_cstr(src);
+	p->line_nbr = 0;
+	tokenize(p, false, false);
+	ASTRING_free(src);
 
 	if (!p->error && !p->end_of_term && !p->run_init) {
 		fprintf(stdout, "Error: syntax error, missing operand or operator\n");
