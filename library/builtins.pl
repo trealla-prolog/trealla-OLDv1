@@ -87,7 +87,7 @@ append([H|T], L, [H|R]) :-
 
 unifiable(T1, T2, Gs) :-
 	copy_term('$unifiable'(T1,T2,Gs), G0),
-	'$rawcall'(G0),
+	'$call'(G0),
 	'$unifiable'(T1,T2,Gs)=G0.
 
 call_cleanup(G, C) :-
