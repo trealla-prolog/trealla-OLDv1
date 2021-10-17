@@ -2835,9 +2835,15 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 		tokenize(p, false, false);
 		ASTRING_free(src);
 	} else {
-		p->srcptr = (char*)pSrc;
+		ASTRING(src);
+		ASTRING_sprintf(src, "%s", pSrc);
+		ASTRING_trim_ws(src);
+		ASTRING_trim(src, '.');
+		ASTRING_strcat(src, ".");
+		p->srcptr = ASTRING_cstr(src);
 		p->line_nbr = 0;
 		tokenize(p, false, false);
+		ASTRING_free(src);
 	}
 
 	if (!p->error && !p->end_of_term && !p->run_init) {

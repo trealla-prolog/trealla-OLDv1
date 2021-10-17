@@ -251,7 +251,7 @@ int main(int ac, char *av[])
 
 
 	if (goal) {
-		if (!pl_eval(pl, goal)) {
+		if (!pl_eval(pl, goal, false)) {
 			int halt_code = get_halt_code(pl);
 			pl_destroy(pl);
 			return halt_code;
@@ -312,7 +312,7 @@ int main(int ac, char *av[])
 			continue;
 		}
 
-		pl_eval(pl, src);
+		pl_eval(pl, src, true);
 		free(line);
 
 		if (get_halt(pl))
