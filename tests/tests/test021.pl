@@ -8,4 +8,4 @@ populate :-
 
 
 main :- populate, retract(x24(X)), write(X), nl, fail.
-main :- halt.
+main.

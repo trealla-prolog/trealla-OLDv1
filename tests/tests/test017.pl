@@ -7,4 +7,4 @@ integers(Low,High,[Low|Rest]) :-
 	integers(M,High,Rest).
 integers(_,_,[]).
 
-main :- integers(1, 100000, L), L=[H|_], write(H), nl, halt.
+main :- integers(1, 100000, L), L=[H|_], write(H), nl.

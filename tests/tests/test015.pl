@@ -1,3 +1,3 @@
 :-initialization(main).
 
-main :- \+ (\+ true), write('PASSED!'), nl, halt.
+main :- \+ (\+ true), write('PASSED!'), nl.

@@ -7,4 +7,4 @@ populate :-
 	assertz(x24(3)).
 
 main :- populate, clause(x24(X),B), write(' > '), write(X), write(' <==> '), write(B), nl, fail.
-main :- nl, halt.
+main :- nl.
