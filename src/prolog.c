@@ -124,7 +124,7 @@ void set_quiet(prolog *pl) { pl->quiet = true; }
 void set_stats(prolog *pl) { pl->stats = true; }
 void set_opt(prolog *pl, int level) { pl->opt = level; }
 
-bool pl_eval(prolog *pl, const char *s, bool interactive)
+bool pl_eval(prolog *pl, const char *s)
 {
 	if (!*s)
 		return false;
@@ -132,7 +132,7 @@ bool pl_eval(prolog *pl, const char *s, bool interactive)
 	parser *p = create_parser(pl->curr_m);
 	if (!p) return false;
 	p->command = true;
-	bool ok = run(p, s, true, !interactive);
+	bool ok = run(p, s, true, false);
 	pl->curr_m = p->m;
 	destroy_parser(p);
 	return ok;
