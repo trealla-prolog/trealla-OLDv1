@@ -9,5 +9,4 @@ main :-
 	writeln(F),
 	writeln(X),
 	writeln(Y),
-	writeln(ok),
-	halt.
+	writeln(ok).

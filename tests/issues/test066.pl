@@ -5,8 +5,7 @@
 
 main :-
     fft([0,1,2,3,4,5,6,7], X),
-    writeln(X),
-    halt.
+    writeln(X).
 
 fft(A, L) :-
     eval(p(A, w^0), X0, 8),

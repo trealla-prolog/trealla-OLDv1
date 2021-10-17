@@ -11,8 +11,7 @@ main :-
     maplist(length, M, [2,2]),
     writeln(M),
     maplist(col(M), [1,2], X),
-    writeln(X),
-    halt.
+    writeln(X).
 
 col(Matrix, N, Column) :-
     maplist(nth1(N), Matrix, Column).

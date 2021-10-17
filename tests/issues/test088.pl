@@ -10,4 +10,4 @@ X::Y :-
 	Y = d.
 
 main :- X::Y, writeln(['X=',X,'Y=',Y]), fail.
-main :- halt.
+main.

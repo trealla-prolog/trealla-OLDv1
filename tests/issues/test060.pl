@@ -13,5 +13,4 @@ main :-
         ),
         C
     ),
-    writeln(C),
-    halt.
+    writeln(C).

@@ -4,8 +4,7 @@ main :-
     prepare(List),
     writeln(List),
     sort(List, ListSorted),
-    writeln(ListSorted),
-    halt.
+    writeln(ListSorted).
 
 prepare([B,A]) :-
     A =.. [pair,2,X],

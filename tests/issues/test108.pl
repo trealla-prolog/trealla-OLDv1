@@ -12,8 +12,7 @@ main :-
     Y is Z,
     write(Y), nl,
     fail.
-main :-
-    halt.
+main.
 
 %equation(1,x^2-3*x+2=0,x).
 %equation(2,cos(x)*(1-2*sin(x))=0,x).

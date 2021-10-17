@@ -5,8 +5,7 @@ main :-
     solve(8, Queens),
     writeln(Queens),
     fail.
-main :-
-    halt.
+main.
 
 solve(N, Queens) :-
     length(Queens, N),

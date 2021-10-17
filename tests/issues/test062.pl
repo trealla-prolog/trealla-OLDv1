@@ -3,8 +3,7 @@
 
 main :-
     colors(Places),
-    writeln(Places),
-    halt.
+    writeln(Places).
 
 colors(Places) :-
     findall(Place-_, neighbours(Place, _), Places),

@@ -6,5 +6,4 @@ main :-
 	write(X), nl,
 	srandom(1000),
 	Y is rand mod 2^5,
-	write(Y), nl,
-	halt.
+	write(Y), nl.

@@ -22,8 +22,7 @@
 
 main :-
 	ebl(cup(obj1), cup(_), Rule),
-	write(Rule), nl,
-	halt.
+	write(Rule), nl.
 
 % domain theory
 cup(X) :-
