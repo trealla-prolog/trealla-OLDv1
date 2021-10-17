@@ -128,7 +128,7 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	return pl_success;
 }
 
-USE_RESULT pl_status fn_sys_rawcall_1(query *q)
+USE_RESULT pl_status fn_sys_call_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 

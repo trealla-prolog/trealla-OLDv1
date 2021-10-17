@@ -10910,7 +10910,7 @@ static const struct builtins g_predicates_iso[] =
 	{"call", 7, fn_iso_call_n, NULL, false},
 	{"call", 8, fn_iso_call_n, NULL, false},
 
-	{"$rawcall", 1, fn_sys_rawcall_1, NULL, false},
+	{"$call", 1, fn_sys_call_1, NULL, false},
 
 	{"repeat", 0, fn_iso_repeat_0, NULL, false},
 	{"true", 0, fn_iso_true_0, NULL, false},
