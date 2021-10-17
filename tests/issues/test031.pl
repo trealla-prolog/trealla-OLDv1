@@ -2,5 +2,4 @@
 
 main :-
 	X = f(X), X == X,
-	writeln(X),
-	halt.
+	writeln(X).

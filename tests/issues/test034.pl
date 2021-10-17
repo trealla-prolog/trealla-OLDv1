@@ -3,5 +3,4 @@
 
 main :-
 	append("abc", "def", Ls),
-	writeln(Ls),
-	halt.
+	writeln(Ls).

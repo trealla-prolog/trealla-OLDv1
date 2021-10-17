@@ -1,5 +1,4 @@
 :-initialization(main).
 
 main :-
-	X =.. 1, writeln(X),
-	halt.
+	X =.. 1, writeln(X).

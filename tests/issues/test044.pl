@@ -6,5 +6,4 @@ main :-
 	writeln(E),
 	length(Ls, N),
 	maplist(=(a), Ls),
-	writeln(ok),
-	halt.
+	writeln(ok).

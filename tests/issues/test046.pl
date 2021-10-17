@@ -5,5 +5,4 @@ main :-
 	aa =.. L2, writeln(L2),
 	[aa] =.. L3, writeln(L3),
 	[aa,bb] =.. L4, writeln(L4),
-	[aa,bb,cc] =.. L5, writeln(L5),
-	halt.
+	[aa,bb,cc] =.. L5, writeln(L5).
