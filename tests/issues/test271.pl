@@ -15,6 +15,5 @@ from_generator(_, _, empty).
 
 main :-
 	findall(Optional, from_generator(a(X), X, Optional), Optionals),
-	write(Optionals), nl,
-	halt.
+	write(Optionals), nl.
 
