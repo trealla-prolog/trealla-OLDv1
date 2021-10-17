@@ -8,4 +8,4 @@ foo(c,c,g).
 foo(d,e,g).
 
 main :- setof(C, A^B^foo(A,B,C), Cs), write(Cs), nl, fail.
-main :- halt.
+main.

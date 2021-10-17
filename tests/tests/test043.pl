@@ -5,4 +5,4 @@ bar(L, _X) :- foo(L, _Y).
 baz(L) :- bar(L, _X).
 
 main :- baz([a]).
-main :- halt.
+main.

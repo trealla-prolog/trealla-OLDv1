@@ -63,4 +63,4 @@ main :-
     test([pickup,the,box]),
     test([pickup,box]),             % should error
     test([paint,the,box]),          % should error
-    halt.
+	true.

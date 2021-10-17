@@ -3,8 +3,7 @@
 
 main :- test1, test2, test3, test4a, test4b, test5a, test5b, test6a, test6b, test6c, test7,
         test8, test9a, test9b, test9c, test10, test11a, test11b, test12, test13, test14,
-        test15a, test15b, test15c, test15d, test16a, test16b, test16c, test17, test18, test19,
-        halt.
+        test15a, test15b, test15c, test15d, test16a, test16b, test16c, test17, test18, test19.
 
 test1 :-
     write('Test1  :\t'),

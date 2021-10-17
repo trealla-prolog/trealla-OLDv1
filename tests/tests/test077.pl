@@ -17,5 +17,4 @@ main :-
         retract(insect(bee)),
         write(here), nl,
         fail.
-main :-
-    halt.
+main.

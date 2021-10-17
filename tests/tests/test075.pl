@@ -7,8 +7,6 @@ main :-
 	clause(legs(C,7), Body),
 	Body == (call(C),call(C)),
 	write(succeeded), nl,
-	halt.
-
+	!.
 main :-
-	write(failed), nl,
-	halt.
+	write(failed), nl.

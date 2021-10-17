@@ -11,5 +11,4 @@ fib(N,R) :-
 
 main :-
 	fib(20,F),
-	write(F), nl,
-	halt.
+	write(F), nl.

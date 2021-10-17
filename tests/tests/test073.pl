@@ -10,7 +10,6 @@ main :-
 	A = a:b,
 	write(A), nl,
 	B = (a:b),
-	write(B), nl,
-	halt.
+	write(B), nl.
 
 

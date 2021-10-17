@@ -4,8 +4,7 @@
 
 % the queens on a chessboard problem (queens) for 4x4 board
 
-main :- doit(4,_),
-	halt.
+main :- doit(4,_).
 
 size(4).
 int(1).

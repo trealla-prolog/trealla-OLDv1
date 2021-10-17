@@ -8,4 +8,4 @@ foo(c,c,g).
 foo(d,e,g).
 
 main :- findall(C, foo(_,_,C), Cs), write(Cs), nl, fail.
-main :- halt.
+main.

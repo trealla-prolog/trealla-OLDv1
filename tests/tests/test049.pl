@@ -10,8 +10,7 @@ foo(c, c, g).
 
 main :-
 	test1a, test2a, test3a, test4a,
-	test1b, test2b, test3b, test4b,
-	halt.
+	test1b, test2b, test3b, test4b.
 
 test1a :-
 	findall(C,foo(_,_,C),L),

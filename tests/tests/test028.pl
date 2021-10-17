@@ -7,4 +7,4 @@ foo(b,c,f).
 foo(c,c,g).
 foo(d,e,g).
 
-main :- findall(Cs, bagof(C, foo(_,_,C), Cs), L), write(L), nl, halt.
+main :- findall(Cs, bagof(C, foo(_,_,C), Cs), L), write(L), nl.

@@ -6,8 +6,7 @@ main(Size) :-
     setof(Total, M^Freq^Perm^square(Size, M, Total, Freq, Perm), Totals),
     last(Totals, Max),
     square(Size, Board, Max, _, Permutation),
-    writeln([Permutation, Board, Max]),
-    halt.
+    writeln([Permutation, Board, Max]).
 
 var_matrix(Size, M) :-
     repeat(Size, Size, RowLengths),

@@ -2,4 +2,4 @@
 
 main :- write('foo
   bar
-  baz'), nl, halt.
+  baz'), nl.

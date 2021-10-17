@@ -16,4 +16,4 @@ det --> [a].
 */
 
 main :- phrase(sentence, X), write(X), nl, fail.
-main :- halt.
+main.

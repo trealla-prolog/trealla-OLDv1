@@ -51,8 +51,7 @@ main :-
 	\+ p(_, f(_, z, _)), write('ok39\n'),
 	\+ \+ retract((p(_, f(_, Y, _)) :- h(Y))), write('ok40\n'),
 	cleanup, write('ok41\n'),
-	write(done), nl,
-	halt.
+	write(done), nl.
 
 cleanup :-
 	abolish(p/3),

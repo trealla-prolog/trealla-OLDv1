@@ -10,8 +10,7 @@ main :-
 	puzzle(P),
 	make_cons(P,0,_,_,_,Cons),
 	solve_cons(Cons),
-	print_sol(P),
-	halt.
+	print_sol(P).
 
 puzzle(P):-
 	P=[_,_,_,_,_,_,_,1,2,

@@ -4,7 +4,7 @@
 % The \+ with the fail is a trick to make it find all solutions.
 
 main :- queens(8,Qs), write(Qs), nl, fail.
-main :- halt.
+main.
 
 queens(N,Qs) :- rangeList(1,N,Ns), queens3(Ns,[],Qs).
 

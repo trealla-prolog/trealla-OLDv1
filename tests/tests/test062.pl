@@ -179,7 +179,7 @@ Finally, to use this expression in the Prolog tokenizer, the escape character it
 main :-
   tokenize(" +|([0-9]+|\\+|-)", "12 + 4 - 29", L),
   write(L), nl, fail.
-main :- halt.
+main.
 
   /*
 L = [12,+,4,-,29] ? ;

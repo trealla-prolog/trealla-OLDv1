@@ -19,8 +19,7 @@ main :-
 	next_to(house(_,norwegian,_,_,_),house(blue,_,_,_,_),Houses),
 	member(house(_,_,zebra,_,_),Houses),
 	member(house(_,_,_,water,_),Houses),
-	print_houses(Houses),
-	halt.
+	print_houses(Houses).
 
 houses([
 	house(_,_,_,_,_),

@@ -22,7 +22,6 @@ main :-
 	retract(p(_,_,_)), write('ok13\n'),
 	assertz(p(Z, h(Z, W), f(W))), write('ok14\n'),
 	p(f(f(a)), h(f(f(a)), f(a)), f(f(a))), write('ok15\n'),
-	retract(p(Z, h(Z, W), f(W))), write('ok16\n'),
-	halt.
+	retract(p(Z, h(Z, W), f(W))), write('ok16\n').
 
 :- initialization(main).

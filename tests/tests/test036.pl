@@ -3,5 +3,4 @@
 main :-
     write([a]), nl,
     write('.'(a,[])), nl,
-    write(.(a,[])), nl,
-    halt.
+    write(.(a,[])), nl.

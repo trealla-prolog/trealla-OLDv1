@@ -28,5 +28,4 @@ remove(P,[I|Is],[I|Nis]) :-
 
 main :-
     primes(100, X),
-    write(X), nl,
-    halt.
+    write(X), nl.

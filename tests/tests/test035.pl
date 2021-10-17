@@ -6,5 +6,4 @@ main :-
     write({a,b,c}), nl,
     write(((1/2)/3)), nl,
     write((a,(b,c))), nl,
-    write({a,(b,c)}), nl,
-    halt.
+    write({a,(b,c)}), nl.
