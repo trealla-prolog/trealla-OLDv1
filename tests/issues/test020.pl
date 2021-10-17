@@ -2,4 +2,4 @@
 
 main :-
 	_X = 3s,
-	halt.
+	true.

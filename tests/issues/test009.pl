@@ -1,5 +1,4 @@
 :-initialization(main).
 
 main :-
-	format("~w~n", [hello]),
-	halt.
+	format("~w~n", [hello]).

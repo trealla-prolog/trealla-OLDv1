@@ -1,5 +1,4 @@
 :-initialization(main).
 
 main :-
-	Ls = "abc", write(Ls), nl,
-	halt.
+	Ls = "abc", write(Ls), nl.
