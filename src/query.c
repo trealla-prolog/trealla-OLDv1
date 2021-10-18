@@ -254,19 +254,33 @@ static void next_key(query *q)
 		q->st.curr_clause = NULL;
 }
 
+static bool is_all_vars(cell *c)
+{
+	unsigned arity = c->arity;
+	c++;
+
+	while (arity--) {
+		if (!is_variable(c))
+			return false;
+
+		c += c->nbr_cells;
+	}
+
+	return true;
+}
+
 static void find_key(query *q, predicate *pr, cell *c)
 {
 	q->st.definitive = false;
 	q->st.iter = NULL;
+	cell *key = deep_clone_to_tmp(q, c, q->st.curr_frame);
 
 	if (!pr->idx || (pr->cnt < q->st.m->indexing_threshold)
-		//|| is_variable(c+1)
-		) {
+		|| is_all_vars(key)) {
 		q->st.curr_clause = pr->head;
 		return;
 	}
 
-	cell *key = deep_clone_to_tmp(q, c, q->st.curr_frame);
 	q->st.curr_clause = NULL;
 	miter *iter;
 
