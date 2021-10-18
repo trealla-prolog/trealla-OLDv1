@@ -359,6 +359,7 @@ typedef struct {
 struct clause_ {
 	predicate *owner;
 	clause *prev, *next, *dirty;
+	uint64_t id;
 	uuid u;
 	rule r;
 };
@@ -369,7 +370,7 @@ struct predicate_ {
 	module *m;
 	map *idx, *idx_save;
 	cell key;
-	uint64_t cnt, refs;
+	uint64_t cnt, refs, id;
 	bool is_prebuilt:1;
 	bool is_public:1;
 	bool is_dynamic:1;

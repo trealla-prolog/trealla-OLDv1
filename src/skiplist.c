@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <time.h>
 #include <math.h>
 
@@ -26,7 +27,8 @@ struct sliter_ {
 	slnode_t *p;
 	const void *key;
 	int idx;
-	bool dead;
+	bool is_dead:1;
+	bool is_tmp_list:1;
 };
 
 struct skiplist_ {
@@ -460,7 +462,7 @@ sliter *sl_first(skiplist *l)
 	iter->l = l;
 	iter->p = l->header->forward[0];
 	iter->idx = 0;
-	iter->dead = false;
+	iter->is_dead = false;
 	return iter;
 }
 
@@ -523,7 +525,7 @@ sliter *sl_find_key(skiplist *l, const void *key)
 	iter->l = l;
 	iter->p = q;
 	iter->idx = imid;
-	iter->dead = false;
+	iter->is_dead = false;
 	return iter;
 }
 
@@ -582,10 +584,10 @@ void sl_done(sliter *iter)
 	if (!iter)
 		return;
 
-	if (iter->dead)
+	if (iter->is_dead)
 		return;
 
-	iter->dead = true;
+	iter->is_dead = true;
 	iter->next = iter->l->iters;
 	iter->l->iters = iter;
 }

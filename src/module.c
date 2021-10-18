@@ -106,6 +106,7 @@ predicate *create_predicate(module *m, cell *c)
 	pr->key.tag = TAG_POOL;
 	pr->key.flags = 0;
 	pr->key.nbr_cells = 1;
+	pr->id = 0;
 
 	if (pr->key.arity) {
 		pr->idx = m_create(index_cmpkey, NULL, m);
@@ -778,6 +779,9 @@ static void assert_commit(clause *cl, predicate *pr, bool append)
 
 	if (pr->is_noindex || !pr->idx)
 		return;
+
+	cl->id = append ? pr->id : -pr->id;
+	pr->id++;
 
 	cell *c = get_head(cl->r.cells);
 
