@@ -292,7 +292,8 @@ static void find_key(query *q, predicate *pr, cell *c)
 	if (!(iter = m_find_key(pr->idx, key)))
 		return;
 
-	m_next_key(iter, (void*)&q->st.curr_clause);
+	if (!m_next_key(iter, (void*)&q->st.curr_clause))
+		return;
 
 	// If the index search has found just one (definitive) solution
 	// then we can use it with no problems. If more than one then
@@ -302,7 +303,7 @@ static void find_key(query *q, predicate *pr, cell *c)
 	map *tmp_list = NULL;
 	clause *cl;
 
-	while (m_next_key(iter, (void*)&cl) && 0) {
+	while (m_next_key(iter, (void*)&cl)) {
 		if (!tmp_list) {
 			tmp_list = m_create(NULL, NULL, NULL);
 			m_allow_dups(tmp_list, false);

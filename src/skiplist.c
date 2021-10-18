@@ -570,6 +570,7 @@ bool sl_is_next_key(sliter *iter)
 		iter->idx = 0;
 	}
 
+	sl_done(iter);
 	return false;
 }
 
