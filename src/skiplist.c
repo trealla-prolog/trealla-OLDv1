@@ -632,7 +632,7 @@ void sl_dump(const skiplist *l, const char *(*f)(const void*, const void*, const
 	if (!l)
 		return;
 
-    slnode_t *p, *q;
+    const slnode_t *p, *q;
     p = l->header;
     p = p->forward[0];
 
