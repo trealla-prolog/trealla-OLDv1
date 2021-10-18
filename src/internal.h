@@ -351,7 +351,6 @@ typedef struct {
 	bool first_cut:1;
 	bool cut_only:1;
 	bool is_fact:1;
-	bool persist:1;
 	bool tail_rec:1;
 	cell cells[];
 } rule;
@@ -359,7 +358,7 @@ typedef struct {
 struct clause_ {
 	predicate *owner;
 	clause *prev, *next, *dirty;
-	uint64_t id;
+	uint64_t db_id;
 	uuid u;
 	rule r;
 };
@@ -370,7 +369,7 @@ struct predicate_ {
 	module *m;
 	map *idx, *idx_save;
 	cell key;
-	uint64_t cnt, refs, id;
+	uint64_t cnt, refs, db_id;
 	bool is_prebuilt:1;
 	bool is_public:1;
 	bool is_dynamic:1;
@@ -446,6 +445,7 @@ typedef struct {
 	miter *f_iter;
 	predicate *pr;
 	module *m;
+	miter *iter;
 	idx_t curr_frame, fp, hp, tp, sp;
 	uint32_t cgen, arena_nbr;
 	uint8_t qnbr;

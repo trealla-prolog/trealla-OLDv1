@@ -1950,7 +1950,7 @@ static pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, enum clause_type i
 	stash_me(q, &cl->r, last_match);
 	add_to_dirty_list(q, cl);
 
-	if (!q->st.m->loading && cl->r.persist)
+	if (!q->st.m->loading && cl->owner->is_persist)
 		db_log(q, cl, LOG_ERASE);
 
 	return pl_success;
@@ -4518,7 +4518,7 @@ static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 		return throw_error(q, c_orig, "permission_error", "modify,static_procedure");
 
 	for (clause *cl = pr->head; cl; cl = cl->next) {
-		if (!q->st.m->loading && cl->r.persist && !cl->r.ugen_erased)
+		if (!q->st.m->loading && cl->owner->is_persist && !cl->r.ugen_erased)
 			db_log(q, cl, LOG_ERASE);
 
 		add_to_dirty_list(q, cl);
@@ -4690,7 +4690,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	p->r->cidx = 0;
 	uuid_gen(q->st.m->pl, &cl->u);
 
-	if (!q->st.m->loading && cl->r.persist)
+	if (!q->st.m->loading && cl->owner->is_persist)
 		db_log(q, cl, LOG_ASSERTA);
 
 	return pl_success;
@@ -4751,7 +4751,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	p->r->cidx = 0;
 	uuid_gen(q->st.m->pl, &cl->u);
 
-	if (!q->st.m->loading && cl->r.persist)
+	if (!q->st.m->loading && cl->owner->is_persist)
 		db_log(q, cl, LOG_ASSERTZ);
 
 	return pl_success;
@@ -5544,7 +5544,7 @@ static USE_RESULT pl_status fn_erase_1(query *q)
 	clause *cl = erase_from_db(q->st.m, &u);
 	may_ptr_error(cl);
 
-	if (!q->st.m->loading && cl->r.persist)
+	if (!q->st.m->loading && cl->owner->is_persist)
 		db_log(q, cl, LOG_ERASE);
 
 	return pl_success;
@@ -5698,7 +5698,7 @@ static pl_status do_asserta_2(query *q)
 		unshare_cell(&tmp2);
 	}
 
-	if (!q->st.m->loading && cl->r.persist)
+	if (!q->st.m->loading && cl->owner->is_persist)
 		db_log(q, cl, LOG_ASSERTA);
 
 	return pl_success;
@@ -5791,7 +5791,7 @@ static pl_status do_assertz_2(query *q)
 		unshare_cell(&tmp2);
 	}
 
-	if (!q->st.m->loading && cl->r.persist)
+	if (!q->st.m->loading && cl->owner->is_persist)
 		db_log(q, cl, LOG_ASSERTZ);
 
 	return pl_success;

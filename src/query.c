@@ -227,6 +227,14 @@ bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx)
 
 static bool is_next_key(query *q)
 {
+	if (q->st.iter) {
+		if (m_is_next(q->st.iter))
+			return true;
+
+		q->st.iter = NULL;
+		return false;
+	}
+
 	if (!q->st.curr_clause->next || q->st.definitive)
 		return false;
 
@@ -235,7 +243,12 @@ static bool is_next_key(query *q)
 
 static void next_key(query *q)
 {
-	if (!q->st.definitive)
+	if (q->st.iter) {
+		if (!m_next(q->st.iter, (void*)&q->st.curr_clause)) {
+			q->st.curr_clause = NULL;
+			q->st.iter = NULL;
+		}
+	} else if (!q->st.definitive)
 		q->st.curr_clause = q->st.curr_clause->next;
 	else
 		q->st.curr_clause = NULL;
@@ -244,8 +257,11 @@ static void next_key(query *q)
 static void find_key(query *q, predicate *pr, cell *c)
 {
 	q->st.definitive = false;
+	q->st.iter = NULL;
 
-	if (!pr->idx || (pr->cnt < q->st.m->indexing_threshold)) {
+	if (!pr->idx || (pr->cnt < q->st.m->indexing_threshold)
+		//|| is_variable(c+1)
+		) {
 		q->st.curr_clause = pr->head;
 		return;
 	}
@@ -257,19 +273,32 @@ static void find_key(query *q, predicate *pr, cell *c)
 	if (!(iter = m_find_key(pr->idx, key)))
 		return;
 
-	if (!m_next_key(iter, (void*)&q->st.curr_clause))
-		return;
+	m_next_key(iter, (void*)&q->st.curr_clause);
 
 	// If the index search has found just one (definitive) solution
 	// then we can use it with no problems. If more than one then
-	// results must be returned in database order. We could prefetch
-	// all the results and return them sorted, but that would be slow
-	// (because a subsequent cut may make that redundant?). For now
-	// just revert to a regular database search in such cases...
+	// results must be returned in database order, so prefetch all
+	// the results and return them sorted as an iterator...
 
-	if (m_next_key(iter, NULL)) {
-		//q->st.curr_clause = pr->head;
-		//m_done(iter);
+	map *tmp_list = NULL;
+	clause *cl;
+
+	while (m_next_key(iter, (void*)&cl)) {
+		if (!tmp_list) {
+			tmp_list = m_create(NULL, NULL, NULL);
+			m_allow_dups(tmp_list, false);
+			m_set_tmp(tmp_list);
+			m_app(tmp_list, (void*)q->st.curr_clause->db_id, q->st.curr_clause);
+		}
+
+		m_app(tmp_list, (void*)cl->db_id, (void*)cl);
+	}
+
+	// FIXME: make sure a cut or backtrack calls m_done(q->st.iter)
+
+	if (tmp_list) {
+		q->st.iter = m_first(tmp_list);
+		m_next(q->st.iter, (void*)&q->st.curr_clause);
 		return;
 	}
 

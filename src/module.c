@@ -104,9 +104,7 @@ predicate *create_predicate(module *m, cell *c)
 	pr->m = m;
 	pr->key = *c;
 	pr->key.tag = TAG_POOL;
-	pr->key.flags = 0;
 	pr->key.nbr_cells = 1;
-	pr->id = 0;
 
 	if (pr->key.arity) {
 		pr->idx = m_create(index_cmpkey, NULL, m);
@@ -774,15 +772,13 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 
 static void assert_commit(clause *cl, predicate *pr, bool append)
 {
-	if (pr->is_persist)
-		cl->r.persist = true;
-
 	if (pr->is_noindex || !pr->idx)
 		return;
 
-	cl->id = append ? pr->id : -pr->id;
-	pr->id++;
+	if (pr->db_id)
+		cl->db_id = append ? pr->db_id : -pr->db_id;
 
+	pr->db_id++;
 	cell *c = get_head(cl->r.cells);
 
 	if (!append)

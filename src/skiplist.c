@@ -27,8 +27,7 @@ struct sliter_ {
 	slnode_t *p;
 	const void *key;
 	int idx;
-	bool is_dead:1;
-	bool is_tmp_list:1;
+	bool is_dead;
 };
 
 struct skiplist_ {
@@ -38,9 +37,9 @@ struct skiplist_ {
 	const void *p;
 	sliter *iters;
 	size_t count;
-	bool allow_dups;
 	int level;
 	unsigned seed;
+	bool allow_dups, is_tmp_list;
 };
 
 #define MAX_LEVELS 16
@@ -51,6 +50,12 @@ inline static slnode_t *new_node_of_level(unsigned x)
 	return malloc(sizeof(slnode_t) + ((x+1) * sizeof(slnode_t*)));
 }
 
+static int default_cmpkey(const void *p1, const void *p2, __attribute__((unused)) const void *p)
+{
+	int64_t i1 = (int64_t)p1;
+	int64_t i2 = (int64_t)p2;
+	return i1 < i2 ? -1 : i1 > i2 ? 1 : 0;
+}
 
 skiplist *sl_create(int (*cmpkey)(const void*, const void*, const void *), void(*delkey)(void*, void*, const void*), const void *p)
 {
@@ -77,9 +82,10 @@ skiplist *sl_create(int (*cmpkey)(const void*, const void*, const void *), void(
 
 	l->header->nbr = 1;
 	l->header->bkt[0].key = NULL;
-	l->cmpkey = cmpkey;
+	l->cmpkey = cmpkey ? cmpkey : default_cmpkey;
 	l->delkey = delkey;
 	l->allow_dups = true;
+	l->is_tmp_list = false;
 	l->p = p;
 	return l;
 }
@@ -466,6 +472,24 @@ sliter *sl_first(skiplist *l)
 	return iter;
 }
 
+bool sl_is_next(sliter *iter)
+{
+	if (!iter)
+		return false;
+
+	while (iter->p) {
+		if (iter->idx < iter->p->nbr) {
+			return true;
+		}
+
+		iter->p = iter->p->forward[0];
+		iter->idx = 0;
+	}
+
+	sl_done(iter);
+	return false;
+}
+
 bool sl_next(sliter *iter, void **val)
 {
 	if (!iter)
@@ -526,7 +550,6 @@ sliter *sl_find_key(skiplist *l, const void *key)
 	iter->p = q;
 	iter->idx = imid;
 	iter->is_dead = false;
-	iter->is_tmp_list = false;
 	return iter;
 }
 
@@ -575,7 +598,7 @@ bool sl_next_key(sliter *iter, void **val)
 	return false;
 }
 
-size_t sl_iter_count(sliter *iter)
+size_t sl_iter_count(const sliter *iter)
 {
 	return sl_count(iter->l);
 }
@@ -588,9 +611,20 @@ void sl_done(sliter *iter)
 	if (iter->is_dead)
 		return;
 
+	if (iter->l->is_tmp_list) {
+		sl_destroy(iter->l);
+		free(iter);
+		return;
+	}
+
 	iter->is_dead = true;
 	iter->next = iter->l->iters;
 	iter->l->iters = iter;
+}
+
+void sl_set_tmp(skiplist *l)
+{
+	l->is_tmp_list = true;
 }
 
 void sl_dump(const skiplist *l, const char *(*f)(const void*, const void*, const void*), const void *p1)
