@@ -336,8 +336,6 @@ void add_to_dirty_list(query *q, clause *cl)
 
 static void purge_dirty_list(query *q)
 {
-	return;
-
 	int cnt = 0;
 
 	while (q->dirty_list) {
@@ -1854,8 +1852,6 @@ pl_status execute(query *q, cell *cells, unsigned nbr_vars)
 
 void destroy_query(query *q)
 {
-	purge_dirty_list(q);
-
 	while (q->st.qnbr > 0) {
 		free(q->tmpq[q->st.qnbr]);
 		q->st.qnbr--;
@@ -1889,6 +1885,7 @@ void destroy_query(query *q)
 	}
 
 	mp_int_clear(&q->tmp_ival);
+	purge_dirty_list(q);
 	free(q->trails);
 	free(q->choices);
 	free(q->slots);
