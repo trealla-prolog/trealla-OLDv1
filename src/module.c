@@ -219,9 +219,6 @@ static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, 
 			return 1;
 	}
 
-	if (!is_variable(p2))
-		return -1;
-
 	return 0;
 }
 
