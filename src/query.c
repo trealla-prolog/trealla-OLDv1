@@ -1520,10 +1520,11 @@ static void dump_vars(query *q, bool partial)
 			continue;
 
 		cell *c = deref(q, &e->c, e->ctx);
+		idx_t c_ctx = q->latest_ctx;
 
 		if (is_indirect(&e->c)) {
 			c = e->c.val_ptr;
-			q->latest_ctx = e->ctx;
+			c_ctx = e->ctx;
 		}
 
 		if (any)
@@ -1554,7 +1555,6 @@ static void dump_vars(query *q, bool partial)
 			parens = true;
 
 		if (parens) fputc('(', stdout);
-		idx_t c_ctx = q->latest_ctx;
 		int saveq = q->quoted;
 		q->quoted = 1;
 
