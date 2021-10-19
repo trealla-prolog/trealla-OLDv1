@@ -675,6 +675,7 @@ static void commit_me(query *q, rule *r)
 		g = make_frame(q, r->nbr_vars);
 
 	if (last_match) {
+		m_done(q->st.iter);
 		drop_choice(q);
 		trim_trail(q);
 	} else {

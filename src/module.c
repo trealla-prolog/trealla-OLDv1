@@ -105,12 +105,7 @@ predicate *create_predicate(module *m, cell *c)
 	pr->key = *c;
 	pr->key.tag = TAG_POOL;
 	pr->key.nbr_cells = 1;
-
-	if (pr->key.arity) {
-		pr->idx = m_create(index_cmpkey, NULL, m);
-		ensure(pr->idx);
-		m_allow_dups(pr->idx, true);
-	}
+	pr->is_noindex = m->pl->noindex;
 
 	m_app(m->index, &pr->key, pr);
 	return pr;
@@ -772,15 +767,30 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 	return cl;
 }
 
-static void assert_commit(clause *cl, predicate *pr, bool append)
+static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 {
-	if (pr->is_noindex || !pr->idx)
-		return;
-
 	if (pr->db_id)
 		cl->db_id = append ? pr->db_id : -pr->db_id;
 
 	pr->db_id++;
+	pr->cnt++;
+
+	if (pr->is_noindex || !pr->key.arity || (pr->cnt < m->indexing_threshold))
+		return;
+
+	if (!pr->idx) {
+		pr->idx = m_create(index_cmpkey, NULL, m);
+		ensure(pr->idx);
+		m_allow_dups(pr->idx, true);
+
+		for (clause *cl2 = pr->head; cl2; cl2 = cl2->next) {
+			cell *c = get_head(cl2->r.cells);
+
+			if (!cl2->r.ugen_erased)
+				m_app(pr->idx, c, cl2);
+		}
+	}
+
 	cell *c = get_head(cl->r.cells);
 
 	if (!append)
@@ -800,12 +810,11 @@ clause *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 
 	cl->next = pr->head;
 	pr->head = cl;
-	pr->cnt++;
 
 	if (!pr->tail)
 		pr->tail = cl;
 
-	assert_commit(cl, pr, false);
+	assert_commit(m, cl, pr, false);
 	return cl;
 }
 
@@ -820,12 +829,11 @@ clause *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 
 	cl->prev = pr->tail;
 	pr->tail = cl;
-	pr->cnt++;
 
 	if (!pr->head)
 		pr->head = cl;
 
-	assert_commit(cl, pr, true);
+	assert_commit(m, cl, pr, true);
 	return cl;
 }
 
