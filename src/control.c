@@ -181,23 +181,6 @@ USE_RESULT pl_status fn_iso_if_then_2(query *q)
 	return pl_success;
 }
 
-USE_RESULT pl_status fn_if_2(query *q)
-{
-	if (q->retry)
-		return pl_failure;
-
-	GET_FIRST_ARG(p1,callable);
-	GET_NEXT_ARG(p2,callable);
-	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
-	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_soft_cut_0, 0, 0);
-	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
-	make_call(q, tmp+nbr_cells);
-	may_error(make_call_barrier(q));
-	q->st.curr_cell = tmp;
-	return pl_success;
-}
-
 static pl_status do_if_then_else(query *q, cell *p1, cell *p2, cell *p3)
 {
 	if (q->retry) {
@@ -218,6 +201,23 @@ static pl_status do_if_then_else(query *q, cell *p1, cell *p2, cell *p3)
 	return pl_success;
 }
 
+USE_RESULT pl_status fn_if_2(query *q)
+{
+	if (q->retry)
+		return pl_failure;
+
+	GET_FIRST_ARG(p1,callable);
+	GET_NEXT_ARG(p2,callable);
+	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
+	idx_t nbr_cells = 1 + p1->nbr_cells;
+	make_structure(tmp+nbr_cells++, g_soft_cut_s, fn_soft_cut_0, 0, 0);
+	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+	make_call(q, tmp+nbr_cells);
+	may_error(make_call_barrier(q));
+	q->st.curr_cell = tmp;
+	return pl_success;
+}
+
 static pl_status do_if_else(query *q, cell *p1, cell *p2, cell *p3)
 {
 	if (q->retry) {
@@ -230,7 +230,7 @@ static pl_status do_if_else(query *q, cell *p1, cell *p2, cell *p3)
 
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_soft_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_soft_cut_s, fn_soft_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_call(q, tmp+nbr_cells);
 	may_error(make_call_barrier(q));
@@ -292,7 +292,7 @@ USE_RESULT pl_status fn_iso_negation_1(query *q)
 	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
 	make_call(q, tmp+nbr_cells);
-	may_error(make_barrier(q));
+	may_error(make_call_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
