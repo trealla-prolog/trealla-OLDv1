@@ -336,6 +336,8 @@ void add_to_dirty_list(query *q, clause *cl)
 
 static void purge_dirty_list(query *q)
 {
+	return;
+
 	int cnt = 0;
 
 	while (q->dirty_list) {
