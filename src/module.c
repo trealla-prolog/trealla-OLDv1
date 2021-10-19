@@ -177,7 +177,9 @@ static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, 
 				return 0;
 
 			return strcmp(GET_STR(m, p1), GET_STR(m, p2));
-		} else if (is_number(p2))
+		} else if (is_atom(p2))
+			return strcmp(GET_STR(m, p1), GET_STR(m, p2));
+		else if (is_number(p2))
 			return 1;
 		else if (!is_variable(p2))
 			return -1;
