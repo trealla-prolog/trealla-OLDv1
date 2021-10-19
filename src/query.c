@@ -796,6 +796,9 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 			break;
 		}
 
+		if (ch->st.iter)
+			m_done(ch->st.iter);
+
 		q->cp--;
 
 		if (ch->register_cleanup) {
