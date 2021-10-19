@@ -109,7 +109,7 @@ predicate *create_predicate(module *m, cell *c)
 	if (pr->key.arity) {
 		pr->idx = m_create(index_cmpkey, NULL, m);
 		ensure(pr->idx);
-		m_allow_dups(pr->idx, false);
+		m_allow_dups(pr->idx, true);
 	}
 
 	m_app(m->index, &pr->key, pr);
@@ -216,6 +216,9 @@ static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, 
 		} else if (!is_variable(p2))
 			return 1;
 	}
+
+	if (!is_variable(p2))
+		return -1;
 
 	return 0;
 }
