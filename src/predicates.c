@@ -1948,11 +1948,11 @@ static pl_status do_retract(query *q, cell *p1, idx_t p1_ctx, enum clause_type i
 	clause *cl = q->st.curr_clause2;
 	bool last_match = !cl->next && (is_retract == DO_RETRACT);
 	stash_me(q, &cl->r, last_match);
-	add_to_dirty_list(q, cl);
 
 	if (!q->st.m->loading && cl->owner->is_persist)
 		db_log(q, cl, LOG_ERASE);
 
+	add_to_dirty_list(q, cl);
 	return pl_success;
 }
 
