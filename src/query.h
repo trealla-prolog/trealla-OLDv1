@@ -71,6 +71,7 @@ extern void call_builtin(query *q, cell *c, idx_t c_ctx);
 extern pl_status call_userfun(query *q, cell *c, idx_t c_ctx);
 extern void add_to_dirty_list(query *q, clause *r);
 extern void do_cleanup(query *q, cell *p1);
+extern void cut_if_det(query *q);
 
 extern ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, idx_t c_ctx, int running, bool cons, unsigned depth);
 extern pl_status print_term(query *q, FILE *fp, cell *c, idx_t c_ctx, int running);

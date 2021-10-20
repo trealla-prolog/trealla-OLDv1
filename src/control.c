@@ -41,6 +41,12 @@ USE_RESULT pl_status fn_iso_fail_0(__attribute__((unused)) query *q)
 	return pl_failure;
 }
 
+static USE_RESULT pl_status fn_cut_if_det_0(query *q)
+{
+	cut_if_det(q);
+	return pl_success;
+}
+
 USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 {
 	if (q->retry)
@@ -60,12 +66,13 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 	cell *tmp;
 
 	if (p1_ctx != q->st.curr_frame) {
-		tmp = copy_to_heap(q, false, p1, p1_ctx, 1);
+		tmp = copy_to_heap(q, false, p1, p1_ctx, 2);
 		unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	} else
 		tmp = clone_to_heap(q, false, p1, 2);
 
 	idx_t nbr_cells = 0 + tmp->nbr_cells;
+	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_cut_if_det_0, 0, 0);
 	make_call(q, tmp+nbr_cells);
 	may_error(make_call_barrier(q));
 	q->st.curr_cell = tmp;

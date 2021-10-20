@@ -839,7 +839,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 
 // If the call is det then the barrier can be dropped...
 
-static void cut_if_det(query *q)
+void cut_if_det(query *q)
 {
 	frame *g = GET_CURR_FRAME();
 
