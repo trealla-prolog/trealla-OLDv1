@@ -528,6 +528,8 @@ idx_t drop_choice(query *q)
 
 bool retry_choice(query *q)
 {
+LOOP:
+
 	if (!q->cp) {
 		q->st.cgen = 0;
 		return false;
@@ -540,7 +542,7 @@ bool retry_choice(query *q)
 	// TO-DO: Watch for stack, make non-recursive...
 
 	if (ch->catchme_exception || ch->soft_cut || ch->did_cleanup)
-		return retry_choice(q);
+		goto LOOP;
 
 	trim_heap(q, ch);
 	q->st = ch->st;
@@ -674,6 +676,7 @@ static void commit_me(query *q, rule *r)
 
 	if (last_match) {
 		m_done(q->st.iter);
+		q->st.iter = NULL;
 		drop_choice(q);
 		trim_trail(q);
 	} else {
