@@ -17,8 +17,8 @@ extern idx_t g_anon_s, g_neck_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
 extern idx_t g_sys_elapsed_s, g_sys_queue_s, g_braces_s, g_call_s, g_braces_s;
 extern idx_t g_sys_stream_property_s, g_unify_s, g_on_s, g_off_s, g_sys_var_s;
 extern idx_t g_plus_s, g_minus_s, g_once_s, g_post_unify_hook_s, g_sys_record_key_s;
-extern idx_t g_and_s, g_or_s, g_at_s, g_sys_ne_s, g_sys_incr_s, g_sys_inner_cut_s;
+extern idx_t g_conjunction_s, g_disjunction_s, g_at_s, g_sys_ne_s, g_sys_incr_s, g_sys_inner_cut_s;
 extern idx_t g_dcg_s, g_throw_s, g_sys_block_catcher_s;
-extern idx_t g_sys_soft_cut_s;
+extern idx_t g_sys_soft_cut_s, g_if_then_s, g_soft_cut_s, g_disjunction_s;
 
 extern void sigfn(int s);
