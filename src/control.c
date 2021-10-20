@@ -41,7 +41,7 @@ USE_RESULT pl_status fn_iso_fail_0(__attribute__((unused)) query *q)
 	return pl_failure;
 }
 
-static USE_RESULT pl_status fn_cut_if_det_0(query *q)
+static USE_RESULT pl_status fn_sys_cut_if_det_0(query *q)
 {
 	cut_if_det(q);
 	return pl_success;
@@ -72,7 +72,7 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 		tmp = clone_to_heap(q, false, p1, 2);
 
 	idx_t nbr_cells = 0 + tmp->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_cut_if_det_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_call(q, tmp+nbr_cells);
 	may_error(make_call_barrier(q));
 	q->st.curr_cell = tmp;
