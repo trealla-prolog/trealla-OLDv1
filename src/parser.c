@@ -1032,7 +1032,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			cell *lhs = c + 1;
 			bool norhs = false;
 
-			//if (!strcmp(GET_STR(p, c), "*->"))
+			//if (c->val_off == g_soft_cut_s)
 			//	norhs = true;
 
 			if (is_variable(lhs)) {
