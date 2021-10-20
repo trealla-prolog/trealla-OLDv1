@@ -50,7 +50,6 @@ extern USE_RESULT pl_status fn_iso_if_then_2(query *q);
 extern USE_RESULT pl_status fn_iso_invoke_2(query *q);
 extern USE_RESULT pl_status fn_sys_call_1(query *q);
 extern USE_RESULT pl_status fn_iso_call_n(query *q);
-extern USE_RESULT pl_status fn_soft_cut_0(query *q);
 extern USE_RESULT pl_status fn_iso_cut_0(query *q);
 extern USE_RESULT pl_status fn_sys_inner_cut_0(query *q);
 extern USE_RESULT pl_status fn_iso_fail_0(query *q);
