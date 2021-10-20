@@ -115,7 +115,7 @@ setof(Template, Generator, Set) :-
     -> 	true
     ; 	must_be(Set, list_or_partial_list, setof/3, _)
     ),
-	'$bagof'(Template, Generator, Bag),
+	bagof_(Template, Generator, Bag),
 	sort(Bag, Set).
 
 bagof(Template, Generator, Bag) :-
@@ -123,30 +123,30 @@ bagof(Template, Generator, Bag) :-
 		-> true
 		; must_be(Bag, list_or_partial_list, bagof/3, _)
 	),
-	'$bagof'(Template, Generator, Bag).
+	bagof_(Template, Generator, Bag).
 
-'$bagof'(Template, Generator, Bag) :-
-	'$free_variables'(Generator, Template, [], Vars, 1),
+bagof_(Template, Generator, Bag) :-
+	free_variables_(Generator, Template, [], Vars, 1),
 	Vars \== [],
 	!,
 	Key =.. [(.)|Vars],
 	functor(Key, (.), N),
 	findall(Key-Template,Generator,Recorded),
-	'$replace_instance'(Recorded, Key, N, _, OmniumGatherum),
+	replace_instance_(Recorded, Key, N, _, OmniumGatherum),
 	keysort(OmniumGatherum, Gamut), !,
-	'$concordant_subset'(Gamut, Key, Answer),
+	concordant_subset_(Gamut, Key, Answer),
 	Bag = Answer.
-'$bagof'(Template, Generator, Bag) :-
+bagof_(Template, Generator, Bag) :-
 	findall(Template, Generator, Bag0),
 	Bag0 \== [],
 	Bag = Bag0.
 
 _^Goal :- Goal.
 
-'$replace_instance'([], _, _, _, []) :- !.
-'$replace_instance'([NewKey-Term|Xs], Key, NVars, Vars, [NewKey-Term|NewBag]) :-
-	'$replace_key_variables'(NVars, Key, Vars, NewKey), !,
-	'$replace_instance'(Xs, Key, NVars, Vars, NewBag).
+replace_instance_([], _, _, _, []) :- !.
+replace_instance_([NewKey-Term|Xs], Key, NVars, Vars, [NewKey-Term|NewBag]) :-
+	replace_key_variables_(NVars, Key, Vars, NewKey), !,
+	replace_instance_(Xs, Key, NVars, Vars, NewBag).
 
 
 %   Original R.A. O'Keefe comment:
@@ -154,78 +154,78 @@ _^Goal :- Goal.
 %   hence the rather strange code.  Only two calls on arg are needed
 %   in Dec-10 interpreted Prolog or C-Prolog.
 
-'$replace_key_variables'(0, _, _, _) :- !.
-'$replace_key_variables'(N, OldKey, Vars0, NewKey) :-
+replace_key_variables_(0, _, _, _) :- !.
+replace_key_variables_(N, OldKey, Vars0, NewKey) :-
 	arg(N, NewKey, Arg),
 	nonvar(Arg), !,
-	'$replace_variables'(Arg, Vars0, Vars1),
+	replace_variables_(Arg, Vars0, Vars1),
 	M is N-1,
-	'$replace_key_variables'(M, OldKey, Vars1, NewKey).
-'$replace_key_variables'(N, OldKey, Vars, NewKey) :-
+	replace_key_variables_(M, OldKey, Vars1, NewKey).
+replace_key_variables_(N, OldKey, Vars, NewKey) :-
 	arg(N, OldKey, OldVar),
 	arg(N, NewKey, OldVar),
 	M is N-1,
-	'$replace_key_variables'(M, OldKey, Vars, NewKey).
+	replace_key_variables_(M, OldKey, Vars, NewKey).
 
-'$replace_variables'(Term, [Var|Vars], Vars) :-
+replace_variables_(Term, [Var|Vars], Vars) :-
 	var(Term), !,
 	Term = Var.
-'$replace_variables'(Term, Vars, Vars) :-
+replace_variables_(Term, Vars, Vars) :-
 	atomic(Term), !.
-'$replace_variables'(Term, Vars0, Vars) :-
+replace_variables_(Term, Vars0, Vars) :-
 	functor(Term, _, Arity),
-	'$replace_variables_term'(Arity, Term, Vars0, Vars).
+	replace_variables_term_(Arity, Term, Vars0, Vars).
 
-'$replace_variables_term'(0, _, Vars, Vars) :- !.
-'$replace_variables_term'(N, Term, Vars0, Vars) :-
+replace_variables_term_(0, _, Vars, Vars) :- !.
+replace_variables_term_(N, Term, Vars0, Vars) :-
 	arg(N, Term, Arg),
-	'$replace_variables'(Arg, Vars0, Vars1),
+	replace_variables_(Arg, Vars0, Vars1),
 	N1 is N-1,
-	'$replace_variables_term'(N1, Term, Vars1, Vars).
+	replace_variables_term_(N1, Term, Vars1, Vars).
 
 
 /*
-%   '$concordant_subset'([Key-Val list], Key, [Val list]).
+%   concordant_subset_([Key-Val list], Key, [Val list]).
 %   takes a list of Key-Val pairs which has been keysorted to bring
 %   all the identical keys together, and enumerates each different
 %   Key and the corresponding lists of values.
 */
 
-'$concordant_subset'([Key-Val|Rest], Clavis, Answer) :-
-	'$concordant_subset'(Rest, Key, List, More),
-	'$concordant_subset'(More, Key, [Val|List], Clavis, Answer).
+concordant_subset_([Key-Val|Rest], Clavis, Answer) :-
+	concordant_subset_(Rest, Key, List, More),
+	concordant_subset_(More, Key, [Val|List], Clavis, Answer).
 
 /*
-%   '$concordant_subset'(Rest, Key, List, More)
+%   concordant_subset_(Rest, Key, List, More)
 %   strips off all the Key-Val pairs from the from of Rest,
 %   putting the Val elements into List, and returning the
 %   left-over pairs, if any, as More.
 */
 
-'$concordant_subset'([Key-Val|Rest], Clavis, List, More) :-
+concordant_subset_([Key-Val|Rest], Clavis, List, More) :-
 	subsumes_term(Key, Clavis),
 	subsumes_term(Clavis, Key),
 	!,
 	Key = Clavis,
 	List = [Val|Rest2],
-	'$concordant_subset'(Rest, Clavis, Rest2, More).
-'$concordant_subset'(More, _, [], More).
+	concordant_subset_(Rest, Clavis, Rest2, More).
+concordant_subset_(More, _, [], More).
 
 /*
-%   '$concordant_subset'/5 tries the current subset, and if that
+%   concordant_subset_/5 tries the current subset, and if that
 %   doesn't work if backs up and tries the next subset.  The
 %   first clause is there to save a choice point when this is
 %   the last possible subset.
 */
 
-'$concordant_subset'([],   Key, Subset, Key, Subset) :- !.
-'$concordant_subset'(_,    Key, Subset, Key, Subset).
-'$concordant_subset'(More, _,   _,   Clavis, Answer) :-
-	'$concordant_subset'(More, Clavis, Answer).
+concordant_subset_([],   Key, Subset, Key, Subset) :- !.
+concordant_subset_(_,    Key, Subset, Key, Subset).
+concordant_subset_(More, _,   _,   Clavis, Answer) :-
+	concordant_subset_(More, Clavis, Answer).
 
-% 0 disables use of '$explicit_binding', 1 enables them
+% 0 disables use of explicit_binding_, 1 enables them
 % setof stuff still uses 1, that's closer to it's usual implementation
-'$free_variables'(A,B,C,D) :- '$free_variables'(A,B,C,D,0).
+free_variables_(A,B,C,D) :- free_variables_(A,B,C,D,0).
 
 % ---extracted from: not.pl --------------------%
 
@@ -238,60 +238,60 @@ _^Goal :- Goal.
 %   as yet unbound are universally quantified, unless
 % a)  they occur in the template
 % b)  they are bound by X^P, setof, or bagof
-%   '$free_variables'(Generator, Template, OldList, NewList,CheckBindings=0,1)
+%   free_variables_(Generator, Template, OldList, NewList,CheckBindings=0,1)
 %   finds this set, using OldList as an accumulator.
 
-'$free_variables'(Term, Bound, VarList, [Term|VarList],_) :-
+free_variables_(Term, Bound, VarList, [Term|VarList],_) :-
 	var(Term),
-	'$term_is_free_of'(Bound, Term),
-	'$list_is_free_of'(VarList, Term),
+	term_is_free_of_(Bound, Term),
+	list_is_free_of_(VarList, Term),
 	!.
-'$free_variables'(Term, _, VarList, VarList,_) :-
+free_variables_(Term, _, VarList, VarList,_) :-
 	var(Term),
 	!.
-'$free_variables'(Term, Bound, OldList, NewList, 1) :-
-	'$explicit_binding'(Term, Bound, NewTerm, NewBound),
+free_variables_(Term, Bound, OldList, NewList, 1) :-
+	explicit_binding_(Term, Bound, NewTerm, NewBound),
 	!,
-	'$free_variables'(NewTerm, NewBound, OldList, NewList, 1).
-'$free_variables'(Term, Bound, OldList, NewList, _) :-
+	free_variables_(NewTerm, NewBound, OldList, NewList, 1).
+free_variables_(Term, Bound, OldList, NewList, _) :-
 	functor(Term, _, N),
-	'$free_variables'(N, Term, Bound, OldList, NewList, 0).
+	free_variables_(N, Term, Bound, OldList, NewList, 0).
 
-'$free_variables'(0,    _,     _, VarList, VarList, _) :- !.
-'$free_variables'(N, Term, Bound, OldList, NewList, B) :-
+free_variables_(0,    _,     _, VarList, VarList, _) :- !.
+free_variables_(N, Term, Bound, OldList, NewList, B) :-
 	arg(N, Term, Argument),
-	'$free_variables'(Argument, Bound, OldList, MidList, B),
+	free_variables_(Argument, Bound, OldList, MidList, B),
 	M is N-1, !,
-	'$free_variables'(M, Term, Bound, MidList, NewList, B).
+	free_variables_(M, Term, Bound, MidList, NewList, B).
 
-%   '$explicit_binding' checks for goals known to existentially quantify
+%   explicit_binding_ checks for goals known to existentially quantify
 %   one or more variables.  In particular "not" is quite common.
 
-'$explicit_binding'(\+(_),     Bound, fail, Bound ).
-'$explicit_binding'(not(_),    Bound, fail, Bound ).
-'$explicit_binding'(Term^Goal, Bound, Goal, Bound+Vars) :-
+explicit_binding_(\+(_),     Bound, fail, Bound ).
+explicit_binding_(not(_),    Bound, fail, Bound ).
+explicit_binding_(Term^Goal, Bound, Goal, Bound+Vars) :-
 	term_variables(Term, Vars).
-'$explicit_binding'(setof(Var,Goal,Set),  Bound, Goal-Set, Bound+Var).
-'$explicit_binding'(bagof(Var,Goal,Bag),  Bound, Goal-Bag, Bound+Var).
+explicit_binding_(setof(Var,Goal,Set),  Bound, Goal-Set, Bound+Var).
+explicit_binding_(bagof(Var,Goal,Bag),  Bound, Goal-Bag, Bound+Var).
 
-'$term_is_free_of'(Term, Var) :-
+term_is_free_of_(Term, Var) :-
 	var(Term), !,
 	Term \== Var.
-'$term_is_free_of'(Term, Var) :-
+term_is_free_of_(Term, Var) :-
 	functor(Term, _, N),
-	'$term_is_free_of'(N, Term, Var).
+	term_is_free_of_(N, Term, Var).
 
-'$term_is_free_of'(0, _, _) :- !.
-'$term_is_free_of'(N, Term, Var) :-
+term_is_free_of_(0, _, _) :- !.
+term_is_free_of_(N, Term, Var) :-
 	arg(N, Term, Argument),
-	'$term_is_free_of'(Argument, Var),
+	term_is_free_of_(Argument, Var),
 	M is N-1, !,
-	'$term_is_free_of'(M, Term, Var).
+	term_is_free_of_(M, Term, Var).
 
-'$list_is_free_of'([], _).
-'$list_is_free_of'([Head|Tail], Var) :-
+list_is_free_of_([], _).
+list_is_free_of_([Head|Tail], Var) :-
 	Head \== Var,
-	'$list_is_free_of'(Tail, Var).
+	list_is_free_of_(Tail, Var).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -305,10 +305,10 @@ sort(Term, _) :-
 	throw(error(instantiation_error, sort/2)).
 sort([], []) :- !.
 sort([X, Y| Xs], Ys) :- !,
-	'$sort_split'([X, Y| Xs], X1s, X2s),
+	sort_split_([X, Y| Xs], X1s, X2s),
 	sort(X1s, Y1s),
 	sort(X2s, Y2s),
-	'$sort_merge'(Y1s, Y2s, Ys0),
+	sort_merge_(Y1s, Y2s, Ys0),
 	Ys = Ys0, !.
 sort([X], [X]) :- !.
 sort(Term, _) :-
@@ -317,33 +317,33 @@ sort(Term, _) :-
 sort(_, Term) :-
 	throw(error(type_error(list,Term), sort/2)).
 
-'$sort_merge'([X| Xs], [Y| Ys], [X| Zs]) :-
+sort_merge_([X| Xs], [Y| Ys], [X| Zs]) :-
 	X == Y, !,
-	'$sort_merge'(Xs, Ys, Zs).
-'$sort_merge'([X| Xs], [Y| Ys], [X| Zs]) :-
+	sort_merge_(Xs, Ys, Zs).
+sort_merge_([X| Xs], [Y| Ys], [X| Zs]) :-
 	X @< Y, !,
-	'$sort_merge'(Xs, [Y| Ys], Zs).
-'$sort_merge'([X| Xs], [Y| Ys], [Y| Zs]) :-
+	sort_merge_(Xs, [Y| Ys], Zs).
+sort_merge_([X| Xs], [Y| Ys], [Y| Zs]) :-
 	X @> Y, !,
-	'$sort_merge'([X | Xs], Ys, Zs).
-'$sort_merge'([], Xs, Xs) :- !.
-'$sort_merge'(Xs, [], Xs).
+	sort_merge_([X | Xs], Ys, Zs).
+sort_merge_([], Xs, Xs) :- !.
+sort_merge_(Xs, [], Xs).
 
-'$sort_split'('-', _, _) :-
+sort_split_('-', _, _) :-
 	throw(error(instantiation_error, sort/2)).
-'$sort_split'([], [], []).
-'$sort_split'([X| Xs], [X| Ys], Zs) :-
-	'$sort_split'(Xs, Zs, Ys).
+sort_split_([], [], []).
+sort_split_([X| Xs], [X| Ys], Zs) :-
+	sort_split_(Xs, Zs, Ys).
 
 msort(Term, _) :-
 	var(Term),
 	throw(error(instantiation_error, msort/2)).
 msort([], []) :- !.
 msort([X, Y| Xs], Ys) :- !,
-	'$sort_split'([X, Y| Xs], X1s, X2s),
+	sort_split_([X, Y| Xs], X1s, X2s),
 	msort(X1s, Y1s),
 	msort(X2s, Y2s),
-	'$msort_merge'(Y1s, Y2s, Ys0),
+	msort_merge_(Y1s, Y2s, Ys0),
 	Ys = Ys0, !.
 msort([X], [X]) :- !.
 msort(Term, _) :-
@@ -352,65 +352,65 @@ msort(Term, _) :-
 msort(_, Term) :-
 	throw(error(type_error(list,Term), msort/2)).
 
-'$msort_merge'([X| Xs], [Y| Ys], [X| Zs]) :-
+msort_merge_([X| Xs], [Y| Ys], [X| Zs]) :-
 	X @=< Y, !,
-	'$msort_merge'(Xs, [Y| Ys], Zs).
-'$msort_merge'([X| Xs], [Y| Ys], [Y| Zs]) :-
+	msort_merge_(Xs, [Y| Ys], Zs).
+msort_merge_([X| Xs], [Y| Ys], [Y| Zs]) :-
 	X @> Y, !,
-	'$msort_merge'([X | Xs], Ys, Zs).
-'$msort_merge'([], Xs, Xs) :- !.
-'$msort_merge'(Xs, [], Xs).
+	msort_merge_([X | Xs], Ys, Zs).
+msort_merge_([], Xs, Xs) :- !.
+msort_merge_(Xs, [], Xs).
 
 samsort(L, R) :- msort(L, R).
 
 keysort(List, Sorted) :-
-	keysort(List, List, Sorted, []).
+	keysort_(List, List, Sorted, []).
 
-keysort([Term| _], _, _, _) :-
+keysort_([Term| _], _, _, _) :-
 	var(Term),
 	throw(error(instantiation_error, keysort/2)).
-keysort([Key-X| Xs], List, Ys, YsTail) :-
+keysort_([Key-X| Xs], List, Ys, YsTail) :-
 	!,
-	'$key_partition'(Xs, Key, List, Left, EQ, EQT, Right),
-	keysort(Left, List,  Ys, [Key-X|EQ]),
-	keysort(Right, List, EQT, YsTail),
+	key_partition_(Xs, Key, List, Left, EQ, EQT, Right),
+	keysort_(Left, List,  Ys, [Key-X|EQ]),
+	keysort_(Right, List, EQT, YsTail),
 	!.
-keysort([], _, Ys, Ys) :-
+keysort_([], _, Ys, Ys) :-
 	!.
-keysort([Term| _], _, _, _) :-
+keysort_([Term| _], _, _, _) :-
 	throw(error(type_error(pair,Term), keysort/2)).
-keysort(Term, List, _, _) :-
+keysort_(Term, List, _, _) :-
 	Term \== [],
 	throw(error(type_error(list,List), keysort/2)).
-keysort(_, _, Sorted, _) :-
+keysort_(_, _, Sorted, _) :-
 	Sorted \= [_|_],
 	throw(error(type_error(list,Sorted), keysort/2)).
-keysort(_, _, [Term| _], _) :-
+keysort_(_, _, [Term| _], _) :-
 	Term \= _-_,
 	throw(error(type_error(pair,Term), keysort/2)).
-keysort(_, _, Sorted, _) :-
+keysort_(_, _, Sorted, _) :-
 	throw(error(type_error(list,Sorted), keysort/2)).
 
-'$key_partition'([Term| _], _, _, _, _, _, _) :-
+key_partition_([Term| _], _, _, _, _, _, _) :-
 	var(Term),
 	throw(error(instantiation_error, keysort/2)).
-'$key_partition'([XKey-X| Xs], YKey, List, [XKey-X| Ls], EQ, EQT, Rs) :-
+key_partition_([XKey-X| Xs], YKey, List, [XKey-X| Ls], EQ, EQT, Rs) :-
 	XKey @< YKey,
 	!,
-	'$key_partition'(Xs, YKey, List, Ls, EQ, EQT, Rs).
-'$key_partition'([XKey-X| Xs], YKey, List, Ls, [XKey-X| EQ], EQT, Rs) :-
+	key_partition_(Xs, YKey, List, Ls, EQ, EQT, Rs).
+key_partition_([XKey-X| Xs], YKey, List, Ls, [XKey-X| EQ], EQT, Rs) :-
 	XKey == YKey,
 	!,
-	'$key_partition'(Xs, YKey, List, Ls, EQ, EQT, Rs).
-'$key_partition'([XKey-X| Xs], YKey, List, Ls, EQ, EQT, [XKey-X| Rs]) :-
+	key_partition_(Xs, YKey, List, Ls, EQ, EQT, Rs).
+key_partition_([XKey-X| Xs], YKey, List, Ls, EQ, EQT, [XKey-X| Rs]) :-
 %	XKey @> YKey,
 	!,
-	'$key_partition'(Xs, YKey, List, Ls, EQ, EQT, Rs).
-'$key_partition'([], _, _, [], EQT, EQT, []) :-
+	key_partition_(Xs, YKey, List, Ls, EQ, EQT, Rs).
+key_partition_([], _, _, [], EQT, EQT, []) :-
 	!.
-'$key_partition'([Term| _], _, _, _, _, _, _) :-
+key_partition_([Term| _], _, _, _, _, _, _) :-
 	throw(error(type_error(pair,Term), keysort/2)).
-'$key_partition'(_, _, List, _, _, _, _) :-
+key_partition_(_, _, List, _, _, _, _) :-
 	throw(error(type_error(list,List), keysort/2)).
 
 %
