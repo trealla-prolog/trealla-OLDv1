@@ -22,6 +22,7 @@ subtract([], _, []) :- !.
 subtract([H|T], L2, L3) :- memberchk(H, L2), !, subtract(T, L2, L3).
 subtract([H|T1], L2, [H|T3]) :- subtract(T1, L2, T3).
 
+union(A, L, L) :- A == [], !.
 union([], L, L).
 union([H|T], Y, Z):- member(H, Y), !, union(T, Y, Z).
 union([H|T], Y, [H|Z]):- union(T, Y, Z).
@@ -39,7 +40,7 @@ append(ListOfLists, List) :-
 	must_be(ListOfLists, list, _, _),
 	append_(ListOfLists, List).
 
-append_([], []).
+append_([], []) :- !.
 append_([L|Ls], As) :-
 	append(L, Ws, As),
 	append_(Ls, Ws).
