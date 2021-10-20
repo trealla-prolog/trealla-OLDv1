@@ -1024,15 +1024,15 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 	idx_t c_idx = c - p->r->cells;
 
 	if (IS_XFX(c) || IS_XFY(c)) {
-		if (!strcmp(GET_STR(p, c), ",")
-			|| !strcmp(GET_STR(p, c), ";")
-			|| !strcmp(GET_STR(p, c), "->")
-			|| !strcmp(GET_STR(p, c), "*->")
-			|| !strcmp(GET_STR(p, c), ":-")) {
+		if ((c->val_off == g_conjunction_s)
+			|| (c->val_off == g_disjunction_s)
+			|| (c->val_off == g_if_then_s)
+			|| (c->val_off == g_soft_cut_s)
+			|| (c->val_off == g_neck_s)) {
 			cell *lhs = c + 1;
 			bool norhs = false;
 
-			//if (!strcmp(GET_STR(p, c), "*->"))
+			//if (c->val_off == g_soft_cut_s)
 			//	norhs = true;
 
 			if (is_variable(lhs)) {
