@@ -105,7 +105,7 @@ predicate *create_predicate(module *m, cell *c)
 	pr->key = *c;
 	pr->key.tag = TAG_POOL;
 	pr->key.nbr_cells = 1;
-	pr->is_noindex = m->pl->noindex;
+	pr->is_noindex = m->pl->noindex || !pr->key.arity;
 
 	m_app(m->index, &pr->key, pr);
 	return pr;
@@ -775,10 +775,11 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	pr->db_id++;
 	pr->cnt++;
 
-	if (pr->is_noindex || !pr->key.arity || (pr->cnt < m->indexing_threshold))
+	if (pr->is_noindex || (pr->cnt < m->indexing_threshold))
 		return;
 
 	if (!pr->idx) {
+		//printf("*** index %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
 		pr->idx = m_create(index_cmpkey, NULL, m);
 		ensure(pr->idx);
 		m_allow_dups(pr->idx, true);
@@ -1172,7 +1173,7 @@ module *create_module(prolog *pl, const char *name)
 	m->id = index_from_pool(pl, name);
 	m->defops = m_create((void*)strcmp, NULL, NULL);
 	m_allow_dups(m->defops, false);
-	m->indexing_threshold = 4096;
+	m->indexing_threshold = 8000;
 
 	if (strcmp(name, "system")) {
 		for (const op_table *ptr = g_ops; ptr->name; ptr++) {
