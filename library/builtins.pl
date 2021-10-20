@@ -72,19 +72,6 @@ variant(Term1, Term2) :-
 	numbervars(Term2Copy, 0, N),
 	Term1Copy == Term2Copy.
 
-% This is so common it needs to be here
-
-member(X, [X|T]) :- T == [], !.
-member(X, [X|_]).
-member(X, [_|Xs]) :- member(X, Xs).
-
-% This is so common it needs to be here
-
-append(A, L, L) :- A == [], !.
-append([], L, L).
-append([H|T], L, [H|R]) :-
-	append(T, L, R).
-
 unifiable(T1, T2, Gs) :-
 	copy_term('$unifiable'(T1,T2,Gs), G0),
 	'$call'(G0),
