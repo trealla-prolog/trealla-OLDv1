@@ -847,7 +847,7 @@ static void check_rule(parser *p, rule *r, predicate *parent)
 		if (&cl->r == r)
 			continue;
 
-		if (index_cmpkey(r->cells+1, cl->r.cells+1, p->m)) {
+		if (!index_cmpkey(r->cells+1, cl->r.cells+1, p->m)) {
 			matched = true;
 			break;
 		}
@@ -860,6 +860,11 @@ static void check_rule(parser *p, rule *r, predicate *parent)
 void xref_db(parser *p)
 {
 	for (predicate *pr = p->m->head; pr; pr = pr->next) {
+		if (pr->is_processed)
+			continue;
+
+		pr->is_processed = true;
+
 		for (clause *cl = pr->head; cl; cl = cl->next)
 			xref_rule(p, &cl->r, pr);
 

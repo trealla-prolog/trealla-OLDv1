@@ -381,6 +381,7 @@ struct predicate_ {
 	bool is_abolished:1;
 	bool is_noindex:1;
 	bool is_check_directive:1;
+	bool is_processed:1;
 };
 
 struct builtins {
