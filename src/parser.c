@@ -842,19 +842,22 @@ void xref_rule(parser *p, rule *r, predicate *parent)
 static void check_rule(parser *p, rule *r, predicate *parent)
 {
 	bool matched = false;
+	cell *head = get_head(r->cells);
 
 	for (clause *cl = parent->head; cl; cl = cl->next) {
 		if (&cl->r == r)
 			continue;
 
-		if (!index_cmpkey(r->cells+1, cl->r.cells+1, p->m)) {
+		if (!index_cmpkey(head, get_head(cl->r.cells), p->m)) {
 			matched = true;
 			break;
 		}
 	}
 
-	if (!matched)
+	if (!matched) {
+		//printf("*** unique %s/%u\n", GET_STR(p, &parent->key), parent->key.arity);
 		r->is_unique = true;
+	}
 }
 
 void xref_db(parser *p)

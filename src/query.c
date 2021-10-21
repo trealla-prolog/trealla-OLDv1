@@ -657,11 +657,12 @@ static void commit_me(query *q, rule *r)
 	frame *g = GET_CURR_FRAME();
 	g->m = q->st.m;
 	q->st.m = q->st.curr_clause->owner->m;
-	bool last_match = r->is_first_cut || !is_next_key(q);
+	bool implied_cut = !q->vars_in_query && r->is_unique;
+	bool last_match = implied_cut || r->is_first_cut || !is_next_key(q);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool choices = any_choices(q, g, true);
-	bool slots_ok = check_slots(q, g, r);
-	bool tco = last_match && !q->no_tco && recursive && !choices && slots_ok;
+	bool slots_ok = implied_cut || check_slots(q, g, r);
+	bool tco = last_match && (implied_cut || !q->no_tco) && recursive && !choices && slots_ok;
 	choice *ch = GET_CURR_CHOICE();
 
 #if 0
@@ -1055,6 +1056,9 @@ void reset_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 
 static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
 {
+	if (is_variable(p1))
+		q->vars_in_query = true;
+
 	if (p1->arity != p2->arity)
 		return false;
 
@@ -1184,6 +1188,9 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 
 	if (p1_ctx == q->st.curr_frame)
 		q->no_tco = true;
+
+	if (is_variable(p1) || is_variable(p2))
+		q->vars_in_query = true;
 
 	if (is_variable(p1) && is_variable(p2)) {
 		if (p2_ctx > p1_ctx)
@@ -1452,6 +1459,7 @@ static USE_RESULT pl_status match_head(query *q)
 		try_me(q, r->nbr_vars);
 		q->tot_matches++;
 		q->no_tco = false;
+		q->vars_in_query = false;
 
 		if (unify_structure(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp, 0)) {
 			if (q->error)
