@@ -841,12 +841,16 @@ void xref_rule(parser *p, rule *r, predicate *parent)
 
 static void check_rule(parser *p, rule *r, predicate *parent)
 {
-	bool matched = false;
+	bool matched = false, me = false;
 	cell *head = get_head(r->cells);
 
 	for (clause *cl = parent->head; cl; cl = cl->next) {
-		if (&cl->r == r)
+		if (!me) {
+			if (&cl->r == r)
+				me = true;
+
 			continue;
+		}
 
 		if (!index_cmpkey(head, get_head(cl->r.cells), p->m)) {
 			matched = true;
