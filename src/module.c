@@ -107,6 +107,9 @@ predicate *create_predicate(module *m, cell *c)
 	pr->key.nbr_cells = 1;
 	pr->is_noindex = m->pl->noindex || !pr->key.arity;
 
+	if (GET_STR(m, c)[0] == '$')
+		pr->is_noindex = true;
+
 	m_app(m->index, &pr->key, pr);
 	return pr;
 }
@@ -1173,7 +1176,7 @@ module *create_module(prolog *pl, const char *name)
 	m->id = index_from_pool(pl, name);
 	m->defops = m_create((void*)strcmp, NULL, NULL);
 	m_allow_dups(m->defops, false);
-	m->indexing_threshold = 8000;
+	m->indexing_threshold = 4096;
 
 	if (strcmp(name, "system")) {
 		for (const op_table *ptr = g_ops; ptr->name; ptr++) {
