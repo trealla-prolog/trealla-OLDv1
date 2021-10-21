@@ -3,25 +3,10 @@
   "children" : [ {
     "name" : "Product defects",
     "children" : [ {
-      "name" : "Crash",
-      "children" : [ {
-        "name" : "predicate_property_2",
-        "uid" : "6bfd5bb03a323521",
-        "parentUid" : "8e048ed04cce61add286093d4fc3dced",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ ]
-      } ],
-      "uid" : "8e048ed04cce61add286093d4fc3dced"
-    }, {
       "name" : "Non-deterministic success",
       "children" : [ {
         "name" : "iso_stream_property_2_01",
-        "uid" : "d9d9a22822c1fe1b",
+        "uid" : "600f69e00a55165e",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
