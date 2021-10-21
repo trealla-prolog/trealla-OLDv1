@@ -22,7 +22,7 @@ extern USE_RESULT pl_status start(query *q);
 extern USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx);
 extern USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_type retract);
 extern unsigned create_vars(query *q, unsigned nbr);
-extern void try_me(const query *q, unsigned vars);
+extern void try_me(query *q, unsigned vars);
 extern USE_RESULT bool find_exception_handler(query *q, cell *e);
 extern USE_RESULT pl_status throw_error(query *q, cell *c, const char *err_type, const char *expected);
 extern pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expected, cell *goal);

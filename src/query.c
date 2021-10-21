@@ -477,7 +477,7 @@ void undo_me(query *q)
 	unwind_trail(q, ch);
 }
 
-void try_me(const query *q, unsigned nbr_vars)
+void try_me(query *q, unsigned nbr_vars)
 {
 	frame *g = GET_FRAME(q->st.fp);
 	g->nbr_slots = g->nbr_vars = nbr_vars;
@@ -489,6 +489,10 @@ void try_me(const query *q, unsigned nbr_vars)
 		e->c.tag = TAG_EMPTY;
 		e->c.attrs = NULL;
 	}
+
+	q->vars_in_query = false;
+	q->no_tco = false;
+	q->tot_matches++;
 }
 
 static void trim_heap(query *q, const choice *ch)
@@ -1455,9 +1459,6 @@ static USE_RESULT pl_status match_head(query *q)
 		rule *r = &q->st.curr_clause->r;
 		cell *head = get_head(r->cells);
 		try_me(q, r->nbr_vars);
-		q->tot_matches++;
-		q->no_tco = false;
-		q->vars_in_query = false;
 
 		if (unify_structure(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp, 0)) {
 			if (q->error)
