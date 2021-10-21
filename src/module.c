@@ -129,7 +129,7 @@ static int predicate_cmpkey(const void *ptr1, const void *ptr2, const void *para
 	return strcmp(m->pl->pool+p1->val_off, m->pl->pool+p2->val_off);
 }
 
-static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, int depth)
+int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, int depth)
 {
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
@@ -356,7 +356,7 @@ void set_persist_in_db(module *m, const char *name, unsigned arity)
 		m->error = true;
 }
 
-static bool check_directive(const cell *c)
+static bool is_check_directive(const cell *c)
 {
 	if (is_structure(c) && (c->val_off == g_neck_s) && (c->arity == 1))
 		return true;
@@ -696,7 +696,7 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 {
 	cell *c = p1;
 
-	if (!check_directive(c))
+	if (!is_check_directive(c))
 		c = get_head(p1);
 
 	if (!c) {
@@ -725,8 +725,8 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 		pr = create_predicate(m, c);
 		ensure(pr);
 
-		if (check_directive(p1))
-			pr->check_directive = true;
+		if (is_check_directive(p1))
+			pr->is_check_directive = true;
 
 		if (!consulting) {
 			push_property(m, GET_STR(m, c), c->arity, "dynamic");

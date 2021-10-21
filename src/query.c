@@ -56,7 +56,7 @@ static void trace_call(query *q, cell *c, idx_t c_ctx, box_t box)
 
 	const char *src = GET_STR(q, c);
 
-	if (!strcmp(src, ",") || !strcmp(src, ";") || !strcmp(src, "->"))
+	if (!strcmp(src, ",") || !strcmp(src, ";") || !strcmp(src, "->") || !strcmp(src, "*->"))
 		return;
 
 	fprintf(stderr, " [%llu] ", (unsigned long long)q->step++);
@@ -657,7 +657,7 @@ static void commit_me(query *q, rule *r)
 	frame *g = GET_CURR_FRAME();
 	g->m = q->st.m;
 	q->st.m = q->st.curr_clause->owner->m;
-	bool last_match = r->first_cut || !is_next_key(q);
+	bool last_match = r->is_first_cut || !is_next_key(q);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool choices = any_choices(q, g, true);
 	bool slots_ok = check_slots(q, g, r);
@@ -675,6 +675,7 @@ static void commit_me(query *q, rule *r)
 		g = make_frame(q, r->nbr_vars);
 
 	if (last_match) {
+		q->st.curr_clause = NULL;
 		m_done(q->st.iter);
 		q->st.iter = NULL;
 		drop_choice(q);
@@ -820,7 +821,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 		}
 
 #if 0
-		if (ch->tail_rec) {
+		if (ch->is_tail_rec) {
 			printf("*** here2\n");
 			frame *g_prev = GET_FRAME(g->prev_frame);
 			g->prev_frame = g_prev->prev_frame;
@@ -885,7 +886,7 @@ static bool resume_frame(query *q)
 	rule *r = &q->st.curr_clause->r;
 
 	if ((q->st.curr_frame == (q->st.fp-1))
-		&& q->st.m->pl->opt && r->tail_rec
+		&& q->st.m->pl->opt && r->is_tail_rec
 		&& !any_choices(q, g, false) && check_slots(q, g, r))
 		q->st.fp--;
 #endif

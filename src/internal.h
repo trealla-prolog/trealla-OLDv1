@@ -348,10 +348,11 @@ typedef struct {
 	uint64_t ugen_created, ugen_erased;
 	idx_t nbr_cells, cidx;
 	uint32_t nbr_vars;
-	bool first_cut:1;
-	bool cut_only:1;
+	bool is_first_cut:1;
+	bool is_cut_only:1;
+	bool is_unique:1;
 	bool is_fact:1;
-	bool tail_rec:1;
+	bool is_tail_rec:1;
 	cell cells[];
 } rule;
 
@@ -379,7 +380,7 @@ struct predicate_ {
 	bool is_discontiguous:1;
 	bool is_abolished:1;
 	bool is_noindex:1;
-	bool check_directive:1;
+	bool is_check_directive:1;
 };
 
 struct builtins {
@@ -467,7 +468,7 @@ typedef struct {
 	bool register_term:1;
 	bool block_catcher:1;
 	bool catcher:1;
-	bool tail_rec:1;
+	bool is_tail_rec:1;
 } choice;
 
 typedef struct arena_ arena;

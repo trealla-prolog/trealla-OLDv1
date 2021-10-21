@@ -817,7 +817,7 @@ static void xref_cell(parser *p, rule *r, cell *c, predicate *parent)
 
 		if (parent && (parent->key.val_off == c->val_off) && (parent->key.arity == c->arity)) {
 			c->flags |= FLAG_TAIL_REC;
-			r->tail_rec = true;
+			r->is_tail_rec = true;
 		}
 	}
 }
@@ -839,18 +839,42 @@ void xref_rule(parser *p, rule *r, predicate *parent)
 	}
 }
 
+static void check_rule(parser *p, rule *r, predicate *parent)
+{
+	bool matched = false;
+
+	for (clause *cl = parent->head; cl; cl = cl->next) {
+		if (&cl->r == r)
+			continue;
+
+		if (index_cmpkey(r->cells+1, cl->r.cells+1, p->m)) {
+			matched = true;
+			break;
+		}
+	}
+
+	if (!matched)
+		r->is_unique = true;
+}
+
 void xref_db(parser *p)
 {
 	for (predicate *pr = p->m->head; pr; pr = pr->next) {
 		for (clause *cl = pr->head; cl; cl = cl->next)
 			xref_rule(p, &cl->r, pr);
+
+		if (pr->is_dynamic || pr->idx)
+			continue;
+
+		for (clause *cl = pr->head; cl; cl = cl->next)
+			check_rule(p, &cl->r, pr);
 	}
 }
 
 static void check_first_cut(parser *p)
 {
 	cell *c = get_body(p->r->cells);
-	int cut_only = true;
+	int is_cut_only = true;
 
 	if (!c)
 		return;
@@ -862,18 +886,18 @@ static void check_first_cut(parser *p)
 		if (!strcmp(GET_STR(p, c), ","))
 			;
 		else if (!IS_OP(c) && !strcmp(GET_STR(p, c), "!")) {
-			p->r->first_cut = true;
+			p->r->is_first_cut = true;
 			break;
 		} else {
-			cut_only = false;
+			is_cut_only = false;
 			break;
 		}
 
 		c += c->nbr_cells;
 	}
 
-	if (p->r->first_cut && cut_only)
-		p->r->cut_only = true;
+	if (p->r->is_first_cut && is_cut_only)
+		p->r->is_cut_only = true;
 }
 
 static idx_t get_varno(parser *p, const char *src)
@@ -912,8 +936,8 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 	memset(&p->vartab, 0, sizeof(p->vartab));
 	rule *r = p->r;
 	r->nbr_vars = 0;
-	r->first_cut = false;
-	r->cut_only = false;
+	r->is_first_cut = false;
+	r->is_cut_only = false;
 
 	for (idx_t i = 0; i < r->cidx; i++) {
 		cell *c = r->cells + i;

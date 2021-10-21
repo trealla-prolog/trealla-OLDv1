@@ -548,6 +548,7 @@ USE_RESULT pl_status fn_iso_throw_1(query *q)
 		cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
 		may_ptr_error(e);
 		safe_copy_cells(e, tmp, tmp->nbr_cells);
+		may_ptr_error(e);
 
 		if (!find_exception_handler(q, e))
 			return pl_failure;
