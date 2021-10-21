@@ -4,11 +4,9 @@
 	last/2, flatten/2, append/3
 	]).
 
-member(X, [X|T]) :- T == [], !.
 member(X, [X|_]).
 member(X, [_|Xs]) :- member(X, Xs).
 
-append(A, L, L) :- A == [], !.
 append([], L, L).
 append([H|T], L, [H|R]) :-
 	append(T, L, R).
@@ -22,7 +20,6 @@ subtract([], _, []) :- !.
 subtract([H|T], L2, L3) :- memberchk(H, L2), !, subtract(T, L2, L3).
 subtract([H|T1], L2, [H|T3]) :- subtract(T1, L2, T3).
 
-union(A, L, L) :- A == [], !.
 union([], L, L).
 union([H|T], Y, Z):- member(H, Y), !, union(T, Y, Z).
 union([H|T], Y, [H|Z]):- union(T, Y, Z).

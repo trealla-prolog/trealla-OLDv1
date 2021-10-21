@@ -1056,9 +1056,6 @@ void reset_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 
 static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
 {
-	if (is_variable(p1))
-		q->vars_in_query = true;
-
 	if (p1->arity != p2->arity)
 		return false;
 
@@ -1190,6 +1187,7 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 		q->no_tco = true;
 
 	if (is_variable(p1) || is_variable(p2))
+	//if (is_variable(p1) && !is_variable(p2))
 		q->vars_in_query = true;
 
 	if (is_variable(p1) && is_variable(p2)) {
