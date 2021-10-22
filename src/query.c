@@ -490,7 +490,8 @@ void try_me(query *q, unsigned nbr_vars)
 		e->c.attrs = NULL;
 	}
 
-	q->vars_in_query = false;
+	q->check_unique = false;
+	q->has_vars = false;
 	q->no_tco = false;
 	q->tot_matches++;
 }
@@ -661,12 +662,12 @@ static void commit_me(query *q, rule *r)
 	frame *g = GET_CURR_FRAME();
 	g->m = q->st.m;
 	q->st.m = q->st.curr_clause->owner->m;
-	bool implied_cut = !q->vars_in_query && r->is_unique;
-	bool last_match = implied_cut || r->is_first_cut || !is_next_key(q);
+	bool implied_cut = q->check_unique && !q->has_vars && r->is_unique;
+	bool last_match = r->is_first_cut || !is_next_key(q);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool choices = any_choices(q, g, true);
-	bool slots_ok = implied_cut || check_slots(q, g, r);
-	bool tco = last_match && (implied_cut || !q->no_tco) && recursive && !choices && slots_ok;
+	bool slots_ok = check_slots(q, g, r);
+	bool tco = last_match && !q->no_tco && recursive && !choices && slots_ok;
 	choice *ch = GET_CURR_CHOICE();
 
 #if 0
@@ -679,7 +680,7 @@ static void commit_me(query *q, rule *r)
 	else
 		g = make_frame(q, r->nbr_vars);
 
-	if (last_match) {
+	if (last_match || implied_cut) {
 		q->st.curr_clause = NULL;
 		m_done(q->st.iter);
 		q->st.iter = NULL;
@@ -1190,9 +1191,8 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 	if (p1_ctx == q->st.curr_frame)
 		q->no_tco = true;
 
-	if (is_variable(p1) || is_variable(p2))
-	//if (is_variable(p1) && !is_variable(p2))
-		q->vars_in_query = true;
+	if (is_variable(p1) && !is_variable(p2))
+		q->has_vars = true;
 
 	if (is_variable(p1) && is_variable(p2)) {
 		if (p2_ctx > p1_ctx)
@@ -1214,6 +1214,8 @@ bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, un
 		set_var(q, p2, p2_ctx, p1, p1_ctx);
 		return true;
 	}
+
+	q->check_unique = true;
 
 	if (is_string(p1) && is_string(p2))
 		return unify_cstring(q, p1, p2);

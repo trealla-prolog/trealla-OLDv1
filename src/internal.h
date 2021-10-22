@@ -535,7 +535,8 @@ struct query_ {
 	bool status:1;
 	bool resume:1;
 	bool no_tco:1;
-	bool vars_in_query:1;
+	bool check_unique:1;
+	bool has_vars:1;
 	bool error:1;
 	bool did_throw:1;
 	bool trace:1;
