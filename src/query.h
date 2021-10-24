@@ -37,6 +37,7 @@ extern USE_RESULT pl_status make_stringn(cell *d, const char *s, size_t n);
 extern void make_literal(cell *tmp, idx_t offset);
 extern int get_stream(query *q, cell *p1);
 extern bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx);
+extern void trim_trail(query *q);
 
 extern USE_RESULT pl_status fn_sys_cut_if_det_0(query *q);
 extern USE_RESULT pl_status fn_iso_throw_1(query *q);

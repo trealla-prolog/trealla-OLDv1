@@ -225,6 +225,7 @@ static USE_RESULT pl_status fn_return_1(query *q)
 	q->accum = p1;
 	cut_me(q, true, false);
 	drop_choice(q);
+	trim_trail(q);
 	q->error = true;
 	return pl_success;
 }

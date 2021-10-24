@@ -577,7 +577,7 @@ static frame *make_frame(query *q, unsigned nbr_vars)
 	return g;
 }
 
-static void trim_trail(query *q)
+void trim_trail(query *q)
 {
 	if (q->undo_hi_tp)
 		return;

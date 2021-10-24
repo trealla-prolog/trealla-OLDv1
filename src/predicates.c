@@ -5425,6 +5425,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 	// Return matching solutions
 
 	drop_choice(q);
+	trim_trail(q);
 	free(q->tmpq[q->st.qnbr]);
 	q->tmpq[q->st.qnbr] = NULL;
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
@@ -9569,6 +9570,7 @@ static USE_RESULT pl_status fn_sys_lt_2(query *q)
 	}
 
 	drop_choice(q);
+	trim_trail(q);
 	return pl_success;
 }
 
@@ -9626,6 +9628,7 @@ static USE_RESULT pl_status fn_sys_ne_2(query *q)
 	}
 
 	drop_choice(q);
+	trim_trail(q);
 	return pl_success;
 }
 
@@ -9766,6 +9769,7 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 
 	undo_me(q);
 	drop_choice(q);
+	trim_trail(q);
 
 	if (first) {
 		cell tmp;
@@ -10189,10 +10193,12 @@ static USE_RESULT pl_status fn_memberchk_2(query *q)
 	while (is_list(p2) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(p2);
 		h = deref(q, h, p2_ctx);
+		idx_t h_ctx = q->latest_ctx;
 		try_me(q, g->nbr_vars);
 
-		if (unify(q, p1, p1_ctx, h, q->latest_ctx)) {
+		if (unify(q, p1, p1_ctx, h, h_ctx)) {
 			drop_choice(q);
+			trim_trail(q);
 			return pl_success;
 		}
 
@@ -10763,6 +10769,7 @@ static USE_RESULT pl_status fn_sys_chk_is_det_1(query *q)
 				break;
 
 			drop_choice(q);
+			trim_trail(q);
 			ch->did_cleanup = true;
 			cell *c = ch->st.curr_cell;
 			c = deref(q, c, ch->st.curr_frame);
