@@ -10906,7 +10906,7 @@ static const struct builtins g_predicates_iso[] =
 	{"throw", 1, fn_iso_throw_1, NULL, false},
 	{"throw", 1, fn_iso_throw_1, NULL, false},
 	{"$catch", 3, fn_iso_catch_3, NULL, false},
-	{"$catch2", 3, fn_iso_catch2_3, NULL, false},
+	{"$catch2", 3, fn_sys_catch2_3, NULL, false},
 
 	{"call", 1, fn_iso_call_n, NULL, false},
 	{"call", 2, fn_iso_call_n, NULL, false},

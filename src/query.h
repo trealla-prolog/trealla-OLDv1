@@ -41,7 +41,7 @@ extern void trim_trail(query *q);
 
 extern USE_RESULT pl_status fn_sys_cut_if_det_0(query *q);
 extern USE_RESULT pl_status fn_iso_throw_1(query *q);
-extern USE_RESULT pl_status fn_iso_catch2_3(query *q);
+extern USE_RESULT pl_status fn_sys_catch2_3(query *q);
 extern USE_RESULT pl_status fn_iso_catch_3(query *q);
 extern USE_RESULT pl_status fn_sys_block_catcher_0(query *q);
 extern USE_RESULT pl_status fn_iso_negation_1(query *q);
