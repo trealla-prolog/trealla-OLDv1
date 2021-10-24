@@ -662,8 +662,8 @@ static void commit_me(query *q, rule *r)
 	frame *g = GET_CURR_FRAME();
 	g->m = q->st.m;
 	q->st.m = q->st.curr_clause->owner->m;
-	bool implied_cut = q->check_unique && !q->has_vars && r->is_unique;
-	bool last_match = r->is_first_cut || !is_next_key(q);
+	bool implied_first_cut = q->check_unique && !q->has_vars && r->is_unique;
+	bool last_match = implied_first_cut || r->is_first_cut || !is_next_key(q);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool choices = any_choices(q, g, true);
 	bool slots_ok = check_slots(q, g, r);
@@ -680,7 +680,7 @@ static void commit_me(query *q, rule *r)
 	else
 		g = make_frame(q, r->nbr_vars);
 
-	if (last_match || implied_cut) {
+	if (last_match) {
 		q->st.curr_clause = NULL;
 		m_done(q->st.iter);
 		q->st.iter = NULL;
