@@ -11070,7 +11070,7 @@ static const struct builtins g_predicates_other[] =
 	{"cpu_time", 1, fn_cpu_time_1, "-variable", false},
 	{"pid", 1, fn_pid_1, "-integer", false},
 	{"shell", 1, fn_shell_1, "+atom", false},
-	{"shell", 2, fn_shell_2, "+atom,??", false},
+	{"shell", 2, fn_shell_2, "+atom,-integer", false},
 	{"popen", 4, fn_popen_4, "+atom,+atom,-stream,+list", false},
 	{"wall_time", 1, fn_wall_time_1, "-integer", false},
 	{"date_time", 6, fn_date_time_6, "-yyyy,-m,-d,-h,--m,-s", false},
