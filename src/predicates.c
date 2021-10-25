@@ -9122,7 +9122,7 @@ static USE_RESULT pl_status fn_atomic_list_concat_3(query *q)
 {
 	GET_FIRST_ARG(p1,iso_list_or_nil);
 	GET_NEXT_ARG(p2,atomic);
-	GET_NEXT_ARG(p3,atom_or_var);
+	GET_NEXT_ARG(p3,atomic_or_var);
 	LIST_HANDLER(p1);
 	ASTRING(pr);
 
