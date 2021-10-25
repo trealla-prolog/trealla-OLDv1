@@ -79,19 +79,19 @@ unifiable(T1, T2, Gs) :-
 
 call_cleanup(G, C) :-
 	'$register_cleanup'(ignore(C)),
-	'$catch2'(
+	call('$catch2'(
 		('$get_level'(Before), G,'$chk_is_det'(Before)),
 		Err,
-		(catch((\+ \+ call(C)), _, true), throw(Err))
+		(catch((\+ \+ call(C)), _, true), throw(Err)))
 	).
 
 setup_call_cleanup(S, G, C) :-
 	once(S),
 	'$register_cleanup'(ignore(C)),
-	'$catch2'(
+	call('$catch2'(
 		('$get_level'(Before), G, '$chk_is_det'(Before)),
 		Err,
-		(catch((\+ \+ call(C)), _, true), throw(Err))
+		(catch((\+ \+ call(C)), _, true), throw(Err)))
 	).
 
 catch(G, E, C) :-
