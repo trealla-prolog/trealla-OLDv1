@@ -10740,7 +10740,7 @@ static USE_RESULT pl_status fn_sys_get_level_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
-	make_int(&tmp, q->cp);
+	make_int(&tmp, q->cp-1);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }

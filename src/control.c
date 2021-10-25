@@ -51,30 +51,25 @@ USE_RESULT pl_status fn_sys_chk_is_det_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 
-	if (q->cp != get_smallint(p1))
+	if (get_smallint(p1) != (q->cp-1))
 		return pl_success;
 
+	drop_choice(q);
+	trim_trail(q);
 	choice *ch = GET_CURR_CHOICE();
 
-	for (;;) {
-		if (ch->register_cleanup) {
-			if (ch->did_cleanup)
-				break;
+	if (!ch->register_cleanup)
+		return pl_success;
 
-			drop_choice(q);
-			trim_trail(q);
-			ch->did_cleanup = true;
-			cell *c = ch->st.curr_cell;
-			c = deref(q, c, ch->st.curr_frame);
-			cell *p1 = deref(q, c+1, ch->st.curr_frame);
-			do_cleanup(q, p1);
-			return pl_success;
-		}
+	if (ch->did_cleanup)
+		return pl_success;
 
-		q->cp--;
-		ch--;
-	}
-
+	drop_choice(q);
+	trim_trail(q);
+	ch->did_cleanup = true;
+	cell *c = deref(q, ch->st.curr_cell, ch->st.curr_frame);
+	c = deref(q, c+1, ch->st.curr_frame);
+	do_cleanup(q, c);
 	return pl_success;
 }
 
