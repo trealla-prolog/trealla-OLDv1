@@ -432,11 +432,11 @@ USE_RESULT pl_status fn_sys_block_catcher_0(query *q)
 	}
 	 while (ch != q->choices);
 
-	if (q->retry)
-		return false;
+	//if (q->retry)
+	//	return false;
 
-	if (ch != GET_CURR_CHOICE())
-		may_error(make_choice(q));
+	//if (ch != GET_CURR_CHOICE())
+	//	may_error(make_choice(q));
 
 	return pl_success;
 }
