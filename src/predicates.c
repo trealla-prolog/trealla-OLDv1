@@ -10754,37 +10754,6 @@ static USE_RESULT pl_status fn_sys_choice_0(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_chk_is_det_1(query *q)
-{
-	GET_FIRST_ARG(p1,integer);
-
-	if (q->cp != get_smallint(p1))
-		return pl_success;
-
-	choice *ch = GET_CURR_CHOICE();
-
-	for (;;) {
-		if (ch->register_cleanup) {
-			if (ch->did_cleanup)
-				break;
-
-			drop_choice(q);
-			trim_trail(q);
-			ch->did_cleanup = true;
-			cell *c = ch->st.curr_cell;
-			c = deref(q, c, ch->st.curr_frame);
-			cell *p1 = deref(q, c+1, ch->st.curr_frame);
-			do_cleanup(q, p1);
-			return pl_success;
-		}
-
-		q->cp--;
-		ch--;
-	}
-
-	return pl_success;
-}
-
 pl_status fn_sys_undo_trail_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
@@ -10908,6 +10877,7 @@ static const struct builtins g_predicates_iso[] =
 	{"$catch", 3, fn_iso_catch_3, NULL, false},
 	{"$catch2", 3, fn_sys_catch2_3, NULL, false},
 	{"$cut_if_det", 0, fn_sys_cut_if_det_0, NULL, false},
+	{"$cut_if_det", 1, fn_sys_cut_if_det_1, "+integer", false},
 
 	{"call", 1, fn_iso_call_n, NULL, false},
 	{"call", 2, fn_iso_call_n, NULL, false},
