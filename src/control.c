@@ -85,7 +85,7 @@ USE_RESULT pl_status fn_sys_cut_if_det_1(query *q)
 	if (q->cp != get_smallint(p1))
 		return pl_success;
 
-	q->cp--;
+	drop_choice(q);
 	return pl_success;
 }
 
