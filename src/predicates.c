@@ -9131,7 +9131,7 @@ static USE_RESULT pl_status fn_atomic_list_concat_3(query *q)
 		h = deref(q, h, p1_ctx);
 
 		if (is_variable(h))
-			return throw_error(q, h, "instantiation_error", "atomic_list_concat/3");
+			return throw_error(q, h, "instantiation_error", "atomic");
 
 		if (!is_atomic(h))
 			return throw_error(q, h, "type_error", "atomic");
