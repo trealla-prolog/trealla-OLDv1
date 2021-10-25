@@ -528,6 +528,7 @@ recorda(K, V, R) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V), R).
 recordz(K, V, R) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V), R).
 recorded(K, V, R) :- nonvar(K), clause('$record_key'(K,V), _, R).
 
+atomic_list_concat(L, Atom) :- atomic_list_concat(L, '', Atom).
 format(F) :- format(F, []).
 partial_string(S, P) :- append(S, _, P).
 partial_string(S, P, V) :- append(S, V, P).
@@ -831,41 +832,6 @@ portray_atts(Term) :-
 	copy_term(Term, Copy, Gs),
 	Term = Copy,
 	write_term(user_output, Gs, [varnames(true)]), nl.
-
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This is bidirectional!
-
-atomic_list_concat(L, Atom) :-
-	atomic_list_concat(L, '', Atom).
-
-atomic_list_concat([], _, '') :- !.
-atomic_list_concat(L, Sep, Atom) :-
-	(	(atom(Sep), ground(L), is_list(L))
-	->	list_atom(L, Sep, Atom)
-	;   (	(atom(Sep), atom(Atom))
-		->  atom_list(Atom, Sep, L)
-		;   instantiation_error(atomic_list_concat_(L, Sep, Atom))
-		)
-	).
-
-list_atom([Word],  _, Word).
-list_atom([Word|L], Sep, Atom) :-
-	list_atom(L, Sep, Right),
-	atomic_concat(Sep, Right, Right1),
-	atomic_concat(Word, Right1, Atom),
-	!.
-
-atom_list(Atom, Sep, [Word|L]) :-
-	sub_atom(Atom, X, N, _, Sep),
-	sub_atom(Atom, 0, X, _, Word),
-	Z is X + N,
-	sub_atom(Atom, Z, _, 0, Rest),
-	!,
-	atom_list(Rest, Sep, L).
-atom_list(Atom, _, [Atom]).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

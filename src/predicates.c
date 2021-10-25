@@ -9097,7 +9097,6 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 	GET_NEXT_ARG(p2,atomic);
 	GET_NEXT_ARG(p3,any);
 
-
 	const char *src1, *src2;
 	size_t len1, len2;
 	char tmpbuf1[256], tmpbuf2[256];
@@ -9111,6 +9110,50 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 	ASTRING_alloc(pr, len1+len2);
 	ASTRING_strcatn(pr, src1, len1);
 	ASTRING_strcatn(pr, src2, len2);
+	cell tmp;
+	may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
+	ASTRING_free(pr);
+	pl_status ok = unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	return ok;
+}
+
+static USE_RESULT pl_status fn_atomic_list_concat_3(query *q)
+{
+	GET_FIRST_ARG(p1,iso_list_or_nil);
+	GET_NEXT_ARG(p2,atomic);
+	GET_NEXT_ARG(p3,atom_or_var);
+	LIST_HANDLER(p1);
+	ASTRING(pr);
+
+	while (is_list(p1)) {
+		cell *h = LIST_HEAD(p1);
+		h = deref(q, h, p1_ctx);
+
+		if (is_variable(h))
+			return throw_error(q, h, "instantiation_error", "atomic_list_concat/3");
+
+		if (!is_atomic(h))
+			return throw_error(q, h, "type_error", "atomic");
+
+		char *dst = print_term_to_strbuf(q, h, q->latest_ctx, 1);
+		ASTRING_strcat(pr, dst);
+		free(dst);
+
+		p1 = LIST_TAIL(p1);
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+
+		if (is_list(p1)) {
+			dst = print_term_to_strbuf(q, p2, p2_ctx, 1);
+			ASTRING_strcat(pr, dst);
+			free(dst);
+		}
+	}
+
+	if (is_variable(p1))
+		return throw_error(q, p1, "instantiation_error", "atomic_list_concat/3");
+
 	cell tmp;
 	may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
 	ASTRING_free(pr);
@@ -11016,6 +11059,7 @@ static const struct builtins g_predicates_other[] =
 	{"copy_term_nat", 2, fn_copy_term_nat_2, NULL, false},
 	{"string", 1, fn_atom_1, "+rule", false},
 	{"atomic_concat", 3, fn_atomic_concat_3, NULL, false},
+	{"atomic_list_concat", 3, fn_atomic_list_concat_3, NULL, false},
 	{"replace", 4, fn_replace_4, "+orig,+from,+to,-new", false},
 	{"print", 1, fn_print_1, "+rule", false},
 	{"writeln", 1, fn_writeln_1, "+rule", false},
