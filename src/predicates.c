@@ -9102,31 +9102,11 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 	size_t len1, len2;
 	char tmpbuf1[256], tmpbuf2[256];
 
-	if (is_atom(p1)) {
-		src1 = GET_STR(q, p1);
-		len1 = LEN_STR(q, p1);
-	} else if (is_bigint(p1)) {
-		return pl_failure;
-	} else if (is_integer(p1)) {
-		src1 = tmpbuf1;
-		len1 = sprint_int(tmpbuf1, sizeof(tmpbuf1), get_int(p1), 10);
-	} else {
-		src1 = tmpbuf1;
-		len1 = snprintf(tmpbuf1, sizeof(tmpbuf1), "%.17g", get_real(p1));
-	}
+	len1 = print_term_to_buf(q, tmpbuf1, sizeof(tmpbuf1), p1, p1_ctx, 1, false, 0);
+	src1 = tmpbuf1;
 
-	if (is_atom(p2)) {
-		src2 = GET_STR(q, p2);
-		len2 = LEN_STR(q, p2);
-	} else if (is_bigint(p1)) {
-		return pl_failure;
-	} else if (is_integer(p2)) {
-		src2 = tmpbuf2;
-		len2 = sprint_int(tmpbuf2, sizeof(tmpbuf2), get_int(p2), 10);
-	} else {
-		src2 = tmpbuf2;
-		len2 = snprintf(tmpbuf2, sizeof(tmpbuf1), "%.17g", get_real(p2));
-	}
+	len2 = print_term_to_buf(q, tmpbuf2, sizeof(tmpbuf2), p2, p2_ctx, 1, false, 0);
+	src2 = tmpbuf2;
 
 	ASTRING_alloc(pr, len1+len2);
 	ASTRING_strcatn(pr, src1, len1);

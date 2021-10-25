@@ -841,7 +841,7 @@ portray_atts(Term) :-
 atomic_list_concat(L, Atom) :-
 	atomic_list_concat(L, '', Atom).
 
-atomic_list_concat([], _, []) :- !.
+atomic_list_concat([], _, '') :- !.
 atomic_list_concat(L, Sep, Atom) :-
 	(	(atom(Sep), ground(L), is_list(L))
 	->	list_atom(L, Sep, Atom)
