@@ -95,10 +95,7 @@ setup_call_cleanup(S, G, C) :-
 	).
 
 catch(G, E, C) :-
-	call('$catch'(
-		G,
-		E, C)
-	).
+	'$call'('$catch'(G, E, C)).
 
 findall(T, G, B, Tail) :-
 	'$mustbe_list_or_var'(B),

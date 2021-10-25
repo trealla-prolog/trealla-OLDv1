@@ -443,11 +443,18 @@ USE_RESULT pl_status fn_sys_block_catcher_0(query *q)
 
 USE_RESULT pl_status fn_iso_catch_3(query *q)
 {
-	GET_FIRST_ARG(p1,any);
+	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
+
+	if (!p0 || (p0 == ERR_CYCLE_CELL))
+		return throw_error(q, q->st.curr_cell, "resource_error", "too_many_vars");
+
+	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
+
+	GET_FIRST_RAW_ARG0(p1,any,p0);
 	GET_NEXT_ARG(p2,any);
 
 	if (q->retry && q->exception) {
-		cell *tmp = deep_copy_to_heap(q, q->exception, q->st.curr_frame, false, false);
+		cell *tmp = deep_clone_to_heap(q, q->exception, q->st.curr_frame);
 		may_ptr_error(tmp);
 		return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 	}
@@ -483,11 +490,18 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 
 USE_RESULT pl_status fn_sys_catch2_3(query *q)
 {
-	GET_FIRST_ARG(p1,any);
+	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
+
+	if (!p0 || (p0 == ERR_CYCLE_CELL))
+		return throw_error(q, q->st.curr_cell, "resource_error", "too_many_vars");
+
+	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
+
+	GET_FIRST_RAW_ARG0(p1,any,p0);
 	GET_NEXT_ARG(p2,any);
 
 	if (q->retry && q->exception) {
-		cell *tmp = deep_copy_to_heap(q, q->exception, q->st.curr_frame, false, false);
+		cell *tmp = deep_clone_to_heap(q, q->exception, q->st.curr_frame);
 		may_ptr_error(tmp);
 		return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 	}
