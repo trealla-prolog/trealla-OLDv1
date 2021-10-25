@@ -1022,8 +1022,8 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 
 	p1 = p->r->cells + p1_idx;
 	p1->tag = TAG_POOL;
-	p1->flags = 0;//FLAG_BUILTIN;
-	p1->fn = NULL;
+	p1->flags = FLAG_BUILTIN;
+	p1->fn = fn_iso_call_n;
 	p1->val_off = g_call_s;
 	p1->nbr_cells = 2;
 	p1->arity = 1;
