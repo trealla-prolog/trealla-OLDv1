@@ -244,8 +244,8 @@ Non-standard predicates
 	memberchk/2                 # memberchk(+rule,+list).
 	nonmember/2                 # \+ memberchk(+rule,+list)
 	atomic_concat/3             # atomic_concat(+atom,+list,-list)
-	atomic_list_concat/2	    # atomic_list_concat(L,Atom) (bidirectional)
-	atomic_list_concat/3	    # atomic_list_concat(L,Sep,Atom) (bidirectional)
+	atomic_list_concat/2	    # atomic_list_concat(L,Atom)
+	atomic_list_concat/3	    # atomic_list_concat(L,Sep,Atom)
 	read_term_from_chars/2	    # read_term_from_chars(+chars,-Term)
 	read_term_from_chars/3	    # read_term_from_chars(+chars,+opts,-Term)
 	write_term_to_chars/3	    # write_term_to_chars(+rule,+opts,-Cs)
