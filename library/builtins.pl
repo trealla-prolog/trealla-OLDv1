@@ -95,7 +95,10 @@ setup_call_cleanup(S, G, C) :-
 	).
 
 catch(G, E, C) :-
-	'$call'('$catch'(G, E, C)).
+	'$get_level'(Before),
+	'$call'('$catch'(G, E, C)),
+	Before0 is Before + 1,
+	'$cut_if_det'(Before0).
 
 findall(T, G, B, Tail) :-
 	'$mustbe_list_or_var'(B),
