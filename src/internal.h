@@ -350,6 +350,8 @@ typedef struct {
 	uint32_t nbr_vars;
 	bool is_first_cut:1;
 	bool is_cut_only:1;
+	bool is_arg1_unique:1;
+	bool is_arg2_unique:1;
 	bool is_unique:1;
 	bool is_fact:1;
 	bool is_tail_rec:1;
@@ -451,7 +453,10 @@ typedef struct {
 	idx_t curr_frame, fp, hp, tp, sp;
 	uint32_t cgen, arena_nbr;
 	uint8_t qnbr;
-	bool definitive:1;
+	bool definite:1;
+	bool maybe_1:1;
+	bool maybe_2:1;
+	bool arg1_is_nonvar:1;
 } prolog_state;
 
 typedef struct {

@@ -77,7 +77,7 @@ USE_RESULT pl_status fn_sys_cut_if_det_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 
-	if (q->cp != get_smallint(p1))
+	if ((q->cp-1) != get_smallint(p1))
 		return pl_success;
 
 	drop_choice(q);

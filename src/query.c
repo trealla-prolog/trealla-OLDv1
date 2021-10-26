@@ -225,7 +225,7 @@ bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx)
 	return is_cyclic_term_internal(q, p1, p1_ctx, NULL);
 }
 
-static bool is_next_key(query *q)
+static bool is_next_key(query *q, rule *r)
 {
 	if (q->st.iter) {
 		if (m_is_next(q->st.iter))
@@ -235,7 +235,13 @@ static bool is_next_key(query *q)
 		return false;
 	}
 
-	if (!q->st.curr_clause->next || q->st.definitive)
+	if (!q->st.curr_clause->next || q->st.definite)
+		return false;
+
+	if (q->st.maybe_1 && r->is_arg1_unique)
+		return false;
+
+	if (q->st.maybe_2 && r->is_arg2_unique)
 		return false;
 
 	return true;
@@ -248,7 +254,7 @@ static void next_key(query *q)
 			q->st.curr_clause = NULL;
 			q->st.iter = NULL;
 		}
-	} else if (!q->st.definitive)
+	} else if (!q->st.definite)
 		q->st.curr_clause = q->st.curr_clause->next;
 	else
 		q->st.curr_clause = NULL;
@@ -271,11 +277,33 @@ static bool is_all_vars(cell *c)
 
 static void find_key(query *q, predicate *pr, cell *c)
 {
-	q->st.definitive = false;
+	q->st.definite = false;
+	q->st.maybe_1 = false;
+	q->st.maybe_2 = false;
 	q->st.iter = NULL;
 
 	if (!pr->idx || (pr->cnt < q->st.m->indexing_threshold)) {
 		q->st.curr_clause = pr->head;
+
+		if (!c->arity)
+			return;
+
+		cell *p1 = c + 1, *p2 = NULL;
+
+		if (c->arity > 1)
+			p2 = p1 + p1->nbr_cells;
+
+		p1 = deref(q, p1, q->st.curr_frame);
+
+		if (p2)
+			p2 = deref(q, p2, q->st.curr_frame);
+
+		if (!is_variable(p1))
+			q->st.maybe_1 = true;
+
+		if (p2 && !is_variable(p2))
+			q->st.maybe_2 = true;
+
 		return;
 	}
 
@@ -295,7 +323,7 @@ static void find_key(query *q, predicate *pr, cell *c)
 	if (!m_next_key(iter, (void*)&q->st.curr_clause))
 		return;
 
-	// If the index search has found just one (definitive) solution
+	// If the index search has found just one (definite) solution
 	// then we can use it with no problems. If more than one then
 	// results must be returned in database order, so prefetch all
 	// the results and return them sorted as an iterator...
@@ -322,7 +350,7 @@ static void find_key(query *q, predicate *pr, cell *c)
 		return;
 	}
 
-	q->st.definitive = true;
+	q->st.definite = true;
 }
 
 void add_to_dirty_list(query *q, clause *cl)
@@ -663,7 +691,7 @@ static void commit_me(query *q, rule *r)
 	g->m = q->st.m;
 	q->st.m = q->st.curr_clause->owner->m;
 	bool implied_first_cut = q->check_unique && !q->has_vars && r->is_unique;
-	bool last_match = implied_first_cut || r->is_first_cut || !is_next_key(q);
+	bool last_match = implied_first_cut || r->is_first_cut || !is_next_key(q, r);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool choices = any_choices(q, g, true);
 	bool slots_ok = check_slots(q, g, r);
