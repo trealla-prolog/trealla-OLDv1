@@ -1,17 +1,6 @@
 {
   "total" : 167,
   "items" : [ {
-    "uid" : "e96278ed9288bacdb418cbcc943c2f26",
-    "name" : "predicates/stream_property_2/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 1,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 74,
-      "unknown" : 0,
-      "total" : 75
-    }
-  }, {
     "uid" : "09812cef55155aac413b0e337d25177f",
     "name" : "unicode/builtins/tests.lgt::tests",
     "statistic" : {
@@ -32,6 +21,17 @@
       "passed" : 96,
       "unknown" : 0,
       "total" : 96
+    }
+  }, {
+    "uid" : "e96278ed9288bacdb418cbcc943c2f26",
+    "name" : "predicates/stream_property_2/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 75,
+      "unknown" : 0,
+      "total" : 75
     }
   }, {
     "uid" : "bb8e106369c9e4f92fe1145b40d7d18a",

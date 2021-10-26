@@ -1,0 +1,51 @@
+{
+  "uid" : "daddaf24b6a03b42",
+  "name" : "lgt_unbounded_right_shift_01",
+  "fullName" : "lgt_unbounded_right_shift_01::tests",
+  "historyId" : "lgt_unbounded_right_shift_01::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "unbounded/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "unbounded/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "unbounded/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "unbounded/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "179-184"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/7c34a4c7e09691033815969c2cce9424f04a0467/tests/prolog/unbounded/tests.lgt#L179"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "daddaf24b6a03b42.json",
+  "parameterValues" : [ "unbounded/tests.lgt", "179-184", "https://github.com/LogtalkDotOrg/logtalk3/tree/7c34a4c7e09691033815969c2cce9424f04a0467/tests/prolog/unbounded/tests.lgt#L179" ]
+}

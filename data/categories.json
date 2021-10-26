@@ -1,24 +1,5 @@
 {
   "uid" : "4b4757e66a1912dae1a509f688f20b0f",
-  "children" : [ {
-    "name" : "Product defects",
-    "children" : [ {
-      "name" : "Non-deterministic success",
-      "children" : [ {
-        "name" : "iso_stream_property_2_01",
-        "uid" : "916c746c435cea21",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 1
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "predicates/stream_property_2/tests.lgt", "30-42", "https://github.com/LogtalkDotOrg/logtalk3/tree/a325649b992173a911c3c2d9054156184a994c66/tests/prolog/predicates/stream_property_2/tests.lgt#L30" ]
-      } ],
-      "uid" : "1e457c6468423f30812a59ec3665696f"
-    } ],
-    "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
-  } ],
+  "children" : [ ],
   "name" : "categories"
 }
