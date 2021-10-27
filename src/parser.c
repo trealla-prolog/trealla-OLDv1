@@ -844,10 +844,10 @@ static void check_rule(parser *p, rule *r, predicate *parent)
 	bool matched = false, me = false;
 	uint64_t umatched = 0;
 	cell *head = get_head(r->cells);
-	cell *p1 = head + 1, *p2 = NULL;
+	cell *arg1 = head + 1, *arg2 = NULL;
 
 	if (parent->key.arity > 1)
-		p2 = p1 + p1->nbr_cells;
+		arg2 = arg1 + arg1->nbr_cells;
 
 	for (clause *cl = parent->head; cl; cl = cl->next) {
 		if (!me) {
@@ -857,21 +857,22 @@ static void check_rule(parser *p, rule *r, predicate *parent)
 			continue;
 		}
 
-		cell *h2 = get_head(cl->r.cells);
-		cell *h21 = h2 + 1, *h22 = NULL;
+		cell *h = get_head(cl->r.cells);
+		cell *harg1 = h + 1;
 
-		if (parent->key.arity > 1)
-			h22 = h21 + h21->nbr_cells;
-
-		if (!index_cmpkey(p1, h21, p->m))
+		if (!index_cmpkey(arg1, harg1, p->m))
 			umatched |= 1 << 0;
 
+		cell *harg2 = NULL;
+
 		if (parent->key.arity > 1) {
-			if (!index_cmpkey(p2, h22, p->m))
+			harg2 = harg1 + harg1->nbr_cells;
+
+			if (!index_cmpkey(arg2, harg2, p->m))
 				umatched |= 1 << 1;
 		}
 
-		if (!index_cmpkey(head, h2, p->m)) {
+		if (!index_cmpkey(head, h, p->m)) {
 			matched = true;
 			//break;
 		}
@@ -882,7 +883,7 @@ static void check_rule(parser *p, rule *r, predicate *parent)
 		r->is_unique = true;
 	}
 
-	if (r->is_unique)
+	//if (r->is_unique)
 		r->umask = ~umatched;
 
 	if (r->is_unique && !parent->is_noindex && !parent->idx && (parent->cnt > 15))

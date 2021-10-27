@@ -793,7 +793,7 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	pr->db_id++;
 	pr->cnt++;
 
-	if (pr->is_noindex || (pr->cnt < m->indexing_threshold))
+	if (pr->is_noindex || ((pr->cnt < m->indexing_threshold) && !pr->idx))
 		return;
 
 	if (!pr->idx)
