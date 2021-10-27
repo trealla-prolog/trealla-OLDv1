@@ -10454,7 +10454,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 	} else if (is_atom(p1))
 		key = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
 	else
-		return throw_error(q, p1, "type_error", "integer");
+		return throw_error(q, p1, "type_error", "atomic");
 
 	may_ptr_error(key);
 
@@ -10469,13 +10469,13 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 
 	if (is_smallint(p2)) {
 		char tmpbuf[128];
-		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_smallint(p2));
+		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_smallint(p2)); // FIXME
 		val = strdup(tmpbuf);
 	} else if (is_atom(p2))
 		val = slicedup(GET_STR(q, p2), LEN_STR(q, p2));
 	else {
 		free(key);
-		return throw_error(q, p2, "type_error", "integer");
+		return throw_error(q, p2, "type_error", "atomic");
 	}
 
 	may_ptr_error(val);
@@ -10526,7 +10526,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 	} else if (is_atom(p1))
 		key = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
 	else
-		return throw_error(q, p2, "type_error", "integer");
+		return throw_error(q, p2, "type_error", "atomic");
 
 	may_ptr_error(key);
 	char *val = NULL;
@@ -10550,7 +10550,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 	}
 
 	if (all_digs) {
-		int_t v = strtoll(val, NULL, 10);
+		int_t v = strtoll(val, NULL, 10);	// FIXME
 		make_int(&tmp, v);
 	} else
 		may_error(make_cstring(&tmp, val));
