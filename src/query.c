@@ -238,10 +238,10 @@ static bool is_next_key(query *q, rule *r)
 	if (!q->st.curr_clause->next || q->st.definite)
 		return false;
 
-	if (q->st.maybe_1 && (r->umask & (1 << 0)))
+	if (q->pl->opt && q->st.maybe_1 && (r->umask & (1 << 0)))
 		return false;
 
-	if (q->st.maybe_2 && (r->umask & (1 << 1)))
+	if (q->pl->opt && q->st.maybe_2 && (r->umask & (1 << 1)))
 		return false;
 
 	return true;
@@ -275,6 +275,20 @@ static bool is_all_vars(cell *c)
 	return true;
 }
 
+static bool is_ground(cell *c)
+{
+	idx_t nbr_cells = c->nbr_cells;
+
+	for (idx_t i = 0; i < nbr_cells; i++) {
+		if (is_variable(c))
+			return false;
+
+		c += c->nbr_cells;
+	}
+
+	return true;
+}
+
 static void find_key(query *q, predicate *pr, cell *c)
 {
 	q->st.definite = false;
@@ -298,10 +312,10 @@ static void find_key(query *q, predicate *pr, cell *c)
 		if (p2)
 			p2 = deref(q, p2, q->st.curr_frame);
 
-		if (!is_variable(p1))
+		if (is_ground(p1))
 			q->st.maybe_1 = true;
 
-		if (p2 && !is_variable(p2))
+		if (p2 && is_ground(p2))
 			q->st.maybe_2 = true;
 
 		return;
