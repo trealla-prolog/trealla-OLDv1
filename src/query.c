@@ -282,7 +282,7 @@ static void find_key(query *q, predicate *pr, cell *c)
 	q->st.maybe_2 = false;
 	q->st.iter = NULL;
 
-	if (!pr->idx || (pr->cnt < q->st.m->indexing_threshold)) {
+	if (!pr->idx) {
 		q->st.curr_clause = pr->head;
 
 		if (!c->arity)

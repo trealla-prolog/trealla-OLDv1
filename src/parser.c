@@ -905,10 +905,10 @@ void xref_db(parser *p)
 		for (clause *cl = pr->head; cl; cl = cl->next)
 			check_rule(p, &cl->r, pr);
 
-		if (!pr->not_unique && !pr->is_noindex && !pr->idx && (pr->cnt > 15)) {
-			//printf("*** unique %s/%u cnt=%u\n", GET_STR(p, &pr->key), pr->key.arity, (unsigned)pr->cnt);
-			reindex(p->m, pr);
-		}
+		//if (!pr->not_unique && !pr->is_noindex && !pr->idx && (pr->cnt > 15)) {
+		//	//printf("*** unique %s/%u cnt=%u\n", GET_STR(p, &pr->key), pr->key.arity, (unsigned)pr->cnt);
+		//	reindex(p->m, pr);
+		//}
 	}
 }
 
