@@ -881,13 +881,11 @@ static void check_rule(parser *p, rule *r, predicate *pr)
 	if (!matched) {
 		//printf("*** unique %s/%u\n", GET_STR(p, &pr->key), pr->key.arity);
 		r->is_unique = true;
-	}
+	} else
+		pr->not_unique = true;
 
 	//if (r->is_unique)
 		r->umask = ~umatched;
-
-	//if (r->is_unique && !pr->is_noindex && !pr->idx && (pr->cnt > 15))
-	//	reindex(p->m, pr);
 }
 
 void xref_db(parser *p)
@@ -906,6 +904,11 @@ void xref_db(parser *p)
 
 		for (clause *cl = pr->head; cl; cl = cl->next)
 			check_rule(p, &cl->r, pr);
+
+		if (!pr->not_unique && !pr->is_noindex && !pr->idx && (pr->cnt > 15)) {
+			//printf("*** unique %s/%u cnt=%u\n", GET_STR(p, &pr->key), pr->key.arity, (unsigned)pr->cnt);
+			reindex(p->m, pr);
+		}
 	}
 }
 

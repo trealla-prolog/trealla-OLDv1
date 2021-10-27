@@ -107,8 +107,8 @@ predicate *create_predicate(module *m, cell *c)
 	pr->key.nbr_cells = 1;
 	pr->is_noindex = m->pl->noindex || !pr->key.arity;
 
-	if (GET_STR(m, c)[0] == '$')
-		pr->is_noindex = true;
+	//if (GET_STR(m, c)[0] == '$')
+	//	pr->is_noindex = true;
 
 	m_app(m->index, &pr->key, pr);
 	return pr;
