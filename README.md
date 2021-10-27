@@ -298,6 +298,9 @@ Non-standard predicates
 	b_getval(K,V)
 	b_delete(K)
 
+	'$kv_set'(+atomic,+atomic,[create(Bool)])	# non-backtracking
+	'$kv_get'(+atomic,?atomic,[delete(Bool)])	# non-backtracking
+
 	call_nth/2
 	offset/2
 	limit/2
