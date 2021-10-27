@@ -886,8 +886,8 @@ static void check_rule(parser *p, rule *r, predicate *pr)
 	//if (r->is_unique)
 		r->umask = ~umatched;
 
-	if (r->is_unique && !pr->is_noindex && !pr->idx && (pr->cnt > 15))
-		reindex(p->m, pr);
+	//if (r->is_unique && !pr->is_noindex && !pr->idx && (pr->cnt > 15))
+	//	reindex(p->m, pr);
 }
 
 void xref_db(parser *p)
