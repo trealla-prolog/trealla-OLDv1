@@ -839,17 +839,17 @@ void xref_rule(parser *p, rule *r, predicate *parent)
 	}
 }
 
-static void check_rule(parser *p, rule *r, predicate *parent)
+static void check_rule(parser *p, rule *r, predicate *pr)
 {
 	bool matched = false, me = false;
 	uint64_t umatched = 0;
 	cell *head = get_head(r->cells);
 	cell *arg1 = head + 1, *arg2 = NULL;
 
-	if (parent->key.arity > 1)
+	if (pr->key.arity > 1)
 		arg2 = arg1 + arg1->nbr_cells;
 
-	for (clause *cl = parent->head; cl; cl = cl->next) {
+	for (clause *cl = pr->head; cl; cl = cl->next) {
 		if (!me) {
 			if (&cl->r == r)
 				me = true;
@@ -865,7 +865,7 @@ static void check_rule(parser *p, rule *r, predicate *parent)
 
 		cell *harg2 = NULL;
 
-		if (parent->key.arity > 1) {
+		if (pr->key.arity > 1) {
 			harg2 = harg1 + harg1->nbr_cells;
 
 			if (!index_cmpkey(arg2, harg2, p->m))
@@ -879,15 +879,15 @@ static void check_rule(parser *p, rule *r, predicate *parent)
 	}
 
 	if (!matched) {
-		//printf("*** unique %s/%u\n", GET_STR(p, &parent->key), parent->key.arity);
+		//printf("*** unique %s/%u\n", GET_STR(p, &pr->key), pr->key.arity);
 		r->is_unique = true;
 	}
 
 	//if (r->is_unique)
 		r->umask = ~umatched;
 
-	if (r->is_unique && !parent->is_noindex && !parent->idx && (parent->cnt > 15))
-		reindex(p->m, parent);
+	if (r->is_unique && !pr->is_noindex && !pr->idx && (pr->cnt > 15))
+		reindex(p->m, pr);
 }
 
 void xref_db(parser *p)
