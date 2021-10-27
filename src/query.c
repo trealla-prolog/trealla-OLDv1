@@ -238,10 +238,10 @@ static bool is_next_key(query *q, rule *r)
 	if (!q->st.curr_clause->next || q->st.definite)
 		return false;
 
-	if (q->st.maybe_1 && r->is_arg1_unique)
+	if (q->st.maybe_1 && (r->umask & (1 << 0)))
 		return false;
 
-	if (q->st.maybe_2 && r->is_arg2_unique)
+	if (q->st.maybe_2 && (r->umask & (1 << 1)))
 		return false;
 
 	return true;

@@ -345,13 +345,11 @@ typedef struct {
 } uuid;
 
 typedef struct {
-	uint64_t ugen_created, ugen_erased;
+	uint64_t ugen_created, ugen_erased, umask;
 	idx_t nbr_cells, cidx;
 	uint32_t nbr_vars;
 	bool is_first_cut:1;
 	bool is_cut_only:1;
-	bool is_arg1_unique:1;
-	bool is_arg2_unique:1;
 	bool is_unique:1;
 	bool is_fact:1;
 	bool is_tail_rec:1;
