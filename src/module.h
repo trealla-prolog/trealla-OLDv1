@@ -21,7 +21,6 @@ extern int index_cmpkey(const void *ptr1, const void *ptr2, const void *param);
 extern bool needs_quoting(module *m, const char *src, int srclen);
 extern void do_db_load(module *m);
 extern int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, int depth);
-extern void reindex(module *m, predicate *pr);
 
 extern clause *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting);
 extern clause *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting);

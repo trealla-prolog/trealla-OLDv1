@@ -345,11 +345,13 @@ typedef struct {
 } uuid;
 
 typedef struct {
-	uint64_t ugen_created, ugen_erased, umask;
+	uint64_t ugen_created, ugen_erased;
 	idx_t nbr_cells, cidx;
 	uint32_t nbr_vars;
 	bool is_first_cut:1;
 	bool is_cut_only:1;
+	bool is_arg1_unique:1;
+	bool is_arg2_unique:1;
 	bool is_unique:1;
 	bool is_fact:1;
 	bool is_tail_rec:1;
@@ -382,7 +384,6 @@ struct predicate_ {
 	bool is_noindex:1;
 	bool is_check_directive:1;
 	bool is_processed:1;
-	bool not_unique:1;
 };
 
 struct builtins {

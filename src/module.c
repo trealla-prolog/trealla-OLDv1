@@ -107,8 +107,8 @@ predicate *create_predicate(module *m, cell *c)
 	pr->key.nbr_cells = 1;
 	pr->is_noindex = m->pl->noindex || !pr->key.arity;
 
-	//if (GET_STR(m, c)[0] == '$')
-	//	pr->is_noindex = true;
+	if (GET_STR(m, c)[0] == '$')
+		pr->is_noindex = true;
 
 	m_app(m->index, &pr->key, pr);
 	return pr;
@@ -770,21 +770,6 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 	return cl;
 }
 
-void reindex(module *m, predicate *pr)
-{
-	//printf("*** index %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
-	pr->idx = m_create(index_cmpkey, NULL, m);
-	ensure(pr->idx);
-	m_allow_dups(pr->idx, true);
-
-	for (clause *cl2 = pr->head; cl2; cl2 = cl2->next) {
-		cell *c = get_head(cl2->r.cells);
-
-		if (!cl2->r.ugen_erased)
-			m_app(pr->idx, c, cl2);
-	}
-}
-
 static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 {
 	if (pr->db_id)
@@ -793,11 +778,22 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 	pr->db_id++;
 	pr->cnt++;
 
-	if (pr->is_noindex || ((pr->cnt < m->indexing_threshold) && !pr->idx))
+	if (pr->is_noindex || (pr->cnt < m->indexing_threshold))
 		return;
 
-	if (!pr->idx)
-		reindex(m, pr);
+	if (!pr->idx) {
+		//printf("*** index %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
+		pr->idx = m_create(index_cmpkey, NULL, m);
+		ensure(pr->idx);
+		m_allow_dups(pr->idx, true);
+
+		for (clause *cl2 = pr->head; cl2; cl2 = cl2->next) {
+			cell *c = get_head(cl2->r.cells);
+
+			if (!cl2->r.ugen_erased)
+				m_app(pr->idx, c, cl2);
+		}
+	}
 
 	cell *c = get_head(cl->r.cells);
 
