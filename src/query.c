@@ -275,6 +275,18 @@ static bool is_all_vars(cell *c)
 	return true;
 }
 
+static bool is_ground(cell *c)
+{
+	idx_t nbr_cells = c->nbr_cells;
+
+	for (idx_t i = 0; i < nbr_cells; i++, c++) {
+		if (is_variable(c))
+			return false;
+	}
+
+	return true;
+}
+
 static void find_key(query *q, predicate *pr, cell *c)
 {
 	q->st.definite = false;
@@ -298,10 +310,10 @@ static void find_key(query *q, predicate *pr, cell *c)
 		if (p2)
 			p2 = deref(q, p2, q->st.curr_frame);
 
-		if (!is_variable(p1))
+		if (is_ground(p1))
 			q->st.maybe_1 = true;
 
-		if (p2 && !is_variable(p2))
+		if (p2 && is_ground(p2))
 			q->st.maybe_2 = true;
 
 		return;
