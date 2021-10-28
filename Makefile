@@ -27,7 +27,7 @@ SRCOBJECTS = tpl.o src/history.o src/functions.o \
 	src/print.o src/prolog.o src/query.o src/format.o \
 	src/skiplist.o src/base64.o src/network.o src/utf8.o
 
-SRCOBJECTS +=  library/builtins.o library/lists.o library/apply.o \
+LIBOBJECTS +=  library/builtins.o library/lists.o library/apply.o \
 	library/http.o library/atts.o library/error.o library/dcgs.o \
 	library/format.o library/charsio.o library/freeze.o \
 	library/ordsets.o library/assoc.o library/dict.o library/dif.o \
@@ -36,7 +36,7 @@ SRCOBJECTS +=  library/builtins.o library/lists.o library/apply.o \
 
 SRCOBJECTS += src/imath/imath.o
 
-OBJECTS = $(SRCOBJECTS) src/version.o
+OBJECTS = $(SRCOBJECTS) $(LIBOBJECTS) src/version.o
 
 library/%.c: library/%.pl
 	xxd -i $^ $@
