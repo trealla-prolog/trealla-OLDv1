@@ -111,12 +111,12 @@ cell *alloc_on_heap(query *q, idx_t nbr_cells)
 
 static cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only)
 {
-	if (depth >= 1000000) {
+	if (depth >= MAX_DEPTH) {
 		q->cycle_error = true;
 		return ERR_CYCLE_CELL;
 	}
 
-	idx_t save_idx = tmp_heap_used(q);
+	const idx_t save_idx = tmp_heap_used(q);
 	p1 = deref(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
 
@@ -131,9 +131,9 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth,
 		if (nonlocals_only && (p1_ctx <= q->st.curr_frame))
 			return tmp;
 
-		frame *g = GET_FRAME(p1_ctx);
-		slot *e = GET_SLOT(g, p1->var_nbr);
-		idx_t slot_nbr = e - q->slots;
+		const frame *g = GET_FRAME(p1_ctx);
+		const slot *e = GET_SLOT(g, p1->var_nbr);
+		const idx_t slot_nbr = e - q->slots;
 
 		for (size_t i = 0; i < q->st.m->pl->tab_idx; i++) {
 			if (q->st.m->pl->tab1[i] == slot_nbr) {

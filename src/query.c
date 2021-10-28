@@ -287,7 +287,7 @@ static bool is_ground(cell *c)
 	return true;
 }
 
-static void find_key(query *q, predicate *pr, cell *c)
+static void find_key(query *q, predicate *pr, cell *key)
 {
 	q->st.definite = false;
 	q->st.maybe_1 = false;
@@ -297,29 +297,29 @@ static void find_key(query *q, predicate *pr, cell *c)
 	if (!pr->idx || (pr->cnt < q->st.m->indexing_threshold)) {
 		q->st.curr_clause = pr->head;
 
-		if (!c->arity)
+		if (!key->arity)
 			return;
 
-		cell *p1 = c + 1, *p2 = NULL;
+		cell *arg1 = key + 1, *arg2 = NULL;
 
-		if (c->arity > 1)
-			p2 = p1 + p1->nbr_cells;
+		if (key->arity > 1)
+			arg2 = arg1 + arg1->nbr_cells;
 
-		p1 = deref(q, p1, q->st.curr_frame);
+		arg1 = deref(q, arg1, q->st.curr_frame);
 
-		if (p2)
-			p2 = deref(q, p2, q->st.curr_frame);
+		if (arg2)
+			arg2 = deref(q, arg2, q->st.curr_frame);
 
-		if (is_ground(p1))
+		if (is_ground(arg1))
 			q->st.maybe_1 = true;
 
-		if (p2 && is_ground(p2))
+		if (arg2 && is_ground(arg2))
 			q->st.maybe_2 = true;
 
 		return;
 	}
 
-	cell *key = deep_clone_to_tmp(q, c, q->st.curr_frame);
+	key = deep_clone_to_tmp(q, key, q->st.curr_frame);
 
 	if (is_all_vars(key)) {
 		q->st.curr_clause = pr->head;
