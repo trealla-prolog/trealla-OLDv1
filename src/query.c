@@ -722,6 +722,8 @@ static void commit_me(query *q, rule *r)
 
 	if (last_match) {
 		q->st.curr_clause = NULL;
+		unshare_predicate(q->st.pr);
+		q->st.pr = NULL;
 		m_done(q->st.iter);
 		q->st.iter = NULL;
 		drop_choice(q);
@@ -1315,14 +1317,18 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 			return throw_error(q, head, "permission_error", "modify,static_procedure");
 
 		q->st.curr_clause2 = pr->head;
+		share_predicate(q->st.pr2=pr);
 		frame *g = GET_FRAME(q->st.curr_frame);
 		g->ugen = q->st.m->pl->ugen;
 	} else {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
 	}
 
-	if (!q->st.curr_clause2)
+	if (!q->st.curr_clause2) {
+		unshare_predicate(q->st.pr2);
+		q->st.pr2 = NULL;
 		return pl_failure;
+	}
 
 	may_error(make_choice(q));
 	cell *p1_body = deref(q, get_logical_body(p1), p1_ctx);
@@ -1369,6 +1375,8 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 	}
 
 	drop_choice(q);
+	unshare_predicate(q->st.pr2);
+	q->st.pr2 = NULL;
 	return pl_failure;
 }
 
@@ -1414,14 +1422,18 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 		}
 
 		q->st.curr_clause2 = pr->head;
+		share_predicate(q->st.pr2=pr);
 		frame *g = GET_FRAME(q->st.curr_frame);
 		g->ugen = q->st.m->pl->ugen;
 	} else {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
 	}
 
-	if (!q->st.curr_clause2)
+	if (!q->st.curr_clause2) {
+		unshare_predicate(q->st.pr2);
+		q->st.pr2 = NULL;
 		return pl_failure;
+	}
 
 	may_error(make_choice(q));
 	const frame *g = GET_FRAME(q->st.curr_frame);
@@ -1449,6 +1461,8 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 	}
 
 	drop_choice(q);
+	unshare_predicate(q->st.pr2);
+	q->st.pr2 = NULL;
 	return pl_failure;
 }
 
@@ -1483,13 +1497,17 @@ static USE_RESULT pl_status match_head(query *q)
 		}
 
 		find_key(q, pr, c);
+		share_predicate(q->st.pr=pr);
 		frame *g = GET_FRAME(q->st.curr_frame);
 		g->ugen = q->st.m->pl->ugen;
 	} else
 		next_key(q);
 
-	if (!q->st.curr_clause)
+	if (!q->st.curr_clause) {
+		unshare_predicate(q->st.pr);
+		q->st.pr = NULL;
 		return pl_failure;
+	}
 
 	may_error(make_choice(q));
 	const frame *g = GET_FRAME(q->st.curr_frame);
@@ -1503,8 +1521,10 @@ static USE_RESULT pl_status match_head(query *q)
 		try_me(q, r->nbr_vars);
 
 		if (unify_structure(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp, 0)) {
-			if (q->error)
+			if (q->error) {
+				q->st.pr = NULL;
 				return pl_error;
+			}
 
 			commit_me(q, r);
 			return pl_success;
@@ -1514,6 +1534,8 @@ static USE_RESULT pl_status match_head(query *q)
 	}
 
 	drop_choice(q);
+	unshare_predicate(q->st.pr);
+	q->st.pr = NULL;
 	return pl_failure;
 }
 

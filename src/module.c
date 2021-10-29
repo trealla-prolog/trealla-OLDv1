@@ -114,6 +114,16 @@ predicate *create_predicate(module *m, cell *c)
 	return pr;
 }
 
+void share_predicate(predicate *pr)
+{
+	pr->use_cnt++;
+}
+
+void unshare_predicate(predicate *pr)
+{
+	pr->use_cnt++;
+}
+
 static int predicate_cmpkey(const void *ptr1, const void *ptr2, const void *param)
 {
 	const cell *p1 = (const cell*)ptr1;

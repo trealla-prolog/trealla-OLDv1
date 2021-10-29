@@ -372,7 +372,7 @@ struct predicate_ {
 	module *m;
 	map *idx, *idx_save;
 	cell key;
-	uint64_t cnt, refs, db_id;
+	uint64_t cnt, use_cnt, db_id;
 	bool is_prebuilt:1;
 	bool is_public:1;
 	bool is_dynamic:1;
@@ -447,7 +447,7 @@ typedef struct {
 	cell *curr_cell;
 	clause *curr_clause, *curr_clause2;
 	miter *f_iter;
-	predicate *pr;
+	predicate *pr, *pr2;
 	module *m;
 	miter *iter;
 	idx_t curr_frame, fp, hp, tp, sp;
