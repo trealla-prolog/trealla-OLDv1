@@ -825,16 +825,16 @@ void xref_rule(parser *p, rule *r, predicate *parent)
 	}
 }
 
-static void check_rule(parser *p, rule *r, predicate *parent)
+static void check_rule(parser *p, rule *r, predicate *pr)
 {
 	bool matched = false, p1_matched = false, p2_matched = false, me = false;
 	cell *head = get_head(r->cells);
 	cell *p1 = head + 1, *p2 = NULL;
 
-	if (parent->key.arity > 1)
+	if (pr->key.arity > 1)
 		p2 = p1 + p1->nbr_cells;
 
-	for (clause *cl = parent->head; cl; cl = cl->next) {
+	for (clause *cl = pr->head; cl; cl = cl->next) {
 		if (!me) {
 			if (&cl->r == r)
 				me = true;
@@ -845,13 +845,13 @@ static void check_rule(parser *p, rule *r, predicate *parent)
 		cell *h2 = get_head(cl->r.cells);
 		cell *h21 = h2 + 1, *h22 = NULL;
 
-		if (parent->key.arity > 1)
+		if (pr->key.arity > 1)
 			h22 = h21 + h21->nbr_cells;
 
 		if (!index_cmpkey(p1, h21, p->m))
 			p1_matched = true;
 
-		if (parent->key.arity > 1) {
+		if (pr->key.arity > 1) {
 			if (!index_cmpkey(p2, h22, p->m))
 				p2_matched = true;
 		}
@@ -863,18 +863,18 @@ static void check_rule(parser *p, rule *r, predicate *parent)
 	}
 
 	if (!matched) {
-		//printf("*** unique %s/%u\n", GET_STR(p, &parent->key), parent->key.arity);
+		//printf("*** unique %s/%u\n", GET_STR(p, &pr->key), pr->key.arity);
 		r->is_unique = true;
 	}
 
 	if (!p1_matched && r->is_unique) {
-		//printf("*** arg1_unique %s/%u\n", GET_STR(p, &parent->key), parent->key.arity);
-		r->is_arg1_unique = true;
+		//printf("*** arg1_unique %s/%u\n", GET_STR(p, &pr->key), pr->key.arity);
+		r->arg1_is_unique = true;
 	}
 
 	if (!p2_matched && r->is_unique) {
-		//printf("*** arg1_unique %s/%u\n", GET_STR(p, &parent->key), parent->key.arity);
-		r->is_arg2_unique = true;
+		//printf("*** arg1_unique %s/%u\n", GET_STR(p, &pr->key), pr->key.arity);
+		r->arg2_is_unique = true;
 	}
 }
 
