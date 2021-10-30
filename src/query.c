@@ -1603,7 +1603,7 @@ static void dump_vars(query *q, bool partial)
 
 	q->is_dump_vars = true;
 
-	for (unsigned i = 0; i < p->nbr_vars; i++) {
+	for (unsigned i = 0; i < (p->nbr_vars-2); i++) {
 		if (!strcmp(p->vartab.var_name[i], "_"))
 			continue;
 
@@ -1622,9 +1622,6 @@ static void dump_vars(query *q, bool partial)
 			c = e->c.val_ptr;
 			c_ctx = e->ctx;
 		}
-
-		if (is_anon(c))
-			continue;
 
 		if (any)
 			fprintf(stdout, ", ");

@@ -70,7 +70,7 @@ typedef enum {
 #define ERR_CYCLE_CMP -2
 
 #define MAX_SMALL_STRING (sizeof(void*)*2)
-#define MAX_VAR_POOL_SIZE 1000
+#define MAX_VAR_POOL_SIZE 4000
 #define MAX_ARITY UCHAR_MAX
 #define MAX_QUEUES 16
 #define MAX_STREAMS 1024

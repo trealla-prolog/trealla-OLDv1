@@ -907,7 +907,6 @@ module *load_text(module *m, const char *src, const char *filename)
 {
 	parser *p = create_parser(m);
 	if (!p) return NULL;
-
 	char *save_filename = p->m->filename;
 	p->m->filename = strdup(filename);
 	p->consulting = true;
