@@ -1612,7 +1612,7 @@ static void dump_vars(query *q, bool partial)
 		if (is_empty(&e->c))
 			continue;
 
-		if (p->vartab.var_name[i][0] == '_')
+		if ((p->vartab.var_name[i][0] == '_') && (p->vartab.var_name[i][1] == '_'))
 			continue;
 
 		cell *c = deref(q, &e->c, e->ctx);
@@ -1622,6 +1622,9 @@ static void dump_vars(query *q, bool partial)
 			c = e->c.val_ptr;
 			c_ctx = e->ctx;
 		}
+
+		if (is_anon(c))
+			continue;
 
 		if (any)
 			fprintf(stdout, ", ");
