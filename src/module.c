@@ -106,7 +106,6 @@ predicate *create_predicate(module *m, cell *c)
 	pr->key.tag = TAG_POOL;
 	pr->key.nbr_cells = 1;
 	pr->is_noindex = m->pl->noindex || !pr->key.arity;
-	pr->filename = m->filename;
 
 	//printf("*** create %s ==> %s/%u\n", m->filename, GET_STR(m, &pr->key), pr->key.arity);
 
@@ -785,6 +784,7 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 	cl->r.nbr_cells = p1->nbr_cells;
 	cl->r.cidx = p1->nbr_cells+1;
 	cl->r.ugen_created = ++m->pl->ugen;
+	cl->filename = m->filename;
 	cl->owner = pr;
 	return cl;
 }
@@ -978,28 +978,21 @@ bool unload_file(module *m, const char *filename)
 	free(tmpbuf);
 	filename = realbuf;
 
-	for (predicate *pr = m->head; pr;) {
-		predicate *save = pr;
-		pr = pr->next;
+	for (predicate *pr = m->head; pr; pr = pr->next) {
+		for (clause *cl = pr->head; cl; cl = cl->next) {
+			if (!strcmp(cl->filename, filename)) {
+				if (!retract_from_db(m, cl))
+					continue;
 
-		if (!strcmp(save->filename, filename)) {
-			//printf("*** unload %s ==>  %s/%u\n", filename, GET_STR(m, &save->key), save->key.arity);
-			predicate *save_prev = save->prev;
-			predicate *save_next = save->next;
+				cl->dirty = pr->dirty_list;
+				pr->dirty_list = cl;
+			}
+		}
 
-			if (save_prev)
-				save_prev->next = save_next;
-
-			if (save_next)
-				save_next->prev = save_prev;
-
-			if (m->head == save)
-				m->head = save_next;
-
-			if (m->tail == save)
-				m->tail = save_prev;
-
-			destroy_predicate(m, save);
+		if (!pr->cnt) {
+			m_destroy(pr->idx_save);
+			m_destroy(pr->idx);
+			pr->idx_save = pr->idx = NULL;
 		}
 	}
 

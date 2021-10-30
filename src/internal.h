@@ -361,6 +361,7 @@ typedef struct {
 struct clause_ {
 	predicate *owner;
 	clause *prev, *next, *dirty;
+	const char *filename;
 	uint64_t db_id;
 	uuid u;
 	rule r;
@@ -372,7 +373,6 @@ struct predicate_ {
 	module *m;
 	map *idx, *idx_save;
 	clause *dirty_list;
-	const char *filename;
 	cell key;
 	uint64_t cnt, use_cnt, db_id;
 	bool is_prebuilt:1;

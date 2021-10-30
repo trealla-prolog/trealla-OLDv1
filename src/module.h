@@ -26,7 +26,7 @@ extern bool is_loaded(module *m, const char *filename);
 
 extern clause *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting);
 extern clause *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting);
-extern bool retract_from_db(module *m, clause *r);
+extern bool retract_from_db(module *m, clause *cl);
 extern clause *erase_from_db(module *m, uuid *ref);
 
 extern void set_discontiguous_in_db(module *m, const char *name, unsigned arity);
