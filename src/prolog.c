@@ -107,14 +107,6 @@ module *find_module_id(prolog *pl, unsigned id)
 	return pl->user_m;
 }
 
-bool deconsult(prolog *pl, const char *filename)
-{
-	module *m = find_module(pl, filename);
-	if (!m) return false;
-	destroy_module(m);
-	return true;
-}
-
 bool get_halt(prolog *pl) { return pl->halt; }
 bool get_status(prolog *pl) { return pl->status; }
 bool get_dump_vars(prolog *pl) { return pl->did_dump_vars; }

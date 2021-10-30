@@ -371,6 +371,8 @@ struct predicate_ {
 	clause *head, *tail;
 	module *m;
 	map *idx, *idx_save;
+	clause *dirty_list;
+	const char *filename;
 	cell key;
 	uint64_t cnt, use_cnt, db_id;
 	bool is_prebuilt:1;
@@ -514,8 +516,8 @@ struct query_ {
 	cell *tmp_heap, *last_arg, *exception, *variable_names;
 	cell *queue[MAX_QUEUES], *tmpq[MAX_QUEUES];
 	arena *arenas;
-	clause *dirty_list;
 	slot *save_e;
+	clause *dirty_list;
 	cell accum;
 	mpz_t tmp_ival;
 	prolog_state st;

@@ -370,36 +370,9 @@ void add_to_dirty_list(query *q, clause *cl)
 	if (!retract_from_db(q->st.m, cl))
 		return;
 
-	cl->dirty = q->dirty_list;
-	q->dirty_list = cl;
-}
-
-static void purge_dirty_list(query *q)
-{
-	int cnt = 0;
-
-	while (q->dirty_list) {
-		clause *cl = q->dirty_list;
-		q->dirty_list = cl->dirty;
-
-		if (cl->prev)
-			cl->prev->next = cl->next;
-
-		if (cl->next)
-			cl->next->prev = cl->prev;
-
-		if (cl->owner->head == cl)
-			cl->owner->head = cl->next;
-
-		if (cl->owner->tail == cl)
-			cl->owner->tail = cl->prev;
-
-		clear_rule(&cl->r);
-		free(cl);
-		cnt++;
-	}
-
-	//if (cnt) printf("Info: query purged %d retracted items\n", cnt);
+	predicate *pr = cl->owner;
+	cl->dirty = pr->dirty_list;
+	pr->dirty_list = cl;
 }
 
 bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials)
@@ -697,6 +670,53 @@ static bool check_slots(const query *q, frame *g, rule *r)
 	return true;
 }
 
+void share_predicate(predicate *pr)
+{
+	if (!pr)
+		return;
+
+	pr->use_cnt++;
+}
+
+void unshare_predicate(query *q, predicate *pr)
+{
+	if (!pr)
+		return;
+
+	if (--pr->use_cnt != 0)
+		return;
+
+	if (!pr->dirty_list)
+		return;
+
+	clause *cl = pr->dirty_list;
+
+	while (cl) {
+		// First unlink it from the predicate
+
+		if (cl->prev)
+			cl->prev->next = cl->next;
+
+		if (cl->next)
+			cl->next->prev = cl->prev;
+
+		if (pr->head == cl)
+			pr->head = cl->next;
+
+		if (pr->tail == cl)
+			pr->tail = cl->prev;
+
+		// Now move it to query dirtylist
+
+		clause *save = cl->dirty;
+		cl->dirty = q->dirty_list;
+		q->dirty_list = cl;
+		cl = save;
+	}
+
+	pr->dirty_list = NULL;
+}
+
 static void commit_me(query *q, rule *r)
 {
 	frame *g = GET_CURR_FRAME();
@@ -722,8 +742,7 @@ static void commit_me(query *q, rule *r)
 
 	if (last_match) {
 		q->st.curr_clause = NULL;
-		unshare_predicate(q->st.pr);
-		q->st.pr = NULL;
+		unshare_predicate(q, q->st.pr);
 		m_done(q->st.iter);
 		q->st.iter = NULL;
 		drop_choice(q);
@@ -741,9 +760,10 @@ void stash_me(query *q, rule *r, bool last_match)
 {
 	idx_t cgen = q->st.cgen;
 
-	if (last_match)
+	if (last_match) {
+		unshare_predicate(q, q->st.pr2);
 		drop_choice(q);
-	else {
+	} else {
 		choice *ch = GET_CURR_CHOICE();
 		ch->st.curr_clause2 = q->st.curr_clause2;
 		cgen = ++q->st.cgen;
@@ -851,6 +871,8 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 		if (ch->st.iter)
 			m_done(ch->st.iter);
 
+		unshare_predicate(q, ch->st.pr2);
+		unshare_predicate(q, ch->st.pr);
 		q->cp--;
 
 		if (ch->register_cleanup) {
@@ -882,8 +904,9 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 #endif
 	}
 
-	if (!q->cp && !q->undo_hi_tp)
+	if (!q->cp && !q->undo_hi_tp) {
 		q->st.tp = 0;
+	}
 }
 
 // If the call is det then the barrier can be dropped...
@@ -1325,8 +1348,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 	}
 
 	if (!q->st.curr_clause2) {
-		unshare_predicate(q->st.pr2);
-		q->st.pr2 = NULL;
+		unshare_predicate(q, q->st.pr2);
 		return pl_failure;
 	}
 
@@ -1375,8 +1397,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 	}
 
 	drop_choice(q);
-	unshare_predicate(q->st.pr2);
-	q->st.pr2 = NULL;
+	unshare_predicate(q, q->st.pr2);
 	return pl_failure;
 }
 
@@ -1430,8 +1451,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 	}
 
 	if (!q->st.curr_clause2) {
-		unshare_predicate(q->st.pr2);
-		q->st.pr2 = NULL;
+		unshare_predicate(q, q->st.pr2);
 		return pl_failure;
 	}
 
@@ -1461,8 +1481,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_
 	}
 
 	drop_choice(q);
-	unshare_predicate(q->st.pr2);
-	q->st.pr2 = NULL;
+	unshare_predicate(q, q->st.pr2);
 	return pl_failure;
 }
 
@@ -1504,8 +1523,7 @@ static USE_RESULT pl_status match_head(query *q)
 		next_key(q);
 
 	if (!q->st.curr_clause) {
-		unshare_predicate(q->st.pr);
-		q->st.pr = NULL;
+		unshare_predicate(q, q->st.pr);
 		return pl_failure;
 	}
 
@@ -1534,8 +1552,7 @@ static USE_RESULT pl_status match_head(query *q)
 	}
 
 	drop_choice(q);
-	unshare_predicate(q->st.pr);
-	q->st.pr = NULL;
+	unshare_predicate(q, q->st.pr);
 	return pl_failure;
 }
 
@@ -1928,6 +1945,21 @@ pl_status execute(query *q, cell *cells, unsigned nbr_vars)
 	return start(q);
 }
 
+static void purge_dirty_list(query *q)
+{
+	int cnt = 0;
+
+	while (q->dirty_list) {
+		clause *cl = q->dirty_list;
+		q->dirty_list = cl->dirty;
+		clear_rule(&cl->r);
+		free(cl);
+		cnt++;
+	}
+
+	//if (cnt) printf("Info: query purged %d\n", cnt);
+}
+
 void destroy_query(query *q)
 {
 	while (q->st.qnbr > 0) {
@@ -1958,9 +1990,8 @@ void destroy_query(query *q)
 
 	slot *e = q->slots;
 
-	for (idx_t i = 0; i < q->st.sp; i++, e++) {
+	for (idx_t i = 0; i < q->st.sp; i++, e++)
 		unshare_cell(&e->c);
-	}
 
 	mp_int_clear(&q->tmp_ival);
 	purge_dirty_list(q);

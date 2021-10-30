@@ -106,6 +106,9 @@ predicate *create_predicate(module *m, cell *c)
 	pr->key.tag = TAG_POOL;
 	pr->key.nbr_cells = 1;
 	pr->is_noindex = m->pl->noindex || !pr->key.arity;
+	pr->filename = m->filename;
+
+	//printf("*** create %s ==> %s/%u\n", m->filename, GET_STR(m, &pr->key), pr->key.arity);
 
 	if (GET_STR(m, c)[0] == '$')
 		pr->is_noindex = true;
@@ -114,14 +117,20 @@ predicate *create_predicate(module *m, cell *c)
 	return pr;
 }
 
-void share_predicate(predicate *pr)
+static void destroy_predicate(module *m, predicate *pr)
 {
-	pr->use_cnt++;
-}
+	m_del(m->index, &pr->key);
 
-void unshare_predicate(predicate *pr)
-{
-	pr->use_cnt++;
+	for (clause *cl = pr->head; cl;) {
+		clause *save = cl->next;
+		clear_rule(&cl->r);
+		free(cl);
+		cl = save;
+	}
+
+	m_destroy(pr->idx_save);
+	m_destroy(pr->idx);
+	free(pr);
 }
 
 static int predicate_cmpkey(const void *ptr1, const void *ptr2, const void *param)
@@ -861,13 +870,13 @@ bool retract_from_db(module *m, clause *cl)
 	return true;
 }
 
-static void	set_loaded(module *m, const char *filename)
+static const char *set_loaded(module *m, const char *filename)
 {
 	struct loaded_file *ptr = m->loaded_files;
 
 	while (ptr) {
 		if (!strcmp(ptr->filename, filename))
-			return;
+			return ptr->filename;
 
 		ptr = ptr->next;
 	}
@@ -877,6 +886,21 @@ static void	set_loaded(module *m, const char *filename)
 	strncpy(ptr->filename, filename, PATH_MAX);
 	ptr->filename[PATH_MAX-1] = '\0';
 	m->loaded_files = ptr;
+	return ptr->filename;
+}
+
+bool is_loaded(module *m, const char *filename)
+{
+	struct loaded_file *ptr = m->loaded_files;
+
+	while (ptr) {
+		if (!strcmp(ptr->filename, filename))
+			return true;
+
+		ptr = ptr->next;
+	}
+
+	return false;
 }
 
 module *load_text(module *m, const char *src, const char *filename)
@@ -923,12 +947,71 @@ module *load_text(module *m, const char *src, const char *filename)
 	return save_m;
 }
 
+bool unload_file(module *m, const char *filename)
+{
+	size_t len = strlen(filename);
+	char *tmpbuf = malloc(len + 20);
+	memcpy(tmpbuf, filename, len+1);
+
+	if (tmpbuf[0] == '~') {
+		const char *ptr = getenv("HOME");
+
+		if (ptr) {
+			tmpbuf = realloc(tmpbuf, strlen(ptr) + 10 + strlen(filename) + 20);
+			strcpy(tmpbuf, ptr);
+			strcat(tmpbuf, filename+1);
+		}
+	}
+
+	char *realbuf = NULL;
+
+	if (!(realbuf = realpath(tmpbuf, NULL))) {
+		strcpy(tmpbuf, filename);
+		strcat(tmpbuf, ".pl");
+
+		if (!(realbuf = realpath(tmpbuf, NULL))) {
+			free(tmpbuf);
+			return false;
+		}
+	}
+
+	free(tmpbuf);
+	filename = realbuf;
+
+	for (predicate *pr = m->head; pr;) {
+		predicate *save = pr;
+		pr = pr->next;
+
+		if (!strcmp(save->filename, filename)) {
+			//printf("*** unload %s ==>  %s/%u\n", filename, GET_STR(m, &save->key), save->key.arity);
+			predicate *save_prev = save->prev;
+			predicate *save_next = save->next;
+
+			if (save_prev)
+				save_prev->next = save_next;
+
+			if (save_next)
+				save_next->prev = save_prev;
+
+			if (m->head == save)
+				m->head = save_next;
+
+			if (m->tail == save)
+				m->tail = save_prev;
+
+			destroy_predicate(m, save);
+		}
+	}
+
+	return true;
+}
+
 module *load_fp(module *m, FILE *fp, const char *filename)
 {
 	parser *p = create_parser(m);
 	if (!p) return NULL;
 	char *save_filename = m->filename;
-	m->filename = strdup(filename);
+	m->filename = (char*)filename;
 	p->consulting = true;
 	p->fp = fp;
 	bool ok = false;
@@ -976,7 +1059,6 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 
 	ok = !p->error;
 	destroy_parser(p);
-	free(m->filename);
 	m->filename = save_filename;
 	return save_m;
 }
@@ -1017,13 +1099,13 @@ module *load_file(module *m, const char *filename)
 
 		if (!(realbuf = realpath(tmpbuf, NULL))) {
 			free(tmpbuf);
-			return false;
+			return NULL;
 		}
 	}
 
 	free(tmpbuf);
-	set_loaded(m, realbuf);
-	FILE *fp = fopen(realbuf, "r");
+	filename = set_loaded(m, realbuf);
+	FILE *fp = fopen(filename, "r");
 
 	if (!fp) {
 		free(realbuf);
@@ -1038,11 +1120,9 @@ module *load_file(module *m, const char *filename)
 		fseek(fp, 0, SEEK_SET);
 
 	clearerr(fp);
-	char *tmp_filename = strdup(realbuf);
-	module *save_m = load_fp(m, fp, tmp_filename);
+	module *save_m = load_fp(m, fp, filename);
 	fclose(fp);
 	free(realbuf);
-	free(tmp_filename);
 	return save_m;
 }
 
@@ -1116,7 +1196,6 @@ void destroy_module(module *m)
 		m->tasks = task;
 	}
 
-	m_destroy(m->index);
 	miter *iter = m_first(m->defops);
 	op_table *opptr;
 
@@ -1137,17 +1216,7 @@ void destroy_module(module *m)
 
 	for (predicate *pr = m->head; pr;) {
 		predicate *save = pr->next;
-
-		for (clause *cl = pr->head; cl;) {
-			clause *save = cl->next;
-			clear_rule(&cl->r);
-			free(cl);
-			cl = save;
-		}
-
-		m_destroy(pr->idx_save);
-		m_destroy(pr->idx);
-		free(pr);
+		destroy_predicate(m, pr);
 		pr = save;
 	}
 
@@ -1165,8 +1234,9 @@ void destroy_module(module *m)
 	if (m->fp)
 		fclose(m->fp);
 
+	m_destroy(m->index);
 	destroy_parser(m->p);
-	free(m->filename);
+	//free(m->filename);
 	free(m->name);
 	free(m);
 }

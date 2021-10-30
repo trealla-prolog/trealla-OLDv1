@@ -4,7 +4,6 @@ extern prolog *pl_create();
 extern void pl_destroy(prolog*);
 
 extern void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found, bool *function);
-extern bool deconsult(prolog *pl, const char *filename);
 extern module *find_module(prolog *pl, const char *name);
 extern module *find_module_id(prolog *pl, unsigned id);
 extern module *find_next_module(prolog *pl, module *m);

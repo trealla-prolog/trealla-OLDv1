@@ -7923,9 +7923,8 @@ static pl_status do_consult(query *q, cell *p1, idx_t p1_ctx)
 {
 	if (is_atom(p1)) {
 		char *src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
-		deconsult(q->st.m->pl, src);
-
 		char *filename = relative_to(q->st.m->filename, src);
+		unload_file(q->st.m, filename);
 
 		if (!load_file(q->st.m, filename)) {
 			free(filename);
@@ -7949,9 +7948,9 @@ static pl_status do_consult(query *q, cell *p1, idx_t p1_ctx)
 
 	module *tmp_m = create_module(q->st.m->pl, GET_STR(q, mod));
 	char *filename = GET_STR(q, file);
-	deconsult(q->st.m->pl, filename);
 	tmp_m->make_public = 1;
 	filename = relative_to(q->st.m->filename, filename);
+	unload_file(q->st.m, filename);
 
 	if (!load_file(tmp_m, filename)) {
 		destroy_module(tmp_m);

@@ -310,20 +310,6 @@ static void do_op(parser *p, cell *c)
 	}
 }
 
-static bool	is_loaded(module *m, const char *filename)
-{
-	struct loaded_file *ptr = m->loaded_files;
-
-	while (ptr) {
-		if (!strcmp(ptr->filename, filename))
-			return true;
-
-		ptr = ptr->next;
-	}
-
-	return false;
-}
-
 static void directives(parser *p, cell *d)
 {
 	p->skip = false;
