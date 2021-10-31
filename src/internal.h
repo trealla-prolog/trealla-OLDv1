@@ -456,8 +456,8 @@ typedef struct {
 	uint32_t cgen, arena_nbr;
 	uint8_t qnbr;
 	bool definite:1;
-	bool maybe_1:1;
-	bool maybe_2:1;
+	bool arg1_is_ground:1;
+	bool arg2_is_ground:1;
 	bool arg1_is_nonvar:1;
 } prolog_state;
 

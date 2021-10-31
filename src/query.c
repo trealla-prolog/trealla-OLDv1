@@ -238,10 +238,10 @@ static bool is_next_key(query *q, rule *r)
 	if (!q->st.curr_clause->next || q->st.definite)
 		return false;
 
-	if (q->pl->opt && q->st.maybe_1 && r->arg1_is_unique)
+	if (q->st.arg1_is_ground && r->arg1_is_unique)
 		return false;
 
-	if (q->pl->opt && q->st.maybe_2 && r->arg2_is_unique)
+	if (q->st.arg2_is_ground && r->arg2_is_unique)
 		return false;
 
 	return true;
@@ -290,14 +290,14 @@ static bool is_ground(cell *c)
 static void find_key(query *q, predicate *pr, cell *key)
 {
 	q->st.definite = false;
-	q->st.maybe_1 = false;
-	q->st.maybe_2 = false;
+	q->st.arg1_is_ground = false;
+	q->st.arg2_is_ground = false;
 	q->st.iter = NULL;
 
 	if (!pr->idx || (pr->cnt < q->st.m->indexing_threshold)) {
 		q->st.curr_clause = pr->head;
 
-		if (!key->arity)
+		if (!key->arity || pr->is_multifile)
 			return;
 
 		cell *arg1 = key + 1, *arg2 = NULL;
@@ -310,11 +310,11 @@ static void find_key(query *q, predicate *pr, cell *key)
 		if (arg2)
 			arg2 = deref(q, arg2, q->st.curr_frame);
 
-		if (is_ground(arg1))
-			q->st.maybe_1 = true;
+		if (q->pl->opt && is_ground(arg1))
+			q->st.arg1_is_ground = true;
 
-		if (arg2 && is_ground(arg2))
-			q->st.maybe_2 = true;
+		if (q->pl->opt && arg2 && is_ground(arg2))
+			q->st.arg2_is_ground = true;
 
 		return;
 	}
