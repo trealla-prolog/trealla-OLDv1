@@ -842,8 +842,8 @@ static void check_rule(parser *p, rule *r, predicate *pr)
 			continue;
 		}
 
-		cell *h2 = get_head(cl->r.cells);
-		cell *h21 = h2 + 1, *h22 = NULL;
+		cell *head2 = get_head(cl->r.cells);
+		cell *h21 = head2 + 1, *h22 = NULL;
 
 		if (pr->key.arity > 1)
 			h22 = h21 + h21->nbr_cells;
@@ -856,7 +856,7 @@ static void check_rule(parser *p, rule *r, predicate *pr)
 				p2_matched = true;
 		}
 
-		if (!index_cmpkey(head, h2, p->m)) {
+		if (!index_cmpkey(head, head2, p->m)) {
 			matched = true;
 			//break;
 		}
@@ -867,13 +867,13 @@ static void check_rule(parser *p, rule *r, predicate *pr)
 		r->is_unique = true;
 	}
 
-	if (!p1_matched && r->is_unique) {
+	if (!p1_matched /*&& r->is_unique*/) {
 		//printf("*** arg1_unique %s/%u\n", GET_STR(p, &pr->key), pr->key.arity);
 		r->arg1_is_unique = true;
 	}
 
-	if (!p2_matched && r->is_unique) {
-		//printf("*** arg1_unique %s/%u\n", GET_STR(p, &pr->key), pr->key.arity);
+	if (!p2_matched /*&& r->is_unique*/) {
+		//printf("*** arg2_unique %s/%u\n", GET_STR(p, &pr->key), pr->key.arity);
 		r->arg2_is_unique = true;
 	}
 }
