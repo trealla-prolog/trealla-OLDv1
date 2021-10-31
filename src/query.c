@@ -297,7 +297,7 @@ static void find_key(query *q, predicate *pr, cell *key)
 	if (!pr->idx || (pr->cnt < q->st.m->indexing_threshold)) {
 		q->st.curr_clause = pr->head;
 
-		if (!key->arity || pr->is_multifile)
+		if (!key->arity || pr->is_multifile || pr->is_dynamic)
 			return;
 
 		cell *arg1 = key + 1, *arg2 = NULL;
