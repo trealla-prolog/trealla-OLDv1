@@ -458,7 +458,6 @@ typedef struct {
 	bool definite:1;
 	bool arg1_is_ground:1;
 	bool arg2_is_ground:1;
-	bool arg1_is_nonvar:1;
 } prolog_state;
 
 typedef struct {
