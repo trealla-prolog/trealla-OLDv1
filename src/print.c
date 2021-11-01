@@ -97,7 +97,7 @@ size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq)
 	extern const char *g_escapes;
 	extern const char *g_anti_escapes;
 	size_t len = 0;
-	int chars = 0, bytes = 0;
+	int chars = 0;
 
 	while (srclen > 0) {
 		int lench = len_char_utf8(src);
@@ -107,7 +107,6 @@ size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq)
 
 		int ch = get_char_utf8(&src);
 		srclen -= lench;
-		bytes += lench;
 		chars++;
 		const char *ptr = (lench == 1) && (ch != ' ') ? strchr(g_escapes, ch) : NULL;
 
