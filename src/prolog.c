@@ -17,14 +17,14 @@
 static const size_t INITIAL_POOL_SIZE = 64000;	// bytes
 
 stream g_streams[MAX_STREAMS] = {{0}};
-idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
-idx_t g_anon_s, g_neck_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
-idx_t g_sys_elapsed_s, g_sys_queue_s, g_braces_s, g_call_s, g_braces_s;
-idx_t g_sys_stream_property_s, g_unify_s, g_on_s, g_off_s, g_sys_var_s;
-idx_t g_plus_s, g_minus_s, g_once_s, g_post_unify_hook_s, g_sys_record_key_s;
-idx_t g_conjunction_s, g_disjunction_s, g_at_s, g_sys_ne_s, g_sys_incr_s, g_sys_inner_cut_s;
-idx_t g_dcg_s, g_throw_s, g_sys_block_catcher_s, g_sys_cut_if_det_s;
-idx_t g_sys_soft_cut_s, g_if_then_s, g_soft_cut_s, g_negation_s;
+pl_idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
+pl_idx_t g_anon_s, g_neck_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
+pl_idx_t g_sys_elapsed_s, g_sys_queue_s, g_braces_s, g_call_s, g_braces_s;
+pl_idx_t g_sys_stream_property_s, g_unify_s, g_on_s, g_off_s, g_sys_var_s;
+pl_idx_t g_plus_s, g_minus_s, g_once_s, g_post_unify_hook_s, g_sys_record_key_s;
+pl_idx_t g_conjunction_s, g_disjunction_s, g_at_s, g_sys_ne_s, g_sys_incr_s, g_sys_inner_cut_s;
+pl_idx_t g_dcg_s, g_throw_s, g_sys_block_catcher_s, g_sys_cut_if_det_s;
+pl_idx_t g_sys_soft_cut_s, g_if_then_s, g_soft_cut_s, g_negation_s;
 
 unsigned g_cpu_count = 4;
 char *g_tpl_lib = NULL;
@@ -33,7 +33,7 @@ char **g_av = NULL, *g_argv0 = NULL;
 
 static atomic_t int g_tpl_count = 0;
 
-bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, idx_t arity)
+bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, pl_idx_t arity)
 {
 	module *m = find_module(pl, mod);
 	if (!m) return false;
@@ -48,9 +48,9 @@ bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, idx_t ari
 	return pr->is_multifile ? true : false;
 }
 
-static idx_t add_to_pool(prolog *pl, const char *name)
+static pl_idx_t add_to_pool(prolog *pl, const char *name)
 {
-	idx_t offset = pl->pool_offset;
+	pl_idx_t offset = pl->pool_offset;
 	size_t len = strlen(name);
 
 	while ((offset+len+1+1) >= pl->pool_size) {
@@ -69,12 +69,12 @@ static idx_t add_to_pool(prolog *pl, const char *name)
 	return offset;
 }
 
-idx_t index_from_pool(prolog *pl, const char *name)
+pl_idx_t index_from_pool(prolog *pl, const char *name)
 {
 	const void *val;
 
 	if (m_get(pl->symtab, name, &val))
-		return (idx_t)(unsigned long)val;
+		return (pl_idx_t)(unsigned long)val;
 
 	return add_to_pool(pl, name);
 }

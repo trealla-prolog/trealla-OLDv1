@@ -36,12 +36,12 @@ static bool any_choices(query *q, frame *g, bool in_commit)
 	if (q->cp < (in_commit ? 2 : 1))
 		return false;
 
-	idx_t curr_choice = q->cp - (in_commit ? 2 : 1);
+	pl_idx_t curr_choice = q->cp - (in_commit ? 2 : 1);
 	const choice *ch = GET_CHOICE(curr_choice);
 	return ch->cgen >= g->cgen ? true : false;
 }
 
-static void trace_call(query *q, cell *c, idx_t c_ctx, box_t box)
+static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 {
 	if (!c || !c->fn || is_empty(c))
 		return;
@@ -92,7 +92,7 @@ static USE_RESULT pl_status check_trail(query *q)
 		q->max_trails = q->st.tp;
 
 		if (q->st.tp >= q->trails_size) {
-			idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size*3/2);
+			pl_idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size*3/2);
 			if (!new_trailssize) {
 				q->error = true;
 				return pl_error;
@@ -111,7 +111,7 @@ static USE_RESULT pl_status check_choice(query *q)
 		q->max_choices = q->cp;
 
 		if (q->cp >= q->choices_size) {
-			idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size*3/2);
+			pl_idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size*3/2);
 			if (!new_choicessize) {
 				q->error = true;
 				return pl_error;
@@ -130,7 +130,7 @@ static USE_RESULT pl_status check_frame(query *q)
 		q->max_frames = q->st.fp;
 
 		if (q->st.fp >= q->frames_size) {
-			idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size*3/2);
+			pl_idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size*3/2);
 			if (!new_framessize) {
 				q->error = true;
 				return pl_error;
@@ -145,13 +145,13 @@ static USE_RESULT pl_status check_frame(query *q)
 
 static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 {
-	idx_t nbr = q->st.sp + cnt;
+	pl_idx_t nbr = q->st.sp + cnt;
 
 	if (nbr > q->max_slots) {
 		q->max_slots = nbr;
 
 		if (nbr >= q->slots_size) {
-			idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, (nbr*3/2));
+			pl_idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, (nbr*3/2));
 			if (!new_slotssize) {
 				q->error = true;
 				return pl_error;
@@ -167,10 +167,10 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 
 struct ref_ {
 	ref *next;
-	idx_t var_nbr, ctx;
+	pl_idx_t var_nbr, ctx;
 };
 
-inline static bool is_in_ref_list(cell *c, idx_t c_ctx, ref *rlist)
+inline static bool is_in_ref_list(cell *c, pl_idx_t c_ctx, ref *rlist)
 {
 	while (rlist && !g_tpl_interrupt) {
 		if ((c->var_nbr == rlist->var_nbr)
@@ -183,12 +183,12 @@ inline static bool is_in_ref_list(cell *c, idx_t c_ctx, ref *rlist)
 	return false;
 }
 
-static bool is_cyclic_term_internal(query *q, cell *p1, idx_t p1_ctx, ref *list)
+static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, ref *list)
 {
 	if (!is_structure(p1))
 		return false;
 
-	idx_t nbr_cells = p1->nbr_cells - 1;
+	pl_idx_t nbr_cells = p1->nbr_cells - 1;
 	p1++;
 
 	while (nbr_cells) {
@@ -202,7 +202,7 @@ static bool is_cyclic_term_internal(query *q, cell *p1, idx_t p1_ctx, ref *list)
 			nlist->ctx = p1_ctx;
 
 			cell *c = deref(q, p1, p1_ctx);
-			idx_t c_ctx = q->latest_ctx;
+			pl_idx_t c_ctx = q->latest_ctx;
 
 			if (is_cyclic_term_internal(q, c, c_ctx, nlist)) {
 				free(nlist);
@@ -219,7 +219,7 @@ static bool is_cyclic_term_internal(query *q, cell *p1, idx_t p1_ctx, ref *list)
 	return false;
 }
 
-bool is_cyclic_term(query *q, cell *p1, idx_t p1_ctx)
+bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	q->cycle_error = false;
 	return is_cyclic_term_internal(q, p1, p1_ctx, NULL);
@@ -277,9 +277,9 @@ static bool is_all_vars(cell *c)
 
 static bool is_ground(cell *c)
 {
-	idx_t nbr_cells = c->nbr_cells;
+	pl_idx_t nbr_cells = c->nbr_cells;
 
-	for (idx_t i = 0; i < nbr_cells; i++, c++) {
+	for (pl_idx_t i = 0; i < nbr_cells; i++, c++) {
 		if (is_variable(c))
 			return false;
 	}
@@ -375,7 +375,7 @@ void add_to_dirty_list(query *q, clause *cl)
 	pr->dirty_list = cl;
 }
 
-bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials)
+bool is_valid_list(query *q, cell *p1, pl_idx_t p1_ctx, bool allow_partials)
 {
 	if (!is_list(p1) && !is_nil(p1))
 		return false;
@@ -392,7 +392,7 @@ bool is_valid_list(query *q, cell *p1, idx_t p1_ctx, bool allow_partials)
 	return is_nil(p1) || (allow_partials && is_variable(p1));
 }
 
-bool is_valid_list_up_to(query *q, cell *p1, idx_t p1_ctx, bool allow_partials, int n)
+bool is_valid_list_up_to(query *q, cell *p1, pl_idx_t p1_ctx, bool allow_partials, int n)
 {
 	if (!is_list(p1) && !is_nil(p1))
 		return false;
@@ -415,9 +415,9 @@ bool is_valid_list_up_to(query *q, cell *p1, idx_t p1_ctx, bool allow_partials, 
 	return is_nil(p1) || (allow_partials && is_variable(p1));
 }
 
-size_t scan_is_chars_list(query *q, cell *l, idx_t l_ctx, bool allow_codes)
+size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes)
 {
-	idx_t save_ctx = q ? q->latest_ctx : l_ctx;
+	pl_idx_t save_ctx = q ? q->latest_ctx : l_ctx;
 	size_t is_chars_list = 0;
 	LIST_HANDLER(l);
 	int cnt = 0;
@@ -515,7 +515,7 @@ static void trim_heap(query *q, const choice *ch)
 		if (a->nbr <= ch->st.arena_nbr)
 			break;
 
-		for (idx_t i = 0; i < a->max_hp_used; i++) {
+		for (pl_idx_t i = 0; i < a->max_hp_used; i++) {
 			cell *c = a->heap + i;
 			unshare_cell(c);
 			c->tag = TAG_EMPTY;
@@ -530,7 +530,7 @@ static void trim_heap(query *q, const choice *ch)
 
 	const arena *a = q->arenas;
 
-	for (idx_t i = ch->st.hp; a && (i < a->max_hp_used) && (i < q->st.hp); i++) {
+	for (pl_idx_t i = ch->st.hp; a && (i < a->max_hp_used) && (i < q->st.hp); i++) {
 		cell *c = a->heap + i;
 		unshare_cell(c);
 		c->tag = TAG_EMPTY;
@@ -538,9 +538,9 @@ static void trim_heap(query *q, const choice *ch)
 	}
 }
 
-idx_t drop_choice(query *q)
+pl_idx_t drop_choice(query *q)
 {
-	idx_t curr_choice = --q->cp;
+	pl_idx_t curr_choice = --q->cp;
 	return curr_choice;
 }
 
@@ -553,7 +553,7 @@ LOOP:
 		return false;
 	}
 
-	idx_t curr_choice = drop_choice(q);
+	pl_idx_t curr_choice = drop_choice(q);
 	const choice *ch = GET_CHOICE(curr_choice);
 	unwind_trail(q, ch);
 
@@ -577,7 +577,7 @@ LOOP:
 
 static frame *make_frame(query *q, unsigned nbr_vars)
 {
-	idx_t new_frame = q->st.fp++;
+	pl_idx_t new_frame = q->st.fp++;
 	frame *g = GET_FRAME(new_frame);
 	g->prev_frame = q->st.curr_frame;
 	g->prev_cell = q->st.curr_cell;
@@ -600,7 +600,7 @@ void trim_trail(query *q)
 		return;
 	}
 
-	idx_t tp;
+	pl_idx_t tp;
 
 	if (q->cp) {
 		const choice *ch = GET_CURR_CHOICE();
@@ -629,7 +629,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	slot *from = GET_FIRST_SLOT(newg);
 	slot *to = GET_FIRST_SLOT(g);
 
-	for (idx_t i = 0; i < nbr_vars; i++) {
+	for (pl_idx_t i = 0; i < nbr_vars; i++) {
 		unshare_cell(&to->c);
 		*to++ = *from++;
 	}
@@ -758,7 +758,7 @@ static void commit_me(query *q, rule *r)
 
 void stash_me(query *q, rule *r, bool last_match)
 {
-	idx_t cgen = q->st.cgen;
+	pl_idx_t cgen = q->st.cgen;
 
 	if (last_match) {
 		unshare_predicate(q, q->st.pr2);
@@ -771,7 +771,7 @@ void stash_me(query *q, rule *r, bool last_match)
 	}
 
 	unsigned nbr_vars = r->nbr_vars;
-	idx_t new_frame = q->st.fp++;
+	pl_idx_t new_frame = q->st.fp++;
 	frame *g = GET_FRAME(new_frame);
 	g->prev_frame = q->st.curr_frame;
 	g->prev_cell = NULL;
@@ -787,7 +787,7 @@ pl_status make_choice(query *q)
 	may_error(check_choice(q));
 
 	frame *g = GET_CURR_FRAME();
-	idx_t curr_choice = q->cp++;
+	pl_idx_t curr_choice = q->cp++;
 	choice *ch = GET_CHOICE(curr_choice);
 	memset(ch, 0, sizeof(choice));
 	ch->ugen = g->ugen;
@@ -883,7 +883,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 			cell *c = ch->st.curr_cell;
 			//c = deref(q, c, ch->st.curr_frame);
 			cell *p1 = deref(q, c+1, ch->st.curr_frame);
-			idx_t p1_ctx = q->latest_ctx;
+			pl_idx_t p1_ctx = q->latest_ctx;
 			cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, false);
 			unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 			do_cleanup(q, tmp);
@@ -999,9 +999,9 @@ unsigned create_vars(query *q, unsigned cnt)
 	} else if ((g->overflow + (g->nbr_vars - g->nbr_slots)) == q->st.sp) {
 		q->st.sp += cnt;
 	} else {
-		idx_t save_overflow = g->overflow;
+		pl_idx_t save_overflow = g->overflow;
 		g->overflow = q->st.sp;
-		idx_t cnt2 = g->nbr_vars - g->nbr_slots;
+		pl_idx_t cnt2 = g->nbr_vars - g->nbr_slots;
 		memmove(q->slots+g->overflow, q->slots+save_overflow, sizeof(slot)*cnt2);
 		q->st.sp += cnt2 + cnt;
 	}
@@ -1017,7 +1017,7 @@ unsigned create_vars(query *q, unsigned cnt)
 	return var_nbr;
 }
 
-static void add_trail(query *q, idx_t c_ctx, unsigned c_var_nbr, cell *attrs, idx_t attrs_ctx)
+static void add_trail(query *q, pl_idx_t c_ctx, unsigned c_var_nbr, cell *attrs, pl_idx_t attrs_ctx)
 {
 	if (check_trail(q) != pl_success) {
 		q->error = pl_error;
@@ -1031,13 +1031,13 @@ static void add_trail(query *q, idx_t c_ctx, unsigned c_var_nbr, cell *attrs, id
 	tr->attrs_ctx = attrs_ctx;
 }
 
-void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
+void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 {
 	const frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
 	e->ctx = v_ctx;
 	cell *attrs = NULL;
-	idx_t attrs_ctx = 0;
+	pl_idx_t attrs_ctx = 0;
 
 	if (is_empty(&e->c)) {
 		attrs = e->c.attrs;
@@ -1073,7 +1073,7 @@ void set_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		add_trail(q, c_ctx, c->var_nbr, attrs, attrs_ctx);
 }
 
-void reset_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
+void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 {
 	const frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
@@ -1088,7 +1088,7 @@ void reset_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 	e->ctx = v_ctx;
 
 	cell *attrs = NULL;
-	idx_t attrs_ctx = 0;
+	pl_idx_t attrs_ctx = 0;
 
 	if (is_empty(&e->c)) {
 		attrs = e->c.attrs;
@@ -1124,7 +1124,7 @@ void reset_var(query *q, const cell *c, idx_t c_ctx, cell *v, idx_t v_ctx)
 		add_trail(q, c_ctx, c->var_nbr, attrs, attrs_ctx);
 }
 
-static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
+static bool unify_structure(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	if (p1->arity != p2->arity)
 		return false;
@@ -1137,9 +1137,9 @@ static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2
 
 	while (arity--) {
 		cell *c1 = deref(q, p1, p1_ctx);
-		idx_t c1_ctx = q->latest_ctx;
+		pl_idx_t c1_ctx = q->latest_ctx;
 		cell *c2 = deref(q, p2, p2_ctx);
-		idx_t c2_ctx = q->latest_ctx;
+		pl_idx_t c2_ctx = q->latest_ctx;
 
 		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
 			return false;
@@ -1151,7 +1151,7 @@ static bool unify_structure(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2
 	return true;
 }
 
-static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
+static bool unify_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	LIST_HANDLER(p1);
 	LIST_HANDLER(p2);
@@ -1161,9 +1161,9 @@ static bool unify_list(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx,
 		cell *h2 = LIST_HEAD(p2);
 
 		cell *c1 = deref(q, h1, p1_ctx);
-		idx_t c1_ctx = q->latest_ctx;
+		pl_idx_t c1_ctx = q->latest_ctx;
 		cell *c2 = deref(q, h2, p2_ctx);
-		idx_t c2_ctx = q->latest_ctx;
+		pl_idx_t c2_ctx = q->latest_ctx;
 
 		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
 			return false;
@@ -1243,7 +1243,7 @@ static const struct dispatch g_disp[] =
 	{0}
 };
 
-bool unify_internal(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
+bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	if (!depth)
 		q->cycle_error = false;
@@ -1307,7 +1307,7 @@ static bool check_update_view(const frame *g, const clause *c)
 
 // Match HEAD :- BODY.
 
-USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
+USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	if (!q->retry) {
 		cell *head = deref(q, get_head(p1), p1_ctx);
@@ -1315,7 +1315,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 
 		if (!is_literal(c)) {
 			// For now convert it to a literal
-			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
+			pl_idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
 			may_idx_error(off);
 			unshare_cell(c);
 			c->tag = TAG_POOL;
@@ -1381,7 +1381,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 
 			if (needs_true) {
 				p1_body = deref(q, p1_body, p1_ctx);
-				idx_t p1_body_ctx = q->latest_ctx;
+				pl_idx_t p1_body_ctx = q->latest_ctx;
 				cell tmp = (cell){0};
 				tmp.tag = TAG_POOL;
 				tmp.nbr_cells = 1;
@@ -1404,14 +1404,14 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, idx_t p1_ctx)
 // Match HEAD.
 // Match HEAD :- true.
 
-USE_RESULT pl_status match_clause(query *q, cell *p1, idx_t p1_ctx, enum clause_type is_retract)
+USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract)
 {
 	if (!q->retry) {
 		cell *c = p1;
 
 		if (!is_literal(c)) {
 			// For now convert it to a literal
-			idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
+			pl_idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
 			may_idx_error(off);
 			unshare_cell(c);
 			c->tag = TAG_POOL;
@@ -1616,7 +1616,7 @@ static void dump_vars(query *q, bool partial)
 			continue;
 
 		cell *c = deref(q, &e->c, e->ctx);
-		idx_t c_ctx = q->latest_ctx;
+		pl_idx_t c_ctx = q->latest_ctx;
 
 		if (is_indirect(&e->c)) {
 			c = e->c.val_ptr;
@@ -1830,7 +1830,7 @@ pl_status start(query *q)
 		q->has_attrs = false;
 		Trace(q, q->st.curr_cell, q->st.curr_frame, CALL);
 		cell *save_cell = q->st.curr_cell;
-		idx_t save_ctx = q->st.curr_frame;
+		pl_idx_t save_ctx = q->st.curr_frame;
 
 		if (q->st.curr_cell->flags&FLAG_BUILTIN	) {
 			if (!q->st.curr_cell->fn) {					// NO-OP
@@ -1968,7 +1968,7 @@ void destroy_query(query *q)
 	}
 
 	for (arena *a = q->arenas; a;) {
-		for (idx_t i = 0; i < a->max_hp_used; i++) {
+		for (pl_idx_t i = 0; i < a->max_hp_used; i++) {
 			cell *c = a->heap + i;
 			unshare_cell(c);
 		}
@@ -1980,7 +1980,7 @@ void destroy_query(query *q)
 	}
 
 	for (int i = 0; i < MAX_QUEUES; i++) {
-		for (idx_t j = 0; j < q->qp[i]; j++) {
+		for (pl_idx_t j = 0; j < q->qp[i]; j++) {
 			cell *c = q->queue[i]+j;
 			unshare_cell(c);
 		}
@@ -1990,7 +1990,7 @@ void destroy_query(query *q)
 
 	slot *e = q->slots;
 
-	for (idx_t i = 0; i < q->st.sp; i++, e++)
+	for (pl_idx_t i = 0; i < q->st.sp; i++, e++)
 		unshare_cell(&e->c);
 
 	mp_int_clear(&q->tmp_ival);
@@ -2056,7 +2056,7 @@ query *create_sub_query(query *q, cell *curr_cell)
 	subq->is_task = true;
 
 	cell *tmp = clone_to_heap(subq, 0, curr_cell, 1);
-	idx_t nbr_cells = tmp->nbr_cells;
+	pl_idx_t nbr_cells = tmp->nbr_cells;
 	make_end(tmp+nbr_cells);
 	subq->st.curr_cell = tmp;
 

@@ -134,7 +134,7 @@ void clear_rule(rule *r)
 	if (!r)
 		return;
 
-	for (idx_t i = 0; i < r->cidx; i++) {
+	for (pl_idx_t i = 0; i < r->cidx; i++) {
 		cell *c = r->cells + i;
 		unshare_cell(c);
 		c->tag = TAG_EMPTY;
@@ -146,7 +146,7 @@ void clear_rule(rule *r)
 static bool make_room(parser *p)
 {
 	if (p->r->cidx == p->r->nbr_cells) {
-		idx_t nbr_cells = p->r->nbr_cells * 2;
+		pl_idx_t nbr_cells = p->r->nbr_cells * 2;
 
 		rule *r = realloc(p->r, sizeof(rule)+(sizeof(cell)*nbr_cells));
 		if (!r) {
@@ -184,7 +184,7 @@ parser *create_parser(module *m)
 	ensure(p);
 	p->pl = m->pl;
 	p->token = calloc(p->token_size=INITIAL_TOKEN_SIZE+1, 1);
-	idx_t nbr_cells = INITIAL_NBR_CELLS;
+	pl_idx_t nbr_cells = INITIAL_NBR_CELLS;
 	p->r = calloc(sizeof(rule)+(sizeof(cell)*nbr_cells), 1);
 	p->r->nbr_cells = nbr_cells;
 	p->start_term = true;
@@ -590,7 +590,7 @@ static void directives(parser *p, cell *d)
 			q.st.m = p->m;
 			snprintf(dstbuf, sizeof(dstbuf), "%s/", g_tpl_lib);
 			char *dst = dstbuf + strlen(dstbuf);
-			idx_t ctx = 0;
+			pl_idx_t ctx = 0;
 			print_term_to_buf(&q, dst, sizeof(dstbuf)-strlen(g_tpl_lib), p1, ctx, 1, false, 0);
 			name = dstbuf;
 		}
@@ -815,7 +815,7 @@ void xref_rule(parser *p, rule *r, predicate *parent)
 	if (c->val_off == g_sys_record_key_s)
 		return;
 
-	for (idx_t i = 0; i < r->cidx; i++) {
+	for (pl_idx_t i = 0; i < r->cidx; i++) {
 		cell *c = r->cells + i;
 
 		if (!is_literal(c))
@@ -926,7 +926,7 @@ static void check_first_cut(parser *p)
 		p->r->is_cut_only = true;
 }
 
-static idx_t get_varno(parser *p, const char *src)
+static pl_idx_t get_varno(parser *p, const char *src)
 {
 	int anon = !strcmp(src, "_");
 	size_t offset = 0;
@@ -965,7 +965,7 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 	r->is_first_cut = false;
 	r->is_cut_only = false;
 
-	for (idx_t i = 0; i < r->cidx; i++) {
+	for (pl_idx_t i = 0; i < r->cidx; i++) {
 		cell *c = r->cells + i;
 
 		if (!is_variable(c))
@@ -995,7 +995,7 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 		}
 	}
 
-	for (idx_t i = 0; i < r->nbr_vars; i++) {
+	for (pl_idx_t i = 0; i < r->nbr_vars; i++) {
 		if (p->consulting && !p->do_read_term && (p->vartab.var_used[i] == 1) &&
 			(p->vartab.var_name[i][strlen(p->vartab.var_name[i])-1] != '_') &&
 			(*p->vartab.var_name[i] != '_')) {
@@ -1004,7 +1004,7 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 		}
 	}
 
-	for (idx_t i = 0; i < r->cidx; i++) {
+	for (pl_idx_t i = 0; i < r->cidx; i++) {
 		cell *c = r->cells + i;
 
 		if (!is_variable(c))
@@ -1024,11 +1024,11 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 
 static cell *insert_here(parser *p, cell *c, cell *p1)
 {
-	idx_t c_idx = c - p->r->cells, p1_idx = p1 - p->r->cells;
+	pl_idx_t c_idx = c - p->r->cells, p1_idx = p1 - p->r->cells;
 	make_room(p);
 
 	cell *last = p->r->cells + (p->r->cidx - 1);
-	idx_t cells_to_move = p->r->cidx - p1_idx;
+	pl_idx_t cells_to_move = p->r->cidx - p1_idx;
 	cell *dst = last + 1;
 
 	while (cells_to_move--)
@@ -1071,7 +1071,7 @@ cell *check_body_callable(parser *p, cell *c)
 
 static cell *term_to_body_conversion(parser *p, cell *c)
 {
-	idx_t c_idx = c - p->r->cells;
+	pl_idx_t c_idx = c - p->r->cells;
 
 	if (IS_XFX(c) || IS_XFY(c)) {
 		if ((c->val_off == g_conjunction_s)
@@ -1126,12 +1126,12 @@ void term_to_body(parser *p)
 	p->r->cells->nbr_cells = p->r->cidx - 1;
 }
 
-static bool reduce(parser *p, idx_t start_idx)
+static bool reduce(parser *p, pl_idx_t start_idx)
 {
-	idx_t lowest = IDX_MAX, work_idx, end_idx = p->r->cidx - 1;
+	pl_idx_t lowest = IDX_MAX, work_idx, end_idx = p->r->cidx - 1;
 	bool do_work = false, bind_le = false;
 
-	for (idx_t i = start_idx; i < p->r->cidx;) {
+	for (pl_idx_t i = start_idx; i < p->r->cidx;) {
 		cell *c = p->r->cells + i;
 
 		//printf("*** OP0 %s type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
@@ -1160,9 +1160,9 @@ static bool reduce(parser *p, idx_t start_idx)
 	if (!do_work)
 		return false;
 
-	idx_t last_idx = 0;
+	pl_idx_t last_idx = 0;
 
-	for (idx_t i = start_idx; i <= end_idx;) {
+	for (pl_idx_t i = start_idx; i <= end_idx;) {
 		cell *c = p->r->cells + i;
 
 		if ((c->nbr_cells > 1) || !is_literal(c) || !c->priority) {
@@ -1198,7 +1198,7 @@ static bool reduce(parser *p, idx_t start_idx)
 
 			rhs += rhs->nbr_cells;
 
-			if ((((idx_t)(rhs - p->r->cells)) < end_idx)
+			if ((((pl_idx_t)(rhs - p->r->cells)) < end_idx)
 				&& IS_XF(rhs) && (rhs->priority == c->priority)) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
@@ -1212,7 +1212,7 @@ static bool reduce(parser *p, idx_t start_idx)
 		if (IS_FX(c) || IS_FY(c)) {
 			cell *rhs = c + 1;
 			c->nbr_cells += rhs->nbr_cells;
-			idx_t off = (idx_t)(rhs - p->r->cells);
+			pl_idx_t off = (pl_idx_t)(rhs - p->r->cells);
 
 			if (off > end_idx) {
 				if (DUMP_ERRS || !p->do_read_term)
@@ -1243,7 +1243,7 @@ static bool reduce(parser *p, idx_t start_idx)
 		if (IS_XF(c) || IS_YF(c)) {
 			cell *lhs = p->r->cells + last_idx;
 			save.nbr_cells += lhs->nbr_cells;
-			idx_t cells_to_move = lhs->nbr_cells;
+			pl_idx_t cells_to_move = lhs->nbr_cells;
 			lhs = c - 1;
 
 			while (cells_to_move--)
@@ -1255,7 +1255,7 @@ static bool reduce(parser *p, idx_t start_idx)
 
 		// Infix...
 
-		idx_t off = (idx_t)(rhs - p->r->cells);
+		pl_idx_t off = (pl_idx_t)(rhs - p->r->cells);
 
 		if (off > end_idx) {
 			if (DUMP_ERRS || !p->do_read_term)
@@ -1268,7 +1268,7 @@ static bool reduce(parser *p, idx_t start_idx)
 
 		cell *lhs = p->r->cells + last_idx;
 		save.nbr_cells += lhs->nbr_cells;
-		idx_t cells_to_move = lhs->nbr_cells;
+		pl_idx_t cells_to_move = lhs->nbr_cells;
 		lhs = c - 1;
 
 		while (cells_to_move--)
@@ -1300,7 +1300,7 @@ static bool reduce(parser *p, idx_t start_idx)
 	return true;
 }
 
-static bool analyze(parser *p, idx_t start_idx)
+static bool analyze(parser *p, pl_idx_t start_idx)
 {
 	while (reduce(p, start_idx))
 		;
@@ -1500,7 +1500,7 @@ bool virtual_term(parser *p, const char *src)
 	return true;
 }
 
-static cell *make_a_literal(parser *p, idx_t offset)
+static cell *make_a_literal(parser *p, pl_idx_t offset)
 {
 	cell *c = make_a_cell(p);
 	c->tag = TAG_POOL;
@@ -2398,7 +2398,7 @@ static bool process_term(parser *p, cell *p1)
 	cell *h = get_head(p1);
 
 	if (is_cstring(h)) {
-		idx_t off = index_from_pool(p->m->pl, GET_STR(p, h));
+		pl_idx_t off = index_from_pool(p->m->pl, GET_STR(p, h));
 		if (off == ERR_IDX) {
 			p->error = true;
 			return false;
@@ -2424,7 +2424,7 @@ static bool process_term(parser *p, cell *p1)
 
 unsigned tokenize(parser *p, bool args, bool consing)
 {
-	idx_t begin_idx = p->r->cidx, arg_idx = p->r->cidx, save_idx = 0;
+	pl_idx_t begin_idx = p->r->cidx, arg_idx = p->r->cidx, save_idx = 0;
 	bool last_op = true, is_func = false, was_consing = false;
 	bool last_bar = false, last_quoted = false;
 	unsigned arity = 1;

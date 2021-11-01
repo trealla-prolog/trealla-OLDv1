@@ -295,7 +295,7 @@ void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
 		m->error = true;
 }
 
-void set_multifile_in_db(module *m, const char *name, idx_t arity)
+void set_multifile_in_db(module *m, const char *name, pl_idx_t arity)
 {
 	cell tmp = (cell){0};
 	tmp.tag = TAG_POOL;
@@ -394,7 +394,7 @@ void convert_to_literal(module *m, cell *c)
 	else
 		src = GET_STR(m, c);
 
-	idx_t off = index_from_pool(m->pl, src);
+	pl_idx_t off = index_from_pool(m->pl, src);
 	unshare_cell(c);
 	c->tag = TAG_POOL;
 	c->val_off = off;
@@ -726,7 +726,7 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 	}
 
 	if (is_cstring(c)) {
-		idx_t off = index_from_pool(m->pl, GET_STR(m, c));
+		pl_idx_t off = index_from_pool(m->pl, GET_STR(m, c));
 		if (off == ERR_IDX) return NULL;
 		unshare_cell(c);
 		c->tag = TAG_POOL;
@@ -1121,7 +1121,7 @@ module *load_file(module *m, const char *filename)
 static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 {
 	(void) dq;
-	idx_t ctx = 0;
+	pl_idx_t ctx = 0;
 	query q = (query){0};
 	q.pl = m->pl;
 	q.st.m = m;

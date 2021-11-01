@@ -32,7 +32,7 @@
 #include "heap.h"
 #include "utf8.h"
 
-static int format_integer(char *dst, int_t v, int grouping, int sep, int decimals, int radix)
+static int format_integer(char *dst, pl_int_t v, int grouping, int sep, int decimals, int radix)
 {
 	char tmpbuf1[1024], tmpbuf2[1024];
 	sprint_int(tmpbuf1, sizeof(tmpbuf1), v, radix);
@@ -66,7 +66,7 @@ static int format_integer(char *dst, int_t v, int grouping, int sep, int decimal
 
 typedef struct {
 	cell *p;
-	idx_t p_ctx;
+	pl_idx_t p_ctx;
 	const char *srcbuf;
 	const char *src;
 	size_t srclen;
@@ -111,7 +111,7 @@ static cell *get_next_cell(query *q, list_reader_t *fmt)
 	cell *head = fmt->p + 1;
 	cell *tail = head + head->nbr_cells;
 	head = deref(q, head, fmt->p_ctx);
-	idx_t save_ctx = q->latest_ctx;
+	pl_idx_t save_ctx = q->latest_ctx;
 	tail = deref(q, tail, fmt->p_ctx);
 	fmt->p = tail;
 	fmt->p_ctx = q->latest_ctx;
@@ -144,7 +144,7 @@ static bool is_more_data(query *q, list_reader_t *fmt)
 	}                                                       \
 }
 
-pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx)
+pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 {
 	list_reader_t fmt1 = {0}, fmt2 = {0};
 	list_reader_t save_fmt1 = {0}, save_fmt2 = {0};
@@ -329,7 +329,7 @@ pl_status do_format(query *q, cell *str, idx_t str_ctx, cell *p1, idx_t p1_ctx, 
 		if (ch == 'i')
 			continue;
 
-        idx_t c_ctx = q->latest_ctx;
+        pl_idx_t c_ctx = q->latest_ctx;
 		start_of_line = false;
 		size_t len = 0;
 

@@ -33,4 +33,4 @@ extern void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
 extern void set_dynamic_in_db(module *m, const char *name, unsigned arity);
 extern void set_meta_predicate_in_db(module *m, cell *c);
 extern void set_persist_in_db(module *m, const char *name, unsigned arity);
-extern void set_multifile_in_db(module *m, const char *name, idx_t arity);
+extern void set_multifile_in_db(module *m, const char *name, pl_idx_t arity);

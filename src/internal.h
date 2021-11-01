@@ -32,11 +32,12 @@
 #define NEWLINE_MODE "posix"
 #endif
 
-typedef intmax_t int_t;
-typedef uintmax_t uint_t;
+typedef intmax_t pl_int_t;
+typedef uintmax_t pl_uint_t;
+typedef uint32_t pl_idx_t;
 
-#define INT_T_MAX INTMAX_MAX
-#define INT_T_MIN INTMAX_MIN
+#define PL_INT_MAX INTMAX_MAX
+#define PL_INT_MIN INTMAX_MIN
 
 #if (__STDC_VERSION__ >= 201112L) && USE_THREADS
 #include <stdatomic.h>
@@ -44,8 +45,6 @@ typedef uintmax_t uint_t;
 #else
 #define atomic_t volatile
 #endif
-
-typedef uint32_t idx_t;
 
 #include "map.h"
 #include "trealla.h"
@@ -65,7 +64,7 @@ typedef enum {
 } pl_status;
 
 // Sentinel Value
-#define ERR_IDX (~(idx_t)0)
+#define ERR_IDX (~(pl_idx_t)0)
 #define IDX_MAX (ERR_IDX-1)
 #define ERR_CYCLE_CMP -2
 
@@ -280,11 +279,11 @@ struct cell_ {
 	uint8_t tag;
 	uint8_t arity;
 	uint16_t flags;
-	idx_t nbr_cells;
+	pl_idx_t nbr_cells;
 
 	union {
 		struct {
-			int_t val_int;
+			pl_int_t val_int;
 			void *val_spare1;
 		};
 
@@ -332,7 +331,7 @@ struct cell_ {
 
 		struct {
 			cell *attrs;				// used with TAG_EMPTY in slot
-			idx_t attrs_ctx;			// to set attributes on a var
+			pl_idx_t attrs_ctx;			// to set attributes on a var
 			uint32_t spare5;
 		};
 	};
@@ -346,7 +345,7 @@ typedef struct {
 
 typedef struct {
 	uint64_t ugen_created, ugen_erased;
-	idx_t nbr_cells, cidx;
+	pl_idx_t nbr_cells, cidx;
 	uint32_t nbr_vars;
 	bool is_first_cut:1;
 	bool is_cut_only:1;
@@ -404,20 +403,20 @@ typedef struct {
 
 typedef struct {
 	cell *attrs;
-	idx_t ctx, attrs_ctx;
+	pl_idx_t ctx, attrs_ctx;
 	uint32_t var_nbr;
 } trail;
 
 typedef struct {
 	cell c;
-	idx_t ctx;
+	pl_idx_t ctx;
 } slot;
 
 typedef struct {
 	cell *prev_cell;
 	module *m;
 	uint64_t ugen;
-	idx_t prev_frame, base_slot_nbr, overflow;
+	pl_idx_t prev_frame, base_slot_nbr, overflow;
 	uint32_t nbr_slots, nbr_vars, cgen;
 } frame;
 
@@ -452,7 +451,7 @@ typedef struct {
 	predicate *pr, *pr2;
 	module *m;
 	miter *iter;
-	idx_t curr_frame, fp, hp, tp, sp;
+	pl_idx_t curr_frame, fp, hp, tp, sp;
 	uint32_t cgen, arena_nbr;
 	uint8_t qnbr;
 	bool definite:1;
@@ -463,7 +462,7 @@ typedef struct {
 typedef struct {
 	prolog_state st;
 	uint64_t ugen;
-	idx_t v1, v2, overflow;
+	pl_idx_t v1, v2, overflow;
 	uint32_t nbr_slots, nbr_vars, cgen, orig_cgen;
 	bool catchme_retry:1;
 	bool catchme_exception:1;
@@ -483,7 +482,7 @@ typedef struct arena_ arena;
 struct arena_ {
 	arena *next;
 	cell *heap;
-	idx_t hp, max_hp_used, h_size;
+	pl_idx_t hp, max_hp_used, h_size;
 	unsigned nbr;
 };
 
@@ -524,11 +523,11 @@ struct query_ {
 	uint64_t step, qid, time_started, get_started, cpu_started, cpu_last_started;
 	unsigned max_depth, tmo_msecs;
 	int nv_start;
-	idx_t cp, tmphp, latest_ctx, popp, variable_names_ctx;
-	idx_t frames_size, slots_size, trails_size, choices_size;
-	idx_t max_choices, max_frames, max_slots, max_trails, save_tp;
-	idx_t h_size, tmph_size, tot_heaps, tot_heapsize, undo_lo_tp, undo_hi_tp;
-	idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
+	pl_idx_t cp, tmphp, latest_ctx, popp, variable_names_ctx;
+	pl_idx_t frames_size, slots_size, trails_size, choices_size;
+	pl_idx_t max_choices, max_frames, max_slots, max_trails, save_tp;
+	pl_idx_t h_size, tmph_size, tot_heaps, tot_heapsize, undo_lo_tp, undo_hi_tp;
+	pl_idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
 	uint8_t nv_mask[MAX_ARITY];
 	prolog_flags flag;
 	enum q_retry retry;
@@ -633,10 +632,10 @@ struct module_ {
 };
 
 struct prolog_ {
-	idx_t tab1[64000];
-	idx_t tab3[64000];
-	idx_t tab2[64000];
-	idx_t tab4[64000];
+	pl_idx_t tab1[64000];
+	pl_idx_t tab3[64000];
+	pl_idx_t tab2[64000];
+	pl_idx_t tab4[64000];
 	uint8_t tab5[64000];
 	module *modules;
 	module *system_m, *user_m, *curr_m, *dcgs;
@@ -644,7 +643,7 @@ struct prolog_ {
 	map *symtab, *funtab, *keyval;
 	char *pool;
 	uint64_t ugen;
-	idx_t pool_offset, pool_size, tab_idx;
+	pl_idx_t pool_offset, pool_size, tab_idx;
 	unsigned varno;
 	uint8_t current_input, current_output, current_error;
 	int8_t halt_code, opt;
@@ -658,12 +657,12 @@ struct prolog_ {
 	bool trace:1;
 };
 
-extern idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
-extern idx_t g_anon_s, g_neck_s, g_eof_s, g_lt_s, g_false_s, g_once_s;
-extern idx_t g_gt_s, g_eq_s, g_sys_elapsed_s, g_sys_queue_s, g_braces_s;
-extern idx_t g_sys_stream_property_s, g_unify_s, g_on_s, g_off_s, g_sys_var_s;
-extern idx_t g_call_s, g_braces_s, g_plus_s, g_minus_s, g_post_unify_hook_s;
-extern idx_t g_sys_soft_cut_s;
+extern pl_idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
+extern pl_idx_t g_anon_s, g_neck_s, g_eof_s, g_lt_s, g_false_s, g_once_s;
+extern pl_idx_t g_gt_s, g_eq_s, g_sys_elapsed_s, g_sys_queue_s, g_braces_s;
+extern pl_idx_t g_sys_stream_property_s, g_unify_s, g_on_s, g_off_s, g_sys_var_s;
+extern pl_idx_t g_call_s, g_braces_s, g_plus_s, g_minus_s, g_post_unify_hook_s;
+extern pl_idx_t g_sys_soft_cut_s;
 
 extern stream g_streams[MAX_STREAMS];
 extern unsigned g_cpu_count;
@@ -696,15 +695,15 @@ inline static void unshare_cell(cell *c)
 	}
 }
 
-inline static idx_t copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
+inline static pl_idx_t copy_cells(cell *dst, const cell *src, pl_idx_t nbr_cells)
 {
 	memcpy(dst, src, sizeof(cell)*nbr_cells);
 	return nbr_cells;
 }
 
-inline static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
+inline static pl_idx_t safe_copy_cells(cell *dst, const cell *src, pl_idx_t nbr_cells)
 {
-	for (idx_t i = 0; i < nbr_cells; i++) {
+	for (pl_idx_t i = 0; i < nbr_cells; i++) {
 		share_cell(src);
 		*dst++ = *src++;
 	}
@@ -712,9 +711,9 @@ inline static idx_t safe_copy_cells(cell *dst, const cell *src, idx_t nbr_cells)
 	return nbr_cells;
 }
 
-inline static void chk_cells(cell *src, idx_t nbr_cells)
+inline static void chk_cells(cell *src, pl_idx_t nbr_cells)
 {
-	for (idx_t i = 0; i < nbr_cells; i++) {
+	for (pl_idx_t i = 0; i < nbr_cells; i++) {
 		unshare_cell(src);
 		src++;
 	}
@@ -736,7 +735,7 @@ extern unsigned count_bits(const uint8_t *mask, unsigned bit);
 extern uint64_t get_time_in_usec(void);
 extern uint64_t cpu_time_in_usec(void);
 extern char *relative_to(const char *basefile, const char *relfile);
-extern size_t sprint_int(char *dst, size_t size, int_t n, int base);
+extern size_t sprint_int(char *dst, size_t size, pl_int_t n, int base);
 extern void format_property(module *m, char *tmpbuf, size_t buflen, const char *name, unsigned arity, const char *type);
 
 #define slicecmp2(s1,l1,s2) slicecmp(s1,l1,s2,strlen(s2))

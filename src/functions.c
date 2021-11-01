@@ -168,10 +168,10 @@ static mp_result mp_int_divx_value(mp_int a, mp_small b, mp_int q)
 			return throw_error(q, q->st.curr_cell, "existence_error", "procedure");	\
 	}
 
-void call_builtin(query *q, cell *c, idx_t c_ctx)
+void call_builtin(query *q, cell *c, pl_idx_t c_ctx)
 {
 	cell *save = q->st.curr_cell;
-	idx_t save_ctx = q->st.curr_frame;
+	pl_idx_t save_ctx = q->st.curr_frame;
 	bool save_calc = q->eval;
 	q->st.curr_cell = c;
 	q->st.curr_frame = c_ctx;
@@ -188,7 +188,7 @@ void call_builtin(query *q, cell *c, idx_t c_ctx)
 	}
 }
 
-pl_status call_userfun(query *q, cell *c, __attribute__((unused)) idx_t c_ctx)
+pl_status call_userfun(query *q, cell *c, __attribute__((unused)) pl_idx_t c_ctx)
 {
 	if (q->retry)
 		return pl_failure;
@@ -200,9 +200,9 @@ pl_status call_userfun(query *q, cell *c, __attribute__((unused)) idx_t c_ctx)
 		return throw_error(q, c, "type_error", "evaluable");
 
 	cell *save = q->st.curr_cell;
-	idx_t save_ctx = q->st.curr_frame;
+	pl_idx_t save_ctx = q->st.curr_frame;
 	cell *tmp = clone_to_heap(q, true, c, 2);
-	idx_t nbr_cells = 1 + c->nbr_cells;
+	pl_idx_t nbr_cells = 1 + c->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_call(q, tmp+nbr_cells);
 	may_error(make_call_barrier(q));
@@ -309,8 +309,8 @@ static USE_RESULT pl_status fn_iso_integer_1(query *q)
 	if (q->eval) {
 		CLEANUP cell p1 = eval(q, p1_tmp);
 
-		if (is_real(&p1) && (p1.val_real < (double)INT_T_MAX) && (p1.val_real > (double)INT_T_MIN)) {
-			q->accum.val_int = (int_t)p1.val_real;
+		if (is_real(&p1) && (p1.val_real < (double)PL_INT_MAX) && (p1.val_real > (double)PL_INT_MIN)) {
+			q->accum.val_int = (pl_int_t)p1.val_real;
 			q->accum.tag = TAG_INT;
 			return pl_success;
 		}
@@ -607,7 +607,7 @@ static USE_RESULT pl_status fn_iso_truncate_1(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 
 	if (is_real(&p1)) {
-		q->accum.val_int = (int_t)p1.val_real;
+		q->accum.val_int = (pl_int_t)p1.val_real;
 		q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
@@ -654,7 +654,7 @@ static USE_RESULT pl_status fn_iso_ceiling_1(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 
 	if (is_real(&p1)) {
-		q->accum.val_int = (int_t)ceil(p1.val_real);
+		q->accum.val_int = (pl_int_t)ceil(p1.val_real);
 		q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
@@ -674,7 +674,7 @@ static USE_RESULT pl_status fn_iso_float_integer_part_1(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 
 	if (is_real(&p1)) {
-		q->accum.val_real = (int_t)p1.val_real;
+		q->accum.val_real = (pl_int_t)p1.val_real;
 		q->accum.tag = TAG_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
@@ -694,7 +694,7 @@ static USE_RESULT pl_status fn_iso_float_fractional_part_1(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 
 	if (is_real(&p1)) {
-		q->accum.val_real = p1.val_real - (int_t)p1.val_real;
+		q->accum.val_real = p1.val_real - (pl_int_t)p1.val_real;
 		q->accum.tag = TAG_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
@@ -714,7 +714,7 @@ static USE_RESULT pl_status fn_iso_floor_1(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 
 	if (is_real(&p1)) {
-		q->accum.val_int = (int_t)floor(p1.val_real);
+		q->accum.val_int = (pl_int_t)floor(p1.val_real);
 		q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, "instantiation_error", "not_sufficiently_instantiated");
@@ -1858,7 +1858,7 @@ static USE_RESULT pl_status fn_iso_neg_1(query *q)
 	return pl_success;
 }
 
-int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned depth)
+int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	if (depth == MAX_DEPTH) {
 		q->cycle_error = true;
@@ -1869,8 +1869,8 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		if (is_variable(p2)) {
 			frame *g1 = GET_FRAME(p1_ctx);
 			frame *g2 = GET_FRAME(p2_ctx);
-			idx_t p1_slot = GET_SLOT(g1,p1->var_nbr) - q->slots;
-			idx_t p2_slot = GET_SLOT(g2,p2->var_nbr) - q->slots;
+			pl_idx_t p1_slot = GET_SLOT(g1,p1->var_nbr) - q->slots;
+			pl_idx_t p2_slot = GET_SLOT(g2,p2->var_nbr) - q->slots;
 			return p1_slot < p2_slot ? -1 : p1_slot > p2_slot ? 1 : 0;
 		}
 
@@ -1931,10 +1931,10 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 		while (is_list(p1) && is_list(p2)) {
 			cell *h1 = LIST_HEAD(p1);
 			h1 = deref(q, h1, p1_ctx);
-			idx_t h1_ctx = q->latest_ctx;
+			pl_idx_t h1_ctx = q->latest_ctx;
 			cell *h2 = LIST_HEAD(p2);
 			h2 = deref(q, h2, p2_ctx);
-			idx_t h2_ctx = q->latest_ctx;
+			pl_idx_t h2_ctx = q->latest_ctx;
 
 			int val = compare(q, h1, h1_ctx, h2, h2_ctx, depth+1);
 			if (val) return val;
@@ -1965,9 +1965,9 @@ int compare(query *q, cell *p1, idx_t p1_ctx, cell *p2, idx_t p2_ctx, unsigned d
 
 	while (arity--) {
 		cell *h1 = deref(q, p1, p1_ctx);
-		idx_t tmp_p1_ctx = q->latest_ctx;
+		pl_idx_t tmp_p1_ctx = q->latest_ctx;
 		cell *h2 = deref(q, p2, p2_ctx);
-		idx_t tmp_p2_ctx = q->latest_ctx;
+		pl_idx_t tmp_p2_ctx = q->latest_ctx;
 
 		int val = compare(q, h1, tmp_p1_ctx, h2, tmp_p2_ctx, depth+1);
 		if (val) return val;
@@ -2273,7 +2273,7 @@ static USE_RESULT pl_status fn_log10_1(query *q)
 	return pl_success;
 }
 
-static uint_t g_seed = 0;
+static pl_uint_t g_seed = 0;
 #define random_M 0x7FFFFFFFL
 
 static double rnd(void)
@@ -2311,7 +2311,7 @@ static USE_RESULT pl_status fn_random_between_3(query *q)
 		return throw_error(q, p2, "type_error", "integer");
 
 	cell tmp;
-	int_t r = rnd() * ((int64_t)RAND_MAX+1);
+	pl_int_t r = rnd() * ((int64_t)RAND_MAX+1);
 	make_int(&tmp, get_smallint(p1) + (r % get_smallint(p2)));
 	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 }
@@ -2358,7 +2358,7 @@ static USE_RESULT pl_status fn_rand_1(query *q)
 	return pl_success;
 }
 
-static int_t gcd(int_t num, int_t remainder)
+static pl_int_t gcd(pl_int_t num, pl_int_t remainder)
 {
 	if (remainder == 0)
 		return num;

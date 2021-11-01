@@ -9,7 +9,7 @@
 
 #define GET_RAW_ARG(n,p) \
 	__attribute__((unused)) cell *p = get_raw_arg(q,n); \
-	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx
+	__attribute__((unused)) pl_idx_t p##_ctx = q->latest_ctx
 
 #define is_callable(c) (is_literal(c) || is_cstring(c))
 #define is_callable_or_var(c) (is_literal(c) || is_cstring(c) || is_variable(c))
@@ -49,7 +49,7 @@
 #define is_iso_list_or_var(c) (is_iso_list(c) || is_variable(c))
 #define is_iso_atom_or_var(c) (is_iso_atom(c) || is_variable(c))
 
-inline static cell *deref(query *q, cell *c, idx_t c_ctx)
+inline static cell *deref(query *q, cell *c, pl_idx_t c_ctx)
 {
 	if (!is_variable(c)) {
 		q->latest_ctx = c_ctx;
@@ -77,7 +77,7 @@ inline static cell *deref(query *q, cell *c, idx_t c_ctx)
 
 #define GET_FIRST_ARG(p,vt) \
 	__attribute__((unused)) cell *p = get_first_arg(q); \
-	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx; \
+	__attribute__((unused)) pl_idx_t p##_ctx = q->latest_ctx; \
 	if (!is_##vt(p)) { return throw_error(q, p, "type_error", #vt); }
 
 #define REGET_FIRST_ARG(p,vt) \
@@ -87,22 +87,22 @@ inline static cell *deref(query *q, cell *c, idx_t c_ctx)
 
 #define GET_FIRST_ARG0(p,vt,p0) \
 	__attribute__((unused)) cell *p = get_first_arg0(q,p0); \
-	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx; \
+	__attribute__((unused)) pl_idx_t p##_ctx = q->latest_ctx; \
 	if (!is_##vt(p)) { return throw_error(q, p, "type_error", #vt); }
 
 #define GET_FIRST_RAW_ARG(p,vt) \
 	__attribute__((unused)) cell *p = get_first_raw_arg(q); \
-	__attribute__((unused)) idx_t p##_ctx = q->st.curr_frame; \
+	__attribute__((unused)) pl_idx_t p##_ctx = q->st.curr_frame; \
 	if (!is_##vt(p)) { return throw_error(q, p, "type_error", #vt); }
 
 #define GET_FIRST_RAW_ARG0(p,vt,p0) \
 	__attribute__((unused)) cell *p = get_first_raw_arg0(q,p0); \
-	__attribute__((unused)) idx_t p##_ctx = q->st.curr_frame; \
+	__attribute__((unused)) pl_idx_t p##_ctx = q->st.curr_frame; \
 	if (!is_##vt(p)) { return throw_error(q, p, "type_error", #vt); }
 
 #define GET_NEXT_ARG(p,vt) \
 	__attribute__((unused)) cell *p = get_next_arg(q); \
-	__attribute__((unused)) idx_t p##_ctx = q->latest_ctx; \
+	__attribute__((unused)) pl_idx_t p##_ctx = q->latest_ctx; \
 	if (!is_##vt(p)) { return throw_error(q, p, "type_error", #vt); }
 
 #define REGET_NEXT_ARG(p,vt) \
@@ -112,7 +112,7 @@ inline static cell *deref(query *q, cell *c, idx_t c_ctx)
 
 #define GET_NEXT_RAW_ARG(p,vt) \
 	__attribute__((unused)) cell *p = get_next_raw_arg(q); \
-	__attribute__((unused)) idx_t p##_ctx = q->st.curr_frame; \
+	__attribute__((unused)) pl_idx_t p##_ctx = q->st.curr_frame; \
 	if (!is_##vt(p)) { return throw_error(q, p, "type_error", #vt); }
 
 inline static cell *get_first_arg(query *q)
@@ -163,11 +163,11 @@ inline static cell *get_raw_arg(const query *q, int n)
 
 #define unify(q,p1,p1_ctx,p2,p2_ctx) unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0)
 
-extern void make_int(cell *tmp, int_t v);
+extern void make_int(cell *tmp, pl_int_t v);
 extern void make_real(cell *tmp, double v);
 extern void make_call(query *q, cell *tmp);
 extern void make_end(cell *tmp);
-extern void make_structure(cell *tmp, idx_t offset, void *fn, unsigned arity, idx_t extra_cells);
+extern void make_structure(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t extra_cells);
 
 extern USE_RESULT pl_status fn_iso_add_2(query *q);
 extern USE_RESULT pl_status fn_local_cut_0(query *q);

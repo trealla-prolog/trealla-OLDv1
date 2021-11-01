@@ -45,9 +45,9 @@ cell *init_tmp_heap(query* q)
 	return q->tmp_heap;
 }
 
-cell *alloc_on_tmp(query *q, idx_t nbr_cells)
+cell *alloc_on_tmp(query *q, pl_idx_t nbr_cells)
 {
-	idx_t new_size = q->tmphp + nbr_cells;
+	pl_idx_t new_size = q->tmphp + nbr_cells;
 
 	if (new_size >= q->tmph_size) {
 		size_t elements = alloc_grow((void**)&q->tmp_heap, sizeof(cell), new_size, (new_size*3)/2);
@@ -66,7 +66,7 @@ cell *alloc_on_tmp(query *q, idx_t nbr_cells)
 // When more space is need allocate a new heap and keep them in the
 // arena list. Backtracking will garbage collect and free as needed.
 
-cell *alloc_on_heap(query *q, idx_t nbr_cells)
+cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 {
 	if (!q->arenas) {
 		if (q->h_size < nbr_cells)
@@ -109,14 +109,14 @@ cell *alloc_on_heap(query *q, idx_t nbr_cells)
 	return c;
 }
 
-static cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth, bool nonlocals_only)
+static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth, bool nonlocals_only)
 {
 	if (depth >= MAX_DEPTH) {
 		q->cycle_error = true;
 		return ERR_CYCLE_CELL;
 	}
 
-	const idx_t save_idx = tmp_heap_used(q);
+	const pl_idx_t save_idx = tmp_heap_used(q);
 	p1 = deref(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
 
@@ -133,7 +133,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth,
 
 		const frame *g = GET_FRAME(p1_ctx);
 		const slot *e = GET_SLOT(g, p1->var_nbr);
-		const idx_t slot_nbr = e - q->slots;
+		const pl_idx_t slot_nbr = e - q->slots;
 
 		for (size_t i = 0; i < q->st.m->pl->tab_idx; i++) {
 			if (q->st.m->pl->tab1[i] == slot_nbr) {
@@ -179,7 +179,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth,
 	return tmp;
 }
 
-cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
+cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
 {
 	if (!init_tmp_heap(q))
 		return NULL;
@@ -205,7 +205,7 @@ cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, bo
 
 	cell *c = rec;
 
-	for (idx_t i = 0; i < rec->nbr_cells; i++, c++) {
+	for (pl_idx_t i = 0; i < rec->nbr_cells; i++, c++) {
 		if (is_variable(c) && is_fresh(c) && c->attrs) {
 			slot *e = GET_SLOT(g, c->var_nbr);
 			e->c.attrs = c->attrs;
@@ -216,7 +216,7 @@ cell *deep_copy_to_tmp(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, bo
 	return q->tmp_heap;
 }
 
-cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
+cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
 {
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, nonlocals_only, copy_attrs);
 	if (!tmp || (tmp == ERR_CYCLE_CELL)) return tmp;
@@ -226,7 +226,7 @@ cell *deep_copy_to_heap(query *q, cell *p1, idx_t p1_ctx, bool nonlocals_only, b
 	return tmp2;
 }
 
-cell *do_deep_copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t suffix, bool nonlocals_only, bool copy_attrs, idx_t *nbr_cells)
+cell *do_deep_copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t suffix, bool nonlocals_only, bool copy_attrs, pl_idx_t *nbr_cells)
 {
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, nonlocals_only, copy_attrs);
 	if (!tmp || (tmp == ERR_CYCLE_CELL)) return tmp;
@@ -247,14 +247,14 @@ cell *do_deep_copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t 
 	return tmp2;
 }
 
-static cell *deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth)
+static cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 {
 	if (depth >= 1000000) {
 		q->cycle_error = true;
 		return ERR_CYCLE_CELL;
 	}
 
-	idx_t save_idx = tmp_heap_used(q);
+	pl_idx_t save_idx = tmp_heap_used(q);
 	p1 = deref(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
 	cell *tmp = alloc_on_tmp(q, 1);
@@ -279,7 +279,7 @@ static cell *deep_clone2_to_tmp(query *q, cell *p1, idx_t p1_ctx, unsigned depth
 	return tmp;
 }
 
-cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx)
+cell *deep_clone_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	if (!init_tmp_heap(q))
 		return NULL;
@@ -290,7 +290,7 @@ cell *deep_clone_to_tmp(query *q, cell *p1, idx_t p1_ctx)
 	return q->tmp_heap;
 }
 
-cell *deep_clone_to_heap(query *q, cell *p1, idx_t p1_ctx)
+cell *deep_clone_to_heap(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	p1 = deep_clone_to_tmp(q, p1, p1_ctx);
 	if (!p1 || (p1 == ERR_CYCLE_CELL)) return p1;
@@ -314,9 +314,9 @@ cell *clone_to_tmp(query *q, cell *p1)
 	return clone2_to_tmp(q, p1);
 }
 
-cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix)
+cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)
 {
-	idx_t nbr_cells = p1->nbr_cells;
+	pl_idx_t nbr_cells = p1->nbr_cells;
 	cell *tmp = alloc_on_heap(q, (prefix?1:0)+nbr_cells+suffix);
 	ensure(tmp);
 
@@ -332,9 +332,9 @@ cell *clone_to_heap(query *q, bool prefix, cell *p1, idx_t suffix)
 	return tmp;
 }
 
-cell *copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t suffix)
+cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t suffix)
 {
-	idx_t nbr_cells = p1->nbr_cells;
+	pl_idx_t nbr_cells = p1->nbr_cells;
 	cell *tmp = alloc_on_heap(q, (prefix?1:0)+nbr_cells+suffix);
 	ensure(tmp);
 
@@ -351,7 +351,7 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t suffix)
 	q->st.m->pl->varno = g->nbr_vars;
 	q->st.m->pl->tab_idx = 0;
 
-	for (idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
+	for (pl_idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
 		*dst = *src;
 		share_cell(src);
 
@@ -359,7 +359,7 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, idx_t p1_ctx, idx_t suffix)
 			continue;
 
 		slot *e = GET_SLOT(g, src->var_nbr);
-		idx_t slot_nbr = e - q->slots;
+		pl_idx_t slot_nbr = e - q->slots;
 		int found = 0;
 
 		for (size_t i = 0; i < q->st.m->pl->tab_idx; i++) {
@@ -409,7 +409,7 @@ cell *alloc_on_queuen(query *q, int qnbr, const cell *c)
 
 void fix_list(cell *c)
 {
-	idx_t cnt = c->nbr_cells;
+	pl_idx_t cnt = c->nbr_cells;
 
 	while (is_iso_list(c)) {
 		c->nbr_cells = cnt;
@@ -450,7 +450,7 @@ USE_RESULT cell *end_list(query *q)
 	tmp->nbr_cells = 1;
 	tmp->val_off = g_nil_s;
 	tmp->arity = tmp->flags = 0;
-	idx_t nbr_cells = tmp_heap_used(q);
+	pl_idx_t nbr_cells = tmp_heap_used(q);
 
 	tmp = alloc_on_heap(q, nbr_cells);
 	if (!tmp) return NULL;
@@ -463,13 +463,13 @@ USE_RESULT cell *end_list(query *q)
 bool search_tmp_list(query *q, cell *v)
 {
 	cell *tmp = get_tmp_heap(q, 0);
-	idx_t nbr_cells = tmp_heap_used(q);
+	pl_idx_t nbr_cells = tmp_heap_used(q);
 
 
 	if (!tmp || !tmp_heap_used(q))
 		return false;
 
-	for (idx_t i = 0; i < nbr_cells; i++, tmp++) {
+	for (pl_idx_t i = 0; i < nbr_cells; i++, tmp++) {
 		if (tmp->var_nbr == v->var_nbr)
 			return true;
 	}
