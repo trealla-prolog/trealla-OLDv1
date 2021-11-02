@@ -979,7 +979,7 @@ bool unload_file(module *m, const char *filename)
 
 	for (predicate *pr = m->head; pr; pr = pr->next) {
 		for (clause *cl = pr->head; cl; cl = cl->next) {
-			if (!strcmp(cl->filename, filename)) {
+			if (cl->filename && !strcmp(cl->filename, filename)) {
 				if (!retract_from_db(m, cl))
 					continue;
 

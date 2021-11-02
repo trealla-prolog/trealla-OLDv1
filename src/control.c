@@ -642,6 +642,14 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 			snprintf(functor, sizeof(functor), "%s", GET_STR(q, goal));
 	}
 
+	int extra = 0;
+	const char *eptr = expected;
+
+	while ((eptr = strchr(eptr, ',')) != NULL) {
+		extra += 1;
+		eptr++;
+	}
+
 	cell *tmp;
 
 	if (is_variable(c)) {
@@ -686,11 +694,6 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 		make_int(tmp+nbr_cells, goal->arity);
 	} else if (!strcmp(err_type, "permission_error") && is_structure(c) && slicecmp2(GET_STR(q, c), LEN_STR(q, c), "/") && is_variable(c+1)) {
 		//snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),(%s)/%u).", err_type, expected, tmpbuf, functor, goal->arity);
-		int extra = 0;
-
-		if (strchr(expected, ','))
-			extra += 1;
-
 		tmp = alloc_on_heap(q, 9+extra);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
@@ -700,11 +703,19 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 		if (!extra)
 			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
 		else {
-			char tmpbuf[1024];
+			char tmpbuf[1024*8];
 			strcpy(tmpbuf, expected);
-			*strchr(tmpbuf, ',') = '\0';
-			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, tmpbuf));
-			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, strchr(expected, ',')+1));
+			const char *ptr = tmpbuf;
+			char *ptr2 = strchr(ptr, ',');
+			if (*ptr2) *ptr2++ = '\0';
+
+			while (ptr2) {
+				make_literal(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
+				ptr = ptr2;
+				ptr2 = strchr(ptr, ',');
+			}
+
+			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
 		}
 
 		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
@@ -761,11 +772,6 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 		make_int(tmp+nbr_cells, goal->arity);
 	} else {
 		//snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, functor, goal->arity);
-		int extra = 0;
-
-		if (strchr(expected, ','))
-			extra += 1;
-
 		tmp = alloc_on_heap(q, 7+(c->nbr_cells-1)+extra);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
@@ -775,11 +781,19 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 		if (!extra)
 			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
 		else {
-			char tmpbuf[1024];
+			char tmpbuf[1024*8];
 			strcpy(tmpbuf, expected);
-			*strchr(tmpbuf, ',') = '\0';
-			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, tmpbuf));
-			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, strchr(expected, ',')+1));
+			const char *ptr = tmpbuf;
+			char *ptr2 = strchr(ptr, ',');
+			if (*ptr2) *ptr2++ = '\0';
+
+			while (ptr2) {
+				make_literal(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
+				ptr = ptr2;
+				ptr2 = strchr(ptr, ',');
+			}
+
+			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
 		}
 
 		nbr_cells += copy_cells(tmp+nbr_cells, c, c->nbr_cells);
