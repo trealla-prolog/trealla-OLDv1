@@ -673,12 +673,13 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 		pl_idx_t nbr_cells = 0;
 		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 8);
 		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2, 4);
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
 		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		tmp[nbr_cells] = *c;
 		if (is_callable(c)) { tmp[nbr_cells].arity = 0; tmp[nbr_cells].nbr_cells = 1; CLR_OP(tmp+nbr_cells); }
 		nbr_cells++;
-		make_int(tmp+nbr_cells, goal->arity);
+		make_int(tmp+nbr_cells++, c->arity);
 		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
