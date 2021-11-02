@@ -610,37 +610,12 @@ USE_RESULT pl_status fn_iso_throw_1(query *q)
 	return fn_iso_catch_3(q);
 }
 
-// TODO: rewrite error throwing not to do printing/parsing. Each
-// type of *_error should have it's own function call...
-
 pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expected, cell *goal)
 {
 	if (g_tpl_interrupt)
 		return pl_failure;
 
 	q->did_throw = true;
-	pl_idx_t c_ctx = q->st.curr_frame;
-	q->quoted = 1;
-	ssize_t len = 0;
-	bool running = !is_cyclic_term(q, c, c_ctx);
-
-	len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
-
-	char *dst = malloc(len+1+1024);
-	may_ptr_error(dst);
-	int off = 0;
-
-	if (q->st.m != q->st.m->pl->user_m)
-		off += sprintf(dst, "%s:", q->st.m->name);
-
-	len = print_term_to_buf(q, dst+off, len+1, c, c_ctx, running, false, 0) + off;
-
-	size_t len2 = (len * 2) + strlen(err_type) + strlen(expected);
-	if (!is_variable(c)) len2 += LEN_STR(q, goal);
-	len2 += 1024;
-	char *dst2 = malloc(len2+1);
-	may_ptr_error(dst2);
-	q->quoted = 0;
 
 	if (!strncmp(expected, "iso_", 4))
 		expected += 4;
@@ -658,6 +633,7 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 
 	expected = tmpbuf;
 	char functor[1024];
+	functor[0] = '\0';
 
 	if (!is_variable(c)) {
 		if (needs_quoting(q->st.m, GET_STR(q, goal), LEN_STR(q, goal))) {
@@ -666,79 +642,134 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 			snprintf(functor, sizeof(functor), "%s", GET_STR(q, goal));
 	}
 
+	cell *tmp;
+
 	if (is_variable(c)) {
 		err_type = "instantiation_error";
-		snprintf(dst2, len2+1, "error(%s,%s).", err_type, expected);
+		//snprintf(dst2, len2+1, "error(%s,%s).", err_type, expected);
+		tmp = alloc_on_heap(q, 3);
+		may_ptr_error(tmp);
+		pl_idx_t nbr_cells = 0;
+		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 2);
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, err_type));
+		make_literal(tmp+nbr_cells, index_from_pool(q->pl, expected));
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "variable")) {
-		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", "uninstantiation_error", dst, functor, goal->arity);
+		err_type = "uninstantiation_error";
+		//snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, dst, functor, goal->arity);
+		tmp = alloc_on_heap(q, 6+(c->nbr_cells-1));
+		may_ptr_error(tmp);
+		pl_idx_t nbr_cells = 0;
+		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 5+(c->nbr_cells-1));
+		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 1, 1+(c->nbr_cells-1));
+		nbr_cells += copy_cells(tmp+nbr_cells, c, c->nbr_cells);
+		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
+		make_int(tmp+nbr_cells, goal->arity);
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "evaluable")) {
-		snprintf(dst2, len2+1, "error(%s(%s,('%s')/%u),(%s)/%u).", err_type, expected, is_callable(c)?GET_STR(q, c):dst, c->arity, functor, goal->arity);
-	} else if (!strcmp(err_type, "permission_error")
-		&& is_structure(c) && slicecmp2(GET_STR(q, c), LEN_STR(q, c), "/") && is_variable(c+1)) {
+		//snprintf(dst2, len2+1, "error(%s(%s,('%s')/%u),(%s)/%u).", err_type, expected, is_callable(c)?GET_STR(q, c):dst, c->arity, functor, goal->arity);
+		tmp = alloc_on_heap(q, 9);
+		may_ptr_error(tmp);
+		pl_idx_t nbr_cells = 0;
+		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 8);
+		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2, 4);
+		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
+		tmp[nbr_cells] = *c;
+		if (is_callable(c)) { tmp[nbr_cells].arity = 0; tmp[nbr_cells].nbr_cells = 1; CLR_OP(tmp+nbr_cells); }
+		nbr_cells++;
+		make_int(tmp+nbr_cells, goal->arity);
+		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
+		make_int(tmp+nbr_cells, goal->arity);
+	} else if (!strcmp(err_type, "permission_error") && is_structure(c) && slicecmp2(GET_STR(q, c), LEN_STR(q, c), "/") && is_variable(c+1)) {
 		char tmpbuf[1024];
 		snprintf(tmpbuf, sizeof(tmpbuf), "('%s')/%u\n", GET_STR(q, c), (unsigned)c->arity);
-		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, tmpbuf, functor, goal->arity);
+		//snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, tmpbuf, functor, goal->arity);
+		tmp = alloc_on_heap(q, 7);
+		may_ptr_error(tmp);
+		pl_idx_t nbr_cells = 0;
+		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 6);
+		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2, 2);
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, tmpbuf));
+		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
+		make_int(tmp+nbr_cells, goal->arity);
 	} else if (!strcmp(err_type, "instantiation_error")) {
-		snprintf(dst2, len2+1, "error(%s,(%s)/%u).", err_type, functor, goal->arity);
+		//snprintf(dst2, len2+1, "error(%s,(%s)/%u).", err_type, functor, goal->arity);
+		tmp = alloc_on_heap(q, 5);
+		may_ptr_error(tmp);
+		pl_idx_t nbr_cells = 0;
+		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 4);
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, err_type));
+		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
+		make_int(tmp+nbr_cells, goal->arity);
 	} else if (!strcmp(err_type, "existence_error") && !strcmp(expected, "procedure")) {
-		char tmpbuf[1024];
-		snprintf(tmpbuf, sizeof(tmpbuf), "('%s')/%u\n", GET_STR(q, c), (unsigned)c->arity);
-		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, tmpbuf, functor, goal->arity);
-	} else if (!strcmp(err_type, "representation_error")) {
-		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, goal->arity);
-	} else if (!strcmp(err_type, "evaluation_error")) {
-		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, goal->arity);
-	} else if (!strcmp(err_type, "syntax_error")) {
-		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, goal->arity);
-	} else if (!strcmp(err_type, "resource_error")) {
-		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, goal->arity);
+		//snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),(%s)/%u).", err_type, expected, tmpbuf, functor, goal->arity);
+		tmp = alloc_on_heap(q, 9);
+		may_ptr_error(tmp);
+		pl_idx_t nbr_cells = 0;
+		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 8);
+		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2, 4);
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
+		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, GET_STR(q, c)));
+		make_int(tmp+nbr_cells++, c->arity);
+		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
+		make_int(tmp+nbr_cells, goal->arity);
+	} else if (!strcmp(err_type, "representation_error")
+		|| !strcmp(err_type, "evaluation_error")
+		|| !strcmp(err_type, "syntax_error")
+		|| !strcmp(err_type, "resource_error")) {
+		//snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, goal->arity);
+		tmp = alloc_on_heap(q, 6);
+		may_ptr_error(tmp);
+		pl_idx_t nbr_cells = 0;
+		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 5);
+		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 1, 1);
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
+		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
+		make_int(tmp+nbr_cells, goal->arity);
 	} else {
+		//snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, functor, goal->arity);
+		tmp = alloc_on_heap(q, 7+(c->nbr_cells-1));
+		may_ptr_error(tmp);
+		pl_idx_t nbr_cells = 0;
+		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 6+(c->nbr_cells-1));
+		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2, 2+(c->nbr_cells-1));
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
+		nbr_cells += copy_cells(tmp+nbr_cells, c, c->nbr_cells);
+		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
+
 		if (!slicecmp2(GET_STR(q, goal), LEN_STR(q, goal), "$call"))
-			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, "call", goal->arity);
+			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, "call"));
 		else if (!slicecmp2(GET_STR(q, goal), LEN_STR(q, goal), "$catch"))
-			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, "catch", goal->arity);
+			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, "catch"));
 		else
-			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, functor, goal->arity);
-	}
+			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 
-	//printf("*** %s\n", dst2);
-
-	parser *p = create_parser(q->st.m);
-	may_ptr_error(p);
-	p->srcptr = dst2;
-	frame *g = GET_CURR_FRAME();
-	p->read_term = g->nbr_vars;
-	tokenize(p, false, false);
-
-	if (p->nbr_vars) {
-		if (!create_vars(q, p->nbr_vars)) {
-			destroy_parser(p);
-			free(dst2);
-			free(dst);
-			return throw_error(q, c, "resource_error", "too_many_vars");
-		}
-	}
-
-	cell *tmp = deep_copy_to_tmp(q, p->r->cells, q->st.curr_frame, false, false);
-	may_ptr_error(tmp);
-	if (tmp == ERR_CYCLE_CELL) {
-		destroy_parser(p);
-		free(dst2);
-		free(dst);
-		return throw_error(q, c, "resource_error", "cyclic_term");
+		make_int(tmp+nbr_cells, goal->arity);
 	}
 
 	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
-	may_ptr_error(e, destroy_parser(p));
+	may_ptr_error(e);
 	safe_copy_cells(e, tmp, tmp->nbr_cells);
-	destroy_parser(p);
 	pl_status ok = pl_failure;
 
 	if (find_exception_handler(q, e))
 		ok = fn_iso_catch_3(q);
 
-	free(dst2);
-	free(dst);
 	return ok;
 }
 
