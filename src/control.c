@@ -531,6 +531,7 @@ USE_RESULT pl_status fn_sys_catch2_3(query *q)
 
 USE_RESULT bool find_exception_handler(query *q, cell *e)
 {
+	pl_idx_t e_ctx = q->st.curr_frame;
 	q->exception = e;
 
 	while (retry_choice(q)) {
@@ -545,7 +546,7 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 		if (!ch->catchme_retry)
 			continue;
 
-		cell *tmp = copy_to_heap(q, false, e, q->st.curr_frame, 0);
+		cell *tmp = copy_to_heap(q, false, e, e_ctx, 0);
 		may_ptr_error(tmp);
 		cell *e2 = malloc(sizeof(cell) * tmp->nbr_cells);
 		may_ptr_error(e2);
@@ -568,11 +569,11 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 
 	fprintf(stdout, "uncaught exception: ");
 
-	if (is_cyclic_term(q, e, q->st.curr_frame)) {
+	if (is_cyclic_term(q, e, e_ctx)) {
 		fprintf(stdout, " CYCLIC_TERM\n");
 	} else {
 		q->quoted = 1;
-		print_term(q, stdout, e, q->st.curr_frame, 1);
+		print_term(q, stdout, e, e_ctx, 1);
 		fprintf(stdout, "\n");
 		q->quoted = 0;
 	}
