@@ -746,12 +746,27 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 		make_int(tmp+nbr_cells, goal->arity);
 	} else {
 		//snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, functor, goal->arity);
-		tmp = alloc_on_heap(q, 7+(c->nbr_cells-1));
+		int extra = 0;
+
+		if (strchr(expected, ','))
+			extra += 1;
+
+		tmp = alloc_on_heap(q, 7+(c->nbr_cells-1)+extra);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
-		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 6+(c->nbr_cells-1));
-		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2, 2+(c->nbr_cells-1));
-		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
+		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 6+(c->nbr_cells-1)+extra);
+		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2+extra, 2+(c->nbr_cells-1)+extra);
+
+		if (!extra)
+			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
+		else {
+			char tmpbuf[1024];
+			strcpy(tmpbuf, expected);
+			*strchr(tmpbuf, ',') = '\0';
+			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, tmpbuf));
+			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, strchr(expected, ',')+1));
+		}
+
 		nbr_cells += copy_cells(tmp+nbr_cells, c, c->nbr_cells);
 		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
