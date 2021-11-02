@@ -685,6 +685,7 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		tmp[nbr_cells] = *c;
+		share_cell(c);
 		if (is_callable(c)) { tmp[nbr_cells].arity = 0; tmp[nbr_cells].nbr_cells = 1; CLR_OP(tmp+nbr_cells); }
 		nbr_cells++;
 		make_int(tmp+nbr_cells++, c->arity);
@@ -721,6 +722,7 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		tmp[nbr_cells] = *c;
+		share_cell(c);
 		if (is_callable(c)) { tmp[nbr_cells].arity = 0; tmp[nbr_cells].nbr_cells = 1; CLR_OP(tmp+nbr_cells); }
 		nbr_cells++;
 		make_int(tmp+nbr_cells++, c->arity);
@@ -796,7 +798,7 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
 		}
 
-		nbr_cells += copy_cells(tmp+nbr_cells, c, c->nbr_cells);
+		nbr_cells += safe_copy_cells(tmp+nbr_cells, c, c->nbr_cells);
 		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 
