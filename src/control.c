@@ -667,7 +667,7 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, goal->arity);
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "evaluable")) {
-		//snprintf(dst2, len2+1, "error(%s(%s,('%s')/%u),(%s)/%u).", err_type, expected, is_callable(c)?GET_STR(q, c):dst, c->arity, functor, goal->arity);
+		//snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),(%s)/%u).", err_type, expected, is_callable(c)?GET_STR(q, c):dst, c->arity, functor, goal->arity);
 		tmp = alloc_on_heap(q, 9);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
@@ -685,16 +685,19 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, goal->arity);
 	} else if (!strcmp(err_type, "permission_error") && is_structure(c) && slicecmp2(GET_STR(q, c), LEN_STR(q, c), "/") && is_variable(c+1)) {
-		char tmpbuf[1024];
-		snprintf(tmpbuf, sizeof(tmpbuf), "('%s')/%u\n", GET_STR(q, c), (unsigned)c->arity);
-		//snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, tmpbuf, functor, goal->arity);
-		tmp = alloc_on_heap(q, 7);
+		//snprintf(dst2, len2+1, "error(%s(%s,(%s)/%u),(%s)/%u).", err_type, expected, tmpbuf, functor, goal->arity);
+		tmp = alloc_on_heap(q, 9);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
-		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 6);
-		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2, 2);
+		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 8);
+		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2, 4);
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
-		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, tmpbuf));
+		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
+		tmp[nbr_cells] = *c;
+		if (is_callable(c)) { tmp[nbr_cells].arity = 0; tmp[nbr_cells].nbr_cells = 1; CLR_OP(tmp+nbr_cells); }
+		nbr_cells++;
+		make_int(tmp+nbr_cells++, c->arity);
 		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));

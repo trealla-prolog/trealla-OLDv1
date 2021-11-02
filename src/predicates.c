@@ -2368,7 +2368,7 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 
 	if (!str->fp) {
 		if ((errno == EACCES) || (strcmp(str->mode, "read") && (errno == EROFS)))
-			return throw_error(q, p1, "permission_error", "open, source_sink");
+			return throw_error(q, p1, "permission_error", "open,source_sink");
 		else
 			return throw_error(q, p1, "existence_error", "source_sink");
 	}
@@ -2533,7 +2533,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 	if (!str->fp) {
 		if ((errno == EACCES) || (strcmp(str->mode, "read") && (errno == EROFS)))
-			return throw_error(q, p1, "permission_error", "open, source_sink");
+			return throw_error(q, p1, "permission_error", "open,source_sink");
 		else
 			return throw_error(q, p1, "existence_error", "source_sink");
 	}
