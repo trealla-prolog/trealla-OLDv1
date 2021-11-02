@@ -669,39 +669,29 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 	if (is_variable(c)) {
 		err_type = "instantiation_error";
 		snprintf(dst2, len2+1, "error(%s,%s).", err_type, expected);
-
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "variable")) {
 		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", "uninstantiation_error", dst, functor, goal->arity);
-
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "evaluable")) {
 		snprintf(dst2, len2+1, "error(%s(%s,('%s')/%u),(%s)/%u).", err_type, expected, is_callable(c)?GET_STR(q, c):dst, c->arity, functor, goal->arity);
-
 	} else if (!strcmp(err_type, "permission_error")
 		&& is_structure(c) && slicecmp2(GET_STR(q, c), LEN_STR(q, c), "/") && is_variable(c+1)) {
 		char tmpbuf[1024];
 		snprintf(tmpbuf, sizeof(tmpbuf), "('%s')/%u\n", GET_STR(q, c), (unsigned)c->arity);
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, tmpbuf, functor, goal->arity);
-
 	} else if (!strcmp(err_type, "instantiation_error")) {
 		snprintf(dst2, len2+1, "error(%s,(%s)/%u).", err_type, functor, goal->arity);
-
 	} else if (!strcmp(err_type, "existence_error") && !strcmp(expected, "procedure")) {
 		char tmpbuf[1024];
 		snprintf(tmpbuf, sizeof(tmpbuf), "('%s')/%u\n", GET_STR(q, c), (unsigned)c->arity);
 		snprintf(dst2, len2+1, "error(%s(%s,%s),(%s)/%u).", err_type, expected, tmpbuf, functor, goal->arity);
-
 	} else if (!strcmp(err_type, "representation_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, goal->arity);
-
 	} else if (!strcmp(err_type, "evaluation_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, goal->arity);
-
 	} else if (!strcmp(err_type, "syntax_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, goal->arity);
-
 	} else if (!strcmp(err_type, "resource_error")) {
 		snprintf(dst2, len2+1, "error(%s(%s),(%s)/%u).", err_type, expected, functor, goal->arity);
-
 	} else {
 		if (!slicecmp2(GET_STR(q, goal), LEN_STR(q, goal), "$call"))
 			snprintf(dst2, len2+1, "error(%s(%s,(%s)),(%s)/%u).", err_type, expected, dst, "call", goal->arity);
