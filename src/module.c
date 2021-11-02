@@ -867,6 +867,7 @@ bool retract_from_db(module *m, clause *cl)
 
 	cl->owner->cnt--;
 	cl->r.ugen_erased = ++m->pl->ugen;
+	cl->filename = NULL;
 	return true;
 }
 
@@ -940,7 +941,7 @@ module *load_text(module *m, const char *src, const char *filename)
 	}
 
 	module *save_m = p->m;
-	free(p->m->filename);
+	//free(p->m->filename);
 	p->m->filename = save_filename;
 	destroy_parser(p);
 	return save_m;
@@ -979,7 +980,8 @@ bool unload_file(module *m, const char *filename)
 
 	for (predicate *pr = m->head; pr; pr = pr->next) {
 		for (clause *cl = pr->head; cl; cl = cl->next) {
-			if (cl->filename && !strcmp(cl->filename, filename)) {
+			if (cl->filename && !cl->dirty
+				&& !strcmp(cl->filename, filename)) {
 				if (!retract_from_db(m, cl))
 					continue;
 
