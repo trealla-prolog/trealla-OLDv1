@@ -664,8 +664,8 @@ pl_status throw_error3(query *q, cell *c, __attribute__((unused)) pl_idx_t c_ctx
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, err_type));
 		make_literal(tmp+nbr_cells, index_from_pool(q->pl, expected));
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "variable")) {
-		//err_type = "uninstantiation_error";
-		printf("error(%s(%s),(%s)/%u).\n", err_type, GET_STR(q, c), functor, goal->arity);
+		err_type = "uninstantiation_error";
+		//printf("error(%s(%s),(%s)/%u).\n", err_type, GET_STR(q, c), functor, goal->arity);
 		tmp = alloc_on_heap(q, 6+(c->nbr_cells-1));
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
