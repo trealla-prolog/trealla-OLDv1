@@ -617,6 +617,7 @@ pl_status throw_error3(query *q, cell *c, __attribute__((unused)) pl_idx_t c_ctx
 		return pl_failure;
 
 	q->did_throw = true;
+	q->quoted = 0;
 
 	if (!strncmp(expected, "iso_", 4))
 		expected += 4;
