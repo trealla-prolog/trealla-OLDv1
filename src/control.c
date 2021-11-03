@@ -93,12 +93,12 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 	pl_idx_t p1_ctx = q->latest_ctx;
 
 	if (!is_callable(p1))
-		return throw_error(q, p1, "type_error", "callable");
+		return throw_error(q, p1, p1_ctx, "type_error", "callable");
 
 	cell *tmp2;
 
 	if ((tmp2 = check_body_callable(q->st.m->p, p1)) != NULL)
-		return throw_error(q, p1, "type_error", "callable");
+		return throw_error(q, p1, p1_ctx, "type_error", "callable");
 
 	cell *tmp;
 
@@ -124,7 +124,7 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
 
 	if (!p0 || (p0 == ERR_CYCLE_CELL))
-		return throw_error(q, q->st.curr_cell, "resource_error", "too_many_vars");
+		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "too_many_vars");
 
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 
@@ -162,7 +162,7 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 		SET_OP(tmp2, specifier);
 
 	if (check_body_callable(q->st.m->p, tmp2) != NULL)
-		return throw_error(q, tmp2, "type_error", "callable");
+		return throw_error(q, tmp2, q->st.curr_frame, "type_error", "callable");
 
 	cell *tmp = clone_to_heap(q, true, tmp2, 2);
 	pl_idx_t nbr_cells = 1+tmp2->nbr_cells;
@@ -178,7 +178,7 @@ USE_RESULT pl_status fn_sys_call_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 
 	if (check_body_callable(q->st.m->p, p1) != NULL)
-		return throw_error(q, p1, "type_error", "callable");
+		return throw_error(q, p1, p1_ctx, "type_error", "callable");
 
 	cell *tmp = clone_to_heap(q, true, p1, 1);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
@@ -356,7 +356,7 @@ USE_RESULT pl_status fn_iso_once_1(query *q)
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
 
 	if (!p0 || (p0 == ERR_CYCLE_CELL))
-		return throw_error(q, q->st.curr_cell, "resource_error", "too_many_vars");
+		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "too_many_vars");
 
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
@@ -378,7 +378,7 @@ USE_RESULT pl_status fn_ignore_1(query *q)
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
 
 	if (!p0 || (p0 == ERR_CYCLE_CELL))
-		return throw_error(q, q->st.curr_cell, "resource_error", "too_many_vars");
+		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "too_many_vars");
 
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
@@ -441,7 +441,7 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
 
 	if (!p0 || (p0 == ERR_CYCLE_CELL))
-		return throw_error(q, q->st.curr_cell, "resource_error", "too_many_vars");
+		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "too_many_vars");
 
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 
@@ -488,7 +488,7 @@ USE_RESULT pl_status fn_sys_catch2_3(query *q)
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
 
 	if (!p0 || (p0 == ERR_CYCLE_CELL))
-		return throw_error(q, q->st.curr_cell, "resource_error", "too_many_vars");
+		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "too_many_vars");
 
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 
@@ -611,7 +611,7 @@ USE_RESULT pl_status fn_iso_throw_1(query *q)
 	return fn_iso_catch_3(q);
 }
 
-pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expected, cell *goal)
+pl_status throw_error3(query *q, cell *c, __attribute__((unused)) pl_idx_t c_ctx, const char *err_type, const char *expected, cell *goal)
 {
 	if (g_tpl_interrupt)
 		return pl_failure;
@@ -813,9 +813,11 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 		make_int(tmp+nbr_cells, goal->arity);
 	}
 
-	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
+	cell *tmp2 = deep_copy_to_heap(q, tmp, q->st.curr_frame, false, false);
+	unify(q, tmp2, q->st.curr_frame, tmp, q->st.curr_frame);
+	cell *e = malloc(sizeof(cell) * tmp2->nbr_cells);
 	may_ptr_error(e);
-	safe_copy_cells(e, tmp, tmp->nbr_cells);
+	safe_copy_cells(e, tmp2, tmp2->nbr_cells);
 	pl_status ok = pl_failure;
 
 	if (find_exception_handler(q, e))
@@ -824,16 +826,16 @@ pl_status throw_error3(query *q, cell *c, const char *err_type, const char *expe
 	return ok;
 }
 
-pl_status throw_error2(query *q, cell *c, const char *err_type, const char *expected, cell *goal)
+pl_status throw_error2(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected, cell *goal)
 {
 	cell tmp;
 	tmp = goal[1];
 	tmp.arity = get_smallint(&goal[2]);
-	return throw_error3(q, c, err_type, expected, &tmp);
+	return throw_error3(q, c, c_ctx, err_type, expected, &tmp);
 }
 
-pl_status throw_error(query *q, cell *c, const char *err_type, const char *expected)
+pl_status throw_error(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected)
 {
-	return throw_error3(q, c, err_type, expected, q->st.curr_cell);
+	return throw_error3(q, c, c_ctx, err_type, expected, q->st.curr_cell);
 }
 

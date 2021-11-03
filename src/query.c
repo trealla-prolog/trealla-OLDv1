@@ -1330,14 +1330,14 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 			bool found = false;
 
 			if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found, NULL), found)
-				return throw_error(q, head, "permission_error", "modify,static_procedure");
+				return throw_error(q, head, q->latest_ctx, "permission_error", "modify,static_procedure");
 
 			q->st.curr_clause2 = NULL;
 			return false;
 		}
 
 		if (!pr->is_dynamic)
-			return throw_error(q, head, "permission_error", "modify,static_procedure");
+			return throw_error(q, head, q->latest_ctx, "permission_error", "modify,static_procedure");
 
 		q->st.curr_clause2 = pr->head;
 		share_predicate(q->st.pr2=pr);
@@ -1426,9 +1426,9 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 
 			if (get_builtin(q->st.m->pl, GET_STR(q, p1), p1->arity, &found, NULL), found) {
 				if (is_retract != DO_CLAUSE)
-					return throw_error(q, p1, "permission_error", "modify,static_procedure");
+					return throw_error(q, p1, p1_ctx, "permission_error", "modify,static_procedure");
 				else
-					return throw_error(q, p1, "permission_error", "access,private_procedure");
+					return throw_error(q, p1, p1_ctx, "permission_error", "access,private_procedure");
 			}
 
 			q->st.curr_clause2 = NULL;
@@ -1437,9 +1437,9 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 
 		if (!pr->is_dynamic) {
 			if (is_retract != DO_CLAUSE)
-				return throw_error(q, p1, "permission_error", "modify,static_procedure");
+				return throw_error(q, p1, p1_ctx, "permission_error", "modify,static_procedure");
 			else
-				return throw_error(q, p1, "permission_error", "access,private_procedure");
+				return throw_error(q, p1, p1_ctx, "permission_error", "access,private_procedure");
 		}
 
 		q->st.curr_clause2 = pr->head;
@@ -1503,7 +1503,7 @@ static USE_RESULT pl_status match_head(query *q)
 			if (!pr) {
 				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(q, c), "initialization")))
 					if (q->st.m->flag.unknown == UNK_ERROR)
-						return throw_error(q, c, "existence_error", "procedure");
+						return throw_error(q, c, q->st.curr_frame, "existence_error", "procedure");
 					else
 						return pl_failure;
 				else
@@ -1858,7 +1858,7 @@ pl_status start(query *q)
 			proceed(q);
 		} else {
 			if (!is_callable(q->st.curr_cell)) {
-				DISCARD_RESULT throw_error(q, q->st.curr_cell, "type_error", "callable");
+				DISCARD_RESULT throw_error(q, q->st.curr_cell, q->st.curr_frame, "type_error", "callable");
 			} else if (match_head(q) != pl_success) {
 				q->retry = QUERY_RETRY;
 				q->tot_retries++;

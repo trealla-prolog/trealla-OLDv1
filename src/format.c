@@ -189,7 +189,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 
 			if (!c || !is_integer(c)) {
 				free(tmpbuf);
-				return throw_error(q, c, "type_error", "integer");
+				return throw_error(q, c, q->st.curr_frame, "type_error", "integer");
 			}
 
 			argval = get_smallint(c);
@@ -318,13 +318,13 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		if (!p2 || !is_list(p2)) {
 			cell tmp;
 			make_literal(&tmp, g_nil_s);
-			return throw_error(q, &tmp, "domain_error", "missing_args");
+			return throw_error(q, &tmp, q->st.curr_frame, "domain_error", "missing_args");
 		}
 
 		cell *c = get_next_cell(q, &fmt2);
 
 		if (!c)
-			return throw_error(q, p2, "domain_error", "missing_args");
+			return throw_error(q, p2, p2_ctx, "domain_error", "missing_args");
 
 		if (ch == 'i')
 			continue;
@@ -335,7 +335,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 
 		if ((ch == 'a') && !is_atom(c)) {
 			free(tmpbuf);
-			return throw_error(q, c, "type_error", "atom");
+			return throw_error(q, c, q->st.curr_frame, "type_error", "atom");
 		}
 
 		switch(ch) {
@@ -368,7 +368,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		case 'c':
 			if (!is_integer(c)) {
 				free(tmpbuf);
-				return throw_error(q, c, "type_error", "integer");
+				return throw_error(q, c, q->st.curr_frame, "type_error", "integer");
 			}
 
 			while (argval-- > 1) {
@@ -385,7 +385,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		case 'E':
 			if (!is_real(c)) {
 				free(tmpbuf);
-				return throw_error(q, c, "type_error", "float");
+				return throw_error(q, c, q->st.curr_frame, "type_error", "float");
 			}
 
 			len = 40;
@@ -409,7 +409,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		case 'G':
 			if (!is_real(c)) {
 				free(tmpbuf);
-				return throw_error(q, c, "type_error", "float");
+				return throw_error(q, c, q->st.curr_frame, "type_error", "float");
 			}
 
 			len = 40;
@@ -432,7 +432,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		case 'f':
 			if (!is_real(c)) {
 				free(tmpbuf);
-				return throw_error(q, c, "type_error", "float");
+				return throw_error(q, c, q->st.curr_frame, "type_error", "float");
 			}
 
 			len = 40;
@@ -448,7 +448,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		case 'I':
 			if (!is_integer(c)) {
 				free(tmpbuf);
-				return throw_error(q, c, "type_error", "integer");
+				return throw_error(q, c, q->st.curr_frame, "type_error", "integer");
 			}
 
 			len = 40;
@@ -459,7 +459,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		case 'd':
 			if (!is_integer(c)) {
 				free(tmpbuf);
-				return throw_error(q, c, "type_error", "integer");
+				return throw_error(q, c, q->st.curr_frame, "type_error", "integer");
 			}
 
 			len = 40;
@@ -470,7 +470,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		case 'D':
 			if (!is_integer(c)) {
 				free(tmpbuf);
-				return throw_error(q, c, "type_error", "integer");
+				return throw_error(q, c, q->st.curr_frame, "type_error", "integer");
 			}
 
 			len = 40;
@@ -481,12 +481,12 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		case 'r':
 			if (!noargval && ((argval < 2) || (argval > 36))) {
 				free(tmpbuf);
-				return throw_error(q, p1, "domain_error", "radix_invalid");
+				return throw_error(q, p1, p1_ctx, "domain_error", "radix_invalid");
 			}
 
 			if (!is_integer(c)) {
 				free(tmpbuf);
-				return throw_error(q, c, "type_error", "integer");
+				return throw_error(q, c, q->st.curr_frame, "type_error", "integer");
 			}
 
 			len = 40;
@@ -497,12 +497,12 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		case 'R':
 			if (!noargval && ((argval < 2) || (argval > 36))) {
 				free(tmpbuf);
-				return throw_error(q, p1, "domain_error", "radix_invalid");
+				return throw_error(q, p1, p1_ctx, "domain_error", "radix_invalid");
 			}
 
 			if (!is_integer(c)) {
 				free(tmpbuf);
-				return throw_error(q, c, "type_error", "integer");
+				return throw_error(q, c, q->st.curr_frame, "type_error", "integer");
 			}
 
 			len = 40;
@@ -537,7 +537,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 
 			if (q->cycle_error) {
 				free(tmpbuf);
-				return throw_error(q, c, "resource_error", "cyclic");
+				return throw_error(q, c, q->st.curr_frame, "resource_error", "cyclic");
             }
 
 			CHECK_BUF(len*2);
@@ -553,7 +553,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 
         default:
 			free(tmpbuf);
-			return throw_error(q, c, "existence_error", "format_charcter");
+			return throw_error(q, c, q->st.curr_frame, "existence_error", "format_charcter");
 		}
 
 		dst += len;
@@ -569,7 +569,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		net_write(tmpbuf, len, str);
 	} else if (is_structure(str) && ((slicecmp2(GET_STR(q, str), LEN_STR(q, str), "atom") && slicecmp2(GET_STR(q, str), LEN_STR(q, str), "chars") && slicecmp2(GET_STR(q, str), LEN_STR(q, str), "string")) || (str->arity > 1) || !is_variable(str+1))) {
 		free(tmpbuf);
-		return throw_error(q, str, "type_error", "structure");
+		return throw_error(q, str, str_ctx, "type_error", "structure");
 	} else if (is_structure(str) && !slicecmp2(GET_STR(q, str), LEN_STR(q, str), "atom")) {
 		cell *c = deref(q, str+1, str_ctx);
 		cell tmp;
@@ -609,7 +609,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		}
 	} else {
 		free(tmpbuf);
-		return throw_error(q, str, "domain_error", "stream_or_alias");
+		return throw_error(q, str, str_ctx, "domain_error", "stream_or_alias");
 	}
 
 	free(tmpbuf);

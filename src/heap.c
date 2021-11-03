@@ -195,7 +195,7 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 
 	if (cnt) {
 		if (!create_vars(q, cnt)) {
-			DISCARD_RESULT throw_error(q, p1, "resource_error", "too_many_vars");
+			DISCARD_RESULT throw_error(q, p1, p1_ctx, "resource_error", "too_many_vars");
 			return NULL;
 		}
 	}
@@ -381,7 +381,7 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t su
 
 	if (q->st.m->pl->varno != g->nbr_vars) {
 		if (!create_vars(q, q->st.m->pl->varno-g->nbr_vars)) {
-			DISCARD_RESULT throw_error(q, p1, "resource_error", "too_many_vars");
+			DISCARD_RESULT throw_error(q, p1, p1_ctx, "resource_error", "too_many_vars");
 			return NULL;
 		}
 	}
