@@ -74,7 +74,7 @@ typedef enum {
 #define MAX_QUEUES 16
 #define MAX_STREAMS 1024
 //#define MAX_DEPTH 9999
-#define MAX_DEPTH 4000			// Clang stack size needs this small
+#define MAX_DEPTH 5000			// Clang stack size needs this small
 #define STREAM_BUFLEN 1024
 
 #define GET_CHOICE(i) (q->choices+(i))
