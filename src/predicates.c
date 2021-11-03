@@ -2887,9 +2887,7 @@ static USE_RESULT pl_status fn_iso_writeq_1(query *q)
 	}
 
 	q->quoted = 1;
-	q->numbervars = true;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
-	q->numbervars = false;
 	q->quoted = 0;
 	return !ferror(str->fp);
 }
@@ -2912,9 +2910,7 @@ static USE_RESULT pl_status fn_iso_writeq_2(query *q)
 	}
 
 	q->quoted = 1;
-	q->numbervars = true;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
-	q->numbervars = false;
 	q->quoted = 0;
 	return !ferror(str->fp);
 }
@@ -3021,7 +3017,7 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 			return false;
 		}
 
-		q->numbervars = !slicecmp2(GET_STR(q, c1), LEN_STR(q, c1), "true");
+		q->nonumbervars = slicecmp2(GET_STR(q, c1), LEN_STR(q, c1), "true");
 	} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "variable_names")) {
 		if (!is_list_or_nil(c1)) {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
@@ -7989,7 +7985,8 @@ static USE_RESULT pl_status fn_format_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,list_or_nil);
-	return do_format(q, NULL, 0, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
+	int ok = do_format(q, NULL, 0, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
+	return ok;
 }
 
 static USE_RESULT pl_status fn_format_3(query *q)
@@ -7997,7 +7994,8 @@ static USE_RESULT pl_status fn_format_3(query *q)
 	GET_FIRST_ARG(pstr,any);
 	GET_NEXT_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,list_or_nil);
-	return do_format(q, pstr, pstr_ctx, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
+	int ok = do_format(q, pstr, pstr_ctx, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
+	return ok;
 }
 
 #if USE_OPENSSL
@@ -9390,7 +9388,6 @@ static unsigned real_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end)
 		p1 += p1->nbr_cells;
 	}
 
-	q->numbervars = true;
 	return cnt;
 }
 
