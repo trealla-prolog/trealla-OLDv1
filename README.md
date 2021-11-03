@@ -389,6 +389,11 @@ Note: popen/[3,4] use the Unix popen() system call:
 		31646 pts/0    00:00:00 sh
 		31647 pts/0    00:00:00 ps
 
+Note: read_term/[2,3] supports the positions(Start,End) and the
+line_counts(Start,End) property options to report file information.
+This is analogous to stream_property/2 use of position(Pos) and
+line_count(Line) options.
+
 
 Definite Clause Grammars
 ========================
