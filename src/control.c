@@ -813,11 +813,9 @@ pl_status throw_error3(query *q, cell *c, __attribute__((unused)) pl_idx_t c_ctx
 		make_int(tmp+nbr_cells, goal->arity);
 	}
 
-	cell *tmp2 = deep_copy_to_heap(q, tmp, q->st.curr_frame, false, false);
-	unify(q, tmp2, q->st.curr_frame, tmp, q->st.curr_frame);
-	cell *e = malloc(sizeof(cell) * tmp2->nbr_cells);
+	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
 	may_ptr_error(e);
-	safe_copy_cells(e, tmp2, tmp2->nbr_cells);
+	safe_copy_cells(e, tmp, tmp->nbr_cells);
 	pl_status ok = pl_failure;
 
 	if (find_exception_handler(q, e))
