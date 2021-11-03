@@ -352,7 +352,7 @@ static bool collect_vars(query *q, cell *p1, pl_idx_t p1_ctx, pl_idx_t nbr_cells
 	return true;
 }
 
-static bool parse_read_params(query *q, parser *p, cell *c, pl_idx_t c_ctx, cell **vars, pl_idx_t *vars_ctx, cell **varnames, pl_idx_t *varnames_ctx, cell **sings, pl_idx_t *sings_ctx)
+static bool parse_read_params(query *q, parser *p, stream *str, cell *c, pl_idx_t c_ctx, cell **vars, pl_idx_t *vars_ctx, cell **varnames, pl_idx_t *varnames_ctx, cell **sings, pl_idx_t *sings_ctx)
 {
 	if (!is_structure(c)) {
 		DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
@@ -404,6 +404,18 @@ static bool parse_read_params(query *q, parser *p, cell *c, pl_idx_t c_ctx, cell
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
 			return false;
 		}
+	} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "position") && (c->arity == 1)) {
+		cell *p = c+1;
+		p = deref(q, p, q->latest_ctx);
+		cell tmp;
+		make_int(&tmp, ftello(str->fp));
+		return unify(q, p, q->latest_ctx, &tmp, q->st.curr_frame) ? true : false;
+	} else if (!slicecmp2(GET_STR(q, c), LEN_STR(q, c), "line_count") && (c->arity == 1)) {
+		cell *p = c+1;
+		p = deref(q, p, q->latest_ctx);
+		cell tmp;
+		make_int(&tmp, str->p?str->p->line_nbr:1);
+		return unify(q, p, q->latest_ctx, &tmp, q->st.curr_frame) ? true : false;
 	} else {
 		DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
 		return false;
@@ -434,7 +446,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 		if (is_variable(h))
 			return throw_error(q, p2, p2_ctx, "instantiation_error", "read_option");
 
-		if (!parse_read_params(q, p, h, q->latest_ctx, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx))
+		if (!parse_read_params(q, p, str, h, q->latest_ctx, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx))
 			return pl_success;
 
 		p2 = LIST_TAIL(p2);
