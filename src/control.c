@@ -1,35 +1,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
 #include <ctype.h>
-#include <errno.h>
-#include <sys/time.h>
-#include <sys/stat.h>
-
-#ifdef _WIN32
-#define USE_MMAP 0
-#else
-#ifndef USE_MMAP
-#define USE_MMAP 1
-#endif
-#if USE_MMAP
-#include <sys/mman.h>
-#endif
-#include <dirent.h>
-#endif
 
 #include "internal.h"
-#include "network.h"
-#include "base64.h"
-#include "library.h"
 #include "parser.h"
 #include "module.h"
 #include "prolog.h"
 #include "query.h"
 #include "builtins.h"
 #include "heap.h"
-#include "utf8.h"
 
 USE_RESULT pl_status fn_iso_true_0(__attribute__((unused)) query *q)
 {

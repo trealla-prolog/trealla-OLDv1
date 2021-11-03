@@ -4,32 +4,14 @@
 #include <time.h>
 #include <ctype.h>
 #include <errno.h>
-#include <sys/time.h>
-#include <sys/stat.h>
 
-#ifdef _WIN32
-#define USE_MMAP 0
-#else
-#ifndef USE_MMAP
-#define USE_MMAP 1
-#endif
-#if USE_MMAP
-#include <sys/mman.h>
-#endif
-#include <dirent.h>
-#endif
-
-#include "trealla.h"
 #include "internal.h"
 #include "network.h"
-#include "base64.h"
-#include "library.h"
 #include "parser.h"
 #include "module.h"
 #include "prolog.h"
 #include "query.h"
 #include "builtins.h"
-#include "heap.h"
 #include "utf8.h"
 
 static int format_integer(char *dst, pl_int_t v, int grouping, int sep, int decimals, int radix)
