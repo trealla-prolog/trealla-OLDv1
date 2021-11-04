@@ -549,10 +549,14 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		int n = q->st.m->pl->current_output;
 		stream *str = &g_streams[n];
 		net_write(tmpbuf, len, str);
-	} else if (is_structure(str) && ((slicecmp2(GET_STR(q, str), LEN_STR(q, str), "atom") && slicecmp2(GET_STR(q, str), LEN_STR(q, str), "chars") && slicecmp2(GET_STR(q, str), LEN_STR(q, str), "string")) || (str->arity > 1) || !is_variable(str+1))) {
+	} else if (is_structure(str)
+		&& ((CMP_SLICE2(q, str, "atom")
+		&& CMP_SLICE2(q, str, "chars")
+		&& CMP_SLICE2(q, str, "string"))
+		|| (str->arity > 1) || !is_variable(str+1))) {
 		free(tmpbuf);
 		return throw_error(q, str, str_ctx, "type_error", "structure");
-	} else if (is_structure(str) && !slicecmp2(GET_STR(q, str), LEN_STR(q, str), "atom")) {
+	} else if (is_structure(str) && !CMP_SLICE2(q, str, "atom")) {
 		cell *c = deref(q, str+1, str_ctx);
 		cell tmp;
 		may_error(make_cstringn(&tmp, tmpbuf, len), free(tmpbuf));

@@ -675,7 +675,7 @@ pl_status throw_error3(query *q, cell *c, __attribute__((unused)) pl_idx_t c_ctx
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, goal->arity);
-	} else if (!strcmp(err_type, "permission_error") && is_structure(c) && slicecmp2(GET_STR(q, c), LEN_STR(q, c), "/") && is_variable(c+1)) {
+	} else if (!strcmp(err_type, "permission_error") && is_structure(c) && CMP_SLICE2(q, c, "/") && is_variable(c+1)) {
 		//printf("error(%s(%s,(%s)/%u),(%s)/%u).\n", err_type, expected, tmpbuf, c->arity, functor, goal->arity);
 		tmp = alloc_on_heap(q, 9+extra);
 		may_ptr_error(tmp);
@@ -784,9 +784,9 @@ pl_status throw_error3(query *q, cell *c, __attribute__((unused)) pl_idx_t c_ctx
 		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 
-		if (!slicecmp2(GET_STR(q, goal), LEN_STR(q, goal), "$call"))
+		if (!CMP_SLICE2(q, goal, "$call"))
 			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, "call"));
-		else if (!slicecmp2(GET_STR(q, goal), LEN_STR(q, goal), "$catch"))
+		else if (!CMP_SLICE2(q, goal, "$catch"))
 			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, "catch"));
 		else
 			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
