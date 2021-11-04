@@ -1626,7 +1626,7 @@ static int get_escape(const char **_src, bool *error, bool number)
 #define isbdigit(ch) (((ch) >= '0') && ((ch) <= '1'))
 #define isodigit(ch) (((ch) >= '0') && ((ch) <= '7'))
 
-static void read_integer(mp_int v2, int base, const char *src,  const char **srcptr)
+static void read_integer(parser *p, mp_int v2, int base, const char *src,  const char **srcptr)
 {
 	size_t bufsiz = 256;
 	char *tmpbuf = malloc(bufsiz);
@@ -1653,8 +1653,12 @@ static void read_integer(mp_int v2, int base, const char *src,  const char **src
 			dst = tmpbuf + offset;
 		}
 
-		while (isspace(*src) || (*src == '_'))
+		while (isspace(*src) || (*src == '_')) {
+			if (*src == '\n')
+				p->line_nbr++;
+
 			src++;
+		}
 	}
 
 	*dst = '\0';
@@ -1764,7 +1768,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	if ((*s == '0') && (s[1] == 'b')) {
 		s += 2;
 
-		read_integer(&v2, 2, s, &s);
+		read_integer(p, &v2, 2, s, &s);
 
 		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
 			p->v.val_bigint = malloc(sizeof(bigint));
@@ -1798,7 +1802,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	if ((*s == '0') && (s[1] == 'o')) {
 		s += 2;
 
-		read_integer(&v2, 8, s, &s);
+		read_integer(p, &v2, 8, s, &s);
 
 		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
 			p->v.val_bigint = malloc(sizeof(bigint));
@@ -1832,7 +1836,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	if ((*s == '0') && (s[1] == 'x')) {
 		s += 2;
 
-		read_integer(&v2, 16, s, &s);
+		read_integer(p, &v2, 16, s, &s);
 
 		if (mp_int_to_int(&v2, &val) == MP_RANGE) {
 			p->v.val_bigint = malloc(sizeof(bigint));
@@ -1863,7 +1867,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		return true;
 	}
 
-	read_integer(&v2, 10, s, &s);
+	read_integer(p, &v2, 10, s, &s);
 
 	if (s && (*s == '.') && isdigit(s[1])) {
 		p->v.tag = TAG_REAL;
@@ -1918,15 +1922,17 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	return true;
 }
 
-static bool is_matching_pair(char **dst, char **src, int lh, int rh)
+static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 {
 	char *s = *src, *d = *dst;
 
 	if (*s != lh)
 		return false;
 
-	while (s++, iswspace(*s))
-		;
+	while (s++, iswspace(*s)) {
+		if (*s == '\n')
+			p->line_nbr++;
+	}
 
 	if (*s != rh)
 		return false;
@@ -1987,8 +1993,7 @@ static const char *eat_space(parser *p)
 		}
 
 		if ((!*src || (*src == '%')) && p->fp) {
-			if (*src == '%')
-				p->line_nbr++;
+			p->line_nbr++;
 
 			if (getline(&p->save_line, &p->n_line, p->fp) == -1)
 				return NULL;
@@ -2319,6 +2324,9 @@ bool get_token(parser *p, int last_op)
 			p->is_op = true;
 
 		if (iswspace(ch)) {
+			if (ch == '\n')
+				p->line_nbr++;
+
 			p->srcptr = (char*)src;
 			src = eat_space(p);
 
@@ -2335,8 +2343,8 @@ bool get_token(parser *p, int last_op)
 		return true;
 	}
 
-	if (is_matching_pair(&dst, (char**)&src, '[',']') ||
-		is_matching_pair(&dst, (char**)&src, '{','}')) {
+	if (is_matching_pair(p, &dst, (char**)&src, '[',']') ||
+		is_matching_pair(p, &dst, (char**)&src, '{','}')) {
 		p->srcptr = (char*)src;
 		src = eat_space(p);
 		p->srcptr = (char*)src;
@@ -2885,12 +2893,12 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 #endif
 
 		p->srcptr = ASTRING_cstr(src);
-		p->line_nbr = 0;
+		p->line_nbr = 1;
 		tokenize(p, false, false);
 		ASTRING_free(src);
 	} else {
 		p->srcptr = (char*)pSrc;
-		p->line_nbr = 0;
+		p->line_nbr = 1;
 		tokenize(p, false, false);
 	}
 

@@ -512,7 +512,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 				return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 			}
 
-			if (!strlen(p->save_line) || (*p->save_line == '\r') || (*p->save_line == '\n')) {
+			if (!*p->save_line || (*p->save_line == '\r') || (*p->save_line == '\n')) {
 				//p->line_nbr++;
 				continue;
 			}
@@ -3468,8 +3468,10 @@ static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 
 	str->ungetch = 0;
 
-	if (ch == '\n')
+	if (ch == '\n') {
 		str->did_getc = false;
+		str->p->line_nbr++;
+	}
 
 	char tmpbuf[80];
 	put_char_utf8(tmpbuf, ch);
@@ -3538,8 +3540,10 @@ static USE_RESULT pl_status fn_iso_get_char_2(query *q)
 
 	str->ungetch = 0;
 
-	if (ch == '\n')
+	if (ch == '\n') {
 		str->did_getc = false;
+		str->p->line_nbr++;
+	}
 
 	char tmpbuf[80];
 	put_char_utf8(tmpbuf, ch);
@@ -3607,7 +3611,10 @@ static USE_RESULT pl_status fn_iso_get_code_1(query *q)
 
 	str->ungetch = 0;
 
-	if ((ch == '\n') || (ch == EOF))
+	if (ch == '\n') {
+		str->did_getc = false;
+		str->p->line_nbr++;
+	} else if (ch == EOF)
 		str->did_getc = false;
 
 	cell tmp;
@@ -3678,8 +3685,10 @@ static USE_RESULT pl_status fn_iso_get_code_2(query *q)
 
 	str->ungetch = 0;
 
-	if (ch == '\n')
+	if (ch == '\n') {
 		str->did_getc = false;
+		str->p->line_nbr++;
+	}
 
 	cell tmp;
 	make_int(&tmp, ch);
