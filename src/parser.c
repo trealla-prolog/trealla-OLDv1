@@ -2323,10 +2323,7 @@ bool get_token(parser *p, int last_op)
 		else if (search_op(p->m, p->token, NULL, false))
 			p->is_op = true;
 
-		if (iswspace(ch)) {
-			//if (ch == '\n')
-			//	p->line_nbr++;
-
+		if (iswspace(ch) && strcmp(p->token, ".")) {
 			p->srcptr = (char*)src;
 			src = eat_space(p);
 

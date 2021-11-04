@@ -3500,7 +3500,8 @@ static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 
 	if (ch == '\n') {
 		str->did_getc = false;
-		str->p->line_nbr++;
+		if (str->p)
+			str->p->line_nbr++;
 	}
 
 	char tmpbuf[80];
@@ -3572,7 +3573,8 @@ static USE_RESULT pl_status fn_iso_get_char_2(query *q)
 
 	if (ch == '\n') {
 		str->did_getc = false;
-		str->p->line_nbr++;
+		if (str->p)
+			str->p->line_nbr++;
 	}
 
 	char tmpbuf[80];
@@ -3643,7 +3645,8 @@ static USE_RESULT pl_status fn_iso_get_code_1(query *q)
 
 	if (ch == '\n') {
 		str->did_getc = false;
-		str->p->line_nbr++;
+		if (str->p)
+			str->p->line_nbr++;
 	} else if (ch == EOF)
 		str->did_getc = false;
 
@@ -3717,7 +3720,8 @@ static USE_RESULT pl_status fn_iso_get_code_2(query *q)
 
 	if (ch == '\n') {
 		str->did_getc = false;
-		str->p->line_nbr++;
+		if (str->p)
+			str->p->line_nbr++;
 	}
 
 	cell tmp;
