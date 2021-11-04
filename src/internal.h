@@ -190,10 +190,15 @@ typedef struct {
 	: strlen((c)->val_chr)										\
 	)
 
+#define _CMP_SLICE(pl,c,str,len) slicecmp2(_GET_STR(pl, c), _LEN_STR(pl, c), str, len)
+#define _CMP_SLICE2(pl,c,str) slicecmp2(_GET_STR(pl, c), _LEN_STR(pl, c), str)
+
 #define LEN_STR_UTF8(c) substrlen_utf8(GET_STR(q, c), LEN_STR(q, c))
 #define GET_STR(x,c) _GET_STR((x)->pl, c)
 #define LEN_STR(x,c) _LEN_STR((x)->pl, c)
 #define GET_POOL(x,off) ((x)->pl->pool + (off))
+#define CMP_SLICE(x,c,str,len) _CMP_SLICE((x)->pl, c, str, len)
+#define CMP_SLICE2(x,c,str) _CMP_SLICE2((x)->pl, c, str)
 
 // If changing the order of these: see runtime.c dispatch table
 
