@@ -190,7 +190,7 @@ typedef struct {
 	: strlen((c)->val_chr)										\
 	)
 
-#define _CMP_SLICE(pl,c,str,len) slicecmp2(_GET_STR(pl, c), _LEN_STR(pl, c), str, len)
+#define _CMP_SLICE(pl,c,str,len) slicecmp(_GET_STR(pl, c), _LEN_STR(pl, c), str, len)
 #define _CMP_SLICE2(pl,c,str) slicecmp2(_GET_STR(pl, c), _LEN_STR(pl, c), str)
 
 #define LEN_STR_UTF8(c) substrlen_utf8(GET_STR(q, c), LEN_STR(q, c))
