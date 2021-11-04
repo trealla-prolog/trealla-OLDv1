@@ -5135,7 +5135,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 		make_literal(&tmp, index_from_pool(q->st.m->pl, VERSION));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!slicecmp2(GET_STR(q, p1), LEN_STR(q, p1), "argv")) {
-		if (g_avc == g_ac) {
+		if (g_avc >= g_ac) {
 			cell tmp;
 			make_literal(&tmp, g_nil_s);
 			return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
