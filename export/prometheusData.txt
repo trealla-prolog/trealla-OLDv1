@@ -6,6 +6,6 @@ launch_status_unknown 0
 launch_time_duration 0
 launch_time_min_duration 0
 launch_time_max_duration 413
-launch_time_sum_duration 3092
+launch_time_sum_duration 3251
 launch_retries_retries 1
 launch_retries_run 2725

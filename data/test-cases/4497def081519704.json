@@ -1,0 +1,51 @@
+{
+  "uid" : "4497def081519704",
+  "name" : "commons_forall_2_04",
+  "fullName" : "commons_forall_2_04::tests",
+  "historyId" : "commons_forall_2_04::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/forall_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/forall_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/forall_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/forall_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "46-49"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/6007218be27f90115fd3364bb9473fcff57f69bb/tests/prolog/predicates/forall_2/tests.lgt#L46"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "4497def081519704.json",
+  "parameterValues" : [ "predicates/forall_2/tests.lgt", "46-49", "https://github.com/LogtalkDotOrg/logtalk3/tree/6007218be27f90115fd3364bb9473fcff57f69bb/tests/prolog/predicates/forall_2/tests.lgt#L46" ]
+}
