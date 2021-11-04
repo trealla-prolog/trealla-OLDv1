@@ -2324,8 +2324,8 @@ bool get_token(parser *p, int last_op)
 			p->is_op = true;
 
 		if (iswspace(ch)) {
-			if (ch == '\n')
-				p->line_nbr++;
+			//if (ch == '\n')
+			//	p->line_nbr++;
 
 			p->srcptr = (char*)src;
 			src = eat_space(p);
