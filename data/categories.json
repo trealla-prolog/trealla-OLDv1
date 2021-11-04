@@ -1,5 +1,79 @@
 {
   "uid" : "4b4757e66a1912dae1a509f688f20b0f",
-  "children" : [ ],
+  "children" : [ {
+    "name" : "Product defects",
+    "children" : [ {
+      "name" : "Crash",
+      "children" : [ {
+        "name" : "format_3",
+        "uid" : "72b2df1ce0b2c746",
+        "parentUid" : "8e048ed04cce61add286093d4fc3dced",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "set_stream_position_2",
+        "uid" : "26901e1fd0e7a469",
+        "parentUid" : "8e048ed04cce61add286093d4fc3dced",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "put_char_2",
+        "uid" : "4afcb9065f2bce6b",
+        "parentUid" : "8e048ed04cce61add286093d4fc3dced",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "nl_1",
+        "uid" : "f8912075a723087a",
+        "parentUid" : "8e048ed04cce61add286093d4fc3dced",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "format_2",
+        "uid" : "a0ae44f75660ddef",
+        "parentUid" : "8e048ed04cce61add286093d4fc3dced",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      }, {
+        "name" : "current_op_3",
+        "uid" : "1605a6575324ab4d",
+        "parentUid" : "8e048ed04cce61add286093d4fc3dced",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      } ],
+      "uid" : "8e048ed04cce61add286093d4fc3dced"
+    } ],
+    "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
+  } ],
   "name" : "categories"
 }

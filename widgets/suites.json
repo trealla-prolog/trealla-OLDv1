@@ -1,6 +1,72 @@
 {
   "total" : 167,
   "items" : [ {
+    "uid" : "bb8e106369c9e4f92fe1145b40d7d18a",
+    "name" : "predicates/format_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
+    "uid" : "2dae564ffa6f8fff4ee6bf8dbbb0e559",
+    "name" : "predicates/set_stream_position_2/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
+    "uid" : "48928fb63b72a3a76e3055fd24a3c3d8",
+    "name" : "predicates/put_char_2/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
+    "uid" : "1a382e72d3ac06a9cc7402c37b1a00c4",
+    "name" : "predicates/nl_1/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
+    "uid" : "dd82f0b51a196f10db178e28f30765c1",
+    "name" : "predicates/format_2/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
+    "uid" : "a5e7e6a80bb657bcaa763c06b523455c",
+    "name" : "predicates/current_op_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
     "uid" : "09812cef55155aac413b0e337d25177f",
     "name" : "unicode/builtins/tests.lgt::tests",
     "statistic" : {
@@ -34,28 +100,6 @@
       "total" : 75
     }
   }, {
-    "uid" : "bb8e106369c9e4f92fe1145b40d7d18a",
-    "name" : "predicates/format_3/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 0,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 65,
-      "unknown" : 0,
-      "total" : 65
-    }
-  }, {
-    "uid" : "dd82f0b51a196f10db178e28f30765c1",
-    "name" : "predicates/format_2/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 0,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 62,
-      "unknown" : 0,
-      "total" : 62
-    }
-  }, {
     "uid" : "2fa097f54728c3cdaa06f09f04fafff8",
     "name" : "predicates/write_term_3/tests.lgt::tests",
     "statistic" : {
@@ -65,50 +109,6 @@
       "passed" : 57,
       "unknown" : 0,
       "total" : 57
-    }
-  }, {
-    "uid" : "e323763b3f5107ef1a6b74d4676f7951",
-    "name" : "syntax/operators/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 0,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 56,
-      "unknown" : 0,
-      "total" : 56
-    }
-  }, {
-    "uid" : "a5e7e6a80bb657bcaa763c06b523455c",
-    "name" : "predicates/current_op_3/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 0,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 49,
-      "unknown" : 0,
-      "total" : 49
-    }
-  }, {
-    "uid" : "d5bfe28ad0b0bbac6a7ed2356c4fa14f",
-    "name" : "predicates/sub_atom_5/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 0,
-      "broken" : 0,
-      "skipped" : 4,
-      "passed" : 45,
-      "unknown" : 0,
-      "total" : 49
-    }
-  }, {
-    "uid" : "cca7e0fd2fd1795563678e8da9db0895",
-    "name" : "syntax/numbers/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 0,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 43,
-      "unknown" : 0,
-      "total" : 43
     }
   } ]
 }

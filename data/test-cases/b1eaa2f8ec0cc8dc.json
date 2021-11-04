@@ -1,0 +1,51 @@
+{
+  "uid" : "b1eaa2f8ec0cc8dc",
+  "name" : "lgt_setup_call_cleanup_3_18",
+  "fullName" : "lgt_setup_call_cleanup_3_18::tests",
+  "historyId" : "lgt_setup_call_cleanup_3_18::tests",
+  "time" : {
+    "duration" : 2
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/setup_call_cleanup_3/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/setup_call_cleanup_3/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/setup_call_cleanup_3/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/setup_call_cleanup_3/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "172-180"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/56ff82a2d7698ab20d556143e6183a4c1e62fd78/tests/prolog/predicates/setup_call_cleanup_3/tests.lgt#L172"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "b1eaa2f8ec0cc8dc.json",
+  "parameterValues" : [ "predicates/setup_call_cleanup_3/tests.lgt", "172-180", "https://github.com/LogtalkDotOrg/logtalk3/tree/56ff82a2d7698ab20d556143e6183a4c1e62fd78/tests/prolog/predicates/setup_call_cleanup_3/tests.lgt#L172" ]
+}
