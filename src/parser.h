@@ -13,8 +13,9 @@ extern void term_to_body(parser *p);
 extern cell *check_body_callable(parser *p, cell *c);
 extern bool run(parser *p, const char *src, bool dump, bool is_init);
 extern void xref_db(parser *p);
-bool virtual_term(parser *p, const char *src);
-bool get_token(parser *p, int last_op);
+extern const char *eat_space(parser *p);
+extern bool virtual_term(parser *p, const char *src);
+extern bool get_token(parser *p, int last_op);
 
 extern void clear_rule(rule *t);
 extern void do_reduce(cell *n);

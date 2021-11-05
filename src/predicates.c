@@ -352,8 +352,10 @@ static bool collect_vars(query *q, cell *p1, pl_idx_t p1_ctx, pl_idx_t nbr_cells
 	return true;
 }
 
-static bool parse_read_params(query *q, parser *p, stream *str, cell *c, pl_idx_t c_ctx, cell **vars, pl_idx_t *vars_ctx, cell **varnames, pl_idx_t *varnames_ctx, cell **sings, pl_idx_t *sings_ctx)
+static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, cell **vars, pl_idx_t *vars_ctx, cell **varnames, pl_idx_t *varnames_ctx, cell **sings, pl_idx_t *sings_ctx)
 {
+	parser *p = str->p;
+
 	if (!is_structure(c)) {
 		DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
 		return false;
@@ -405,17 +407,9 @@ static bool parse_read_params(query *q, parser *p, stream *str, cell *c, pl_idx_
 			return false;
 		}
 	} else if (!CMP_SLICE2(q, c, "positions") && (c->arity == 2)) {
-		cell *p = c+1;
-		p = deref(q, p, c_ctx);
-		cell tmp;
-		make_int(&tmp, ftello(str->fp));
-		DISCARD_RESULT unify(q, p, q->latest_ctx, &tmp, q->st.curr_frame);
+		p->pos_start = ftello(str->fp);
 	} else if (!CMP_SLICE2(q, c, "line_counts") && (c->arity == 2)) {
-		cell *p = c+1;
-		p = deref(q, p, c_ctx);
-		cell tmp;
-		make_int(&tmp, str->p?str->p->line_nbr:1);
-		DISCARD_RESULT unify(q, p, q->latest_ctx, &tmp, q->st.curr_frame);
+		p->line_nbr_start = p->line_nbr;
 	} else {
 		DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
 		return false;
@@ -439,6 +433,19 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 	pl_idx_t vars_ctx = 0, varnames_ctx = 0, sings_ctx = 0;
 	cell *p21 = p2;
 	pl_idx_t p21_ctx = p2_ctx;
+
+#if 0
+	if (p->srcptr && (*p->srcptr == '\n')) {
+		p->srcptr = NULL;
+		p->line_nbr++;
+	}
+#else
+	if (p->srcptr) {
+		char *src = (char*)eat_space(p);
+		p->srcptr = src;
+	}
+#endif
+
 	LIST_HANDLER(p21);
 
 	while (is_list(p21) && !g_tpl_interrupt) {
@@ -448,7 +455,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 		if (is_variable(h))
 			return throw_error(q, p2, p2_ctx, "instantiation_error", "read_option");
 
-		if (!parse_read_params(q, p, str, h, q->latest_ctx, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx))
+		if (!parse_read_params(q, str, h, q->latest_ctx, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx))
 			return pl_success;
 
 		p21 = LIST_TAIL(p21);
@@ -504,9 +511,6 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 					set_var(q, sings, sings_ctx, &tmp, q->st.curr_frame);
 				}
 
-				//destroy_parser(p);
-				//str->p = NULL;
-
 				cell *p22 = p2;
 				pl_idx_t p22_ctx = p2_ctx;
 				LIST_HANDLER(p22);
@@ -514,22 +518,35 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 				while (is_list(p22) && !g_tpl_interrupt) {
 					cell *h = LIST_HEAD(p22);
 					h = deref(q, h, p22_ctx);
+					pl_idx_t h_ctx = q->latest_ctx;
 
 					if (is_variable(h))
 						return throw_error(q, p2, p2_ctx, "instantiation_error", "read_option");
 
 					if (!CMP_SLICE2(q, h, "positions") && (h->arity == 2)) {
-						cell *p = h+2;
-						p = deref(q, p, q->latest_ctx);
+						cell *p = h+1;
+						p = deref(q, p, h_ctx);
+						pl_idx_t p_ctx = q->latest_ctx;
 						cell tmp;
+						make_int(&tmp, str->p->pos_start);
+						unify(q, p, p_ctx, &tmp, q->st.curr_frame);
+						p = h+2;
+						p = deref(q, p, h_ctx);
+						p_ctx = q->latest_ctx;
 						make_int(&tmp, ftello(str->fp));
-						DISCARD_RESULT unify(q, p, q->latest_ctx, &tmp, q->st.curr_frame);
+						unify(q, p, p_ctx, &tmp, q->st.curr_frame);
 					} else if (!CMP_SLICE2(q, h, "line_counts") && (h->arity == 2)) {
-						cell *p = h+2;
+						cell *p = h+1;
 						p = deref(q, p, q->latest_ctx);
+						pl_idx_t p_ctx = q->latest_ctx;
 						cell tmp;
-						make_int(&tmp, str->p?str->p->line_nbr:1);
-						DISCARD_RESULT unify(q, p, q->latest_ctx, &tmp, q->st.curr_frame);
+						make_int(&tmp, str->p->line_nbr_start);
+						unify(q, p, p_ctx, &tmp, q->st.curr_frame);
+						p = h+2;
+						p = deref(q, p, q->latest_ctx);
+						p_ctx = q->latest_ctx;
+						make_int(&tmp, str->p->line_nbr);
+						unify(q, p, p_ctx, &tmp, q->st.curr_frame);
 					}
 
 					p22 = LIST_TAIL(p22);
@@ -542,10 +559,8 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 				return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 			}
 
-			if (!*p->save_line || (*p->save_line == '\r') || (*p->save_line == '\n')) {
-				//p->line_nbr++;
+			if (!*p->save_line || (*p->save_line == '\r') || (*p->save_line == '\n'))
 				continue;
-			}
 
 			p->srcptr = p->save_line;
 		} else if (src)
@@ -581,22 +596,35 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 	while (is_list(p22) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(p22);
 		h = deref(q, h, p22_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
 
 		if (is_variable(h))
 			return throw_error(q, p2, p2_ctx, "instantiation_error", "read_option");
 
 		if (!CMP_SLICE2(q, h, "positions") && (h->arity == 2)) {
-			cell *p = h+2;
-			p = deref(q, p, q->latest_ctx);
+			cell *p = h+1;
+			p = deref(q, p, h_ctx);
+			pl_idx_t p_ctx = q->latest_ctx;
 			cell tmp;
+			make_int(&tmp, str->p->pos_start);
+			unify(q, p, p_ctx, &tmp, q->st.curr_frame);
+			p = h+2;
+			p = deref(q, p, h_ctx);
+			p_ctx = q->latest_ctx;
 			make_int(&tmp, ftello(str->fp));
-			unify(q, p, q->latest_ctx, &tmp, q->st.curr_frame);
+			unify(q, p, p_ctx, &tmp, q->st.curr_frame);
 		} else if (!CMP_SLICE2(q, h, "line_counts") && (h->arity == 2)) {
-			cell *p = h+2;
-			p = deref(q, p, q->latest_ctx);
+			cell *p = h+1;
+			p = deref(q, p, h_ctx);
+			pl_idx_t p_ctx = q->latest_ctx;
 			cell tmp;
-			make_int(&tmp, str->p?str->p->line_nbr:1);
-			DISCARD_RESULT unify(q, p, q->latest_ctx, &tmp, q->st.curr_frame);
+			make_int(&tmp, str->p->line_nbr_start);
+			unify(q, p, p_ctx, &tmp, q->st.curr_frame);
+			p = h+2;
+			p = deref(q, p, h_ctx);
+			p_ctx = q->latest_ctx;
+			make_int(&tmp, str->p->line_nbr);
+			unify(q, p, p_ctx, &tmp, q->st.curr_frame);
 		}
 
 		p22 = LIST_TAIL(p22);

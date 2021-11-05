@@ -1965,7 +1965,7 @@ static bool valid_float(const char *src)
 	return true;
 }
 
-static const char *eat_space(parser *p)
+const char *eat_space(parser *p)
 {
 	const char *src = p->srcptr;
 	bool done;
@@ -1993,7 +1993,8 @@ static const char *eat_space(parser *p)
 		}
 
 		if ((!*src || (*src == '%')) && p->fp) {
-			p->line_nbr++;
+			if (*src == '%')
+				p->line_nbr++;
 
 			if (getline(&p->save_line, &p->n_line, p->fp) == -1)
 				return NULL;
@@ -2439,7 +2440,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		if (p->error && !p->do_read_term)
 			break;
 
-		//fprintf(stderr, "Debug: token '%s' quoted=%d, tag=%u, op=%d, lastop=%d, string=%d\n", p->token, p->quote_char, p->v.tag, p->is_op, last_op, p->string);
+		//fprintf(stderr, "Debug: token '%s' line_nbr=%d, quoted=%d, tag=%u, op=%d, lastop=%d, string=%d '%s'\n", p->token, p->line_nbr, p->quote_char, p->v.tag, p->is_op, last_op, p->string, p->srcptr);
 
 		if (!p->quote_char && !strcmp(p->token, ".")
 		    && (*p->srcptr != '(')
