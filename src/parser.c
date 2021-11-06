@@ -1653,7 +1653,7 @@ static void read_integer(__attribute__((unused)) parser *p, mp_int v2, int base,
 		}
 
 #if 0
-		while (isspace(*src) || (*src == '_')) {
+		while (iswspace(*src) || (*src == '_')) {
 			if (*src == '\n')
 				p->line_nbr++;
 
@@ -1933,7 +1933,7 @@ static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 
 	s++;
 
-	while (isspace(*s)) {
+	while (iswspace(*s)) {
 		if (*s == '\n')
 			line_nbr++;
 
@@ -1980,7 +1980,7 @@ const char *eat_space(parser *p)
 	do {
 		done = true;
 
-		while (isspace(*src)) {
+		while (iswspace(*src)) {
 			if (*src == '\n')
 				p->line_nbr++;
 
