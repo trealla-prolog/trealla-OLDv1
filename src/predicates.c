@@ -3532,6 +3532,7 @@ static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 
 	if (ch == '\n') {
 		str->did_getc = false;
+
 		if (str->p)
 			str->p->line_nbr++;
 	}
@@ -3605,6 +3606,7 @@ static USE_RESULT pl_status fn_iso_get_char_2(query *q)
 
 	if (ch == '\n') {
 		str->did_getc = false;
+
 		if (str->p)
 			str->p->line_nbr++;
 	}
@@ -3677,6 +3679,7 @@ static USE_RESULT pl_status fn_iso_get_code_1(query *q)
 
 	if (ch == '\n') {
 		str->did_getc = false;
+
 		if (str->p)
 			str->p->line_nbr++;
 	} else if (ch == EOF)
@@ -3752,6 +3755,7 @@ static USE_RESULT pl_status fn_iso_get_code_2(query *q)
 
 	if (ch == '\n') {
 		str->did_getc = false;
+
 		if (str->p)
 			str->p->line_nbr++;
 	}

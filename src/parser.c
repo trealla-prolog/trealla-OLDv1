@@ -1980,7 +1980,7 @@ const char *eat_space(parser *p)
 	do {
 		done = true;
 
-		while (iswspace(*src)) {
+		while (isspace(*src)) {
 			if (*src == '\n')
 				p->line_nbr++;
 
