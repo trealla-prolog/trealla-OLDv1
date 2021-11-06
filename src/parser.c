@@ -1653,12 +1653,14 @@ static void read_integer(parser *p, mp_int v2, int base, const char *src,  const
 			dst = tmpbuf + offset;
 		}
 
+#if 0
 		while (isspace(*src) || (*src == '_')) {
 			if (*src == '\n')
 				p->line_nbr++;
 
 			src++;
 		}
+#endif
 	}
 
 	*dst = '\0';
@@ -1930,9 +1932,13 @@ static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 	if (*s != lh)
 		return false;
 
-	while (s++, iswspace(*s)) {
+	s++;
+
+	while (isspace(*s)) {
 		if (*s == '\n')
 			line_nbr++;
+
+		s++;
 	}
 
 	if (*s != rh)
