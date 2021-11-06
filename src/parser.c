@@ -342,8 +342,8 @@ static void directives(parser *p, cell *d)
 
 	if (!strcmp(dirname, "include") && (c->arity == 1)) {
 		if (!is_atom(p1)) return;
-		const char *name = GET_STR(p, p1);
 		unsigned save_line_nbr = p->line_nbr;
+		const char *name = GET_STR(p, p1);
 		char *filename = relative_to(p->m->filename, name);
 
 		if (!load_file(p->m, filename)) {
@@ -362,13 +362,12 @@ static void directives(parser *p, cell *d)
 
 	if (!strcmp(dirname, "ensure_loaded") && (c->arity == 1)) {
 		if (!is_atom(p1)) return;
+		unsigned save_line_nbr = p->line_nbr;
 		const char *name = GET_STR(p, p1);
 		char *filename = relative_to(p->m->filename, name);
 
 		if (is_loaded(p->m, filename))
 			return;
-
-		unsigned save_line_nbr = p->line_nbr;
 
 		if (!load_file(p->m, filename)) {
 			if (DUMP_ERRS || !p->do_read_term)
