@@ -1167,7 +1167,7 @@ static void make_rule(module *m, const char *src)
 	bool save = m->p->consulting;
 	m->p->consulting = true;
 	m->p->srcptr = (char*)src;
-	m->p->line_nbr = 0;
+	m->p->line_nbr = 1;
 	tokenize(m->p, false, false);
 	m->prebuilt = false;
 	m->p->consulting = save;
