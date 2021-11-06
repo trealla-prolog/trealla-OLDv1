@@ -1626,7 +1626,7 @@ static int get_escape(const char **_src, bool *error, bool number)
 #define isbdigit(ch) (((ch) >= '0') && ((ch) <= '1'))
 #define isodigit(ch) (((ch) >= '0') && ((ch) <= '7'))
 
-static void read_integer(parser *p, mp_int v2, int base, const char *src,  const char **srcptr)
+static void read_integer(__attribute__((unused)) parser *p, mp_int v2, int base, const char *src,  const char **srcptr)
 {
 	size_t bufsiz = 256;
 	char *tmpbuf = malloc(bufsiz);
