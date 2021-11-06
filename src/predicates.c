@@ -434,6 +434,17 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 	cell *p21 = p2;
 	pl_idx_t p21_ctx = p2_ctx;
 
+	if (!src && !p->srcptr && str->fp) {
+		if (getline(&p->save_line, &p->n_line, str->fp) == -1) {
+			if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+				clearerr(str->fp);
+				do_yield_0(q, 1);
+				return pl_failure;
+			}
+		} else
+			p->srcptr = p->save_line;
+	}
+
 	if (p->srcptr) {
 		char *src = (char*)eat_space(p);
 		p->srcptr = src;
