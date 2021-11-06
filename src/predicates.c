@@ -1906,7 +1906,9 @@ static USE_RESULT pl_status fn_iso_set_stream_position_2(query *q)
 	if (!str->repo)
 		return throw_error(q, p1, p1_ctx, "permission_error", "reposition,stream");
 
-	if (fseeko(str->fp, get_int(p1), SEEK_SET))
+	off_t pos = get_smallint(p1);
+
+	if (fseeko(str->fp, pos, SEEK_SET))
 		return throw_error(q, p1, p1_ctx, "domain_error", "position");
 
 	return pl_success;

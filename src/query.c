@@ -557,8 +557,6 @@ LOOP:
 	const choice *ch = GET_CHOICE(curr_choice);
 	unwind_trail(q, ch);
 
-	// TO-DO: Watch for stack, make non-recursive...
-
 	if (ch->catchme_exception || ch->soft_cut || ch->did_cleanup)
 		goto LOOP;
 
