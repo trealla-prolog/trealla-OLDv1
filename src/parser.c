@@ -1925,13 +1925,14 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 {
 	char *s = *src, *d = *dst;
+	unsigned line_nbr = p->line_nbr;
 
 	if (*s != lh)
 		return false;
 
 	while (s++, iswspace(*s)) {
 		if (*s == '\n')
-			p->line_nbr++;
+			line_nbr++;
 	}
 
 	if (*s != rh)
@@ -1943,6 +1944,7 @@ static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 	*d = '\0';
 	*dst = d;
 	*src = s;
+	p->line_nbr = line_nbr;
 	return true;
 }
 
