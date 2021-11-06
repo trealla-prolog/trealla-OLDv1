@@ -434,17 +434,10 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 	cell *p21 = p2;
 	pl_idx_t p21_ctx = p2_ctx;
 
-#if 0
-	if (p->srcptr && (*p->srcptr == '\n')) {
-		p->srcptr = NULL;
-		p->line_nbr++;
-	}
-#else
 	if (p->srcptr) {
 		char *src = (char*)eat_space(p);
 		p->srcptr = src;
 	}
-#endif
 
 	LIST_HANDLER(p21);
 
