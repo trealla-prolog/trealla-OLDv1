@@ -442,6 +442,8 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 				do_yield_0(q, 1);
 				return pl_failure;
 			}
+
+			p->srcptr = NULL;
 		} else
 			p->srcptr = p->save_line;
 	}
@@ -494,6 +496,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 					return pl_failure;
 				}
 
+				p->srcptr = NULL;
 				str->at_end_of_file = str->eof_action != eof_action_reset;
 
 				if (str->eof_action == eof_action_reset)

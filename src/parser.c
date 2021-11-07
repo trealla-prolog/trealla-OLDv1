@@ -1997,11 +1997,12 @@ const char *eat_space(parser *p)
 			if (*src == '\n')
 				p->line_nbr++;
 
-			if (getline(&p->save_line, &p->n_line, p->fp) == -1)
+			if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
+				p->srcptr = NULL;
 				return NULL;
+			}
 
-			p->srcptr = p->save_line;
-			src = p->srcptr;
+			src = p->srcptr = p->save_line;
 			done = false;
 			continue;
 		}
@@ -2027,8 +2028,10 @@ const char *eat_space(parser *p)
 				src++;
 
 			if (!*src && p->comment && p->fp) {
-				if (getline(&p->save_line, &p->n_line, p->fp) == -1)
+				if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
+					p->srcptr = NULL;
 					return NULL;
+				}
 
 				src = p->srcptr = p->save_line;
 			}
