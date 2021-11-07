@@ -1896,7 +1896,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 	p->v.tag = TAG_INT;
 
-	if ((s[-1] == '.') || iswspace(s[-1]))
+	if ((s[-1] == '.') || isspace(s[-1]))
 		s--;
 
 	*srcptr = s;
@@ -1924,7 +1924,7 @@ static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 
 	s++;
 
-	while (iswspace(*s)) {
+	while (isspace(*s)) {
 		if (*s == '\n')
 			line_nbr++;
 
@@ -1971,14 +1971,14 @@ const char *eat_space(parser *p)
 	do {
 		done = true;
 
-		while (iswspace(*src)) {
+		while (isspace(*src)) {
 			if (*src == '\n')
 				p->line_nbr++;
 
 			src++;
 		}
 
-		while ((*src == '%') && !p->fp) {
+		if ((*src == '%') && !p->fp) {
 			while (*src && (*src != '\n'))
 				src++;
 
@@ -1991,7 +1991,10 @@ const char *eat_space(parser *p)
 		}
 
 		if ((!*src || (*src == '%')) && p->fp) {
-			if (*src == '%')
+			while (*src && (*src != '\n'))
+				src++;
+
+			if (*src == '\n')
 				p->line_nbr++;
 
 			if (getline(&p->save_line, &p->n_line, p->fp) == -1)
@@ -2381,7 +2384,7 @@ bool get_token(parser *p, int last_op)
 		if (strchr(s_delims, ch))
 			break;
 
-		if ((ch == '.') && iswspace(*src))
+		if ((ch == '.') && isspace(*src))
 			break;
 
 		ch = peek_char_utf8(src);
