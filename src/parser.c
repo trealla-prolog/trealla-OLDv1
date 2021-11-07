@@ -192,12 +192,6 @@ parser *create_parser(module *m)
 	p->m = m;
 	p->error = false;
 	p->flag = m->flag;
-
-	if (!p->token || !p->r) {
-		destroy_parser(p);
-		p = NULL;
-	}
-
 	return p;
 }
 
@@ -1313,6 +1307,7 @@ void reset(parser *p)
 	p->r->cidx = 0;
 	p->start_term = true;
 	p->comment = false;
+	p->error = false;
 }
 
 static bool dcg_expansion(parser *p)

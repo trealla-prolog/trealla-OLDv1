@@ -584,9 +584,9 @@ struct parser_ {
 	cell v;
 	size_t token_size, n_line, toklen, pos_start;
 	prolog_flags flag;
-	unsigned line_nbr, depth, read_term, line_nbr_start;
+	unsigned depth, read_term;
 	unsigned nesting_parens, nesting_braces, nesting_brackets;
-	int quote_char;
+	int quote_char, line_nbr,line_nbr_start;
 	unsigned nbr_vars;
 	int8_t dq_consing;
 	bool error;

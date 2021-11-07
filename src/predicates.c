@@ -361,7 +361,8 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 		return false;
 	}
 
-	cell *c1 = deref(q, c+1, q->latest_ctx);
+	cell *c1 = deref(q, c+1, c_ctx);
+	pl_idx_t c1_ctx = q->latest_ctx;
 
 	if (!CMP_SLICE2(q, c, "character_escapes")) {
 		if (is_literal(c1))
@@ -383,7 +384,7 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 		if (is_variable(c1)) {
 			cell *v = c1;
 			if (vars) *vars = v;
-			if (vars_ctx) *vars_ctx = q->latest_ctx;
+			if (vars_ctx) *vars_ctx = c1_ctx;
 		} else {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
 			return false;
@@ -392,7 +393,7 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 		if (is_variable(c1)) {
 			cell *v = c1;
 			if (varnames) *varnames = v;
-			if (varnames_ctx) *varnames_ctx = q->latest_ctx;
+			if (varnames_ctx) *varnames_ctx = c1_ctx;
 		} else {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
 			return false;
@@ -401,12 +402,12 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 		if (is_variable(c1)) {
 			cell *v = c1;
 			if (sings) *sings = v;
-			if (sings_ctx) *sings_ctx = q->latest_ctx;
+			if (sings_ctx) *sings_ctx = c1_ctx;
 		} else {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
 			return false;
 		}
-	} else if (!CMP_SLICE2(q, c, "positions") && (c->arity == 2)) {
+	} else if (!CMP_SLICE2(q, c, "positions") && (c->arity == 2) && str->fp) {
 		p->pos_start = ftello(str->fp);
 	} else if (!CMP_SLICE2(q, c, "line_counts") && (c->arity == 2)) {
 		p->line_nbr_start = p->line_nbr;
@@ -420,15 +421,15 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 
 static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, char *src)
 {
-	if (!str->p)
+	if (!str->p) {
 		str->p = create_parser(q->st.m);
+		str->p->flag = q->st.m->flag;
+		str->p->fp = str->fp;
+	} else
+		reset(str->p);
 
 	parser *p = str->p;
-	p->fp = str->fp;
-	reset(p);
 	p->one_shot = true;
-	p->error = false;
-	p->flag = q->st.m->flag;
 	cell *vars = NULL, *varnames = NULL, *sings = NULL;
 	pl_idx_t vars_ctx = 0, varnames_ctx = 0, sings_ctx = 0;
 	cell *p21 = p2;
@@ -455,11 +456,12 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 	while (is_list(p21) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(p21);
 		h = deref(q, h, p21_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
 
 		if (is_variable(h))
 			return throw_error(q, p2, p2_ctx, "instantiation_error", "read_option");
 
-		if (!parse_read_params(q, str, h, q->latest_ctx, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx))
+		if (!parse_read_params(q, str, h, h_ctx, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx))
 			return pl_success;
 
 		p21 = LIST_TAIL(p21);
@@ -541,13 +543,13 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 						unify(q, p, p_ctx, &tmp, q->st.curr_frame);
 					} else if (!CMP_SLICE2(q, h, "line_counts") && (h->arity == 2)) {
 						cell *p = h+1;
-						p = deref(q, p, q->latest_ctx);
+						p = deref(q, p, h_ctx);
 						pl_idx_t p_ctx = q->latest_ctx;
 						cell tmp;
 						make_int(&tmp, str->p->line_nbr_start);
 						unify(q, p, p_ctx, &tmp, q->st.curr_frame);
 						p = h+2;
-						p = deref(q, p, q->latest_ctx);
+						p = deref(q, p, h_ctx);
 						p_ctx = q->latest_ctx;
 						make_int(&tmp, str->p->line_nbr);
 						unify(q, p, p_ctx, &tmp, q->st.curr_frame);
@@ -2162,11 +2164,12 @@ static pl_status do_stream_property(query *q)
 	stream *str = &g_streams[n];
 	cell *c = p1 + 1;
 	c = deref(q, c, p1_ctx);
+	pl_idx_t c_ctx = q->latest_ctx;
 
 	if (!CMP_SLICE2(q, p1, "file_name")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->filename));
-		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
 	}
@@ -2174,7 +2177,7 @@ static pl_status do_stream_property(query *q)
 	if (!CMP_SLICE2(q, p1, "alias")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->name));
-		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
 	}
@@ -2182,7 +2185,7 @@ static pl_status do_stream_property(query *q)
 	if (!CMP_SLICE2(q, p1, "mode")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->mode));
-		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
 	}
@@ -2190,7 +2193,7 @@ static pl_status do_stream_property(query *q)
 	if (!CMP_SLICE2(q, p1, "bom") && !str->binary) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->bom?"true":"false"));
-		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
 	}
@@ -2198,7 +2201,7 @@ static pl_status do_stream_property(query *q)
 	if (!CMP_SLICE2(q, p1, "type")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->binary ? "binary" : "text"));
-		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
 	}
@@ -2206,7 +2209,7 @@ static pl_status do_stream_property(query *q)
 	if (!CMP_SLICE2(q, p1, "reposition")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, str->socket || (n <= 2) ? "false" : "true"));
-		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
 	}
@@ -2214,7 +2217,7 @@ static pl_status do_stream_property(query *q)
 	if (!CMP_SLICE2(q, p1, "encoding") && !str->binary) {
 		cell tmp;
 		may_error(make_cstring(&tmp, "UTF-8"));
-		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
 	}
@@ -2222,7 +2225,7 @@ static pl_status do_stream_property(query *q)
 	if (!CMP_SLICE2(q, p1, "newline")) {
 		cell tmp;
 		may_error(make_cstring(&tmp, NEWLINE_MODE));
-		pl_status ok = unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
 	}
@@ -2245,7 +2248,7 @@ static pl_status do_stream_property(query *q)
 		else
 			make_literal(&tmp, index_from_pool(q->st.m->pl, "none"));
 
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		return unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (!CMP_SLICE2(q, p1, "end_of_stream") && is_stream(pstr)) {
@@ -2281,19 +2284,19 @@ static pl_status do_stream_property(query *q)
 		else
 			make_literal(&tmp, index_from_pool(q->st.m->pl, "not"));
 
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		return unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (!CMP_SLICE2(q, p1, "position") && !is_variable(pstr)) {
 		cell tmp;
 		make_int(&tmp, ftello(str->fp));
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		return unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (!CMP_SLICE2(q, p1, "line_count") && !is_variable(pstr)) {
 		cell tmp;
-		make_int(&tmp, str->p?str->p->line_nbr:1);
-		return unify(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
+		make_int(&tmp, str->p->line_nbr);
+		return unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 	}
 
 	return pl_failure;
@@ -2739,7 +2742,6 @@ static USE_RESULT pl_status fn_iso_close_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,list_or_nil);
-
 	LIST_HANDLER(p1);
 
 	while (is_list(p1)) {
