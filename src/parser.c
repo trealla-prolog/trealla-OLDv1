@@ -2340,16 +2340,16 @@ bool get_token(parser *p, int last_op)
 
 	if (is_matching_pair(p, &dst, (char**)&src, '[',']') ||
 		is_matching_pair(p, &dst, (char**)&src, '{','}')) {
-		p->srcptr = (char*)src;
-		src = eat_space(p);
+		//p->srcptr = (char*)src;
+		//src = eat_space(p);
 		p->srcptr = (char*)src;
 		return (dst - p->token) != 0;
 	}
 
 	if ((src[0] == '=') && (src[1] == '.') && (src[2] == '.')) {
 		dst += sprintf(dst, "=..");
-		p->srcptr = (char*)src+3;
 		p->is_op = true;
+		p->srcptr = (char*)src+3;
 		return (dst - p->token) != 0;
 	}
 
