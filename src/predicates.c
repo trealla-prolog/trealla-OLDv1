@@ -565,8 +565,8 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 				return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 			}
 
-			if (!*p->save_line || (*p->save_line == '\r') || (*p->save_line == '\n'))
-				continue;
+			//if (!*p->save_line || (*p->save_line == '\r') || (*p->save_line == '\n'))
+			//	continue;
 
 			p->srcptr = p->save_line;
 		} else if (src)
