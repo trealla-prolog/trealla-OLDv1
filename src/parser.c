@@ -171,6 +171,7 @@ static cell *make_a_cell(parser *p)
 
 void destroy_parser(parser *p)
 {
+	free(p->tmpbuf);
 	free(p->save_line);
 	free(p->token);
 	clear_rule(p->r);
@@ -1621,11 +1622,12 @@ static int get_escape(const char **_src, bool *error, bool number)
 #define isbdigit(ch) (((ch) >= '0') && ((ch) <= '1'))
 #define isodigit(ch) (((ch) >= '0') && ((ch) <= '7'))
 
-static void read_integer(__attribute__((unused)) parser *p, mp_int v2, int base, const char *src,  const char **srcptr)
+static void read_integer(parser *p, mp_int v2, int base, const char *src,  const char **srcptr)
 {
-	size_t bufsiz = 256;
-	char *tmpbuf = malloc(bufsiz);
-	char *dst = tmpbuf;
+	if (!p->tmpbuf)
+		p->tmpbuf = malloc(p->tmpbuf_size=256);
+
+	char *dst = p->tmpbuf;
 
 	 while (*src) {
 		if ((base == 2) && ((*src < '0') || (*src > '1')))
@@ -1642,10 +1644,10 @@ static void read_integer(__attribute__((unused)) parser *p, mp_int v2, int base,
 
 		*dst++ = *src++;
 
-		if ((size_t)(dst - tmpbuf) >= (bufsiz-1)) {
-			size_t offset = dst - tmpbuf;
-			tmpbuf = realloc(tmpbuf, bufsiz*=2);
-			dst = tmpbuf + offset;
+		if ((size_t)(dst - p->tmpbuf) >= (p->tmpbuf_size-1)) {
+			size_t offset = dst - p->tmpbuf;
+			p->tmpbuf = realloc(p->tmpbuf, p->tmpbuf_size*=2);
+			dst = p->tmpbuf + offset;
 		}
 
 		while (isblank(*src) || (*src == '_')) {
@@ -1660,8 +1662,7 @@ static void read_integer(__attribute__((unused)) parser *p, mp_int v2, int base,
 	else if ((base == 16) && !isxdigit(src[-1]))
 		src--;
 
-	mp_int_read_cstring(v2, base, (char*)tmpbuf, NULL);
-	free(tmpbuf);
+	mp_int_read_cstring(v2, base, (char*)p->tmpbuf, NULL);
 	*srcptr = src;
 }
 

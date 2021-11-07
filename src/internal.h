@@ -580,9 +580,9 @@ struct parser_ {
 	FILE *fp;
 	module *m;
 	rule *r;
-	char *token, *save_line, *srcptr, *error_desc;
+	char *token, *save_line, *srcptr, *error_desc, *tmpbuf;
 	cell v;
-	size_t token_size, n_line, toklen, pos_start;
+	size_t token_size, n_line, toklen, pos_start, tmpbuf_size;
 	prolog_flags flag;
 	unsigned depth, read_term;
 	unsigned nesting_parens, nesting_braces, nesting_brackets;
