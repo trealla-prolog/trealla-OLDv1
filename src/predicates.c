@@ -2500,7 +2500,6 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	GET_NEXT_ARG(p4,list_or_nil);
 	int n = new_stream();
 	char *src = NULL;
-	bool use_bom = false;
 
 	if (n < 0)
 		return throw_error(q, p1, p1_ctx, "resource_error", "too_many_streams");
@@ -2536,13 +2535,14 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	may_ptr_error(str->name = strdup(filename));
 	may_ptr_error(str->mode = slicedup(GET_STR(q, p2), LEN_STR(q, p2)));
 	str->eof_action = eof_action_eof_code;
-	bool binary = false, bom_specified = false;
+	str->binary = false;
 
 #if USE_MMAP
 	cell *mmap_var = NULL;
 	pl_idx_t mmap_ctx = 0;
 #endif
 
+	bool bom_specified = false, use_bom = false;
 	LIST_HANDLER(p4);
 
 	while (is_list(p4)) {
@@ -2577,9 +2577,8 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			} else if (!CMP_SLICE2(q, c, "type")) {
 				if (is_atom(name) && !CMP_SLICE2(q, name, "binary")) {
 					str->binary = true;
-					binary = true;
 				} else if (is_atom(name) && !CMP_SLICE2(q, name, "text"))
-					binary = false;
+					str->binary = false;
 				else
 					return throw_error(q, c, q->latest_ctx, "domain_error", "stream_option");
 			} else if (!CMP_SLICE2(q, c, "bom")) {
@@ -2618,24 +2617,24 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 		int fd = fileno(oldstr->fp);
 
 		if (!strcmp(str->mode, "read"))
-			str->fp = fdopen(fd, binary?"rb":"r");
+			str->fp = fdopen(fd, str->binary?"rb":"r");
 		else if (!strcmp(str->mode, "write"))
-			str->fp = fdopen(fd, binary?"wb":"w");
+			str->fp = fdopen(fd, str->binary?"wb":"w");
 		else if (!strcmp(str->mode, "append"))
-			str->fp = fdopen(fd, binary?"ab":"a");
+			str->fp = fdopen(fd, str->binary?"ab":"a");
 		else if (!strcmp(str->mode, "update"))
-			str->fp = fdopen(fd, binary?"rb+":"r+");
+			str->fp = fdopen(fd, str->binary?"rb+":"r+");
 		else
 			return throw_error(q, p2, p2_ctx, "domain_error", "io_mode");
 	} else {
 		if (!strcmp(str->mode, "read"))
-			str->fp = fopen(filename, binary?"rb":"r");
+			str->fp = fopen(filename, str->binary?"rb":"r");
 		else if (!strcmp(str->mode, "write"))
-			str->fp = fopen(filename, binary?"wb":"w");
+			str->fp = fopen(filename, str->binary?"wb":"w");
 		else if (!strcmp(str->mode, "append"))
-			str->fp = fopen(filename, binary?"ab":"a");
+			str->fp = fopen(filename, str->binary?"ab":"a");
 		else if (!strcmp(str->mode, "update"))
-			str->fp = fopen(filename, binary?"rb+":"r+");
+			str->fp = fopen(filename, str->binary?"rb+":"r+");
 		else
 			return throw_error(q, p2, p2_ctx, "domain_error", "io_mode");
 	}
@@ -2651,7 +2650,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 	size_t offset = 0;
 
-	if (!strcmp(str->mode, "read") && !binary && (!bom_specified || use_bom)) {
+	if (!strcmp(str->mode, "read") && !str->binary && (!bom_specified || use_bom)) {
 		int ch = xgetc_utf8(net_getc, str);
 
 		if (feof(str->fp))
@@ -2662,7 +2661,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			offset = 3;
 		} else
 			fseek(str->fp, 0, SEEK_SET);
-	} else if (!strcmp(str->mode, "write") && !binary && use_bom) {
+	} else if (!strcmp(str->mode, "write") && !str->binary && use_bom) {
 		int ch = 0xFEFF;
 		char tmpbuf[10];
 		put_char_utf8(tmpbuf, ch);
