@@ -183,15 +183,16 @@ parser *create_parser(module *m)
 	parser *p = calloc(1, sizeof(parser));
 	ensure(p);
 	p->pl = m->pl;
+	p->m = m;
 	p->token = calloc(p->token_size=INITIAL_TOKEN_SIZE+1, 1);
+	ensure(p->token, free(p));
 	pl_idx_t nbr_cells = INITIAL_NBR_CELLS;
 	p->r = calloc(sizeof(rule)+(sizeof(cell)*nbr_cells), 1);
+	ensure(p->r, (free(p->token), free(p)));
 	p->r->nbr_cells = nbr_cells;
 	p->start_term = true;
-	p->line_nbr = 1;
-	p->m = m;
-	p->error = false;
 	p->flag = m->flag;
+	p->line_nbr = 1;
 	return p;
 }
 
