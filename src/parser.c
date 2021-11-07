@@ -1652,14 +1652,9 @@ static void read_integer(__attribute__((unused)) parser *p, mp_int v2, int base,
 			dst = tmpbuf + offset;
 		}
 
-#if 0
-		while (iswspace(*src) || (*src == '_')) {
-			if (*src == '\n')
-				p->line_nbr++;
-
+		while (iswblank(*src) || (*src == '_')) {
 			src++;
 		}
-#endif
 	}
 
 	*dst = '\0';
