@@ -1648,7 +1648,7 @@ static void read_integer(__attribute__((unused)) parser *p, mp_int v2, int base,
 			dst = tmpbuf + offset;
 		}
 
-		while (iswblank(*src) || (*src == '_')) {
+		while (isblank(*src) || (*src == '_')) {
 			src++;
 		}
 	}
