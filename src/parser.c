@@ -203,7 +203,7 @@ void consultall(parser *p, cell *l)
 
 	while (is_list(l) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(l);
-		char *s = slicedup(GET_STR(p, h), LEN_STR(p, h));
+		char *s = DUP_SLICE(p, h);
 		load_file(p->m, s);
 		free(s);
 		l = LIST_TAIL(l);
@@ -245,7 +245,7 @@ static void do_op(parser *p, cell *c)
 	}
 
 	unsigned specifier;
-	char *spec = slicedup(GET_STR(p, p2), LEN_STR(p, p2));
+	char *spec = DUP_SLICE(p, p2);
 
 	if (!strcmp(spec, "fx"))
 		specifier = OP_FX;
@@ -275,7 +275,7 @@ static void do_op(parser *p, cell *c)
 		cell *h = LIST_HEAD(p3);
 
 		if (is_atom(h)) {
-			char *name = slicedup(GET_STR(p, h), LEN_STR(p, h));
+			char *name = DUP_SLICE(p, h);
 
 			if (!set_op(p->m, name, specifier, get_int(p1))) {
 				if (DUMP_ERRS || !p->do_read_term)
@@ -292,7 +292,7 @@ static void do_op(parser *p, cell *c)
 	}
 
 	if (is_atom(p3) && !is_nil(p3)) {
-		char *name = slicedup(GET_STR(p, p3), LEN_STR(p, p3));
+		char *name = DUP_SLICE(p, p3);
 
 		if (!set_op(p->m, name, specifier, get_int(p1))) {
 			if (DUMP_ERRS || !p->do_read_term)

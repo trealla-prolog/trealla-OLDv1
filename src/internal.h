@@ -193,6 +193,7 @@ typedef struct {
 #define _CMP_SLICE(pl,c,str,len) slicecmp(_GET_STR(pl, c), _LEN_STR(pl, c), str, len)
 #define _CMP_SLICE2(pl,c,str) slicecmp2(_GET_STR(pl, c), _LEN_STR(pl, c), str)
 #define _CMP_SLICES(pl,c1,c2) slicecmp(_GET_STR(pl, c1), _LEN_STR(pl, c1), _GET_STR(pl, c2), _LEN_STR(pl, c2))
+#define _DUP_SLICE(pl,c) slicedup(_GET_STR(pl, c), _LEN_STR(pl, c))
 
 #define LEN_STR_UTF8(c) substrlen_utf8(GET_STR(q, c), LEN_STR(q, c))
 #define GET_STR(x,c) _GET_STR((x)->pl, c)
@@ -201,6 +202,7 @@ typedef struct {
 #define CMP_SLICE(x,c,str,len) _CMP_SLICE((x)->pl, c, str, len)
 #define CMP_SLICE2(x,c,str) _CMP_SLICE2((x)->pl, c, str)
 #define CMP_SLICES(x,c1,c2) _CMP_SLICES((x)->pl, c1, c2)
+#define DUP_SLICE(x,c) _DUP_SLICE((x)->pl, c)
 
 // If changing the order of these: see runtime.c dispatch table
 

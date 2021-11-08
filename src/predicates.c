@@ -2409,7 +2409,7 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 	const char *filename;
 
 	if (is_atom(p1))
-		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename = src = DUP_SLICE(q, p1);
 	else
 		return throw_error(q, p1, p1_ctx, "domain_error", "source_sink");
 
@@ -2427,7 +2427,7 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 	str->domain = true;
 	may_ptr_error(str->filename = strdup(filename));
 	may_ptr_error(str->name = strdup(filename));
-	may_ptr_error(str->mode = slicedup(GET_STR(q, p2), LEN_STR(q, p2)));
+	may_ptr_error(str->mode = DUP_SLICE(q, p2));
 	str->eof_action = eof_action_eof_code;
 	bool binary = false;
 	LIST_HANDLER(p4);
@@ -2449,7 +2449,7 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 
 			if (!CMP_SLICE2(q, c, "alias")) {
 				free(str->name);
-				str->name = slicedup(GET_STR(q, name), LEN_STR(q, name));
+				str->name = DUP_SLICE(q, name);
 			} else if (!CMP_SLICE2(q, c, "type")) {
 				if (is_atom(name) && !CMP_SLICE2(q, name, "binary")) {
 					str->binary = true;
@@ -2524,7 +2524,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 		stream *oldstr = &g_streams[oldn];
 		filename = oldstr->filename;
 	} else if (is_atom(p1))
-		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename = src = DUP_SLICE(q, p1);
 	else
 		return throw_error(q, p1, p1_ctx, "domain_error", "source_sink");
 
@@ -2541,7 +2541,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	stream *str = &g_streams[n];
 	may_ptr_error(str->filename = strdup(filename));
 	may_ptr_error(str->name = strdup(filename));
-	may_ptr_error(str->mode = slicedup(GET_STR(q, p2), LEN_STR(q, p2)));
+	may_ptr_error(str->mode = DUP_SLICE(q, p2));
 	str->eof_action = eof_action_eof_code;
 
 #if USE_MMAP
@@ -2580,7 +2580,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 #endif
 			} else if (!CMP_SLICE2(q, c, "alias")) {
 				free(str->name);
-				str->name = slicedup(GET_STR(q, name), LEN_STR(q, name));
+				str->name = DUP_SLICE(q, name);
 			} else if (!CMP_SLICE2(q, c, "type")) {
 				if (is_atom(name) && !CMP_SLICE2(q, name, "binary")) {
 					str->binary = true;
@@ -6499,7 +6499,7 @@ static USE_RESULT pl_status fn_savefile_2(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename = src = DUP_SLICE(q, p1);
 
 	FILE *fp = fopen(filename, "wb");
 	may_ptr_error(fp);
@@ -6525,7 +6525,7 @@ static USE_RESULT pl_status fn_loadfile_2(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename = src = DUP_SLICE(q, p1);
 
 	FILE *fp = fopen(filename, "rb");
 	free(src);
@@ -6585,7 +6585,7 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 		may_ptr_error(src);
 		filename = src;
 	} else
-		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename = src = DUP_SLICE(q, p1);
 
 	FILE *fp = fopen(filename, "r");
 	free(src);
@@ -6855,7 +6855,7 @@ static USE_RESULT pl_status fn_server_3(query *q)
 	}
 
 	stream *str = &g_streams[n];
-	may_ptr_error(str->filename = slicedup(GET_STR(q, p1), LEN_STR(q, p1)));
+	may_ptr_error(str->filename = DUP_SLICE(q, p1));
 	may_ptr_error(str->name = strdup(hostname));
 	may_ptr_error(str->mode = strdup("update"));
 	str->nodelay = nodelay;
@@ -7039,7 +7039,7 @@ static USE_RESULT pl_status fn_client_5(query *q)
 	}
 
 	stream *str = &g_streams[n];
-	may_ptr_error(str->filename = slicedup(GET_STR(q, p1), LEN_STR(q, p1)));
+	may_ptr_error(str->filename = DUP_SLICE(q, p1));
 	may_ptr_error(str->name = strdup(hostname));
 	may_ptr_error(str->mode = strdup("update"));
 	str->socket = true;
@@ -7951,7 +7951,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename = src = DUP_SLICE(q, p1);
 
 	LIST_HANDLER(p_opts);
 
@@ -7967,7 +7967,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 				}
 			} else if (!CMP_SLICE2(q, h, "relative_to")) {
 				if (is_atom(h+1))
-					cwd = slicedup(GET_STR(q, h+1), LEN_STR(q, h+1));
+					cwd = DUP_SLICE(q, h+1);
 			}
 		}
 
@@ -8050,7 +8050,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	if (is_atom(p1)) {
-		char *src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		char *src = DUP_SLICE(q, p1);
 		char *filename = relative_to(q->st.m->filename, src);
 		unload_file(q->st.m, filename);
 
@@ -8465,7 +8465,7 @@ static USE_RESULT pl_status fn_access_file_2(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename = src = DUP_SLICE(q, p1);
 
 	int amode = R_OK;
 
@@ -8518,7 +8518,7 @@ static USE_RESULT pl_status fn_exists_file_1(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename = src = DUP_SLICE(q, p1);
 
 	struct stat st = {0};
 
@@ -8551,7 +8551,7 @@ static USE_RESULT pl_status fn_directory_files_2(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename = src = DUP_SLICE(q, p1);
 
 	struct stat st = {0};
 
@@ -8608,7 +8608,7 @@ static USE_RESULT pl_status fn_delete_file_1(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename = src = DUP_SLICE(q, p1);
 
 	struct stat st = {0};
 
@@ -8637,7 +8637,7 @@ static USE_RESULT pl_status fn_rename_file_2(query *q)
 
 		filename1 = src1 = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename1 = src1 = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename1 = src1 = DUP_SLICE(q, p1);
 
 	if (is_iso_list(p2)) {
 		size_t len = scan_is_chars_list(q, p2, p2_ctx, true);
@@ -8680,7 +8680,7 @@ static USE_RESULT pl_status fn_time_file_2(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename = src = DUP_SLICE(q, p1);
 
 	struct stat st = {0};
 
@@ -8711,7 +8711,7 @@ static USE_RESULT pl_status fn_size_file_2(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename = src = DUP_SLICE(q, p1);
 
 	struct stat st = {0};
 
@@ -8741,7 +8741,7 @@ static USE_RESULT pl_status fn_exists_directory_1(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename = src = DUP_SLICE(q, p1);
 
 	struct stat st = {0};
 
@@ -8772,7 +8772,7 @@ static USE_RESULT pl_status fn_make_directory_1(query *q)
 
 		filename = src = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename = src = DUP_SLICE(q, p1);
 
 	struct stat st = {0};
 
@@ -8801,7 +8801,7 @@ static USE_RESULT pl_status fn_make_directory_path_1(query *q)
 
 		filename = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename = DUP_SLICE(q, p1);
 
 	struct stat st = {0};
 
@@ -8859,7 +8859,7 @@ static USE_RESULT pl_status fn_working_directory_2(query *q)
 
 			filename = src = chars_list_to_string(q, p_new, p_new_ctx, len);
 		} else
-			filename = src = slicedup(GET_STR(q, p_new), LEN_STR(q, p_new));
+			filename = src = DUP_SLICE(q, p_new);
 
 		if (chdir(filename)) {
 			unshare_cell(&tmp);
@@ -8885,7 +8885,7 @@ static USE_RESULT pl_status fn_chdir_1(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	} else
-		filename = src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		filename = src = DUP_SLICE(q, p1);
 
 	pl_status ok = !chdir(filename);
 	free(src);
@@ -9109,7 +9109,7 @@ static USE_RESULT pl_status fn_hex_chars_2(query *q)
 		return pl_success;
 	}
 
-	char *src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+	char *src = DUP_SLICE(q, p1);
 	pl_int_t p1_val = strtoull(src, NULL, 16);
 	free(src);
 
@@ -9141,7 +9141,7 @@ static USE_RESULT pl_status fn_octal_chars_2(query *q)
 		return pl_success;
 	}
 
-	char *src = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+	char *src = DUP_SLICE(q, p1);
 	pl_int_t p1_val = strtoull(src, NULL, 8);
 	free(src);
 
@@ -10580,7 +10580,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_smallint(p1));
 		key = strdup(tmpbuf);
 	} else if (is_atom(p1))
-		key = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		key = DUP_SLICE(q, p1);
 	else
 		return throw_error(q, p1, p1_ctx, "type_error", "integer");
 
@@ -10600,7 +10600,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_smallint(p2));
 		val = strdup(tmpbuf);
 	} else if (is_atom(p2))
-		val = slicedup(GET_STR(q, p2), LEN_STR(q, p2));
+		val = DUP_SLICE(q, p2);
 	else {
 		free(key);
 		return throw_error(q, p2, p2_ctx, "type_error", "integer");
@@ -10652,7 +10652,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_int(p1));
 		key = tmpbuf;
 	} else if (is_atom(p1))
-		key = slicedup(GET_STR(q, p1), LEN_STR(q, p1));
+		key = DUP_SLICE(q, p1);
 	else
 		return throw_error(q, p2, p2_ctx, "type_error", "integer");
 
