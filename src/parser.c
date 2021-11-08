@@ -2369,9 +2369,8 @@ bool get_token(parser *p, int last_op)
 		return (dst - p->token) != 0;
 	}
 
-	static const char *s_delims = "!(){}[]|_,;`'\"";
-
 	while (*src) {
+		static const char *s_delims = "!(){}[]|_,;`'\"";
 		ch = get_char_utf8(&src);
 		size_t len = (dst-p->token) + put_len_utf8(ch) + 1;
 
