@@ -1779,8 +1779,10 @@ static USE_RESULT pl_status fn_iso_atom_length_2(query *q)
 static int new_stream()
 {
 	for (int i = 0; i < MAX_STREAMS; i++) {
-		if (!g_streams[i].fp)
+		if (!g_streams[i].fp) {
+			memset(&g_streams[i], 0, sizeof(stream));
 			return i;
+		}
 	}
 
 	return -1;
@@ -1790,6 +1792,9 @@ static int get_named_stream(const char *name, size_t len)
 {
 	for (int i = 0; i < MAX_STREAMS; i++) {
 		stream *str = &g_streams[i];
+
+		if (!str->fp)
+			continue;
 
 		if (str->name && (strlen(str->name) == len)
 			&& !strncmp(str->name, name, len))
@@ -2538,7 +2543,6 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	may_ptr_error(str->name = strdup(filename));
 	may_ptr_error(str->mode = slicedup(GET_STR(q, p2), LEN_STR(q, p2)));
 	str->eof_action = eof_action_eof_code;
-	str->binary = false;
 
 #if USE_MMAP
 	cell *mmap_var = NULL;
@@ -2732,11 +2736,10 @@ static USE_RESULT pl_status fn_iso_close_1(query *q)
 		del_stream_properties(q, n);
 
 	net_close(str);
-	free(str->filename);
 	free(str->mode);
-	free(str->data);
+	free(str->filename);
 	free(str->name);
-	memset(str, 0, sizeof(stream));
+	free(str->data);
 	return pl_success;
 }
 

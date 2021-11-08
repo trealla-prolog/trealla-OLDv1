@@ -425,4 +425,6 @@ void net_close(stream *str)
 		pclose(str->fp);
 	else
 		fclose(str->fp);
+
+	str->fp = NULL;
 }

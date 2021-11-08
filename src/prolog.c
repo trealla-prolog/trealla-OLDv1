@@ -153,18 +153,14 @@ static void g_destroy(prolog *pl)
 				&& (str->fp != stderr))
 				fclose(str->fp);
 
-			free(str->filename);
+			if (str->p)
+				destroy_parser(str->p);
+
 			free(str->mode);
+			free(str->filename);
 			free(str->name);
-			str->filename = NULL;
-			str->name = NULL;
-			str->mode = NULL;
+			free(str->data);
 		}
-
-		if (str->p)
-			destroy_parser(str->p);
-
-		str->p = NULL;
 	}
 
 	memset(g_streams, 0, sizeof(g_streams));
