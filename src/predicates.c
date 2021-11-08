@@ -6607,13 +6607,14 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 	int nbr = 1, in_list = 0;
 
 	while ((getline(&line, &len, fp) != -1) && !g_tpl_interrupt) {
-		size_t len = strlen(line);
-		if (line[len-1] == '\n') {
+		int len = strlen(line);
+
+		if (len && (line[len-1] == '\n')) {
 			line[len-1] = '\0';
 			len--;
 		}
 
-		if (line[len-1] == '\r') {
+		if (len && (line[len-1] == '\r')) {
 			line[len-1] = '\0';
 			len--;
 		}
@@ -6656,13 +6657,14 @@ static USE_RESULT pl_status fn_getlines_1(query *q)
 	int nbr = 1, in_list = 0;
 
 	while ((getline(&line, &len, str->fp) != -1) && !g_tpl_interrupt) {
-		size_t len = strlen(line);
-		if (line[len-1] == '\n') {
+		int len = strlen(line);
+
+		if (len && (line[len-1] == '\n')) {
 			line[len-1] = '\0';
 			len--;
 		}
 
-		if (line[len-1] == '\r') {
+		if (len && (line[len-1] == '\r')) {
 			line[len-1] = '\0';
 			len--;
 		}
@@ -6704,13 +6706,14 @@ static USE_RESULT pl_status fn_getlines_2(query *q)
 	int nbr = 1, in_list = 0;
 
 	while ((getline(&line, &len, str->fp) != -1) && !g_tpl_interrupt) {
-		size_t len = strlen(line);
-		if (line[len-1] == '\n') {
+		int len = strlen(line);
+
+		if (len && (line[len-1] == '\n')) {
 			line[len-1] = '\0';
 			len--;
 		}
 
-		if (line[len-1] == '\r') {
+		if (len && (line[len-1] == '\r')) {
 			line[len-1] = '\0';
 			len--;
 		}
@@ -7103,11 +7106,17 @@ static USE_RESULT pl_status fn_getline_1(query *q)
 		return pl_failure;
 	}
 
-	if (line[strlen(line)-1] == '\n')
-		line[strlen(line)-1] = '\0';
+	len = strlen(line);
 
-	if (line[strlen(line)-1] == '\r')
-		line[strlen(line)-1] = '\0';
+	if (len && (line[len-1] == '\n')) {
+		line[len-1] = '\0';
+		len--;
+	}
+
+	if (len && (line[len-1] == '\r')) {
+		line[len-1] = '\0';
+		len--;
+	}
 
 	cell tmp;
 	may_error(make_string(&tmp, line), free(line));
