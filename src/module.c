@@ -902,8 +902,8 @@ module *load_text(module *m, const char *src, const char *filename)
 {
 	parser *p = create_parser(m);
 	if (!p) return NULL;
-	char *save_filename = m->filename;
-	m->filename = strdup(filename);
+	char *save_filename = p->m->filename;
+	p->m->filename = strdup(filename);
 	p->consulting = true;
 	p->srcptr = (char*)src;
 	tokenize(p, false, false);
@@ -926,7 +926,7 @@ module *load_text(module *m, const char *src, const char *filename)
 			p->consulting = false;
 			p->command = true;
 
-			if (run(p, "(:- initialization(__G_)), retract((:- initialization(_))), !, __G_", false, true))
+			if (run(p, "retract((:- initialization(__G_))), !, __G_", false, true))
 				p->m->pl->halt = true;
 		}
 
@@ -935,8 +935,8 @@ module *load_text(module *m, const char *src, const char *filename)
 	}
 
 	module *save_m = p->m;
-	free(m->filename);
-	m->filename = save_filename;
+	//free(p->m->filename);
+	p->m->filename = save_filename;
 	destroy_parser(p);
 	return save_m;
 }
@@ -1037,7 +1037,7 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 			p->command = true;
 			p->consulting = false;
 
-			if (run(p, "(:- initialization(__G_)), retract((:- initialization(_))), !, __G_", false, true))
+			if (run(p, "retract((:- initialization(__G_))), !, __G_", false, true))
 				p->m->pl->halt = true;
 		}
 
@@ -1047,7 +1047,7 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 
 	ok = !p->error;
 	destroy_parser(p);
-	free(m->filename);
+	//free(p->m->filename);
 	m->filename = save_filename;
 	return save_m;
 }
