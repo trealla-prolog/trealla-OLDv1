@@ -19,6 +19,23 @@
 
 static const unsigned INITIAL_TOKEN_SIZE = 100;		// bytes
 
+char *slicedup(const char *s, size_t n)
+{
+	char *ptr = malloc(n+1);
+	if (!ptr) return NULL;
+	memcpy(ptr, s, n);
+	ptr[n] = '\0';
+	return ptr;
+}
+
+int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2)
+{
+	size_t min_len = len1 < len2 ? len1 : len2;
+	int val = memcmp(s1, s2, min_len);
+	if (val) return val > 0 ? 1 : -1;
+	return len1 < len2 ? -1 : len1 > len2 ? 1 : 0;
+}
+
 static const char *get_filename(const char *path)
 {
 	const char *ptr = strrchr(path, '/');
