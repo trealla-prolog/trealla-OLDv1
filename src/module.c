@@ -1225,7 +1225,7 @@ void destroy_module(module *m)
 
 	m_destroy(m->index);
 	destroy_parser(m->p);
-	//free(m->filename);
+	free(m->filename);
 	free(m->name);
 	free(m);
 }
