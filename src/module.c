@@ -935,7 +935,7 @@ module *load_text(module *m, const char *src, const char *filename)
 	}
 
 	module *save_m = p->m;
-	//free(p->m->filename);
+	free(p->m->filename);
 	p->m->filename = save_filename;
 	destroy_parser(p);
 	return save_m;
@@ -1047,7 +1047,7 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 
 	ok = !p->error;
 	destroy_parser(p);
-	//free(p->m->filename);
+	free(p->m->filename);
 	m->filename = save_filename;
 	return save_m;
 }
