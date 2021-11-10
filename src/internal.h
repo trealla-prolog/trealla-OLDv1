@@ -614,7 +614,7 @@ struct parser_ {
 
 struct loaded_file {
 	struct loaded_file *next;
-	char filename[PATH_MAX];
+	const char *filename;
 };
 
 #define MAX_MODULES_USED 64
@@ -624,8 +624,7 @@ struct module_ {
 	prolog *pl;
 	module *used[MAX_MODULES_USED];
 	query *tasks;
-	const char *filename;
-	char *name;
+	const char *filename, *name;
 	predicate *head, *tail;
 	parser *p;
 	FILE *fp;

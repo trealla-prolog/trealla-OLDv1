@@ -878,8 +878,7 @@ static const char *set_loaded(module *m, const char *filename)
 
 	ptr = malloc(sizeof(*ptr));
 	ptr->next = m->loaded_files;
-	strncpy(ptr->filename, filename, PATH_MAX);
-	ptr->filename[PATH_MAX-1] = '\0';
+	ptr->filename = GET_STRING_FROM_POOL(m->pl, filename);
 	m->loaded_files = ptr;
 	return ptr->filename;
 }
@@ -1223,7 +1222,6 @@ void destroy_module(module *m)
 
 	m_destroy(m->index);
 	destroy_parser(m->p);
-	free(m->name);
 	free(m);
 }
 
@@ -1234,7 +1232,7 @@ module *create_module(prolog *pl, const char *name)
 
 	m->pl = pl;
 	m->filename = GET_STRING_FROM_POOL(pl, name);
-	m->name = strdup(name);
+	m->name = GET_STRING_FROM_POOL(m->pl, name);
 	m->flag.unknown = UNK_ERROR;
 	m->flag.double_quote_chars = true;
 	m->flag.character_escapes = true;
