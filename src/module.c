@@ -902,8 +902,8 @@ module *load_text(module *m, const char *src, const char *filename)
 {
 	parser *p = create_parser(m);
 	if (!p) return NULL;
-	char *save_filename = p->m->filename;
-	p->m->filename = strdup(filename);
+	const char *save_filename = p->m->filename;
+	p->m->filename = GET_STRING_FROM_POOL(m->pl, filename);
 	p->consulting = true;
 	p->srcptr = (char*)src;
 	tokenize(p, false, false);
@@ -935,7 +935,6 @@ module *load_text(module *m, const char *src, const char *filename)
 	}
 
 	module *save_m = p->m;
-	//free(p->m->filename);
 	p->m->filename = save_filename;
 	destroy_parser(p);
 	return save_m;
@@ -998,8 +997,8 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 {
 	parser *p = create_parser(m);
 	if (!p) return NULL;
-	char *save_filename = m->filename;
-	m->filename = strdup(filename);
+	const char *save_filename = m->filename;
+	m->filename = GET_STRING_FROM_POOL(m->pl, filename);
 	p->consulting = true;
 	p->fp = fp;
 	bool ok = false;
@@ -1047,7 +1046,6 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 
 	ok = !p->error;
 	destroy_parser(p);
-	//free(p->m->filename);
 	m->filename = save_filename;
 	return save_m;
 }
@@ -1225,7 +1223,6 @@ void destroy_module(module *m)
 
 	m_destroy(m->index);
 	destroy_parser(m->p);
-	free(m->filename);
 	free(m->name);
 	free(m);
 }
@@ -1236,7 +1233,7 @@ module *create_module(prolog *pl, const char *name)
 	ensure(m);
 
 	m->pl = pl;
-	m->filename = strdup(name);
+	m->filename = GET_STRING_FROM_POOL(pl, name);
 	m->name = strdup(name);
 	m->flag.unknown = UNK_ERROR;
 	m->flag.double_quote_chars = true;

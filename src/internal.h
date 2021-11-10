@@ -204,6 +204,8 @@ typedef struct {
 #define CMP_SLICES(x,c1,c2) _CMP_SLICES((x)->pl, c1, c2)
 #define DUP_SLICE(x,c) _DUP_SLICE((x)->pl, c)
 
+#define GET_STRING_FROM_POOL(pl,s) (const char*)((pl)->pool + index_from_pool(pl, s))
+
 // If changing the order of these: see runtime.c dispatch table
 
 enum {
@@ -622,7 +624,8 @@ struct module_ {
 	prolog *pl;
 	module *used[MAX_MODULES_USED];
 	query *tasks;
-	char *name, *filename;
+	const char *filename;
+	char *name;
 	predicate *head, *tail;
 	parser *p;
 	FILE *fp;
