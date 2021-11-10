@@ -568,25 +568,22 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 USE_RESULT pl_status fn_iso_throw_1(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
+	cell *e;
 
 	if (is_cyclic_term(q, p1, p1_ctx)) {
-		cell *e = malloc(sizeof(cell) * p1->nbr_cells);
+		e = malloc(sizeof(cell) * p1->nbr_cells);
 		may_ptr_error(e);
 		safe_copy_cells(e, p1, p1->nbr_cells);
-
-		if (!find_exception_handler(q, e))
-			return pl_failure;
 	} else {
 		cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
 		may_ptr_error(tmp);
-		cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
+		e = malloc(sizeof(cell) * tmp->nbr_cells);
 		may_ptr_error(e);
 		safe_copy_cells(e, tmp, tmp->nbr_cells);
-		may_ptr_error(e);
-
-		if (!find_exception_handler(q, e))
-			return pl_failure;
 	}
+
+	if (!find_exception_handler(q, e))
+		return pl_failure;
 
 	return fn_iso_catch_3(q);
 }
