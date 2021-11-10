@@ -526,7 +526,7 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 		if (!ch->catchme_retry)
 			continue;
 
-		cell *tmp = copy_to_heap(q, false, e, e_ctx, 0);
+		cell *tmp = deep_copy_to_tmp(q, e, e_ctx, false, false);
 		may_ptr_error(tmp);
 		cell *e2 = malloc(sizeof(cell) * tmp->nbr_cells);
 		may_ptr_error(e2);
