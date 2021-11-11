@@ -94,6 +94,9 @@ setup_call_cleanup(S, G, C) :-
 		(catch((\+ \+ call(C)), _, true), throw(Err))
 	).
 
+throw(E) :-
+	'$throw'(E).
+
 catch(G, E, C) :-
 	'$get_level'(Before),
 	'$call'('$catch'(G, E, C)),
