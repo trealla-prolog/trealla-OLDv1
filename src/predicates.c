@@ -2517,8 +2517,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 		if (!len)
 			return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-		filename = src;
+		filename = src = chars_list_to_string(q, p1, p1_ctx, len);
 	}
 
 	stream *str = &g_streams[n];
@@ -2526,6 +2525,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	may_ptr_error(str->name = strdup(filename));
 	may_ptr_error(str->mode = DUP_SLICE(q, p2));
 	str->eof_action = eof_action_eof_code;
+	free(src);
 
 #if USE_MMAP
 	cell *mmap_var = NULL;
@@ -2618,22 +2618,22 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			return throw_error(q, p2, p2_ctx, "domain_error", "io_mode");
 	} else {
 		if (!strcmp(str->mode, "read"))
-			str->fp = fopen(filename, str->binary?"rb":"r");
+			str->fp = fopen(str->filename, str->binary?"rb":"r");
 		else if (!strcmp(str->mode, "write"))
-			str->fp = fopen(filename, str->binary?"wb":"w");
+			str->fp = fopen(str->filename, str->binary?"wb":"w");
 		else if (!strcmp(str->mode, "append"))
-			str->fp = fopen(filename, str->binary?"ab":"a");
+			str->fp = fopen(str->filename, str->binary?"ab":"a");
 		else if (!strcmp(str->mode, "update"))
-			str->fp = fopen(filename, str->binary?"rb+":"r+");
+			str->fp = fopen(str->filename, str->binary?"rb+":"r+");
 		else
 			return throw_error(q, p2, p2_ctx, "domain_error", "io_mode");
 	}
 
-	free(src);
-
 	if (!str->fp) {
 		if ((errno == EACCES) || (strcmp(str->mode, "read") && (errno == EROFS)))
 			return throw_error(q, p1, p1_ctx, "permission_error", "open,source_sink");
+		else if ((strcmp(str->mode, "read") && (errno == EISDIR)))
+			return throw_error(q, p1, p1_ctx, "permission_error", "open,isadir");
 		else
 			return throw_error(q, p1, p1_ctx, "existence_error", "source_sink");
 	}
