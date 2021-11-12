@@ -10883,7 +10883,7 @@ static USE_RESULT pl_status fn_sys_get_level_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
-	make_int(&tmp, q->cp>1?q->cp-1:1);
+	make_int(&tmp, ((pl_int_t)q->cp)-1);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
@@ -11146,7 +11146,7 @@ static const struct builtins g_predicates_other[] =
 
 	{"$register_cleanup", 1, fn_sys_register_cleanup_1, NULL, false},
 	{"$register_term", 1, fn_sys_register_term_1, NULL, false},
-	{"$chk_is_det", 1, fn_sys_chk_is_det_1, "+integer", false},
+	{"$cleanup_if_det", 1, fn_sys_cleanup_if_det_1, "+integer", false},
 	{"$get_level", 1, fn_sys_get_level_1, "-var", false},
 
 	// Edinburgh...

@@ -27,11 +27,11 @@ USE_RESULT pl_status fn_sys_cut_if_det_0(query *q)
 	return pl_success;
 }
 
-USE_RESULT pl_status fn_sys_chk_is_det_1(query *q)
+USE_RESULT pl_status fn_sys_cleanup_if_det_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 
-	if (get_smallint(p1) != (q->cp-1))
+	if ((get_smallint(p1)+1) != q->cp)
 		return pl_success;
 
 	drop_choice(q);
@@ -57,7 +57,7 @@ USE_RESULT pl_status fn_sys_cut_if_det_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 
-	if ((q->cp-1) != get_smallint(p1))
+	if ((get_smallint(p1)+1) != q->cp)
 		return pl_success;
 
 	drop_choice(q);

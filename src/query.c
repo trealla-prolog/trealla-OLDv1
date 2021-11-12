@@ -1932,9 +1932,16 @@ pl_status execute(query *q, cell *cells, unsigned nbr_vars)
 	q->st.m->pl->did_dump_vars = false;
 	q->st.curr_cell = cells;
 	q->st.sp = nbr_vars;
-	q->st.fp = 1;
 	q->abort = false;
 	q->cycle_error = false;
+
+	// There is initially a frame (hence fp=0 is valid), so
+	// this points to the next available frame...
+	q->st.fp = 1;
+
+	// There may not be a choice-point, so this points to the
+	// next available choice-point
+	q->cp = 0;
 
 	frame *g = q->frames + q->st.curr_frame;
 	g->nbr_vars = nbr_vars;

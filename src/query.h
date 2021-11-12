@@ -41,7 +41,7 @@ extern void trim_trail(query *q);
 extern void share_predicate(predicate *pr);
 extern void unshare_predicate(query *q, predicate *pr);
 
-extern pl_status fn_sys_chk_is_det_1(query *q);
+extern pl_status fn_sys_cleanup_if_det_1(query *q);
 extern pl_status fn_sys_cut_if_det_0(query *q);
 extern pl_status fn_sys_cut_if_det_1(query *q);
 extern pl_status fn_iso_throw_1(query *q);
