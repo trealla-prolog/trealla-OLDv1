@@ -543,12 +543,10 @@ pl_idx_t drop_choice(query *q)
 	if (!q->cp)
 		return q->cp;
 
-	pl_idx_t curr_choice = --q->cp;
-
-	if (!q->cp)
+	if (!--q->cp)
 		q->st.cgen = 0;
 
-	return curr_choice;
+	return q->cp;
 }
 
 bool retry_choice(query *q)
@@ -878,7 +876,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 
 		unshare_predicate(q, ch->st.pr2);
 		unshare_predicate(q, ch->st.pr);
-		q->cp--;
+		drop_choice(q);
 
 		if (ch->register_cleanup) {
 			if (ch->did_cleanup)
@@ -926,7 +924,7 @@ void cut_if_det(query *q)
 	choice *ch = GET_CURR_CHOICE();
 
 	if (ch->call_barrier && (ch->cgen == g->cgen))
-		q->cp--;
+		drop_choice(q);
 }
 
 // Continue to next rule in body
@@ -1792,7 +1790,7 @@ static bool any_outstanding_choices(query *q)
 			break;
 
 		ch--;
-		q->cp--;
+		drop_choice(q);
 	}
 
 	return q->cp > 0;
@@ -1890,7 +1888,7 @@ pl_status start(query *q)
 					if (!ch->barrier)
 						break;
 
-					q->cp--;
+					drop_choice(q);
 				}
 
 				if (any_outstanding_choices(q) && q->p && !q->run_init) {
