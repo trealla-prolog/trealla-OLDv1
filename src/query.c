@@ -854,7 +854,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 				return;
 			}
 
-			ch--;
+			drop_choice(q);
 		}
 
 		// A normal cut can't break through a barrier...
