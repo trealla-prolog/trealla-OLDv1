@@ -2632,8 +2632,8 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	if (!str->fp) {
 		if ((errno == EACCES) || (strcmp(str->mode, "read") && (errno == EROFS)))
 			return throw_error(q, p1, p1_ctx, "permission_error", "open,source_sink");
-		else if ((strcmp(str->mode, "read") && (errno == EISDIR)))
-			return throw_error(q, p1, p1_ctx, "permission_error", "open,isadir");
+		//else if ((strcmp(str->mode, "read") && (errno == EISDIR)))
+		//	return throw_error(q, p1, p1_ctx, "permission_error", "open,isadir");
 		else
 			return throw_error(q, p1, p1_ctx, "existence_error", "source_sink");
 	}
