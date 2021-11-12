@@ -540,7 +540,14 @@ static void trim_heap(query *q, const choice *ch)
 
 pl_idx_t drop_choice(query *q)
 {
+	if (!q->cp)
+		return q->cp;
+
 	pl_idx_t curr_choice = --q->cp;
+
+	if (!q->cp)
+		q->st.cgen = 0;
+
 	return curr_choice;
 }
 
