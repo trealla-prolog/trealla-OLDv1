@@ -520,8 +520,8 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 		if (ch->block_catcher)
 			continue;
 
-		if (ch->register_cleanup && ch->did_cleanup)
-			continue;
+		//if (ch->register_cleanup && ch->did_cleanup)
+		//	continue;
 
 		if (!ch->catchme_retry)
 			continue;

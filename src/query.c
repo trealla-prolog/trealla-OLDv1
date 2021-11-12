@@ -878,10 +878,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 		unshare_predicate(q, ch->st.pr);
 		q->cp--;
 
-		if (ch->register_cleanup) {
-			if (ch->did_cleanup)
-				continue;
-
+		if (ch->register_cleanup && !ch->did_cleanup) {
 			ch->did_cleanup = true;
 			cell *c = ch->st.curr_cell;
 			c = deref(q, c, ch->st.curr_frame);
