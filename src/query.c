@@ -884,11 +884,12 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 
 			ch->did_cleanup = true;
 			cell *c = ch->st.curr_cell;
-			//c = deref(q, c, ch->st.curr_frame);
-			cell *p1 = deref(q, c+1, ch->st.curr_frame);
-			pl_idx_t p1_ctx = q->latest_ctx;
-			cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, false);
-			unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
+			c = deref(q, c, ch->st.curr_frame);
+			pl_idx_t c_ctx = q->latest_ctx;
+			c = deref(q, c+1, c_ctx);
+			c_ctx = q->latest_ctx;
+			cell *tmp = deep_copy_to_heap(q, c, c_ctx, false, false);
+			unify(q, c, c_ctx, tmp, q->st.curr_frame);
 			do_cleanup(q, tmp);
 			break;
 		}
