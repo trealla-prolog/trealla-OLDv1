@@ -854,7 +854,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 				return;
 			}
 
-			drop_choice(q);
+			ch--;
 		}
 
 		// A normal cut can't break through a barrier...
@@ -876,7 +876,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 
 		unshare_predicate(q, ch->st.pr2);
 		unshare_predicate(q, ch->st.pr);
-		drop_choice(q);
+		q->cp--;
 
 		if (ch->register_cleanup) {
 			if (ch->did_cleanup)
