@@ -16,25 +16,15 @@ frozen(Var, Term) :-
 	;	Term = true
 	).
 
-/*
-verify_attributes(Var, _, Goals) :-
-	get_atts(Var, frozen(Term)), !,
-	( var(Term)
-	->	Goals = []
-	;	Goals = [Term]
-	).
-verify_attributes(_, _, []).
-*/
-
 verify_attributes(Var, Other, Goals) :-
-	get_atts(Var, frozen(Fa)), !,
+	get_atts(Var, frozen(VarT)), !,
 	( var(Other)
-	-> ( get_atts(Other,  frozen(Fb))
-		->	put_atts(Other,  frozen((Fb,Fa)))
-		;	put_atts(Other,  frozen(Fa))
+	-> ( get_atts(Other, frozen(OtherT))
+		->	put_atts(Other, frozen((OtherT, VarT)))
+		;	put_atts(Other, frozen(VarT))
 		),
 		Goals = []
-	;   Goals = [Fa]
+	;   Goals = [VarT]
 	).
 verify_attributes(_, _, []).
 
