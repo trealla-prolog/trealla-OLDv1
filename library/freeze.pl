@@ -17,14 +17,14 @@ frozen(Var, Term) :-
 	).
 
 verify_attributes(Var, Other, Goals) :-
-	get_atts(Var, frozen(VarT)), !,
+	get_atts(Var, frozen(VarGoals)), !,
 	( var(Other)
-	-> ( get_atts(Other, frozen(OtherT))
-		->	put_atts(Other, frozen((OtherT, VarT)))
-		;	put_atts(Other, frozen(VarT))
+	-> ( get_atts(Other, frozen(OtherGoals))
+		->	put_atts(Other, frozen((OtherGoals, VarGoals)))
+		;	put_atts(Other, frozen(VarGoals))
 		),
 		Goals = []
-	;   Goals = [VarT]
+	;   Goals = [VarGoals]
 	).
 verify_attributes(_, _, []).
 
