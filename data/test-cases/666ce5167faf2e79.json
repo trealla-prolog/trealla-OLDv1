@@ -1,0 +1,51 @@
+{
+  "uid" : "666ce5167faf2e79",
+  "name" : "lgt_unicode_escape_sequence_bmp_04",
+  "fullName" : "lgt_unicode_escape_sequence_bmp_04::tests",
+  "historyId" : "lgt_unicode_escape_sequence_bmp_04::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "unicode/syntax/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "unicode/syntax/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "unicode/syntax/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "unicode/syntax/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "104-105"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/9faf5dbd41dcda13eefe9bff6f1dfa22e6d84b6c/tests/prolog/unicode/syntax/tests.lgt#L104"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "666ce5167faf2e79.json",
+  "parameterValues" : [ "unicode/syntax/tests.lgt", "104-105", "https://github.com/LogtalkDotOrg/logtalk3/tree/9faf5dbd41dcda13eefe9bff6f1dfa22e6d84b6c/tests/prolog/unicode/syntax/tests.lgt#L104" ]
+}
