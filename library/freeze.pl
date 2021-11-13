@@ -5,25 +5,36 @@
 :- attribute frozen/1.
 
 freeze(Var, Term) :-
-	( nonvar(Var) ->
-		call(Term)
-	;
-		put_atts(Var, frozen(Term))
+	(	nonvar(Var)
+	->	call(Term)
+	;	put_atts(Var, frozen(Term))
 	).
 
 frozen(Var, Term) :-
-	( get_atts(Var, frozen(Term)) ->
-		true
-	;
-		Term = true
+	( get_atts(Var, frozen(Term))
+	->	true
+	;	Term = true
 	).
 
+/*
 verify_attributes(Var, _, Goals) :-
 	get_atts(Var, frozen(Term)), !,
-	( var(Term) ->
+	( var(Term)
+	->	Goals = []
+	;	Goals = [Term]
+	).
+verify_attributes(_, _, []).
+*/
+
+verify_attributes(Var, Other, Goals) :-
+	get_atts(Var, frozen(Fa)), !,
+	( var(Other)
+	-> ( get_atts(Other,  frozen(Fb))
+		->	put_atts(Other,  frozen((Fb,Fa)))
+		;	put_atts(Other,  frozen(Fa))
+		),
 		Goals = []
-	;
-		Goals = [Term]
+	;   Goals = [Fa]
 	).
 verify_attributes(_, _, []).
 
