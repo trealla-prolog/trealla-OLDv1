@@ -8109,8 +8109,15 @@ static USE_RESULT pl_status fn_format_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,list_or_nil);
-	int ok = do_format(q, NULL, 0, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
-	return ok;
+
+	if (is_nil(p1)) {
+		if (is_nil(p2))
+			return pl_success;
+		else
+			return throw_error(q, p2, p2_ctx, "domain_error", "list");
+	}
+
+	return do_format(q, NULL, 0, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
 }
 
 static USE_RESULT pl_status fn_format_3(query *q)
@@ -8118,8 +8125,15 @@ static USE_RESULT pl_status fn_format_3(query *q)
 	GET_FIRST_ARG(pstr,any);
 	GET_NEXT_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,list_or_nil);
-	int ok = do_format(q, pstr, pstr_ctx, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
-	return ok;
+
+	if (is_nil(p1)) {
+		if (is_nil(p2))
+			return pl_success;
+		else
+			return throw_error(q, p2, p2_ctx, "domain_error", "list");
+	}
+
+	return do_format(q, pstr, pstr_ctx, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
 }
 
 #if USE_OPENSSL
