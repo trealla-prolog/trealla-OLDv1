@@ -34,6 +34,17 @@
       "total" : 75
     }
   }, {
+    "uid" : "2fa097f54728c3cdaa06f09f04fafff8",
+    "name" : "predicates/write_term_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 66,
+      "unknown" : 0,
+      "total" : 66
+    }
+  }, {
     "uid" : "0da529a0a6949d3d5150b9a550fbf922",
     "name" : "predicates/format_3/tests_chars.lgt::tests_chars",
     "statistic" : {
@@ -78,17 +89,6 @@
       "total" : 62
     }
   }, {
-    "uid" : "430a68e04dd3714567bd0708385427c4",
-    "name" : "predicates/format_2/tests_chars.lgt::tests_chars",
-    "statistic" : {
-      "failed" : 0,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 62,
-      "unknown" : 0,
-      "total" : 62
-    }
-  }, {
     "uid" : "35ce7c65630bce1fdc47cff730339d9c",
     "name" : "predicates/format_2/tests_codes.lgt::tests_codes",
     "statistic" : {
@@ -100,15 +100,15 @@
       "total" : 62
     }
   }, {
-    "uid" : "2fa097f54728c3cdaa06f09f04fafff8",
-    "name" : "predicates/write_term_3/tests.lgt::tests",
+    "uid" : "430a68e04dd3714567bd0708385427c4",
+    "name" : "predicates/format_2/tests_chars.lgt::tests_chars",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 57,
+      "passed" : 62,
       "unknown" : 0,
-      "total" : 57
+      "total" : 62
     }
   } ]
 }
