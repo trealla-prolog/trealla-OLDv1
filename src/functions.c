@@ -17,7 +17,7 @@
 #include "heap.h"
 
 #define SET_ACCUM() {											\
-	q->accum.tag = TAG_INT;									\
+	q->accum.tag = TAG_INT;										\
 	q->accum.flags = FLAG_MANAGED;								\
 	q->accum.val_bigint = malloc(sizeof(bigint));				\
 	q->accum.val_bigint->refcnt = 0;							\
@@ -78,6 +78,7 @@ static void clr_accum(cell *p)
 		} else if (is_real(&p1)) { \
 			double d = BIGINT_TO_DOUBLE(&p2.val_bigint->ival); \
 			q->accum.val_real = p1.val_real op d; \
+			if (isinf(q->accum.val_real)) return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "float_overflow"); \
 			q->accum.tag = TAG_REAL; \
 			q->accum.flags = 0; \
 		} \
