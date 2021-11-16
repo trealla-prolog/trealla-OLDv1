@@ -535,7 +535,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 
         default:
 			free(tmpbuf);
-			return throw_error(q, c, q->st.curr_frame, "existence_error", "format_charcter");
+			return throw_error(q, c, q->st.curr_frame, "existence_error", "format_character");
 		}
 
 		dst += len;
