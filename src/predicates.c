@@ -1166,6 +1166,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 
 	if (!is_variable(p2) && !any_vars) {
 		char *tmpbuf = malloc(cnt+1+1);
+		may_ptr_error(tmpbuf);
 		char *dst = tmpbuf;
 		*dst = '\0';
 		LIST_HANDLER(p2);
@@ -1409,6 +1410,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 
 	if (!is_variable(p2) && !any_vars) {
 		char *tmpbuf = malloc((cnt*6)+1+1);
+		may_ptr_error(tmpbuf);
 		char *dst = tmpbuf;
 		*dst = '\0';
 		LIST_HANDLER(p2);
@@ -9867,6 +9869,7 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 			continue;
 
 		cell *tmp = malloc(sizeof(cell)*(2+c->nbr_cells));
+		may_ptr_error(tmp);
 		make_structure(tmp, g_unify_s, fn_iso_unify_2, 2, 1+c->nbr_cells);
 		SET_OP(tmp, OP_XFX);
 		tmp[1] = *p;
@@ -9900,6 +9903,7 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 			continue;
 
 		cell *tmp = malloc(sizeof(cell)*(2+c->nbr_cells));
+		may_ptr_error(tmp);
 		make_structure(tmp, g_unify_s, fn_iso_unify_2, 2, 1+c->nbr_cells);
 		SET_OP(tmp, OP_XFX);
 		tmp[1] = *p;
