@@ -9846,6 +9846,9 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 	}
 
 	q->in_hook = false;
+
+	// Find all the variables on the LHS that have been bound...
+
 	cell *p = p1;
 	pl_idx_t p_ctx = p1_ctx;
 	pl_idx_t nbr_cells = p->nbr_cells;
@@ -9878,6 +9881,8 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 		free(tmp);
 	}
 
+	// Find all the variables on the RHS that have been bound...
+
 	p = p2;
 	p_ctx = p2_ctx;
 	nbr_cells = p->nbr_cells;
@@ -9886,22 +9891,7 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 		if (!is_variable(p))
 			continue;
 
-		// Ignore duplicates
-
-		cell *p_tmp = p1;
-		bool redo = false;
-
-		for (pl_idx_t j = 0; j < p1->nbr_cells; j++, p_tmp++) {
-			if (!is_variable(p_tmp))
-				continue;
-
-			if (deref(q, p_tmp, p1_ctx) == deref(q, p, p2_ctx)) {
-				redo = true;
-				break;
-			}
-		}
-
-		if (redo)
+		if (!first && search_tmp_list(q, p))
 			continue;
 
 		cell *c = deref(q, p, p_ctx);
