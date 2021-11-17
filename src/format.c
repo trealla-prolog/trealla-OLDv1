@@ -176,6 +176,10 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 
 			argval = get_smallint(c);
 			ch = get_next_char(q, &fmt1);
+		} else if (ch == '`') {
+			ch = get_next_char(q, &fmt1);
+			argval = ch;
+			ch = get_next_char(q, &fmt1);
 		} else {
 			while (isdigit(ch)) {
 				noargval = 0;
