@@ -925,7 +925,7 @@ module *load_text(module *m, const char *src, const char *filename)
 			p->consulting = false;
 			p->command = true;
 
-			if (run(p, "forall(retract((:- initialization(__G_))), !, __G_)", false, true))
+			if (run(p, "forall(retract((:- initialization(__G_))), __G_)", false, true))
 				p->m->pl->halt = true;
 		}
 
