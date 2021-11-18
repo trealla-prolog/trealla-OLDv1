@@ -22,7 +22,6 @@ extern bool needs_quoting(module *m, const char *src, int srclen);
 extern void do_db_load(module *m);
 extern int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, int depth);
 extern bool unload_file(module *m, const char *filename);
-extern bool is_loaded(module *m, const char *filename);
 
 extern clause *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting);
 extern clause *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting);

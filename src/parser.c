@@ -379,9 +379,6 @@ static void directives(parser *p, cell *d)
 		const char *name = GET_STR(p, p1);
 		char *filename = relative_to(p->m->filename, name);
 
-		if (is_loaded(p->m, filename))
-			return;
-
 		if (!load_file(p->m, filename)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: not found: %s\n", filename);

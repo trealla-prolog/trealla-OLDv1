@@ -883,7 +883,7 @@ static const char *set_loaded(module *m, const char *filename)
 	return ptr->filename;
 }
 
-bool is_loaded(module *m, const char *filename)
+static bool is_loaded(const module *m, const char *filename)
 {
 	struct loaded_file *ptr = m->loaded_files;
 
@@ -1090,6 +1090,10 @@ module *load_file(module *m, const char *filename)
 	}
 
 	free(tmpbuf);
+
+	if (is_loaded(m, realbuf))
+		return m;
+
 	filename = set_loaded(m, realbuf);
 	FILE *fp = fopen(filename, "r");
 
