@@ -31,7 +31,7 @@ typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 // Note: when in commit there is a provisional choice point
 // that we should skip over, hence the '2' ...
 
-static bool any_choices(query *q, frame *g, bool in_commit)
+static bool any_choices(const query *q, const frame *g, bool in_commit)
 {
 	if (q->cp < (in_commit ? 2 : 1))
 		return false;
@@ -962,7 +962,16 @@ static bool resume_frame(query *q)
 
 	if ((q->st.curr_frame == (q->st.fp-1))
 		&& q->st.m->pl->opt && r->is_tail_rec
-		&& !any_choices(q, g, false) && check_slots(q, g, r))
+		&& !any_choices(q, g, false)
+		&& check_slots(q, g, r))
+		q->st.fp--;
+#endif
+
+#if 0
+	if ((q->st.curr_frame == (q->st.fp-1))
+		&& q->st.m->pl->opt
+		&& !any_choices(q, g, false)
+		&& !g->is_dirty)
 		q->st.fp--;
 #endif
 
