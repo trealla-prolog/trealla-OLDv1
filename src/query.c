@@ -31,12 +31,12 @@ typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 // Note: when in commit there is a provisional choice point
 // that we should skip over, hence the '2' ...
 
-static bool any_choices(const query *q, const frame *f, bool in_commit)
+static bool any_choices(const query *q, const frame *f)
 {
-	if (q->cp < (in_commit ? 2 : 1))
+	if (q->cp < (q->in_commit ? 2 : 1))
 		return false;
 
-	pl_idx_t curr_choice = q->cp - (in_commit ? 2 : 1);
+	pl_idx_t curr_choice = q->cp - (q->in_commit ? 2 : 1);
 	const choice *ch = GET_CHOICE(curr_choice);
 	return ch->cgen >= f->cgen ? true : false;
 }
@@ -71,7 +71,7 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 #if DEBUG
 	frame *f = GET_CURR_FRAME();
 	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u:tp%u:cp%u:fp%u:sp%u:hp%u} ",
-		q->st.curr_frame, f->nbr_vars, f->nbr_slots, any_choices(q, f, false),
+		q->st.curr_frame, f->nbr_vars, f->nbr_slots, any_choices(q, f),
 		q->st.tp, q->cp, q->st.fp, q->st.sp, q->st.hp);
 #endif
 
@@ -724,13 +724,14 @@ void unshare_predicate(query *q, predicate *pr)
 
 static void commit_me(query *q, rule *r)
 {
+	q->in_commit = true;
 	frame *f = GET_CURR_FRAME();
 	f->m = q->st.m;
 	q->st.m = q->st.curr_clause->owner->m;
 	bool implied_first_cut = q->check_unique && !q->has_vars && r->is_unique;
 	bool last_match = implied_first_cut || r->is_first_cut || !is_next_key(q, r);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
-	bool choices = any_choices(q, f, true);
+	bool choices = any_choices(q, f);
 	bool slots_ok = check_slots(q, f, r);
 	bool tco = last_match && !q->no_tco && recursive && !choices && slots_ok;
 	choice *ch = GET_CURR_CHOICE();
@@ -759,6 +760,7 @@ static void commit_me(query *q, rule *r)
 
 	q->st.curr_cell = get_body(r->cells);
 	//memset(q->nv_mask, 0, MAX_ARITY);
+	q->in_commit = false;
 }
 
 void stash_me(query *q, rule *r, bool last_match)
@@ -957,12 +959,14 @@ static bool resume_frame(query *q)
 
 	frame *f = GET_CURR_FRAME();
 
+	//printf("*** resume is_dirty=%d\n", f->is_dirty);
+
 #if 0
 	rule *r = &q->st.curr_clause->r;
 
 	if ((q->st.curr_frame == (q->st.fp-1))
 		&& q->st.m->pl->opt && r->is_tail_rec
-		&& !any_choices(q, g, false)
+		&& !any_choices(q, g)
 		&& check_slots(q, g, r))
 		q->st.fp--;
 #endif
@@ -970,7 +974,7 @@ static bool resume_frame(query *q)
 #if 0
 	if ((q->st.curr_frame == (q->st.fp-1))
 		&& q->st.m->pl->opt
-		&& !any_choices(q, g, false)
+		&& !any_choices(q, g)
 		&& !f->is_dirty)
 		q->st.fp--;
 #endif

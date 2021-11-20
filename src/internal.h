@@ -573,6 +573,7 @@ struct query_ {
 	bool run_init:1;
 	bool varnames:1;
 	bool listing:1;
+	bool in_commit:1;
 };
 
 struct parser_ {
