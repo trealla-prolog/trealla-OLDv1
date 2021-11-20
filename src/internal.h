@@ -429,6 +429,7 @@ typedef struct {
 	uint64_t ugen;
 	pl_idx_t prev_frame, base_slot_nbr, overflow;
 	uint32_t nbr_slots, nbr_vars, cgen;
+	bool is_dirty:1;
 } frame;
 
 enum { eof_action_eof_code, eof_action_error, eof_action_reset };
@@ -486,6 +487,7 @@ typedef struct {
 	bool block_catcher:1;
 	bool catcher:1;
 	bool is_tail_rec:1;
+	bool is_dirty:1;
 } choice;
 
 typedef struct arena_ arena;

@@ -575,6 +575,7 @@ LOOP:
 	g->nbr_vars = ch->nbr_vars;
 	g->nbr_slots = ch->nbr_slots;
 	g->overflow = ch->overflow;
+	g->is_dirty = ch->is_dirty;
 	return true;
 }
 
@@ -586,6 +587,7 @@ static frame *make_frame(query *q, unsigned nbr_vars)
 	g->prev_cell = q->st.curr_cell;
 	g->cgen = ++q->st.cgen;
 	g->overflow = 0;
+	g->is_dirty = false;
 
 	q->st.sp += nbr_vars;
 	q->st.curr_frame = new_frame;
@@ -801,6 +803,7 @@ pl_status make_choice(query *q)
 	ch->nbr_vars = g->nbr_vars;
 	ch->nbr_slots = g->nbr_slots;
 	ch->overflow = g->overflow;
+	ch->is_dirty = g->is_dirty;
 
 	return pl_success;
 }
@@ -1034,7 +1037,7 @@ static void add_trail(query *q, pl_idx_t c_ctx, unsigned c_var_nbr, cell *attrs,
 
 void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 {
-	const frame *g = GET_FRAME(c_ctx);
+	frame *g = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(g, c->var_nbr);
 	e->ctx = v_ctx;
 	cell *attrs = NULL;
@@ -1052,6 +1055,8 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		share_cell(v);
 		e->c = *v;
 	}
+
+	g->is_dirty = true;
 
 	if (attrs) {
 		if (is_variable(v)) {
