@@ -928,7 +928,7 @@ void cut_if_det(query *q)
 		drop_choice(q);
 }
 
-// Continue to next rule in body
+// Proceed to next goal in frame...
 
 static void proceed(query *q)
 {
@@ -948,7 +948,7 @@ static void proceed(query *q)
 	}
 }
 
-// Reached end of body, return to previous frame
+// Resume previous frame...
 
 static bool resume_frame(query *q)
 {
