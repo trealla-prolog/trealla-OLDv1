@@ -31,14 +31,14 @@ typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 // Note: when in commit there is a provisional choice point
 // that we should skip over, hence the '2' ...
 
-static bool any_choices(const query *q, const frame *g, bool in_commit)
+static bool any_choices(const query *q, const frame *f, bool in_commit)
 {
 	if (q->cp < (in_commit ? 2 : 1))
 		return false;
 
 	pl_idx_t curr_choice = q->cp - (in_commit ? 2 : 1);
 	const choice *ch = GET_CHOICE(curr_choice);
-	return ch->cgen >= g->cgen ? true : false;
+	return ch->cgen >= f->cgen ? true : false;
 }
 
 static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
@@ -69,9 +69,9 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 		"????");
 
 #if DEBUG
-	frame *g = GET_CURR_FRAME();
+	frame *f = GET_CURR_FRAME();
 	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u:tp%u:cp%u:fp%u:sp%u:hp%u} ",
-		q->st.curr_frame, g->nbr_vars, g->nbr_slots, any_choices(q, g, false),
+		q->st.curr_frame, f->nbr_vars, f->nbr_slots, any_choices(q, f, false),
 		q->st.tp, q->cp, q->st.fp, q->st.sp, q->st.hp);
 #endif
 
@@ -475,8 +475,8 @@ static void unwind_trail(query *q, const choice *ch)
 {
 	while (q->st.tp > ch->st.tp) {
 		const trail *tr = q->trails + --q->st.tp;
-		const frame *g = GET_FRAME(tr->ctx);
-		slot *e = GET_SLOT(g, tr->var_nbr);
+		const frame *f = GET_FRAME(tr->ctx);
+		slot *e = GET_SLOT(f, tr->var_nbr);
 		unshare_cell(&e->c);
 		e->c.tag = TAG_EMPTY;
 		e->c.attrs = tr->attrs;
@@ -492,10 +492,10 @@ void undo_me(query *q)
 
 void try_me(query *q, unsigned nbr_vars)
 {
-	frame *g = GET_FRAME(q->st.fp);
-	g->nbr_slots = g->nbr_vars = nbr_vars;
-	g->base_slot_nbr = q->st.sp;
-	slot *e = GET_FIRST_SLOT(g);
+	frame *f = GET_FRAME(q->st.fp);
+	f->nbr_slots = f->nbr_vars = nbr_vars;
+	f->base_slot_nbr = q->st.sp;
+	slot *e = GET_FIRST_SLOT(f);
 
 	for (unsigned i = 0; i < nbr_vars; i++, e++) {
 		//unshare_cell(&e->c);
@@ -569,30 +569,30 @@ LOOP:
 	q->st = ch->st;
 	q->save_m = NULL;		// maybe move q->save_m to q->st.save_m
 
-	frame *g = GET_CURR_FRAME();
-	g->ugen = ch->ugen;
-	g->cgen = ch->orig_cgen;
-	g->nbr_vars = ch->nbr_vars;
-	g->nbr_slots = ch->nbr_slots;
-	g->overflow = ch->overflow;
-	g->is_dirty = ch->is_dirty;
+	frame *f = GET_CURR_FRAME();
+	f->ugen = ch->ugen;
+	f->cgen = ch->orig_cgen;
+	f->nbr_vars = ch->nbr_vars;
+	f->nbr_slots = ch->nbr_slots;
+	f->overflow = ch->overflow;
+	f->is_dirty = ch->is_dirty;
 	return true;
 }
 
 static frame *make_frame(query *q, unsigned nbr_vars)
 {
 	pl_idx_t new_frame = q->st.fp++;
-	frame *g = GET_FRAME(new_frame);
-	g->prev_frame = q->st.curr_frame;
-	g->prev_cell = q->st.curr_cell;
-	g->cgen = ++q->st.cgen;
-	g->overflow = 0;
-	g->is_dirty = false;
+	frame *f = GET_FRAME(new_frame);
+	f->prev_frame = q->st.curr_frame;
+	f->prev_cell = q->st.curr_cell;
+	f->cgen = ++q->st.cgen;
+	f->overflow = 0;
+	f->is_dirty = false;
 
 	q->st.sp += nbr_vars;
 	q->st.curr_frame = new_frame;
-	g = GET_FRAME(q->st.curr_frame);
-	return g;
+	f = GET_FRAME(q->st.curr_frame);
+	return f;
 }
 
 void trim_trail(query *q)
@@ -625,14 +625,14 @@ void trim_trail(query *q)
 
 static void reuse_frame(query *q, unsigned nbr_vars)
 {
-	const frame *newg = GET_FRAME(q->st.fp);
-	frame *g = GET_CURR_FRAME();
+	const frame *newf = GET_FRAME(q->st.fp);
+	frame *f = GET_CURR_FRAME();
 
 	const choice *ch = GET_CURR_CHOICE();
 	q->st.sp = ch->st.sp;
 
-	slot *from = GET_FIRST_SLOT(newg);
-	slot *to = GET_FIRST_SLOT(g);
+	slot *from = GET_FIRST_SLOT(newf);
+	slot *to = GET_FIRST_SLOT(f);
 
 	for (pl_idx_t i = 0; i < nbr_vars; i++) {
 		unshare_cell(&to->c);
@@ -642,28 +642,28 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	// If the new frame is smaller then the current one.
 	// I don't think this is possible at the moment...
 
-	for (unsigned i = nbr_vars; i < g->nbr_vars; i++, to++) {
+	for (unsigned i = nbr_vars; i < f->nbr_vars; i++, to++) {
 		unshare_cell(&to->c);
 		to->c.tag = TAG_EMPTY;
 		to->c.attrs = NULL;
 	}
 
-	g->cgen = newg->cgen;
-	g->nbr_slots = nbr_vars;
-	g->nbr_vars = nbr_vars;
-	g->overflow = 0;
+	f->cgen = newf->cgen;
+	f->nbr_slots = nbr_vars;
+	f->nbr_vars = nbr_vars;
+	f->overflow = 0;
 
-	q->st.sp = g->base_slot_nbr + nbr_vars;
+	q->st.sp = f->base_slot_nbr + nbr_vars;
 	q->tot_tcos++;
 }
 
-static bool check_slots(const query *q, frame *g, rule *r)
+static bool check_slots(const query *q, frame *f, rule *r)
 {
-	if (g->nbr_vars != r->nbr_vars)
+	if (f->nbr_vars != r->nbr_vars)
 		return false;
 
-	for (unsigned i = 0; i < g->nbr_vars; i++) {
-		const slot *e = GET_SLOT(g, i);
+	for (unsigned i = 0; i < f->nbr_vars; i++) {
+		const slot *e = GET_SLOT(f, i);
 
 		if (is_indirect(&e->c))
 			return false;
@@ -724,14 +724,14 @@ void unshare_predicate(query *q, predicate *pr)
 
 static void commit_me(query *q, rule *r)
 {
-	frame *g = GET_CURR_FRAME();
-	g->m = q->st.m;
+	frame *f = GET_CURR_FRAME();
+	f->m = q->st.m;
 	q->st.m = q->st.curr_clause->owner->m;
 	bool implied_first_cut = q->check_unique && !q->has_vars && r->is_unique;
 	bool last_match = implied_first_cut || r->is_first_cut || !is_next_key(q, r);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
-	bool choices = any_choices(q, g, true);
-	bool slots_ok = check_slots(q, g, r);
+	bool choices = any_choices(q, f, true);
+	bool slots_ok = check_slots(q, f, r);
 	bool tco = last_match && !q->no_tco && recursive && !choices && slots_ok;
 	choice *ch = GET_CURR_CHOICE();
 
@@ -743,7 +743,7 @@ static void commit_me(query *q, rule *r)
 	if (tco && q->st.m->pl->opt)
 		reuse_frame(q, r->nbr_vars);
 	else
-		g = make_frame(q, r->nbr_vars);
+		f = make_frame(q, r->nbr_vars);
 
 	if (last_match) {
 		q->st.curr_clause = NULL;
@@ -754,7 +754,7 @@ static void commit_me(query *q, rule *r)
 		trim_trail(q);
 	} else {
 		ch->st.curr_clause = q->st.curr_clause;
-		ch->cgen = g->cgen;
+		ch->cgen = f->cgen;
 	}
 
 	q->st.curr_cell = get_body(r->cells);
@@ -777,11 +777,11 @@ void stash_me(query *q, rule *r, bool last_match)
 
 	unsigned nbr_vars = r->nbr_vars;
 	pl_idx_t new_frame = q->st.fp++;
-	frame *g = GET_FRAME(new_frame);
-	g->prev_frame = q->st.curr_frame;
-	g->prev_cell = NULL;
-	g->cgen = cgen;
-	g->overflow = 0;
+	frame *f = GET_FRAME(new_frame);
+	f->prev_frame = q->st.curr_frame;
+	f->prev_cell = NULL;
+	f->cgen = cgen;
+	f->overflow = 0;
 
 	q->st.sp += nbr_vars;
 }
@@ -791,19 +791,19 @@ pl_status make_choice(query *q)
 	may_error(check_frame(q));
 	may_error(check_choice(q));
 
-	frame *g = GET_CURR_FRAME();
+	frame *f = GET_CURR_FRAME();
 	pl_idx_t curr_choice = q->cp++;
 	choice *ch = GET_CHOICE(curr_choice);
 	memset(ch, 0, sizeof(choice));
-	ch->ugen = g->ugen;
-	ch->orig_cgen = ch->cgen = g->cgen;
+	ch->ugen = f->ugen;
+	ch->orig_cgen = ch->cgen = f->cgen;
 	ch->st = q->st;
 
 	may_error(check_slot(q, MAX_ARITY));
-	ch->nbr_vars = g->nbr_vars;
-	ch->nbr_slots = g->nbr_slots;
-	ch->overflow = g->overflow;
-	ch->is_dirty = g->is_dirty;
+	ch->nbr_vars = f->nbr_vars;
+	ch->nbr_slots = f->nbr_slots;
+	ch->overflow = f->overflow;
+	ch->is_dirty = f->is_dirty;
 
 	return pl_success;
 }
@@ -814,9 +814,9 @@ pl_status make_choice(query *q)
 pl_status make_barrier(query *q)
 {
 	may_error(make_choice(q));
-	frame *g = GET_CURR_FRAME();
+	frame *f = GET_CURR_FRAME();
 	choice *ch = GET_CURR_CHOICE();
-	ch->cgen = g->cgen = ++q->st.cgen;
+	ch->cgen = f->cgen = ++q->st.cgen;
 	ch->barrier = true;
 	return pl_success;
 }
@@ -845,15 +845,15 @@ pl_status make_catcher(query *q, enum q_retry retry)
 
 void cut_me(query *q, bool inner_cut, bool soft_cut)
 {
-	frame *g = GET_CURR_FRAME();
+	frame *f = GET_CURR_FRAME();
 
 	while (q->cp) {
 		choice *ch = GET_CURR_CHOICE();
 
 		while (soft_cut) {
-			if (ch->barrier && (ch->cgen == g->cgen)) {
+			if (ch->barrier && (ch->cgen == f->cgen)) {
 				ch->soft_cut = true;
-				g->cgen--;
+				f->cgen--;
 				return;
 			}
 
@@ -862,14 +862,14 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 
 		// A normal cut can't break through a barrier...
 
-		if (!inner_cut && ch->barrier && (ch->cgen == g->cgen))
+		if (!inner_cut && ch->barrier && (ch->cgen == f->cgen))
 			break;
 
 		// Whereas an inner cut clears the barrier.
 
-		if (ch->cgen < g->cgen) {
+		if (ch->cgen < f->cgen) {
 			if (inner_cut)
-				g->cgen--;
+				f->cgen--;
 
 			break;
 		}
@@ -897,9 +897,9 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 #if 0
 		if (ch->is_tail_rec) {
 			printf("*** here2\n");
-			frame *g_prev = GET_FRAME(g->prev_frame);
-			g->prev_frame = g_prev->prev_frame;
-			g->prev_cell = g_prev->prev_cell;
+			frame *f_prev = GET_FRAME(f->prev_frame);
+			f->prev_frame = g_prev->prev_frame;
+			f->prev_cell = g_prev->prev_cell;
 			*g_prev = *g;
 			q->st.curr_frame--;
 			q->st.fp--;
@@ -917,14 +917,14 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 
 void cut_if_det(query *q)
 {
-	frame *g = GET_CURR_FRAME();
+	frame *f = GET_CURR_FRAME();
 
 	if (!q->cp)		// redundant
 		return;
 
 	choice *ch = GET_CURR_CHOICE();
 
-	if (ch->call_barrier && (ch->cgen == g->cgen))
+	if (ch->call_barrier && (ch->cgen == f->cgen))
 		drop_choice(q);
 }
 
@@ -933,12 +933,12 @@ void cut_if_det(query *q)
 static void proceed(query *q)
 {
 	q->st.curr_cell += q->st.curr_cell->nbr_cells;
-	frame *g = GET_CURR_FRAME();
+	frame *f = GET_CURR_FRAME();
 
 	while (q->st.curr_cell && is_end(q->st.curr_cell)) {
 		if (q->st.curr_cell->val_ptr) {
 			cut_if_det(q);
-			g->cgen = q->st.curr_cell->cgen;	// set the cgen back
+			f->cgen = q->st.curr_cell->cgen;	// set the cgen back
 		}
 
 		if (q->st.curr_cell->mod_nbr != q->st.m->id)
@@ -955,7 +955,7 @@ static bool resume_frame(query *q)
 	if (!q->st.curr_frame)
 		return false;
 
-	frame *g = GET_CURR_FRAME();
+	frame *f = GET_CURR_FRAME();
 
 #if 0
 	rule *r = &q->st.curr_clause->r;
@@ -971,14 +971,14 @@ static bool resume_frame(query *q)
 	if ((q->st.curr_frame == (q->st.fp-1))
 		&& q->st.m->pl->opt
 		&& !any_choices(q, g, false)
-		&& !g->is_dirty)
+		&& !f->is_dirty)
 		q->st.fp--;
 #endif
 
-	q->st.curr_cell = g->prev_cell;
-	q->st.curr_frame = g->prev_frame;
-	g = GET_CURR_FRAME();
-	q->st.m = g->m;
+	q->st.curr_cell = f->prev_cell;
+	q->st.curr_frame = f->prev_frame;
+	f = GET_CURR_FRAME();
+	q->st.m = f->m;
 	return true;
 }
 
@@ -993,40 +993,40 @@ void make_indirect(cell *tmp, cell *c)
 
 unsigned create_vars(query *q, unsigned cnt)
 {
-	frame *g = GET_CURR_FRAME();
+	frame *f = GET_CURR_FRAME();
 
 	if (!cnt)
-		return g->nbr_vars;
+		return f->nbr_vars;
 
-	unsigned var_nbr = g->nbr_vars;
+	unsigned var_nbr = f->nbr_vars;
 
 	if (check_slot(q, cnt) != pl_success)
 		return 0;
 
-	if ((g->base_slot_nbr + g->nbr_slots) >= q->st.sp) {
-		g->nbr_slots += cnt;
-		q->st.sp = g->base_slot_nbr + g->nbr_slots;
-	} else if (!g->overflow) {
-		g->overflow = q->st.sp;
+	if ((f->base_slot_nbr + f->nbr_slots) >= q->st.sp) {
+		f->nbr_slots += cnt;
+		q->st.sp = f->base_slot_nbr + f->nbr_slots;
+	} else if (!f->overflow) {
+		f->overflow = q->st.sp;
 		q->st.sp += cnt;
-	} else if ((g->overflow + (g->nbr_vars - g->nbr_slots)) == q->st.sp) {
+	} else if ((f->overflow + (f->nbr_vars - f->nbr_slots)) == q->st.sp) {
 		q->st.sp += cnt;
 	} else {
-		pl_idx_t save_overflow = g->overflow;
-		g->overflow = q->st.sp;
-		pl_idx_t cnt2 = g->nbr_vars - g->nbr_slots;
-		memmove(q->slots+g->overflow, q->slots+save_overflow, sizeof(slot)*cnt2);
+		pl_idx_t save_overflow = f->overflow;
+		f->overflow = q->st.sp;
+		pl_idx_t cnt2 = f->nbr_vars - f->nbr_slots;
+		memmove(q->slots+f->overflow, q->slots+save_overflow, sizeof(slot)*cnt2);
 		q->st.sp += cnt2 + cnt;
 	}
 
-	slot *e = GET_SLOT(g, g->nbr_vars);
+	slot *e = GET_SLOT(f, f->nbr_vars);
 
 	for (unsigned i = 0; i < cnt; i++, e++) {
 		e->c.tag = TAG_EMPTY;
 		e->c.attrs = NULL;
 	}
 
-	g->nbr_vars += cnt;
+	f->nbr_vars += cnt;
 	return var_nbr;
 }
 
@@ -1046,8 +1046,8 @@ static void add_trail(query *q, pl_idx_t c_ctx, unsigned c_var_nbr, cell *attrs,
 
 void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 {
-	frame *g = GET_FRAME(c_ctx);
-	slot *e = GET_SLOT(g, c->var_nbr);
+	frame *f = GET_FRAME(c_ctx);
+	slot *e = GET_SLOT(f, c->var_nbr);
 	e->ctx = v_ctx;
 	cell *attrs = NULL;
 	pl_idx_t attrs_ctx = 0;
@@ -1065,12 +1065,12 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		e->c = *v;
 	}
 
-	g->is_dirty = true;
+	f->is_dirty = true;
 
 	if (attrs) {
 		if (is_variable(v)) {
-			const frame *g = GET_FRAME(v_ctx);
-			slot *e = GET_SLOT(g, v->var_nbr);
+			const frame *f = GET_FRAME(v_ctx);
+			slot *e = GET_SLOT(f, v->var_nbr);
 
 			if (!e->c.attrs) {
 				e->c.attrs = attrs;
@@ -1090,14 +1090,14 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 
 void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 {
-	const frame *g = GET_FRAME(c_ctx);
-	slot *e = GET_SLOT(g, c->var_nbr);
+	const frame *f = GET_FRAME(c_ctx);
+	slot *e = GET_SLOT(f, c->var_nbr);
 
 	while (is_variable(&e->c)) {
 		c = &e->c;
 		c_ctx = e->ctx;
-		g = GET_FRAME(c_ctx);
-		e = GET_SLOT(g, c->var_nbr);
+		f = GET_FRAME(c_ctx);
+		e = GET_SLOT(f, c->var_nbr);
 	}
 
 	e->ctx = v_ctx;
@@ -1120,8 +1120,8 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 
 	if (attrs) {
 		if (is_variable(v)) {
-			const frame *g = GET_FRAME(v_ctx);
-			slot *e = GET_SLOT(g, v->var_nbr);
+			const frame *f = GET_FRAME(v_ctx);
+			slot *e = GET_SLOT(f, v->var_nbr);
 
 			if (!e->c.attrs) {
 				e->c.attrs = attrs;
@@ -1309,12 +1309,12 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 	return g_disp[p1->tag].fn(q, p1, p2);
 }
 
-static bool check_update_view(const frame *g, const clause *c)
+static bool check_update_view(const frame *f, const clause *c)
 {
-	if (c->r.ugen_created > g->ugen)
+	if (c->r.ugen_created > f->ugen)
 		return false;
 
-	if (c->r.ugen_erased && (c->r.ugen_erased <= g->ugen))
+	if (c->r.ugen_erased && (c->r.ugen_erased <= f->ugen))
 		return false;
 
 	return true;
@@ -1356,8 +1356,8 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 
 		q->st.curr_clause2 = pr->head;
 		share_predicate(q->st.pr2=pr);
-		frame *g = GET_FRAME(q->st.curr_frame);
-		g->ugen = q->st.m->pl->ugen;
+		frame *f = GET_FRAME(q->st.curr_frame);
+		f->ugen = q->st.m->pl->ugen;
 	} else {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
 	}
@@ -1370,10 +1370,10 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 	may_error(make_choice(q));
 	cell *p1_body = deref(q, get_logical_body(p1), p1_ctx);
 	cell *orig_p1 = p1;
-	const frame *g = GET_FRAME(q->st.curr_frame);
+	const frame *f = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
-		if (!check_update_view(g, q->st.curr_clause2))
+		if (!check_update_view(f, q->st.curr_clause2))
 			continue;
 
 		rule *r = &q->st.curr_clause2->r;
@@ -1459,8 +1459,8 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 
 		q->st.curr_clause2 = pr->head;
 		share_predicate(q->st.pr2=pr);
-		frame *g = GET_FRAME(q->st.curr_frame);
-		g->ugen = q->st.m->pl->ugen;
+		frame *f = GET_FRAME(q->st.curr_frame);
+		f->ugen = q->st.m->pl->ugen;
 	} else {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
 	}
@@ -1471,10 +1471,10 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 	}
 
 	may_error(make_choice(q));
-	const frame *g = GET_FRAME(q->st.curr_frame);
+	const frame *f = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
-		if (!check_update_view(g, q->st.curr_clause2))
+		if (!check_update_view(f, q->st.curr_clause2))
 			continue;
 
 		rule *r = &q->st.curr_clause2->r;
@@ -1532,8 +1532,8 @@ static USE_RESULT pl_status match_head(query *q)
 
 		find_key(q, pr, c);
 		share_predicate(q->st.pr=pr);
-		frame *g = GET_FRAME(q->st.curr_frame);
-		g->ugen = q->st.m->pl->ugen;
+		frame *f = GET_FRAME(q->st.curr_frame);
+		f->ugen = q->st.m->pl->ugen;
 	} else
 		next_key(q);
 
@@ -1543,10 +1543,10 @@ static USE_RESULT pl_status match_head(query *q)
 	}
 
 	may_error(make_choice(q));
-	const frame *g = GET_FRAME(q->st.curr_frame);
+	const frame *f = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause; next_key(q)) {
-		if (!check_update_view(g, q->st.curr_clause))
+		if (!check_update_view(f, q->st.curr_clause))
 			continue;
 
 		rule *r = &q->st.curr_clause->r;
@@ -1613,7 +1613,7 @@ static void	clear_results()
 static void dump_vars(query *q, bool partial)
 {
 	parser *p = q->p;
-	frame *g = GET_FIRST_FRAME();
+	frame *f = GET_FIRST_FRAME();
 	int any = 0;
 
 	q->is_dump_vars = true;
@@ -1622,7 +1622,7 @@ static void dump_vars(query *q, bool partial)
 		if (!strcmp(p->vartab.var_name[i], "_"))
 			continue;
 
-		slot *e = GET_SLOT(g, i);
+		slot *e = GET_SLOT(f, i);
 
 		if (is_empty(&e->c))
 			continue;
@@ -1960,10 +1960,10 @@ pl_status execute(query *q, cell *cells, unsigned nbr_vars)
 	// next available choice-point
 	q->cp = 0;
 
-	frame *g = q->frames + q->st.curr_frame;
-	g->nbr_vars = nbr_vars;
-	g->nbr_slots = nbr_vars;
-	g->ugen = ++q->st.m->pl->ugen;
+	frame *f = q->frames + q->st.curr_frame;
+	f->nbr_vars = nbr_vars;
+	f->nbr_slots = nbr_vars;
+	f->ugen = ++q->st.m->pl->ugen;
 	return start(q);
 }
 
@@ -2082,12 +2082,12 @@ query *create_sub_query(query *q, cell *curr_cell)
 	make_end(tmp+nbr_cells);
 	subq->st.curr_cell = tmp;
 
-	frame *gsrc = GET_FRAME(q->st.curr_frame);
-	frame *gdst = subq->frames;
-	gdst->nbr_vars = gsrc->nbr_vars;
-	slot *e = GET_FIRST_SLOT(gsrc);
+	frame *fsrc = GET_FRAME(q->st.curr_frame);
+	frame *fdst = subq->frames;
+	fdst->nbr_vars = fsrc->nbr_vars;
+	slot *e = GET_FIRST_SLOT(fsrc);
 
-	for (unsigned i = 0; i < gsrc->nbr_vars; i++, e++) {
+	for (unsigned i = 0; i < fsrc->nbr_vars; i++, e++) {
 		cell *c = deref(q, &e->c, e->ctx);
 		cell tmp = (cell){0};
 		tmp.tag = TAG_VAR;
@@ -2096,7 +2096,7 @@ query *create_sub_query(query *q, cell *curr_cell)
 		set_var(subq, &tmp, 0, c, q->latest_ctx);
 	}
 
-	subq->st.sp = gsrc->nbr_vars;
+	subq->st.sp = fsrc->nbr_vars;
 	return subq;
 }
 

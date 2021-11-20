@@ -141,9 +141,9 @@ void make_call(query *q, cell *tmp)
 {
 	make_end(tmp);
 	cell *c = q->st.curr_cell;
-	frame *g = GET_CURR_FRAME();
+	frame *f = GET_CURR_FRAME();
 	tmp->val_ptr = c + c->nbr_cells;	// save the return instruction
-	tmp->cgen = g->cgen;				// ... choice-generation
+	tmp->cgen = f->cgen;				// ... choice-generation
 	tmp->mod_nbr = q->st.m->id;			// ... current-module
 }
 
@@ -561,8 +561,8 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 		break;
 	}
 
-	frame *g = GET_CURR_FRAME();
-	p->read_term = g->nbr_vars;
+	frame *f = GET_CURR_FRAME();
+	p->read_term = f->nbr_vars;
 	p->do_read_term = true;
 	tokenize(p, false, false);
 	p->read_term = 0;
@@ -4389,8 +4389,8 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 
 static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 {
-	frame *g = GET_CURR_FRAME();
-	q->st.m->pl->varno = g->nbr_vars;
+	frame *f = GET_CURR_FRAME();
+	q->st.m->pl->varno = f->nbr_vars;
 	q->st.m->pl->tab_idx = 0;
 	collect_vars(q, p1, p1_ctx, p1->nbr_cells, 0);
 	const unsigned cnt = q->st.m->pl->tab_idx;
@@ -4427,8 +4427,8 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 		make_literal(tmp, g_nil_s);
 
 	if (cnt) {
-		unsigned new_vars = q->st.m->pl->varno - g->nbr_vars;
-		q->st.m->pl->varno = g->nbr_vars;
+		unsigned new_vars = q->st.m->pl->varno - f->nbr_vars;
+		q->st.m->pl->varno = f->nbr_vars;
 
 		if (new_vars) {
 			if (!create_vars(q, new_vars))
@@ -4514,8 +4514,8 @@ static USE_RESULT pl_status fn_sys_strip_attributes_1(query *q)
 		c = deref(q, c, p1_ctx);
 
 		if (is_variable(c)) {
-			frame *g = GET_FRAME(q->latest_ctx);
-			slot *e = GET_SLOT(g, c->var_nbr);
+			frame *f = GET_FRAME(q->latest_ctx);
+			slot *e = GET_SLOT(f, c->var_nbr);
 			e->c.attrs = NULL;
 		}
 
@@ -5418,8 +5418,8 @@ static USE_RESULT pl_status fn_sys_list_1(query *q)
 	cell *l = convert_to_list(q, get_queue(q), queue_used(q));
 
 #if 0
-	frame *g = GET_CURR_FRAME();
-	unsigned new_varno = g->nbr_vars;
+	frame *f = GET_CURR_FRAME();
+	unsigned new_varno = f->nbr_vars;
 	cell *c = l;
 
 	for (pl_idx_t i = 0; i < l->nbr_cells; i++, c++) {
@@ -5429,8 +5429,8 @@ static USE_RESULT pl_status fn_sys_list_1(query *q)
 		}
 	}
 
-	if (new_varno != g->nbr_vars) {
-		if (!create_vars(q, new_varno-g->nbr_vars))
+	if (new_varno != f->nbr_vars) {
+		if (!create_vars(q, new_varno-f->nbr_vars))
 			return throw_error(q, p1, p1_ctx, "resource_error", "too_many_vars");
 
 		REGET_FIRST_ARG(p1,variable);
@@ -5520,11 +5520,11 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 	init_queuen(q);
 	may_error(make_choice(q));
 	nbr_cells = q->tmpq_size[q->st.qnbr];
-	frame *g = GET_CURR_FRAME();
+	frame *f = GET_CURR_FRAME();
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
-		try_me(q, g->nbr_vars*2);
+		try_me(q, f->nbr_vars*2);
 
 		if (unify(q, p1, p1_ctx, c, q->st.fp)) {
 			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
@@ -9837,8 +9837,8 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 
 	q->in_hook = true;
 	may_error(make_choice(q));
-	frame *g = GET_CURR_FRAME();
-	try_me(q, g->nbr_vars);
+	frame *f = GET_CURR_FRAME();
+	try_me(q, f->nbr_vars);
 
 	if (!unify(q, p1, p1_ctx, p2, p2_ctx) && !q->cycle_error) {
 		q->in_hook = false;
@@ -9947,8 +9947,8 @@ static USE_RESULT pl_status fn_sys_unblock_verify_hook_0(query *q)
 static USE_RESULT pl_status fn_sys_erase_attributes_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	frame *g = GET_FRAME(p1_ctx);
-	slot *e = GET_SLOT(g, p1->var_nbr);
+	frame *f = GET_FRAME(p1_ctx);
+	slot *e = GET_SLOT(f, p1->var_nbr);
 	e->c.attrs = NULL;
 	return pl_success;
 }
@@ -9957,8 +9957,8 @@ static USE_RESULT pl_status fn_sys_write_attributes_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,list_or_nil);
-	frame *g = GET_FRAME(p1_ctx);
-	slot *e = GET_SLOT(g, p1->var_nbr);
+	frame *f = GET_FRAME(p1_ctx);
+	slot *e = GET_SLOT(f, p1->var_nbr);
 	e->c.attrs = p2;
 	e->c.attrs_ctx = p2_ctx;
 	return pl_success;
@@ -9968,8 +9968,8 @@ static USE_RESULT pl_status fn_sys_read_attributes_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,variable);
-	frame *g = GET_FRAME(p1_ctx);
-	slot *e = GET_SLOT(g, p1->var_nbr);
+	frame *f = GET_FRAME(p1_ctx);
+	slot *e = GET_SLOT(f, p1->var_nbr);
 
 	if (!e->c.attrs) {
 		cell tmp;
@@ -10339,13 +10339,13 @@ static USE_RESULT pl_status fn_memberchk_2(query *q)
 	}
 
 	may_error(make_choice(q));
-	frame *g = GET_CURR_FRAME();
+	frame *f = GET_CURR_FRAME();
 
 	while (is_list(p2) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(p2);
 		h = deref(q, h, p2_ctx);
 		pl_idx_t h_ctx = q->latest_ctx;
-		try_me(q, g->nbr_vars);
+		try_me(q, f->nbr_vars);
 
 		if (unify(q, p1, p1_ctx, h, h_ctx)) {
 			drop_choice(q);
@@ -10909,7 +10909,7 @@ pl_status fn_sys_undo_trail_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	q->in_hook = true;
-	frame *g = GET_CURR_FRAME();
+	frame *f = GET_CURR_FRAME();
 
 	q->save_e = malloc(sizeof(slot)*(q->undo_hi_tp - q->undo_lo_tp));
 	may_ptr_error(q->save_e);
@@ -10919,8 +10919,8 @@ pl_status fn_sys_undo_trail_1(query *q)
 
 	for (pl_idx_t i = q->undo_lo_tp, j = 0; i < q->undo_hi_tp; i++, j++) {
 		const trail *tr = q->trails + i;
-		const frame *g = GET_FRAME(tr->ctx);
-		slot *e = GET_SLOT(g, tr->var_nbr);
+		const frame *f = GET_FRAME(tr->ctx);
+		slot *e = GET_SLOT(f, tr->var_nbr);
 		//printf("*** unbind [%u:%u] ctx=%u, var=%u\n", j, i, tr->ctx, tr->var_nbr);
 		q->save_e[j] = *e;
 
@@ -10944,7 +10944,7 @@ pl_status fn_sys_undo_trail_1(query *q)
 
 	cell *tmp = end_list(q);
 	may_ptr_error(tmp);
-	set_var(q, p1, p1_ctx, tmp, g->prev_frame);
+	set_var(q, p1, p1_ctx, tmp, f->prev_frame);
 	return pl_success;
 }
 
@@ -10952,8 +10952,8 @@ pl_status fn_sys_redo_trail_0(query * q)
 {
 	for (pl_idx_t i = q->undo_lo_tp, j = 0; i < q->undo_hi_tp; i++, j++) {
 		const trail *tr = q->trails + i;
-		const frame *g = GET_FRAME(tr->ctx);
-		slot *e = GET_SLOT(g, tr->var_nbr);
+		const frame *f = GET_FRAME(tr->ctx);
+		slot *e = GET_SLOT(f, tr->var_nbr);
 		//printf("*** rebind [%u:%u:%u] ctx=%u, var=%u\n", j, i, q->undo_hi_tp, tr->ctx, tr->var_nbr);
 		*e = q->save_e[j];
 	}

@@ -1868,10 +1868,10 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsi
 
 	if (is_variable(p1)) {
 		if (is_variable(p2)) {
-			frame *g1 = GET_FRAME(p1_ctx);
-			frame *g2 = GET_FRAME(p2_ctx);
-			pl_idx_t p1_slot = GET_SLOT(g1,p1->var_nbr) - q->slots;
-			pl_idx_t p2_slot = GET_SLOT(g2,p2->var_nbr) - q->slots;
+			frame *f1 = GET_FRAME(p1_ctx);
+			frame *f2 = GET_FRAME(p2_ctx);
+			pl_idx_t p1_slot = GET_SLOT(f1,p1->var_nbr) - q->slots;
+			pl_idx_t p2_slot = GET_SLOT(f2,p2->var_nbr) - q->slots;
 			return p1_slot < p2_slot ? -1 : p1_slot > p2_slot ? 1 : 0;
 		}
 

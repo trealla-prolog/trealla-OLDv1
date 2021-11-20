@@ -56,14 +56,14 @@ inline static cell *deref(query *q, cell *c, pl_idx_t c_ctx)
 		return c;
 	}
 
-	const frame *g = GET_FRAME(c_ctx);
-	slot *e = GET_SLOT(g, c->var_nbr);
+	const frame *f = GET_FRAME(c_ctx);
+	slot *e = GET_SLOT(f, c->var_nbr);
 
 	while (is_variable(&e->c)) {
 		c_ctx = e->ctx;
 		c = &e->c;
-		g = GET_FRAME(c_ctx);
-		e = GET_SLOT(g, c->var_nbr);
+		f = GET_FRAME(c_ctx);
+		e = GET_SLOT(f, c->var_nbr);
 	}
 
 	if (is_empty(&e->c))

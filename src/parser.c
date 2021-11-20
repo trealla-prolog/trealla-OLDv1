@@ -1366,14 +1366,14 @@ static bool dcg_expansion(parser *p)
 	tokenize(p2, false, false);
 	ASTRING_free(s);
 	execute(q, p2->r->cells, p2->r->nbr_vars);
-	frame *g = GET_FIRST_FRAME();
+	frame *f = GET_FIRST_FRAME();
 	char *src = NULL;
 
 	for (unsigned i = 0; i < p2->r->nbr_vars; i++) {
 		if (strcmp(p2->vartab.var_name[i], "_TermOut"))
 			continue;
 
-		slot *e = GET_SLOT(g, i);
+		slot *e = GET_SLOT(f, i);
 
 		if (is_empty(&e->c))
 			break;
@@ -1450,11 +1450,11 @@ static bool term_expansion(parser *p)
 		return false;
 	}
 
-	frame *g = GET_FIRST_FRAME();
+	frame *f = GET_FIRST_FRAME();
 	char *src = NULL;
 
 	for (unsigned i = 0; i < p2->r->nbr_vars; i++) {
-		slot *e = GET_SLOT(g, i);
+		slot *e = GET_SLOT(f, i);
 
 		if (is_empty(&e->c))
 			continue;

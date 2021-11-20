@@ -274,10 +274,10 @@ static void reformat_float(char *tmpbuf)
 
 static int find_binding(query *q, pl_idx_t var_nbr, pl_idx_t var_ctx)
 {
-	const frame *g = GET_FRAME(q->st.curr_frame);
-	const slot *e = GET_FIRST_SLOT(g);
+	const frame *f = GET_FRAME(q->st.curr_frame);
+	const slot *e = GET_FIRST_SLOT(f);
 
-	for (pl_idx_t i = 0; i < g->nbr_vars; i++, e++) {
+	for (pl_idx_t i = 0; i < f->nbr_vars; i++, e++) {
 		if (!is_variable(&e->c))
 			continue;
 
@@ -467,8 +467,8 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 	}
 
 	if (is_variable(c)) {
-		frame *g = GET_FRAME(c_ctx);
-		slot *e = GET_SLOT(g, c->var_nbr);
+		frame *f = GET_FRAME(c_ctx);
+		slot *e = GET_SLOT(f, c->var_nbr);
 		pl_idx_t slot_nbr = e - q->slots;
 		dst += snprintf(dst, dstlen, "_%u", (unsigned)slot_nbr);
 		return dst - save_dst;
@@ -792,8 +792,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 		if (is_variable(c) && running && !q->cycle_error
 			&& ((c_ctx != q->st.curr_frame) || is_fresh(c) || (running > 0))) {
-			frame *g = GET_FRAME(c_ctx);
-			slot *e = GET_SLOT(g, c->var_nbr);
+			frame *f = GET_FRAME(c_ctx);
+			slot *e = GET_SLOT(f, c->var_nbr);
 			dst += snprintf(dst, dstlen, "_%u", (unsigned)(e - q->slots));
 			return dst - save_dst;
 		}

@@ -131,8 +131,8 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 		if (nonlocals_only && (p1_ctx <= q->st.curr_frame))
 			return tmp;
 
-		const frame *g = GET_FRAME(p1_ctx);
-		const slot *e = GET_SLOT(g, p1->var_nbr);
+		const frame *f = GET_FRAME(p1_ctx);
+		const slot *e = GET_SLOT(f, p1->var_nbr);
 		const pl_idx_t slot_nbr = e - q->slots;
 
 		for (size_t i = 0; i < q->st.m->pl->tab_idx; i++) {
@@ -184,11 +184,11 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 	if (!init_tmp_heap(q))
 		return NULL;
 
-	frame *g = GET_CURR_FRAME();
-	q->st.m->pl->varno = g->nbr_vars;
+	frame *f = GET_CURR_FRAME();
+	q->st.m->pl->varno = f->nbr_vars;
 	q->st.m->pl->tab_idx = 0;
 	q->cycle_error = false;
-	int nbr_vars = g->nbr_vars;
+	int nbr_vars = f->nbr_vars;
 	cell* rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, nonlocals_only);
 	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 	int cnt = q->st.m->pl->varno - nbr_vars;
@@ -207,7 +207,7 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 
 	for (pl_idx_t i = 0; i < rec->nbr_cells; i++, c++) {
 		if (is_variable(c) && is_fresh(c) && c->attrs) {
-			slot *e = GET_SLOT(g, c->var_nbr);
+			slot *e = GET_SLOT(f, c->var_nbr);
 			e->c.attrs = c->attrs;
 			e->c.attrs_ctx = c->attrs_ctx;
 		}
@@ -347,8 +347,8 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t su
 	}
 
 	cell *src = p1, *dst = tmp+(prefix?1:0);
-	frame *g = GET_CURR_FRAME();
-	q->st.m->pl->varno = g->nbr_vars;
+	frame *f = GET_CURR_FRAME();
+	q->st.m->pl->varno = f->nbr_vars;
 	q->st.m->pl->tab_idx = 0;
 
 	for (pl_idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
@@ -358,7 +358,7 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t su
 		if (!is_variable(src))
 			continue;
 
-		slot *e = GET_SLOT(g, src->var_nbr);
+		slot *e = GET_SLOT(f, src->var_nbr);
 		pl_idx_t slot_nbr = e - q->slots;
 		int found = 0;
 
@@ -379,8 +379,8 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t su
 		dst->flags = FLAG2_FRESH;
 	}
 
-	if (q->st.m->pl->varno != g->nbr_vars) {
-		if (!create_vars(q, q->st.m->pl->varno-g->nbr_vars)) {
+	if (q->st.m->pl->varno != f->nbr_vars) {
+		if (!create_vars(q, q->st.m->pl->varno-f->nbr_vars)) {
 			DISCARD_RESULT throw_error(q, p1, p1_ctx, "resource_error", "too_many_vars");
 			return NULL;
 		}
