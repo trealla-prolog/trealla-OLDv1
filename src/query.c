@@ -773,8 +773,7 @@ void stash_me(query *q, rule *r, bool last_match)
 	} else {
 		choice *ch = GET_CURR_CHOICE();
 		ch->st.curr_clause2 = q->st.curr_clause2;
-		cgen = ++q->st.cgen;
-		ch->cgen = cgen;
+		ch->cgen = cgen = ++q->st.cgen;
 	}
 
 	unsigned nbr_vars = r->nbr_vars;

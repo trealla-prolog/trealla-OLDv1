@@ -68,7 +68,7 @@ typedef enum {
 #define IDX_MAX (ERR_IDX-1)
 #define ERR_CYCLE_CMP -2
 
-#define MAX_SMALL_STRING (MAX(sizeof(void*),sizeof(double))*2)
+#define MAX_SMALL_STRING 16
 #define MAX_VAR_POOL_SIZE 4000
 #define MAX_ARITY UCHAR_MAX
 #define MAX_QUEUES 16
@@ -84,8 +84,12 @@ typedef enum {
 #define GET_FIRST_FRAME() GET_FRAME(0)
 #define GET_CURR_FRAME() GET_FRAME(q->st.curr_frame)
 
-#define GET_SLOT(f,i) ((i) < (f)->nbr_slots ? (q->slots+(f)->base_slot_nbr+(i)) : (q->slots+(f)->overflow+((i)-(f)->nbr_slots)))
-#define GET_FIRST_SLOT(g) GET_SLOT(g,0)
+#define GET_SLOT(f,i) ((i) < (f)->nbr_slots ? 		\
+	(q->slots+(f)->base_slot_nbr+(i)) : 			\
+	(q->slots+(f)->overflow+((i)-(f)->nbr_slots)) 	\
+	)
+
+#define GET_FIRST_SLOT(g) GET_SLOT(g, 0)
 
 // Primary type...
 
