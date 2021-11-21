@@ -78,7 +78,7 @@ typedef enum {
 #define STREAM_BUFLEN 1024
 
 #define GET_CHOICE(i) (q->choices+(i))
-#define GET_CURR_CHOICE() GET_CHOICE(q->cp-1)
+#define GET_CURR_CHOICE() GET_CHOICE(q->cp?q->cp-1:q->cp)
 
 #define GET_FRAME(i) (q->frames+(i))
 #define GET_FIRST_FRAME() GET_FRAME(0)

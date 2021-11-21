@@ -70,8 +70,10 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 
 #if DEBUG
 	frame *f = GET_CURR_FRAME();
-	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u:tp%u:cp%u:fp%u:sp%u:hp%u} ",
+	choice *ch = GET_CURR_CHOICE();
+	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u(f%u:ch%u):tp%u:cp%u:fp%u:sp%u:hp%u} ",
 		q->st.curr_frame, f->nbr_vars, f->nbr_slots, any_choices(q, f),
+		f->cgen, ch->cgen,
 		q->st.tp, q->cp, q->st.fp, q->st.sp, q->st.hp);
 #endif
 
@@ -958,7 +960,12 @@ static bool resume_frame(query *q)
 
 	frame *f = GET_CURR_FRAME();
 
-	//printf("*** resume is_dirty=%d\n", f->is_dirty);
+#if 0
+	if (q->cp) {
+		const choice *ch = GET_CURR_CHOICE();
+		printf("*** resume f->cgen=%u, ch->cgen=%u\n", f->cgen, ch->cgen);
+	}
+#endif
 
 #if 0
 	if (q->st.curr_clause) {
@@ -968,6 +975,15 @@ static bool resume_frame(query *q)
 			&& q->st.m->pl->opt && r->is_tail_rec
 			&& !any_choices(q, f)
 			&& check_slots(q, f, r))
+			q->st.fp--;
+	}
+#endif
+
+#if 0
+	if (q->st.curr_clause) {
+		if ((q->st.curr_frame == (q->st.fp-1))
+			&& q->st.m->pl->opt && !q->st.curr_clause->next
+			&& !any_choices(q, f))
 			q->st.fp--;
 	}
 #endif
@@ -1890,7 +1906,6 @@ pl_status start(query *q)
 
 		while (!q->st.curr_cell || is_end(q->st.curr_cell)) {
 			if (!resume_frame(q)) {
-
 				while (q->cp) {
 					choice *ch = GET_CURR_CHOICE();
 
