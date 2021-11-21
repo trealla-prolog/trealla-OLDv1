@@ -979,7 +979,7 @@ static bool resume_frame(query *q)
 	}
 #endif
 
-#if 0
+#if 1
 	if (q->st.curr_clause) {
 		if ((q->st.curr_frame == (q->st.fp-1))
 			&& q->st.m->pl->opt && !q->st.curr_clause->next
