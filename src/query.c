@@ -590,6 +590,7 @@ static frame *make_frame(query *q, unsigned nbr_vars)
 	f->cgen = ++q->st.cgen;
 	f->overflow = 0;
 	f->is_dirty = false;
+	f->is_last = false;
 
 	q->st.sp += nbr_vars;
 	q->st.curr_frame = new_frame;
@@ -677,6 +678,18 @@ static bool check_slots(const query *q, frame *f, rule *r)
 	return true;
 }
 
+static bool check_slots2(const query *q, frame *f)
+{
+	for (unsigned i = 0; i < f->nbr_vars; i++) {
+		const slot *e = GET_SLOT(f, i);
+
+		if (e->ctx)
+			return false;
+	}
+
+	return true;
+}
+
 void share_predicate(predicate *pr)
 {
 	if (!pr)
@@ -749,6 +762,7 @@ static void commit_me(query *q, rule *r)
 		f = make_frame(q, r->nbr_vars);
 
 	if (last_match) {
+		f->is_last = true;
 		q->st.curr_clause = NULL;
 		unshare_predicate(q, q->st.pr);
 		m_done(q->st.iter);
@@ -979,13 +993,15 @@ static bool resume_frame(query *q)
 	}
 #endif
 
-#if 1
+#if 0
 	if (q->st.curr_clause) {
-		if ((q->st.curr_frame == (q->st.fp-1))
-			&& q->st.m->pl->opt && !q->st.curr_clause->next
-			&& !any_choices(q, f))
-			q->st.fp--;
+		rule *r = &q->st.curr_clause->r;
 	}
+
+	if ((q->st.curr_frame == (q->st.fp-1))
+		&& q->st.m->pl->opt && f->is_last
+		&& !any_choices(q, f))
+		q->st.fp--;
 #endif
 
 	q->st.curr_cell = f->prev_cell;

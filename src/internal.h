@@ -283,7 +283,16 @@ typedef struct query_ query;
 typedef struct predicate_ predicate;
 typedef struct clause_ clause;
 typedef struct cell_ cell;
+typedef struct rule_ rule;
+typedef struct trail_ trail;
+typedef struct frame_ frame;
 typedef struct parser_ parser;
+typedef struct arena_ arena;
+typedef struct stream_ stream;
+typedef struct slot_ slot;
+typedef struct choice_ choice;
+typedef struct prolog_state_ prolog_state;
+typedef struct prolog_flags_ prolog_flags;
 
 // Using a fixed-size cell allows having arrays of cells, which is
 // basically what a Term is. A compound is a variable length array of
@@ -358,7 +367,7 @@ typedef struct {
 	uint64_t u1, u2;
 } uuid;
 
-typedef struct {
+struct rule_ {
 	uint64_t ugen_created, ugen_erased;
 	pl_idx_t nbr_cells, cidx;
 	uint32_t nbr_vars;
@@ -370,7 +379,7 @@ typedef struct {
 	bool is_fact:1;
 	bool is_tail_rec:1;
 	cell cells[];
-} rule;
+};
 
 struct clause_ {
 	predicate *owner;
@@ -416,29 +425,30 @@ typedef struct {
 	unsigned priority;
 } op_table;
 
-typedef struct {
+struct trail_ {
 	cell *attrs;
 	pl_idx_t ctx, attrs_ctx;
 	uint32_t var_nbr;
-} trail;
+};
 
-typedef struct {
+struct slot_ {
 	cell c;
 	pl_idx_t ctx;
-} slot;
+};
 
-typedef struct {
+struct frame_ {
 	cell *prev_cell;
 	module *m;
 	uint64_t ugen;
 	pl_idx_t prev_frame, base_slot_nbr, overflow;
 	uint32_t nbr_slots, nbr_vars, cgen;
 	bool is_dirty:1;
-} frame;
+	bool is_last:1;
+};
 
 enum { eof_action_eof_code, eof_action_error, eof_action_reset };
 
-typedef struct {
+struct stream_ {
 	FILE *fp;
 	char *mode, *filename, *name, *data, *src;
 	void *sslptr;
@@ -458,9 +468,9 @@ typedef struct {
 	bool udp:1;
 	bool ssl:1;
 	bool domain:1;
-} stream;
+};
 
-typedef struct {
+struct prolog_state_ {
 	cell *curr_cell;
 	clause *curr_clause, *curr_clause2;
 	miter *f_iter;
@@ -473,9 +483,9 @@ typedef struct {
 	bool definite:1;
 	bool arg1_is_ground:1;
 	bool arg2_is_ground:1;
-} prolog_state;
+};
 
-typedef struct {
+struct choice_ {
 	prolog_state st;
 	uint64_t ugen;
 	pl_idx_t v1, v2, overflow;
@@ -492,9 +502,7 @@ typedef struct {
 	bool catcher:1;
 	bool is_tail_rec:1;
 	bool is_dirty:1;
-} choice;
-
-typedef struct arena_ arena;
+};
 
 struct arena_ {
 	arena *next;
@@ -507,7 +515,7 @@ enum q_retry { QUERY_OK=0, QUERY_RETRY=1, QUERY_EXCEPTION=2 };
 enum unknowns { UNK_FAIL=0, UNK_ERROR=1, UNK_WARNING=2, UNK_CHANGEABLE=3 };
 enum occurs { OCCURS_FALSE=0, OCCURS_TRUE=1, OCCURS_ERROR = 2 };
 
-typedef struct prolog_flags_ {
+struct prolog_flags_ {
 	enum occurs occurs_check;
 	enum unknowns unknown;
 	bool double_quote_codes:1;
@@ -517,7 +525,7 @@ typedef struct prolog_flags_ {
 	bool char_conversion:1;
 	bool not_strict_iso:1;
 	bool debug:1;
-} prolog_flags;
+};
 
 struct query_ {
 	query *prev, *next, *parent;
@@ -763,8 +771,7 @@ extern void format_property(module *m, char *tmpbuf, size_t buflen, const char *
 typedef struct {
 	char *buf, *dst;
 	size_t size;
-}
- astring;
+} astring;
 
 #define ASTRING(pr) astring pr##_buf;									\
 	pr##_buf.size = 0;													\
