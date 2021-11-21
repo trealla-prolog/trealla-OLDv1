@@ -38,7 +38,7 @@ static bool any_choices(const query *q, const frame *f)
 
 	pl_idx_t curr_choice = q->cp - (q->in_commit ? 2 : 1);
 	const choice *ch = GET_CHOICE(curr_choice);
-	return ch->cgen >= f->cgen ? true : false;
+	return ch->cgen > f->cgen;
 }
 
 static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
