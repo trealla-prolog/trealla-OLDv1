@@ -966,16 +966,8 @@ static bool resume_frame(query *q)
 
 	if ((q->st.curr_frame == (q->st.fp-1))
 		&& q->st.m->pl->opt && r->is_tail_rec
-		&& !any_choices(q, g)
-		&& check_slots(q, g, r))
-		q->st.fp--;
-#endif
-
-#if 0
-	if ((q->st.curr_frame == (q->st.fp-1))
-		&& q->st.m->pl->opt
-		&& !any_choices(q, g)
-		&& !f->is_dirty)
+		&& !any_choices(q, f)
+		&& check_slots(q, f, r))
 		q->st.fp--;
 #endif
 
