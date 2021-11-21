@@ -962,13 +962,15 @@ static bool resume_frame(query *q)
 	//printf("*** resume is_dirty=%d\n", f->is_dirty);
 
 #if 0
-	rule *r = &q->st.curr_clause->r;
+	if (q->st.curr_clause) {
+		rule *r = &q->st.curr_clause->r;
 
-	if ((q->st.curr_frame == (q->st.fp-1))
-		&& q->st.m->pl->opt && r->is_tail_rec
-		&& !any_choices(q, f)
-		&& check_slots(q, f, r))
-		q->st.fp--;
+		if ((q->st.curr_frame == (q->st.fp-1))
+			&& q->st.m->pl->opt && r->is_tail_rec
+			&& !any_choices(q, f)
+			&& check_slots(q, f, r))
+			q->st.fp--;
+	}
 #endif
 
 	q->st.curr_cell = f->prev_cell;
