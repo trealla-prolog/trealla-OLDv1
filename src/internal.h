@@ -377,6 +377,7 @@ struct rule_ {
 	bool arg2_is_unique:1;
 	bool is_unique:1;
 	bool is_fact:1;
+	bool is_complex:1;
 	bool is_tail_rec:1;
 	cell cells[];
 };
@@ -442,8 +443,7 @@ struct frame_ {
 	uint64_t ugen;
 	pl_idx_t prev_frame, base_slot_nbr, overflow;
 	uint32_t nbr_slots, nbr_vars, cgen;
-	bool is_dirty:1;
-	bool is_last:1;
+	bool is_complex:1;
 };
 
 enum { eof_action_eof_code, eof_action_error, eof_action_reset };
@@ -501,7 +501,6 @@ struct choice_ {
 	bool block_catcher:1;
 	bool catcher:1;
 	bool is_tail_rec:1;
-	bool is_dirty:1;
 };
 
 struct arena_ {

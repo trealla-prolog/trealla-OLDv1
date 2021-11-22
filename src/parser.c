@@ -819,7 +819,27 @@ static void xref_cell(parser *p, rule *r, cell *c, predicate *parent)
 
 void xref_rule(parser *p, rule *r, predicate *parent)
 {
-	cell *c = r->cells;
+	cell *head = get_head(r->cells);
+	cell *c = head;
+	uint64_t mask = 0;
+
+	// Check if a variable occurs more than once in the head...
+
+	for (pl_idx_t i = 0; i < head->nbr_cells; i++, c++) {
+		if (!is_variable(c))
+			continue;
+
+		uint64_t mask2 = 1ULL << c->var_nbr;
+
+		if (mask & mask2) {
+			r->is_complex = true;
+			break;
+		}
+
+		mask |= mask2;
+	}
+
+	c = r->cells;
 
 	if (c->val_off == g_sys_record_key_s)
 		return;

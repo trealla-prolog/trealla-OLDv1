@@ -577,7 +577,6 @@ LOOP:
 	f->nbr_vars = ch->nbr_vars;
 	f->nbr_slots = ch->nbr_slots;
 	f->overflow = ch->overflow;
-	f->is_dirty = ch->is_dirty;
 	return true;
 }
 
@@ -588,9 +587,8 @@ static frame *make_frame(query *q, unsigned nbr_vars)
 	f->prev_frame = q->st.curr_frame;
 	f->prev_cell = q->st.curr_cell;
 	f->cgen = ++q->st.cgen;
+	f->is_complex = false;
 	f->overflow = 0;
-	f->is_dirty = false;
-	f->is_last = false;
 
 	q->st.sp += nbr_vars;
 	q->st.curr_frame = new_frame;
@@ -678,17 +676,19 @@ static bool check_slots(const query *q, frame *f, rule *r)
 	return true;
 }
 
+#if 0
 static bool check_slots2(const query *q, frame *f)
 {
 	for (unsigned i = 0; i < f->nbr_vars; i++) {
 		const slot *e = GET_SLOT(f, i);
 
-		if (e->ctx)
+		iff (e->ctx)
 			return false;
 	}
 
 	return true;
 }
+#endif
 
 void share_predicate(predicate *pr)
 {
@@ -742,6 +742,7 @@ static void commit_me(query *q, rule *r)
 	q->in_commit = true;
 	frame *f = GET_CURR_FRAME();
 	f->m = q->st.m;
+	f->is_complex = q->st.curr_clause->r.is_complex;
 	q->st.m = q->st.curr_clause->owner->m;
 	bool implied_first_cut = q->check_unique && !q->has_vars && r->is_unique;
 	bool last_match = implied_first_cut || r->is_first_cut || !is_next_key(q, r);
@@ -762,7 +763,6 @@ static void commit_me(query *q, rule *r)
 		f = make_frame(q, r->nbr_vars);
 
 	if (last_match) {
-		f->is_last = true;
 		q->st.curr_clause = NULL;
 		unshare_predicate(q, q->st.pr);
 		m_done(q->st.iter);
@@ -820,7 +820,6 @@ pl_status make_choice(query *q)
 	ch->nbr_vars = f->nbr_vars;
 	ch->nbr_slots = f->nbr_slots;
 	ch->overflow = f->overflow;
-	ch->is_dirty = f->is_dirty;
 
 	return pl_success;
 }
@@ -986,22 +985,28 @@ static bool resume_frame(query *q)
 		rule *r = &q->st.curr_clause->r;
 
 		if ((q->st.curr_frame == (q->st.fp-1))
-			&& q->st.m->pl->opt && r->is_tail_rec
+			&& q->st.m->pl->opt
+			&& r->is_tail_rec
 			&& !any_choices(q, f)
 			&& check_slots(q, f, r))
 			q->st.fp--;
 	}
 #endif
 
-#if 0
-	if (q->st.curr_clause) {
-		rule *r = &q->st.curr_clause->r;
-	}
+#if 1
+	bool is_last = !q->st.curr_clause;
+
+	if ((q->st.curr_frame == (q->st.fp-1)) && is_last)
+		fprintf(stderr, "*** resume f->is_last=%d, is_complex=%d\n", is_last, f->is_complex);
 
 	if ((q->st.curr_frame == (q->st.fp-1))
-		&& q->st.m->pl->opt && f->is_last
-		&& !any_choices(q, f))
+		&& q->st.m->pl->opt
+		&& is_last
+		&& !f->is_complex && 0
+		&& !any_choices(q, f)) {
+		fprintf(stderr, "*** trim\n");
 		q->st.fp--;
+	}
 #endif
 
 	q->st.curr_cell = f->prev_cell;
@@ -1093,8 +1098,6 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		share_cell(v);
 		e->c = *v;
 	}
-
-	f->is_dirty = true;
 
 	if (attrs) {
 		if (is_variable(v)) {

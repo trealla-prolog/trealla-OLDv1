@@ -14,7 +14,7 @@ sift([I|Is],[I|Ps]) :-
     remove(I,Is,New),
     sift(New,Ps).
 
-remove(_,[],[]) :- !.
+remove(_,[],[]).
 remove(P,[I|Is],Nis) :-
     0 is I mod P,
     !,
