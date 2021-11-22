@@ -826,6 +826,11 @@ void xref_rule(parser *p, rule *r, predicate *parent)
 	// Check if a variable occurs more than once in the head...
 
 	for (pl_idx_t i = 0; i < head->nbr_cells; i++, c++) {
+		if (is_iso_list(c)) {
+			r->is_complex = true;
+			break;
+		}
+
 		if (!is_variable(c))
 			continue;
 
@@ -856,12 +861,16 @@ void xref_rule(parser *p, rule *r, predicate *parent)
 
 static void check_rule(parser *p, rule *r, predicate *pr)
 {
-	bool matched = false, p1_matched = false, p2_matched = false, me = false;
+	bool matched = false, me = false;
+	bool p1_matched = false, p2_matched = false, p3_matched = false;
 	cell *head = get_head(r->cells);
-	cell *p1 = head + 1, *p2 = NULL;
+	cell *p1 = head + 1, *p2 = NULL, *p3 = NULL;
 
 	if (pr->key.arity > 1)
 		p2 = p1 + p1->nbr_cells;
+
+	if (pr->key.arity > 2)
+		p3 = p2 + p2->nbr_cells;
 
 	for (clause *cl = pr->head; cl; cl = cl->next) {
 		if (!me) {
@@ -872,10 +881,13 @@ static void check_rule(parser *p, rule *r, predicate *pr)
 		}
 
 		cell *head2 = get_head(cl->r.cells);
-		cell *h21 = head2 + 1, *h22 = NULL;
+		cell *h21 = head2 + 1, *h22 = NULL, *h23 = NULL;
 
 		if (pr->key.arity > 1)
 			h22 = h21 + h21->nbr_cells;
+
+		if (pr->key.arity > 2)
+			h23 = h22 + h22->nbr_cells;
 
 		if (!index_cmpkey(p1, h21, p->m))
 			p1_matched = true;
@@ -885,6 +897,11 @@ static void check_rule(parser *p, rule *r, predicate *pr)
 				p2_matched = true;
 		}
 
+		if (pr->key.arity > 2) {
+			if (!index_cmpkey(p3, h23, p->m))
+				p3_matched = true;
+		}
+
 		if (!index_cmpkey(head, head2, p->m)) {
 			matched = true;
 			//break;
@@ -892,18 +909,19 @@ static void check_rule(parser *p, rule *r, predicate *pr)
 	}
 
 	if (!matched) {
-		//printf("*** unique %s/%u\n", GET_STR(p, &pr->key), pr->key.arity);
 		r->is_unique = true;
 	}
 
 	if (!p1_matched /*&& r->is_unique*/) {
-		//printf("*** arg1_unique %s/%u\n", GET_STR(p, &pr->key), pr->key.arity);
 		r->arg1_is_unique = true;
 	}
 
 	if (!p2_matched /*&& r->is_unique*/) {
-		//printf("*** arg2_unique %s/%u\n", GET_STR(p, &pr->key), pr->key.arity);
 		r->arg2_is_unique = true;
+	}
+
+	if (!p3_matched /*&& r->is_unique*/) {
+		r->arg3_is_unique = true;
 	}
 }
 

@@ -246,6 +246,9 @@ static bool is_next_key(query *q, rule *r)
 	if (q->st.arg2_is_ground && r->arg2_is_unique)
 		return false;
 
+	if (q->st.arg3_is_ground && r->arg3_is_unique)
+		return false;
+
 	return true;
 }
 
@@ -294,6 +297,7 @@ static void find_key(query *q, predicate *pr, cell *key)
 	q->st.definite = false;
 	q->st.arg1_is_ground = false;
 	q->st.arg2_is_ground = false;
+	q->st.arg3_is_ground = false;
 	q->st.iter = NULL;
 
 	if (!pr->idx || (pr->cnt < q->st.m->indexing_threshold)) {
@@ -302,21 +306,30 @@ static void find_key(query *q, predicate *pr, cell *key)
 		if (!key->arity || pr->is_multifile || pr->is_dynamic)
 			return;
 
-		cell *arg1 = key + 1, *arg2 = NULL;
+		cell *arg1 = key + 1, *arg2 = NULL, *arg3 = NULL;
 
 		if (key->arity > 1)
 			arg2 = arg1 + arg1->nbr_cells;
+
+		if (key->arity > 2)
+			arg3 = arg2 + arg2->nbr_cells;
 
 		arg1 = deref(q, arg1, q->st.curr_frame);
 
 		if (arg2)
 			arg2 = deref(q, arg2, q->st.curr_frame);
 
+		if (arg3)
+			arg3 = deref(q, arg3, q->st.curr_frame);
+
 		if (q->pl->opt && is_ground(arg1))
 			q->st.arg1_is_ground = true;
 
 		if (q->pl->opt && arg2 && is_ground(arg2))
 			q->st.arg2_is_ground = true;
+
+		if (q->pl->opt && arg3 && is_ground(arg3))
+			q->st.arg3_is_ground = true;
 
 		return;
 	}
@@ -588,6 +601,7 @@ static frame *make_frame(query *q, unsigned nbr_vars)
 	f->prev_cell = q->st.curr_cell;
 	f->cgen = ++q->st.cgen;
 	f->is_complex = false;
+	f->is_last = false;
 	f->overflow = 0;
 
 	q->st.sp += nbr_vars;
@@ -676,19 +690,19 @@ static bool check_slots(const query *q, frame *f, rule *r)
 	return true;
 }
 
-#if 0
 static bool check_slots2(const query *q, frame *f)
 {
+	return true;
+
 	for (unsigned i = 0; i < f->nbr_vars; i++) {
 		const slot *e = GET_SLOT(f, i);
 
-		iff (e->ctx)
+		if (e->ctx)
 			return false;
 	}
 
 	return true;
 }
-#endif
 
 void share_predicate(predicate *pr)
 {
@@ -763,6 +777,7 @@ static void commit_me(query *q, rule *r)
 		f = make_frame(q, r->nbr_vars);
 
 	if (last_match) {
+		f->is_last = true;
 		q->st.curr_clause = NULL;
 		unshare_predicate(q, q->st.pr);
 		m_done(q->st.iter);
@@ -993,17 +1008,15 @@ static bool resume_frame(query *q)
 	}
 #endif
 
-#if 1
-	bool is_last = !q->st.curr_clause;
+#if 0
+	if ((q->st.curr_frame == (q->st.fp-1)) && f->is_last)
+		fprintf(stderr, "*** resume f->is_last=%d, is_complex=%d\n", f->is_last, f->is_complex);
 
-	if ((q->st.curr_frame == (q->st.fp-1)) && is_last)
-		fprintf(stderr, "*** resume f->is_last=%d, is_complex=%d\n", is_last, f->is_complex);
-
-	if ((q->st.curr_frame == (q->st.fp-1))
+	if ((q->st.curr_frame == (q->st.fp-1)) && f->is_last
 		&& q->st.m->pl->opt
-		&& is_last
-		&& !f->is_complex && 0
-		&& !any_choices(q, f)) {
+		&& !f->is_complex
+		&& !any_choices(q, f)
+		&& check_slots2(q, f)) {
 		fprintf(stderr, "*** trim\n");
 		q->st.fp--;
 	}

@@ -4,7 +4,6 @@ primes(Limit,Ps) :-
 
 integers(Low,High,[Low|Rest]) :-
     Low =< High,
-    !,
     M is Low+1,
     integers(M,High,Rest).
 integers(_,_,[]).

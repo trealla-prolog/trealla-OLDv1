@@ -106,7 +106,7 @@ typedef enum {
 
 #define is_iso_atom(c) ((is_literal(c) || is_cstring(c)) && !(c)->arity)
 #define is_iso_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
-#define is_cons_list(c) (is_iso_list(c) && is_variable(c+2))
+#define is_partial_list(c) (is_iso_list(c) && is_variable(c+2))
 
 #define get_real(c) (c)->val_real
 #define set_real(c,v) (c)->val_real = (v)
@@ -375,6 +375,7 @@ struct rule_ {
 	bool is_cut_only:1;
 	bool arg1_is_unique:1;
 	bool arg2_is_unique:1;
+	bool arg3_is_unique:1;
 	bool is_unique:1;
 	bool is_fact:1;
 	bool is_complex:1;
@@ -444,6 +445,7 @@ struct frame_ {
 	pl_idx_t prev_frame, base_slot_nbr, overflow;
 	uint32_t nbr_slots, nbr_vars, cgen;
 	bool is_complex:1;
+	bool is_last:1;
 };
 
 enum { eof_action_eof_code, eof_action_error, eof_action_reset };
@@ -483,6 +485,7 @@ struct prolog_state_ {
 	bool definite:1;
 	bool arg1_is_ground:1;
 	bool arg2_is_ground:1;
+	bool arg3_is_ground:1;
 };
 
 struct choice_ {
