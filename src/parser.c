@@ -2785,7 +2785,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			priority = search_op(p->m, p->token, &specifier, last_op);
 
 		if (!strcmp(p->token, "!") &&
-			((*p->srcptr == ',') || (*p->srcptr == '.')))
+			((*p->srcptr == ')') || (*p->srcptr == ';') || (*p->srcptr == ',') || (*p->srcptr == '.')))
 			p->quote_char = 1;
 
 		if (p->quote_char) {
