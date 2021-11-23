@@ -756,7 +756,6 @@ static void commit_me(query *q, rule *r)
 	q->in_commit = true;
 	frame *f = GET_CURR_FRAME();
 	f->m = q->st.m;
-	f->is_complex = q->st.curr_clause->r.is_complex;
 	q->st.m = q->st.curr_clause->owner->m;
 	bool implied_first_cut = q->check_unique && !q->has_vars && r->is_unique;
 	bool last_match = implied_first_cut || r->is_first_cut || !is_next_key(q, r);
@@ -777,6 +776,7 @@ static void commit_me(query *q, rule *r)
 		f = make_frame(q, r->nbr_vars);
 
 	if (last_match) {
+		f->is_complex = q->st.curr_clause->r.is_complex;
 		f->is_last = true;
 		q->st.curr_clause = NULL;
 		unshare_predicate(q, q->st.pr);
@@ -1009,15 +1009,14 @@ static bool resume_frame(query *q)
 #endif
 
 #if 0
-	if ((q->st.curr_frame == (q->st.fp-1)) && f->is_last)
-		fprintf(stderr, "*** resume f->is_last=%d, is_complex=%d\n", f->is_last, f->is_complex);
+	//if ((q->st.curr_frame == (q->st.fp-1)) && f->is_last)
+	//	fprintf(stderr, "*** resume f->is_last=%d, f->is_complex=%d, any_choices=%d\n", f->is_last, f->is_complex, any_choices(q, f));
 
 	if ((q->st.curr_frame == (q->st.fp-1)) && f->is_last
 		&& q->st.m->pl->opt
 		&& !f->is_complex
-		&& !any_choices(q, f)
-		&& check_slots2(q, f)) {
-		fprintf(stderr, "*** trim\n");
+		&& !any_choices(q, f)) {
+		//fprintf(stderr, "*** trim\n");
 		q->st.fp--;
 	}
 #endif

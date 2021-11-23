@@ -839,6 +839,8 @@ void xref_rule(parser *p, rule *r, predicate *parent)
 		mask |= mask2;
 	}
 
+	// Other stuff...
+
 	c = r->cells;
 
 	if (c->val_off == g_sys_record_key_s)
