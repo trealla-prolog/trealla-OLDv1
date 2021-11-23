@@ -674,8 +674,10 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 
 static bool check_slots(const query *q, frame *f, rule *r)
 {
-	if (f->nbr_vars != r->nbr_vars)
-		return false;
+	if (r != NULL) {
+		if (f->nbr_vars != r->nbr_vars)
+			return false;
+	}
 
 	for (unsigned i = 0; i < f->nbr_vars; i++) {
 		const slot *e = GET_SLOT(f, i);
@@ -683,21 +685,7 @@ static bool check_slots(const query *q, frame *f, rule *r)
 		if (is_indirect(&e->c))
 			return false;
 
-		if (is_string(&e->c))
-			return false;
-	}
-
-	return true;
-}
-
-static bool check_slots2(const query *q, frame *f)
-{
-	return true;
-
-	for (unsigned i = 0; i < f->nbr_vars; i++) {
-		const slot *e = GET_SLOT(f, i);
-
-		if (e->ctx)
+		if (is_managed(&e->c))
 			return false;
 	}
 
@@ -1015,7 +1003,8 @@ static bool resume_frame(query *q)
 	if ((q->st.curr_frame == (q->st.fp-1)) && f->is_last
 		&& q->st.m->pl->opt
 		&& !f->is_complex
-		&& !any_choices(q, f)) {
+		&& !any_choices(q, f)
+		&& check_slots(q, f, NULL)) {
 		//fprintf(stderr, "*** trim\n");
 		q->st.fp--;
 	}
