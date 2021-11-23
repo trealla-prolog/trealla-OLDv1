@@ -106,7 +106,6 @@ typedef enum {
 
 #define is_iso_atom(c) ((is_literal(c) || is_cstring(c)) && !(c)->arity)
 #define is_iso_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
-#define is_partial_list(c) (is_iso_list(c) && is_variable(c+2))
 
 #define get_real(c) (c)->val_real
 #define set_real(c,v) (c)->val_real = (v)
