@@ -9839,6 +9839,7 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 	may_error(make_choice(q));
 	frame *f = GET_CURR_FRAME();
 	try_me(q, f->nbr_vars);
+	pl_idx_t save_tp = q->st.tp;
 
 	if (!unify(q, p1, p1_ctx, p2, p2_ctx) && !q->cycle_error) {
 		q->in_hook = false;
@@ -9848,65 +9849,27 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 	}
 
 	q->in_hook = false;
-
-	// Find all the variables on the LHS that have been bound...
-
-	cell *p = p1;
-	pl_idx_t p_ctx = p1_ctx;
-	pl_idx_t nbr_cells = p->nbr_cells;
 	bool first = true;
 
-	for (pl_idx_t i = 0; i < nbr_cells; i++, p++) {
-		if (!is_variable(p))
-			continue;
+	// Go thru trail, getting the bindings...
 
-		if (!first && search_tmp_list(q, p))
-			continue;
+	while (save_tp < q->st.tp) {
+		const trail *tr = q->trails + save_tp;
+		const frame *f = GET_FRAME(tr->ctx);
+		slot *e = GET_SLOT(f, tr->var_nbr);
+		cell *c = deref(q, &e->c, e->ctx);
 
-		cell *c = deref(q, p, p_ctx);
-
-		if (c == p)
-			continue;
-
-		cell *tmp = malloc(sizeof(cell)*(2+c->nbr_cells));
-		may_ptr_error(tmp);
-		make_structure(tmp, g_unify_s, fn_iso_unify_2, 2, 1+c->nbr_cells);
-		SET_OP(tmp, OP_XFX);
-		tmp[1] = *p;
-		copy_cells(tmp+2, c, c->nbr_cells);
-
-		if (first) {
-			first = false;
-			allocate_list(q, tmp);
-		} else
-			append_list(q, tmp);
-
-		free(tmp);
-	}
-
-	// Find all the variables on the RHS that have been bound...
-
-	p = p2;
-	p_ctx = p2_ctx;
-	nbr_cells = p->nbr_cells;
-
-	for (pl_idx_t i = 0; i < nbr_cells; i++, p++) {
-		if (!is_variable(p))
-			continue;
-
-		if (!first && search_tmp_list(q, p))
-			continue;
-
-		cell *c = deref(q, p, p_ctx);
-
-		if (c == p)
-			continue;
+		if (is_indirect(c))
+			c = c->val_ptr;
 
 		cell *tmp = malloc(sizeof(cell)*(2+c->nbr_cells));
 		may_ptr_error(tmp);
 		make_structure(tmp, g_unify_s, fn_iso_unify_2, 2, 1+c->nbr_cells);
 		SET_OP(tmp, OP_XFX);
-		tmp[1] = *p;
+		cell v;
+		make_variable(&v, g_anon_s);
+		v.var_nbr = tr->var_nbr;
+		tmp[1] = v;
 		safe_copy_cells(tmp+2, c, c->nbr_cells);
 
 		if (first) {
@@ -9916,17 +9879,11 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 			append_list(q, tmp);
 
 		free(tmp);
+		save_tp++;
 	}
 
 	undo_me(q);
 	drop_choice(q);
-	trim_trail(q);
-
-	if (first) {
-		cell tmp;
-		make_literal(&tmp, g_nil_s);
-		return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
-	}
 
 	cell *l = end_list(q);
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
