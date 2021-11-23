@@ -826,11 +826,6 @@ void xref_rule(parser *p, rule *r, predicate *parent)
 	// Check if a variable occurs more than once in the head...
 
 	for (pl_idx_t i = 0; i < head->nbr_cells; i++, c++) {
-		if (is_iso_list(c)) {
-			r->is_complex = true;
-			break;
-		}
-
 		if (!is_variable(c))
 			continue;
 
