@@ -5444,12 +5444,12 @@ static USE_RESULT pl_status fn_sys_queue_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	cell *tmp = deep_clone_to_tmp(q, p1, p1_ctx);
-	may_ptr_error(tmp);
 
-	if (tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
+	if (!tmp || tmp == ERR_CYCLE_CELL)
+		alloc_on_queuen(q, 0, p1);
+	else
+		alloc_on_queuen(q, 0, tmp);
 
-	alloc_on_queuen(q, 0, tmp);
 	return pl_success;
 }
 
@@ -5458,12 +5458,12 @@ static USE_RESULT pl_status fn_sys_queuen_2(query *q)
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,any);
 	cell *tmp = deep_clone_to_tmp(q, p2, p2_ctx);
-	may_ptr_error(tmp);
 
-	if (tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
+	if (!tmp || tmp == ERR_CYCLE_CELL)
+		alloc_on_queuen(q, get_int(p1), p2);
+	else
+		alloc_on_queuen(q, get_int(p1), tmp);
 
-	alloc_on_queuen(q, get_int(p1), tmp);
 	return pl_success;
 }
 
