@@ -249,7 +249,7 @@ cell *do_deep_copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_
 
 static cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 {
-	if (depth >= MAX_DEPTH) {
+	if (depth >= (MAX_DEPTH*2)) {
 		q->cycle_error = true;
 		return ERR_CYCLE_CELL;
 	}
