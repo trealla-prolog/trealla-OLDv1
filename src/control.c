@@ -102,9 +102,10 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 		return pl_failure;
 
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
+	may_ptr_error(p0);
 
-	if (!p0 || (p0 == ERR_CYCLE_CELL))
-		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "too_many_vars");
+	if (p0 == ERR_CYCLE_CELL)
+		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "cyclic_term");
 
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 
@@ -334,9 +335,10 @@ USE_RESULT pl_status fn_iso_once_1(query *q)
 		return pl_failure;
 
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
+	may_ptr_error(p0);
 
-	if (!p0 || (p0 == ERR_CYCLE_CELL))
-		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "too_many_vars");
+	if (p0 == ERR_CYCLE_CELL)
+		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "cyclic_term");
 
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
@@ -419,9 +421,10 @@ USE_RESULT pl_status fn_sys_block_catcher_0(query *q)
 USE_RESULT pl_status fn_iso_catch_3(query *q)
 {
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
+	may_ptr_error(p0);
 
-	if (!p0 || (p0 == ERR_CYCLE_CELL))
-		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "too_many_vars");
+	if (p0 == ERR_CYCLE_CELL)
+		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "cyclic_term");
 
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 
@@ -466,9 +469,10 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 USE_RESULT pl_status fn_sys_catch2_3(query *q)
 {
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
+	may_ptr_error(p0);
 
-	if (!p0 || (p0 == ERR_CYCLE_CELL))
-		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "too_many_vars");
+	if (p0 == ERR_CYCLE_CELL)
+		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "cyclic_term");
 
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 

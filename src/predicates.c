@@ -4471,7 +4471,7 @@ static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
 	cell *tmp = do_term_variables(q, p1, p1_ctx);
 
 	if (!tmp)
-		return throw_error(q, p1, p1_ctx, "resource_error", "too_many_vars");
+		return throw_error(q, p1, p1_ctx, "resource_error", "out_of_memory");
 
 	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
 	may_ptr_error(tmp2);
@@ -4491,7 +4491,7 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
 	if (q->cycle_error)
-		return throw_error(q, p1, p1_ctx, "resource_error", "too_many_vars");
+		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
 
 	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, true);
 
@@ -4542,12 +4542,12 @@ static USE_RESULT pl_status fn_copy_term_nat_2(query *q)
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
 	if (q->cycle_error)
-		return throw_error(q, p1, p1_ctx, "resource_error", "too_many_vars");
+		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
 
 	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, false);
 
 	if (!tmp || tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, p1_ctx, "resource_error", "too_many_vars");
+		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
 
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
@@ -10021,7 +10021,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_integer(p2) && !is_smallint(p2))
-		return throw_error(q, p2, p2_ctx, "resource_error", "too_many_vars");
+		return throw_error(q, p2, p2_ctx, "resource_error", "number_too_big");
 
 	if (is_negative(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
