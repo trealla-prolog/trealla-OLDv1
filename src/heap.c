@@ -216,6 +216,11 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 	return q->tmp_heap;
 }
 
+cell *deep_copy_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
+{
+	return deep_copy_to_tmp(q, p1, p1_ctx, nonlocals_only, copy_attrs);
+}
+
 cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
 {
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, nonlocals_only, copy_attrs);
@@ -226,25 +231,9 @@ cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only
 	return tmp2;
 }
 
-cell *do_deep_copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t suffix, bool nonlocals_only, bool copy_attrs, pl_idx_t *nbr_cells)
+cell *deep_copy_to_heap_with_cycle_check(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
 {
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, nonlocals_only, copy_attrs);
-	if (!tmp || (tmp == ERR_CYCLE_CELL)) return tmp;
-	cell *tmp2 = alloc_on_heap(q, (prefix?1:0)+tmp->nbr_cells+suffix);
-	if (!tmp2) return NULL;
-
-	if (prefix) {
-		*nbr_cells = 1;
-		// Needed for follow() to work
-		*tmp2 = (cell){0};
-		tmp2->tag = TAG_EMPTY;
-		tmp2->nbr_cells = 1;
-		tmp2->flags = FLAG_BUILTIN;
-	} else
-		*nbr_cells = 0;
-
-	*nbr_cells += safe_copy_cells(tmp2+(prefix?1:0), tmp, tmp->nbr_cells);
-	return tmp2;
+	return deep_copy_to_heap(q, p1, p1_ctx, nonlocals_only, copy_attrs);
 }
 
 static cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)

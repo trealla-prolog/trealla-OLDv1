@@ -7,10 +7,11 @@ cell *deep_clone_to_heap_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, c
 cell *deep_clone_to_heap(query *q, cell *p1, pl_idx_t p1_ctx);
 cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs);
 
-cell *do_deep_copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t suffix, bool nonlocals_only, bool copy_attrs, pl_idx_t *nbr_cells);
-
-cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs);
 cell *deep_clone_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx);
+cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs);
+
+cell *deep_copy_to_heap_with_cycle_check(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs);
+cell *deep_copy_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs);
 
 cell *clone2_to_tmp(query *q, cell *p1);
 cell *clone_to_tmp(query *q, cell *p1);
