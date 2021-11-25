@@ -180,20 +180,17 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, ref *li
 			if (is_in_ref_list(p1, p1_ctx, list))
 				return q->cycle_error = true;
 
-			ref *nlist = malloc(sizeof(ref));
-			nlist->next = list;
-			nlist->var_nbr = p1->var_nbr;
-			nlist->ctx = p1_ctx;
+			ref nlist;
+			nlist.next = list;
+			nlist.var_nbr = p1->var_nbr;
+			nlist.ctx = p1_ctx;
 
 			cell *c = deref(q, p1, p1_ctx);
 			pl_idx_t c_ctx = q->latest_ctx;
 
-			if (is_cyclic_term_internal(q, c, c_ctx, nlist)) {
-				free(nlist);
+			if (is_cyclic_term_internal(q, c, c_ctx, &nlist)) {
 				return true;
 			}
-
-			free(nlist);
 		}
 
 		nbr_cells--;
