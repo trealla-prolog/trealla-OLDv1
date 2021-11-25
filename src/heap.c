@@ -216,11 +216,6 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 	return q->tmp_heap;
 }
 
-cell *deep_copy_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
-{
-	return deep_copy_to_tmp(q, p1, p1_ctx, nonlocals_only, copy_attrs);
-}
-
 cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
 {
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, nonlocals_only, copy_attrs);
@@ -229,11 +224,6 @@ cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only
 	if (!tmp2) return NULL;
 	safe_copy_cells(tmp2, tmp, tmp->nbr_cells);
 	return tmp2;
-}
-
-cell *deep_copy_to_heap_with_cycle_check(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
-{
-	return deep_copy_to_heap(q, p1, p1_ctx, nonlocals_only, copy_attrs);
 }
 
 static cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
