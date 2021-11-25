@@ -210,7 +210,7 @@ static cell *deep_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_
 	return tmp;
 }
 
-static cell *deep_copy_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs, ref *list)
+cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
 {
 	if (!init_tmp_heap(q))
 		return NULL;
@@ -220,6 +220,17 @@ static cell *deep_copy_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_c
 	q->st.m->pl->tab_idx = 0;
 	q->cycle_error = false;
 	int nbr_vars = f->nbr_vars;
+	ref nlist, *list = NULL;
+
+	if (is_variable(p1)) {
+		nlist.next = list;
+		nlist.var_nbr = p1->var_nbr;
+		nlist.ctx = p1_ctx;
+		list = &nlist;
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+	}
+
 	cell* rec = deep_copy2_to_tmp_with_cycle_check(q, p1, p1_ctx, 0, nonlocals_only, list);
 	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 	int cnt = q->st.m->pl->varno - nbr_vars;
@@ -245,11 +256,6 @@ static cell *deep_copy_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_c
 	}
 
 	return q->tmp_heap;
-}
-
-cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
-{
-	return deep_copy_to_tmp_with_cycle_check(q, p1, p1_ctx, nonlocals_only, copy_attrs, NULL);
 }
 
 cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)

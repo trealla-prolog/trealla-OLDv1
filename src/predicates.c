@@ -4493,7 +4493,8 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	if (q->cycle_error)
 		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
 
-	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, true);
+	GET_FIRST_RAW_ARG(p1_raw,any);
+	cell *tmp = deep_copy_to_heap(q, p1_raw, p1_raw_ctx, false, true);
 
 	if (!tmp || (tmp == ERR_CYCLE_CELL))
 		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
