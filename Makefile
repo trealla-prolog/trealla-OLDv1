@@ -24,7 +24,7 @@ endif
 SRCOBJECTS = tpl.o src/history.o src/functions.o \
 	src/predicates.o src/contrib.o src/heap.c \
 	src/control.o src/library.o src/module.o src/parser.o \
-	src/print.o src/prolog.o src/query.o src/format.o \
+	src/print.o src/prolog.o src/query.o src/format.o src/unify.o \
 	src/skiplist.o src/base64.o src/network.o src/utf8.o
 
 LIBOBJECTS +=  library/builtins.o library/lists.o library/apply.o \
@@ -103,6 +103,10 @@ src/query.o: src/query.c src/internal.h src/map.h src/skiplist.h \
   src/parser.h src/module.h src/prolog.h src/query.h src/builtins.h \
   src/heap.h src/utf8.h
 src/skiplist.o: src/skiplist.c src/skiplist.h
+src/unify.o: src/unify.c src/internal.h src/map.h src/skiplist.h \
+  src/trealla.h src/cdebug.h src/imath/imath.h src/history.h \
+  src/parser.h src/module.h src/prolog.h src/query.h src/builtins.h \
+  src/heap.h src/utf8.h
 src/utf8.o: src/utf8.c src/utf8.h
 src/version.o: src/version.c
 src/imath.o: src/imath/imath.c src/imath/imath.h
