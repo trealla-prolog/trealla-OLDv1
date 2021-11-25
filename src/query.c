@@ -167,24 +167,6 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 	return pl_success;
 }
 
-struct ref_ {
-	ref *next;
-	pl_idx_t var_nbr, ctx;
-};
-
-inline static bool is_in_ref_list(cell *c, pl_idx_t c_ctx, ref *rlist)
-{
-	while (rlist && !g_tpl_interrupt) {
-		if ((c->var_nbr == rlist->var_nbr)
-			&& (c_ctx == rlist->ctx))
-			return true;
-
-		rlist = rlist->next;
-	}
-
-	return false;
-}
-
 static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, ref *list)
 {
 	if (!is_structure(p1))

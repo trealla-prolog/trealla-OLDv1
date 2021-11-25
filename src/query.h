@@ -103,3 +103,10 @@ inline static pl_status make_string(cell *d, const char *s)
 
 typedef struct ref_ ref;
 
+struct ref_ {
+	ref *next;
+	pl_idx_t var_nbr, ctx;
+};
+
+extern bool is_in_ref_list(cell *c, pl_idx_t c_ctx, ref *rlist);
+
