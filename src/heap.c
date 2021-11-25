@@ -184,8 +184,12 @@ static cell *deep_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_
 	p1++;
 
 	while (arity--) {
-		cell *c = deref(q, p1, p1_ctx);
-		pl_idx_t c_ctx = q->latest_ctx;
+		cell *c = p1;
+		pl_idx_t c_ctx = p1_ctx;
+
+		c = deref(q, p1, p1_ctx);
+		c_ctx = q->latest_ctx;
+
 		cell *rec = deep_copy2_to_tmp_with_cycle_check(q, c, c_ctx, depth+1, nonlocals_only, list);
 		if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 		p1 += p1->nbr_cells;
