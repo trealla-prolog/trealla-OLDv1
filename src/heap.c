@@ -122,7 +122,7 @@ bool is_in_ref_list(cell *c, pl_idx_t c_ctx, ref *rlist)
 	return false;
 }
 
-static cell *deep_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth, bool nonlocals_only, void *list)
+static cell *deep_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth, bool nonlocals_only, ref *list)
 {
 	if (depth >= MAX_DEPTH) {
 		q->cycle_error = true;
@@ -192,7 +192,7 @@ static cell *deep_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_
 	return tmp;
 }
 
-static cell *deep_copy_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs, void *list)
+static cell *deep_copy_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs, ref *list)
 {
 	if (!init_tmp_heap(q))
 		return NULL;
