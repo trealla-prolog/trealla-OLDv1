@@ -305,21 +305,22 @@ static bool collect_vars(query *q, cell *p1, pl_idx_t p1_ctx, pl_idx_t nbr_cells
 
 	for (unsigned i = 0; i < nbr_cells;) {
 		cell *c = deref(q, p1, p1_ctx);
-		int found = 0;
+		pl_idx_t c_ctx = q->latest_ctx;
+		bool found = false;
 
 		if (is_structure(c)) {
-			collect_vars(q, c+1, q->latest_ctx, c->nbr_cells-1, depth+1);
+			collect_vars(q, c+1, c_ctx, c->nbr_cells-1, depth+1);
 		} else if (is_variable(c)) {
 			for (unsigned idx = 0; idx < q->st.m->pl->tab_idx; idx++) {
-				if ((q->st.m->pl->tab1[idx] == q->latest_ctx) && (q->st.m->pl->tab2[idx] == c->var_nbr)) {
+				if ((q->st.m->pl->tab1[idx] == c_ctx) && (q->st.m->pl->tab2[idx] == c->var_nbr)) {
 					q->st.m->pl->tab4[idx]++;
-					found = 1;
+					found = true;
 					break;
 				}
 			}
 
 			if (!found) {
-				q->st.m->pl->tab1[q->st.m->pl->tab_idx] = q->latest_ctx;
+				q->st.m->pl->tab1[q->st.m->pl->tab_idx] = c_ctx;
 				q->st.m->pl->tab2[q->st.m->pl->tab_idx] = c->var_nbr;
 				q->st.m->pl->tab3[q->st.m->pl->tab_idx] = c->val_off;
 				q->st.m->pl->tab4[q->st.m->pl->tab_idx] = 1;
