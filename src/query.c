@@ -1446,9 +1446,9 @@ static item *g_items = NULL;
 
 static int check_duplicate_result(query *q, cell *c, int i)
 {
-	item *ptr = g_items;
+	const item *ptr = g_items;
 
-	while (ptr) {
+	while (ptr && g_tpl_interrupt) {
 		if (!compare(q, c, q->st.curr_frame, ptr->c, q->st.curr_frame, 0)) {
 			return ptr->nbr;
 		}
@@ -1456,11 +1456,12 @@ static int check_duplicate_result(query *q, cell *c, int i)
 		ptr = ptr->next;
 	}
 
-	ptr = malloc(sizeof(item));
-	ptr->c = c;
-	ptr->nbr = i;
-	ptr->next = g_items;
-	g_items = ptr;
+	item *ptr2 = g_items;
+	ptr2 = malloc(sizeof(item));
+	ptr2->c = c;
+	ptr2->nbr = i;
+	ptr2->next = g_items;
+	g_items = ptr2;
 	return -1;
 }
 

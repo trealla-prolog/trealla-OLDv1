@@ -49,6 +49,11 @@ static bool unify_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p
 	LIST_HANDLER(p2);
 
 	while (is_list(p1) && is_list(p2) && !g_tpl_interrupt) {
+		if (depth >= MAX_DEPTH) {
+			q->cycle_error = true;
+			return true;
+		}
+
 		cell *h1 = LIST_HEAD(p1);
 		cell *h2 = LIST_HEAD(p2);
 
@@ -57,8 +62,12 @@ static bool unify_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p
 		cell *c2 = deref(q, h2, p2_ctx);
 		pl_idx_t c2_ctx = q->latest_ctx;
 
-		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
+		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1)) {
+			if (q->cycle_error)
+				return true;
+
 			return false;
+		}
 
 		p1 = LIST_TAIL(p1);
 		p2 = LIST_TAIL(p2);
@@ -67,6 +76,7 @@ static bool unify_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p
 		p1_ctx = q->latest_ctx;
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
+		depth++;
 	}
 
 	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1);
