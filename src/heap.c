@@ -130,8 +130,11 @@ static cell *deep_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_
 	}
 
 	const pl_idx_t save_idx = tmp_heap_used(q);
-	p1 = deref(q, p1, p1_ctx);
-	p1_ctx = q->latest_ctx;
+
+	if (!is_in_ref_list(p1, p1_ctx, list)) {
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+	}
 
 	cell *tmp = alloc_on_tmp(q, 1);
 	if (!tmp) return NULL;
@@ -182,7 +185,8 @@ static cell *deep_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_
 
 	while (arity--) {
 		cell *c = deref(q, p1, p1_ctx);
-		cell *rec = deep_copy2_to_tmp_with_cycle_check(q, c, q->latest_ctx, depth+1, nonlocals_only, list);
+		pl_idx_t c_ctx = q->latest_ctx;
+		cell *rec = deep_copy2_to_tmp_with_cycle_check(q, c, c_ctx, depth+1, nonlocals_only, list);
 		if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 		p1 += p1->nbr_cells;
 	}
