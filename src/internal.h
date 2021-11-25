@@ -546,7 +546,9 @@ struct query_ {
 	mpz_t tmp_ival;
 	prolog_state st;
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
-	uint64_t step, qid, time_started, get_started, cpu_started, cpu_last_started;
+	uint64_t step, qid;
+	uint64_t time_started, get_started;
+	uint64_t cpu_started, cpu_last_started;
 	unsigned max_depth, tmo_msecs;
 	int nv_start;
 	pl_idx_t cp, tmphp, latest_ctx, popp, variable_names_ctx;
