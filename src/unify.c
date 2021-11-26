@@ -32,7 +32,7 @@ bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ct
 		pl_idx_t c1_ctx = q->latest_ctx;
 		cell *c2 = deref(q, p2, p2_ctx);
 		pl_idx_t c2_ctx = q->latest_ctx;
-		ref r1, r2;
+		ref r1 = {0}, r2 = {0};
 
 		if (q->info) {
 			if (is_variable(p1)) {
