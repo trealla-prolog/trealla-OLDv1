@@ -97,7 +97,7 @@ struct ref_ {
 };
 
 struct coinduction_ {
-	ref *ptr1, *ptr2;
+	ref *r1, *r2;
 };
 
 

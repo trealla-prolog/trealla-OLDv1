@@ -32,9 +32,34 @@ bool unify_structure(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_
 		pl_idx_t c1_ctx = q->latest_ctx;
 		cell *c2 = deref(q, p2, p2_ctx);
 		pl_idx_t c2_ctx = q->latest_ctx;
+		ref r1, r2;
+
+		if (q->info) {
+			if (is_variable(p1)) {
+				r1.next = q->info->r1;
+				r1.var_nbr = p1->var_nbr;
+				r1.ctx = p1_ctx;
+				q->info->r1 = &r1;
+			}
+
+			if (is_variable(p2)) {
+				r2.next = q->info->r2;
+				r2.var_nbr = p1->var_nbr;
+				r2.ctx = p1_ctx;
+				q->info->r2 = &r2;
+			}
+		}
 
 		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
 			return false;
+
+		if (q->info) {
+			if (is_variable(p1))
+				q->info->r1 = r1.next;		// restore
+
+			if (is_variable(p2))
+				q->info->r2 = r2.next;		// restore
+		}
 
 		p1 += p1->nbr_cells;
 		p2 += p2->nbr_cells;
@@ -45,6 +70,7 @@ bool unify_structure(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_
 
 static bool unify_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
+	unsigned save_depth = depth;
 	LIST_HANDLER(p1);
 	LIST_HANDLER(p2);
 
@@ -54,12 +80,12 @@ static bool unify_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p
 			return true;
 		}
 
-		cell *h1 = LIST_HEAD(p1);
-		cell *h2 = LIST_HEAD(p2);
+		cell *c1 = LIST_HEAD(p1);
+		cell *c2 = LIST_HEAD(p2);
 
-		cell *c1 = deref(q, h1, p1_ctx);
+		c1 = deref(q, c1, p1_ctx);
 		pl_idx_t c1_ctx = q->latest_ctx;
-		cell *c2 = deref(q, h2, p2_ctx);
+		c2 = deref(q, c2, p2_ctx);
 		pl_idx_t c2_ctx = q->latest_ctx;
 
 		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1)) {
@@ -69,17 +95,17 @@ static bool unify_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p
 			return false;
 		}
 
-		p1 = LIST_TAIL(p1);
-		p2 = LIST_TAIL(p2);
+		c1 = LIST_TAIL(p1);
+		c2 = LIST_TAIL(p2);
 
-		p1 = deref(q, p1, p1_ctx);
+		p1 = deref(q, c1, p1_ctx);
 		p1_ctx = q->latest_ctx;
-		p2 = deref(q, p2, p2_ctx);
+		p2 = deref(q, c2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 		depth++;
 	}
 
-	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1);
+	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, save_depth+1);
 }
 
 static bool unify_integer(__attribute__((unused)) query *q, cell *p1, cell *p2)
