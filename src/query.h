@@ -1,10 +1,15 @@
 #pragma once
 
+typedef struct ref_ ref;
+
+struct ref_ {
+	ref *next;
+	pl_idx_t var_nbr, ctx;
+};
+
 typedef struct {
 	void *ptr1, *ptr2;
 } coinduction;
-
-#define unify(q,p1,p1_ctx,p2,p2_ctx) unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0, NULL)
 
 extern query *create_query(module *m, bool sub_query);
 extern query *create_sub_query(query *q, cell *curr_cell);
@@ -84,6 +89,7 @@ extern pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx);
 extern void add_to_dirty_list(query *q, clause *r);
 extern void do_cleanup(query *q, cell *p1);
 extern void cut_if_det(query *q);
+extern bool is_in_ref_list(cell *c, pl_idx_t c_ctx, ref *rlist);
 
 extern ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_ctx, int running, bool cons, unsigned depth);
 extern pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running);
@@ -96,6 +102,10 @@ extern pl_status print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, in
 extern char *print_canonical_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running);
 extern pl_status print_canonical_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, int running);
 
+inline static bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
+{
+	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0, NULL);
+}
 
 inline static pl_status make_cstring(cell *d, const char *s)
 {
@@ -106,13 +116,3 @@ inline static pl_status make_string(cell *d, const char *s)
 {
 	return make_stringn(d, s, strlen(s));
 }
-
-typedef struct ref_ ref;
-
-struct ref_ {
-	ref *next;
-	pl_idx_t var_nbr, ctx;
-};
-
-extern bool is_in_ref_list(cell *c, pl_idx_t c_ctx, ref *rlist);
-
