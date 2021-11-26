@@ -1,15 +1,15 @@
 Introduction
 ============
 
-For convenience a fixed size cell has been implemented. The following
-diagrams illustrate the cell layout on 64-bit systems.
+For convenience a fixed size (24-byte) cell has been implemented. The
+following diagrams illustrate the cell layout on 64-bit systems.
 
 
 Literal
 =======
 ```
         +----------+---------+----------+---------+
-    0   | val_type |  arity  |       flags        |    CELL 1
+    0   |   tag    |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
     4   |                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -23,20 +23,20 @@ Literal
         +----------+---------+----------+---------+
 ```
 
-Where *val_type* is TYPE_LITERAL.
+Where *tag* is TAG_LITERAL.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
-Where *val_off* is into the symbol table.
+Where *val_off* is a byte-offset into the symbol table.
 
-Two atoms will unify if their *val_off* is the same.
-An Atom is always used for functor names.
+Two literals will unify if their *val_off* is the same.
+A literal is always used for functor names.
 
 
 Var
 ===
 ```
         +----------+---------+----------+---------+
-    0   | val_type |  arity  |       flags        |    CELL 1
+    0   |   tag    |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
     4   |                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -50,18 +50,18 @@ Var
         +----------+---------+----------+---------+
 ```
 
-Where *val_type* is TYPE_VAR.
+Where *tag* is TAG_VAR.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
-Where *val_off* is into the symbol table.
-Where *var_nbr* is the index into the frame
+Where *val_off* is a byte_offset into the symbol table.
+Where *var_nbr* is the index into a frame's slots
 
 
 Integer
 =======
 ```
         +----------+---------+----------+---------+
-    0   | val_type |  arity  |       flags        |    CELL 1
+    0   |   tag    |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
     4   |                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -70,12 +70,12 @@ Integer
    12   |                                         |
         +----------+---------+----------+---------+
    16   |                                         |
-        +                                         +
+        |               - UNUSED -                |
    20   |                                         |
         +----------+---------+----------+---------+
 ```
 
-Where *val_type* is TYPE_RATIONAL.
+Where *tag* is TAG_RATIONAL.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
 Where *val_int* is a signed 64-bit integer.
@@ -85,7 +85,7 @@ Bigint
 ======
 ```
         +----------+---------+----------+---------+
-    0   | val_type |  arity  |       flags        |    CELL 1
+    0   |   tag    |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
     4   |                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -94,12 +94,12 @@ Bigint
    12   |                                         |
         +----------+---------+----------+---------+
    16   |                                         |
-        +                                         +
+        |               - UNUSED -                |
    20   |                                         |
         +----------+---------+----------+---------+
 ```
 
-Where *val_type* is TYPE_RATIONAL.
+Where *tag* is TAG_RATIONAL.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
 Where *val_bigint* is a pointer.
@@ -109,7 +109,7 @@ Float
 =====
 ```
         +----------+---------+----------+---------+
-    0   | val_type |  arity  |       flags        |    CELL 1
+    0   |   tag    |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
     4   |                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -123,7 +123,7 @@ Float
         +----------+---------+----------+---------+
 ```
 
-Where *val_type* is TYPE_FLOAT.
+Where *tag* is TAG_FLOAT.
 Where *arity* is always 0
 Where *nbr_cells* is always 1.
 Where *val_real* is a floating-point *double*.
@@ -135,7 +135,7 @@ Cstring
 A small string < 16 bytes.
 ```
         +----------+---------+----------+---------+
-    0   | val_type |  arity  |       flags        |    CELL 1
+    0   |   tag    |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
     4   |                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -149,7 +149,7 @@ A small string < 16 bytes.
         +----------+---------+----------+---------+
 ```
 
-Where *val_type* is TYPE_CSTRING.
+Where *tag* is TAG_CSTRING.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
 Where *val_chr* is up to 15 bytes of UTF-8 chars, NULL-terminated.
@@ -161,7 +161,7 @@ Static BLOB
 ===========
 ```
         +----------+---------+----------+---------+
-    0   | val_type |  arity  |       flags        |    CELL 1
+    0   |   tag    |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
     4   |                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -175,7 +175,7 @@ Static BLOB
         +----------+---------+----------+---------+
 ```
 
-Where *val_type* is TYPE_CSTRING.
+Where *tag* is TAG_CSTRING.
 Where *arity* is always 0.
 Where *flags* is FLAG_BLOB | FLAG2_STATIC.
 Where *nbr_cells* is always 1.
@@ -193,7 +193,7 @@ Non-static BLOB
 A ref-counted string buffer.
 ```
         +----------+---------+----------+---------+
-    0   | val_type |  arity  |       flags        |    CELL 1
+    0   |   tag    |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
     4   |                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -207,7 +207,7 @@ A ref-counted string buffer.
         +----------+---------+----------+---------+
 ```
 
-Where *val_type* is TYPE_CSTRING.
+Where *tag* is TAG_CSTRING.
 Where *arity* is always 0.
 Where *flags* is FLAG_BLOB.
 Where *nbr_cells* is always 1.
@@ -231,7 +231,7 @@ Compound
 ========
 ```
         +----------+---------+----------+---------+
-    0   | val_type |  arity  |       flags        |    CELL 1
+    0   |   tag    |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
     4   |                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -243,13 +243,13 @@ Compound
         +----------+---------+----------+---------+
    20   |               - UNUSED -                |
         +----------+---------+----------+---------+
-    0   | val_type |  arity  |       flags        |    CELL 2
+    0   |   tag    |  arity  |       flags        |    CELL 2
 ```
 
-Where *val_type* is TYPE_LITERAL.
+Where *tag* is TAG_LITERAL.
 Where *arity* is > 0.
 Where *nbr_cells* is > 1 and includes the args.
-Where *val_off* is into the symbol table.
+Where *val_off* is a byte-offset into the symbol table.
 Where args are the following cells (see *nbr_cells*).
 
 
@@ -257,7 +257,7 @@ List
 ====
 ```
         +----------+---------+----------+---------+
-    0   | val_type |  arity  |       flags        |    CELL 1
+    0   |   tag    |  arity  |       flags        |    CELL 1
         +----------+---------+----------+---------+
     4   |                 nbr_cells               |
         +----------+---------+----------+---------+
@@ -269,13 +269,13 @@ List
         +----------+---------+----------+---------+
    20   |               - UNUSED -                |
         +----------+---------+----------+---------+
-    0   | val_type |  arity  |       flags        |    CELL 2
+    0   |   tag    |  arity  |       flags        |    CELL 2
 ```
 
-Where *val_type* is TYPE_LITERAL.
+Where *tag* is TAG_LITERAL.
 Where *arity* is always 2.
 Where *nbr_cells* is > 1 and includes head & tail args.
-Where *val_off* is into the symbol table to '.'.
+Where *val_off* is a byte-offset into the symbol table to '.'.
 Where args are the following cells (see *nbr_cells*).
 Where the tail arg is usually a list.
 Where the final tail arg is usually the atom *[]*.
@@ -287,8 +287,11 @@ Frames
 A frame is an element of the frame stack. Each frame is of fixed size
 and contains an index into the slot table of the base slot for the
 frame. It also contains a count of the number of variables that make up
-the frame. The frame plus it's slots constitute a working context for
-a set of goals. Choices can back-track to a given context.
+the frame. If a frame expands (creates new variables) the slots may
+become discontiguous.
+
+The frame plus it's slots constitute a working context for a set of
+goals. Choices can back-track to a given context.
 
 Since only index numbers are used to refer to frames (a *ctx* number)
 the frame space can be easily resized.
@@ -336,8 +339,9 @@ Heap
 ====
 
 A space for dynamically created terms (compounds). Heap space is
-allocated in arenas (aka. pages) as linked list of ever increasing size.
+allocated in arenas as a linked list of ever increasing size.
 
-A term allocated on the heap must be fully contained within an arena,
+A term allocated on the heap must be fully contained within one arena,
 to this end such terms are first allocated in a temporary space and
-copied into a suitablly size arena.
+copied into a suitablly size arena. A term (eg. a list) can be grown
+incrementally first on the temporary space.

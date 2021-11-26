@@ -76,7 +76,7 @@ cell *list_tail(cell *l, cell *tmp)
 	size_t len = len_char_utf8(src);
 
 	if (str_len == len) {
-		tmp->tag = TAG_POOL;
+		tmp->tag = TAG_LITERAL;
 		tmp->nbr_cells = 1;
 		tmp->arity = 0;
 		tmp->flags = 0;
@@ -1079,7 +1079,7 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 		*dst-- = *last--;
 
 	p1 = p->r->cells + p1_idx;
-	p1->tag = TAG_POOL;
+	p1->tag = TAG_LITERAL;
 	p1->flags = FLAG_BUILTIN;
 	p1->fn = fn_iso_call_n;
 	p1->val_off = g_call_s;
@@ -1223,7 +1223,7 @@ static bool reduce(parser *p, pl_idx_t start_idx)
 
 		//printf("*** OP1 %s type=%u, specifier=%u, pri=%u\n", GET_STR(p, c), c->tag, GET_OP(c), c->priority);
 
-		c->tag = TAG_POOL;
+		c->tag = TAG_LITERAL;
 		c->arity = 1;
 
 		// Prefix...
@@ -1548,7 +1548,7 @@ bool virtual_term(parser *p, const char *src)
 static cell *make_a_literal(parser *p, pl_idx_t offset)
 {
 	cell *c = make_a_cell(p);
-	c->tag = TAG_POOL;
+	c->tag = TAG_LITERAL;
 	c->nbr_cells = 1;
 	c->val_off = offset;
 	return c;
@@ -2129,7 +2129,7 @@ bool get_token(parser *p, int last_op)
 	char *dst = p->token;
 	*dst = '\0';
 	bool neg = false;
-	p->v.tag = TAG_POOL;
+	p->v.tag = TAG_LITERAL;
 	p->v.flags = 0;
 	p->v.nbr_cells = 1;
 	p->quote_char = 0;
@@ -2464,7 +2464,7 @@ static bool process_term(parser *p, cell *p1)
 		}
 
 		unshare_cell(h);
-		h->tag = TAG_POOL;
+		h->tag = TAG_LITERAL;
 		h->val_off = off;
 		h->flags = 0;
 		h->arity = 0;
@@ -2827,7 +2827,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		// Operators in canonical form..
 
 		if (last_op && priority && (*p->srcptr == '(')) {
-			p->v.tag = TAG_POOL;
+			p->v.tag = TAG_LITERAL;
 			specifier = 0;
 			priority = 0;
 			p->quote_char = 0;

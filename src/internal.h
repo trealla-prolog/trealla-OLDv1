@@ -95,7 +95,7 @@ typedef enum {
 
 #define is_empty(c) ((c)->tag == TAG_EMPTY)
 #define is_variable(c) ((c)->tag == TAG_VAR)
-#define is_literal(c) ((c)->tag == TAG_POOL)
+#define is_literal(c) ((c)->tag == TAG_LITERAL)
 #define is_cstring(c) ((c)->tag == TAG_CSTR)
 #define is_integer(c) ((c)->tag == TAG_INT)
 #define is_real(c) ((c)->tag == TAG_REAL)
@@ -214,7 +214,7 @@ typedef struct {
 enum {
 	TAG_EMPTY=0,
 	TAG_VAR=1,
-	TAG_POOL=2,
+	TAG_LITERAL=2,
 	TAG_CSTR=3,
 	TAG_INT=4,
 	TAG_REAL=5,

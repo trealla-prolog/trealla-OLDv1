@@ -1175,7 +1175,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 			pl_idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
 			may_idx_error(off);
 			unshare_cell(c);
-			c->tag = TAG_POOL;
+			c->tag = TAG_LITERAL;
 			c->val_off = off;
 			c->flags = 0;
 			c->arity = 0;
@@ -1240,7 +1240,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 				p1_body = deref(q, p1_body, p1_ctx);
 				pl_idx_t p1_body_ctx = q->latest_ctx;
 				cell tmp = (cell){0};
-				tmp.tag = TAG_POOL;
+				tmp.tag = TAG_LITERAL;
 				tmp.nbr_cells = 1;
 				tmp.val_off = g_true_s;
 				ok = unify(q, p1_body, p1_body_ctx, &tmp, q->st.curr_frame);
@@ -1271,7 +1271,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 			pl_idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
 			may_idx_error(off);
 			unshare_cell(c);
-			c->tag = TAG_POOL;
+			c->tag = TAG_LITERAL;
 			c->val_off = off;
 			c->flags = 0;
 		}

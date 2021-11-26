@@ -119,7 +119,7 @@ void make_real(cell *tmp, double v)
 
 void make_structure(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t extra_cells)
 {
-	tmp->tag = TAG_POOL;
+	tmp->tag = TAG_LITERAL;
 	tmp->nbr_cells = 1 + extra_cells;
 	tmp->flags = 0;
 	if (fn) tmp->flags |= FLAG_BUILTIN;
@@ -149,7 +149,7 @@ void make_call(query *q, cell *tmp)
 
 void make_literal(cell *tmp, pl_idx_t offset)
 {
-	tmp->tag = TAG_POOL;
+	tmp->tag = TAG_LITERAL;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
 	tmp->val_off = offset;
@@ -210,7 +210,7 @@ static USE_RESULT cell *end_list_unsafe(query *q)
 {
 	cell *tmp = alloc_on_tmp(q, 1);
 	if (!tmp) return NULL;
-	tmp->tag = TAG_POOL;
+	tmp->tag = TAG_LITERAL;
 	tmp->nbr_cells = 1;
 	tmp->val_off = g_nil_s;
 	tmp->arity = tmp->flags = 0;
@@ -4912,7 +4912,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 			cell *tmp = alloc_on_heap(q, 1+arity);
 			may_ptr_error(tmp);
 			*tmp = (cell){0};
-			tmp[0].tag = TAG_POOL;
+			tmp[0].tag = TAG_LITERAL;
 			tmp[0].arity = arity;
 			tmp[0].nbr_cells = 1 + arity;
 
@@ -4941,7 +4941,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 	CLR_OP(&tmp);
 
 	if (is_string(p1)) {
-		tmp.tag = TAG_POOL;
+		tmp.tag = TAG_LITERAL;
 		tmp.val_off = g_dot_s;
 		tmp.flags = 0;
 	}
@@ -4996,7 +4996,7 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 	}
 
 	cell tmp = (cell){0};
-	tmp.tag = TAG_POOL;
+	tmp.tag = TAG_LITERAL;
 	tmp.val_off = index_from_pool(q->st.m->pl, functor);
 	tmp.arity = arity;
 
@@ -5070,7 +5070,7 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 		return search_functor(q, p1, p1_ctx, p2, p2_ctx) ? pl_success : pl_failure;
 
 	cell tmp = (cell){0};
-	tmp.tag = TAG_POOL;
+	tmp.tag = TAG_LITERAL;
 	tmp.val_off = is_literal(p1) ? p1->val_off : index_from_pool(q->st.m->pl, GET_STR(q, p1));
 	tmp.arity = get_int(p2);
 
@@ -10937,7 +10937,7 @@ pl_status do_post_unification_hook(query *q)
 	tmp[0].nbr_cells = 1;
 	tmp[0].flags = FLAG_BUILTIN;
 
-	tmp[1].tag = TAG_POOL;
+	tmp[1].tag = TAG_LITERAL;
 	tmp[1].nbr_cells = 1;
 	tmp[1].arity = 0;
 	tmp[1].flags = 0;
