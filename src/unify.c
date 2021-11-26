@@ -16,7 +16,7 @@
 #include "utf8.h"
 
 
-bool unify_structure(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
+bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	if (p1->arity != p2->arity)
 		return false;
@@ -36,17 +36,27 @@ bool unify_structure(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_
 
 		if (q->info) {
 			if (is_variable(p1)) {
-				r1.next = q->info->r1;
-				r1.var_nbr = p1->var_nbr;
-				r1.ctx = p1_ctx;
-				q->info->r1 = &r1;
+				if (is_in_ref_list(p1, p1_ctx, q->info->r1)) {
+					c1 = p1;
+					c1_ctx = p1_ctx;
+				} else {
+					r1.next = q->info->r1;
+					r1.var_nbr = p1->var_nbr;
+					r1.ctx = p1_ctx;
+					q->info->r1 = &r1;
+				}
 			}
 
 			if (is_variable(p2)) {
-				r2.next = q->info->r2;
-				r2.var_nbr = p1->var_nbr;
-				r2.ctx = p1_ctx;
-				q->info->r2 = &r2;
+				if (is_in_ref_list(p2, p2_ctx, q->info->r2)) {
+					c2 = p2;
+					c2_ctx = p2_ctx;
+				} else {
+					r2.next = q->info->r2;
+					r2.var_nbr = p2->var_nbr;
+					r2.ctx = p2_ctx;
+					q->info->r2 = &r2;
+				}
 			}
 		}
 
@@ -68,8 +78,13 @@ bool unify_structure(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_
 	return true;
 }
 
-static bool unify_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
+// This is for when one arg is a string & the other an iso-list...
+
+static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
+	if (p1->arity != p2->arity)
+		return false;
+
 	unsigned save_depth = depth;
 	LIST_HANDLER(p1);
 	LIST_HANDLER(p2);
@@ -108,7 +123,7 @@ static bool unify_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p
 	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, save_depth+1);
 }
 
-static bool unify_integer(__attribute__((unused)) query *q, cell *p1, cell *p2)
+static bool unify_integers(__attribute__((unused)) query *q, cell *p1, cell *p2)
 {
 	if (is_bigint(p1) && is_bigint(p2))
 		return !mp_int_compare(&p1->val_bigint->ival, &p2->val_bigint->ival);
@@ -125,7 +140,7 @@ static bool unify_integer(__attribute__((unused)) query *q, cell *p1, cell *p2)
 	return false;
 }
 
-static bool unify_real(__attribute__((unused)) query *q, cell *p1, cell *p2)
+static bool unify_reals(__attribute__((unused)) query *q, cell *p1, cell *p2)
 {
 	if (is_real(p2))
 		return get_real(p1) == get_real(p2);
@@ -133,7 +148,7 @@ static bool unify_real(__attribute__((unused)) query *q, cell *p1, cell *p2)
 	return false;
 }
 
-static bool unify_literal(query *q, cell *p1, cell *p2)
+static bool unify_literals(query *q, cell *p1, cell *p2)
 {
 	if (is_literal(p2))
 		return p1->val_off == p2->val_off;
@@ -144,7 +159,7 @@ static bool unify_literal(query *q, cell *p1, cell *p2)
 	return false;
 }
 
-static bool unify_cstring(query *q, cell *p1, cell *p2)
+static bool unify_cstrings(query *q, cell *p1, cell *p2)
 {
 	if (is_cstring(p2) && (LEN_STR(q, p1) == LEN_STR(q, p2)))
 		return !memcmp(GET_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p1));
@@ -164,10 +179,10 @@ static const struct dispatch g_disp[] =
 {
 	{TAG_EMPTY, NULL},
 	{TAG_VAR, NULL},
-	{TAG_LITERAL, unify_literal},
-	{TAG_CSTR, unify_cstring},
-	{TAG_INT, unify_integer},
-	{TAG_REAL, unify_real},
+	{TAG_LITERAL, unify_literals},
+	{TAG_CSTR, unify_cstrings},
+	{TAG_INT, unify_integers},
+	{TAG_REAL, unify_reals},
 	{0}
 };
 
@@ -211,13 +226,13 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 	q->check_unique = true;
 
 	if (is_string(p1) && is_string(p2))
-		return unify_cstring(q, p1, p2);
+		return unify_cstrings(q, p1, p2);
 
-	if (is_list(p1) && is_list(p2))
-		return unify_list(q, p1, p1_ctx, p2, p2_ctx, depth+1);
+	if (is_string(p1) || is_string(p2))
+		return unify_string_to_list(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 
 	if (p1->arity || p2->arity)
-		return unify_structure(q, p1, p1_ctx, p2, p2_ctx, depth+1);
+		return unify_structs(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 
 	return g_disp[p1->tag].fn(q, p1, p2);
 }
