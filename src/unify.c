@@ -16,7 +16,7 @@
 #include "utf8.h"
 
 
-bool unify_structure(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth, coinduction *info)
+bool unify_structure(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	if (p1->arity != p2->arity)
 		return false;
@@ -33,7 +33,7 @@ bool unify_structure(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_
 		cell *c2 = deref(q, p2, p2_ctx);
 		pl_idx_t c2_ctx = q->latest_ctx;
 
-		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1, info))
+		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
 			return false;
 
 		p1 += p1->nbr_cells;
@@ -43,7 +43,7 @@ bool unify_structure(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_
 	return true;
 }
 
-static bool unify_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth, coinduction *info)
+static bool unify_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	LIST_HANDLER(p1);
 	LIST_HANDLER(p2);
@@ -62,7 +62,7 @@ static bool unify_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p
 		cell *c2 = deref(q, h2, p2_ctx);
 		pl_idx_t c2_ctx = q->latest_ctx;
 
-		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1, info)) {
+		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1)) {
 			if (q->cycle_error)
 				return true;
 
@@ -79,7 +79,7 @@ static bool unify_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p
 		depth++;
 	}
 
-	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1, info);
+	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 }
 
 static bool unify_integer(__attribute__((unused)) query *q, cell *p1, cell *p2)
@@ -145,7 +145,7 @@ static const struct dispatch g_disp[] =
 	{0}
 };
 
-bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth, coinduction *info)
+bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	if (!depth)
 		q->cycle_error = false;
@@ -188,10 +188,10 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 		return unify_cstring(q, p1, p2);
 
 	if (is_list(p1) && is_list(p2))
-		return unify_list(q, p1, p1_ctx, p2, p2_ctx, depth+1, info);
+		return unify_list(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 
 	if (p1->arity || p2->arity)
-		return unify_structure(q, p1, p1_ctx, p2, p2_ctx, depth+1, info);
+		return unify_structure(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 
 	return g_disp[p1->tag].fn(q, p1, p2);
 }
