@@ -97,13 +97,17 @@ struct ref_ {
 };
 
 struct coinduction_ {
-	void *ptr1, *ptr2;
+	ref *ptr1, *ptr2;
 };
 
 
 inline static bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 {
-	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
+	coinduction info = {0};
+	q->info = &info;
+	bool ok = unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
+	q->info = NULL;
+	return ok;
 }
 
 inline static pl_status make_cstring(cell *d, const char *s)
