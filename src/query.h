@@ -91,8 +91,6 @@ extern pl_status print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, in
 extern char *print_canonical_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running);
 extern pl_status print_canonical_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, int running);
 
-typedef struct ref_ ref;
-
 struct ref_ {
 	ref *next;
 	pl_idx_t var_nbr, ctx;
