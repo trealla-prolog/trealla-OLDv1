@@ -1,5 +1,11 @@
 #pragma once
 
+typedef struct {
+	void *ptr1, *ptr2;
+} coinduction;
+
+#define unify(q,p1,p1_ctx,p2,p2_ctx) unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0, NULL)
+
 extern query *create_query(module *m, bool sub_query);
 extern query *create_sub_query(query *q, cell *curr_cell);
 extern void destroy_query(query *q);
@@ -29,8 +35,8 @@ extern pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err
 extern pl_status throw_error2(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected, cell *goal);
 extern void call_attrs(query *q, cell *attrs);
 extern void stash_me(query *q, rule *t, bool last_match);
-extern bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
-extern bool unify_structure(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
+extern bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth, coinduction *info);
+extern bool unify_structure(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth, coinduction *info);
 extern pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx);
 extern size_t slicecpy(char *dst, size_t dstlen, const char *src, size_t len);
 extern pl_status make_cstringn(cell *d, const char *s, size_t n);
