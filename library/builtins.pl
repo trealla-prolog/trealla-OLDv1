@@ -138,6 +138,7 @@ bagof(Template, Generator, Bag) :-
 	bagof_(Template, Generator, Bag).
 
 bagof_(Template, Generator, Bag) :-
+	acyclic_term(Generator),
 	free_variables_(Generator, Template, [], Vars, 1),
 	Vars \== [],
 	!,
