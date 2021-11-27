@@ -102,7 +102,10 @@ struct cycle_info_ {
 
 inline static int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 {
+	cycle_info info = {0};
+	q->info = &info;
 	int ok = compare_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
+	q->info = NULL;
 	return ok;
 }
 
