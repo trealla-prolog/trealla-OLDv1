@@ -292,7 +292,7 @@ typedef struct slot_ slot;
 typedef struct choice_ choice;
 typedef struct prolog_state_ prolog_state;
 typedef struct prolog_flags_ prolog_flags;
-typedef struct coinduction_ coinduction;
+typedef struct cycle_info_ cycle_info;
 typedef struct ref_ ref;
 
 // Using a fixed-size cell allows having arrays of cells, which is
@@ -544,7 +544,7 @@ struct query_ {
 	arena *arenas;
 	slot *save_e;
 	clause *dirty_list;
-	coinduction *info;
+	cycle_info *info;
 	cell accum;
 	mpz_t tmp_ival;
 	prolog_state st;
