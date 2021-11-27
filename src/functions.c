@@ -1969,13 +1969,48 @@ int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_
 	p2 = p2 + 1;
 
 	while (arity--) {
-		cell *h1 = deref(q, p1, p1_ctx);
-		pl_idx_t tmp_p1_ctx = q->latest_ctx;
-		cell *h2 = deref(q, p2, p2_ctx);
-		pl_idx_t tmp_p2_ctx = q->latest_ctx;
+		cell *c1 = deref(q, p1, p1_ctx);
+		pl_idx_t c1_ctx = q->latest_ctx;
+		cell *c2 = deref(q, p2, p2_ctx);
+		pl_idx_t c2_ctx = q->latest_ctx;
+		ref r1 = {0}, r2 = {0};
 
-		int val = compare_internal(q, h1, tmp_p1_ctx, h2, tmp_p2_ctx, depth+1);
+		if (q->info) {
+			if (is_variable(p1)) {
+				if (is_in_ref_list(p1, p1_ctx, q->info->r1)) {
+					c1 = p1;
+					c1_ctx = p1_ctx;
+				} else {
+					r1.next = q->info->r1;
+					r1.var_nbr = p1->var_nbr;
+					r1.ctx = p1_ctx;
+					q->info->r1 = &r1;
+				}
+			}
+
+			if (is_variable(p2)) {
+				if (is_in_ref_list(p2, p2_ctx, q->info->r2)) {
+					c2 = p2;
+					c2_ctx = p2_ctx;
+				} else {
+					r2.next = q->info->r2;
+					r2.var_nbr = p2->var_nbr;
+					r2.ctx = p2_ctx;
+					q->info->r2 = &r2;
+				}
+			}
+		}
+
+		int val = compare_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1);
 		if (val) return val;
+
+		if (q->info) {
+			if (is_variable(p1))
+				q->info->r1 = r1.next;		// restore
+
+			if (is_variable(p2))
+				q->info->r2 = r2.next;		// restore
+		}
 
 		p1 += p1->nbr_cells;
 		p2 += p2->nbr_cells;
