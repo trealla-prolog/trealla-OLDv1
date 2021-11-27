@@ -209,7 +209,7 @@ typedef struct {
 
 #define GET_STRING_FROM_POOL(pl,s) (const char*)((pl)->pool + index_from_pool(pl, s))
 
-// If changing the order of these: see runtime.c dispatch table
+// If changing the order of these: see unify.c dispatch table
 
 enum {
 	TAG_EMPTY=0,
