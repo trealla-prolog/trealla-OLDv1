@@ -94,35 +94,33 @@ static void get_params(query *q, pl_idx_t *p1, pl_idx_t *p2)
 
 static void make_variable(cell *tmp, pl_idx_t off)
 {
-	memset(tmp, 0, sizeof(cell));
+	*tmp = (cell){0};
 	tmp->tag = TAG_VAR;
 	tmp->nbr_cells = 1;
-	tmp->arity = tmp->flags = 0;
 	tmp->val_off = off;
-	tmp->var_nbr = 0;
 }
 
 void make_int(cell *tmp, pl_int_t v)
 {
+	*tmp = (cell){0};
 	tmp->tag = TAG_INT;
 	tmp->nbr_cells = 1;
-	tmp->arity = tmp->flags = 0;
 	set_smallint(tmp, v);
 }
 
 void make_real(cell *tmp, double v)
 {
+	*tmp = (cell){0};
 	tmp->tag = TAG_REAL;
 	tmp->nbr_cells = 1;
-	tmp->arity = tmp->flags = 0;
 	set_real(tmp, v);
 }
 
 void make_structure(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t extra_cells)
 {
+	*tmp = (cell){0};
 	tmp->tag = TAG_LITERAL;
 	tmp->nbr_cells = 1 + extra_cells;
-	tmp->flags = 0;
 	if (fn) tmp->flags |= FLAG_BUILTIN;
 	tmp->fn = fn;
 	tmp->arity = arity;
@@ -131,11 +129,9 @@ void make_structure(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx
 
 void make_end(cell *tmp)
 {
+	*tmp = (cell){0};
 	tmp->tag = TAG_END;
 	tmp->nbr_cells = 1;
-	tmp->arity = tmp->flags = 0;
-	tmp->match = NULL;
-	tmp->val_ptr = NULL;
 }
 
 void make_call(query *q, cell *tmp)
@@ -150,17 +146,17 @@ void make_call(query *q, cell *tmp)
 
 void make_literal(cell *tmp, pl_idx_t offset)
 {
+	*tmp = (cell){0};
 	tmp->tag = TAG_LITERAL;
 	tmp->nbr_cells = 1;
-	tmp->arity = tmp->flags = 0;
 	tmp->val_off = offset;
 }
 
 static void make_smalln(cell *tmp, const char *s, size_t n)
 {
+	*tmp = (cell){0};
 	tmp->tag = TAG_CSTR;
 	tmp->nbr_cells = 1;
-	tmp->arity = tmp->flags = 0;
 	memcpy(tmp->val_chr, s, n);
 	tmp->val_chr[n] = '\0';
 }
@@ -239,16 +235,16 @@ USE_RESULT pl_status make_cstringn(cell *d, const char *s, size_t n)
 		}
 	}
 
+	*d = (cell){0};
 	d->tag = TAG_CSTR;
-	d->flags = 0;
 	d->nbr_cells = 1;
-	d->arity = 0;
 	SET_STR(d, s, n, 0);
 	return pl_success;
 }
 
 USE_RESULT pl_status make_stringn(cell *d, const char *s, size_t n)
 {
+	*d = (cell){0};
 	d->tag = TAG_CSTR;
 	d->flags = FLAG_STRING;
 	d->nbr_cells = 1;

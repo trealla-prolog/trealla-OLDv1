@@ -355,7 +355,7 @@ struct cell_ {
 		};
 
 		struct {
-			cell *attrs;				// used with TAG_EMPTY/TAG_VAR in slot
+			cell *attrs;				// used with TAG_EMPTY in slot
 			pl_idx_t attrs_ctx;			// to set attributes on a var
 			uint32_t spare5;
 		};

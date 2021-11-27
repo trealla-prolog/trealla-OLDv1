@@ -154,8 +154,8 @@ void clear_rule(rule *r)
 	for (pl_idx_t i = 0; i < r->cidx; i++) {
 		cell *c = r->cells + i;
 		unshare_cell(c);
+		*c = (cell){0};
 		c->tag = TAG_EMPTY;
-		c->attrs = NULL;
 	}
 
 	r->cidx = 0;
