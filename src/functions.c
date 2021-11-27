@@ -1859,7 +1859,7 @@ static USE_RESULT pl_status fn_iso_neg_1(query *q)
 	return pl_success;
 }
 
-int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
+int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	if (depth == MAX_DEPTH) {
 		q->cycle_error = true;
@@ -1937,7 +1937,7 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsi
 			h2 = deref(q, h2, p2_ctx);
 			pl_idx_t h2_ctx = q->latest_ctx;
 
-			int val = compare(q, h1, h1_ctx, h2, h2_ctx, depth+1);
+			int val = compare_internal(q, h1, h1_ctx, h2, h2_ctx, depth+1);
 			if (val) return val;
 
 			p1 = LIST_TAIL(p1);
@@ -1954,7 +1954,7 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsi
 		if (is_list(p2))
 			return -1;
 
-		return compare(q, p1, p1_ctx, p2, p2_ctx, depth+1);
+		return compare_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 	}
 
 	int val = CMP_SLICES(q, p1, p2);
@@ -1970,7 +1970,7 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsi
 		cell *h2 = deref(q, p2, p2_ctx);
 		pl_idx_t tmp_p2_ctx = q->latest_ctx;
 
-		int val = compare(q, h1, tmp_p1_ctx, h2, tmp_p2_ctx, depth+1);
+		int val = compare_internal(q, h1, tmp_p1_ctx, h2, tmp_p2_ctx, depth+1);
 		if (val) return val;
 
 		p1 += p1->nbr_cells;
@@ -1984,7 +1984,7 @@ static USE_RESULT pl_status fn_iso_seq_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	int res = compare(q, p1, p1_ctx, p2, p2_ctx, 0);
+	int res = compare_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
 	return res == 0 || res == ERR_CYCLE_CMP;
 }
 
@@ -1992,7 +1992,7 @@ static USE_RESULT pl_status fn_iso_sne_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	int res = compare(q, p1, p1_ctx, p2, p2_ctx, 0);
+	int res = compare_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
 	return res != 0 && res != ERR_CYCLE_CMP;
 }
 
@@ -2000,7 +2000,7 @@ static USE_RESULT pl_status fn_iso_slt_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	int res = compare(q, p1, p1_ctx, p2, p2_ctx, 0);
+	int res = compare_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
 	return res != ERR_CYCLE_CMP && res < 0;
 }
 
@@ -2008,7 +2008,7 @@ static USE_RESULT pl_status fn_iso_sle_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	int res = compare(q, p1, p1_ctx, p2, p2_ctx, 0);
+	int res = compare_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
 	return res != ERR_CYCLE_CMP && res <= 0;
 }
 
@@ -2016,7 +2016,7 @@ static USE_RESULT pl_status fn_iso_sgt_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	int res = compare(q, p1, p1_ctx, p2, p2_ctx, 0);
+	int res = compare_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
 	return res != ERR_CYCLE_CMP && res > 0;
 }
 
@@ -2024,7 +2024,7 @@ static USE_RESULT pl_status fn_iso_sge_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	int res = compare(q, p1, p1_ctx, p2, p2_ctx, 0);
+	int res = compare_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
 	return res != ERR_CYCLE_CMP && res >= 0;
 }
 

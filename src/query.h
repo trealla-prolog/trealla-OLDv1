@@ -29,6 +29,7 @@ extern pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err
 extern pl_status throw_error2(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected, cell *goal);
 extern void call_attrs(query *q, cell *attrs);
 extern void stash_me(query *q, rule *t, bool last_match);
+extern int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
 extern bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
 extern bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
 extern pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx);
@@ -72,7 +73,6 @@ extern void make_indirect(cell *tmp, cell *c);
 extern unsigned fake_numbervars(query *q, cell *c, pl_idx_t c_ctx, unsigned start);
 extern bool has_vars(query *q, cell *c, pl_idx_t c_ctx, unsigned depth);
 extern pl_status do_post_unification_hook(query *q);
-extern int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
 extern void call_builtin(query *q, cell *c, pl_idx_t c_ctx);
 extern pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx);
 extern void add_to_dirty_list(query *q, clause *r);
