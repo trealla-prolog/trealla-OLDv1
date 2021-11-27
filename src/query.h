@@ -100,6 +100,11 @@ struct cycle_info_ {
 	ref *r1, *r2;
 };
 
+inline static int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
+{
+	int ok = compare_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
+	return ok;
+}
 
 inline static bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 {

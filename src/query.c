@@ -1428,7 +1428,7 @@ static int check_duplicate_result(query *q, cell *c, int i)
 	const item *ptr = g_items;
 
 	while (ptr && g_tpl_interrupt) {
-		if (!compare_internal(q, c, q->st.curr_frame, ptr->c, q->st.curr_frame, 0)) {
+		if (!compare(q, c, q->st.curr_frame, ptr->c, q->st.curr_frame)) {
 			return ptr->nbr;
 		}
 

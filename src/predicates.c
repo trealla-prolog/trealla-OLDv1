@@ -10958,7 +10958,7 @@ static USE_RESULT pl_status fn_iso_compare_3(query *q)
 			return throw_error(q, p1, p1_ctx, "domain_error", "order");
 	}
 
-	int status = compare_internal(q, p2, p2_ctx, p3, p3_ctx, 0);
+	int status = compare(q, p2, p2_ctx, p3, p3_ctx);
 	cell tmp;
 
 	make_literal(&tmp,
