@@ -97,6 +97,7 @@ static void make_variable(cell *tmp, pl_idx_t off)
 	tmp->tag = TAG_VAR;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
+	tmp->attrs = NULL;
 	tmp->val_off = off;
 	tmp->var_nbr = 0;
 }
