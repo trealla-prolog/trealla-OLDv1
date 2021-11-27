@@ -94,10 +94,10 @@ static void get_params(query *q, pl_idx_t *p1, pl_idx_t *p2)
 
 static void make_variable(cell *tmp, pl_idx_t off)
 {
+	memset(tmp, 0, sizeof(cell));
 	tmp->tag = TAG_VAR;
 	tmp->nbr_cells = 1;
 	tmp->arity = tmp->flags = 0;
-	tmp->attrs = NULL;
 	tmp->val_off = off;
 	tmp->var_nbr = 0;
 }
@@ -4923,6 +4923,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 				tmp[0].val_off = p2->val_off;
 
 			for (unsigned i = 1; i <= arity; i++) {
+				memset(tmp+i, 0, sizeof(cell));
 				tmp[i].tag = TAG_VAR;
 				tmp[i].nbr_cells = 1;
 				tmp[i].var_nbr = var_nbr++;
@@ -9970,7 +9971,7 @@ static pl_status do_length(query *q)
 	GET_NEXT_ARG(p2,integer);
 	unsigned nbr = get_int(p2);
 	GET_RAW_ARG(2, p2_orig);
-	cell tmp;
+	cell tmp = (cell){0};
 	make_int(&tmp, ++nbr);
 	reset_var(q, p2_orig, p2_orig_ctx, &tmp, q->st.curr_frame);
 	may_error(make_choice(q));
@@ -10138,7 +10139,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 				if (!(var_nbr = create_vars(q, nbr)))
 					return throw_error(q, p2, p2_ctx, "resource_error", "too_many_vars");
 
-				cell tmp;
+				cell tmp = (cell){0};
 				tmp.tag = TAG_VAR;
 				tmp.nbr_cells = 1;
 				tmp.flags = FLAG2_FRESH | FLAG2_ANON;
@@ -10194,7 +10195,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 
 		REGET_FIRST_ARG(p1,list_or_nil_or_var);
 
-		cell tmp;
+		cell tmp = (cell){0};
 		tmp.tag = TAG_VAR;
 		tmp.nbr_cells = 1;
 		tmp.arity = 0;

@@ -155,6 +155,7 @@ void clear_rule(rule *r)
 		cell *c = r->cells + i;
 		unshare_cell(c);
 		c->tag = TAG_EMPTY;
+		c->attrs = NULL;
 	}
 
 	r->cidx = 0;
