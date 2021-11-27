@@ -138,7 +138,6 @@ bagof(Template, Generator, Bag) :-
 	bagof_(Template, Generator, Bag).
 
 bagof_(Template, Generator, Bag) :-
-	fail,
 	free_variables_(Generator, Template, [], Vars, 1),
 	Vars \== [],
 	!,
