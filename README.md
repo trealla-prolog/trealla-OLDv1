@@ -363,6 +363,8 @@ Non-standard predicates
 	getline/2                   # getline(+stream,-string)
 	getlines/1                  # getlines(-strings)
 	getlines/2                  # getlines(+stream,-strings)
+	read_line_to_string/1
+	read_line_to_string/2
 	bread/3                     # bread(+stream,?len,-string)
 	bwrite/2                    # bwrite(+stream,+string)
 	replace/4                   # replace(+string,+old,+new,-string)

@@ -11162,6 +11162,8 @@ static const struct builtins g_predicates_other[] =
 	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list", false},
 	{"server", 3, fn_server_3, "+string,-stream,+list", false},
 	{"accept", 2, fn_accept_2, "+stream,-stream", false},
+	{"read_line_to_string", 1, fn_getline_1, "-string", false},
+	{"read_line_to_string", 2, fn_getline_2, "+stream,-string", false},
 	{"getline", 1, fn_getline_1, "-string", false},
 	{"getline", 2, fn_getline_2, "+stream,-string", false},
 	{"getlines", 1, fn_getlines_1, "-list", false},
