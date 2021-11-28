@@ -6554,6 +6554,65 @@ static USE_RESULT pl_status fn_loadfile_2(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_read_file_to_string_3(query *q)
+{
+	GET_FIRST_ARG(p1,atom_or_list);
+	GET_NEXT_ARG(p2,variable);
+	char *filename;
+	char *src = NULL;
+
+	if (is_iso_list(p1)) {
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
+
+		if (!len)
+			return throw_error(q, p1, p1_ctx, "type_error", "atom");
+
+		src = chars_list_to_string(q, p1, p1_ctx, len);
+		filename = src;
+	} else
+		filename = src = DUP_SLICE(q, p1);
+
+	FILE *fp = fopen(filename, "rb");
+	free(src);
+
+	if (!fp)
+		return throw_error(q, p1, p1_ctx, "existence_error", "cannot_open_file");
+
+	// Check for a BOM
+
+	int ch = getc_utf8(fp), offset = 0;
+
+	if ((unsigned)ch != 0xFEFF)
+		fseek(fp, 0, SEEK_SET);
+	else
+		offset = 3;
+
+	struct stat st = {0};
+
+	if (fstat(fileno(fp), &st)) {
+		return pl_error;
+	}
+
+	size_t len = st.st_size - offset;
+	char *s = malloc(len+1);
+	may_ptr_error(s, fclose(fp));
+
+	if (fread(s, 1, len, fp) != (size_t)len) {
+		free(s);
+		fclose(fp);
+		return throw_error(q, p1, p1_ctx, "domain_error", "cannot_read");
+	}
+
+	s[st.st_size] = '\0';
+	fclose(fp);
+	cell tmp;
+	may_error(make_stringn(&tmp, s, len), free(s));
+	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	free(s);
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_getfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -7136,6 +7195,87 @@ static USE_RESULT pl_status fn_getline_2(query *q)
 		}
 
 		return pl_failure;
+	}
+
+	if (line[strlen(line)-1] == '\n')
+		line[strlen(line)-1] = '\0';
+
+	if (line[strlen(line)-1] == '\r')
+		line[strlen(line)-1] = '\0';
+
+	cell tmp;
+	may_error(make_string(&tmp, line), free(line));
+	free(line);
+	pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	return ok;
+}
+
+static USE_RESULT pl_status fn_read_line_to_string_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	int n = q->st.m->pl->current_input;
+	stream *str = &g_streams[n];
+	char *line = NULL;
+	size_t len = 0;
+
+	if (isatty(fileno(str->fp))) {
+		fprintf(str->fp, "%s", PROMPT);
+		fflush(str->fp);
+	}
+
+	if (net_getline(&line, &len, str) == -1) {
+		cell tmp;
+		make_literal(&tmp, g_eof_s);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	len = strlen(line);
+
+	if (len && (line[len-1] == '\n')) {
+		line[len-1] = '\0';
+		len--;
+	}
+
+	if (len && (line[len-1] == '\r')) {
+		line[len-1] = '\0';
+		len--;
+	}
+
+	cell tmp;
+	may_error(make_string(&tmp, line), free(line));
+	free(line);
+	pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	return ok;
+}
+
+static USE_RESULT pl_status fn_read_line_to_string_2(query *q)
+{
+	GET_FIRST_ARG(pstr,stream);
+	GET_NEXT_ARG(p1,any);
+	int n = get_stream(q, pstr);
+	stream *str = &g_streams[n];
+	char *line = NULL;
+	size_t len = 0;
+
+	if (isatty(fileno(str->fp))) {
+		fprintf(str->fp, "%s", PROMPT);
+		fflush(str->fp);
+	}
+
+	if (net_getline(&line, &len, str) == -1) {
+		free(line);
+
+		if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+			clearerr(str->fp);
+			do_yield_0(q, 1);
+			return pl_failure;
+		}
+
+		cell tmp;
+		make_literal(&tmp, g_eof_s);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (line[strlen(line)-1] == '\n')
@@ -11162,8 +11302,9 @@ static const struct builtins g_predicates_other[] =
 	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list", false},
 	{"server", 3, fn_server_3, "+string,-stream,+list", false},
 	{"accept", 2, fn_accept_2, "+stream,-stream", false},
-	{"read_line_to_string", 1, fn_getline_1, "-string", false},
-	{"read_line_to_string", 2, fn_getline_2, "+stream,-string", false},
+	{"read_line_to_string", 1, fn_read_line_to_string_1, "-string", false},
+	{"read_line_to_string", 2, fn_read_line_to_string_2, "+stream,-string", false},
+	{"read_file_to_string", 3, fn_read_file_to_string_3, "+string,-string,+options", false},
 	{"getline", 1, fn_getline_1, "-string", false},
 	{"getline", 2, fn_getline_2, "+stream,-string", false},
 	{"getlines", 1, fn_getlines_1, "-list", false},
