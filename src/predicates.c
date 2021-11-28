@@ -7211,35 +7211,6 @@ static USE_RESULT pl_status fn_getline_2(query *q)
 	return ok;
 }
 
-static USE_RESULT pl_status fn_read_line_to_string_1(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	int n = q->st.m->pl->current_input;
-	stream *str = &g_streams[n];
-	char *line = NULL;
-	size_t len = 0;
-
-	if (isatty(fileno(str->fp))) {
-		fprintf(str->fp, "%s", PROMPT);
-		fflush(str->fp);
-	}
-
-	if (net_getline(&line, &len, str) == -1) {
-		cell tmp;
-		make_literal(&tmp, g_eof_s);
-		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	}
-
-	len = strlen(line);
-
-	cell tmp;
-	may_error(make_string(&tmp, line), free(line));
-	free(line);
-	pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	unshare_cell(&tmp);
-	return ok;
-}
-
 static USE_RESULT pl_status fn_read_line_to_string_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
@@ -11286,7 +11257,6 @@ static const struct builtins g_predicates_other[] =
 	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list", false},
 	{"server", 3, fn_server_3, "+string,-stream,+list", false},
 	{"accept", 2, fn_accept_2, "+stream,-stream", false},
-	{"read_line_to_string", 1, fn_read_line_to_string_1, "-string", false},
 	{"read_line_to_string", 2, fn_read_line_to_string_2, "+stream,-string", false},
 	{"read_file_to_string", 3, fn_read_file_to_string_3, "+string,-string,+options", false},
 	{"getline", 1, fn_getline_1, "-string", false},

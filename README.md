@@ -363,7 +363,6 @@ Non-standard predicates
 	getline/2                   # getline(+stream,-string)
 	getlines/1                  # getlines(-strings)
 	getlines/2                  # getlines(+stream,-strings)
-	read_line_to_string/1		# removes terminator
 	read_line_to_string/2		# removes terminator
 	read_file_to_string/3
 	bread/3                     # bread(+stream,?len,-string)
