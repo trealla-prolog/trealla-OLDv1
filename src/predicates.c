@@ -7232,16 +7232,6 @@ static USE_RESULT pl_status fn_read_line_to_string_1(query *q)
 
 	len = strlen(line);
 
-	if (len && (line[len-1] == '\n')) {
-		line[len-1] = '\0';
-		len--;
-	}
-
-	if (len && (line[len-1] == '\r')) {
-		line[len-1] = '\0';
-		len--;
-	}
-
 	cell tmp;
 	may_error(make_string(&tmp, line), free(line));
 	free(line);
@@ -7277,12 +7267,6 @@ static USE_RESULT pl_status fn_read_line_to_string_2(query *q)
 		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
-
-	if (line[strlen(line)-1] == '\n')
-		line[strlen(line)-1] = '\0';
-
-	if (line[strlen(line)-1] == '\r')
-		line[strlen(line)-1] = '\0';
 
 	cell tmp;
 	may_error(make_string(&tmp, line), free(line));
