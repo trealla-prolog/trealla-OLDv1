@@ -7,13 +7,13 @@
 :- use_module(library(dict)).
 
 read_response(S, Code) :-
-	getline(S, Line),
+	read_line_to_string(S, Line),
 	split(Line, ' ' ,_Ver, Rest),
 	split(Rest, ' ', Code2, _),
 	number_chars(Code, Code2).
 
 read_header(S, Pair) :-
-	getline(S, Line),
+	read_line_to_string(S, Line),
 	split(Line,':', K, V),
 	(K \= [] -> true ; (!, fail)),
 	string_lower(K, K2),
@@ -23,11 +23,11 @@ read_header(S, Pair) :-
 	read_header(S, Pair).
 
 read_chunks(S, Tmp, Data) :-
-	getline(S, Line),
+	read_line_to_string(S, Line),
 	hex_chars(Len, Line),
 	Len > 0,
 	bread(S, Len, Tmp2),
-	getline(S, _),
+	read_line_to_string(S, _),
 	append(Tmp, Tmp2, Tmp3),
 	read_chunks(S, Tmp3, Data).
 read_chunks(_, Data, Data).
@@ -128,7 +128,7 @@ http_delete(Url, Data, Opts) :-
 % Handle a server request...
 
 http_request(S, Method, Path, Ver, Hdrs) :-
-	getline(S, Line),
+	read_line_to_string(S, Line),
 	split(Line, ' ' ,Method2, Rest),
 	split(Rest, ' ', Path, Rest2),
 	split(Rest2, '/', _, Ver),
