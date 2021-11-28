@@ -1,0 +1,51 @@
+{
+  "uid" : "12b861edaf0af7b3",
+  "name" : "discontiguous_1_03",
+  "fullName" : "discontiguous_1_03::tests",
+  "historyId" : "discontiguous_1_03::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "directives/discontiguous_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "directives/discontiguous_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "directives/discontiguous_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "directives/discontiguous_1/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "38-39"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/2db91968ebd7034ccf5ea7ea7550a2c13721c0e6/tests/prolog/directives/discontiguous_1/tests.lgt#L38"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "12b861edaf0af7b3.json",
+  "parameterValues" : [ "directives/discontiguous_1/tests.lgt", "38-39", "https://github.com/LogtalkDotOrg/logtalk3/tree/2db91968ebd7034ccf5ea7ea7550a2c13721c0e6/tests/prolog/directives/discontiguous_1/tests.lgt#L38" ]
+}
