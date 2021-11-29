@@ -6558,6 +6558,7 @@ static USE_RESULT pl_status fn_read_file_to_string_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,variable);
+	GET_NEXT_ARG(p3,list_or_nil);
 	char *filename;
 	char *src = NULL;
 
@@ -6572,7 +6573,47 @@ static USE_RESULT pl_status fn_read_file_to_string_3(query *q)
 	} else
 		filename = src = DUP_SLICE(q, p1);
 
-	FILE *fp = fopen(filename, "rb");
+	bool bom_specified = false, use_bom = false, is_binary = false;
+	LIST_HANDLER(p3);
+
+	while (is_list(p3)) {
+		cell *h = LIST_HEAD(p3);
+		cell *c = deref(q, h, p3_ctx);
+
+		if (is_variable(c))
+			return throw_error(q, c, q->latest_ctx, "instantiation_error", "args_not_sufficiently_instantiated");
+
+		if (is_structure(c) && (c->arity == 1)) {
+			cell *name = c + 1;
+			name = deref(q, name, q->latest_ctx);
+
+			if (!CMP_SLICE2(q, c, "type")) {
+				if (is_atom(name) && !CMP_SLICE2(q, name, "binary")) {
+					is_binary = true;
+				} else if (is_atom(name) && !CMP_SLICE2(q, name, "text"))
+					is_binary = false;
+				else
+					return throw_error(q, c, q->latest_ctx, "domain_error", "stream_option");
+			} else if (!CMP_SLICE2(q, c, "bom")) {
+				bom_specified = true;
+
+				if (is_atom(name) && !CMP_SLICE2(q, name, "true"))
+					use_bom = true;
+				else if (is_atom(name) && !CMP_SLICE2(q, name, "false"))
+					use_bom = false;
+			}
+		} else
+			return throw_error(q, c, q->latest_ctx, "domain_error", "stream_option");
+
+		p3 = LIST_TAIL(p3);
+		p3 = deref(q, p3, p3_ctx);
+		p3_ctx = q->latest_ctx;
+
+		if (is_variable(p3))
+			return throw_error(q, p3, p3_ctx, "instantiation_error", "args_not_sufficiently_instantiated");
+	}
+
+	FILE *fp = fopen(filename, is_binary?"rb":"r");
 	free(src);
 
 	if (!fp)
@@ -6580,12 +6621,16 @@ static USE_RESULT pl_status fn_read_file_to_string_3(query *q)
 
 	// Check for a BOM
 
-	int ch = getc_utf8(fp), offset = 0;
+	size_t offset = 0;
 
-	if ((unsigned)ch != 0xFEFF)
-		fseek(fp, 0, SEEK_SET);
-	else
-		offset = 3;
+	if (!is_binary && (!bom_specified || use_bom)) {
+		int ch = getc_utf8(fp);
+
+		if ((unsigned)ch != 0xFEFF)
+			fseek(fp, 0, SEEK_SET);
+		else
+			offset = 3;
+	}
 
 	struct stat st = {0};
 
