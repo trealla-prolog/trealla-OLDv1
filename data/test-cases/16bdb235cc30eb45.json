@@ -1,0 +1,51 @@
+{
+  "uid" : "16bdb235cc30eb45",
+  "name" : "iso_retract_1_06",
+  "fullName" : "iso_retract_1_06::tests",
+  "historyId" : "iso_retract_1_06::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/retract_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/retract_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/retract_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/retract_1/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "75-80"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/249280525c52fcce7228e960e556987b8c98c343/tests/prolog/predicates/retract_1/tests.lgt#L75"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "16bdb235cc30eb45.json",
+  "parameterValues" : [ "predicates/retract_1/tests.lgt", "75-80", "https://github.com/LogtalkDotOrg/logtalk3/tree/249280525c52fcce7228e960e556987b8c98c343/tests/prolog/predicates/retract_1/tests.lgt#L75" ]
+}
