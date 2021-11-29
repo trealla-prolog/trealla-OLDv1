@@ -7284,6 +7284,16 @@ static USE_RESULT pl_status fn_read_line_to_string_2(query *q)
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
+	if (len && (line[len-1] == '\n')) {
+		line[len-1] = '\0';
+		len--;
+	}
+
+	if (len && (line[len-1] == '\r')) {
+		line[len-1] = '\0';
+		len--;
+	}
+
 	cell tmp;
 	may_error(make_string(&tmp, line), free(line));
 	free(line);
