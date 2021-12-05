@@ -7752,7 +7752,8 @@ static USE_RESULT pl_status fn_wait_0(query *q)
 	while (!g_tpl_interrupt && q->st.m->tasks) {
 		uint64_t now = get_time_in_usec() / 1000;
 		query *task = q->st.m->tasks;
-		unsigned did_something = 0, spawn_cnt = 0;
+		unsigned spawn_cnt = 0;
+		bool did_something = false;
 
 		while (!g_tpl_interrupt && task) {
 			if (task->spawned) {
@@ -7780,7 +7781,7 @@ static USE_RESULT pl_status fn_wait_0(query *q)
 
 			DISCARD_RESULT start(task);
 			task = task->next;
-			did_something = 1;
+			did_something = true;
 		}
 
 		if (!did_something)
@@ -7795,7 +7796,8 @@ static USE_RESULT pl_status fn_await_0(query *q)
 	while (!g_tpl_interrupt && q->st.m->tasks) {
 		pl_uint_t now = get_time_in_usec() / 1000;
 		query *task = q->st.m->tasks;
-		unsigned did_something = 0, spawn_cnt = 0;
+		unsigned spawn_cnt = 0;
+		bool did_something = false;
 
 		while (!g_tpl_interrupt && task) {
 			if (task->spawned) {
@@ -7824,7 +7826,7 @@ static USE_RESULT pl_status fn_await_0(query *q)
 			DISCARD_RESULT start(task);
 
 			if (!task->tmo_msecs && task->yielded) {
-				did_something = 1;
+				did_something = true;
 				break;
 			}
 		}
