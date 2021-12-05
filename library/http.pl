@@ -1,6 +1,6 @@
 :- module(http, [
 	http_open/3, http_get/3, http_post/4, http_patch/4, http_put/4, http_delete/3,
-	http_server/1, http_server/2, http_request/5
+	http_server/2, http_request/5
 	]).
 
 :- use_module(library(lists)).
@@ -123,7 +123,7 @@ http_delete(Url, Data, Opts) :-
 
 http_request(S, Method, Path, Ver, Hdrs) :-
 	getline(S, Line),
-	split(Line, ' ' ,Method2, Rest),
+	split(Line, ' ', Method2, Rest),
 	split(Rest, ' ', Path, Rest2),
 	split(Rest2, '/', _, Ver),
 	string_upper(Method2, Method),
@@ -131,17 +131,13 @@ http_request(S, Method, Path, Ver, Hdrs) :-
 
 % Create a server...
 
-http_server(Opts) :-
-	http_server(true, Opts).
-
 http_server(Goal, Opts) :-
 	(memberchk(port(Port), Opts) -> true ; Port = 8080),
-	format(atom(Host), ':~d', Port),
+	(	integer(Port)
+	->	format(atom(Host), ':~d', Port)
+	;	format(atom(Host), '~w', Port)
+	),
 	server(Host, S, []),
-	accept(S,Conn),
+	accept(S, S2),
 		fork,
-		(	Goal = true
-		->	true
-		; call(Goal, Conn)
-		).
-
+		call(Goal, S2).

@@ -82,7 +82,7 @@ task10(C) :-
 
 test10a :-
 	fork,
-	server(':8080',S,[ssl(false),hostname('localhost')]),
+	server('',S,[ssl(false),hostname(localhost),port(8080)]),
 	accept(S,C),
 		fork,
 		task10(C).
