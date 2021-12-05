@@ -441,16 +441,16 @@ HTTP 1.1
 
 	:- use_module(library(http)).
 
-	http_get/3
-	http_post/4
-	http_patch/4
-	http_put/4
-	http_delete/3
-	http_open/3
+	http_get/3				# http_get(Url, Data, Opts)
+	http_post/4				# http_post(Url, Data, Opts)
+	http_patch/4			# http_patch(Url, Data, Opts)
+	http_put/4				# http_put(Url, Data, Opts)
+	http_delete/3			# http_delete(Url, Data, Opts)
 
-	http_server/1
-	http_server/2
-	http_request/5
+	http_server/2			# http_server(Goal,Opts),
+	http_request/5			# http_request(S, Method, Path, Ver, Hdrs)
+
+A server *Goal* takes a single arg, the connection stream.
 
 
 Networking					##EXPERIMENTAL##
