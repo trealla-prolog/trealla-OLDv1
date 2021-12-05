@@ -448,6 +448,10 @@ HTTP 1.1
 	http_delete/3
 	http_open/3
 
+	http_server/1
+	http_server/2
+	http_request/5
+
 
 Networking					##EXPERIMENTAL##
 ==========
