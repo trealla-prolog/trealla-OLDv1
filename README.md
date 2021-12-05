@@ -448,6 +448,7 @@ HTTP 1.1
 	http_delete/3			# http_delete(Url, Data, Opts)
 
 	http_server/2			# http_server(Goal,Opts),
+
 	http_request/5			# http_request(S, Method, Path, Ver, Hdrs)
 
 A server *Goal* takes a single arg, the connection stream.

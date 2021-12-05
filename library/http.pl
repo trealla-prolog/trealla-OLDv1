@@ -132,7 +132,7 @@ http_request(S, Method, Path, Ver, Hdrs) :-
 % Create a server...
 
 http_server(Goal, Opts) :-
-	(memberchk(port(Port), Opts) -> true ; Port = 8080),
+	(memberchk(port(Port), Opts) -> true ; Port = 0),
 	(	integer(Port)
 	->	format(atom(Host), ':~d', Port)
 	;	format(atom(Host), '~w', Port)
