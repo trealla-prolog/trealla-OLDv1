@@ -49,10 +49,10 @@ http_open(UrlList, S, Opts) :-
 	memberchk(host(Host), UrlList),
 	memberchk(path(Path), UrlList),
 	(memberchk(method(Method), OptList) -> true ; Method = get),
-	(memberchk(version(Maj-Min), OptList) -> true ; (Maj = 1, Min = 1)),
+	(memberchk(version(Major-Minor), OptList) -> true ; (Major = 1, Minor = 1)),
 	client(Host, _Host, _Path, S, OptList),
 	string_upper(Method, UMethod),
-	format(S, '~s /~s HTTP/~d.~d\r~nHost: ~s\r~nConnection: keep-alive\r~n\r~n', [UMethod,Path,Maj,Min,Host]),
+	format(S, '~s /~s HTTP/~d.~d\r~nHost: ~s\r~nConnection: keep-alive\r~n\r~n', [UMethod,Path,Major,Minor,Host]),
 	read_response(S, Code),
 	findall(Hdr, read_header(S, Hdr), Hdrs),
 	append(Host, Path, Url),
@@ -68,7 +68,7 @@ process(Url, S, Opts) :-
 	OptList=Opts,
 	(memberchk(post(PostData), OptList) -> Method2 = post ; Method2 = get),
 	(memberchk(method(Method), OptList) -> true ; Method = Method2),
-	(memberchk(version(Maj-Min), OptList) -> true ; (Maj = 1, Min = 1)),
+	(memberchk(version(Major-Minor), OptList) -> true ; (Major = 1, Minor = 1)),
 	client(Url, Host, Path, S, OptList),
 	string_upper(Method, UMethod),
 	(	memberchk(header("content-type", Ct), OptList)
@@ -79,7 +79,7 @@ process(Url, S, Opts) :-
 	-> (length(PostData, DataLen), format(atom(Clen), "Content-Length: ~d\r~n", [DataLen]))
 	;	Clen = ''
 	),
-	format(S, "~s /~s HTTP/~d.~d\r~nHost: ~s\r~nConnection: close\r~n~a~a\r~n", [UMethod,Path,Maj,Min,Host,Ctype,Clen]),
+	format(S, "~s /~s HTTP/~d.~d\r~nHost: ~s\r~nConnection: close\r~n~a~a\r~n", [UMethod,Path,Major,Minor,Host,Ctype,Clen]),
 	(nonvar(DataLen) -> bwrite(S, PostData) ; true),
 	read_response(S, Code),
 	findall(Hdr, read_header(S, Hdr), Hdrs),
