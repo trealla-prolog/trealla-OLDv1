@@ -48,12 +48,8 @@ http_open(UrlList, S, Opts) :-
 	union(UrlList, Opts, OptList),
 	memberchk(host(Host), UrlList),
 	memberchk(path(Path), UrlList),
-	(memberchk(method(Method), OptList) ->
-		true ;
-		Method = get),
-	(memberchk(version(Maj-Min), OptList) ->
-		true ;
-		(Maj = 1, Min = 1)),
+	(memberchk(method(Method), OptList) -> true ; Method = get),
+	(memberchk(version(Maj-Min), OptList) -> true ; (Maj = 1, Min = 1)),
 	client(Host, _Host, _Path, S, OptList),
 	string_upper(Method, UMethod),
 	format(S, '~s /~s HTTP/~d.~d\r~nHost: ~s\r~nConnection: keep-alive\r~n\r~n', [UMethod,Path,Maj,Min,Host]),
@@ -70,23 +66,19 @@ http_open(UrlList, S, Opts) :-
 process(Url, S, Opts) :-
 	is_list(Opts),
 	OptList=Opts,
-	(memberchk(post(PostData), OptList) ->
-		Method2 = post ;
-		Method2 = get),
-	(memberchk(method(Method), OptList) ->
-		true ;
-		Method = Method2),
-	(memberchk(version(Maj-Min), OptList) ->
-		true ;
-		(Maj = 1, Min = 1)),
+	(memberchk(post(PostData), OptList) -> Method2 = post ; Method2 = get),
+	(memberchk(method(Method), OptList) -> true ; Method = Method2),
+	(memberchk(version(Maj-Min), OptList) -> true ; (Maj = 1, Min = 1)),
 	client(Url, Host, Path, S, OptList),
 	string_upper(Method, UMethod),
-	(memberchk(header("content-type", Ct), OptList) ->
-		format(atom(Ctype), "Content-Type: ~w\r~n",[Ct]) ;
-		Ctype = '' ),
-	(nonvar(PostData) ->
-		(length(PostData, DataLen), format(atom(Clen), "Content-Length: ~d\r~n", [DataLen])) ;
-		Clen = '' ),
+	(	memberchk(header("content-type", Ct), OptList)
+	->	format(atom(Ctype), "Content-Type: ~w\r~n",[Ct])
+	;	Ctype = ''
+	),
+	(	nonvar(PostData)
+	-> (length(PostData, DataLen), format(atom(Clen), "Content-Length: ~d\r~n", [DataLen]))
+	;	Clen = ''
+	),
 	format(S, "~s /~s HTTP/~d.~d\r~nHost: ~s\r~nConnection: close\r~n~a~a\r~n", [UMethod,Path,Maj,Min,Host,Ctype,Clen]),
 	(nonvar(DataLen) -> bwrite(S, PostData) ; true),
 	read_response(S, Code),
@@ -101,16 +93,15 @@ http_get(Url, Data, Opts) :-
 	Opts3=[status_code2(Code)|Opts2],
 	process(Url, S, Opts3),
 	dict:get(Hdrs, "transfer-encoding", TE, ''),
-	( TE == "chunked" ->
-		read_chunks(S, '', Body) ;
-		read_body(S, Hdrs, Body)
+	(	TE == "chunked"
+	->	read_chunks(S, '', Body)
+	; read_body(S, Hdrs, Body)
 	),
 	close(S),
-	(memberchk(Code, [301,302]) ->
-		(dict:get(Hdrs, "location", Loc, ''),
+	(	memberchk(Code, [301,302])
+	-> (dict:get(Hdrs, "location", Loc, ''),
 		http_get(Loc, Data, Opts))
-	;
-		(Data=Body,
+	; 	(Data=Body,
 		ignore(memberchk(final_url(Url), Opts)),
 		ignore(memberchk(status_code(Code), Opts)),
 		ignore(memberchk(headers(Hdrs), Opts)))
