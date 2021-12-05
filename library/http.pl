@@ -1,5 +1,5 @@
 :- module(http, [
-	http_open/3, http_get/3, http_post/4, http_put/4, http_delete/3,
+	http_open/3, http_get/3, http_post/4, http_patch/4, http_put/4, http_delete/3,
 	http_request/5
 	]).
 
@@ -109,6 +109,9 @@ http_get(Url, Data, Opts) :-
 
 http_post(Url, Data, Reply, Opts) :-
 	http_get(Url, Reply, [post(Data)|Opts]).
+
+http_patch(Url, Data, Reply, Opts) :-
+	http_post(Url, Data, Reply, [method(patch)|Opts]).
 
 http_put(Url, Data, Reply, Opts) :-
 	http_post(Url, Data, Reply, [method(put)|Opts]).

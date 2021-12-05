@@ -443,6 +443,7 @@ HTTP 1.1
 
 	http_get/3
 	http_post/4
+	http_patch/4
 	http_put/4
 	http_delete/3
 	http_open/3
