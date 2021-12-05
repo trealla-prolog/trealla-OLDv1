@@ -6946,7 +6946,9 @@ static USE_RESULT pl_status fn_server_3(query *q)
 		close(fd);
 	}
 
-	net_set_nonblocking(str);
+	if (!str->ssl)
+		net_set_nonblocking(str);
+
 	cell *tmp = alloc_on_heap(q, 1);
 	may_ptr_error(tmp);
 	make_int(tmp, n);
@@ -7003,7 +7005,9 @@ static USE_RESULT pl_status fn_accept_2(query *q)
 		}
 	}
 
-	net_set_nonblocking(str2);
+	if (!str->ssl)
+		net_set_nonblocking(str2);
+
 	may_error(make_choice(q));
 	cell tmp;
 	make_int(&tmp, n);
@@ -7134,7 +7138,7 @@ static USE_RESULT pl_status fn_client_5(query *q)
 		return throw_error(q, p1, p1_ctx, "existence_error", "cannot_open_stream");
 	}
 
-	if (ssl) {
+	if (str->ssl) {
 		str->sslptr = net_enable_ssl(fd, hostname, 0, str->level, certfile);
 		may_ptr_error (str->sslptr, close(fd));
 	}
