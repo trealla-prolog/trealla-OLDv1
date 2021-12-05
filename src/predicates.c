@@ -7139,7 +7139,7 @@ static USE_RESULT pl_status fn_client_5(query *q)
 		may_ptr_error (str->sslptr, close(fd));
 	}
 
-	if (nonblock)
+	if (nonblock && !str->ssl)
 		net_set_nonblocking(str);
 
 	cell tmp;
