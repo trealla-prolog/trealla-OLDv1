@@ -1,6 +1,6 @@
 :- use_module(library(http)).
 
-handle(C, 'GET', '/', Ver, Hdrs) :-
+handle(C, "GET", "/", Ver, Hdrs) :-
 	format(C, "HTTP/~w 200 Ok\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n", [Ver]),
 	format(C, "<html><body><h1>Home</h1><h2>~w</h2></body></html>\n", [Hdrs]).
 handle(C, _, _, Ver, _) :-
@@ -9,11 +9,11 @@ handle(C, _, _, Ver, _) :-
 
 main :-
 	fork,
-	server(':8080', S, []),
+	server(":8080", S, []),
 	accept(S, C),
 		fork,
 		http_request(C, Method, Path, Ver, Hdrs),
-		writeln([Method,Path,Ver,hdrs]),
+		writeln([Method, Path, Ver, Hdrs]),
 		handle(C, Method, Path, Ver, Hdrs),
 		close(C).
 
