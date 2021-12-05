@@ -1697,7 +1697,7 @@ pl_status start(query *q)
 				continue;
 			}
 
-			if (!q->st.curr_cell->fn(q)) {
+			if (q->st.curr_cell->fn(q) == pl_failure) {
 				q->retry = QUERY_RETRY;
 
 				if (q->yielded)

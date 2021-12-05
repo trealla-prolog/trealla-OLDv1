@@ -73,7 +73,7 @@ static pl_status do_yield_0(query *q, int msecs)
 {
 	q->yielded = true;
 	q->tmo_msecs = get_time_in_usec() / 1000;
-	q->tmo_msecs += msecs;
+	q->tmo_msecs += msecs > 0 ? msecs : 1;
 	may_error(make_choice(q));
 	return pl_failure;
 }
@@ -420,8 +420,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 		if (getline(&p->save_line, &p->n_line, str->fp) == -1) {
 			if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 				clearerr(str->fp);
-				do_yield_0(q, 1);
-				return pl_failure;
+				return do_yield_0(q, 1);
 			}
 
 			p->srcptr = NULL;
@@ -473,8 +472,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 			if (getline(&p->save_line, &p->n_line, str->fp) == -1) {
 				if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 					clearerr(str->fp);
-					do_yield_0(q, 1);
-					return pl_failure;
+					return do_yield_0(q, 1);
 				}
 
 				p->srcptr = NULL;
@@ -3502,8 +3500,7 @@ static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
-		do_yield_0(q, 1);
-		return pl_failure;
+		return do_yield_0(q, 1);
 	}
 
 	str->did_getc = true;
@@ -3576,8 +3573,7 @@ static USE_RESULT pl_status fn_iso_get_char_2(query *q)
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
-		do_yield_0(q, 1);
-		return pl_failure;
+		return do_yield_0(q, 1);
 	}
 
 	str->did_getc = true;
@@ -3649,8 +3645,7 @@ static USE_RESULT pl_status fn_iso_get_code_1(query *q)
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
-		do_yield_0(q, 1);
-		return pl_failure;
+		return do_yield_0(q, 1);
 	}
 
 	str->did_getc = true;
@@ -3725,8 +3720,7 @@ static USE_RESULT pl_status fn_iso_get_code_2(query *q)
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
-		do_yield_0(q, 1);
-		return pl_failure;
+		return do_yield_0(q, 1);
 	}
 
 	str->did_getc = true;
@@ -3793,8 +3787,7 @@ static USE_RESULT pl_status fn_iso_get_byte_1(query *q)
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
-		do_yield_0(q, 1);
-		return pl_failure;
+		return do_yield_0(q, 1);
 	}
 
 	str->did_getc = true;
@@ -3858,8 +3851,7 @@ static USE_RESULT pl_status fn_iso_get_byte_2(query *q)
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
-		do_yield_0(q, 1);
-		return pl_failure;
+		return do_yield_0(q, 1);
 	}
 
 	str->did_getc = true;
@@ -3913,8 +3905,7 @@ static USE_RESULT pl_status fn_iso_peek_char_1(query *q)
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
-		do_yield_0(q, 1);
-		return pl_failure;
+		return do_yield_0(q, 1);
 	}
 
 
@@ -3969,8 +3960,7 @@ static USE_RESULT pl_status fn_iso_peek_char_2(query *q)
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
-		do_yield_0(q, 1);
-		return pl_failure;
+		return do_yield_0(q, 1);
 	}
 
 	if (FEOF(str)) {
@@ -4023,8 +4013,7 @@ static USE_RESULT pl_status fn_iso_peek_code_1(query *q)
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
-		do_yield_0(q, 1);
-		return pl_failure;
+		return do_yield_0(q, 1);
 	}
 
 	if (FEOF(str)) {
@@ -4079,8 +4068,7 @@ static USE_RESULT pl_status fn_iso_peek_code_2(query *q)
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
-		do_yield_0(q, 1);
-		return pl_failure;
+		return do_yield_0(q, 1);
 	}
 
 	if (FEOF(str)) {
@@ -4128,8 +4116,7 @@ static USE_RESULT pl_status fn_iso_peek_byte_1(query *q)
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
-		do_yield_0(q, 1);
-		return pl_failure;
+		return do_yield_0(q, 1);
 	}
 
 	if (FEOF(str)) {
@@ -4180,8 +4167,7 @@ static USE_RESULT pl_status fn_iso_peek_byte_2(query *q)
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
-		do_yield_0(q, 1);
-		return pl_failure;
+		return do_yield_0(q, 1);
 	}
 
 	if (FEOF(str)) {
@@ -6162,10 +6148,8 @@ static USE_RESULT pl_status fn_sleep_1(query *q)
 
 	GET_FIRST_ARG(p1,integer);
 
-	if (q->is_task) {
-		do_yield_0(q, get_int(p1)*1000);
-		return pl_failure;
-	}
+	if (q->is_task)
+		return do_yield_0(q, get_int(p1)*1000);
 
 	sleep((unsigned)get_int(p1));
 	return pl_success;
@@ -6178,10 +6162,8 @@ static USE_RESULT pl_status fn_delay_1(query *q)
 
 	GET_FIRST_ARG(p1,integer);
 
-	if (q->is_task) {
-		do_yield_0(q, get_int(p1));
-		return pl_failure;
-	}
+	if (q->is_task)
+		return do_yield_0(q, get_int(p1));
 
 	msleep((unsigned)get_int(p1));
 	return pl_success;
@@ -6983,12 +6965,9 @@ static USE_RESULT pl_status fn_accept_2(query *q)
 	int fd = net_accept(str);
 
 	if (fd == -1) {
-		if (q->is_task) {
-			do_yield_0(q, 10);
-			return pl_failure;
-		}
+		if (q->is_task)
+			return do_yield_0(q, 1);
 
-		//printf("*** here\n");
 		return pl_failure;
 	}
 
@@ -7235,8 +7214,7 @@ static USE_RESULT pl_status fn_getline_2(query *q)
 
 		if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 			clearerr(str->fp);
-			do_yield_0(q, 1);
-			return pl_failure;
+			return do_yield_0(q, 1);
 		}
 
 		return pl_failure;
@@ -7275,8 +7253,7 @@ static USE_RESULT pl_status fn_read_line_to_string_2(query *q)
 
 		if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 			clearerr(str->fp);
-			do_yield_0(q, 1);
-			return pl_failure;
+			return do_yield_0(q, 1);
 		}
 
 		cell tmp;
@@ -7335,8 +7312,7 @@ static USE_RESULT pl_status fn_bread_3(query *q)
 
 			if (q->is_task) {
 				clearerr(str->fp);
-				do_yield_0(q, 1);
-				return pl_failure;
+				return do_yield_0(q, 1);
 			}
 		}
 
@@ -7774,7 +7750,7 @@ static query *pop_task(module *m, query *task)
 static USE_RESULT pl_status fn_wait_0(query *q)
 {
 	while (!g_tpl_interrupt && q->st.m->tasks) {
-		pl_uint_t now = get_time_in_usec() / 1000;
+		uint64_t now = get_time_in_usec() / 1000;
 		query *task = q->st.m->tasks;
 		unsigned did_something = 0, spawn_cnt = 0;
 
@@ -7803,7 +7779,6 @@ static USE_RESULT pl_status fn_wait_0(query *q)
 			}
 
 			DISCARD_RESULT start(task);
-
 			task = task->next;
 			did_something = 1;
 		}
@@ -7872,8 +7847,7 @@ static USE_RESULT pl_status fn_yield_0(query *q)
 	if (q->retry)
 		return pl_success;
 
-	do_yield_0(q, 0);
-	return pl_failure;
+	return do_yield_0(q, 0);
 }
 
 static USE_RESULT pl_status fn_task_n(query *q)
@@ -10502,8 +10476,7 @@ static USE_RESULT pl_status fn_get_unbuffered_code_1(query *q)
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
-		do_yield_0(q, 1);
-		return pl_failure;
+		return do_yield_0(q, 1);
 	}
 
 	str->did_getc = true;
@@ -10560,8 +10533,7 @@ static USE_RESULT pl_status fn_get_unbuffered_char_1(query *q)
 
 	if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 		clearerr(str->fp);
-		do_yield_0(q, 1);
-		return pl_failure;
+		return do_yield_0(q, 1);
 	}
 
 	str->did_getc = true;

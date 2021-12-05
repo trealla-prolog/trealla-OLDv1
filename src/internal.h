@@ -552,7 +552,8 @@ struct query_ {
 	uint64_t step, qid;
 	uint64_t time_started, get_started;
 	uint64_t cpu_started, cpu_last_started;
-	unsigned max_depth, tmo_msecs;
+	unsigned max_depth;
+	uint64_t tmo_msecs;
 	int nv_start;
 	pl_idx_t cp, tmphp, latest_ctx, popp, variable_names_ctx;
 	pl_idx_t frames_size, slots_size, trails_size, choices_size;
