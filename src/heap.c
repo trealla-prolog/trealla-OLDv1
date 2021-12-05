@@ -131,9 +131,11 @@ static cell *deep_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_
 
 	const pl_idx_t save_idx = tmp_heap_used(q);
 
-	if (!is_in_ref_list(p1, p1_ctx, list)) {
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
+	if (is_variable(p1)) {
+		if (!is_in_ref_list(p1, p1_ctx, list)) {
+			p1 = deref(q, p1, p1_ctx);
+			p1_ctx = q->latest_ctx;
+		}
 	}
 
 	cell *tmp = alloc_on_tmp(q, 1);
@@ -220,18 +222,19 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 	q->st.m->pl->tab_idx = 0;
 	q->cycle_error = false;
 	int nbr_vars = f->nbr_vars;
+	bool ok = false;
 	ref nlist, *list = NULL;
 
 	if (is_variable(p1)) {
 		nlist.next = list;
 		nlist.var_nbr = p1->var_nbr;
 		nlist.ctx = p1_ctx;
-		list = &nlist;
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
+		ok = true;
 	}
 
-	cell* rec = deep_copy2_to_tmp_with_cycle_check(q, p1, p1_ctx, 0, nonlocals_only, list);
+	cell* rec = deep_copy2_to_tmp_with_cycle_check(q, p1, p1_ctx, 0, nonlocals_only, ok ? &nlist : list);
 	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 	int cnt = q->st.m->pl->varno - nbr_vars;
 
