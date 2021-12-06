@@ -273,7 +273,7 @@ cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only
 
 static cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 {
-	if (depth >= (MAX_DEPTH*2)) {
+	if (depth >= MAX_DEPTH) {
 		q->cycle_error = true;
 		return ERR_CYCLE_CELL;
 	}
