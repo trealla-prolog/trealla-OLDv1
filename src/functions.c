@@ -1976,10 +1976,13 @@ int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_
 		ref r1 = {0}, r2 = {0};
 
 		if (q->info) {
+			bool cycle1 = false, cycle2 = false;
+
 			if (is_variable(p1)) {
 				if (is_in_ref_list(p1, p1_ctx, q->info->r1)) {
 					c1 = p1;
 					c1_ctx = p1_ctx;
+					cycle1 = true;
 				} else {
 					r1.next = q->info->r1;
 					r1.var_nbr = p1->var_nbr;
@@ -1992,6 +1995,7 @@ int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_
 				if (is_in_ref_list(p2, p2_ctx, q->info->r2)) {
 					c2 = p2;
 					c2_ctx = p2_ctx;
+					cycle2 = true;
 				} else {
 					r2.next = q->info->r2;
 					r2.var_nbr = p2->var_nbr;
@@ -1999,6 +2003,9 @@ int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_
 					q->info->r2 = &r2;
 				}
 			}
+
+			if (cycle1 && cycle2)
+				return 0;
 		}
 
 		int val = compare_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1);
