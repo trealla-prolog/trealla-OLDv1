@@ -989,6 +989,7 @@ bool unload_file(module *m, const char *filename)
 		}
 	}
 
+	free(realbuf);
 	return true;
 }
 
