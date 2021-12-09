@@ -9671,20 +9671,22 @@ static unsigned real_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end)
 	unsigned arity = p1->arity;
 	p1++;
 
-	while (arity--) {
+	for (; arity--; p1 += p1->nbr_cells) {
 		cell *c = deref(q, p1, p1_ctx);
+		pl_idx_t c_ctx = q->latest_ctx;
+
+		if (is_variable(p1) && is_cyclic_term(q, c, c_ctx))
+			continue;
 
 		if (is_variable(c)) {
 			cell *tmp = alloc_on_heap(q, 2);
 			make_structure(tmp+0, g_sys_var_s, NULL, 1, 1);
 			make_int(tmp+1, *end); *end = *end + 1;
 			tmp->flags |= FLAG2_QUOTED;
-			set_var(q, c, q->latest_ctx, tmp, q->st.curr_frame);
+			set_var(q, c, c_ctx, tmp, q->st.curr_frame);
 			cnt++;
 		} else if (is_structure(c))
-			cnt += real_numbervars(q, c, q->latest_ctx, end);
-
-		p1 += p1->nbr_cells;
+			cnt += real_numbervars(q, c, c_ctx, end);
 	}
 
 	return cnt;
@@ -9693,10 +9695,6 @@ static unsigned real_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end)
 static USE_RESULT pl_status fn_numbervars_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-
-	if (is_cyclic_term(q, p1, p1_ctx))
-		return pl_success;
-
 	int end = 0;
 	real_numbervars(q, p1, p1_ctx, &end);
 	return pl_success;
@@ -9707,17 +9705,6 @@ static USE_RESULT pl_status fn_numbervars_3(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer);
 	GET_NEXT_ARG(p3,integer_or_var);
-
-	if (is_cyclic_term(q, p1, p1_ctx)) {
-		cell tmp;
-		make_int(&tmp, 0);
-
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) != pl_success)
-			return pl_failure;
-
-		return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
-	}
-
 	int end = q->nv_start = get_int(p2);
 	unsigned cnt = real_numbervars(q, p1, p1_ctx, &end);
 	cell tmp;
