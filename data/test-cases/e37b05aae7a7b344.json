@@ -1,0 +1,51 @@
+{
+  "uid" : "e37b05aae7a7b344",
+  "name" : "eclipse_throw_1_05",
+  "fullName" : "eclipse_throw_1_05::tests",
+  "historyId" : "eclipse_throw_1_05::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "control/throw_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "control/throw_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "control/throw_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "control/throw_1/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "64-65"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/4226c103324c78c3a36dd8d707f9bb3619ded958/tests/prolog/control/throw_1/tests.lgt#L64"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "e37b05aae7a7b344.json",
+  "parameterValues" : [ "control/throw_1/tests.lgt", "64-65", "https://github.com/LogtalkDotOrg/logtalk3/tree/4226c103324c78c3a36dd8d707f9bb3619ded958/tests/prolog/control/throw_1/tests.lgt#L64" ]
+}
