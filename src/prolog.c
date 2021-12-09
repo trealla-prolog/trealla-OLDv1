@@ -91,8 +91,12 @@ module *find_next_module(prolog *pl, module *m)
 module *find_module(prolog *pl, const char *name)
 {
 	for (module *m = pl->modules; m; m = m->next) {
-		if (!strcmp(m->name, name))
-			return m;
+		if (!strcmp(m->name, name)) {
+			if (m->orig)
+				return m->orig;
+			else
+				return m;
+		}
 	}
 
 	return NULL;
@@ -378,6 +382,7 @@ prolog *pl_create()
 			|| !strcmp(lib->name, "lists")			// Common
 			|| !strcmp(lib->name, "apply")			// Common
 			|| !strcmp(lib->name, "freeze")			// Common
+			|| !strcmp(lib->name, "dif")			// Common
 			) {
 			size_t len = *lib->len;
 			char *src = malloc(len+1);

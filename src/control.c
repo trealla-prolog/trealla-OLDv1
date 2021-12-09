@@ -172,10 +172,13 @@ USE_RESULT pl_status fn_iso_invoke_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,callable);
+
 	module *m = find_module(q->st.m->pl, GET_STR(q, p1));
 
-	if (!m)
+	if (!m) {
+		printf("*** create %s\n", GET_STR(q, p1));
 		m = create_module(q->st.m->pl, GET_STR(q, p1));
+	}
 
 	cell *tmp = clone_to_heap(q, true, p2, 1);
 	pl_idx_t nbr_cells = 1;

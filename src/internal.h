@@ -642,7 +642,7 @@ struct loaded_file {
 #define MAX_MODULES_USED 64
 
 struct module_ {
-	module *next;
+	module *next, *orig;
 	prolog *pl;
 	module *used[MAX_MODULES_USED];
 	query *tasks;

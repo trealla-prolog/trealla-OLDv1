@@ -1230,6 +1230,12 @@ void destroy_module(module *m)
 	free(m);
 }
 
+void duplicate_module(prolog *pl, module *m, const char *name)
+{
+	module *tmp_m = create_module(pl, name);
+	tmp_m->orig = m;
+}
+
 module *create_module(prolog *pl, const char *name)
 {
 	module *m = calloc(1, sizeof(module));

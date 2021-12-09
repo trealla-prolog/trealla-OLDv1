@@ -1,6 +1,7 @@
 #pragma once
 
 extern module *create_module(prolog *pl, const char *name);
+extern void duplicate_module(prolog *pl, module *m, const char *name);
 extern void destroy_module(module *m);
 
 extern bool save_file(module *m, const char *filename);

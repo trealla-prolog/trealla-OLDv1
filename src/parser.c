@@ -456,6 +456,14 @@ static void directives(parser *p, cell *d)
 		return;
 	}
 
+	if (!strcmp(dirname, "attribute") && (c->arity == 1)) {
+		cell *arg = c + 1;
+		cell *attr = arg+1;
+		const char *name = GET_STR(p, attr);
+		duplicate_module(p->m->pl, p->m, name);
+		return;
+	}
+
 	if (!strcmp(dirname, "module") && (c->arity == 2)) {
 		cell *p2 = c + 2;
 		const char *name = "";
