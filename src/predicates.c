@@ -10175,6 +10175,9 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	GET_FIRST_ARG(p1,list_or_nil_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
 
+	if (is_cyclic_term(q, p1, p1_ctx))
+		return throw_error(q, p2, p2_ctx, "type_error", "cyclic_term");
+
 	if (is_integer(p2) && !is_smallint(p2))
 		return throw_error(q, p2, p2_ctx, "resource_error", "number_too_big");
 
