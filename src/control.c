@@ -554,7 +554,7 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 
 	fprintf(stdout, "uncaught exception: ");
 
-	if (is_cyclic_term(q, e, e_ctx) && 0) {
+	if (is_cyclic_term(q, e, e_ctx)) {
 		fprintf(stdout, " CYCLIC_TERM\n");
 	} else {
 		q->quoted = 1;
