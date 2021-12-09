@@ -1417,32 +1417,12 @@ typedef struct item_ item;
 
 struct item_ {
 	cell *c;
+	pl_idx_t c_ctx;
 	int nbr;
 	item *next;
 };
 
 static item *g_items = NULL;
-
-static int check_duplicate_result(query *q, cell *c, int i)
-{
-	const item *ptr = g_items;
-
-	while (ptr && g_tpl_interrupt) {
-		if (!compare(q, c, q->st.curr_frame, ptr->c, q->st.curr_frame)) {
-			return ptr->nbr;
-		}
-
-		ptr = ptr->next;
-	}
-
-	item *ptr2 = g_items;
-	ptr2 = malloc(sizeof(item));
-	ptr2->c = c;
-	ptr2->nbr = i;
-	ptr2->next = g_items;
-	g_items = ptr2;
-	return -1;
-}
 
 static void	clear_results()
 {
@@ -1451,6 +1431,27 @@ static void	clear_results()
 		g_items = g_items->next;
 		free(save);
 	}
+}
+
+static int check_duplicate_result(query *q, int nbr, cell *c, pl_idx_t c_ctx)
+{
+	item *ptr = g_items;
+
+	while (ptr) {
+		if (!compare(q, c, c_ctx, ptr->c, ptr->c_ctx)) {
+			return ptr->nbr;
+		}
+
+		ptr = ptr->next;
+	}
+
+	ptr = malloc(sizeof(item));
+	ptr->c = c;
+	ptr->c_ctx = c_ctx;
+	ptr->nbr = nbr;
+	ptr->next = g_items;
+	g_items = ptr;
+	return -1;
 }
 
 static void dump_vars(query *q, bool partial)
@@ -1487,7 +1488,7 @@ static void dump_vars(query *q, bool partial)
 
 		// See if there is already an output with this value...
 
-		int j = check_duplicate_result(q, c, i);
+		int j = check_duplicate_result(q, i, c, c_ctx);
 
 		if (j >= 0) {
 			fprintf(stdout, "%s", p->vartab.var_name[j]);
