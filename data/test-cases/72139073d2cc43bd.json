@@ -1,0 +1,51 @@
+{
+  "uid" : "72139073d2cc43bd",
+  "name" : "iso_asserta_1_02",
+  "fullName" : "iso_asserta_1_02::tests",
+  "historyId" : "iso_asserta_1_02::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/asserta_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/asserta_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/asserta_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/asserta_1/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "47-48"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/a607159f27a291d2abf134ea2a53950fe9a181cc/tests/prolog/predicates/asserta_1/tests.lgt#L47"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "72139073d2cc43bd.json",
+  "parameterValues" : [ "predicates/asserta_1/tests.lgt", "47-48", "https://github.com/LogtalkDotOrg/logtalk3/tree/a607159f27a291d2abf134ea2a53950fe9a181cc/tests/prolog/predicates/asserta_1/tests.lgt#L47" ]
+}
