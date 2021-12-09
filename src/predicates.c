@@ -9693,6 +9693,10 @@ static unsigned real_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end)
 static USE_RESULT pl_status fn_numbervars_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
+
+	if (is_cyclic_term(q, p1, p1_ctx))
+		return pl_success;
+
 	int end = 0;
 	real_numbervars(q, p1, p1_ctx, &end);
 	return pl_success;
@@ -9703,6 +9707,17 @@ static USE_RESULT pl_status fn_numbervars_3(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer);
 	GET_NEXT_ARG(p3,integer_or_var);
+
+	if (is_cyclic_term(q, p1, p1_ctx)) {
+		cell tmp;
+		make_int(&tmp, 0);
+
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) != pl_success)
+			return pl_failure;
+
+		return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+	}
+
 	int end = q->nv_start = get_int(p2);
 	unsigned cnt = real_numbervars(q, p1, p1_ctx, &end);
 	cell tmp;
