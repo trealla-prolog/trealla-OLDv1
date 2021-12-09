@@ -1433,9 +1433,19 @@ static void	clear_results()
 	}
 }
 
+static void add_result(int nbr, cell *c, pl_idx_t c_ctx)
+{
+	item *ptr = malloc(sizeof(item));
+	ptr->c = c;
+	ptr->c_ctx = c_ctx;
+	ptr->nbr = nbr;
+	ptr->next = g_items;
+	g_items = ptr;
+}
+
 static int check_duplicate_result(query *q, int nbr, cell *c, pl_idx_t c_ctx)
 {
-	item *ptr = g_items;
+	const item *ptr = g_items;
 
 	while (ptr) {
 		if (!compare(q, c, c_ctx, ptr->c, ptr->c_ctx)) {
@@ -1445,12 +1455,7 @@ static int check_duplicate_result(query *q, int nbr, cell *c, pl_idx_t c_ctx)
 		ptr = ptr->next;
 	}
 
-	ptr = malloc(sizeof(item));
-	ptr->c = c;
-	ptr->c_ctx = c_ctx;
-	ptr->nbr = nbr;
-	ptr->next = g_items;
-	g_items = ptr;
+	add_result(nbr, c, c_ctx);
 	return -1;
 }
 
