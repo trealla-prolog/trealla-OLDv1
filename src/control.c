@@ -175,10 +175,8 @@ USE_RESULT pl_status fn_iso_invoke_2(query *q)
 
 	module *m = find_module(q->st.m->pl, GET_STR(q, p1));
 
-	if (!m) {
-		printf("*** create %s\n", GET_STR(q, p1));
+	if (!m)
 		m = create_module(q->st.m->pl, GET_STR(q, p1));
-	}
 
 	cell *tmp = clone_to_heap(q, true, p2, 1);
 	pl_idx_t nbr_cells = 1;
