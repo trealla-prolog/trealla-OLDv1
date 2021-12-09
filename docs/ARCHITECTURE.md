@@ -287,8 +287,8 @@ Frames
 A frame is an element of the frame stack. Each frame is of fixed size
 and contains an index into the slot table of the base slot for the
 frame. It also contains a count of the number of variables that make up
-the frame. If a frame expands (creates new variables) the slots may
-become discontiguous.
+the frame. If a frame expands (creates new variables) the slots *may*
+become discontiguous if it's not the top frame.
 
 The frame plus it's slots constitute a working context for a set of
 goals. Choices can back-track to a given context.
@@ -342,6 +342,5 @@ A space for dynamically created terms (compounds). Heap space is
 allocated in arenas as a linked list of ever increasing size.
 
 A term allocated on the heap must be fully contained within one arena,
-to this end such terms are first allocated in a temporary space and
-copied into a suitablly size arena. A term (eg. a list) can be grown
-incrementally first on the temporary space.
+to this end terms are first allocated in a temporary space and copied
+into a suitably sized arena.
