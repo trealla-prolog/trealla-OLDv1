@@ -58,7 +58,7 @@ current_prolog_flag(P, A) :-
 subsumes_term(G, S) :-
 	\+ \+ (
 	 term_variables(S, V1),
-	 unify_with_occurs_check(G, S),
+	 G = S,
 	 term_variables(V1, V2),
 	 V2 == V1
 	).
