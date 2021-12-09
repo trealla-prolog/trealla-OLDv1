@@ -1457,8 +1457,7 @@ static void dump_vars(query *q, bool partial)
 {
 	parser *p = q->p;
 	frame *f = GET_FIRST_FRAME();
-	int any = 0;
-
+	bool any = false;
 	q->is_dump_vars = true;
 
 	for (unsigned i = 0; i < (p->nbr_vars-2); i++) {
@@ -1492,7 +1491,7 @@ static void dump_vars(query *q, bool partial)
 
 		if (j >= 0) {
 			fprintf(stdout, "%s", p->vartab.var_name[j]);
-			any++;
+			any = true;
 			continue;
 		}
 
@@ -1519,7 +1518,7 @@ static void dump_vars(query *q, bool partial)
 
 		if (parens) fputc(')', stdout);
 		q->quoted = saveq;
-		any++;
+		any = true;
 	}
 
 	q->is_dump_vars = false;
