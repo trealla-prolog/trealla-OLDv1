@@ -266,6 +266,7 @@ Non-standard predicates
 	copy_term/3                 # copy_term(+term1,-term2,-Goals)
 	unifiable/3                 # unifiable(+term1,+term2,-Goals)
 	?=/2                        # ?=(+term1,+term2)
+	cyclic_term/1
 	findall/4
 	var_number/2
 	ignore/1

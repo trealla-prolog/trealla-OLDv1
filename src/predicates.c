@@ -5061,6 +5061,12 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 	return search_predicate(q->st.m, &tmp) != NULL;
 }
 
+static USE_RESULT pl_status fn_cyclic_term_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	return is_cyclic_term(q, p1, p1_ctx) ? pl_success : pl_failure;
+}
+
 static USE_RESULT pl_status fn_iso_acyclic_term_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -11223,6 +11229,7 @@ static const struct builtins g_predicates_other[] =
 	{"*->", 2, fn_if_2, NULL, false},
 	{"if", 3, fn_if_3, NULL, false},
 
+	{"cyclic_term", 1, fn_cyclic_term_1, NULL, false},
 	{"current_module", 1, fn_current_module_1, NULL, false},
 	{"use_module", 1, fn_use_module_1, NULL, false},
 	{"use_module", 2, fn_use_module_2, NULL, false},
