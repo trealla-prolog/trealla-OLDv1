@@ -89,7 +89,7 @@ typedef enum {
 	(q->slots+(f)->overflow+((i)-(f)->nbr_slots)) 	\
 	)
 
-#define GET_FIRST_SLOT(g) GET_SLOT(g, 0)
+#define GET_FIRST_SLOT(f) GET_SLOT(f, 0)
 
 // Primary type...
 
