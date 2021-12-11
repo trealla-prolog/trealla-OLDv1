@@ -382,6 +382,7 @@ prolog *pl_create()
 			|| !strcmp(lib->name, "lists")			// Common
 			|| !strcmp(lib->name, "apply")			// Common
 			|| !strcmp(lib->name, "freeze")			// Common
+			|| !strcmp(lib->name, "when")			// Common
 			|| !strcmp(lib->name, "dif")			// Common
 			) {
 			size_t len = *lib->len;
