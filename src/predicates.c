@@ -11040,8 +11040,8 @@ pl_status fn_sys_undo_trail_1(query *q)
 		v.var_nbr = tr->var_nbr;
 
 		q->in_hook = true;
-		set_var(q, &lhs, q->st.curr_frame, &v, tr->ctx);
-		set_var(q, &rhs, q->st.curr_frame, &e->c, e->ctx);
+		set_var(q, &lhs, q->st.curr_frame, &v, tr->ctx);	// The VAR
+		set_var(q, &rhs, q->st.curr_frame, &e->c, e->ctx);	// The VAL
 		q->in_hook = false;
 
 		cell tmp[3];
