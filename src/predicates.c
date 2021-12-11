@@ -9996,9 +9996,9 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,list_or_nil_or_var);
 
-	q->in_hook = true;
 	may_error(make_choice(q));
 	pl_idx_t save_tp = q->st.tp;
+	q->in_hook = true;
 
 	if (!unify(q, p1, p1_ctx, p2, p2_ctx) && !q->cycle_error) {
 		q->in_hook = false;
@@ -10046,18 +10046,6 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 
 	cell *l = end_list(q);
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
-}
-
-static USE_RESULT pl_status fn_sys_block_verify_hook_0(query *q)
-{
-	q->in_hook = true;
-	return pl_success;
-}
-
-static USE_RESULT pl_status fn_sys_unblock_verify_hook_0(query *q)
-{
-	q->in_hook = false;
-	return pl_success;
 }
 
 static USE_RESULT pl_status fn_sys_erase_attributes_1(query *q)
@@ -11402,8 +11390,6 @@ static const struct builtins g_predicates_other[] =
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer", false},
 	{"limit", 2, fn_limit_2, "+integer,+callable", false},
 	{"offset", 2, fn_offset_2, "+integer,+callable", false},
-	{"$block_verify_hook", 0, fn_sys_block_verify_hook_0, NULL, false},
-	{"$unblock_verify_hook", 0, fn_sys_unblock_verify_hook_0, NULL, false},
 	{"$unifiable", 3, fn_sys_unifiable_3, NULL, false},
 	{"$incr", 2, fn_sys_incr_2, "?var", false},
 	{"$choice", 0, fn_sys_choice_0, NULL, false},
