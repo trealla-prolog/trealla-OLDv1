@@ -236,8 +236,10 @@ Non-standard predicates
 	get_attr/3                  # SWI-compatible
 	del_attr/2                  # SWI-compatible
 
-	freeze/2                    # use_module(library(freeze))
-	frozen/2                    # use_module(library(freeze))
+	freeze/2                    # auto-loaded from library(freeze)
+	frozen/2                    # auto-loaded from library(freeze)
+	when/2						# auto-loaded from library(when)
+	dif/2						# auto-loaded from library(dif)
 
 	must_be/4                   # must_be(+rule,+type,+rule,+arg)
 	expand_term/2               # expand_term(+rule,-Term)
