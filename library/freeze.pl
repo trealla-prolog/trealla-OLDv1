@@ -8,7 +8,7 @@
 
 freeze(Var, Goal) :-
 	(	nonvar(Var)
-	->	call(Goal)
+	->	Goal
 	;	put_atts(Var, frozen(Goal))
 	).
 

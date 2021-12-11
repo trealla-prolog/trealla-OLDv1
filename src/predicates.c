@@ -11015,7 +11015,6 @@ static USE_RESULT pl_status fn_sys_choice_0(query *q)
 pl_status fn_sys_undo_trail_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	frame *f = GET_CURR_FRAME();
 
 	q->save_e = malloc(sizeof(slot)*(q->undo_hi_tp - q->undo_lo_tp));
 	may_ptr_error(q->save_e);
@@ -11030,12 +11029,26 @@ pl_status fn_sys_undo_trail_1(query *q)
 		//printf("*** unbind [%u:%u] ctx=%u, var=%u\n", j, i, tr->ctx, tr->var_nbr);
 		q->save_e[j] = *e;
 
+		cell lhs, rhs;
+		make_variable(&lhs, g_anon_s);
+		lhs.var_nbr = create_vars(q, 2);
+		make_variable(&rhs, g_anon_s);
+		rhs.var_nbr = lhs.var_nbr + 1;
+
+		cell v;
+		make_variable(&v, g_anon_s);
+		v.var_nbr = tr->var_nbr;
+
+		q->in_hook = true;
+		set_var(q, &lhs, q->st.curr_frame, &v, tr->ctx);
+		set_var(q, &rhs, q->st.curr_frame, &e->c, e->ctx);
+		q->in_hook = false;
+
 		cell tmp[3];
 		make_structure(tmp, g_minus_s, NULL, 2, 2);
 		SET_OP(&tmp[0], OP_YFX);
-		make_variable(&tmp[1], g_anon_s);
-		tmp[1].var_nbr = tr->var_nbr;
-		tmp[2] = e->c;
+		tmp[1] = lhs;
+		tmp[2] = rhs;
 
 		if (first) {
 			allocate_list(q, tmp);
@@ -11051,7 +11064,7 @@ pl_status fn_sys_undo_trail_1(query *q)
 	cell *tmp = end_list(q);
 	may_ptr_error(tmp);
 	q->in_hook = true;
-	set_var(q, p1, p1_ctx, tmp, f->prev_frame);
+	set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	q->in_hook = false;
 	return pl_success;
 }
