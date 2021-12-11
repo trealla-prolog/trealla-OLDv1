@@ -6,21 +6,26 @@
 :- meta_predicate(when(+, 0)).
 :- attribute when/1.
 
-when(nonvar(Var), Goal) :-
+when(VarCond, Goal) :-
+	VarCond = nonvar(Var),
 	process_var_(Var, VarCond, Goal).
 
-when(ground(Var), Goal) :-
+when(VarCond, Goal) :-
+	VarCond = ground(Var),
 	process_var_(Var, VarCond, Goal).
 
-when(?=(Var1,Var2), Goal) :-
+when(VarCond, Goal) :-
+	VarCond = ?=(Var1, Var2),
 	process_var_(Var1, VarCond, Goal),
 	process_var_(Var2, VarCond, Goal).
 
-when((Var1,Var2), Goal) :-
+when(VarCond, Goal) :-
+	VarCond = (Var1,Var2),
 	process_var_(Var1, VarCond, Goal),
 	process_var_(Var2, VarCond, Goal).
 
-when((Var1;Var2), Goal) :-
+when(VarCond, Goal) :-
+	VarCond = (Var1;Var2),
 	process_var_(Var1, VarCond, Goal),
 	process_var_(Var2, VarCond, Goal).
 
