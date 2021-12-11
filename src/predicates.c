@@ -11027,7 +11027,6 @@ static USE_RESULT pl_status fn_sys_choice_0(query *q)
 pl_status fn_sys_undo_trail_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	q->in_hook = true;
 	frame *f = GET_CURR_FRAME();
 
 	q->save_e = malloc(sizeof(slot)*(q->undo_hi_tp - q->undo_lo_tp));
@@ -11063,7 +11062,9 @@ pl_status fn_sys_undo_trail_1(query *q)
 
 	cell *tmp = end_list(q);
 	may_ptr_error(tmp);
+	q->in_hook = true;
 	set_var(q, p1, p1_ctx, tmp, f->prev_frame);
+	q->in_hook = false;
 	return pl_success;
 }
 
@@ -11079,7 +11080,6 @@ pl_status fn_sys_redo_trail_0(query * q)
 
 	q->undo_lo_tp = q->undo_hi_tp = 0;
 	free(q->save_e);
-	q->in_hook = false;
 	return pl_success;
 }
 
