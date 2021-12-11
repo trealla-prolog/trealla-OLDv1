@@ -6,36 +6,36 @@
 :- meta_predicate(when(+, 0)).
 :- attribute when/1.
 
-when(VarCond, Goal) :-
-	VarCond = nonvar(Var),
-	process_var_(Var, VarCond, Goal).
+when(Cond, Goal) :-
+	Cond = nonvar(Var), !,
+	process_var_(Var, Cond, Goal).
 
-when(VarCond, Goal) :-
-	VarCond = ground(Var),
-	process_var_(Var, VarCond, Goal).
+when(Cond, Goal) :-
+	Cond = ground(Var), !,
+	process_var_(Var, Cond, Goal).
 
-when(VarCond, Goal) :-
-	VarCond = ?=(Var1, Var2),
-	process_var_(Var1, VarCond, Goal),
-	process_var_(Var2, VarCond, Goal).
+when(Cond, Goal) :-
+	Cond = ?=(Var1, Var2), !,
+	process_var_(Var1, Cond, Goal),
+	process_var_(Var2, Cond, Goal).
 
-when(VarCond, Goal) :-
-	VarCond = (Var1,Var2),
-	process_var_(Var1, VarCond, Goal),
-	process_var_(Var2, VarCond, Goal).
+when(Cond, Goal) :-
+	Cond = (Var1,Var2), !,
+	process_var_(Var1, Cond, Goal),
+	process_var_(Var2, Cond, Goal).
 
-when(VarCond, Goal) :-
-	VarCond = (Var1;Var2),
-	process_var_(Var1, VarCond, Goal),
-	process_var_(Var2, VarCond, Goal).
+when(Cond, Goal) :-
+	Cond = (Var1;Var2), !,
+	process_var_(Var1, Cond, Goal),
+	process_var_(Var2, Cond, Goal).
 
-process_var_(Var, VarCond, Goal) :-
+process_var_(Var, Cond, Goal) :-
 	(	get_atts(Var, when(OldCond-OldGoal))
-		->	(	NewCond = (VarCond, OldCond),
+		->	(	NewCond = (Cond, OldCond),
 				NewGoal = (OldGoal, Goal),
 				put_atts(Var, -when(_))
 			)
-		;	(	NewCond = VarCond,
+		;	(	NewCond = Cond,
 				NewGoal = Goal
 			)
 	),
