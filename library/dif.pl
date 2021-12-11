@@ -6,6 +6,18 @@
 
 :- attribute dif/1.
 
+dif(X, Y) :-
+    X \== Y,
+    (   X \= Y -> true
+    ;   (   term_variables(X, XVars),
+            term_variables(Y, YVars),
+            dif_set_variables(XVars, X, Y),
+            dif_set_variables(YVars, X, Y)
+        )
+    ).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 put_dif_att(Var, X, Y) :-
     (   get_atts(Var, +dif(Z)) ->
 	    sort([X \== Y | Z], NewZ),
@@ -33,19 +45,6 @@ verify_attributes(Var, Value, Goals) :-
 	    term_variables(Value, ValueVars),
 	    append_goals(ValueVars, Goals)
     ;   Goals = []
-    ).
-
-% Probably the world's worst dif/2 implementation. I'm open to
-% suggestions for improvement.
-
-dif(X, Y) :-
-    X \== Y,
-    (   X \= Y -> true
-    ;   (   term_variables(X, XVars),
-            term_variables(Y, YVars),
-            dif_set_variables(XVars, X, Y),
-            dif_set_variables(YVars, X, Y)
-        )
     ).
 
 gather_dif_goals([]) --> [].

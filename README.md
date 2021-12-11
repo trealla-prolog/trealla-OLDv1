@@ -12,7 +12,7 @@ A compact, efficient Prolog interpreter with
 	Uses 1st & 2nd arg indexing
 	DCGs
 	User-defined functions
-	Attributed variables with SICStus interface (work-in-progress)
+	Attributed variables with SICStus interface (freeze/dif/when)
 	Logtalk compatible (work-in-progress)
 	REPL with history
 	MIT licensed

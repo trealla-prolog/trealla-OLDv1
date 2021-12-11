@@ -1,6 +1,8 @@
 :- module(freeze, [freeze/2, frozen/2]).
 
 :- use_module(library(atts)).
+:- use_module(library(dcgs)).
+
 :- meta_predicate(freeze(?, 0)).
 :- attribute frozen/1.
 
@@ -15,6 +17,8 @@ frozen(Var, Goal) :-
 	->	true
 	;	Goal = true
 	).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 verify_attributes(Var, Other, Goals) :-
 	get_atts(Var, frozen(VarGoals)), !,

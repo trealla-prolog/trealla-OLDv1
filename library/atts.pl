@@ -1,6 +1,7 @@
 :- module(atts, [op(1150, fx, attribute)]).
+
 :- use_module(library(apply)).
-:- use_module(library(lists)).
+:- use_module(library(lists), [append/3]).
 
 '$post_unify_hook' :-
 	'$undo_trail'(Vars),
