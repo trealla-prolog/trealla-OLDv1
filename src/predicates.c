@@ -10082,8 +10082,12 @@ static USE_RESULT pl_status fn_sys_write_attributes_2(query *q)
 
 static USE_RESULT pl_status fn_sys_read_attributes_2(query *q)
 {
-	GET_FIRST_ARG(p1,variable);
+	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,variable);
+
+	if (!is_variable(p1))
+		return false;
+
 	frame *f = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(f, p1->var_nbr);
 
