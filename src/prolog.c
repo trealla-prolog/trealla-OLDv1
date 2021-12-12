@@ -14,7 +14,7 @@
 #include "module.h"
 #include "prolog.h"
 
-static const size_t INITIAL_POOL_SIZE = 64000;	// bytes
+static const size_t INITIAL_POOL_SIZE = 256000;	// bytes
 
 stream g_streams[MAX_STREAMS] = {{0}};
 pl_idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;

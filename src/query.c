@@ -737,7 +737,7 @@ static void commit_me(query *q, rule *r)
 		tco, q->no_tco, last_match, recursive, choices, slots_ok);
 #endif
 
-	if (tco && q->st.m->pl->opt)
+	if (tco && q->pl->opt)
 		reuse_frame(q, r->nbr_vars);
 	else
 		f = make_frame(q, r->nbr_vars);
@@ -940,7 +940,7 @@ static void proceed(query *q)
 		}
 
 		if (q->st.curr_cell->mod_nbr != q->st.m->id)
-			q->st.m = find_module_id(q->st.m->pl, q->st.curr_cell->mod_nbr);
+			q->st.m = find_module_id(q->pl, q->st.curr_cell->mod_nbr);
 
 		q->st.curr_cell = q->st.curr_cell->val_ptr;
 	}
@@ -967,7 +967,7 @@ static bool resume_frame(query *q)
 		rule *r = &q->st.curr_clause->r;
 
 		if ((q->st.curr_frame == (q->st.fp-1))
-			&& q->st.m->pl->opt
+			&& q->pl->opt
 			&& r->is_tail_rec
 			&& !any_choices(q, f)
 			&& check_slots(q, f, r))
@@ -980,7 +980,7 @@ static bool resume_frame(query *q)
 	//	fprintf(stderr, "*** resume f->is_last=%d, f->is_complex=%d, any_choices=%d\n", f->is_last, f->is_complex, any_choices(q, f));
 
 	if ((q->st.curr_frame == (q->st.fp-1)) && f->is_last
-		&& q->st.m->pl->opt
+		&& q->pl->opt
 		&& !f->is_complex
 		&& !any_choices(q, f)
 		&& check_slots(q, f, NULL)) {
@@ -1172,7 +1172,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 
 		if (!is_literal(c)) {
 			// For now convert it to a literal
-			pl_idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
+			pl_idx_t off = index_from_pool(q->pl, GET_STR(q, c));
 			may_idx_error(off);
 			unshare_cell(c);
 			c->tag = TAG_LITERAL;
@@ -1186,7 +1186,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		if (!pr) {
 			bool found = false;
 
-			if (get_builtin(q->st.m->pl, GET_STR(q, head), head->arity, &found, NULL), found)
+			if (get_builtin(q->pl, GET_STR(q, head), head->arity, &found, NULL), found)
 				return throw_error(q, head, q->latest_ctx, "permission_error", "modify,static_procedure");
 
 			q->st.curr_clause2 = NULL;
@@ -1199,7 +1199,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		q->st.curr_clause2 = pr->head;
 		share_predicate(q->st.pr2=pr);
 		frame *f = GET_FRAME(q->st.curr_frame);
-		f->ugen = q->st.m->pl->ugen;
+		f->ugen = q->pl->ugen;
 	} else {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
 	}
@@ -1268,7 +1268,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 
 		if (!is_literal(c)) {
 			// For now convert it to a literal
-			pl_idx_t off = index_from_pool(q->st.m->pl, GET_STR(q, c));
+			pl_idx_t off = index_from_pool(q->pl, GET_STR(q, c));
 			may_idx_error(off);
 			unshare_cell(c);
 			c->tag = TAG_LITERAL;
@@ -1281,7 +1281,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 		if (!pr) {
 			bool found = false;
 
-			if (get_builtin(q->st.m->pl, GET_STR(q, p1), p1->arity, &found, NULL), found) {
+			if (get_builtin(q->pl, GET_STR(q, p1), p1->arity, &found, NULL), found) {
 				if (is_retract != DO_CLAUSE)
 					return throw_error(q, p1, p1_ctx, "permission_error", "modify,static_procedure");
 				else
@@ -1302,7 +1302,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 		q->st.curr_clause2 = pr->head;
 		share_predicate(q->st.pr2=pr);
 		frame *f = GET_FRAME(q->st.curr_frame);
-		f->ugen = q->st.m->pl->ugen;
+		f->ugen = q->pl->ugen;
 	} else {
 		q->st.curr_clause2 = q->st.curr_clause2->next;
 	}
@@ -1375,7 +1375,7 @@ static USE_RESULT pl_status match_head(query *q)
 		find_key(q, pr, c);
 		share_predicate(q->st.pr=pr);
 		frame *f = GET_FRAME(q->st.curr_frame);
-		f->ugen = q->st.m->pl->ugen;
+		f->ugen = q->pl->ugen;
 	} else
 		next_key(q);
 
@@ -1534,7 +1534,7 @@ static void dump_vars(query *q, bool partial)
 		fflush(stdout);
 	}
 
-	q->st.m->pl->did_dump_vars = any;
+	q->pl->did_dump_vars = any;
 	clear_results();
 }
 
@@ -1595,7 +1595,7 @@ static bool check_redo(query *q)
 	if (q->do_dump_vars && q->cp) {
 		dump_vars(q, true);
 
-		if (!q->st.m->pl->did_dump_vars)
+		if (!q->pl->did_dump_vars)
 			printf("true");
 	}
 
@@ -1807,7 +1807,7 @@ uint64_t get_time_in_usec(void)
 
 pl_status execute(query *q, cell *cells, unsigned nbr_vars)
 {
-	q->st.m->pl->did_dump_vars = false;
+	q->pl->did_dump_vars = false;
 	q->st.curr_cell = cells;
 	q->st.sp = nbr_vars;
 	q->abort = false;
@@ -1824,7 +1824,7 @@ pl_status execute(query *q, cell *cells, unsigned nbr_vars)
 	frame *f = q->frames + q->st.curr_frame;
 	f->nbr_vars = nbr_vars;
 	f->nbr_slots = nbr_vars;
-	f->ugen = ++q->st.m->pl->ugen;
+	f->ugen = ++q->pl->ugen;
 	return start(q);
 }
 

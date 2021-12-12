@@ -133,7 +133,7 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 
 	if ((tmp2->match = search_predicate(q->st.m, tmp2)) != NULL) {
 		tmp2->flags &= ~FLAG_BUILTIN;
-	} else if ((tmp2->fn = get_builtin(q->st.m->pl, GET_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
+	} else if ((tmp2->fn = get_builtin(q->pl, GET_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
 		tmp2->flags |= FLAG_BUILTIN;
 	}
 
@@ -173,10 +173,10 @@ USE_RESULT pl_status fn_iso_invoke_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,callable);
 
-	module *m = find_module(q->st.m->pl, GET_STR(q, p1));
+	module *m = find_module(q->pl, GET_STR(q, p1));
 
 	if (!m)
-		m = create_module(q->st.m->pl, GET_STR(q, p1));
+		m = create_module(q->pl, GET_STR(q, p1));
 
 	cell *tmp = clone_to_heap(q, true, p2, 1);
 	pl_idx_t nbr_cells = 1;
@@ -563,7 +563,7 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 		q->quoted = 0;
 	}
 
-	q->st.m->pl->did_dump_vars = true;
+	q->pl->did_dump_vars = true;
 	free(e);
 	q->exception = NULL;
 	q->error = true;

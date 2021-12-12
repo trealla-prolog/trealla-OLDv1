@@ -460,7 +460,10 @@ static void directives(parser *p, cell *d)
 		cell *arg = c + 1;
 		cell *attr = arg+1;
 		const char *name = GET_STR(p, attr);
-		duplicate_module(p->m->pl, p->m, name);
+
+		if (strcmp(name, p->m->name))
+			duplicate_module(p->m->pl, p->m, name);
+
 		return;
 	}
 
@@ -2987,7 +2990,7 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 	p->m->pl->halt_code = q->halt_code;
 	p->m->pl->status = q->status;
 
-	if (!p->m->pl->quiet && !p->directive && dump && q->st.m->pl->stats) {
+	if (!p->m->pl->quiet && !p->directive && dump && q->pl->stats) {
 		fprintf(stdout,
 			"Goals %llu. Matches %llu. Max frames %u, choices %u, trails: %u, slots %u, heap %u. Backtracks %llu. TCOs:%llu\n",
 			(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
