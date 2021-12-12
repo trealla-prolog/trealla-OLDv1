@@ -132,8 +132,8 @@ setof(Template, Generator, Set) :-
 
 bagof(Template, Generator, Bag) :-
     (	var(Bag)
-		-> true
-		; must_be(Bag, list_or_partial_list, bagof/3, _)
+	->	true
+	;	must_be(Bag, list_or_partial_list, bagof/3, _)
 	),
 	bagof_(Template, Generator, Bag).
 
@@ -760,14 +760,14 @@ put_atts(Var, +Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	functor(Value, Functor, _),
-	dict:set(D, Module-Functor, Attr, D2),
+	dict:app(D, Module-Functor, Attr, D2),
 	'$write_attributes'(Var, D2).
 
 put_atts(Var, Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	functor(Value, Functor, _),
-	dict:set(D, Module-Functor, Attr, D2),
+	dict:app(D, Module-Functor, Attr, D2),
 	'$write_attributes'(Var, D2).
 
 get_atts(Var, L) :- var(L), !,
