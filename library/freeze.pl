@@ -16,7 +16,9 @@ freeze(Var, Goal) :-
 	).
 
 frozen(Var, Goal) :-
-	(	(get_atts(Var, frozen(Goal)) ; get_atts(Var, when(_Cond-Goal)))
+	(	(	get_atts(Var, frozen(Goal))
+		;	get_atts(Var, when(_Cond-Goal))
+		)
 	->	true
 	;	Goal = true
 	).
