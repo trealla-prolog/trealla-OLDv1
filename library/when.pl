@@ -50,15 +50,15 @@ process_var_(Var, Cond, Goal) :-
 verify_attributes(Var, Other, Goals) :-
 	get_atts(Var, when(VarCond-VarGoal)),
 	(	var(Other)
-	-> 	get_atts(Other, when(VarCond-OtherGoal)),
+	-> 	get_atts(Other, when(OtherCond-OtherGoal)),
 		Goals =
 			(	VarCond
 			->	VarGoal
-			; 	(	VarCond == VarCond
+			; 	(	VarCond == OtherCond
 				->	NewCond = VarCond
-				;	NewCond = (VarCond,VarCond)
+				;	NewCond = (OtherCond,VarCond)
 				),
-			(	VarGoal == VarGoal
+			(	VarGoal == OtherGoal
 			->	NewGoal = VarGoal
 			;	NewGoal = (OtherGoal,VarGoal)
 			),
