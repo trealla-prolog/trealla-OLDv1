@@ -634,7 +634,7 @@ struct parser_ {
 
 struct loaded_file {
 	struct loaded_file *next;
-	const char *filename;
+	char *filename;
 };
 
 #define MAX_MODULES_USED 64

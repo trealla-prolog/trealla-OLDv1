@@ -897,6 +897,18 @@ static bool is_loaded(const module *m, const char *filename)
 	return false;
 }
 
+static void clear_loaded(const module *m)
+{
+	struct loaded_file *ptr = m->loaded_files;
+
+	while (ptr) {
+		struct loaded_file *save = ptr;
+		ptr = ptr->next;
+		free(save->filename);
+		free(save);
+	}
+}
+
 module *load_text(module *m, const char *src, const char *filename)
 {
 	parser *p = create_parser(m);
@@ -999,7 +1011,7 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 	parser *p = create_parser(m);
 	if (!p) return NULL;
 	char *save_filename = m->filename;
-	m->filename = strdup(filename);
+	m->filename = (char*)filename;
 	p->consulting = true;
 	p->fp = fp;
 	bool ok = false;
@@ -1174,14 +1186,6 @@ static void make_rule(module *m, const char *src)
 
 void destroy_module(module *m)
 {
-	struct loaded_file *ptr = m->loaded_files;
-
-	while (ptr) {
-		struct loaded_file *save = ptr;
-		ptr = ptr->next;
-		free(save);
-	}
-
 	while (m->tasks) {
 		query *task = m->tasks->next;
 		destroy_query(m->tasks);
@@ -1230,6 +1234,7 @@ void destroy_module(module *m)
 	destroy_parser(m->p);
 	free(m->filename);
 	free(m->name);
+	clear_loaded(m);
 	free(m);
 }
 
