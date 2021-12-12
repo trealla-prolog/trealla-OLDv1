@@ -9,7 +9,13 @@
 freeze(Var, Goal) :-
 	(	nonvar(Var)
 	->	Goal
-	;	put_atts(Var, frozen(Goal))
+	;	(	get_atts(Var, frozen(OldGoals))
+		->	(
+				put_atts(Var, -frozen(Goal)),
+				put_atts(Var, frozen((OldGoals,Goal)))
+			)
+		;	put_atts(Var, frozen(Goal))
+		)
 	).
 
 frozen(Var, Goal) :-

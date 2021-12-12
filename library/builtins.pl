@@ -760,14 +760,14 @@ put_atts(Var, +Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	functor(Value, Functor, _),
-	dict:app(D, Module-Functor, Attr, D2),
+	dict:set(D, Module-Functor, Attr, D2),
 	'$write_attributes'(Var, D2).
 
 put_atts(Var, Attr) :- !,
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	functor(Value, Functor, _),
-	dict:app(D, Module-Functor, Attr, D2),
+	dict:set(D, Module-Functor, Attr, D2),
 	'$write_attributes'(Var, D2).
 
 get_atts(Var, L) :- var(L), !,
