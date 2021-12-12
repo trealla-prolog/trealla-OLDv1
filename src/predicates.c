@@ -10955,9 +10955,9 @@ static USE_RESULT pl_status fn_module_1(query *q)
 
 	if (!m) {
 		if (q->p->command)
-			fprintf(stdout, "Info: created module '%s'\n", GET_STR(q, p1));
+			fprintf(stdout, "Info: created module '%s'\n", name);
 
-		m = create_module(q->pl, GET_STR(q, p1));
+		m = create_module(q->pl, name);
 	}
 
 	q->st.m = m;
