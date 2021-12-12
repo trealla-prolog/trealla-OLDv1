@@ -167,6 +167,27 @@ static void make_small(cell *tmp, const char *s)
 	make_smalln(tmp, s, n);
 }
 
+static void make_var_ref(query *q, cell *tmp, unsigned var_nbr, pl_idx_t ctx)
+{
+	make_variable(tmp, g_anon_s);
+	tmp->var_nbr = create_vars(q, 1);
+	cell v;
+	make_variable(&v, g_anon_s);
+	v.var_nbr = var_nbr;
+	q->in_hook = true;
+	set_var(q, tmp, q->st.curr_frame, &v, ctx);
+	q->in_hook = false;
+}
+
+static void make_cell_ref(query *q, cell *tmp, cell *v, pl_idx_t ctx)
+{
+	make_variable(tmp, g_anon_s);
+	tmp->var_nbr = create_vars(q, 1);
+	q->in_hook = true;
+	set_var(q, tmp, q->st.curr_frame, v, ctx);
+	q->in_hook = false;
+}
+
 #if 0
 static void init_queue(query* q)
 {
@@ -11030,19 +11051,8 @@ pl_status fn_sys_undo_trail_1(query *q)
 		q->save_e[j] = *e;
 
 		cell lhs, rhs;
-		make_variable(&lhs, g_anon_s);
-		lhs.var_nbr = create_vars(q, 2);
-		make_variable(&rhs, g_anon_s);
-		rhs.var_nbr = lhs.var_nbr + 1;
-
-		cell v;
-		make_variable(&v, g_anon_s);
-		v.var_nbr = tr->var_nbr;
-
-		q->in_hook = true;
-		set_var(q, &lhs, q->st.curr_frame, &v, tr->ctx);	// The VAR
-		set_var(q, &rhs, q->st.curr_frame, &e->c, e->ctx);	// The VAL
-		q->in_hook = false;
+		make_var_ref(q, &lhs, tr->var_nbr, tr->ctx);
+		make_cell_ref(q, &rhs, &e->c, e->ctx);
 
 		cell tmp[3];
 		make_structure(tmp, g_minus_s, NULL, 2, 2);
