@@ -1011,7 +1011,7 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 	parser *p = create_parser(m);
 	if (!p) return NULL;
 	char *save_filename = m->filename;
-	m->filename = (char*)filename;
+	m->filename = strdup(filename);
 	p->consulting = true;
 	p->fp = fp;
 	bool ok = false;
@@ -1059,6 +1059,7 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 
 	ok = !p->error;
 	destroy_parser(p);
+	free(m->filename);
 	m->filename = save_filename;
 	return save_m;
 }
