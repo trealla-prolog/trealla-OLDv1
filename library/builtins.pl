@@ -750,7 +750,7 @@ put_atts(Var, -Attr) :- !,
 	->	Functor = Value
 	; 	functor(Value, Functor, _)
 	),
-	dict:del(D, Module-Functor, D2),
+	dict:del(D, Module, D2),
 	(	D2 = []
 	->	'$erase_attributes'(Var)
 	;	'$write_attributes'(Var, D2)
@@ -758,16 +758,14 @@ put_atts(Var, -Attr) :- !,
 
 put_atts(Var, +Attr) :- !,
 	'$read_attributes'(Var, D),
-	Attr =.. [Module,Value],
-	functor(Value, Functor, _),
-	dict:set(D, Module-Functor, Attr, D2),
+	Attr =.. [Module,_],
+	dict:set(D, Module, Attr, D2),
 	'$write_attributes'(Var, D2).
 
 put_atts(Var, Attr) :- !,
 	'$read_attributes'(Var, D),
-	Attr =.. [Module,Value],
-	functor(Value, Functor, _),
-	dict:set(D, Module-Functor, Attr, D2),
+	Attr =.. [Module,_],
+	dict:set(D, Module, Attr, D2),
 	'$write_attributes'(Var, D2).
 
 get_atts(Var, L) :- var(L), !,
@@ -776,21 +774,18 @@ get_atts(Var, L) :- var(L), !,
 
 get_atts(Var, -Attr) :- !,
 	'$read_attributes'(Var, D),
-	Attr =.. [Module,Value],
-	catch(functor(Value, Functor, _), _, true),
-	\+ dict:get(D, Module-Functor, _).
+	Attr =.. [Module,_],
+	\+ dict:get(D, Module, _).
 
 get_atts(Var, +Attr) :- !,
 	'$read_attributes'(Var, D),
-	Attr =.. [Module,Value],
-	catch(functor(Value, Functor, _), _, true),
-	dict:get(D, Module-Functor, Attr).
+	Attr =.. [Module,_],
+	dict:get(D, Module, Attr).
 
 get_atts(Var, Attr) :- !,
 	'$read_attributes'(Var, D),
-	Attr =.. [Module,Value],
-	catch(functor(Value, Functor, _), _, true),
-	dict:get(D, Module-Functor, Attr).
+	Attr =.. [Module,_],
+	dict:get(D, Module, Attr).
 
 del_atts(Var) :-
 	var(Var),
