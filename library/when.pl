@@ -20,12 +20,16 @@ when(Cond, Goal) :-
 	process_var_(Var2, Cond, Goal).
 
 when(Cond, Goal) :-
-	Cond = (Var1,Var2), !,
+	Cond = (Cond1,Cond2), !,
+	arg(1, Cond1, Var1),
+	arg(1, Cond2, Var2),
 	process_var_(Var1, Cond, Goal),
 	process_var_(Var2, Cond, Goal).
 
 when(Cond, Goal) :-
-	Cond = (Var1;Var2), !,
+	Cond = (Cond1;Cond2), !,
+	arg(1, Cond1, Var1),
+	arg(1, Cond2, Var2),
 	process_var_(Var1, Cond, Goal),
 	process_var_(Var2, Cond, Goal).
 
