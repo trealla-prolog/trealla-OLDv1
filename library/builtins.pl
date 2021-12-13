@@ -46,7 +46,10 @@ predicate_property(P, A) :-
 		)
 	),
 	must_be(P, callable, predicate_property/2, _),
-	'$predicate_property'(P, A).
+	(	P = (M:P2)
+	->	M:'$predicate_property'(P2, A)
+	;	'$predicate_property'(P, A)
+	).
 
 current_prolog_flag(P, A) :-
 	nonvar(P), !,
