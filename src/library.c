@@ -38,9 +38,9 @@ extern unsigned char library_random_pl[];
 extern unsigned int library_random_pl_len;
 extern unsigned char library_lambda_pl[];
 extern unsigned int library_lambda_pl_len;
-extern unsigned char library_clpb_pl[];
-extern unsigned int library_clpb_pl_len;
 
+//extern unsigned char library_clpb_pl[];
+//extern unsigned int library_clpb_pl_len;
 //extern unsigned char library_clpz_pl[];
 //extern unsigned int library_clpz_pl_len;
 
@@ -64,8 +64,8 @@ library g_libs[] = {
 	 {"pairs", library_pairs_pl, &library_pairs_pl_len},
 	 {"random", library_random_pl, &library_random_pl_len},
 	 {"lambda", library_lambda_pl, &library_lambda_pl_len},
-	 {"clpb", library_clpb_pl, &library_clpb_pl_len},
 
+	 //{"clpb", library_clpb_pl, &library_clpb_pl_len},
 	 //{"clpz", library_clpz_pl, &library_clpz_pl_len},
 
 	 {0}
