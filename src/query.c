@@ -64,8 +64,8 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 		box == CALL ? "CALL" :
 		box == EXIT ? "EXIT" :
 		box == REDO ? "REDO" :
-		box == NEXT ? (isatty(2)?"\e[32mNEXT\e[0m" : "NEXT") :
-		box == FAIL ? (isatty(2) ? "\e[31mFAIL\e[0m" : "FAIL") :
+		box == NEXT ? "NEXT" :
+		box == FAIL ? "FAIL":
 		"????");
 
 #if DEBUG
