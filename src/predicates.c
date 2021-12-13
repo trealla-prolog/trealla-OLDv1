@@ -11539,7 +11539,6 @@ void format_property(module *m, char *tmpbuf, size_t buflen, const char *name, u
 	} else
 		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$predicate_property'(%s", name);
 
-
 	if (arity) {
 		dst += snprintf(dst, buflen-(dst-tmpbuf), "(");
 
