@@ -32,7 +32,7 @@ LIBOBJECTS +=  library/builtins.o library/lists.o library/apply.o \
 	library/format.o library/charsio.o library/freeze.o \
 	library/ordsets.o library/assoc.o library/dict.o library/dif.o \
 	library/ugraphs.o library/pairs.o library/random.o \
-	library/lambda.o library/when.o
+	library/lambda.o library/when.o library/clpb.o
 
 SRCOBJECTS += src/imath/imath.o
 

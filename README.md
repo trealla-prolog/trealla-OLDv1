@@ -13,6 +13,7 @@ A compact, efficient Prolog interpreter with
 	DCGs
 	User-defined functions
 	Attributed variables with SICStus interface (freeze/dif/when)
+	Constraint library CLPB (work-in-progress)
 	Logtalk compatible (work-in-progress)
 	REPL with history
 	MIT licensed
