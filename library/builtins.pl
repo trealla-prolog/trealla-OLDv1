@@ -195,10 +195,13 @@ replace_variables_(Term, Vars0, Vars) :-
 replace_variables_term_(0, _, Vars, Vars) :- !.
 replace_variables_term_(N, Term, Vars0, Vars) :-
 	arg(N, Term, Arg),
-	replace_variables_(Arg, Vars0, Vars1),
-	N1 is N-1,
-	replace_variables_term_(N1, Term, Vars1, Vars).
-
+	(	cyclic_term(Arg)
+	->	N1 is N-1,
+		replace_variables_term_(N1, Term, Vars0, Vars)
+	;	replace_variables_(Arg, Vars0, Vars1),
+		N1 is N-1,
+		replace_variables_term_(N1, Term, Vars1, Vars)
+	).
 
 /*
 %   concordant_subset_([Key-Val list], Key, [Val list]).
@@ -276,9 +279,13 @@ free_variables_(Term, Bound, OldList, NewList, _) :-
 free_variables_(0,    _,     _, VarList, VarList, _) :- !.
 free_variables_(N, Term, Bound, OldList, NewList, B) :-
 	arg(N, Term, Argument),
-	free_variables_(Argument, Bound, OldList, MidList, B),
-	M is N-1, !,
-	free_variables_(M, Term, Bound, MidList, NewList, B).
+	(	cyclic_term(Argument)
+	->	M is N-1, !,
+		free_variables_(M, Term, Bound, OldList, NewList, B)
+	;	free_variables_(Argument, Bound, OldList, MidList, B),
+		M is N-1, !,
+		free_variables_(M, Term, Bound, MidList, NewList, B)
+	).
 
 %   explicit_binding_ checks for goals known to existentially quantify
 %   one or more variables.  In particular "not" is quite common.
