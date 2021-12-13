@@ -15,13 +15,18 @@ freeze(Var, Goal) :-
 		)
 	).
 
-frozen(Var, Goal) :-
-	(	(	get_atts(Var, frozen(Goal))
-		;	get_atts(Var, when(_Cond-Goal))
-		)
-	->	true
-	;	Goal = true
-	).
+toconj([], In, In).
+toconj([H|T], true, Out) :- !,
+	Out2 = H,
+	toconj(T, Out2, Out).
+toconj([H|T], In, Out) :-
+	Out2 = (H, In),
+	toconj(T, Out2, Out).
+
+frozen(Term, Goal) :-
+	copy_term(Term, _, Gs),
+	flatten(Gs, Gs2),
+	toconj(Gs2, true, Goal).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -39,5 +44,7 @@ verify_attributes(Var, Other, Goals) :-
 verify_attributes(_, _, []).
 
 attribute_goals(Var) -->
-	{ get_atts(Var, frozen(Goals)), put_atts(Var, -frozen(_)) },
-	[freeze(Var, Goals)].
+    { get_atts(Var, frozen(Goals)),
+      put_atts(Var, -frozen(_)) },
+    [freeze(Var, Goals)].
+
