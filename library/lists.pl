@@ -1,7 +1,8 @@
 :- module(lists, [
 	member/2, select/3, selectchk/3, subtract/3, union/3,
 	intersection/3, reverse/2, append/2, nth/3, nth1/3, nth0/3,
-	last/2, flatten/2, append/3, same_length/2, sum_list/2
+	last/2, flatten/2, append/3, same_length/2, sum_list/2,
+	toconjunction/2
 	]).
 
 member(X, [X|_]).
@@ -79,3 +80,14 @@ sum_list(Ls, S) :-
         foldl(lists:sum_, Ls, 0, S).
 
 sum_(L, S0, S) :- S is S0 + L.
+
+toconjunction(List, Goal) :-
+	toconjunction_(List, [], Goal).
+
+toconjunction_([], In, In).
+toconjunction_([H|T], [], Out) :- !,
+	Out2 = H,
+	toconjunction_(T, Out2, Out).
+toconjunction_([H|T], In, Out) :-
+	Out2 = (H, In),
+	toconjunction_(T, Out2, Out).

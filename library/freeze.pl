@@ -15,18 +15,10 @@ freeze(Var, Goal) :-
 		)
 	).
 
-toconj([], In, In).
-toconj([H|T], true, Out) :- !,
-	Out2 = H,
-	toconj(T, Out2, Out).
-toconj([H|T], In, Out) :-
-	Out2 = (H, In),
-	toconj(T, Out2, Out).
-
 frozen(Term, Goal) :-
 	copy_term(Term, _, Gs),
 	flatten(Gs, Gs2),
-	toconj(Gs2, true, Goal).
+	toconjunction(Gs2, Goal).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
