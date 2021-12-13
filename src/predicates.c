@@ -9611,6 +9611,12 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 	}
 
 	if (pr) {
+		make_literal(&tmp, index_from_pool(q->pl, "meta_predicate"));
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
+			return pl_success;
+	}
+
+	if (pr) {
 		make_literal(&tmp, index_from_pool(q->pl, "visible"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;

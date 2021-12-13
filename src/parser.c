@@ -779,8 +779,6 @@ static void directives(parser *p, cell *d)
 				set_dynamic_in_db(m, GET_STR(p, c_name), arity);
 			else if (!strcmp(dirname, "persist"))
 				set_persist_in_db(m, GET_STR(p, c_name), arity);
-			else if (!strcmp(dirname, "meta_predicate"))
-				set_meta_predicate_in_db(m, c_name);
 
 			p1 += p1->nbr_cells;
 		} else if (!strcmp(dirname, "meta_predicate")) {

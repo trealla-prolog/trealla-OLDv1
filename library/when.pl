@@ -3,7 +3,7 @@
 :- use_module(library(atts)).
 :- use_module(library(dcgs)).
 
-:- meta_predicate(when(+, 0)).
+:- meta_predicate(when(*, 0)).
 :- attribute when/1.
 
 when(Cond, Goal) :-

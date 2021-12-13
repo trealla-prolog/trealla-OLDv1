@@ -1,7 +1,7 @@
 :- module(lists, [
 	member/2, select/3, selectchk/3, subtract/3, union/3,
 	intersection/3, reverse/2, append/2, nth/3, nth1/3, nth0/3,
-	last/2, flatten/2, append/3
+	last/2, flatten/2, append/3, same_length/2, sum_list/2
 	]).
 
 member(X, [X|_]).
@@ -70,3 +70,12 @@ flatten_([Hd|Tl], Tail, List) :-
     flatten_(Hd, FlatHeadTail, List),
     flatten_(Tl, Tail, FlatHeadTail).
 flatten_(NonList, Tl, [NonList|Tl]).
+
+same_length([], []).
+same_length([_|As], [_|Bs]) :-
+        same_length(As, Bs).
+
+sum_list(Ls, S) :-
+        foldl(lists:sum_, Ls, 0, S).
+
+sum_(L, S0, S) :- S is S0 + L.
