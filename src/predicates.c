@@ -7648,6 +7648,9 @@ static USE_RESULT pl_status fn_is_list_or_partial_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
+	if (is_variable(p1))
+		return true;
+
 	if (is_cyclic_term(q, p1, p1_ctx))
 		return false;
 

@@ -326,14 +326,17 @@ list_is_free_of_([Head|Tail], Var) :-
 sort(Term, _) :-
 	var(Term),
 	throw(error(instantiation_error, sort/2)).
-sort([], []) :- !.
+sort(_, Term) :-
+	\+ is_list_or_partial_list(Term),
+	throw(error(type_error(list,Term), sort/2)).
+sort([], S) :- !, S = [].
 sort([X, Y| Xs], Ys) :- !,
 	sort_split_([X, Y| Xs], X1s, X2s),
 	sort(X1s, Y1s),
 	sort(X2s, Y2s),
 	sort_merge_(Y1s, Y2s, Ys0),
 	Ys = Ys0, !.
-sort([X], [X]) :- !.
+sort([X], S) :- !, S = [X].
 sort(Term, _) :-
 	Term \== [],
 	throw(error(type_error(list,Term), sort/2)).
@@ -361,14 +364,17 @@ sort_split_([X| Xs], [X| Ys], Zs) :-
 msort(Term, _) :-
 	var(Term),
 	throw(error(instantiation_error, msort/2)).
-msort([], []) :- !.
+msort(_, Term) :-
+	\+ is_list_or_partial_list(Term),
+	throw(error(type_error(list,Term), msort/2)).
+msort([], S) :- !, S = [].
 msort([X, Y| Xs], Ys) :- !,
 	sort_split_([X, Y| Xs], X1s, X2s),
 	msort(X1s, Y1s),
 	msort(X2s, Y2s),
 	msort_merge_(Y1s, Y2s, Ys0),
 	Ys = Ys0, !.
-msort([X], [X]) :- !.
+msort([X], S) :- !, S = [X].
 msort(Term, _) :-
 	Term \== [],
 	throw(error(type_error(list,Term), msort/2)).
@@ -817,11 +823,6 @@ del_atts(Var) :-
 	'$erase_attribute'(Var).
 
 attvar(Var) :-
-	var(Var),
-	'$read_attributes'(Var, D),
-	D \= [].
-
-attributed(Var) :-
 	var(Var),
 	'$read_attributes'(Var, D),
 	D \= [].
