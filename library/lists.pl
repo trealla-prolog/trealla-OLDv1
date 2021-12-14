@@ -81,7 +81,8 @@ sum_list(Ls, S) :-
 
 sum_(L, S0, S) :- S is S0 + L.
 
-toconjunction(List, Goal) :-
+toconjunction(List0, Goal) :-
+	reverse(List0, List),
 	toconjunction_(List, true, Goal).
 
 toconjunction_([], In, In).
