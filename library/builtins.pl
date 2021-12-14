@@ -3,8 +3,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % These are SICStus compatible...
 
-must_be(Term, var, Goal, _Arg) :- !, (var(Term) -> true ; throw(error(instantiation_error(Term), Goal))), !.
-must_be(Term, nonvar, Goal, _Arg) :- !, (nonvar(Term) -> true ; throw(error(uninstantiation_error(Term), Goal))), !.
+must_be(Term, var, Goal, _Arg) :- !, (var(Term) -> true ; throw(error(uninstantiation_error(Term), Goal))), !.
+must_be(Term, nonvar, Goal, _Arg) :- !, (nonvar(Term) -> true ; throw(error(instantiation_error(Term), Goal))), !.
 
 must_be(Term, callable, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (callable(Term) -> true ; throw(error(type_error(callable, Term), Goal))), !.
 must_be(Term, atom, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (atom(Term) -> true ; throw(error(type_error(atom, Term), Goal))), !.
@@ -764,6 +764,7 @@ put_atts(Var, [H|T]) :- !,
 	put_atts(Var, T).
 
 put_atts(Var, -Attr) :- !,
+	must_be(Var, var, put_atts/2, 'attribute'),
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	(	var(Value)
@@ -777,12 +778,14 @@ put_atts(Var, -Attr) :- !,
 	).
 
 put_atts(Var, +Attr) :- !,
+	must_be(Var, var, put_atts/2, 'attribute'),
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,_],
 	dict:set(D, Module, Attr, D2),
 	'$write_attributes'(Var, D2).
 
 put_atts(Var, Attr) :- !,
+	must_be(Var, var, put_atts/2, 'attribute'),
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,_],
 	dict:set(D, Module, Attr, D2),
