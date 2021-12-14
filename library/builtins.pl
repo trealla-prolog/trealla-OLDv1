@@ -735,8 +735,11 @@ get_attr(Var, Module, Value) :-
 	get_atts(Var, Attr).
 
 del_attr(Var, Module) :-
-	Attr =.. [Module,_],
-	put_atts(Var, -Attr).
+	(	var(Var)
+	->	( Attr =.. [Module,_],
+		put_atts(Var, -Attr) )
+	;	true
+	).
 
 % when goal expansion is implemented delete the above and use just this:
 
@@ -748,7 +751,6 @@ goal_expansion(put_attr(Var, Module, Value), put_atts(Var, Access)) :-
 
 goal_expansion(del_attr(Var, Module), (var(Var) -> put_atts(Var, -Access);true)) :-
         Access =.. [Module,_].
-
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
