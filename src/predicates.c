@@ -10078,6 +10078,7 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 static USE_RESULT pl_status fn_sys_erase_attributes_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
+
 	frame *f = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(f, p1->var_nbr);
 	e->c.attrs = NULL;
@@ -10088,6 +10089,7 @@ static USE_RESULT pl_status fn_sys_write_attributes_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,list_or_nil);
+
 	frame *f = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(f, p1->var_nbr);
 	e->c.attrs = p2;
@@ -10097,11 +10099,8 @@ static USE_RESULT pl_status fn_sys_write_attributes_2(query *q)
 
 static USE_RESULT pl_status fn_sys_read_attributes_2(query *q)
 {
-	GET_FIRST_ARG(p1,any);
+	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,variable);
-
-	if (!is_variable(p1))
-		return false;
 
 	frame *f = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(f, p1->var_nbr);

@@ -726,7 +726,6 @@ current_op(A, B, C) :-
 % SWI compatible
 
 put_attr(Var, Module, Value) :-
-	var(Var),
 	Attr =.. [Module,Value],
 	put_atts(Var, Attr).
 
@@ -736,7 +735,6 @@ get_attr(Var, Module, Value) :-
 	get_atts(Var, Attr).
 
 del_attr(Var, Module) :-
-	var(Var),
 	Attr =.. [Module,_],
 	put_atts(Var, -Attr).
 
@@ -814,10 +812,12 @@ del_atts(Var) :-
 	'$erase_attribute'(Var).
 
 attvar(Var) :-
+	var(Var),
 	'$read_attributes'(Var, D),
 	D \= [].
 
 attributed(Var) :-
+	var(Var),
 	'$read_attributes'(Var, D),
 	D \= [].
 
