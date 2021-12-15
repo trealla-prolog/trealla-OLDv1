@@ -1984,23 +1984,35 @@ static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 
 	s++;
 
-	while (isspace(*s)) {
-		if (*s == '\n')
-			line_nbr++;
+	char *dup_src = strdup(*src);
+	p->srcptr = s;
+	s = eat_space(p);
 
-		s++;
-	}
+	if (*s != rh) {
+		if (p->did_getline) {
+			size_t len1 = strlen(dup_src);
+			size_t len2 = len1 + strlen(p->srcptr);
+			char *tmp = malloc(len2+1);
+			strcpy(tmp, dup_src);
+			strcat(tmp, p->srcptr);
+			free(p->save_line);
+			p->srcptr = p->save_line = tmp;
+			p->n_line = len2;
+			*src = p->srcptr;
+		}
 
-	if (*s != rh)
+		free(dup_src);
 		return false;
+	}
 
 	s++;
 	*d++ = lh;
 	*d++ = rh;
 	*d = '\0';
 	*dst = d;
-	*src = s;
+	p->srcptr = s;
 	p->line_nbr = line_nbr;
+	free(dup_src);
 	return true;
 }
 
@@ -2023,9 +2035,10 @@ static bool valid_float(const char *src)
 	return true;
 }
 
-const char *eat_space(parser *p)
+char *eat_space(parser *p)
 {
-	const char *src = p->srcptr;
+	p->did_getline = false;
+	char *src = p->srcptr;
 	bool done;
 
 	do {
@@ -2062,6 +2075,7 @@ const char *eat_space(parser *p)
 				return NULL;
 			}
 
+			p->did_getline = true;
 			src = p->srcptr = p->save_line;
 			done = false;
 			continue;
@@ -2093,6 +2107,7 @@ const char *eat_space(parser *p)
 					return NULL;
 				}
 
+				p->did_getline = true;
 				src = p->srcptr = p->save_line;
 			}
 		}
@@ -2407,9 +2422,6 @@ bool get_token(parser *p, int last_op)
 
 	if (is_matching_pair(p, &dst, (char**)&src, '[',']') ||
 		is_matching_pair(p, &dst, (char**)&src, '{','}')) {
-		//p->srcptr = (char*)src;
-		//src = eat_space(p);
-		p->srcptr = (char*)src;
 		return (dst - p->token) != 0;
 	}
 
