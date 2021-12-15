@@ -749,13 +749,13 @@ del_attr(Var, Module) :-
 
 % when goal expansion is implemented delete the above and use just this:
 
-goal_expansion(get_attr(Var, Module, Value), (var(Var),get_atts(Var, Access))) :-
+goal_expansion(get_attr(Var, Module, Value), get_atts(Var, Access)) :-
         Access =.. [Module,Value].
 
 goal_expansion(put_attr(Var, Module, Value), put_atts(Var, Access)) :-
         Access =.. [Module,Value].
 
-goal_expansion(del_attr(Var, Module), (var(Var) -> put_atts(Var, -Access);true)) :-
+goal_expansion(del_attr(Var, Module), (var(Var) -> put_atts(Var, -Access); true)) :-
         Access =.. [Module,_].
 
 %
@@ -772,7 +772,7 @@ put_atts(Var, [H|T]) :- !,
 	put_atts(Var, T).
 
 put_atts(Var, -Attr) :- !,
-	must_be(Var, var, put_atts/2, 'attribute'),
+	var(Var),
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	(	var(Value)
@@ -786,34 +786,38 @@ put_atts(Var, -Attr) :- !,
 	).
 
 put_atts(Var, +Attr) :- !,
-	must_be(Var, var, put_atts/2, 'attribute'),
+	var(Var),
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,_],
 	dict:set(D, Module, Attr, D2),
 	'$write_attributes'(Var, D2).
 
 put_atts(Var, Attr) :- !,
-	must_be(Var, var, put_atts/2, 'attribute'),
+	var(Var),
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,_],
 	dict:set(D, Module, Attr, D2),
 	'$write_attributes'(Var, D2).
 
 get_atts(Var, L) :- var(L), !,
+	var(Var),
 	'$read_attributes'(Var, D),
 	dict:match(D, _, L).
 
 get_atts(Var, -Attr) :- !,
+	var(Var),
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,_],
 	\+ dict:get(D, Module, _).
 
 get_atts(Var, +Attr) :- !,
+	var(Var),
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,_],
 	dict:get(D, Module, Attr).
 
 get_atts(Var, Attr) :- !,
+	var(Var),
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,_],
 	dict:get(D, Module, Attr).
