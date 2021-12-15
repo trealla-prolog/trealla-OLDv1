@@ -330,17 +330,15 @@ sort(_, Term) :-
 	\+ is_list_or_partial_list(Term),
 	throw(error(type_error(list,Term), sort/2)).
 sort([], S) :- !, S = [].
-sort([X, Y| Xs], Ys) :- !,
+sort([X, Y| Xs], Ys) :-
 	sort_split_([X, Y| Xs], X1s, X2s),
+	!,
 	sort(X1s, Y1s),
 	sort(X2s, Y2s),
 	sort_merge_(Y1s, Y2s, Ys0),
-	Ys = Ys0, !.
+	Ys = Ys0.
 sort([X], S) :- !, S = [X].
 sort(Term, _) :-
-	Term \== [],
-	throw(error(type_error(list,Term), sort/2)).
-sort(_, Term) :-
 	throw(error(type_error(list,Term), sort/2)).
 
 sort_merge_([X| Xs], [Y| Ys], [X| Zs]) :-
@@ -368,17 +366,15 @@ msort(_, Term) :-
 	\+ is_list_or_partial_list(Term),
 	throw(error(type_error(list,Term), msort/2)).
 msort([], S) :- !, S = [].
-msort([X, Y| Xs], Ys) :- !,
+msort([X, Y| Xs], Ys) :-
 	sort_split_([X, Y| Xs], X1s, X2s),
+	!,
 	msort(X1s, Y1s),
 	msort(X2s, Y2s),
 	msort_merge_(Y1s, Y2s, Ys0),
-	Ys = Ys0, !.
+	Ys = Ys0.
 msort([X], S) :- !, S = [X].
 msort(Term, _) :-
-	Term \== [],
-	throw(error(type_error(list,Term), msort/2)).
-msort(_, Term) :-
 	throw(error(type_error(list,Term), msort/2)).
 
 msort_merge_([X| Xs], [Y| Ys], [X| Zs]) :-
