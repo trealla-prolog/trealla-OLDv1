@@ -664,17 +664,17 @@ struct module_ {
 };
 
 struct prolog_ {
+	stream streams[MAX_STREAMS];
+	module *modules;
+	module *system_m, *user_m, *curr_m, *dcgs;
+	map *symtab, *funtab, *keyval;
+	char *pool;
 	pl_idx_t tab1[64000];
 	pl_idx_t tab3[64000];
 	pl_idx_t tab2[64000];
 	pl_idx_t tab4[64000];
 	uint8_t tab5[64000];
-	module *modules;
-	module *system_m, *user_m, *curr_m, *dcgs;
 	uint64_t s_last, s_cnt, seed;
-	map *symtab, *funtab, *keyval;
-	char *pool;
-	stream streams[MAX_STREAMS];
 	uint64_t ugen;
 	pl_idx_t pool_offset, pool_size, tab_idx;
 	unsigned varno;
