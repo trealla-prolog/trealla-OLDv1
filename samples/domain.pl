@@ -30,11 +30,6 @@ verify_attributes(_, _, []).                % unification triggered
                                             % because of attributes
                                             % in other modules
 
-attribute_goals(X) -->
-    { get_atts(X, +dif(Goals)) },
-    gather_dif_goals(Goals),
-    { put_atts(X, -dif(_)) }.
-
 attribute_goal(Var, domain(Var,Dom)) :-     % interpretation as goal
         get_atts(Var, dom(Dom)).
 
