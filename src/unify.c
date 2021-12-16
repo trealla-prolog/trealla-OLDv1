@@ -161,21 +161,24 @@ static bool unify_literals(query *q, cell *p1, cell *p2)
 
 static bool unify_cstrings(query *q, cell *p1, cell *p2)
 {
-	if (is_cstring(p2) && (LEN_STR(q, p1) == LEN_STR(q, p2)))
+	if (LEN_STR(q, p1) != LEN_STR(q, p2))
+		return false;
+
+	if (is_cstring(p2))
 		return !memcmp(GET_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p1));
 
-	if (is_literal(p2) && (LEN_STR(q, p1) == LEN_STR(q, p2)))
+	if (is_literal(p2))
 		return !memcmp(GET_STR(q, p1), GET_POOL(q, p2->val_off), LEN_STR(q, p1));
 
 	return false;
 }
 
-struct dispatch {
+struct dispatch_table {
 	uint8_t tag;
 	bool (*fn)(query*, cell*, cell*);
 };
 
-static const struct dispatch g_disp[] =
+static const struct dispatch_table g_disp[] =
 {
 	{TAG_EMPTY, NULL},
 	{TAG_VAR, NULL},

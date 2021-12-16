@@ -2,7 +2,7 @@
 % To use:
 %
 %	$ cd samples
-%	tpl -g main,halt -f test_domain.pl
+%	$ tpl -g main,halt -f test_domain.pl
 %
 
 :- use_module(library(format)).
