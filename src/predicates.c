@@ -1217,7 +1217,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		*dst = '\0';
 
 		int n = q->pl->current_input;
-		stream *str = &g_streams[n];
+		stream *str = &q->pl->streams[n];
 
 		if (!str->p)
 			str->p = create_parser(q->st.m);
@@ -1463,7 +1463,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 		*dst = '\0';
 
 		int n = q->pl->current_input;
-		stream *str = &g_streams[n];
+		stream *str = &q->pl->streams[n];
 
 		if (!str->p)
 			str->p = create_parser(q->st.m);
@@ -1778,11 +1778,11 @@ static USE_RESULT pl_status fn_iso_atom_length_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static int new_stream()
+static int new_stream(prolog *pl)
 {
 	for (int i = 0; i < MAX_STREAMS; i++) {
-		if (!g_streams[i].fp) {
-			memset(&g_streams[i], 0, sizeof(stream));
+		if (!pl->streams[i].fp) {
+			memset(&pl->streams[i], 0, sizeof(stream));
 			return i;
 		}
 	}
@@ -1790,10 +1790,10 @@ static int new_stream()
 	return -1;
 }
 
-static int get_named_stream(const char *name, size_t len)
+static int get_named_stream(prolog *pl, const char *name, size_t len)
 {
 	for (int i = 0; i < MAX_STREAMS; i++) {
-		stream *str = &g_streams[i];
+		stream *str = &pl->streams[i];
 
 		if (!str->fp)
 			continue;
@@ -1813,7 +1813,7 @@ static int get_named_stream(const char *name, size_t len)
 int get_stream(query *q, cell *p1)
 {
 	if (is_atom(p1)) {
-		int n = get_named_stream(GET_STR(q, p1), LEN_STR(q, p1));
+		int n = get_named_stream(q->pl, GET_STR(q, p1), LEN_STR(q, p1));
 
 		if (n < 0)
 			return -1;
@@ -1824,18 +1824,18 @@ int get_stream(query *q, cell *p1)
 	if (!(p1->flags&FLAG_STREAM))
 		return -1;
 
-	if (!g_streams[get_int(p1)].fp)
+	if (!q->pl->streams[get_int(p1)].fp)
 		return -1;
 
 	return get_smallint(p1);
 }
 
-static bool is_closed_stream(cell *p1)
+static bool is_closed_stream(prolog *pl, cell *p1)
 {
 	if (!(p1->flags&FLAG_STREAM))
 		return false;
 
-	if (g_streams[get_smallint(p1)].fp)
+	if (pl->streams[get_smallint(p1)].fp)
 		return false;
 
 	return true;
@@ -1883,7 +1883,7 @@ static USE_RESULT pl_status fn_iso_set_input_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (strcmp(str->mode, "read") && strcmp(str->mode, "update"))
 		return throw_error(q, pstr, q->st.curr_frame, "permission_error", "input,stream");
@@ -1896,7 +1896,7 @@ static USE_RESULT pl_status fn_iso_set_output_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, q->st.curr_frame, "permission_error", "output,stream");
@@ -1909,7 +1909,7 @@ static USE_RESULT pl_status fn_iso_set_stream_position_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,any);
 
 	if (!is_integer(p1))
@@ -2078,7 +2078,7 @@ static pl_status do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_typ
 
 static void add_stream_properties(query *q, int n)
 {
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	char tmpbuf[1024*8];
 	char *dst = tmpbuf;
 	*dst = '\0';
@@ -2171,7 +2171,7 @@ static pl_status do_stream_property(query *q)
 	GET_FIRST_ARG(pstr,any);
 	GET_NEXT_ARG(p1,any);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	cell *c = p1 + 1;
 	c = deref(q, c, p1_ctx);
 	pl_idx_t c_ctx = q->latest_ctx;
@@ -2344,7 +2344,7 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 	GET_NEXT_ARG(p1,any);
 
 	if (!is_stream_or_var(pstr)) {
-		if (is_closed_stream(pstr))
+		if (is_closed_stream(q->pl, pstr))
 			return throw_error(q, pstr, q->st.curr_frame, "existence_error", "stream");
 		else
 			return throw_error(q, pstr, q->st.curr_frame, "domain_error", "stream");
@@ -2363,10 +2363,10 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 		clear_streams_properties(q);
 
 		for (int i = 0; i < MAX_STREAMS; i++) {
-			if (!g_streams[i].fp)
+			if (!q->pl->streams[i].fp)
 				continue;
 
-			stream *str = &g_streams[i];
+			stream *str = &q->pl->streams[i];
 
 			if (!str->socket)
 				add_stream_properties(q, i);
@@ -2402,7 +2402,7 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,variable);
 	GET_NEXT_ARG(p4,list_or_nil);
-	int n = new_stream();
+	int n = new_stream(q->pl);
 	char *src = NULL;
 
 	if (n < 0)
@@ -2425,7 +2425,7 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 		filename = src;
 	}
 
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	str->domain = true;
 	may_ptr_error(str->filename = strdup(filename));
 	may_ptr_error(str->name = strdup(filename));
@@ -2446,7 +2446,7 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 			name = deref(q, name, q->latest_ctx);
 
 
-			if (get_named_stream(GET_STR(q, name), LEN_STR(q, name)) >= 0)
+			if (get_named_stream(q->pl, GET_STR(q, name), LEN_STR(q, name)) >= 0)
 				return throw_error(q, c, q->latest_ctx, "permission_error", "open,source_sink");
 
 			if (!CMP_SLICE2(q, c, "alias")) {
@@ -2508,7 +2508,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,variable);
 	GET_NEXT_ARG(p4,list_or_nil);
-	int n = new_stream();
+	int n = new_stream(q->pl);
 	char *src = NULL;
 
 	if (n < 0)
@@ -2523,7 +2523,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 		if (oldn < 0)
 			return throw_error(q, p1, p1_ctx, "type_error", "not_a_stream");
 
-		stream *oldstr = &g_streams[oldn];
+		stream *oldstr = &q->pl->streams[oldn];
 		filename = oldstr->filename;
 	} else if (is_atom(p1))
 		filename = src = DUP_SLICE(q, p1);
@@ -2539,7 +2539,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 		filename = src = chars_list_to_string(q, p1, p1_ctx, len);
 	}
 
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	may_ptr_error(str->filename = strdup(filename));
 	may_ptr_error(str->name = strdup(filename));
 	may_ptr_error(str->mode = DUP_SLICE(q, p2));
@@ -2571,7 +2571,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			if (!is_atom(name) && CMP_SLICE2(q, c, "mmap"))
 				return throw_error(q, c, q->latest_ctx, "domain_error", "stream_option");
 
-			if (get_named_stream(GET_STR(q, name), LEN_STR(q, name)) >= 0)
+			if (get_named_stream(q->pl, GET_STR(q, name), LEN_STR(q, name)) >= 0)
 				return throw_error(q, c, q->latest_ctx, "permission_error", "open,source_sink");
 
 			if (!CMP_SLICE2(q, c, "mmap")) {
@@ -2715,7 +2715,7 @@ static USE_RESULT pl_status fn_iso_close_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if ((str->fp == stdin)
 		|| (str->fp == stdout)
@@ -2777,7 +2777,7 @@ static USE_RESULT pl_status fn_iso_close_2(query *q)
 static USE_RESULT pl_status fn_iso_at_end_of_stream_0(query *q)
 {
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (!str->ungetch && str->p) {
 		if (str->p->srcptr && *str->p->srcptr) {
@@ -2804,7 +2804,7 @@ static USE_RESULT pl_status fn_iso_at_end_of_stream_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (strcmp(str->mode, "read") && strcmp(str->mode, "update"))
 		return throw_error(q, pstr, q->st.curr_frame, "permission_error", "input,stream");
@@ -2833,7 +2833,7 @@ static USE_RESULT pl_status fn_iso_at_end_of_stream_1(query *q)
 static USE_RESULT pl_status fn_iso_flush_output_0(query *q)
 {
 	int n = q->pl->current_output;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	fflush(str->fp);
 	return !ferror(str->fp);
 }
@@ -2842,7 +2842,7 @@ static USE_RESULT pl_status fn_iso_flush_output_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, q->st.curr_frame, "permission_error", "output,stream");
@@ -2854,7 +2854,7 @@ static USE_RESULT pl_status fn_iso_flush_output_1(query *q)
 static USE_RESULT pl_status fn_iso_nl_0(query *q)
 {
 	int n = q->pl->current_output;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	fputc('\n', str->fp);
 	//fflush(str->fp);
 	return !ferror(str->fp);
@@ -2864,7 +2864,7 @@ static USE_RESULT pl_status fn_iso_nl_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, q->st.curr_frame, "permission_error", "output,stream");
@@ -2878,7 +2878,7 @@ static USE_RESULT pl_status fn_iso_read_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (str->binary) {
 		cell tmp;
@@ -2896,7 +2896,7 @@ static USE_RESULT pl_status fn_iso_read_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,any);
 
 	if (strcmp(str->mode, "read"))
@@ -2919,7 +2919,7 @@ static USE_RESULT pl_status fn_iso_read_term_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (str->binary) {
 		cell tmp;
@@ -2935,7 +2935,7 @@ static USE_RESULT pl_status fn_iso_read_term_3(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
 
@@ -2956,7 +2956,7 @@ static USE_RESULT pl_status fn_iso_write_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = q->pl->current_output;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (str->binary) {
 		cell tmp;
@@ -2973,7 +2973,7 @@ static USE_RESULT pl_status fn_iso_write_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,any);
 
 	if (!strcmp(str->mode, "read"))
@@ -2994,7 +2994,7 @@ static USE_RESULT pl_status fn_iso_writeq_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = q->pl->current_output;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (str->binary) {
 		cell tmp;
@@ -3013,7 +3013,7 @@ static USE_RESULT pl_status fn_iso_writeq_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,any);
 
 	if (!strcmp(str->mode, "read"))
@@ -3036,7 +3036,7 @@ static USE_RESULT pl_status fn_iso_write_canonical_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = q->pl->current_output;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (str->binary) {
 		cell tmp;
@@ -3053,7 +3053,7 @@ static USE_RESULT pl_status fn_iso_write_canonical_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,any);
 
 	if (!strcmp(str->mode, "read"))
@@ -3202,7 +3202,7 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
 	int n = q->pl->current_output;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (str->binary) {
 		cell tmp;
@@ -3263,7 +3263,7 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
 
@@ -3325,7 +3325,7 @@ static USE_RESULT pl_status fn_iso_put_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	int n = q->pl->current_output;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	size_t len = len_char_utf8(GET_STR(q, p1));
 
 	if (str->binary) {
@@ -3350,7 +3350,7 @@ static USE_RESULT pl_status fn_iso_put_char_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,atom);
 	size_t len = len_char_utf8(GET_STR(q, p1));
 
@@ -3379,7 +3379,7 @@ static USE_RESULT pl_status fn_iso_put_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	int n = q->pl->current_output;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (str->binary) {
 		cell tmp;
@@ -3405,7 +3405,7 @@ static USE_RESULT pl_status fn_iso_put_code_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,integer);
 
 	if (!strcmp(str->mode, "read"))
@@ -3435,7 +3435,7 @@ static USE_RESULT pl_status fn_iso_put_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,byte);
 	int n = q->pl->current_output;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (!str->binary) {
 		cell tmp;
@@ -3461,7 +3461,7 @@ static USE_RESULT pl_status fn_iso_put_byte_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,byte);
 
 	if (!strcmp(str->mode, "read"))
@@ -3489,7 +3489,7 @@ static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_character_or_var);
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (str->binary) {
 		cell tmp;
@@ -3558,7 +3558,7 @@ static USE_RESULT pl_status fn_iso_get_char_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,in_character_or_var);
 
 	if (strcmp(str->mode, "read"))
@@ -3631,7 +3631,7 @@ static USE_RESULT pl_status fn_iso_get_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (is_integer(p1) && (get_int(p1) < -1))
 		return throw_error(q, p1, p1_ctx, "representation_error", "in_character_code");
@@ -3702,7 +3702,7 @@ static USE_RESULT pl_status fn_iso_get_code_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,integer_or_var);
 
 	if (is_integer(p1) && (get_int(p1) < -1))
@@ -3776,7 +3776,7 @@ static USE_RESULT pl_status fn_iso_get_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_byte_or_var);
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (!str->binary) {
 		cell tmp;
@@ -3836,7 +3836,7 @@ static USE_RESULT pl_status fn_iso_get_byte_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,in_byte_or_var);
 
 	if (strcmp(str->mode, "read"))
@@ -3899,7 +3899,7 @@ static USE_RESULT pl_status fn_iso_peek_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_character_or_var);
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (str->binary) {
 		cell tmp;
@@ -3950,7 +3950,7 @@ static USE_RESULT pl_status fn_iso_peek_char_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,in_character_or_var);
 
 	if (strcmp(str->mode, "read"))
@@ -4004,7 +4004,7 @@ static USE_RESULT pl_status fn_iso_peek_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (is_integer(p1) && (get_int(p1) < -1))
 		return throw_error(q, p1, p1_ctx, "representation_error", "in_character_code");
@@ -4055,7 +4055,7 @@ static USE_RESULT pl_status fn_iso_peek_code_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,integer_or_var);
 
 	if (is_integer(p1) && (get_int(p1) < -1))
@@ -4110,7 +4110,7 @@ static USE_RESULT pl_status fn_iso_peek_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_byte_or_var);
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (!str->binary) {
 		cell tmp;
@@ -4157,7 +4157,7 @@ static USE_RESULT pl_status fn_iso_peek_byte_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,in_byte_or_var);
 
 	if (strcmp(str->mode, "read"))
@@ -6282,7 +6282,7 @@ static USE_RESULT pl_status fn_writeln_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = q->pl->current_output;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	fputc('\n', str->fp);
 	//fflush(str->fp);
@@ -6293,7 +6293,7 @@ static USE_RESULT pl_status fn_print_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = q->pl->current_output;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	int was_string = false;
 
 	if (is_string(p1)) {
@@ -6772,7 +6772,7 @@ static USE_RESULT pl_status fn_getlines_1(query *q)
 {
 	GET_NEXT_ARG(p1,variable);
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	char *line = NULL;
 	size_t len = 0;
 	int nbr = 1, in_list = 0;
@@ -6821,7 +6821,7 @@ static USE_RESULT pl_status fn_getlines_2(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,variable);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	char *line = NULL;
 	size_t len = 0;
 	int nbr = 1, in_list = 0;
@@ -6971,14 +6971,14 @@ static USE_RESULT pl_status fn_server_3(query *q)
 	if (fd == -1)
 		return throw_error(q, p1, p1_ctx, "existence_error", "server_failed");
 
-	int n = new_stream();
+	int n = new_stream(q->pl);
 
 	if (n < 0) {
 		close(fd);
 		return throw_error(q, p1, p1_ctx, "resource_error", "too_many_streams");
 	}
 
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	may_ptr_error(str->filename = DUP_SLICE(q, p1));
 	may_ptr_error(str->name = strdup(hostname));
 	may_ptr_error(str->mode = strdup("update"));
@@ -7011,7 +7011,7 @@ static USE_RESULT pl_status fn_accept_2(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,variable);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	int fd = net_accept(str);
 
@@ -7022,14 +7022,14 @@ static USE_RESULT pl_status fn_accept_2(query *q)
 		return pl_failure;
 	}
 
-	n = new_stream();
+	n = new_stream(q->pl);
 
 	if (n < 0) {
 		close(fd);
 		return throw_error(q, p1, p1_ctx, "resource_error", "too_many_streams");
 	}
 
-	stream *str2 = &g_streams[n];
+	stream *str2 = &q->pl->streams[n];
 	may_ptr_error(str2->filename = strdup(str->filename));
 	may_ptr_error(str2->name = strdup(str->name));
 	may_ptr_error(str2->mode = strdup("update"));
@@ -7156,14 +7156,14 @@ static USE_RESULT pl_status fn_client_5(query *q)
 	if (fd == -1)
 		return throw_error(q, p1, p1_ctx, "resource_error", "could_not_connect");
 
-	int n = new_stream();
+	int n = new_stream(q->pl);
 
 	if (n < 0) {
 		close(fd);
 		return throw_error(q, p1, p1_ctx, "resource_error", "too_many_streams");
 	}
 
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	may_ptr_error(str->filename = DUP_SLICE(q, p1));
 	may_ptr_error(str->name = strdup(hostname));
 	may_ptr_error(str->mode = strdup("update"));
@@ -7214,7 +7214,7 @@ static USE_RESULT pl_status fn_getline_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	char *line = NULL;
 	size_t len = 0;
 
@@ -7253,7 +7253,7 @@ static USE_RESULT pl_status fn_getline_2(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,any);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	char *line = NULL;
 	size_t len = 0;
 
@@ -7292,7 +7292,7 @@ static USE_RESULT pl_status fn_read_line_to_string_2(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,any);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	char *line = NULL;
 	size_t len = 0;
 
@@ -7338,7 +7338,7 @@ static USE_RESULT pl_status fn_bread_3(query *q)
 	GET_NEXT_ARG(p1,integer_or_var);
 	GET_NEXT_ARG(p2,variable);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	size_t len;
 
 	if (is_integer(p1) && is_positive(p1)) {
@@ -7441,7 +7441,7 @@ static USE_RESULT pl_status fn_bwrite_2(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,atom);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	const char *src = GET_STR(q, p1);
 	size_t len = LEN_STR(q, p1);
 
@@ -7468,7 +7468,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_2(query *q)
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_term,any);
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	char *src;
 	size_t len;
 
@@ -7508,7 +7508,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 	GET_NEXT_ARG(p_opts,any);
 	GET_NEXT_ARG(p_term,any);
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	char *src;
 	size_t len;
@@ -7547,7 +7547,7 @@ static USE_RESULT pl_status fn_read_term_from_atom_3(query *q)
 	GET_NEXT_ARG(p_term,any);
 	GET_NEXT_ARG(p_opts,any);
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	char *src;
 	size_t len;
@@ -9087,7 +9087,7 @@ static USE_RESULT pl_status fn_edin_redo_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
 		fprintf(str->fp, "%s", PROMPT);
@@ -9116,7 +9116,7 @@ static USE_RESULT pl_status fn_edin_redo_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,integer);
 
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
@@ -9151,7 +9151,7 @@ static USE_RESULT pl_status fn_edin_tab_1(query *q)
 		return throw_error(q, &p1, p1_tmp_ctx, "type_error", "integer");
 
 	int n = q->pl->current_output;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	for (int i = 0; i < get_int(&p1); i++)
 		fputc(' ', str->fp);
@@ -9169,7 +9169,7 @@ static USE_RESULT pl_status fn_edin_tab_2(query *q)
 		return throw_error(q, &p1, p1_tmp_ctx, "type_error", "integer");
 
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	for (int i = 0; i < get_int(&p1); i++)
 		fputc(' ', str->fp);
@@ -9180,7 +9180,7 @@ static USE_RESULT pl_status fn_edin_tab_2(query *q)
 static USE_RESULT pl_status fn_edin_seen_0(query *q)
 {
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (n <= 2)
 		return pl_success;
@@ -9201,7 +9201,7 @@ static USE_RESULT pl_status fn_edin_seen_0(query *q)
 static USE_RESULT pl_status fn_edin_told_0(query *q)
 {
 	int n = q->pl->current_output;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (n <= 2)
 		return pl_success;
@@ -9222,7 +9222,7 @@ static USE_RESULT pl_status fn_edin_told_0(query *q)
 static USE_RESULT pl_status fn_edin_seeing_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	char *name = q->pl->current_input==0?"user":g_streams[q->pl->current_input].name;
+	char *name = q->pl->current_input==0?"user":q->pl->streams[q->pl->current_input].name;
 	cell tmp;
 	may_error(make_cstring(&tmp, name));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -9233,7 +9233,7 @@ static USE_RESULT pl_status fn_edin_seeing_1(query *q)
 static USE_RESULT pl_status fn_edin_telling_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	char *name =q->pl->current_output==1?"user":g_streams[q->pl->current_output].name;
+	char *name =q->pl->current_output==1?"user":q->pl->streams[q->pl->current_output].name;
 	cell tmp;
 	may_error(make_cstring(&tmp, name));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -10510,7 +10510,7 @@ static USE_RESULT pl_status fn_get_unbuffered_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (is_integer(p1) && (get_int(p1) < -1))
 		return throw_error(q, p1, p1_ctx, "representation_error", "in_character_code");
@@ -10567,7 +10567,7 @@ static USE_RESULT pl_status fn_get_unbuffered_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_character_or_var);
 	int n = q->pl->current_input;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 
 	if (is_integer(p1) && (get_int(p1) < -1))
 		return throw_error(q, p1, p1_ctx, "representation_error", "in_character_code");
@@ -10632,7 +10632,7 @@ static USE_RESULT pl_status fn_sys_put_chars_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = q->pl->current_output;
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	size_t len;
 
 	if (is_cstring(p1)) {
@@ -10655,7 +10655,7 @@ static USE_RESULT pl_status fn_sys_put_chars_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
-	stream *str = &g_streams[n];
+	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,any);
 	size_t len;
 

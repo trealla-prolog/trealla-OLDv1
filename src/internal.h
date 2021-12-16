@@ -674,6 +674,7 @@ struct prolog_ {
 	uint64_t s_last, s_cnt, seed;
 	map *symtab, *funtab, *keyval;
 	char *pool;
+	stream streams[MAX_STREAMS];
 	uint64_t ugen;
 	pl_idx_t pool_offset, pool_size, tab_idx;
 	unsigned varno;
@@ -696,7 +697,6 @@ extern pl_idx_t g_sys_stream_property_s, g_unify_s, g_on_s, g_off_s, g_sys_var_s
 extern pl_idx_t g_call_s, g_braces_s, g_plus_s, g_minus_s, g_post_unify_hook_s;
 extern pl_idx_t g_sys_soft_cut_s;
 
-extern stream g_streams[MAX_STREAMS];
 extern unsigned g_cpu_count;
 
 inline static void share_cell(const cell *c)

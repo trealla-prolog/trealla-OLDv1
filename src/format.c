@@ -551,7 +551,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 
 	if (str == NULL) {
 		int n = q->st.m->pl->current_output;
-		stream *str = &g_streams[n];
+		stream *str = &q->pl->streams[n];
 		net_write(tmpbuf, len, str);
 	} else if (is_structure(str)
 		&& ((CMP_SLICE2(q, str, "atom")
@@ -579,7 +579,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		unshare_cell(&tmp);
 	} else if (is_stream(str)) {
 		int n = get_stream(q, str);
-		stream *str = &g_streams[n];
+		stream *str = &q->pl->streams[n];
 		const char *tmpsrc = tmpbuf;
 
 		while (len) {

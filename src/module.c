@@ -1076,7 +1076,7 @@ module *load_file(module *m, const char *filename)
 {
 	if (!strcmp(filename, "user")) {
 		for (int i = 0; i < MAX_STREAMS; i++) {
-			stream *str = &g_streams[i];
+			stream *str = &m->pl->streams[i];
 
 			if (!strcmp(str->name, "user_input")) {
 				module *save_m = load_fp(m, str->fp, filename);

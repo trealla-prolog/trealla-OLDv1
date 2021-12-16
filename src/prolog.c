@@ -16,7 +16,6 @@
 
 static const size_t INITIAL_POOL_SIZE = 64000;	// bytes
 
-stream g_streams[MAX_STREAMS] = {{0}};
 pl_idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 pl_idx_t g_anon_s, g_neck_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
 pl_idx_t g_sys_elapsed_s, g_sys_queue_s, g_braces_s, g_call_s, g_braces_s;
@@ -146,10 +145,46 @@ bool pl_consult(prolog *pl, const char *filename)
 	return load_file(pl->user_m, filename);
 }
 
-static void g_destroy(prolog *pl)
+static void g_destroy()
 {
+	free(g_tpl_lib);
+}
+
+static void keyvalfree(const void *key, const void *val)
+{
+	free((void*)key);
+	free((void*)val);
+}
+
+static void g_init()
+{
+	char *ptr = getenv("TPL_LIBRARY_PATH");
+
+	if (ptr)
+		g_tpl_lib = strdup(ptr);
+}
+
+void pl_destroy(prolog *pl)
+{
+	if (!pl) return;
+
+	destroy_module(pl->system_m);
+	destroy_module(pl->user_m);
+
+	while (pl->modules)
+		destroy_module(pl->modules);
+
+	m_destroy(pl->funtab);
+	m_destroy(pl->symtab);
+	m_destroy(pl->keyval);
+	free(pl->pool);
+	pl->pool_offset = 0;
+
+	if (!--g_tpl_count)
+		g_destroy();
+
 	for (int i = 0; i < MAX_STREAMS; i++) {
-		stream *str = &g_streams[i];
+		stream *str = &pl->streams[i];
 
 		if (str->fp) {
 			if ((str->fp != stdin)
@@ -167,31 +202,38 @@ static void g_destroy(prolog *pl)
 		}
 	}
 
-	memset(g_streams, 0, sizeof(g_streams));
+	memset(pl->streams, 0, sizeof(pl->streams));
 
-	while (pl->modules)
-		destroy_module(pl->modules);
-
-	free(g_tpl_lib);
-	m_destroy(pl->funtab);
-	m_destroy(pl->symtab);
-	m_destroy(pl->keyval);
-	free(pl->pool);
-	pl->pool_offset = 0;
+	free(pl);
 }
 
-static void keyvalfree(const void *key, const void *val)
+prolog *pl_create()
 {
-	free((void*)key);
-	free((void*)val);
-}
+	prolog *pl = calloc(1, sizeof(prolog));
 
-static bool g_init(prolog *pl)
-{
+	if (!g_tpl_count++)
+		g_init();
+
+	if (!g_tpl_lib) {
+		g_tpl_lib = realpath(g_argv0, NULL);
+
+		if (g_tpl_lib) {
+			char *src = g_tpl_lib + strlen(g_tpl_lib) - 1;
+
+			while ((src != g_tpl_lib) && (*src != '/'))
+				src--;
+
+			*src = '\0';
+			g_tpl_lib = realloc(g_tpl_lib, strlen(g_tpl_lib)+40);
+			strcat(g_tpl_lib, "/library");
+		} else
+			g_tpl_lib = strdup("../library");
+	}
+
 	pl->pool = calloc(pl->pool_size=INITIAL_POOL_SIZE, 1);
-	if (pl->pool) {
-		bool error = false;
+	bool error = false;
 
+	if (pl->pool) {
 		CHECK_SENTINEL(pl->symtab = m_create((void*)strcmp, (void*)free, NULL), NULL);
 		CHECK_SENTINEL(pl->keyval = m_create((void*)strcmp, (void*)keyvalfree, NULL), NULL);
 		m_allow_dups(pl->symtab, false);
@@ -232,24 +274,6 @@ static bool g_init(prolog *pl)
 			CHECK_SENTINEL(g_error_s = index_from_pool(pl, "error"), ERR_IDX);
 			CHECK_SENTINEL(g_slash_s = index_from_pool(pl, "/"), ERR_IDX);
 
-			g_streams[0].fp = stdin;
-			CHECK_SENTINEL(g_streams[0].filename = strdup("stdin"), NULL);
-			CHECK_SENTINEL(g_streams[0].name = strdup("user_input"), NULL);
-			CHECK_SENTINEL(g_streams[0].mode = strdup("read"), NULL);
-			g_streams[0].eof_action = eof_action_reset;
-
-			g_streams[1].fp = stdout;
-			CHECK_SENTINEL(g_streams[1].filename = strdup("stdout"), NULL);
-			CHECK_SENTINEL(g_streams[1].name = strdup("user_output"), NULL);
-			CHECK_SENTINEL(g_streams[1].mode = strdup("append"), NULL);
-			g_streams[1].eof_action = eof_action_reset;
-
-			g_streams[2].fp = stderr;
-			CHECK_SENTINEL(g_streams[2].filename = strdup("stderr"), NULL);
-			CHECK_SENTINEL(g_streams[2].name = strdup("user_error"), NULL);
-			CHECK_SENTINEL(g_streams[2].mode = strdup("append"), NULL);
-			g_streams[2].eof_action = eof_action_reset;
-
 			CHECK_SENTINEL(g_sys_elapsed_s = index_from_pool(pl, "$elapsed"), ERR_IDX);
 			CHECK_SENTINEL(g_sys_queue_s = index_from_pool(pl, "$queue"), ERR_IDX);
 			CHECK_SENTINEL(g_sys_var_s = index_from_pool(pl, "$VAR"), ERR_IDX);
@@ -264,58 +288,27 @@ static bool g_init(prolog *pl)
 			CHECK_SENTINEL(g_sys_cut_if_det_s = index_from_pool(pl, "$cut_if_det"), ERR_IDX);
 		}
 
-		if (error) {
-			g_destroy(pl);
+		if (error)
 			return NULL;
-		}
-	}
-	return pl->pool ? true : false;
-}
-
-void pl_destroy(prolog *pl)
-{
-	if (!pl) return;
-
-	destroy_module(pl->system_m);
-	destroy_module(pl->user_m);
-
-	if (!--g_tpl_count)
-		g_destroy(pl);
-
-	free(pl);
-}
-
-prolog *pl_create()
-{
-	prolog *pl = calloc(1, sizeof(prolog));
-
-	if (!g_tpl_count++ && !g_init(pl)) {
-		free(pl);
-		return NULL;
 	}
 
-	if (!g_tpl_lib) {
-		char *ptr = getenv("TPL_LIBRARY_PATH");
+	pl->streams[0].fp = stdin;
+	CHECK_SENTINEL(pl->streams[0].filename = strdup("stdin"), NULL);
+	CHECK_SENTINEL(pl->streams[0].name = strdup("user_input"), NULL);
+	CHECK_SENTINEL(pl->streams[0].mode = strdup("read"), NULL);
+	pl->streams[0].eof_action = eof_action_reset;
 
-		if (ptr)
-			g_tpl_lib = strdup(ptr);
-	}
+	pl->streams[1].fp = stdout;
+	CHECK_SENTINEL(pl->streams[1].filename = strdup("stdout"), NULL);
+	CHECK_SENTINEL(pl->streams[1].name = strdup("user_output"), NULL);
+	CHECK_SENTINEL(pl->streams[1].mode = strdup("append"), NULL);
+	pl->streams[1].eof_action = eof_action_reset;
 
-	if (!g_tpl_lib) {
-		g_tpl_lib = realpath(g_argv0, NULL);
-
-		if (g_tpl_lib) {
-			char *src = g_tpl_lib + strlen(g_tpl_lib) - 1;
-
-			while ((src != g_tpl_lib) && (*src != '/'))
-				src--;
-
-			*src = '\0';
-			g_tpl_lib = realloc(g_tpl_lib, strlen(g_tpl_lib)+40);
-			strcat(g_tpl_lib, "/library");
-		} else
-			g_tpl_lib = strdup("../library");
-	}
+	pl->streams[2].fp = stderr;
+	CHECK_SENTINEL(pl->streams[2].filename = strdup("stderr"), NULL);
+	CHECK_SENTINEL(pl->streams[2].name = strdup("user_error"), NULL);
+	CHECK_SENTINEL(pl->streams[2].mode = strdup("append"), NULL);
+	pl->streams[2].eof_action = eof_action_reset;
 
 	pl->funtab = m_create((void*)strcmp, NULL, NULL);
 	m_allow_dups(pl->funtab, false);
