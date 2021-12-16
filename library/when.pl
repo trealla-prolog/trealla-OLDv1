@@ -68,5 +68,6 @@ verify_attributes(Var, Other, Goals) :-
 	).
 
 attribute_goals(Var) -->
-	{ get_atts(Var, when(Goals)), put_atts(Var, -when(_)) },
+	{ get_atts(Var, when(Goals)),
+		put_atts(Var, -when(_)) },
 	[when(Var, Goals)].

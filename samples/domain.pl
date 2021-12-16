@@ -33,6 +33,11 @@ verify_attributes(_, _, []).                % unification triggered
 attribute_goal(Var, domain(Var,Dom)) :-     % interpretation as goal
         get_atts(Var, dom(Dom)).
 
+attribute_goals(Var) -->
+	{ get_atts(Var, dom(Goals)),
+		put_atts(Var, -dom(_)) },
+	[dom(Var, Goals)].
+
 domain(X, Dom) :-
         var(Dom), !,
         get_atts(X, dom(Dom)).
