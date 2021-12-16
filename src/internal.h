@@ -667,14 +667,14 @@ struct prolog_ {
 	stream streams[MAX_STREAMS];
 	module *modules;
 	module *system_m, *user_m, *curr_m, *dcgs;
-	map *symtab, *funtab, *keyval;
-	char *pool;
 	pl_idx_t tab1[64000];
 	pl_idx_t tab3[64000];
 	pl_idx_t tab2[64000];
 	pl_idx_t tab4[64000];
 	uint8_t tab5[64000];
 	uint64_t s_last, s_cnt, seed;
+	map *symtab, *funtab, *keyval;
+	char *pool;
 	uint64_t ugen;
 	pl_idx_t pool_offset, pool_size, tab_idx;
 	unsigned varno;
@@ -755,20 +755,20 @@ inline static void chk_cells(cell *src, pl_idx_t nbr_cells)
 #define LIST_HEAD(l) list_head(l, &l##_h_tmp)
 #define LIST_TAIL(l) list_tail(l, &l##_t_tmp)
 
-extern cell *list_head(cell *l, cell *tmp);
-extern cell *list_tail(cell *l, cell *tmp);
+cell *list_head(cell *l, cell *tmp);
+cell *list_tail(cell *l, cell *tmp);
 
 enum clause_type {DO_CLAUSE, DO_RETRACT, DO_STREAM_RETRACT, DO_RETRACTALL};
 
-extern size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq);
-extern char *slicedup(const char *s, size_t n);
-extern int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2);
-extern unsigned count_bits(const uint8_t *mask, unsigned bit);
-extern uint64_t get_time_in_usec(void);
-extern uint64_t cpu_time_in_usec(void);
-extern char *relative_to(const char *basefile, const char *relfile);
-extern size_t sprint_int(char *dst, size_t size, pl_int_t n, int base);
-extern void format_property(module *m, char *tmpbuf, size_t buflen, const char *name, unsigned arity, const char *type);
+size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq);
+char *slicedup(const char *s, size_t n);
+int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2);
+unsigned count_bits(const uint8_t *mask, unsigned bit);
+uint64_t get_time_in_usec(void);
+uint64_t cpu_time_in_usec(void);
+char *relative_to(const char *basefile, const char *relfile);
+size_t sprint_int(char *dst, size_t size, pl_int_t n, int base);
+void format_property(module *m, char *tmpbuf, size_t buflen, const char *name, unsigned arity, const char *type);
 
 #define slicecmp2(s1,l1,s2) slicecmp(s1,l1,s2,strlen(s2))
 

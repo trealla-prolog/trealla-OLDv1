@@ -161,14 +161,14 @@ inline static cell *get_raw_arg(const query *q, int n)
 	return c;
 }
 
-extern void make_int(cell *tmp, pl_int_t v);
-extern void make_real(cell *tmp, double v);
-extern void make_call(query *q, cell *tmp);
-extern void make_end(cell *tmp);
-extern void make_structure(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t extra_cells);
+void make_int(cell *tmp, pl_int_t v);
+void make_real(cell *tmp, double v);
+void make_call(query *q, cell *tmp);
+void make_end(cell *tmp);
+void make_structure(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t extra_cells);
 
-extern USE_RESULT pl_status fn_iso_add_2(query *q);
-extern USE_RESULT pl_status fn_local_cut_0(query *q);
+USE_RESULT pl_status fn_iso_add_2(query *q);
+USE_RESULT pl_status fn_local_cut_0(query *q);
 
 #define eval(q,c)														\
 	is_function(c) || is_builtin(c) ? (call_builtin(q,c,c##_ctx), q->accum) :				\

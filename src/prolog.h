@@ -1,12 +1,12 @@
 #pragma once
 
-extern void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found, bool *function);
-extern module *find_module(prolog *pl, const char *name);
-extern module *find_module_id(prolog *pl, unsigned id);
-extern module *find_next_module(prolog *pl, module *m);
-extern pl_idx_t index_from_pool(prolog *pl, const char *name);
-extern bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, unsigned arity);
-extern void load_builtins(prolog *pl);
+void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found, bool *function);
+module *find_module(prolog *pl, const char *name);
+module *find_module_id(prolog *pl, unsigned id);
+module *find_next_module(prolog *pl, module *m);
+pl_idx_t index_from_pool(prolog *pl, const char *name);
+bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, unsigned arity);
+void load_builtins(prolog *pl);
 
 extern pl_idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
 extern pl_idx_t g_anon_s, g_neck_s, g_eof_s, g_lt_s, g_gt_s, g_eq_s, g_false_s;
