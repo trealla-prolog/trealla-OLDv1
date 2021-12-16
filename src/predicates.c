@@ -10922,6 +10922,57 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 		name = dstbuf;
 	}
 
+	if (true) {
+		module *m;
+
+		if ((m = find_module(q->pl, name)) != NULL) {
+			if (!m->fp)
+				do_db_load(m);
+
+			if (m != q->st.m)
+				q->st.m->used[q->st.m->idx_used++] = m;
+
+			return pl_success;
+		}
+
+		if (!strcmp(name, "between")
+		    || !strcmp(name, "samsort")
+		    || !strcmp(name, "terms")
+		    || !strcmp(name, "types")
+			|| !strcmp(name, "iso_ext")
+		    || !strcmp(name, "files"))
+			return pl_success;
+
+		for (library *lib = g_libs; lib->name; lib++) {
+			if (strcmp(lib->name, name))
+				continue;
+
+			char *src = malloc(*lib->len+1);
+			may_ptr_error(src);
+			memcpy(src, lib->start, *lib->len);
+			src[*lib->len] = '\0';
+			ASTRING(s1);
+			ASTRING_sprintf(s1, "library/%s", lib->name);
+			m = load_text(q->st.m, src, ASTRING_cstr(s1));
+			ASTRING_free(s1);
+			free(src);
+
+			if (m != q->st.m)
+				do_db_load(m);
+
+			if (m != q->st.m)
+				q->st.m->used[q->st.m->idx_used++] = m;
+
+			return pl_success;
+		}
+
+		snprintf(dstbuf, sizeof(dstbuf), "%s/", g_tpl_lib);
+		char *dst = dstbuf + strlen(dstbuf);
+		pl_idx_t ctx = 0;
+		print_term_to_buf(q, dst, sizeof(dstbuf)-strlen(g_tpl_lib), p1, ctx, 1, 0, 0);
+		name = dstbuf;
+	}
+
 	char *filename = relative_to(q->st.m->filename, name);
 	module *m;
 
