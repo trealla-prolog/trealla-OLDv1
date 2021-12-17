@@ -360,10 +360,6 @@ sort_split_([X| Xs], [X| Ys], Zs) :-
 	sort_split_(Xs, Zs, Ys).
 
 msort(Term, _) :-
-	(	acyclic_term(Term)
-	->	true
-	;	throw(error(type_error(list,Term), msort/2))
-	),
 	var(Term),
 	throw(error(instantiation_error, msort/2)).
 msort(_, Term) :-
