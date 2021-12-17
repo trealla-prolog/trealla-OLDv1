@@ -153,7 +153,7 @@ int main(int ac, char *av[])
 	char histfile[1024];
 	snprintf(histfile, sizeof(histfile), "%s/%s", homedir, ".tpl_history");
 
-	//int did_load = 0;
+	//bool did_load = false;
 	int i, do_goal = 0, do_lib = 0;
 	int version = 0, quiet = 0, daemon = 0;
 	int ns = 0;
@@ -203,8 +203,7 @@ int main(int ac, char *av[])
 
 	signal(SIGPIPE, SIG_IGN);
 	const char *goal = NULL;
-
-	pl_consult(pl, "~/.tplrc");
+	bool did_consult = false;
 
 	for (i = 1; i < ac; i++) {
 		if (!strcmp(av[i], "--"))
@@ -227,6 +226,7 @@ int main(int ac, char *av[])
 			do_goal = 0;
 			do_lib = 1;
 		} else if (!strcmp(av[i], "-f") || !strcmp(av[i], "-l") || !strcmp(av[i], "--consult-file")) {
+			did_consult = true;
 			do_lib = do_goal = 0;
 		} else if (!strcmp(av[i], "-g") || !strcmp(av[i], "--query-goal")) {
 			do_lib = 0;
@@ -240,8 +240,6 @@ int main(int ac, char *av[])
 			do_goal = 0;
 			goal = av[i];
 		} else {
-			//did_load = 1;
-
 			if (!pl_consult(pl, av[i]) || ns) {
 				pl_destroy(pl);
 				return 1;
@@ -249,6 +247,8 @@ int main(int ac, char *av[])
 		}
 	}
 
+	if (!did_consult)
+		pl_consult(pl, "~/.tplrc");
 
 	if (goal) {
 		if (!pl_eval(pl, goal)) {
