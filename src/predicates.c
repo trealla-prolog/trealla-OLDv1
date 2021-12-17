@@ -10966,11 +10966,15 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			return pl_success;
 		}
 
-		snprintf(dstbuf, sizeof(dstbuf), "%s/", g_tpl_lib);
-		char *dst = dstbuf + strlen(dstbuf);
-		pl_idx_t ctx = 0;
-		print_term_to_buf(q, dst, sizeof(dstbuf)-strlen(g_tpl_lib), p1, ctx, 1, 0, 0);
-		name = dstbuf;
+		struct stat st;
+
+		if (stat(name, &st)) {
+			snprintf(dstbuf, sizeof(dstbuf), "%s/", g_tpl_lib);
+			char *dst = dstbuf + strlen(dstbuf);
+			pl_idx_t ctx = 0;
+			print_term_to_buf(q, dst, sizeof(dstbuf)-strlen(g_tpl_lib), p1, ctx, 1, 0, 0);
+			name = dstbuf;
+		}
 	}
 
 	char *filename = relative_to(q->st.m->filename, name);
