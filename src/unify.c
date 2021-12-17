@@ -16,7 +16,7 @@
 #include "utf8.h"
 
 
-bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
+bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	if (p1->arity != p2->arity)
 		return false;
@@ -60,7 +60,7 @@ bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ct
 			}
 		}
 
-		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx))
+		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
 			return false;
 
 		if (q->info) {
@@ -80,15 +80,21 @@ bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ct
 
 // This is for when one arg is a string & the other an iso-list...
 
-static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
+static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	if (p1->arity != p2->arity)
 		return false;
 
+	unsigned save_depth = depth;
 	LIST_HANDLER(p1);
 	LIST_HANDLER(p2);
 
 	while (is_list(p1) && is_list(p2) && !g_tpl_interrupt) {
+		if (depth >= MAX_DEPTH) {
+			q->cycle_error = true;
+			return true;
+		}
+
 		cell *c1 = LIST_HEAD(p1);
 		cell *c2 = LIST_HEAD(p2);
 
@@ -97,7 +103,7 @@ static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, 
 		c2 = deref(q, c2, p2_ctx);
 		pl_idx_t c2_ctx = q->latest_ctx;
 
-		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx)) {
+		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1)) {
 			if (q->cycle_error)
 				return true;
 
@@ -111,9 +117,10 @@ static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, 
 		p1_ctx = q->latest_ctx;
 		p2 = deref(q, c2, p2_ctx);
 		p2_ctx = q->latest_ctx;
+		depth++;
 	}
 
-	return unify_internal(q, p1, p1_ctx, p2, p2_ctx);
+	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, save_depth+1);
 }
 
 static bool unify_integers(__attribute__((unused)) query *q, cell *p1, cell *p2)
@@ -154,24 +161,21 @@ static bool unify_literals(query *q, cell *p1, cell *p2)
 
 static bool unify_cstrings(query *q, cell *p1, cell *p2)
 {
-	if (LEN_STR(q, p1) != LEN_STR(q, p2))
-		return false;
-
-	if (is_cstring(p2))
+	if (is_cstring(p2) && (LEN_STR(q, p1) == LEN_STR(q, p2)))
 		return !memcmp(GET_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p1));
 
-	if (is_literal(p2))
+	if (is_literal(p2) && (LEN_STR(q, p1) == LEN_STR(q, p2)))
 		return !memcmp(GET_STR(q, p1), GET_POOL(q, p2->val_off), LEN_STR(q, p1));
 
 	return false;
 }
 
-struct dispatch_table {
+struct dispatch {
 	uint8_t tag;
 	bool (*fn)(query*, cell*, cell*);
 };
 
-static const struct dispatch_table g_disp[] =
+static const struct dispatch g_disp[] =
 {
 	{TAG_EMPTY, NULL},
 	{TAG_VAR, NULL},
@@ -182,8 +186,16 @@ static const struct dispatch_table g_disp[] =
 	{0}
 };
 
-bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
+bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
+	if (!depth)
+		q->cycle_error = false;
+
+	if (depth >= MAX_DEPTH) {
+		q->cycle_error = true;
+		return true;
+	}
+
 	if (p1_ctx == q->st.curr_frame)
 		q->no_tco = true;
 
@@ -217,10 +229,10 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 		return unify_cstrings(q, p1, p2);
 
 	if (is_string(p1) || is_string(p2))
-		return unify_string_to_list(q, p1, p1_ctx, p2, p2_ctx);
+		return unify_string_to_list(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 
 	if (p1->arity || p2->arity)
-		return unify_structs(q, p1, p1_ctx, p2, p2_ctx);
+		return unify_structs(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 
 	return g_disp[p1->tag].fn(q, p1, p2);
 }

@@ -1233,7 +1233,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		try_me(q, r->nbr_vars);
 		q->tot_matches++;
 
-		if (unify_structs(q, p1, p1_ctx, c, q->st.fp)) {
+		if (unify_structs(q, p1, p1_ctx, c, q->st.fp, 0)) {
 			int ok;
 
 			if (needs_true) {
@@ -1331,7 +1331,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 		try_me(q, r->nbr_vars);
 		q->tot_matches++;
 
-		if (unify_structs(q, p1, p1_ctx, head, q->st.fp))
+		if (unify_structs(q, p1, p1_ctx, head, q->st.fp, 0))
 			return pl_success;
 
 		undo_me(q);
@@ -1395,7 +1395,7 @@ static USE_RESULT pl_status match_head(query *q)
 		cell *head = get_head(r->cells);
 		try_me(q, r->nbr_vars);
 
-		if (unify_structs(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp)) {
+		if (unify_structs(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp, 0)) {
 			if (q->error) {
 				q->st.pr = NULL;
 				return pl_error;
