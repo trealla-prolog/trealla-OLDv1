@@ -1040,12 +1040,12 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 
 	if (attrs) {
 		if (is_variable(v)) {
-			const frame *f = GET_FRAME(v_ctx);
-			slot *e = GET_SLOT(f, v->var_nbr);
+			const frame *f2 = GET_FRAME(v_ctx);
+			slot *e2 = GET_SLOT(f2, v->var_nbr);
 
-			if (!e->c.attrs) {
-				e->c.attrs = attrs;
-				e->c.attrs_ctx = attrs_ctx;
+			if (!e2->c.attrs) {
+				e2->c.attrs = attrs;
+				e2->c.attrs_ctx = attrs_ctx;
 
 				if (q->cp || attrs)
 					add_trail(q, v_ctx, v->var_nbr, NULL, 0);
