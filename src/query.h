@@ -80,6 +80,7 @@ void do_cleanup(query *q, cell *p1);
 void cut_if_det(query *q);
 bool is_in_ref_list(cell *c, pl_idx_t c_ctx, reflist *rlist);
 bool collect_vars(query *q, cell *p1, pl_idx_t p1_ctx);
+pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx);
 
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_ctx, int running, bool cons, unsigned depth);
 pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running);

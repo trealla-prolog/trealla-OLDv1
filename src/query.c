@@ -1676,9 +1676,13 @@ pl_status start(query *q)
 		} else if (is_iso_list(q->st.curr_cell)) {
 			cell *l = q->st.curr_cell;
 			LIST_HANDLER(l);
+			pl_idx_t l_ctx = q->st.curr_frame;
 
 			while (is_list(l) && !g_tpl_interrupt) {
 				cell *h = LIST_HEAD(l);
+				h = deref(q, h, l_ctx);
+
+				may_error(do_consult(q, h, l_ctx));
 
 				if (is_variable(h)) {
 					DISCARD_RESULT throw_error(q, h, q->st.curr_frame, "instantiation_error", "args_not_sufficiently_instantiated");
@@ -1686,9 +1690,10 @@ pl_status start(query *q)
 				}
 
 				l = LIST_TAIL(l);
+				l = deref(q, l, l_ctx);
+				l_ctx = q->st.curr_frame;
 			}
 
-			consultall(q->st.m->p, q->st.curr_cell);
 			proceed(q);
 		} else {
 			if (!is_callable(q->st.curr_cell)) {

@@ -8190,7 +8190,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	return ok;
 }
 
-static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
+pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	if (is_atom(p1)) {
 		char *src = DUP_SLICE(q, p1);
@@ -8200,7 +8200,7 @@ static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 		if (!load_file(q->st.m, filename)) {
 			free(filename);
 			free(src);
-			return throw_error(q, p1, p1_ctx, "existence_error", "filespec");
+			return throw_error(q, p1, p1_ctx, "existence_error", "source_sink");
 		}
 
 		free(filename);
@@ -8209,13 +8209,13 @@ static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 	}
 
 	if (CMP_SLICE2(q, p1, ":"))
-		return throw_error(q, p1, p1_ctx, "type_error", "filespec");
+		return throw_error(q, p1, p1_ctx, "type_error", "source_sink");
 
 	cell *mod = deref(q, p1+1, p1_ctx);
 	cell *file = deref(q, p1+2, p1_ctx);
 
 	if (!is_atom(mod) || !is_atom(file))
-		return throw_error(q, p1, p1_ctx, "type_error", "filespec");
+		return throw_error(q, p1, p1_ctx, "type_error", "source_sink");
 
 	module *tmp_m = create_module(q->pl, GET_STR(q, mod));
 	char *filename = GET_STR(q, file);
@@ -8226,7 +8226,7 @@ static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 	if (!load_file(tmp_m, filename)) {
 		destroy_module(tmp_m);
 		free(filename);
-		return throw_error(q, p1, p1_ctx, "existence_error", "filespec");
+		return throw_error(q, p1, p1_ctx, "existence_error", "source_sink");
 	}
 
 	free(filename);
