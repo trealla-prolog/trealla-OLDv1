@@ -15,3 +15,5 @@ houses([
 
 main :-
 	true.
+
+:- initialization(main).
