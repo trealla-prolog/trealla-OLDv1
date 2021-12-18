@@ -31,7 +31,6 @@ void call_attrs(query *q, cell *attrs);
 void stash_me(query *q, rule *t, bool last_match);
 int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
 extern bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
-extern bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
 pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx);
 size_t slicecpy(char *dst, size_t dstlen, const char *src, size_t len);
 pl_status make_cstringn(cell *d, const char *s, size_t n);
@@ -104,19 +103,21 @@ struct cycle_info_ {
 
 inline static int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 {
-	cycle_info info = {0};
-	q->info = &info;
+	cycle_info info1 = {0}, info2 = {0};
+	q->info1 = &info1;
+	q->info2 = &info2;
 	int ok = compare_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
-	q->info = NULL;
+	q->info1 = q->info2 = NULL;
 	return ok;
 }
 
 inline static bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 {
-	cycle_info info = {0};
-	q->info = &info;
+	cycle_info info1 = {0}, info2 = {0};
+	q->info1 = &info1;
+	q->info2 = &info2;
 	bool ok = unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
-	q->info = NULL;
+	q->info1 = q->info2 = NULL;
 	return ok;
 }
 

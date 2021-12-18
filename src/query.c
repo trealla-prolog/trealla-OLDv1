@@ -1288,7 +1288,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 		try_me(q, r->nbr_vars);
 		q->tot_matches++;
 
-		if (unify_structs(q, p1, p1_ctx, head, q->st.fp, 0))
+		if (unify(q, p1, p1_ctx, head, q->st.fp))
 			return pl_success;
 
 		undo_me(q);

@@ -542,7 +542,7 @@ struct query_ {
 	arena *arenas;
 	slot *save_e;
 	clause *dirty_list;
-	cycle_info *info;
+	cycle_info *info1, *info2;
 	cell accum;
 	mpz_t tmp_ival;
 	prolog_state st;
