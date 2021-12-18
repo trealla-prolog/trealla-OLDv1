@@ -27,7 +27,8 @@ bool collect_vars(query *q, cell *p1, pl_idx_t p1_ctx, pl_idx_t nbr_cells, int d
 		bool found = false;
 
 		if (is_structure(c)) {
-			collect_vars(q, c+1, c_ctx, c->nbr_cells-1, depth+1);
+			if (!collect_vars(q, c+1, c_ctx, c->nbr_cells-1, depth+1))
+				return false;
 		} else if (is_variable(c)) {
 			for (unsigned idx = 0; idx < q->pl->tab_idx; idx++) {
 				if ((q->pl->tab1[idx] == c_ctx) && (q->pl->tab2[idx] == c->var_nbr)) {
