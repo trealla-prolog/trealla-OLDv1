@@ -1023,11 +1023,8 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 {
 	frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
-	cell *attrs = NULL;
-	pl_idx_t attrs_ctx = 0;
-
-	attrs = e->c.attrs;
-	attrs_ctx = e->c.attrs_ctx;
+	cell *attrs = e->c.attrs;
+	pl_idx_t attrs_ctx = e->c.attrs_ctx;
 
 	if (is_structure(v)) {
 		make_indirect(&e->c, v);
