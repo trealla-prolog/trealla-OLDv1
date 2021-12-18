@@ -51,15 +51,13 @@
 
 inline static cell *deref(query *q, cell *c, pl_idx_t c_ctx)
 {
-	if (!is_variable(c)) {
-		q->latest_ctx = c_ctx;
-		return c;
-	}
+	if (!is_variable(c))
+		return q->latest_ctx = c_ctx, c;
 
 	const frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
 
-	while (is_variable(&e->c)) {
+	while (is_variable(&e->c) && !g_tpl_interrupt) {
 		c_ctx = e->ctx;
 		c = &e->c;
 		f = GET_FRAME(c_ctx);
