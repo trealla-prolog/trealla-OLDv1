@@ -15,9 +15,9 @@ A compact, efficient Prolog interpreter with
 	REPL with history
 	MIT licensed
 
-	Attributed variables with SICStus interface (*work-in-progress*)
-	Rational trees aka. cyclic terms (*work-in-progress*)
-	Logtalk compatible (*work-in-progress*)
+	Attributed variables with SICStus interface (*WIP*)
+	Rational trees aka. cyclic terms (*WIP*)
+	Logtalk compatible (*WIP*)
 
 Trealla is not WAM-based. It uses tree-walking, structure-sharing and
 deep-binding.
