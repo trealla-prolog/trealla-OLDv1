@@ -1046,13 +1046,15 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 
 				if (q->cp || attrs)
 					add_trail(q, v_ctx, v->var_nbr, NULL, 0);
-			} else
+			} else {
 				q->has_attrs = true;
-		} else
-			q->has_attrs = true;
+			}
+		}
+
+		q->has_attrs = true;
 	}
 
-	if (q->cp || attrs)
+	if (q->cp || q->has_attrs)
 		add_trail(q, c_ctx, c->var_nbr, attrs, attrs_ctx);
 }
 
