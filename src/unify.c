@@ -54,6 +54,8 @@ bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx)
 	return is_cyclic_term_internal(q, p1, p1_ctx, NULL);
 }
 
+// TODO : change this to make a list of vars as we go...
+
 static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, reflist *list)
 {
 	pl_idx_t nbr_cells = p1->nbr_cells;
