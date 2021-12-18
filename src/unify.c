@@ -54,20 +54,32 @@ bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx)
 	return is_cyclic_term_internal(q, p1, p1_ctx, NULL);
 }
 
-bool collect_vars(query *q, cell *p1, pl_idx_t p1_ctx, pl_idx_t nbr_cells, int depth)
+static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, reflist *list)
 {
-	if (depth > MAX_DEPTH)
-		return false;
+	pl_idx_t nbr_cells = p1->nbr_cells;
 
-	for (unsigned i = 0; (i < nbr_cells) && !g_tpl_interrupt;) {
+	while (nbr_cells) {
+		if (is_variable(p1)) {
+			if (is_in_ref_list(p1, p1_ctx, list))
+				return;
+
+			reflist nlist;
+			nlist.next = list;
+			nlist.var_nbr = p1->var_nbr;
+			nlist.ctx = p1_ctx;
+			cell *c = deref(q, p1, p1_ctx);
+			pl_idx_t c_ctx = q->latest_ctx;
+
+			if (is_structure(c))
+				collect_vars_internal(q, c, c_ctx, &nlist);
+		}
+
 		cell *c = deref(q, p1, p1_ctx);
 		pl_idx_t c_ctx = q->latest_ctx;
-		bool found = false;
 
-		if (is_structure(c)) {
-			if (!collect_vars(q, c+1, c_ctx, c->nbr_cells-1, depth+1))
-				return false;
-		} else if (is_variable(c)) {
+		if (is_variable(c)) {
+			bool found = false;
+
 			for (unsigned idx = 0; idx < q->pl->tab_idx; idx++) {
 				if ((q->pl->tab1[idx] == c_ctx) && (q->pl->tab2[idx] == c->var_nbr)) {
 					q->pl->tab4[idx]++;
@@ -86,10 +98,14 @@ bool collect_vars(query *q, cell *p1, pl_idx_t p1_ctx, pl_idx_t nbr_cells, int d
 			}
 		}
 
-		i += p1->nbr_cells;
-		p1 += p1->nbr_cells;
+		nbr_cells--;
+		p1++;
 	}
+}
 
+bool collect_vars(query *q, cell *p1, pl_idx_t p1_ctx)
+{
+	collect_vars_internal(q, p1, p1_ctx, NULL);
 	return true;
 }
 

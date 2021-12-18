@@ -619,7 +619,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 	q->pl->tab_idx = 0;
 
 	if (p->nbr_vars)
-		collect_vars(q, p->r->cells, q->st.curr_frame, p->r->cidx-1, 0);
+		collect_vars(q, p->r->cells, q->st.curr_frame);
 
 	if (vars) {
 		unsigned cnt = q->pl->tab_idx;
@@ -4359,7 +4359,7 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 	frame *f = GET_CURR_FRAME();
 	q->pl->varno = f->nbr_vars;
 	q->pl->tab_idx = 0;
-	collect_vars(q, p1, p1_ctx, p1->nbr_cells, 0);
+	collect_vars(q, p1, p1_ctx);
 	const unsigned cnt = q->pl->tab_idx;
 	init_tmp_heap(q);
 	cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
