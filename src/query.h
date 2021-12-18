@@ -78,7 +78,7 @@ pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx);
 void add_to_dirty_list(query *q, clause *r);
 void do_cleanup(query *q, cell *p1);
 void cut_if_det(query *q);
-bool is_in_ref_list(cell *c, pl_idx_t c_ctx, ref *rlist);
+bool is_in_ref_list(cell *c, pl_idx_t c_ctx, reflist *rlist);
 bool collect_vars(query *q, cell *p1, pl_idx_t p1_ctx, pl_idx_t nbr_cells, int depth);
 
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_ctx, int running, bool cons, unsigned depth);
@@ -92,13 +92,13 @@ pl_status print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int runni
 char *print_canonical_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running);
 pl_status print_canonical_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, int running);
 
-struct ref_ {
-	ref *next;
+struct reflist_ {
+	reflist *next;
 	pl_idx_t var_nbr, ctx;
 };
 
 struct cycle_info_ {
-	ref *r1, *r2;
+	reflist *r1, *r2;
 };
 
 inline static int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)

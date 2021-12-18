@@ -1973,7 +1973,7 @@ int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_
 		pl_idx_t c1_ctx = q->latest_ctx;
 		cell *c2 = deref(q, p2, p2_ctx);
 		pl_idx_t c2_ctx = q->latest_ctx;
-		ref r1 = {0}, r2 = {0};
+		reflist r1 = {0}, r2 = {0};
 
 		if (q->info) {
 			bool cycle1 = false, cycle2 = false;

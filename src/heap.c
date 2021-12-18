@@ -109,7 +109,7 @@ cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 	return c;
 }
 
-bool is_in_ref_list(cell *c, pl_idx_t c_ctx, ref *rlist)
+bool is_in_ref_list(cell *c, pl_idx_t c_ctx, reflist *rlist)
 {
 	while (rlist && !g_tpl_interrupt) {
 		if ((c->var_nbr == rlist->var_nbr)
@@ -122,7 +122,7 @@ bool is_in_ref_list(cell *c, pl_idx_t c_ctx, ref *rlist)
 	return false;
 }
 
-static cell *deep_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth, bool nonlocals_only, ref *list)
+static cell *deep_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth, bool nonlocals_only, reflist *list)
 {
 	if (depth >= MAX_DEPTH) {
 		q->cycle_error = true;
@@ -189,7 +189,7 @@ static cell *deep_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_
 		cell *c = p1;
 		pl_idx_t c_ctx = p1_ctx;
 		bool ok = false;
-		ref nlist;
+		reflist nlist;
 
 		if (is_variable(c)) {
 			if (!is_in_ref_list(c, c_ctx, list)) {
@@ -223,7 +223,7 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 	q->cycle_error = false;
 	int nbr_vars = f->nbr_vars;
 	bool ok = false;
-	ref nlist, *list = NULL;
+	reflist nlist, *list = NULL;
 
 	if (is_variable(p1)) {
 		nlist.next = list;

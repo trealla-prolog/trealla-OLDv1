@@ -231,7 +231,7 @@ enum {
 	FLAG_BLOB=1<<7,						// used with TAG_CSTR
 	FLAG_STRING=1<<8,					// used with TAG_CSTR
 	FLAG_STATIC=1<<9,
-	FLAG_MANAGED=1<<10,					// any ref-counted object
+	FLAG_MANAGED=1<<10,					// any reflist-counted object
 	FLAG_FUNCTION=1<<11,
 
 	FLAG_SPARE1=1<<12,
@@ -291,7 +291,7 @@ typedef struct choice_ choice;
 typedef struct prolog_state_ prolog_state;
 typedef struct prolog_flags_ prolog_flags;
 typedef struct cycle_info_ cycle_info;
-typedef struct ref_ ref;
+typedef struct reflist_ reflist;
 
 // Using a fixed-size cell allows having arrays of cells, which is
 // basically what a Term is. A compound is a variable length array of

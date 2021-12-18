@@ -173,7 +173,7 @@ which gives a memory-mapped view of a file as a string *Ls*. List
 operations on files are now essentially zero-overhead! DCG applications
 will gain greatly (*phrase_from_file/[2-3]* uses this).
 
-Both strings and atoms make use of low-overhead ref-counted byte slices
+Both strings and atoms make use of low-overhead reflist-counted byte slices
 where appropriate.
 
 

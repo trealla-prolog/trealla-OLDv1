@@ -15,7 +15,7 @@
 #include "heap.h"
 #include "utf8.h"
 
-static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, ref *list)
+static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, reflist *list)
 {
 	if (!is_structure(p1))
 		return false;
@@ -28,7 +28,7 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, ref *li
 			if (is_in_ref_list(p1, p1_ctx, list))
 				return q->cycle_error = true;
 
-			ref nlist;
+			reflist nlist;
 			nlist.next = list;
 			nlist.var_nbr = p1->var_nbr;
 			nlist.ctx = p1_ctx;
@@ -109,7 +109,7 @@ bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ct
 		pl_idx_t c1_ctx = q->latest_ctx;
 		cell *c2 = deref(q, p2, p2_ctx);
 		pl_idx_t c2_ctx = q->latest_ctx;
-		ref r1 = {0}, r2 = {0};
+		reflist r1 = {0}, r2 = {0};
 
 		if (q->info) {
 			if (is_variable(p1)) {
