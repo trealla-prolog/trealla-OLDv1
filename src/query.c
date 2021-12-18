@@ -1036,6 +1036,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	e->ctx = v_ctx;
 
 	if (attrs) {
+#if 0
 		if (is_variable(v)) {
 			const frame *f2 = GET_FRAME(v_ctx);
 			slot *e2 = GET_SLOT(f2, v->var_nbr);
@@ -1048,7 +1049,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 				q->has_attrs = true;
 			}
 		}
-
+#endif
 		q->has_attrs = true;
 	}
 
