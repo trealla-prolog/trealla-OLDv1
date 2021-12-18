@@ -4426,6 +4426,10 @@ static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 
 	if (!is_variable(p2) && !is_nil(p2)
+		&& is_cyclic_term(q, p2, p2_ctx))
+		return throw_error(q, p2, p2_ctx, "type_error", "list");
+
+	if (!is_variable(p2) && !is_nil(p2)
 		&& !is_valid_list(q, p2, p2_ctx, true))
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
