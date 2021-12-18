@@ -1026,11 +1026,8 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	cell *attrs = NULL;
 	pl_idx_t attrs_ctx = 0;
 
-	if (is_empty(&e->c)) {
-		attrs = e->c.attrs;
-		attrs_ctx = e->c.attrs_ctx;
-	} else
-		attrs = NULL;
+	attrs = e->c.attrs;
+	attrs_ctx = e->c.attrs_ctx;
 
 	if (is_structure(v)) {
 		make_indirect(&e->c, v);
