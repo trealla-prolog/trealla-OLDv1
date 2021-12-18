@@ -79,6 +79,7 @@ void add_to_dirty_list(query *q, clause *r);
 void do_cleanup(query *q, cell *p1);
 void cut_if_det(query *q);
 bool is_in_ref_list(cell *c, pl_idx_t c_ctx, ref *rlist);
+bool collect_vars(query *q, cell *p1, pl_idx_t p1_ctx, pl_idx_t nbr_cells, int depth);
 
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_ctx, int running, bool cons, unsigned depth);
 pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running);

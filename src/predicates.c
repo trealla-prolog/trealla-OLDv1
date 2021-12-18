@@ -316,44 +316,6 @@ static USE_RESULT pl_status fn_iso_notunify_2(query *q)
 	return !fn_iso_unify_2(q);
 }
 
-static bool collect_vars(query *q, cell *p1, pl_idx_t p1_ctx, pl_idx_t nbr_cells, int depth)
-{
-	if (depth > MAX_DEPTH)
-		return false;
-
-	for (unsigned i = 0; i < nbr_cells;) {
-		cell *c = deref(q, p1, p1_ctx);
-		pl_idx_t c_ctx = q->latest_ctx;
-		bool found = false;
-
-		if (is_structure(c)) {
-			collect_vars(q, c+1, c_ctx, c->nbr_cells-1, depth+1);
-		} else if (is_variable(c)) {
-			for (unsigned idx = 0; idx < q->pl->tab_idx; idx++) {
-				if ((q->pl->tab1[idx] == c_ctx) && (q->pl->tab2[idx] == c->var_nbr)) {
-					q->pl->tab4[idx]++;
-					found = true;
-					break;
-				}
-			}
-
-			if (!found) {
-				q->pl->tab1[q->pl->tab_idx] = c_ctx;
-				q->pl->tab2[q->pl->tab_idx] = c->var_nbr;
-				q->pl->tab3[q->pl->tab_idx] = c->val_off;
-				q->pl->tab4[q->pl->tab_idx] = 1;
-				q->pl->tab5[q->pl->tab_idx] = is_anon(c) ? 1 : 0;
-				q->pl->tab_idx++;
-			}
-		}
-
-		i += p1->nbr_cells;
-		p1 += p1->nbr_cells;
-	}
-
-	return true;
-}
-
 static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, cell **vars, pl_idx_t *vars_ctx, cell **varnames, pl_idx_t *varnames_ctx, cell **sings, pl_idx_t *sings_ctx)
 {
 	parser *p = str->p;
