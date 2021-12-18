@@ -1023,7 +1023,6 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 {
 	frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
-	e->ctx = v_ctx;
 	cell *attrs = NULL;
 	pl_idx_t attrs_ctx = 0;
 
@@ -1033,12 +1032,14 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	} else
 		attrs = NULL;
 
-	if (is_structure(v))
+	if (is_structure(v)) {
 		make_indirect(&e->c, v);
-	else {
+	} else {
 		share_cell(v);
 		e->c = *v;
 	}
+
+	e->ctx = v_ctx;
 
 	if (attrs) {
 		if (is_variable(v)) {
