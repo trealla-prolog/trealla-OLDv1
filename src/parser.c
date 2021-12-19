@@ -684,17 +684,23 @@ static void directives(parser *p, cell *d)
 	}
 
 	if (!strcmp(dirname, "if") && (c->arity == 1)) {
-		fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
+		if (DUMP_ERRS || !p->do_read_term)
+			fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
+
 		return;
 	}
 
 	if (!strcmp(dirname, "else") && (c->arity == 1)) {
-		fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
+		if (DUMP_ERRS || !p->do_read_term)
+			fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
+
 		return;
 	}
 
 	if (!strcmp(dirname, "endif") && (c->arity == 1)) {
-		fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
+		if (DUMP_ERRS || !p->do_read_term)
+			fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
+
 		return;
 	}
 
@@ -740,6 +746,9 @@ static void directives(parser *p, cell *d)
 						return;
 					}
 				}
+			} else {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
 			}
 		}
 
@@ -790,6 +799,9 @@ static void directives(parser *p, cell *d)
 		} else if (!strcmp(GET_STR(p, p1), ",") && (p1->arity == 2))
 			p1 += 1;
 		else {
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
+
 			break;
 		}
 	}
