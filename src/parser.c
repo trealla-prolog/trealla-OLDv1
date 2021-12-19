@@ -638,7 +638,6 @@ static void directives(parser *p, cell *d)
 
 	if (!strcmp(dirname, "meta_predicate") && (c->arity == 1)) {
 		if (!is_structure(p1)) return;
-		return;
 	}
 
 	if (!strcmp(dirname, "set_prolog_flag") && (c->arity == 2)) {
@@ -686,14 +685,17 @@ static void directives(parser *p, cell *d)
 
 	if (!strcmp(dirname, "if") && (c->arity == 1)) {
 		fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
+		return;
 	}
 
 	if (!strcmp(dirname, "else") && (c->arity == 1)) {
 		fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
+		return;
 	}
 
 	if (!strcmp(dirname, "endif") && (c->arity == 1)) {
 		fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
+		return;
 	}
 
 	LIST_HANDLER(p1);
@@ -749,7 +751,7 @@ static void directives(parser *p, cell *d)
 
 	//printf("*** %s\n", dirname);
 
-	while (is_literal(p1)) {
+	while (is_literal(p1) && !g_tpl_interrupt) {
 		module *m = p->m;
 		cell *c_id = p1;
 
@@ -788,17 +790,9 @@ static void directives(parser *p, cell *d)
 		} else if (!strcmp(GET_STR(p, p1), ",") && (p1->arity == 2))
 			p1 += 1;
 		else {
-			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
+			break;
 		}
-
-		return;
 	}
-
-	if (DUMP_ERRS || !p->do_read_term)
-		fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
-
-	return;
 }
 
 static void xref_cell(parser *p, rule *r, cell *c, predicate *parent)
