@@ -308,12 +308,25 @@ static USE_RESULT pl_status fn_iso_unify_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	return unify(q, p1, p1_ctx, p2, p2_ctx);
+	return unify(q, p1, p1_ctx, p2, p2_ctx) ? pl_success : pl_failure;
 }
 
 static USE_RESULT pl_status fn_iso_notunify_2(query *q)
 {
-	return !fn_iso_unify_2(q);
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,any);
+
+	may_error(make_choice(q));
+	try_me(q, 0);
+
+	if (unify(q, p1, p1_ctx, p2, p2_ctx)) {
+		drop_choice(q);
+		return pl_failure;
+	}
+
+	undo_me(q);
+	drop_choice(q);
+	return pl_success;
 }
 
 static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, cell **vars, pl_idx_t *vars_ctx, cell **varnames, pl_idx_t *varnames_ctx, cell **sings, pl_idx_t *sings_ctx)
