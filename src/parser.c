@@ -2675,7 +2675,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 			if (!last_op && (priority > 999)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: suggest parens around operator '%s', line %d %s\n", p->token, p->line_nbr, p->srcptr);
+					fprintf(stdout, "Error: syntax error parens needed operator '%s', line %d\n", p->token, p->line_nbr);
 
 				p->error = true;
 				break;
