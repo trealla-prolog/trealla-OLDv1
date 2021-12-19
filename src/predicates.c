@@ -4425,9 +4425,16 @@ static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 
-	if (!is_variable(p2) && !is_nil(p2)
-		&& is_cyclic_term(q, p2, p2_ctx))
-		return throw_error(q, p2, p2_ctx, "type_error", "list");
+	if (!is_variable(p2) && !is_nil(p2)) {
+		LIST_HANDLER(p2);
+		LIST_HEAD(p2);
+		cell *tl = LIST_TAIL(p2);
+		tl = deref(q, tl, p2_ctx);
+		pl_idx_t tl_ctx = q->latest_ctx;
+
+		if (is_cyclic_term(q, tl, tl_ctx))
+			return throw_error(q, p2, p2_ctx, "type_error", "list");
+	}
 
 	if (!is_variable(p2) && !is_nil(p2)
 		&& !is_valid_list(q, p2, p2_ctx, true))
@@ -10164,8 +10171,17 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	GET_FIRST_ARG(p1,list_or_nil_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
 
-	if (is_cyclic_term(q, p1, p1_ctx))
-		return throw_error(q, p2, p2_ctx, "type_error", "cyclic_term");
+	if (!is_variable(p1) && !is_nil(p1)) {
+		LIST_HANDLER(p1);
+		LIST_HEAD(p1);
+		cell *tl = LIST_TAIL(p1);
+		tl = deref(q, tl, p1_ctx);
+		pl_idx_t tl_ctx = q->latest_ctx;
+
+		if (is_cyclic_term(q, tl, tl_ctx))
+			return throw_error(q, p1, p1_ctx, "type_error", "list");
+	}
+
 
 	if (is_integer(p2) && !is_smallint(p2))
 		return throw_error(q, p2, p2_ctx, "resource_error", "number_too_big");
@@ -10185,7 +10201,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	}
 #endif
 
-	if (!is_variable(p1) && !is_nil(p1)
+	if (!is_variable(p1) && !is_nil(p1) && 0
 		&& (is_cyclic_term(q, p1, p1_ctx) || !is_valid_list(q, p1, p1_ctx, true)))
 		return throw_error(q, p1, p1_ctx, "type_error", "list");
 
