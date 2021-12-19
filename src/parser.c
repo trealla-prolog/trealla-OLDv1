@@ -2669,11 +2669,11 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
-		if (!p->quote_char && args && !consing && p->is_op && last_op && strcmp(p->token, ",")) {
+		if (!p->quote_char && args && !consing && p->is_op /*&& last_op*/ && strcmp(p->token, ",")) {
 			unsigned specifier = 0;
 			unsigned priority = search_op(p->m, p->token, &specifier, last_op);
 
-			if (!last_op && (priority > 1000)) {
+			if (!last_op && (priority > 999)) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: suggest parens around operator '%s', line %d %s\n", p->token, p->line_nbr, p->srcptr);
 
