@@ -10201,8 +10201,8 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	}
 #endif
 
-	if (!is_variable(p1) && !is_nil(p1) && 0
-		&& (is_cyclic_term(q, p1, p1_ctx) || !is_valid_list(q, p1, p1_ctx, true)))
+	if (!is_variable(p1) && !is_nil(p1)
+		&& !is_cyclic_term(q, p1, p1_ctx) && !is_valid_list(q, p1, p1_ctx, true))
 		return throw_error(q, p1, p1_ctx, "type_error", "list");
 
 	if (!is_variable(p1) && is_valid_list(q, p1, p1_ctx, false)
@@ -10374,7 +10374,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		return pl_success;
 	}
 
-	return throw_error(q, p1, p1_ctx, "type_error", "arg_invalid");
+	return throw_error(q, p1, p1_ctx, "type_error", "list");
 }
 
 static USE_RESULT pl_status fn_memberchk_2(query *q)
