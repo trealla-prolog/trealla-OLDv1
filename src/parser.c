@@ -638,6 +638,7 @@ static void directives(parser *p, cell *d)
 
 	if (!strcmp(dirname, "meta_predicate") && (c->arity == 1)) {
 		if (!is_structure(p1)) return;
+		return;
 	}
 
 	if (!strcmp(dirname, "set_prolog_flag") && (c->arity == 2)) {
@@ -786,9 +787,16 @@ static void directives(parser *p, cell *d)
 			p1 += p1->nbr_cells;
 		} else if (!strcmp(GET_STR(p, p1), ",") && (p1->arity == 2))
 			p1 += 1;
-		else
-			break;
+		else {
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
+		}
+
+		return;
 	}
+
+	if (DUMP_ERRS || !p->do_read_term)
+		fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
 
 	return;
 }
