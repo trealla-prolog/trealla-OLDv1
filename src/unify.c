@@ -168,6 +168,9 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
 			return false;
 
+		if (q->cycle_error)
+			return true;
+
 		if (q->info1) {
 			if (is_variable(p1))
 				q->info1->r1 = r1.next;		// restore
@@ -216,6 +219,9 @@ static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, 
 
 			return false;
 		}
+
+		if (q->cycle_error)
+			return true;
 
 		c1 = LIST_TAIL(p1);
 		c2 = LIST_TAIL(p2);
