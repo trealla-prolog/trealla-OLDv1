@@ -7759,6 +7759,76 @@ static USE_RESULT pl_status fn_sys_mustbe_list_or_var_1(query *q)
 	return pl_success;
 }
 
+#if 0
+// This needs a depth-first term iterator helper function to be
+// workable (a next() function). Maybe simpler to just keep a visted
+// list, as it likely only ever dealing with short lists.
+
+static Node* detect_cycle(Node* head)
+{
+	// if head is null then no loop
+	if (head == NULL)
+		return NULL;
+
+	Node* slow = head;
+	Node* fast = head->next;
+	int power = 1;
+	int length = 1;
+
+	while (fast != NULL && fast != slow) {
+		if (length == power) {
+
+			// updating the power.
+			power *= 2;
+
+			// updating the length
+			length = 0;
+
+			slow = fast;
+		}
+
+		fast = fast->next;
+		++length;
+	}
+
+	// if it is null then no loop
+	if (fast == NULL)
+		return NULL;
+
+	// length stores actual length of the loop.
+
+	// Now set slow to the beginning
+	// and fast to head+length i.e length of the cycle.
+	slow = fast = head;
+
+	while (length > 0) {
+		fast = fast->next;
+		--length;
+	}
+
+	// Now move both pointers by one node so that they meet at the beginning loop.
+	while (fast != slow) {
+		fast = fast->next;
+		slow = slow->next;
+	}
+
+	return slow;
+}
+#endif
+
+static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,integer_or_var);
+	GET_NEXT_ARG(p3,any);
+	GET_NEXT_ARG(p4,variable);
+
+	if (is_integer(p2) && is_negative(p2))
+		return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
+
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_is_stream_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -11504,12 +11574,15 @@ static const struct builtins g_predicates_other[] =
 	{"$mustbe_list", 1, fn_sys_mustbe_list_1, "?list", false},
 	{"$mustbe_list_or_var", 1, fn_sys_mustbe_list_or_var_1, "?list", false},
 
-	// Used for database log
+	// Used for testing...
+
+	{"$skip_max_list", 4, fn_sys_skip_max_list_4, NULL, false},
+
+	// Used for database log...
 
 	{"$a_", 2, fn_sys_asserta_2, "+rule,+ref", false},
 	{"$z_", 2, fn_sys_assertz_2, "+rule,+ref", false},
 	{"$e_", 1, fn_erase_1, "+ref", false},
-
 	{"$db_load", 0, fn_sys_db_load_0, NULL, false},
 	{"$db_save", 0, fn_sys_db_save_0, NULL, false},
 
