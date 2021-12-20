@@ -7759,39 +7759,52 @@ static USE_RESULT pl_status fn_sys_mustbe_list_or_var_1(query *q)
 	return pl_success;
 }
 
-#if 0
-// This needs a depth-first term iterator helper function to be
-// workable (a next() function). Maybe simpler to just keep a visted
-// list, as it likely only ever dealing with short lists.
-
-static Node* detect_cycle(Node* head)
+static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx)
 {
-	// if head is null then no loop
+	if (is_variable(c)) {
+		c = deref(q, c, *c_ctx);
+		*c_ctx = q->latest_ctx;
+
+		if (!is_iso_list(c))
+			return NULL;
+	}
+
+	c++;
+
+	if (is_nil(c))
+		return NULL;
+
+	if (!is_iso_list(c))
+		return c;
+
+	c++;
+	c = deref(q, c, *c_ctx);
+	*c_ctx = q->latest_ctx;
+
+	return c;
+}
+
+cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int *cycle_length)
+{
 	if (head == NULL)
 		return NULL;
 
-	Node* slow = head;
-	Node* fast = head->next;
-	int power = 1;
-	int length = 1;
+	cell* slow = head;
+	pl_idx_t slow_ctx = *head_ctx, fast_ctx = *head_ctx;
+	cell* fast = term_next(q, head, &fast_ctx);
+	int power = 1, length = 1;
 
 	while (fast != NULL && fast != slow) {
 		if (length == power) {
-
-			// updating the power.
 			power *= 2;
-
-			// updating the length
 			length = 0;
-
 			slow = fast;
 		}
 
-		fast = fast->next;
+		fast = term_next(q, fast, &fast_ctx);
 		++length;
 	}
 
-	// if it is null then no loop
 	if (fast == NULL)
 		return NULL;
 
@@ -7800,33 +7813,47 @@ static Node* detect_cycle(Node* head)
 	// Now set slow to the beginning
 	// and fast to head+length i.e length of the cycle.
 	slow = fast = head;
+	int save_length = length;
 
 	while (length > 0) {
-		fast = fast->next;
+		fast = term_next(q, fast, &fast_ctx);
 		--length;
 	}
 
-	// Now move both pointers by one node so that they meet at the beginning loop.
 	while (fast != slow) {
-		fast = fast->next;
-		slow = slow->next;
+		fast = term_next(q, fast, &fast_ctx);
+		slow = term_next(q, slow, &slow_ctx);
 	}
 
+	*head_ctx = slow_ctx;
+	*cycle_length = save_length;
 	return slow;
 }
-#endif
 
 static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer_or_var);
-	GET_NEXT_ARG(p3,any);
+	GET_NEXT_RAW_ARG(p3,list_or_nil_or_var);
 	GET_NEXT_ARG(p4,variable);
 
 	if (is_integer(p2) && is_negative(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
 
-	return pl_success;
+	pl_idx_t c_ctx = p3_ctx;
+	cell *c = p3;
+	int length;
+	c = detect_cycle(q, c, &c_ctx, &length);
+
+	if (!c) {
+		c_ctx = p3_ctx;
+		c = p3;
+	}
+
+	set_var(q, p4, p4_ctx, c, c_ctx);
+	cell tmp;
+	make_int(&tmp, length);
+	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
 static USE_RESULT pl_status fn_is_stream_1(query *q)
