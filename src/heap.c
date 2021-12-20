@@ -531,7 +531,7 @@ static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx)
 
 cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int max, int *skip)
 {
-	if (head == NULL)
+	if (!head)
 		return NULL;
 
 	cell* slow = head;
@@ -539,7 +539,7 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int max, int *skip)
 	cell* fast = term_next(q, head, &fast_ctx);
 	int power = 1, length = 1;
 
-	while (fast != NULL && fast != slow) {
+	while (fast && (fast != slow)) {
 		if (length == power) {
 			power *= 2;
 			length = 0;
@@ -550,7 +550,7 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int max, int *skip)
 		++length;
 	}
 
-	if (fast == NULL)
+	if (!fast)
 		return NULL;
 
 	// length stores actual length of the loop.
