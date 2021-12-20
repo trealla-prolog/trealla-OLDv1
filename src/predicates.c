@@ -7759,77 +7759,6 @@ static USE_RESULT pl_status fn_sys_mustbe_list_or_var_1(query *q)
 	return pl_success;
 }
 
-static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx)
-{
-	if (is_variable(c)) {
-		c = deref(q, c, *c_ctx);
-		*c_ctx = q->latest_ctx;
-
-		if (!is_iso_list(c))
-			return NULL;
-	}
-
-	c++;
-
-	if (is_nil(c))
-		return NULL;
-
-	if (!is_iso_list(c))
-		return c;
-
-	c++;
-	c = deref(q, c, *c_ctx);
-	*c_ctx = q->latest_ctx;
-
-	return c;
-}
-
-static cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int *cycle_length)
-{
-	if (head == NULL)
-		return NULL;
-
-	cell* slow = head;
-	pl_idx_t slow_ctx = *head_ctx, fast_ctx = *head_ctx;
-	cell* fast = term_next(q, head, &fast_ctx);
-	int power = 1, length = 1;
-
-	while (fast != NULL && fast != slow) {
-		if (length == power) {
-			power *= 2;
-			length = 0;
-			slow = fast;
-		}
-
-		fast = term_next(q, fast, &fast_ctx);
-		++length;
-	}
-
-	if (fast == NULL)
-		return NULL;
-
-	// length stores actual length of the loop.
-	// Now set slow to the beginning
-	// and fast to head+length i.e length of the cycle.
-
-	slow = fast = head;
-	int save_length = length;
-
-	while (length > 0) {
-		fast = term_next(q, fast, &fast_ctx);
-		--length;
-	}
-
-	while (fast != slow) {
-		fast = term_next(q, fast, &fast_ctx);
-		slow = term_next(q, slow, &slow_ctx);
-	}
-
-	*head_ctx = slow_ctx;
-	*cycle_length = save_length;
-	return slow;
-}
-
 // Just working on a list for now... this work-in-progress
 
 static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
@@ -7844,8 +7773,8 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 
 	pl_idx_t c_ctx = p3_ctx;
 	cell *c = p3;
-	int length;
-	c = detect_cycle(q, c, &c_ctx, &length);
+	int max;
+	c = detect_cycle(q, c, &c_ctx, &max);
 
 	if (!c) {
 		c_ctx = p3_ctx;
@@ -7854,7 +7783,7 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 
 	set_var(q, p4, p4_ctx, c, c_ctx);
 	cell tmp;
-	make_int(&tmp, length);
+	make_int(&tmp, max);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 

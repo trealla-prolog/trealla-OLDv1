@@ -41,6 +41,7 @@ bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx);
 void trim_trail(query *q);
 void share_predicate(predicate *pr);
 void unshare_predicate(query *q, predicate *pr);
+cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int *cycle_length);
 
 pl_status fn_sys_cleanup_if_det_1(query *q);
 pl_status fn_sys_cut_if_det_0(query *q);
