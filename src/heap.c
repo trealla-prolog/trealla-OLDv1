@@ -537,13 +537,19 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int max, int *skip)
 	cell* slow = head;
 	pl_idx_t slow_ctx = *head_ctx, fast_ctx = *head_ctx;
 	cell* fast = term_next(q, head, &fast_ctx);
-	int power = 1, length = 1;
+	int power = 1, length = 1, cnt = 1;
 
 	while (fast && (fast != slow)) {
 		if (length == power) {
 			power *= 2;
 			length = 0;
 			slow = fast;
+		}
+
+		if (max == cnt++) {
+			*head_ctx = fast_ctx;
+			*skip = cnt - 1;
+			return fast;
 		}
 
 		fast = term_next(q, fast, &fast_ctx);
@@ -563,6 +569,9 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int max, int *skip)
 	while (length > 0) {
 		fast = term_next(q, fast, &fast_ctx);
 		--length;
+
+		if (length == max)
+			break;
 	}
 
 	while (fast != slow) {
