@@ -7773,8 +7773,8 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 
 	pl_idx_t c_ctx = p3_ctx;
 	cell *c = p3;
-	int max;
-	c = detect_cycle(q, c, &c_ctx, &max);
+	int skip, max = is_integer(p2) ? get_smallint(p2) : INT_MAX;
+	c = detect_cycle(q, c, &c_ctx, max, &skip);
 
 	if (!c) {
 		c_ctx = p3_ctx;
@@ -7783,7 +7783,7 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 
 	set_var(q, p4, p4_ctx, c, c_ctx);
 	cell tmp;
-	make_int(&tmp, max);
+	make_int(&tmp, skip);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 

@@ -529,7 +529,7 @@ static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx)
 
 // This uses Brent's algorithm...
 
-cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int *max)
+cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int max, int *skip)
 {
 	if (head == NULL)
 		return NULL;
@@ -571,6 +571,6 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int *max)
 	}
 
 	*head_ctx = slow_ctx;
-	*max = save_length;
+	*skip = save_length;
 	return slow;
 }
