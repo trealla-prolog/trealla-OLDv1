@@ -7784,7 +7784,7 @@ static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx)
 	return c;
 }
 
-cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int *cycle_length)
+static cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int *cycle_length)
 {
 	if (head == NULL)
 		return NULL;
@@ -7809,9 +7809,9 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int *cycle_length)
 		return NULL;
 
 	// length stores actual length of the loop.
-
 	// Now set slow to the beginning
 	// and fast to head+length i.e length of the cycle.
+
 	slow = fast = head;
 	int save_length = length;
 
@@ -7829,6 +7829,8 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int *cycle_length)
 	*cycle_length = save_length;
 	return slow;
 }
+
+// Just working on a list for now... this work-in-progress
 
 static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 {
@@ -11600,8 +11602,6 @@ static const struct builtins g_predicates_other[] =
 	{"$mustbe_pairlist_or_var", 2, fn_sys_mustbe_pairlist_or_var_2, "?pair,+goal", false},
 	{"$mustbe_list", 1, fn_sys_mustbe_list_1, "?list", false},
 	{"$mustbe_list_or_var", 1, fn_sys_mustbe_list_or_var_1, "?list", false},
-
-	// Used for testing...
 
 	{"$skip_max_list", 4, fn_sys_skip_max_list_4, NULL, false},
 
