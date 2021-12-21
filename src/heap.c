@@ -509,8 +509,9 @@ static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx, bool *done)
 		return c;
 	}
 
-	c++;
-	c++;
+	LIST_HANDLER(c);
+	LIST_HEAD(c);
+	c = LIST_TAIL(c);
 	c = deref(q, c, *c_ctx);
 	*c_ctx = q->latest_ctx;
 	return c;
