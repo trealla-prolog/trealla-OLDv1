@@ -7771,6 +7771,10 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 	if (is_integer(p2) && is_negative(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
 
+	if (is_string(p3)) {
+		return throw_error(q, p1, p1_ctx, "type_error", "list");
+	}
+
 	pl_idx_t c_ctx = p3_ctx;
 	cell *c = p3;
 	int skip, max = is_integer(p2) ? get_smallint(p2) : INT_MAX;

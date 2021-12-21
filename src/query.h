@@ -21,27 +21,56 @@ void term_assign_vars(parser *p, unsigned start, bool rebase);
 pl_status start(query *q);
 pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx);
 pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type retract);
-unsigned create_vars(query *q, unsigned nbr);
 void try_me(query *q, unsigned vars);
+void call_attrs(query *q, cell *attrs);
+void stash_me(query *q, rule *t, bool last_match);
+void trim_trail(query *q);
+bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
+pl_status do_post_unification_hook(query *q);
+
 bool find_exception_handler(query *q, cell *e);
 pl_status throw_error(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected);
 pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected, cell *goal);
 pl_status throw_error2(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected, cell *goal);
-void call_attrs(query *q, cell *attrs);
-void stash_me(query *q, rule *t, bool last_match);
+
+bool is_valid_list_up_to(query *q, cell *p1, pl_idx_t p1_ctx, bool allow_partials, int n);
+bool is_valid_list(query *q, cell *p1, pl_idx_t p1_ctx, bool allow_partials);
+size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes);
+
+unsigned create_vars(query *q, unsigned nbr);
 int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
-extern bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
+void share_predicate(predicate *pr);
+void unshare_predicate(query *q, predicate *pr);
+cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int max, int *skip);
+bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx);
 pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx);
 size_t slicecpy(char *dst, size_t dstlen, const char *src, size_t len);
 pl_status make_cstringn(cell *d, const char *s, size_t n);
 pl_status make_stringn(cell *d, const char *s, size_t n);
 void make_literal(cell *tmp, pl_idx_t offset);
 int get_stream(query *q, cell *p1);
-bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx);
-void trim_trail(query *q);
-void share_predicate(predicate *pr);
-void unshare_predicate(query *q, predicate *pr);
-cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int max, int *skip);
+void make_indirect(cell *tmp, cell *c);
+unsigned fake_numbervars(query *q, cell *c, pl_idx_t c_ctx, unsigned start);
+bool has_vars(query *q, cell *c, pl_idx_t c_ctx, unsigned depth);
+void call_builtin(query *q, cell *c, pl_idx_t c_ctx);
+pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx);
+void add_to_dirty_list(query *q, clause *r);
+void do_cleanup(query *q, cell *p1);
+void cut_if_det(query *q);
+bool is_in_ref_list(cell *c, pl_idx_t c_ctx, reflist *rlist);
+bool collect_vars(query *q, cell *p1, pl_idx_t p1_ctx);
+pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx);
+
+ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_ctx, int running, bool cons, unsigned depth);
+pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running);
+pl_status print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, int running);
+char *print_term_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running);
+void clear_write_options(query *q);
+
+ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_ctx, int running, bool unused, unsigned depth);
+pl_status print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running);
+char *print_canonical_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running);
+pl_status print_canonical_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, int running);
 
 pl_status fn_sys_cleanup_if_det_1(query *q);
 pl_status fn_sys_cut_if_det_0(query *q);
@@ -64,34 +93,6 @@ pl_status fn_iso_fail_0(query *q);
 pl_status fn_iso_true_0(query *q);
 pl_status fn_iso_once_1(query *q);
 pl_status fn_ignore_1(query *q);
-
-bool is_valid_list_up_to(query *q, cell *p1, pl_idx_t p1_ctx, bool allow_partials, int n);
-bool is_valid_list(query *q, cell *p1, pl_idx_t p1_ctx, bool allow_partials);
-size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes);
-
-void make_indirect(cell *tmp, cell *c);
-unsigned fake_numbervars(query *q, cell *c, pl_idx_t c_ctx, unsigned start);
-bool has_vars(query *q, cell *c, pl_idx_t c_ctx, unsigned depth);
-pl_status do_post_unification_hook(query *q);
-void call_builtin(query *q, cell *c, pl_idx_t c_ctx);
-pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx);
-void add_to_dirty_list(query *q, clause *r);
-void do_cleanup(query *q, cell *p1);
-void cut_if_det(query *q);
-bool is_in_ref_list(cell *c, pl_idx_t c_ctx, reflist *rlist);
-bool collect_vars(query *q, cell *p1, pl_idx_t p1_ctx);
-pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx);
-
-ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_ctx, int running, bool cons, unsigned depth);
-pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running);
-pl_status print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, int running);
-char *print_term_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running);
-void clear_write_options(query *q);
-
-ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_ctx, int running, bool unused, unsigned depth);
-pl_status print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running);
-char *print_canonical_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running);
-pl_status print_canonical_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, int running);
 
 struct reflist_ {
 	reflist *next;
