@@ -502,28 +502,17 @@ bool search_tmp_list(query *q, cell *v)
 }
 
 
-static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx)
+static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx, bool *done)
 {
-	if (is_variable(c)) {
-		c = deref(q, c, *c_ctx);
-		*c_ctx = q->latest_ctx;
-
-		if (!is_iso_list(c))
-			return NULL;
+	if (!is_list(c)) {
+		*done = true;
+		return c;
 	}
 
 	c++;
-
-	if (is_nil(c))
-		return NULL;
-
-	if (!is_iso_list(c))
-		return c;
-
 	c++;
 	c = deref(q, c, *c_ctx);
 	*c_ctx = q->latest_ctx;
-
 	return c;
 }
 
@@ -534,10 +523,16 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int max, int *skip)
 	if (!head)
 		return NULL;
 
+	if (!max) {
+		*skip = max;
+		return head;
+	}
+
 	cell* slow = head;
 	pl_idx_t slow_ctx = *head_ctx, fast_ctx = *head_ctx;
-	cell* fast = term_next(q, head, &fast_ctx);
-	int power = 1, length = 1, cnt = 1;
+	bool done = false;
+	cell* fast = term_next(q, head, &fast_ctx, &done);
+	int power = 1, length = 1, cnt = 0;
 
 	while (fast && (fast != slow)) {
 		if (length == power) {
@@ -546,13 +541,16 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int max, int *skip)
 			slow = fast;
 		}
 
-		if (max == cnt++) {
+		if ((max == ++cnt) || done){
+			if (done)
+				--cnt;
+
 			*head_ctx = fast_ctx;
-			*skip = cnt - 1;
+			*skip = cnt;
 			return fast;
 		}
 
-		fast = term_next(q, fast, &fast_ctx);
+		fast = term_next(q, fast, &fast_ctx, &done);
 		++length;
 	}
 
@@ -567,7 +565,7 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int max, int *skip)
 	int save_length = length;
 
 	while (length > 0) {
-		fast = term_next(q, fast, &fast_ctx);
+		fast = term_next(q, fast, &fast_ctx, &done);
 		--length;
 
 		if (length == max)
@@ -575,8 +573,8 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, int max, int *skip)
 	}
 
 	while (fast != slow) {
-		fast = term_next(q, fast, &fast_ctx);
-		slow = term_next(q, slow, &slow_ctx);
+		fast = term_next(q, fast, &fast_ctx, &done);
+		slow = term_next(q, slow, &slow_ctx, &done);
 	}
 
 	*head_ctx = slow_ctx;
