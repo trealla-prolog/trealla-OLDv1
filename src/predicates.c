@@ -7763,7 +7763,7 @@ static USE_RESULT pl_status fn_sys_mustbe_list_or_var_1(query *q)
 
 static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 {
-	GET_FIRST_ARG(p1,any);
+	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,integer_or_var);
 	GET_NEXT_ARG(p3,list_or_nil_or_var);
 	GET_NEXT_ARG(p4,variable);
