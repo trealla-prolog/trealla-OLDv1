@@ -9,7 +9,7 @@
 dif(X, Y) :-
     X \== Y,
     (   X \= Y
-    -> true
+    ->	true
     ;   (   term_variables(X, XVars),
             term_variables(Y, YVars),
             dif_set_variables(XVars, X, Y),
@@ -21,9 +21,9 @@ dif(X, Y) :-
 
 put_dif_att(Var, X, Y) :-
     (   get_atts(Var, +dif(Z))
-    ->
-	    sort([X \== Y | Z], NewZ),
-	    put_atts(Var, +dif(NewZ))
+    ->	(	sort([X \== Y | Z], NewZ),
+			put_atts(Var, +dif(NewZ))
+		)
     ;   put_atts(Var, +dif([X \== Y]))
     ).
 
@@ -35,9 +35,9 @@ dif_set_variables([Var|Vars], X, Y) :-
 append_goals([], _).
 append_goals([Var|Vars], Goals) :-
     (   get_atts(Var, +dif(VarGoals))
-    ->
-	    append(Goals, VarGoals, NewGoals0),
-	    sort(NewGoals0, NewGoals)
+    ->	(	append(Goals, VarGoals, NewGoals0),
+			sort(NewGoals0, NewGoals)
+		)
     ;   NewGoals = Goals
     ),
     put_atts(Var, +dif(NewGoals)),
