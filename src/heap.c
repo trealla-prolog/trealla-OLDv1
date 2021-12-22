@@ -502,22 +502,18 @@ bool search_tmp_list(query *q, cell *v)
 }
 
 
-static cell *list_next(query *q, cell *c, pl_idx_t *c_ctx, bool *done)
+static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx, bool *done)
 {
+	if (!is_list(c)) {
+		*done = true;
+		return c;
+	}
+
 	LIST_HANDLER(c);
 	LIST_HEAD(c);
 	c = LIST_TAIL(c);
 	c = deref(q, c, *c_ctx);
 	*c_ctx = q->latest_ctx;
-	return c;
-}
-
-static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx, bool *done)
-{
-	if (is_list(c))
-		return list_next(q, c, c_ctx, done);
-
-	*done = true;
 	return c;
 }
 
