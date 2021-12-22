@@ -1,0 +1,51 @@
+{
+  "uid" : "347a462a2b7071e9",
+  "name" : "lgt_integer_power_2_15",
+  "fullName" : "lgt_integer_power_2_15::tests",
+  "historyId" : "lgt_integer_power_2_15::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/integer_power_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "functions/integer_power_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "functions/integer_power_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "functions/integer_power_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "94-97"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/837b2c85880e06c874c80d22330cca0d2b876ec8/tests/prolog/functions/integer_power_2/tests.lgt#L94"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "347a462a2b7071e9.json",
+  "parameterValues" : [ "functions/integer_power_2/tests.lgt", "94-97", "https://github.com/LogtalkDotOrg/logtalk3/tree/837b2c85880e06c874c80d22330cca0d2b876ec8/tests/prolog/functions/integer_power_2/tests.lgt#L94" ]
+}
