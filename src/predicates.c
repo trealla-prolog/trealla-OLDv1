@@ -5701,7 +5701,9 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 			q->st.curr_clause2 = cl;
 			r = &cl->r;
 			cell *head = get_head(r->cells);
-			unify(q, p1, p1_ctx, head, q->st.fp);
+
+			if (!unify(q, p1, p1_ctx, head, q->st.fp))
+				break;
 		} else {
 			if (match_clause(q, p1, p1_ctx, DO_CLAUSE) != pl_success)
 				break;
