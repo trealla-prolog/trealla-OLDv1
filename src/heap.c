@@ -501,7 +501,6 @@ bool search_tmp_list(query *q, cell *v)
 	return false;
 }
 
-
 static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx, bool *done)
 {
 	if (!is_list(c)) {
