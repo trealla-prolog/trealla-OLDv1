@@ -462,7 +462,7 @@ phrase(GRBody, S0) :-
 
 phrase(GRBody, S0, S) :-
 	(	var(GRBody)
-	-> throw(error(instantiation_error, phrase/3))
+	->	throw(error(instantiation_error, phrase/3))
 	;	(	dcg_constr(GRBody)
 		->	phrase_(GRBody, S0, S)
 		;	(	functor(GRBody, _, _)

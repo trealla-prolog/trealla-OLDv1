@@ -341,8 +341,11 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 	if (is_string(p1) && is_string(p2))
 		return unify_cstrings(q, p1, p2);
 
-	if (is_string(p1) || is_string(p2))
+	if (is_string(p1) && is_list(p2))
 		return unify_string_to_list(q, p1, p1_ctx, p2, p2_ctx, depth+1);
+
+	if (is_string(p2) && is_list(p1))
+		return unify_string_to_list(q, p2, p2_ctx, p1, p1_ctx, depth+1);
 
 	if (p1->arity || p2->arity)
 		return unify_structs(q, p1, p1_ctx, p2, p2_ctx, depth+1);
