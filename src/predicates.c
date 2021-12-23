@@ -11073,6 +11073,17 @@ static USE_RESULT pl_status fn_sys_register_term_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_sys_timeout_1(query *q)
+{
+	GET_FIRST_ARG(p1,integer);
+
+	if (is_bigint(p1) || is_negative(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "positive_integer");
+
+	alarm(get_smallint(p1));
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)
 {
 	if (q->retry) {
@@ -11420,6 +11431,7 @@ static const struct builtins g_predicates_other[] =
 	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list", false},
 	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list", false},
 
+	{"$timeout", 1, fn_sys_timeout_1, "+integer", false},
 	{"$write_attributes", 2, fn_sys_write_attributes_2, "+variable,+list", false},
 	{"$read_attributes", 2, fn_sys_read_attributes_2, "+variable,-list", false},
 	{"$erase_attributes", 1, fn_sys_erase_attributes_1, "+variable", false},

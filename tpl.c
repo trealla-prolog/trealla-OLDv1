@@ -37,9 +37,9 @@
 
 void sigfn(int s)
 {
-        (void) s;
+	(void)s;
 	signal(SIGINT, &sigfn);
-	g_tpl_interrupt = 1;
+	g_tpl_interrupt = s;
 }
 
 static int daemonize(int argc, char *argv[])
@@ -198,8 +198,10 @@ int main(int ac, char *av[])
 			pl_destroy(pl);
 			return 0;
 		}
-	} else
+	} else {
 		signal(SIGINT, &sigfn);
+		signal(SIGALRM, &sigfn);
+	}
 
 	signal(SIGPIPE, SIG_IGN);
 	const char *goal = NULL;
