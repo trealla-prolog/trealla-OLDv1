@@ -54,6 +54,87 @@ bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx)
 	return is_cyclic_term_internal(q, p1, p1_ctx, NULL);
 }
 
+static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx, bool *done)
+{
+	if (!is_list(c)) {
+		*done = true;
+		return c;
+	}
+
+	LIST_HANDLER(c);
+	LIST_HEAD(c);
+	c = LIST_TAIL(c);
+	c = deref(q, c, *c_ctx);
+	*c_ctx = q->latest_ctx;
+	return c;
+}
+
+// This uses Brent's algorithm...
+
+cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_int_t *skip)
+{
+	if (!head)
+		return NULL;
+
+	if (!max) {
+		*skip = max;
+		return head;
+	}
+
+	cell* slow = head;
+	pl_idx_t slow_ctx = *head_ctx, fast_ctx = *head_ctx;
+	bool done = false;
+	cell* fast = term_next(q, head, &fast_ctx, &done);
+	int power = 1, length = 1, cnt = 0;
+
+	while (fast && (fast != slow)) {
+		if (length == power) {
+			power *= 2;
+			length = 0;
+			slow = fast;
+		}
+
+		if ((max == ++cnt) || done){
+			if (done)
+				--cnt;
+
+			*head_ctx = fast_ctx;
+			*skip = cnt;
+			return fast;
+		}
+
+		fast = term_next(q, fast, &fast_ctx, &done);
+		++length;
+	}
+
+	if (!fast)
+		return NULL;
+
+	// length stores actual length of the loop.
+	// Now set slow to the beginning
+	// and fast to head+length i.e length of the cycle.
+
+	slow = fast = head;
+	int save_length = length;
+
+	while (length > 0) {
+		fast = term_next(q, fast, &fast_ctx, &done);
+		--length;
+
+		if (length == max)
+			break;
+	}
+
+	while (fast != slow) {
+		fast = term_next(q, fast, &fast_ctx, &done);
+		slow = term_next(q, slow, &slow_ctx, &done);
+	}
+
+	*head_ctx = slow_ctx;
+	*skip = save_length;
+	return slow;
+}
+
 // TODO : change this to make a list of vars as we go...
 
 static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, reflist *list)
