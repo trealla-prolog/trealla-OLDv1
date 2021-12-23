@@ -1,0 +1,51 @@
+{
+  "uid" : "5b1cd75a632dc6c",
+  "name" : "iso_atom_chars_2_05",
+  "fullName" : "iso_atom_chars_2_05::tests",
+  "historyId" : "iso_atom_chars_2_05::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/atom_chars_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/atom_chars_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/atom_chars_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/atom_chars_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "47-48"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/ae5b8c26579e2d01d0b88235c64d5179752f2c50/tests/prolog/predicates/atom_chars_2/tests.lgt#L47"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "5b1cd75a632dc6c.json",
+  "parameterValues" : [ "predicates/atom_chars_2/tests.lgt", "47-48", "https://github.com/LogtalkDotOrg/logtalk3/tree/ae5b8c26579e2d01d0b88235c64d5179752f2c50/tests/prolog/predicates/atom_chars_2/tests.lgt#L47" ]
+}
