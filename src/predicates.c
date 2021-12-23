@@ -8254,17 +8254,19 @@ static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 		char *src = DUP_SLICE(q, p1);
 		char *filename = relative_to(q->st.m->filename, src);
 		unload_file(q->st.m, filename);
+		free(src);
 
 		if (!load_file(q->st.m, filename)) {
 			free(filename);
-			free(src);
 			return throw_error(q, p1, p1_ctx, "existence_error", "source_sink");
 		}
 
 		free(filename);
-		free(src);
 		return pl_success;
 	}
+
+	if (!is_structure(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "source_sink");
 
 	if (CMP_SLICE2(q, p1, ":"))
 		return throw_error(q, p1, p1_ctx, "type_error", "source_sink");
@@ -8291,11 +8293,43 @@ static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 	return pl_success;
 }
 
+static pl_status do_deconsult(query *q, cell *p1, pl_idx_t p1_ctx)
+{
+	if (is_atom(p1)) {
+		char *src = DUP_SLICE(q, p1);
+		char *filename = relative_to(q->st.m->filename, src);
+		unload_file(q->st.m, filename);
+		free(src);
+		free(filename);
+		return pl_success;
+	}
+
+	if (!is_structure(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "source_sink");
+
+	if (CMP_SLICE2(q, p1, ":"))
+		return throw_error(q, p1, p1_ctx, "type_error", "source_sink");
+
+	cell *mod = deref(q, p1+1, p1_ctx);
+	cell *file = deref(q, p1+2, p1_ctx);
+
+	if (!is_atom(mod) || !is_atom(file))
+		return throw_error(q, p1, p1_ctx, "type_error", "source_sink");
+
+	module *tmp_m = create_module(q->pl, GET_STR(q, mod));
+	char *filename = GET_STR(q, file);
+	tmp_m->make_public = 1;
+	filename = relative_to(q->st.m->filename, filename);
+	unload_file(q->st.m, filename);
+	free(filename);
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_load_files_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
 
-	if (!is_iso_list(p1)) {
+	if (is_atom(p1)) {
 		may_error(do_consult(q, p1, p1_ctx));
 		return pl_success;
 	}
@@ -8307,6 +8341,30 @@ static USE_RESULT pl_status fn_load_files_2(query *q)
 		cell *c = deref(q, h, p1_ctx);
 		pl_idx_t c_ctx = q->latest_ctx;
 		may_error(do_consult(q, c, c_ctx));
+		p1 = LIST_TAIL(p1);
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+	}
+
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_unload_files_1(query *q)
+{
+	GET_FIRST_ARG(p1,atom_or_structure);
+
+	if (is_atom(p1)) {
+		may_error(do_deconsult(q, p1, p1_ctx));
+		return pl_success;
+	}
+
+	LIST_HANDLER(p1);
+
+	while (is_list(p1) && !g_tpl_interrupt) {
+		cell *h = LIST_HEAD(p1);
+		cell *c = deref(q, h, p1_ctx);
+		pl_idx_t c_ctx = q->latest_ctx;
+		may_error(do_deconsult(q, c, c_ctx));
 		p1 = LIST_TAIL(p1);
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
@@ -11289,6 +11347,7 @@ static const struct builtins g_predicates_other[] =
 	{"module", 1, fn_module_1, NULL, false},
 	{"using", 0, fn_using_0, NULL, false},
 	{"load_files", 2, fn_load_files_2, NULL, false},
+	{"unload_files", 1, fn_unload_files_1, NULL, false},
 	{"listing", 0, fn_listing_0, NULL, false},
 	{"listing", 1, fn_listing_1, NULL, false},
 	{"time", 1, fn_time_1, NULL, false},

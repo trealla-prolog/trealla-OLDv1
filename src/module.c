@@ -870,7 +870,7 @@ static const char *set_loaded(module *m, const char *filename)
 	struct loaded_file *ptr = m->loaded_files;
 
 	while (ptr) {
-		if (!strcmp(ptr->filename, filename))
+		if (ptr->filename && !strcmp(ptr->filename, filename))
 			return ptr->filename;
 
 		ptr = ptr->next;
@@ -883,12 +883,27 @@ static const char *set_loaded(module *m, const char *filename)
 	return ptr->filename;
 }
 
+static void set_unloaded(module *m, const char *filename)
+{
+	struct loaded_file *ptr = m->loaded_files;
+
+	while (ptr) {
+		if (ptr->filename && !strcmp(ptr->filename, filename)) {
+			free(ptr->filename);
+			ptr->filename = NULL;
+			break;
+		}
+
+		ptr = ptr->next;
+	}
+}
+
 static bool is_loaded(const module *m, const char *filename)
 {
 	struct loaded_file *ptr = m->loaded_files;
 
 	while (ptr) {
-		if (!strcmp(ptr->filename, filename))
+		if (ptr->filename && !strcmp(ptr->filename, filename))
 			return true;
 
 		ptr = ptr->next;
@@ -904,7 +919,10 @@ static void clear_loaded(const module *m)
 	while (ptr) {
 		struct loaded_file *save = ptr;
 		ptr = ptr->next;
-		free(save->filename);
+
+		if (save->filename)
+			free(save->filename);
+
 		free(save);
 	}
 }
@@ -989,8 +1007,10 @@ bool unload_file(module *m, const char *filename)
 
 	for (predicate *pr = m->head; pr; pr = pr->next) {
 		for (clause *cl = pr->head; cl; cl = cl->next) {
-			if (cl->filename && !cl->dirty
-				&& !strcmp(cl->filename, filename)) {
+			if (cl->r.ugen_erased)
+				continue;
+
+			if (cl->filename && !strcmp(cl->filename, filename)) {
 				if (!retract_from_db(m, cl))
 					continue;
 
@@ -1006,6 +1026,7 @@ bool unload_file(module *m, const char *filename)
 		}
 	}
 
+	set_unloaded(m, filename);
 	free(realbuf);
 	return true;
 }
