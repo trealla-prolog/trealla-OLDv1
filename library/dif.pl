@@ -45,9 +45,9 @@ append_goals([Var|Vars], Goals) :-
 
 verify_attributes(Var, Value, Goals) :-
     (   get_atts(Var, +dif(Goals))
-    ->
-	    term_variables(Value, ValueVars),
-	    append_goals(ValueVars, Goals)
+    ->	(	term_variables(Value, ValueVars),
+			append_goals(ValueVars, Goals)
+		)
     ;   Goals = []
     ).
 
