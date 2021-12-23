@@ -8248,7 +8248,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	return ok;
 }
 
-pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
+static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	if (is_atom(p1)) {
 		char *src = DUP_SLICE(q, p1);
@@ -8305,7 +8305,8 @@ static USE_RESULT pl_status fn_load_files_2(query *q)
 	while (is_list(p1) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(p1);
 		cell *c = deref(q, h, p1_ctx);
-		may_error(do_consult(q, c, q->latest_ctx));
+		pl_idx_t c_ctx = q->latest_ctx;
+		may_error(do_consult(q, c, c_ctx));
 		p1 = LIST_TAIL(p1);
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
