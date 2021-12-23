@@ -547,6 +547,11 @@ recorda(K, V, R) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V), R).
 recordz(K, V, R) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V), R).
 recorded(K, V, R) :- nonvar(K), clause('$record_key'(K,V), _, R).
 
+call_with_time_limit(Time, Goal) :-
+	'$alarm'(Time),
+	once(Goal),
+	'$alarm'(0).
+
 atomic_list_concat(L, Atom) :- atomic_list_concat(L, '', Atom).
 format(F) :- format(F, []).
 partial_string(S, P) :- append(S, _, P).
