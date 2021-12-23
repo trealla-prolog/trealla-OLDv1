@@ -142,18 +142,14 @@ static void make_var_ref(query *q, cell *tmp, unsigned var_nbr, pl_idx_t ctx)
 	cell v;
 	make_variable(&v, g_anon_s);
 	v.var_nbr = var_nbr;
-	q->in_hook = true;
 	set_var(q, tmp, q->st.curr_frame, &v, ctx);
-	q->in_hook = false;
 }
 
 static void make_cell_ref(query *q, cell *tmp, cell *v, pl_idx_t ctx)
 {
 	make_variable(tmp, g_anon_s);
 	tmp->var_nbr = create_vars(q, 1);
-	q->in_hook = true;
 	set_var(q, tmp, q->st.curr_frame, v, ctx);
-	q->in_hook = false;
 }
 
 pl_status fn_sys_undo_trail_1(query *q)
@@ -196,9 +192,8 @@ pl_status fn_sys_undo_trail_1(query *q)
 
 	cell *tmp = end_list(q);
 	may_ptr_error(tmp);
-	q->in_hook = true;
 	set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
-	q->in_hook = false;
+	q->in_hook = true;
 	return pl_success;
 }
 
@@ -214,11 +209,13 @@ pl_status fn_sys_redo_trail_0(query * q)
 
 	q->undo_lo_tp = q->undo_hi_tp = 0;
 	free(q->save_e);
+	q->in_hook = false;
 	return pl_success;
 }
 
 pl_status do_post_unification_hook(query *q)
 {
+
 	q->undo_lo_tp = q->save_tp;
 	q->undo_hi_tp = q->st.tp;
 	cell *tmp = alloc_on_heap(q, 3);
