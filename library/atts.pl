@@ -3,12 +3,20 @@
 :- use_module(library(apply)).
 :- use_module(library(lists), [append/3]).
 
-'$post_unify_hook' :-
+post_unify_hook_ :-
 	'$undo_trail'(Vars),
 	ignore(process_vars_(Vars, [], Goals)),
 	'$redo_trail',
 	maplist(call, Goals),
 	!.
+
+'$post_unify_hook' :-
+	post_unify_hook_,
+	!,
+	'$end_hook'.
+'$post_unify_hook' :-
+	'$end_hook',
+	fail.
 
 process_vars_([], Goals, Goals) :- !.
 process_vars_([Var-Val|Vars], SoFar, Goals) :-

@@ -10052,16 +10052,17 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 
 	may_error(make_choice(q));
 	pl_idx_t save_tp = q->st.tp;
+	bool save_hook = q->in_hook;
 	q->in_hook = true;
 
 	if (!unify(q, p1, p1_ctx, p2, p2_ctx) && !q->cycle_error) {
-		q->in_hook = false;
+		q->in_hook = save_hook;
 		undo_me(q);
 		drop_choice(q);
 		return pl_failure;
 	}
 
-	q->in_hook = false;
+	q->in_hook = save_hook;
 	bool first = true;
 
 	// Go thru trail, getting the bindings...
@@ -11318,6 +11319,7 @@ static const struct builtins g_predicates_other[] =
 	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars", false},
 	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL, false},
 	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL, false},
+	{"$end_hook", 0, fn_sys_end_hook_0, NULL, false},
 	{"format", 2, fn_format_2, "+string,+list", false},
 	{"format", 3, fn_format_3, "+stream,+string,+list", false},
 	{"abolish", 2, fn_abolish_2, NULL, false},

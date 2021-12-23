@@ -155,8 +155,6 @@ static void make_cell_ref(query *q, cell *tmp, cell *v, pl_idx_t ctx)
 pl_status fn_sys_undo_trail_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-
-	q->in_hook = true;
 	q->save_e = malloc(sizeof(slot)*(q->undo_hi_tp - q->undo_lo_tp));
 	may_ptr_error(q->save_e);
 	bool first = true;
@@ -167,7 +165,7 @@ pl_status fn_sys_undo_trail_1(query *q)
 		const trail *tr = q->trails + i;
 		const frame *f = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(f, tr->var_nbr);
-		//printf("*** unbind [%u:%u] ctx=%u, var=%u\n", j, i, tr->ctx, tr->var_nbr);
+		//printf("*** unbind [%u:%u] hi_tp=%u, ctx=%u, var=%u\n", j, i, q->undo_hi_tp, tr->ctx, tr->var_nbr);
 		q->save_e[j] = *e;
 
 		cell lhs, rhs;
@@ -203,17 +201,23 @@ pl_status fn_sys_redo_trail_0(query * q)
 		const trail *tr = q->trails + i;
 		const frame *f = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(f, tr->var_nbr);
-		//printf("*** rebind [%u:%u:%u] ctx=%u, var=%u\n", j, i, q->undo_hi_tp, tr->ctx, tr->var_nbr);
+		//printf("*** rebind [%u:%u] hi_tp=%u, ctx=%u, var=%u\n", j, i, q->undo_hi_tp, tr->ctx, tr->var_nbr);
 		*e = q->save_e[j];
 	}
 
-	q->in_hook = false;
 	free(q->save_e);
+	return pl_success;
+}
+
+pl_status fn_sys_end_hook_0(query * q)
+{
+	q->in_hook = false;
 	return pl_success;
 }
 
 pl_status do_post_unification_hook(query *q)
 {
+	q->in_hook = true;
 	q->has_attrs = false;
 	q->undo_lo_tp = q->save_tp;
 	q->undo_hi_tp = q->st.tp;
@@ -487,9 +491,6 @@ static const struct dispatch g_disp[] =
 
 bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
-	if (!depth)
-		q->cycle_error = false;
-
 	if (depth >= MAX_DEPTH) {
 		q->cycle_error = true;
 		return true;

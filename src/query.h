@@ -95,6 +95,7 @@ pl_status fn_iso_once_1(query *q);
 pl_status fn_ignore_1(query *q);
 pl_status fn_sys_undo_trail_1(query *q);
 pl_status fn_sys_redo_trail_0(query * q);
+pl_status fn_sys_end_hook_0(query * q);
 
 struct reflist_ {
 	reflist *next;
@@ -120,6 +121,8 @@ inline static bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t
 	cycle_info info1 = {0}, info2 = {0};
 	q->info1 = &info1;
 	q->info2 = &info2;
+	q->save_tp = q->st.tp;
+	q->has_attrs = q->cycle_error = false;
 	bool ok = unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
 	q->info1 = q->info2 = NULL;
 	return ok;
