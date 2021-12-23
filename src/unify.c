@@ -208,8 +208,8 @@ pl_status fn_sys_redo_trail_0(query * q)
 	}
 
 	q->undo_lo_tp = q->undo_hi_tp = 0;
-	free(q->save_e);
 	q->in_hook = false;
+	free(q->save_e);
 	return pl_success;
 }
 
