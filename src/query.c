@@ -1686,6 +1686,8 @@ pl_status start(query *q)
 				may_error(do_post_unification_hook(q));
 		}
 
+		q->has_attrs = false;
+
 		if (g_tpl_interrupt)
 			continue;
 
