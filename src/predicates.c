@@ -92,7 +92,7 @@ static void get_params(query *q, pl_idx_t *p1, pl_idx_t *p2)
 	if (p2) *p2 = ch->v2;
 }
 
-static void make_variable(cell *tmp, pl_idx_t off)
+void make_variable(cell *tmp, pl_idx_t off)
 {
 	*tmp = (cell){0};
 	tmp->tag = TAG_VAR;
@@ -165,27 +165,6 @@ static void make_small(cell *tmp, const char *s)
 {
 	size_t n = strlen(s);
 	make_smalln(tmp, s, n);
-}
-
-static void make_var_ref(query *q, cell *tmp, unsigned var_nbr, pl_idx_t ctx)
-{
-	make_variable(tmp, g_anon_s);
-	tmp->var_nbr = create_vars(q, 1);
-	cell v;
-	make_variable(&v, g_anon_s);
-	v.var_nbr = var_nbr;
-	q->in_hook = true;
-	set_var(q, tmp, q->st.curr_frame, &v, ctx);
-	q->in_hook = false;
-}
-
-static void make_cell_ref(query *q, cell *tmp, cell *v, pl_idx_t ctx)
-{
-	make_variable(tmp, g_anon_s);
-	tmp->var_nbr = create_vars(q, 1);
-	q->in_hook = true;
-	set_var(q, tmp, q->st.curr_frame, v, ctx);
-	q->in_hook = false;
 }
 
 #if 0
@@ -11137,94 +11116,6 @@ static USE_RESULT pl_status fn_sys_choice_0(query *q)
 		return pl_failure;
 
 	may_error(make_choice(q));
-	return pl_success;
-}
-
-pl_status fn_sys_undo_trail_1(query *q)
-{
-	GET_FIRST_ARG(p1,variable);
-
-	q->save_e = malloc(sizeof(slot)*(q->undo_hi_tp - q->undo_lo_tp));
-	may_ptr_error(q->save_e);
-	bool first = true;
-
-	// Unbind our vars
-
-	for (pl_idx_t i = q->undo_lo_tp, j = 0; i < q->undo_hi_tp; i++, j++) {
-		const trail *tr = q->trails + i;
-		const frame *f = GET_FRAME(tr->ctx);
-		slot *e = GET_SLOT(f, tr->var_nbr);
-		//printf("*** unbind [%u:%u] ctx=%u, var=%u\n", j, i, tr->ctx, tr->var_nbr);
-		q->save_e[j] = *e;
-
-		cell lhs, rhs;
-		make_var_ref(q, &lhs, tr->var_nbr, tr->ctx);
-		make_cell_ref(q, &rhs, &e->c, e->ctx);
-
-		cell tmp[3];
-		make_structure(tmp, g_minus_s, NULL, 2, 2);
-		SET_OP(&tmp[0], OP_YFX);
-		tmp[1] = lhs;
-		tmp[2] = rhs;
-
-		if (first) {
-			allocate_list(q, tmp);
-			first = false;
-		} else
-			append_list(q, tmp);
-
-		e->c.tag = TAG_EMPTY;
-		e->c.attrs = tr->attrs;
-		e->c.attrs_ctx = tr->attrs_ctx;
-	}
-
-	cell *tmp = end_list(q);
-	may_ptr_error(tmp);
-	q->in_hook = true;
-	set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
-	q->in_hook = false;
-	return pl_success;
-}
-
-pl_status fn_sys_redo_trail_0(query * q)
-{
-	for (pl_idx_t i = q->undo_lo_tp, j = 0; i < q->undo_hi_tp; i++, j++) {
-		const trail *tr = q->trails + i;
-		const frame *f = GET_FRAME(tr->ctx);
-		slot *e = GET_SLOT(f, tr->var_nbr);
-		//printf("*** rebind [%u:%u:%u] ctx=%u, var=%u\n", j, i, q->undo_hi_tp, tr->ctx, tr->var_nbr);
-		*e = q->save_e[j];
-	}
-
-	q->undo_lo_tp = q->undo_hi_tp = 0;
-	free(q->save_e);
-	return pl_success;
-}
-
-pl_status do_post_unification_hook(query *q)
-{
-	q->undo_lo_tp = q->save_tp;
-	q->undo_hi_tp = q->st.tp;
-	cell *tmp = alloc_on_heap(q, 3);
-	may_ptr_error(tmp);
-	// Needed for follow() to work
-	*tmp = (cell){0};
-	tmp[0].tag = TAG_EMPTY;
-	tmp[0].nbr_cells = 1;
-	tmp[0].flags = FLAG_BUILTIN;
-
-	tmp[1].tag = TAG_LITERAL;
-	tmp[1].nbr_cells = 1;
-	tmp[1].arity = 0;
-	tmp[1].flags = 0;
-	tmp[1].val_off = g_post_unify_hook_s;
-	tmp[1].match = search_predicate(q->pl->user_m, tmp+1);
-
-	if (!tmp[1].match)
-		return throw_error(q, tmp+1, q->st.curr_frame, "existence_error", "procedure");
-
-	make_call(q, tmp+2);
-	q->st.curr_cell = tmp;
 	return pl_success;
 }
 
