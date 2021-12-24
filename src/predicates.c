@@ -9788,8 +9788,6 @@ static unsigned real_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, i
 	p1++;
 
 	for (; arity--; p1 += p1->nbr_cells) {
-		cell *c = deref(q, p1, p1_ctx);
-		pl_idx_t c_ctx = q->latest_ctx;
 
 		if (is_variable(p1)) {
 			bool found = false;
@@ -9808,6 +9806,9 @@ static unsigned real_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, i
 			q->pl->tab2[q->pl->tab_idx] = p1->var_nbr;
 			q->pl->tab_idx++;
 		}
+
+		cell *c = deref(q, p1, p1_ctx);
+		pl_idx_t c_ctx = q->latest_ctx;
 
 		if (is_variable(c)) {
 			cell *tmp = alloc_on_heap(q, 2);
