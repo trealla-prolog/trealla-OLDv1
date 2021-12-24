@@ -5,7 +5,7 @@
 
 post_unify_hook_ :-
 	'$undo_trail'(Vars),
-	ignore(process_vars_(Vars, [], Goals)),
+	ignore(process_vars_(Vars, [], Goals)),  % why ignore?
 	'$redo_trail',
 	maplist(call, Goals).
 

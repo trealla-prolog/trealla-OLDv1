@@ -1735,7 +1735,7 @@ pl_status start(query *q)
 
 	if (q->halt)
 		q->error = false;
-	else if (q->do_dump_vars && !q->abort && q->status)
+	else if (q->do_dump_vars && !q->abort && q->status && !q->error)
 		dump_vars(q, false);
 
 	return pl_success;
