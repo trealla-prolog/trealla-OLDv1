@@ -5,13 +5,13 @@
     "failed" : 0,
     "broken" : 0,
     "skipped" : 113,
-    "passed" : 2950,
+    "passed" : 2970,
     "unknown" : 0,
-    "total" : 3063
+    "total" : 3083
   },
   "time" : {
     "minDuration" : 0,
-    "maxDuration" : 312,
-    "sumDuration" : 2803
+    "maxDuration" : 426,
+    "sumDuration" : 4016
   }
 }
