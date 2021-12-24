@@ -550,9 +550,17 @@ recorded(K, V, R) :- nonvar(K), clause('$record_key'(K,V), _, R).
 :- meta_predicate(call_with_time_limit(-,0)).
 
 call_with_time_limit(Time, Goal) :-
-	'$alarm'(Time),
+	Time0 is truncate(Time * 1000),
+	'$alarm'(Time0),
 	(	catch(once(Goal), E, ('$alarm'(0), throw(E)))
 	->	'$alarm'(0)
+	;	('$alarm'(0), fail)
+	).
+
+time_out(Goal, Time, Result) :-
+	'$alarm'(Time),
+	(	catch(once(Goal), E, ('$alarm'(0), throw(E)))
+	->	('$alarm'(0), Result = success)
 	;	('$alarm'(0), fail)
 	).
 

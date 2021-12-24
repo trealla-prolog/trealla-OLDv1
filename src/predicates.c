@@ -11152,19 +11152,28 @@ static USE_RESULT pl_status fn_sys_register_term_1(query *q)
 
 static USE_RESULT pl_status fn_sys_alarm_1(query *q)
 {
-	GET_FIRST_ARG(p1,integer);
+	GET_FIRST_ARG(p1,number);
+	int time0 = 0;
 
-	if (is_bigint(p1) || is_negative(p1))
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "positive_integer");
+
+	if (is_real(p1))
+		time0 = get_real(p1) * 1000;
+	else
+		time0 = get_smallint(p1);
+
+	if (time0 < 0)
 		return throw_error(q, p1, p1_ctx, "domain_error", "positive_integer");
 
 	struct itimerval it = {0};
 
-	if (get_smallint(p1) == 0) {
+	if (time0 == 0) {
 		setitimer(ITIMER_REAL, &it, NULL);
 		return pl_success;
 	}
 
-	int ms = get_smallint(p1);
+	int ms = time0;
 	int secs = ms / 1000;
 	ms -= secs * 1000;
 
