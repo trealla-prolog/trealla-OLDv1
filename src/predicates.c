@@ -338,8 +338,7 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 		}
 	} else if (!CMP_SLICE2(q, c, "variables")) {
 		if (is_variable(c1)) {
-			cell *v = c1;
-			if (vars) *vars = v;
+			if (vars) *vars = c1;
 			if (vars_ctx) *vars_ctx = c1_ctx;
 		} else {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
@@ -347,8 +346,7 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 		}
 	} else if (!CMP_SLICE2(q, c, "variable_names")) {
 		if (is_variable(c1)) {
-			cell *v = c1;
-			if (varnames) *varnames = v;
+			if (varnames) *varnames = c1;
 			if (varnames_ctx) *varnames_ctx = c1_ctx;
 		} else {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
@@ -356,8 +354,7 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 		}
 	} else if (!CMP_SLICE2(q, c, "singletons")) {
 		if (is_variable(c1)) {
-			cell *v = c1;
-			if (sings) *sings = v;
+			if (sings) *sings = c1;
 			if (sings_ctx) *sings_ctx = c1_ctx;
 		} else {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
@@ -3036,7 +3033,7 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 		return false;
 	}
 
-	cell *c1 = deref(q,c+1, q->latest_ctx);
+	cell *c1 = deref(q,c+1, c_ctx);
 	pl_idx_t c1_ctx = q->latest_ctx;
 
 	if (is_variable(c1)) {
@@ -3095,8 +3092,6 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 			return false;
 		}
 
-		// TODO: write_term variable_names
-
 		cell *c1_orig = c1;
 		pl_idx_t c1_orig_ctx = c1_ctx;
 		LIST_HANDLER(c1);
@@ -3104,6 +3099,7 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 		while (is_list(c1)) {
 			cell *h = LIST_HEAD(c1);
 			h = deref(q, h, c1_ctx);
+			pl_idx_t h_ctx = q->latest_ctx;
 
 			if (!is_structure(h)) {
 				DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
@@ -3111,11 +3107,13 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 			}
 
 			if (is_literal(h)) {
-				if (is_variable(h+1)) {
+				h = deref(q, h+1, h_ctx);
+
+				if (is_variable(h)) {
 					DISCARD_RESULT throw_error(q, c, c_ctx, "instantiation_error", "write_option");
 					return false;
-				} else if (!is_atom(h+1)) {
-					DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
+				} else if (!is_atom(h)) {
+					DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option1");
 					return false;
 				}
 #if 0

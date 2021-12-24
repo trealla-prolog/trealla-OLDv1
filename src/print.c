@@ -412,8 +412,9 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 		while (is_list(l)) {
 			cell *h = LIST_HEAD(l);
 			h = running ? deref(q, h, l_ctx) : h;
-			cell *name = h+1;
-			cell *val = h+2;
+			pl_idx_t h_ctx = q->latest_ctx;
+			cell *name = deref(q, h+1, h_ctx);
+			cell *val = deref(q, h+2, h_ctx);
 
 			if (!strcmp(GET_STR(q, val), GET_STR(q, c))) {
 				dst += snprintf(dst, dstlen, "%s", GET_STR(q, name));
@@ -773,8 +774,9 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			while (is_list(l)) {
 				cell *h = LIST_HEAD(l);
 				h = running ? deref(q, h, l_ctx) : h;
-				cell *name = h+1;
-				cell *var = h+2;
+				pl_idx_t h_ctx = q->latest_ctx;
+				cell *name = deref(q, h+1, h_ctx);
+				cell *var = deref(q, h+2, h_ctx);
 				var = running ? deref(q, var, q->latest_ctx) : var;
 
 				if (!strcmp(GET_STR(q, var), GET_STR(q, c))) {
