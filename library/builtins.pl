@@ -547,7 +547,7 @@ recorda(K, V, R) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V), R).
 recordz(K, V, R) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V), R).
 recorded(K, V, R) :- nonvar(K), clause('$record_key'(K,V), _, R).
 
-:- meta_predicate(call_with_time_limit(-,0)).
+:- meta_predicate(call_with_time_limit(+,0)).
 
 call_with_time_limit(Time, Goal) :-
 	Time0 is truncate(Time * 1000),
@@ -556,6 +556,8 @@ call_with_time_limit(Time, Goal) :-
 	->	'$alarm'(0)
 	;	('$alarm'(0), fail)
 	).
+
+:- meta_predicate(time_out(0,+,-)).
 
 time_out(Goal, Time, Result) :-
 	'$alarm'(Time),
