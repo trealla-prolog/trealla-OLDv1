@@ -9764,7 +9764,7 @@ unsigned fake_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned start)
 	return end;
 }
 
-static unsigned real_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end)
+static unsigned real_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int depth)
 {
 	unsigned cnt = 0;
 
@@ -9781,6 +9781,9 @@ static unsigned real_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end)
 	if (!is_structure(p1))
 		return cnt;
 
+	if (!depth)
+		q->pl->tab_idx = 0;
+
 	unsigned arity = p1->arity;
 	p1++;
 
@@ -9788,8 +9791,23 @@ static unsigned real_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end)
 		cell *c = deref(q, p1, p1_ctx);
 		pl_idx_t c_ctx = q->latest_ctx;
 
-		if (is_variable(p1) && is_cyclic_term(q, c, c_ctx))
-			continue;
+		if (is_variable(p1)) {
+			bool found = false;
+
+			for (unsigned idx = 0; idx < q->pl->tab_idx; idx++) {
+				if ((q->pl->tab1[idx] == p1_ctx) && (q->pl->tab2[idx] == p1->var_nbr)) {
+					found = true;
+					break;
+				}
+			}
+
+			if (found)
+				continue;
+
+			q->pl->tab1[q->pl->tab_idx] = p1_ctx;
+			q->pl->tab2[q->pl->tab_idx] = p1->var_nbr;
+			q->pl->tab_idx++;
+		}
 
 		if (is_variable(c)) {
 			cell *tmp = alloc_on_heap(q, 2);
@@ -9799,7 +9817,7 @@ static unsigned real_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end)
 			set_var(q, c, c_ctx, tmp, q->st.curr_frame);
 			cnt++;
 		} else if (is_structure(c))
-			cnt += real_numbervars(q, c, c_ctx, end);
+			cnt += real_numbervars(q, c, c_ctx, end, depth+1);
 	}
 
 	return cnt;
@@ -9809,7 +9827,7 @@ static USE_RESULT pl_status fn_numbervars_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int end = 0;
-	real_numbervars(q, p1, p1_ctx, &end);
+	real_numbervars(q, p1, p1_ctx, &end, 0);
 	return pl_success;
 }
 
@@ -9819,7 +9837,7 @@ static USE_RESULT pl_status fn_numbervars_3(query *q)
 	GET_NEXT_ARG(p2,integer);
 	GET_NEXT_ARG(p3,integer_or_var);
 	int end = q->nv_start = get_int(p2);
-	unsigned cnt = real_numbervars(q, p1, p1_ctx, &end);
+	unsigned cnt = real_numbervars(q, p1, p1_ctx, &end, 0);
 	cell tmp;
 	make_int(&tmp, get_int(p2)+cnt);
 	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
