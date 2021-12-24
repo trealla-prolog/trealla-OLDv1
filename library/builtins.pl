@@ -549,8 +549,7 @@ recorded(K, V, R) :- nonvar(K), clause('$record_key'(K,V), _, R).
 
 call_with_time_limit(Time, Goal) :-
 	'$alarm'(Time),
-	once(Goal),
-	'$alarm'(0).
+	once(Goal).
 
 atomic_list_concat(L, Atom) :- atomic_list_concat(L, '', Atom).
 format(F) :- format(F, []).

@@ -11157,7 +11157,20 @@ static USE_RESULT pl_status fn_sys_alarm_1(query *q)
 	if (is_bigint(p1) || is_negative(p1))
 		return throw_error(q, p1, p1_ctx, "domain_error", "positive_integer");
 
-	alarm(get_smallint(p1));
+	struct itimerval it = {0};
+
+	if (get_smallint(p1) == 0) {
+		setitimer(ITIMER_REAL, &it, NULL);
+		return pl_success;
+	}
+
+	int ms = get_smallint(p1);
+	int secs = ms / 1000;
+	ms -= secs * 1000;
+
+	it.it_value.tv_sec = secs;
+	it.it_value.tv_usec = ms * 1000;
+	setitimer(ITIMER_REAL, &it, NULL);
 	return pl_success;
 }
 

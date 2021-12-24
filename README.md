@@ -295,7 +295,7 @@ Non-standard predicates
 	module/1
 	line_count/2
 	strip_module/3
-	call_with_time_limit/2		# call_with_time_limit(+seconds,+callable)
+	call_with_time_limit/2		# call_with_time_limit(+millisecs,+callable)
 
 	nb_setval(K,V)
 	nb_getval(K,V)
