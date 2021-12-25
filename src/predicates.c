@@ -3113,7 +3113,7 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 					DISCARD_RESULT throw_error(q, c, c_ctx, "instantiation_error", "write_option");
 					return false;
 				} else if (!is_atom(h)) {
-					DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option1");
+					DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 					return false;
 				}
 #if 0
