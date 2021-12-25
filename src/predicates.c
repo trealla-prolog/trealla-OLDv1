@@ -9826,6 +9826,7 @@ static USE_RESULT pl_status fn_numbervars_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int end = 0;
+	q->numbervars = true;
 	real_numbervars(q, p1, p1_ctx, &end, 0);
 	return pl_success;
 }
@@ -9836,6 +9837,7 @@ static USE_RESULT pl_status fn_numbervars_3(query *q)
 	GET_NEXT_ARG(p2,integer);
 	GET_NEXT_ARG(p3,integer_or_var);
 	int end = q->nv_start = get_int(p2);
+	q->numbervars = true;
 	unsigned cnt = real_numbervars(q, p1, p1_ctx, &end, 0);
 	cell tmp;
 	make_int(&tmp, get_int(p2)+cnt);
