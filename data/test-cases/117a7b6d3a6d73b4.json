@@ -1,0 +1,51 @@
+{
+  "uid" : "117a7b6d3a6d73b4",
+  "name" : "lgt_float_fractional_part_1_03",
+  "fullName" : "lgt_float_fractional_part_1_03::tests",
+  "historyId" : "lgt_float_fractional_part_1_03::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/float_fractional_part_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "functions/float_fractional_part_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "functions/float_fractional_part_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "functions/float_fractional_part_1/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "46-49"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/d8d21f626e90f854fdad66663b99baca8ad70d3d/tests/prolog/functions/float_fractional_part_1/tests.lgt#L46"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "117a7b6d3a6d73b4.json",
+  "parameterValues" : [ "functions/float_fractional_part_1/tests.lgt", "46-49", "https://github.com/LogtalkDotOrg/logtalk3/tree/d8d21f626e90f854fdad66663b99baca8ad70d3d/tests/prolog/functions/float_fractional_part_1/tests.lgt#L46" ]
+}
