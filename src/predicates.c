@@ -2955,6 +2955,7 @@ static USE_RESULT pl_status fn_iso_writeq_1(query *q)
 	}
 
 	q->quoted = 1;
+	q->numbervars= true;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	q->quoted = 0;
 	return !ferror(str->fp);
@@ -2978,6 +2979,7 @@ static USE_RESULT pl_status fn_iso_writeq_2(query *q)
 	}
 
 	q->quoted = 1;
+	q->numbervars= true;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	q->quoted = 0;
 	return !ferror(str->fp);
