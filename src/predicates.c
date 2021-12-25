@@ -3192,7 +3192,6 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 		return throw_error(q, p2_orig, p2_ctx, "type_error", "list");
 	}
 
-	q->latest_ctx = p1_ctx;
 	q->variable_names = vnames;
 	q->variable_names_ctx = vnames_ctx;
 

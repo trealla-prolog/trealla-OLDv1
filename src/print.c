@@ -411,18 +411,19 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 		while (is_list(l)) {
 			cell *h = LIST_HEAD(l);
-			h = running ? deref(q, h, l_ctx) : h;
+			h = deref(q, h, l_ctx);
 			pl_idx_t h_ctx = q->latest_ctx;
 			cell *name = deref(q, h+1, h_ctx);
-			cell *val = deref(q, h+2, h_ctx);
+			cell *var = deref(q, h+2, h_ctx);
+			pl_idx_t var_ctx = q->latest_ctx;
 
-			if (!strcmp(GET_STR(q, val), GET_STR(q, c))) {
+			if ((var_ctx == c_ctx) && (var->var_nbr == c->var_nbr)) {
 				dst += snprintf(dst, dstlen, "%s", GET_STR(q, name));
 				return dst - save_dst;
 			}
 
 			l = LIST_TAIL(l);
-			l = running ? deref(q, l, l_ctx) : l;
+			l = deref(q, l, l_ctx);
 			l_ctx = q->latest_ctx;
 		}
 	}
@@ -773,19 +774,19 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 			while (is_list(l)) {
 				cell *h = LIST_HEAD(l);
-				h = running ? deref(q, h, l_ctx) : h;
+				h = deref(q, h, l_ctx);
 				pl_idx_t h_ctx = q->latest_ctx;
 				cell *name = deref(q, h+1, h_ctx);
 				cell *var = deref(q, h+2, h_ctx);
-				var = running ? deref(q, var, q->latest_ctx) : var;
+				pl_idx_t var_ctx = q->latest_ctx;
 
-				if (!strcmp(GET_STR(q, var), GET_STR(q, c))) {
+				if ((var_ctx == c_ctx) && (var->var_nbr == c->var_nbr)) {
 					dst += snprintf(dst, dstlen, "%s", GET_STR(q, name));
 					return dst - save_dst;
 				}
 
 				l = LIST_TAIL(l);
-				l = running ? deref(q, l, l_ctx) : l;
+				l = deref(q, l, l_ctx);
 				l_ctx = q->latest_ctx;
 			}
 		}
