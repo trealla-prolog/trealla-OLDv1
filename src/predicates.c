@@ -3085,7 +3085,7 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 			return false;
 		}
 
-		q->nonumbervars = CMP_SLICE2(q, c1, "true");
+		q->numbervars = !CMP_SLICE2(q, c1, "true");
 	} else if (!CMP_SLICE2(q, c, "variable_names")) {
 		if (!is_list_or_nil(c1)) {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");

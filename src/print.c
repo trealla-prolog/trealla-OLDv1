@@ -760,7 +760,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		if ((c->arity == 1) && is_literal(c) && !strcmp(src, "{}")) braces = 1;
 
 		if (running && is_literal(c) && !strcmp(src, "$VAR")
-			&& !q->nonumbervars && (!q->is_dump_vars || depth) && is_integer(c+1)) {
+			&& (q->numbervars || q->quoted) && (!q->is_dump_vars || depth) && is_integer(c+1)) {
 			unsigned var_nbr = get_smallint(c+1) - q->nv_start;
 			dst += snprintf(dst, dstlen, "%s", varformat(var_nbr));
 			return dst - save_dst;
@@ -1151,6 +1151,6 @@ pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 void clear_write_options(query *q)
 {
 	q->max_depth = q->quoted = 0;
-	q->nl = q->fullstop = q->varnames = q->ignore_ops = q->nonumbervars = false;
+	q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
 	q->variable_names = NULL;
 }
