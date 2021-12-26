@@ -2508,22 +2508,17 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	while (is_list(p4)) {
 		cell *h = LIST_HEAD(p4);
 		cell *c = deref(q, h, p4_ctx);
+		pl_idx_t c_ctx = q->latest_ctx;
 
 		if (is_variable(c))
 			return throw_error(q, c, q->latest_ctx, "instantiation_error", "args_not_sufficiently_instantiated");
 
 		if (is_structure(c) && (c->arity == 1)) {
 			cell *name = c + 1;
-			name = deref(q, name, q->latest_ctx);
-
-			if (is_variable(name) && CMP_SLICE2(q, c, "mmap"))
-				return throw_error(q, name, q->latest_ctx, "instantiation_error", "stream_option");
-
-			if (!is_atom(name) && CMP_SLICE2(q, c, "mmap"))
-				return throw_error(q, c, q->latest_ctx, "domain_error", "stream_option");
+			name = deref(q, name, c_ctx);
 
 			if (get_named_stream(q->pl, GET_STR(q, name), LEN_STR(q, name)) >= 0)
-				return throw_error(q, c, q->latest_ctx, "permission_error", "open,source_sink");
+				return throw_error(q, c, c_ctx, "permission_error", "open,source_sink");
 
 			if (!CMP_SLICE2(q, c, "mmap")) {
 #if USE_MMAP
@@ -2532,16 +2527,34 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 				mmap_ctx = q->latest_ctx;
 #endif
 			} else if (!CMP_SLICE2(q, c, "alias")) {
+				if (is_variable(name))
+					return throw_error(q, name, q->latest_ctx, "instantiation_error", "stream_option");
+
+				if (!is_atom(name))
+					return throw_error(q, c, c_ctx, "domain_error", "stream_option");
+
 				free(str->name);
 				str->name = DUP_SLICE(q, name);
 			} else if (!CMP_SLICE2(q, c, "type")) {
+				if (is_variable(name))
+					return throw_error(q, name, q->latest_ctx, "instantiation_error", "stream_option");
+
+				if (!is_atom(name))
+					return throw_error(q, c, c_ctx, "domain_error", "stream_option");
+
 				if (is_atom(name) && !CMP_SLICE2(q, name, "binary")) {
 					str->binary = true;
 				} else if (is_atom(name) && !CMP_SLICE2(q, name, "text"))
 					str->binary = false;
 				else
-					return throw_error(q, c, q->latest_ctx, "domain_error", "stream_option");
+					return throw_error(q, c, c_ctx, "domain_error", "stream_option");
 			} else if (!CMP_SLICE2(q, c, "bom")) {
+				if (is_variable(name))
+					return throw_error(q, name, q->latest_ctx, "instantiation_error", "stream_option");
+
+				if (!is_atom(name))
+					return throw_error(q, c, c_ctx, "domain_error", "stream_option");
+
 				bom_specified = true;
 
 				if (is_atom(name) && !CMP_SLICE2(q, name, "true"))
@@ -2549,11 +2562,23 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 				else if (is_atom(name) && !CMP_SLICE2(q, name, "false"))
 					use_bom = false;
 			} else if (!CMP_SLICE2(q, c, "reposition")) {
+				if (is_variable(name))
+					return throw_error(q, name, q->latest_ctx, "instantiation_error", "stream_option");
+
+				if (!is_atom(name))
+					return throw_error(q, c, c_ctx, "domain_error", "stream_option");
+
 				if (is_atom(name) && !CMP_SLICE2(q, name, "true"))
 					str->repo = true;
 				else if (is_atom(name) && !CMP_SLICE2(q, name, "false"))
 					str->repo = false;
 			} else if (!CMP_SLICE2(q, c, "eof_action")) {
+				if (is_variable(name))
+					return throw_error(q, name, q->latest_ctx, "instantiation_error", "stream_option");
+
+				if (!is_atom(name))
+					return throw_error(q, c, c_ctx, "domain_error", "stream_option");
+
 				if (is_atom(name) && !CMP_SLICE2(q, name, "error")) {
 					str->eof_action = eof_action_error;
 				} else if (is_atom(name) && !CMP_SLICE2(q, name, "eof_code")) {
@@ -2561,9 +2586,11 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 				} else if (is_atom(name) && !CMP_SLICE2(q, name, "reset")) {
 					str->eof_action = eof_action_reset;
 				}
+			} else {
+				return throw_error(q, c, c_ctx, "domain_error", "stream_option");
 			}
 		} else
-			return throw_error(q, c, q->latest_ctx, "domain_error", "stream_option");
+			return throw_error(q, c, c_ctx, "domain_error", "stream_option");
 
 		p4 = LIST_TAIL(p4);
 		p4 = deref(q, p4, p4_ctx);
