@@ -85,14 +85,19 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 	pl_idx_t slow_ctx = *head_ctx, fast_ctx = *head_ctx;
 	bool done = false;
 	cell* fast = term_next(q, head, &fast_ctx, &done);
-	int power = 1, length = 1, cnt = 0;
+	int length = 1, cnt = 0;
+#if 0
+	int power = 1;
+#endif
 
 	while (fast && (fast != slow)) {
+#if 0
 		if (length == power) {
 			power *= 2;
 			length = 0;
 			slow = fast;
 		}
+#endif
 
 		if ((max == ++cnt) || done){
 			if (done)

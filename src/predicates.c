@@ -7746,7 +7746,7 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,integer_or_var);
 	GET_NEXT_ARG(p3,list_or_nil_or_var);
-	GET_NEXT_ARG(p4,variable);
+	GET_NEXT_ARG(p4,list_or_nil_or_var);
 
 	if (is_integer(p2) && is_negative(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
@@ -7790,7 +7790,11 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 		c = p3;
 	}
 
-	set_var(q, p4, p4_ctx, c, c_ctx);
+	pl_status ok = unify(q, p4, p4_ctx, c, c_ctx);
+
+	if (ok != pl_success)
+		return ok;
+
 	cell tmp;
 	make_int(&tmp, skip);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
