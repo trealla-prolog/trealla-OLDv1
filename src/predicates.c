@@ -3103,6 +3103,11 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 			h = deref(q, h, c1_ctx);
 			pl_idx_t h_ctx = q->latest_ctx;
 
+			if (is_variable(h)) {
+				DISCARD_RESULT throw_error(q, h, h_ctx, "instantiation_error", "write_option");
+				return false;
+			}
+
 			if (!is_structure(h)) {
 				DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 				return false;
