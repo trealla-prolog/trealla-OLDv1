@@ -3108,6 +3108,11 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 				return false;
 			}
 
+			if (CMP_SLICE2(q, h, "=")) {
+				DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
+				return false;
+			}
+
 			if (is_literal(h)) {
 				h = deref(q, h+1, h_ctx);
 
