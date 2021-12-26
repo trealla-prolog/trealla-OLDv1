@@ -22,6 +22,9 @@ A compact, efficient Prolog interpreter with
 Trealla is not WAM-based. It uses tree-walking, structure-sharing and
 deep-binding.
 
+Note, unbounded integers (aka. bigints) are for arithmetic purposes
+only and will give a type_error when used inplaces not expected.
+
 
 A note on UTF-8
 ===============
