@@ -3124,12 +3124,14 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 					return false;
 				}
 
+#if 0
 				cell *h2 = deref(q, h+2, h_ctx);
 
 				if (!is_variable(h2)) {
 					DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 					return false;
 				}
+#endif
 			}
 
 			c1 = LIST_TAIL(c1);
