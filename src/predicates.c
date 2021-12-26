@@ -3114,21 +3114,22 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 			}
 
 			if (is_literal(h)) {
-				h = deref(q, h+1, h_ctx);
+				cell *h1 = deref(q, h+1, h_ctx);
 
-				if (is_variable(h)) {
+				if (is_variable(h1)) {
 					DISCARD_RESULT throw_error(q, c, c_ctx, "instantiation_error", "write_option");
 					return false;
-				} else if (!is_atom(h)) {
+				} else if (!is_atom(h1)) {
 					DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 					return false;
 				}
-#if 0
-				if (!is_variable(h+2)) {
+
+				cell *h2 = deref(q, h+2, h_ctx);
+
+				if (!is_variable(h2)) {
 					DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 					return false;
 				}
-#endif
 			}
 
 			c1 = LIST_TAIL(c1);
