@@ -10393,7 +10393,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	}
 
 
-	if (is_integer(p2) && !is_smallint(p2) && 0)
+	if (is_integer(p2) && !is_smallint(p2))
 		return throw_error(q, p2, p2_ctx, "type_error", "integer");
 
 	if (is_negative(p2))
