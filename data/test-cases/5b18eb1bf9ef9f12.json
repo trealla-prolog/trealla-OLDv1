@@ -1,0 +1,51 @@
+{
+  "uid" : "5b18eb1bf9ef9f12",
+  "name" : "iso_not_unifiable_2_14",
+  "fullName" : "iso_not_unifiable_2_14::tests",
+  "historyId" : "iso_not_unifiable_2_14::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "skipped",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/not_unifiable_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/not_unifiable_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/not_unifiable_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/not_unifiable_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "97-99"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/74112246ef72d78ff45390ce1d67840d3beb50c8/tests/prolog/predicates/not_unifiable_2/tests.lgt#L97"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "5b18eb1bf9ef9f12.json",
+  "parameterValues" : [ "predicates/not_unifiable_2/tests.lgt", "97-99", "https://github.com/LogtalkDotOrg/logtalk3/tree/74112246ef72d78ff45390ce1d67840d3beb50c8/tests/prolog/predicates/not_unifiable_2/tests.lgt#L97" ]
+}
