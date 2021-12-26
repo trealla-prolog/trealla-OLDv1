@@ -3038,15 +3038,20 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 	cell *c1 = deref(q,c+1, c_ctx);
 	pl_idx_t c1_ctx = q->latest_ctx;
 
-	if (is_variable(c1)) {
-		DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
-		return false;
-	}
-
 	if (!CMP_SLICE2(q, c, "max_depth")) {
+		if (is_variable(c1)) {
+			DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
+			return false;
+		}
+
 		if (is_integer(c1))
 			q->max_depth = get_int(&c[1]);
 	} else if (!CMP_SLICE2(q, c, "fullstop")) {
+		if (is_variable(c1)) {
+			DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
+			return false;
+		}
+
 		if (!is_literal(c1) || (CMP_SLICE2(q, c1, "true") && CMP_SLICE2(q, c1, "false"))) {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
@@ -3054,6 +3059,11 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 
 		q->fullstop = !CMP_SLICE2(q, c1, "true");
 	} else if (!CMP_SLICE2(q, c, "nl")) {
+		if (is_variable(c1)) {
+			DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
+			return false;
+		}
+
 		if (!is_literal(c1) || (CMP_SLICE2(q, c1, "true") && CMP_SLICE2(q, c1, "false"))) {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
@@ -3061,6 +3071,11 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 
 		q->nl = !CMP_SLICE2(q, c1, "true");
 	} else if (!CMP_SLICE2(q, c, "quoted")) {
+		if (is_variable(c1)) {
+			DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
+			return false;
+		}
+
 		if (!is_literal(c1) || (CMP_SLICE2(q, c1, "true") && CMP_SLICE2(q, c1, "false"))) {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
@@ -3068,6 +3083,11 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 
 		q->quoted = !CMP_SLICE2(q, c1, "true");
 	} else if (!CMP_SLICE2(q, c, "varnames")) {
+		if (is_variable(c1)) {
+			DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
+			return false;
+		}
+
 		if (!is_literal(c1) || (CMP_SLICE2(q, c1, "true") && CMP_SLICE2(q, c1, "false"))) {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
@@ -3075,6 +3095,11 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 
 		q->varnames = !CMP_SLICE2(q, c1, "true");
 	} else if (!CMP_SLICE2(q, c, "ignore_ops")) {
+		if (is_variable(c1)) {
+			DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
+			return false;
+		}
+
 		if (!is_literal(c1) || (CMP_SLICE2(q, c1, "true") && CMP_SLICE2(q, c1, "false"))) {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
@@ -3082,6 +3107,11 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 
 		q->ignore_ops = !CMP_SLICE2(q, c1, "true");
 	} else if (!CMP_SLICE2(q, c, "numbervars")) {
+		if (is_variable(c1)) {
+			DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
+			return false;
+		}
+
 		if (!is_literal(c1) || (CMP_SLICE2(q, c1, "true") && CMP_SLICE2(q, c1, "false"))) {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
@@ -3089,6 +3119,11 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 
 		q->numbervars = !CMP_SLICE2(q, c1, "true");
 	} else if (!CMP_SLICE2(q, c, "variable_names")) {
+		if (is_variable(c1)) {
+			DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
+			return false;
+		}
+
 		if (!is_list_or_nil(c1)) {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
