@@ -1715,12 +1715,12 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 static USE_RESULT pl_status fn_iso_atom_length_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,integer_or_var);
+	GET_NEXT_ARG(p2,smallint_or_var);
 
 	if (!is_iso_atom(p1))
 		return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-	if (is_smallint(p2) && is_negative(p2))
+	if (is_negative(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
 
 	size_t len = substrlen_utf8(GET_STR(q, p1), LEN_STR(q, p1));
@@ -2338,11 +2338,8 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 	}
 
 	rule *r = &q->st.curr_clause2->r;
-	GET_FIRST_ARG(pstrx,any);
-
-	if (is_smallint(pstrx))
-		pstrx->flags |= FLAG_STREAM | FLAG_HEX;
-
+	GET_FIRST_ARG(pstrx,smallint);
+	pstrx->flags |= FLAG_STREAM | FLAG_HEX;
 	stash_me(q, r, false);
 	return pl_success;
 }
@@ -7819,14 +7816,14 @@ static USE_RESULT pl_status fn_sys_mustbe_list_or_var_1(query *q)
 static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	GET_NEXT_ARG(p2,integer_or_var);
+	GET_NEXT_ARG(p2,smallint_or_var);
 	GET_NEXT_ARG(p3,list_or_nil_or_var);
 	GET_NEXT_ARG(p4,list_or_nil_or_var);
 
 	if (is_integer(p2) && is_negative(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
 
-	pl_int_t skip=0, max = is_smallint(p2) ? get_smallint(p2) : INT_MAX;
+	pl_int_t skip=0, max = is_integer(p2) ? get_int(p2) : INT_MAX;
 
 	if (is_string(p3)) {
 		const char *src = GET_STR(q, p3);
@@ -9421,14 +9418,14 @@ static pl_idx_t jenkins_one_at_a_time_hash(const char *key, size_t len)
 static USE_RESULT pl_status fn_term_hash_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,integer_or_var);
+	GET_NEXT_ARG(p2,smallint_or_var);
 
 	if (is_variable(p1))
 		return pl_success;
 
 	cell tmp;
 
-	if (is_smallint(p1)) {
+	if (is_integer(p1)) {
 		char tmpbuf[80];
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long)get_smallint(p1));
 		make_int(&tmp, jenkins_one_at_a_time_hash(tmpbuf, strlen(tmpbuf)));
@@ -10379,7 +10376,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		return do_length(q);
 
 	GET_FIRST_ARG(p1,list_or_nil_or_var);
-	GET_NEXT_ARG(p2,integer_or_var);
+	GET_NEXT_ARG(p2,smallint_or_var);
 
 	if (!is_variable(p1) && !is_nil(p1)) {
 		LIST_HANDLER(p1);
@@ -10393,13 +10390,10 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	}
 
 
-	if (is_integer(p2) && !is_smallint(p2))
-		return throw_error(q, p2, p2_ctx, "type_error", "integer");
-
 	if (is_negative(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
 
-	if (!is_variable(p1) && !is_nil(p1) && is_smallint(p2)
+	if (!is_variable(p1) && !is_nil(p1)
 		&& !is_string(p1) && !is_valid_list_up_to(q, p1, p1_ctx, true, get_smallint(p2)))
 		return throw_error(q, p1, p1_ctx, "type_error", "list");
 
@@ -10474,7 +10468,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		return pl_success;
 	}
 
-	if (is_smallint(p2) && !is_variable(p1)) {
+	if (is_integer(p2) && !is_variable(p1)) {
 		if (get_int(p2) == 0) {
 			cell tmp;
 			make_literal(&tmp, g_nil_s);
@@ -10541,7 +10535,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		return get_smallint(p2) == cnt;
 	}
 
-	if (is_variable(p1) && is_smallint(p2)) {
+	if (is_variable(p1) && is_integer(p2)) {
 		if (is_negative(p2))
 			return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
 
@@ -10869,8 +10863,8 @@ static USE_RESULT pl_status fn_sys_put_chars_2(query *q)
 
 static USE_RESULT pl_status fn_kv_set_3(query *q)
 {
-	GET_FIRST_ARG(p1,atomic);
-	GET_NEXT_ARG(p2,atomic);
+	GET_FIRST_ARG(p1,smallint_or_atom);
+	GET_NEXT_ARG(p2,smallint_or_atom);
 	GET_NEXT_ARG(p3,list_or_nil);
 	bool do_create = false;
 	LIST_HANDLER(p3);
@@ -10903,7 +10897,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 
 	char *key;
 
-	if (is_smallint(p1)) {
+	if (is_integer(p1)) {
 		char tmpbuf[128];
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_smallint(p1));
 		key = strdup(tmpbuf);
@@ -10923,7 +10917,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 
 	char *val;
 
-	if (is_smallint(p2)) {
+	if (is_integer(p2)) {
 		char tmpbuf[128];
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_smallint(p2));
 		val = strdup(tmpbuf);

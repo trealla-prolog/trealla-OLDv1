@@ -619,6 +619,9 @@ pl_status throw_error3(query *q, cell *c, __attribute__((unused)) pl_idx_t c_ctx
 	char functor[1024];
 	functor[0] = '\0';
 
+	if (!strcmp(expected, "smallint"))
+		expected = "integer";
+
 	if (!is_variable(c)) {
 		if (needs_quoting(q->st.m, GET_STR(q, goal), LEN_STR(q, goal))) {
 			snprintf(functor, sizeof(functor), "'%s'", GET_STR(q, goal));

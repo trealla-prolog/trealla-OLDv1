@@ -30,6 +30,8 @@
 #define is_real_or_var(c) (is_real(c) || is_variable(c))
 #define is_integer_or_var(c) (is_integer(c) || is_variable(c))
 #define is_integer_or_atom(c) (is_integer(c) || is_atom(c))
+#define is_smallint_or_var(c) (is_smallint(c) || is_variable(c))
+#define is_smallint_or_atom(c) (is_smallint(c) || is_atom(c))
 #define is_nonvar(c) !is_variable(c)
 #define is_stream(c) (get_stream(q,c) >= 0)
 #define is_stream_or_var(c) (is_stream(c) || is_variable(c))
