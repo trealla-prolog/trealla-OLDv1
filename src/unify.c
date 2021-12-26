@@ -86,11 +86,12 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 	bool done = false;
 	cell* fast = term_next(q, head, &fast_ctx, &done);
 	int length = 1, cnt = 0;
+
 #if 0
 	int power = 1;
 #endif
 
-	while (fast) {
+	while (true) {
 		if ((fast == slow) && (fast_ctx == slow_ctx))
 			break;
 
@@ -115,7 +116,7 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 		++length;
 	}
 
-	if (!fast)
+	if (done)
 		return NULL;
 
 	// length stores actual length of the loop.
@@ -123,6 +124,7 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 	// and fast to head+length i.e length of the cycle.
 
 	slow = fast = head;
+	fast_ctx = slow_ctx = *head_ctx;
 	int save_length = length;
 
 	while (length > 0) {
@@ -133,13 +135,16 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 			break;
 	}
 
-	while (fast != slow) {
+	while (true) {
+		if ((fast == slow) && (fast_ctx == slow_ctx))
+			break;
+
 		fast = term_next(q, fast, &fast_ctx, &done);
 		slow = term_next(q, slow, &slow_ctx, &done);
 	}
 
-	*head_ctx = slow_ctx;
 	*skip = save_length;
+	*head_ctx = slow_ctx;
 	return slow;
 }
 
