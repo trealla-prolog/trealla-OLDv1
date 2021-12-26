@@ -901,7 +901,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		if (rhs_pri >= my_priority) parens = 1;
 		if (isalpha(*src)) space = 1;
 		if (is_number(rhs)) parens = 1;
-		if (strcmp(GET_STR(q, c), "\\+")) if (is_literal(c)) parens = 0; // Hack
+		if (strcmp(GET_STR(q, c), "\\+")) if (is_atomic(rhs)) parens = 0; // Hack
 		if (is_integer(rhs) && (is_negative(rhs) || is_zero(rhs))) parens = 0;
 		int quote = q->quoted && has_spaces(src, LEN_STR(q,c));
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
