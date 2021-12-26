@@ -90,7 +90,10 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 	int power = 1;
 #endif
 
-	while (fast && (fast != slow)) {
+	while (fast) {
+		if ((fast == slow) && (fast_ctx == slow_ctx))
+			break;
+
 #if 0
 		if (length == power) {
 			power *= 2;
@@ -103,8 +106,8 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 			if (done)
 				--cnt;
 
-			*head_ctx = fast_ctx;
 			*skip = cnt;
+			*head_ctx = fast_ctx;
 			return fast;
 		}
 
