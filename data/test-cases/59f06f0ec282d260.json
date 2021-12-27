@@ -1,0 +1,51 @@
+{
+  "uid" : "59f06f0ec282d260",
+  "name" : "lgt_succ_2_10",
+  "fullName" : "lgt_succ_2_10::tests",
+  "historyId" : "lgt_succ_2_10::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/succ_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/succ_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/succ_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/succ_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "62-63"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree//tests/prolog/predicates/succ_2/tests.lgt#L62"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "59f06f0ec282d260.json",
+  "parameterValues" : [ "predicates/succ_2/tests.lgt", "62-63", "https://github.com/LogtalkDotOrg/logtalk3/tree//tests/prolog/predicates/succ_2/tests.lgt#L62" ]
+}

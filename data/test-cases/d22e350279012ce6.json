@@ -1,0 +1,51 @@
+{
+  "uid" : "d22e350279012ce6",
+  "name" : "iso_cut_0_11",
+  "fullName" : "iso_cut_0_11::tests",
+  "historyId" : "iso_cut_0_11::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "control/cut_0/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "control/cut_0/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "control/cut_0/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "control/cut_0/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "88-91"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree//tests/prolog/control/cut_0/tests.lgt#L88"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "d22e350279012ce6.json",
+  "parameterValues" : [ "control/cut_0/tests.lgt", "88-91", "https://github.com/LogtalkDotOrg/logtalk3/tree//tests/prolog/control/cut_0/tests.lgt#L88" ]
+}
