@@ -100,6 +100,7 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 			power *= 2;
 			length = 0;
 			slow = fast;
+			slow_ctx = fast_ctx;
 		}
 #endif
 
