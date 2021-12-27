@@ -81,10 +81,10 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 		return head;
 	}
 
-	cell* slow = head;
+	cell *slow = head;
 	pl_idx_t slow_ctx = *head_ctx, fast_ctx = *head_ctx;
 	bool done = false;
-	cell* fast = term_next(q, head, &fast_ctx, &done);
+	cell *fast = term_next(q, head, &fast_ctx, &done);
 	int length = 1, cnt = 0;
 
 #if 0
