@@ -22,9 +22,6 @@ A compact, efficient Prolog interpreter with
 Trealla is not WAM-based. It uses tree-walking, structure-sharing and
 deep-binding.
 
-Note, unbounded integers (aka. bigints) are for arithmetic purposes
-only and will give a type_error when used inplaces not expected.
-
 
 A note on UTF-8
 ===============
@@ -104,7 +101,11 @@ On *BSD* systems use *gmake* to build and do
 to get the *xxd* utility.
 
 For unbounded arithmetic uses a modified fork of the [imath](https://github.com/infradig/imath)
-library, which is partially included in the source.
+library, which is partially included in the source. Note, unbounded
+integers (aka. bigints) are for arithmetic purposes only and will give a
+type_error when used inplaces not expected. The *imath* library has a bug
+whereby printing large numbers becomes exponentially slower (100K+ digits)
+and will require a switch to *libtomath* at some point to remedy.
 
 
 Usage
