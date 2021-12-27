@@ -1,0 +1,51 @@
+{
+  "uid" : "ee0801e1082df629",
+  "name" : "eclipse_call_N_28",
+  "fullName" : "eclipse_call_N_28::tests",
+  "historyId" : "eclipse_call_N_28::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/call_N/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/call_N/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/call_N/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/call_N/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "184-192"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/91a25d0cdb8b33455ae2a664cad87ee27b67163a/tests/prolog/predicates/call_N/tests.lgt#L184"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "ee0801e1082df629.json",
+  "parameterValues" : [ "predicates/call_N/tests.lgt", "184-192", "https://github.com/LogtalkDotOrg/logtalk3/tree/91a25d0cdb8b33455ae2a664cad87ee27b67163a/tests/prolog/predicates/call_N/tests.lgt#L184" ]
+}
