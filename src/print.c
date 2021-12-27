@@ -646,7 +646,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		LIST_HANDLER(l);
 
 		while (is_list(l)) {
-			if (cnt++ > MAX_ELEMENTS) {
+			if ((cnt++ > MAX_ELEMENTS) && (running < 0)) {
 				dst += snprintf(dst, dstlen, "%s", " ...");
 				break;
 			}
@@ -669,7 +669,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	unsigned print_list = 0, cnt = 0;
 
 	while (is_iso_list(c)) {
-		if (cnt++ > MAX_ELEMENTS) {
+		if ((cnt++ > MAX_ELEMENTS) && (running < 0)) {
 			dst--;
 			dst += snprintf(dst, dstlen, "%s", "|...]");
 			return dst - save_dst;
