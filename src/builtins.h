@@ -18,6 +18,7 @@
 #define is_number(c) (is_integer(c) || is_real(c))
 #define is_atomic(c) (is_atom(c) || is_number(c))
 #define is_list_or_nil(c) (is_list(c) || is_nil(c))
+#define is_list_or_atom_or_var(c) (is_list(c) || is_atom(c) || is_variable(c))
 #define is_list_or_nil_or_var(c) (is_list_or_nil(c) || is_variable(c))
 #define is_list_or_var(c) (is_list(c) || is_variable(c))
 #define is_structure_or_var(c) (is_structure(c) || is_variable(c))

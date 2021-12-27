@@ -7826,7 +7826,7 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,smallint_or_var);
-	GET_NEXT_ARG(p3,list_or_nil_or_var);
+	GET_NEXT_ARG(p3,list_or_atom_or_var);
 	GET_NEXT_ARG(p4,list_or_nil_or_var);
 
 	if (is_integer(p2) && is_negative(p2))
