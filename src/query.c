@@ -1422,6 +1422,29 @@ static void dump_vars(query *q, bool partial)
 	frame *f = GET_FIRST_FRAME();
 	bool any = false;
 	q->is_dump_vars = true;
+	bool first = true;
+
+	for (unsigned i = 0; i < (p->nbr_vars-2); i++) {
+		if (!strcmp(p->vartab.var_name[i], "_"))
+			continue;
+
+		if ((p->vartab.var_name[i][0] == '_') && (p->vartab.var_name[i][1] == '_'))
+			continue;
+
+		cell tmp[3];
+		make_structure(tmp, g_eq_s, NULL, 2, 2);
+		make_cstring(tmp+1, p->vartab.var_name[i]);
+		make_variable(tmp+2, g_anon_s);
+		tmp[2].var_nbr = i;
+
+		if (first) {
+			allocate_list(q, tmp);
+			first = false;
+		} else
+			append_list(q, tmp);
+	}
+
+	cell *vlist = end_list(q);
 
 	for (unsigned i = 0; i < (p->nbr_vars-2); i++) {
 		if (!strcmp(p->vartab.var_name[i], "_"))
@@ -1473,6 +1496,8 @@ static void dump_vars(query *q, bool partial)
 		if (parens) fputc('(', stdout);
 		int saveq = q->quoted;
 		q->quoted = 1;
+		q->variable_names = vlist;
+		q->variable_names_ctx = 0;
 
 		if (is_cyclic_term(q, c, c_ctx))
 			print_term(q, stdout, c, c_ctx, 0);
@@ -1485,6 +1510,7 @@ static void dump_vars(query *q, bool partial)
 	}
 
 	q->is_dump_vars = false;
+	q->variable_names = NULL;
 
 	if (any && !partial) {
 		fprintf(stdout, ".\n");
