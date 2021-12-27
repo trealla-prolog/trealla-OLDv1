@@ -150,18 +150,15 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 
 static void make_var_ref(query *q, cell *tmp, unsigned var_nbr, pl_idx_t ctx)
 {
-	make_variable(tmp, g_anon_s);
-	tmp->var_nbr = create_vars(q, 1);
+	make_variable(tmp, g_anon_s, create_vars(q, 1));
 	cell v;
-	make_variable(&v, g_anon_s);
-	v.var_nbr = var_nbr;
+	make_variable(&v, g_anon_s, var_nbr);
 	set_var(q, tmp, q->st.curr_frame, &v, ctx);
 }
 
 static void make_cell_ref(query *q, cell *tmp, cell *v, pl_idx_t ctx)
 {
-	make_variable(tmp, g_anon_s);
-	tmp->var_nbr = create_vars(q, 1);
+	make_variable(tmp, g_anon_s, create_vars(q, 1));
 	set_var(q, tmp, q->st.curr_frame, v, ctx);
 }
 

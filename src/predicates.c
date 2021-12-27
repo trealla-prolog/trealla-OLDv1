@@ -92,7 +92,16 @@ static void get_params(query *q, pl_idx_t *p1, pl_idx_t *p2)
 	if (p2) *p2 = ch->v2;
 }
 
-void make_variable(cell *tmp, pl_idx_t off)
+void make_variable(cell *tmp, pl_idx_t off, unsigned var_nbr)
+{
+	*tmp = (cell){0};
+	tmp->tag = TAG_VAR;
+	tmp->nbr_cells = 1;
+	tmp->val_off = off;
+	tmp->var_nbr = var_nbr;
+}
+
+void make_variable2(cell *tmp, pl_idx_t off)
 {
 	*tmp = (cell){0};
 	tmp->tag = TAG_VAR;
@@ -625,8 +634,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 				tmp[idx].arity = 2;
 				tmp[idx++].nbr_cells = ((cnt-done)*2)+1;
 				cell v;
-				make_variable(&v, q->pl->tab3[i]);
-				v.var_nbr = q->pl->tab2[i];
+				make_variable(&v, q->pl->tab3[i], q->pl->tab2[i]);
 				tmp[idx++] = v;
 				done++;
 			}
@@ -682,8 +690,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 				tmp[idx++] = v;
 				make_literal(&v, q->pl->tab3[i]);
 				tmp[idx++] = v;
-				make_variable(&v, q->pl->tab3[i]);
-				v.var_nbr = q->pl->tab2[i];
+				make_variable(&v, q->pl->tab3[i], q->pl->tab2[i]);
 				tmp[idx++] = v;
 				done++;
 			}
@@ -745,8 +752,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 				tmp[idx++] = v;
 				make_literal(&v, q->pl->tab3[i]);
 				tmp[idx++] = v;
-				make_variable(&v, q->pl->tab3[i]);
-				v.var_nbr = q->pl->tab2[i];
+				make_variable(&v, q->pl->tab3[i], q->pl->tab2[i]);
 				tmp[idx++] = v;
 				done++;
 			}
@@ -2091,8 +2097,7 @@ static void del_stream_properties(query *q, int n)
 	cell *tmp = alloc_on_heap(q, 3);
 	make_literal(tmp+0, g_sys_stream_property_s);
 	make_int(tmp+1, n);
-	make_variable(tmp+2, g_anon_s);
-	tmp[2].var_nbr = create_vars(q, 1);
+	make_variable(tmp+2, g_anon_s, create_vars(q, 1));
 	tmp->nbr_cells = 3;
 	tmp->arity = 2;
 	q->retry = QUERY_OK;
@@ -4438,7 +4443,7 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 			tmp[idx].nbr_cells = ((cnt-done)*2)+1;
 			idx++;
 			cell v;
-			make_variable(&v, q->pl->tab3[i]);
+			make_variable2(&v, q->pl->tab3[i]);
 
 			if (q->pl->tab1[i] != q->st.curr_frame) {
 				v.flags |= FLAG2_FRESH;
@@ -4470,12 +4475,10 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 				continue;
 
 			cell v, tmp2;
-			make_variable(&v, g_anon_s);
+			make_variable(&v, g_anon_s, q->pl->varno++);
 			v.flags |= FLAG2_FRESH;
-			v.var_nbr = q->pl->varno++;
-			make_variable(&tmp2, g_anon_s);
+			make_variable(&tmp2, g_anon_s, q->pl->tab2[i]);
 			tmp2.flags |= FLAG2_FRESH;
-			tmp2.var_nbr = q->pl->tab2[i];
 			set_var(q, &v, q->st.curr_frame, &tmp2, q->pl->tab1[i]);
 		}
 	}
@@ -10236,8 +10239,7 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 		make_structure(tmp, g_unify_s, fn_iso_unify_2, 2, 1+c->nbr_cells);
 		SET_OP(tmp, OP_XFX);
 		cell v;
-		make_variable(&v, g_anon_s);
-		v.var_nbr = tr->var_nbr;
+		make_variable(&v, g_anon_s, tr->var_nbr);
 		tmp[1] = v;
 		safe_copy_cells(tmp+2, c, c->nbr_cells);
 
