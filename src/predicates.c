@@ -2518,9 +2518,6 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 		cell *name = c + 1;
 		name = deref(q, name, c_ctx);
 
-		if (get_named_stream(q->pl, GET_STR(q, name), LEN_STR(q, name)) >= 0)
-			return throw_error(q, c, c_ctx, "permission_error", "open,source_sink");
-
 		if (!CMP_SLICE2(q, c, "mmap")) {
 #if USE_MMAP
 			mmap_var = name;
@@ -2539,6 +2536,9 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 			if (!is_atom(name))
 				return throw_error(q, c, c_ctx, "domain_error", "stream_option");
+
+			if (get_named_stream(q->pl, GET_STR(q, name), LEN_STR(q, name)) >= 0)
+				return throw_error(q, c, c_ctx, "permission_error", "open,source_sink");
 
 			free(str->name);
 			str->name = DUP_SLICE(q, name);
