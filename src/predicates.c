@@ -2528,6 +2528,12 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 				mmap_var = deref(q, mmap_var, q->latest_ctx);
 				mmap_ctx = q->latest_ctx;
 #endif
+			} else if (!CMP_SLICE2(q, c, "encoding")) {
+				if (is_variable(name))
+					return throw_error(q, name, q->latest_ctx, "instantiation_error", "stream_option");
+
+				if (!is_atom(name))
+					return throw_error(q, c, c_ctx, "domain_error", "stream_option");
 			} else if (!CMP_SLICE2(q, c, "alias")) {
 				if (is_variable(name))
 					return throw_error(q, name, q->latest_ctx, "instantiation_error", "stream_option");
