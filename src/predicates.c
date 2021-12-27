@@ -3356,7 +3356,7 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 
 static USE_RESULT pl_status fn_iso_put_char_1(query *q)
 {
-	GET_FIRST_ARG(p1,atom);
+	GET_FIRST_ARG(p1,character);
 	int n = q->pl->current_output;
 	stream *str = &q->pl->streams[n];
 	size_t len = len_char_utf8(GET_STR(q, p1));
@@ -3384,7 +3384,7 @@ static USE_RESULT pl_status fn_iso_put_char_2(query *q)
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
 	stream *str = &q->pl->streams[n];
-	GET_NEXT_ARG(p1,atom);
+	GET_NEXT_ARG(p1,character);
 	size_t len = len_char_utf8(GET_STR(q, p1));
 
 	if (!strcmp(str->mode, "read"))
