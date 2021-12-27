@@ -20,6 +20,8 @@
 #define DBL_DECIMAL_DIG DBL_DIG
 #endif
 
+#define MAX_ELEMENTS 64
+
 bool needs_quoting(module *m, const char *src, int srclen)
 {
 	if (!*src)
@@ -482,7 +484,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 		LIST_HANDLER(l);
 
 		while (is_list(l)) {
-			if ((cnt > 256) && (running < 0)) {
+			if ((cnt > MAX_ELEMENTS) && (running < 0)) {
 				dst += snprintf(dst, dstlen, "|...");
 				return dst - save_dst;
 			}
@@ -640,9 +642,15 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	if (is_chars_list) {
 		cell *l = c;
 		dst += snprintf(dst, dstlen, "%s", "\"");
+		unsigned cnt = 0;
 		LIST_HANDLER(l);
 
 		while (is_list(l)) {
+			if (cnt++ > MAX_ELEMENTS) {
+				dst += snprintf(dst, dstlen, "%s", " ...");
+				break;
+			}
+
 			cell *h = LIST_HEAD(l);
 			cell *c = running ? deref(q, h, c_ctx) : h;
 			dst += formatted(dst, dstlen, GET_STR(q, c), LEN_STR(q, c), false);
@@ -661,7 +669,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	unsigned print_list = 0, cnt = 0;
 
 	while (is_iso_list(c)) {
-		if (cnt++ > 256) {
+		if (cnt++ > MAX_ELEMENTS) {
 			dst--;
 			dst += snprintf(dst, dstlen, "%s", "|...]");
 			return dst - save_dst;
@@ -816,12 +824,12 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		if (braces)
 			;
 		else if (quote || q->quoted) {
-			if ((running < 0) && is_blob(c) && (len_str > 256))
-				len_str = 256;
+			if ((running < 0) && is_blob(c) && (len_str > MAX_ELEMENTS))
+				len_str = MAX_ELEMENTS;
 
 			dst += formatted(dst, dstlen, src, len_str, dq);
 
-			if ((running < 0) && is_blob(c) && (len_str == 256)) {
+			if ((running < 0) && is_blob(c) && (len_str == MAX_ELEMENTS)) {
 				dst--;
 				dst += snprintf(dst, dstlen, "%s", "|...");
 			}
