@@ -85,13 +85,13 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 	pl_idx_t slow_ctx = *head_ctx, fast_ctx = *head_ctx;
 	bool done = false;
 	cell *fast = term_next(q, head, &fast_ctx, &done);
-	int length = 1, cnt = 0;
+	pl_int_t length = 1, cnt = 0;
 
 #if 0
 	int power = 1;
 #endif
 
-	while (true) {
+	while (!g_tpl_interrupt) {
 		if ((fast == slow) && (fast_ctx == slow_ctx))
 			break;
 
@@ -126,7 +126,7 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 
 	slow = fast = head;
 	fast_ctx = slow_ctx = *head_ctx;
-	int save_length = length;
+	pl_int_t save_length = length;
 
 	while (length > 0) {
 		fast = term_next(q, fast, &fast_ctx, &done);
@@ -136,7 +136,7 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 			break;
 	}
 
-	while (true) {
+	while (!g_tpl_interrupt) {
 		if ((fast == slow) && (fast_ctx == slow_ctx))
 			break;
 
