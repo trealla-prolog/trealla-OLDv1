@@ -3220,7 +3220,7 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 		}
 
 		if (!is_nil(c1)) {
-			DISCARD_RESULT throw_error(q, c, c_ctx, "type_error", "list");
+			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
 		}
 
