@@ -1,0 +1,51 @@
+{
+  "uid" : "56b4d4ce092260e0",
+  "name" : "lgt_term_comparison_20",
+  "fullName" : "lgt_term_comparison_20::tests",
+  "historyId" : "lgt_term_comparison_20::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/term_comparison/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/term_comparison/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/term_comparison/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/term_comparison/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "111-112"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/8f0c65b97c49fb90108d4af3067b834fca226bce/tests/prolog/predicates/term_comparison/tests.lgt#L111"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "56b4d4ce092260e0.json",
+  "parameterValues" : [ "predicates/term_comparison/tests.lgt", "111-112", "https://github.com/LogtalkDotOrg/logtalk3/tree/8f0c65b97c49fb90108d4af3067b834fca226bce/tests/prolog/predicates/term_comparison/tests.lgt#L111" ]
+}
