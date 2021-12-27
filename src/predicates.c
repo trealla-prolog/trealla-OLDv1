@@ -10376,7 +10376,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		return do_length(q);
 
 	GET_FIRST_ARG(p1,list_or_nil_or_var);
-	GET_NEXT_ARG(p2,smallint_or_var);
+	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (!is_variable(p1) && !is_nil(p1)) {
 		LIST_HANDLER(p1);
@@ -10389,9 +10389,11 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 			return throw_error(q, p1, p1_ctx, "type_error", "list");
 	}
 
-
 	if (is_negative(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
+
+	if (is_nil(p1) && is_integer(p2))
+		return is_zero(p2);
 
 	if (!is_variable(p1) && !is_nil(p1)
 		&& !is_string(p1) && !is_valid_list_up_to(q, p1, p1_ctx, true, get_smallint(p2)))
@@ -10408,6 +10410,9 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	if (!is_variable(p1) && !is_nil(p1)
 		&& !is_cyclic_term(q, p1, p1_ctx) && !is_valid_list(q, p1, p1_ctx, true))
 		return throw_error(q, p1, p1_ctx, "type_error", "list");
+
+	if (is_bigint(p2))
+		return throw_error(q, p2, p2_ctx, "type_error", "integer");
 
 	if (!is_variable(p1) && is_valid_list(q, p1, p1_ctx, false)
 		&& is_variable(p2)) {
