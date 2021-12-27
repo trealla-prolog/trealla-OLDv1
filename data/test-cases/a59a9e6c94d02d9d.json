@@ -1,0 +1,51 @@
+{
+  "uid" : "a59a9e6c94d02d9d",
+  "name" : "iso_acyclic_term_1_01",
+  "fullName" : "iso_acyclic_term_1_01::tests",
+  "historyId" : "iso_acyclic_term_1_01::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/acyclic_term_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/acyclic_term_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/acyclic_term_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/acyclic_term_1/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "35-36"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree//tests/prolog/predicates/acyclic_term_1/tests.lgt#L35"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "a59a9e6c94d02d9d.json",
+  "parameterValues" : [ "predicates/acyclic_term_1/tests.lgt", "35-36", "https://github.com/LogtalkDotOrg/logtalk3/tree//tests/prolog/predicates/acyclic_term_1/tests.lgt#L35" ]
+}
