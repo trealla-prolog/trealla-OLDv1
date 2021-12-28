@@ -92,6 +92,9 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 #endif
 
 	while (!g_tpl_interrupt) {
+		if (done)
+			break;
+
 		if ((fast == slow) && (fast_ctx == slow_ctx))
 			break;
 
@@ -104,10 +107,7 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 		}
 #endif
 
-		if ((max == ++cnt) || done){
-			if (done)
-				--cnt;
-
+		if (max == ++cnt) {
 			*skip = cnt;
 			*head_ctx = fast_ctx;
 			return fast;
@@ -117,8 +117,11 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 		++length;
 	}
 
-	if (done)
-		return NULL;
+	if (done) {
+		*skip = cnt;
+		*head_ctx = fast_ctx;
+		return fast;
+	}
 
 	// length stores actual length of the loop.
 	// Now set slow to the beginning
