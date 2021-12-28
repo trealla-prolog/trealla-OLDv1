@@ -902,6 +902,8 @@ plus(X,Y,S) :- var(X), nonvar(Y), nonvar(S),
 plus(_,_,_) :-
 	throw(error(instantiation_error, plus/3)).
 
+:- meta_predicate(plus(?,?)).
+
 succ(X,S) :- nonvar(X), Y=1, nonvar(Y),
 	must_be(X, integer, succ/2, _), must_be(Y, integer, succ/2, _), !,
 	(	X >= 0
