@@ -11781,7 +11781,7 @@ static void load_properties(module *m)
 	format_property(m, tmpbuf, sizeof(tmpbuf), "fail", 0, "control_construct"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "|", 2, "meta_predicate((:|+))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "time", 1, "meta_predicate(time(0))"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), "call_cleanup", 3, "meta_predicate(call_cleanup(0,0,0))"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "call_cleanup", 2, "meta_predicate(call_cleanup(0,0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "setup_call_cleanup", 3, "meta_predicate(setup_call_cleanup(0,0,0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "asserta", 1, "meta_predicate(asserta(:))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "assertz", 1, "meta_predicate(assertz(:))"); ASTRING_strcat(pr, tmpbuf);
