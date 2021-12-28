@@ -1509,7 +1509,7 @@ static void dump_vars(query *q, bool partial)
 	}
 
 	q->is_dump_vars = false;
-	q->variable_names = NULL;
+	clear_write_options(q);
 
 	if (any && !partial) {
 		fprintf(stdout, ".\n");

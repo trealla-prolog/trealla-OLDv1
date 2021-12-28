@@ -1088,6 +1088,7 @@ char *print_term_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running)
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
 	}
 
+	clear_write_options(q);
 	char *buf = malloc(len+10);
 	ensure(buf);
 	len = print_term_to_buf(q, buf, len+1, c, c_ctx, running, false, 0);
@@ -1106,6 +1107,7 @@ pl_status print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, i
 	char *dst = malloc(len+10);
 	may_ptr_error(dst);
 	len = print_term_to_buf(q, dst, len+1, c, c_ctx, running, false, 0);
+	clear_write_options(q);
 	const char *src = dst;
 
 	while (len) {
@@ -1138,6 +1140,7 @@ pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 	char *dst = malloc(len+10);
 	may_ptr_error(dst);
 	len = print_term_to_buf(q, dst, len+1, c, c_ctx, running, false, 0);
+	clear_write_options(q);
 	const char *src = dst;
 
 	while (len) {
