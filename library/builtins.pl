@@ -122,9 +122,6 @@ deterministic(Goal, Det) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Derived from code by R.A. O'Keefe
 
-:- meta_predicate(setof(-,0,?)).
-:- meta_predicate(bagof(-,0,?)).
-
 setof(Template, Generator, Set) :-
     ( 	var(Set)
     -> 	true
@@ -139,6 +136,9 @@ bagof(Template, Generator, Bag) :-
 	;	must_be(Bag, list_or_partial_list, bagof/3, _)
 	),
 	bagof_(Template, Generator, Bag).
+
+:- meta_predicate(setof(-,0,?)).
+:- meta_predicate(bagof(-,0,?)).
 
 bagof_(Template, Generator, Bag) :-
 	acyclic_term(Generator),
@@ -547,8 +547,6 @@ recorda(K, V, R) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V), R).
 recordz(K, V, R) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V), R).
 recorded(K, V, R) :- nonvar(K), clause('$record_key'(K,V), _, R).
 
-:- meta_predicate(call_with_time_limit(+,0)).
-
 call_with_time_limit(Time, Goal) :-
 	Time0 is truncate(Time * 1000),
 	'$alarm'(Time0),
@@ -557,14 +555,15 @@ call_with_time_limit(Time, Goal) :-
 	;	('$alarm'(0), fail)
 	).
 
-:- meta_predicate(time_out(0,+,-)).
-
 time_out(Goal, Time, Result) :-
 	'$alarm'(Time),
 	(	catch(once(Goal), E, ('$alarm'(0), throw(E)))
 	->	('$alarm'(0), Result = success)
 	;	('$alarm'(0), fail)
 	).
+
+:- meta_predicate(call_with_time_limit(+,0)).
+:- meta_predicate(time_out(0,+,-)).
 
 atomic_list_concat(L, Atom) :- atomic_list_concat(L, '', Atom).
 format(F) :- format(F, []).
@@ -888,8 +887,6 @@ portray_atts(Term) :-
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- meta_predicate(plus(?,?,?)).
-
 plus(X,Y,S) :- nonvar(X), nonvar(Y),
 	must_be(X, integer, plus/3, _), must_be(Y, integer, plus/3, _), !,
 	S is X + Y.
@@ -901,8 +898,6 @@ plus(X,Y,S) :- var(X), nonvar(Y), nonvar(S),
 	X is S - Y.
 plus(_,_,_) :-
 	throw(error(instantiation_error, plus/3)).
-
-:- meta_predicate(plus(?,?)).
 
 succ(X,S) :- nonvar(X), Y=1, nonvar(Y),
 	must_be(X, integer, succ/2, _), must_be(Y, integer, succ/2, _), !,

@@ -353,8 +353,6 @@ void set_meta_predicate_in_db(module *m, cell *c)
 		pr->is_meta_predicate = true;
 	} else
 		m->error = true;
-
-	push_property(m, GET_STR(m, c), c->arity, "static");
 }
 
 void set_persist_in_db(module *m, const char *name, unsigned arity)
@@ -749,7 +747,6 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 		} else {
 			if (m->prebuilt) {
 				push_property(m, GET_STR(m, c), c->arity, "built_in");
-				push_property(m, GET_STR(m, c), c->arity, "private");
 			}
 
 			push_property(m, GET_STR(m, c), c->arity, "static");
