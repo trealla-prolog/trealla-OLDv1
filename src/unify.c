@@ -110,18 +110,17 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 	cell *fast = term_next(q, head, &fast_ctx, &done);
 	pl_int_t length = 1, cnt = 0;
 
-#if 1
+#define DO_BRENT 1		// If 0 it's basically Floyd
+
+#if DO_BRENT
 	int power = 1;
 #endif
 
-	while (!g_tpl_interrupt) {
-		if (done)
-			break;
-
+	while (!g_tpl_interrupt && !done) {
 		if ((fast == slow) && (fast_ctx == slow_ctx))
 			break;
 
-#if 1
+#if DO_BRENT
 		if (length == power) {
 			power *= 2;
 			length = 0;
