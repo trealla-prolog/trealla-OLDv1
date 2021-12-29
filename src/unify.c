@@ -69,7 +69,7 @@ static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx, bool *done)
 	return c;
 }
 
-// This uses Brent's algorithm...
+// This uses Brent's method...
 
 cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_int_t *skip, cell *tmp)
 {
