@@ -7821,8 +7821,6 @@ static USE_RESULT pl_status fn_sys_mustbe_list_or_var_1(query *q)
 	return pl_success;
 }
 
-// Just working on a dot-list for now... this is work-in-progress
-
 static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
