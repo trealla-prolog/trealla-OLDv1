@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <float.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 
 #include "internal.h"
 #include "parser.h"
@@ -1136,6 +1137,15 @@ module *load_file(module *m, const char *filename)
 		return m;
 
 	filename = set_loaded(m, realbuf);
+
+	struct stat st = {0};
+	stat(filename, &st);
+
+	if ((st.st_mode & S_IFMT) == S_IFDIR) {
+		free(realbuf);
+		return NULL;
+	}
+
 	FILE *fp = fopen(filename, "r");
 
 	if (!fp) {
