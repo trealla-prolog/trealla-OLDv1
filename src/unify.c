@@ -71,8 +71,31 @@ static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx, bool *done)
 
 // This uses Brent's algorithm...
 
-cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_int_t *skip)
+cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_int_t *skip, cell *tmp)
 {
+	if (is_string(head)) {
+		const char *src = GET_STR(q, head);
+		size_t len_src = LEN_STR(q, head);
+		const char *save_src = src;
+
+		while ((max-- > 0) && (len_src > 0)) {
+			size_t len = len_char_utf8(src);
+			len_src -= len;
+			src += len;
+			*skip += 1;
+		}
+
+		if (LEN_STR(q, head) == (size_t)(src-save_src)) {
+			make_literal(tmp, g_nil_s);
+		} else if (src == save_src) {
+			tmp = head;
+		} else {
+			may_error(make_stringn(tmp, src, LEN_STR(q, head) - (src-save_src)));
+		}
+
+		return tmp;
+	}
+
 	if (!head)
 		return NULL;
 

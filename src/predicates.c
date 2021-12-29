@@ -7834,38 +7834,9 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 		return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
 
 	pl_int_t skip=0, max = is_integer(p2) ? get_int(p2) : PL_INT_MAX;
-
-	if (is_string(p3)) {
-		const char *src = GET_STR(q, p3);
-		size_t len_src = LEN_STR(q, p3);
-		const char *save_src = src;
-
-		while ((max-- > 0) && (len_src > 0)) {
-			size_t len = len_char_utf8(src);
-			len_src -= len;
-			src += len;
-			skip++;
-		}
-
-		if (LEN_STR(q, p3) == (size_t)(src-save_src)) {
-			cell tmp;
-			make_literal(&tmp, g_nil_s);
-			set_var(q, p4, p4_ctx, &tmp, q->st.curr_frame);
-		} else if (src == save_src) {
-			set_var(q, p4, p4_ctx, p3, p3_ctx);
-		} else {
-			cell tmp;
-			may_error(make_stringn(&tmp, src, LEN_STR(q, p3) - (src-save_src)));
-			set_var(q, p4, p4_ctx, &tmp, q->st.curr_frame);
-		}
-
-		cell tmp;
-		make_int(&tmp, skip);
-		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	}
-
 	pl_idx_t c_ctx = p3_ctx;
-	cell *c = detect_cycle(q, p3, &c_ctx, max, &skip);
+	cell tmp;
+	cell *c = detect_cycle(q, p3, &c_ctx, max, &skip, &tmp);
 
 	if (!c) {
 		c_ctx = p3_ctx;
@@ -7877,7 +7848,6 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 	if (ok != pl_success)
 		return ok;
 
-	cell tmp;
 	make_int(&tmp, skip);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
