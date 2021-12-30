@@ -168,6 +168,7 @@ static void make_smalln(cell *tmp, const char *s, size_t n)
 	tmp->nbr_cells = 1;
 	memcpy(tmp->val_chr, s, n);
 	tmp->val_chr[n] = '\0';
+	tmp->chr_len = n;
 }
 
 static void make_small(cell *tmp, const char *s)
@@ -910,7 +911,7 @@ static USE_RESULT pl_status fn_iso_char_code_2(query *q)
 		char tmpbuf[256];
 		int n = put_char_utf8(tmpbuf, get_int(p2));
 		cell tmp;
-		may_error(make_cstringn(&tmp, tmpbuf, n));
+		make_smalln(&tmp, tmpbuf, n);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -3587,7 +3588,7 @@ static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 	char tmpbuf[80];
 	n = put_char_utf8(tmpbuf, ch);
 	cell tmp;
-	may_error(make_cstringn(&tmp, tmpbuf, n));
+	make_smalln(&tmp, tmpbuf, n);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -3660,7 +3661,7 @@ static USE_RESULT pl_status fn_iso_get_char_2(query *q)
 	char tmpbuf[80];
 	n = put_char_utf8(tmpbuf, ch);
 	cell tmp;
-	may_error(make_cstringn(&tmp, tmpbuf, n));
+	make_smalln(&tmp, tmpbuf, n);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 

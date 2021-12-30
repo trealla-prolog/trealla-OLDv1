@@ -68,7 +68,7 @@ typedef enum {
 #define IDX_MAX (ERR_IDX-1)
 #define ERR_CYCLE_CMP -2
 
-#define MAX_SMALL_STRING 16
+#define MAX_SMALL_STRING 15
 #define MAX_VAR_POOL_SIZE 4000
 #define MAX_ARITY UCHAR_MAX
 #define MAX_QUEUES 16
@@ -190,7 +190,7 @@ typedef struct {
 	( !is_cstring(c) ? strlen((pl)->pool + (c)->val_off)		\
 	: is_strbuf(c) ? (c)->strb_len								\
 	: is_static(c) ? (c)->str_len								\
-	: strlen((c)->val_chr)										\
+	: (c)->chr_len												\
 	)
 
 #define _CMP_SLICE(pl,c,str,len) slicecmp(_GET_STR(pl, c), _LEN_STR(pl, c), str, len)
@@ -328,6 +328,7 @@ struct cell_ {
 
 		struct {
 			char val_chr[MAX_SMALL_STRING];
+			uint8_t	chr_len;
 		};
 
 		struct {

@@ -59,6 +59,7 @@ cell *list_head(cell *l, cell *tmp)
 	tmp->arity = 0;
 	memcpy(tmp->val_chr, src, len);
 	tmp->val_chr[len] = '\0';
+	tmp->chr_len = len;
 	return tmp;
 }
 
@@ -2929,6 +2930,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			if ((p->toklen < MAX_SMALL_STRING) && !p->string) {
 				memcpy(c->val_chr, p->token, p->toklen);
 				c->val_chr[p->toklen] = '\0';
+				c->chr_len = p->toklen;
 			} else {
 				if (p->string) {
 					c->flags |= FLAG_STRING;
