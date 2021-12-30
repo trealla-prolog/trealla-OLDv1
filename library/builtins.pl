@@ -88,6 +88,8 @@ call_cleanup(G, C) :-
 		(catch((\+ \+ call(C)), _, true), throw(Err))
 	).
 
+:- meta_predicate(call_cleanup(0,0)).
+
 setup_call_cleanup(S, G, C) :-
 	once(S),
 	'$register_cleanup'(ignore(C)),
@@ -97,6 +99,8 @@ setup_call_cleanup(S, G, C) :-
 		(catch((\+ \+ call(C)), _, true), throw(Err))
 	).
 
+:- meta_predicate(call_cleanup(0,0,0)).
+
 throw(E) :-
 	'$throw'(E).
 
@@ -105,6 +109,8 @@ catch(G, E, C) :-
 	'$call'('$catch'(G, E, C)),
 	Before0 is Before + 1,
 	'$cut_if_det'(Before0).
+
+:- meta_predicate(catch(0,?,0)).
 
 findall(T, G, B, Tail) :-
 	'$mustbe_list_or_var'(B),
@@ -460,6 +466,8 @@ phrase_from_file(P, Filename, Opts) :-
 phrase(GRBody, S0) :-
 	phrase(GRBody, S0, []).
 
+:- meta_predicate(phrase(//,?)).
+
 phrase(GRBody, S0, S) :-
 	(	var(GRBody)
 	->	throw(error(instantiation_error, phrase/3))
@@ -471,6 +479,8 @@ phrase(GRBody, S0, S) :-
 			)
 		)
 	).
+
+:- meta_predicate(phrase(//,?,?)).
 
 phrase_([], S, S).
 	phrase_(!, S, S).

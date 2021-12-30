@@ -11753,8 +11753,6 @@ static void load_properties(module *m)
 	format_property(m, tmpbuf, sizeof(tmpbuf), "fail", 0, "control_construct"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "|", 2, "meta_predicate((:|+))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "time", 1, "meta_predicate(time(0))"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), "call_cleanup", 2, "meta_predicate(call_cleanup(0,0))"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), "setup_call_cleanup", 3, "meta_predicate(setup_call_cleanup(0,0,0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "asserta", 1, "meta_predicate(asserta(:))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "assertz", 1, "meta_predicate(assertz(:))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "retract", 1, "meta_predicate(retract(:))"); ASTRING_strcat(pr, tmpbuf);
@@ -11762,10 +11760,7 @@ static void load_properties(module *m)
 	format_property(m, tmpbuf, sizeof(tmpbuf), "current_predicate", 1, "meta_predicate(current_predicate(:))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "predicate_property", 1, "meta_predicate(predicate_property(:,?))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "abolish", 1, "meta_predicate(abolish(:))"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), "clause", 2, "meta_predicate(abolish(:,?))"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), "catch", 3, "meta_predicate(catch(0,?,0))"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), "phrase", 2, "meta_predicate(phrase(2,?))"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), "phrase", 3, "meta_predicate(phrase(2,?,?))"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "clause", 2, "meta_predicate(clause(:,?))"); ASTRING_strcat(pr, tmpbuf);
 
 	for (int i = 2; i <= 7; i++) {
 		char metabuf[256];
