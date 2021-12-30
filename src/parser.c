@@ -1990,29 +1990,26 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 {
-	char *s = *src, *d = *dst;
 	unsigned line_nbr = p->line_nbr;
+	char *s = *src, *d = *dst;
 
 	if (*s != lh)
 		return false;
 
-	s++;
-
 	char *dup_src = strdup(*src);
-	p->srcptr = s;
+	p->srcptr = ++s;
 	s = eat_space(p);
 
 	if (*s != rh) {
 		if (p->did_getline) {
 			size_t len1 = strlen(dup_src);
-			size_t len2 = len1 + strlen(p->srcptr);
+			size_t len2 = len1 + strlen(s);
 			char *tmp = malloc(len2+1);
 			strcpy(tmp, dup_src);
-			strcat(tmp, p->srcptr);
+			strcpy(tmp+len1, s);
 			free(p->save_line);
-			p->srcptr = p->save_line = tmp;
-			p->n_line = len2;
-			*src = p->srcptr;
+			*src = p->srcptr = p->save_line = tmp;
+			p->n_line = len2 + 1;
 		}
 
 		free(dup_src);
@@ -2083,6 +2080,12 @@ char *eat_space(parser *p)
 
 			if (*src == '\n')
 				p->line_nbr++;
+
+			if (*src) {
+				src++;
+				done = false;
+				continue;
+			}
 
 			if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
 				p->srcptr = NULL;
