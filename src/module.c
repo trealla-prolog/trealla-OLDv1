@@ -1093,6 +1093,8 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 
 module *load_file(module *m, const char *filename)
 {
+	const char *orig_filename = filename;
+
 	if (!strcmp(filename, "user")) {
 		for (int i = 0; i < MAX_STREAMS; i++) {
 			stream *str = &m->pl->streams[i];
@@ -1142,8 +1144,12 @@ module *load_file(module *m, const char *filename)
 	stat(filename, &st);
 
 	if ((st.st_mode & S_IFMT) == S_IFDIR) {
-		free(realbuf);
-		return NULL;
+		char *tmpbuf = malloc(strlen(orig_filename+20));
+		strcpy(tmpbuf, orig_filename);
+		strcat(tmpbuf, ".pl");
+		m = load_file(m, tmpbuf);
+		free(tmpbuf);
+		return m;
 	}
 
 	FILE *fp = fopen(filename, "r");
