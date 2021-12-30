@@ -1632,7 +1632,7 @@ static int get_hex(const char **srcptr, unsigned n, bool *error)
 
 const char *g_escapes = "\e\a\f\b\t\v\r\n\x20\x7F\'\\\"`";
 const char *g_anti_escapes = "eafbtvrnsd'\\\"`";
-#define ALLOW_UNICODE_ESCAPE false
+#define ALLOW_UNICODE_ESCAPE true
 
 static int get_escape(const char **_src, bool *error, bool number)
 {
