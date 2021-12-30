@@ -25,7 +25,7 @@ void try_me(query *q, unsigned vars);
 void call_attrs(query *q, cell *attrs);
 void stash_me(query *q, rule *t, bool last_match);
 void trim_trail(query *q);
-bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
+bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx);
 pl_status do_post_unification_hook(query *q);
 
 bool find_exception_handler(query *q, cell *e);
@@ -122,7 +122,7 @@ inline static bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t
 	q->info2 = &info2;
 	q->save_tp = q->st.tp;
 	q->has_attrs = q->cycle_error = false;
-	bool ok = unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
+	bool ok = unify_internal(q, p1, p1_ctx, p2, p2_ctx);
 	q->info1 = q->info2 = NULL;
 	return ok;
 }
