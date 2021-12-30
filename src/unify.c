@@ -69,10 +69,12 @@ static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx, bool *done)
 	return c;
 }
 
-// This uses Brent's method...
+// This uses Brent's algorithm...
 
 cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_int_t *skip, cell *tmp)
 {
+	// Keep string code separate for now...
+
 	if (is_string(head)) {
 		const char *src = GET_STR(q, head);
 		size_t len_src = LEN_STR(q, head);
@@ -96,6 +98,8 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 		return tmp;
 	}
 
+	// Handle ISO lists...
+
 	if (!head)
 		return NULL;
 
@@ -109,25 +113,18 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 	bool done = false;
 	cell *fast = term_next(q, head, &fast_ctx, &done);
 	pl_int_t length = 1, cnt = 0;
-
-#define DO_BRENT 1		// If 0 it's basically Floyd
-
-#if DO_BRENT
 	int power = 1;
-#endif
 
 	while (!g_tpl_interrupt && !done) {
 		if ((fast == slow) && (fast_ctx == slow_ctx))
 			break;
 
-#if DO_BRENT
 		if (length == power) {
 			power *= 2;
 			length = 0;
 			slow = fast;
 			slow_ctx = fast_ctx;
 		}
-#endif
 
 		if (max == ++cnt) {
 			*skip = cnt;
@@ -145,16 +142,11 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 		return fast;
 	}
 
-	// length stores actual length of the loop.
-	// Now set slow to the beginning
-	// and fast to head+length i.e length of the cycle.
-
 	slow = fast = head;
 	fast_ctx = slow_ctx = *head_ctx;
 
-	while (length > 0) {
+	while (length-- > 0) {
 		fast = term_next(q, fast, &fast_ctx, &done);
-		--length;
 
 		if (length == max)
 			break;
