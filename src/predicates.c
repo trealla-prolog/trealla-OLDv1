@@ -5291,8 +5291,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 
 		cell *l = end_list(q);
 		may_ptr_error(l);
-		pl_status ok = unify(q, p2, p2_ctx, l, q->st.curr_frame);
-		return ok;
+		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	} else if (!CMP_SLICE2(q, p1, "unknown")) {
 		cell tmp;
 		make_literal(&tmp,
@@ -6487,8 +6486,7 @@ static USE_RESULT pl_status fn_split_atom_4(query *q)
 
 	l = end_list(q);
 	may_ptr_error(l);
-	pl_status ok = unify(q, p4, p4_ctx, l, q->st.curr_frame);
-	return ok;
+	return unify(q, p4, p4_ctx, l, q->st.curr_frame);
 }
 
 static USE_RESULT pl_status fn_split_4(query *q)
