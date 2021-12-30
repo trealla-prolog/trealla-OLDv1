@@ -1,0 +1,51 @@
+{
+  "uid" : "e8107a4c4b6109a9",
+  "name" : "lgt_bitwise_right_shift_2_07",
+  "fullName" : "lgt_bitwise_right_shift_2_07::tests",
+  "historyId" : "lgt_bitwise_right_shift_2_07::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/bitwise_right_shift_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "functions/bitwise_right_shift_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "functions/bitwise_right_shift_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "functions/bitwise_right_shift_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "63-64"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/2d9fa064ca81d622bf57e839dc120a8c30986c98/tests/prolog/functions/bitwise_right_shift_2/tests.lgt#L63"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "e8107a4c4b6109a9.json",
+  "parameterValues" : [ "functions/bitwise_right_shift_2/tests.lgt", "63-64", "https://github.com/LogtalkDotOrg/logtalk3/tree/2d9fa064ca81d622bf57e839dc120a8c30986c98/tests/prolog/functions/bitwise_right_shift_2/tests.lgt#L63" ]
+}
