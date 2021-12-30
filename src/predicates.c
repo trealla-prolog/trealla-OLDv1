@@ -908,9 +908,9 @@ static USE_RESULT pl_status fn_iso_char_code_2(query *q)
 
 	if (is_variable(p1)) {
 		char tmpbuf[256];
-		put_char_utf8(tmpbuf, get_int(p2));
+		int n = put_char_utf8(tmpbuf, get_int(p2));
 		cell tmp;
-		make_small(&tmp, tmpbuf);
+		may_error(make_cstringn(&tmp, tmpbuf, n));
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -3585,9 +3585,9 @@ static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 	}
 
 	char tmpbuf[80];
-	put_char_utf8(tmpbuf, ch);
+	n = put_char_utf8(tmpbuf, ch);
 	cell tmp;
-	make_small(&tmp, tmpbuf);
+	may_error(make_cstringn(&tmp, tmpbuf, n));
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -3658,9 +3658,9 @@ static USE_RESULT pl_status fn_iso_get_char_2(query *q)
 	}
 
 	char tmpbuf[80];
-	put_char_utf8(tmpbuf, ch);
+	n = put_char_utf8(tmpbuf, ch);
 	cell tmp;
-	make_small(&tmp, tmpbuf);
+	may_error(make_cstringn(&tmp, tmpbuf, n));
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
