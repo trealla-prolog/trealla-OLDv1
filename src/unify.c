@@ -344,10 +344,12 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 	if (!depth)
 		q->cycle_error = false;
 
+#if 0
 	if (depth >= MAX_DEPTH) {
 		q->cycle_error = true;
 		return true;
 	}
+#endif
 
 	if (p1->arity != p2->arity)
 		return false;
@@ -393,7 +395,7 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 			}
 		}
 
-		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
+		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth++))
 			return false;
 
 		if (q->cycle_error)
@@ -441,7 +443,7 @@ static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, 
 		c2 = deref(q, c2, p2_ctx);
 		pl_idx_t c2_ctx = q->latest_ctx;
 
-		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1)) {
+		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth++)) {
 			if (q->cycle_error)
 				return true;
 
