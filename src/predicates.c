@@ -11935,7 +11935,7 @@ static void load_ops(query *q)
 		ASTRING_strcat(pr, tmpbuf);
 	}
 
-	//printf("%s", tmpbuf);
+	//printf("%s", ASTRING_cstr(pr));
 
 	parser *p = create_parser(q->st.m);
 	p->srcptr = ASTRING_cstr(pr);

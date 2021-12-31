@@ -2374,10 +2374,19 @@ bool get_token(parser *p, int last_op)
 				continue;
 			}
 
-			if (search_op(p->m, p->token, NULL, false)) {
-				p->is_op = true;
+			if (strcmp(p->token, "[")
+				&& strcmp(p->token, "(")
+				&& strcmp(p->token, "{")
+				&& strcmp(p->token, "]")
+				&& strcmp(p->token, ")")
+				&& strcmp(p->token, "}"))
+			{
+				if (search_op(p->m, p->token, NULL, false)) {
+					p->is_op = true;
 
-				if (!strcmp(p->token, ","))
+					if (!strcmp(p->token, ","))
+						p->quote_char = -1;
+				} else
 					p->quote_char = -1;
 			} else
 				p->quote_char = -1;
