@@ -327,8 +327,8 @@ struct cell_ {
 		};
 
 		struct {
-			char val_chr[MAX_SMALL_STRING];
 			uint8_t	chr_len;
+			char val_chr[MAX_SMALL_STRING];
 		};
 
 		struct {
