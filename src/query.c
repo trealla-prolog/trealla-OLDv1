@@ -1547,6 +1547,7 @@ static int check_interrupt(query *q)
 		if ((ch == ';') || (ch == ' ')) {
 			q->trace = true;
 			q->creep = true;
+			q->pl->did_dump_vars = false;
 			return 0;
 		}
 
@@ -1598,6 +1599,7 @@ static bool check_redo(query *q)
 			printf("\n; ");
 			fflush(stdout);
 			q->retry = QUERY_RETRY;
+			q->pl->did_dump_vars = false;
 			break;
 		}
 
