@@ -7815,14 +7815,14 @@ static USE_RESULT pl_status fn_sys_mustbe_list_or_var_1(query *q)
 static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	GET_NEXT_ARG(p2,smallint_or_var);
+	GET_NEXT_ARG(p2,integer_or_var);
 	GET_NEXT_ARG(p3,list_or_atom_or_var);
 	GET_NEXT_ARG(p4,list_or_nil_or_var);
 
 	if (is_integer(p2) && is_negative(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
 
-	pl_int_t skip=0, max = is_integer(p2) ? get_int(p2) : PL_INT_MAX;
+	pl_int_t skip=0, max = is_smallint(p2) ? get_smallint(p2) : PL_INT_MAX;
 	pl_idx_t c_ctx = p3_ctx;
 	cell tmp;
 	cell *c = detect_cycle(q, p3, &c_ctx, max, &skip, &tmp);
