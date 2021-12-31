@@ -99,7 +99,7 @@ setup_call_cleanup(S, G, C) :-
 		(catch((\+ \+ call(C)), _, true), throw(Err))
 	).
 
-:- meta_predicate(call_cleanup(0,0,0)).
+:- meta_predicate(setup_call_cleanup(0,0,0)).
 
 throw(E) :-
 	'$throw'(E).
@@ -124,6 +124,8 @@ deterministic(Goal, Det) :-
 	->	Det = false
 	;	true
 	).
+
+:- meta_predicate(deterministic(0,?)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Derived from code by R.A. O'Keefe
