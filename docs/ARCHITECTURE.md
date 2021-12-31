@@ -144,15 +144,16 @@ A small string < 16 bytes.
    12   |                                         |
         +                 val_chr[16]             +
    16   |                                         |
-        +                                         +
-   20   |                                         |
+        +                               +---------+
+   20   |                               | chr_len |
         +----------+---------+----------+---------+
 ```
 
 Where *tag* is TAG_CSTRING.
 Where *arity* is always 0.
 Where *nbr_cells* is always 1.
-Where *val_chr* is up to 15 bytes of UTF-8 chars, NULL-terminated.
+Where *val_chr* is up to 14 bytes of UTF-8 chars, NULL-terminated.
+Where *chr_len* is the number of bytes (0-14) in *val_chr*.
 
 A Cstring may be used for atoms that are not functors and need quoting.
 
