@@ -78,6 +78,17 @@
       "total" : 68
     }
   }, {
+    "uid" : "fb4ba390283f9e15d7ba85c1c2a4c1a4",
+    "name" : "predicates/format_2/tests_atom.lgt::tests_atom",
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 65,
+      "unknown" : 0,
+      "total" : 65
+    }
+  }, {
     "uid" : "430a68e04dd3714567bd0708385427c4",
     "name" : "predicates/format_2/tests_chars.lgt::tests_chars",
     "statistic" : {
@@ -91,17 +102,6 @@
   }, {
     "uid" : "35ce7c65630bce1fdc47cff730339d9c",
     "name" : "predicates/format_2/tests_codes.lgt::tests_codes",
-    "statistic" : {
-      "failed" : 0,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 65,
-      "unknown" : 0,
-      "total" : 65
-    }
-  }, {
-    "uid" : "fb4ba390283f9e15d7ba85c1c2a4c1a4",
-    "name" : "predicates/format_2/tests_atom.lgt::tests_atom",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
