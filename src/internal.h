@@ -632,6 +632,7 @@ struct parser_ {
 	bool is_op:1;
 	bool skip:1;
 	bool command:1;
+	bool last_close:1;
 };
 
 struct loaded_file {

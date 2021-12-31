@@ -1384,6 +1384,7 @@ void reset(parser *p)
 	p->start_term = true;
 	p->comment = false;
 	p->error = false;
+	p->last_close = false;
 }
 
 static bool dcg_expansion(parser *p)
@@ -2629,7 +2630,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			break;
 		}
 
-		if (!p->quote_char && !last_op && 0 && !strcmp(p->token, "(")) {	// FIXME
+		if (!p->quote_char && p->last_close && !strcmp(p->token, "(")) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error needs operator '%s', line %d\n", p->token, p->line_nbr);
 
@@ -2654,6 +2655,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			c->nbr_cells = p->r->cidx - save_idx;
 			fix_list(c);
 			p->start_term = false;
+			p->last_close = false;
 			last_op = false;
 			continue;
 		}
@@ -2674,6 +2676,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			c = p->r->cells+save_idx;
 			c->nbr_cells = p->r->cidx - save_idx;
 			p->start_term = false;
+			p->last_close = false;
 			last_op = false;
 			continue;
 		}
@@ -2696,6 +2699,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			is_func = false;
 			last_op = false;
 			p->start_term = false;
+			p->last_close = false;
 			continue;
 		}
 
@@ -2734,6 +2738,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			cell *c = make_a_literal(p, g_dot_s);
 			c->arity = 2;
 			p->start_term = true;
+			p->last_close = false;
 			last_op = true;
 			continue;
 		}
@@ -2762,6 +2767,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				break;
 			}
 
+			p->last_close = false;
 			last_op = true;
 			continue;
 		}
@@ -2788,6 +2794,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			last_op = true;
 			last_bar = true;
 			was_consing = true;
+			p->last_close = false;
 			//consing = false;
 			continue;
 		}
@@ -2812,6 +2819,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && !strcmp(p->token, ")")) {
+			p->last_close = true;
 			last_op = false;
 			p->nesting_parens--;
 			analyze(p, begin_idx);
@@ -2819,6 +2827,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && !strcmp(p->token, "]")) {
+			p->last_close = true;
 			last_op = false;
 			p->nesting_brackets--;
 			analyze(p, begin_idx);
@@ -2826,11 +2835,14 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && !strcmp(p->token, "}")) {
+			p->last_close = true;
 			last_op = false;
 			p->nesting_braces--;
 			analyze(p, begin_idx);
 			return arity;
 		}
+
+		p->last_close = false;
 
 		if (p->is_variable && (*p->srcptr == '(')) {
 			if (DUMP_ERRS || !p->do_read_term)
