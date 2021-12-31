@@ -1021,7 +1021,7 @@ bool unload_file(module *m, const char *filename)
 			m_destroy(pr->idx_save);
 			m_destroy(pr->idx);
 			pr->idx_save = pr->idx = NULL;
-			pr->is_abolished = true;
+			//pr->is_abolished = true;
 		}
 	}
 
