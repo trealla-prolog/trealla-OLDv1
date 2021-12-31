@@ -39,7 +39,13 @@ bool needs_quoting(module *m, const char *src, int srclen)
 		return true;
 
 	if (search_op(m, src, NULL, false))
-		return strchr(src, ' ');
+		return strchr(src, ' ')
+			|| !strcmp(src, "(")
+			|| !strcmp(src, ")")
+			|| !strcmp(src, "[")
+			|| !strcmp(src, "]")
+			|| !strcmp(src, "{")
+			|| !strcmp(src, "}");
 
 	if (!iswlower(ch) || !iswalpha(ch)) { // NO %/
 		static const char *s_symbols = "+-*<>=@#^~\\:$.";
