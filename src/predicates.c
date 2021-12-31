@@ -171,12 +171,6 @@ static void make_smalln(cell *tmp, const char *s, size_t n)
 	tmp->chr_len = n;
 }
 
-static void make_small(cell *tmp, const char *s)
-{
-	size_t n = strlen(s);
-	make_smalln(tmp, s, n);
-}
-
 #if 0
 static void init_queue(query* q)
 {
@@ -239,10 +233,8 @@ USE_RESULT pl_status make_cstringn(cell *d, const char *s, size_t n)
 	}
 
 	if (n < MAX_SMALL_STRING) {
-		if (!memchr(s, 0, n)) {
-			make_smalln(d, s, n);
-			return pl_success;
-		}
+		make_smalln(d, s, n);
+		return pl_success;
 	}
 
 	*d = (cell){0};
@@ -3978,9 +3970,9 @@ static USE_RESULT pl_status fn_iso_peek_char_1(query *q)
 
 	str->ungetch = ch;
 	char tmpbuf[80];
-	put_char_utf8(tmpbuf, ch);
+	n = put_char_utf8(tmpbuf, ch);
 	cell tmp;
-	make_small(&tmp, tmpbuf);
+	make_smalln(&tmp, tmpbuf, n);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -4032,9 +4024,9 @@ static USE_RESULT pl_status fn_iso_peek_char_2(query *q)
 
 	str->ungetch = ch;
 	char tmpbuf[80];
-	put_char_utf8(tmpbuf, ch);
+	n = put_char_utf8(tmpbuf, ch);
 	cell tmp;
-	make_small(&tmp, tmpbuf);
+	make_smalln(&tmp, tmpbuf, n);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -10789,9 +10781,9 @@ static USE_RESULT pl_status fn_get_unbuffered_char_1(query *q)
 	}
 
 	char tmpbuf[80];
-	put_char_utf8(tmpbuf, ch);
+	n = put_char_utf8(tmpbuf, ch);
 	cell tmp;
-	make_small(&tmp, tmpbuf);
+	make_smalln(&tmp, tmpbuf, n);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
