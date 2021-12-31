@@ -623,10 +623,9 @@ pl_status throw_error3(query *q, cell *c, __attribute__((unused)) pl_idx_t c_ctx
 		expected = "integer";
 
 	if (!is_variable(c)) {
-		if (needs_quoting(q->st.m, GET_STR(q, goal), LEN_STR(q, goal))) {
-			snprintf(functor, sizeof(functor), "'%s'", GET_STR(q, goal));
-		} else
-			snprintf(functor, sizeof(functor), "%s", GET_STR(q, goal));
+		char *tmpbuf = DUP_SLICE(q, goal);
+		snprintf(functor, sizeof(functor), "%s", tmpbuf);
+		free(tmpbuf);
 	}
 
 	int extra = 0;
