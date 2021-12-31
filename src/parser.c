@@ -2620,6 +2620,23 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
+		if (!p->quote_char && !last_op &&
+			(!strcmp(p->token, "[") || !strcmp(p->token, "{"))) {
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Error: syntax error needs operator '%s', line %d\n", p->token, p->line_nbr);
+
+			p->error = true;
+			break;
+		}
+
+		if (!p->quote_char && !last_op && 0 && !strcmp(p->token, "(")) {	// FIXME
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Error: syntax error needs operator '%s', line %d\n", p->token, p->line_nbr);
+
+			p->error = true;
+			break;
+		}
+
 		if (!p->quote_char && !strcmp(p->token, "[")) {
 			save_idx = p->r->cidx;
 			cell *c = make_a_literal(p, g_dot_s);
