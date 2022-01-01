@@ -22,65 +22,6 @@
 
 #define MAX_ELEMENTS 64
 
-bool needs_quoting(module *m, const char *src, int srclen)
-{
-	if (!*src)
-		return true;
-
-	if (!strcmp(src, ",") || !strcmp(src, ".") || !strcmp(src, "|"))
-		return true;
-
-	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!"))
-		return false;
-
-	int ch = peek_char_utf8(src);
-
-	if (iswupper(ch) || isdigit(ch) || (ch == '_'))
-		return true;
-
-	if (search_op(m, src, NULL, false))
-		return strchr(src, ' ')
-			|| strchr(src, '\'')
-			|| strchr(src, '\"')
-			|| !strcmp(src, "(")
-			|| !strcmp(src, ")")
-			|| !strcmp(src, "[")
-			|| !strcmp(src, "]")
-			|| !strcmp(src, "{")
-			|| !strcmp(src, "}");
-
-	if (!iswlower(ch) || !iswalpha(ch)) { // NO %/
-		static const char *s_symbols = "+-*<>=@#^~\\:$.";
-		int quote = false;
-
-		while (srclen--) {
-			if (!strchr(s_symbols, *src)) {
-				quote = true;
-				break;
-			}
-
-			src++;
-		}
-
-		return quote;
-	}
-
-	while (srclen > 0) {
-		int lench = len_char_utf8(src);
-
-		if (!lench)
-			break;
-
-		int ch = get_char_utf8(&src);
-		srclen -= lench;
-
-		if (!iswalnum(ch) && (ch != '_'))
-			return true;
-	}
-
-	return false;
-}
-
 static bool op_needs_quoting(module *m, const char *src, int srclen)
 {
 	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!"))
@@ -132,6 +73,17 @@ static bool op_needs_quoting(module *m, const char *src, int srclen)
 	}
 
 	return false;
+}
+
+bool needs_quoting(module *m, const char *src, int srclen)
+{
+	if (!*src)
+		return true;
+
+	if (!strcmp(src, ",") || !strcmp(src, ".") || !strcmp(src, "|"))
+		return true;
+
+	return op_needs_quoting(m, src, srclen);
 }
 
 static bool has_spaces(const char *src, int srclen)
