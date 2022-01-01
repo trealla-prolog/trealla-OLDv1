@@ -92,7 +92,7 @@ cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_in
 		} else if (src == save_src) {
 			tmp = head;
 		} else {
-			may_error(make_stringn(tmp, src, LEN_STR(q, head) - (src-save_src)));
+			make_stringn(tmp, src, LEN_STR(q, head) - (src-save_src));
 		}
 
 		return tmp;
