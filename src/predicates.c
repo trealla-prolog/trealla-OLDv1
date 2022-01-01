@@ -2056,8 +2056,11 @@ static void add_stream_properties(query *q, int n)
 			str->ungetch = ch;
 	}
 
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, alias('%s')).\n", n, str->name);
-	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, file_name('%s')).\n", n, str->filename);
+	char tmpbuf2[1024];
+	formatted(tmpbuf2, sizeof(tmpbuf2), str->name, strlen(str->name), false);
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, alias('%s')).\n", n, tmpbuf2);
+	formatted(tmpbuf2, sizeof(tmpbuf2), str->filename, strlen(str->filename), false);
+	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, file_name('%s')).\n", n, tmpbuf2);
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, mode(%s)).\n", n, str->mode);
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, type(%s)).\n", n, str->binary ? "binary" : "text");
 	dst += snprintf(dst, sizeof(tmpbuf)-strlen(tmpbuf), "'$stream_property'(%d, line_count(%d)).\n", n, str->p ? str->p->line_nbr : 1);
@@ -11675,22 +11678,9 @@ void format_property(module *m, char *tmpbuf, size_t buflen, const char *name, u
 	char *dst = tmpbuf;
 
 	if (needs_quoting(m, name, strlen(name))) {
-		char namebuf[512];
-		const char *src = name;
-		char *dst2 = namebuf;
-		size_t len = sizeof(namebuf)-1;
-
-		while (*src && len-- > 1) {
-			if (*src == '\\') {
-				*dst2++ = *src;
-				len--;
-			}
-
-			*dst2++ = *src++;
-		}
-
-		*dst2 = '\0';
-		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$predicate_property'('%s'", namebuf);
+		char tmpbuf2[1024];
+		formatted(tmpbuf2, sizeof(tmpbuf2), name, strlen(name), false);
+		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$predicate_property'('%s'", tmpbuf2);
 	} else
 		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$predicate_property'(%s", name);
 
