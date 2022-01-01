@@ -40,6 +40,8 @@ bool needs_quoting(module *m, const char *src, int srclen)
 
 	if (search_op(m, src, NULL, false))
 		return strchr(src, ' ')
+			|| strchr(src, '\'')
+			|| strchr(src, '\"')
 			|| !strcmp(src, "(")
 			|| !strcmp(src, ")")
 			|| !strcmp(src, "[")
