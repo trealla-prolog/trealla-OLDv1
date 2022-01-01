@@ -1,0 +1,51 @@
+{
+  "uid" : "75994a946d27d765",
+  "name" : "lgt_unbounded_subtraction_04",
+  "fullName" : "lgt_unbounded_subtraction_04::tests",
+  "historyId" : "lgt_unbounded_subtraction_04::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "unbounded/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "unbounded/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "unbounded/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "unbounded/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "79-80"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/9eb41ada256af889b5b7d1d856a1e0667e2a028e/tests/prolog/unbounded/tests.lgt#L79"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "75994a946d27d765.json",
+  "parameterValues" : [ "unbounded/tests.lgt", "79-80", "https://github.com/LogtalkDotOrg/logtalk3/tree/9eb41ada256af889b5b7d1d856a1e0667e2a028e/tests/prolog/unbounded/tests.lgt#L79" ]
+}

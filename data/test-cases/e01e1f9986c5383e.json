@@ -1,0 +1,51 @@
+{
+  "uid" : "e01e1f9986c5383e",
+  "name" : "iso_xor_2_03",
+  "fullName" : "iso_xor_2_03::tests",
+  "historyId" : "iso_xor_2_03::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "skipped",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/xor_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "functions/xor_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "functions/xor_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "functions/xor_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "45-47"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/9eb41ada256af889b5b7d1d856a1e0667e2a028e/tests/prolog/functions/xor_2/tests.lgt#L45"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "e01e1f9986c5383e.json",
+  "parameterValues" : [ "functions/xor_2/tests.lgt", "45-47", "https://github.com/LogtalkDotOrg/logtalk3/tree/9eb41ada256af889b5b7d1d856a1e0667e2a028e/tests/prolog/functions/xor_2/tests.lgt#L45" ]
+}
