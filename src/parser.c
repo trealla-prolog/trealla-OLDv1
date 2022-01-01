@@ -2299,6 +2299,7 @@ bool get_token(parser *p, int last_op)
 				*dst++ = ']';
 				*dst = '\0';
 				p->srcptr = (char*)++src;
+				p->toklen = dst - p->token;
 				return true;
 			}
 
@@ -2306,6 +2307,7 @@ bool get_token(parser *p, int last_op)
 			p->dq_consing = 1;
 			p->quote_char = 0;
 			p->srcptr = (char*)src;
+			p->toklen = dst - p->token;
 			return true;
 		} else if ((p->quote_char == '"') && p->flag.double_quote_chars)
 			p->string = true;
@@ -2392,8 +2394,8 @@ bool get_token(parser *p, int last_op)
 			} else
 				p->quote_char = -1;
 
-			p->toklen = dst - p->token;
 			p->srcptr = (char*)src;
+			p->toklen = dst - p->token;
 			return true;
 		}
 	}
@@ -2445,6 +2447,7 @@ bool get_token(parser *p, int last_op)
 		}
 
 		p->srcptr = (char*)src;
+		p->toklen = dst - p->token;
 		return true;
 	}
 
@@ -2454,6 +2457,7 @@ bool get_token(parser *p, int last_op)
 		//is_matching_pair(p, &dst, (char**)&src, ',',';') ||
 		//is_matching_pair(p, &dst, (char**)&src, ';',',') ||
 		is_matching_pair(p, &dst, (char**)&src, ';',';')) {
+		p->toklen = dst - p->token;
 		return (dst - p->token) != 0;
 	}
 
@@ -2461,6 +2465,7 @@ bool get_token(parser *p, int last_op)
 		dst += sprintf(dst, "=..");
 		p->is_op = true;
 		p->srcptr = (char*)src+3;
+		p->toklen = dst - p->token;
 		return (dst - p->token) != 0;
 	}
 
@@ -2469,6 +2474,7 @@ bool get_token(parser *p, int last_op)
 		*dst++ = *src++;
 		*dst = '\0';
 		p->srcptr = (char*)src;
+		p->toklen = dst - p->token;
 		return (dst - p->token) != 0;
 	}
 
@@ -2501,6 +2507,7 @@ bool get_token(parser *p, int last_op)
 
 	p->is_op = search_op(p->m, p->token, NULL, false);
 	p->srcptr = (char*)src;
+	p->toklen = dst - p->token;
 	return true;
 }
 
