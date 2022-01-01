@@ -11676,20 +11676,7 @@ void format_property(module *m, char *tmpbuf, size_t buflen, const char *name, u
 
 	if (needs_quoting(m, name, strlen(name))) {
 		char namebuf[512];
-		const char *src = name;
-		char *dst2 = namebuf;
-		size_t len = sizeof(namebuf)-1;
-
-		while (*src && len-- > 1) {
-			if (*src == '\\') {
-				*dst2++ = *src;
-				len--;
-			}
-
-			*dst2++ = *src++;
-		}
-
-		*dst2 = '\0';
+		formatted(namebuf, sizeof(namebuf), name, strlen(name), false);
 		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$predicate_property'('%s'", namebuf);
 	} else
 		dst += snprintf(dst, buflen-(dst-tmpbuf), "'$predicate_property'(%s", name);

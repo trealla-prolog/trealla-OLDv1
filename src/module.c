@@ -1089,7 +1089,7 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 
 	ok = !p->error;
 	destroy_parser(p);
-	//free(m->filename);
+	free(m->filename);
 	m->filename = save_filename;
 	return save_m;
 }
