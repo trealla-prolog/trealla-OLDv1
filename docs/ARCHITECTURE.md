@@ -343,5 +343,5 @@ A space for dynamically created terms (compounds). Heap space is
 allocated in arenas as a linked list of ever increasing size.
 
 A term allocated on the heap must be fully contained within one arena,
-to this end terms are first allocated in a temporary space and copied
+to this end terms are first built in a temporary space and copied
 into a suitably sized arena.

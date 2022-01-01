@@ -294,13 +294,13 @@ static USE_RESULT pl_status fn_iso_unify_2(query *q)
 
 static USE_RESULT pl_status fn_iso_notunify_2(query *q)
 {
+	may_error(make_choice(q));
+
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
-	may_error(make_choice(q));
-	try_me(q, 0);
-
 	if (unify(q, p1, p1_ctx, p2, p2_ctx)) {
+		undo_me(q);
 		drop_choice(q);
 		return pl_failure;
 	}
