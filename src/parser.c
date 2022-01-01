@@ -2332,6 +2332,15 @@ bool get_token(parser *p, int last_op)
 					break;
 				}
 
+				if (ch < ' ') {
+					if (DUMP_ERRS || !p->do_read_term)
+						fprintf(stdout, "Error: syntax error, invalid quoted character, line %d\n", p->line_nbr);
+
+					p->error_desc = "illegal_escape";
+					p->error = true;
+					return false;
+				}
+
 				if ((ch == '\\') && p->flag.character_escapes) {
 					int ch2 = *src;
 					ch = get_escape(&src, &p->error, false);
