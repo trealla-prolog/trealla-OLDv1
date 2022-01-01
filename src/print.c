@@ -81,6 +81,59 @@ bool needs_quoting(module *m, const char *src, int srclen)
 	return false;
 }
 
+static bool op_needs_quoting(module *m, const char *src, int srclen)
+{
+	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!"))
+		return false;
+
+	int ch = peek_char_utf8(src);
+
+	if (iswupper(ch) || isdigit(ch) || (ch == '_'))
+		return true;
+
+	if (search_op(m, src, NULL, false))
+		return strchr(src, ' ')
+			|| strchr(src, '\'')
+			|| strchr(src, '\"')
+			|| !strcmp(src, "(")
+			|| !strcmp(src, ")")
+			|| !strcmp(src, "[")
+			|| !strcmp(src, "]")
+			|| !strcmp(src, "{")
+			|| !strcmp(src, "}");
+
+	if (!iswlower(ch) || !iswalpha(ch)) { // NO %/
+		static const char *s_symbols = "+-*<>=@#^~\\:$.";
+		int quote = false;
+
+		while (srclen--) {
+			if (!strchr(s_symbols, *src)) {
+				quote = true;
+				break;
+			}
+
+			src++;
+		}
+
+		return quote;
+	}
+
+	while (srclen > 0) {
+		int lench = len_char_utf8(src);
+
+		if (!lench)
+			break;
+
+		int ch = get_char_utf8(&src);
+		srclen -= lench;
+
+		if (!iswalnum(ch) && (ch != '_'))
+			return true;
+	}
+
+	return false;
+}
+
 static bool has_spaces(const char *src, int srclen)
 {
 	if (!*src)
@@ -971,6 +1024,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
 	int quote = q->quoted && has_spaces(src, LEN_STR(q,c));
+	if (op_needs_quoting(q->st.m, GET_STR(q, c), LEN_STR(q, c))) quote = 1;
 	if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 	dst += plain(dst, dstlen, src, srclen);
 	if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
