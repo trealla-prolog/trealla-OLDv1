@@ -1,0 +1,51 @@
+{
+  "uid" : "460e1c45b736d2d1",
+  "name" : "eclipse_retractall_1_09",
+  "fullName" : "eclipse_retractall_1_09::tests",
+  "historyId" : "eclipse_retractall_1_09::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/retractall_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/retractall_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/retractall_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/retractall_1/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "102-103"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/9eb41ada256af889b5b7d1d856a1e0667e2a028e/tests/prolog/predicates/retractall_1/tests.lgt#L102"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "460e1c45b736d2d1.json",
+  "parameterValues" : [ "predicates/retractall_1/tests.lgt", "102-103", "https://github.com/LogtalkDotOrg/logtalk3/tree/9eb41ada256af889b5b7d1d856a1e0667e2a028e/tests/prolog/predicates/retractall_1/tests.lgt#L102" ]
+}
