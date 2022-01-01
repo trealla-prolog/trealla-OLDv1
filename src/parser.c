@@ -2186,6 +2186,7 @@ bool get_token(parser *p, int last_op)
 		*dst = '\0';
 		p->srcptr = (char*)++src;
 		p->dq_consing = 0;
+		p->toklen = dst - p->token;
 		return true;
 	}
 
@@ -2193,6 +2194,7 @@ bool get_token(parser *p, int last_op)
 		*dst++ = ',';
 		*dst = '\0';
 		p->dq_consing = 1;
+		p->toklen = dst - p->token;
 		return true;
 	}
 
@@ -2218,6 +2220,7 @@ bool get_token(parser *p, int last_op)
 		set_smallint(&p->v, ch);
 		p->v.tag = TAG_INT;
 		p->dq_consing = -1;
+		p->toklen = dst - p->token;
 		return true;
 	}
 
@@ -2283,6 +2286,7 @@ bool get_token(parser *p, int last_op)
 		}
 
 		p->srcptr = (char*)src;
+		p->toklen = dst - p->token;
 		return eat_comment(p);
 	}
 
