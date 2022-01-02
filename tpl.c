@@ -304,11 +304,6 @@ int main(int ac, char *av[])
 		while (isspace(*src))
 			src++;
 
-		if (!strcmp(src, "halt.")) {
-			free(line);
-			break;
-		}
-
 		if (!*src || (*src == '\n')) {
 			free(line);
 			continue;
