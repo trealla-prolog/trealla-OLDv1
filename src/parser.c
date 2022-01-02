@@ -2208,7 +2208,7 @@ bool get_token(parser *p, int last_op)
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, illegal character escape <<%s>>, line %d '%s'\n", p->srcptr, p->line_nbr, p->save_line?p->save_line:"");
 
-				p->error_desc = "illegal_escape";
+				p->error_desc = "illegal_character_escape";
 				p->error = true;
 				return false;
 			}
@@ -2278,7 +2278,7 @@ bool get_token(parser *p, int last_op)
 					if (DUMP_ERRS || !p->do_read_term)
 						fprintf(stdout, "Error: syntax error, float, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
-					p->error_desc = "number";
+					p->error_desc = "float";
 					p->error = true;
 					return false;
 				}
@@ -2336,7 +2336,7 @@ bool get_token(parser *p, int last_op)
 					if (DUMP_ERRS || !p->do_read_term)
 						fprintf(stdout, "Error: syntax error, invalid quoted character, line %d\n", p->line_nbr);
 
-					p->error_desc = "illegal_escape";
+					p->error_desc = "invalid_quoted_character";
 					p->error = true;
 					return false;
 				}
@@ -2354,7 +2354,7 @@ bool get_token(parser *p, int last_op)
 						if (DUMP_ERRS || !p->do_read_term)
 							fprintf(stdout, "Error: syntax error, illegal character escape <<%s>>, line %d, '%s'\n", p->srcptr, p->line_nbr, p->save_line?p->save_line:"");
 
-						p->error_desc = "illegal_escape";
+						p->error_desc = "illegal_character_escape";
 						p->error = true;
 						return false;
 					}
@@ -2381,7 +2381,7 @@ bool get_token(parser *p, int last_op)
 					if (DUMP_ERRS || !p->do_read_term)
 						fprintf(stdout, "Error: syntax error, unterminated quoted atom, line %d, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
-					p->error_desc = "atom";
+					p->error_desc = "unterminated_quoted_atom";
 					p->error = true;
 					return false;
 				}
@@ -2452,7 +2452,7 @@ bool get_token(parser *p, int last_op)
 
 			if (!p->is_op && (*src == '(')) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, or operator expected, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line?p->save_line:"");
+					fprintf(stdout, "Error: syntax error, operator expected, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line?p->save_line:"");
 
 				p->error_desc = "operator_expected";
 				p->error = true;
