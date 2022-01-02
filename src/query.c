@@ -447,6 +447,7 @@ void undo_me(query *q)
 
 void try_me(query *q, unsigned nbr_vars)
 {
+	may_error(check_slot(q, MAX_ARITY));
 	frame *f = GET_FRAME(q->st.fp);
 	f->nbr_slots = f->nbr_vars = nbr_vars;
 	f->base_slot_nbr = q->st.sp;
@@ -758,8 +759,6 @@ pl_status make_choice(query *q)
 	ch->ugen = f->ugen;
 	ch->orig_cgen = ch->cgen = f->cgen;
 	ch->st = q->st;
-
-	may_error(check_slot(q, MAX_ARITY));
 	ch->nbr_vars = f->nbr_vars;
 	ch->nbr_slots = f->nbr_slots;
 	ch->overflow = f->overflow;
