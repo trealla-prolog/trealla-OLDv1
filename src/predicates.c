@@ -5075,7 +5075,9 @@ static bool search_functor(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx
 		if (pr->is_abolished)
 			continue;
 
-		try_me(q, MAX_ARITY);
+		if (try_me(q, MAX_ARITY) != pl_success)
+			return false;
+
 		cell tmpn, tmpa;
 		make_literal(&tmpn, pr->key.val_off);
 		make_int(&tmpa, pr->key.arity);
@@ -5584,7 +5586,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
 		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
-		try_me(q, MAX_ARITY);
+		may_error(try_me(q, MAX_ARITY));
 
 		if (unify(q, p1, p1_ctx, c, q->st.fp)) {
 			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);

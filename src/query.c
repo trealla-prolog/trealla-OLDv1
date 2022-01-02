@@ -90,7 +90,7 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 
 static USE_RESULT pl_status check_trail(query *q)
 {
-	if (q->st.tp > q->max_trails) {
+	while (q->st.tp > q->max_trails) {
 		q->max_trails = q->st.tp;
 
 		if (q->st.tp >= q->trails_size) {
@@ -109,7 +109,7 @@ static USE_RESULT pl_status check_trail(query *q)
 
 static USE_RESULT pl_status check_choice(query *q)
 {
-	if (q->cp > q->max_choices) {
+	while (q->cp > q->max_choices) {
 		q->max_choices = q->cp;
 
 		if (q->cp >= q->choices_size) {
@@ -128,7 +128,7 @@ static USE_RESULT pl_status check_choice(query *q)
 
 static USE_RESULT pl_status check_frame(query *q)
 {
-	if (q->st.fp > q->max_frames) {
+	while (q->st.fp > q->max_frames) {
 		q->max_frames = q->st.fp;
 
 		if (q->st.fp >= q->frames_size) {
@@ -149,7 +149,7 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 {
 	pl_idx_t nbr = q->st.sp + cnt;
 
-	if (nbr > q->max_slots) {
+	while (nbr > q->max_slots) {
 		q->max_slots = nbr;
 
 		if (nbr >= q->slots_size) {
@@ -445,7 +445,7 @@ void undo_me(query *q)
 	unwind_trail(q, ch);
 }
 
-void try_me(query *q, unsigned nbr_vars)
+pl_status try_me(query *q, unsigned nbr_vars)
 {
 	may_error(check_slot(q, MAX_ARITY));
 	frame *f = GET_FRAME(q->st.fp);
@@ -463,6 +463,7 @@ void try_me(query *q, unsigned nbr_vars)
 	q->has_vars = false;
 	q->no_tco = false;
 	q->tot_matches++;
+	return pl_success;
 }
 
 static void trim_heap(query *q, const choice *ch)
@@ -1186,7 +1187,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 			needs_true = true;
 		}
 
-		try_me(q, r->nbr_vars);
+		may_error(try_me(q, r->nbr_vars));
 		q->tot_matches++;
 
 		if (unify(q, p1, p1_ctx, c, q->st.fp)) {
@@ -1284,7 +1285,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 		if ((is_retract == DO_RETRACT) && body)
 			continue;
 
-		try_me(q, r->nbr_vars);
+		may_error(try_me(q, r->nbr_vars));
 		q->tot_matches++;
 
 		if (unify(q, p1, p1_ctx, head, q->st.fp))
@@ -1349,7 +1350,7 @@ static USE_RESULT pl_status match_head(query *q)
 
 		rule *r = &q->st.curr_clause->r;
 		cell *head = get_head(r->cells);
-		try_me(q, r->nbr_vars);
+		may_error(try_me(q, r->nbr_vars));
 
 		if (unify(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp)) {
 			if (q->error) {

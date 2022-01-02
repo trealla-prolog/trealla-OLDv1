@@ -21,7 +21,7 @@ void term_assign_vars(parser *p, unsigned start, bool rebase);
 pl_status start(query *q);
 pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx);
 pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type retract);
-void try_me(query *q, unsigned vars);
+pl_status try_me(query *q, unsigned vars);
 void call_attrs(query *q, cell *attrs);
 void stash_me(query *q, rule *t, bool last_match);
 void trim_trail(query *q);
