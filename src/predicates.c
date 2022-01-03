@@ -389,23 +389,6 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 	cell *p21 = p2;
 	pl_idx_t p21_ctx = p2_ctx;
 
-	if (!src && !p->srcptr && str->fp) {
-		if (getline(&p->save_line, &p->n_line, str->fp) == -1) {
-			if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
-				clearerr(str->fp);
-				return do_yield_0(q, 1);
-			}
-
-			p->srcptr = NULL;
-		} else
-			p->srcptr = p->save_line;
-	}
-
-	if (p->srcptr) {
-		char *src = (char*)eat_space(p);
-		p->srcptr = src;
-	}
-
 	LIST_HANDLER(p21);
 
 	while (is_list(p21) && !g_tpl_interrupt) {
@@ -429,6 +412,23 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 
 	if (!is_nil(p21))
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
+
+	if (!src && !p->srcptr && str->fp) {
+		if (getline(&p->save_line, &p->n_line, str->fp) == -1) {
+			if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+				clearerr(str->fp);
+				return do_yield_0(q, 1);
+			}
+
+			p->srcptr = NULL;
+		} else
+			p->srcptr = p->save_line;
+	}
+
+	if (p->srcptr) {
+		char *src = (char*)eat_space(p);
+		p->srcptr = src;
+	}
 
 	for (;;) {
 #if 0
