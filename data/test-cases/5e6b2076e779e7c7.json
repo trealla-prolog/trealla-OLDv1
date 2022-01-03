@@ -1,0 +1,51 @@
+{
+  "uid" : "5e6b2076e779e7c7",
+  "name" : "assertz_2_05",
+  "fullName" : "assertz_2_05::tests",
+  "historyId" : "assertz_2_05::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/clause_references/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/clause_references/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/clause_references/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/clause_references/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "79-82"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/2214b9cd28d311c837f2fbfa09a219726e1864b6/tests/prolog/predicates/clause_references/tests.lgt#L79"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "5e6b2076e779e7c7.json",
+  "parameterValues" : [ "predicates/clause_references/tests.lgt", "79-82", "https://github.com/LogtalkDotOrg/logtalk3/tree/2214b9cd28d311c837f2fbfa09a219726e1864b6/tests/prolog/predicates/clause_references/tests.lgt#L79" ]
+}
