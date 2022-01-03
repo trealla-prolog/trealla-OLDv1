@@ -2338,6 +2338,7 @@ bool get_token(parser *p, int last_op)
 
 					p->error_desc = "invalid_quoted_character";
 					p->error = true;
+					p->srcptr = (char*)src;
 					return false;
 				}
 
@@ -2356,6 +2357,7 @@ bool get_token(parser *p, int last_op)
 
 						p->error_desc = "illegal_character_escape";
 						p->error = true;
+						p->srcptr = (char*)src;
 						return false;
 					}
 				}
@@ -2383,6 +2385,7 @@ bool get_token(parser *p, int last_op)
 
 					p->error_desc = "unterminated_quoted_atom";
 					p->error = true;
+					p->srcptr = (char*)src;
 					return false;
 				}
 
