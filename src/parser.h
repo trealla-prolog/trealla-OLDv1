@@ -6,7 +6,7 @@ extern parser *create_parser(module *m);
 extern void destroy_parser(parser *p);
 
 extern unsigned tokenize(parser *p, bool args, bool consing);
-extern void xref_rule(parser *p, rule *t, predicate *parent);
+extern void xref_rule(parser *p, clause *t, predicate *parent);
 extern void reset(parser *p);
 extern void consultall(parser *p, cell *l);
 extern void term_to_body(parser *p);
@@ -17,7 +17,7 @@ extern char *eat_space(parser *p);
 extern bool virtual_term(parser *p, const char *src);
 extern bool get_token(parser *p, int last_op);
 
-extern void clear_rule(rule *t);
+extern void clear_rule(clause *t);
 extern void do_reduce(cell *n);
 extern void fix_list(cell *c);
 extern bool check_if_rule(const cell *c);

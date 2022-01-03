@@ -121,11 +121,11 @@ static void destroy_predicate(module *m, predicate *pr)
 {
 	m_del(m->index, &pr->key);
 
-	for (clause *cl = pr->head; cl;) {
-		clause *save = cl->next;
-		clear_rule(&cl->r);
-		free(cl);
-		cl = save;
+	for (db_entry *dbe = pr->head; dbe;) {
+		db_entry *save = dbe->next;
+		clear_rule(&dbe->cl);
+		free(dbe);
+		dbe = save;
 	}
 
 	m_destroy(pr->idx_save);
@@ -244,15 +244,15 @@ int index_cmpkey(const void *ptr1, const void *ptr2, const void *param)
 	return index_cmpkey_(ptr1, ptr2, param, 0);
 }
 
-clause *find_in_db(module *m, uuid *reflist)
+db_entry *find_in_db(module *m, uuid *reflist)
 {
 	for (predicate *pr = m->head; pr; pr = pr->next) {
-		for (clause *cl = pr->head ; cl; cl = cl->next) {
-			if (cl->r.ugen_erased)
+		for (db_entry *dbe = pr->head ; dbe; dbe = dbe->next) {
+			if (dbe->cl.ugen_erased)
 				continue;
 
-			if (!memcmp(&cl->u, reflist, sizeof(uuid)))
-				return cl;
+			if (!memcmp(&dbe->u, reflist, sizeof(uuid)))
+				return dbe;
 		}
 	}
 
@@ -271,12 +271,12 @@ static void push_property(module *m, const char *name, unsigned arity, const cha
 	destroy_parser(p);
 }
 
-clause *erase_from_db(module *m, uuid *reflist)
+db_entry *erase_from_db(module *m, uuid *reflist)
 {
-	clause *cl = find_in_db(m, reflist);
-	if (!cl) return 0;
-	cl->r.ugen_erased = ++m->pl->ugen;
-	return cl;
+	db_entry *dbe = find_in_db(m, reflist);
+	if (!dbe) return 0;
+	dbe->cl.ugen_erased = ++m->pl->ugen;
+	return dbe;
 }
 
 void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
@@ -706,7 +706,7 @@ unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_p
 	return 0;
 }
 
-static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consulting)
+static db_entry* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 {
 	cell *c = p1;
 
@@ -714,7 +714,7 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 		c = get_head(p1);
 
 	if (!c) {
-		fprintf(stdout, "Error: not a fact or clause\n");
+		fprintf(stdout, "Error: not a fact or db_entry\n");
 		return NULL;
 	}
 
@@ -763,28 +763,28 @@ static clause* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consult
 	if (m->prebuilt)
 		pr->is_prebuilt = true;
 
-	clause *cl = calloc(sizeof(clause)+(sizeof(cell)*(p1->nbr_cells+1)), 1);
-	if (!cl) {
+	db_entry *dbe = calloc(sizeof(db_entry)+(sizeof(cell)*(p1->nbr_cells+1)), 1);
+	if (!dbe) {
 		pr->is_abolished = true;
 		return NULL;
 	}
 
-	copy_cells(cl->r.cells, p1, p1->nbr_cells);
-	cl->r.cells[p1->nbr_cells] = (cell){0};
-	cl->r.cells[p1->nbr_cells].tag = TAG_END;
-	cl->r.nbr_vars = nbr_vars;
-	cl->r.nbr_cells = p1->nbr_cells;
-	cl->r.cidx = p1->nbr_cells+1;
-	cl->r.ugen_created = ++m->pl->ugen;
-	cl->filename = m->filename;
-	cl->owner = pr;
-	return cl;
+	copy_cells(dbe->cl.cells, p1, p1->nbr_cells);
+	dbe->cl.cells[p1->nbr_cells] = (cell){0};
+	dbe->cl.cells[p1->nbr_cells].tag = TAG_END;
+	dbe->cl.nbr_vars = nbr_vars;
+	dbe->cl.nbr_cells = p1->nbr_cells;
+	dbe->cl.cidx = p1->nbr_cells+1;
+	dbe->cl.ugen_created = ++m->pl->ugen;
+	dbe->filename = m->filename;
+	dbe->owner = pr;
+	return dbe;
 }
 
-static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
+static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 {
 	if (pr->db_id)
-		cl->db_id = append ? pr->db_id : -pr->db_id;
+		dbe->db_id = append ? pr->db_id : -pr->db_id;
 
 	pr->db_id++;
 	pr->cnt++;
@@ -798,68 +798,68 @@ static void assert_commit(module *m, clause *cl, predicate *pr, bool append)
 		ensure(pr->idx);
 		m_allow_dups(pr->idx, true);
 
-		for (clause *cl2 = pr->head; cl2; cl2 = cl2->next) {
-			cell *c = get_head(cl2->r.cells);
+		for (db_entry *cl2 = pr->head; cl2; cl2 = cl2->next) {
+			cell *c = get_head(cl2->cl.cells);
 
-			if (!cl2->r.ugen_erased)
+			if (!cl2->cl.ugen_erased)
 				m_app(pr->idx, c, cl2);
 		}
 	}
 
-	cell *c = get_head(cl->r.cells);
+	cell *c = get_head(dbe->cl.cells);
 
 	if (!append)
-		m_set(pr->idx, c, cl);
+		m_set(pr->idx, c, dbe);
 	else
-		m_app(pr->idx, c, cl);
+		m_app(pr->idx, c, dbe);
 }
 
-clause *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
+db_entry *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 {
-	clause *cl = assert_begin(m, nbr_vars, p1, consulting);
-	if (!cl) return NULL;
-	predicate *pr = cl->owner;
+	db_entry *dbe = assert_begin(m, nbr_vars, p1, consulting);
+	if (!dbe) return NULL;
+	predicate *pr = dbe->owner;
 
 	if (pr->head)
-		pr->head->prev = cl;
+		pr->head->prev = dbe;
 
-	cl->next = pr->head;
-	pr->head = cl;
+	dbe->next = pr->head;
+	pr->head = dbe;
 
 	if (!pr->tail)
-		pr->tail = cl;
+		pr->tail = dbe;
 
-	assert_commit(m, cl, pr, false);
-	return cl;
+	assert_commit(m, dbe, pr, false);
+	return dbe;
 }
 
-clause *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
+db_entry *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 {
-	clause *cl = assert_begin(m, nbr_vars, p1, consulting);
-	if (!cl) return NULL;
-	predicate *pr = cl->owner;
+	db_entry *dbe = assert_begin(m, nbr_vars, p1, consulting);
+	if (!dbe) return NULL;
+	predicate *pr = dbe->owner;
 
 	if (pr->tail)
-		pr->tail->next = cl;
+		pr->tail->next = dbe;
 
-	cl->prev = pr->tail;
-	pr->tail = cl;
+	dbe->prev = pr->tail;
+	pr->tail = dbe;
 
 	if (!pr->head)
-		pr->head = cl;
+		pr->head = dbe;
 
-	assert_commit(m, cl, pr, true);
-	return cl;
+	assert_commit(m, dbe, pr, true);
+	return dbe;
 }
 
-bool retract_from_db(module *m, clause *cl)
+bool retract_from_db(module *m, db_entry *dbe)
 {
-	if (cl->r.ugen_erased)
+	if (dbe->cl.ugen_erased)
 		return false;
 
-	cl->owner->cnt--;
-	cl->r.ugen_erased = ++m->pl->ugen;
-	cl->filename = NULL;
+	dbe->owner->cnt--;
+	dbe->cl.ugen_erased = ++m->pl->ugen;
+	dbe->filename = NULL;
 	return true;
 }
 
@@ -935,7 +935,7 @@ module *load_text(module *m, const char *src, const char *filename)
 	p->srcptr = (char*)src;
 	tokenize(p, false, false);
 
-	if (!p->error && !p->already_loaded && !p->end_of_term && p->r->cidx) {
+	if (!p->error && !p->already_loaded && !p->end_of_term && p->cl->cidx) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, incomplete statement\n");
 
@@ -1004,16 +1004,16 @@ bool unload_file(module *m, const char *filename)
 	filename = realbuf;
 
 	for (predicate *pr = m->head; pr; pr = pr->next) {
-		for (clause *cl = pr->head; cl; cl = cl->next) {
-			if (cl->r.ugen_erased)
+		for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
+			if (dbe->cl.ugen_erased)
 				continue;
 
-			if (cl->filename && !strcmp(cl->filename, filename)) {
-				if (!retract_from_db(m, cl))
+			if (dbe->filename && !strcmp(dbe->filename, filename)) {
+				if (!retract_from_db(m, dbe))
 					continue;
 
-				cl->dirty = pr->dirty_list;
-				pr->dirty_list = cl;
+				dbe->dirty = pr->dirty_list;
+				pr->dirty_list = dbe;
 			}
 		}
 
@@ -1056,7 +1056,7 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 	}
 	 while (ok && !p->already_loaded);
 
-	if (!p->error && !p->already_loaded && !p->end_of_term && p->r->cidx) {
+	if (!p->error && !p->already_loaded && !p->end_of_term && p->cl->cidx) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, incomplete statement\n");
 
@@ -1188,14 +1188,14 @@ static void module_save_fp(module *m, FILE *fp, int canonical, int dq)
 		if (pr->is_prebuilt)
 			continue;
 
-		for (clause *cl = pr->head; cl; cl = cl->next) {
-			if (cl->r.ugen_erased)
+		for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
+			if (dbe->cl.ugen_erased)
 				continue;
 
 			if (canonical)
-				print_canonical(&q, fp, cl->r.cells, ctx, 0);
+				print_canonical(&q, fp, dbe->cl.cells, ctx, 0);
 			else
-				print_term(&q, fp, cl->r.cells, ctx, 0);
+				print_term(&q, fp, dbe->cl.cells, ctx, 0);
 
 			fprintf(fp, "\n");
 		}

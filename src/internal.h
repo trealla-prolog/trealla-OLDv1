@@ -278,9 +278,9 @@ enum {
 typedef struct module_ module;
 typedef struct query_ query;
 typedef struct predicate_ predicate;
-typedef struct clause_ clause;
+typedef struct db_entry_ db_entry;
 typedef struct cell_ cell;
-typedef struct rule_ rule;
+typedef struct clause_ clause;
 typedef struct trail_ trail;
 typedef struct frame_ frame;
 typedef struct parser_ parser;
@@ -367,7 +367,7 @@ typedef struct {
 	uint64_t u1, u2;
 } uuid;
 
-struct rule_ {
+struct clause_ {
 	uint64_t ugen_created, ugen_erased;
 	pl_idx_t nbr_cells, cidx;
 	uint32_t nbr_vars;
@@ -383,21 +383,21 @@ struct rule_ {
 	cell cells[];
 };
 
-struct clause_ {
+struct db_entry_ {
 	predicate *owner;
-	clause *prev, *next, *dirty;
+	db_entry *prev, *next, *dirty;
 	const char *filename;
 	uint64_t db_id;
 	uuid u;
-	rule r;
+	clause cl;
 };
 
 struct predicate_ {
 	predicate *prev, *next;
-	clause *head, *tail;
+	db_entry *head, *tail;
 	module *m;
 	map *idx, *idx_save;
-	clause *dirty_list;
+	db_entry *dirty_list;
 	cell key;
 	uint64_t cnt, use_cnt, db_id;
 	bool is_prebuilt:1;
@@ -474,7 +474,7 @@ struct stream_ {
 
 struct prolog_state_ {
 	cell *curr_cell;
-	clause *curr_clause, *curr_clause2;
+	db_entry *curr_clause, *curr_clause2;
 	miter *f_iter;
 	predicate *pr, *pr2;
 	module *m;
@@ -542,7 +542,7 @@ struct query_ {
 	cell *queue[MAX_QUEUES], *tmpq[MAX_QUEUES];
 	arena *arenas;
 	slot *save_e;
-	clause *dirty_list;
+	db_entry *dirty_list;
 	cycle_info *info1, *info2;
 	cell accum;
 	mpz_t tmp_ival;
@@ -604,7 +604,7 @@ struct parser_ {
 	prolog *pl;
 	FILE *fp;
 	module *m;
-	rule *r;
+	clause *cl;
 	char *token, *save_line, *srcptr, *error_desc, *tmpbuf;
 	cell v;
 	size_t token_size, n_line, toklen, pos_start, tmpbuf_size;

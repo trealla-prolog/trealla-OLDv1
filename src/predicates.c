@@ -593,13 +593,13 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 		p22_ctx = q->latest_ctx;
 	}
 
-	if (!p->r->cidx) {
+	if (!p->cl->cidx) {
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	xref_rule(p, p->r, NULL);
+	xref_rule(p, p->cl, NULL);
 
 	if (p->nbr_vars) {
 		if (!create_vars(q, p->nbr_vars))
@@ -609,7 +609,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 	q->pl->tab_idx = 0;
 
 	if (p->nbr_vars)
-		collect_vars(q, p->r->cells, q->st.curr_frame);
+		collect_vars(q, p->cl->cells, q->st.curr_frame);
 
 	if (vars) {
 		unsigned cnt = q->pl->tab_idx;
@@ -766,11 +766,11 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 		}
 	}
 
-	cell *tmp = alloc_on_heap(q, p->r->cidx-1);
+	cell *tmp = alloc_on_heap(q, p->cl->cidx-1);
 	may_ptr_error(tmp);
-	safe_copy_cells(tmp, p->r->cells, p->r->cidx-1);
+	safe_copy_cells(tmp, p->cl->cells, p->cl->cidx-1);
 	pl_status ok = unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
-	clear_rule(p->r);
+	clear_rule(p->cl);
 	return ok;
 }
 
@@ -1966,7 +1966,7 @@ static int uuid_from_buf(const char *s, uuid *u)
 
 enum log_type { LOG_ASSERTA=1, LOG_ASSERTZ=2, LOG_ERASE=3 };
 
-static void db_log(query *q, clause *cl, enum log_type l)
+static void db_log(query *q, db_entry *dbe, enum log_type l)
 {
 	char tmpbuf[256];
 	char *dst;
@@ -1974,19 +1974,19 @@ static void db_log(query *q, clause *cl, enum log_type l)
 
 	switch(l) {
 	case LOG_ASSERTA:
-		dst = print_term_to_strbuf(q, cl->r.cells, q->st.curr_frame, 1);
-		uuid_to_buf(&cl->u, tmpbuf, sizeof(tmpbuf));
+		dst = print_term_to_strbuf(q, dbe->cl.cells, q->st.curr_frame, 1);
+		uuid_to_buf(&dbe->u, tmpbuf, sizeof(tmpbuf));
 		fprintf(q->st.m->fp, "'$a_'(%s,'%s').\n", dst, tmpbuf);
 		free(dst);
 		break;
 	case LOG_ASSERTZ:
-		dst = print_term_to_strbuf(q, cl->r.cells, q->st.curr_frame, 1);
-		uuid_to_buf(&cl->u, tmpbuf, sizeof(tmpbuf));
+		dst = print_term_to_strbuf(q, dbe->cl.cells, q->st.curr_frame, 1);
+		uuid_to_buf(&dbe->u, tmpbuf, sizeof(tmpbuf));
 		fprintf(q->st.m->fp, "'$z_'(%s,'%s').\n", dst, tmpbuf);
 		free(dst);
 		break;
 	case LOG_ERASE:
-		uuid_to_buf(&cl->u, tmpbuf, sizeof(tmpbuf));
+		uuid_to_buf(&dbe->u, tmpbuf, sizeof(tmpbuf));
 		fprintf(q->st.m->fp, "'$e_'('%s').\n", tmpbuf);
 		break;
 	}
@@ -2014,14 +2014,14 @@ static pl_status do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_typ
 	if ((match != pl_success) || q->did_throw)
 		return match;
 
-	clause *cl = q->st.curr_clause2;
-	bool last_match = !cl->next && (is_retract == DO_RETRACT);
-	stash_me(q, &cl->r, last_match);
+	db_entry *dbe = q->st.curr_clause2;
+	bool last_match = !dbe->next && (is_retract == DO_RETRACT);
+	stash_me(q, &dbe->cl, last_match);
 
-	if (!q->st.m->loading && cl->owner->is_persist)
-		db_log(q, cl, LOG_ERASE);
+	if (!q->st.m->loading && dbe->owner->is_persist)
+		db_log(q, dbe, LOG_ERASE);
 
-	add_to_dirty_list(q, cl);
+	add_to_dirty_list(q, dbe);
 	return pl_success;
 }
 
@@ -2273,9 +2273,9 @@ static void clear_streams_properties(query *q)
 	predicate *pr = find_predicate(q->st.m, &tmp);
 
 	if (pr) {
-		for (clause *cl = pr->head; cl;) {
-			clause *save = cl;
-			cl = cl->next;
+		for (db_entry *dbe = pr->head; dbe;) {
+			db_entry *save = dbe;
+			dbe = dbe->next;
 			add_to_dirty_list(q, save);
 		}
 
@@ -2337,7 +2337,7 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 		return pl_failure;
 	}
 
-	rule *r = &q->st.curr_clause2->r;
+	clause *r = &q->st.curr_clause2->cl;
 	GET_FIRST_ARG(pstrx,smallint);
 	pstrx->flags |= FLAG_STREAM | FLAG_HEX;
 	stash_me(q, r, false);
@@ -4606,7 +4606,7 @@ static USE_RESULT pl_status fn_iso_clause_2(query *q)
 
 	while (match_clause(q, p1, p1_ctx, DO_CLAUSE) == pl_success) {
 		if (q->did_throw) return pl_success;
-		rule *r = &q->st.curr_clause2->r;
+		clause *r = &q->st.curr_clause2->cl;
 		cell *body = get_body(r->cells);
 		pl_status ok;
 
@@ -4677,11 +4677,11 @@ static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 	if (!pr->is_dynamic)
 		return throw_error(q, c_orig, q->st.curr_frame, "permission_error", "modify,static_procedure");
 
-	for (clause *cl = pr->head; cl; cl = cl->next) {
-		if (!q->st.m->loading && cl->owner->is_persist && !cl->r.ugen_erased)
-			db_log(q, cl, LOG_ERASE);
+	for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
+		if (!q->st.m->loading && dbe->owner->is_persist && !dbe->cl.ugen_erased)
+			db_log(q, dbe, LOG_ERASE);
 
-		add_to_dirty_list(q, cl);
+		add_to_dirty_list(q, dbe);
 	}
 
 	m_destroy(pr->idx);
@@ -4761,7 +4761,7 @@ static void do_term_assign_vars(parser *p, pl_idx_t nbr_cells)
 	uint8_t vars[MAX_ARITY] = {0};
 
 	for (pl_idx_t i = 0; i < nbr_cells; i++) {
-		cell *c = p->r->cells+i;
+		cell *c = p->cl->cells+i;
 
 		if (!is_variable(c))
 			continue;
@@ -4771,7 +4771,7 @@ static void do_term_assign_vars(parser *p, pl_idx_t nbr_cells)
 	}
 
 	for (pl_idx_t i = 0; i < nbr_cells; i++) {
-		cell *c = p->r->cells+i;
+		cell *c = p->cl->cells+i;
 
 		if (!is_variable(c))
 			continue;
@@ -4831,16 +4831,16 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	pl_idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->st.m->p;
 
-	if (nbr_cells > p->r->nbr_cells) {
-		p->r = realloc(p->r, sizeof(rule)+(sizeof(cell)*(nbr_cells+1)));
-		may_ptr_error(p->r);
-		p->r->nbr_cells = nbr_cells;
+	if (nbr_cells > p->cl->nbr_cells) {
+		p->cl = realloc(p->cl, sizeof(clause)+(sizeof(cell)*(nbr_cells+1)));
+		may_ptr_error(p->cl);
+		p->cl->nbr_cells = nbr_cells;
 	}
 
-	p->r->cidx = safe_copy_cells(p->r->cells, tmp, nbr_cells);
+	p->cl->cidx = safe_copy_cells(p->cl->cells, tmp, nbr_cells);
 	do_term_assign_vars(p, nbr_cells);
 	term_to_body(p);
-	cell *h = get_head(p->r->cells);
+	cell *h = get_head(p->cl->cells);
 
 	if (is_cstring(h))
 		convert_to_literal(q->st.m, h);
@@ -4848,13 +4848,13 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	if (!is_literal(h))
 		return throw_error(q, h, q->st.curr_frame, "type_error", "callable");
 
-	clause *cl = asserta_to_db(q->st.m, p->r->nbr_vars, p->r->cells, 0);
-	may_ptr_error(cl);
-	p->r->cidx = 0;
-	uuid_gen(q->pl, &cl->u);
+	db_entry *dbe = asserta_to_db(q->st.m, p->cl->nbr_vars, p->cl->cells, 0);
+	may_ptr_error(dbe);
+	p->cl->cidx = 0;
+	uuid_gen(q->pl, &dbe->u);
 
-	if (!q->st.m->loading && cl->owner->is_persist)
-		db_log(q, cl, LOG_ASSERTA);
+	if (!q->st.m->loading && dbe->owner->is_persist)
+		db_log(q, dbe, LOG_ASSERTA);
 
 	return pl_success;
 }
@@ -4895,16 +4895,16 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	pl_idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->st.m->p;
 
-	if (nbr_cells > p->r->nbr_cells) {
-		p->r = realloc(p->r, sizeof(rule)+(sizeof(cell)*(nbr_cells+1)));
-		may_ptr_error(p->r);
-		p->r->nbr_cells = nbr_cells;
+	if (nbr_cells > p->cl->nbr_cells) {
+		p->cl = realloc(p->cl, sizeof(clause)+(sizeof(cell)*(nbr_cells+1)));
+		may_ptr_error(p->cl);
+		p->cl->nbr_cells = nbr_cells;
 	}
 
-	p->r->cidx = safe_copy_cells(p->r->cells, tmp, nbr_cells);
+	p->cl->cidx = safe_copy_cells(p->cl->cells, tmp, nbr_cells);
 	do_term_assign_vars(p, nbr_cells);
 	term_to_body(p);
-	cell *h = get_head(p->r->cells);
+	cell *h = get_head(p->cl->cells);
 
 	if (is_cstring(h))
 		convert_to_literal(q->st.m, h);
@@ -4912,13 +4912,13 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	if (!is_literal(h))
 		return throw_error(q, h, q->st.curr_frame, "type_error", "callable");
 
-	clause *cl = assertz_to_db(q->st.m, p->r->nbr_vars, p->r->cells, 0);
-	may_ptr_error(cl);
-	p->r->cidx = 0;
-	uuid_gen(q->pl, &cl->u);
+	db_entry *dbe = assertz_to_db(q->st.m, p->cl->nbr_vars, p->cl->cells, 0);
+	may_ptr_error(dbe);
+	p->cl->cidx = 0;
+	uuid_gen(q->pl, &dbe->u);
 
-	if (!q->st.m->loading && cl->owner->is_persist)
-		db_log(q, cl, LOG_ASSERTZ);
+	if (!q->st.m->loading && dbe->owner->is_persist)
+		db_log(q, dbe, LOG_ASSERTZ);
 
 	return pl_success;
 }
@@ -5717,11 +5717,11 @@ static USE_RESULT pl_status fn_erase_1(query *q)
 	GET_FIRST_ARG(p1,atom);
 	uuid u;
 	uuid_from_buf(GET_STR(q, p1), &u);
-	clause *cl = erase_from_db(q->st.m, &u);
-	may_ptr_error(cl);
+	db_entry *dbe = erase_from_db(q->st.m, &u);
+	may_ptr_error(dbe);
 
-	if (!q->st.m->loading && cl->owner->is_persist)
-		db_log(q, cl, LOG_ERASE);
+	if (!q->st.m->loading && dbe->owner->is_persist)
+		db_log(q, dbe, LOG_ERASE);
 
 	return pl_success;
 }
@@ -5732,9 +5732,9 @@ static USE_RESULT pl_status fn_instance_2(query *q)
 	GET_NEXT_ARG(p2,any);
 	uuid u;
 	uuid_from_buf(GET_STR(q, p1), &u);
-	clause *cl = find_in_db(q->st.m, &u);
-	may_ptr_error(cl);
-	return unify(q, p2, p2_ctx, cl->r.cells, q->st.curr_frame);
+	db_entry *dbe = find_in_db(q->st.m, &u);
+	may_ptr_error(dbe);
+	return unify(q, p2, p2_ctx, dbe->cl.cells, q->st.curr_frame);
 }
 
 static USE_RESULT pl_status fn_clause_3(query *q)
@@ -5744,18 +5744,18 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 	GET_NEXT_ARG(p3,atom_or_var);
 
 	for (;;) {
-		rule *r;
+		clause *r;
 
 		if (!is_variable(p3)) {
 			uuid u;
 			uuid_from_buf(GET_STR(q, p3), &u);
-			clause *cl = find_in_db(q->st.m, &u);
+			db_entry *dbe = find_in_db(q->st.m, &u);
 
-			if (!cl || (!u.u1 && !u.u2))
+			if (!dbe || (!u.u1 && !u.u2))
 				break;
 
-			q->st.curr_clause2 = cl;
-			r = &cl->r;
+			q->st.curr_clause2 = dbe;
+			r = &dbe->cl;
 			cell *head = get_head(r->cells);
 
 			if (!unify(q, p1, p1_ctx, head, q->st.fp))
@@ -5770,7 +5770,7 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 			may_error(make_cstring(&tmp, tmpbuf));
 			set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 			unshare_cell(&tmp);
-			r = &q->st.curr_clause2->r;
+			r = &q->st.curr_clause2->cl;
 		}
 
 		cell *body = get_body(r->cells);
@@ -5841,16 +5841,16 @@ static pl_status do_asserta_2(query *q)
 	pl_idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->st.m->p;
 
-	if (nbr_cells > p->r->nbr_cells) {
-		p->r = realloc(p->r, sizeof(rule)+(sizeof(cell)*(nbr_cells+1)));
-		may_ptr_error(p->r);
-		p->r->nbr_cells = nbr_cells;
+	if (nbr_cells > p->cl->nbr_cells) {
+		p->cl = realloc(p->cl, sizeof(clause)+(sizeof(cell)*(nbr_cells+1)));
+		may_ptr_error(p->cl);
+		p->cl->nbr_cells = nbr_cells;
 	}
 
-	p->r->cidx = safe_copy_cells(p->r->cells, tmp, nbr_cells);
+	p->cl->cidx = safe_copy_cells(p->cl->cells, tmp, nbr_cells);
 	do_term_assign_vars(p, nbr_cells);
 	term_to_body(p);
-	cell *h = get_head(p->r->cells);
+	cell *h = get_head(p->cl->cells);
 
 	if (is_cstring(h))
 		convert_to_literal(q->st.m, h);
@@ -5858,26 +5858,26 @@ static pl_status do_asserta_2(query *q)
 	if (!is_literal(h))
 		return throw_error(q, h, q->latest_ctx, "type_error", "callable");
 
-	clause *cl = asserta_to_db(q->st.m, p->r->nbr_vars, p->r->cells, 0);
-	may_ptr_error(cl);
-	p->r->cidx = 0;
+	db_entry *dbe = asserta_to_db(q->st.m, p->cl->nbr_vars, p->cl->cells, 0);
+	may_ptr_error(dbe);
+	p->cl->cidx = 0;
 
 	if (!is_variable(p2)) {
 		uuid u;
 		uuid_from_buf(GET_STR(q, p2), &u);
-		cl->u = u;
+		dbe->u = u;
 	} else {
-		uuid_gen(q->pl, &cl->u);
+		uuid_gen(q->pl, &dbe->u);
 		char tmpbuf[128];
-		uuid_to_buf(&cl->u, tmpbuf, sizeof(tmpbuf));
+		uuid_to_buf(&dbe->u, tmpbuf, sizeof(tmpbuf));
 		cell tmp2;
 		may_error(make_cstring(&tmp2, tmpbuf));
 		set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 		unshare_cell(&tmp2);
 	}
 
-	if (!q->st.m->loading && cl->owner->is_persist)
-		db_log(q, cl, LOG_ASSERTA);
+	if (!q->st.m->loading && dbe->owner->is_persist)
+		db_log(q, dbe, LOG_ASSERTA);
 
 	return pl_success;
 }
@@ -5942,16 +5942,16 @@ static pl_status do_assertz_2(query *q)
 	pl_idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->st.m->p;
 
-	if (nbr_cells > p->r->nbr_cells) {
-		p->r = realloc(p->r, sizeof(rule)+(sizeof(cell)*(nbr_cells+1)));
-		may_ptr_error(p->r);
-		p->r->nbr_cells = nbr_cells;
+	if (nbr_cells > p->cl->nbr_cells) {
+		p->cl = realloc(p->cl, sizeof(clause)+(sizeof(cell)*(nbr_cells+1)));
+		may_ptr_error(p->cl);
+		p->cl->nbr_cells = nbr_cells;
 	}
 
-	p->r->cidx = safe_copy_cells(p->r->cells, tmp, nbr_cells);
+	p->cl->cidx = safe_copy_cells(p->cl->cells, tmp, nbr_cells);
 	do_term_assign_vars(p, nbr_cells);
 	term_to_body(p);
-	cell *h = get_head(p->r->cells);
+	cell *h = get_head(p->cl->cells);
 
 	if (is_cstring(h))
 		convert_to_literal(q->st.m, h);
@@ -5959,26 +5959,26 @@ static pl_status do_assertz_2(query *q)
 	if (!is_literal(h))
 		return throw_error(q, h, q->latest_ctx, "type_error", "callable");
 
-	clause *cl = assertz_to_db(q->st.m, p->r->nbr_vars, p->r->cells, 0);
-	may_ptr_error(cl);
-	p->r->cidx = 0;
+	db_entry *dbe = assertz_to_db(q->st.m, p->cl->nbr_vars, p->cl->cells, 0);
+	may_ptr_error(dbe);
+	p->cl->cidx = 0;
 
 	if (!is_variable(p2)) {
 		uuid u;
 		uuid_from_buf(GET_STR(q, p2), &u);
-		cl->u = u;
+		dbe->u = u;
 	} else {
-		uuid_gen(q->pl, &cl->u);
+		uuid_gen(q->pl, &dbe->u);
 		char tmpbuf[128];
-		uuid_to_buf(&cl->u, tmpbuf, sizeof(tmpbuf));
+		uuid_to_buf(&dbe->u, tmpbuf, sizeof(tmpbuf));
 		cell tmp2;
 		may_error(make_cstring(&tmp2, tmpbuf));
 		set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 		unshare_cell(&tmp2);
 	}
 
-	if (!q->st.m->loading && cl->owner->is_persist)
-		db_log(q, cl, LOG_ASSERTZ);
+	if (!q->st.m->loading && dbe->owner->is_persist)
+		db_log(q, dbe, LOG_ASSERTZ);
 
 	return pl_success;
 }
@@ -6021,18 +6021,18 @@ static void save_db(FILE *fp, query *q, int logging)
 		if (src[0] == '$')
 			continue;
 
-		for (clause *cl = pr->head; cl && !g_tpl_interrupt; cl = cl->next) {
-			if (cl->r.ugen_erased)
+		for (db_entry *dbe = pr->head; dbe && !g_tpl_interrupt; dbe = dbe->next) {
+			if (dbe->cl.ugen_erased)
 				continue;
 
 			if (logging)
 				fprintf(fp, "z_(");
 
-			print_term(q, fp, cl->r.cells, q->st.curr_frame, 0);
+			print_term(q, fp, dbe->cl.cells, q->st.curr_frame, 0);
 
 			if (logging) {
 				char tmpbuf[256];
-				uuid_to_buf(&cl->u, tmpbuf, sizeof(tmpbuf));
+				uuid_to_buf(&dbe->u, tmpbuf, sizeof(tmpbuf));
 				fprintf(fp, ",'%s')", tmpbuf);
 			}
 
@@ -6063,11 +6063,11 @@ static void save_name(FILE *fp, query *q, pl_idx_t name, unsigned arity)
 		if ((arity != pr->key.arity) && (arity != -1U))
 			continue;
 
-		for (clause *cl = pr->head; cl && !g_tpl_interrupt; cl = cl->next) {
-			if (cl->r.ugen_erased)
+		for (db_entry *dbe = pr->head; dbe && !g_tpl_interrupt; dbe = dbe->next) {
+			if (dbe->cl.ugen_erased)
 				continue;
 
-			print_term(q, fp, cl->r.cells, q->st.curr_frame, 0);
+			print_term(q, fp, dbe->cl.cells, q->st.curr_frame, 0);
 			fprintf(fp, ".\n");
 		}
 	}
@@ -9983,9 +9983,9 @@ static void restore_db(module *m, FILE *fp)
 
 		p->srcptr = p->save_line;
 		tokenize(p, false, false);
-		xref_rule(p, p->r, NULL);
-		execute(q, p->r->cells, p->r->nbr_cells);
-		clear_rule(p->r);
+		xref_rule(p, p->cl, NULL);
+		execute(q, p->cl->cells, p->cl->nbr_cells);
+		clear_rule(p->cl);
 	}
 
 	m->loading = 0;
@@ -11465,8 +11465,8 @@ static const struct builtins g_predicates_other[] =
 
 	{"get_unbuffered_code", 1, fn_get_unbuffered_code_1, "?code", false},
 	{"get_unbuffered_char", 1, fn_get_unbuffered_char_1, "?char", false},
-	{"memberchk", 2, fn_memberchk_2, "?rule,+list", false},
-	{"nonmember", 2, fn_nonmember_2, "?rule,+list", false},
+	{"memberchk", 2, fn_memberchk_2, "?clause,+list", false},
+	{"nonmember", 2, fn_nonmember_2, "?clause,+list", false},
 	{"$put_chars", 1, fn_sys_put_chars_1, "+chars", false},
 	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars", false},
 	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL, false},
@@ -11478,12 +11478,12 @@ static const struct builtins g_predicates_other[] =
 	{"assert", 1, fn_iso_assertz_1, NULL, false},
 	{"$strip_attributes", 1, fn_sys_strip_attributes_1, "+vars", false},
 	{"copy_term_nat", 2, fn_copy_term_nat_2, NULL, false},
-	{"string", 1, fn_atom_1, "+rule", false},
+	{"string", 1, fn_atom_1, "+clause", false},
 	{"atomic_concat", 3, fn_atomic_concat_3, NULL, false},
 	{"atomic_list_concat", 3, fn_atomic_list_concat_3, NULL, false},
 	{"replace", 4, fn_replace_4, "+orig,+from,+to,-new", false},
-	{"print", 1, fn_print_1, "+rule", false},
-	{"writeln", 1, fn_writeln_1, "+rule", false},
+	{"print", 1, fn_print_1, "+clause", false},
+	{"writeln", 1, fn_writeln_1, "+clause", false},
 	{"sleep", 1, fn_sleep_1, "+integer", false},
 	{"delay", 1, fn_delay_1, "+integer", false},
 	{"busy", 1, fn_busy_1, "+integer", false},
@@ -11514,12 +11514,12 @@ static const struct builtins g_predicates_other[] =
 	{"split_atom", 4, fn_split_atom_4, "+string,+sep,+pad,-list", false},
 	{"split_string", 4, fn_split_atom_4, "+string,+sep,+pad,-list", false},
 	{"split", 4, fn_split_4, "+string,+string,?left,?right", false},
-	{"is_list_or_partial_list", 1, fn_is_list_or_partial_list_1, "+rule", false},
-	{"is_list", 1, fn_is_list_1, "+rule", false},
-	{"list", 1, fn_is_list_1, "+rule", false},
-	{"is_stream", 1, fn_is_stream_1, "+rule", false},
-	//{"forall", 2, fn_forall_2, "+rule,+rule", false},
-	{"term_hash", 2, fn_term_hash_2, "+rule,?integer", false},
+	{"is_list_or_partial_list", 1, fn_is_list_or_partial_list_1, "+clause", false},
+	{"is_list", 1, fn_is_list_1, "+clause", false},
+	{"list", 1, fn_is_list_1, "+clause", false},
+	{"is_stream", 1, fn_is_stream_1, "+clause", false},
+	//{"forall", 2, fn_forall_2, "+clause,+clause", false},
+	{"term_hash", 2, fn_term_hash_2, "+clause,?integer", false},
 	{"rename_file", 2, fn_rename_file_2, "+string,+string", false},
 	{"directory_files", 2, fn_directory_files_2, "+pathname,-list", false},
 	{"delete_file", 1, fn_delete_file_1, "+string", false},
@@ -11534,11 +11534,11 @@ static const struct builtins g_predicates_other[] =
 	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL, false},
 	{"chdir", 1, fn_chdir_1, "+string", false},
 	{"name", 2, fn_iso_atom_codes_2, "?string,?list", false},
-	{"read_term_from_chars", 2, fn_read_term_from_chars_2, "+chars,-rule", false},
-	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,+opts,+rule", false},
-	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+chars,-rule,+opts", false},
-	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "+rule,+list,?chars", false},
-	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "+rule,+list,?chars", false},
+	{"read_term_from_chars", 2, fn_read_term_from_chars_2, "+chars,-clause", false},
+	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,+opts,+clause", false},
+	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+chars,-clause,+opts", false},
+	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "+clause,+list,?chars", false},
+	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "+clause,+list,?chars", false},
 	{"base64", 2, fn_base64_2, "?string,?string", false},
 	{"urlenc", 2, fn_urlenc_2, "?string,?string", false},
 	{"atom_lower", 2, fn_atom_lower_2, "?atom,?atom", false},
@@ -11553,26 +11553,26 @@ static const struct builtins g_predicates_other[] =
 	{"$load_properties", 0, fn_sys_load_properties_0, NULL, false},
 	{"$load_flags", 0, fn_sys_load_flags_0, NULL, false},
 	{"$load_ops", 0, fn_sys_load_ops_0, NULL, false},
-	{"numbervars", 1, fn_numbervars_1, "+rule", false},
-	{"numbervars", 3, fn_numbervars_3, "+rule,+start,?end", false},
-	{"numbervars", 4, fn_numbervars_3, "+rule,+start,?end,+list", false},
-	{"var_number", 2, fn_var_number_2, "+rule,?integer", false},
-	{"char_type", 2, fn_char_type_2, "+char,+rule", false},
-	{"code_type", 2, fn_char_type_2, "+code,+rule", false},
+	{"numbervars", 1, fn_numbervars_1, "+clause", false},
+	{"numbervars", 3, fn_numbervars_3, "+clause,+start,?end", false},
+	{"numbervars", 4, fn_numbervars_3, "+clause,+start,?end,+list", false},
+	{"var_number", 2, fn_var_number_2, "+clause,?integer", false},
+	{"char_type", 2, fn_char_type_2, "+char,+clause", false},
+	{"code_type", 2, fn_char_type_2, "+code,+clause", false},
 	{"uuid", 1, fn_uuid_1, "-string", false},
-	{"asserta", 2, fn_asserta_2, "+rule,-reflist", false},
-	{"assertz", 2, fn_assertz_2, "+rule,-reflist", false},
-	{"instance", 2, fn_instance_2, "+ref,?rule", false},
+	{"asserta", 2, fn_asserta_2, "+clause,-reflist", false},
+	{"assertz", 2, fn_assertz_2, "+clause,-reflist", false},
+	{"instance", 2, fn_instance_2, "+ref,?clause", false},
 	{"erase", 1, fn_erase_1, "+ref", false},
 	{"clause", 3, fn_clause_3, "?head,?body,-reflist", false},
-	{"$queue", 1, fn_sys_queue_1, "+rule", false},
+	{"$queue", 1, fn_sys_queue_1, "+clause", false},
 	{"$list", 1, fn_sys_list_1, "-list", false},
 	{"getenv", 2, fn_getenv_2, NULL, false},
 	{"setenv", 2, fn_setenv_2, NULL, false},
 	{"unsetenv", 1, fn_unsetenv_1, NULL, false},
 	{"statistics", 0, fn_statistics_0, NULL, false},
 	{"statistics", 2, fn_statistics_2, "+string,-variable", false},
-	{"duplicate_term", 2, fn_iso_copy_term_2, "+rule,-variable", false},
+	{"duplicate_term", 2, fn_iso_copy_term_2, "+clause,-variable", false},
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer", false},
 	{"limit", 2, fn_limit_2, "+integer,+callable", false},
 	{"offset", 2, fn_offset_2, "+integer,+callable", false},
@@ -11599,22 +11599,22 @@ static const struct builtins g_predicates_other[] =
 #endif
 
 	{"task", 1, fn_task_n, "+callable", false},
-	{"task", 2, fn_task_n, "+callable,+rule,...", false},
-	{"task", 3, fn_task_n, "+callable,+rule,...", false},
-	{"task", 4, fn_task_n, "+callable,+rule,...", false},
-	{"task", 5, fn_task_n, "+callable,+rule,...", false},
-	{"task", 6, fn_task_n, "+callable,+rule,...", false},
-	{"task", 7, fn_task_n, "+callable,+rule,...", false},
-	{"task", 8, fn_task_n, "+callable,+rule,...", false},
+	{"task", 2, fn_task_n, "+callable,+clause,...", false},
+	{"task", 3, fn_task_n, "+callable,+clause,...", false},
+	{"task", 4, fn_task_n, "+callable,+clause,...", false},
+	{"task", 5, fn_task_n, "+callable,+clause,...", false},
+	{"task", 6, fn_task_n, "+callable,+clause,...", false},
+	{"task", 7, fn_task_n, "+callable,+clause,...", false},
+	{"task", 8, fn_task_n, "+callable,+clause,...", false},
 
 	{"wait", 0, fn_wait_0, NULL, false},
 	{"await", 0, fn_await_0, NULL, false},
 	{"yield", 0, fn_yield_0, NULL, false},
 	{"fork", 0, fn_fork_0, NULL, false},
-	{"send", 1, fn_send_1, "+rule", false},
-	{"recv", 1, fn_recv_1, "?rule", false},
+	{"send", 1, fn_send_1, "+clause", false},
+	{"recv", 1, fn_recv_1, "?clause", false},
 
-	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+rule,+rule", false},
+	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+clause,+clause", false},
 	{"$mustbe_pairlist", 2, fn_sys_mustbe_pairlist_2, "+pair,+goal", false},
 	{"$mustbe_pairlist_or_var", 2, fn_sys_mustbe_pairlist_or_var_2, "?pair,+goal", false},
 	{"$mustbe_list", 1, fn_sys_mustbe_list_1, "?list", false},
@@ -11624,8 +11624,8 @@ static const struct builtins g_predicates_other[] =
 
 	// Used for database log...
 
-	{"$a_", 2, fn_sys_asserta_2, "+rule,+ref", false},
-	{"$z_", 2, fn_sys_assertz_2, "+rule,+ref", false},
+	{"$a_", 2, fn_sys_asserta_2, "+clause,+ref", false},
+	{"$z_", 2, fn_sys_assertz_2, "+clause,+ref", false},
 	{"$e_", 1, fn_erase_1, "+ref", false},
 	{"$db_load", 0, fn_sys_db_load_0, NULL, false},
 	{"$db_save", 0, fn_sys_db_save_0, NULL, false},
@@ -11750,7 +11750,7 @@ static void load_properties(module *m)
 	format_property(m, tmpbuf, sizeof(tmpbuf), "current_predicate", 1, "meta_predicate(current_predicate(:))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "predicate_property", 1, "meta_predicate(predicate_property(:,?))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "abolish", 1, "meta_predicate(abolish(:))"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), "clause", 2, "meta_predicate(clause(:,?))"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "clause", 2, "meta_predicate(db_entry(:,?))"); ASTRING_strcat(pr, tmpbuf);
 
 	for (int i = 2; i <= 7; i++) {
 		char metabuf[256];

@@ -167,7 +167,7 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 	return pl_success;
 }
 
-static bool is_next_key(query *q, rule *r)
+static bool is_next_key(query *q, clause *r)
 {
 	if (q->st.iter) {
 		if (m_is_next(q->st.iter))
@@ -296,9 +296,9 @@ static void find_key(query *q, predicate *pr, cell *key)
 	// the results and return them sorted as an iterator...
 
 	map *tmp_list = NULL;
-	clause *cl;
+	db_entry *dbe;
 
-	while (m_next_key(iter, (void*)&cl)) {
+	while (m_next_key(iter, (void*)&dbe)) {
 		if (!tmp_list) {
 			tmp_list = m_create(NULL, NULL, NULL);
 			m_allow_dups(tmp_list, false);
@@ -306,7 +306,7 @@ static void find_key(query *q, predicate *pr, cell *key)
 			m_app(tmp_list, (void*)q->st.curr_clause->db_id, q->st.curr_clause);
 		}
 
-		m_app(tmp_list, (void*)cl->db_id, (void*)cl);
+		m_app(tmp_list, (void*)dbe->db_id, (void*)dbe);
 	}
 
 	// FIXME: make sure a cut or backtrack calls m_done(q->st.iter)
@@ -320,14 +320,14 @@ static void find_key(query *q, predicate *pr, cell *key)
 	q->st.definite = true;
 }
 
-void add_to_dirty_list(query *q, clause *cl)
+void add_to_dirty_list(query *q, db_entry *dbe)
 {
-	if (!retract_from_db(q->st.m, cl))
+	if (!retract_from_db(q->st.m, dbe))
 		return;
 
-	predicate *pr = cl->owner;
-	cl->dirty = pr->dirty_list;
-	pr->dirty_list = cl;
+	predicate *pr = dbe->owner;
+	dbe->dirty = pr->dirty_list;
+	pr->dirty_list = dbe;
 }
 
 bool is_valid_list(query *q, cell *p1, pl_idx_t p1_ctx, bool allow_partials)
@@ -614,7 +614,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	q->tot_tcos++;
 }
 
-static bool check_slots(const query *q, frame *f, rule *r)
+static bool check_slots(const query *q, frame *f, clause *r)
 {
 	if (r != NULL) {
 		if (f->nbr_vars != r->nbr_vars)
@@ -653,35 +653,35 @@ void unshare_predicate(query *q, predicate *pr)
 	if (!pr->dirty_list)
 		return;
 
-	clause *cl = pr->dirty_list;
+	db_entry *dbe = pr->dirty_list;
 
-	while (cl) {
+	while (dbe) {
 		// First unlink it from the predicate
 
-		if (cl->prev)
-			cl->prev->next = cl->next;
+		if (dbe->prev)
+			dbe->prev->next = dbe->next;
 
-		if (cl->next)
-			cl->next->prev = cl->prev;
+		if (dbe->next)
+			dbe->next->prev = dbe->prev;
 
-		if (pr->head == cl)
-			pr->head = cl->next;
+		if (pr->head == dbe)
+			pr->head = dbe->next;
 
-		if (pr->tail == cl)
-			pr->tail = cl->prev;
+		if (pr->tail == dbe)
+			pr->tail = dbe->prev;
 
 		// Now move it to query dirtylist
 
-		clause *save = cl->dirty;
-		cl->dirty = q->dirty_list;
-		q->dirty_list = cl;
-		cl = save;
+		db_entry *save = dbe->dirty;
+		dbe->dirty = q->dirty_list;
+		q->dirty_list = dbe;
+		dbe = save;
 	}
 
 	pr->dirty_list = NULL;
 }
 
-static void commit_me(query *q, rule *r)
+static void commit_me(query *q, clause *r)
 {
 	q->in_commit = true;
 	frame *f = GET_CURR_FRAME();
@@ -706,7 +706,7 @@ static void commit_me(query *q, rule *r)
 		f = make_frame(q, r->nbr_vars);
 
 	if (last_match) {
-		f->is_complex = q->st.curr_clause->r.is_complex;
+		f->is_complex = q->st.curr_clause->cl.is_complex;
 		f->is_last = true;
 		q->st.curr_clause = NULL;
 		unshare_predicate(q, q->st.pr);
@@ -724,7 +724,7 @@ static void commit_me(query *q, rule *r)
 	q->in_commit = false;
 }
 
-void stash_me(query *q, rule *r, bool last_match)
+void stash_me(query *q, clause *r, bool last_match)
 {
 	pl_idx_t cgen = q->st.cgen;
 
@@ -925,7 +925,7 @@ static bool resume_frame(query *q)
 
 #if 0
 	if (q->st.curr_clause) {
-		rule *r = &q->st.curr_clause->r;
+		clause *r = &q->st.curr_clause->cl;
 
 		if ((q->st.curr_frame == (q->st.fp-1))
 			&& q->pl->opt
@@ -1108,12 +1108,12 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		add_trail(q, c_ctx, c->var_nbr, attrs, attrs_ctx);
 }
 
-static bool check_update_view(const frame *f, const clause *c)
+static bool check_update_view(const frame *f, const db_entry *c)
 {
-	if (c->r.ugen_created > f->ugen)
+	if (c->cl.ugen_created > f->ugen)
 		return false;
 
-	if (c->r.ugen_erased && (c->r.ugen_erased <= f->ugen))
+	if (c->cl.ugen_erased && (c->cl.ugen_erased <= f->ugen))
 		return false;
 
 	return true;
@@ -1175,7 +1175,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		if (!check_update_view(f, q->st.curr_clause2))
 			continue;
 
-		rule *r = &q->st.curr_clause2->r;
+		clause *r = &q->st.curr_clause2->cl;
 		cell *c = r->cells;
 		bool needs_true = false;
 		p1 = orig_p1;
@@ -1276,7 +1276,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 		if (!check_update_view(f, q->st.curr_clause2))
 			continue;
 
-		rule *r = &q->st.curr_clause2->r;
+		clause *r = &q->st.curr_clause2->cl;
 		cell *head = get_head(r->cells);
 		cell *body = get_logical_body(r->cells);
 
@@ -1348,7 +1348,7 @@ static USE_RESULT pl_status match_head(query *q)
 		if (!check_update_view(f, q->st.curr_clause))
 			continue;
 
-		rule *r = &q->st.curr_clause->r;
+		clause *r = &q->st.curr_clause->cl;
 		cell *head = get_head(r->cells);
 		may_error(try_me(q, r->nbr_vars));
 
@@ -1810,10 +1810,10 @@ static void purge_dirty_list(query *q)
 	int cnt = 0;
 
 	while (q->dirty_list) {
-		clause *cl = q->dirty_list;
-		q->dirty_list = cl->dirty;
-		clear_rule(&cl->r);
-		free(cl);
+		db_entry *dbe = q->dirty_list;
+		q->dirty_list = dbe->dirty;
+		clear_rule(&dbe->cl);
+		free(dbe);
 		cnt++;
 	}
 
