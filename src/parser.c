@@ -3013,28 +3013,22 @@ unsigned tokenize(parser *p, bool args, bool consing)
 	return !p->error;
 }
 
-bool run(parser *p, const char *pSrc, bool dump, bool is_init)
+bool run(parser *p, const char *pSrc, bool dump)
 {
 	if (*pSrc == '.') {
 		fprintf(stdout, "Error: syntax error, unexpected end of rule\n");
 		return false;
 	}
 
-	if (!is_init) {
-		ASTRING(src);
-		ASTRING_sprintf(src, "deterministic((%s", pSrc);
-		ASTRING_trim_ws(src);
-		ASTRING_trim(src, '.');
-		ASTRING_strcat(src, "), _).");
-		p->srcptr = ASTRING_cstr(src);
-		p->line_nbr = 1;
-		tokenize(p, false, false);
-		ASTRING_free(src);
-	} else {
-		p->srcptr = (char*)pSrc;
-		p->line_nbr = 1;
-		tokenize(p, false, false);
-	}
+	ASTRING(src);
+	ASTRING_strcat(src, pSrc);
+	ASTRING_trim_ws(src);
+	ASTRING_trim(src, '.');
+	ASTRING_strcat(src, ".");
+	p->srcptr = ASTRING_cstr(src);
+	p->line_nbr = 1;
+	tokenize(p, false, false);
+	ASTRING_free(src);
 
 	if (!p->error && !p->end_of_term && !p->run_init) {
 		fprintf(stdout, "Error: syntax error, missing operand or operator\n");

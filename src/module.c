@@ -955,7 +955,7 @@ module *load_text(module *m, const char *src, const char *filename)
 			ASTRING(src);
 			ASTRING_sprintf(src, "forall(%s:retract((:- initialization(__G_))), __G_)", p->m->name);
 
-			if (run(p, ASTRING_cstr(src), false, true))
+			if (run(p, ASTRING_cstr(src), false))
 				p->m->pl->halt = true;
 
 			ASTRING_free(src);
@@ -1077,7 +1077,7 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 			ASTRING(src);
 			ASTRING_sprintf(src, "forall(%s:retract((:- initialization(__G_))), __G_)", p->m->name);
 
-			if (run(p, ASTRING_cstr(src), false, true))
+			if (run(p, ASTRING_cstr(src), false))
 				p->m->pl->halt = true;
 
 			ASTRING_free(src);

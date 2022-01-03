@@ -129,7 +129,7 @@ bool pl_eval(prolog *pl, const char *s)
 	parser *p = create_parser(pl->curr_m);
 	if (!p) return false;
 	p->command = true;
-	bool ok = run(p, s, true, false);
+	bool ok = run(p, s, true);
 	pl->curr_m = p->m;
 	destroy_parser(p);
 	return ok;
