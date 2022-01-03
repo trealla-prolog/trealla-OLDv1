@@ -298,15 +298,15 @@ int main(int ac, char *av[])
 
 	char *line;
 
-	while ((line = history_readline_eol("?- ", '\n')) != NULL) {
-		char *src = line;
+	while ((line = history_readline_eol("?- ", '.')) != NULL) {
+		const char *src = line;
 
 		while (isspace(*src))
 			src++;
 
-		for (char *s = src; *s; s++) {
-			if ((*s == '\r') || (*s == '\n'))
-				*s = '\0';
+		if (!strcmp(src, "halt.")) {
+			free(line);
+			break;
 		}
 
 		if (!*src || (*src == '\n')) {

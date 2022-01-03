@@ -2178,7 +2178,6 @@ bool get_token(parser *p, int last_op)
 	p->v.nbr_cells = 1;
 	p->quote_char = 0;
 	p->string = p->is_quoted = p->is_variable = p->is_op = false;
-	p->error = false;
 
 	if (p->dq_consing && (*src == '"') && (src[1] == '"')) {
 		src++;
@@ -2581,7 +2580,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				if (DUMP_ERRS || !p->do_read_term)
 					printf("Error: syntax error, mismatched parens/brackets/braces, line %u '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
-				p->error_desc = "parens";
+				p->error_desc = "mismatched_parens_or_brackets_or_braces";
 				p->error = true;
 				p->nesting_parens = p->nesting_brackets = p->nesting_braces = 0;
 			}
@@ -2651,6 +2650,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error needs operator '%s', line %d\n", p->token, p->line_nbr);
 
+			p->error_desc = "needs_operator";
 			p->error = true;
 			break;
 		}
@@ -2659,6 +2659,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error needs operator '%s', line %d\n", p->token, p->line_nbr);
 
+			p->error_desc = "needs_operator";
 			p->error = true;
 			break;
 		}
@@ -2734,8 +2735,9 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 			if (!last_op && (priority > 999)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error parens needed operator '%s', line %d\n", p->token, p->line_nbr);
+					fprintf(stdout, "Error: syntax error parens needed around operator '%s', line %d\n", p->token, p->line_nbr);
 
+				p->error_desc = "parens_needed";
 				p->error = true;
 				break;
 			}
@@ -2746,7 +2748,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error missing element '%s'\n", p->save_line?p->save_line:"");
 
-				p->error_desc = "list";
+				p->error_desc = "missing_element";
 				p->error = true;
 				break;
 			}
@@ -2871,7 +2873,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (p->is_variable && (*p->srcptr == '(')) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, variable as functor, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
 			p->error_desc = "variable_cannot_be_functor";
 			p->error = true;
@@ -2947,7 +2949,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!p->is_op && !is_func && !last_op) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, near '%s' operator expected '%s'\n", p->token, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, near '%s', operator expected '%s'\n", p->token, p->save_line?p->save_line:"");
 
 			p->error_desc = "operator_expected";
 			p->error = true;
