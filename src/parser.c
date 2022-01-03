@@ -3013,8 +3013,6 @@ unsigned tokenize(parser *p, bool args, bool consing)
 	return !p->error;
 }
 
-#define QUERY_ASSERT 1
-
 bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 {
 	if (*pSrc == '.') {
@@ -3024,22 +3022,10 @@ bool run(parser *p, const char *pSrc, bool dump, bool is_init)
 
 	if (!is_init) {
 		ASTRING(src);
-
-// Currently QUERY_ASSERT has to be true or else freeze
-// doesn't work... to be investigated.
-
-#if !QUERY_ASSERT
 		ASTRING_sprintf(src, "deterministic((%s", pSrc);
 		ASTRING_trim_ws(src);
 		ASTRING_trim(src, '.');
 		ASTRING_strcat(src, "), _).");
-#else
-		ASTRING_sprintf(src, "assertz(:- xinitialization((%s", pSrc);
-		ASTRING_trim_ws(src);
-		ASTRING_trim(src, '.');
-		ASTRING_strcat(src, "))), (:- xinitialization(__G_)), retract(:- xinitialization(_)), !, '$call'(__G_).");
-#endif
-
 		p->srcptr = ASTRING_cstr(src);
 		p->line_nbr = 1;
 		tokenize(p, false, false);

@@ -1420,11 +1420,11 @@ static void dump_vars(query *q, bool partial)
 {
 	parser *p = q->p;
 	frame *f = GET_FIRST_FRAME();
-	bool any = false;
 	q->is_dump_vars = true;
 	bool first = true;
+	bool any = false;
 
-	for (unsigned i = 0; i < (p->nbr_vars-2); i++) {
+	for (unsigned i = 0; i < p->nbr_vars; i++) {
 		if (!strcmp(p->vartab.var_name[i], "_"))
 			continue;
 
@@ -1445,7 +1445,7 @@ static void dump_vars(query *q, bool partial)
 
 	cell *vlist = end_list(q);
 
-	for (unsigned i = 0; i < (p->nbr_vars-2); i++) {
+	for (unsigned i = 0; i < p->nbr_vars; i++) {
 		if (!strcmp(p->vartab.var_name[i], "_"))
 			continue;
 

@@ -40,6 +40,7 @@ int history_getch_fd(int fd)
 	return ch;
 }
 
+#if 1
 char *history_readline_eol(const char *prompt, char eol)
 {
 	char *cmd = NULL;
@@ -86,6 +87,25 @@ LOOP:
 
 	return cmd;
 }
+#else
+char *history_readline_eol(const char *prompt, __attribute__((unused)) char eol)
+{
+	char *line;
+
+	if ((line = readline(prompt)) == NULL)
+		return NULL;
+
+	for (char *s = line; *s; s++) {
+		if (*s == '\n')
+			*s = '\0';
+	}
+
+	if (*line)
+		add_history(line);
+
+	return line;
+}
+#endif
 
 static char g_filename[1024];
 
