@@ -2178,6 +2178,7 @@ bool get_token(parser *p, int last_op)
 	p->v.nbr_cells = 1;
 	p->quote_char = 0;
 	p->string = p->is_quoted = p->is_variable = p->is_op = false;
+	p->error = false;
 
 	if (p->dq_consing && (*src == '"') && (src[1] == '"')) {
 		src++;

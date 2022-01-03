@@ -40,51 +40,17 @@ int history_getch_fd(int fd)
 	return ch;
 }
 
-char *history_readline_eol(const char *prompt, char eol)
+char *history_readline_eol(const char *prompt, __attribute__((unused)) char eol)
 {
-	char *cmd = NULL;
 	char *line;
-
-LOOP:
 
 	if ((line = readline(prompt)) == NULL)
 		return NULL;
 
-	if (cmd) {
-		size_t n = strlen(cmd) + strlen(line);
-		cmd = realloc(cmd, n+1);
-		ensure(cmd);
-		strcat(cmd, line);
-	} else {
-		cmd = strdup(line);
-	}
+	if (line[0] && (line[0] != '\r') && (line[0] != '\n'))
+		add_history(line);
 
-	free(line);
-	const char *s = cmd;
-
-	for (;;) {
-		int ch = get_char_utf8(&s);
-		const char *end_ptr = cmd + strlen(cmd) - (strlen(cmd) ? 1 : 0);
-
-		while (isspace(*end_ptr) && (end_ptr != cmd))
-			end_ptr--;
-
-		if ((ch == 0) && (*end_ptr == eol)) {
-			if (strcmp(cmd, "."))
-				add_history(cmd);
-
-			break;
-		}
-
-		if (ch == 0) {
-			cmd = realloc(cmd, strlen(cmd)+1+1);
-			strcat(cmd, "\n");
-			prompt = "";
-			goto LOOP;
-		}
-	}
-
-	return cmd;
+	return line;
 }
 
 static char g_filename[1024];
