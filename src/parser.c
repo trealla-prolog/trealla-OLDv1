@@ -3072,7 +3072,7 @@ bool run(parser *p, const char *pSrc, bool dump)
 			(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
 	}
 
-	bool ok = !q->error;
+	const bool ok = !q->error;
 	p->m = q->st.m;
 	destroy_query(q);
 	return ok;
