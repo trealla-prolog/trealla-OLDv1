@@ -599,6 +599,12 @@ deconsult(Files) :- unload_files(Files).
 strip_module(T,M,P) :- T=M:P -> true ; P=T, module(M).
 ?=(X,Y) :- \+ unifiable(X,Y,[_|_]).
 
+'$run'(G) :-
+	(	G
+	->	true
+	;	format('Warning: call(~w) failed~n', [G])
+	).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SWI compatible
 %
