@@ -3033,8 +3033,10 @@ bool run(parser *p, const char *pSrc, bool dump)
 		p->error = true;
 	}
 
-	if (p->error)
+	if (p->error) {
+		p->pl->did_dump_vars = true;
 		return false;
+	}
 
 	if (p->skip) {
 		p->m->pl->status = true;
