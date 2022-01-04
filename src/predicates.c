@@ -36,7 +36,7 @@
 #include "openssl/sha.h"
 #endif
 
-#define MAX_VARS (1L<<17)
+#define MAX_VARS (1L<<30)
 
 #ifdef _WIN32
 #define msleep Sleep
@@ -603,7 +603,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 
 	if (p->nbr_vars) {
 		if (!create_vars(q, p->nbr_vars))
-			return throw_error(q, p1, p1_ctx, "resource_error", "too_many_vars");
+			return throw_error(q, p1, p1_ctx, "resource_error", "stack");
 	}
 
 	q->pl->tab_idx = 0;
@@ -4950,7 +4950,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 
 		if (arity) {
 			if (!(var_nbr = create_vars(q, arity)))
-				return throw_error(q, p3, p3_ctx, "resource_error", "too_many_vars");
+				return throw_error(q, p3, p3_ctx, "resource_error", "stack");
 
 			REGET_FIRST_ARG(p1,any);
 			REGET_NEXT_ARG(p2,any);
@@ -5492,7 +5492,7 @@ static USE_RESULT pl_status fn_sys_list_1(query *q)
 
 	if (new_varno != f->nbr_vars) {
 		if (!create_vars(q, new_varno-f->nbr_vars))
-			return throw_error(q, p1, p1_ctx, "resource_error", "too_many_vars");
+			return throw_error(q, p1, p1_ctx, "resource_error", "stack");
 
 		REGET_FIRST_ARG(p1,variable);
 	}
@@ -10381,7 +10381,7 @@ static pl_status do_length(query *q)
 
 	if (nbr >= MAX_VARS) {
 		drop_choice(q);
-		return throw_error(q, p2, p2_ctx, "resource_error", "too_many_vars");
+		return throw_error(q, p2, p2_ctx, "resource_error", "stack");
 	}
 
 	unsigned var_nbr = safe_list_length(q, p1, p1_ctx);
@@ -10392,7 +10392,7 @@ static pl_status do_length(query *q)
 	if (nbr) {
 		if (!(var_nbr = create_vars(q, nbr))) {
 			drop_choice(q);
-			return throw_error(q, p1, p1_ctx, "resource_error", "too_many_vars");
+			return throw_error(q, p1, p1_ctx, "resource_error", "stack");
 		}
 
 		REGET_FIRST_ARG(p1,any);
@@ -10551,7 +10551,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 				unsigned var_nbr = 0, nbr = get_smallint(p2)-cnt;
 
 				if (!(var_nbr = create_vars(q, nbr)))
-					return throw_error(q, p2, p2_ctx, "resource_error", "too_many_vars");
+					return throw_error(q, p2, p2_ctx, "resource_error", "stack");
 
 				cell tmp = (cell){0};
 				tmp.tag = TAG_VAR;
@@ -10591,7 +10591,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 			return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
 
 		if (is_ge(p2,MAX_VARS))
-			return throw_error(q, p2, p2_ctx, "resource_error", "too_many_vars");
+			return throw_error(q, p2, p2_ctx, "resource_error", "stack");
 
 		pl_idx_t nbr = get_smallint(p2);
 
@@ -10605,7 +10605,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		unsigned var_nbr = 0;
 
 		if (!(var_nbr = create_vars(q, nbr)))
-			return throw_error(q, p2, p2_ctx, "resource_error", "too_many_vars");
+			return throw_error(q, p2, p2_ctx, "resource_error", "stack");
 
 		REGET_FIRST_ARG(p1,list_or_nil_or_var);
 
