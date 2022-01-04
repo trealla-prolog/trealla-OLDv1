@@ -88,6 +88,86 @@ static const op_table g_ops[] =
 	{0,0,0}
 };
 
+static const char *set_loaded(module *m, const char *filename)
+{
+	struct loaded_file *ptr = m->loaded_files;
+
+	while (ptr) {
+		if (!strcmp(ptr->filename, filename)) {
+			ptr->is_loaded = true;
+			return ptr->filename;
+		}
+
+		ptr = ptr->next;
+	}
+
+	ptr = malloc(sizeof(*ptr));
+	ptr->next = m->loaded_files;
+	ptr->filename = strdup(filename);
+	ptr->is_loaded = true;
+	m->loaded_files = ptr;
+	return ptr->filename;
+}
+
+static const char *set_known(module *m, const char *filename)
+{
+	struct loaded_file *ptr = m->loaded_files;
+
+	while (ptr) {
+		if (!strcmp(ptr->filename, filename))
+			return ptr->filename;
+
+		ptr = ptr->next;
+	}
+
+	ptr = malloc(sizeof(*ptr));
+	ptr->next = m->loaded_files;
+	ptr->filename = strdup(filename);
+	ptr->is_loaded = false;
+	m->loaded_files = ptr;
+	return ptr->filename;
+}
+
+static void set_unloaded(module *m, const char *filename)
+{
+	struct loaded_file *ptr = m->loaded_files;
+
+	while (ptr) {
+		if (!strcmp(ptr->filename, filename)) {
+			ptr->is_loaded = false;
+			return;
+		}
+
+		ptr = ptr->next;
+	}
+}
+
+static bool is_loaded(const module *m, const char *filename)
+{
+	struct loaded_file *ptr = m->loaded_files;
+
+	while (ptr) {
+		if (ptr->is_loaded && !strcmp(ptr->filename, filename))
+			return true;
+
+		ptr = ptr->next;
+	}
+
+	return false;
+}
+
+static void clear_loaded(const module *m)
+{
+	struct loaded_file *ptr = m->loaded_files;
+
+	while (ptr) {
+		struct loaded_file *save = ptr;
+		ptr = ptr->next;
+		free(save->filename);
+		free(save);
+	}
+}
+
 predicate *create_predicate(module *m, cell *c)
 {
 	predicate *pr = calloc(1, sizeof(predicate));
@@ -518,7 +598,7 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 	}
 
 	op_table *tmp = malloc(sizeof(op_table));
-	tmp->name = strdup(name);
+	tmp->name = set_known(m, name);
 	tmp->priority = priority;
 	tmp->specifier = specifier;
 	m->loaded_ops = false;
@@ -863,74 +943,12 @@ bool retract_from_db(module *m, db_entry *dbe)
 	return true;
 }
 
-static const char *set_loaded(module *m, const char *filename)
-{
-	struct loaded_file *ptr = m->loaded_files;
-
-	while (ptr) {
-		if (ptr->filename && !strcmp(ptr->filename, filename))
-			return ptr->filename;
-
-		ptr = ptr->next;
-	}
-
-	ptr = malloc(sizeof(*ptr));
-	ptr->next = m->loaded_files;
-	ptr->filename = strdup(filename);
-	m->loaded_files = ptr;
-	return ptr->filename;
-}
-
-static void set_unloaded(module *m, const char *filename)
-{
-	struct loaded_file *ptr = m->loaded_files;
-
-	while (ptr) {
-		if (ptr->filename && !strcmp(ptr->filename, filename)) {
-			free(ptr->filename);
-			ptr->filename = NULL;
-			break;
-		}
-
-		ptr = ptr->next;
-	}
-}
-
-static bool is_loaded(const module *m, const char *filename)
-{
-	struct loaded_file *ptr = m->loaded_files;
-
-	while (ptr) {
-		if (ptr->filename && !strcmp(ptr->filename, filename))
-			return true;
-
-		ptr = ptr->next;
-	}
-
-	return false;
-}
-
-static void clear_loaded(const module *m)
-{
-	struct loaded_file *ptr = m->loaded_files;
-
-	while (ptr) {
-		struct loaded_file *save = ptr;
-		ptr = ptr->next;
-
-		if (save->filename)
-			free(save->filename);
-
-		free(save);
-	}
-}
-
 module *load_text(module *m, const char *src, const char *filename)
 {
 	parser *p = create_parser(m);
 	if (!p) return NULL;
-	char *save_filename = p->m->filename;
-	p->m->filename = strdup(filename);
+	const char *save_filename = p->m->filename;
+	p->m->filename = set_known(m, filename);
 	p->consulting = true;
 	p->srcptr = (char*)src;
 	tokenize(p, false, false);
@@ -966,7 +984,6 @@ module *load_text(module *m, const char *src, const char *filename)
 	}
 
 	module *save_m = p->m;
-	free(p->m->filename);
 	p->m->filename = save_filename;
 	destroy_parser(p);
 	return save_m;
@@ -1036,8 +1053,8 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 {
 	parser *p = create_parser(m);
 	if (!p) return NULL;
-	char *save_filename = m->filename;
-	m->filename = strdup(filename);
+	const char *save_filename = m->filename;
+	m->filename = set_known(m, filename);
 	p->consulting = true;
 	p->fp = fp;
 	bool ok = false;
@@ -1089,7 +1106,6 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 
 	ok = !p->error;
 	destroy_parser(p);
-	//free(m->filename);
 	m->filename = save_filename;
 	return save_m;
 }
@@ -1241,18 +1257,14 @@ void destroy_module(module *m)
 	miter *iter = m_first(m->defops);
 	op_table *opptr;
 
-	while (m_next(iter, (void**)&opptr)) {
-		free(opptr->name);
+	while (m_next(iter, (void**)&opptr))
 		free(opptr);
-	}
 
 	m_destroy(m->defops);
 	iter = m_first(m->ops);
 
-	while (m_next(iter, (void**)&opptr)) {
-		free(opptr->name);
+	while (m_next(iter, (void**)&opptr))
 		free(opptr);
-	}
 
 	m_destroy(m->ops);
 
@@ -1278,8 +1290,6 @@ void destroy_module(module *m)
 
 	m_destroy(m->index);
 	destroy_parser(m->p);
-	free(m->filename);
-	free(m->name);
 	clear_loaded(m);
 	free(m);
 }
@@ -1296,8 +1306,8 @@ module *create_module(prolog *pl, const char *name)
 	ensure(m);
 
 	m->pl = pl;
-	m->filename = strdup(name);
-	m->name = strdup(name);
+	m->filename = set_known(m, name);
+	m->name = set_known(m, name);
 	m->flag.unknown = UNK_ERROR;
 	m->flag.double_quote_chars = true;
 	m->flag.character_escapes = true;
@@ -1311,7 +1321,6 @@ module *create_module(prolog *pl, const char *name)
 		for (const op_table *ptr = g_ops; ptr->name; ptr++) {
 			op_table *tmp = malloc(sizeof(op_table));
 			memcpy(tmp, ptr, sizeof(op_table));
-			tmp->name = strdup(ptr->name);
 			m_app(m->defops, tmp->name, tmp);
 		}
 	}

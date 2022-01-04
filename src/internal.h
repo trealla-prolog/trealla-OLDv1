@@ -422,7 +422,7 @@ struct builtins {
 };
 
 typedef struct {
-	char *name;
+	const char *name;
 	unsigned specifier;
 	unsigned priority;
 } op_table;
@@ -638,6 +638,7 @@ struct parser_ {
 struct loaded_file {
 	struct loaded_file *next;
 	char *filename;
+	bool is_loaded:1;
 };
 
 #define MAX_MODULES_USED 64
@@ -647,7 +648,7 @@ struct module_ {
 	prolog *pl;
 	module *used[MAX_MODULES_USED];
 	query *tasks;
-	char *filename, *name;
+	const char *filename, *name;
 	predicate *head, *tail;
 	parser *p;
 	FILE *fp;

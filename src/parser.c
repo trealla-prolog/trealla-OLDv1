@@ -2683,8 +2683,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			c = p->cl->cells + save_idx;
 			c->nbr_cells = p->cl->cidx - save_idx;
 			fix_list(c);
-			p->start_term = false;
-			p->last_close = false;
+			p->start_term = p->last_close = false;
 			last_op = false;
 			continue;
 		}
@@ -2704,8 +2703,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 			c = p->cl->cells+save_idx;
 			c->nbr_cells = p->cl->cidx - save_idx;
-			p->start_term = false;
-			p->last_close = false;
+			p->start_term = p->last_close = false;
 			last_op = false;
 			continue;
 		}
@@ -2725,10 +2723,8 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				c->nbr_cells = p->cl->cidx - save_idx;
 			}
 
-			is_func = false;
-			last_op = false;
-			p->start_term = false;
-			p->last_close = false;
+			is_func = last_op = false;
+			p->start_term = p->last_close = false;
 			continue;
 		}
 
@@ -2767,9 +2763,8 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 			cell *c = make_a_literal(p, g_dot_s);
 			c->arity = 2;
-			p->start_term = true;
+			p->start_term = last_op = true;
 			p->last_close = false;
-			last_op = true;
 			continue;
 		}
 
@@ -2821,9 +2816,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->is_quoted && consing && !strcmp(p->token, "|")) {
-			last_op = true;
-			last_bar = true;
-			was_consing = true;
+			last_op = last_bar = was_consing = true;
 			p->last_close = false;
 			//consing = false;
 			continue;
@@ -3028,9 +3021,11 @@ bool run(parser *p, const char *pSrc, bool dump)
 	ASTRING_trim_ws(src);
 	ASTRING_trim(src, '.');
 	ASTRING_strcat(src, ".");
+
 	p->srcptr = ASTRING_cstr(src);
 	p->line_nbr = 1;
 	tokenize(p, false, false);
+
 	ASTRING_free(src);
 
 	if (!p->error && !p->end_of_term && !p->run_init) {
