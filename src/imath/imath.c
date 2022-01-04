@@ -28,6 +28,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -2971,18 +2972,27 @@ mp_result mp_int_lsb(mp_int z, mp_usmall *out) {
 		return MP_UNDEF;
 
 	mp_usmall uz = MP_USED(z);
-	mp_digit *dz = MP_DIGITS(z) + uz - 1;
+	mp_digit *dz = MP_DIGITS(z);
 	mp_usmall count = 0;
-	while ((uz > 0) && !count) {
-		mp_usmall n = *dz--;
+	unsigned skip = 0;
+
+	while (uz-- > 0) {
+		mp_usmall n = *dz++;
+
+		if (!n) {
+			skip++;
+			continue;
+		}
+
         while ((n & 1) == 0) {
             ++count;
             n = n >> 1;
         }
-		--uz;
+
+        break;
 	}
 
-	if (out) *out = count;
+	if (out) *out = count ? (skip*sizeof(mp_digit)*8)+count : 0;
 
   return MP_OK;
 }
@@ -2996,8 +3006,8 @@ mp_result mp_int_msb(mp_int z, mp_usmall *out) {
 	mp_usmall uz = MP_USED(z);
 	mp_digit *dz = MP_DIGITS(z) + uz - 1;
 	mp_usmall count = -1;
-	while (uz > 0) {
-		mp_usmall n = *dz;
+	while ((uz > 0) && !count) {
+		mp_usmall n = *dz--;
         while (n != 0) {
             count++;
             n = n >> 1;
