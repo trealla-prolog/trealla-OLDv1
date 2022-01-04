@@ -619,7 +619,7 @@ static USE_RESULT pl_status fn_lsb_1(query *q)
 		q->accum.val_int = count;
 	} else {
 		if (p1.val_int < 1)
-		return throw_error(q, &p1, q->st.curr_frame, "domain_error", "not_less_than_one");
+			return throw_error(q, &p1, q->st.curr_frame, "domain_error", "not_less_than_one");
 
 		uint64_t n = p1.val_int;
     	uint64_t lsb = 0;
@@ -653,7 +653,7 @@ static USE_RESULT pl_status fn_msb_1(query *q)
 		q->accum.val_int = count;
 	} else {
 		if (p1.val_int < 1)
-		return throw_error(q, &p1, q->st.curr_frame, "domain_error", "not_less_than_one");
+			return throw_error(q, &p1, q->st.curr_frame, "domain_error", "not_less_than_one");
 
 		uint64_t n = p1.val_int;
     	uint64_t msb = -1;
