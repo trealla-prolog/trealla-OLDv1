@@ -601,6 +601,74 @@ static USE_RESULT pl_status fn_popcount_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_lsb_1(query *q)
+{
+	CHECK_CALC();
+	GET_FIRST_ARG(p1_tmp,any);
+	CLEANUP cell p1 = eval(q, p1_tmp);
+
+	if (!is_integer(&p1))
+		return throw_error(q, &p1, q->st.curr_frame, "type_error", "integer");
+
+	if (is_bigint(&p1)) {
+		mp_usmall count = 0;
+
+		if (mp_int_lsb(&p1.val_bigint->ival, &count) != MP_OK)
+			return throw_error(q, &p1, q->st.curr_frame, "domain_error", "not_less_than_one");
+
+		q->accum.val_int = count;
+	} else {
+		if (p1.val_int < 1)
+		return throw_error(q, &p1, q->st.curr_frame, "domain_error", "not_less_than_one");
+
+		uint64_t n = p1.val_int;
+    	uint64_t lsb = 0;
+    	while ((n & 1) == 0) {
+    	    ++lsb;
+    	    n = n >> 1;
+    	}
+
+		q->accum.val_int = lsb;
+	}
+
+	q->accum.tag = TAG_INT;
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_msb_1(query *q)
+{
+	CHECK_CALC();
+	GET_FIRST_ARG(p1_tmp,any);
+	CLEANUP cell p1 = eval(q, p1_tmp);
+
+	if (!is_integer(&p1))
+		return throw_error(q, &p1, q->st.curr_frame, "type_error", "integer");
+
+	if (is_bigint(&p1)) {
+		mp_usmall count = 0;
+
+		if (mp_int_lsb(&p1.val_bigint->ival, &count) != MP_OK)
+			return throw_error(q, &p1, q->st.curr_frame, "domain_error", "not_less_than_one");
+
+		q->accum.val_int = count;
+	} else {
+		if (p1.val_int < 1)
+		return throw_error(q, &p1, q->st.curr_frame, "domain_error", "not_less_than_one");
+
+		uint64_t n = p1.val_int;
+    	uint64_t msb = -1;
+    	while (n != 0) {
+    	    msb++;
+    	    n = n >> 1;
+    	}
+
+		q->accum.val_int = msb;
+	}
+
+	q->accum.tag = TAG_INT;
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_iso_truncate_1(query *q)
 {
 	CHECK_CALC();
@@ -2530,6 +2598,8 @@ const struct builtins g_functions[] =
 	{"atanh", 1, fn_atanh_1, NULL, true},
 
 	{"popcount", 1, fn_popcount_1, NULL, true},
+	{"lsb", 1, fn_lsb_1, NULL, true},
+	{"msb", 1, fn_msb_1, NULL, true},
 	{"atan2", 2, fn_iso_atan2_2, NULL, true},
 	{"copysign", 2, fn_iso_copysign_2, NULL, true},
 	{"truncate", 1, fn_iso_truncate_1, NULL, true},
