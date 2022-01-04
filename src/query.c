@@ -966,12 +966,17 @@ void make_indirect(cell *tmp, cell *c)
 	tmp->val_ptr = c;
 }
 
+#define MAX_VARS (1L<<24)
+
 unsigned create_vars(query *q, unsigned cnt)
 {
 	frame *f = GET_CURR_FRAME();
 
 	if (!cnt)
 		return f->nbr_vars;
+
+	if ((q->st.sp + cnt) > MAX_VARS)
+		return 0;
 
 	unsigned var_nbr = f->nbr_vars;
 
