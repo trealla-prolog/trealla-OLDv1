@@ -1,0 +1,51 @@
+{
+  "uid" : "d9bed8788805e5f",
+  "name" : "op_3_infix_left_assotiative",
+  "fullName" : "op_3_infix_left_assotiative::tests",
+  "historyId" : "op_3_infix_left_assotiative::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "syntax/directives/op_3/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "syntax/directives/op_3/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "syntax/directives/op_3/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "syntax/directives/op_3/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "57-60"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/85a8681faaed12517b69aceadf2c4fe1ba21feee/tests/prolog/syntax/directives/op_3/tests.lgt#L57"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "d9bed8788805e5f.json",
+  "parameterValues" : [ "syntax/directives/op_3/tests.lgt", "57-60", "https://github.com/LogtalkDotOrg/logtalk3/tree/85a8681faaed12517b69aceadf2c4fe1ba21feee/tests/prolog/syntax/directives/op_3/tests.lgt#L57" ]
+}
