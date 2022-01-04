@@ -1468,7 +1468,7 @@ static void dump_vars(query *q, bool partial)
 		if (any)
 			fprintf(stdout, ", ");
 
-		fprintf(stdout, "%s = ", p->vartab.var_name[i]);
+		fprintf(stdout, "   %s = ", p->vartab.var_name[i]);
 
 		// See if there is already an output with this value...
 
@@ -1596,7 +1596,7 @@ static bool check_redo(query *q)
 		}
 
 		if ((ch == ' ') || (ch == ';')) {
-			printf("\n; ");
+			printf(";\n");
 			fflush(stdout);
 			q->retry = QUERY_RETRY;
 			q->pl->did_dump_vars = false;
@@ -1604,7 +1604,7 @@ static bool check_redo(query *q)
 		}
 
 		if ((ch == '\n') || (ch == 'a')) {
-			printf("\n; ...\n");
+			printf(";\n   ...\n");
 			q->abort = true;
 			return true;
 		}
