@@ -1590,12 +1590,12 @@ static bool check_redo(query *q)
 		int ch = history_getch();
 
 		if ((ch == 'h') || (ch == '?')) {
-			printf("Action (a)[abort], (x)[exit], (;)[retry]:\n");
+			printf("Action (a)bort, e(x)it, (r)etry, (c)ontinue:\n");
 			fflush(stdout);
 			continue;
 		}
 
-		if ((ch == ' ') || (ch == ';')) {
+		if ((ch == ' ') || (ch == ';') || (ch == 'r')) {
 			printf(";\n");
 			fflush(stdout);
 			q->retry = QUERY_RETRY;
