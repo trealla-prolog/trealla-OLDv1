@@ -9415,14 +9415,14 @@ static pl_idx_t jenkins_one_at_a_time_hash(const char *key, size_t len)
 static USE_RESULT pl_status fn_term_hash_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,smallint_or_var);
+	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_variable(p1))
 		return pl_success;
 
 	cell tmp;
 
-	if (is_integer(p1)) {
+	if (is_smallint(p1)) {
 		char tmpbuf[80];
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long)get_smallint(p1));
 		make_int(&tmp, jenkins_one_at_a_time_hash(tmpbuf, strlen(tmpbuf)));
