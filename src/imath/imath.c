@@ -3007,6 +3007,7 @@ mp_result mp_int_msb(mp_int z, mp_usmall *out) {
 	mp_digit *dz = MP_DIGITS(z) + uz - 1;
 	mp_usmall count = -1;
 	mp_usmall n = *dz;
+
 	while (n != 0) {
 		count++;
 		n = n >> 1;
