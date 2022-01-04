@@ -361,7 +361,7 @@ USE_RESULT pl_status fn_ignore_1(query *q)
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
 
 	if (!p0 || (p0 == ERR_CYCLE_CELL))
-		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "too_many_vars");
+		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "stack");
 
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
