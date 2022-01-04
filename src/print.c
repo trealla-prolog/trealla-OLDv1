@@ -914,9 +914,12 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				if (!braces && is_literal(tmp)) {
 					const char *s = GET_STR(q, tmp);
 
-					if (!strcmp(s, ",") || !strcmp(s, ";") ||
-						!strcmp(s, "->") || !strcmp(s, ":-") ||
-						!strcmp(s, "*->") || !strcmp(s, "-->"))
+					if (!strcmp(s, ",")
+						/*
+						|| !strcmp(s, ";") || !strcmp(s, "->")
+						|| !strcmp(s, ":-") || !strcmp(s, "*->") || !strcmp(s, "-->")
+						*/
+						)
 						parens = 1;
 				}
 
