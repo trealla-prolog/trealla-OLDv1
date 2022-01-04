@@ -9423,7 +9423,7 @@ static USE_RESULT pl_status fn_term_hash_2(query *q)
 	cell tmp;
 
 	if (is_smallint(p1)) {
-		char tmpbuf[80];
+		char tmpbuf[256];
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long)get_smallint(p1));
 		make_int(&tmp, jenkins_one_at_a_time_hash(tmpbuf, strlen(tmpbuf)));
 	} else if (is_atom(p1)) {
