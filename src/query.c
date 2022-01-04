@@ -1545,8 +1545,7 @@ static int check_interrupt(query *q)
 		}
 
 		if ((ch == ';') || (ch == ' ') || (ch == 'r')) {
-			q->trace = true;
-			q->creep = true;
+			q->trace = q->creep = true;
 			q->pl->did_dump_vars = false;
 			return 0;
 		}
