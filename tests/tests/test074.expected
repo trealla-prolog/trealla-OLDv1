@@ -1,3 +1,3 @@
 ok
-type_error(list,[_20,_21|a])
+type_error(list,[_21,_22|a])
 term_variables/2

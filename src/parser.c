@@ -3042,7 +3042,7 @@ bool run(parser *p, const char *pSrc, bool dump)
 		return false;
 
 	if (p->skip) {
-		p->m->pl->status = 1;
+		p->m->pl->status = true;
 		return true;
 	}
 
