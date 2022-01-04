@@ -4870,7 +4870,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	may_ptr_error(tmp);
 
 	if (tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
+		return throw_error(q, p1, p1_ctx, "resource_error", "too_deep");
 
 	cell *head = get_head(tmp);
 

@@ -1561,7 +1561,7 @@ static int check_interrupt(query *q)
 			return 1;
 		}
 
-		if (ch == 'c') {
+		if (ch == 'e') {
 			if (!q->run_init)
 				printf("\n");
 
