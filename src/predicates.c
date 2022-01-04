@@ -9439,66 +9439,66 @@ static USE_RESULT pl_status fn_term_hash_2(query *q)
 
 static USE_RESULT pl_status fn_hex_chars_2(query *q)
 {
-	GET_FIRST_ARG(p2,integer_or_var);
-	GET_NEXT_ARG(p1,atom_or_var);
+	GET_FIRST_ARG(p1,integer_or_var);
+	GET_NEXT_ARG(p2,atom_or_var);
 
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "atom");
 
-	if (is_variable(p1)) {
+	if (is_variable(p2)) {
 		char tmpbuf[256];
-		snprintf(tmpbuf, sizeof(tmpbuf), "%llx", (long long)get_int(p2));
+		snprintf(tmpbuf, sizeof(tmpbuf), "%llx", (long long)get_int(p1));
 		cell tmp;
 		may_error(make_string(&tmp, tmpbuf));
-		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
 	}
 
-	char *src = DUP_SLICE(q, p1);
-	pl_int_t p1_val = strtoull(src, NULL, 16);
+	char *src = DUP_SLICE(q, p2);
+	pl_int_t p2_val = strtoull(src, NULL, 16);
 	free(src);
 
-	if (is_variable(p2)) {
+	if (is_variable(p1)) {
 		cell tmp;
-		make_int(&tmp, p1_val);
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		make_int(&tmp, p2_val);
+		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
 
-	return p1_val == get_int(p2);
+	return p2_val == get_int(p1);
 }
 
 static USE_RESULT pl_status fn_octal_chars_2(query *q)
 {
-	GET_FIRST_ARG(p2,integer_or_var);
-	GET_NEXT_ARG(p1,atom_or_var);
+	GET_FIRST_ARG(p1,integer_or_var);
+	GET_NEXT_ARG(p2,atom_or_var);
 
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
-	if (is_variable(p1)) {
+	if (is_variable(p2)) {
 		char tmpbuf[256];
-		snprintf(tmpbuf, sizeof(tmpbuf), "%llo", (long long)get_int(p2));
+		snprintf(tmpbuf, sizeof(tmpbuf), "%llo", (long long)get_int(p1));
 		cell tmp;
 		may_error(make_string(&tmp, tmpbuf));
-		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
 	}
 
-	char *src = DUP_SLICE(q, p1);
-	pl_int_t p1_val = strtoull(src, NULL, 8);
+	char *src = DUP_SLICE(q, p2);
+	pl_int_t p2_val = strtoull(src, NULL, 8);
 	free(src);
 
-	if (is_variable(p2)) {
+	if (is_variable(p1)) {
 		cell tmp;
-		make_int(&tmp, p1_val);
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		make_int(&tmp, p2_val);
+		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
 
-	return p1_val == get_int(p2);
+	return p2_val == get_int(p1);
 }
 
 static USE_RESULT pl_status fn_atom_1(query *q)
@@ -11572,7 +11572,9 @@ static const struct builtins g_predicates_other[] =
 	{"bread", 3, fn_bread_3, "+stream,+integer,-string", false},
 	{"bwrite", 2, fn_bwrite_2, "+stream,-string", false},
 	{"hex_chars", 2, fn_hex_chars_2, "?integer,?string", false},
+	{"hex_bytes", 2, fn_hex_chars_2, "?integer,?string", false},
 	{"octal_chars", 2, fn_octal_chars_2, "?integer,?string", false},
+	{"octal_bytes", 2, fn_octal_chars_2, "?integer,?string", false},
 	{"$legacy_predicate_property", 2, fn_sys_legacy_predicate_property_2, "+callable,?string", false},
 	{"$load_properties", 0, fn_sys_load_properties_0, NULL, false},
 	{"$load_flags", 0, fn_sys_load_flags_0, NULL, false},
