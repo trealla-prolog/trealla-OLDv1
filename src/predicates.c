@@ -9447,26 +9447,49 @@ static USE_RESULT pl_status fn_hex_chars_2(query *q)
 
 	if (is_variable(p2)) {
 		char tmpbuf[256];
-		snprintf(tmpbuf, sizeof(tmpbuf), "%llx", (long long)get_int(p1));
+		char *dst = tmpbuf;
+
+		if (is_bigint(p1)) {
+			size_t len = mp_int_string_len(&p1->val_bigint->ival, 16) -1;
+			dst = malloc(len+10);
+			mp_int_to_string(&p1->val_bigint->ival, 16, dst, len+1);
+		} else {
+			snprintf(tmpbuf, sizeof(tmpbuf), "%llx", (long long)get_int(p1));
+		}
+
 		cell tmp;
-		may_error(make_string(&tmp, tmpbuf));
+		may_error(make_string(&tmp, dst));
+		if (is_bigint(p2)) free(dst);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
 	}
 
 	char *src = DUP_SLICE(q, p2);
-	pl_int_t p2_val = strtoull(src, NULL, 16);
-	free(src);
+	const char *s = src;
+	mpz_t v2;
+	mp_int_init(&v2);
+	mp_small val;
 
-	if (is_variable(p1)) {
-		cell tmp;
-		make_int(&tmp, p2_val);
-		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-		return pl_success;
+	if (!q->p)
+		q->p = create_parser(q->st.m);
+
+	read_integer(q->p, &v2, 16, s, &s);
+	free(src);
+	cell tmp = {0};
+
+	if (mp_int_to_int(&v2, &val) == MP_RANGE) {
+		tmp.tag = TAG_INT;
+		tmp.val_bigint = malloc(sizeof(bigint));
+		tmp.val_bigint->refcnt = 1;
+		mp_int_init_copy(&tmp.val_bigint->ival, &v2);
+		tmp.flags |= FLAG_MANAGED;
+	} else {
+		make_int(&tmp, val);
 	}
 
-	return p2_val == get_int(p1);
+	mp_int_clear(&v2);
+	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
 static USE_RESULT pl_status fn_octal_chars_2(query *q)
@@ -9475,30 +9498,53 @@ static USE_RESULT pl_status fn_octal_chars_2(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 
 	if (is_variable(p1) && is_variable(p2))
-		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
+		return throw_error(q, p1, p1_ctx, "instantiation_error", "atom");
 
 	if (is_variable(p2)) {
 		char tmpbuf[256];
-		snprintf(tmpbuf, sizeof(tmpbuf), "%llo", (long long)get_int(p1));
+		char *dst = tmpbuf;
+
+		if (is_bigint(p1)) {
+			size_t len = mp_int_string_len(&p1->val_bigint->ival, 8) -1;
+			dst = malloc(len+10);
+			mp_int_to_string(&p1->val_bigint->ival, 8, dst, len+1);
+		} else {
+			snprintf(tmpbuf, sizeof(tmpbuf), "%llo", (long long)get_int(p1));
+		}
+
 		cell tmp;
-		may_error(make_string(&tmp, tmpbuf));
+		may_error(make_string(&tmp, dst));
+		if (is_bigint(p2)) free(dst);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
 	}
 
 	char *src = DUP_SLICE(q, p2);
-	pl_int_t p2_val = strtoull(src, NULL, 8);
-	free(src);
+	const char *s = src;
+	mpz_t v2;
+	mp_int_init(&v2);
+	mp_small val;
 
-	if (is_variable(p1)) {
-		cell tmp;
-		make_int(&tmp, p2_val);
-		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-		return pl_success;
+	if (!q->p)
+		q->p = create_parser(q->st.m);
+
+	read_integer(q->p, &v2, 16, s, &s);
+	free(src);
+	cell tmp = {0};
+
+	if (mp_int_to_int(&v2, &val) == MP_RANGE) {
+		tmp.tag = TAG_INT;
+		tmp.val_bigint = malloc(sizeof(bigint));
+		tmp.val_bigint->refcnt = 1;
+		mp_int_init_copy(&tmp.val_bigint->ival, &v2);
+		tmp.flags |= FLAG_MANAGED;
+	} else {
+		make_int(&tmp, val);
 	}
 
-	return p2_val == get_int(p1);
+	mp_int_clear(&v2);
+	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
 static USE_RESULT pl_status fn_atom_1(query *q)

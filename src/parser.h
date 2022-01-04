@@ -2,25 +2,26 @@
 
 #define DUMP_ERRS 0
 
-extern parser *create_parser(module *m);
-extern void destroy_parser(parser *p);
+parser *create_parser(module *m);
+void destroy_parser(parser *p);
 
-extern unsigned tokenize(parser *p, bool args, bool consing);
-extern void xref_rule(parser *p, clause *t, predicate *parent);
-extern void reset(parser *p);
-extern void consultall(parser *p, cell *l);
-extern void term_to_body(parser *p);
-extern cell *check_body_callable(parser *p, cell *c);
-extern bool run(parser *p, const char *src, bool dump);
-extern void xref_db(parser *p);
-extern char *eat_space(parser *p);
-extern bool virtual_term(parser *p, const char *src);
-extern bool get_token(parser *p, int last_op);
+unsigned tokenize(parser *p, bool args, bool consing);
+void xref_rule(parser *p, clause *t, predicate *parent);
+void reset(parser *p);
+void consultall(parser *p, cell *l);
+void term_to_body(parser *p);
+cell *check_body_callable(parser *p, cell *c);
+bool run(parser *p, const char *src, bool dump);
+void xref_db(parser *p);
+char *eat_space(parser *p);
+bool virtual_term(parser *p, const char *src);
+bool get_token(parser *p, int last_op);
+void read_integer(parser *p, mp_int v2, int base, const char *src,  const char **srcptr);
 
-extern void clear_rule(clause *t);
-extern void do_reduce(cell *n);
-extern void fix_list(cell *c);
-extern bool check_if_rule(const cell *c);
-extern cell *get_head(cell *c);
-extern cell *get_body(cell *c);
-extern cell *get_logical_body(cell *c);
+void clear_rule(clause *t);
+void do_reduce(cell *n);
+void fix_list(cell *c);
+bool check_if_rule(const cell *c);
+cell *get_head(cell *c);
+cell *get_body(cell *c);
+cell *get_logical_body(cell *c);

@@ -1697,7 +1697,7 @@ static int get_escape(const char **_src, bool *error, bool number)
 #define isbdigit(ch) (((ch) >= '0') && ((ch) <= '1'))
 #define isodigit(ch) (((ch) >= '0') && ((ch) <= '7'))
 
-static void read_integer(parser *p, mp_int v2, int base, const char *src,  const char **srcptr)
+void read_integer(parser *p, mp_int v2, int base, const char *src,  const char **srcptr)
 {
 	if (!p->tmpbuf)
 		p->tmpbuf = malloc(p->tmpbuf_size=256);
