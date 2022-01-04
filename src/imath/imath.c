@@ -2973,8 +2973,8 @@ mp_result mp_int_lsb(mp_int z, mp_usmall *out) {
 	mp_usmall uz = MP_USED(z);
 	mp_digit *dz = MP_DIGITS(z) + uz - 1;
 	mp_usmall count = 0;
-	while (uz > 0) {
-		mp_usmall n = *dz;
+	while ((uz > 0) && !count) {
+		mp_usmall n = *dz--;
         while ((n & 1) == 0) {
             ++count;
             n = n >> 1;

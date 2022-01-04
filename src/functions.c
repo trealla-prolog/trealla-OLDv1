@@ -619,10 +619,11 @@ static USE_RESULT pl_status fn_lsb_1(query *q)
 		q->accum.val_int = count;
 	} else {
 		if (p1.val_int < 1)
-		return throw_error(q, &p1, q->st.curr_frame, "domain_error", "not_less_than_one");
+			return throw_error(q, &p1, q->st.curr_frame, "domain_error", "not_less_than_one");
 
 		uint64_t n = p1.val_int;
     	uint64_t lsb = 0;
+
     	while ((n & 1) == 0) {
     	    ++lsb;
     	    n = n >> 1;
@@ -647,16 +648,17 @@ static USE_RESULT pl_status fn_msb_1(query *q)
 	if (is_bigint(&p1)) {
 		mp_usmall count = 0;
 
-		if (mp_int_lsb(&p1.val_bigint->ival, &count) != MP_OK)
+		if (mp_int_msb(&p1.val_bigint->ival, &count) != MP_OK)
 			return throw_error(q, &p1, q->st.curr_frame, "domain_error", "not_less_than_one");
 
 		q->accum.val_int = count;
 	} else {
 		if (p1.val_int < 1)
-		return throw_error(q, &p1, q->st.curr_frame, "domain_error", "not_less_than_one");
+			return throw_error(q, &p1, q->st.curr_frame, "domain_error", "not_less_than_one");
 
 		uint64_t n = p1.val_int;
     	uint64_t msb = -1;
+
     	while (n != 0) {
     	    msb++;
     	    n = n >> 1;
