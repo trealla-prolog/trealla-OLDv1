@@ -33,6 +33,9 @@ bool needs_quoting(module *m, const char *src, int srclen)
 	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!"))
 		return false;
 
+	if ((src[0] == '/') && (src[1] == '*'))
+		return true;
+
 	int ch = peek_char_utf8(src);
 
 	if (iswupper(ch) || isdigit(ch) || (ch == '_'))
@@ -50,7 +53,7 @@ bool needs_quoting(module *m, const char *src, int srclen)
 			|| !strcmp(src, "}");
 
 	if (!iswlower(ch) || !iswalpha(ch)) { // NO %/
-		static const char *s_symbols = "+-*<>=@#^~\\:$.";
+		static const char *s_symbols = "+-*/<>=@#^~\\:$.";
 		int quote = false;
 
 		while (srclen--) {
