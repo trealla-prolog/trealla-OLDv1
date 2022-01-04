@@ -36,7 +36,7 @@
 #include "openssl/sha.h"
 #endif
 
-#define MAX_VARS (1L<<31)
+#define MAX_VARS (1L<<24)
 
 #ifdef _WIN32
 #define msleep Sleep
@@ -10379,7 +10379,7 @@ static pl_status do_length(query *q)
 	if (is_variable(p1) && is_anon(p1))
 		return pl_success;
 
-	if (nbr >= MAX_VARS) {
+	if ((q->st.sp+nbr) > MAX_VARS) {
 		drop_choice(q);
 		return throw_error(q, p2, p2_ctx, "resource_error", "stack");
 	}
@@ -10590,7 +10590,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		if (is_negative(p2))
 			return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
 
-		if (is_ge(p2,MAX_VARS))
+		if ((get_int(p2)+q->st.sp) > MAX_VARS)
 			return throw_error(q, p2, p2_ctx, "resource_error", "stack");
 
 		pl_idx_t nbr = get_smallint(p2);
