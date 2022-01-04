@@ -1590,7 +1590,7 @@ static bool check_redo(query *q)
 		int ch = history_getch();
 
 		if ((ch == 'h') || (ch == '?')) {
-			printf("Action (a)bort, e(x)it, (r)etry, (c)ontinue:\n");
+			printf("Action (a)bort, (e)xit, (r)etry, (c)ontinue:\n");
 			fflush(stdout);
 			continue;
 		}
@@ -1609,7 +1609,7 @@ static bool check_redo(query *q)
 			return true;
 		}
 
-		if (ch == 'x') {
+		if (ch == 'e') {
 			if (!q->run_init)
 				printf("\n");
 
