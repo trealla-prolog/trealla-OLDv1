@@ -36,7 +36,7 @@
 #include "openssl/sha.h"
 #endif
 
-#define MAX_VARS (1L<<30)
+#define MAX_VARS (1L<<31)
 
 #ifdef _WIN32
 #define msleep Sleep
