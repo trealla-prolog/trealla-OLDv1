@@ -1535,7 +1535,7 @@ static int check_interrupt(query *q)
 		printf("%c\n", ch);
 
 		if (ch == 'h') {
-			printf("Action (c)[continue], (t)[trace], (r)[creep]: ");
+			printf("Action (a)bort, (e)xit, (r)etry, (c)ontinue, (t)race, c(r)eep: ");
 			goto LOOP;
 		}
 
@@ -1544,14 +1544,14 @@ static int check_interrupt(query *q)
 			return 0;
 		}
 
-		if ((ch == ';') || (ch == ' ')) {
+		if ((ch == ';') || (ch == ' ') || (ch == 'r')) {
 			q->trace = true;
 			q->creep = true;
 			q->pl->did_dump_vars = false;
 			return 0;
 		}
 
-		if (ch == 'c')
+		if (ch == 'r')
 			return 0;
 
 		if (ch == 'f')
@@ -1562,7 +1562,7 @@ static int check_interrupt(query *q)
 			return 1;
 		}
 
-		if (ch == 'x') {
+		if (ch == 'c') {
 			if (!q->run_init)
 				printf("\n");
 
