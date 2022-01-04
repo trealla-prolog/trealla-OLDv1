@@ -2459,12 +2459,26 @@ bool get_token(parser *p, int last_op)
 
 				p->error_desc = "operator_expected";
 				p->error = true;
+				p->srcptr = (char*)src;
+				return false;
 			}
 		}
 
 		p->srcptr = (char*)src;
 		p->toklen = dst - p->token;
 		return true;
+	}
+
+	if (is_matching_pair(p, &dst, (char**)&src, ')','(') ||
+		is_matching_pair(p, &dst, (char**)&src, ']','(') ||
+		is_matching_pair(p, &dst, (char**)&src, '}','(')) {
+		if (DUMP_ERRS || !p->do_read_term)
+			fprintf(stdout, "Error: syntax error, operator expected, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line?p->save_line:"");
+
+		p->error_desc = "operator_expected";
+		p->error = true;
+		p->srcptr = (char*)src;
+		return false;
 	}
 
 	if (is_matching_pair(p, &dst, (char**)&src, '[',']') ||
