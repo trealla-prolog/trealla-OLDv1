@@ -350,10 +350,13 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 		reflist r1 = {0}, r2 = {0};
 
 		if (q->info1) {
+			int both = 0;
+
 			if (is_variable(p1)) {
 				if (is_in_ref_list(p1, p1_ctx, q->info1->r1)) {
 					c1 = p1;
 					c1_ctx = p1_ctx;
+					both++;
 				} else {
 					r1.next = q->info1->r1;
 					r1.var_nbr = p1->var_nbr;
@@ -361,19 +364,22 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 					q->info1->r1 = &r1;
 				}
 			}
-		}
 
-		if (q->info2) {
 			if (is_variable(p2)) {
 				if (is_in_ref_list(p2, p2_ctx, q->info2->r2)) {
 					c2 = p2;
 					c2_ctx = p2_ctx;
+					both++;
 				} else {
 					r2.next = q->info2->r2;
 					r2.var_nbr = p2->var_nbr;
 					r2.ctx = p2_ctx;
 					q->info2->r2 = &r2;
 				}
+			}
+
+			if (both) {
+				return pl_success;
 			}
 		}
 
