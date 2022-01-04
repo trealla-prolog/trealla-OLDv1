@@ -9459,7 +9459,7 @@ static USE_RESULT pl_status fn_hex_chars_2(query *q)
 
 		cell tmp;
 		may_error(make_string(&tmp, dst));
-		if (is_bigint(p2)) free(dst);
+		if (is_bigint(p1)) free(dst);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
@@ -9489,7 +9489,9 @@ static USE_RESULT pl_status fn_hex_chars_2(query *q)
 	}
 
 	mp_int_clear(&v2);
-	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	return ok;
 }
 
 static USE_RESULT pl_status fn_octal_chars_2(query *q)
@@ -9514,7 +9516,7 @@ static USE_RESULT pl_status fn_octal_chars_2(query *q)
 
 		cell tmp;
 		may_error(make_string(&tmp, dst));
-		if (is_bigint(p2)) free(dst);
+		if (is_bigint(p1)) free(dst);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return pl_success;
@@ -9544,7 +9546,9 @@ static USE_RESULT pl_status fn_octal_chars_2(query *q)
 	}
 
 	mp_int_clear(&v2);
-	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	return ok;
 }
 
 static USE_RESULT pl_status fn_atom_1(query *q)
