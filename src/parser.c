@@ -3077,6 +3077,7 @@ bool run(parser *p, const char *pSrc, bool dump)
 	p->m->pl->halt = q->halt;
 	p->m->pl->halt_code = q->halt_code;
 	p->m->pl->status = q->status;
+	p->m->pl->is_redo = q->is_redo;
 
 	if (!p->m->pl->quiet && !p->directive && dump && q->pl->stats) {
 		fprintf(stdout,

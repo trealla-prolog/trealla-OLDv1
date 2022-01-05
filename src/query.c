@@ -1472,8 +1472,10 @@ static void dump_vars(query *q, bool partial)
 
 		if (any)
 			fprintf(stdout, ", ");
-		else
+		else if (!q->is_redo)
 			fprintf(stdout, "   ");
+		else
+			fprintf(stdout, "  ");
 
 		fprintf(stdout, "%s = ", p->vartab.var_name[i]);
 
@@ -1591,7 +1593,7 @@ static bool check_redo(query *q)
 	fflush(stdout);
 
 	for (;;) {
-		printf(" ");
+		printf("\n");
 		fflush(stdout);
 		int ch = history_getch();
 
@@ -1602,8 +1604,9 @@ static bool check_redo(query *q)
 		}
 
 		if ((ch == ' ') || (ch == ';') || (ch == 'r')) {
-			printf(";\n");
+			printf(";");
 			fflush(stdout);
+			q->is_redo = true;
 			q->retry = QUERY_RETRY;
 			q->pl->did_dump_vars = false;
 			break;
@@ -1795,6 +1798,7 @@ pl_status execute(query *q, cell *cells, unsigned nbr_vars)
 	q->st.sp = nbr_vars;
 	q->abort = false;
 	q->cycle_error = false;
+	q->is_redo = false;
 
 	// There is initially a frame (hence fp=0 is valid), so
 	// this points to the next available frame...

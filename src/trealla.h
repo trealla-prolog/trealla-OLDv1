@@ -14,6 +14,7 @@ extern bool pl_consult_fp(prolog*, FILE *fp, const char *filename);
 extern int get_halt_code(prolog*);
 extern bool get_halt(prolog*);
 extern bool get_status(prolog*);
+extern bool get_redo(prolog*);
 extern bool get_dump_vars(prolog*);
 
 extern void set_trace(prolog*);

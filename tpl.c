@@ -316,7 +316,11 @@ int main(int ac, char *av[])
 			break;
 
 		if (!get_dump_vars(pl)) {
-			printf("   %s", get_status(pl) ? "true" : "false");
+			if (get_redo(pl))
+				printf("  %s", get_status(pl) ? "true" : "false");
+			else
+				printf("   %s", get_status(pl) ? "true" : "false");
+
 			printf(".\n");
 		}
 	}

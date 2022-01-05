@@ -113,6 +113,7 @@ module *find_module_id(prolog *pl, unsigned id)
 
 bool get_halt(prolog *pl) { return pl->halt; }
 bool get_status(prolog *pl) { return pl->status; }
+bool get_redo(prolog *pl) { return pl->is_redo; }
 bool get_dump_vars(prolog *pl) { return pl->did_dump_vars; }
 int get_halt_code(prolog *pl) { return pl->halt_code; }
 
