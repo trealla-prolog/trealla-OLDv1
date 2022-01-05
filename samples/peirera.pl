@@ -4,8 +4,7 @@
 	    list_bench_results/2	% +File, +Id
 	  ]).
 
-:- meta_predicate
-	do_n(+, 0, -).
+:- meta_predicate(do_n(+, 0, -)).
 
 %%	bench_peirera is det.
 %%	bench_peirera(+SpeedupOrName) is det.
