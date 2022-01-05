@@ -1402,7 +1402,7 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 	bool odd = len & 1, first = true;
 
 	if (odd)
-		return throw_error(q, p2, p2_ctx, "domain_error", "hex_encoding");
+		return throw_error(q, p1, p1_ctx, "domain_error", "hex_encoding");
 
 	while (len) {
 		unsigned val = 0;
