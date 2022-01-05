@@ -260,8 +260,6 @@ Non-standard predicates
 	write_canonical_to_chars/3  # write_term_to_chars(+rule,+opts,-Cs)
 	chars_base64/3              # currently options are ignored
 	chars_urlenc/3              # currently options are ignored
-	crypto_data_hash/3          # convert data string to hash string
-	hex_bytes/2                 # convert hex string to list of codes
 	hex_chars/2                 # as number_chars, but in hex
 	octal_chars/2               # as number_chars, but in octal
 	partial_string/2            # partial_string(+string,-String)
@@ -388,11 +386,6 @@ Non-standard predicates
 	replace/4                   # replace(+string,+old,+new,-string)
 	persist/1                   # directive 'persist funct/arity'
 
-	sha1/2                      # sha1(+plaintext,?hash)        NEEDS OPENSSL
-	sha256/2                    # sha256(+plaintext,?hash)      NEEDS OPENSSL
-	sha384/2                    # sha384(+plaintext,?hash)      NEEDS OPENSSL
-	sha512/2                    # sha512(+plaintext,?hash)      NEEDS OPENSSL
-
 	open(stream(Str),...)       # with open/4 reopen a stream
 	open(F,M,S,[mmap(Ls)])      # with open/4 mmap() the file to Ls
 
@@ -454,6 +447,24 @@ then call...
 	?- F is fac(20).
 	F = 2432902008176640000.
 ```
+
+
+Crypto functions
+================
+
+Hash a plain-text data string (or atom) to a hexadecimal byte string
+representing the cryptographic strength hashed value. The options
+are *algorithm(Name)* where *Name* can be *sha256*, *sha384* or *sha512*
+at the moment. If it is a variable it will be unified with the default
+*sha256* algorithm. This predicate is only available when compiled
+with OpenSSL...
+
+	crypto_data_hash/3          # crypto_data_hash(+data,-hash,+options)
+
+Convert a hexadecimal string (or atom) to a codes-list where each code
+represents an integer 0..255 in value...
+
+	hex_bytes/2                 # hex_bytes(?hash,?codes)
 
 
 HTTP 1.1
