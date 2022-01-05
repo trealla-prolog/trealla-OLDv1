@@ -1343,7 +1343,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 
 static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 {
-	GET_FIRST_ARG(p1,list_or_var);
+	GET_FIRST_ARG(p1,list_or_nil_or_var);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
 
 	if (is_variable(p1) && is_variable(p2))
@@ -1352,16 +1352,10 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 	if (is_cyclic_term(q, p2, p2_ctx))
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
-	if (!is_variable(p2) && is_nil(p2)) {
-		cell tmp;
-		make_literal(&tmp, g_empty_s);
-		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (is_variable(p2) && !LEN_STR(q, p1)) {
+	if (is_nil(p2)) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
 	// Verify the list
@@ -1426,48 +1420,46 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 		return ok;
 	}
 
-	char *src = NULL;
+	LIST_HANDLER(p1);
+	bool first = true;
 
-	if (is_string(p1))
-		src = GET_STR(q, p1);
-	else if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
+	while (is_list(p1)) {
+		cell *h = LIST_HEAD(p1);
+		h = deref(q, h, p1_ctx);
 
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "chars");
+		if (!is_atom(h))
+			return throw_error(q, p1, p1_ctx, "type_error", "char");
 
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-	}
-
-	char *save_src = src;
-	size_t len = strlen(src);
-	bool odd = len & 1, first = true;
-
-	if (odd) {
-		if (is_iso_list(p1)) free(save_src);
-		return throw_error(q, p1, p1_ctx, "domain_error", "hex_encoding");
-	}
-
-	while (len) {
+		const char *src = GET_STR(q, h);
+		int n = peek_char_utf8(src);;
 		unsigned val = 0;
 
-		int n = *src++;
-		len--;
-
 		if (isdigit(n))
 			val += n - '0';
 		else if ((n >= 'a') && (n <= 'f'))
 			val += (n - 'a') + 10;
 		else if ((n >= 'A') && (n <= 'F'))
 			val += (n - 'A') + 10;
-		else {
-			if (is_iso_list(p1)) free(save_src);
+		else
 			return throw_error(q, p1, p1_ctx, "representation_error", "byte");
-		}
 
 		val <<= 4;
-		n = *src++;
-		len--;
+
+		p1 = LIST_TAIL(p1);
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+
+		if (!is_list(p1))
+			return throw_error(q, p1, p1_ctx, "domain_error", "hex_encoding");
+
+		h = LIST_HEAD(p1);
+		h = deref(q, h, p1_ctx);
+
+		if (!is_atom(h))
+			return throw_error(q, p1, p1_ctx, "type_error", "char");
+
+		src = GET_STR(q, h);
+		n = peek_char_utf8(src);;
 
 		if (isdigit(n))
 			val += n - '0';
@@ -1475,10 +1467,8 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 			val += (n - 'a') + 10;
 		else if ((n >= 'A') && (n <= 'F'))
 			val += (n - 'A') + 10;
-		else {
-			if (is_iso_list(p1)) free(save_src);
+		else
 			return throw_error(q, p1, p1_ctx, "representation_error", "byte");
-		}
 
 		cell tmp;
 		make_int(&tmp, (int)val);
@@ -1489,10 +1479,21 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 			append_list(q, &tmp);
 
 		first = false;
+		p1 = LIST_TAIL(p1);
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+	}
+
+	if (!is_nil(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "hex_encoding");
+
+	if (first) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
 	cell *l = end_list(q);
-	if (is_iso_list(p1)) free(save_src);
 	may_ptr_error(l);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }

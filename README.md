@@ -462,11 +462,10 @@ with OpenSSL...
 
 	crypto_data_hash/3          # crypto_data_hash(+data,-hash,+options)
 
-Convert a hexadecimal string to a codes-list where each code
-represents an integer 0..255 in value. At least one arg must be
+Convert a hexadecimal string to a byte-list. At least one arg must be
 instantiated...
 
-	hex_bytes/2                 # hex_bytes(?hash,?codes)
+	hex_bytes/2                 # hex_bytes(?hash,?bytes)
 
 
 HTTP 1.1
