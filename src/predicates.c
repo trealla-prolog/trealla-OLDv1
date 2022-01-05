@@ -1400,18 +1400,45 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 		return ok;
 	}
 
-	const char *tmpbuf = GET_STR(q, p1);
+	const char *src = GET_STR(q, p1);
 	size_t len = LEN_STR(q, p1);
-	const char *src = tmpbuf;
-	cell tmp;
-	len -= len_char_utf8(src);
-	make_int(&tmp, get_char_utf8(&src));
-	allocate_list(q, &tmp);
+	bool odd = len & 1, first = true;
 
 	while (len) {
-		len -= len_char_utf8(src);
-		make_int(&tmp, get_char_utf8(&src));
-		append_list(q, &tmp);
+		unsigned val = 0;
+
+		if (!odd) {
+			int n = *src++;
+			len--;
+
+			if (isdigit(n))
+				val += n - '0';
+			else if ((n >= 'a') && (n <= 'f'))
+				val += (n - 'a') + 10;
+			else if ((n >= 'A') && (n <= 'F'))
+				val += (n - 'A') + 10;
+		}
+
+		val <<= 4;
+		int n = *src++;
+		len--;
+
+		if (isdigit(n))
+			val += n - '0';
+		else if ((n >= 'a') && (n <= 'f'))
+			val += (n - 'a') + 10;
+		else if ((n >= 'A') && (n <= 'F'))
+			val += (n - 'A') + 10;
+
+		cell tmp;
+		make_int(&tmp, (int)val);
+
+		if (first)
+			allocate_list(q, &tmp);
+		else
+			append_list(q, &tmp);
+
+		odd = first = false;
 	}
 
 	cell *l = end_list(q);
