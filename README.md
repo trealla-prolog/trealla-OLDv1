@@ -453,7 +453,7 @@ then call...
 Crypto functions
 ================
 
-Hash a plain-text data string (or atom) to a hexadecimal byte string
+Hash a plain-text data string to a hexadecimal byte string
 representing the cryptographic strength hashed value. The options
 are *algorithm(Name)* where *Name* can be *sha256*, *sha384* or *sha512*
 at the moment. If it is a variable it will be unified with the default
@@ -462,7 +462,7 @@ with OpenSSL...
 
 	crypto_data_hash/3          # crypto_data_hash(+data,-hash,+options)
 
-Convert a hexadecimal string (or atom) to a codes-list where each code
+Convert a hexadecimal string to a codes-list where each code
 represents an integer 0..255 in value. At least one arg must be
 instantiated...
 

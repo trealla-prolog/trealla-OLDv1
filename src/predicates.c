@@ -1401,25 +1401,26 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 	size_t len = LEN_STR(q, p1);
 	bool odd = len & 1, first = true;
 
+	if (odd)
+		return throw_error(q, p2, p2_ctx, "domain_error", "hex_encoding");
+
 	while (len) {
 		unsigned val = 0;
 
-		if (!odd) {
-			int n = *src++;
-			len--;
+		int n = *src++;
+		len--;
 
-			if (isdigit(n))
-				val += n - '0';
-			else if ((n >= 'a') && (n <= 'f'))
-				val += (n - 'a') + 10;
-			else if ((n >= 'A') && (n <= 'F'))
-				val += (n - 'A') + 10;
-			else
-				return throw_error(q, p1, p1_ctx, "representation_error", "byte");
-		}
+		if (isdigit(n))
+			val += n - '0';
+		else if ((n >= 'a') && (n <= 'f'))
+			val += (n - 'a') + 10;
+		else if ((n >= 'A') && (n <= 'F'))
+			val += (n - 'A') + 10;
+		else
+			return throw_error(q, p1, p1_ctx, "representation_error", "byte");
 
 		val <<= 4;
-		int n = *src++;
+		n = *src++;
 		len--;
 
 		if (isdigit(n))
@@ -1439,7 +1440,7 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 		else
 			append_list(q, &tmp);
 
-		odd = first = false;
+		first = false;
 	}
 
 	cell *l = end_list(q);
