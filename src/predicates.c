@@ -1312,6 +1312,113 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
+static USE_RESULT pl_status fn_hex_bytes_2(query *q)
+{
+	GET_FIRST_ARG(p1,atom_or_var);
+	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
+
+	if (is_variable(p1) && is_variable(p2))
+		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
+
+	if (is_cyclic_term(q, p2, p2_ctx))
+		return throw_error(q, p2, p2_ctx, "type_error", "list");
+
+	if (!is_iso_atom(p1) && !is_variable(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "atom");
+
+	if (!is_variable(p2) && is_nil(p2)) {
+		cell tmp;
+		make_literal(&tmp, g_empty_s);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (is_variable(p2) && !LEN_STR(q, p1)) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
+
+	// Verify the list
+
+	if (!is_variable(p2)) {
+		cell *save_p2 = p2;
+		pl_idx_t save_p2_ctx = p2_ctx;
+		LIST_HANDLER(p2);
+
+		while (is_list(p2)) {
+			cell *head = LIST_HEAD(p2);
+			head = deref(q, head, p2_ctx);
+
+			if (!is_integer(head) && is_variable(p1))
+				return throw_error(q, head, q->latest_ctx, "type_error", "integer");
+
+			if (!is_integer(head) && !is_variable(head))
+				return throw_error(q, head, q->latest_ctx, "type_error", "integer");
+
+			cell *tail = LIST_TAIL(p2);
+			p2 = deref(q, tail, p2_ctx);
+			p2_ctx = q->latest_ctx;
+		}
+
+		if (!is_nil(p2) && !is_variable(p2))
+			return throw_error(q, p2, p2_ctx, "type_error", "list");
+
+		p2 = save_p2;
+		p2_ctx = save_p2_ctx;
+	}
+
+	if (!is_variable(p2) && is_variable(p1)) {
+		ASTRING(pr);
+		LIST_HANDLER(p2);
+
+		while (is_list(p2)) {
+			cell *head = LIST_HEAD(p2);
+			head = deref(q, head, p2_ctx);
+
+			pl_int_t val = get_int(head);
+
+			if ((val < 0) || (val > 255))
+				return throw_error(q, head, q->latest_ctx, "representation_error", "byte");
+
+			char ch[10];
+			snprintf(ch, sizeof(ch), "%02X", (unsigned)val);
+			ASTRING_strcat(pr, ch);
+			cell *tail = LIST_TAIL(p2);
+			p2 = deref(q, tail, p2_ctx);
+			p2_ctx = q->latest_ctx;
+
+		}
+
+		if (!is_nil(p2))
+			return throw_error(q, p2, p2_ctx, "type_error", "list");
+
+		cell tmp;
+		may_error(make_cstring(&tmp, ASTRING_cstr(pr)), ASTRING_free(pr));
+		ASTRING_free(pr);
+		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		unshare_cell(&tmp);
+		return ok;
+	}
+
+	const char *tmpbuf = GET_STR(q, p1);
+	size_t len = LEN_STR(q, p1);
+	const char *src = tmpbuf;
+	cell tmp;
+	len -= len_char_utf8(src);
+	make_int(&tmp, get_char_utf8(&src));
+	allocate_list(q, &tmp);
+
+	while (len) {
+		len -= len_char_utf8(src);
+		make_int(&tmp, get_char_utf8(&src));
+		append_list(q, &tmp);
+	}
+
+	cell *l = end_list(q);
+	may_ptr_error(l);
+	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
+}
+
 static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 {
 	GET_FIRST_ARG(p1,number_or_var);
@@ -11611,6 +11718,7 @@ static const struct builtins g_predicates_other[] =
 	{"string_upper", 2, fn_string_upper_2, "?string,?string", false},
 	{"bread", 3, fn_bread_3, "+stream,+integer,-string", false},
 	{"bwrite", 2, fn_bwrite_2, "+stream,-string", false},
+	{"hex_bytes", 2, fn_hex_bytes_2, "?string,?list", false},
 	{"hex_chars", 2, fn_hex_chars_2, "?integer,?string", false},
 	{"octal_chars", 2, fn_octal_chars_2, "?integer,?string", false},
 	{"$legacy_predicate_property", 2, fn_sys_legacy_predicate_property_2, "+callable,?string", false},
