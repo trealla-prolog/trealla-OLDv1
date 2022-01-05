@@ -260,8 +260,8 @@ Non-standard predicates
 	write_canonical_to_chars/3  # write_term_to_chars(+rule,+opts,-Cs)
 	chars_base64/3              # currently options are ignored
 	chars_urlenc/3              # currently options are ignored
-	hex_bytes/2                 # as number_chars, but in hex
-	octal_bytes/2               # as number_chars, but in octal
+	hex_chars/2                 # as number_chars, but in hex
+	octal_chars/2               # as number_chars, but in octal
 	partial_string/2            # partial_string(+string,-String)
 	partial_string/3            # partial_string(+string,-String,-Var)
 	if/3, (*->)/2               # soft-cut

@@ -9435,7 +9435,7 @@ static USE_RESULT pl_status fn_term_hash_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_hex_bytes_2(query *q)
+static USE_RESULT pl_status fn_hex_chars_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -9492,7 +9492,7 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 	return ok;
 }
 
-static USE_RESULT pl_status fn_octal_bytes_2(query *q)
+static USE_RESULT pl_status fn_octal_chars_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -11611,8 +11611,8 @@ static const struct builtins g_predicates_other[] =
 	{"string_upper", 2, fn_string_upper_2, "?string,?string", false},
 	{"bread", 3, fn_bread_3, "+stream,+integer,-string", false},
 	{"bwrite", 2, fn_bwrite_2, "+stream,-string", false},
-	{"hex_bytes", 2, fn_hex_bytes_2, "?integer,?string", false},
-	{"octal_bytes", 2, fn_octal_bytes_2, "?integer,?string", false},
+	{"hex_chars", 2, fn_hex_chars_2, "?integer,?string", false},
+	{"octal_chars", 2, fn_octal_chars_2, "?integer,?string", false},
 	{"$legacy_predicate_property", 2, fn_sys_legacy_predicate_property_2, "+callable,?string", false},
 	{"$load_properties", 0, fn_sys_load_properties_0, NULL, false},
 	{"$load_flags", 0, fn_sys_load_flags_0, NULL, false},
