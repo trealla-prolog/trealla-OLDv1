@@ -1448,7 +1448,7 @@ static void dump_vars(query *q, bool partial)
 			append_list(q, tmp);
 	}
 
-	cell *vlist = end_list(q);
+	cell *vlist = !first ? end_list(q) : NULL;
 
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
 		if (!strcmp(p->vartab.var_name[i], "_"))
