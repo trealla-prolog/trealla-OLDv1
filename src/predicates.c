@@ -169,6 +169,35 @@ static void make_smalln(cell *tmp, const char *s, size_t n)
 	tmp->chr_len = n;
 }
 
+static char *chars_list_to_string(query *q, cell *p_chars, pl_idx_t p_chars_ctx, size_t len)
+{
+	char *tmp = malloc(len+1);
+	ensure(tmp);
+	char *dst = tmp;
+	LIST_HANDLER(p_chars);
+
+	while (is_list(p_chars)) {
+		cell *h = LIST_HEAD(p_chars);
+		h = deref(q, h, p_chars_ctx);
+
+		if (is_integer(h)) {
+			int ch = get_int(h);
+			dst += put_char_utf8(dst, ch);
+		} else {
+			const char *p = GET_STR(q, h);
+			int ch = peek_char_utf8(p);
+			dst += put_char_utf8(dst, ch);
+		}
+
+		p_chars = LIST_TAIL(p_chars);
+		p_chars = deref(q, p_chars, p_chars_ctx);
+		p_chars_ctx = q->latest_ctx;
+	}
+
+	*dst = '\0';
+	return tmp;
+}
+
 #if 0
 static void init_queue(query* q)
 {
@@ -1314,7 +1343,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 
 static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_var);
+	GET_FIRST_ARG(p1,list_or_var);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
 
 	if (is_variable(p1) && is_variable(p2))
@@ -1397,12 +1426,27 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 		return ok;
 	}
 
-	const char *src = GET_STR(q, p1);
-	size_t len = LEN_STR(q, p1);
+	char *src = NULL;
+
+	if (is_string(p1))
+		src = GET_STR(q, p1);
+	else if (is_iso_list(p1)) {
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
+
+		if (!len)
+			return throw_error(q, p1, p1_ctx, "type_error", "chars");
+
+		src = chars_list_to_string(q, p1, p1_ctx, len);
+	}
+
+	char *save_src = src;
+	size_t len = strlen(src);
 	bool odd = len & 1, first = true;
 
-	if (odd)
+	if (odd) {
+		if (is_iso_list(p1)) free(save_src);
 		return throw_error(q, p1, p1_ctx, "domain_error", "hex_encoding");
+	}
 
 	while (len) {
 		unsigned val = 0;
@@ -1416,8 +1460,10 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 			val += (n - 'a') + 10;
 		else if ((n >= 'A') && (n <= 'F'))
 			val += (n - 'A') + 10;
-		else
+		else {
+			if (is_iso_list(p1)) free(save_src);
 			return throw_error(q, p1, p1_ctx, "representation_error", "byte");
+		}
 
 		val <<= 4;
 		n = *src++;
@@ -1429,8 +1475,10 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 			val += (n - 'a') + 10;
 		else if ((n >= 'A') && (n <= 'F'))
 			val += (n - 'A') + 10;
-		else
+		else {
+			if (is_iso_list(p1)) free(save_src);
 			return throw_error(q, p1, p1_ctx, "representation_error", "byte");
+		}
 
 		cell tmp;
 		make_int(&tmp, (int)val);
@@ -1444,6 +1492,7 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 	}
 
 	cell *l = end_list(q);
+	if (is_iso_list(p1)) free(save_src);
 	may_ptr_error(l);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
@@ -2007,35 +2056,6 @@ static USE_RESULT pl_status fn_iso_set_stream_position_2(query *q)
 		return throw_error(q, p1, p1_ctx, "domain_error", "position");
 
 	return pl_success;
-}
-
-static char *chars_list_to_string(query *q, cell *p_chars, pl_idx_t p_chars_ctx, size_t len)
-{
-	char *tmp = malloc(len+1);
-	ensure(tmp);
-	char *dst = tmp;
-	LIST_HANDLER(p_chars);
-
-	while (is_list(p_chars)) {
-		cell *h = LIST_HEAD(p_chars);
-		h = deref(q, h, p_chars_ctx);
-
-		if (is_integer(h)) {
-			int ch = get_int(h);
-			dst += put_char_utf8(dst, ch);
-		} else {
-			const char *p = GET_STR(q, h);
-			int ch = peek_char_utf8(p);
-			dst += put_char_utf8(dst, ch);
-		}
-
-		p_chars = LIST_TAIL(p_chars);
-		p_chars = deref(q, p_chars, p_chars_ctx);
-		p_chars_ctx = q->latest_ctx;
-	}
-
-	*dst = '\0';
-	return tmp;
 }
 
 static void compare_and_zero(uint64_t v1, uint64_t *v2, uint64_t *v)
