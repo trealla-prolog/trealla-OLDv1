@@ -53,7 +53,7 @@ bool needs_quoting(module *m, const char *src, int srclen)
 			|| !strcmp(src, "}");
 
 	if (!iswlower(ch) || !iswalpha(ch)) { // NO %/
-		static const char *s_symbols = "+-*/<>=@#^~\\:$.";
+		static const char *s_symbols = "+-*/<>=@#^~\\:$?.";
 		int quote = false;
 
 		while (srclen--) {

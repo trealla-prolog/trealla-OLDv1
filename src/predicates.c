@@ -11959,13 +11959,17 @@ static void load_properties(module *m)
 	format_property(m, tmpbuf, sizeof(tmpbuf), "|", 2, "meta_predicate((:|+))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "time", 1, "meta_predicate(time(0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "asserta", 1, "meta_predicate(asserta(:))"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "asserta", 2, "meta_predicate(asserta(:,-))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "assertz", 1, "meta_predicate(assertz(:))"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "assertz", 2, "meta_predicate(assertz(:,-))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "retract", 1, "meta_predicate(retract(:))"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "retract", 2, "meta_predicate(retract(:,?))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "retractall", 1, "meta_predicate(retractall(:))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "current_predicate", 1, "meta_predicate(current_predicate(:))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "predicate_property", 1, "meta_predicate(predicate_property(:,?))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "abolish", 1, "meta_predicate(abolish(:))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "clause", 2, "meta_predicate(db_entry(:,?))"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "clause", 3, "meta_predicate(db_entry(:,?,?))"); ASTRING_strcat(pr, tmpbuf);
 
 	for (int i = 2; i <= 7; i++) {
 		char metabuf[256];
