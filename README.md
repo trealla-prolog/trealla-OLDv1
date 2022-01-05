@@ -260,6 +260,7 @@ Non-standard predicates
 	write_canonical_to_chars/3  # write_term_to_chars(+rule,+opts,-Cs)
 	chars_base64/3              # currently options are ignored
 	chars_urlenc/3              # currently options are ignored
+	crypto_data_hash/3          # convert data string to hash string
 	hex_bytes/2                 # convert hex string to list of codes
 	hex_chars/2                 # as number_chars, but in hex
 	octal_chars/2               # as number_chars, but in octal

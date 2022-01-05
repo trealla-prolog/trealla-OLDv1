@@ -8601,7 +8601,7 @@ static USE_RESULT pl_status fn_sha1_2(query *q)
 	size_t buflen = sizeof(tmpbuf);
 
 	for (int i = 0; i < SHA_DIGEST_LENGTH; i++) {
-		size_t len = snprintf(dst, buflen, "%02X", digest[i]);
+		size_t len = snprintf(dst, buflen, "%02x", digest[i]);
 		dst += len;
 		buflen -= len;
 	}
@@ -8625,7 +8625,7 @@ static USE_RESULT pl_status fn_sha256_2(query *q)
 	size_t buflen = sizeof(tmpbuf);
 
 	for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
-		size_t len = snprintf(dst, buflen, "%02X", digest[i]);
+		size_t len = snprintf(dst, buflen, "%02x", digest[i]);
 		dst += len;
 		buflen -= len;
 	}
@@ -8649,7 +8649,7 @@ static USE_RESULT pl_status fn_sha384_2(query *q)
 	size_t buflen = sizeof(tmpbuf);
 
 	for (int i = 0; i < SHA384_DIGEST_LENGTH; i++) {
-		size_t len = snprintf(dst, buflen, "%02X", digest[i]);
+		size_t len = snprintf(dst, buflen, "%02x", digest[i]);
 		dst += len;
 		buflen -= len;
 	}
@@ -8673,9 +8673,97 @@ static USE_RESULT pl_status fn_sha512_2(query *q)
 	size_t buflen = sizeof(tmpbuf);
 
 	for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) {
-		size_t len = snprintf(dst, buflen, "%02X", digest[i]);
+		size_t len = snprintf(dst, buflen, "%02x", digest[i]);
 		dst += len;
 		buflen -= len;
+	}
+
+	cell tmp;
+	may_error(make_string(&tmp, tmpbuf));
+	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	return ok;
+}
+
+static USE_RESULT pl_status fn_crypto_data_hash_3(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,atom_or_var);
+	GET_NEXT_ARG(p3,list_or_nil);
+	bool is_sha384 = false, is_sha512 = false;
+	bool is_sha256 = true;
+	LIST_HANDLER(p3);
+
+	while (is_list(p3)) {
+		cell *h = LIST_HEAD(p3);
+		h = deref(q, h, p3_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
+
+		if (is_structure(h) && (h->arity == 1)) {
+			cell *arg = h+1;
+			arg = deref(q, arg, h_ctx);
+			pl_idx_t arg_ctx = q->latest_ctx;
+
+			if (!CMP_SLICE2(q, h, "algorithm")) {
+				if (is_variable(arg)) {
+					cell tmp;
+					make_literal(&tmp, index_from_pool(q->pl, "sha256"));
+					set_var(q, arg, arg_ctx, &tmp, q->st.curr_frame);
+					is_sha384 = is_sha512 = false;
+					is_sha256 = true;
+				} else if (!CMP_SLICE2(q, arg, "sha256")) {
+					is_sha384 = is_sha512 = false;
+					is_sha256 = true;
+				} else if (!CMP_SLICE2(q, arg, "sha384")) {
+					is_sha256 = is_sha512 = false;
+					is_sha384 = true;
+				} else if (!CMP_SLICE2(q, arg, "sha512")) {
+					is_sha384 = is_sha256 = false;
+					is_sha512 = true;
+				} else
+					return throw_error(q, arg, arg_ctx, "domain_error", "algorithm");
+			} else
+				return throw_error(q, h, h_ctx, "domain_error", "hash_option");
+		} else
+			return throw_error(q, h, h_ctx, "domain_error", "hash_option");
+
+		p3 = LIST_TAIL(p3);
+		p3 = deref(q, p3, p3_ctx);
+		p3_ctx = q->latest_ctx;
+	}
+
+	char tmpbuf[512];
+	char *dst = tmpbuf;
+	*dst = '\0';
+	size_t buflen = sizeof(tmpbuf);
+
+	if (is_sha256) {
+		unsigned char digest[SHA256_DIGEST_LENGTH];
+		SHA256((unsigned char*)GET_STR(q, p1), LEN_STR(q, p1), digest);
+
+		for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+			size_t len = snprintf(dst, buflen, "%02x", digest[i]);
+			dst += len;
+			buflen -= len;
+		}
+	} else if (is_sha384) {
+		unsigned char digest[SHA384_DIGEST_LENGTH];
+		SHA384((unsigned char*)GET_STR(q, p1), LEN_STR(q, p1), digest);
+
+		for (int i = 0; i < SHA384_DIGEST_LENGTH; i++) {
+			size_t len = snprintf(dst, buflen, "%02x", digest[i]);
+			dst += len;
+			buflen -= len;
+		}
+	} else if (is_sha512) {
+		unsigned char digest[SHA512_DIGEST_LENGTH];
+		SHA512((unsigned char*)GET_STR(q, p1), LEN_STR(q, p1), digest);
+
+		for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) {
+			size_t len = snprintf(dst, buflen, "%02x", digest[i]);
+			dst += len;
+			buflen -= len;
+		}
 	}
 
 	cell tmp;
@@ -11800,6 +11888,7 @@ static const struct builtins g_predicates_other[] =
 	{"sha256", 2, fn_sha256_2, "+string,?string", false},
 	{"sha384", 2, fn_sha384_2, "+string,?string", false},
 	{"sha512", 2, fn_sha512_2, "+string,?string", false},
+	{"crypto_data_hash", 3, fn_crypto_data_hash_3, "?string,?string,?list", false},
 #endif
 
 	{"task", 1, fn_task_n, "+callable", false},
