@@ -1323,9 +1323,6 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 	if (is_cyclic_term(q, p2, p2_ctx))
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
-	if (!is_iso_atom(p1) && !is_variable(p1))
-		return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
 	if (!is_variable(p2) && is_nil(p2)) {
 		cell tmp;
 		make_literal(&tmp, g_empty_s);
@@ -1393,7 +1390,7 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 			return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 		cell tmp;
-		may_error(make_cstring(&tmp, ASTRING_cstr(pr)), ASTRING_free(pr));
+		may_error(make_string(&tmp, ASTRING_cstr(pr)), ASTRING_free(pr));
 		ASTRING_free(pr);
 		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
