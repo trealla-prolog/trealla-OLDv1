@@ -22,6 +22,7 @@ A compact, efficient Prolog interpreter with
 Trealla is not WAM-based. It uses tree-walking, structure-sharing and
 deep-binding.
 
+![Trealla Logo: Trealla](trealla.png)
 
 A note on UTF-8
 ===============
