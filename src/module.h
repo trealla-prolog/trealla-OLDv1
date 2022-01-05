@@ -10,7 +10,6 @@ module *load_fp(module *m, FILE *fp, const char *filename);
 module *load_text(module *m, const char *src, const char *filename);
 
 void convert_to_literal(module *m, cell *c);
-db_entry *find_in_db(module *m, uuid *reflist);
 unsigned find_op(module *m, const char *name, unsigned specifier);
 unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_prefix);
 bool set_op(module *m, const char *name, unsigned specifier, unsigned priority);
@@ -27,7 +26,8 @@ bool unload_file(module *m, const char *filename);
 db_entry *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting);
 db_entry *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting);
 bool retract_from_db(module *m, db_entry *dbe);
-db_entry *erase_from_db(module *m, uuid *reflist);
+db_entry *find_in_db(module *m, uuid *ref);
+db_entry *erase_from_db(module *m, uuid *ref);
 
 void set_discontiguous_in_db(module *m, const char *name, unsigned arity);
 void set_dynamic_in_db(module *m, const char *name, unsigned arity);

@@ -324,14 +324,14 @@ int index_cmpkey(const void *ptr1, const void *ptr2, const void *param)
 	return index_cmpkey_(ptr1, ptr2, param, 0);
 }
 
-db_entry *find_in_db(module *m, uuid *reflist)
+db_entry *find_in_db(module *m, uuid *ref)
 {
 	for (predicate *pr = m->head; pr; pr = pr->next) {
 		for (db_entry *dbe = pr->head ; dbe; dbe = dbe->next) {
 			if (dbe->cl.ugen_erased)
 				continue;
 
-			if (!memcmp(&dbe->u, reflist, sizeof(uuid)))
+			if (!memcmp(&dbe->u, ref, sizeof(uuid)))
 				return dbe;
 		}
 	}
@@ -351,9 +351,9 @@ static void push_property(module *m, const char *name, unsigned arity, const cha
 	destroy_parser(p);
 }
 
-db_entry *erase_from_db(module *m, uuid *reflist)
+db_entry *erase_from_db(module *m, uuid *ref)
 {
-	db_entry *dbe = find_in_db(m, reflist);
+	db_entry *dbe = find_in_db(m, ref);
 	if (!dbe) return 0;
 	dbe->cl.ugen_erased = ++m->pl->ugen;
 	return dbe;
