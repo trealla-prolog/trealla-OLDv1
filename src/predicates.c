@@ -11888,6 +11888,7 @@ static const struct builtins g_predicates_other[] =
 	{"sha256", 2, fn_sha256_2, "+string,?string", false},
 	{"sha384", 2, fn_sha384_2, "+string,?string", false},
 	{"sha512", 2, fn_sha512_2, "+string,?string", false},
+
 	{"crypto_data_hash", 3, fn_crypto_data_hash_3, "?string,?string,?list", false},
 #endif
 
