@@ -462,7 +462,8 @@ with OpenSSL...
 	crypto_data_hash/3          # crypto_data_hash(+data,-hash,+options)
 
 Convert a hexadecimal string (or atom) to a codes-list where each code
-represents an integer 0..255 in value...
+represents an integer 0..255 in value. At least one arg must be
+instantiated...
 
 	hex_bytes/2                 # hex_bytes(?hash,?codes)
 
