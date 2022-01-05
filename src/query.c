@@ -1472,8 +1472,10 @@ static void dump_vars(query *q, bool partial)
 
 		if (any)
 			fprintf(stdout, ", ");
+		else
+			fprintf(stdout, "   ");
 
-		fprintf(stdout, "   %s = ", p->vartab.var_name[i]);
+		fprintf(stdout, "%s = ", p->vartab.var_name[i]);
 
 		// See if there is already an output with this value...
 
