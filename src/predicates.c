@@ -1417,6 +1417,8 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 				val += (n - 'a') + 10;
 			else if ((n >= 'A') && (n <= 'F'))
 				val += (n - 'A') + 10;
+			else
+				return throw_error(q, p1, p1_ctx, "representation_error", "byte");
 		}
 
 		val <<= 4;
@@ -1429,6 +1431,8 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 			val += (n - 'a') + 10;
 		else if ((n >= 'A') && (n <= 'F'))
 			val += (n - 'A') + 10;
+		else
+			return throw_error(q, p1, p1_ctx, "representation_error", "byte");
 
 		cell tmp;
 		make_int(&tmp, (int)val);
