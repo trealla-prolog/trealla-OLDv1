@@ -5894,9 +5894,12 @@ static USE_RESULT pl_status fn_instance_2(query *q)
 
 static USE_RESULT pl_status fn_clause_3(query *q)
 {
-	GET_FIRST_ARG(p1,callable);
+	GET_FIRST_ARG(p1,callable_or_var);
 	GET_NEXT_ARG(p2,callable_or_var);
 	GET_NEXT_ARG(p3,atom_or_var);
+
+	if (is_variable(p1) && is_variable(p2) && is_variable(p3))
+		return throw_error(q, p3, p3_ctx, "instantiation_error", "args_not_sufficiently_instantiated");
 
 	for (;;) {
 		clause *r;
@@ -11774,11 +11777,11 @@ static const struct builtins g_predicates_other[] =
 	{"char_type", 2, fn_char_type_2, "+char,+clause", false},
 	{"code_type", 2, fn_char_type_2, "+code,+clause", false},
 	{"uuid", 1, fn_uuid_1, "-string", false},
-	{"asserta", 2, fn_asserta_2, "+clause,-reflist", false},
-	{"assertz", 2, fn_assertz_2, "+clause,-reflist", false},
+	{"asserta", 2, fn_asserta_2, "+clause,-ref", false},
+	{"assertz", 2, fn_assertz_2, "+clause,-ref", false},
 	{"instance", 2, fn_instance_2, "+ref,?clause", false},
 	{"erase", 1, fn_erase_1, "+ref", false},
-	{"clause", 3, fn_clause_3, "?head,?body,-reflist", false},
+	{"clause", 3, fn_clause_3, "?head,?body,-ref", false},
 	{"$queue", 1, fn_sys_queue_1, "+clause", false},
 	{"$list", 1, fn_sys_list_1, "-list", false},
 	{"getenv", 2, fn_getenv_2, NULL, false},
