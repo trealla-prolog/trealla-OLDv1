@@ -8586,102 +8586,6 @@ static USE_RESULT pl_status fn_format_3(query *q)
 }
 
 #if USE_OPENSSL
-static USE_RESULT pl_status fn_sha1_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,atom_or_var);
-	unsigned char digest[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*)GET_STR(q, p1), LEN_STR(q, p1), digest);
-	char tmpbuf[512];
-	char *dst = tmpbuf;
-	*dst = '\0';
-	size_t buflen = sizeof(tmpbuf);
-
-	for (int i = 0; i < SHA_DIGEST_LENGTH; i++) {
-		size_t len = snprintf(dst, buflen, "%02x", digest[i]);
-		dst += len;
-		buflen -= len;
-	}
-
-	cell tmp;
-	may_error(make_string(&tmp, tmpbuf));
-	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	unshare_cell(&tmp);
-	return ok;
-}
-
-static USE_RESULT pl_status fn_sha256_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,atom_or_var);
-	unsigned char digest[SHA256_DIGEST_LENGTH];
-	SHA256((unsigned char*)GET_STR(q, p1), LEN_STR(q, p1), digest);
-	char tmpbuf[512];
-	char *dst = tmpbuf;
-	*dst = '\0';
-	size_t buflen = sizeof(tmpbuf);
-
-	for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
-		size_t len = snprintf(dst, buflen, "%02x", digest[i]);
-		dst += len;
-		buflen -= len;
-	}
-
-	cell tmp;
-	may_error(make_string(&tmp, tmpbuf));
-	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	unshare_cell(&tmp);
-	return ok;
-}
-
-static USE_RESULT pl_status fn_sha384_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,atom_or_var);
-	unsigned char digest[SHA384_DIGEST_LENGTH];
-	SHA384((unsigned char*)GET_STR(q, p1), LEN_STR(q, p1), digest);
-	char tmpbuf[512];
-	char *dst = tmpbuf;
-	*dst = '\0';
-	size_t buflen = sizeof(tmpbuf);
-
-	for (int i = 0; i < SHA384_DIGEST_LENGTH; i++) {
-		size_t len = snprintf(dst, buflen, "%02x", digest[i]);
-		dst += len;
-		buflen -= len;
-	}
-
-	cell tmp;
-	may_error(make_string(&tmp, tmpbuf));
-	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	unshare_cell(&tmp);
-	return ok;
-}
-
-static USE_RESULT pl_status fn_sha512_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,atom_or_var);
-	unsigned char digest[SHA512_DIGEST_LENGTH];
-	SHA512((unsigned char*)GET_STR(q, p1), LEN_STR(q, p1), digest);
-	char tmpbuf[512];
-	char *dst = tmpbuf;
-	*dst = '\0';
-	size_t buflen = sizeof(tmpbuf);
-
-	for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) {
-		size_t len = snprintf(dst, buflen, "%02x", digest[i]);
-		dst += len;
-		buflen -= len;
-	}
-
-	cell tmp;
-	may_error(make_string(&tmp, tmpbuf));
-	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	unshare_cell(&tmp);
-	return ok;
-}
-
 static USE_RESULT pl_status fn_crypto_data_hash_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -11881,11 +11785,6 @@ static const struct builtins g_predicates_other[] =
 	{"$dump_keys", 1, fn_sys_dump_keys_1, "+pi", false},
 
 #if USE_OPENSSL
-	{"sha1", 2, fn_sha1_2, "+string,?string", false},
-	{"sha256", 2, fn_sha256_2, "+string,?string", false},
-	{"sha384", 2, fn_sha384_2, "+string,?string", false},
-	{"sha512", 2, fn_sha512_2, "+string,?string", false},
-
 	{"crypto_data_hash", 3, fn_crypto_data_hash_3, "?string,?string,?list", false},
 #endif
 
