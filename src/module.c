@@ -1107,6 +1107,10 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 	ok = !p->error;
 	destroy_parser(p);
 	m->filename = save_filename;
+
+	if (!ok)
+		unload_file(m, filename);
+
 	return save_m;
 }
 
