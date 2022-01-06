@@ -963,16 +963,15 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		pl_idx_t rhs_ctx = q->latest_ctx;
 		int space = !is_atom(rhs) && !is_number(rhs);
-		space += (!strcmp(src, "-") || !strcmp(src, "+")) && is_smallint(rhs) && (get_smallint(rhs) < 0);
-		space += IS_OP(rhs);
+		space += (!strcmp(src, "-")) && is_smallint(rhs) && (get_smallint(rhs) < 0);
+		space += !strcmp(src, "-") && (IS_OP(rhs) || is_number(rhs));
 		int parens = is_op(rhs);
 		unsigned my_priority = search_op(q->st.m, GET_STR(q, c), NULL, true);
 		unsigned rhs_pri = is_literal(rhs) ? search_op(q->st.m, GET_STR(q, rhs), NULL, true) : 0;
 		if (rhs_pri >= my_priority) parens = 1;
 		if (isalpha(*src)) space = 1;
-		if (is_number(rhs)) parens = 1;
 		if (strcmp(GET_STR(q, c), "\\+")) if (is_atomic(rhs)) parens = 0; // Hack
-		if (is_integer(rhs) && (is_negative(rhs) || is_zero(rhs))) parens = 0;
+		if (!strcmp(src, "-") && is_number(rhs) && !is_negative(rhs)) parens = 1;
 		int quote = q->quoted && has_spaces(src, LEN_STR(q,c));
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 		dst += plain(dst, dstlen, src, srclen);
