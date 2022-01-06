@@ -756,7 +756,9 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		bool special_op = false;
 
 		if (is_literal(head)) {
-			special_op = (!strcmp(GET_STR(q, head), ",")
+			special_op = (
+				!strcmp(GET_STR(q, head), ",")
+				|| !strcmp(GET_STR(q, head), "|")
 				|| !strcmp(GET_STR(q, head), ";")
 				|| !strcmp(GET_STR(q, head), "->")
 				|| !strcmp(GET_STR(q, head), "*->")

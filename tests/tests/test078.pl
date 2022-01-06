@@ -1,5 +1,4 @@
 :- initialization(main).
-:- use_module(library(lists)).
 
 % http://jens-otten.de/tutorial_cade19/
 % https://www.philipzucker.com/javascript-automated-proving/
