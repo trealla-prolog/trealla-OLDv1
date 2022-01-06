@@ -1613,7 +1613,7 @@ static bool check_redo(query *q)
 		}
 
 		if ((ch == '\n') || (ch == 'a')) {
-			printf(";   ... .\n");
+			printf(";  ... .\n");
 			q->abort = true;
 			return true;
 		}
