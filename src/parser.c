@@ -1761,7 +1761,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	if (!isdigit(*s))
 		return false;
 
-	if ((*s == '0') && (s[1] == '\'')) {
+	if ((*s == '0') && (s[1] == '\'') && !search_op(p->m, "", NULL, false)) {
 		s += 2;
 		int v;
 
