@@ -2527,7 +2527,7 @@ bool get_token(parser *p, int last_op)
 		if (strchr(s_delims, ch) || iswspace(ch))
 			break;
 
-		if ((ch == '.') && isspace(*src))
+		if ((ch == '.') && (isspace(*src) || (*src == '%')))
 			break;
 
 		ch = peek_char_utf8(src);
