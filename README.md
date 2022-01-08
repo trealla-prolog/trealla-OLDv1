@@ -118,7 +118,8 @@ Usage
 where options can be:
 
 	-O0, --noopt       - no optimization
-	-l file            - consult file
+	-f file            - load file (*~/.tplrc* not loaded)
+	-l file            - load file (*~/.tplrc* loaded)
 	-g goal            - query goal (only used once)
 	--library path     - alt to TPL_LIBRARY_PATH env variable
 	-t, --trace        - trace
@@ -140,7 +141,7 @@ Invocation without any goal presents the REPL.
 
 The default path to the library is relative to the executable location.
 
-The file "~/.tplrc" is consulted on startup.
+The file *~/.tplrc* is consulted on startup unless the *-f* option is present.
 
 
 Acknowledgements

@@ -205,7 +205,7 @@ int main(int ac, char *av[])
 
 	signal(SIGPIPE, SIG_IGN);
 	const char *goal = NULL;
-	bool did_consult = false;
+	bool no_res = false;
 
 	for (i = 1; i < ac; i++) {
 		if (!strcmp(av[i], "--"))
@@ -228,7 +228,9 @@ int main(int ac, char *av[])
 			do_goal = 0;
 			do_lib = 1;
 		} else if (!strcmp(av[i], "-f") || !strcmp(av[i], "-l") || !strcmp(av[i], "--consult-file")) {
-			did_consult = true;
+			if (!strcmp(av[i], "-f"))
+				no_res = true;
+
 			do_lib = do_goal = 0;
 		} else if (!strcmp(av[i], "-g") || !strcmp(av[i], "--query-goal")) {
 			do_lib = 0;
@@ -249,7 +251,7 @@ int main(int ac, char *av[])
 		}
 	}
 
-	if (!did_consult)
+	if (!no_res)
 		pl_consult(pl, "~/.tplrc");
 
 	if (goal) {
@@ -273,7 +275,8 @@ int main(int ac, char *av[])
 		fprintf(stdout, "Usage:\n");
 		fprintf(stdout, "  tpl [options] [files] [-- args]\n");
 		fprintf(stdout, "Options:\n");
-		fprintf(stdout, "  -l file\t\t- consult file\n");
+		fprintf(stdout, "  -f file\t\t- load file (~/.tplrc not loaded)\n");
+		fprintf(stdout, "  -l file\t\t- load file (~/.tplrc) loaded\n");
 		fprintf(stdout, "  -g goal\t\t- query goal (only used once)\n");
 		fprintf(stdout, "  --library path\t- alt to TPL_LIBRARY_PATH env variable\n");
 		fprintf(stdout, "  -v, --version\t\t- print version info and exit\n");
