@@ -964,7 +964,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		cell *rhs = c + 1;
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		pl_idx_t rhs_ctx = q->latest_ctx;
-		int space = !strcmp(src, "-") && (!is_structure(rhs) || is_op(rhs));
+		int space = !strcmp(src, "-") && (is_number(rhs) || is_op(rhs));
 		int parens = 0;//is_op(rhs);
 		unsigned my_priority = search_op(q->st.m, GET_STR(q, c), NULL, true);
 		unsigned rhs_pri = is_literal(rhs) ? search_op(q->st.m, GET_STR(q, rhs), NULL, true) : 0;
