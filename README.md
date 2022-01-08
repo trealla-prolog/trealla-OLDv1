@@ -151,7 +151,11 @@ This project started in March 2020 and it would not be where it is today
 without help from these people:
 
 Special thanks to [Xin Wang](https://github.com/dram) for providing the
-testing framework and initial push to get serious.
+testing framework, for the initial push to get serious and for being
+the first to take this work (in it's nascent form) seriously.
+
+Special thanks to [Paulo Moura](https://github.com/pmoura) for his patience
+and sleuthing in the quest for Trealla to run his Logtalk project.
 
 Special thanks to [Markus Triska](https://github.com/triska) for
 driving the use of packed UTF-8 strings for character-lists. For the
@@ -162,10 +166,11 @@ Special thanks to [Jos De Roo](https://github.com/josd) for his testing
 against some classic Prolog examples and his EYE project.
 
 Special thanks to [Christian Thaeter](https://github.com/cehteh) for his
-ongoing work with code cleanup and development ideas.
+work with code cleanup and development ideas.
 
-Special thanks to [Paulo Moura](https://github.com/pmoura) for his patience
-and sleuthing in the quest for Trealla to run his Logtalk project.
+Special thanks to [Ulrich Neumerkel](https://github.com/uwn) for his
+DCG reference library, for his drive towards ISO standardization and for
+being himself.
 
 
 Strings
