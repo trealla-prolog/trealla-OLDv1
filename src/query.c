@@ -1587,7 +1587,7 @@ static bool check_redo(query *q)
 		dump_vars(q, true);
 
 		if (!q->pl->did_dump_vars)
-			printf("true");
+			printf("   true");
 	}
 
 	fflush(stdout);
@@ -1614,6 +1614,7 @@ static bool check_redo(query *q)
 
 		if ((ch == '\n') || (ch == 'a')) {
 			printf(";  ... .\n");
+			q->pl->did_dump_vars = true;
 			q->abort = true;
 			return true;
 		}
