@@ -964,16 +964,20 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		cell *rhs = c + 1;
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		pl_idx_t rhs_ctx = q->latest_ctx;
-		int space = !strcmp(src, "-") && (is_number(rhs) || is_op(rhs));
-		int parens = 0;//is_op(rhs);
 		unsigned my_priority = search_op(q->st.m, GET_STR(q, c), NULL, true);
 		unsigned rhs_pri = is_literal(rhs) ? search_op(q->st.m, GET_STR(q, rhs), NULL, true) : 0;
-		if (rhs_pri > my_priority) parens = 1;
-		if (isalpha(*src)) space = 1;
-		if (!strcmp(src, "-") && (rhs_pri == my_priority) && (rhs->arity > 1)) parens = 1;
-		//if (strcmp(GET_STR(q, c), "\\+")) if (is_atomic(rhs)) parens = 0; // Hack
-		if (!strcmp(src, "-") && is_number(rhs) && !is_negative(rhs)) parens = 1;
-		int quote = q->quoted && has_spaces(src, LEN_STR(q,c));
+
+		bool space = !strcmp(src, "-") && (is_number(rhs) || is_op(rhs));
+		if (isalpha(*src)) space = true;
+
+		bool parens = false; //is_op(rhs);
+		if (rhs_pri > my_priority) parens = true;
+		if (!strcmp(src, "-") && (rhs_pri == my_priority) && (rhs->arity > 1)) parens = true;
+		//if (strcmp(GET_STR(q, c), "\\+")) if (is_atomic(rhs)) parens = false; // Hack
+		if (!strcmp(src, "-") && is_number(rhs) && !is_negative(rhs)) parens = true;
+
+		bool quote = q->quoted && has_spaces(src, LEN_STR(q,c));
+
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 		dst += plain(dst, dstlen, src, srclen);
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
