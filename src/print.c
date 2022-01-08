@@ -1008,6 +1008,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	int lhs_parens = lhs_pri_1 >= my_priority;
 	if ((lhs_pri_1 == my_priority) && IS_YFX(c)) lhs_parens = 0;
 	lhs_parens += lhs_pri_2 > 0;
+
 	if (lhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
 	ssize_t res = print_term_to_buf(q, dst, dstlen, lhs, lhs_ctx, running, 0, depth+1);
 	if (res < 0) return -1;
@@ -1045,11 +1046,13 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 	if (!*src) space = 0;
 	space += is_smallint(rhs) && is_negative(rhs);
+
 	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
 	int rhs_parens = rhs_pri_1 >= my_priority;
 	if ((rhs_pri_1 == my_priority) && IS_XFY(c)) rhs_parens = 0;
 	rhs_parens += rhs_pri_2 > 0;
+
 	if (rhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
 	res = print_term_to_buf(q, dst, dstlen, rhs, rhs_ctx, running, 0, depth+1);
 	if (res < 0) return -1;
