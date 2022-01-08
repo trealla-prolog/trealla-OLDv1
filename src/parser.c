@@ -2577,7 +2577,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 {
 	pl_idx_t begin_idx = p->cl->cidx, arg_idx = p->cl->cidx, save_idx = 0;
 	bool last_op = true, is_func = false, was_consing = false;
-	bool last_bar = false, last_quoted = false;
+	bool last_bar = false, last_quoted = false, last_postfix = false;
 	unsigned arity = 1;
 	p->depth++;
 
@@ -2958,6 +2958,15 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			save_idx = p->cl->cidx;
 		}
 
+		if (!p->is_op && !is_func && last_op && last_postfix) {
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Error: syntax error, near '%s', operator expected '%s'\n", p->token, p->save_line?p->save_line:"");
+
+			p->error_desc = "operator_expected";
+			p->error = true;
+			break;
+		}
+
 		if (!p->is_op && !is_func && !last_op) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, near '%s', operator expected '%s'\n", p->token, p->save_line?p->save_line:"");
@@ -2969,6 +2978,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		last_quoted = p->is_quoted;
 		last_op = strcmp(p->token, ")") && priority;
+		last_postfix = last_op && IS_POSTFIX(specifier);
 
 		p->start_term = false;
 		cell *c = make_a_cell(p);
