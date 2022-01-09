@@ -323,7 +323,7 @@ struct cell_ {
 		struct {
 			cell *val_ptr;
 			uint32_t cgen;				// choice generation
-			uint32_t mod_nbr;
+			uint32_t mod_id;
 		};
 
 		struct {

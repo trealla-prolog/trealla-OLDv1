@@ -750,7 +750,6 @@ void stash_me(query *q, clause *r, bool last_match)
 
 pl_status make_choice(query *q)
 {
-	may_error(check_frame(q));
 	may_error(check_choice(q));
 
 	frame *f = GET_CURR_FRAME();
@@ -900,8 +899,8 @@ static void proceed(query *q)
 			f->cgen = q->st.curr_cell->cgen;	// set the cgen back
 		}
 
-		if (q->st.curr_cell->mod_nbr != q->st.m->id)
-			q->st.m = find_module_id(q->pl, q->st.curr_cell->mod_nbr);
+		if (q->st.curr_cell->mod_id != q->st.m->id)
+			q->st.m = find_module_id(q->pl, q->st.curr_cell->mod_id);
 
 		q->st.curr_cell = q->st.curr_cell->val_ptr;
 	}
@@ -1171,6 +1170,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		return pl_failure;
 	}
 
+	may_error(check_frame(q));
 	may_error(make_choice(q));
 	cell *p1_body = deref(q, get_logical_body(p1), p1_ctx);
 	cell *orig_p1 = p1;
@@ -1274,6 +1274,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 		return pl_failure;
 	}
 
+	may_error(check_frame(q));
 	may_error(make_choice(q));
 	const frame *f = GET_FRAME(q->st.curr_frame);
 
@@ -1346,6 +1347,7 @@ static USE_RESULT pl_status match_head(query *q)
 		return pl_failure;
 	}
 
+	may_error(check_frame(q));
 	may_error(make_choice(q));
 	const frame *f = GET_FRAME(q->st.curr_frame);
 
