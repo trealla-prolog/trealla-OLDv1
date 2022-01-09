@@ -897,7 +897,7 @@ static void proceed(query *q)
 	frame *f = GET_CURR_FRAME();
 
 	while (q->st.curr_cell && is_end(q->st.curr_cell)) {
-		if (q->st.curr_cell->val_ptr) {
+		if (q->st.curr_cell->val_ret) {
 			cut_if_det(q);
 			f->cgen = q->st.curr_cell->cgen;	// set the cgen back
 		}
@@ -905,7 +905,7 @@ static void proceed(query *q)
 		if (q->st.curr_cell->mod_id != q->st.m->id)
 			q->st.m = find_module_id(q->pl, q->st.curr_cell->mod_id);
 
-		q->st.curr_cell = q->st.curr_cell->val_ptr;
+		q->st.curr_cell = q->st.curr_cell->val_ret;
 	}
 }
 

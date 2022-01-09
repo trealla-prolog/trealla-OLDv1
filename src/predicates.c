@@ -146,7 +146,7 @@ void make_return(query *q, cell *tmp)
 	make_end(tmp);
 	cell *c = q->st.curr_cell;
 	frame *f = GET_CURR_FRAME();
-	tmp->val_ptr = c ? c + c->nbr_cells : NULL;	// save the return instruction
+	tmp->val_ret = c ? c + c->nbr_cells : NULL;	// save the return instruction
 	tmp->cgen = f->cgen;						// ... choice-generation
 	tmp->mod_id = q->st.m->id;					// ... current-module
 }
@@ -11544,8 +11544,6 @@ static const struct builtins g_predicates_iso[] =
 	{"call", 6, fn_iso_call_n, NULL, false},
 	{"call", 7, fn_iso_call_n, NULL, false},
 	{"call", 8, fn_iso_call_n, NULL, false},
-
-	{"$call", 1, fn_sys_call_1, NULL, false},
 
 	{"repeat", 0, fn_iso_repeat_0, NULL, false},
 	{"true", 0, fn_iso_true_0, NULL, false},

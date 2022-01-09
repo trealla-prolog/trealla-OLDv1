@@ -154,20 +154,6 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	return pl_success;
 }
 
-USE_RESULT pl_status fn_sys_call_1(query *q)
-{
-	GET_FIRST_ARG(p1,callable);
-
-	if (check_body_callable(q->st.m->p, p1) != NULL)
-		return throw_error(q, p1, p1_ctx, "type_error", "callable");
-
-	cell *tmp = clone_to_heap(q, true, p1, 1);
-	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_return(q, tmp+nbr_cells);
-	q->st.curr_cell = tmp;
-	return pl_success;
-}
-
 USE_RESULT pl_status fn_iso_invoke_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -788,9 +774,7 @@ pl_status throw_error3(query *q, cell *c, __attribute__((unused)) pl_idx_t c_ctx
 		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 
-		if (!CMP_SLICE2(q, goal, "$call"))
-			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, "call"));
-		else if (!CMP_SLICE2(q, goal, "$catch"))
+		if (!CMP_SLICE2(q, goal, "$catch"))
 			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, "catch"));
 		else
 			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
