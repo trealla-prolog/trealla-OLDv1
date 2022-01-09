@@ -27,6 +27,17 @@ USE_RESULT pl_status fn_sys_cut_if_det_0(query *q)
 	return pl_success;
 }
 
+USE_RESULT pl_status fn_sys_cut_if_det_1(query *q)
+{
+	GET_FIRST_ARG(p1,integer);
+
+	if (get_smallint(p1) != q->cp)
+		return pl_success;
+
+	drop_choice(q);
+	return pl_success;
+}
+
 USE_RESULT pl_status fn_sys_cleanup_if_det_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
@@ -50,17 +61,6 @@ USE_RESULT pl_status fn_sys_cleanup_if_det_1(query *q)
 	cell *c = deref(q, ch->st.curr_cell, ch->st.curr_frame);
 	c = deref(q, c+1, ch->st.curr_frame);
 	do_cleanup(q, c);
-	return pl_success;
-}
-
-USE_RESULT pl_status fn_sys_cut_if_det_1(query *q)
-{
-	GET_FIRST_ARG(p1,integer);
-
-	if (get_smallint(p1) != q->cp)
-		return pl_success;
-
-	drop_choice(q);
 	return pl_success;
 }
 
