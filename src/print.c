@@ -967,7 +967,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		unsigned my_priority = search_op(q->st.m, GET_STR(q, c), NULL, true);
 		unsigned rhs_pri = is_literal(rhs) ? search_op(q->st.m, GET_STR(q, rhs), NULL, true) : 0;
 
-		bool space = !strcmp(src, "-") && (is_number(rhs) || is_op(rhs));
+		bool space = (c->val_off == g_minus_s) && (is_number(rhs) || is_op(rhs));
 		if (isalpha(*src)) space = true;
 
 		bool parens = false; //is_op(rhs);
@@ -1008,6 +1008,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	bool lhs_parens = lhs_pri_1 >= my_priority;
 	if ((lhs_pri_1 == my_priority) && IS_YFX(c)) lhs_parens = false;
 	if (lhs_pri_2 > 0) lhs_parens = true;
+	if (is_structure(lhs) && (lhs_pri_1 <= my_priority) && (lhs->val_off == g_plus_s)) { lhs_parens = false; }
 
 	if (lhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
 	ssize_t res = print_term_to_buf(q, dst, dstlen, lhs, lhs_ctx, running, 0, depth+1);
@@ -1050,7 +1051,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	bool rhs_parens = rhs_pri_1 >= my_priority;
 	if ((rhs_pri_1 == my_priority) && IS_XFY(c)) rhs_parens = false;
 	if (rhs_pri_2 > 0) rhs_parens = true;
-	if (is_structure(rhs) && rhs->val_off == g_plus_s) { rhs_parens = false; space = true; }
+	if (is_structure(rhs) && (rhs_pri_1 <= my_priority) && (rhs->val_off == g_plus_s)) { rhs_parens = false; space = true; }
 
 	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
