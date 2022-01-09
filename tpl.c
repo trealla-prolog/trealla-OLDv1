@@ -156,7 +156,6 @@ int main(int ac, char *av[])
 	//bool did_load = false;
 	int i, do_goal = 0, do_lib = 0;
 	int version = 0, quiet = 0, daemon = 0;
-	int ns = 0;
 	void *pl = pl_create();
 	if (!pl)
 	{
@@ -187,8 +186,6 @@ int main(int ac, char *av[])
 			set_trace(pl);
 		else if (!strcmp(av[i], "--stats"))
 			set_stats(pl);
-		else if (!strcmp(av[i], "--ns"))
-			ns = 1;
 		else if (!strcmp(av[i], "-d") || !strcmp(av[i], "--daemon"))
 			daemon = 1;
 	}
@@ -261,11 +258,17 @@ int main(int ac, char *av[])
 			return halt_code;
 		}
 
-		if (get_halt(pl) || ns) {
+		if (ns) {
 			int halt_code = get_halt_code(pl);
 			pl_destroy(pl);
 			return halt_code;
 		}
+	}
+
+	if (get_halt(pl)) {
+		int halt_code = get_halt_code(pl);
+		pl_destroy(pl);
+		return halt_code;
 	}
 
 	if (!quiet)
@@ -288,7 +291,6 @@ int main(int ac, char *av[])
 		fprintf(stdout, "  -w, --watchdog\t- create watchdog\n");
 		fprintf(stdout, "  --consult\t\t- consult from STDIN\n");
 		fprintf(stdout, "  --stats\t\t- print stats\n");
-		fprintf(stdout, "  --ns\t\t\t- non-stop (to top-level)\n");
 	}
 
 	if ((version && !quiet) || ns) {
