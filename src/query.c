@@ -779,6 +779,9 @@ pl_status make_barrier(query *q)
 	return pl_success;
 }
 
+// Set a special flag so that $cut_if_det knows to also
+// remove the barrier if it needs to...
+
 pl_status make_call_barrier(query *q)
 {
 	may_error(make_barrier(q));
