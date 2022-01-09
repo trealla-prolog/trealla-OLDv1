@@ -75,11 +75,6 @@ variant(Term1, Term2) :-
 	numbervars(Term2Copy, 0, N),
 	Term1Copy == Term2Copy.
 
-unifiable(T1, T2, Gs) :-
-	copy_term('$unifiable'(T1,T2,Gs), G0),
-	'$call'(G0),
-	'$unifiable'(T1,T2,Gs)=G0.
-
 call_cleanup(G, C) :-
 	'$register_cleanup'(ignore(C)),
 	'$catch2'(
@@ -106,7 +101,7 @@ throw(E) :-
 
 catch(G, E, C) :-
 	'$get_level'(Before),
-	'$call'('$catch'(G, E, C)),
+	'$catch'(G, E, C),
 	Before0 is Before + 1,
 	'$cut_if_det'(Before0).
 

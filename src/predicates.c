@@ -11793,7 +11793,7 @@ static const struct builtins g_predicates_other[] =
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer", false},
 	{"limit", 2, fn_limit_2, "+integer,+callable", false},
 	{"offset", 2, fn_offset_2, "+integer,+callable", false},
-	{"$unifiable", 3, fn_sys_unifiable_3, NULL, false},
+	{"unifiable", 3, fn_sys_unifiable_3, NULL, false},
 	{"$incr", 2, fn_sys_incr_2, "?var", false},
 	{"$choice", 0, fn_sys_choice_0, NULL, false},
 	{"once", 1, fn_iso_once_1, "+callable", false},
