@@ -788,7 +788,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			while (is_list(l)) {
 				cell *h = LIST_HEAD(l);
 				const char *sh = GET_STR(q, h);
-				bool quote = strchr(lchars, *sh) || (*sh < ' ');
+				int sch = peek_char_utf8(sh);
+				bool quote = strchr(lchars, *sh) || (*sh < ' ') || iswspace(sch);
 				dst += snprintf(dst, dstlen, "%s", ",");
 				if (quote) dst += snprintf(dst, dstlen, "%s", "'");
 				dst += formatted(dst, dstlen, GET_STR(q, h), LEN_STR(q, h), false);
