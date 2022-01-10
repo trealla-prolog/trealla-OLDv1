@@ -781,6 +781,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			cons = 1;
 			continue;
 		} else if (is_string(tail)) {
+#if 0
 			cell *l = tail;
 			LIST_HANDLER(l);
 			const char *lchars = "[,|.]%(){}`";
@@ -796,6 +797,11 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				if (quote) dst += snprintf(dst, dstlen, "%s", "'");
 				l = LIST_TAIL(l);
 			}
+#else
+			dst+= snprintf(dst, dstlen, "%s", "|\"");
+			dst += formatted(dst, dstlen, GET_STR(q, tail), LEN_STR(q, tail), false);
+			dst += snprintf(dst, dstlen, "%s", "\"");
+#endif
 
 			print_list++;
 		} else {

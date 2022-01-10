@@ -12114,7 +12114,7 @@ static void load_ops(query *q)
 		formatted(name, sizeof(name), ptr->name, strlen(ptr->name), false);
 		char tmpbuf[1024];
 
-		snprintf(tmpbuf, sizeof(tmpbuf), "'$current_op'(%u, %s, '%s').\n",
+		snprintf(tmpbuf, sizeof(tmpbuf), "'$current_op'(%u, %s, (%s)).\n",
 			ptr->priority, specifier, name);
 		ASTRING_strcat(pr, tmpbuf);
 	}
