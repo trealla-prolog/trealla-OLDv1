@@ -269,7 +269,7 @@ pl_status do_post_unification_hook(query *q)
 	if (!tmp[1].match)
 		return throw_error(q, tmp+1, q->st.curr_frame, "existence_error", "procedure");
 
-	make_call(q, tmp+2);
+	make_return(q, tmp+2);
 	q->st.curr_cell = tmp;
 	return pl_success;
 }

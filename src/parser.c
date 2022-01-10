@@ -2317,18 +2317,22 @@ bool get_token(parser *p, int last_op)
 		} else if ((p->quote_char == '"') && p->flag.double_quote_chars)
 			p->string = true;
 
+		if (p->string && (*src == p->quote_char) && (*src == '"')) {
+			dst += put_char_bare_utf8(dst, '[');
+			dst += put_char_bare_utf8(dst, ']');
+			p->string = false;
+			src++;
+			p->srcptr = (char*)src;
+			p->toklen = dst - p->token;
+			return true;
+		}
+
 		for (;;) {
 			for (int ch; (ch = get_char_utf8(&src));) {
 
 				if ((ch == p->quote_char) && (*src == ch)) {
 					ch = *src++;
 				} else if (ch == p->quote_char) {
-					if ((ch == '"') && !*p->token && p->string) {
-						dst += put_char_bare_utf8(dst, ch='[');
-						dst += put_char_bare_utf8(dst, ch=']');
-						p->string = false;
-					}
-
 					p->quote_char = 0;
 					break;
 				}

@@ -141,14 +141,14 @@ void make_end(cell *tmp)
 	tmp->nbr_cells = 1;
 }
 
-void make_call(query *q, cell *tmp)
+void make_return(query *q, cell *tmp)
 {
 	make_end(tmp);
 	cell *c = q->st.curr_cell;
 	frame *f = GET_CURR_FRAME();
-	tmp->val_ptr = c ? c + c->nbr_cells : NULL;	// save the return instruction
-	tmp->cgen = f->cgen;					// ... choice-generation
-	tmp->mod_nbr = q->st.m->id;				// ... current-module
+	tmp->val_ret = c ? c + c->nbr_cells : NULL;	// save the return instruction
+	tmp->cgen = f->cgen;						// ... choice-generation
+	tmp->mod_id = q->st.m->id;					// ... current-module
 }
 
 void make_literal(cell *tmp, pl_idx_t offset)
@@ -5704,7 +5704,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 		make_int(tmp+nbr_cells++, q->st.qnbr);
 		nbr_cells += safe_copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
 		make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
-		make_call(q, tmp+nbr_cells);
+		make_return(q, tmp+nbr_cells);
 		may_error(make_barrier(q));
 		q->st.curr_cell = tmp;
 		init_queuen(q);
@@ -6337,7 +6337,7 @@ static USE_RESULT pl_status fn_time_1(query *q)
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_elapsed_s, fn_sys_elapsed_0, 0, 0);
-	make_call(q, tmp+nbr_cells);
+	make_return(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -10309,7 +10309,7 @@ static USE_RESULT pl_status fn_limit_2(query *q)
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_lt_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
 	make_int(tmp+nbr_cells++, get_int(p1));
-	make_call(q, tmp+nbr_cells);
+	make_return(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -10337,7 +10337,7 @@ static USE_RESULT pl_status fn_offset_2(query *q)
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_gt_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
 	make_int(tmp+nbr_cells++, get_int(p1));
-	make_call(q, tmp+nbr_cells);
+	make_return(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -10381,7 +10381,7 @@ static USE_RESULT pl_status fn_call_nth_2(query *q)
 		tmp[nbr_cells] = *p2_raw;
 		tmp[nbr_cells++].nbr_cells = 1;
 		make_int(tmp+nbr_cells++, 0);
-		make_call(q, tmp+nbr_cells);
+		make_return(q, tmp+nbr_cells);
 		q->st.curr_cell = tmp;
 		return pl_success;
 	}
@@ -10391,7 +10391,7 @@ static USE_RESULT pl_status fn_call_nth_2(query *q)
 	make_structure(tmp+nbr_cells++, g_sys_ne_s, fn_sys_ne_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
 	make_int(tmp+nbr_cells++, get_int(p2));
-	make_call(q, tmp+nbr_cells);
+	make_return(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -11460,7 +11460,7 @@ static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)
 		pl_idx_t nbr_cells = 1 + p1->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
 		make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
-		make_call(q, tmp+nbr_cells);
+		make_return(q, tmp+nbr_cells);
 		q->st.curr_cell = tmp;
 		return pl_success;
 	}
@@ -11476,7 +11476,7 @@ void do_cleanup(query *q, cell *p1)
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0); // ???
-	make_call(q, tmp+nbr_cells);
+	make_return(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 }
 
@@ -11533,7 +11533,6 @@ static const struct builtins g_predicates_iso[] =
 	{"$throw", 1, fn_iso_throw_1, NULL, false},
 	{"$catch", 3, fn_iso_catch_3, NULL, false},
 	{"$catch2", 3, fn_sys_catch2_3, NULL, false},
-	{"$cut_if_det", 0, fn_sys_cut_if_det_0, NULL, false},
 	{"$cut_if_det", 1, fn_sys_cut_if_det_1, "+integer", false},
 
 	{"call", 1, fn_iso_call_n, NULL, false},
@@ -11544,8 +11543,6 @@ static const struct builtins g_predicates_iso[] =
 	{"call", 6, fn_iso_call_n, NULL, false},
 	{"call", 7, fn_iso_call_n, NULL, false},
 	{"call", 8, fn_iso_call_n, NULL, false},
-
-	{"$call", 1, fn_sys_call_1, NULL, false},
 
 	{"repeat", 0, fn_iso_repeat_0, NULL, false},
 	{"true", 0, fn_iso_true_0, NULL, false},
@@ -11793,7 +11790,7 @@ static const struct builtins g_predicates_other[] =
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer", false},
 	{"limit", 2, fn_limit_2, "+integer,+callable", false},
 	{"offset", 2, fn_offset_2, "+integer,+callable", false},
-	{"$unifiable", 3, fn_sys_unifiable_3, NULL, false},
+	{"unifiable", 3, fn_sys_unifiable_3, NULL, false},
 	{"$incr", 2, fn_sys_incr_2, "?var", false},
 	{"$choice", 0, fn_sys_choice_0, NULL, false},
 	{"once", 1, fn_iso_once_1, "+callable", false},
