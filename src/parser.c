@@ -52,7 +52,7 @@ cell *list_head(cell *l, cell *tmp)
 		return l + 1;
 
 	const char *src = is_static(l) ? l->val_str : (char*)l->val_strb->cstr + l->strb_off;
-	size_t len = *src ? len_char_utf8(src) : 1;
+	size_t len = len_char_utf8(src);
 	tmp->tag = TAG_CSTR;
 	tmp->nbr_cells = 1;
 	tmp->flags = 0;
@@ -74,7 +74,7 @@ cell *list_tail(cell *l, cell *tmp)
 
 	const char *src = is_static(l) ? l->val_str : (char*)l->val_strb->cstr + l->strb_off;
 	size_t str_len = is_static(l) ? (size_t)l->str_len : (size_t)l->val_strb->len - l->strb_off;
-	size_t len = *src ? len_char_utf8(src) : 1;
+	size_t len = len_char_utf8(src);
 
 	if (str_len == len) {
 		tmp->tag = TAG_LITERAL;
@@ -2317,18 +2317,22 @@ bool get_token(parser *p, int last_op)
 		} else if ((p->quote_char == '"') && p->flag.double_quote_chars)
 			p->string = true;
 
+		if (p->string && (*src == p->quote_char) && (*src == '"')) {
+			dst += put_char_bare_utf8(dst, '[');
+			dst += put_char_bare_utf8(dst, ']');
+			p->string = false;
+			src++;
+			p->srcptr = (char*)src;
+			p->toklen = dst - p->token;
+			return true;
+		}
+
 		for (;;) {
 			for (int ch; (ch = get_char_utf8(&src));) {
 
 				if ((ch == p->quote_char) && (*src == ch)) {
 					ch = *src++;
 				} else if (ch == p->quote_char) {
-					if ((ch == '"') && !*p->token && p->string) {
-						dst += put_char_bare_utf8(dst, ch='[');
-						dst += put_char_bare_utf8(dst, ch=']');
-						p->string = false;
-					}
-
 					p->quote_char = 0;
 					break;
 				}
