@@ -395,11 +395,11 @@ size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes)
 			int ch = get_int(c);
 			char tmp[20];
 			put_char_utf8(tmp, ch);
-			size_t len = len_char_utf8(tmp);
+			size_t len = *tmp ? len_char_utf8(tmp) : 1;
 			is_chars_list += len;
 		} else {
 			const char *src = GET_STR(q, c);
-			size_t len = len_char_utf8(src);
+			size_t len = *src ? len_char_utf8(src) : 1;
 
 			if (len != LEN_STR(q, c)) {
 				is_chars_list = 0;

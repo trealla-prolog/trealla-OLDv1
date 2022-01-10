@@ -69,11 +69,7 @@ bool needs_quoting(module *m, const char *src, int srclen)
 	}
 
 	while (srclen > 0) {
-		int lench = len_char_utf8(src);
-
-		if (!lench)
-			break;
-
+		int lench = *src ? len_char_utf8(src) : 1;
 		int ch = get_char_utf8(&src);
 		srclen -= lench;
 
@@ -122,11 +118,7 @@ static bool op_needs_quoting(module *m, const char *src, int srclen)
 	}
 
 	while (srclen > 0) {
-		int lench = len_char_utf8(src);
-
-		if (!lench)
-			break;
-
+		int lench = *src ? len_char_utf8(src) : 1;
 		int ch = get_char_utf8(&src);
 		srclen -= lench;
 
@@ -143,11 +135,7 @@ static bool has_spaces(const char *src, int srclen)
 		return true;
 
 	while (srclen > 0) {
-		int lench = len_char_utf8(src);
-
-		if (!lench)
-			break;
-
+		int lench = *src ? len_char_utf8(src) : 1;
 		int ch = get_char_utf8(&src);
 		srclen -= lench;
 
@@ -166,11 +154,7 @@ size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq)
 	int chars = 0;
 
 	while (srclen > 0) {
-		int lench = len_char_utf8(src);
-
-		if (!lench)
-			break;
-
+		int lench = *src ? len_char_utf8(src) : 1;
 		int ch = get_char_utf8(&src);
 		srclen -= lench;
 		chars++;
