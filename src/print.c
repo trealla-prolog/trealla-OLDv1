@@ -1055,7 +1055,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	bool rhs_parens = rhs_pri_1 >= my_priority;
 	if ((rhs_pri_1 == my_priority) && IS_XFY(c)) rhs_parens = false;
 	if (rhs_pri_2 > 0) rhs_parens = true;
-	if (is_structure(rhs) && (rhs_pri_1 <= my_priority) && (rhs->val_off == g_plus_s)) { rhs_parens = false; space = true; }
+	if (is_structure(rhs) && (rhs_pri_1 <= my_priority)
+		&& ((rhs->val_off == g_plus_s) || (rhs->val_off == g_minus_s))) { rhs_parens = false; space = true; }
 
 	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
