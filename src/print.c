@@ -957,6 +957,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		unsigned rhs_pri = is_literal(rhs) ? search_op(q->st.m, GET_STR(q, rhs), NULL, true) : 0;
 
 		bool space = (c->val_off == g_minus_s) && (is_number(rhs) || is_op(rhs));
+		if ((c->val_off == g_plus_s) && is_op(rhs)) space = true;
 		if (isalpha(*src)) space = true;
 
 		bool parens = false; //is_op(rhs);
