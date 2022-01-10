@@ -59,6 +59,7 @@ test:
 
 clean:
 	rm -f tpl src/*.o src/imath/*.o library/*.o library/*.c *.o gmon.* vgcore.* *.core core core.* faultinject.*
+	rm -f *.itf *.po samples/*.itf samples/*.po
 
 # from [gcc|clang] -MM src/*.c src/imath/*.c
 

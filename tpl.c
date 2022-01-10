@@ -241,7 +241,7 @@ int main(int ac, char *av[])
 			do_goal = 0;
 			goal = av[i];
 		} else {
-			if (!pl_consult(pl, av[i]) || ns) {
+			if (!pl_consult(pl, av[i])) {
 				pl_destroy(pl);
 				return 1;
 			}
@@ -253,12 +253,6 @@ int main(int ac, char *av[])
 
 	if (goal) {
 		if (!pl_eval(pl, goal)) {
-			int halt_code = get_halt_code(pl);
-			pl_destroy(pl);
-			return halt_code;
-		}
-
-		if (ns) {
 			int halt_code = get_halt_code(pl);
 			pl_destroy(pl);
 			return halt_code;
@@ -293,7 +287,7 @@ int main(int ac, char *av[])
 		fprintf(stdout, "  --stats\t\t- print stats\n");
 	}
 
-	if ((version && !quiet) || ns) {
+	if (version && !quiet) {
 		pl_destroy(pl);
 		return 0;
 	}
