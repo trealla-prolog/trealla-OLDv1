@@ -756,7 +756,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 		int parens = is_structure(head) && special_op;
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
-		ssize_t res = print_term_to_buf(q, dst, dstlen, head, head_ctx, running, 0, depth++);
+		ssize_t res = print_term_to_buf(q, dst, dstlen, head, head_ctx, running, true, depth++);
 		if (res < 0) return -1;
 		dst += res;
 		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
@@ -770,7 +770,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 			if (strcmp(src, "[]")) {
 				dst += snprintf(dst, dstlen, "%s", "|");
-				ssize_t res = print_term_to_buf(q, dst, dstlen, tail, c_ctx, running, 1, depth+1);
+				ssize_t res = print_term_to_buf(q, dst, dstlen, tail, c_ctx, running, true, depth+1);
 				if (res < 0) return -1;
 				dst += res;
 			}
@@ -785,16 +785,17 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			LIST_HANDLER(l);
 
 			while (is_list(l)) {
-				dst += snprintf(dst, dstlen, "%s", ",");
+				dst += snprintf(dst, dstlen, "%s", ",'");
 				cell *h = LIST_HEAD(l);
 				dst += formatted(dst, dstlen, GET_STR(q, h), LEN_STR(q, h), false);
+				dst += snprintf(dst, dstlen, "%s", "'");
 				l = LIST_TAIL(l);
 			}
 
 			print_list++;
 		} else {
 			dst += snprintf(dst, dstlen, "%s", "|");
-			ssize_t res = print_term_to_buf(q, dst, dstlen, tail, c_ctx, running, 1, depth+1);
+			ssize_t res = print_term_to_buf(q, dst, dstlen, tail, c_ctx, running, true, depth+1);
 			if (res < 0) return -1;
 			dst += res;
 		}
