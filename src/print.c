@@ -783,7 +783,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		} else if (is_string(tail)) {
 			cell *l = tail;
 			LIST_HANDLER(l);
-			const char *lchars = "[,|]";
+			const char *lchars = "[,|.]%(){}`";
 
 			while (is_list(l)) {
 				cell *h = LIST_HEAD(l);
