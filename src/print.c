@@ -703,7 +703,12 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	if (!is_chars_list && running)
 		is_chars_list += scan_is_chars_list(q, c, c_ctx, false);
 
-	if (is_chars_list) {
+	if (is_string(c)) {
+		dst += snprintf(dst, dstlen, "%s", "\"");
+		dst += formatted(dst, dstlen, GET_STR(q, c), LEN_STR(q, c), false);
+		dst += snprintf(dst, dstlen, "%s", "\"");
+		return dst - save_dst;
+	} else if (is_chars_list) {
 		cell *l = c;
 		dst += snprintf(dst, dstlen, "%s", "\"");
 		unsigned cnt = 0;

@@ -52,7 +52,7 @@ cell *list_head(cell *l, cell *tmp)
 		return l + 1;
 
 	const char *src = is_static(l) ? l->val_str : (char*)l->val_strb->cstr + l->strb_off;
-	size_t len = len_char_utf8(src);
+	size_t len = *src ? len_char_utf8(src) : 1;
 	tmp->tag = TAG_CSTR;
 	tmp->nbr_cells = 1;
 	tmp->flags = 0;
