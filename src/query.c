@@ -1723,6 +1723,9 @@ pl_status start(query *q)
 				may_error(do_post_unification_hook(q));
 
 			proceed(q);
+		} else if (is_string(q->st.curr_cell)) {
+			consultall(q->st.m->p, q->st.curr_cell);
+			proceed(q);
 		} else {
 			if (!is_callable(q->st.curr_cell)) {
 				DISCARD_RESULT throw_error(q, q->st.curr_cell, q->st.curr_frame, "type_error", "callable");
