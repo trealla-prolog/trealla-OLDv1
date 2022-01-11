@@ -1655,7 +1655,7 @@ static bool any_outstanding_choices(query *q)
 	return q->cp > 0;
 }
 
-pl_status consultall(query *q, cell *l)
+static pl_status consultall(query *q, cell *l)
 {
 	LIST_HANDLER(l);
 

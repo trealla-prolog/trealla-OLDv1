@@ -216,6 +216,19 @@ parser *create_parser(module *m)
 	return p;
 }
 
+static void consultall(parser *p, cell *l)
+{
+	LIST_HANDLER(l);
+
+	while (is_list(l) && !g_tpl_interrupt) {
+		cell *h = LIST_HEAD(l);
+		char *s = DUP_SLICE(p, h);
+		load_file(p->m, s);
+		free(s);
+		l = LIST_TAIL(l);
+	}
+}
+
 char *relative_to(const char *basefile, const char *relfile)
 {
 	char *tmpbuf = malloc(strlen(basefile) + strlen(relfile) + 256);
