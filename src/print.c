@@ -163,6 +163,9 @@ size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq)
 		if ((ch == '\'') && dq)
 			ptr = 0;
 
+		if (ch == '\\')
+			ptr = 0;
+
 		if (ch && ptr) {
 			if (dstlen) {
 				*dst++ = '\\';
@@ -198,7 +201,7 @@ size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq)
 				*dst++ = '\\';
 
 			len += 3;
-		} else if (ch == '\\') {
+		} else if ((ch == '\\') && false) {
 			if (dstlen) {
 				*dst++ = '\\';
 				*dst++ = ch;
