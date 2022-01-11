@@ -2987,7 +2987,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!p->is_op && !is_func && !last_op) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, near '%s', operator expected2 '%s'\n", p->token, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, near '%s', operator expected '%s'\n", p->token, p->save_line?p->save_line:"");
 
 			p->error_desc = "operator_expected";
 			p->error = true;
