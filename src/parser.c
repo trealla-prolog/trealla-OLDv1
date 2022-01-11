@@ -2761,6 +2761,20 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			}
 		}
 
+		if (!p->quote_char && consing && p->is_op && strcmp(p->token, ",") && strcmp(p->token, "|")) {
+			unsigned specifier = 0;
+			unsigned priority = search_op(p->m, p->token, &specifier, last_op);
+
+			if (!last_op && (priority > 999)) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error parens needed around operator '%s', line %d\n", p->token, p->line_nbr);
+
+				p->error_desc = "parens_needed";
+				p->error = true;
+				break;
+			}
+		}
+
 		if (!p->quote_char && consing && !strcmp(p->token, ",")) {
 			if ((*p->srcptr == ',') && !p->flag.double_quote_codes) {
 				if (DUMP_ERRS || !p->do_read_term)
@@ -2971,7 +2985,9 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			break;
 		}
 
-		if (!p->is_op && !is_func && !last_op) {
+		//printf("*** op=%s, prefix=%d\n", p->token, IS_PREFIX(specifier));
+
+		if ((!p->is_op || IS_PREFIX(specifier)) && !is_func && !last_op) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, near '%s', operator expected '%s'\n", p->token, p->save_line?p->save_line:"");
 
