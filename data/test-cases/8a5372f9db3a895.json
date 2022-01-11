@@ -1,0 +1,51 @@
+{
+  "uid" : "8a5372f9db3a895",
+  "name" : "sics_bitwise_and_2_07",
+  "fullName" : "sics_bitwise_and_2_07::tests",
+  "historyId" : "sics_bitwise_and_2_07::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/bitwise_and_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "functions/bitwise_and_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "functions/bitwise_and_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "functions/bitwise_and_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "62-67"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/35935ee0d1cceb0d2cb7c116f9cfa9664c14ef21/tests/prolog/functions/bitwise_and_2/tests.lgt#L62"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "8a5372f9db3a895.json",
+  "parameterValues" : [ "functions/bitwise_and_2/tests.lgt", "62-67", "https://github.com/LogtalkDotOrg/logtalk3/tree/35935ee0d1cceb0d2cb7c116f9cfa9664c14ef21/tests/prolog/functions/bitwise_and_2/tests.lgt#L62" ]
+}

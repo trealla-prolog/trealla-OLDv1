@@ -1,0 +1,51 @@
+{
+  "uid" : "185ea1f4fe1ffae2",
+  "name" : "eclipse_sort_2_10",
+  "fullName" : "eclipse_sort_2_10::tests",
+  "historyId" : "eclipse_sort_2_10::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/sort_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/sort_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/sort_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/sort_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "83-86"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/35935ee0d1cceb0d2cb7c116f9cfa9664c14ef21/tests/prolog/predicates/sort_2/tests.lgt#L83"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "185ea1f4fe1ffae2.json",
+  "parameterValues" : [ "predicates/sort_2/tests.lgt", "83-86", "https://github.com/LogtalkDotOrg/logtalk3/tree/35935ee0d1cceb0d2cb7c116f9cfa9664c14ef21/tests/prolog/predicates/sort_2/tests.lgt#L83" ]
+}
