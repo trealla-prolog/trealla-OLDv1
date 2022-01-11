@@ -2765,7 +2765,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			unsigned specifier = 0;
 			unsigned priority = search_op(p->m, p->token, &specifier, last_op);
 
-			if (!isalpha(p->token[0]) && (priority > 999)) {
+			if (!last_op && (priority > 999)) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error parens needed around operator '%s', line %d\n", p->token, p->line_nbr);
 
