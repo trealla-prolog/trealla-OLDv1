@@ -594,8 +594,8 @@ strip_module(T,M,P) :- T=M:P -> true ; P=T, module(M).
 ?=(X,Y) :- \+ unifiable(X,Y,[_|_]).
 '$skip_list'(Skip,Xs0,Xs) :- '$skip_max_list'(Skip,_,Xs0,Xs).
 
-[Files1|[]] :- !,
-	load_files(Files1,[]).
+[Files] :- !,
+	load_files(Files,[]).
 [Files1|Files2] :-
 	load_files(Files1,[]),
 	[Files2].
