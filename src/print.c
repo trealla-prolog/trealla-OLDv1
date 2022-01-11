@@ -709,7 +709,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 			cell *h = LIST_HEAD(l);
 			cell *c = running ? deref(q, h, c_ctx) : h;
-			dst += formatted(dst, dstlen, GET_STR(q, c), LEN_STR(q, c), false);
+			dst += formatted(dst, dstlen, GET_STR(q, c), LEN_STR(q, c), true);
 			l = LIST_TAIL(l);
 			l = running ? deref(q, l, c_ctx) : l;
 			c_ctx = q->latest_ctx;
@@ -791,7 +791,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 				cell *h = LIST_HEAD(l);
 				cell *c = running ? deref(q, h, c_ctx) : h;
-				dst += formatted(dst, dstlen, GET_STR(q, c), LEN_STR(q, c), false);
+				dst += formatted(dst, dstlen, GET_STR(q, c), LEN_STR(q, c), true);
 				l = LIST_TAIL(l);
 				l = running ? deref(q, l, c_ctx) : l;
 				c_ctx = q->latest_ctx;
