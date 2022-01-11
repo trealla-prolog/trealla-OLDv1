@@ -1,0 +1,54 @@
+{
+  "uid" : "a806dfd43b855aa7",
+  "name" : "float_1",
+  "fullName" : "float_1::tests",
+  "historyId" : "float_1::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "functions/float_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "functions/float_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "functions/float_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ {
+      "uid" : "196e07de87119543",
+      "status" : "failed",
+      "statusDetails" : "Broken",
+      "time" : {
+        "duration" : 0
+      }
+    } ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "a806dfd43b855aa7.json",
+  "parameterValues" : [ ]
+}
