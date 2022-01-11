@@ -594,12 +594,6 @@ strip_module(T,M,P) :- T=M:P -> true ; P=T, module(M).
 ?=(X,Y) :- \+ unifiable(X,Y,[_|_]).
 '$skip_list'(Skip,Xs0,Xs) :- '$skip_max_list'(Skip,_,Xs0,Xs).
 
-[File] :- !,
-	load_files(File,[]).
-[File|Rest] :-
-	load_files(File,[]),
-	[Rest].
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SWI compatible
 %

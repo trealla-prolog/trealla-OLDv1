@@ -1655,6 +1655,28 @@ static bool any_outstanding_choices(query *q)
 	return q->cp > 0;
 }
 
+pl_status consultall(query *q, cell *l)
+{
+	LIST_HANDLER(l);
+
+	while (is_list(l) && !g_tpl_interrupt) {
+		cell *h = LIST_HEAD(l);
+		char *s = DUP_SLICE(q, h);
+
+		if (!load_file(q->p->m, s)) {
+			cell tmp;
+			make_cstring(&tmp, s);
+			free(s);
+			return throw_error(q, &tmp, q->st.curr_frame, "existence_error", "source_sink");
+		}
+
+		free(s);
+		l = LIST_TAIL(l);
+	}
+
+	return pl_success;
+}
+
 pl_status start(query *q)
 {
 	q->yielded = false;
@@ -1723,8 +1745,8 @@ pl_status start(query *q)
 				may_error(do_post_unification_hook(q));
 
 			proceed(q);
-		} else if (is_string(q->st.curr_cell)) {
-			consultall(q->st.m->p, q->st.curr_cell);
+		} else if (is_list(q->st.curr_cell)) {
+			consultall(q, q->st.curr_cell);
 			proceed(q);
 		} else {
 			if (!is_callable(q->st.curr_cell)) {

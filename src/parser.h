@@ -8,7 +8,6 @@ void destroy_parser(parser *p);
 unsigned tokenize(parser *p, bool args, bool consing);
 void xref_rule(parser *p, clause *t, predicate *parent);
 void reset(parser *p);
-void consultall(parser *p, cell *l);
 void term_to_body(parser *p);
 cell *check_body_callable(parser *p, cell *c);
 bool run(parser *p, const char *src, bool dump);
