@@ -777,7 +777,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				if (res < 0) return -1;
 				dst += res;
 			}
-		} else if (q->p->flag.double_quote_chars && scan_is_chars_list(q, tail, c_ctx, false)) {
+		} else if (false && q->p->flag.double_quote_chars && scan_is_chars_list(q, tail, c_ctx, false)) {
 			cell *l = tail;
 			dst += snprintf(dst, dstlen, "%s", "|\"");
 			unsigned cnt = 0;
