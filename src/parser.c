@@ -2985,7 +2985,9 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			break;
 		}
 
-		if (!p->is_op && !is_func && !last_op) {
+		//printf("*** op=%s, prefix=%d\n", p->token, IS_PREFIX(specifier));
+
+		if ((!p->is_op || IS_PREFIX(specifier)) && !is_func && !last_op) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, near '%s', operator expected '%s'\n", p->token, p->save_line?p->save_line:"");
 
