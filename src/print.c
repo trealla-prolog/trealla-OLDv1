@@ -709,7 +709,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 			cell *h = LIST_HEAD(l);
 			cell *c = running ? deref(q, h, c_ctx) : h;
-			dst += formatted(dst, dstlen, GET_STR(q, c), LEN_STR(q, c), false);
+			dst += formatted(dst, dstlen, GET_STR(q, c), LEN_STR(q, c), true);
 			l = LIST_TAIL(l);
 			l = running ? deref(q, l, c_ctx) : l;
 			c_ctx = q->latest_ctx;
@@ -777,6 +777,28 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				if (res < 0) return -1;
 				dst += res;
 			}
+		} else if (false && q->p->flag.double_quote_chars && scan_is_chars_list(q, tail, c_ctx, false)) {
+			cell *l = tail;
+			dst += snprintf(dst, dstlen, "%s", "|\"");
+			unsigned cnt = 0;
+			LIST_HANDLER(l);
+
+			while (is_list(l)) {
+				if ((cnt++ > MAX_ELEMENTS) && (running < 0)) {
+					dst += snprintf(dst, dstlen, "%s", " ...");
+					break;
+				}
+
+				cell *h = LIST_HEAD(l);
+				cell *c = running ? deref(q, h, c_ctx) : h;
+				dst += formatted(dst, dstlen, GET_STR(q, c), LEN_STR(q, c), true);
+				l = LIST_TAIL(l);
+				l = running ? deref(q, l, c_ctx) : l;
+				c_ctx = q->latest_ctx;
+			}
+
+			dst += snprintf(dst, dstlen, "%s", "\"]");
+			return dst - save_dst;
 		} else if (is_iso_list(tail)) {
 			dst += snprintf(dst, dstlen, "%s", ",");
 			c = tail;
