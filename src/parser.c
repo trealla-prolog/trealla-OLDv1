@@ -2401,7 +2401,8 @@ bool get_token(parser *p, int last_op)
 				continue;
 			}
 
-			if (strcmp(p->token, "[")
+			if (!p->string
+				&&strcmp(p->token, "[")
 				&& strcmp(p->token, "(")
 				&& strcmp(p->token, "{")
 				&& strcmp(p->token, "]")
