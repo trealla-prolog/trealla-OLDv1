@@ -1,0 +1,47 @@
+{
+  "uid" : "7fa7410fd82ab5ad",
+  "name" : "length_2",
+  "fullName" : "length_2::tests",
+  "historyId" : "length_2::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/length_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/length_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/length_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "7fa7410fd82ab5ad.json",
+  "parameterValues" : [ ]
+}

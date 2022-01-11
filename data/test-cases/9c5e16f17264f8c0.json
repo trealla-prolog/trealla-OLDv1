@@ -1,0 +1,47 @@
+{
+  "uid" : "9c5e16f17264f8c0",
+  "name" : "functor_3",
+  "fullName" : "functor_3::tests",
+  "historyId" : "functor_3::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/functor_3/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/functor_3/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/functor_3/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "9c5e16f17264f8c0.json",
+  "parameterValues" : [ ]
+}

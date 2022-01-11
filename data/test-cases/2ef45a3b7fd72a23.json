@@ -1,0 +1,47 @@
+{
+  "uid" : "2ef45a3b7fd72a23",
+  "name" : "not_unifiable_2",
+  "fullName" : "not_unifiable_2::tests",
+  "historyId" : "not_unifiable_2::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/not_unifiable_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/not_unifiable_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/not_unifiable_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "2ef45a3b7fd72a23.json",
+  "parameterValues" : [ ]
+}
