@@ -2332,6 +2332,15 @@ bool get_token(parser *p, int last_op)
 
 		for (;;) {
 			for (int ch; (ch = get_char_utf8(&src));) {
+				if (ch == '\n') {
+					if (DUMP_ERRS || !p->do_read_term)
+						fprintf(stdout, "Error: syntax error, unterminated quoted atom, line %d, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+
+					p->error_desc = "unterminated_quoted_atom";
+					p->error = true;
+					p->srcptr = (char*)src;
+					return false;
+				}
 
 				if ((ch == p->quote_char) && (*src == ch)) {
 					ch = *src++;
