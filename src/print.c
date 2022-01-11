@@ -689,7 +689,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 	if (is_string(c)) {
 		dst += snprintf(dst, dstlen, "%s", "\"");
-		dst += formatted(dst, dstlen, GET_STR(q, c), LEN_STR(q, c), false);
+		dst += formatted(dst, dstlen, GET_STR(q, c), LEN_STR(q, c), true);
 		dst += snprintf(dst, dstlen, "%s", "\"");
 		return dst - save_dst;
 	} else if (is_chars_list) {
@@ -799,7 +799,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			}
 #else
 			dst+= snprintf(dst, dstlen, "%s", "|\"");
-			dst += formatted(dst, dstlen, GET_STR(q, tail), LEN_STR(q, tail), false);
+			dst += formatted(dst, dstlen, GET_STR(q, tail), LEN_STR(q, tail), true);
 			dst += snprintf(dst, dstlen, "%s", "\"");
 #endif
 
