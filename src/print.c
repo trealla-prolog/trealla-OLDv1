@@ -30,7 +30,7 @@ bool needs_quoting(module *m, const char *src, int srclen)
 	if (!strcmp(src, ",") || !strcmp(src, ".") || !strcmp(src, "|"))
 		return true;
 
-	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!"))
+	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!") || !strcmp(src, "\\"))
 		return false;
 
 	if ((src[0] == '/') && (src[1] == '*'))
@@ -557,7 +557,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 	if (is_string(c)) dq = quote = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
 
-	if (quote || q->quoted)
+	if (quote)
 		dst += formatted(dst, dstlen, src, srclen, dq);
 	else
 		dst += plain(dst, dstlen, src, srclen);
@@ -706,7 +706,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 			cell *h = LIST_HEAD(l);
 			cell *c = running ? deref(q, h, c_ctx) : h;
-			dst += formatted(dst, dstlen, GET_STR(q, c), LEN_STR(q, c), false);
+			dst += formatted(dst, dstlen, GET_STR(q, c), LEN_STR(q, c), true);
 			l = LIST_TAIL(l);
 			l = running ? deref(q, l, c_ctx) : l;
 			c_ctx = q->latest_ctx;
@@ -793,7 +793,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				bool quote = strchr(lchars, *sh) || (*sh < ' ') || iswspace(sch);
 				dst += snprintf(dst, dstlen, "%s", ",");
 				if (quote) dst += snprintf(dst, dstlen, "%s", "'");
-				dst += formatted(dst, dstlen, GET_STR(q, h), LEN_STR(q, h), false);
+				if (quote)
+					dst += formatted(dst, dstlen, GET_STR(q, h), LEN_STR(q, h), false);
+				else
+					dst += plain(dst, dstlen, GET_STR(q, h), LEN_STR(q, h));
 				if (quote) dst += snprintf(dst, dstlen, "%s", "'");
 				l = LIST_TAIL(l);
 			}
@@ -890,7 +893,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 		if (braces)
 			;
-		else if (quote || q->quoted) {
+		else if (quote) {
 			if ((running < 0) && is_blob(c) && (len_str > MAX_ELEMENTS))
 				len_str = MAX_ELEMENTS;
 
