@@ -1095,6 +1095,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	}
 
 	if (attrs) {
+#if 0
 		if (is_variable(v)) {
 			const frame *f = GET_FRAME(v_ctx);
 			slot *e = GET_SLOT(f, v->var_nbr);
@@ -1108,6 +1109,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 			} else
 				q->has_attrs = true;
 		} else
+#endif
 			q->has_attrs = true;
 	}
 
@@ -1698,6 +1700,7 @@ pl_status start(query *q)
 
 		q->tot_goals++;
 		q->did_throw = false;
+		q->has_attrs = false;
 		Trace(q, q->st.curr_cell, q->st.curr_frame, CALL);
 		cell *save_cell = q->st.curr_cell;
 		pl_idx_t save_ctx = q->st.curr_frame;
