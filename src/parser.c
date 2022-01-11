@@ -223,7 +223,10 @@ static void consultall(parser *p, cell *l)
 	while (is_list(l) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(l);
 		char *s = DUP_SLICE(p, h);
-		load_file(p->m, s);
+
+		if (!load_file(p->m, s))
+			fprintf(stdout, "Error: file not found: '%s'\n", s);
+
 		free(s);
 		l = LIST_TAIL(l);
 	}
