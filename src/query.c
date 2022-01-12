@@ -1657,6 +1657,20 @@ static bool any_outstanding_choices(query *q)
 
 static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 {
+	if (is_string(l)) {
+		char *s = DUP_SLICE(q, l);
+
+		if (!load_file(q->p->m, s)) {
+			cell tmp;
+			make_cstring(&tmp, s);
+			free(s);
+			return throw_error(q, &tmp, q->st.curr_frame, "existence_error", "source_sink");
+		}
+
+		free(s);
+		return pl_success;
+	}
+
 	LIST_HANDLER(l);
 
 	while (is_list(l) && !g_tpl_interrupt) {
@@ -1664,7 +1678,7 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 		h = deref(q, h, l_ctx);
 		pl_idx_t h_ctx = q->latest_ctx;
 
-		if (is_iso_list(h)) {
+		if (is_list(h)) {
 			if (consultall(q, h, h_ctx) != pl_success)
 				return pl_failure;
 		} else {
