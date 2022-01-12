@@ -838,7 +838,8 @@ static db_entry* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consu
 		}
 	}
 
-	pr->is_processed = false;
+	if (!pr->is_dynamic)
+		pr->is_processed = false;
 
 	if (m->prebuilt)
 		pr->is_prebuilt = true;
