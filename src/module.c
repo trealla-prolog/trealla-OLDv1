@@ -836,8 +836,9 @@ static db_entry* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consu
 			push_property(m, GET_STR(m, c), c->arity, "public");
 			pr->is_public = true;
 		}
-
 	}
+
+	pr->is_processed = false;
 
 	if (m->prebuilt)
 		pr->is_prebuilt = true;
@@ -1032,6 +1033,7 @@ bool unload_file(module *m, const char *filename)
 
 				dbe->dirty = pr->dirty_list;
 				pr->dirty_list = dbe;
+				pr->is_processed = false;
 			}
 		}
 

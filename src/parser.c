@@ -851,6 +851,12 @@ static void xref_cell(parser *p, clause *r, cell *c, predicate *parent)
 
 void xref_rule(parser *p, clause *r, predicate *parent)
 {
+	r->arg1_is_unique = false;
+	r->arg2_is_unique = false;
+	r->arg3_is_unique = false;
+	r->is_unique = false;
+	r->is_tail_rec = false;
+
 	cell *head = get_head(r->cells);
 	cell *c = head;
 	uint64_t mask = 0;
@@ -880,6 +886,8 @@ void xref_rule(parser *p, clause *r, predicate *parent)
 
 	for (pl_idx_t i = 0; i < r->cidx; i++) {
 		cell *c = r->cells + i;
+		c->flags &= ~FLAG_TAIL;
+		c->flags &= ~FLAG_TAIL_REC;
 
 		if (!is_literal(c))
 			continue;
