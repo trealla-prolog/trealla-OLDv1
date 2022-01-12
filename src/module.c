@@ -993,6 +993,7 @@ bool unload_file(module *m, const char *filename)
 	size_t len = strlen(filename);
 	char *tmpbuf = malloc(len + 20);
 	memcpy(tmpbuf, filename, len+1);
+	strcat(tmpbuf, ".pl");
 
 	if (tmpbuf[0] == '~') {
 		const char *ptr = getenv("HOME");
@@ -1008,7 +1009,6 @@ bool unload_file(module *m, const char *filename)
 
 	if (!(realbuf = realpath(tmpbuf, NULL))) {
 		strcpy(tmpbuf, filename);
-		strcat(tmpbuf, ".pl");
 
 		if (!(realbuf = realpath(tmpbuf, NULL))) {
 			free(tmpbuf);
