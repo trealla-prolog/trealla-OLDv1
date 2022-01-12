@@ -222,12 +222,16 @@ static void consultall(parser *p, cell *l)
 
 	while (is_list(l) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(l);
-		char *s = DUP_SLICE(p, h);
 
-		if (!load_file(p->m, s))
-			fprintf(stdout, "Error: file not found: '%s'\n", s);
+		if (is_iso_list(h))
+			consultall(p, h);
+		else {
+			char *s = GET_STR(p, h);
 
-		free(s);
+			if (!load_file(p->m, s))
+				fprintf(stdout, "Error: file not found: '%s'\n", s);
+		}
+
 		l = LIST_TAIL(l);
 	}
 }

@@ -1655,23 +1655,34 @@ static bool any_outstanding_choices(query *q)
 	return q->cp > 0;
 }
 
-static pl_status consultall(query *q, cell *l)
+static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 {
 	LIST_HANDLER(l);
 
 	while (is_list(l) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(l);
-		char *s = DUP_SLICE(q, h);
+		h = deref(q, h, l_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
 
-		if (!load_file(q->p->m, s)) {
-			cell tmp;
-			make_cstring(&tmp, s);
+		if (is_iso_list(h)) {
+			if (consultall(q, h, h_ctx) != pl_success)
+				return pl_failure;
+		} else {
+			char *s = DUP_SLICE(q, h);
+
+			if (!load_file(q->p->m, s)) {
+				cell tmp;
+				make_cstring(&tmp, s);
+				free(s);
+				return throw_error(q, &tmp, q->st.curr_frame, "existence_error", "source_sink");
+			}
+
 			free(s);
-			return throw_error(q, &tmp, q->st.curr_frame, "existence_error", "source_sink");
 		}
 
-		free(s);
 		l = LIST_TAIL(l);
+		l = deref(q, l, l_ctx);
+		l_ctx = q->latest_ctx;
 	}
 
 	return pl_success;
@@ -1746,7 +1757,7 @@ pl_status start(query *q)
 
 			proceed(q);
 		} else if (is_list(q->st.curr_cell)) {
-			consultall(q, q->st.curr_cell);
+			consultall(q, q->st.curr_cell, q->st.curr_frame);
 			proceed(q);
 		} else {
 			if (!is_callable(q->st.curr_cell)) {
