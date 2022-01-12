@@ -567,10 +567,15 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 		p->error = false;
 
 		if (!isatty(fileno(p->fp))) {
+			void *save_fp = p->fp;
+			p->fp = NULL;
+
 			while (get_token(p, false)
-				&& p->token[0] && strcmp(p->token, ".")
-				&& !feof(p->fp) && !ferror(p->fp))
+				&& p->token[0] && strcmp(p->token, "."))
 				;
+
+			p->fp = save_fp;
+			p->did_getline = false;
 		}
 
 		cell tmp;
