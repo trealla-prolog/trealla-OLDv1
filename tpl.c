@@ -156,7 +156,7 @@ int main(int ac, char *av[])
 	//bool did_load = false;
 	int i, do_goal = 0, do_lib = 0;
 	int version = 0, quiet = 0, daemon = 0;
-	bool ns = false;
+	bool ns = false, no_res = false;
 	void *pl = pl_create();
 	if (!pl)
 	{
@@ -205,7 +205,6 @@ int main(int ac, char *av[])
 
 	signal(SIGPIPE, SIG_IGN);
 	const char *goal = NULL;
-	bool no_res = false;
 
 	for (i = 1; i < ac; i++) {
 		if (!strcmp(av[i], "--"))

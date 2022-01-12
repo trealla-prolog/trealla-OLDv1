@@ -1005,10 +1005,11 @@ bool unload_file(module *m, const char *filename)
 		}
 	}
 
+	char *savebuf = strdup(tmpbuf);
 	char *realbuf = NULL;
 
 	if (!(realbuf = realpath(tmpbuf, NULL))) {
-		strcpy(tmpbuf, filename);
+		strcpy(tmpbuf, savebuf);
 
 		if (!(realbuf = realpath(tmpbuf, NULL))) {
 			free(tmpbuf);
@@ -1016,6 +1017,7 @@ bool unload_file(module *m, const char *filename)
 		}
 	}
 
+	free(savebuf);
 	free(tmpbuf);
 	filename = realbuf;
 
@@ -1143,13 +1145,13 @@ module *load_file(module *m, const char *filename)
 		}
 	}
 
+	char *savebuf = strdup(tmpbuf);
 	char *realbuf = NULL;
-
 	strcpy(tmpbuf, filename);
 	strcat(tmpbuf, ".pl");
 
 	if (!(realbuf = realpath(tmpbuf, NULL))) {
-		strcpy(tmpbuf, filename);
+		strcpy(tmpbuf, savebuf);
 
 		if (!(realbuf = realpath(tmpbuf, NULL))) {
 			free(tmpbuf);
@@ -1157,6 +1159,7 @@ module *load_file(module *m, const char *filename)
 		}
 	}
 
+	free(savebuf);
 	free(tmpbuf);
 
 	if (is_loaded(m, realbuf))
