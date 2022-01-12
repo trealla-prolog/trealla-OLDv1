@@ -146,6 +146,10 @@ The default path to the library is relative to the executable location.
 
 The file *~/.tplrc* is consulted on startup unless the *-f* option is present.
 
+When consulting, reconsulting and deconsulting files the *.pl* version
+of the filename is always preferred (if not specified) when looking for a
+file.
+
 
 Acknowledgements
 ================
