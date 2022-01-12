@@ -1145,9 +1145,11 @@ module *load_file(module *m, const char *filename)
 
 	char *realbuf = NULL;
 
+	strcpy(tmpbuf, filename);
+	strcat(tmpbuf, ".pl");
+
 	if (!(realbuf = realpath(tmpbuf, NULL))) {
 		strcpy(tmpbuf, filename);
-		strcat(tmpbuf, ".pl");
 
 		if (!(realbuf = realpath(tmpbuf, NULL))) {
 			free(tmpbuf);
