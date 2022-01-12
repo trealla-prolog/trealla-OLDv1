@@ -1,0 +1,51 @@
+{
+  "uid" : "96b488fc467eb77a",
+  "name" : "erase_1_01",
+  "fullName" : "erase_1_01::tests",
+  "historyId" : "erase_1_01::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/clause_references/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/clause_references/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/clause_references/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/clause_references/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "114-121"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/d2a259216343ed18f0965e5c0d52a72aa0eb1950/tests/prolog/predicates/clause_references/tests.lgt#L114"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "96b488fc467eb77a.json",
+  "parameterValues" : [ "predicates/clause_references/tests.lgt", "114-121", "https://github.com/LogtalkDotOrg/logtalk3/tree/d2a259216343ed18f0965e5c0d52a72aa0eb1950/tests/prolog/predicates/clause_references/tests.lgt#L114" ]
+}
