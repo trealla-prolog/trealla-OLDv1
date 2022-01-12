@@ -566,8 +566,12 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 	if (p->error) {
 		p->error = false;
 
-		while (get_token(p, false) && p->token[0] && strcmp(p->token, "."))
-			;
+		if (!isatty(fileno(p->fp))) {
+			while (get_token(p, false)
+				&& p->token[0] && strcmp(p->token, ".")
+				&& !feof(p->fp) && !ferror(p->fp))
+				;
+		}
 
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
