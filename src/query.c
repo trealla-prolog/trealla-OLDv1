@@ -274,7 +274,7 @@ static void find_key(query *q, predicate *pr, cell *key)
 		return;
 	}
 
-	key = deep_clone_to_tmp(q, key, q->st.curr_frame);
+	key = deep_clone_to_heap(q, key, q->st.curr_frame);
 
 	if (is_all_vars(key)) {
 		q->st.curr_clause = pr->head;
