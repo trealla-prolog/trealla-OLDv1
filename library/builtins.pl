@@ -358,7 +358,7 @@ sort_merge_(Xs, [], Xs).
 
 sort_split_('-', _, _) :-
 	throw(error(instantiation_error, sort/2)).
-sort_split_([], [], []).
+sort_split_([], [], []) :- !.
 sort_split_([X| Xs], [X| Ys], Zs) :-
 	sort_split_(Xs, Zs, Ys).
 

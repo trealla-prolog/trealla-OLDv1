@@ -990,6 +990,37 @@ module *load_text(module *m, const char *src, const char *filename)
 	return save_m;
 }
 
+static bool unload_realfile(module *m, const char *filename)
+{
+	for (predicate *pr = m->head; pr; pr = pr->next) {
+		for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
+			if (dbe->cl.ugen_erased)
+				continue;
+
+			if (dbe->filename && !strcmp(dbe->filename, filename)) {
+				if (!retract_from_db(m, dbe))
+					continue;
+
+				dbe->dirty = pr->dirty_list;
+				pr->dirty_list = dbe;
+				pr->is_processed = false;
+			}
+		}
+
+		if (!pr->cnt) {
+			m_destroy(pr->idx_save);
+			m_destroy(pr->idx);
+			pr->idx_save = pr->idx = NULL;
+
+			if (!pr->is_multifile && !pr->is_dynamic)
+				pr->is_abolished = true;
+		}
+	}
+
+	set_unloaded(m, filename);
+	return true;
+}
+
 bool unload_file(module *m, const char *filename)
 {
 	size_t len = strlen(filename);
@@ -1022,35 +1053,7 @@ bool unload_file(module *m, const char *filename)
 	free(savebuf);
 	free(tmpbuf);
 	filename = realbuf;
-
-	for (predicate *pr = m->head; pr; pr = pr->next) {
-		for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
-			if (dbe->cl.ugen_erased)
-				continue;
-
-			if (dbe->filename && !strcmp(dbe->filename, filename)) {
-				if (!retract_from_db(m, dbe))
-					continue;
-
-				dbe->dirty = pr->dirty_list;
-				pr->dirty_list = dbe;
-				pr->is_processed = false;
-			}
-		}
-
-		if (!pr->cnt) {
-			m_destroy(pr->idx_save);
-			m_destroy(pr->idx);
-			pr->idx_save = pr->idx = NULL;
-
-			if (!pr->is_multifile && !pr->is_dynamic)
-				pr->is_abolished = true;
-		}
-	}
-
-	set_unloaded(m, filename);
-	free(realbuf);
-	return true;
+	return unload_realfile(m, filename);
 }
 
 module *load_fp(module *m, FILE *fp, const char *filename)
@@ -1113,7 +1116,7 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 	m->filename = save_filename;
 
 	if (!ok)
-		unload_file(m, filename);
+		unload_realfile(m, filename);
 
 	return save_m;
 }
