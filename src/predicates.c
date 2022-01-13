@@ -7731,7 +7731,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 		src[len] = '\0';
 	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx, false)) > 0) {
 		if (!len) {
-			return throw_error(q, p_chars, p_chars_ctx, "type_error", "atom");
+			return throw_error(q, p_chars, p_chars_ctx, "type_error", "chars");
 		}
 
 		src = chars_list_to_string(q, p_chars, p_chars_ctx, len);
@@ -7775,7 +7775,7 @@ static USE_RESULT pl_status fn_read_term_from_atom_3(query *q)
 
 		src = chars_list_to_string(q, p_chars, p_chars_ctx, len);
 	} else
-		return throw_error(q, p_chars, p_chars_ctx, "type_error", "chars");
+		return throw_error(q, p_chars, p_chars_ctx, "type_error", "atom");
 
 	const char *end_ptr = src + strlen(src) - 1;
 
