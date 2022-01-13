@@ -37,6 +37,7 @@ bool is_valid_list_up_to(query *q, cell *p1, pl_idx_t p1_ctx, bool allow_partial
 bool is_valid_list(query *q, cell *p1, pl_idx_t p1_ctx, bool allow_partials);
 size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, bool *has_var);
 size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes);
+char *chars_list_to_string(query *q, cell *p_chars, pl_idx_t p_chars_ctx, size_t len);
 
 unsigned create_vars(query *q, unsigned nbr);
 int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);

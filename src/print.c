@@ -764,6 +764,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		cell *tail = LIST_TAIL(c);
 		tail = running ? deref(q, tail, c_ctx) : tail;
 		c_ctx = q->latest_ctx;
+		size_t tmp_len;
 
 		if (is_literal(tail) && !is_structure(tail)) {
 			src = GET_STR(q, tail);
@@ -774,27 +775,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				if (res < 0) return -1;
 				dst += res;
 			}
-		} else if (scan_is_chars_list(q, tail, c_ctx, false) > 1) {
-			cell *l = tail;
-			dst += snprintf(dst, dstlen, "%s", "|\"");
-			unsigned cnt = 0;
-			LIST_HANDLER(l);
-
-			while (is_list(l)) {
-				if ((cnt++ > MAX_ELEMENTS) && (running < 0)) {
-					dst += snprintf(dst, dstlen, "%s", " ...");
-					break;
-				}
-
-				cell *h = LIST_HEAD(l);
-				cell *c = running ? deref(q, h, c_ctx) : h;
-				dst += formatted(dst, dstlen, GET_STR(q, c), LEN_STR(q, c), true);
-				l = LIST_TAIL(l);
-				l = running ? deref(q, l, c_ctx) : l;
-				c_ctx = q->latest_ctx;
-			}
-
-			dst += snprintf(dst, dstlen, "%s", "\"");
+		} else if ((tmp_len = scan_is_chars_list(q, tail, c_ctx, false)) > 1) {
+			char *tmp_src = chars_list_to_string(q, tail, c_ctx, tmp_len);
+			dst += snprintf(dst, dstlen, "|\"%s\"", tmp_src);
+			free(tmp_src);
 			print_list++;
 		} else if (is_iso_list(tail)) {
 			dst += snprintf(dst, dstlen, "%s", ",");

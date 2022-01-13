@@ -169,7 +169,7 @@ static void make_smalln(cell *tmp, const char *s, size_t n)
 	tmp->chr_len = n;
 }
 
-static char *chars_list_to_string(query *q, cell *p_chars, pl_idx_t p_chars_ctx, size_t len)
+char *chars_list_to_string(query *q, cell *p_chars, pl_idx_t p_chars_ctx, size_t len)
 {
 	char *tmp = malloc(len+1);
 	ensure(tmp);
