@@ -2249,8 +2249,14 @@ bool get_token(parser *p, int last_op)
 		return true;
 	}
 
-	if (!(src = eat_space(p)))
+	if (!(src = eat_space(p))) {
+		if (DUMP_ERRS || !p->do_read_term)
+			fprintf(stdout, "Error: syntax error, incomplete statement, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+
+		p->error_desc = "cincomplete_statement";
+		p->error = true;
 		return false;
+	}
 
 	if (!*src) {
 		p->srcptr = (char*)src;
@@ -2501,17 +2507,14 @@ bool get_token(parser *p, int last_op)
 			p->srcptr = (char*)src;
 			src = eat_space(p);
 
-		if (!src) {
-			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, incomplete statement, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+			if (!src) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, incomplete statement, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
-			p->error_desc = "cincomplete_statement";
-			p->error = true;
-			return false;
-		}
-
-			if (!src)
+				p->error_desc = "cincomplete_statement";
+				p->error = true;
 				return false;
+			}
 
 			if (!p->is_op && (*src == '(')) {
 				if (DUMP_ERRS || !p->do_read_term)
