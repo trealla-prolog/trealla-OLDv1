@@ -2018,6 +2018,15 @@ static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 	p->srcptr = ++s;
 	s = eat_space(p);
 
+	if (!s) {
+		if (DUMP_ERRS || !p->do_read_term)
+			fprintf(stdout, "Error: syntax error, incomplete statement, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+
+		p->error_desc = "cincomplete_statement";
+		p->error = true;
+		return false;
+	}
+
 	if (*s != rh) {
 		if (p->did_getline) {
 			size_t len1 = strlen(dup_src);
@@ -2267,6 +2276,15 @@ bool get_token(parser *p, int last_op)
 		p->srcptr = (char*)src;
 		src = eat_space(p);
 
+		if (!src) {
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Error: syntax error, incomplete statement, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+
+			p->error_desc = "cincomplete_statement";
+			p->error = true;
+			return false;
+		}
+
 		if (isdigit(*src))
 			neg = true;
 		else
@@ -2482,6 +2500,18 @@ bool get_token(parser *p, int last_op)
 		if (iswspace(ch) && strcmp(p->token, ".")) {
 			p->srcptr = (char*)src;
 			src = eat_space(p);
+
+		if (!src) {
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Error: syntax error, incomplete statement, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+
+			p->error_desc = "cincomplete_statement";
+			p->error = true;
+			return false;
+		}
+
+			if (!src)
+				return false;
 
 			if (!p->is_op && (*src == '(')) {
 				if (DUMP_ERRS || !p->do_read_term)
