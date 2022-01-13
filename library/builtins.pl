@@ -580,7 +580,6 @@ chars_base64(Plain, Base64,_) :- base64(Plain, Base64).
 chars_urlenc(Plain, Url, _) :- urlenc(Plain, Url).
 term_to_atom(T, S) :- write_term_to_chars(S, T, []).
 write_term_to_atom(S, T, Opts) :- write_term_to_chars(S, Opts, T).
-read_term_from_atom(S, T, Opts) :- read_term_from_chars(S, Opts, T).
 absolute_file_name(R, A) :- absolute_file_name(R, A, []).
 client(U, H, P, S) :- client(U,H,P,S,[]).
 server(H, S) :- server(H,S,[]).
