@@ -35,6 +35,7 @@ pl_status throw_error2(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 
 bool is_valid_list_up_to(query *q, cell *p1, pl_idx_t p1_ctx, bool allow_partials, int n);
 bool is_valid_list(query *q, cell *p1, pl_idx_t p1_ctx, bool allow_partials);
+size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, bool *has_var);
 size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes);
 
 unsigned create_vars(query *q, unsigned nbr);

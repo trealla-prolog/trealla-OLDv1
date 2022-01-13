@@ -372,8 +372,9 @@ bool is_valid_list_up_to(query *q, cell *p1, pl_idx_t p1_ctx, bool allow_partial
 	return is_nil(p1) || (allow_partials && is_variable(p1));
 }
 
-size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes)
+size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, bool *has_var)
 {
+	*has_var = false;
 	pl_idx_t save_ctx = q ? q->latest_ctx : l_ctx;
 	size_t is_chars_list = 0;
 	LIST_HANDLER(l);
@@ -384,6 +385,12 @@ size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes)
 		&& !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(l);
 		cell *c = q ? deref(q, h, l_ctx) : h;
+
+		if (is_variable(c)) {
+			if (q) q->latest_ctx = save_ctx;
+			*has_var = true;
+			return 0;
+		}
 
 		if (is_integer(c) && !allow_codes) {
 			is_chars_list = 0;
@@ -417,15 +424,22 @@ size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes)
 		cnt++;
 	}
 
-	if (is_variable(l))
+	if (is_variable(l)) {
 		is_chars_list = 0;
-	else if (is_string(l))
+		*has_var = true;
+	} else if (is_string(l))
 		;
 	else if (!is_literal(l) || (l->val_off != g_nil_s))
 		is_chars_list = 0;
 
 	if (q) q->latest_ctx = save_ctx;
 	return is_chars_list;
+}
+
+size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes)
+{
+	bool has_var;
+	return scan_is_chars_list2(q, l, l_ctx, allow_codes, &has_var);
 }
 
 static void unwind_trail(query *q, const choice *ch)

@@ -7681,6 +7681,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_2(query *q)
 	stream *str = &q->pl->streams[n];
 	char *src;
 	size_t len;
+	bool has_var;
 
 	if (is_atom(p_chars) && !is_string(p_chars)) {
 		if (!strcmp(GET_STR(q, p_chars), "[]")) {
@@ -7688,20 +7689,24 @@ static USE_RESULT pl_status fn_read_term_from_chars_2(query *q)
 			make_literal(&tmp, g_eof_s);
 			return unify(q, p_term, p_term_ctx, &tmp, q->st.curr_frame);
 		} else
-			return throw_error(q, p_chars, p_chars_ctx, "type_error", "chars");
+			return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
 	} else if (is_string(p_chars)) {
 		len = LEN_STR(q, p_chars);
 		src = malloc(len+1);
 		may_ptr_error(src);
 		memcpy(src, GET_STR(q, p_chars), len);
 		src[len] = '\0';
-	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx, false)) > 0) {
+	} else if ((len = scan_is_chars_list2(q, p_chars, p_chars_ctx, false, &has_var)) > 0) {
 		if (!len)
-			return throw_error(q, p_chars, p_chars_ctx, "type_error", "chars");
+			return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
 
 		src = chars_list_to_string(q, p_chars, p_chars_ctx, len);
-	} else
-		return throw_error(q, p_chars, p_chars_ctx, "type_error", "chars");
+	} else {
+		if (has_var)
+			return throw_error(q, p_chars, p_chars_ctx, "instantiation_error", "variable");
+
+		return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
+	}
 
 	const char *end_ptr = src + strlen(src) - 1;
 
@@ -7725,9 +7730,9 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 	GET_NEXT_ARG(p_opts,list_or_nil);
 	int n = q->pl->current_input;
 	stream *str = &q->pl->streams[n];
-
 	char *src;
 	size_t len;
+	bool has_var;
 
 	if (is_atom(p_chars) && !is_string(p_chars)) {
 		if (!strcmp(GET_STR(q, p_chars), "[]")) {
@@ -7735,20 +7740,24 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 			make_literal(&tmp, g_eof_s);
 			return unify(q, p_term, p_term_ctx, &tmp, q->st.curr_frame);
 		} else
-			return throw_error(q, p_chars, p_chars_ctx, "type_error", "chars");
+			return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
 	} else if (is_string(p_chars)) {
 		len = LEN_STR(q, p_chars);
 		src = malloc(len+1);
 		may_ptr_error(src);
 		memcpy(src, GET_STR(q, p_chars), len);
 		src[len] = '\0';
-	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx, false)) > 0) {
+	} else if ((len = scan_is_chars_list2(q, p_chars, p_chars_ctx, false, &has_var)) > 0) {
 		if (!len)
-			return throw_error(q, p_chars, p_chars_ctx, "type_error", "chars");
+			return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
 
 		src = chars_list_to_string(q, p_chars, p_chars_ctx, len);
-	} else
-		return throw_error(q, p_chars, p_chars_ctx, "type_error", "chars");
+	} else {
+		if (has_var)
+			return throw_error(q, p_chars, p_chars_ctx, "instantiation_error", "variable");
+
+		return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
+	}
 
 	const char *end_ptr = src + strlen(src) - 1;
 
