@@ -1,0 +1,41 @@
+{
+  "uid" : "2b5ec779eff5fd6f",
+  "name" : "discontiguous_1",
+  "fullName" : "discontiguous_1::tests",
+  "historyId" : "discontiguous_1::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "directives/discontiguous_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "directives/discontiguous_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "directives/discontiguous_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : true,
+  "retry" : true,
+  "extra" : {
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "2b5ec779eff5fd6f.json",
+  "parameterValues" : [ ]
+}

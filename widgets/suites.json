@@ -1,114 +1,114 @@
 {
-  "total" : 184,
+  "total" : 177,
   "items" : [ {
-    "uid" : "09812cef55155aac413b0e337d25177f",
-    "name" : "unicode/builtins/tests.lgt::tests",
+    "uid" : "21ff05688ac7c7a65af1611086e5abe1",
+    "name" : "control/catch_3/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 136,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 136
+      "total" : 1
     }
   }, {
-    "uid" : "6323f92028da534ce9e9b896fe8a8e78",
-    "name" : "unbounded/tests.lgt::tests",
+    "uid" : "f79e79716635533de165983b0cb332b7",
+    "name" : "predicates/setup_call_cleanup_3/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 96,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 96
+      "total" : 1
     }
   }, {
-    "uid" : "2fa097f54728c3cdaa06f09f04fafff8",
-    "name" : "predicates/write_term_3/tests.lgt::tests",
+    "uid" : "e932b067ec6507437bc7f6f91a7edce2",
+    "name" : "syntax/double_quoted_terms/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 94,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 94
+      "total" : 1
     }
   }, {
-    "uid" : "e96278ed9288bacdb418cbcc943c2f26",
-    "name" : "predicates/stream_property_2/tests.lgt::tests",
+    "uid" : "9358c2e25e7e1b088a85f74d7684a70d",
+    "name" : "predicates/subsumes_term_2/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 75,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 75
+      "total" : 1
     }
   }, {
-    "uid" : "c420a856533f5147a2dfa28c1c33fd98",
-    "name" : "predicates/format_3/tests_atom.lgt::tests_atom",
+    "uid" : "911b4cde90c22dfd46d05a09a800b432",
+    "name" : "predicates/between_3/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 68,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 68
+      "total" : 1
     }
   }, {
-    "uid" : "0da529a0a6949d3d5150b9a550fbf922",
-    "name" : "predicates/format_3/tests_chars.lgt::tests_chars",
+    "uid" : "1a382e72d3ac06a9cc7402c37b1a00c4",
+    "name" : "predicates/nl_1/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 68,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 68
+      "total" : 1
     }
   }, {
-    "uid" : "927c073078ff64d83ef2195bbab9ac0d",
-    "name" : "predicates/format_3/tests_codes.lgt::tests_codes",
+    "uid" : "a8091a1c412eb3beb944350de8af0e96",
+    "name" : "unicode/syntax/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 68,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 68
+      "total" : 1
     }
   }, {
-    "uid" : "fb4ba390283f9e15d7ba85c1c2a4c1a4",
-    "name" : "predicates/format_2/tests_atom.lgt::tests_atom",
+    "uid" : "f7ce4dccb2ceb0e4d0fd328cb259aad9",
+    "name" : "predicates/arg_3/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 65,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 65
+      "total" : 1
     }
   }, {
-    "uid" : "35ce7c65630bce1fdc47cff730339d9c",
-    "name" : "predicates/format_2/tests_codes.lgt::tests_codes",
+    "uid" : "6322d084442b9243f3c9d853f64fed03",
+    "name" : "syntax/curly_terms/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 65,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 65
+      "total" : 1
     }
   }, {
-    "uid" : "430a68e04dd3714567bd0708385427c4",
-    "name" : "predicates/format_2/tests_chars.lgt::tests_chars",
+    "uid" : "c82980285e89679372b26db840ecb7ad",
+    "name" : "predicates/set_prolog_flag_2/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 65,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 65
+      "total" : 1
     }
   } ]
 }

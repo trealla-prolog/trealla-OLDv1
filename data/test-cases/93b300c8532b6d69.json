@@ -1,0 +1,61 @@
+{
+  "uid" : "93b300c8532b6d69",
+  "name" : "op_3",
+  "fullName" : "op_3::tests",
+  "historyId" : "op_3::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "directives/op_3/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "directives/op_3/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "directives/op_3/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ {
+      "uid" : "6d226e782565849c",
+      "status" : "failed",
+      "statusDetails" : "Broken",
+      "time" : {
+        "duration" : 0
+      }
+    }, {
+      "uid" : "4c08befd18f02f8a",
+      "status" : "failed",
+      "statusDetails" : "Broken",
+      "time" : {
+        "duration" : 0
+      }
+    } ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "93b300c8532b6d69.json",
+  "parameterValues" : [ ]
+}
