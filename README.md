@@ -270,7 +270,7 @@ Non-standard predicates
 	atomic_list_concat/2	    # atomic_list_concat(L,Atom)
 	atomic_list_concat/3	    # atomic_list_concat(L,Sep,Atom)
 	read_term_from_chars/2	    # read_term_from_chars(+chars,-Term)
-	read_term_from_chars/3	    # read_term_from_chars(+chars,+opts,-Term)
+	read_term_from_chars/3	    # read_term_from_chars(+chars,-Term,+opts)
 	write_term_to_chars/3	    # write_term_to_chars(+rule,+opts,-Cs)
 	write_canonical_to_chars/3  # write_term_to_chars(+rule,+opts,-Cs)
 	chars_base64/3              # currently options are ignored
