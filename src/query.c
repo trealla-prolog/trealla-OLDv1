@@ -1212,6 +1212,11 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 			} else
 				ok = pl_success;
 
+			if (ok == pl_success) {
+				q->pl->prof_tot++;
+				r->prof_cnt++;
+			}
+
 			return ok;
 		}
 
@@ -1297,8 +1302,11 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 		may_error(try_me(q, r->nbr_vars));
 		q->tot_matches++;
 
-		if (unify(q, p1, p1_ctx, head, q->st.fp))
+		if (unify(q, p1, p1_ctx, head, q->st.fp)) {
+			q->pl->prof_tot++;
+			r->prof_cnt++;
 			return pl_success;
+		}
 
 		undo_me(q);
 	}
@@ -1359,8 +1367,6 @@ static USE_RESULT pl_status match_head(query *q)
 			continue;
 
 		clause *r = &q->st.curr_clause->cl;
-		q->pl->prof_tot++;
-		r->prof_cnt++;
 		cell *head = get_head(r->cells);
 		may_error(try_me(q, r->nbr_vars));
 
@@ -1370,6 +1376,8 @@ static USE_RESULT pl_status match_head(query *q)
 				return pl_error;
 			}
 
+			q->pl->prof_tot++;
+			r->prof_cnt++;
 			commit_me(q, r);
 			return pl_success;
 		}
