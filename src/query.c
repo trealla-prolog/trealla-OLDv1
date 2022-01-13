@@ -1359,6 +1359,8 @@ static USE_RESULT pl_status match_head(query *q)
 			continue;
 
 		clause *r = &q->st.curr_clause->cl;
+		q->pl->prof_tot++;
+		r->prof_cnt++;
 		cell *head = get_head(r->cells);
 		may_error(try_me(q, r->nbr_vars));
 

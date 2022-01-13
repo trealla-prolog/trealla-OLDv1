@@ -373,7 +373,7 @@ typedef struct {
 } uuid;
 
 struct clause_ {
-	uint64_t ugen_created, ugen_erased;
+	uint64_t ugen_created, ugen_erased, prof_cnt;
 	pl_idx_t nbr_cells, cidx;
 	uint32_t nbr_vars;
 	bool is_first_cut:1;
@@ -553,11 +553,10 @@ struct query_ {
 	mpz_t tmp_ival;
 	prolog_state st;
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
-	uint64_t step, qid;
+	uint64_t step, qid,tmo_msecs;
 	uint64_t time_started, get_started;
 	uint64_t cpu_started, cpu_last_started;
 	unsigned max_depth;
-	uint64_t tmo_msecs;
 	int nv_start;
 	pl_idx_t cp, tmphp, latest_ctx, popp, variable_names_ctx;
 	pl_idx_t frames_size, slots_size, trails_size, choices_size;
@@ -677,10 +676,10 @@ struct prolog_ {
 	module *modules;
 	module *system_m, *user_m, *curr_m, *dcgs;
 	pl_idx_t tab1[64000], tab2[64000], tab3[64000], tab4[64000], tab5[64000];
-	uint64_t s_last, s_cnt, seed;
 	map *symtab, *funtab, *keyval;
 	char *pool;
-	uint64_t ugen;
+	uint64_t s_last, s_cnt, seed;
+	uint64_t ugen, prof_tot;
 	pl_idx_t pool_offset, pool_size;
 	unsigned tab_idx, varno;
 	uint8_t current_input, current_output, current_error;

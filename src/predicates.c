@@ -6172,12 +6172,17 @@ static USE_RESULT pl_status fn_sys_assertz_2(query *q)
 	return do_assertz_2(q);
 }
 
-static void save_db(FILE *fp, query *q, int logging)
+static void save_db(FILE *fp, query *q, bool logging, bool profiling)
 {
 	q->listing = true;
 
+	if (profiling)
+		fprintf(fp, "profile([\n");
+
+	unsigned cnt = 0;
+
 	for (predicate *pr = q->st.m->head; pr && !g_tpl_interrupt; pr = pr->next) {
-		if (pr->is_prebuilt)
+		if (pr->is_prebuilt && !profiling)
 			continue;
 
 		if (logging && !pr->is_persist)
@@ -6185,7 +6190,7 @@ static void save_db(FILE *fp, query *q, int logging)
 
 		const char *src = GET_STR(q, &pr->key);
 
-		if (src[0] == '$')
+		if ((src[0] == '$') && !profiling)
 			continue;
 
 		for (db_entry *dbe = pr->head; dbe && !g_tpl_interrupt; dbe = dbe->next) {
@@ -6195,7 +6200,14 @@ static void save_db(FILE *fp, query *q, int logging)
 			if (logging)
 				fprintf(fp, "z_(");
 
-			print_term(q, fp, dbe->cl.cells, q->st.curr_frame, 0);
+			if (profiling) {
+				if (dbe->cl.prof_cnt) {
+					if (cnt) fprintf(fp, ",\n");
+					fprintf(fp, "  '%s'/%u, %llu, %.2f", GET_STR(q, &pr->key), pr->key.arity, (unsigned long long)dbe->cl.prof_cnt, 100.0*dbe->cl.prof_cnt/q->pl->prof_tot);
+					cnt++;
+				}
+			} else
+				print_term(q, fp, dbe->cl.cells, q->st.curr_frame, 0);
 
 			if (logging) {
 				char tmpbuf[256];
@@ -6203,16 +6215,38 @@ static void save_db(FILE *fp, query *q, int logging)
 				fprintf(fp, ",'%s')", tmpbuf);
 			}
 
-			fprintf(fp, ".\n");
+			if (profiling) {
+				if (dbe->cl.prof_cnt)
+					fprintf(fp, ")");
+			} else
+				fprintf(fp, ".\n");
 		}
 	}
+
+	if (profiling)
+		fprintf(fp, "\n]).\n");
 
 	q->listing = false;
 }
 
 static USE_RESULT pl_status fn_listing_0(query *q)
 {
-	save_db(stdout, q, 0);
+	save_db(stdout, q, false, false);
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_profile_0(query *q)
+{
+	save_db(stdout, q, false, true);
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_profile_1(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	FILE *fp = fopen(GET_STR(q, p1), "w");
+	if (fp) save_db(fp, q, false, true);
+	fclose(fp);
 	return pl_success;
 }
 
@@ -10274,7 +10308,7 @@ static USE_RESULT pl_status fn_sys_db_save_0(query *q)
 	snprintf(filename2, sizeof(filename2), "%s.TMP", q->st.m->name);
 	FILE *fp = fopen(filename2, "wb");
 	may_ptr_error(fp);
-	save_db(q->st.m->fp, q, 1);
+	save_db(q->st.m->fp, q, true, false);
 	fclose(fp);
 	remove(filename);
 	rename(filename2, filename);
@@ -11662,6 +11696,8 @@ static const struct builtins g_predicates_other[] =
 	{"using", 0, fn_using_0, NULL, false},
 	{"load_files", 2, fn_load_files_2, NULL, false},
 	{"unload_files", 1, fn_unload_files_1, NULL, false},
+	{"profile", 0, fn_profile_0, NULL, false},
+	{"profile", 1, fn_profile_1, NULL, false},
 	{"listing", 0, fn_listing_0, NULL, false},
 	{"listing", 1, fn_listing_1, NULL, false},
 	{"time", 1, fn_time_1, NULL, false},
