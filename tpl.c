@@ -244,6 +244,7 @@ int main(int ac, char *av[])
 			goal = av[i];
 		} else {
 			if (!pl_consult(pl, av[i])) {
+				fprintf(stderr, "Error: error(extistence_error(source_sink,'%s'),consult/1)\n", av[i]);
 				pl_destroy(pl);
 				return 1;
 			}
