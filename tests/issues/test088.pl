@@ -9,5 +9,5 @@ X::Y :-
 	X = c,
 	Y = d.
 
-main :- X::Y, writeln(['X=',X,'Y=',Y]), fail.
+main :- X::Y, writeq(['X=',X,'Y=',Y]), nl, fail.
 main.
