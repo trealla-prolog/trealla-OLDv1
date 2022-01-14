@@ -1,6 +1,8 @@
 :- use_module(library(format)).
 :- use_module(library(http)).
 
+writeln(T) :- writeq(T), nl.
+
 test1 :-
 	\+ \+ true,
 	writeln(ok1).

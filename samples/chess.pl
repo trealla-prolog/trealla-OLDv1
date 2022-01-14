@@ -174,7 +174,7 @@ alpha_beta(Board, Color, 0, Alpha, Beta, BestMove, MoveVal) :-
     % write(' val: '), write(MoveVal), nl.
 alpha_beta(Board, Color, Depth, Alpha, Beta, BestMove, MoveVal) :-
     collect_moves(Board, Color, MoveList), !,
-    %writeln(MoveList), nl,
+    %writeq(MoveList), nl,
     find_best(Board, Color, MoveList, Depth, Alpha, Beta, BestMove, MoveVal).
 
 find_best(Board, Color, [move(From, To)|Moves], Depth, Alpha, Beta,

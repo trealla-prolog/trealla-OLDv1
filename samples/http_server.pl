@@ -13,7 +13,7 @@ main :-
 	accept(S, C),
 		fork,
 		http_request(C, Method, Path, Ver, Hdrs),
-		writeln([Method, Path, Ver, Hdrs]),
+		writeq([Method, Path, Ver, Hdrs]), nl,
 		handle(C, Method, Path, Ver, Hdrs),
 		close(C).
 

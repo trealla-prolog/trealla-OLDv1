@@ -1,5 +1,7 @@
 :-use_module(library(auth)).
 
+writeln(T) :- writeq(T), nl.
+
 test1a :-
 	auth:adduser(user1,pass1),
 	writeln('OK').
