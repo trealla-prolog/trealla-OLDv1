@@ -378,7 +378,7 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 				}
 			}
 
-			if (both) {
+			if (both == 2) {
 				return pl_success;
 			}
 		}
