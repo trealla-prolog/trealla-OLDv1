@@ -764,7 +764,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		cell *tail = LIST_TAIL(c);
 		tail = running ? deref(q, tail, c_ctx) : tail;
 		c_ctx = q->latest_ctx;
-		size_t tmp_len;
+		size_t tmp_len = 0;
 
 		if (is_literal(tail) && !is_structure(tail)) {
 			src = GET_STR(q, tail);
@@ -780,9 +780,9 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			dst += snprintf(dst, dstlen, "|\"%s\"", tmp_src);
 			free(tmp_src);
 			print_list++;
-		} else if (tmp_len == 1) {
+		} else if ((tmp_len == 1) && !is_iso_list(tail)) {
 			dst += snprintf(dst, dstlen, "|\"");
-			dst += formatted(dst, dstlen, GET_STR(q, tail+1), LEN_STR(q, tail+1), true);
+			dst += formatted(dst, dstlen, GET_STR(q, tail), LEN_STR(q, tail), true);
 			dst += snprintf(dst, dstlen, "\"");
 			print_list++;
 		} else if (is_iso_list(tail)) {

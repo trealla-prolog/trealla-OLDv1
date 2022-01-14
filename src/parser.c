@@ -2251,10 +2251,7 @@ bool get_token(parser *p, int last_op)
 
 	src = eat_space(p);
 
-	if (!p->srcptr)
-		return false;
-
-	if (!src) {
+	if (!src && !p->end_of_term) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, incomplete statement, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
@@ -2732,6 +2729,8 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 			continue;
 		}
+
+		p->end_of_term = false;
 
 		if (!p->quote_char && !last_op &&
 			(!strcmp(p->token, "[") || !strcmp(p->token, "{"))) {
