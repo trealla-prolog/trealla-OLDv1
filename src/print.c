@@ -780,6 +780,11 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			dst += snprintf(dst, dstlen, "|\"%s\"", tmp_src);
 			free(tmp_src);
 			print_list++;
+		} else if (tmp_len == 1) {
+			dst += snprintf(dst, dstlen, "|\"");
+			dst += formatted(dst, dstlen, GET_STR(q, tail+1), LEN_STR(q, tail+1), true);
+			dst += snprintf(dst, dstlen, "\"");
+			print_list++;
 		} else if (is_iso_list(tail)) {
 			dst += snprintf(dst, dstlen, "%s", ",");
 			c = tail;
