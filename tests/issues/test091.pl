@@ -19,4 +19,4 @@ bar.
 
 main :-
 	'$l_foo',
-	writeln(ok).
+	writeq(ok), nl.

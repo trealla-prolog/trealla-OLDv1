@@ -12,4 +12,4 @@ main :-
 	'$l_bar',
 	'$l_baz',
 	'$l_foo',
-	writeln(ok).
+	writeq(ok), nl.

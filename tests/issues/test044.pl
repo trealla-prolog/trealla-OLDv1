@@ -3,7 +3,7 @@
 
 main :-
 	length(_, E), N is 2^E,
-	writeln(E),
+	writeq(E), nl,
 	length(Ls, N),
 	maplist(=(a), Ls),
-	writeln(ok).
+	writeq(ok), nl.

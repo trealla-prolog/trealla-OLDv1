@@ -3,6 +3,6 @@
 
 main :-
 	member(I, [A,B,B,A]),
-	writeln(I), fail.
+	writeq(I), nl, fail.
 main.
 

@@ -13,4 +13,4 @@ main :-
         ),
         C
     ),
-    writeln(C).
+    writeq(C), nl.

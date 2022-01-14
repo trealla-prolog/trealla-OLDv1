@@ -3,9 +3,9 @@
 
 main :-
 	prepare(List),
-    writeln(List),
+    writeq(List), nl,
     sort(List, ListSorted),
-    writeln(ListSorted).
+    writeq(ListSorted), nl.
 
 prepare(List) :-
     append([A,B], [B,A], List).

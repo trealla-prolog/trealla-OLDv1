@@ -4,7 +4,7 @@
 
 main :-
     maplist(compute, [[1,0,1,0,0,1],[1,0,1,1,1,1],[1,1,1,1,1,1],[]], OutTapes),
-    writeln(OutTapes).
+    writeq(OutTapes), nl.
 
 % interpreter for Univeral Turing Machine
 

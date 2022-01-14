@@ -3,4 +3,4 @@
 
 main :-
 	append("abc", "def", Ls),
-	writeln(Ls).
+	writeq(Ls), nl.

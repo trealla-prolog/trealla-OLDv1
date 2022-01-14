@@ -2,4 +2,4 @@
 
 main :-
 	a(X) =.. [Y|Z],
-	writeln(Y), writeln(Z).
+	writeq(Y), nl, writeq(Z), nl.

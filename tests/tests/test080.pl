@@ -6,7 +6,7 @@ main :-
 	freeze(V2, W2=3),
 	V1 = V2,
 	(V1 = 1; V1 = -1),
-	writeln([V1,V2,W1,W2]),
+	writeq([V1,V2,W1,W2]), nl,
 	fail.
 main.
 

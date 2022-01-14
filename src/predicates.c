@@ -6489,17 +6489,6 @@ static USE_RESULT pl_status fn_cpu_time_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_writeln_1(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	int n = q->pl->current_output;
-	stream *str = &q->pl->streams[n];
-	print_term_to_stream(q, str, p1, p1_ctx, 1);
-	fputc('\n', str->fp);
-	//fflush(str->fp);
-	return !ferror(str->fp);
-}
-
 static USE_RESULT pl_status fn_print_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -11726,7 +11715,6 @@ static const struct builtins g_predicates_other[] =
 	{"atomic_list_concat", 3, fn_atomic_list_concat_3, NULL, false},
 	{"replace", 4, fn_replace_4, "+orig,+from,+to,-new", false},
 	{"print", 1, fn_print_1, "+clause", false},
-	{"writeln", 1, fn_writeln_1, "+clause", false},
 	{"sleep", 1, fn_sleep_1, "+integer", false},
 	{"delay", 1, fn_delay_1, "+integer", false},
 	{"busy", 1, fn_busy_1, "+integer", false},

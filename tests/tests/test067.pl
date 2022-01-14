@@ -1,7 +1,7 @@
 main :-
-	( call(writeln, 'OK here') ->
-		writeln('OK no error') ; writeln('OOPS was error')
+	( call(writeq, 'OK here') ->
+		(nl, writeq('OK no error'), nl) ; (nl, writeq('OOPS was error'), nl)
 	),
-	writeln('OK done (3rd line)').
+	writeq('OK done (3rd line)'), nl.
 
 :- initialization(main).

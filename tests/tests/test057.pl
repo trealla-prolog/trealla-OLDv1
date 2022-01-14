@@ -53,8 +53,8 @@ det --> [some].
     Test supplied sentence for parsing...
 */
 
-test(S) :- phrase(s,S), write(S), write(' '), writeln('OK!').
-test(S) :- write(S), write(' '), writeln('*** ERROR?').
+test(S) :- phrase(s,S), write(S), write(' '), writeq('OK!'), nl.
+test(S) :- write(S), write(' '), writeq('*** ERROR?'), nl.
 
 main :-
     test([pickup,the,small,white,box]),

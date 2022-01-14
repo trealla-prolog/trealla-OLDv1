@@ -2,6 +2,6 @@
 
 main :-
 	setof(t, true, Ls),
-	writeln(Ls),
+	writeq(Ls), nl,
 	setof(tt, true, Ls2),
-	writeln(Ls2).
+	writeq(Ls2), nl.

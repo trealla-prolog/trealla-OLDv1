@@ -1,5 +1,7 @@
 :- use_module(library(freeze)).
 
+writeln(T) :- write(T), nl.
+
 task70(X,Y) :-
 	write('Frozen X='),
 	write(X), Y=456,

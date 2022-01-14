@@ -5,13 +5,13 @@
 
 main :-
     maplist(col([[1,2],[3,4]]), [1,2], X1),
-    writeln(X1),
+    writeq(X1), nl,
     maplist(col([[A,2],[3,A]]), [1,2], X2),
-    writeln(X2),
+    write(X2), nl,
     maplist(length, M, [2,2]),
-    writeln(M),
+    writeq(M), nl,
     maplist(col(M), [1,2], X),
-    writeln(X).
+    writeq(X), nl.
 
 col(Matrix, N, Column) :-
     maplist(nth1(N), Matrix, Column).

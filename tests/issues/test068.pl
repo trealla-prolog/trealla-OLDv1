@@ -2,9 +2,9 @@
 
 main :-
     prepare(List),
-    writeln(List),
+    writeq(List), nl,
     sort(List, ListSorted),
-    writeln(ListSorted).
+    write(ListSorted), nl.
 
 prepare([B,A]) :-
     A =.. [pair,2,X],

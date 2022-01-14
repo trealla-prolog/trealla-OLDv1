@@ -3,7 +3,7 @@
 
 main :-
     solve(8, Queens),
-    writeln(Queens),
+    writeq(Queens), nl,
     fail.
 main.
 

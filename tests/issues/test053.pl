@@ -2,6 +2,6 @@
 
 main :-
 	X1 =.. [1],
-	writeln(X1),
+	writeq(X1), nl,
 	X2 =.. [1,2,3],
-	writeln(X2).
+	writeq(X2), nl.
