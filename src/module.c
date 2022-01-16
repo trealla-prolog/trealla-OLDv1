@@ -905,7 +905,7 @@ db_entry *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 		pr->head->prev = dbe;
 
 	if (pr->head && !pr->is_multifile && dbe->filename && pr->head->filename) {
-		if (dbe->filename != pr->head->filename)
+		if (strchr(dbe->filename, '$') && dbe->filename != pr->head->filename)
 			fprintf(stderr, "Warning: overwriting %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
 	}
 
@@ -929,7 +929,7 @@ db_entry *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 		pr->tail->next = dbe;
 
 	if (pr->head && !pr->is_multifile && dbe->filename && pr->head->filename) {
-		if (dbe->filename != pr->head->filename)
+		if (strchr(dbe->filename, '$') && dbe->filename != pr->head->filename)
 			fprintf(stderr, "Warning: overwriting %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
 	}
 
