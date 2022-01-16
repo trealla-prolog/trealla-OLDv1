@@ -904,6 +904,11 @@ db_entry *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 	if (pr->head)
 		pr->head->prev = dbe;
 
+	if (pr->head && !pr->is_multifile && dbe->filename && pr->head->filename) {
+		if (dbe->filename != pr->head->filename)
+			fprintf(stderr, "Warning: overwriting %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
+	}
+
 	dbe->next = pr->head;
 	pr->head = dbe;
 
@@ -922,6 +927,11 @@ db_entry *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 
 	if (pr->tail)
 		pr->tail->next = dbe;
+
+	if (pr->head && !pr->is_multifile && dbe->filename && pr->head->filename) {
+		if (dbe->filename != pr->head->filename)
+			fprintf(stderr, "Warning: overwriting %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
+	}
 
 	dbe->prev = pr->tail;
 	pr->tail = dbe;
@@ -1512,6 +1522,9 @@ module *create_module(prolog *pl, const char *name)
 	m_allow_dups(m->index, false);
 	m->p = create_parser(m);
 	ensure(m->p);
+
+	set_multifile_in_db(m, "$predicate_property", 2);
+	set_multifile_in_db(m, ":-", 1);
 
 	parser *p = create_parser(m);
 	if (p) {
