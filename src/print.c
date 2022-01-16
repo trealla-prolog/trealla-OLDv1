@@ -677,7 +677,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	int is_chars_list = is_string(c);
 
 	if (!is_chars_list && running)
-		is_chars_list += scan_is_chars_list(q, c, c_ctx, false);
+		is_chars_list += q->st.m->flag.double_quote_chars && scan_is_chars_list(q, c, c_ctx, false);
 
 	if (is_string(c)) {
 		dst += snprintf(dst, dstlen, "%s", "\"");
@@ -767,7 +767,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				if (res < 0) return -1;
 				dst += res;
 			}
-		} else if ((tmp_len = scan_is_chars_list(q, tail, c_ctx, false)) > 0) {
+		} else if (q->st.m->flag.double_quote_chars
+			&& (tmp_len = scan_is_chars_list(q, tail, c_ctx, false)) > 0) {
 			char *tmp_src = chars_list_to_string(q, tail, c_ctx, tmp_len);
 
 			if ((strlen(tmp_src) == 1) && (*tmp_src == '\''))
