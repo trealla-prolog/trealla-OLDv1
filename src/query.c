@@ -33,7 +33,7 @@ typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 
 static bool any_choices(const query *q, const frame *f)
 {
-	if (q->cp < (q->in_commit ? 2 : 1))
+	if (q->cp <= (q->in_commit ? 2 : 1))
 		return false;
 
 	pl_idx_t curr_choice = q->cp - (q->in_commit ? 2 : 1);
@@ -592,7 +592,7 @@ void trim_trail(query *q)
 
 	pl_idx_t tp;
 
-	if (q->cp) {
+	if (q->cp > 1) {
 		const choice *ch = GET_CURR_CHOICE();
 		tp = ch->st.tp;
 	} else
@@ -945,7 +945,7 @@ static bool resume_frame(query *q)
 	frame *f = GET_CURR_FRAME();
 
 #if 0
-	if (q->cp) {
+	if (q->cp > 1) {
 		const choice *ch = GET_CURR_CHOICE();
 		printf("*** resume f->cgen=%u, ch->cgen=%u\n", f->cgen, ch->cgen);
 	}
@@ -1067,7 +1067,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	cell *attrs = is_empty(&e->c) ? e->c.attrs : NULL;
 	pl_idx_t attrs_ctx = e->c.attrs_ctx;
 
-	if (q->cp || attrs)
+	if ((q->cp > 1) || attrs)
 		add_trail(q, c_ctx, c->var_nbr, attrs, attrs_ctx);
 
 	if (is_structure(v)) {
@@ -1119,7 +1119,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 
 	e->ctx = v_ctx;
 
-	if (q->cp && trailing)
+	if ((q->cp > 1) && trailing)
 		add_trail(q, c_ctx, c->var_nbr, NULL, 0);
 }
 
