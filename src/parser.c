@@ -1639,7 +1639,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 			if (!*s || iscntrl(*s)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+					fprintf(stdout, "Error: syntax error parsing number2, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
 				p->error_desc = "number";
 				p->error = true;
@@ -1653,7 +1653,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 #if 1
 		} else if ((*s == '\'') && !p->flag.not_strict_iso && search_op(p->m, "", NULL, false)) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error parsing number3, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
 			p->error_desc = "number";
 			p->error = true;
@@ -1664,7 +1664,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 		if (p->error) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error parsing number4, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
 			p->error_desc = "number";
 			p->error = true;
@@ -1811,14 +1811,16 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	mp_int_clear(&v2);
 	int ch = peek_char_utf8(s);
 
+#if 0
 	if (iswalpha(ch)) {
 		if (DUMP_ERRS || !p->do_read_term)
-			fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+			fprintf(stdout, "Error: syntax error, parsing number5, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
 		p->error_desc = "number";
 		p->error = true;
 		return false;
 	}
+#endif
 
 	p->v.tag = TAG_INT;
 
@@ -1828,9 +1830,9 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	*srcptr = s;
 	ch = peek_char_utf8(*srcptr);
 
-	if ((ch == '(') || iswalpha(ch)) {
+	if ((ch == '(') /*|| iswalpha(ch)*/) {
 		if (DUMP_ERRS || !p->do_read_term)
-			fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+			fprintf(stdout, "Error: syntax error, parsing number6, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
 		p->error_desc = "number";
 		p->error = true;
