@@ -944,6 +944,172 @@ bool retract_from_db(module *m, db_entry *dbe)
 	return true;
 }
 
+static void xref_cell(module *m, clause *r, cell *c, predicate *parent)
+{
+	const char *functor = GET_STR(m, c);
+	unsigned specifier;
+
+	if ((c->arity == 2)
+		&& !GET_OP(c)
+		&& (c->val_off != g_braces_s)
+		&& search_op(m, functor, &specifier, false)) {
+		SET_OP(c, specifier);
+	}
+
+	bool found = false, function = false;
+	c->fn = get_builtin(m->pl, functor, c->arity, &found, &function);
+
+	if (found) {
+		if (function)
+			c->flags |= FLAG_FUNCTION;
+		else
+			c->flags |= FLAG_BUILTIN;
+
+		return;
+	}
+
+	if ((c+c->nbr_cells) >= (r->cells+r->cidx-1)) {
+		c->flags |= FLAG_TAIL;
+
+		if (parent && (parent->key.val_off == c->val_off) && (parent->key.arity == c->arity)) {
+			c->flags |= FLAG_TAIL_REC;
+			r->is_tail_rec = true;
+		}
+	}
+}
+
+void xref_rule(module *m, clause *r, predicate *parent)
+{
+	r->arg1_is_unique = false;
+	r->arg2_is_unique = false;
+	r->arg3_is_unique = false;
+	r->is_unique = false;
+	r->is_tail_rec = false;
+
+	cell *head = get_head(r->cells);
+	cell *c = head;
+	uint64_t mask = 0;
+
+	// Check if a variable occurs more than once in the head...
+
+	for (pl_idx_t i = 0; i < head->nbr_cells; i++, c++) {
+		if (!is_variable(c))
+			continue;
+
+		uint64_t mask2 = 1ULL << c->var_nbr;
+
+		if (mask & mask2) {
+			r->is_complex = true;
+			break;
+		}
+
+		mask |= mask2;
+	}
+
+	// Other stuff...
+
+	c = r->cells;
+
+	if (c->val_off == g_sys_record_key_s)
+		return;
+
+	for (pl_idx_t i = 0; i < r->cidx; i++) {
+		cell *c = r->cells + i;
+		c->flags &= ~FLAG_TAIL;
+		c->flags &= ~FLAG_TAIL_REC;
+
+		if (!is_literal(c))
+			continue;
+
+		xref_cell(m, r, c, parent);
+	}
+}
+
+static void check_rule(module *m, clause *r, predicate *pr)
+{
+	bool matched = false, me = false;
+	bool p1_matched = false, p2_matched = false, p3_matched = false;
+	cell *head = get_head(r->cells);
+	cell *p1 = head + 1, *p2 = NULL, *p3 = NULL;
+
+	if (pr->key.arity > 1)
+		p2 = p1 + p1->nbr_cells;
+
+	if (pr->key.arity > 2)
+		p3 = p2 + p2->nbr_cells;
+
+	for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
+		if (!me) {
+			if (&dbe->cl == r)
+				me = true;
+
+			continue;
+		}
+
+		cell *head2 = get_head(dbe->cl.cells);
+		cell *h21 = head2 + 1, *h22 = NULL, *h23 = NULL;
+
+		if (pr->key.arity > 1)
+			h22 = h21 + h21->nbr_cells;
+
+		if (pr->key.arity > 2)
+			h23 = h22 + h22->nbr_cells;
+
+		if (!index_cmpkey(p1, h21, m))
+			p1_matched = true;
+
+		if (pr->key.arity > 1) {
+			if (!index_cmpkey(p2, h22, m))
+				p2_matched = true;
+		}
+
+		if (pr->key.arity > 2) {
+			if (!index_cmpkey(p3, h23, m))
+				p3_matched = true;
+		}
+
+		if (!index_cmpkey(head, head2, m)) {
+			matched = true;
+			//break;
+		}
+	}
+
+	if (!matched) {
+		r->is_unique = true;
+	}
+
+	if (!p1_matched /*&& r->is_unique*/) {
+		r->arg1_is_unique = true;
+	}
+
+	if (!p2_matched /*&& r->is_unique*/) {
+		r->arg2_is_unique = true;
+	}
+
+	if (!p3_matched /*&& r->is_unique*/) {
+		r->arg3_is_unique = true;
+	}
+}
+
+void xref_db(module *m)
+{
+	for (predicate *pr = m->head; pr; pr = pr->next) {
+		if (pr->is_processed)
+			continue;
+
+		pr->is_processed = true;
+
+		for (db_entry *dbe = pr->head; dbe; dbe = dbe->next)
+			xref_rule(m, &dbe->cl, pr);
+
+		if (pr->is_dynamic || pr->idx)
+			continue;
+
+		for (db_entry *dbe = pr->head; dbe; dbe = dbe->next)
+			check_rule(m, &dbe->cl, pr);
+	}
+}
+
 module *load_text(module *m, const char *src, const char *filename)
 {
 	parser *p = create_parser(m);
@@ -962,7 +1128,7 @@ module *load_text(module *m, const char *src, const char *filename)
 	}
 
 	if (!p->error) {
-		xref_db(p);
+		xref_db(p->m);
 		int save = p->m->pl->quiet;
 		p->m->pl->quiet = true;
 		p->m->pl->halt = false;
@@ -1007,14 +1173,15 @@ static bool unload_realfile(module *m, const char *filename)
 			}
 		}
 
-		if (!pr->cnt) {
-			m_destroy(pr->idx_save);
-			m_destroy(pr->idx);
-			pr->idx_save = pr->idx = NULL;
+		m_destroy(pr->idx_save);
+		m_destroy(pr->idx);
+		pr->idx_save = pr->idx = NULL;
 
+		if (!pr->cnt) {
 			if (!pr->is_multifile && !pr->is_dynamic)
 				pr->is_abolished = true;
-		}
+		} else
+			xref_db(m);
 	}
 
 	set_unloaded(m, filename);
@@ -1090,7 +1257,7 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 	module *save_m = p->m;
 
 	if (!p->error && !p->already_loaded) {
-		xref_db(p);
+		xref_db(p->m);
 		int save = p->m->pl->quiet;
 		p->m->pl->quiet = true;
 		p->directive = true;
@@ -1349,7 +1516,7 @@ module *create_module(prolog *pl, const char *name)
 	parser *p = create_parser(m);
 	if (p) {
 		p->consulting = true;
-		xref_db(p);
+		xref_db(p->m);
 		destroy_parser(p);
 	}
 

@@ -815,172 +815,6 @@ static void directives(parser *p, cell *d)
 	}
 }
 
-static void xref_cell(parser *p, clause *r, cell *c, predicate *parent)
-{
-	const char *functor = GET_STR(p, c);
-	unsigned specifier;
-
-	if ((c->arity == 2)
-		&& !GET_OP(c)
-		&& (c->val_off != g_braces_s)
-		&& search_op(p->m, functor, &specifier, false)) {
-		SET_OP(c, specifier);
-	}
-
-	bool found = false, function = false;
-	c->fn = get_builtin(p->m->pl, functor, c->arity, &found, &function);
-
-	if (found) {
-		if (function)
-			c->flags |= FLAG_FUNCTION;
-		else
-			c->flags |= FLAG_BUILTIN;
-
-		return;
-	}
-
-	if ((c+c->nbr_cells) >= (r->cells+r->cidx-1)) {
-		c->flags |= FLAG_TAIL;
-
-		if (parent && (parent->key.val_off == c->val_off) && (parent->key.arity == c->arity)) {
-			c->flags |= FLAG_TAIL_REC;
-			r->is_tail_rec = true;
-		}
-	}
-}
-
-void xref_rule(parser *p, clause *r, predicate *parent)
-{
-	r->arg1_is_unique = false;
-	r->arg2_is_unique = false;
-	r->arg3_is_unique = false;
-	r->is_unique = false;
-	r->is_tail_rec = false;
-
-	cell *head = get_head(r->cells);
-	cell *c = head;
-	uint64_t mask = 0;
-
-	// Check if a variable occurs more than once in the head...
-
-	for (pl_idx_t i = 0; i < head->nbr_cells; i++, c++) {
-		if (!is_variable(c))
-			continue;
-
-		uint64_t mask2 = 1ULL << c->var_nbr;
-
-		if (mask & mask2) {
-			r->is_complex = true;
-			break;
-		}
-
-		mask |= mask2;
-	}
-
-	// Other stuff...
-
-	c = r->cells;
-
-	if (c->val_off == g_sys_record_key_s)
-		return;
-
-	for (pl_idx_t i = 0; i < r->cidx; i++) {
-		cell *c = r->cells + i;
-		c->flags &= ~FLAG_TAIL;
-		c->flags &= ~FLAG_TAIL_REC;
-
-		if (!is_literal(c))
-			continue;
-
-		xref_cell(p, r, c, parent);
-	}
-}
-
-static void check_rule(parser *p, clause *r, predicate *pr)
-{
-	bool matched = false, me = false;
-	bool p1_matched = false, p2_matched = false, p3_matched = false;
-	cell *head = get_head(r->cells);
-	cell *p1 = head + 1, *p2 = NULL, *p3 = NULL;
-
-	if (pr->key.arity > 1)
-		p2 = p1 + p1->nbr_cells;
-
-	if (pr->key.arity > 2)
-		p3 = p2 + p2->nbr_cells;
-
-	for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
-		if (!me) {
-			if (&dbe->cl == r)
-				me = true;
-
-			continue;
-		}
-
-		cell *head2 = get_head(dbe->cl.cells);
-		cell *h21 = head2 + 1, *h22 = NULL, *h23 = NULL;
-
-		if (pr->key.arity > 1)
-			h22 = h21 + h21->nbr_cells;
-
-		if (pr->key.arity > 2)
-			h23 = h22 + h22->nbr_cells;
-
-		if (!index_cmpkey(p1, h21, p->m))
-			p1_matched = true;
-
-		if (pr->key.arity > 1) {
-			if (!index_cmpkey(p2, h22, p->m))
-				p2_matched = true;
-		}
-
-		if (pr->key.arity > 2) {
-			if (!index_cmpkey(p3, h23, p->m))
-				p3_matched = true;
-		}
-
-		if (!index_cmpkey(head, head2, p->m)) {
-			matched = true;
-			//break;
-		}
-	}
-
-	if (!matched) {
-		r->is_unique = true;
-	}
-
-	if (!p1_matched /*&& r->is_unique*/) {
-		r->arg1_is_unique = true;
-	}
-
-	if (!p2_matched /*&& r->is_unique*/) {
-		r->arg2_is_unique = true;
-	}
-
-	if (!p3_matched /*&& r->is_unique*/) {
-		r->arg3_is_unique = true;
-	}
-}
-
-void xref_db(parser *p)
-{
-	for (predicate *pr = p->m->head; pr; pr = pr->next) {
-		if (pr->is_processed)
-			continue;
-
-		pr->is_processed = true;
-
-		for (db_entry *dbe = pr->head; dbe; dbe = dbe->next)
-			xref_rule(p, &dbe->cl, pr);
-
-		if (pr->is_dynamic || pr->idx)
-			continue;
-
-		for (db_entry *dbe = pr->head; dbe; dbe = dbe->next)
-			check_rule(p, &dbe->cl, pr);
-	}
-}
-
 static void check_first_cut(parser *p)
 {
 	cell *c = get_body(p->cl->cells);
@@ -1516,7 +1350,7 @@ static bool term_expansion(parser *p)
 	p2->skip = true;
 	p2->srcptr = ASTRING_cstr(s);
 	tokenize(p2, false, false);
-	xref_rule(p2, p2->cl, NULL);
+	xref_rule(p2->m, p2->cl, NULL);
 	execute(q, p2->cl->cells, p2->cl->nbr_vars);
 	ASTRING_free(s);
 
@@ -2683,7 +2517,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				term_to_body(p);
 
 				if (p->consulting && !p->skip) {
-					xref_rule(p, p->cl, NULL);
+					xref_rule(p->m, p->cl, NULL);
 					term_expansion(p);
 					cell *p1 = p->cl->cells;
 
@@ -3127,7 +2961,13 @@ bool run(parser *p, const char *pSrc, bool dump)
 	}
 
 	ASTRING(src);
-	ASTRING_strcat(src, pSrc);
+
+	if (!p->run_init) {
+		ASTRING_sprintf(src, "'$choice',%s", pSrc);
+	} else {
+		ASTRING_sprintf(src, "%s", pSrc);
+	}
+
 	ASTRING_trim_ws(src);
 	ASTRING_trim(src, '.');
 	ASTRING_strcat(src, ".");
@@ -3161,7 +3001,7 @@ bool run(parser *p, const char *pSrc, bool dump)
 	if (!p->command)
 		term_expansion(p);
 
-	xref_rule(p, p->cl, NULL);
+	xref_rule(p->m, p->cl, NULL);
 
 	query *q = create_query(p->m, false);
 	if (!q) return false;

@@ -635,7 +635,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	xref_rule(p, p->cl, NULL);
+	xref_rule(p->m, p->cl, NULL);
 
 	if (p->nbr_vars) {
 		if (!create_vars(q, p->nbr_vars))
@@ -1810,12 +1810,14 @@ static pl_status do_atom_concat_3(query *q)
 
 	GET_RAW_ARG(1,p1_raw);
 	GET_RAW_ARG(2,p2_raw);
+	unshare_cell(p1);
+	unshare_cell(p2);
 	cell tmp;
 	may_error(make_slice(q, &tmp, p3, 0, len1+len));
-	reset_var(q, p1_raw, p1_raw_ctx, &tmp, q->st.curr_frame);
+	reset_var(q, p1_raw, p1_raw_ctx, &tmp, q->st.curr_frame, true);
 	unshare_cell(&tmp);
 	may_error(make_slice(q, &tmp, p2, len, len2-len));
-	reset_var(q, p2_raw, p2_raw_ctx, &tmp, q->st.curr_frame);
+	reset_var(q, p2_raw, p2_raw_ctx, &tmp, q->st.curr_frame, true);
 	unshare_cell(&tmp);
 
 	if (!done)
@@ -4405,24 +4407,14 @@ static USE_RESULT pl_status fn_iso_arg_3(query *q)
 	GET_FIRST_ARG(p1,integer_or_var);
 	GET_NEXT_ARG(p2,compound);
 	GET_NEXT_ARG(p3,any);
+	GET_NEXT_ARG(p4,integer_or_var);
 
-	if (is_integer(p1)) {
-		int arg_nbr = get_int(p1);
+	if (q->retry || is_integer(p1)) {
+		int arg_nbr = get_int(is_integer(p1) ? p1 : p4);
 
 		if (q->retry) {
 			if (++arg_nbr > p2->arity)
 				return pl_failure;
-
-			GET_RAW_ARG(1, p1_raw);
-			GET_RAW_ARG(3, p3_raw);
-
-			p1 = p1_raw; p1_ctx = p1_raw_ctx;
-			p3 = p3_raw; p3_ctx = p3_raw_ctx;
-
-			cell tmp;
-			make_int(&tmp, arg_nbr);
-			reset_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-			may_error(make_choice(q));
 		}
 
 		if (arg_nbr < 0)
@@ -4436,7 +4428,17 @@ static USE_RESULT pl_status fn_iso_arg_3(query *q)
 		for (int i = 1; i <= arg_nbr; i++) {
 			if (i == arg_nbr) {
 				c = deref(q, c, p2_ctx);
-				return unify(q, p3, p3_ctx, c, q->latest_ctx);
+				pl_idx_t c_ctx = q->latest_ctx;
+				cell tmp;
+				make_int(&tmp, arg_nbr);
+				GET_RAW_ARG(4,p4_raw);
+				set_var(q, p4_raw, p4_ctx, &tmp, q->st.curr_frame);
+
+				if (!is_integer(p1))
+					may_error(make_choice(q));
+
+				unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+				return unify(q, p3, p3_ctx, c, c_ctx);
 			}
 
 			c += c->nbr_cells;
@@ -4446,11 +4448,13 @@ static USE_RESULT pl_status fn_iso_arg_3(query *q)
 	if (is_variable(p1) && is_variable(p3)) {
 		cell tmp;
 		make_int(&tmp, 1);
-		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		cell *c = p2 + 1;
 		c = deref(q, c, p2_ctx);
-		set_var(q, p3, p3_ctx, c, q->latest_ctx);
+		pl_idx_t c_ctx = q->latest_ctx;
+		set_var(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 		may_error(make_choice(q));
+		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		set_var(q, p3, p3_ctx, c, c_ctx);
 		return pl_success;
 	}
 
@@ -6494,15 +6498,13 @@ static USE_RESULT pl_status fn_between_3(query *q)
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
 	GET_NEXT_ARG(p3,integer_or_var);
+	GET_NEXT_ARG(p4,integer_or_var);
 
 	if (!is_integer(p1))
 		return throw_error(q, p1, p1_ctx, "type_error", "integer");
 
 	if (!is_integer(p2))
 		return throw_error(q, p2, p2_ctx, "type_error", "integer");
-
-	if (is_integer(p3) && !is_integer(p3))
-		return throw_error(q, p3, p3_ctx, "type_error", "integer");
 
 	if (!q->retry) {
 		if (get_int(p1) > get_int(p2))
@@ -6518,23 +6520,25 @@ static USE_RESULT pl_status fn_between_3(query *q)
 			return pl_success;
 		}
 
-		set_var(q, p3, p3_ctx, p1, q->st.curr_frame);
+		reset_var(q, p4, q->st.curr_frame, p1, q->st.curr_frame, false);
 
 		if (get_int(p1) != get_int(p2))
 			may_error(make_choice(q));
 
+		set_var(q, p3, p3_ctx, p1, q->st.curr_frame);
 		return pl_success;
 	}
 
-	pl_int_t val = get_int(p3) + 1;
-	GET_RAW_ARG(3,p3_raw);
+	pl_int_t val = get_int(p4) + 1;
+	GET_RAW_ARG(4,p4_raw);
 	cell tmp;
 	make_int(&tmp, val);
-	reset_var(q, p3_raw, p3_raw_ctx, &tmp, q->st.curr_frame);
+	reset_var(q, p4_raw, q->st.curr_frame, &tmp, q->st.curr_frame, false);
 
 	if (val != get_int(p2))
 		may_error(make_choice(q));
 
+	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
 
@@ -8469,16 +8473,16 @@ static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 	}
 
 	if (!is_structure(p1))
-		return throw_error(q, p1, p1_ctx, "type_error", "source_sink");
+		return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
 	if (CMP_SLICE2(q, p1, ":"))
-		return throw_error(q, p1, p1_ctx, "type_error", "source_sink");
+		return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
 	cell *mod = deref(q, p1+1, p1_ctx);
 	cell *file = deref(q, p1+2, p1_ctx);
 
 	if (!is_atom(mod) || !is_atom(file))
-		return throw_error(q, p1, p1_ctx, "type_error", "source_sink");
+		return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
 	module *tmp_m = create_module(q->pl, GET_STR(q, mod));
 	char *filename = GET_STR(q, file);
@@ -8530,7 +8534,7 @@ static pl_status do_deconsult(query *q, cell *p1, pl_idx_t p1_ctx)
 
 static USE_RESULT pl_status fn_load_files_2(query *q)
 {
-	GET_FIRST_ARG(p1,atom_or_structure);
+	GET_FIRST_ARG(p1,atom_or_list);
 
 	if (is_atom(p1)) {
 		may_error(do_consult(q, p1, p1_ctx));
@@ -9980,60 +9984,7 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 	return pl_failure;
 }
 
-static unsigned fake_collect_vars(query *q, cell *p1, pl_idx_t nbr_cells, cell **slots, int depth)
-{
-	if (depth > MAX_DEPTH)
-		return 0;
-
-	unsigned cnt = 0;
-
-	for (pl_idx_t i = 0; i < nbr_cells;) {
-		cell *c = p1;
-
-		if (is_structure(c)) {
-			cnt += fake_collect_vars(q, c+1, c->nbr_cells-1, slots, depth+1);
-		} else if (is_variable(c)) {
-			assert(c->var_nbr < MAX_ARITY);
-
-			if (!slots[c->var_nbr]) {
-				slots[c->var_nbr] = c;
-				cnt++;
-			}
-		}
-
-		i += p1->nbr_cells;
-		p1 += p1->nbr_cells;
-	}
-
-	return cnt;
-}
-
-unsigned fake_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned start)
-{
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
-	ensure(tmp);
-
-	if (tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
-
-	unify(q, p1, p1_ctx, tmp, q->st.curr_frame);	// undo???
-	cell *slots[MAX_ARITY] = {0};
-	fake_collect_vars(q, tmp, tmp->nbr_cells, slots, 0);
-	memset(q->nv_mask, 0, MAX_ARITY);
-	unsigned end = q->nv_start = start;
-
-	for (unsigned i = 0; i < MAX_ARITY; i++) {
-		if (!slots[i])
-			continue;
-
-		q->nv_mask[slots[i]->var_nbr] = 1;
-		end++;
-	}
-
-	return end;
-}
-
-static unsigned real_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int depth)
+static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int depth)
 {
 	unsigned cnt = 0;
 
@@ -10087,7 +10038,7 @@ static unsigned real_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, i
 			set_var(q, c, c_ctx, tmp, q->st.curr_frame);
 			cnt++;
 		} else if (is_structure(c))
-			cnt += real_numbervars(q, c, c_ctx, end, depth+1);
+			cnt += do_numbervars(q, c, c_ctx, end, depth+1);
 	}
 
 	return cnt;
@@ -10098,7 +10049,7 @@ static USE_RESULT pl_status fn_numbervars_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int end = 0;
 	q->numbervars = true;
-	real_numbervars(q, p1, p1_ctx, &end, 0);
+	do_numbervars(q, p1, p1_ctx, &end, 0);
 	return pl_success;
 }
 
@@ -10109,7 +10060,7 @@ static USE_RESULT pl_status fn_numbervars_3(query *q)
 	GET_NEXT_ARG(p3,integer_or_var);
 	int end = q->nv_start = get_int(p2);
 	q->numbervars = true;
-	unsigned cnt = real_numbervars(q, p1, p1_ctx, &end, 0);
+	unsigned cnt = do_numbervars(q, p1, p1_ctx, &end, 0);
 	cell tmp;
 	make_int(&tmp, get_int(p2)+cnt);
 	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
@@ -10204,7 +10155,7 @@ static void restore_db(module *m, FILE *fp)
 
 		p->srcptr = p->save_line;
 		tokenize(p, false, false);
-		xref_rule(p, p->cl, NULL);
+		xref_rule(p->m, p->cl, NULL);
 		execute(q, p->cl->cells, p->cl->nbr_cells);
 		clear_rule(p->cl);
 	}
@@ -10515,13 +10466,15 @@ static unsigned safe_list_length(query *q, cell *p1, pl_idx_t p1_ctx)
 static pl_status do_length(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,integer);
-	unsigned nbr = get_int(p2);
-	GET_RAW_ARG(2, p2_orig);
+	GET_NEXT_ARG(p2,variable);
+	GET_NEXT_ARG(p3, integer);
+	unsigned nbr = get_int(p3);
 	cell tmp = (cell){0};
 	make_int(&tmp, ++nbr);
-	reset_var(q, p2_orig, p2_orig_ctx, &tmp, q->st.curr_frame);
+	GET_RAW_ARG(3,p3_raw);
+	reset_var(q, p3_raw, p3_raw_ctx, &tmp, q->st.curr_frame, false);
 	may_error(make_choice(q));
+	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 
 	if (is_variable(p1) && is_anon(p1))
 		return pl_success;
@@ -10565,6 +10518,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 
 	GET_FIRST_ARG(p1,list_or_nil_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
+	GET_NEXT_ARG(p3,variable);
 
 	if (!is_variable(p1) && !is_nil(p1)) {
 		LIST_HANDLER(p1);
@@ -10647,15 +10601,16 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 
 		cell tmp;
 		make_int(&tmp, 0);
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		may_error(make_choice(q));
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 
 		if (!is_variable(p1))
 			return pl_failure;
 
 		if (!is_anon(p1)) {
 			make_literal(&tmp, g_nil_s);
-			set_var(q, p1,p1_ctx, &tmp, q->st.curr_frame);
+			set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		}
 
 		return pl_success;
@@ -11561,8 +11516,8 @@ static const struct builtins g_predicates_iso[] =
 	{"number_chars", 2, fn_iso_number_chars_2, NULL, false},
 	{"number_codes", 2, fn_iso_number_codes_2, NULL, false},
 	{"clause", 2, fn_iso_clause_2, NULL, false},
-	{"length", 2, fn_iso_length_2, NULL, false},
-	{"arg", 3, fn_iso_arg_3, NULL, false},
+	{"$length", 3, fn_iso_length_2, NULL, false},
+	{"$arg", 4, fn_iso_arg_3, NULL, false},
 	{"functor", 3, fn_iso_functor_3, NULL, false},
 	{"copy_term", 2, fn_iso_copy_term_2, NULL, false},
 	{"term_variables", 2, fn_iso_term_variables_2, NULL, false},
@@ -11706,7 +11661,7 @@ static const struct builtins g_predicates_other[] =
 	{"wall_time", 1, fn_wall_time_1, "-integer", false},
 	{"date_time", 6, fn_date_time_6, "-yyyy,-m,-d,-h,--m,-s", false},
 	{"date_time", 7, fn_date_time_7, "-yyyy,-m,-d,-h,--m,-s,-ms", false},
-	{"between", 3, fn_between_3, "+integer,+integer,-integer", false},
+	{"$between", 4, fn_between_3, "+integer,+integer,-integer", false},
 	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list", false},
 	{"server", 3, fn_server_3, "+string,-stream,+list", false},
 	{"accept", 2, fn_accept_2, "+stream,-stream", false},

@@ -22,6 +22,8 @@ bool needs_quoting(module *m, const char *src, int srclen);
 void do_db_load(module *m);
 int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, int depth);
 bool unload_file(module *m, const char *filename);
+void xref_rule(module *m, clause *t, predicate *parent);
+void xref_db(module *m);
 
 db_entry *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting);
 db_entry *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting);

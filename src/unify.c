@@ -185,6 +185,15 @@ static void make_cell_ref(query *q, cell *tmp, cell *v, pl_idx_t ctx)
 pl_status fn_sys_undo_trail_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
+
+	if (((q->undo_hi_tp - q->undo_lo_tp) == 0) ||
+		(q->undo_lo_tp > q->undo_hi_tp)) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		return pl_success;
+	}
+
 	q->save_e = malloc(sizeof(slot)*(q->undo_hi_tp - q->undo_lo_tp));
 	may_ptr_error(q->save_e);
 	bool first = true;
@@ -236,6 +245,7 @@ pl_status fn_sys_redo_trail_0(query * q)
 	}
 
 	free(q->save_e);
+	q->save_e = NULL;
 	return pl_success;
 }
 

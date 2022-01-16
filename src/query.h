@@ -11,7 +11,7 @@ pl_status make_catcher(query *q, enum q_retry type);
 
 void cut_me(query *q, bool inner_cut, bool soft_cut);
 void set_var(query *q, const cell *c, pl_idx_t ctx, cell *v, pl_idx_t v_ctx);
-void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx);
+void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx, bool trailing);
 pl_status execute(query *q, cell *cells, unsigned nbr_vars);
 pl_status fn_call_0(query *q, cell *p1);
 void undo_me(query *q);
@@ -52,7 +52,6 @@ pl_status make_stringn(cell *d, const char *s, size_t n);
 void make_literal(cell *tmp, pl_idx_t offset);
 int get_stream(query *q, cell *p1);
 void make_indirect(cell *tmp, cell *c);
-unsigned fake_numbervars(query *q, cell *c, pl_idx_t c_ctx, unsigned start);
 bool has_vars(query *q, cell *c, pl_idx_t c_ctx, unsigned depth);
 void call_builtin(query *q, cell *c, pl_idx_t c_ctx);
 pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx);

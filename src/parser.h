@@ -6,12 +6,10 @@ parser *create_parser(module *m);
 void destroy_parser(parser *p);
 
 unsigned tokenize(parser *p, bool args, bool consing);
-void xref_rule(parser *p, clause *t, predicate *parent);
 void reset(parser *p);
 void term_to_body(parser *p);
 cell *check_body_callable(parser *p, cell *c);
 bool run(parser *p, const char *src, bool dump);
-void xref_db(parser *p);
 char *eat_space(parser *p);
 bool virtual_term(parser *p, const char *src);
 bool get_token(parser *p, int last_op);

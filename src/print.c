@@ -360,13 +360,6 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 	//if (!running)
 	//	return print_term_to_buf(q, dst, dstlen, c, c_ctx, running, cons, depth);
 
-	if (!depth && !dst && !dstlen && running) {
-		fake_numbervars(q, c, c_ctx, 0);
-		memset(s_mask1, 0, MAX_ARITY);
-		memset(s_mask2, 0, MAX_ARITY);
-		q->nv_start = -1;
-	}
-
 	char *save_dst = dst;
 
 	if (depth > MAX_DEPTH) {
@@ -480,7 +473,6 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 	if (is_variable(c) && running && (q->nv_start == -1)
 		&& ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != ERR_IDX)) {
-
 #if 0
 		for (unsigned i = 0; i < MAX_ARITY && var_nbr; i++) {
 			if (q->nv_mask[i])
@@ -775,15 +767,17 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				if (res < 0) return -1;
 				dst += res;
 			}
-		} else if ((tmp_len = scan_is_chars_list(q, tail, c_ctx, false)) > 1) {
+		} else if ((tmp_len = scan_is_chars_list(q, tail, c_ctx, false)) > 0) {
 			char *tmp_src = chars_list_to_string(q, tail, c_ctx, tmp_len);
-			dst += snprintf(dst, dstlen, "|\"%s\"", tmp_src);
+
+			if ((strlen(tmp_src) == 1) && (*tmp_src == '\''))
+				dst += snprintf(dst, dstlen, "|\"%s\"", tmp_src);
+			else if (strlen(tmp_src) == 1)
+				dst += snprintf(dst, dstlen, ",%s", tmp_src);
+			else
+				dst += snprintf(dst, dstlen, "|\"%s\"", tmp_src);
+
 			free(tmp_src);
-			print_list++;
-		} else if ((tmp_len == 1) && !is_iso_list(tail)) {
-			dst += snprintf(dst, dstlen, "|\"");
-			dst += formatted(dst, dstlen, GET_STR(q, tail), LEN_STR(q, tail), true);
-			dst += snprintf(dst, dstlen, "\"");
 			print_list++;
 		} else if (is_iso_list(tail)) {
 			dst += snprintf(dst, dstlen, "%s", ",");

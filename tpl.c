@@ -268,10 +268,10 @@ int main(int ac, char *av[])
 		return halt_code;
 	}
 
-	if (!quiet)
+	if (version)
 		printf("Trealla Prolog (c) Infradig 2020-2021, %s\n", g_version);
 
-	if ((version == 2) && !quiet) {
+	if (version == 2) {
 		fprintf(stdout, "Usage:\n");
 		fprintf(stdout, "  tpl [options] [files] [-- args]\n");
 		fprintf(stdout, "Options:\n");

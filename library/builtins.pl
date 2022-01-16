@@ -23,8 +23,6 @@ must_be(Term, list_or_partial_list, Goal, _Arg) :- !, '$mustbe_instantiated'(Ter
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-expand_term((H --> B), Out) :- !,
-	dcg_translate((H --> B), Out), !.
 expand_term(In, Out) :-
 	term_expansion(In, Out).
 
@@ -444,74 +442,6 @@ key_partition_(_, _, List, _, _, _, _) :-
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-
-phrase_from_file(P, Filename) :-
-	open(Filename, read, Str, [mmap(Ms)]),
-	copy_term(P, P2), P2=P,
-	phrase(P2, Ms, []),
-	close(Str).
-
-phrase_from_file(P, Filename, Opts) :-
-	open(Filename, read, Str, [mmap(Ms)|Opts]),
-	copy_term(P, P2), P2=P,
-	phrase(P2, Ms, []),
-	close(Str).
-
-phrase(GRBody, S0) :-
-	phrase(GRBody, S0, []).
-
-:- meta_predicate(phrase(//,?)).
-
-phrase(GRBody, S0, S) :-
-	(	var(GRBody)
-	->	throw(error(instantiation_error, phrase/3))
-	;	(	dcg_constr(GRBody)
-		->	phrase_(GRBody, S0, S)
-		;	(	functor(GRBody, _, _)
-			->	call(GRBody, S0, S)
-			;	throw(error(type_error(callable, GRBody), phrase/3))
-			)
-		)
-	).
-
-:- meta_predicate(phrase(//,?,?)).
-
-phrase_([], S, S).
-	phrase_(!, S, S).
-phrase_((A, B), S0, S) :-
-	phrase(A, S0, S1), phrase(B, S1, S).
-phrase_((A -> B ; C), S0, S) :-
-	!,
-	(	phrase(A, S0, S1)
-	->	phrase(B, S1, S)
-	;	phrase(C, S0, S)
-	).
-phrase_((A ; B), S0, S) :-
-	(phrase(A, S0, S) ; phrase(B, S0, S)).
-phrase_((A | B), S0, S) :-
-	(phrase(A, S0, S) ; phrase(B, S0, S)).
-phrase_({G}, S0, S) :-
-	(call(G), S0 = S).
-phrase_(call(G), S0, S) :-
-	call(G, S0, S).
-phrase_((A -> B), S0, S) :-
-	phrase((A -> B ; fail), S0, S).
-phrase_(phrase(NonTerminal), S0, S) :-
-	phrase(NonTerminal, S0, S).
-phrase_([T|Ts], S0, S) :-
-	append([T|Ts], S, S0).
-
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Canonical version... this is a start
-
-phrase_to_stream(P, Stream) :-
-	phrase(P, Chars, []),
-	maplist(write(Stream), Chars).
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Edinburgh...
 
@@ -589,9 +519,20 @@ load_files(Files) :- load_files(Files,[]).
 consult(Files) :- load_files(Files,[]).
 reconsult(Files) :- load_files(Files,[]).
 deconsult(Files) :- unload_files(Files).
-strip_module(T,M,P) :- T=M:P -> true ; P=T, module(M).
+strip_module(T,M,P) :- T=M:P -> true ; P=T.
 ?=(X,Y) :- \+ unifiable(X,Y,[_|_]).
 '$skip_list'(Skip,Xs0,Xs) :- '$skip_max_list'(Skip,_,Xs0,Xs).
+
+between(I,J,K) :- '$between'(I,J,K,_).
+length(L,N) :- '$length'(L,N,_).
+arg(X,Y,Z) :- '$arg'(X,Y,Z,_).
+
+iso_dif(X, Y) :-
+	X \== Y,
+	( X \= Y
+	-> true
+	; throw(error(instantiation_error,iso_dif/2))
+	).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SWI compatible

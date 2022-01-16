@@ -54,10 +54,12 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 	if (box == CALL)
 		box = q->retry?REDO:q->resume?NEXT:CALL;
 
+#if 0
 	const char *src = GET_STR(q, c);
 
 	if (!strcmp(src, ",") || !strcmp(src, ";") || !strcmp(src, "->") || !strcmp(src, "*->"))
 		return;
+#endif
 
 	fprintf(stderr, " [%llu] ", (unsigned long long)q->step++);
 	fprintf(stderr, "%s ",
@@ -75,6 +77,11 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 		q->st.curr_frame, f->nbr_vars, f->nbr_slots, any_choices(q, f),
 		f->cgen, ch->cgen,
 		q->st.tp, q->cp, q->st.fp, q->st.sp, q->st.hp);
+#endif
+
+#if 0
+	for (unsigned i = 0; i < q->cp; i++)
+		fprintf(stderr, "    ");
 #endif
 
 	int save_depth = q->max_depth;
@@ -191,7 +198,12 @@ static bool is_next_key(query *q, clause *r)
 	if (q->st.arg3_is_ground && r->arg3_is_unique)
 		return false;
 
-	return true;
+	db_entry *next = q->st.curr_clause->next;
+
+	while (next && next->cl.ugen_erased)
+		next = next->next;
+
+	return next ? true : false;
 }
 
 static void next_key(query *q)
@@ -380,7 +392,7 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 	LIST_HANDLER(l);
 	int cnt = 0;
 
-	while (is_iso_list(l) && !is_cyclic_term(q, l, l_ctx)
+	while (is_iso_list(l) /*&& !is_cyclic_term(q, l, l_ctx)*/
 		&& (q->st.m->flag.double_quote_chars || allow_codes)
 		&& !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(l);
@@ -767,18 +779,16 @@ void stash_me(query *q, clause *r, bool last_match)
 pl_status make_choice(query *q)
 {
 	may_error(check_choice(q));
-
 	frame *f = GET_CURR_FRAME();
 	pl_idx_t curr_choice = q->cp++;
 	choice *ch = GET_CHOICE(curr_choice);
-	memset(ch, 0, sizeof(choice));
+	*ch = (choice){0};
 	ch->ugen = f->ugen;
 	ch->orig_cgen = ch->cgen = f->cgen;
 	ch->st = q->st;
 	ch->nbr_vars = f->nbr_vars;
 	ch->nbr_slots = f->nbr_slots;
 	ch->overflow = f->overflow;
-
 	return pl_success;
 }
 
@@ -1046,7 +1056,15 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 {
 	frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
-	cell *attrs = e->c.attrs;
+
+	while (is_variable(&e->c)) {
+		c = &e->c;
+		c_ctx = e->ctx;
+		f = GET_FRAME(c_ctx);
+		e = GET_SLOT(f, c->var_nbr);
+	}
+
+	cell *attrs = is_empty(&e->c) ? e->c.attrs : NULL;
 	pl_idx_t attrs_ctx = e->c.attrs_ctx;
 
 	if (q->cp || attrs)
@@ -1080,7 +1098,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	}
 }
 
-void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
+void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx, bool trailing)
 {
 	const frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
@@ -1092,43 +1110,17 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		e = GET_SLOT(f, c->var_nbr);
 	}
 
-	e->ctx = v_ctx;
-
-	cell *attrs = NULL;
-	pl_idx_t attrs_ctx = 0;
-
-	if (is_empty(&e->c)) {
-		attrs = e->c.attrs;
-		attrs_ctx = e->c.attrs_ctx;
-	} else
-		attrs = NULL;
-
-	if (is_structure(v))
+	if (is_structure(v)) {
 		make_indirect(&e->c, v);
-	else {
+	} else {
 		share_cell(v);
 		e->c = *v;
 	}
 
-	if (attrs) {
-		if (is_variable(v)) {
-			const frame *f = GET_FRAME(v_ctx);
-			slot *e = GET_SLOT(f, v->var_nbr);
+	e->ctx = v_ctx;
 
-			if (!e->c.attrs) {
-				e->c.attrs = attrs;
-				e->c.attrs_ctx = attrs_ctx;
-
-				if (q->cp)
-					add_trail(q, v_ctx, v->var_nbr, NULL, 0);
-			} else
-				q->has_attrs = true;
-		} else
-			q->has_attrs = true;
-	}
-
-	if (q->cp)
-		add_trail(q, c_ctx, c->var_nbr, attrs, attrs_ctx);
+	if (q->cp && trailing)
+		add_trail(q, c_ctx, c->var_nbr, NULL, 0);
 }
 
 static bool check_update_view(const frame *f, const db_entry *c)
@@ -1655,7 +1647,7 @@ static bool check_redo(query *q)
 
 static bool any_outstanding_choices(query *q)
 {
-	if (!q->cp)
+	if (q->cp <= 1)
 		return false;
 
 	choice *ch = GET_CURR_CHOICE();
@@ -1668,7 +1660,7 @@ static bool any_outstanding_choices(query *q)
 		drop_choice(q);
 	}
 
-	return q->cp > 0;
+	return q->cp > 1;
 }
 
 static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
