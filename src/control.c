@@ -41,8 +41,11 @@ USE_RESULT pl_status fn_sys_cut_if_det_1(query *q)
 USE_RESULT pl_status fn_sys_cleanup_if_det_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
+	pl_idx_t before = get_smallint(p1);
 
-	if (get_smallint(p1) != q->cp)
+	printf("*** before=%u, q->cp=%u\n", before, q->cp);
+
+	if (before != q->cp)
 		return pl_success;
 
 	drop_choice(q);

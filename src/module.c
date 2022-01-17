@@ -897,6 +897,8 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 
 db_entry *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 {
+LOOP:
+
 	db_entry *dbe = assert_begin(m, nbr_vars, p1, consulting);
 	if (!dbe) return NULL;
 	predicate *pr = dbe->owner;
@@ -904,9 +906,31 @@ db_entry *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 	if (pr->head)
 		pr->head->prev = dbe;
 
-	if (pr->head && !pr->is_multifile && dbe->filename && pr->head->filename) {
-		if (strchr(dbe->filename, '$') && dbe->filename != pr->head->filename)
+	if (pr->head && !pr->is_multifile
+		&& (GET_STR(m, &pr->key)[0] != '$')
+		&& dbe->filename && pr->head->filename) {
+		if (dbe->filename != pr->head->filename) {
 			fprintf(stderr, "Warning: overwriting %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
+
+			for (predicate *pr = m->head; pr; pr = pr->next) {
+				for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
+					if (dbe->cl.ugen_erased)
+						continue;
+
+					if (!retract_from_db(m, dbe))
+						continue;
+
+					dbe->dirty = pr->dirty_list;
+					pr->dirty_list = dbe;
+					pr->is_processed = false;
+				}
+
+				m_destroy(pr->idx_save);
+				m_destroy(pr->idx);
+			}
+
+			goto LOOP;
+		}
 	}
 
 	dbe->next = pr->head;
@@ -921,6 +945,8 @@ db_entry *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 
 db_entry *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 {
+LOOP:
+
 	db_entry *dbe = assert_begin(m, nbr_vars, p1, consulting);
 	if (!dbe) return NULL;
 	predicate *pr = dbe->owner;
@@ -928,9 +954,31 @@ db_entry *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 	if (pr->tail)
 		pr->tail->next = dbe;
 
-	if (pr->head && !pr->is_multifile && dbe->filename && pr->head->filename) {
-		if (strchr(dbe->filename, '$') && dbe->filename != pr->head->filename)
+	if (pr->head && !pr->is_multifile
+		&& (GET_STR(m, &pr->key)[0] != '$')
+		&& dbe->filename && pr->head->filename) {
+		if (dbe->filename != pr->head->filename) {
 			fprintf(stderr, "Warning: overwriting %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
+
+			for (predicate *pr = m->head; pr; pr = pr->next) {
+				for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
+					if (dbe->cl.ugen_erased)
+						continue;
+
+					if (!retract_from_db(m, dbe))
+						continue;
+
+					dbe->dirty = pr->dirty_list;
+					pr->dirty_list = dbe;
+					pr->is_processed = false;
+				}
+
+				m_destroy(pr->idx_save);
+				m_destroy(pr->idx);
+			}
+
+			goto LOOP;
+		}
 	}
 
 	dbe->prev = pr->tail;
