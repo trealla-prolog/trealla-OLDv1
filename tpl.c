@@ -155,7 +155,7 @@ int main(int ac, char *av[])
 
 	//bool did_load = false;
 	int i, do_goal = 0, do_lib = 0;
-	int version = 0, quiet = 0, daemon = 0;
+	int version = 0, daemon = 0;
 	bool ns = false, no_res = false;
 	void *pl = pl_create();
 	if (!pl)
@@ -180,7 +180,6 @@ int main(int ac, char *av[])
 			version = 1;
 		} else if (!strcmp(av[i], "-q") || !strcmp(av[i], "--quiet")) {
 			set_quiet(pl);
-			quiet = 1;
 		} else if (!strcmp(av[i], "-O0") || !strcmp(av[i], "--noopt"))
 			set_opt(pl, 0);
 		else if (!strcmp(av[i], "-t") || !strcmp(av[i], "--trace"))
@@ -251,7 +250,7 @@ int main(int ac, char *av[])
 		}
 	}
 
-	if (!no_res)
+	if (!no_res && !version)
 		pl_consult(pl, "~/.tplrc");
 
 	if (goal) {
@@ -290,7 +289,7 @@ int main(int ac, char *av[])
 		fprintf(stdout, "  --stats\t\t- print stats\n");
 	}
 
-	if (version && !quiet) {
+	if (version) {
 		pl_destroy(pl);
 		return 0;
 	}
