@@ -895,20 +895,8 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 		m_app(pr->idx, c, dbe);
 }
 
-db_entry *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
+static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
 {
-	db_entry *dbe;
-	predicate *pr;
-
-LOOP:
-
-	dbe = assert_begin(m, nbr_vars, p1, consulting);
-	if (!dbe) return NULL;
-	pr = dbe->owner;
-
-	if (pr->head)
-		pr->head->prev = dbe;
-
 	if (pr->head && !pr->is_multifile && !pr->is_dynamic
 		&& (GET_STR(m, &pr->key)[0] != '$')) {
 		if (dbe->filename != pr->head->filename) {
@@ -929,9 +917,29 @@ LOOP:
 			m_destroy(pr->idx_save);
 			m_destroy(pr->idx);
 			pr->head = pr->tail = NULL;
-			goto LOOP;
+			return false;
 		}
 	}
+
+	return true;
+}
+
+db_entry *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
+{
+	db_entry *dbe;
+	predicate *pr;
+
+LOOP:
+
+	dbe = assert_begin(m, nbr_vars, p1, consulting);
+	if (!dbe) return NULL;
+	pr = dbe->owner;
+
+	if (pr->head)
+		pr->head->prev = dbe;
+
+	if (!check_multifile(m, pr, dbe))
+		goto LOOP;
 
 	dbe->next = pr->head;
 	pr->head = dbe;
@@ -957,29 +965,8 @@ LOOP:
 	if (pr->tail)
 		pr->tail->next = dbe;
 
-	if (pr->head && !pr->is_multifile && !pr->is_dynamic
-		&& (GET_STR(m, &pr->key)[0] != '$')) {
-		if (dbe->filename != pr->head->filename) {
-			fprintf(stderr, "Warning: overwriting %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
-
-			for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
-				if (dbe->cl.ugen_erased)
-					continue;
-
-				if (!retract_from_db(m, dbe))
-					continue;
-
-				dbe->dirty = pr->dirty_list;
-				pr->dirty_list = dbe;
-				pr->is_processed = false;
-			}
-
-			m_destroy(pr->idx_save);
-			m_destroy(pr->idx);
-			pr->head = pr->tail = NULL;
-			goto LOOP;
-		}
-	}
+	if (!check_multifile(m, pr, dbe))
+		goto LOOP;
 
 	dbe->prev = pr->tail;
 	pr->tail = dbe;
