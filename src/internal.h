@@ -448,7 +448,7 @@ struct frame_ {
 	module *m;
 	uint64_t ugen;
 	pl_idx_t prev_frame, base_slot_nbr, overflow;
-	uint32_t nbr_slots, nbr_vars, cgen;
+	uint32_t nbr_slots, nbr_vars, cp;
 	bool is_complex:1;
 	bool is_last:1;
 };
@@ -497,7 +497,7 @@ struct choice_ {
 	prolog_state st;
 	uint64_t ugen;
 	pl_idx_t v1, v2, overflow;
-	uint32_t nbr_slots, nbr_vars, cgen, orig_cgen;
+	uint32_t nbr_slots, nbr_vars, cp, frame_cp;
 	bool catchme_retry:1;
 	bool catchme_exception:1;
 	bool barrier:1;

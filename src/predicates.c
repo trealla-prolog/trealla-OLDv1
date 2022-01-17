@@ -147,7 +147,7 @@ void make_return(query *q, cell *tmp)
 	cell *c = q->st.curr_cell;
 	frame *f = GET_CURR_FRAME();
 	tmp->val_ret = c ? c + c->nbr_cells : NULL;	// save the return instruction
-	tmp->cgen = f->cgen;						// ... choice-generation
+	tmp->cgen = f->cp;						// ... choice-generation
 	tmp->mod_id = q->st.m->id;					// ... current-module
 }
 
