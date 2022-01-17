@@ -1830,7 +1830,8 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	*srcptr = s;
 	ch = peek_char_utf8(*srcptr);
 
-	if ((ch == '(') /*|| iswalpha(ch)*/) {
+	//if ((ch == '(') || iswalpha(ch)) {
+	if (ch == '(') {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
