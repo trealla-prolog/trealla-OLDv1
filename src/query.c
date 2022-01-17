@@ -38,7 +38,7 @@ static bool any_choices(const query *q, const frame *f)
 
 	pl_idx_t curr_choice = q->cp - (q->in_commit ? 2 : 1);
 	const choice *ch = GET_CHOICE(curr_choice);
-	return ch->cp > f->cp;
+	return ch->cgen > f->cgen;
 }
 
 static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
@@ -75,7 +75,7 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 	choice *ch = GET_CURR_CHOICE();
 	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u(f%u:ch%u):tp%u:cp%u:fp%u:sp%u:hp%u} ",
 		q->st.curr_frame, f->nbr_vars, f->nbr_slots, any_choices(q, f),
-		f->cp, ch->cp,
+		f->cgen, ch->cgen,
 		q->st.tp, q->cp, q->st.fp, q->st.sp, q->st.hp);
 #endif
 
@@ -556,7 +556,7 @@ LOOP:
 
 	frame *f = GET_CURR_FRAME();
 	f->ugen = ch->ugen;
-	f->cp = ch->frame_cp;
+	f->cgen = ch->frame_cgen;
 	f->nbr_vars = ch->nbr_vars;
 	f->nbr_slots = ch->nbr_slots;
 	f->overflow = ch->overflow;
@@ -569,7 +569,7 @@ static frame *make_frame(query *q, unsigned nbr_vars)
 	frame *f = GET_FRAME(new_frame);
 	f->prev_frame = q->st.curr_frame;
 	f->prev_cell = q->st.curr_cell;
-	f->cp = ++q->cgen;
+	f->cgen = ++q->cgen;
 	f->is_complex = false;
 	f->is_last = false;
 	f->overflow = 0;
@@ -633,7 +633,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 		to->c.attrs = NULL;
 	}
 
-	f->cp = newf->cp;
+	f->cgen = newf->cgen;
 	f->nbr_slots = nbr_vars;
 	f->nbr_vars = nbr_vars;
 	f->overflow = 0;
@@ -744,7 +744,7 @@ static void commit_me(query *q, clause *r)
 		trim_trail(q);
 	} else {
 		ch->st.curr_clause = q->st.curr_clause;
-		ch->cp = f->cp;
+		ch->cgen = f->cgen;
 	}
 
 	q->st.curr_cell = get_body(r->cells);
@@ -762,7 +762,7 @@ void stash_me(query *q, clause *r, bool last_match)
 	} else {
 		choice *ch = GET_CURR_CHOICE();
 		ch->st.curr_clause2 = q->st.curr_clause2;
-		ch->cp = cgen = ++q->cgen;
+		ch->cgen = cgen = ++q->cgen;
 	}
 
 	unsigned nbr_vars = r->nbr_vars;
@@ -770,7 +770,7 @@ void stash_me(query *q, clause *r, bool last_match)
 	frame *f = GET_FRAME(new_frame);
 	f->prev_frame = q->st.curr_frame;
 	f->prev_cell = NULL;
-	f->cp = cgen;
+	f->cgen = cgen;
 	f->overflow = 0;
 
 	q->st.sp += nbr_vars;
@@ -784,7 +784,7 @@ pl_status make_choice(query *q)
 	choice *ch = GET_CHOICE(curr_choice);
 	*ch = (choice){0};
 	ch->ugen = f->ugen;
-	ch->frame_cp = ch->cp = f->cp;
+	ch->frame_cgen = ch->cgen = f->cgen;
 	ch->st = q->st;
 	ch->nbr_vars = f->nbr_vars;
 	ch->nbr_slots = f->nbr_slots;
@@ -800,7 +800,7 @@ pl_status make_barrier(query *q)
 	may_error(make_choice(q));
 	frame *f = GET_CURR_FRAME();
 	choice *ch = GET_CURR_CHOICE();
-	ch->cp = f->cp = ++q->cgen;
+	ch->cgen = f->cgen = ++q->cgen;
 	ch->barrier = true;
 	return pl_success;
 }
@@ -838,9 +838,9 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 		choice *ch = GET_CURR_CHOICE();
 
 		while (soft_cut) {
-			if (ch->barrier && (ch->cp == f->cp)) {
+			if (ch->barrier && (ch->cgen == f->cgen)) {
 				ch->soft_cut = true;
-				f->cp--;
+				f->cgen--;
 				return;
 			}
 
@@ -849,14 +849,14 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 
 		// A normal cut can't break through a barrier...
 
-		if (!inner_cut && ch->barrier && (ch->cp == f->cp))
+		if (!inner_cut && ch->barrier && (ch->cgen == f->cgen))
 			break;
 
 		// Whereas an inner cut clears the barrier.
 
-		if (ch->cp < f->cp) {
+		if (ch->cgen < f->cgen) {
 			if (inner_cut)
-				f->cp--;
+				f->cgen--;
 
 			break;
 		}
@@ -911,7 +911,7 @@ void cut_if_det(query *q)
 
 	choice *ch = GET_CURR_CHOICE();
 
-	if (ch->call_barrier && (ch->cp == f->cp))
+	if (ch->call_barrier && (ch->cgen == f->cgen))
 		drop_choice(q);
 }
 
@@ -925,7 +925,7 @@ static void proceed(query *q)
 	while (q->st.curr_cell && is_end(q->st.curr_cell)) {
 		if (q->st.curr_cell->val_ret) {
 			cut_if_det(q);
-			f->cp = q->st.curr_cell->cgen;	// set the cgen back
+			f->cgen = q->st.curr_cell->cgen;	// set the cgen back
 		}
 
 		if (q->st.curr_cell->mod_id != q->st.m->id)
@@ -947,7 +947,7 @@ static bool resume_frame(query *q)
 #if 0
 	if (q->cp > 1) {
 		const choice *ch = GET_CURR_CHOICE();
-		printf("*** resume f->cp=%u, ch->cp=%u\n", f->cp, ch->cp);
+		printf("*** resume f->cgen=%u, ch->cgen=%u\n", f->cgen, ch->cgen);
 	}
 #endif
 
