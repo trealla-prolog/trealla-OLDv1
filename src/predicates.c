@@ -7679,6 +7679,15 @@ static USE_RESULT pl_status fn_read_term_from_chars_2(query *q)
 		return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
 	}
 
+	while (iswspace(*src))
+		src++;
+
+	if (!*src) {
+		cell tmp;
+		make_literal(&tmp, g_eof_s);
+		return unify(q, p_term, p_term_ctx, &tmp, q->st.curr_frame);
+	}
+
 	const char *end_ptr = src + strlen(src) - 1;
 
 	while (isspace(*end_ptr) && (end_ptr != src))
