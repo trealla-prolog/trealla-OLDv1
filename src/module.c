@@ -909,7 +909,7 @@ LOOP:
 	if (pr->head)
 		pr->head->prev = dbe;
 
-	if (pr->head && !pr->is_multifile
+	if (pr->head && !pr->is_multifile && !pr->is_dynamic
 		&& (GET_STR(m, &pr->key)[0] != '$')
 		&& dbe->filename && pr->head->filename) {
 		if (dbe->filename != pr->head->filename) {
@@ -960,7 +960,7 @@ LOOP:
 	if (pr->tail)
 		pr->tail->next = dbe;
 
-	if (pr->head && !pr->is_multifile
+	if (pr->head && !pr->is_multifile && !pr->is_dynamic
 		&& (GET_STR(m, &pr->key)[0] != '$')
 		&& dbe->filename && pr->head->filename) {
 		if (dbe->filename != pr->head->filename) {
