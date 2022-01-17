@@ -929,17 +929,15 @@ db_entry *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 	db_entry *dbe;
 	predicate *pr;
 
-LOOP:
+	do {
+		dbe = assert_begin(m, nbr_vars, p1, consulting);
+		if (!dbe) return NULL;
+		pr = dbe->owner;
 
-	dbe = assert_begin(m, nbr_vars, p1, consulting);
-	if (!dbe) return NULL;
-	pr = dbe->owner;
-
-	if (pr->head)
-		pr->head->prev = dbe;
-
-	if (!check_multifile(m, pr, dbe))
-		goto LOOP;
+		if (pr->head)
+			pr->head->prev = dbe;
+	}
+	 while (!check_multifile(m, pr, dbe));
 
 	dbe->next = pr->head;
 	pr->head = dbe;
@@ -956,17 +954,16 @@ db_entry *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 	db_entry *dbe;
 	predicate *pr;
 
-LOOP:
+	do {
+		dbe = assert_begin(m, nbr_vars, p1, consulting);
+		if (!dbe) return NULL;
+		pr = dbe->owner;
 
-	dbe = assert_begin(m, nbr_vars, p1, consulting);
-	if (!dbe) return NULL;
-	pr = dbe->owner;
+		if (pr->tail)
+			pr->tail->next = dbe;
 
-	if (pr->tail)
-		pr->tail->next = dbe;
-
-	if (!check_multifile(m, pr, dbe))
-		goto LOOP;
+	}
+	 while (!check_multifile(m, pr, dbe));
 
 	dbe->prev = pr->tail;
 	pr->tail = dbe;
