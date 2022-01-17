@@ -1286,7 +1286,7 @@ module *load_fp(module *m, FILE *fp, const char *filename, bool including)
 	parser *p = create_parser(m);
 	if (!p) return NULL;
 	const char *save_filename = m->filename;
-	m->filename = set_known(m, filename);
+	if (!including) m->filename = set_known(m, filename);
 	p->consulting = true;
 	p->fp = fp;
 	bool ok = false;
