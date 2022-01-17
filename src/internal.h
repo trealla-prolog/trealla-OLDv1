@@ -485,7 +485,7 @@ struct prolog_state_ {
 	module *m;
 	miter *iter;
 	pl_idx_t curr_frame, fp, hp, tp, sp;
-	uint32_t cgen, arena_nbr;
+	uint32_t arena_nbr;
 	uint8_t qnbr;
 	bool definite:1;
 	bool arg1_is_ground:1;
@@ -564,6 +564,7 @@ struct query_ {
 	pl_idx_t max_choices, max_frames, max_slots, max_trails, save_tp;
 	pl_idx_t h_size, tmph_size, tot_heaps, tot_heapsize, undo_lo_tp, undo_hi_tp;
 	pl_idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
+	uint32_t cgen;
 	uint8_t nv_mask[MAX_ARITY];
 	prolog_flags flag;
 	enum q_retry retry;

@@ -529,7 +529,7 @@ pl_idx_t drop_choice(query *q)
 		return q->cp;
 
 	if (!--q->cp)
-		q->st.cgen = 0;
+		q->cgen = 0;
 
 	return q->cp;
 }
@@ -539,7 +539,7 @@ bool retry_choice(query *q)
 LOOP:
 
 	if (!q->cp) {
-		q->st.cgen = 0;
+		q->cgen = 0;
 		return false;
 	}
 
@@ -569,7 +569,7 @@ static frame *make_frame(query *q, unsigned nbr_vars)
 	frame *f = GET_FRAME(new_frame);
 	f->prev_frame = q->st.curr_frame;
 	f->prev_cell = q->st.curr_cell;
-	f->cp = ++q->st.cgen;
+	f->cp = ++q->cgen;
 	f->is_complex = false;
 	f->is_last = false;
 	f->overflow = 0;
@@ -754,7 +754,7 @@ static void commit_me(query *q, clause *r)
 
 void stash_me(query *q, clause *r, bool last_match)
 {
-	pl_idx_t cgen = q->st.cgen;
+	pl_idx_t cgen = q->cgen;
 
 	if (last_match) {
 		unshare_predicate(q, q->st.pr2);
@@ -762,7 +762,7 @@ void stash_me(query *q, clause *r, bool last_match)
 	} else {
 		choice *ch = GET_CURR_CHOICE();
 		ch->st.curr_clause2 = q->st.curr_clause2;
-		ch->cp = cgen = ++q->st.cgen;
+		ch->cp = cgen = ++q->cgen;
 	}
 
 	unsigned nbr_vars = r->nbr_vars;
@@ -800,7 +800,7 @@ pl_status make_barrier(query *q)
 	may_error(make_choice(q));
 	frame *f = GET_CURR_FRAME();
 	choice *ch = GET_CURR_CHOICE();
-	ch->cp = f->cp = ++q->st.cgen;
+	ch->cp = f->cp = ++q->cgen;
 	ch->barrier = true;
 	return pl_success;
 }
