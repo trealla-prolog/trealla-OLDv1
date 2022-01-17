@@ -8735,7 +8735,7 @@ static int do_b64decode_2(query *q)
 	return ok;
 }
 
-static USE_RESULT pl_status fn_base64_2(query *q)
+static USE_RESULT pl_status fn_base64_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -8831,7 +8831,7 @@ static pl_status do_urldecode_2(query *q)
 	return ok;
 }
 
-static USE_RESULT pl_status fn_urlenc_2(query *q)
+static USE_RESULT pl_status fn_urlenc_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -11702,8 +11702,8 @@ static const struct builtins g_predicates_other[] =
 	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+chars,-clause,+opts", false},
 	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "+clause,+list,?chars", false},
 	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "+clause,+list,?chars", false},
-	{"base64", 2, fn_base64_2, "?string,?string", false},
-	{"urlenc", 2, fn_urlenc_2, "?string,?string", false},
+	{"base64", 3, fn_base64_3, "?string,?string,+Opts", false},
+	{"urlenc", 3, fn_urlenc_3, "?string,?string,+Opts", false},
 	{"atom_lower", 2, fn_atom_lower_2, "?atom,?atom", false},
 	{"atom_upper", 2, fn_atom_upper_2, "?atom,?atom", false},
 	{"string_lower", 2, fn_string_lower_2, "?string,?string", false},
