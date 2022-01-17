@@ -573,10 +573,8 @@ static frame *make_frame(query *q, unsigned nbr_vars)
 	f->is_complex = false;
 	f->is_last = false;
 	f->overflow = 0;
-
 	q->st.sp += nbr_vars;
 	q->st.curr_frame = new_frame;
-	f = GET_FRAME(q->st.curr_frame);
 	return f;
 }
 
