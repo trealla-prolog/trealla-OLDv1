@@ -1668,7 +1668,7 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 	if (is_string(l)) {
 		char *s = DUP_SLICE(q, l);
 
-		if (!load_file(q->p->m, s)) {
+		if (!load_file(q->p->m, s, false)) {
 			cell tmp;
 			make_cstring(&tmp, s);
 			free(s);
@@ -1692,7 +1692,7 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 		} else {
 			char *s = DUP_SLICE(q, h);
 
-			if (!load_file(q->p->m, s)) {
+			if (!load_file(q->p->m, s, false)) {
 				cell tmp;
 				make_cstring(&tmp, s);
 				free(s);

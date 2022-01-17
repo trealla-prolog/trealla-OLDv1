@@ -8463,7 +8463,7 @@ static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 		unload_file(q->st.m, filename);
 		free(src);
 
-		if (!load_file(q->st.m, filename)) {
+		if (!load_file(q->st.m, filename, false)) {
 			free(filename);
 			return throw_error(q, p1, p1_ctx, "existence_error", "source_sink");
 		}
@@ -8490,7 +8490,7 @@ static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 	filename = relative_to(q->st.m->filename, filename);
 	unload_file(q->st.m, filename);
 
-	if (!load_file(tmp_m, filename)) {
+	if (!load_file(tmp_m, filename, false)) {
 		destroy_module(tmp_m);
 		free(filename);
 		return throw_error(q, p1, p1_ctx, "existence_error", "source_sink");
@@ -11301,7 +11301,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 	char *filename = relative_to(q->st.m->filename, name);
 	module *m;
 
-	if (!(m = load_file(q->st.m, filename))) {
+	if (!(m = load_file(q->st.m, filename, false))) {
 		fprintf(stdout, "Error: module file not found: %s\n", filename);
 		free(filename);
 		return pl_failure;

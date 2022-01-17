@@ -228,7 +228,7 @@ static void consultall(parser *p, cell *l)
 		else {
 			char *s = GET_STR(p, h);
 
-			if (!load_file(p->m, s))
+			if (!load_file(p->m, s, false))
 				fprintf(stdout, "Error: file not found: '%s'\n", s);
 		}
 
@@ -368,7 +368,7 @@ static void directives(parser *p, cell *d)
 		const char *name = GET_STR(p, p1);
 		char *filename = relative_to(p->m->filename, name);
 
-		if (!load_file(p->m, filename)) {
+		if (!load_file(p->m, filename, true)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: not found: %s\n", filename);
 
@@ -388,7 +388,7 @@ static void directives(parser *p, cell *d)
 		const char *name = GET_STR(p, p1);
 		char *filename = relative_to(p->m->filename, name);
 
-		if (!load_file(p->m, filename)) {
+		if (!load_file(p->m, filename, false)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: not found: %s\n", filename);
 
@@ -627,7 +627,7 @@ static void directives(parser *p, cell *d)
 		char *filename = relative_to(p->m->filename, name);
 		module *m;
 
-		if (!(m = load_file(p->m, filename))) {
+		if (!(m = load_file(p->m, filename, false))) {
 			//if (DUMP_ERRS || !p->do_read_term)
 			//	fprintf(stdout, "Error: using module file: %s\n", filename);
 

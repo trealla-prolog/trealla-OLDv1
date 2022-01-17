@@ -1281,7 +1281,7 @@ bool unload_file(module *m, const char *filename)
 	return unload_realfile(m, filename);
 }
 
-module *load_fp(module *m, FILE *fp, const char *filename)
+module *load_fp(module *m, FILE *fp, const char *filename, bool including)
 {
 	parser *p = create_parser(m);
 	if (!p) return NULL;
@@ -1346,7 +1346,7 @@ module *load_fp(module *m, FILE *fp, const char *filename)
 	return save_m;
 }
 
-module *load_file(module *m, const char *filename)
+module *load_file(module *m, const char *filename, bool including)
 {
 	const char *orig_filename = filename;
 
@@ -1355,7 +1355,7 @@ module *load_file(module *m, const char *filename)
 			stream *str = &m->pl->streams[i];
 
 			if (!strcmp(str->name, "user_input")) {
-				module *save_m = load_fp(m, str->fp, filename);
+				module *save_m = load_fp(m, str->fp, filename, including);
 				clearerr(str->fp);
 				return save_m;
 			}
@@ -1405,7 +1405,7 @@ module *load_file(module *m, const char *filename)
 		char *tmpbuf = malloc(strlen(orig_filename+20));
 		strcpy(tmpbuf, orig_filename);
 		strcat(tmpbuf, ".pl");
-		m = load_file(m, tmpbuf);
+		m = load_file(m, tmpbuf, including);
 		free(tmpbuf);
 		return m;
 	}
@@ -1425,7 +1425,7 @@ module *load_file(module *m, const char *filename)
 		fseek(fp, 0, SEEK_SET);
 
 	clearerr(fp);
-	module *save_m = load_fp(m, fp, filename);
+	module *save_m = load_fp(m, fp, filename, including);
 	fclose(fp);
 	free(realbuf);
 	return save_m;

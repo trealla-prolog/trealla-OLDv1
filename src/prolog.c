@@ -138,12 +138,12 @@ bool pl_eval(prolog *pl, const char *s)
 
 bool pl_consult_fp(prolog *pl, FILE *fp, const char *filename)
 {
-	return load_fp(pl->user_m, fp, filename) != NULL;
+	return load_fp(pl->user_m, fp, filename, false) != NULL;
 }
 
 bool pl_consult(prolog *pl, const char *filename)
 {
-	return load_file(pl->user_m, filename);
+	return load_file(pl->user_m, filename, false);
 }
 
 static void g_destroy()

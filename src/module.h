@@ -5,8 +5,8 @@ void duplicate_module(prolog *pl, module *m, const char *name);
 void destroy_module(module *m);
 
 bool save_file(module *m, const char *filename);
-module *load_file(module *m, const char *filename);
-module *load_fp(module *m, FILE *fp, const char *filename);
+module *load_file(module *m, const char *filename, bool including);
+module *load_fp(module *m, FILE *fp, const char *filename, bool including);
 module *load_text(module *m, const char *src, const char *filename);
 
 void convert_to_literal(module *m, cell *c);
