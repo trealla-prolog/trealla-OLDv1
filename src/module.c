@@ -910,8 +910,7 @@ LOOP:
 		pr->head->prev = dbe;
 
 	if (pr->head && !pr->is_multifile && !pr->is_dynamic
-		&& (GET_STR(m, &pr->key)[0] != '$')
-		&& dbe->filename && pr->head->filename) {
+		&& (GET_STR(m, &pr->key)[0] != '$')) {
 		if (dbe->filename != pr->head->filename) {
 			fprintf(stderr, "Warning: overwriting %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
 
@@ -929,6 +928,7 @@ LOOP:
 
 			m_destroy(pr->idx_save);
 			m_destroy(pr->idx);
+			pr->head = pr->tail = NULL;
 			goto LOOP;
 		}
 	}
@@ -958,8 +958,7 @@ LOOP:
 		pr->tail->next = dbe;
 
 	if (pr->head && !pr->is_multifile && !pr->is_dynamic
-		&& (GET_STR(m, &pr->key)[0] != '$')
-		&& dbe->filename && pr->head->filename) {
+		&& (GET_STR(m, &pr->key)[0] != '$')) {
 		if (dbe->filename != pr->head->filename) {
 			fprintf(stderr, "Warning: overwriting %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
 
@@ -977,6 +976,7 @@ LOOP:
 
 			m_destroy(pr->idx_save);
 			m_destroy(pr->idx);
+			pr->head = pr->tail = NULL;
 			goto LOOP;
 		}
 	}
@@ -1355,6 +1355,10 @@ module *load_file(module *m, const char *filename, bool including)
 			stream *str = &m->pl->streams[i];
 
 			if (!strcmp(str->name, "user_input")) {
+				char tmpbuf[256];
+				static unsigned s_cnt = 1;
+				snprintf(tmpbuf, sizeof(tmpbuf), "user_%u\n", s_cnt++);
+				filename = set_loaded(m, tmpbuf);
 				module *save_m = load_fp(m, str->fp, filename, including);
 				clearerr(str->fp);
 				return save_m;
