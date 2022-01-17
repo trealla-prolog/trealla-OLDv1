@@ -915,23 +915,20 @@ LOOP:
 		if (dbe->filename != pr->head->filename) {
 			fprintf(stderr, "Warning: overwriting %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
 
-			for (predicate *pr = m->head; pr; pr = pr->next) {
-				for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
-					if (dbe->cl.ugen_erased)
-						continue;
+			for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
+				if (dbe->cl.ugen_erased)
+					continue;
 
-					if (!retract_from_db(m, dbe))
-						continue;
+				if (!retract_from_db(m, dbe))
+					continue;
 
-					dbe->dirty = pr->dirty_list;
-					pr->dirty_list = dbe;
-					pr->is_processed = false;
-				}
-
-				m_destroy(pr->idx_save);
-				m_destroy(pr->idx);
+				dbe->dirty = pr->dirty_list;
+				pr->dirty_list = dbe;
+				pr->is_processed = false;
 			}
 
+			m_destroy(pr->idx_save);
+			m_destroy(pr->idx);
 			goto LOOP;
 		}
 	}
@@ -966,23 +963,20 @@ LOOP:
 		if (dbe->filename != pr->head->filename) {
 			fprintf(stderr, "Warning: overwriting %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
 
-			for (predicate *pr = m->head; pr; pr = pr->next) {
-				for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
-					if (dbe->cl.ugen_erased)
-						continue;
+			for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
+				if (dbe->cl.ugen_erased)
+					continue;
 
-					if (!retract_from_db(m, dbe))
-						continue;
+				if (!retract_from_db(m, dbe))
+					continue;
 
-					dbe->dirty = pr->dirty_list;
-					pr->dirty_list = dbe;
-					pr->is_processed = false;
-				}
-
-				m_destroy(pr->idx_save);
-				m_destroy(pr->idx);
+				dbe->dirty = pr->dirty_list;
+				pr->dirty_list = dbe;
+				pr->is_processed = false;
 			}
 
+			m_destroy(pr->idx_save);
+			m_destroy(pr->idx);
 			goto LOOP;
 		}
 	}
