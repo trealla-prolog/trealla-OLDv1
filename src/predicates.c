@@ -6372,7 +6372,7 @@ static USE_RESULT pl_status fn_statistics_2(query *q)
 
 	if (!CMP_SLICE2(q, p1, "cputime") && is_variable(p2)) {
 		uint64_t now = cpu_time_in_usec();
-		double elapsed = now - q->cpu_started;
+		double elapsed = now - q->time_cpu_started;
 		cell tmp;
 		make_real(&tmp, elapsed/1000/1000);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -6388,12 +6388,12 @@ static USE_RESULT pl_status fn_statistics_2(query *q)
 
 	if (!CMP_SLICE2(q, p1, "runtime")) {
 		uint64_t now = cpu_time_in_usec();
-		double elapsed = now - q->cpu_started;
+		double elapsed = now - q->time_cpu_started;
 		cell tmp;
 		make_int(&tmp, elapsed/1000);
 		allocate_list(q, &tmp);
-		elapsed = now - q->cpu_last_started;
-		q->cpu_last_started = now;
+		elapsed = now - q->time_cpu_last_started;
+		q->time_cpu_last_started = now;
 		make_int(&tmp, elapsed/1000);
 		append_list(q, &tmp);
 		make_literal(&tmp, g_nil_s);
@@ -6486,7 +6486,7 @@ static USE_RESULT pl_status fn_get_time_1(query *q)
 static USE_RESULT pl_status fn_cpu_time_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-	double v = ((double)cpu_time_in_usec()-q->cpu_started) / 1000 / 1000;
+	double v = ((double)cpu_time_in_usec()-q->time_cpu_started) / 1000 / 1000;
 	cell tmp;
 	make_real(&tmp, (double)v);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);

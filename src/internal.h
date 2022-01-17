@@ -555,7 +555,7 @@ struct query_ {
 	uint64_t tot_goals, tot_retries, tot_matches, tot_tcos;
 	uint64_t step, qid;
 	uint64_t time_started, get_started;
-	uint64_t cpu_started, cpu_last_started;
+	uint64_t time_cpu_started, time_cpu_last_started;
 	unsigned max_depth;
 	uint64_t tmo_msecs;
 	int nv_start;
