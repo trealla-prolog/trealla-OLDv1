@@ -566,7 +566,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 	if (p->error) {
 		p->error = false;
 
-		if (!isatty(fileno(p->fp))) {
+		if (!p->fp || !isatty(fileno(p->fp))) {
 			void *save_fp = p->fp;
 			p->fp = NULL;
 
@@ -1925,7 +1925,7 @@ static USE_RESULT pl_status fn_iso_atom_length_2(query *q)
 static int new_stream(prolog *pl)
 {
 	for (int i = 0; i < MAX_STREAMS; i++) {
-		if (!pl->streams[i].fp) {
+		if (!pl->streams[i].fp && !pl->streams[i].ignore) {
 			memset(&pl->streams[i], 0, sizeof(stream));
 			return i;
 		}
@@ -7648,7 +7648,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_2(query *q)
 {
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_term,any);
-	int n = q->pl->current_input;
+	int n = 3;
 	stream *str = &q->pl->streams[n];
 	char *src;
 	size_t len;
@@ -7679,8 +7679,15 @@ static USE_RESULT pl_status fn_read_term_from_chars_2(query *q)
 		return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
 	}
 
-	while (iswspace(*src))
-		src++;
+	if (!str->p) {
+		str->p = create_parser(q->st.m);
+		str->p->flag = q->st.m->flag;
+		str->p->fp = str->fp;
+	} else
+		reset(str->p);
+
+	str->p->srcptr = src;
+	src = eat_space(str->p);
 
 	if (!*src) {
 		cell tmp;
@@ -7699,6 +7706,10 @@ static USE_RESULT pl_status fn_read_term_from_chars_2(query *q)
 	cell tmp;
 	make_literal(&tmp, g_nil_s);
 	pl_status ok = do_read_term(q, str, p_term, p_term_ctx, &tmp, q->st.curr_frame, src);
+
+	if (ok != pl_success)
+		return pl_failure;
+
 	free(src);
 	return ok;
 }
@@ -7708,7 +7719,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_term,any);
 	GET_NEXT_ARG(p_opts,list_or_nil);
-	int n = q->pl->current_input;
+	int n = 3;
 	stream *str = &q->pl->streams[n];
 	char *src;
 	size_t len;
@@ -7739,6 +7750,22 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 		return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
 	}
 
+	if (!str->p) {
+		str->p = create_parser(q->st.m);
+		str->p->flag = q->st.m->flag;
+		str->p->fp = str->fp;
+	} else
+		reset(str->p);
+
+	str->p->srcptr = src;
+	src = eat_space(str->p);
+
+	if (!*src) {
+		cell tmp;
+		make_literal(&tmp, g_eof_s);
+		return unify(q, p_term, p_term_ctx, &tmp, q->st.curr_frame);
+	}
+
 	const char *end_ptr = src + strlen(src) - 1;
 
 	while (isspace(*end_ptr) && (end_ptr != src))
@@ -7748,6 +7775,10 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 		strcat(src, ".");
 
 	pl_status ok = do_read_term(q, str, p_term, p_term_ctx, p_opts, p_opts_ctx, src);
+
+	if (ok != pl_success)
+		return pl_failure;
+
 	free(src);
 	return ok;
 }

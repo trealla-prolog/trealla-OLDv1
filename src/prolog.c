@@ -316,6 +316,8 @@ prolog *pl_create()
 	CHECK_SENTINEL(pl->streams[2].mode = strdup("append"), NULL);
 	pl->streams[2].eof_action = eof_action_reset;
 
+	pl->streams[3].ignore = true;;
+
 	pl->funtab = m_create((void*)strcmp, NULL, NULL);
 	m_allow_dups(pl->funtab, false);
 

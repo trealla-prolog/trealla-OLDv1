@@ -464,6 +464,7 @@ struct stream_ {
 	size_t data_len, alloc_nbytes;
 	int ungetch, srclen;
 	uint8_t level, eof_action;
+	bool ignore:1;
 	bool at_end_of_file:1;
 	bool bom:1;
 	bool repo:1;
