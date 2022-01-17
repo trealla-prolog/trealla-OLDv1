@@ -4476,6 +4476,20 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		&& !is_valid_list(q, p2, p2_ctx, true))
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
+	if (is_string(p1)) {
+		cell tmp;
+		make_literal(&tmp, g_dot_s);
+		allocate_list(q, &tmp);
+		LIST_HANDLER(p1);
+		cell *h = LIST_HEAD(p1);
+		append_list(q, h);
+		cell *t = LIST_TAIL(p1);
+		append_list(q, t);
+		cell *l = end_list(q);
+		may_ptr_error(l);
+		return unify(q, p2, p2_ctx, l, p1_ctx);
+	}
+
 	if (is_variable(p2)) {
 		cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, false);
 		may_ptr_error(tmp);
