@@ -7677,7 +7677,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_2(query *q)
 			return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
 	} else if (is_string(p_chars)) {
 		len = LEN_STR(q, p_chars);
-		src = malloc(len+1);
+		src = malloc(len+1+1);
 		may_ptr_error(src);
 		memcpy(src, GET_STR(q, p_chars), len);
 		src[len] = '\0';
@@ -7700,10 +7700,12 @@ static USE_RESULT pl_status fn_read_term_from_chars_2(query *q)
 	} else
 		reset(str->p);
 
+	char *save_src = src;
 	str->p->srcptr = src;
 	src = eat_space(str->p);
 
 	if (!*src) {
+		free(save_src);
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
 		return unify(q, p_term, p_term_ctx, &tmp, q->st.curr_frame);
@@ -7720,11 +7722,11 @@ static USE_RESULT pl_status fn_read_term_from_chars_2(query *q)
 	cell tmp;
 	make_literal(&tmp, g_nil_s);
 	pl_status ok = do_read_term(q, str, p_term, p_term_ctx, &tmp, q->st.curr_frame, src);
+	free(save_src);
 
 	if (ok != pl_success)
 		return pl_failure;
 
-	free(src);
 	return ok;
 }
 
@@ -7771,10 +7773,12 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 	} else
 		reset(str->p);
 
+	char *save_src = src;
 	str->p->srcptr = src;
 	src = eat_space(str->p);
 
 	if (!*src) {
+		free(save_src);
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
 		return unify(q, p_term, p_term_ctx, &tmp, q->st.curr_frame);
@@ -7789,11 +7793,11 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 		strcat(src, ".");
 
 	pl_status ok = do_read_term(q, str, p_term, p_term_ctx, p_opts, p_opts_ctx, src);
+	free(save_src);
 
 	if (ok != pl_success)
 		return pl_failure;
 
-	free(src);
 	return ok;
 }
 
