@@ -815,6 +815,13 @@ static db_entry* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consu
 	}
 
 	if (!pr) {
+		bool found = false, function = false;
+
+		if (get_builtin(m->pl, GET_STR(m, c), c->arity, &found, &function), found && !function) {
+			fprintf(stdout, "Error: overwriting '%s'/%u\n", GET_STR(m, c), c->arity);
+			return NULL;
+		}
+
 		pr = create_predicate(m, c);
 		ensure(pr);
 

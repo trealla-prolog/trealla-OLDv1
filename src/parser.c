@@ -2467,9 +2467,10 @@ static bool process_term(parser *p, cell *p1)
 	}
 
 	if (!p->error && !assertz_to_db(p->m, p->cl->nbr_vars, p1, 1)) {
+#if 0
 		if (DUMP_ERRS || !p->do_read_term)
 			printf("Error: '%s', line %u\n", p->token, p->line_nbr);
-
+#endif
 		p->error = true;
 		return false;
 	}

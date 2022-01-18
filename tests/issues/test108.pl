@@ -373,10 +373,10 @@ remove_duplicates(Xs,Ys) :- no_doubles(Xs,Ys).
 no_doubles([X|Xs],Ys) :-
     member(X,Xs), no_doubles(Xs,Ys).
 no_doubles([X|Xs],[X|Ys]) :-
-    nonmember(X,Xs), no_doubles(Xs,Ys).
+    mynonmember(X,Xs), no_doubles(Xs,Ys).
 no_doubles([],[]).
 
-nonmember(X,[Y|Ys]) :- X \== Y, nonmember(X,Ys).
-nonmember(_,[]).
+mynonmember(X,[Y|Ys]) :- X \== Y, mynonmember(X,Ys).
+mynonmember(_,[]).
 
 compound1(Term) :- functor(Term,_,N),N > 0,!.

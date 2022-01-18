@@ -445,10 +445,6 @@ key_partition_(_, _, List, _, _, _, _) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Edinburgh...
 
-tab(0) :- !.
-tab(N) :- put_code(32), M is N-1, tab(M).
-tab(_, 0) :- !.
-tab(S, N) :- put_code(S, 32), M is N-1, tab(S, M).
 get0(C) :- get_code(C).
 get0(S, C) :- get_code(S, C).
 display(T) :- write_canonical(T).
