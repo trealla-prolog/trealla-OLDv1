@@ -810,7 +810,7 @@ static db_entry* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consu
 	predicate *pr = find_predicate(m, c);
 
 	if (pr && !consulting && !pr->is_dynamic) {
-		fprintf(stdout, "Error: not dynamic '%s'/%u\n", GET_STR(m, c), c->arity);
+		fprintf(stdout, "Error: not dynamic %s/%u\n", GET_STR(m, c), c->arity);
 		return NULL;
 	}
 
@@ -818,7 +818,7 @@ static db_entry* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consu
 		bool found = false, function = false;
 
 		if (get_builtin(m->pl, GET_STR(m, c), c->arity, &found, &function), found && !function) {
-			fprintf(stdout, "Error: overwriting '%s'/%u\n", GET_STR(m, c), c->arity);
+			fprintf(stdout, "Error: permission error modifying %s/%u\n", GET_STR(m, c), c->arity);
 			return NULL;
 		}
 

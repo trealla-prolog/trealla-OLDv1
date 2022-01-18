@@ -5062,9 +5062,9 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	if (!is_literal(head) && !is_cstring(head))
 		return throw_error(q, head, q->st.curr_frame, "type_error", "callable");
 
-	bool found = false;
+	bool found = false, function = false;
 
-	if (get_builtin(q->pl, GET_STR(q, head), head->arity, &found, NULL), found) {
+	if (get_builtin(q->pl, GET_STR(q, head), head->arity, &found, &function), found && !function) {
 		if (!GET_OP(head))
 			return throw_error(q, head, q->st.curr_frame, "permission_error", "modify,static_procedure");
 	}
