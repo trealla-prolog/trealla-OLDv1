@@ -13,11 +13,15 @@
 
 USE_RESULT pl_status fn_iso_true_0(__attribute__((unused)) query *q)
 {
+	q->accum.val_int = 1;
+	q->accum.tag = TAG_INT;
 	return pl_success;
 }
 
 USE_RESULT pl_status fn_iso_fail_0(__attribute__((unused)) query *q)
 {
+	q->accum.val_int = 0;
+	q->accum.tag = TAG_INT;
 	return pl_failure;
 }
 

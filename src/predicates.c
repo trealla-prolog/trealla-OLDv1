@@ -7722,6 +7722,8 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 
 	pl_status ok = do_read_term(q, str, p_term, p_term_ctx, p_opts, p_opts_ctx, src);
 	free(save_src);
+	destroy_parser(str->p);
+	str->p = NULL;
 
 	if (ok != pl_success)
 		return pl_failure;
