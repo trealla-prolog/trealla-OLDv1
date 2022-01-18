@@ -7658,78 +7658,6 @@ static USE_RESULT pl_status fn_bwrite_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_read_term_from_chars_2(query *q)
-{
-	GET_FIRST_ARG(p_chars,any);
-	GET_NEXT_ARG(p_term,any);
-	int n = 3;
-	stream *str = &q->pl->streams[n];
-	char *src;
-	size_t len;
-	bool has_var;
-
-	if (is_atom(p_chars) && !is_string(p_chars)) {
-		if (!strcmp(GET_STR(q, p_chars), "[]")) {
-			cell tmp;
-			make_literal(&tmp, g_eof_s);
-			return unify(q, p_term, p_term_ctx, &tmp, q->st.curr_frame);
-		} else
-			return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
-	} else if (is_string(p_chars)) {
-		len = LEN_STR(q, p_chars);
-		src = malloc(len+1+1);
-		may_ptr_error(src);
-		memcpy(src, GET_STR(q, p_chars), len);
-		src[len] = '\0';
-	} else if ((len = scan_is_chars_list2(q, p_chars, p_chars_ctx, false, &has_var)) > 0) {
-		if (!len)
-			return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
-
-		src = chars_list_to_string(q, p_chars, p_chars_ctx, len);
-	} else {
-		if (has_var)
-			return throw_error(q, p_chars, p_chars_ctx, "instantiation_error", "variable");
-
-		return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
-	}
-
-	if (!str->p) {
-		str->p = create_parser(q->st.m);
-		str->p->flag = q->st.m->flag;
-		str->p->fp = str->fp;
-	} else
-		reset(str->p);
-
-	char *save_src = src;
-	str->p->srcptr = src;
-	src = eat_space(str->p);
-
-	if (!*src) {
-		free(save_src);
-		cell tmp;
-		make_literal(&tmp, g_eof_s);
-		return unify(q, p_term, p_term_ctx, &tmp, q->st.curr_frame);
-	}
-
-	const char *end_ptr = src + strlen(src) - 1;
-
-	while (isspace(*end_ptr) && (end_ptr != src))
-		end_ptr--;
-
-	if (src[strlen(src)-1] != '.')
-		strcat(src, ".");
-
-	cell tmp;
-	make_literal(&tmp, g_nil_s);
-	pl_status ok = do_read_term(q, str, p_term, p_term_ctx, &tmp, q->st.curr_frame, src);
-	free(save_src);
-
-	if (ok != pl_success)
-		return pl_failure;
-
-	return ok;
-}
-
 static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 {
 	GET_FIRST_ARG(p_chars,any);
@@ -11755,7 +11683,6 @@ static const struct builtins g_predicates_other[] =
 	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL, false},
 	{"chdir", 1, fn_chdir_1, "+string", false},
 	{"name", 2, fn_iso_atom_codes_2, "?string,?list", false},
-	{"read_term_from_chars", 2, fn_read_term_from_chars_2, "+chars,-clause", false},
 	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,-clause,+opts", false},
 	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+chars,-clause,+opts", false},
 	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "+clause,+list,?chars", false},

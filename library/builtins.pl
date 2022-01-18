@@ -516,6 +516,7 @@ consult(Files) :- load_files(Files,[]).
 reconsult(Files) :- load_files(Files,[]).
 deconsult(Files) :- unload_files(Files).
 strip_module(T,M,P) :- T=M:P -> true ; P=T.
+read_from_chars(S,T) :- read_term_from_chars(S,T,[]).
 ?=(X,Y) :- \+ unifiable(X,Y,[_|_]).
 '$skip_list'(Skip,Xs0,Xs) :- '$skip_max_list'(Skip,_,Xs0,Xs).
 
