@@ -1465,12 +1465,12 @@ static void dump_vars(query *q, bool partial)
 		if (!strcmp(p->vartab.var_name[i], "_"))
 			continue;
 
+		if ((p->vartab.var_name[i][0] == '_') && (p->vartab.var_name[i][1] == '_'))
+			continue;
+
 		slot *e = GET_SLOT(f, i);
 
 		if (is_empty(&e->c))
-			continue;
-
-		if ((p->vartab.var_name[i][0] == '_') && (p->vartab.var_name[i][1] == '_'))
 			continue;
 
 		cell *c = deref(q, &e->c, e->ctx);
@@ -1520,6 +1520,8 @@ static void dump_vars(query *q, bool partial)
 
 		if (is_cyclic_term(q, c, c_ctx))
 			print_term(q, stdout, c, c_ctx, 0);
+		else if (c->var_nbr == e->c.var_nbr)
+			print_term(q, stdout, &e->c, c_ctx, 0);
 		else
 			print_term(q, stdout, c, c_ctx, -1);
 
