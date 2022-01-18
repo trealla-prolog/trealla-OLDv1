@@ -1520,7 +1520,7 @@ static void dump_vars(query *q, bool partial)
 
 		if (is_cyclic_term(q, c, c_ctx))
 			print_term(q, stdout, c, c_ctx, 0);
-		else if (c->var_nbr == e->c.var_nbr)
+		else if (is_variable(c) && (c->var_nbr == e->c.var_nbr))
 			print_term(q, stdout, &e->c, c_ctx, 0);
 		else
 			print_term(q, stdout, c, c_ctx, -1);
