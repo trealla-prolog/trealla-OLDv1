@@ -194,6 +194,9 @@ pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx)
 	if (q->retry)
 		return pl_failure;
 
+	if (is_string(c))
+		return throw_error(q, c, c_ctx, "type_error", "evaluable");
+
 	if (!c->match)
 		c->match = search_predicate(q->st.m, c);
 
