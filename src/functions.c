@@ -203,6 +203,8 @@ pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx)
 	if (!c->match)
 		return throw_error(q, c, c_ctx, "type_error", "evaluable");
 
+	return throw_error(q, c, c_ctx, "type_error", "evaluable");
+
 	cell *save = q->st.curr_cell;
 	pl_idx_t save_ctx = q->st.curr_frame;
 	cell *tmp = clone_to_heap(q, true, c, 2);
@@ -271,7 +273,7 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 	return pl_failure;
 }
 
-static USE_RESULT pl_status fn_iso_float_1(query *q)
+USE_RESULT pl_status fn_iso_float_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 
@@ -306,7 +308,7 @@ static USE_RESULT pl_status fn_iso_float_1(query *q)
 	return is_real(p1_tmp);
 }
 
-static USE_RESULT pl_status fn_iso_integer_1(query *q)
+USE_RESULT pl_status fn_iso_integer_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 
@@ -352,7 +354,7 @@ static USE_RESULT pl_status fn_iso_abs_1(query *q)
 	else if (is_real(&p1))
 		q->accum.val_real = fabs(p1.val_real);
 	else
-		return throw_error(q, &p1, q->st.curr_frame, "type_error", "number");
+		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 
 	return pl_success;
 }
@@ -371,7 +373,7 @@ static USE_RESULT pl_status fn_iso_sign_1(query *q)
 	else if (is_real(&p1))
 		q->accum.val_real = p1.val_real < 0 ? -1 : p1.val_real > 0  ? 1 : 0;
 	else
-		return throw_error(q, &p1, q->st.curr_frame, "type_error", "number");
+		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 
 	return pl_success;
 }
@@ -402,7 +404,7 @@ static USE_RESULT pl_status fn_iso_negative_1(query *q)
 	else if (is_variable(&p1))
 		return throw_error(q, &p1, q->st.curr_frame, "instantiation_error", "not_sufficiently_instantiated");
 	else
-		return throw_error(q, &p1, q->st.curr_frame, "type_error", "number");
+		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 
 	return pl_success;
 }

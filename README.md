@@ -11,7 +11,6 @@ A compact, efficient Prolog interpreter with
 	Unlimited arity (system resources constrained)
 	Uses 1st & 2nd arg indexing
 	DCGs
-	User-defined functions
 	REPL with history
 	MIT licensed
 
@@ -431,36 +430,6 @@ Uses Ulrich Neumerkel's standard reference library. DCG rules are
 translated automatically as this library is auto-included.
 
 	:- use_module(library(dcgs)).
-
-
-User-defined functions
-======================
-
-User-defined functions can be arbitrarily complex, but cannot be
-back-tracked into. They make use of the *return/1* predicate to
-return a unique value. Given the classic Prolog...
-
-```prolog
-	fac(N,F) :-
-		factorial(N,1,F).
-
-	factorial(0,F,F) :- !.
-	factorial(N,Tot,F) :-
-		NewTot is Tot * N,
-		N1 is N - 1,
-		factorial(N1,NewTot,F).
-```
-
-define a function...
-
-	fac(N) :- fac(N,F), return(F).
-
-then call...
-
-```prolog
-	?- F is fac(20).
-	F = 2432902008176640000.
-```
 
 
 Crypto functions
