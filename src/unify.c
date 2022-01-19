@@ -454,7 +454,7 @@ static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, 
 	return unify_internal(q, p1, p1_ctx, p2, p2_ctx);
 }
 
-static bool unify_integers(__attribute__((unused)) query *q, cell *p1, cell *p2)
+static bool unify_integers(UNUSED query *q, cell *p1, cell *p2)
 {
 	if (is_bigint(p1) && is_bigint(p2))
 		return !mp_int_compare(&p1->val_bigint->ival, &p2->val_bigint->ival);
@@ -471,7 +471,7 @@ static bool unify_integers(__attribute__((unused)) query *q, cell *p1, cell *p2)
 	return false;
 }
 
-static bool unify_reals(__attribute__((unused)) query *q, cell *p1, cell *p2)
+static bool unify_reals(UNUSED query *q, cell *p1, cell *p2)
 {
 	if (is_real(p2))
 		return get_real(p1) == get_real(p2);

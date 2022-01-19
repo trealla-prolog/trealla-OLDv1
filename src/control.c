@@ -11,12 +11,12 @@
 #include "builtins.h"
 #include "heap.h"
 
-USE_RESULT pl_status fn_iso_true_0(__attribute__((unused)) query *q)
+USE_RESULT pl_status fn_iso_true_0(UNUSED query *q)
 {
 	return pl_success;
 }
 
-USE_RESULT pl_status fn_iso_fail_0(__attribute__((unused)) query *q)
+USE_RESULT pl_status fn_iso_fail_0(UNUSED query *q)
 {
 	return pl_failure;
 }
@@ -583,7 +583,7 @@ USE_RESULT pl_status fn_iso_throw_1(query *q)
 	return fn_iso_catch_3(q);
 }
 
-pl_status throw_error3(query *q, cell *c, __attribute__((unused)) pl_idx_t c_ctx, const char *err_type, const char *expected, cell *goal)
+pl_status throw_error3(query *q, cell *c, UNUSED pl_idx_t c_ctx, const char *err_type, const char *expected, cell *goal)
 {
 	if (g_tpl_interrupt)
 		return pl_failure;

@@ -63,6 +63,8 @@ typedef enum {
 	pl_success =  1,
 } pl_status;
 
+#define UNUSED __attribute__((unused))
+
 // Sentinel Value
 #define ERR_IDX (~(pl_idx_t)0)
 #define IDX_MAX (ERR_IDX-1)
