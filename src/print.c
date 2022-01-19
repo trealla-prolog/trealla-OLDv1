@@ -930,25 +930,28 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 	size_t srclen = LEN_STR(q, c);
 
-	// Postfix...
-
-	if (IS_XF(c) || IS_YF(c)) {
+	if (CELL_POSTFIX(c)) {
 		cell *lhs = c + 1;
 		lhs = running ? deref(q, lhs, c_ctx) : lhs;
 		pl_idx_t lhs_ctx = q->latest_ctx;
 		ssize_t res = print_term_to_buf(q, dst, dstlen, lhs, lhs_ctx, running, 0, depth+1);
 		if (res < 0) return -1;
 		dst += res;
+
+		bool space = (c->val_off == g_minus_s) && (is_number(lhs) || search_op(q->st.m, GET_STR(q, lhs), NULL, true));
+		if ((c->val_off == g_plus_s) && search_op(q->st.m, GET_STR(q, lhs), NULL, true) && lhs->arity) space = true;
+		if (isalpha(*src)) space = true;
+		if (space) dst += snprintf(dst, dstlen, "%s", " ");
+
 		int quote = q->quoted && has_spaces(src, LEN_STR(q,c));
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
+
 		dst += plain(dst, dstlen, src, srclen);
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 		return dst - save_dst;
 	}
 
-	// Prefix...
-
-	if (IS_FX(c) || IS_FY(c)) {
+	if (CELL_PREFIX(c)) {
 		cell *rhs = c + 1;
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		pl_idx_t rhs_ctx = q->latest_ctx;
