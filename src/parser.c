@@ -1700,6 +1700,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			mp_int_clear(&v2);
 		}
 
+#if 0
 		int ch = peek_char_utf8(s);
 
 		if (isdigit(ch) || iswalpha(ch)) {
@@ -1710,6 +1711,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			p->error = true;
 			return false;
 		}
+#endif
 
 		p->v.tag = TAG_INT;
 		p->v.flags |= FLAG_BINARY;
@@ -1734,6 +1736,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			mp_int_clear(&v2);
 		}
 
+#if 0
 		int ch = peek_char_utf8(s);
 
 		if (isdigit(ch) || iswalpha(ch)) {
@@ -1744,6 +1747,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			p->error = true;
 			return false;
 		}
+#endif
 
 		p->v.tag = TAG_INT;
 		p->v.flags |= FLAG_OCTAL;
@@ -1768,6 +1772,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			mp_int_clear(&v2);
 		}
 
+#if 0
 		int ch = peek_char_utf8(s);
 
 		if (isdigit(ch) || iswalpha(ch)) {
@@ -1778,6 +1783,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			p->error = true;
 			return false;
 		}
+#endif
 
 		p->v.tag = TAG_INT;
 		p->v.flags |= FLAG_HEX;
