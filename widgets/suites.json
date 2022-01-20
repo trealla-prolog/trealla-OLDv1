@@ -1,5 +1,5 @@
 {
-  "total" : 184,
+  "total" : 185,
   "items" : [ {
     "uid" : "09812cef55155aac413b0e337d25177f",
     "name" : "unicode/builtins/tests.lgt::tests",
@@ -89,8 +89,8 @@
       "total" : 65
     }
   }, {
-    "uid" : "35ce7c65630bce1fdc47cff730339d9c",
-    "name" : "predicates/format_2/tests_codes.lgt::tests_codes",
+    "uid" : "430a68e04dd3714567bd0708385427c4",
+    "name" : "predicates/format_2/tests_chars.lgt::tests_chars",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
@@ -100,8 +100,8 @@
       "total" : 65
     }
   }, {
-    "uid" : "430a68e04dd3714567bd0708385427c4",
-    "name" : "predicates/format_2/tests_chars.lgt::tests_chars",
+    "uid" : "35ce7c65630bce1fdc47cff730339d9c",
+    "name" : "predicates/format_2/tests_codes.lgt::tests_codes",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,

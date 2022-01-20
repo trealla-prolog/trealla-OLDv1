@@ -1,0 +1,51 @@
+{
+  "uid" : "9a2118c55c073fa0",
+  "name" : "iso_conjunction_2_02",
+  "fullName" : "iso_conjunction_2_02::tests",
+  "historyId" : "iso_conjunction_2_02::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "control/conjunction_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "control/conjunction_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "control/conjunction_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "control/conjunction_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "40-45"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/ceaf74253f9e7e9c01ee0d464d1044b0087d9e77/tests/prolog/control/conjunction_2/tests.lgt#L40"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "9a2118c55c073fa0.json",
+  "parameterValues" : [ "control/conjunction_2/tests.lgt", "40-45", "https://github.com/LogtalkDotOrg/logtalk3/tree/ceaf74253f9e7e9c01ee0d464d1044b0087d9e77/tests/prolog/control/conjunction_2/tests.lgt#L40" ]
+}
