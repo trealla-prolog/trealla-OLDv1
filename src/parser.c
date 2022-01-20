@@ -2178,7 +2178,7 @@ bool get_token(parser *p, int last_op)
 		return eat_comment(p);
 	}
 
-	// Quoted strings...
+	// Quoted...
 
 	if ((*src == '"') || (*src == '`') || (*src == '\'')) {
 		p->quote_char = *src++;
@@ -2324,18 +2324,18 @@ bool get_token(parser *p, int last_op)
 
 	if (iswalpha(ch) || (ch == '_')) {
 		while (iswalnum(ch) || (ch == '_')) {
-			if ((src[0] == ':') && (src[1] == ':'))	// HACK
+			if ((src[0] == ':') && (src[1] == ':'))	// HACK, but why?
 				break;
 
-			ch = get_char_utf8(&src);
+			get_char_utf8(&src);
 
-			size_t len = (dst - p->token) + put_len_utf8(ch) + 1;
+			size_t len = (dst + put_len_utf8(ch) + 1) - p->token;
 
 			if (len >= p->token_size) {
 				size_t offset = dst - p->token;
 				p->token = realloc(p->token, p->token_size*=2);
 				ensure(p->token);
-				dst = p->token+offset;
+				dst = p->token + offset;
 			}
 
 			dst += put_char_bare_utf8(dst, ch);
