@@ -1815,9 +1815,11 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	}
 
 	mp_int_clear(&v2);
-	int ch = peek_char_utf8(s);
+	int ch;
 
 #if 0
+	ch = peek_char_utf8(s);
+
 	if (iswalpha(ch)) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
@@ -1919,17 +1921,19 @@ static bool valid_float(const char *src)
 char *eat_space(parser *p)
 {
 	p->did_getline = false;
-	char *src = p->srcptr;
+	const char *src = p->srcptr;
 	bool done;
 
 	do {
 		done = true;
+		int ch = peek_char_utf8(src);
 
-		while (isspace(*src)) {
-			if (*src == '\n')
+		while (iswspace(ch)) {
+			if (ch == '\n')
 				p->line_nbr++;
 
-			src++;
+			get_char_utf8(&src);
+			ch = peek_char_utf8(src);
 		}
 
 		if ((*src == '%') && !p->fp) {
@@ -2002,7 +2006,7 @@ char *eat_space(parser *p)
 	}
 	 while (!done);
 
-	return src;
+	return (char*)src;
 }
 
 static bool eat_comment(parser *p)
