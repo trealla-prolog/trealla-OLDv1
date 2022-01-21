@@ -95,7 +95,7 @@ Then...
 
 	make test
 
-A 'make debug' build compiles in 0.2s with *tcc* and about 3s with
+A 'make debug' build compiles in <1s with *tcc* and about 5-6s with
 *clang* and *gcc*. Should build on any Unix-like system with a C99
 compiler. Has been tested on macOS, Linux, FreeBSD and Raspbian (32 &
 64-bit) systems.
