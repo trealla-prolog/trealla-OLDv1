@@ -1700,19 +1700,6 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			mp_int_clear(&v2);
 		}
 
-#if 0
-		int ch = peek_char_utf8(s);
-
-		if (isdigit(ch) || iswalpha(ch)) {
-			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing binary, line %u, '%s\n", p->line_nbr, p->save_line?p->save_line:"");
-
-			p->error_desc = "number";
-			p->error = true;
-			return false;
-		}
-#endif
-
 		p->v.tag = TAG_INT;
 		p->v.flags |= FLAG_BINARY;
 		*srcptr = s;
@@ -1736,19 +1723,6 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			mp_int_clear(&v2);
 		}
 
-#if 0
-		int ch = peek_char_utf8(s);
-
-		if (isdigit(ch) || iswalpha(ch)) {
-			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing octal, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
-
-			p->error_desc = "number";
-			p->error = true;
-			return false;
-		}
-#endif
-
 		p->v.tag = TAG_INT;
 		p->v.flags |= FLAG_OCTAL;
 		*srcptr = s;
@@ -1771,19 +1745,6 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			if (neg) p->v.val_int = -p->v.val_int;
 			mp_int_clear(&v2);
 		}
-
-#if 0
-		int ch = peek_char_utf8(s);
-
-		if (isdigit(ch) || iswalpha(ch)) {
-			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing hexadecimal, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
-
-			p->error_desc = "number";
-			p->error = true;
-			return false;
-		}
-#endif
 
 		p->v.tag = TAG_INT;
 		p->v.flags |= FLAG_HEX;
@@ -1816,27 +1777,13 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 	mp_int_clear(&v2);
 	int ch;
-
-#if 0
-	ch = peek_char_utf8(s);
-
-	if (iswalpha(ch)) {
-		if (DUMP_ERRS || !p->do_read_term)
-			fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
-
-		p->error_desc = "number";
-		p->error = true;
-		return false;
-	}
-#endif
-
 	p->v.tag = TAG_INT;
 
 	if ((s[-1] == '.') || isspace(s[-1]))
 		s--;
 
 	*srcptr = s;
-	ch = peek_char_utf8(*srcptr);
+	ch = peek_char_utf8(s);
 
 	//if ((ch == '(') || iswalpha(ch)) {
 	if (ch == '(') {
