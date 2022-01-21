@@ -2327,6 +2327,8 @@ bool get_token(parser *p, int last_op)
 		return true;
 	}
 
+	// Symbols...
+
 	if (is_matching_pair(p, &dst, (char**)&src, ')','(') ||
 		is_matching_pair(p, &dst, (char**)&src, ']','(') ||
 		is_matching_pair(p, &dst, (char**)&src, '}','(')) {
@@ -2375,10 +2377,12 @@ bool get_token(parser *p, int last_op)
 		if (strchr(s_delims, ch) || iswspace(ch))
 			break;
 
-		if ((ch == '.') && (isspace(*src) || (*src == '%')))
+		int ch_next = peek_char_utf8(src);
+
+		if ((ch == '.') && (iswspace(ch_next) || (ch == '%')))
 			break;
 
-		ch = peek_char_utf8(src);
+		ch = ch_next;
 
 		if (strchr(s_delims, ch) || iswspace(ch) || iswalnum(ch) || (ch == '_'))
 			break;
