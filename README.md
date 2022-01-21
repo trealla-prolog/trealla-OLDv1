@@ -51,18 +51,18 @@ characters...
 	是.            % be: means, approximately, "True".
 	不是 :- \+ 是.  % not be: means, approximately, "False".
 	<CTRL-D>
-	true.
+	   true.
 	?- 是.
-	true.
+	   true.
 	?- 不是.
-	false.
+	   false.
 
 Trealla accepts as a variable any atom beginning with Unicode uppercase...
 
 	?- atom_upper(δ,C).
-	C = Δ.
+	   C = Δ.
 	?- Δ is 123456-123455.
-	Δ = 1.
+	   Δ = 1.
 	?-
 
 
