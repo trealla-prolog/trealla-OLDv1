@@ -1513,7 +1513,7 @@ static void dump_vars(query *q, bool partial)
 				const char *src = GET_STR(q, c);
 				int ch = peek_char_utf8(src);
 
-				if (!iswalpha(ch))
+				if (!iswalpha(ch) && (ch != '_'))
 					space = true;
 			}
 		}
