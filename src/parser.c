@@ -2374,7 +2374,7 @@ bool get_token(parser *p, int last_op)
 		dst += put_char_utf8(dst, ch);
 		*dst = '\0';
 
-		if (strchr(s_solo, ch) || iswspace(ch))
+		if (((ch < 256) && strchr(s_solo, ch)) || iswspace(ch))
 			break;
 
 		int ch_next = peek_char_utf8(src);
@@ -2387,7 +2387,7 @@ bool get_token(parser *p, int last_op)
 
 		ch = ch_next;
 
-		if (strchr(s_solo, ch) || iswspace(ch) || iswalnum(ch) || (ch == '_'))
+		if (((ch < 256) && strchr(s_solo, ch)) || iswspace(ch) || iswalnum(ch) || (ch == '_'))
 			break;
 	}
 
@@ -2441,7 +2441,10 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		if (p->error && !p->do_read_term)
 			break;
 
-		//fprintf(stderr, "Debug: token '%s' line_nbr=%d, quoted=%d, tag=%u, op=%d, lastop=%d, string=%d '%s'\n", p->token, p->line_nbr, p->quote_char, p->v.tag, p->is_op, last_op, p->string, p->srcptr);
+#if 0
+		int ch = peek_char_utf8(p->token);
+		fprintf(stderr, "Debug: token '%s' (%d) line_nbr=%d, quoted=%d, tag=%u, op=%d, lastop=%d, string=%d '%s'\n", p->token, ch, p->line_nbr, p->quote_char, p->v.tag, p->is_op, last_op, p->string, p->srcptr);
+#endif
 
 		if (!p->quote_char && !strcmp(p->token, ".")
 		    && (*p->srcptr != '(')
