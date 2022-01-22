@@ -602,6 +602,7 @@ struct query_ {
 	bool varnames:1;
 	bool listing:1;
 	bool in_commit:1;
+	bool did_quote:1;
 };
 
 struct parser_ {

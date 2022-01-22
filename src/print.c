@@ -922,6 +922,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			dst += plain(dst, dstlen, src, len_str);
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
+		q->did_quote = !braces&&quote;
 
 		if (is_structure(c) && !is_string(c)) {
 			pl_idx_t arity = c->arity;
@@ -1144,6 +1145,7 @@ pl_status print_canonical_to_stream(query *q, stream *str, cell *c, pl_idx_t c_c
 pl_status print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 {
 	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
+	q->did_quote = false;
 
 	if (len < 0) {
 		running = 0;
@@ -1180,6 +1182,7 @@ pl_status print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int runni
 char *print_term_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running)
 {
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
+	q->did_quote = false;
 
 	if (len < 0) {
 		running = 0;
@@ -1196,6 +1199,7 @@ char *print_term_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running)
 pl_status print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, int running)
 {
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
+	q->did_quote = false;
 
 	if (len < 0) {
 		running = 0;
@@ -1228,6 +1232,7 @@ pl_status print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, i
 pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 {
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
+	q->did_quote = false;
 
 	if (len < 0) {
 		running = 0;
