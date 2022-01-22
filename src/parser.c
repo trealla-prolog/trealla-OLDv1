@@ -2360,7 +2360,7 @@ bool get_token(parser *p, int last_op)
 	}
 
 	while (*src) {
-		static const char *s_solo = "!(){}[]|_,;`'\"";
+		static const char *s_solo = "!(){}[]|,;`'\"";
 		ch = get_char_utf8(&src);
 		size_t len = (dst + put_len_utf8(ch) + 1) - p->token;
 

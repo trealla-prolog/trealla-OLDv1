@@ -52,6 +52,7 @@ bool needs_quoting(module *m, const char *src, int srclen)
 			|| !strcmp(src, "{")
 			|| !strcmp(src, "}");
 
+#if 0
 	if (!iswlower(ch) || !iswalpha(ch)) { // NO %/
 		static const char *s_symbols = "+-*/<>=@#^~\\:$?.";
 		int quote = false;
@@ -67,17 +68,40 @@ bool needs_quoting(module *m, const char *src, int srclen)
 
 		return quote;
 	}
+#endif
+
+	static const char *s_solo = "!(){}[]|,;`'\"";
+	const char *s = src;
+	int slen = srclen;
+
+	while (slen--) {
+		int ch = *s++;
+
+		if (strchr(s_solo, ch))
+			return true;
+	}
+
+	int cnt = 0, alphas = 0, nonalphas = 0;
 
 	while (srclen > 0) {
 		int lench = len_char_utf8(src);
 		int ch = get_char_utf8(&src);
 		srclen -= lench;
+		cnt++;
 
-		if (!iswalnum(ch) && (ch != '_'))
-			return true;
+		if (iswalnum(ch) || (ch == '_'))
+			alphas++;
+		else
+			nonalphas++;
 	}
 
-	return false;
+	if (cnt == alphas)
+		return false;
+
+	if (cnt == nonalphas)
+		return false;
+
+	return true;
 }
 
 static bool op_needs_quoting(module *m, const char *src, int srclen)
