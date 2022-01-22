@@ -95,10 +95,7 @@ bool needs_quoting(module *m, const char *src, int srclen)
 			nonalphas++;
 	}
 
-	if (cnt == alphas)
-		return false;
-
-	if (cnt == nonalphas)
+	if ((cnt == alphas) || (cnt == nonalphas))
 		return false;
 
 	return true;
