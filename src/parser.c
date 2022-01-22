@@ -2360,7 +2360,7 @@ bool get_token(parser *p, int last_op)
 	}
 
 	while (*src) {
-		static const char *s_delims = "!(){}[]|_,;`'\"";
+		static const char *s_solo = "!(){}[]|_,;`'\"";
 		ch = get_char_utf8(&src);
 		size_t len = (dst + put_len_utf8(ch) + 1) - p->token;
 
@@ -2374,17 +2374,20 @@ bool get_token(parser *p, int last_op)
 		dst += put_char_utf8(dst, ch);
 		*dst = '\0';
 
-		if (strchr(s_delims, ch) || iswspace(ch))
+		if (strchr(s_solo, ch) || iswspace(ch))
 			break;
 
 		int ch_next = peek_char_utf8(src);
 
-		if ((ch == '.') && (iswspace(ch_next) || (ch == '%')))
+		if (ch_next == '%')
+			break;
+
+		if ((ch == '.') && iswspace(ch_next))
 			break;
 
 		ch = ch_next;
 
-		if (strchr(s_delims, ch) || iswspace(ch) || iswalnum(ch) || (ch == '_'))
+		if (strchr(s_solo, ch) || iswspace(ch) || iswalnum(ch) || (ch == '_'))
 			break;
 	}
 
