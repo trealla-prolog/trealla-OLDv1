@@ -81,7 +81,7 @@ bool needs_quoting(module *m, const char *src, int srclen)
 			return true;
 	}
 
-	int cnt = 0, alphas = 0, nonalphas = 0;
+	int cnt = 0, alphas = 0, nonalphas = 0, graphs = 0;
 
 	while (srclen > 0) {
 		int lench = len_char_utf8(src);
@@ -91,12 +91,22 @@ bool needs_quoting(module *m, const char *src, int srclen)
 
 		if (iswalnum(ch) || (ch == '_'))
 			alphas++;
+		else if (isgraph(ch) && (ch != '%'))
+			graphs++;
 		else
 			nonalphas++;
 	}
 
-	if ((cnt == alphas) || (cnt == nonalphas))
+	if (cnt == alphas)
 		return false;
+
+	if (cnt == graphs)
+		return false;
+
+#if 0
+	if (cnt == nonalphas)
+		return false;
+#endif
 
 	return true;
 }
