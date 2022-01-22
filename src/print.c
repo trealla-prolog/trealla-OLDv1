@@ -30,6 +30,18 @@ bool needs_quoting(module *m, const char *src, int srclen)
 	if (!strcmp(src, ",") || !strcmp(src, ".") || !strcmp(src, "|"))
 		return true;
 
+	if (!strcmp(src, "(") || !strcmp(src, ")"))
+		return true;
+
+	if (!strcmp(src, "[") || !strcmp(src, "]"))
+		return true;
+
+	if (!strcmp(src, "{") || !strcmp(src, "}"))
+		return true;
+
+	if (!strcmp(src, "'") || !strcmp(src, "\"") || !strcmp(src, "`"))
+		return true;
+
 	if (!strcmp(src, "{}") || !strcmp(src, "[]") || !strcmp(src, "!") || !strcmp(src, "\\"))
 		return false;
 
@@ -38,7 +50,7 @@ bool needs_quoting(module *m, const char *src, int srclen)
 
 	int ch = peek_char_utf8(src);
 
-	if (iswupper(ch) || isdigit(ch) || (ch == '_'))
+	if (iswupper(ch) || isdigit(ch) || iswspace(ch) || (ch == '_'))
 		return true;
 
 	if (search_op(m, src, NULL, false))
@@ -52,29 +64,26 @@ bool needs_quoting(module *m, const char *src, int srclen)
 			|| !strcmp(src, "{")
 			|| !strcmp(src, "}");
 
-	if (!iswlower(ch) || !iswalpha(ch)) { // NO %/
-		static const char *s_symbols = "+-*/<>=@#^~\\:$?.";
-		int quote = false;
+	int lench = len_char_utf8(src);
+	ch = get_char_utf8(&src);
+	srclen -= lench;
 
-		while (srclen--) {
-			if (!strchr(s_symbols, *src)) {
-				quote = true;
-				break;
-			}
+	if (!iswalpha(ch) && !srclen)
+		return false;
 
-			src++;
-		}
+	bool quote = !iswalpha(ch) || iswupper(ch);
 
-		return quote;
-	}
+	while (srclen) {
+		lench = len_char_utf8(src);
+		ch = get_char_utf8(&src);
 
-	while (srclen > 0) {
-		int lench = len_char_utf8(src);
-		int ch = get_char_utf8(&src);
-		srclen -= lench;
-
-		if (!iswalnum(ch) && (ch != '_'))
+		if (!quote && !iswalnum(ch) && (ch != '_'))
 			return true;
+
+		if (quote && (iswalnum(ch) || (ch == '_')))
+			return true;
+
+		srclen -= lench;
 	}
 
 	return false;

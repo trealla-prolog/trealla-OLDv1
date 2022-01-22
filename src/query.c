@@ -1457,6 +1457,7 @@ static void dump_vars(query *q, bool partial)
 	}
 
 	cell *vlist = !first ? end_list(q) : NULL;
+	bool space = false;
 
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
 		if (!strcmp(p->vartab.var_name[i], "_"))
@@ -1495,6 +1496,7 @@ static void dump_vars(query *q, bool partial)
 		}
 
 		bool parens = false;
+		space = false;
 
 		// If priority >= '=' then put in parens...
 
@@ -1503,8 +1505,18 @@ static void dump_vars(query *q, bool partial)
 			if (pri >= 700) parens = true;
 		}
 
-		if (is_atom(c) && !is_string(c) && search_op(q->st.m, GET_STR(q, c), NULL, false) && !IS_OP(c))
-			parens = true;
+		if (is_atom(c) && !is_string(c) && LEN_STR(q, c) && !is_nil(c)) {
+			if (search_op(q->st.m, GET_STR(q, c), NULL, false) && !IS_OP(c))
+				parens = true;
+
+			if (!parens) {
+				const char *src = GET_STR(q, c);
+				int ch = peek_char_utf8(src);
+
+				if (!iswalpha(ch))
+					space = true;
+			}
+		}
 
 		if (parens) fputc('(', stdout);
 		int saveq = q->quoted;
@@ -1531,6 +1543,7 @@ static void dump_vars(query *q, bool partial)
 	clear_write_options(q);
 
 	if (any && !partial) {
+		if (space) fprintf(stdout, " ");
 		fprintf(stdout, ".\n");
 		fflush(stdout);
 	}
