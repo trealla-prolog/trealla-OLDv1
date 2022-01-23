@@ -5,19 +5,8 @@
     "children" : [ {
       "name" : "Error instead of success",
       "children" : [ {
-        "name" : "lgt_write_term_3_38",
-        "uid" : "ed949ef3f4bfcb4",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 3
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "predicates/write_term_3/tests.lgt", "303-312", "https://github.com/LogtalkDotOrg/logtalk3/tree/5fe4306360ee8d5714f5008abec1a2ed3da3c330/tests/prolog/predicates/write_term_3/tests.lgt#L303" ]
-      }, {
-        "name" : "lgt_write_term_3_39",
-        "uid" : "8fa3f43496ec6cc9",
+        "name" : "lgt_unicode_escape_sequence_full_05",
+        "uid" : "8f61da876a4f5f99",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
@@ -25,29 +14,7 @@
         },
         "flaky" : false,
         "newFailed" : false,
-        "parameters" : [ "predicates/write_term_3/tests.lgt", "312-321", "https://github.com/LogtalkDotOrg/logtalk3/tree/5fe4306360ee8d5714f5008abec1a2ed3da3c330/tests/prolog/predicates/write_term_3/tests.lgt#L312" ]
-      }, {
-        "name" : "lgt_write_term_3_36",
-        "uid" : "cc6073ddad425422",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 2
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "predicates/write_term_3/tests.lgt", "283-294", "https://github.com/LogtalkDotOrg/logtalk3/tree/5fe4306360ee8d5714f5008abec1a2ed3da3c330/tests/prolog/predicates/write_term_3/tests.lgt#L283" ]
-      }, {
-        "name" : "lgt_write_term_3_37",
-        "uid" : "50235fa2ebc0f879",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 3
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "predicates/write_term_3/tests.lgt", "294-303", "https://github.com/LogtalkDotOrg/logtalk3/tree/5fe4306360ee8d5714f5008abec1a2ed3da3c330/tests/prolog/predicates/write_term_3/tests.lgt#L294" ]
+        "parameters" : [ "unicode/syntax/tests.lgt", "175-184", "https://github.com/LogtalkDotOrg/logtalk3/tree/5fe4306360ee8d5714f5008abec1a2ed3da3c330/tests/prolog/unicode/syntax/tests.lgt#L175" ]
       } ],
       "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
     } ],
