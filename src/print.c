@@ -588,13 +588,28 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 	return dst - save_dst;
 }
 
-static char *varformat(unsigned nbr)
+static const char *varformat(unsigned nbr)
 {
 	static char tmpbuf[80];
 	char *dst = tmpbuf;
 	dst += sprintf(dst, "%c", 'A'+nbr%26);
-	if ((nbr/26) > 0) sprintf(dst, "%u", nbr/26);
+	if ((nbr/26) > 0) dst += sprintf(dst, "%u", (nbr/26)%26);
+	if ((nbr/26/26) > 0) sprintf(dst, "%u", (nbr/26/26)%26);
 	return tmpbuf;
+}
+
+static const char *get_slot_name(query *q, pl_idx_t slot_idx)
+{
+	for (unsigned i = 0; i < q->pl->tab_idx; i++) {
+		if (q->pl->tab1[i] == slot_idx)
+			return varformat(i);
+	}
+
+	unsigned i = q->pl->tab_idx++;
+	q->pl->tab1[i] = slot_idx;
+	const char *s = varformat(i);
+	//fprintf(stderr, "%u => %u => %s\n", slot_idx, i, s);
+	return s;
 }
 
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_ctx, int running, bool cons, unsigned depth)
@@ -871,7 +886,14 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			&& ((c_ctx != q->st.curr_frame) || is_fresh(c) || (running > 0))) {
 			frame *f = GET_FRAME(c_ctx);
 			slot *e = GET_SLOT(f, c->var_nbr);
-			dst += snprintf(dst, dstlen, "_%u", (unsigned)(e - q->slots));
+			pl_idx_t slot_idx = e - q->slots;
+
+			if (q->is_dump_vars) {
+				const char *name = get_slot_name(q, slot_idx);
+				dst += snprintf(dst, dstlen, "_%s", name);
+			} else
+				dst += snprintf(dst, dstlen, "_%u", (unsigned)slot_idx);
+
 			return dst - save_dst;
 		}
 
