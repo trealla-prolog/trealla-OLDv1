@@ -81,10 +81,10 @@ bool needs_quoting(module *m, const char *src, int srclen)
 	if (cnt == alphas)
 		return false;
 
+#if 0
 	if (cnt == graphs)
 		return false;
 
-#if 0
 	if (cnt == nonalphas)
 		return false;
 #endif
