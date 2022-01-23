@@ -2344,8 +2344,8 @@ bool get_token(parser *p, int last_op)
 	if (is_matching_pair(p, &dst, (char**)&src, '[',']') ||
 		is_matching_pair(p, &dst, (char**)&src, '{','}') ||
 		is_matching_pair(p, &dst, (char**)&src, ',',',') ||
-		//is_matching_pair(p, &dst, (char**)&src, ',',';') ||
-		//is_matching_pair(p, &dst, (char**)&src, ';',',') ||
+		(!p->args && is_matching_pair(p, &dst, (char**)&src, ',',';')) ||
+		(!p->args && is_matching_pair(p, &dst, (char**)&src, ';',',')) ||
 		is_matching_pair(p, &dst, (char**)&src, ';',';')) {
 		p->toklen = dst - p->token;
 		return (dst - p->token) != 0;
@@ -2437,7 +2437,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 	unsigned arity = 1;
 	p->depth++;
 
-	while (get_token(p, last_op)) {
+	while (p->args = args, get_token(p, last_op)) {
 		if (p->error && !p->do_read_term)
 			break;
 
