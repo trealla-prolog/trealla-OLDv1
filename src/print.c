@@ -70,14 +70,13 @@ bool needs_quoting(module *m, const char *src, int srclen)
 	}
 #endif
 
-	static const char *s_solo = "!(){}[]|,;`'\"";
 	const char *s = src;
 	int slen = srclen;
 
 	while (slen--) {
 		int ch = *s++;
 
-		if (strchr(s_solo, ch))
+		if ((ch < 256) && strchr(g_solo, ch))
 			return true;
 	}
 

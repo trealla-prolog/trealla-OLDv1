@@ -22,3 +22,5 @@ bool check_if_rule(const cell *c);
 cell *get_head(cell *c);
 cell *get_body(cell *c);
 cell *get_logical_body(cell *c);
+
+extern const char *g_solo;

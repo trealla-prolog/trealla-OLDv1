@@ -18,6 +18,7 @@
 #include "utf8.h"
 
 static const unsigned INITIAL_TOKEN_SIZE = 100;		// bytes
+const char *g_solo = "!(){}[]|,;`'\"";
 
 char *slicedup(const char *s, size_t n)
 {
@@ -2360,7 +2361,6 @@ bool get_token(parser *p, int last_op)
 	}
 
 	while (*src) {
-		static const char *s_solo = "!(){}[]|,;`'\"";
 		ch = get_char_utf8(&src);
 		size_t len = (dst + put_len_utf8(ch) + 1) - p->token;
 
@@ -2374,7 +2374,7 @@ bool get_token(parser *p, int last_op)
 		dst += put_char_utf8(dst, ch);
 		*dst = '\0';
 
-		if (((ch < 256) && strchr(s_solo, ch)) || iswspace(ch))
+		if (((ch < 256) && strchr(g_solo, ch)) || iswspace(ch))
 			break;
 
 		int ch_next = peek_char_utf8(src);
@@ -2387,7 +2387,7 @@ bool get_token(parser *p, int last_op)
 
 		ch = ch_next;
 
-		if (((ch < 256) && strchr(s_solo, ch)) || iswspace(ch) || iswalnum(ch) || (ch == '_'))
+		if (((ch < 256) && strchr(g_solo, ch)) || iswspace(ch) || iswalnum(ch) || (ch == '_'))
 			break;
 	}
 
