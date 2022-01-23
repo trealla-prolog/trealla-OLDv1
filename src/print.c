@@ -52,29 +52,12 @@ bool needs_quoting(module *m, const char *src, int srclen)
 			|| !strcmp(src, "{")
 			|| !strcmp(src, "}");
 
-#if 0
-	if (!iswlower(ch) || !iswalpha(ch)) { // NO %/
-		static const char *s_symbols = "+-*/<>=@#^~\\:$?.";
-		int quote = false;
-
-		while (srclen--) {
-			if (!strchr(s_symbols, *src)) {
-				quote = true;
-				break;
-			}
-
-			src++;
-		}
-
-		return quote;
-	}
-#endif
-
 	const char *s = src;
 	int slen = srclen;
 
-	while (slen--) {
-		int ch = *s++;
+	while (slen) {
+		slen -= len_char_utf8(s);
+		int ch = get_char_utf8(&s);
 
 		if ((ch < 256) && strchr(g_solo, ch))
 			return true;
