@@ -6,11 +6,11 @@
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "lgt_unicode_escape_sequence_full_05",
-        "uid" : "853a12640d65940c",
+        "uid" : "135f9ac5f6d48dd",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "duration" : 2
+          "duration" : 3
         },
         "flaky" : false,
         "newFailed" : false,
