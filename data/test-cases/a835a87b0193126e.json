@@ -1,0 +1,51 @@
+{
+  "uid" : "a835a87b0193126e",
+  "name" : "commons_findall_4_11",
+  "fullName" : "commons_findall_4_11::tests",
+  "historyId" : "commons_findall_4_11::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/findall_4/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/findall_4/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/findall_4/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/findall_4/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "78-81"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/4f4d8ffe9c581092fa3b4c461127c1a6aa8802aa/tests/prolog/predicates/findall_4/tests.lgt#L78"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "a835a87b0193126e.json",
+  "parameterValues" : [ "predicates/findall_4/tests.lgt", "78-81", "https://github.com/LogtalkDotOrg/logtalk3/tree/4f4d8ffe9c581092fa3b4c461127c1a6aa8802aa/tests/prolog/predicates/findall_4/tests.lgt#L78" ]
+}
