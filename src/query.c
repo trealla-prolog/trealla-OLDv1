@@ -1525,7 +1525,7 @@ static void dump_vars(query *q, bool partial)
 		q->variable_names = vlist;
 		q->variable_names_ctx = 0;
 
-		if (is_indirect(&e->c))
+		if (is_indirect(&e->c) && (e->ctx != 0))
 			q->variable_names = NULL;
 
 		if (is_cyclic_term(q, c, c_ctx))
