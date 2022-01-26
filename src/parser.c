@@ -2332,7 +2332,13 @@ bool get_token(parser *p, int last_op)
 
 	if (is_matching_pair(p, &dst, (char**)&src, ')','(') ||
 		is_matching_pair(p, &dst, (char**)&src, ']','(') ||
-		is_matching_pair(p, &dst, (char**)&src, '}','(')) {
+		is_matching_pair(p, &dst, (char**)&src, '}','(') ||
+		is_matching_pair(p, &dst, (char**)&src, '}','(') ||
+		is_matching_pair(p, &dst, (char**)&src, ',',')') ||
+		is_matching_pair(p, &dst, (char**)&src, ',',']') ||
+		is_matching_pair(p, &dst, (char**)&src, ',','}') ||
+		is_matching_pair(p, &dst, (char**)&src, ',','|') ||
+		is_matching_pair(p, &dst, (char**)&src, ',',',')) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, operator expected, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line?p->save_line:"");
 
