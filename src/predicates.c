@@ -4445,19 +4445,6 @@ static USE_RESULT pl_status fn_iso_arg_3(query *q)
 		}
 	}
 
-	if (is_variable(p1) && is_variable(p3)) {
-		cell tmp;
-		make_int(&tmp, 1);
-		cell *c = p2 + 1;
-		c = deref(q, c, p2_ctx);
-		pl_idx_t c_ctx = q->latest_ctx;
-		set_var(q, p4, p4_ctx, &tmp, q->st.curr_frame);
-		may_error(make_choice(q));
-		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-		set_var(q, p3, p3_ctx, c, c_ctx);
-		return pl_success;
-	}
-
 	return throw_error(q, p1, p1_ctx, "instantiation_error", "number");
 }
 
