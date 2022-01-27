@@ -923,6 +923,7 @@ static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
 
 			m_destroy(pr->idx_save);
 			m_destroy(pr->idx);
+			pr->idx_save = pr->idx = NULL;
 			pr->head = pr->tail = NULL;
 			return false;
 		}
