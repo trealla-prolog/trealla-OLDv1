@@ -4516,7 +4516,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		p2 = tmp;
 		p2_ctx = q->st.curr_frame;
 		unsigned arity = 0;
-		init_tmp_heap(q);
+		may_ptr_error(init_tmp_heap(q));
 		cell *save_p2 = p2;
 		LIST_HANDLER(p2);
 
@@ -4603,7 +4603,7 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 	q->pl->tab_idx = 0;
 	collect_vars(q, p1, p1_ctx);
 	const unsigned cnt = q->pl->tab_idx;
-	init_tmp_heap(q);
+	may_ptr_error(init_tmp_heap(q));
 	cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
 	ensure(tmp);
 	unsigned idx = 0;
@@ -5680,9 +5680,9 @@ static USE_RESULT pl_status fn_sys_queue_1(query *q)
 	may_ptr_error(tmp);
 
 	if (tmp == ERR_CYCLE_CELL)
-		alloc_on_queuen(q, 0, p1);
+		may_ptr_error(alloc_on_queuen(q, 0, p1));
 	else
-		alloc_on_queuen(q, 0, tmp);
+		may_ptr_error(alloc_on_queuen(q, 0, tmp));
 
 	return pl_success;
 }
@@ -5695,9 +5695,9 @@ static USE_RESULT pl_status fn_sys_queuen_2(query *q)
 	may_ptr_error(tmp);
 
 	if (tmp == ERR_CYCLE_CELL)
-		alloc_on_queuen(q, get_int(p1), p2);
+		may_ptr_error(alloc_on_queuen(q, get_int(p1), p2));
 	else
-		alloc_on_queuen(q, get_int(p1), tmp);
+		may_ptr_error(alloc_on_queuen(q, get_int(p1), tmp));
 
 	return pl_success;
 }
@@ -5763,7 +5763,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 		if (unify(q, p1, p1_ctx, c, q->st.fp)) {
 			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
 			may_ptr_error(tmp);
-			alloc_on_queuen(q, q->st.qnbr, tmp);
+			may_ptr_error(alloc_on_queuen(q, q->st.qnbr, tmp));
 		}
 
 		undo_me(q);
@@ -8123,13 +8123,13 @@ static USE_RESULT pl_status fn_task_n(query *q)
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
-	clone_to_tmp(q, p1);
+	may_ptr_error(clone_to_tmp(q, p1));
 	unsigned arity = p1->arity;
 	unsigned args = 1;
 
 	while (args++ < q->st.curr_cell->arity) {
 		GET_NEXT_RAW_ARG(p2,any);
-		clone2_to_tmp(q, p2);
+		may_ptr_error(clone2_to_tmp(q, p2));
 		arity++;
 	}
 
@@ -8175,7 +8175,7 @@ static USE_RESULT pl_status fn_send_1(query *q)
 		share_cell(c2);
 	}
 
-	alloc_on_queuen(dstq, 0, c);
+	may_ptr_error(alloc_on_queuen(dstq, 0, c));
 	q->yielded = true;
 	return pl_success;
 }

@@ -114,13 +114,13 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
-	clone_to_tmp(q, p1);
+	may_ptr_error(clone_to_tmp(q, p1));
 	unsigned arity = p1->arity;
 	unsigned args = 1;
 
 	while (args++ < q->st.curr_cell->arity) {
 		GET_NEXT_RAW_ARG(p2,any);
-		clone2_to_tmp(q, p2);
+		may_ptr_error(clone2_to_tmp(q, p2));
 		arity++;
 	}
 
