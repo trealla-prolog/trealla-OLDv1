@@ -4507,6 +4507,12 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 	}
 
 	if (is_variable(p1)) {
+		cell *p22 = p2 + 1;
+		p22 = deref(q, p22, p2_ctx);
+
+		if (is_variable(p22))
+			return throw_error(q, p2, p2_ctx, "instantiation_error", "not_sufficiently_instantiated");
+
 		cell *tmp = deep_copy_to_heap(q, p2, p2_ctx, false, false);
 		may_ptr_error(tmp);
 		if (tmp == ERR_CYCLE_CELL)
