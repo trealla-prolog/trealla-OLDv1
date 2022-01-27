@@ -1,5 +1,24 @@
 {
   "uid" : "4b4757e66a1912dae1a509f688f20b0f",
-  "children" : [ ],
+  "children" : [ {
+    "name" : "Product defects",
+    "children" : [ {
+      "name" : "Error instead of success",
+      "children" : [ {
+        "name" : "lgt_catch_3_13",
+        "uid" : "531028aa72fdc478",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "control/catch_3/tests.lgt", "181-200", "https://github.com/LogtalkDotOrg/logtalk3/tree/e3a1f92ac45af46a9feae21ba7cae18622895f47/tests/prolog/control/catch_3/tests.lgt#L181" ]
+      } ],
+      "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
+    } ],
+    "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
+  } ],
   "name" : "categories"
 }
