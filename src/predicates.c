@@ -4413,6 +4413,9 @@ static USE_RESULT pl_status fn_iso_arg_3(query *q)
 		if (is_negative(p1))
 			return throw_error(q, p1, p1_ctx, "domain_error", "not_less_than_zero");
 
+		if (is_bigint(p1))
+			return pl_failure;
+
 		int arg_nbr = get_int(is_integer(p1) ? p1 : p4);
 
 		if (q->retry) {
