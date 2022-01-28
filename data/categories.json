@@ -6,7 +6,7 @@
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "lgt_catch_3_13",
-        "uid" : "f258a8489dae8b47",
+        "uid" : "bc044435bfd299b5",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
@@ -14,7 +14,7 @@
         },
         "flaky" : false,
         "newFailed" : false,
-        "parameters" : [ "control/catch_3/tests.lgt", "181-200", "https://github.com/LogtalkDotOrg/logtalk3/tree/e3a1f92ac45af46a9feae21ba7cae18622895f47/tests/prolog/control/catch_3/tests.lgt#L181" ]
+        "parameters" : [ "control/catch_3/tests.lgt", "181-200", "https://github.com/LogtalkDotOrg/logtalk3/tree/1677978c2f356810afb8fb2a74714998ce67088a/tests/prolog/control/catch_3/tests.lgt#L181" ]
       } ],
       "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
     } ],
