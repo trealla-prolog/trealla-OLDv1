@@ -4416,7 +4416,7 @@ static USE_RESULT pl_status fn_iso_arg_3(query *q)
 		if (is_bigint(p1))
 			return pl_failure;
 
-		int arg_nbr = get_int(is_integer(p1) ? p1 : p4);
+		pl_int_t arg_nbr = get_int(is_integer(p1) ? p1 : p4);
 
 		if (q->retry) {
 			if (++arg_nbr > p2->arity)
