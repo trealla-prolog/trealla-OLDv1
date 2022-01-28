@@ -1982,7 +1982,10 @@ int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_
 		return -1;
 	}
 
-	if (is_atom(p1) && is_atom(p2))
+	if (is_iso_atom(p1) && is_iso_atom(p2))
+		return CMP_SLICES(q, p1, p2);
+
+	if (is_string(p1) && is_string(p2))
 		return CMP_SLICES(q, p1, p2);
 
 	if (is_iso_atom(p1)) {

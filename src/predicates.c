@@ -326,7 +326,6 @@ static USE_RESULT pl_status fn_iso_notunify_2(query *q)
 	may_error(make_choice(q));
 
 	if (unify(q, p1, p1_ctx, p2, p2_ctx)) {
-		undo_me(q);
 		drop_choice(q);
 		return pl_failure;
 	}
