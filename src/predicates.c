@@ -11407,15 +11407,6 @@ static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)
 	return pl_success;
 }
 
-void do_cleanup(query *q, cell *p1)
-{
-	cell *tmp = clone_to_heap(q, true, p1, 2);
-	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0); // ???
-	make_return(q, tmp+nbr_cells);
-	q->st.curr_cell = tmp;
-}
-
 static USE_RESULT pl_status fn_sys_get_level_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
