@@ -19,7 +19,7 @@ A compact, efficient Prolog interpreter with
 	Logtalk compatible (*WIP*)
 
 Trealla is not WAM-based. It uses tree-walking, structure-sharing and
-deep-binding. Source is compiled to an AST that is interprected at
+deep-binding. Source is compiled to an AST that is interpreted at
 runtime.
 
 
