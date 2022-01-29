@@ -321,17 +321,26 @@ static USE_RESULT pl_status fn_iso_unify_2(query *q)
 
 static USE_RESULT pl_status fn_iso_notunify_2(query *q)
 {
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
-	may_error(make_choice(q));
+	if (q->retry)
+		return pl_success;
 
-	if (unify(q, p1, p1_ctx, p2, p2_ctx)) {
-		drop_choice(q);
-		return pl_failure;
-	}
-
-	undo_me(q);
-	drop_choice(q);
+	GET_FIRST_RAW_ARG(p1,any);
+	GET_NEXT_RAW_ARG(p2,any);
+	cell tmp2;
+	make_structure(&tmp2, g_unify_s, fn_iso_unify_2, 2, 0);
+	cell *tmp = clone_to_heap(q, true, &tmp2, p1->nbr_cells+p2->nbr_cells+3);
+	pl_idx_t nbr_cells = 1;
+	tmp[nbr_cells].nbr_cells += p1->nbr_cells+p2->nbr_cells;
+	nbr_cells++;
+	copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
+	nbr_cells += p1->nbr_cells;
+	copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+	nbr_cells += p2->nbr_cells;
+	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
+	make_return(q, tmp+nbr_cells);
+	may_error(make_barrier(q));
+	q->st.curr_cell = tmp;
 	return pl_success;
 }
 
