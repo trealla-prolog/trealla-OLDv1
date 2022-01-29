@@ -1507,7 +1507,7 @@ static void dump_vars(query *q, bool partial)
 		}
 
 		if (is_atom(c) && !is_string(c) && LEN_STR(q, c) && !is_nil(c)) {
-			if (search_op(q->st.m, GET_STR(q, c), NULL, false) && !IS_OP(c))
+			if (search_op(q->st.m, GET_STR(q, c), NULL, false))
 				parens = true;
 
 			if (!parens) {
