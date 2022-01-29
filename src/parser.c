@@ -2046,6 +2046,7 @@ bool get_token(parser *p, int last_op)
 
 	src = eat_space(p);
 
+#if 0
 	if (!src && !p->end_of_term) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, incomplete statement, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
@@ -2054,6 +2055,7 @@ bool get_token(parser *p, int last_op)
 		p->error = true;
 		return false;
 	}
+#endif
 
 	if (!src)
 		return false;
