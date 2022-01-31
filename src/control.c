@@ -398,8 +398,9 @@ USE_RESULT pl_status fn_sys_block_catcher_0(query *q)
 		return pl_success;
 
 	choice *ch = GET_CURR_CHOICE();
+	pl_idx_t cp = q->cp;
 
-	do {
+	while (cp--) {
 		if (ch->catchme_retry) {
 			ch->block_catcher = !ch->block_catcher;
 			break;
@@ -407,13 +408,6 @@ USE_RESULT pl_status fn_sys_block_catcher_0(query *q)
 
 		ch--;
 	}
-	 while (ch != q->choices);
-
-	//if (q->retry)
-	//	return false;
-
-	//if (ch != GET_CURR_CHOICE())
-	//	may_error(make_choice(q));
 
 	return pl_success;
 }
