@@ -2927,10 +2927,10 @@ bool run(parser *p, const char *pSrc, bool dump)
 	}
 
 	ASTRING(src);
-	ASTRING_sprintf(src, "'$choice',%s", pSrc);
+	ASTRING_sprintf(src, "'$choice',(%s", pSrc);
 	ASTRING_trim_ws(src);
 	ASTRING_trim(src, '.');
-	ASTRING_strcat(src, ".");
+	ASTRING_strcat(src, ").");
 
 	p->srcptr = ASTRING_cstr(src);
 	p->line_nbr = 1;
