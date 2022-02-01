@@ -1,6 +1,9 @@
 Trealla Prolog
 ==============
 
+NOTE: if this repo disappears it's [moved here](https://github.com/trealla-prolog/).
+
+
 A compact, efficient Prolog interpreter with
 [ISO compliant](https://infradig.github.io/trealla/) aspirations.
 
