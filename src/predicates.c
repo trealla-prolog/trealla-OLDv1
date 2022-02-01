@@ -11466,7 +11466,7 @@ static const struct builtins g_predicates_iso[] =
 	{";", 2, fn_iso_disjunction_2, NULL, false},
 	{"\\+", 1, fn_iso_negation_1, NULL, false},
 	{"$throw", 1, fn_iso_throw_1, NULL, false},
-	{"$catch", 3, fn_iso_catch_3, NULL, false},
+	{"catch", 3, fn_iso_catch_3, NULL, false},
 	{"$catch2", 3, fn_sys_catch2_3, NULL, false},
 
 	{"call", 1, fn_iso_call_n, NULL, false},
@@ -11871,6 +11871,7 @@ static void load_properties(module *m)
 	format_property(m, tmpbuf, sizeof(tmpbuf), "call", 1, "meta_predicate(call(0))"); ASTRING_strcat(pr, tmpbuf);
 
 	format_property(m, tmpbuf, sizeof(tmpbuf), "once", 1, "meta_predicate(once(0))"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "catch", 3, "meta_predicate(catch(0,0,0))"); ASTRING_strcat(pr, tmpbuf);
 
 	format_property(m, tmpbuf, sizeof(tmpbuf), "findall", 3, "control_construct"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "findall", 3, "meta_predicate(findall(?,0,-))"); ASTRING_strcat(pr, tmpbuf);
