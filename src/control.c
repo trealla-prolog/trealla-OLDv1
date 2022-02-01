@@ -298,9 +298,8 @@ USE_RESULT pl_status fn_iso_disjunction_2(query *q)
 	GET_NEXT_ARG(p2,callable);
 
 	if (q->retry) {
-		cell *tmp = clone_to_heap(q, true, p2, 2);
+		cell *tmp = clone_to_heap(q, true, p2, 1);
 		pl_idx_t nbr_cells = 1 + p2->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 		make_return(q, tmp+nbr_cells);
 		q->st.curr_cell = tmp;
 		return pl_success;
