@@ -36,6 +36,36 @@ void do_cleanup(query *q, cell *p1)
 	q->st.curr_cell = tmp;
 }
 
+static USE_RESULT pl_status fn_sys_cleanup_if_det_0(query *q)
+{
+	if (!q->cp)		// redundant
+		return pl_success;
+
+	choice *ch = GET_CURR_CHOICE();
+	frame *f = GET_CURR_FRAME();
+
+	if (!ch->call_barrier || (ch->cgen != f->cgen))
+		return pl_success;
+
+	drop_choice(q);
+	//trim_trail(q);
+	ch = GET_CURR_CHOICE();
+
+	if (!ch->register_cleanup)
+		return pl_success;
+
+	if (ch->did_cleanup)
+		return pl_success;
+
+	drop_choice(q);
+	//trim_trail(q);
+	ch->did_cleanup = true;
+	cell *c = deref(q, ch->st.curr_cell, ch->st.curr_frame);
+	c = deref(q, c+1, ch->st.curr_frame);
+	do_cleanup(q, c);
+	return pl_success;
+}
+
 USE_RESULT pl_status fn_sys_cleanup_if_det_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
@@ -472,9 +502,10 @@ USE_RESULT pl_status fn_sys_catch2_3(query *q)
 	if (q->retry == QUERY_EXCEPTION) {
 		GET_NEXT_ARG(p3,callable);
 		q->retry = QUERY_OK;
-		cell *tmp = clone_to_heap(q, true, p3, 1);
+		cell *tmp = clone_to_heap(q, true, p3, 2);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 1+p3->nbr_cells;
+		make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cleanup_if_det_0, 0, 0);
 		make_return(q, tmp+nbr_cells);
 		may_error(make_catcher(q, QUERY_EXCEPTION));
 		q->st.curr_cell = tmp;
@@ -486,9 +517,10 @@ USE_RESULT pl_status fn_sys_catch2_3(query *q)
 
 	// First time through? Try the primary goal...
 
-	cell *tmp = clone_to_heap(q, true, p1, 1);
+	cell *tmp = clone_to_heap(q, true, p1, 2);
 	may_ptr_error(tmp);
 	pl_idx_t nbr_cells = 1+p1->nbr_cells;
+	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cleanup_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(make_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;

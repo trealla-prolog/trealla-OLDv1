@@ -67,7 +67,7 @@ subsumes_term(G, S) :-
 call_cleanup(G, C) :-
 	'$register_cleanup'(ignore(C)),
 	'$catch2'(
-		('$get_level'(Before), call(G),'$cleanup_if_det'(Before)),
+		call(G),
 		Err,
 		(catch((\+ \+ call(C)), _, true), throw(Err))
 	).
@@ -78,7 +78,7 @@ setup_call_cleanup(S, G, C) :-
 	once(S),
 	'$register_cleanup'(ignore(C)),
 	'$catch2'(
-		('$get_level'(Before), call(G), '$cleanup_if_det'(Before)),
+		call(G),
 		Err,
 		(catch((\+ \+ call(C)), _, true), throw(Err))
 	).
