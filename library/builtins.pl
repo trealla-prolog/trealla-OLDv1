@@ -64,15 +64,6 @@ subsumes_term(G, S) :-
 	 V2 == V1
 	).
 
-variant(Term1, Term2) :-
-	% avoid trouble in any shared variables
-	copy_term(Term1, Term1Copy),
-	copy_term(Term2, Term2Copy),
-	% ground and compare the rule copies
-	numbervars(Term1Copy, 0, N),
-	numbervars(Term2Copy, 0, N),
-	Term1Copy == Term2Copy.
-
 call_cleanup(G, C) :-
 	'$register_cleanup'(ignore(C)),
 	'$catch2'(
@@ -110,15 +101,6 @@ findall(T, G, B, Tail) :-
 	'$mustbe_list_or_var'(Tail),
 	findall(T, G, B0),
 	append(B0, Tail, B), !.
-
-deterministic(Goal, Det) :-
-	call_cleanup(Goal, Det = true),
-	(	var(Det)
-	->	Det = false
-	;	true
-	).
-
-:- meta_predicate(deterministic(0,?)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Derived from code by R.A. O'Keefe
