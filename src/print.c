@@ -882,8 +882,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
-		if (is_variable(c) && running && !q->cycle_error
-			&& ((c_ctx != q->st.curr_frame) || is_fresh(c) || (running > 0))) {
+		if (is_variable(c) && q) {
 			frame *f = GET_FRAME(c_ctx);
 			slot *e = GET_SLOT(f, c->var_nbr);
 			pl_idx_t slot_idx = e - q->slots;
@@ -894,11 +893,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			} else
 				dst += snprintf(dst, dstlen, "_%u", (unsigned)slot_idx);
 
-			return dst - save_dst;
-		}
-
-		if (is_variable(c) && !running && !q->cycle_error) {
-			dst += snprintf(dst, dstlen, "%s", GET_STR(q, c));
 			return dst - save_dst;
 		}
 
