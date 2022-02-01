@@ -197,10 +197,11 @@ USE_RESULT pl_status fn_iso_if_then_2(query *q)
 
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
-	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
+	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+2);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(make_call_barrier(q));
 	q->st.curr_cell = tmp;
@@ -216,10 +217,11 @@ USE_RESULT pl_status fn_if_2(query *q)
 
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
-	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
+	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+2);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_soft_cut_s, fn_sys_soft_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(make_call_barrier(q));
 	q->st.curr_cell = tmp;
@@ -236,10 +238,11 @@ static pl_status do_if_then_else(query *q, cell *p1, cell *p2, cell *p3)
 		return pl_success;
 	}
 
-	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
+	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+2);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(make_call_barrier(q));
 	q->st.curr_cell = tmp;
@@ -339,9 +342,10 @@ USE_RESULT pl_status fn_iso_once_1(query *q)
 
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
-	cell *tmp = clone_to_heap(q, true, p1, 2);
+	cell *tmp = clone_to_heap(q, true, p1, 3);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(make_call_barrier(q));
 	q->st.curr_cell = tmp;
@@ -360,9 +364,10 @@ USE_RESULT pl_status fn_ignore_1(query *q)
 
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
-	cell *tmp = clone_to_heap(q, true, p1, 2);
+	cell *tmp = clone_to_heap(q, true, p1, 3);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(make_call_barrier(q));
 	q->st.curr_cell = tmp;
@@ -431,11 +436,9 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 	if (q->retry == QUERY_EXCEPTION) {
 		GET_NEXT_ARG(p3,callable);
 		q->retry = QUERY_OK;
-		cell *tmp = clone_to_heap(q, true, p3, 3);
+		cell *tmp = clone_to_heap(q, true, p3, 1);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 1+p3->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_block_catcher_s, fn_sys_block_catcher_0, 0, 0);
-		make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 		make_return(q, tmp+nbr_cells);
 		may_error(make_catcher(q, QUERY_EXCEPTION));
 		q->st.curr_cell = tmp;
@@ -447,11 +450,10 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 
 	// First time through? Try the primary goal...
 
-	cell *tmp = clone_to_heap(q, true, p1, 3);
+	cell *tmp = clone_to_heap(q, true, p1, 2);
 	may_ptr_error(tmp);
 	pl_idx_t nbr_cells = 1+p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_block_catcher_s, fn_sys_block_catcher_0, 0, 0);
-	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(make_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;
