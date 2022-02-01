@@ -89,10 +89,7 @@ throw(E) :-
 	'$throw'(E).
 
 catch(G, E, C) :-
-	'$get_level'(Before),
-	'$catch'(G, E, C),
-	Before0 is Before + 1,
-	'$cut_if_det'(Before0).
+	'$catch'(G, E, C).
 
 :- meta_predicate(catch(0,?,0)).
 

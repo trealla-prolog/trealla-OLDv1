@@ -816,7 +816,7 @@ pl_status make_call_barrier(query *q)
 
 pl_status make_catcher(query *q, enum q_retry retry)
 {
-	may_error(make_barrier(q));
+	may_error(make_call_barrier(q));
 	choice *ch = GET_CURR_CHOICE();
 	ch->catcher = true;
 
