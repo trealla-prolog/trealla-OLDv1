@@ -11465,7 +11465,7 @@ static const struct builtins g_predicates_iso[] =
 	{"->", 2, fn_iso_if_then_2, NULL, false},
 	{";", 2, fn_iso_disjunction_2, NULL, false},
 	{"\\+", 1, fn_iso_negation_1, NULL, false},
-	{"throw", 1, fn_iso_throw_1, NULL, false},
+	{"$throw", 1, fn_iso_throw_1, NULL, false},
 	{"catch", 3, fn_iso_catch_3, NULL, false},
 	{"$catch2", 3, fn_sys_catch2_3, NULL, false},
 

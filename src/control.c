@@ -585,15 +585,7 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 
 USE_RESULT pl_status fn_iso_throw_1(query *q)
 {
-	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
-	may_ptr_error(p0);
-
-	if (p0 == ERR_CYCLE_CELL)
-		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "cyclic_term");
-
-	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
-
-	GET_FIRST_RAW_ARG0(p1,nonvar,p0);
+	GET_FIRST_ARG(p1,nonvar);
 	cell *e;
 
 	if (is_cyclic_term(q, p1, p1_ctx)) {
@@ -601,7 +593,7 @@ USE_RESULT pl_status fn_iso_throw_1(query *q)
 		may_ptr_error(e);
 		safe_copy_cells(e, p1, p1->nbr_cells);
 	} else {
-		cell *tmp = deep_clone_to_tmp(q, p1, q->st.curr_frame);
+		cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
 		may_ptr_error(tmp);
 		e = malloc(sizeof(cell) * tmp->nbr_cells);
 		may_ptr_error(e);
