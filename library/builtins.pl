@@ -85,9 +85,6 @@ setup_call_cleanup(S, G, C) :-
 
 :- meta_predicate(setup_call_cleanup(0,0,0)).
 
-throw(E) :-
-	'$throw'(E).
-
 findall(T, G, B, Tail) :-
 	'$mustbe_list_or_var'(B),
 	'$mustbe_list_or_var'(Tail),
