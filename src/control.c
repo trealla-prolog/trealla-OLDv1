@@ -434,10 +434,9 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 	if (q->retry == QUERY_EXCEPTION) {
 		GET_NEXT_ARG(p3,callable);
 		q->retry = QUERY_OK;
-		cell *tmp = clone_to_heap(q, true, p3, 2);
+		cell *tmp = clone_to_heap(q, true, p3, 1);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 1+p3->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 		make_return(q, tmp+nbr_cells);
 		may_error(make_catcher(q, QUERY_EXCEPTION));
 		q->st.curr_cell = tmp;
@@ -449,11 +448,10 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 
 	// First time through? Try the primary goal...
 
-	cell *tmp = clone_to_heap(q, true, p1, 3);
+	cell *tmp = clone_to_heap(q, true, p1, 2);
 	may_ptr_error(tmp);
 	pl_idx_t nbr_cells = 1+p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_block_catcher_s, fn_sys_block_catcher_0, 0, 0);
-	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(make_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;
