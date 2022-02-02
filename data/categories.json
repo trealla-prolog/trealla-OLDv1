@@ -6,7 +6,7 @@
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "lgt_catch_3_13",
-        "uid" : "f366ddb44fb41c2",
+        "uid" : "eacf739828f11c3c",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
