@@ -1,8 +1,6 @@
 Trealla Prolog
 ==============
 
-NOTE: if this repo disappears it's [moved here](https://github.com/trealla-prolog/).
-
 NOTE: after the move, access will be automatically redirected to the
 new repo location. However it is best to set your repo origin directly...
 
@@ -11,7 +9,7 @@ $ git remote set-url origin https://github.com/trealla-prolog/trealla
 ```
 
 A compact, efficient Prolog interpreter with
-[ISO compliant](https://infradig.github.io/trealla/) aspirations.
+[ISO compliant](https://trealla-prolog.github.io/trealla/) aspirations.
 
 	Integers are unbounded
 	Atoms are UTF-8 of unlimited length
