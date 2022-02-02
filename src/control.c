@@ -48,7 +48,6 @@ static USE_RESULT pl_status fn_sys_cleanup_if_det_0(query *q)
 		return pl_success;
 
 	drop_choice(q);
-	//trim_trail(q);
 	ch = GET_CURR_CHOICE();
 
 	if (!ch->register_cleanup)
@@ -58,7 +57,6 @@ static USE_RESULT pl_status fn_sys_cleanup_if_det_0(query *q)
 		return pl_success;
 
 	drop_choice(q);
-	//trim_trail(q);
 	ch->did_cleanup = true;
 	cell *c = deref(q, ch->st.curr_cell, ch->st.curr_frame);
 	c = deref(q, c+1, ch->st.curr_frame);
@@ -77,7 +75,6 @@ USE_RESULT pl_status fn_sys_cleanup_if_det_1(query *q)
 		return pl_success;
 
 	drop_choice(q);
-	trim_trail(q);
 	choice *ch = GET_CURR_CHOICE();
 
 	if (!ch->register_cleanup)
@@ -87,7 +84,6 @@ USE_RESULT pl_status fn_sys_cleanup_if_det_1(query *q)
 		return pl_success;
 
 	drop_choice(q);
-	trim_trail(q);
 	ch->did_cleanup = true;
 	cell *c = deref(q, ch->st.curr_cell, ch->st.curr_frame);
 	c = deref(q, c+1, ch->st.curr_frame);
@@ -359,6 +355,7 @@ USE_RESULT pl_status fn_iso_once_1(query *q)
 		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "cyclic_term");
 
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
+
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
@@ -380,6 +377,7 @@ USE_RESULT pl_status fn_ignore_1(query *q)
 		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "stack");
 
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
+
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
