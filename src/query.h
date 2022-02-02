@@ -4,10 +4,10 @@ query *create_query(module *m, bool sub_query);
 query *create_sub_query(query *q, cell *curr_cell);
 void destroy_query(query *q);
 
-pl_status make_choice(query *q);
-pl_status make_barrier(query *q);
-pl_status make_call_barrier(query *q);
-pl_status make_catcher(query *q, enum q_retry type);
+pl_status push_choice(query *q);
+pl_status push_barrier(query *q);
+pl_status push_call_barrier(query *q);
+pl_status push_catcher(query *q, enum q_retry type);
 
 void cut_me(query *q, bool inner_cut, bool soft_cut);
 void set_var(query *q, const cell *c, pl_idx_t ctx, cell *v, pl_idx_t v_ctx);

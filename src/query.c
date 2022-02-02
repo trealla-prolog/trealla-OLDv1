@@ -563,7 +563,7 @@ LOOP:
 	return true;
 }
 
-static frame *make_frame(query *q, unsigned nbr_vars)
+static frame *push_frame(query *q, unsigned nbr_vars)
 {
 	pl_idx_t new_frame = q->st.fp++;
 	frame *f = GET_FRAME(new_frame);
@@ -729,7 +729,7 @@ static void commit_me(query *q, clause *r)
 	if (tco && q->pl->opt)
 		reuse_frame(q, r->nbr_vars);
 	else
-		f = make_frame(q, r->nbr_vars);
+		f = push_frame(q, r->nbr_vars);
 
 	if (last_match) {
 		f->is_complex = q->st.curr_clause->cl.is_complex;
@@ -774,7 +774,7 @@ void stash_me(query *q, clause *r, bool last_match)
 	q->st.sp += nbr_vars;
 }
 
-pl_status make_choice(query *q)
+pl_status push_choice(query *q)
 {
 	may_error(check_choice(q));
 	frame *f = GET_CURR_FRAME();
@@ -793,9 +793,9 @@ pl_status make_choice(query *q)
 // A barrier is used when making a call, it sets a
 // new choice generation so that cuts are contained...
 
-pl_status make_barrier(query *q)
+pl_status push_barrier(query *q)
 {
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 	frame *f = GET_CURR_FRAME();
 	choice *ch = GET_CURR_CHOICE();
 	ch->cgen = f->cgen = ++q->cgen;
@@ -806,17 +806,17 @@ pl_status make_barrier(query *q)
 // Set a special flag so that $cut_if_det knows to also
 // remove the barrier if it needs to...
 
-pl_status make_call_barrier(query *q)
+pl_status push_call_barrier(query *q)
 {
-	may_error(make_barrier(q));
+	may_error(push_barrier(q));
 	choice *ch = GET_CURR_CHOICE();
 	ch->call_barrier = true;
 	return pl_success;
 }
 
-pl_status make_catcher(query *q, enum q_retry retry)
+pl_status push_catcher(query *q, enum q_retry retry)
 {
-	may_error(make_call_barrier(q));
+	may_error(push_call_barrier(q));
 	choice *ch = GET_CURR_CHOICE();
 	ch->catcher = true;
 
@@ -1184,7 +1184,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 	}
 
 	may_error(check_frame(q));
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 	cell *p1_body = deref(q, get_logical_body(p1), p1_ctx);
 	cell *orig_p1 = p1;
 	const frame *f = GET_FRAME(q->st.curr_frame);
@@ -1288,7 +1288,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 	}
 
 	may_error(check_frame(q));
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 	const frame *f = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
@@ -1361,7 +1361,7 @@ static USE_RESULT pl_status match_head(query *q)
 	}
 
 	may_error(check_frame(q));
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 	const frame *f = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause; next_key(q)) {

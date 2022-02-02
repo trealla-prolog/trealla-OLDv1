@@ -72,7 +72,7 @@ static pl_status do_yield_0(query *q, int msecs)
 	q->yielded = true;
 	q->tmo_msecs = get_time_in_usec() / 1000;
 	q->tmo_msecs += msecs > 0 ? msecs : 1;
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 	return pl_failure;
 }
 
@@ -339,7 +339,7 @@ static USE_RESULT pl_status fn_iso_notunify_2(query *q)
 	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
-	may_error(make_barrier(q));
+	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -820,7 +820,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 
 static USE_RESULT pl_status fn_iso_repeat_0(query *q)
 {
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 	return pl_success;
 }
 
@@ -1687,7 +1687,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 		fixed = true;
 
 	if (!q->retry) {
-		may_error(make_choice(q));
+		may_error(push_choice(q));
 
 		if (!is_variable(p2))
 			before = get_int(p2);
@@ -1723,7 +1723,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 	for (size_t i = before; i <= len_p1; i++) {
 		for (size_t j = len; j <= (len_p1-i); j++) {
 			set_params(q, i, j+1);
-			may_error(make_choice(q));
+			may_error(push_choice(q));
 			cell tmp;
 			make_int(&tmp, i);
 
@@ -1799,7 +1799,7 @@ static pl_status do_atom_concat_3(query *q)
 		set_var(q, p2, p2_ctx, p3, q->st.curr_frame);
 
 		if (LEN_STR(q, p3))
-			may_error(make_choice(q));
+			may_error(push_choice(q));
 
 		return pl_success;
 	}
@@ -1829,7 +1829,7 @@ static pl_status do_atom_concat_3(query *q)
 	unshare_cell(&tmp);
 
 	if (!done)
-		may_error(make_choice(q));
+		may_error(push_choice(q));
 
 	return pl_success;
 }
@@ -4446,7 +4446,7 @@ static USE_RESULT pl_status fn_iso_arg_3(query *q)
 				set_var(q, p4_raw, p4_ctx, &tmp, q->st.curr_frame);
 
 				if (!is_integer(p1))
-					may_error(make_choice(q));
+					may_error(push_choice(q));
 
 				unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 				return unify(q, p3, p3_ctx, c, c_ctx);
@@ -5254,7 +5254,7 @@ static bool search_functor(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx
 	if (!q->retry)
 		q->st.f_iter = m_first(q->st.m->index);
 
-	DISCARD_RESULT make_choice(q);
+	DISCARD_RESULT push_choice(q);
 	predicate *pr = NULL;
 
 	while (m_next(q->st.f_iter, (void*)&pr)) {
@@ -5736,7 +5736,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 		nbr_cells += safe_copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
 		make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
 		make_return(q, tmp+nbr_cells);
-		may_error(make_barrier(q));
+		may_error(push_barrier(q));
 		q->st.curr_cell = tmp;
 		init_queuen(q);
 		free(q->tmpq[q->st.qnbr]);
@@ -5767,7 +5767,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 	// Now grab matching solutions
 
 	init_queuen(q);
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 	nbr_cells = q->tmpq_size[q->st.qnbr];
 
 	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
@@ -6541,7 +6541,7 @@ static USE_RESULT pl_status fn_between_3(query *q)
 		reset_var(q, p4, q->st.curr_frame, p1, q->st.curr_frame, false);
 
 		if (get_int(p1) != get_int(p2))
-			may_error(make_choice(q));
+			may_error(push_choice(q));
 
 		set_var(q, p3, p3_ctx, p1, q->st.curr_frame);
 		return pl_success;
@@ -6554,7 +6554,7 @@ static USE_RESULT pl_status fn_between_3(query *q)
 	reset_var(q, p4_raw, q->st.curr_frame, &tmp, q->st.curr_frame, false);
 
 	if (val != get_int(p2))
-		may_error(make_choice(q));
+		may_error(push_choice(q));
 
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
@@ -6576,7 +6576,7 @@ static USE_RESULT pl_status fn_forall_2(query *q)
 	cell *tmp = get_heap(q, off);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells + p2->nbr_cells;
 	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -7256,7 +7256,7 @@ static USE_RESULT pl_status fn_accept_2(query *q)
 	if (!str->ssl)
 		net_set_nonblocking(str2);
 
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 	cell tmp;
 	make_int(&tmp, n);
 	tmp.flags |= FLAG_STREAM | FLAG_HEX;
@@ -8119,7 +8119,7 @@ static USE_RESULT pl_status fn_await_0(query *q)
 	if (!q->st.m->tasks)
 		return pl_failure;
 
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 	return pl_success;
 }
 
@@ -10342,7 +10342,7 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,list_or_nil_or_var);
 
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 	pl_idx_t save_tp = q->st.tp;
 	bool save_hook = q->in_hook;
 	q->in_hook = true;
@@ -10465,7 +10465,7 @@ static pl_status do_length(query *q)
 	make_int(&tmp, ++nbr);
 	GET_RAW_ARG(3,p3_raw);
 	reset_var(q, p3_raw, p3_raw_ctx, &tmp, q->st.curr_frame, false);
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 
 	if (is_variable(p1) && is_anon(p1))
@@ -10594,7 +10594,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 		cell tmp;
 		make_int(&tmp, 0);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
-		may_error(make_choice(q));
+		may_error(push_choice(q));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 
 		if (!is_variable(p1))
@@ -10801,7 +10801,7 @@ static USE_RESULT pl_status fn_memberchk_2(query *q)
 		return pl_failure;
 	}
 
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 
 	while (is_list(p2) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(p2);
@@ -11161,7 +11161,7 @@ static USE_RESULT pl_status fn_current_module_1(query *q)
 			return find_module(q->pl, name) ? pl_success : pl_failure;
 		}
 
-		may_error(make_choice(q));
+		may_error(push_choice(q));
 		module *m = q->current_m = q->pl->modules;
 		cell tmp;
 		make_literal(&tmp, index_from_pool(q->pl, m->name));
@@ -11177,7 +11177,7 @@ static USE_RESULT pl_status fn_current_module_1(query *q)
 	if (!m)
 		return pl_failure;
 
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 	cell tmp;
 	make_literal(&tmp, index_from_pool(q->pl, m->name));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -11357,7 +11357,7 @@ static USE_RESULT pl_status fn_using_0(query *q)
 static USE_RESULT pl_status fn_sys_register_term_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 	choice *ch = GET_CURR_CHOICE();
 	ch->register_term = true;
 	return pl_success;
@@ -11409,7 +11409,7 @@ static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)
 		return pl_success;
 	}
 
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 	choice *ch = GET_CURR_CHOICE();
 	ch->register_cleanup = true;
 	return pl_success;
@@ -11429,7 +11429,7 @@ static USE_RESULT pl_status fn_sys_choice_0(query *q)
 	if (q->retry)
 		return pl_failure;
 
-	may_error(make_choice(q));
+	may_error(push_choice(q));
 	return pl_success;
 }
 
