@@ -408,23 +408,28 @@ USE_RESULT pl_status fn_sys_soft_cut_0(query *q)
 	return pl_success;
 }
 
-USE_RESULT pl_status fn_sys_block_catcher_0(query *q)
+USE_RESULT pl_status fn_sys_block_catcher_1(query *q)
 {
 	if (!q->cp)
 		return pl_success;
 
-	choice *ch = GET_CURR_CHOICE();
-	pl_idx_t cp = q->cp;
+	GET_FIRST_ARG(p1,integer);
+	pl_idx_t cp = get_smallint(p1);
+	choice *ch = GET_CHOICE(cp);
 
-	while (cp--) {
-		if (ch->catchme_retry) {
-			ch->block_catcher = !ch->block_catcher;
-			break;
-		}
+	if (!ch->catchme_retry)
+		return pl_failure;
 
-		ch--;
+	if (q->retry) {
+		ch->block_catcher = false;
+		return pl_failure;
 	}
 
+	if (cut_if_det(q))
+		return pl_success;
+
+	ch->block_catcher = true;
+	may_error(make_choice(q));
 	return pl_success;
 }
 
@@ -467,10 +472,12 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 
 	// First time through? Try the primary goal...
 
-	cell *tmp = clone_to_heap(q, true, p1, 3);
+	pl_idx_t cp = q->cp;
+	cell *tmp = clone_to_heap(q, true, p1, 4);
 	may_ptr_error(tmp);
 	pl_idx_t nbr_cells = 1+p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_block_catcher_s, fn_sys_block_catcher_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_sys_block_catcher_s, fn_sys_block_catcher_1, 1, 1);
+	make_int(tmp+nbr_cells++, cp);
 	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(make_catcher(q, QUERY_RETRY));
