@@ -1,0 +1,51 @@
+{
+  "uid" : "be7187d809d5b3b4",
+  "name" : "iso_unify_with_occurs_check_2_15",
+  "fullName" : "iso_unify_with_occurs_check_2_15::tests",
+  "historyId" : "iso_unify_with_occurs_check_2_15::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/unify_with_occurs_check_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/unify_with_occurs_check_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/unify_with_occurs_check_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/unify_with_occurs_check_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "131-134"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/c737a00f0293cfc1fdd85e5b704a6d2524b6d29a/tests/prolog/predicates/unify_with_occurs_check_2/tests.lgt#L131"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "be7187d809d5b3b4.json",
+  "parameterValues" : [ "predicates/unify_with_occurs_check_2/tests.lgt", "131-134", "https://github.com/LogtalkDotOrg/logtalk3/tree/c737a00f0293cfc1fdd85e5b704a6d2524b6d29a/tests/prolog/predicates/unify_with_occurs_check_2/tests.lgt#L131" ]
+}

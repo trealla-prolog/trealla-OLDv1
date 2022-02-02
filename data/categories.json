@@ -6,11 +6,11 @@
       "name" : "Error instead of success",
       "children" : [ {
         "name" : "lgt_catch_3_13",
-        "uid" : "eacf739828f11c3c",
+        "uid" : "d9fa2ce369e3c7b1",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
-          "duration" : 1
+          "duration" : 0
         },
         "flaky" : false,
         "newFailed" : false,
