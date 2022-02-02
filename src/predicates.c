@@ -7682,7 +7682,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 			return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
 	} else if (is_string(p_chars)) {
 		len = LEN_STR(q, p_chars);
-		src = malloc(len+1);
+		src = malloc(len+1+1);		// +1 is to allow adding a '.'
 		may_ptr_error(src);
 		memcpy(src, GET_STR(q, p_chars), len);
 		src[len] = '\0';
