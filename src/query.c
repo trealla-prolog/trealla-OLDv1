@@ -926,7 +926,6 @@ static void proceed(query *q)
 
 	while (q->st.curr_cell && is_end(q->st.curr_cell)) {
 		if (q->st.curr_cell->val_ret) {
-			cut_if_det(q);
 			f->cgen = q->st.curr_cell->cgen;	// set the cgen back
 		}
 
