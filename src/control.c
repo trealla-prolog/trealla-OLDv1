@@ -361,7 +361,7 @@ USE_RESULT pl_status fn_iso_once_1(query *q)
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_call_barrier(q));
+	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -383,7 +383,7 @@ USE_RESULT pl_status fn_ignore_1(query *q)
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_call_barrier(q));
+	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
