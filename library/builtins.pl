@@ -66,7 +66,7 @@ subsumes_term(G, S) :-
 
 call_cleanup(G, C) :-
 	'$register_cleanup'(ignore(C)),
-	'$catch2'(
+	'$call_cleanup'(
 		call(G),
 		Err,
 		(catch((\+ \+ call(C)), _, true), throw(Err))
@@ -77,7 +77,7 @@ call_cleanup(G, C) :-
 setup_call_cleanup(S, G, C) :-
 	once(S),
 	'$register_cleanup'(ignore(C)),
-	'$catch2'(
+	'$call_cleanup'(
 		call(G),
 		Err,
 		(catch((\+ \+ call(C)), _, true), throw(Err))

@@ -478,7 +478,7 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 	return pl_success;
 }
 
-USE_RESULT pl_status fn_sys_catch2_3(query *q)
+USE_RESULT pl_status fn_sys_call_cleanup_3(query *q)
 {
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
 	may_ptr_error(p0);

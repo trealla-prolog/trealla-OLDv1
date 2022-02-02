@@ -76,7 +76,7 @@ pl_status fn_sys_cleanup_if_det_1(query *q);
 pl_status fn_sys_cut_if_det_0(query *q);
 pl_status fn_sys_cut_if_det_1(query *q);
 pl_status fn_iso_throw_1(query *q);
-pl_status fn_sys_catch2_3(query *q);
+pl_status fn_sys_call_cleanup_3(query *q);
 pl_status fn_iso_catch_3(query *q);
 pl_status fn_sys_block_catcher_0(query *q);
 pl_status fn_iso_negation_1(query *q);
