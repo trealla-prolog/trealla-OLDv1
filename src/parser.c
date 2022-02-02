@@ -971,6 +971,7 @@ cell *check_body_callable(parser *p, cell *c)
 		if (!strcmp(GET_STR(p, c), ",")
 			|| !strcmp(GET_STR(p, c), ";")
 			|| !strcmp(GET_STR(p, c), "->")
+			|| !strcmp(GET_STR(p, c), "*->")
 			|| !strcmp(GET_STR(p, c), ":-")) {
 			cell *lhs = c + 1;
 			cell *tmp;
