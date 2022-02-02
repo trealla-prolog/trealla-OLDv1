@@ -3,6 +3,12 @@ Trealla Prolog
 
 NOTE: if this repo disappears it's [moved here](https://github.com/trealla-prolog/).
 
+NOTE: after the move, access will be automatically redirected to the
+new repo location. However it is best to set your repo origin directly...
+
+'''console
+$ git remote set-url origin https://github.com/trealla-prolog/trealla
+'''
 
 A compact, efficient Prolog interpreter with
 [ISO compliant](https://infradig.github.io/trealla/) aspirations.
@@ -50,24 +56,27 @@ requirements, like *get_char*, *get_code*, *sub_atom*, *atom_length*,
 Unicode atoms do not need to be quoted unless they contain breaking
 characters...
 
-	?- [user].
-	是.            % be: means, approximately, "True".
-	不是 :- \+ 是.  % not be: means, approximately, "False".
-	<CTRL-D>
-	   true.
-	?- 是.
-	   true.
-	?- 不是.
-	   false.
+```prolog
+?- [user].
+是.            % be: means, approximately, "True".
+不是 :- \+ 是.  % not be: means, approximately, "False".
+<CTRL-D>
+   true.
+?- 是.
+   true.
+?- 不是.
+   false.
+```
 
 Trealla accepts as a variable any atom beginning with Unicode uppercase...
 
-	?- atom_upper(δ,C).
-	   C = Δ.
-	?- Δ is 123456-123455.
-	   Δ = 1.
-	?-
-
+```prolog
+?- atom_upper(δ,C).
+   C = Δ.
+?- Δ is 123456-123455.
+   Δ = 1.
+?-
+```
 
 Building
 ========
