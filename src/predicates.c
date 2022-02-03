@@ -11590,7 +11590,6 @@ static const struct builtins g_predicates_other[] =
 
 	{"$register_cleanup", 1, fn_sys_register_cleanup_1, NULL, false},
 	{"$register_term", 1, fn_sys_register_term_1, NULL, false},
-	{"$cleanup_if_det", 1, fn_sys_cleanup_if_det_1, "+integer", false},
 	{"$get_level", 1, fn_sys_get_level_1, "-var", false},
 
 	// Edinburgh...
