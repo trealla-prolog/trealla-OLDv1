@@ -1802,7 +1802,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 {
-	unsigned line_nbr = p->line_nbr;
+	unsigned save_line_nbr = p->line_nbr;
 	char *s = *src, *d = *dst;
 
 	if (*s != lh)
@@ -1843,7 +1843,7 @@ static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 	*d = '\0';
 	*dst = d;
 	p->srcptr = s;
-	p->line_nbr = line_nbr;
+	p->line_nbr = save_line_nbr;
 	free(dup_src);
 	return true;
 }
