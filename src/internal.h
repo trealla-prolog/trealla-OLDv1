@@ -622,7 +622,7 @@ struct parser_ {
 	prolog_flags flag;
 	unsigned depth, read_term;
 	unsigned nesting_parens, nesting_braces, nesting_brackets;
-	int quote_char, line_nbr,line_nbr_start;
+	int quote_char, line_nbr, line_nbr_start;
 	unsigned nbr_vars;
 	int8_t dq_consing;
 	bool error;
