@@ -74,7 +74,6 @@ pl_status print_canonical_to_stream(query *q, stream *str, cell *c, pl_idx_t c_c
 
 pl_status fn_sys_cleanup_if_det_1(query *q);
 pl_status fn_sys_cut_if_det_0(query *q);
-pl_status fn_sys_cut_if_det_1(query *q);
 pl_status fn_iso_throw_1(query *q);
 pl_status fn_sys_call_cleanup_3(query *q);
 pl_status fn_iso_catch_3(query *q);
