@@ -2854,7 +2854,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	}
 #endif
 
-	cell tmp;
+	cell tmp ;
 	make_int(&tmp, n);
 	tmp.flags |= FLAG_STREAM | FLAG_HEX;
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);

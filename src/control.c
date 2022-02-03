@@ -406,7 +406,7 @@ USE_RESULT pl_status fn_sys_soft_cut_0(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_block_catcher_1(query *q)
+USE_RESULT pl_status fn_sys_block_catcher_1(query *q)
 {
 	if (!q->cp)
 		return pl_success;
@@ -423,11 +423,10 @@ static USE_RESULT pl_status fn_sys_block_catcher_1(query *q)
 		return pl_failure;
 	}
 
-	ch->block_catcher = true;
-
 	if (cut_if_det(q))
 		return pl_success;
 
+	ch->block_catcher = true;
 	may_error(push_choice(q));
 	return pl_success;
 }
@@ -472,11 +471,12 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 	// First time through? Try the primary goal...
 
 	pl_idx_t cp = q->cp;
-	cell *tmp = clone_to_heap(q, true, p1, 3);
+	cell *tmp = clone_to_heap(q, true, p1, 4);
 	may_ptr_error(tmp);
 	pl_idx_t nbr_cells = 1+p1->nbr_cells;
 	make_structure(tmp+nbr_cells++, g_sys_block_catcher_s, fn_sys_block_catcher_1, 1, 1);
 	make_int(tmp+nbr_cells++, cp);
+	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;
