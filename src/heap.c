@@ -86,8 +86,10 @@ cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 		ensure(a);
 		a->next = q->arenas;
 
-		q->h_size *= 2;
-		q->h_size += nbr_cells;
+		if (q->h_size < nbr_cells) {
+			q->h_size = nbr_cells;
+			q->h_size += nbr_cells / 2;
+		}
 
 		a->heap = calloc(q->h_size, sizeof(cell));
 		ensure(a->heap);
