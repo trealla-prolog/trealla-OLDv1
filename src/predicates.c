@@ -2616,11 +2616,10 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 			return throw_error(q, p1, p1_ctx, "existence_error", "source_sink");
 	}
 
-	cell *tmp = alloc_on_heap(q, 1);
-	may_ptr_error(tmp);
-	make_int(tmp, n);
-	tmp->flags |= FLAG_STREAM | FLAG_HEX;
-	set_var(q, p3, p3_ctx, tmp, q->st.curr_frame);
+	cell tmp;
+	make_int(&tmp, n);
+	tmp.flags |= FLAG_STREAM | FLAG_HEX;
+	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
 
@@ -2855,11 +2854,10 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	}
 #endif
 
-	cell *tmp = alloc_on_heap(q, 1);
-	may_ptr_error(tmp);
-	make_int(tmp, n);
-	tmp->flags |= FLAG_STREAM | FLAG_HEX;
-	set_var(q, p3, p3_ctx, tmp, q->st.curr_frame);
+	cell tmp;
+	make_int(&tmp, n);
+	tmp.flags |= FLAG_STREAM | FLAG_HEX;
+	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
 
@@ -7197,11 +7195,10 @@ static USE_RESULT pl_status fn_server_3(query *q)
 	if (!str->ssl)
 		net_set_nonblocking(str);
 
-	cell *tmp = alloc_on_heap(q, 1);
-	may_ptr_error(tmp);
-	make_int(tmp, n);
-	tmp->flags |= FLAG_STREAM | FLAG_HEX;
-	set_var(q, p2, p2_ctx, tmp, q->st.curr_frame);
+	cell tmp;
+	make_int(&tmp, n);
+	tmp.flags |= FLAG_STREAM | FLAG_HEX;
+	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
 
@@ -7401,11 +7398,10 @@ static USE_RESULT pl_status fn_client_5(query *q)
 	may_error(make_string(&tmp, path));
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
-	cell *tmp2 = alloc_on_heap(q, 1);
-	may_ptr_error(tmp2);
-	make_int(tmp2, n);
-	tmp2->flags |= FLAG_STREAM | FLAG_HEX;
-	set_var(q, p4, p4_ctx, tmp2, q->st.curr_frame);
+	cell tmp2;
+	make_int(&tmp2, n);
+	tmp2.flags |= FLAG_STREAM | FLAG_HEX;
+	set_var(q, p4, p4_ctx, &tmp2, q->st.curr_frame);
 	return pl_success;
 }
 
