@@ -399,6 +399,7 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 	} else if (!CMP_SLICE2(q, c, "positions") && (c->arity == 2) && str->fp) {
 		p->pos_start = ftello(str->fp);
 	} else if (!CMP_SLICE2(q, c, "line_counts") && (c->arity == 2)) {
+		if (p->srcptr) eat_space(p);
 		p->line_nbr_start = p->line_nbr;
 	} else {
 		DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
