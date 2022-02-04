@@ -1811,6 +1811,7 @@ static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 	int save_off = 0;
 	fpos_t pos = {0};
 	int save_line_nbr = p->line_nbr;
+	int save_line_nbr_start = p->line_nbr_start;
 
 	if (p->fp && p->save_line) {
 		dup_src = strdup(p->save_line);
@@ -1839,6 +1840,7 @@ static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 			p->n_line = 0;
 			p->srcptr = *src = dup_src + save_off;
 			p->line_nbr = save_line_nbr;
+			p->line_nbr_start = save_line_nbr_start;
 		} else
 			free(dup_src);
 
