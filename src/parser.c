@@ -1807,7 +1807,17 @@ static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 	if (*s != lh)
 		return false;
 
-	char *dup_src = strdup(*src);
+	char *dup_src = NULL;
+	int save_off = 0;
+	fpos_t pos = {0};
+	int save_line_nbr = p->line_nbr;
+
+	if (p->fp && p->save_line) {
+		dup_src = strdup(p->save_line);
+		save_off = *src - p->save_line;
+		fgetpos(p->fp, &pos);
+	}
+
 	p->srcptr = ++s;
 	s = eat_space(p);
 
@@ -1817,22 +1827,21 @@ static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 
 		p->error_desc = "cincomplete_statement";
 		p->error = true;
+		free(dup_src);
 		return false;
 	}
 
 	if (*s != rh) {
 		if (p->did_getline) {
-			size_t len1 = strlen(dup_src);
-			size_t len2 = len1 + strlen(s);
-			char *tmp = malloc(len2+1);
-			strcpy(tmp, dup_src);
-			strcpy(tmp+len1, s);
+			fsetpos(p->fp, &pos);
 			free(p->save_line);
-			*src = p->srcptr = p->save_line = tmp;
-			p->n_line = len2 + 1;
-		}
+			p->save_line = dup_src;
+			p->n_line = 0;
+			p->srcptr = *src = dup_src + save_off;
+			p->line_nbr = save_line_nbr;
+		} else
+			free(dup_src);
 
-		free(dup_src);
 		return false;
 	}
 
