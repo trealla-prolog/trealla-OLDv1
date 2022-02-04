@@ -374,6 +374,7 @@ static void directives(parser *p, cell *d)
 				fprintf(stdout, "Error: not found: %s\n", filename);
 
 			free(filename);
+			p->line_nbr = save_line_nbr;
 			p->error = true;
 			return;
 		}
@@ -394,6 +395,7 @@ static void directives(parser *p, cell *d)
 				fprintf(stdout, "Error: not found: %s\n", filename);
 
 			free(filename);
+			p->line_nbr = save_line_nbr;
 			p->error = true;
 			return;
 		}
