@@ -2068,11 +2068,11 @@ static USE_RESULT pl_status fn_iso_set_stream_position_2(query *q)
 	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,any);
 
-	if (!is_integer(p1))
-		return throw_error(q, p1, p1_ctx, "domain_error", "stream_position");
-
 	if (!str->repo)
 		return throw_error(q, p1, p1_ctx, "permission_error", "reposition,stream");
+
+	if (!is_smallint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "stream_position");
 
 	off_t pos = get_smallint(p1);
 

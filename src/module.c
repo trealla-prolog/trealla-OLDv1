@@ -969,7 +969,6 @@ db_entry *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 
 		if (pr->tail)
 			pr->tail->next = dbe;
-
 	}
 	 while (!check_multifile(m, pr, dbe));
 

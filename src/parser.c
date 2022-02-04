@@ -1839,7 +1839,7 @@ static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 			fsetpos(p->fp, &pos);
 			free(p->save_line);
 			p->save_line = dup_src;
-			p->n_line = 0;
+			p->n_line = strlen(dup_src);
 			p->srcptr = *src = dup_src + save_off;
 			p->line_nbr = save_line_nbr;
 			p->line_nbr_start = save_line_nbr_start;
