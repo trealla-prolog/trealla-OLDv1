@@ -334,16 +334,6 @@ static void find_key(query *q, predicate *pr, cell *key)
 	q->st.definite = true;
 }
 
-void add_to_dirty_list(query *q, db_entry *dbe)
-{
-	if (!retract_from_db(q->st.m, dbe))
-		return;
-
-	predicate *pr = dbe->owner;
-	dbe->dirty = pr->dirty_list;
-	pr->dirty_list = dbe;
-}
-
 bool is_valid_list(query *q, cell *p1, pl_idx_t p1_ctx, bool allow_partials)
 {
 	if (!is_list(p1) && !is_nil(p1))

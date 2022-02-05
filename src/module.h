@@ -9,6 +9,7 @@ module *load_file(module *m, const char *filename, bool including);
 module *load_fp(module *m, FILE *fp, const char *filename, bool including);
 module *load_text(module *m, const char *src, const char *filename);
 
+bool add_to_dirty_list(module *m, db_entry *r);
 void convert_to_literal(module *m, cell *c);
 unsigned find_op(module *m, const char *name, unsigned specifier);
 unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_prefix);

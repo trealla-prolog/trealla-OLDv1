@@ -196,12 +196,34 @@ predicate *create_predicate(module *m, cell *c)
 	return pr;
 }
 
+bool add_to_dirty_list(module *m, db_entry *dbe)
+{
+	if (!retract_from_db(m, dbe))
+		return false;
+
+	predicate *pr = dbe->owner;
+	dbe->dirty = pr->dirty_list;
+	pr->dirty_list = dbe;
+	return true;
+}
+
 static void destroy_predicate(module *m, predicate *pr)
 {
 	m_del(m->index, &pr->key);
 
 	for (db_entry *dbe = pr->head; dbe;) {
 		db_entry *save = dbe->next;
+
+		if (!dbe->cl.ugen_erased) {
+			clear_rule(&dbe->cl);
+			free(dbe);
+		}
+
+		dbe = save;
+	}
+
+	for (db_entry *dbe = pr->dirty_list; dbe;) {
+		db_entry *save = dbe->dirty;
 		clear_rule(&dbe->cl);
 		free(dbe);
 		dbe = save;
@@ -910,14 +932,9 @@ static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
 			fprintf(stderr, "Warning: overwriting %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
 
 			for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
-				if (dbe->cl.ugen_erased)
+				if (!add_to_dirty_list(m, dbe))
 					continue;
 
-				if (!retract_from_db(m, dbe))
-					continue;
-
-				dbe->dirty = pr->dirty_list;
-				pr->dirty_list = dbe;
 				pr->is_processed = false;
 			}
 

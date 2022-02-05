@@ -55,7 +55,6 @@ void make_indirect(cell *tmp, cell *c);
 bool has_vars(query *q, cell *c, pl_idx_t c_ctx, unsigned depth);
 void call_builtin(query *q, cell *c, pl_idx_t c_ctx);
 pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx);
-void add_to_dirty_list(query *q, db_entry *r);
 void do_cleanup(query *q, cell *p1);
 bool cut_if_det(query *q);
 bool is_in_ref_list(cell *c, pl_idx_t c_ctx, reflist *rlist);

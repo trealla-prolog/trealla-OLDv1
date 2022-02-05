@@ -2199,7 +2199,7 @@ static pl_status do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_typ
 	if (!q->st.m->loading && dbe->owner->is_persist)
 		db_log(q, dbe, LOG_ERASE);
 
-	add_to_dirty_list(q, dbe);
+	add_to_dirty_list(q->st.m, dbe);
 	return pl_success;
 }
 
@@ -2454,7 +2454,7 @@ static void clear_streams_properties(query *q)
 		for (db_entry *dbe = pr->head; dbe;) {
 			db_entry *save = dbe;
 			dbe = dbe->next;
-			add_to_dirty_list(q, save);
+			add_to_dirty_list(q->st.m, save);
 		}
 
 		pr->head = pr->tail = NULL;
@@ -4869,7 +4869,7 @@ static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 		if (!q->st.m->loading && dbe->owner->is_persist && !dbe->cl.ugen_erased)
 			db_log(q, dbe, LOG_ERASE);
 
-		add_to_dirty_list(q, dbe);
+		add_to_dirty_list(q->st.m, dbe);
 	}
 
 	m_destroy(pr->idx);
