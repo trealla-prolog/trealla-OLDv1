@@ -8452,7 +8452,7 @@ static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 	if (is_atom(p1)) {
 		char *src = DUP_SLICE(q, p1);
 		char *filename = relative_to(q->st.m->filename, src);
-		unload_file(q->st.m, filename);
+		//unload_file(q->st.m, filename);
 		free(src);
 
 		if (!load_file(q->st.m, filename, false)) {
