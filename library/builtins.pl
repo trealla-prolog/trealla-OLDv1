@@ -85,16 +85,6 @@ setup_call_cleanup(S, G, C) :-
 
 :- meta_predicate(setup_call_cleanup(0,0,0)).
 
-call_det(G, D) :-
-	'$register_cleanup'(D=true),
-	'$call_cleanup'(
-		ignore(G),
-		Err,
-		(catch((\+ \+ D=true), _, true), throw(Err))
-	).
-
-:- meta_predicate(call_det(0,*)).
-
 throw(E) :-
 	'$throw'(E).
 
