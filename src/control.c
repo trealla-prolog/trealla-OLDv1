@@ -59,7 +59,8 @@ static USE_RESULT pl_status fn_sys_cleanup_if_det_0(query *q)
 	drop_choice(q);
 	ch->did_cleanup = true;
 	cell *c = deref(q, ch->st.curr_cell, ch->st.curr_frame);
-	c = deref(q, c+1, ch->st.curr_frame);
+	pl_idx_t c_ctx = q->latest_ctx;
+	c = deref(q, c+1, c_ctx);
 	do_cleanup(q, c);
 	return pl_success;
 }

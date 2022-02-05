@@ -61,7 +61,8 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 		return;
 #endif
 
-	fprintf(stderr, " [%llu] ", (unsigned long long)q->step++);
+	fprintf(stderr, " [%llu:%u] ", (unsigned long long)q->step++, q->cp);
+
 	fprintf(stderr, "%s ",
 		box == CALL ? "CALL" :
 		box == EXIT ? "EXIT" :
@@ -73,10 +74,10 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 #if DEBUG
 	frame *f = GET_CURR_FRAME();
 	choice *ch = GET_CURR_CHOICE();
-	fprintf(stderr, "{f(%u:v=%u:s=%u):ch%u(f%u:ch%u):tp%u:cp%u:fp%u:sp%u:hp%u} ",
-		q->st.curr_frame, f->nbr_vars, f->nbr_slots, any_choices(q, f),
+	fprintf(stderr, "{f%u:ch%u(f%u:ch%u):tp%u:fp%u:sp%u:hp%u} ",
+		q->st.curr_frame, any_choices(q, f),
 		f->cgen, ch->cgen,
-		q->st.tp, q->cp, q->st.fp, q->st.sp, q->st.hp);
+		q->st.tp, q->st.fp, q->st.sp, q->st.hp);
 #endif
 
 #if 0
@@ -771,9 +772,9 @@ pl_status push_choice(query *q)
 	pl_idx_t curr_choice = q->cp++;
 	choice *ch = GET_CHOICE(curr_choice);
 	*ch = (choice){0};
+	ch->st = q->st;
 	ch->ugen = f->ugen;
 	ch->frame_cgen = ch->cgen = f->cgen;
-	ch->st = q->st;
 	ch->nbr_vars = f->nbr_vars;
 	ch->nbr_slots = f->nbr_slots;
 	ch->overflow = f->overflow;
