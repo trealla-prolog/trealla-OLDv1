@@ -1784,7 +1784,11 @@ pl_status start(query *q)
 
 			proceed(q);
 		} else if (is_list(q->st.curr_cell)) {
-			consultall(q, q->st.curr_cell, q->st.curr_frame);
+			if (consultall(q, q->st.curr_cell, q->st.curr_frame) != pl_success) {
+				q->retry = true;
+				continue;
+			}
+
 			proceed(q);
 		} else {
 			if (!is_callable(q->st.curr_cell)) {
