@@ -631,7 +631,7 @@ pl_status throw_error3(query *q, cell *c, UNUSED pl_idx_t c_ctx, const char *err
 	if (is_variable(c)) {
 		err_type = "instantiation_error";
 		//printf("error(%s,%s).\n", err_type, expected);
-		tmp = alloc_on_tmp(q, 3);
+		tmp = alloc_on_heap(q, 3);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 2);
@@ -640,7 +640,7 @@ pl_status throw_error3(query *q, cell *c, UNUSED pl_idx_t c_ctx, const char *err
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "variable")) {
 		err_type = "uninstantiation_error";
 		//printf("error(%s(%s),(%s)/%u).\n", err_type, GET_STR(q, c), functor, goal->arity);
-		tmp = alloc_on_tmp(q, 6+(c->nbr_cells-1));
+		tmp = alloc_on_heap(q, 6+(c->nbr_cells-1));
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 5+(c->nbr_cells-1));
@@ -652,7 +652,7 @@ pl_status throw_error3(query *q, cell *c, UNUSED pl_idx_t c_ctx, const char *err
 		make_int(tmp+nbr_cells, goal->arity);
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "evaluable")) {
 		//printf("error(%s(%s,(%s)/%u),(%s)/%u).\n", err_type, expected, GET_STR(q, c), c->arity, functor, goal->arity);
-		tmp = alloc_on_tmp(q, 9);
+		tmp = alloc_on_heap(q, 9);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 8);
@@ -671,7 +671,7 @@ pl_status throw_error3(query *q, cell *c, UNUSED pl_idx_t c_ctx, const char *err
 		make_int(tmp+nbr_cells, goal->arity);
 	} else if (!strcmp(err_type, "permission_error") && is_structure(c) && CMP_SLICE2(q, c, "/") && is_variable(c+1)) {
 		//printf("error(%s(%s,(%s)/%u),(%s)/%u).\n", err_type, expected, tmpbuf, c->arity, functor, goal->arity);
-		tmp = alloc_on_tmp(q, 9+extra);
+		tmp = alloc_on_heap(q, 9+extra);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 8+extra);
@@ -708,7 +708,7 @@ pl_status throw_error3(query *q, cell *c, UNUSED pl_idx_t c_ctx, const char *err
 		make_int(tmp+nbr_cells, goal->arity);
 	} else if (!strcmp(err_type, "instantiation_error")) {
 		//printf("error(%s,(%s)/%u).\n", err_type, functor, goal->arity);
-		tmp = alloc_on_tmp(q, 5);
+		tmp = alloc_on_heap(q, 5);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 4);
@@ -719,7 +719,7 @@ pl_status throw_error3(query *q, cell *c, UNUSED pl_idx_t c_ctx, const char *err
 		make_int(tmp+nbr_cells, goal->arity);
 	} else if (!strcmp(err_type, "existence_error") && !strcmp(expected, "procedure")) {
 		//printf("error(%s(%s,(%s)/%u),(%s)/%u).\n", err_type, expected, tmpbuf, c->arity, functor, goal->arity);
-		tmp = alloc_on_tmp(q, 9);
+		tmp = alloc_on_heap(q, 9);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 8);
@@ -738,7 +738,7 @@ pl_status throw_error3(query *q, cell *c, UNUSED pl_idx_t c_ctx, const char *err
 		|| !strcmp(err_type, "syntax_error")
 		|| !strcmp(err_type, "resource_error")) {
 		//printf("error(%s(%s),(%s)/%u).\n", err_type, expected, functor, goal->arity);
-		tmp = alloc_on_tmp(q, 6);
+		tmp = alloc_on_heap(q, 6);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 5);
@@ -750,7 +750,7 @@ pl_status throw_error3(query *q, cell *c, UNUSED pl_idx_t c_ctx, const char *err
 		make_int(tmp+nbr_cells, goal->arity);
 	} else {
 		//printf("error(%s(%s,(%s)),(%s)/%u).\n", err_type, expected, GET_STR(q, c), functor, goal->arity);
-		tmp = alloc_on_tmp(q, 7+(c->nbr_cells-1)+extra);
+		tmp = alloc_on_heap(q, 7+(c->nbr_cells-1)+extra);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 6+(c->nbr_cells-1)+extra);
