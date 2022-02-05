@@ -291,8 +291,7 @@ Non-standard predicates
 	if/3, (*->)/2               # soft-cut
 	setup_call_cleanup/3        # setup_call_cleanup(+setup,+goal,+cleanup)
 	call_cleanup/2              # call_cleanup(+goal,+cleanup)
-	deterministic/2             # deterministic(+goal,:boolean)
-	variant/2                   # variant(+term1,+term2)
+	call_det/2					# call_det(+goal,:boolean)
 	term_attvars/2              # term_attvars(+term,-Vs)
 	copy_term_nat/2             # doesn't copy attrs
 	copy_term/3                 # copy_term(+term1,-term2,-Goals)
