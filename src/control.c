@@ -195,8 +195,6 @@ USE_RESULT pl_status fn_iso_if_then_2(query *q)
 	return pl_success;
 }
 
-extern pl_status fn_sys_soft_cut_0(query *q);
-
 USE_RESULT pl_status fn_if_2(query *q)
 {
 	if (q->retry)
