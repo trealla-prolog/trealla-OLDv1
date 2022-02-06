@@ -1180,8 +1180,9 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 		// Infix...
 
 		pl_idx_t off = (pl_idx_t)(rhs - p->cl->cells);
+		bool nolhs = (last_idx == (unsigned)-1);
 
-		if ((last_idx == (unsigned)-1) || (off > end_idx)) {
+		if (nolhs || (off > end_idx)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: missing operand to '%s', line %u, '%s'\n", GET_STR(p, c), p->line_nbr, p->save_line?p->save_line:"");
 
