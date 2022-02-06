@@ -190,7 +190,7 @@ USE_RESULT pl_status fn_iso_if_then_2(query *q)
 	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_call_barrier(q));
+	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -207,7 +207,7 @@ USE_RESULT pl_status fn_if_2(query *q)
 	make_structure(tmp+nbr_cells++, g_sys_soft_cut_s, fn_sys_soft_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_call_barrier(q));
+	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -227,7 +227,7 @@ static pl_status do_if_then_else(query *q, cell *p1, cell *p2, cell *p3)
 	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_call_barrier(q));
+	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
@@ -247,7 +247,7 @@ static pl_status do_if_else(query *q, cell *p1, cell *p2, cell *p3)
 	make_structure(tmp+nbr_cells++, g_sys_soft_cut_s, fn_sys_soft_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_call_barrier(q));
+	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
