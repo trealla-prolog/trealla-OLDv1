@@ -2953,6 +2953,8 @@ bool run(parser *p, const char *pSrc, bool dump)
 		p->one_shot = true;
 		p->consulting = false;
 
+		//printf("*** '%s'\n", p->srcptr);
+
 		if (!tokenize(p, false, false))
 			break;
 
