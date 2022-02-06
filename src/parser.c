@@ -1048,7 +1048,7 @@ void term_to_body(parser *p)
 	p->cl->cells->nbr_cells = p->cl->cidx - 1;
 }
 
-static bool reduce(parser *p, pl_idx_t start_idx)
+static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 {
 	pl_idx_t lowest = IDX_MAX, work_idx, end_idx = p->cl->cidx - 1;
 	bool do_work = false, bind_le = false;
@@ -1056,7 +1056,8 @@ static bool reduce(parser *p, pl_idx_t start_idx)
 	for (pl_idx_t i = start_idx; i < p->cl->cidx;) {
 		cell *c = p->cl->cells + i;
 
-		//printf("*** OP0 %s type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
+		if (!p->consulting && 0)
+			printf("*** OP0 %s type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
 
 		if ((c->nbr_cells > 1) || !is_literal(c) || !c->priority) {
 			i += c->nbr_cells;
@@ -1082,7 +1083,7 @@ static bool reduce(parser *p, pl_idx_t start_idx)
 	if (!do_work)
 		return false;
 
-	pl_idx_t last_idx = 0;
+	pl_idx_t last_idx = (unsigned)-1;
 
 	for (pl_idx_t i = start_idx; i <= end_idx;) {
 		cell *c = p->cl->cells + i;
@@ -1099,7 +1100,8 @@ static bool reduce(parser *p, pl_idx_t start_idx)
 			continue;
 		}
 
-		//printf("*** OP1 %s type=%u, specifier=%u, pri=%u\n", GET_STR(p, c), c->tag, GET_OP(c), c->priority);
+		if (!p->consulting && 0)
+			printf("*** OP1 last=%u/start=%u %s type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", last_idx, start_idx, GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
 
 		c->tag = TAG_LITERAL;
 		c->arity = 1;
@@ -1179,7 +1181,7 @@ static bool reduce(parser *p, pl_idx_t start_idx)
 
 		pl_idx_t off = (pl_idx_t)(rhs - p->cl->cells);
 
-		if (off > end_idx) {
+		if ((last_idx == (unsigned)-1) || (off > end_idx)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: missing operand to '%s', line %u, '%s'\n", GET_STR(p, c), p->line_nbr, p->save_line?p->save_line:"");
 
@@ -1222,9 +1224,9 @@ static bool reduce(parser *p, pl_idx_t start_idx)
 	return true;
 }
 
-static bool analyze(parser *p, pl_idx_t start_idx)
+static bool analyze(parser *p, pl_idx_t start_idx, bool last_op)
 {
-	while (reduce(p, start_idx))
+	while (reduce(p, start_idx, last_op))
 		;
 
 	return !p->error;
@@ -2494,7 +2496,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				return false;
 			}
 
-			if (analyze(p, 0)) {
+			if (analyze(p, 0, last_op)) {
 				if (p->cl->cells->nbr_cells < (p->cl->cidx-1)) {
 					if (DUMP_ERRS || !p->do_read_term)
 						printf("Error: syntax error, operator expected '%s', line %u, '%s'\n", p->token, p->line_nbr, p->save_line?p->save_line:"");
@@ -2691,7 +2693,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && args && !strcmp(p->token, ",")) {
-			analyze(p, arg_idx);
+			analyze(p, arg_idx, last_op);
 			arg_idx = p->cl->cidx;
 
 			if (*p->srcptr == ',') {
@@ -2767,7 +2769,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			p->last_close = true;
 			last_op = false;
 			p->nesting_parens--;
-			analyze(p, begin_idx);
+			analyze(p, begin_idx, last_op);
 			return arity;
 		}
 
@@ -2775,7 +2777,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			p->last_close = true;
 			last_op = false;
 			p->nesting_brackets--;
-			analyze(p, begin_idx);
+			analyze(p, begin_idx, last_op);
 			return arity;
 		}
 
@@ -2783,7 +2785,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			p->last_close = true;
 			last_op = false;
 			p->nesting_braces--;
-			analyze(p, begin_idx);
+			analyze(p, begin_idx, last_op);
 			return arity;
 		}
 
@@ -2985,7 +2987,7 @@ bool run(parser *p, const char *pSrc, bool dump)
 			return true;
 		}
 
-		if (!analyze(p, 0))
+		if (!analyze(p, 0, true))
 			return false;
 
 		term_assign_vars(p, 0, false);
