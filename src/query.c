@@ -1675,10 +1675,10 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 		char *s = DUP_SLICE(q, l);
 
 		if (!load_file(q->p->m, s, false)) {
-			cell tmp;
-			make_cstring(&tmp, s);
+			cell *tmp = alloc_on_heap(q, 1);
+			make_cstring(tmp, s);
 			free(s);
-			return throw_error(q, &tmp, q->st.curr_frame, "existence_error", "source_sink");
+			return throw_error(q, tmp, q->st.curr_frame, "existence_error", "source_sink");
 		}
 
 		free(s);
@@ -1699,10 +1699,10 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 			char *s = DUP_SLICE(q, h);
 
 			if (!load_file(q->p->m, s, false)) {
-				cell tmp;
-				make_cstring(&tmp, s);
+				cell *tmp = alloc_on_heap(q, 1);
+				make_cstring(tmp, s);
 				free(s);
-				return throw_error(q, &tmp, q->st.curr_frame, "existence_error", "source_sink");
+				return throw_error(q, tmp, q->st.curr_frame, "existence_error", "source_sink");
 			}
 
 			free(s);
