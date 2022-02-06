@@ -2485,6 +2485,15 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				p->nesting_parens = p->nesting_brackets = p->nesting_braces = 0;
 			}
 
+			if (!p->cl->cidx) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, incomplete statement, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+
+				p->error_desc = "cincomplete_statement";
+				p->error = true;
+				return false;
+			}
+
 			if (analyze(p, 0)) {
 				if (p->cl->cells->nbr_cells < (p->cl->cidx-1)) {
 					if (DUMP_ERRS || !p->do_read_term)
