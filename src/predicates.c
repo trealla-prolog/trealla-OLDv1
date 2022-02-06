@@ -7753,9 +7753,8 @@ static USE_RESULT pl_status fn_read_term_from_atom_3(query *q)
 		memcpy(src, GET_STR(q, p_chars), len);
 		src[len] = '\0';
 	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx, false)) > 0) {
-		if (!len) {
+		if (!len)
 			return throw_error(q, p_chars, p_chars_ctx, "type_error", "atom");
-		}
 
 		src = chars_list_to_string(q, p_chars, p_chars_ctx, len);
 	} else
