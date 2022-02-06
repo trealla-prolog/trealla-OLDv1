@@ -581,7 +581,7 @@ void trim_trail(query *q)
 
 	pl_idx_t tp;
 
-	if (q->cp > 1) {
+	if (q->cp) {
 		const choice *ch = GET_CURR_CHOICE();
 		tp = ch->st.tp;
 	} else
@@ -937,7 +937,7 @@ static bool resume_frame(query *q)
 	frame *f = GET_CURR_FRAME();
 
 #if 0
-	if (q->cp > 1) {
+	if (q->cp) {
 		const choice *ch = GET_CURR_CHOICE();
 		printf("*** resume f->cgen=%u, ch->cgen=%u\n", f->cgen, ch->cgen);
 	}
@@ -1059,7 +1059,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	cell *attrs = is_empty(&e->c) ? e->c.attrs : NULL;
 	pl_idx_t attrs_ctx = e->c.attrs_ctx;
 
-	if ((q->cp > 1) || attrs)
+	if (q->cp || attrs)
 		add_trail(q, c_ctx, c->var_nbr, attrs, attrs_ctx);
 
 	if (is_structure(v)) {
@@ -1111,7 +1111,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 
 	e->ctx = v_ctx;
 
-	if ((q->cp > 1) && trailing)
+	if (q->cp && trailing)
 		add_trail(q, c_ctx, c->var_nbr, NULL, 0);
 }
 
@@ -1653,7 +1653,7 @@ static bool check_redo(query *q)
 
 static bool any_outstanding_choices(query *q)
 {
-	if (q->cp <= 1)
+	if (!q->cp)
 		return false;
 
 	choice *ch = GET_CURR_CHOICE();
@@ -1666,7 +1666,7 @@ static bool any_outstanding_choices(query *q)
 		drop_choice(q);
 	}
 
-	return q->cp > 1;
+	return q->cp;
 }
 
 static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)

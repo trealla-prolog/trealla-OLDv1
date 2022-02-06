@@ -2939,64 +2939,76 @@ bool run(parser *p, const char *pSrc, bool dump)
 	}
 
 	ASTRING(src);
-	ASTRING_sprintf(src, "'$choice',(%s", pSrc);
+	ASTRING_sprintf(src, "%s", pSrc);
 	ASTRING_trim_ws(src);
 	ASTRING_trim(src, '.');
-	ASTRING_strcat(src, ").");
+	ASTRING_strcat(src, ".");
 
 	p->srcptr = ASTRING_cstr(src);
 	p->line_nbr = 1;
-	tokenize(p, false, false);
+	bool ok;
+
+	for (;p->srcptr && *p->srcptr;) {
+		reset(p);
+		p->line_nbr = 1;
+		p->one_shot = true;
+
+		if (!tokenize(p, false, false))
+			break;
+
+		if (!p->error && !p->end_of_term && !p->run_init) {
+			fprintf(stdout, "Error: syntax error, missing operand or operator\n");
+			p->error = true;
+		}
+
+		if (p->error) {
+			p->pl->did_dump_vars = true;
+			return false;
+		}
+
+		if (p->skip) {
+			p->m->pl->status = true;
+			return true;
+		}
+
+		if (!analyze(p, 0))
+			return false;
+
+		term_assign_vars(p, 0, false);
+
+		if (!p->command)
+			term_expansion(p);
+
+		xref_rule(p->m, p->cl, NULL);
+
+		query *q = create_query(p->m, false);
+		if (!q) return false;
+		q->p = p;
+		q->do_dump_vars = dump;
+		q->run_init = p->run_init;
+		execute(q, p->cl->cells, p->cl->nbr_vars);
+
+		p->m->pl->halt = q->halt;
+		p->m->pl->halt_code = q->halt_code;
+		p->m->pl->status = q->status;
+		p->m->pl->is_redo = q->is_redo;
+
+		if (!p->m->pl->quiet && !p->directive && dump && q->pl->stats) {
+			fprintf(stdout,
+				"Goals %llu. Matches %llu. Max frames %u, choices %u, trails: %u, slots %u, heap %u. Backtracks %llu. TCOs:%llu\n",
+				(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
+				q->max_frames, q->max_choices, q->max_trails, q->max_slots, q->arenas->max_hp_used,
+				(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
+		}
+
+		ok = !q->error;
+		p->m = q->st.m;
+		destroy_query(q);
+
+		if (!ok)
+			break;
+	}
 
 	ASTRING_free(src);
-
-	if (!p->error && !p->end_of_term && !p->run_init) {
-		fprintf(stdout, "Error: syntax error, missing operand or operator\n");
-		p->error = true;
-	}
-
-	if (p->error) {
-		p->pl->did_dump_vars = true;
-		return false;
-	}
-
-	if (p->skip) {
-		p->m->pl->status = true;
-		return true;
-	}
-
-	if (!analyze(p, 0))
-		return false;
-
-	term_assign_vars(p, 0, false);
-
-	if (!p->command)
-		term_expansion(p);
-
-	xref_rule(p->m, p->cl, NULL);
-
-	query *q = create_query(p->m, false);
-	if (!q) return false;
-	q->p = p;
-	q->do_dump_vars = dump;
-	q->run_init = p->run_init;
-	execute(q, p->cl->cells, p->cl->nbr_vars);
-
-	p->m->pl->halt = q->halt;
-	p->m->pl->halt_code = q->halt_code;
-	p->m->pl->status = q->status;
-	p->m->pl->is_redo = q->is_redo;
-
-	if (!p->m->pl->quiet && !p->directive && dump && q->pl->stats) {
-		fprintf(stdout,
-			"Goals %llu. Matches %llu. Max frames %u, choices %u, trails: %u, slots %u, heap %u. Backtracks %llu. TCOs:%llu\n",
-			(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
-			q->max_frames, q->max_choices, q->max_trails, q->max_slots, q->arenas->max_hp_used,
-			(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
-	}
-
-	const bool ok = !q->error;
-	p->m = q->st.m;
-	destroy_query(q);
 	return ok;
 }
