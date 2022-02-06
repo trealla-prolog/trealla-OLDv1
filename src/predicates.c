@@ -4619,7 +4619,7 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 	q->pl->tab_idx = 0;
 	collect_vars(q, p1, p1_ctx);
 	const unsigned cnt = q->pl->tab_idx;
-	may_ptr_error(init_tmp_heap(q));
+	if (!init_tmp_heap(q)) return NULL;
 	cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
 	ensure(tmp);
 	unsigned idx = 0;
