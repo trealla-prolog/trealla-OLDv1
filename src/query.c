@@ -836,12 +836,12 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 			ch--;
 		}
 
-		// A normal cut can't break through a barrier...
+		// A normal cut can't break through it's containing barrier...
 
 		if (!inner_cut && ch->barrier && (ch->cgen == f->cgen))
 			break;
 
-		// Whereas an inner cut clears the barrier.
+		// Whereas an inner cut removes it's barrier
 
 		if (ch->cgen < f->cgen) {
 			if (inner_cut)
