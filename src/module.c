@@ -1413,6 +1413,7 @@ module *load_file(module *m, const char *filename, bool including)
 		strcpy(tmpbuf, savebuf);
 
 		if (!(realbuf = realpath(tmpbuf, NULL))) {
+			free(savebuf);
 			free(tmpbuf);
 			return NULL;
 		}
