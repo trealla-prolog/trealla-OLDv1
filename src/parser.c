@@ -1057,7 +1057,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 		cell *c = p->cl->cells + i;
 
 		if (!p->consulting && 0)
-			printf("*** OP0 start=%u %s type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", start_idx, GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
+			printf("*** OP0 %s type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
 
 		if ((c->nbr_cells > 1) || !is_literal(c) || !c->priority) {
 			i += c->nbr_cells;
@@ -1083,8 +1083,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 	if (!do_work)
 		return false;
 
-	pl_idx_t last_idx = start_idx;
-	bool first = true;
+	pl_idx_t last_idx = (unsigned)-1;
 
 	for (pl_idx_t i = start_idx; i <= end_idx;) {
 		cell *c = p->cl->cells + i;
@@ -1092,7 +1091,6 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 		if ((c->nbr_cells > 1) || !is_literal(c) || !c->priority) {
 			last_idx = i;
 			i += c->nbr_cells;
-			first = false;
 			continue;
 		}
 
@@ -1183,7 +1181,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 
 		pl_idx_t off = (pl_idx_t)(rhs - p->cl->cells);
 
-		if (first || (off > end_idx)) {
+		if ((last_idx == (unsigned)-1) || (off > end_idx)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: missing operand to '%s', line %u, '%s'\n", GET_STR(p, c), p->line_nbr, p->save_line?p->save_line:"");
 
