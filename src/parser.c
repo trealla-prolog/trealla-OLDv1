@@ -1806,6 +1806,9 @@ static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
 {
 	char *s = *src, *d = *dst;
 
+	if (p->error)
+		return false;
+
 	if (*s != lh)
 		return false;
 
@@ -2947,7 +2950,7 @@ bool run(parser *p, const char *pSrc, bool dump)
 	p->srcptr = ASTRING_cstr(src);
 	bool ok;
 
-	while (p->srcptr && *p->srcptr) {
+	while (p->srcptr && *p->srcptr && !g_tpl_interrupt) {
 		reset(p);
 		p->line_nbr = 1;
 		p->one_shot = true;

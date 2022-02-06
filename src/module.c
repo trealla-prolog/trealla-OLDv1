@@ -1312,7 +1312,7 @@ module *load_fp(module *m, FILE *fp, const char *filename, bool including)
 		tokenize(p, false, false);
 		ok = !p->error;
 	}
-	 while (ok && !p->already_loaded);
+	 while (ok && !p->already_loaded && !g_tpl_interrupt);
 
 	if (!p->error && !p->already_loaded && !p->end_of_term && p->cl->cidx) {
 		if (DUMP_ERRS || !p->do_read_term)
