@@ -842,7 +842,7 @@ typedef struct {
 
 #define ASTRING_strcatn(pr,s,len) {										\
 	ASTRING_check(pr, len);												\
-	memcpy(pr##_buf.dst, s, (len)+1);									\
+	memcpy(pr##_buf.dst, s, len);										\
 	pr##_buf.dst += len;												\
 	*pr##_buf.dst = '\0';												\
 }
