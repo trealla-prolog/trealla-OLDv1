@@ -1369,13 +1369,18 @@ module *load_file(module *m, const char *filename, bool including)
 
 			if (!strcmp(str->name, "user_input")) {
 				while (m->pl->p && m->pl->p->srcptr && *m->pl->p->srcptr) {
-					reset(m->pl->p);
 					m->filename = filename;
-					m->pl->p->line_nbr = 1;
-					m->pl->p->consulting = true;
+					parser *p = create_parser(m);
+					if (!p) return NULL;
+					p->srcptr = m->pl->p->srcptr;
+					p->consulting = true;
+					p->m = m;
 
-					if (!tokenize(m->pl->p, false, false))
+					if (!tokenize(p, false, false))
 						break;
+
+					m->pl->p->srcptr = p->srcptr;
+					destroy_parser(p);
 				}
 
 				module *save_m = load_fp(m, str->fp, filename, including);
