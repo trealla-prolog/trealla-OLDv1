@@ -2951,6 +2951,7 @@ bool run(parser *p, const char *pSrc, bool dump)
 		reset(p);
 		p->line_nbr = 1;
 		p->one_shot = true;
+		p->consulting = false;
 
 		if (!tokenize(p, false, false))
 			break;

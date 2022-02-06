@@ -1362,21 +1362,22 @@ module *load_file(module *m, const char *filename, bool including)
 	if (!strcmp(filename, "user")) {
 		for (int i = 0; i < MAX_STREAMS; i++) {
 			stream *str = &m->pl->streams[i];
+			char tmpbuf[256];
+			static unsigned s_cnt = 1;
+			snprintf(tmpbuf, sizeof(tmpbuf), "user_%u\n", s_cnt++);
+			filename = set_loaded(m, tmpbuf);
 
 			if (!strcmp(str->name, "user_input")) {
-				if (m->pl->p->srcptr && *m->pl->p->srcptr) {
+				while (m->pl->p && m->pl->p->srcptr && *m->pl->p->srcptr) {
 					reset(m->pl->p);
-					m->filename = set_known(m, "user");
+					m->filename = filename;
 					m->pl->p->line_nbr = 1;
 					m->pl->p->consulting = true;
-					m->pl->p->one_shot = false;
-					tokenize(m->pl->p, false, false);
+
+					if (!tokenize(m->pl->p, false, false))
+						break;
 				}
 
-				char tmpbuf[256];
-				static unsigned s_cnt = 1;
-				snprintf(tmpbuf, sizeof(tmpbuf), "user_%u\n", s_cnt++);
-				filename = set_loaded(m, tmpbuf);
 				module *save_m = load_fp(m, str->fp, filename, including);
 				clearerr(str->fp);
 				return save_m;
