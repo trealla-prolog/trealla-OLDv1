@@ -1678,7 +1678,9 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 			cell *tmp = alloc_on_heap(q, 1);
 			make_cstring(tmp, s);
 			free(s);
-			return throw_error(q, tmp, q->st.curr_frame, "existence_error", "source_sink");
+			pl_status ok = throw_error(q, tmp, q->st.curr_frame, "existence_error", "source_sink");
+			unshare_cell(tmp);
+			return ok;
 		}
 
 		free(s);
@@ -1702,7 +1704,9 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 				cell *tmp = alloc_on_heap(q, 1);
 				make_cstring(tmp, s);
 				free(s);
-				return throw_error(q, tmp, q->st.curr_frame, "existence_error", "source_sink");
+				pl_status ok = throw_error(q, tmp, q->st.curr_frame, "existence_error", "source_sink");
+				unshare_cell(tmp);
+				return ok;
 			}
 
 			free(s);
