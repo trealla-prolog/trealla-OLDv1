@@ -2945,10 +2945,9 @@ bool run(parser *p, const char *pSrc, bool dump)
 	ASTRING_strcat(src, ".");
 
 	p->srcptr = ASTRING_cstr(src);
-	p->line_nbr = 1;
 	bool ok;
 
-	for (;p->srcptr && *p->srcptr;) {
+	for (; p->srcptr && *p->srcptr;) {
 		reset(p);
 		p->line_nbr = 1;
 		p->one_shot = true;
