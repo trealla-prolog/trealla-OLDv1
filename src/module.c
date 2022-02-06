@@ -1300,6 +1300,7 @@ module *load_fp(module *m, FILE *fp, const char *filename, bool including)
 	bool ok = false;
 
 	virtual_term(p, "begin_of_file.");
+	tokenize(p, false, false);
 
 	do {
 		if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
@@ -1363,6 +1364,15 @@ module *load_file(module *m, const char *filename, bool including)
 			stream *str = &m->pl->streams[i];
 
 			if (!strcmp(str->name, "user_input")) {
+				if (m->pl->p->srcptr && *m->pl->p->srcptr) {
+					reset(m->pl->p);
+					m->filename = set_known(m, "user");
+					m->pl->p->line_nbr = 1;
+					m->pl->p->consulting = true;
+					m->pl->p->one_shot = false;
+					tokenize(m->pl->p, false, false);
+				}
+
 				char tmpbuf[256];
 				static unsigned s_cnt = 1;
 				snprintf(tmpbuf, sizeof(tmpbuf), "user_%u\n", s_cnt++);
