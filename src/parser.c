@@ -2266,7 +2266,7 @@ bool get_token(parser *p, int last_op)
 			}
 
 			if (!p->string
-				&&strcmp(p->token, "[")
+				&& strcmp(p->token, "[")
 				&& strcmp(p->token, "(")
 				&& strcmp(p->token, "{")
 				&& strcmp(p->token, "]")
@@ -2803,8 +2803,11 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		unsigned specifier = 0;
 		int priority = 0;
 
-		if (is_literal(&p->v))
-			priority = search_op(p->m, p->token, &specifier, last_op);
+		if (is_literal(&p->v)) {
+			int nextch = *eat_space(p);
+			bool noneg = (!strcmp(p->token, "-") || !strcmp(p->token, "+")) && (nextch == '='); // Hack
+			priority = search_op(p->m, p->token, &specifier, last_op && !noneg);
+		}
 
 		if (!strcmp(p->token, "!") &&
 			((*p->srcptr == ')') || (*p->srcptr == ';') || (*p->srcptr == ',') || (*p->srcptr == '.')))
