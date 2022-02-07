@@ -1057,7 +1057,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 		cell *c = p->cl->cells + i;
 
 		if (!p->consulting && 0)
-			printf("*** OP0 %s type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
+			printf("*** OP1 start=%u %s type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", start_idx, GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
 
 		if ((c->nbr_cells > 1) || !is_literal(c) || !c->priority) {
 			i += c->nbr_cells;
@@ -1181,6 +1181,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 
 		pl_idx_t off = (pl_idx_t)(rhs - p->cl->cells);
 		bool nolhs = (last_idx == (unsigned)-1);
+		if (i == start_idx) nolhs = true;
 
 		if (nolhs || (off > end_idx)) {
 			if (DUMP_ERRS || !p->do_read_term)
@@ -2457,7 +2458,7 @@ static bool process_term(parser *p, cell *p1)
 
 unsigned tokenize(parser *p, bool args, bool consing)
 {
-	pl_idx_t begin_idx = p->cl->cidx, arg_idx = p->cl->cidx, save_idx = 0;
+	pl_idx_t arg_idx = p->cl->cidx, save_idx = 0;
 	bool last_op = true, is_func = false, was_consing = false;
 	bool last_bar = false, last_quoted = false, last_postfix = false;
 	unsigned arity = 1;
@@ -2770,7 +2771,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			p->last_close = true;
 			last_op = false;
 			p->nesting_parens--;
-			analyze(p, begin_idx, last_op);
+			analyze(p, arg_idx, last_op);
 			return arity;
 		}
 
@@ -2778,7 +2779,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			p->last_close = true;
 			last_op = false;
 			p->nesting_brackets--;
-			analyze(p, begin_idx, last_op);
+			analyze(p, arg_idx, last_op);
 			return arity;
 		}
 
@@ -2786,7 +2787,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			p->last_close = true;
 			last_op = false;
 			p->nesting_braces--;
-			analyze(p, begin_idx, last_op);
+			analyze(p, arg_idx, last_op);
 			return arity;
 		}
 
