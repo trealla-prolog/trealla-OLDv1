@@ -2758,7 +2758,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && p->start_term &&
-			(!strcmp(p->token, ",") || !strcmp(p->token, "]") || !strcmp(p->token, ")") || !strcmp(p->token, "}"))) {
+			(!strcmp(p->token, "]") || !strcmp(p->token, ")") || !strcmp(p->token, "}"))) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, start of rule expected, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
