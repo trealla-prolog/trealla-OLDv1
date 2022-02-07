@@ -493,7 +493,7 @@ USE_RESULT pl_status fn_sys_call_cleanup_3(query *q)
 		cell *tmp = clone_to_heap(q, true, p3, 2);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 1+p3->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cleanup_if_det_0, 0, 0);
+		make_structure(tmp+nbr_cells++, g_sys_cleanup_if_det_s, fn_sys_cleanup_if_det_0, 0, 0);
 		make_return(q, tmp+nbr_cells);
 		may_error(push_catcher(q, QUERY_EXCEPTION));
 		q->st.curr_cell = tmp;
@@ -508,7 +508,7 @@ USE_RESULT pl_status fn_sys_call_cleanup_3(query *q)
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	may_ptr_error(tmp);
 	pl_idx_t nbr_cells = 1+p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cleanup_if_det_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_sys_cleanup_if_det_s, fn_sys_cleanup_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;
