@@ -11254,6 +11254,7 @@ static USE_RESULT pl_status fn_current_module_1(query *q)
 	return pl_success;
 }
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_use_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -11376,13 +11377,16 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_use_module_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
 	return fn_use_module_1(q);
 }
+#endif
 
 static USE_RESULT pl_status fn_module_1(query *q)
 {
@@ -11654,12 +11658,12 @@ static const struct builtins g_predicates_other[] =
 
 	{"cyclic_term", 1, fn_cyclic_term_1, NULL, false},
 	{"current_module", 1, fn_current_module_1, NULL, false},
-	{"use_module", 1, fn_use_module_1, NULL, false},
-	{"use_module", 2, fn_use_module_2, NULL, false},
 	{"module", 1, fn_module_1, NULL, false},
 	{"using", 0, fn_using_0, NULL, false},
 
 #ifndef SANDBOX
+	{"use_module", 1, fn_use_module_1, NULL, false},
+	{"use_module", 2, fn_use_module_2, NULL, false},
 	{"load_files", 2, fn_load_files_2, NULL, false},
 	{"unload_files", 1, fn_unload_files_1, NULL, false},
 	{"getfile", 2, fn_getfile_2, "+string,-list", false},
