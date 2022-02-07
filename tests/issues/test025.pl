@@ -1,5 +1,4 @@
 :-initialization(main).
 
 main :-
-	write_canonical("abc"), nl,
-	halt.
+	write_canonical("abc"), nl.
