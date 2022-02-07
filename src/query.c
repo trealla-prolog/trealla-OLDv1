@@ -61,7 +61,7 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 		return;
 #endif
 
-	fprintf(stderr, " [%llu:%u] ", (unsigned long long)q->step++, q->cp);
+	fprintf(stderr, " [%llu:f%u:cp%u] ", (unsigned long long)q->step++, q->st.curr_frame, q->cp);
 
 	fprintf(stderr, "%s ",
 		box == CALL ? "CALL" :
@@ -74,9 +74,8 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 #if DEBUG
 	frame *f = GET_CURR_FRAME();
 	choice *ch = GET_CURR_CHOICE();
-	fprintf(stderr, "{f%u:ch%u(f%u:ch%u):tp%u:fp%u:sp%u:hp%u} ",
-		q->st.curr_frame, any_choices(q, f),
-		f->cgen, ch->cgen,
+	fprintf(stderr, "{ch%u:tp%u:fp%u:sp%u:hp%u} ",
+		any_choices(q, f),
 		q->st.tp, q->st.fp, q->st.sp, q->st.hp);
 #endif
 
