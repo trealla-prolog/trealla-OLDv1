@@ -1938,7 +1938,6 @@ static USE_RESULT pl_status fn_iso_atom_length_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-#ifndef SANDBOX
 static int new_stream(prolog *pl)
 {
 	for (int i = 0; i < MAX_STREAMS; i++) {
@@ -1950,7 +1949,6 @@ static int new_stream(prolog *pl)
 
 	return -1;
 }
-#endif
 
 static int get_named_stream(prolog *pl, const char *name, size_t len)
 {
@@ -7096,7 +7094,6 @@ static USE_RESULT pl_status fn_getlines_2(query *q)
 	return pl_success;
 }
 
-#ifndef SANDBOX
 static void parse_host(const char *src, char *hostname, char *path, unsigned *port, int *ssl, int *domain)
 {
 	if (!strncmp(src, "https://", 8)) {
@@ -7120,9 +7117,7 @@ static void parse_host(const char *src, char *hostname, char *path, unsigned *po
 	hostname[1023] = '\0';
 	path[4095] = '\0';
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_server_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -7238,9 +7233,7 @@ static USE_RESULT pl_status fn_server_3(query *q)
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_accept_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
@@ -7299,9 +7292,7 @@ static USE_RESULT pl_status fn_accept_2(query *q)
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_client_5(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -7445,7 +7436,6 @@ static USE_RESULT pl_status fn_client_5(query *q)
 	set_var(q, p4, p4_ctx, &tmp2, q->st.curr_frame);
 	return pl_success;
 }
-#endif
 
 static USE_RESULT pl_status fn_getline_1(query *q)
 {
@@ -11696,9 +11686,6 @@ static const struct builtins g_predicates_other[] =
 	{"chdir", 1, fn_chdir_1, "+string", false},
 	{"sleep", 1, fn_sleep_1, "+integer", false},
 	{"delay", 1, fn_delay_1, "+integer", false},
-	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list", false},
-	{"server", 3, fn_server_3, "+string,-stream,+list", false},
-	{"accept", 2, fn_accept_2, "+stream,-stream", false},
 	{"pid", 1, fn_pid_1, "-integer", false},
 	{"shell", 1, fn_shell_1, "+atom", false},
 	{"shell", 2, fn_shell_2, "+atom,-integer", false},
@@ -11715,6 +11702,10 @@ static const struct builtins g_predicates_other[] =
 	{"$db_save", 0, fn_sys_db_save_0, NULL, false},
 
 #endif
+
+	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list", false},
+	{"server", 3, fn_server_3, "+string,-stream,+list", false},
+	{"accept", 2, fn_accept_2, "+stream,-stream", false},
 
 	{"listing", 0, fn_listing_0, NULL, false},
 	{"listing", 1, fn_listing_1, NULL, false},
