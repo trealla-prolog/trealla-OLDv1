@@ -824,16 +824,13 @@ static USE_RESULT pl_status fn_iso_repeat_0(query *q)
 	return pl_success;
 }
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_iso_halt_0(query *q)
 {
 	q->halt_code = 0;
 	q->halt = q->error = true;
 	return pl_halt;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_iso_halt_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
@@ -841,7 +838,6 @@ static USE_RESULT pl_status fn_iso_halt_1(query *q)
 	q->halt = q->error = true;
 	return pl_halt;
 }
-#endif
 
 static USE_RESULT pl_status fn_iso_number_1(query *q)
 {
@@ -11584,10 +11580,10 @@ static const struct builtins g_predicates_iso[] =
 	{"open", 4, fn_iso_open_4, NULL, false},
 	{"close", 1, fn_iso_close_1, NULL, false},
 	{"close", 2, fn_iso_close_2, NULL, false},
-	{"halt", 0, fn_iso_halt_0, NULL, false},
-	{"halt", 1, fn_iso_halt_1, NULL, false},
 #endif
 
+	{"halt", 0, fn_iso_halt_0, NULL, false},
+	{"halt", 1, fn_iso_halt_1, NULL, false},
 	{"read_term", 2, fn_iso_read_term_2, NULL, false},
 	{"read_term", 3, fn_iso_read_term_3, NULL, false},
 	{"read", 1, fn_iso_read_1, NULL, false},
