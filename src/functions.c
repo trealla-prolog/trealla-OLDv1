@@ -189,53 +189,6 @@ void call_builtin(query *q, cell *c, pl_idx_t c_ctx)
 	}
 }
 
-pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx)
-{
-	if (q->retry)
-		return pl_failure;
-
-	if (is_string(c))
-		return throw_error(q, c, c_ctx, "type_error", "evaluable");
-
-	if (!c->match)
-		c->match = search_predicate(q->st.m, c);
-
-	if (!c->match)
-		return throw_error(q, c, c_ctx, "type_error", "evaluable");
-
-	return throw_error(q, c, c_ctx, "type_error", "evaluable");
-
-	cell *save = q->st.curr_cell;
-	pl_idx_t save_ctx = q->st.curr_frame;
-	cell *tmp = clone_to_heap(q, true, c, 2);
-	pl_idx_t nbr_cells = 1 + c->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
-	make_return(q, tmp+nbr_cells);
-	may_error(push_call_barrier(q));
-	q->st.curr_cell = tmp;
-	pl_status ok = start(q);
-	q->error = false;
-
-	if (!q->did_throw) {
-		q->st.curr_cell = save;
-		q->st.curr_frame = save_ctx;
-	}
-
-	return ok;
-}
-
-static USE_RESULT pl_status fn_return_1(query *q)
-{
-	GET_FIRST_ARG(p1_tmp,any);
-	CLEANUP cell p1 = eval(q, p1_tmp);
-	q->accum = p1;
-	cut_me(q, true, false);
-	drop_choice(q);
-	trim_trail(q);
-	q->error = true;
-	return pl_success;
-}
-
 static USE_RESULT pl_status fn_iso_is_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -2550,7 +2503,6 @@ const struct builtins g_functions[] =
 	{"@<", 2, fn_iso_slt_2, NULL, false},
 
 	{"is", 2, fn_iso_is_2, NULL, false},
-	{"return", 1, fn_return_1, NULL, false},
 	{"float", 1, fn_iso_float_1, NULL, false},
 	{"integer", 1, fn_iso_integer_1, NULL, false},
 	{"srandom", 1, fn_set_seed_1, "+integer", false},
