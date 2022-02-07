@@ -824,13 +824,16 @@ static USE_RESULT pl_status fn_iso_repeat_0(query *q)
 	return pl_success;
 }
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_iso_halt_0(query *q)
 {
 	q->halt_code = 0;
 	q->halt = q->error = true;
 	return pl_halt;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_iso_halt_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
@@ -838,6 +841,7 @@ static USE_RESULT pl_status fn_iso_halt_1(query *q)
 	q->halt = q->error = true;
 	return pl_halt;
 }
+#endif
 
 static USE_RESULT pl_status fn_iso_number_1(query *q)
 {
@@ -1934,6 +1938,7 @@ static USE_RESULT pl_status fn_iso_atom_length_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
+#ifndef SANDBOX
 static int new_stream(prolog *pl)
 {
 	for (int i = 0; i < MAX_STREAMS; i++) {
@@ -1945,6 +1950,7 @@ static int new_stream(prolog *pl)
 
 	return -1;
 }
+#endif
 
 static int get_named_stream(prolog *pl, const char *name, size_t len)
 {
@@ -2265,6 +2271,7 @@ static void add_stream_properties(query *q, int n)
 	destroy_parser(p);
 }
 
+#ifndef SANDBOX
 static void del_stream_properties(query *q, int n)
 {
 	cell *tmp = alloc_on_heap(q, 3);
@@ -2294,6 +2301,7 @@ static void del_stream_properties(query *q, int n)
 
 	q->retry = QUERY_OK;
 }
+#endif
 
 static pl_status do_stream_property(query *q)
 {
@@ -2522,6 +2530,7 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 	return pl_success;
 }
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_popen_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -2626,7 +2635,9 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_iso_open_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
@@ -2864,7 +2875,9 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_iso_close_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
@@ -2898,7 +2911,9 @@ static USE_RESULT pl_status fn_iso_close_1(query *q)
 	free(str->data);
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_iso_close_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
@@ -2927,6 +2942,7 @@ static USE_RESULT pl_status fn_iso_close_2(query *q)
 
 	return fn_iso_close_1(q);
 }
+#endif
 
 static USE_RESULT pl_status fn_iso_at_end_of_stream_0(query *q)
 {
@@ -6084,6 +6100,7 @@ static USE_RESULT pl_status fn_asserta_2(query *q)
 	return do_asserta_2(q);
 }
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_sys_asserta_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
@@ -6094,6 +6111,7 @@ static USE_RESULT pl_status fn_sys_asserta_2(query *q)
 	GET_NEXT_ARG(p2,atom);
 	return do_asserta_2(q);
 }
+#endif
 
 static pl_status do_assertz_2(query *q)
 {
@@ -6185,6 +6203,7 @@ static USE_RESULT pl_status fn_assertz_2(query *q)
 	return do_assertz_2(q);
 }
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_sys_assertz_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
@@ -6195,6 +6214,7 @@ static USE_RESULT pl_status fn_sys_assertz_2(query *q)
 	GET_NEXT_ARG(p2,atom);
 	return do_assertz_2(q);
 }
+#endif
 
 static void save_db(FILE *fp, query *q, int logging)
 {
@@ -6425,6 +6445,7 @@ static USE_RESULT pl_status fn_statistics_2(query *q)
 	return pl_failure;
 }
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_sleep_1(query *q)
 {
 	if (q->retry)
@@ -6438,7 +6459,9 @@ static USE_RESULT pl_status fn_sleep_1(query *q)
 	sleep((unsigned)get_int(p1));
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_delay_1(query *q)
 {
 	if (q->retry)
@@ -6452,6 +6475,7 @@ static USE_RESULT pl_status fn_delay_1(query *q)
 	msleep((unsigned)get_int(p1));
 	return pl_success;
 }
+#endif
 
 static USE_RESULT pl_status fn_busy_1(query *q)
 {
@@ -6701,6 +6725,7 @@ static USE_RESULT pl_status fn_split_4(query *q)
 	return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 }
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_savefile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -6726,7 +6751,9 @@ static USE_RESULT pl_status fn_savefile_2(query *q)
 	free(src);
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_loadfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -6785,6 +6812,7 @@ static USE_RESULT pl_status fn_loadfile_2(query *q)
 	free(s);
 	return pl_success;
 }
+#endif
 
 static USE_RESULT pl_status fn_read_file_to_string_3(query *q)
 {
@@ -6890,6 +6918,7 @@ static USE_RESULT pl_status fn_read_file_to_string_3(query *q)
 	return pl_success;
 }
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_getfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -6968,6 +6997,7 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 
 	return pl_success;
 }
+#endif
 
 static USE_RESULT pl_status fn_getlines_1(query *q)
 {
@@ -7066,6 +7096,7 @@ static USE_RESULT pl_status fn_getlines_2(query *q)
 	return pl_success;
 }
 
+#ifndef SANDBOX
 static void parse_host(const char *src, char *hostname, char *path, unsigned *port, int *ssl, int *domain)
 {
 	if (!strncmp(src, "https://", 8)) {
@@ -7089,7 +7120,9 @@ static void parse_host(const char *src, char *hostname, char *path, unsigned *po
 	hostname[1023] = '\0';
 	path[4095] = '\0';
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_server_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -7205,7 +7238,9 @@ static USE_RESULT pl_status fn_server_3(query *q)
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_accept_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
@@ -7264,7 +7299,9 @@ static USE_RESULT pl_status fn_accept_2(query *q)
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_client_5(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -7408,6 +7445,7 @@ static USE_RESULT pl_status fn_client_5(query *q)
 	set_var(q, p4, p4_ctx, &tmp2, q->st.curr_frame);
 	return pl_success;
 }
+#endif
 
 static USE_RESULT pl_status fn_getline_1(query *q)
 {
@@ -7531,6 +7569,7 @@ static USE_RESULT pl_status fn_read_line_to_string_2(query *q)
 	return ok;
 }
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_bread_3(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
@@ -7634,7 +7673,9 @@ static USE_RESULT pl_status fn_bread_3(query *q)
 	str->data = NULL;
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_bwrite_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
@@ -7661,6 +7702,7 @@ static USE_RESULT pl_status fn_bwrite_2(query *q)
 
 	return pl_success;
 }
+#endif
 
 static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 {
@@ -8200,6 +8242,7 @@ static USE_RESULT pl_status fn_recv_1(query *q)
 	return unify(q, p1, p1_ctx, c, q->st.curr_frame);
 }
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_pid_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
@@ -8208,6 +8251,7 @@ static USE_RESULT pl_status fn_pid_1(query *q)
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
+#endif
 
 static USE_RESULT pl_status fn_wall_time_1(query *q)
 {
@@ -8275,6 +8319,7 @@ static USE_RESULT pl_status fn_date_time_6(query *q)
 	return pl_success;
 }
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_shell_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -8284,7 +8329,9 @@ static USE_RESULT pl_status fn_shell_1(query *q)
 	else
 		return pl_failure;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_shell_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -8295,7 +8342,9 @@ static USE_RESULT pl_status fn_shell_2(query *q)
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static char *fixup(const char *srcptr)
 {
 	char *tmpbuf = strdup(srcptr);
@@ -8322,7 +8371,9 @@ static char *fixup(const char *srcptr)
 	*dst = '\0';
 	return tmpbuf;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -8445,7 +8496,9 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	unshare_cell(&tmp);
 	return ok;
 }
+#endif
 
+#ifndef SANDBOX
 static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	if (is_atom(p1)) {
@@ -8490,7 +8543,9 @@ static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 	free(filename);
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static pl_status do_deconsult(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	if (is_atom(p1)) {
@@ -8522,7 +8577,9 @@ static pl_status do_deconsult(query *q, cell *p1, pl_idx_t p1_ctx)
 	free(filename);
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_load_files_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -8546,7 +8603,9 @@ static USE_RESULT pl_status fn_load_files_2(query *q)
 
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_unload_files_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
@@ -8570,6 +8629,7 @@ static USE_RESULT pl_status fn_unload_files_1(query *q)
 
 	return pl_success;
 }
+#endif
 
 static USE_RESULT pl_status fn_format_2(query *q)
 {
@@ -8936,7 +8996,7 @@ static USE_RESULT pl_status fn_string_upper_2(query *q)
 	return ok;
 }
 
-
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_access_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -8990,7 +9050,9 @@ static USE_RESULT pl_status fn_access_file_2(query *q)
 	free(src);
 	return ok;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_exists_file_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -9022,7 +9084,9 @@ static USE_RESULT pl_status fn_exists_file_1(query *q)
 
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_directory_files_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -9080,7 +9144,9 @@ static USE_RESULT pl_status fn_directory_files_2(query *q)
 	pl_status ok = unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	return ok;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_delete_file_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -9109,7 +9175,9 @@ static USE_RESULT pl_status fn_delete_file_1(query *q)
 	free(src);
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_rename_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -9151,7 +9219,9 @@ static USE_RESULT pl_status fn_rename_file_2(query *q)
 	free(src2);
 	return ok ? pl_success : pl_failure;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_time_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -9182,7 +9252,9 @@ static USE_RESULT pl_status fn_time_file_2(query *q)
 	make_real(&tmp, st.st_mtime);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_size_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -9213,7 +9285,9 @@ static USE_RESULT pl_status fn_size_file_2(query *q)
 	make_int(&tmp, st.st_size);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_exists_directory_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -9245,7 +9319,9 @@ static USE_RESULT pl_status fn_exists_directory_1(query *q)
 
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_make_directory_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -9275,7 +9351,9 @@ static USE_RESULT pl_status fn_make_directory_1(query *q)
 	free(src);
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_make_directory_path_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -9321,7 +9399,9 @@ static USE_RESULT pl_status fn_make_directory_path_1(query *q)
 	free(filename);
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_working_directory_2(query *q)
 {
 	GET_FIRST_ARG(p_old,variable);
@@ -9361,7 +9441,9 @@ static USE_RESULT pl_status fn_working_directory_2(query *q)
 	unshare_cell(&tmp);
 	return ok;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_chdir_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -9379,6 +9461,7 @@ static USE_RESULT pl_status fn_chdir_1(query *q)
 	free(src);
 	return ok;
 }
+#endif
 
 static USE_RESULT pl_status fn_edin_redo_1(query *q)
 {
@@ -10183,12 +10266,15 @@ void do_db_load(module *m)
 	ensure(m->fp);
 }
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_sys_db_load_0(query *q)
 {
 	do_db_load(q->st.m);
 	return pl_success;
 }
+#endif
 
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_sys_db_save_0(query *q)
 {
 	if (!q->st.m->fp)
@@ -10212,6 +10298,7 @@ static USE_RESULT pl_status fn_sys_db_save_0(query *q)
 	may_ptr_error(q->st.m->fp);
 	return pl_success;
 }
+#endif
 
 static USE_RESULT pl_status fn_abolish_2(query *q)
 {
@@ -11481,8 +11568,6 @@ static const struct builtins g_predicates_iso[] =
 	{"true", 0, fn_iso_true_0, NULL, false},
 	{"fail", 0, fn_iso_fail_0, NULL, false},
 	{"false", 0, fn_iso_fail_0, NULL, false},
-	{"halt", 0, fn_iso_halt_0, NULL, false},
-	{"halt", 1, fn_iso_halt_1, NULL, false},
 	{"atom", 1, fn_iso_atom_1, NULL, false},
 	{"atomic", 1, fn_iso_atomic_1, NULL, false},
 	{"number", 1, fn_iso_number_1, NULL, false},
@@ -11507,9 +11592,14 @@ static const struct builtins g_predicates_iso[] =
 	{"sub_atom", 5, fn_iso_sub_atom_5, NULL, false},
 	{"current_rule", 1, fn_iso_current_rule_1, NULL, false},
 
+#ifndef SANDBOX
 	{"open", 4, fn_iso_open_4, NULL, false},
 	{"close", 1, fn_iso_close_1, NULL, false},
 	{"close", 2, fn_iso_close_2, NULL, false},
+	{"halt", 0, fn_iso_halt_0, NULL, false},
+	{"halt", 1, fn_iso_halt_1, NULL, false},
+#endif
+
 	{"read_term", 2, fn_iso_read_term_2, NULL, false},
 	{"read_term", 3, fn_iso_read_term_3, NULL, false},
 	{"read", 1, fn_iso_read_1, NULL, false},
@@ -11584,8 +11674,48 @@ static const struct builtins g_predicates_other[] =
 	{"use_module", 2, fn_use_module_2, NULL, false},
 	{"module", 1, fn_module_1, NULL, false},
 	{"using", 0, fn_using_0, NULL, false},
+
+#ifndef SANDBOX
 	{"load_files", 2, fn_load_files_2, NULL, false},
 	{"unload_files", 1, fn_unload_files_1, NULL, false},
+	{"getfile", 2, fn_getfile_2, "+string,-list", false},
+	{"loadfile", 2, fn_loadfile_2, "+string,-string", false},
+	{"savefile", 2, fn_savefile_2, "+string,+string", false},
+	{"rename_file", 2, fn_rename_file_2, "+string,+string", false},
+	{"directory_files", 2, fn_directory_files_2, "+pathname,-list", false},
+	{"delete_file", 1, fn_delete_file_1, "+string", false},
+	{"exists_file", 1, fn_exists_file_1, "+string", false},
+	{"access_file", 2, fn_access_file_2, "+string,+mode", false},
+	{"time_file", 2, fn_time_file_2, "+string,-real", false},
+	{"size_file", 2, fn_size_file_2, "+string,-integer", false},
+	{"exists_directory", 1, fn_exists_directory_1, "+string", false},
+	{"make_directory", 1, fn_make_directory_1, "+string", false},
+	{"make_directory_path", 1, fn_make_directory_path_1, "+string", false},
+	{"working_directory", 2, fn_working_directory_2, "-string,+string", false},
+	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL, false},
+	{"chdir", 1, fn_chdir_1, "+string", false},
+	{"sleep", 1, fn_sleep_1, "+integer", false},
+	{"delay", 1, fn_delay_1, "+integer", false},
+	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list", false},
+	{"server", 3, fn_server_3, "+string,-stream,+list", false},
+	{"accept", 2, fn_accept_2, "+stream,-stream", false},
+	{"pid", 1, fn_pid_1, "-integer", false},
+	{"shell", 1, fn_shell_1, "+atom", false},
+	{"shell", 2, fn_shell_2, "+atom,-integer", false},
+	{"popen", 4, fn_popen_4, "+atom,+atom,-stream,+list", false},
+	{"bread", 3, fn_bread_3, "+stream,+integer,-string", false},
+	{"bwrite", 2, fn_bwrite_2, "+stream,-string", false},
+
+	// Used for database log...
+
+	{"$a_", 2, fn_sys_asserta_2, "+clause,+ref", false},
+	{"$z_", 2, fn_sys_assertz_2, "+clause,+ref", false},
+	{"$e_", 1, fn_erase_1, "+ref", false},
+	{"$db_load", 0, fn_sys_db_load_0, NULL, false},
+	{"$db_save", 0, fn_sys_db_save_0, NULL, false},
+
+#endif
+
 	{"listing", 0, fn_listing_0, NULL, false},
 	{"listing", 1, fn_listing_1, NULL, false},
 	{"time", 1, fn_time_1, NULL, false},
@@ -11627,33 +11757,21 @@ static const struct builtins g_predicates_other[] =
 	{"atomic_concat", 3, fn_atomic_concat_3, NULL, false},
 	{"atomic_list_concat", 3, fn_atomic_list_concat_3, NULL, false},
 	{"replace", 4, fn_replace_4, "+orig,+from,+to,-new", false},
-	{"sleep", 1, fn_sleep_1, "+integer", false},
-	{"delay", 1, fn_delay_1, "+integer", false},
 	{"busy", 1, fn_busy_1, "+integer", false},
 	{"now", 0, fn_now_0, NULL, false},
 	{"now", 1, fn_now_1, "now(-integer)", false},
 	{"get_time", 1, fn_get_time_1, "-variable", false},
 	{"cpu_time", 1, fn_cpu_time_1, "-variable", false},
-	{"pid", 1, fn_pid_1, "-integer", false},
-	{"shell", 1, fn_shell_1, "+atom", false},
-	{"shell", 2, fn_shell_2, "+atom,-integer", false},
-	{"popen", 4, fn_popen_4, "+atom,+atom,-stream,+list", false},
 	{"wall_time", 1, fn_wall_time_1, "-integer", false},
 	{"date_time", 6, fn_date_time_6, "-yyyy,-m,-d,-h,--m,-s", false},
 	{"date_time", 7, fn_date_time_7, "-yyyy,-m,-d,-h,--m,-s,-ms", false},
 	{"$between", 4, fn_between_3, "+integer,+integer,-integer", false},
-	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list", false},
-	{"server", 3, fn_server_3, "+string,-stream,+list", false},
-	{"accept", 2, fn_accept_2, "+stream,-stream", false},
 	{"read_line_to_string", 2, fn_read_line_to_string_2, "+stream,-string", false},
 	{"read_file_to_string", 3, fn_read_file_to_string_3, "+string,-string,+options", false},
 	{"getline", 1, fn_getline_1, "-string", false},
 	{"getline", 2, fn_getline_2, "+stream,-string", false},
 	{"getlines", 1, fn_getlines_1, "-list", false},
 	{"getlines", 2, fn_getlines_2, "+stream,-list", false},
-	{"getfile", 2, fn_getfile_2, "+string,-list", false},
-	{"loadfile", 2, fn_loadfile_2, "+string,-string", false},
-	{"savefile", 2, fn_savefile_2, "+string,+string", false},
 	{"split_atom", 4, fn_split_atom_4, "+string,+sep,+pad,-list", false},
 	{"split_string", 4, fn_split_atom_4, "+string,+sep,+pad,-list", false},
 	{"split", 4, fn_split_4, "+string,+string,?left,?right", false},
@@ -11663,19 +11781,6 @@ static const struct builtins g_predicates_other[] =
 	{"is_stream", 1, fn_is_stream_1, "+clause", false},
 	//{"forall", 2, fn_forall_2, "+clause,+clause", false},
 	{"term_hash", 2, fn_term_hash_2, "+clause,?integer", false},
-	{"rename_file", 2, fn_rename_file_2, "+string,+string", false},
-	{"directory_files", 2, fn_directory_files_2, "+pathname,-list", false},
-	{"delete_file", 1, fn_delete_file_1, "+string", false},
-	{"exists_file", 1, fn_exists_file_1, "+string", false},
-	{"access_file", 2, fn_access_file_2, "+string,+mode", false},
-	{"time_file", 2, fn_time_file_2, "+string,-real", false},
-	{"size_file", 2, fn_size_file_2, "+string,-integer", false},
-	{"exists_directory", 1, fn_exists_directory_1, "+string", false},
-	{"make_directory", 1, fn_make_directory_1, "+string", false},
-	{"make_directory_path", 1, fn_make_directory_path_1, "+string", false},
-	{"working_directory", 2, fn_working_directory_2, "-string,+string", false},
-	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL, false},
-	{"chdir", 1, fn_chdir_1, "+string", false},
 	{"name", 2, fn_iso_atom_codes_2, "?string,?list", false},
 	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,-clause,+opts", false},
 	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+chars,-clause,+opts", false},
@@ -11687,8 +11792,6 @@ static const struct builtins g_predicates_other[] =
 	{"atom_upper", 2, fn_atom_upper_2, "?atom,?atom", false},
 	{"string_lower", 2, fn_string_lower_2, "?string,?string", false},
 	{"string_upper", 2, fn_string_upper_2, "?string,?string", false},
-	{"bread", 3, fn_bread_3, "+stream,+integer,-string", false},
-	{"bwrite", 2, fn_bwrite_2, "+stream,-string", false},
 	{"hex_bytes", 2, fn_hex_bytes_2, "?string,?list", false},
 	{"hex_chars", 2, fn_hex_chars_2, "?integer,?string", false},
 	{"octal_chars", 2, fn_octal_chars_2, "?integer,?string", false},
@@ -11762,14 +11865,6 @@ static const struct builtins g_predicates_other[] =
 	{"$mustbe_list_or_var", 1, fn_sys_mustbe_list_or_var_1, "?list", false},
 
 	{"$skip_max_list", 4, fn_sys_skip_max_list_4, NULL, false},
-
-	// Used for database log...
-
-	{"$a_", 2, fn_sys_asserta_2, "+clause,+ref", false},
-	{"$z_", 2, fn_sys_assertz_2, "+clause,+ref", false},
-	{"$e_", 1, fn_erase_1, "+ref", false},
-	{"$db_load", 0, fn_sys_db_load_0, NULL, false},
-	{"$db_save", 0, fn_sys_db_save_0, NULL, false},
 
 	{0}
 };
