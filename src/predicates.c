@@ -259,16 +259,7 @@ USE_RESULT pl_status make_cstringn(cell *d, const char *s, size_t n)
 		return pl_success;
 	}
 
-	bool contains_null = false;
-
-	for (size_t i = 0; i < n; i++) {
-		if (!s[i]) {
-			contains_null = true;
-			break;
-		}
-	}
-
-	if ((n < MAX_SMALL_STRING) && !contains_null) {
+	if (n < MAX_SMALL_STRING) {
 		make_smalln(d, s, n);
 		return pl_success;
 	}
