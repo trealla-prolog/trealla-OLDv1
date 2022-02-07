@@ -259,7 +259,16 @@ USE_RESULT pl_status make_cstringn(cell *d, const char *s, size_t n)
 		return pl_success;
 	}
 
-	if (n < MAX_SMALL_STRING) {
+	bool contains_null = false;
+
+	for (size_t i = 0; i < n; i++) {
+		if (!s[i]) {
+			contains_null = true;
+			break;
+		}
+	}
+
+	if ((n < MAX_SMALL_STRING) && !contains_null) {
 		make_smalln(d, s, n);
 		return pl_success;
 	}
@@ -1320,8 +1329,15 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 				return throw_error(q, head, q->latest_ctx, "representation_error", "character_code");
 
 			char ch[10];
-			put_char_utf8(ch, val);
-			ASTRING_strcat(pr, ch);
+			int len;
+
+			if (!val) {
+				ch[0] = 0;
+				len = 1;
+			} else
+				len = put_char_utf8(ch, val);
+
+			ASTRING_strcatn(pr, ch, len);
 			cell *tail = LIST_TAIL(p2);
 			p2 = deref(q, tail, p2_ctx);
 			p2_ctx = q->latest_ctx;
@@ -1332,7 +1348,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 			return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 		cell tmp;
-		may_error(make_cstring(&tmp, ASTRING_cstr(pr)), ASTRING_free(pr));
+		may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
 		ASTRING_free(pr);
 		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);

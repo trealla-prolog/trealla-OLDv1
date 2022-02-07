@@ -73,7 +73,6 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 
 #if DEBUG
 	frame *f = GET_CURR_FRAME();
-	choice *ch = GET_CURR_CHOICE();
 	fprintf(stderr, "{ch%u:tp%u:fp%u:sp%u:hp%u} ",
 		any_choices(q, f),
 		q->st.tp, q->st.fp, q->st.sp, q->st.hp);
