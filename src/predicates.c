@@ -7559,7 +7559,6 @@ static USE_RESULT pl_status fn_read_line_to_string_2(query *q)
 	return ok;
 }
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_bread_3(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
@@ -7663,9 +7662,7 @@ static USE_RESULT pl_status fn_bread_3(query *q)
 	str->data = NULL;
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_bwrite_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
@@ -7692,7 +7689,6 @@ static USE_RESULT pl_status fn_bwrite_2(query *q)
 
 	return pl_success;
 }
-#endif
 
 static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 {
@@ -8232,7 +8228,6 @@ static USE_RESULT pl_status fn_recv_1(query *q)
 	return unify(q, p1, p1_ctx, c, q->st.curr_frame);
 }
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_pid_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
@@ -8241,7 +8236,6 @@ static USE_RESULT pl_status fn_pid_1(query *q)
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
-#endif
 
 static USE_RESULT pl_status fn_wall_time_1(query *q)
 {
@@ -11686,12 +11680,9 @@ static const struct builtins g_predicates_other[] =
 	{"chdir", 1, fn_chdir_1, "+string", false},
 	{"sleep", 1, fn_sleep_1, "+integer", false},
 	{"delay", 1, fn_delay_1, "+integer", false},
-	{"pid", 1, fn_pid_1, "-integer", false},
 	{"shell", 1, fn_shell_1, "+atom", false},
 	{"shell", 2, fn_shell_2, "+atom,-integer", false},
 	{"popen", 4, fn_popen_4, "+atom,+atom,-stream,+list", false},
-	{"bread", 3, fn_bread_3, "+stream,+integer,-string", false},
-	{"bwrite", 2, fn_bwrite_2, "+stream,-string", false},
 
 	// Used for database log...
 
@@ -11706,6 +11697,8 @@ static const struct builtins g_predicates_other[] =
 	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list", false},
 	{"server", 3, fn_server_3, "+string,-stream,+list", false},
 	{"accept", 2, fn_accept_2, "+stream,-stream", false},
+	{"bread", 3, fn_bread_3, "+stream,+integer,-string", false},
+	{"bwrite", 2, fn_bwrite_2, "+stream,-string", false},
 
 	{"listing", 0, fn_listing_0, NULL, false},
 	{"listing", 1, fn_listing_1, NULL, false},
@@ -11729,6 +11722,7 @@ static const struct builtins g_predicates_other[] =
 
 	// Miscellaneous...
 
+	{"pid", 1, fn_pid_1, "-integer", false},
 	{"get_unbuffered_code", 1, fn_get_unbuffered_code_1, "?code", false},
 	{"get_unbuffered_char", 1, fn_get_unbuffered_char_1, "?char", false},
 	{"memberchk", 2, fn_memberchk_2, "?clause,+list", false},
