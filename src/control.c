@@ -155,6 +155,8 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	return pl_success;
 }
 
+// module:goal
+
 USE_RESULT pl_status fn_iso_invoke_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -178,6 +180,8 @@ USE_RESULT pl_status fn_iso_invoke_2(query *q)
 	return pl_success;
 }
 
+// if -> then
+
 USE_RESULT pl_status fn_iso_if_then_2(query *q)
 {
 	if (q->retry)
@@ -195,6 +199,8 @@ USE_RESULT pl_status fn_iso_if_then_2(query *q)
 	return pl_success;
 }
 
+// if *-> then
+
 USE_RESULT pl_status fn_if_2(query *q)
 {
 	if (q->retry)
@@ -211,6 +217,8 @@ USE_RESULT pl_status fn_if_2(query *q)
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
+
+// if -> then ; else
 
 static pl_status do_if_then_else(query *q, cell *p1, cell *p2, cell *p3)
 {
@@ -232,6 +240,8 @@ static pl_status do_if_then_else(query *q, cell *p1, cell *p2, cell *p3)
 	return pl_success;
 }
 
+// if *-> then ; else
+
 static pl_status do_if_else(query *q, cell *p1, cell *p2, cell *p3)
 {
 	if (q->retry) {
@@ -252,6 +262,8 @@ static pl_status do_if_else(query *q, cell *p1, cell *p2, cell *p3)
 	return pl_success;
 }
 
+// if_(if,then,else)
+
 USE_RESULT pl_status fn_if_3(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
@@ -259,6 +271,8 @@ USE_RESULT pl_status fn_if_3(query *q)
 	GET_NEXT_ARG(p3,callable);
 	return do_if_else(q, p1, p2, p3);
 }
+
+// either ; or
 
 USE_RESULT pl_status fn_iso_disjunction_2(query *q)
 {
@@ -294,6 +308,8 @@ USE_RESULT pl_status fn_iso_disjunction_2(query *q)
 	q->st.curr_cell = tmp;
 	return pl_success;
 }
+
+// \+ goal
 
 USE_RESULT pl_status fn_iso_negation_1(query *q)
 {

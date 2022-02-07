@@ -782,7 +782,8 @@ pl_status push_choice(query *q)
 }
 
 // A barrier is used when making a call, it sets a
-// new choice generation so that cuts are contained...
+// new choice generation so that normal cuts are contained.
+// A '$inner_cut' though will also remove the barrier...
 
 pl_status push_barrier(query *q)
 {
@@ -794,7 +795,7 @@ pl_status push_barrier(query *q)
 	return pl_success;
 }
 
-// Set a special flag so that $cut_if_det knows to also
+// Set a special flag so that '$cut_if_det' knows to also
 // remove the barrier if it needs to...
 
 pl_status push_call_barrier(query *q)
