@@ -31,7 +31,7 @@ void do_cleanup(query *q, cell *p1)
 {
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0); // ???
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0); // ???
 	make_return(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 }
@@ -187,7 +187,7 @@ USE_RESULT pl_status fn_iso_if_then_2(query *q)
 	GET_NEXT_ARG(p2,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
@@ -224,7 +224,7 @@ static pl_status do_if_then_else(query *q, cell *p1, cell *p2, cell *p3)
 
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
@@ -303,7 +303,7 @@ USE_RESULT pl_status fn_iso_negation_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 3);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
@@ -327,7 +327,7 @@ USE_RESULT pl_status fn_iso_once_1(query *q)
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;
@@ -349,7 +349,7 @@ USE_RESULT pl_status fn_ignore_1(query *q)
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;

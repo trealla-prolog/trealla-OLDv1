@@ -336,7 +336,7 @@ static USE_RESULT pl_status fn_iso_notunify_2(query *q)
 	nbr_cells += p1->nbr_cells;
 	copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	nbr_cells += p2->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
+	make_structure(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
 	make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
@@ -11472,7 +11472,7 @@ static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)
 		GET_FIRST_ARG(p1,callable);
 		cell *tmp = clone_to_heap(q, true, p1, 3);
 		pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_inner_cut_s, fn_sys_inner_cut_0, 0, 0);
+		make_structure(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
 		make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
 		make_return(q, tmp+nbr_cells);
 		q->st.curr_cell = tmp;

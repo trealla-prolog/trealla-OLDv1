@@ -175,13 +175,13 @@ USE_RESULT pl_status fn_local_cut_0(query *q);
 USE_RESULT pl_status fn_iso_float_1(query *q);
 USE_RESULT pl_status fn_iso_integer_1(query *q);
 
-#define eval(q,c)																		\
-	is_function(c) || is_builtin(c) ? (call_builtin(q,c,c##_ctx), q->accum) :			\
-		*c;																				\
-	q->accum.flags = 0;																	\
-	if (q->did_throw)																	\
-		return pl_success; 																\
-	if (is_variable(c))																	\
-		return throw_error(q, c, q->st.curr_frame, "instantiation_error", "number");	\
-	if (is_builtin(c) && (c->fn != fn_iso_float_1) && (c->fn != fn_iso_integer_1))		\
+#define eval(q,c)														\
+	is_function(c) || is_builtin(c) ? (call_builtin(q,c,c##_ctx), q->accum) :				\
+	is_callable(c) ? (call_userfun(q, c, c##_ctx), q->accum) : *c;		\
+	q->accum.flags = 0;													\
+	if (q->did_throw)													\
+		return pl_success; 												\
+	if (is_variable(c))											\
+		return throw_error(q, c, q->st.curr_frame, "instantiation_error", "number"); \
+	if (is_builtin(c) && (c->fn != fn_iso_float_1) && (c->fn != fn_iso_integer_1)) \
 		return throw_error(q, c, q->st.curr_frame, "type_error", "evaluable");
