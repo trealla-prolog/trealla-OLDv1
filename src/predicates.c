@@ -4494,7 +4494,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 	cell *t = LIST_TAIL(p2);
 	pl_idx_t t_ctx = p2_ctx;
 
-	if ((is_variable(t) && p2->var_nbr == t->var_nbr) && (p2_ctx == t_ctx))
+	if (is_variable(t) && (p2->var_nbr == t->var_nbr) && (p2_ctx == t_ctx))
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (!is_variable(p2) && !is_nil(p2)
