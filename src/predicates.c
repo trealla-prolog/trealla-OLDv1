@@ -4489,7 +4489,12 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 	if (is_variable(p1) && is_nil(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "non_empty_list");
 
-	if (is_cyclic_term(q, p2, p2_ctx))
+	LIST_HANDLER(p2);
+	LIST_HEAD(p2);
+	cell *t = LIST_TAIL(p2);
+	pl_idx_t t_ctx = p2_ctx;
+
+	if ((is_variable(t) && p2->var_nbr == t->var_nbr) && (p2_ctx == t_ctx))
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (!is_variable(p2) && !is_nil(p2)
