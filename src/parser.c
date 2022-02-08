@@ -2833,7 +2833,18 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (priority && (last_op || last_bar)
 			&& !IS_POSTFIX(specifier)) {
-			int nextch = *eat_space(p);
+			char *s = eat_space(p);
+
+			if (!s) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, incomplete, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+
+				p->error_desc = "syntax_error_incomplete";
+				p->error = true;
+				break;
+			}
+
+			int nextch = *s;
 
 			if ((nextch == ',')
 				|| (nextch == ')')
