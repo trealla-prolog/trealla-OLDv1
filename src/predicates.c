@@ -4481,13 +4481,16 @@ static USE_RESULT pl_status fn_iso_arg_3(query *q)
 static USE_RESULT pl_status fn_iso_univ_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,list_or_nil_or_var);
+	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
 
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
 	if (is_variable(p1) && is_nil(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "non_empty_list");
+
+	if (is_cyclic_term(q, p2, p2_ctx))
+		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (!is_variable(p2) && !is_nil(p2)
 		&& !is_valid_list(q, p2, p2_ctx, true))
@@ -4696,7 +4699,7 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,list_or_nil_or_var);
+	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
 
 	if (!is_variable(p2) && !is_nil(p2)) {
 		LIST_HANDLER(p2);
