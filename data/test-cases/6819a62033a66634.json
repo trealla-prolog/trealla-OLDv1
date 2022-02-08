@@ -1,0 +1,51 @@
+{
+  "uid" : "6819a62033a66634",
+  "name" : "iso_keysort_2_05",
+  "fullName" : "iso_keysort_2_05::tests",
+  "historyId" : "iso_keysort_2_05::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "skipped",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/keysort_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/keysort_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/keysort_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "predicates/keysort_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "55-57"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/853efc56519905606ae00f0b0b00048fe61490f7/tests/prolog/predicates/keysort_2/tests.lgt#L55"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "6819a62033a66634.json",
+  "parameterValues" : [ "predicates/keysort_2/tests.lgt", "55-57", "https://github.com/LogtalkDotOrg/logtalk3/tree/853efc56519905606ae00f0b0b00048fe61490f7/tests/prolog/predicates/keysort_2/tests.lgt#L55" ]
+}
