@@ -2806,7 +2806,18 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		int priority = 0;
 
 		if (is_literal(&p->v)) {
-			int nextch = *eat_space(p);
+			char *s = eat_space(p);
+
+			if (!s) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, incomplete, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+
+				p->error_desc = "syntax_error_incomplete";
+				p->error = true;
+				break;
+			}
+
+			int nextch = *s;
 			bool noneg = (!strcmp(p->token, "-") || !strcmp(p->token, "+")) && (nextch == '='); // Hack
 			priority = search_op(p->m, p->token, &specifier, last_op && !noneg);
 		}
