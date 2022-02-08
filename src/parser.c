@@ -2818,7 +2818,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			}
 
 			int nextch = *s;
-			bool noneg = (!strcmp(p->token, "-") || !strcmp(p->token, "+")) && (nextch == '='); // Hack
+			bool noneg = false;//(!strcmp(p->token, "-") || !strcmp(p->token, "+")) && (nextch == '='); // Hack
 			priority = search_op(p->m, p->token, &specifier, last_op && !noneg);
 		}
 
