@@ -2640,6 +2640,15 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
+		if (!p->quote_char && !args && !consing && last_op && !strcmp(p->token, ",")) {
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Error: syntax error quotes needed around operator '%s', line %d\n", p->token, p->line_nbr);
+
+			p->error_desc = "quotes_needed";
+			p->error = true;
+			break;
+		}
+
 		if (!p->quote_char && args && !consing && p->is_op /*&& last_op*/ && strcmp(p->token, ",")) {
 			unsigned specifier = 0;
 			unsigned priority = search_op(p->m, p->token, &specifier, last_op);
