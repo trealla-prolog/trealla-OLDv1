@@ -785,7 +785,8 @@ term_attvars(Term, Vs) :-
 collect_goals_(_, [], GsIn, GsIn) :- !.
 collect_goals_(V, [H|T], GsIn, GsOut) :-
 	H =.. [M, _],
-	catch(M:attribute_goals(V, Goal, []), _, Goal = put_atts(V, +H)),
+	catch(M:attribute_goals(V, Goal0, []), _, Goal0 = put_atts(V, +H)),
+	( Goal0 = [H2] -> Goal = H2 ; Goal = Goal0 ),
 	collect_goals_(V, T, [Goal|GsIn], GsOut).
 
 collect_goals_([], GsIn, GsIn) :- !.
