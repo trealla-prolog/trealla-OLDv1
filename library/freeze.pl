@@ -6,7 +6,11 @@
 :- meta_predicate(freeze(?, 0)).
 :- attribute frozen/1.
 
-freeze(Var, Goal) :-
+freeze(Var, Goal0) :-
+	(	Goal0 = _:_
+	-> 	Goal = Goal0
+	; 	Goal = user:Goal0
+	),
 	(	nonvar(Var)
 	->	Goal
 	;	(	get_atts(Var, frozen(OldGoals))
