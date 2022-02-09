@@ -1741,6 +1741,9 @@ pl_status start(query *q)
 		if (g_tpl_interrupt) {
 			int ok = check_interrupt(q);
 
+			if (!q->st.curr_cell)
+				break;
+
 			switch (ok) {
 				case 1:
 					return pl_success;
