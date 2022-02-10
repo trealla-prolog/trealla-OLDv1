@@ -1085,7 +1085,8 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 			}
 		}
 #endif
-		q->has_attrs = true;
+		if ((c_ctx != v_ctx) || (c->var_nbr != v->var_nbr))
+			q->has_attrs = true;
 	}
 }
 

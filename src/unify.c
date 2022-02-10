@@ -249,6 +249,12 @@ pl_status fn_sys_redo_trail_0(query * q)
 	return pl_success;
 }
 
+pl_status fn_sys_end_hook_0(query * q)
+{
+	q->in_hook = false;
+	return pl_success;
+}
+
 pl_status do_post_unification_hook(query *q)
 {
 	q->in_hook = true;

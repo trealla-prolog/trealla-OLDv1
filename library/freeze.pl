@@ -20,7 +20,7 @@ freeze(Var, Goal0) :-
 	).
 
 frozen(Term, Goal) :-
-	copy_term(Term, _, Gs),
+	'$copy_term'(Term, _, Gs),
 	flatten(Gs, Gs2),
 	toconjunction(Gs2, Goal).
 
