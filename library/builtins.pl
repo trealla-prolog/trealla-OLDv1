@@ -796,7 +796,9 @@ collect_goals_([V|T], GsIn, GsOut) :-
 	collect_goals_(T, GsOut2, GsOut).
 
 copy_term(Term, Copy, Gs) :-
+	'$block_hook',
 	copy_term(Term, Copy),
+	'$end_hook',
 	term_attvars(Copy, CopyVs),
 	collect_goals_(CopyVs, [], Gs),
 	'$strip_attributes'(CopyVs).

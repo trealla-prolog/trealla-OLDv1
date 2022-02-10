@@ -4758,9 +4758,10 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	if (!tmp || (tmp == ERR_CYCLE_CELL))
 		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
 
+	bool save_hook = q->in_hook;
 	q->in_hook = true;
 	pl_status ok = unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
-	q->in_hook = true;
+	q->in_hook = save_hook;
 	return ok;
 }
 
@@ -11503,6 +11504,18 @@ static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)
 	return pl_success;
 }
 
+static pl_status fn_sys_block_hook_0(query * q)
+{
+	q->in_hook = true;
+	return pl_success;
+}
+
+static pl_status fn_sys_end_hook_0(query * q)
+{
+	q->in_hook = false;
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_sys_get_level_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
@@ -11749,6 +11762,7 @@ static const struct builtins g_predicates_other[] =
 	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars", false},
 	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL, false},
 	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL, false},
+	{"$block_hook", 0, fn_sys_block_hook_0, NULL, false},
 	{"$end_hook", 0, fn_sys_end_hook_0, NULL, false},
 	{"format", 2, fn_format_2, "+string,+list", false},
 	{"format", 3, fn_format_3, "+stream,+string,+list", false},
