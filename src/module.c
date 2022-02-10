@@ -807,6 +807,74 @@ unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_p
 	return 0;
 }
 
+static void check_rule(module *m, db_entry *dbe)
+{
+	predicate *pr = dbe->owner;
+	clause *r = &dbe->cl;
+	bool matched = false, me = false;
+	bool p1_matched = false, p2_matched = false, p3_matched = false;
+	cell *head = get_head(r->cells);
+	cell *p1 = head + 1, *p2 = NULL, *p3 = NULL;
+
+	if (pr->key.arity > 1)
+		p2 = p1 + p1->nbr_cells;
+
+	if (pr->key.arity > 2)
+		p3 = p2 + p2->nbr_cells;
+
+	for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
+		if (!me) {
+			if (&dbe->cl == r)
+				me = true;
+
+			continue;
+		}
+
+		cell *head2 = get_head(dbe->cl.cells);
+		cell *h21 = head2 + 1, *h22 = NULL, *h23 = NULL;
+
+		if (pr->key.arity > 1)
+			h22 = h21 + h21->nbr_cells;
+
+		if (pr->key.arity > 2)
+			h23 = h22 + h22->nbr_cells;
+
+		if (!index_cmpkey(p1, h21, m))
+			p1_matched = true;
+
+		if (pr->key.arity > 1) {
+			if (!index_cmpkey(p2, h22, m))
+				p2_matched = true;
+		}
+
+		if (pr->key.arity > 2) {
+			if (!index_cmpkey(p3, h23, m))
+				p3_matched = true;
+		}
+
+		if (!index_cmpkey(head, head2, m)) {
+			matched = true;
+			//break;
+		}
+	}
+
+	if (!matched) {
+		r->is_unique = true;
+	}
+
+	if (!p1_matched /*&& r->is_unique*/) {
+		r->arg1_is_unique = true;
+	}
+
+	if (!p2_matched /*&& r->is_unique*/) {
+		r->arg2_is_unique = true;
+	}
+
+	if (!p3_matched /*&& r->is_unique*/) {
+		r->arg3_is_unique = true;
+	}
+}
+
 static db_entry* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 {
 	cell *c = p1;
@@ -971,6 +1039,10 @@ db_entry *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 		pr->tail = dbe;
 
 	assert_commit(m, dbe, pr, false);
+
+	if (!consulting && 0)
+		check_rule(m, dbe);
+
 	return dbe;
 }
 
@@ -1091,72 +1163,6 @@ void xref_rule(module *m, clause *r, predicate *parent)
 	}
 }
 
-static void check_rule(module *m, clause *r, predicate *pr)
-{
-	bool matched = false, me = false;
-	bool p1_matched = false, p2_matched = false, p3_matched = false;
-	cell *head = get_head(r->cells);
-	cell *p1 = head + 1, *p2 = NULL, *p3 = NULL;
-
-	if (pr->key.arity > 1)
-		p2 = p1 + p1->nbr_cells;
-
-	if (pr->key.arity > 2)
-		p3 = p2 + p2->nbr_cells;
-
-	for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
-		if (!me) {
-			if (&dbe->cl == r)
-				me = true;
-
-			continue;
-		}
-
-		cell *head2 = get_head(dbe->cl.cells);
-		cell *h21 = head2 + 1, *h22 = NULL, *h23 = NULL;
-
-		if (pr->key.arity > 1)
-			h22 = h21 + h21->nbr_cells;
-
-		if (pr->key.arity > 2)
-			h23 = h22 + h22->nbr_cells;
-
-		if (!index_cmpkey(p1, h21, m))
-			p1_matched = true;
-
-		if (pr->key.arity > 1) {
-			if (!index_cmpkey(p2, h22, m))
-				p2_matched = true;
-		}
-
-		if (pr->key.arity > 2) {
-			if (!index_cmpkey(p3, h23, m))
-				p3_matched = true;
-		}
-
-		if (!index_cmpkey(head, head2, m)) {
-			matched = true;
-			//break;
-		}
-	}
-
-	if (!matched) {
-		r->is_unique = true;
-	}
-
-	if (!p1_matched /*&& r->is_unique*/) {
-		r->arg1_is_unique = true;
-	}
-
-	if (!p2_matched /*&& r->is_unique*/) {
-		r->arg2_is_unique = true;
-	}
-
-	if (!p3_matched /*&& r->is_unique*/) {
-		r->arg3_is_unique = true;
-	}
-}
-
 void xref_db(module *m)
 {
 	for (predicate *pr = m->head; pr; pr = pr->next) {
@@ -1172,7 +1178,7 @@ void xref_db(module *m)
 			continue;
 
 		for (db_entry *dbe = pr->head; dbe; dbe = dbe->next)
-			check_rule(m, &dbe->cl, pr);
+			check_rule(m, dbe);
 	}
 }
 
