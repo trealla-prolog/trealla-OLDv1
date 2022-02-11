@@ -4743,12 +4743,6 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
-	if (is_variable(p1) && is_variable(p2)) {
-		if ((p1->var_nbr ==  p2->var_nbr) &&
-			(p1_ctx == p2_ctx))
-			return pl_success;
-	}
-
 	if (is_atomic(p1) && is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 

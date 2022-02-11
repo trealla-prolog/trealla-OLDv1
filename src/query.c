@@ -1055,11 +1055,11 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		e = GET_SLOT(f, c->var_nbr);
 	}
 
-	cell *attrs = is_empty(&e->c) ? e->c.attrs : NULL;
-	pl_idx_t attrs_ctx = e->c.attrs_ctx;
+	cell *c_attrs = is_empty(&e->c) ? e->c.attrs : NULL;
+	pl_idx_t c_attrs_ctx = e->c.attrs_ctx;
 
-	if (q->cp || attrs)
-		add_trail(q, c_ctx, c->var_nbr, attrs, attrs_ctx);
+	if (q->cp || c_attrs)
+		add_trail(q, c_ctx, c->var_nbr, c_attrs, c_attrs_ctx);
 
 	if (is_structure(v)) {
 		make_indirect(&e->c, v);
@@ -1070,7 +1070,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 
 	e->ctx = v_ctx;
 
-	if (attrs) {
+	if (c_attrs) {
 #if 0
 		if (is_variable(v)) {
 			const frame *f2 = GET_FRAME(v_ctx);
