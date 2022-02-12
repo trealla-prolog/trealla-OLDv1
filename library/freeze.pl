@@ -30,7 +30,7 @@ verify_attributes(Var, Other, Goals) :-
 	get_atts(Var, frozen(VarGoals)), !,
 	(	var(Other)
 	->	(	(	get_atts(Other, frozen(OtherGoals))
-			->	(	OtherGoals = VarGoals
+			->	(	OtherGoals == VarGoals
 				->	true
 				;	put_atts(Other, frozen((OtherGoals, VarGoals)))
 				)
