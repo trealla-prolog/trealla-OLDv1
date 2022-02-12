@@ -9,8 +9,8 @@
 :- attribute dif/1.
 
 put_dif_att(Var, X, Y) :-
-    (   get_atts(Var, +dif(Z)) ->
-	    catch(sort([X \== Y | Z], NewZ), _, true),  % Hack
+    (   (get_atts(Var, +dif(Z)), nonvar(Z)) ->
+	    sort([X \== Y | Z], NewZ),
 	    put_atts(Var, +dif(NewZ))
     ;   put_atts(Var, +dif([X \== Y]))
     ).
