@@ -94,6 +94,16 @@ findall(T, G, B, Tail) :-
 	findall(T, G, B0),
 	append(B0, Tail, B), !.
 
+dif([]).
+dif([Term | Terms]) :-
+	dif_(Terms, Term),
+	dif(Terms).
+
+dif_([], _).
+dif_([Next| Terms], Term) :-
+	dif(Term, Next),
+	dif_(Terms, Term).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Derived from code by R.A. O'Keefe
 
