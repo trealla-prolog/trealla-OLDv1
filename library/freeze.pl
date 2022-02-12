@@ -30,7 +30,10 @@ verify_attributes(Var, Other, Goals) :-
 	get_atts(Var, frozen(VarGoals)), !,
 	(	var(Other)
 	->	(	(	get_atts(Other, frozen(OtherGoals))
-			->	put_atts(Other, frozen((OtherGoals, VarGoals)))
+			->	(	OtherGoals = VarGoals
+				->	true
+				;	put_atts(Other, frozen((OtherGoals, VarGoals)))
+				)
 			;	put_atts(Other, frozen(VarGoals))
 			),
 			Goals = []
