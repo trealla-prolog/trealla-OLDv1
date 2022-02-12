@@ -10,7 +10,7 @@
 
 put_dif_att(Var, X, Y) :-
     (   get_atts(Var, +dif(Z)) ->
-	    sort([X \== Y | Z], NewZ),
+	    catch(sort([X \== Y | Z], NewZ), _, true),  % Hack
 	    put_atts(Var, +dif(NewZ))
     ;   put_atts(Var, +dif([X \== Y]))
     ).
