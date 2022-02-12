@@ -1072,22 +1072,6 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	}
 
 	e->ctx = v_ctx;
-
-#if 0
-	if (is_variable(v)) {
-		const frame *f2 = GET_FRAME(v_ctx);
-		slot *e2 = GET_SLOT(f2, v->var_nbr);
-		cell *attrs2 = is_empty(&e2->c) ? e2->c.attrs : NULL;
-
-		// If c had attrs but v doesn't then restore them
-
-		if (attrs && !attrs2) {
-			e->c.attrs = attrs;
-			e->c.attrs_ctx = attrs_ctx;
-			q->run_hook = false;
-		}
-	}
-#endif
 }
 
 void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx, bool trailing)
