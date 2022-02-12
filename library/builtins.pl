@@ -796,6 +796,9 @@ collect_goals_([V|T], GsIn, GsOut) :-
 	collect_goals_(T, GsOut2, GsOut).
 
 copy_term(Term, Copy, Gs) :-
+	'$copy_term'(Term, Copy, Gs).
+
+'$copy_term'(Term, Copy, Gs) :-
 	copy_term(Term, Copy),
 	term_attvars(Copy, CopyVs),
 	collect_goals_(CopyVs, [], Gs),
