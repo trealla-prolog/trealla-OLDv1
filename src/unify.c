@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdlib.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
 #include <string.h>
@@ -252,7 +253,7 @@ pl_status fn_sys_redo_trail_0(query * q)
 pl_status do_post_unification_hook(query *q)
 {
 	q->in_hook = true;
-	q->has_attrs = false;
+	q->run_hook = false;
 	q->undo_lo_tp = q->save_tp;
 	q->undo_hi_tp = q->st.tp;
 	cell *tmp = alloc_on_heap(q, 3);

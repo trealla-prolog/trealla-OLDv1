@@ -119,7 +119,7 @@ inline static bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t
 	q->info1 = &info1;
 	q->info2 = &info2;
 	q->save_tp = q->st.tp;
-	q->has_attrs = q->cycle_error = false;
+	q->run_hook = q->cycle_error = false;
 	bool ok = unify_internal(q, p1, p1_ctx, p2, p2_ctx);
 	q->info1 = q->info2 = NULL;
 	return ok;

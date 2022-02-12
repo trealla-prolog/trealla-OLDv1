@@ -1055,11 +1055,14 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		e = GET_SLOT(f, c->var_nbr);
 	}
 
-	cell *c_attrs = is_empty(&e->c) ? e->c.attrs : NULL;
-	pl_idx_t c_attrs_ctx = e->c.attrs_ctx;
+	cell *attrs = is_empty(&e->c) ? e->c.attrs : NULL;
+	pl_idx_t attrs_ctx = e->c.attrs_ctx;
 
-	if (q->cp || c_attrs)
-		add_trail(q, c_ctx, c->var_nbr, c_attrs, c_attrs_ctx);
+	if (attrs)
+		q->run_hook = true;
+
+	if (q->cp || attrs)
+		add_trail(q, c_ctx, c->var_nbr, attrs, attrs_ctx);
 
 	if (is_structure(v)) {
 		make_indirect(&e->c, v);
@@ -1070,23 +1073,21 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 
 	e->ctx = v_ctx;
 
-	if (c_attrs) {
 #if 0
-		if (is_variable(v)) {
-			const frame *f2 = GET_FRAME(v_ctx);
-			slot *e2 = GET_SLOT(f2, v->var_nbr);
+	if (is_variable(v)) {
+		const frame *f2 = GET_FRAME(v_ctx);
+		slot *e2 = GET_SLOT(f2, v->var_nbr);
+		cell *attrs2 = is_empty(&e2->c) ? e2->c.attrs : NULL;
 
-			if (!e2->c.attrs) {
-				e2->c.attrs = attrs;
-				e2->c.attrs_ctx = attrs_ctx;
-				add_trail(q, v_ctx, v->var_nbr, NULL, 0);
-			} else {
-				q->has_attrs = true;
-			}
+		// If c had attrs but v doesn't then restore them
+
+		if (attrs && !attrs2) {
+			e->c.attrs = attrs;
+			e->c.attrs_ctx = attrs_ctx;
+			q->run_hook = false;
 		}
-#endif
-		q->has_attrs = true;
 	}
+#endif
 }
 
 void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx, bool trailing)
@@ -1789,7 +1790,7 @@ pl_status start(query *q)
 				continue;
 			}
 
-			if (q->has_attrs && !q->in_hook)
+			if (q->run_hook && !q->in_hook)
 				may_error(do_post_unification_hook(q));
 
 			proceed(q);
@@ -1809,11 +1810,11 @@ pl_status start(query *q)
 				continue;
 			}
 
-			if (q->has_attrs && !q->in_hook)
+			if (q->run_hook && !q->in_hook)
 				may_error(do_post_unification_hook(q));
 		}
 
-		q->has_attrs = false;
+		q->run_hook = false;
 
 		if (g_tpl_interrupt)
 			continue;

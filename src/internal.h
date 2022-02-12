@@ -574,7 +574,7 @@ struct query_ {
 	int8_t halt_code;
 	int8_t quoted;
 	bool is_redo:1;
-	bool has_attrs:1;
+	bool run_hook:1;
 	bool in_hook:1;
 	bool do_dump_vars:1;
 	bool is_dump_vars:1;
