@@ -7,7 +7,9 @@ post_unify_hook_ :-
 	'$undo_trail'(Vars),
 	ignore(process_vars_(Vars, [], Goals)),  % why ignore?
 	'$redo_trail',
-	(acyclic_term(Goals) -> maplist(call, Goals) ; true).
+	(	acyclic_term(Goals)		% FIXME: better to fix call
+	->	maplist(call, Goals)
+	; 	true).
 
 '$post_unify_hook' :-
 	(	post_unify_hook_
