@@ -71,7 +71,7 @@ static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx, bool *done)
 
 // This uses Brent's algorithm...
 
-cell* detect_cycle(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_int_t *skip, cell *tmp)
+cell* skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_int_t *skip, cell *tmp)
 {
 	if (!head)
 		return NULL;

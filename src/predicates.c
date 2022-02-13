@@ -7866,14 +7866,29 @@ static USE_RESULT pl_status fn_write_canonical_to_chars_3(query *q)
 	return ok;
 }
 
+static bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial)
+{
+	pl_int_t skip = 0, max = 1000000000;
+	pl_idx_t c_ctx = p1_ctx;
+	cell tmp;
+
+	cell* c = skip_max_list(q, p1, &c_ctx, max, &skip, &tmp);
+	*is_partial = false;
+
+	if (is_nil(c))
+		return true;
+
+	if (is_variable(c))
+		*is_partial = true;
+
+	return false;
+}
+
 static USE_RESULT pl_status fn_is_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-
-	if (is_cyclic_term(q, p1, p1_ctx))
-		return false;
-
-	return is_valid_list(q, p1, p1_ctx, false);
+	bool is_partial;
+	return check_list(q, p1, p1_ctx, &is_partial);
 }
 
 static USE_RESULT pl_status fn_is_partial_list_1(query *q)
@@ -7883,10 +7898,12 @@ static USE_RESULT pl_status fn_is_partial_list_1(query *q)
 	if (is_variable(p1))
 		return true;
 
-	if (is_cyclic_term(q, p1, p1_ctx))
+	bool is_partial;
+
+	if (check_list(q, p1, p1_ctx, &is_partial))
 		return false;
 
-	return !is_valid_list(q, p1, p1_ctx, false) && is_valid_list(q, p1, p1_ctx, true);
+	return is_partial;
 }
 
 static USE_RESULT pl_status fn_is_list_or_partial_list_1(query *q)
@@ -7896,10 +7913,12 @@ static USE_RESULT pl_status fn_is_list_or_partial_list_1(query *q)
 	if (is_variable(p1))
 		return true;
 
-	if (is_cyclic_term(q, p1, p1_ctx))
-		return false;
+	bool is_partial;
 
-	return is_valid_list(q, p1, p1_ctx, true);
+	if (check_list(q, p1, p1_ctx, &is_partial))
+		return true;
+
+	return is_partial;
 }
 
 static USE_RESULT pl_status fn_sys_instantiated_2(query *q)
@@ -8031,7 +8050,7 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 	pl_int_t skip=0, max = is_smallint(p2) ? get_smallint(p2) : PL_INT_MAX;
 	pl_idx_t c_ctx = p3_ctx;
 	cell tmp;
-	cell *c = detect_cycle(q, p3, &c_ctx, max, &skip, &tmp);
+	cell *c = skip_max_list(q, p3, &c_ctx, max, &skip, &tmp);
 
 	if (!c) {
 		c_ctx = p3_ctx;
