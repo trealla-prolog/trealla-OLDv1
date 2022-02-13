@@ -1502,17 +1502,12 @@ static void dump_vars(query *q, bool partial)
 		q->quoted = 1;
 		q->variable_names = vlist;
 		q->variable_names_ctx = 0;
+		q->max_depth = 1000;
 
 		if (is_indirect(&e->c) && (e->ctx != 0) && 0)
 			q->variable_names = NULL;
 
-		if (is_cyclic_term(q, c, c_ctx))
-			print_term(q, stdout, c, c_ctx, 0);
-		else if (is_variable(c) && (c->var_nbr == e->c.var_nbr) && 0)
-			print_term(q, stdout, &e->c, e->ctx, 0);
-		else
-			print_term(q, stdout, c, c_ctx, 1);
-
+		print_term(q, stdout, c, c_ctx, 1);
 		if (parens) fputc(')', stdout);
 		if (q->did_quote) space = false;
 		q->quoted = saveq;

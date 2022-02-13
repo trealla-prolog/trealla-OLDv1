@@ -794,7 +794,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				if (res < 0) return -1;
 				dst += res;
 			}
-		} else if (q->st.m->flag.double_quote_chars
+		} else if (q->st.m->flag.double_quote_chars && running
 			&& (tmp_len = scan_is_chars_list(q, tail, c_ctx, false)) > 0) {
 			char *tmp_src = chars_list_to_string(q, tail, c_ctx, tmp_len);
 
@@ -1237,8 +1237,7 @@ pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 	ssize_t len = 0;
 
 	if (!running || is_cyclic_term(q, c, c_ctx)) {
-		running = 0;
-		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
+		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running=0, false, 1);
 	} else {
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 		q->did_quote = false;
