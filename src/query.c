@@ -1519,6 +1519,7 @@ static void dump_vars(query *q, bool partial)
 		any = true;
 	}
 
+	g_tpl_interrupt = false;
 	q->is_dump_vars = false;
 	clear_write_options(q);
 
