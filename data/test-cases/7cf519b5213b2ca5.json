@@ -1,0 +1,51 @@
+{
+  "uid" : "7cf519b5213b2ca5",
+  "name" : "lgt_number_34",
+  "fullName" : "lgt_number_34::tests",
+  "historyId" : "lgt_number_34::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "syntax/numbers/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "syntax/numbers/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "syntax/numbers/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "syntax/numbers/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "196-198"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/ea9903e1c41a55216e0a0708798f0a323dd1c18c/tests/prolog/syntax/numbers/tests.lgt#L196"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "7cf519b5213b2ca5.json",
+  "parameterValues" : [ "syntax/numbers/tests.lgt", "196-198", "https://github.com/LogtalkDotOrg/logtalk3/tree/ea9903e1c41a55216e0a0708798f0a323dd1c18c/tests/prolog/syntax/numbers/tests.lgt#L196" ]
+}

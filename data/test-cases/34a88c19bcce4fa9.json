@@ -1,0 +1,51 @@
+{
+  "uid" : "34a88c19bcce4fa9",
+  "name" : "lgt_unbounded_float_division_04",
+  "fullName" : "lgt_unbounded_float_division_04::tests",
+  "historyId" : "lgt_unbounded_float_division_04::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "unbounded/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "unbounded/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "unbounded/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "unbounded/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "115-116"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/ea9903e1c41a55216e0a0708798f0a323dd1c18c/tests/prolog/unbounded/tests.lgt#L115"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "34a88c19bcce4fa9.json",
+  "parameterValues" : [ "unbounded/tests.lgt", "115-116", "https://github.com/LogtalkDotOrg/logtalk3/tree/ea9903e1c41a55216e0a0708798f0a323dd1c18c/tests/prolog/unbounded/tests.lgt#L115" ]
+}

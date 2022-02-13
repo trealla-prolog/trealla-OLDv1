@@ -1,0 +1,51 @@
+{
+  "uid" : "f2c0d038795aad7d",
+  "name" : "sics_unicode_atom_codes_2_12",
+  "fullName" : "sics_unicode_atom_codes_2_12::tests",
+  "historyId" : "sics_unicode_atom_codes_2_12::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "unicode/builtins/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "unicode/builtins/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "unicode/builtins/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "unicode/builtins/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "151-152"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/ea9903e1c41a55216e0a0708798f0a323dd1c18c/tests/prolog/unicode/builtins/tests.lgt#L151"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "f2c0d038795aad7d.json",
+  "parameterValues" : [ "unicode/builtins/tests.lgt", "151-152", "https://github.com/LogtalkDotOrg/logtalk3/tree/ea9903e1c41a55216e0a0708798f0a323dd1c18c/tests/prolog/unicode/builtins/tests.lgt#L151" ]
+}
