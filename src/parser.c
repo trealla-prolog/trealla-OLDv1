@@ -2993,6 +2993,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 bool run(parser *p, const char *pSrc, bool dump)
 {
+
 	if (*pSrc == '.') {
 		fprintf(stdout, "Error: syntax error, unexpected end of rule\n");
 		return false;

@@ -310,6 +310,7 @@ int main(int ac, char *av[])
 			continue;
 		}
 
+		g_tpl_interrupt = 0;
 		pl_eval(pl, src);
 		free(line);
 
