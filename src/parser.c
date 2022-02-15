@@ -2372,8 +2372,8 @@ bool get_token(parser *p, int last_op)
 	if (is_matching_pair(p, &dst, (char**)&src, '[',']') ||
 		is_matching_pair(p, &dst, (char**)&src, '{','}') ||
 		is_matching_pair(p, &dst, (char**)&src, ',',',') ||
-		(!p->args && is_matching_pair(p, &dst, (char**)&src, ',',';')) ||
-		(!p->args && is_matching_pair(p, &dst, (char**)&src, ';',',')) ||
+		//(!p->args && is_matching_pair(p, &dst, (char**)&src, ',',';')) ||
+		//(!p->args && is_matching_pair(p, &dst, (char**)&src, ';',',')) ||
 		is_matching_pair(p, &dst, (char**)&src, ';',';')) {
 		p->toklen = dst - p->token;
 		return (dst - p->token) != 0;
