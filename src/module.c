@@ -1376,30 +1376,31 @@ module *load_file(module *m, const char *filename, bool including)
 			snprintf(tmpbuf, sizeof(tmpbuf), "user_%u\n", s_cnt++);
 			filename = set_loaded(m, tmpbuf);
 
-			if (!strcmp(str->name, "user_input")) {
-				while (m->pl->p && m->pl->p->srcptr && *m->pl->p->srcptr) {
-					m->filename = filename;
-					parser *p = create_parser(m);
-					if (!p) return NULL;
-					p->srcptr = m->pl->p->srcptr;
-					p->consulting = true;
-					p->m = m;
+			if (strcmp(str->name, "user_input"))
+				continue;
 
-					if (!tokenize(p, false, false))
-						break;
+			while (m->pl->p && m->pl->p->srcptr && *m->pl->p->srcptr) {
+				m->filename = filename;
+				parser *p = create_parser(m);
+				if (!p) return NULL;
+				p->srcptr = m->pl->p->srcptr;
+				p->consulting = true;
+				p->m = m;
 
-					m->pl->p->srcptr = p->srcptr;
-					destroy_parser(p);
-				}
+				if (!tokenize(p, false, false))
+					break;
 
-				module *save_m = load_fp(m, str->fp, filename, including);
-				clearerr(str->fp);
-				return save_m;
+				m->pl->p->srcptr = p->srcptr;
+				destroy_parser(p);
 			}
+
+			module *save_m = load_fp(m, str->fp, filename, including);
+			clearerr(str->fp);
+			return save_m;
 		}
 	}
 
-	size_t len = strlen(filename);
+		size_t len = strlen(filename);
 	char *tmpbuf = malloc(len + 20);
 	memcpy(tmpbuf, filename, len+1);
 
