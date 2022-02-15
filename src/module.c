@@ -1315,7 +1315,10 @@ module *load_fp(module *m, FILE *fp, const char *filename, bool including)
 		}
 
 		p->srcptr = p->save_line;
-		tokenize(p, false, false);
+
+		if (!tokenize(p, false, false))
+			break;
+
 		ok = !p->error;
 	}
 	 while (ok && !p->already_loaded && !g_tpl_interrupt);

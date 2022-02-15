@@ -2519,6 +2519,11 @@ unsigned tokenize(parser *p, bool args, bool consing)
 						(!strcmp(GET_STR(p, p1), "begin_of_file") ||
 							!strcmp(GET_STR(p, p1), "end_of_file")))
 						p->skip = true;
+
+					if (!p1->arity && !strcmp(GET_STR(p, p1), "end_of_file")) {
+						p->end_of_term = true;
+						return 0;
+					}
 				}
 
 				if (p->consulting && !p->skip) {
