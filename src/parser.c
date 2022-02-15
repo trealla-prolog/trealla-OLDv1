@@ -2349,6 +2349,15 @@ bool get_token(parser *p, int last_op)
 		return true;
 	}
 
+	if (!*src) {
+		p->is_op = search_op(p->m, p->token, NULL, false);
+		p->srcptr = (char*)src;
+		p->toklen = dst - p->token;
+		return true;
+	}
+
+	ch = peek_char_utf8(src);
+
 	// Symbols...
 
 	if (is_matching_pair(p, &dst, (char**)&src, ')','(') ||
@@ -2373,8 +2382,9 @@ bool get_token(parser *p, int last_op)
 		return (dst - p->token) != 0;
 	}
 
-	while (*src) {
-		ch = get_char_utf8(&src);
+	ch = get_char_utf8(&src);
+
+	do {
 		size_t len = (dst + put_len_utf8(ch) + 1) - p->token;
 
 		if (len >= p->token_size) {
@@ -2402,7 +2412,10 @@ bool get_token(parser *p, int last_op)
 
 		if (((ch < 256) && strchr(g_solo, ch)) || iswspace(ch) || iswalnum(ch) || (ch == '_'))
 			break;
+
+		ch = get_char_utf8(&src);
 	}
+	 while (*src);
 
 	p->is_op = search_op(p->m, p->token, NULL, false);
 	p->srcptr = (char*)src;
