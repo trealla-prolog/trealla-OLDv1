@@ -2355,11 +2355,9 @@ bool get_token(parser *p, int last_op)
 		is_matching_pair(p, &dst, (char**)&src, ']','(') ||
 		is_matching_pair(p, &dst, (char**)&src, '}','(') ||
 		is_matching_pair(p, &dst, (char**)&src, '}','(') ||
-		is_matching_pair(p, &dst, (char**)&src, ',',')') ||
-		is_matching_pair(p, &dst, (char**)&src, ',',']') ||
-		is_matching_pair(p, &dst, (char**)&src, ',','}') ||
-		is_matching_pair(p, &dst, (char**)&src, ',','|') ||
-		is_matching_pair(p, &dst, (char**)&src, ',',',')) {
+		is_matching_pair(p, &dst, (char**)&src, '(',',') ||
+		is_matching_pair(p, &dst, (char**)&src, '[',',') ||
+		is_matching_pair(p, &dst, (char**)&src, ',',')')) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, operator expected, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line?p->save_line:"");
 
@@ -2370,19 +2368,7 @@ bool get_token(parser *p, int last_op)
 	}
 
 	if (is_matching_pair(p, &dst, (char**)&src, '[',']') ||
-		is_matching_pair(p, &dst, (char**)&src, '{','}') ||
-		is_matching_pair(p, &dst, (char**)&src, ',',',') ||
-		//(!p->args && is_matching_pair(p, &dst, (char**)&src, ',',';')) ||
-		//(!p->args && is_matching_pair(p, &dst, (char**)&src, ';',',')) ||
-		is_matching_pair(p, &dst, (char**)&src, ';',';')) {
-		p->toklen = dst - p->token;
-		return (dst - p->token) != 0;
-	}
-
-	if ((src[0] == '=') && (src[1] == '.') && (src[2] == '.')) {
-		dst += sprintf(dst, "=..");
-		p->is_op = true;
-		p->srcptr = (char*)src+3;
+		is_matching_pair(p, &dst, (char**)&src, '{','}')) {
 		p->toklen = dst - p->token;
 		return (dst - p->token) != 0;
 	}
