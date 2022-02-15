@@ -2351,8 +2351,6 @@ bool get_token(parser *p, int last_op)
 
 	// Symbols...
 
-	int ch_start = peek_char_utf8(src);
-
 	if (is_matching_pair(p, &dst, (char**)&src, ')','(') ||
 		is_matching_pair(p, &dst, (char**)&src, ']','(') ||
 		is_matching_pair(p, &dst, (char**)&src, '}','(') ||
@@ -2377,6 +2375,14 @@ bool get_token(parser *p, int last_op)
 		(!p->args && is_matching_pair(p, &dst, (char**)&src, ',',';')) ||
 		(!p->args && is_matching_pair(p, &dst, (char**)&src, ';',',')) ||
 		is_matching_pair(p, &dst, (char**)&src, ';',';')) {
+		p->toklen = dst - p->token;
+		return (dst - p->token) != 0;
+	}
+
+	if ((src[0] == '=') && (src[1] == '.') && (src[2] == '.')) {
+		dst += sprintf(dst, "=..");
+		p->is_op = true;
+		p->srcptr = (char*)src+3;
 		p->toklen = dst - p->token;
 		return (dst - p->token) != 0;
 	}
