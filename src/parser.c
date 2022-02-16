@@ -1873,7 +1873,7 @@ char *eat_space(parser *p)
 				continue;
 			}
 
-			if (getline(&p->save_line, &p->n_line, p->fp) == -1)
+			if (p->no_fp || getline(&p->save_line, &p->n_line, p->fp) == -1)
 				return p->srcptr = "";
 
 			p->did_getline = true;
@@ -1903,7 +1903,7 @@ char *eat_space(parser *p)
 				src++;
 
 			if (!*src && p->comment && p->fp) {
-				if (getline(&p->save_line, &p->n_line, p->fp) == -1)
+				if (p->no_fp || getline(&p->save_line, &p->n_line, p->fp) == -1)
 					return p->srcptr = "";
 
 				p->did_getline = true;
@@ -2178,7 +2178,7 @@ bool get_token(parser *p, int last_op)
 			*dst = '\0';
 
 			if (p->quote_char && p->fp) {
-				if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
+				if (p->no_fp || getline(&p->save_line, &p->n_line, p->fp) == -1) {
 					p->srcptr = "";
 
 					if (DUMP_ERRS || !p->do_read_term)

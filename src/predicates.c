@@ -413,6 +413,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 		str->p = create_parser(q->st.m);
 		str->p->flag = q->st.m->flag;
 		str->p->fp = str->fp;
+		str->p->no_fp = q->p->no_fp;
 	} else
 		reset(str->p);
 
@@ -448,13 +449,13 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (!src && !p->srcptr && str->fp) {
-		if (getline(&p->save_line, &p->n_line, str->fp) == -1) {
+		if (p->no_fp || getline(&p->save_line, &p->n_line, str->fp) == -1) {
 			if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 				clearerr(str->fp);
 				return do_yield_0(q, 1);
 			}
 
-			p->srcptr = NULL;
+			p->srcptr = "";
 		} else
 			p->srcptr = p->save_line;
 	}
@@ -477,13 +478,13 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 			if (p->srcptr && (*p->srcptr == '\n'))
 				p->line_nbr++;
 
-			if (getline(&p->save_line, &p->n_line, str->fp) == -1) {
+			if (p->no_fp || getline(&p->save_line, &p->n_line, str->fp) == -1) {
 				if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
 					clearerr(str->fp);
 					return do_yield_0(q, 1);
 				}
 
-				p->srcptr = NULL;
+				p->srcptr = "";
 				str->at_end_of_file = str->eof_action != eof_action_reset;
 
 				if (str->eof_action == eof_action_reset)
@@ -7763,7 +7764,9 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 	if (src[strlen(src)-1] != '.')
 		strcat(src, ".");
 
+	q->p->no_fp = true;
 	pl_status ok = do_read_term(q, str, p_term, p_term_ctx, p_opts, p_opts_ctx, src);
+	q->p->no_fp = false;
 	free(save_src);
 	destroy_parser(str->p);
 	str->p = NULL;
@@ -7807,7 +7810,9 @@ static USE_RESULT pl_status fn_read_term_from_atom_3(query *q)
 	if (src[strlen(src)-1] != '.')
 		strcat(src, ".");
 
+	q->p->no_fp = true;
 	pl_status ok = do_read_term(q, str, p_term, p_term_ctx, p_opts, p_opts_ctx, src);
+	q->p->no_fp = false;
 	free(src);
 	return ok;
 }
