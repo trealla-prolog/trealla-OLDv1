@@ -1873,10 +1873,8 @@ char *eat_space(parser *p)
 				continue;
 			}
 
-			if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
-				p->srcptr = NULL;
-				return NULL;
-			}
+			if (getline(&p->save_line, &p->n_line, p->fp) == -1)
+				return p->srcptr = "";
 
 			p->did_getline = true;
 			src = p->srcptr = p->save_line;
@@ -1905,10 +1903,8 @@ char *eat_space(parser *p)
 				src++;
 
 			if (!*src && p->comment && p->fp) {
-				if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
-					p->srcptr = NULL;
-					return NULL;
-				}
+				if (getline(&p->save_line, &p->n_line, p->fp) == -1)
+					return p->srcptr = "";
 
 				p->did_getline = true;
 				src = p->srcptr = p->save_line;
@@ -1950,7 +1946,7 @@ static bool eat_comment(parser *p)
 
 bool get_token(parser *p, int last_op)
 {
-	if (p->error || !p->srcptr)
+	if (p->error || !p->srcptr || !*p->srcptr)
 		return false;
 
 	const char *src = p->srcptr;
@@ -2010,10 +2006,7 @@ bool get_token(parser *p, int last_op)
 
 	src = eat_space(p);
 
-	if (!src)
-		return false;
-
-	if (!*src) {
+	if (!src || !*src) {
 		p->srcptr = (char*)src;
 		return false;
 	}
@@ -2037,7 +2030,7 @@ bool get_token(parser *p, int last_op)
 		p->srcptr = (char*)src;
 		src = eat_space(p);
 
-		if (!src) {
+		if (!src || !*src) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, incomplete statement, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
@@ -2186,14 +2179,13 @@ bool get_token(parser *p, int last_op)
 
 			if (p->quote_char && p->fp) {
 				if (getline(&p->save_line, &p->n_line, p->fp) == -1) {
-					p->srcptr = NULL;
+					p->srcptr = "";
 
 					if (DUMP_ERRS || !p->do_read_term)
 						fprintf(stdout, "Error: syntax error, unterminated quoted atom, line %d, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
 					p->error_desc = "unterminated_quoted_atom";
 					p->error = true;
-					p->srcptr = (char*)src;
 					return false;
 				}
 
@@ -2258,7 +2250,7 @@ bool get_token(parser *p, int last_op)
 			p->srcptr = (char*)src;
 			src = eat_space(p);
 
-			if (!src) {
+			if (!src || !*src) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, incomplete statement, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
@@ -2273,7 +2265,6 @@ bool get_token(parser *p, int last_op)
 
 				p->error_desc = "operator_expected";
 				p->error = true;
-				p->srcptr = (char*)src;
 				return false;
 			}
 		}
@@ -2794,7 +2785,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		if (is_literal(&p->v)) {
 			char *s = eat_space(p);
 
-			if (!s) {
+			if (!s || !*s) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, incomplete, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
@@ -2831,7 +2822,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			&& !IS_POSTFIX(specifier)) {
 			char *s = eat_space(p);
 
-			if (!s) {
+			if (!s || !*s) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, incomplete, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 

@@ -7748,7 +7748,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 	str->p->srcptr = src;
 	src = eat_space(str->p);
 
-	if (!*src) {
+	if (!src || !*src) {
 		free(save_src);
 		cell tmp;
 		make_literal(&tmp, g_eof_s);
