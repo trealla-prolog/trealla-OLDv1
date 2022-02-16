@@ -1806,64 +1806,9 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	return true;
 }
 
-static bool is_matching_pair(parser *p, char **dst, char **src, int lh, int rh)
+inline static bool is_matching_pair(int ch, int next_ch, int lh, int rh)
 {
-	char *s = *src, *d = *dst;
-
-	if (p->error)
-		return false;
-
-	if (*s != lh)
-		return false;
-
-	char *dup_src = NULL;
-	int save_off = 0;
-	fpos_t pos = {0};
-	int save_line_nbr = p->line_nbr;
-	int save_line_nbr_start = p->line_nbr_start;
-
-	if (p->fp && p->save_line) {
-		dup_src = strdup(p->save_line);
-		save_off = *src - p->save_line;
-		fgetpos(p->fp, &pos);
-	}
-
-	p->srcptr = ++s;
-	s = eat_space(p);
-
-	if (!s) {
-		if (DUMP_ERRS || !p->do_read_term)
-			fprintf(stdout, "Error: syntax error, incomplete statement, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
-
-		p->error_desc = "cincomplete_statement";
-		p->error = true;
-		free(dup_src);
-		return false;
-	}
-
-	if (*s != rh) {
-		if (p->did_getline) {
-			fsetpos(p->fp, &pos);
-			free(p->save_line);
-			p->save_line = dup_src;
-			p->n_line = strlen(dup_src);
-			p->srcptr = *src = dup_src + save_off;
-			p->line_nbr = save_line_nbr;
-			p->line_nbr_start = save_line_nbr_start;
-		} else
-			free(dup_src);
-
-		return false;
-	}
-
-	s++;
-	*d++ = lh;
-	*d++ = rh;
-	*d = '\0';
-	*dst = d;
-	p->srcptr = s;
-	free(dup_src);
-	return true;
+	return (ch == lh) && (next_ch == rh);
 }
 
 static bool valid_float(const char *src)
@@ -2064,17 +2009,6 @@ bool get_token(parser *p, int last_op)
 	}
 
 	src = eat_space(p);
-
-#if 0
-	if (!src && !p->end_of_term) {
-		if (DUMP_ERRS || !p->do_read_term)
-			fprintf(stdout, "Error: syntax error, incomplete statement, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
-
-		p->error_desc = "cincomplete_statement";
-		p->error = true;
-		return false;
-	}
-#endif
 
 	if (!src)
 		return false;
@@ -2350,23 +2284,62 @@ bool get_token(parser *p, int last_op)
 	}
 
 	if (!*src) {
+		p->toklen = dst - p->token;
 		p->is_op = search_op(p->m, p->token, NULL, false);
 		p->srcptr = (char*)src;
-		p->toklen = dst - p->token;
 		return true;
 	}
 
-	ch = peek_char_utf8(src);
+	ch = get_char_utf8(&src);
+	int next_ch = peek_char_utf8(src);
+	bool was_space = iswspace(next_ch);
+
+	if ((ch == '.') && iswspace(next_ch)) {
+		dst += put_char_utf8(dst, ch);
+		p->toklen = dst - p->token;
+		p->is_op = search_op(p->m, p->token, NULL, false);
+		p->srcptr = (char*)src;
+		return true;
+	}
+
+	p->srcptr = (char*)src;
+	src = eat_space(p);
+
+	if (!src || !*src) {
+		dst += put_char_utf8(dst, ch);
+		p->toklen = dst - p->token;
+		p->is_op = search_op(p->m, p->token, NULL, false);
+		p->srcptr = (char*)src;
+		return true;
+	}
+
+	next_ch = peek_char_utf8(src);
+
+	if (is_matching_pair(ch, next_ch, '[',']')) {
+		strcpy(p->token, "[]");
+		p->toklen = 2;
+		get_char_utf8(&src);
+		p->srcptr = (char*)src;
+		return true;
+	}
+
+	if (is_matching_pair(ch, next_ch, '{','}')) {
+		strcpy(p->token, "{}");
+		p->toklen = 2;
+		get_char_utf8(&src);
+		p->srcptr = (char*)src;
+		return true;
+	}
 
 	// Symbols...
 
-	if (is_matching_pair(p, &dst, (char**)&src, ')','(') ||
-		is_matching_pair(p, &dst, (char**)&src, ']','(') ||
-		is_matching_pair(p, &dst, (char**)&src, '}','(') ||
-		is_matching_pair(p, &dst, (char**)&src, '}','(') ||
-		is_matching_pair(p, &dst, (char**)&src, '(',',') ||
-		is_matching_pair(p, &dst, (char**)&src, '[',',') ||
-		is_matching_pair(p, &dst, (char**)&src, ',',')')) {
+	if (is_matching_pair(ch, next_ch, ')','(') ||
+		is_matching_pair(ch, next_ch, ']','(') ||
+		is_matching_pair(ch, next_ch, '}','(') ||
+		is_matching_pair(ch, next_ch, '}','(') ||
+		is_matching_pair(ch, next_ch, '(',',') ||
+		is_matching_pair(ch, next_ch, '[',',') ||
+		is_matching_pair(ch, next_ch, ',',')')) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, operator expected, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line?p->save_line:"");
 
@@ -2376,13 +2349,13 @@ bool get_token(parser *p, int last_op)
 		return false;
 	}
 
-	if (is_matching_pair(p, &dst, (char**)&src, '[',']') ||
-		is_matching_pair(p, &dst, (char**)&src, '{','}')) {
+	if (was_space) {
+		dst += put_char_utf8(dst, ch);
 		p->toklen = dst - p->token;
-		return (dst - p->token) != 0;
+		p->is_op = search_op(p->m, p->token, NULL, false);
+		p->srcptr = (char*)src;
+		return true;
 	}
-
-	ch = get_char_utf8(&src);
 
 	do {
 		size_t len = (dst + put_len_utf8(ch) + 1) - p->token;
@@ -2417,9 +2390,9 @@ bool get_token(parser *p, int last_op)
 	}
 	 while (*src);
 
+	p->toklen = dst - p->token;
 	p->is_op = search_op(p->m, p->token, NULL, false);
 	p->srcptr = (char*)src;
-	p->toklen = dst - p->token;
 	return true;
 }
 
