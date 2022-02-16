@@ -2294,33 +2294,37 @@ bool get_token(parser *p, int last_op)
 	}
 
 	p->srcptr = (char*)src;
-	src = eat_space(p);
 
-	if (!src || !*src) {
-		dst += put_char_utf8(dst, ch);
-		p->toklen = dst - p->token;
-		p->is_op = search_op(p->m, p->token, NULL, false);
-		p->srcptr = (char*)src;
-		return true;
-	}
+	if ((ch == '[') || (ch == '{')) {
+		src = eat_space(p);
 
-	next_ch = peek_char_utf8(src);
+		if (!src || !*src) {
+			dst += put_char_utf8(dst, ch);
+			p->toklen = dst - p->token;
+			p->is_op = search_op(p->m, p->token, NULL, false);
+			p->srcptr = (char*)src;
+			return true;
+		}
 
-	if (is_matching_pair(ch, next_ch, '[',']')) {
-		strcpy(p->token, "[]");
-		p->toklen = 2;
-		get_char_utf8(&src);
-		p->srcptr = (char*)src;
-		return true;
-	}
+		next_ch = peek_char_utf8(src);
 
-	if (is_matching_pair(ch, next_ch, '{','}')) {
-		strcpy(p->token, "{}");
-		p->toklen = 2;
-		get_char_utf8(&src);
-		p->srcptr = (char*)src;
-		return true;
-	}
+		if (is_matching_pair(ch, next_ch, '[',']')) {
+			strcpy(p->token, "[]");
+			p->toklen = 2;
+			get_char_utf8(&src);
+			p->srcptr = (char*)src;
+			return true;
+		}
+
+		if (is_matching_pair(ch, next_ch, '{','}')) {
+			strcpy(p->token, "{}");
+			p->toklen = 2;
+			get_char_utf8(&src);
+			p->srcptr = (char*)src;
+			return true;
+		}
+	} else
+		next_ch = peek_char_utf8(src);
 
 	// Symbols...
 
