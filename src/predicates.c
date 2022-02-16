@@ -579,7 +579,7 @@ static pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, 
 			void *save_fp = p->fp;
 			p->fp = NULL;
 
-			while (get_token(p, false)
+			while (get_token(p, false, false)
 				&& p->token[0] && strcmp(p->token, "."))
 				;
 
@@ -1222,7 +1222,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		p->flag = q->st.m->flag;
 		p->srcptr = tmpbuf;
 		p->do_read_term = true;
-		bool ok = get_token(p, true);
+		bool ok = get_token(p, true, false);
 		p->do_read_term = false;
 
 		if (q->did_throw) {
@@ -1632,7 +1632,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 		p->flag = q->st.m->flag;
 		p->srcptr = tmpbuf;
 		p->do_read_term = true;
-		bool ok = get_token(p, true);
+		bool ok = get_token(p, true, false);
 		p->do_read_term = false;
 
 		if (q->did_throw) {

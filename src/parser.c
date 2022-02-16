@@ -1056,13 +1056,13 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 	for (pl_idx_t i = start_idx; i < p->cl->cidx;) {
 		cell *c = p->cl->cells + i;
 
-		if (!p->consulting && 0)
-			printf("*** OP1 start=%u %s type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", start_idx, GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
-
 		if ((c->nbr_cells > 1) || !is_literal(c) || !c->priority) {
 			i += c->nbr_cells;
 			continue;
 		}
+
+		if (!p->consulting && 0)
+			printf("*** OP1 start=%u %s type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", start_idx, GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
 
 		if ((i == start_idx) && (i == end_idx)) {
 			c->priority = 0;
@@ -1101,7 +1101,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 		}
 
 		if (!p->consulting && 0)
-			printf("*** OP1 last=%u/start=%u %s type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", last_idx, start_idx, GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
+			printf("*** OP2 last=%u/start=%u %s type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", last_idx, start_idx, GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
 
 		c->tag = TAG_LITERAL;
 		c->arity = 1;
@@ -1147,6 +1147,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 				return false;
 			}
 
+			//printf("*** prefix len=%u\n", c->nbr_cells);
 			break;
 		}
 
@@ -1174,6 +1175,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 				*c-- = *lhs--;
 
 			*c = save;
+			//printf("*** postfix len=%u\n", c->nbr_cells);
 			break;
 		}
 
@@ -1220,6 +1222,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 			}
 		}
 
+		//printf("*** infix len=%u\n", c->nbr_cells);
 		break;
 	}
 
@@ -1944,7 +1947,7 @@ static bool eat_comment(parser *p)
 	return true;
 }
 
-bool get_token(parser *p, int last_op)
+bool get_token(parser *p, bool last_op, bool was_postfix)
 {
 	if (p->error || !p->srcptr || !*p->srcptr)
 		return false;
@@ -2016,7 +2019,7 @@ bool get_token(parser *p, int last_op)
 	bool is_neg = false;
 	const char *save_src = src;
 
-	if ((*src == '-') && last_op) {
+	if ((*src == '-') && last_op && !was_postfix) {
 		is_neg = true;
 		src += 1;
 	}
@@ -2431,7 +2434,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 	unsigned arity = 1;
 	p->depth++;
 
-	while (p->args = args, get_token(p, last_op)) {
+	while (p->args = args, get_token(p, last_op, last_postfix)) {
 		if (p->error && !p->do_read_term)
 			break;
 
@@ -2623,7 +2626,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quote_char && args && !consing && p->is_op /*&& last_op*/ && strcmp(p->token, ",")) {
 			unsigned specifier = 0;
-			unsigned priority = search_op(p->m, p->token, &specifier, last_op);
+			unsigned priority = search_op(p->m, p->token, &specifier, last_op && !last_postfix);
 
 			if (!last_op && (priority > 999)) {
 				if (DUMP_ERRS || !p->do_read_term)
@@ -2637,7 +2640,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quote_char && consing && p->is_op && strcmp(p->token, ",") && strcmp(p->token, "|")) {
 			unsigned specifier = 0;
-			unsigned priority = search_op(p->m, p->token, &specifier, last_op);
+			unsigned priority = search_op(p->m, p->token, &specifier, last_op && !last_postfix);
 
 			if (!last_op && (priority > 999)) {
 				if (DUMP_ERRS || !p->do_read_term)
@@ -2810,7 +2813,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				break;
 			}
 
-			priority = search_op(p->m, p->token, &specifier, last_op);
+			priority = search_op(p->m, p->token, &specifier, last_op && !last_postfix);
 		}
 
 		if (!strcmp(p->token, "!") &&
@@ -2853,16 +2856,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			priority = 0;
 		}
 
-#if 0
-		if (priority
-			&& ((specifier == OP_XF) || (specifier == OP_YF))
-			&& last_op) {
-			specifier = 0;
-			priority = 0;
-		}
-#endif
-
-		if (priority && (specifier == OP_YFX) && last_op && !last_quoted) {
+		if (priority && (specifier == OP_YFX) && last_op && !last_postfix && !last_quoted) {
 			specifier = 0;
 			priority = 0;
 		}
