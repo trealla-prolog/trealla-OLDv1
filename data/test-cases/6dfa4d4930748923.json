@@ -1,0 +1,51 @@
+{
+  "uid" : "6dfa4d4930748923",
+  "name" : "iso_atom_08",
+  "fullName" : "iso_atom_08::tests",
+  "historyId" : "iso_atom_08::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "syntax/atoms/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "syntax/atoms/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "syntax/atoms/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "syntax/atoms/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "64-66"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/c98962bd1b6f6010e42420f360d6597047f542f6/tests/prolog/syntax/atoms/tests.lgt#L64"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "6dfa4d4930748923.json",
+  "parameterValues" : [ "syntax/atoms/tests.lgt", "64-66", "https://github.com/LogtalkDotOrg/logtalk3/tree/c98962bd1b6f6010e42420f360d6597047f542f6/tests/prolog/syntax/atoms/tests.lgt#L64" ]
+}
