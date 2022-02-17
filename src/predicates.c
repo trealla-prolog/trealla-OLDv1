@@ -10631,23 +10631,17 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	GET_NEXT_ARG(p3,variable);
 
 	if (!is_variable(p1) && !is_nil(p1)) {
-#if 0
 		LIST_HANDLER(p1);
 		LIST_HEAD(p1);
 		cell *tl = LIST_TAIL(p1);
 		tl = deref(q, tl, p1_ctx);
 		pl_idx_t tl_ctx = q->latest_ctx;
-
-		if (is_cyclic_term(q, tl, tl_ctx))
-			return throw_error(q, p1, p1_ctx, "type_error", "list");
-#else
 		cell tmp;
 		pl_int_t skip = 0;
-		cell *t = skip_max_list(q, p1, &p1_ctx, UINT_MAX, &skip, &tmp);
+		cell *t = skip_max_list(q, tl, &tl_ctx, UINT_MAX, &skip, &tmp);
 
 		if (is_iso_list(t))
 			return throw_error(q, p1, p1_ctx, "type_error", "list");
-#endif
 	}
 
 	if (is_negative(p2))
@@ -10659,14 +10653,6 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	if (!is_variable(p1) && !is_nil(p1)
 		&& !is_string(p1) && !is_valid_list_up_to(q, p1, p1_ctx, true, get_smallint(p2)))
 		return throw_error(q, p1, p1_ctx, "type_error", "list");
-
-#if 0
-	if (is_structure(p1) && is_cyclic_term(q, p1, p1_ctx)) {
-		cell tmp;
-		make_int(&tmp, safe_list_length(q, p1, p1_ctx));
-		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	}
-#endif
 
 	if (!is_variable(p1) && !is_nil(p1)
 		&& !is_valid_list(q, p1, p1_ctx, true))
