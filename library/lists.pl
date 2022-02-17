@@ -2,7 +2,7 @@
 	member/2, select/3, selectchk/3, subtract/3, union/3,
 	intersection/3, reverse/2, append/2, nth/3, nth1/3, nth0/3,
 	last/2, flatten/2, append/3, same_length/2, sum_list/2,
-	toconjunction/2
+	toconjunction/2, numlist/3
 	]).
 
 member(X, [X|_]).
@@ -92,3 +92,16 @@ toconjunction_([H|T], true, Out) :- !,
 toconjunction_([H|T], In, Out) :-
 	Out2 = (H, In),
 	toconjunction_(T, Out2, Out).
+
+numlist(L, U, Ns) :-
+	must_be(integer, L),
+	must_be(integer, U),
+	L =< U,
+	numlist_(L, U, Ns).
+
+numlist_(U, U, List) :-
+	!,
+	List = [U].
+numlist_(L, U, [L|Ns]) :-
+	L2 is L+1,
+	numlist_(L2, U, Ns).

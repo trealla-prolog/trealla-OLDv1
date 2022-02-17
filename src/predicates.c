@@ -10631,6 +10631,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	GET_NEXT_ARG(p3,variable);
 
 	if (!is_variable(p1) && !is_nil(p1)) {
+#if 0
 		LIST_HANDLER(p1);
 		LIST_HEAD(p1);
 		cell *tl = LIST_TAIL(p1);
@@ -10639,6 +10640,14 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 
 		if (is_cyclic_term(q, tl, tl_ctx))
 			return throw_error(q, p1, p1_ctx, "type_error", "list");
+#else
+		cell tmp;
+		pl_int_t skip = 0;
+		cell *t = skip_max_list(q, p1, &p1_ctx, UINT_MAX, &skip, &tmp);
+
+		if (is_iso_list(t))
+			return throw_error(q, p1, p1_ctx, "type_error", "list");
+#endif
 	}
 
 	if (is_negative(p2))
@@ -10660,7 +10669,7 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 #endif
 
 	if (!is_variable(p1) && !is_nil(p1)
-		&& !is_cyclic_term(q, p1, p1_ctx) && !is_valid_list(q, p1, p1_ctx, true))
+		&& !is_valid_list(q, p1, p1_ctx, true))
 		return throw_error(q, p1, p1_ctx, "type_error", "list");
 
 	if (is_bigint(p2))
