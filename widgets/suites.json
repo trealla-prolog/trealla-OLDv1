@@ -45,8 +45,8 @@
       "total" : 75
     }
   }, {
-    "uid" : "927c073078ff64d83ef2195bbab9ac0d",
-    "name" : "predicates/format_3/tests_codes.lgt::tests_codes",
+    "uid" : "c420a856533f5147a2dfa28c1c33fd98",
+    "name" : "predicates/format_3/tests_atom.lgt::tests_atom",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
@@ -67,8 +67,8 @@
       "total" : 68
     }
   }, {
-    "uid" : "c420a856533f5147a2dfa28c1c33fd98",
-    "name" : "predicates/format_3/tests_atom.lgt::tests_atom",
+    "uid" : "927c073078ff64d83ef2195bbab9ac0d",
+    "name" : "predicates/format_3/tests_codes.lgt::tests_codes",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
