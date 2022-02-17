@@ -10630,6 +10630,10 @@ static USE_RESULT pl_status fn_iso_length_2(query *q)
 	GET_NEXT_ARG(p2,integer_or_var);
 	GET_NEXT_ARG(p3,variable);
 
+	if (is_variable(p1) && is_variable(p2) &&
+		(p1->var_nbr == p2->var_nbr) && (p1_ctx == p2_ctx))
+		return false;
+
 	if (!is_variable(p1) && !is_nil(p1)) {
 		LIST_HANDLER(p1);
 		LIST_HEAD(p1);
