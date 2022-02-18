@@ -525,10 +525,8 @@ bool retry_choice(query *q)
 {
 LOOP:
 
-	if (q->cp <= INITIAL_CHOICE) {
-		q->cgen = 0;
+	if (q->cp <= INITIAL_CHOICE)
 		return false;
-	}
 
 	pl_idx_t curr_choice = drop_choice(q);
 	const choice *ch = GET_CHOICE(curr_choice);
