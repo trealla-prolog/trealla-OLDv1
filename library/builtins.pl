@@ -495,7 +495,6 @@ read_from_chars(S,T) :- read_term_from_chars(S,T,[]).
 '$skip_list'(Skip,Xs0,Xs) :- '$skip_max_list'(Skip,_,Xs0,Xs).
 
 between(I,J,K) :- '$between'(I,J,K,_).
-length(L,N) :- '$length'(L,N,_).
 arg(X,Y,Z) :- '$arg'(X,Y,Z,_).
 
 iso_dif(X, Y) :-
