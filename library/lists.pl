@@ -108,7 +108,6 @@ numlist_(L, U, [L|Ns]) :-
 
 length(Xs0, N) :-
 	(var(N) -> Bingo = false ; Bingo = true),
-
 	'$skip_max_list'(M, N, Xs0, Xs),
 	!,
 	(  Xs == [] -> N = M
