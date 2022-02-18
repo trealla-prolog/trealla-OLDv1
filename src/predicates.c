@@ -8067,7 +8067,7 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 	if (ok != pl_success)
 		return ok;
 
-	if (!is_iso_list_or_nil(c)) {
+	if (!is_iso_list_or_nil(c) && !is_variable(c)) {
 		make_int(&tmp, -1);
 
 		pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
