@@ -2,7 +2,7 @@
 	member/2, select/3, selectchk/3, subtract/3, union/3,
 	intersection/3, reverse/2, append/2, nth/3, nth1/3, nth0/3,
 	last/2, flatten/2, append/3, same_length/2, sum_list/2,
-	toconjunction/2, numlist/3
+	toconjunction/2, numlist/3, length/2
 	]).
 
 /*  Parts of this file are...
@@ -136,7 +136,7 @@ numlist_(L, U, [L|Ns]) :-
 	L2 is L+1,
 	numlist_(L2, U, Ns).
 
-xlength(Xs0, N) :-
+length(Xs0, N) :-
    '$skip_max_list'(M, N, Xs0, Xs),
    !,
    (  Xs == [] -> N = M
@@ -145,10 +145,10 @@ xlength(Xs0, N) :-
    ;  N == Xs -> throw(error(resource_error(finite_memory),length/2))
    ;  length_addendum(Xs, N, M)
    ).
-xlength(_, N) :-
+length(_, N) :-
    integer(N), !,
    domain_error(not_less_than_zero, N, length/2).
-xlength(_, N) :-
+length(_, N) :-
    type_error(integer, N, length/2).
 
 length_addendum([], N, N).

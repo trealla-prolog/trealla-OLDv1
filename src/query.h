@@ -103,6 +103,12 @@ struct cycle_info_ {
 	reflist *r1, *r2;
 };
 
+#define DUMP_TERM(s,c,c_ctx) {						\
+	printf("*** %s ", s);							\
+	print_term(q, stdout, c, c_ctx, 1);				\
+	printf("\n");									\
+}
+
 inline static int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 {
 	cycle_info info1 = {0}, info2 = {0};

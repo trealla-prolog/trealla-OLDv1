@@ -261,6 +261,120 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 	return q->tmp_heap;
 }
 
+static cell *deep_raw_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth, reflist *list)
+{
+	if (depth >= MAX_DEPTH) {
+		q->cycle_error = true;
+		return ERR_CYCLE_CELL;
+	}
+
+	const pl_idx_t save_idx = tmp_heap_used(q);
+
+	if (is_variable(p1)) {
+		if (!is_in_ref_list(p1, p1_ctx, list)) {
+			p1 = deref(q, p1, p1_ctx);
+			p1_ctx = q->latest_ctx;
+		}
+	}
+
+	cell *tmp = alloc_on_tmp(q, 1);
+	if (!tmp) return NULL;
+	copy_cells(tmp, p1, 1);
+
+	if (!is_structure(p1)) {
+		if (!is_variable(p1))
+			return tmp;
+
+		const frame *f = GET_FRAME(p1_ctx);
+		const slot *e = GET_SLOT(f, p1->var_nbr);
+		const pl_idx_t slot_nbr = e - q->slots;
+
+		for (size_t i = 0; i < q->st.m->pl->tab_idx; i++) {
+			if (q->st.m->pl->tab1[i] == slot_nbr) {
+				tmp->var_nbr = q->st.m->pl->tab2[i];
+				tmp->flags = FLAG2_FRESH;
+
+				if (is_anon(p1))
+					tmp->flags |= FLAG2_ANON;
+
+				tmp->val_off = p1->val_off;
+				tmp->attrs = NULL;
+				return tmp;
+			}
+		}
+
+		tmp->var_nbr = q->st.m->pl->varno;
+		tmp->flags = FLAG2_FRESH;
+		tmp->val_off = p1->val_off;
+		tmp->attrs = e->c.attrs;
+		tmp->attrs_ctx = e->c.attrs_ctx;
+
+		if (is_anon(p1))
+			tmp->flags |= FLAG2_ANON;
+
+		q->st.m->pl->tab1[q->st.m->pl->tab_idx] = slot_nbr;
+		q->st.m->pl->tab2[q->st.m->pl->tab_idx] = q->st.m->pl->varno++;
+		q->st.m->pl->tab_idx++;
+		return tmp;
+	}
+
+	unsigned arity = p1->arity;
+	p1++;
+
+	while (arity--) {
+		cell *c = p1;
+		pl_idx_t c_ctx = p1_ctx;
+		bool ok = false;
+		reflist nlist;
+
+		if (is_variable(c)) {
+			if (!is_in_ref_list(c, c_ctx, list)) {
+				nlist.next = list;
+				nlist.var_nbr = c->var_nbr;
+				nlist.ctx = c_ctx;
+				c = deref(q, p1, p1_ctx);
+				c_ctx = q->latest_ctx;
+				ok = true;
+			}
+		}
+
+		cell *rec = deep_raw_copy2_to_tmp_with_cycle_check(q, c, c_ctx, depth+1, ok ? &nlist : list);
+		if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
+		p1 += p1->nbr_cells;
+	}
+
+	tmp = get_tmp_heap(q, save_idx);
+	tmp->nbr_cells = tmp_heap_used(q) - save_idx;
+	return tmp;
+}
+
+cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
+{
+	if (!init_tmp_heap(q))
+		return NULL;
+
+	frame *f = GET_CURR_FRAME();
+	q->st.m->pl->varno = f->nbr_vars;
+	q->st.m->pl->tab_idx = 0;
+	q->cycle_error = false;
+	int nbr_vars = f->nbr_vars;
+	bool ok = false;
+	reflist nlist, *list = NULL;
+
+	if (is_variable(p1)) {
+		nlist.next = list;
+		nlist.var_nbr = p1->var_nbr;
+		nlist.ctx = p1_ctx;
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+		ok = true;
+	}
+
+	cell* rec = deep_raw_copy2_to_tmp_with_cycle_check(q, p1, p1_ctx, 0, ok ? &nlist : list);
+	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
+	return q->tmp_heap;
+}
+
 cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
 {
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, nonlocals_only, copy_attrs);

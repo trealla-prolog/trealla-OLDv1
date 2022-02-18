@@ -3,21 +3,17 @@
 USE_RESULT size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max_elements);
 
 USE_RESULT cell *deep_clone_to_heap_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, cell *p3, pl_idx_t p3_ctx, cell *p4, pl_idx_t p4_ctx);
-
 USE_RESULT cell *deep_clone_to_heap(query *q, cell *p1, pl_idx_t p1_ctx);
-USE_RESULT cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs);
-
 USE_RESULT cell *deep_clone_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx);
-USE_RESULT cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs);
-
-USE_RESULT cell *clone2_to_tmp(query *q, cell *p1);
+USE_RESULT cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix);
 USE_RESULT cell *clone_to_tmp(query *q, cell *p1);
 
-USE_RESULT cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix);
+USE_RESULT cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs);
+USE_RESULT cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs);
+USE_RESULT cell *clone2_to_tmp(query *q, cell *p1);
 USE_RESULT cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t suffix);
 
-USE_RESULT cell *deep_clone_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx);
-USE_RESULT cell *deep_clone_to_heap(query *q, cell *p1, pl_idx_t p1_ctx);
+USE_RESULT cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx);
 
 USE_RESULT cell *alloc_on_heap(query *q, pl_idx_t nbr_cells);
 USE_RESULT cell *alloc_on_tmp(query *q, pl_idx_t nbr_cells);
