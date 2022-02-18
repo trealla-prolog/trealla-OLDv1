@@ -1506,7 +1506,7 @@ static void dump_vars(query *q, bool partial)
 		q->variable_names_ctx = 0;
 		q->max_depth = 1000;
 
-		if (is_indirect(&e->c) && (e->ctx != 0) && 1)
+		if (is_indirect(&e->c) && (e->ctx != 0))
 			q->variable_names = NULL;
 
 		print_term(q, stdout, c, c_ctx, -1);
