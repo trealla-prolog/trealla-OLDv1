@@ -136,7 +136,7 @@ numlist_(L, U, [L|Ns]) :-
 	L2 is L+1,
 	numlist_(L2, U, Ns).
 
-length(Xs0, N) :-
+xlength(Xs0, N) :-
    '$skip_max_list'(M, N, Xs0, Xs),
    !,
    (  Xs == [] -> N = M
@@ -145,10 +145,10 @@ length(Xs0, N) :-
    ;  N == Xs -> throw(error(resource_error(finite_memory),length/2))
    ;  length_addendum(Xs, N, M)
    ).
-length(_, N) :-
+xlength(_, N) :-
    integer(N), !,
    domain_error(not_less_than_zero, N, length/2).
-length(_, N) :-
+xlength(_, N) :-
    type_error(integer, N, length/2).
 
 length_addendum([], N, N).
