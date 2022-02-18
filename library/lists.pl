@@ -137,14 +137,17 @@ numlist_(L, U, [L|Ns]) :-
 	numlist_(L2, U, Ns).
 
 length(Xs0, N) :-
-   '$skip_max_list'(M, N, Xs0, Xs),
-   !,
-   (  Xs == [] -> N = M
-   ;  nonvar(Xs) -> var(N), throw(error(resource_error(finite_memory),length/2))
-   ;  nonvar(N) -> R is N-M, length_rundown(Xs, R)
-   ;  N == Xs -> throw(error(resource_error(finite_memory),length/2))
-   ;  length_addendum(Xs, N, M)
-   ).
+	(var(N) -> Bingo = false ; Bingo = true),
+	'$skip_max_list'(M, N, Xs0, Xs),
+	!,
+	(  Xs == [] -> N = M
+	;  Xs \= [_|_] -> throw(error(type_error(list,Xs0),length/2))
+	;  Bingo, '$skip_max_list'(_, Max, Xs0, _), Max == -1 -> throw(error(type_error(list,Xs0),length/2))
+	;  nonvar(Xs) -> var(N), throw(error(resource_error(finite_memory),length/2))
+	;  nonvar(N) -> R is N-M, length_rundown(Xs, R)
+	;  N == Xs -> throw(error(resource_error(finite_memory),length/2))
+	;  length_addendum(Xs, N, M)
+	).
 length(_, N) :-
    integer(N), !,
    domain_error(not_less_than_zero, N, length/2).

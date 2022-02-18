@@ -86,7 +86,7 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 	int save_depth = q->max_depth;
 	q->max_depth = 1000;
 	q->quoted = true;
-	print_term(q, stderr, c, c_ctx, 1);
+	print_term(q, stderr, c, c_ctx, -1);
 	q->quoted = false;
 	fprintf(stderr, "\n");
 	fflush(stderr);
@@ -1506,10 +1506,10 @@ static void dump_vars(query *q, bool partial)
 		q->variable_names_ctx = 0;
 		q->max_depth = 1000;
 
-		if (is_indirect(&e->c) && (e->ctx != 0) && 0)
+		if (is_indirect(&e->c) && (e->ctx != 0) && 1)
 			q->variable_names = NULL;
 
-		print_term(q, stdout, c, c_ctx, 1);
+		print_term(q, stdout, c, c_ctx, -1);
 		if (parens) fputc(')', stdout);
 		if (q->did_quote) space = false;
 		q->quoted = saveq;
