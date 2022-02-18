@@ -20,7 +20,7 @@
 #define DBL_DECIMAL_DIG DBL_DIG
 #endif
 
-#define MAX_ELEMENTS ((running) < 0 ? 64 : 4096)
+#define MAX_ELEMENTS (running < 0 ? 25 : 4096)
 
 bool needs_quoting(module *m, const char *src, int srclen)
 {
@@ -537,7 +537,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 		while (is_list(l)) {
 			if (cnt > MAX_ELEMENTS) {
-				dst += snprintf(dst, dstlen, "|...");
+				dst += snprintf(dst, dstlen, ",...");
 				return dst - save_dst;
 			}
 
@@ -743,13 +743,13 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	while (is_iso_list(c)) {
 		if (cnt++ > MAX_ELEMENTS) {
 			dst--;
-			dst += snprintf(dst, dstlen, "%s", "|...]");
+			dst += snprintf(dst, dstlen, "%s", ",...]");
 			return dst - save_dst;
 		}
 
 		if (q->max_depth && (depth >= q->max_depth) && (running < 0)) {
 			dst--;
-			dst += snprintf(dst, dstlen, "%s", "|...]");
+			dst += snprintf(dst, dstlen, "%s", ",...]");
 			return dst - save_dst;
 		}
 
@@ -913,7 +913,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 			if (is_blob(c) && (len_str == MAX_ELEMENTS)) {
 				dst--;
-				dst += snprintf(dst, dstlen, "%s", "|...");
+				dst += snprintf(dst, dstlen, "%s", ",...");
 			}
 		} else
 			dst += plain(dst, dstlen, src, len_str);
