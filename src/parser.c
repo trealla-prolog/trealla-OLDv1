@@ -2966,7 +2966,13 @@ bool run(parser *p, const char *pSrc, bool dump)
 	}
 
 	ASTRING(src);
+
+#if INITIAL_CHOICE
+	ASTRING_sprintf(src, "'$choice',%s", pSrc);
+#else
 	ASTRING_sprintf(src, "%s", pSrc);
+#endif
+
 	ASTRING_trim_ws(src);
 	ASTRING_trim(src, '.');
 	ASTRING_strcat(src, ".");

@@ -78,6 +78,7 @@ typedef enum {
 //#define MAX_DEPTH 9999
 #define MAX_DEPTH 6000			// Clang stack size needs this small
 #define STREAM_BUFLEN 1024
+#define INITIAL_CHOICE 1
 
 #define GET_CHOICE(i) (q->choices+(i))
 #define GET_CURR_CHOICE() GET_CHOICE(q->cp?q->cp-1:q->cp)

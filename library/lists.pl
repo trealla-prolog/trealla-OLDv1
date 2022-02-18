@@ -5,6 +5,36 @@
 	toconjunction/2, numlist/3
 	]).
 
+/*  Parts of this file are...
+
+    Copyright (c)  2018-2021, Mark Thom
+    Copyright (c)  2002-2020, University of Amsterdam
+                              VU University Amsterdam
+                              SWI-Prolog Solutions b.v.
+    All rights reserved.
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
+    1. Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in
+       the documentation and/or other materials provided with the
+       distribution.
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+    COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+    POSSIBILITY OF SUCH DAMAGE.
+*/
+
 member(X, [X|_]).
 member(X, [_|Xs]) :- member(X, Xs).
 
@@ -105,3 +135,28 @@ numlist_(U, U, List) :-
 numlist_(L, U, [L|Ns]) :-
 	L2 is L+1,
 	numlist_(L2, U, Ns).
+
+xlength(Xs0, N) :-
+   '$skip_max_list'(M, N, Xs0, Xs),
+   !,
+   (  Xs == [] -> N = M
+   ;  nonvar(Xs) -> var(N), throw(error(resource_error(finite_memory),length/2))
+   ;  nonvar(N) -> R is N-M, length_rundown(Xs, R)
+   ;  N == Xs -> throw(error(resource_error(finite_memory),length/2))
+   ;  length_addendum(Xs, N, M)
+   ).
+xlength(_, N) :-
+   integer(N), !,
+   domain_error(not_less_than_zero, N, length/2).
+xlength(_, N) :-
+   type_error(integer, N, length/2).
+
+length_addendum([], N, N).
+length_addendum([_|Xs], N, M) :-
+    M1 is M + 1,
+    length_addendum(Xs, N, M1).
+
+length_rundown(Xs, 0) :- !, Xs = [].
+length_rundown([_|Xs], N) :-
+    N1 is N-1,
+    length_rundown(Xs, N1).
