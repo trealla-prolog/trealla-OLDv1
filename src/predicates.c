@@ -3265,7 +3265,7 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 			return false;
 		}
 
-		if (is_integer(c1))
+		if (is_integer(c1) && (get_int(&c[1]) >= 1))
 			q->max_depth = get_int(&c[1]);
 	} else if (!CMP_SLICE2(q, c, "fullstop")) {
 		if (is_variable(c1)) {
