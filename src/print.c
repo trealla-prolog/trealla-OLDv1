@@ -1142,10 +1142,18 @@ pl_status print_canonical_to_stream(query *q, stream *str, cell *c, pl_idx_t c_c
 pl_status print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 {
 	ssize_t len = 0;
+	bool cyclic = false;
 
-	if (!running || is_cyclic_term(q, c, c_ctx)) {
-		running = 0;
-		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
+	if (running < 0) {
+		cell tmp;
+		pl_int_t max = LONG_MAX, skip = 0;
+		pl_idx_t tmp_ctx = c_ctx;
+		cell *t = skip_max_list(q, c, &tmp_ctx, max, &skip, &tmp);
+		if (!is_nil(t)) cyclic = true;
+	}
+
+	if (!running || cyclic || ((running > 0) && is_cyclic_term(q, c, c_ctx))) {
+		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running=0, false, 1);
 	} else {
 		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 		q->did_quote = false;
@@ -1181,10 +1189,18 @@ pl_status print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int runni
 char *print_term_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running)
 {
 	ssize_t len = 0;
+	bool cyclic = false;
 
-	if (!running || is_cyclic_term(q, c, c_ctx)) {
-		running = 0;
-		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
+	if (running < 0) {
+		cell tmp;
+		pl_int_t max = LONG_MAX, skip = 0;
+		pl_idx_t tmp_ctx = c_ctx;
+		cell *t = skip_max_list(q, c, &tmp_ctx, max, &skip, &tmp);
+		if (!is_nil(t)) cyclic = true;
+	}
+
+	if (!running || cyclic || ((running > 0) && is_cyclic_term(q, c, c_ctx))) {
+		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running=0, false, 1);
 	} else {
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 		q->did_quote = false;
@@ -1200,10 +1216,18 @@ char *print_term_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running)
 pl_status print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, int running)
 {
 	ssize_t len = 0;
+	bool cyclic = false;
 
-	if (!running || is_cyclic_term(q, c, c_ctx)) {
-		running = 0;
-		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
+	if (running < 0) {
+		cell tmp;
+		pl_int_t max = LONG_MAX, skip = 0;
+		pl_idx_t tmp_ctx = c_ctx;
+		cell *t = skip_max_list(q, c, &tmp_ctx, max, &skip, &tmp);
+		if (!is_nil(t)) cyclic = true;
+	}
+
+	if (!running || cyclic || ((running > 0) && is_cyclic_term(q, c, c_ctx))) {
+		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running=0, false, 1);
 	} else {
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 		q->did_quote = false;
@@ -1235,8 +1259,17 @@ pl_status print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, i
 pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 {
 	ssize_t len = 0;
+	bool cyclic = false;
 
-	if (!running || is_cyclic_term(q, c, c_ctx)) {
+	if (running < 0) {
+		cell tmp;
+		pl_int_t max = LONG_MAX, skip = 0;
+		pl_idx_t tmp_ctx = c_ctx;
+		cell *t = skip_max_list(q, c, &tmp_ctx, max, &skip, &tmp);
+		if (!is_nil(t)) cyclic = true;
+	}
+
+	if (!running || cyclic || ((running > 0) && is_cyclic_term(q, c, c_ctx))) {
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running=0, false, 1);
 	} else {
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
