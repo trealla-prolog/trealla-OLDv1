@@ -84,7 +84,7 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 #endif
 
 	int save_depth = q->max_depth;
-	q->max_depth = 1000;
+	q->max_depth = 25;
 	q->quoted = true;
 	print_term(q, stderr, c, c_ctx, -1);
 	q->quoted = false;
@@ -1504,7 +1504,7 @@ static void dump_vars(query *q, bool partial)
 		q->quoted = 1;
 		q->variable_names = vlist;
 		q->variable_names_ctx = 0;
-		q->max_depth = 1000;
+		q->max_depth = 25;
 
 		if (is_indirect(&e->c) && (e->ctx != 0))
 			q->variable_names = NULL;
