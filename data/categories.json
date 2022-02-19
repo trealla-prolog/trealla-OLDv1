@@ -5,41 +5,8 @@
     "children" : [ {
       "name" : "Failure instead of error",
       "children" : [ {
-        "name" : "commons_length_2_14",
-        "uid" : "dfaabe3d52517978",
-        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "predicates/length_2/tests.lgt", "80-81", "https://github.com/LogtalkDotOrg/logtalk3/tree/3c3e7ef219a78d525042c0b3ec2a9da389353e91/tests/prolog/predicates/length_2/tests.lgt#L80" ]
-      }, {
-        "name" : "commons_length_2_16",
-        "uid" : "2535957805fd3dd2",
-        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "predicates/length_2/tests.lgt", "86-87", "https://github.com/LogtalkDotOrg/logtalk3/tree/3c3e7ef219a78d525042c0b3ec2a9da389353e91/tests/prolog/predicates/length_2/tests.lgt#L86" ]
-      }, {
-        "name" : "commons_length_2_17",
-        "uid" : "e7713cf99fdc7a68",
-        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "predicates/length_2/tests.lgt", "89-90", "https://github.com/LogtalkDotOrg/logtalk3/tree/3c3e7ef219a78d525042c0b3ec2a9da389353e91/tests/prolog/predicates/length_2/tests.lgt#L89" ]
-      }, {
         "name" : "commons_length_2_18",
-        "uid" : "ed4015d6f249b129",
+        "uid" : "9b2944de016ca76b",
         "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
         "status" : "failed",
         "time" : {
@@ -49,8 +16,19 @@
         "newFailed" : false,
         "parameters" : [ "predicates/length_2/tests.lgt", "92-93", "https://github.com/LogtalkDotOrg/logtalk3/tree/3c3e7ef219a78d525042c0b3ec2a9da389353e91/tests/prolog/predicates/length_2/tests.lgt#L92" ]
       }, {
+        "name" : "commons_length_2_14",
+        "uid" : "dbbf578c034e8972",
+        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "predicates/length_2/tests.lgt", "80-81", "https://github.com/LogtalkDotOrg/logtalk3/tree/3c3e7ef219a78d525042c0b3ec2a9da389353e91/tests/prolog/predicates/length_2/tests.lgt#L80" ]
+      }, {
         "name" : "commons_length_2_15",
-        "uid" : "d737cbda2bcd7ee2",
+        "uid" : "fe40b39d44e6356e",
         "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
         "status" : "failed",
         "time" : {
@@ -59,6 +37,28 @@
         "flaky" : false,
         "newFailed" : false,
         "parameters" : [ "predicates/length_2/tests.lgt", "83-84", "https://github.com/LogtalkDotOrg/logtalk3/tree/3c3e7ef219a78d525042c0b3ec2a9da389353e91/tests/prolog/predicates/length_2/tests.lgt#L83" ]
+      }, {
+        "name" : "commons_length_2_17",
+        "uid" : "748d9153b7799c58",
+        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "predicates/length_2/tests.lgt", "89-90", "https://github.com/LogtalkDotOrg/logtalk3/tree/3c3e7ef219a78d525042c0b3ec2a9da389353e91/tests/prolog/predicates/length_2/tests.lgt#L89" ]
+      }, {
+        "name" : "commons_length_2_16",
+        "uid" : "c9eb44ce0c475424",
+        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "predicates/length_2/tests.lgt", "86-87", "https://github.com/LogtalkDotOrg/logtalk3/tree/3c3e7ef219a78d525042c0b3ec2a9da389353e91/tests/prolog/predicates/length_2/tests.lgt#L86" ]
       } ],
       "uid" : "f1d33384b55b86e6da2d391daa3c4717"
     } ],
