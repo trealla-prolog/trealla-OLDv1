@@ -1509,7 +1509,11 @@ static void dump_vars(query *q, bool partial)
 		if (is_indirect(&e->c) && (e->ctx != 0))
 			q->variable_names = NULL;
 
-		print_term(q, stdout, c, c_ctx, -1);
+		if (is_variable(&e->c))
+			fprintf(stdout, "%s", p->vartab.var_name[e->c.var_nbr]);
+		else
+			print_term(q, stdout, c, c_ctx, -1);
+
 		if (parens) fputc(')', stdout);
 		if (q->did_quote) space = false;
 		q->quoted = saveq;
