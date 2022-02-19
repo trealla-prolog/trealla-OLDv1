@@ -1,5 +1,5 @@
 {
-  "total" : 185,
+  "total" : 184,
   "items" : [ {
     "uid" : "6984bae94e7678c9d6f1b911bb94461e",
     "name" : "predicates/length_2/tests.lgt::tests",
@@ -56,8 +56,8 @@
       "total" : 75
     }
   }, {
-    "uid" : "927c073078ff64d83ef2195bbab9ac0d",
-    "name" : "predicates/format_3/tests_codes.lgt::tests_codes",
+    "uid" : "0da529a0a6949d3d5150b9a550fbf922",
+    "name" : "predicates/format_3/tests_chars.lgt::tests_chars",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
@@ -78,8 +78,8 @@
       "total" : 68
     }
   }, {
-    "uid" : "0da529a0a6949d3d5150b9a550fbf922",
-    "name" : "predicates/format_3/tests_chars.lgt::tests_chars",
+    "uid" : "927c073078ff64d83ef2195bbab9ac0d",
+    "name" : "predicates/format_3/tests_codes.lgt::tests_codes",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
@@ -89,8 +89,8 @@
       "total" : 68
     }
   }, {
-    "uid" : "fb4ba390283f9e15d7ba85c1c2a4c1a4",
-    "name" : "predicates/format_2/tests_atom.lgt::tests_atom",
+    "uid" : "35ce7c65630bce1fdc47cff730339d9c",
+    "name" : "predicates/format_2/tests_codes.lgt::tests_codes",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
@@ -100,8 +100,8 @@
       "total" : 65
     }
   }, {
-    "uid" : "35ce7c65630bce1fdc47cff730339d9c",
-    "name" : "predicates/format_2/tests_codes.lgt::tests_codes",
+    "uid" : "fb4ba390283f9e15d7ba85c1c2a4c1a4",
+    "name" : "predicates/format_2/tests_atom.lgt::tests_atom",
     "statistic" : {
       "failed" : 0,
       "broken" : 0,
