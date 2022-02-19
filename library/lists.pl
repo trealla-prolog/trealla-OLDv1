@@ -107,13 +107,9 @@ numlist_(L, U, [L|Ns]) :-
 	numlist_(L2, U, Ns).
 
 length(Xs0, N) :-
-	(var(N) -> Bingo = false ; Bingo = true),
 	'$skip_max_list'(M, N, Xs0, Xs),
 	!,
 	(  Xs == [] -> N = M
-	% These are not strict ISO but reflect common usage...
-	;  Xs \= [_|_] -> type_error(list, Xs0, length/2)
-	;  Bingo, '$skip_max_list'(_, Max, Xs0, _), Max == -1 -> type_error(list, Xs0, length/2)
 	;  nonvar(Xs) -> var(N), throw(error(resource_error(finite_memory), length/2))
 	;  nonvar(N) -> R is N-M, length_rundown(Xs, R)
 	;  N == Xs -> throw(error(resource_error(finite_memory), length/2))
