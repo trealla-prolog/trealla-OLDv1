@@ -7999,7 +7999,7 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 	if (is_integer(p2) && is_negative(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
 
-	if (is_atomic(p3)) {
+	if (is_atomic(p3) && !is_string(p3)) {
 		cell tmp;
 		make_int(&tmp, 0);
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
