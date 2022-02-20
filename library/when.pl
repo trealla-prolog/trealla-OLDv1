@@ -34,8 +34,8 @@ when(Cond, Goal) :-
 	process_var_(Var2, Cond, Goal).
 
 process_var_(Var, Cond, Goal) :-
-	(	get_atts(Var, when(OldCond-OldGoal))
-	->	(	NewCond = (Cond, OldCond),
+	(	get_atts(Var, when(OldCond-OldGoal)) ->
+		(	NewCond = (Cond, OldCond),
 			NewGoal = (OldGoal, Goal),
 			put_atts(Var, -when(_))
 		)
@@ -49,8 +49,8 @@ process_var_(Var, Cond, Goal) :-
 
 verify_attributes(Var, Other, Goals) :-
 	get_atts(Var, when(VarCond-VarGoal)),
-	(	var(Other)
-	-> 	get_atts(Other, when(OtherCond-OtherGoal)),
+	(	var(Other) ->
+		get_atts(Other, when(OtherCond-OtherGoal)),
 		Goals =
 			(	VarCond
 			->	VarGoal
@@ -58,8 +58,8 @@ verify_attributes(Var, Other, Goals) :-
 				->	NewCond = VarCond
 				;	NewCond = (OtherCond,VarCond)
 				),
-			(	VarGoal == OtherGoal
-			->	NewGoal = VarGoal
+			(	VarGoal == OtherGoal ->
+				NewGoal = VarGoal
 			;	NewGoal = (OtherGoal,VarGoal)
 			),
 			put_atts(Other, when(NewCond-NewGoal))

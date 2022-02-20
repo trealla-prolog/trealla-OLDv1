@@ -7,14 +7,13 @@
 :- attribute frozen/1.
 
 freeze(Var, Goal0) :-
-	(	Goal0 = _:_
-	-> 	Goal = Goal0
+	(	Goal0 = _:_ ->
+		Goal = Goal0
 	; 	Goal = user:Goal0
 	),
-	(	nonvar(Var)
-	->	Goal
-	;	(	get_atts(Var, frozen(OldGoals))
-		->	put_atts(Var, frozen((OldGoals,Goal)))
+	(	nonvar(Var) -> Goal
+	;	(	get_atts(Var, frozen(OldGoals)) ->
+			put_atts(Var, frozen((OldGoals,Goal)))
 		;	put_atts(Var, frozen(Goal))
 		)
 	).
@@ -28,10 +27,9 @@ frozen(Term, Goal) :-
 
 verify_attributes(Var, Other, Goals) :-
 	get_atts(Var, frozen(VarGoals)), !,
-	(	var(Other)
-	->	(	(	get_atts(Other, frozen(OtherGoals))
-			->	(	OtherGoals == VarGoals
-				->	true
+	(	var(Other) ->
+		(	(	get_atts(Other, frozen(OtherGoals)) ->
+				(	OtherGoals == VarGoals -> true
 				;	put_atts(Other, frozen((OtherGoals, VarGoals)))
 				)
 			;	put_atts(Other, frozen(VarGoals))

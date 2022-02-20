@@ -35,17 +35,14 @@ predicate_property(P, A) :-
 	'$legacy_predicate_property'(P, A).
 predicate_property(P, A) :-
 	'$load_properties',
-	(	var(A)
-	->	true
+	(	var(A) -> true
 	; 	(	(Controls = [built_in,control_construct,discontiguous,private,static,dynamic,persist,multifile,meta_predicate(_)],
-			memberchk(A, Controls))
-		->	true
+			memberchk(A, Controls)) -> true
 		;	throw(error(domain_error(predicate_property, A), P))
 		)
 	),
 	must_be(P, callable, predicate_property/2, _),
-	(	P = (M:P2)
-	->	M:'$predicate_property'(P2, A)
+	(	P = (M:P2) -> M:'$predicate_property'(P2, A)
 	;	'$predicate_property'(P, A)
 	).
 
@@ -98,16 +95,14 @@ findall(T, G, B, Tail) :-
 % Derived from code by R.A. O'Keefe
 
 setof(Template, Generator, Set) :-
-    ( 	var(Set)
-    -> 	true
+    ( 	var(Set) -> true
     ; 	must_be(Set, list_or_partial_list, setof/3, _)
     ),
 	bagof_(Template, Generator, Bag),
 	sort(Bag, Set).
 
 bagof(Template, Generator, Bag) :-
-    (	var(Bag)
-	->	true
+    (	var(Bag) ->	true
 	;	must_be(Bag, list_or_partial_list, bagof/3, _)
 	),
 	bagof_(Template, Generator, Bag).
@@ -170,8 +165,7 @@ replace_variables_(Term, Vars0, Vars) :-
 replace_variables_term_(0, _, Vars, Vars) :- !.
 replace_variables_term_(N, Term, Vars0, Vars) :-
 	arg(N, Term, Arg),
-	(	cyclic_term(Arg)
-	->	N1 is N-1,
+	(	cyclic_term(Arg) ->	N1 is N-1,
 		replace_variables_term_(N1, Term, Vars0, Vars)
 	;	replace_variables_(Arg, Vars0, Vars1),
 		N1 is N-1,
@@ -254,8 +248,7 @@ free_variables_(Term, Bound, OldList, NewList, _) :-
 free_variables_(0,    _,     _, VarList, VarList, _) :- !.
 free_variables_(N, Term, Bound, OldList, NewList, B) :-
 	arg(N, Term, Argument),
-	(	cyclic_term(Argument)
-	->	M is N-1, !,
+	(	cyclic_term(Argument) -> M is N-1, !,
 		free_variables_(M, Term, Bound, OldList, NewList, B)
 	;	free_variables_(Argument, Bound, OldList, MidList, B),
 		M is N-1, !,
@@ -457,15 +450,13 @@ recorded(K, V, R) :- nonvar(K), clause('$record_key'(K,V), _, R).
 call_with_time_limit(Time, Goal) :-
 	Time0 is truncate(Time * 1000),
 	'$alarm'(Time0),
-	(	catch(once(Goal), E, ('$alarm'(0), throw(E)))
-	->	'$alarm'(0)
+	(	catch(once(Goal), E, ('$alarm'(0), throw(E))) -> '$alarm'(0)
 	;	('$alarm'(0), fail)
 	).
 
 time_out(Goal, Time, Result) :-
 	'$alarm'(Time),
-	(	catch(once(Goal), E, ('$alarm'(0), throw(E)))
-	->	('$alarm'(0), Result = success)
+	(	catch(once(Goal), E, ('$alarm'(0), throw(E))) -> ('$alarm'(0), Result = success)
 	;	('$alarm'(0), fail)
 	).
 
@@ -499,8 +490,7 @@ arg(X,Y,Z) :- '$arg'(X,Y,Z,_).
 
 iso_dif(X, Y) :-
 	X \== Y,
-	( X \= Y
-	-> true
+	( X \= Y -> true
 	; throw(error(instantiation_error,iso_dif/2))
 	).
 
@@ -680,11 +670,11 @@ get_attr(Var, Module, Value) :-
 	get_atts(Var, Attr).
 
 del_attr(Var, Module) :-
-	(	var(Var)
-	->	( Attr =.. [Module,_],
-		put_atts(Var, -Attr) )
-	;	true
-	).
+	var(Var), !,
+	Attr =.. [Module,_],
+	put_atts(Var, -Attr).
+del_attr(_, _).
+
 
 % when goal expansion is implemented delete the above and use just this:
 
@@ -714,13 +704,12 @@ put_atts(Var, -Attr) :- !,
 	var(Var),
 	'$read_attributes'(Var, D),
 	Attr =.. [Module,Value],
-	(	var(Value)
-	->	Functor = Value
+	(	var(Value) ->
+		Functor = Value
 	; 	functor(Value, Functor, _)
 	),
 	dict:del(D, Module, D2),
-	(	D2 = []
-	->	'$erase_attributes'(Var)
+	(	D2 = [] -> '$erase_attributes'(Var)
 	;	'$write_attributes'(Var, D2)
 	).
 
@@ -772,8 +761,8 @@ attvar(Var) :-
 
 term_attvars_([], VsIn, VsIn) :- !.
 term_attvars_([H|T], VsIn, VsOut) :-
-	(	attvar(H)
-	->	term_attvars_(T, [H|VsIn], VsOut)
+	(	attvar(H) ->
+		term_attvars_(T, [H|VsIn], VsOut)
 	;	term_attvars_(T, VsIn, VsOut)
 	).
 
@@ -824,15 +813,13 @@ plus(_,_,_) :-
 
 succ(X,S) :- nonvar(X), Y=1, nonvar(Y),
 	must_be(X, integer, succ/2, _), must_be(Y, integer, succ/2, _), !,
-	(	X >= 0
-	->	true
+	(	X >= 0 -> true
 	; 	throw(error(domain_error(not_less_than_zero, X), succ/2))
 	),
 	S is X + Y.
 succ(X,S) :- var(X), Y=1, nonvar(Y), nonvar(S),
 	must_be(S, integer, succ/2, _), must_be(Y, integer, succ/2, _), !,
-	(	S >= 0
-	->	true
+	(	S >= 0 -> true
 	; 	throw(error(domain_error(not_less_than_zero, S), succ/2))
 	),
 	!,
