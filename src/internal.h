@@ -229,14 +229,14 @@ enum {
 	FLAG_BINARY=1<<3,					// used with TAG_INT
 	FLAG_STREAM=1<<4,					// used with TAG_INT
 	FLAG_TAIL_REC=1<<5,
+	FLAG_FUNCTION=1<<6,
 	FLAG_BLOB=1<<7,						// used with TAG_CSTR
 	FLAG_STRING=1<<8,					// used with TAG_CSTR
 	FLAG_STATIC=1<<9,
 	FLAG_MANAGED=1<<10,					// any reflist-counted object
-	FLAG_FUNCTION=1<<11,
 
-	FLAG_SPARE1=1<<12,
-	FLAG_SPARE2=1<<6,
+	FLAG_SPARE1=1<<11,
+	FLAG_SPARE2=1<<12,
 
 	FLAG2_FIRST_USE=FLAG_HEX,			// used with TAG_VAR
 	FLAG2_ANON=FLAG_OCTAL,				// used with TAG_VAR
