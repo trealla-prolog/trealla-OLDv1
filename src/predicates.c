@@ -8018,34 +8018,19 @@ static USE_RESULT pl_status fn_sys_mustbe_pairlist_or_var_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_mustbe_list_1(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-
-	if (is_cyclic_term(q, p1, p1_ctx))
-		return throw_error(q, p1, p1_ctx, "type_error", "list");
-
-	if (is_valid_list(q, p1, p1_ctx, true)
-		&& !is_valid_list(q, p1, p1_ctx, false))
-		return throw_error(q, p1, p1_ctx, "instantiation_error", "partial_list");
-
-	if (!is_valid_list(q, p1, p1_ctx, false))
-		return throw_error(q, p1, p1_ctx, "type_error", "list");
-
-	return pl_success;
-}
 
 static USE_RESULT pl_status fn_sys_mustbe_list_or_var_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
-	if (is_variable(p1))
+	if (is_variable(p1) || is_nil(p1))
 		return pl_success;
 
-	if (is_cyclic_term(q, p1, p1_ctx))
-		return throw_error(q, p1, p1_ctx, "type_error", "list");
+	// This checks for a valid list (it allows for partial but acyclic lists)...
 
-	if (!is_valid_list(q, p1, p1_ctx, true))
+	bool is_partial = false;
+
+	if (!is_iso_list(p1) || !check_list(q, p1, p1_ctx, &is_partial) || is_partial)
 		return throw_error(q, p1, p1_ctx, "type_error", "list");
 
 	return pl_success;
@@ -11642,7 +11627,6 @@ static const struct builtins g_predicates_other[] =
 	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+clause,+clause", false},
 	{"$mustbe_pairlist", 2, fn_sys_mustbe_pairlist_2, "+pair,+goal", false},
 	{"$mustbe_pairlist_or_var", 2, fn_sys_mustbe_pairlist_or_var_2, "?pair,+goal", false},
-	{"$mustbe_list", 1, fn_sys_mustbe_list_1, "?list", false},
 	{"$mustbe_list_or_var", 1, fn_sys_mustbe_list_or_var_1, "?list", false},
 
 	{"$skip_max_list", 4, fn_sys_skip_max_list_4, NULL, false},
