@@ -71,13 +71,14 @@ static bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial)
 	cell tmp;
 
 	cell* c = skip_max_list(q, p1, &c_ctx, max, &skip, &tmp);
-	*is_partial = false;
 
 	if (is_nil(c))
 		return true;
 
 	if (is_variable(c))
 		*is_partial = true;
+	else
+		*is_partial = false;
 
 	return false;
 }
@@ -4501,10 +4502,6 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
-	bool is_partial = false;
-
-	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial))
-		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
@@ -4512,16 +4509,19 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 	if (is_variable(p1) && is_nil(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "non_empty_list");
 
+	// This checks for a valid list (it allows for partial but acyclic lists)...
+
+	bool is_partial = false;
+
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
+		return throw_error(q, p2, p2_ctx, "type_error", "list");
+
 	LIST_HANDLER(p2);
 	LIST_HEAD(p2);
 	cell *t = LIST_TAIL(p2);
 	pl_idx_t t_ctx = p2_ctx;
 
 	if (is_variable(t) && (p2->var_nbr == t->var_nbr) && (p2_ctx == t_ctx))
-		return throw_error(q, p2, p2_ctx, "type_error", "list");
-
-	if (!is_variable(p2) && !is_nil(p2)
-		&& !is_valid_list(q, p2, p2_ctx, true))
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (is_string(p1)) {
@@ -4740,8 +4740,11 @@ static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
 			return throw_error(q, p2, p2_ctx, "type_error", "list");
 	}
 
-	if (!is_variable(p2) && !is_nil(p2)
-		&& !is_valid_list(q, p2, p2_ctx, true))
+	// This checks for a valid list (it allows for partial but acyclic lists)...
+
+	bool is_partial = false;
+
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (!is_variable(p1) && (is_atom(p1) || is_number(p1))) {
@@ -5773,7 +5776,11 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,list_or_nil_or_var);
 
-	if (is_list(p3) && !is_valid_list(q, p3, p3_ctx, true))
+	// This checks for a valid list (it allows for partial but acyclic lists)...
+
+	bool is_partial = false;
+
+	if (is_iso_list(p3) && !check_list(q, p3, p3_ctx, &is_partial) && !is_partial)
 		return throw_error(q, p3, p3_ctx, "type_error", "list");
 
 	if (!q->retry) {
