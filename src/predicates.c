@@ -7991,10 +7991,10 @@ static USE_RESULT pl_status fn_sys_mustbe_list_or_var_1(query *q)
 
 static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 {
-	GET_FIRST_ARG(p1,variable);
+	GET_FIRST_ARG(p1,integer_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
 	GET_NEXT_ARG(p3,any);
-	GET_NEXT_ARG(p4,list_or_nil_or_var);
+	GET_NEXT_ARG(p4,any);
 
 	if (is_integer(p2) && is_negative(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
