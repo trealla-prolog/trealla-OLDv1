@@ -7957,14 +7957,11 @@ static USE_RESULT pl_status fn_sys_mustbe_pairlist_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
-	if (is_cyclic_term(q, p1, p1_ctx))
-		return throw_error(q, p1, p1_ctx, "type_error", "list");
+	// This checks for a valid list (it allows for partial but acyclic lists)...
 
-	if (is_valid_list(q, p1, p1_ctx, true)
-		&& !is_valid_list(q, p1, p1_ctx, false))
-		return throw_error2(q, p1, p1_ctx, "instantiation_error", "tail_is_a_variable", p2);
+	bool is_partial = false;
 
-	if (!is_valid_list(q, p1, p1_ctx, false))
+	if (is_iso_list(p1) && !check_list(q, p1, p1_ctx, &is_partial))
 		return throw_error(q, p1, p1_ctx, "type_error", "list");
 
 	LIST_HANDLER(p1);
@@ -7995,10 +7992,11 @@ static USE_RESULT pl_status fn_sys_mustbe_pairlist_or_var_2(query *q)
 	if (is_variable(p1))
 		return pl_success;
 
-	if (is_cyclic_term(q, p1, p1_ctx))
-		return throw_error(q, p1, p1_ctx, "type_error", "list");
+	// This checks for a valid list (it allows for partial but acyclic lists)...
 
-	if (!is_valid_list(q, p1, p1_ctx, true))
+	bool is_partial = false;
+
+	if (is_iso_list(p1) && !check_list(q, p1, p1_ctx, &is_partial))
 		return throw_error(q, p1, p1_ctx, "type_error", "list");
 
 	LIST_HANDLER(p1);
