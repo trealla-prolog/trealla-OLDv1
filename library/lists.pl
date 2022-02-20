@@ -106,6 +106,11 @@ numlist_(L, U, [L|Ns]) :-
 	L2 is L+1,
 	numlist_(L2, U, Ns).
 
+/*
+  This implementation of length/2 differs from the ISO draft in that
+  it type-checks the first argument.
+*/
+
 length(Xs0, N) :-
 	'$skip_max_list'(M, N, Xs0, Xs),
 	( Xs == [] -> N = M

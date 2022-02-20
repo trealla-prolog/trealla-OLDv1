@@ -64,6 +64,24 @@ size_t slicecpy(char *dst, size_t dstlen, const char *src, size_t len)
 	return dst - save;
 }
 
+static bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial)
+{
+	pl_int_t skip = 0, max = 1000000000;
+	pl_idx_t c_ctx = p1_ctx;
+	cell tmp;
+
+	cell* c = skip_max_list(q, p1, &c_ctx, max, &skip, &tmp);
+	*is_partial = false;
+
+	if (is_nil(c))
+		return true;
+
+	if (is_variable(c))
+		*is_partial = true;
+
+	return false;
+}
+
 static cell err_cell = {0};
 cell *ERR_CYCLE_CELL = &err_cell;
 
@@ -4483,6 +4501,10 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
+	bool is_partial = false;
+
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial))
+		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
@@ -7869,24 +7891,6 @@ static USE_RESULT pl_status fn_write_canonical_to_chars_3(query *q)
 	pl_status ok = unify(q, p_chars, p_chars_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
-}
-
-static bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial)
-{
-	pl_int_t skip = 0, max = 1000000000;
-	pl_idx_t c_ctx = p1_ctx;
-	cell tmp;
-
-	cell* c = skip_max_list(q, p1, &c_ctx, max, &skip, &tmp);
-	*is_partial = false;
-
-	if (is_nil(c))
-		return true;
-
-	if (is_variable(c))
-		*is_partial = true;
-
-	return false;
 }
 
 static USE_RESULT pl_status fn_is_list_1(query *q)
