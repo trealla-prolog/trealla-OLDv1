@@ -350,29 +350,6 @@ bool is_valid_list(query *q, cell *p1, pl_idx_t p1_ctx, bool allow_partials)
 	return is_nil(p1) || (allow_partials && is_variable(p1));
 }
 
-bool is_valid_list_up_to(query *q, cell *p1, pl_idx_t p1_ctx, bool allow_partials, int n)
-{
-	if (!is_list(p1) && !is_nil(p1))
-		return false;
-
-	LIST_HANDLER(p1);
-
-	while (is_list(p1) && !g_tpl_interrupt) {
-		LIST_HEAD(p1);
-
-		if (!n)
-			return true;
-
-		p1 = LIST_TAIL(p1);
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-
-		n--;
-	}
-
-	return is_nil(p1) || (allow_partials && is_variable(p1));
-}
-
 size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, bool *has_var)
 {
 	*has_var = false;
