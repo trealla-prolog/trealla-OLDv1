@@ -988,7 +988,11 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
-	if (is_cyclic_term(q, p2, p2_ctx))
+	// This checks for a valid list (it allows for partial but acyclic lists)...
+
+	bool is_partial = false;
+
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (!is_iso_atom(p1) && !is_variable(p1))
@@ -1138,7 +1142,11 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
-	if (is_cyclic_term(q, p2, p2_ctx))
+	// This checks for a valid list (it allows for partial but acyclic lists)...
+
+	bool is_partial = false;
+
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (is_nil(p2))
@@ -1279,7 +1287,11 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
-	if (is_cyclic_term(q, p2, p2_ctx))
+	// This checks for a valid list (it allows for partial but acyclic lists)...
+
+	bool is_partial = false;
+
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (!is_iso_atom(p1) && !is_variable(p1))
@@ -1393,7 +1405,11 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
-	if (is_cyclic_term(q, p2, p2_ctx))
+	// This checks for a valid list (it allows for partial but acyclic lists)...
+
+	bool is_partial = false;
+
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (is_nil(p2)) {
@@ -1551,7 +1567,11 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
-	if (is_cyclic_term(q, p2, p2_ctx))
+	// This checks for a valid list (it allows for partial but acyclic lists)...
+
+	bool is_partial = false;
+
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (is_nil(p2))
@@ -7952,73 +7972,6 @@ static USE_RESULT pl_status fn_sys_instantiated_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_mustbe_pairlist_2(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
-
-	// This checks for a valid list (it allows for partial but acyclic lists)...
-
-	bool is_partial = false;
-
-	if (is_iso_list(p1) && !check_list(q, p1, p1_ctx, &is_partial))
-		return throw_error(q, p1, p1_ctx, "type_error", "list");
-
-	LIST_HANDLER(p1);
-
-	while (is_list(p1) && !g_tpl_interrupt) {
-		cell *h = LIST_HEAD(p1);
-		h = deref(q, h, p1_ctx);
-
-		if (is_variable(h))
-			return throw_error(q, h, q->latest_ctx, "instantiation_error", "not_sufficiently_instantiated");
-
-		if (!is_literal(h) || (h->arity != 2) || (h->val_off != g_minus_s))
-			return throw_error(q, h, q->latest_ctx, "type_error", "pair");
-
-		p1 = LIST_TAIL(p1);
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-	}
-
-	return pl_success;
-}
-
-static USE_RESULT pl_status fn_sys_mustbe_pairlist_or_var_2(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
-
-	if (is_variable(p1))
-		return pl_success;
-
-	// This checks for a valid list (it allows for partial but acyclic lists)...
-
-	bool is_partial = false;
-
-	if (is_iso_list(p1) && !check_list(q, p1, p1_ctx, &is_partial))
-		return throw_error(q, p1, p1_ctx, "type_error", "list");
-
-	LIST_HANDLER(p1);
-
-	while (is_list(p1) && !g_tpl_interrupt) {
-		cell *h = LIST_HEAD(p1);
-		h = deref(q, h, p1_ctx);
-
-		if (!is_variable(h)) {
-			if (!is_literal(h) || (h->arity != 2) || (h->val_off != g_minus_s))
-				return throw_error(q, h, q->latest_ctx, "type_error", "pair");
-		}
-
-		p1 = LIST_TAIL(p1);
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-	}
-
-	return pl_success;
-}
-
-
 static USE_RESULT pl_status fn_sys_mustbe_list_or_var_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -11625,8 +11578,6 @@ static const struct builtins g_predicates_other[] =
 	{"recv", 1, fn_recv_1, "?clause", false},
 
 	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+clause,+clause", false},
-	{"$mustbe_pairlist", 2, fn_sys_mustbe_pairlist_2, "+pair,+goal", false},
-	{"$mustbe_pairlist_or_var", 2, fn_sys_mustbe_pairlist_or_var_2, "?pair,+goal", false},
 	{"$mustbe_list_or_var", 1, fn_sys_mustbe_list_or_var_1, "?list", false},
 
 	{"$skip_max_list", 4, fn_sys_skip_max_list_4, NULL, false},
