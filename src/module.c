@@ -1107,8 +1107,6 @@ static void xref_cell(module *m, clause *r, cell *c, predicate *parent)
 	}
 
 	if ((c+c->nbr_cells) >= (r->cells+r->cidx-1)) {
-		c->flags |= FLAG_TAIL;
-
 		if (parent && (parent->key.val_off == c->val_off) && (parent->key.arity == c->arity)) {
 			c->flags |= FLAG_TAIL_REC;
 			r->is_tail_rec = true;
@@ -1153,7 +1151,6 @@ void xref_rule(module *m, clause *r, predicate *parent)
 
 	for (pl_idx_t i = 0; i < r->cidx; i++) {
 		cell *c = r->cells + i;
-		c->flags &= ~FLAG_TAIL;
 		c->flags &= ~FLAG_TAIL_REC;
 
 		if (!is_literal(c))
