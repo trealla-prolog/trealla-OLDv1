@@ -64,27 +64,27 @@ cell *alloc_on_tmp(query *q, pl_idx_t nbr_cells)
 // done as it will invalidate existing pointers. Build any compounds
 // first on the tmp heap, then allocate in one go here and copy in.
 // When more space is need allocate a new heap and keep them in the
-// arena list. Backtracking will garbage collect and free as needed.
+// page list. Backtracking will garbage collect and free as needed.
 
 cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 {
-	if (!q->arenas) {
+	if (!q->pages) {
 		if (q->h_size < nbr_cells)
 			q->h_size = nbr_cells;
 
-		arena *a = calloc(1, sizeof(arena));
+		page *a = calloc(1, sizeof(page));
 		ensure(a);
 		a->heap = calloc(q->h_size, sizeof(cell));
 		ensure(a->heap);
 		a->h_size = q->h_size;
-		a->nbr = q->st.arena_nbr++;
-		q->arenas = a;
+		a->nbr = q->st.curr_page++;
+		q->pages = a;
 	}
 
 	if ((q->st.hp + nbr_cells) >= q->h_size) {
-		arena *a = calloc(1, sizeof(arena));
+		page *a = calloc(1, sizeof(page));
 		ensure(a);
-		a->next = q->arenas;
+		a->next = q->pages;
 
 		if (q->h_size < nbr_cells) {
 			q->h_size = nbr_cells;
@@ -94,17 +94,17 @@ cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 		a->heap = calloc(q->h_size, sizeof(cell));
 		ensure(a->heap);
 		a->h_size = q->h_size;
-		a->nbr = q->st.arena_nbr++;
-		q->arenas = a;
+		a->nbr = q->st.curr_page++;
+		q->pages = a;
 		q->st.hp = 0;
 	}
 
-	cell *c = q->arenas->heap + q->st.hp;
+	cell *c = q->pages->heap + q->st.hp;
 	q->st.hp += nbr_cells;
-	q->arenas->hp = q->st.hp;
+	q->pages->hp = q->st.hp;
 
-	if (q->st.hp > q->arenas->max_hp_used)
-		q->arenas->max_hp_used = q->st.hp;
+	if (q->st.hp > q->pages->max_hp_used)
+		q->pages->max_hp_used = q->st.hp;
 
 	return c;
 }

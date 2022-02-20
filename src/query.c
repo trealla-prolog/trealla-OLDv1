@@ -445,8 +445,8 @@ pl_status try_me(query *q, unsigned nbr_vars)
 
 static void trim_heap(query *q, const choice *ch)
 {
-	for (arena *a = q->arenas; a;) {
-		if (a->nbr <= ch->st.arena_nbr)
+	for (page *a = q->pages; a;) {
+		if (a->nbr <= ch->st.curr_page)
 			break;
 
 		for (pl_idx_t i = 0; i < a->max_hp_used; i++) {
@@ -456,13 +456,13 @@ static void trim_heap(query *q, const choice *ch)
 			c->attrs = NULL;
 		}
 
-		arena *save = a;
-		q->arenas = a = a->next;
+		page *save = a;
+		q->pages = a = a->next;
 		free(save->heap);
 		free(save);
 	}
 
-	const arena *a = q->arenas;
+	const page *a = q->pages;
 
 	for (pl_idx_t i = ch->st.hp; a && (i < a->max_hp_used) && (i < q->st.hp); i++) {
 		cell *c = a->heap + i;
@@ -1867,13 +1867,13 @@ void destroy_query(query *q)
 		q->st.qnbr--;
 	}
 
-	for (arena *a = q->arenas; a;) {
+	for (page *a = q->pages; a;) {
 		for (pl_idx_t i = 0; i < a->max_hp_used; i++) {
 			cell *c = a->heap + i;
 			unshare_cell(c);
 		}
 
-		arena *save = a;
+		page *save = a;
 		a = a->next;
 		free(save->heap);
 		free(save);

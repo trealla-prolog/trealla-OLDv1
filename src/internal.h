@@ -287,7 +287,7 @@ typedef struct clause_ clause;
 typedef struct trail_ trail;
 typedef struct frame_ frame;
 typedef struct parser_ parser;
-typedef struct arena_ arena;
+typedef struct page_ page;
 typedef struct stream_ stream;
 typedef struct slot_ slot;
 typedef struct choice_ choice;
@@ -489,7 +489,7 @@ struct prolog_state_ {
 	module *m;
 	miter *iter;
 	pl_idx_t curr_frame, fp, hp, tp, sp;
-	uint32_t arena_nbr;
+	uint32_t curr_page;
 	uint8_t qnbr;
 	bool definite:1;
 	bool arg1_is_ground:1;
@@ -502,6 +502,7 @@ struct choice_ {
 	uint64_t ugen;
 	pl_idx_t v1, v2, overflow;
 	uint32_t nbr_slots, nbr_vars, cgen, frame_cgen;
+	bool is_tail_rec:1;
 	bool catchme_retry:1;
 	bool catchme_exception:1;
 	bool barrier:1;
@@ -512,11 +513,10 @@ struct choice_ {
 	bool register_term:1;
 	bool block_catcher:1;
 	bool catcher:1;
-	bool is_tail_rec:1;
 };
 
-struct arena_ {
-	arena *next;
+struct page_ {
+	page *next;
 	cell *heap;
 	pl_idx_t hp, max_hp_used, h_size;
 	unsigned nbr;
@@ -549,7 +549,7 @@ struct query_ {
 	trail *trails;
 	cell *tmp_heap, *last_arg, *exception, *variable_names;
 	cell *queue[MAX_QUEUES], *tmpq[MAX_QUEUES];
-	arena *arenas;
+	page *pages;
 	slot *save_e;
 	db_entry *dirty_list;
 	cycle_info *info1, *info2;
