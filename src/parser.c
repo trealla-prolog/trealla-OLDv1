@@ -87,7 +87,7 @@ cell *list_tail(cell *l, cell *tmp)
 	}
 
 	if (is_static(l)) {
-		tmp->flags = FLAG_BLOB | FLAG_STATIC | FLAG_STRING;
+		tmp->flags = FLAG_CSTR_BLOB | FLAG_STATIC | FLAG_CSTR_STRING;
 		tmp->nbr_cells = 1;
 		tmp->arity = 2;
 		tmp->val_str = l->val_str + len;
@@ -910,7 +910,7 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 		p->vartab.var_name[c->var_nbr] = GET_STR(p, c);
 
 		if (p->vartab.var_used[c->var_nbr]++ == 0) {
-			c->flags |= FLAG2_FIRST_USE;
+			c->flags |= FLAG_VAR_FIRST_USE;
 			r->nbr_vars++;
 			p->nbr_vars++;
 		}
@@ -932,7 +932,7 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 			continue;
 
 		if (c->val_off == g_anon_s)
-			c->flags |= FLAG2_ANON;
+			c->flags |= FLAG_VAR_ANON;
 	}
 
 	cell *c = make_a_cell(p);
@@ -1712,7 +1712,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		}
 
 		p->v.tag = TAG_INT;
-		p->v.flags |= FLAG_BINARY;
+		p->v.flags |= FLAG_INT_BINARY;
 		*srcptr = s;
 		return true;
 	}
@@ -1735,7 +1735,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		}
 
 		p->v.tag = TAG_INT;
-		p->v.flags |= FLAG_OCTAL;
+		p->v.flags |= FLAG_INT_OCTAL;
 		*srcptr = s;
 		return true;
 	}
@@ -1758,7 +1758,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 		}
 
 		p->v.tag = TAG_INT;
-		p->v.flags |= FLAG_HEX;
+		p->v.flags |= FLAG_INT_HEX;
 		*srcptr = s;
 		return true;
 	}
@@ -2929,7 +2929,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				c->tag = TAG_VAR;
 
 			if (p->is_quoted)
-				c->flags |= FLAG2_QUOTED;
+				c->flags |= FLAG_CSTR_QUOTED;
 
 			c->val_off = index_from_pool(p->m->pl, p->token);
 			ensure(c->val_off != ERR_IDX);
@@ -2942,7 +2942,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				c->chr_len = p->toklen;
 			} else {
 				if (p->string) {
-					c->flags |= FLAG_STRING;
+					c->flags |= FLAG_CSTR_STRING;
 					c->arity = 2;
 				}
 

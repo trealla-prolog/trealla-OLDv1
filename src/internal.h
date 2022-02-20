@@ -142,16 +142,16 @@ typedef enum {
 #define is_smallint(c) (is_integer(c) && !((c)->flags & FLAG_MANAGED))
 #define is_bigint(c) (is_integer(c) && (c)->flags & FLAG_MANAGED)
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
-#define is_string(c) (is_cstring(c) && (c)->flags & FLAG_STRING)
+#define is_string(c) (is_cstring(c) && (c)->flags & FLAG_CSTR_STRING)
 #define is_managed(c) ((c)->flags & FLAG_MANAGED)
-#define is_blob(c) (is_cstring(c) && (c)->flags & FLAG_BLOB)
+#define is_blob(c) (is_cstring(c) && (c)->flags & FLAG_CSTR_BLOB)
 #define is_list(c) (is_iso_list(c) || is_string(c))
 #define is_static(c) (is_blob(c) && ((c)->flags & FLAG_STATIC))
 #define is_strbuf(c) (is_blob(c) && !((c)->flags & FLAG_STATIC))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
-#define is_quoted(c) ((c)->flags & FLAG2_QUOTED)
-#define is_fresh(c) ((c)->flags & FLAG2_FRESH)
-#define is_anon(c) ((c)->flags & FLAG2_ANON)
+#define is_quoted(c) ((c)->flags & FLAG_CSTR_QUOTED)
+#define is_fresh(c) ((c)->flags & FLAG_VAR_FRESH)
+#define is_anon(c) ((c)->flags & FLAG_VAR_ANON)
 #define is_builtin(c) ((c)->flags & FLAG_BUILTIN)
 #define is_function(c) ((c)->flags & FLAG_FUNCTION)
 #define is_tail_recursive(c) ((c)->flags & FLAG_TAIL_REC)
@@ -178,7 +178,7 @@ typedef struct {
 	(c)->val_strb = strb;										\
 	(c)->strb_off = off;										\
 	(c)->strb_len = n;											\
-	(c)->flags |= FLAG_MANAGED | FLAG_BLOB;						\
+	(c)->flags |= FLAG_MANAGED | FLAG_CSTR_BLOB;						\
 	}
 
 #define _GET_STR(pl,c) 											\
@@ -223,25 +223,26 @@ enum {
 };
 
 enum {
-	FLAG_BUILTIN=1<<0,
-	FLAG_HEX=1<<1,						// used with TAG_INT
-	FLAG_OCTAL=1<<2,					// used with TAG_INT
-	FLAG_BINARY=1<<3,					// used with TAG_INT
-	FLAG_STREAM=1<<4,					// used with TAG_INT
-	FLAG_TAIL_REC=1<<5,
-	FLAG_FUNCTION=1<<6,
-	FLAG_BLOB=1<<7,						// used with TAG_CSTR
-	FLAG_STRING=1<<8,					// used with TAG_CSTR
+	FLAG_INT_HEX=1<<0,					// used with TAG_INT
+	FLAG_INT_OCTAL=1<<1,				// used with TAG_INT
+	FLAG_INT_BINARY=1<<2,				// used with TAG_INT
+	FLAG_INT_STREAM=1<<3,				// used with TAG_INT
+
+	FLAG_CSTR_BLOB=1<<0,				// used with TAG_CSTR
+	FLAG_CSTR_STRING=1<<1,				// used with TAG_CSTR
+	FLAG_CSTR_QUOTED=1<<2,				// used with TAG_CSTR
+
+	FLAG_VAR_FIRST_USE=1<<0,			// used with TAG_VAR
+	FLAG_VAR_ANON=1<<1,					// used with TAG_VAR
+	FLAG_VAR_FRESH=1<<2,				// used with TAG_VAR
+
+	FLAG_SPARE1=1<<6,
+	FLAG_SPARE2=1<<7,
+	FLAG_BUILTIN=1<<8,
 	FLAG_STATIC=1<<9,
 	FLAG_MANAGED=1<<10,					// any reflist-counted object
-
-	FLAG_SPARE1=1<<11,
-	FLAG_SPARE2=1<<12,
-
-	FLAG2_FIRST_USE=FLAG_HEX,			// used with TAG_VAR
-	FLAG2_ANON=FLAG_OCTAL,				// used with TAG_VAR
-	FLAG2_FRESH=FLAG_BINARY,			// used with TAG_VAR
-	FLAG2_QUOTED=FLAG_OCTAL,			// used with TAG_CSTR
+	FLAG_TAIL_REC=1<<11,
+	FLAG_FUNCTION=1<<12,
 
 	FLAG_END=1<<13
 };
@@ -298,7 +299,7 @@ typedef struct reflist_ reflist;
 // Using a fixed-size cell allows having arrays of cells, which is
 // basically what a Term is. A compound is a variable length array of
 // cells, the length specified by 'nbr_cells' field in the 1st cell.
-// A cell is a tagged union, the size should should 24 bytes.
+// A cell is a tagged union, the size should be 24 bytes.
 
 struct cell_ {
 	uint8_t tag;

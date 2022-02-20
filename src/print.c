@@ -388,18 +388,18 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 		int radix = 10;
 
 		if (q->listing) {
-			if (c->flags & FLAG_BINARY)
+			if (c->flags & FLAG_INT_BINARY)
 				radix = 2;
-			else if (c->flags & FLAG_HEX)
+			else if (c->flags & FLAG_INT_HEX)
 				radix = 16;
-			else if ((c->flags & FLAG_OCTAL) && !running)
+			else if ((c->flags & FLAG_INT_OCTAL) && !running)
 				radix = 8;
 
-			if (c->flags & FLAG_BINARY)
+			if (c->flags & FLAG_INT_BINARY)
 				dst += snprintf(dst, dstlen, "%s0b", is_negative(c)?"-":"");
-			else if (c->flags & FLAG_HEX)
+			else if (c->flags & FLAG_INT_HEX)
 				dst += snprintf(dst, dstlen, "%s0x", is_negative(c)?"-":"");
-			else if (c->flags & FLAG_OCTAL)
+			else if (c->flags & FLAG_INT_OCTAL)
 				dst += snprintf(dst, dstlen, "%s0o", is_negative(c)?"-":"");
 		}
 
@@ -417,10 +417,10 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 	if (is_smallint(c)) {
 		if (q->listing) {
-			if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY))) {
+			if (((c->flags & FLAG_INT_HEX) || (c->flags & FLAG_INT_BINARY))) {
 				dst += snprintf(dst, dstlen, "%s0x", get_smallint(c)<0?"-":"");
 				dst += sprint_int(dst, dstlen, get_smallint(c), 16);
-			} else if ((c->flags & FLAG_OCTAL) && !running) {
+			} else if ((c->flags & FLAG_INT_OCTAL) && !running) {
 				dst += snprintf(dst, dstlen, "%s0o", get_smallint(c)<0?"-":"");
 				dst += sprint_int(dst, dstlen, get_smallint(c), 8);
 			} else
@@ -541,7 +541,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 			cell *h = LIST_HEAD(l);
 			l = LIST_TAIL(l);
-			h->flags &= ~FLAG_STRING;
+			h->flags &= ~FLAG_CSTR_STRING;
 
 			if (!cnt++)
 				allocate_list(q, h);
@@ -631,19 +631,19 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 		if (q->listing) {
 			if (q->listing) {
-				if (c->flags & FLAG_BINARY)
+				if (c->flags & FLAG_INT_BINARY)
 					radix = 2;
-				else if (c->flags & FLAG_HEX)
+				else if (c->flags & FLAG_INT_HEX)
 					radix = 16;
-				else if ((c->flags & FLAG_OCTAL) && !running)
+				else if ((c->flags & FLAG_INT_OCTAL) && !running)
 					radix = 8;
 			}
 
-			if (c->flags & FLAG_BINARY)
+			if (c->flags & FLAG_INT_BINARY)
 				dst += snprintf(dst, dstlen, "%s0b", is_negative(c)?"-":"");
-			else if (c->flags & FLAG_HEX)
+			else if (c->flags & FLAG_INT_HEX)
 				dst += snprintf(dst, dstlen, "%s0x", is_negative(c)?"-":"");
-			else if ((c->flags & FLAG_OCTAL) && !running)
+			else if ((c->flags & FLAG_INT_OCTAL) && !running)
 				dst += snprintf(dst, dstlen, "%s0o", is_negative(c)?"-":"");
 		}
 
@@ -661,10 +661,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 	if (is_smallint(c)) {
 		if (q->listing) {
-			if (((c->flags & FLAG_HEX) || (c->flags & FLAG_BINARY))) {
+			if (((c->flags & FLAG_INT_HEX) || (c->flags & FLAG_INT_BINARY))) {
 				dst += snprintf(dst, dstlen, "%s0x", get_smallint(c)<0?"-":"");
 				dst += sprint_int(dst, dstlen, get_smallint(c), 16);
-			} else if ((c->flags & FLAG_OCTAL) && !running) {
+			} else if ((c->flags & FLAG_INT_OCTAL) && !running) {
 				dst += snprintf(dst, dstlen, "%s0o", get_smallint(c)<0?"-":"");
 				dst += sprint_int(dst, dstlen, get_smallint(c), 8);
 			} else

@@ -294,7 +294,7 @@ USE_RESULT pl_status make_stringn(cell *d, const char *s, size_t n)
 {
 	*d = (cell){0};
 	d->tag = TAG_CSTR;
-	d->flags = FLAG_STRING;
+	d->flags = FLAG_CSTR_STRING;
 	d->nbr_cells = 1;
 	d->arity = 2;
 	SET_STR(d, s, n, 0);
@@ -1032,7 +1032,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 	if (is_string(p2)) {
 		cell tmp;
 		may_error(make_slice(q, &tmp, p2, 0, LEN_STR(q, p2)));
-		tmp.flags &= ~FLAG_STRING;
+		tmp.flags &= ~FLAG_CSTR_STRING;
 		tmp.arity = 0;
 		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
@@ -1078,7 +1078,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 
 	if (is_string(p2) && is_variable(p1)) {
 		cell tmp = *p2;
-		tmp.flags &= ~FLAG_STRING;
+		tmp.flags &= ~FLAG_CSTR_STRING;
 		tmp.arity = 0;
 		set_var(q, p1, p1_ctx, p2, q->st.curr_frame);
 		return pl_success;
@@ -2024,7 +2024,7 @@ int get_stream(query *q, cell *p1)
 		return n;
 	}
 
-	if (!(p1->flags&FLAG_STREAM))
+	if (!(p1->flags&FLAG_INT_STREAM))
 		return -1;
 
 	if (!q->pl->streams[get_int(p1)].fp)
@@ -2035,7 +2035,7 @@ int get_stream(query *q, cell *p1)
 
 static bool is_closed_stream(prolog *pl, cell *p1)
 {
-	if (!(p1->flags&FLAG_STREAM))
+	if (!(p1->flags&FLAG_INT_STREAM))
 		return false;
 
 	if (pl->streams[get_smallint(p1)].fp)
@@ -2051,7 +2051,7 @@ static USE_RESULT pl_status fn_iso_current_input_1(query *q)
 	if (is_variable(pstr)) {
 		cell tmp;
 		make_int(&tmp, q->pl->current_input);
-		tmp.flags |= FLAG_STREAM | FLAG_HEX;
+		tmp.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
 		set_var(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
@@ -2070,7 +2070,7 @@ static USE_RESULT pl_status fn_iso_current_output_1(query *q)
 	if (is_variable(pstr)) {
 		cell tmp;
 		make_int(&tmp, q->pl->current_output);
-		tmp.flags |= FLAG_STREAM | FLAG_HEX;
+		tmp.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
 		set_var(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
@@ -2566,7 +2566,7 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 
 	clause *r = &q->st.curr_clause2->cl;
 	GET_FIRST_ARG(pstrx,smallint);
-	pstrx->flags |= FLAG_STREAM | FLAG_HEX;
+	pstrx->flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
 	stash_me(q, r, false);
 	return pl_success;
 }
@@ -2672,7 +2672,7 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 
 	cell tmp;
 	make_int(&tmp, n);
-	tmp.flags |= FLAG_STREAM | FLAG_HEX;
+	tmp.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
@@ -2901,7 +2901,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 		void *addr = mmap(0, len, prot, MAP_PRIVATE, fd, offset);
 		cell tmp = {0};
 		tmp.tag = TAG_CSTR;
-		tmp.flags = FLAG_BLOB | FLAG_STRING | FLAG_STATIC;
+		tmp.flags = FLAG_CSTR_BLOB | FLAG_CSTR_STRING | FLAG_STATIC;
 		tmp.nbr_cells = 1;
 		tmp.arity = 2;
 		tmp.val_str = addr;
@@ -2912,7 +2912,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 	cell tmp ;
 	make_int(&tmp, n);
-	tmp.flags |= FLAG_STREAM | FLAG_HEX;
+	tmp.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
@@ -3094,7 +3094,7 @@ static USE_RESULT pl_status fn_iso_read_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,binary_stream");
 	}
 
@@ -3116,7 +3116,7 @@ static USE_RESULT pl_status fn_iso_read_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,binary_stream");
 	}
 
@@ -3135,7 +3135,7 @@ static USE_RESULT pl_status fn_iso_read_term_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,binary_stream");
 	}
 
@@ -3156,7 +3156,7 @@ static USE_RESULT pl_status fn_iso_read_term_3(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,binary_stream");
 	}
 
@@ -3172,7 +3172,7 @@ static USE_RESULT pl_status fn_iso_write_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
@@ -3193,7 +3193,7 @@ static USE_RESULT pl_status fn_iso_write_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
@@ -3210,7 +3210,7 @@ static USE_RESULT pl_status fn_iso_writeq_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
@@ -3234,7 +3234,7 @@ static USE_RESULT pl_status fn_iso_writeq_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
@@ -3254,7 +3254,7 @@ static USE_RESULT pl_status fn_iso_write_canonical_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
@@ -3275,7 +3275,7 @@ static USE_RESULT pl_status fn_iso_write_canonical_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
@@ -3469,7 +3469,7 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
@@ -3536,7 +3536,7 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
@@ -3596,7 +3596,7 @@ static USE_RESULT pl_status fn_iso_put_char_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
@@ -3625,7 +3625,7 @@ static USE_RESULT pl_status fn_iso_put_char_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
@@ -3649,7 +3649,7 @@ static USE_RESULT pl_status fn_iso_put_code_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
@@ -3679,7 +3679,7 @@ static USE_RESULT pl_status fn_iso_put_code_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
@@ -3705,7 +3705,7 @@ static USE_RESULT pl_status fn_iso_put_byte_1(query *q)
 	if (!str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,text_stream");
 	}
 
@@ -3759,14 +3759,14 @@ static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,binary_stream");
 	}
 
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -3832,14 +3832,14 @@ static USE_RESULT pl_status fn_iso_get_char_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,binary_stream");
 	}
 
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -3904,14 +3904,14 @@ static USE_RESULT pl_status fn_iso_get_code_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,binary_stream");
 	}
 
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -3979,14 +3979,14 @@ static USE_RESULT pl_status fn_iso_get_code_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,binary_stream");
 	}
 
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -4046,14 +4046,14 @@ static USE_RESULT pl_status fn_iso_get_byte_1(query *q)
 	if (!str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,text_stream");
 	}
 
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -4110,14 +4110,14 @@ static USE_RESULT pl_status fn_iso_get_byte_2(query *q)
 	if (!str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,text_stream");
 	}
 
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -4169,14 +4169,14 @@ static USE_RESULT pl_status fn_iso_peek_char_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,binary_stream");
 	}
 
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -4224,14 +4224,14 @@ static USE_RESULT pl_status fn_iso_peek_char_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,binary_stream");
 	}
 
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -4277,14 +4277,14 @@ static USE_RESULT pl_status fn_iso_peek_code_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,binary_stream");
 	}
 
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -4332,14 +4332,14 @@ static USE_RESULT pl_status fn_iso_peek_code_2(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,binary_stream");
 	}
 
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -4380,14 +4380,14 @@ static USE_RESULT pl_status fn_iso_peek_byte_1(query *q)
 	if (!str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,text_stream");
 	}
 
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -4431,14 +4431,14 @@ static USE_RESULT pl_status fn_iso_peek_byte_2(query *q)
 	if (!str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,text_stream");
 	}
 
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -4704,7 +4704,7 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 			make_variable2(&v, q->pl->tab3[i]);
 
 			if (q->pl->tab1[i] != q->st.curr_frame) {
-				v.flags |= FLAG2_FRESH;
+				v.flags |= FLAG_VAR_FRESH;
 				v.var_nbr = q->pl->varno++;
 			} else
 				v.var_nbr = q->pl->tab2[i];
@@ -4734,9 +4734,9 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 
 			cell v, tmp2;
 			make_variable(&v, g_anon_s, q->pl->varno++);
-			v.flags |= FLAG2_FRESH;
+			v.flags |= FLAG_VAR_FRESH;
 			make_variable(&tmp2, g_anon_s, q->pl->tab2[i]);
-			tmp2.flags |= FLAG2_FRESH;
+			tmp2.flags |= FLAG_VAR_FRESH;
 			set_var(q, &v, q->st.curr_frame, &tmp2, q->pl->tab1[i]);
 		}
 	}
@@ -5237,7 +5237,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 				tmp[i].nbr_cells = 1;
 				tmp[i].var_nbr = var_nbr++;
 				tmp[i].val_off = g_anon_s;
-				tmp[i].flags = FLAG2_FRESH | FLAG2_ANON;
+				tmp[i].flags = FLAG_VAR_FRESH | FLAG_VAR_ANON;
 			}
 
 			set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
@@ -5745,7 +5745,7 @@ static USE_RESULT pl_status fn_sys_list_1(query *q)
 	for (pl_idx_t i = 0; i < l->nbr_cells; i++, c++) {
 		if (is_variable(c) && is_anon(c)) {
 			c->var_nbr = new_varno++;
-			c->flags = FLAG2_FRESH | FLAG2_ANON;
+			c->flags = FLAG_VAR_FRESH | FLAG_VAR_ANON;
 		}
 	}
 
@@ -7290,7 +7290,7 @@ static USE_RESULT pl_status fn_server_3(query *q)
 
 	cell tmp;
 	make_int(&tmp, n);
-	tmp.flags |= FLAG_STREAM | FLAG_HEX;
+	tmp.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
@@ -7349,7 +7349,7 @@ static USE_RESULT pl_status fn_accept_2(query *q)
 	may_error(push_choice(q));
 	cell tmp;
 	make_int(&tmp, n);
-	tmp.flags |= FLAG_STREAM | FLAG_HEX;
+	tmp.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
@@ -7493,7 +7493,7 @@ static USE_RESULT pl_status fn_client_5(query *q)
 	unshare_cell(&tmp);
 	cell tmp2;
 	make_int(&tmp2, n);
-	tmp2.flags |= FLAG_STREAM | FLAG_HEX;
+	tmp2.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
 	set_var(q, p4, p4_ctx, &tmp2, q->st.curr_frame);
 	return pl_success;
 }
@@ -10057,7 +10057,7 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 		cell *tmp = alloc_on_heap(q, 2);
 		make_structure(tmp+0, g_sys_var_s, NULL, 1, 1);
 		make_int(tmp+1, *end); *end = *end + 1;
-		tmp->flags |= FLAG2_QUOTED;
+		tmp->flags |= FLAG_CSTR_QUOTED;
 		set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
 		cnt++;
 		return cnt;
@@ -10099,7 +10099,7 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 			cell *tmp = alloc_on_heap(q, 2);
 			make_structure(tmp+0, g_sys_var_s, NULL, 1, 1);
 			make_int(tmp+1, *end); *end = *end + 1;
-			tmp->flags |= FLAG2_QUOTED;
+			tmp->flags |= FLAG_CSTR_QUOTED;
 			set_var(q, c, c_ctx, tmp, q->st.curr_frame);
 			cnt++;
 		} else if (is_structure(c))
@@ -10635,14 +10635,14 @@ static USE_RESULT pl_status fn_get_unbuffered_code_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,binary_stream");
 	}
 
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,past_end_of_stream");
 	}
 
@@ -10692,14 +10692,14 @@ static USE_RESULT pl_status fn_get_unbuffered_char_1(query *q)
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,binary_stream");
 	}
 
 	if (str->at_end_of_file && (str->eof_action == eof_action_error)) {
 		cell tmp;
 		make_int(&tmp, n);
-		tmp.flags |= FLAG_HEX;
+		tmp.flags |= FLAG_INT_HEX;
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "input,past_end_of_stream");
 	}
 

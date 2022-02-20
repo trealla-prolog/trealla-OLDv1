@@ -156,10 +156,10 @@ static cell *deep_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_
 		for (size_t i = 0; i < q->st.m->pl->tab_idx; i++) {
 			if (q->st.m->pl->tab1[i] == slot_nbr) {
 				tmp->var_nbr = q->st.m->pl->tab2[i];
-				tmp->flags = FLAG2_FRESH;
+				tmp->flags = FLAG_VAR_FRESH;
 
 				if (is_anon(p1))
-					tmp->flags |= FLAG2_ANON;
+					tmp->flags |= FLAG_VAR_ANON;
 
 				tmp->val_off = p1->val_off;
 				tmp->attrs = NULL;
@@ -168,13 +168,13 @@ static cell *deep_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_
 		}
 
 		tmp->var_nbr = q->st.m->pl->varno;
-		tmp->flags = FLAG2_FRESH;
+		tmp->flags = FLAG_VAR_FRESH;
 		tmp->val_off = p1->val_off;
 		tmp->attrs = e->c.attrs;
 		tmp->attrs_ctx = e->c.attrs_ctx;
 
 		if (is_anon(p1))
-			tmp->flags |= FLAG2_ANON;
+			tmp->flags |= FLAG_VAR_ANON;
 
 		q->st.m->pl->tab1[q->st.m->pl->tab_idx] = slot_nbr;
 		q->st.m->pl->tab2[q->st.m->pl->tab_idx] = q->st.m->pl->varno++;
@@ -292,10 +292,10 @@ static cell *deep_raw_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t
 		for (size_t i = 0; i < q->st.m->pl->tab_idx; i++) {
 			if (q->st.m->pl->tab1[i] == slot_nbr) {
 				tmp->var_nbr = q->st.m->pl->tab2[i];
-				tmp->flags = FLAG2_FRESH;
+				tmp->flags = FLAG_VAR_FRESH;
 
 				if (is_anon(p1))
-					tmp->flags |= FLAG2_ANON;
+					tmp->flags |= FLAG_VAR_ANON;
 
 				tmp->val_off = p1->val_off;
 				tmp->attrs = NULL;
@@ -304,13 +304,13 @@ static cell *deep_raw_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t
 		}
 
 		tmp->var_nbr = q->st.m->pl->varno;
-		tmp->flags = FLAG2_FRESH;
+		tmp->flags = FLAG_VAR_FRESH;
 		tmp->val_off = p1->val_off;
 		tmp->attrs = e->c.attrs;
 		tmp->attrs_ctx = e->c.attrs_ctx;
 
 		if (is_anon(p1))
-			tmp->flags |= FLAG2_ANON;
+			tmp->flags |= FLAG_VAR_ANON;
 
 		q->st.m->pl->tab1[q->st.m->pl->tab_idx] = slot_nbr;
 		q->st.m->pl->tab2[q->st.m->pl->tab_idx] = q->st.m->pl->varno++;
@@ -514,7 +514,7 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t su
 			q->st.m->pl->tab_idx++;
 		}
 
-		dst->flags = FLAG2_FRESH;
+		dst->flags = FLAG_VAR_FRESH;
 	}
 
 	if (q->st.m->pl->varno != f->nbr_vars) {
