@@ -20,8 +20,9 @@ USE_RESULT cell *alloc_on_tmp(query *q, pl_idx_t nbr_cells);
 USE_RESULT cell *alloc_on_queuen(query *q, int qnbr, const cell *c);
 
 USE_RESULT cell *init_tmp_heap(query* q);
-inline static pl_idx_t tmp_heap_used(const query *q) { return q->tmphp; }
-USE_RESULT inline static cell *get_tmp_heap(const query *q, pl_idx_t i) { return q->tmp_heap + i; }
+
+#define get_tmp_heap(q,i) ((q)->tmp_heap + (i))
+#define tmp_heap_used(q) (q)->tmphp
 
 void fix_list(cell *c);
 bool search_tmp_list(query *q, cell *v);
