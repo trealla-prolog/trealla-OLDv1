@@ -1418,10 +1418,7 @@ static bool term_expansion(parser *p)
 	destroy_parser(p2);
 	destroy_query(q);
 
-	if (p->cl->cells->val_off == g_dcg_s)
-		return dcg_expansion(p);
-
-	return true;
+	return term_expansion(p);
 }
 
 bool virtual_term(parser *p, const char *src)
