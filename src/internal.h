@@ -715,28 +715,26 @@ extern unsigned g_cpu_count;
 
 inline static void share_cell(const cell *c)
 {
-	if (!is_managed(c))
-		return;
-
-	if (is_strbuf(c))
-		(c)->val_strb->refcnt++;
-	else if (is_bigint(c))
-		(c)->val_bigint->refcnt++;
+	if (is_managed(c)) {
+		if (is_strbuf(c))
+			(c)->val_strb->refcnt++;
+		else if (is_bigint(c))
+			(c)->val_bigint->refcnt++;
+	}
 }
 
 inline static void unshare_cell(const cell *c)
 {
-	if (!is_managed(c))
-		return;
-
-	if (is_strbuf(c)) {
-		if (--(c)->val_strb->refcnt == 0) {
-			free((c)->val_strb);
-		}
-	} else if (is_bigint(c)) {
-		if (--(c)->val_bigint->refcnt == 0)	{
-			mp_int_clear(&(c)->val_bigint->ival);
-			free((c)->val_bigint);
+	if (is_managed(c)) {
+		if (is_strbuf(c)) {
+			if (--(c)->val_strb->refcnt == 0) {
+				free((c)->val_strb);
+			}
+		} else if (is_bigint(c)) {
+			if (--(c)->val_bigint->refcnt == 0)	{
+				mp_int_clear(&(c)->val_bigint->ival);
+				free((c)->val_bigint);
+			}
 		}
 	}
 }
