@@ -713,28 +713,27 @@ extern pl_idx_t g_sys_soft_cut_s;
 
 extern unsigned g_cpu_count;
 
-inline static void share_cell(const cell *c)
+#define share_cell(c) if (is_managed(c)) share_cell_(c)
+#define unshare_cell(c) if (is_managed(c)) unshare_cell_(c)
+
+inline static void share_cell_(const cell *c)
 {
-	if (is_managed(c)) {
-		if (is_strbuf(c))
-			(c)->val_strb->refcnt++;
-		else if (is_bigint(c))
-			(c)->val_bigint->refcnt++;
-	}
+	if (is_strbuf(c))
+		(c)->val_strb->refcnt++;
+	else if (is_bigint(c))
+		(c)->val_bigint->refcnt++;
 }
 
-inline static void unshare_cell(const cell *c)
+inline static void unshare_cell_(const cell *c)
 {
-	if (is_managed(c)) {
-		if (is_strbuf(c)) {
-			if (--(c)->val_strb->refcnt == 0) {
-				free((c)->val_strb);
-			}
-		} else if (is_bigint(c)) {
-			if (--(c)->val_bigint->refcnt == 0)	{
-				mp_int_clear(&(c)->val_bigint->ival);
-				free((c)->val_bigint);
-			}
+	if (is_strbuf(c)) {
+		if (--(c)->val_strb->refcnt == 0) {
+			free((c)->val_strb);
+		}
+	} else if (is_bigint(c)) {
+		if (--(c)->val_bigint->refcnt == 0)	{
+			mp_int_clear(&(c)->val_bigint->ival);
+			free((c)->val_bigint);
 		}
 	}
 }
@@ -745,16 +744,20 @@ inline static pl_idx_t safe_copy_cells(cell *dst, const cell *src, pl_idx_t nbr_
 {
 	memcpy(dst, src, sizeof(cell)*nbr_cells);
 
-	for (pl_idx_t i = 0; i < nbr_cells; i++)
-		share_cell(src++);
+	for (pl_idx_t i = 0; i < nbr_cells; i++) {
+		share_cell(src);
+		src++;
+	}
 
 	return nbr_cells;
 }
 
 inline static void chk_cells(const cell *src, pl_idx_t nbr_cells)
 {
-	for (pl_idx_t i = 0; i < nbr_cells; i++)
-		unshare_cell(src++);
+	for (pl_idx_t i = 0; i < nbr_cells; i++) {
+		unshare_cell(src);
+		src++;
+	}
 }
 
 #define LIST_HANDLER(l) cell l##_h_tmp; cell l##_t_tmp
