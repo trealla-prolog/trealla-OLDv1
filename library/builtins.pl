@@ -23,12 +23,6 @@ must_be(Term, list_or_partial_list, Goal, _Arg) :- !, '$mustbe_instantiated'(Ter
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-expand_term(In, Out) :-
-	term_expansion(In, Out).
-
-unify_with_occurs_check(X, X) :-
-	acyclic_term(X).
-
 predicate_property(P, A) :-
 	nonvar(P), atom(A), !,
 	must_be(P, callable, predicate_property/2, _),
@@ -469,9 +463,12 @@ time_out(Goal, Time, Result) :-
 :- meta_predicate(call_with_time_limit(+,0)).
 :- meta_predicate(time_out(0,+,-)).
 
-atomic_list_concat(L, Atom) :- atomic_list_concat(L, '', Atom).
 writeln(T) :- write(T), nl.
 format(F) :- format(F, []).
+open(F, M, S) :- open(F, M, S, []).
+unify_with_occurs_check(X, X) :- acyclic_term(X).
+expand_term(In, Out) :- term_expansion(In, Out).
+atomic_list_concat(L, Atom) :- atomic_list_concat(L, '', Atom).
 partial_string(S, P) :- append(S, _, P).
 partial_string(S, P, V) :- append(S, V, P).
 chars_base64(Plain, Base64, Opts) :- base64(Plain, Base64, Opts).
@@ -482,7 +479,6 @@ absolute_file_name(R, A) :- absolute_file_name(R, A, []).
 client(U, H, P, S) :- client(U,H,P,S,[]).
 server(H, S) :- server(H,S,[]).
 prolog_load_context(module, Module) :- module(Module).
-open(F, M, S) :- open(F, M, S, []).
 load_files(Files) :- load_files(Files,[]).
 consult(Files) :- load_files(Files,[]).
 reconsult(Files) :- load_files(Files,[]).
