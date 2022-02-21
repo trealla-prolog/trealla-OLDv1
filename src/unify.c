@@ -516,9 +516,6 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 	if (p1_ctx == q->st.curr_frame)
 		q->no_tco = true;
 
-	if (is_variable(p1) && !is_variable(p2))
-		q->has_vars = true;
-
 	if (is_variable(p1) && is_variable(p2)) {
 		if (p2_ctx > p1_ctx)
 			set_var(q, p2, p2_ctx, p1, p1_ctx);
@@ -531,6 +528,9 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 	}
 
 	if (is_variable(p1)) {
+		if (!is_variable(p2))
+			q->has_vars = true;
+
 		set_var(q, p1, p1_ctx, p2, p2_ctx);
 		return true;
 	}
@@ -556,4 +556,3 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 
 	return g_disp[p1->tag].fn(q, p1, p2);
 }
-
