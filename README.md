@@ -321,6 +321,7 @@ Non-standard predicates
 	module/1
 	line_count/2
 	strip_module/3
+	atom_number/2
 
 	call_with_time_limit/2		# SWI-compatible
 	time_out/3					# SICStus-compatible
