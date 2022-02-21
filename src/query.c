@@ -1382,12 +1382,6 @@ static void dump_vars(query *q, bool partial)
 	bool any = false;
 
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
-		if (!strcmp(p->vartab.var_name[i], "_"))
-			continue;
-
-		if (p->vartab.var_name[i][0] == '_')
-			continue;
-
 		cell tmp[3];
 		make_structure(tmp, g_eq_s, NULL, 2, 2);
 		make_cstring(tmp+1, p->vartab.var_name[i]);
