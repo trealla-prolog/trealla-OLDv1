@@ -932,7 +932,13 @@ static bool resume_frame(query *q)
 	return true;
 }
 
-void make_indirect(cell *tmp, cell *c)
+// Note: there is no reason this couldn't include a context.
+// Currently it is assumed everything has been copied into the
+// heap area and all variables are local. It should also be
+// possible to make it an offset rather than a pointer by
+// including the page nbr.
+
+static void make_indirect(cell *tmp, cell *c)
 {
 	tmp->tag = TAG_PTR;
 	tmp->nbr_cells = 1;
