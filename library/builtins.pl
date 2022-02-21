@@ -297,6 +297,10 @@ sort(Term, _) :-
 sort(_, Term) :-
 	\+ is_list_or_partial_list(Term),
 	throw(error(type_error(list,Term), sort/2)).
+sort(Term, _) :-
+	'$skip_max_list'(_, _, Term, Xs),
+	Xs \== [], nonvar(Xs),
+	throw(error(type_error(list,Term), sort/2)).
 sort([], S) :- !, S = [].
 sort([X, Y| Xs], Ys) :-
 	sort_split_([X, Y| Xs], X1s, X2s),
@@ -333,6 +337,10 @@ msort(Term, _) :-
 msort(_, Term) :-
 	\+ is_list_or_partial_list(Term),
 	throw(error(type_error(list,Term), msort/2)).
+msort(Term, _) :-
+	'$skip_max_list'(_, _, Term, Xs),
+	Xs \== [], nonvar(Xs),
+	throw(error(type_error(list,Term), sort/2)).
 msort([], S) :- !, S = [].
 msort([X, Y| Xs], Ys) :-
 	sort_split_([X, Y| Xs], X1s, X2s),
