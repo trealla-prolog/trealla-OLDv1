@@ -724,7 +724,7 @@ inline static void share_cell(const cell *c)
 		(c)->val_bigint->refcnt++;
 }
 
-inline static void unshare_cell(cell *c)
+inline static void unshare_cell(const cell *c)
 {
 	if (!is_managed(c))
 		return;
@@ -749,20 +749,18 @@ inline static pl_idx_t copy_cells(cell *dst, const cell *src, pl_idx_t nbr_cells
 
 inline static pl_idx_t safe_copy_cells(cell *dst, const cell *src, pl_idx_t nbr_cells)
 {
-	for (pl_idx_t i = 0; i < nbr_cells; i++) {
-		share_cell(src);
-		*dst++ = *src++;
-	}
+	memcpy(dst, src, sizeof(cell)*nbr_cells);
+
+	for (pl_idx_t i = 0; i < nbr_cells; i++)
+		share_cell(src++);
 
 	return nbr_cells;
 }
 
-inline static void chk_cells(cell *src, pl_idx_t nbr_cells)
+inline static void chk_cells(const cell *src, pl_idx_t nbr_cells)
 {
-	for (pl_idx_t i = 0; i < nbr_cells; i++) {
-		unshare_cell(src);
-		src++;
-	}
+	for (pl_idx_t i = 0; i < nbr_cells; i++)
+		unshare_cell(src++);
 }
 
 #define LIST_HANDLER(l) cell l##_h_tmp; cell l##_t_tmp
