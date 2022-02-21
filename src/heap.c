@@ -186,8 +186,6 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 	while (arity--) {
 		cell *c = p1;
 		pl_idx_t c_ctx = p1_ctx;
-		bool ok = false;
-		reflist nlist;
 
 		if (is_variable(c)) {
 			c = deref(q, p1, p1_ctx);
@@ -247,7 +245,7 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 	return q->tmp_heap;
 }
 
-static cell *deep_raw_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth, reflist *list)
+static cell *deep_raw_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 {
 	if (depth >= MAX_DEPTH) {
 		q->cycle_error = true;
@@ -257,10 +255,8 @@ static cell *deep_raw_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t
 	const pl_idx_t save_idx = tmp_heap_used(q);
 
 	if (is_variable(p1)) {
-		if (!is_in_ref_list(p1, p1_ctx, list)) {
-			p1 = deref(q, p1, p1_ctx);
-			p1_ctx = q->latest_ctx;
-		}
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
 	}
 
 	cell *tmp = alloc_on_tmp(q, 1);
@@ -310,21 +306,10 @@ static cell *deep_raw_copy2_to_tmp_with_cycle_check(query *q, cell *p1, pl_idx_t
 	while (arity--) {
 		cell *c = p1;
 		pl_idx_t c_ctx = p1_ctx;
-		bool ok = false;
-		reflist nlist;
+		c = deref(q, p1, p1_ctx);
+		c_ctx = q->latest_ctx;
 
-		if (is_variable(c)) {
-			if (!is_in_ref_list(c, c_ctx, list)) {
-				nlist.next = list;
-				nlist.var_nbr = c->var_nbr;
-				nlist.ctx = c_ctx;
-				c = deref(q, p1, p1_ctx);
-				c_ctx = q->latest_ctx;
-				ok = true;
-			}
-		}
-
-		cell *rec = deep_raw_copy2_to_tmp_with_cycle_check(q, c, c_ctx, depth+1, ok ? &nlist : list);
+		cell *rec = deep_raw_copy2_to_tmp(q, c, c_ctx, depth+1);
 		if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 		p1 += p1->nbr_cells;
 	}
@@ -344,19 +329,13 @@ cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
 	q->st.m->pl->tab_idx = 0;
 	q->cycle_error = false;
 	int nbr_vars = f->nbr_vars;
-	bool ok = false;
-	reflist nlist, *list = NULL;
 
 	if (is_variable(p1)) {
-		nlist.next = list;
-		nlist.var_nbr = p1->var_nbr;
-		nlist.ctx = p1_ctx;
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
-		ok = true;
 	}
 
-	cell* rec = deep_raw_copy2_to_tmp_with_cycle_check(q, p1, p1_ctx, 0, ok ? &nlist : list);
+	cell* rec = deep_raw_copy2_to_tmp(q, p1, p1_ctx, 0);
 	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 	return q->tmp_heap;
 }
