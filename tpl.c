@@ -230,7 +230,7 @@ int main(int ac, char *av[])
 				no_res = true;
 
 			do_lib = do_goal = 0;
-		} else if (!strcmp(av[i], "-g") || !strcmp(av[i], "--query-goal")) {
+		} else if (!strcmp(av[i], "-g") || !strcmp(av[i], "-e") || !strcmp(av[i], "--query-goal")) {
 			do_lib = 0;
 			do_goal = 1;
 		} else if (av[i][0] == '-') {
