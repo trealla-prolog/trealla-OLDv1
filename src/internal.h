@@ -741,11 +741,7 @@ inline static void unshare_cell(const cell *c)
 	}
 }
 
-inline static pl_idx_t copy_cells(cell *dst, const cell *src, pl_idx_t nbr_cells)
-{
-	memcpy(dst, src, sizeof(cell)*nbr_cells);
-	return nbr_cells;
-}
+#define copy_cells(dst, src, nbr_cells) memcpy(dst, src, sizeof(cell)*(nbr_cells))
 
 inline static pl_idx_t safe_copy_cells(cell *dst, const cell *src, pl_idx_t nbr_cells)
 {
