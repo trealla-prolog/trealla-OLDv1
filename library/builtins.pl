@@ -470,6 +470,7 @@ time_out(Goal, Time, Result) :-
 :- meta_predicate(time_out(0,+,-)).
 
 atomic_list_concat(L, Atom) :- atomic_list_concat(L, '', Atom).
+writeln(T) :- write(T), nl.
 format(F) :- format(F, []).
 partial_string(S, P) :- append(S, _, P).
 partial_string(S, P, V) :- append(S, V, P).

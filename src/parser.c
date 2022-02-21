@@ -1347,7 +1347,7 @@ static bool term_expansion(parser *p)
 	predicate *pr = find_functor(p->m, "term_expansion", 2);
 
 	if (!pr || !pr->cnt)
-		return true;
+		return false;
 
 	query *q = create_query(p->m, false);
 	ensure(q);
@@ -1417,6 +1417,10 @@ static bool term_expansion(parser *p)
 
 	destroy_parser(p2);
 	destroy_query(q);
+
+	if (p->cl->cells->val_off == g_dcg_s)
+		return dcg_expansion(p);
+
 	return true;
 }
 
