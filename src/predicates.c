@@ -5704,7 +5704,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 	return pl_success;
 }
 
-typedef struct { cell *c; pl_idx_t c_ctx; } cell_pair;
+typedef struct { cell *c; pl_idx_t c_ctx; } basepair;
 
 #ifdef __FreeBSD__
 static int nodecmp(void *thunk, const void *ptr1, const void *ptr2)
@@ -5712,8 +5712,8 @@ static int nodecmp(void *thunk, const void *ptr1, const void *ptr2)
 static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 #endif
 {
-	const cell_pair *cp1 = (const cell_pair*)ptr1;
-	const cell_pair *cp2 = (const cell_pair*)ptr2;
+	const basepair *cp1 = (const basepair*)ptr1;
+	const basepair *cp2 = (const basepair*)ptr2;
 	cell *p1 = cp1->c, *p2 = cp2->c;
 	pl_idx_t p1_ctx = cp1->c_ctx, p2_ctx = cp2->c_ctx;
 	query *q = (query*)thunk;
@@ -5730,7 +5730,7 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup)
 		return NULL;
 
 	size_t cnt = skip;
-	cell_pair *base = malloc(sizeof(cell_pair)*cnt);
+	basepair *base = malloc(sizeof(basepair)*cnt);
 	size_t idx = 0;
 	LIST_HANDLER(p1);
 
@@ -5747,9 +5747,9 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup)
 	}
 
 #ifdef __FreeBSD__
-	qsort_r(base, cnt, sizeof(cell_pair), q, nodecmp);
+	qsort_r(base, cnt, sizeof(basepair), q, nodecmp);
 #else
-	qsort_r(base, cnt, sizeof(cell_pair), nodecmp, q);
+	qsort_r(base, cnt, sizeof(basepair), nodecmp, q);
 #endif
 
 	for (size_t i = 0; i < cnt; i++) {
