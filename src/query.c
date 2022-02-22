@@ -1726,7 +1726,7 @@ pl_status start(query *q)
 				continue;
 			}
 
-			if (q->st.curr_cell->fn(q) == pl_failure) {
+			if ((q->st.curr_cell->fn(q) == pl_failure) && !q->error) {
 				q->retry = QUERY_RETRY;
 
 				if (q->yielded)
@@ -1750,7 +1750,7 @@ pl_status start(query *q)
 		} else {
 			if (!is_callable(q->st.curr_cell)) {
 				DISCARD_RESULT throw_error(q, q->st.curr_cell, q->st.curr_frame, "type_error", "callable");
-			} else if (match_head(q) != pl_success) {
+			} else if ((match_head(q) == pl_failure) && !q->error) {
 				q->retry = QUERY_RETRY;
 				q->tot_retries++;
 				continue;
@@ -1759,6 +1759,9 @@ pl_status start(query *q)
 			if (q->run_hook && !q->in_hook)
 				may_error(do_post_unification_hook(q));
 		}
+
+		if (q->error)
+			fprintf(stdout, "error: out of memory\n");
 
 		q->run_hook = false;
 
