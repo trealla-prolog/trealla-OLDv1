@@ -5767,11 +5767,6 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup)
 
 		cell *tmp = base[i].c;
 
-		if (is_variable(tmp)) {
-			tmp->val_ctx = base[i].c_ctx;
-			tmp->flags |= FLAG_VAR_REF;
-		}
-
 		if (i == 0)
 			allocate_list(q, tmp);
 		else
