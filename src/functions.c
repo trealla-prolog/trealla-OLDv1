@@ -1939,12 +1939,6 @@ int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_
 		return ERR_CYCLE_CMP;
 	}
 
-	if (is_ref(p1))
-		p1_ctx = p1->val_ctx;
-
-	if (is_ref(p2))
-		p2_ctx = p2->val_ctx;
-
 	if (is_variable(p1)) {
 		if (is_variable(p2)) {
 			frame *f1 = GET_FRAME(p1_ctx);
