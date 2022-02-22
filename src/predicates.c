@@ -1123,8 +1123,8 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 		len -= n;
 
 		if (first) {
-			first = false;
 			allocate_list(q, &tmp2);
+			first = false;
 		} else
 			append_list(q, &tmp2);
 	}
@@ -1533,12 +1533,12 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 		cell tmp;
 		make_int(&tmp, (int)val);
 
-		if (first)
+		if (first) {
 			allocate_list(q, &tmp);
-		else
+			first = false;
+		} else
 			append_list(q, &tmp);
 
-		first = false;
 		p1 = LIST_TAIL(p1);
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
@@ -5732,15 +5732,11 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup)
 	pl_int_t max = PL_INT_MAX, skip = 0;
 	pl_idx_t tmp_ctx = p1_ctx;
 	cell tmp;
-	cell *c = skip_max_list(q, p1, &tmp_ctx, max, &skip, &tmp);
-
-	if (!is_nil(c))
-		return NULL;
-
+	skip_max_list(q, p1, &tmp_ctx, max, &skip, &tmp);
 	size_t cnt = skip;
 	basepair *base = malloc(sizeof(basepair)*cnt);
-	size_t idx = 0;
 	LIST_HANDLER(p1);
+	size_t idx = 0;
 
 	while (is_list(p1)) {
 		cell *h = LIST_HEAD(p1);
@@ -5769,7 +5765,8 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup)
 				continue;
 		}
 
-		cell *c = base[i].c;
+		cell *c = deref(q, base[i].c, base[i].c_ctx);
+		//pl_idx_t c_ctx = q->latest_ctx;
 
 		if (i == 0)
 			allocate_list(q, c);
@@ -5798,11 +5795,7 @@ static USE_RESULT pl_status fn_sys_sort_2(query *q)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	cell *l = nodesort(q, p1, p1_ctx, true);
-
-	if (!l)
-		return throw_error(q, p1, p1_ctx, "type_error", "list");
-
-	return unify(q, l, q->st.curr_frame, p2, p2_ctx);
+	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
 static USE_RESULT pl_status fn_sys_msort_2(query *q)
@@ -5821,11 +5814,7 @@ static USE_RESULT pl_status fn_sys_msort_2(query *q)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	cell *l = nodesort(q, p1, p1_ctx, false);
-
-	if (!l)
-		return throw_error(q, p1, p1_ctx, "type_error", "list");
-
-	return unify(q, l, q->st.curr_frame, p2, p2_ctx);
+	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
 static cell *convert_to_list(query *q, cell *c, pl_idx_t nbr_cells)
@@ -10579,8 +10568,8 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 		safe_copy_cells(tmp+2, c, c->nbr_cells);
 
 		if (first) {
-			first = false;
 			allocate_list(q, tmp);
+			first = false;
 		} else
 			append_list(q, tmp);
 
