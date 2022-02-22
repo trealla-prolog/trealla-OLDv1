@@ -11584,6 +11584,9 @@ static const struct builtins g_predicates_other[] =
 
 	// Miscellaneous...
 
+	{"$sort", 2, fn_sys_sort_2, NULL, false},
+	{"$msort", 2, fn_sys_msort_2, NULL, false},
+
 	{"pid", 1, fn_pid_1, "-integer", false},
 	{"get_unbuffered_code", 1, fn_get_unbuffered_code_1, "?code", false},
 	{"get_unbuffered_char", 1, fn_get_unbuffered_char_1, "?char", false},
