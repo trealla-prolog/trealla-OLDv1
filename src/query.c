@@ -938,7 +938,7 @@ static bool resume_frame(query *q)
 // possible to make it an offset rather than a pointer by
 // including the page nbr.
 
-static void make_indirect(cell *tmp, cell *c)
+void make_indirect(cell *tmp, cell *c)
 {
 	tmp->tag = TAG_PTR;
 	tmp->nbr_cells = 1;

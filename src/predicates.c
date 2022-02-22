@@ -5722,6 +5722,8 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 	pl_idx_t p1_ctx = cp1->c_ctx, p2_ctx = cp2->c_ctx;
 	p1 = deref(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
+	p2 = deref(q, p2, p2_ctx);
+	p2_ctx = q->latest_ctx;
 	return compare(q, p1, p1_ctx, p2, p2_ctx);
 }
 
@@ -5742,8 +5744,7 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup)
 
 	while (is_list(p1)) {
 		cell *h = LIST_HEAD(p1);
-		h = deref(q, h, p1_ctx);
-		pl_idx_t h_ctx = q->latest_ctx;
+		pl_idx_t h_ctx = p1_ctx;
 		base[idx].c = h;
 		base[idx].c_ctx = h_ctx;
 		idx++;
@@ -5768,12 +5769,12 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup)
 				continue;
 		}
 
-		cell *tmp = base[i].c;
+		cell *c = base[i].c;
 
 		if (i == 0)
-			allocate_list(q, tmp);
+			allocate_list(q, c);
 		else
-			append_list(q, tmp);
+			append_list(q, c);
 	}
 
 	cell *l = end_list(q);
