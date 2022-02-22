@@ -5704,7 +5704,6 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 	return pl_success;
 }
 
-#if 0
 typedef struct { cell *c; pl_idx_t c_ctx; } cell_pair;
 
 #ifdef __FreeBSD__
@@ -5763,10 +5762,17 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup)
 				continue;
 		}
 
+		cell *tmp = base[i].c;
+
+		if (is_variable(tmp)) {
+			tmp->val_ctx = base[i].c_ctx;
+			tmp->flags |= FLAG_VAR_REF;
+		}
+
 		if (i == 0)
-			allocate_list(q, base[i].c);
+			allocate_list(q, tmp);
 		else
-			append_list(q, base[i].c);
+			append_list(q, tmp);
 	}
 
 	cell *l = end_list(q);
@@ -5807,7 +5813,6 @@ static USE_RESULT pl_status fn_iso_msort_2(query *q)
 
 	return unify(q, l, p1_ctx, p2, p2_ctx);
 }
-#endif
 
 static cell *convert_to_list(query *q, cell *c, pl_idx_t nbr_cells)
 {
@@ -11485,10 +11490,8 @@ static const struct builtins g_predicates_iso[] =
 	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL, false},
 	{"compare", 3, fn_iso_compare_3, NULL, false},
 
-#if 0
-	{"$sort", 2, fn_iso_sort_2, NULL, false},
-	{"$msort", 2, fn_iso_msort_2, NULL, false},
-#endif
+	{"$x_sort", 2, fn_iso_sort_2, NULL, false},		// experimental
+	{"$x_msort", 2, fn_iso_msort_2, NULL, false},	// experimental
 
 	{"=", 2, fn_iso_unify_2, NULL, false},
 	{"\\=", 2, fn_iso_notunify_2, NULL, false},
