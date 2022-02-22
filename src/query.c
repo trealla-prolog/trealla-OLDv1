@@ -104,7 +104,7 @@ static USE_RESULT pl_status check_trail(query *q)
 		if (q->st.tp >= q->trails_size) {
 			pl_idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size*4/3);
 			if (!new_trailssize) {
-				q->error = true;
+				q->is_oom = q->error = true;
 				return pl_error;
 			}
 
@@ -123,7 +123,7 @@ static USE_RESULT pl_status check_choice(query *q)
 		if (q->cp >= q->choices_size) {
 			pl_idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size*4/3);
 			if (!new_choicessize) {
-				q->error = true;
+				q->is_oom = q->error = true;
 				return pl_error;
 			}
 
@@ -142,7 +142,7 @@ static USE_RESULT pl_status check_frame(query *q)
 		if (q->st.fp >= q->frames_size) {
 			pl_idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size*4/3);
 			if (!new_framessize) {
-				q->error = true;
+				q->is_oom = q->error = true;
 				return pl_error;
 			}
 
@@ -163,7 +163,7 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 		if (nbr >= q->slots_size) {
 			pl_idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, (nbr*4/3));
 			if (!new_slotssize) {
-				q->error = true;
+				q->is_oom = q->error = true;
 				return pl_error;
 			}
 
@@ -1726,7 +1726,7 @@ pl_status start(query *q)
 				continue;
 			}
 
-			if ((q->st.curr_cell->fn(q) == pl_failure) && !q->error) {
+			if ((q->st.curr_cell->fn(q) != pl_success) && !q->is_oom) {
 				q->retry = QUERY_RETRY;
 
 				if (q->yielded)
@@ -1750,7 +1750,7 @@ pl_status start(query *q)
 		} else {
 			if (!is_callable(q->st.curr_cell)) {
 				DISCARD_RESULT throw_error(q, q->st.curr_cell, q->st.curr_frame, "type_error", "callable");
-			} else if ((match_head(q) == pl_failure) && !q->error) {
+			} else if ((match_head(q) != pl_success) && !q->is_oom) {
 				q->retry = QUERY_RETRY;
 				q->tot_retries++;
 				continue;
@@ -1760,7 +1760,7 @@ pl_status start(query *q)
 				may_error(do_post_unification_hook(q));
 		}
 
-		if (q->error)
+		if (q->is_oom)
 			fprintf(stdout, "error: out of memory\n");
 
 		q->run_hook = false;
