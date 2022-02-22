@@ -5712,11 +5712,13 @@ static int nodecmp(void *thunk, const void *ptr1, const void *ptr2)
 static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 #endif
 {
+	query *q = (query*)thunk;
 	const basepair *cp1 = (const basepair*)ptr1;
 	const basepair *cp2 = (const basepair*)ptr2;
 	cell *p1 = cp1->c, *p2 = cp2->c;
 	pl_idx_t p1_ctx = cp1->c_ctx, p2_ctx = cp2->c_ctx;
-	query *q = (query*)thunk;
+	p1 = deref(q, p1, p1_ctx);
+	p1_ctx = q->latest_ctx;
 	return compare(q, p1, p1_ctx, p2, p2_ctx);
 }
 
@@ -5765,11 +5767,6 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup)
 
 		cell *tmp = base[i].c;
 
-		if (is_variable(tmp) && (base[i].c_ctx != q->st.curr_frame)) {
-			tmp->val_ctx = base[i].c_ctx;
-			tmp->flags |= FLAG_VAR_REF;
-		}
-
 		if (i == 0)
 			allocate_list(q, tmp);
 		else
@@ -5781,7 +5778,7 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup)
 	return l;
 }
 
-static USE_RESULT pl_status fn_iso_sort_2(query *q)
+static USE_RESULT pl_status fn_sys_sort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
@@ -5801,10 +5798,10 @@ static USE_RESULT pl_status fn_iso_sort_2(query *q)
 	if (!l)
 		return throw_error(q, p1, p1_ctx, "type_error", "list");
 
-	return unify(q, l, p1_ctx, p2, p2_ctx);
+	return unify(q, l, q->st.curr_frame, p2, p2_ctx);
 }
 
-static USE_RESULT pl_status fn_iso_msort_2(query *q)
+static USE_RESULT pl_status fn_sys_msort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
@@ -5824,7 +5821,7 @@ static USE_RESULT pl_status fn_iso_msort_2(query *q)
 	if (!l)
 		return throw_error(q, p1, p1_ctx, "type_error", "list");
 
-	return unify(q, l, p1_ctx, p2, p2_ctx);
+	return unify(q, l, q->st.curr_frame, p2, p2_ctx);
 }
 
 static cell *convert_to_list(query *q, cell *c, pl_idx_t nbr_cells)
@@ -11503,8 +11500,8 @@ static const struct builtins g_predicates_iso[] =
 	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL, false},
 	{"compare", 3, fn_iso_compare_3, NULL, false},
 
-	{"$sort", 2, fn_iso_sort_2, NULL, false},
-	{"$msort", 2, fn_iso_msort_2, NULL, false},
+	{"$sort", 2, fn_sys_sort_2, NULL, false},
+	{"$msort", 2, fn_sys_msort_2, NULL, false},
 
 	{"=", 2, fn_iso_unify_2, NULL, false},
 	{"\\=", 2, fn_iso_notunify_2, NULL, false},

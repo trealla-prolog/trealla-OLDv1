@@ -155,7 +155,6 @@ typedef enum {
 #define is_builtin(c) ((c)->flags & FLAG_BUILTIN)
 #define is_function(c) ((c)->flags & FLAG_FUNCTION)
 #define is_tail_recursive(c) ((c)->flags & FLAG_TAIL_REC)
-#define is_ref(c) ((c)->flags & FLAG_VAR_REF)
 #define is_op(c) (c->flags & 0xE000)
 
 typedef struct {
@@ -236,7 +235,6 @@ enum {
 	FLAG_VAR_FIRST_USE=1<<0,			// used with TAG_VAR
 	FLAG_VAR_ANON=1<<1,					// used with TAG_VAR
 	FLAG_VAR_FRESH=1<<2,				// used with TAG_VAR
-	FLAG_VAR_REF=1<<3,					// used with TAG_VAR
 
 	FLAG_SPARE1=1<<6,
 	FLAG_SPARE2=1<<7,
@@ -357,7 +355,6 @@ struct cell_ {
 				pl_status (*fn)(query*);
 				predicate *match;
 				uint16_t priority;		// used in parsing operators
-				pl_idx_t val_ctx;		// used with TAG_VAR
 			};
 
 			uint32_t val_off;			// offset into pool
