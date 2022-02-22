@@ -5704,6 +5704,111 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 	return pl_success;
 }
 
+#if 0
+typedef struct { cell *c; pl_idx_t c_ctx; } cell_pair;
+
+#ifdef __FreeBSD__
+static int nodecmp(void *thunk, const void *ptr1, const void *ptr2)
+#else
+static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
+#endif
+{
+	const cell_pair *cp1 = (const cell_pair*)ptr1;
+	const cell_pair *cp2 = (const cell_pair*)ptr2;
+	cell *p1 = cp1->c, *p2 = cp2->c;
+	pl_idx_t p1_ctx = cp1->c_ctx, p2_ctx = cp2->c_ctx;
+	query *q = (query*)thunk;
+	return compare(q, p1, p1_ctx, p2, p2_ctx);
+}
+
+static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup)
+{
+	pl_int_t max = PL_INT_MAX, skip = 0;
+	cell tmp;
+	cell *c = skip_max_list(q, p1, &p1_ctx, max, &skip, &tmp);
+
+	if (!is_nil(c))
+		return NULL;
+
+	size_t cnt = skip;
+	cell_pair *base = malloc(sizeof(cell_pair)*cnt);
+	size_t idx = 0;
+	LIST_HANDLER(p1);
+
+	while (is_list(p1)) {
+		cell *h = LIST_HEAD(p1);
+		h = deref(q, h, p1_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
+		base[idx].c = h;
+		base[idx].c_ctx = h_ctx;
+		idx++;
+		p1 = LIST_TAIL(p1);
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+	}
+
+#ifdef __FreeBSD__
+	qsort_r(base, cnt, sizeof(cell_pair), q, nodecmp);
+#else
+	qsort_r(base, cnt, sizeof(cell_pair), nodecmp, q);
+#endif
+
+	for (size_t i = 0; i < cnt; i++) {
+		if (i > 0) {
+#ifdef __FreeBSD__
+			if (dedup && !nodecmp(q, &base[i], &base[i-1]))
+#else
+			if (dedup && !nodecmp(&base[i], &base[i-1], q))
+#endif
+				continue;
+		}
+
+		if (i == 0)
+			allocate_list(q, base[i].c);
+		else
+			append_list(q, base[i].c);
+	}
+
+	cell *l = end_list(q);
+	free(base);
+	return l;
+}
+
+static USE_RESULT pl_status fn_iso_sort_2(query *q)
+{
+	GET_FIRST_ARG(p1,list_or_nil);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
+	bool is_partial = false;
+
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
+		return throw_error(q, p2, p2_ctx, "type_error", "list");
+
+	cell *l = nodesort(q, p1, p1_ctx, true);
+
+	if (!l)
+		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_list");
+
+	return unify(q, l, p1_ctx, p2, p2_ctx);
+}
+
+static USE_RESULT pl_status fn_iso_msort_2(query *q)
+{
+	GET_FIRST_ARG(p1,list_or_nil);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
+	bool is_partial = false;
+
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
+		return throw_error(q, p2, p2_ctx, "type_error", "list");
+
+	cell *l = nodesort(q, p1, p1_ctx, false);
+
+	if (!l)
+		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_list");
+
+	return unify(q, l, p1_ctx, p2, p2_ctx);
+}
+#endif
+
 static cell *convert_to_list(query *q, cell *c, pl_idx_t nbr_cells)
 {
 	if ((!nbr_cells || !c->nbr_cells)) {
@@ -11379,6 +11484,11 @@ static const struct builtins g_predicates_iso[] =
 	{"current_predicate", 1, fn_iso_current_predicate_1, NULL, false},
 	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL, false},
 	{"compare", 3, fn_iso_compare_3, NULL, false},
+
+#if 0
+	{"$sort", 2, fn_iso_sort_2, NULL, false},
+	{"$msort", 2, fn_iso_msort_2, NULL, false},
+#endif
 
 	{"=", 2, fn_iso_unify_2, NULL, false},
 	{"\\=", 2, fn_iso_notunify_2, NULL, false},
