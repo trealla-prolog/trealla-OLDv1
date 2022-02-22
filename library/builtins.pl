@@ -354,6 +354,8 @@ msort_merge_([X| Xs], [Y| Ys], [Y| Zs]) :-
 msort_merge_([], Xs, Xs) :- !.
 msort_merge_(Xs, [], Xs).
 
+samsort(L, R) :- msort(L, R).
+
 keysort(List, Sorted) :-
 	keysort_(List, List, Sorted, []).
 
@@ -464,7 +466,6 @@ time_out(Goal, Time, Result) :-
 writeln(T) :- write(T), nl.
 format(F) :- format(F, []).
 open(F, M, S) :- open(F, M, S, []).
-samsort(L, R) :- msort(L, R).
 unify_with_occurs_check(X, X) :- acyclic_term(X).
 expand_term(In, Out) :- term_expansion(In, Out).
 atomic_list_concat(L, Atom) :- atomic_list_concat(L, '', Atom).

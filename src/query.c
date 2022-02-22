@@ -1726,7 +1726,7 @@ pl_status start(query *q)
 				continue;
 			}
 
-			if ((q->st.curr_cell->fn(q) != pl_success) && !q->is_oom) {
+			if ((q->st.curr_cell->fn(q) == pl_failure) && !q->is_oom) {
 				q->retry = QUERY_RETRY;
 
 				if (q->yielded)
@@ -1760,8 +1760,10 @@ pl_status start(query *q)
 				may_error(do_post_unification_hook(q));
 		}
 
-		if (q->is_oom)
+		if (q->is_oom) {
 			fprintf(stdout, "error: out of memory\n");
+			return pl_failure;
+		}
 
 		q->run_hook = false;
 
