@@ -5780,13 +5780,13 @@ static USE_RESULT pl_status fn_iso_sort_2(query *q)
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	bool is_partial = false;
 
-	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial))
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	cell *l = nodesort(q, p1, p1_ctx, true);
 
 	if (!l)
-		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_list");
+		return throw_error(q, p1, p1_ctx, "type_error", "list");
 
 	return unify(q, l, p1_ctx, p2, p2_ctx);
 }
@@ -5797,13 +5797,13 @@ static USE_RESULT pl_status fn_iso_msort_2(query *q)
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	bool is_partial = false;
 
-	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial))
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	cell *l = nodesort(q, p1, p1_ctx, false);
 
 	if (!l)
-		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_list");
+		return throw_error(q, p1, p1_ctx, "type_error", "list");
 
 	return unify(q, l, p1_ctx, p2, p2_ctx);
 }
