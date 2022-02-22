@@ -5739,7 +5739,10 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup)
 		h = deref(q, h, p1_ctx);
 		pl_idx_t h_ctx = q->latest_ctx;
 		base[idx].c = h;
-		base[idx].c_ctx = h_ctx;
+
+		if (is_variable(h))
+			base[idx].c_ctx = h_ctx;
+
 		idx++;
 		p1 = LIST_TAIL(p1);
 		p1 = deref(q, p1, p1_ctx);
