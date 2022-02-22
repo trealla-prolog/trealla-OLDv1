@@ -285,77 +285,6 @@ list_is_free_of_([Head|Tail], Var) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-sort(Term, _) :-
-	var(Term),
-	throw(error(instantiation_error, sort/2)).
-sort(_, Term) :-
-	\+ is_list_or_partial_list(Term),
-	throw(error(type_error(list,Term), sort/2)).
-sort(Term, _) :-
-	\+ is_list_or_partial_list(Term),
-	throw(error(type_error(list,Term), sort/2)).
-sort([], S) :- !, S = [].
-sort([X, Y| Xs], Ys) :-
-	sort_split_([X, Y| Xs], X1s, X2s),
-	!,
-	sort(X1s, Y1s),
-	sort(X2s, Y2s),
-	sort_merge_(Y1s, Y2s, Ys0),
-	Ys = Ys0.
-sort([X], S) :- !, S = [X].
-sort(Term, _) :-
-	throw(error(type_error(list,Term), sort/2)).
-
-sort_merge_([X| Xs], [Y| Ys], [X| Zs]) :-
-	X == Y, !,
-	sort_merge_(Xs, Ys, Zs).
-sort_merge_([X| Xs], [Y| Ys], [X| Zs]) :-
-	X @< Y, !,
-	sort_merge_(Xs, [Y| Ys], Zs).
-sort_merge_([X| Xs], [Y| Ys], [Y| Zs]) :-
-	X @> Y, !,
-	sort_merge_([X | Xs], Ys, Zs).
-sort_merge_([], Xs, Xs) :- !.
-sort_merge_(Xs, [], Xs).
-
-sort_split_('-', _, _) :-
-	throw(error(instantiation_error, sort/2)).
-sort_split_([], [], []) :- !.
-sort_split_([X| Xs], [X| Ys], Zs) :-
-	sort_split_(Xs, Zs, Ys).
-
-msort(Term, _) :-
-	var(Term),
-	throw(error(instantiation_error, msort/2)).
-msort(_, Term) :-
-	\+ is_list_or_partial_list(Term),
-	throw(error(type_error(list,Term), msort/2)).
-msort(Term, _) :-
-	\+ is_list_or_partial_list(Term),
-	throw(error(type_error(list,Term), sort/2)).
-msort([], S) :- !, S = [].
-msort([X, Y| Xs], Ys) :-
-	sort_split_([X, Y| Xs], X1s, X2s),
-	!,
-	msort(X1s, Y1s),
-	msort(X2s, Y2s),
-	msort_merge_(Y1s, Y2s, Ys0),
-	Ys = Ys0.
-msort([X], S) :- !, S = [X].
-msort(Term, _) :-
-	throw(error(type_error(list,Term), msort/2)).
-
-msort_merge_([X| Xs], [Y| Ys], [X| Zs]) :-
-	X @=< Y, !,
-	msort_merge_(Xs, [Y| Ys], Zs).
-msort_merge_([X| Xs], [Y| Ys], [Y| Zs]) :-
-	X @> Y, !,
-	msort_merge_([X | Xs], Ys, Zs).
-msort_merge_([], Xs, Xs) :- !.
-msort_merge_(Xs, [], Xs).
-
-samsort(L, R) :- msort(L, R).
-
 keysort(List, Sorted) :-
 	keysort_(List, List, Sorted, []).
 
@@ -466,6 +395,7 @@ time_out(Goal, Time, Result) :-
 writeln(T) :- write(T), nl.
 format(F) :- format(F, []).
 open(F, M, S) :- open(F, M, S, []).
+samsort(L, R) :- msort(L, R).
 unify_with_occurs_check(X, X) :- acyclic_term(X).
 expand_term(In, Out) :- term_expansion(In, Out).
 atomic_list_concat(L, Atom) :- atomic_list_concat(L, '', Atom).

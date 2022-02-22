@@ -5782,11 +5782,17 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup)
 
 static USE_RESULT pl_status fn_iso_sort_2(query *q)
 {
-	GET_FIRST_ARG(p1,list_or_nil);
+	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	bool is_partial = false;
 
-	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial))
+	if (is_iso_list(p1) && !check_list(q, p1, p1_ctx, &is_partial) && !is_partial)
+		return throw_error(q, p1, p1_ctx, "type_error", "list");
+
+	if (is_variable(p1) || is_partial)
+		return throw_error(q, p1, p1_ctx, "instantiation_error", "list");
+
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	cell *l = nodesort(q, p1, p1_ctx, true);
@@ -5799,11 +5805,17 @@ static USE_RESULT pl_status fn_iso_sort_2(query *q)
 
 static USE_RESULT pl_status fn_iso_msort_2(query *q)
 {
-	GET_FIRST_ARG(p1,list_or_nil);
+	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	bool is_partial = false;
 
-	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial))
+	if (is_iso_list(p1) && !check_list(q, p1, p1_ctx, &is_partial) && !is_partial)
+		return throw_error(q, p1, p1_ctx, "type_error", "list");
+
+	if (is_variable(p1) || is_partial)
+		return throw_error(q, p1, p1_ctx, "instantiation_error", "list");
+
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	cell *l = nodesort(q, p1, p1_ctx, false);
@@ -11490,8 +11502,8 @@ static const struct builtins g_predicates_iso[] =
 	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL, false},
 	{"compare", 3, fn_iso_compare_3, NULL, false},
 
-	{"$x_sort", 2, fn_iso_sort_2, NULL, false},		// experimental
-	{"$x_msort", 2, fn_iso_msort_2, NULL, false},	// experimental
+	{"sort", 2, fn_iso_sort_2, NULL, false},
+	{"msort", 2, fn_iso_msort_2, NULL, false},
 
 	{"=", 2, fn_iso_unify_2, NULL, false},
 	{"\\=", 2, fn_iso_notunify_2, NULL, false},
