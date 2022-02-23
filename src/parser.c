@@ -2968,7 +2968,7 @@ bool run(parser *p, const char *pSrc, bool dump)
 
 	ASTRING(src);
 
-#if INITIAL_CHOICE
+#if INITIAL_FRAME
 	ASTRING_sprintf(src, "'$choice',%s", pSrc);
 #else
 	ASTRING_sprintf(src, "%s", pSrc);

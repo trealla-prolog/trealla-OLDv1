@@ -78,7 +78,7 @@ typedef enum {
 //#define MAX_DEPTH 9999
 #define MAX_DEPTH 6000			// Clang stack size needs this small
 #define STREAM_BUFLEN 1024
-#define INITIAL_CHOICE 0
+#define INITIAL_FRAME 0
 
 #define GET_CHOICE(i) (q->choices+(i))
 #define GET_CURR_CHOICE() GET_CHOICE(q->cp?q->cp-1:q->cp)
@@ -87,9 +87,9 @@ typedef enum {
 #define GET_FIRST_FRAME() GET_FRAME(0)
 #define GET_CURR_FRAME() GET_FRAME(q->st.curr_frame)
 
-#define GET_SLOT(f,i) ((i) < (f)->nbr_slots ? 		\
-	(q->slots+(f)->base_slot_nbr+(i)) : 			\
-	(q->slots+(f)->overflow+((i)-(f)->nbr_slots)) 	\
+#define GET_SLOT(f,i) ((i) < (f)->nbr_slots ? 			\
+	(q->slots+(f)->base_slot_nbr+(i)) : 				\
+	(q->slots+(f)->overflow+((i)-(f)->nbr_slots)) 		\
 	)
 
 #define GET_FIRST_SLOT(f) GET_SLOT(f, 0)
@@ -120,16 +120,19 @@ typedef enum {
 #define neg_smallint(c) (c)->val_int = -llabs((c)->val_int)
 #define neg_real(c) (c)->val_real = -fabs((c)->val_real)
 
-#define is_zero(c) (is_bigint(c) ? mp_int_compare_zero(&(c)->val_bigint->ival) == 0 : \
-	is_integer(c) ? get_smallint(c) == 0 : \
+#define is_zero(c) (is_bigint(c) ?							\
+	mp_int_compare_zero(&(c)->val_bigint->ival) == 0 :		\
+	is_integer(c) ? get_smallint(c) == 0 :					\
 	is_real(c) ? get_real(c) == 0.0 : false)
 
-#define is_negative(c) (is_bigint(c) ? (c)->val_bigint->ival.sign == MP_NEG : \
-	is_integer(c) ? get_smallint(c) < 0 : \
+#define is_negative(c) (is_bigint(c) ?						\
+	(c)->val_bigint->ival.sign == MP_NEG :					\
+	is_integer(c) ? get_smallint(c) < 0 :					\
 	is_real(c) ? get_real(c) < 0.0 : false)
 
-#define is_positive(c) (is_bigint(c) ? mp_int_compare_zero(&(c)->val_bigint->ival) > 0 : \
-	is_integer(c) ? get_smallint(c) > 0 : \
+#define is_positive(c) (is_bigint(c) ?						\
+	mp_int_compare_zero(&(c)->val_bigint->ival) > 0 :		\
+	is_integer(c) ? get_smallint(c) > 0 :					\
 	is_real(c) ? get_real(c) > 0.0 : false)
 
 #define is_gt(c,n) (get_smallint(c) > (n))

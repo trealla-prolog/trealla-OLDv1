@@ -474,7 +474,7 @@ static void trim_heap(query *q, const choice *ch)
 
 pl_idx_t drop_choice(query *q)
 {
-	if (q->cp <= INITIAL_CHOICE)
+	if (q->cp <= INITIAL_FRAME)
 		return q->cp;
 
 	--q->cp;
@@ -485,7 +485,7 @@ bool retry_choice(query *q)
 {
 LOOP:
 
-	if (q->cp <= INITIAL_CHOICE)
+	if (q->cp <= INITIAL_FRAME)
 		return false;
 
 	pl_idx_t curr_choice = drop_choice(q);
@@ -528,7 +528,7 @@ void trim_trail(query *q)
 	if (q->undo_hi_tp)
 		return;
 
-	if (q->cp <= INITIAL_CHOICE) {
+	if (q->cp <= INITIAL_FRAME) {
 		q->st.tp = 0;
 		return;
 	}
@@ -839,7 +839,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 #endif
 	}
 
-	if ((q->cp <= INITIAL_CHOICE) && !q->undo_hi_tp) {
+	if ((q->cp <= INITIAL_FRAME) && !q->undo_hi_tp) {
 		q->st.tp = 0;
 	}
 }
@@ -850,7 +850,7 @@ bool cut_if_det(query *q)
 {
 	frame *f = GET_CURR_FRAME();
 
-	if (q->cp <= INITIAL_CHOICE)		// redundant
+	if (q->cp <= INITIAL_FRAME)		// redundant
 		return true;
 
 	choice *ch = GET_CURR_CHOICE();
@@ -1023,7 +1023,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	if (c_attrs)
 		q->run_hook = true;
 
-	if ((q->cp > INITIAL_CHOICE) || c_attrs)
+	if ((q->cp > INITIAL_FRAME) || c_attrs)
 		add_trail(q, c_ctx, c->var_nbr, c_attrs, c_attrs_ctx);
 
 	if (is_structure(v)) {
@@ -1057,7 +1057,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 
 	e->ctx = v_ctx;
 
-	if ((q->cp > INITIAL_CHOICE) && trailing)
+	if ((q->cp > INITIAL_FRAME) && trailing)
 		add_trail(q, c_ctx, c->var_nbr, NULL, 0);
 }
 
@@ -1461,12 +1461,15 @@ static void dump_vars(query *q, bool partial)
 		int saveq = q->quoted;
 		q->quoted = 1;
 		q->variable_names = vlist;
-		q->variable_names_ctx = 0;
+		q->variable_names_ctx = INITIAL_FRAME;
 		q->max_depth = 25;
 
-		if (is_variable(&e->c))
-			fprintf(stdout, "%s", p->vartab.var_name[e->c.var_nbr]);
-		else
+		//if (is_indirect(&e->c) && (e->ctx != INITIAL_FRAME))
+		//	q->variable_names = NULL;
+
+		//if (is_variable(c) && (c_ctx == INITIAL_FRAME))
+		//	fprintf(stdout, "%s", p->vartab.var_name[c->var_nbr]);
+		//else
 			print_term(q, stdout, c, c_ctx, -1);
 
 		if (parens) fputc(')', stdout);
@@ -1594,7 +1597,7 @@ static bool check_redo(query *q)
 
 static bool any_outstanding_choices(query *q)
 {
-	if (q->cp <= INITIAL_CHOICE)
+	if (q->cp <= INITIAL_FRAME)
 		return false;
 
 	choice *ch = GET_CURR_CHOICE();
