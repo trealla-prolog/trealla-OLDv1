@@ -2398,7 +2398,6 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 static bool process_term(parser *p, cell *p1)
 {
 	directives(p, p1);
-
 	cell *h = get_head(p1);
 
 	if (is_cstring(h)) {
@@ -2441,7 +2440,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 #if 0
 		int ch = peek_char_utf8(p->token);
-		fprintf(stderr, "Debug: token '%s' (%d) line_nbr=%d, quoted=%d, tag=%u, op=%d, lastop=%d, string=%d '%s'\n", p->token, ch, p->line_nbr, p->quote_char, p->v.tag, p->is_op, last_op, p->string, p->srcptr);
+		fprintf(stderr, "Debug: token '%s' (%d) line_nbr=%d, quoted=%d, tag=%u, op=%d, lastop=%d, string=%d\n", p->token, ch, p->line_nbr, p->quote_char, p->v.tag, p->is_op, last_op, p->string);
 #endif
 
 		if (!p->quote_char && !strcmp(p->token, ".")

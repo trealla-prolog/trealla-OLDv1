@@ -888,16 +888,6 @@ static db_entry* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consu
 		return NULL;
 	}
 
-	if (is_cstring(c)) {
-		pl_idx_t off = index_from_pool(m->pl, GET_STR(m, c));
-		if (off == ERR_IDX) return NULL;
-		unshare_cell(c);
-		c->tag = TAG_LITERAL;
-		c->val_off = off;
-		c->flags = 0;
-		c->arity = 0;
-	}
-
 	predicate *pr = find_predicate(m, c);
 
 	if (pr && !consulting && !pr->is_dynamic) {
