@@ -10,8 +10,7 @@ member(X, [X|_]).
 member(X, [_|Xs]) :- member(X, Xs).
 
 append([], L, L).
-append([H|T], L, [H|R]) :-
-	append(T, L, R).
+append([H|T], L, [H|R]) :- append(T, L, R).
 
 select(X, [X|T], T).
 select(X, [H|T], [H|Rest]) :- select(X, T, Rest).
@@ -74,11 +73,9 @@ flatten_([Hd|Tl], Tail, List) :-
 flatten_(NonList, Tl, [NonList|Tl]).
 
 same_length([], []).
-same_length([_|As], [_|Bs]) :-
-        same_length(As, Bs).
+same_length([_|As], [_|Bs]) :- same_length(As, Bs).
 
-sum_list(Ls, S) :-
-        foldl(lists:sum_, Ls, 0, S).
+sum_list(Ls, S) :- foldl(lists:sum_, Ls, 0, S).
 
 sum_(L, S0, S) :- S is S0 + L.
 
