@@ -1467,9 +1467,9 @@ static void dump_vars(query *q, bool partial)
 		//if (is_indirect(&e->c) && (e->ctx != INITIAL_FRAME))
 		//	q->variable_names = NULL;
 
-		//if (is_variable(c) && (c_ctx == INITIAL_FRAME))
-		//	fprintf(stdout, "%s", p->vartab.var_name[c->var_nbr]);
-		//else
+		if (is_variable(c) && (c_ctx == INITIAL_FRAME))
+			fprintf(stdout, "%s", p->vartab.var_name[c->var_nbr]);
+		else
 			print_term(q, stdout, c, c_ctx, -1);
 
 		if (parens) fputc(')', stdout);
