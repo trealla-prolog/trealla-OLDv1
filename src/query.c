@@ -1464,9 +1464,6 @@ static void dump_vars(query *q, bool partial)
 		q->variable_names_ctx = 0;
 		q->max_depth = 25;
 
-		if (is_indirect(&e->c) && (e->ctx != 0))
-			q->variable_names = NULL;
-
 		if (is_variable(&e->c))
 			fprintf(stdout, "%s", p->vartab.var_name[e->c.var_nbr]);
 		else
