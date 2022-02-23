@@ -1378,7 +1378,6 @@ static void dump_vars(query *q, bool partial)
 	frame *f = GET_FIRST_FRAME();
 	q->is_dump_vars = true;
 	q->pl->tab_idx = 0;
-	bool first = true;
 	bool any = false;
 
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
@@ -1387,14 +1386,13 @@ static void dump_vars(query *q, bool partial)
 		make_cstring(tmp+1, p->vartab.var_name[i]);
 		make_variable(tmp+2, g_anon_s, i);
 
-		if (first) {
+		if (i == 0)
 			allocate_list(q, tmp);
-			first = false;
-		} else
+		else
 			append_list(q, tmp);
 	}
 
-	cell *vlist = !first ? end_list(q) : NULL;
+	cell *vlist = p->nbr_vars ? end_list(q) : NULL;
 	bool space = false;
 
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
