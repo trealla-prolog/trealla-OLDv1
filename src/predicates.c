@@ -5830,6 +5830,12 @@ static USE_RESULT pl_status fn_iso_sort_2(query *q)
 	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
+	if (is_nil(p1)) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
+
 	pl_status status;
 	cell *l = nodesort(q, p1, p1_ctx, true, false, &status);
 	if (!l) return status;
@@ -5851,6 +5857,12 @@ static USE_RESULT pl_status fn_iso_msort_2(query *q)
 	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
+	if (is_nil(p1)) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
+
 	pl_status status;
 	cell *l = nodesort(q, p1, p1_ctx, false, false, &status);
 	if (!l) return status;
@@ -5871,6 +5883,21 @@ static USE_RESULT pl_status fn_iso_keysort_2(query *q)
 
 	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
+
+	LIST_HANDLER(p2);
+	cell *tmp_h = LIST_HEAD(p2);
+	tmp_h = deref(q, tmp_h, p2_ctx);
+	pl_idx_t tmp_h_ctx = q->latest_ctx;
+	LIST_TAIL(p2);
+
+	//if (!is_structure(tmp_h) || strcmp(GET_STR(q, tmp_h), "-"))
+	//	return throw_error(q, tmp_h, tmp_h_ctx, "type_error", "pair");
+
+	if (is_nil(p1)) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
 
 	pl_status status;
 	cell *l = nodesort(q, p1, p1_ctx, false, true, &status);
