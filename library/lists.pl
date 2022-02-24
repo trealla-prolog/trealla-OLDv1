@@ -106,14 +106,15 @@ numlist_(L, U, [L|Ns]) :-
 
 length_checked(Xs0, N) :-
 	'$skip_max_list'(M, N, Xs0, Xs),
-	( Xs == [] -> N = M
-	; var(Xs), Xs == N -> fail
-	; Xs \= [_|_] -> throw(error(type_error(list,Xs0),length/2))
-	; nonvar(N), '$skip_max_list'(_, Max, Xs, _), Max == -1 -> throw(error(type_error(list,Xs0),length/2))
-	; nonvar(Xs) -> var(N), throw(error(resource_error(finite_memory),length/2))
-	; nonvar(N) -> R is N-M, length_rundown(Xs, R)
-	; N == Xs -> throw(error(resource_error(finite_memory),length/2))
-	; length_addendum(Xs, N, M)
+	(  Xs == [] -> N = M
+	;  var(Xs), Xs == N -> fail
+	;  Xs \= [_|_] -> throw(error(type_error(list,Xs0),length/2))
+	;  nonvar(Xs0), M == 0, integer(N), N > 0 -> throw(error(type_error(list,Xs0),length/2))
+	;  nonvar(N), '$skip_max_list'(_, Max, Xs, _), Max == -1 -> throw(error(type_error(list,Xs0),length/2))
+	;  nonvar(Xs) -> var(N), throw(error(resource_error(finite_memory),length/2))
+	;  nonvar(N) -> R is N-M, length_rundown(Xs, R)
+	;  N == Xs -> throw(error(resource_error(finite_memory),length/2))
+	;  length_addendum(Xs, N, M)
 	).
 
 length(Xs0, N) :-
