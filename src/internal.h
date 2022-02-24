@@ -578,6 +578,7 @@ struct query_ {
 	int8_t halt_code;
 	int8_t quoted;
 	bool is_oom:1;
+	bool keysort:1;
 	bool is_redo:1;
 	bool run_hook:1;
 	bool in_hook:1;

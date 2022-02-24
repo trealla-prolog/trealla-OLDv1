@@ -5727,7 +5727,7 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 	return compare(q, p1, p1_ctx, p2, p2_ctx);
 }
 
-static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup)
+static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keysort)
 {
 	pl_int_t max = PL_INT_MAX, skip = 0;
 	pl_idx_t tmp_ctx = p1_ctx;
@@ -5748,6 +5748,8 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup)
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
+
+	q->keysort = keysort;
 
 #ifdef __FreeBSD__
 	qsort_r(base, cnt, sizeof(basepair), q, nodecmp);
@@ -5775,6 +5777,7 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup)
 	}
 
 	cell *l = end_list(q);
+	q->keysort = false;
 	free(base);
 	return l;
 }
@@ -5794,7 +5797,7 @@ static USE_RESULT pl_status fn_sys_sort_2(query *q)
 	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
-	cell *l = nodesort(q, p1, p1_ctx, true);
+	cell *l = nodesort(q, p1, p1_ctx, true, false);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -5813,7 +5816,26 @@ static USE_RESULT pl_status fn_sys_msort_2(query *q)
 	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
-	cell *l = nodesort(q, p1, p1_ctx, false);
+	cell *l = nodesort(q, p1, p1_ctx, false, false);
+	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
+}
+
+static USE_RESULT pl_status fn_sys_keysort_2(query *q)
+{
+	GET_FIRST_ARG(p1,list_or_nil);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
+	bool is_partial = false;
+
+	if (is_iso_list(p1) && !check_list(q, p1, p1_ctx, &is_partial) && !is_partial)
+		return throw_error(q, p1, p1_ctx, "type_error", "list");
+
+	if (is_partial)
+		return throw_error(q, p1, p1_ctx, "instantiation_error", "list");
+
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
+		return throw_error(q, p2, p2_ctx, "type_error", "list");
+
+	cell *l = nodesort(q, p1, p1_ctx, false, true);
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
@@ -11576,6 +11598,7 @@ static const struct builtins g_predicates_other[] =
 
 	{"$sort", 2, fn_sys_sort_2, NULL, false},
 	{"$msort", 2, fn_sys_msort_2, NULL, false},
+	{"$keysort", 2, fn_sys_keysort_2, NULL, false},
 
 	{"pid", 1, fn_pid_1, "-integer", false},
 	{"get_unbuffered_code", 1, fn_get_unbuffered_code_1, "?code", false},
