@@ -5721,16 +5721,22 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 	cell *p1 = cp1->c, *p2 = cp2->c;
 	pl_idx_t p1_ctx = cp1->c_ctx, p2_ctx = cp2->c_ctx;
 
-	if (q->keysort) {
-		p1 = p1 + 1;
-		p2 = p2 + 1;
-	}
-
 	p1 = deref(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
 
 	p2 = deref(q, p2, p2_ctx);
 	p2_ctx = q->latest_ctx;
+
+	if (q->keysort) {
+		p1 = p1 + 1;
+		p2 = p2 + 1;
+
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+
+		p2 = deref(q, p2, p2_ctx);
+		p2_ctx = q->latest_ctx;
+	}
 
 	return compare(q, p1, p1_ctx, p2, p2_ctx);
 }
@@ -5776,7 +5782,14 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 		}
 
 		cell *c = deref(q, base[i].c, base[i].c_ctx);
-		//pl_idx_t c_ctx = q->latest_ctx;
+		pl_idx_t c_ctx = q->latest_ctx;
+		cell tmp;
+
+		if (is_variable(c) || is_structure(c)) {
+			make_variable(&tmp, c->val_off, create_vars(q, 1));
+			unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+			c = &tmp;
+		}
 
 		if (i == 0)
 			allocate_list(q, c);
