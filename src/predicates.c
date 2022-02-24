@@ -5884,14 +5884,16 @@ static USE_RESULT pl_status fn_iso_keysort_2(query *q)
 	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
-	LIST_HANDLER(p2);
-	cell *tmp_h = LIST_HEAD(p2);
-	tmp_h = deref(q, tmp_h, p2_ctx);
-	pl_idx_t tmp_h_ctx = q->latest_ctx;
-	LIST_TAIL(p2);
+	if (is_iso_list(p2)) {
+		LIST_HANDLER(p2);
+		cell *tmp_h = LIST_HEAD(p2);
+		tmp_h = deref(q, tmp_h, p2_ctx);
+		pl_idx_t tmp_h_ctx = q->latest_ctx;
+		LIST_TAIL(p2);
 
-	//if (!is_structure(tmp_h) || strcmp(GET_STR(q, tmp_h), "-"))
-	//	return throw_error(q, tmp_h, tmp_h_ctx, "type_error", "pair");
+		if (!is_variable(tmp_h) && (!is_structure(tmp_h) || strcmp(GET_STR(q, tmp_h), "-")))
+			return throw_error(q, tmp_h, tmp_h_ctx, "type_error", "pair");
+	}
 
 	if (is_nil(p1)) {
 		cell tmp;
