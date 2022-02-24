@@ -5720,10 +5720,18 @@ static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
 	const basepair *cp2 = (const basepair*)ptr2;
 	cell *p1 = cp1->c, *p2 = cp2->c;
 	pl_idx_t p1_ctx = cp1->c_ctx, p2_ctx = cp2->c_ctx;
+
+	if (q->keysort) {
+		p1 = p1 + 1;
+		p2 = p2 + 1;
+	}
+
 	p1 = deref(q, p1, p1_ctx);
 	p1_ctx = q->latest_ctx;
+
 	p2 = deref(q, p2, p2_ctx);
 	p2_ctx = q->latest_ctx;
+
 	return compare(q, p1, p1_ctx, p2, p2_ctx);
 }
 
