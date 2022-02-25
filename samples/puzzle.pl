@@ -1,4 +1,7 @@
-:- use_module(library(lists)).
+%:- use_module(library(lists)).
+
+select(X, [X|T], T).
+select(X, [H|T], [H|Rest]) :- select(X, T, Rest).
 
 %% Each sq is repr by sq(SqNum,Var,RowDig,ColDig,RegReg)
 %% were XXXDig is a "bitmask" used(D1,...D9) and Dk is 1 iff digit k used in
