@@ -1,7 +1,7 @@
 %:- use_module(library(lists)).
 
-select(X, [X|T], T).
-select(X, [H|T], [H|Rest]) :- select(X, T, Rest).
+myselect(X, [X|T], T).
+myselect(X, [H|T], [H|Rest]) :- myselect(X, T, Rest).
 
 %% Each sq is repr by sq(SqNum,Var,RowDig,ColDig,RegReg)
 %% were XXXDig is a "bitmask" used(D1,...D9) and Dk is 1 iff digit k used in
@@ -93,7 +93,7 @@ solve_cons(Cons) :-
 
 get_sq(Sq,Cons,Rest) :-
 	length(_,N),		%% generate 0..inf -- incr depending
-	select(Sq,Cons,Rest),
+	myselect(Sq,Cons,Rest),
 	Sq=sq(_,V,_,_,_),
 	var(V),				%% make sure sq has not been solved already
 	num_vars(Sq,N),		%% count number of unused digits in Sq
