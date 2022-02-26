@@ -75,8 +75,9 @@ LOOP:
 			end_ptr--;
 
 		if ((ch == 0) && (*end_ptr == eol)) {
-			if (strcmp(cmd, "halt.") && strcmp(cmd, "."))
+			if (strcmp(cmd, "halt.") && strcmp(cmd, ".")) {
 				;//add_history(cmd);
+			}
 
 			break;
 		}
@@ -104,8 +105,9 @@ char *history_readline_eol(const char *prompt, __attribute__((unused)) char eol)
 			*s = '\0';
 	}
 
-	if (*line)
-		;//ic_history_add(line);
+	if (*line) {
+		;add_history(line);
+	}
 
 	return line;
 }
