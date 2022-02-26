@@ -5722,7 +5722,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 
 typedef struct { cell *c; pl_idx_t c_ctx; } basepair;
 
-#ifdef __BSD__ || __APPLE__
+#if __BSD__ || __APPLE__
 static int nodecmp(void *thunk, const void *ptr1, const void *ptr2)
 #else
 static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
@@ -5790,7 +5790,7 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 
 	q->keysort = keysort;
 
-#ifdef __BSD__ || __APPLE__
+#if __BSD__ || __APPLE__
 	qsort_r(base, cnt, sizeof(basepair), (void*)q, nodecmp);
 #else
 	qsort_r(base, cnt, sizeof(basepair), nodecmp, (void*)q);
@@ -5798,7 +5798,7 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 
 	for (size_t i = 0; i < cnt; i++) {
 		if (i > 0) {
-#ifdef __BSD__ || __APPLE__
+#if __BSD__ || __APPLE__
 			if (dedup && !nodecmp(q, &base[i], &base[i-1]))
 #else
 			if (dedup && !nodecmp(&base[i], &base[i-1], q))
