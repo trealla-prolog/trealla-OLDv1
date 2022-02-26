@@ -11,7 +11,7 @@
   },
   "time" : {
     "minDuration" : 0,
-    "maxDuration" : 365,
-    "sumDuration" : 3391
+    "maxDuration" : 380,
+    "sumDuration" : 3512
   }
 }
