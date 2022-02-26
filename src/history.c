@@ -119,6 +119,7 @@ void history_load(const char *filename)
 {
 	snprintf(g_filename, sizeof(g_filename), "%s", filename);
 	ic_set_history(g_filename, 999);
+	ic_enable_brace_matching (true);
 }
 
 void history_save(void)
