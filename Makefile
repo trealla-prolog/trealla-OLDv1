@@ -66,7 +66,7 @@ clean:
 		vgcore.* *.core core core.*
 	rm -f *.itf *.po samples/*.itf samples/*.po
 
-# from [gcc|clang] -MM src/*.c src/imath/*.c
+# from [gcc|clang] -MM src/*.c src/imath/*.c src/isocline/src/isocline.c
 
 src/base64.o: src/base64.c src/base64.h
 src/contrib.o: src/contrib.c src/trealla.h src/internal.h src/map.h \
