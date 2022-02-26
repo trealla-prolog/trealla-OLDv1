@@ -5,8 +5,8 @@
     "children" : [ {
       "name" : "Failure instead of error",
       "children" : [ {
-        "name" : "commons_length_2_18",
-        "uid" : "9b2944de016ca76b",
+        "name" : "commons_length_2_16",
+        "uid" : "97bcd5019946ae87",
         "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
         "status" : "failed",
         "time" : {
@@ -14,32 +14,10 @@
         },
         "flaky" : false,
         "newFailed" : false,
-        "parameters" : [ "predicates/length_2/tests.lgt", "92-93", "https://github.com/LogtalkDotOrg/logtalk3/tree/3c3e7ef219a78d525042c0b3ec2a9da389353e91/tests/prolog/predicates/length_2/tests.lgt#L92" ]
-      }, {
-        "name" : "commons_length_2_14",
-        "uid" : "dbbf578c034e8972",
-        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "predicates/length_2/tests.lgt", "80-81", "https://github.com/LogtalkDotOrg/logtalk3/tree/3c3e7ef219a78d525042c0b3ec2a9da389353e91/tests/prolog/predicates/length_2/tests.lgt#L80" ]
-      }, {
-        "name" : "commons_length_2_15",
-        "uid" : "fe40b39d44e6356e",
-        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "predicates/length_2/tests.lgt", "83-84", "https://github.com/LogtalkDotOrg/logtalk3/tree/3c3e7ef219a78d525042c0b3ec2a9da389353e91/tests/prolog/predicates/length_2/tests.lgt#L83" ]
+        "parameters" : [ "predicates/length_2/tests.lgt", "86-87", "https://github.com/LogtalkDotOrg/logtalk3/tree/c8339cef43611c7ec614e432f4cec515fda0fe29/tests/prolog/predicates/length_2/tests.lgt#L86" ]
       }, {
         "name" : "commons_length_2_17",
-        "uid" : "748d9153b7799c58",
+        "uid" : "90265b465d9398fe",
         "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
         "status" : "failed",
         "time" : {
@@ -47,10 +25,10 @@
         },
         "flaky" : false,
         "newFailed" : false,
-        "parameters" : [ "predicates/length_2/tests.lgt", "89-90", "https://github.com/LogtalkDotOrg/logtalk3/tree/3c3e7ef219a78d525042c0b3ec2a9da389353e91/tests/prolog/predicates/length_2/tests.lgt#L89" ]
+        "parameters" : [ "predicates/length_2/tests.lgt", "89-90", "https://github.com/LogtalkDotOrg/logtalk3/tree/c8339cef43611c7ec614e432f4cec515fda0fe29/tests/prolog/predicates/length_2/tests.lgt#L89" ]
       }, {
-        "name" : "commons_length_2_16",
-        "uid" : "c9eb44ce0c475424",
+        "name" : "commons_length_2_18",
+        "uid" : "4e6ea0fd4e8fa78",
         "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
         "status" : "failed",
         "time" : {
@@ -58,9 +36,46 @@
         },
         "flaky" : false,
         "newFailed" : false,
-        "parameters" : [ "predicates/length_2/tests.lgt", "86-87", "https://github.com/LogtalkDotOrg/logtalk3/tree/3c3e7ef219a78d525042c0b3ec2a9da389353e91/tests/prolog/predicates/length_2/tests.lgt#L86" ]
+        "parameters" : [ "predicates/length_2/tests.lgt", "92-93", "https://github.com/LogtalkDotOrg/logtalk3/tree/c8339cef43611c7ec614e432f4cec515fda0fe29/tests/prolog/predicates/length_2/tests.lgt#L92" ]
+      }, {
+        "name" : "commons_length_2_19",
+        "uid" : "ecd9d2ca58a6b543",
+        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "predicates/length_2/tests.lgt", "95-96", "https://github.com/LogtalkDotOrg/logtalk3/tree/c8339cef43611c7ec614e432f4cec515fda0fe29/tests/prolog/predicates/length_2/tests.lgt#L95" ]
+      }, {
+        "name" : "commons_length_2_15",
+        "uid" : "fa4099338b533d39",
+        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "predicates/length_2/tests.lgt", "83-84", "https://github.com/LogtalkDotOrg/logtalk3/tree/c8339cef43611c7ec614e432f4cec515fda0fe29/tests/prolog/predicates/length_2/tests.lgt#L83" ]
       } ],
       "uid" : "f1d33384b55b86e6da2d391daa3c4717"
+    }, {
+      "name" : "Wrong error",
+      "children" : [ {
+        "name" : "commons_length_2_14",
+        "uid" : "52b7939f1231e1a4",
+        "parentUid" : "253761ad1716c4cf6303f692bd63b68e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "predicates/length_2/tests.lgt", "80-81", "https://github.com/LogtalkDotOrg/logtalk3/tree/c8339cef43611c7ec614e432f4cec515fda0fe29/tests/prolog/predicates/length_2/tests.lgt#L80" ]
+      } ],
+      "uid" : "253761ad1716c4cf6303f692bd63b68e"
     } ],
     "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
   } ],
