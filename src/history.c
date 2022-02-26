@@ -6,8 +6,10 @@
 #include <time.h>
 #include <assert.h>
 
-#include <readline/readline.h>
-#include <readline/history.h>
+//#include <readline/readline.h>
+//#include <readline/history.h>
+#include "isocline/include/isocline.h"
+
 #include "history.h"
 #include "utf8.h"
 
@@ -46,9 +48,11 @@ char *history_readline_eol(const char *prompt, char eol)
 	char *cmd = NULL;
 	char *line;
 
+	ic_set_prompt_marker("", "");
+
 LOOP:
 
-	if ((line = readline(prompt)) == NULL)
+	if ((line = ic_readline(prompt)) == NULL)
 		return NULL;
 
 	if (cmd) {
@@ -72,7 +76,7 @@ LOOP:
 
 		if ((ch == 0) && (*end_ptr == eol)) {
 			if (strcmp(cmd, "halt.") && strcmp(cmd, "."))
-				add_history(cmd);
+				;//add_history(cmd);
 
 			break;
 		}
@@ -92,7 +96,7 @@ char *history_readline_eol(const char *prompt, __attribute__((unused)) char eol)
 {
 	char *line;
 
-	if ((line = readline(prompt)) == NULL)
+	if ((line = ic_readline(prompt)) == NULL)
 		return NULL;
 
 	for (char *s = line; *s; s++) {
@@ -101,7 +105,7 @@ char *history_readline_eol(const char *prompt, __attribute__((unused)) char eol)
 	}
 
 	if (*line)
-		add_history(line);
+		;//ic_history_add(line);
 
 	return line;
 }
@@ -112,13 +116,9 @@ static char g_filename[1024];
 void history_load(const char *filename)
 {
 	snprintf(g_filename, sizeof(g_filename), "%s", filename);
-	using_history();
-	read_history(g_filename);
+	ic_set_history(g_filename, 999);
 }
 
 void history_save(void)
 {
-	write_history(g_filename);
-	//rl_clear_history();
-	clear_history();
 }

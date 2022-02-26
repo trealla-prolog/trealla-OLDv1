@@ -34,7 +34,7 @@ LIBOBJECTS +=  library/builtins.o library/lists.o library/apply.o \
 	library/pairs.o library/random.o \
 	library/lambda.o library/when.o
 
-SRCOBJECTS += src/imath/imath.o
+SRCOBJECTS += src/imath/imath.o src/isocline/src/isocline.o
 
 OBJECTS = $(SRCOBJECTS) $(LIBOBJECTS) src/version.o
 
@@ -61,12 +61,12 @@ test:
 	./tests/run.sh
 
 clean:
-	rm -f tpl src/*.o src/imath/*.o \
+	rm -f tpl src/*.o src/imath/*.o src/isocline/src/*.o \
 		library/*.o library/*.c *.o gmon.* \
 		vgcore.* *.core core core.*
 	rm -f *.itf *.po samples/*.itf samples/*.po
 
-# from [gcc|clang] -MM src/*.c src/imath/*.c src/portable/*.c
+# from [gcc|clang] -MM src/*.c src/imath/*.c
 
 src/base64.o: src/base64.c src/base64.h
 src/contrib.o: src/contrib.c src/trealla.h src/internal.h src/map.h \
@@ -83,7 +83,7 @@ src/functions.o: src/functions.c src/trealla.h src/internal.h src/map.h \
   src/prolog.h src/builtins.h src/heap.h
 src/heap.o: src/heap.c src/internal.h src/map.h src/skiplist.h src/trealla.h \
   src/cdebug.h src/imath/imath.h src/query.h src/builtins.h src/heap.h
-src/history.o: src/history.c src/history.h src/utf8.h src/cdebug.h
+src/history.o: src/history.c src/history.h src/utf8.h src/cdebug.h src/isocline/include/isocline.h
 src/library.o: src/library.c src/library.h
 src/module.o: src/module.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/imath/imath.h src/parser.h src/module.h \
@@ -115,4 +115,5 @@ src/unify.o: src/unify.c src/internal.h src/map.h src/skiplist.h \
   src/heap.h src/utf8.h
 src/utf8.o: src/utf8.c src/utf8.h
 src/version.o: src/version.c
-src/imath.o: src/imath/imath.c src/imath/imath.h
+src/imath/imath.o: src/imath/imath.c src/imath/imath.h
+src/isocline/src/isocline.o: src/isocline/src/isocline.c src/isocline/include/isocline.h
