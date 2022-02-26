@@ -4,6 +4,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <errno.h>
+#include <dirent.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 
@@ -16,7 +17,6 @@
 #if USE_MMAP
 #include <sys/mman.h>
 #endif
-#include <dirent.h>
 #endif
 
 #include "internal.h"
@@ -34,6 +34,17 @@
 
 #if USE_OPENSSL
 #include "openssl/sha.h"
+#endif
+
+#ifdef _WIN32
+#include <io.h>
+#define PATH_SEP "\\"
+#define PATH_SEP_CHAR '\\'
+#define NEWLINE_MODE "dos"
+#else
+#define PATH_SEP "/"
+#define PATH_SEP_CHAR '/'
+#define NEWLINE_MODE "posix"
 #endif
 
 #ifdef _WIN32

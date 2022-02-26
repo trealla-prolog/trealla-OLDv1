@@ -6,6 +6,7 @@
 #include <limits.h>
 #include <math.h>
 #include <assert.h>
+#include <unistd.h>
 #include <sys/param.h>
 
 #ifndef USE_OPENSSL
@@ -14,22 +15,6 @@
 
 #ifndef USE_THREADS
 #define USE_THREADS 0
-#endif
-
-#ifdef _WIN32
-#include <io.h>
-#define isatty _isatty
-#define snprintf _snprintf
-#define chdir _chdir
-#define getpid _getpid
-#define PATH_SEP "\\"
-#define PATH_SEP_CHAR '\\'
-#define NEWLINE_MODE "dos"
-#else
-#include <unistd.h>
-#define PATH_SEP "/"
-#define PATH_SEP_CHAR '/'
-#define NEWLINE_MODE "posix"
 #endif
 
 typedef intmax_t pl_int_t;
