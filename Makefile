@@ -2,7 +2,7 @@ GIT_VERSION := "$(shell git describe --abbrev=4 --dirty --always --tags)"
 
 CFLAGS = -Isrc -I/usr/local/include -DVERSION='$(GIT_VERSION)' -O3 \
 	-Wall -Wextra -D_GNU_SOURCE -Wno-deprecated-declarations \
-	-funsigned-char $(OPT)
+	-funsigned-char $(OPT) -Wno-unused-function -Wno-unused-parameter
 
 LDFLAGS = -L/usr/local/lib -lreadline -lm
 
