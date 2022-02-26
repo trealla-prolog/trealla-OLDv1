@@ -5,30 +5,8 @@
     "children" : [ {
       "name" : "Failure instead of error",
       "children" : [ {
-        "name" : "commons_length_2_16",
-        "uid" : "97bcd5019946ae87",
-        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "predicates/length_2/tests.lgt", "86-87", "https://github.com/LogtalkDotOrg/logtalk3/tree/c8339cef43611c7ec614e432f4cec515fda0fe29/tests/prolog/predicates/length_2/tests.lgt#L86" ]
-      }, {
-        "name" : "commons_length_2_17",
-        "uid" : "90265b465d9398fe",
-        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "parameters" : [ "predicates/length_2/tests.lgt", "89-90", "https://github.com/LogtalkDotOrg/logtalk3/tree/c8339cef43611c7ec614e432f4cec515fda0fe29/tests/prolog/predicates/length_2/tests.lgt#L89" ]
-      }, {
         "name" : "commons_length_2_18",
-        "uid" : "4e6ea0fd4e8fa78",
+        "uid" : "f216a23b748c72d2",
         "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
         "status" : "failed",
         "time" : {
@@ -38,8 +16,8 @@
         "newFailed" : false,
         "parameters" : [ "predicates/length_2/tests.lgt", "92-93", "https://github.com/LogtalkDotOrg/logtalk3/tree/c8339cef43611c7ec614e432f4cec515fda0fe29/tests/prolog/predicates/length_2/tests.lgt#L92" ]
       }, {
-        "name" : "commons_length_2_19",
-        "uid" : "ecd9d2ca58a6b543",
+        "name" : "commons_length_2_17",
+        "uid" : "ce103693b598bc00",
         "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
         "status" : "failed",
         "time" : {
@@ -47,10 +25,10 @@
         },
         "flaky" : false,
         "newFailed" : false,
-        "parameters" : [ "predicates/length_2/tests.lgt", "95-96", "https://github.com/LogtalkDotOrg/logtalk3/tree/c8339cef43611c7ec614e432f4cec515fda0fe29/tests/prolog/predicates/length_2/tests.lgt#L95" ]
+        "parameters" : [ "predicates/length_2/tests.lgt", "89-90", "https://github.com/LogtalkDotOrg/logtalk3/tree/c8339cef43611c7ec614e432f4cec515fda0fe29/tests/prolog/predicates/length_2/tests.lgt#L89" ]
       }, {
         "name" : "commons_length_2_15",
-        "uid" : "fa4099338b533d39",
+        "uid" : "414f6b5a6899686c",
         "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
         "status" : "failed",
         "time" : {
@@ -59,13 +37,35 @@
         "flaky" : false,
         "newFailed" : false,
         "parameters" : [ "predicates/length_2/tests.lgt", "83-84", "https://github.com/LogtalkDotOrg/logtalk3/tree/c8339cef43611c7ec614e432f4cec515fda0fe29/tests/prolog/predicates/length_2/tests.lgt#L83" ]
+      }, {
+        "name" : "commons_length_2_16",
+        "uid" : "dc3c843e4976eed1",
+        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "predicates/length_2/tests.lgt", "86-87", "https://github.com/LogtalkDotOrg/logtalk3/tree/c8339cef43611c7ec614e432f4cec515fda0fe29/tests/prolog/predicates/length_2/tests.lgt#L86" ]
+      }, {
+        "name" : "commons_length_2_19",
+        "uid" : "326df52203fa0ca6",
+        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ "predicates/length_2/tests.lgt", "95-96", "https://github.com/LogtalkDotOrg/logtalk3/tree/c8339cef43611c7ec614e432f4cec515fda0fe29/tests/prolog/predicates/length_2/tests.lgt#L95" ]
       } ],
       "uid" : "f1d33384b55b86e6da2d391daa3c4717"
     }, {
       "name" : "Wrong error",
       "children" : [ {
         "name" : "commons_length_2_14",
-        "uid" : "52b7939f1231e1a4",
+        "uid" : "4c81674181fd9958",
         "parentUid" : "253761ad1716c4cf6303f692bd63b68e",
         "status" : "failed",
         "time" : {
