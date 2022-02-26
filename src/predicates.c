@@ -2583,6 +2583,7 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 }
 
 #ifndef SANDBOX
+#ifndef _WIN32
 static USE_RESULT pl_status fn_popen_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -2687,6 +2688,7 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
+#endif
 #endif
 
 #ifndef SANDBOX
@@ -11635,7 +11637,10 @@ static const struct builtins g_predicates_other[] =
 	{"delay", 1, fn_delay_1, "+integer", false},
 	{"shell", 1, fn_shell_1, "+atom", false},
 	{"shell", 2, fn_shell_2, "+atom,-integer", false},
+
+#ifndef _WIN32
 	{"popen", 4, fn_popen_4, "+atom,+atom,-stream,+list", false},
+#endif
 
 	// Used for database log...
 
