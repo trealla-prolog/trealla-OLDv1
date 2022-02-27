@@ -793,11 +793,7 @@ pl_status throw_error3(query *q, cell *c, UNUSED pl_idx_t c_ctx, const char *err
 		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 
-		if (!CMP_SLICE2(q, goal, "$catch"))
-			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, "catch"));
-		else
-			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
-
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
 	}
 
