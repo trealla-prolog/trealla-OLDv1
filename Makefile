@@ -6,6 +6,10 @@ CFLAGS = -Isrc -I/usr/local/include -DVERSION='$(GIT_VERSION)' -O3 \
 
 LDFLAGS = -L/usr/local/lib -lreadline -lm
 
+ifndef NOISOCLINE
+CFLAGS += -DUSE_ISOCLINE=1
+endif
+
 ifndef NOSSL
 CFLAGS += -DUSE_OPENSSL=1
 LDFLAGS += -L/usr/local/opt/openssl/lib -lssl -lcrypto
@@ -34,7 +38,11 @@ LIBOBJECTS +=  library/builtins.o library/lists.o library/apply.o \
 	library/pairs.o library/random.o \
 	library/lambda.o library/when.o
 
-SRCOBJECTS += src/imath/imath.o src/isocline/src/isocline.o
+SRCOBJECTS += src/imath/imath.o
+
+ifndef NOISOCLINE
+SRCOBJECTS += src/isocline/src/isocline.o
+endif
 
 OBJECTS = $(SRCOBJECTS) $(LIBOBJECTS) src/version.o
 

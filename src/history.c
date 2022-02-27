@@ -6,9 +6,7 @@
 #include <time.h>
 #include <assert.h>
 
-#define ISOCLINE 1
-
-#if !ISOCLINE
+#if !USE_ISOCLINE
 #include <readline/readline.h>
 #include <readline/history.h>
 #else
@@ -50,7 +48,7 @@ int history_getch_fd(int fd)
 static char g_filename[1024];
 
 
-#if !ISOCLINE
+#if !USE_ISOCLINE
 char *history_readline_eol(const char *prompt, char eol)
 {
 	char *cmd = NULL;
@@ -171,6 +169,8 @@ void history_load(const char *filename)
 
 	ic_set_default_completer(NULL, NULL);
 	ic_set_default_highlighter(NULL, NULL);
+
+	ic_set_prompt_marker("", "");
 }
 
 void history_save(void)

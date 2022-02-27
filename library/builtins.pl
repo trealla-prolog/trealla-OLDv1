@@ -76,8 +76,7 @@ setup_call_cleanup(S, G, C) :-
 
 :- meta_predicate(setup_call_cleanup(0,0,0)).
 
-throw(E) :-
-	'$throw'(E).
+throw(E) :- '$throw'(E).
 
 catch(G, E, C) :- '$catch'(G, E, C).
 
