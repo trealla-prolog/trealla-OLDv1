@@ -1372,6 +1372,22 @@ static int check_duplicate_result(query *q, int nbr, cell *c, pl_idx_t c_ctx)
 	return -1;
 }
 
+static unsigned varunformat(const char *s)
+{
+	if ((*s < 'A') || (*s > 'Z'))
+		return 0;
+
+	char ch = 0;
+	unsigned i = 0;
+	sscanf(s, "%c%u", &ch, &i);
+
+	if (i > 26)
+		return 0;
+
+	unsigned j = ch - 'A' + (i * 26);
+	return j;
+}
+
 static void dump_vars(query *q, bool partial)
 {
 	parser *p = q->p;
@@ -1380,14 +1396,15 @@ static void dump_vars(query *q, bool partial)
 	q->pl->tab_idx = 0;
 	bool any = false;
 
+	for (unsigned i = 0; i < MAX_ARITY; i++)
+		q->ignore[i] = false;
+
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
-		int ch = p->vartab.var_name[i][1];
+		unsigned j;
 
 		if ((p->vartab.var_name[i][0] == '_')
-			&& ((ch >= 'A') && (ch <= 'Z'))) {
-			unsigned j = p->vartab.var_name[i][1] - 'A';
+			&& ((j = varunformat(p->vartab.var_name[i]+1)) != 0))
 			q->ignore[j] = true;
-		}
 	}
 
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
