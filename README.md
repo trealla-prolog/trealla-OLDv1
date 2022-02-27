@@ -97,9 +97,13 @@ On Debian+ systems you may need to install OpenSSL:
 
 	sudo apt install libssl-dev
 
-Or, to build without OpenSSL:
+To build without OpenSSL:
 
 	make NOSSL=1
+
+To build without ISOCLINE (use GNU readline instead):
+
+	make NOISOCLINE=1
 
 Then...
 
