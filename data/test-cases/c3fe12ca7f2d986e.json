@@ -1,0 +1,51 @@
+{
+  "uid" : "c3fe12ca7f2d986e",
+  "name" : "lgt_unicode_get_char_2_02a",
+  "fullName" : "lgt_unicode_get_char_2_02a::tests",
+  "historyId" : "lgt_unicode_get_char_2_02a::tests",
+  "time" : {
+    "duration" : 2
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "unicode/builtins/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "unicode/builtins/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "unicode/builtins/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "unicode/builtins/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "302-304"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/624da08d6fae119be6553194bc0e39504c98def1/tests/prolog/unicode/builtins/tests.lgt#L302"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "c3fe12ca7f2d986e.json",
+  "parameterValues" : [ "unicode/builtins/tests.lgt", "302-304", "https://github.com/LogtalkDotOrg/logtalk3/tree/624da08d6fae119be6553194bc0e39504c98def1/tests/prolog/unicode/builtins/tests.lgt#L302" ]
+}
