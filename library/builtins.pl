@@ -79,6 +79,8 @@ setup_call_cleanup(S, G, C) :-
 throw(E) :-
 	'$throw'(E).
 
+catch(G, E, C) :- '$catch'(G, E, C).
+
 findall(T, G, B, Tail) :-
 	'$mustbe_list_or_var'(B),
 	'$mustbe_list_or_var'(Tail),
