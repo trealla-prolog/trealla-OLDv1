@@ -201,7 +201,7 @@ static void make_smalln(cell *tmp, const char *s, size_t n)
 
 char *chars_list_to_string(query *q, cell *p_chars, pl_idx_t p_chars_ctx, size_t len)
 {
-	char *tmp = malloc(len+1);
+	char *tmp = malloc(len+1+1);
 	ensure(tmp);
 	char *dst = tmp;
 	LIST_HANDLER(p_chars);
@@ -7981,7 +7981,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 	GET_NEXT_ARG(p_opts,list_or_nil);
 	int n = 3;
 	stream *str = &q->pl->streams[n];
-	char *src;
+	char *src = NULL;
 	size_t len;
 	bool has_var;
 

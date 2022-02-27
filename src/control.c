@@ -518,7 +518,6 @@ USE_RESULT pl_status fn_sys_call_cleanup_3(query *q)
 USE_RESULT bool find_exception_handler(query *q, cell *e)
 {
 	pl_idx_t e_ctx = q->st.curr_frame;
-	q->exception = e;
 
 	while (retry_choice(q)) {
 		choice *ch = GET_CHOICE(q->cp);
@@ -536,7 +535,8 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 		may_ptr_error(tmp);
 		cell *e2 = malloc(sizeof(cell) * tmp->nbr_cells);
 		may_ptr_error(e2);
-		safe_copy_cells(e2, tmp, tmp->nbr_cells);
+		//safe_copy_cells(e2, tmp, tmp->nbr_cells);
+		copy_cells(e2, tmp, tmp->nbr_cells);
 
 		q->exception = e2;
 		q->retry = QUERY_EXCEPTION;
@@ -549,7 +549,6 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 
 		free(e2);
 		q->exception = NULL;
-		free(e);
 		return true;
 	}
 
@@ -568,7 +567,6 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 	}
 
 	q->pl->did_dump_vars = true;
-	free(e);
 	q->exception = NULL;
 	q->error = true;
 	return false;
@@ -582,18 +580,23 @@ USE_RESULT pl_status fn_iso_throw_1(query *q)
 	if (is_cyclic_term(q, p1, p1_ctx)) {
 		e = malloc(sizeof(cell) * p1->nbr_cells);
 		may_ptr_error(e);
-		safe_copy_cells(e, p1, p1->nbr_cells);
+		//safe_copy_cells(e, p1, p1->nbr_cells);
+		copy_cells(e, p1, p1->nbr_cells);
 	} else {
 		cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
 		may_ptr_error(tmp);
 		e = malloc(sizeof(cell) * tmp->nbr_cells);
 		may_ptr_error(e);
-		safe_copy_cells(e, tmp, tmp->nbr_cells);
+		//safe_copy_cells(e, tmp, tmp->nbr_cells);
+		copy_cells(e, tmp, tmp->nbr_cells);
 	}
 
-	if (!find_exception_handler(q, e))
+	if (!find_exception_handler(q, e)) {
+		free(e);
 		return pl_failure;
+	}
 
+	free(e);
 	return fn_iso_catch_3(q);
 }
 
@@ -799,11 +802,15 @@ pl_status throw_error3(query *q, cell *c, UNUSED pl_idx_t c_ctx, const char *err
 
 	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
 	may_ptr_error(e);
-	safe_copy_cells(e, tmp, tmp->nbr_cells);
+	//safe_copy_cells(e, tmp, tmp->nbr_cells);
+	copy_cells(e, tmp, tmp->nbr_cells);
 
-	if (find_exception_handler(q, e))
+	if (find_exception_handler(q, e)) {
+		free(e);
 		return fn_iso_catch_3(q);
+	}
 
+	free(e);
 	return pl_failure;
 }
 
