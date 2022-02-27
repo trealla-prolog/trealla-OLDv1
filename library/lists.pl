@@ -118,14 +118,14 @@ length_checked(Xs0, N) :-
 	).
 
 length(Xs0, N) :-
-	'$skip_max_list'(M, N, Xs0,Xs),
-	!,
-	(  Xs == [] -> N = M
-	;  nonvar(Xs) -> var(N), Xs = [_|_], throw(error(resource_error(finite_memory),length/2))
-	;  nonvar(N) -> R is N-M, length_rundown(Xs, R)
-	;  N == Xs -> throw(error(resource_error(finite_memory),length/2))
-	;  length_addendum(Xs, N, M)
-	).
+   '$skip_max_list'(M, N, Xs0,Xs),
+   !,
+   (  Xs == [] -> N = M
+   ;  nonvar(Xs) -> var(N), Xs = [_|_], throw(error(resource_error(finite_memory),length/2))
+   ;  nonvar(N) -> R is N-M, length_rundown(Xs, R)
+   ;  N == Xs -> throw(error(resource_error(finite_memory),length/2))
+   ;  length_addendum(Xs, N, M)
+   ).
 length(_, N) :-
    integer(N), !,
    domain_error(not_less_than_zero, N, length/2).
