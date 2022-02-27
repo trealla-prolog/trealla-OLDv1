@@ -1464,8 +1464,8 @@ static void dump_vars(query *q, bool partial)
 		q->variable_names_ctx = INITIAL_FRAME;
 		q->max_depth = 25;
 
-		//if (is_indirect(&e->c) && (e->ctx != INITIAL_FRAME))
-		//	q->variable_names = NULL;
+		if (is_indirect(&e->c) && (e->ctx != INITIAL_FRAME))
+			q->variable_names = NULL;
 
 		if (is_variable(c) && (c_ctx == INITIAL_FRAME))
 			fprintf(stdout, "%s", p->vartab.var_name[c->var_nbr]);
