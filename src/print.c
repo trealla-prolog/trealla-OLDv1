@@ -592,15 +592,19 @@ static const char *varformat(unsigned nbr)
 	char *dst = tmpbuf;
 	dst += sprintf(dst, "%c", 'A'+nbr%26);
 	if ((nbr/26) > 0) dst += sprintf(dst, "%u", (nbr/26)%26);
-	if ((nbr/26/26) > 0) sprintf(dst, "%u", (nbr/26/26)%26);
+	if ((nbr/26/26) > 0) sprintf(dst, "_%u", (nbr/26/26)%26);
 	return tmpbuf;
 }
 
 static const char *get_slot_name(query *q, pl_idx_t slot_idx)
 {
 	for (unsigned i = 0; i < q->pl->tab_idx; i++) {
-		if (q->pl->tab1[i] == slot_idx)
-			return varformat(i);
+		if (q->pl->tab1[i] == slot_idx) {
+			if (q->ignore[i])
+				q->ignore_offset++;
+
+			return varformat(i+q->ignore_offset);
+		}
 	}
 
 	unsigned i = q->pl->tab_idx++;

@@ -537,6 +537,7 @@ struct query_ {
 	trail *trails;
 	cell *tmp_heap, *last_arg, *exception, *variable_names;
 	cell *queue[MAX_QUEUES], *tmpq[MAX_QUEUES];
+	bool ignore[MAX_ARITY];
 	page *pages;
 	slot *save_e;
 	db_entry *dirty_list;
@@ -548,7 +549,7 @@ struct query_ {
 	uint64_t step, qid;
 	uint64_t time_started, get_started;
 	uint64_t time_cpu_started, time_cpu_last_started;
-	unsigned max_depth;
+	unsigned max_depth, ignore_offset;
 	uint64_t tmo_msecs;
 	int nv_start;
 	pl_idx_t cp, tmphp, latest_ctx, popp, variable_names_ctx;
