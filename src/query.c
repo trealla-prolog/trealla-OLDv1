@@ -1399,9 +1399,6 @@ static void dump_vars(query *q, bool partial)
 		if (!strcmp(p->vartab.var_name[i], "_"))
 			continue;
 
-		if (p->vartab.var_name[i][0] == '_')
-			continue;
-
 		slot *e = GET_SLOT(f, i);
 
 		if (is_empty(&e->c))
