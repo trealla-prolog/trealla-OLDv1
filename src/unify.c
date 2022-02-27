@@ -421,8 +421,7 @@ static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, 
 		cell *c1 = LIST_HEAD(p1);
 		cell *c2 = LIST_HEAD(p2);
 
-		c1 = deref(q, c1, p1_ctx);
-		pl_idx_t c1_ctx = q->latest_ctx;
+		pl_idx_t c1_ctx = p1_ctx;
 		c2 = deref(q, c2, p2_ctx);
 		pl_idx_t c2_ctx = q->latest_ctx;
 
@@ -439,8 +438,7 @@ static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, 
 		c1 = LIST_TAIL(p1);
 		c2 = LIST_TAIL(p2);
 
-		p1 = deref(q, c1, p1_ctx);
-		p1_ctx = q->latest_ctx;
+		p1 = c1;
 		p2 = deref(q, c2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}

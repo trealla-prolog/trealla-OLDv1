@@ -52,7 +52,7 @@ cell *list_head(cell *l, cell *tmp)
 	if (!is_string(l))
 		return l + 1;
 
-	const char *src = is_static(l) ? l->val_str : (char*)l->val_strb->cstr + l->strb_off;
+	const char *src = is_static(l) ? l->val_str : is_strbuf(l) ? (char*)l->val_strb->cstr + l->strb_off : (char*)l->val_chr + l->val_off;
 	size_t len = len_char_utf8(src);
 	tmp->tag = TAG_CSTR;
 	tmp->nbr_cells = 1;
@@ -73,8 +73,8 @@ cell *list_tail(cell *l, cell *tmp)
 		return h + h->nbr_cells;
 	}
 
-	const char *src = is_static(l) ? l->val_str : (char*)l->val_strb->cstr + l->strb_off;
-	size_t str_len = is_static(l) ? (size_t)l->str_len : (size_t)l->val_strb->len - l->strb_off;
+	const char *src = is_static(l) ? l->val_str : is_strbuf(l) ? (char*)l->val_strb->cstr + l->strb_off : (char*)l->val_chr;
+	size_t str_len = is_static(l) ? (size_t)l->str_len : is_strbuf(l) ? (size_t)l->val_strb->len - l->strb_off : (unsigned)l->chr_len;
 	size_t len = len_char_utf8(src);
 
 	if (str_len == len) {
@@ -95,9 +95,17 @@ cell *list_tail(cell *l, cell *tmp)
 		return tmp;
 	}
 
+	if (is_strbuf(l)) {
+		copy_cells(tmp, l, 1);
+		tmp->strb_off = l->strb_off + len;
+		tmp->strb_len = l->strb_len - len;
+		return tmp;
+	}
+
 	copy_cells(tmp, l, 1);
-	tmp->strb_off = l->strb_off + len;
-	tmp->strb_len = l->strb_len - len;
+	memcpy(tmp->val_chr, l->val_chr + len, l->chr_len - len);
+	tmp->val_chr[l->chr_len - len] = '\0';
+	tmp->chr_len = l->chr_len - len;
 	return tmp;
 }
 

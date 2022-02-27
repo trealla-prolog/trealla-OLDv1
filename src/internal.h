@@ -166,14 +166,14 @@ typedef struct {
 	(c)->val_strb = strb;										\
 	(c)->strb_off = off;										\
 	(c)->strb_len = n;											\
-	(c)->flags |= FLAG_MANAGED | FLAG_CSTR_BLOB;						\
+	(c)->flags |= FLAG_MANAGED | FLAG_CSTR_BLOB;				\
 	}
 
 #define _GET_STR(pl,c) 											\
 	( !is_cstring(c) ? ((pl)->pool + (c)->val_off)				\
 	: is_strbuf(c) ? ((c)->val_strb->cstr + (c)->strb_off)		\
 	: is_static(c) ? (c)->val_str								\
-	: ((char*)(c)->val_chr)										\
+	: (char*)(c)->val_chr										\
 	)
 
 #define _LEN_STR(pl,c) 											\

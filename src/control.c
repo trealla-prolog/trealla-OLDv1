@@ -800,12 +800,11 @@ pl_status throw_error3(query *q, cell *c, UNUSED pl_idx_t c_ctx, const char *err
 	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
 	may_ptr_error(e);
 	safe_copy_cells(e, tmp, tmp->nbr_cells);
-	pl_status ok = pl_failure;
 
 	if (find_exception_handler(q, e))
-		ok = fn_iso_catch_3(q);
+		return fn_iso_catch_3(q);
 
-	return ok;
+	return pl_failure;
 }
 
 pl_status throw_error2(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected, cell *goal)
