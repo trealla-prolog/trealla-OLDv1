@@ -303,7 +303,7 @@ USE_RESULT pl_status make_cstringn(cell *d, const char *s, size_t n)
 
 USE_RESULT pl_status make_stringn(cell *d, const char *s, size_t n)
 {
-	if (n < MAX_SMALL_STRING) {
+	if (n < (MAX_SMALL_STRING-4)) { // FIXME: why the -4
 		make_smalln(d, s, n);
 		d->flags = FLAG_CSTR_STRING;
 		d->arity = 2;

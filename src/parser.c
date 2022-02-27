@@ -103,7 +103,8 @@ cell *list_tail(cell *l, cell *tmp)
 	}
 
 	copy_cells(tmp, l, 1);
-	strcpy(tmp->val_chr, l->val_chr + len);
+	memcpy(tmp->val_chr, l->val_chr + len, l->chr_len - len);
+	tmp->val_chr[l->chr_len - len] = '\0';
 	tmp->chr_len = l->chr_len - len;
 	return tmp;
 }
