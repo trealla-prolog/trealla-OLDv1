@@ -6,8 +6,15 @@
 #include <time.h>
 #include <assert.h>
 
+#define ISOCLINE 1
+
+#if !ISOCLINE
 #include <readline/readline.h>
 #include <readline/history.h>
+#else
+#include "isocline/include/isocline.h"
+#endif
+
 #include "history.h"
 #include "utf8.h"
 
@@ -40,7 +47,10 @@ int history_getch_fd(int fd)
 	return ch;
 }
 
-#if 1
+static char g_filename[1024];
+
+
+#if !ISOCLINE
 char *history_readline_eol(const char *prompt, char eol)
 {
 	char *cmd = NULL;
@@ -87,27 +97,6 @@ LOOP:
 
 	return cmd;
 }
-#else
-char *history_readline_eol(const char *prompt, __attribute__((unused)) char eol)
-{
-	char *line;
-
-	if ((line = readline(prompt)) == NULL)
-		return NULL;
-
-	for (char *s = line; *s; s++) {
-		if (*s == '\n')
-			*s = '\0';
-	}
-
-	if (*line)
-		add_history(line);
-
-	return line;
-}
-#endif
-
-static char g_filename[1024];
 
 void history_load(const char *filename)
 {
@@ -122,3 +111,69 @@ void history_save(void)
 	//rl_clear_history();
 	clear_history();
 }
+#else
+char *history_readline_eol(const char *prompt, char eol)
+{
+	char *cmd = NULL;
+	char *line;
+
+LOOP:
+
+	if ((line = ic_readline(prompt)) == NULL)
+		return NULL;
+
+	if (cmd) {
+		size_t n = strlen(cmd) + strlen(line);
+		cmd = realloc(cmd, n+1);
+		ensure(cmd);
+		strcat(cmd, line);
+	} else {
+		cmd = strdup(line);
+	}
+
+	free(line);
+	const char *s = cmd;
+
+	for (;;) {
+		int ch = get_char_utf8(&s);
+		const char *end_ptr = cmd + strlen(cmd) - (strlen(cmd) ? 1 : 0);
+
+		while (isspace(*end_ptr) && (end_ptr != cmd))
+			end_ptr--;
+
+		if ((ch == 0) && (*end_ptr == eol)) {
+			if (strcmp(cmd, "halt.") && strcmp(cmd, "."))
+				ic_history_add(cmd);
+
+			break;
+		}
+
+		if (ch == 0) {
+			cmd = realloc(cmd, strlen(cmd)+1+1);
+			strcat(cmd, "\n");
+			prompt = "";
+			goto LOOP;
+		}
+	}
+
+	return cmd;
+}
+
+void history_load(const char *filename)
+{
+	snprintf(g_filename, sizeof(g_filename), "%s", filename);
+	ic_set_history(g_filename, 999);
+
+	ic_enable_brace_matching(false);
+	ic_enable_brace_insertion(false);
+	ic_enable_completion_preview(false);
+	ic_enable_color(false);
+
+	ic_set_default_completer(NULL, NULL);
+	ic_set_default_highlighter(NULL, NULL);
+}
+
+void history_save(void)
+{
+}
+#endif
