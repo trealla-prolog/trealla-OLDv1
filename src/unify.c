@@ -101,6 +101,7 @@ cell* skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_i
 			tmp = head;
 		} else {
 			make_stringn(tmp, src, LEN_STR(q, head) - (src-save_src));
+			share_cell(tmp);
 		}
 
 		return tmp;

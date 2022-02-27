@@ -79,9 +79,10 @@ static bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial)
 {
 	pl_int_t skip = 0, max = 1000000000;
 	pl_idx_t c_ctx = p1_ctx;
-	cell tmp;
+	cell tmp = {0};
 
 	cell* c = skip_max_list(q, p1, &c_ctx, max, &skip, &tmp);
+	unshare_cell(&tmp);
 
 	if (is_nil(c))
 		return true;
@@ -5765,8 +5766,10 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 {
 	pl_int_t max = PL_INT_MAX, skip = 0;
 	pl_idx_t tmp_ctx = p1_ctx;
-	cell tmp;
+	cell tmp = {0};
+
 	skip_max_list(q, p1, &tmp_ctx, max, &skip, &tmp);
+	unshare_cell(&tmp);
 	size_t cnt = skip;
 	basepair *base = malloc(sizeof(basepair)*cnt);
 	LIST_HANDLER(p1);
@@ -8231,8 +8234,9 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 
 	pl_int_t skip=0, max = is_smallint(p2) ? get_smallint(p2) : PL_INT_MAX;
 	pl_idx_t c_ctx = p3_ctx;
-	cell tmp;
+	cell tmp = {0};
 	cell *c = skip_max_list(q, p3, &c_ctx, max, &skip, &tmp);
+	unshare_cell(&tmp);
 
 	if (!c) {
 		c_ctx = p3_ctx;
