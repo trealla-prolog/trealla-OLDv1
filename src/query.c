@@ -1758,12 +1758,17 @@ pl_status start(query *q)
 				may_error(do_post_unification_hook(q));
 		}
 
-		if (q->is_oom) {
-			fprintf(stdout, "error: out of memory\n");
-			return pl_failure;
-		}
-
 		q->run_hook = false;
+
+		if (q->is_oom) {
+			q->is_oom = q->error = false;
+
+			if (throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "memory") != pl_success) {
+				q->retry = QUERY_RETRY;
+				q->tot_retries++;
+				continue;
+			}
+		}
 
 		if (g_tpl_interrupt)
 			continue;
