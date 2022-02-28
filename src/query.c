@@ -333,9 +333,9 @@ static void find_key(query *q, predicate *pr, cell *key)
 	q->st.definite = true;
 }
 
-size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, bool *has_var)
+size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, bool *has_var, bool *is_partial)
 {
-	*has_var = false;
+	*is_partial = *has_var = false;
 	pl_idx_t save_ctx = q ? q->latest_ctx : l_ctx;
 	size_t is_chars_list = 0;
 	LIST_HANDLER(l);
@@ -387,7 +387,7 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 
 	if (is_variable(l)) {
 		is_chars_list = 0;
-		*has_var = true;
+		*has_var = *is_partial = true;
 	} else if (is_string(l))
 		;
 	else if (!is_literal(l) || (l->val_off != g_nil_s))
@@ -399,8 +399,8 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 
 size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes)
 {
-	bool has_var;
-	return scan_is_chars_list2(q, l, l_ctx, allow_codes, &has_var);
+	bool has_var, is_partial;
+	return scan_is_chars_list2(q, l, l_ctx, allow_codes, &has_var, &is_partial);
 }
 
 static void unwind_trail(query *q, const choice *ch)
