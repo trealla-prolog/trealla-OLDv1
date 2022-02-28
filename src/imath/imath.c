@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <string.h>
 
 const mp_result MP_OK = 0;      /* no error, all is well  */
@@ -1690,8 +1691,10 @@ static const mp_digit fill = (mp_digit)0xdeadbeefabad1dea;
 #endif
 
 static mp_digit *s_alloc(mp_size num) {
+  errno = 0;
   mp_digit *out = malloc(num * sizeof(mp_digit));
   //assert(out != NULL);
+  if (out == NULL) errno = ENOMEM;
 
 #if DEBUG
   for (mp_size ix = 0; ix < num; ++ix) out[ix] = fill;

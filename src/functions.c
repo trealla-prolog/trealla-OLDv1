@@ -1303,6 +1303,9 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 		if (mp_int_expt_value(p1.val_int, p2.val_int, &q->tmp_ival) != MP_OK)
 			return throw_error(q, &p1, q->st.curr_frame, "resource_error", "memory");
 
+		if (errno == ENOMEM)
+			return throw_error(q, &p1, q->st.curr_frame, "resource_error", "memory");
+
 		if (mp_int_compare_value(&q->tmp_ival, MP_SMALL_MAX) > 0) {
 			SET_ACCUM();
 			return pl_success;
