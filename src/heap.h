@@ -1,6 +1,6 @@
 #pragma once
 
-USE_RESULT size_t alloc_grow(void** addr, size_t elem_size, size_t min_elements, size_t max_elements);
+USE_RESULT size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements, size_t max_elements);
 
 USE_RESULT cell *deep_clone_to_heap_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, cell *p3, pl_idx_t p3_ctx, cell *p4, pl_idx_t p4_ctx);
 USE_RESULT cell *deep_clone_to_heap(query *q, cell *p1, pl_idx_t p1_ctx);
@@ -19,7 +19,7 @@ USE_RESULT cell *alloc_on_heap(query *q, pl_idx_t nbr_cells);
 USE_RESULT cell *alloc_on_tmp(query *q, pl_idx_t nbr_cells);
 USE_RESULT cell *alloc_on_queuen(query *q, int qnbr, const cell *c);
 
-USE_RESULT cell *init_tmp_heap(query* q);
+USE_RESULT cell *init_tmp_heap(query *q);
 
 #define get_tmp_heap(q,i) ((q)->tmp_heap + (i))
 #define tmp_heap_used(q) (q)->tmphp

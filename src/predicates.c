@@ -81,10 +81,10 @@ static bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial)
 	pl_idx_t c_ctx = p1_ctx;
 	cell tmp = {0};
 
-	cell* c = skip_max_list(q, p1, &c_ctx, max, &skip, &tmp);
+	cell *c = skip_max_list(q, p1, &c_ctx, max, &skip, &tmp);
 	unshare_cell(&tmp);
 
-	if (is_nil(c))
+	if (!strcmp(GET_STR(q,c), "[]"))
 		return true;
 
 	if (is_variable(c))
@@ -230,7 +230,7 @@ char *chars_list_to_string(query *q, cell *p_chars, pl_idx_t p_chars_ctx, size_t
 }
 
 #if 0
-static void init_queue(query* q)
+static void init_queue(query *q)
 {
 	free(q->queue[0]);
 	q->queue[0] = NULL;
@@ -255,7 +255,7 @@ static cell *pop_queue(query *q)
 	return c;
 }
 
-static void init_queuen(query* q)
+static void init_queuen(query *q)
 {
 	free(q->queue[q->st.qnbr]);
 	q->queue[q->st.qnbr] = NULL;
@@ -8262,7 +8262,7 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 	if (ok != pl_success)
 		return ok;
 
-	if (!is_iso_list_or_nil(c) && !is_variable(c)) {
+	if (!is_iso_list_or_nil(c) && !(is_cstring(c) && !strcmp(GET_STR(q,c), "[]")) && !is_variable(c)) {
 		make_int(&tmp, -1);
 		unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
@@ -11454,13 +11454,13 @@ static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)
 	return pl_success;
 }
 
-static pl_status fn_sys_block_hook_0(query * q)
+static pl_status fn_sys_block_hook_0(query *q)
 {
 	q->in_hook = true;
 	return pl_success;
 }
 
-static pl_status fn_sys_end_hook_0(query * q)
+static pl_status fn_sys_end_hook_0(query *q)
 {
 	q->in_hook = false;
 	return pl_success;

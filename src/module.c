@@ -876,7 +876,7 @@ static void check_rule(module *m, db_entry *dbe)
 	}
 }
 
-static db_entry* assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consulting)
+static db_entry *assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 {
 	cell *c = p1;
 

@@ -13,7 +13,7 @@ size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements, size_t max
 {
 	assert(min_elements <= max_elements);
 	size_t elements = max_elements;
-	void* mem;
+	void *mem;
 
 	do {
 		mem = realloc(*addr, elem_size * elements);
@@ -33,7 +33,7 @@ size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements, size_t max
 // The tmp heap is used for temporary allocations (a scratch-pad)
 // for work in progress. As such it can survive a realloc() call.
 
-cell *init_tmp_heap(query* q)
+cell *init_tmp_heap(query *q)
 {
 	if (!q->tmp_heap) {
 		q->tmp_heap = malloc(q->tmph_size * sizeof(cell));
@@ -218,7 +218,7 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 		p1_ctx = q->latest_ctx;
 	}
 
-	cell* rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, nonlocals_only);
+	cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, nonlocals_only);
 	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 	int cnt = q->st.m->pl->varno - nbr_vars;
 
@@ -335,7 +335,7 @@ cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
 		p1_ctx = q->latest_ctx;
 	}
 
-	cell* rec = deep_raw_copy2_to_tmp(q, p1, p1_ctx, 0);
+	cell *rec = deep_raw_copy2_to_tmp(q, p1, p1_ctx, 0);
 	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 	return q->tmp_heap;
 }
