@@ -1691,7 +1691,7 @@ static const mp_digit fill = (mp_digit)0xdeadbeefabad1dea;
 
 static mp_digit *s_alloc(mp_size num) {
   mp_digit *out = malloc(num * sizeof(mp_digit));
-  assert(out != NULL);
+  //assert(out != NULL);
 
 #if DEBUG
   for (mp_size ix = 0; ix < num; ++ix) out[ix] = fill;
@@ -1708,7 +1708,7 @@ static mp_digit *s_realloc(mp_digit *old, mp_size osize, mp_size nsize) {
   memcpy(new, old, osize * sizeof(mp_digit));
 #else
   mp_digit *new = realloc(old, nsize * sizeof(mp_digit));
-  assert(new != NULL);
+  //assert(new != NULL);
 #endif
 
   return new;

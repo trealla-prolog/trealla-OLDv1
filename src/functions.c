@@ -21,7 +21,9 @@
 	q->accum.flags = FLAG_MANAGED;								\
 	q->accum.val_bigint = malloc(sizeof(bigint));				\
 	q->accum.val_bigint->refcnt = 0;							\
-	mp_int_init_copy(&q->accum.val_bigint->ival, &q->tmp_ival);	\
+	if (mp_int_init_copy(&q->accum.val_bigint->ival, &q->tmp_ival) == MP_MEMORY) {\
+		return throw_error(q, &q->accum, q->st.curr_frame, "resource_error", "memory"); \
+	} \
 }
 
 static void clr_accum(cell *p)
@@ -1277,7 +1279,7 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 			return throw_error(q, &p1, q->st.curr_frame, "type_error", "greater_zero");
 
 		if (p2.val_int > (INT32_MAX/2))
-			return throw_error(q, &p1, q->st.curr_frame, "resource_error", "can_nae_take_any_more");
+			return throw_error(q, &p1, q->st.curr_frame, "resource_error", "memory");
 
 		if (mp_int_expt(&p1.val_bigint->ival, p2.val_int, &q->tmp_ival) != MP_OK)
 			return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "integer_overflow");
@@ -1296,10 +1298,10 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 		}
 
 		if (p2.val_int > (INT32_MAX/2))
-			return throw_error(q, &p1, q->st.curr_frame, "resource_error", "can_nae_take_any_more");
+			return throw_error(q, &p1, q->st.curr_frame, "resource_error", "memory");
 
 		if (mp_int_expt_value(p1.val_int, p2.val_int, &q->tmp_ival) != MP_OK)
-			return throw_error(q, &p1, q->st.curr_frame, "resource_error", "can_nae_take_any_more");
+			return throw_error(q, &p1, q->st.curr_frame, "resource_error", "memory");
 
 		if (mp_int_compare_value(&q->tmp_ival, MP_SMALL_MAX) > 0) {
 			SET_ACCUM();
