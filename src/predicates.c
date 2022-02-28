@@ -7994,23 +7994,25 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 			make_literal(&tmp, g_eof_s);
 			return unify(q, p_term, p_term_ctx, &tmp, q->st.curr_frame);
 		} else
-			return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
+			return throw_error(q, p_chars, p_chars_ctx, "type_error", "character");
 	} else if (is_string(p_chars)) {
 		len = LEN_STR(q, p_chars);
 		src = malloc(len+1+1);		// +1 is to allow adding a '.'
 		may_ptr_error(src);
 		memcpy(src, GET_STR(q, p_chars), len);
 		src[len] = '\0';
+	} else if (!check_list(q, p_chars, p_chars_ctx, &is_partial)) {
+		return throw_error(q, p_chars, p_chars_ctx, "type_error", "list");
 	} else if ((len = scan_is_chars_list2(q, p_chars, p_chars_ctx, false, &has_var, &is_partial)) > 0) {
 		if (!len)
-			return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
+			return throw_error(q, p_chars, p_chars_ctx, "type_error", "character");
 
 		src = chars_list_to_string(q, p_chars, p_chars_ctx, len);
 	} else {
 		if (has_var)
 			return throw_error(q, p_chars, p_chars_ctx, "instantiation_error", "variable");
 
-		return throw_error(q, p_chars, p_chars_ctx, "type_error", "char");
+		return throw_error(q, p_chars, p_chars_ctx, "type_error", "character");
 	}
 
 	if (!str->p) {
