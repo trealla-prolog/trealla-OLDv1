@@ -448,7 +448,7 @@ void set_meta_predicate_in_db(module *m, cell *c)
 		query q = (query){0};
 		q.pl = m->pl;
 		q.st.m = m;
-		char *dst = print_term_to_strbuf(&q, c, 0, 0);
+		char *dst = print_canonical_to_strbuf(&q, c, 0, 0);
 		char tmpbuf[1024];
 		snprintf(tmpbuf, sizeof(tmpbuf), "meta_predicate(%s)", dst);
 		push_property(m, name, arity, tmpbuf);
