@@ -101,9 +101,9 @@ To build without OpenSSL:
 
 	make NOSSL=1
 
-To build without ISOCLINE (use GNU readline instead):
+To build with ISOCLINE (default is to use GNU readline):
 
-	make NOISOCLINE=1
+	make ISOCLINE=1
 
 Then...
 

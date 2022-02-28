@@ -6,7 +6,7 @@ CFLAGS = -Isrc -I/usr/local/include -DVERSION='$(GIT_VERSION)' -O3 \
 
 LDFLAGS = -L/usr/local/lib -lreadline -lm
 
-ifndef NOISOCLINE
+ifdef ISOCLINE
 CFLAGS += -DUSE_ISOCLINE=1
 endif
 
@@ -40,7 +40,7 @@ LIBOBJECTS +=  library/builtins.o library/lists.o library/apply.o \
 
 SRCOBJECTS += src/imath/imath.o
 
-ifndef NOISOCLINE
+ifdef ISOCLINE
 SRCOBJECTS += src/isocline/src/isocline.o
 endif
 
