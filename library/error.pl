@@ -55,7 +55,7 @@ must_be_(chars, Ls) :-
             true
         ;   all_characters(Ls)
         ).
-must_be_(list, Term)    :- (is_list(Term) -> true ; throw(error(type_error(list, Term), must_be/2))).
+must_be_(list, Term)    :- (ilist(Term) -> true ; throw(error(type_error(list, Term), must_be/2))).
 %must_be_(list, Term)    :- check_(ilist, list, Term).
 must_be_(type, Term)    :- check_(type, type, Term).
 must_be_(boolean, Term) :- check_(boolean, boolean, Term).
