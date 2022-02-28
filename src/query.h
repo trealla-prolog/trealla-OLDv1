@@ -139,3 +139,4 @@ inline static pl_status make_string(cell *d, const char *s)
 {
 	return make_stringn(d, s, strlen(s));
 }
+

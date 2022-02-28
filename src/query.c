@@ -92,8 +92,9 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 	fflush(stderr);
 	q->max_depth = save_depth;
 
-	if (q->creep)
-		sleep(1);
+	if (q->creep) {
+		msleep(500);
+	}
 }
 
 static USE_RESULT pl_status check_trail(query *q)
@@ -1531,7 +1532,7 @@ static int check_interrupt(query *q)
 		printf("%c\n", ch);
 
 		if (ch == 'h') {
-			printf("Action (a)bort, (e)xit, (r)etry, (c)ontinue, (t)race, c(r)eep: ");
+			printf("Action (e)nd, e(x)it, (r)etry, (c)ontinue, (t)race, cree(p): ");
 			goto LOOP;
 		}
 
@@ -1540,24 +1541,24 @@ static int check_interrupt(query *q)
 			return 0;
 		}
 
-		if ((ch == ';') || (ch == ' ') || (ch == 'r')) {
-			q->trace = q->creep = true;
-			q->pl->did_dump_vars = false;
+		if (ch == 'p') {
+			q->trace = q->creep = !q->creep;
 			return 0;
 		}
 
-		if (ch == 'r')
+		if ((ch == ';') || (ch == ' ') || (ch == 'r')) {
 			return 0;
+		}
 
-		if (ch == 'f')
+		if ((ch == '\n') || (ch == 'e'))
 			return -1;
 
-		if (ch == 'a') {
+		if (ch == 'e') {
 			q->abort = true;
 			return 1;
 		}
 
-		if (ch == 'e') {
+		if (ch == 'x') {
 			if (!q->run_init)
 				printf("\n");
 
@@ -1579,15 +1580,34 @@ static bool check_redo(query *q)
 
 	fflush(stdout);
 
+	if (q->autofail) {
+		printf("\n;");
+		fflush(stdout);
+		q->is_redo = true;
+		q->retry = QUERY_RETRY;
+		q->pl->did_dump_vars = false;
+		return false;
+	}
+
 	for (;;) {
 		printf("\n");
 		fflush(stdout);
 		int ch = history_getch();
 
 		if ((ch == 'h') || (ch == '?')) {
-			printf("Action (a)bort, (e)xit, (r)etry:\n");
+			printf("Action (a)ll, e(x)it, (r)etry, (e)nd:\n");
 			fflush(stdout);
 			continue;
+		}
+
+		if (ch == 'a') {
+			printf(";");
+			fflush(stdout);
+			q->is_redo = true;
+			q->retry = QUERY_RETRY;
+			q->pl->did_dump_vars = false;
+			q->autofail = true;
+			break;
 		}
 
 		if ((ch == ' ') || (ch == ';') || (ch == 'r')) {
@@ -1599,14 +1619,14 @@ static bool check_redo(query *q)
 			break;
 		}
 
-		if ((ch == '\n') || (ch == 'a')) {
+		if ((ch == '\n') || (ch == 'e')) {
 			printf(";  ... .\n");
 			q->pl->did_dump_vars = true;
 			q->abort = true;
 			return true;
 		}
 
-		if (ch == 'e') {
+		if (ch == 'x') {
 			if (!q->run_init)
 				printf("\n");
 

@@ -47,18 +47,6 @@
 #define NEWLINE_MODE "posix"
 #endif
 
-#ifdef _WIN32
-#define msleep Sleep
-#else
-static void msleep(int ms)
-{
-	struct timespec tv;
-	tv.tv_sec = (ms) / 1000;
-	tv.tv_nsec = ((ms) % 1000) * 1000 * 1000;
-	nanosleep(&tv, &tv);
-}
-#endif
-
 #define PROMPT ""
 
 size_t slicecpy(char *dst, size_t dstlen, const char *src, size_t len)

@@ -7,6 +7,7 @@
 #include <math.h>
 #include <assert.h>
 #include <unistd.h>
+#include <time.h>
 #include <sys/param.h>
 
 #ifndef USE_OPENSSL
@@ -563,6 +564,7 @@ struct query_ {
 	enum q_retry retry;
 	int8_t halt_code;
 	int8_t quoted;
+	bool autofail:1;
 	bool is_oom:1;
 	bool keysort:1;
 	bool is_redo:1;
@@ -845,3 +847,16 @@ typedef struct {
 
 #define ASTRING_cstr(pr) pr##_buf.buf ? pr##_buf.buf : ""
 #define ASTRING_free(pr) { free(pr##_buf.buf); pr##_buf.buf = NULL; }
+
+#ifdef _WIN32
+#define msleep Sleep
+#else
+static void msleep(int ms)
+{
+	struct timespec tv;
+	tv.tv_sec = (ms) / 1000;
+	tv.tv_nsec = ((ms) % 1000) * 1000 * 1000;
+	nanosleep(&tv, &tv);
+}
+#endif
+
