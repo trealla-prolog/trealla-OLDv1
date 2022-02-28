@@ -4,6 +4,7 @@ USE_RESULT size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements,
 
 USE_RESULT cell *deep_clone_to_heap_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, cell *p3, pl_idx_t p3_ctx, cell *p4, pl_idx_t p4_ctx);
 USE_RESULT cell *deep_clone_to_heap(query *q, cell *p1, pl_idx_t p1_ctx);
+USE_RESULT cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth);
 USE_RESULT cell *deep_clone_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx);
 USE_RESULT cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix);
 USE_RESULT cell *clone_to_tmp(query *q, cell *p1);

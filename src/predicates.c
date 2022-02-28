@@ -75,7 +75,7 @@ size_t slicecpy(char *dst, size_t dstlen, const char *src, size_t len)
 	return dst - save;
 }
 
-static bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial)
+bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial)
 {
 	pl_int_t skip = 0, max = 1000000000;
 	pl_idx_t c_ctx = p1_ctx;
