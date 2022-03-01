@@ -3038,10 +3038,11 @@ bool run(parser *p, const char *pSrc, bool dump)
 
 		if (!p->m->pl->quiet && !p->directive && dump && q->pl->stats) {
 			fprintf(stdout,
-				"Goals %llu. Matches %llu. Max frames %u, choices %u, trails: %u, slots %u, heap %u. Backtracks %llu. TCOs:%llu\n",
+				"Goals %llu. Matches %llu. Max frames %u, choices %u, trails: %u, slots %u, heap %u. Backtracks %llu. TCOs:%llu, strings=%u, atoms=%u\n",
 				(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
 				q->max_frames, q->max_choices, q->max_trails, q->max_slots, (q->pages?q->pages->max_hp_used:0),
-				(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
+				(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos,
+				g_string_cnt, g_literal_cnt);
 		}
 
 		ok = !q->error;

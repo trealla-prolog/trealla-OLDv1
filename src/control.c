@@ -774,9 +774,9 @@ pl_status throw_error3(query *q, cell *c, UNUSED pl_idx_t c_ctx, const char *err
 		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 6+(c->nbr_cells-1)+extra);
 		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2+extra, 2+(c->nbr_cells-1)+extra);
 
-		if (!extra)
+		if (!extra) {
 			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
-		else {
+		} else {
 			char tmpbuf[1024*8];
 			strcpy(tmpbuf, expected);
 			const char *ptr = tmpbuf;

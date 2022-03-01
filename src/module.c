@@ -505,8 +505,9 @@ predicate *find_predicate(module *m, cell *c)
 	tmp.flags = 0;
 	tmp.nbr_cells = 1;
 
-	if (is_cstring(c))
+	if (is_cstring(c)) {
 		tmp.val_off = index_from_pool(m->pl, GET_STR(m, c));
+	}
 
 	miter *iter = m_find_key(m->index, &tmp);
 	predicate *pr = NULL;

@@ -49,6 +49,8 @@ typedef enum {
 	pl_success =  1,
 } pl_status;
 
+extern unsigned g_string_cnt, g_literal_cnt;
+
 #define UNUSED __attribute__((unused))
 
 // Sentinel Value
@@ -164,6 +166,7 @@ typedef struct {
 	strb->cstr[n] = 0;											\
 	strb->len = n;												\
 	strb->refcnt = 1;											\
+	g_string_cnt++;												\
 	(c)->val_strb = strb;										\
 	(c)->strb_off = off;										\
 	(c)->strb_len = n;											\
@@ -346,7 +349,7 @@ struct cell_ {
 				uint16_t priority;		// used in parsing operators
 			};
 
-			uint32_t val_off;			// offset into pool
+			uint32_t val_off;			// used with TAG_VAR & TAG_LITERAL
 			uint32_t var_nbr;			// used with TAG_VAR
 		};
 
@@ -722,6 +725,7 @@ inline static void unshare_cell_(const cell *c)
 	if (is_strbuf(c)) {
 		if (--(c)->val_strb->refcnt == 0) {
 			free((c)->val_strb);
+			g_string_cnt--;
 		}
 	} else if (is_bigint(c)) {
 		if (--(c)->val_bigint->refcnt == 0)	{

@@ -62,10 +62,14 @@ static pl_idx_t add_to_pool(prolog *pl, const char *name)
 		pl->pool_size = nbytes;
 	}
 
+	if (((size_t)offset + len + 1) > UINT32_MAX)
+		return ERR_IDX;
+
 	memcpy(pl->pool + offset, name, len+1);
 	pl->pool_offset += len + 1;
 	const char *key = strdup(name);
 	m_set(pl->symtab, key, (void*)(unsigned long)offset);
+	g_literal_cnt++;
 	return offset;
 }
 

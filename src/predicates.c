@@ -1776,6 +1776,9 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 
 	for (size_t i = before; i <= len_p1; i++) {
 		for (size_t j = len; j <= (len_p1-i); j++) {
+			if (g_tpl_interrupt)
+				break;
+
 			set_params(q, i, j+1);
 			may_error(push_choice(q));
 			cell tmp;
