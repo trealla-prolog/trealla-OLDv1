@@ -1,10 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
-#include <time.h>
 #include <ctype.h>
 #include <errno.h>
 #include <dirent.h>
+#include <time.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 
@@ -34,6 +35,18 @@
 
 #if USE_OPENSSL
 #include "openssl/sha.h"
+#endif
+
+#ifdef _WIN32
+#define msleep Sleep
+#else
+static void msleep(int ms)
+{
+	struct timespec tv;
+	tv.tv_sec = (ms) / 1000;
+	tv.tv_nsec = ((ms) % 1000) * 1000 * 1000;
+	nanosleep(&tv, &tv);
+}
 #endif
 
 #ifdef _WIN32

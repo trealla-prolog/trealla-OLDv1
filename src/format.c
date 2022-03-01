@@ -4,6 +4,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <errno.h>
+#include <sys/param.h>
 
 #include "internal.h"
 #include "network.h"

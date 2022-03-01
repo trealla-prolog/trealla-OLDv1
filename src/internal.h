@@ -7,9 +7,6 @@
 #include <math.h>
 #include <assert.h>
 #include <unistd.h>
-#include <time.h>
-#include <sys/time.h>
-#include <sys/param.h>
 
 #ifndef USE_OPENSSL
 #define USE_OPENSSL 0
@@ -852,16 +849,3 @@ typedef struct {
 
 #define ASTRING_cstr(pr) pr##_buf.buf ? pr##_buf.buf : ""
 #define ASTRING_free(pr) { free(pr##_buf.buf); pr##_buf.buf = NULL; }
-
-#ifdef _WIN32
-#define msleep Sleep
-#else
-static void msleep(int ms)
-{
-	struct timespec tv;
-	tv.tv_sec = (ms) / 1000;
-	tv.tv_nsec = ((ms) % 1000) * 1000 * 1000;
-	nanosleep(&tv, &tv);
-}
-#endif
-
