@@ -5928,7 +5928,7 @@ static USE_RESULT pl_status fn_iso_keysort_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	pl_status status;
+	pl_status status = 0;
 	cell *l = nodesort(q, p1, p1_ctx, false, true, &status);
 	if (!l) return status;
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
