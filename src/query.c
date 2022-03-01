@@ -738,7 +738,7 @@ pl_status push_choice(query *q)
 	frame *f = GET_CURR_FRAME();
 	pl_idx_t curr_choice = q->cp++;
 	choice *ch = GET_CHOICE(curr_choice);
-	*ch = (choice){0};
+	memset(ch, 0, sizeof(choice));
 	ch->st = q->st;
 	ch->ugen = f->ugen;
 	ch->frame_cgen = ch->cgen = f->cgen;
