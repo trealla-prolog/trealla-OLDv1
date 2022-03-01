@@ -69,7 +69,7 @@ static pl_idx_t add_to_pool(prolog *pl, const char *name)
 	const char *key = strdup(name);
 	m_set(pl->symtab, key, (void*)(unsigned long)offset);
 	g_literal_cnt++;
-	return offset;
+	return (pl_idx_t)offset;
 }
 
 pl_idx_t index_from_pool(prolog *pl, const char *name)
