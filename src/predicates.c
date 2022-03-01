@@ -11428,7 +11428,7 @@ static USE_RESULT pl_status fn_sys_alarm_1(query *q)
 	if (time0 < 0)
 		return throw_error(q, p1, p1_ctx, "domain_error", "positive_integer");
 
-	struct itimerval it = {0};
+	struct itimerval it;
 
 	if (time0 == 0) {
 		setitimer(ITIMER_REAL, &it, NULL);
