@@ -65,6 +65,9 @@ profile:
 debug:
 	$(MAKE) 'OPT=$(OPT) -O0 -g -DDEBUG'
 
+release:
+	$(MAKE) 'OPT=$(OPT) -DNDEBUG'
+
 test:
 	./tests/run.sh
 

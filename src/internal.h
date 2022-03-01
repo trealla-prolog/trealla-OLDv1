@@ -685,7 +685,7 @@ struct prolog_ {
 	map *symtab, *funtab, *keyval;
 	char *pool;
 	uint64_t s_last, s_cnt, seed, ugen;
-	pl_idx_t pool_offset, pool_size;
+	size_t pool_offset, pool_size;
 	unsigned tab_idx, varno;
 	uint8_t current_input, current_output, current_error;
 	int8_t halt_code, opt;

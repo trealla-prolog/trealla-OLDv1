@@ -50,11 +50,10 @@ bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, pl_idx_t 
 
 static pl_idx_t add_to_pool(prolog *pl, const char *name)
 {
-	pl_idx_t offset = pl->pool_offset;
-	size_t len = strlen(name);
+	size_t offset = pl->pool_offset, len = strlen(name);
 
 	while ((offset+len+1+1) >= pl->pool_size) {
-		size_t nbytes = pl->pool_size * 2;
+		size_t nbytes = (size_t)pl->pool_size * 3 / 2;
 		char *tmp = realloc(pl->pool, nbytes);
 		if (!tmp) return ERR_IDX;
 		pl->pool = tmp;
@@ -62,7 +61,7 @@ static pl_idx_t add_to_pool(prolog *pl, const char *name)
 		pl->pool_size = nbytes;
 	}
 
-	if (((size_t)offset + len + 1) > UINT32_MAX)
+	if ((offset + len + 1) >= UINT32_MAX)
 		return ERR_IDX;
 
 	memcpy(pl->pool + offset, name, len+1);
