@@ -746,7 +746,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	unsigned print_list = 0, cnt = 0;
 
 	while (is_iso_list(c)) {
-			if (q->max_depth && (cnt++ >= q->max_depth)) {
+		if (q->max_depth && (cnt++ >= q->max_depth)) {
 			dst--;
 			dst += snprintf(dst, dstlen, "%s", ",...]");
 			return dst - save_dst;
@@ -805,6 +805,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 			if ((strlen(tmp_src) == 1) && (*tmp_src == '\''))
 				dst += snprintf(dst, dstlen, "|\"%s\"", tmp_src);
+			else if ((strlen(tmp_src) == 1) && needs_quoting(q->st.m, tmp_src, 1))
+				dst += snprintf(dst, dstlen, ",'%s'", tmp_src);
 			else if (strlen(tmp_src) == 1)
 				dst += snprintf(dst, dstlen, ",%s", tmp_src);
 			else
