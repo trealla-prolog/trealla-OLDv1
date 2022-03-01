@@ -1219,8 +1219,14 @@ static USE_RESULT pl_status fn_iso_pow_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 
 	if (is_zero(&p1)) {
-		q->accum.val_real = 0.0;
-		q->accum.tag = TAG_REAL;
+		if (is_integer(&p1)) {
+			q->accum.val_int = 0;
+			q->accum.tag = TAG_INT;
+		} else {
+			q->accum.val_real = 0.0;
+			q->accum.tag = TAG_REAL;
+		}
+
 		return pl_success;
 	}
 
@@ -1279,8 +1285,14 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 
 	if (is_zero(&p1)) {
-		q->accum.val_int = 0;
-		q->accum.tag = TAG_INT;
+		if (is_integer(&p1)) {
+			q->accum.val_int = 0;
+			q->accum.tag = TAG_INT;
+		} else {
+			q->accum.val_real = 0.0;
+			q->accum.tag = TAG_REAL;
+		}
+
 		return pl_success;
 	}
 
