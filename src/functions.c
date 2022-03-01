@@ -1217,6 +1217,13 @@ static USE_RESULT pl_status fn_iso_pow_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	CLEANUP cell p1 = eval(q, p1_tmp);
+
+	if (is_zero(&p1)) {
+		q->accum.val_real = 0.0;
+		q->accum.tag = TAG_REAL;
+		return pl_success;
+	}
+
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_smallint(&p2)) {
@@ -1270,6 +1277,13 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
 	CLEANUP cell p1 = eval(q, p1_tmp);
+
+	if (is_zero(&p1)) {
+		q->accum.val_int = 0;
+		q->accum.tag = TAG_INT;
+		return pl_success;
+	}
+
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2)) {
