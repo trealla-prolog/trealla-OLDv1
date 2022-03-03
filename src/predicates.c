@@ -5732,17 +5732,13 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 	return pl_success;
 }
 
-typedef struct { cell *c; pl_idx_t c_ctx; } basepair;
+typedef struct { cell *c; pl_idx_t c_ctx; query *q; } basepair;
 
-#if __BSD__ || __APPLE__
-static int nodecmp(void *thunk, const void *ptr1, const void *ptr2)
-#else
-static int nodecmp(const void *ptr1, const void *ptr2, void *thunk)
-#endif
+static int nodecmp(const void *ptr1, const void *ptr2)
 {
-	query *q = (query*)thunk;
 	const basepair *cp1 = (const basepair*)ptr1;
 	const basepair *cp2 = (const basepair*)ptr2;
+	query *q = cp1->q;
 	cell *p1 = cp1->c, *p2 = cp2->c;
 	pl_idx_t p1_ctx = cp1->c_ctx, p2_ctx = cp2->c_ctx;
 
@@ -5796,6 +5792,7 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 
 		base[idx].c = h;
 		base[idx].c_ctx = h_ctx;
+		base[idx].q = q;
 		idx++;
 		p1 = LIST_TAIL(p1);
 		p1 = deref(q, p1, p1_ctx);
@@ -5804,19 +5801,11 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 
 	q->keysort = keysort;
 
-#if __BSD__ || __APPLE__
-	qsort_r(base, cnt, sizeof(basepair), (void*)q, nodecmp);
-#else
-	qsort_r(base, cnt, sizeof(basepair), nodecmp, (void*)q);
-#endif
+	qsort(base, cnt, sizeof(basepair), nodecmp);
 
 	for (size_t i = 0; i < cnt; i++) {
 		if (i > 0) {
-#if __BSD__ || __APPLE__
-			if (dedup && !nodecmp(q, &base[i], &base[i-1]))
-#else
-			if (dedup && !nodecmp(&base[i], &base[i-1], q))
-#endif
+			if (dedup && !nodecmp(&base[i], &base[i-1]))
 				continue;
 		}
 
