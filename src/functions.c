@@ -1273,20 +1273,26 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
 	if (is_bigint(&p1) && is_bigint(&p2)) {
-		return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "int_overflow");
+		if (is_negative(&p2))
+			return throw_error(q, &p2, q->st.curr_frame, "type_error", "greater_zero");
+
+		if (mp_int_expt_full(&p1.val_bigint->ival, &p2.val_bigint->ival, &q->tmp_ival) != MP_OK)
+			return throw_error(q, &p2, q->st.curr_frame, "resource_error", "memory");
+
+		SET_ACCUM();
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
 		if (p2.val_int < 0)
-			return throw_error(q, &p1, q->st.curr_frame, "type_error", "greater_zero");
+			return throw_error(q, &p2, q->st.curr_frame, "type_error", "greater_zero");
 
 		if (p2.val_int > (INT32_MAX/2))
-			return throw_error(q, &p1, q->st.curr_frame, "resource_error", "memory");
+			return throw_error(q, &p2, q->st.curr_frame, "resource_error", "memory");
 
 		if (mp_int_expt(&p1.val_bigint->ival, p2.val_int, &q->tmp_ival) != MP_OK)
-			return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "int_overflow");
+			return throw_error(q, &p2, q->st.curr_frame, "resource_error", "memory");
 
 		SET_ACCUM();
 	} else if (is_bigint(&p2) && is_smallint(&p1)) {
-		return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "int_overflow");
+		return throw_error(q, &p2, q->st.curr_frame, "resource_error", "memory");
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		if ((p1.val_int != 1) && (p2.val_int < 0))
 			return throw_error(q, &p1, q->st.curr_frame, "type_error", "float");
@@ -1298,7 +1304,7 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 		}
 
 		if (p2.val_int > (INT32_MAX/2))
-			return throw_error(q, &p1, q->st.curr_frame, "resource_error", "memory");
+			return throw_error(q, &p2, q->st.curr_frame, "resource_error", "memory");
 
 		if (mp_int_expt_value(p1.val_int, p2.val_int, &q->tmp_ival) != MP_OK)
 			return throw_error(q, &p1, q->st.curr_frame, "resource_error", "memory");
