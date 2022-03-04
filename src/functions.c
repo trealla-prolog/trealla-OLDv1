@@ -163,6 +163,7 @@ static mp_result mp_int_divx_value(mp_int a, mp_small b, mp_int q)
 
 #define CHECK_CALC()							\
 	clr_accum(&q->accum);						\
+	errno = 0;									\
 												\
 	if (!q->eval) {								\
 		if (q->st.m->flag.unknown == 0)			\
@@ -1292,7 +1293,19 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 
 		SET_ACCUM();
 	} else if (is_bigint(&p2) && is_smallint(&p1)) {
-		return throw_error(q, &p2, q->st.curr_frame, "resource_error", "memory");
+		if (is_negative(&p2))
+			return throw_error(q, &p2, q->st.curr_frame, "type_error", "greater_zero");
+
+		mpz_t tmp;
+		mp_int_init_value(&tmp, p1.val_int);
+
+		if (mp_int_expt_full(&tmp, &p2.val_bigint->ival, &q->tmp_ival) != MP_OK) {
+			mp_int_clear(&tmp);
+			return throw_error(q, &p2, q->st.curr_frame, "resource_error", "memory");
+		}
+
+		mp_int_clear(&tmp);
+		SET_ACCUM();
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		if ((p1.val_int != 1) && (p2.val_int < 0))
 			return throw_error(q, &p1, q->st.curr_frame, "type_error", "float");
