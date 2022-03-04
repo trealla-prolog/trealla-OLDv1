@@ -2968,7 +2968,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 bool run(parser *p, const char *pSrc, bool dump)
 {
 
-	if (*pSrc == '.') {
+	if ((*pSrc == '.') && !pSrc[1]) {
 		fprintf(stdout, "Error: syntax error, unexpected end of rule\n");
 		return false;
 	}
