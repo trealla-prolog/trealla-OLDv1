@@ -17,13 +17,19 @@
 #include "heap.h"
 
 #define SET_ACCUM() {											\
+	if (errno == ENOMEM)										\
+		return throw_error(q, &p1, q->st.curr_frame, "resource_error", "memory"); \
 	q->accum.tag = TAG_INT;										\
 	q->accum.flags = FLAG_MANAGED;								\
 	q->accum.val_bigint = malloc(sizeof(bigint));				\
+	if (errno == ENOMEM)										\
+		return throw_error(q, &p1, q->st.curr_frame, "resource_error", "memory"); \
 	q->accum.val_bigint->refcnt = 0;							\
 	if (mp_int_init_copy(&q->accum.val_bigint->ival, &q->tmp_ival) == MP_MEMORY) {\
 		return throw_error(q, &q->accum, q->st.curr_frame, "resource_error", "memory"); \
 	} \
+	if (errno == ENOMEM)										\
+		return throw_error(q, &p1, q->st.curr_frame, "resource_error", "memory"); \
 }
 
 static void clr_accum(cell *p)
@@ -1280,9 +1286,6 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 		if (mp_int_expt_full(&p1.val_bigint->ival, &p2.val_bigint->ival, &q->tmp_ival) != MP_OK)
 			return throw_error(q, &p2, q->st.curr_frame, "resource_error", "memory");
 
-		if (errno == ENOMEM)
-			return throw_error(q, &p1, q->st.curr_frame, "resource_error", "memory");
-
 		SET_ACCUM();
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
 		if (p2.val_int < 0)
@@ -1293,9 +1296,6 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 
 		if (mp_int_expt(&p1.val_bigint->ival, p2.val_int, &q->tmp_ival) != MP_OK)
 			return throw_error(q, &p2, q->st.curr_frame, "resource_error", "memory");
-
-		if (errno == ENOMEM)
-			return throw_error(q, &p1, q->st.curr_frame, "resource_error", "memory");
 
 		SET_ACCUM();
 	} else if (is_bigint(&p2) && is_smallint(&p1)) {
@@ -1311,10 +1311,6 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 		}
 
 		mp_int_clear(&tmp);
-
-		if (errno == ENOMEM)
-			return throw_error(q, &p1, q->st.curr_frame, "resource_error", "memory");
-
 		SET_ACCUM();
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		if ((p1.val_int != 1) && (p2.val_int < 0))

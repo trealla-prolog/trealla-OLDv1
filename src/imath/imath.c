@@ -379,7 +379,9 @@ mp_result mp_int_init(mp_int z) {
 }
 
 mp_int mp_int_alloc(void) {
+  errno = 0;
   mp_int out = malloc(sizeof(mpz_t));
+  if(out == NULL) errno = ENOMEM;
 
   if (out != NULL) mp_int_init(out);
 
@@ -1703,15 +1705,18 @@ static mp_digit *s_alloc(mp_size num) {
 }
 
 static mp_digit *s_realloc(mp_digit *old, mp_size osize, mp_size nsize) {
+  errno = 0;
 #if DEBUG
   mp_digit *new = s_alloc(nsize);
-  assert(new != NULL);
+ // assert(new != NULL);
+  if (new == NULL) errno = ENOMEM;
 
   for (mp_size ix = 0; ix < nsize; ++ix) new[ix] = fill;
   memcpy(new, old, osize * sizeof(mp_digit));
 #else
   mp_digit *new = realloc(old, nsize * sizeof(mp_digit));
   //assert(new != NULL);
+  if (new == NULL) errno = ENOMEM;
 #endif
 
   return new;
