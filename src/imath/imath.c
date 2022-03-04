@@ -379,7 +379,6 @@ mp_result mp_int_init(mp_int z) {
 }
 
 mp_int mp_int_alloc(void) {
-  errno = 0;
   mp_int out = malloc(sizeof(mpz_t));
   if(out == NULL) errno = ENOMEM;
 
@@ -1693,7 +1692,6 @@ static const mp_digit fill = (mp_digit)0xdeadbeefabad1dea;
 #endif
 
 static mp_digit *s_alloc(mp_size num) {
-  errno = 0;
   mp_digit *out = malloc(num * sizeof(mp_digit));
   //assert(out != NULL);
   if (out == NULL) errno = ENOMEM;
@@ -1705,7 +1703,6 @@ static mp_digit *s_alloc(mp_size num) {
 }
 
 static mp_digit *s_realloc(mp_digit *old, mp_size osize, mp_size nsize) {
-  errno = 0;
 #if DEBUG
   mp_digit *new = s_alloc(nsize);
  // assert(new != NULL);
