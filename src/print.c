@@ -913,12 +913,12 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		if (braces)
 			;
 		else if (quote) {
-			if (is_blob(c) && q->max_depth && (len_str >= q->max_depth))
+			if (is_blob(c) && q->max_depth && (len_str >= q->max_depth) && (LEN_STR(q,c) > 128))
 				len_str = q->max_depth;
 
 			dst += formatted(dst, dstlen, src, len_str, dq);
 
-			if (is_blob(c) && q->max_depth && (len_str >= q->max_depth)) {
+			if (is_blob(c) && q->max_depth && (len_str >= q->max_depth) && (LEN_STR(q,c) > 128)) {
 				dst--;
 				dst += snprintf(dst, dstlen, "%s", ",...");
 			}
