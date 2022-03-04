@@ -95,8 +95,8 @@ sort_(Term, _) :-
 sort_([], []) :- !.
 sort_([X, Y| Xs], Ys) :- !,
 	'$sort_split'([X, Y| Xs], X1s, X2s),
-	sort(X1s, Y1s),
-	sort(X2s, Y2s),
+	sort_(X1s, Y1s),
+	sort_(X2s, Y2s),
 	'$sort_merge'(Y1s, Y2s, Ys0),
 	Ys = Ys0, !.
 sort_([X], [X]) :- !.
@@ -130,8 +130,8 @@ msort_(Term, _) :-
 msort_([], []) :- !.
 msort_([X, Y| Xs], Ys) :- !,
 	'$sort_split'([X, Y| Xs], X1s, X2s),
-	msort(X1s, Y1s),
-	msort(X2s, Y2s),
+	msort_(X1s, Y1s),
+	msort_(X2s, Y2s),
 	'$msort_merge'(Y1s, Y2s, Ys0),
 	Ys = Ys0, !.
 msort_([X], [X]) :- !.
