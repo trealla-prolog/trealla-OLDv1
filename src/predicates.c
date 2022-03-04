@@ -5801,11 +5801,7 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 
 	q->keysort = keysort;
 
-#if __BSD__ || __FREEBSD__ || __APPLE__
-	mergesort(base, cnt, sizeof(basepair), nodecmp);
-#else
 	qsort(base, cnt, sizeof(basepair), nodecmp);
-#endif
 
 	for (size_t i = 0; i < cnt; i++) {
 		if (i > 0) {

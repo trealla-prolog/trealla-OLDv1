@@ -87,6 +87,123 @@ findall(T, G, B, Tail) :-
 	append(B0, Tail, B), !.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+
+sort_(Term, _) :-
+	var(Term),
+	throw(error(instantiation_error, sort/2)).
+sort_([], []) :- !.
+sort_([X, Y| Xs], Ys) :- !,
+	'$sort_split'([X, Y| Xs], X1s, X2s),
+	sort(X1s, Y1s),
+	sort(X2s, Y2s),
+	'$sort_merge'(Y1s, Y2s, Ys0),
+	Ys = Ys0, !.
+sort_([X], [X]) :- !.
+sort_(Term, _) :-
+	Term \== [],
+	throw(error(type_error(list,Term), sort/2)).
+sort_(_, Term) :-
+	throw(error(type_error(list,Term), sort/2)).
+
+'$sort_merge'([X| Xs], [Y| Ys], [X| Zs]) :-
+	X == Y, !,
+	'$sort_merge'(Xs, Ys, Zs).
+'$sort_merge'([X| Xs], [Y| Ys], [X| Zs]) :-
+	X @< Y, !,
+	'$sort_merge'(Xs, [Y| Ys], Zs).
+'$sort_merge'([X| Xs], [Y| Ys], [Y| Zs]) :-
+	X @> Y, !,
+	'$sort_merge'([X | Xs], Ys, Zs).
+'$sort_merge'([], Xs, Xs) :- !.
+'$sort_merge'(Xs, [], Xs).
+
+'$sort_split'('-', _, _) :-
+	throw(error(instantiation_error, sort/2)).
+'$sort_split'([], [], []).
+'$sort_split'([X| Xs], [X| Ys], Zs) :-
+	'$sort_split'(Xs, Zs, Ys).
+
+msort_(Term, _) :-
+	var(Term),
+	throw(error(instantiation_error, msort/2)).
+msort_([], []) :- !.
+msort_([X, Y| Xs], Ys) :- !,
+	'$sort_split'([X, Y| Xs], X1s, X2s),
+	msort(X1s, Y1s),
+	msort(X2s, Y2s),
+	'$msort_merge'(Y1s, Y2s, Ys0),
+	Ys = Ys0, !.
+msort_([X], [X]) :- !.
+msort_(Term, _) :-
+	Term \== [],
+	throw(error(type_error(list,Term), msort/2)).
+msort_(_, Term) :-
+	throw(error(type_error(list,Term), msort/2)).
+
+'$msort_merge'([X| Xs], [Y| Ys], [X| Zs]) :-
+	X @=< Y, !,
+	'$msort_merge'(Xs, [Y| Ys], Zs).
+'$msort_merge'([X| Xs], [Y| Ys], [Y| Zs]) :-
+	X @> Y, !,
+	'$msort_merge'([X | Xs], Ys, Zs).
+'$msort_merge'([], Xs, Xs) :- !.
+'$msort_merge'(Xs, [], Xs).
+
+keysort_(List, Sorted) :-
+	keysort(List, List, Sorted, []).
+
+keysort([Term| _], _, _, _) :-
+	var(Term),
+	throw(error(instantiation_error, keysort/2)).
+keysort([Key-X| Xs], List, Ys, YsTail) :-
+	!,
+	'$key_partition'(Xs, Key, List, Left, EQ, EQT, Right),
+	keysort(Left, List,  Ys, [Key-X|EQ]),
+	keysort(Right, List, EQT, YsTail),
+	!.
+keysort([], _, Ys, Ys) :-
+	!.
+keysort([Term| _], _, _, _) :-
+	throw(error(type_error(pair,Term), keysort/2)).
+keysort(Term, List, _, _) :-
+	Term \== [],
+	throw(error(type_error(list,List), keysort/2)).
+keysort(_, _, Sorted, _) :-
+	Sorted \= [_|_],
+	throw(error(type_error(list,Sorted), keysort/2)).
+keysort(_, _, [Term| _], _) :-
+	Term \= _-_,
+	throw(error(type_error(pair,Term), keysort/2)).
+keysort(_, _, Sorted, _) :-
+	throw(error(type_error(list,Sorted), keysort/2)).
+
+'$key_partition'([Term| _], _, _, _, _, _, _) :-
+	var(Term),
+	throw(error(instantiation_error, keysort/2)).
+'$key_partition'([XKey-X| Xs], YKey, List, [XKey-X| Ls], EQ, EQT, Rs) :-
+	XKey @< YKey,
+	!,
+	'$key_partition'(Xs, YKey, List, Ls, EQ, EQT, Rs).
+'$key_partition'([XKey-X| Xs], YKey, List, Ls, [XKey-X| EQ], EQT, Rs) :-
+	XKey == YKey,
+	!,
+	'$key_partition'(Xs, YKey, List, Ls, EQ, EQT, Rs).
+'$key_partition'([XKey-X| Xs], YKey, List, Ls, EQ, EQT, [XKey-X| Rs]) :-
+%	XKey @> YKey,
+	!,
+	'$key_partition'(Xs, YKey, List, Ls, EQ, EQT, Rs).
+'$key_partition'([], _, _, [], EQT, EQT, []) :-
+	!.
+'$key_partition'([Term| _], _, _, _, _, _, _) :-
+	throw(error(type_error(pair,Term), keysort/2)).
+'$key_partition'(_, _, List, _, _, _, _) :-
+	throw(error(type_error(list,List), keysort/2)).
+
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Derived from code by R.A. O'Keefe
 
 setof(Template, Generator, Set) :-
