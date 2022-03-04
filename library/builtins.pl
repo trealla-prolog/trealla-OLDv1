@@ -151,31 +151,31 @@ msort_(_, Term) :-
 '$msort_merge'(Xs, [], Xs).
 
 keysort_(List, Sorted) :-
-	keysort(List, List, Sorted, []).
+	keysort_(List, List, Sorted, []).
 
-keysort([Term| _], _, _, _) :-
+keysort_([Term| _], _, _, _) :-
 	var(Term),
 	throw(error(instantiation_error, keysort/2)).
-keysort([Key-X| Xs], List, Ys, YsTail) :-
+keysort_([Key-X| Xs], List, Ys, YsTail) :-
 	!,
 	'$key_partition'(Xs, Key, List, Left, EQ, EQT, Right),
-	keysort(Left, List,  Ys, [Key-X|EQ]),
-	keysort(Right, List, EQT, YsTail),
+	keysort_(Left, List,  Ys, [Key-X|EQ]),
+	keysort_(Right, List, EQT, YsTail),
 	!.
-keysort([], _, Ys, Ys) :-
+keysort_([], _, Ys, Ys) :-
 	!.
-keysort([Term| _], _, _, _) :-
+keysort_([Term| _], _, _, _) :-
 	throw(error(type_error(pair,Term), keysort/2)).
-keysort(Term, List, _, _) :-
+keysort_(Term, List, _, _) :-
 	Term \== [],
 	throw(error(type_error(list,List), keysort/2)).
-keysort(_, _, Sorted, _) :-
+keysort_(_, _, Sorted, _) :-
 	Sorted \= [_|_],
 	throw(error(type_error(list,Sorted), keysort/2)).
-keysort(_, _, [Term| _], _) :-
+keysort_(_, _, [Term| _], _) :-
 	Term \= _-_,
 	throw(error(type_error(pair,Term), keysort/2)).
-keysort(_, _, Sorted, _) :-
+keysort_(_, _, Sorted, _) :-
 	throw(error(type_error(list,Sorted), keysort/2)).
 
 '$key_partition'([Term| _], _, _, _, _, _, _) :-
@@ -211,7 +211,7 @@ setof(Template, Generator, Set) :-
     ; 	must_be(Set, list_or_partial_list, setof/3, _)
     ),
 	bagof_(Template, Generator, Bag),
-	sort(Bag, Set).
+	sort_(Bag, Set).
 
 bagof(Template, Generator, Bag) :-
     (	var(Bag) ->	true
@@ -231,7 +231,7 @@ bagof_(Template, Generator, Bag) :-
 	functor(Key, (.), N),
 	findall(Key-Template,Generator,Recorded),
 	replace_instance_(Recorded, Key, N, _, OmniumGatherum),
-	keysort(OmniumGatherum, Gamut), !,
+	keysort_(OmniumGatherum, Gamut), !,
 	concordant_subset_(Gamut, Key, Answer),
 	Bag = Answer.
 bagof_(Template, Generator, Bag) :-
