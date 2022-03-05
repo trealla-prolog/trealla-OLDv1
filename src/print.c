@@ -461,7 +461,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 		cell *l = q->variable_names;
 		LIST_HANDLER(l);
 
-		while (is_list(l)) {
+		while (is_iso_list(l)) {
 			cell *h = LIST_HEAD(l);
 			cell *name = h+1;
 			cell *var = h+2;
@@ -861,7 +861,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			cell *l = q->variable_names;
 			LIST_HANDLER(l);
 
-			while (is_list(l)) {
+			while (is_iso_list(l)) {
 				cell *h = LIST_HEAD(l);
 				cell *name = h+1;
 				cell *var = h+2;
@@ -1259,7 +1259,7 @@ pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 		pl_int_t max = LONG_MAX, skip = 0;
 		pl_idx_t tmp_ctx = c_ctx;
 		cell *t = skip_max_list(q, c, &tmp_ctx, max, &skip, &tmp);
-		if (!is_nil(t)) cyclic = true;
+		if (!is_nil(t) && !is_variable(t)) cyclic = true;
 	}
 
 	if (!running || cyclic || (running && is_cyclic_term(q, c, c_ctx))) {
