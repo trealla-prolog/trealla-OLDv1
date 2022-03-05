@@ -780,7 +780,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 		int parens = is_structure(head) && special_op;
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
-		ssize_t res = print_term_to_buf(q, dst, dstlen, head, head_ctx, running, false, depth++);
+		ssize_t res = print_term_to_buf(q, dst, dstlen, head, head_ctx, running, false, depth+1);
 		if (res < 0) return -1;
 		dst += res;
 		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
