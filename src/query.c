@@ -1544,7 +1544,7 @@ static int check_interrupt(query *q)
 		printf("%c\n", ch);
 
 		if (ch == 'h') {
-			printf("Action (e)nd, e(x)it, (r)etry, (c)ontinue, (t)race, cree(p): ");
+			printf("Action (a)ll, (e)nd, e(x)it, (r)etry, (c)ontinue, (t)race, cree(p): ");
 			goto LOOP;
 		}
 
@@ -1562,7 +1562,7 @@ static int check_interrupt(query *q)
 			return 0;
 		}
 
-		if ((ch == '\n') || (ch == 'e'))
+		if (ch == '\n')
 			return -1;
 
 		if (ch == 'e') {
