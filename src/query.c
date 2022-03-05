@@ -1501,7 +1501,7 @@ static void dump_vars(query *q, bool partial)
 		q->variable_names_ctx = INITIAL_FRAME;
 		q->max_depth = 25;
 
-		if (is_indirect(&e->c) && (e->ctx != INITIAL_FRAME))
+		if (is_indirect(&e->c) && (e->ctx != INITIAL_FRAME) && 0)
 			q->variable_names = NULL;
 
 		if (is_variable(c) && (c_ctx == INITIAL_FRAME))
