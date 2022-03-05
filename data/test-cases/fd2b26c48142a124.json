@@ -1,0 +1,51 @@
+{
+  "uid" : "fd2b26c48142a124",
+  "name" : "lgt_unicode_non_ground_compound_term_reading",
+  "fullName" : "lgt_unicode_non_ground_compound_term_reading::tests",
+  "historyId" : "lgt_unicode_non_ground_compound_term_reading::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "unicode/syntax/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "unicode/syntax/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "unicode/syntax/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "unicode/syntax/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "90-92"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/def2b01dfaf96b6bf6bc7b36800b8c2e392fa2b9/tests/prolog/unicode/syntax/tests.lgt#L90"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "fd2b26c48142a124.json",
+  "parameterValues" : [ "unicode/syntax/tests.lgt", "90-92", "https://github.com/LogtalkDotOrg/logtalk3/tree/def2b01dfaf96b6bf6bc7b36800b8c2e392fa2b9/tests/prolog/unicode/syntax/tests.lgt#L90" ]
+}
