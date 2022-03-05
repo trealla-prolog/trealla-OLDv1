@@ -457,9 +457,8 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 	pl_idx_t var_nbr = 0;
 
-	if (is_variable(c) && running && q->variable_names) {
+	if (running && is_variable(c) && q->variable_names && (c_ctx == q->variable_names_ctx)) {
 		cell *l = q->variable_names;
-		pl_idx_t l_ctx = q->variable_names_ctx;
 		LIST_HANDLER(l);
 
 		while (is_list(l)) {
@@ -467,7 +466,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 			cell *name = h+1;
 			cell *var = h+2;
 
-			if ((l_ctx == c_ctx) && (var->var_nbr == c->var_nbr)) {
+			if (var->var_nbr == c->var_nbr) {
 				dst += snprintf(dst, dstlen, "%s", GET_STR(q, name));
 				return dst - save_dst;
 			}
@@ -858,9 +857,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			return dst - save_dst;
 		}
 
-		if (running && is_variable(c) && q->variable_names) {
+		if (running && is_variable(c) && q->variable_names && (c_ctx == q->variable_names_ctx)) {
 			cell *l = q->variable_names;
-			pl_idx_t l_ctx = q->variable_names_ctx;
 			LIST_HANDLER(l);
 
 			while (is_list(l)) {
@@ -868,7 +866,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				cell *name = h+1;
 				cell *var = h+2;
 
-				if ((l_ctx == c_ctx) && (var->var_nbr == c->var_nbr)) {
+				if (var->var_nbr == c->var_nbr) {
 					dst += snprintf(dst, dstlen, "%s", GET_STR(q, name));
 					return dst - save_dst;
 				}
@@ -879,7 +877,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
-		if (is_variable(c) && q) {
+		if (is_variable(c)) {
 			frame *f = GET_FRAME(c_ctx);
 			slot *e = GET_SLOT(f, c->var_nbr);
 			pl_idx_t slot_idx = e - q->slots;
