@@ -1870,7 +1870,7 @@ static void s_usub(mp_digit *da, mp_digit *db, mp_digit *dc, mp_size size_a,
   }
 
   /* If there is a borrow out at the end, it violates the precondition */
-  assert(w == 0);
+  //assert(w == 0);
 }
 
 static int s_kmul(mp_digit *da, mp_digit *db, mp_digit *dc, mp_size size_a,
@@ -1938,7 +1938,7 @@ static int s_kmul(mp_digit *da, mp_digit *db, mp_digit *dc, mp_size size_a,
     /* Assemble the output value */
     COPY(t1, dc, buf_size);
     carry = s_uadd(t3, dc + bot_size, dc + bot_size, buf_size + 1, buf_size);
-    assert(carry == 0);
+    //assert(carry == 0);
 
     carry =
         s_uadd(t2, dc + 2 * bot_size, dc + 2 * bot_size, buf_size, buf_size);
