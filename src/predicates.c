@@ -5732,13 +5732,15 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 	return pl_success;
 }
 
-typedef struct { cell *c; pl_idx_t c_ctx; query *q; } basepair;
+typedef struct { cell *c; pl_idx_t c_ctx; query *q; bool ascending; int arg; } basepair;
 
 static int nodecmp(const void *ptr1, const void *ptr2)
 {
 	const basepair *cp1 = (const basepair*)ptr1;
 	const basepair *cp2 = (const basepair*)ptr2;
+	bool ascending = cp1->ascending;
 	query *q = cp1->q;
+	int arg = cp1->arg;
 	cell *p1 = cp1->c, *p2 = cp2->c;
 	pl_idx_t p1_ctx = cp1->c_ctx, p2_ctx = cp2->c_ctx;
 
@@ -5748,18 +5750,27 @@ static int nodecmp(const void *ptr1, const void *ptr2)
 	p2 = deref(q, p2, p2_ctx);
 	p2_ctx = q->latest_ctx;
 
-	if (q->keysort) {
+	if (p1->arity && (arg > 0)) {
 		p1 = p1 + 1;
 		p2 = p2 + 1;
 
+		while (--arg > 0) {
+			p1 += p1->nbr_cells;
+			p2 += p2->nbr_cells;
+		}
+
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
-
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
 
-	return compare(q, p1, p1_ctx, p2, p2_ctx);
+	int ok = compare(q, p1, p1_ctx, p2, p2_ctx);
+
+	if (ascending)
+		return ok < 0 ? -1 : ok > 0 ? 1 : 0;
+	else
+		return ok < 0 ? 1 : ok > 0 ? -1 : 0;
 }
 
 static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keysort, pl_status *status)
@@ -5793,13 +5804,13 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 		base[idx].c = h;
 		base[idx].c_ctx = h_ctx;
 		base[idx].q = q;
+		base[idx].ascending = true;
+		base[idx].arg = keysort ? 1 : 0;
 		idx++;
 		p1 = LIST_TAIL(p1);
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
-
-	q->keysort = keysort;
 
 	// On Linux qsort seems to produce a stable sort, although it's
 	// not guaranteed. On BSD systems mergesort is supposed to be.
@@ -5835,7 +5846,6 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 	}
 
 	cell *l = end_list(q);
-	q->keysort = false;
 	free(base);
 	return l;
 }
@@ -5930,6 +5940,133 @@ static USE_RESULT pl_status fn_iso_keysort_2(query *q)
 	cell *l = nodesort(q, p1, p1_ctx, false, true, &status);
 	if (!l) return status;
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
+}
+
+static cell *nodesort4(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool ascending, int arg, pl_status *status)
+{
+	pl_int_t max = PL_INT_MAX, skip = 0;
+	pl_idx_t tmp_ctx = p1_ctx;
+	cell tmp = {0};
+
+	skip_max_list(q, p1, &tmp_ctx, max, &skip, &tmp);
+	unshare_cell(&tmp);
+	size_t cnt = skip;
+	basepair *base = malloc(sizeof(basepair)*cnt);
+	LIST_HANDLER(p1);
+	size_t idx = 0;
+
+	while (is_list(p1)) {
+		cell *h = LIST_HEAD(p1);
+		pl_idx_t h_ctx = p1_ctx;
+
+		base[idx].c = h;
+		base[idx].c_ctx = h_ctx;
+		base[idx].q = q;
+		base[idx].ascending = ascending;
+		base[idx].arg = arg;
+		idx++;
+		p1 = LIST_TAIL(p1);
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+	}
+
+	// On Linux qsort seems to produce a stable sort, although it's
+	// not guaranteed. On BSD systems mergesort is supposed to be.
+	// Note: bagof/setof are now using a Prolog sort/keysort that
+	// is known to be stable.
+
+#if __BSD__ || __FREEBSD__ || __APPLE__ || __MACH__ || __Darwin__ || __DragonFly__
+	mergesort(base, cnt, sizeof(basepair), nodecmp);
+#else
+	qsort(base, cnt, sizeof(basepair), nodecmp);
+#endif
+
+	for (size_t i = 0; i < cnt; i++) {
+		if (i > 0) {
+			if (dedup && !nodecmp(&base[i], &base[i-1]))
+				continue;
+		}
+
+		cell *c = deref(q, base[i].c, base[i].c_ctx);
+		pl_idx_t c_ctx = q->latest_ctx;
+		cell tmp;
+
+		if (is_variable(c) || is_structure(c)) {
+			make_variable(&tmp, c->val_off, create_vars(q, 1));
+			unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+			c = &tmp;
+		}
+
+		if (i == 0)
+			allocate_list(q, c);
+		else
+			append_list(q, c);
+	}
+
+	cell *l = end_list(q);
+	free(base);
+	return l;
+}
+
+static USE_RESULT pl_status fn_sort_4(query *q)
+{
+	GET_FIRST_ARG(p1,integer);
+	GET_NEXT_ARG(p2,atom);
+	GET_NEXT_ARG(p3,list_or_nil);
+	GET_NEXT_ARG(p4,list_or_nil_or_var);
+	bool is_partial = false, dedup = false, ascending = true;
+
+	if (is_integer(p1) && is_negative(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "not_less_than_zero");
+
+	int arg = get_smallint(p1);
+	const char *src = GET_STR(q, p2);
+
+	if (!strcmp(src, "@<")) {
+		ascending = true;
+		dedup = true;
+	} else if (!strcmp(src, "@=<")) {
+		ascending = true;
+		dedup = false;
+	} else if (!strcmp(src, "@>")) {
+		ascending = false;
+		dedup = true;
+	} else if (!strcmp(src, "@>=")) {
+		ascending = false;
+		dedup = false;
+	} else
+		return throw_error(q, p2, p2_ctx, "domain_error", "order");
+
+	if (is_iso_list(p3) && !check_list(q, p3, p3_ctx, &is_partial) && !is_partial)
+		return throw_error(q, p3, p3_ctx, "type_error", "list");
+
+	if (is_partial)
+		return throw_error(q, p3, p3_ctx, "instantiation_error", "list");
+
+	if (is_iso_list(p4) && !check_list(q, p4, p4_ctx, &is_partial) && !is_partial)
+		return throw_error(q, p4, p4_ctx, "type_error", "list");
+
+	if (is_iso_list(p4)) {
+		LIST_HANDLER(p4);
+		cell *tmp_h = LIST_HEAD(p4);
+		tmp_h = deref(q, tmp_h, p4_ctx);
+		pl_idx_t tmp_h_ctx = q->latest_ctx;
+		LIST_TAIL(p4);
+
+		if (!is_variable(tmp_h) && (!is_structure(tmp_h) || strcmp(GET_STR(q, tmp_h), "-")))
+			return throw_error(q, tmp_h, tmp_h_ctx, "type_error", "pair");
+	}
+
+	if (is_nil(p3)) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
+	}
+
+	pl_status status = 0;
+	cell *l = nodesort4(q, p3, p3_ctx, dedup, ascending, arg, &status);
+	if (!l) return status;
+	return unify(q, p4, p4_ctx, l, q->st.curr_frame);
 }
 
 static cell *convert_to_list(query *q, cell *c, pl_idx_t nbr_cells)
@@ -11563,6 +11700,9 @@ static const struct builtins g_predicates_iso[] =
 	{"atom_concat", 3, fn_iso_atom_concat_3, NULL, false},
 	{"sub_atom", 5, fn_iso_sub_atom_5, NULL, false},
 	{"current_rule", 1, fn_iso_current_rule_1, NULL, false},
+	{"sort", 2, fn_iso_sort_2, NULL, false},
+	{"msort", 2, fn_iso_msort_2, NULL, false},
+	{"keysort", 2, fn_iso_keysort_2, NULL, false},
 
 #ifndef SANDBOX
 	{"open", 4, fn_iso_open_4, NULL, false},
@@ -11713,9 +11853,7 @@ static const struct builtins g_predicates_other[] =
 
 	// Miscellaneous...
 
-	{"sort", 2, fn_iso_sort_2, NULL, false},
-	{"msort", 2, fn_iso_msort_2, NULL, false},
-	{"keysort", 2, fn_iso_keysort_2, NULL, false},
+	{"sort", 4, fn_sort_4, NULL, false},
 
 	{"pid", 1, fn_pid_1, "-integer", false},
 	{"get_unbuffered_code", 1, fn_get_unbuffered_code_1, "?code", false},
