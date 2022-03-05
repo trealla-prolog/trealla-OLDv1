@@ -304,6 +304,7 @@ Non-standard predicates
 	goal_expansion/2			# TODO
 	cyclic_term/1
 	findall/4
+	sort/4
 	var_number/2
 	ignore/1
 	is_list/1
