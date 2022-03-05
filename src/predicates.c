@@ -5801,6 +5801,11 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 
 	q->keysort = keysort;
 
+	// On Linux qsort seems to produce a stable sort, although it's
+	// not guaranteed. On BSD systems mergesort is supposed to be.
+	// Note: bagof/setof are now using a Prolog sort/keysort that
+	// is known to be stable.
+
 #if __BSD__ || __FREEBSD__ || __APPLE__ || __MACH__ || __Darwin__ || __DragonFly__
 	mergesort(base, cnt, sizeof(basepair), nodecmp);
 #else
