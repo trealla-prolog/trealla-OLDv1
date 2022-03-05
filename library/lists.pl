@@ -29,10 +29,12 @@ intersection([], _, []).
 intersection([H|T], Y, [H|Z]) :- member(H, Y), !, intersection(T, Y, Z).
 intersection([_|T], Y, Z) :- intersection(T, Y, Z).
 
-reverse(L1, L2) :- revzap_(L1, [], L2).
+reverse(Xs, Ys) :-
+	reverse(Xs, [], Ys, Ys).
 
-revzap_([], L, L) :- !.
-revzap_([H|L], L2, L3) :- revzap_(L, [H|L2], L3).
+reverse([], Ys, Ys, []).
+reverse([X|Xs], Rs, Ys, [_|Bound]) :-
+	reverse(Xs, [X|Rs], Ys, Bound).
 
 append(ListOfLists, List) :-
 	must_be(ListOfLists, list, _, _),
