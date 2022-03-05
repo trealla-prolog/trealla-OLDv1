@@ -5801,7 +5801,7 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 
 	q->keysort = keysort;
 
-#if __BSD__ || __FREEBSD__ || __APPLE__
+#if __BSD__ || __FREEBSD__ || __APPLE__ || __MACH__ || __Darwin__ || __DragonFly__
 	mergesort(base, cnt, sizeof(basepair), nodecmp);
 #else
 	qsort(base, cnt, sizeof(basepair), nodecmp);
