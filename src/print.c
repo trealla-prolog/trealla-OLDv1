@@ -1159,7 +1159,7 @@ pl_status print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int runni
 		if (!is_nil(t)) cyclic = true;
 	}
 
-	if (!running || cyclic || ((running > 0) && is_cyclic_term(q, c, c_ctx))) {
+	if (!running || cyclic || (running && is_cyclic_term(q, c, c_ctx))) {
 		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running=0, false, 1);
 	} else {
 		len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
@@ -1206,7 +1206,7 @@ char *print_term_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running)
 		if (!is_nil(t)) cyclic = true;
 	}
 
-	if (!running || cyclic || ((running > 0) && is_cyclic_term(q, c, c_ctx))) {
+	if (!running || cyclic || (running && is_cyclic_term(q, c, c_ctx))) {
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running=0, false, 1);
 	} else {
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
@@ -1232,7 +1232,7 @@ pl_status print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, i
 		if (!is_nil(t)) cyclic = true;
 	}
 
-	if (!running || cyclic || ((running > 0) && is_cyclic_term(q, c, c_ctx))) {
+	if (!running || cyclic || (running && is_cyclic_term(q, c, c_ctx))) {
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running=0, false, 1);
 	} else {
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
@@ -1274,7 +1274,7 @@ pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 		if (!is_nil(t)) cyclic = true;
 	}
 
-	if (!running || cyclic || ((running > 0) && is_cyclic_term(q, c, c_ctx))) {
+	if (!running || cyclic || (running && is_cyclic_term(q, c, c_ctx))) {
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running=0, false, 1);
 	} else {
 		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
