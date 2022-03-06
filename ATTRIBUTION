@@ -1,9 +1,10 @@
-/*  Portions of Prolog source code included here may be subject
-	to copyright and are used with attribution. The rest may be
-	as described or in the 'Prolog Commons'.
+/*  Portions of the Prolog library source code included here may be
+	subject to copyright and are used with attribution. The rest may
+	be as described or in the 'Prolog Commons'.
 */
 
 /*
+/*  Author:        Mark Thom, Jan Wielemaker, and Richard O'Keefe
     Copyright (c)  2018-2021, Mark Thom
     Copyright (c)  2002-2020, University of Amsterdam
                               VU University Amsterdam
