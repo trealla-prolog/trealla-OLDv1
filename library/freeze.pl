@@ -6,17 +6,9 @@
 :- meta_predicate(freeze(?, 0)).
 :- attribute frozen/1.
 
-freeze(Var, Goal0) :-
-	(	Goal0 = _:_ ->
-		Goal = Goal0
-	; 	Goal = user:Goal0
-	),
-	(	nonvar(Var) -> Goal
-	;	(	get_atts(Var, frozen(OldGoals)) ->
-			put_atts(Var, frozen((OldGoals,Goal)))
-		;	put_atts(Var, frozen(Goal))
-		)
-	).
+freeze(X, Goal) :-
+    put_atts(Fresh, frozen(Goal)),
+    Fresh = X.
 
 frozen(Term, Goal) :-
 	copy_term(Term, _, Gs),
@@ -26,18 +18,15 @@ frozen(Term, Goal) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 verify_attributes(Var, Other, Goals) :-
-	get_atts(Var, frozen(VarGoals)), !,
-	(	var(Other) ->
-		(	(	get_atts(Other, frozen(OtherGoals)) ->
-				(	OtherGoals == VarGoals -> true
-				;	put_atts(Other, frozen((OtherGoals, VarGoals)))
-				)
-			;	put_atts(Other, frozen(VarGoals))
-			),
-			Goals = []
-		)
-	;   Goals = [VarGoals]
-	).
+        get_atts(Var, frozen(Fa)), !,       % are we involved?
+        (   var(Other) ->                   % must be attributed then
+            (   get_atts(Other,  frozen(Fb)) % has a pending goal?
+            ->  put_atts(Other,  frozen((Fb,Fa))) % rescue conjunction
+            ;   put_atts(Other,  frozen(Fa)) % rescue the pending goal
+            ),
+            Goals = []
+        ;   Goals = [Fa]
+        ).
 verify_attributes(_, _, []).
 
 attribute_goals(Var) -->
