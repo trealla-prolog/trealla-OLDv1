@@ -7,7 +7,7 @@
 	last/2, flatten/2, same_length/2, sum_list/2,
 	toconjunction/2, numlist/3,
 	length/2, length_checked/2,
-	reverse/2, rev/2
+	reverse/2
 	]).
 
 reverse(Xs, Ys) :-
@@ -19,10 +19,6 @@ reverse(Xs, Ys) :-
 reverse_([], [], YsRev, YsRev).
 reverse_([_|Xs], [Y1|Ys], YsPreludeRev, Xss) :-
     reverse_(Xs, Ys, [Y1|YsPreludeRev], Xss).
-
-% This is the old (traditional) fast reverse...
-
-rev(L1, L2) :- revzap_(L1, [], L2).
 
 revzap_([], L, L) :- !.
 revzap_([H|L], L2, L3) :- revzap_(L, [H|L2], L3).
