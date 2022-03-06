@@ -355,6 +355,7 @@ Non-standard predicates
 	delete_file/1
 	exists_file/1               # also file_exists/1
 	rename_file/2
+	copy_file/2
 	time_file/2
 	size_file/2
 

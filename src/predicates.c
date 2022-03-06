@@ -9593,6 +9593,67 @@ static USE_RESULT pl_status fn_rename_file_2(query *q)
 #endif
 
 #ifndef SANDBOX
+static USE_RESULT pl_status fn_copy_file_2(query *q)
+{
+	GET_FIRST_ARG(p1,atom_or_list);
+	GET_NEXT_ARG(p2,atom_or_list);
+	char *src1 = NULL, *src2 = NULL;
+	char *filename1, *filename2;
+
+	if (is_iso_list(p1)) {
+		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
+
+		if (!len)
+			return throw_error(q, p1, p1_ctx, "type_error", "atom");
+
+		filename1 = src1 = chars_list_to_string(q, p1, p1_ctx, len);
+	} else
+		filename1 = src1 = DUP_SLICE(q, p1);
+
+	if (is_iso_list(p2)) {
+		size_t len = scan_is_chars_list(q, p2, p2_ctx, true);
+
+		if (!len)
+			return throw_error(q, p2, p2_ctx, "type_error", "atom");
+
+		src2 = chars_list_to_string(q, p2, p2_ctx, len);
+		filename2 = src2;
+	} else
+		filename2 = GET_STR(q, p2);
+
+	FILE *fp1 = fopen(filename1, "rb");
+
+	if (!fp1) {
+		free(src1);
+		free(src2);
+		return throw_error(q, p1, p1_ctx, "existence_error", "file");
+	}
+
+	free(src1);
+	FILE *fp2 = fopen(filename2, "wb");
+
+	if (!fp2) {
+		fclose(fp1);
+		free(src2);
+		return throw_error(q, p2, p2_ctx, "permission_error", "file");
+	}
+
+	free(src2);
+	char buffer[1024];
+	size_t n;
+
+	while ((n = fread(buffer, 1, sizeof(buffer), fp1)) > 0) {
+		if (fwrite(buffer, 1, n, fp2) != n)
+			return throw_error(q, p2, p2_ctx, "system_error", "file");
+	}
+
+	fclose(fp2);
+	fclose(fp1);
+	return pl_success;
+}
+#endif
+
+#ifndef SANDBOX
 static USE_RESULT pl_status fn_time_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -11683,6 +11744,7 @@ static const struct builtins g_predicates_other[] =
 	{"loadfile", 2, fn_loadfile_2, "+string,-string", false},
 	{"savefile", 2, fn_savefile_2, "+string,+string", false},
 	{"rename_file", 2, fn_rename_file_2, "+string,+string", false},
+	{"copy_file", 2, fn_copy_file_2, "+string,+string", false},
 	{"directory_files", 2, fn_directory_files_2, "+pathname,-list", false},
 	{"delete_file", 1, fn_delete_file_1, "+string", false},
 	{"exists_file", 1, fn_exists_file_1, "+string", false},
