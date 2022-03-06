@@ -12,10 +12,11 @@ post_unify_hook_ :-
 	; 	true).
 
 '$post_unify_hook' :-
-	(	post_unify_hook_ ->
-		'$end_hook'
-	;	('$end_hook', fail)
-	).
+	post_unify_hook_,
+	'$end_hook'.
+'$post_unify_hook' :-
+	'$end_hook',
+	fail.
 
 process_vars_([], Goals, Goals) :- !.
 process_vars_([Var-Val|Vars], SoFar, Goals) :-
