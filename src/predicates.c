@@ -5750,7 +5750,7 @@ static int nodecmp(const void *ptr1, const void *ptr2)
 	p2 = deref(q, p2, p2_ctx);
 	p2_ctx = q->latest_ctx;
 
-	if (p1->arity && (arg > 0)) {
+	if ((p1->arity >= arg) && (arg > 0)) {
 		p1 = p1 + 1;
 		p2 = p2 + 1;
 

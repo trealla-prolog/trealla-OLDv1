@@ -491,8 +491,7 @@ pl_idx_t drop_choice(query *q)
 	if (q->cp <= INITIAL_FRAME)
 		return q->cp;
 
-	--q->cp;
-	return q->cp;
+	return --q->cp;
 }
 
 bool retry_choice(query *q)
