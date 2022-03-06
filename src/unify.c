@@ -346,6 +346,8 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 	unsigned arity = p1->arity;
 	p1++; p2++;
 
+	// FIXME: make non-recursive
+
 	while (arity-- && !g_tpl_interrupt) {
 		cell *c1 = deref(q, p1, p1_ctx);
 		pl_idx_t c1_ctx = q->latest_ctx;
