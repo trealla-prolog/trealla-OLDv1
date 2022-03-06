@@ -12,12 +12,12 @@
 
 reverse(Xs, Ys) :-
     (  nonvar(Xs) -> revzap_(Xs, [], Ys)
-    ;  reverse(Ys, Xs, [], Ys)
+    ;  reverse_(Ys, Xs, [], Ys)
     ).
 
-reverse([], [], YsRev, YsRev).
-reverse([_|Xs], [Y1|Ys], YsPreludeRev, Xss) :-
-    reverse(Xs, Ys, [Y1|YsPreludeRev], Xss).
+reverse_([], [], YsRev, YsRev).
+reverse_([_|Xs], [Y1|Ys], YsPreludeRev, Xss) :-
+    reverse_(Xs, Ys, [Y1|YsPreludeRev], Xss).
 
 % This is the old (traditional) fast reverse...
 
