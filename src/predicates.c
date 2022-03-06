@@ -9643,11 +9643,20 @@ static USE_RESULT pl_status fn_copy_file_2(query *q)
 	size_t n;
 
 	while ((n = fread(buffer, 1, sizeof(buffer), fp1)) > 0) {
-		if (fwrite(buffer, 1, n, fp2) != n)
+		if (fwrite(buffer, 1, n, fp2) != n) {
+			fclose(fp2);
+			fclose(fp1);
 			return throw_error(q, p2, p2_ctx, "system_error", "file");
+		}
 	}
 
 	fclose(fp2);
+
+	if (!feof(fp1)) {
+		fclose(fp1);
+		return throw_error(q, p1, p1_ctx, "system_error", "file");
+	}
+
 	fclose(fp1);
 	return pl_success;
 }
