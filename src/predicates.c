@@ -10898,117 +10898,6 @@ static USE_RESULT pl_status fn_sys_read_attributes_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_memberchk_2(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,list_or_nil);
-	LIST_HANDLER(p2);
-
-	if (is_variable(p1)) {
-		cell *h = LIST_HEAD(p2);
-		h = deref(q, h, p2_ctx);
-		set_var(q, p1, p1_ctx, h, q->latest_ctx);
-		return pl_success;
-	}
-
-	if (is_atom(p1) && is_string(p2)) {
-		const char *src = GET_STR(q, p1);
-		size_t len = LEN_STR(q, p1);
-		size_t lench = len_char_utf8(src);
-
-		if (lench == len)
-			return memmem(GET_STR(q, p2), LEN_STR(q, p2), src, lench) ? pl_success : pl_failure;
-	}
-
-	if (is_atom(p1)) {
-		const char *src = GET_STR(q, p1);
-		size_t len = LEN_STR(q, p1);
-
-		while (is_list(p2) && !g_tpl_interrupt) {
-			cell *h = LIST_HEAD(p2);
-			h = deref(q, h, p2_ctx);
-
-			if (is_atom(h)) {
-				size_t lenh = LEN_STR(q, h);
-
-				if (lenh == len) {
-					if (!memcmp(src, GET_STR(q, h), len))
-						return pl_success;
-				}
-			}
-
-			p2 = LIST_TAIL(p2);
-			p2 = deref(q, p2, p2_ctx);
-			p2_ctx = q->latest_ctx;
-		}
-
-		return pl_failure;
-	}
-
-	if (is_integer(p1)) {
-		while (is_list(p2) && !g_tpl_interrupt) {
-			cell *h = LIST_HEAD(p2);
-			h = deref(q, h, p2_ctx);
-
-			if (is_integer(h)) {
-				if (get_int(p1) == get_int(h))
-					return pl_success;
-			}
-
-			p2 = LIST_TAIL(p2);
-			p2 = deref(q, p2, p2_ctx);
-			p2_ctx = q->latest_ctx;
-		}
-
-		return pl_failure;
-	}
-
-	if (is_real(p1)) {
-		while (is_list(p2) && !g_tpl_interrupt) {
-			cell *h = LIST_HEAD(p2);
-			h = deref(q, h, p2_ctx);
-
-			if (is_real(h)) {
-				if (get_real(p1) == get_real(h))
-					return pl_success;
-			}
-
-			p2 = LIST_TAIL(p2);
-			p2 = deref(q, p2, p2_ctx);
-			p2_ctx = q->latest_ctx;
-		}
-
-		return pl_failure;
-	}
-
-	may_error(push_choice(q));
-
-	while (is_list(p2) && !g_tpl_interrupt) {
-		cell *h = LIST_HEAD(p2);
-		h = deref(q, h, p2_ctx);
-		pl_idx_t h_ctx = q->latest_ctx;
-
-		if (unify(q, p1, p1_ctx, h, h_ctx)) {
-			drop_choice(q);
-			trim_trail(q);
-			return pl_success;
-		}
-
-		undo_me(q);
-		p2 = LIST_TAIL(p2);
-		p2 = deref(q, p2, p2_ctx);
-		p2_ctx = q->latest_ctx;
-	}
-
-	drop_choice(q);
-	return pl_failure;
-}
-
-static USE_RESULT pl_status fn_nonmember_2(query *q)
-{
-	return fn_memberchk_2(q) == pl_success ? pl_failure : pl_success;
-}
-
 static USE_RESULT pl_status fn_get_unbuffered_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
@@ -11858,8 +11747,6 @@ static const struct builtins g_predicates_other[] =
 	{"pid", 1, fn_pid_1, "-integer", false},
 	{"get_unbuffered_code", 1, fn_get_unbuffered_code_1, "?code", false},
 	{"get_unbuffered_char", 1, fn_get_unbuffered_char_1, "?char", false},
-	{"memberchk", 2, fn_memberchk_2, "?clause,+list", false},
-	{"nonmember", 2, fn_nonmember_2, "?clause,+list", false},
 	{"$put_chars", 1, fn_sys_put_chars_1, "+chars", false},
 	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars", false},
 	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL, false},
