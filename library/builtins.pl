@@ -89,67 +89,6 @@ findall(T, G, B, Tail) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
-sort_(Term, _) :-
-	var(Term),
-	throw(error(instantiation_error, sort/2)).
-sort_([], []) :- !.
-sort_([X, Y| Xs], Ys) :- !,
-	'$sort_split'([X, Y| Xs], X1s, X2s),
-	sort_(X1s, Y1s),
-	sort_(X2s, Y2s),
-	'$sort_merge'(Y1s, Y2s, Ys0),
-	Ys = Ys0, !.
-sort_([X], [X]) :- !.
-sort_(Term, _) :-
-	Term \== [],
-	throw(error(type_error(list,Term), sort/2)).
-sort_(_, Term) :-
-	throw(error(type_error(list,Term), sort/2)).
-
-'$sort_merge'([X| Xs], [Y| Ys], [X| Zs]) :-
-	X == Y, !,
-	'$sort_merge'(Xs, Ys, Zs).
-'$sort_merge'([X| Xs], [Y| Ys], [X| Zs]) :-
-	X @< Y, !,
-	'$sort_merge'(Xs, [Y| Ys], Zs).
-'$sort_merge'([X| Xs], [Y| Ys], [Y| Zs]) :-
-	X @> Y, !,
-	'$sort_merge'([X | Xs], Ys, Zs).
-'$sort_merge'([], Xs, Xs) :- !.
-'$sort_merge'(Xs, [], Xs).
-
-'$sort_split'('-', _, _) :-
-	throw(error(instantiation_error, sort/2)).
-'$sort_split'([], [], []).
-'$sort_split'([X| Xs], [X| Ys], Zs) :-
-	'$sort_split'(Xs, Zs, Ys).
-
-msort_(Term, _) :-
-	var(Term),
-	throw(error(instantiation_error, msort/2)).
-msort_([], []) :- !.
-msort_([X, Y| Xs], Ys) :- !,
-	'$sort_split'([X, Y| Xs], X1s, X2s),
-	msort_(X1s, Y1s),
-	msort_(X2s, Y2s),
-	'$msort_merge'(Y1s, Y2s, Ys0),
-	Ys = Ys0, !.
-msort_([X], [X]) :- !.
-msort_(Term, _) :-
-	Term \== [],
-	throw(error(type_error(list,Term), msort/2)).
-msort_(_, Term) :-
-	throw(error(type_error(list,Term), msort/2)).
-
-'$msort_merge'([X| Xs], [Y| Ys], [X| Zs]) :-
-	X @=< Y, !,
-	'$msort_merge'(Xs, [Y| Ys], Zs).
-'$msort_merge'([X| Xs], [Y| Ys], [Y| Zs]) :-
-	X @> Y, !,
-	'$msort_merge'([X | Xs], Ys, Zs).
-'$msort_merge'([], Xs, Xs) :- !.
-'$msort_merge'(Xs, [], Xs).
-
 keysort_(List, Sorted) :-
 	keysort_(List, List, Sorted, []).
 
@@ -211,7 +150,7 @@ setof(Template, Generator, Set) :-
     ; 	must_be(Set, list_or_partial_list, setof/3, _)
     ),
 	bagof_(Template, Generator, Bag),
-	sort_(Bag, Set).
+	sort(Bag, Set).
 
 bagof(Template, Generator, Bag) :-
     (	var(Bag) ->	true
