@@ -2,8 +2,8 @@
 	member/2, select/3, selectchk/3, subtract/3, union/3,
 	intersection/3, reverse/2, append/2, nth/3, nth1/3, nth0/3,
 	last/2, flatten/2, append/3, same_length/2, sum_list/2,
-	toconjunction/2, numlist/3,
-	length/2, length_checked/2
+	toconjunction/2, numlist/3, length/2, length_checked/2,
+	rev/2
 	]).
 
 member(X, [X|_]).
@@ -30,11 +30,18 @@ intersection([H|T], Y, [H|Z]) :- member(H, Y), !, intersection(T, Y, Z).
 intersection([_|T], Y, Z) :- intersection(T, Y, Z).
 
 reverse(Xs, Ys) :-
-	reverse(Xs, [], Ys, Ys).
+    (  nonvar(Xs) -> reverse(Xs, Ys, [], Xs)
+    ;  reverse(Ys, Xs, [], Ys)
+    ).
 
-reverse([], Ys, Ys, []).
-reverse([X|Xs], Rs, Ys, [_|Bound]) :-
-	reverse(Xs, [X|Rs], Ys, Bound).
+reverse([], [], YsRev, YsRev).
+reverse([_|Xs], [Y1|Ys], YsPreludeRev, Xss) :-
+    reverse(Xs, Ys, [Y1|YsPreludeRev], Xss).
+
+rev(L1, L2) :- revzap_(L1, [], L2).
+
+revzap_([], L, L) :- !.
+revzap_([H|L], L2, L3) :- revzap_(L, [H|L2], L3).
 
 append(ListOfLists, List) :-
 	must_be(ListOfLists, list, _, _),
