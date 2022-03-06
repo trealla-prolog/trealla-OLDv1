@@ -7155,7 +7155,6 @@ static USE_RESULT pl_status fn_savefile_2(query *q)
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom);
 	char *filename;
-	char *src = NULL;
 
 	if (is_iso_list(p1)) {
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
@@ -7163,16 +7162,15 @@ static USE_RESULT pl_status fn_savefile_2(query *q)
 		if (!len)
 			return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-		filename = src;
+		filename = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = src = DUP_SLICE(q, p1);
+		filename = DUP_SLICE(q, p1);
 
 	FILE *fp = fopen(filename, "wb");
 	may_ptr_error(fp);
 	fwrite(GET_STR(q, p2), 1, LEN_STR(q, p2), fp);
 	fclose(fp);
-	free(src);
+	free(filename);
 	return pl_success;
 }
 #endif
@@ -7183,7 +7181,6 @@ static USE_RESULT pl_status fn_loadfile_2(query *q)
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,variable);
 	char *filename;
-	char *src = NULL;
 
 	if (is_iso_list(p1)) {
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
@@ -7191,13 +7188,12 @@ static USE_RESULT pl_status fn_loadfile_2(query *q)
 		if (!len)
 			return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-		filename = src;
+		filename = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = src = DUP_SLICE(q, p1);
+		filename = DUP_SLICE(q, p1);
 
 	FILE *fp = fopen(filename, "rb");
-	free(src);
+	free(filename);
 
 	if (!fp)
 		return throw_error(q, p1, p1_ctx, "existence_error", "cannot_open_file");
@@ -7348,7 +7344,6 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,variable);
 	char *filename;
-	char *src = NULL;
 
 	if (is_iso_list(p1)) {
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
@@ -7356,14 +7351,12 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 		if (!len)
 			return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-		may_ptr_error(src);
-		filename = src;
+		filename = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = src = DUP_SLICE(q, p1);
+		filename = DUP_SLICE(q, p1);
 
 	FILE *fp = fopen(filename, "r");
-	free(src);
+	free(filename);
 
 	if (!fp) {
 		free(filename);
@@ -8751,7 +8744,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	GET_NEXT_ARG(p_opts,list_or_nil);
 	bool expand = false;
-	char *src = NULL, *filename;
+	char *filename;
 	char *here = strdup(q->st.m->filename);
 	may_ptr_error(here);
 	char *ptr = here + strlen(here) - 1;
@@ -8769,10 +8762,9 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 		if (!len)
 			return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-		filename = src;
+		filename = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = src = DUP_SLICE(q, p1);
+		filename = DUP_SLICE(q, p1);
 
 	LIST_HANDLER(p_opts);
 
@@ -8857,12 +8849,12 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	cell tmp;
 
 	if (is_string(p1))
-		may_error(make_string(&tmp, tmpbuf), free(tmpbuf); free(src));
+		may_error(make_string(&tmp, tmpbuf), free(tmpbuf); free(filename));
 	else
-		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf); free(src));
+		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf); free(filename));
 
 	free(tmpbuf);
-	free(src);
+	free(filename);
 	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
@@ -9372,8 +9364,7 @@ static USE_RESULT pl_status fn_access_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom);
-	const char *filename;
-	char *src = NULL;
+	char *filename;
 
 	if (is_iso_list(p1)) {
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
@@ -9381,10 +9372,9 @@ static USE_RESULT pl_status fn_access_file_2(query *q)
 		if (!len)
 			return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-		filename = src;
+		filename = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = src = DUP_SLICE(q, p1);
+		filename = DUP_SLICE(q, p1);
 
 	int amode = R_OK;
 
@@ -9397,10 +9387,10 @@ static USE_RESULT pl_status fn_access_file_2(query *q)
 	else if (!CMP_SLICE2(q, p2, "execute"))
 		amode = X_OK;
 	else if (!CMP_SLICE2(q, p2, "none")) {
-		free(src);
+		free(filename);
 		return pl_success;
 	} else {
-		free(src);
+		free(filename);
 		return throw_error(q, p2, p2_ctx, "domain_error", "mode");
 	}
 
@@ -9408,17 +9398,17 @@ static USE_RESULT pl_status fn_access_file_2(query *q)
 	int status = stat(filename, &st);
 
 	if (status && (!CMP_SLICE2(q, p2, "read") || !CMP_SLICE2(q, p2, "exist") || !CMP_SLICE2(q, p2, "execute") || !CMP_SLICE2(q, p2, "none"))) {
-		free(src);
+		free(filename);
 		return pl_failure;
 	}
 
 	if (status && (!CMP_SLICE2(q, p2, "write") || !CMP_SLICE2(q, p2, "append"))) {
-		free(src);
+		free(filename);
 		return pl_success;
 	}
 
 	int ok = !access(filename, amode);
-	free(src);
+	free(filename);
 	return ok;
 }
 #endif
@@ -9427,8 +9417,7 @@ static USE_RESULT pl_status fn_access_file_2(query *q)
 static USE_RESULT pl_status fn_exists_file_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
-	const char *filename;
-	char *src = NULL;
+	char *filename;
 
 	if (is_iso_list(p1)) {
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
@@ -9436,19 +9425,18 @@ static USE_RESULT pl_status fn_exists_file_1(query *q)
 		if (!len)
 			return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-		filename = src;
+		filename = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = src = DUP_SLICE(q, p1);
+		filename = DUP_SLICE(q, p1);
 
 	struct stat st = {0};
 
 	if (stat(filename, &st)) {
-		free(src);
+		free(filename);
 		return pl_failure;
 	}
 
-	free(src);
+	free(filename);
 
 	if ((st.st_mode & S_IFMT) != S_IFREG)
 		return pl_failure;
@@ -9462,8 +9450,7 @@ static USE_RESULT pl_status fn_directory_files_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,variable);
-	const char *filename;
-	char *src = NULL;
+	char *filename;
 
 	if (is_iso_list(p1)) {
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
@@ -9471,22 +9458,21 @@ static USE_RESULT pl_status fn_directory_files_2(query *q)
 		if (!len)
 			return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-		filename = src;
+		filename = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = src = DUP_SLICE(q, p1);
+		filename = DUP_SLICE(q, p1);
 
 	struct stat st = {0};
 
 	if (stat(filename, &st)) {
-		free(src);
+		free(filename);
 		return throw_error(q, p1, p1_ctx, "existence_error", "directory");
 	}
 
 	DIR *dirp = opendir(filename);
 
 	if (!dirp) {
-		free(src);
+		free(filename);
 		return throw_error(q, p1, p1_ctx, "existence_error", "directory");
 	}
 
@@ -9510,7 +9496,7 @@ static USE_RESULT pl_status fn_directory_files_2(query *q)
 	}
 
 	closedir(dirp);
-	free(src);
+	free(filename);
 	cell *l = end_list(q);
 	pl_status ok = unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	return ok;
@@ -9521,8 +9507,7 @@ static USE_RESULT pl_status fn_directory_files_2(query *q)
 static USE_RESULT pl_status fn_delete_file_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
-	const char *filename;
-	char *src = NULL;
+	char *filename;
 
 	if (is_iso_list(p1)) {
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
@@ -9530,20 +9515,19 @@ static USE_RESULT pl_status fn_delete_file_1(query *q)
 		if (!len)
 			return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-		filename = src;
+		filename = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = src = DUP_SLICE(q, p1);
+		filename = DUP_SLICE(q, p1);
 
 	struct stat st = {0};
 
 	if (stat(filename, &st)) {
-		free(src);
+		free(filename);
 		return throw_error(q, p1, p1_ctx, "existence_error", "file");
 	}
 
 	remove(filename);
-	free(src);
+	free(filename);
 	return pl_success;
 }
 #endif
@@ -9553,7 +9537,6 @@ static USE_RESULT pl_status fn_rename_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom_or_list);
-	char *src1 = NULL, *src2 = NULL;
 	char *filename1, *filename2;
 
 	if (is_iso_list(p1)) {
@@ -9562,32 +9545,33 @@ static USE_RESULT pl_status fn_rename_file_2(query *q)
 		if (!len)
 			return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-		filename1 = src1 = chars_list_to_string(q, p1, p1_ctx, len);
+		filename1 = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename1 = src1 = DUP_SLICE(q, p1);
+		filename1 = DUP_SLICE(q, p1);
 
 	if (is_iso_list(p2)) {
 		size_t len = scan_is_chars_list(q, p2, p2_ctx, true);
 
-		if (!len)
+		if (!len) {
+			free(filename1);
 			return throw_error(q, p2, p2_ctx, "type_error", "atom");
+		}
 
-		src2 = chars_list_to_string(q, p2, p2_ctx, len);
-		filename2 = src2;
+		filename2 = chars_list_to_string(q, p2, p2_ctx, len);
 	} else
-		filename2 = GET_STR(q, p2);
+		filename2 = DUP_SLICE(q, p2);
 
 	struct stat st = {0};
 
 	if (stat(filename1, &st)) {
-		free(src1);
-		free(src2);
+		free(filename1);
+		free(filename2);
 		return throw_error(q, p1, p1_ctx, "existence_error", "file");
 	}
 
 	bool ok = !rename(filename1, filename2);
-	free(src1);
-	free(src2);
+	free(filename1);
+	free(filename2);
 	return ok ? pl_success : pl_failure;
 }
 #endif
@@ -9597,7 +9581,6 @@ static USE_RESULT pl_status fn_copy_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom_or_list);
-	char *src1 = NULL, *src2 = NULL;
 	char *filename1, *filename2;
 
 	if (is_iso_list(p1)) {
@@ -9606,39 +9589,40 @@ static USE_RESULT pl_status fn_copy_file_2(query *q)
 		if (!len)
 			return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-		filename1 = src1 = chars_list_to_string(q, p1, p1_ctx, len);
+		filename1 = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename1 = src1 = DUP_SLICE(q, p1);
+		filename1 = DUP_SLICE(q, p1);
 
 	if (is_iso_list(p2)) {
 		size_t len = scan_is_chars_list(q, p2, p2_ctx, true);
 
-		if (!len)
+		if (!len) {
+			free(filename1);
 			return throw_error(q, p2, p2_ctx, "type_error", "atom");
+		}
 
-		src2 = chars_list_to_string(q, p2, p2_ctx, len);
-		filename2 = src2;
+		filename2 = chars_list_to_string(q, p2, p2_ctx, len);
 	} else
-		filename2 = GET_STR(q, p2);
+		filename2 = DUP_SLICE(q, p2);
 
 	FILE *fp1 = fopen(filename1, "rb");
 
 	if (!fp1) {
-		free(src1);
-		free(src2);
+		free(filename1);
+		free(filename2);
 		return throw_error(q, p1, p1_ctx, "existence_error", "file");
 	}
 
-	free(src1);
+	free(filename1);
 	FILE *fp2 = fopen(filename2, "wb");
 
 	if (!fp2) {
 		fclose(fp1);
-		free(src2);
+		free(filename2);
 		return throw_error(q, p2, p2_ctx, "permission_error", "file");
 	}
 
-	free(src2);
+	free(filename2);
 	char buffer[1024];
 	size_t n;
 
@@ -9667,8 +9651,7 @@ static USE_RESULT pl_status fn_time_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,variable);
-	const char *filename;
-	char *src = NULL;
+	char *filename;
 
 	if (is_iso_list(p1)) {
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
@@ -9676,19 +9659,18 @@ static USE_RESULT pl_status fn_time_file_2(query *q)
 		if (!len)
 			return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-		filename = src;
+		filename = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = src = DUP_SLICE(q, p1);
+		filename = DUP_SLICE(q, p1);
 
 	struct stat st = {0};
 
 	if (stat(filename, &st)) {
-		free(src);
+		free(filename);
 		return throw_error(q, p1, p1_ctx, "existence_error", "file");
 	}
 
-	free(src);
+	free(filename);
 	cell tmp;
 	make_real(&tmp, st.st_mtime);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -9700,8 +9682,7 @@ static USE_RESULT pl_status fn_size_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,integer_or_var);
-	const char *filename;
-	char *src = NULL;
+	char *filename;
 
 	if (is_iso_list(p1)) {
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
@@ -9709,19 +9690,18 @@ static USE_RESULT pl_status fn_size_file_2(query *q)
 		if (!len)
 			return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-		filename = src;
+		filename = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = src = DUP_SLICE(q, p1);
+		filename = DUP_SLICE(q, p1);
 
 	struct stat st = {0};
 
 	if (stat(filename, &st)) {
-		free(src);
+		free(filename);
 		return throw_error(q, p1, p1_ctx, "existence_error", "file");
 	}
 
-	free(src);
+	free(filename);
 	cell tmp;
 	make_int(&tmp, st.st_size);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -9732,8 +9712,7 @@ static USE_RESULT pl_status fn_size_file_2(query *q)
 static USE_RESULT pl_status fn_exists_directory_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
-	const char *filename;
-	char *src = NULL;
+	char *filename;
 
 	if (is_iso_list(p1)) {
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
@@ -9741,19 +9720,18 @@ static USE_RESULT pl_status fn_exists_directory_1(query *q)
 		if (!len)
 			return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-		filename = src;
+		filename = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = src = DUP_SLICE(q, p1);
+		filename = DUP_SLICE(q, p1);
 
 	struct stat st = {0};
 
 	if (stat(filename, &st)) {
-		free(src);
+		free(filename);
 		return pl_failure;
 	}
 
-	free(src);
+	free(filename);
 
 	if ((st.st_mode & S_IFMT) != S_IFDIR)
 		return pl_failure;
@@ -9766,8 +9744,7 @@ static USE_RESULT pl_status fn_exists_directory_1(query *q)
 static USE_RESULT pl_status fn_make_directory_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
-	const char *filename;
-	char *src = NULL;
+	char *filename;
 
 	if (is_iso_list(p1)) {
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
@@ -9775,21 +9752,21 @@ static USE_RESULT pl_status fn_make_directory_1(query *q)
 		if (!len)
 			return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-		filename = src = chars_list_to_string(q, p1, p1_ctx, len);
+		filename = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = src = DUP_SLICE(q, p1);
+		filename = DUP_SLICE(q, p1);
 
 	struct stat st = {0};
 
 	if (!stat(filename, &st)) {
-		free(src);
+		free(filename);
 		return throw_error(q, p1, p1_ctx, "existence_error", "file");
 	}
 
 	if (mkdir(filename, 0777))
 		return throw_error(q, p1, p1_ctx, "permission_error", "file");
 
-	free(src);
+	free(filename);
 	return pl_success;
 }
 #endif
@@ -9855,8 +9832,7 @@ static USE_RESULT pl_status fn_working_directory_2(query *q)
 	may_error(make_string(&tmp, oldpath));
 
 	if (is_atom_or_list(p_new)) {
-		const char *filename;
-		char *src = NULL;
+		char *filename;
 
 		if (is_iso_list(p_new)) {
 			size_t len = scan_is_chars_list(q, p_new, p_new_ctx, true);
@@ -9866,16 +9842,16 @@ static USE_RESULT pl_status fn_working_directory_2(query *q)
 				return throw_error(q, p_new, p_new_ctx, "type_error", "atom");
 			}
 
-			filename = src = chars_list_to_string(q, p_new, p_new_ctx, len);
+			filename = chars_list_to_string(q, p_new, p_new_ctx, len);
 		} else
-			filename = src = DUP_SLICE(q, p_new);
+			filename = DUP_SLICE(q, p_new);
 
 		if (chdir(filename)) {
 			unshare_cell(&tmp);
 			return throw_error(q, p_new, p_new_ctx, "existence_error", "path");
 		}
 
-		free(src);
+		free(filename);
 	}
 
 	pl_status ok = unify(q, p_old, p_old_ctx, &tmp, q->st.curr_frame);
@@ -9888,18 +9864,16 @@ static USE_RESULT pl_status fn_working_directory_2(query *q)
 static USE_RESULT pl_status fn_chdir_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
-	const char *filename;
-	char *src = NULL;
+	char *filename;
 
 	if (is_iso_list(p1)) {
 		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-		filename = src;
+		filename = chars_list_to_string(q, p1, p1_ctx, len);
 	} else
-		filename = src = DUP_SLICE(q, p1);
+		filename = DUP_SLICE(q, p1);
 
 	pl_status ok = !chdir(filename);
-	free(src);
+	free(filename);
 	return ok;
 }
 #endif
