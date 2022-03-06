@@ -416,6 +416,20 @@ size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes)
 	return scan_is_chars_list2(q, l, l_ctx, allow_codes, &has_var, &is_partial);
 }
 
+static void add_trail(query *q, pl_idx_t c_ctx, unsigned c_var_nbr, cell *attrs, pl_idx_t attrs_ctx)
+{
+	if (check_trail(q) != pl_success) {
+		q->error = pl_error;
+		return;
+	}
+
+	trail *tr = q->trails + q->st.tp++;
+	tr->ctx = c_ctx;
+	tr->var_nbr = c_var_nbr;
+	tr->attrs = attrs;
+	tr->attrs_ctx = attrs_ctx;
+}
+
 static void unwind_trail(query *q, const choice *ch)
 {
 	while (q->st.tp > ch->st.tp) {
@@ -1004,20 +1018,6 @@ unsigned create_vars(query *q, unsigned cnt)
 	return var_nbr;
 }
 
-static void add_trail(query *q, pl_idx_t c_ctx, unsigned c_var_nbr, cell *attrs, pl_idx_t attrs_ctx)
-{
-	if (check_trail(q) != pl_success) {
-		q->error = pl_error;
-		return;
-	}
-
-	trail *tr = q->trails + q->st.tp++;
-	tr->ctx = c_ctx;
-	tr->var_nbr = c_var_nbr;
-	tr->attrs = attrs;
-	tr->attrs_ctx = attrs_ctx;
-}
-
 void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 {
 	frame *f = GET_FRAME(c_ctx);
@@ -1036,7 +1036,10 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	if (c_attrs)
 		q->run_hook = true;
 
-	if ((q->cp > INITIAL_FRAME) || c_attrs)
+	// The q->cp-1 is because we have to allow for the temporary
+	// choice-point we are in...
+
+	if ((q->cp-1 > INITIAL_FRAME) || c_attrs)
 		add_trail(q, c_ctx, c->var_nbr, c_attrs, c_attrs_ctx);
 
 	if (is_structure(v)) {
