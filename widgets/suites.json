@@ -1,19 +1,8 @@
 {
-  "total" : 185,
+  "total" : 177,
   "items" : [ {
-    "uid" : "6984bae94e7678c9d6f1b911bb94461e",
-    "name" : "predicates/length_2/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 6,
-      "broken" : 0,
-      "skipped" : 3,
-      "passed" : 18,
-      "unknown" : 0,
-      "total" : 27
-    }
-  }, {
-    "uid" : "8c7c11628e768e873513ac99dd2929a7",
-    "name" : "predicates/open_4/tests.lgt::tests",
+    "uid" : "cca7e0fd2fd1795563678e8da9db0895",
+    "name" : "syntax/numbers/tests.lgt::tests",
     "statistic" : {
       "failed" : 1,
       "broken" : 0,
@@ -23,92 +12,103 @@
       "total" : 1
     }
   }, {
-    "uid" : "09812cef55155aac413b0e337d25177f",
-    "name" : "unicode/builtins/tests.lgt::tests",
+    "uid" : "abe3fa0b318ad3903971cba77caa78aa",
+    "name" : "predicates/put_code_2/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 136,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 136
+      "total" : 1
     }
   }, {
-    "uid" : "6323f92028da534ce9e9b896fe8a8e78",
-    "name" : "unbounded/tests.lgt::tests",
+    "uid" : "0a0b9614bd9eaba3c9e6be9a84f8ad5e",
+    "name" : "directives/discontiguous_1/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
-      "broken" : 0,
-      "skipped" : 4,
-      "passed" : 97,
-      "unknown" : 0,
-      "total" : 101
-    }
-  }, {
-    "uid" : "2fa097f54728c3cdaa06f09f04fafff8",
-    "name" : "predicates/write_term_3/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 94,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 94
+      "total" : 1
     }
   }, {
-    "uid" : "e96278ed9288bacdb418cbcc943c2f26",
-    "name" : "predicates/stream_property_2/tests.lgt::tests",
+    "uid" : "1af86e4306095c2c0ae99f9bb85ecb08",
+    "name" : "predicates/atom_concat_3/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 75,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 75
+      "total" : 1
     }
   }, {
-    "uid" : "0da529a0a6949d3d5150b9a550fbf922",
-    "name" : "predicates/format_3/tests_chars.lgt::tests_chars",
+    "uid" : "3531819b712116635f693ecff121f411",
+    "name" : "functions/round_1/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 68,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 68
+      "total" : 1
     }
   }, {
-    "uid" : "c420a856533f5147a2dfa28c1c33fd98",
-    "name" : "predicates/format_3/tests_atom.lgt::tests_atom",
+    "uid" : "5c54456dcc82966a2e99d98b5219e6e6",
+    "name" : "functions/sinh_1/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 68,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 68
+      "total" : 1
     }
   }, {
-    "uid" : "927c073078ff64d83ef2195bbab9ac0d",
-    "name" : "predicates/format_3/tests_codes.lgt::tests_codes",
+    "uid" : "99435521304eae5c110018f363e3c213",
+    "name" : "predicates/is_2/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 68,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 68
+      "total" : 1
     }
   }, {
-    "uid" : "35ce7c65630bce1fdc47cff730339d9c",
-    "name" : "predicates/format_2/tests_codes.lgt::tests_codes",
+    "uid" : "075e0c6a2ee7ba4c4fce17ecf5c0b57f",
+    "name" : "functions/acosh_1/tests.lgt::tests",
     "statistic" : {
-      "failed" : 0,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 65,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 65
+      "total" : 1
+    }
+  }, {
+    "uid" : "bfc66718b628ad0f17b207cda66db1a2",
+    "name" : "predicates/arithmetic_comparison/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
+    "uid" : "8ad146771357626f746c63b309a2009b",
+    "name" : "predicates/atomic_concat_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
     }
   } ]
 }

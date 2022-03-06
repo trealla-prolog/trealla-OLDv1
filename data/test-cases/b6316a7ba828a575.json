@@ -1,0 +1,47 @@
+{
+  "uid" : "b6316a7ba828a575",
+  "name" : "retract_1",
+  "fullName" : "retract_1::tests",
+  "historyId" : "retract_1::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "predicates/retract_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "predicates/retract_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "predicates/retract_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "b6316a7ba828a575.json",
+  "parameterValues" : [ ]
+}
