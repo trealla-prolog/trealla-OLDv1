@@ -38,6 +38,8 @@ reverse([], [], YsRev, YsRev).
 reverse([_|Xs], [Y1|Ys], YsPreludeRev, Xss) :-
     reverse(Xs, Ys, [Y1|YsPreludeRev], Xss).
 
+% This is the old (traditional) fast reverse...
+
 rev(L1, L2) :- revzap_(L1, [], L2).
 
 revzap_([], L, L) :- !.
