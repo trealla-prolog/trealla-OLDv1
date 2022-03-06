@@ -431,6 +431,7 @@ static void unwind_trail(query *q, const choice *ch)
 
 void undo_me(query *q)
 {
+	q->tot_retries++;
 	const choice *ch = GET_CURR_CHOICE();
 	unwind_trail(q, ch);
 }
@@ -548,7 +549,7 @@ void trim_trail(query *q)
 
 	pl_idx_t tp;
 
-	if (q->cp) {
+	if (q->cp > INITIAL_FRAME) {
 		const choice *ch = GET_CURR_CHOICE();
 		tp = ch->st.tp;
 	} else
@@ -1777,7 +1778,7 @@ pl_status start(query *q)
 				if (q->yielded)
 					break;
 
-				q->tot_retries++;
+				q->tot_backtracks++;
 				continue;
 			}
 
@@ -1797,7 +1798,7 @@ pl_status start(query *q)
 				DISCARD_RESULT throw_error(q, q->st.curr_cell, q->st.curr_frame, "type_error", "callable");
 			} else if ((match_head(q) != pl_success) && !q->is_oom) {
 				q->retry = QUERY_RETRY;
-				q->tot_retries++;
+				q->tot_backtracks++;
 				continue;
 			}
 
@@ -1812,7 +1813,7 @@ pl_status start(query *q)
 
 			if (throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "memory") != pl_success) {
 				q->retry = QUERY_RETRY;
-				q->tot_retries++;
+				q->tot_backtracks++;
 				continue;
 			}
 		}
