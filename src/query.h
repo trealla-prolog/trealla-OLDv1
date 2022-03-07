@@ -94,6 +94,8 @@ pl_status fn_sys_undo_trail_1(query *q);
 pl_status fn_sys_redo_trail_0(query *q);
 pl_status fn_sys_soft_inner_cut_0(query *q);
 
+int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx);
+bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx);
 
 struct reflist_ {
 	reflist *next;
@@ -108,39 +110,6 @@ struct cycle_info_ {
 	printf("*** %s ", s);							\
 	print_term(q, stdout, c, c_ctx, 1);				\
 	printf("\n");									\
-}
-
-inline static int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
-{
-	q->cycle_error = false;
-	bool is_partial;
-
-	if (check_list(q, p1, p1_ctx, &is_partial) && check_list(q, p2, p2_ctx, &is_partial))
-		return compare_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
-
-	cycle_info info1 = {0}, info2 = {0};
-	q->info1 = &info1;
-	q->info2 = &info2;
-	int ok = compare_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
-	q->info1 = q->info2 = NULL;
-	return ok;
-}
-
-inline static bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
-{
-	q->save_tp = q->st.tp;
-	q->run_hook = q->cycle_error = false;
-	bool is_partial;
-
-	if (check_list(q, p1, p1_ctx, &is_partial) && check_list(q, p2, p2_ctx, &is_partial))
-		return unify_internal(q, p1, p1_ctx, p2, p2_ctx);
-
-	cycle_info info1 = {0}, info2 = {0};
-	q->info1 = &info1;
-	q->info2 = &info2;
-	bool ok = unify_internal(q, p1, p1_ctx, p2, p2_ctx);
-	q->info1 = q->info2 = NULL;
-	return ok;
 }
 
 inline static pl_status make_cstring(cell *d, const char *s)

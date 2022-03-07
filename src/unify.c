@@ -339,7 +339,7 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 	LIST_HANDLER(p1);
 	LIST_HANDLER(p2);
 
-	while (is_iso_list(p1) && is_iso_list(p2)) {
+	while (is_iso_list(p1) && is_iso_list(p2) && !g_tpl_interrupt) {
 		cell *h1 = LIST_HEAD(p1);
 		h1 = deref(q, h1, p1_ctx);
 		pl_idx_t h1_ctx = q->latest_ctx;
@@ -577,7 +577,7 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 	if (is_string(p2) && is_list(p1))
 		return unify_string_to_list(q, p2, p2_ctx, p1, p1_ctx);
 
-	if (is_iso_list(p1) && is_iso_list(p2))
+	if (q->lists_ok && is_iso_list(p1) && is_iso_list(p2))
 		return unify_lists(q, p1, p1_ctx, p2, p2_ctx);
 
 	if (p1->arity || p2->arity)
@@ -585,3 +585,45 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 
 	return g_disp[p1->tag].fn(q, p1, p2);
 }
+
+bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
+{
+	q->save_tp = q->st.tp;
+	q->run_hook = q->cycle_error = false;
+	bool is_partial;
+
+	if (is_iso_list(p1) && is_iso_list(p2)) {
+		if (check_list(q, p1, p1_ctx, &is_partial) && check_list(q, p2, p2_ctx, &is_partial)) {
+			q->lists_ok = true;
+			pl_status ok = unify_internal(q, p1, p1_ctx, p2, p2_ctx);
+			q->lists_ok = false;
+			return ok;
+		}
+	} else
+		q->lists_ok = true;
+
+	cycle_info info1 = {0}, info2 = {0};
+	q->info1 = &info1;
+	q->info2 = &info2;
+	bool ok = unify_internal(q, p1, p1_ctx, p2, p2_ctx);
+	q->info1 = q->info2 = NULL;
+	q->lists_ok = false;
+	return ok;
+}
+
+int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
+{
+	q->cycle_error = false;
+	bool is_partial;
+
+	if (check_list(q, p1, p1_ctx, &is_partial) && check_list(q, p2, p2_ctx, &is_partial))
+		return compare_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
+
+	cycle_info info1 = {0}, info2 = {0};
+	q->info1 = &info1;
+	q->info2 = &info2;
+	int ok = compare_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
+	q->info1 = q->info2 = NULL;
+	return ok;
+}
+
