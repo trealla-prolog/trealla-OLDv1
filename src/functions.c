@@ -13,7 +13,6 @@
 #include "query.h"
 #include "module.h"
 #include "prolog.h"
-#include "builtins.h"
 #include "heap.h"
 
 #define SET_ACCUM() {											\

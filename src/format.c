@@ -12,7 +12,6 @@
 #include "module.h"
 #include "prolog.h"
 #include "query.h"
-#include "builtins.h"
 #include "utf8.h"
 
 static int format_integer(char *dst, pl_int_t v, int grouping, int sep, int decimals, int radix)

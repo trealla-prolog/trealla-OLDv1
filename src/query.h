@@ -1,5 +1,7 @@
 #pragma once
 
+#include "builtins.h"
+
 query *create_query(module *m, bool sub_query);
 query *create_sub_query(query *q, cell *curr_cell);
 void destroy_query(query *q);
@@ -128,10 +130,17 @@ inline static bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t
 {
 	q->save_tp = q->st.tp;
 	q->run_hook = q->cycle_error = false;
-	bool is_partial;
+	bool is_partial1 = false, is_partial2 = false;
 
-	if (check_list(q, p1, p1_ctx, &is_partial) && check_list(q, p2, p2_ctx, &is_partial))
+	if ((check_list(q, p1, p1_ctx, &is_partial1) || is_partial1)
+		|| (check_list(q, p2, p2_ctx, &is_partial2) || is_partial2))
 		return unify_internal(q, p1, p1_ctx, p2, p2_ctx);
+
+#if 0
+	printf("*** here %s list=%d, %d/%d <==> %s list=%d, %d/%d\n",
+		GET_STR(q, p1), is_iso_list(p1), check_list(q, p1, p1_ctx, &is_partial1), is_partial1,
+		GET_STR(q, p2), is_iso_list(p2), check_list(q, p2, p2_ctx, &is_partial2), is_partial2);
+#endif
 
 	cycle_info info1 = {0}, info2 = {0};
 	q->info1 = &info1;

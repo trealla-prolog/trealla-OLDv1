@@ -10,7 +10,6 @@
 #include "module.h"
 #include "prolog.h"
 #include "query.h"
-#include "builtins.h"
 #include "heap.h"
 #include "utf8.h"
 

@@ -8,7 +8,6 @@
 #include "module.h"
 #include "prolog.h"
 #include "query.h"
-#include "builtins.h"
 #include "heap.h"
 
 USE_RESULT pl_status fn_iso_true_0(UNUSED query *q)

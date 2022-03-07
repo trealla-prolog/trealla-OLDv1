@@ -14,7 +14,6 @@
 #include "module.h"
 #include "prolog.h"
 #include "query.h"
-#include "builtins.h"
 #include "utf8.h"
 
 static const unsigned INITIAL_TOKEN_SIZE = 100;		// bytes
