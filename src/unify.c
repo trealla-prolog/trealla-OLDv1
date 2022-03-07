@@ -54,7 +54,7 @@ bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx)
 
 static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx, bool *done)
 {
-	if (!is_list(c)) {
+	if (!is_iso_list(c)) {
 		*done = true;
 		return c;
 	}
@@ -136,6 +136,13 @@ cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_i
 	}
 
 	if (done) {
+		if (is_string(fast)) {
+			cnt += LEN_STR_UTF8(fast);
+			*skip = cnt;
+			make_literal(tmp, g_nil_s);
+			return tmp;
+		}
+
 		*skip = cnt;
 		*head_ctx = fast_ctx;
 		return fast;
