@@ -130,6 +130,11 @@ inline static bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t
 {
 	q->save_tp = q->st.tp;
 	q->run_hook = q->cycle_error = false;
+	bool is_partial;
+
+	if (check_list(q, p1, p1_ctx, &is_partial) && check_list(q, p2, p2_ctx, &is_partial))
+		return unify_internal(q, p1, p1_ctx, p2, p2_ctx);
+
 	cycle_info info1 = {0}, info2 = {0};
 	q->info1 = &info1;
 	q->info2 = &info2;
