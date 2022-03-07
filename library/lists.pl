@@ -11,17 +11,13 @@
 	]).
 
 reverse(Xs, Ys) :-
-%    (  nonvar(Xs) -> reverse_(Xs, Ys, [], Xs)
-    (  is_list(Xs) -> revzap_(Xs, [], Ys)
+    (  nonvar(Xs) -> reverse_(Xs, Ys, [], Xs)
     ;  reverse_(Ys, Xs, [], Ys)
     ).
 
 reverse_([], [], YsRev, YsRev).
 reverse_([_|Xs], [Y1|Ys], YsPreludeRev, Xss) :-
     reverse_(Xs, Ys, [Y1|YsPreludeRev], Xss).
-
-revzap_([], L, L).
-revzap_([H|L], L2, L3) :- revzap_(L, [H|L2], L3).
 
 append([], []).
 append([L0|Ls0], Ls) :-
