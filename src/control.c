@@ -801,8 +801,7 @@ pl_status throw_error3(query *q, cell *c, UNUSED pl_idx_t c_ctx, const char *err
 
 	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
 	may_ptr_error(e);
-	//safe_copy_cells(e, tmp, tmp->nbr_cells);
-	copy_cells(e, tmp, tmp->nbr_cells);
+	safe_copy_cells(e, tmp, tmp->nbr_cells);
 
 	if (find_exception_handler(q, e)) {
 		free(e);
