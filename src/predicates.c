@@ -8743,7 +8743,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	GET_NEXT_ARG(p_opts,list_or_nil);
 	bool expand = false;
-	char *filename;
+	char *filename = NULL;
 	char *here = strdup(q->st.m->filename);
 	may_ptr_error(here);
 	char *ptr = here + strlen(here) - 1;
@@ -8841,6 +8841,8 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 		}
 	}
 
+	free(filename);
+
 	if (cwd != here)
 		free(cwd);
 
@@ -8848,12 +8850,11 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	cell tmp;
 
 	if (is_string(p1))
-		may_error(make_string(&tmp, tmpbuf), free(tmpbuf); free(filename));
+		may_error(make_string(&tmp, tmpbuf), free(tmpbuf));
 	else
-		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf); free(filename));
+		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf));
 
 	free(tmpbuf);
-	free(filename);
 	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
