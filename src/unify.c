@@ -341,59 +341,14 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 
 	while (is_iso_list(p1) && is_iso_list(p2)) {
 		cell *h1 = LIST_HEAD(p1);
-		cell *c1 = deref(q, h1, p1_ctx);
-		pl_idx_t c1_ctx = q->latest_ctx;
+		h1 = deref(q, h1, p1_ctx);
+		pl_idx_t h1_ctx = q->latest_ctx;
 		cell *h2 = LIST_HEAD(p2);
-		cell *c2 = deref(q, h2, p2_ctx);
-		pl_idx_t c2_ctx = q->latest_ctx;
-		reflist r1 = {0}, r2 = {0};
+		h2 = deref(q, h2, p2_ctx);
+		pl_idx_t h2_ctx = q->latest_ctx;
 
-		if (q->info1) {
-			int both = 0;
-
-			if (is_variable(h1)) {
-				if (is_in_ref_list(h1, p1_ctx, q->info1->r1)) {
-					c1 = h1;
-					c1_ctx = p1_ctx;
-					both++;
-				} else {
-					r1.next = q->info1->r1;
-					r1.var_nbr = h1->var_nbr;
-					r1.ctx = p1_ctx;
-					q->info1->r1 = &r1;
-				}
-			}
-
-			if (is_variable(h2)) {
-				if (is_in_ref_list(h2, p2_ctx, q->info2->r2)) {
-					c2 = h2;
-					c2_ctx = p2_ctx;
-					both++;
-				} else {
-					r2.next = q->info2->r2;
-					r2.var_nbr = h2->var_nbr;
-					r2.ctx = p2_ctx;
-					q->info2->r2 = &r2;
-				}
-			}
-
-			if (both == 2) {
-				return pl_success;
-			}
-		}
-
-		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx))
+		if (!unify_internal(q, h1, h1_ctx, h2, h2_ctx))
 			return false;
-
-		if (q->info1) {
-			if (is_variable(h1))
-				q->info1->r1 = r1.next;		// restore
-		}
-
-		if (q->info2) {
-			if (is_variable(h2))
-				q->info2->r2 = r2.next;		// restore
-		}
 
 		p1 = LIST_TAIL(p1);
 		p1 = deref(q, p1, p1_ctx);
