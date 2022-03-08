@@ -1,11 +1,11 @@
 [ {
   "buildOrder" : 1,
   "data" : {
-    "failed" : 6,
+    "failed" : 233,
     "broken" : 0,
-    "skipped" : 118,
-    "passed" : 3049,
+    "skipped" : 173,
+    "passed" : 7723,
     "unknown" : 0,
-    "total" : 3173
+    "total" : 8129
   }
 } ]
