@@ -1,0 +1,51 @@
+{
+  "uid" : "2eb8a917cd37e741",
+  "name" : "elephants_02",
+  "fullName" : "elephants_02::tests",
+  "historyId" : "elephants_02::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/elephants/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/elephants/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/elephants/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/elephants/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "38-39"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/3092c779ecc532a1b49fcef62fae92acee2286ef/examples/elephants/tests.lgt#L38"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "2eb8a917cd37e741.json",
+  "parameterValues" : [ "examples/elephants/tests.lgt", "38-39", "https://github.com/LogtalkDotOrg/logtalk3/tree/3092c779ecc532a1b49fcef62fae92acee2286ef/examples/elephants/tests.lgt#L38" ]
+}
