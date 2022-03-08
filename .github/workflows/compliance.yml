@@ -9,11 +9,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Trealla ProLog
+      - name: Checkout Trealla Prolog
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Compile Trealla ProLog
+      - name: Compile Trealla Prolog
         run: |
           make clean && make
           sudo ln -s "$PWD/tpl" /usr/local/bin/tpl
