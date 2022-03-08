@@ -36,12 +36,12 @@ jobs:
           echo "LOGTALK_GIT_HASH=`git ls-remote https://github.com/LogtalkDotOrg/logtalk3 HEAD | cut -f1`" >> $GITHUB_ENV
       - name: Run the Prolog standards compliance test suite
         run: |
-          cd "$LOGTALKUSER/tests/prolog"
-          logtalk_tester -p trealla -g "set_logtalk_flag(clean,off)" -t 120 -f xunit_net_v2 -s "$HOME/logtalk/tests/prolog/" -u "https://github.com/LogtalkDotOrg/logtalk3/tree/$LOGTALK_GIT_HASH/tests/prolog/" -w || EXIT=$?
+          cd "$LOGTALKUSER"
+          logtalk_tester -p trealla -g "set_logtalk_flag(clean,off)" -t 120 -f xunit_net_v2 -s "$HOME/logtalk/" -u "https://github.com/LogtalkDotOrg/logtalk3/tree/$LOGTALK_GIT_HASH/" -w || EXIT=$?
           echo "EXIT=$EXIT" >> $GITHUB_ENV
       - name: Create Allure report
         run: |
-          cd "$LOGTALKUSER/tests/prolog"
+          cd "$LOGTALKUSER"
           logtalk_allure_report -t "Standards Compliance Report" -- Backend='Trealla Prolog' Commit=$GITHUB_SHA
           mv allure-report $GITHUB_WORKSPACE/
       - name: Upload Allure report
