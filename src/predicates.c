@@ -8232,8 +8232,8 @@ static USE_RESULT pl_status fn_read_term_from_atom_3(query *q)
 
 static USE_RESULT pl_status fn_write_term_to_atom_3(query *q)
 {
-	GET_FIRST_ARG(p_term,any);
-	GET_NEXT_ARG(p_chars,atom_or_var);
+	GET_FIRST_ARG(p_chars,atom_or_var);
+	GET_NEXT_ARG(p_term,any);
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *vnames = NULL;
 	pl_idx_t vnames_ctx = 0;
@@ -8264,8 +8264,8 @@ static USE_RESULT pl_status fn_write_term_to_atom_3(query *q)
 
 static USE_RESULT pl_status fn_write_canonical_to_atom_3(query *q)
 {
-	GET_FIRST_ARG(p_term,any);
-	GET_NEXT_ARG(p_chars,atom_or_var);
+	GET_FIRST_ARG(p_chars,atom_or_var);
+	GET_NEXT_ARG(p_term,any);
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *vnames = NULL;
 	pl_idx_t vnames_ctx = 0;
@@ -8293,8 +8293,8 @@ static USE_RESULT pl_status fn_write_canonical_to_atom_3(query *q)
 
 static USE_RESULT pl_status fn_write_term_to_chars_3(query *q)
 {
-	GET_FIRST_ARG(p_term,any);
-	GET_NEXT_ARG(p_chars,atom_or_var);
+	GET_FIRST_ARG(p_chars,atom_or_var);
+	GET_NEXT_ARG(p_term,any);
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *vnames = NULL;
 	pl_idx_t vnames_ctx = 0;
@@ -8325,8 +8325,8 @@ static USE_RESULT pl_status fn_write_term_to_chars_3(query *q)
 
 static USE_RESULT pl_status fn_write_canonical_to_chars_3(query *q)
 {
-	GET_FIRST_ARG(p_term,any);
-	GET_NEXT_ARG(p_chars,atom_or_var);
+	GET_FIRST_ARG(p_chars,atom_or_var);
+	GET_NEXT_ARG(p_term,any);
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *vnames = NULL;
 	pl_idx_t vnames_ctx = 0;
@@ -11908,12 +11908,12 @@ static const struct builtins g_predicates_other[] =
 	//{"forall", 2, fn_forall_2, "+clause,+clause", false},
 	{"term_hash", 2, fn_term_hash_2, "+clause,?integer", false},
 	{"name", 2, fn_iso_atom_codes_2, "?string,?list", false},
-	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+atom,-clause,+list", false},
-	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,-clause,+list", false},
-	{"write_term_to_atom", 3, fn_write_term_to_atom_3, "+clause,?atom,+list", false},
-	{"write_canonical_to_atom", 3, fn_write_canonical_to_chars_3, "+clause,?atom,+list", false},
-	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "+clause,?chars,+list", false},
-	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "+clause,?chars,+list", false},
+	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+atom,?clause,+list", false},
+	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,?clause,+list", false},
+	{"write_term_to_atom", 3, fn_write_term_to_atom_3, "?atom,+clause,+list", false},
+	{"write_canonical_to_atom", 3, fn_write_canonical_to_chars_3, "?atom,+clause,+list", false},
+	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "?chars,+clause,+list", false},
+	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "?chars,+clause,+list", false},
 	{"base64", 3, fn_base64_3, "?string,?string,+Opts", false},
 	{"urlenc", 3, fn_urlenc_3, "?string,?string,+Opts", false},
 	{"atom_lower", 2, fn_atom_lower_2, "?atom,?atom", false},
