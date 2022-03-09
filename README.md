@@ -285,8 +285,8 @@ Non-standard predicates
 	atomic_list_concat/3	    # atomic_list_concat(L,Sep,Atom)
 	read_term_from_chars/2	    # read_term_from_chars(+chars,?term)
 	read_term_from_chars/3	    # read_term_from_chars(+chars,?term,+list)
-	write_term_to_chars/3	    # write_term_to_chars(?Cs,+term,+list)
-	write_canonical_to_chars/3  # write_canonical_to_chars(?Cs,+term,+list)
+	write_term_to_chars/3	    # write_term_to_chars(?chars,+term,+list)
+	write_canonical_to_chars/3  # write_canonical_to_chars(?chars,+term,+list)
 	chars_base64/3              # currently options are ignored
 	chars_urlenc/3              # currently options are ignored
 	hex_chars/2                 # as number_chars, but in hex
