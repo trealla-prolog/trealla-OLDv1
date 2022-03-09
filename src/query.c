@@ -353,7 +353,7 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 	LIST_HANDLER(l);
 	int cnt = 0;
 
-	while (is_iso_list(l) /*&& !is_cyclic_term(q, l, l_ctx)*/
+	while (is_iso_list(l)
 		&& (q->st.m->flag.double_quote_chars || allow_codes)
 		&& !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(l);
@@ -368,7 +368,7 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 		if (is_integer(c) && !allow_codes) {
 			is_chars_list = 0;
 			break;
-		} else if (!is_integer(c) && !is_atom(c)) {
+		} else if (!is_integer(c) && !is_iso_atom(c)) {
 			is_chars_list = 0;
 			break;
 		}
