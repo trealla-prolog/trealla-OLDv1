@@ -34,6 +34,17 @@
       "total" : 78
     }
   }, {
+    "uid" : "96923bc2b0328e8c797ed095e73447ee",
+    "name" : "tests/prolog/predicates/write_term_3/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 14,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 80,
+      "unknown" : 0,
+      "total" : 94
+    }
+  }, {
     "uid" : "a0bf07a93ae3abe80d02c8212e1848b7",
     "name" : "tests/logtalk/predicates/category_property_2/tests.lgt::tests",
     "statistic" : {
@@ -98,17 +109,6 @@
       "passed" : 42,
       "unknown" : 0,
       "total" : 48
-    }
-  }, {
-    "uid" : "f7fb34a8f9e5c1b84903a4ff3495e1ea",
-    "name" : "tests/prolog/predicates/length_2/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 6,
-      "broken" : 0,
-      "skipped" : 3,
-      "passed" : 18,
-      "unknown" : 0,
-      "total" : 27
     }
   } ]
 }
