@@ -456,21 +456,29 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 	pl_idx_t var_nbr = 0;
 
-	if (running && is_variable(c) && q->variable_names && (c_ctx == q->variable_names_ctx)) {
+	if (running && is_variable(c) && q->variable_names) {
 		cell *l = q->variable_names;
+		pl_idx_t l_ctx = q->variable_names_ctx;
 		LIST_HANDLER(l);
 
 		while (is_iso_list(l)) {
 			cell *h = LIST_HEAD(l);
+			h = deref(q, h, l_ctx);
+			pl_idx_t h_ctx = q->latest_ctx;
 			cell *name = h+1;
+			name = deref(q, name, h_ctx);
 			cell *var = h+2;
+			var = deref(q, var, h_ctx);
+			pl_idx_t var_ctx = q->latest_ctx;
 
-			if (var->var_nbr == c->var_nbr) {
+			if ((var->var_nbr == c->var_nbr) && (var_ctx = c_ctx)) {
 				dst += snprintf(dst, dstlen, "%s", GET_STR(q, name));
 				return dst - save_dst;
 			}
 
 			l = LIST_TAIL(l);
+			l = deref(q, l, l_ctx);
+			l_ctx = q->latest_ctx;
 		}
 	}
 
@@ -856,21 +864,29 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			return dst - save_dst;
 		}
 
-		if (running && is_variable(c) && q->variable_names && (c_ctx == q->variable_names_ctx)) {
+		if (running && is_variable(c) && q->variable_names) {
 			cell *l = q->variable_names;
+			pl_idx_t l_ctx = q->variable_names_ctx;
 			LIST_HANDLER(l);
 
 			while (is_iso_list(l)) {
-				cell *h = LIST_HEAD(l);
-				cell *name = h+1;
-				cell *var = h+2;
+			cell *h = LIST_HEAD(l);
+			h = deref(q, h, l_ctx);
+			pl_idx_t h_ctx = q->latest_ctx;
+			cell *name = h+1;
+			name = deref(q, name, h_ctx);
+			cell *var = h+2;
+			var = deref(q, var, h_ctx);
+			pl_idx_t var_ctx = q->latest_ctx;
 
-				if (var->var_nbr == c->var_nbr) {
+				if ((var->var_nbr == c->var_nbr) && (var_ctx == c_ctx)) {
 					dst += snprintf(dst, dstlen, "%s", GET_STR(q, name));
 					return dst - save_dst;
 				}
 
 				l = LIST_TAIL(l);
+				l = deref(q, l, l_ctx);
+				l_ctx = q->latest_ctx;
 			}
 		}
 

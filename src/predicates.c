@@ -3324,7 +3324,7 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 		return false;
 	}
 
-	cell *c1 = deref(q,c+1, c_ctx);
+	cell *c1 = deref(q, c+1, c_ctx);
 	pl_idx_t c1_ctx = q->latest_ctx;
 
 	if (!CMP_SLICE2(q, c, "max_depth")) {
@@ -3504,16 +3504,17 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 
 	q->flag = q->st.m->flag;
 	cell *p2_orig = p2, *vnames = NULL;
-	pl_idx_t vnames_ctx = 0;
+	pl_idx_t p2_orig_ctx = p2_ctx, vnames_ctx = 0;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
 		h = deref(q, h, p2_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
 
-		if (!parse_write_params(q, h, q->latest_ctx, &vnames, &vnames_ctx)) {
+		if (!parse_write_params(q, h, h_ctx, &vnames, &vnames_ctx)) {
 			clear_write_options(q);
-			return pl_success;
+			return pl_failure;
 		}
 
 		p2 = LIST_TAIL(p2);
@@ -3523,12 +3524,12 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 
 	if (is_variable(p2)) {
 		clear_write_options(q);
-		return throw_error(q, p2_orig, p2_ctx, "instantiation_error", "write_option");
+		return throw_error(q, p2_orig, p2_orig_ctx, "instantiation_error", "write_option");
 	}
 
 	if (!is_nil(p2)) {
 		clear_write_options(q);
-		return throw_error(q, p2_orig, p2_ctx, "type_error", "list");
+		return throw_error(q, p2_orig, p2_orig_ctx, "type_error", "list");
 	}
 
 	q->variable_names = vnames;
@@ -3571,16 +3572,17 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 
 	q->flag = q->st.m->flag;
 	cell *p2_orig = p2, *vnames = NULL;
-	pl_idx_t vnames_ctx;
+	pl_idx_t p2_orig_ctx = p2_ctx, vnames_ctx;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
 		h = deref(q, h, p2_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
 
-		if (!parse_write_params(q, h, q->latest_ctx, &vnames, &vnames_ctx)) {
+		if (!parse_write_params(q, h, h_ctx, &vnames, &vnames_ctx)) {
 			clear_write_options(q);
-			return pl_success;
+			return pl_failure;
 		}
 
 		p2 = LIST_TAIL(p2);
@@ -3590,18 +3592,22 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 
 	if (is_variable(p2)) {
 		clear_write_options(q);
-		return throw_error(q, p2_orig, p2_ctx, "instantiation_error", "write_option");
+		return throw_error(q, p2_orig, p2_orig_ctx, "instantiation_error", "write_option");
 	}
 
 	if (!is_nil(p2)) {
 		clear_write_options(q);
-		return throw_error(q, p2_orig, p2_ctx, "type_error", "list");
+		return throw_error(q, p2_orig, p2_orig_ctx, "type_error", "list");
 	}
 
 	q->latest_ctx = p1_ctx;
 	q->variable_names = vnames;
 	q->variable_names_ctx = vnames_ctx;
-	print_term_to_stream(q, str, p1, p1_ctx, 1);
+
+	if (q->ignore_ops)
+		print_canonical_to_stream(q, str, p1, p1_ctx, 1);
+	else
+		print_term_to_stream(q, str, p1, p1_ctx, 1);
 
 	if (q->fullstop)
 		net_write(".", 1, str);
@@ -8242,9 +8248,9 @@ static USE_RESULT pl_status fn_write_term_to_atom_3(query *q)
 
 	while (is_list(p2) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(p2);
-		cell *c = deref(q, h, p2_ctx);
-		pl_idx_t c_ctx = q->latest_ctx;
-		parse_write_params(q, c, c_ctx, &vnames, &vnames_ctx);
+		h = deref(q, h, p2_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
+		parse_write_params(q, h, h_ctx, &vnames, &vnames_ctx);
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
@@ -8274,8 +8280,9 @@ static USE_RESULT pl_status fn_write_canonical_to_atom_3(query *q)
 
 	while (is_list(p2) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(p2);
-		cell *c = deref(q, h, p2_ctx);
-		parse_write_params(q, c, q->latest_ctx, &vnames, &vnames_ctx);
+		h = deref(q, h, p2_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
+		parse_write_params(q, h, h_ctx, &vnames, &vnames_ctx);
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
@@ -8303,9 +8310,9 @@ static USE_RESULT pl_status fn_write_term_to_chars_3(query *q)
 
 	while (is_list(p2) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(p2);
-		cell *c = deref(q, h, p2_ctx);
-		pl_idx_t c_ctx = q->latest_ctx;
-		parse_write_params(q, c, c_ctx, &vnames, &vnames_ctx);
+		h = deref(q, h, p2_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
+		parse_write_params(q, h, h_ctx, &vnames, &vnames_ctx);
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
@@ -8335,8 +8342,9 @@ static USE_RESULT pl_status fn_write_canonical_to_chars_3(query *q)
 
 	while (is_list(p2) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(p2);
-		cell *c = deref(q, h, p2_ctx);
-		parse_write_params(q, c, q->latest_ctx, &vnames, &vnames_ctx);
+		h = deref(q, h, p2_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
+		parse_write_params(q, h, h_ctx, &vnames, &vnames_ctx);
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
