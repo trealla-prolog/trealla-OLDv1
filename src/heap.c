@@ -159,7 +159,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 					tmp->flags |= FLAG_VAR_ANON;
 
 				tmp->val_off = p1->val_off;
-				tmp->attrs = NULL;
+				//tmp->attrs = NULL;
 				return tmp;
 			}
 		}
@@ -167,8 +167,8 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 		tmp->var_nbr = q->st.m->pl->varno;
 		tmp->flags = FLAG_VAR_FRESH;
 		tmp->val_off = p1->val_off;
-		tmp->attrs = e->c.attrs;
-		tmp->attrs_ctx = e->c.attrs_ctx;
+		tmp->tmp_attrs = e->c.attrs;
+		tmp->tmp_attrs_ctx = e->c.attrs_ctx;
 
 		if (is_anon(p1))
 			tmp->flags |= FLAG_VAR_ANON;
@@ -234,10 +234,10 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 	cell *c = rec;
 
 	for (pl_idx_t i = 0; i < rec->nbr_cells; i++, c++) {
-		if (is_variable(c) && is_fresh(c) && c->attrs) {
+		if (is_variable(c) && is_fresh(c) && c->tmp_attrs) {
 			slot *e = GET_SLOT(f, c->var_nbr);
-			e->c.attrs = c->attrs;
-			e->c.attrs_ctx = c->attrs_ctx;
+			e->c.attrs = c->tmp_attrs;
+			e->c.attrs_ctx = c->tmp_attrs_ctx;
 		}
 	}
 
@@ -279,7 +279,7 @@ static cell *deep_raw_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned
 					tmp->flags |= FLAG_VAR_ANON;
 
 				tmp->val_off = p1->val_off;
-				tmp->attrs = NULL;
+				//tmp->attrs = NULL;
 				return tmp;
 			}
 		}
@@ -287,8 +287,8 @@ static cell *deep_raw_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned
 		tmp->var_nbr = q->st.m->pl->varno;
 		tmp->flags = FLAG_VAR_FRESH;
 		tmp->val_off = p1->val_off;
-		tmp->attrs = e->c.attrs;
-		tmp->attrs_ctx = e->c.attrs_ctx;
+		tmp->tmp_attrs = e->c.attrs;
+		tmp->tmp_attrs_ctx = e->c.attrs_ctx;
 
 		if (is_anon(p1))
 			tmp->flags |= FLAG_VAR_ANON;

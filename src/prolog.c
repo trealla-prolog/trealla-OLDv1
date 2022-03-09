@@ -248,9 +248,7 @@ prolog *pl_create()
 		return NULL;
 	}
 
-	// These must be the first pool items created so they are
-	// same in every prolog object...
-
+	CHECK_SENTINEL(index_from_pool(pl, "dummy"), ERR_IDX);
 	CHECK_SENTINEL(g_false_s = index_from_pool(pl, "false"), ERR_IDX);
 	CHECK_SENTINEL(g_true_s = index_from_pool(pl, "true"), ERR_IDX);
 	CHECK_SENTINEL(g_at_s = index_from_pool(pl, "@"), ERR_IDX);

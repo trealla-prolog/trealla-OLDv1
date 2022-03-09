@@ -155,33 +155,33 @@ cell *get_logical_body(cell *c)
 	return body;
 }
 
-void clear_rule(clause *r)
+void clear_rule(clause *cl)
 {
-	if (!r)
+	if (!cl)
 		return;
 
-	for (pl_idx_t i = 0; i < r->cidx; i++) {
-		cell *c = r->cells + i;
+	for (pl_idx_t i = 0; i < cl->cidx; i++) {
+		cell *c = cl->cells + i;
 		unshare_cell(c);
 		*c = (cell){0};
 		c->tag = TAG_EMPTY;
 	}
 
-	r->cidx = 0;
+	cl->cidx = 0;
 }
 
 static bool make_room(parser *p)
 {
-	if (p->cl->cidx == p->cl->nbr_cells) {
-		pl_idx_t nbr_cells = p->cl->nbr_cells * 2;
+	if (p->cl->cidx >= p->cl->nbr_cells) {
+		pl_idx_t nbr_cells = p->cl->nbr_cells * 3 / 2;
 
-		clause *r = realloc(p->cl, sizeof(clause)+(sizeof(cell)*nbr_cells));
-		if (!r) {
+		clause *cl = realloc(p->cl, sizeof(clause)+(sizeof(cell)*nbr_cells));
+		if (!cl) {
 			p->error = true;
 			return false;
 		}
 
-		p->cl = r;
+		p->cl = cl;
 		p->cl->nbr_cells = nbr_cells;
 	}
 
@@ -888,13 +888,13 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 	p->start_term = true;
 	p->nbr_vars = 0;
 	memset(&p->vartab, 0, sizeof(p->vartab));
-	clause *r = p->cl;
-	r->nbr_vars = 0;
-	r->is_first_cut = false;
-	r->is_cut_only = false;
+	clause *cl = p->cl;
+	cl->nbr_vars = 0;
+	cl->is_first_cut = false;
+	cl->is_cut_only = false;
 
-	for (pl_idx_t i = 0; i < r->cidx; i++) {
-		cell *c = r->cells + i;
+	for (pl_idx_t i = 0; i < cl->cidx; i++) {
+		cell *c = cl->cells + i;
 
 		if (!is_variable(c))
 			continue;
@@ -918,12 +918,12 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 
 		if (p->vartab.var_used[c->var_nbr]++ == 0) {
 			c->flags |= FLAG_VAR_FIRST_USE;
-			r->nbr_vars++;
+			cl->nbr_vars++;
 			p->nbr_vars++;
 		}
 	}
 
-	for (pl_idx_t i = 0; i < r->nbr_vars; i++) {
+	for (pl_idx_t i = 0; i < cl->nbr_vars; i++) {
 		if (p->consulting && !p->do_read_term && (p->vartab.var_used[i] == 1) &&
 			(p->vartab.var_name[i][strlen(p->vartab.var_name[i])-1] != '_') &&
 			(*p->vartab.var_name[i] != '_')) {
@@ -932,8 +932,11 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 		}
 	}
 
-	for (pl_idx_t i = 0; i < r->cidx; i++) {
-		cell *c = r->cells + i;
+	for (pl_idx_t i = 0; i < cl->cidx; i++) {
+		cell *c = cl->cells + i;
+
+		//if (is_literal(c)) printf("*** %u : %u %s\n", i, c->tag, GET_STR(p, c));
+		//if (is_variable(c)) printf("*** %u : %u var_nbr=%d, off=%u\n", i, c->tag, c->var_nbr, c->val_off);
 
 		if (!is_variable(c))
 			continue;
@@ -1052,7 +1055,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 void term_to_body(parser *p)
 {
 	term_to_body_conversion(p, p->cl->cells);
-	p->cl->cells->nbr_cells = p->cl->cidx - 1;
+	p->cl->cells->nbr_cells = p->cl->cidx - 1;	// Drops TAG_END
 }
 
 static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
