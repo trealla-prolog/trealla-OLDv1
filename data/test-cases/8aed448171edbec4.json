@@ -1,0 +1,51 @@
+{
+  "uid" : "8aed448171edbec4",
+  "name" : "sicstus_12",
+  "fullName" : "sicstus_12::tests",
+  "historyId" : "sicstus_12::tests",
+  "time" : {
+    "duration" : 2
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/sicstus/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/sicstus/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/sicstus/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/sicstus/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "75-82"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/3092c779ecc532a1b49fcef62fae92acee2286ef/examples/sicstus/tests.lgt#L75"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "8aed448171edbec4.json",
+  "parameterValues" : [ "examples/sicstus/tests.lgt", "75-82", "https://github.com/LogtalkDotOrg/logtalk3/tree/3092c779ecc532a1b49fcef62fae92acee2286ef/examples/sicstus/tests.lgt#L75" ]
+}

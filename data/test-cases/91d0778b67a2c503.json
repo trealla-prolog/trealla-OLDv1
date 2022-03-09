@@ -1,0 +1,51 @@
+{
+  "uid" : "91d0778b67a2c503",
+  "name" : "multifile_07",
+  "fullName" : "multifile_07::tests",
+  "historyId" : "multifile_07::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/multifile/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/multifile/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/multifile/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/multifile/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "72-73"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/3092c779ecc532a1b49fcef62fae92acee2286ef/examples/multifile/tests.lgt#L72"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "91d0778b67a2c503.json",
+  "parameterValues" : [ "examples/multifile/tests.lgt", "72-73", "https://github.com/LogtalkDotOrg/logtalk3/tree/3092c779ecc532a1b49fcef62fae92acee2286ef/examples/multifile/tests.lgt#L72" ]
+}
