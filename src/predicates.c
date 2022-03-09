@@ -3514,7 +3514,7 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 
 		if (!parse_write_params(q, h, h_ctx, &vnames, &vnames_ctx)) {
 			clear_write_options(q);
-			return pl_failure;
+			return pl_success;
 		}
 
 		p2 = LIST_TAIL(p2);
@@ -3582,7 +3582,7 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 
 		if (!parse_write_params(q, h, h_ctx, &vnames, &vnames_ctx)) {
 			clear_write_options(q);
-			return pl_failure;
+			return pl_success;
 		}
 
 		p2 = LIST_TAIL(p2);
