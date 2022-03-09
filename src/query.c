@@ -1009,8 +1009,8 @@ unsigned create_vars(query *q, unsigned cnt)
 	slot *e = GET_SLOT(f, f->nbr_vars);
 
 	for (unsigned i = 0; i < cnt; i++, e++) {
+		memset(e, 0, sizeof(slot));
 		e->c.tag = TAG_EMPTY;
-		e->c.attrs = NULL;
 	}
 
 	f->nbr_vars += cnt;

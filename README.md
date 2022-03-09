@@ -233,9 +233,10 @@ Non-standard predicates
 
 	get_unbuffered_code/1		# read a single unbuffered code
 	get_unbuffered_char/1		# read a single unbuffered character
-	read_term_from_atom/3       # use read_term_from_chars/3 instead
-	write_term_to_atom/3        # use write_term_to_chars/3 instead
-	term_to_atom/2              # use write_term_to_chars/3 instead
+	read_term_from_atom/3       # read_term_from_atom(+atom,?term)
+	write_term_to_atom/3        # write_term_to_atom(?atom,?term,+list)
+	write_canonical_to_atom/3   # write_canonical_to_atom(?atom,?term,+list)
+	term_to_atom/2              # term_to_atom(?atom,?term)
 
 	srandom/1                   # set_seed(+integer) set random number seed
 	set_seed/1                  # set_seed(+integer) set random number seed
@@ -282,10 +283,10 @@ Non-standard predicates
 	atomic_concat/3             # atomic_concat(+atom,+list,-list)
 	atomic_list_concat/2	    # atomic_list_concat(L,Atom)
 	atomic_list_concat/3	    # atomic_list_concat(L,Sep,Atom)
-	read_term_from_chars/2	    # read_term_from_chars(+chars,-Term)
-	read_term_from_chars/3	    # read_term_from_chars(+chars,-Term,+opts)
-	write_term_to_chars/3	    # write_term_to_chars(+rule,+opts,-Cs)
-	write_canonical_to_chars/3  # write_term_to_chars(+rule,+opts,-Cs)
+	read_term_from_chars/2	    # read_term_from_chars(+chars,?term)
+	read_term_from_chars/3	    # read_term_from_chars(+chars,?term,+list)
+	write_term_to_chars/3	    # write_term_to_chars(?chars,?term,+list)
+	write_canonical_to_chars/3  # write_canonical_to_chars(?chars,?term,+list)
 	chars_base64/3              # currently options are ignored
 	chars_urlenc/3              # currently options are ignored
 	hex_chars/2                 # as number_chars, but in hex
@@ -293,8 +294,8 @@ Non-standard predicates
 	partial_string/2            # partial_string(+string,-String)
 	partial_string/3            # partial_string(+string,-String,-Var)
 	if/3, (*->)/2               # soft-cut
-	setup_call_cleanup/3        # setup_call_cleanup(+setup,+goal,+cleanup)
-	call_cleanup/2              # call_cleanup(+goal,+cleanup)
+	setup_call_cleanup/3        # setup_call_cleanup(+setup,+call,+cleanup)
+	call_cleanup/2              # call_cleanup(+call,+cleanup)
 	term_attvars/2              # term_attvars(+term,-Vs)
 	copy_term_nat/2             # doesn't copy attrs
 	copy_term/3                 # copy_term(+term1,-term2,-Goals)

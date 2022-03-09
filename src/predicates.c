@@ -3324,7 +3324,7 @@ static bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames,
 		return false;
 	}
 
-	cell *c1 = deref(q,c+1, c_ctx);
+	cell *c1 = deref(q, c+1, c_ctx);
 	pl_idx_t c1_ctx = q->latest_ctx;
 
 	if (!CMP_SLICE2(q, c, "max_depth")) {
@@ -3504,16 +3504,17 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 
 	q->flag = q->st.m->flag;
 	cell *p2_orig = p2, *vnames = NULL;
-	pl_idx_t vnames_ctx = 0;
+	pl_idx_t p2_orig_ctx = p2_ctx, vnames_ctx = 0;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
 		h = deref(q, h, p2_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
 
-		if (!parse_write_params(q, h, q->latest_ctx, &vnames, &vnames_ctx)) {
+		if (!parse_write_params(q, h, h_ctx, &vnames, &vnames_ctx)) {
 			clear_write_options(q);
-			return pl_success;
+			return pl_failure;
 		}
 
 		p2 = LIST_TAIL(p2);
@@ -3523,12 +3524,12 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 
 	if (is_variable(p2)) {
 		clear_write_options(q);
-		return throw_error(q, p2_orig, p2_ctx, "instantiation_error", "write_option");
+		return throw_error(q, p2_orig, p2_orig_ctx, "instantiation_error", "write_option");
 	}
 
 	if (!is_nil(p2)) {
 		clear_write_options(q);
-		return throw_error(q, p2_orig, p2_ctx, "type_error", "list");
+		return throw_error(q, p2_orig, p2_orig_ctx, "type_error", "list");
 	}
 
 	q->variable_names = vnames;
@@ -3571,16 +3572,17 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 
 	q->flag = q->st.m->flag;
 	cell *p2_orig = p2, *vnames = NULL;
-	pl_idx_t vnames_ctx;
+	pl_idx_t p2_orig_ctx = p2_ctx, vnames_ctx;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2)) {
 		cell *h = LIST_HEAD(p2);
 		h = deref(q, h, p2_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
 
-		if (!parse_write_params(q, h, q->latest_ctx, &vnames, &vnames_ctx)) {
+		if (!parse_write_params(q, h, h_ctx, &vnames, &vnames_ctx)) {
 			clear_write_options(q);
-			return pl_success;
+			return pl_failure;
 		}
 
 		p2 = LIST_TAIL(p2);
@@ -3590,18 +3592,22 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 
 	if (is_variable(p2)) {
 		clear_write_options(q);
-		return throw_error(q, p2_orig, p2_ctx, "instantiation_error", "write_option");
+		return throw_error(q, p2_orig, p2_orig_ctx, "instantiation_error", "write_option");
 	}
 
 	if (!is_nil(p2)) {
 		clear_write_options(q);
-		return throw_error(q, p2_orig, p2_ctx, "type_error", "list");
+		return throw_error(q, p2_orig, p2_orig_ctx, "type_error", "list");
 	}
 
 	q->latest_ctx = p1_ctx;
 	q->variable_names = vnames;
 	q->variable_names_ctx = vnames_ctx;
-	print_term_to_stream(q, str, p1, p1_ctx, 1);
+
+	if (q->ignore_ops)
+		print_canonical_to_stream(q, str, p1, p1_ctx, 1);
+	else
+		print_term_to_stream(q, str, p1, p1_ctx, 1);
 
 	if (q->fullstop)
 		net_write(".", 1, str);
@@ -5045,8 +5051,9 @@ static unsigned count_non_anons(uint8_t *mask, unsigned bit)
 	return bits;
 }
 
-static void do_term_assign_vars(parser *p, pl_idx_t nbr_cells)
+static void do_term_assign_vars(parser *p)
 {
+	pl_idx_t nbr_cells = p->cl->cidx;
 	term_assign_vars(p, 0, true);
 	uint8_t vars[MAX_ARITY] = {0};
 
@@ -5128,7 +5135,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	}
 
 	p->cl->cidx = safe_copy_cells(p->cl->cells, tmp, nbr_cells);
-	do_term_assign_vars(p, nbr_cells);
+	do_term_assign_vars(p);
 	term_to_body(p);
 	cell *h = get_head(p->cl->cells);
 
@@ -5192,7 +5199,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	}
 
 	p->cl->cidx = safe_copy_cells(p->cl->cells, tmp, nbr_cells);
-	do_term_assign_vars(p, nbr_cells);
+	do_term_assign_vars(p);
 	term_to_body(p);
 	cell *h = get_head(p->cl->cells);
 
@@ -6482,7 +6489,7 @@ static pl_status do_asserta_2(query *q)
 	}
 
 	p->cl->cidx = safe_copy_cells(p->cl->cells, tmp, nbr_cells);
-	do_term_assign_vars(p, nbr_cells);
+	do_term_assign_vars(p);
 	term_to_body(p);
 	cell *h = get_head(p->cl->cells);
 
@@ -6585,7 +6592,7 @@ static pl_status do_assertz_2(query *q)
 	}
 
 	p->cl->cidx = safe_copy_cells(p->cl->cells, tmp, nbr_cells);
-	do_term_assign_vars(p, nbr_cells);
+	do_term_assign_vars(p);
 	term_to_body(p);
 	cell *h = get_head(p->cl->cells);
 
@@ -8229,23 +8236,90 @@ static USE_RESULT pl_status fn_read_term_from_atom_3(query *q)
 	return ok;
 }
 
-static USE_RESULT pl_status fn_write_term_to_chars_3(query *q)
+static USE_RESULT pl_status fn_write_term_to_atom_3(query *q)
 {
-	GET_FIRST_ARG(p_term,any);
+	GET_FIRST_ARG(p_chars,atom_or_var);
+	GET_NEXT_ARG(p_term,any);
 	GET_NEXT_ARG(p2,list_or_nil);
-	GET_NEXT_ARG(p_chars,any);
+	cell *vnames = NULL;
+	pl_idx_t vnames_ctx = 0;
 	q->flag = q->st.m->flag;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(p2);
-		cell *c = deref(q, h, p2_ctx);
-		parse_write_params(q, c, q->latest_ctx, NULL, NULL);
+		h = deref(q, h, p2_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
+		parse_write_params(q, h, h_ctx, &vnames, &vnames_ctx);
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 	}
 
+	q->variable_names = vnames;
+	q->variable_names_ctx = vnames_ctx;
+	char *dst = print_term_to_strbuf(q, p_term, p_term_ctx, 1);
+	clear_write_options(q);
+	cell tmp;
+	may_error(make_cstring(&tmp, dst), free(dst));
+	free(dst);
+	pl_status ok = unify(q, p_chars, p_chars_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	return ok;
+}
+
+static USE_RESULT pl_status fn_write_canonical_to_atom_3(query *q)
+{
+	GET_FIRST_ARG(p_chars,atom_or_var);
+	GET_NEXT_ARG(p_term,any);
+	GET_NEXT_ARG(p2,list_or_nil);
+	cell *vnames = NULL;
+	pl_idx_t vnames_ctx = 0;
+	q->flag = q->st.m->flag;
+	LIST_HANDLER(p2);
+
+	while (is_list(p2) && !g_tpl_interrupt) {
+		cell *h = LIST_HEAD(p2);
+		h = deref(q, h, p2_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
+		parse_write_params(q, h, h_ctx, &vnames, &vnames_ctx);
+		p2 = LIST_TAIL(p2);
+		p2 = deref(q, p2, p2_ctx);
+		p2_ctx = q->latest_ctx;
+	}
+
+	char *dst = print_canonical_to_strbuf(q, p_term, p_term_ctx, 1);
+	clear_write_options(q);
+	cell tmp;
+	may_error(make_cstring(&tmp, dst), free(dst));
+	free(dst);
+	pl_status ok = unify(q, p_chars, p_chars_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	return ok;
+}
+
+static USE_RESULT pl_status fn_write_term_to_chars_3(query *q)
+{
+	GET_FIRST_ARG(p_chars,atom_or_var);
+	GET_NEXT_ARG(p_term,any);
+	GET_NEXT_ARG(p2,list_or_nil);
+	cell *vnames = NULL;
+	pl_idx_t vnames_ctx = 0;
+	q->flag = q->st.m->flag;
+	LIST_HANDLER(p2);
+
+	while (is_list(p2) && !g_tpl_interrupt) {
+		cell *h = LIST_HEAD(p2);
+		h = deref(q, h, p2_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
+		parse_write_params(q, h, h_ctx, &vnames, &vnames_ctx);
+		p2 = LIST_TAIL(p2);
+		p2 = deref(q, p2, p2_ctx);
+		p2_ctx = q->latest_ctx;
+	}
+
+	q->variable_names = vnames;
+	q->variable_names_ctx = vnames_ctx;
 	char *dst = print_term_to_strbuf(q, p_term, p_term_ctx, 1);
 	clear_write_options(q);
 	cell tmp;
@@ -8258,16 +8332,19 @@ static USE_RESULT pl_status fn_write_term_to_chars_3(query *q)
 
 static USE_RESULT pl_status fn_write_canonical_to_chars_3(query *q)
 {
-	GET_FIRST_ARG(p_term,any);
+	GET_FIRST_ARG(p_chars,atom_or_var);
+	GET_NEXT_ARG(p_term,any);
 	GET_NEXT_ARG(p2,list_or_nil);
-	GET_NEXT_ARG(p_chars,any);
+	cell *vnames = NULL;
+	pl_idx_t vnames_ctx = 0;
 	q->flag = q->st.m->flag;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(p2);
-		cell *c = deref(q, h, p2_ctx);
-		parse_write_params(q, c, q->latest_ctx, NULL, NULL);
+		h = deref(q, h, p2_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
+		parse_write_params(q, h, h_ctx, &vnames, &vnames_ctx);
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
@@ -11755,8 +11832,8 @@ static const struct builtins g_predicates_other[] =
 
 	// Used for database log...
 
-	{"$a_", 2, fn_sys_asserta_2, "+clause,+ref", false},
-	{"$z_", 2, fn_sys_assertz_2, "+clause,+ref", false},
+	{"$a_", 2, fn_sys_asserta_2, "+term,+ref", false},
+	{"$z_", 2, fn_sys_assertz_2, "+term,+ref", false},
 	{"$e_", 1, fn_erase_1, "+ref", false},
 	{"$db_load", 0, fn_sys_db_load_0, NULL, false},
 	{"$db_save", 0, fn_sys_db_save_0, NULL, false},
@@ -11808,7 +11885,7 @@ static const struct builtins g_predicates_other[] =
 	{"assert", 1, fn_iso_assertz_1, NULL, false},
 	{"$strip_attributes", 1, fn_sys_strip_attributes_1, "+vars", false},
 	{"copy_term_nat", 2, fn_copy_term_nat_2, NULL, false},
-	{"string", 1, fn_atom_1, "+clause", false},
+	{"string", 1, fn_atom_1, "+term", false},
 	{"atomic_concat", 3, fn_atomic_concat_3, NULL, false},
 	{"atomic_list_concat", 3, fn_atomic_list_concat_3, NULL, false},
 	{"replace", 4, fn_replace_4, "+orig,+from,+to,-new", false},
@@ -11831,20 +11908,22 @@ static const struct builtins g_predicates_other[] =
 	{"split_string", 4, fn_split_atom_4, "+string,+sep,+pad,-list", false},
 	{"split", 4, fn_split_4, "+string,+string,?left,?right", false},
 	{"$is_partial_string", 1, fn_sys_is_partial_string_1, "+string", false},
-	{"is_list_or_partial_list", 1, fn_is_list_or_partial_list_1, "+clause", false},
-	{"is_partial_list", 1, fn_is_partial_list_1, "+clause", false},
-	{"is_list", 1, fn_is_list_1, "+clause", false},
-	{"list", 1, fn_is_list_1, "+clause", false},
-	{"is_stream", 1, fn_is_stream_1, "+clause", false},
-	//{"forall", 2, fn_forall_2, "+clause,+clause", false},
-	{"term_hash", 2, fn_term_hash_2, "+clause,?integer", false},
+	{"is_list_or_partial_list", 1, fn_is_list_or_partial_list_1, "+term", false},
+	{"is_partial_list", 1, fn_is_partial_list_1, "+term", false},
+	{"is_list", 1, fn_is_list_1, "+term", false},
+	{"list", 1, fn_is_list_1, "+term", false},
+	{"is_stream", 1, fn_is_stream_1, "+term", false},
+	//{"forall", 2, fn_forall_2, "+term,+term", false},
+	{"term_hash", 2, fn_term_hash_2, "+term,?integer", false},
 	{"name", 2, fn_iso_atom_codes_2, "?string,?list", false},
-	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,-clause,+opts", false},
-	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+chars,-clause,+opts", false},
-	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "+clause,+list,?chars", false},
-	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "+clause,+list,?chars", false},
-	{"base64", 3, fn_base64_3, "?string,?string,+Opts", false},
-	{"urlenc", 3, fn_urlenc_3, "?string,?string,+Opts", false},
+	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+atom,?term,+list", false},
+	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,?term,+list", false},
+	{"write_term_to_atom", 3, fn_write_term_to_atom_3, "?atom,?term,+list", false},
+	{"write_canonical_to_atom", 3, fn_write_canonical_to_chars_3, "?atom,?term,+list", false},
+	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "?chars,?term,+list", false},
+	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "?chars,?term,+list", false},
+	{"base64", 3, fn_base64_3, "?string,?string,+list", false},
+	{"urlenc", 3, fn_urlenc_3, "?string,?string,+list", false},
 	{"atom_lower", 2, fn_atom_lower_2, "?atom,?atom", false},
 	{"atom_upper", 2, fn_atom_upper_2, "?atom,?atom", false},
 	{"string_lower", 2, fn_string_lower_2, "?string,?string", false},
@@ -11856,26 +11935,26 @@ static const struct builtins g_predicates_other[] =
 	{"$load_properties", 0, fn_sys_load_properties_0, NULL, false},
 	{"$load_flags", 0, fn_sys_load_flags_0, NULL, false},
 	{"$load_ops", 0, fn_sys_load_ops_0, NULL, false},
-	{"numbervars", 1, fn_numbervars_1, "+clause", false},
-	{"numbervars", 3, fn_numbervars_3, "+clause,+start,?end", false},
-	{"numbervars", 4, fn_numbervars_3, "+clause,+start,?end,+list", false},
-	{"var_number", 2, fn_var_number_2, "+clause,?integer", false},
-	{"char_type", 2, fn_char_type_2, "+char,+clause", false},
-	{"code_type", 2, fn_char_type_2, "+code,+clause", false},
+	{"numbervars", 1, fn_numbervars_1, "+term", false},
+	{"numbervars", 3, fn_numbervars_3, "+term,+start,?end", false},
+	{"numbervars", 4, fn_numbervars_3, "+term,+start,?end,+list", false},
+	{"var_number", 2, fn_var_number_2, "+term,?integer", false},
+	{"char_type", 2, fn_char_type_2, "+char,+term", false},
+	{"code_type", 2, fn_char_type_2, "+code,+term", false},
 	{"uuid", 1, fn_uuid_1, "-string", false},
-	{"asserta", 2, fn_asserta_2, "+clause,-ref", false},
-	{"assertz", 2, fn_assertz_2, "+clause,-ref", false},
+	{"asserta", 2, fn_asserta_2, "+term,-ref", false},
+	{"assertz", 2, fn_assertz_2, "+term,-ref", false},
 	{"instance", 2, fn_instance_2, "+ref,?clause", false},
 	{"erase", 1, fn_erase_1, "+ref", false},
 	{"clause", 3, fn_clause_3, "?head,?body,-ref", false},
-	{"$queue", 1, fn_sys_queue_1, "+clause", false},
+	{"$queue", 1, fn_sys_queue_1, "+term", false},
 	{"$list", 1, fn_sys_list_1, "-list", false},
 	{"getenv", 2, fn_getenv_2, NULL, false},
 	{"setenv", 2, fn_setenv_2, NULL, false},
 	{"unsetenv", 1, fn_unsetenv_1, NULL, false},
 	{"statistics", 0, fn_statistics_0, NULL, false},
 	{"statistics", 2, fn_statistics_2, "+string,-variable", false},
-	{"duplicate_term", 2, fn_iso_copy_term_2, "+clause,-variable", false},
+	{"duplicate_term", 2, fn_iso_copy_term_2, "+term,-variable", false},
 	{"call_nth", 2, fn_call_nth_2, "+callable,+integer", false},
 	{"limit", 2, fn_limit_2, "+integer,+callable", false},
 	{"offset", 2, fn_offset_2, "+integer,+callable", false},
@@ -11900,22 +11979,22 @@ static const struct builtins g_predicates_other[] =
 #endif
 
 	{"task", 1, fn_task_n, "+callable", false},
-	{"task", 2, fn_task_n, "+callable,+clause,...", false},
-	{"task", 3, fn_task_n, "+callable,+clause,...", false},
-	{"task", 4, fn_task_n, "+callable,+clause,...", false},
-	{"task", 5, fn_task_n, "+callable,+clause,...", false},
-	{"task", 6, fn_task_n, "+callable,+clause,...", false},
-	{"task", 7, fn_task_n, "+callable,+clause,...", false},
-	{"task", 8, fn_task_n, "+callable,+clause,...", false},
+	{"task", 2, fn_task_n, "+callable,+term,...", false},
+	{"task", 3, fn_task_n, "+callable,+term,...", false},
+	{"task", 4, fn_task_n, "+callable,+term,...", false},
+	{"task", 5, fn_task_n, "+callable,+term,...", false},
+	{"task", 6, fn_task_n, "+callable,+term,...", false},
+	{"task", 7, fn_task_n, "+callable,+term,...", false},
+	{"task", 8, fn_task_n, "+callable,+term,...", false},
 
 	{"wait", 0, fn_wait_0, NULL, false},
 	{"await", 0, fn_await_0, NULL, false},
 	{"yield", 0, fn_yield_0, NULL, false},
 	{"fork", 0, fn_fork_0, NULL, false},
-	{"send", 1, fn_send_1, "+clause", false},
+	{"send", 1, fn_send_1, "+term", false},
 	{"recv", 1, fn_recv_1, "?clause", false},
 
-	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+clause,+clause", false},
+	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+term,+term", false},
 	{"$mustbe_list_or_var", 1, fn_sys_mustbe_list_or_var_1, "?list", false},
 
 	{"$skip_max_list", 4, fn_sys_skip_max_list_4, NULL, false},
