@@ -1,0 +1,56 @@
+{
+  "uid" : "2c084eea6ee94061",
+  "name" : "size_metric_directory",
+  "fullName" : "size_metric_directory::size_metric_tests",
+  "historyId" : "size_metric_directory::size_metric_tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "failed",
+  "statusMessage" : "Non-deterministic success",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/code_metrics/size_metric_tests.lgt::size_metric_tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/code_metrics/size_metric_tests.lgt::size_metric_tests"
+  }, {
+    "name" : "package",
+    "value" : "tools/code_metrics/size_metric_tests.lgt::size_metric_tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/code_metrics/size_metric_tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "59-61"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/3092c779ecc532a1b49fcef62fae92acee2286ef/tools/code_metrics/size_metric_tests.lgt#L59"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "2c084eea6ee94061.json",
+  "parameterValues" : [ "tools/code_metrics/size_metric_tests.lgt", "59-61", "https://github.com/LogtalkDotOrg/logtalk3/tree/3092c779ecc532a1b49fcef62fae92acee2286ef/tools/code_metrics/size_metric_tests.lgt#L59" ]
+}
