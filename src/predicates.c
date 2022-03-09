@@ -8230,11 +8230,72 @@ static USE_RESULT pl_status fn_read_term_from_atom_3(query *q)
 	return ok;
 }
 
+static USE_RESULT pl_status fn_write_term_to_atom_3(query *q)
+{
+	GET_FIRST_ARG(p_term,any);
+	GET_NEXT_ARG(p_chars,atom_or_var);
+	GET_NEXT_ARG(p2,list_or_nil);
+	cell *vnames = NULL;
+	pl_idx_t vnames_ctx = 0;
+	q->flag = q->st.m->flag;
+	LIST_HANDLER(p2);
+
+	while (is_list(p2) && !g_tpl_interrupt) {
+		cell *h = LIST_HEAD(p2);
+		cell *c = deref(q, h, p2_ctx);
+		pl_idx_t c_ctx = q->latest_ctx;
+		parse_write_params(q, c, c_ctx, &vnames, &vnames_ctx);
+		p2 = LIST_TAIL(p2);
+		p2 = deref(q, p2, p2_ctx);
+		p2_ctx = q->latest_ctx;
+	}
+
+	q->variable_names = vnames;
+	q->variable_names_ctx = vnames_ctx;
+	char *dst = print_term_to_strbuf(q, p_term, p_term_ctx, 1);
+	clear_write_options(q);
+	cell tmp;
+	may_error(make_cstring(&tmp, dst), free(dst));
+	free(dst);
+	pl_status ok = unify(q, p_chars, p_chars_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	return ok;
+}
+
+static USE_RESULT pl_status fn_write_canonical_to_atom_3(query *q)
+{
+	GET_FIRST_ARG(p_term,any);
+	GET_NEXT_ARG(p_chars,atom_or_var);
+	GET_NEXT_ARG(p2,list_or_nil);
+	cell *vnames = NULL;
+	pl_idx_t vnames_ctx = 0;
+	q->flag = q->st.m->flag;
+	LIST_HANDLER(p2);
+
+	while (is_list(p2) && !g_tpl_interrupt) {
+		cell *h = LIST_HEAD(p2);
+		cell *c = deref(q, h, p2_ctx);
+		parse_write_params(q, c, q->latest_ctx, &vnames, &vnames_ctx);
+		p2 = LIST_TAIL(p2);
+		p2 = deref(q, p2, p2_ctx);
+		p2_ctx = q->latest_ctx;
+	}
+
+	char *dst = print_canonical_to_strbuf(q, p_term, p_term_ctx, 1);
+	clear_write_options(q);
+	cell tmp;
+	may_error(make_cstring(&tmp, dst), free(dst));
+	free(dst);
+	pl_status ok = unify(q, p_chars, p_chars_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	return ok;
+}
+
 static USE_RESULT pl_status fn_write_term_to_chars_3(query *q)
 {
 	GET_FIRST_ARG(p_term,any);
+	GET_NEXT_ARG(p_chars,atom_or_var);
 	GET_NEXT_ARG(p2,list_or_nil);
-	GET_NEXT_ARG(p_chars,any);
 	cell *vnames = NULL;
 	pl_idx_t vnames_ctx = 0;
 	q->flag = q->st.m->flag;
@@ -8265,8 +8326,8 @@ static USE_RESULT pl_status fn_write_term_to_chars_3(query *q)
 static USE_RESULT pl_status fn_write_canonical_to_chars_3(query *q)
 {
 	GET_FIRST_ARG(p_term,any);
+	GET_NEXT_ARG(p_chars,atom_or_var);
 	GET_NEXT_ARG(p2,list_or_nil);
-	GET_NEXT_ARG(p_chars,any);
 	cell *vnames = NULL;
 	pl_idx_t vnames_ctx = 0;
 	q->flag = q->st.m->flag;
@@ -11847,10 +11908,12 @@ static const struct builtins g_predicates_other[] =
 	//{"forall", 2, fn_forall_2, "+clause,+clause", false},
 	{"term_hash", 2, fn_term_hash_2, "+clause,?integer", false},
 	{"name", 2, fn_iso_atom_codes_2, "?string,?list", false},
-	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,-clause,+opts", false},
-	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+chars,-clause,+opts", false},
-	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "+clause,+list,?chars", false},
-	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "+clause,+list,?chars", false},
+	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+atom,-clause,+list", false},
+	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,-clause,+list", false},
+	{"write_term_to_atom", 3, fn_write_term_to_atom_3, "+clause,?atom,+list", false},
+	{"write_canonical_to_atom", 3, fn_write_canonical_to_chars_3, "+clause,?atom,+list", false},
+	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "+clause,?chars,+list", false},
+	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "+clause,?chars,+list", false},
 	{"base64", 3, fn_base64_3, "?string,?string,+Opts", false},
 	{"urlenc", 3, fn_urlenc_3, "?string,?string,+Opts", false},
 	{"atom_lower", 2, fn_atom_lower_2, "?atom,?atom", false},

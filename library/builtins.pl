@@ -404,7 +404,6 @@ partial_string(S, P, V) :- append(S, V, P).
 chars_base64(Plain, Base64, Opts) :- base64(Plain, Base64, Opts).
 chars_urlenc(Plain, Url, Opts) :- urlenc(Plain, Url, Opts).
 term_to_atom(T, S) :- write_term_to_chars(S, T, []).
-write_term_to_atom(S, T, Opts) :- write_term_to_chars(S, Opts, T).
 absolute_file_name(R, A) :- absolute_file_name(R, A, []).
 client(U, H, P, S) :- client(U,H,P,S,[]).
 server(H, S) :- server(H,S,[]).
