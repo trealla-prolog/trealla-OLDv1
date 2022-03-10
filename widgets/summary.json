@@ -1,17 +1,17 @@
 {
-  "reportName" : "Standards Compliance Report",
+  "reportName" : "Logtalk distribution full tests",
   "testRuns" : [ ],
   "statistic" : {
-    "failed" : 227,
+    "failed" : 233,
     "broken" : 0,
-    "skipped" : 172,
-    "passed" : 7723,
+    "skipped" : 173,
+    "passed" : 7724,
     "unknown" : 0,
-    "total" : 8122
+    "total" : 8130
   },
   "time" : {
     "minDuration" : 0,
-    "maxDuration" : 30593,
-    "sumDuration" : 327652
+    "maxDuration" : 30821,
+    "sumDuration" : 437565
   }
 }
