@@ -2,16 +2,16 @@
   "reportName" : "Standards Compliance Report",
   "testRuns" : [ ],
   "statistic" : {
-    "failed" : 233,
+    "failed" : 232,
     "broken" : 0,
     "skipped" : 173,
-    "passed" : 7754,
+    "passed" : 7806,
     "unknown" : 0,
-    "total" : 8160
+    "total" : 8211
   },
   "time" : {
     "minDuration" : 0,
-    "maxDuration" : 48443,
-    "sumDuration" : 314947
+    "maxDuration" : 31371,
+    "sumDuration" : 357622
   }
 }
