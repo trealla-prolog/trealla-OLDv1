@@ -1,0 +1,51 @@
+{
+  "uid" : "35f77f5c8b910261",
+  "name" : "packs_packs_unpin_0_02",
+  "fullName" : "packs_packs_unpin_0_02::tests",
+  "historyId" : "packs_packs_unpin_0_02::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/packs/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/packs/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tools/packs/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/packs/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "327-328"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/3092c779ecc532a1b49fcef62fae92acee2286ef/tools/packs/tests.lgt#L327"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "35f77f5c8b910261.json",
+  "parameterValues" : [ "tools/packs/tests.lgt", "327-328", "https://github.com/LogtalkDotOrg/logtalk3/tree/3092c779ecc532a1b49fcef62fae92acee2286ef/tools/packs/tests.lgt#L327" ]
+}
