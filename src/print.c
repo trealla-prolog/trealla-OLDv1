@@ -463,10 +463,10 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 		while (is_iso_list(l)) {
 			cell *h = LIST_HEAD(l);
-			//h = deref(q, h, l_ctx);
-			//pl_idx_t h_ctx = q->latest_ctx;
+			h = deref(q, h, l_ctx);
+			pl_idx_t h_ctx = q->latest_ctx;
 			cell *name = h+1;
-			//name = deref(q, name, h_ctx);
+			name = deref(q, name, h_ctx);
 			cell *var = h+2;
 			//var = deref(q, var, h_ctx);
 			pl_idx_t var_ctx = l_ctx;//q->latest_ctx;
@@ -871,10 +871,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 			while (is_iso_list(l)) {
 				cell *h = LIST_HEAD(l);
-				//h = deref(q, h, l_ctx);
-				//pl_idx_t h_ctx = q->latest_ctx;
+				h = deref(q, h, l_ctx);
+				pl_idx_t h_ctx = q->latest_ctx;
 				cell *name = h+1;
-				//name = deref(q, name, h_ctx);
+				name = deref(q, name, h_ctx);
 				cell *var = h+2;
 				//var = deref(q, var, h_ctx);
 				pl_idx_t var_ctx = l_ctx;//q->latest_ctx;
