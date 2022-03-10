@@ -348,29 +348,29 @@ static void find_key(query *q, predicate *pr, cell *key)
 size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, bool *has_var, bool *is_partial)
 {
 	*is_partial = *has_var = false;
-	pl_idx_t save_ctx = q ? q->latest_ctx : l_ctx;
 	size_t is_chars_list = 0;
 	LIST_HANDLER(l);
 	int cnt = 0;
 
-	while (is_iso_list(l) /*&& !is_cyclic_term(q, l, l_ctx)*/
+	while (is_iso_list(l)
 		&& (q->st.m->flag.double_quote_chars || allow_codes)
 		&& !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(l);
-		cell *c = q ? deref(q, h, l_ctx) : h;
+		cell *c = deref(q, h, l_ctx);
 
 		if (is_variable(c)) {
-			if (q) q->latest_ctx = save_ctx;
 			*has_var = true;
+			return 0;
+		}
+
+		if (!is_integer(c) && !is_iso_atom(c)) {
+			is_chars_list = 0;
 			return 0;
 		}
 
 		if (is_integer(c) && !allow_codes) {
 			is_chars_list = 0;
-			break;
-		} else if (!is_integer(c) && !is_atom(c)) {
-			is_chars_list = 0;
-			break;
+			return 0;
 		}
 
 		if (is_integer(c)) {
@@ -385,15 +385,15 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 
 			if (len != LEN_STR(q, c)) {
 				is_chars_list = 0;
-				break;
+				return 0;
 			}
 
 			is_chars_list += len;
 		}
 
 		l = LIST_TAIL(l);
-		l = q ? deref(q, l, l_ctx) : l;
-		if (q) l_ctx = q->latest_ctx;
+		l = deref(q, l, l_ctx);
+		l_ctx = q->latest_ctx;
 		cnt++;
 	}
 
@@ -402,10 +402,9 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 		*has_var = *is_partial = true;
 	} else if (is_string(l))
 		;
-	else if (!is_literal(l) || (l->val_off != g_nil_s))
+	else if (!is_literal(l) || !is_nil(l))
 		is_chars_list = 0;
 
-	if (q) q->latest_ctx = save_ctx;
 	return is_chars_list;
 }
 

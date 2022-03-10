@@ -1285,7 +1285,9 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 
 		free(tmpbuf);
 		cell tmp = p->v;
-		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		pl_status ok2 = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		unshare_cell(&tmp);
+		return ok2;
 	}
 
 	ssize_t len = print_canonical_to_buf(q, NULL, 0, p1, p1_ctx, 1, 0, 0);
@@ -1707,7 +1709,9 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 
 		free(tmpbuf);
 		cell tmp = p->v;
-		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		pl_status ok2 = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		unshare_cell(&tmp);
+		return ok2;
 	}
 
 	ssize_t len = print_canonical_to_buf(q, NULL, 0, p1, p1_ctx, 1, 0, 0);
@@ -2002,7 +2006,9 @@ static USE_RESULT pl_status fn_iso_atom_length_2(query *q)
 	size_t len = substrlen_utf8(GET_STR(q, p1), LEN_STR(q, p1));
 	cell tmp;
 	make_int(&tmp, len);
-	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	return ok;
 }
 
 static int new_stream(prolog *pl)
