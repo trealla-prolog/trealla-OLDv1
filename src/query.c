@@ -805,9 +805,16 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 
 	while (q->cp > INITIAL_FRAME) {
 		choice *ch = GET_CURR_CHOICE();
+		choice *save_ch = ch;
 
 		while (soft_cut && (ch >= q->choices)) {
 			if (ch->barrier && (ch->cgen == f->cgen)) {
+				if (ch == save_ch) {
+					f->cgen--;
+					q->cp--;
+					return;
+				}
+
 				ch->soft_cut = true;
 				f->cgen--;
 				return;
