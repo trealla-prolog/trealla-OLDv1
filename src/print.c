@@ -468,9 +468,10 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 			cell *name = h+1;
 			name = deref(q, name, h_ctx);
 			cell *var = h+2;
-			pl_idx_t var_ctx = l_ctx;
+			var = deref(q, var, h_ctx);
+			pl_idx_t var_ctx = q->latest_ctx;
 
-			if ((var->var_nbr == c->var_nbr) && (var_ctx = c_ctx)) {
+			if (is_variable(var) && (var->var_nbr == c->var_nbr) && (var_ctx = c_ctx)) {
 				dst += snprintf(dst, dstlen, "%s", GET_STR(q, name));
 				return dst - save_dst;
 			}
@@ -875,9 +876,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				cell *name = h+1;
 				name = deref(q, name, h_ctx);
 				cell *var = h+2;
-				pl_idx_t var_ctx = l_ctx;
+				var = deref(q, var, h_ctx);
+				pl_idx_t var_ctx = q->latest_ctx;
 
-				if ((var->var_nbr == c->var_nbr) && (var_ctx == c_ctx)) {
+				if (is_variable(var) && (var->var_nbr == c->var_nbr) && (var_ctx == c_ctx)) {
 					dst += snprintf(dst, dstlen, "%s", GET_STR(q, name));
 					return dst - save_dst;
 				}
