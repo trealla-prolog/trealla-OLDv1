@@ -8,9 +8,9 @@
 	ignore(process_vars_(Vars, [], Goals)),  % why ignore?
 	'$redo_trail',
 	'$end_hook',
-	(	acyclic_term(Goals) ->
-		maplist(call, Goals)
-	; 	true).
+	acyclic_term(Goals)
+	-> maplist(call, Goals)
+	; true.
 
 process_vars_([], Goals, Goals) :- !.
 process_vars_([Var-Val|Vars], SoFar, Goals) :-
