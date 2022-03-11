@@ -1,5 +1,3 @@
-:- use_module(library(freeze)).
-
 task70(X,Y) :-
 	write('Frozen X='),
 	write(X), Y=456,
@@ -32,6 +30,6 @@ test72 :-
 	freeze(X, task72(X)),
 	writeln('OK done').
 
-main :- test70, test71, test72.
+main :- test70, test71, test72, halt.
 
 :- initialization(main).
