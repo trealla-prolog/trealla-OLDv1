@@ -1,0 +1,58 @@
+{
+  "uid" : "c893d265b90a8f98",
+  "name" : "term_rountrip_compound_object",
+  "fullName" : "term_rountrip_compound_object::tests(test_files/simple)",
+  "historyId" : "term_rountrip_compound_object::tests(test_files/simple)",
+  "time" : {
+    "duration" : 64
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/json/tests.lgt::tests(test_files/simple)"
+  }, {
+    "name" : "testClass",
+    "value" : "library/json/tests.lgt::tests(test_files/simple)"
+  }, {
+    "name" : "package",
+    "value" : "library/json/tests.lgt::tests(test_files/simple)"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/json/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "135-137"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/ccacc8ade84da8f9daee829c70b3db921a0df3dd/library/json/tests.lgt#L135"
+  }, {
+    "name" : "note",
+    "value" : "term({vars-[SubClass,Comment], unifications-[{SubClass-NodeSignal, Comment-A node signal},{SubClass-InvariantSignal, Comment-A graph invariant signal}]})"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "c893d265b90a8f98.json",
+  "parameterValues" : [ "library/json/tests.lgt", "135-137", "https://github.com/LogtalkDotOrg/logtalk3/tree/ccacc8ade84da8f9daee829c70b3db921a0df3dd/library/json/tests.lgt#L135", "term({vars-[SubClass,Comment], unifications-[{SubClass-NodeSignal, Comment-A node signal},{SubClass-InvariantSignal, Comment-A graph invariant signal}]})" ]
+}
