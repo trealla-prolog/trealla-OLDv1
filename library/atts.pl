@@ -7,7 +7,6 @@
 	'$undo_trail'(Vars),
 	ignore(process_vars_(Vars, [], Goals)),  % why ignore?
 	'$redo_trail',
-	'$end_hook',
 	maplist(call, Goals).
 
 process_vars_([], Goals, Goals) :- !.

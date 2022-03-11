@@ -252,6 +252,7 @@ pl_status fn_sys_redo_trail_0(query * q)
 
 	free(q->save_e);
 	q->save_e = NULL;
+	q->in_hook = false;
 	return pl_success;
 }
 
