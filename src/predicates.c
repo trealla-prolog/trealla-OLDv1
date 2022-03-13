@@ -75,7 +75,7 @@ size_t slicecpy(char *dst, size_t dstlen, const char *src, size_t len)
 	return dst - save;
 }
 
-bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial)
+bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial, pl_int_t *skip_)
 {
 	pl_int_t skip = 0, max = 1000000000;
 	pl_idx_t c_ctx = p1_ctx;
@@ -83,6 +83,9 @@ bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial)
 
 	cell *c = skip_max_list(q, p1, &c_ctx, max, &skip, &tmp);
 	unshare_cell(&tmp);
+
+	if (skip_)
+		*skip_ = skip;
 
 	if (!strcmp(GET_STR(q,c), "[]"))
 		return true;
@@ -1035,7 +1038,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 
 	bool is_partial = false;
 
-	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, NULL) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (!is_iso_atom(p1) && !is_variable(p1))
@@ -1189,7 +1192,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 
 	bool is_partial = false;
 
-	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, NULL) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (is_nil(p2))
@@ -1336,7 +1339,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 
 	bool is_partial = false;
 
-	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, NULL) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (!is_iso_atom(p1) && !is_variable(p1))
@@ -1454,7 +1457,7 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 
 	bool is_partial = false;
 
-	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, NULL) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (is_nil(p2)) {
@@ -1616,7 +1619,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 
 	bool is_partial = false;
 
-	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, NULL) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (is_nil(p2))
@@ -4596,7 +4599,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 
 	bool is_partial = false;
 
-	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, NULL) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 #if 0
@@ -4829,7 +4832,7 @@ static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
 
 	bool is_partial = false;
 
-	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, NULL) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (!is_variable(p1) && (is_atom(p1) || is_number(p1))) {
@@ -5893,14 +5896,15 @@ static USE_RESULT pl_status fn_iso_sort_2(query *q)
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	bool is_partial = false;
+	pl_int_t skip1 = 0, skip2 = 0;
 
-	if (is_iso_list(p1) && !check_list(q, p1, p1_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p1) && !check_list(q, p1, p1_ctx, &is_partial, &skip1) && !is_partial)
 		return throw_error(q, p1, p1_ctx, "type_error", "list");
 
 	if (is_partial)
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "list");
 
-	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, &skip2) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (is_nil(p1)) {
@@ -5908,6 +5912,9 @@ static USE_RESULT pl_status fn_iso_sort_2(query *q)
 		make_literal(&tmp, g_nil_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
+
+	if (skip1 && skip2 && (skip2 > skip1))
+		return false;
 
 	pl_status status;
 	cell *l = nodesort(q, p1, p1_ctx, true, false, &status);
@@ -5920,14 +5927,15 @@ static USE_RESULT pl_status fn_iso_msort_2(query *q)
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	bool is_partial = false;
+	pl_int_t skip1 = 0, skip2 = 0;
 
-	if (is_iso_list(p1) && !check_list(q, p1, p1_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p1) && !check_list(q, p1, p1_ctx, &is_partial, &skip1) && !is_partial)
 		return throw_error(q, p1, p1_ctx, "type_error", "list");
 
 	if (is_partial)
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "list");
 
-	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, &skip2) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (is_nil(p1)) {
@@ -5935,6 +5943,9 @@ static USE_RESULT pl_status fn_iso_msort_2(query *q)
 		make_literal(&tmp, g_nil_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
+
+	if (skip1 && skip2 && (skip2 > skip1))
+		return false;
 
 	pl_status status;
 	cell *l = nodesort(q, p1, p1_ctx, false, false, &status);
@@ -5947,14 +5958,15 @@ static USE_RESULT pl_status fn_iso_keysort_2(query *q)
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	bool is_partial = false;
+	pl_int_t skip1 = 0, skip2 = 0;
 
-	if (is_iso_list(p1) && !check_list(q, p1, p1_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p1) && !check_list(q, p1, p1_ctx, &is_partial, &skip1) && !is_partial)
 		return throw_error(q, p1, p1_ctx, "type_error", "list");
 
 	if (is_partial)
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "list");
 
-	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, &skip2) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 	if (is_iso_list(p2)) {
@@ -5973,6 +5985,9 @@ static USE_RESULT pl_status fn_iso_keysort_2(query *q)
 		make_literal(&tmp, g_nil_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
+
+	if (skip1 && skip2 && (skip2 > skip1))
+		return false;
 
 	pl_status status = 0;
 	cell *l = nodesort(q, p1, p1_ctx, false, true, &status);
@@ -6053,6 +6068,7 @@ static USE_RESULT pl_status fn_sort_4(query *q)
 	GET_NEXT_ARG(p3,list_or_nil);
 	GET_NEXT_ARG(p4,list_or_nil_or_var);
 	bool is_partial = false, dedup = false, ascending = true;
+	pl_int_t skip1 = 0, skip2 = 0;
 
 	if (is_integer(p1) && is_negative(p1))
 		return throw_error(q, p1, p1_ctx, "domain_error", "not_less_than_zero");
@@ -6075,13 +6091,13 @@ static USE_RESULT pl_status fn_sort_4(query *q)
 	} else
 		return throw_error(q, p2, p2_ctx, "domain_error", "order");
 
-	if (is_iso_list(p3) && !check_list(q, p3, p3_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p3) && !check_list(q, p3, p3_ctx, &is_partial, &skip1) && !is_partial)
 		return throw_error(q, p3, p3_ctx, "type_error", "list");
 
 	if (is_partial)
 		return throw_error(q, p3, p3_ctx, "instantiation_error", "list");
 
-	if (is_iso_list(p4) && !check_list(q, p4, p4_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p4) && !check_list(q, p4, p4_ctx, &is_partial, &skip2) && !is_partial)
 		return throw_error(q, p4, p4_ctx, "type_error", "list");
 
 	if (is_iso_list(p4)) {
@@ -6100,6 +6116,9 @@ static USE_RESULT pl_status fn_sort_4(query *q)
 		make_literal(&tmp, g_nil_s);
 		return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	}
+
+	if (skip1 && skip2 && (skip2 > skip1))
+		return false;
 
 	pl_status status = 0;
 	cell *l = nodesort4(q, p3, p3_ctx, dedup, ascending, arg, &status);
@@ -6203,7 +6222,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 
 	bool is_partial = false;
 
-	if (is_iso_list(p3) && !check_list(q, p3, p3_ctx, &is_partial) && !is_partial)
+	if (is_iso_list(p3) && !check_list(q, p3, p3_ctx, &is_partial, NULL) && !is_partial)
 		return throw_error(q, p3, p3_ctx, "type_error", "list");
 
 	if (!q->retry) {
@@ -8171,7 +8190,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 		may_ptr_error(src);
 		memcpy(src, GET_STR(q, p_chars), len);
 		src[len] = '\0';
-	} else if (!check_list(q, p_chars, p_chars_ctx, &is_partial)) {
+	} else if (!check_list(q, p_chars, p_chars_ctx, &is_partial, NULL)) {
 		return throw_error(q, p_chars, p_chars_ctx, "type_error", "list");
 	} else if ((len = scan_is_chars_list2(q, p_chars, p_chars_ctx, false, &has_var, &is_partial)) > 0) {
 		if (!len)
@@ -8404,7 +8423,7 @@ static USE_RESULT pl_status fn_is_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	bool is_partial;
-	return check_list(q, p1, p1_ctx, &is_partial);
+	return check_list(q, p1, p1_ctx, &is_partial, NULL);
 }
 
 static USE_RESULT pl_status fn_is_partial_list_1(query *q)
@@ -8416,7 +8435,7 @@ static USE_RESULT pl_status fn_is_partial_list_1(query *q)
 
 	bool is_partial;
 
-	if (check_list(q, p1, p1_ctx, &is_partial))
+	if (check_list(q, p1, p1_ctx, &is_partial, NULL))
 		return false;
 
 	return is_partial;
@@ -8431,7 +8450,7 @@ static USE_RESULT pl_status fn_is_list_or_partial_list_1(query *q)
 
 	bool is_partial;
 
-	if (check_list(q, p1, p1_ctx, &is_partial))
+	if (check_list(q, p1, p1_ctx, &is_partial, NULL))
 		return true;
 
 	return is_partial;
@@ -8463,7 +8482,7 @@ static USE_RESULT pl_status fn_sys_mustbe_list_or_var_1(query *q)
 
 	bool is_partial = false;
 
-	if (!is_iso_list(p1) || !check_list(q, p1, p1_ctx, &is_partial) || is_partial)
+	if (!is_iso_list(p1) || !check_list(q, p1, p1_ctx, &is_partial, NULL) || is_partial)
 		return throw_error(q, p1, p1_ctx, "type_error", "list");
 
 	return pl_success;
