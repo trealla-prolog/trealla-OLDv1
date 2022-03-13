@@ -6213,17 +6213,24 @@ static USE_RESULT pl_status fn_sys_queuen_2(query *q)
 
 static USE_RESULT pl_status fn_iso_findall_3(query *q)
 {
-	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, true);
-	GET_FIRST_ARG0(p1,any,p0);
-	GET_NEXT_ARG(p2,callable);
-	GET_NEXT_ARG(p3,list_or_nil_or_var);
+	GET_FIRST_ARG(xp1,any);
+	GET_NEXT_ARG(xp2,callable);
+	GET_NEXT_ARG(xp3,list_or_nil_or_var);
 
 	// This checks for a valid list (it allows for partial but acyclic lists)...
 
 	bool is_partial = false;
 
-	if (is_iso_list(p3) && !check_list(q, p3, p3_ctx, &is_partial, NULL) && !is_partial)
-		return throw_error(q, p3, p3_ctx, "type_error", "list");
+	if (is_iso_list(xp3) && !check_list(q, xp3, xp3_ctx, &is_partial, NULL) && !is_partial)
+		return throw_error(q, xp3, xp3_ctx, "type_error", "list");
+
+	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, true);
+	GET_FIRST_ARG0(p1,any,p0);
+	GET_NEXT_ARG(p2,callable);
+	GET_NEXT_ARG(p3,list_or_nil_or_var);
+
+	if (p0 == ERR_CYCLE_CELL)
+		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "cyclic_term");
 
 	if (!q->retry) {
 		q->st.qnbr++;
