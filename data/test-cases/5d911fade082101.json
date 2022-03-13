@@ -1,0 +1,55 @@
+{
+  "uid" : "5d911fade082101",
+  "name" : "file_dependency_diagram_files_3_01",
+  "fullName" : "file_dependency_diagram_files_3_01::tests",
+  "historyId" : "file_dependency_diagram_files_3_01::tests",
+  "time" : {
+    "duration" : 13
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/diagrams/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/diagrams/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tools/diagrams/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/diagrams/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "404-408"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/fb42ee89da622ade501957d9ed4eb785eeadde10/tools/diagrams/tests.lgt#L404"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "5d911fade082101.json",
+  "parameterValues" : [ "tools/diagrams/tests.lgt", "404-408", "https://github.com/LogtalkDotOrg/logtalk3/tree/fb42ee89da622ade501957d9ed4eb785eeadde10/tools/diagrams/tests.lgt#L404" ]
+}
