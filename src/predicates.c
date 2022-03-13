@@ -4817,17 +4817,6 @@ static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
 
-	if (!is_variable(p2) && !is_nil(p2)) {
-		LIST_HANDLER(p2);
-		LIST_HEAD(p2);
-		cell *tl = LIST_TAIL(p2);
-		tl = deref(q, tl, p2_ctx);
-		pl_idx_t tl_ctx = q->latest_ctx;
-
-		if (is_cyclic_term(q, tl, tl_ctx))
-			return throw_error(q, p2, p2_ctx, "type_error", "list");
-	}
-
 	// This checks for a valid list (it allows for partial but acyclic lists)...
 
 	bool is_partial = false;
