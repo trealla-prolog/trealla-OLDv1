@@ -45,6 +45,7 @@ void share_predicate(predicate *pr);
 void unshare_predicate(query *q, predicate *pr);
 cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_int_t *skip, cell *tmp);
 bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx);
+bool is_acyclic_term(query *q, cell *p1, pl_idx_t p1_ctx);
 pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx);
 size_t slicecpy(char *dst, size_t dstlen, const char *src, size_t len);
 pl_status make_cstringn(cell *d, const char *s, size_t n);

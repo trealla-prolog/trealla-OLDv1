@@ -396,7 +396,6 @@ writeln(T) :- write(T), nl.
 format(F) :- format(F, []).
 open(F, M, S) :- open(F, M, S, []).
 samsort(L, R) :- msort(L, R).
-unify_with_occurs_check(X, X) :- acyclic_term(X).
 expand_term(In, Out) :- term_expansion(In, Out).
 atomic_list_concat(L, Atom) :- atomic_list_concat(L, '', Atom).
 partial_string(S, P) :- append(S, _, P).

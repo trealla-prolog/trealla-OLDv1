@@ -52,6 +52,12 @@ bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx)
 	return is_cyclic_term_internal(q, p1, p1_ctx, NULL);
 }
 
+bool is_acyclic_term(query *q, cell *p1, pl_idx_t p1_ctx)
+{
+	q->cycle_error = false;
+	return !is_cyclic_term_internal(q, p1, p1_ctx, NULL);
+}
+
 static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx, bool *done)
 {
 	if (!is_iso_list(c)) {
