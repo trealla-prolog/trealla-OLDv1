@@ -4846,14 +4846,19 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
+	bool is_partial = false;
+
+	if (is_iso_list(p1) && !check_list(q, p1, p1_ctx, &is_partial, NULL) && !is_partial)
+		return throw_error(q, p1, p1_ctx, "type_error", "list");
+
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, NULL) && !is_partial)
+		return throw_error(q, p2, p2_ctx, "type_error", "list");
+
 	if (is_atomic(p1) && is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
 	if (!is_variable(p2) && !has_vars(q, p1, p1_ctx, 0))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
-
-	if (q->cycle_error)
-		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
 
 	GET_FIRST_RAW_ARG(p1_raw,any);
 	cell *tmp = deep_copy_to_heap(q, p1_raw, p1_raw_ctx, false, true);
