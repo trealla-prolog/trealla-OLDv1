@@ -516,7 +516,8 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 			if (is_string(c) && !q->quoted)
 				q->quoted = -1;
 
-			q->max_depth = !argval?26:argval;
+			if (argval)
+				q->max_depth = argval;
 
 			if (canonical)
 				len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, 1, false, 0);
