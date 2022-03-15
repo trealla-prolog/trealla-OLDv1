@@ -572,9 +572,9 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 	pl_idx_t arity = c->arity;
 	dst += snprintf(dst, dstlen, "(");
+	unsigned cnt = 0;
 
-	for (c++; arity--; c += c->nbr_cells) {
-
+	for (c++; arity--; c += c->nbr_cells, cnt++) {
 		cell *tmp = running ? deref(q, c, c_ctx) : c;
 		ssize_t res = print_canonical_to_buf(q, dst, dstlen, tmp, q->latest_ctx, running, cons, depth+1);
 		if (res < 0) return -1;
@@ -582,6 +582,11 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 		if (q->max_depth && ((depth+1) >= q->max_depth)) {
 			dst += snprintf(dst, dstlen, ",...)");
+			return dst - save_dst;
+		}
+
+		if (q->max_depth && (cnt >= q->max_depth)) {
+			dst += snprintf(dst, dstlen, "...)");
 			return dst - save_dst;
 		}
 
