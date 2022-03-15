@@ -574,10 +574,16 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 	dst += snprintf(dst, dstlen, "(");
 
 	for (c++; arity--; c += c->nbr_cells) {
+
 		cell *tmp = running ? deref(q, c, c_ctx) : c;
 		ssize_t res = print_canonical_to_buf(q, dst, dstlen, tmp, q->latest_ctx, running, cons, depth+1);
 		if (res < 0) return -1;
 		dst += res;
+
+		if (q->max_depth && ((depth+1) >= q->max_depth)) {
+			dst += snprintf(dst, dstlen, ",...)");
+			return dst - save_dst;
+		}
 
 		if (arity)
 			dst += snprintf(dst, dstlen, ",");
@@ -725,7 +731,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 		while (is_list(l)) {
 			if (q->max_depth && (cnt++ >= q->max_depth)) {
-				dst += snprintf(dst, dstlen, "%s", " ...");
+				dst += snprintf(dst, dstlen, "%s", "...");
 				break;
 			}
 
@@ -951,6 +957,11 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 				if (parens)
 					dst += snprintf(dst, dstlen, "%s", "(");
+
+				if (q->max_depth && ((depth+1) >= q->max_depth)) {
+					dst += snprintf(dst, dstlen, "...)");
+					return dst - save_dst;
+				}
 
 				ssize_t res = print_term_to_buf(q, dst, dstlen, tmp, tmp_ctx, running, 0, depth+1);
 				if (res < 0) return -1;
