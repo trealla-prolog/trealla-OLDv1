@@ -1,0 +1,55 @@
+{
+  "uid" : "8ea16190b707978b",
+  "name" : "dictionary_intersection_2_03",
+  "fullName" : "dictionary_intersection_2_03::tests(bintree)",
+  "historyId" : "dictionary_intersection_2_03::tests(bintree)",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/dictionaries/tests.lgt::tests(bintree)"
+  }, {
+    "name" : "testClass",
+    "value" : "library/dictionaries/tests.lgt::tests(bintree)"
+  }, {
+    "name" : "package",
+    "value" : "library/dictionaries/tests.lgt::tests(bintree)"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/dictionaries/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "429-432"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/376dda1616c66f73786787f71f7607650c97fb0e/library/dictionaries/tests.lgt#L429"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "8ea16190b707978b.json",
+  "parameterValues" : [ "library/dictionaries/tests.lgt", "429-432", "https://github.com/LogtalkDotOrg/logtalk3/tree/376dda1616c66f73786787f71f7607650c97fb0e/library/dictionaries/tests.lgt#L429" ]
+}
