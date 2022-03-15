@@ -121,7 +121,20 @@ bool is_in_ref_list(cell *c, pl_idx_t c_ctx, reflist *rlist)
 	return false;
 }
 
-static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth, bool nonlocals_only)
+static bool is_in_ref_list2(cell *c, pl_idx_t c_ctx, reflist *rlist)
+{
+	while (rlist && !g_tpl_interrupt) {
+		if ((c == rlist->ptr)
+			&& (c_ctx == rlist->ctx))
+			return true;
+
+		rlist = rlist->next;
+	}
+
+	return false;
+}
+
+static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth, bool nonlocals_only, reflist *list)
 {
 	if (depth >= MAX_DEPTH) {
 		q->cycle_error = true;
@@ -179,6 +192,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 		return tmp;
 	}
 
+	cell *save_p1 = p1;
 	unsigned arity = p1->arity;
 	p1++;
 
@@ -191,7 +205,23 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 			c_ctx = q->latest_ctx;
 		}
 
-		cell *rec = deep_copy2_to_tmp(q, c, c_ctx, depth+1, nonlocals_only);
+		reflist nlist = {0};
+
+		if (is_in_ref_list2(c, c_ctx, list)) {
+			cell *tmp = alloc_on_tmp(q, 1);
+			if (!tmp) return NULL;
+			tmp->tag = TAG_VAR;
+			tmp->flags = 0;
+			tmp->var_nbr = create_vars(q, 1); // new unbound var
+			tmp->val_off = g_anon_s;
+			break;
+		}
+
+		nlist.next = list;
+		nlist.ptr = save_p1;
+		nlist.ctx = p1_ctx;
+
+		cell *rec = deep_copy2_to_tmp(q, c, c_ctx, depth+1, nonlocals_only, &nlist);
 		if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 		p1 += p1->nbr_cells;
 	}
@@ -217,7 +247,11 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 		p1_ctx = q->latest_ctx;
 	}
 
-	cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, nonlocals_only);
+	reflist nlist = {0};
+	nlist.ptr = p1;
+	nlist.ctx = p1_ctx;
+
+	cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, nonlocals_only, &nlist);
 	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 	int cnt = q->st.m->pl->varno - nbr_vars;
 

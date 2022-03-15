@@ -100,7 +100,12 @@ pl_status fn_sys_soft_inner_cut_0(query *q);
 
 struct reflist_ {
 	reflist *next;
-	pl_idx_t var_nbr, ctx;
+	pl_idx_t ctx;
+
+	union {
+		cell *ptr;
+		pl_idx_t var_nbr;
+	};
 };
 
 struct cycle_info_ {

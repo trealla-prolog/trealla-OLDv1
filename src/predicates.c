@@ -4846,6 +4846,9 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
+#define ALLOW_CYCLES 1
+
+#if !ALLOW_CYCLES
 	bool is_partial = false;
 
 	if (is_iso_list(p1) && !check_list(q, p1, p1_ctx, &is_partial, NULL) && !is_partial)
@@ -4853,6 +4856,7 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 
 	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, NULL) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
+#endif
 
 	if (is_atomic(p1) && is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
@@ -4865,6 +4869,19 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 
 	if (!tmp || (tmp == ERR_CYCLE_CELL))
 		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
+
+#if ALLOW_CYCLES
+	if (!is_variable(p1)) {
+		pl_idx_t tmp_ctx = q->st.curr_frame;
+		pl_int_t skip = 0;
+		cell tmp2;
+		cell *t = skip_max_list(q, tmp, &tmp_ctx, 1000000000, &skip, &tmp2);
+
+		if (t && is_variable(t) && !skip) {
+			unify(q, p2, p2_ctx, t, q->st.curr_frame);
+		}
+	}
+#endif
 
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
