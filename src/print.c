@@ -766,7 +766,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 		if (q->max_depth && (depth >= q->max_depth)) {
 			dst--;
-			dst += snprintf(dst, dstlen, "%s", ",...]");
+			dst += snprintf(dst, dstlen, "%s", "...]");
 			return dst - save_dst;
 		}
 
