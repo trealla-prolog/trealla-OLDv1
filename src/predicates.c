@@ -4846,7 +4846,7 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
-#define ALLOW_CYCLES 1
+#define ALLOW_CYCLES 0
 
 #if !ALLOW_CYCLES
 	bool is_partial = false;

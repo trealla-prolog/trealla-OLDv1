@@ -156,7 +156,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 		if (!is_variable(p1))
 			return tmp;
 
-		if (nonlocals_only && (p1_ctx <= q->st.curr_frame))
+		if (nonlocals_only && (p1_ctx != q->st.curr_frame))
 			return tmp;
 
 		const frame *f = GET_FRAME(p1_ctx);
