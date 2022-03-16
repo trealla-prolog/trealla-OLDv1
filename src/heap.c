@@ -210,19 +210,19 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 		if (is_in_ref_list2(c, c_ctx, list)) {
 			cell *tmp = alloc_on_tmp(q, 1);
 			if (!tmp) return NULL;
-			tmp->tag = TAG_VAR;
-			tmp->flags = 0;
-			tmp->var_nbr = create_vars(q, 1); // new unbound var
-			tmp->val_off = g_anon_s;
-			break;
+			*tmp = *p1;
+			tmp->var_nbr = q->st.m->pl->tab2[0];
+			tmp->flags |= FLAG_VAR_FRESH;
+			//tmp->attrs = NULL;
+		} else {
+			nlist.next = list;
+			nlist.ptr = save_p1;
+			nlist.ctx = p1_ctx;
+
+			cell *rec = deep_copy2_to_tmp(q, c, c_ctx, depth+1, nonlocals_only, &nlist);
+			if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 		}
 
-		nlist.next = list;
-		nlist.ptr = save_p1;
-		nlist.ctx = p1_ctx;
-
-		cell *rec = deep_copy2_to_tmp(q, c, c_ctx, depth+1, nonlocals_only, &nlist);
-		if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 		p1 += p1->nbr_cells;
 	}
 
@@ -236,6 +236,7 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 	if (!init_tmp_heap(q))
 		return NULL;
 
+	cell *save_p1 = p1;
 	frame *f = GET_CURR_FRAME();
 	q->st.m->pl->varno = f->nbr_vars;
 	q->st.m->pl->tab_idx = 0;
@@ -269,6 +270,13 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 			DISCARD_RESULT throw_error(q, p1, p1_ctx, "resource_error", "stack");
 			return NULL;
 		}
+	}
+
+	if (is_variable(save_p1)) {
+		cell tmp;
+		tmp = *save_p1;
+		tmp.var_nbr = q->st.m->pl->tab2[0];
+		unify(q, &tmp, q->st.curr_frame, rec, q->st.curr_frame);
 	}
 
 	if (!copy_attrs)
