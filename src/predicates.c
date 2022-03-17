@@ -4829,16 +4829,6 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
-#if 0
-	bool is_partial = false;
-
-	if (is_iso_list(p1) && !check_list(q, p1, p1_ctx, &is_partial, NULL) && !is_partial)
-		return throw_error(q, p1, p1_ctx, "type_error", "list");
-
-	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, NULL) && !is_partial)
-		return throw_error(q, p2, p2_ctx, "type_error", "list");
-#endif
-
 	if (is_atomic(p1) && is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 

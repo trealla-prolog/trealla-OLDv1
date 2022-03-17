@@ -990,13 +990,13 @@ static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
 			bool any = false;
 
 			for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
+				if (!dbe->dirty)
+					any = true;
+
 				if (!add_to_dirty_list(m, dbe))
 					continue;
 
 				pr->is_processed = false;
-
-				if (!dbe->dirty)
-					any = true;
 			}
 
 			if (any)

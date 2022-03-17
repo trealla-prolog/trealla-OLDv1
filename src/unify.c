@@ -459,7 +459,7 @@ static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, 
 	LIST_HANDLER(p1);
 	LIST_HANDLER(p2);
 
-	while (is_list(p1) && is_list(p2) && !g_tpl_interrupt) {
+	while (is_list(p1) && is_iso_list(p2) && !g_tpl_interrupt) {
 		cell *c1 = LIST_HEAD(p1);
 		cell *c2 = LIST_HEAD(p2);
 
