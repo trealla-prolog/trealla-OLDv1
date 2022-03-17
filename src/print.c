@@ -629,6 +629,24 @@ static const char *get_slot_name(query *q, pl_idx_t slot_idx)
 	return s;
 }
 
+ssize_t print_variable(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_ctx, bool running)
+{
+	char *save_dst = dst;
+	frame *f = GET_FRAME(c_ctx);
+	slot *e = GET_SLOT(f, c->var_nbr);
+	pl_idx_t slot_idx = e - q->slots;
+
+	if (q->is_dump_vars) {
+		const char *name = get_slot_name(q, slot_idx);
+		dst += snprintf(dst, dstlen, "_%s", name);
+	} else if (!running) {
+		dst += snprintf(dst, dstlen, "%s", GET_STR(q, c));
+	} else
+		dst += snprintf(dst, dstlen, "_%u", (unsigned)slot_idx);
+
+	return dst - save_dst;
+}
+
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_ctx, int running, bool cons, unsigned depth)
 {
 	char *save_dst = dst;
@@ -904,18 +922,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
 		if (is_variable(c)) {
-			frame *f = GET_FRAME(c_ctx);
-			slot *e = GET_SLOT(f, c->var_nbr);
-			pl_idx_t slot_idx = e - q->slots;
-
-			if (q->is_dump_vars) {
-				const char *name = get_slot_name(q, slot_idx);
-				dst += snprintf(dst, dstlen, "_%s", name);
-			} else if (!running) {
-				dst += snprintf(dst, dstlen, "%s", GET_STR(q, c));
-			} else
-				dst += snprintf(dst, dstlen, "_%u", (unsigned)slot_idx);
-
+			dst += print_variable(q, dst, dstlen, c, c_ctx, running);
 			return dst - save_dst;
 		}
 
@@ -950,18 +957,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				pl_idx_t tmp_ctx = q->latest_ctx;
 
 				if ((tmp == save_c) && (tmp_ctx == save_ctx)) {
-					frame *f = GET_FRAME(c_ctx);
-					slot *e = GET_SLOT(f, c->var_nbr);
-					pl_idx_t slot_idx = e - q->slots;
-
-					if (q->is_dump_vars) {
-						const char *name = get_slot_name(q, slot_idx);
-						dst += snprintf(dst, dstlen, "_%s", name);
-					} else if (!running) {
-						dst += snprintf(dst, dstlen, "%s", GET_STR(q, c));
-					} else
-						dst += snprintf(dst, dstlen, "_%u", (unsigned)slot_idx);
-
+					dst += print_variable(q, dst, dstlen, c, c_ctx, running);
 					return dst - save_dst;
 				}
 
