@@ -987,14 +987,20 @@ static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
 	if (pr->head && !pr->is_multifile && !pr->is_dynamic
 		&& (GET_STR(m, &pr->key)[0] != '$')) {
 		if (dbe->filename != pr->head->filename) {
-			fprintf(stderr, "Warning: overwriting %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
+			bool any = false;
 
 			for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
 				if (!add_to_dirty_list(m, dbe))
 					continue;
 
 				pr->is_processed = false;
+
+				if (!dbe->dirty)
+					any = true;
 			}
+
+			if (any)
+				fprintf(stderr, "Warning: overwriting %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
 
 			m_destroy(pr->idx_save);
 			m_destroy(pr->idx);
