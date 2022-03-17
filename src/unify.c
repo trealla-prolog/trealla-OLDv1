@@ -553,6 +553,9 @@ static const struct dispatch g_disp[] =
 
 bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 {
+	if ((p1 == p2) && (p1_ctx == p2_ctx))
+		return pl_success;
+
 	if (p1_ctx == q->st.curr_frame)
 		q->no_tco = true;
 
