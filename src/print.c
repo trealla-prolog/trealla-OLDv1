@@ -637,8 +637,7 @@ ssize_t print_variable(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_c
 	pl_idx_t slot_idx = e - q->slots;
 
 	if (q->is_dump_vars) {
-		const char *name = get_slot_name(q, slot_idx);
-		dst += snprintf(dst, dstlen, "_%s", name);
+		dst += snprintf(dst, dstlen, "_%s", get_slot_name(q, slot_idx));
 	} else if (!running) {
 		dst += snprintf(dst, dstlen, "%s", GET_STR(q, c));
 	} else
