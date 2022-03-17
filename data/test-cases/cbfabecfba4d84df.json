@@ -1,0 +1,55 @@
+{
+  "uid" : "cbfabecfba4d84df",
+  "name" : "expand_term_cl_08",
+  "fullName" : "expand_term_cl_08::tests",
+  "historyId" : "expand_term_cl_08::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/methods/expand_term_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/methods/expand_term_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/methods/expand_term_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/methods/expand_term_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "87-88"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/beb43f71214fd40311605b9ca39322de61b5a4c2/tests/logtalk/methods/expand_term_2/tests.lgt#L87"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "cbfabecfba4d84df.json",
+  "parameterValues" : [ "tests/logtalk/methods/expand_term_2/tests.lgt", "87-88", "https://github.com/LogtalkDotOrg/logtalk3/tree/beb43f71214fd40311605b9ca39322de61b5a4c2/tests/logtalk/methods/expand_term_2/tests.lgt#L87" ]
+}
