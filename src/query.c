@@ -1473,7 +1473,7 @@ static void dump_vars(query *q, bool partial)
 
 		int j = check_duplicate_result(q, i, c, c_ctx);
 
-		if (j >= 0) {
+		if ((j >= 0) && ((unsigned)j != i)) {
 			fprintf(stdout, "%s", p->vartab.var_name[j]);
 			any = true;
 			continue;

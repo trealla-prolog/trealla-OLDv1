@@ -617,16 +617,13 @@ static const char *get_slot_name(query *q, pl_idx_t slot_idx)
 			while (q->ignore[i+offset])
 				offset++;
 
-			q->ignore[i+offset] = true;
 			return varformat(i+offset);
 		}
 	}
 
 	unsigned i = q->pl->tab_idx++;
 	q->pl->tab1[i] = slot_idx;
-	const char *s = varformat(i);
-	//fprintf(stderr, "%u => %u => %s\n", slot_idx, i, s);
-	return s;
+	return varformat(i);
 }
 
 ssize_t print_variable(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_ctx, bool running)
