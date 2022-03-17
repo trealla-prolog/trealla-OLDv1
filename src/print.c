@@ -919,11 +919,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			return dst - save_dst;
 		}
 
-		if (is_variable(c)) {
-			dst += snprintf(dst, dstlen, "_%u", c->var_nbr);
-			return dst - save_dst;
-		}
-
 		unsigned len_str = LEN_STR(q, c);
 
 		if (braces)
@@ -947,10 +942,29 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		if (is_structure(c) && !is_string(c)) {
 			pl_idx_t arity = c->arity;
 			dst += snprintf(dst, dstlen, "%s", braces?"{":"(");
+			cell *save_c = c;
+			pl_idx_t save_ctx = c_ctx;
 
 			for (c++; arity--; c += c->nbr_cells) {
 				cell *tmp = running ? deref(q, c, c_ctx) : c;
 				pl_idx_t tmp_ctx = q->latest_ctx;
+
+				if ((tmp == save_c) && (tmp_ctx == save_ctx)) {
+					frame *f = GET_FRAME(c_ctx);
+					slot *e = GET_SLOT(f, c->var_nbr);
+					pl_idx_t slot_idx = e - q->slots;
+
+					if (q->is_dump_vars) {
+						const char *name = get_slot_name(q, slot_idx);
+						dst += snprintf(dst, dstlen, "_%s", name);
+					} else if (!running) {
+						dst += snprintf(dst, dstlen, "%s", GET_STR(q, c));
+					} else
+						dst += snprintf(dst, dstlen, "_%u", (unsigned)slot_idx);
+
+					return dst - save_dst;
+				}
+
 				int parens = 0;
 
 				if (!braces && is_literal(tmp)) {

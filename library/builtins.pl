@@ -418,7 +418,6 @@ read_from_chars(S,T) :- read_term_from_chars(S,T,[]).
 atom_number(A,N) :- atom_codes(A,Codes), number_codes(N,Codes).
 
 between(I,J,K) :- '$between'(I,J,K,_).
-arg(X,Y,Z) :- '$arg'(X,Y,Z,_).
 
 iso_dif(X, Y) :-
 	X \== Y,

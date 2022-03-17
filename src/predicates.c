@@ -4537,51 +4537,34 @@ static USE_RESULT pl_status fn_iso_peek_byte_2(query *q)
 
 static USE_RESULT pl_status fn_iso_arg_3(query *q)
 {
-	GET_FIRST_ARG(p1,integer_or_var);
+	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,compound);
 	GET_NEXT_ARG(p3,any);
-	GET_NEXT_ARG(p4,integer_or_var);
 
-	if (q->retry || is_integer(p1)) {
-		if (is_negative(p1))
-			return throw_error(q, p1, p1_ctx, "domain_error", "not_less_than_zero");
+	if (is_negative(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "not_less_than_zero");
 
-		if (is_bigint(p1))
-			return pl_failure;
+	if (is_bigint(p1))
+		return pl_failure;
 
-		pl_int_t arg_nbr = get_int(is_integer(p1) ? p1 : p4);
+	pl_int_t arg_nbr = get_smallint(p1);
 
-		if (q->retry) {
-			if (++arg_nbr > p2->arity)
-				return pl_failure;
+	if ((arg_nbr == 0) || (arg_nbr > p2->arity))
+		return pl_failure;
+
+	cell *c = p2 + 1;
+
+	for (int i = 1; i <= arg_nbr; i++) {
+		if (i == arg_nbr) {
+			c = deref(q, c, p2_ctx);
+			pl_idx_t c_ctx = q->latest_ctx;
+			return unify(q, p3, p3_ctx, c, c_ctx);
 		}
 
-		if ((arg_nbr == 0) || (arg_nbr > p2->arity))
-			return pl_failure;
-
-		cell *c = p2 + 1;
-
-		for (int i = 1; i <= arg_nbr; i++) {
-			if (i == arg_nbr) {
-				c = deref(q, c, p2_ctx);
-				pl_idx_t c_ctx = q->latest_ctx;
-				cell tmp;
-				make_int(&tmp, arg_nbr);
-				GET_RAW_ARG(4,p4_raw);
-				set_var(q, p4_raw, p4_ctx, &tmp, q->st.curr_frame);
-
-				if (!is_integer(p1))
-					may_error(push_choice(q));
-
-				unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-				return unify(q, p3, p3_ctx, c, c_ctx);
-			}
-
-			c += c->nbr_cells;
-		}
+		c += c->nbr_cells;
 	}
 
-	return throw_error(q, p1, p1_ctx, "instantiation_error", "number");
+	return pl_success;
 }
 
 static USE_RESULT pl_status fn_iso_univ_2(query *q)
@@ -11751,7 +11734,7 @@ static const struct builtins g_predicates_iso[] =
 	{"number_chars", 2, fn_iso_number_chars_2, NULL, false},
 	{"number_codes", 2, fn_iso_number_codes_2, NULL, false},
 	{"clause", 2, fn_iso_clause_2, NULL, false},
-	{"$arg", 4, fn_iso_arg_3, NULL, false},
+	{"arg", 3, fn_iso_arg_3, NULL, false},
 	{"functor", 3, fn_iso_functor_3, NULL, false},
 	{"copy_term", 2, fn_iso_copy_term_2, NULL, false},
 	{"term_variables", 2, fn_iso_term_variables_2, NULL, false},
