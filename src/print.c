@@ -483,15 +483,6 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 	if (is_variable(c) && running && (q->nv_start == -1)
 		&& ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != ERR_IDX)) {
-#if 0
-		for (unsigned i = 0; i < MAX_ARITY && var_nbr; i++) {
-			if (q->nv_mask[i])
-				break;
-
-			var_nbr--;
-		}
-#endif
-
 		if (!dstlen) {
 			if (!(s_mask1[var_nbr]))
 				s_mask1[var_nbr] = 1;
