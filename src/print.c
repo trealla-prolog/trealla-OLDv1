@@ -468,8 +468,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 			cell *name = h+1;
 			name = deref(q, name, h_ctx);
 			cell *var = h+2;
-			var = var;//deref(q, var, h_ctx);
-			pl_idx_t var_ctx = h_ctx;//q->latest_ctx;
+			pl_idx_t var_ctx = h_ctx;
 
 			if (is_variable(var) && (var->var_nbr == c->var_nbr) && (var_ctx = c_ctx)) {
 				dst += snprintf(dst, dstlen, "%s", GET_STR(q, name));
@@ -484,15 +483,6 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 	if (is_variable(c) && running && (q->nv_start == -1)
 		&& ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != ERR_IDX)) {
-#if 0
-		for (unsigned i = 0; i < MAX_ARITY && var_nbr; i++) {
-			if (q->nv_mask[i])
-				break;
-
-			var_nbr--;
-		}
-#endif
-
 		if (!dstlen) {
 			if (!(s_mask1[var_nbr]))
 				s_mask1[var_nbr] = 1;
@@ -901,8 +891,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				cell *name = h+1;
 				name = deref(q, name, h_ctx);
 				cell *var = h+2;
-				var = var;//deref(q, var, h_ctx);
-				pl_idx_t var_ctx = h_ctx;//q->latest_ctx;
+				pl_idx_t var_ctx = h_ctx;
 
 				if (is_variable(var) && (var->var_nbr == c->var_nbr) && (var_ctx == c_ctx)) {
 					dst += snprintf(dst, dstlen, "%s", GET_STR(q, name));
