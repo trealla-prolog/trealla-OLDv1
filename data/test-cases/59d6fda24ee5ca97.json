@@ -1,0 +1,55 @@
+{
+  "uid" : "59d6fda24ee5ca97",
+  "name" : "set_insert_all_3_02",
+  "fullName" : "set_insert_all_3_02::tests(set(integer))",
+  "historyId" : "set_insert_all_3_02::tests(set(integer))",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/sets/tests.lgt::tests(set(integer))"
+  }, {
+    "name" : "testClass",
+    "value" : "library/sets/tests.lgt::tests(set(integer))"
+  }, {
+    "name" : "package",
+    "value" : "library/sets/tests.lgt::tests(set(integer))"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/sets/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "145-148"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/55bf10bfca4765cf86f04eff7a326387a1e9960d/library/sets/tests.lgt#L145"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "59d6fda24ee5ca97.json",
+  "parameterValues" : [ "library/sets/tests.lgt", "145-148", "https://github.com/LogtalkDotOrg/logtalk3/tree/55bf10bfca4765cf86f04eff7a326387a1e9960d/library/sets/tests.lgt#L145" ]
+}
