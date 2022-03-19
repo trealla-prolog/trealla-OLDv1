@@ -24,6 +24,7 @@ append([L0|Ls0], Ls) :-
     append(L0, Rest, Ls),
     append(Ls0, Rest).
 
+append([], R1, R2) :- nonvar(R1), nonvar(R2), R1=R2, !.
 append([], R, R).
 append([X|L], R, [X|S]) :- append(L, R, S).
 
