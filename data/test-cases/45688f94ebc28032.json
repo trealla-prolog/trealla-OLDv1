@@ -1,0 +1,55 @@
+{
+  "uid" : "45688f94ebc28032",
+  "name" : "assertz_1_19",
+  "fullName" : "assertz_1_19::tests",
+  "historyId" : "assertz_1_19::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/methods/assertz_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/methods/assertz_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/methods/assertz_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/methods/assertz_1/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "111-115"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/4d5ded4b534d54f403c1c74d2b80ce4543c45f6a/tests/logtalk/methods/assertz_1/tests.lgt#L111"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "45688f94ebc28032.json",
+  "parameterValues" : [ "tests/logtalk/methods/assertz_1/tests.lgt", "111-115", "https://github.com/LogtalkDotOrg/logtalk3/tree/4d5ded4b534d54f403c1c74d2b80ce4543c45f6a/tests/logtalk/methods/assertz_1/tests.lgt#L111" ]
+}

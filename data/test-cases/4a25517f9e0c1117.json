@@ -1,0 +1,55 @@
+{
+  "uid" : "4a25517f9e0c1117",
+  "name" : "nested_dictionaries_delete_in_4_deep_dict",
+  "fullName" : "nested_dictionaries_delete_in_4_deep_dict::tests(navltree)",
+  "historyId" : "nested_dictionaries_delete_in_4_deep_dict::tests(navltree)",
+  "time" : {
+    "duration" : 9
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/nested_dictionaries/tests.lgt::tests(navltree)"
+  }, {
+    "name" : "testClass",
+    "value" : "library/nested_dictionaries/tests.lgt::tests(navltree)"
+  }, {
+    "name" : "package",
+    "value" : "library/nested_dictionaries/tests.lgt::tests(navltree)"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/nested_dictionaries/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "315-320"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/4d5ded4b534d54f403c1c74d2b80ce4543c45f6a/library/nested_dictionaries/tests.lgt#L315"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "4a25517f9e0c1117.json",
+  "parameterValues" : [ "library/nested_dictionaries/tests.lgt", "315-320", "https://github.com/LogtalkDotOrg/logtalk3/tree/4d5ded4b534d54f403c1c74d2b80ce4543c45f6a/library/nested_dictionaries/tests.lgt#L315" ]
+}
