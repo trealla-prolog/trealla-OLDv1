@@ -87,12 +87,12 @@ static int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_id
 	if (is_string(p1) && is_string(p2))
 		return CMP_SLICES(q, p1, p2);
 
-	if ((is_string(p1) && is_list(p2))
-		|| (is_string(p2) && is_list(p1))) {
+	if ((is_string(p1) && is_iso_list(p2))
+		|| (is_string(p2) && is_iso_list(p1))) {
 		LIST_HANDLER(p1);
 		LIST_HANDLER(p2);
 
-		while (is_list(p1) && is_list(p2)) {
+		while (is_list(p1) && is_list(p2) && !g_tpl_interrupt) {
 			cell *h1 = LIST_HEAD(p1);
 			h1 = deref(q, h1, p1_ctx);
 			pl_idx_t h1_ctx = q->latest_ctx;
@@ -746,6 +746,9 @@ static const struct dispatch g_disp[] =
 
 bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 {
+	if ((p1 == p2) && (p1_ctx == p2_ctx))
+		return true;
+
 	if (p1_ctx == q->st.curr_frame)
 		q->no_tco = true;
 
