@@ -645,6 +645,8 @@ static const struct dispatch g_disp[] =
 
 static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 {
+	cell *save_p1 = p1, *save_p2 = p2;
+	pl_idx_t save_p1_ctx = p1_ctx, save_p2_ctx = p2_ctx;
 	LIST_HANDLER(p1);
 	LIST_HANDLER(p2);
 
@@ -656,6 +658,15 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 		h2 = deref(q, h2, p2_ctx);
 		pl_idx_t h2_ctx = q->latest_ctx;
 
+		if ((h1 == save_p1) && (h1_ctx == save_p1_ctx))
+			p1 = NULL;
+
+		if ((h2 == save_p2) && (h2_ctx == save_p2_ctx))
+			p2 = NULL;
+
+		if (!p1 || !p2)
+			break;
+
 		if (!unify_internal(q, h1, h1_ctx, h2, h2_ctx))
 			return false;
 
@@ -665,7 +676,28 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 		p2 = LIST_TAIL(p2);
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
+
+		if ((p1 == save_p1) && (p1_ctx == save_p1_ctx))
+			p1 = NULL;
+
+		if ((p2 == save_p2) && (p2_ctx == save_p2_ctx))
+			p2 = NULL;
+
+		if (!p1 || !p2)
+			break;
 	}
+
+	if (!p1 && !p2)
+		return true;
+
+	if (!p1 && is_variable(p2))
+		return true;
+
+	if (!p2 && is_variable(p1))
+		return true;
+
+	if (!p1 || !p2)
+		return false;
 
 	return unify_internal(q, p1, p1_ctx, p2, p2_ctx);
 }
