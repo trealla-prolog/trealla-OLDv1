@@ -810,7 +810,7 @@ bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 			return ok;
 		}
 	} else
-		q->lists_ok = false;
+		q->lists_ok = true;
 
 	cycle_info info1 = {0}, info2 = {0};
 	q->info1 = &info1;
