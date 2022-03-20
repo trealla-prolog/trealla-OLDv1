@@ -1970,11 +1970,13 @@ int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_
 
 	if (is_variable(p1)) {
 		if (is_variable(p2)) {
-			frame *f1 = GET_FRAME(p1_ctx);
-			frame *f2 = GET_FRAME(p2_ctx);
-			pl_idx_t p1_slot = GET_SLOT(f1,p1->var_nbr) - q->slots;
-			pl_idx_t p2_slot = GET_SLOT(f2,p2->var_nbr) - q->slots;
-			return p1_slot < p2_slot ? -1 : p1_slot > p2_slot ? 1 : 0;
+			if (p1_ctx < p2_ctx)
+				return -1;
+
+			if (p1_ctx > p2_ctx)
+				return 1;
+
+			return p1->var_nbr < p2->var_nbr ? -1 : p1->var_nbr > p2->var_nbr ? 1 : 0;
 		}
 
 		return -1;

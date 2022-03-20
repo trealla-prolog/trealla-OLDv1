@@ -6779,7 +6779,7 @@ static USE_RESULT pl_status fn_listing_1(query *q)
 	return pl_success;
 }
 
-const char *dump_key(const void *k, UNUSED const void *v, const void *p)
+const char *dump_key(const void *k, const void *v, const void *p)
 {
 	query *q = (query*)p;
 	cell *c = (cell*)k;

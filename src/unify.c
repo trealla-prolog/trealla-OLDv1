@@ -488,7 +488,7 @@ static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, 
 	return unify_internal(q, p1, p1_ctx, p2, p2_ctx);
 }
 
-static bool unify_integers(UNUSED query *q, cell *p1, cell *p2)
+static bool unify_integers(query *q, cell *p1, cell *p2)
 {
 	if (is_bigint(p1) && is_bigint(p2))
 		return !mp_int_compare(&p1->val_bigint->ival, &p2->val_bigint->ival);
@@ -505,7 +505,7 @@ static bool unify_integers(UNUSED query *q, cell *p1, cell *p2)
 	return false;
 }
 
-static bool unify_reals(UNUSED query *q, cell *p1, cell *p2)
+static bool unify_reals(query *q, cell *p1, cell *p2)
 {
 	if (is_real(p2))
 		return get_real(p1) == get_real(p2);
@@ -633,8 +633,10 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 	q->cycle_error = false;
 	bool is_partial;
 
-	if (check_list(q, p1, p1_ctx, &is_partial, NULL) && check_list(q, p2, p2_ctx, &is_partial, NULL))
-		return compare_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
+	if (is_iso_list(p1) && is_iso_list(p2)) {
+		if (check_list(q, p1, p1_ctx, &is_partial, NULL) && check_list(q, p2, p2_ctx, &is_partial, NULL))
+			return compare_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
+	}
 
 	cycle_info info1 = {0}, info2 = {0};
 	q->info1 = &info1;

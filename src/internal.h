@@ -49,8 +49,6 @@ typedef enum {
 
 extern unsigned g_string_cnt, g_literal_cnt;
 
-#define UNUSED __attribute__((unused))
-
 // Sentinel Value
 #define ERR_IDX (~(pl_idx_t)0)
 #define IDX_MAX (ERR_IDX-1)
