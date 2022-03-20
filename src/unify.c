@@ -541,139 +541,6 @@ bool collect_vars(query *q, cell *p1, pl_idx_t p1_ctx)
 	return true;
 }
 
-static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
-{
-	cell *save_p1 = p1, *save_p2 = p2;
-	pl_idx_t save_p1_ctx = p1_ctx, save_p2_ctx = p2_ctx;
-	LIST_HANDLER(p1);
-	LIST_HANDLER(p2);
-
-	while (is_iso_list(p1) && is_iso_list(p2) && !g_tpl_interrupt) {
-		cell *h1 = LIST_HEAD(p1);
-		h1 = deref(q, h1, p1_ctx);
-		pl_idx_t h1_ctx = q->latest_ctx;
-		cell *h2 = LIST_HEAD(p2);
-		h2 = deref(q, h2, p2_ctx);
-		pl_idx_t h2_ctx = q->latest_ctx;
-
-		if ((h1 == save_p1) && (h1_ctx == save_p1_ctx))
-			p1 = NULL;
-
-		if ((h2 == save_p2) && (h2_ctx == save_p2_ctx))
-			p2 = NULL;
-
-		if (!p1 || !p2)
-			break;
-
-		if (!unify_internal(q, h1, h1_ctx, h2, h2_ctx))
-			return false;
-
-		p1 = LIST_TAIL(p1);
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-		p2 = LIST_TAIL(p2);
-		p2 = deref(q, p2, p2_ctx);
-		p2_ctx = q->latest_ctx;
-
-		if ((p1 == save_p1) && (p1_ctx == save_p1_ctx))
-			p1 = NULL;
-
-		if ((p2 == save_p2) && (p2_ctx == save_p2_ctx))
-			p2 = NULL;
-
-		if (!p1 || !p2)
-			break;
-	}
-
-	if (!p1 && !p2)
-		return true;
-
-	if (!p1 && is_variable(p2))
-		return true;
-
-	if (!p2 && is_variable(p1))
-		return true;
-
-	if (!p1 || !p2)
-		return false;
-
-	return unify_internal(q, p1, p1_ctx, p2, p2_ctx);
-}
-
-static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
-{
-	if (p1->arity != p2->arity)
-		return false;
-
-	if (p1->val_off != p2->val_off)
-		return false;
-
-	unsigned arity = p1->arity;
-	p1++; p2++;
-
-	// FIXME: make non-recursive
-
-	while (arity-- && !g_tpl_interrupt) {
-		cell *c1 = deref(q, p1, p1_ctx);
-		pl_idx_t c1_ctx = q->latest_ctx;
-		cell *c2 = deref(q, p2, p2_ctx);
-		pl_idx_t c2_ctx = q->latest_ctx;
-		reflist r1 = {0}, r2 = {0};
-
-		if (q->info1) {
-			int both = 0;
-
-			if (is_variable(p1)) {
-				if (is_in_ref_list(p1, p1_ctx, q->info1->r1)) {
-					c1 = p1;
-					c1_ctx = p1_ctx;
-					both++;
-				} else {
-					r1.next = q->info1->r1;
-					r1.var_nbr = p1->var_nbr;
-					r1.ctx = p1_ctx;
-					q->info1->r1 = &r1;
-				}
-			}
-
-			if (is_variable(p2)) {
-				if (is_in_ref_list(p2, p2_ctx, q->info2->r2)) {
-					c2 = p2;
-					c2_ctx = p2_ctx;
-					both++;
-				} else {
-					r2.next = q->info2->r2;
-					r2.var_nbr = p2->var_nbr;
-					r2.ctx = p2_ctx;
-					q->info2->r2 = &r2;
-				}
-			}
-
-			if (both == 2) {
-				return pl_success;
-			}
-		}
-
-		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx))
-			return false;
-
-		if (q->info1) {
-			if (is_variable(p1))
-				q->info1->r1 = r1.next;		// restore
-		}
-
-		if (q->info2) {
-			if (is_variable(p2))
-				q->info2->r2 = r2.next;		// restore
-		}
-
-		p1 += p1->nbr_cells;
-		p2 += p2->nbr_cells;
-	}
-
-	return true;
-}
-
 // This is for when one arg is a string & the other an iso-list...
 
 static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
@@ -775,6 +642,137 @@ static const struct dispatch g_disp[] =
 	{TAG_REAL, unify_reals},
 	{0}
 };
+
+static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
+{
+	cell *save_p1 = p1, *save_p2 = p2;
+	pl_idx_t save_p1_ctx = p1_ctx, save_p2_ctx = p2_ctx;
+	LIST_HANDLER(p1);
+	LIST_HANDLER(p2);
+
+	while (is_iso_list(p1) && is_iso_list(p2) && !g_tpl_interrupt) {
+		cell *h1 = LIST_HEAD(p1);
+		h1 = deref(q, h1, p1_ctx);
+		pl_idx_t h1_ctx = q->latest_ctx;
+		cell *h2 = LIST_HEAD(p2);
+		h2 = deref(q, h2, p2_ctx);
+		pl_idx_t h2_ctx = q->latest_ctx;
+
+		if ((h1 == save_p1) && (h1_ctx == save_p1_ctx))
+			p1 = NULL;
+
+		if ((h2 == save_p2) && (h2_ctx == save_p2_ctx))
+			p2 = NULL;
+
+		if (!p1 || !p2)
+			break;
+
+		if (!unify_internal(q, h1, h1_ctx, h2, h2_ctx))
+			return false;
+
+		p1 = LIST_TAIL(p1);
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+		p2 = LIST_TAIL(p2);
+		p2 = deref(q, p2, p2_ctx);
+		p2_ctx = q->latest_ctx;
+
+		if ((p1 == save_p1) && (p1_ctx == save_p1_ctx))
+			p1 = NULL;
+
+		if ((p2 == save_p2) && (p2_ctx == save_p2_ctx))
+			p2 = NULL;
+
+		if (!p1 || !p2)
+			break;
+	}
+
+	if (!p1 && !p2)
+		return true;
+
+	if (!p1 && is_variable(p2))
+		return true;
+
+	if (!p2 && is_variable(p1))
+		return true;
+
+	if (!p1 || !p2)
+		return false;
+
+	return unify_internal(q, p1, p1_ctx, p2, p2_ctx);
+}
+
+static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
+{
+	if (p1->arity != p2->arity)
+		return false;
+
+	if (p1->val_off != p2->val_off)
+		return false;
+
+	unsigned arity = p1->arity;
+	p1++; p2++;
+
+	while (arity-- && !g_tpl_interrupt) {
+		cell *c1 = deref(q, p1, p1_ctx);
+		pl_idx_t c1_ctx = q->latest_ctx;
+		cell *c2 = deref(q, p2, p2_ctx);
+		pl_idx_t c2_ctx = q->latest_ctx;
+		reflist r1 = {0}, r2 = {0};
+
+		if (q->info1) {
+			int both = 0;
+
+			if (is_variable(p1)) {
+				if (is_in_ref_list(p1, p1_ctx, q->info1->r1)) {
+					c1 = p1;
+					c1_ctx = p1_ctx;
+					both++;
+				} else {
+					r1.next = q->info1->r1;
+					r1.var_nbr = p1->var_nbr;
+					r1.ctx = p1_ctx;
+					q->info1->r1 = &r1;
+				}
+			}
+
+			if (is_variable(p2)) {
+				if (is_in_ref_list(p2, p2_ctx, q->info2->r2)) {
+					c2 = p2;
+					c2_ctx = p2_ctx;
+					both++;
+				} else {
+					r2.next = q->info2->r2;
+					r2.var_nbr = p2->var_nbr;
+					r2.ctx = p2_ctx;
+					q->info2->r2 = &r2;
+				}
+			}
+
+			if (both == 2) {
+				return pl_success;
+			}
+		}
+
+		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx))
+			return false;
+
+		if (q->info1) {
+			if (is_variable(p1))
+				q->info1->r1 = r1.next;		// restore
+		}
+
+		if (q->info2) {
+			if (is_variable(p2))
+				q->info2->r2 = r2.next;		// restore
+		}
+
+		p1 += p1->nbr_cells;
+		p2 += p2->nbr_cells;
+	}
+
+	return true;
+}
 
 bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 {
