@@ -585,7 +585,13 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 			break;
 	}
 
-	if ((p1 == NULL) && (p2 == NULL))
+	if (!p1 && !p2)
+		return true;
+
+	if (!p1 && is_variable(p2))
+		return true;
+
+	if (!p2 && is_variable(p1))
 		return true;
 
 	if (!p1 || !p2)
