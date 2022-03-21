@@ -170,9 +170,11 @@ predicate *create_predicate(module *m, cell *c)
 {
 	bool found, function;
 
-	if (get_builtin(m->pl, GET_STR(m, c), c->arity, &found, &function), found && !function) {
-		fprintf(stdout, "Error: permission error modifying %s/%u\n", GET_STR(m, c), c->arity);
-		return NULL;
+	if (strcmp(m->name, "format")) {
+		if (get_builtin(m->pl, GET_STR(m, c), c->arity, &found, &function), found && !function) {
+			fprintf(stdout, "Error: permission error modifying %s/%u\n", GET_STR(m, c), c->arity);
+			return NULL;
+		}
 	}
 
 	predicate *pr = calloc(1, sizeof(predicate));
