@@ -942,17 +942,21 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		if (is_structure(c) && !is_string(c)) {
 			pl_idx_t arity = c->arity;
 			dst += snprintf(dst, dstlen, "%s", braces?"{":"(");
+#if 0
 			cell *save_c = c;
 			pl_idx_t save_ctx = c_ctx;
+#endif
 
 			for (c++; arity--; c += c->nbr_cells) {
 				cell *tmp = running ? deref(q, c, c_ctx) : c;
 				pl_idx_t tmp_ctx = q->latest_ctx;
 
+#if 0
 				if ((tmp == save_c) && (tmp_ctx == save_ctx)) {
 					dst += print_variable(q, dst, dstlen, c, c_ctx, running);
 					return dst - save_dst;
 				}
+#endif
 
 				int parens = 0;
 
