@@ -5761,12 +5761,6 @@ static int nodecmp(const void *ptr1, const void *ptr2)
 	cell *p1 = cp1->c, *p2 = cp2->c;
 	pl_idx_t p1_ctx = cp1->c_ctx, p2_ctx = cp2->c_ctx;
 
-	p1 = deref(q, p1, p1_ctx);
-	p1_ctx = q->latest_ctx;
-
-	p2 = deref(q, p2, p2_ctx);
-	p2_ctx = q->latest_ctx;
-
 	if ((p1->arity >= arg) && (arg > 0)) {
 		p1 = p1 + 1;
 		p2 = p2 + 1;
@@ -5804,8 +5798,8 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 	size_t idx = 0;
 
 	while (is_list(p1)) {
-		cell *h = LIST_HEAD(p1);
-		pl_idx_t h_ctx = p1_ctx;
+		cell *h = deref(q, LIST_HEAD(p1), p1_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
 
 		if (keysort) {
 			cell *tmp = deref(q, h, h_ctx);
@@ -5985,8 +5979,8 @@ static cell *nodesort4(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool asc
 	size_t idx = 0;
 
 	while (is_list(p1)) {
-		cell *h = LIST_HEAD(p1);
-		pl_idx_t h_ctx = p1_ctx;
+		cell *h = deref(q, LIST_HEAD(p1), p1_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
 
 		base[idx].c = h;
 		base[idx].c_ctx = h_ctx;
@@ -6779,7 +6773,7 @@ static USE_RESULT pl_status fn_listing_1(query *q)
 	return pl_success;
 }
 
-const char *dump_key(const void *k, UNUSED const void *v, const void *p)
+const char *dump_key(const void *k, const void *v, const void *p)
 {
 	query *q = (query*)p;
 	cell *c = (cell*)k;

@@ -1460,6 +1460,9 @@ static void dump_vars(query *q, bool partial)
 			c_ctx = e->ctx;
 		}
 
+		if (is_anon(c))
+			continue;
+
 		if (any)
 			fprintf(stdout, ", ");
 		else if (!q->is_redo)

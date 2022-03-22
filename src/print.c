@@ -633,6 +633,108 @@ ssize_t print_variable(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_c
 	return dst - save_dst;
 }
 
+static ssize_t print_iso_list(query *q, char *save_dst, char *dst, size_t dstlen, cell *c, pl_idx_t c_ctx, int running, bool cons, unsigned depth)
+{
+	// FIXME make non-recursive
+
+	unsigned print_list = 0, cnt = 0;
+
+	while (is_iso_list(c)) {
+		if (q->max_depth && (cnt++ >= q->max_depth)) {
+			dst--;
+			dst += snprintf(dst, dstlen, "%s", ",...]");
+			return dst - save_dst;
+		}
+
+		if (q->max_depth && (depth >= q->max_depth)) {
+			dst--;
+			dst += snprintf(dst, dstlen, "%s", "...]");
+			return dst - save_dst;
+		}
+
+		LIST_HANDLER(c);
+		cell *head = LIST_HEAD(c);
+
+		if (!cons)
+			dst += snprintf(dst, dstlen, "%s", "[");
+
+		head = running ? deref(q, head, c_ctx) : head;
+		pl_idx_t head_ctx = q->latest_ctx;
+		bool special_op = false;
+
+		if (is_literal(head)) {
+			special_op = (
+				!strcmp(GET_STR(q, head), ",")
+				|| !strcmp(GET_STR(q, head), "|")
+				|| !strcmp(GET_STR(q, head), ";")
+				|| !strcmp(GET_STR(q, head), "->")
+				|| !strcmp(GET_STR(q, head), "*->")
+				|| !strcmp(GET_STR(q, head), "-->"));
+		}
+
+		int parens = is_structure(head) && special_op;
+		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
+		ssize_t res = print_term_to_buf(q, dst, dstlen, head, head_ctx, running, false, depth+1);
+		if (res < 0) return -1;
+		dst += res;
+		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
+
+		cell *tail = LIST_TAIL(c);
+		tail = running ? deref(q, tail, c_ctx) : tail;
+		c_ctx = q->latest_ctx;
+		size_t tmp_len = 0;
+
+		if (is_literal(tail) && !is_structure(tail)) {
+			const char *src = GET_STR(q, tail);
+
+			if (strcmp(src, "[]")) {
+				dst += snprintf(dst, dstlen, "%s", "|");
+				ssize_t res = print_term_to_buf(q, dst, dstlen, tail, c_ctx, running, true, depth+1);
+				if (res < 0) return -1;
+				dst += res;
+			}
+		} else if (q->st.m->flag.double_quote_chars && running
+			&& (tmp_len = scan_is_chars_list(q, tail, c_ctx, false)) > 0) {
+			char *tmp_src = chars_list_to_string(q, tail, c_ctx, tmp_len);
+
+			if ((strlen(tmp_src) == 1) && (*tmp_src == '\''))
+				dst += snprintf(dst, dstlen, "|\"%s\"", tmp_src);
+			else if ((strlen(tmp_src) == 1) && needs_quoting(q->st.m, tmp_src, 1))
+				dst += snprintf(dst, dstlen, ",'%s'", tmp_src);
+			else if (strlen(tmp_src) == 1)
+				dst += snprintf(dst, dstlen, ",%s", tmp_src);
+			else
+				dst += snprintf(dst, dstlen, "|\"%s\"", tmp_src);
+
+			free(tmp_src);
+			print_list++;
+		} else if (is_iso_list(tail)) {
+			dst += snprintf(dst, dstlen, "%s", ",");
+			c = tail;
+			print_list++;
+			cons = 1;
+			continue;
+		} else if (is_string(tail)) {
+			dst+= snprintf(dst, dstlen, "%s", "|\"");
+			dst += formatted(dst, dstlen, GET_STR(q, tail), LEN_STR(q, tail), true);
+			dst += snprintf(dst, dstlen, "%s", "\"");
+			print_list++;
+		} else {
+			dst += snprintf(dst, dstlen, "%s", "|");
+			ssize_t res = print_term_to_buf(q, dst, dstlen, tail, c_ctx, running, true, depth+1);
+			if (res < 0) return -1;
+			dst += res;
+		}
+
+		if (!cons || print_list)
+			dst += snprintf(dst, dstlen, "%s", "]");
+
+		return dst - save_dst;
+	}
+
+	return dst - save_dst;
+}
+
 ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_ctx, int running, bool cons, unsigned depth)
 {
 	char *save_dst = dst;
@@ -756,104 +858,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		return dst - save_dst;
 	}
 
-	// FIXME make non-recursive
+	if (is_iso_list(c))
+		return print_iso_list(q, save_dst, dst, dstlen, c, c_ctx, running, cons, depth);
 
 	const char *src = GET_STR(q, c);
-	unsigned print_list = 0, cnt = 0;
-
-	while (is_iso_list(c)) {
-		if (q->max_depth && (cnt++ >= q->max_depth)) {
-			dst--;
-			dst += snprintf(dst, dstlen, "%s", ",...]");
-			return dst - save_dst;
-		}
-
-		if (q->max_depth && (depth >= q->max_depth)) {
-			dst--;
-			dst += snprintf(dst, dstlen, "%s", "...]");
-			return dst - save_dst;
-		}
-
-		LIST_HANDLER(c);
-		cell *head = LIST_HEAD(c);
-
-		if (!cons)
-			dst += snprintf(dst, dstlen, "%s", "[");
-
-		head = running ? deref(q, head, c_ctx) : head;
-		pl_idx_t head_ctx = q->latest_ctx;
-		bool special_op = false;
-
-		if (is_literal(head)) {
-			special_op = (
-				!strcmp(GET_STR(q, head), ",")
-				|| !strcmp(GET_STR(q, head), "|")
-				|| !strcmp(GET_STR(q, head), ";")
-				|| !strcmp(GET_STR(q, head), "->")
-				|| !strcmp(GET_STR(q, head), "*->")
-				|| !strcmp(GET_STR(q, head), "-->"));
-		}
-
-		int parens = is_structure(head) && special_op;
-		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
-		ssize_t res = print_term_to_buf(q, dst, dstlen, head, head_ctx, running, false, depth+1);
-		if (res < 0) return -1;
-		dst += res;
-		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
-
-		cell *tail = LIST_TAIL(c);
-		tail = running ? deref(q, tail, c_ctx) : tail;
-		c_ctx = q->latest_ctx;
-		size_t tmp_len = 0;
-
-		if (is_literal(tail) && !is_structure(tail)) {
-			src = GET_STR(q, tail);
-
-			if (strcmp(src, "[]")) {
-				dst += snprintf(dst, dstlen, "%s", "|");
-				ssize_t res = print_term_to_buf(q, dst, dstlen, tail, c_ctx, running, true, depth+1);
-				if (res < 0) return -1;
-				dst += res;
-			}
-		} else if (q->st.m->flag.double_quote_chars && running
-			&& (tmp_len = scan_is_chars_list(q, tail, c_ctx, false)) > 0) {
-			char *tmp_src = chars_list_to_string(q, tail, c_ctx, tmp_len);
-
-			if ((strlen(tmp_src) == 1) && (*tmp_src == '\''))
-				dst += snprintf(dst, dstlen, "|\"%s\"", tmp_src);
-			else if ((strlen(tmp_src) == 1) && needs_quoting(q->st.m, tmp_src, 1))
-				dst += snprintf(dst, dstlen, ",'%s'", tmp_src);
-			else if (strlen(tmp_src) == 1)
-				dst += snprintf(dst, dstlen, ",%s", tmp_src);
-			else
-				dst += snprintf(dst, dstlen, "|\"%s\"", tmp_src);
-
-			free(tmp_src);
-			print_list++;
-		} else if (is_iso_list(tail)) {
-			dst += snprintf(dst, dstlen, "%s", ",");
-			c = tail;
-			print_list++;
-			cons = 1;
-			continue;
-		} else if (is_string(tail)) {
-			dst+= snprintf(dst, dstlen, "%s", "|\"");
-			dst += formatted(dst, dstlen, GET_STR(q, tail), LEN_STR(q, tail), true);
-			dst += snprintf(dst, dstlen, "%s", "\"");
-			print_list++;
-		} else {
-			dst += snprintf(dst, dstlen, "%s", "|");
-			ssize_t res = print_term_to_buf(q, dst, dstlen, tail, c_ctx, running, true, depth+1);
-			if (res < 0) return -1;
-			dst += res;
-		}
-
-		if (!cons || print_list)
-			dst += snprintf(dst, dstlen, "%s", "]");
-
-		return dst - save_dst;
-	}
-
 	int optype = GET_OP(c);
 	unsigned specifier;
 
@@ -879,7 +887,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			return dst - save_dst;
 		}
 
-		if (running && is_variable(c) && q->variable_names) {
+		if (is_variable(c) && !is_anon(c) && q->variable_names) {
 			cell *l = q->variable_names;
 			pl_idx_t l_ctx = q->variable_names_ctx;
 			LIST_HANDLER(l);

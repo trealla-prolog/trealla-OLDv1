@@ -2275,7 +2275,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 
 			if (!p->is_op && (*src == '(')) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, operator expected, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line?p->save_line:"");
+					fprintf(stdout, "Error: syntax error, operator expected before parens, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line?p->save_line:"");
 
 				p->error_desc = "operator_expected";
 				p->error = true;
@@ -2350,7 +2350,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		is_matching_pair(ch, next_ch, '[',',') ||
 		is_matching_pair(ch, next_ch, ',',')')) {
 		if (DUMP_ERRS || !p->do_read_term)
-			fprintf(stdout, "Error: syntax error, operator expected, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line?p->save_line:"");
+			fprintf(stdout, "Error: syntax error, operator expected special char, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line?p->save_line:"");
 
 		p->error_desc = "operator_expected";
 		p->error = true;
@@ -2481,7 +2481,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			if (analyze(p, 0, last_op)) {
 				if (p->cl->cells->nbr_cells < (p->cl->cidx-1)) {
 					if (DUMP_ERRS || !p->do_read_term)
-						printf("Error: syntax error, operator expected '%s', line %u, '%s'\n", p->token, p->line_nbr, p->save_line?p->save_line:"");
+						printf("Error: syntax error, operator expected unfinished input '%s', line %u, '%s'\n", p->token, p->line_nbr, p->save_line?p->save_line:"");
 
 					p->error_desc = "operator_expected";
 					p->error = true;
@@ -2495,10 +2495,12 @@ unsigned tokenize(parser *p, bool args, bool consing)
 					term_expansion(p);
 					cell *p1 = p->cl->cells;
 
-					if (!p1->arity &&
-						(!strcmp(GET_STR(p, p1), "begin_of_file") ||
-							!strcmp(GET_STR(p, p1), "end_of_file")))
-						p->skip = true;
+					if (!p1->arity && !strcmp(GET_STR(p, p1), "begin_of_file")) {
+						p->end_of_term = true;
+						last_op = true;
+						p->cl->cidx = 0;
+						continue;
+					}
 
 					if (!p1->arity && !strcmp(GET_STR(p, p1), "end_of_file")) {
 						p->end_of_term = true;
@@ -2548,7 +2550,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		if (!p->quote_char && !last_op &&
 			(!strcmp(p->token, "[") || !strcmp(p->token, "{"))) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error needs operator '%s', line %d\n", p->token, p->line_nbr);
+				fprintf(stdout, "Error: syntax error, needs operator '%s', line %d\n", p->token, p->line_nbr);
 
 			p->error_desc = "needs_operator";
 			p->error = true;
@@ -2557,7 +2559,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quote_char && p->last_close && !strcmp(p->token, "(")) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error needs operator '%s', line %d\n", p->token, p->line_nbr);
+				fprintf(stdout, "Error: syntax error, needs operator '%s', line %d\n", p->token, p->line_nbr);
 
 			p->error_desc = "needs_operator";
 			p->error = true;
@@ -2891,7 +2893,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!p->is_op && !is_func && last_op && last_postfix) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, near '%s', operator expected '%s'\n", p->token, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, near '%s', operator expected postfix '%s'\n", p->token, p->save_line?p->save_line:"");
 
 			p->error_desc = "operator_expected";
 			p->error = true;
