@@ -1157,7 +1157,6 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 				return false;
 			}
 
-			//printf("*** prefix len=%u\n", c->nbr_cells);
 			break;
 		}
 
@@ -1185,7 +1184,6 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 				*c-- = *lhs--;
 
 			*c = save;
-			//printf("*** postfix len=%u\n", c->nbr_cells);
 			break;
 		}
 
@@ -1232,7 +1230,6 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 			}
 		}
 
-		//printf("*** infix len=%u\n", c->nbr_cells);
 		break;
 	}
 
