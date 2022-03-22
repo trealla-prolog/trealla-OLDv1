@@ -398,80 +398,6 @@ cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only
 	return tmp2;
 }
 
-static cell *deep_raw_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
-{
-	if (depth >= MAX_DEPTH) {
-		q->cycle_error = true;
-		return ERR_CYCLE_CELL;
-	}
-
-	const pl_idx_t save_idx = tmp_heap_used(q);
-
-	if (is_variable(p1)) {
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-	}
-
-	cell *tmp = alloc_on_tmp(q, 1);
-	if (!tmp) return NULL;
-	copy_cells(tmp, p1, 1);
-
-	if (!is_structure(p1)) {
-		if (!is_variable(p1))
-			return tmp;
-
-		const frame *f = GET_FRAME(p1_ctx);
-		const slot *e = GET_SLOT(f, p1->var_nbr);
-		const pl_idx_t slot_nbr = e - q->slots;
-
-		for (size_t i = 0; i < q->st.m->pl->tab_idx; i++) {
-			if (q->st.m->pl->tab1[i] == slot_nbr) {
-				tmp->var_nbr = q->st.m->pl->tab2[i];
-				tmp->flags = FLAG_VAR_FRESH;
-
-				if (is_anon(p1))
-					tmp->flags |= FLAG_VAR_ANON;
-
-				tmp->val_off = p1->val_off;
-				//tmp->attrs = NULL;
-				return tmp;
-			}
-		}
-
-		tmp->var_nbr = q->st.m->pl->varno;
-		tmp->flags = FLAG_VAR_FRESH;
-		tmp->val_off = p1->val_off;
-		tmp->tmp_attrs = e->c.attrs;
-		tmp->tmp_attrs_ctx = e->c.attrs_ctx;
-
-		if (is_anon(p1))
-			tmp->flags |= FLAG_VAR_ANON;
-
-		q->st.m->pl->tab1[q->st.m->pl->tab_idx] = slot_nbr;
-		q->st.m->pl->tab2[q->st.m->pl->tab_idx] = q->st.m->pl->varno++;
-		q->st.m->pl->tab_idx++;
-		return tmp;
-	}
-
-	unsigned arity = p1->arity;
-	p1++;
-
-	while (arity--) {
-		cell *c = p1;
-		pl_idx_t c_ctx = p1_ctx;
-		c = deref(q, p1, p1_ctx);
-		c_ctx = q->latest_ctx;
-
-		cell *rec = deep_raw_copy2_to_tmp(q, c, c_ctx, depth+1);
-		if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
-		p1 += p1->nbr_cells;
-	}
-
-	tmp = get_tmp_heap(q, save_idx);
-	tmp->nbr_cells = tmp_heap_used(q) - save_idx;
-	return tmp;
-}
-
 cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	if (!init_tmp_heap(q))
@@ -481,14 +407,17 @@ cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
 	q->st.m->pl->varno = f->nbr_vars;
 	q->st.m->pl->tab_idx = 0;
 	q->cycle_error = false;
-	int nbr_vars = f->nbr_vars;
 
 	if (is_variable(p1)) {
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
 
-	cell *rec = deep_raw_copy2_to_tmp(q, p1, p1_ctx, 0);
+	reflist nlist = {0};
+	nlist.ptr = p1;
+	nlist.ctx = p1_ctx;
+
+	cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, false, &nlist);
 	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 	return q->tmp_heap;
 }
