@@ -199,11 +199,11 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 
 		while (is_iso_list(p1)) {
 			cell *h = LIST_HEAD(p1);
-			pl_idx_t c_ctx = p1_ctx;
 			cell *c = h;
+			pl_idx_t c_ctx = p1_ctx;
 
-			if (is_variable(h)) {
-				c = deref(q, h, p1_ctx);
+			if (is_variable(c)) {
+				c = deref(q, c, c_ctx);
 				c_ctx = q->latest_ctx;
 			}
 
