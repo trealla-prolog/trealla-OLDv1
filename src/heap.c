@@ -220,7 +220,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 			nlist.ptr = save_p1;
 			nlist.ctx = p1_ctx;
 
-			cell *rec = deep_copy2_to_tmp(q, c, c_ctx, depth+1, nonlocals_only, &nlist);
+			cell *rec = deep_copy2_to_tmp(q, c, c_ctx, depth+1, nonlocals_only, !q->lists_ok ? &nlist : NULL);
 			if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 		}
 
@@ -262,7 +262,7 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 	nlist.ptr = p1;
 	nlist.ctx = p1_ctx;
 
-	cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, nonlocals_only, &nlist);
+	cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, nonlocals_only, !q->lists_ok ? &nlist : NULL);
 	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 	int cnt = q->st.m->pl->varno - nbr_vars;
 
@@ -298,8 +298,24 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 
 cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)
 {
+	cell *c = deref(q, p1, p1_ctx);
+	pl_idx_t c_ctx = q->latest_ctx;
+
+	if (is_iso_list(c)) {
+		bool is_partial;
+
+		if (check_list(q, c, c_ctx, &is_partial, NULL))
+			q->lists_ok = true;
+		else
+			q->lists_ok = false;
+	} else
+		q->lists_ok = true;
+
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, nonlocals_only, copy_attrs);
+	q->lists_ok = false;
+
 	if (!tmp || (tmp == ERR_CYCLE_CELL)) return tmp;
+
 	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
 	if (!tmp2) return NULL;
 	safe_copy_cells(tmp2, tmp, tmp->nbr_cells);
