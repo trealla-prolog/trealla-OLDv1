@@ -11736,6 +11736,7 @@ static const struct builtins g_predicates_iso[] =
 	{"close", 2, fn_iso_close_2, NULL, false},
 #endif
 
+	{"end_of_file", 0, fn_iso_halt_0, NULL, false},
 	{"halt", 0, fn_iso_halt_0, NULL, false},
 	{"halt", 1, fn_iso_halt_1, NULL, false},
 	{"read_term", 2, fn_iso_read_term_2, NULL, false},
