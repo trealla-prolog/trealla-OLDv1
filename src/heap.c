@@ -311,6 +311,19 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 	if (!init_tmp_heap(q))
 		return NULL;
 
+	cell *c = deref(q, p1, p1_ctx);
+	pl_idx_t c_ctx = q->latest_ctx;
+
+	if (is_iso_list(c)) {
+		bool is_partial;
+
+		if (check_list(q, c, c_ctx, &is_partial, NULL))
+			q->lists_ok = true;
+		else
+			q->lists_ok = false;
+	} else
+		q->lists_ok = true;
+
 	cell *save_p1 = p1;
 	frame *f = GET_CURR_FRAME();
 	q->st.m->pl->varno = f->nbr_vars;
@@ -337,6 +350,7 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 	nlist.ctx = p1_ctx;
 
 	cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, nonlocals_only, !q->lists_ok ? &nlist : NULL);
+	q->lists_ok = false;
 	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 	int cnt = q->st.m->pl->varno - nbr_vars;
 
@@ -357,7 +371,7 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 	if (!copy_attrs)
 		return q->tmp_heap;
 
-	cell *c = rec;
+	c = rec;
 
 	for (pl_idx_t i = 0; i < rec->nbr_cells; i++, c++) {
 		if (is_variable(c) && is_fresh(c) && c->tmp_attrs) {
@@ -375,19 +389,7 @@ cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only
 	cell *c = deref(q, p1, p1_ctx);
 	pl_idx_t c_ctx = q->latest_ctx;
 
-	if (is_iso_list(c)) {
-		bool is_partial;
-
-		if (check_list(q, c, c_ctx, &is_partial, NULL))
-			q->lists_ok = true;
-		else
-			q->lists_ok = false;
-	} else
-		q->lists_ok = true;
-
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, nonlocals_only, copy_attrs);
-	q->lists_ok = false;
-
 	if (!tmp || (tmp == ERR_CYCLE_CELL)) return tmp;
 
 	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
