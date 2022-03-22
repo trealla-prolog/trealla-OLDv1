@@ -252,7 +252,6 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 			*tmp = *p1;
 			tmp->var_nbr = q->st.m->pl->tab2[0];
 			tmp->flags |= FLAG_VAR_FRESH;
-
 			//tmp->attrs = NULL;
 		} else {
 			nlist.next = list;
@@ -287,7 +286,6 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 				*tmp = *p1;
 				tmp->var_nbr = q->st.m->pl->tab2[0];
 				tmp->flags |= FLAG_VAR_FRESH;
-
 				//tmp->attrs = NULL;
 			} else {
 				nlist.next = list;
