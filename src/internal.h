@@ -624,6 +624,7 @@ struct parser_ {
 	unsigned nbr_vars;
 	int8_t dq_consing;
 	bool error;
+	bool was_consing:1;
 	bool did_getline:1;
 	bool already_loaded:1;
 	bool do_read_term:1;

@@ -2436,7 +2436,7 @@ static bool process_term(parser *p, cell *p1)
 unsigned tokenize(parser *p, bool args, bool consing)
 {
 	pl_idx_t arg_idx = p->cl->cidx, save_idx = 0;
-	bool last_op = true, is_func = false, was_consing = false;
+	bool last_op = true, is_func = false;
 	bool last_bar = false, last_quoted = false, last_postfix = false;
 	unsigned arity = 1;
 	p->depth++;
@@ -2569,18 +2569,23 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			c->arity = 2;
 			p->start_term = true;
 			p->nesting_brackets++;
+			bool was_consing = p->was_consing;
+			p->was_consing = false;
 			tokenize(p, true, true);
-			last_bar = false;
+
+			if (!p->was_consing)
+				make_a_literal(p, g_nil_s);
+
+			p->start_term = p->last_close = false;
+			p->was_consing = was_consing;
+			last_bar = last_op = false;
 
 			if (p->error)
 				break;
 
-			make_a_literal(p, g_nil_s);
 			c = p->cl->cells + save_idx;
 			c->nbr_cells = p->cl->cidx - save_idx;
 			fix_list(c);
-			p->start_term = p->last_close = false;
-			last_op = false;
 			continue;
 		}
 
@@ -2671,7 +2676,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				break;
 			}
 
-			if (was_consing) {
+			if (p->was_consing) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error parsing list '%s'\n", p->save_line?p->save_line:"");
 
@@ -2725,7 +2730,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			break;
 		}
 
-		if (!p->is_quoted && was_consing && consing && !strcmp(p->token, "|")) {
+		if (!p->is_quoted && p->was_consing && consing && !strcmp(p->token, "|")) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error parsing list '%s'\n", p->save_line?p->save_line:"");
 
@@ -2735,13 +2740,13 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->is_quoted && consing && !strcmp(p->token, "|")) {
-			last_op = last_bar = was_consing = true;
+			last_op = last_bar = p->was_consing = true;
 			p->last_close = false;
 			//consing = false;
 			continue;
 		}
 
-		if (!p->is_quoted && was_consing && last_bar && !strcmp(p->token, "]")) {
+		if (!p->is_quoted && p->was_consing && last_bar && !strcmp(p->token, "]")) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error parsing list '%s'\n", p->save_line?p->save_line:"");
 
