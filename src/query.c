@@ -1417,6 +1417,8 @@ static void dump_vars(query *q, bool partial)
 	q->pl->tab_idx = 0;
 	bool any = false;
 
+	// Build the ignore list for vaiable name clashes....
+
 	for (unsigned i = 0; i < MAX_ARITY; i++)
 		q->ignore[i] = false;
 
@@ -1427,6 +1429,8 @@ static void dump_vars(query *q, bool partial)
 			&& ((j = varunformat(p->vartab.var_name[i]+1)) != -1))
 			q->ignore[j] = true;
 	}
+
+	// Build the variable-names list for dumping vars...
 
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
 		cell tmp[3];
@@ -1439,6 +1443,9 @@ static void dump_vars(query *q, bool partial)
 		else
 			append_list(q, tmp);
 	}
+
+	// Now go through the variables (slots actually) and
+	// dump them out...
 
 	cell *vlist = p->nbr_vars ? end_list(q) : NULL;
 	bool space = false;
@@ -1472,8 +1479,6 @@ static void dump_vars(query *q, bool partial)
 
 		fprintf(stdout, "%s = ", p->vartab.var_name[i]);
 
-		// See if there is already an output with this value...
-
 		int j = check_duplicate_result(q, i, c, c_ctx);
 
 		if ((j >= 0) && ((unsigned)j != i)) {
@@ -1485,11 +1490,11 @@ static void dump_vars(query *q, bool partial)
 		bool parens = false;
 		space = false;
 
-		// If priority >= '=' then put in parens...
-
 		if (is_structure(c)) {
 			unsigned pri = find_op(q->st.m, GET_STR(q, c), GET_OP(c));
-			if (pri >= 700) parens = true;
+
+			if (pri >= 700)
+				parens = true;
 		}
 
 		if (is_atom(c) && !is_string(c) && LEN_STR(q, c) && !is_nil(c)) {
