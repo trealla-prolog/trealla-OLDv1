@@ -342,6 +342,15 @@ static USE_RESULT pl_status make_slice(query *q, cell *d, const cell *orig, size
 		return pl_success;
 	}
 
+	if (n < MAX_SMALL_STRING) {
+		const char *s = GET_STR(q, orig);
+
+		if (is_string(orig))
+			return make_stringn(d, s+off, n);
+
+		return make_cstringn(d, s+off, n);
+	}
+
 	if (is_strbuf(orig)) {
 		*d = *orig;
 		d->strb_off += off;
