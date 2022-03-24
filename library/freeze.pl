@@ -8,7 +8,7 @@
 
 freeze(X, Goal) :-
     put_atts(Fresh, frozen(Goal)),
-    Fresh = X.
+    X = Fresh.
 
 frozen(Term, Goal) :-
 	copy_term(Term, _, Gs),
