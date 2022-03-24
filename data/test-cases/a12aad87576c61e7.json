@@ -1,0 +1,60 @@
+{
+  "uid" : "a12aad87576c61e7",
+  "name" : "directory_dependency_diagram_rdirectory_1_01",
+  "fullName" : "directory_dependency_diagram_rdirectory_1_01::tests",
+  "historyId" : "directory_dependency_diagram_rdirectory_1_01::tests",
+  "time" : {
+    "duration" : 127
+  },
+  "status" : "failed",
+  "statusMessage" : "Non-deterministic success",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/diagrams/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/diagrams/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tools/diagrams/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/diagrams/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "243-245"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/5efeb96baf76f757e80725df7880d91f0a249e79/tools/diagrams/tests.lgt#L243"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "a12aad87576c61e7.json",
+  "parameterValues" : [ "tools/diagrams/tests.lgt", "243-245", "https://github.com/LogtalkDotOrg/logtalk3/tree/5efeb96baf76f757e80725df7880d91f0a249e79/tools/diagrams/tests.lgt#L243" ]
+}
