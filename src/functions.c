@@ -690,7 +690,12 @@ static USE_RESULT pl_status fn_iso_truncate_1(query *q)
 
 	if (is_real(&p1)) {
 		q->accum.val_int = (pl_int_t)p1.val_real;
-		q->accum.tag = TAG_INT;
+
+		if (fetestexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW)) {
+			mp_int_set_double(&q->tmp_ival, p1.val_real);
+			SET_ACCUM();
+		} else
+			q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, q->st.curr_frame, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (is_smallint(&p1)) {
@@ -717,7 +722,12 @@ static USE_RESULT pl_status fn_iso_round_1(query *q)
 			fesetround(FE_UPWARD);
 
 		q->accum.val_int = llrint(p1.val_real);
-		q->accum.tag = TAG_INT;
+
+		if (fetestexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW)) {
+			mp_int_set_double(&q->tmp_ival, p1.val_real);
+			SET_ACCUM();
+		} else
+			q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, q->st.curr_frame, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (is_smallint(&p1)) {
@@ -737,7 +747,12 @@ static USE_RESULT pl_status fn_iso_ceiling_1(query *q)
 
 	if (is_real(&p1)) {
 		q->accum.val_int = (pl_int_t)ceil(p1.val_real);
-		q->accum.tag = TAG_INT;
+
+		if (fetestexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW)) {
+			mp_int_set_double(&q->tmp_ival, p1.val_real);
+			SET_ACCUM();
+		} else
+			q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, q->st.curr_frame, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (is_smallint(&p1)) {
@@ -797,7 +812,12 @@ static USE_RESULT pl_status fn_iso_floor_1(query *q)
 
 	if (is_real(&p1)) {
 		q->accum.val_int = (pl_int_t)floor(p1.val_real);
-		q->accum.tag = TAG_INT;
+
+		if (fetestexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW)) {
+			mp_int_set_double(&q->tmp_ival, p1.val_real);
+			SET_ACCUM();
+		} else
+			q->accum.tag = TAG_INT;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, q->st.curr_frame, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (is_smallint(&p1)) {
