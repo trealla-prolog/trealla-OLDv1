@@ -1,0 +1,55 @@
+{
+  "uid" : "c454d06109d99565",
+  "name" : "encodings_utf_8_02",
+  "fullName" : "encodings_utf_8_02::tests_utf_8",
+  "historyId" : "encodings_utf_8_02::tests_utf_8",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/encodings/tests_utf_8.lgt::tests_utf_8"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/encodings/tests_utf_8.lgt::tests_utf_8"
+  }, {
+    "name" : "package",
+    "value" : "examples/encodings/tests_utf_8.lgt::tests_utf_8"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/encodings/tests_utf_8.lgt"
+  }, {
+    "name" : "position",
+    "value" : "43-45"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/a071c0499180c32c7bb2d8d45a486b84ded9fc9d/examples/encodings/tests_utf_8.lgt#L43"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "c454d06109d99565.json",
+  "parameterValues" : [ "examples/encodings/tests_utf_8.lgt", "43-45", "https://github.com/LogtalkDotOrg/logtalk3/tree/a071c0499180c32c7bb2d8d45a486b84ded9fc9d/examples/encodings/tests_utf_8.lgt#L43" ]
+}

@@ -1,0 +1,55 @@
+{
+  "uid" : "568f6b5cfdc6ee1b",
+  "name" : "carengines_01",
+  "fullName" : "carengines_01::tests",
+  "historyId" : "carengines_01::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/carengines/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/carengines/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/carengines/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/carengines/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "37-40"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/a071c0499180c32c7bb2d8d45a486b84ded9fc9d/examples/carengines/tests.lgt#L37"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "568f6b5cfdc6ee1b.json",
+  "parameterValues" : [ "examples/carengines/tests.lgt", "37-40", "https://github.com/LogtalkDotOrg/logtalk3/tree/a071c0499180c32c7bb2d8d45a486b84ded9fc9d/examples/carengines/tests.lgt#L37" ]
+}
