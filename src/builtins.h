@@ -165,6 +165,7 @@ inline static cell *get_raw_arg(const query *q, int n)
 void make_int(cell *tmp, pl_int_t v);
 void make_real(cell *tmp, double v);
 void make_return(query *q, cell *tmp);
+void make_return2(query *q, cell *tmp, cell *ret);
 void make_end(cell *tmp);
 void make_structure(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t extra_cells);
 void make_variable(cell *tmp, pl_idx_t off, unsigned var_nbr);
