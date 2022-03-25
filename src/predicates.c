@@ -185,6 +185,15 @@ void make_return(query *q, cell *tmp)
 	tmp->mod_id = q->st.m->id;					// ... current-module
 }
 
+void make_return2(query *q, cell *tmp, cell *c_ret)
+{
+	make_end(tmp);
+	frame *f = GET_CURR_FRAME();
+	tmp->val_ret = q->st.curr_cell;				// save the return instruction
+	tmp->cgen = f->cgen;						// ... choice-generation
+	tmp->mod_id = q->st.m->id;					// ... current-module
+}
+
 void make_literal(cell *tmp, pl_idx_t offset)
 {
 	*tmp = (cell){0};
@@ -4841,6 +4850,16 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
+	if (is_variable(p1) && is_variable(p2)) {
+		frame *f1 = GET_FRAME(p1_ctx);
+		slot *e1 = GET_SLOT(f1, p1->var_nbr);
+		frame *f2 = GET_FRAME(p2_ctx);
+		slot *e2 = GET_SLOT(f2, p2->var_nbr);
+		e2->c.attrs = e1->c.attrs;
+		e2->c.attrs_ctx = e1->c.attrs_ctx;
+		return pl_success;
+	}
+
 	if (is_atomic(p1) && is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
@@ -4863,6 +4882,33 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
+static USE_RESULT pl_status fn_copy_term_nat_2(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,any);
+
+	if (is_atomic(p1) && is_variable(p2))
+		return unify(q, p1, p1_ctx, p2, p2_ctx);
+
+	if (!is_variable(p2) && !has_vars(q, p1, p1_ctx, 0))
+		return unify(q, p1, p1_ctx, p2, p2_ctx);
+
+	GET_FIRST_RAW_ARG(p1_raw,any);
+	cell *tmp = deep_copy_to_heap(q, p1_raw, p1_raw_ctx, false, false);
+
+	if (!tmp || (tmp == ERR_CYCLE_CELL))
+		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
+
+	if (is_variable(p1_raw) && !is_variable(p1) && is_variable(p2)) {
+		cell tmpv;
+		tmpv = *p2;
+		tmpv.var_nbr = q->st.m->pl->tab2[0];
+		unify(q, p2, p2_ctx, &tmpv, q->st.curr_frame);
+	}
+
+	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
+}
+
 static USE_RESULT pl_status fn_sys_strip_attributes_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -4871,7 +4917,7 @@ static USE_RESULT pl_status fn_sys_strip_attributes_1(query *q)
 	if (!is_variable(p1) && !is_iso_list(p1))
 		return pl_success;
 
-	while (is_list(p1)) {
+	while (is_iso_list(p1)) {
 		cell *c = LIST_HEAD(p1);
 		c = deref(q, c, p1_ctx);
 
@@ -4887,31 +4933,6 @@ static USE_RESULT pl_status fn_sys_strip_attributes_1(query *q)
 	}
 
 	return pl_success;
-}
-
-static USE_RESULT pl_status fn_copy_term_nat_2(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
-
-	if (is_variable(p1) && is_variable(p2))
-		return pl_success;
-
-	if (is_atomic(p1) && is_variable(p2))
-		return unify(q, p1, p1_ctx, p2, p2_ctx);
-
-	if (!is_variable(p2) && !has_vars(q, p1, p1_ctx, 0))
-		return unify(q, p1, p1_ctx, p2, p2_ctx);
-
-	if (q->cycle_error)
-		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
-
-	cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, false);
-
-	if (!tmp || tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
-
-	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
 static USE_RESULT pl_status fn_iso_clause_2(query *q)

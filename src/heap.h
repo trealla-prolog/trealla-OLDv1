@@ -22,6 +22,7 @@ USE_RESULT cell *alloc_on_queuen(query *q, int qnbr, const cell *c);
 
 USE_RESULT cell *init_tmp_heap(query *q);
 
+#define get_tmp_heap_start(q) (q)->tmp_heap
 #define get_tmp_heap(q,i) ((q)->tmp_heap + (i))
 #define tmp_heap_used(q) (q)->tmphp
 

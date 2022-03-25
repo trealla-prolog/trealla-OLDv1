@@ -173,7 +173,6 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 					tmp->flags |= FLAG_VAR_ANON;
 
 				tmp->val_off = p1->val_off;
-				//tmp->attrs = NULL;
 				return tmp;
 			}
 		}
@@ -300,6 +299,8 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 		return NULL;
 
 	cell *save_p1 = p1;
+	pl_idx_t save_p1_ctx = p1_ctx;
+
 	cell *c = deref(q, p1, p1_ctx);
 	pl_idx_t c_ctx = q->latest_ctx;
 
@@ -357,7 +358,7 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 	}
 
 	if (!copy_attrs)
-		return q->tmp_heap;
+		return get_tmp_heap_start(q);
 
 	c = rec;
 
@@ -369,7 +370,7 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only,
 		}
 	}
 
-	return q->tmp_heap;
+	return get_tmp_heap_start(q);
 }
 
 cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool nonlocals_only, bool copy_attrs)

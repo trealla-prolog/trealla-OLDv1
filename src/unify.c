@@ -455,12 +455,13 @@ pl_status fn_sys_redo_trail_0(query * q)
 	return pl_success;
 }
 
-pl_status do_post_unification_hook(query *q)
+pl_status do_post_unification_hook(query *q, bool is_builtin)
 {
 	q->in_hook = true;
 	q->run_hook = false;
 	q->undo_lo_tp = q->save_tp;
 	q->undo_hi_tp = q->st.tp;
+
 	cell *tmp = alloc_on_heap(q, 3);
 	may_ptr_error(tmp);
 	// Needed for follow() to work
@@ -479,7 +480,11 @@ pl_status do_post_unification_hook(query *q)
 	if (!tmp[1].match)
 		return throw_error(q, tmp+1, q->st.curr_frame, "existence_error", "procedure");
 
-	make_return(q, tmp+2);
+	if (is_builtin)
+		make_return(q, tmp+2);
+	else
+		make_return2(q, tmp+2, q->st.curr_cell);
+
 	q->st.curr_cell = tmp;
 	return pl_success;
 }

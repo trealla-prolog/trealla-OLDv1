@@ -1795,7 +1795,7 @@ pl_status start(query *q)
 			}
 
 			if (q->run_hook && !q->in_hook)
-				may_error(do_post_unification_hook(q));
+				may_error(do_post_unification_hook(q, true));
 
 			proceed(q);
 		} else if (is_list(q->st.curr_cell)) {
@@ -1814,8 +1814,9 @@ pl_status start(query *q)
 				continue;
 			}
 
-			if (q->run_hook && !q->in_hook)
-				may_error(do_post_unification_hook(q));
+			if (q->run_hook && !q->in_hook) {
+				may_error(do_post_unification_hook(q, false));
+			}
 		}
 
 		q->run_hook = false;

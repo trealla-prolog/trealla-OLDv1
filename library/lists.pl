@@ -1,13 +1,13 @@
 :- module(lists, [
-	member/2, memberchk/2,
-	select/3, selectchk/3,
-	append/2, append/3,
-	subtract/3, union/3, intersection/3,
-	nth/3, nth1/3, nth0/3,
-	last/2, flatten/2, same_length/2, sum_list/2,
-	toconjunction/2, numlist/3,
-	length/2, length_checked/2,
-	reverse/2
+		member/2, memberchk/2,
+		select/3, selectchk/3,
+		append/2, append/3,
+		subtract/3, union/3, intersection/3,
+		nth/3, nth1/3, nth0/3,
+		last/2, flatten/2, same_length/2, sum_list/2,
+		toconjunction/2, numlist/3,
+		length/2, length_checked/2,
+		reverse/2
 	]).
 
 reverse(Xs, Ys) :-
