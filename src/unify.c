@@ -461,6 +461,7 @@ pl_status do_post_unification_hook(query *q)
 	q->run_hook = false;
 	q->undo_lo_tp = q->save_tp;
 	q->undo_hi_tp = q->st.tp;
+
 	cell *tmp = alloc_on_heap(q, 3);
 	may_ptr_error(tmp);
 	// Needed for follow() to work
