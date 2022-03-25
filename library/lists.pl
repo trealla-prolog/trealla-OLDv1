@@ -1,14 +1,43 @@
 :- module(lists, [
-	member/2, memberchk/2,
-	select/3, selectchk/3,
-	append/2, append/3,
-	subtract/3, union/3, intersection/3,
-	nth/3, nth1/3, nth0/3,
-	last/2, flatten/2, same_length/2, sum_list/2,
-	toconjunction/2, numlist/3,
-	length/2, length_checked/2,
-	reverse/2
+		member/2, memberchk/2,
+		select/3, selectchk/3,
+		append/2, append/3,
+		subtract/3, union/3, intersection/3,
+		nth/3, nth1/3, nth0/3,
+		last/2, flatten/2, same_length/2, sum_list/2,
+		toconjunction/2, numlist/3,
+		length/2, length_checked/2,
+		reverse/2, permutation/2
 	]).
+
+/*  Author:        Mark Thom, Jan Wielemaker, and Richard O'Keefe
+    Copyright (c)  2018-2021, Mark Thom
+    Copyright (c)  2002-2020, University of Amsterdam
+                              VU University Amsterdam
+                              SWI-Prolog Solutions b.v.
+    All rights reserved.
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
+    1. Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in
+       the documentation and/or other materials provided with the
+       distribution.
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+    COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+    POSSIBILITY OF SUCH DAMAGE.
+*/
 
 reverse(Xs, Ys) :-
     (  nonvar(Xs) -> reverse_(Xs, Ys, [], Xs)
@@ -149,3 +178,25 @@ length_rundown(Xs, 0) :- !, Xs = [].
 length_rundown([_|Xs], N) :-
     N1 is N-1,
     length_rundown(Xs, N1).
+
+permutation(Xs, Ys) :-
+    '$skip_max_list'(Xlen, _, Xs, XTail),
+    '$skip_max_list'(Ylen, _, Ys, YTail),
+    (   XTail == [], YTail == []            % both proper lists
+    ->  Xlen == Ylen
+    ;   var(XTail), YTail == []             % partial, proper
+    ->  length(Xs, Ylen)
+    ;   XTail == [], var(YTail)             % proper, partial
+    ->  length(Ys, Xlen)
+    ;   var(XTail), var(YTail)              % partial, partial
+    ->  length(Xs, Len),
+        length(Ys, Len)
+    ;   must_be(list, Xs),                  % either is not a list
+        must_be(list, Ys)
+    ),
+    perm(Xs, Ys).
+
+perm([], []).
+perm(List, [First|Perm]) :-
+    select(First, List, Rest),
+    perm(Rest, Perm).
