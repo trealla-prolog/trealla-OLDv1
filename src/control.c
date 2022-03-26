@@ -338,6 +338,7 @@ USE_RESULT pl_status fn_iso_once_1(query *q)
 		return pl_failure;
 
 	GET_FIRST_ARG(xp1,callable);
+
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
 	may_ptr_error(p0);
 
@@ -362,6 +363,7 @@ USE_RESULT pl_status fn_ignore_1(query *q)
 		return pl_success;
 
 	GET_FIRST_ARG(xp1,callable);
+
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
 	may_ptr_error(p0);
 
