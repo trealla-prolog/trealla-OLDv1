@@ -58,7 +58,7 @@ subsumes_term(G, S) :-
 call_cleanup(G, C) :-
 	'$register_cleanup'(ignore(C)),
 	'$call_cleanup'(
-		G,
+		call(G),
 		Err,
 		(catch((\+ \+ C), _, true), throw(Err))
 	).
@@ -69,16 +69,12 @@ setup_call_cleanup(S, G, C) :-
 	once(S),
 	'$register_cleanup'(ignore(C)),
 	'$call_cleanup'(
-		G,
+		call(G),
 		Err,
 		(catch((\+ \+ C), _, true), throw(Err))
 	).
 
 :- meta_predicate(setup_call_cleanup(0,0,0)).
-
-throw(E) :- '$throw'(E).
-
-catch(G, E, C) :- '$catch'(G, E, C).
 
 findall(T, G, B, Tail) :-
 	'$mustbe_list_or_var'(B),
@@ -414,13 +410,14 @@ deconsult(Files) :- unload_files(Files).
 strip_module(T,M,P) :- T=M:P -> true ; P=T.
 read_from_chars(S,T) :- read_term_from_chars(S,T,[]).
 ?=(X,Y) :- \+ unifiable(X,Y,[_|_]).
-'$skip_list'(Skip,Xs0,Xs) :- '$skip_max_list'(Skip,_,Xs0,Xs).
 atom_number(A,N) :- atom_codes(A,Codes), number_codes(N,Codes).
+'$skip_list'(Skip,Xs0,Xs) :- '$skip_max_list'(Skip,_,Xs0,Xs).
+between(I,J,K) :- '$between'(I,J,K,_).
+catch(G, E, C) :- '$catch'(call(G), E, call(C)).
+throw(E) :- '$throw'(E).
 once(G) :- G, !.
 ignore(G) :- G, !.
 ignore(_).
-
-between(I,J,K) :- '$between'(I,J,K,_).
 
 iso_dif(X, Y) :-
 	X \== Y,

@@ -375,15 +375,7 @@ USE_RESULT pl_status fn_sys_block_catcher_1(query *q)
 
 USE_RESULT pl_status fn_iso_catch_3(query *q)
 {
-	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
-	may_ptr_error(p0);
-
-	if (p0 == ERR_CYCLE_CELL)
-		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "cyclic_term");
-
-	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
-
-	GET_FIRST_RAW_ARG0(p1,any,p0);
+	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
 	if (q->retry && q->exception) {
@@ -426,15 +418,7 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 
 USE_RESULT pl_status fn_sys_call_cleanup_3(query *q)
 {
-	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
-	may_ptr_error(p0);
-
-	if (p0 == ERR_CYCLE_CELL)
-		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "cyclic_term");
-
-	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
-
-	GET_FIRST_RAW_ARG0(p1,any,p0);
+	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
 	if (q->retry && q->exception) {
