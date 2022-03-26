@@ -4838,8 +4838,13 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 		slot *e1 = GET_SLOT(f1, p1->var_nbr);
 		frame *f2 = GET_FRAME(p2_ctx);
 		slot *e2 = GET_SLOT(f2, p2->var_nbr);
-		e2->c.attrs = e1->c.attrs;
-		e2->c.attrs_ctx = e1->c.attrs_ctx;
+
+		if (e1->c.attrs) {
+			cell *tmp = deep_copy_to_heap_with_replacement(q, e1->c.attrs, e1->c.attrs_ctx, false, true, p1, p1_ctx, p2, p2_ctx);
+			e2->c.attrs = tmp;
+			e2->c.attrs_ctx = q->st.curr_frame;
+		}
+
 		return pl_success;
 	}
 
