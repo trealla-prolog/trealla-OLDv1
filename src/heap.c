@@ -216,7 +216,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 				tmp->flags |= FLAG_VAR_FRESH;
 				//tmp->attrs = NULL;
 			} else {
-				cell *rec = deep_copy2_to_tmp(q, c, c_ctx, depth+1, nonlocals_only, !q->lists_ok ? list : NULL);
+				cell *rec = deep_copy2_to_tmp(q, c, c_ctx, depth+1, nonlocals_only, list);
 				if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 			}
 
@@ -245,7 +245,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 		}
 
 		if (!cyclic) {
-			cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, depth+1, nonlocals_only, !q->lists_ok ? list : NULL);
+			cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, depth+1, nonlocals_only, list);
 			if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 		}
 
