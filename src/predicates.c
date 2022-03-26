@@ -4621,18 +4621,11 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 	}
 
 	if (is_variable(p2)) {
-		cell *tmp = deep_copy_to_heap(q, p1, p1_ctx, false, false);
-		may_ptr_error(tmp);
-		if (tmp == ERR_CYCLE_CELL)
-			return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
-
-		unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
-		cell tmp2 = *tmp;
+		cell tmp2 = *p1;
 		tmp2.nbr_cells = 1;
 		tmp2.arity = 0;
 		CLR_OP(&tmp2);
 		allocate_list(q, &tmp2);
-		p1 = tmp;
 		unsigned arity = p1->arity;
 		p1++;
 
@@ -4643,7 +4636,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 
 		cell *l = end_list(q);
 		may_ptr_error(l);
-		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
+		return unify(q, p2, p2_ctx, l, p1_ctx);
 	}
 
 	if (is_variable(p1)) {
