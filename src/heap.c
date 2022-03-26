@@ -279,7 +279,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 				nlist.ptr = save_p1;
 				nlist.ctx = save_p1_ctx;
 
-				cell *rec = deep_copy2_to_tmp(q, c, c_ctx, depth+1, nonlocals_only, &nlist);
+				cell *rec = deep_copy2_to_tmp(q, c, c_ctx, depth+1, nonlocals_only, !q->lists_ok ? &nlist : NULL);
 				if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 			}
 
