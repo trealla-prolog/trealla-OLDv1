@@ -101,8 +101,6 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	if (q->retry)
 		return pl_failure;
 
-	GET_FIRST_ARG(xp1,callable);
-
 	// This copy is because we are building the call structure
 	// and we need variables to be in the local context. One day vars
 	// will be able to hold their own context... free the vars!
@@ -377,10 +375,6 @@ USE_RESULT pl_status fn_sys_block_catcher_1(query *q)
 
 USE_RESULT pl_status fn_iso_catch_3(query *q)
 {
-	GET_FIRST_ARG(xp1,any);
-	GET_NEXT_ARG(xp2,any);
-	GET_NEXT_ARG(xp3,callable);
-
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
 	may_ptr_error(p0);
 
