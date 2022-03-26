@@ -416,6 +416,9 @@ read_from_chars(S,T) :- read_term_from_chars(S,T,[]).
 ?=(X,Y) :- \+ unifiable(X,Y,[_|_]).
 '$skip_list'(Skip,Xs0,Xs) :- '$skip_max_list'(Skip,_,Xs0,Xs).
 atom_number(A,N) :- atom_codes(A,Codes), number_codes(N,Codes).
+once(G) :- G, !.
+ignore(G) :- G, !.
+ignore(_).
 
 between(I,J,K) :- '$between'(I,J,K,_).
 
