@@ -352,18 +352,6 @@ directory_exists(F) :- exists_directory(F).
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-
-not(G) :- G, !, fail.
-not(_).
-
-forall(Cond, Action) :-
-	\+ (Cond, \+ Action).
-
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 current_key(K) :- var(K), '$record_key'(K,_).
 recorda(K, V) :- nonvar(K), nonvar(V), asserta('$record_key'(K,V)).
 recordz(K, V) :- nonvar(K), nonvar(V), assertz('$record_key'(K,V)).
@@ -413,11 +401,14 @@ read_from_chars(S,T) :- read_term_from_chars(S,T,[]).
 atom_number(A,N) :- atom_codes(A,Codes), number_codes(N,Codes).
 '$skip_list'(Skip,Xs0,Xs) :- '$skip_max_list'(Skip,_,Xs0,Xs).
 between(I,J,K) :- '$between'(I,J,K,_).
+forall(Cond, Action) :- \+ (Cond, \+ Action).
 catch(G, E, C) :- '$catch'(call(G), E, call(C)).
 throw(E) :- '$throw'(E).
 once(G) :- G, !.
 ignore(G) :- G, !.
 ignore(_).
+not(G) :- G, !, fail.
+not(_).
 
 iso_dif(X, Y) :-
 	X \== Y,
