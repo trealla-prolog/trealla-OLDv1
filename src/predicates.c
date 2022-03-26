@@ -4846,9 +4846,6 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	if (is_atomic(p1) && is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
-	if (!is_variable(p2) && !has_vars(q, p1, p1_ctx, 0))
-		return unify(q, p1, p1_ctx, p2, p2_ctx);
-
 	GET_FIRST_RAW_ARG(p1_raw,any);
 	cell *tmp = deep_copy_to_heap(q, p1_raw, p1_raw_ctx, false, true);
 
@@ -4871,9 +4868,6 @@ static USE_RESULT pl_status fn_copy_term_nat_2(query *q)
 	GET_NEXT_ARG(p2,any);
 
 	if (is_atomic(p1) && is_variable(p2))
-		return unify(q, p1, p1_ctx, p2, p2_ctx);
-
-	if (!is_variable(p2) && !has_vars(q, p1, p1_ctx, 0))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
 	GET_FIRST_RAW_ARG(p1_raw,any);
