@@ -4855,7 +4855,7 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	if (!tmp || (tmp == ERR_CYCLE_CELL))
 		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
 
-	if (is_variable(p1_raw) && !is_variable(p1) && is_variable(p2)) {
+	if (is_variable(p1_raw) && is_variable(p2)) {
 		cell tmpv;
 		tmpv = *p2;
 		tmpv.var_nbr = q->st.m->pl->tab2[0];
@@ -4882,7 +4882,7 @@ static USE_RESULT pl_status fn_copy_term_nat_2(query *q)
 	if (!tmp || (tmp == ERR_CYCLE_CELL))
 		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
 
-	if (is_variable(p1_raw) && !is_variable(p1) && is_variable(p2)) {
+	if (is_variable(p1_raw) && is_variable(p2)) {
 		cell tmpv;
 		tmpv = *p2;
 		tmpv.var_nbr = q->st.m->pl->tab2[0];
