@@ -2407,7 +2407,7 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 	return pl_success;
 }
 
-const struct builtins g_functions[] =
+const struct builtins g_functions_bifs[] =
 {
 	// Predicate...
 

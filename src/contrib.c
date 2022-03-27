@@ -11,7 +11,7 @@
 #include "internal.h"
 #include "builtins.h"
 
-const struct builtins g_contrib_funcs[] =
+const struct builtins g_contrib_bifs[] =
 {
 	{0}
 };

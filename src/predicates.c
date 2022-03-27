@@ -11742,7 +11742,7 @@ static USE_RESULT pl_status fn_iso_compare_3(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static const struct builtins g_predicates_iso[] =
+static const struct builtins g_iso_bifs[] =
 {
 	{",", 2, NULL, NULL, false},
 
@@ -11868,7 +11868,7 @@ static const struct builtins g_predicates_iso[] =
 	{0}
 };
 
-static const struct builtins g_predicates_other[] =
+static const struct builtins g_other_bifs[] =
 {
 	{"*->", 2, fn_if_2, NULL, false},
 	{"if", 3, fn_if_3, NULL, false},
@@ -12097,24 +12097,29 @@ void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found, boo
 	return NULL;
 }
 
-extern const struct builtins g_functions[];
-extern const struct builtins g_contrib_funcs[];
+extern const struct builtins g_functions_bifs[];
+extern const struct builtins g_files_bifs[];
+extern const struct builtins g_contrib_bifs[];
 
 void load_builtins(prolog *pl)
 {
-	for (const struct builtins *ptr = g_predicates_iso; ptr->name; ptr++) {
+	for (const struct builtins *ptr = g_iso_bifs; ptr->name; ptr++) {
 		m_app(pl->funtab, ptr->name, ptr);
 	}
 
-	for (const struct builtins *ptr = g_functions; ptr->name; ptr++) {
+	for (const struct builtins *ptr = g_functions_bifs; ptr->name; ptr++) {
 		m_app(pl->funtab, ptr->name, ptr);
 	}
 
-	for (const struct builtins *ptr = g_predicates_other; ptr->name; ptr++) {
+	for (const struct builtins *ptr = g_other_bifs; ptr->name; ptr++) {
 		m_app(pl->funtab, ptr->name, ptr);
 	}
 
-	for (const struct builtins *ptr = g_contrib_funcs; ptr->name; ptr++) {
+	for (const struct builtins *ptr = g_files_bifs; ptr->name; ptr++) {
+		m_app(pl->funtab, ptr->name, ptr);
+	}
+
+	for (const struct builtins *ptr = g_contrib_bifs; ptr->name; ptr++) {
 		m_app(pl->funtab, ptr->name, ptr);
 	}
 }
@@ -12229,7 +12234,7 @@ static void load_properties(module *m)
 		format_property(m, tmpbuf, sizeof(tmpbuf), "task", i, metabuf); ASTRING_strcat(pr, tmpbuf);
 	}
 
-	for (const struct builtins *ptr = g_predicates_iso; ptr->name; ptr++) {
+	for (const struct builtins *ptr = g_iso_bifs; ptr->name; ptr++) {
 		m_app(m->pl->funtab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		if (ptr->function) continue;
@@ -12238,7 +12243,7 @@ static void load_properties(module *m)
 		format_property(m, tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "native_code"); ASTRING_strcat(pr, tmpbuf);
  	}
 
-	for (const struct builtins *ptr = g_functions; ptr->name; ptr++) {
+	for (const struct builtins *ptr = g_functions_bifs; ptr->name; ptr++) {
 		m_app(m->pl->funtab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		if (ptr->function) continue;
@@ -12247,7 +12252,7 @@ static void load_properties(module *m)
 		format_property(m, tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "native_code"); ASTRING_strcat(pr, tmpbuf);
 	}
 
-	for (const struct builtins *ptr = g_predicates_other; ptr->name; ptr++) {
+	for (const struct builtins *ptr = g_other_bifs; ptr->name; ptr++) {
 		m_app(m->pl->funtab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		if (ptr->function) continue;
@@ -12256,7 +12261,7 @@ static void load_properties(module *m)
 		format_property(m, tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "native_code"); ASTRING_strcat(pr, tmpbuf);
 	}
 
-	for (const struct builtins *ptr = g_contrib_funcs; ptr->name; ptr++) {
+	for (const struct builtins *ptr = g_contrib_bifs; ptr->name; ptr++) {
 		m_app(m->pl->funtab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		if (ptr->function) continue;
