@@ -4100,6 +4100,480 @@ static USE_RESULT pl_status fn_chdir_1(query *q)
 }
 #endif
 
+static void parse_host(const char *src, char *hostname, char *path, unsigned *port, int *ssl, int *domain)
+{
+	if (!strncmp(src, "https://", 8)) {
+		src += 8;
+		*ssl = 1;
+		*port = 443;
+	} else if (!strncmp(src, "http://", 7)) {
+		src += 7;
+		*ssl = 0;
+		*port = 80;
+	} else if (!strncmp(src, "unix://", 7)) {
+		src += 7;
+		*domain = 1;
+	}
+
+	if (*src == ':')
+		sscanf(src, ":%u/%4095s", port, path);
+	else
+		sscanf(src, "%1023[^:/]:%u/%4095s", hostname, port, path);
+
+	hostname[1023] = '\0';
+	path[4095] = '\0';
+}
+
+static USE_RESULT pl_status fn_server_3(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,variable);
+	GET_NEXT_ARG(p3,list_or_nil);
+	char hostname[1024], path[1024*4];
+	char *keyfile = "privkey.pem", *certfile = "fullchain.pem";
+	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, domain = 0, level = 0;
+	unsigned port = 80;
+	snprintf(hostname, sizeof(hostname), "localhost");
+	path[0] = '\0';
+	LIST_HANDLER(p3);
+
+	while (is_list(p3) && !g_tpl_interrupt) {
+		cell *h = LIST_HEAD(p3);
+		cell *c = deref(q, h, p3_ctx);
+
+		if (is_structure(c) && (c->arity == 1)) {
+			if (!CMP_SLICE2(q, c, "udp")) {
+				c = c + 1;
+
+				if (is_atom(c))
+					udp = !CMP_SLICE2(q, c, "true") ? 1 : 0;
+			} else if (!CMP_SLICE2(q, c, "nodelay")) {
+				c = c + 1;
+
+				if (is_atom(c))
+					nodelay = !CMP_SLICE2(q, c, "true") ? 1 : 0;
+			} else if (!CMP_SLICE2(q, c, "ssl")) {
+				c = c + 1;
+
+				if (is_atom(c))
+					ssl = !CMP_SLICE2(q, c, "true") ? 1 : 0;
+			} else if (!CMP_SLICE2(q, c, "keyfile")) {
+				c = c + 1;
+
+				if (is_atom(c))
+					keyfile = GET_STR(q, c);
+			} else if (!CMP_SLICE2(q, c, "certfile")) {
+				c = c + 1;
+
+				if (is_atom(c))
+					certfile = GET_STR(q, c);
+			} else if (!CMP_SLICE2(q, c, "hostname")) {
+				c = c + 1;
+
+				if (is_atom(c))
+					slicecpy(hostname, sizeof(hostname), GET_STR(q, c), LEN_STR(q, c));
+			} else if (!CMP_SLICE2(q, c, "scheme")) {
+				c = c + 1;
+
+				if (is_atom(c)) {
+					ssl = !CMP_SLICE2(q, c, "https") ? 1 : 0;
+					port = 443;
+				}
+			} else if (!CMP_SLICE2(q, c, "port")) {
+				c = c + 1;
+
+				if (is_integer(c))
+					port = get_int(c);
+			} else if (!CMP_SLICE2(q, c, "level")) {
+				c = c + 1;
+
+				if (is_integer(c))
+					level = (int)get_int(c);
+			}
+		}
+
+		p3 = LIST_TAIL(p3);
+		p3 = deref(q, p3, p3_ctx);
+		p3_ctx = q->latest_ctx;
+	}
+
+	const char *url = GET_STR(q, p1);
+	parse_host(url, hostname, path, &port, &ssl, &domain);
+	nonblock = q->is_task;
+
+	int fd = net_server(hostname, port, udp, ssl?keyfile:NULL, ssl?certfile:NULL);
+
+	if (fd == -1)
+		return throw_error(q, p1, p1_ctx, "existence_error", "server_failed");
+
+	int n = new_stream(q->pl);
+
+	if (n < 0) {
+		close(fd);
+		return throw_error(q, p1, p1_ctx, "resource_error", "too_many_streams");
+	}
+
+	stream *str = &q->pl->streams[n];
+	may_ptr_error(str->filename = DUP_SLICE(q, p1));
+	may_ptr_error(str->name = strdup(hostname));
+	may_ptr_error(str->mode = strdup("update"));
+	str->nodelay = nodelay;
+	str->nonblock = nonblock;
+	str->udp = udp;
+	str->fp = fdopen(fd, "r+");
+	str->ssl = ssl;
+	str->level = level;
+	str->sslptr = NULL;
+
+	if (str->fp == NULL) {
+		return throw_error(q, p1, p1_ctx, "existence_error", "cannot_open_stream");
+		close(fd);
+	}
+
+	if (!str->ssl)
+		net_set_nonblocking(str);
+
+	cell tmp;
+	make_int(&tmp, n);
+	tmp.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
+	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_accept_2(query *q)
+{
+	GET_FIRST_ARG(pstr,stream);
+	GET_NEXT_ARG(p1,variable);
+	int n = get_stream(q, pstr);
+	stream *str = &q->pl->streams[n];
+
+	int fd = net_accept(str);
+
+	if (fd == -1) {
+		if (q->is_task)
+			return do_yield_0(q, 1);
+
+		return pl_failure;
+	}
+
+	n = new_stream(q->pl);
+
+	if (n < 0) {
+		close(fd);
+		return throw_error(q, p1, p1_ctx, "resource_error", "too_many_streams");
+	}
+
+	stream *str2 = &q->pl->streams[n];
+	may_ptr_error(str2->filename = strdup(str->filename));
+	may_ptr_error(str2->name = strdup(str->name));
+	may_ptr_error(str2->mode = strdup("update"));
+	str->socket = true;
+	str2->nodelay = str->nodelay;
+	str2->nonblock = str->nonblock;
+	str2->udp = str->udp;
+	str2->ssl = str->ssl;
+	str2->fp = fdopen(fd, "r+");
+
+	if (str2->fp == NULL) {
+		close(fd);
+		return throw_error(q, p1, p1_ctx, "existence_error", "cannot_open_stream");
+	}
+
+	if (str->ssl) {
+		str2->sslptr = net_enable_ssl(fd, str->name, 1, str->level, NULL);
+
+		if (!str2->sslptr) {
+			close(fd);
+			return pl_failure;
+		}
+	}
+
+	if (!str->ssl)
+		net_set_nonblocking(str2);
+
+	may_error(push_choice(q));
+	cell tmp;
+	make_int(&tmp, n);
+	tmp.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_client_5(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,variable);
+	GET_NEXT_ARG(p3,variable);
+	GET_NEXT_ARG(p4,variable);
+	GET_NEXT_ARG(p5,list_or_nil);
+	char hostname[1024], path[1024*4];
+	char *certfile = NULL;
+	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, domain = 0, level = 0;
+	hostname[0] = path[0] = '\0';
+	unsigned port = 80;
+	LIST_HANDLER(p5);
+
+	while (is_list(p5) && !g_tpl_interrupt) {
+		cell *h = LIST_HEAD(p5);
+		cell *c = deref(q, h, p5_ctx);
+
+		if (is_structure(c) && (c->arity == 1)) {
+			if (!CMP_SLICE2(q, c, "udp")) {
+				c = c + 1;
+
+				if (is_atom(c))
+					udp = !CMP_SLICE2(q, c, "true") ? 1 : 0;
+			} else if (!CMP_SLICE2(q, c, "nodelay")) {
+				c = c + 1;
+
+				if (is_atom(c))
+					nodelay = !CMP_SLICE2(q, c, "true") ? 1 : 0;
+			} else if (!CMP_SLICE2(q, c, "ssl")) {
+				c = c + 1;
+
+				if (is_atom(c))
+					ssl = !CMP_SLICE2(q, c, "true") ? 1 : 0;
+			} else if (!CMP_SLICE2(q, c, "certfile")) {
+				c = c + 1;
+
+				if (is_atom(c))
+					certfile = GET_STR(q, c);
+			} else if (!CMP_SLICE2(q, c, "scheme")) {
+				c = c + 1;
+
+				if (is_atom(c)) {
+					ssl = !CMP_SLICE2(q, c, "https") ? 1 : 0;
+					port = 443;
+				}
+			} else if (!CMP_SLICE2(q, c, "port")) {
+				c = c + 1;
+
+				if (is_integer(c))
+					port = (int)get_int(c);
+			} else if (!CMP_SLICE2(q, c, "level")) {
+				c = c + 1;
+
+				if (is_integer(c))
+					level = (int)get_int(c);
+			}
+		}
+
+		p5 = LIST_TAIL(p5);
+		p5 = deref(q, p5, p5_ctx);
+		p5_ctx = q->latest_ctx;
+	}
+
+	const char *url = GET_STR(q, p1);
+	parse_host(url, hostname, path, &port, &ssl, &domain);
+	nonblock = q->is_task;
+
+	while (is_list(p5) && !g_tpl_interrupt) {
+		cell *h = LIST_HEAD(p5);
+		cell *c = deref(q, h, p5_ctx);
+
+		if (is_structure(c) && (c->arity == 1)) {
+			if (!CMP_SLICE2(q, c, "host")) {
+				c = c + 1;
+
+				//if (is_atom(c))
+				//	;//udp = !CMP_SLICE2(q, c, "true") ? 1 : 0;
+			}
+		}
+
+		p5 = LIST_TAIL(p5);
+		p5 = deref(q, p5, p5_ctx);
+		p5_ctx = q->latest_ctx;
+	}
+
+	int fd = net_connect(hostname, port, udp, nodelay);
+
+	if (fd == -1)
+		return throw_error(q, p1, p1_ctx, "resource_error", "could_not_connect");
+
+	int n = new_stream(q->pl);
+
+	if (n < 0) {
+		close(fd);
+		return throw_error(q, p1, p1_ctx, "resource_error", "too_many_streams");
+	}
+
+	stream *str = &q->pl->streams[n];
+	may_ptr_error(str->filename = DUP_SLICE(q, p1));
+	may_ptr_error(str->name = strdup(hostname));
+	may_ptr_error(str->mode = strdup("update"));
+	str->socket = true;
+	str->nodelay = nodelay;
+	str->nonblock = nonblock;
+	str->udp = udp;
+	str->ssl = ssl;
+	str->level = level;
+	str->fp = fdopen(fd, "r+");
+
+	if (!str->filename || !str->name || !str->mode) {
+		free(str->filename);
+		free(str->name);
+		free(str->mode); //cehteh: maybe from pool?
+		return pl_error;
+	}
+
+	if (str->fp == NULL) {
+		close(fd);
+		return throw_error(q, p1, p1_ctx, "existence_error", "cannot_open_stream");
+	}
+
+	if (str->ssl) {
+		str->sslptr = net_enable_ssl(fd, hostname, 0, str->level, certfile);
+		may_ptr_error (str->sslptr, close(fd));
+	}
+
+	if (nonblock && !str->ssl)
+		net_set_nonblocking(str);
+
+	cell tmp;
+	may_error(make_string(&tmp, hostname));
+	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	may_error(make_string(&tmp, path));
+	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	cell tmp2;
+	make_int(&tmp2, n);
+	tmp2.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
+	set_var(q, p4, p4_ctx, &tmp2, q->st.curr_frame);
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_bread_3(query *q)
+{
+	GET_FIRST_ARG(pstr,stream);
+	GET_NEXT_ARG(p1,integer_or_var);
+	GET_NEXT_ARG(p2,variable);
+	int n = get_stream(q, pstr);
+	stream *str = &q->pl->streams[n];
+	size_t len;
+
+	if (is_integer(p1) && is_positive(p1)) {
+		if (!str->data) {
+			str->data = malloc(get_int(p1)+1);
+			may_ptr_error(str->data);
+			str->data_len = 0;
+		}
+
+		for (;;) {
+			len = get_int(p1) - str->data_len;
+			size_t nbytes = net_read(str->data+str->data_len, len, str);
+			str->data_len += nbytes;
+			str->data[str->data_len] = '\0';
+
+			if (nbytes == len)
+				break;
+
+			if (feof(str->fp)) {
+				free(str->data);
+				str->data = NULL;
+				return pl_failure;
+			}
+
+			if (q->is_task) {
+				clearerr(str->fp);
+				return do_yield_0(q, 1);
+			}
+		}
+
+		cell tmp;
+		may_error(make_stringn(&tmp, str->data, str->data_len), free(str->data));
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		unshare_cell(&tmp);
+		free(str->data);
+		str->data = NULL;
+		return pl_success;
+	}
+
+	if (is_integer(p1)) {
+		if (!str->data) {
+			str->data = malloc((str->alloc_nbytes=1024)+1);
+			may_ptr_error(str->data);
+			str->data_len = 0;
+		}
+
+		size_t nbytes = net_read(str->data, str->alloc_nbytes, str);
+		str->data[nbytes] = '\0';
+		str->data = realloc(str->data, nbytes+1);
+		may_ptr_error(str->data);
+		cell tmp;
+		may_error(make_stringn(&tmp, str->data, nbytes), free(str->data));
+		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		unshare_cell(&tmp);
+		free(str->data);
+		str->data = NULL;
+		return pl_success;
+	}
+
+	if (!str->data) {
+		str->data = malloc((str->alloc_nbytes=1024)+1);
+		may_ptr_error(str->data);
+		str->data_len = 0;
+	}
+
+	for (;;) {
+		size_t len = str->alloc_nbytes - str->data_len;
+		size_t nbytes = net_read(str->data+str->data_len, len, str);
+		str->data_len += nbytes;
+		str->data[str->data_len] = '\0';
+
+		if (!nbytes || feof(str->fp))
+			break;
+
+		if (str->alloc_nbytes == str->data_len) {
+			str->data = realloc(str->data, (str->alloc_nbytes*=2)+1);
+			may_ptr_error(str->data);
+		}
+	}
+
+	cell tmp1;
+	make_int(&tmp1, str->data_len);
+	set_var(q, p1, p1_ctx, &tmp1, q->st.curr_frame);
+	cell tmp2;
+
+	if (str->data_len)
+		may_error(make_stringn(&tmp2, str->data, str->data_len), free(str->data));
+	else
+		make_literal(&tmp2, g_nil_s);
+
+	set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
+	unshare_cell(&tmp2);
+	free(str->data);
+	str->data = NULL;
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_bwrite_2(query *q)
+{
+	GET_FIRST_ARG(pstr,stream);
+	GET_NEXT_ARG(p1,atom);
+	int n = get_stream(q, pstr);
+	stream *str = &q->pl->streams[n];
+	const char *src = GET_STR(q, p1);
+	size_t len = LEN_STR(q, p1);
+
+	while (len && !g_tpl_interrupt) {
+		size_t nbytes = net_write(src, len, str);
+
+		if (!nbytes) {
+			if (feof(str->fp) || ferror(str->fp))
+				return pl_error; // can feof() happen on writing?
+		}
+
+		// TODO: make this yieldable
+
+		clearerr(str->fp);
+		len -= nbytes;
+		src += nbytes;
+	}
+
+	return pl_success;
+}
+
 const struct builtins g_files_bifs[] =
 {
 #ifndef SANDBOX
@@ -4196,6 +4670,13 @@ const struct builtins g_files_bifs[] =
 	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "?chars,?term,+list", false},
 	{"read_line_to_string", 2, fn_read_line_to_string_2, "+stream,-string", false},
 	{"read_file_to_string", 3, fn_read_file_to_string_3, "+string,-string,+options", false},
+
+	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list", false},
+	{"server", 3, fn_server_3, "+string,-stream,+list", false},
+	{"accept", 2, fn_accept_2, "+stream,-stream", false},
+	{"bread", 3, fn_bread_3, "+stream,+integer,-string", false},
+	{"bwrite", 2, fn_bwrite_2, "+stream,-string", false},
+
 
 #ifndef _WIN32
 	{"popen", 4, fn_popen_4, "+atom,+atom,-stream,+list", false},
