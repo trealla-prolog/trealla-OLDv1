@@ -1549,15 +1549,14 @@ static void dump_vars(query *q, bool partial)
 		any = true;
 	}
 
-	g_tpl_interrupt = false;
-	q->is_dump_vars = false;
-
 	if (any && any_attributed(q))
 		fprintf(stdout, ",\n");
 
 	// Print residual goals of attributed variables...
 
 	if (any_attributed(q) && !q->in_attvar_print) {
+		q->variable_names = vlist;
+		q->variable_names_ctx = INITIAL_FRAME;
 		cell p1;
 		make_literal(&p1, index_from_pool(q->pl, "dump_attvars"));
 		cell *tmp = clone_to_heap(q, false, &p1, 1);
@@ -1569,6 +1568,9 @@ static void dump_vars(query *q, bool partial)
 		q->in_attvar_print = false;
 		any = true;
 	}
+
+	g_tpl_interrupt = false;
+	q->is_dump_vars = false;
 
 	if (any && !partial) {
 		if (space) fprintf(stdout, " ");
