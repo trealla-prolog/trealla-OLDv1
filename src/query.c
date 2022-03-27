@@ -1435,6 +1435,9 @@ static bool any_attributed(const query *q)
 
 static void dump_vars(query *q, bool partial)
 {
+	if (q->in_attvar_print)
+		return;
+
 	parser *p = q->p;
 	frame *f = GET_FIRST_FRAME();
 	q->is_dump_vars = true;
